@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.34 1999/03/24 01:17:07 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.35 1999/03/29 23:11:41 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.35  1999/03/29 23:11:41  snelling
+// auxiliary hit table eliminated
+//
 // Revision 1.34  1999/03/24 01:17:07  sakrejda
 // tss_pars added to the xyz_newtab call
 //
@@ -482,7 +485,6 @@ Int_t St_tcl_Maker::Make(){
   St_DataSetIter local(m_DataSet);
 
   St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
-  St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",1);         local.Add(tphitau);
   St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
   St_tcc_morphology *morph    = 0;
   if(m_tclMorphOn) {
@@ -560,7 +562,7 @@ Int_t St_tcl_Maker::Make(){
 	Int_t tph_res =  tph(m_tcl_sector_index,m_tclpar,m_tsspar,
 			     m_tpg_pad_plane,
 			     pixel_data_in,pixel_data_out,
-			     tpseq,tpcluster,tphit,tphitau);
+			     tpseq,tpcluster,tphit);
 //			  ==============================================
         if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
       }
@@ -625,7 +627,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.34 1999/03/24 01:17:07 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.35 1999/03/29 23:11:41 snelling Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
