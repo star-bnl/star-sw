@@ -1,6 +1,7 @@
 #include <iostream>
 #include "StiTrackNode.h"
 
+double StiTrackNode::kField = 0.;
 //_____________________________________________________________________________
 void StiTrackNode::set(const double xx[5],
 	 const double cc[15], 
