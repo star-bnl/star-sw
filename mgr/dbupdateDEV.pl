@@ -22,8 +22,8 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbTJobsSetup.pl";
 
 my $TOP_DIRD = "/star/rcf/test/dev/";
 my @dir_year = ("year_1h", "year_2a");
-my @node_dir = ("tfs_redhat61", "tfs_Solaris_CC5"), 
-my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral");
+my @node_dir = ("tfs_redhat61", "tfs_Solaris_CC5", "trs_redhat61", "daq_redhat61"), 
+my @hc_dir = ("hc_lowdensity", "hc_standard", "hc_highdensity", "peripheral", "minbias");
 
 my @OUT_DIR;
 my @OUTD_DIR;
@@ -35,7 +35,9 @@ my %dayHash = (
 		 "Tue" => 2, 
 		 "Wed" => 3, 
 		 "Thu" => 4, 
-		 "Fri" => 5, 
+		 "Fri" => 5,
+                 "Sat" => 6,
+                 "Sun" => 7, 
 		 );
 
 my $min;
@@ -83,11 +85,11 @@ if($thisday eq "Sat" or $thisday eq "Sun" ){
 
 ##### setup output directories for DEV with thisDay
 
-for ($i = 0; $i < 2; $i++) {
+for ($i = 0; $i < scalar(@node_dir); $i++) {
      for ($j = 0; $j < 2; $j++) {
       for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $testDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-#    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -95,11 +97,11 @@ for ($i = 0; $i < 2; $i++) {
 
 ##### setup output directories for DEV with beforeDay
 
-for ($i = 0; $i < 2; $i++) {
+for ($i = 0; $i < scalar(@node_dir); $i++) {
      for ($j = 0; $j < 2; $j++) {
       for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $beforeDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-#    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -335,7 +337,7 @@ my $pfullName;
  $EvSkip = 0;
  $jobTime = 0; 
 
-       if ($fname =~ /evts.log/)  {
+       if ($fname =~ /.log/)  {
 #    print "File Name:",$fname, "\n";       
        $fullname = $eachOutLDir."/".$fname;
       $mpath = $eachOutLDir;
@@ -360,7 +362,7 @@ my $pfullName;
        $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
                        $fullyear,$mo,$dy,$hr,$min);    
 
-           if( $ltime > 3600 && $ltime < 345600 ){         
+           if( $ltime > 1800 && $ltime < 345600 ){         
 #   print "Log time: ", $ltime, "\n";
            
         foreach my $eachOldJob (@old_jobs) {
@@ -377,8 +379,7 @@ my $pfullName;
  
           $newAvail = "N";
   print  "Changing availability for test files", "\n";
-#  print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ", $newAvail, "\n"; 
-
+  print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ",$newAvail, "\n"; 
      &updateJSTable();
 
         &logInfo("$fullname", "$platf");
@@ -390,7 +391,7 @@ my $pfullName;
       $crCode = "n\/a"; 
 
   print  "Filling JobStatus with DEV log files for testDay and beforeDay\n";
-  print  "files to be inserted:", $mjID, " % ",$mpath, " % ",$timeS , " % ",$mavail, "\n";  
+  print  "files to be inserted:", $mjID, " % ",$mpath, " % ",$timeS , " % ", $memFst," % ",$memLst," % ", $mavail, "\n";  
          &fillJSTable();
 
        $fObjAdr = \(LFileAttr->new());
@@ -451,6 +452,10 @@ foreach  $eachOutNDir (@OUT_DIR) {
        $EvGen = "hadronic_cocktail";
         $EvType = $EvTp;
     }
+       elsif ($EvTp =~ /minbias/) {
+       $EvGen = "daq";
+        $EvType = $EvTp;
+  }
        $form = "root";
     my $comname = basename("$flname",".root");
       if ($comname =~ m/\.([a-z0-9_]{3,})$/) {
@@ -461,6 +466,9 @@ foreach  $eachOutNDir (@OUT_DIR) {
        @prt = split("_",$bsname);
         $evR = $prt[2];
         $EvReq = $EvReq = substr($evR,0,-5);
+   }
+      elsif($flname =~ /st_physics/) {
+        $EvReq = 250; 
      }else {
       @prt = split(/\./,$bsname);
       $evR = $prt[1];
@@ -472,7 +480,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
           ($size, $mTime) = (stat($lgFile))[7, 9];
             $ltime = $now - $mTime;
 #  print "Log time: ", $ltime, "\n"; 
-           if( $ltime > 3600 && $ltime < 345600 ){         
+           if( $ltime > 1800 && $ltime < 345600 ){         
 	     foreach my $eachLogFile (@testJobStFiles) {
 
                $mjID    = ($$eachLogFile)->jbId;
@@ -682,7 +690,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
               $newAvail = "N";
    print "Changing availability for test files", "\n";
-#   print "file to be updated:", $pvjbId, " % ", $pfullName, " % ",$pvTime, " % ", $newAvail, "\n"; 
+   print "file to be updated:", $pvjbId, " % ", $pfullName, " % ",$pvTime, " % ", $newAvail, "\n"; 
    &updateDbTable();
 
     print "Filling Files Catalog with DEV output files for testDay and beforeDay\n";
@@ -874,12 +882,10 @@ my $Anflag = 0;
 
           $mymaker = $size_line[3];
         if( $mymaker eq "tree:"){
-	  if( $plt_form eq "tfs_redhat61" or $plt_form eq "trs_redhat61" ) {
-         $maker_size[$no_event + 1] = $size_line[9]/1000;
-      }elsif( $plt_form eq "tfs_Solaris_CC5")  {
-         $maker_size[$no_event + 1] = $size_line[12]/1000; 
-        }elsif ($plt_form eq "trs_Solaris") {
-          $maker_size[$no_event + 1] = $size_line[12]/1000;
+	  if( $plt_form eq "tfs_Solaris_CC5" or $plt_form eq "trs_Solaris" ) {
+         $maker_size[$no_event + 1] = $size_line[12]/1000;
+        }else {
+          $maker_size[$no_event + 1] = $size_line[9]/1000;
         }
        }
       }
