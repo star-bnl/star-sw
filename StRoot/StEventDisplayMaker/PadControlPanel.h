@@ -4,7 +4,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.h,v 1.3 2002/12/24 01:32:55 fine Exp $
+// $Id: PadControlPanel.h,v 1.4 2003/01/08 03:16:31 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@
 
 class QButtonGroup;
 class TVirtualPad;
-
+//
 class StPadControlPanel
 #if !defined(__CINT__)
   : public QObject 
@@ -41,7 +41,6 @@ Q_OBJECT
 #endif
   private:
      QButtonGroup *fBar;  
-//   TGLayoutHints *fL1;
 
 protected:
   void AddButt(const Char_t *buttonName, const Char_t *command);
