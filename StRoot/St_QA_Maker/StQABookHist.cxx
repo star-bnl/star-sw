@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.34 2003/01/23 04:03:18 jeromel Exp $
+// $Id: StQABookHist.cxx,v 2.35 2003/01/23 20:53:11 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.35  2003/01/23 20:53:11  genevb
+// Additional dAu changes
+//
 // Revision 2.34  2003/01/23 04:03:18  jeromel
 // Include fixed
 //
@@ -701,8 +704,8 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_tot->Rebin(0,"TPC+SVT/total");
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
-  m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",40,0.,10000.);
-  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",50,0.,1500.,50,0.,1500.);
+  m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",150,0.,9000.);
+  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",150,0.,1500.,150,0.,1500.);
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
@@ -1109,11 +1112,11 @@ void StQABookHist::BookHistGlob(){
   m_momF->Rebin(0,"East");
   m_momF->Rebin(1,"West");
   m_momF->SetStats(kFALSE);
-  m_chisq0F     = QAH::MH1F("QaGtrkChisq0F",  "globtrk: residuals-xy projection, ftpc",50,0.,5.,2);
+  m_chisq0F     = QAH::MH1F("QaGtrkChisq0F",  "globtrk: chi2/ndf x,y fit, ftpc",50,0.,5.,2);
   m_chisq0F->Rebin(0,"East");
   m_chisq0F->Rebin(1,"West");
   m_chisq0F->SetStats(kFALSE);
-  m_chisq1F     = QAH::MH1F("QaGtrkChisq1F",  "globtrk: residuals-rz projection, ftpc",50,0.,5.,2);
+  m_chisq1F     = QAH::MH1F("QaGtrkChisq1F",  "globtrk: chi2/ndf r,z fit, ftpc",50,0.,5.,2);
   m_chisq1F->Rebin(0,"East");
   m_chisq1F->Rebin(1,"West");
   m_chisq1F->SetStats(kFALSE);
@@ -1152,10 +1155,10 @@ void StQABookHist::BookHistGlob(){
   m_pTFW         = QAH::H1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,10.);
   m_momFE        = QAH::H1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH::H1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: residuals-xy projection, ftpc east", 50, 0.,5.);
-  m_chisq0FW     = QAH::H1F("QaGtrkChisq0FW",  "globtrk: residuals-xy projection, ftpc west", 50, 0.,5.);
-  m_chisq1FE     = QAH::H1F("QaGtrkChisq1FE",  "globtrk: residuals-rz projection, ftpc east", 50, 0.,5.);
-  m_chisq1FW     = QAH::H1F("QaGtrkChisq1FW",  "globtrk: residuals-rz projection, ftpc west", 50, 0.,5.);
+  m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: chi2/ndf x,y fit, ftpc east", 50, 0.,5.);
+  m_chisq0FW     = QAH::H1F("QaGtrkChisq0FW",  "globtrk: chi2/ndf x,y fit, ftpc west", 50, 0.,5.);
+  m_chisq1FE     = QAH::H1F("QaGtrkChisq1FE",  "globtrk: chi2/ndf r,z fit, ftpc east", 50, 0.,5.);
+  m_chisq1FW     = QAH::H1F("QaGtrkChisq1FW",  "globtrk: chi2/ndf r,z fit, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
 
@@ -1195,8 +1198,8 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_iflag   = QAH::H1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,900.);
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
-  m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",50,0.,5000.);
-  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,1500.,50,0.,1500.);
+  m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",150,0.,4500.);
+  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",150,0.,1500.,150,0.,1500.);
   m_primtrk_goodF->SetXTitle("East");
   m_primtrk_goodF->SetYTitle("West");
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
@@ -1504,11 +1507,11 @@ void StQABookHist::BookHistPrim(){
   m_pmomF->Rebin(0,"East");
   m_pmomF->Rebin(1,"West");
   m_pmomF->SetStats(kFALSE);
-  m_pchisq0F     = QAH::MH1F("QaPtrkChisq0F",  "primtrk: residuals-xy projection, ftpc",50,0.,5.,2);
+  m_pchisq0F     = QAH::MH1F("QaPtrkChisq0F",  "primtrk: chi2/ndf x,y fit, ftpc",50,0.,5.,2);
   m_pchisq0F->Rebin(0,"East");
   m_pchisq0F->Rebin(1,"West");
   m_pchisq0F->SetStats(kFALSE);
-  m_pchisq1F     = QAH::MH1F("QaPtrkChisq1F",  "primtrk: residuals-rz projection, ftpc",50,0.,5.,2);
+  m_pchisq1F     = QAH::MH1F("QaPtrkChisq1F",  "primtrk: chi2/ndf r,z fit, ftpc",50,0.,5.,2);
   m_pchisq1F->Rebin(0,"East");
   m_pchisq1F->Rebin(1,"West");
   m_pchisq1F->SetStats(kFALSE);
@@ -1547,10 +1550,10 @@ void StQABookHist::BookHistPrim(){
   m_ppTFW         = QAH::H1F("QaPtrkPtFW",      "primtrk: pT, ftpc west",50,0.,5.);
   m_pmomFE        = QAH::H1F("QaPtrkPFE",       "primtrk: momentum, ftpc east ",50,0.,5.);
   m_pmomFW        = QAH::H1F("QaPtrkPFW",       "primtrk: momentum, ftpc west ",50,0.,5.);
-  m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: residuals-xy projection, ftpc east", 50, 0.,5.);
-  m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: residuals-xy projection, ftpc west", 50, 0.,5.);
-  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: residuals-rz projection, ftpc east", 50, 0.,5.);
-  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: residuals-rz projection, ftpc west", 50, 0.,5.);
+  m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: chi2/ndf x,y fit, ftpc east", 50, 0.,5.);
+  m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: chi2/ndf x,y fit, ftpc west", 50, 0.,5.);
+  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: chi2/ndf r,z fit, ftpc east", 50, 0.,5.);
+  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: chi2/ndf r,z ft, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
   m_ppT_eta_recFE = QAH::H2F("QaPtrkPtVsEtaFE","primtrk: log pT vs eta, ftpcE",20,-4.5,-2.,40,1.,4.);
