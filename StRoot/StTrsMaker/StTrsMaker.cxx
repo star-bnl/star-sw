@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.35 1999/06/16 14:26:49 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.36 1999/06/17 19:04:40 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.36  1999/06/17 19:04:40  lasiuk
+// Rotate the momentum the same way that the position is rotated
+//
 // Revision 1.35  1999/06/16 14:26:49  fisyak
 // Add flags for egcs on Solaris
 //
@@ -194,7 +197,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.35 1999/06/16 14:26:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.36 1999/06/17 19:04:40 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -570,10 +573,22 @@ Int_t StTrsMaker::Make(){
 		sector12Coordinate.setX(-xp);
 	    }
 
-	    StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
-					      tpc_hit->p[1]*GeV,
+	    // Must rotate the momentum as well,  BUT you should
+	    // only incur this calculational penalty if you split
+	    // the segment into more than 1 mini segement
+	    double pxPrime = tpc_hit->p[0]*cb - tpc_hit->p[1]*sb;
+	    double pyPrime = tpc_hit->p[0]*sb + tpc_hit->p[1]*cb;
+	    
+	    StThreeVector<double> hitMomentum(pxPrime*GeV,
+					      pyPrime*GeV,
 					      tpc_hit->p[2]*GeV);
 
+
+//	    PR(tpc_hit->p[0]*GeV);
+//	    PR(pxPrime*GeV);
+//	    PR(hitMomentum);
+
+	    
 	    // I need PID info here, for the ionization splitting (beta gamma)!
 	    int geantPID = tpc_track[tpc_hit->track_p].ge_pid;
 	    //cout << "gentPID " << gentPID << " " << tpc_hit->de << endl;
@@ -801,7 +816,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.35 1999/06/16 14:26:49 fisyak Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.36 1999/06/17 19:04:40 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
