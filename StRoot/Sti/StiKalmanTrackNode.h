@@ -8,6 +8,9 @@
 
 class StiHit;
 class StiDetector;
+class StiMaterial;
+class StiPlanarShape;
+class StiCylindricalShape;
 
 /*! \class StiKalmanTrackNode
   Work class used to handle Kalman filter information while
@@ -79,63 +82,74 @@ public:
     void setTargetDet(const StiDetector * targetDet);
     const StiDetector * getTargetDet();
         
-    /// rotation angle of local coordinates wrt global coordinates
-    double fAlpha;
-    /// local X-coordinate of this track (reference plane)
-    double fX;   
-    /// local Y-coordinate of this track (reference plane)           
-    double fP0; 
-    /// local Z-coordinate of this track (reference plane)
-    double fP1;
-    /// (signed curvature)*(local X-coordinate of helix axis)
-    double fP2;
-    /// signed curvature [sign = sign(-qB)]
-    double fP3;  
-    /// tangent of the track momentum dip angle
-    double fP4;
-
-    /// covariance matrix of the track parameters
-    double fC00;                       
-    double fC10, fC11;                 
-    double fC20, fC21, fC22;           
-    double fC30, fC31, fC32, fC33;     
-    double fC40, fC41, fC42, fC43, fC44;
-    double fChi2;
-    float  fdEdx;           // dE/dx 
-    float  pathLength;
+		/// rotation angle of local coordinates wrt global coordinates
+		double fAlpha;
+		/// local X-coordinate of this track (reference plane)
+		double fX;   
+		/// local Y-coordinate of this track (reference plane)           
+		double fP0; 
+		/// local Z-coordinate of this track (reference plane)
+		double fP1;
+		/// (signed curvature)*(local X-coordinate of helix axis)
+		double fP2;
+		/// signed curvature [sign = sign(-qB)]
+		double fP3;  
+		/// tangent of the track momentum dip angle
+		double fP4;
+		
+		/// covariance matrix of the track parameters
+		double fC00;                       
+		double fC10, fC11;                 
+		double fC20, fC21, fC22;           
+		double fC30, fC31, fC32, fC33;     
+		double fC40, fC41, fC42, fC43, fC44;
+		double fChi2;
+		float  fdEdx;           // dE/dx 
+	float  pathLength;
 	
-    int hitCount;
-    int nullCount;
-    int contiguousHitCount;
-    int contiguousNullCount;
+	int hitCount;
+	int nullCount;
+	int contiguousHitCount;
+	int contiguousNullCount;
 
-    // static methods
-    static void    setFieldConstant(double f) { kField = f;};
-    static double  getFieldConstant()         { return kField;}; 
-    static void    setMassHypothesis(double m);
-    static double  getMassHypothesis(); 
-    static void    setElossCalculated(bool option);
-    static void    setMCSCalculated(bool option);
-    static bool    getElossCalculated();
-    static bool    getMCSCalculated();  
-    static int    minContiguousHitCountForNullReset;
-    static int    maxNullCount;  
-    static int    maxContiguousNullCount;
-    friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
+  // static methods
+  static void    setFieldConstant(double f) { kField = f;};
+  static double  getFieldConstant()         { return kField;}; 
+  static void    setMassHypothesis(double m);
+  static double  getMassHypothesis(); 
+  static void    setElossCalculated(bool option);
+  static void    setMCSCalculated(bool option);
+  static bool    getElossCalculated();
+  static bool    getMCSCalculated();  
+	static int    minContiguousHitCountForNullReset;
+	static int    maxNullCount;  
+	static int    maxContiguousNullCount;
+  friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
 
-    static bool  recurse;
+	static bool  recurse;
 
 
-protected:   
-    
-    const StiDetector * targetDet; // not persistent
-    
-    static double kField;
-    static bool   elossCalculated;
-    static bool   mcsCalculated;
-    static double massHypothesis;
+ protected:   
+  
+	const StiDetector * targetDet; // not persistent
 
-    static double x1,x2,y1,z1,dx,r1,r2,c1,c2,x0,rho;
+  static double kField;
+  static bool   elossCalculated;
+  static bool   mcsCalculated;
+  static double massHypothesis;
+
+	static int   shapeCode;
+	static const StiDetector * det;
+	static const StiPlanarShape * planarShape;
+	static const StiCylindricalShape * cylinderShape;
+	static StiMaterial * gas;
+	static StiMaterial * prevGas;
+	static StiMaterial * mat;
+	static StiMaterial * prevMat;
+	static double x1,x2,y1,z1,dx,r1,r2,c1,c2,c1sq,c2sq,x0,y0;
+	static double radThickness, density;
+	static double gasDensity,matDensity,gasRL,matRL;
+
 };
 
 //stl helper functor
