@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.5 2003/06/25 23:04:26 thenry Exp $
+ * $Id: StJetMaker.cxx,v 1.6 2003/08/01 16:29:21 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -176,7 +176,6 @@ Int_t StJetMaker::Make() {
   }
   if(muDstMaker->muDst()->numberOfPrimaryTracks() <= 0) return kStOk;
 
-  /*
   // fill jetEvent 
   int res;
   res = jetEvent->fill(event, mudst);
@@ -184,7 +183,6 @@ Int_t StJetMaker::Make() {
     mBadCounter++;
     return kStOK;
   }
-  */  
 
   // Get geant info, if any, and fill geant branch
 #ifdef _GEANT_
