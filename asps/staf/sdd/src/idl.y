@@ -88,7 +88,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.7 1998/06/05 02:07:16 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.8 1998/06/05 23:26:19 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -295,7 +295,8 @@ void FirstFile(FILE *ff) {
 }
 void SecondFile(FILE *ff) {
   FF"#include \"St_%s_Table.h\"\n",gTable);
-  FF"ClassImp(St_%s)\n",gTable);
+  FF"#include \"Stypes.h\"\n");
+  FF"TableImp(%s)\n",gTable);
   FF"void St_%s::Streamer(TBuffer &b){St_Table::Streamer(b);}\n",gTable);
 }
 void WriteTwoRootTableFiles(void) {
