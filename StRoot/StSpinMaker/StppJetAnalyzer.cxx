@@ -202,7 +202,7 @@ bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
 	    (pj.pt() > mJetPtMin)
 	    && (fabs(pj.eta()) < mJetEtaMax)
 	    && (fabs(pj.eta()) > mJetEtaMin)
-            && ((int)pj.numberOfParticles() >= mJetNmin)
+            && (pj.numberOfParticles() >= mJetNmin)
 	    );
 }
 
@@ -226,12 +226,12 @@ void StppJetAnalyzer::fillLists()
     }
 }
 
-void StppJetAnalyzer::fillLists(StMuTrackFourVec* tracks, int numTracks)
+void StppJetAnalyzer::fillLists(FourList &tracks)
 {
-    for (int i=0; i < numTracks; i++) {
-	if (accept(&tracks[i])) {
-	    mFourList.push_back(&tracks[i]) ; //for ownership
-	    StProtoJet tempPj(&tracks[i]);
+    for (FourList::iterator i=tracks.begin(); i != tracks.end(); i++) {
+	if (accept( ((StMuTrackFourVec*) *i) )  ) {
+	    mFourList.push_back(*i) ; //for ownership
+	    StProtoJet tempPj(*i);
 	    if (accept(tempPj)) { //check to make sure that nothing is wrong w/ protojet, as well!!!
 		mProtoJets.push_back( tempPj ); //for jet finding
 	    }
@@ -246,12 +246,12 @@ void StppJetAnalyzer::setEvent(StppEvent* e)
     fillLists();
 }
 
-void StppJetAnalyzer::setFourVec(StMuTrackFourVec* tracks, int numTracks)
+void StppJetAnalyzer::setFourVec(FourList &tracks)
 {
     mFourList.clear();
     mProtoJets.clear();
 
-    fillLists(tracks, numTracks);
+    fillLists(tracks);
 }
 
 void StppJetAnalyzer::findJets()
@@ -284,3 +284,7 @@ void StppJetAnalyzer::addBranch(const char *name, void *stppudst)
   TTree* ppuDst = (TTree *) stppudst;
   ppuDst->Branch (name, "StJets", &muDstJets, 64000, 99);   
 }
+
+
+
+
