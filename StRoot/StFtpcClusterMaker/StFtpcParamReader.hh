@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.17 2001/07/11 21:19:33 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.18 2002/01/21 22:14:56 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.18  2002/01/21 22:14:56  jcs
+// added values for temperature/pressure calculations to ftpcClusterPars
+//
 // Revision 1.17  2001/07/11 21:19:33  jcs
 // remove obsolete entries in tables
 //
@@ -82,6 +85,14 @@ protected:
   Int_t mNumberOfDriftSteps;
   Float_t mStandardPressure;
   Float_t mNormalizedNowPressure;
+  Float_t mAdjustedAirPressureWest;
+  Float_t mAdjustedAirPressureEast;
+  Float_t mMinPressure;
+  Float_t mMaxPressure;
+  Float_t mGasTemperatureWest;
+  Float_t mGasTemperatureEast;
+  Float_t mMinGasTemperature; 
+  Float_t mMaxGasTemperature;
   Float_t mLorentzAngleFactor;
   Int_t mOrderOfDiffusionErrors;
   Float_t *mPadDiffusionErrors;
@@ -166,6 +177,10 @@ public:
   Float_t fssGasLorentzAngle(Int_t i);
   // parameter set functions
   Int_t setNormalizedNowPressure(Float_t f) {mNormalizedNowPressure=f; return 1;}
+  Int_t setAdjustedAirPressureWest(Float_t f) {mAdjustedAirPressureWest=f;return 0;}
+  Int_t setAdjustedAirPressureEast(Float_t f) {mAdjustedAirPressureEast=f;return 0;}
+  Int_t setGasTemperatureWest(Float_t f) {mGasTemperatureWest = f;return 0;}
+  Int_t setGasTemperatureEast(Float_t f) {mGasTemperatureEast = f;return 0;}
 
   // inline get functions
   Int_t gaussFittingFlags() {return mGaussFittingFlags;}
@@ -173,6 +188,14 @@ public:
   Int_t numberOfDriftSteps() {return mNumberOfDriftSteps;}
   Float_t standardPressure() {return mStandardPressure;}
   Float_t normalizedNowPressure() {return mNormalizedNowPressure;}
+  Float_t adjustedAirPressureWest() {return mAdjustedAirPressureWest;}
+  Float_t adjustedAirPressureEast() {return mAdjustedAirPressureEast;}
+  Float_t minPressure() {return mMinPressure;}
+  Float_t maxPressure() {return mMaxPressure;}
+  Float_t gasTemperatureEast() {return mGasTemperatureEast;}
+  Float_t gasTemperatureWest() {return mGasTemperatureWest;}
+  Float_t minGasTemperature() {return mMinGasTemperature;}
+  Float_t maxGasTemperature() {return mMaxGasTemperature;}
   Float_t lorentzAngleFactor() {return mLorentzAngleFactor;}
   Float_t padBadFitError() {return mPadBadFitError;}
   Float_t timeBadFitError() {return mTimeBadFitError;}
