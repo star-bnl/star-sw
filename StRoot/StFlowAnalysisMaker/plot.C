@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.5 1999/12/04 00:15:41 posk Exp $
+// $Id: plot.C,v 1.6 1999/12/21 01:19:29 posk Exp $
 //
 // Author: Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker
@@ -9,6 +9,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.6  1999/12/21 01:19:29  posk
+// Added more histograms.
+//
 // Revision 1.5  1999/12/04 00:15:41  posk
 // Works with StFlowEvent which works with the new StEvent
 //
@@ -25,21 +28,20 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-//TFile histFile("flow.hist.root");
+TFile histFile("flow.hist.root");
 
-const Int_t nHars   = 4;
-const Int_t nSels   = 2;
-const Int_t nSubs   = 2;
-const Float_t twopi = 2. * 3.1416;
-Float_t etaMax      = 2.;
-Float_t ptMax       = 2.;
+const Int_t nHars    = 6;
+const Int_t nSels    = 2;
+const Int_t nSubs    = 2;
+const Float_t twopi  = 2. * 3.1416;
+const Float_t etaMax = 2.;
+const Float_t ptMax  = 2.;
+
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
     
-  TFile histFile("flow.hist.root");
-
   // names of histograms made by StFlowAnalysisMaker
   // also projections of some of these histograms
   const char* baseName[] = { "Flow_Res_Sel",
@@ -69,9 +71,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vObs2D_Sel",
 			     "Flow_v2D_Sel",
 			     "Flow_v.Eta_Sel",
-			     "Flow_v.Pt_Sel"};
-  const Int_t nNames = sizeof(baseName) / sizeof(*baseName);
-  const Int_t nSingles = 8 + 1;
+			     "Flow_v.Pt_Sel" };
+  //const int nNames = sizeof(baseName) / sizeof(baseName[0]);
+  const int nNames = sizeof(baseName) / 4;
+  const int nSingles = 8 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -107,21 +110,21 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   cout << "  name= " << shortName[pageNumber] << endl;
 
   // set the constants
-  Float_t qMax   =     2.;
-  Float_t phiMax = twopi; 
-  Int_t n_qBins  =    50;
+  float qMax   =     2.;
+  float phiMax = twopi; 
+  int n_qBins  =    50;
 
   char* cp = strstr(shortName[pageNumber],"Subs");
-  Int_t columns = (cp) ? nSubs + nSels : nSels;
-  Int_t rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
+  int columns = (cp) ? nSubs + nSels : nSels;
+  int rows = (strcmp(shortName[pageNumber],"Flow_Psi_Sub_Corr_Diff")!=0) ?
     nHars : nHars -1;
-  Int_t pads = rows*columns;
+  int pads = rows*columns;
 
   // make the plots
   if (selN == 0) {
-    Int_t canvasWidth = 600, canvasHeight = 780;
+    int canvasWidth = 600, canvasHeight = 780;
   } else {
-    Int_t canvasWidth = 780, canvasHeight = 600;
+    int canvasWidth = 780, canvasHeight = 600;
   }
   TCanvas* c = new TCanvas(shortName[pageNumber],shortName[pageNumber],
 			   canvasWidth,canvasHeight);
@@ -138,9 +141,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   graphPad->cd();
   if (selN==0) {
     graphPad->Divide(columns,rows);
-    Int_t firstK = 0, firstJ = 0, lastK = columns, lastJ = rows;
+    int firstK = 0, firstJ = 0, lastK = columns, lastJ = rows;
   } else {
-    Int_t firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
+    int firstK = selN -1, firstJ = harN -1, lastK = selN, lastJ = harN;
   }
   TLine* lineZeroEta = new TLine(-etaMax, 0., etaMax, 0.);
   TLine* lineZeroPt = new TLine(0., 0., ptMax, 0.);
@@ -151,7 +154,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     for (int k = firstK ; k < lastK; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
-      Int_t padN = j*columns + k + 1; // pad number
+      int padN = j*columns + k + 1; // pad number
       char* temp = new char[30];    // construct histName
       strcpy(temp,shortName[pageNumber]);
       char* cproj = strstr(temp,".");
@@ -220,7 +223,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	}
   	lineZeroPt->Draw();
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
-	Float_t norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
+	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm); // normalize height to one
 	if (strstr(shortName[pageNumber],"Diff")!=0) { 
@@ -240,8 +243,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  hist->Fit("funcCos2");
 	  delete funcCos2;
 	}
-	//hist->SetMinimum(0.8);
-	if (strstr(shortName[pageNumber],"Phi")!=0) hist->SetMinimum(0.9);
+	if (strstr(shortName[pageNumber],"Phi")!=0) hist->SetMinimum(0.8);
 	gStyle->SetOptStat(10);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
@@ -256,7 +258,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
       } else if (strstr(shortName[pageNumber],"Phi")!=0) { // Phi distibutions
-       	hist->SetMinimum(0.8*(hist->GetMaximum()));
+       	hist->SetMinimum(0.9*(hist->GetMinimum()));
 	if (strstr(shortName[pageNumber],"Weight")!=0) {
 	  gStyle->SetOptStat(0);
 	  hist->Draw(); 
@@ -288,9 +290,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 // macro for the resolution plots
 TCanvas* plotResolution(){
   char* profName[] = {"Flow_prof_Cos_Sel","Flow_Res_Sel"};
-  Int_t columns = nSels;
-  Int_t rows = 2;
-  Int_t pads = rows*columns;
+  int columns = nSels;
+  int rows = 2;
+  int pads = rows*columns;
 
   TCanvas* c = new TCanvas(profName[1],profName[1],600,780);
   c->ToggleEventStatus();
@@ -302,12 +304,12 @@ TCanvas* plotResolution(){
   graphPad->cd();
   graphPad->Divide(columns,rows);
   for (int j = 0; j < rows; j++) {
-    Int_t profNumber = j;
+    int profNumber = j;
     cout << "resolution name= " << profName[profNumber] << endl;
     for (int k = 0; k < columns; k++) {
       char countColumns[2];
       sprintf(countColumns,"%d",k+1);
-      Int_t padN = j*columns + k +1;
+      int padN = j*columns + k +1;
       TString* histName = new TString(profName[profNumber]);
       histName->Append(*countColumns);
       cout << "row= " << j << " col= " << k << " pad= " << padN << "\t" 
@@ -427,3 +429,6 @@ void plotAll(Int_t nNames, Int_t selN = 0, Int_t harN = 0) {
   }
   cout << "  plotAll Done" << endl;
 }
+
+#endif
+
