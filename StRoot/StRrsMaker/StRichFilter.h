@@ -1,5 +1,5 @@
 /************************************************************
- * $Id: StRichFilter.h,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
+ * $Id: StRichFilter.h,v 1.3 2000/02/08 16:22:57 lasiuk Exp $
  *
  * Description:
  *  Filter decides which algorithms to apply depending on the kind
@@ -18,8 +18,8 @@
  *
  ***********************************************************************
  * $Log: StRichFilter.h,v $
- * Revision 1.2  2000/01/25 22:02:19  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:22:57  lasiuk
+ * move selection into maker.  Remove from package next revision
  *
  * Revision 1.3  2000/02/08 16:22:57  lasiuk
  * move selection into maker.  Remove from package next revision
@@ -32,12 +32,12 @@
  *
  *  revision history:
  *     - 8/9/1999 created the class,               Alexandre Nevski.
-
+ *     - 8/16/1999 added changeCoord               C & A
  *
  ************************************************************************/
 #ifdef NEVER
 #ifndef ST_RICH_FILTER_H
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#define ST_RICH_FILTER_H
 
 #include <functional>
 #ifndef ST_NO_NAMESPACES
@@ -46,19 +46,17 @@ using std::unary_function;
 
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
-#include "StRichGeometryDb.h"
+#endif
 #include "StRichRrsMacros.h"
-    struct StRichFilter : public unary_function<StRichGHit,void> {
-	void operator()(StRichGHit& );
-	void changeCoord(StRichGHit& );
-	void whatQuadrant(StRichGHit& );
+#include "StRichGHit.h"
+//#include "StRichGeometryDb.h"
 
-    };
 struct StRichFilter : public unary_function<StRichGHit,void> {
     void operator()(StRichGHit& );    
 };
 
 #ifndef ST_NO_NAMESPACES    
+//}
 #endif
 
 #endif

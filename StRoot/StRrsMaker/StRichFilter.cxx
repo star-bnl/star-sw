@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: StRichFilter.cxx,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
+ * $Id: StRichFilter.cxx,v 1.3 2000/02/08 16:22:56 lasiuk Exp $
  *
  * Description:
  *  StRichFilter decides which algorithms to apply depending on the kind
@@ -25,8 +25,8 @@
  *
  *****************************************************************************
  * $Log: StRichFilter.cxx,v $
- * Revision 1.2  2000/01/25 22:02:19  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:22:56  lasiuk
+ * move selection into maker.  Remove from package next revision
  *
  * Revision 1.3  2000/02/08 16:22:56  lasiuk
  * move selection into maker.  Remove from package next revision
@@ -35,80 +35,45 @@
  * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:00  lasiuk
-
+ * Initial Revision
  *
  *****************************************************************************/
 #ifdef NEVER
+#ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
-#include "StRichFilter.h"
 #include "StRichFilter.h"
 #include "StRichIonization.h"
 #include "StRichInduceSignal.h"
 
 #ifdef RICH_WITH_VIEWER
-    void StRichFilter::operator()(StRichGHit& hit)
-    {
-	StRichIonization   ionize;
-	StRichInduceSignal induceSignal;
-	
-	if ( hit.mVolumeID != "RCSI" ) 
-	    { 
-		whatQuadrant( hit );                     // alters hit !
-		ionize( hit );		 
-	    }
-	else 
-	    {
-		changeCoord( hit );                      // alters hit !
-		
-		if ( hit.dE > 0 ) 
-		    induceSignal ( hit );
-	    }
-	
-#ifdef RICH_WITH_VIEWER
-	if (StRichViewer::histograms ) 
-	    StRichViewer::getView()->mPadPlane->Fill( hit.z, hit.x, 1);
+#include "StRichViewer.h"
 #endif
+
+void StRichFilter::operator()(StRichGHit& hit)
+{
+    StRichIonization   ionize;
+    StRichInduceSignal induceSignal;
+
+    //
+    // If in the GAP, ionize the gas
     PR(hit.volumeID());
-    
-    
-    void StRichFilter::changeCoord(StRichGHit& hit )
-    {
-	static StRichGeometryDb* mGeometryDb = StRichGeometryDb::getDb();
-	double factor_z = ( mGeometryDb->length - mGeometryDb->quad_gap_z ) / 4;
-	double factor_x = ( mGeometryDb->width  - mGeometryDb->quad_gap_x ) / 4;
-	
-	if ( hit.quad == 1 || hit.quad == 4 ) // right side
-	    hit.z = hit.z + factor_z;
-	else                                  // left  side
-	    hit.z = hit.z - factor_z;
-	
-	if ( hit.quad == 1 || hit.quad == 2 ) // upper part
-	    hit.x = hit.x + factor_x;           
-	else                                  // lower part
-	    hit.x = hit.x - factor_x;
-	
+    if ( hit.volumeID() != "RCSI" ) { 
+	ionize( hit );		 
+    }
+    else {
+	//
 	// check if it is photon
 	if ( hit.dE() > 0 ) 
-    void StRichFilter::whatQuadrant(StRichGHit& hit)
-    {
-	if ( hit.z > 0 ) {
-	    if ( hit.x > 0 )
-		hit.quad = 1;
-	    else 
-		hit.quad = 4;
-	}
-	else {
-	    if ( hit.x > 0 )
-		hit.quad = 2;
-	    else 
-		hit.quad = 3;
-	}
+	    induceSignal ( hit );
     }
     
-    
+#ifdef RICH_WITH_VIEWER
+    if (StRichViewer::histograms ) 
+	StRichViewer::getView()->mPadPlane->Fill( hit.position().z(), hit.position().x(), 1);
 #endif
 }
+
 #ifndef ST_NO_NAMESPACES
 //}
 #endif
