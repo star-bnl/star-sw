@@ -2,8 +2,12 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.8 1999/09/12 23:03:03 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.9 1999/09/13 15:07:05 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.9  1999/09/13 15:07:05  caines
+// Added creation of garb(tphit) and garb(tptrack) so it is possible
+// to run with TPC turned off
+//
 // Revision 1.8  1999/09/12 23:03:03  fisyak
 // Move parameters into makers
 //
@@ -50,7 +54,8 @@ ClassImp(StPrimaryMaker)
   //_____________________________________________________________________________
   StPrimaryMaker::StPrimaryMaker(const char *name):StMaker(name),
   m_evr_evrpar(0),
-  m_egr_egrpar(0)
+  m_egr_egrpar(0),
+  m_egr2_egrpar(0)
 {
   m_flag      = 2;
 }
@@ -96,21 +101,22 @@ Int_t StPrimaryMaker::Init(){
     tp_param->z =  0.; 
   }
   // egr2
+
   m_egr2_egrpar = new St_egr_egrpar("egr2_egrpar",1);
   {  
     egr_egrpar_st row;
-    memset(&row,0,m_evr_evrpar->GetRowSize());
-    row.scenario =  5;
+    memset(&row,0,m_evr_egrpar->GetRowSize());
+    row.scenario =  0;
     row.mxtry =    10;
     row.minfit =    5;
     row.prob[0] =   2;
     row.prob[1] =   2;
     row.debug[0] =  1;
     row.svtchicut = 0;
-    row.usetpc    = 1;
-    row.usesvt    = 0;
+    row.usetpc    = 2;
+    row.usesvt    = 2;
     row.usevert   = 1;
-    row.useglobal = 0;
+    row.useglobal = 2;
     m_egr2_egrpar->AddAt(&row,0);
   }
   AddRunCont(m_egr2_egrpar);
@@ -144,11 +150,13 @@ Int_t StPrimaryMaker::Make(){
     evaltrk   = (St_tte_eval   *) tpc_tracks("evaltrk");
   }
   if (! evaltrk)    {evaltrk = new St_tte_eval("evaltrk",1); AddGarb(evaltrk);}
+  if (! tptrack)    {tptrack = new St_tpt_track("tptrack",1); AddGarb(tptrack);}
   St_DataSet    *tpchits = GetInputDS("tpc_hits");
   St_tcl_tphit     *tphit     = 0;
   if (tpchits) {
     tphit     = (St_tcl_tphit     *) tpchits->Find("tphit");
   }
+  if (! tphit)    {tphit = new St_tcl_tphit("tphit",1); AddGarb(tphit);} 
   
   St_DataSet     *svtracks = GetInputDS("svt_tracks");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
@@ -224,6 +232,7 @@ Int_t StPrimaryMaker::Make(){
                           no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
       {
 	double qwe = pow(glob2->x0-v0[0],2)+pow(glob2->y0-v0[1],2)+pow(glob2->z0-v0[2],2);
+	
 	glob->impact = TMath::Sqrt(qwe);
       }
     
@@ -256,4 +265,11 @@ Int_t StPrimaryMaker::Make(){
   return iMake;
 }
 //_____________________________________________________________________________
+
+
+
+
+
+
+
 
