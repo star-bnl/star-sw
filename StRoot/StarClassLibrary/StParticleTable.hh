@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.hh,v 1.2 1999/12/21 15:14:26 ullrich Exp $
+ * $Id: StParticleTable.hh,v 1.3 2000/01/04 14:57:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,8 +14,9 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.hh,v $
- * Revision 1.2  1999/12/21 15:14:26  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 1.3  2000/01/04 14:57:56  ullrich
+ * Added friend declaration to avoid warning messages
+ * under Linux.
  *
  * Revision 1.2  1999/12/21 15:14:26  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -71,6 +72,8 @@ public:
 
     StVecPtrParticleDefinition allParticles() const;
     
+    friend class nobody;
+
 private:
     StParticleTable();
     StParticleTable(const StParticleTable &right);
