@@ -1,5 +1,5 @@
 //*******************************************************/
-// $Id: trsExample.cc,v 1.1 1999/01/18 10:54:48 lasiuk Exp $
+// $Id: trsExample.cc,v 1.2 1999/01/18 20:59:06 lasiuk Exp $
 //
 // Author: brian, October, 1998
 //
@@ -8,13 +8,13 @@
 //
 // :: To produce a histogram file, define DIAGNOSTICS
 #define DIAGNOSTICS
+//
 // $Log: trsExample.cc,v $
-// Revision 1.1  1999/01/18 10:54:48  lasiuk
-// Initial revision
+// Revision 1.2  1999/01/18 20:59:06  lasiuk
+// function selection
 //
 // Revision 1.1  1999/01/18 10:54:48  lasiuk
 // Initial revision
-//
 /********************************************************/
 #include <iostream.h>
 #include <unistd.h>    // needed for access()
@@ -161,8 +161,18 @@ int main (int argc,char* argv[])
 
     StTrsAnalogSignalGenerator *trsAnalogSignalGenerator =
 	StTrsSlowAnalogSignalGenerator::instance(geomDb, scDb, electronicsDb, sector);
+    dynamic_cast<StTrsSlowAnalogSignalGenerator*>(trsAnalogSignalGenerator)->
+	setChargeDistribution(StTrsSlowAnalogSignalGenerator::endo);
+	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::gatti);
+	//setChargeDistribution(StTrsSlowAnalogSignalGenerator::dipole);
+    dynamic_cast<StTrsSlowAnalogSignalGenerator*>(trsAnalogSignalGenerator)->
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::delta);
+	setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianExact);
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::asymmetricGaussianApproximation);
+	//setElectronicSampler(StTrsSlowAnalogSignalGenerator::realShaper); 
 //     trsAnalogSignalGenerator->setDeltaRow(0);
-//     trsAnalogSignalGenerator->setDeltaPad(0);
+    trsAnalogSignalGenerator->setDeltaPad(2);
 //     trsAnalogSignalGenerator->setSignalThreshold(.0001);
 //     trsAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
     //     ??should the type of function be an option ???
