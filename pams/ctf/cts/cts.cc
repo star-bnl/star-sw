@@ -9,11 +9,17 @@
 #include <math.h>
 #include <iostream.h>
 #include <malloc.h>
+#include "PAM.h"
 #include "cts.h"
 #include "ctfgeo.h"
 //
 //  Function definitions
 //
+#define  rg32_  F77_NAME(rg32,RG32)
+#define  rndm_  F77_NAME(rndm,RNMD)
+extern "C" float type_of_call rg32_() ;
+extern "C" float type_of_call rndm_(int) ;
+
 extern "C" void    MessageOut( const char *msg );
 //
 void cts_get_ctf_indexes ( long detector, long volume, long &i_phi, long &i_eta ) ;
@@ -58,8 +64,6 @@ float cts_slat_response_table ( float& z, float& d, float& tof,
 
 
 //
-extern "C" float rg32_() ;
-extern "C" float rndm_() ;
 extern "C" void  hf2_ ( long* ihis, float* x, float* y, float* w );
 //
 //   Common variables
@@ -410,7 +414,7 @@ long cts_detector_response (
 //
 //     Generate noise only in phys_noise% of slats
 //
-      if ( rndm_() < mpara->phys_noise ) 
+      if ( rndm_(1) < mpara->phys_noise ) 
              cts_physical_noise ( i_phi, i_eta, n_slats_on,
                                   n_phe, time,
                                   mslat_h, mslat,   
@@ -621,7 +625,7 @@ void cts_electronic_noise (
 //
 //     Check whether noise should be generated
 //
-        if ( rndm_() > mpara->elec_noise ) continue ;
+        if ( rndm_(1) > mpara->elec_noise ) continue ;
 //
         n_slats_on++ ;
         i_slat = n_slats_on ;
@@ -630,10 +634,10 @@ void cts_electronic_noise (
 //      Generated ADC&TDC signals
 //
         raw[i_slat].adc = mpara->amin_noise +
-               rndm_() * (mpara->amax_noise-mpara->amin_noise) ;
+               rndm_(1) * (mpara->amax_noise-mpara->amin_noise) ;
 
         raw[i_slat].tdc = mpara->tmin_noise +
-               rndm_() * (mpara->tmax_noise-mpara->tmin_noise) ;
+               rndm_(1) * (mpara->tmax_noise-mpara->tmin_noise) ;
 //
 //     Add info in Raw
 //
@@ -777,8 +781,8 @@ void cts_physical_noise ( long           i_phi,        long            i_eta,
         || noisy_i_phi > geo->i_phi_max
         || noisy_i_eta < geo->i_eta_min
         || noisy_i_eta > geo->i_eta_max ; ) {
-       noisy_i_phi = i_phi + (int)(3.*rndm_())-1 ;
-       noisy_i_eta = i_eta + (int)(3.*rndm_())-1 ;
+       noisy_i_phi = i_phi + (int)(3.*rndm_(1))-1 ;
+       noisy_i_eta = i_eta + (int)(3.*rndm_(1))-1 ;
    }
 //
 //      Get index
