@@ -59,7 +59,16 @@ void StHbtCoulomb::SetFile(const char* readFile) {
 
 void StHbtCoulomb::SetChargeProduct(const double& charge) {
   cout << " StHbtCoulomb::SetChargeProduct() " << endl;
-  mZ1Z2 = charge;
+  if ( mZ1Z2!=charge ) { 
+    mZ1Z2 = charge;
+    if ( mZ1Z2>0 ) {
+      mFile = "/afs/rhic/star/hbt/coul/StHbtCorrectionFiles/correctionpp.dat";
+    }
+    else {
+      mFile = "/afs/rhic/star/hbt/coul/StHbtCorrectionFiles/correctionpm.dat";
+    }
+    CreateLookupTable(mRadius);
+  }
 }
 
 void StHbtCoulomb::CreateLookupTable(const double& radius) {
@@ -330,4 +339,24 @@ double StHbtCoulomb::Eta(const StHbtPair* pair) {
 	     (vz1cms-vz2cms)*(vz1cms-vz2cms) );
 
   return ( mZ1Z2*fine_structure_const/(dv) );
+}
+
+StHbt1DHisto* StHbtCoulomb::CorrectionHistogram(const double& mass1, const double& mass2, const int& nBins, 
+						const double& low, const double& high) {
+  if ( mass1!=mass2 ) {
+    cout << "Masses not equal ... try again.  No histogram created." << endl;
+    assert(0);
+  }
+  StHbt1DHisto* correction = new StHbt1DHisto("correction","Coulomb correction",nBins,low,high);
+  const double reducedMass = mass1*mass2/(mass1+mass2);
+  double qInv = low;
+  double dQinv = (high-low)/( (double)nBins );
+  double eta;
+  for (int ii=0; ii<nBins; ii++) {
+    qInv = low+ (double)ii*dQinv;
+    eta = 2.0*mZ1Z2*reducedMass*fine_structure_const/( qInv );
+    CoulombCorrect( eta );
+    correction->Fill( low+((double)ii+0.5)*dQinv, CoulombCorrect(eta,mRadius) );
+  }
+  return (correction);
 }
