@@ -9,8 +9,6 @@
 #include "StThreeVectorD.hh"
 #include "tables/St_svg_config_Table.h"
 
-class StiTrack;
-class StTrack;
 class StTpcHit;
 class StSvtHit;
 class StSsdHit;
@@ -80,7 +78,6 @@ public:
     StThreeVector<double> operator() (const StThreeVector<double>& position, double refAngle);
     StThreeVectorD operator() (const StThreeVectorD& position, double refAngle);
 
-    void StiGeometryTransform::operator() (const StTrack* st, StiTrack* sti);
     
 protected: 
 
