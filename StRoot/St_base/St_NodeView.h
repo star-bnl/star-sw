@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.21 1999/11/13 16:59:17 fine Exp $
+// $Id: St_NodeView.h,v 1.22 1999/11/16 16:29:57 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.22  1999/11/16 16:29:57  fine
+// TObject::GetObjectInfo() implemented
+//
 // Revision 1.21  1999/11/13 16:59:17  fine
 // St_Node and St_NodeView headers adjusted to ROOT 2.23/ not compatible with ROOT 2.22 anymore though!
 //
@@ -95,6 +98,7 @@ public:
   virtual TList   *GetListOfShapes()      const;
 //  virtual TList   *GetListOfAttributes()  const;
   virtual void     GetLocalRange(Float_t *min, Float_t *max);
+  virtual Text_t  *GetObjectInfo(Int_t px, Int_t py);
   virtual TShape  *GetShape()  const;
 //  virtual St_Node *GetThisAttributes() const;
   virtual Int_t    GetVisibility() const;

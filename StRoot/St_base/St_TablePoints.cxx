@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   14/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_TablePoints.cxx,v 1.2 1999/11/04 18:03:10 fine Exp $
+// $Id: St_TablePoints.cxx,v 1.3 1999/11/16 16:29:57 fine Exp $
 // $Log: St_TablePoints.cxx,v $
+// Revision 1.3  1999/11/16 16:29:57  fine
+// TObject::GetObjectInfo() implemented
+//
 // Revision 1.2  1999/11/04 18:03:10  fine
 // new ctor for tablepoints introduced to make EventDiplay happy
 //
@@ -71,5 +74,20 @@ St_TablePoints::St_TablePoints(St_TableSorter *sorter, Int_t keyIndex,Option_t *
      SetTablePointer(GetTable());
   }
   SetOption(opt); 
+}
+
+//______________________________________________________________________________
+Int_t St_TablePoints::DistancetoPrimitive(Int_t px, Int_t py)
+{
+//*-*-*-*-*-*-*Compute distance from point px,py to a 3-D points *-*-*-*-*-*-*
+//*-*          =====================================================
+//*-*
+//*-*  Compute the closest distance of approach from point px,py to each segment
+//*-*  of the polyline.
+//*-*  Returns when the distance found is below DistanceMaximum.
+//*-*  The distance is computed in pixels units.
+//*-*
+//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* 
+   return -1;
 }
 
