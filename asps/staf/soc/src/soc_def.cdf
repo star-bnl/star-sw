@@ -152,3 +152,26 @@ Show version attribute of a registered object.
 .
 >ACTION KAM_SOCOBJECT_VERSION
 
+** ---------------------------------------------------------------------
+** SOC/OBJECT/LOCK IDREF [ LOCK ] 
+>COMMAND LOCK
+>PARAMETERS
+IDREF 'Identification Reference.' I D=-1
++
+LOCK 'New lock value' C R='-,T,F' D='-'
+>GUIDANCE
+Show or set the lock attribute of a registered object.
+.
+>ACTION KAM_SOCOBJECT_LOCK
+
+** ---------------------------------------------------------------------
+** SOC/OBJECT/IMPLEMENTS IDREF INTERFACE
+>COMMAND IMPLEMENTS
+>PARAMETERS
+IDREF 'Identification Reference.' I D=-1
+INTERFACE 'Interface name' C
+>GUIDANCE
+Show whether a registered object implements an interface.
+.
+>ACTION KAM_SOCOBJECT_IMPLEMENTS
+
