@@ -310,7 +310,6 @@ CC:>------------------------------------------------------------------
                sector(nsignal).sector  = isec
                sector(nsignal).nhit    = se_hit(isec)
                sector(nsignal).de      = se_de(isec)
-               sector(nsignal).tot_hit = tot_cell_hit(isec)
 *--
                do jj = 0, 10
                 raw(nsignal + 96*jj).sector = isec 
