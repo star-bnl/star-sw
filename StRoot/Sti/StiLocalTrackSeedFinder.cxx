@@ -68,11 +68,12 @@ void StiLocalTrackSeedFinder::initialize()
 	      cout << "StiLocalSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
 	      throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
 	    }
-	  if (detector->isActive()) 
-	    {
-	      cout << "StiLocalTrackSeedFinder::initialize() -I- Adding detector:"<<detector->getName()<<endl;
-	      addLayer(detector);
-	    }
+	  addLayer(detector);
+	  if (!detector->isActive()) 
+	    cout <<"StiLocalTrackSeedFinder::initialize() -I- NOT Adding detector:"<<detector->getName()<<endl;
+	  //  {
+	  //    cout << "StiLocalTrackSeedFinder::initialize() -I- Adding detector:"<<detector->getName()<<endl;
+	  //  }
 	}
     }
   cout << "StiLocalTrackSeedFinder::initialize() -I- Done" << endl;

@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.6 2003/04/29 18:48:34 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.7 2003/05/01 20:46:52 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.7  2003/05/01 20:46:52  pruneau
+ * changed error parametrization
+ *
  * Revision 2.6  2003/04/29 18:48:34  pruneau
  * *** empty log message ***
  *
@@ -67,6 +70,8 @@ class StiTrackingPlots : public HistogramGroup
   TH2D *_nptsVsPt;
   TH2D *_nptsVsPtPlus;
   TH2D *_nptsVsPtMinus;
+  TH2D *_nptsVsEtaPtGt200;
+  TH2D *_nptsVsEtaPtLt200;
 
   TH2D *_nptsVsEta;
   TH2D *_nptsVsEtaPlus;

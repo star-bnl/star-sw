@@ -67,7 +67,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("minContiguousHitCountForNullReset",     
                             "minContiguousHitCountForNullReset",  
                             &minContiguousHitCountForNullReset, 
-                            1, 
+                            2, 
                             1, 
                             10, 
                             1, 
@@ -75,7 +75,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("minSearchWindow",     
                             "minSearchWindow",   
                             &minSearchWindow,  
-                            1.5, 0.5, 20., 0.1, 0)); 
+                            1.6, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxSearchWindow", 
                             "maxSearchWindow", 
                             &maxSearchWindow,         
@@ -83,7 +83,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("searchWindowScale", 
                             "searchWindowScale",  
                             &searchWindowScale, 
-                            15.0, 0.5, 20., 0.1, 0)); 
+                            5.0, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2ForSelection",  
                             "maxChi2ForSelection",   
                             &maxChi2ForSelection, 
@@ -91,7 +91,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxChi2Vertex",  
                             "maxChi2Vertex",   
                             &maxChi2Vertex, 
-                            100., 0., 20000., 0.1, 0)); 
+                            50., 0., 20000., 0.1, 0)); 
   add(f->getInstance()->set("massHypothesis", 
                             "massHypothesis",  
                             &massHypothesis,  
@@ -100,10 +100,10 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("OuterScaling",
                             "OuterScaling",
                             &outerScaling,
-                            1.4, 0., 20., 0.1, 0)); 
+                            1., 0., 20., 0.1, 0)); 
   add(f->getInstance()->set("InnerScaling",
                             "InnerScaling",
                             &innerScaling,
-                            1.4, 0., 20., 0.1, 0)); 
+                            1., 0., 20., 0.1, 0)); 
   
 } 

@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.7 2003/04/29 18:48:34 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.8 2003/05/01 20:46:52 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.8  2003/05/01 20:46:52  pruneau
+ * changed error parametrization
+ *
  * Revision 2.7  2003/04/29 18:48:34  pruneau
  * *** empty log message ***
  *
@@ -92,7 +95,9 @@ void StiTrackingPlots::initialize()
   _nptsVsEta      = book("nptsVsEta",     "nptsVsEta",     40, -2., 2., 50, 0., 50.);
   _nptsVsEtaPlus  = book("nptsVsEtaPlus", "nptsVsEtaPlus", 40, -2., 2., 50, 0., 50.);
   _nptsVsEtaMinus = book("nptsVsEtaMinus","nptsVsEtaMinus",40, -2., 2., 50, 0., 50.);
-  
+  _nptsVsEtaPtGt200 = book("nptsVsEtaPtGt200",     "nptsVsEtaPtGt200",     40, -2., 2., 50, 0., 50.);
+  _nptsVsEtaPtLt200 = book("nptsVsEtaPtLt200",     "nptsVsEtaPtLt200",     40, -2., 2., 50, 0., 50.);
+
   _nptsVsPhi = book("nptsVsPhi","nptsVsPhi",100,-3.1415927,3.1415927, 50, 0., 50.);
   _nptsVsPhiPlus = book("nptsVsPhiPlus","nptsVsPhiPlus",100,-3.1415927,3.1415927, 50, 0., 50.);
   _nptsVsPhiMinus = book("nptsVsPhiMinus","nptsVsPhiMinus",100,-3.1415927,3.1415927, 50, 0., 50.);
@@ -146,6 +151,10 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
       _nptsVsPt->Fill(thePt,nPts);
       _nptsVsEta->Fill(eta,nPts);
       _nptsVsPhi->Fill(phi,nPts);
+      if (thePt>0.2)
+	_nptsVsEtaPtGt200->Fill(eta,nPts);
+      else
+	_nptsVsEtaPtLt200->Fill(eta,nPts);
       if (nPts>5)
 	{
 	  double chi2 = track->getChi2()/(nPts-5);
