@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.155 2004/09/07 18:42:19 fisyak Exp $
+// $Id: StMaker.cxx,v 1.156 2004/11/02 02:11:15 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -52,7 +52,7 @@ static const char *DBaliases[]={
    "es99",     "er99",    "dc99", "year_1d",  "year_1e",
 "year_1h",  "year_2a", "year_2b","year2001", "year2003", 
  "y2003x",   "y2003a",  "y2003b",   "y2004",   "y2004x",
- "y2004a",          0
+ "y2004a",   "y2004b",   "y2005",  "y2005x",          0
 };   
 
 static const int   DBdates[]=  {
@@ -60,7 +60,7 @@ static const int   DBdates[]=  {
  19990615,   19990616,  19991206,  19991101,   19991201,
  20000614,   20010610,  20010501,  20010615,   20021115, 
  20021115,   20021115,  20021115,  20031120,   20031120,
- 20031120,          0
+ 20031120,   20031120,  20041030,  20041030,          0
 };
 
 static const int   DBtimes[]=  {
@@ -68,7 +68,7 @@ static const int   DBtimes[]=  {
         0,     120000,     80000,         0,          0,
    175430,          0,         0,         0,          0,        
         0,          0,         0,         0,          0,
-        0,          0
+        0,          0,         0,         0,          0
 };
 
 
@@ -1443,6 +1443,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.156  2004/11/02 02:11:15  jeromel
+// Updated aliases for y2005 (note 5 days offset comparing to advertized value for breathing room margin)
+//
 // Revision 1.155  2004/09/07 18:42:19  fisyak
 // Make icc happy
 //
