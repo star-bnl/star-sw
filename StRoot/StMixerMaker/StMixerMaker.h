@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.6 2000/08/11 14:56:17 pfachini Exp $
+ * $Id: StMixerMaker.h,v 1.7 2002/03/12 22:36:48 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
+ * Revision 1.7  2002/03/12 22:36:48  pfachini
+ * Changing Init() to InitRun(int)
+ *
  * Revision 1.6  2000/08/11 14:56:17  pfachini
  * *** empty log message ***
  *
@@ -74,22 +77,22 @@ class StMixerMaker : public StMaker {
     StTpcElectronics            *mElectronicsDb; //!
     
     // Processes
-    StTrsDigitalSignalGenerator   *mDigitalSignalGenerator; //!
+    StTrsDigitalSignalGenerator     *mDigitalSignalGenerator; //!
     StMixerEmbedding                *mEmbedding; //!
 
     // Container
-    StTrsSector               *mSector;//!
-    StTrsSector               *mSector1;//!
-    StTrsSector               *mSector2;//!
-    StTrsDigitalSector        *mDigitalSector;//!
+    StTrsSector               *mSector; //!
+    StTrsSector               *mSector1; //!
+    StTrsSector               *mSector2; //!
+    StTrsDigitalSector        *mDigitalSector; //!
 
     // I/O streams
-    char*                        mOutputFileName;//!
-    StTrsOstream*              mOutputStreamMixer;//!
-    int                          mNumberOfEvents;//!
+    char*                        mOutputFileName; //!
+    StTrsOstream*                mOutputStreamMixer; //!
+    int                          mNumberOfEvents; //!
 
     // Output
-    StTrsRawDataEvent             *mAllTheDataMixer;//!
+    StTrsRawDataEvent            *mAllTheDataMixer; //!
    
     int                          mFirstSector;
     int                          mLastSector;
@@ -99,23 +102,23 @@ class StMixerMaker : public StMaker {
  public:
     StMixerMaker(const char *name="Mixer",char *kind1="undefined",char *kind2="undefined");
     ~StMixerMaker();
-    Int_t  Init();
+    Int_t  InitRun(int);
     Int_t  Make();
     Int_t  Finish();
     
-    void Clear(Option_t *option="");    // called after every event to cleanup 
+    void Clear(Option_t *option="");  // called after every event to cleanup 
 
     Char_t   *GetConfig1() {return gConfig1;}
     Char_t   *GetConfig2() {return gConfig2;}
     int   getSequences1(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
     int   getSequences2(int sector,int row,int pad,int *nseq,StSequence **listOfSequences);//!
-    int   writeFile(char*, int);//!
+    int   writeFile(char*, int); //!
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.6 2000/08/11 14:56:17 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.7 2002/03/12 22:36:48 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
-    ClassDef(StMixerMaker, 1)   //StAF chain virtual base class for Makers
+    ClassDef(StMixerMaker, 2)  // StAF chain virtual base class for Makers
 };
 
 #endif
