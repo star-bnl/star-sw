@@ -1,7 +1,10 @@
 //*-- Author : James Dunlop
 // 
-// $Id: StHitFilterMaker.cxx,v 1.3 2004/04/08 19:28:55 caines Exp $
+// $Id: StHitFilterMaker.cxx,v 1.4 2004/09/02 19:13:44 fisyak Exp $
 // $Log: StHitFilterMaker.cxx,v $
+// Revision 1.4  2004/09/02 19:13:44  fisyak
+// Keep Tpc hits for tracks with Tof Pid Traits
+//
 // Revision 1.3  2004/04/08 19:28:55  caines
 // Make Hitfilter take out those SVT hits not on tracks defined in the constructor - same as TPC filtering
 //
@@ -129,7 +132,16 @@ bool StHitFilterMaker::accept(StEvent *event) {
 
 bool StHitFilterMaker::accept(StTrack *track) {
     if (track->flag() <= 0) return false;
-    
+    StSPtrVecTrackPidTraits &traits = track->pidTraits();
+    unsigned int size = traits.size();
+    if (size) {
+      for (unsigned int i = 0; i < size; i++) {
+	if (! traits[i]) continue;
+	if ( traits[i]->IsZombie()) continue;
+	StTofPidTraits* p = dynamic_cast<StTofPidTraits*>(traits[i]);
+	if (p) {return true;}
+      }
+    }
     if (track->geometry()) {
 	if (mPtLowerCut > 0 && track->geometry()->momentum().perp() < mPtLowerCut )
 	    return false;
