@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.18 2000/02/23 21:03:17 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.19 2000/03/30 17:02:36 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.19  2000/03/30 17:02:36  hardtke
+ * limit warning message in StRTpcPadPlane
+ *
  * Revision 1.18  2000/02/23 21:03:17  hardtke
  * fix tpc_row_par -- causing tpt problems
  *
@@ -69,6 +72,7 @@ StTpcDb::StTpcDb(St_DataSet* input) {
  else{
    gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input Da   taSet","E");
  }
+ gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  gStTpcDb = this;
 }
 
@@ -77,6 +81,7 @@ StTpcDb::StTpcDb(StMaker* maker) {
  assert(gStTpcDb==0);
  memset(this,0,sizeof(StTpcDb));
  if (maker) GetDataBase(maker);
+ gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  gStTpcDb = this;
 }
 

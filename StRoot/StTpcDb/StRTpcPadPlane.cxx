@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.cxx,v 1.8 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StRTpcPadPlane.cxx,v 1.9 2000/03/30 17:02:36 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.cxx,v $
+ * Revision 1.9  2000/03/30 17:02:36  hardtke
+ * limit warning message in StRTpcPadPlane
+ *
  * Revision 1.8  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -95,7 +98,7 @@ float StRTpcPadPlane::RowPitchAtRow(int row) const {
 //_____________________________________________________________________________
 int StRTpcPadPlane::indexForRowPad(int row, int pad) const {
   if (pad >numberOfPadsAtRow(row)) {
-   gMessMgr->Message("StRTpcPadPlane::Invalid Pad number","E");
+    gMessMgr->Message("","W") << "StRTpcPadPlane::Invalid Pad number, row, pad = " << row << "," << pad << endm;;
    return -1;
   }
 
@@ -107,3 +110,11 @@ int StRTpcPadPlane::indexForRowPad(int row, int pad) const {
   index+=pad-1;
   return index;
 }
+
+
+
+
+
+
+
+
