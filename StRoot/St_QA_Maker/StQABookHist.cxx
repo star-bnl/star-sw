@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.13 2001/05/25 16:31:21 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.14 2001/05/25 17:20:09 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.14  2001/05/25 17:20:09  lansdell
+// squashed a small bug
+//
 // Revision 2.13  2001/05/25 16:31:21  lansdell
 // more updates to qa shift histograms
 //
@@ -589,7 +592,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
   m_globtrk_good_sm  = QAH::H1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,500.);
-  m_globtrk_good_tot = QAH::MH1F("QaGtrkGoodTot","globtrk: ratio good tracks (tpc,tpc+svt) to all tracks (tpc,tpc+svt)",50,0,1,5);
+  m_globtrk_good_tot = QAH::MH1F("QaGtrkGoodTot","globtrk: ratio good tracks (tpc,tpc+svt) to all tracks (tpc,tpc+svt)",50,0,1,2);
   m_globtrk_good_tot->Rebin(0,"TPC+SVT/total");
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
