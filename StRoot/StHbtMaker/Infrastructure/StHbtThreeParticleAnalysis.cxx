@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.cxx,v 1.4 2000/07/25 03:26:52 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.cxx,v 1.5 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.cxx,v $
+ * Revision 1.5  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.4  2000/07/25 03:26:52  willson
  * Error with small event collections fixed.
  *
@@ -53,6 +56,7 @@ StHbtThreeParticleAnalysis::StHbtThreeParticleAnalysis(){
   mThirdParticleCut  = 0;
   mTripletCut           = 0;
   mCorrFctnCollection= 0;
+  mNeventsProcessed = 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
   mMixingBuffer = new StHbtPicoEventCollection;
 }
@@ -77,6 +81,7 @@ StHbtThreeParticleAnalysis::~StHbtThreeParticleAnalysis(){
     delete *piter;
   }
   delete mMixingBuffer;
+  mNeventsProcessed = 0;
 }
 //______________________
 StHbtCorrFctn* StHbtThreeParticleAnalysis::CorrFctn(int n){  // return pointer to n-th correlation function
@@ -118,6 +123,8 @@ StHbtString StHbtThreeParticleAnalysis::Report()
 }
 //_________________________
 void StHbtThreeParticleAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
+  // Add event to processed events
+  AddEventProcessed();
   // startup for EbyE 
   EventBegin(hbtEvent);  
   // event cut and event cut monitor
@@ -290,6 +297,10 @@ void StHbtThreeParticleAnalysis::Finish(){
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->Finish();
   }
+}
+//_________________________
+void StHbtThreeParticleAnalysis::AddEventProcessed() {
+  mNeventsProcessed++;
 }
 
 

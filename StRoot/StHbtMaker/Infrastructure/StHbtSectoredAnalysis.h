@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSectoredAnalysis.h,v 1.3 2000/06/15 18:54:08 willson Exp $
+ * $Id: StHbtSectoredAnalysis.h,v 1.4 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHbtSectoredAnalysis.h,v $
+ * Revision 1.4  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.3  2000/06/15 18:54:08  willson
  * Methods to access cuts and correlation functions moved to derived analysis
  * classes.
@@ -101,11 +104,15 @@ public:
   virtual void ProcessEvent(const StHbtEvent*);
   void EventBegin(const StHbtEvent*); //startup for EbyE
   void EventEnd(const StHbtEvent*);   // cleanup for EbyE
+  int GetNeventsProcessed();
 
   virtual void Finish();
 
 
 private:
+
+  void AddEventProcessed();
+
   StHbtPairCut*                      mPairCut;
   StHbtCorrFctnCollection*           mCorrFctnCollection;
   StHbtEventCut*                     mEventCut;
@@ -123,6 +130,8 @@ private:
   int                                mNumBinsZ;
   StHbtSectoredPicoEventCollection*  mSectoredMixingBuffer;
   unsigned int                       mNumEventsToMix;
+  unsigned int                       mNeventsProcessed;
+
 
 #ifdef __ROOT__
   ClassDef(StHbtSectoredAnalysis, 0)
@@ -215,3 +224,5 @@ inline void StHbtSectoredAnalysis::SetDeltaP(float x) {
 }
 
 #endif
+
+inline int StHbtSectoredAnalysis::GetNeventsProcessed() {return mNeventsProcessed;}

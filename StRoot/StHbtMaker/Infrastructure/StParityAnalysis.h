@@ -52,6 +52,7 @@ public:
   virtual void ProcessEvent(const StHbtEvent*);
   void EventBegin(const StHbtEvent*); //startup for EbyE
   void EventEnd(const StHbtEvent*);   // cleanup for EbyE
+  int GetNeventsProcessed();
 
   virtual void Finish();
 
@@ -59,7 +60,9 @@ public:
 
 
   private:
-  
+
+  void AddEventProcessed();
+
   StHbtPairCut*             mPairCut;
   StHbtCorrFctnCollection*  mCorrFctnCollection;
   StHbtEventCut*            mEventCut;
@@ -67,6 +70,8 @@ public:
   StHbtParticleCut*         mSecondParticleCut;
   StHbtPicoEventCollection*  mMixingBuffer;
   unsigned int mNumEventsToMix;
+  unsigned int mNeventsProcessed;
+
 
 
 #ifdef __ROOT__
@@ -95,5 +100,7 @@ inline void StParityAnalysis::SetSecondParticleCut(StHbtParticleCut* x) {mSecond
 
 inline void StParityAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
 inline bool StParityAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
+inline int StParityAnalysis::GetNeventsProcessed() {return mNeventsProcessed;}
+
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtSectoredAnalysis.cxx,v 1.2 2000/07/16 21:38:23 laue Exp $
+ * $Id: StHbtSectoredAnalysis.cxx,v 1.3 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHbtSectoredAnalysis.cxx,v $
+ * Revision 1.3  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.2  2000/07/16 21:38:23  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -129,6 +132,7 @@ StHbtSectoredAnalysis::StHbtSectoredAnalysis(){
   mSecondParticleCut = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
+  mNeventsProcessed = 0;
   // Defaults for sectoring
   mPXmax = 5.0;
   mPXmin = -5.0;
@@ -152,6 +156,7 @@ StHbtSectoredAnalysis::StHbtSectoredAnalysis(const StHbtSectoredAnalysis& a) : S
   mSecondParticleCut = 0;
   mPairCut           = 0;
   mCorrFctnCollection= 0;
+  mNeventsProcessed = 0;
   mPXmax = 5.0;
   mPXmin = -5.0;
   mPYmax = 5.0;
@@ -269,7 +274,10 @@ StHbtString StHbtSectoredAnalysis::Report()
 }
 //_________________________
 void StHbtSectoredAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
- 
+
+  // Add event to processed events
+  AddEventProcessed();
+
   int i, j, k, i2, j2, k2;   // used in loops over sectors
   int size1=0, size2=0;      // To get the total size of all sectors
   bool DidOverflow;          // To only count the overflow bin once per sector
@@ -626,6 +634,10 @@ void StHbtSectoredAnalysis::Finish(){
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->Finish();
   }
+}
+//_________________________
+void StHbtSectoredAnalysis::AddEventProcessed() {
+  mNeventsProcessed++;
 }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtThreeParticleAnalysis.h,v 1.5 2000/07/25 03:26:52 willson Exp $
+ * $Id: StHbtThreeParticleAnalysis.h,v 1.6 2000/08/11 16:35:41 rcwells Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtThreeParticleAnalysis.h,v $
+ * Revision 1.6  2000/08/11 16:35:41  rcwells
+ * Added number of events processed to each HBT analysis
+ *
  * Revision 1.5  2000/07/25 03:26:52  willson
  * Error with small event collections fixed.
  *
@@ -78,11 +81,16 @@ public:
   virtual void ProcessEvent(const StHbtEvent*);
   void EventBegin(const StHbtEvent*); //startup for EbyE
   void EventEnd(const StHbtEvent*);   // cleanup for EbyE
+  int GetNeventsProcessed();
+
 
   virtual void Finish();
 
 
 private:
+
+  void AddEventProcessed();
+
   StHbtTripletCut*          mTripletCut;
   StHbtCorrFctnCollection*  mCorrFctnCollection;
   StHbtEventCut*            mEventCut;
@@ -91,6 +99,8 @@ private:
   StHbtParticleCut*         mThirdParticleCut;
   StHbtPicoEventCollection*  mMixingBuffer;
   unsigned int mNumEventsToMix;
+  unsigned int mNeventsProcessed;
+
 
 #ifdef __ROOT__
   ClassDef(StHbtThreeParticleAnalysis, 0)
@@ -122,5 +132,7 @@ inline void StHbtThreeParticleAnalysis::SetThirdParticleCut(StHbtParticleCut* x)
 
 inline void StHbtThreeParticleAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
 inline bool StHbtThreeParticleAnalysis::MixingBufferFull(){return (mMixingBuffer->size() >= mNumEventsToMix);}
+inline int StHbtThreeParticleAnalysis::GetNeventsProcessed() {return mNeventsProcessed;}
+
 
 #endif

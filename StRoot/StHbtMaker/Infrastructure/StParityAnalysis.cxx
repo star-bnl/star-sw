@@ -68,6 +68,7 @@ StParityAnalysis::StParityAnalysis(){
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
+  mNeventsProcessed = 0;
 }
 //____________________________
 
@@ -79,6 +80,7 @@ StParityAnalysis::StParityAnalysis(const StParityAnalysis& a) : StHbtBaseAnalysi
   mPairCut           = 0;
   mCorrFctnCollection= 0;
   mCorrFctnCollection = new StHbtCorrFctnCollection;
+  mNeventsProcessed = 0;
 
   // find the right event cut
   mEventCut = a.mEventCut->Clone();
@@ -174,6 +176,8 @@ StHbtString StParityAnalysis::Report()
 //_________________________
 void StParityAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 
+  // Add event to processed events
+  AddEventProcessed();
 
   ParityBuff PlusSame;
   ParityBuff MinusSame;
@@ -430,4 +434,8 @@ void StParityAnalysis::Finish(){
   for (iter=mCorrFctnCollection->begin(); iter!=mCorrFctnCollection->end();iter++){
     (*iter)->Finish();
   }
+}
+//_________________________
+void StParityAnalysis::AddEventProcessed() {
+  mNeventsProcessed++;
 }
