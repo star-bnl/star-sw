@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.11 2002/10/11 15:45:50 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.12 2002/10/31 13:42:55 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.12  2002/10/31 13:42:55  oldi
+// Code cleanup.
+//
 // Revision 1.11  2002/10/11 15:45:50  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -406,7 +409,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   }
 
   for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
-    
+
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
 
     if (track->GetHemisphere() == hemisphere) {
@@ -417,12 +420,11 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   // fit only 20 cm in both directions of maximum
   z_hist.Fit(&gauss_z, "QN", "", z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())-20,
 	     z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())+20);
-
   SetZ(gauss_z.GetParameter(1));
   SetZerr(gauss_z.GetParameter(2));
 
   for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
-    
+
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
     
     if (track->GetHemisphere() == hemisphere) {
