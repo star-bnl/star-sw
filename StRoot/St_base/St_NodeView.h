@@ -18,9 +18,10 @@ public:
   St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition=0,EDataSetPass iopt=kStruct);
   virtual ~St_NodeView(){}
   virtual void Browse(TBrowser *b);
+  virtual void Draw(Option_t *option);
   virtual St_NodePosition *GetPosition(){ return (St_NodePosition *)GetObject();}
   virtual St_Node         *GetNode();
-  virtual void             Paint(Option_t *option);
+  virtual void             Paint(Option_t *option="");
   ClassDef(St_NodeView,1)
 };
 #endif
