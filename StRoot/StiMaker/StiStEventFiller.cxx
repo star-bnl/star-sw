@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.6 2003/03/12 17:58:05 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.7 2003/03/13 15:15:52 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.7  2003/03/13 15:15:52  pruneau
+ * various
+ *
  * Revision 2.6  2003/03/12 17:58:05  pruneau
  * fixing stuff
  *
@@ -581,7 +584,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
     {
       double dy,dz,d;
       StiKalmanTrackNode * node = kktrack->getInnerMostHitNode();
-      cout << " vertex:" << node->getHit()<<endl;
+      cout << " ______________________\n\nvertex:" << *node->getHit()<<endl;
       dy = node->_p0 - node->getHit()->y();
       dz = node->_p1 - node->getHit()->z();
       d = sqrt(dy*dy+dz*dz);
@@ -642,28 +645,48 @@ float StiStEventFiller::impactParameter(const StiTrack* track)
   // get the innermost hit node
   const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>(track);
   StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
+  //cout << " ///////////////////// LAST NODE :" << *lastNode<<endl;
+  //StiKalmanTrackNode*	node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
+  //cout << " //Previous node:"<<*node<<endl;
   // construct a Helix using Ben's Routines
   //StiGeometryTransform* transformer = StiGeometryTransform::instance();
   //StThreeVector<double> dummyVec(-999,-999,-999);
   //StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
   //transformer->operator()(node, helix);
   //=====
+  //cout <<" =========  test ===== 1 =================="<<endl;
+
+  //const StThreeVector<double> momentum = node->getGlobalMomentum();
+  //cout << "StiTrack  ------->  px:"<< momentum.x() << " py:"<<  momentum.y() << " pz:"<< momentum.z()<<endl;
+  //cout << "    MYDCA:"<< kTrack->getDca();
+  //cout << "    PHASE: "<<node->getPhase()<<endl;
+
   StThreeVector<double> origin(node->getRefPosition(), node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
-  *helix = StHelix(node->getCurvature(),
+
+  const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
+  StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
+  cout << "primary vertex " << vxD << endl;
+
+  //StPhysicalHelix physical(fabs(node->getCurvature()),
+  //		   node->getDipAngle(), 
+  //		   node->getPhase(), 
+  //		   origin,
+  //		   int(node->getHelicity()));
+  
+  //StThreeVector<double> phyMom = physical.momentum(0.5*tesla);
+  //cout << "HELIX:  px:"<< phyMom.x() << " py:"<<  phyMom.y() << " pz:"<< phyMom.z()<<endl;
+
+  *helix = StHelix(fabs(node->getCurvature()),
 		   node->getDipAngle(),
 		   node->getPhase(),
 		   origin,
 		   int(node->getHelicity()));
 
-  // these next lines are just to keep prototypes right, Ben uses StPhysicalHelix<double>
-  // but StEvent uses StThreeVectorF for persistency...
-  const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
-  StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
-  cout << "primary vertex " << vxD << endl;
-  // return distance of closest approach to primary vertex
-  cout << "helix " << helix << endl;
+  //cout << "helix " << *helix << endl;
   float dca = static_cast<float>(helix->distance(vxD));
-  cout << "dca " << dca << endl;
+  //cout << "dcaHelix    : " << dca << endl;  
+  //cout << "dcaPhysical : " << static_cast<float>(physical.distance(vxD) ) << endl;  
+
   return dca;
 }

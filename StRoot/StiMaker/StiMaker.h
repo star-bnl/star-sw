@@ -39,7 +39,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.2 2003/03/12 17:58:05 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.3 2003/03/13 15:15:52 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     static StiMaker* instance();
     static void kill();
@@ -48,6 +48,8 @@ class StiMaker : public StMaker
 
     TH1D * dyHist;
     TH1D * dzHist;
+    TH1D * phiHist;
+    TH1D * pseudoRapHist;
 
 protected:
     StiMaker(const char* name = "StiMaker");
