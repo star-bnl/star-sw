@@ -1,11 +1,8 @@
-// $Id: StTrsMaker.cxx,v 1.8 1999/02/04 18:39:25 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.9 1999/02/05 23:08:34 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
-// Revision 1.8  1999/02/04 18:39:25  lasiuk
-// Add private member whichSector() to decode volumeId;
-// add multiple sector capabilities
-// add unpacker
-// runs in LINUX
+// Revision 1.9  1999/02/05 23:08:34  fisyak
+// Add Valery's update of DataSet
 //
 // Revision 1.7  1999/01/28 02:46:09  lasiuk
 // SUN compile with new GEANT interface
@@ -94,7 +91,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.8 1999/02/04 18:39:25 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.9 1999/02/05 23:08:34 fisyak Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -225,7 +222,6 @@ Int_t StTrsMaker::Init()
 
     mDigitalSignalGenerator =
 	StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
-
 
     return StMaker::Init();
 }
@@ -483,13 +479,17 @@ Int_t StTrsMaker::Make(){
 	break;
     } // Loop over sectors
     cout << "Got totheend of the maker" << endl;
+  if (m_DataSet) delete m_DataSet;
+  m_DataSet =  new St_DataSet(GetName());
+  m_DataSet->Add(new St_ObjectSet("Event",mAllTheData));
+  m_DataSet->Add(new St_ObjectSet("Decoder",&myUnPacker));
   
   return kStOK;
 }
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.8 1999/02/04 18:39:25 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.9 1999/02/05 23:08:34 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
