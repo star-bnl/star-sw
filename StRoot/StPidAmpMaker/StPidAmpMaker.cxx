@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPidAmpMaker.cxx,v 1.9 2002/02/14 21:25:56 aihong Exp $
+// $Id: StPidAmpMaker.cxx,v 1.10 2002/02/25 19:30:07 jeromel Exp $
 //
 // Authors: Aihong Tang
 //
@@ -106,7 +106,7 @@ Int_t StPidAmpMaker::Init() {
 
 
   gMessMgr->SetLimit("##### StPidAmp", 2);
-  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.9 2002/02/14 21:25:56 aihong Exp $");
+  gMessMgr->Info("##### StPidAmp: $Id: StPidAmpMaker.cxx,v 1.10 2002/02/25 19:30:07 jeromel Exp $");
 
   return StMaker::Init();
 }
@@ -261,8 +261,6 @@ Int_t StPidAmpMaker::Finish() {
 
        }
 
-   histoFile.SetFormat(1);   
-
    histoFile.Write();
 
    histoFile.Close();
@@ -285,6 +283,9 @@ Int_t StPidAmpMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StPidAmpMaker.cxx,v $
+// Revision 1.10  2002/02/25 19:30:07  jeromel
+// ... SetFormat() again
+//
 // Revision 1.9  2002/02/14 21:25:56  aihong
 // re-install the new version
 //
