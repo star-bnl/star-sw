@@ -43,7 +43,7 @@ Int_t St_Table::MakeWrapClass(Text_t *name)
   return 0;
 }
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Int_t size)
+St_Table::St_Table(Text_t *name, Int_t size): St_DataSet()
 {
    // Default St_Table ctor.
    s_TableHeader = new table_head_st;
@@ -57,7 +57,7 @@ St_Table::St_Table(Text_t *name, Int_t size)
 }
  
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Int_t n,Int_t size)
+St_Table::St_Table(Text_t *name, Int_t n,Int_t size) : St_DataSet(name)
 {
    // Create St_Table object and set array size to n longs.
  
@@ -71,7 +71,7 @@ St_Table::St_Table(Text_t *name, Int_t n,Int_t size)
 }
  
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Int_t n, Char_t *table,Int_t size)
+St_Table::St_Table(Text_t *name, Int_t n, Char_t *table,Int_t size) : St_DataSet(name)
 {
    // Create St_Table object and initialize it with values of array.
  
@@ -84,7 +84,8 @@ St_Table::St_Table(Text_t *name, Int_t n, Char_t *table,Int_t size)
 }
  
 //______________________________________________________________________________
-St_Table::St_Table(Text_t *name, Text_t *type, Int_t n, Char_t *array, Int_t size)
+St_Table::St_Table(Text_t *name, Text_t *type, Int_t n, Char_t *array, Int_t size) 
+         : St_DataSet(name)
 {
    // Create St_Table object and initialize it with values of array.
  
@@ -168,6 +169,7 @@ Char_t *St_Table::Create()
 }
 //______________________________________________________________________________
 void St_Table::Browse(TBrowser *b){
+  St_DataSet::Browse(b);
 #ifndef WIN32
   Inspect();
 #endif
@@ -217,17 +219,17 @@ void St_Table::Dump()
 }
 #endif 
 //______________________________________________________________________________
-Long_t St_Table::GetNRows(){ 
+Long_t St_Table::GetNRows() const { 
 // Returns the number of the rows for the wrapped table
 return *s_MaxIndex;
 }
 //______________________________________________________________________________
-Long_t St_Table::GetRowSize(){ 
+Long_t St_Table::GetRowSize() const { 
 // Returns the size (in bytes) of one table row 
   return *s_Size;
 }
 //______________________________________________________________________________
-Long_t St_Table::GetTableSize(){ 
+Long_t St_Table::GetTableSize() const { 
 // Returns the number of the used rows 
 return fN;
 }
@@ -238,7 +240,7 @@ void  *St_Table::GetArray() const {
 //______________________________________________________________________________
 const Char_t *St_Table::GetType() const { 
 //Returns the type of the wrpped C-structure
-return GetTitle();
+  return GetTitle();
 }
 
 //______________________________________________________________________________
@@ -257,7 +259,7 @@ void St_Table::LinkHeader()
 //______________________________________________________________________________
 void St_Table::ls(Option_t *option)
 {
-  TNamed::ls(option);
+  St_DataSet::ls(option);
   IncreaseDirLevel();
   IndentLevel();
   cout       <<"Allocated rows: "<<fN
@@ -268,7 +270,20 @@ void St_Table::ls(Option_t *option)
   DecreaseDirLevel();
 }
 //______________________________________________________________________________
-Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf)
+void St_Table::ls(Int_t deep)
+{
+  St_DataSet::ls(deep);
+  IncreaseDirLevel();
+  IndentLevel();
+  cout       <<"Allocated rows: "<<fN
+       <<'\t'<<"Used rows: "     <<*s_MaxIndex
+       <<'\t'<<"Row size: "      <<*s_Size
+       <<endl;
+  Print();
+  DecreaseDirLevel();
+}
+//______________________________________________________________________________
+Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const 
 {
   Char_t buffer[100];
   strcpy(buffer,GetTitle());
@@ -387,7 +402,7 @@ void St_Table::SetHeadFields(Text_t *name)
 void St_Table::SetName(const Text_t *const name)
 {
    strcpy(s_TableHeader->name,name);
-   TNamed::SetName(s_TableHeader->name);
+   St_DataSet::SetName(s_TableHeader->name);
 }
 //______________________________________________________________________________
 void St_Table::SetTablePointer(void *table)
@@ -400,7 +415,7 @@ void St_Table::SetTablePointer(void *table)
 void St_Table::SetType(const Text_t *const type)
 {
    strcpy(s_TableHeader->type,type);
-   TNamed::SetTitle(s_TableHeader->type);
+   St_DataSet::SetTitle(s_TableHeader->type);
 }
 
 //______________________________________________________________________________
@@ -797,7 +812,7 @@ void St_Table::Streamer(TBuffer &b)
 
 
    if (b.IsReading()) {
-     TNamed::Streamer(b);
+     St_DataSet::Streamer(b);
      b >> fN;
      StreamerHeader(b);
      LinkHeader();
@@ -805,7 +820,7 @@ void St_Table::Streamer(TBuffer &b)
      Set(*s_MaxIndex);
      printf(" Read:s_Size = %i fN = %i \n", *s_Size, fN);
    } else {
-      TNamed::Streamer(b);
+      St_DataSet::Streamer(b);
       b << fN;
       StreamerHeader(b);
       printf(" Write: s_Size = %i  fN = %i head size =  %i \n", *s_Size, fN, sizeof(table_head_st));

@@ -16,6 +16,7 @@
 #include "TClass.h"
 #include "St_XDFFile.h"
 #include "St_DataSet.h"
+#include "St_Table.h"
 
 ClassImp(St_XDFFile)
 
@@ -28,8 +29,17 @@ St_XDFFile::St_XDFFile(){
 }
 
 //______________________________________________________________________________
-St_XDFFile::St_XDFFile(Char_t *filename,Char_t *mode)
+St_XDFFile::St_XDFFile(const Char_t *filename,const Char_t *mode)
 {
+  //
+  // Open the XDF file
+  //
+  //   Char_t *filename - name of the file to open
+  //   Char_t *mode     - mode to open this file
+  //                      "r"  - read only
+  //                      "w"  - write mode
+  //
+
   fName   = 0;
   fStream = 0;
   fFile   = 0;
@@ -77,7 +87,7 @@ void St_XDFFile::Delete(DS_DATASET_T *ds)
 }
 
 //______________________________________________________________________________
-Int_t St_XDFFile::OpenXDF(Char_t *filename,Char_t *mode) 
+Int_t St_XDFFile::OpenXDF(const Char_t *filename,const Char_t *mode) 
 {
   //
   // OpenXDF(Char_t *filename,Char_t *mode) 
@@ -89,6 +99,7 @@ Int_t St_XDFFile::OpenXDF(Char_t *filename,Char_t *mode)
   //             this method append the "b" - binary option itself
   //             for any mode supplied
   //
+
   fMethodName = "OpenXDF(Char_t *filename,Char_t *mode)";
   if (!(filename || strlen(filename))) return 3;
   Char_t *expfile = gSystem->ExpandPathName(filename); 
@@ -135,6 +146,7 @@ Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
  // The method creates temporary the XDR DS_DATASET_T C structure and deletes
  // it upon exit
  //
+
  fMethodName = "WriteEvent";
  printf("%s \n",fMethodName);
  if (!( dataset && fFile) ) return 0;
@@ -170,8 +182,9 @@ St_DataSet *St_XDFFile::NextEventGet()
  // It is the calling method responsibility to delete the object created with
  // this method to avoid any memory leak
  //
+
  fMethodName = "NextEvent()";
- // printf("%s \n",fMethodName);
+ printf("%s \n",fMethodName);
  if (!fFile) return 0;
  if (strchr(fType,'r')) {
    if (!::xdr_dataset(fStream,&fDataSet))
@@ -203,14 +216,14 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
  // This means the original DS_DATASET_T *ds can not be used 
  // for the second time since it has no useful information anymore.
  //
+
   DS_DATASET_T *dt;
   St_DataSet *dataset = 0;
-  dataset = new St_DataSet(ds->name);
-#if 0
+
    printf (" dir: ds=0x%x  \n", ds);
    printf ("      tid  - %d     \n", ds->tid);
    printf ("      name - %s     \n", ds->name);
-#endif
+
   if (ds->tid) 
   {
       Char_t *data;
@@ -247,7 +260,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
         Printf(" Error: MakeDataSet the share lib /DLL for the table <%s> was not loaded",type);
       }
 
-      dataset->Add(table);
+      dataset = table;
       delete [] classname;
 
      // remove the the STAF table from the original dataset
@@ -256,10 +269,12 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       ds->p.data   = 0;
       ds->maxcount = 0;
   }
-  else 
+  else {
+    dataset = new St_DataSet(ds->name);
     for (Int_t j=0; j< ds->elcount; j++)
       if (dt=ds->p.link[j]) 
           dataset->Add(MakeDataSet(dt));
+  }
   return dataset;
  }
 //______________________________________________________________________________
@@ -278,8 +293,7 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
  //
   if (!dataset) return 0;
   DS_DATASET_T *ds=0;
-
-  St_Table *ta = dataset->GetTableObj();
+  St_Table *ta = (St_Table *)dataset->Data();
   if (ta) {
     Char_t tablespec[1000];
     if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,1000), 
