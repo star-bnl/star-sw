@@ -1,12 +1,15 @@
-// $Id: dedx.C,v 1.2 1999/01/02 19:08:25 fisyak Exp $
+// $Id: dedx.C,v 1.3 1999/04/08 17:12:21 fisyak Exp $
 // $Log: dedx.C,v $
+// Revision 1.3  1999/04/08 17:12:21  fisyak
+// Change file names to MDC2 dst
+//
 // Revision 1.2  1999/01/02 19:08:25  fisyak
 // Add ctf
 //
 // Revision 1.1  1998/11/19 23:40:04  fine
 // A new macro "dedx.C" by Craig Ogilvie has been introduced
 //
-void dedx(const Char_t *Path="/disk1/star/auau200/hijing135/default/",const Char_t *root_file="all2.root")
+void dedx(const Char_t *Path="/disk00001/star/auau200/venus412/default/b6_9/year_1b/hadronic_on/tss/",const Char_t *root_file="all2.root")
 {  
 
 // This begin_html <a href=http://www.rhic.bnl.gov/cgi-bin/star-cgi/cvsweb.pl/StRoot/macros/dedx.C> macro</a> by  <a href="mailto:OGILVIE@mitlns.mit.edu"> Craig Ogilvie </a> end_html
