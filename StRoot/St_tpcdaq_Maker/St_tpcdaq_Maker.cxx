@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.14  1999/04/05 22:56:56  ward
+// Further adjustments for 0-511.
+//
 // Revision 1.13  1999/04/05 16:57:19  ward
 // Updated version tag (Spock).
 //
@@ -294,7 +297,7 @@ int St_tpcdaq_Maker::Output() {
           if(startTimeBin>511) startTimeBin=511;
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
-          if(startTimeBin<=0x100) timeWhere=iseq+1; else timeOff=0x100;
+          if(startTimeBin<=255) timeWhere=iseq+1; else timeOff=0x100;
 // printf("BBB startTimeBin=%3d, timeOff=%3d, diff = %x\n",startTimeBin,timeOff,
                         // startTimeBin-timeOff);
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
@@ -372,7 +375,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.13 1999/04/05 16:57:19 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.14 1999/04/05 22:56:56 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
