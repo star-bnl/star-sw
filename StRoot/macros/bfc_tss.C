@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.3 1999/02/23 02:26:26 fisyak Exp $
+// $Id: bfc_tss.C,v 1.4 1999/02/24 19:45:45 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -48,7 +48,7 @@ void Load(){
     gSystem->Load("St_io_Maker");
 }
 
-bfc_tss(const Int_t Nevents=100,
+bfc_tss(const Int_t Nevents=10000,
      const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd",
      TString* FileOut=0)
 {                              

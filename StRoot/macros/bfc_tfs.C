@@ -1,4 +1,4 @@
-// $Id: bfc_tfs.C,v 1.1 1999/02/22 23:28:12 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.2 1999/02/24 19:45:45 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -39,7 +39,6 @@ void Load(){
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
-    gSystem->Load("St_strange");
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     gSystem->Load("St_run_summary_Maker");
@@ -47,21 +46,28 @@ void Load(){
     gSystem->Load("St_io_Maker");
 }
 
-bfc_tfs(const Int_t Nevents=1,
+bfc_tfs(const Int_t Nevents=1000,
      const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd",
      TString* FileOut=0)
 {                              
+  //set I/O for crs
+  TString InFile = "$input_file";
+  gSystem->ExpandPathName(InFile);
+  if (!strcmp("$input_file",InFile.Data())) {InFile = fzfile;}
+  Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
+  if (NoEvents <=0) {NoEvents = Nevents;}  
+  if (NoEvents > Nevents) {NoEvents = Nevents;}  
+  printf("Input file name = %s with No.Events to process = %d\n",InFile.Data(),NoEvents);
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   if (!FileOut){
-    FileOut = new TString(gSystem->BaseName(fzfile));
+    FileOut = new TString(gSystem->BaseName(InFile.Data()));
     FileOut->ReplaceAll(".fzd",".root");
     FileOut->ReplaceAll(".fz",".root");
     FileOut->Strip();
   }
   cout << "File for chain " << FileOut.Data() << endl;
   TFile       *root_out  =  new TFile(FileOut->Data(),"RECREATE");
-
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("bfc");
@@ -73,7 +79,7 @@ bfc_tfs(const Int_t Nevents=1,
   geant->SetNwGEANT(40 000 000);
   //  geant->SetNwPAW(1000000);
   TString cmd("gfile p ");
-  cmd += fzfile;
+  cmd += InFile;
   geant->Do(cmd.Data());
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
@@ -82,15 +88,17 @@ bfc_tfs(const Int_t Nevents=1,
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
   St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
-  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
-  St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
-  St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
   StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
   St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
-  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
   St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
   St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
   St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
+
+  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
+  St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
+  St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
+  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
+
   St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
   St_dst_Maker         *dst     = new St_dst_Maker("dst","dst");
   //  dst_Maker->Save();
@@ -102,7 +110,7 @@ bfc_tfs(const Int_t Nevents=1,
   chain->PrintInfo();
 
   // Init the chain and all its makers
-  chain->SetDebug(1);
+  //  chain->SetDebug(1);
   int iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
 
@@ -116,15 +124,15 @@ bfc_tfs(const Int_t Nevents=1,
   if (root_out) {chain->Write();}
   gBenchmark->Start("bfc");
   Int_t i=0;
-  for (Int_t i =1; i <= Nevents; i++){
+  for (Int_t i =1; i <= NoEvents; i++){
     if (chain->Make(i)) break;
-    if (i != Nevents) chain->Clear();
+    if (i != NoEvents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
     printf ("===========================================\n");
   }
 
-  if (Nevents > 1) {
+  if (NoEvents > 1) {
     chain->Finish();
     if (root_out){
       root_out->Write();
