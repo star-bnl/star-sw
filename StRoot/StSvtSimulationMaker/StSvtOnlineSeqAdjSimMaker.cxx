@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.5 2004/03/30 21:27:12 caines Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.6 2004/07/01 13:54:29 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -31,7 +31,9 @@ StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(n
   m8bitPixelColl=NULL;
   mPixelColl=NULL;
   mSvtBadAnodes=NULL;
-  
+  mCurrentPixelData=NULL;
+  mCurrent8bitPixelData=NULL;
+ 
   //This is because of some Makers downd the chain
   GetConfig();
   SetRawData(); 
@@ -72,21 +74,22 @@ Int_t StSvtOnlineSeqAdjSimMaker::GetConfig()
 //__________________________________________________________________________________________________
 Int_t  StSvtOnlineSeqAdjSimMaker::GetDaqParams()
 {
-  mDaq=NULL;    
-
+  mDaq=NULL;
+ 
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtDaq");
   if (dataSet==NULL){
-      gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters from database!!!!"<<endm;
-      return kStErr;
-      }
-
+    gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters from database!!!!"<<endm;
+    assert(dataSet); //for safety reasons
+    //return kStErr;
+  }
+  
   mDaq = (StSvtDaq*)dataSet->GetObject();
   if (mDaq==NULL){
-      gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
-      return kStErr;
-      }
-
+    gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
+    assert(mDaq);
+    //return kStErr;
+  }   
 
   SetNumberTBinsToClear(mDaq->getClearedTimeBins());
   SetExtraPixelsBefore(mDaq->getPixelsBefore());
@@ -101,17 +104,16 @@ Int_t  StSvtOnlineSeqAdjSimMaker::GetDaqParams()
 }
 
 //____________________________________________________________________________
+///Gets data from the rest of the simulator in the chain above 
 Int_t StSvtOnlineSeqAdjSimMaker::GetPixelData()
 {
-  m8bitPixelColl=NULL;
-  mPixelColl=NULL;
-
   St_DataSet* dataSet=NULL;
   dataSet = GetDataSet("StSvtPixelData");
   if (!dataSet) {
     gMessMgr->Error()<<"no StSvtPixelData dataset"<<endm;
-    return kStErr;//assert(dataSet);
-    }
+    return kStErr; //assert(dataSet);
+  }
+
   mPixelColl=(StSvtData*)dataSet->GetObject();
   if (!mPixelColl){
       gMessMgr->Error()<<"StSvtPixelData is empty"<<endm;
@@ -123,18 +125,17 @@ Int_t StSvtOnlineSeqAdjSimMaker::GetPixelData()
   dataSet = GetDataSet("StSvt8bitPixelData");
   if (!dataSet) {
     gMessMgr->Error()<<"no StSvt8bitPixelData dataset"<<endm;
-    return kStErr;//assert(dataSet);
+    assert(dataSet);
     }
   m8bitPixelColl=(StSvtData*)dataSet->GetObject();
   if (!m8bitPixelColl){
       gMessMgr->Error()<<"StSvt8bitPixelData is empty"<<endm;
-      return kStErr;//assert(m8bitPixelColl);
+      assert(m8bitPixelColl);
       }
-      
-  return kStOk; 
 }  
 
 //____________________________________________________________________________
+/// Get list of bad anodes from the database
 void StSvtOnlineSeqAdjSimMaker::GetBadAnodes()
 {
   St_DataSet *dataSet;
@@ -157,7 +158,7 @@ void StSvtOnlineSeqAdjSimMaker::GetBadAnodes()
 
 //____________________________________________________________________________
 void StSvtOnlineSeqAdjSimMaker::SetRawData()
-{  //this makes new or replaces raw data pro SvtDaqMaker
+{  //this makes new or replaces raw data for SvtDaqMaker
 
   St_ObjectSet* set=(St_ObjectSet*)GetDataSet("StSvtRawData");
   
@@ -176,6 +177,7 @@ Int_t StSvtOnlineSeqAdjSimMaker::Init()
 }
 
 //____________________________________________________________________________
+///Reads run dependent data from the database
 Int_t StSvtOnlineSeqAdjSimMaker::InitRun(int runumber)
 {
   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::InitRun"<<endm;	
@@ -218,11 +220,11 @@ m_n_seq_hi =n_seq_hi;
 }
 
 //____________________________________________________________________________
+///Does all data adjusting. At the end creates data in the raw format - the same format as the real data in.
 Int_t  StSvtOnlineSeqAdjSimMaker::Make()
 {
   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::Make"<<endm;	
-  
-  SetRawData(); ;
+  SetRawData();
   if (GetPixelData()!= kStOk) return kStErr;
   
   for(int Barrel = 1;Barrel <= mPixelColl->getNumberOfBarrels();Barrel++) {

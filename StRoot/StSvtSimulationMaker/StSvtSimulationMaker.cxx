@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.23 2004/04/08 15:11:27 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.24 2004/07/01 13:54:29 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -8,9 +8,7 @@
  * Description: Svt Slow Simulator Maker class
  *
  ***************************************************************************
- *
- * $Log: StSvtSimulationMaker.cxx,v $
- * Revision 1.23  2004/04/08 15:11:27  caines
+  * Revision 1.23  2004/04/08 15:11:27  caines
  * Ensure array is initialised to zeros
  *
  * Revision 1.22  2004/04/06 20:18:19  caines
@@ -18,6 +16,13 @@
  *
  * Revision 1.21  2004/03/30 21:27:12  caines
  * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
+ *
+ * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.24  2004/07/01 13:54:29  caines
+ * Changes to the simulation maker from the review
+ *
+ * Revision 1.20  2004/02/24 15:53:22  caines
+ * Read all params from database
  *
  * Revision 1.19  2004/01/27 02:45:42  perev
  * LeakOff
@@ -70,9 +75,9 @@
  **************************************************************************/
 
 
-#include <string.h>
-#include <math.h>
-
+#include <string>
+#include <cmath>
+using namespace std;
 
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
@@ -119,18 +124,29 @@
 
 ClassImp(StSvtSimulationMaker)
 
+  /*! hardvired constants
+   * mTimeBinSize = 0.04;  // Micro Secs -  this is quite accurate according to Dave Lynn
+   * mDefaultDriftVelocity = 1.E-5*675000;  // used only if there is no database
+   * mDiffusionConst=0.0035;   // [mm**2/micro seconds] default=0.0035 (for silicon)
+   * mLifeTime=1000000.0;     // [us]   default =1000000.0
+   * mTrapConst=4.0e-5;       // [us]   default =0
+  */
 
-
-
+#define cTimeBinSize 0.04
+#define cDefaultDriftVelocity 1.E-5*675000
+#define cDiffusionConst 0.0035
+#define cLifeTime 1000000.0
+#define cTrapConst 4.0e-5
 //___________________________________________________________________________
+/// the only place where electron cloud expansioin constants are set
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 { 
    if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
   
   //electron cloud settings - these can be tuned;
-  mDiffusionConst=0.0035;   // [mm**2/micro seconds]
-  mLifeTime=1000000.0;     // [us]
-  mTrapConst=0;            // [us]
+  mDiffusionConst= cDiffusionConst;   // [mm**2/micro seconds] default=0.0035 (for silicon)
+  mLifeTime=cLifeTime;     // [us]   //default =1000000.0
+  mTrapConst=cTrapConst;       // [us]   //default =0
 
   //options - can be set by setOptions
   mExpOption = "both";     // both, coulomb, diffusion
@@ -198,6 +214,7 @@ void StSvtSimulationMaker::setDiffusionConst(double diffConst)
 }
 
 //____________________________________________________________________________
+//mainly for debugging
 Int_t StSvtSimulationMaker::setOptions(char* option1, int option2, int option3, int option4)
 {
   mExpOption = option1;  
@@ -212,7 +229,7 @@ Int_t StSvtSimulationMaker::setOptions(char* option1, int option2, int option3, 
 //____________________________________________________________________________
 Int_t StSvtSimulationMaker::Init()
 {
-    
+      
   if(Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Init() ..."<<endm;
     
   // init objects that do parts of simulation
@@ -236,16 +253,18 @@ Int_t StSvtSimulationMaker::Init()
 }
 
 //__________________________________________________________________________
+///all database dependent data are read here 
 Int_t StSvtSimulationMaker::InitRun(int runumber)
 { //when the run changes
   if(Debug()) gMessMgr->Info() <<"StSvtSimulationMaker::InitRun()"<<endm;
   
   //read from database
+  Int_t res;
   getConfig();
   getSvtGeometry();
-  getSvtDriftSpeeds();
-  getSvtT0();
-  if (getPedestalOffset()!=kStOk) return kStErr;
+  if ((res=getSvtDriftSpeeds())!=kStOk) return res;
+  if ((res=getSvtT0())!=kStOk) return res;
+  if ((res=getPedestalOffset())!=kStOk) return res; 
 
   setSvtPixelData();
   //Set up coordinate transformation 
@@ -255,9 +274,9 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   //mAnodeSize = mSvtSrsPar->pitch*10;  // mm
   //mDriftVelocity = 1.E-5*mSvtSrsPar->vd;  // mm/MicroSec (?)
   // *****values hard wired for the time being - should be in database
-  mTimeBinSize = 0.04;  // Micro Secs - Petr: this is quite accurate according to Dave
+  mTimeBinSize = cTimeBinSize;  // Micro Secs - Petr: this is quite accurate according to Dave
   mAnodeSize = mSvtGeom->getAnodePitch()*10;  // mm
-  mDefaultDriftVelocity = 1.E-5*675000;  // used only if there is no database
+  mDefaultDriftVelocity = cDefaultDriftVelocity;  // used only if there is no database
   
   //set default drift speeds - if drift speed data exist it will be overriden later
   mSvtSimulation->setAnodeTimeBinSizes(mTimeBinSize , mAnodeSize);
@@ -332,18 +351,19 @@ void  StSvtSimulationMaker::resetPixelData(){
 
 
 //____________________________________________________________________________
+///create output data and put them into the chain
 void  StSvtSimulationMaker::setSvtPixelData()
 { //add pixeldata to chain->.data
   if (GetDataSet("StSvtPixelData")) cout<<"Error: Found StSvtSimPIxels in the chain - should have been deleted"<<endl;
      
   St_ObjectSet *set = new St_ObjectSet("StSvtPixelData");
   AddConst(set); 
-  mSvtSimPixelColl = new /*StSvtHybridCollection*/StSvtData(mConfig->getConfiguration());
+  mSvtSimPixelColl = new StSvtData(mConfig->getConfiguration());
   set->SetObject((TObject*)mSvtSimPixelColl);
   
   set = new St_ObjectSet("StSvt8bitPixelData");
   AddConst(set); 
-  mSvt8bitPixelColl = new /*StSvtHybridCollection*/StSvtData(mConfig->getConfiguration());
+  mSvt8bitPixelColl = new StSvtData(mConfig->getConfiguration());
   set->SetObject((TObject*)mSvt8bitPixelColl);
 
   mNumOfHybrids = mSvtSimPixelColl->getTotalNumberOfHybrids(); 
@@ -366,11 +386,13 @@ void  StSvtSimulationMaker::setGeantData()
 
   if (mSvtGeantHitColl) cout<<"!!!!!!m SvtGeantHitColl already exists in SvtSimulationMaker.cxx:setEval"<<endl;
   else{
-    mSvtGeantHitColl = new /*StSvtHybridCollection*/StSvtData(mConfig->getConfiguration());
+    //owned by the SvtData
+    mSvtGeantHitColl = new StSvtData(mConfig->getConfiguration());
     set->SetObject((TObject*)mSvtGeantHitColl);
   }
 
 //+++++++++++++++++
+//for debugging purposes
   if(!counter){
     counter = new int[mNumOfHybrids];
     for( int ii=0; ii<mNumOfHybrids; ii++){
@@ -406,7 +428,8 @@ Int_t  StSvtSimulationMaker::getPedestalOffset()
     gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
     return kStErr;
     }
-		    
+
+
   mPedOffset=daq->getPedOffset();
 
   return kStOk;
@@ -420,7 +443,7 @@ Int_t StSvtSimulationMaker::getSvtDriftSpeeds()
   dataSet = GetDataSet("StSvtDriftVelocity");
   if (!dataSet){
     cout<<"Warning: no SVT drift velocity data available - using default drift speed:"<<mDefaultDriftVelocity<<endl;
-    return kStWarn;
+    return kStErr;
   } //this might be obsolete, maybe it's better to give an error instead of running on
 
   mDriftSpeedColl = (StSvtHybridCollection*)dataSet->GetObject();
@@ -438,7 +461,7 @@ Int_t StSvtSimulationMaker::getSvtT0()
   dataSet = GetDataSet("StSvtT0");
   if (!dataSet){
     cout<<"Warning: no SVT T0 data available -using defalt T0 = 0"<<endl;
-    return kStWarn;
+    return kStErr;
   } //this might be obsolete, maybe it's better to give an error instead of running on
   
   mT0 = (StSvtT0*)dataSet->GetObject();
@@ -608,6 +631,7 @@ Int_t StSvtSimulationMaker::Make()
       
     }
      
+  cout<<"bad hits:"<<tmpBadCount<<endl;
   if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()...END" << endm;
   return kStOK;
 }
