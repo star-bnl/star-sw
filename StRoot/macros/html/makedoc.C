@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.41 1999/09/12 01:09:57 fine Exp $
+// $Id: makedoc.C,v 1.42 1999/09/14 15:30:40 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.42  1999/09/14 15:30:40  fine
+// makedocs adjusted to the new source tree
+//
 // Revision 1.41  1999/09/12 01:09:57  fine
 // Adjusted to the new source tree
 //
@@ -70,8 +73,6 @@
      gSystem->Load("St_base");
      gSystem->Load("xdf2root");
      gSystem->Load("St_Tables");
-  
-     gSystem->Load("libtls.so");
    
 //     gSystem->Load("global.sl");
 //     gSystem->Load("St_global");
@@ -99,8 +100,7 @@
   //Create the object of the THtml class
   THtml *html = new THtml();
 
-  TString STAR = AFS;  
-  STAR += "/star/packages/dev";
+  TString STAR = "$STAR";  
   TString sourcedir;
   sourcedir = STAR;
   if (!NT) { 
@@ -140,6 +140,8 @@
     lookup += STAR;
     lookup += "/include:";
     lookup += STAR;
+    lookup += "/include/tables:";
+    lookup += STAR;
     lookup += "/StRoot/xdf2root:";
     lookup += STAR;
     lookup += "/.share/tables:";
@@ -156,8 +158,7 @@
     lookup += STAR;
     lookup += "/StRoot/StEventDisplayMaker:";
     lookup += STAR;
-    lookup += "/StRoot/StEvent";
-    lookup += ":";
+    lookup += "/StRoot/StEvent:";
     lookup += STAR;
     lookup += "/StRoot/StarClassLibrary";
   }
@@ -168,7 +169,7 @@
   if (NT) 
      html->SetOutputDir("J:/Public/STAF/draft/base/html");
   else
-     html->SetOutputDir("/afs/rhic/star/packages/dev/StRoot/html");
+     html->SetOutputDir("$STAR/StRoot/html");
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
@@ -197,7 +198,7 @@
 
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
   // Create HTML subdirectory tree
-   const Char_t* htmlTree = "/afs/rhic/star/packages/dev/StRoot/html";
+   const Char_t* htmlTree = "$STAR/StRoot/html";
   if (gSystem->AccessPathName(htmlTree) && !NT) {
      gSystem->MakeDirectory(htmlTree);
   }

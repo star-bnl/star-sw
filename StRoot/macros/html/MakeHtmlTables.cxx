@@ -1,5 +1,8 @@
-// $Id: MakeHtmlTables.cxx,v 1.8 1999/09/12 01:09:57 fine Exp $
+// $Id: MakeHtmlTables.cxx,v 1.9 1999/09/14 15:30:39 fine Exp $
 // $Log: MakeHtmlTables.cxx,v $
+// Revision 1.9  1999/09/14 15:30:39  fine
+// makedocs adjusted to the new source tree
+//
 // Revision 1.8  1999/09/12 01:09:57  fine
 // Adjusted to the new source tree
 //
@@ -32,14 +35,14 @@
 
   void *dirhandle = 0;
   const Char_t *affix="_st";
-  char *sourcedir = 0;
+  TString sourcedir;
   if (NT) 
     sourcedir = "//sol/afs_rhic/star/packages/dev/.share/tables";
   else
-    sourcedir = "/afs/rhic/star/packages/dev/include/tables";
-    //    sourcedir = "/afs/rhic/star/packages/dev/.share/tables";
+    sourcedir = "$STAR/include/tables";
 
-  if (!(dirhandle = gSystem->OpenDirectory(sourcedir))) return;
+  gSystem->ExpandPathName(sourcedir);
+  if (!(dirhandle = gSystem->OpenDirectory(sourcedir.Data()))) return;
 
   // Create THtml object
   THtml *html = new THtml;
@@ -48,18 +51,19 @@
   if (NT) 
     lookup = "//sol/afs_rhic/star/packages/dev/.share/tables;../base;//sol/afs_rhic/star/packages/dev/.share/base";
   else {
-    lookup  = "/afs/rhic/star/packages/StAF/dev/inc:";
-    lookup += "/afs/rhic/star/packages/dev/:";
-    lookup += "/afs/rhic/star/packages/dev/include/tables:";
-    lookup += "/afs/rhic/star/packages/dev/.share/tables:";
-    lookup += "/afs/rhic/star/packages/dev/StRoot/St_base";
+    lookup  = "$STAF/inc:";
+    lookup += "$STAR:";
+    lookup += sourcedir;
+    lookup += ":";
+    lookup += "$STAR/.share/tables:";
+    lookup += "$STAR/StRoot/St_base";
   }
 
   html->SetSourceDir(lookup.Data());
   if (NT) 
      html->SetOutputDir("J:/Public/STAF/draft/base/html");
   else
-     html->SetOutputDir("/afs/rhic/star/packages/dev/StRoot/html");
+     html->SetOutputDir("$STAR/StRoot/html");
 
   html.MakeClass("St_Table",kTRUE);
 
@@ -85,7 +89,7 @@
           html.MakeClass(name,kTRUE);
          } 
      }
-     free(name);
+     delete [] name ;
    }
    gSystem->FreeDirectory(dirhandle);
    // Make html for itself
