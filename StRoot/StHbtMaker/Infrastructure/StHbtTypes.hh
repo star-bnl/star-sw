@@ -6,8 +6,7 @@
 
 //#define FRANKS_HISTO
 #include "StHbtMaker/Infrastructure/franks1Histo.hh"  
-#include "StHbtMaker/Infrastructure/franks1HistoD.h"  
-#include "StHbtMaker/Infrastructure/franks2HistoD.h"  
+#include "StHbtMaker/Infrastructure/franks2Histo.hh"  
 
 /*------------------------------
  * Enumerations                */
@@ -44,8 +43,8 @@ typedef TH2D StHbt2DHisto;
 typedef TH3D StHbt3DHisto;
 
 #else 
-typedef franks1HistoD StHbt1DHisto;
-typedef franks2HistoD StHbt2DHisto;
+typedef franks1Histo<double> StHbt1DHisto;
+typedef franks2Histo<double> StHbt2DHisto;
 #endif // __ROOT__
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.6 2000/01/25 17:35:17 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.7 2000/02/13 17:17:12 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.7  2000/02/13 17:17:12  laue
+ * Calls to the EventBegin() and EventEnd() functions implemented
+ * The actual analysis is moved from StHbtManager to StHbtAnalysis
+ *
  * Revision 1.6  2000/01/25 17:35:17  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -105,6 +109,10 @@ public:
   bool AnalyzeIdenticalParticles();
   StHbtString Report();       //! returns reports of all cuts applied and correlation functions being done
 
+  void ProcessEvent(const StHbtEvent*);
+  void EventBegin(const StHbtEvent*); //startup for EbyE
+  void EventEnd(const StHbtEvent*);   // cleanup for EbyE
+
   void Finish();
 
 
@@ -115,7 +123,6 @@ private:
   StHbtPairCut*       mPairCut;
 
   StHbtPicoEventCollection*  mMixingBuffer;
-
   StHbtCorrFctnCollection* mCorrFctnCollection;
 
   unsigned int mNumEventsToMix;
