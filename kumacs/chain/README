@@ -221,7 +221,7 @@
 *   - run svt tracking
 *   - write xdf file containing full directories
 * 
-* 11. call_bfc_tfs_global_dst_testv0.kumac
+* 11. call_bfc_test_v0.kumac
 *   - read in g2t test file with lots of V0's
 *   - process thru whole chain to dst pkgs
 *   - write out ntuple
