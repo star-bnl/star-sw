@@ -1,14 +1,18 @@
 /*******************************************************************
- * $Id: StRichPhysicsDb.cxx,v 1.3 2000/02/08 16:29:33 lasiuk Exp $
+ * $Id: StRichPhysicsDb.cxx,v 1.4 2000/02/11 21:10:54 lasiuk Exp $
  *
  * Description:
  *  Implementation of the two databases modules
  *
  *******************************************************************
  * $Log: StRichPhysicsDb.cxx,v $
- * Revision 1.3  2000/02/08 16:29:33  lasiuk
- * include gasGainAmplification factor here instead of geometry
+ * Revision 1.4  2000/02/11 21:10:54  lasiuk
+ * maximum energy probability in access function
+ * change electrons/cm and gas gain to 10 pwer 5
  *
+ * Revision 1.4  2000/02/11 21:10:54  lasiuk
+ * maximum energy probability in access function
+ * change electrons/cm and gas gain to 10 pwer 5
  *
  * Revision 1.3  2000/02/08 16:29:33  lasiuk
  * include gasGainAmplification factor here instead of geometry
@@ -54,8 +58,8 @@ StRichPhysicsDb::StRichPhysicsDb()
 
 
 void StRichPhysicsDb::my_fill()
-    avg_n_inter     = 25/centimeter;
-    mGasGainAmplification = 1.0e4;
+{
+    mVersion         = 1;
     
     mPolia           = 0.3;
     avg_n_inter     = 15.3/centimeter;
@@ -70,8 +74,6 @@ void StRichPhysicsDb::my_fill()
     adc_factor      = 0.16556*(1.e-15*coulomb);      // adc/femtocoulomb
     adc_threshold   = 5;
     channel_width   = 10;           // bits
-    //e_charge        = 1.602e-19;
-    
 }
 
 void StRichPhysicsDb::common_fill()
@@ -114,7 +116,7 @@ void StRichPhysicsDb::print(ostream& os) const
 {
     os << "** StRichPhysicsDb::print() ** " << endl;
     os << " version: " << version() << endl;
-    os << "maximumElectronEnergy=     "  << maximumElectronEnergy() << endl;
+
     os << "Ionization:" << endl;
     os << "polia= " << polia() << endl;
     os << "averageNumberOfInteraction= " << (averageNumberOfInteractions()/centimeter) << " /cm" << endl;
