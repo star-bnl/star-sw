@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.77 2002/11/27 21:54:32 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.78 2002/11/28 02:35:53 jeromel Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.78  2002/11/28 02:35:53  jeromel
+// Minor correction
+//
 // Revision 1.77  2002/11/27 21:54:32  potekhin
 // Added new naming convention in ESM
 //
@@ -617,7 +620,7 @@ Int_t St_geant_Maker::Make()
 
     geant3->Gfnhit("ECAH","EXSE", nhit1);
     geant3->Gfnhit("ECAH","EHMS", nhit2);
-    nhits = nhit1+nhit2
+    nhits = nhit1+nhit2;
     if (nhits>0) {
       St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
       m_DataSet->Add(g2t_esm_hit);
