@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.31 2001/03/14 23:43:39 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.32 2001/11/21 01:53:42 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,7 +11,17 @@
  *
  ***************************************************************************
  *
+ *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.32  2001/11/21 01:53:42  long
+ * adding log message for 3/2001 long;
+ *
+ * adding:
+ *
+ *     if(aMiniSegment.position().z()>0)
+ *      listOfMiniSegments->push_back(aMiniSegment);  //HL,03/2001 protect against
+ *       negative z.
+ *
  * Revision 1.31  2001/03/14 23:43:39  long
  * *** empty log message ***
  *
