@@ -29,6 +29,7 @@
 #include "StMcEventMaker/StMcEventMaker.h"
 
 // Sti
+#include "Sti/StiFactoryTypes.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHit.h"
 #include "Sti/StiDetector.h"
@@ -45,6 +46,7 @@
 #include "Sti/StiKalmanTrackFinder.h"
 
 //StiGui
+#include "StiGui/StiGuiFactoryTypes.h"
 #include "StiGui/StiDrawableHits.h"
 #include "StiGui/StiRootDrawableHits.h"
 #include "StiGui/StiRootDrawableLine.h"
@@ -205,7 +207,7 @@ Int_t StiMaker::Init()
     mhitfactory->setMaxIncrementCount(10);  //So, we can have 10 allocations at 50k a pop -> 500k hits max.
 
     //The Evalualbe Track Factory
-    mtrackfactory = new StiEvaluableTrackFactory("EvaluableTrackFactory");
+    mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory");
     mtrackfactory->setIncrementalSize(1000);
     mtrackfactory->setMaxIncrementCount(10);
 
@@ -227,13 +229,13 @@ Int_t StiMaker::Init()
     mEvaluableSeedFinder->build();
 
     //The StiDetector factory
-    mdetectorfactory = new detector_factory("DrawableDetectorFactory");
+    mdetectorfactory = new StiRDDetectorFactory("RDDetectorFactory");
     mdetectorfactory->setIncrementalSize(1000);
     mdetectorfactory->setMaxIncrementCount(10);
     mdetectorfactory->reset();
 
     //The DetectorNodeFactory
-    mdatanodefactory = new data_node_factory("DataNodeFactory");
+    mdatanodefactory = new StiDetectorNodeFactory("DetectorNodeFactory");
     mdatanodefactory->setIncrementalSize(1000);
     mdatanodefactory->setMaxIncrementCount(10);
     mdatanodefactory->reset();
