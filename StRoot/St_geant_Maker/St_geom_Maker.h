@@ -1,5 +1,8 @@
-// $Id: St_geom_Maker.h,v 1.1 1998/10/31 00:28:31 fisyak Exp $
+// $Id: St_geom_Maker.h,v 1.2 1998/12/04 19:36:48 fisyak Exp $
 // $Log: St_geom_Maker.h,v $
+// Revision 1.2  1998/12/04 19:36:48  fisyak
+// Add Pavel/Ruben gstar interface
+//
 // Revision 1.1  1998/10/31 00:28:31  fisyak
 // Makers take care about branches
 //
@@ -28,14 +31,19 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
+class TNode;
+
 #endif
 //class St_stk_stkpar;
+extern "C"    void    geant_();
+extern "C"    void    agmain_();
 class St_geom_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.1 1998/10/31 00:28:31 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.2 1998/12/04 19:36:48 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
+ TNode*   fNode;
  
  protected:
  public: 
@@ -46,6 +54,10 @@ class St_geom_Maker : public StMaker {
    virtual Int_t  Make();
    virtual void   PrintInfo();
    virtual void   Clear(Option_t *option){}; // No clearance for parameters
+   void Draw();  
+   void Do  (const char*);  
+   void Work();  
+   TNode* GetNode() { return fNode; }
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
    ClassDef(St_geom_Maker, 1)   //StAF chain virtual base class for Makers
 };
