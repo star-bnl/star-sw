@@ -14,6 +14,11 @@ CCC   Author: PL,WP,LM,CR Sun Nov 23 14:00:37 MET 1997
 CCC   Function matches projection from tpc and hits in layers of svt, 
 CCC   (tpc -> SSD -> 3rd -> 2nd -> 1st layer of SVT)
 CCC   and put data into est_match table.
+CCC   02/07/99 LM To save cpu time the loop on the wafer is limited 
+CCC   to the wafers belonging to a given layer
+CCC   Only the tracks with cos(angle)>0.7 are projected on the wafers
+CCC   angle is the relative angle between the normal of the wafer and 
+CCC   (x0,y0) track vector. 
 
 #include "est_track.inc"
 #include "est_param_def.inc" 
@@ -21,6 +26,7 @@ CCC   and put data into est_match table.
 #include "phys_constants.inc"
 
       integer waf_min,waf_max,pas
+      integer geomrow_min,geomrow_max
       integer i,ii,j,curlo,numb,ini_pts,max_pts,used_pts,found,wafer,tot_found
       integer jj, jjj,waf,clayer
       integer k, gf, corr_found
@@ -36,7 +42,7 @@ CCC   and put data into est_match table.
       real x000, y000, phi000, psi
       real fact, rh, lambda, cosla
       real es, asine, xf, yf, zf,z_tpc, phi_tpc
-      real x0w,y0w,xfw,angle
+      real x0w,y0w,xfw,angle,cosangle
       real phidif, phidif2, err_z, err_phi, err_z_i, err_phi_i
       real afacmax(14),aphi(14),az(14)
 
@@ -58,7 +64,9 @@ C.....GETTING THE CURRENT PT LOOP, LAYER AND SCANING PARAMETERS
       passdim(5)=sqrt(2.)
       if (clayer.eq.1) then
          waf_min = 1000
-         waf_max = 2999       
+         waf_max = 2999
+         geomrow_min=1
+         geomrow_max=32
          afacmax(curlo)=est_ctrl(1).afacmax1(curlo)
          aphi(curlo)=est_ctrl(1).aphi1(curlo)/passdim(pas)
          az(curlo)=est_ctrl(1).az1(curlo)/passdim(pas)        
@@ -67,6 +75,8 @@ C.....GETTING THE CURRENT PT LOOP, LAYER AND SCANING PARAMETERS
       if (clayer.eq.2) then
          waf_min = 3000
          waf_max = 4999        
+         geomrow_min=33
+         geomrow_max=104
          afacmax(curlo)=est_ctrl(1).afacmax2(curlo)
          aphi(curlo)=est_ctrl(1).aphi2(curlo)/passdim(pas)
          az(curlo)=est_ctrl(1).az2(curlo)/passdim(pas)
@@ -75,6 +85,8 @@ C.....GETTING THE CURRENT PT LOOP, LAYER AND SCANING PARAMETERS
       if (clayer.eq.3) then
          waf_min = 5000
          waf_max = 6999
+         geomrow_min=105
+         geomrow_max=216
          afacmax(curlo)=est_ctrl(1).afacmax3(curlo)
          aphi(curlo)=est_ctrl(1).aphi3(curlo)/passdim(pas)
          az(curlo)=est_ctrl(1).az3(curlo)/passdim(pas)
@@ -82,6 +94,8 @@ C.....GETTING THE CURRENT PT LOOP, LAYER AND SCANING PARAMETERS
       if (clayer.eq.4) then
          waf_min = 7000
          waf_max = 8999
+         geomrow_min=217
+         geomrow_max=536
          afacmax(curlo)=est_ctrl(1).afacmax4(curlo)
          aphi(curlo)=est_ctrl(1).aphi4(curlo)/passdim(pas)
          az(curlo)=est_ctrl(1).az4(curlo)/passdim(pas)
@@ -97,38 +111,48 @@ C.....RECALCULATING LAYER HITS FORM (X,Y,Z) TO (R,PHI,Z) SYSTEM
       jj=0
       do i=1,scs_spt_h.nok
          if (scs_spt(i).id_wafer.ge.waf_min .and.
-     >        scs_spt(i).id_wafer.le.waf_max) jj=jj+1
-         if (scs_spt(i).id_wafer.ge.waf_min .and.
-     >        scs_spt(i).id_wafer.le.waf_max.and.
-     >        scs_spt(i).flag.eq.est_ctrl(1).maxass) k=k+1
-         if (scs_spt(i).id_wafer.ge.waf_min .and.
-     >        scs_spt(i).id_wafer.le.waf_max.and.scs_spt(i).flag.lt.est_ctrl(1).maxass) then
-            j = j+1
-            rsvt(j) = sqrt(scs_spt(i).x(1)**2 + scs_spt(i).x(2)**2) 
-            zsvt(j) = scs_spt(i).x(3)
-            phisvt(j) = 0.
-            phisvt(j) = atan2(scs_spt(i).x(2),scs_spt(i).x(1))
-            if (phisvt(j).lt.0) phisvt(j)=phisvt(j)+C_2PI
-            numb(j) = i
-            waf(j) = scs_spt(i).id_wafer
-         end if
+     >        scs_spt(i).id_wafer.le.waf_max)  then
+            jj=jj+1
+            if (scs_spt(i).flag.eq.est_ctrl(1).maxass) then
+               k=k+1
+            else
+               j = j+1
+               rsvt(j) = sqrt(scs_spt(i).x(1)**2 + scs_spt(i).x(2)**2) 
+               zsvt(j) = scs_spt(i).x(3)
+               phisvt(j) = 0.
+               phisvt(j) = atan2(scs_spt(i).x(2),scs_spt(i).x(1))
+               if (phisvt(j).lt.0) phisvt(j)=phisvt(j)+C_2PI
+               numb(j) = i
+               waf(j) = scs_spt(i).id_wafer
+            endif
+         endif
       end do
       ini_pts = jj
       max_pts = j
       used_pts = k
-
+      if (est_ctrl(1).ktrl1.eq.1) write(6,*)
+     *     'tot,used,available hits in the layer =',ini_pts,used_pts,max_pts
 
 C.....HERE WE START WITH A LOOP OVER THE WAFERS
 
       if (est_ctrl(1).ktrl1.eq.1) write(6,*)'Starting to loop over the wafers.....'
-      do j=geom_h.nok,1,-1
+C....trying to save cpu time
+C      do j=geom_h.nok,1,-1
+      do j=geomrow_max,geomrow_min,-1
          if (geom(j).id.ge.waf_min .and. 
      >        geom(j).id.le.waf_max) then
+
+C...........FIRST WE  GET SOME INFO ABOUT THE WAFER
             a_par = geom(j).n(1)
             b_par = geom(j).n(2)
             angle = atan2(b_par,a_par)-C_PI_2
             if (angle.lt.-C_PI) angle = angle + C_2PI
-            
+            layer=geom(j).layer
+            id_shape=config(1).layer_shape(layer)
+            drift_length=shape(id_shape).shape(1)
+            trans_length=shape(id_shape).shape(2)  
+            id_active=srspar(1).id_active(layer)
+
             do i=1,IN_DET
                order(i) = i
                phier_f(i) = 0.
@@ -148,12 +172,13 @@ C..............THE TRACK AS TO BE IN THE PT RANGE AND NOT MORE THAN ONE MISSING 
 C..............PREVIOUS LAYERS
                if (1./est_match(i).invp_tpc.gt.est_ctrl(1).apmin(curlo).and.est_match(i).flag.eq.0
      >              .and.clayer.ge.est_match(i).layer-(est_ctrl(1).nhole(pas))) then
-
 C.................WE TRANSFORM THE TRACK PARAMETER IN THE WAFER LOCAL FRAME
 C.................AND THEN WE CALCULATE THE INTERCEPT OF THE TRACK AND THE WAFER
                   r0 = est_match(i).r0
                   x0 = r0*cos(est_match(i).phi0/C_DEG_PER_RAD)
                   y0 = r0*sin(est_match(i).phi0/C_DEG_PER_RAD)
+                  cosangle=x0/r0*a_par+y0/r0*b_par
+                  if (cosangle.ge.0.70) then
                   z0 = est_match(i).z0
                   b_magn = est_ctrl(1).bmag
                   q_ch = est_match(i).q
@@ -201,11 +226,6 @@ C.................POSITION OF THE TRACK PROJECTION IN THE LOCAL FRAME OF THE CUR
                   l_preint(3) = 0.
 C.................CHECKING IF THE PROJECTION IS WITHIN THE ACTIVE AREA OF THE WAFER
 C.................WITH SOME EXTEND OF THE REAL ACTIVE AREA SIZE                  
-                  layer=geom(j).layer
-                  id_shape=config(1).layer_shape(layer)
-                  drift_length=shape(id_shape).shape(1)
-                  trans_length=shape(id_shape).shape(2)  
-                  id_active=srspar(1).id_active(layer)
                   active=active_area(id_active,l_preint,
      >                 drift_length*est_ctrl(1).ext(curlo),
      >                 trans_length*est_ctrl(1).ext(curlo),
@@ -310,6 +330,7 @@ C.......................IF WE DONT FIND ENOUGHT HITS WE INCREASE THE SEARCHING A
                         endif
                      enddo ! END OF SEARCHING THE ASSOCIATIONS
                   endif ! END OF THE TRACK IN ACTIVE AREA
+                  endif
                endif ! END OF TRACK IN GOOD PT RANGE
             enddo  ! END OF LOOP OVER TRACKS
 
