@@ -7,6 +7,7 @@
 *
 */
 #include "PAM.idl"
+#include "dst_summary_param.idl"
 #include "dst_run_header.idl"
 #include "dst_run_summary.idl"
 #include "dst_event_header.idl"
@@ -16,7 +17,8 @@
 
 interface fill_dst_run_summary  : amiModule {
 	STAFCV_T call ( 
-                  in    dst_run_header        dstRunHeader
+                  in    dst_summary_param     dstSummaryParam
+                , in    dst_run_header        dstRunHeader
                 , in    dst_event_header      dstEventHeader
                 , in    dst_event_summary     dstEventSummary
                 , in    dst_track             dstTrack
@@ -24,4 +26,4 @@ interface fill_dst_run_summary  : amiModule {
                 , inout dst_run_summary       dstRunSummary
 		);
 };
-/*  Last mod. for fill_dst_run_summary.idl :  $Fri Aug 28 14:55:30 EDT 1998$ */
+/*  Last mod. for fill_dst_run_summary.idl :  $Tue Nov 17 21:12:00 EST 1998$ */
