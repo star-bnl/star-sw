@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.10 2000/01/20 14:42:40 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.11 2000/04/20 13:49:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.10  2000/01/20 14:42:40  ullrich
- * Fixed bug in numberOfPossiblePoints(). Sum was wrong.
+ * Revision 2.11  2000/04/20 13:49:07  ullrich
+ * Removed redundant line in operator=().
  *
  * Revision 2.10  2000/01/20 14:42:40  ullrich
  * Fixed bug in numberOfPossiblePoints(). Sum was wrong.
@@ -58,7 +58,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.10 2000/01/20 14:42:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.11 2000/04/20 13:49:07 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -110,8 +110,6 @@ StTrack&
 StTrack::operator=(const StTrack& track)
 {
     if (this != &track) {
-        if (mGeometry)
-            delete mGeometry;
         mFlag = track.mFlag;
         mKey = track.mKey;
         mEncodedMethod = track.mEncodedMethod;
