@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.1 2000/09/13 21:01:12 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 2.2 2000/09/13 21:14:20 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 2.1  2000/09/13 21:01:12  lasiuk
- * adjust to interface of new CF
+ * Revision 2.2  2000/09/13 21:14:20  lasiuk
+ * pause commented
+ *
+ * Revision 2.2  2000/09/13 21:14:20  lasiuk
+ * pause commented
  *
  * Revision 2.1  2000/09/13 21:01:12  lasiuk
  * adjust to interface of new CF
@@ -264,10 +267,10 @@ Int_t StRchMaker::Make() {
 
     //
     // Load the pixels into a container for
-    cout << "Next Event? <ret>: " << endl;
-    do {
-      if(getchar()) break;
-    } while (true);
+    // input into the CF
+    //
+    mPixelStore.clear();
+//      cout << "Next Event? <ret>: " << endl;
 //      do {
 //        if(getchar()) break;
 //      } while (true);
@@ -864,10 +867,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-    printf("* $Id: StRchMaker.cxx,v 2.1 2000/09/13 21:01:12 lasiuk Exp $\n");
+void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.1 2000/09/13 21:01:12 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.2 2000/09/13 21:14:20 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
