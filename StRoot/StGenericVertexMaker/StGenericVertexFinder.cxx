@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.4 2004/07/24 02:57:40 balewski Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.5 2004/07/30 22:59:00 calderon Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -32,7 +32,8 @@ void StGenericVertexFinder::FillStEvent(StEvent* event) const{
 
   StPrimaryVertex* primV = new StPrimaryVertex();
   primV->setPosition(this->result());             //requires StThreeVectorF
-  primV->setFlag(mFlagBase+this->status());       //requires unsigned int
+//   primV->setFlag(mFlagBase+this->status());       //requires unsigned int
+  primV->setFlag(1);                              // Should conform to dst_vertex.idl flag definition.
   primV->setCovariantMatrix(cov);                 //requires float[6]
   primV->setChiSquared(xSq);                      //requires float
   primV->setProbChiSquared(probXSq);              //requires float
@@ -72,6 +73,11 @@ void StGenericVertexFinder::setFlagBase()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.5  2004/07/30 22:59:00  calderon
+// Setting the primary vertex flag to 1 for the moment, as per
+// dst_vertex.idl.  This was causing the FTPC code to reject the
+// primary vertex used as their seed.
+//
 // Revision 1.4  2004/07/24 02:57:40  balewski
 // clean up of ppLMV, CTB-util separated
 //
