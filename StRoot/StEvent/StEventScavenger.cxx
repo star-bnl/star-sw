@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.2 2000/09/27 02:53:23 ullrich Exp $
+ * $Id: StEventScavenger.cxx,v 2.3 2000/10/16 21:06:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.3  2000/10/16 21:06:32  ullrich
+ * Added new method: removeTpcHitsNotOnTracks()
+ *
  * Revision 2.2  2000/09/27 02:53:23  ullrich
  * No delete, create only zombies.
  *
@@ -87,6 +90,38 @@ bool StEventScavenger::removeTpcHitCollection(StEvent* evt)
 		for (unsigned int h=0; h<theHits->sector(n)->padrow(m)->hits().size(); h++)
 		    theHits->sector(n)->padrow(m)->hits()[h]->makeZombie();
 	theHits->makeZombie();
+	return true;
+    }
+    else
+	return false;
+}
+
+bool StEventScavenger::removeTpcHitsNotOnTracks(StEvent* evt)
+{
+    if (evt && evt->tpcHitCollection()) {
+	// first remove all hits not associated with a track at all
+	StTpcHitCollection *theHits = evt->tpcHitCollection();
+	for (unsigned int n=0; n<theHits->numberOfSectors(); n++)
+	    for (unsigned int m=0; m<theHits->sector(n)->numberOfPadrows(); m++) 
+		for (unsigned int h=0; h<theHits->sector(n)->padrow(m)->hits().size(); h++)
+		    if (theHits->sector(n)->padrow(m)->hits()[h]->trackReferenceCount() == 0)
+			theHits->sector(n)->padrow(m)->hits()[h]->makeZombie();
+	// now all hits associated with zombie tracks
+	StSPtrVecTrackNode& nodes = evt->trackNodes();
+	for (unsigned int i = 0; i < nodes.size(); i++) {   // loop nodes
+	    StTrackNode* node = nodes[i];
+	    for (unsigned int j = 0; j < node->entries(); j++) {   // loop tracks in node
+		if (node->track(j)->isZombie()) {
+		    StTrack* track = node->track(j);
+		    StTrackDetectorInfo* info = track->detectorInfo();
+		    if (info) {
+			StPtrVecHit& hitList = info->hits();
+			for (unsigned int k = 0; k < hitList.size(); k++)   // loop hits
+			    if (hitList[k]->detector() == kTpcId) hitList[k]->makeZombie();
+		    }
+		}
+	    }
+	}
 	return true;
     }
     else

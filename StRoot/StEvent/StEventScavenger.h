@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.h,v 2.2 2000/09/27 02:53:23 ullrich Exp $
+ * $Id: StEventScavenger.h,v 2.3 2000/10/16 21:06:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.h,v $
+ * Revision 2.3  2000/10/16 21:06:32  ullrich
+ * Added new method: removeTpcHitsNotOnTracks()
+ *
  * Revision 2.2  2000/09/27 02:53:23  ullrich
  * No delete, create only zombies.
  *
@@ -41,5 +44,7 @@ public:
     static bool removeKinkVertices(StEvent*);
 
     static bool remove(StTrack*);
+
+    static bool removeTpcHitsNotOnTracks(StEvent*);
 };
 #endif
