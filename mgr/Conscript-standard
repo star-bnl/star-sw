@@ -11,9 +11,10 @@ my @Repo = ();
 @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
 my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
-my @idlML    = find_idlM($Dir);   #  $i = 0; for my $s (@idlM) {print "i=",$i++," idlM = ",$s,"\n";}
-my @srcL     = find_sources($Dir);#  my $i=0; for my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}
-my @h_filesL = find_hfiles($Dir);   #$i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
+my $i;
+my @idlML    = find_idlM($Dir);     #$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}
+my @srcL     = find_sources($Dir);  #$i = 0; foreach my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}
+my @h_filesL = find_hfiles($Dir);   #$i = 0; foreach my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
 opendir (DIR, $Dir) or die "Can't open $Dir\n";
 my @dirEntries = readdir DIR;
 closedir DIR; #print "dirEntries = @dirEntries\n";
@@ -72,9 +73,7 @@ if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
     $LIBS .= " " . $_lib;#     print "LIBS    = $LIBS\n"
   }
 }
-if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {
-$CPPP .= ":/usr/local/include";
-}
+if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {$CPPP .= ":/usr/local/include";}
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
@@ -100,7 +99,32 @@ my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_C
 my $DIR = cwd(); #print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
-if ($Dir !~ /pams\//) {
+if ($#idlM > -1) {
+  my $include = $INCLUDE . "/" . $pkg;# print "include = $include\n";
+  foreach my $idl (@idlM) {
+    my $stem = basename($idl,".idl"); print "idl = $idl  stem = $stem\n" if $param::debug;
+    my $idm  = $stem . ".idl";
+    my $idMM = $DIR . "/" . $Dir . "/" . $idl; print "idMM = $idMM\n" if $param::debug;
+    my $idM  = "#" . $Dir . "/" . $idl; print "idM = $idM\n" if $param::debug;
+    my @idlS = ($idM);
+    my $modh = $INCLUDE . "/"   . $stem . ".h";
+    my $modi = $INCLUDE . "/"   . $stem . ".inc";
+    my $modH = $include . "/"   . "St_" . $stem . "_Module.h"; print "modH = $modH\n" if $param::debug;
+    my $modC = $share . "/"   . "St_" . $stem . "_Module.cxx"; print "modC = $modC\n" if $param::debug;
+    if ($STAR_SYS !~ /^intel_wnt$/) {
+      Command $env2 [$modh], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
+      Command $env2 [$modi], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
+      Command $env2 [$modH], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
+      Command $env2 [$modC], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
+    }
+    my @objmod = ($modC);
+    Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n" if $param::debug;
+    (my $mod = $modC) =~  s/$share/$obj/g; 
+    push @src, $mod;# print "src + $mod: @src\n" if $param::debug;
+    push @Defs, $modH;
+  }
+}
+else {
   foreach $h (@h_files) {
     if ($h =~ /LinkDef/ || $h =~ /Stypes/) {push @Defs, $h; next;}
     my $hh = $Dir . "/" . $h;
@@ -123,33 +147,6 @@ if ($Dir !~ /pams\//) {
       }
     }
   ENDL:
-  }
-}
-else {
-  if ($#idlM > -1) {
-  my $include = $INCLUDE . "/" . $pkg;
-    for $idl (@idlM) {
-      my $stem = basename($idl,".idl"); #print "idl = $idl  stem = $stem\n" if $param::debug;
-      my $idm  = $stem . ".idl";
-      my $idMM = $DIR . "/" . $Dir . "/" . $idl;# print "idMM = $idMM\n" if $param::debug;
-      my $idM  = "#" . $Dir . "/" . $idl;# print "idM = $idM\n" if $param::debug;
-      my @idlS = ($idM);
-      my $modh = $INCLUDE . "/"   . $stem . ".h";
-      my $modi = $INCLUDE . "/"   . $stem . ".inc";
-      my $modH = $include . "/"   . "St_" . $stem . "_Module.h"; 
-      my $modC = $share . "/"   . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n" if $param::debug;
-	if ($STAR_SYS !~ /^intel_wnt$/) {
-	  Command $env2 [$modh], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
-	  Command $env2 [$modi], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
-	  Command $env2 [$modH], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
-	  Command $env2 [$modC], @idlS,  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);  
-	}
-	my @objmod = ($modC);
-	Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n" if $param::debug;
-      (my $mod = $modC) =~  s/$share/$obj/g; 
-      push @src, $mod;# print "src + $mod: @src\n" if $param::debug;
-      push @Defs, $modH;
-    }
   }
 }
 if ($#Defs > -1) {
