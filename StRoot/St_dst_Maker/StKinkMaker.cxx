@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.26 2000/01/25 16:01:48 fisyak Exp $
+// $Id: StKinkMaker.cxx,v 1.27 2000/02/02 21:37:36 lbarnby Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.27  2000/02/02 21:37:36  lbarnby
+// CC5
+//
 // Revision 1.26  2000/01/25 16:01:48  fisyak
 // Devorce with StAF
 //
@@ -93,6 +96,9 @@
 #include "StThreeVector.hh"
 #include "TObjArray.h"
 #include "SystemOfUnits.h"
+#if !defined(ST_NO_NAMESPACES)
+using namespace units;
+#endif
 
 #include "StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}

@@ -1,5 +1,8 @@
-// $Id: StKinkTrkIdCheck.hh,v 1.3 1999/12/16 21:52:27 wdeng Exp $
+// $Id: StKinkTrkIdCheck.hh,v 1.4 2000/02/02 21:37:37 lbarnby Exp $
 // $Log: StKinkTrkIdCheck.hh,v $
+// Revision 1.4  2000/02/02 21:37:37  lbarnby
+// CC5
+//
 // Revision 1.3  1999/12/16 21:52:27  wdeng
 // Added CVS Id strings
 //
@@ -7,9 +10,6 @@
 #ifndef StKinkTrkIdCheck_hh
 #define StKinkTrkIdCheck_hh
 
-#if !defined(ST_NO_NAMESPACES) 
-using namespace std;
-#endif
 
 #include "TObject.h"
 

@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.13 1999/11/27 18:21:41 fisyak Exp $
+// $Id: StMatchMaker.cxx,v 1.14 2000/02/02 21:37:37 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.14  2000/02/02 21:37:37  lbarnby
+// CC5
+//
 // Revision 1.13  1999/11/27 18:21:41  fisyak
 // Add test that primary vertex exists
 //
@@ -42,6 +45,9 @@
 #include <string.h>
 //#include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
+#if !defined(ST_NO_NAMESPACES)
+using namespace units;
+#endif
 #include "TMath.h"
 #include "StMatchMaker.h"
 

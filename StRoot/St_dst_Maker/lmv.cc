@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.10 2000/01/26 02:41:36 nystrand Exp $
+// $Id: lmv.cc,v 1.11 2000/02/02 21:37:37 lbarnby Exp $
 // $Log: lmv.cc,v $
+// Revision 1.11  2000/02/02 21:37:37  lbarnby
+// CC5
+//
 // Revision 1.10  2000/01/26 02:41:36  nystrand
 // Fixed bug in path length calculation
 //
@@ -56,6 +59,10 @@
 #include <vector>
 #include "StChain.h"
 #include "SystemOfUnits.h"
+#if !defined(ST_NO_NAMESPACES)
+using namespace std::vector;
+using namespace units;
+#endif
 #include "StThreeVectorD.hh"
 #include "StHelixD.hh"
 #include "StPhysicalHelixD.hh"
@@ -73,7 +80,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.10 2000/01/26 02:41:36 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.11 2000/02/02 21:37:37 lbarnby Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
