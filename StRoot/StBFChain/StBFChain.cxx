@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.209 2001/07/12 23:35:03 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.210 2001/07/13 01:22:03 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -89,7 +89,7 @@ Bfc_st BFC[] = {
   //                                                         ,"Production chain for summer 2001 data (incomplete)",kFALSE},
   {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                               "SVT makers for Data",kFALSE}, 
-  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+  {"P2001"       ,""  ,"","y2001,in,tpc_daq,tpc,svt_daq,SvtD,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2001 data (temptative)",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
