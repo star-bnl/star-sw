@@ -1,5 +1,13 @@
-
-
+//:Description: dedx calibration parameters done at dst production 
+//:Synonyms::::
+//:Source: Aihong & C. Ogilvie
+//:Update:
+//:Update frequncy:
+//:Reminder:
+//:Recall frequency:
+//:Size of Data:
+#ifndef TPC_DEDXPIDAMPDB_H
+#define TPC_DEDXPIDAMPDB_H
 struct tpcDedxPidAmpDb {
 
    float  gasCalib; /* calibration # for variations in gas gain */
@@ -26,5 +34,11 @@ struct tpcDedxPidAmpDb {
    float  chargedSigPar[2];  /* parameters for the Linear */
 
 };
+#endif
+
+
+
+
+
 
 

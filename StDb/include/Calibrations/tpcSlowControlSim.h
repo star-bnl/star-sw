@@ -8,6 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
+//:Pointer to Data: Calibrations_tpc/tpcSlowControlSim
 struct tpcSlowControlSim {
 
   //  type varnam;    //Units : Comments
