@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.64 1999/09/12 01:42:14 fine Exp $
+// $Id: StMaker.cxx,v 1.65 1999/09/12 15:02:53 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.65  1999/09/12 15:02:53  fine
+// Multi-level maker source dirs introduced for MakeDoc method
+//
 // Revision 1.64  1999/09/12 01:42:14  fine
 // StMAker::MakeDoc has been adjusted to the new source tree
 //
@@ -779,6 +782,11 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  
   TString lookup = STAR;
   lookup += delim;
+
+  lookup += STAR;
+  lookup += gSystem->DirName(ImplFileName());
+  lookup += delim;
+
   lookup += STAR;
   lookup += "/StRoot/";
   lookup += classname;
@@ -801,12 +809,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
     }
   }
   
-  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
+//  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
 
   lookup += delim;
   lookup += STAR;
   lookup += "/StRoot/";
-  lookup += c;
+  lookup += classname;
 
   gSystem->ExpandPathName(lookup);
   lookup.ReplaceAll("//StRoot/","/StRoot/");
@@ -838,13 +846,13 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   static Bool_t makeAllAtOnce = kTRUE;
   if (makeAllAtOnce && baseClasses) { 
      makeAllAtOnce = kFALSE;
-//     gHtml->MakeAll(); 
+   //  gHtml->MakeAll();  // VF 10/09/99
      for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
   }
 
   // Create the doc for this class
-  printf(" Making html for <%s>\n",c);
-  gHtml->MakeClass((Char_t *)c);
+  printf(" Making html for <%s>\n",classname.Data());
+  gHtml->MakeClass((Char_t *)classname.Data());
 //   Loop on all makers
    TList *tl = GetMakeList();
    if (tl) {
