@@ -1,5 +1,8 @@
-* $Id: tcl.F,v 1.1 1998/05/21 01:10:47 hardtke Exp $
+* $Id: tcl.F,v 1.2 1998/05/22 00:18:14 hardtke Exp $
 * $Log: tcl.F,v $
+* Revision 1.2  1998/05/22 00:18:14  hardtke
+* modified hit finder with new data format
+*
 * Revision 1.1  1998/05/21 01:10:47  hardtke
 * cluster finder with new data structures
 *
@@ -133,7 +136,11 @@ c  18-May-1998 D. Hardtke
 c       Adopt the new tpc data format.  tcl_make_clusters.F becomes
 c       tcl.F.  It now call tcl_clusters_in_row instead of tcl_clsrow.   
 c       NOTE THAT THE LOOP OF SECTORS IS NO LONGER PERFORMED HERE.
-
+c
+c  21-May-1998 D. Hardtke
+c       In order to facilitate hit finding, replace structre tcl_tpseq with
+c       tcl_tp_seq.  This has a few added words, including a pointer into
+c       the pixel table and the offset.
 
 #include "tcl.inc"
 #include "tls_ecvalues.inc"

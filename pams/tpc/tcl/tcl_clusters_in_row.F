@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.1 1998/05/21 01:10:50 hardtke Exp $
+* $Id: tcl_clusters_in_row.F,v 1.2 1998/05/22 00:18:17 hardtke Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.2  1998/05/22 00:18:17  hardtke
+* modified hit finder with new data format
+*
 * Revision 1.1  1998/05/21 01:10:50  hardtke
 * cluster finder with new data structures
 *
@@ -25,14 +28,14 @@ C     pad_plane_h:
 C     pad_plane:
 C     raw_sec_m_h: 
 C     raw_sec_m: 
-C     raw_row_out_h:
-C     raw_row_out: 
-C     raw_pad_out_h: 
-C     raw_pad_out: 
-C     raw_seq_out_h: 
-C     raw_seq_out: 
-C     pixel_data_out_h: 
-C     pixel_data_out: 
+C     raw_row_h:
+C     raw_row: 
+C     raw_pad_h: 
+C     raw_pad: 
+C     raw_seq_h: 
+C     raw_seq: 
+C     pixel_data_h: 
+C     pixel_data: 
 C
 C   Output arguments : (values in the following tables)
 C
@@ -80,6 +83,10 @@ c     * this routine is a copied and hacked version of tcl_clsrow
 c     * replace tppad/tppixel with new data format
 c     * no longer call tcl_get_row_seq since data is easily available
 c    
+c   21-May-1998 D. Hardtke
+c     * in order to make hit finding possible, add the low and high
+c       tdc vaules for each sequence to tpseq (which is now follows the
+c       structure tcl_tp_seq).
 
 #include "PAM.inc"
 #include "tpg_pad_plane.inc"
@@ -103,9 +110,9 @@ c
 #include "tcl_tpcluster.inc"
         RECORD      /TABLE_HEAD_ST/             tpcluster_h
         RECORD   /TCL_TPCLUSTER_ST/            tpcluster(*)
-#include "tcl_tpseq.inc"
+#include "tcl_tp_seq.inc"
         RECORD      /TABLE_HEAD_ST/                 tpseq_h
-        RECORD       /TCL_TPSEQ_ST/                tpseq(*)
+        RECORD       /TCL_TP_SEQ_ST/                tpseq(*)
 
 
 C----------------------------------------------------------------------
@@ -445,6 +452,8 @@ c
               tpseq(tpseq_h.nok).jpix = ipix(seq_in_cluster(iseq))
               tpseq(tpseq_h.nok).tpc_row = 100*sector+row
               tpseq(tpseq_h.nok).secpad = ipad(seq_in_cluster(iseq))
+              tpseq(tpseq_h.nok).tdc_low = itlo(seq_in_cluster(iseq))
+              tpseq(tpseq_h.nok).tdc_hi = ithi(seq_in_cluster(iseq))
 ccc no more!!!     +             secpad_offset(row) ! note we restore offset
               if (iseq.ne.nseq_in_cluster) 
      +             tpseq(tpseq_h.nok).next = tpseq_h.nok+1
