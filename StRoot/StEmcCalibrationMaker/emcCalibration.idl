@@ -1,0 +1,18 @@
+/*****************************************************************************
+*   Table: emcCalibration
+*        description: Table which contains all calibration information
+*        auther:      SUAIDE, Alexandre
+*        compile with stic -f <name.idl>
+******************************************************************************/
+   struct emcCalibration 
+   { 
+       long   Status;                    /* status of the tower/wire (0=problem, 1=ok)*/
+              
+       long   CalibStatus;               /* calibration status (0=failed, 1=ok) */
+       float  AdcToE[5];                 /* ADC to Energy */
+       float  AdcToEErr[5];              /* ADC to Energy error */
+       float  AdcToECov[5][5];           /* ADC to Energy covariance matrix */
+       float  AdcToEChiSqr;              /* ADC to Energy chi square */
+       float  AdcPedestal;               /* ADC pedestal */
+       float  AdcPedestalRms;            /* ADC pedestal RMS */
+   };
