@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.4 1999/04/21 23:41:45 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.5 1999/06/24 15:14:37 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.5  1999/06/24 15:14:37  sakrejda
+* possible maximum number of points on track estimate added (Spiros)
+*
 * Revision 1.4  1999/04/21 23:41:45  sakrejda
 * possible number of points on track added to the tpt_track table (Spirose's request
 *
@@ -32,6 +35,7 @@ C<--------------------------------------------------------------------
 #include "tpt_track.inc"
 #include "tpt_pointers.inc"
 #include "phys_constants.inc"
+#include "math_constants.inc"
 
 C___________________________________________________________________
       RECORD /table_head_st/    track_h
@@ -44,7 +48,18 @@ C___________________________________________________________________
       REAL   dx0,dy0
       real   twopi,radtodeg
       real   xlocal(3),bfield(3)
-      data   xlocal /3*0/
+      data   xlocal /3*0./
+
+C*** This part if for n_pos (n_max) calculation
+C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
+      REAL     trakl(6), rr, xc(2)
+      INTEGER  nmax
+      data nmax /0/
+
+      LOGICAL nposOn
+      DATA nposOn /.FALSE./
+
+
 C___________________________________________________________________
 
       twopi=8.0*atan(1.0)
@@ -101,7 +116,6 @@ C     z coordinate of the point where track parameters are given
       track(ipt).cov(15) = trk(ipt).dpar(9)
 C
       track(ipt).nrec = trk(ipt).nhit
-      track(ipt).npos = 0.
 C
 C     azimuthal angle for the momentum at the first point
       sgn = sign(1.0,trk(ipt).p(2))
@@ -112,5 +126,31 @@ C     azimuthal angle for the momentum at the first point
 **cc      if (track(ipt).psi.gt.180.0) track(ipt).psi = 
 **cc     +     track(ipt).psi - 360.0
 C
+
+      if(nposOn) then
+c---- Calculation of possible (maximum) number of points
+
+C convert to Tesla
+      bfield(1) = bfield(1)/10.
+      bfield(2) = bfield(2)/10.
+      bfield(3) = bfield(3)/10.
+
+C*** Copy parameters to local table
+              trakl(1)   = track(ipt).r0
+              trakl(2)   = track(ipt).phi0*C_RAD_PER_DEG !degrees to radians
+              trakl(3)   = track(ipt).z0
+              trakl(4)   = track(ipt).psi*C_RAD_PER_DEG !degrees to radians
+              trakl(5)   = track(ipt).tanl
+              trakl(6)   = track(ipt).invp
+              IF(rr.lt.999999) THEN
+                 rr=1./(C_D_CURVATURE*bfield(3)*10.*track(ipt).invp)
+              ELSE
+                 rr=9999999.
+              ENDIF
+              call n_max(trakl,rr,nmax,bfield(3))
+      endif
+      track(ipt).npos = nmax
+c--------------------------------------------------------
+
       tpt_load_track = STAFCV_OK
       end
