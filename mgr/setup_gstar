@@ -1,0 +1,10 @@
+rm -f gstar;      ln -s  $STAR_BIN/staf       gstar 
+rm -f geant3;     ln -s  $STAR_BIN/geant3             .
+rm -f geant3.def; ln -s  $STAR_BIN/geant3.def         .
+rm -f makefile;   ln -s  $STAR_BIN/makefile           . 
+rm -f geom.kumac; ln -s  $STAR_BIN/geom.kumac         .
+rm -f dzdoc.bank; ln -s  $STAR_BIN/dzdoc.bank         .
+rm -f *.sl;       ln -s  $STAR_PAMS/geometry/star/*.g . 
+                  ln -s  $STAR_PAMS/sim/gstar/*.g     .
+                  ln -s  $STAR_PAMS/sim/gstar/*.c     .
+make detm
