@@ -43,7 +43,7 @@ void TrackingMenuGroup::dispatch(int option)
 void TrackingMenuGroup::finishTrack()
 { 
   cout<<"TrackingMenuGroup::finishTrack() -I- Started"<<endl;
-  getToolkit()->getTrackFinder()->findNextTrack(); 
+  getToolkit()->getTrackFinder()->findTrack(); 
   getDisplay()->draw();
   cout<<"TrackingMenuGroup::finishTrack() -I- Done"<<endl;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.17 2003/09/21 02:19:28 perev Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.18 2004/02/21 18:28:29 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.18  2004/02/21 18:28:29  pruneau
+ * Updates to comply to changes in interfaces
+ *
  * Revision 2.17  2003/09/21 02:19:28  perev
  * several initializations to 0 added
  *
@@ -293,7 +296,7 @@ StiDetectorContainer  * StiDefaultToolkit::getDetectorContainer()
 {
   if (_detectorContainer)
     return _detectorContainer;
-  _detectorContainer = new StiDetectorContainer("DetectorContainer","Detector Container");
+  _detectorContainer = new StiDetectorContainer("DetectorContainer","Detector Container", getDetectorBuilder());
   //  _detectorContainer->build(getDetectorBuilder());
   //_detectorContainer->reset();
   return _detectorContainer;
@@ -303,7 +306,7 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
 {
   if (_hitContainer)
     return _hitContainer;
-  _hitContainer = new StiHitContainer("HitContainer","Reconstructed Hits");
+  _hitContainer = new StiHitContainer("HitContainer","Reconstructed Hits", getHitFactory() );
   return _hitContainer;
 }
 
@@ -312,7 +315,7 @@ StiHitContainer       * StiDefaultToolkit::getMcHitContainer()
 {
   if (_mcHitContainer)
     return _mcHitContainer;
-  _mcHitContainer = new StiHitContainer("McHitContainer","MC Hits Container");			
+  _mcHitContainer = new StiHitContainer("McHitContainer","MC Hits Container", getHitFactory() );			
   return _mcHitContainer;
 }
 
@@ -342,11 +345,12 @@ StiDetectorFinder    * StiDefaultToolkit::getDetectorFinder()
   return _detectorFinder;
 }
 
-StiTrackSeedFinder   * StiDefaultToolkit::getTrackSeedFinder()
+StiTrackFinder   * StiDefaultToolkit::getTrackSeedFinder()
 {
   if (_trackSeedFinder)
     return _trackSeedFinder;
   _trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
+						 "Local Track Seed Finder",
 						 getTrackFactory(),
 						 getHitContainer(), 
 						 getDetectorContainer());  

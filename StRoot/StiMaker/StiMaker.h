@@ -19,11 +19,9 @@ class StiTrack;
 class StiStEventFiller;
 class StiTrackContainer;
 class StiEvaluableTrack;
-class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
 class StiKalmanTrackFitter;
-class StiTrackSeedFinder;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
 class StMcEventMaker;
@@ -55,7 +53,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.12 2004/01/30 21:47:23 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.13 2004/02/21 18:28:32 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
@@ -75,7 +73,7 @@ private:
     bool                 _initialized;
     StiToolkit  *        _toolkit;
     StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * _hitLoader;
-    StiTrackSeedFinder *  _seedFinder;
+    StiTrackFinder *       _seedFinder;
     StiKalmanTrackFinder * _tracker;
     StiKalmanTrackFitter * _fitter;
     StiStEventFiller *    _eventFiller;

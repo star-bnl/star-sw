@@ -24,9 +24,9 @@
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFile)
   : StiDetectorBuilder("Tpc",active,inputFile)
 {
-  _trackingParameters.setName("TpcTrackingParameters");
-  _innerCalc.setName("InnerTpcHitErrors");
-  _outerCalc.setName("OuterTpcHitErrors");
+  _trackingParameters.setName("tpcTrackingParameters");
+  _innerCalc.setName("tpcInnerHitErrors");
+  _outerCalc.setName("tpcOuterHitErrors");
 }
 
 
@@ -48,19 +48,19 @@ void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
   char name[50];
   cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   unsigned int row;
-	load(_inputFile,source);
-
+  load(_inputFile,source);
+  
   if (!gStTpcDb) 
-		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- gStTpcDb==0");
-
-	_padPlane = gStTpcDb->PadPlaneGeometry();
+    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- gStTpcDb==0");
+  
+  _padPlane = gStTpcDb->PadPlaneGeometry();
   if (!_padPlane) 
-		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _padPlane==0");
-
-	_dimensions = gStTpcDb->Dimensions();
+    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _padPlane==0");
+  
+  _dimensions = gStTpcDb->Dimensions();
   if (!_dimensions)
-		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
-
+    throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
+  
   unsigned int nRows = _padPlane->numberOfRows()+2;
   setNRows(nRows);
   for(unsigned int row = 0; row<nRows;row++)

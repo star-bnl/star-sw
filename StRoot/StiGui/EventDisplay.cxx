@@ -301,8 +301,8 @@ void EventDisplay::draw(StiHitContainer * container,
   const HitMapToVectorAndEndType& map = container->hits();
   for (HitMapToVectorAndEndType::const_iterator it=map.begin(); it!=map.end(); it++) 
     {
-      const HitVectorType &hits = (*it).second.theHitVec;
-       for (HitVectorType::const_iterator iter=hits.begin();iter!=hits.end();iter++)
+      const vector<StiHit*> &hits = (*it).second.theHitVec;
+       for (vector<StiHit*>::const_iterator iter=hits.begin();iter!=hits.end();iter++)
 	 {
 	   const StiHit * hit = (*iter);
 	   if (filter && !filter->filter(hit)) continue;
@@ -348,12 +348,12 @@ void EventDisplay::draw(StiTrackContainer * recTrackContainer,
   StiHitToHitMap mcHitToRecHitMap;
   //StiHitToHitMap recHitToMcHitMap;
   StiDefaultHitAssociationFilter hitAssocFilter;
-  mcHitToRecHitMap.build(mcHitContainer,recHitContainer,&hitAssocFilter);
+  mcHitToRecHitMap.build(*mcHitContainer,*recHitContainer,hitAssocFilter);
   cout << "   mcHitToRecHitMap.size():" <<  mcHitToRecHitMap.size() << endl;
   mcHitToRecHitMap.analyze();
   //recHitToMcHitMap.build(recHitContainer,mcHitContainer,&hitAssocFilter);
   StiHitToTrackMap recHitToTrackMap;
-  recHitToTrackMap.build(recTrackContainer);
+  recHitToTrackMap.build(*recTrackContainer);
   cout << " recHitToTrackMap.size():" << recHitToTrackMap.size()<<endl;
   
   StiTrackToObjMap map;
@@ -384,8 +384,8 @@ void EventDisplay::draw(StiTrackContainer * recTrackContainer,
 		  mcT->setStyle(1);
 		  mcT->setSize(1.);
 		  mcT->draw(); 
-		  const HitVectorType & mcHits = mcTrack->getHits();
-		  for(HitVectorType::const_iterator hitIter = mcHits.begin();hitIter!=mcHits.end();++hitIter)
+		  const vector<StiHit*> & mcHits = mcTrack->getHits();
+		  for(vector<StiHit*>::const_iterator hitIter = mcHits.begin();hitIter!=mcHits.end();++hitIter)
 		    { 
 		      StiHit * mcHit = * hitIter;
 		      StiHit * recHit;
@@ -432,8 +432,8 @@ void EventDisplay::draw(StiTrackContainer * recTrackContainer,
 		  mcT->setStyle(1);
 		  mcT->setSize(2.);
 		  mcT->draw(); 
-		  const HitVectorType & theHits = mcTrack->getHits();
-		  for(HitVectorType::const_iterator mcHitIter = theHits.begin();mcHitIter!=theHits.end();++mcHitIter)
+		  const vector<StiHit*> & theHits = mcTrack->getHits();
+		  for(vector<StiHit*>::const_iterator mcHitIter = theHits.begin();mcHitIter!=theHits.end();++mcHitIter)
 		    {
 		      StiHit * theHit = *mcHitIter;
 		      _noMatchHits.add(theHit->x_g(), theHit->y_g(), theHit->z_g() );

@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.137  2004/02/21 18:28:31  pruneau
+// Updates to comply to changes in interfaces
+//
 // Revision 1.136  2004/02/19 22:18:07  pruneau
 // Modified call to StMcEventMaker structure
 //
@@ -331,7 +334,7 @@ Int_t StiMaker::InitRun(int run)
 			StiMasterDetectorBuilder * masterBuilder = _toolkit->getDetectorBuilder();
 			masterBuilder->build(*this);
       StiDetectorContainer * detectorContainer = _toolkit->getDetectorContainer(); 
-      detectorContainer->build(masterBuilder);
+      detectorContainer->initialize();//build(masterBuilder);
       detectorContainer->reset();
 			if (_pars->useResidualCalculator)
 				{

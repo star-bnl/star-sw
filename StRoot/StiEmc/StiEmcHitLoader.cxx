@@ -54,7 +54,7 @@ void StiEmcHitLoader::loadHits(StEvent* source,
       y = (*pointIter)->position().y();
       z = (*pointIter)->position().z();
       stiHit->setGlobal(detector,*pointIter,x,y,z,energy);
-      _hitContainer->push_back( stiHit );
+      _hitContainer->add( stiHit );
     }  
 }
 
