@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.13 1999/09/24 01:23:23 fisyak Exp $
+// $Id: StSmdstMaker.cxx,v 1.14 1999/11/16 23:01:19 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.14  1999/11/16 23:01:19  genevb
+// Modified for StEvent 2.0
+//
 // Revision 1.13  1999/09/24 01:23:23  fisyak
 // Reduced Include Path
 //
@@ -66,11 +69,13 @@
 #include <TPaveText.h>
 #include <TStyle.h>
 #include "StEvent.h"
+#include "StPrimaryVertex.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
+#include "StTrack.h"
 #include "math_constants.h"
 #include "PhysicalConstants.h"
-#include "TMath.h"
+#include <math.h>
 #include "StMagF.h"
 #include "StMessMgr.h"
 
@@ -221,15 +226,12 @@ Int_t StSmdstMaker::FillV0Table() {
    Float_t dx, dy, dz;
    Float_t primX, primY, primZ;
   
-  StEvent* ev = (StEvent *) GetInputDS("StEvent");
-  if (!ev) return kStOK; // If no event, we're done
+   StEvent* ev = (StEvent *) GetInputDS("StEvent");
+   if (!ev) return kStOK; // If no event, we're done
    
-   StVertexCollection *vertices = ev->vertexCollection();
-   if (!vertices) {
-     gMessMgr->Warning("StSmdstMaker - no vertex collection in event.");
-     return kStOK;
-   }
-   if (!(vertices->size())) {
+   StSPtrVecV0Vertex& v0Vertices = ev->v0Vertices();
+   Int_t v0tot = v0Vertices.size();
+   if (!v0tot) {
      gMessMgr->Warning("StSmdstMaker - no vertices in event.");
      return kStOK;
    }
@@ -242,7 +244,7 @@ Int_t StSmdstMaker::FillV0Table() {
    if( bf[2] == 0. )
      gMessMgr->Warning("StSmdstMaker - magnetic field not loaded.");
 
-   StVertex *primaryVertex = ev->primaryVertex();
+   StPrimaryVertex *primaryVertex = ev->primaryVertex();
    if (primaryVertex) {
      const StThreeVectorF& primaryPos = primaryVertex->position();
      primX = primaryPos.x();
@@ -255,35 +257,25 @@ Int_t StSmdstMaker::FillV0Table() {
      primZ = 0.;
    }
 
-   StGlobalTrack* nTrack;
-   StGlobalTrack* pTrack;
-   StTrackFitTraits* nFitTraits;
-   StTrackFitTraits* pFitTraits;
-   StVertexIterator vtxI;
-   for (vtxI  = ev->vertexCollection()->begin();
-        vtxI != ev->vertexCollection()->end(); vtxI++) {
-     StVertex *vtx = *vtxI;
-     if ( vtx->type() != V0) continue;
-     StV0Vertex *vertex = (StV0Vertex *) vtx;
+   StTrack* nTrack;
+   StTrack* pTrack;
+   for (unsigned int i=0; i<v0tot; i++) {
+     StV0Vertex *vertex = v0Vertices[i];
 
-     StVecPtrGlobalTrack& vTracks = vertex->daughters();
-     if( vTracks.size() > 1 ) {
-       nTrack = vTracks[negativeTrack];
-       pTrack = vTracks[positiveTrack];
-       nFitTraits = &nTrack->fitTraits();
-       pFitTraits = &pTrack->fitTraits();
-       nflag = nFitTraits->qualityBitmap();
-       pflag = pFitTraits->qualityBitmap();
-     } else {
-       nflag = 1;
-       pflag = 1;
-     }
+     nTrack = vertex->daughter(negative);
+     pTrack = vertex->daughter(positive);
+     if (nTrack) {
+       nflag = nTrack->flag();
+     } else nflag = 1;
+     if (pTrack) {
+       pflag = pTrack->flag();
+     } else pflag = 1;
 
      const StThreeVectorF& pos = vertex->position();
      dx = pos.x() - primX;
      dy = pos.y() - primY;
      dz = pos.z() - primZ;
-     dv0 = TMath::Sqrt( dx*dx + dy*dy + dz*dz );
+     dv0 = sqrt( dx*dx + dy*dy + dz*dz );
 
      if (( vertex->dcaDaughters() <= m_max_dca ) &&
          ( vertex->dcaParentToPrimaryVertex() <= m_max_bv0 ) &&
@@ -297,39 +289,41 @@ Int_t StSmdstMaker::FillV0Table() {
          return kStErr;
        }
 
-       const StThreeVectorF& nMom = vertex->momentumOfDaughter(negativeTrack);
-       const StThreeVectorF& pMom = vertex->momentumOfDaughter(positiveTrack);
+       const StThreeVectorF& nMom = vertex->momentumOfDaughter(negative);
+       const StThreeVectorF& pMom = vertex->momentumOfDaughter(positive);
       
        ptotn2 = nMom.mag2();
        ptotp2 = pMom.mag2();
        pdotn  = nMom.dot(pMom);
 
-       eprp = TMath::Sqrt(mMasspr2 + ptotp2);
-       eprn = TMath::Sqrt(mMasspr2 + ptotn2);
-       epip = TMath::Sqrt(mMasspi2 + ptotp2);
-       epin = TMath::Sqrt(mMasspi2 + ptotn2);
+       eprp = sqrt(mMasspr2 + ptotp2);
+       eprn = sqrt(mMasspr2 + ptotn2);
+       epip = sqrt(mMasspi2 + ptotp2);
+       epin = sqrt(mMasspi2 + ptotn2);
        
-       mala = TMath::Sqrt( mMasspr2 + mMasspi2 + 2*(eprp*epin - pdotn) );
-       malb = TMath::Sqrt( mMasspr2 + mMasspi2 + 2*(epip*eprn - pdotn) );
-       mak0 = TMath::Sqrt( mMasspi2 + mMasspi2 + 2*(epip*epin - pdotn) );
+       mala = sqrt( mMasspr2 + mMasspi2 + 2*(eprp*epin - pdotn) );
+       malb = sqrt( mMasspr2 + mMasspi2 + 2*(epip*eprn - pdotn) );
+       mak0 = sqrt( mMasspi2 + mMasspi2 + 2*(epip*epin - pdotn) );
 
        StThreeVectorF vMom = pMom + nMom;
 
        pt2   = vMom.perp2();
        ptot2 = vMom.mag2();
-       ptot  = TMath::Sqrt(ptot2);
+       ptot  = sqrt(ptot2);
 
        ppp = ( ptotp2 + pdotn )/ptot;
        ppn = ( ptotn2 + pdotn )/ptot;
 
-       ela = TMath::Sqrt( mMassla2 + ptot2 );
-       ek0 = TMath::Sqrt( mMassk02 + ptot2 );
+       ela = sqrt( mMassla2 + ptot2 );
+       ek0 = sqrt( mMassk02 + ptot2 );
 
 //       m_v0->id        = v0_vertex[in].id;
        m_v0->id        = 0;
-       m_v0->run       = ev->runNumber();
-       m_v0->event[0]  = (ev->id()).first;
-       m_v0->event[1]  = (ev->id()).second;
+       m_v0->run       = ev->runId();
+//       m_v0->event[0]  = (ev->id()).first;
+//       m_v0->event[1]  = (ev->id()).second;
+       m_v0->event[0]  = ev->id();
+       m_v0->event[1]  = 0;
 //       m_v0->id_vertex = v0_vertex[in].id_vertex;
        m_v0->id_vertex = 0;
 //       m_v0->pidp      = track[pkey].id_global_pid;
@@ -338,17 +332,16 @@ Int_t StSmdstMaker::FillV0Table() {
        m_v0->pidn      = 0;
        m_v0->nflag     = nflag;
        m_v0->pflag     = pflag;
-       if (vTracks.size() > 1) {
-         m_v0->npn       = nFitTraits->numberOfFitPoints();
-         m_v0->npp       = pFitTraits->numberOfFitPoints();
-       } else {
-         m_v0->npp       = 0;
-         m_v0->npp       = 0;
-       }
+       if (nTrack) {
+         m_v0->npn       = nTrack->fitTraits().numberOfFitPoints();
+       } else m_v0->npn       = 0;
+       if (pTrack) {
+         m_v0->npp       = pTrack->fitTraits().numberOfFitPoints();
+       } else m_v0->npp       = 0;
        m_v0->alpha     = (ppp - ppn)/(ppp + ppn);
-       m_v0->ptarm     = TMath::Sqrt(fabs(ptotp2 - ppp*ppp));
-       m_v0->bn        = vertex->dcaDaughterToPrimaryVertex(negativeTrack);
-       m_v0->bp        = vertex->dcaDaughterToPrimaryVertex(positiveTrack);
+       m_v0->ptarm     = sqrt(fabs(ptotp2 - ppp*ppp));
+       m_v0->bn        = vertex->dcaDaughterToPrimaryVertex(negative);
+       m_v0->bp        = vertex->dcaDaughterToPrimaryVertex(positive);
        m_v0->dca       = vertex->dcaDaughters();
        m_v0->bv0       = vertex->dcaParentToPrimaryVertex();
        m_v0->mala      = mala;
@@ -373,9 +366,9 @@ Int_t StSmdstMaker::FillV0Table() {
 //         C_D_CURVATURE*bf[2]*track[nkey].invpt;
        m_v0->sagn      = 0;
        m_v0->sagp      = 0;
-       m_v0->rapla     = TMath::Log((ela+vMom.z())/TMath::Sqrt(mMassla2+pt2));
+       m_v0->rapla     = log((ela+vMom.z())/sqrt(mMassla2+pt2));
        m_v0->raplb     = m_v0->rapla;
-       m_v0->rapk0     = TMath::Log((ek0+vMom.z())/TMath::Sqrt(mMassk02+pt2));
+       m_v0->rapk0     = log((ek0+vMom.z())/sqrt(mMassk02+pt2));
        m_v0->theta     = nMom.angle(pMom) * C_DEG_PER_RAD;
 
        smdst_v0->AddAt(m_v0,out);
@@ -451,42 +444,36 @@ void StSmdstMaker::FillXiHistograms() {
 
   StEvent* ev = (StEvent *) GetInputDS("StEvent");
   if (!ev) return; // If no event, we're done
-  StVertexCollection *vertices = ev->vertexCollection();
-  if (!vertices) {
-    gMessMgr->Warning("StSmdstMaker - no vertex collection in event.");
-    return;
-  }
-  if (!(vertices->size())) {
+
+  StSPtrVecXiVertex& xiVertices = ev->xiVertices();
+  Int_t castot = xiVertices.size();
+  if (!castot) {
     gMessMgr->Warning("StSmdstMaker - no vertices in event.");
     return;
   }
 
   if (m_DataSet && update) {
-    StVertexIterator vtxI;
-   for (vtxI  = ev->vertexCollection()->begin();
-        vtxI != ev->vertexCollection()->end(); vtxI++) {
-     StVertex *vtx = *vtxI;
-     if ( vtx->type() != Xi) continue;
-     StXiVertex *vertex = (StXiVertex *) vtx;
+    for (unsigned int i=0; i<castot; i++) {
+      StXiVertex *vertex = xiVertices[i];
 
-     const StThreeVectorF& bMom = vertex->momentumOfBachelor();
-     const StThreeVectorF vMom = vertex->momentumOfV0();
+      const StThreeVectorF& bMom = vertex->momentumOfBachelor();
+      const StThreeVectorF vMom = vertex->momentumOfV0();
       
-     ptotb2 = bMom.mag2();
-     ptotv2 = vMom.mag2();
-     bdotv = vMom.dot(bMom);
+      ptotb2 = bMom.mag2();
+      ptotv2 = vMom.mag2();
+      bdotv = vMom.dot(bMom);
 
-     ek0b = TMath::Sqrt(mMassk02 + ptotb2);
-     epib = TMath::Sqrt(mMasspi2 + ptotb2);
-     elav = TMath::Sqrt(mMassla2 + ptotv2);
-       
-     maxi = TMath::Sqrt( mMassla2 + mMasspi2 + 2*(elav*epib - bdotv) );
-     maom = TMath::Sqrt( mMassla2 + mMassk02 + 2*(elav*ek0b - bdotv) );
+      ek0b = sqrt(mMassk02 + ptotb2);
+      epib = sqrt(mMasspi2 + ptotb2);
+      elav = sqrt(mMassla2 + ptotv2);
 
-     m_xi_mass->Fill(maxi);
-     m_om_mass->Fill(maom);
+      maxi = sqrt( mMassla2 + mMasspi2 + 2*(elav*epib - bdotv) );
+      maom = sqrt( mMassla2 + mMassk02 + 2*(elav*ek0b - bdotv) );
 
-   }
+      m_xi_mass->Fill(maxi);
+      m_om_mass->Fill(maom);
+
+    }
   }
   if (!update || (m_DataSet && (counter%update) == 0)) {
     m_str2->cd();
