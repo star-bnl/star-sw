@@ -26,12 +26,12 @@ StSsdConfig& StSsdConfig::operator = (const StSsdConfig& geom)
 
 void StSsdConfig::setConfiguration()
 {
-  if  ((mTotalNumberOfHybrids == 32))  // LADDER 0
+  if  ((totLadderPresent == 1))  // LADDER 0
     mConfig = TString("LAD0");
-  else if (mTotalNumberOfHybrids == 320) // HALF SSD
+  else if (totLadderPresent == 10) // HALF SSD
     mConfig = TString("HALF");
-  else if (mTotalNumberOfHybrids == 640) // FULL SSD
-    mConfig = TString("SSD");
+  else if (totLadderPresent == 20) // FULL SSD
+    mConfig = TString("FULL");
   else
     mConfig = TString("NULL");
 }
@@ -50,7 +50,15 @@ void StSsdConfig::setConfiguration(const char* config)
       setTotalNumberOfHybrids(320);
     }
   else
-    gMessMgr->Message("Configuration of SSD not defined! It must be LAD0 or HALF or SSD ","E");
+    if ( !strncmp(config, "FULL", strlen("FULL")) )
+      {
+	setNumberOfLadders(20);
+	setNumberOfWafers(320);
+	setNumberOfHybrids(2);
+	setTotalNumberOfHybrids(640);
+      }
+    else
+      gMessMgr->Message("Configuration of SSD not defined! It must be LAD0 or HALF or FULL ","E");
   
 }
 
