@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.3 2001/08/16 21:02:03 munhoz Exp $
+ * $Id: StSvtConfig.cc,v 1.4 2001/08/24 21:02:58 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.4  2001/08/24 21:02:58  caines
+ * Do index swapping for year2001 data
+ *
  * Revision 1.3  2001/08/16 21:02:03  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
@@ -199,6 +202,24 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     break;
   }
 
+  if( (barrelID == 2) && (ladderID == 1) && (waferID > 3)){
+    if( hybridID ==1) index++;
+    if( hybridID ==2) index --;
+  }
+  
+  else if( (barrelID == 2) && (ladderID == 8)){
+    if( hybridID ==1) index++;
+    if( hybridID ==2) index --;
+  }
+
+  else if( (barrelID == 3) && (ladderID == 16) && (waferID > 4)){
+    index -= 14;
+  }
+  else if( (barrelID == 3) && (ladderID == 15) && (waferID > 4)){
+    index += 14;
+  }
+
+
   if ( !strncmp(mConfig, "SYST", strlen("SYST")) ) {
     if      ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 1)) index = 0;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 2)) index = 1;
@@ -309,4 +330,122 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
   }
 
   return index;
+}
+
+
+int StSvtConfig::getBarrel(int index){
+
+  int mNumberOfBarrels;                        // Number of Barrels
+  
+  mNumberOfBarrels = getNumberOfBarrels();
+  
+  
+  int MaxIndex=0; 
+  for( int i=0; i< mNumberOfBarrels;i++) {
+    
+    MaxIndex +=  getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
+      getNumberOfHybrids();
+    if( MaxIndex > index) return i+1;
+  }
+  
+  return -1;
+}
+
+int StSvtConfig::getLadder(int index){
+
+  int i, indexsav, CurrentIndex=0;
+
+  int Barrel = getBarrel(index);
+
+  // Cope with switch readout in real data
+
+  indexsav = index;
+  if( index> 425) indexsav -= 14;
+  else if( index> 411 && index < 418) indexsav += 14;
+  
+
+  for( i=0; i< Barrel-1; i++){
+    CurrentIndex += getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
+      getNumberOfHybrids();
+  }
+
+  for( i=0; i< getNumberOfLadders(Barrel); i++){
+    CurrentIndex += getNumberOfWafers(Barrel)*getNumberOfHybrids();
+    if( CurrentIndex > indexsav) return i+1;
+  }
+  
+  return -1;
+}
+
+int StSvtConfig::getWafer(int index){
+
+  int i, indexsav=0,CurrentIndex=0;
+
+  int Barrel = getBarrel(index);
+  int Ladder = getLadder(index);
+
+  
+  indexsav = index;
+  if( index> 425) indexsav -= 14;
+  else if( index> 411 && index < 418) indexsav += 14;
+
+  for( i=0; i< Barrel-1; i++){
+    CurrentIndex += getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
+      getNumberOfHybrids();
+  }
+
+  for( i=0; i< Ladder-1; i++){
+    CurrentIndex += getNumberOfWafers(Barrel)*getNumberOfHybrids();
+  }
+
+  for(i=0; i<getNumberOfWafers(Barrel); i++){
+    CurrentIndex += getNumberOfHybrids();
+    if( CurrentIndex > indexsav) return i+1;
+  }
+  
+  return -1;
+}
+    
+int StSvtConfig::getHybrid(int index){
+
+  int i, indexsav, CurrentIndex=0;
+
+  int Barrel = getBarrel(index);
+  int Ladder = getLadder(index);
+  int Wafer = getWafer(index);
+
+  
+  indexsav = index;
+  if( index> 425) indexsav -= 14;
+  else if( index> 411 && index < 418) indexsav += 14;
+
+  for( i=0; i< Barrel-1; i++){
+    CurrentIndex += getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
+      getNumberOfHybrids();
+  }
+
+  for( i=0; i< Ladder-1; i++){
+    CurrentIndex += getNumberOfWafers(Barrel)*getNumberOfHybrids();
+  }
+
+  for(i=0; i<Wafer-1; i++){
+    CurrentIndex += getNumberOfHybrids();
+  }
+
+  
+  if( (Barrel == 2) && (Ladder == 1) && (Wafer > 3)){
+     if( indexsav == CurrentIndex++) return 2;
+     else if ( indexsav == CurrentIndex) return 1;
+  }
+  
+  else if( (Barrel == 2) && (Ladder == 8)){
+    if( indexsav == CurrentIndex++) return 2;
+    else if ( indexsav == CurrentIndex) return 1;
+
+  }
+ 
+  if( indexsav == CurrentIndex++) return 1;
+  else if ( indexsav == CurrentIndex) return 2;
+ 
+  return -1;
 }

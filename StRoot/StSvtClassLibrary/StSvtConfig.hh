@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.hh,v 1.1 2000/11/30 20:38:50 caines Exp $
+ * $Id: StSvtConfig.hh,v 1.2 2001/08/24 21:03:03 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.hh,v $
+ * Revision 1.2  2001/08/24 21:03:03  caines
+ * Do index swapping for year2001 data
+ *
  * Revision 1.1  2000/11/30 20:38:50  caines
  * Svt configuration files
  *
@@ -54,6 +57,11 @@ public:
   void setConfiguration(const char* config); // set the SVT configuration
 
   int getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
+  int getBarrel(int index);
+  int getLadder(int index);
+  int getWafer(int index);
+  int getHybrid(int index);
+  
   const char* getConfiguration(); // Returns the SVT configuration
 
 protected:
