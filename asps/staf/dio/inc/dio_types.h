@@ -46,6 +46,8 @@ extern CC_P int dio_start();
 extern CC_P int dio_stop();
 extern CC_P void dio_def_();
 extern CC_P int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
+extern CC_P int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
+extern CC_P int dio_clearDataset(DS_DATASET_T *pDS);
 extern CC_P char* dio_mode2text(DIO_MODE_T mode);
 extern CC_P DIO_MODE_T dio_text2mode(char* text);
 extern CC_P char* dio_state2text(DIO_STATE_T state);

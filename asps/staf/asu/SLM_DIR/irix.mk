@@ -30,7 +30,15 @@ endif
 # C++
 export CXX := CC
 #export CXX := g++
+# HACK for IAGO.LBL.GOV's Delta C++ Compiler
+IAGO := iago
+HOST := $(shell uname -n)
+ifeq ($(IAGO),$(HOST))
 export CXXFLAGS += -xansi -use_cfront
+else
+export CXXFLAGS += -xansi
+endif
+#
 ifeq ($(DEBUG),$(TRUE))
 export CXXFLAGS += -g
 endif

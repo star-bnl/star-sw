@@ -302,7 +302,7 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
       fprintf(stdout,"\n");
    }
    
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -313,7 +313,7 @@ STAFCV_T tdmTable:: show () {
       EML_ERROR(DSL_ERROR);
    }
    printf("%s \n",tspec);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -337,7 +337,7 @@ STAFCV_T tdmTable:: getColumn (TDM_COLUMN_T& column, long ncol) {
    for(int i=0;i<column.rank;i++) column.shape[i] = columnShape(ncol,i);
    column.elcount = columnElcount(ncol);
 
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -430,7 +430,7 @@ STAFCV_T tdmTable:: getCell (TDM_CELLDATA_T& data
    data.data.v = cellAddress(nrow,ncol);
    data._d = columnTypeCode(ncol);
    data._maximum = data._length = data._size = columnSize(ncol);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -439,7 +439,7 @@ STAFCV_T tdmTable:: putCell (const TDM_CELLDATA_T& data
    if( !VALID_CELL(nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
    void *pData = cellAddress(nrow,ncol);
    memcpy(pData,data.data.v,columnSize(ncol));
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -461,7 +461,7 @@ STAFCV_T tdmTable:: getData (TDM_DATABLOCK_T& data) {
    data._length = nrows*rsize;
    data._buffer = (unsigned char*)ASUALLOC(data._maximum);
    memcpy(data._buffer,pData,data._length);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -478,7 +478,7 @@ STAFCV_T tdmTable:: putData (const TDM_DATABLOCK_T& data) {
       EML_ERROR(BAD_TABLE);
    }
    memcpy(pData,data._buffer,data._length);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 
 }
 
@@ -491,7 +491,7 @@ STAFCV_T tdmTable:: putData (const TDM_DATABLOCK_T& data) {
 STAFCV_T tdmTable:: cvtDslPointer(DSL_PTR_T& pDS) {
 
    pDS = (DSL_PTR_T)pDSthis;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -652,7 +652,7 @@ STAFCV_T tdmDataset:: getDatasetEntry (tdmDataset*& dataset
 //----------------------------------
 STAFCV_T tdmDataset:: cvtDslPointer(DSL_PTR_T& pDS) {
    pDS = (DSL_PTR_T)pDSthis;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -717,7 +717,7 @@ STAFCV_T tdmFactory:: deleteDataset (const char * name) {
    if( !soc->deleteObject(name,"tdmDataset") ){
       EML_ERROR(CANT_DELETE_OBJECT);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -725,7 +725,7 @@ STAFCV_T tdmFactory:: deleteTable (const char * name) {
    if( !soc->deleteObject(name,"tdmTable") ){
       EML_ERROR(CANT_DELETE_OBJECT);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -736,7 +736,7 @@ STAFCV_T tdmFactory:: findDataset (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    dataset = (tdmDataset*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -747,7 +747,7 @@ STAFCV_T tdmFactory:: findTable (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    table = (tdmTable*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -762,7 +762,7 @@ STAFCV_T tdmFactory:: getDataset (IDREF_T id, tdmDataset*& dataset) {
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    dataset = (tdmDataset*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 
 }
 
@@ -778,47 +778,47 @@ STAFCV_T tdmFactory:: getTable (IDREF_T id, tdmTable*& table) {
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    table = (tdmTable*)(obj->ptr());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
-STAFCV_T tdmFactory:: list () {
+char * tdmFactory:: list () {
    socObject* obj;
 
    printf("\n"
-"**********************************************************************"
+"+---------------------------------------------------------------------"
    "\n"
-"**************** TDM - Table & Dataset Memory listing ****************"
+"|*************** TDM - Table & Dataset Memory listing ****************"
    "\n"
-"**********************************************************************"
+"+-------+-----------------+-----------------+-------------------------"
    "\n"
-"* IDREF * NAME            * TYPE            *                         "
+"| IDREF | NAME            | TYPE            |                         "
     "\n"
-"**********************************************************************"
+"+-------+-----------------+-----------------+-------------------------"
     "\n");
    for( int i=0;i<myCount;i++ ){
       if( soc->getObject(entry(i),obj) ){
          if( 0 == strcmp("tdmTable",obj->type()) ){
-            printf("* %5d * %-15s * %-15s * %d of %d rows filled \n"
+            printf("| %5d | %-15s | %-15s | %d of %d rows filled \n"
                         ,obj->idRef(),obj->name(),obj->type()
                         ,TDMTABLE(obj)->rowCount()
                         ,TDMTABLE(obj)->maxRowCount());
          } else if( 0 == strcmp("tdmDataset",obj->type()) ){
-            printf("* %5d * %-15s * %-15s * %d of %d entries used \n"
+            printf("| %5d | %-15s | %-15s | %d of %d entries used \n"
                         ,obj->idRef(),obj->name(),obj->type()
                         ,TDMDATASET(obj)->entryCount()
                         ,TDMDATASET(obj)->maxEntryCount());
          }
       } else {
-         printf("* %5d * %-15s * %-15s * \n"
+         printf("| %5d | %-15s | %-15s | \n"
                         ,entry(i),"**DELETED**","**DELETED**");
       }
    }
    printf(
-"**********************************************************************"
+"+-------+-----------------+-----------------+-------------------------"
    "\n\n");
 
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   return ""; // TEMPORARY HACK
 }
 
 //----------------------------------
@@ -833,7 +833,7 @@ STAFCV_T tdmFactory:: newDataset (const char * name, long setDim) {
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 
 }
 
@@ -850,7 +850,7 @@ STAFCV_T tdmFactory:: newTable (const char * name, const char * spec
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -866,7 +866,7 @@ STAFCV_T tdmFactory:: createDataset (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -883,7 +883,7 @@ STAFCV_T tdmFactory:: createTable (const char * name
    }
    addEntry(id);
    table = p;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -903,7 +903,7 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    ll -= 7;
    name = (char*)ASUALLOC(ll+1);
    strncpy(name,c+7,ll);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -917,7 +917,7 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
    }
    spec = (char*)ASUALLOC(l+1);
    strcpy(spec,c);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --

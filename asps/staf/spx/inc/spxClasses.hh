@@ -82,13 +82,13 @@ public:
 //**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual char * list ();
    virtual STAFCV_T deleteDummy (const char * name);
    virtual STAFCV_T deleteGrid (const char * name);
    virtual STAFCV_T findDummy (const char * name, spxDummy*& dummy);
    virtual STAFCV_T findGrid (const char * name, spxGrid*& grid);
    virtual STAFCV_T getDummy (IDREF_T id, spxDummy*& dummy);
    virtual STAFCV_T getGrid (IDREF_T id, spxGrid*& grid);
-   virtual STAFCV_T list ();
    virtual STAFCV_T newDummy (const char * name);
    virtual STAFCV_T newGrid (const char * name
 		, short height, short width);

@@ -64,7 +64,7 @@ int kam_soc_bind()
    asp_start();
 
    ASUFREE(solibName);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -101,7 +101,7 @@ int kam_soc_release()
    asp_stop();
 
    ASUFREE(solibName);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -131,7 +131,7 @@ int kam_socobject_name()
    char *n;
    printf("SOC:\tObject name = %s \n",n=p->name());
    delete[] n;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -161,7 +161,7 @@ int kam_socobject_type()
    char *t;
    printf("SOC:\tObject type = %s \n",t=p->type());
    delete[] t;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -180,7 +180,7 @@ int kam_soc_count()
 
    long i = soc->count();
    printf("SOC:\tObject count = %d \n",i);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -199,7 +199,7 @@ int kam_soc_deleteid()
    long id = ku_geti();		/* object id */
 
    soc->deleteID(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -219,7 +219,7 @@ int kam_soc_deleteobject()
    char* type = ku_gets();	/* object type */
 
    soc->deleteObject(name,type);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -243,7 +243,7 @@ int kam_soc_idobject()
       EML_ERROR(KAM_INVALID_IDREF);
    }
    printf("SOC:\tObject idRef =  %d \n",id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -260,8 +260,8 @@ int kam_soc_list()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
 
-   soc->list();
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("%s",soc->list() );
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -281,6 +281,6 @@ int kam_soc_newobject()
 
    soc->newObject(name);
 
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 

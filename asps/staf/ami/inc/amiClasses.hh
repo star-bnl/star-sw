@@ -64,6 +64,7 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual char * list ();
    virtual STAFCV_T callInvoker (const char * name
 		, const STRING_SEQ_T& tables);
 
@@ -72,7 +73,6 @@ public:
                 , amiInvoker*& invoker);
    virtual STAFCV_T getInvoker (IDREF_T id
                 , amiInvoker*& invoker);
-   virtual STAFCV_T list ();
    virtual STAFCV_T newInvoker (const char * name
 		, long rank
 		, FNC_PTR_T pam

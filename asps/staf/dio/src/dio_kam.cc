@@ -39,7 +39,7 @@ int kam_dio_count()
    long npars = ku_npar();      /* number of KUIP parameters */
 
    printf("DIO:\tObject count = %d \n",dio->count());
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -56,10 +56,8 @@ int kam_dio_list()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-   if( !dio->list() ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   printf("%s",dio->list() );
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -80,6 +78,7 @@ int kam_dio_newfilestream()
    char* mode = ku_getc();      /* I/O mode */
 
    DIO_MODE_T iomode=dio_text2mode(mode);
+   dioFileStream* stream;
 
 #ifndef NOTCL
    switch (file[0]) {
@@ -96,17 +95,40 @@ int kam_dio_newfilestream()
    }
 #endif /*NOTCL*/
 
-   if( !dio->newFileStream(name,file,iomode) ){
+   if( !dio->newFileStream(name,file) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   if( !(DIO_UNKNOWN_MODE == iomode) ){
+      if( !dio->findFileStream(name, stream) ){
+	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      }
+      if( !stream->open(iomode) ){
+	 EML_ERROR(KAM_METHOD_FAILURE);
+      }
+   }
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //######################################################################
 void kam_diofilestream_open_(){kam_diofilestream_open();}
 int kam_diofilestream_open()
 {
-   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();      /* filestream name */
+   char* mode = ku_getc();      /* I/O mode */
+
+   DIO_MODE_T iomode=dio_text2mode(mode);
+   dioFileStream* stream;
+
+   if( !(DIO_UNKNOWN_MODE == iomode) ){
+      if( !dio->findFileStream(name, stream) ){
+	 EML_ERROR(KAM_OBJECT_NOT_FOUND);
+      }
+      if( !stream->open(iomode) ){
+	 EML_ERROR(KAM_METHOD_FAILURE);
+      }
+   }
+   EML_SUCCESS(STAFCV_OK);
 }
 //######################################################################
 
@@ -133,7 +155,7 @@ int kam_diofilestream_close()
    if( !stream->close() ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -150,17 +172,29 @@ int kam_diofilestream_getevent()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
-   char* path = ku_gets();      /* DUI path */
+   char* dest = ku_gets();      /* destination dataset */
 
    dioFileStream* stream;
+   tdmDataset* destination=NULL;
 
+EML_PRINTF("Find file stream (%s).\n",name);
    if( !dio->findFileStream(name, stream) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   if( !stream->getEvent(path) ){
+
+EML_PRINTF("Find destination dataset (%s)(%p).\n",dest,destination);
+   if( !tdm->findDataset(dest, destination)
+   &&  !tdm->newDataset(dest, 100) 		// HACK - 100
+   &&  !tdm->findDataset(dest, destination)
+   ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+EML_PRINTF("Get the event.\n");
+   if( !stream->getEvent(destination) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -177,17 +211,21 @@ int kam_diofilestream_putevent()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();      /* stream name */
-   char* path = ku_gets();      /* DUI path */
+   char* sour = ku_gets();      /* source dataset */
 
    dioFileStream* stream;
+   tdmDataset* source;
 
    if( !dio->findFileStream(name, stream) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   if( !stream->putEvent(path) ){
+   if( !tdm->findDataset(sour, source) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   if( !stream->putEvent(source) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -212,7 +250,7 @@ int kam_diofilestream_mode()
    }
    printf("DIO:\tStream mode = (%s) \n"
 		, dio_mode2text(stream->mode()));
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 /*
@@ -237,7 +275,7 @@ int kam_diofilestream_state()
    }
    printf("DIO:\tStream state = (%s) \n"
 		, dio_state2text(stream->state()));
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 

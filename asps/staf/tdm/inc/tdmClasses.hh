@@ -167,6 +167,7 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+   virtual char * list ();
    virtual STAFCV_T deleteDataset (const char * name);
    virtual STAFCV_T deleteTable (const char * name);
    virtual STAFCV_T findDataset (const char * name
@@ -174,7 +175,6 @@ public:
    virtual STAFCV_T findTable (const char * name, tdmTable*& table);
    virtual STAFCV_T getDataset (IDREF_T id, tdmDataset*& dataset);
    virtual STAFCV_T getTable (IDREF_T id, tdmTable*& table);
-   virtual STAFCV_T list ();
    virtual STAFCV_T newDataset (const char * name, long setDim);
    virtual STAFCV_T newTable (const char * name, const char * spec
                 , long rows);

@@ -94,7 +94,7 @@ STAFCV_T duiDispatcher:: mkTable (const char * filePath
    ){
       EML_ERROR(CANT_CREATE_OBJECT);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -118,7 +118,7 @@ STAFCV_T duiDispatcher:: cd (const char * dirPath) {
    ASUFREE(p);
    cwd(newPath);
    ASUFREE(newPath);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -147,7 +147,7 @@ STAFCV_T duiDispatcher:: ls (const char * path, char *& result) {
    }
    if( isTable ) dui_ls_l_Table(pDS,result);
    if( isDataset ) dui_ls_l_Dataset(pDS,result);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -171,7 +171,7 @@ STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
       EML_ERROR(DSL_ERROR);
    }
    ASUFREE(bName); ASUFREE(nName);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -184,7 +184,7 @@ STAFCV_T duiDispatcher:: mv (const char * fromPath
 STAFCV_T duiDispatcher:: pwd (char *& result) {
    result = (char*)ASUALLOC(strlen(myCwd) +1);
    strcpy(result,myCwd);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -234,7 +234,7 @@ STAFCV_T duiDispatcher:: findDataset (const char * dirPath
       }
    }
    ASUFREE(fullPath);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -258,7 +258,7 @@ STAFCV_T duiDispatcher:: findTable (const char * filePath
       }
    }
    ASUFREE(fullPath);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -276,7 +276,7 @@ STAFCV_T duiDispatcher:: newDataset (const char * name, long setDim){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -295,7 +295,7 @@ STAFCV_T duiDispatcher:: newTable (const char * name, const char * spec
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 
 }
 
@@ -310,7 +310,7 @@ STAFCV_T duiDispatcher:: findNode_ds (const char * path
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    ASUFREE(fullPath);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 // ---------------------------------------------------------------------

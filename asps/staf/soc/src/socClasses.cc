@@ -15,7 +15,7 @@
 #include "socClasses.hh"
 #include "soc_globals.h"
 
-#define VALID_IDREF(A)  ( (0 <= A && A < myCount && A < maxCount) \
+#define VALID_IDREF(A)  ( (0 <= A && A < myCount && A < myMaxCount) \
 	&& ( myObjs[A] != NULL ) )
 
 //:=============================================== CLASS              ==
@@ -111,186 +111,17 @@ unsigned char socObject::  lock () {
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T socObject:: attach () {
    myLock++;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
 STAFCV_T socObject:: release () {
    if(myLock>0)myLock--;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
-
-//:=============================================== CLASS              ==
-// socCatalog
-
-//:----------------------------------------------- CTORS & DTOR       --
-socCatalog:: socCatalog() 
-	: socObject((IDREF_T)0) {
-   myPtr = (SOC_PTR_T)this;
-   myCount = 0;
-   maxCount = OBJ_MAX_COUNT;
-   myObjs = new socObject* [maxCount];
-   IDREF_T id;
-   signIn(this,id);
-}
-
-//----------------------------------
-socCatalog:: ~socCatalog() {
-	for( long i=myCount-1; i>0; i-- ){
-  		delete myObjs[i];
-	}
-  	delete[] myObjs;
-}
-
-//:----------------------------------------------- ATTRIBUTES         --
-long socCatalog::  count () {
-   return myCount;
-}
-
-//:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T socCatalog:: deleteID (IDREF_T id) {
-   if( !VALID_IDREF(id) ){
-      EML_ERROR(INVALID_IDREF);
-   }
-   if(myObjs[id]->lock()){
-      EML_ERROR(OBJECT_LOCKED);
-   }
-   delete myObjs[id];
-   myObjs[id] = NULL;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: deleteObject (
-		const char * name, const char * type) {
-   IDREF_T id;
-   idObject(name,type,id);
-   if( !VALID_IDREF(id) ){
-      EML_ERROR(INVALID_IDREF);
-   }
-   if(myObjs[id]->lock()){
-      EML_ERROR(OBJECT_LOCKED);
-   }
-   deleteID(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: findObject (
-		const char * name, const char * type
-		, socObject*& obj) {
-   IDREF_T id;
-   idObject(name,type,id);
-   if( !VALID_IDREF(id) ){
-      obj = NULL;
-      EML_ERROR(INVALID_IDREF);
-   }
-   if(myObjs[id]->lock()){
-      EML_ERROR(OBJECT_LOCKED);
-   }
-   obj = myObjs[id];
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: getObject (IDREF_T id, socObject*& obj) {
-   if( !VALID_IDREF(id) ){
-      obj = NULL;
-      EML_ERROR(INVALID_IDREF);
-   }
-   obj = myObjs[id];
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: idObject (const char * name
-		, const char * type, IDREF_T& id) {
-// THIS COULD BE IMPLEMENTED BY A HASHTABLE LOOKUP !!
-   char *n, *t;
-   for( int i=0; i<myCount; i++ ){
-      if( myObjs[i] ) {
-	 if(  0 == strcmp(n=myObjs[i]->name(),name) ){
-	    if( 0 == strcmp(t=myObjs[i]->type(),type) 
-	    ||  0 == strcmp("-",type) ){
-	       id = i;
-	       ASUFREE(n); ASUFREE(t);
-	       EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-	    }
-	    ASUFREE(t);
-	 }
-	 ASUFREE(n);
-      }
-   }
-   id = -1;
-// EML_ERROR(INVALID_IDREF);
-   return FALSE;	//- HACK: This error is too sensitive
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: list () {
-
-   printf("\n"
-"**********************************************************************"
-   "\n"
-"*************** SOC - Service & Object Catalog listing ***************"
-   "\n"
-"**********************************************************************"
-   "\n"
-"* IDREF * NAME                    * TYPE                    * POINTER "
-    "\n"
-"**********************************************************************"
-    "\n");
-   char *n,*t;
-   for( int i=0;i<myCount;i++ ){
-      if( myObjs[i] ){
-	 printf("* %5d * %-23s * %-23s * %p \n"
-	 		,i,n=(myObjs[i])->name(),t=(myObjs[i])->type()
-			,myObjs[i]);
-	 delete[] n; delete[] t;
-      } else {
-	 printf("* %5d * %-23s * %-23s * - \n"
-	 		,i,"**DELETED**","**DELETED**");
-      }
-   }
-   printf(
-"**********************************************************************"
-   "\n\n");
-
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: newObject (const char * name) {
-   static socObject* p;
-   p = new socObject(name,"socObject");
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: signIn (socObject* obj, IDREF_T& id) {
-   myObjs[myCount] = obj;
-   myCount++;
-   id = myCount;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
-
-//----------------------------------
-STAFCV_T socCatalog:: signOut (IDREF_T id) {
-   if( !VALID_IDREF(id) ){
-      EML_ERROR(INVALID_IDREF);
-   }
-   if(myObjs[id]->lock()){
-      EML_ERROR(OBJECT_LOCKED);
-   }
-   myObjs[id] = NULL;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
-}
- 
-//:----------------------------------------------- PRIV FUNCTIONS     --
-//:**NONE**
 
 //:=============================================== CLASS              ==
 // socFactory
@@ -325,10 +156,18 @@ long socFactory :: maxCount () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+char * socFactory :: list () {
+   for( int i=0;i<maxCount();i++ ){
+      printf("%d (%d)\n",i,entry(i));
+   }
+   return "";	// TEMPORARY HACK
+}
+
+//----------------------------------
 STAFCV_T socFactory :: addEntry (IDREF_T idRef) {
    if(myCount >= myMaxCount)return FALSE;
    idRefs[myCount++] = idRef;
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -337,7 +176,7 @@ STAFCV_T socFactory :: deleteEntry (IDREF_T idRef) {
       if( idRef == idRefs[i] ){
 	 idRefs[i]=0;
          soc->deleteID(idRef);
-	 EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+	 EML_SUCCESS(STAFCV_OK);
       }
    }
    EML_ERROR(INVALID_IDREF);
@@ -353,12 +192,180 @@ IDREF_T socFactory :: entry (long n) {
    }
 }
 
-//:----------------------------------------------- PROT VARIABLES     --
-//:**NONE**
 //:----------------------------------------------- PROT FUNCTIONS     --
 //:**NONE**
-//:----------------------------------------------- PRIV VARIABLES     --
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
+
+//:=============================================== CLASS              ==
+// socCatalog
+
+//:----------------------------------------------- CTORS & DTOR       --
+socCatalog:: socCatalog() 
+        : socFactory(OBJ_MAX_COUNT)
+	, socObject((IDREF_T)0) {
+   myPtr = (SOC_PTR_T)this;
+   myObjs = new socObject* [maxCount()];
+   IDREF_T id;
+   signIn(this,id);
+}
+
+//----------------------------------
+socCatalog:: ~socCatalog() {
+	for( long i=myCount-1; i>0; i-- ){
+  		delete myObjs[i];
+	}
+  	delete[] myObjs;
+}
+
+//:----------------------------------------------- ATTRIBUTES         --
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+STAFCV_T socCatalog:: deleteID (IDREF_T id) {
+   if( !VALID_IDREF(id) ){
+      EML_ERROR(INVALID_IDREF);
+   }
+   if(myObjs[id]->lock()){
+      EML_ERROR(OBJECT_LOCKED);
+   }
+   delete myObjs[id];
+   myObjs[id] = NULL;
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: deleteObject (
+		const char * name, const char * type) {
+   IDREF_T id;
+   idObject(name,type,id);
+   if( !VALID_IDREF(id) ){
+      EML_ERROR(INVALID_IDREF);
+   }
+   if(myObjs[id]->lock()){
+      EML_ERROR(OBJECT_LOCKED);
+   }
+   deleteID(id);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: findObject (
+		const char * name, const char * type
+		, socObject*& obj) {
+   IDREF_T id;
+   idObject(name,type,id);
+   if( !VALID_IDREF(id) ){
+      obj = NULL;
+      EML_ERROR(INVALID_IDREF);
+   }
+   if(myObjs[id]->lock()){
+      EML_ERROR(OBJECT_LOCKED);
+   }
+   obj = myObjs[id];
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: getObject (IDREF_T id, socObject*& obj) {
+   if( !VALID_IDREF(id) ){
+      obj = NULL;
+      EML_ERROR(INVALID_IDREF);
+   }
+   obj = myObjs[id];
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: idObject (const char * name
+		, const char * type, IDREF_T& id) {
+// THIS COULD BE IMPLEMENTED BY A HASHTABLE LOOKUP !!
+   char *n, *t;
+   for( int i=0; i<myCount; i++ ){
+      if( myObjs[i] ) {
+	 if(  0 == strcmp(n=myObjs[i]->name(),name) ){
+	    if( 0 == strcmp(t=myObjs[i]->type(),type) 
+	    ||  0 == strcmp("-",type) ){
+	       id = i;
+	       ASUFREE(n); ASUFREE(t);
+	       EML_SUCCESS(STAFCV_OK);
+	    }
+	    ASUFREE(t);
+	 }
+	 ASUFREE(n);
+      }
+   }
+   id = -1;
+// EML_ERROR(INVALID_IDREF);
+   return FALSE;	//- HACK: This error is too sensitive
+}
+
+//----------------------------------
+//- OVER-RIDE socFactory:: list()
+char * socCatalog :: list () {
+
+// char *c, *cc;
+// c = (char*)ASUALLOC(70*(myCount+5));	// Best guess
+
+   printf("\n"
+"+---------------------------------------------------------------------"
+   "\n"
+"|************** SOC - Service & Object Catalog listing ***************"
+   "\n"
+"+-------+-----------------+-----------------+-------------------------"
+   "\n"
+"| IDREF | NAME            | TYPE            | POINTER                 "
+    "\n"
+"+-------+-----------------+-----------------+-------------------------"
+    "\n");
+   char *n,*t;
+   for( int i=0;i<myCount;i++ ){
+      if( myObjs[i] ){
+	 printf("| %5d | %-15s | %-15s | %p \n"
+	 		,i,n=(myObjs[i])->name(),t=(myObjs[i])->type()
+			,myObjs[i]);
+	 delete[] n; delete[] t;
+      } else {
+/*- Do not printout any info about deleted objects. -**
+  	 printf("| %5d | %-15s | %-15s | - \n"
+	 		,i,"**DELETED**","**DELETED**");
+-*/
+      }
+   }
+   printf(
+"+-------+-----------------+-----------------+-------------------------"
+   "\n\n");
+
+   return ""; // TEMPORARY HACK
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: newObject (const char * name) {
+   static socObject* p;
+   p = new socObject(name,"socObject");
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: signIn (socObject* obj, IDREF_T& id) {
+   myObjs[myCount] = obj;
+   myCount++;
+   id = myCount;
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T socCatalog:: signOut (IDREF_T id) {
+   if( !VALID_IDREF(id) ){
+      EML_ERROR(INVALID_IDREF);
+   }
+   if(myObjs[id]->lock()){
+      EML_ERROR(OBJECT_LOCKED);
+   }
+   myObjs[id] = NULL;
+   EML_SUCCESS(STAFCV_OK);
+}
+ 
 //:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
 

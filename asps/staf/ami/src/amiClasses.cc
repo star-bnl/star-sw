@@ -9,7 +9,7 @@
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
-#include "duiLib.h"
+#include "tdmLib.h"
 #include "ami_macros.h"
 #include "amiClasses.hh"
 
@@ -96,7 +96,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
       delete[] h;
       delete[] d;
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -165,11 +165,11 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    tbls._buffer = new tdmTable* [tables._maximum];
 
    for( int i=0;i<tables._length;i++ ){
-      if( !dui->findTablePath(tables._buffer[i]
+      if( !tdm->findTable(tables._buffer[i]
 			,tbls._buffer[i])
-      &&  !(dui->mkTable(tables._buffer[i]
+      &&  !(tdm->newTable(tables._buffer[i]
 			,invoker->tableSpec(i),0)
-            &&dui->findTablePath(tables._buffer[i]
+            &&tdm->findTable(tables._buffer[i]
 			,tbls._buffer[i]))
       ){
 	 EML_ERROR(OBJECT_NOT_FOUND);
@@ -177,7 +177,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    }
 //- Call the actual invoker object.
    invoker->call(tbls);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -185,7 +185,7 @@ STAFCV_T amiBroker:: deleteInvoker (const char * name ) {
    if( !soc->deleteObject(name,"amiInvoker") ){
       EML_ERROR(CANT_DELETE_OBJECT);
    }
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -197,7 +197,7 @@ STAFCV_T amiBroker:: findInvoker (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    invoker = AMIINVOKER(obj);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -213,42 +213,42 @@ STAFCV_T amiBroker:: getInvoker (IDREF_T id
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    invoker = AMIINVOKER(obj);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
-STAFCV_T amiBroker:: list () {
+char * amiBroker:: list () {
    socObject* obj;
 
    printf("\n"
-"**********************************************************************"
+"+---------------------------------------------------------------------"
    "\n"
-"************** AMI - Analysis Module Interface listing ***************"
+"|************* AMI - Analysis Module Interface listing ***************"
    "\n"
-"**********************************************************************"
+"+-------+-----------------+-----------------+------+------------------"
    "\n"
-"* IDREF * NAME            * TYPE            * RANK *                  "
+"| IDREF | NAME            | TYPE            | RANK |                  "
    "\n"
-"**********************************************************************"
+"+-------+-----------------+-----------------+------+------------------"
     "\n");
    for( int i=0;i<count();i++ ){
       if( soc->getObject(entry(i),obj) ){
          if( 0 == strcmp("amiInvoker",obj->type()) ){
-            printf("* %5d * %-15s * %-15s * %4d * \n"
+            printf("| %5d | %-15s | %-15s | %4d | \n"
                         ,obj->idRef(),obj->name(),obj->type()
 			,AMIINVOKER(obj)->rank()
                         );
          }
       } else {
-         printf("* %5d * %-15s * %-15s * %4s * \n"
+         printf("* %5d | %-15s | %-15s | %4s | \n"
                         ,entry(i),"**DELETED**","**DELETED**","***");
       }
    }
    printf(
-"**********************************************************************"
+"+-------+-----------------+-----------------+------+------------------"
    "\n\n");
 
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   return ""; // TEMPORARY HACK
 }
 
 //----------------------------------
@@ -266,7 +266,7 @@ STAFCV_T amiBroker:: newInvoker (const char * name
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+   EML_SUCCESS(STAFCV_OK);
 
 }
 
