@@ -9,7 +9,7 @@ Time-stamp: <99/06/30 14:54:10 ullrich>
 ---------------
 The StarClassLibrary (or SCL) is a C++ class library which
 contains general purpose classes such as:
-   2- and 4-vectors
+   3- and 4-vectors
    matrices
    helices
    particle definitions
