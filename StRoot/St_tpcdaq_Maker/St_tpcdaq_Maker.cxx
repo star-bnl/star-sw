@@ -877,7 +877,7 @@ Int_t St_tpcdaq_Maker::Make() {
 char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 {
   mMergeSequences=mergeSequences;
-  (void) printf("St_tpcdaq_Maker::SetSequenceMerging: mMergeSequences is %s",(mMergeSequences?"ON":"OFF"));
+  (void) printf("St_tpcdaq_Maker::SetSequenceMerging: mMergeSequences is %s\n",(mMergeSequences?"ON":"OFF"));
   return mMergeSequences;
 }
 
@@ -888,6 +888,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.87  2004/03/31 19:34:14  jeromel
+// Newline
+//
 // Revision 1.86  2004/03/15 23:54:46  jeromel
 // Unused var removed (detail)
 //
