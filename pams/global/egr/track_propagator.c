@@ -99,7 +99,6 @@ long type_of_call track_propagator_(
 	      ptrack[i].y0 = xx0[1];
 	      ptrack[i].z0 = xx0[2];
 	    }
-	  return STAFCV_OK;
 	}
       
       if(target->iflag == 3)
@@ -165,6 +164,7 @@ long type_of_call track_propagator_(
 	  
 	}
     }
+  return STAFCV_OK;
 }
   
 
