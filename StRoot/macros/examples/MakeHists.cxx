@@ -1,3 +1,4 @@
+//*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
 void MakeHists(Char_t *xdffilename="$(temp)/test.xdf") 
 {
