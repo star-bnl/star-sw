@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.hh,v 1.3 2005/03/14 22:57:18 jcs Exp $
+//   $Id: StFtpcGasUtilities.hh,v 1.4 2005/03/23 14:32:29 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.hh,v $
+//   Revision 1.4  2005/03/23 14:32:29  jcs
+//   additional changes for using body + extra temperatures starting with y2005
+//
 //   Revision 1.3  2005/03/14 22:57:18  jcs
 //   clean up code
 //   use body + extra temperature readings starting with y2005
@@ -35,11 +38,13 @@ class StFtpcGasUtilities
    StFtpcParamReader   *mParam;
    StFtpcDbReader      *mDb;
    StDetectorDbFTPCGas *mGas;
+   St_ftpcTemps        *mTemps;
   
   public:
    StFtpcGasUtilities(StFtpcParamReader   *paramReader,
                       StFtpcDbReader      *dbReader,
-	       	      StDetectorDbFTPCGas *mGas);
+	       	      StDetectorDbFTPCGas *mGas,
+                      St_ftpcTemps        *mTemps);
 
    ~StFtpcGasUtilities();
 

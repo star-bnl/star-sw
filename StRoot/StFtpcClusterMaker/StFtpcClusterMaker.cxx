@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.78  2005/03/23 14:32:28  jcs
+// additional changes for using body + extra temperatures starting with y2005
+//
 // Revision 1.77  2005/03/14 22:56:12  jcs
 // use the body + the extra ftpc temperature reading starting with y2005
 //
@@ -318,7 +321,8 @@ StMaker(name),
     m_gas(0),
     m_electronics(0),
     m_cathode(0),
-    m_clustergeo(0)
+    m_clustergeo(0),
+    m_temps(0)
 {
   mCurrentEvent=0;   //!
   mFtpcHitColl=0;    //!
@@ -490,6 +494,7 @@ Int_t StFtpcClusterMaker::Make()
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+  m_temps = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
 
   // create parameter reader
   StFtpcParamReader paramReader(m_clusterpars,m_fastsimgas,m_fastsimpars);
@@ -566,7 +571,8 @@ Int_t StFtpcClusterMaker::Make()
          
       StFtpcGasUtilities gasUtils(&paramReader,
 		                  &dbReader,
-				  gas);
+				  gas,
+                                  m_temps);
 
       returnCode = gasUtils.barometricPressure();
 
@@ -577,20 +583,7 @@ Int_t StFtpcClusterMaker::Make()
 
       // For FTPC West
       
-      if (dbDate < 20050101) {
-         returnCode = gasUtils.averageTemperatureWest(dbDate,GetRunNumber());
-      }
-      else {
-         // test if extra FTPC temperature readings are available from offline DB
-         St_ftpcTemps* temps=NULL;
-         temps = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
-         
-         if ( !temps ) {
-            gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcTemps"<<endm;
-            return kStWarn;
-         }
-         returnCode = gasUtils.averageTemperatureWest(dbDate,GetRunNumber(),temps);
-      }
+      returnCode = gasUtils.averageTemperatureWest(dbDate,GetRunNumber());
       
       // test if averageBodyTemperature for FTPC West found for first event
       if (paramReader.gasTemperatureWest() == 0) {
@@ -605,20 +598,7 @@ Int_t StFtpcClusterMaker::Make()
 
       // For FTPC East
       
-      if (dbDate < 20050101) {
-         returnCode = gasUtils.averageTemperatureEast(dbDate,GetRunNumber());
-      }
-      else {
-         // test if extra FTPC temperature readings are available from offline DB
-         St_ftpcTemps* temps=NULL;
-         temps = (St_ftpcTemps *)dblocal_calibrations("ftpcTemps");
-         
-         if ( !temps ) {
-            gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Offline database: Calibrations_ftpc/ftpcTemps"<<endm;
-            return kStWarn;
-         }
-         returnCode = gasUtils.averageTemperatureEast(dbDate,GetRunNumber(),temps);
-      }
+      returnCode = gasUtils.averageTemperatureEast(dbDate,GetRunNumber());
       
       // test if averageBodyTemperature for FTPC East found for first event
       if (paramReader.gasTemperatureEast() == 0 ) {
