@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructEvent.cxx,v 1.3 2004/06/09 22:39:09 prindle Exp $
+ * $Id: StEStructEvent.cxx,v 1.4 2004/06/25 03:13:41 porter Exp $
  *
  * Author: Jeff Porter as rewrite of Ebye code by Jeff Reid
  *
@@ -87,8 +87,10 @@ void StEStructEvent::Clear(Option_t *option) {
 // Feb 26, 2004 djp Change from UInt_t to Double_t so we can use
 //                  impact parameter in case data comes from an event generator.
 void StEStructEvent::SetCentrality(Double_t impact) {
-  mCentrality=StEStructCentrality::Instance()->centrality(impact);
-  mPtCentrality=StEStructCentrality::Instance()->ptCentrality(impact);
+  if(StEStructCentrality::Instance()->numCentralities()>0)
+     mCentrality=StEStructCentrality::Instance()->centrality(impact);
+  if(StEStructCentrality::Instance()->numPtCentralities()>0)
+     mPtCentrality=StEStructCentrality::Instance()->ptCentrality(impact);
 }
 
 //-------------------------------------------------------
@@ -125,6 +127,9 @@ StEStructTrackCollection * StEStructEvent::TrackCollectionP() const { return mTr
 /**********************************************************************
  *
  * $Log: StEStructEvent.cxx,v $
+ * Revision 1.4  2004/06/25 03:13:41  porter
+ * updated centrality methods and put a test in StEStructEvent.cxx
+ *
  * Revision 1.3  2004/06/09 22:39:09  prindle
  * Expanded centrality class.
  * Call to set centrality from event reader.
