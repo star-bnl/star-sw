@@ -395,9 +395,9 @@ c  by dE.  To do this, remove the *'s
                  endif
 c                if(irow .le. pad_plane(1).nrow_in)then
                  if(irow .le. 13)then
-                    mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).scale_in
+                    mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).gain_in
                  else
-                    mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).scale_out
+                    mchit_q(nmchit)=mchit_q(nmchit)*tsspar(1).gain_out
                  endif
 c
 c                correct for integral
