@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.41 2000/09/15 22:52:53 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.42 2000/09/16 22:23:04 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.42  2000/09/16 22:23:04  snelling
+// Auto magically switch to rapidity when identified particles are used
+//
 // Revision 1.41  2000/09/15 22:52:53  posk
 // Added Pt weighting for event plane calculation.
 //
@@ -230,6 +233,9 @@ Int_t StFlowAnalysisMaker::Init() {
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
+  xLabel = "Pseudorapidity";
+  if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
+
   const float etaMin          =  -1.5;
   const float etaMax          =   1.5;
   const float ptMin           =    0.;
@@ -404,13 +410,13 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistYieldAll2D = new TH2D("Flow_YieldAll2D", "Flow_YieldAll2D",
     nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
   mHistYieldAll2D->Sumw2();
-  mHistYieldAll2D->SetXTitle("Pseudorapidity");
+  mHistYieldAll2D->SetXTitle((char*)xLabel.Data());
   mHistYieldAll2D->SetYTitle("Pt (GeV)");
 
   // Mean Eta in each bin
   mHistBinEta = new TProfile("Flow_Bin_Eta", "Flow_Bin_Eta",
     nEtaBins, etaMin, etaMax, etaMin, etaMax, "");
-  mHistBinEta->SetXTitle("Pseudorapidity");
+  mHistBinEta->SetXTitle((char*)xLabel.Data());
   mHistBinEta->SetYTitle("<Eta>");
   
   // Mean Pt in each bin
@@ -856,7 +862,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistYield2D =	new TH2D(histTitle->Data(),
         histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax);
       histFull[k].histFullHar[j].mHistYield2D->Sumw2();
-      histFull[k].histFullHar[j].mHistYield2D->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHistYield2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHistYield2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
@@ -868,7 +874,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
         histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMaxPart,
 							       -100., 100., "");
-      histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
@@ -879,7 +885,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
         histTitle->Data(), nEtaBins, etaMin, etaMax, -100., 100., "");
-      histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("v (%)");
       delete histTitle;
 
@@ -897,7 +903,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.41 2000/09/15 22:52:53 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.42 2000/09/16 22:23:04 snelling Exp $");
 
   return StMaker::Init();
 }
@@ -1071,6 +1077,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     float phi    = pFlowTrack->Phi();
     if (phi < 0.) phi += twopi;
     float eta    = pFlowTrack->Eta();
+    if (strlen(pFlowSelect->PidPart()) != 0) { eta = pFlowTrack->Y(); }
     float pt     = pFlowTrack->Pt();
     int   charge = pFlowTrack->Charge();
     float dca    = pFlowTrack->Dca();
@@ -1079,7 +1086,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     int   maxPts = pFlowTrack->MaxPts();
     Char_t pid[10];
     strcpy(pid, pFlowTrack->Pid());
-    float totalp = pt/sqrt(1-(tanh(eta)*tanh(eta)));
+    float totalp = pFlowTrack->P();
 
     // For PID multiplicites
     if (strcmp(pid, "pi+")    == 0)  piPlusN++;
@@ -1184,7 +1191,6 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     // For Eta symmetry
     if (eta > 0.) { etaSymPosN++; }
     else { etaSymNegN++; }
-
 
     for (int k = 0; k < Flow::nSels; k++) {
       pFlowSelect->SetSelection(k);
@@ -1389,7 +1395,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHist_v2D = 
 	histFull[k].histFullHar[j].mHist_vObs2D->ProjectionXY(histTitle->Data());
       histFull[k].histFullHar[j].mHist_v2D->SetTitle(histTitle->Data());
-      histFull[k].histFullHar[j].mHist_v2D->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_v2D->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_v2D->SetYTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_v2D->SetZTitle("v (%)");
       delete histTitle;
@@ -1403,7 +1409,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHist_vEta = 
 	histFull[k].histFullHar[j].mHist_vObsEta->ProjectionX(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vEta->SetTitle(histTitle->Data());
-      histFull[k].histFullHar[j].mHist_vEta->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_vEta->SetXTitle((char*)xLabel.Data());
       histFull[k].histFullHar[j].mHist_vEta->SetYTitle("v (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vEta);

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.22 2000/09/15 22:52:55 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.23 2000/09/16 22:23:06 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.23  2000/09/16 22:23:06  snelling
+// Auto magically switch to rapidity when identified particles are used
+//
 // Revision 1.22  2000/09/15 22:52:55  posk
 // Added Pt weighting for event plane calculation.
 //
@@ -93,6 +96,7 @@
 #include "StMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
+#include "TString.h"
 class StFlowEvent;
 class FlowTag_st;
 class StFlowSelection;
@@ -119,7 +123,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.22 2000/09/15 22:52:55 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.23 2000/09/16 22:23:06 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -140,7 +144,7 @@ private:
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
- 
+  TString          xLabel;      //! label axis with rapidity or pseudorapidity 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   FlowTag_st*      pFlowTag;    //! pointer to StEvent
   StFlowSelection* pFlowSelect; //! selection object
