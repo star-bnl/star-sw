@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.4 2002/01/23 00:19:36 jeromel Exp $
+ * $Id: TMemStat.cxx,v 1.5 2002/04/06 03:50:25 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -94,7 +94,7 @@ void TMemStat::Summary()
    daver /=dtally;
    drms = sqrt(fabs(drms/dtally-daver*daver));
    printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n"
-        ,"Toatal",(int)dtally,dmin,daver,dmax,drms);
+        ,"Total",(int)dtally,dmin,daver,dmax,drms);
    {for(int i=0;i<40+4*12;i++) printf("=");} printf("\n");
 
 }
