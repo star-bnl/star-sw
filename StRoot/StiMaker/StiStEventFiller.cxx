@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.32 2004/04/21 21:36:24 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.33 2004/07/07 19:33:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.33  2004/07/07 19:33:48  calderon
+ * Added method fillFlags.  Flags tpc, tpc+svt (globals and primaries) and flags -x02 tracks with less than 5 total fit points
+ *
  * Revision 2.32  2004/04/21 21:36:24  calderon
  * Correction in the comments about the encoded method.
  *
@@ -656,7 +659,10 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   double alpha, xRef, x[5], covM[15], chi2node;
   node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
-  chi2[0] = track->getChi2()/(track->getPointCount()-5.); // changed again!  chi2() was not divided by N.D. of F. changed 12/May/03: using track->getChi2() instead of chi2node, want sum of chi2 for all nodes
+  if (track->getPointCount()>5) 
+      chi2[0] = track->getChi2()/(track->getPointCount()-5.); // changed again!  chi2() was not divided by N.D. of F. changed 12/May/03: using track->getChi2() instead of chi2node, want sum of chi2 for all nodes
+  else
+      chi2[0] = -9999;
   chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
     
 
@@ -686,7 +692,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // which does a memberwise copy.  Therefore, constructing a local instance of 
   // StTrackFitTraits is fine, as it will get properly copied.
   StTrackFitTraits fitTraits(geantIdPidHyp,nFitPoints,chi2,covMFloat);
-  gTrack->setFitTraits(fitTraits); 
+  gTrack->setFitTraits(fitTraits);
   return;
 }
 
@@ -732,25 +738,63 @@ void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiKalmanTrack* track){
 }
 
 /// data members from StTrack
-/// flags http://www.star.bnl.gov/html/all_l/html/
-///  x=1 -> TPC only 
-/// 	x=2 -> SVT only 
-/// 	x=3 -> TPC + primary vertex 
-/// 	x=4 -> SVT + primary vertex 
-/// 	x=5 -> SVT+TPC 
-/// 	x=6 -> SVT+TPC+primary vertex 
-/// 	x=7 -> FTPC only 
-/// 	x=8 -> FTPC+primary 
-void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
-{
+/// flags http://www.star.bnl.gov/html/all_l/html/dst_track_flags.html
+/// x=1 -> TPC only
+/// x=2 -> SVT only
+/// x=3 -> TPC + primary vertex
+/// x=4 -> SVT + primary vertex
+/// x=5 -> SVT+TPC
+/// x=6 -> SVT+TPC+primary vertex
+/// x=7 -> FTPC only
+/// x=8 -> FTPC+primary
+/// The last two digits indicate the status of the refit:
+/// = +x01 -> good track
+/// = -x01 -> Bad fit, outlier removal eliminated too many points
+/// = -x02 -> Bad fit, not enough points to fit
+/// = -x03 -> Bad fit, too many fit iterations
+/// = -x04 -> Bad Fit, too many outlier removal iterations
+/// = -x06 -> Bad fit, outlier could not be identified
+/// = -x10 -> Bad fit, not enough points to start
 
-  //cout << "StiStEventFiller::fillTrack()" << endl;
+void StiStEventFiller::fillFlags(StTrack* gTrack) {
   if (gTrack->type()==global) {
     gTrack->setFlag(101); //change: make sure flag is ok
   }
   else if (gTrack->type()==primary) {
     gTrack->setFlag(301);
   }
+  StTrackFitTraits& fitTrait = gTrack->fitTraits();
+  //int tpcFitPoints = fitTrait.numberOfFitPoints(kTpcId);
+  int svtFitPoints = fitTrait.numberOfFitPoints(kSvtId);
+  int totFitPoints = fitTrait.numberOfFitPoints();
+  /// In the flagging scheme, I will put in the cases for
+  /// TPC only, and TPC+SVT (plus their respective cases with vertex)
+  /// Ftpc case has their own code and SSD doesn't have a flag...
+
+  // first case is default above, tpc only = 101 and tpc+vertex = 301
+  // next case is:
+  // if the track has svt points, it will be an svt+tpc track
+  // (we assume that the ittf tracks start from tpc, so we don't
+  // use the "svt only" case.)
+  if (svtFitPoints>0) {
+      if (gTrack->type()==global) {
+	  gTrack->setFlag(501); //svt+tpc
+      }
+      else if (gTrack->type()==primary) {
+	  gTrack->setFlag(601); //svt+tpc+primary
+      }
+  }
+  if (totFitPoints<5) {
+      int flag = gTrack->flag();
+      //keep most sig. digit, set last digit to 2, and flip sign
+      gTrack->setFlag(-(((flag%100)*100)+2)); // -x02 
+  }
+
+}
+void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
+{
+
+  //cout << "StiStEventFiller::fillTrack()" << endl;
   // encoded method = 16 bits = 12 fitting and 4 finding, for the moment use:
   // kKalmanFitId
   // bit 15 for finding, (needs to be changed in StEvent).
@@ -780,6 +824,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   fillGeometry(gTrack, track, true);  // outer geometry
   fillFitTraits(gTrack, track);
   fillPidTraits(gTrack, track);
+  fillFlags(gTrack);
   return;
 }
 bool StiStEventFiller::accept(StiKalmanTrack* track) {

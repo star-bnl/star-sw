@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.8 2004/03/31 00:27:29 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.9 2004/07/07 19:33:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.9  2004/07/07 19:33:48  calderon
+ * Added method fillFlags.  Flags tpc, tpc+svt (globals and primaries) and flags -x02 tracks with less than 5 total fit points
+ *
  * Revision 2.8  2004/03/31 00:27:29  calderon
  * Modifications for setting the fit points based on the chi2<chi2Max algorithm.
  * -Distinguish between points and fit points, so I added a function for each.
@@ -134,6 +137,7 @@ public:
     void fillPidTraits(StTrack* track, StiKalmanTrack* kTrack);
     void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
+    void fillFlags(StTrack* track);
     unsigned short encodedStEventPoints(StiKalmanTrack* kTrack); 
     unsigned short encodedStEventFitPoints(StiKalmanTrack* kTrack); 
     float impactParameter(StiKalmanTrack* kTrack);
