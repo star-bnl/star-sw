@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.9 2000/06/23 20:55:40 kathy Exp $
+//! $Id: StHistUtil.h,v 1.10 2000/06/29 04:46:19 lansdell Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.10  2000/06/29 04:46:19  lansdell
+//! removed virtual from inline methods
+//!
 //! Revision 1.9  2000/06/23 20:55:40  kathy
 //! moved #endif to end where it's supposed to be
 //!
@@ -74,30 +77,21 @@ class StHistUtil {
 
  private:
   // Data-members to make up the output Canvases and Postscript files
-  TCanvas       *m_HistCanvas;       //!
-  Int_t          m_PadColumns;     // Number of the columns (TPad's) on the single Canvas
-  Int_t          m_PadRows;        // Number of the columns (TPad's) on the single Canvas
-  
-  Int_t          m_PaperWidth;     // Paper size in cm
-  Int_t          m_PaperHeight;    // Paper size in cm
-  
-  TString        m_FirstHistName;
-  TString        m_LastHistName;
-  
-  TString        m_PsFileName;     // Name of the PostScipt file to plot hist's out
-  
-  TString        m_GlobalTitle;    // Title at top of each page of output
-  
-  TList         *m_ListOfLogY;     //! list of histogram names that will be drawn with logY scale
-
-  TList         *m_ListOfLogX;     //! list of histogram names that will be drawn with logX scale
-
-  TList         *m_ListOfPrint;    //! list of histogram names that will be drawn,printed
-
-  StMaker       *m_PntrToMaker;    //! pointer to an St_Maker, so can find histograms
-
-  static const Int_t    maxHistCopy=512;      //! size of array of new histograms 
-  TH1            *newHist[maxHistCopy]; //! array of new histograms that other will be copied into
+  TCanvas *m_HistCanvas; //!
+  Int_t   m_PadColumns;  // Number of the columns (TPad's) on the single Canvas
+  Int_t   m_PadRows;     // Number of the columns (TPad's) on the single Canvas
+  Int_t   m_PaperWidth;  // Paper size in cm
+  Int_t   m_PaperHeight; // Paper size in cm
+  TString m_FirstHistName;
+  TString m_LastHistName;
+  TString m_PsFileName;  // Name of the PostScipt file to plot hist's out
+  TString m_GlobalTitle; // Title at top of each page of output
+  TList   *m_ListOfLogY; //! list of histogram names that will be drawn with logY scale
+  TList   *m_ListOfLogX; //! list of histogram names that will be drawn with logX scale
+  TList   *m_ListOfPrint;//! list of histogram names that will be drawn,printed
+  StMaker *m_PntrToMaker;//! pointer to an St_Maker, so can find histograms
+  static const Int_t maxHistCopy=512; //! size of array of new histograms 
+  TH1     *newHist[maxHistCopy]; //! array of new histograms that other will be copied into
 
 
  protected:
@@ -133,46 +127,46 @@ class StHistUtil {
 
 
 // Inline methods
-  virtual void    SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
-  virtual void    SetZones(Int_t columns=2, Int_t rows=3);   
-     // SetPaperSize -->  A4 is 20,26  US letter is 20,24
-  virtual void    SetPaperSize(Int_t width=20, Int_t height=24); 
-  virtual void    SetPostScriptFile(const Char_t *psFileName="");
-  virtual void    SetPntrToMaker(StMaker *m1);
-  virtual void    SetGlobalTitle(const Char_t *globalTitle="");
-  virtual TH1**   getNewHist();
-  virtual Int_t   getNewHistSize();
+  void SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
+  void SetZones(Int_t columns=2, Int_t rows=3);   
+  // SetPaperSize -->  A4 is 20,26  US letter is 20,24
+  void SetPaperSize(Int_t width=20, Int_t height=24); 
+  void SetPostScriptFile(const Char_t *psFileName="");
+  void SetPntrToMaker(StMaker *m1);
+  void SetGlobalTitle(const Char_t *globalTitle="");
+  TH1** getNewHist();
+  Int_t getNewHistSize();
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.9 2000/06/23 20:55:40 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.10 2000/06/29 04:46:19 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
         
 inline void StHistUtil::SetHistsNamesDraw(const Char_t *firstName, const Char_t *lastName)
-                         { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
+  { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
 
 inline void StHistUtil::SetZones(Int_t columns, Int_t rows)
-                         { m_PadColumns =columns; m_PadRows = rows;}
+  { m_PadColumns =columns; m_PadRows = rows;}
 
 inline void StHistUtil::SetPaperSize(Int_t width, Int_t height)
-                         { m_PaperWidth = width; m_PaperHeight = height;}
+  { m_PaperWidth = width; m_PaperHeight = height;}
 
 inline void StHistUtil::SetPostScriptFile(const Char_t *psFileName)
-                         { m_PsFileName = psFileName;}
+  { m_PsFileName = psFileName;}
 
 inline void StHistUtil::SetPntrToMaker(StMaker *m1) 
-                          {m_PntrToMaker = m1;}
+  {m_PntrToMaker = m1;}
 
 inline void StHistUtil::SetGlobalTitle(const Char_t *globalTitle)
-                         { m_GlobalTitle = globalTitle;}
+  { m_GlobalTitle = globalTitle;}
 
 inline TH1**  StHistUtil::getNewHist()
-                            {return newHist;}
+  {return newHist;}
 
 inline Int_t StHistUtil::getNewHistSize()
-                           {return maxHistCopy; }
+  {return maxHistCopy; }
 
 
 #endif
