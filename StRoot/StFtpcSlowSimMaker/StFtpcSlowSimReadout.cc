@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.10 2002/09/13 13:41:11 fsimon Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.11 2002/09/13 13:44:02 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.11  2002/09/13 13:44:02  fsimon
+// Added Random noise to each Timebin -> Better description of real data
+//
 // Revision 1.10  2002/09/13 13:41:11  fsimon
 // Comment out anglefactor
 //
@@ -309,7 +312,7 @@ void StFtpcSlowSimReadout::OutputADC() const
 {
   int num_pixels[11]={0}, num_pixels_occupied[11]={0};
   
-  // Gaussian distribution for Noise
+  // Gaussian distribution for Noise, Sigma 1.5 ADC channels
   TF1* noise = new TF1("noise","gaus",-5,5);
   noise->SetParameters(1,0,1.5);
   cout << "Using random noise with a sigma of 1.5\n";
@@ -326,7 +329,7 @@ void StFtpcSlowSimReadout::OutputADC() const
 	  if(DEBUG)
 	    num_pixels[(int) (bin/30)]++;
 	  
-	  // Add random noise
+	  // Add random noise to each timebin
 	  mADCArray[i] += noise->GetRandom();
 	 
 	  if(mADCArray[i] >= mParam->zeroSuppressThreshold()) {
