@@ -98,6 +98,7 @@
 * evr        - primary vertex reconstruction
 * egr        - refit global tracks
 * ev0        - Strange particle reconstruction (v0's)
+* ev02       - V0 reco w/separate params for SVT&TPC trks; should replace ev0 
 * ev0_e      - v0 evaluation
 * ctf   - runs cts,ctu
 * mwc   - runs mws,mwu
