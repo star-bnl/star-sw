@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.40 1999/02/03 23:19:15 fine Exp $ 
+// $Id: St_Table.cxx,v 1.41 1999/02/04 15:38:45 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.41  1999/02/04 15:38:45  fine
+// St_Table::SavePrimitive - some extra protections have been introduced. Thanks Victor Perevoztchikov
+//
 // Revision 1.40  1999/02/03 23:19:15  fine
 // St_Table:: protection for SavePrimitive has been introduced
 //
@@ -806,7 +809,7 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
    TClass *classPtr = GetRowClass();
 
 
-   if (classPtr == 0) return;
+   if (classPtr == 0) {ClosePrimitive(out); return;}
    if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
    if (!classPtr->GetNdata()) {ClosePrimitive(out); return;}
 
@@ -834,7 +837,7 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
       << endl
       << "// ====================================================================" << endl
       << "// ------  Test whether this table share library was loaded ------"      << endl
-      << "  if (!gROOT->GetClass(\"" << classPtr->GetName() << "\")) return 0;"    << endl
+      << "  if (!gROOT->GetClass(\"" << "St_" << GetTitle() << "\")) return 0;"    << endl
       <<    classPtr->GetName() << " " << rowId << ";" << endl
       <<  "St_" <<  GetTitle() << " *" << tableId << " = new " 
                                << "St_" << GetTitle()
