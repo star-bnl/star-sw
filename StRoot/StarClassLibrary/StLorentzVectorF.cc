@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorF.cc,v 1.1 1999/01/30 03:59:03 fisyak Exp $
+ * $Id: StLorentzVectorF.cc,v 1.2 1999/10/15 15:56:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorF.cc,v $
- * Revision 1.1  1999/01/30 03:59:03  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/10/15 15:56:34  ullrich
+ * Changed output format in operator<<, added operator>>
  *
  * Revision 1.2  1999/10/15 15:56:34  ullrich
  * Changed output format in operator<<, added operator>>
@@ -93,7 +93,18 @@ StLorentzVectorF::operator-= (const StLorentzVectorD& v)
     mX4 -= v.t();
     return *this;
 }
-  return os << '(' << v.vect() << ',' << v.t() << ')';
+
+ostream& operator<< (ostream& os, const StLorentzVectorF& v)
+{
+    return os << v.vect() << "\t\t" << v.t();
+}
+    T  x, y, z, t;
+istream&  operator>>(istream& is, StLorentzVectorF& v)
+{
+    double  x, y, z, t;
+    is >> x >> y >> z >> t;
+    v.setX(x);
+    v.setY(y);
       R__b << mX4;
    }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.5 1999/06/04 18:01:36 ullrich Exp $
+ * $Id: StLorentzVector.hh,v 1.6 1999/10/15 15:56:36 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,9 +20,8 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
- * Revision 1.5  1999/06/04 18:01:36  ullrich
- * New operators operator() and operator[] which can be used
- * as lvalues.
+ * Revision 1.6  1999/10/15 15:56:36  ullrich
+ * Changed output format in operator<<, added operator>>
  *
  * Revision 1.5  1999/06/04 18:01:36  ullrich
  * New operators operator() and operator[] which can be used
@@ -662,7 +661,19 @@ inline StLorentzVector<T> operator/ (const StLorentzVector<T>& v, X c)
 template<class T>
 ostream& operator<< (ostream& os, const StLorentzVector<T>& v)
 {
-  return os << '(' << v.vect() << ',' << v.t() << ')';
+    return os << v.vect() << "\t\t" << v.t();
+}
+
+template<class T>
+istream&  operator>>(istream& is, StLorentzVector<T>& v)
+{
+    T  x, y, z, t;
+    is >> x >> y >> z >> t;
+    v.setX(x);
+    v.setY(y);
+    v.setZ(z);
+    v.setT(t);
+    return is;
 }
 
 //
