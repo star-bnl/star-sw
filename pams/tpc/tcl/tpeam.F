@@ -1,5 +1,8 @@
-* $Id: tpeam.F,v 1.41 1998/02/20 22:18:41 sakrejda Exp $
+* $Id: tpeam.F,v 1.42 1998/03/20 06:05:14 sakrejda Exp $
 * $Log: tpeam.F,v $
+* Revision 1.42  1998/03/20 06:05:14  sakrejda
+* 10.0e-6 changed to 1.0e-6 in tpeam and tpham, maching changes in tss
+*
 * Revision 1.41  1998/02/20 22:18:41  sakrejda
 * tsspar.v_drift replaced with a call to tgc_drift_velocity
 *
@@ -318,7 +321,7 @@ c        fixed by having this call in the initialisation phase
          if (tclpar(1).mc.eq.0) then
 c fill ntuple 500 = pixel information
 	WRITE(6,*)'OFFSETTING PIXELS BY ...',
-     +		3.0*tsspar(1).tau*dvel*10.0e-6
+     +		3.0*tsspar(1).tau*dvel*1.0e-6
             do kclus=1,tpcluster_h.nok
                vec(4)=kclus
                nseq_hit=tpcluster(kclus).nseq
@@ -348,7 +351,7 @@ c fill ntuple 500 = pixel information
 c I'm tired of answering the same question of why there is a time
 c  offset between the pixels and the hits, so offset the pixels too
                      vec(2) = vec(2) - 
-     +                    3.0*tsspar(1).tau*dvel*10.0e-6
+     +                    3.0*tsspar(1).tau*dvel*1.0e-6
                      call hfn(500+ihisto,vec)
                      kpix=kpix+1
                   enddo
