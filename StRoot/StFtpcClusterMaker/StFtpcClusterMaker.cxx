@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.65  2004/04/19 22:00:46  oldi
+// Minor changes.
+//
 // Revision 1.64  2004/04/06 18:36:51  oldi
 // New data mebers for pad and time position and pad and time sigma filled.
 //
@@ -379,7 +382,7 @@ Int_t StFtpcClusterMaker::Make()
   int using_FTPC_slow_simulator = 0;
 
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
-  if(mCurrentEvent){
+  if (mCurrentEvent) {
     mFtpcHitColl = mCurrentEvent->ftpcHitCollection();
   } else mFtpcHitColl = 0;
 
