@@ -1,7 +1,4 @@
 #  $Log: Makeloop.mk,v $
-#  Revision 1.89  1999/08/14 00:37:35  fisyak
-#  New Cons stuff
-#
 #  Revision 1.88  1999/07/20 00:24:55  fisyak
 #  Remove Objy
 #
@@ -346,7 +343,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/14 00:37:35 $ 
+#           Last modification $Date: 1999/07/20 00:24:55 $ 
 #  default setings
 # Current Working Directory
 #
@@ -422,7 +419,7 @@ St_TablesDoc:
 %_StRoot:
 	$(MAKE)  -f $(MakeDll) depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll)
-St_Tables:
+St_Tables: $(BASE)
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend NODEPEND=1999
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
          SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=1999

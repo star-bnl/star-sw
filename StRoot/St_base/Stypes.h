@@ -65,7 +65,7 @@ enum EReturnCodes {
       TClass *c = CreateClass(_QUOTE2_(St_,name), Class_Version(), \
                               DeclFileName(), ImplFileName(), \
                               DeclFileLine(), ImplFileLine()); \
-                  CreateClass(_QUOTE2_(name,_st), Class_Version(), \
+      TClass *b = CreateClass(_QUOTE2_(name,_st), Class_Version(), \
                               _QUOTE2_(name,.h), _QUOTE2_(name,.h), \
                                1,               1 ); \
       fgIsA = c; \

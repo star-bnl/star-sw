@@ -1,11 +1,8 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.6 1999/08/08 18:57:41 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.5 1999/07/25 16:24:26 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
-# Revision 1.6  1999/08/08 18:57:41  wenaus
-# Show all HPSS files for a run
-#
 # Revision 1.5  1999/07/25 16:24:26  wenaus
 # Use DB for HPSS check from Wensheng
 #
@@ -90,22 +87,22 @@ sub displayLog {
     &StDbConnect();
 
     my @theDbFiles;
-    if ( $hpssCheck ) {      
-      $sql="select name,size from $RunFileT where hpss='Y'";
+    if ( $hpssCheck ) {
+      $nDbfiles = 0;
+      
+      $sql="select name from $RunFileT where hpss='Y'";
       $cursor =$dbh->prepare($sql)
 	|| die "Cannot prepare statement: $DBI::errstr\n";
       $cursor->execute;
 
-      my $nDbfiles = 0;
       while(@fields = $cursor->fetchrow) {
-          my $cols=$cursor->{NUM_OF_FIELDS};
-          for($i=0;$i<$cols;$i++) {
-              my $fvalue=$fields[$i];
-              my $fname=$cursor->{NAME}->[$i];
-              if ( lc($fname) eq 'name' ) {$theDbFiles[$nDbfiles] = $fvalue}
-              if ( lc($fname) eq 'size' ) {$theDbFileSize[$nDbfiles] = $fvalue}
-          }
-          $nDbfiles++;
+	my $cols=$cursor->{NUM_OF_FIELDS};
+	for($i=0;$i<$cols;$i++) {
+	  my $fvalue=$fields[$i];
+	  my $fname=$cursor->{NAME}->[$i];
+	  $theDbFiles[$nDbfiles] = $fvalue;
+	  $nDbfiles++;
+	}
       }
     }
 
@@ -135,8 +132,10 @@ Commissioning forum</a> -
 <a href="/STARAFS/comp/prod/">Production</a>
 </font></center>
 <p>
-Links at right (you need a wide window) give access to event summaries and allow editing or deleting of run log entries. 
-Updated every three hours. Problems and suggestions to wenaus\@bnl.gov
+Links at right (you need a wide window) give access to event summaries and allow editing/deleting
+of run log entries. To kill a junk entry like a 'testing' comment,
+edit it and set status=-1 (if you just delete it it will reappear if
+the database is rebuilt from the entry log). Updated every three hours.
 <p>
 <table border=0 cellpadding=0 cellspacing=0 width="100%">
 <tr><td align=left>
@@ -150,7 +149,6 @@ Last update started at $timestamp
 <p><pre>
 END
     $nrow=0;
-    $nrunold = 0;
     while(@fields = $cursor->fetchrow) {
         my $cols=$cursor->{NUM_OF_FIELDS};
         for($i=0;$i<$cols;$i++) {
@@ -168,10 +166,8 @@ END
         }
         $nrun = $val{'name'};
         if ( $nrun ne '' && $nrun < 100 ) {next}  # Don't display junk
-        if ( $nrun eq $nrunold ) {next} # $$$Hack to skip redundant entries
-        $nrunold = $nrun;
         $id=$val{'id'};
-        $delLink="<a href=\"http://duvall.star.bnl.gov/phpMyAdmin/sql.php3?&server=0&db=system_data&table=Run&goto=%2FphpMyAdmin%2Fsql.php3%3Fserver%3D0%26db%3Dsystem_data%26pos%3D0%26sql_query%3DSELECT%2B%252A%2BFROM%2BRun%26sql_order%3D%2Border%2Bby%2B%2527ctime%2527%2BASC%26table%3DRun&sql_query=DELETE+FROM+Run+WHERE++id+%3D+%27$id%27+&zero_rows=The+row+has+been+deleted\"><u>Delete</u></a>";
+        $delLink="<a href=\"http://duvall.star.bnl.gov/phpMyAdmin/sql.php3?&server=0&db=system_data&table=Run&goto=%2FphpMyAdmin%2Fsql.php3%3Fserver%3D0%26db%3Dsystem_data%26pos%3D0%26sql_query%3DSELECT%2B%252A%2BFROM%2BRun%26sql_order%3D%2Border%2Bby%2B%2527ctime%2527%2BASC%26table%3DRun&sql_query=DELETE+FROM+Run+WHERE++id+%3D+%27$id%27+&zero_rows=The+row+has+been+deleted\"><u>Del</u></a>";
         $editLink="<a href=\"http://duvall.star.bnl.gov/phpMyAdmin/tbl_change.php3?&server=0&db=system_data&table=Run&goto=%2FphpMyAdmin%2Fsql.php3%3Fserver%3D0%26db%3Dsystem_data%26pos%3D0%26sql_query%3DSELECT%2B%252A%2BFROM%2BRun%26sql_order%3D%2Border%2Bby%2B%2527ctime%2527%2BASC%26table%3DRun&primary_key=+id+%3D+%27$id%27+\"><u>Edit</u></a>";
         $eventsLink="<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?events=$nrun\"><u>Events</u></a>";
         $outline = '';
@@ -283,50 +279,41 @@ END
                 my $gotHpssFile = 0;
                 my $hpssFilename = '';
                 print "<blockquote><blockquote>";
-                my $name = $val{'name'};
-                if ( $name =~ m/[0-9]+/ ) {
-                    foreach $daqf ( @daqfiles ) {
-                        if ( ( $daqf =~ m/\.$name(\.[0-9]+)*\.daq$/ )
-                            || ( $daqf =~ m/st_([0-9a-z]+)_0*$name(.*)\.daq$/ ) ) {
-                            my ($fmode, $uid, $gid, $filesize, 
-                                $readTime, $writeTime, $cTime) =
-                                    (stat($daqf))[2,4,5,7,8,9,10];
-                            printf("<b>Disk: %-35s %6dMB</b>\n",$daqf,$filesize/1000000);
-                            $gotTheFile = 1;
+                foreach $daqf ( @daqfiles ) {
+                    my $name = $val{'name'};
+                    if ( $daqf =~ m/\.$name\.daq$/ ) {
+                        my ($fmode, $uid, $gid, $filesize, 
+                            $readTime, $writeTime, $cTime) =
+                                (stat($daqf))[2,4,5,7,8,9,10];
+                        printf("<b>Data: %-28s %6dMB</b>\n",$daqf,$filesize/1000000);
+                        if($hpssCheck) {
+                            my @daqfname = split(/\//, $daqf);
+                            $gotHpssFile = 0;
+                            foreach $aHpssFile (@theDbFiles) {
+                                @aHpssFileE = split(/\//,$aHpssFile);
+                                if( $aHpssFileE[7] eq $daqfname[4] ) {
+                                    $gotHpssFile = 1;
+                                    $hpssFilename = $aHpssFile;
+                                    $hpssFilename =~ s/\/\//\//g;
+                                    last;
+                                }
+                            }       
                         }
+                        $gotTheFile = 1;
                     }
-                    if($hpssCheck) {
-                        my @daqfname = split(/\//, $daqf);
-                        my $flen = scalar @daqfname;
-                        my $ffile = $daqfname[$flen-1];
-                        $gotHpssFile = 0;
-                        my $nDbFiles = scalar @theDbFiles;
-                        for ( $ifl=0; $ifl<$nDbFiles; $ifl++) {
-                            my $aHpssFile = $theDbFiles[$ifl];
-                            my $filesize = $theDbFileSize[$ifl];
-                            my @aHpssFileE = split(/\//,$aHpssFile);
-                            my $hlen = scalar @HpssFileE;
-                            my $hfile = $aHpssFileE[$hlen-1];
-#                                if( $aHpssFileE[$hlen-1] eq $daqfname[$flen-1] ) {
-                            if ( ( $hfile =~ m/\.$name(\.[0-9]+)*\.daq$/ )
-                                || ( $hfile =~ m/st_([0-9a-z]+)_0*$name(.*)\.daq$/ ) ) {
-                                $gotHpssFile = 1;
-                                $hpssFilename = $aHpssFile;
-                                $hpssFilename =~ s/\/\//\//g;
-                                printf("<b>HPSS: %-35s %6dMB</b>\n",$hpssFilename,
-                                       $filesize/1000000);
-                            }
-                        }
-                    }       
                 }
                 # for run records, report file location info
                 if ( $val{'name'} ne '' ) {
                     if ( $gotTheFile ) {
-                        if ( ! $gotHpssFile ) {
-                            if ($hpssCheck) {print "<b><font color=\"red\">Not in HPSS</font></b>"}
+                        if ( $gotHpssFile ) {
+                            print "<b><font color=\"black\">In HPSS: $hpssFilename</font></b>";
+                        } else {
+                            if ($hpssCheck) {print "  <b><font color=\"red\">Not in HPSS</font></b>"}
                         }
                     } else {
-                        if ( ! $gotHpssFile ) {
+                        if ( $gotHpssFile ) {
+                            print "<b><font color=\"black\">In HPSS: $hpssFilename</font></b>";
+                        } else {
                             if ($hpssCheck) {
                                 print "<b><font color=\"red\">Data file not in /disk1/star/daq and not in HPSS</b></font>";
                             } else {
@@ -366,7 +353,6 @@ $fullLogUrl - $runLogUrl - $logLogUrl <!-- - $hpssLogUrl -->
 <h3>Make a log entry:
 </h3>
 <blockquote>
-Problems and suggestions to wenaus\@bnl.gov<br>
 <font color="red"><b>Red: Required for logging comments or runs</b></font>
 <br>
 <font color="darkgreen"><b>Green: Use these if you are logging a run</b></font>

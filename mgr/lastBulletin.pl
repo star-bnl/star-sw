@@ -1,8 +1,11 @@
 #!/usr/local/bin/perl
 #
-# $Id: lastBulletin.pl,v 1.2 1999/08/14 15:25:28 wenaus Exp $
+# $Id: lastBulletin.pl,v 1.3 1999/08/17 02:55:03 wenaus Exp $
 #
 # $Log: lastBulletin.pl,v $
+# Revision 1.3  1999/08/17 02:55:03  wenaus
+# eliminate reporting of who posted
+#
 # Revision 1.2  1999/08/14 15:25:28  wenaus
 # suppress cmd output
 #
@@ -68,7 +71,7 @@ if ( $poster ne '' ) {
 }
 $floc = "/star/datapool/web";
 open(OFILE,">$floc/lastBulletin.txt") or die "File open failure $!";
-$oline = sprintf("Last mod %d $hours $who\n",$delHrs);
+$oline = sprintf("Last mod %d $hours\n",$delHrs);
 print OFILE $oline;
 close OFILE;
 close BFILE;

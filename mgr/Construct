@@ -18,11 +18,11 @@ my $SoOUT    = "-o";
 my $CPP      = "gcc";
 my $CPPFLAGS = "";
 my $CXX      = "g++";
-my $CXXFLAGS = "-fpic -w";
+my $CXXFLAGS = $DEBUG . "  -fpic -w";
 my $CC       = "gcc";
-my $CFLAGS   = "  -fpic -w";
+my $CFLAGS   = $DEBUG . "  -fpic -w";
 my $FC       = "f77";
-my $FFLAGS   = "  -KPIC -w -DCERNLIB_TYPE";
+my $FFLAGS   = $DEBUG . "  -KPIC -w -DCERNLIB_TYPE";
 my $AR       = "ar";
 my $ARFLAGS  = "rvu";
 my $LD       = $CXX;
@@ -46,19 +46,19 @@ if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/)
 #  ====================
   $OSFID    = "lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
   $FC       = "pgf77";
-  $CXXFLAGS = " -fPIC -Wall";
+  $CXXFLAGS = $DEBUG . " -fPIC -Wall";
 #  $CPPPATH .= "/usr/local/include/g++:";
 #                                             -fpipe
-  $CFLAGS   = " -fPIC -Wall";
+  $CFLAGS   = $DEBUG . " -fPIC -Wall";
   $CPPFLAGS .= " f2cFortran";
-  $LDFLAGS  = " -Wl,-Bstatic";
-  $EXEFLAGS = " -Wl,-Bdynamic";  
-  $SOFLAGS  = " -shared";  
+  $LDFLAGS  = $DEBUG . " -Wl,-Bstatic";
+  $EXEFLAGS = $DEBUG . " -Wl,-Bdynamic";  
+  $SOFLAGS  = $DEBUG . " -shared";  
   $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
   $FLIBS    = "-L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
   if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
   $FLIBS   .= " -lcrypt";
-  $FFLAGS   = " -DPGI";  
+  $FFLAGS   = $DEBUG . " -DPGI";  
   $FEXTEND  = "-Mextend";
 }
 elsif (/^hp_ux102/) {
@@ -71,20 +71,20 @@ elsif (/^hp_ux102/) {
   $CC       = "cc";
   $LD       = $CXX;
   $SO       = $CXX;
-  $CXXFLAGS = " -z +Z  -Dextname";
-  $CFLAGS   = " -Ae -z +Z -Dextname";  
+  $CXXFLAGS = $DEBUG . " -z +Z  -Dextname";
+  $CFLAGS   = $DEBUG . " -Ae -z +Z -Dextname";  
   if (defined($SCL_OPTIMISE)){ # from Brian
     $CXXFLAGS .= " +Olibcalls +Onolimit";
   }
   else {
   $CXXFLAGS .= " +d";}
-  $LDFLAGS   = " -z -Wl,+s -Wl,-E,+vnocompatwarnings";
+  $LDFLAGS   = $DEBUG . " -z -Wl,+s -Wl,-E,+vnocompatwarnings";
   $EXEFLAGS  = $LDFLAGS . " -Wl,-N"; 
-  $SOFLAGS   = "  -b -z";  
+  $SOFLAGS   = $DEBUG . "  -b -z";  
   $CLIBS     = "-lXm -lXt -lX11 -lm -lPW -ldld";
   $FC        = "fort77";
   $FLIBS     = "/opt/fortran/lib/libU77.a";
-  $FFLAGS    = " +DA1.0 +ppu +Z  +U77 -K";
+  $FFLAGS    = $DEBUG . " +DA1.0 +ppu +Z  +U77 -K";
   $FEXTEND   = "+es";
 }
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
@@ -92,23 +92,19 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $CPPFLAGS  =~ s/SunOS//g;
   $OSFID     =  "sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS";
   $CC        = "/opt/SUNWspro/bin/cc";
-  $CXX       = "/opt/SUNWspro/bin/CC -features=no%castop -features=no%anachronisms";
+  $CXX       = "/opt/SUNWspro/bin/CC";
   $FC        = "/opt/SUNWspro/bin/f77";
-  $CXXFLAGS  =  "-KPIC +w";
+  $CXXFLAGS  =  $DEBUG . "  -KPIC -features=no%castop -features=no%anachronisms +w";
   $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
-  $FFLAGS    =  "  -KPIC -w";
+  $FFLAGS    =  $DEBUG . "  -KPIC -w";
   $FEXTEND   = "-e";
-  $CFLAGS    =  " -KPIC";
+  $CFLAGS    =  $DEBUG . " -KPIC";
   $LD        =  $CXX;
-  $LDFLAGS   =  " -Bstatic"; 
+  $LDFLAGS   =  $DEBUG . " -Bstatic"; 
   $SO        =  $CXX;
-  $SOFLAGS   =  " -G";
+  $SOFLAGS   =  $DEBUG . " -G";
 }
-$MAIN    = cwd();
-$INCLUDE = "#inc";
-$LIB     = "";
-$EXPORT = "#.share";
 my $FLAGS = $CPPFLAGS . " " . $OSFID . " __ROOT__";
 $CPPFLAGS = "-D" . join (" -D", split (" ",$FLAGS));
 print "CPPFLAGS = ", $CPPFLAGS, "\n";
@@ -118,57 +114,54 @@ print "CXX =\t",$CXX,";\tCXXFLAGS = \t",$CXXFLAGS,"\n";
 print "FC  =\t",$FC,";\tFFLAGS = \t",$FFLAGS,"\tFLIBS =\t",$FLIBS,"\n"; 
 print "LD  =\t",$LD,";\t$LDFLGAS = \t",$LDFLAGS,"\n";
 print "SO  =\t",$SO,";\t$SOFLGAS = \t",$SOFLAGS,"\n";
-print "INCLUDE = ",$INCLUDE,"\n";
-(my $inc = $INCLUDE) =~ s/\#//g;
-$CPPPATH .= ".:" . $inc .":StRoot:pams:.share:.share/tables";
+print "INCLUDE = ",$INLCUDE,"\n";
+$CPPPATH .= ".:inc:StRoot:pams:.share:.share/tables";
 my @includes = ("St_base","StChain","StUtilities","xdf2root","StarClassLibrary","StEvent");
 foreach my $inc (@includes) {
   $CPPPATH .= ":StRoot/" . $inc;
 }
 $CPPPATH .= ":" . $ROOTSYS . "/src:/opt/star/include";
-$FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
 my $DirPath  = cwd();
 print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n";
 print " STAR = ",$STAR,"\n";
-push @Reps, $STAR;
-Repository ($STAR);
-my @Repo = Repository_List; print "Repositories = @Repo\n";
-my $STICFLAGS = "-H -q";
+if ($DirPath eq $STAR) {
+  print "Repository = ",$STAR,"\n";
+  Repository($STAR); 
+}
+else {
+  print "Repositories = ",$DirPath," + ",$STAR,"\n";
+  Repository  ($DirPath, $STAR);
+}
 $env = new cons(
-		'STIC'         => $STIC,
-		'STICFLAGS'    => $STICFLAGS,
-		'STICCOM'      => 'cd %<:d;  %STIC %STICFLAGS %_IFLAGS %<', 
 		'CPPPATH'      => $CPPPATH,
 		'CPPFLAGS'     => $CPPFLAGS,
-		'DEBUG'        => $DEBUG,
 		'FC'	       => $FC,
 		'FFLAGS'       => $FFLAGS,
 		'FEXTEND'      => $FEXTEND,
-		'FCPPPATH'     => $FCPPPATH,
-		'FCCOM'        => 'cd %<:d; %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f -o %>:f',
+		'FCCOM'        => '%FC %FFLAGS %FEXTEND %_IFLAGS -c %< -o %>',
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => 'cd %<:d; %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
+		'GEANT3COM'    => '%GEANT3 %< -o %<.F; %FC %FFLAGS  %_IFLAGS -c %<.F -o %>',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
-		'CCCOM'        => 'cd %<:d; %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
+		'CCCOM'        => '%CC %CFLAGS %CPPFLAGS %_IFLAGS -c %< -o %>',
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
-		'CXXCOM'       => 'cd %<:d; %CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %<:f -o %>:f',
+		'CXXCOM'       => '%CXX %CXXFLAGS %CPPFLAGS %_IFLAGS -c %< -o %>',
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
-		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS -o %> %<:f %_LDIRS %LIBS',
+		'LINKCOM'      => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
-		'LINKMODULECOM'=> '%SO %DEBUG %SOFLAGS %SoOUT %> %<',
+		'LINKMODULECOM'=> '%SO %SOFLAGS %SoOUT %> %<',
 		'AR'	       => $AR,
 		'ARFLAGS'      => $ARFLAGS,
 		'ARCOM'        => "%AR %ARFLAGS %> %<;%RANLIB %>",
 		'RANLIB'       => 'ranlib',
 		'AS'	       => 'as',
 		'ASFLAGS'      => '',
-		'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
+		'ASCOM'        => '%AS %ASFLAGS %< -o %>',
 		'LD'	       => 'ld',
 		'LDFLAGS'      => '',
 		'PREFLIB'      => 'lib',
@@ -184,8 +177,7 @@ $env = new cons(
 				   '.c'  => 'build::command::cc',
 				   '.cc' => 'build::command::cxx',
 				   '.cxx'=> 'build::command::cxx',
-				   '.cpp'=> 'build::command::cxx',
-				   '.idl'=> 'build::command::stic'
+				   '.cpp'=> 'build::command::cxx'
 				  },
 		'SUFOBJ'	=> '.o',
 		'ENV'	        => { 'PATH' => $PATH,
@@ -197,35 +189,35 @@ $env = new cons(
 				   },
 	       );
 #Command $env 
-my $build  = "." . $STAR_HOST_SYS; print "build = $build\n";
+$MAIN    = "";
+$INCLUDE = ""; 
+$LIB     = "";
+$EXPORT = "#.share";
+my $build  = "." . $STAR_HOST_SYS;
 if (! -d $build) {mkdir $build, 0664;}
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
-Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
+Link $BUILD => $DirPath; print "Link $BUILD => $DirPath\n";
 if (! -d "$obj")   {mkdir $obj, 0664;}
-my @Targets = ();
-my @conscripts = ("StRoot/Conscript", "pams/Conscript","tables/Conscript");
-#my @conscripts = ("pams/Conscript","tables/Conscript");
-#my @conscripts = ("pams/Conscript");
-for my $conscript (@conscripts) {
-  if (-f $conscript) {
-    my $target = $OBJ . "/" . $conscript;
-    push @Targets, $target; print "new taret = $target\n";
-  }
+my $Targets = "";
+if (-d "./StRoot") {
+  my $stroot = $build . "/StRoot";
+  if (! -f "$stroot") {symlink obj, $stroot; print "symlink obj, $stroot\n";}
+  $Targets .= "#" . $stroot . "/Conscript";
 }
-#if (-d "./StRoot") {
-#  my $stroot = $build . "/StRoot";
-#  if (! -f "$stroot") {symlink obj, $stroot; print "symlink obj, $stroot\n";}
-#  $Targets .= "#" . $stroot . "/Conscript";
-#}
-print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = @Targets\n";
+if (-d "./pams") {
+  my $pams   = $build . "/pams"; 
+  if (! -f "$pams")   {symlink obj, $pams; print "symlink obj, $pams \n";}
+  $Targets .= $pams . "/Conscript";
+}
+print "STAR_SYS  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = $Targets\n";
 #Link $OBJ => 'StRoot'; print "Link $OBJ => StRoot\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
-Build  @Targets;
+Build  ($Targets);
 #Build ( "StRoot/Conscript" );
 #________________________________________________________________________________
 # Builder for a C++ module
@@ -253,30 +245,6 @@ sub includes {
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
 #________________________________________________________________________________
-# Builder for a stic module
-package build::command::stic;
-
-BEGIN { @ISA = qw(build::command) }
-
-#________________________________________
-sub find {
-# print "==========\tDebug:","In build::command::stic-find- parameters = ", @_, "\n";
-    $_[1]->{_stic} || do {
-	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
-	my($self) = find build::command($env, $env->{STICCOM});
-	$self->{scanner} = $cscanner;
-	bless $env->{_stic} = $self;
-    }
-}
-#________________________________________
-# Invoke the associated	 C scanner to get signature of included files.
-sub includes {
-# print "==========\tDebug:","In build::command::stic-includes- parameters = ", @_, "\n";
-    my($self, $tgt) = @_;
-    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
-}
 #________________________________________________________________________________
 # Builder for a F77 module
 package build::command::fc;
@@ -303,7 +271,7 @@ sub includes {
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
 #________________________________________________________________________________
-# Builder for a geant3 module
+# Builder for a C++ module
 package build::command::geant3;
 
 BEGIN { @ISA = qw(build::command) }
@@ -342,18 +310,14 @@ package script;
 sub find_sources {
   if (defined($AFS)) {$File::Find::dont_use_nlink;}
   @search_files   = ();
-  if (-d $_[0]) {
-    &File::Find::find(\&wanted, @_);
-    for my $dir (@_) {
-      if ( -d $dir ) { 
-	my $i = 0;
-	for ($i=0;$i<=$#search_files;$i++) {
-	  #      print "i = ",$i, "src =", $search_files[$i],"\n";
-	  my $file = $search_files[$i];
-	  $file =~ s/$dir\///g;
-	  $search_files[$i] = $file;
-	}
-      }
+  &File::Find::find(\&wanted, @_);
+  for my $dir (@_) {
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+#      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
     }
   }
 #  print "find_source found $#search_files + 1 files\n";
@@ -365,76 +329,32 @@ sub find_hfiles {
   @search_files   = ();
   &File::Find::find(\&wanted_Def, @_);
   for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+#      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
     }
   }
 #  print "find_source found $#search_files + 1 files\n";
   return @search_files;
-}
-#________________________________________
-sub find_inc {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_inc, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub find_idlM {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_idlM, @_);
-  for my $dir (@_) {
-    if ( -d $dir ) { 
-      my $i = 0;
-      for ($i=0;$i<=$#search_files;$i++) {
-	#      print "i = ",$i, "src =", $search_files[$i],"\n";
-	my $file = $search_files[$i];
-	$file =~ s/$dir\///g;
-	$search_files[$i] = $file;
-      }
-    }
-  }
-#  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub cpppath {
-  my $ENV = $_[0]; 
-  my @cpp = split /:/, $ENV->{CPPPATH};
-  my @repositories = Repository_List;
-  my $PWD = cwd(); # print "cpppath PWD = $PWD\n";
-  my $CPPPATH = "";
-  for my $d (@cpp) {
-    if ($d) {
-      for my $repository ($PWD,@repositories) {
-	if ($repository) {$CPPPATH .= " -I$repository/" . $d;}
-      }
-    }
-  }
-  return $CPPPATH;
 }
 #________________________________________
 sub cppflags {
-  return  cpppath($_[0]) . $ENV->{CPPFLAGS};
+my $ENV = $_[0]; 
+my @cpp = split /:/, $ENV->{CPPPATH};
+my @repositories = Repository_List;
+my $PWD = $cwd;
+my $CPPFLAGS = "-I";
+$CPPFLAGS .= join " -I$PWD", @cpp;
+for my $repository (@repositories) {
+  $CPPFLAGS .= " -I";
+  $CPPFLAGS .= join " -I$repository/", @cpp;
+}
+$CPPFLAGS .= $ENV->{CPPFLAGS};
+$CPPFLAGS .= " -D__ROOT__";#print "CPPFLAGS = ", $CPPFLAGS, "\n";
+return $CPPFLAGS;
 }
 #________________________________________
 sub script::wanted {
@@ -442,8 +362,6 @@ sub script::wanted {
   ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
   if ( -d _ &&
        (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
 	/^idl$/ ||
 	/^exa$/ ||
 	/^inc$/ ||
@@ -459,30 +377,8 @@ sub script::wanted {
       /^.*\.cc$/      ||
       /^.*\.cxx$/     ||
       /^.*\.g$/       ||
-#     /^.*\.f$/       ||
-      /^.*\.F$/) {#print "$name\n";
-    push @search_files, $name; 
-  }
-}
-#________________________________________
-sub script::wanted_idlM {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d _ &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^inc$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$prune = 1; return;}
-  if (/^.*\.idl$/) {#print "$name\n";
+      /^.*\.F$/       ||
+      /^.*\.f$/) {#print "$name\n";
     push @search_files, $name; 
   }
 }
@@ -492,8 +388,6 @@ sub script::wanted_Def {
   ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
   if ( -d _ &&
        (/^CVS$/      ||
-	/^macros$/ ||
-	/^html$/ ||
 	/^idl$/      ||
 	/^exa$/      ||
 	/^inc$/      ||
@@ -503,29 +397,17 @@ sub script::wanted_Def {
 	/^local$/    ||
 	/^hold$/     ||
 	/^wrk$/))       {$prune = 1; return;}
-  if (/^.*\.h$/      || /^.*\.hh$/ ) {#    print "$name\n"; 
+  if (/^.*\.h$/      || /^.*\.hh$/) {#    print "$name\n"; 
 					 push @search_files, $name; }
-}
-#________________________________________
-sub script::wanted_inc {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);#  print "wanted $_ \n";
-  if ( -d $_ &&
-       (/^CVS$/ ||
-	/^macros$/ ||
-	/^html$/ ||
-	/^idl$/ ||
-	/^exa$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$prune = 1; return;}
-  if ( /^.*\.h$/|| /^.*\.hh$/ || /^.*\.inc$/  || /^.*\.hpp$/) { 
-#    if ($name =~ '/inc/' || $name =~ '/\w*cdes/') { print "$name\n"; 
-    if ($name =~ '/inc/' ) {# print "$name\n"; 
-      push @search_files, $name; }
-  }
+#    my $Name = basename($name);
+#    if ($Name =~ /LinkDef/) { push @search_files, $name;}
+#    else {
+#      open (In, $Name) or die "Can't open $Name";
+#      while (my $line = <In>) {
+#	if ($line =~/ClassDef/) {
+#	  push @search_files, $name; last;}
+#      }
+#      close (In);
+#    }
+#  }
 }

@@ -1,8 +1,5 @@
-# $Id: MakePam.mk,v 1.104 1999/08/14 00:37:35 fisyak Exp $
+# $Id: MakePam.mk,v 1.103 1999/07/28 14:16:24 fisyak Exp $
 # $Log: MakePam.mk,v $
-# Revision 1.104  1999/08/14 00:37:35  fisyak
-# New Cons stuff
-#
 # Revision 1.103  1999/07/28 14:16:24  fisyak
 # Simplify for St_base, take out geant3.def
 #
@@ -287,7 +284,7 @@ echo "//                                          ">>$(GEN_TAB)/St_$(STEM)_Table
 echo "/////////////////////////////////////////////////////////////////////////  ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "                                            ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "#include \"Stypes.h\"                       ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
-echo "St_tableDescriptor *_NAME2_(St_,$(STEM))::fgColDescriptors = 0; ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TList *_NAME2_(St_,$(STEM))::fgListOfColDescriptors = 0; ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "TableImp($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "TableStreamerImp($(STEM))             ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;
 endef
@@ -303,9 +300,9 @@ echo "                                           ">>$(GEN_TAB)/St_$(STEM)_Table.
 echo "class St_$(STEM) : public St_Table   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "{                                          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "protected:                                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  static St_tableDescriptor *fgColDescriptors;">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  static TList *fgListOfColDescriptors;    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual TList *GetRowDescriptors() { return fgListOfColDescriptors?fgListOfColDescriptors:(fgListOfColDescriptors=GetTableDescriptors());}       ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual void  SetRowDescriptors(TList *list) { fgListOfColDescriptors = list;}  ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "public:                                    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}           ">>$(GEN_TAB)/St_$(STEM)_Table.h ;\
 echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
