@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.hh,v 1.7 1999/12/21 01:11:02 posk Exp $
+// $Id: StFlowTrack.hh,v 1.8 2000/01/13 22:19:21 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.hh,v $
+// Revision 1.8  2000/01/13 22:19:21  posk
+// Updates and corrections.
+//
 // Revision 1.7  1999/12/21 01:11:02  posk
 // Added more quantities to StFlowEvent.
 //
@@ -70,10 +73,6 @@ public:
   void     SetMaxPts(Int_t);
   void     SetSelect(Int_t harmonic, Int_t selection);
   void     SetSubevent(Int_t harmonic, Int_t selection, Int_t subevent);
-
-  // For I/O of this object -- functions defined in FlowIO.cc
-  //  friend ostream& operator<<(ostream& out, StFlowTrack& trk);
-  //  friend istream& operator>>(istream& in,  StFlowTrack& trk);
 
 private:
 

@@ -1,20 +1,21 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.hh,v 1.7 1999/12/21 01:11:01 posk Exp $
+//  $Id: StFlowMaker.hh,v 1.8 2000/01/13 22:19:20 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description: 
-//  Interface to StEvent for StFlowEvent and base class for
-//    StFlowTagMaker and StFlowAnalysisMaker
+//  Maker to fill StFlowEvent from StEvent
 //
-// Environment:
-//  Software developed for the STAR Detector at LBNL
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.hh,v $
+//  Revision 1.8  2000/01/13 22:19:20  posk
+//  Updates and corrections.
+//
 //  Revision 1.7  1999/12/21 01:11:01  posk
 //  Added more quantities to StFlowEvent.
 //
@@ -61,7 +62,6 @@ public:
   void            PrintInfo();
   Int_t           Make();
   Int_t           Finish();
-  static Double_t BField();                  // returns the magnetic field
   StFlowEvent*    FlowEventPointer() const;  // returns pointer to the StFlowEvent
 
 protected:
@@ -76,15 +76,10 @@ private:
   StEvent*        pEvent;                    //! pointer to DST data
   StFlowEvent*    pFlowEvent;                //! pointer to micro-DST data
 
-  static Double_t mBField;
-  //TString      MakerName;
-
   ClassDef(StFlowMaker, 1)                   // macro for rootcint
 
 };
 
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
-
-inline Double_t StFlowMaker::BField() { return mBField; }
 
 #endif

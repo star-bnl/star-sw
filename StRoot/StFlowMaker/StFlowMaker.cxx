@@ -1,16 +1,19 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.10 1999/12/21 21:30:53 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.11 2000/01/13 22:19:19 posk Exp $
 //
-// Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+// Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
+//
 //////////////////////////////////////////////////////////////////////
 //
-// Description:  Maker to fill StFlowEvent from StEvent and
-//      base class for StFlowTagMaker and StFlowAnalysisMaker
+// Description: Maker to fill StFlowEvent from StEvent
 //
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.11  2000/01/13 22:19:19  posk
+// Updates and corrections.
+//
 // Revision 1.10  1999/12/21 21:30:53  posk
 // Updated the README file.
 //
@@ -50,7 +53,6 @@
 #include "StFlowMaker.hh"
 #include "StFlowEvent.hh"
 #include "StEvent.h"
-//#include "StEventSummary.h"
 #include "StRun.h"
 #include "StEventTypes.h"
 #include "StFlowCutEvent.hh"
@@ -64,14 +66,11 @@
 
 ClassImp(StFlowMaker)
 
-  Double_t StFlowMaker::mBField = 0.;
-
 //-----------------------------------------------------------------------
 
 StFlowMaker::StFlowMaker(const Char_t *name): 
   StMaker(name),
   pEvent(0) {
-    //  MakerName(name) {
 }
 
 //-----------------------------------------------------------------------
@@ -97,7 +96,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.10 1999/12/21 21:30:53 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.11 2000/01/13 22:19:19 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -105,15 +104,6 @@ void StFlowMaker::PrintInfo() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Init() {
-
-  // Get a pointer to StRun to get BField
-//   StRun* pRun = (StRun*)GetInputDS("StRun");
-//   PR(pRun);
-//   if (!pRun) double BField = pRun->magneticField();
-//   PR(BField);
-  mBField = 0.5*tesla;
-    
-
   // Open PhiWgt file
   readPhiWgtFile();
 
@@ -129,7 +119,6 @@ Int_t StFlowMaker::Init() {
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Finish() {
-
   // Print the cut lists
   StFlowCutEvent::PrintCutList();
   StFlowCutTrack::PrintCutList();
@@ -219,7 +208,7 @@ void StFlowMaker::fillFlowEvent() {
     if (StFlowCutTrack::CheckTrack(pTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
-      StThreeVectorD p = pTrack->geometry()->helix().momentum(mBField);
+      StThreeVectorD p = pTrack->geometry()->momentum();
       pFlowTrack->SetPhi(p.phi());
       pFlowTrack->SetEta(p.pseudoRapidity());
       pFlowTrack->SetPt(p.perp());

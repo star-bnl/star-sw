@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.9 1999/12/21 17:31:50 posk Exp $
+// $Id: StFlowEvent.cc,v 1.10 2000/01/13 22:19:18 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.10  2000/01/13 22:19:18  posk
+// Updates and corrections.
+//
 // Revision 1.9  1999/12/21 17:31:50  posk
 // Fixed random_shuffle in making the sub events.
 //
@@ -148,7 +151,7 @@ Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const {
   if (!checkInput(harN, selN, 0)) return 0.;
 
   if (mPhi < 0.) mPhi += twopi;
-  int n = (int)(mPhi/twopi)*Flow::nPhiBins;
+  int n = (int)((mPhi/twopi)*Flow::nPhiBins);
 
   return mPhiWgt[selN][harN][n];
 }

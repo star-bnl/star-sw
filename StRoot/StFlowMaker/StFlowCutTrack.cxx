@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.4 1999/12/15 22:01:23 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.5 2000/01/13 22:19:17 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.5  2000/01/13 22:19:17  posk
+// Updates and corrections.
+//
 // Revision 1.4  1999/12/15 22:01:23  posk
 // Added StFlowConstants.hh
 //
@@ -43,8 +46,8 @@
 
 //-----------------------------------------------------------------------
 
-Int_t    StFlowCutTrack::mFitPtsCuts[2]     = {10, 200};
-Float_t  StFlowCutTrack::mFitOverMaxCuts[2] = {0.6, 1.};
+Int_t    StFlowCutTrack::mFitPtsCuts[2]     = {15, 200};
+Float_t  StFlowCutTrack::mFitOverMaxCuts[2] = {0.55, 2.};
 
 UInt_t   StFlowCutTrack::mTrackN            = 0;     
 UInt_t   StFlowCutTrack::mGoodTrackN        = 0;
@@ -81,7 +84,7 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   // Fit points / max points
   Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
-  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.8;
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
   if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
       (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
     mFitOverMaxCutN++;
@@ -90,8 +93,7 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
 
   // Increment counters for Eta symmetry cut
-  double bField = StFlowMaker::BField();
-  StThreeVectorD p = pTrack->geometry()->helix().momentum(bField); 
+  StThreeVectorD p = pTrack->geometry()->momentum(); 
   if (p.pseudoRapidity() > 0.) {
     mEtaSymPosN++;
   } else {
