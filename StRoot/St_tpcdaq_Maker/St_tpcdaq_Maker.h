@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.20 2000/03/28 20:34:57 fine Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.21 2000/06/13 17:42:55 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.21  2000/06/13 17:42:55  ward
+// asic and noise attached to db, but not yet gains
+//
 // Revision 1.20  2000/03/28 20:34:57  fine
 // Adjuested to ROOT 2.24
 //
@@ -158,7 +161,6 @@ class St_tpcdaq_Maker : public StMaker {
 #ifdef ASIC_THRESHOLDS
    int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
    void AsicThresholds(float gain,int *nseq,StSequence **lst);
-   void LookForAsicFile();
 #endif
    int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList);
    void SetNoiseEliminationStuff();
@@ -173,7 +175,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.20 2000/03/28 20:34:57 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.21 2000/06/13 17:42:55 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
