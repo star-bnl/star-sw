@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.11 2005/01/05 21:57:02 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.12 2005/01/27 05:28:58 genevb Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.12  2005/01/27 05:28:58  genevb
+// open runcoBranch
+//
 // Revision 1.11  2005/01/05 21:57:02  genevb
 // More lib loads, evtselBranch, remove date set on calib maker
 //
@@ -134,6 +137,7 @@ void bfcread_event_QAhist(
   IOMk->SetBranch("evtselBranch",0,"r");
   IOMk->SetBranch("event",0,"r");
   IOMk->SetBranch("geantBranch",0,"r");
+  IOMk->SetBranch("runcoBranch",0,"r");
   IOMk->SetDebug();
 
 // database stuff

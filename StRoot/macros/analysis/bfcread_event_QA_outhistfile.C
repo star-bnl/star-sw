@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.10 2001/07/17 03:26:51 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.11 2005/01/27 05:28:58 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.11  2005/01/27 05:28:58  genevb
+// open runcoBranch
+//
 // Revision 1.10  2001/07/17 03:26:51  genevb
 // Modify input file for year 2001
 //
@@ -117,6 +120,7 @@ void bfcread_event_QA_outhistfile(
   IOMk->SetIOMode("r");
   IOMk->SetBranch("event",0,"r");
   IOMk->SetBranch("geantBranch",0,"r");
+  IOMk->SetBranch("runcoBranch",0,"r");
 
 // database stuff
   const char* calibDB = "MySQL:StarDb";
