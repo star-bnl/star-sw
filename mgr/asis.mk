@@ -22,7 +22,7 @@ SOURCES   := $(subst $(CERN_DIR)/,,$(wildcard $(CERN_DIR)/* $(CERN_DIR)/.*) )
 SOURCES   := $(subst  .. , ,$(SOURCES))
 SOURCES   := $(strip $(subst  . , ,$(SOURCES)))
 SRC       := $(strip $(foreach dir, $(SOURCES), $(shell test -f $(CERN_DIR)/$(dir) && echo $(dir))))
-DIRS      := $(sort $(strip $(foreach dir, $(SRC), $(shell test -d $(CERN_DIR)/$(dir) && echo $(dir)))))
+DIRS      := $(sort $(strip $(foreach dir, $(SOURCES), $(shell test -d $(CERN_DIR)/$(dir) && echo $(dir)))))
 src       := $(strip $(filter-out $(DIRS),$(SRC)))
 src       := $(filter-out %.gz %.tar %.Z,$(src))
 dirs      := $(filter-out alpha_% tar hp700_ux90 rs_aix% sgi_% sun4c_%,$(DIRS))
@@ -57,3 +57,4 @@ test:
 	@echo "skip_list   = |"$(skip_list)"|"
 	@echo "SKIP_LIST   = |"$(SKIP_LIST)"|"
 	@echo "dirs        = |"$(dirs)"|"
+	@echo "DIRS        = |"$(DIRS)"|"
