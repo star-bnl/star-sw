@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.23 2001/06/07 10:30:42 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.24 2001/06/27 16:15:24 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.24  2001/06/27 16:15:24  flierl
+// ommit empty padrows from raw data files
+//
 // Revision 1.23  2001/06/07 10:30:42  flierl
 // switch off writing into tables
 //
@@ -433,7 +436,7 @@ Int_t St_l3Clufi_Maker::WriteClustersIntoTables()
     /////////
     cout << "Start filling banks into tables..." << endl;
     
-  //creat tcl_tphits table
+    //creat tcl_tphits table
     St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",500000);
     tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
     m_DataSet->Add(stl3hit);
@@ -487,6 +490,7 @@ Int_t St_l3Clufi_Maker::WriteClustersIntoTables()
 	    z_dis->Fill(l3hitst[tt].z);
 	    charge_dis->Fill(l3hitst[tt].q);
 	}
+    return(kTRUE) ;
 }
 //_____________________________________________________________________________
 Int_t St_l3Clufi_Maker::WriteClustersIntoFile() 
@@ -622,6 +626,8 @@ Int_t St_l3Clufi_Maker::FillPixel(Int_t mSector)
 		    // raw_row_in
 		    st_raw_row = (St_raw_row*) mSectorIter("raw_row_in");
 		    row_st = (raw_row_st*) st_raw_row->GetTable();
+		    // if row is empty jump to the next one
+		    if (st_raw_row->GetNRows() == 0 ) continue ;
 		    // raw_pad_in
 		    st_raw_pad = (St_raw_pad*) mSectorIter("raw_pad_in");
 		    pad_st = (raw_pad_st*) st_raw_pad->GetTable();
@@ -641,6 +647,8 @@ Int_t St_l3Clufi_Maker::FillPixel(Int_t mSector)
 		    // raw_row_in
 		    st_raw_row = (St_raw_row*) mSectorIter("raw_row_out");
 		    row_st = (raw_row_st*) st_raw_row->GetTable();
+		    // if row is empty jump to the next one
+		    if (st_raw_row->GetNRows() == 0 ) continue ;
 		    // raw_pad_in
 		    st_raw_pad = (St_raw_pad*) mSectorIter("raw_pad_out");
 		    pad_st = (raw_pad_st*) st_raw_pad->GetTable();
