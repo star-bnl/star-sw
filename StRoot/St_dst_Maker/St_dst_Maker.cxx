@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.74 2003/04/05 22:36:25 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.75 2003/04/10 22:28:02 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.75  2003/04/10 22:28:02  caines
+// Fixing SVT for runs where the SVT oscilates in and out for different events
+//
 // Revision 1.74  2003/04/05 22:36:25  caines
 // Fix filling on local coords so its time and anode not cm
 //
@@ -229,7 +232,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.74 2003/04/05 22:36:25 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.75 2003/04/10 22:28:02 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -469,16 +472,13 @@ Int_t  St_dst_Maker::Filler(){
     StSvtAnalysedHybridClusters *mSvtBigHit;
     StSvtHybridCollection *mSvtCluColl=0;
     St_DataSet *dataSetSvt =0;
-    //dataSetSvt = GetDataSet("StSvtData");
-    //if( dataSetSvt)
     dataSetSvt = GetDataSet("StSvtAnalResults");
-
-    // If dataSetSvt not there then fast sim ran and need to use scs_spt else
+    
     // set this scs_spt nrows to zero and fill dst_point from svt collection
-
+    
     int NSvtPoints = scs_spt->GetNRows();
-    if( dataSetSvt) scs_spt->SetNRows(0);
-
+    scs_spt->SetNRows(0);
+    
   // dst_point_filler
   Int_t no_of_points    = tphit->GetNRows() + scs_spt->GetNRows();
   Int_t no_ftpc_points  = 0;
@@ -520,9 +520,9 @@ Int_t  St_dst_Maker::Filler(){
     //  pack SVT info into dst_point
  
     if( dataSetSvt)
-       mSvtCluColl = (StSvtHybridCollection*)(dataSetSvt->GetObject());
-    if(mSvtCluColl){
-	
+      mSvtCluColl = (StSvtHybridCollection*)(dataSetSvt->GetObject());
+    if(mSvtCluColl && NSvtPoints>0){
+      
       for(int barrel = 1;barrel <= mSvtCluColl->getNumberOfBarrels();barrel++) {
 	
 	for (int ladder = 1;ladder <= mSvtCluColl->getNumberOfLadders(barrel);ladder++) {
@@ -538,25 +538,25 @@ Int_t  St_dst_Maker::Filler(){
 	      if( !mSvtBigHit) continue;
 	      
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
-
+		
 		//		if( mSvtBigHit->svtHit()[clu].flag() > 3 ||
 		//   mSvtBigHit->svtHitData()[clu].peakAdc < 15 ) continue;
-
+		
 		mypoint.hw_position = 2;
-  		mypoint.hw_position += (1L<<4)*(index2);
+		mypoint.hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
 		
 		mypoint.hw_position += (1L<<13)*(svtx);
-
+		
 		svty = int(mSvtBigHit->WaferPosition()[clu].y()*4);
-	      	mypoint.hw_position += (1L<<22)*svty;
-
+		mypoint.hw_position += (1L<<22)*svty;
+		
 		if( mSvtBigHit->svtHit()[clu].charge() < (1L<<10)){
 		  mypoint.charge = (int)mSvtBigHit->svtHit()[clu].charge();
 		}
 		else 
 		  mypoint.charge = (1L<<10)-1;
-
+		
 		if( mSvtBigHit->svtHitData()[clu].peakAdc < (1L<<7)){
 		  mypoint.charge +=  
 		    mSvtBigHit->svtHitData()[clu].peakAdc*(1L<<10);
@@ -569,19 +569,19 @@ Int_t  St_dst_Maker::Filler(){
 		if( mSvtBigHit->svtHit()[clu].position().x() > (-1*maxRange) &&
 		    mSvtBigHit->svtHit()[clu].position().x() < maxRange)
 		  svtx = int(mapFactor*(mSvtBigHit->svtHit()[clu]
-			     .position().x() + maxRange));
+					.position().x() + maxRange));
 		else svtx = 0;
 		
 		if( mSvtBigHit->svtHit()[clu].position().y() > (-1*maxRange) &&
 		    mSvtBigHit->svtHit()[clu].position().y() < maxRange)
 		  svty = int(mapFactor*(mSvtBigHit->svtHit()[clu]
-			     .position().y() + maxRange));
+					.position().y() + maxRange));
 		else svty = 0;
 		
 		if( mSvtBigHit->svtHit()[clu].position().z() > (-1*maxRange) &&
 		    mSvtBigHit->svtHit()[clu].position().z() < maxRange)
-                     svtz = int(mapFactor*(mSvtBigHit->svtHit()[clu]
-				.position().z() + maxRange));
+		  svtz = int(mapFactor*(mSvtBigHit->svtHit()[clu]
+					.position().z() + maxRange));
 		else svtz = 0;
 		svty10 = int(svty/(1L<<10));
 		svty11 = svty - (1L<<10)*svty10;
@@ -591,23 +591,23 @@ Int_t  St_dst_Maker::Filler(){
 		
 		
 		//cov =  mSvtBigHit->svtHit()[clu].positionError().x()
-		//  *mSvtBigHit->svtHit()[clu].positionError().x();
-
-		// Temporarily fill with No. anodes and No. pixels
+		  //  *mSvtBigHit->svtHit()[clu].positionError().x();
 		
-
-		cov = 1./(100*
-		       (float)mSvtBigHit->svtHitData()[clu].numOfAnodesInClu);
-		if( cov > 0.0 && cov < (1.0/float((1L<<6))))
+		  // Temporarily fill with No. anodes and No. pixels
+		  
+		  
+		  cov = 1./(100*
+			    (float)mSvtBigHit->svtHitData()[clu].numOfAnodesInClu);
+		  if( cov > 0.0 && cov < (1.0/float((1L<<6))))
 		    svtx = int((1L<<26)*cov);
-		else  svtx = 0;
-		
-		//	cov =  mSvtBigHit->svtHit()[clu].positionError().y()
-		// *mSvtBigHit->svtHit()[clu].positionError().y();
-
-		cov = 1./(100*
-		     (float)mSvtBigHit->svtHitData()[clu].numOfPixelsInClu);
-		if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
+		  else  svtx = 0;
+		  
+		  //	cov =  mSvtBigHit->svtHit()[clu].positionError().y()
+		  // *mSvtBigHit->svtHit()[clu].positionError().y();
+		  
+		  cov = 1./(100*
+			    (float)mSvtBigHit->svtHitData()[clu].numOfPixelsInClu);
+		  if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
 		  svty = int((1L<<26)*cov);
 		else  svty = 0;
 		
