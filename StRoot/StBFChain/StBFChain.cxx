@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.29 1999/11/11 16:29:06 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.30 1999/11/13 00:26:13 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.30  1999/11/13 00:26:13  fisyak
+// Add UserDb option for Cint files
+//
 // Revision 1.29  1999/11/11 16:29:06  fisyak
 // Clean up FileOut treatment
 //
@@ -307,10 +310,16 @@ Int_t StBFChain::Instantiate()
 	  }
 	  else {
 	    const char *mainDB = "$STAR/StDb/params";
+	          char *userDB = 0;
+		  TString STAR("$STAR");
+		  gSystem->ExpandPathName(STAR);
+	          TString PWD(gSystem->pwd());
+                  if (STAR != PWD && gSystem->AccessPathName("./StDb/params") == 0)  userDB = "./StDb/params";
 	    //DbInit from StDbBroker.so checks that mysql db1 server is accessible
 	    //  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
 	    gMessMgr->QAInfo() << " Main DataBase == " << mainDB << endm;  
-	    dbMk = new St_db_Maker("db",mainDB);
+	    if (userDB) gMessMgr->QAInfo() << " User DataBase == " << PWD.Data() << "/" << userDB << endm;  
+	    dbMk = new St_db_Maker("db",mainDB,userDB);
 	    if (dbMk) {
 	      BFC[i].Name = (Char_t *) dbMk->GetName();
 	      SetDbOptions();
