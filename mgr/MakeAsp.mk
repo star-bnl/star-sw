@@ -96,7 +96,7 @@ INC_GEN_DIR := $(OUT_DIR)/inc
 INCLUDES := $(SRC_DIR) $(INC_DIR)
 INCLUDES += $(INC_GEN_DIR)
 INCLUDES += $(STAF_SYS_INCS)
-INCLUDES += $(STAF_CERN_INCS)
+INCLUDES += $(CERN_ROOT_INCS)
 INCLUDES += $(STAF_UTILS_INCS)
 
 INCLUDES := $(addprefix -I,$(INCLUDES))
@@ -193,7 +193,7 @@ LIB_DIRS := $(filter-out -L, $(L_DIR_THIS) $(L_DIR_ANA) $(L_DIR_ANA))
 ALL_LIBS := $(subst lib,-l,$(basename $(notdir $(ALL_LIBS))))  
 ALL_LIBS := -ltdm -lspx -lsoc -lasu -ltop -ltnt -lami -ldio -ldui -ldsl -ldsu
 ifndef SYSTEM_DOMAIN
-ALL_LIBS := $(ALL_LIBS) $(STAF_CERN_LIBS) $(FLIBS) $(CLIBS)
+ALL_LIBS := $(ALL_LIBS) $(CERN_ROOT_LIBS) $(FLIBS) $(CLIBS)
 else
 ALL_LIBS := $(ALL_LIBS) $(CLIBS)
 endif
