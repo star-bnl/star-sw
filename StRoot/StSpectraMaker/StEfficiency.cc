@@ -2,9 +2,12 @@
 #include <fstream.h>
 #include "StSpectraCutNhit.h"
 #include "StSpectraCutDCA.h"
+#include "StGetConfigValue.hh"
 
 StEfficiency::StEfficiency(){
-
+  //
+  // for better design should call working constructor with default arguments
+  //
 }
 
 StEfficiency::StEfficiency(efficiencyType efficType, char* efficFile) {
@@ -13,37 +16,24 @@ StEfficiency::StEfficiency(efficiencyType efficType, char* efficFile) {
   // each element is one of several derived cuts
   // read these cuts from file
   //
-  ifstream efrom(efficFile);
-  if (efrom.bad()) {
-    cout << "problem opening file " << efficFile << endl;
-    // thow an excpetion ?
-  } 
-  //
-  // read cuts from file and fill container of cuts
-  // to do, enumerate types of cuts for error checking
-  //
-  string cut;
-  do {
-    efrom >> cut ;
-    if (cut == "nhit") {
-      int nHitLow, nHitHigh;
-      efrom >> nHitLow >> nHitHigh ;
-      mSpectraCutContainer.push_back(new StSpectraCutNhit(nHitLow,nHitHigh));
-    } else if (cut == "dca") {
-      double dcaLow, dcaHigh;
-      efrom >> dcaLow >> dcaHigh ;
-      mSpectraCutContainer.push_back(new StSpectraCutDCA(dcaLow, dcaHigh));
-    }
-  } while ( cut!= "end");
 
-  if (efficType == function){
-     double scale;
-     double momentumTerm;
-     efrom >> scale >> momentumTerm;
-     mMomentumTerm = momentumTerm;
-     mScale = scale;
+  int *nhitRange = new int[2];
+  StGetConfigValue(efficFile, "nhit", nhitRange, 2);
+  cout << "nhit "<< nhitRange[0] << " " << nhitRange[1] << endl;
+  mSpectraCutContainer.
+    push_back(new StSpectraCutNhit(nhitRange[0],nhitRange[1]));
 
-  } else if (efficType == histogram) {
+  double * dcaRange = new double[2];  
+  StGetConfigValue(efficFile, "dca", dcaRange, 2);
+  cout << "dca " << dcaRange[0] << " " << dcaRange[1] << endl;
+  mSpectraCutContainer.
+    push_back(new StSpectraCutDCA(dcaRange[0], dcaRange[1]));
+
+  if (efficType == FUNCTION) {
+     mMomentumTerm = 0.04;
+     mScale = 0.96;
+
+  } else if (efficType == HISTOGRAM) {
     //
     // read histogram from file and copy it into mEfficHist
     // not implemented
@@ -51,41 +41,9 @@ StEfficiency::StEfficiency(efficiencyType efficType, char* efficFile) {
     cout << "not a known type of efficieincy " << endl;
     // throw an exception?
   }  
-  efrom.close();
-}
 
+}
 StEfficiency::~StEfficiency() {
-}
-istream& operator>>(istream& is, efficiencyType& efficType) {
-  string word;
-  is >> word;
-  if (word == "function") {
-    efficType = function;
-  } else if (word == "histogram") {
-    efficType = histogram;
-  } else {
-    cout << "error in type of efficiency correction" << endl;
-    // throw an exception?
-  }
-  return is;
-}
-    
-
-istream& operator>>(istream& is, StEfficiency& effic) {
-  //
-  // in file have "type of track cut", lower, upper range
-  // e.g. nhit  10 1000
-  // use this to instantiate a StSpectraCutNhit(10,1000)
-  // and then push this back into container of track cuts
-  // crash in some way if there is not a match between nhit and
-  // a derived StSpectraCut
-  //
-  double scale;
-  double momentumTerm;
-  is >> scale >> momentumTerm;
-  effic.mMomentumTerm = momentumTerm;
-  effic.mScale = scale;
-  return is;
 }
 
 void StEfficiency::setParticle(string particle) {
@@ -100,5 +58,6 @@ double StEfficiency::efficiency(StTrack* track) {
  double e = sqrt(p*p + mass*mass);
  double beta = p/e ;
  double effic = mScale*(1-mMomentumTerm/pow(beta*p,2));
+ // cout << mScale << " " << mMomentumTerm << " " << effic << endl;
 return effic;
 }

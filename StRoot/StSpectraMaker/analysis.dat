@@ -1,16 +1,7 @@
 pi+
 piplus
-function
-StRoot/StSpectraMaker/effic.dat
--2. 2. yrange 
-20 nybins
-1.0 upper_mt-m0
-10 nmtbins
-pi-
-piminus
-function
-StRoot/StSpectraMaker/effic.dat
--2. 2. yrange 
-20 nybins
-1.0 upper_mt-m0
-10 nmtbins
+StRoot/StSpectraMaker/effic.config
+-2. 2.  
+20 
+1.0 
+10

@@ -114,7 +114,7 @@ void StTpcDeviantSpectraAnalysis::fillHistograms(StEvent& event) {
 	    if  (dedxPidTr &&  dedxPidTr->method() == kTruncatedMeanId) {
 	      double dedx = dedxPidTr->mean();
 
-	      StParticleDefinition *guess = track->pidTraits(tpcDedx);
+	      const StParticleDefinition *guess = track->pidTraits(tpcDedx);
 	      double deviant = tpcDedx.numberOfSigma(mParticle);
 
 	      double effic = mEffic.efficiency(track);
