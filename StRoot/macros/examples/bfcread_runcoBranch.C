@@ -1,7 +1,7 @@
-// $Id: bfcread_runcoBranch.C,v 1.7 2000/04/12 16:13:41 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.8 2000/04/12 16:20:12 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
-// Revision 1.7  2000/04/12 16:13:41  kathy
-// have changed so that macro loads only table libraries needed instead of all table libraries
+// Revision 1.8  2000/04/12 16:20:12  kathy
+// fixing library loads to only do minimum
 //
 // Revision 1.6  2000/03/23 19:54:36  kathy
 // update branch macros so they write out to a file, and clean up
@@ -48,7 +48,7 @@ StChain *chain;
 void bfcread_runcoBranch(
  Int_t nevents=1, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.runco.root",
+ "/afs/rhic/star/data/samples/gstar.dst.root",
   const char *fname="qa_runco.out")
 {
 //
@@ -66,7 +66,7 @@ void bfcread_runcoBranch(
 
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+    gSystem->Load("libglobal_Tables");
     gSystem->Load("StIOMaker");
 
 //  Setup top part of chain
