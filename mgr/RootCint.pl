@@ -99,11 +99,9 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
   my $class;
   my $includes = "";
   my $com = 0;
-  while ($line = <In>) {
+  while ($line = <In>) {#print $line;
     next if $line =~ /^\s*\/\//;
-    if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;}
     if ($com && $line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
-    next if ($com);
     if ($line =~ /\/\*/) {
       $com = 1;
       if ($line =~ /\*\//) {
@@ -112,6 +110,8 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
       }
       else {$line =~ s/\/\*.*$//;}
     }
+    next if ($com);
+    if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;}
     if ($line =~ /\#include/ && $line !~ /(<>)/) {
       (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
       $inc_h =~ s/\"//g; 		#print "inc_h = $inc_h\n";
@@ -119,7 +119,7 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
       if ($sources =~ /$inc_hh/) {
 	$includes .= ":" . $inc_hh; 	#print "--includes for $h: $includes\n";
       }
-    }
+    } 
     if ($line =~/ClassDef/) {
       if ($line =~ /\#\#/) {next;} # ClassDefs in macro definition
       my @words = split /([\(,\-\!\)])/, $line;
@@ -178,7 +178,9 @@ for my $h  (split /\s/,$sources) {	#print "SRC:", $h, "\n";
       else {print OUTPUT $line;}
     }
     close (OUTPUT);
-    my $flag = rename $tmp, $new_h;  #print "rename $tmp $new_h;\n";
+    rename $tmp, $new_h or 
+      `mv $tmp $new_h`;# or die "Can't rename or move $tmp to $new_h;\n";
+    
   }#end Collection Definition
 }
 my $opened = "";
@@ -277,7 +279,8 @@ if ($h_files) {
   $h_files .= " " . "LinkDef.h";
   my $local_cint = basename($Cint_cxx);  		#print "files = $#files\n";
   $CPPFLAGS = " -I" . $DirName . " " . $CPPFLAGS;
-  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
+#  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ -I. $CPPFLAGS $h_files";
+  my $cmd  = "rootcint -f $Cint_cxx -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
   print "cmd = ",$cmd,"\n";
   my $flag = `$cmd`; if ($?) {exit 2;}
 

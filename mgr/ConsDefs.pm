@@ -1,8 +1,9 @@
-# $Id: ConsDefs.pm,v 1.62 2004/01/05 18:08:00 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.63 2004/01/15 00:11:53 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
     use Cwd;
+    use Env;
     use File::Find();
 
     #________________________________________
@@ -16,6 +17,8 @@
     *topnlink = *File::Find::topnlink;
 
     #use strict;
+    $BUILD   = "#." . $STAR_HOST_SYS; print "build for $BUILD\n" unless ($param::quiet);
+    $INCLUDE = $BUILD  . "/include"; 
 
     @search_files = ();
     $DEBUG        = "-g";
@@ -37,10 +40,7 @@
     $Lout     = "-o ";
     $Cinp     = "";
     $CXXinp   = "";
-    $CPPFLAGS = "";                                                  #-I-";
 
-    # Dirty patch to circunvent a cons side effect which is to 
-    # eliminate from the -I search list non-existing directories.
     $EXTRA_CPPFLAGS = "";
     #$EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");                     
           #-I-";
@@ -58,32 +58,31 @@
     $SRPLIBS  = "";                  # -L" . $SRPDIR . "/lib -lsrp -lgmp";
 
     chomp($HOST = `hostname`);
-
-    ##### use shadow passwords for authentication #####
-    $SHADOWFLAGS = "";               #-DR__SHADOWPW
-    $SHADOWLIBS  = "";
-    $AUTHFLAGS     = $SHADOWFLAGS . " " . $AFSFLAGS . " " . $SRPFLAGS;
-    $AUTHLIBS      = $SHADOWLIBS . " " . $AFSLIBS . " " . $SRPLIBS;
-#    $R_CPPFLAGS    = "-DG__LONGBUF -DR__AFS -DHAVE_CONFIG";
-    $R_CPPFLAGS    = "-DR__AFS -DHAVE_CONFIG";
-    $CPP           = "";                           #"gcc -E";
+    $CPP           = "";
     $CPPPATH       = "";
+    $CPPFLAGS      = "";
     $EXTRA_CPPPATH = "";
+
+    $G77           = "g77";
+    $G77FLAGS      = "-pipe -w %DEBUG -fno-second-underscore -fno-automatic -Wall -W -Wsurprising -fPIC";
+    $G77EXTEND     = "-ffixed-line-length-132"; 
+
     $CXX           = "g++";
-    #$CXX           = "/usr/bin/g++" if ($HOST =~ "rplay6");
     $CXXFLAGS      = "-fpic -w";
     $EXTRA_CXXFLAGS = "";
     $CXXOPT         = "";
-    $CINTCXXFLAGS   = "";
-    $PLATFORM       = "linux";
-    $ARCH          = "linuxegcs";
+
     $CC            = "gcc";
-    #$CC            = "/usr/bin/gcc" if ($HOST =~ "rplay6");
     $CFLAGS        = "-fpic -w";
     $EXTRA_CFLAGS  = "";
-    $CINTCFLAGS    = "";
-    $FC            = "g77";
-    $FFLAGS        = "-w -DCERNLIB_TYPE";          #-KPIC
+
+    $FC            = $G77;
+    $FCPATH       = "";
+    $EXTRA_FCPATH = "";
+    $FFLAGS        = $G77FLAGS;
+    $FEXTEND       = $G77EXTEND;
+    $FPPFLAGS      = "-DCERNLIB_TYPE";
+    $EXTRA_FFLAGS  = "";
     $AR            = "ar";
     $ARFLAGS       = "rvu";
     $LD            = $CXX;
@@ -95,8 +94,12 @@
     $SOFLAGS       = "";
     $STIC          = "stic";
     $STICFLAGS     = "";
-    $GEANT3        = "geant3";
+    $AGETOF        = "agetof";
+
     $KUIP          = $CERN_ROOT . "/bin/kuipc";
+    if ( !$ROOT )       { print "ROOT_LEVEL has to be defined\n"; exit 1;}
+    if ( !$ROOT_LEVEL ) { print "ROOT_LEVEL has to be defined\n"; exit 1;}
+    if ( !$ROOTSYS )    { print "ROOT_SYS   has to be defined\n"; exit 1;}
     $ROOTCINT      = $ROOTSYS . "/bin/rootcint";
     $CINTSYSDIR    = $ROOTSYS . "/cint";
     $LIBS          = "";
@@ -109,24 +112,22 @@
     $CRYPTLIBS     = "";
     $SYSLIBS       = "";
     $OSFID         = "";
-
+    $OSFCFID       = "";
     $date   = `date +\%d\%b-%T`;
     $CXXCOM =
-"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>";
-
-    # $MAKELIB = "test -f %> && mv %> %>.$date;";
+ "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d %_IFLAGS %EXTRA_CPPPATH -c %CXXinp%< %Cout%>";
+    $CCCOM = "%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d %_IFLAGS %EXTRA_CPPPATH -c %Cinp%< %Cout%>";
     $MAKELIB .= "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
-
-    # $MAKELIB = "%SO %DEBUG %SOFLAGS %EXTRA_SOFLAGS %SoOUT%> %< ";
     $LINKCOM =
       "%LD %DEBUG %LDFLAGS %EXTRA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
-    $FCCOM =
-      "%FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>";
-    $GEANT3COM = "test -f %>:b.F && rm %>:b.F;";
-    $GEANT3COM .=
-"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS %FCPPPATH -c %>:b.F -o %>";
+ my $FCCOM = "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG %FEXTEND -I%<:d %_IFLAGS %EXTRA_FCPATH -c %< %Fout%>";
+ my $AGETOFCOM  = "test -f %>:b.F && rm %>:b.F;";
+    $AGETOFCOM .= "%AGETOF %< -o %>:b.F &&";
+    $AGETOFCOM .= "%FC %FPPFLAGS %FFLAGS %EXTRA_FPPFLAGS %FDEBUG -I%<:d %_IFLAGS %EXTRA_FCPATH -c";
+    $AGETOFCOM .= " %>:b.F %Fout%>";
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
+    $NoKeep = undef;
     if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; }
 
     if ( !$STAR_SYS ) {
@@ -138,33 +139,91 @@
     print "System: ", $_, "\n" unless ($param::quiet);
 
 
+ if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
+   my($packl,$cernl,$kernl);
+   
+   if ( -e "$CERN_ROOT/bin/cernlib_noshift"      &&
+	-e "$CERN_ROOT/lib/libpacklib_noshift.a" &&
+	-e "$CERN_ROOT/lib/libkernlib_noshift.a" ){
+     $cernl = "$CERN_ROOT/bin/cernlib_noshift";
+     $packl = "packlib_noshift";
+     $kernl = "kernlib_noshift";
+   } else {
+     if ( ! -e "$CERN_ROOT/bin/cernlib"){
+       print 
+	 "\n",
+	 " ** WARNING  ** Could not find $CERN_ROOT/bin/cernlib\n",
+	 "                Will attempt to proceed and assume it is in\n",
+	 "                your path ...\n",
+	 "\n";
+       $cernl = "cernlib";
+     } else {
+       $cernl = "$CERN_ROOT/bin/cernlib";
+     }
+     print "WARNING :: Using default packlib (with possibly shift)\n";
+     $packl = "packlib";
+     $kernl = "kernlib";
+   }
+   
+   $CERNLIBS .= " " . `$cernl geant321 pawlib packlib graflib/X11 packlib mathlib kernlib`;
 
+   $CERNLIBS =~ s/packlib\./$packl\./g;
+   $CERNLIBS =~ s/kernlib\./$kernl\./g;
+   
+   chop($CERNLIBS);
+ }
 
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
-    if ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/) {
+ if ($STAR_HOST_SYS =~ /^rh80_icc/) {
+	$PLATFORM      = "linux";
+	$ARCH          = "linuxicc";
+	$PGI           = "";
+	$CC            = "icc";
+	$CXX           = "icc";
+	$CXXFLAGS      = "-w -ansi -fpic";
+	$CFLAGS        = "-restrict -w -fpic";# -Wall
+	$ICC_MAJOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f1; rm  /tmp/icc_version;`;
+        $ICC_MINOR     = `$CXX -V -dryrun  >& /tmp/icc_version; awk '{ if (NR==1) print \$8 }' /tmp/icc_version| cut -d'.' -f2; rm  /tmp/icc_version;`;
+	chomp($ICC_MAJOR); chomp($ICC_MINOR);
+	$LIBG2C        = `gcc -print-file-name=libg2c.a | awk '{ if (\$1 != "libg2c.a") print \$1}'`;
+	chomp($LIBG2C); 
+#	$LIBFRTBEGIN   = `gcc -print-file-name=libfrtbegin.a | awk '{ if (\$1 != "libfrtbegin.a") print \$1}'`;
+#	chomp($LIBFRTBEGIN);
+	$LIBFRTBEGIN = "";
+	if ($ICC_MAJOR eq '8') {
+	  $FC            = "ifort";
+	  $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
+	  $F77LIBS       = $LIBFRTBEGIN ." ". $LIBG2C ." -L". $LIBIFCPATH ." -lifcore";
+	}
+	else                   {
+	  $FC            = "ifc";
+	  $LIBIFCPATH    = `which ifc | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
+	  $F77LIBS       = $LIBFRTBEGIN ." ". $LIBG2C ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
+	  $F77LIBS       = $LIBG2C ." -L". $LIBIFCPATH ." -lF90 -lCEPCF90 -lintrins";
+	}
+	
+	$FLIBS         = $F77LIBS;
+	$FFLAGS        = "";
+	$FEXTEND       = "-132";
+	
+	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
+	$SYSLIBS       = "-lm -ldl -rdynamic";
+	$CLIBS         = "-lm -ldl -rdynamic";
+	$CRYPTLIBS     = "-lcrypt";
+	$LD            = $CXX;
+	$LDFLAGS       = "";
+	$SO            = $CXX;
+	$SOFLAGS       = "-shared -u*";
+
+ } elsif ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/) {
         #
         # Case linux
         #
-        $PLATFORM = "linux";
-        $ARCH     = "linuxegcs";
-        $OSFID    = "f2cFortran";
-        $OSFID .= " lnx Linux linux LINUX";
-	# beware, ANSI disables some hidden auto-define and i386 is
-	# one of them
-	if ($STAR_SYS =~ /^i386_/){
-	    $OSFID .= " i386";
-	}
-
-        $OSFID .=
-          " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
-
         if ($STAR && $STAR_HOST_SYS !~ /gcc3/ ) {
             $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES";
         }
-        $R_CPPFLAGS .=
-" -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
         $CXXFLAGS     = "-pipe -fPIC";
 	$CXXFLAGS    .= " -Wall";
 	$CXXFLAGS    .= " -Woverloaded-virtual";
@@ -187,66 +246,15 @@
 	    }
 	    print "set DEBUG = $DEBUG\n" unless ($param::quiet);
 	}
-        $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
-        $CFLAGS     = "-pipe -fPIC -Wall";
-	$CFLAGS    .= " -Wall";
-	$CFLAGS    .= " -Wshadow";
-        $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
-        $LDFLAGS  = "";    #$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
+        $CFLAGS    = "-pipe -fPIC -Wall";
+	$CFLAGS   .= " -Wall";
+	$CFLAGS   .= " -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
         $XLIBS     = "-L/usr/X11R6/lib -lXpm -lX11";
         $THREAD    = "-lpthread";
         $CRYPTLIBS = "-lcrypt";
         $SYSLIBS   = "-lm -ldl -rdynamic";
-
-        if ( /egcs$/ || !$STAR ) {
-            $CLIBS = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
-            $FC    = "g77";
-#    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
-            $FFLAGS = "-pipe -fno-second-underscore -fno-automatic -Wall -W -Wsurprising"; 
-            $FCCOM  = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
-	    $FDEBUG = $DEBUG;
-            $FCCOM .=
-            "%FC -E -P %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&";
-            $FCCOM .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>:b.f;";
-            $FCCOM .= "if [ -f %>:b.f ]; then %FC %FFLAGS -c %>:b.f %Fout%> ;";
-            $FCCOM .=
-"else %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>; fi";
-            my $GEANT3COM = $FCCOM;
-            $FEXTEND = "-ffixed-line-length-132";
-        }
-        elsif (/kcc$/) {
-            $OSFID = "f2cFortran";
-            $OSFID .=
-" lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
-
-            if ($STAR) {
-                $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
-            }
-            $CXXOPT   = "+K0 -O0 --no_exceptions";
-            $CXX      = "KCC";
-            $CXXFLAGS = $CXXOPT . " --signed_chars -D_EXTERN_INLINE=inline";
-            $CXXFLAGS .= " --display_error_number --diag_suppress 191 -fPIC";
-            $CLIBS   = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl -Bdynamic";
-            $SYSLIBS = "-lm -ldl";
-            $LD      = $CXX;
-            $LDFLAGS = $CXXOPT;
-            $SO      = $CXX;
-            $SOFLAGS = $CXXOPT;
-        } else {
-            if ($PGI) { 
-		# BEWARE : PGI introduced a libpgc.so at version 4.0
-		# and we use to have a .a only
-		if ( -e "$PGI/linux86/lib/libpgc.a"){
-		    $CLIBS  = " $PGI/linux86/lib/libpgc.a ";
-		} else {
-		    $CLIBS  = " -L$PGI/linux86/lib -lpgc ";
-		}
-	    }
-	    $CLIBS .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 ".
-		" -lm -ldl  -rdynamic ";
-        }
-        if ($STAR_SYS =~ /^i386_linux2/) { $FLIBS .= " -lI77 -lF77"; }
+	$CLIBS    .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
 
         if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
             print "Use INSURE++\n";
@@ -258,124 +266,52 @@
         }
 
         if ($PGI) {
-            $FC    = "pgf77";
-	    # BEWARE : PGI introduced a libpgc.so at version 4.0
-	    # and we use to have a .a only
-	    if ( -e "$PGI/linux86/lib/lpgftnrtl.a"){
-		$FLIBS = " $PGI/linux86/lib/lpgftnrtl.a ";
-	    } else {
-		$FLIBS = " -L$PGI/linux86/lib -lpgftnrtl ";
-	    }
-	    if ( -e "$PGI/linux86/lib/libpgc.a"){
-		$FLIBS .= " $PGI/linux86/lib/libpgc.a ";
-	    } else {
-		$FLIBS .= " -L$PGI/linux86/lib -lpgc";
-	    }
-
-	    if( -e "$OPTSTAR/lib/libpgf77S.so"){
-		$FLIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
-		if( -e "$OPTSTAR/lib/libpgf77A.a"){
-		    $FLIBS .= " -lpgf77A";
-		}
-	    }
-            $FFLAGS  = "-DPGI";
-            $FEXTEND = "-Mextend";
-        }
+	  $FC    = "pgf77";
+	  $FFLAGS = "-w -DCERNLIB_TYPE";
+	  $FPPFLAGS  = "";
+	  $FEXTEND = "-Mextend";
+	}
         $F77LIBS = " -lg2c -lnsl";
         $FLIBS .= $F77LIBS;
 
 
-    } elsif (/^hp_ux102/) {
-        #    case "hp":
-        #  ====================
-        $PLATFORM = "hpux";
-        $ARCH     = "hpuxacc";
-        if ($STAR) {
-            $OSFID =
-             "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
-        }
-        $OSFID .= " NEW_ARRAY_ON";    # _INCLUDE_HPUX_SOURCE";
-        $CXX      = "aCC";
-        $CC       = "cc";
-        $LD       = $CXX;
-        $SO       = $CXX;
-        $CXXFLAGS = "+W70,495,740,749,823,829 -z +Z -Dextname";
-        $R_CPPFLAGS .=
-" -DR__ACC -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB  -DG__ROOT -DG__REDIRECTIO -D__STDCPP__";
-        $CINTCXXFLAGS = "-z +Z " . $R_CPPFLAGS . " -D_POSIX2_SOURCE";
-        $CFLAGS       = " -Ae -z +Z -Dextname";
-        $CINTCFLAGS   = $CFLAGS . " " . $R_CPPFLAGS . " -D_POSIX2_SOURCE";
-        $SOEXT        = "sl";
-
-        #   $XLIBS    = $ROOTSYS . "../lib/libXpm.a -lX11";
-        $XLIBS = $ROOTSYS . "/lib/libXpm.a -L/usr/lib/X11R5 -lX11";
-        if ( defined($SCL_OPTIMISE) ) {    # from Brian
-            $CXXFLAGS .= " +Olibcalls +Onolimit";
-        }
-        else { $CXXFLAGS .= " +d"; }
-        $LDFLAGS    = "-z -Wl,+s -Wl,-E,+vnocompatwarnings";
-        $SOFLAGS    = "-b -Wl,+vnocompatwarnings";             #-b -z";
-        $CLIBS      = "/usr/lib/libM.sl";
-        $SYSLIBS    = "-lm -ldld";
-        $FC         = "fort77";
-        $FFLAGS     = "-WF,-P +ppu +Z +B -K";
-        $FEXTEND    = "+es";
-        $F77LD      = $FC;
-        $F77LDFLAGS = "-K +ppu";
-        print "SHLIB_PATH = $SHLIB_PATH\n";
-
-    } elsif (/^alpha_dux40/) {
+    } elsif (/^alpha_dux/) {
 	#
 	# Trying True64
 	#
-	$PLATFORM      = "OSF1";
-	$ARCH          = "True64";
-	$OSFID         = " ST_NO_NAMESPACES ST_NO_EXCEPTIONS QUIET_ASP";
-	$EXTRA_CPPPATH = "";
-
+	$PLATFORM      = "alpha";
+	$ARCH          = "alphaxxx6";
 	$CC            = "cc";
 	$CXX           = "cxx";
-	$CXXCOM        = "%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d  %_IFLAGS -c %CXXinp%< %Cout%>";
-	$CXXFLAGS      = "";
+	$CXXFLAGS      = "tlocal";
 	$CFLAGS        = "";
-	$EXTRA_CXXFLAGS= "";
-	$EXTRA_CFLAGS  = "";
-
-	$CLIBS         = "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen";
-
+	$EXTRA_CXXFLAGS= "-Iinclude -long_double_size 64";
 	$FC            = "f77";
-	$FLIBS         = "";
+	$F77LIBS       = "/usr/shlib/libFutil.so /usr/shlib/libUfor.so /usr/shlib/libfor.so /usr/shlib/libots.so";
+	$FLIBS         = $F77LIBS;
 	$FFLAGS        = "-old_f77";
-	$FEXTEND       = "-extend_source";
+	$FEXTEND       = "-extend_source -shared -warn argument_checking -warn nouninitialize";
 	
-
-	$R_CPPFLAGS    = "";
-	$CINTCFLAGS    = $CFLAGS   . " " . $R_CPPFLAGS;
-	$CINTCXXFLAGS  = $CXXFLAGS . " " . $R_CPPFLAGS;
-
 	$XLIBS         = "-L" . $ROOTSYS . "/lib -lXpm  -lX11";
-	$SYSLIBS       = "-lmalloc -lm -ldl -lnsl -lsocket";
-
+	$SYSLIBS       = "-lm";
+	$CLIBS         = "-lm -ltermcap";
 	$LD            = $CXX;
-	$LDFLAGS       = "";    # -Bdynamic
+	$LDFLAGS       = "";
 	$SO            = $CXX;
-	$SOFLAGS       = "-G "; #-ptr%ObjDir";
-
-    } elsif (/^sun4x_5./) {
+	$SOFLAGS       = "-shared -nocxxstd -Wl,-expect_unresolved,*,-msym,-soname,";
+    } elsif (/^sun4x_/) {
 	#
 	# Solaris
 	#
         $PLATFORM = "solaris";
         $ARCH     = "solarisCC5";
-        if (/^sun4x_56/) {$OSFID    = "__SunOS_5_6";}
-	if (/^sun4x_58/) {$OSFID    = "__SunOS_5_8";}
-        $OSFID .=
-" CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
-
+        if (/^sun4x_56/) {$OSFCFID    = "__SunOS_5_6";}
+	if (/^sun4x_58/) {$OSFCFID    = "__SunOS_5_8";}
+        $OSFCFID .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED SOLARIS";
         if ($STAR) {
             $OSFID .= " ST_NO_MEMBER_TEMPLATES";
         }
-        $OSFID .= " SUN Solaris sun sun4os5 " . $STAR_SYS;
+        $OSFCFID .= " SUN Solaris sun sun4os5 " . $STAR_SYS;
         $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
 	$SUNWS = $ENV{'SUNWS'};
 	$SUNOPT= $ENV{'SUNOPT'};
@@ -384,16 +320,13 @@
         $CC     = "$SUNOPT/$SUNWS/bin/cc";
         $CXX    = "$SUNOPT/$SUNWS/bin/CC";
         $CXXCOM =
-"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -I%<:d -ptr%ObjDir %_IFLAGS -c %CXXinp%< %Cout%>";
+"%CXX %CXXFLAGS %EXTRA_CXXFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS -ptr%ObjDir -I%<:d %_IFLAGS -c %CXXinp%< %Cout%>";
         $FC             = "$SUNOPT/$SUNWS/bin/f77";
-        $CXXFLAGS       = "-KPIC";                # -library=iostream,no%%Cstd";
+        $CXXFLAGS       = "-KPIC";
         $EXTRA_CXXFLAGS = " -D__CC5__";
         $EXTRA_CFLAGS   = " -D__CC5__";
-        $R_CPPFLAGS    .=
-" -DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
-        $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
         $CLIBS        =
-          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen $SUNOPT/$SUNWS/lib/libCrun.so";
+          "-lm -ltermcap -ldl -lnsl -lsocket -lgen $SUNOPT/$SUNWS/lib/libCrun.so -L. -lCstd -lmalloc";
           # Brute force required for CC WS6.0 (?). Links all others but that one
 	  # (libCrun however isa softlink unlike the others).
           # -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
@@ -401,17 +334,14 @@
         $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
 
         #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
-        $SYSLIBS =
-          "-lmalloc -lm -ldl -lnsl -lsocket";# -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
+        $SYSLIBS    = "-lmalloc -lm -ldl -lnsl -lsocket";
         $FFLAGS     = "-KPIC -w";
         $FEXTEND    = "-e";
         $CFLAGS     = "-KPIC";
-        $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
         $LD         = $CXX;
-        $LDFLAGS    = " -Bdynamic";                  #-library=iostream
+        $LDFLAGS    = " -Bdynamic";
         $SO         = $CXX;
         $SOFLAGS    = "-G -ptr%ObjDir";
-        ;    #
 
         if ( defined( $ARG{INSURE} ) ) {
             print "***Use INSURE++***\n";
@@ -423,41 +353,84 @@
         }
     }
 
+    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; $OSFCFID .= " " . $STAR_HOST_SYS;}
+    $OSFCFID  .= " CERNLIB_TYPE";
+    $OSFID    .= " __ROOT__";
+    $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $OSFID ) );
+    $CFLAGS   .= " -D" . join ( " -D", split ( " ", $OSFID ) );
 
+    $FPPFLAGS  .= " -D" . join ( " -D", split ( " ", $OSFCFID ) );
 
-    if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; }
-    my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
-#    $CPPFLAGS .= " " . $R_CPPFLAGS;
-    $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $FLAGS ) );
-
-    #$ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
     $ROOTSRC = $ROOTSYS . "/include";
-    my @params = (
-      'PLATFORM'    => $PLATFORM,
-      'ARCH'        => $ARCH,
-      'AFSDIR'      => $AFSDIR,
-      'AFSLIB'      => $AFSLIB,
-      'AFSFLAGS'    => $AFSFLAGS,
-      'SRPDIR'      => $SRPDIR,
-      'SRPFLAGS'    => $SRPFLAGS,
-      'SRPLIBS'     => $SRPLIBS,
-      'SHADOWFLAGS' => $SHADOWFLAGS,
-      'SHADOWLIBS'  => $SHADOWLIBS,
-      'AUTHFLAGS'   => $AUTHFLAGS,
-      'AUTHLIBS'    => $AUTHLIBS,
+    $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC . $main::PATH_SEPARATOR . "#";
+    my $pwd = cwd(); 
+    my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";   
+    if ($PATH !~ /$STAR_BIN/) {$PATH = $STAR_BIN . ":" . $PATH;}
+    $PATH = $path2bin .":". $PATH;  #print "PATH = $PATH\n";
+    $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
+# packages
+# MySQL
+ my $os_name = `uname`;
+ chomp($os_name);
+ my ($MYSQLINCDIR,$mysqlheader) = 
+ script::find_lib($MYSQL . " " .
+		  "/include /usr/include ".
+		  "/usr/include/mysql  ".
+		  "/usr/mysql/include  ".
+		  "/usr/mysql  ".
+		  $OPTSTAR . "/include " .  $OPTSTAR . "/include/mysql " ,
+		  "mysql.h");
+ if ($MYSQLINCDIR) {
+   print "Use MYSQLINCDIR = \t$MYSQLINCDIR \n" if $MYSQLINCDIR;
+ }
+ else {die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";}
+ (my $mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib/;
+ my ($MYSQLLIBDIR,$MYSQLLIB) = 
+ script::find_lib($mysqllibdir . " /usr/lib/mysql".
+		  $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql " ,
+		  "libmysqlclient");
+ if ($STAR_HOST_SYS =~ /^rh/) { 
+   $MYSQLLIB .= " -lmystrings";
+   if (-r "/usr/lib/libssl.a"   ) {$MYSQLLIB .= " -lssl";}
+   if (-r "/usr/lib/libcrypto.a") {$MYSQLLIB .= " -lcrypto";}
+   $MYSQLLIB .= " -lz";
+ }
+ print "Use MYSQLLIBDIR = \t$MYSQLLIBDIR and MYSQLLIB = \t$MYSQLLIB\n" if $MYSQLLIBDIR; 
+# QT
+ if (defined($QTDIR) && -d $QTDIR) {
+   if (-e $QTDIR . "/bin/moc") {
+     $QTLIBDIR = $QTDIR . "/lib";
+     $QTBINDIR = $QTDIR . "/bin";
+   }
+   if ($QTBINDIR) {
+     $QTINCDIR = $QTDIR . "/include";
+     $QTFLAGS  = "-DR__QT";#-DQT_THREAD_SUPPORT";
+     $QTLIBS   = "-lqt-mt";
+     if ($main::_WIN32) {
+       $QTLIBS  .= " " . $QTDIR . "/lib/qt-mt*.lib " . 
+	 $ROOTSYS . "/lib/libGraf.lib " . 
+	   $ROOTSYS . "/lib/libGpad.lib shell32.lib Ws2_32.lib Imm32.lib Winmm.lib";}
+     print "Use QTLIBDIR = \t$QTLIBDIR \tQTINCDIR = \t$QTINCDIR \tQTFLAGS = \t$QTFLAGS \tQTLIBS = \t$QTLIBS\n" if $QTLIBDIR;
+   }
+ }
 
-      #		'CPP'	       => $CPP,
+    
+    my @params = (
       'CPPPATH'       => $CPPPATH,
       'EXTRA_CPPPATH' => $EXTRA_CPPPATH,
       'CPPFLAGS'      => $CPPFLAGS,
       'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
-      'R_CPPFLAGS'    => $R_CPPFLAGS,
       'DEBUG'         => $DEBUG,
       'FDEBUG'        => $FDEBUG,
+      'G77'           => $G77, 
+      'G77FLAGS'      => $G77FLAGS,
+      'G77EXTEND'     => $G77EXTEND,
       'FC'            => $FC,
-      'FFLAGS'        => $FFLAGS,
+      'FPPFLAGS'      => $FPPFLAGS,
       'FEXTEND'       => $FEXTEND,
-      'FCPPPATH'      => $FCPPPATH,
+      'FFLAGS'        => $FFLAGS,
+      'FCPATH'        => $FCPATH,
+      'EXTRA_FCPATH'  => $EXTRA_FCPATH,
       'Fout'          => $Fout,
       'CXXinp'        => $CXXinp,
       'Cinp'          => $Cinp,
@@ -465,11 +438,10 @@
       'Lout'          => $Lout,
       'SoOUT'         => $SoOUT,
       'FCCOM'         => $FCCOM,
-      'GEANT3'        => $GEANT3,
-      'GEANT3COM'     => $GEANT3COM,
+      'AGETOF'        => $AGETOF,
+      'AGETOFCOM'     => $AGETOFCOM,
       'CC'            => $CC,
       'CFLAGS'        => $CFLAGS,
-      'CINTCFLAGS'    => $CINTCFLAGS,
       'EXTRA_CFLAGS'  => $EXTRA_CFLAGS,
       'KUIP'          => $KUIP,
       'KUIPCOM'       => '%KUIP %< %<.f && %FC %FFLAGS -c %<.f -o %>',
@@ -477,7 +449,6 @@
       '%CC %CFLAGS %EXTRA_CFLAGS %DEBUG %CPPFLAGS %EXTRA_CPPFLAGS %_IFLAGS -c %Cinp%< %Cout%>',
       'CXX'            => $CXX,
       'CXXFLAGS'       => $CXXFLAGS,
-      'CINTCXXFLAGS'   => $CINTCXXFLAGS,
       'EXTRA_CXXFLAGS' => $EXTRA_CXXFLAGS,
       'CXXCOM'         => $CXXCOM,
       'CLIBS'          => $CLIBS,
@@ -514,7 +485,8 @@
       'SUFSOLIB'       => $SOEXT,
       'SUFEXE'         => $EXESUF,
       'SUFMAP'         => {
-          '.g'   => 'build::command::geant3',
+          '.g'   => 'build::command::agetof',
+          '.age' => 'build::command::agetof',
           '.f'   => 'build::command::fc',
           '.F'   => 'build::command::fc',
           '.C'   => 'build::command::cxx',
@@ -547,9 +519,45 @@
           'TMP'             => $TMP,
           'STAR_SYS'        => $STAR_HOST_SYS,
 	  'STAR_VERSION'    => $STAR_VERSION,
+          'PERL5LIB'        => $PERL5LIB,
           'OPTSTAR'         => $OPTSTAR
-      }
+      },
+	  'Packages' => {		  
+			 'MYSQL' => {
+				     'LIBDIR'=> $MYSQLLIBDIR,
+				     'INCDIR'=> $MYSQLINCDIR,
+				     'LIBS'  => $MYSQLLIB
+				    },
+			 'QT' => {
+				  'DIR'   => $QTDIR,
+				  'INCDIR'=> $QTINCDIR,
+				  'BINDIR'=> $QTBINDIR,
+				  'FLAGS' => $QTFLAGS,
+				  'LIBDIR'=> $QTLIBDIR,
+				  'LIBS'  => $QTLIBS 
+				 }
+			}
     );
-    push ( @param::defaults, @params );
+ push ( @param::defaults, @params );
+}
+#________________________________________________________________________________
+sub find_lib {
+  my @libsdirs = split ' ',shift;# print "libsdirs: @libsdirs\n";
+  my @libs     = split ' ',shift;# print "libs: @libs\n";
+  my @libexts  = ("",".so", ".sl", ".a", ".lib");
+  foreach my $i (@libsdirs) {
+    next if ! -d $i;
+    foreach my $j (@libs) {
+      foreach my $ext (@libexts) {
+	my $l = $i . "/" . $j . $ext;;# print "l = $l\n";
+	next if ! -r $l;
+	my $k = $j;
+	$k =~ s/^lib/-l/;
+	$k =~ s/\.(so|lib|a)$//;
+	return ($i,$k);
+      }
+    }
+  }
+  print "Can't find @libs in @libsdirs\n";
 }
 1;

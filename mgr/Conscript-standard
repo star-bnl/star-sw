@@ -1,10 +1,5 @@
 #!/usr/bin/env perl
-
-#use warnings qw(all);
-#use diagnostics;
-
-Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
-
+Import qw ( env INCLUDE LIB BIN BUILD OBJ);
 ( my $build = $OBJ ) =~ s/\#//g;
 $build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
                                                         # print "MAIN = $MAIN\n";
@@ -20,10 +15,6 @@ my $AFS_RHIC     = $env->{ENV}->{AFS_RHIC};
 
 my $SO_PKG  = "";
 my $SO_PKGT = "";
-my $SHARE   = $EXPORT;   # *** Will remove later. For now, old version have
-                         # sub-dirs with Conscript scripts expecting EXPORT
-                         # variable
-
 my $pkg;
 my $PKG;
 
@@ -46,11 +37,6 @@ if ( ($Dir =~ m/StRoot.*Pool\// && $Dir !~ /StRoot.*Pool\/St/) ||
     $PKG = $pkg;
 }
 
-
-
-
-#print "Dir=$Dir => pkg = $pkg => PKG = $PKG\n";
-
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
@@ -63,8 +49,6 @@ foreach my $Rep(@Repo) {
 }
 @idlL = script::sortu(@idlL);
 
-
-
 my @idlML    = script::find_idlM($Dir);
 my @srcL     = script::find_sources($Dir);
 my @h_filesL = script::find_hfiles($Dir);
@@ -72,8 +56,7 @@ my @h_filesL = script::find_hfiles($Dir);
 print "idlL = @idlL\n" if $param::debug;
 
 my (@src, @h_files, @idlM);
-my ($LIBS, $LIBPATH, $CPPPATH, $CXXFLAGS, $FC, $FFLAGS, $FEXTEND);
-my ($MYSQLINC,$MYSQLLIB,$QTDIR);
+my ($LIBS, $LIBPATH, $CPPPATH, $CXXFLAGS, $FC, $FFLAGS, $FEXTEND, $FFLAGS);
 my ($i, $obj);
 my $LIBPKG = "";
 
@@ -99,7 +82,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	if ( -d $RepDir ) {
 	    my @srcR =
 		script::find_sources($RepDir);
-	    # my $i=0; for my $s (@srcR) {print "i=",$i++," src = ",$s,"\n";}
 	    foreach my $i(@srcR) { push @srcL, $i; }
 	    my @idlMR = script::find_idlM($RepDir);
 
@@ -108,9 +90,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    foreach my $i(@h_filesR) { push @h_filesL, $i; }
 	}
     }
-    @src     = script::sortu(@srcL);       # print "src = @src\n";
+    @src     = script::sortu(@srcL);
     @h_files = script::sortu(@h_filesL);
-    @idlM    = script::sortu(@idlML);      # print "idlM = @idlM\n";
+    @idlM    = script::sortu(@idlML);
     if ( $#idlM > -1 and $PKG !~ "^St" ) { $PKG = "St_" . $PKG; }
 
     $obj = $ObjDir;
@@ -124,23 +106,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $CXXFLAGS= $env->{CXXFLAGS};
     $FC      = $env->{FC};
     $FFLAGS  = $env->{FFLAGS};
+    $FPPFLAGS= $env->{FPPFLAGS};
+    $FCPATH  = $env->{FCPATH};
     $FEXTEND = $env->{FEXTEND};
-
-
-    # Resolve Mysql right away i.e. use the Linux local installed
-    # library instead of the eventually provided /opt/star one.
-    if (-d "/usr/include/mysql"){
-	$MYSQLINC = "/usr/include/mysql";
-	$MYSQLLIB = "/usr/lib/mysql";
-    } else {
-	$MYSQLINC = $env->{ENV}->{OPTSTAR} . "/include/mysql";
-	$MYSQLLIB = $env->{ENV}->{OPTSTAR} . "/lib";
-    }
-    $QTDIR = $ENV{QTDIR};
-
-
-
-
     #+
     # Extraneous flag treatment for specific makers
     # Search path depth for Makers.
@@ -148,14 +116,12 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "-=-=-=-=- Will now test $pkg\n" if ($param::debug);
     if ( $pkg =~ m/^StEventDisplay/){
 	# This make requires both ROOT Qt and QT libraries
-	if ( defined($QTDIR) && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
+	if ( defined($env->{Packages}->{QT}->{DIR}) && (-r $ENV{ROOTSYS} . "/include/TQt.h" || -r $ENV{ROOTSYS} . "/include/TGQt.h")){
 	    #print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
-	    $QTDIRBIN = $QTDIR . "/bin";
-
-	    $CPPPATH .= $main::PATH_SEPARATOR . $QTDIR . "/include";
-	    $LIBPATH .= $main::PATH_SEPARATOR . $QTDIR . "/lib";
-	    #$LIBS ... should come loaded from ROOT
-	    $CXXFLAGS.= " -DR__QT";
+	    $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{QT}->{INCDIR};
+	    $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{QT}->{LIBDIR}; 
+	    #$LIBS ... should come loaded from ROOT 
+	    $CXXFLAGS.= " " . $env->{Packages}->{QT}->{FLAGS}; 
 	}
 
 	#
@@ -166,18 +132,18 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	      $pkg =~ m/^StDbBroker$/) {
 	if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
 	
-	$LIBPATH .= $main::PATH_SEPARATOR . $MYSQLLIB;
+	$LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 	print "LIBPATH = $LIBPATH\n" if $param::debug;
-	$LIBS .= " -lmysqlclient";
+	$LIBS .= " " . $env->{Packages}->{MYSQL}->{LIBS};
 	print "LIBS    = $LIBS\n" if $param::debug;
-	$CPPPATH .=  $main::PATH_SEPARATOR . $MYSQLINC;
+	$CPPPATH .=  $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 
 
 	#... next block wich only requires the includes
 	# but no link with the client library
     } elsif ( $pkg =~ m/^St.*Db/ ) {
-	$CPPPATH .= $main::PATH_SEPARATOR . $MYSQLINC;
+	$CPPPATH .= $main::PATH_SEPARATOR .  $env->{Packages}->{MYSQL}->{INCDIR};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
 	
     } elsif ( $pkg =~ m/^pyth$/ ) {
@@ -253,16 +219,17 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StDaqLib$/ ) {
 	$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
+    } elsif ( $pkg =~ m/^gcalor$/ ) {
+        $LIBPKG = "lib" . $pkg . "." . $env->{SUFLIB};
+	$SO_PKG = "";
+	$FCPATH = "#" . $Dir . "/../" . $main::PATH_SEPARATOR . "#" . $Dir . "/../gcalor/include" . $main::PATH_SEPARATOR .$env->{FCPATH};
+	$FPPFLAGS = " -DCOMMONS_CONFIG_H -DCERNLIB_LINUX";
+	if ($STAR_SYS =~ /^rh/) { 
+	  $FC = "g77";
+	  $FFLAGS   = "-pipe -fno-second-underscore -Wall -W -Wsurprising -fPIC";
+	  $FEXTEND  = ""; 
+	}
     }
-
-    
-    # Prepare a local share variable
-    ( my $share = $SHARE . "/" . $Dir ) =~ s/\/pams//g;
-    print "new share $share\n" if $param::debug;
-    $share =~ s/\/StRoot//g;
-    $share =~ s/\/(sim|gen)//g;
-
-
     if ( $#idlM > -1 ) {
 	$CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
 	print "CPPPATH = $CPPPATH\n" if $param::debug;
@@ -293,13 +260,14 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 			'FCCOM'    => $FCCOM,
 			'LIBPATH'  => $LIBPATH,
 			'LIBS'     => $LIBS,
-			'share'    => $share,
 			'ObjDir'   => $obj_dir,
 			'FC'       => $FC,
 			'FFLAGS'   => $FFLAGS,
+			'FPPFLAGS' => $FPPFLAGS,
+			'FCPATH'   => $FCPATH,
 			'FEXTEND'  => $FEXTEND
 			);
-    bless $env2, "cons";
+#?     bless $env2, "cons";
 
 
     print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |", $env2->{LIBS},
@@ -328,7 +296,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $cscanner = find scan::cpp( $env2->{_cwd}, $ROOTCINT_CPP );
     print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
     my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
-
+    if ($env2->{EXTRA_CPPFLAGS}) {
+      $ROOTCINT_CPPPATH .= " " . $env2->{EXTRA_CPPFLAGS}; # Requested By Frank Laue
+    }
     print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
     $cscanner = find scan::cpp( $env2->{_cwd}, $STIC_CPP );
     my $STIC_CPPPATH =
@@ -355,24 +325,20 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	    my $modi = $INCLUDE . "/" . $stem . ".inc";
 	    my $modH = $include . "/" . "St_" . $stem . "_Module.h";
 	    print "modH = $modH\n" if $param::debug;
-	    my $modC = $share . "/" . "St_" . $stem . "_Module.cxx";
+	    my $modC = "St_" . $stem . "_Module.cxx";
 	    print "modC = $modC\n" if $param::debug;
 
 	    if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-		Command $env2 [$modh], @idlS,
-		  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
-		Command $env2 [$modi], @idlS,
-		  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
-		Command $env2 [$modH], @idlS,
-		  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
-		Command $env2 [$modC], @idlS,
-		  qq(stic.pl %> -s -r $STIC_CPPPATH -q %1);
+	      my $stic_cmd = "mkdir /tmp/\$\$; cd /tmp/\$\$;";
+	      $stic_cmd .= " stic -s -r $STIC_CPPPATH -q %<:a ; mv %>:f %>:a; rm -rf /tmp/\$\$";
+	      Command $env2 [$modh], @idlS, qq($stic_cmd);
+	      Command $env2 [$modi], @idlS, qq($stic_cmd);
+	      Command $env2 [$modH], @idlS, qq($stic_cmd);
+	      Command $env2 [$modC], @idlS, qq($stic_cmd);
 	    }
 	    my @objmod = ($modC);
-	    Install $env2 $ObjDir, @objmod;
 	    print "Install @objmod in $ObjDir\n" if $param::debug;
-	    ( my $mod = $modC ) =~ s/$share/$obj/g;
-	    push @src, $mod;
+	    push @src, $modC;
 	    print "src + $mod: @src\n" if $param::debug;
 	    push @Defs, $modH;
 	}
@@ -386,9 +352,9 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 		my $qtFlag       = 1;
 		while ( $line = <In> ) {
 		    if ( ( $line =~ /ClassDef/ || $line =~ /StCollectionDef/) ) {
-			push @Defs, $h;
+			push @Defs, $h; # print "$h <==========\n";
 			$classDefFlag = 0;
-		    } elsif ( $line =~ /Q_OBJECT/ && defined($QTDIRBIN) ) {
+		    } elsif ( $line =~ /Q_OBJECT/ && defined($env->{Packages}->{QT}->{BINDIR}) ) {
 			push @QtDefs, $h;
 			$qtFlag = 0;
 		    }
@@ -424,19 +390,16 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     }
 
     if ( $#Defs > -1 ) {
-	my @CintFiles = ( $share . "/" . $PKG . "_Cint.cxx", $share . "/" . $PKG . "_Cint.h" );
-
-	#yf  Install $env2 $share, @Defs;
+	my @CintFiles = ( $PKG . "_Cint.cxx", $PKG . "_Cint.h" );
+	@Defs = script::sortu(@Defs);
 	my @defs = ();
 	foreach my $def(@Defs) {    #print "def = $def OBJ = $OBJ\n";
 	    if ( $def =~ /^\#/ ) { push @defs, $def; }
 	    else { push @defs, "#" . $Dir . "/" . $def; }
-	}    # print "defs = @defs\n";
+	}
 	Command $env2 [@CintFiles], @defs,
 	  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
-	Install $env2 $ObjDir, @CintFiles;
-	( my $cint = $CintFiles[0] ) =~ s/$share/$obj/g;
-	push @src, $cint;
+	push @src, $CintFiles[0];
 	print "+==========add $cint\n" if $param::debug;
     }
 
@@ -456,8 +419,6 @@ if ( $#idlL > -1 ) {
     my $objT = $OBJ . "/pams/tables";
     ( my $objT_dir = $objT ) =~ s/^\#//g;
     print "objT_dir = $objT_dir\n" if $param::debug;
-    my $shareT = "$SHARE/tables";
-    print "shareT = $shareT\n" if $param::debug;
     my $includeT = $INCLUDE . "/tables";
     print "includeT = $includeT\n" if $param::debug;
 
@@ -491,9 +452,7 @@ if ( $#idlL > -1 ) {
         #___________________________________
         my $ROOTCINT_CPP =
 	    $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
-        $ROOTCINT_CPP .=
-	    $main::PATH_SEPARATOR . $shareT . $main::PATH_SEPARATOR
-	    . $env->{ENV}->{ROOTSRC};
+        $ROOTCINT_CPP .= $main::PATH_SEPARATOR . $env->{ENV}->{ROOTSRC};
 
         my $tobj_dir = $obj_dir . "/Tables";
         $CPPPATH =
@@ -502,11 +461,10 @@ if ( $#idlL > -1 ) {
           'DEBUG'   => ' ',
           'CPPPATH' => $CPPPATH,
           'ObjDir'  => $tobj_dir
-        );
-        my $cscanner =
+         );
+       my $cscanner =
 	    find scan::cpp( $env->{_cwd}, $ROOTCINT_CPP );
-        my $ROOTCINT_CPPPATH = $cscanner->iflags($env3);
-
+        my $ROOTCINT_CPPPATH = $cscanner->iflags($env3); #print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n"; die;
         foreach my $idll(@idlT) {
             my $stem = File::Basename::basename( $idll, ".idl" );
             print "stem = $stem; idll: $idll\n" if $param::debug;
@@ -519,13 +477,13 @@ if ( $#idlL > -1 ) {
             print "idli: $idli\n" if $param::debug;
             my $idlH = $includeT . "/St_" . $stem . "_Table.h";
             print "idlH: $idlH\n" if $param::debug;
-            my $idlC = $shareT . "/St_" . $stem . "_Table.cxx";
+            my $idlC = "St_" . $stem . "_Table.cxx";
             print "idlC: $idlC\n" if $param::debug;
-            my $LinkDef = $shareT . "/" . $stem . "LinkDef.h";
+            my $LinkDef = $stem . "LinkDef.h";
             print "LinkDef = $LinkDef\n" if $param::debug;
-            my $idlCintH = $shareT . "/St_" . $stem . "_TableCint.h";
+            my $idlCintH = "St_" . $stem . "_TableCint.h";
             print "idlCintH = $idlCintH\n" if $param::debug;
-            my $idlCintC = $shareT . "/St_" . $stem . "_TableCint.cxx";
+            my $idlCintC = "St_" . $stem . "_TableCint.cxx";
             print "idlCintC = $idlCintC\n" if $param::debug;
             ( my $IDL = $idll ) =~ s/^\#//g;
             print "IDL = $IDL\n" if $param::debug;
@@ -534,8 +492,9 @@ if ( $#idlL > -1 ) {
                 my @Deps = ($idll);
                 print "Deps: $Deps[0]\n" if $param::debug;
                 if ( $STAR_SYS !~ /^intel_wnt$/ ) {
-                    Command $env3 [$idlh], @Deps, qq (stic.pl %>  -q %1 );
-                    Command $env3 [$idli], @Deps, qq (stic.pl %>  -q %1 );
+		  my $stic_cmd = "mkdir /tmp/\$\$; cd /tmp/\$\$; stic -q %<:a ; mv %>:f %>:a; rm -rf /tmp/\$\$";
+                    Command $env3 [$idlh], @Deps, qq ($stic_cmd);
+                    Command $env3 [$idli], @Deps, qq ($stic_cmd);
                     push @Deps, $idlh;
                     Command $env3 [$idlH], @Deps, qq (ConstructTable.pl %1 %>);
                     push @Deps, $idlH;
@@ -551,27 +510,22 @@ if ( $#idlL > -1 ) {
 
                 if ( $STAR_SYS !~ /^intel_wnt$/ ) {
                     Command $env3 [ ($idlCintC , $idlCintH) ], @Deps,
-qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
+		    qq (rootcint -f %> -c $ROOTCINT_CPPPATH -D__ROOT__ %1 %2);
                 }
                 push @Deps, $idlCintC;
                 push @Deps, $idlCintH;
                 push @Deps, $idlC;
                 my @src = ( $idlC, $idlCintH, $idlCintC );
-                Install $env3 $objT, @src; #print "Install $env3 $objT, @src\n";
+                Install $env3 $objT, @src; 
             }
             my $s;
 
             if ( $SO_PKGT eq $SO_PKG ) {
-                ( $s = $idlC ) =~ s/$shareT/$objT/g;
-                push @src, $s;
-                ( $s = $idlCintC ) =~ s/$shareT/$objT/g;
-                push @src, $s;
-
+	       push @src,$idlC;
+	       push @src, $idlCintC;
             } else {
-                ( $s = $idlC ) =~ s/$shareT/$objT/g;
-                push @sourcesT, $s;
-                ( $s = $idlCintC ) =~ s/$shareT/$objT/g;
-                push @sourcesT, $s;
+	      push @sourcesT, $idlC;
+	      push @sourcesT, $idlCintC;
             }
         }
         print "sourcesT = @sourcesT\n" if $param::debug;
@@ -591,13 +545,16 @@ if ( $#src > -1 ) {
         Library $env2 $LIBPKG, @src;
         Install $env2 $LIB,    $LIBPKG;
         print "Install $env2 $LIB, $LIBPKG\n" if $param::debug;
-        my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
-        Depends $env2 $SO_PKG, $libpkg;
+	if ($SO_PKG) {
+	  my $libpkg = $LIB . "/" . File::Basename::basename($LIBPKG);
+	  Depends $env2 $SO_PKG, $libpkg;
+	}
     }
-    script::Keep $SO_PKG;
-    LinkedModule $env2 $SO_PKG, @src;
-    Install $env2 $LIB,         $SO_PKG;
-
+    if ($SO_PKG) {
+      script::Keep $SO_PKG;
+      LinkedModule $env2 $SO_PKG, @src;
+      Install $env2 $LIB,         $SO_PKG;
+    }
     if ( $pkg eq "Star2Root" or $pkg eq "St_base" or $pkg eq "StUtilities" ) {
         my $lib = $LIB . "/lib" . $SO_PKG;
         InstallAs $env2 $lib, $SO_PKG;
@@ -612,15 +569,14 @@ sub script::MakeMoc {
     my @includes = split $main::PATH_SEPARATOR,shift;
     my $Dir  = $env->{Dir};
     my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
-    my $ObjDir        = "#" . $env->{ObjDir};  #    print "MakeMoc ObjDir = $ObjDir\n";
     my @src      = ();
     my @Defs     = ();
     my $PLATFORM = $env->{PLATFORM};
     foreach my $header (@includes) {
 	my $dd = $d;
 	my $G__name = "moc_" . $header;
-	$G__name =~ s/\.h$/\.cxx/; # print "G__name = $G__name\n";
-	my $moc = $QTDIRBIN . "/moc";
+	$G__name =~ s/\.h$/\.cxx/; 
+	my $moc = $env->{Packages}->{QT}->{BINDIR} . "/moc";
 	Command $env ($G__name), ($header), qq($moc -o %>  %<);
 	push @src, $G__name;
 	print "+==========add moc file: $G__name\n" if $param::debug;
@@ -628,5 +584,5 @@ sub script::MakeMoc {
     return @src;
 }
 
-#________________________________________________________________________________
-
+#_________________________________________________________________________________
+		     
