@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Current Available Macros</title>
-<!-- Changed by: Kathleen R. Turner, 29-Nov-1999 -->
+<!-- Changed by: Kathleen R. Turner,  2-Dec-1999 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -308,35 +308,78 @@
   Library macros that use the code are (**)
 <font  size ="+1" color="black">
    <ul>
+
     <li> <font  size ="+1" color="red"> bfc.C <font  size ="+1" color="black"> <br>
           &nbsp  - St_QA_Maker class runs during production to book & fill QA_Maker histograms
             from dst tables
+
     <li>  <font  size ="+1" color="red">bfcread_hist_list_all.C - <font  size ="+1" color="black"> <br>
-          &nbsp  - reads .hist.root file produced from bfc.C <br>
-          &nbsp  - lists all histograms (from all Makers) <br>
+          &nbsp  - reads .hist.root file produced from bfc.C or other chain <br>
+          &nbsp  - lists all histograms (from all Makers) it
+                   finds under all subdirectories for given top level
+                   directory<br>
           &nbsp  - shows how to do this in macro - not using utilities
+
     <li>  <font  size ="+1" color="red">bfcread_hist_list.C  <font  size ="+1" color="black"> <br>
-           &nbsp  - reads .hist.root file produced from bfc.C and lists histograms for
-                    given Maker <br>
+           &nbsp  - reads .hist.root file produced from bfc.C or other chain<br>
+           &nbsp  - lists all histograms it
+                   finds under given Maker subdirectory for given top
+                   level directory  <br>
            &nbsp - uses SetPntrToMaker, ListHists methods
+                  from StHistUtil
+
     <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
-          &nbsp   - reads .hist.root file produced from bfc.C  <br>
-          &nbsp   -  lists,draws,prints histograms for given Maker<br>
+          &nbsp   - reads .hist.root file produced from bfc.C  or other chain<br>
+          &nbsp   -  lists,draws,prints to output ps file histograms for given Maker
+                    subdirectory for given top level directory<br>
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
                  &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+                  from StHistUtil
+
     <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
-          &nbsp   - creates chain and then runs the St_QA_Maker for Nevents <br>
-          &nbsp   -  lists,draws,prints histograms from "QA"   <br>                  
+          &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
+                    dst-table histograms <br>
+          &nbsp   -  lists,draws,prints histograms from "QA" subdirectory   <br>                  
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
                  &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+                  from StHistUtil
+
     <li>  <font  size ="+1" color="red">bfcread_dst_EventQAhist.C <font  size ="+1" color="black"> <br>
           &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
-          &nbsp   - creates chain and then runs the StEventMaker and StEventQAMaker for Nevents <br>
-          &nbsp   -  lists,draws,prints histograms from "EventQA"   <br>                  
+          &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
+                    and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   -  lists,draws,prints histograms from "EventQA" subdirectory  <br>                  
           &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
                  &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+                  from StHistUtil
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the St_QA_Maker for nevents to book & fill QA 
+                    dst-table histograms <br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
+
+    <li>  <font  size ="+1" color="red">bfcread_dst_EventQAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the StEventMaker (to fill StEvent data structure)
+                    and StEventQAMaker for nevents to book & fill QA 
+                    StEvent histograms<br>
+          &nbsp   - writes histograms to output *.hist.root with given top level and Maker
+                     subdirectory   <br>                  
+          &nbsp   - one can then use bfcread_hist* macros (above) to view the histograms
+          &nbsp  - uses SetPntrToMaker, ListHists methods from StHistUtil
+
    </ul>
+
+Reminder!  In order to get your histograms in "correct" place, you
+   must book them in ::Init method of your macro  OR
+   you must use the AddHist method to put them in the right place!!!
 
 <p>
  <font  size ="+1" color="red">
