@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.9 2001/07/31 23:21:42 lansdell Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.10 2001/08/27 21:15:15 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.10  2001/08/27 21:15:15  genevb
+// fixed a typo
+//
 // Revision 2.9  2001/07/31 23:21:42  lansdell
 // added last point, hit-helix histos
 //
@@ -348,7 +351,7 @@
   "StEMMQaXiVtxTot",
   "StEMMQaKinkTot",
   "StEMMQaGtrkRZf0",
-  "StMMEQaGtrkRZf0TS",
+  "StEMMQaGtrkRZf0TS",
   "StEMMQaPtrkRZf0",
   "StEMMQaPtrkRZf0TS",
   "StEMMbemcClNum",
