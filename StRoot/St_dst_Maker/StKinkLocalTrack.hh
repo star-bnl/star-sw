@@ -1,7 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
-// $Id: StKinkLocalTrack.hh,v 1.6 2000/02/02 21:37:36 lbarnby Exp $
+// $Id: StKinkLocalTrack.hh,v 1.7 2001/04/09 19:56:55 wdeng Exp $
 // $Log: StKinkLocalTrack.hh,v $
+// Revision 1.7  2001/04/09 19:56:55  wdeng
+// Added 'const' to Compare function signature
+//
 // Revision 1.6  2000/02/02 21:37:36  lbarnby
 // CC5
 //
@@ -32,7 +35,7 @@ public:
   // StKinkLocalTrack(const StKinkLocalTrack&);                  use default
   // const StKinkLocalTrack& operator=(const StKinkLocalTrack&); use default
   
-  Int_t  Compare(TObject *obj);
+  Int_t  Compare(const TObject *obj) const;
   Bool_t IsSortable() const { return 1; }
   Bool_t IsEqual(TObject *obj);
   

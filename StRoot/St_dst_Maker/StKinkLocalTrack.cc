@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.8 2000/01/25 16:01:48 fisyak Exp $
+// $Id: StKinkLocalTrack.cc,v 1.9 2001/04/09 19:56:55 wdeng Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.9  2001/04/09 19:56:55  wdeng
+// Added 'const' to Compare function signature
+//
 // Revision 1.8  2000/01/25 16:01:48  fisyak
 // Devorce with StAF
 //
@@ -65,7 +68,7 @@ StKinkLocalTrack::~StKinkLocalTrack() {
 }
 
 
-Int_t StKinkLocalTrack::Compare(TObject *obj)
+Int_t StKinkLocalTrack::Compare(const TObject *obj) const
 {
   if( mStartRadius2D == ((StKinkLocalTrack*)obj)->mStartRadius2D ) return 0;
   if( mStartRadius2D <  ((StKinkLocalTrack*)obj)->mStartRadius2D ) return -1;
