@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.21 2003/09/23 17:47:55 akio Exp $
+// $Id: StppEvent.cxx,v 1.22 2003/09/23 20:43:09 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.22  2003/09/23 20:43:09  akio
+// *** empty log message ***
+//
 // Revision 1.21  2003/09/23 17:47:55  akio
 // small fix for warnings
 //
@@ -632,11 +635,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     //Bridge to fortran/ntuple filling
     if(runN<4000000){
       //calling fortran pi0 finder from FPD
-<<<<<<< StppEvent.cxx
       float result[10], rin[10], bbcdif=-999.9;
-=======
-      float result[10], rin[10], bbcdif=-999999.;
->>>>>>> 1.20
       int iin[10], ibbca[32], ibbct[32];
       for(int i=0; i<10; i++){ result[i]=0.0; }
       unsigned short east=1500, west=1500;
