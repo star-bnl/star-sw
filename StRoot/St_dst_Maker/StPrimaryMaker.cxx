@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.17 1999/11/10 01:56:35 lbarnby Exp $
+// $Id: StPrimaryMaker.cxx,v 1.18 1999/11/12 01:45:02 nystrand Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.18  1999/11/12 01:45:02  nystrand
+// Added call to St_db_Maker->GetDateTime to determine geometry
+//
 // Revision 1.17  1999/11/10 01:56:35  lbarnby
 // fix to allow 'intermediate' primary vertices to be saved plus final one - was previously only saving initial guess
 //
@@ -72,8 +75,9 @@
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
+#include "St_db_Maker/St_db_Maker.h"
 
-long lmv(St_dst_track *track, St_dst_vertex *vertex);
+long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 
 //class St_tcl_tpcluster;
 //class St_scs_cluster;
@@ -214,11 +218,14 @@ Int_t StPrimaryMaker::Make(){
   } 
 
   // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
-  long NGlbTrk = tptrack->GetNRows();
+  long NGlbTrk = globtrk->GetNRows();
   if( NGlbTrk < 15 ){
     // lmv
+
+    St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
+    Int_t mdate = db->GetDateTime().GetDate();
     if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
-    iRes = lmv(globtrk,vertex);
+    iRes = lmv(globtrk,vertex,mdate);
     //   ================================================
   }
   else{    
