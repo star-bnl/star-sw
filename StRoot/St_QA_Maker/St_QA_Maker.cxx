@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.23 1999/04/28 18:39:29 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.24 1999/05/05 19:35:52 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.24  1999/05/05 19:35:52  kathy
+// add new method ListHists and clean up
+//
 // Revision 1.23  1999/04/28 18:39:29  kathy
 // removed check of two different directory for GetDataSet because the infrastructure code should take care of this and not the Makers
 //
@@ -311,8 +314,7 @@ ClassImp(St_QA_Maker)
   // for method MakeHistXi
 
 //  Now construct inline functions: 
-  drawinit=kFALSE;
-  SetDraw();
+  SetDraw(kFALSE);
   SetHistsNames();
   SetZones();
   SetPaperSize();
@@ -328,7 +330,7 @@ St_QA_Maker::~St_QA_Maker(){
 
 Int_t St_QA_Maker::DrawHists() 
 {  
-  cout << " **** Now in St_QA_Maker::DrawHists - beginning **** " << endl;
+  cout << " **** Now in St_QA_Maker::DrawHists  **** " << endl;
 
 
 // set output ps file name
@@ -336,13 +338,17 @@ Int_t St_QA_Maker::DrawHists()
   const Char_t *psfileName = m_PsFileName.Data();
   if (!m_PsFileName.IsNull()) psf = new TPostScript((char *)psfileName);  
   
-//set papersize & options
+//set Style of Plots
   const Int_t numPads = m_PadColumns*m_PadRows;  
+// SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
   gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
   gStyle->SetOptStat(111111);
+//
 
 //setup canvas
   SafeDelete(m_QACanvas);
+
+// TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
   TCanvas *QACanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
   QACanvas->SetFillColor(19);
   QACanvas->SetBorderSize(2);  
@@ -354,7 +360,8 @@ Int_t St_QA_Maker::DrawHists()
   const Char_t *lastHistName  = m_LastHistName.Data();
 
   TObject *obj = 0;
-  TList *dirList = gDirectory->GetList();
+//  TList *dirList = gDirectory->GetList();
+  TList *dirList = Histograms();
   Int_t padCount = 0;
   
 // Create an iterator
@@ -394,6 +401,39 @@ Int_t St_QA_Maker::DrawHists()
     delete psf;
   }
   return histCounter;
+}
+
+//_____________________________________________________________________________
+// Method ListHists -->
+// List of all histograms
+
+Int_t St_QA_Maker::ListHists() 
+{  
+  cout << " **** Now in St_QA_Maker::ListHists **** " << endl;
+
+  TObject *obj = 0;
+  TList *dirList = gDirectory->GetList();
+  
+// Create an iterator
+  TIter nextObj(dirList);
+  Int_t histReadCount = 0;
+
+// use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
+  while (obj = nextObj()) {
+
+// now check if obj is a histogram
+    if (obj->InheritsFrom("TH1")) {
+ 
+      histReadCount++;
+//  \n means newline, \" means print a quote
+//      printf(" %d. Have histogram Type %s, Name %s with Title=\"%s\"\n",histReadCount,obj->ClassName(),obj->GetName(),obj->GetTitle());
+      cout << " Hist No. " << histReadCount << ", Type: " << obj->ClassName() 
+           << ", Name: " << obj->GetName() << ", Title \"" << obj->GetTitle() << "\"  "<< endl; 
+    }
+  }
+
+  cout << " ****  Total No. Histograms  = " << histReadCount <<endl;
+  return histReadCount;
 }
 
 //_____________________________________________________________________________
@@ -1077,7 +1117,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.23 1999/04/28 18:39:29 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.24 1999/05/05 19:35:52 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

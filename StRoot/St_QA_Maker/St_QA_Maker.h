@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.14 1999/04/21 20:19:19 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.15 1999/05/05 19:35:53 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.15  1999/05/05 19:35:53  kathy
+//! add new method ListHists and clean up
+//!
 //! Revision 1.14  1999/04/21 20:19:19  kathy
 //! put in comments and cleaned up - works for mdc2 dst in dev now
 //!
@@ -92,7 +95,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.14 1999/04/21 20:19:19 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.15 1999/05/05 19:35:53 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -158,28 +161,29 @@ class St_QA_Maker : public StMaker {
   Int_t          m_PadColumns;     // Number of the columns (TPad's) on the single Canvas
   Int_t          m_PadRows;        // Number of the columns (TPad's) on the single Canvas
   
-  Int_t          m_PaperWidth;     // Paper size in inch.
-  Int_t          m_PaperHeight;    // Paper size in inch.
+  Int_t          m_PaperWidth;     // Paper size in cm
+  Int_t          m_PaperHeight;    // Paper size in cm
   
   TString        m_FirstHistName;
   TString        m_LastHistName;
   
+  TString        m_LogHistName;    // Name of histogram that we want plotted in LogY scale
+
   TString        m_PsFileName;     // Name of the PostScipt file to plot hist's out
   
   
  protected:
   
   // for method MakeEvSum - from table event_summary
-  TH1F     *m_trk_tot_gd;    //! number of good global tracks divided by total
-  TH1F     *m_glb_trk_tot;   //! # tracks total from globtrk
-  TH1F     *m_glb_trk_gd;    //! # tracks good from globtrk
-  TH1F     *m_glb_trk_plusminus; //! # trks pos/neg. 
-  
-  TH1F     *m_vert_total;    //! total number of vertices
-  TH1F     *m_vert_V0;       //! number of V0 vertices
-  /*    TH1F     *m_vert_La;       //! number of La vertices  */
-  /*    TH1F     *m_vert_Ala;      //! number of Ala vertices */
-  /*    TH1F     *m_vert_K0;       //! number of K0 vertices */
+  TH1F     *m_trk_tot_gd;         //! number of good global tracks divided by total
+  TH1F     *m_glb_trk_tot;        //! # tracks total from globtrk
+  TH1F     *m_glb_trk_gd;         //! # tracks good from globtrk
+  TH1F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
+  TH1F     *m_vert_total;         //! total number of vertices
+  TH1F     *m_vert_V0;            //! number of V0 vertices
+  /*    TH1F     *m_vert_La;      //! number of La vertices  */
+  /*    TH1F     *m_vert_Ala;     //! number of Ala vertices */
+  /*    TH1F     *m_vert_K0;      //! number of K0 vertices */
   TH1F     *m_mean_pt;       //! mean pt value
   TH1F     *m_mean_eta;      //! mean eta value 
   TH1F     *m_prim_vrtx0;    //! primary vrtx x position
@@ -307,6 +311,7 @@ class St_QA_Maker : public StMaker {
   St_QA_Maker(const char *name="QA", const char *title="evet/QA");
   virtual       ~St_QA_Maker();
   virtual Int_t  DrawHists();
+  virtual Int_t  ListHists();
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
@@ -339,19 +344,29 @@ class St_QA_Maker : public StMaker {
   virtual void   PrintInfo();
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
   virtual void   SetHistsNames(const Char_t *firstName="*", const Char_t *lastName="*");
+// SetZones --> divide canvas into 2 x 3 zones
   virtual void   SetZones(Int_t columns=2, Int_t rows=3);
-  virtual void   SetPaperSize(Int_t width=20, Int_t height=27);
+// SetPaperSize -->  A4 is 20,26  US letter is 20,24
+  virtual void   SetPaperSize(Int_t width=20, Int_t height=24);
   virtual void   SetPostScriptFile(const Char_t *psFileName="");
+
   
+// the following is a ROOT macro  that is needed in all ROOT code
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
     
 #endif
     
-inline void St_QA_Maker::SetDraw(Bool_t drawFlag) { drawinit = drawFlag;}
+inline void St_QA_Maker::SetDraw(Bool_t drawFlag) 
+                         { drawinit = drawFlag;}
 inline void St_QA_Maker::SetHistsNames(const Char_t *firstName, const Char_t *lastName)
-            { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
-inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows){ m_PadColumns =columns; m_PadRows = rows;}
+                         { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
+inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows)
+                         { m_PadColumns =columns; m_PadRows = rows;}
 inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height)
-            { m_PaperWidth = width; m_PaperHeight = height;}
-inline void St_QA_Maker::SetPostScriptFile(const Char_t *psFileName){ m_PsFileName = psFileName;}
+                         { m_PaperWidth = width; m_PaperHeight = height;}
+inline void St_QA_Maker::SetPostScriptFile(const Char_t *psFileName)
+                         { m_PsFileName = psFileName;}
+
+
+
