@@ -5,12 +5,16 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.14 2004/01/19 20:19:44 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.15 2004/01/26 21:12:19 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.15  2004/01/26 21:12:19  zolnie
+ * added one one more quick member getPhiMean with one argument
+ * returns phi for a sector rather than a subsector
+ *
  * Revision 1.14  2004/01/19 20:19:44  zolnie
  * added getEtaMin and getEtaMax inline members
  *
@@ -77,7 +81,12 @@ public:
     return 0.5 * fabs( mEtaBin[eta] - mEtaBin[eta+1] );
   }
 
-  // return the mean value of phi
+  // return the mean value of phi (subsector)
+  inline Float_t getPhiMean(UInt_t sec) const {
+    double dPhi=2.0*M_PI/mNumSec;
+    return mClock*(sec+0.5)*dPhi+mPhi0;
+  }
+  // return the mean value of phi (subsector)
   inline Float_t getPhiMean(UInt_t sec, UInt_t ssec) const {
     double dPhi=2.0*M_PI/mNumSec;
     return mClock*(Float_t(sec)+(ssec+0.5)/mNumSSec)*dPhi+mPhi0;
