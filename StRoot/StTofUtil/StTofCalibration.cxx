@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibration.cxx,v 1.3 2002/01/22 16:12:42 geurts Exp $
+ * $Id: StTofCalibration.cxx,v 1.4 2002/01/29 23:33:26 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibration.cxx,v $
+ * Revision 1.4  2002/01/29 23:33:26  geurts
+ * change default tdc calibration factor
+ *
  * Revision 1.3  2002/01/22 16:12:42  geurts
  * minor bugfix for Solaris
  *
@@ -50,7 +53,7 @@ StTofCalibration::StTofCalibration(){
   for(int iRow=0; iRow<TOFP_MAX_SLATS; iRow++){
     StructSlatCalib* tempSlatCalib = new StructSlatCalib;
     tempSlatCalib->offset_tdc =  0.;
-    tempSlatCalib->cc_tdc     =  25.0e-12;
+    tempSlatCalib->cc_tdc     =  50.0e-12;
     tempSlatCalib->ods_tdc    =  0.;
     tempSlatCalib->offset_adc =  0.;
     tempSlatCalib->ods_adc    =  0.;
