@@ -4,8 +4,12 @@ MODULE  CALBGEO1 is the geometry of the Barrel EM Calorimeter
    Created   January 20, 2004
 * Based on the original CALBGEO
 *
-* $Id: calbgeo1.g,v 1.2 2004/01/19 22:48:41 potekhin Exp $
+* $Id: calbgeo1.g,v 1.3 2004/01/22 00:28:04 potekhin Exp $
 * $Log: calbgeo1.g,v $
+* Revision 1.3  2004/01/22 00:28:04  potekhin
+* Correct a typo -- the angle covered by a module is 6 deg,
+* not 3
+*
 * Revision 1.2  2004/01/19 22:48:41  potekhin
 * A working version of the new barrel calorimeter geometry,
 * which does not reply on DIV, but instead creates copies of modules
@@ -178,7 +182,7 @@ EndBlock
 * -----------------------------------------------------------------------------
 Block CPHI corresponds to a single module
       attribute CPHI  seen=1   colo=5
-      Shape  PCON Phi1=0.0 DPhi=3.0 Nz=3,
+      Shape  PCON Phi1=0.0 DPhi=6.0 Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
@@ -188,13 +192,12 @@ Block CPHI corresponds to a single module
       Create   CBTW   dx=calg_FrontThk
       Position CBTW   x =calg_Rmin+calg_FrontThk,
                       z =current_depth/tan_theta/2 
-*
+
       current_depth = current_depth + 2*calg_FrontThk  
+
       layer = 0
       do super = 1,nint(calg_Nsuper)
-*
          create and position CSUP
-*
       enddo
 *                                  Module Back Plates
       Create   CBTW   dx=calg_CompThk
