@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.24 1999/03/20 23:30:00 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.25 1999/03/30 03:08:43 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.25  1999/03/30 03:08:43  sakrejda
+// remanents of the auxiliary table removed
+//
 // Revision 1.24  1999/03/20 23:30:00  perev
 // new maker schema
 //
@@ -158,6 +161,7 @@ Int_t St_tpt_Maker::Init(){
 // 		Create ntuple
   m_final = new TNtuple("final","Tpctest tracks and hits",
      "evno:alpha:lambda:row:x:y:z:track:cluster:q:xave:sigma:zrf:prf:nfit:invp:psi:phi0:r0:tanl:z0:chisqxy:chisqz:nseq");
+ // xave and sigma are not filled anymore because they came from aux table (RAI)
 
   return StMaker::Init();
 }
@@ -289,21 +293,21 @@ Int_t St_tpt_Maker::Make(){
   if (m_mkfinal) {
     St_tcl_tphit  *n_hit = 0;
     St_tcl_tpcluster *n_clus  = 0;
-    St_tcl_tphit_aux *n_hitau = 0;
+    //    St_tcl_tphit_aux *n_hitau = 0; // aux table 
     St_DataSet *tpc_hits = GetInputDS("tpc_hits");
     if (tpc_hits) {
       St_DataSetIter tpc_data(tpc_hits);
       n_hit      = (St_tcl_tphit *) tpc_data["tphit"];
       n_clus     = (St_tcl_tpcluster *)  tpc_data["tpcluster"];
-      n_hitau    = (St_tcl_tphit_aux *) tpc_data["tphitau"];
+      //      n_hitau    = (St_tcl_tphit_aux *) tpc_data["tphitau"]; //aux table
     }
     if(n_hit){
       St_tpt_track * n_track    = (St_tpt_track *) tpc_tracks["tptrack"];
       tcl_tphit_st *h = n_hit->GetTable(); 
       for (int i = 0;i<n_hit->GetNRows();i++,h++){
-	tcl_tphit_aux_st *au =  n_hitau->GetTable();
-	for(int iau=0;iau<n_hitau->GetNRows();iau++,au++){
-	  if(au->id != h->id) continue;
+	//	tcl_tphit_aux_st *au =  n_hitau->GetTable(); //aux table
+	//	for(int iau=0;iau<n_hitau->GetNRows();iau++,au++){ //aux table
+	//	  if(au->id != h->id) continue; //aux table
 	  // cluster variable is one more than row num in cluster table
 	  tcl_tpcluster_st *clu = n_clus->GetTable();
 	  clu += h->cluster -1;
@@ -317,7 +321,8 @@ Int_t St_tpt_Maker::Make(){
 	      
 	      Float_t row[] = {evno,h->alpha,h->lambda,
 			       h->row,h->x,h->y,h->z,h->track,h->cluster,h->q,
-			       au->xave,au->sigma,h->zrf,h->prf,
+			       //au->xave,au->sigma,h->zrf,h->prf, //aux table
+			       0,0,h->zrf,h->prf,
 			       t->nfit,t->invp,t->psi,t->phi0,t->r0,t->tanl,
 			       t->z0,t->chisq[0],t->chisq[1],clu->nseq};
 	      m_final->Fill(row);
@@ -326,11 +331,12 @@ Int_t St_tpt_Maker::Make(){
 	  else{
 	    Float_t row[] = {evno,h->alpha,h->lambda,
                              h->row,h->x,h->y,h->z,h->track,h->cluster,h->q,
-			     au->xave,au->sigma,h->zrf,h->prf,0,0,0,0,0,
+			     //au->xave,au->sigma,h->zrf,h->prf,0,0,0,0,0, //aux table
+			     0,0,h->zrf,h->prf,0,0,0,0,0,
 			     0,0,0,0,clu->nseq};
 	    m_final->Fill(row);
 	  } // end of no track else
-	} // end of hit_aux table loop
+	  //	} // end of hit_aux table loop
       }  // end of hit loop
     }
   }// end of if on m_mkfinal flag.
@@ -338,7 +344,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.24 1999/03/20 23:30:00 perev Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.25 1999/03/30 03:08:43 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
