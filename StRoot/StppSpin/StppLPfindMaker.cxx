@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.3 2001/04/23 19:44:26 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.4 2001/04/26 20:04:52 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.4  2001/04/26 20:04:52  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2001/04/23 19:44:26  balewski
 // *** empty log message ***
 //
@@ -187,9 +190,8 @@ Int_t StppLPfindMaker::Make()
     break;
   } 
   assert(rTPT);
-
   float delZ, lpRxy, delRxy;
-  DcaTract2Vert(rLP,delZ, lpRxy, delRxy);
+  DcaTract2Vert(rTPT,delZ, lpRxy, delRxy);
 
   nEVfound++;
   
@@ -246,11 +248,11 @@ return kStOK;
 
 
 //_____________________________________________________________________________
-void  StppLPfindMaker::DcaTract2Vert(dst_track_st *rLP,float &delZ, float &lpRxy, float &delRxy)
+void  StppLPfindMaker::DcaTract2Vert(tpt_track_st *TPT,float &delZ, float &lpRxy, float &delRxy)
 {
   delRxy=-1;
   
-  // get DCA of rLP vs, rVertex
+  // get DCA of TPT-track vs, rVertex
   double spath,h;
   double x0,y0,z0;
   double ptinv,psi,tanl;
@@ -264,20 +266,20 @@ void  StppLPfindMaker::DcaTract2Vert(dst_track_st *rLP,float &delZ, float &lpRxy
   double bfield = 0.1*b[2]; //This is now Tesla.
   
   // First point on Helix
-  x0 = rLP->r0*cos(rLP->phi0* degree);
-  y0 = rLP->r0*sin(rLP->phi0* degree);
-  z0 = rLP->z0;
+  x0 = TPT->r0*cos(TPT->phi0* degree);
+  y0 = TPT->r0*sin(TPT->phi0* degree);
+  z0 = TPT->z0;
   
   StThreeVectorD origin(x0*centimeter, y0*centimeter, z0*centimeter);
   
   // Helicity / Sense of Curvatutre
-  h  = 1.0;  if( bfield*rLP->icharge > 0.0 )h=-1.0;
+  h  = 1.0;  if( bfield*TPT->q > 0.0 )h=-1.0;
   double qtrk = 1.0; if( h*bfield > 0.0)qtrk=-1.0;
   
   // Track direction at first point
-  ptinv  = rLP->invpt;
-  tanl   = rLP->tanl;
-  psi    = rLP->psi* degree; 
+  ptinv  = TPT->invp;
+  tanl   = TPT->tanl;
+  psi    = TPT->psi* degree; 
   if(psi<0.0){psi=psi+2.*M_PI;}
   
   px   = (1./ptinv)*cos(psi);
@@ -290,13 +292,13 @@ void  StppLPfindMaker::DcaTract2Vert(dst_track_st *rLP,float &delZ, float &lpRxy
   double yorigin = primV->position().y();
   spath = TrkHlx.pathLength(xorigin, yorigin);
   StThreeVectorD XMinVec = TrkHlx.at(spath);
-  cout<<"XYZ of rLP at DCA to vertex= "<<XMinVec<<endl;
+  cout<<"XYZ of rLP_TPT at DCA to vertex= "<<XMinVec<<endl;
   delZ=primV->position().z()-XMinVec.z();
   float dx=primV->position().x()-XMinVec.x();
   float dy=primV->position().y()-XMinVec.y();
   lpRxy=sqrt(XMinVec.x()*XMinVec.x() +XMinVec.y()*XMinVec.y() );
   delRxy=sqrt(dx*dx+dy*dy);
-  printf("zVert-ZrLP =%f cm, delRxy/cm=%f, lpRxy/cm=%f\n",delZ,delRxy,lpRxy);
+  printf("zVert - ZrLP_TPT =%f cm, delRxy/cm=%f, lpRxy/cm=%f\n",delZ,delRxy,lpRxy);
   
 }
 
