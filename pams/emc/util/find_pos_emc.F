@@ -76,7 +76,8 @@ c*-
             z=0.5 + ((ebin-75)/75.0-0.5)
      +       *ems_control(1).bemc_eta_bin(ebin+1)
          endif
-         r=240.0                                    !Temporaly! Has to be check!!!
+         r=ems_control(1).bemc_inner_r              !Temporaly! Has to be check!!!
+         z=z*ems_control(1).bemc_max_z              !Temporaly! Has to be check!!!
          eta=-1.0*ALOG(TAN(ATAN2(r,z)/2.0))
       elseif(det.eq.BSMDP) then                     ! Barrel SMD phi strip
          eta=rl*(ems_control(1).bemc_eta_bin(ebin*2-1)
