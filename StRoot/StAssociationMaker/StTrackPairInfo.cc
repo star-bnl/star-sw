@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StTrackPairInfo.cc,v 1.4 1999/12/08 00:00:25 calderon Exp $
+ * $Id: StTrackPairInfo.cc,v 1.5 1999/12/14 07:07:41 calderon Exp $
  * $Log: StTrackPairInfo.cc,v $
+ * Revision 1.5  1999/12/14 07:07:41  calderon
+ * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
+ * each detector.
+ * Numbering scheme from StEvent & StMcEvent as per SVT request
+ * Added Kink, V0 and Xi vertex associations.
+ *
  * Revision 1.4  1999/12/08 00:00:25  calderon
  * New version of StAssociationMaker.
  * -Uses new StEvent / StMcEvent
@@ -20,8 +26,9 @@
 #include "StTrackPairInfo.hh"
 #include "StMcTrack.hh"
 #include "StGlobalTrack.h"
+#include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.4 1999/12/08 00:00:25 calderon Exp $";
+static const char rcsid[] = "$Id: StTrackPairInfo.cc,v 1.5 1999/12/14 07:07:41 calderon Exp $";
 
 StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
 				 StMcTrack*     mcTrk,
@@ -34,7 +41,31 @@ StTrackPairInfo::StTrackPairInfo(StGlobalTrack* rcTrk,
     mCommonTpcHits(tpcPings),
     mCommonSvtHits(svtPings),
     mCommonFtpcHits(ftpcPings)
-{ /* noop */ }
+{
+    // Percent of Svt Hits
+    unsigned short  numPoints = rcTrk->detectorInfo()->numberOfPoints(kSvtId);
+    mRatioCommonToTotalHitsSvt  =
+	(numPoints) ? static_cast<float>(mCommonSvtHits)/static_cast<float>(numPoints) : 0;
+
+    // Percent of Tpc Hits
+    numPoints = rcTrk->detectorInfo()->numberOfPoints(kTpcId);
+    mRatioCommonToTotalHitsTpc  =
+	(numPoints) ? static_cast<float>(mCommonTpcHits)/static_cast<float>(numPoints) : 0;
+
+    if (!numPoints) {
+	// Percent of Ftpc West Hits in common
+	numPoints = rcTrk->detectorInfo()->numberOfPoints(kFtpcWestId);
+	mRatioCommonToTotalHitsFtpc =
+	    (numPoints) ? static_cast<float>(mCommonFtpcHits)/static_cast<float>(numPoints) : 0;
+	
+	// If no Ftpc West Hits, try Ftpc East 
+	if (!numPoints) {
+	    numPoints = rcTrk->detectorInfo()->numberOfPoints(kFtpcEastId);
+	    mRatioCommonToTotalHitsFtpc =
+		(numPoints) ? static_cast<float>(mCommonFtpcHits)/static_cast<float>(numPoints) : 0;
+	}
+    }
+}
 
 StTrackPairInfo::~StTrackPairInfo() { /* noop */ }
 

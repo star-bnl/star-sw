@@ -1,7 +1,13 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.h,v 1.4 1999/12/08 00:00:25 calderon Exp $
+ * $Id: StMcParameterDB.h,v 1.5 1999/12/14 07:07:41 calderon Exp $
  * $Log: StMcParameterDB.h,v $
+ * Revision 1.5  1999/12/14 07:07:41  calderon
+ * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
+ * each detector.
+ * Numbering scheme from StEvent & StMcEvent as per SVT request
+ * Added Kink, V0 and Xi vertex associations.
+ *
  * Revision 1.4  1999/12/08 00:00:25  calderon
  * New version of StAssociationMaker.
  * -Uses new StEvent / StMcEvent
@@ -39,9 +45,8 @@ class StMcParameterDB {
 public:
     static StMcParameterDB* instance(); // *MENU*
 
-    virtual ~StMcParameterDB();  //!
-    
     float xCutTpc() const; // *MENU*
+    float yCutTpc() const;
     float zCutTpc() const; // *MENU*
     unsigned int reqCommonHitsTpc() const; // *MENU*
 
@@ -55,6 +60,7 @@ public:
     unsigned int reqCommonHitsFtpc() const; // *MENU*
     
     void setXCutTpc(float); // *MENU*
+    void setYCutTpc(float); // *MENU*
     void setZCutTpc(float); // *MENU*
     void setReqCommonHitsTpc(unsigned int); // *MENU*
 
@@ -74,6 +80,7 @@ private:
     StMcParameterDB& operator= (const StMcParameterDB&);
     
     float mXCutTpc;
+    float mYCutTpc;
     float mZCutTpc;
     unsigned int mReqCommonHitsTpc;
 
@@ -92,6 +99,8 @@ private:
 ostream& operator<<(ostream &, const StMcParameterDB&);
 
 inline float StMcParameterDB::xCutTpc() const { return mXCutTpc; }
+
+inline float StMcParameterDB::yCutTpc() const { return mYCutTpc; }
 
 inline float StMcParameterDB::zCutTpc() const { return mZCutTpc; }
 

@@ -1,16 +1,22 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.14 1999/12/08 00:00:24 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.15 1999/12/14 07:07:41 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.15  1999/12/14 07:07:41  calderon
+ * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
+ * each detector.
+ * Numbering scheme from StEvent & StMcEvent as per SVT request
+ * Added Kink, V0 and Xi vertex associations.
+ *
+ * Numbering scheme from StEvent & StMcEvent as per SVT request
+ * Added Kink, V0 and Xi vertex associations.
+ *
  * Revision 1.14  1999/12/08 00:00:24  calderon
  * New version of StAssociationMaker.
  * -Uses new StEvent / StMcEvent
  * -Includes maps using reconstructed and monte carlo objects as keys for:
  *   TPC Hits
  *   SVT Hits
- *   FTPC Hits
- *   Tracks (using all 3 hit multimaps)
- *
  *   FTPC Hits
  *   Tracks (using all 3 hit multimaps)
  *
@@ -75,23 +81,22 @@
 #include <stdlib.h>
 using std::string;
 using std::vector;
+#endif
+
+#include "StAssociationMaker.h"
 #include "StMcParameterDB.h"
 #include "StTrackPairInfo.hh"
 
+#include "StGlobals.hh"
+#include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorF.hh"
 
 
 #include "StChain.h"
 #include "St_DataSet.h"
-#include "StMcParameterDB.h"
-#include "StTrackPairInfo.hh"
-
-#include "StThreeVectorF.hh"
 #include "St_DataSetIter.h"
 #include "TH2.h"
-
-#include "StDbUtilities/StCoordinates.hh"
 
 
 #include "StEventTypes.h"
@@ -169,6 +174,19 @@ bool compTrack::operator()(const StGlobalTrack* t1, const StGlobalTrack* t2) con
     return t1 < t2;
 }
 
+bool compMcTrack::operator()(const StMcTrack* t1, const StMcTrack* t2) const {
+    return t1 < t2;
+}
+bool compKinkVertex::operator()(const StKinkVertex* v1, const StKinkVertex* v2) const {
+    return v1 < v2;
+}
+bool compV0Vertex::operator()(const StV0Vertex* v1, const StV0Vertex* v2) const {
+    return v1 < v2;
+}
+bool compXiVertex::operator()(const StXiVertex* v1, const StXiVertex* v2) const {
+    return v1 < v2;
+}
+
 bool compMcVertex::operator()(const StMcVertex* v1, const StMcVertex* v2) const {
     return v1 < v2;
 }
@@ -225,6 +243,12 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     mRcSvtHitMap  = 0;
     mMcSvtHitMap  = 0;
     mRcFtpcHitMap = 0;
+    mMcFtpcHitMap = 0;
+    mRcTrackMap   = 0;
+    mMcTrackMap   = 0;
+    mRcKinkMap   = 0;
+    mMcKinkMap   = 0;
+    mRcV0Map   = 0;
     mMcV0Map   = 0;
     mRcXiMap   = 0;
     mMcXiMap   = 0;
@@ -287,6 +311,36 @@ StAssociationMaker::~StAssociationMaker()
     if (mMcTrackMap) {
 	mMcTrackMap->clear();
 	SafeDelete(mMcTrackMap);
+	cout << "Deleted M.C. Track Map" << endl;
+
+    }    
+    if (mRcKinkMap) {
+	mRcKinkMap->clear();
+	SafeDelete(mRcKinkMap);
+	cout << "Deleted Rec. Kink Map" << endl;
+    }
+    if (mMcKinkMap) {
+	mMcKinkMap->clear();
+	SafeDelete(mMcKinkMap);
+	cout << "Deleted M.C. Kink Map" << endl;
+    }
+    if (mRcV0Map) {
+	mRcV0Map->clear();
+	SafeDelete(mRcV0Map);
+	cout << "Deleted Rec. V0 Map" << endl;
+    }
+    if (mMcV0Map) {
+	mMcV0Map->clear();
+	SafeDelete(mMcV0Map);
+	cout << "Deleted M.C. V0 Map" << endl;
+    }
+    if (mRcXiMap) {
+	mRcXiMap->clear();
+	SafeDelete(mRcXiMap);
+	cout << "Deleted Rec. Xi Map" << endl;
+    }
+    if (mMcXiMap) {
+	mMcXiMap->clear();
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
@@ -344,6 +398,36 @@ void StAssociationMaker::Clear(const char*)
     if (mMcTrackMap) {
 	mMcTrackMap->clear();
 	SafeDelete(mMcTrackMap);
+	cout << "Deleted M.C. Track Map" << endl;
+
+    }    
+    if (mRcKinkMap) {
+	mRcKinkMap->clear();
+	SafeDelete(mRcKinkMap);
+	cout << "Deleted Rec. Kink Map" << endl;
+    }
+    if (mMcKinkMap) {
+	mMcKinkMap->clear();
+	SafeDelete(mMcKinkMap);
+	cout << "Deleted M.C. Kink Map" << endl;
+    }
+    if (mRcV0Map) {
+	mRcV0Map->clear();
+	SafeDelete(mRcV0Map);
+	cout << "Deleted Rec. V0 Map" << endl;
+    }
+    if (mMcV0Map) {
+	mMcV0Map->clear();
+	SafeDelete(mMcV0Map);
+	cout << "Deleted M.C. V0 Map" << endl;
+    }
+    if (mRcXiMap) {
+	mRcXiMap->clear();
+	SafeDelete(mRcXiMap);
+	cout << "Deleted Rec. Xi Map" << endl;
+    }
+    if (mMcXiMap) {
+	mMcXiMap->clear();
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
@@ -455,39 +539,34 @@ Int_t StAssociationMaker::Make()
     StMcTpcHit* mcTpcHit;
     
     // Instantiate the Tpc Hit maps
-    StGlobalCoordinate rcTpcHitCoord(0,0,0);
-    StTpcLocalSectorCoordinate rcTpcHitLocalCoord(0,0,0,1);
-    StTpcCoordinateTransform transformer(gStTpcDb);
-
     mRcTpcHitMap = new rcTpcHitMapType;
     mMcTpcHitMap = new mcTpcHitMapType;
 
     float tpcHitDistance;
     
     for (unsigned int iSector=0;
-		
+	 iSector<rcTpcHitColl->numberOfSectors(); iSector++) {
 	
-	     iPadrow<rcTpcHitColl->sector(iSector)->numberOfPadrows();
+	cout << "In Sector : " << iSector + 1 << endl;
 	StTpcSectorHitCollection* tpcSectHitColl = rcTpcHitColl->sector(iSector);
-	    
+	for (unsigned int iPadrow=0;
 	     iPadrow<tpcSectHitColl->numberOfPadrows();
 	     iPadrow++) {
-		 iHit<rcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().size();
+	    StTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
 	    //PR(iPadrow);
 	    for (unsigned int iHit=0;
 		 iHit<tpcPadRowHitColl->hits().size();
-		rcTpcHit = rcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits()[iHit];
-		rcTpcHitCoord.setPosition(rcTpcHit->position());
-		transformer(rcTpcHitCoord,rcTpcHitLocalCoord);
+		 iHit++){
 		//PR(iHit); 
+
 		rcTpcHit = tpcPadRowHitColl->hits()[iHit];
-		StMcTpcHit* closestTpcHit = 0;
 		
 		StMcTpcHit* closestTpcHit = 0;
 		
 		for (unsigned int jHit=0;
 		     jHit<mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().size();
-		    float xDiff = mcTpcHit->localPosition().x() - rcTpcHitLocalCoord.position().x();
+		     jHit++){
+		    //PR(jHit); 
 		    mcTpcHit = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits()[jHit];
 		    float xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
 		    float yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
@@ -498,7 +577,9 @@ Int_t StAssociationMaker::Make()
 		    }
 		    if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
 			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
-		    if ( fabs(xDiff)< parDB->xCutTpc() && fabs(zDiff) < parDB->zCutTpc()) {
+			closestTpcHit = mcTpcHit;
+		    }
+
 		    if ( fabs(xDiff)< parDB->xCutTpc() &&
 			 fabs(yDiff)< parDB->yCutTpc() &&
 			 fabs(zDiff)< parDB->zCutTpc()) {
@@ -506,10 +587,10 @@ Int_t StAssociationMaker::Make()
 			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
 			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
 		    }
-		    mTpcLocalHitResolution->Fill(closestTpcHit->localPosition().x()-
-					      rcTpcHitLocalCoord.position().x(),
-					      closestTpcHit->position().z()-
-					        rcTpcHit->position().z() );
+		    
+		} // End of Hits in Padrow loop for MC Hits
+		if (closestTpcHit)
+		    mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
 						 rcTpcHit->position().x(),
 						 closestTpcHit->position().z()-
 						 rcTpcHit->position().z() );
@@ -529,9 +610,9 @@ Int_t StAssociationMaker::Make()
     
     // Instantiate the Svt Hit maps
     mRcSvtHitMap = new rcSvtHitMapType;
-    
-    for (unsigned int iLayer=0;
-	 iLayer<rcSvtHitColl->numberOfLayers(); iLayer++) {
+    mMcSvtHitMap = new mcSvtHitMapType;
+
+    float svtHitDistance;
     unsigned int nSvtHits = rcSvtHitColl->numberOfHits();
     for (unsigned int iLayer=0;  nSvtHits &&
 	     iLayer<rcSvtHitColl->numberOfLayers(); iLayer++) {
@@ -611,7 +692,7 @@ Int_t StAssociationMaker::Make()
 	
 	cout << "In Plane : " << iPlane + 1 << endl;
 		
-	    
+	for (unsigned int iSector=0;
 	     iSector<rcFtpcHitColl->plane(iPlane)->numberOfSectors();
 	     iSector++) {
 	   
@@ -998,9 +1079,138 @@ Int_t StAssociationMaker::Make()
     }// StEvent track loop
 
     // Clear the candidate vector
-    
     candidates.clear();
+	 
+    cout << "Finished Making Track Associations *********" << endl;
+
+    //
+    // Start doing Vertex Associations ----------------------
+    //
+
+    // Instantiate the Vertex maps
+    mRcKinkMap = new rcKinkMapType;
+    mMcKinkMap = new mcKinkMapType;
+    mRcV0Map   = new rcV0MapType;
+    mMcV0Map   = new mcV0MapType;
+    mRcXiMap   = new rcXiMapType;
+    mMcXiMap   = new mcXiMapType;
+    // Begin making associations
+    cout << "Making Vertex Associations" << endl;
+
+    StSPtrVecKinkVertex& kinks = rEvent->kinkVertices();
+    StSPtrVecV0Vertex& v0s = rEvent->v0Vertices();
+    StSPtrVecXiVertex& xis = rEvent->xiVertices();
+
     
+    cout << "Kinks..." << endl;
+    pair<rcTrackMapIter, rcTrackMapIter> kinkBounds;
+    // Loop over Kinks
+
+    StKinkVertex* rcKink  = 0;
+    StTrack* kinkParent  = 0;
+    StGlobalTrack* gKinkDaughter = 0;
+    StGlobalTrack* gKinkParent = 0;
+    StMcTrack* mcDaughter = 0;
+    StMcVertex* mcKink    = 0;
+    StMcVertex* primary   = mEvent->primaryVertex();
+    const StMcTrack*  mcParent  = 0;
+    for (StKinkVertexIterator kvi = kinks.begin(); kvi!=kinks.end(); kvi++) {
+	
+	rcKink = *kvi; // Got Kink ...
+	kinkDaughter  = rcKink->daughter(0);
+	gKinkParent = dynamic_cast<StGlobalTrack*>(kinkParent);
+	kinkBounds = mRcTrackMap->equal_range(gKinkDaughter);
+	// Got Parent
+	for (rcTrackMapIter trkIter = kinkBounds.first; trkIter!=kinkBounds.second; trkIter++) {
+	kinkBoundsDaughter = mRcTrackMap->equal_range(gKinkDaughter);
+	// Loop over associated tracks of the daughter
+	for (rcTrackMapIter trkIter = kinkBoundsDaughter.first; trkIter!=kinkBoundsDaughter.second; trkIter++) {
+	    mcDaughter = (*trkIter).second->partnerMcTrack(); // Get associated daughter
+	    mcParent = mcKink->parent(); // Check that parents match
+	    if (mcParent && rcKink->geantIdParent() == mcParent->geantId()) {
+		// Got a candidate
+		mRcKinkMap->insert(rcKinkMapValType (rcKink, mcKink));
+		mMcKinkMap->insert(mcKinkMapValType (mcKink, rcKink));
+		    mRcKinkMap->insert(rcKinkMapValType (rcKink, mcKink));
+		}
+    }
+	}
+    } // kink loop
+	
+    cout << "V0s..." << endl;
+    pair<rcTrackMapIter, rcTrackMapIter> v0Bounds1;
+    pair<rcTrackMapIter, rcTrackMapIter> v0Bounds2;    
+    StV0Vertex* rcV0  = 0;
+    StTrack* v0Daughter1  = 0;
+    StGlobalTrack* gV0Daughter1 = 0;
+    StTrack* v0Daughter2  = 0;
+    StGlobalTrack* gV0Daughter2 = 0;
+    
+    StMcTrack* mcDaughter1 = 0;
+    StMcTrack* mcDaughter2 = 0;
+    
+    // Loop over V0s
+    for (StV0VertexIterator v0vi = v0s.begin(); v0vi!=v0s.end(); v0vi++) {
+	rcV0 = *v0vi; // Got V0 ...
+	v0Daughter1  = rcV0->daughter(0);
+	gV0Daughter1 = dynamic_cast<StGlobalTrack*>(v0Daughter1);
+	if (!gV0Daughter1) continue;
+	// Got Daughter1
+	v0Daughter2  = rcV0->daughter(1);
+	gV0Daughter2 = dynamic_cast<StGlobalTrack*>(v0Daughter2);
+	if (!gV0Daughter2) continue;
+	// Got Daughter2
+	v0Bounds1 = mRcTrackMap->equal_range(gV0Daughter1);
+	v0Bounds2 = mRcTrackMap->equal_range(gV0Daughter2);
+	for (rcTrackMapIter trkIter1 = v0Bounds1.first; trkIter1!=v0Bounds1.second; trkIter1++) {
+	    mcDaughter1 = (*trkIter1).second->partnerMcTrack();
+	    for (rcTrackMapIter trkIter2 = v0Bounds2.first; trkIter2!=v0Bounds2.second; trkIter2++) {
+		mcDaughter2 = (*trkIter2).second->partnerMcTrack();
+		if (mcDaughter1->startVertex() == mcDaughter2->startVertex() &&
+		    mcDaughter1->startVertex() != primary &&
+		    mcDaughter1->startVertex() != 0) {
+		    // Got a V0 candidate
+		    mRcV0Map->insert(rcV0MapValType (rcV0, mcDaughter1->startVertex()));
+		    mMcV0Map->insert(mcV0MapValType (mcDaughter1->startVertex(), rcV0));
+		    
+		}
+    }
+	
+    } // V0 loop
+    
+    cout << "Xis..." << endl;
+    pair<rcTrackMapIter, rcTrackMapIter> xiBounds;
+    pair<rcV0MapIter, rcV0MapIter> xiBoundsV0;
+    
+    StXiVertex*    rcXi;
+    StV0Vertex*    rcV0ofXi;
+    StTrack*       rcBachelor;
+    StGlobalTrack* gRcBachelor;
+    StMcTrack*     mcBachelor;
+    StMcVertex*    mcXi;
+    StMcVertex*    mcV0;
+    // Loop over Xis
+    for (StXiVertexIterator xvi = xis.begin(); xvi!=xis.end(); xvi++) {
+	rcXi = *xvi;
+	rcV0ofXi = rcXi->v0Vertex();
+	rcBachelor = rcXi->bachelor();
+	gRcBachelor = dynamic_cast<StGlobalTrack*>(rcBachelor);
+	if (!gRcBachelor) continue;
+	xiBounds = mRcTrackMap->equal_range(gRcBachelor);
+	for (rcTrackMapIter trkIter3 = xiBounds.first; trkIter3!= xiBounds.second; trkIter3++){
+	    mcBachelor = (*trkIter3).second->partnerMcTrack();
+	    mcXi = mcBachelor->startVertex();
+	    if (mcXi == primary || mcXi == 0) continue;
+	    xiBoundsV0 = mRcV0Map->equal_range(rcV0ofXi);
+	    for (rcV0MapIter v0Iter = xiBoundsV0.first; v0Iter!= xiBoundsV0.second; v0Iter++){
+		mcV0 = (*v0Iter).second;
+		if (mcXi == mcV0->parent()->startVertex()) {
+		    // Got a Xi candidate
+		    mRcXiMap->insert(rcXiMapValType (rcXi, mcXi));
+		    mMcXiMap->insert(mcXiMapValType (mcXi, rcXi));
+		    
+		}
+	    }
 	}
     }
       
