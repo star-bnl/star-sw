@@ -6,21 +6,20 @@ macro init_memory nid table
 message ' Init table ' [table] ' to write to  NTUPLE in memory with ID ' [nid]
 
 
-if  [nid] = none then
-  wait 'Please hit enter for NID or type q to quit macro'
-  message 'enter NID - ntuple id'
-  read nid
-endif
+  if  [nid] = none then
+   wait 'Please hit enter for NID or type q to quit macro'
+   message 'enter NID - ntuple id'
+   read nid
+  endif
 
-if  [table] = none then
-  wait 'Please hit enter for TABLE or type q to quit macro'
-  message 'enter TABLE - table to be written to ntuple e.g. /dui/data'
-  read table
-endif
+  if  [table] = none then
+   wait 'Please hit enter for TABLE or type q to quit macro'
+   message 'enter TABLE - table to be written to ntuple e.g. /dui/data'
+   read table
+  endif
 
 
-tnt/newcwntuple [nid] [table]
-*tnt/cwntuple/append [nid] [table]
+  tnt/newcwntuple [nid] [table]
 
 
 return
@@ -29,9 +28,9 @@ return
 
 macro write_event_memory nid table
 
-message ' Writing table ' [table] ' to ntuple in memory with id ' [nid]
+ message ' Writing table ' [table] ' to ntuple in memory with id ' [nid]
 
-tnt/cwntuple/append [nid] [table]
+ tnt/cwntuple/append [nid] [table]
 
 return
 
@@ -43,33 +42,33 @@ macro init_disk funit nfile nid table
 message ' Init table ' [table] ' to NTUPLE on disk with ID ' [nid]
 message ' ntuple file is ' [nfile] ' on unit ' [funit]
 
-if [funit] = none then
- wait 'Please hit enter for FUNIT or type q to quit macro'
- message 'enter FUNIT - file unit number'
- read funit
-endif
+ if [funit] = none then
+  wait 'Please hit enter for FUNIT or type q to quit macro'
+  message 'enter FUNIT - file unit number'
+  read funit
+ endif
 
-if  [nfile] = none then
-  wait 'Please hit enter for NFILE or type q to quit macro'
-  message 'enter NFILE - ntuple file name'
-  read nfile
-endif
+ if  [nfile] = none then
+   wait 'Please hit enter for NFILE or type q to quit macro'
+   message 'enter NFILE - ntuple file name'
+   read nfile
+ endif
 
-if  [nid] = none then
-  wait 'Please hit enter for NID or type q to quit macro'
-  message 'enter NID - ntuple id'
-  read nid
-endif
+ if  [nid] = none then
+   wait 'Please hit enter for NID or type q to quit macro'
+   message 'enter NID - ntuple id'
+   read nid
+ endif
 
-if  [table] = none then
+ if  [table] = none then
   wait 'Please hit enter for TABLE or type q to quit macro'
   message 'enter TABLE - table to be written to ntuple e.g. /dui/data'
   read table
-endif
+ endif
 
 
-hi/file [funit] [nfile] ! n
-tnt/newcwntuple [nid] [table]
+ hi/file [funit] [nfile] ! n
+ tnt/newcwntuple [nid] [table]
 
 return
 
@@ -78,9 +77,9 @@ return
 
 macro write_event_disk nid table
 
-message ' write event from ' [table] ' to ntuple on disk with id ' [nid]
+ message ' write event from ' [table] ' to ntuple on disk with id ' [nid]
 
-tnt/cwntuple/append [nid] [table]
+ tnt/cwntuple/append [nid] [table]
 
 return
 
@@ -88,10 +87,10 @@ return
 
 macro close_disk funit
 
-message ' close ntuple and file unit ' [funit]
+ message ' close ntuple and file unit ' [funit]
 
-hrout 0
-close [funit]
+ hrout 0
+ close [funit]
 
 return
 
