@@ -120,7 +120,7 @@ StFtpcCluster *StFtpcClusterFinder::search(fcl_det_st *det,
   /* calculate fastlog lookup */
   for(iIndex=1; iIndex<256; iIndex++)
     {
-      fastlog[iIndex] = log(iIndex);
+      fastlog[iIndex] = log((double) iIndex);
     }
 
   /* reset counter for found clusters */
