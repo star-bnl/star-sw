@@ -93,7 +93,7 @@ Int_t StTreeMaker::Init()
 //_____________________________________________________________________________
 Int_t StTreeMaker::Open(const char *)
 {
-  UpdateTree();
+  UpdateTree(0);
   fTree->SetUKey(0);
   return 0;
 }
@@ -120,7 +120,7 @@ Int_t StTreeMaker::MakeWrite()
 
 //		Fill branches
 
-  FillBranch(0);
+  UpdateTree(1);
 
 //		Write StTree
   ULong_t ukey = GetNumber();
@@ -129,34 +129,60 @@ Int_t StTreeMaker::MakeWrite()
   return 0;
 }
 //_____________________________________________________________________________
-void StTreeMaker::FillBranch(StBranch *brOnly)
+void StTreeMaker::UpdateTree(Int_t flag)
 {
 //		Fill branches
 
-  StBranch *br;St_DataSet *dat,*ds,*inBr,*intoBrs;
-  const char* logs;int nlog;
-  TString tlog;
+  StBranch *br;
+  const char* logs;int nlog,isSetBr,isHist; 
+  St_DataSet *upd,*updList,*dat,*ds;
+  const char *updName,*updTitl,*cc;
+
+  TString updFile,updMode,tlog;
   
+  updList= Find(".branches");
+  if (!updList) return;
+  St_DataSetIter updNext(updList);
   
-  intoBrs = Find(".branches");
-  if (!intoBrs) return;
-  St_DataSetIter intoNext(intoBrs);
+  while ((upd=updNext())) {//loop updates
+    updTitl = upd->GetTitle();
+    updName = upd->GetName();
+    updFile = ""; updMode = "";
+    isSetBr = (strncmp("SetBranch:",updTitl,10)==0);
+
+    if (isSetBr) {//SetBranch block
+      cc = strstr(updTitl,"file="); 
+      if (cc) updFile.Replace(0,0,cc+5,strcspn(cc+5," "));
+      cc = strstr(updTitl,"mode="); 
+      if (cc) updMode.Replace(0,0,cc+5,strcspn(cc+5," "));
   
-  while ((inBr=intoNext())) {//loop intoBR
-    if (brOnly) { // Only one branch
-      br = brOnly;
-      if (strcmp(br->GetName(),inBr->GetName())) continue;
-    } else {
-      if (!strncmp("hist",inBr->GetName(),4)) continue;
-      br = (StBranch*)fTree->Find(inBr->GetName());
-      if (!br) 	continue;
+      if (updName[0]=='*') { //Wild Card
+      if (!updMode.IsNull() || !updFile.IsNull()) fTree->SetFile(updFile,updMode,1);  
+        delete upd; continue;
+      } 
+    } //endif SetBranch block*
+    
+    br = (StBranch*)fTree->Find(updName);
+    if (!br && fIOMode=="w") { 
+      br = new StBranch(updName,fTree);
+      updMode = "w";
     }
-    logs = inBr->GetTitle();nlog=0;
+    if (!br) 					continue;
+    if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
+    
+    if (isSetBr) {delete upd; continue;}
+    if (flag==0) continue;
+    
+    isHist = (strncmp("hist",updName,4)==0); 
+    if ( (flag==1) != (!isHist)) 	continue;
+
+
+    logs = (const char*)updTitl;nlog=0;
     while(1999) //loop over log names
     {
       logs += nlog + strspn(logs+nlog," "); nlog = strcspn(logs," ");if(!nlog) break; 
       tlog.Replace(0,999,logs,nlog); 
-      dat = GetDataSet(logs);  if (!dat) continue;      
+      dat = GetDataSet(tlog);  if (!dat) continue;      
       if (dat->InheritsFrom(StMaker::Class())) dat = dat->Find(".data"); 
       if (!dat) continue;
       if (*dat->GetName()!='.') 
@@ -167,7 +193,8 @@ void StTreeMaker::FillBranch(StBranch *brOnly)
         while((ds = nextDs())) br->Add(ds);
       }//end of datasets
     }//end of log names
-  }//end of intoBR
+
+  }//end of updates
 
 }
 
@@ -204,44 +231,6 @@ void StTreeMaker::Clear(Option_t *opt)
 void StTreeMaker::PrintInfo(){
   if (GetDebug()) printf("StTreeMaker\n"); //  %s %s \n",GetName(), GetTitle());
 }
-
-//_____________________________________________________________________________
-void StTreeMaker::UpdateTree()
-{
-  StBranch *br;
-  St_DataSet *upd,*updList;
-  const char *updName,*updTitl,*cc;
-  TString updFile,updMode;
-      
-  if (!fTree) return;
-  updList = Find(".branches");
-  if (!updList) return;
-  St_DataSetIter nextUpd(updList);
-  while ((upd = nextUpd()))
-  {
-    updTitl = upd->GetTitle();
-    if (strncmp("SetBranch:",updTitl,10))	continue;
-    updName = upd->GetName();
-    updFile = ""; cc = strstr(updTitl,"file="); 
-    if (cc) updFile.Replace(0,0,cc+5,strcspn(cc+5," "));
-    updMode = ""; cc = strstr(updTitl,"mode="); 
-    if (cc) updMode.Replace(0,0,cc+5,strcspn(cc+5," "));
-    delete upd;
-  
-    if (updName[0]=='*') { //Wild Card
-      if (!updMode.IsNull()) fTree->SetIOMode(updMode);  
-      if (!updFile.IsNull()) fTree->SetFile  (updFile);  
-      continue;
-    } //endif *
-    
-    br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode=="w") br = new StBranch(updName,fTree);
-    if (!br) 					continue;
-    if (!updMode.IsNull()) br->SetIOMode(updMode);  
-    if (!updFile.IsNull()) br->SetFile  (updFile);  
-  }//end updates  
-  
-}
 //_____________________________________________________________________________
 void StTreeMaker::FillHistBranch(StBranch *histBr)
 {
@@ -258,14 +247,14 @@ void StTreeMaker::FillHistBranch(StBranch *histBr)
     if (strcmp(".make",par->GetName()))	continue;
     dothist = ds->Find(".hist");
     if (!dothist)			continue;
-    TList *tl = (TList*)ds->GetObject();
+    TList *tl = (TList*)((St_ObjectSet*)dothist)->GetObject();
     if (!tl || !tl->First())		continue;
     TString ts(ds->GetName()); ts +="Hist";
     St_ObjectSet *os = new St_ObjectSet(ts);
     os->SetObject(tl);
     histBr->Add(os);
   }
-  FillBranch(histBr);
+  UpdateTree(2);
 }
 
 
