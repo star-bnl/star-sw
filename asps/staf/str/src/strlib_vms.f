@@ -1625,14 +1625,188 @@
 1	RETURN
 	END
 
+	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
+
+	IMPLICIT NONE
+
+	INTEGER Ireal !Integer-cast of a IEEE-style floating number.
+
+*  Description:
+
+*	Convert Ireal, which is passed to this routine as an integer-
+*	casting of an IEEE-style floating number, into a VAX
+*	floating number (see STR_FLOAT_HOST_TO_IEEE for more details).
+
+	INTEGER Ieee, Ivax
+
+	INTEGER I4
+	INTEGER*2 I2(2), J2
+	EQUIVALENCE ( I4, I2 )
+
+	LOGICAL SIGN
+	INTEGER Ifraction
+
+	Ieee = Ireal !Work with a copy.
+
+	IF (IAND( Ieee, '80000000'X ) .NE. 0 ) THEN !Sign bit is set.
+	  SIGN   = .TRUE.
+	  Ieee = IAND( Ieee, '7FFFFFFF'X ) !Clear the sign bit.
+	ELSE
+	  SIGN   = .FALSE.
+	END IF
+
+	IF      (Ieee.GE.'7F000000'X) THEN !Infinities become VAX "NAN".
+	  Ivax='80000000'X                 !(NAN ==> Not A Number)
+	  SIGN=.FALSE.                     !No sign information.
+
+	ELSE IF (Ieee.GE.'00800000'X) THEN !"Normal" range.
+	  Ivax=Ieee+'01000000'X            !Add 2 to the exponent.
+
+	ELSE IF (Ieee.GE.'00400000'X) THEN !Given Ireal has zero exponent,
+	                                   !but with full precision.
+	  Ifraction=ISHFT( Ieee, 1 )       !Shift the fraction left 1 bit.
+	  Ifraction=IAND( Ifraction, '007FFFFF'X) !Lose the high bit of the
+	                                    !fraction, which had been shifted
+	                                    !into the exponent.
+	  Ivax=Ifraction+'01000000'X        !The exponent is 2.
+
+	ELSE IF (Ieee.GE.'00200000'X) THEN  !Given Ireal has zero exponent,
+	                                    !and suffers a loss of precision.
+	  Ivax=ISHFT( Ieee, 2 )             !Shift the fraction left 2 bits.
+	                                    !The hob becomes an exponent of 1.
+
+	ELSE                                !Everything else is a VAX zero:
+	  Ireal=0.
+	  RETURN                            !No more work needed here.
+
+	END IF
+
+	IF (SIGN) THEN !Set the sign bit.
+	  Ivax = IOR( Ivax, '80000000'X )
+	END IF
+
+*	Swap the halves on Ivax:
+
+	I4=Ivax
+	J2=I2(2)
+	I2(2)=I2(1)
+	I2(1)=J2
+
+	Ireal=I4
+
+	RETURN
+	END
+
+	SUBROUTINE STR_FLOAT_HOST_TO_IEEE( Ireal )
+
+	IMPLICIT NONE
+
+	INTEGER Ireal !Integer-cast of a DEC-style floating number.
+
+*  Description:
+
+*	Convert Ireal, which is passed to this routine as an integer
+*	cast of a DEC-style floating number, into an IEEE-style floating
+*	number:
+*
+*	                       DEC-style
+*
+*	_31_____________  16_15_________14___________7_6______________0_
+*	|fraction (F2) ...  | sign (S) | exponent (E) | fraction (F1)  |
+*	|-------------------|----------|--------------|----------------|
+*	                 LSB                          MSB
+*
+*	With the usual:  x = (+/-) f * 2**k
+*	"+/-" is "+" if S (bit 15) is 0, and "-" if not.
+*	"f" is always positive, and:  1 .GT. f   1/2  .LE. f
+*	The leading bit of "f" is always omitted (the "hidden" bit).
+*
+*	           F1(shifted up 16 bits) + F2(shifted down 16 bits) + 2**23
+*	"f"  =   ------------------------------------------------------------
+*	                                   2**24
+*
+*	Note that the MSB of "f" is bit 6, from F1.
+*
+*	"k" is:   E(shifted down 7 bits)
+*
+*	Note that bit 14 (in E) is the sign bit of E.  For E=0, S=0, "x" is
+*	defined to be zero.  For E=0, S=1, "x" is a reserved operand - illegal.
+
+	INTEGER Ieee, Ivax
+
+	INTEGER I4
+	INTEGER*2 I2(2), J2
+	EQUIVALENCE ( I4, I2 )
+
+	LOGICAL SIGN
+	INTEGER Ifraction
+
+*	Swap the halves on Ireal:
+
+	I4=Ireal
+	J2=I2(2)
+	I2(2)=I2(1)
+	I2(1)=J2
+
+	Ivax=I4
+
+
+	IF (IAND( Ivax, '80000000'X ) .NE. 0 ) THEN !Sign bit is set.
+	  IF (Ivax .EQ. '80000000'X) THEN !VAX NAN.
+	    Ireal = '7FFFFFFF'X !Make an IEEE NAN & it's done.
+	    RETURN
+	  END IF
+	  SIGN   = .TRUE.
+	  Ivax = IAND( Ivax, '7FFFFFFF'X ) !Clear the sign bit.
+	ELSE
+	  SIGN   = .FALSE.
+	END IF
+
+	IF      (Ivax.GE.'01800000'X) THEN !"Normal" range.
+	  Ieee=Ivax-'01000000'X            !Subtract 2 from the exponent.
+
+	ELSE IF (Ivax.GE.'01000000'X) THEN !Given Ivax has exponent 2;
+	                                   !Ieee will have exponent 0,
+	                                   !with full precision.
+	  Ifraction=IAND( Ivax, '007FFFFF'X) !Lose the exponent.
+	  Ifraction=IOR( Ifraction, '00800000'X) !Set the hidden bit.
+	  Ieee=ISHFT( Ifraction, -1 )      !Shift the fraction right 1 bit.
+
+	ELSE IF (Ivax.GE.'00800000'X) THEN !Given Ivax has exponent 1;
+	                                   !Ieee will have exponent 0,
+	                                   !with loss of precision.
+	  Ifraction=IAND( Ivax, '007FFFFF'X) !Lose the exponent.
+	  Ifraction=IOR( Ifraction, '00800000'X) !Set the hidden bit.
+	  Ieee=ISHFT( Ifraction, -2 )      !Shift the fraction right 2 bits.
+
+	ELSE                               !Everything else is a VAX zero:
+	  Ireal=0.                         !Which forces Ieee to zero (set Ireal).
+	  RETURN                           !No more work needed here.
+
+	END IF
+
+	IF (SIGN) THEN !Set the sign bit -- this may make a VAX NAN.
+	  Ieee = IOR( Ieee, '80000000'X )
+	END IF
+
+*	Just to be safe (ie, has this programmer missed something?),
+*	do another NAN-check etc:
+	IF (Ieee.EQ.'80000000'X) THEN !This is a VAX NAN:
+	  Ieee = '7F800000'X !Make an IEEE NAN & it's done.
+	END IF
+
+	Ireal = Ieee !Return the IEEE conversion.
+
+	RETURN
+	END
+
 	SUBROUTINE STR_FLOAT_VAX_TO_HOST( Ireal )
 
 	IMPLICIT NONE
 
 	INTEGER Ireal !Integer-cast of a DEC-style floating number.
 
-*  Functional description:
-
+*  Description:
 *	No-op under VMS!
 
 *	Convert Ireal, which is passed to this routine as an integer
@@ -1670,8 +1844,7 @@
 
 	INTEGER Ireal !Integer-cast of a Host-style floating number.
 
-*  Functional description:
-
+*  Description:
 *	No-op under VMS!
 
 *	Convert Ireal, which is passed to this routine as an integer
@@ -1680,3 +1853,27 @@
 
 	RETURN !No-op under VMS.
 	END
+
+	SUBROUTINE STR_Time1970( Seconds_Since_1970 )
+
+	IMPLICIT NONE
+
+*  Output:
+	INTEGER Seconds_Since_1970
+*  Description:
+*	Get the number of seconds since 1-Jan-1970, 00:00:00 GMT of the current local time.
+
+	INTEGER Hour, Min, Sec
+	INTEGER Year, Month, Day
+
+*	The VMS version (this) is a little kludgey, but it works.
+
+
+	CALL STRTIME( Hour, Min, Sec )
+	CALL STRDATE( Year, Month, Day )
+
+	CALL STR_MakeTime1970( Year, Month, Day, Hour, Min, Sec, Seconds_Since_1970 )
+
+	RETURN
+	END
+
