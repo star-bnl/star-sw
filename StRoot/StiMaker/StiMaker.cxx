@@ -212,26 +212,13 @@ Int_t StiMaker::Init()
     mhitfactory->setMaxIncrementCount(10);
     //So, we can have 10 allocations at 50k a pop -> 500k hits max.
 
-    //The Evalualbe Track Factory
-    if (StiIOBroker::instance()->useGui()==true) {
-	mtrackfactory =
-	    new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
-    }
-    else {
-	mtrackfactory =
-	    new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
-    }
-    mtrackfactory->setIncrementalSize(50);
-    mtrackfactory->setMaxIncrementCount(100);
-
     //The Track node factory
     mktracknodefactory =
 	new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
     mktracknodefactory->setIncrementalSize(1000);
     mktracknodefactory->setMaxIncrementCount(100);
     
-    StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );
-    
+    StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );    
 
     //The StiDetector factory
     if (StiIOBroker::instance()->useGui()==true) {
@@ -263,21 +250,37 @@ Int_t StiMaker::Init()
 
     //The seed finder (must be built after detector-tree)
     if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kEvaluable) {
+	//Make an evaluable track factory
+	if (StiIOBroker::instance()->useGui()==true) {
+	    mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
+	}
+	else {
+	    mtrackfactory = new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
+	}
+	mtrackfactory->setIncrementalSize(50);
+	mtrackfactory->setMaxIncrementCount(100);	    
+	    
 	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kEvaluable"<<endl;
 	StiEvaluableTrackSeedFinder* temp =
 	    new StiEvaluableTrackSeedFinder(mAssociationMaker);
 	temp->setFactory(mtrackfactory);
-	temp->setBuildPath("StRoot/StiMaker/RunTimeParameters/EvaluableSeedFinder.txt");
-	temp->build();
 	mSeedFinder=temp;
     }
+    
     else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kComposite) {
+	//Make a kalman track factory
+	if (StiIOBroker::instance()->useGui()==true) {
+	    mtrackfactory = new StiRDKalmanTrackFactory("StiRDKalmanTrackFactory",50);
+	}
+	else {
+	    mtrackfactory = new StiKalmanTrackFactory("StiKalmanTrackFactory");
+	}
+	mtrackfactory->setIncrementalSize(50);
+	mtrackfactory->setMaxIncrementCount(100);
+	
 	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kComposite"<<endl;
-	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder();
-	temp->setFactory(mtrackfactory);
-	temp->setBuildPath("StRoot/StiMaker/RunTimeParameters/CompositeSeedFinderBuild.txt");
-	temp->build();
-	mSeedFinder=temp;	
+	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory);
+	mSeedFinder=temp;
     }
     else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kUndefined) { //not initialized
 	cout <<"StiMaker::init(). ERROR:\t SeedFinderType==StiIOBroker::kUndefined"<<endl;
