@@ -14,6 +14,7 @@
 #include "TString.h"
 #include "Gtypes.h"
 #include "TPoints3DABC.h"
+#include "StThreeVectorF.hh"
 
 class StEvent;
 class StTrack;
@@ -23,8 +24,101 @@ class StarClassLibrary;
 class TExMap;
 class TObjArray;
 class StRefArray;
-
+class StPtrVecHit;
 class BetheBloch;
+class StPhysicalHelixD;
+class THelixTrack;
+class StHelixD;
+
+
+class StVertexHelper
+{
+public:
+  StVertexHelper(const StVertex *vtx=0);
+       void    SetVertex(const StVertex *vtx);    
+        int    GetType();
+        int    GetFlag();
+const StThreeVectorF &GetPoint();
+
+        int    GetNTracks();            //excluding parent
+const StTrack *GetTrack(int idx);       // -1=parent track  
+const StTrack *GetParent() {return GetTrack(-1);}        
+private:  
+const StVertex *fVtx;
+};
+
+class StTrackHelper
+{
+public:
+      StTrackHelper(const StTrack *trk=0);
+     ~StTrackHelper();
+       void     SetTrack(const StTrack *trk);    
+        int     GetType();
+        int     GetFlag();
+        int     GetCharge();
+const StVertex *GetParent();     
+      float     GetImpact();
+      float     GetCurv();
+      float     GetLength();
+const StThreeVectorF &GetFirstPoint();
+const StThreeVectorF &GetLastPoint();
+const StThreeVectorF &GetMom();
+
+        int     GetNHits();
+const StHit    *GetHit(int idx);
+const StPtrVecHit *GetHits();
+      StPhysicalHelixD *GetHelix(int idx=0);
+private:
+const StTrack *fTrk;
+const StPtrVecHit *fHits;
+StPhysicalHelixD  *fHelx[2];
+};
+
+class StHitHelper
+{
+public:
+      StHitHelper(const StHit *hit=0);
+       void     SetHit(const StHit *hit);    
+        int     GetDetId();
+        int     GetFlag();
+      float     GetCharge();
+        int     IsUsed();
+        int     IsFit();
+const StThreeVectorF &GetPoint();
+
+private:
+const StHit *fHit;
+};
+
+enum EHKind {kUDF = 0 
+    ,kVTX = BIT( 1),kTRK = BIT( 2),kHIT = BIT( 3),kHRR = BIT( 4)//StEvent types
+    ,kPRM = BIT( 5),kKNK = BIT( 6),kV0  = BIT( 7),kXI  = BIT( 8)//Vertex  types
+    ,kTGB = BIT(10),kTPR = BIT(11),kTPT = BIT(12),kTSY = BIT(13)//Track   types
+    ,kEGB = BIT(14),kEPR = BIT(15)                              //Track   types
+    ,kUSE = BIT(20),kUNU = BIT(21),kFIT = BIT(22),kTHT = BIT(23)//Hit     types
+    ,kTRR = BIT(30)};                                           //TObjArray
+
+//#ifndef __EVENTHELPER_ONLY__
+extern const char *EHKindN[]; 
+extern const int   EHKindS[];
+//#endif
+#ifdef __EVENTHELPER_ONLY__
+const char *EHKindN[] = {"undefined" 
+    ,"Vertex"   ,"Tracks"    ,"Hits"  ,"HitArr"
+    ,"Primary"  ,"Kink"      ,"V0"    ,"Xi"
+    ,"Global"   ,"PRIMARY"   ,"Tpt"   ,"SECONDARY"
+    ,"estGlobal","estPrimary"                             
+    ,"Used"     ,"Unused"    ,"Fitted","Track Hits"             
+    ,"TObjArray",0};                                          
+const int EHKindS[]= {kUDF
+    ,kVTX,kTRK,kHIT,kHRR                                    
+    ,kPRM,kKNK,kV0 ,kXI  
+    ,kTGB,kTPR,kTPT,kTSY
+    ,kEGB,kEPR                            
+    ,kUSE,kUNU,kFIT,kTHT               
+    ,kTRR,-1};                                       
+#endif
+
 
 class StEventHelper : public TNamed{
 
@@ -33,16 +127,19 @@ TObject *fObject;
 TExMap *fMap;
 
 public:
-
     StEventHelper(const TObject *evt=0,const char *opt="");
     virtual ~StEventHelper();
     TObjArray *SelConts (const char *sel=".*");
-    TObjArray *SelTracks(Int_t th);
-    TObjArray *SelHits  (const char *RegEx, Int_t un);
-    TObjArray *SelVertex(const char *sel,Int_t thFlag);
+    TObjArray *SelTracks(const char *sel=0, Int_t th=0);
+    TObjArray *SelHits  (const char *RegEx, Int_t un=0);
+    TObjArray *SelVertex(const char *sel,   Int_t th=0);
+    TObjArray *ExpandAndFilter(const TObject   *evobjs,int flag,TObjArray *out=0);
+    TObjArray *MakePoints     (      TObjArray *evobjs,int flag);
     virtual void ls(Option_t* option="") const;
     virtual void Clear(Option_t *opt="");
     void Reset(const TObject *evt=0,const char *opt="");
+static int Kind(const TObject *to);
+static THelixTrack *MyHelix(THelixTrack *myHlx,const StHelixD *evHlx);
 private:
 
 ClassDef(StEventHelper,0)    
@@ -51,7 +148,7 @@ ClassDef(StEventHelper,0)
 class StPoints3DABC : public TPoints3DABC 
 {
 public:
-   StPoints3DABC(const char *name="",const char *title="",TObject *obj=0)
+   StPoints3DABC(const char *name="",const char *title="",const TObject *obj=0)
    { fSize=0; fXYZ=0;
      char buf[200];
      if (obj && (!name || !name[0])) {
@@ -66,7 +163,8 @@ public:
              virtual Float_t GetY(Int_t idx) const {return fXYZ[idx*3+1];}
              virtual Float_t GetZ(Int_t idx) const {return fXYZ[idx*3+2];}
              virtual Int_t   Size() const          {return fSize;}
-             virtual TObject *GetObject() const    {return fObj;}
+             virtual Int_t   Kind() const          {return 0;}
+             virtual const TObject *GetObject() const    {return fObj;}
                      void    Add(StPoints3DABC *add);
                      Int_t   Add(float x, float y, float z){return TPoints3DABC::Add(x,y,z);} //WarnOff
 // Dummies
@@ -92,7 +190,7 @@ protected:
  Int_t     fSize;
  Int_t     fN;
  Float_t  *fXYZ;
- TObject  *fObj;
+ const TObject  *fObj;
  ClassDef(StPoints3DABC,0)    
 };
 
@@ -101,8 +199,9 @@ protected:
 class StTrackPoints : public StPoints3DABC 
 {
 public:
-   StTrackPoints(StTrack *st,const char *name="",const char *title="");
+   StTrackPoints(const StTrack *st,const char *name="",const char *title="");
   ~StTrackPoints(){};
+virtual Int_t   Kind() const          {return 2;}
 virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
 
 private:
@@ -112,7 +211,6 @@ private:
 
 // data members                  
 private:  
- StTrack          *&fTrack;     
  ClassDef(StTrackPoints,0)    
 };
 
@@ -120,14 +218,14 @@ private:
 class StVertexPoints : public StPoints3DABC 
 {
 public:
-   StVertexPoints(StVertex *sv,const char *name="",const char *title="");
+   StVertexPoints(const StVertex *sv,const char *name="",const char *title="");
   ~StVertexPoints(){};
+virtual Int_t   Kind() const          {return 1;}
 private:
    StVertexPoints(const StVertexPoints&);
    void operator=(const StVertexPoints&);
 // data members                  
 private:  
- StVertex *&fVertex;     
  ClassDef(StVertexPoints,0)    
 };
 
@@ -136,9 +234,10 @@ private:
 class StHitPoints : public StPoints3DABC 
 {
 public:
-   StHitPoints(StHit *sh,const char *name="",const char *title="");
-   StHitPoints(StRefArray *arr,const char *name="",const char *title="");
+   StHitPoints(const StHit *sh,const char *name="",const char *title="");
+   StHitPoints(const StRefArray *arr,const char *name="",const char *title="");
   ~StHitPoints(){};
+virtual Int_t   Kind() const          {return 3;}
 private:
   void Init() ;
 
@@ -148,14 +247,14 @@ private:
 };
 
 //______________________________________________________________________________
-class StFilterABC : public TNamed {  	//base class for StEvent filters
+class StFilterABC : public TNamed {     //base class for StEvent filters
 public:
    StFilterABC(const char *name,bool active=true);
    ~StFilterABC(){};
 
-   virtual float        *GetPars() const	= 0;
-   virtual const float  *GetDefs() const	= 0;
-   virtual const char  **GetNams() const	= 0;
+   virtual float        *GetPars() const        = 0;
+   virtual const float  *GetDefs() const        = 0;
+   virtual const char  **GetNams() const        = 0;
            bool         *GetActive() { return &fActive;}
            void          SetDefs();
            bool          Active() const {return fActive;}
@@ -191,7 +290,7 @@ inline Int_t StFilterABC::AcceptCB(StPoints3DABC *pnt,Color_t &color, Size_t &si
 
 class StFilterDef : public StFilterABC { // An example of default filter
 public:
-   		StFilterDef(const char *name,bool active=true);
+                StFilterDef(const char *name,bool active=true);
                ~StFilterDef(){};
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
@@ -227,7 +326,7 @@ ClassDef(StFilterDef,0)
 
 class StMuDstFilterHelper : public StFilterABC { // An example of default filter
 public:
-   		StMuDstFilterHelper(const char *name,bool active=true);
+                StMuDstFilterHelper(const char *name,bool active=true);
                ~StMuDstFilterHelper();
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
@@ -276,7 +375,7 @@ private:
 
 class StColorFilterHelper : public StFilterABC { // An example of default coloring filter
 public:
-   		StColorFilterHelper(const char *name,bool active=true);
+                StColorFilterHelper(const char *name,bool active=true);
                ~StColorFilterHelper();
 virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
