@@ -356,9 +356,9 @@ void StEmcSpectra::DrawAllEtaBin(Int_t etabin,Float_t Norm)
         {
           Float_t a=1;
 					Float_t b=0;
-          Int_t s;
-				  GetEqualConst(id,&a,&b,&s);
-          if(a!=0 && s==1) 
+          Int_t ss;
+				  GetEqualConst(id,&a,&b,&ss);        
+          if(a!=0 && ss==1) 
           {
             if(mHistTmp[nh]) {delete mHistTmp[nh]; mHistTmp[nh] = NULL;}
             if(nh>0) if(mHistTmpAsym[nh]) {delete mHistTmp[nh]; mHistTmp[nh] = NULL;}
@@ -495,13 +495,13 @@ TH1D* StEmcSpectra::GetEtaBinSpectra(Int_t etabin, Int_t mode)
         {
           Float_t a=1;
 					Float_t b=0;
-          Int_t s;
+          Int_t ss;
 					if(mode==0)
 					{
 						Float_t a,b;
-						GetEqualConst(id,&a,&b,&s);
+						GetEqualConst(id,&a,&b,&ss);
 					}
-          if(a!=0 && s==1) mEtaBinTmp->Add(ReBin(id,a,b),1); 
+          if(a!=0 && ss==1) mEtaBinTmp->Add(ReBin(id,a,b),1); 
         }
       }
   

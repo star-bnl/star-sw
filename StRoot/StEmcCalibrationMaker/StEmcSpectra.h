@@ -20,7 +20,7 @@ standard functions to manipulate spectra, such as mean, rms, rebins, etc.
 #include "TH1.h"
 #include "StEmcUtil/filters/StEmcFilter.h"
 #include "StEmcUtil/projection/StEmcPosition.h"
-#define MAXHIST 1000
+#define MAXHIST 2000
 
 class StEmcGeom;
 class StEvent;
