@@ -1,9 +1,15 @@
 #include "StTree.h"
 
-const char* TFOPT[9] = {"0","read","recreate","update",
-                        "0","read","recreate","update",0};
+const char* TFOPT[9] = {"0","READ","RECREATE","UPDATE",
+                        "0","READ","RECREATE","UPDATE",0};
 const char  RWU[] = "0rwu0rnu0rcu";
 char IOMODE[] = "0";
+
+inline Int_t IntOMode(char ciomode)
+{
+char *c=strchr(RWU,tolower(ciomode));
+return (c) ? (c-RWU)&3 : 0;
+}
 
 ClassImp(StIOEvent)
 StIOEvent::StIOEvent():TObject(){};
@@ -134,8 +140,7 @@ void StBranch::SetOption(Option_t *opt)
 //_______________________________________________________________________________
 void StBranch::SetIOMode(Option_t *iomode)
 { 
-char* c;
-fIOMode = 0; if ((c=strchr(RWU,tolower(iomode[0])))) fIOMode=(c-RWU)&3;
+fIOMode = ::IntOMode(iomode[0]);
 }    
 //_______________________________________________________________________________
 Option_t *StBranch::GetIOMode()
@@ -175,6 +180,7 @@ void StBranch::Close(const char *)
 Int_t StBranch::Open()
 {
   if (!fIOMode) return 0;
+  if (fTFile)   return 0;
   if (fFile.IsNull()) { // Construct file name
     fFile=GetName(); fFile+=".root";
     StTree *tree = (StTree*)GetParent();
@@ -261,38 +267,28 @@ void StBranch::SetParAll(TList *savList)
 //_______________________________________________________________________________
 void StBranch::OpenTFile()
 {
-TString hisopt;
-int ihismode;
+int maxIOMode=fIOMode;
 StBranch *tree,*bran;
 
-  if (! fTFile ) {	// search Tfile if any;
-
+  for (int iter=0; iter <2; iter++) {// 2 iters. 1st to find, 2nd to fill
     tree = (StBranch*)GetParent();
     if (tree) {	//loop all the branches
       St_DataSetIter next(tree);
       while((bran=(StBranch*)next())) {// 
+        if (bran == this)			continue;
         if (!bran->fTFile) 			continue;
         if (fFile != bran->fTFile->GetName()) 	continue;
-        fTFile = bran->fTFile; 			break;
-  } } }
+        if (iter==0) if (bran->fIOMode > maxIOMode) maxIOMode = bran->fIOMode;
+        else         bran->fTFile = fTFile;
+  } } 
+  if (iter) break;
 
-
-  if (!fTFile) { fTFileOwner=1; 
-  fTFile = new TFile(fFile,TFOPT[fIOMode],GetName());
+  fTFileOwner=1; 
+  fTFile = new TFile(fFile,TFOPT[maxIOMode],GetName());
   printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
-        ,GetName(),TFOPT[fIOMode],(const char*)fFile);} 
+        ,GetName(),TFOPT[maxIOMode],(const char*)fFile);
+  } 
 
-  hisopt = fTFile->GetOption();
-
-  for (ihismode = 0; TFOPT[ihismode]; ihismode++) {
-    if (!hisopt.CompareTo(TFOPT[ihismode],TString::kIgnoreCase)) break;}
-  ihismode &=3; 
-  
-  if (fIOMode <= ihismode  && fTFile->IsOpen()) return;
-  if (ihismode < fIOMode) ihismode = fIOMode;
-  fTFile->Close(); fTFile->Open(fFile,TFOPT[ihismode]);
-  printf("** <StBranch::Open> Branch=%s \tMode=%s \tFile=%s \tOpened **\n"
-        ,GetName(),TFOPT[ihismode],(const char*)fFile); 
 }
 //_______________________________________________________________________________
 void StBranch::Clear(Option_t *)
