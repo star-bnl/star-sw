@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.28 1999/11/11 01:54:37 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.29 1999/11/11 16:29:06 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.29  1999/11/11 16:29:06  fisyak
+// Clean up FileOut treatment
+//
 // Revision 1.28  1999/11/11 01:54:37  fisyak
 // Fix Trs name
 //
@@ -215,7 +218,7 @@ BfcItem BFC[] = {
   {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"St_geom"     ,"","",""       ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
-  {"DISPLAY"    ,"EventDisplay","","St_geom","StEventDisplayMaker","StEvent,StEventDisplayMaker","",kFALSE},
+  {"DISPLAY"    ,"EventDisplay","","St_geom"        ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"DEBUG"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
   {"HIGZ"        ,""  ,"",""                                               ,"","","Pop HIGZ window",kFALSE},  
@@ -511,7 +514,6 @@ void StBFChain::SetFlags(const Char_t *Chain, Bool_t Force)
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
   Char_t *Infile  = (Char_t *) infile;
-  Char_t *Outfile = (Char_t *) outfile;
   if (!Infile) {
     if (GetOption("MINIDAQ")) {
       Infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"; // laser data
@@ -558,15 +560,13 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	else setFiles->AddFile(Files[i]->Data());
       }
     }
-    if (GetOption("GSTAR")) {
-      if (!Outfile) FileOut = new TString("gtrack");
-      else          FileOut = new TString(Outfile);
-      gMessMgr->QAInfo() << "Output root file name " << FileOut->Data() << endm;
-      printf ("==============================================\n");
-    }
+  }
+  if (InFile) gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
+  if (outfile)               FileOut = new TString(outfile);
+  else {
+    if (GetOption("GSTAR"))  FileOut = new TString("gtrack");
     else {
-      if (Outfile) FileOut = new TString(Outfile);
-      else {
+      if (InFile) {
 	FileOut = new TString(gSystem->BaseName(InFile->Data()));
 	FileOut->ReplaceAll("*","");
 	FileOut->ReplaceAll("..",".");
@@ -576,12 +576,9 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	FileOut->ReplaceAll(".xdf","");
 	FileOut->Strip();
       }
-      printf ("==============================================\n");
-      gMessMgr->QAInfo() << "Input file name = " << InFile->Data() << endm;
-      gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
-      printf ("==============================================\n");
     }
   }
+  if (FileOut)  gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
   if (GetOption("XOUT") && FileOut) {
     XdfFile = new TString(FileOut->Data());
     XdfFile->Append(".dst.xdf");
