@@ -20,6 +20,7 @@
 *--------------------------------------------------------------------
 
 macro initialize
+macro/global/import *
 
     message ' Initializing for tpc tracker '
 
@@ -39,6 +40,7 @@ macro initialize
 *------------------------------------------------------------------------
 
 macro process_event_tpt   nev
+macro/global/import *
 
 
    message ' TPC tpt tracker: Processing Event # ' [nev]
@@ -59,6 +61,7 @@ return
 *------------------------------------------------------------------------
 
 macro process_event_tte   nev
+macro/global/import *
 
    message ' TPC tte tracker: Processing Event # ' [nev]
 

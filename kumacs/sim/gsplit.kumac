@@ -1,6 +1,7 @@
 macro gsplit _
 file=/star/mds/data/SD98/auau200/gst/central/hijing/set0001/regular/auau_ce_b0-2 _
 fev=1 step=10 ntot=200 skip=0
+macro/global/import *
 debug on
 lev=[fev]+[ntot]-1
 filen = [file]_[fev]_[lev]_new.fzd
@@ -26,4 +27,3 @@ if $fexist([filen])=1 then
   enddo
 endif
 exit:
-return 

@@ -18,6 +18,7 @@
 *--------------------------------------------------------------------
 
 macro initialize
+macro/global/import *
 
     message ' Initializing for tpc fast simulator '
 
@@ -28,6 +29,7 @@ macro initialize
 *------------------------------------------------------------------------
 
 macro process_event   nev
+macro/global/import *
 
    message ' TPC fast sim, Processing Event # ' [nev]
 

@@ -1,4 +1,5 @@
 macro run nevents=1
+macro/global/import *
 *
 *   Load geometry
 *

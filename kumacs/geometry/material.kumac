@@ -1,4 +1,5 @@
 macro material   ntrig=10000  rmin=0.  rmax=250.  emin=0.  emax=2.0
+macro/global/import *
 debug off
 gclos all
 Call HERMES(0)

@@ -11,6 +11,7 @@
 *--------------------------------------------------------------------
 
 macro initialize 
+macro/global/import *
 
   message ' Initializing for tpc clustering '
 
@@ -23,6 +24,7 @@ macro initialize
 * -------------------------------------------------
  
 macro initialize_fast 
+macro/global/import *
 
 * exec before tpc_fast_sim initialize!
   
@@ -36,6 +38,7 @@ macro initialize_fast
 *------------------------------------------------------------------------
 
 macro process_event nev tpc_sector_first tpc_sector_last   
+macro/global/import *
   
     message ' TPC clustering: processing event # ' [nev]
 

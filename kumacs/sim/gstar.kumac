@@ -3,6 +3,7 @@
 * ******************************************
  
  macro init_geom geomtype
+macro/global/import *
    
    if [geomtype].eq.muons  then
      message ' initializing for muons with no mag or Bfield! '
@@ -20,6 +21,7 @@
 **************************************************************
  
  macro init_phys phystype
+macro/global/import *
    
     if [phystype].eq.muons then
       exec set_hadr_phys_off
@@ -37,10 +39,11 @@
 *****************************************
  
  macro load_lib
+macro/global/import *
    
 * HAVE TO HAVE THESE 4 STEPS IN ORDER!
    
-   cd /dui/geant
+   cd [geant]
    
    make geometry
 
@@ -53,6 +56,7 @@
  
 * ********************************************
  macro input_phase
+macro/global/import *
    
           
  wait ' NOW YOU MUST ENTER VALUES FOR PHASE - hit enter or q '
@@ -82,12 +86,13 @@
  
 * *********************************************
  macro process_event
+macro/global/import *
    
 
 * read in another event from input_file
      trig 1
      
-   cd /dui/geant
+   cd [geant]
 * write out in staf table format
    for/call g2t
      
