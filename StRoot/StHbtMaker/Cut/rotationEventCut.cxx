@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: rotationEventCut.cxx,v 1.3 2001/06/21 19:09:44 laue Exp $
+ * $Id: rotationEventCut.cxx,v 1.4 2001/12/05 15:13:22 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: rotationEventCut.cxx,v $
+ * Revision 1.4  2001/12/05 15:13:22  laue
+ * rotationEventCut.h: cut on l3 trigger algorithm
+ * franksXiCut.cxx: updates
+ *
  * Revision 1.3  2001/06/21 19:09:44  laue
  * updated to match changed base classes
  *
@@ -37,7 +41,7 @@
 ClassImp(rotationEventCut)
 #endif
 
-rotationEventCut::rotationEventCut() : mRotation(false), mRandom(false), mSmear(0) {
+rotationEventCut::rotationEventCut() : mRotation(false), mRandom(false), mSmear(0), mL3TriggerAlgorithm(0) {
   mNEventsPassed =  mNEventsFailed = 0;
   mEventRefMult[0]      = 0;  mEventRefMult[1]   = 100000;
   mEventMult[0]         = 0;  mEventMult[1]      = 100000;
@@ -45,7 +49,7 @@ rotationEventCut::rotationEventCut() : mRotation(false), mRandom(false), mSmear(
   mNumberOfTracks[0]    = 0;  mNumberOfTracks[1] = 100000;
   mNumberOfV0s[0]       = 0;  mNumberOfV0s[1]    = 100000;
   mReactionPlaneError[0]=-10.; mReactionPlaneError[1]=+10.;
-
+  
   engine = new HepJamesRandom();
   gauss = new RandGauss(engine);
 } 
@@ -84,6 +88,8 @@ bool rotationEventCut::Pass(const StHbtEvent* event){
        ((int)event->V0Collection()->size() >= mNumberOfV0s[0]) &&
        ((int)event->V0Collection()->size() <= mNumberOfV0s[1])
        );
+
+    if (mL3TriggerAlgorithm) goodEvent = goodEvent && (mL3TriggerAlgorithm & event->L3TriggerAlgorithm(0));
 
     if ( mVertZPos[0] < mVertZPos[1]) 
       goodEvent = goodEvent && ( (VertexZPos >= mVertZPos[0]) && (VertexZPos <= mVertZPos[1]) );
