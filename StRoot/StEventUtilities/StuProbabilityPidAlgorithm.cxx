@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.21 2000/12/26 23:27:05 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.22 2000/12/28 21:00:57 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.22  2000/12/28 21:00:57  aihong
+ * remove temp. fix
+ *
  * Revision 1.21  2000/12/26 23:27:05  aihong
  * temperory fix for e amp tail
  *
@@ -654,7 +657,7 @@ void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(double myCentrality, doubl
 
     double eContribution=0;
    if (mEAmp && mECenter && mESigma) eContribution = eGaus.Eval(myDedx,0.,0.);
-   if (fabs(myRig)>0.95) eContribution=0; //will deal with it later.
+   //   if (fabs(myRig)>0.95) eContribution=0; //will deal with it later.
 
 
     double piContribution=0;
