@@ -8,8 +8,6 @@ newtable sector mwc_sector 384
 newtable raw    mwc_raw    384
 newtable cor    mwc_cor    384
 
-ls
-pwd
 cd /dui
  
 return
