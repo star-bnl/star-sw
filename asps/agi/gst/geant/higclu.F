@@ -1,7 +1,10 @@
 *
-* $Id: higclu.F,v 1.1 1998/07/04 17:54:42 nevski Exp $
+* $Id: higclu.F,v 1.2 1998/10/24 04:59:39 nevski Exp $
 *
 * $Log: higclu.F,v $
+* Revision 1.2  1998/10/24 04:59:39  nevski
+* corrections from Federico Carminati
+*
 * Revision 1.1  1998/07/04 17:54:42  nevski
 * undefined SIDE corrected
 *
@@ -203,16 +206,18 @@ C**
       IF(NTARG.EQ.0) GOTO 51
       DO 4 I=NT1,NT2
 * PN, 06/04/98: SIDE(I) should be always defined.
-      SIDE(I)=-2.
       IF(NPNHMF.GT.0) GOTO 52
       CALL GRNDM(RNDM,1)
       IPA(I)=-(7+IFIX(RNDM(1)*3.0))
+* line added by fca
+      SIDE(I)=-1.
       GOTO 4
    52 IPA(I)=-16
       PNRAT=1.-ZNO2/ATNO2
       CALL GRNDM(RNDM,1)
       IF(RNDM(1).GT.PNRAT) IPA(I)=-14
       TARG=TARG+1.
+      SIDE(I)=-2.
       NPNHMF=NPNHMF-1
     4 CONTINUE
       NT=NT2
