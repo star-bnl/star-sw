@@ -16,8 +16,8 @@ int rdMuDst2spec(
 	  char* inDir   = "./",
 	  int nEve=5 ){ 
 
-  inDir   = "/star/data40/reco/production62GeV/ReversedFullField/P04id/2004/090/";
-  file="st_physics_5090009_raw_4040021.MuDst.root";
+  inDir   = "/star/data39/reco/production62GeV/ReversedFullField/P04id/2004/089//";
+  file="st_physics_5089006_raw_4040002.MuDst.root";
 
   initHisto();
 
