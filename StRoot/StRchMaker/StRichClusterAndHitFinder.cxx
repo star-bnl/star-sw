@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 1.6 2000/06/01 21:11:16 dunlop Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 1.6  2000/06/01 21:11:16  dunlop
- * Filled the id associated to hit
+ * Revision 2.0  2000/08/09 16:22:11  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
+ * Revision 2.5  2000/11/07 14:12:44  lasiuk
+ * init() information and
+ * quadrant threshold cuts default is 200 ADC counts
  *
  * Revision 2.4  2000/11/01 16:51:10  lasiuk
  * print the number of pads in dumpHitInfo()

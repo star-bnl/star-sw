@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleCluster.cxx,v 1.1 2000/05/18 11:34:21 lasiuk Exp $
+ * $Id: StRichSimpleCluster.cxx,v 2.0 2000/08/09 16:22:12 gans Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleCluster.cxx,v $
+ * Revision 2.0  2000/08/09 16:22:12  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
  * Revision 1.1  2000/05/18 11:34:21  lasiuk
  * iRename revision
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 1.4 2000/05/31 19:26:15 dunlop Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 2.0 2000/08/09 16:22:12 gans Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 1.4  2000/05/31 19:26:15  dunlop
- * Filling non-ctor entries in persistent hits + support for this
+ * Revision 2.0  2000/08/09 16:22:12  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
+ * this process (eDeconvolution).
+ * MC info restored in classifyHit() member
+ * cut parameters (for decon) added in initializeCutParameters()
  * startAmplitude set to 0.  This keeps track of the local
  * max of the hit now.
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.13 2000/06/13 18:26:13 dunlop Exp $
+ * $Id: StRchMaker.h,v 2.0 2000/08/09 16:22:11 gans Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,8 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 1.13  2000/06/13 18:26:13  dunlop
- * Modified SetMode (public)
+ * Revision 2.0  2000/08/09 16:22:11  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
+ * Revision 2.0  2000/08/09 16:22:11  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
  * Revision 1.13  2000/06/13 18:26:13  dunlop
  * Modified SetMode (public)
@@ -46,7 +49,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-#define rCH_WITH_PAD_MONITOR 1
+
+#define rCH_DEBUG 1
+#define rCH_HISTOGRAM
 
 #include "StRichDisplayActivate.h"
 
@@ -93,6 +98,8 @@ public:
     virtual Int_t  Make();
     virtual void   PrintInfo();
     virtual Int_t  Finish();
+
+    void setUseMatrix(int v);
     int  adcDecoder(unsigned long code, unsigned long* pad, unsigned long* row, unsigned long* adc);
     void setPedestalSubtract(int v,const char *file);
     void clearPadMonitor();
@@ -117,6 +124,12 @@ private:
     // flags
     short mRichCollectionPresent ;
     short mPixelCollectionPresent;
+    short mClusterCollectionPresent;
+    short mHitCollectionPresent;
+    short mCfOnly                ;
+    //pedestal
+    short mPedestalSubtract;
+    float mPedestal[160][96];
     float mSigma[160][96];
     const char* mPedestalFile;
     
@@ -150,10 +163,10 @@ private:
     // hits
     TH1F* mhc;//!
     TH1F* mhmc;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.13 2000/06/13 18:26:13 dunlop Exp $ built "__DATE__" "__TIME__ ;
+    TH1F* mhc2m;//!
 #endif
     virtual const char *GetCVS() const	{
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.13 2000/06/13 18:26:13 dunlop Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 2.0 2000/08/09 16:22:11 gans Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 public:

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSimpleHitCollection.h,v 1.1 2000/05/18 12:24:12 lasiuk Exp $
+ * $Id: StRichSimpleHitCollection.h,v 2.0 2000/08/09 16:22:13 gans Exp $
  *
  * Description:
  *  Container for output of cluster finder
@@ -10,6 +10,9 @@
  ****************************************************************
  *
  * $Log: StRichSimpleHitCollection.h,v $
+ * Revision 2.0  2000/08/09 16:22:13  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
  * Revision 1.1  2000/05/18 12:24:12  lasiuk
  * nitial revision
  *

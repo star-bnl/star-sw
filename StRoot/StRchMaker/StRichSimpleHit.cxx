@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleHit.cxx,v 1.3 2000/05/23 16:55:55 lasiuk Exp $
+ * $Id: StRichSimpleHit.cxx,v 2.0 2000/08/09 16:22:12 gans Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,10 +10,13 @@
  ***************************************************************************
  *
  * $Log: StRichSimpleHit.cxx,v $
- * Revision 1.3  2000/05/23 16:55:55  lasiuk
- * Incorporate new MC info
- * add clone() where necessary
- * accomodate name changes
+ * Revision 2.0  2000/08/09 16:22:12  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
+ * Revision 2.1  2000/09/29 19:01:24  lasiuk
+ * enumerated types added for flags
+ * c'tor includes cp from persistent hit
+ * number of pads added as a member
  *
  * Revision 2.0  2000/08/09 16:22:12  gans
  * Cosmetic Changes. Naming convention for TDrawable objects

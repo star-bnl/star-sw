@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleMCHit.cxx,v 1.2 2000/06/16 02:07:04 lasiuk Exp $
+ * $Id: StRichSimpleMCHit.cxx,v 2.0 2000/08/09 16:22:13 gans Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: StRichSimpleMCHit.cxx,v $
+ * Revision 2.0  2000/08/09 16:22:13  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
  * Revision 1.2  2000/06/16 02:07:04  lasiuk
  * explicit pathnames for different Maker files
  *

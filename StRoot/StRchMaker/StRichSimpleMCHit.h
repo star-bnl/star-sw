@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSimpleMCHit.h,v 1.1 2000/05/23 16:54:19 lasiuk Exp $
+ * $Id: StRichSimpleMCHit.h,v 2.0 2000/08/09 16:22:13 gans Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: StRichSimpleMCHit.h,v $
+ * Revision 2.0  2000/08/09 16:22:13  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
  * Revision 1.1  2000/05/23 16:54:19  lasiuk
  * Initial Revision
  *
