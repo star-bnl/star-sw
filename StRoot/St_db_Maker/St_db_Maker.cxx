@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.72 2003/10/06 04:05:33 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.73 2003/11/07 17:33:19 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.73  2003/11/07 17:33:19  perev
+// Add more clear message if no timestamp
+//
 // Revision 1.72  2003/10/06 04:05:33  perev
 // deletes to be pleasant to Insure
 //
@@ -235,7 +238,10 @@ Int_t St_db_Maker::Make()
 {
 
   TDatime td = GetDateTime();
-  assert(td.GetDate() < 20330101);
+  if (td.GetDate() >= 20330101) {
+     Error("Make", "TimeStamp not set. Can not make request to DB");	    
+     return kStFatal;
+  }
   fUpdateMode = 1;
   UpdateDB(fDataBase);  
   fUpdateMode = 0;
@@ -615,7 +621,7 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
     }
     if (strncmp(filename,psname+1,lpsname)) {// make new pseudo directory
       psname[1]=0; strncat(psname,filename,lpsname);
-      pseudo = new St_ValiSet(psname,ds); strcat(psname,".");
+      pseudo = new St_ValiSet(psname,ds); //VP strcat(psname,".");
     }
 
     if (isSql) { 	// save SQL  object
