@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.423 2004/07/01 00:11:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.424 2004/07/23 01:03:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -851,8 +851,11 @@ Bfc_st BFC2[] = {
 
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
-  {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constraint",kFALSE},
-  {"CtbMatchVtx"    ,""  ,"","",""                                       ,"","CTB Matching ON in Vertex Finding",kFALSE},
+  {"beamLine"    ,""  ,"","",""                                      ,"","LMV Beam line constraint",kFALSE},
+  {"CtbMatchVtx" ,""  ,"","",""                             ,"","CTB Matching ON in Vertex Finding",kFALSE},
+  {"VFMinuit"      ,""  ,"","",""                                       ,"","Minuit Vertex Finding",kFALSE}, 
+  {"VFppLMV"       ,""  ,"","",""                                        ,"","ppLMV Vertex Finding",kFALSE}, 
+
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1474,14 +1477,18 @@ Int_t StBFChain::Instantiate()
 	    //if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
 	  }
 	  if (maker=="StGenericVertexMaker") {
-	      if (GetOption("beamLine")) {
-		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
-		  gvtxMk->UseBeamLine();
-	      }
-	      if (GetOption("CtbMatchVtx")) {
-		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
-		  gvtxMk->UseCTB();
-	      }
+	      StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
+	      int                   VtxOpt = 0;
+
+	      // VertexFinder method
+	      if ( GetOption("VFMinuit") ){  VtxOpt |= 0x1;}	      
+	      if ( GetOption("VFppLMV") ){   VtxOpt |= 0x2;}
+	      gvtxMk->SetMode(VtxOpt);
+
+	      // All VertexFinders implement those (or not)
+	      if (GetOption("beamLine")) {      gvtxMk->UseBeamLine();}
+	      if (GetOption("CtbMatchVtx")) {   gvtxMk->UseCTB();}
+
 	  }
 	  if (maker=="StAssociationMaker") {
 	      if (GetOption("ITTF")) {
