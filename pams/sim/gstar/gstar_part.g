@@ -1,6 +1,10 @@
-* $Id: gstar_part.g,v 1.10 2004/06/06 14:08:35 fisyak Exp $
+* $Id: gstar_part.g,v 1.11 2004/12/20 17:55:31 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.11  2004/12/20 17:55:31  potekhin
+* Requested by Sevil and heavily used in embedding,
+* sigma(1385) family has been added to the particle list
+*
 * Revision 1.10  2004/06/06 14:08:35  fisyak
 * make LASERINO charged
 *
@@ -77,9 +81,22 @@
   Particle chasrino  code=171         TrkTyp=6 mass=0     charge=1 tlife=big
 
 
+
+  Particle S1385plus     code=701 TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23
+                         pdg=3224  bratio= { 1, }       mode= { 1808, }
+
+  Particle S1385minus    code=702 TrkTyp=4 mass=1.3872  charge=-1  tlife=1.67e-23
+                         pdg=3114  bratio= { 1, }       mode= { 1809, }
+
+  Particle S1385barplus  code=703 TrkTyp=4 mass=1.3872  charge=-1  tlife=1.67e-23
+                         pdg=-3114  bratio= { 1, }       mode= { 2608, }
+
+  Particle S1385barminus code=704 TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23
+                         pdg=-3224  bratio= { 1, }       mode= { 2609, }
+
 * the Stranglet World, authored by Ron Longacre and remastered by M.Potekhin
 * As per Ron Longacre's recommendation, we assign PDG codes which do not
-* overlap with existing ones, and do not stick to the rigorous definitions.
+* overlap with existing ones, and do not stick to the rigorous definitions.vec/del MODE
 
   Particle H0       code=801  TrkTyp=3 mass=2.21   charge=0 tlife=1.335E-10,
                      pdg=801  bratio = { 0.89, 0.11 }, mode   = { 1000014021, 1009014018 }
