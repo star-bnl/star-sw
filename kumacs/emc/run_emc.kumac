@@ -55,7 +55,7 @@
    exec load_libraries#run [domain]
 
 * **************************************************************
-* --------- Setup and run tpc fast simulator & tracker pams -------------*
+* --------- Setup and run emc/ems&jet pams -------------*
    
 * open input g2t data file
   exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
@@ -114,16 +114,5 @@
 return
  
 ************************************************************************
-
-
-
-
-
-
-
-
-
-
-
 
 
