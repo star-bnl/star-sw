@@ -1,5 +1,14 @@
-* $Id: phmdgeo.g,v 1.11 2004/03/31 16:42:05 potekhin Exp $
+* $Id: phmdgeo.g,v 1.12 2004/04/28 00:34:21 potekhin Exp $
 * $Log: phmdgeo.g,v $
+* Revision 1.12  2004/04/28 00:34:21  potekhin
+* Introduced a proper version flag which helps
+* steering from outside (geometry.g). Used it
+* to reinstate the standard GEANT cuts in the
+* GSTPAR calls, when version set to 2. The original
+* custom settings lead to a huge expense of
+* CPU and will be used in custom sims from
+* now on
+*
 * Revision 1.11  2004/03/31 16:42:05  potekhin
 * Changed Dipak's comment to reflect the actual number
 * modified in the previous check-in
@@ -59,7 +68,8 @@
     Created   03-july-2001
     Content   PHMD,PHMS,PHMT,PHSR,PMDA,AIRA,PHCA,PPBA,
               PFEA,PCBA,BASA,ASTR,PSTR,PDCU,PDGS
-              
+
+    structure PMVR {version, int Config}
               
     structure PMDG {version,m_max,m_min,zdist(2),DPMDx,DPMDy,DPMDz, 
                     PARGCz,PARSCz,PARFEz,PARPBz,
@@ -76,6 +86,11 @@
     SizeN (N) = ((N + 1./3.)*pmdg_CELL_RADIUS)*2 + pmdg_boundary*2.*2./sqrt(3.)
 
 *
+    Fill PMVR                   ! PMD geometry
+      version = 1               ! geometry version
+      Config  = 1               ! general configuration of the detector
+    endfill
+
     Fill PMDG                   ! PMD geometry
       version = 1               ! geometry version
       m_max   = 135.0           ! Mother volume max radius
@@ -105,8 +120,15 @@
       th_lead     = 1.5    ! Thickness of the Lead
       th_steel    = 0.5    ! Thickness of the steel support
     endfill
+
+
+* note that in the above, we only need PMVR version 2 to flag the fact
+* that we'll use the standard GEANT default values of the cuts
+* in GSTPAR. Version 1 contained the low special purpose values.
     
+      Use  PMVR
       Use  PMDG
+
       root32=sqrt(3.0)/2.0
       root34=root32/2.0
 
@@ -396,8 +418,10 @@ Block PPBA is The lead plates for different modules
                        dy=ylen0-ylen2*pmdg_boundary*root34/root32,
                         dz=pmdg_th_lead/2.
 
+      if(PMVR_Config.eq.1) then
         call GSTPAR (ag_imed, 'CUTGAM', .0001)
         call GSTPAR (ag_imed, 'CUTELE', .0001)
+      endif
 endblock
 *-------------------------------------------------------------
 Block PFEA is  The iron plates for different modules 
@@ -407,8 +431,10 @@ Block PFEA is  The iron plates for different modules
                         dy=ylen0-ylen2*pmdg_boundary*root34/root32,
                         dz=pmdg_th_steel/2.
 
+      if(PMVR_Config.eq.1) then
         call GSTPAR (ag_imed, 'CUTGAM', .0001)
         call GSTPAR (ag_imed, 'CUTELE', .0001)
+      endif
 endblock
 *------------------------------------------------------
 Block BASA is the G10 base plate
@@ -424,8 +450,10 @@ Block BASA is the G10 base plate
         Attribute BASA    seen=1     colo=6
         Shape     PARA    dx=xlen0-pmdg_boundary/root32 dy=ylen dz=pmdg_th_base/2.
 
+      if(PMVR_Config.eq.1) then
         call GSTPAR (ag_imed, 'CUTGAM', .0001)
         call GSTPAR (ag_imed, 'CUTELE', .0001)
+      endif
 endblock
 *-------------------------------------------
 Block PCBA is the chamber PCB
@@ -441,8 +469,10 @@ Block PCBA is the chamber PCB
          Attribute PCBA    seen=1     colo=4
          Shape     PARA    dx=xlen0-pmdg_boundary/root32 dy=ylen dz=pmdg_th_pcb/2.
 
+      if(PMVR_Config.eq.1) then
          call GSTPAR (ag_imed, 'CUTGAM', .0001)
          call GSTPAR (ag_imed, 'CUTELE', .0001)
+      endif
 endblock
 *-------------------------------------------------------------
 Block PDCU is The outer cell in the PMD module
@@ -471,8 +501,10 @@ Block PDGS is The inner cell in the PMD module
                       rmn={pmdg_hexd2(6),pmdg_hexd2(9)},
                       rmx={pmdg_hexd2(7),pmdg_hexd2(10)}
 
+      if(PMVR_Config.eq.1) then
         call GSTPAR (ag_imed, 'CUTGAM', .0001)
         call GSTPAR (ag_imed, 'CUTELE', .00001)
+      endif
 
       HITS      PDGS  Eloss:0:(0,1)
 *     HITS      PDGS  Eloss:0:Calo(0,1) - do not keep track id
