@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.3 1999/08/17 01:44:31 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.4 1999/08/17 18:55:54 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.4  1999/08/17 18:55:54  snelling
+ * Added two member funtions: setSector and setNrXbins
+ *
  * Revision 1.3  1999/08/17 01:44:31  snelling
  * changed ntuple projection to normal histogram filling
  *
@@ -25,6 +28,7 @@
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
 #include "tpc/St_tpt_residuals_Module.h"
+#include "tpc/St_xyz_newtab_Module.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TNtuple.h"
@@ -34,7 +38,9 @@
 ClassImp(StQACosmicMaker)
 
   StQACosmicMaker::StQACosmicMaker(const char *name):
-  StMaker(name){
+  StMaker(name), 
+  bSectorSelectionOn(kFALSE), 
+  nXBins(200) {
 }
 
 //-----------------------------------------------------------------------
@@ -54,7 +60,7 @@ Int_t StQACosmicMaker::Make() {
 //-----------------------------------------------------------------------
 void StQACosmicMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.3 1999/08/17 01:44:31 snelling Exp $\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.4 1999/08/17 18:55:54 snelling Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -168,7 +174,6 @@ Int_t StQACosmicMaker::initHistograms() {
 
   Float_t xMin = -100.;
   Float_t xMax = 100.;
-  Int_t nXBins = 200;
   Float_t yMin = -1.;
   Float_t yMax = 1.;
   Int_t nYBins = 200;
@@ -231,6 +236,16 @@ Int_t StQACosmicMaker::initHistograms() {
 Int_t StQACosmicMaker::fillHistograms() {
   
   int i;
+
+  // get pointers to raw adc xyz table
+  St_DataSetIter Itpc_raw(GetDataSet("tpc_raw"));
+  St_tfc_adcxyz *phtfc = 0;
+  tfc_adcxyz_st *ptadcxyz = 0;
+  phtfc = (St_tfc_adcxyz *) Itpc_raw.Find("adcxyz");
+  if (phtfc) {ptadcxyz = phtfc->GetTable();}
+  else { cout << "Warning: adcxyz table header does not exist " << endl; return kStWarn; }
+  if (!ptadcxyz) { cout << "Warning: adcxyz table does not exist " << endl; return kStWarn; }
+
   
   // get pointers to tpc hit table
   St_DataSetIter Itpc_hits(GetDataSet("tpc_hits"));
@@ -267,18 +282,20 @@ Int_t StQACosmicMaker::fillHistograms() {
   colName = "id";
   St_TableSorter trksorter(*phtrk,colName,0,nrows-1);
   
-  for(i=0; i<phtcl->GetNRows();i++) {
+  for(i=0; i<phtcl->GetNRows(); i++) {
     Int_t irow_res = ressorter[(Int_t)(pttphit[i].id)];
     // track in row table is 1000*id + position on track
     Int_t irow_trk = trksorter[(Int_t)(pttphit[i].track/1000.)];
+    Int_t isector = (Int_t)(pttphit[i].row/100.);
     
     Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
 			    (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
 
-    // global cuts
-    if (ptres[irow_res].resy != 0. && pttphit[i].alpha != 0.) {    
+
+    // global cuts and no specific sector selected
+    if (ptres[irow_res].resy != 0. && pttphit[i].alpha != 0. && !bSectorSelectionOn) {    
       // inner sector
-      if ((Int_t(pttphit[i].row/100.)) <= 13) {
+      if (isector <= 13) {
 	if (trkcalcp >= 0.3) {
 	  ResidualHists[0].mXYResVersusAlpha->
 	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
@@ -300,6 +317,19 @@ Int_t StQACosmicMaker::fillHistograms() {
 	}
       }
     }
+    // fill histograms only for selected sector, low momentum in hist1 rest in hist0
+    else {
+      if (isector == SelectedSector) {
+	if (trkcalcp >= 0.3) {
+	  ResidualHists[0].mXYResVersusAlpha->
+	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+	}
+	else {
+	  ResidualHists[1].mXYResVersusAlpha->
+	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	}
+      }
+    }
   }
 
   return kStOK;
@@ -312,55 +342,77 @@ Int_t StQACosmicMaker::calcHistograms() {
   int i;
 
   for (i = 0; i < 4; i++) {
+    TString *mHistTitle;
     TString *mHistName;
     char mCount[1];
     sprintf(mCount,"%d",i);
 
     //    TH2F *test=(TH2F*)chain->Maker("QACosmics")->GetHistList()->FindObject("xyresvsalpha0");   
+    //    (TH1D*) Maker(GetName())->GetHistList()->FindObject(mHistName->Data());   
+
     ResidualHists[i].mXYResVersusAlpha->FitSlicesY();
     if (Debug()) {  
       cout << "pointer to hist: " << ResidualHists[i].mXYResVersusAlpha << endl;
     }
+
+    mHistTitle = new TString("Magnitude xy residual vs crossing angle");
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
+    mHistTitle->Append(*mCount);
     mHistName->Append("_0");
-    if (Debug()) {  
-    cout << "pointer to hist0: " << ((TH1D *) gDirectory->Get(mHistName->Data())) << endl;
-    cout << "pointer to dest hist: " << ResidualHists[i].FitHists.mXYResVersusAlpha_mag << endl;
-    }
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_mag);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetName(mHistTitle->Data());
     delete mHistName;
+    delete mHistTitle;
     ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetXTitle("Crossing Angle (radians)");
     ResidualHists[i].FitHists.mXYResVersusAlpha_mag->SetYTitle("Magnitude");
-    
+
+
+    mHistTitle = new TString("Mean xy residual vs crossing angle");
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
+    mHistTitle->Append(*mCount);
     mHistName->Append("_1");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_mean);
-    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetName("Mean xy residual vs crossing angle");
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetName(mHistTitle->Data());
     delete mHistName;
+    delete mHistTitle;
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetMaximum(.4);
+    ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetMinimum(-.4);
     ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetXTitle("Crossing Angle (radians)");
     ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetYTitle("Mean xy residuals");
     ResidualHists[i].FitHists.mXYResVersusAlpha_mean->GetXaxis()->SetLabelSize(0.04);
     ResidualHists[i].FitHists.mXYResVersusAlpha_mean->GetYaxis()->SetLabelSize(0.04);
     ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetMarkerColor(kBlue);
     ResidualHists[i].FitHists.mXYResVersusAlpha_mean->SetMarkerStyle(20);
-    
+
+    mHistTitle = new TString("Sigma xy residual vs crossing angle");
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
+    mHistTitle->Append(*mCount);
     mHistName->Append("_2");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_sigma);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->SetName(mHistTitle->Data());
     delete mHistName;
+    delete mHistTitle;
     ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->SetXTitle("Crossing Angle (radians)");
     ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->SetYTitle("Sigma");
     
+    mHistTitle = new TString("Chi2 xy residual vs crossing angle");
     mHistName  = new TString("xyresvsalpha");
     mHistName->Append(*mCount);
+    mHistTitle->Append(*mCount);
     mHistName->Append("_chi2");
     ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ResidualHists[i].FitHists.mXYResVersusAlpha_chi);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetName(mHistTitle->Data());
     delete mHistName;
+    delete mHistTitle;
     ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetXTitle("Crossing Angle (radians)");
-    ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetYTitle("chi^2");
+    ResidualHists[i].FitHists.mXYResVersusAlpha_chi->SetYTitle("chi2");
     
     for (int j=0; j<ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fN; j++) { 
       ResidualHists[i].FitHists.mXYResVersusAlpha_sigma->fArray[j] = 
@@ -373,3 +425,20 @@ Int_t StQACosmicMaker::calcHistograms() {
 
 }
 
+//-----------------------------------------------------------------------
+
+void StQACosmicMaker::setSector(const Int_t sectorNumber) {
+
+  SectorSelectionOn();
+
+  if (sectorNumber > 0 && sectorNumber <=24) {
+  SelectedSector = sectorNumber;
+  cout << "Sector: " << SelectedSector << " selected" << endl;
+  }
+  else {
+    cout << "error sector selected which does not exist" << endl;
+  }
+
+}
+
+//-----------------------------------------------------------------------
