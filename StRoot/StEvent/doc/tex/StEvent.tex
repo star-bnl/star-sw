@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.1 1999/11/12 17:44:09 ullrich Exp $
+% $Id: StEvent.tex,v 2.2 1999/11/12 18:08:33 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -104,8 +104,8 @@
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
 % and added description of StPrimaryVertex::flag().
-  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.2 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 18:08:33 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.2 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 18:08:33 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.2 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 18:08:33 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,8 +177,8 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/11/12 17:44:09 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.2 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/11/12 18:08:33 $ $}  % replaced by cvs with current revision
 \index{header files}
 \index{StEventTypes.h file}
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
@@ -202,7 +202,7 @@ To summarize: All you need when using StEvent is to include
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.1 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.2 $ $}  \\[5mm] % replaced by cvs with current revision
 \index{enumerations}
 \index{constants}
 \index{StDetectorId.h file}
@@ -499,13 +499,16 @@ typedef unsigned char  Bool_t;      //Boolean
 code other than in the definition of class data member. Even worse
 this can have disadvantages when it comes to calls to system functions
 and speed. It also makes code less portable and readable.  Don't use
-    \verb+const StClassNameIterator begin() const;+\\
+them only because you see them used in \StEvent.
+
 \subsection{Container and Iterators}
 \label{sec:Container}
-    \verb+const StClassNameIterator end() const;+\\
+\index{container} \index{iterators} Version 2 of \StEvent\ comes with
+a new naming scheme for containers.  All containers used in \StEvent\
 store objects by pointer. Technically they are all vectors and
 therefore allow random-access as in
-    \verb+void erase(StClassNameIterator iter) const;+\\
+\begin{verbatim}
+    pointer_to_object = container[i];
     Deletes element referred to by iterator \texttt{iter}.
     If applied to structural containers the objects gets deleted.
 containers, so called structural and non-structural containers.  What
@@ -518,15 +521,16 @@ There are many more than one can describe here.
 If you want to learn more you better have a look at the
 \texttt{StArray.h} source code directly.
     \textbf{p}oin\textbf{t}e\textbf{r}s carry the prefix
-Needless to say that every container comes with two iterators a constant
-and a non-constant version.
-The name of each iterators is composed of the name of the objects it iterates
-over and the suffix \texttt{Iterator} or \texttt{ConstIterator}.\\
-Example: For the structural container \texttt{StSPtrVecTrackNode} the iterators
-StTrackNodeIterator and StTrackNodeConstIterator are defined.
-Iterators do no care about structural or non-structural so there is only one
-set of iterators for  \texttt{StSPtrVecTrackNode} and \texttt{StPtrVecTrackNode}
-containers.
+Needless to say that every container comes with two iterators a
+constant and a non-constant version.  The name of each iterators is
+composed of the name of container and the
+contain and we are done. Hence a structural container which holds
+objects (or better pointer to objects) of type \texttt{StTrackNode} is
+iterators StSPtrVecTrackNodeIterator and
+StSPtrVecTrackNodeConstIterator are defined.  Iterators care if the
+iterate over about structural or non-structural containers so there
+are two sets of iterators for \texttt{StSPtrVecTrackNode} and
+they same. The secret lies in their implementation. If you create a
 container by your own you should always use the non-structural
 containers. Those you can create and delete without doing \StEvent\
 any harm. Never delete a structural container unless you stand with
@@ -542,7 +546,7 @@ StPtrVecTrack
 StPtrVecTrackPidTraits
 StSPtrVecFtpcHit
 StSPtrVecKinkVertex
-for (StTrackIterator i = container.begin(); i != container.end(); i++)
+StSPtrVecPrimaryTrack
 StSPtrVecPrimaryVertex
 StSPtrVecSvtHit
 StSPtrVecTpcHit
