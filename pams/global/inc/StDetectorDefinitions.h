@@ -1,3 +1,5 @@
+#ifndef StDetectorDefinitions_hh
+#define StDetectorDefinitions_hh
 
 /* Numbering scheme for detectors
 ** TPC             = 1
@@ -54,3 +56,4 @@
 #define kTpcSsdSvtIdentifier          23
 #define kSsdSvtIdentifier             24
 
+#endif /*STDETECTORDEFINITIONS*/

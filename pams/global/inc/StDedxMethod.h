@@ -1,3 +1,5 @@
+#ifndef StDedxMethod_hh
+#define StDedxMethod_hh
 #include "StDedxDefinitions.h"
 enum StDedxMethod {
   kUndefinedMethodId         = kUndefinedMethodIdentifier,
@@ -7,3 +9,4 @@ enum StDedxMethod {
   kWeightedTruncatedMeanId   = kWeightedTruncatedMeanIdentifier,
   kOtherMethodId             = kOtherMethodIdentifier
 };
+#endif

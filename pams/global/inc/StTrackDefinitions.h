@@ -1,4 +1,5 @@
-
+#ifndef StTrackDefinitions_hh
+#define StTrackDefinitions_hh
 /* Numbering scheme for dst_track::methods, finder scheme
 ** This is a bitmap scheme. Places are reserved for detector trackers.
 ** Total number of bits reserved (including sign bit) is 12-bits for
@@ -37,5 +38,5 @@
 #define kKalmanFitIdentifier            3
 #define kLine2StepIdentifier            4
 #define kLine3DIdentifier               5
-
+#endif
 

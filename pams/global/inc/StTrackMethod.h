@@ -1,3 +1,5 @@
+#ifndef StTrackMethod_hh
+#define StTrackMethod_hh
 #include "StTrackDefinitions.h"
 
 enum StTrackFittingMethod {
@@ -8,3 +10,4 @@ enum StTrackFittingMethod {
   kLine2StepId               = kLine2StepIdentifier,
   kLine3DId                  = kLine3DIdentifier
 };
+#endif
