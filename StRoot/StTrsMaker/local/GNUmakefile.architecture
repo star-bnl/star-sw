@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile.architecture,v 1.3 1998/11/16 14:45:17 lasiuk Exp $
+# $Id: GNUmakefile.architecture,v 1.4 1999/01/20 15:56:23 lasiuk Exp $
 #
 # Author: Thomas Ullrich, Mar 25 1998
 # --------------------------------------------------------------------------
@@ -42,8 +42,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile.architecture,v $
-# Revision 1.3  1998/11/16 14:45:17  lasiuk
-# Nov 16
+# Revision 1.4  1999/01/20 15:56:23  lasiuk
+# simple mods
 #
 # Revision 1.3  1998/11/16 14:45:17  lasiuk
 # Nov 16
@@ -123,8 +123,12 @@ ifeq ($(findstring i386, $(STAR_SYS)),i386)
         CPPFLAGS     += -DST_NO_NUMERIC_LIMITS -DST_NO_EXCEPTIONS
 	CPPFLAGS     += -DST_NO_NAMESPACES
 	CXXFLAGS     := -pipe -fno-for-scope
-		CXXFLAGS += -g 
+	ifdef SCL_OPTIMISE
 		CXXFLAGS += -O 
+	else
+		CXXFLAGS += -g
+	endif
+	MAKESHLIB    := 1
 	SHEXT        := so
 	LD           := $(CXX)
 	LDFLAGS      := -shared
