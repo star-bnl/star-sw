@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.8 2001/07/31 23:21:42 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.9 2001/08/03 20:33:55 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.9  2001/08/03 20:33:55  lansdell
+// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
+//
 // Revision 2.8  2001/07/31 23:21:42  lansdell
 // added last point, hit-helix histos
 //
@@ -55,7 +58,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.8 2001/07/31 23:21:42 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.9 2001/08/03 20:33:55 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -118,6 +121,8 @@ class StQABookHist : public TObject {
 // ************************ Histogram Pointers *****************************
  public:
 
+  TH1F     *mNullPrimVtxMult;   //! primary vertex check (based on
+                                //! (multiplicity for real data)
   
   // for method MakeGlob - from table globtrk
   TH1F     *m_globtrk_fit_prob; //!
@@ -265,7 +270,8 @@ class StQABookHist : public TObject {
   TH2F     *m_pT_eta_recTS;    //! pT versus eta, tpc+svt
   TH2F     *m_pT_eta_recFE;    //! pT versus eta, ftpcE
   TH2F     *m_pT_eta_recFW;    //! pT versus eta, ftpcW
-  TH2F     *m_globtrk_xf_yfT;  //! Y vs X of first hit on trk, tpc
+  TH2F     *m_globtrk_xf_yfTE; //! Y vs X of first hit on trk, tpc east
+  TH2F     *m_globtrk_xf_yfTW; //! Y vs X of first hit on trk, tpc west
   TH2F     *m_globtrk_xf_yfTS; //! Y vs X of first hit on trk, tpc+svt
   TH2F     *m_globtrk_xf_yfFE; //! Y vs X of first hit on trk, ftpc east
   TH2F     *m_globtrk_xf_yfFW; //! Y vs X of first hit on trk, ftpc west
@@ -463,7 +469,8 @@ class StQABookHist : public TObject {
   TH2F     *m_ppT_eta_recTS;    //! pT versus eta, tpc+svt
   TH2F     *m_ppT_eta_recFE;    //! pT versus eta, ftpcE
   TH2F     *m_ppT_eta_recFW;    //! pT versus eta, ftpcW
-  TH2F     *m_primtrk_xf_yfT;   //! Y vs X of first hit on trk, tpc
+  TH2F     *m_primtrk_xf_yfTE;  //! Y vs X of first hit on trk, tpc east
+  TH2F     *m_primtrk_xf_yfTW;  //! Y vs X of first hit on trk, tpc west
   TH2F     *m_primtrk_xf_yfTS;  //! Y vs X of first hit on trk, tpc+svt
   TH2F     *m_primtrk_xf_yfFE;  //! Y vs X of first hit on trk, ftpc east
   TH2F     *m_primtrk_xf_yfFW;  //! Y vs X of first hit on trk, ftpc west

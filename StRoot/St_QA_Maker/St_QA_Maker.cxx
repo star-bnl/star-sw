@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.6 2001/05/16 20:57:03 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.7 2001/08/03 20:33:56 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.7  2001/08/03 20:33:56  lansdell
+// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
+//
 // Revision 2.6  2001/05/16 20:57:03  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -433,7 +436,10 @@ void St_QA_Maker::MakeHistGlob(){
         hists->m_chisq1T->Fill(chisq1);
 	
 // these are for tpc & ftpc
-        hists->m_globtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
+	if (t->x_first[2]<0)
+	  hists->m_globtrk_xf_yfTE->Fill(t->x_first[0],t->x_first[1]);
+	else
+	  hists->m_globtrk_xf_yfTW->Fill(t->x_first[0],t->x_first[1]);
         hists->m_eta_trklengthT->Fill(eta,t->length);
         hists->m_npoint_lengthT->Fill(t->length,Float_t(trkpnt));
         hists->m_fpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
@@ -835,7 +841,10 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pchisq1T->Fill(chisq1);
 	
 // these are for tpc & ftpc
-        hists->m_primtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
+	if (t->x_first[2]<0)
+	  hists->m_primtrk_xf_yfTE->Fill(t->x_first[0],t->x_first[1]);
+	else
+	  hists->m_primtrk_xf_yfTW->Fill(t->x_first[0],t->x_first[1]);
         hists->m_peta_trklengthT->Fill(eta,t->length);
         hists->m_pnpoint_lengthT->Fill(t->length,Float_t(trkpnt));
         hists->m_pfpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
