@@ -9,7 +9,7 @@ interface g2t_kine : amiModule{
           STAFCV_T call  (
 				);
 };
-/* Last mod. for g2t: $Date: 1997/12/31 14:33:29 $ */
+/* Last mod. for g2t: $Date: 1998/01/03 23:46:37 $ */
 
 
 
