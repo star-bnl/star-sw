@@ -1,20 +1,10 @@
 macro cts_init
 macro/global/import *
 *
-*   Load geometry
-*
-cd [constants]
-*
-
-newfilestream ctb_geo $STAR/params/ctf/ctg_pars_ctb.xdf r
-getevent ctb_geo
-dio/stream/close ctb_geo
- 
-* 
 *    Define tables
 *
  
- cd [params]/ctf/
+ cd [params]/ctf
  
 * 
 newtab cts cts_mpara 1
@@ -79,15 +69,9 @@ tdm/table/cell/putvalue 'cts[0].time_response' _
          95.44   96.02 96.52 96.94 97.30 97.64 97.91 98.15 _
          98.38   98.59 98.79 98.97 99.14 99.29 99.42 99.55 _
          99.65   99.74 99.82 99.88 99.92 99.95 99.97 99.98
-*
-*    Define some tables
-*
-cd [data]/ctf
-*
-newtab ctb_mslat cts_mslat 240
-newtab ctb_event cts_event 1000
-newtab ctb_raw   ctu_raw   240
+
 *
 cd /dui
+
 
 

@@ -1,0 +1,14 @@
+ macro init
+   macro/global/import *
+ 
+  cd [data]/ctf
+  newtab ctb_mslat cts_mslat 240
+  newtab ctb_event cts_event 500
+  newtab ctb_raw   ctu_raw   240
+  newtab ctb_cor   ctu_cor   240
+  ls
+  pwd
+  cd /dui
+ 
+ return
+ 

@@ -1,4 +1,4 @@
-macro init out=1 
+macro write 
 macro/global/import *
 
 *
@@ -11,16 +11,17 @@ n_tot     = [n_tot_eta]*[n_tot_phi]
 *    Define geometry and calibration tables
 *
 cd [params]/ctf
-newtab ctb          ctg_geo        1
-newtab ctb_slat_phi ctg_slat_phi [n_tot_phi]
-newtab ctb_slat_eta ctg_slat_eta [n_tot_eta]
-cd [calib]/ctf
-newtab ctb_slat     ctg_slat     [n_tot]
-cd [geometry]/ctf
-wait
+ newtab ctb          ctg_geo        1
+ newtab ctb_slat_phi ctg_slat_phi [n_tot_phi]
+ newtab ctb_slat_eta ctg_slat_eta [n_tot_eta]
+ 
+
+ newtab ctb_slat     ctg_slat     [n_tot]
+ 
+  
 *
 *    Initialize ctb geometry tables
-*
+* 
 rowcount ctb 1
 *
 tdm/table/cell/putvalue 'ctb[0].init'             0
@@ -80,9 +81,9 @@ tdm/table/cell/putvalue 'ctb_slat_eta[2].r'        215.41
 tdm/table/cell/putvalue 'ctb_slat_eta[3].r'        212.5 
 
 
-cd ../calib
 rowcount ctb_slat [n_tot]
-wait
+ 
+ 
 *
 do i_eta = 1, [n_tot_eta]
    do i_phi=1,[n_tot_phi]
@@ -130,20 +131,35 @@ do i_eta = 1, [n_tot_eta]
 
    enddo
 enddo
-*
+* 
+ 
+ cd /dui
+ 
+* 
 *   Call module
 *
-ami/module/call ctg [geometry]/ctf/ctb _
-                    [geometry]/ctf/ctb_slat_phi _
-                    [geometry]/ctf/ctb_slat_eta _ 
-                    [calib]/ctf/ctb_slat
-*
-if [out] .ne. 0 then
-  cd /dui/constants
-  /dio/newfilestream       output_file ctg_pars_ctb.dsl w
-  putevent output_file ctf
-endif
+ami/module/call ctg [params]/ctf/ctb _
+                    [params]/ctf/ctb_slat_phi _
+                    [params]/ctf/ctb_slat_eta _ 
+                    [params]/ctf/ctb_slat
  
-cd /dui
-
+*
+* write geometry tables out to file
+  /dio/newfilestream  output_file ctg_pars_ctb.dsl w
+  putevent output_file [params]/ctf
+ 
+ 
 RETURN
+ 
+**************************************************************
+ macro read 
+ macro/global/import *
+   
+   cd [params]
+   /dio/newfilestream  input_file ctg_pars_ctb.dsl r
+   getevent input_file 
+   cd /dui
+   
+ return
+ 
+* *************************************************************
