@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.55 1999/07/15 13:56:47 perev Exp $
+// $Id: StMaker.cxx,v 1.56 1999/07/16 15:09:36 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.56  1999/07/16 15:09:36  fisyak
+// reduce length of PrintInfo line
+//
 // Revision 1.55  1999/07/15 13:56:47  perev
 // cleanup
 //
@@ -610,7 +613,7 @@ void StMaker::PrintInfo() const
 {
    const char *cvs = GetCVS();
    const char *built = strstr(cvs,"built");
-   printf(" \t%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
+   printf(" %-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;
