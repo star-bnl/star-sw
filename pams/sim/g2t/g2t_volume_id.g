@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.37 2001/09/06 00:22:00 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.38 2002/10/16 19:12:44 kopytin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.38  2002/10/16 19:12:44  kopytin
+* Volume ID for BBC elements added. If changed, will affect StBbcSimulationMaker.
+*
 * Revision 1.37  2001/09/06 00:22:00  nevski
 * new svt geometry numbering intrroduced
 *
@@ -530,6 +533,11 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
                                      + numbv(4)*100    + numbv(5)
 
 *16*
+      else If (Csys=='bbc') then
+* 				Mikhail Kopytine for the BBC group
+* BBC has 4 levels: west/east, annulus, triple module, single module
+        volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
+*17*
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
