@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.44 2004/05/16 20:56:20 fisyak Exp $
+// $Id: StMatchMaker.cxx,v 1.45 2004/05/18 18:10:31 fisyak Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.45  2004/05/18 18:10:31  fisyak
+// comment assert
+//
 // Revision 1.44  2004/05/16 20:56:20  fisyak
 // Fix global and primary tracks fits for Field OFF
 //
@@ -672,11 +675,12 @@ Int_t StMatchMaker::Make(){
 	   row = s_spc[spt_id].id_wafer/1000;
 	   if(  s_spc[spt_id].id_globtrk-1 < 0){
 	     cout << spt_id << " " << s_spc[spt_id].id_globtrk<< " " << endl;
-	     assert(0);
+	     //	     assert(0);
 	   }
-	   if( row>7)row=7;
-	   track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
-	   
+	   else {
+	     if( row>7)row=7;
+	     track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
+	   }
 	 }
 	 
        }
