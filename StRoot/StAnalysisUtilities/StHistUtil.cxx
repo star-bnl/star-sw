@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.11 2000/02/10 22:21:57 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.12 2000/02/11 15:54:06 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.12  2000/02/11 15:54:06  kathy
+// set point id histogram to logY scale
+//
 // Revision 1.11  2000/02/10 22:21:57  kathy
 // turned the new impact param hist to logY scale
 //
@@ -922,6 +925,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaDedxDedx1FE",
  "TabQaDedxDedx0FW", 
  "TabQaDedxDedx1FW",
+ "TabQaPointId",
  "TabQaEvgenPt",
  "TabQaEvgenVtxX",
  "TabQaEvgenVtxY",
