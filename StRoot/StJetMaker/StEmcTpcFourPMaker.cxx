@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.5 2004/09/14 17:27:15 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.6 2004/09/30 13:58:45 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -165,23 +165,52 @@ Int_t StEmcTpcFourPMaker::Make() {
     // Calculate trackEmcPhi (Phi of the track at the radius of the EMC SMD)
     // pt=BeR, pt=0.3BR, pt GeV/c, B Tesla, R meters, R = pt/(Be) = pt/(0.3B)
     cout <<"\tlooping on:\t"<<nTracks<<"\ttracks from MuDst"<<endl;
+    int ntkept =0;
+    int badflag, ftpc, loweta, higheta, badr, badhits;
+    badflag = ftpc = loweta = higheta = badr = badhits = 0;
+    
     for(int i = 0; i < nTracks; i++)
 	{
 	    StMuTrack* track = uDst->primaryTracks(i);
-	    if(track->flag() < 0) continue;
-	    if(track->eta() < GetEtaLow()) continue;
-	    if(track->eta() > GetEtaHigh()) continue;
+	    if(track->flag() < 0) {
+		//cout <<"skipping track:\t"<<i<<"\twith flag:\t"<<track->flag()<<endl;
+		++badflag;
+		continue;
+	    }
+	    if (track->topologyMap().trackFtpcEast()==true || track->topologyMap().trackFtpcWest()==true) {
+		//cout <<"skipping track:\t"<<i<<"\twhich is from FTPC"<<endl;
+		++ftpc;
+		continue;
+	    }
+	    if(track->eta() < GetEtaLow()) {
+		//cout <<"skipping track:\t"<<i<<"\twith eta:\t"<<track->eta()<<"\twich is less than:\t"<<GetEtaLow()<<endl;
+		++loweta;
+		continue;
+	    }
+	    if(track->eta() > GetEtaHigh()) {
+		//cout <<"skipping track:\t"<<i<<"\twith eta:\t"<<track->eta()<<"\twich is more than:\t"<<GetEtaHigh()<<endl;
+		++higheta;
+		continue;
+	    }
 	    double pt = track->pt();
-	    double R = pt/(0.3*mField);
-	    if(R < HSMDR) // just forget the track if it doesn't get to EMC radius. 
+	    double R = pt/(0.3*fabs(mField));
+	    if(R < HSMDR) {// just forget the track if it doesn't get to EMC radius.
+		//cout <<"skipping track:\t"<<i<<"\twith R:\t"<<R<<"\twich is less than:\t"<<HSMDR<<"\t with pt:\t"<<pt<<"\tusing b:\t"<<mField<<endl;
+		++badr;
 		continue;
-	    if(static_cast<double>(track->nHits())
-	       /static_cast<double>(track->nHitsPoss()) < .51)
+	    }
+	    if(static_cast<double>(track->nHits())/static_cast<double>(track->nHitsPoss()) < .51) {
+		//cout <<"skipping track:\t"<<i<<"\twith nHits:\t"<<track->nHits()<<"\tand nHitsPoss:\t"<<track->nHitsPoss()<<endl;
+		++badhits;
 		continue;
+	    }
 	    sumPtTracks += pt;
 	    binmap.insertTrack(track, i);
+	    ++ntkept;
 	}
-
+    cout <<"skipped "<<badflag<<" for flag, "<<ftpc<<" for ftpc, "<<loweta<<" for loweta, "<<higheta<<" for higheta, "<<badr<<" for badr, "<<badhits<<" for hits"<<endl;
+    
+    cout <<"Added:\t"<<ntkept<<"\ttracks to the binmap"<<endl;
     // Retreive the points
     StEmcCollection *emc = NULL;
     if(useType != Hits)

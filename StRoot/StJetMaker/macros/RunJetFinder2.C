@@ -7,8 +7,7 @@ int total=0;
 
 void RunJetFinder2(int nevents=100,
 		   const char* dir = "",
-		   const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0030061.MuDst.root",
-		   //const char* file = "/star/data35/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117052_raw_2010002.MuDst.root",
+		   const char* file = "/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/135/st_physics_adc_5135068_raw_2050001.MuDst.root",
 		   const char *filter = "",
 		   const char *outfile="./4150010_raw_0030061")
 {
@@ -76,7 +75,8 @@ void RunJetFinder2(int nevents=100,
     //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* anapars = new StppAnaPars();
     anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(15); //track->nHitsFit()>15    anapars->setCutPtMin(0.2); //track->pt() > 0.2
+    anapars->setNhits(15); //track->nHitsFit()>15
+    anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
     anapars->setJetPtMin(5.0); //MLM, remember to change this back to 5!
     anapars->setJetEtaMax(100.0);
@@ -84,7 +84,6 @@ void RunJetFinder2(int nevents=100,
     anapars->setJetNmin(0);
     
 
-    /*
     //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
     StConePars* cpars = new StConePars();
     cpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
@@ -98,7 +97,6 @@ void RunJetFinder2(int nevents=100,
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, cpars, "MkConeJetsPt02R07");
-    */
 
     //Setup the cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
     StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
@@ -109,13 +107,11 @@ void RunJetFinder2(int nevents=100,
     ccdfpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ccdfpars, "MkCdfChargedJetsPt02R07");
 
-    /*
     //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
     ktpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ktpars, "MkKtJet");
-    */
     
     chain->Init();
     chain->PrintInfo();

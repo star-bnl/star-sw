@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.5 2004/09/22 15:46:20 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.6 2004/09/30 13:58:46 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -163,7 +163,23 @@ Int_t StJetMaker::Make()
 
 	int ijet=0;
 	for(JetList::iterator it=cJets.begin(); it!=cJets.end(); ++it) {
+
+	    /*
+	    //temp check from here.................
 	    //dumpProtojetToStream(mudst->event()->eventId(), ijet, *mOfstream, *it);
+	    StProtoJet& pj = (*it);
+	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
+	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.	    
+	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
+		//AbstractFourVec* v = (*it2);
+		//cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
+		StMuTrackFourVec* fv = dynamic_cast<StMuTrackFourVec*>(*it2);
+		assert(fv);
+		cout <<"\t\t\t"<<(*fv)<<endl;
+	    }
+	    //to here .............................
+	    */
+	    
 	    muDstJets->addProtoJet(*it);
 	    ++ijet;
 	}
