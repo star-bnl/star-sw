@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.9 1999/03/24 22:21:52 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.10 1999/07/25 02:14:17 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.10  1999/07/25 02:14:17  lasiuk
+ * correct memory deallocation without modifying interface
+ *
  * Revision 1.9  1999/03/24 22:21:52  lasiuk
  * confirm dataset delete
  *
@@ -44,33 +47,36 @@
 
 #include "StTrsUnpacker.hh"
 
-StTrsUnpacker::StTrsUnpacker() { /* nopt */}
+StTrsUnpacker::StTrsUnpacker()
+{
+    // Initialize the pointers
+    mPadList = 0;
+    mSequence = 0;
+}
 
 StTrsUnpacker::~StTrsUnpacker()
-{
-    //cout << "StTrsUnpacker::~StTrsUnpacker()" << endl;
-    //delete [] mSequence;
-    //delete [] mPadList;
-}
+{ /* nopt*/ }
     
 int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
 {
     int status;
     StTrsRawDataEvent *theData = (StTrsRawDataEvent*)eventData;
+    //StTrsRawDataEvent *theData = dynamic_cast<StTrsRawDataEvent*>(eventData);
 //     PR(theData->mSectors.size());
 
-    // Diagnostic...make sure the pointers are zero!
-//     for(int bbb=0; bbb<theData->mSectors.size(); bbb++)
-// 	cout << bbb << '\t' << (theData->mSectors[bbb]) << endl;
-    
-    if(theData->mSectors.size() >= which) { // bounds check
+    //
+    // Do bounds check
+    //
+    if(theData->mSectors.size() >= which) {
 	if ( (theData->mSectors[(which-1)]) ) {  // check the pointer...
 	    cout << "Sector: " << which << " data exists." << endl;
 	    mSector = theData->mSectors[(which-1)];
 	    status = 0;
 	}
-	else { // If the pointer is NULL
-	       // Go on to the next sector
+	else {
+	    //
+	    // If the pointer is NULL
+	    // Go on to the next sector
 	    cout << "Sector: " << which << " data exists NOT." << endl;
 	    status = -1;
 	}
@@ -80,15 +86,21 @@ int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
 
 int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Seq)
 {
+    //PR(mSequence);
+    if(mSequence) {
+	delete [] mSequence;
+	mSequence = 0;
+    }
     
     pair<digitalTimeBins*, digitalTimeBins*>
 	TrsPadData = mSector->timeBinsOfRowAndPad(padRow,npad);
 
-//     PR(TrsPadData.first->size());
+    //PR(TrsPadData.first->size());
 
     short numberOfZeros = 0;
     short numberOfEntriesD = TrsPadData.first->size();
     short numberOfEntriesZ = TrsPadData.second->size();
+
     //PR(numberOfEntriesD);
     //PR(numberOfEntriesZ);
     assert(numberOfEntriesD == numberOfEntriesZ);
@@ -102,11 +114,10 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 #else
     vector<StSequence, allocator<StSequence> > tmp;
 #endif
+
     tmp.clear();
+
     //
-//     for(int bbb=0; bbb<numberOfEntriesD; bbb++) {
-// 	cout << bbb << '\t' << (int)(*TrsPadData.first)[bbb] << '\t' << (int)(*TrsPadData.second)[bbb] << endl;
-//     }
     // Construct the sequences:
     for(; ii<numberOfEntriesD; ii++) {
 	if ( (*TrsPadData.first)[ii] == static_cast<unsigned char>(0) ) {
@@ -140,13 +151,12 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	} while ( ((*TrsPadData.first)[ii] != static_cast<unsigned char>(0)) &&
 		   (ii<numberOfEntriesD) );
 	ii--; // Adjust it, since you overstep the sequence...
-//  	PR(aSequence.length);
+  	//PR(aSequence.length);
 	numberOfZeros += aSequence.length;
 	tmp.push_back(aSequence);
     }
 
     // Return as an array!
-    // CAREFUL::Must call clear() to deallocate this memory when you are done!
     //
     *nSeq = tmp.size();
     mSequence = new StSequence[*nSeq];
@@ -170,9 +180,16 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
 {
     //cout << "StTrsUnpacker::getPadList()" << endl;
+    //PR(mPadList);
+    if(mPadList) {
+	delete [] mPadList;
+	mPadList = 0;
+    }
+    //
     // Count the sequences on the pad and store the list
     int numberOfPadsWithSignals = 0;
 
+    //
     // Should be data base derived quatities...
     if(padRow<1 || padRow>45) {
 	cerr << "Pad Row " << padRow << " out of range" << endl;
@@ -199,12 +216,11 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
 	}
     }
 
-//     PR(tmp.size());
-
     if (tmp.size() == 0) {
 	mPadList = 0;
     }
-    else {  // Otherwise fill the pad list
+    else {
+	// Otherwise fill the pad list
 	mPadList = new unsigned char[(tmp.size())];
 
 	for(ii=0; ii< tmp.size(); ii++) {
@@ -220,6 +236,9 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
 
 void StTrsUnpacker::clear()
 {
+    //cout << "StTrsUnpacker::clear()" << endl;
     delete [] mSequence;
+    mSequence = 0;
     delete [] mPadList;
+    mPadList = 0;
 }
