@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.49 1999/07/11 01:33:33 fine Exp $
+// $Id: StMaker.cxx,v 1.50 1999/07/11 01:59:04 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.50  1999/07/11 01:59:04  perev
+// add GetCVSTag again
+//
 // Revision 1.49  1999/07/11 01:33:33  fine
 // makedoc some corrections for MakeDoc
 //
@@ -136,7 +139,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.49 1999/07/11 01:33:33 fine Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.50 1999/07/11 01:59:04 perev Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -149,16 +152,6 @@ StMaker::StMaker()
 //_____________________________________________________________________________
 StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
 {
-   TString ts(".maker ");
-   ts += GetCVS();
-   if (ts.Contains("StMaker.h")) {// GetCVS not overloaded
-     Warning("StMaker","GetCVS is not overloaded");
-     printf("  Please add into file %s the following line: \n",IsA()->GetDeclFileName());
-     printf("  virtual const char *GetCVS()\n");
-     printf("  {static const char cvs[]=\"Tag $Name:  $ $Id: StMaker.cxx,v 1.49 1999/07/11 01:33:33 fine Exp $ built \"__DATE__\" \"__TIME__ ; return cvs;}\n\n");  
-   }
-   SetTitle(ts);
-   
    m_Inputs = 0;
    if (!fgStChain) {	// it is first maker, it is chain
      fgStChain = this;
@@ -449,6 +442,7 @@ Int_t StMaker::Init()
    StMaker *maker;
 
    while ((maker = (StMaker*)nextMaker())) {
+
      // save last created histogram in current Root directory
       gROOT->cd();
       objLast = gDirectory->GetList()->Last();

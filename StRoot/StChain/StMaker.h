@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.24 1999/07/09 22:00:22 perev Exp $
+// $Id: StMaker.h,v 1.25 1999/07/11 01:59:04 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.25  1999/07/11 01:59:04  perev
+// add GetCVSTag again
+//
 // Revision 1.24  1999/07/09 22:00:22  perev
 // GetCVS into StMaker
 //
@@ -191,14 +194,15 @@ public:
    static const char   *GetCVSIdC();
 
 //		must be in here in .h
-protected:
+
 
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
 
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.24 1999/07/09 22:00:22 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.25 1999/07/11 01:59:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
+  virtual const char *GetCVSTag(){return  GetCVS();};
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
 
