@@ -1,7 +1,7 @@
 //StFtpcTrackToStEvent.h
 /*******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.hh,v 1.2 2004/05/07 14:39:39 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.hh,v 1.3 2004/08/31 22:26:17 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -58,10 +58,6 @@ private:
   map<StFtpcTrack*, StTrackNode*> mTrkNodeMap;
   
   unsigned short mStiEncoded;
-  //helix parameters
-  StThreeVectorD *originD;
-  StPhysicalHelixD * physicalHelix;
-
-};
+ };
 
 #endif
