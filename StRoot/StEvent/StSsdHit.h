@@ -1,8 +1,9 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.3 1999/11/09 19:35:17 ullrich Exp $
+ * $Id: StSsdHit.h,v 2.4 2000/01/05 16:05:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *         Lilian Martin, Dec 1999
  ***************************************************************************
  *
  * Description:
@@ -10,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
- * Revision 2.3  1999/11/09 19:35:17  ullrich
- * Memory now allocated using StMemoryPool via overloaded new/delete
+ * Revision 2.4  2000/01/05 16:05:39  ullrich
+ * Updated for actual use in StEvent. Unpacking changed.
  *
  * Revision 2.3  1999/11/09 19:35:17  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
@@ -42,17 +43,21 @@ public:
     ~StSsdHit();
 
     void* operator new(size_t)     { return mPool.alloc(); }
-    void  operator delete(void* p) { mPool.free(p); }
-    
-    ULong_t  centralStripNSide() const;   // 0-767
-    ULong_t  centralStripPSide() const;   // 0-767
-    ULong_t  clusterSizeNSide() const;
-    ULong_t  clusterSizePSide() const;
-    ULong_t  matchingQualityFactor() const;
+    void  operator delete(void* p) { mPool.free(p); }    
+
+    ULong_t ladder() const;              // ladder=[1-20]
+    ULong_t wafer() const;               // wafer=[1-16]
+    ULong_t centralStripNSide() const;  
+    ULong_t centralStripPSide() const;  
+    ULong_t clusterSizeNSide() const;   
+    ULong_t clusterSizePSide() const;
 
 protected:
     static StMemoryPool mPool;  //!
     StObject* clone();
+    
+private:
+    enum {mWaferPerLadder=16};
     ClassDef(StSsdHit,1)
 };
 #endif
