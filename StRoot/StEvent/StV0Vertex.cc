@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cc,v 1.6 1999/04/09 19:34:03 genevb Exp $
+ * $Id: StV0Vertex.cc,v 1.7 1999/04/13 23:27:21 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cc,v $
+ * Revision 1.7  1999/04/13 23:27:21  genevb
+ * Slightly refined vertex code, updated V0, Xi vertex documentation
+ *
  * Revision 1.6  1999/04/09 19:34:03  genevb
  * Added vertex daughter functionality
  *
@@ -33,7 +36,7 @@
 #include <iostream.h>
 #include "StEvent/StV0Vertex.hh"
 
-static const char rcsid[] = "$Id: StV0Vertex.cc,v 1.6 1999/04/09 19:34:03 genevb Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cc,v 1.7 1999/04/13 23:27:21 genevb Exp $";
 
 StV0Vertex::StV0Vertex() : 
  StVertex()
@@ -71,7 +74,7 @@ StGlobalTrack* StV0Vertex::daughter(StTrackSign sign, double B)
     int agree = 1;
     if (sign == negativeTrack) agree = -1;
     while (i < numberOfDaughters()) {
-      StGlobalTrack* ithDaughter = daughters()[i++];
+      StGlobalTrack* ithDaughter = StVertex::daughter(i++);
       // Check for charge and field sign agreement
       if ( (agree * ithDaughter->helix().charge(B)) > 0) return ithDaughter;
     }

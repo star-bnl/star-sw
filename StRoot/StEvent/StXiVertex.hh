@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.5 1999/04/09 20:02:12 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.6 1999/04/13 23:27:21 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.6  1999/04/13 23:27:21  genevb
+ * Slightly refined vertex code, updated V0, Xi vertex documentation
+ *
  * Revision 1.5  1999/04/09 20:02:12  genevb
  * Change constancy of new functions
  *
@@ -85,5 +88,7 @@ inline float StXiVertex::dcaDaughters() const { return mDcaDaughters; }
 inline float StXiVertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
 inline StV0Vertex* StXiVertex::v0Vertex() const { return mV0Vertex; }
+
+inline StGlobalTrack* StXiVertex::bachelor() { return StVertex::daughter(0); }
 
 #endif
