@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.10 2002/02/19 17:40:49 ullrich Exp $
+ * $Id: StRichPidTraits.h,v 2.11 2002/02/19 23:21:30 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.11  2002/02/19 23:21:30  ullrich
+ * Added copy constructor and assignment operator. New destructor.
+ *
  * Revision 2.10  2002/02/19 17:40:49  ullrich
  * Changed version number from 2 to 3.
  *
@@ -59,8 +62,8 @@ public:
     StRichPidTraits();
     ~StRichPidTraits();
     
-    //StRichPidTraits(const StRichPidTraits&) {/* nopt */}
-    //StRichPidTraits& operator=(const StRichPidTraits&) {/* nopt */}
+    StRichPidTraits(const StRichPidTraits&);
+    StRichPidTraits& operator=(const StRichPidTraits&);
     
     int  operator==(const StRichPidTraits&) const;
     
@@ -97,25 +100,21 @@ public:
     float                  signedDca3d() const;
     
 private:
-    StSPtrVecRichPid mThePids;
-
-    Int_t            mProductionVersion;
-    Int_t            mId;
-    Float_t          mProbability;
-
-//  StRichHit*        	mAssociatedMip; //$LINK
+    StSPtrVecRichPid  mThePids;
+    Int_t             mProductionVersion;
+    Int_t             mId;
+    Float_t           mProbability;
 #ifdef __CINT__
-    StObjLink	      	mAssociatedMip; 
+    StObjLink	      mAssociatedMip; 
 #else
-    StLink<StRichHit> 	mAssociatedMip; 
+    StLink<StRichHit> mAssociatedMip; 
 #endif //__CINT__
-    StThreeVectorF   mMipResidual;
-    StThreeVectorF   mRefitResidual;
-
-    Float_t          mSigned3dDca;
-    Float_t          mSigned2dDca;
-
-    StRichSpectra*   mRichSpectra;
+    StThreeVectorF    mMipResidual;
+    StThreeVectorF    mRefitResidual;
+    Float_t           mSigned3dDca;
+    Float_t           mSigned2dDca;
+    StRichSpectra*    mRichSpectra;
+    
     StObject* clone() const;
 
     ClassDef(StRichPidTraits,3)
@@ -123,13 +122,10 @@ private:
 
 // sets
 
-inline       StSPtrVecRichPid& StRichPidTraits::getAllPids()        { return mThePids;}
+inline StSPtrVecRichPid& StRichPidTraits::getAllPids()        { return mThePids;}
 inline const StSPtrVecRichPid&  StRichPidTraits::getAllPids() const { return mThePids;}
-
 inline void  StRichPidTraits::addPid(StRichPid* t) {mThePids.push_back(t);}
-
 inline StObject* StRichPidTraits::clone() const {return new StRichPidTraits(*this);}
-
 inline void StRichPidTraits::setProductionVersion(int id) {mProductionVersion = id;}
 inline void StRichPidTraits::setId(int id) {mId = id;}
 inline void StRichPidTraits::setProbability(float p) {mProbability = p;}
@@ -138,20 +134,16 @@ inline void StRichPidTraits::setMipResidual(const StThreeVectorF& res) {mMipResi
 inline void StRichPidTraits::setRefitResidual(const StThreeVectorF& res) {mRefitResidual = res;}
 inline void StRichPidTraits::setSignedDca2d(float v) {mSigned2dDca = v;}
 inline void StRichPidTraits::setSignedDca3d(float v) {mSigned3dDca = v;}
-
 inline int StRichPidTraits::productionVersion() const { return mProductionVersion;}
 inline int StRichPidTraits::id() const {return mId;}
 inline float StRichPidTraits::probability() const {return mProbability;}
-
 inline const StRichHit* StRichPidTraits::associatedMip() const { return mAssociatedMip;}
 inline const StThreeVectorF& StRichPidTraits::mipResidual() const {return mMipResidual;}
 inline const StThreeVectorF& StRichPidTraits::refitResidual() const { return mRefitResidual;}
 inline float StRichPidTraits::signedDca2d() const { return mSigned2dDca;}
 inline float StRichPidTraits::signedDca3d() const { return mSigned3dDca;}
-
 inline StRichSpectra* StRichPidTraits::getRichSpectra() {return mRichSpectra;}
 inline const StRichSpectra* StRichPidTraits::getRichSpectra() const {return mRichSpectra;}
-
 inline void StRichPidTraits::setRichSpectra(StRichSpectra* sp) {mRichSpectra = sp;}
 
 //non-members
