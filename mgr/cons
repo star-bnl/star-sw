@@ -1,20 +1,22 @@
 #!/opt/star/bin/perl
 use Env; 
-if (defined($AFS)) {$File::Find::dont_use_nlink;}
 use File::Basename;
-use File::Find ();
+use File::Find;
+use POSIX;
+use File::Copy;
+if (defined($AFS)) {$File::Find::dont_use_nlink;}
 #use lib qw(/usr/local/lib/site_perl);
 #use strict;
 use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.33 2000/04/13 16:34:20 fisyak Exp $
+# $Id: cons,v 1.34 2000/04/22 20:05:51 fisyak Exp $
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.33 2000/04/13 16:34:20 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.34 2000/04/22 20:05:51 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2690,7 +2692,8 @@ sub source_exists {
 	# under any Repository.  If there\'s one in the local
 	# build directory, it no longer belongs there.
 	if ($time) {
-	    unlink($path) || die("$0: couldn't unlink $path ($!)\n");
+#yf	    unlink($path) || die("$0: couldn't unlink $path ($!)\n");
+	  return $self->{source_exists} = 1;
 	}
 	return $self->{source_exists} = '';
     } else {
