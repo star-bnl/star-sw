@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.3 1999/11/01 12:45:09 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.4 2000/01/20 14:43:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
- * Revision 2.3  1999/11/01 12:45:09  ullrich
- * Modified unpacking of point counter
+ * Revision 2.4  2000/01/20 14:43:07  ullrich
+ * Fixed bug in numberOfPoints(). Sum was wrong.
  *
  * Revision 2.4  2000/01/20 14:43:07  ullrich
  * Fixed bug in numberOfPoints(). Sum was wrong.
@@ -33,7 +33,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.3 1999/11/01 12:45:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.4 2000/01/20 14:43:07 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0)
 { /* noop */ }
@@ -53,10 +53,9 @@ StTrackDetectorInfo::firstPoint() const { return mFirstPoint; }
 const StThreeVectorF&
 StTrackDetectorInfo::lastPoint() const { return mLastPoint; }
 
-    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-    return (mNumberOfPoints%1000) +
-	((mNumberOfPoints%10000)/1000) +
-	(mNumberOfPoints/10000);    
+UShort_t
+StTrackDetectorInfo::numberOfPoints() const
+{
     return (numberOfPoints(kTpcId) +
 	    numberOfPoints(kSvtId) +
 	    numberOfPoints(kSsdId));    
@@ -64,6 +63,8 @@ StTrackDetectorInfo::lastPoint() const { return mLastPoint; }
 
 UShort_t
 StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
+{
+    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
     switch (det) {
     case kFtpcWestId:
     case kFtpcEastId:
@@ -72,10 +73,6 @@ StTrackDetectorInfo::numberOfPoints(StDetectorId det) const
 	break;
     case kSvtId:
 	return (mNumberOfPoints%10000)/1000;
-	break;
-    case kFtpcWestId:
-    case kFtpcEastId:
-	return mNumberOfPoints;
 	break;
     case kSsdId:
 	return mNumberOfPoints/10000;
