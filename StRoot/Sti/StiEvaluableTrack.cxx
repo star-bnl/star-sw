@@ -15,7 +15,7 @@
 #include "StiKalmanTrack.h"
 #include "StiEvaluableTrack.h"
 
-StiEvaluableTrack::StiEvaluableTrack() : msttrack(0), mstmctrack(0)
+StiEvaluableTrack::StiEvaluableTrack() : mPair(0)
 {
 }
 
@@ -23,29 +23,9 @@ StiEvaluableTrack::~StiEvaluableTrack()
 {
 }
 
-void StiEvaluableTrack::setStTrack(StTrack* val)
-{
-    msttrack = val;
-}
-
-void StiEvaluableTrack::setStMcTrack(StMcTrack* val)
-{
-    mstmctrack = val;
-}
-
 void StiEvaluableTrack::reset()
 {
-    msttrack = 0;
-    mstmctrack = 0;
+    mPair=0;
     this->StiKalmanTrack::reset();
 }
 
-StTrack* StiEvaluableTrack::stTrack() const
-{
-    return msttrack;
-}
-
-StMcTrack* StiEvaluableTrack::stMcTrack() const
-{
-    return mstmctrack;
-}

@@ -25,6 +25,9 @@
 // StEvent
 #include "StEventTypes.h"
 
+//StMcEventMaker
+#include "StMcEventMaker/StMcEventMaker.h"
+
 // Sti
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHit.h"
@@ -58,7 +61,23 @@ ostream& operator<<(ostream&, const StiHit&);
 
 ClassImp(StiMaker)
   
-StiMaker::StiMaker(const Char_t *name) : StMaker(name)
+StiMaker::StiMaker(const Char_t *name) : StMaker(name),
+					 //Containers
+					 mhitstore(0), mdetector(0), mtrackstore(0),
+					 //Factories
+					 mhitfactory(0), mtrackfactory(0), mktracknodefactory(0),
+					 mdetectorfactory(0), mdatanodefactory(0), mkalmantrackfactory(0),
+					 //Display
+					 mdisplay(0), mdrawablehits(0),
+					 //Utilities
+					 mhitfiller(0), mtrackseedfinder(0), mkalmanseedfinder(0),
+					 //Test
+					 mtempseedfinder(0), mcompseedfinder(0),
+					 //Tracker
+					 mtracker(0),
+					 //Members
+					 mmaterialbuildpath(0), mdetectorbuildpath(0),
+					 mevent(0), mMcEventMaker(0), mAssociationMaker(0)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
     sinstance = this;
@@ -204,7 +223,7 @@ Int_t StiMaker::Init()
     mkalmantrackfactory->setMaxIncrementCount(10);
 
     //EvaluableTrack SeedFinder
-    mtrackseedfinder = new StiEvaluableTrackSeedFinder();
+    mtrackseedfinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
     mtrackseedfinder->setFactory(mtrackfactory);
     mtrackseedfinder->setStTrackType(mStTrackType);
 
@@ -275,6 +294,16 @@ Int_t StiMaker::Make()
 {
     StEvent* rEvent = 0;
     rEvent = (StEvent*) GetInputDS("StEvent");
+    if (!mMcEventMaker) {
+	cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
+	return 0;
+    }
+    StMcEvent* mc = mMcEventMaker->currentMcEvent();
+    if (!mc) {
+	cout <<"StiMaker::Make(). ERROR!\tMcEvent==0"<<endl;
+	return 0;
+    }
+    
     if (rEvent) {
 	mevent = rEvent;
 	
@@ -289,23 +318,6 @@ Int_t StiMaker::Make()
 	mhitstore->sortHits();
 	cout <<"\tdone"<<endl;
 
-	/*
-	  //Temp test of hit container
-	  const hitmap& hitMap = mhitstore->hits();
-	  for (hitmap::const_iterator it=hitMap.begin(); it!=hitMap.end(); ++it) {
-	  const hitvector& tempvec = (*it).second;
-	  for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); ++vit) {
-	  if ((*vit)->detector()==0) {
-	  cout <<"\t\t\t\tNull Detector: "<<**vit<<endl;
-	  }
-	  else {
-	  cout <<"Fine"<<endl;
-	  }
-	  }
-	  }
-	*/
-	
-	
 	//Init seed finder for start
 	mcompseedfinder->reset();
 
@@ -326,7 +338,7 @@ Int_t StiMaker::Make()
 
 	//Initialize the SeedFinder, loop on tracks
 	cout <<"StiMaker::Make()\tFill drawable tracks"<<endl;
-	mtrackseedfinder->setEvent(mevent);
+	mtrackseedfinder->setEvent(mevent, mc);
 	while (mtrackseedfinder->hasMore()) {
 	    StiRootDrawableStiEvaluableTrack* thetrack =
 		dynamic_cast<StiRootDrawableStiEvaluableTrack*>(mtrackseedfinder->next());

@@ -9,6 +9,8 @@
 #define StiEvaluableTrackSeedFinder_HH
 
 #include <vector>
+#include <map>
+
 #include "StiSeedFinder.h"
 #include "StEvent/StEnumerations.h"
 
@@ -21,14 +23,16 @@ class StiKalmanTrack;
 class StTrack;
 class StiStTrackFilter;
 class StMcEvent;
-
+class StMcTrack;
+class StAssociationMaker;
+class StTrackPairInfo;
 class StiEvaluableTrackSeedFinder : public StiSeedFinder
 {
 public:
     typedef vector<StiStTrackFilter*> st_trackfilter_vector;
     //typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
     
-    StiEvaluableTrackSeedFinder();
+    StiEvaluableTrackSeedFinder(StAssociationMaker*);
     virtual ~StiEvaluableTrackSeedFinder();
     
     //Sets
@@ -46,27 +50,44 @@ public:
     void printStTracks() const;
 
 protected:
-    StiEvaluableTrack* makeTrack(StTrack*);
+    StiEvaluableTrack* makeTrack(StMcTrack*);
     
 private:
-    StEvent* mevent; //cache pointer
-    StMcEvent* mmcevent;
+    StiEvaluableTrackSeedFinder(); //Not implemented
+    StAssociationMaker* mAssociationMaker;
+    StEvent* mevent;
+    StMcEvent* mMcEvent;
     StiEvaluableTrackFactory* mfactory;
-    
     StTrackType mtype; //enumeration to the type of track we get from StEvent
     st_trackfilter_vector mfiltervector;
-    
-    StSPtrVecTrackNodeIterator mcurrent;
-    StSPtrVecTrackNodeIterator mbegin; 
-    StSPtrVecTrackNodeIterator mend;
+
+    vector<StMcTrack*>::iterator mCurrentMc;
+    vector<StMcTrack*>::iterator mBeginMc;
+    vector<StMcTrack*>::iterator mEndMc;
 };
 
+//Stl utility functors
+class BestCommonHits
+{
+public:
+    typedef pair<StMcTrack*, StTrackPairInfo*> McToStPair_t;
+    
+    BestCommonHits();
+
+    void operator()(const McToStPair_t& rhs);
+    
+    StTrackPairInfo* pair() const {return mPair;}
+    
+private:
+    unsigned int mMostCommon;
+    StTrackPairInfo* mPair;
+};
+    
 inline void StiEvaluableTrackSeedFinder::setFactory(StiEvaluableTrackFactory* val)
 {
     mfactory=val;
 }
 
 #endif
-
 
 

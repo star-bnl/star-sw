@@ -13,6 +13,7 @@ class StiTrack;
 class StiKalmanTrack;
 class StiKalmanTrackNode;
 class StTrack;
+class StGlobalTrack;
 class StTpcHit;
 class StSvtHit;
 class StSsdHit;
@@ -76,7 +77,7 @@ public:
 
     void operator() (const StiKalmanTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
 
-    void operator() (const StTrack*, StiKalmanTrack*);
+    void operator() (const StGlobalTrack*, StiKalmanTrack*);
     
     //Point Transform Functors
     
