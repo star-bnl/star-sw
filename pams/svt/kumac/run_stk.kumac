@@ -7,7 +7,7 @@
          
  message ' !!! run_stk: vertex not found,  filled from MC ***'
  
-  cd [data]/global/vertices
+  cd [params]/global/vertices
   tdm/newtable stk_vtx stk_vtx 1
   tdm/table/rowcount stk_vtx 1
   tdm/table/cell/putvalue 'stk_vtx[0].id' 1
@@ -31,7 +31,7 @@ return
         [geant_Event]/g2t_event _
         [geant_Event]/g2t_vertex _
         [data]/svt/hits/scs_spt _
-        [data]/global/vertices/stk_vtx _
+        [params]/global/vertices/stk_vtx _
         [data]/global/vertices/stk_vtx_direct _
         [data]/svt/tracks/groups _
         [data]/svt/tracks/stk_track _
@@ -62,7 +62,7 @@ MACRO eval_stk
 	 [geant_Event]/g2t_event _
 	 [geant_Event]/g2t_vertex _
 	 [data]/svt/hits/scs_spt _
-	 [data]/global/vertices/stk_vtx _
+	 [params]/global/vertices/stk_vtx _
 	 [data]/svt/tracks/groups _
 	 [data]/svt/tracks/stk_track _
 	 [data]/svt/tracks/stk_kine _

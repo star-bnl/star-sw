@@ -18,7 +18,7 @@ MACRO run
   endif
   
   ami/mod/call sgr_am _
-        [data]/global/vertices/stk_vtx _
+        [params]/global/vertices/stk_vtx _
 	[params]/svt/svgpars/geom _
         [data]/svt/hits/scs_spt _
         [data]/svt/tracks/groups _ 
@@ -57,7 +57,7 @@ endif
                 [geant_Event]/g2t_event _
                 [geant_Event]/g2t_vertex _
                 [data]/svt/hits/scs_spt _
-                [data]/global/vertices/stk_vtx _
+                [params]/global/vertices/stk_vtx _
                 [data]/svt/tracks/groups _
                 [data]/svt/tracks/stk_track _
                 [data]/svt/tracks/stk_kine _
