@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.10 1998/11/25 21:58:24 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.11 1998/12/01 02:02:38 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.11  1998/12/01 02:02:38  fisyak
+// fix run_summary_param
+//
 // Revision 1.10  1998/11/25 21:58:24  fisyak
 // Cleanup
 //
@@ -259,8 +262,17 @@ Int_t St_dst_Maker::Make(){
   }
 
   cout << " run_dst: finished calling dst_point_filler" << endl;
-    St_dst_event_header  *event_header  = new St_dst_event_header("event_header",1);
-                                                              dst.Add(event_header);
+  St_dst_event_header  *event_header  = new St_dst_event_header("event_header",1);
+  dst.Add(event_header);
+  dst_event_header_st  *event = event_header->GetTable();
+  event->n_event[0]=      0;
+  event->n_event[1]=      0;
+  event->n_run=        0;
+  strcpy(event->event_type,"Collision");
+  event->time=         0;
+  event->trig_mask=    0;
+  event->bunch_cross=  0;
+    
     St_dst_event_summary *event_summary = new St_dst_event_summary("event_summary",1);
                                                               dst.Add(event_summary);
     St_dst_monitor_soft *monitor_soft = new St_dst_monitor_soft("monitor_soft",1);
@@ -288,9 +300,9 @@ Int_t St_dst_Maker::Make(){
     cout << " run_dst: Calling fill_dst_event_summary" << endl;
     St_DataSetIter summary(gStChain->DataSet("run_summary"));
     St_dst_run_header *run_header = (St_dst_run_header *) summary("run_header");
-    St_dst_run_summary *run_summary = (St_dst_run_summary *) summary("run_summary");
+    St_dst_summary_param *summary_param = (St_dst_summary_param *) summary("summary_param");
      
-    Int_t Res_fill_dst_event_summary = fill_dst_event_summary(run_header,run_summary,event_header,
+    Int_t Res_fill_dst_event_summary = fill_dst_event_summary(summary_param,run_header,event_header,
                                                             globtrk,vertex,event_summary);
 
     if (Res_fill_dst_event_summary != kSTAFCV_OK) {
@@ -361,7 +373,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.10 1998/11/25 21:58:24 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.11 1998/12/01 02:02:38 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
