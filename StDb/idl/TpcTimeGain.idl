@@ -9,4 +9,5 @@
 //:Pointer to data:  TpcTimeGain.time:
 struct TpcTimeGain {
   float ScaleFactor;
+  float ErrorScaleFactor;
 };
