@@ -18,7 +18,7 @@
        float     distanceKinkDaughter2D;
        float     distanceKinkParentZ;
        float     distanceKinkDaughterZ;
-       short     numOfPadRows;  	
+       long      numOfPadRows;  	
  } ;
-/*  Last mod. for tkf_tkfpar:   $Date: 1999/12/23 19:29:13 $  */
+/*  Last mod. for tkf_tkfpar:   $Date: 2000/01/05 20:19:26 $  */
 

@@ -71,8 +71,8 @@
                            /* varies depending on vertex type (see above)  */
   long      det_id;        /* Packed daughter track info (see above)       */
   long      id_aux_ent;    /* Foreign key into auxiliary vertex table(s)   */
-  short     vtx_id;        /* vertex type ID, use StVertexDefinitions.h    */
-  short     n_daughters;   /* number of charged daughter tracks (see above)*/
+  long      vtx_id;        /* vertex type ID, use StVertexDefinitions.h    */
+  long      n_daughters;   /* number of charged daughter tracks (see above)*/
  } ;
-/*  Last mod. for dst_vertex:   $Date: 1999/12/23 19:29:13 $ */
+/*  Last mod. for dst_vertex:   $Date: 2000/01/05 20:19:26 $ */
 

@@ -33,16 +33,16 @@
  *
  *       
  *       Definition of variable dedx[2] for each method:
- *            mean / sigma
+ *            mean / sigma of mean
  *
  */
 
  struct dst_dedx   {
-  float  dedx[2];    /* dE/dx summary info; mean,sigma                   */
-  short  id_track;   /* Foreign key to dst_track                         */
-  short  det_id;     /* Det ID-SVT,TPC,FTPC, use StDetectorDefinitions.h */
-  short  method;     /* dE/dx calculation method (see  comments above)   */
-  short  ndedx;      /* number of points used in dE/dx calcu.            */
+  float  dedx[2];    /* dE/dx summary info; mean,sigma of mean           */
+  long   id_track;   /* Foreign key to dst_track                         */
+  long   det_id;     /* Det ID-SVT,TPC,FTPC, use StDetectorDefinitions.h */
+  long   method;     /* dE/dx calculation method (see  comments above)   */
+  long   ndedx;      /* number of points used in dE/dx calcu.            */
  } ;
-/*  Last mod. for dst_dedx:   $Date: 1999/12/23 19:29:12 $ */
+/*  Last mod. for dst_dedx:   $Date: 2000/01/05 20:19:25 $ */
 

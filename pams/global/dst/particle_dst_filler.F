@@ -36,7 +36,7 @@ CC:>--------------------------------------------------------------------
 CC:  Local Variable Type Declarations:
 
       integer*4  i
-      integer*2  charge_short
+c      integer*2  charge_short
 
       real*4  pt,phi,eta,pi,rad,charge,icharge
       real*4  px,py,pz,E,theta,tanl,invpt,pcut
@@ -96,7 +96,7 @@ CC:  Determine if particle is within the kinematic acceptance>>
 CC:  Determine the charge of the particle>>
 
                charge = icharge(particle(i).idhep)
-               charge_short = int(charge)
+c               charge_short = int(charge)
 
 CC:  And include it if charge.ne.0 OR if par(1).switch_neutrals = 1
 
@@ -135,7 +135,8 @@ CC:  Load/Fill dst_track and increment nok value:
                 dst_track(dst_track_h.nok).n_point     = 0
                 dst_track(dst_track_h.nok).n_max_point = 0
                 dst_track(dst_track_h.nok).n_fit_point = 0    
-                dst_track(dst_track_h.nok).icharge = charge_short
+c                dst_track(dst_track_h.nok).icharge = charge_short
+                dst_track(dst_track_h.nok).icharge = charge
                 dst_track(dst_track_h.nok).r0 = 0.1*
      +   sqrt(particle(i).vhep(1)**2.+particle(i).vhep(2)**2.)
                 dst_track(dst_track_h.nok).phi0 = 

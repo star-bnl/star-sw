@@ -15,9 +15,9 @@ struct dst_mon_soft_l3{
     long  nTotalHits ;        /* total number of clusters in the event */
     long  nTotalTracks;       /* total number of tracks found by tracker */
     long  nTotalPrimaryTracks; /* number of primary tracks found by tracker */
-    short triggermask;        /* the result of the trigger inquiry */
-    short processorId[24] ;   /* processor where the sector was reconstructed */
-    short id_param[24];       /* the parameter set used in the tracker */
+    long  triggermask;        /* the result of the trigger inquiry */
+    long  processorId[24] ;   /* processor where the sector was reconstructed */
+    long  id_param[24];       /* the parameter set used in the tracker */
 };
-/*  Last mod. for dst_mon_soft_l3:   $Date: 1999/12/23 19:29:12 $ */
+/*  Last mod. for dst_mon_soft_l3:   $Date: 2000/01/05 20:19:25 $ */
 

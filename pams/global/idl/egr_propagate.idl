@@ -8,5 +8,5 @@
   float       r;      /* reference radius */
   float       x[3];   /* coordinates of target points */
   float       z;      /* constant z of target plane */
-  short       iflag;  /* switch:propagate to point/radius/plane */
+  long        iflag;  /* switch:propagate to point/radius/plane */
 };

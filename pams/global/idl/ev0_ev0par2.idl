@@ -10,7 +10,7 @@
        float     ptarm_max;  /* Max. value of arm. pt allowed, only first entry used*/
        float     dcapnmin;   /* Min. value of tracks at interaction */
        long      iflag;      /* Controls execution flow, i.e. evaluate done now or not. */
-       short     n_point;    /* Min. number of points on track */ 
+       long      n_point;    /* Min. number of points on track */ 
    } ;
 /*  Last mod. for ev0par2: $Data: $  */
 

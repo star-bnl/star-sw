@@ -26,9 +26,9 @@
   long tpc_id;       /* Foreign key to either TPC point or track*/
   long next_match;   /* Next svm_match id in linked list, last   */   
                      /* to first, etc.                           */
-  short match_type;  /* Matching type index: 1=vec-vec, 2=vec-pt*/
-  short method;      /* Matching method index: PID/vertex on/off etc. */
-  short iflag;       /* Summary of matching quality information     */
+  long  match_type;  /* Matching type index: 1=vec-vec, 2=vec-pt*/
+  long  method;      /* Matching method index: PID/vertex on/off etc. */
+  long  iflag;       /* Summary of matching quality information     */
  } ;
-/*  Last mod. for svm_match:   $Date: 1999/12/23 19:29:13 $ */
+/*  Last mod. for svm_match:   $Date: 2000/01/05 20:19:26 $ */
 

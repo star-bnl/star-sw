@@ -12,7 +12,7 @@
  *  secrow    packs the detector ID number using the definitions in
  *            StDetectorDefinitions (4 bits), the sector number 1 to
  *            24 (5 bits), and the pad row number 1 to 45 (6 bits)
- *            into a 'short' integer word.
+ *            into a 'long' integer word.
  *
  *  padtimeadc packs the pad number (maximum of 182) (8 bits), time
  *             bucket number (0-511, 9 bits) and ADC value (10 bits)
@@ -24,7 +24,7 @@
 
  struct dst_pixel  {
   long  padtimeadc;   /* Packed pad#, time bucket and ADC        */
-  short secrow;       /* Packed det ID, sec., row. numbers       */
+  long  secrow;       /* Packed det ID, sec., row. numbers       */
  } ;
-/*  Last mod. for dst_pixel::   $Date: 1999/12/23 19:29:12 $ */
+/*  Last mod. for dst_pixel::   $Date: 2000/01/05 20:19:25 $ */
 
