@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.42 1998/08/17 14:44:28 didenko Exp $
+# $Id: MakePam.mk,v 1.43 1998/08/18 18:53:16 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.43  1998/08/18 18:53:16  fisyak
+# Add root I/O
+#
 # Revision 1.42  1998/08/17 14:44:28  didenko
 # ****
 #
@@ -272,30 +275,31 @@ $(FILES_TAI) : $(GEN_TAB)/%.inc : %.idl
 	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
 #$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : %.idl
 #	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
+ifndef NOROOT
 $(GEN_TAB)/.rootrc:
-	@echo "# ROOT Environment settings are handled via the class TEnv. To see" > $(ALL_TAGS)
-	@echo "# which values are active do: gEnv->Print(). ">>  $(ALL_TAGS)
+	@echo '# ROOT Environment settings are handled via the class TEnv. To see' > $(ALL_TAGS)
+	@echo '# which values are active do: gEnv->Print(). '>>  $(ALL_TAGS)
  
-	@echo "# Path used by dynamic loader to find shared libraries and macros ">>  $(ALL_TAGS)
-	@echo "# Paths are different for Unix and Windows. The example shows the defaults">>  $(ALL_TAGS)
-	@echo "# for all ROOT applications for either Unix or Windows.">>  $(ALL_TAGS)
-	@echo "Unix.*.Root.DynamicPath:    .:$(ROOTSYS)/lib:.$(STAR_SYS)/lib:$(STAR_LIB):$(STAF_LIB)">>  $(ALL_TAGS)
-	@echo "Unix.*.Root.MacroPath:      .:./StRoot/macros:$(STAR)/StRoot/macros:$(STAR)/StRoot/test:$(STAR)/.share/tables:$(ROOTSYS)/macros">>  $(ALL_TAGS)
-	@echo "WinNT.*.Root.DynamicPath:   ./;$(ROOTSYS)/star/bin;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$(ROOTSYS);$(ROOTSYS)/bin;$(PATH)">>  $(ALL_TAGS)
-	@echo "WinNT.*.Root.MacroPath:     ./;$(home)/root/macros;$(ROOTSYS)/tutorials;$(ROOTSYS)/star/macros;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$(ROOTSYS)/macros">>  $(ALL_TAGS)
-	@echo "# Show where library or macro is found (in path specified above)">>  $(ALL_TAGS)
-	@echo "Root.ShowPath:           false">>  $(ALL_TAGS)
+	@echo '# Path used by dynamic loader to find shared libraries and macros '>>  $(ALL_TAGS)
+	@echo '# Paths are different for Unix and Windows. The example shows the defaults'>>  $(ALL_TAGS)
+	@echo '# for all ROOT applications for either Unix or Windows.'>>  $(ALL_TAGS)
+	@echo 'Unix.*.Root.DynamicPath:    .:$$(ROOTSYS)/lib:.$$(STAR_SYS)/lib:$$(STAR_LIB):$$(STAF_LIB)'>>  $(ALL_TAGS)
+	@echo 'Unix.*.Root.MacroPath:      .:./StRoot/macros:$$(STAR)/StRoot/macros:$$(STAR)/StRoot/test:$$(STAR)/.share/tables:$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
+	@echo 'WinNT.*.Root.DynamicPath:   ./;$$(ROOTSYS)/star/bin;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS);$$(ROOTSYS)/bin;$$(PATH)'>>  $(ALL_TAGS)
+	@echo 'WinNT.*.Root.MacroPath:     ./;$$(home)/root/macros;$$(ROOTSYS)/tutorials;$$(ROOTSYS)/star/macros;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$$(ROOTSYS)/macros'>>  $(ALL_TAGS)
+	@echo '# Show where library or macro is found (in path specified above)'>>  $(ALL_TAGS)
+	@echo 'Root.ShowPath:           false'>>  $(ALL_TAGS)
  
-	@echo "# Activate memory statistics (size and cnt is used to trap allocation of">>  $(ALL_TAGS)
-	@echo "# blocks of a certain size after cnt times)">>  $(ALL_TAGS)
-	@echo "Root.MemStat:            0">>  $(ALL_TAGS)
-	@echo "Root.MemStat.size:      -1">>  $(ALL_TAGS)
-	@echo "Root.MemStat.cnt:       -1">>  $(ALL_TAGS)
-	@echo "Root.ObjectStat:         1">>  $(ALL_TAGS)
+	@echo '# Activate memory statistics (size and cnt is used to trap allocation of'>>  $(ALL_TAGS)
+	@echo '# blocks of a certain size after cnt times)'>>  $(ALL_TAGS)
+	@echo 'Root.MemStat:            0'>>  $(ALL_TAGS)
+	@echo 'Root.MemStat.size:      -1'>>  $(ALL_TAGS)
+	@echo 'Root.MemStat.cnt:       -1'>>  $(ALL_TAGS)
+	@echo 'Root.ObjectStat:         1'>>  $(ALL_TAGS)
  
-	@echo "# Rint (interactive ROOT executable) specific alias, logon and logoff macros">>  $(ALL_TAGS)
-	@echo "Rint.Logon:              ./gentable.C">>  $(ALL_TAGS)
-	@echo "Rint.History:             /dev/null">>  $(ALL_TAGS)
+	@echo '# Rint (interactive ROOT executable) specific alias, logon and logoff macros'>>  $(ALL_TAGS)
+	@echo 'Rint.Logon:              ./gentable.C'>>  $(ALL_TAGS)
+	@echo 'Rint.History:             /dev/null'>>  $(ALL_TAGS)
 
 $(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "{" >   $(GEN_TAB)/gentable.C;
@@ -304,10 +308,10 @@ $(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
 	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
-	echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
+	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
 	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
 	@echo "}" >> $(GEN_TAB)/gentable.C;
-	cd $(GEN_TAB); root.exe -b -q /dev/null ; $(RM) gentable.C
+	cd $(GEN_TAB); Root.exe -b -q /dev/null > /dev/null; $(RM) gentable.C
 #$(FILES_THH) : $(GEN_TAB)/St_%_Table.h   : %.idl
 #	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
 $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
@@ -317,10 +321,11 @@ $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
 	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
 	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
-	echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
+	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
 	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
 	@echo "}" >> $(GEN_TAB)/gentable.C;
-	cd $(GEN_TAB); root.exe -b -q /dev/null ; $(RM) gentable.C
+	cd $(GEN_TAB); Root.exe -b -q /dev/null > /dev/null ; $(RM) gentable.C
+endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def

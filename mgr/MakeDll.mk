@@ -1,6 +1,9 @@
 #
 ifdef SO_LIB
-   OUT_DIR := $(shell cd $(dir $(SO_LIB))/../..; pwd)
+#  OUT_DIR := $(shell cd $(dir $(SO_LIB))/../..; pwd)
+   OUT_UP  := $(subst / ,,$(dir $(SO_LIB))  )
+   OUT_UPP := $(subst / ,,$(dir $(OUT_UP))  )
+   OUT_DIR := $(subst / ,,$(dir $(OUT_UPP)) )
 endif
 ifndef OUT_DIR
   OUT_DIR := $(shell pwd)
@@ -277,10 +280,10 @@ show:
 	@echo MAKEFLAGS   := $(MAKEFLAGS)
 	@echo MAKEFILES   := $(MAKEFILES)
 	@echo OUT_DIR     := $(OUT_DIR)
+	@echo OUT_UP      := $(OUT_UP)
+	@echo OUT_UPP     := $(OUT_UPP)
 	@echo INP_DIR     := $(INP_DIR) 
 	@echo UPP_INP_DIR := $(UPP_INP_DIR)
-	@echo UPP_OUT_DIR := $(UPP_OUT_DIR)
-	@echo OUT_DIR     := $(OUT_DIR) 
 	@echo PKGNAME     := $(PKGNAME) 
 	@echo SRC_DIR     := $(SRC_DIR)
 	@echo GEN_DIR := $(GEN_DIR) 

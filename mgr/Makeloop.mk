@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.5  1998/08/18 18:53:16  fisyak
+#  Add root I/O
+#
 #  Revision 1.4  1998/08/12 21:45:27  fisyak
 #  Add test on StRoot directories
 #
@@ -94,7 +97,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/12 21:45:27 $ 
+#           Last modification $Date: 1998/08/18 18:53:16 $ 
 #  default setings
 # Current Working Directory
 #
@@ -190,7 +193,7 @@ endif
 ifneq ($(EMPTY),$(SUBDIRS))     
 ifneq (,$(findstring $(LEVEL),0 1))
 ifneq (,$(wildcard $(ROOT_DIR)/StRoot/base))
-TARGETS += St_base 
+BASE := St_base 
 endif
 ifneq (,$(wildcard $(ROOT_DIR)/.share/tables))
 TARGETS += St_Tables
@@ -204,7 +207,7 @@ endif
 #      I_have_subdirs
 all:  $(addsuffix _all, $(SUBDIRS))   $(TARGETS)
 %_all:; $(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
-test: $(addsuffix _test, $(SUBDIRS))
+test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
 	$(MAKE) -f $(MakePam) -C $(STEM) test $(MAKFLAGS) 
 clean: $(addsuffix _clean, $(SUBDIRS))
