@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.cxx,v 2.1 1999/10/28 22:27:58 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.cxx,v 2.2 2002/01/03 20:59:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.cxx,v $
+ * Revision 2.2  2002/01/03 20:59:33  ullrich
+ * Added BBC and FPD.
+ *
  * Revision 2.1  1999/10/28 22:27:58  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -20,7 +23,7 @@
 #include "StTriggerDetectorCollection.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.1 1999/10/28 22:27:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTriggerDetectorCollection.cxx,v 2.2 2002/01/03 20:59:33 ullrich Exp $";
 
 ClassImp(StTriggerDetectorCollection)
 
@@ -30,6 +33,12 @@ StTriggerDetectorCollection::StTriggerDetectorCollection(const dst_TrgDet_st& t)
     mCtb(t), mMwc(t), mVpd(t), mZdc(t) {/* noop */}
 
 StTriggerDetectorCollection::~StTriggerDetectorCollection() {/* noop */}
+
+StBbcTriggerDetector&
+StTriggerDetectorCollection::bbc() { return mBbc; }
+
+const StBbcTriggerDetector&
+StTriggerDetectorCollection::bbc() const { return mBbc; }
 
 StCtbTriggerDetector&
 StTriggerDetectorCollection::ctb() { return mCtb; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.8 2001/12/01 15:41:55 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.9 2002/01/03 20:59:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.9  2002/01/03 20:59:33  ullrich
+ * Added BBC and FPD.
+ *
  * Revision 2.8  2001/12/01 15:41:55  ullrich
  * Added StDetectorState container hints.
  *
@@ -38,7 +41,7 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.8 2001/12/01 15:41:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.9 2002/01/03 20:59:33 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -67,6 +70,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEmcCollection",             "evt_emc",      6);
     setBranch("StRichCollection",            "evt_aux",      7);
     setBranch("StTofCollection",             "evt_aux",      7);
+    setBranch("StFpdCollection",             "evt_aux",      7);
     setBranch("StSsdHitCollection",          "evt_hits",     8);
     setBranch("StSvtHitCollection",          "evt_hits",     8);
     setBranch("StTpcHitCollection",          "evt_hits",     8);
@@ -82,6 +86,7 @@ StEventClusteringHints::StEventClusteringHints()
     setBranch("StEmcCollection",             "event", 1);
     setBranch("StRichCollection",            "event", 1);
     setBranch("StTofCollection",             "event", 1);
+    setBranch("StFpdCollection",             "event", 1);
     setBranch("StSsdHitCollection",          "event", 1);
     setBranch("StSvtHitCollection",          "event", 1);
     setBranch("StTpcHitCollection",          "event", 1);

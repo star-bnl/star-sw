@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.19 2001/12/01 15:42:26 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.20 2002/01/03 20:59:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.20  2002/01/03 20:59:33  ullrich
+ * Added BBC and FPD.
+ *
  * Revision 2.19  2001/12/01 15:42:26  ullrich
  * Added StDetectorState.h
  *
@@ -72,6 +75,7 @@
 #ifndef StEventTypes_hh
 #define StEventTypes_hh
  
+#include "StBbcTriggerDetector.h"
 #include "StCalibrationVertex.h"
 #include "StCtbSoftwareMonitor.h"
 #include "StCtbTriggerDetector.h"
@@ -90,6 +94,7 @@
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
 #include "StEventSummary.h"
+#include "StFpdCollection.h"
 #include "StFtpcHit.h"
 #include "StFtpcHitCollection.h"
 #include "StFtpcPlaneHitCollection.h"

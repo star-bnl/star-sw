@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.25 2001/12/01 15:40:48 ullrich Exp $
+ * $Id: StEvent.h,v 2.26 2002/01/03 20:59:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.26  2002/01/03 20:59:33  ullrich
+ * Added BBC and FPD.
+ *
  * Revision 2.25  2001/12/01 15:40:48  ullrich
  * Added StDetectorState access function.
  *
@@ -107,6 +110,7 @@ class StDetectorState;
 class StEventClusteringHints;
 class StEventInfo;
 class StEventSummary;
+class StFpdCollection;
 class StSoftwareMonitor;
 class StTpcHitCollection;
 class StFtpcHitCollection;
@@ -170,6 +174,8 @@ public:
     const StRichCollection*             richCollection() const;
     StTofCollection*                    tofCollection();
     const StTofCollection*              tofCollection() const;
+    StFpdCollection*                    fpdCollection();
+    const StFpdCollection*              fpdCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -233,6 +239,7 @@ public:
     void setEmcCollection(StEmcCollection*);
     void setRichCollection(StRichCollection*);
     void setTofCollection(StTofCollection*);
+    void setFpdCollection(StFpdCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
     void setL0Trigger(StL0Trigger*);
     void setL1Trigger(StL1Trigger*);

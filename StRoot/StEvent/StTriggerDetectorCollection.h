@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.0 1999/10/12 18:43:20 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.1 2002/01/03 20:59:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.1  2002/01/03 20:59:34  ullrich
+ * Added BBC and FPD.
+ *
  * Revision 2.0  1999/10/12 18:43:20  ullrich
  * Completely Revised for New Version
  *
@@ -17,6 +20,7 @@
 #ifndef StTriggerDetectorCollection_hh
 #define StTriggerDetectorCollection_hh
 #include "StObject.h"
+#include "StBbcTriggerDetector.h"
 #include "StCtbTriggerDetector.h"
 #include "StMwcTriggerDetector.h"
 #include "StVpdTriggerDetector.h"
@@ -32,7 +36,9 @@ public:
     // StTriggerDetectorCollection& operator=(const StTriggerDetectorCollection&); use default
     virtual ~StTriggerDetectorCollection();
     
-    StCtbTriggerDetector&       ctb();
+    StBbcTriggerDetector&       bbc();
+    const StBbcTriggerDetector& bbc() const;
+     StCtbTriggerDetector&      ctb();
     const StCtbTriggerDetector& ctb() const;
     StMwcTriggerDetector&       mwc();
     const StMwcTriggerDetector& mwc() const;
@@ -46,7 +52,8 @@ protected:
     StMwcTriggerDetector mMwc;
     StVpdTriggerDetector mVpd;
     StZdcTriggerDetector mZdc;
+    StBbcTriggerDetector mBbc;
     
-    ClassDef(StTriggerDetectorCollection,1)
+    ClassDef(StTriggerDetectorCollection,2)
 };
 #endif
