@@ -30,8 +30,10 @@ public:
 //:----------------------------------------------- ATTRIBUTES         --
    virtual long nCalls ();
 
+//- override virtual
+   virtual char * listing();
+
 //:----------------------------------------------- PUB FUNCTIONS      --
-   virtual STAFCV_T hello (const char * message);
    virtual STAFCV_T null ();
    virtual STAFCV_T getTime (char *& tim);
 
@@ -54,6 +56,9 @@ public:
 //:----------------------------------------------- ATTRIBUTES         --
    virtual short height ();
    virtual short width ();
+
+//- override virtual
+   virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual STAFCV_T get (short n, short m, long& value);

@@ -53,36 +53,6 @@ STAFCV_T spxdummy_ncalls(char* name)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_spxdummy_hello_
-*:DESCRIPTION:  KUIP Action Module to 
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* SPX/DUMMY/HELLO NAME MESSAGE
-*:<---------------------------------------------------------------------
-*/
-void kam_spxdummy_hello_()
-{
-   long npars = ku_npar();	/* number of KUIP parameters */
-   char* name = ku_gets();	/* spxDummy name */
-   char* message = ku_gets();	/* message */
-
-        STAFCV_T status = spxdummy_hello(name,message);
-}
-STAFCV_T spxdummy_hello(char* name, char* message)
-{
-   spxDummy* dummy;		/* spxDummy object */
-
-   if( !spx->findDummy(name, dummy) ){
-      EML_ERROR(KAM_OBJECT_NOT_FOUND);
-   }
-   if( !dummy->hello(message) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-
-/*
-*:>---------------------------------------------------------------------
 *:ROUTINE:      void kam_spxdummy_null_
 *:DESCRIPTION:  KUIP Action Module to 
 *:ARGUMENTS:    -- NONE --

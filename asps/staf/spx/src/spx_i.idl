@@ -18,11 +18,14 @@ interface spxDummy_i : socObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
 readonly attribute long nCalls;
+		/* The number of calls to method and/or attribute
+		functions of the object. */
 
 //:----------------------------------------------- FUNCTIONS          --
-STAFCV_T hello(in string message);
 STAFCV_T null();
+		/* Do nothing. */
 STAFCV_T getTime(out string time);
+		/* Return a time string (local time). */
 
 };
 
@@ -31,11 +34,15 @@ interface spxGrid_i : socObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
 readonly attribute short height;
+		/* Height (# of rows) of the grid object. */
 readonly attribute short width;
+		/* Width (# of columns) of the grid object. */
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T get(in short n, in short m, out long value);
+		/* Get the cell value from cell (n,m). */
 STAFCV_T set(in short n, in short m, in long value);
+		/* Set the cell value in cell (n,m). */
 
 };
 
@@ -46,17 +53,22 @@ interface spxManager_i : socFactory_i {
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T deleteDummy(in string name);
+		/* Delete an spxDummy object. */
+spxDummy_i findDummy(in string name);
+		/* Locate an spxDummy object by name. */
+spxDummy_i getDummy(in IDREF_T id);
+		/* Locate an spxDummy object by idRef#. */
+spxDummy_i newDummy(in string name);
+		/* Create a new spxDummy object. */
+
 STAFCV_T deleteGrid(in string name);
-STAFCV_T findDummy(in string name,
-		out spxDummy_i dummy);
-STAFCV_T findGrid(in string name,
-		out spxGrid_i grid);
-STAFCV_T getDummy(in IDREF_T id,
-		out spxDummy_i dummy);
-STAFCV_T getGrid(in IDREF_T id,
-		out spxGrid_i grid);
-STAFCV_T newDummy(in string name);
-STAFCV_T newGrid(in string name, in short height, in short width);
+		/* Delete an spxGrid object. */
+spxGrid_i findGrid(in string name);
+		/* Locate an spxGrid object by name. */
+spxGrid_i getGrid(in IDREF_T id);
+		/* Locate an spxGrid object by idRef#. */
+spxGrid_i newGrid(in string name, in short height, in short width);
+		/* Create a new spxGrid object. */
 
 };
 
