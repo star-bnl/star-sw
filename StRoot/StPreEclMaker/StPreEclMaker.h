@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.7 2001/02/06 18:23:58 pavlinov Exp $
+// $Id: StPreEclMaker.h,v 1.8 2001/04/17 23:51:57 pavlinov Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.8  2001/04/17 23:51:57  pavlinov
+// Clean up before MDC4
+//
 // Revision 1.7  2001/02/06 18:23:58  pavlinov
 // Changed the algorithm of finding of EMC's collection in StPreEclMaker
 //
@@ -47,7 +50,6 @@
 //          Aleksei Pavlinov , July 1999.
 //          initial version from Akio Ogawa    
 //    
-
 #ifndef STAR_StPreEclMaker
 #define STAR_StPreEclMaker
 
