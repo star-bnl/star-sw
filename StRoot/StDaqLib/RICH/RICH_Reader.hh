@@ -62,7 +62,19 @@ struct RichDATA{
 };
 
 
-class RICH_Reader{
+
+
+class StRichReaderInterface {
+public:
+    virtual ~StRichReaderInterface(){}
+
+    virtual unsigned short GetADCFromCoord(int, int)       = 0;
+    virtual unsigned short GetADCFromCramChannel(int, int) = 0;
+    virtual unsigned int GetEventNumber()                  = 0;
+};
+
+
+class RICH_Reader : public StRichReaderInterface {
   void ProcessEvent(const Bank_RICP * RichPTR);
 
 public:
@@ -73,7 +85,7 @@ RICH_Reader(EventReader *er, Bank_RICP *pRICP);
 
     unsigned short GetADCFromCoord(int x,int y);
     unsigned short GetADCFromCramChannel(int cramBlock,int channelNum);
-    unsigned int GetEventNumber();
+    unsigned int   GetEventNumber();
     
     const char * GetBankType();
     
