@@ -26,9 +26,9 @@ tcp:
 
 install:
 	cd $(LPATH); \
-	cp libdsl*.a $(STAR_LIB)/$(STAR_LEVEL)/sys/lib
+	cp libdsl*.a $(STAR_LIB)/$(STAR_SYS_LEVEL)/sys/lib
 	cd $(HPATH); \
-	cp ds*.h $(STAR_LIB)/$(STAR_LEVEL)/sys/inc
+	cp ds*.h $(STAR_LIB)/$(STAR_SYS_LEVEL)/sys/inc
 
 vwall: vwlib vwtest
 
