@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.3 1999/11/29 15:33:34 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.4 1999/12/02 16:35:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
- * Revision 2.3  1999/11/29 15:33:34  ullrich
- * Changed Macro for SUN CC
+ * Revision 2.4  1999/12/02 16:35:40  ullrich
+ * Added method to return the stored dE/dx traits
  *
  * Revision 2.5  1999/12/21 15:09:14  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -34,8 +34,8 @@
 using std::vector;
 #endif
 
-    StParticleDefinition* operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
-    
+class StDedxPidTraits;
+
 class StTpcDedxPidAlgorithm : public StPidAlgorithm {
 public:
     StTpcDedxPidAlgorithm();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.2 1999/10/28 22:27:01 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.3 1999/12/02 16:35:34 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.2  1999/10/28 22:27:01  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/02 16:35:34  ullrich
+ * Added method to return the stored dE/dx traits
  *
  * Revision 2.7  2000/04/20 16:47:31  ullrich
  * Check for null pointer added.
@@ -46,7 +46,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm()
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.2 1999/10/28 22:27:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.3 1999/12/02 16:35:34 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -87,6 +87,8 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
         if (p && p->detector() == kTpcId && p->method() == mDedxMethod) mTraits = p;
     }
     if (!mTraits) return 0;    // no info available
+    for (unsigned int k=0; k<mParticles.size(); k++)
+        if (mParticles[k]->charge()*mTrack->geometry()->charge() > 0)  // require same charge sign
             if ((sigma = numberOfSigma(mParticles[k])) < minSigma) {
     //  return the most probable.
                 minSigma = sigma;
@@ -130,8 +132,6 @@ StTpcDedxPidAlgorithm::traits() const { return mTraits; }
     double gamma =sqrt(pow(momentum/particle->mass(),2)+1.);
     double beta = sqrt(1. - 1./pow(gamma,2));
     double rise = bpar[2]*pow(beta*gamma,2);
-
-
 
     return beta > 0 ? bpar[0]/pow(beta,2)*(0.5*log(rise)-pow(beta,2)-bpar[1]) : 1000;
 }
