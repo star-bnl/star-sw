@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.40 1998/08/10 23:20:53 fisyak Exp $
+# $Id: MakePam.mk,v 1.41 1998/08/12 22:15:05 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.41  1998/08/12 22:15:05  fisyak
+# Add check for %_i.cc
+#
 # Revision 1.40  1998/08/10 23:20:53  fisyak
 # Add test for base and tables
 #
@@ -251,12 +254,12 @@ $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM)
 endif                           
 endif                           # NO idl- or g-files
 #_________________dependencies_____________________________
-ifneq (, $(strip $(FILES_D))) 
-include $(FILES_D)
-endif                               #
 ifneq (, $(strip $(FILES_DM)))
 include $(FILES_DM)
 endif                               # 
+ifneq (, $(strip $(FILES_D))) 
+include $(FILES_D)
+endif                               #
 endif                            # end if of FILES_O FILES_SL
 #--------  idm, idl --------
 ifneq (,$(FILES_ALL_TAB))
@@ -321,11 +324,13 @@ $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
         cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
 #       cp St_$(STEM)_Module.cxx $(GEN_DIR)/; $(RM) *.*;
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
+	rm $(GEN_DIR)/$(STEM)_i.cc
 	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
         $(STIC) -q $(STICFLAGS) $(1ST_DEPS); \
         gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(1ST_DEPS) | \
         sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
-        > $(GEN_DIR)/$(STEM).didl; 
+        > $(GEN_DIR)/$(STEM).didl; \
+        $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl;
 #        cp $(STEM)_i.cc $(STEM).h $(STEM).inc $(GEN_DIR); $(RM) *.*; 
 endif #IDM
 $(DEP_DIR)/%.d:%.cc 
