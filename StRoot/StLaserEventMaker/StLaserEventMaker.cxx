@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.6 2000/06/26 22:11:40 fisyak Exp $
+// $Id: StLaserEventMaker.cxx,v 1.7 2000/07/26 22:49:40 didenko Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.7  2000/07/26 22:49:40  didenko
+// add one more parameter in tpt
+//
 // Revision 1.6  2000/06/26 22:11:40  fisyak
 // remove params
 //
@@ -118,11 +121,13 @@ Int_t StLaserEventMaker::Make(){
       
   St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks);
   m_DataSet->Add(tptrack);
-
+  St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
+  Add(clusterVertex);
 
 //			call TPT tracker 
     if (Debug()) cout << " start tpt run " << endl;
-      Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
+    
+      Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
 //                      ==============================
     
     if (Res_tpt != kSTAFCV_OK) {
