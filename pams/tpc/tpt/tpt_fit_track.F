@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.14 2000/08/14 17:16:18 snelling Exp $
+* $Id: tpt_fit_track.F,v 1.15 2000/08/18 02:22:17 snelling Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.15  2000/08/18 02:22:17  snelling
+* fixed radian degree bug and removed second crossing angle correction
+*
 * Revision 1.14  2000/08/14 17:16:18  snelling
 * changed hit errors to absolute values
 *
@@ -128,11 +131,11 @@ C           write(6,*)"mxpnt",mxpnt,ncir,ient,ipt,i
 	   zcir(ncir) = hit(ient).z
 C          calculate correction to the error, coming from the 
 C          crossing angle
-           iret = tpt_cross_fact(hit(ient).row,xcir(ncir),ycir(ncir),
-     >                           xold,yold,cf,theta)
+c           iret = tpt_cross_fact(hit(ient).row,xcir(ncir),ycir(ncir),
+c     >                           xold,yold,cf,theta)
            ipadrow=mod(hit(ient).row,100)
            if(ncir.gt.1) then
-                lambda = atan(abs(zcir(ncir)-zcir(ncir-1))/
+                lambda = atand(abs(zcir(ncir)-zcir(ncir-1))/
      >                   sqrt((xcir(ncir)-xcir(ncir-1))**2+(ycir(ncir)-ycir(ncir-1))**2))
                 call tpt_hit_uncert(zcir(ncir),theta,lambda,ipadrow,sigX,sigZ)
                 wcir(i)=1.0/sigx**2/cf
