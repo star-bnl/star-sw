@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.14 2003/04/30 15:39:32 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.15 2003/05/06 15:36:36 mmiller Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,11 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.15  2003/05/06 15:36:36  mmiller
+ * Committing changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
+ * Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
+ * Not so elegant...
+ *
  * Revision 2.14  2003/04/30 15:39:32  pruneau
  * Integrating StiResidual in main stream Sti
  *
@@ -394,9 +399,22 @@ void StiDefaultToolkit::setAssociationMaker(StAssociationMaker * a)
 {
   _associationMaker = a;
   if (!_associationMaker)
-    throw runtime_error(" StiDefaultToolkit::getAssociationMaker() - FATAL - _associationMaker==0");
+    throw runtime_error(" StiDefaultToolkit::setAssociationMaker() - FATAL - _associationMaker==0");
 }
 
+StiMaker * StiDefaultToolkit::getStiMaker()
+{
+  if (!_stiMaker)
+    throw runtime_error(" StiDefaultToolkit::getStiMaker() - FATAL - _stiMaker==0");
+  return _stiMaker;
+}
+
+void StiDefaultToolkit::setStiMaker(StiMaker * a)
+{
+  _stiMaker = a;
+  if (!_stiMaker)
+    throw runtime_error(" StiDefaultToolkit::setStiMaker() - FATAL - _stiMaker==0");
+}
 
 void StiDefaultToolkit::setGuiEnabled(bool guiEnabled)
 {

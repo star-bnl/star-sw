@@ -80,6 +80,7 @@ void StiTpcDetectorBuilder::buildDetectors()
   ifcShape->setHalfDepth( _dimensions->tpcTotalLength()/2. );
   ifcShape->setOpeningAngle( M_PI/6. );
   ifcShape->setOuterRadius(_dimensions->ifcRadius() + ifcShape->getThickness()/2.);
+
   //Outer  field cage
   StiCylindricalShape *ofcShape = new StiCylindricalShape;
   ofcShape->setName("tpc/ofc");
@@ -101,6 +102,7 @@ void StiTpcDetectorBuilder::buildDetectors()
       p->setZcenter(0.);
       p->setLayerRadius(fIfcRadius);
       p->setNormalRep(phiForTpcSector(sector), fIfcRadius, 0.);
+      p->setRegion(StiPlacement::kMidRapidity);
       
       StiDetector *ifcVolume = _detectorFactory->getInstance();
       sprintf(name, "TPC/Ifc/Sector_%d", sector);
@@ -120,6 +122,8 @@ void StiTpcDetectorBuilder::buildDetectors()
       p->setZcenter(0.);
       p->setLayerRadius(fOfcRadius);
       p->setNormalRep(phiForTpcSector(sector), fOfcRadius, 0.);
+      p->setRegion(StiPlacement::kMidRapidity);      
+
       
       StiDetector *ofcVolume = _detectorFactory->getInstance();
       sprintf(name, "TPC/Ofc/Sector_%d", sector);
@@ -161,6 +165,7 @@ void StiTpcDetectorBuilder::buildDetectors()
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setNormalRep(phiForTpcSector(sector), fRadius, 0.); 
 	  pPlacement->setLayerRadius(fRadius);
+	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  sprintf(name, "Tpc/Padrow_%d/Sector_%d", row, sector);
 	  // fill in the detector object and save it in our vector
 	  StiDetector *pDetector = _detectorFactory->getInstance();

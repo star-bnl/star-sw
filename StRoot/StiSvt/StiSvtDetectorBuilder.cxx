@@ -109,6 +109,7 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
+	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  float fLadderPhi = phiForSvtBarrelLadder(layer, ladder);
 	  if ((layer%2)==1)
 	    fLadderPhi +=M_PI/getNSectors(layer);
@@ -132,6 +133,7 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
+	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, 
 				   fGapRadius,
 				   -offset);
@@ -151,6 +153,7 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
+	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, 
 				   fGapRadius,
 				   offset);
