@@ -375,8 +375,3 @@ c----------------------------------------------------------------------
        return
        end
  
-#if !defined(CERNLIB_HPUX)
-*CMZ :  1.30/00 29/03/97  18.01.53  by  Pavel Nevski
-*-- Author :    Pavel Nevski   19/03/97
-#endif
- 

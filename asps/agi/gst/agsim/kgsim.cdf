@@ -4,8 +4,37 @@
 >Name AGXINIT
 >Menu AGUSER
 >guidance
-Advanced Geant Interface menu
-*-----------------------------------------------------------------------------
+Advanced Geant Interface
+ 
+    ********************************************************************
+    *                                                                  *
+    *        A D V A N C E D   G E A N T   I N T E R F A C E           *
+    *                                                                  *
+    *                      30-Jul-98 hot news:                         *
+    *                                                                  *
+    * Kuip command "ON ERROR GOTO label" will now react on:            *
+    *      - End_of_DATA on P stream, Write_Error on O stream          *
+    *      - time_left less than defined by GTIME command argument     *
+    * Explicit NCOPY parameter is now allowed in the POSITION operator *
+    * USE operator has an OPERation NEXT, allowing bank chain scanning *
+    * "-b filename" option now available for batch mode.               *
+    *                                                                  *
+    * Absorption length calculation for mixtures corrected in GEANT.   *
+    * CMZ KEEP sequences (car-format) are recognised as REPLACE macros *
+    *                                                                  *
+    * GEANT memory may be increased at the program invocation time -   *
+    * start with -h option to get more information how to use switches *
+    *                                                                  *
+    * Tracking in MANY volumes is corrected - no missing hits anymore  *
+    *                                                                  *
+    * GENZ package added - LGNFIND,GNZGET* calls are available         *
+    *                                                                  *
+    *           FOR MORE DETAILS PLEASE USE HELP FACILITY              *
+    *                                                                  *
+    * To get complete description of AGI commands in printable format  *
+    *              do:  MANUAL AGUSER MAN.TEX LATEX                    *
+    ********************************************************************
+ 
 >Command ACTIONS
 >parameters
 +
@@ -89,7 +118,7 @@ Flag  'control flag name' C
 * R='PRIN,DEBU,GEOM,HIST,GRAP,SIMU,DIGI,RECO,MFLD,ANAL,BACK'
 Value 'flag value'        I
 >Guidance
-For a given detector subsystem (or for ALL of them) sets a control flag value.
+Set control flags for a given detector subsystem (or for ALL of them).
 Possible flags and their default values are:
        PNOW  (0)             - print level for current event
        PRIN  (0)             - normal print level
@@ -115,29 +144,42 @@ Detector 'detector subsystem name' C
 NAME  'name of the selected bank or of a variable in the bank' C
 Value 'value of the selector or new value of the variable    ' R
 >Guidance
-When a USE operator is called for a bank for the first time,
-it checks weither the bank name and the value of its selector
-coincides with the one mentioned in a DETP command for the same detector.
-If this is the case, corresponding variables in the bank are replaced
-by the new value.
  
-Only one DETP command per detector is kept in the program,
-the next command with the same detector name overwrites the previous one.
+ DETP command provides a way to modify the content of parameter banks.
+ 
+When a USE operator is called for a bank for the first time,
+it checks wether the bank name and the value of its selector
+coincides with the one mentioned in the DETP command for the same detector.
+If this is the case, corresponding variables in the bank are replaced
+by the new value. Selector name and value is provided in brackets
+after the bank name. If no name (only a value) is provided,
+this refers to the selector in the USE operator itself.
+ 
+ Only one DETP command per detector is kept in the program.
+The next command with the same detector name overwrites the previous one.
 On the other hand, any number of banks and their variable
-can be changed by a single command (which can be expended
-to several lines following KUIP rules.
+can be changed by a single command (which can be extended
+over several lines following KUIP rules).
 When data are read from P stream, they are stripped out of
 old DETP commands.
  
  Typing rules for  DETP parameters are the following:
- - the bank selector may be given in () or with a = sign.
+ - the bank selector value may be given in () or with a = sign.
  - variable to change should have a trailing = sign.
- - the new value should be separated by a blank.
  - command is not case sensitive.
  
- Example:
- DETP CALO cgeo(1).rmin= 200
- DETP CALO cgeo= 1 rmin= 200
+ Example.
+ DETP CALO cgeo=1  rmin=200  rmax=300
+ DETP CALO cgeo(1).rmin=200  rmax=300
+ DETP CALO cgeo(version=1).rmin=200  rmax=300
+ 
+DETP command may be generated also from the code using two
+subroutines:  AgDETPnew (Detector) and AgDETPadd (Name,Values,Nval).
+ Example. The previous command may be generated by:
+ Call AgDETP new ('CALO')
+ Call AgDETP add ('cgeo(version=1).rmin=',200,1)
+ Call AgDETP add ('rmax=',300,1)
+ 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
 >Command GVERTEX
@@ -409,6 +451,18 @@ events on top of a physics event.
 Background data should be in GEANT or GENZ format.
 Interaction time, vertex and track numbers of each secondary event
 are updated upon read.
+ 
+>Action AGXUSER
+*-----------------------------------------------------------------------------
+>Command GRFILE
+>parameters
++
+file    'geometry file name'       C  D='geom.rz'
+inout   'Input or Output command'  C  D='OUT'      R='IN,OUT'
+unit    'Unit number'              I  D=30
+>Guidance
+read in or write out (default) a geometry file in rz-format.
+ 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
 >Command REBANK
@@ -444,9 +498,9 @@ variable names not longer than 8 charactes.
 >Guidance
  
 Here we provide some general guidance in addition to the Atlas note
-SOFT-NO-014, for using USE operator in the reconstruction code
+SOFT-NO-014, for using USE operator in the reconstruction code.
  
-the complete format of the USE operator is
+ the complete format of the USE operator is
  
  USE Path [ variable=value ] [ OPER={DELETE/UNIQUE/NEXT/ZERO} ] [ STAT=istat ]
  
@@ -481,7 +535,6 @@ All fields apart from Path are optional.
              Initial value of ISTAT should be defined with a DATA statement.
  
 >Action AGXUSER
- 
 *-----------------------------------------------------------------------------
 >Command GEXEC
 >Parameters
@@ -490,10 +543,27 @@ file         'name of the *.g file'               C
 library     'additional library path and libraies'  C  D=' '
  
 >Guidance
-parse to fortran, compile, link as a shared library
-and execute users program, stored in the file.g.
+compile, link as a shared library and execute a user code,
+stored in a source file with extention .g, .f, .F, .c  or .cc.
 The file may contain several subroutines.
-The one which has the same name as the file is executed.
+The one which has the same name as the file is executed,
+unless the file contains a file_init or file_start entry,
+which have the precedence.
+ 
+>Action AGXUSER
+*-----------------------------------------------------------------------------
+>Command GMAKE
+>Parameters
+source      'default path to the module source'        C  D='.'
++
+name        'name of the makefile '                    C  D=' '
+library     'additional keyword parameters for make'   C  D=' '
+ 
+>Guidance
+Redefine default path to the source for GEXEC command,
+as well as the name of the makefile to be executed by GEXEC.
+Additional parameters for the make procedure may be supplied with
+their keywords (examples: LIB_PATH=... LIBS=...)
  
 >Action AGXUSER
 *-----------------------------------------------------------------------------
@@ -507,7 +577,9 @@ which cannot be derived from the nature of input data.
  
 List of known program version :
  
- RZ95, RZ96 - Different key formats in RZ files (affects RZ/FILE)
+ RZ95, RZ96      - Different key formats in RZ files (affects RZ/FILE)
+ ATLAS,STAF,DENS - Different packing versions for REBANK, affects
+                   the number of user banks per single ZEBRA bank
  
 >Action AGXUSER
 *-----------------------------------------------------------------------------
@@ -583,21 +655,6 @@ dataset  'directory to clear'                       C  D='.'
  
 >Guidance
 Clear (reset row conters) all tables in the selected directory and below it.
- 
->Action AGXUSER
-*-----------------------------------------------------------------------------
->Command GMAKE
->Parameters
-source      'default path to the module source'        C  D='.'
-+
-name        'name of the makefile '                    C  D=' '
-library     'additional keyword parameters for make'   C  D=' '
- 
->Guidance
-Redefine default path to the source for GEXEC command,
-as well as the name of the makefile to be executed by GEXEC.
-Additional parameters for the make procedure may be supplied with
-their keywords (examples: LIB_PATH=... LIBS=...)
  
 >Action AGXUSER
 *-----------------------------------------------------------------------------
