@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.34 2002/02/20 06:15:05 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.35 2002/02/21 05:07:32 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.35  2002/02/21 05:07:32  genevb
+// Had not fully implemented previous changed - now fixed
+//
 // Revision 1.34  2002/02/20 06:15:05  genevb
 // Do not trim on dcapnmin above ptV0 = 3.5 GeV/c
 //
@@ -311,8 +314,13 @@ void StV0Maker::Trim(){
   for (Int_t iv0 = 0; iv0 < dst_v0_vertex->GetNRows(); iv0++) {
     dst_v0_vertex_st* v0row = dst_v0_vertex->GetTable(iv0);
     Bool_t isXiV0 = (v0row->dcav0 < 0);
+    float ptV0_sq = pow((v0row->neg_px + v0row->pos_px),2) +
+                    pow((v0row->neg_py + v0row->pos_py),2);
+    // Current cuts are different for dcaV0 and dcapnmin (pt below 3.5 GeV/c)
     Bool_t passV0 = (TMath::Abs(v0row->dcav0) < pars->dcav0) &&
-        (v0row->dcap > pars->dcapnmin) && (v0row->dcan > pars->dcapnmin);
+                    ((ptV0_sq >= ptV0_cut_sq) ||
+                     ((v0row->dcap > pars->dcapnmin) &&
+                      (v0row->dcan > pars->dcapnmin)));
 
     if (isXiV0 && passV0) {
       v0row->dcav0 = - (v0row->dcav0);
@@ -323,19 +331,23 @@ void StV0Maker::Trim(){
       Bool_t notGood = kTRUE;
       lastV0 = dst_v0_vertex->GetNRows();
       Long_t idVert = v0row->id_vertex;
-      while (notGood) {
+      while (notGood) {  // Delete V0s at the end until we find a keeper
         if ((--lastV0)==iv0) {
           break;
 	}
         dst_v0_vertex_st* v0rowL = dst_v0_vertex->GetTable(lastV0);
-        isXiV0 = (v0rowL->dcav0 < 0);
-        float ptV0_sq = pow((v0rowL->neg_px + v0rowL->pos_px),2) +
-                        pow((v0rowL->neg_py + v0rowL->pos_py),2);
-        // Current cuts are different for dcaV0 and 
-        // dcapnmin (pt below 3.5 GeV/c)
-        passV0 = (TMath::Abs(v0rowL->dcav0) < pars->dcav0) &&
-                 ((ptV0_sq >= ptV0_cut_sq) ||
-                 ((v0rowL->dcap > pars->dcapnmin) && (v0rowL->dcan > pars->dcapnmin)));
+        if (! (isXiV0 = (v0rowL->dcav0 < 0)) ) {
+          // Calculate passV0 only if isXiV0 is false (only reason we need it)
+          ptV0_sq = pow((v0rowL->neg_px + v0rowL->pos_px),2) +
+                    pow((v0rowL->neg_py + v0rowL->pos_py),2);
+          // Current cuts are different for dcaV0 and 
+          // dcapnmin (pt below 3.5 GeV/c)
+          passV0 = (TMath::Abs(v0rowL->dcav0) < pars->dcav0) &&
+                   ((ptV0_sq >= ptV0_cut_sq) ||
+                    ((v0rowL->dcap > pars->dcapnmin) &&
+                     (v0rowL->dcan > pars->dcapnmin)));
+        }
+
 	if (isXiV0 || passV0) {
 	  notGood = kFALSE;
 
