@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.1 2003/09/09 00:05:21 jeromel Exp $
+ * $Id: StMuIOMaker.cxx,v 1.2 2003/09/09 18:16:53 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -9,44 +9,11 @@
 
 #include "St_base/StFileI.h"
 
-#include "StEvent/StEvent.h"
-#include "StEvent/StTrack.h"
-#include "StEvent/StTrackNode.h"
-#include "StEvent/StRichSpectra.h"
-#include "StEvent/StDetectorState.h"
-#include "StEvent/StEventTypes.h"
-#include "StEvent/StRunInfo.h"
-#include "StEvent/StEventInfo.h"
-
-#include "StEventUtilities/StuRefMult.hh"
-#include "StEventUtilities/StuProbabilityPidAlgorithm.h"
-
-#include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StTimer.hh"
 
-#include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
-#include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
-#include "StStrangeMuDstMaker/StV0MuDst.hh"
-#include "StStrangeMuDstMaker/StV0Mc.hh"
-#include "StStrangeMuDstMaker/StXiMuDst.hh"
-#include "StStrangeMuDstMaker/StXiMc.hh"
-#include "StStrangeMuDstMaker/StKinkMuDst.hh"
-#include "StStrangeMuDstMaker/StKinkMc.hh"
-#include "StStrangeMuDstMaker/StStrangeCuts.hh"
 
-
-#include "StMuException.hh"
-#include "StMuEvent.h"
-#include "StMuTrack.h"
-#include "StMuDebug.h"
-#include "StMuCut.h"
-#include "StMuFilter.h"
-#include "StMuL3Filter.h"
-#include "StMuChainMaker.h"
-#include "StMuEmcCollection.h"
 #include "StMuEmcUtil.h"
-#include "StMuTimer.h"
-
+#include "StMuDebug.h"
 #include "StMuIOMaker.h"
 #include "StMuDst.h"
 
@@ -60,25 +27,22 @@
 
 ClassImp(StMuIOMaker)
 
-#if !(ST_NO_NAMESPACES)
-  using namespace units;
-#endif
-
 
 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   The default constructor as it is right now was written in order to run the StMuIOMaker during reconstruction in the bfc.
-   Since the PID table that is needed for muDst production is not passed as an argument to the bfc, this default constructor
-   sets a specific PID table. This table has to be updated when changing to a new production version.
-   Also, the standard track and l3 track filters are set.
+   The default constructor. Creates the TClonesArrays, the StMuDst instance and an instance of the 
+   EMC helper class StMuEmcUtil.
+   The mCurrentIndex variable is initialized to -1, indicating that no valid event was read.
  */
-StMuIOMaker::StMuIOMaker(const char* name) : StIOInterFace(name,"r"), mChain(0) {
-  mStMuDst = new StMuDst();
-  mEmcUtil = new StMuEmcUtil();
-  createArrays();
+StMuIOMaker::StMuIOMaker(const char* name) : StIOInterFace(name,"r"), 
+mNumberOfEvents(0),
+mCurrentIndex(-1), mEventCounter(0), mChain(0) {
+	mStMuDst = new StMuDst();
+	mEmcUtil = new StMuEmcUtil();
+	createArrays();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -178,9 +142,10 @@ TClonesArray* StMuIOMaker::clonesArray(TClonesArray*& p, const char* type, int s
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   The Init() routine is used to establish contact to other makers. As it is STAR habit (but really really bad coding) we identify the 
-   other makers by names (instead of passing pointers). Here, the names are hard-wired because they have to be identical to the names 
-   the bfc is assining to the makers. Do not alter these names unless you know what you are doing.
+   The Init() routine is used to establish contact to other makers. 
+   Here, the names are hard-wired because they have to be identical to the 
+   names the bfc is assigning to the makers. Do not alter these names 
+   unless you know what you are doing.
 */
 int StMuIOMaker::Init(){
   DEBUGMESSAGE2("");
@@ -199,11 +164,14 @@ void StMuIOMaker::Clear(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Just closes the input file. 
+ */
 int StMuIOMaker::Finish() {
   DEBUGMESSAGE2("");
   closeRead();
   DEBUGMESSAGE3("out");
-  return 0;
+  return kStOK;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -229,11 +197,17 @@ void StMuIOMaker::setBranchAddresses(TChain* chain) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	Closes open input files (deletes the input chain). Then creates a new 
+	TChain, builds up the index from runId and eventID. Sets the local
+	TClonesArray pointers to the branch addresses of the TChain.
+ */
 void StMuIOMaker::openRead() {
   DEBUGVALUE2(fFile);
   if ( mChain ) {
 	  closeRead();
   }
+  mCurrentIndex = -1;	
   mChain = new TChain("MuDst");
   mChain->Add(fFile);
   mNumberOfEvents = mChain->GetEntries();
@@ -244,11 +218,25 @@ void StMuIOMaker::openRead() {
   timer.stop();
   cout << " Index of " << mNumberOfEvents << " events buit in " << timer.elapsedTime()/1000. << " seconds " << endl;  
   setBranchAddresses(mChain);
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);  
+  mStMuDst->unset();  
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	This is the function that actually reads a new event. All other 
+	implementations of Make will eventually call this function.
+	@param  the index of the event to read
+	@return kStEOF if the requested index is greater that the number of events in the chain
+	@return kStErr if the requested index does not exists
+	@return kStOk if the requested event was read successfully 
+	If for any reason no event is read, the pointers to the TClonesArrays 
+	are set to 0. It will cause a crash if you will try to access 
+	information from the pointer to the StMuDst.  This is done for ,
+	so that nobody reads the same (last) event over and over again without 
+	noticing. Please check the return values of Make(), only kStOk means a 
+	an event was read succesfull and data can be extracted.
+ */
 int StMuIOMaker::Make(int index){
   DEBUGMESSAGE2("");
   DEBUGVALUE3(index);
@@ -256,6 +244,7 @@ int StMuIOMaker::Make(int index){
   mStMuDst->unset();
   if ( mCurrentIndex >= mNumberOfEvents) return kStEOF;
   if ( mCurrentIndex < 0 ) return kStErr;
+  if (!mChain) return kStEOF;
   int bytes = mChain->GetEntry(mCurrentIndex);
   DEBUGVALUE3(bytes);
   mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);
@@ -265,6 +254,13 @@ int StMuIOMaker::Make(int index){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	Causes an event identified by runId and and eventID to be read.
+	@return kStEOF if the requested index is greater that the number of events in the chain
+	@return kStErr if the requested index does not exists
+	@return kStOk if the requested event was read successfully 
+	@param runId, eventId
+ */
 int StMuIOMaker::Make(int major, int minor){
   DEBUGMESSAGE2("");
   DEBUGVALUE3(major);
@@ -275,6 +271,13 @@ int StMuIOMaker::Make(int major, int minor){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	Causes an event identified by a StUKey to be read.
+	@return kStEOF if the requested index is greater that the number of events in the chain
+	@return kStErr if the requested index does not exists
+	@return kStOk if the requested event was read successfully 
+	@param StUKey identifier (runId and eventId will be extracted from the StUKey)
+ */
 int StMuIOMaker::Make(const StUKey& key){
   DEBUGMESSAGE2("");
   int index = mChain->GetEntryNumberWithIndex(key.GetRunId(),key.GetEventId());
@@ -283,6 +286,12 @@ int StMuIOMaker::Make(const StUKey& key){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	Causes the next event in the chain to be read
+	@return kStEOF if the requested index is greater that the number of events in the chain
+	@return kStErr if the requested index does not exists
+	@return kStOk if the requested event was read successfully 
+ */
 int StMuIOMaker::Make(){
   return Make(mCurrentIndex+1);
 }
@@ -290,21 +299,36 @@ int StMuIOMaker::Make(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuIOMaker::closeRead(){
-  DEBUGMESSAGE2("");
+/**
+	Deletes the current chain.
+ */
+	DEBUGMESSAGE2("");
   if (mChain) mChain->Delete();
   mChain = 0;
  }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	Sets the new file to be read by deleting the old chain firt and then 
+	opening a new chain.
+	@param full path and filename of the next file to be read
+ */
 void  StMuIOMaker::SetFileName(const char *fileName){
+	closeRead();
 	fFile = fileName;
 	openRead();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+	Sets the new file to be read by deleting the old chain firt and then 
+	opening a new chain.
+	@param full path and filename of the next file to be read
+ */
 void  StMuIOMaker::SetFile(const char *fileName)    {
+	closeRead();
 	fFile = fileName;
 	openRead();
 }
@@ -313,8 +337,9 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
- * Revision 1.1  2003/09/09 00:05:21  jeromel
- * First version
+ * Revision 1.2  2003/09/09 18:16:53  laue
+ * StMuIOMaker: embedded documentation added
+ * StMuTimer: name of define changed (was same as StTimer)
  *
  **************************************************************************/
 

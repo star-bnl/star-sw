@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.1 2003/09/09 00:05:21 jeromel Exp $
+ * $Id: StMuIOMaker.h,v 1.2 2003/09/09 18:16:53 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuIOMaker_hh
@@ -91,7 +91,7 @@ class StMuIOMaker : public StIOInterFace {
   int numberOfEvents() { return mNumberOfEvents; }
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.1 2003/09/09 00:05:21 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.2 2003/09/09 18:16:53 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -148,7 +148,8 @@ inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
- * Revision 1.1  2003/09/09 00:05:21  jeromel
- * First version
+ * Revision 1.2  2003/09/09 18:16:53  laue
+ * StMuIOMaker: embedded documentation added
+ * StMuTimer: name of define changed (was same as StTimer)
  *
  **************************************************************************/

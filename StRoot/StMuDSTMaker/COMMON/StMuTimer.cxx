@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTimer.cxx,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuTimer.cxx,v 1.2 2003/09/09 18:16:53 laue Exp $
  *
  * Author: Thomas Ullrich, April 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMuTimer.cxx,v $
+ * Revision 1.2  2003/09/09 18:16:53  laue
+ * StMuIOMaker: embedded documentation added
+ * StMuTimer: name of define changed (was same as StTimer)
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *
@@ -21,7 +25,7 @@
 #include <stdlib.h>
 #include "StMuTimer.h"
 
-ClassImp(StMuTimer)
+//ClassImp(StMuTimer)
 
 StMuTimer::StMuTimer() : mStartTime(0), mStopTime(0), mIsStopped(1)
 {/* noop */}
