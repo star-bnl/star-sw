@@ -909,8 +909,10 @@ void StFile::SetInfo(TDataSet *ds)
       const char *bra=ky->GetName();
       if (strstr(bra,"tree"))                           continue;
       if (strstr(bra,"Tree"))                           continue;
+      if (strstr(bra,".")==0)				continue;
       i = tit.Index("branch=NONE"); assert(i>=0);
       tit.Replace(i+7,4,bra,strcspn(bra,"."));
+      break;
   } }
 
 RETN:;
