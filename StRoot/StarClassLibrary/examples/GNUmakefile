@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.5 1999/12/21 16:30:17 ullrich Exp $
+# $Id: GNUmakefile,v 1.6 2000/03/16 16:30:58 ullrich Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.5  1999/12/21 16:30:17  ullrich
-# Added test program for StFastCircleFitter.
+# Revision 1.6  2000/03/16 16:30:58  ullrich
+# Added new example randomTest4.
 #
 # Revision 1.6  2000/03/16 16:30:58  ullrich
 # Added new example randomTest4.
@@ -138,6 +138,16 @@ hbookTest%:	hbookTest%.cc StHbook.o RandEngine.o RandGauss.o Random.o \
 vecTest3:  vecTest3.cc RandEngine.o RandFlat.o Random.o JamesRandom.o RandomEngine.o
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< \
 	RandEngine.o RandFlat.o Random.o \
+	JamesRandom.o RandomEngine.o \
+	-o vecTest3 $(LDFLAGS)
+
+randomTest4:  	randomTest4.cc DRand48Engine.o RandExponential.o Random.o \
+		JamesRandom.o RandFlat.o RandomEngine.o RandBreitWigner.o RandGauss.o \
+		RandEngine.o  RandPoisson.o RanluxEngine.o RanecuEngine.o StRandom.o
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< \
+        DRand48Engine.o RandExponential.o Random.o \
+	JamesRandom.o RandFlat.o RandomEngine.o \
+	RandBreitWigner.o RandGauss.o RandEngine.o \
 	RandPoisson.o RanluxEngine.o RanecuEngine.o StRandom.o \
 	-o $@ $(LDFLAGS)
 
