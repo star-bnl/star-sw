@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.8 1999/09/14 00:55:47 liq Exp $
+* $Id: tpt_form_segments.F,v 1.9 1999/11/07 05:52:54 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.9  1999/11/07 05:52:54  sakrejda
+* calculation of the dip and crossing angle moved tp tpt_load_track
+*
 * Revision 1.8  1999/09/14 00:55:47  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -200,26 +203,13 @@ C              memorize the final best segment
                    endif
                    hit(ient).track = ntrk*1000+ld
                  end do
-                 ldpnt = trk(ntrk).nhit
-                 ld = trk(ntrk).ipnt(ldpnt)
-                 track(ntrk).hitid = hit(ld).id
-                 xold = hit(ld).x
-                 yold = hit(ld).y
-                 do ld=trk(ntrk).nhit-1,1,-1
-                    ient = trk(ntrk).ipnt(ld)
-                    iret = tpt_cross_fact(hit(ient).row,hit(ient).x,
-     >              hit(ient).y,xold,yold,cf,hit(ient).alpha)
-                    xold = hit(ient).x
-                    yold = hit(ient).y
-                 end do
-                 hit( trk(ntrk).ipnt(trk(ntrk).nhit)).alpha =
-     >           hit( trk(ntrk).ipnt(trk(ntrk).nhit-1)).alpha
+c
                  if(saved) then
                    do ld=1,9
                     trk(ntrk).p(ld) = saved_trk.p(ld)
                    end do
                  endif
-                 iret = tpt_load_track(ntrk,track_h,track,trk)
+                 iret = tpt_load_track(ntrk,track_h,track,trk,hit_h,hit)
                endif ! end of an if on good track (flag>0)
                endif ! end of an if on nroot>0
                endif ! end of an if on available hit
