@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.9  1998/08/21 15:44:48  fisyak
+#  Add reco_ds
+#
 #  Revision 1.8  1998/08/20 15:42:40  fisyak
 #  Remove MakeSYS.mk
 #
@@ -106,7 +109,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/20 15:42:40 $ 
+#           Last modification $Date: 1998/08/21 15:44:48 $ 
 #  default setings
 # Current Working Directory
 #
@@ -201,6 +204,7 @@ ifeq ($(NAME),$(PKG))
 endif                          
 ifneq ($(EMPTY),$(SUBDIRS))     
 ifneq (,$(findstring $(LEVEL),0 1))
+ifndef ROOT_DIR 
 ifneq (,$(wildcard $(ROOT_DIR)/StRoot/base))
 BASE := St_base 
 endif
@@ -212,6 +216,7 @@ TARGETS += St_Tables
 endif
 ifneq (,$(wildcard $(ROOT_DIR)/StRoot/StChain))
 TARGETS += StChain
+endif
 endif
 endif
 #          I have subdrs
