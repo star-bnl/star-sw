@@ -1,4 +1,4 @@
-// $Id: bfc_tfs.C,v 1.8 1999/03/02 16:09:43 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.9 1999/03/03 02:30:25 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -46,7 +46,7 @@ void Load(){
     gSystem->Load("St_io_Maker");
 }
 
-bfc_tfs(const Int_t Nevents=1000,
+bfc_tfs(const Int_t Nevents=10000000,
      const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd",
      TString* FileOut=0)
 {                              
@@ -82,7 +82,7 @@ bfc_tfs(const Int_t Nevents=1000,
   St_params_Maker     *params = new St_params_Maker("params","params");
   St_geom_Maker        *geom = new St_geom_Maker("geom","run/geant/Run");
   geant = new St_geant_Maker("geant","event/geant/Event");
-  geant->SetNwGEANT(25 000 000);
+  geant->SetNwGEANT(10 000 000);
   //  geant->SetNwPAW(1000000);
   TString cmd("gfile p ");
   cmd += InFile;
