@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.7 1999/07/20 02:17:51 lasiuk Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.8 2000/01/10 23:11:31 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
+ * Revision 1.8  2000/01/10 23:11:31  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.7  1999/07/20 02:17:51  lasiuk
  * remove CVS merge conflicts
  *
@@ -58,8 +61,13 @@
  **************************************************************************/
 #ifndef ST_TRS_CHARGE_SEGMENT_HH
 #define ST_TRS_CHARGE_SEGMENT_HH
+
 #include <iostream.h>
 #include <list>
+
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::list;
+#endif
 
 #include "SystemOfUnits.h"
 #include "StGlobals.hh"

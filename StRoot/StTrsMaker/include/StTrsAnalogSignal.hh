@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.hh,v 1.3 1999/01/15 11:03:14 lasiuk Exp $
+ * $Id: StTrsAnalogSignal.hh,v 1.4 2000/01/10 23:11:30 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.hh,v $
+ * Revision 1.4  2000/01/10 23:11:30  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.3  1999/01/15 11:03:14  lasiuk
  * modify << operator for STL use
  *
@@ -28,6 +31,10 @@
 
 #include <iostream.h>
 #include <utility>
+
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::pair;
+#endif
 
 class StTrsAnalogSignal {
 public:

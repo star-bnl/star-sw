@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.5 1999/12/08 02:10:25 calderon Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.6 2000/01/10 23:11:32 lasiuk Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
+ * Revision 1.6  2000/01/10 23:11:32  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.5  1999/12/08 02:10:25  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -39,12 +42,23 @@
 #ifndef ST_TRS_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_TRS_DIGITAL_SIGNAL_GENERATOR_HH
 #include <vector>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::vector;
+#endif
 
 #include "StTrsAnalogSignal.hh"
 #include "StTpcElectronics.hh"
 #include "StTrsSector.hh"
 #include "StTrsDigitalSector.hh"
 
+#ifndef ST_NO_EXCEPTIONS
+#   include <stdexcept>
+#   if !defined(ST_NO_NAMESPACES)
+        using std::invalid_argument;
+        using std::range_error;
+        using std::domain_error;
+#   endif
+#endif
 class StTrsDigitalSignalGenerator {
 public:
     virtual ~StTrsDigitalSignalGenerator();

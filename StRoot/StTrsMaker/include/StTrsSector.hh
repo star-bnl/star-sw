@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.hh,v 1.3 1999/11/11 19:45:02 calderon Exp $
+ * $Id: StTrsSector.hh,v 1.4 2000/01/10 23:11:32 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.hh,v $
+ * Revision 1.4  2000/01/10 23:11:32  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.3  1999/11/11 19:45:02  calderon
  * Made variables-> data members in analog signal generator to avoid
  * initialization time when member functions are called.
@@ -43,6 +46,9 @@
 #define ST_TRS_SECTOR_HH
 
 #include <vector>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::vector;
+#endif
 #include "StTrsAnalogSignal.hh"
 #include "StTpcGeometry.hh"
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.6 1999/11/10 15:45:50 calderon Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.7 2000/01/10 23:11:31 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
+ * Revision 1.7  2000/01/10 23:11:31  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.6  1999/11/10 15:45:50  calderon
  * Made changes to reduce timing, including:
  * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
@@ -54,6 +57,11 @@
 
 #include <utility>
 #include <vector>
+
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::min;
+using std::max;
+#endif
 
 #include "Randomize.h"
 
