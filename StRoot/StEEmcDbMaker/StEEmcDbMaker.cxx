@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.19 2003/10/03 22:44:27 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.20 2003/11/20 16:01:25 balewski Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -18,7 +18,7 @@
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h" 
 
 #include "tables/St_eemcDbADCconf_Table.h"
-#include "tables/St_eemcDbPMTconf_Table.h"
+//#include "tables/St_eemcDbPMTconf_Table.h"
 #include "tables/St_eemcDbPMTcal_Table.h"
 #include "tables/St_eemcDbPMTped_Table.h"
 #include "tables/St_eemcDbPMTstat_Table.h"
@@ -69,7 +69,7 @@ StEEmcDbMaker::~StEEmcDbMaker(){
 
   if( mNSector) {
     delete [] mDbADCconf;
-    delete [] mDbPMTconf;
+    //    delete [] mDbPMTconf;
     delete [] mDbPMTcal;
     delete [] mDbPMTped;
     delete [] mDbPMTstat;
@@ -153,7 +153,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   mNSector=mlastSecID - mfirstSecID+1;
 
   mDbADCconf=(eemcDbADCconf_st **) new void *[mNSector];
-  mDbPMTconf=(eemcDbPMTconf_st **) new void *[mNSector];
+  //  mDbPMTconf=(eemcDbPMTconf_st **) new void *[mNSector];
   mDbPMTcal= (eemcDbPMTcal_st  **) new void *[mNSector];
   mDbPMTped= (eemcDbPMTped_st  **) new void *[mNSector];
   mDbPMTstat=(eemcDbPMTstat_st **) new void *[mNSector];
@@ -162,7 +162,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
   int i;
   for(i=0; i<mNSector; i++) {// clear pointers
     mDbADCconf[i]=0;
-    mDbPMTconf[i]=0;
+    //    mDbPMTconf[i]=0;
     mDbPMTcal [i]=0;
     mDbPMTped [i]=0;
     mDbPMTstat[i]=0;
@@ -181,18 +181,18 @@ const StEEmcDbIndexItem1*
 StEEmcDbMaker::getT(int sec, char sub, int eta){
   char name[20];
   sprintf(name,"%2.2dT%c%2.2d",sec,sub,eta);
-  int index=EEname2Index(name);
-  return mDbItem1+index;  
+  int key=EEname2Index(name);
+  return mDbItem1+key;  
 }
 //__________________________________________________
 //__________________________________________________
 //__________________________________________________
 
 const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getByIndex(int index){
-  assert(index>=0);
-  assert(index<EEindexMax);
-  return mDbItem1+index;  
+StEEmcDbMaker::getByIndex(int key){
+  assert(key>=0);
+  assert(key<EEindexMax);
+  return mDbItem1+key;  
 }
 
 //__________________________________________________
@@ -244,7 +244,7 @@ void  StEEmcDbMaker::mReloadDb  (){
   mDbADCconf[0]=0;
   for(i=0; i<mNSector; i++) {// clear old data
     delete mDbADCconf [i]; mDbADCconf [i]=0;
-    delete mDbPMTconf [i]; mDbPMTconf [i]=0;
+    //    delete mDbPMTconf [i]; mDbPMTconf [i]=0;
     delete mDbPMTcal  [i]; mDbPMTcal  [i]=0;
     delete mDbPMTped  [i]; mDbPMTped  [i]=0;
     delete mDbPMTstat [i]; mDbPMTstat [i]=0;
@@ -320,7 +320,7 @@ void  StEEmcDbMaker::mReloadDb  (){
       getTable<St_eemcDbADCconf,eemcDbADCconf_st>
 	(eedb,secID,"eemcADCconf",mask, mDbADCconf+is);
 
-      getTable<St_eemcDbPMTconf,eemcDbPMTconf_st>(eedb,secID,"eemcPMTconf",mask,mDbPMTconf+is);
+      //      getTable<St_eemcDbPMTconf,eemcDbPMTconf_st>(eedb,secID,"eemcPMTconf",mask,mDbPMTconf+is);
       
    
       getTable<St_eemcDbPMTcal,eemcDbPMTcal_st>(eedb,secID,"eemcPMTcal",mask,   mDbPMTcal+is);
@@ -382,11 +382,11 @@ void  StEEmcDbMaker::mOptimizeDb(){
       //tmp      assert(t->slot[j]>=0 && t->slot[j]<EEMC_MaxAdcSlot);
       //tmp assert(t->channel[j]>=0 && t->channel[j]<EEMC_MaxAdcChan);
 
-      int index=EEname2Index(name);
+      int key=EEname2Index(name);
       // store valid entry
-      mDbItem1[index].crate=t->crate[j];
-      mDbItem1[index].chan=t->channel[j];
-      mDbItem1[index].setName(name);
+      mDbItem1[key].crate=t->crate[j];
+      mDbItem1[key].chan=t->channel[j];
+      mDbItem1[key].setName(name);
 
       assert(t->crate[j]>=0 && t->crate[j]<mxAdcCrate);
       assert(t->channel[j]>=0 && t->channel[j]<mxAdcChan);
@@ -394,10 +394,10 @@ void  StEEmcDbMaker::mOptimizeDb(){
       if(mLookup[t->crate[j]][t->channel[j]]) {
 	printf("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",t->crate[j],t->channel[j]);
 	mLookup[t->crate[j]][t->channel[j]]->print(); // first time
-	mDbItem1[index].print(); // second time
+	mDbItem1[key].print(); // second time
 	assert(1==2);
       }
-      mLookup[t->crate[j]][t->channel[j]]=&mDbItem1[index];
+      mLookup[t->crate[j]][t->channel[j]]=&mDbItem1[key];
       
       //      if(j>300) break;
       // printf("Mapped %s -->index=%d -->crate/chan=%d/%d \n",mDbItem1[index].name,index,t->crate[j],t->channel[j]);
@@ -409,10 +409,10 @@ void  StEEmcDbMaker::mOptimizeDb(){
   //---------------------------------------------------
   printf("\nAcquire secondary info for active elements ...\n");
 
-  int index;
-  for(index=0; index<EEindexMax; index++){//main loop over all pixels
-    if(mDbItem1[index].chan<0) continue;
-    StEEmcDbIndexItem1 *item=mDbItem1+index;
+  int key;
+  for(key=0; key<EEindexMax; key++){//main loop over all pixels
+    if(mDbItem1[key].chan<0) continue;
+    StEEmcDbIndexItem1 *item=mDbItem1+key;
 
     char *name=item->name;
     int secID=atoi(name);
@@ -427,15 +427,15 @@ void  StEEmcDbMaker::mOptimizeDb(){
     eemcDbPMTcal_st *cal= mDbPMTcal[i];
     if(cal==0) continue; // DB data for this sector not loaded from DB
     
-    for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
+    for(j=0;j<EEMCDbMaxPmt; j++) { // loop within sector
       char name1[EEMCDbMaxName];
       strncpy(name1,cal->name+j*EEMCDbMaxName, EEMCDbMaxName-1);
       if(name1[0]==EEMCDbStringDelim) break;
       name1[EEMCDbMaxName-1]=0;
       char *p=strstr(name1,item->name);
       if(p==0) continue;
-      mDbItem1[index].gain=cal->gain[j];
-      mDbItem1[index].hv=cal->hv[j];
+      mDbItem1[key].gain=cal->gain[j];
+      mDbItem1[key].hv=cal->hv[j];
       //if(strchr(name1,'T')==0)
       //    printf(" Axx=%s, index=%d j=%d  gain=%f hv=%f c1=%d c2\%d\n",name1,j,index,cal->gain[j],cal->hv[j], name1[0], name1[1]) ;
       break;
@@ -451,8 +451,8 @@ void  StEEmcDbMaker::mOptimizeDb(){
       name1[EEMCDbMaxName-1]=0;
       char *p=strstr(name1,item->name);
       if(p==0) continue;
-      mDbItem1[index].ped=ped->ped[j];
-      mDbItem1[index].thr=ped->ped[j]+KsigOverPed*ped->sig[j];
+      mDbItem1[key].ped=ped->ped[j];
+      mDbItem1[key].thr=ped->ped[j]+KsigOverPed*ped->sig[j];
       break;
     }
     
@@ -466,8 +466,8 @@ void  StEEmcDbMaker::mOptimizeDb(){
       name1[EEMCDbMaxName-1]=0;
       char *p=strstr(name1,item->name);
       if(p==0) continue;
-      mDbItem1[index].stat=stat->stat[j];
-      mDbItem1[index].fail=stat->fail[j];
+      mDbItem1[key].stat=stat->stat[j];
+      mDbItem1[key].fail=stat->fail[j];
       break;
     }
     
@@ -585,6 +585,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.20  2003/11/20 16:01:25  balewski
+// towards run4
+//
 // Revision 1.19  2003/10/03 22:44:27  balewski
 // fix '$' problem in db-entries name
 //
