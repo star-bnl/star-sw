@@ -1,5 +1,9 @@
-# $Id: MakeDll.mk,v 1.72 1999/04/02 22:59:01 fisyak Exp $
+
+# $Id: MakeDll.mk,v 1.73 1999/04/13 20:35:40 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.73  1999/04/13 20:35:40  fisyak
+# Add Stypes to dictionary
+#
 # Revision 1.72  1999/04/02 22:59:01  fisyak
 # filter-out St_laser_Maker St_run_summary_Maker St_tpctest_Maker
 #
@@ -174,10 +178,9 @@ INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
-INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/src
+INCINT    := $(INC_DIRS) $(CERN_ROOT)/include $(ROOTSYS)/src
+INC_DIRS   = $(INCINT) $(STAF_UTILS_INCS) 
 
-INCINT := $(INC_DIRS) 
-#INCINT := $(wildcard $(ROOTSYS)/cint/stl) $(INC_DIRS)
 ifdef NT
 INC_DIRS := $(INC_DIRS) $(SUNRPC)
 endif
@@ -194,9 +197,9 @@ ifdef NT
  INCLUDES :=
  INCINT   :=
 endif
-INCINT   += $(ROOTCINTD)
-
 CPPFLAGS += -D__ROOT__ 
+
+DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
 CXXFLAGS +=-ptr$(OBJ_DIR)
 endif
@@ -228,9 +231,7 @@ DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))
 
 OUTPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) 
-#                                                                      $(SRC_DIR) 
-INPUT_DIRS += $(SRC_DIR) $(SRC_DIR)/src
-INPUT_DIRS += $(ROOT_DIR)
+INPUT_DIRS  += $(SRC_DIR) $(SRC_DIR)/src $(ROOT_DIR)
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
@@ -298,7 +299,7 @@ ifdef FILES_ORD
     NAMES_DEF    += $(shell  grep C++ $(LinkDef) | grep global | awk '{print $$5}')
     NAMES_DEF    := $(subst ;, ,$(NAMES_DEF))    
     NAMES_DEF    := $(subst -, ,$(NAMES_DEF))   
-    NAMES_DEF    := $(subst !, ,$(NAMES_DEF))   
+    NAMES_DEF    := $(subst !, ,$(NAMES_DEF))
     ifneq (,$(NAMES_DEF))
       NAMES_ORD  := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
     endif
@@ -306,6 +307,10 @@ ifdef FILES_ORD
       FILES_CINT_DEF :=$(GEN_DIR)/$(PKG)_DCint.cxx 
       FILES_DEF_H    := $(wildcard $(addprefix $(SRC_DIR)/,$(addsuffix .h,$(NAMES_DEF)) \
                                                            $(addsuffix .hh,$(NAMES_DEF))))
+     ifneq (,$(wildcard $(SRC_DIR)/Stypes.h))
+      FILES_DEF_H    += $(SRC_DIR)/Stypes.h
+      NAMES_DEF      += Stypes
+     endif
     endif
   endif
   ifneq (,$(NAMES_ORD))
@@ -376,10 +381,10 @@ $(FILES_CINT_SYM) : $(SRC_DIR)/St_Module.h
 	$(CAT) $(LINKDEF); 
 ifndef NT
 	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) St_Module.h $(notdir $(LINKDEF))
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) St_Module.h $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT)  $(notdir $(1ST_DEPS)) \
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT)  $(notdir $(1ST_DEPS)) \
         St_DataSet.h $(notdir $(LINKDEF))
 endif
 $(GEN_DIR)/St_TableCint.cxx : $(SRC_DIR)/St_Table.h
@@ -390,10 +395,10 @@ $(GEN_DIR)/St_TableCint.cxx : $(SRC_DIR)/St_Table.h
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) St_Table.h $(LINKDEF)
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) St_Table.h $(LINKDEF)
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(LINKDEF)
 endif
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
@@ -404,17 +409,17 @@ $(FILES_CINT_ORD) : $(FILES_ORD_H)
 	@$(CAT) $(LINKDEF)
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_ORD_H)) \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_ORD_H)) \
         $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) \
 	 $(notdir $(LINKDEF))
 endif
-$(FILES_CINT_DEF) : $(FILES_DEF_H)   
+$(FILES_CINT_DEF) : $(FILES_DEF_H)  $(LinkDef)
 	cd $(GEN_DIR); \
 	$(CAT) $(LinkDef); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_DEF_H)) \
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_DEF_H)) \
         $(notdir $(LinkDef))
 
 $(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h 
@@ -425,10 +430,10 @@ $(FILES_CINT_TAB) : $(GEN_DIR)/St_%_TableCint.cxx : $(SRC_DIR)/St_%_Table.h
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & $(CP) $(1ST_DEPS) . & )) \
-	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 endif
 
 $(FILES_CINT_MOD) : $(FILES_MOD_H) $(FILES_MOD_HS)
@@ -441,10 +446,10 @@ $(FILES_CINT_MOD) : $(FILES_MOD_H) $(FILES_MOD_HS)
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(sort $(notdir $(FILES_MOD_H) $(FILES_MOD_HS))) $(notdir $(LINKDEF))
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(sort $(notdir $(FILES_MOD_H) $(FILES_MOD_HS))) $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & )) \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c $(DINCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
 endif
 
 
