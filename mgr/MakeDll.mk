@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.115 1999/09/24 22:19:16 fisyak Exp $
+# $Id: MakeDll.mk,v 1.116 1999/09/26 19:16:02 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.116  1999/09/26 19:16:02  fisyak
+# Merge directory structures with cons
+#
 # Revision 1.115  1999/09/24 22:19:16  fisyak
 # Fix print-out
 #
@@ -299,7 +302,7 @@ ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
 INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
-INCINT    := $(INC_DIRS) $(CERN_ROOT)/include $(ROOTSYS)/src
+INCINT    := $(INC_DIRS) $(GEN_DIR_INC) $(STAR)/include/$(DOMAIN) $(CERN_ROOT)/include $(ROOTSYS)/src
 FFLAGS   += -DCERNLIB_TYPE
 INC_DIRS  += $(INCINT) $(STAF_UTILS_INCS) 
 
@@ -372,11 +375,11 @@ endif
 
 ifdef FILES_MOD
   NAMES_MOD      := $(subst _Module,,$(subst St_,,$(basename $(notdir $(FILES_MOD)))))
-  FILES_MOD_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix _Module.h,$(NAMES_MOD)))
-  STAR_SRC       := $(subst $(ROOT_DIR),$(STAR),$(SRC_DIR))
+  FILES_MOD_H    := $(addprefix $(GEN_DIR_INC)/St_,$(addsuffix _Module.h,$(NAMES_MOD)))
+  STAR_SRC       := $(subst $(ROOT_DIR),$(STAR),$(GEN_DIR_INC))
   FILES_MOD_HS   := $(wildcard $(STAR_SRC)/St_*_Module.h)
   NAMES_MOD_HS   := $(subst _Module,,$(subst St_,,$(basename $(notdir $(FILES_MOD_HS)))))
-  FILES_CINT_MOD := $(addprefix $(GEN_DIR)/St_,$(addsuffix _ModuleCint.cxx,$(NAMES_MOD)))
+# FILES_CINT_MOD := $(addprefix $(GEN_DIR)/St_,$(addsuffix _ModuleCint.cxx,$(NAMES_MOD)))
   FILES_CINT_MOD :=$(GEN_DIR)/$(PKG)_Cint.cxx
   FILES_H        := $(filter-out $(FILES_MOD_H), $(FILES_H))
 endif
@@ -621,9 +624,7 @@ test:
 	@echo LIBRARY     := $(LIBRARY)
 	@echo STAR_OBJ_DIR:= $(STAR_OBJ_DIR)
 	@echo STAR_FILES_O:= $(STAR_FILES_O)
-	@echo FILES_MOD_HS:= $(FILES_MOD_HS)
 	@echo STAR_SRC    := $(STAR_SRC)
-	@echo NAMES_MOD_HS:= $(NAMES_MOD_HS)
 	@echo MY_SO_CINT := $(MY_SO_CINT)
 	@echo SL_NEW_CINT := $(SL_NEW_CINT)
 
@@ -648,6 +649,7 @@ test:
 	@echo NAMES_SYM := $(NAMES_SYM) 
 	@echo NAMES_TAB := $(NAMES_TAB)
 	@echo NAMES_MOD := $(NAMES_MOD)
+	@echo NAMES_MOD_HS:= $(NAMES_MOD_HS)
 	@echo NAMES_COL := $(NAMES_COL)
 
 	@echo FILES_CINT_ORD := $(FILES_CINT_ORD) 
@@ -660,6 +662,7 @@ test:
 	@echo FILES_ORD_H := $(FILES_ORD_H) 
 	@echo FILES_DEF_H := $(FILES_DEF_H) 
 	@echo FILES_MOD_H := $(FILES_MOD_H)
+	@echo FILES_MOD_HS:= $(FILES_MOD_HS)
 	@echo FILES_DCINT := $(FILES_DCINT)
 	@echo FILES_COL   := $(FILES_COL)
 	@echo FILES_GCO   := $(FILES_GCO)

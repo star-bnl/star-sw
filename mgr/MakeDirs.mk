@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.11 1999/09/12 01:47:25 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.12 1999/09/26 19:16:02 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.12  1999/09/26 19:16:02  fisyak
+# Merge directory structures with cons
+#
 # Revision 1.11  1999/09/12 01:47:25  fisyak
 # merge cons and makel tables h-files into include/tables
 #
@@ -48,6 +51,7 @@ GEN_TAB := $(DIR_GEN)/tables
 GEN_INC := $(ROOT_DIR)/include
 GEN_TAB_INC := $(GEN_INC)/tables
 GEN_DIR := $(DIR_GEN)/$(DOMAIN)
+GEN_DIR_INC := $(GEN_INC)/$(DOMAIN)
 DOM_DIRS:= $(filter-out CVS, $(notdir $(wildcard $(ROOT_DIR)/pams/*)))
 #.
 check_sys   := $(shell test -d $(SYS_DIR)  || mkdir -p $(SYS_DIR)) 
@@ -60,3 +64,4 @@ check_tab   := $(shell test -d $(GEN_TAB)  || mkdir -p $(GEN_TAB))
 check_tmp   := $(shell test -d $(GEN_TMP)  || mkdir -p $(GEN_TMP))
 check_inc   := $(shell test -d $(GEN_INC)  || mkdir -p $(GEN_INC))
 check_tab_inc   := $(shell test -d $(GEN_TAB_INC)  || mkdir -p $(GEN_TAB_INC))
+check_gen_inc   := $(shell test -d $(GEN_DIR_INC)  || mkdir -p $(GEN_DIR_INC))
