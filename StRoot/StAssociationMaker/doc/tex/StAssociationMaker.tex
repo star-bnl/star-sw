@@ -2,7 +2,7 @@
 %
 % StAssociationMaker - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StAssociationMaker.tex,v 1.1 1999/07/14 01:58:34 calderon Exp $
+% $Id: StAssociationMaker.tex,v 1.2 1999/07/14 14:46:13 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,8 +23,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StAssociationMaker.tex,v $
-% Revision 1.1  1999/07/14 01:58:34  calderon
-% Added documentation files
+% Revision 1.2  1999/07/14 14:46:13  calderon
+% Updated documentation to include macros in CVS
 %
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -305,7 +305,8 @@ only on Linux and in new):
 
 Please note that at the moment, StMcEventMaker only runs with ROOT files.
 
-StAssociator.C will run \name{\$STAR/StRoot/macros/StAssociator.C} which runs a %$%%%
+StAssociator.C can be found in \name{\$CVSROOT/StRoot/macros/examples/StAssociator.C}, %$%%%
+and it runs a 
 chain consisting of four makers:
 \begin{description}
 \item[\name{StEventReaderMaker}:] loads StEvent
@@ -420,10 +421,10 @@ StMcEvent:
 
 \begin{verbatim}
     mkdir StRoot/StMyMcAnalysisMaker
-    cp $STAR/StRoot/StMcAnalysisMaker/* StRoot/StMyMcAnalysisMaker/                                   %$
+    cp  $STAR/StRoot/StMcAnalysisMaker/* StRoot/StMyMcAnalysisMaker/                                   %$
     [edit]
     makel -C StRoot/StMyMcAnalysisMaker
-    cp $STAR/StRoot/macros/StAssociator.C ./  (and edit to use your maker)                            %$
+    cvs co $CVSROOT/StRoot/macros/examples/StAssociator.C  (and edit to use your maker)                            %$
     root4star StAssociator.C
 \end{verbatim}
 
