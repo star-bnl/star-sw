@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.17 1999/03/27 23:58:42 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.18 1999/04/24 13:15:24 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.18  1999/04/24 13:15:24  fisyak
+# Add --sillent mode for set SILENT environmnet variable
+#
 # Revision 1.17  1999/03/27 23:58:42  fisyak
 # Add hbook to root
 #
@@ -127,7 +130,6 @@ ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
 ALL_EXE_LIBS += $(ROOTLIBS) $(ROOTGLIBS)
 ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)	
 
-#.SILENT:
 .SUFFIXES:
 .SUFFIXES:  .o .g .f .c .cc .cxx   .F
 #all: Root.exe root4star 
