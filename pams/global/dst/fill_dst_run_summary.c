@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "asuAlloc.h"
 
 /* ------- STAF/ROOT generated includes ------- */
 #include "fill_dst_run_summary.h"
