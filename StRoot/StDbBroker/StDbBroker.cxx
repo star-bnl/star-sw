@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.41 2003/09/02 17:55:35 perev Exp $
+ * $Id: StDbBroker.cxx,v 1.42 2003/09/12 01:48:06 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.42  2003/09/12 01:48:06  porter
+ * removed all strstream objects in favor of stringstream+string directly
+ *
  * Revision 1.41  2003/09/02 17:55:35  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -142,7 +145,6 @@
  *
  *
  **************************************************************************/
-#include <Stsstream.h>
 #include <Stiostream.h>
 #include <stdlib.h> 
 
@@ -289,14 +291,14 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
    if(!mdescriptor->Dimensions(i)){
       buff.WriteScalar("1","length");
    } else {
-     ostrstream os;
+     ostringstream os;
      const unsigned int* index = mdescriptor->IndexArray(i);
      for(int k=0; k<(int)mdescriptor->Dimensions(i)-1;k++) 
        os<<index[k]<<",";
-     os<<index[mdescriptor->Dimensions(i)-1]<<ends;
-     const char* lengthString = os.str(); 
+     os<<index[mdescriptor->Dimensions(i)-1];
+     const char* lengthString = (os.str()).c_str(); 
      buff.WriteScalar(lengthString,"length");
-     os.freeze(0);
+     //     os.freeze(0);
      //     delete [] lengthString;
    }
 
@@ -377,30 +379,18 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
   // 20000127  002502
    m_DateTime[0] = date; 
    m_DateTime[1]= time;
-   //   cout<<" Date ="<<date << " & Time = " << time<<endl;
 
-   //   char dateTime[16];
-   //   ostrstream ds(dateTime,16);
-   //   char timeCheck[7];
-   //   ostrstream ts(timeCheck,7);
-   const char* dateTime;
-   ostrstream ds;
-   const char* timeCheck;
-   ostrstream ts;
+   ostringstream ds;
+   ostringstream ts;
 
-   ts<<m_DateTime[1]<<ends;
-   timeCheck = ts.str();
-   int len = strlen(timeCheck);
+   ts<<m_DateTime[1];
+   int len = (ts.str()).length(); 
    ds<<m_DateTime[0];
    for(int i=0;i<6-len;i++)ds<<"0";
-   ds<<m_DateTime[1]<<ends;
+   ds<<m_DateTime[1];
 
-   dateTime = ds.str();
+   const char* dateTime = (ds.str()).c_str();
    mgr->setRequestTime(dateTime);
-   ds.freeze(0);
-   ts.freeze(0);
-   //   delete [] timeCheck;
-   //   delete [] dateTime;
 }
 
 //____________________________________________________________________________
@@ -508,18 +498,18 @@ void StDbBroker::makeDateTime(const char* dateTime,UInt_t& iDate,UInt_t& iTime){
 bool StDbBroker::UseRunLog(StDbTable* table){
 
   unsigned int prodTime=table->getProdTime();    
-    ostrstream rq;
+    ostringstream rq;
     rq<<" where runNumber="<<m_runNumber;
 
     if(prodTime==0){
-      rq<<" AND deactive=0 "<<ends;
+      rq<<" AND deactive=0 ";
     } else {
       rq<<" AND (deactive=0 OR deactive>="<<prodTime<<")";
-      rq<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
+      rq<<" AND unix_timestamp(entryTime)<="<<prodTime;
     } 
 
-    bool fetchStatus=mgr->fetchDbTable(table,(char*)rq.str());
-    rq.freeze(0);
+    bool fetchStatus=mgr->fetchDbTable(table,(char*)(rq.str()).c_str());
+
 
 return fetchStatus;
 }
@@ -528,20 +518,20 @@ return fetchStatus;
 Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
 #define __METHOD__ "WriteToDb(pArray,tabID)"
 
-  ostrstream em;
+  ostringstream em;
   if(!pArray || tabID==0) {
-    em<<" Write Failed -> either data-array or tableID is incomplete"<<ends;
-    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
+    em<<" Write Failed -> either data-array or tableID is incomplete";
+    return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
   if(!m_Nodes){
-    em<<"Write Failed -> incomplete table context. Try InitConfig() 1st"<<ends;
-    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
+    em<<"Write Failed -> incomplete table context. Try InitConfig() 1st";
+    return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
   StDbNode* anode= m_Nodes->getNode(tabID);
   StDbTable* table=dynamic_cast<StDbTable*>(anode);
   if(!table){
-    em<<"Write Failed -> tableID="<<tabID<<" is not known " <<ends;
-    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
+    em<<"Write Failed -> tableID="<<tabID<<" is not known ";
+    return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
 
   if(!table->hasDescriptor())table->setDescriptor(GetTableDescriptor());
@@ -558,11 +548,11 @@ Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
 //_____________________________________________________________________________
 Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
 #define __METHOD__ "WriteToDb(pArray,fullPath,idList)"
-  ostrstream em;
+  ostringstream em;
 
   if(!pArray || !fullPath) {
-    em<<" Write Failed:: either data-array or path is incomplete"<<ends;
-    return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
+    em<<" Write Failed:: either data-array or path is incomplete";
+    return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
 
   char* path=new char[strlen(fullPath)+1]; 
@@ -606,9 +596,9 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
    }
 
    if(!table){
-     em<<"Write Failed table="<<m_tableName<<" not found in db="<<dbName<<ends;
+     em<<"Write Failed table="<<m_tableName<<" not found in db="<<dbName;
      delete [] path;
-     return mgr->printInfo(em.str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
+     return mgr->printInfo((em.str()).c_str(),dbMErr,__LINE__,__CLASS__,__METHOD__);
    }
 
    table->setDescriptor(GetTableDescriptor());
