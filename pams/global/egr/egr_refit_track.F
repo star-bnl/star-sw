@@ -163,8 +163,8 @@ C     load the fitting arrays for the primary vertex
             xcir(ncir) = prim_vrtx_x
             ycir(ncir) = prim_vrtx_y 
             zcir(ncir) = prim_vrtx_z
-            wcir(ncir) = 500.0        ! Arbitrary, but large, for now
-            wlin(ncir) = 1000.0
+            wcir(ncir) = 1250.      ! Record as 0.2 in z and 0.02 in xy (cm)
+            wlin(ncir) = 25.0
             pnt(ncir) = gtrk(igtrk).nhit
          endif
 
