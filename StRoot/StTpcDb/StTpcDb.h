@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.15 2000/03/27 21:21:22 fine Exp $
+ * $Id: StTpcDb.h,v 1.16 2000/05/11 17:17:27 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.16  2000/05/11 17:17:27  hardtke
+ * make trigger time offset available -- currently NOT different for beam and laser events
+ *
  * Revision 1.15  2000/03/27 21:21:22  fine
  * Adjusted to ROOT 2.24
  *
@@ -74,6 +77,7 @@
 #include "St_DataSet.h"
 class StMaker;
 class St_tpcDriftVelocity;
+class St_trgTimeOffset;
 //class StTpcCoordinateTransform;
 
 class StTpcDb {
@@ -88,7 +92,9 @@ class StTpcDb {
  StTpcGainI*           gain[24];      //!
  StTpcT0I*             t0[24];        //! 
  St_DataSet*           tpc[3];        //!
+ St_DataSet*           trg[3];        //!
  St_tpcDriftVelocity*  dvel;          //!
+ St_trgTimeOffset*     toff;          //!
  // StTpcCoordinateTransform* transform; //!
 
  protected:
@@ -108,6 +114,7 @@ class StTpcDb {
    St_Table *getTpcTable(int i);
    //small pieces of data:
    float DriftVelocity();
+   float triggerTimeOffset();
 
 
 #ifdef __ROOT__
