@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.18 2000/03/15 22:38:21 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.19 2000/04/12 15:06:50 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.19  2000/04/12 15:06:50  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
 // Revision 1.18  2000/03/15 22:38:21  kathy
 // new version of macro that now keeps track of how many events there were and how many tables per event - doesn't keep track of missing tables anymore since autoQA does that
 //
@@ -80,7 +83,12 @@ void QA_bfcread_dst_tables(
 {
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
+
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libtpc_Tables");
+
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
 

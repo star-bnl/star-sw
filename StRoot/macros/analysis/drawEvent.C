@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.8 2000/01/19 21:00:32 kathy Exp $
+// $Id: drawEvent.C,v 1.9 2000/04/12 15:06:53 kathy Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.9  2000/04/12 15:06:53  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
 // Revision 1.8  2000/01/19 21:00:32  kathy
 // update macros to use standard default xdf files in /afs/rhic/star/data/samples
 //
@@ -102,15 +105,18 @@ void doEventsQQ(const Int_t nevents=999,
   // Dynamically link needed shared libs
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-  gSystem->Load("St_Tables");
+
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libtpc_Tables");
+
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StMagF");
   gSystem->Load("StEvent");
-//  gSystem->Load("StEventReaderMaker");
   gSystem->Load("StEventMaker");
-//  gSystem->Load("StAnalysisMaker");
   gSystem->Load("St_geom_Maker");
   gSystem->Load("StEventDisplayMaker");
 
