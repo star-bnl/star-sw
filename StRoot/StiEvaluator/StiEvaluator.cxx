@@ -25,6 +25,8 @@
 #include "Sti/StiEvaluableTrack.h"
 #include "Sti/StiTrack.h"
 #include "Sti/StiKalmanTrack.h"
+#include "Sti/StiHit.h"
+#include "Sti/StiKalmanTrackNode.h"
 
 //StiEvaluator includes
 #include "StiEvaluator.h"
@@ -106,25 +108,145 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	    return;
 	}
 	//Call some function to actually fill TTree object(s)
+	mEntry->clear();
 	mEntry->setMcTrack(associatedPair->partnerMcTrack());
 	mEntry->setGlobalTrack(associatedPair->partnerTrack());
 	mEntry->setStiTrack(track);
-	mTree->Fill();
 
+	//Clear the hit entry
+	fillHitEntry(track);
+
+	//Test array
+	/*
+	  cout <<"Look at the array"<<endl;
+	  for (unsigned int h=0; h<mEntry->hitCounter(); ++h) {
+	  TObject* temp = mEntry->array()[h];
+	  StiHitEntry* hit = static_cast<StiHitEntry*>(temp);
+	  cout <<"\tGlobal Pos:\t"
+	  <<hit->hitGlobalX<<"\t"
+	  <<hit->hitGlobalY<<"\t"
+	  <<hit->hitGlobalZ<<endl;
+	  }
+	*/
+	mTree->Fill();
     }
 }
 
+void StiEvaluator::fillHitEntry(const StiKalmanTrackNode* node)
+{
+    //Reset the entry:
+    mStiHitEntry.reset();
+    
+    //Fill node-wise quantities:
+    mStiHitEntry.trackAlpha = node->fAlpha;
+    mStiHitEntry.trackLocalX = node->fX;
+    mStiHitEntry.trackLocalY = node->fP0;
+    mStiHitEntry.trackLocalZ = node->fP1;
+    mStiHitEntry.trackLocalEta = node->fP2;
+    mStiHitEntry.trackLocalCurvature = node->fP3;
+    mStiHitEntry.trackLocalTanLambda = node->fP4;
+    mStiHitEntry.trackLocalChi2 = node->fChi2;    
+    
+    //Fill hit-wise quantities, if there's a hit for this node:
+    const StiHit* hit = node->getHit();
+    if (hit) {
+	fillHitEntry(hit);
+    }
+
+    //Add to the track entry
+    mEntry->addStiHitEntry(mStiHitEntry);
+
+}
+
+void StiEvaluator::fillHitEntry(const StiHit* hit)
+{
+    mStiHitEntry.hitPosition = hit->position();
+    mStiHitEntry.hitRefAngle = hit->refangle();
+    mStiHitEntry.hitLocalX = hit->x();
+    mStiHitEntry.hitLocalY = hit->y();
+    mStiHitEntry.hitLocalZ = hit->z();
+    
+    const StThreeVectorF& pos = hit->globalPosition();
+    mStiHitEntry.hitGlobalX = pos.x();
+    mStiHitEntry.hitGlobalY = pos.y();
+    mStiHitEntry.hitGlobalZ = pos.z();
+    /*
+      cout <<"\tGlobal Pos:\t"
+      <<mStiHitEntry.hitGlobalX<<"\t"
+      <<mStiHitEntry.hitGlobalY<<"\t"
+      <<mStiHitEntry.hitGlobalZ<<endl;
+    */
+}
+
+void StiEvaluator::fillHitEntry(const StiKalmanTrack* track)
+{
+    //Start at the last node on the track, work upwards until you find the root of the tree:
+    
+    StiKalmanTrackNode* node = track->getLastNode(); //start at innermost
+    unsigned int nodes=0;
+    bool go=true;
+    while (go) {
+	++nodes;
+	fillHitEntry(node);
+	//now check for parent:
+	if (node->isRoot()) { //this means that it's the root, no where else to go
+	    go=false;
+	}
+	else {
+	    node = dynamic_cast<StiKalmanTrackNode*>(node->getParent());
+	    if (!node) {
+		cout <<"StiEvaluator::fillHitEntry(const StiKalmanTrack&) ERROR:\t"
+		     <<"Cast to StiKalmanTrackNodeFailed.  Abort"<<endl;
+		return;
+	    }
+	}
+    }
+    // cout <<"StiEvaluator::fillHitEntry(StiKalmanTrack)\t"
+    // <<nodes<<" nodes processed for track"<<endl;
+}
+
+
 //Temp, to be moved to own file
 
+ClassImp(StiHitEntry)
+
+StiHitEntry::StiHitEntry()
+{
+    reset();
+}
+
+StiHitEntry::~StiHitEntry()
+{
+   
+}
+
+
+void StiHitEntry::reset()
+{
+    hitPosition = hitRefAngle = hitLocalX = hitLocalY = hitLocalZ = 0.;
+    hitGlobalX = hitGlobalY = hitGlobalZ;
+    trackAlpha = trackLocalX = trackLocalY = trackLocalZ = trackLocalEta = trackLocalCurvature
+	= trackLocalTanLambda = trackXCenter = trackYCenter = trackLocalChi2 = 0.;
+}
 
 ClassImp(TrackEntry)
 
-TrackEntry::TrackEntry() 
+TrackEntry::TrackEntry()
+    : mArray(new TClonesArray("StiHitEntry",100))
 {
+}
+
+void TrackEntry::addStiHitEntry(const StiHitEntry& hit)
+{
+    TClonesArray& cArr = *mArray;
+    new(cArr[mHitCounter++]) StiHitEntry(hit);
 }
 
 void TrackEntry::clear()
 {
+    mArray->Clear();
+    mHitCounter = 0;
+
     mcTrackId = mcTrackPsi = 0.;
     globalTrackQ = 0;
     globalTrackM = globalTrackPsi = globalTrackChi2 = globalTrackNHit = 0.;
