@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.27 1999/07/21 21:12:02 perev Exp $
+// $Id: doEvents.C,v 1.28 1999/07/23 22:03:42 genevb Exp $
 // $Log: doEvents.C,v $
-// Revision 1.27  1999/07/21 21:12:02  perev
-// supress debug print
+// Revision 1.28  1999/07/23 22:03:42  genevb
+// Extra bracket
+//
+// Revision 1.28  1999/07/23 22:03:42  genevb
+// Extra bracket
 //
 // Revision 1.27  1999/07/21 21:12:02  perev
 // supress debug print
@@ -198,7 +201,7 @@ EventLoop: if (i <= nevents && !istat) {
 //    if (set)  {
 //      St_DataSetIter dirt(set);
 //      dirt.Du();
-    }
+//    }
 }
   }
      chain->Clear();
