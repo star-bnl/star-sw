@@ -9,7 +9,7 @@
 
 
 // steering - watch it!
-//#define FCF_ANNOTATE_CLUSTERS
+#define FCF_ANNOTATE_CLUSTERS
 
 
 
@@ -89,10 +89,7 @@ struct FcfSimOutput {   // this is just the payload definition.
 extern struct fcfPixAnnotate fcfPixA[45][182][512] ;	// a biiiig one!
 
 #else
-
-#include "tables/St_fcfPixel_Table.h"
-extern TDataSet *fcfPixATop;
-extern St_fcfPixel *fcfPixA;
+extern struct fcfPixAnnotate pixStruct[183][512] ;
 
 #endif
 
