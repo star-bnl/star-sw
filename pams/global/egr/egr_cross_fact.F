@@ -24,19 +24,19 @@ C<--------------------------------------------------------------------
  
       IMPLICIT NONE
 C#include "tpt_const.inc"
+#include "math_constants.inc"
 C_______________________________________________________________________
       INTEGER idet
       REAL    xnew,ynew,xold,yold,cf,theta
-      REAL    pi,xv,yv,alpha,vlocal(3),vglobal(3)
+      REAL    vlocal(3),vglobal(3)
       integer tgc_global_to_local_p,isect,iret
-      PARAMETER (pi=3.141592653589)
 C______________________________________________________________________
  
       if(cf.lt.0) then
          cf=1.0
       else
          isect = idet/100
-*         alpha = real(2*isect-1)*pi/12.0
+*         alpha = real(2*isect-1)*C_PI/12.0
 *         xv = xnew-xold
 *         yv = ynew-yold
 *         cf = (-sin(alpha)*xv+cos(alpha)*yv)/sqrt(xv**2+yv**2)
@@ -55,3 +55,4 @@ C______________________________________________________________________
       endif
       egr_cross_fact = 0
       end
+
