@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.14 2000/01/27 19:29:50 fisyak Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.15 2003/01/22 23:37:18 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.15  2003/01/22 23:37:18  genevb
+ * Change function for abs()
+ *
  * Revision 1.14  2000/01/27 19:29:50  fisyak
  * Put StrangeTag to .data
  *
@@ -58,7 +61,7 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 #include "StChain.h"
-#include <math.h>
+#include "TMath.h"
 #include "PhysicalConstants.h"
 
 ClassImp(StStrangeTagsMaker)
@@ -123,6 +126,7 @@ void StStrangeTagsMaker::fillTag()
     Int_t nbelowXi = 0;
     Int_t nXi = 0;
     Int_t naboveXi = 0;
+    Float_t perc;
 
     size_t i;
 
@@ -145,20 +149,20 @@ void StStrangeTagsMaker::fillTag()
         Float_t maLa = sqrt(eLa*eLa - pV2);
         Float_t maLb = sqrt(eLb*eLb - pV2);
 
-        Float_t perc = (maK0/kaon_0_short_mass_c2) - 1.;
-        if (abs(perc) < mRange) nK0++;
-        else if (abs(perc + m2Range) < mRange) nbelowK0++;
-        else if (abs(perc - m2Range) < mRange) naboveK0++;
+        perc = (maK0/kaon_0_short_mass_c2) - 1.;
+        if (TMath::Abs(perc) < mRange) nK0++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowK0++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveK0++;
 
         perc = (maLa/lambda_mass_c2) - 1.;
-        if (abs(perc) < mRange) nLa++;
-        else if (abs(perc + m2Range) < mRange) nbelowLa++;
-        else if (abs(perc - m2Range) < mRange) naboveLa++;
+        if (TMath::Abs(perc) < mRange) nLa++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowLa++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveLa++;
 
         perc = (maLb/antilambda_mass_c2) - 1.;
-        if (abs(perc) < mRange) nLb++;
-        else if (abs(perc + m2Range) < mRange) nbelowLb++;
-        else if (abs(perc - m2Range) < mRange) naboveLb++;
+        if (TMath::Abs(perc) < mRange) nLb++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowLb++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveLb++;
 
     }
     for (i=0; i<castot; i++) {
@@ -175,10 +179,10 @@ void StStrangeTagsMaker::fillTag()
         Float_t eXi = ela + epi;
         Float_t maXi = sqrt(eXi*eXi - pX2);
 
-        Float_t perc = (maXi/xi_minus_mass_c2) - 1.;
-        if (abs(perc) < mRange) nXi++;
-        else if (abs(perc + m2Range) < mRange) nbelowXi++;
-        else if (abs(perc - m2Range) < mRange) naboveXi++;
+        perc = (maXi/xi_minus_mass_c2) - 1.;
+        if (TMath::Abs(perc) < mRange) nXi++;
+        else if (TMath::Abs(perc + m2Range) < mRange) nbelowXi++;
+        else if (TMath::Abs(perc - m2Range) < mRange) naboveXi++;
 
     }
 
