@@ -1,18 +1,17 @@
 ############################################################################
 #
-# $Id: GNUmakefile.architecture,v 1.1 2000/01/27 17:13:11 lasiuk Exp $
+# $Id: GNUmakefile.architecture,v 1.2 2000/02/08 16:36:00 lasiuk Exp $
 #
 # Author: brian
 #
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile.architecture,v $
-# Revision 1.1  2000/01/27 17:13:11  lasiuk
-# Initial Revisions
-#
 # Revision 1.2  2000/02/08 16:36:00  lasiuk
 # hp compatible
 #
+# Revision 1.2  2000/02/08 16:36:00  lasiuk
+# hp compatible
 #
 # Revision 1.1  2000/01/27 17:13:11  lasiuk
 # Initial Revisions
@@ -59,7 +58,8 @@ endif
 ifeq ($(STAR_SYS),hp_ux102)
 	CXX          := aCC
 	CXXFLAGS     := +z
-		CPPFLAGS += -DRWSTD_BOUNDS_CHECKING 
+	ifdef TRS_OPTIMISE
+		CXXFLAGS += +O3 +Olibcalls +Onolimit
 	else
 		CPPFLAGS += -DRWSTD_BOUNDS_CHECKING -DRICH_COORDINATE_BOUNDS_CHECK
 		CPPFLAGS += -DST_NO_NAMESPACES
