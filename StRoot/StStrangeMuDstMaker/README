@@ -1,0 +1,14 @@
+StStrangeMuDstMaker
+
+Description:
+Creates a micro DST for the strangeness group using a TTree.
+Interfaces to StEvent. Example macros to make and read the micro DST can be
+found in $STAR/StRoot/macros/analysis called makeStrangeMuDst.C and 
+readStrangeMuDst.C respectively.
+
+Authors:
+Gene Van Buren, UCLA
+Peter G. Jones, University of Birmingham
+
+History:
+280300 GVB Rewritten from StV0MiniDstMaker and committed to STAR library
