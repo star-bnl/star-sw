@@ -3,12 +3,13 @@
 
 #include "StiFactoryTypedefs.h"
 #include "StiConstants.h"
-#include "StiSeedFinder.h"
-#include "StiTrackFilter.h"
-#include "StiDetectorContainer.h"
-#include "StiHitContainer.h"
-#include "StiTrackContainer.h"
-#include "StDbUtilities/StMagUtilities.h"
+
+class StiSeedFinder;
+class StiTrackFilter;
+class StiDetectorContainer;
+class StiHitContainer;
+class StiTrackContainer;
+class StMagUtilities;
 
 class StiTrackFinder 
 {

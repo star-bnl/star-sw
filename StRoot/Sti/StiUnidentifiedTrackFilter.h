@@ -3,8 +3,10 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "StiTrack.h"
+
 #include "StiTrackFilter.h"
+
+class StiTrack;
 
 /**
  * StiUnidentified track filter. This filter shall be used to 

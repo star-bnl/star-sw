@@ -1,4 +1,8 @@
 #include <iostream>
+
+//Sti
+#include "StiHit.h"
+#include "StiDetector.h"
 #include "StiTrackNode.h"
 
 double StiTrackNode::kField = 0.;

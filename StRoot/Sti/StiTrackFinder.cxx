@@ -4,6 +4,11 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+
+//StDbUtilities
+#include "StDbUtilities/StMagUtilities.h"
+
+//Sti
 #include "StiSeedFinder.h"
 #include "StiTrackFilter.h"
 #include "StiDetectorContainer.h"

@@ -5,6 +5,22 @@
 #include <iostream>
 #include "StiHit.h"
 
+StiHit::StiHit()
+{
+    msthit=0;
+}
+
+StiHit::~StiHit()
+{
+}
+
+StiHit::StiHit(const StiHit& rhs)
+{
+    if (*this==rhs) return;
+    copyToThis(rhs);
+    return;
+}
+
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
     return os <<hit.refangle()<<"\t"<<hit.position()<<"\t"

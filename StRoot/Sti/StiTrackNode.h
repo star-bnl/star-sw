@@ -3,8 +3,9 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StiDefaultMutableTreeNode.h"
-#include "StiHit.h"
-#include "StiDetector.h"
+
+class StiHit;
+class StiDetector;
 
 class StiTrackNode : public StiDefaultMutableTreeNode
 {

@@ -2,7 +2,8 @@
 #define StiTrack_H 1
 
 #include <math.h>
-#include "StiHit.h"
+
+class StiHit;
 
 class StiTrack 
 {
