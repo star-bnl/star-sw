@@ -24,6 +24,9 @@
 #include "tables/St_emcMipCalib_Table.h"
 #include "tables/St_emcPedestal_Table.h" 
 
+#include "TH1.h" 
+#include "TH2.h" 
+
 //#define StEmcCalibrationMaker_DEBUG 1
 
 #define maxdet 8
@@ -88,7 +91,7 @@ class StEmcCalibrationMaker : public StMaker
            Bool_t  FillEffPed();
            Bool_t  CheckTracks();
            Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*);
-           Bool_t  SubtractPedestal();
+           Bool_t  CheckPedestal();
            void    ClearCalibTable();
            void    SetCalibStatus();
            void    ClearEqualTable();
@@ -116,7 +119,6 @@ class StEmcCalibrationMaker : public StMaker
            St_emcCalibration*     CalibTable;
            St_emcEqualization*    EqualTable;
            St_emcMipCalib*        MipTable;
-           St_emcPedestal*        ped;
    
            StEmcEqualSpectra*     EqualSpec;
            StEmcMipSpectra*       MipSpec;

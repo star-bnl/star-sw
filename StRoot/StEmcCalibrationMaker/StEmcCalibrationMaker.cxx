@@ -108,7 +108,7 @@ Int_t StEmcCalibrationMaker::Init()
   emcCalSummary_st* Summary_st=SummaryTable->GetTable();
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
   
-  if(Settings_st[0].DataType!=0) Settings_st[0].EOverMipCte=0.252; // e/MIP for real data
+  if(Settings_st[0].DataType!=0) Settings_st[0].EOverMipCte=0.261; // e/MIP for real data
   
   detnum=Summary_st[0].DetNumber-1;  // this is only the vector index
   
@@ -363,13 +363,10 @@ Int_t StEmcCalibrationMaker::Make()
   trackTower.Reset();
   CheckTracks();
   
-  if (Settings_st[0].DoPedSubtraction == 1) 
+  if(!CheckPedestal())
   {
-    if(!SubtractPedestal())
-    {
-      gMessMgr->Warning("StEmcCalibrationMaker::Make() - Could not get pedestals");
-      return kStWarn;
-    }
+    gMessMgr->Warning("StEmcCalibrationMaker::Make() - Could not check pedestals");
+    return kStWarn;
   }
 
   evnumber++;
@@ -775,24 +772,35 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
   
 }
 //_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::SubtractPedestal()
+Bool_t StEmcCalibrationMaker::CheckPedestal()
 {
-  cout <<"Subtracting pedestals for detector "<<detname[detnum]<<endl;
+  cout <<"Checking pedestals for detector "<<detname[detnum]<<endl;
+  emcCalSettings_st* Settings_st=SettingsTable->GetTable();
+  
+  St_emcPedestal* ped=NULL;
   TString calibDb="Calibrations/emc/"+detname[detnum];
   TDataSet *emcDb=GetInputDB(calibDb.Data());
-  if(!emcDb) return kFALSE;
+  
+  if(!emcDb && Settings_st[0].DoPedSubtraction == 1) return kFALSE;
   
   if(detnum==0) // bemc
   {
-    ped=(St_emcPedestal*)emcDb->Find("bemcPedestal");
-    if(!ped) return kFALSE;
-    
-    emcPedestal_st *pedst=ped->GetTable();
+    if(emcDb) ped=(St_emcPedestal*)emcDb->Find("bemcPedestal");
+    if(!ped && Settings_st[0].DoPedSubtraction == 1) return kFALSE;
+    emcPedestal_st *pedst=NULL;
+    if(ped) pedst=ped->GetTable();
+
     for(Int_t i=0;i<nbins;i++)
     {
-      //if (pedst[i].AdcPedestal!=0)cout <<"Id = "<<i+1<<"  Pedestal = "<<pedst[i].AdcPedestal<<"  RMS = "<<pedst[i].AdcPedestalRMS<<endl;
-      emcHits[i]-=(Int_t)pedst[i].AdcPedestal;
-      if(emcHits[i]<2.*pedst[i].AdcPedestalRMS) emcHits[i]=0;
+      if (pedst && Settings_st[0].DoPedSubtraction == 1) emcHits[i]-=(Int_t)pedst[i].AdcPedestal;
+      if (pedst)
+      {
+        if(emcHits[i]<2.*pedst[i].AdcPedestalRMS) emcHits[i]=0;
+      }
+      else
+      { 
+        if(emcHits[i]<4.0) emcHits[i]=0; // 2* avg ped RMS
+      }
     }
   }
   
@@ -857,7 +865,7 @@ Bool_t StEmcCalibrationMaker::Equalize()
     if(EqualSpec->GetStatus(i)>0 && EqualSpec->GetSum(i)>=Settings_st[0].EqEventsPerBin)
     {
       Float_t mean,rms;
-      EqualSpec->GetMeanAndRms(i,&mean,&rms);
+      EqualSpec->GetLogMeanAndRms(i,20,140,&mean,&rms);
       sum+=mean;
       nb++;
     }
@@ -884,7 +892,7 @@ Bool_t StEmcCalibrationMaker::Equalize()
           {
             numberReady++;
             Float_t mean,rms;
-            EqualSpec->GetMeanAndRms(id1,&mean,&rms);
+            EqualSpec->GetLogMeanAndRms(id1,20,140,&mean,&rms);
             sum+=mean;
           }
         }      
@@ -902,8 +910,8 @@ Bool_t StEmcCalibrationMaker::Equalize()
             if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>=Settings_st[0].EqEventsPerBin)
             {
               Float_t mean,rms;
-              EqualSpec->GetMeanAndRms(id1,&mean,&rms);
-              Float_t dmean1=fabs(mean-MEAN);
+              EqualSpec->GetLogMeanAndRms(id1,20,140,&mean,&rms);
+              Float_t dmean1=fabs(mean-LOCALMEAN);
               if(dmean1<dmean) {dmean=dmean1; refmean=mean; ref=id1;}
             }
           }
@@ -1193,7 +1201,7 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
       Float_t eta=0,phi=0;
       calibGeo->getEtaPhi(bin,eta,phi);
       Float_t theta=2.*atan(exp(-eta));
-      y[1]*=(1.+0.056)/sin(theta); // from V.Rykov
+      y[1]*=(1.+0.056*eta*eta)/sin(theta); // from V.Rykov
     }
     
     // Pi0
@@ -1343,6 +1351,12 @@ Bool_t StEmcCalibrationMaker::SaveTables()
   TH1F h2("Calib_P2","Calibration constants p2",nbins,0.5,(Float_t)nbins+0.5);
   TH1F h3("Calib_P3","Calibration constants p3",nbins,0.5,(Float_t)nbins+0.5);
   TH1F h4("Calib_P4","Calibration constants p4",nbins,0.5,(Float_t)nbins+0.5);
+
+  TH1F h5("gain*SinTheta","Calibration gain*sin(theta)",nbins,0.5,(Float_t)nbins+0.5);
+
+  TH2F h6("gain_X_theta","Calibration gain versus Theta",100,0,3.1415/2,200,0,.02);
+  TH2F h7("gain*SinTheta_X_theta","Calibration gain*sin(theta) versus theat",100,0,3.1415/2,200,0,.02);
+
   TH1F equa0("EqualSlope","Equalization Slope",nbins,0.5,(Float_t)nbins+0.5);
   TH1F equa1("EqualShift","Equalization Shift",nbins,0.5,(Float_t)nbins+0.5);
   TH1F equalocc("EqualOcc","Equalization Occupancy",nbins,0.5,(Float_t)nbins+0.5);
@@ -1370,6 +1384,17 @@ Bool_t StEmcCalibrationMaker::SaveTables()
       h3.SetBinError(h3.FindBin(x),Calib_st[i-1].AdcToEErr[3]);
       h4.Fill(x,Calib_st[i-1].AdcToE[4]);
       h4.SetBinError(h4.FindBin(x),Calib_st[i-1].AdcToEErr[4]);
+
+      Float_t eta=0,phi=0;
+      calibGeo->getEtaPhi(i,eta,phi);
+      Float_t theta=2.*atan(exp(-eta));
+      
+      h5.Fill(x,Calib_st[i-1].AdcToE[1]*sin(theta));
+      h5.SetBinError(h4.FindBin(x),Calib_st[i-1].AdcToEErr[1]*sin(theta));
+      
+      h6.Fill(theta,Calib_st[i-1].AdcToE[1]);
+      h7.Fill(theta,Calib_st[i-1].AdcToE[1]*sin(theta));
+      
     }
     
     if(EqualSpec)
@@ -1420,7 +1445,7 @@ Bool_t StEmcCalibrationMaker::SaveTables()
     mip0.Write(); mipocc.Write();
   }
         
-  h0.Write(); h1.Write(); h2.Write(); h3.Write(); h4.Write();
+  h0.Write(); h1.Write(); h2.Write(); h3.Write(); h4.Write(); h5.Write(); h6.Write(); h7.Write(); 
   f.Close();
   
   // finished creating hist file....
@@ -1618,7 +1643,7 @@ void StEmcCalibrationMaker::LoadSpectra(char *time)
     detname[detnum].Data(),stamp.Data());
     MipSpec->LoadAll(spec);
   }
-  evnumber==1;
+  evnumber=1;
   Int_t firstEventTimeNew=atoi(stamp(9,6).Data());
   Int_t firstEventDateNew=atoi(stamp(0,8).Data());
   if(firstEventDateNew<firstEventDate || (firstEventDateNew==firstEventDate && firstEventTimeNew<firstEventTime))
