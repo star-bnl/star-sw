@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGetConfigValue.hh,v 1.1 1999/01/30 03:59:01 fisyak Exp $
+ * $Id: StGetConfigValue.hh,v 1.2 1999/12/21 15:14:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 4, 1997
  ***************************************************************************
@@ -41,8 +41,8 @@
  ***************************************************************************
  *
  * $Log: StGetConfigValue.hh,v $
- * Revision 1.1  1999/01/30 03:59:01  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/12/21 15:14:00  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.1  1999/01/30 03:59:01  fisyak
  * Root Version of StarClassLibrary
@@ -58,6 +58,9 @@
 #include <strstream.h>
 #include <string>
 #include "StGlobals.hh"
+#if !defined(ST_NO_NAMESPACES)
+using std::string;
+#endif
 
 template<class T>
 void StGetConfigValue(const char* filename, const char* name, T& value)
@@ -68,7 +71,12 @@ void StGetConfigValue(const char* filename, const char* name, T& value)
     string       line;
     StSizeType   pos;
     while (ifs.good() && !ifs.eof()) {
+#if defined(__SUNPRO_CC)
+	char c; line.erase();
+	while ((c = ifs.get()) && c != '\n' && !ifs.eof()) line += c;
+#else
 	getline(ifs,line,'\n');
+#endif
 	if ((pos = line.find('#')) != StNPOS)		// remove text after '#'
 	    line.erase(pos,line.length());
 	if ((pos = line.find("//")) != StNPOS)		// remove text after '//'
@@ -95,7 +103,12 @@ void StGetConfigValue(const char* filename, const char* name, T& value, int nite
     string        line;
     StSizeType    pos;
     while (ifs.good() && !ifs.eof()) {
+#if defined(__SUNPRO_CC)
+	char c; line.erase();
+	while ((c = ifs.get()) && c != '\n' && !ifs.eof()) line += c;
+#else
 	getline(ifs,line,'\n');
+#endif
 	if ((pos = line.find('#')) != StNPOS)		// remove text after '#'
 	    line.erase(pos,line.length());
 	if ((pos = line.find("//")) != StNPOS)		// remove text after '//'

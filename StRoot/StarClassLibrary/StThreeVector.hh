@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.5 1999/10/15 15:46:54 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.6 1999/12/21 15:14:31 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.5  1999/10/15 15:46:54  ullrich
- * Changed output format in operator<<
+ * Revision 1.6  1999/12/21 15:14:31  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.5  1999/10/15 15:46:54  ullrich
  * Changed output format in operator<<
@@ -41,19 +41,25 @@
  **************************************************************************/
 #ifndef ST_THREE_VECTOR_HH
 #define ST_THREE_VECTOR_HH
-#ifndef __CINT__
+
 #include <iostream.h>
 #include <math.h>
+
 #ifdef GNU_GCC
-#   include <stddef.h>
+#include <stddef.h>
 #endif
+
+#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
+#include <stdcomp.h>
+#endif
+
 #ifndef ST_NO_EXCEPTIONS
-#   include <stdexcept>
+#include <stdexcept>
+#if !defined(ST_NO_NAMESPACES)
+using std::out_of_range;
 #endif
-#ifdef __SUNPRO_CC
-#   include <stdcomp.h>
 #endif
-#endif
+
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 template<class T>
 #else
@@ -156,7 +162,6 @@ protected:
     T    mX1, mX2, mX3;
 };
 
-#ifndef __CINT__
 //
 //        Implementation of member functions
 //
@@ -743,5 +748,4 @@ istream&  operator>>(istream& is, StThreeVector<T>& v)
     return is;
 }
 
-#endif
 #endif

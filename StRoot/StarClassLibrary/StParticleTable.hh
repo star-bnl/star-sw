@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.hh,v 1.1 1999/05/14 18:50:00 ullrich Exp $
+ * $Id: StParticleTable.hh,v 1.2 1999/12/21 15:14:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.hh,v $
- * Revision 1.1  1999/05/14 18:50:00  ullrich
- * Initial Revision
+ * Revision 1.2  1999/12/21 15:14:26  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/12/21 15:14:26  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -24,10 +24,16 @@
  * Initial Revision
  *
  **************************************************************************/
+#ifndef StParticleTable_hh
 #define StParticleTable_hh
 
 #include <iostream.h>
 #include <string>
+#include <map>
+#include <vector>
+class StParticleDefinition;
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
 using std::map;
 using std::string;
 #endif

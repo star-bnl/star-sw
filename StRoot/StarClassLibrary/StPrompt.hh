@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrompt.hh,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StPrompt.hh,v 1.2 1999/12/21 15:14:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 15 1997
  ***************************************************************************
@@ -32,8 +32,8 @@
  ***************************************************************************
  *
  * $Log: StPrompt.hh,v $
- * Revision 1.1  1999/01/30 03:59:05  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/12/21 15:14:28  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/12/21 15:14:28  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -49,6 +49,9 @@
 #define ST_PROMPT_HH
 
 #include <iostream.h>
+#include <strstream.h>
+#include <string>
+#include <ctype.h>
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 #endif
@@ -75,12 +78,12 @@ inline void StPrompt(const char *text, T& var)
 
 inline void StPrompt(const char *text, string& var)
 {
-    cout << text << " [" << var << "]: ";
+    string line;
     char   c;
     
     cout << text << " [" << var.c_str() << "]: ";
     while ((c = cin.get()) && c != '\n') line += c;
-#ifndef __SUNPRO_CC
+    if (line.length() > 0) var = line;
 }
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
@@ -90,7 +93,7 @@ inline void StBoolPrompt(const char *text, bool& var)
 #endif
 {
     string line;
-    cout << text << " [" << svar << "]: ";
+    char   c;
     string svar = var ? "true" : "false";
 
     cout << text << " [" << svar.c_str() << "]: ";

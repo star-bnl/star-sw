@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: promptTest.cc,v 1.1 1999/02/17 12:44:01 ullrich Exp $
+ * $Id: promptTest.cc,v 1.2 1999/12/21 15:14:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: promptTest.cc,v $
- * Revision 1.1  1999/02/17 12:44:01  ullrich
- * New Revision
+ * Revision 1.2  1999/12/21 15:14:56  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/12/21 15:14:56  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -23,6 +23,9 @@
  * Initial Revision
  *
  **************************************************************************/
+#include "StPrompt.hh"
+#include "StThreeVector.hh"
+#include <string>
 #if !defined(ST_NO_NAMESPACES)
 using std::string;
 #endif
@@ -37,7 +40,7 @@ int main()
 	char   othername[16] = "short.c";
 	double var = 1/3.;
 	
-	    cout << "new value: " << filename << endl;
+	bool answer = true;
 	while (answer) {
 	    StPrompt("Enter file name", filename);
 	    cout << "new value: " << filename.c_str() << endl;

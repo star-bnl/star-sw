@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.2 1999/11/22 15:04:43 ullrich Exp $
+ * $Id: StVertex.cxx,v 2.3 1999/12/21 15:09:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 2.2  1999/11/22 15:04:43  ullrich
- * Forgot to fill mPosition in constructor. Fixed now.
+ * Revision 2.3  1999/12/21 15:09:23  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.5  2000/02/10 16:32:19  ullrich
  * flag changed from unsigned to signed long
@@ -27,6 +27,10 @@
  *
  * Revision 2.1  1999/10/28 22:28:07  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
+ *
+ * Revision 2.0  1999/10/12 18:43:29  ullrich
+ * Completely Revised for New Version
+ *
  **************************************************************************/
 #include <algorithm>
 #include "StVertex.h"
@@ -39,7 +43,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.2 1999/11/22 15:04:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.3 1999/12/21 15:09:23 ullrich Exp $";
 
 StVertex::StVertex()
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobals.hh,v 1.2 1999/11/09 16:20:08 ullrich Exp $
+ * $Id: StGlobals.hh,v 1.3 1999/12/21 15:14:03 ullrich Exp $
  *
  * Author:  Thomas Ullrich, 1998
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StGlobals.hh,v $
- * Revision 1.2  1999/11/09 16:20:08  ullrich
- * Include stdcomp.h only for SUN.
+ * Revision 1.3  1999/12/21 15:14:03  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/11/09 16:20:08  ullrich
  * Include stdcomp.h only for SUN.
@@ -27,7 +27,7 @@
 #ifndef ST_GLOBALS_HH
 #define ST_GLOBALS_HH
 
-#if defined(__SUNPRO_CC)
+#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
 #include <stdcomp.h>
 #endif
 

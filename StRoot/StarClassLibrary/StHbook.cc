@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbook.cc,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StHbook.cc,v 1.2 1999/12/21 15:14:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Yale University
  ***************************************************************************
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StHbook.cc,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/12/21 15:14:05  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.1  1999/01/30 03:59:02  fisyak
  * Root Version of StarClassLibrary
@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include "StGlobals.hh"
 #include "StHbook.hh"
-#ifdef __SUNPRO_CC
+#if defined (__SUNPRO_CC)
 #include <strings.h>
 #endif
 

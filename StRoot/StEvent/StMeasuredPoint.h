@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMeasuredPoint.h,v 2.2 1999/10/28 22:26:05 ullrich Exp $
+ * $Id: StMeasuredPoint.h,v 2.3 1999/12/21 15:09:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMeasuredPoint.h,v $
- * Revision 2.2  1999/10/28 22:26:05  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/21 15:09:02  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.2  1999/10/28 22:26:05  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -26,10 +26,6 @@
 #include "StObject.h"
 #include "StThreeVectorF.hh"
 #include "StMatrixF.hh"
-
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
-#endif
 
 class StMeasuredPoint : public StObject {
 public:

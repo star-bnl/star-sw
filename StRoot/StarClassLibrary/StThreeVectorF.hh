@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.3 1999/06/04 18:00:14 ullrich Exp $
+ * $Id: StThreeVectorF.hh,v 1.4 1999/12/21 15:14:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,10 +13,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
- * Revision 1.3  1999/06/04 18:00:14  ullrich
- * Added new constructor which takes C-style array as argument.
- * New operators operator() and operator[] which can be used
- * as lvalues.
+ * Revision 1.4  1999/12/21 15:14:33  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.4  1999/12/21 15:14:33  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -35,10 +33,8 @@
  * Revision 1.1  1999/01/23 00:28:07  ullrich
  * Initial Revision
  *
-#ifndef __CINT__
  **************************************************************************/
 #ifndef ST_THREE_VECTOR_F_HH
-#endif
 #define ST_THREE_VECTOR_F_HH
 #include <iostream.h>
 #include <math.h>

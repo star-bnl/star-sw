@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.4 1999/11/29 21:45:38 fisyak Exp $
+ * $Id: StHelix.cc,v 1.5 1999/12/21 15:14:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
- * Revision 1.4  1999/11/29 21:45:38  fisyak
- * fix abs for HP
+ * Revision 1.5  1999/12/21 15:14:08  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.9  2000/05/22 21:38:28  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -31,7 +31,10 @@
  *
  * Revision 1.5  1999/12/21 15:14:08  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
-#include <limits>
+ *
+ * Revision 1.4  1999/11/29 21:45:38  fisyak
+ * fix abs for HP
+ *
  * Revision 1.3  1999/03/07 14:55:41  wenaus
  * fix scope problem
  *

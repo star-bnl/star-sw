@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.3 1999/03/07 14:52:14 wenaus Exp $
+ * $Id: StHelix.hh,v 1.4 1999/12/21 15:14:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
- * Revision 1.3  1999/03/07 14:52:14  wenaus
- * Add missing 'using namespace std'
+ * Revision 1.4  1999/12/21 15:14:10  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.3  1999/03/07 14:52:14  wenaus
  * Add missing 'using namespace std'
@@ -37,7 +37,9 @@
 #include <algorithm>
 #include "StThreeVector.hh"
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+using std::pair;
+using std::swap;
+using std::max;
 #endif
 
 class StHelix {

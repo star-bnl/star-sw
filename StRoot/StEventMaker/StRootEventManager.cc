@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.1 1999/11/04 17:41:32 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.2 1999/12/21 15:13:16 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,8 +12,8 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
- * Revision 2.1  1999/11/04 17:41:32  ullrich
- * Fixed typo
+ * Revision 2.2  1999/12/21 15:13:16  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.4  2000/05/25 14:44:47  ullrich
  * Removed remaining pieces of the RICH pixel table.
@@ -26,7 +26,7 @@
  *
  * Revision 2.1  1999/11/04 17:41:32  ullrich
  * Fixed typo
-using namespace std;
+ *
  * Revision 2.0  1999/11/04 19:03:00  ullrich
  * Revised to build new StEvent version
  *

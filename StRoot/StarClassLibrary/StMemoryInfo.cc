@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.cc,v 1.2 1999/11/05 18:10:47 ullrich Exp $
+ * $Id: StMemoryInfo.cc,v 1.3 1999/12/21 15:14:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.cc,v $
- * Revision 1.2  1999/11/05 18:10:47  ullrich
- * Added blank line as last printed line.
+ * Revision 1.3  1999/12/21 15:14:16  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/11/05 18:10:47  ullrich
  * Added blank line as last printed line.
@@ -70,7 +70,7 @@ void StMemoryInfo::print(ostream& os)
 {   
     os << "---------- Memory Status (snapshot #" << mCounter << ") ----------" << endl;
 #if defined(__SUNPRO_CC)
-    os << "Sorry, StMemoryInfo is not supported on SUN compiler CC4.2" << endl;
+    os << "Sorry, StMemoryInfo is not supported on SUN." << endl;    
 #elif defined(__GNUC__)
     printLine(os, "total space allocated from system", mInfo.arena, mOldInfo.arena);
     printLine(os, "number of non-inuse chunks", mInfo.ordblks, mOldInfo.ordblks);

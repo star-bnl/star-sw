@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RanecuEngine.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RanecuEngine.cc,v 1.3 1999/12/21 15:13:58 ullrich Exp $
  *
  * Author:  Gabriele Cosmo - Created - 2nd February 1996
  *          modified for SCL bl
@@ -20,8 +20,8 @@
  ***************************************************************************
  *
  * $Log: RanecuEngine.cc,v $
- * Revision 1.2  1999/12/07 23:43:04  ullrich
- * Modified to get rid of warnings on Linux.
+ * Revision 1.3  1999/12/21 15:13:58  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
@@ -34,7 +34,7 @@
  *
  **************************************************************************/
 #include "RanecuEngine.h"
-#ifdef __SUNPRO_CC
+#if __SUNPRO_CC < 0x500
 #include <stdlib.h>
 #else
 #include <cstdlib>          // for abs(), tu

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helixTest2.cc,v 1.1 1999/02/17 12:43:59 ullrich Exp $
+ * $Id: helixTest2.cc,v 1.2 1999/12/21 15:14:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 1998 
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: helixTest2.cc,v $
- * Revision 1.1  1999/02/17 12:43:59  ullrich
- * New Revision
+ * Revision 1.2  1999/12/21 15:14:51  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.1  1999/02/17 12:43:59  ullrich
  * New Revision
@@ -66,7 +66,7 @@ int main()
 
     r=1*meter;
     s = helix->pathLength(r);
-    cout << "The helix reaches r=1m at s1 = " << s.first
+    cout << "The helix reaches r=1 m at s1 = " << s.first
 	 << " and s2 = " << s.second << endl;
 
     mmpoint = StThreeVector<double>(100, 100, 100);
