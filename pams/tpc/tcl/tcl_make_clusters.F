@@ -68,6 +68,8 @@ c   "sequence" orientation of algorithm is much more
 c   straight-forward and actually worked (in practice!) for 
 c   multi-track events
 c
+c  19nov94 MALisa - jtppad no longer passed from here through tcl_clsrow
+c			to tcl_get_row_seq
 c
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
@@ -109,7 +111,6 @@ c
 
 C----------------------------------------------------------------------
 
- 	INTEGER Jtppad
 	INTEGER Nsectors, Nrows
 	INTEGER Row
 	INTEGER Sector
@@ -127,7 +128,43 @@ C----------------------------------------------------------------------
 	DATA    IDE1 /0/
 
 C----------------------------------------------------------------------
+c--------- mal - inserted just temporarily... -------------------
+        integer iii,jjj
+        integer secmal,rowmal,padmal
+        integer padsprevious(1:45)
+        integer tpptrmal,nbkts,ibkt
+        integer adcmal,tdcmal,idmal
 
+        padsprevious(1) = 0
+        do iii=2,45
+          padsprevious(iii) = padsprevious(iii-1)+
+     1                          pad_plane(1).npads(iii-1)
+        enddo
+ 
+c output all occupied pixels to a file for later visualization
+        write(6,*)'writing contents of pixels to unit 39'
+        write(6,*)'there are ',tppadh.nok,' pixels to write out'
+        do iii=1,tppadh.nok
+          secmal = tppad(iii).tpc_row/100
+          rowmal = tppad(iii).tpc_row - 100*secmal
+          padmal = tppad(iii).secpad - padsprevious(rowmal)
+          if (rowmal.gt.pad_plane(1).nrow_in) 
+     1          rowmal=rowmal-pad_plane(1).nrow_in
+          tpptrmal = tppad(iii).jpix
+          do jjj=1,tppad(iii).nseq
+            nbkts = ibits(tppixel(tpptrmal).datum,8,6)
+            do ibkt = 1,nbkts
+              adcmal=ibits(tppixel(tpptrmal).datum,16,16)
+              tdcmal=ibits(tppixel(tpptrmal).datum,0,8)+
+     1                  ibits(tppixel(tpptrmal).datum,14,2)*256
+              idmal=tpmcpix(tpptrmal).mcid
+              tpptrmal = tpptrmal+1
+              write(39,'(6(i4,5x))')
+     1                  secmal,rowmal,padmal,tdcmal,adcmal,idmal
+            enddo
+          enddo
+        enddo
+c----------------------------------------------------
 	TCL_Make_Clusters = tucod_ok
 
 *       CALL MESSAGE(
@@ -140,7 +177,6 @@ C----------------------------------------------------------------------
 *	But for now:
 	Nsectors = 48 !Inner/outer are 2 sectors.
 
-	Jtppad = 1 !Start looking at first row in tppad.
 
 	DO Sector = 1, Nsectors
 	  Nrows = TPG_Nrows_in_Sector( Sector )
@@ -156,7 +192,7 @@ c    1	                 , tpclusterh, tpcluster, tpseqh, tpseq )
 	    TAS_Code = TCL_ClsRow( Sector, Row 
      1                   , pad_plane_h, pad_plane
      1	                 , tppadh, tppad, tppixelh, tppixel, tpmcpixh
-     1	                 , tpmcpix, Jtppad
+     1	                 , tpmcpix
      1	                 , tpclusterh, tpcluster, tpseqh, tpseq )
 
 	    IF ( TAS_Code .NE. tucod_ok ) THEN
@@ -178,7 +214,7 @@ C
         INTEGER FUNCTION TCL_Clsrow( Sector, Row
      1                 , pad_plane_h, pad_plane
      1	               , tppadh, tppad, tppixelh, tppixel, tpmcpixh
-     1	               , tpmcpix, Jtppad
+     1	               , tpmcpix
      1	               , tpclusterh, tpcluster, tpseqh, tpseq )
 
 	IMPLICIT NONE
@@ -195,7 +231,6 @@ C     tpppixelh
 C     tppixel:
 C     tpmcpixh
 C     tpmcpix:
-C     Jtppad:
 C
 C   Output arguments : (values in the following tables)
 C
@@ -268,8 +303,6 @@ c
         RECORD / table_head_st     / tpmcpixh   !header for tpmcpix table
         RECORD / tpmcpix_row_st    / tpmcpix(*) !rows of tpmcpix table
 
-*  Input/output:
-	INTEGER                      Jtppad       !Pointer to tppad table, initially set by caller to 1.
 
 *  Outputs:
         RECORD / table_head_st     / tpclusterh   !header for cluster table
@@ -335,7 +368,7 @@ c
      1                 ( Sector, Row, Nrowseqs_max
      1                 , pad_plane_h, pad_plane
      1	               , tppadh, tppad, tppixelh, tppixel, tpmcpixh
-     1	               , tpmcpix, Jtppad
+     1	               , tpmcpix
      1	               , Nrowseqs, Ipix, Ipad, Itlo, Ithi, Itid ) 
      1	                              ) THEN
 
@@ -529,7 +562,7 @@ C
      1                 ( Sector, Row, Nseqs_max
      1                 , pad_plane_h, pad_plane
      1	               , tppadh, tppad, tppixelh, tppixel, tpmcpixh
-     1	               , tpmcpix, Jtppad
+     1	               , tpmcpix
      1	               , Nseqs, Ipix, Ipad, Itlo, Ithi, Itid ) 
 
 	IMPLICIT NONE
@@ -547,7 +580,9 @@ C     tpppixelh
 C     tppixel:
 C     tpmcpixh
 C     tpmcpix:
-C     Jtppad:     Tppad offset
+C
+C   Output arguments : (values in the following tables)
+C
 C     Nseqs:      Number of sequences with data returned in following arrays
 C     Ipix:       Offset into TPPIXEL table of start of each sequence
 C     Ipad:       Unique sector-wide PAD id for sequence
@@ -555,12 +590,6 @@ C     Itlo:       Low TDC value for sequence
 C     Ithi:       Hi TDC value for sequence
 C     Itid:       MC Track id responsible for sequence
 C
-C   Output arguments : (values in the following tables)
-C
-C     tpclusterh
-C     tpcluster:
-C     tpseqh
-C     tpseq:
 C
 C  Returns:
 C	.TRUE. if sequences in Sector, Row were found and loaded.
@@ -581,6 +610,9 @@ c   ==============
 c   replacement for B. Hackenberg's original pixel-based 
 c   sector,row data fetch routine...
 c
+c   19nov94 MALisa - small stuff: jtppad no longer passed, since it is internal
+c				  also, inconsistency in row OR sector will
+c				  result in failure now (was row AND sector)
 #include "tas_structures.inc"
 
 #include "tpg_pad_plane_pars.inc"
@@ -608,7 +640,7 @@ c
         RECORD / table_head_st     / tpmcpixh    !header for tpmcpix table
         RECORD / tpmcpix_row_st    / tpmcpix(*)  !rows of tpmcpix table
 
-*  Input/output:
+*  Input/output: - no longer passed - mal 19nov94
 	INTEGER                      Jtppad      !Pointer to tppad table, initially set by caller to 1.
 
 *  Outputs:
@@ -698,7 +730,7 @@ c->RJM  starts at jsector = 1; must translate from tppads 1,45 rows
            Jrow = Jrow - pad_plane(1).nrow_in
         endif
         Jsector =      tppad( Jtppad ).tpc_row / 100 
-        IF      ( Jsector .NE. Sector .and. Jrow .NE. Row) THEN 
+        IF     ( Jsector.NE.Sector .or. Jrow.NE.Row) THEN ! .and.->.or. 19nov94
            TCL_Get_Row_Seq = .FALSE. !Fail.
            RETURN
         END IF
