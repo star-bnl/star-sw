@@ -74,7 +74,7 @@ void StMixerFastDigitalSignalGenerator::digitizeSignal()
     vector<unsigned char, allocator<unsigned char> > digitalPadData;
 #endif
     // Remember mSector is the "normal" analog sector! 
-      cout << "StMixerFastDigitalSignalGenerator::digitizeSignal()" << endl;
+    //cout << "StMixerFastDigitalSignalGenerator::digitizeSignal()" << endl;
       for(int irow=1; irow<=mSector->numberOfRows(); irow++) { 
 	for(unsigned int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
            

@@ -49,7 +49,7 @@ void StMixerEmbedding::doEmbedding()
   tpcTimeBins currentPad;   
    
   // Remember mSector is the "normal" analog sector! 
-  cout << "StMixerEmbedding::doEmbedding()" << endl;
+  //cout << "StMixerEmbedding::doEmbedding()" << endl;
   for(int irow=1; irow<=mSector->numberOfRows(); irow++) { 
     for(unsigned int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
       //for (unsigned int i=0; i<mSector1->timeBinsOfRowAndPad(irow,ipad).size(); i++) {
