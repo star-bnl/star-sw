@@ -64,6 +64,7 @@ c       Merging will take place if the table entry srspar.merge = 1            c
 c       (The default is 1)                                                     c
 c       modified to accept the SSD hits    LM sept-98                          c
 c       id_globtrk initialized to zero when filling scs_spt LM sept-98         c
+c       resol. for the SSD is read in the second row of srs_direct LM jui-98   c
 c------------------------------------------------------------------------------c
       INTEGER*4 FUNCTION SRS_AM(
      1            result_h,            result ,
@@ -2484,6 +2485,8 @@ c     ======
      &     ' to transfer to table spt.')
  1002 format(1x,
      +'f-spt_direct_gs: no rows in direct - will use defaults.')
+ 1005 format(1x,
+     +'f-spt_direct_gs: row 2 absent in direct - will use the SVT parameters.')
  1003 format(1x,'f-spt_direct_gs: no rows in geom.')
  1004 format(1x,
      +'f-spt_direct_gs: unknown wafer id for space point:',i5)
@@ -2519,6 +2522,8 @@ c     b)the number of data to be transfered is too big given the size of the tar
          direct(1).sd = 0.0020     ! 20 microns
          direct(1).st = 0.0020     ! 20 microns
          direct_h.nok = 1
+      else if (direct_h.nok.eq.1) then
+         write(6,1005)
       end if
 
 c     loop on all rows of svt_hit and transfer the global coordinates, the dedx info
@@ -2539,8 +2544,13 @@ c     map to wafer local frame coordinate, smear and map back to global frame
      &           geom(iwafer).d,
      &           geom(iwafer).t,
      &           geom(iwafer).n)
-            xp(1) = xp(1)+ direct(1).sd *rg32(dummy)
-            xp(2) = xp(2)+ direct(1).st *rg32(dummy)
+            if (wafer.lt.7000.or.direct_h.nok.eq.1) then
+               xp(1) = xp(1)+ direct(1).sd *rg32(dummy)
+               xp(2) = xp(2)+ direct(1).st *rg32(dummy)
+            else
+               xp(1) = xp(1)+ direct(2).sd *rg32(dummy)
+               xp(2) = xp(2)+ direct(2).st *rg32(dummy)
+            endif
             spt(ispt).xl(1) = xp(1)
             spt(ispt).xl(2) = xp(2)
             spt(ispt).xl(3) = 0
@@ -2549,8 +2559,14 @@ c     map to wafer local frame coordinate, smear and map back to global frame
      &           geom(iwafer).d,
      &           geom(iwafer).t,
      &           geom(iwafer).n)
-            dxp(1) = direct(1).sd
-            dxp(2) = direct(1).st
+            
+            if (wafer.lt.7000.or.direct_h.nok.eq.1) then
+               dxp(1) = direct(1).sd
+               dxp(2) = direct(1).st
+            else
+               dxp(1) = direct(2).sd
+               dxp(2) = direct(2).st
+            endif
             dxp(3) = 0.
             zero(1) = 0.
             zero(2) = 0.
