@@ -3,19 +3,10 @@
 class StChain;
 StChain *chain=0;
 
-void DoMatch(Int_t nevents=50){
-  //char *fname="/star/data22/MC/balewski/pp4run3/minb200-10k.event.root";
-  //  char *fname="200Ksample/mc2003-1.event.root";
-  // char *fname="eve400/mc2003-90.event.root";
-  //char *fname="mips2003/mc_all.event.root";
-  //char *fname="mips2003/mc_default.event.root";
-
-   char *fname="/star/data16/reco/dAuMinBias/FullField/P03ia/2003/026/st_physics_4026006_raw_0040*.event.root";
-   //char *fname="/star/data22/MC/rfatemi/data/st_physics_4049020_raw_0030003.event.root";
-
-
-   //TString miniF="eve400.eeTree";
-   TString miniF="eveY2.eeTree";
+void DoMatch(Int_t nevents=110){
+  //  char *fname="/star/data16/reco/dAuMinBias/FullField/P03ia/2003/026/st_physics_4026006_raw_0040*.event.root";
+  char *fname="/star/data22/MC/balewski/dAu_MC/rcf1197_95_5899evts-a*.event.root";
+  TString miniF="dAu1K.eeTree";
 
   //
   // First load some shared libraries we need
@@ -61,17 +52,17 @@ void DoMatch(Int_t nevents=50){
   br->SetAddress(&event);
   Int_t nevent = (Int_t)t4->GetEntries();
 
-  int token=36;
-
+  printf("\n\n XXXXXXXXXXXXXXXXXXXXXXXXXX  eeTree - events XXXXXXXXXX\n");
+  
   for (Int_t ie=0;ie<nevent;ie++) {    
     if(ie>=nevents) break;
     //read this branch only
     br->GetEntry(ie);  
     //    event->print();
     printf("\niEve=%d  ---------- ID=%d token=%d timeSTamp=%d\n",ie,event->ID,event->token,event->timeStamp);
-    if(token==event->token) break;
+
   }
-  
+  printf("XXXXXXXXXXXXXXXXXXXXXXXXXX  eeTree - done XXXXXXXXXX\n\n");  
   // create chain    
   chain = new StChain("bfc"); 
   //chain->SetDebug();
@@ -92,7 +83,8 @@ void DoMatch(Int_t nevents=50){
   if (initStat) chain->Fatal(initStat, "during Init()");
   
   int istat=0,iev=1;
-  
+
+  printf(" XXXXXXXXXXXXXXXXXXXXXXXXXX  StEvent - events XXXXXXXXXX\n");  
   // Do the event loop    
  EventLoop: 
   if (iev<=nevents && istat!=2) 
@@ -110,15 +102,12 @@ void DoMatch(Int_t nevents=50){
       
       StTriggerId* trg=(StTriggerId*)  stEvent->triggerIdCollection()->nominal();
       
-      printf("L0 token=%d  trig: is(2003)=%d nominal=%d version=%d\n",L0->triggerToken(),trg->isTrigger(2003),trg->version(2003));
+      //printf("L0 token=%d  trig: is(2003)=%d nominal=%d version=%d\n",L0->triggerToken(),trg->isTrigger(2003),trg->version(2003));
       
       if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
       if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
       iev++; 
-      printf("xxxx %d %d \n",token,L0->triggerToken());
-      if(token==L0->triggerToken()) break;
-      
-      if(iev<100) goto EventLoop;
+      goto  EventLoop;
     } // Event Loop
   chain->Finish();
   
