@@ -16,6 +16,7 @@
  * 
  **************************************************************************/
 
+
 #include "StHbtMaker/Reader/StHbtBinaryReader.h"
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
@@ -72,6 +73,7 @@ StHbtBinaryReader::~StHbtBinaryReader(){
 }
 //_______________________________
 StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
+  cout << " StHbtBinaryReader::ReturnHbtEvent() " << endl;
   StHbtEvent* event = new StHbtEvent;
   if (mReaderStatus == ioOK ) mReaderStatus = binaryIO->read(*event,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
   if (mReaderStatus != ioOK) {
@@ -93,6 +95,13 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
     delete event; // we do not return events when reader status is not ioOk
     return 0;
   }    
+  // parse event throu event cut
+  if (mEventCut && event ) {
+    if ( mEventCut->Pass(event)==0 ) {
+      delete event;
+      event=0;
+    }
+  }
 #ifdef STHBTDEBUG
   cout << " StHbtBinaryReader::ReturnHbtEvent() -  bytes read : " << binaryIO->bytesRead() << endl;
 #endif
@@ -120,6 +129,9 @@ int StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event){
 #ifdef STHBTDEBUG
       cout << " StHbtBinaryReader::WriteHbtEvent(StHbtEvent* event) - eventCut passed" << endl;
 #endif
+      //      StHbtEvent* newEvent = new StHbtEvent(*event, mTrackCut, mV0Cut);  // apply cuts while copying event
+      //      mReaderStatus = binaryIO->write(*newEvent,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
+      //      delete newEvent;
       StHbtEvent newEvent(*event, mTrackCut, mV0Cut);  // apply cuts while copying event
       mReaderStatus = binaryIO->write(newEvent,mStHbtEventVersion,mStHbtTrackVersion,mStHbtV0Version);
     }
@@ -255,3 +267,4 @@ StHbtString StHbtBinaryReader::Report(){
   temp += "\n";
   return temp;
 }
+

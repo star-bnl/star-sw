@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.6 2000/04/13 18:15:33 fine Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.7 2000/05/25 21:04:30 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -73,7 +73,7 @@ StHbtString StHbtXDFReader::Report(){
   else {
     temp += "NONE";
   }
-  temp += "\n---> TrackCuts in Reader:\n ";
+  temp += "\n---> TrackCuts in Reader:  ";
   if (mTrackCut) {
     temp += mTrackCut->Report();
   }
@@ -81,7 +81,7 @@ StHbtString StHbtXDFReader::Report(){
     temp += "NONE";
   }
   temp += "\n";
-  temp += "\n---> V0Cuts in Reader:\n ";
+  temp += "\n---> V0Cuts in Reader:  ";
   if (mV0Cut) {
     temp += mV0Cut->Report();
   }
@@ -181,14 +181,6 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
 #ifdef STHBTDEBUG
   cout << " primary vertex : " << VertexPosition << endl;
 #endif  
-  // By now, all event-wise information has been extracted and stored in hbtEvent
-  // see if it passes any front-loaded event cut
-  if (mEventCut){
-    if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
-      delete hbtEvent;
-      return 0;
-    }
-  }
 
   int acceptedParticles=mAcceptedParticles->size();
   int acceptedMothers=mAcceptedMothers->size();
@@ -367,6 +359,13 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
     }
 
     hbtEvent->TrackCollection()->push_back(hbtTrack);
+  }
+
+  if (mEventCut){
+    if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
+      delete hbtEvent;
+      return 0;
+    }
   }
 
   printf("%8i(%i) tracks pushed into collection \n",hbtEvent->TrackCollection()->size(),mult); 

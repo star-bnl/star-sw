@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *  
+ * $Id: StHbtBinaryReader.h,v 1.9 2000/05/25 21:04:30 laue Exp $ 
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -8,12 +8,13 @@
  * Description: part of STAR HBT Framework: StHbtMaker package
  *       This is the HbtEventReader class to be used when reading/writing
  *       BINARY files. 
- *       It is been developted out of a copy of the StHbtAsciiReader class 
- *       on 11/18/1999 
  *
  ***************************************************************************
  *
- *  
+ * $Log: StHbtBinaryReader.h,v $
+ * Revision 1.9  2000/05/25 21:04:30  laue
+ * StStandarsHbtEventReader updated for the new StStrangMuDstMaker
+ * 
  **************************************************************************/
 
 #ifndef StHbtBinaryReader_hh
@@ -98,7 +99,5 @@ public:
       
 
 };
-
-
 
 #endif

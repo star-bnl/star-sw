@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.h,v 1.3 2000/02/26 19:06:12 laue Exp $
+ * $Id: StHbtXDFReader.h,v 1.4 2000/05/25 21:04:30 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -85,9 +85,6 @@ private:
 
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
   StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
-  StHbtEventCut* mEventCut;     //!
-  StHbtTrackCut* mTrackCut; //!
-  StHbtV0Cut* mV0Cut; //!
   long              mV0;        //! Number of v0s looked at to date
   pdgIdList* mAcceptedParticles; //!
   pdgIdList* mAcceptedMothers;   //!

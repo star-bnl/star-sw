@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.20 2000/04/26 14:55:45 rcwells Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.21 2000/05/25 21:04:30 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,8 +20,8 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
- * Revision 1.20  2000/04/26 14:55:45  rcwells
- * Fixed filling of NHitsPossible in StStandardHbtEventsReader
+ * Revision 1.21  2000/05/25 21:04:30  laue
+ * StStandarsHbtEventReader updated for the new StStrangMuDstMaker
  *
  * Revision 1.19  2000/04/03 16:22:07  laue
  * some include files changed
@@ -139,8 +139,10 @@
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-#include "StV0MiniDstMaker/StV0MiniDst.hh"
+//#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
+//#include "StV0MiniDstMaker/StV0MiniDst.hh"
+#include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"  
+#include "StStrangeMuDstMaker/StV0MuDst.hh"
 
 #include "StEventMaker/StEventMaker.h"
 
@@ -158,8 +160,6 @@ StStandardHbtEventReader::StStandardHbtEventReader(){
   mTheEventMaker=0;
   mTheV0Maker=0;
   mReaderStatus = 0;  // "good"
-  mV0=0;
-
 
 }
 //__________________
@@ -200,7 +200,7 @@ StHbtString StStandardHbtEventReader::Report(){
 //__________________
 StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
-  cout << "StStandardHbtEventReader::ReturnHbtEvent" << endl;
+  cout << " StStandardHbtEventReader::ReturnHbtEvent()" << endl;
 
   StEvent* rEvent = 0;
 
@@ -209,7 +209,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   rEvent = tempMaker->event();
 
   if (!rEvent){
-    cout << "StStandardHbtEventReader - No StEvent!!! " << endl;
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() - No StEvent!!! " << endl;
     return 0;
   }
 
@@ -226,7 +226,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
   StHbtThreeVector vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
-  cout << " primary vertex : " << vp << endl;
+  cout << " StStandardHbtEventReader::ReturnHbtEvent() - primary vertex : " << vp << endl;
  
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
@@ -238,11 +238,11 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
 
   StTrack* rTrack;
-  cout << "StStandardHbtReader::ReturnHbtEvent - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
+  cout << "StStandardHbtReader::ReturnHbtEvent() - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
 
   StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
 
-  if (!PidAlgorithm) cout << "Whoa!! No PidAlgorithm!! " << endl;
+  if (!PidAlgorithm) cout << " StStandardHbtEventReader::ReturnHbtEvent() - Whoa!! No PidAlgorithm!! " << endl;
 
   // the following just point to particle definitions in StEvent
   StElectron* Electron = StElectron::instance();
@@ -339,8 +339,6 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetTrackId(rTrack->key());
 
     hbtTrack->SetNHits(nhits);
-    int nHitsPoss = rTrack->numberOfPossiblePoints(kTpcId);
-    hbtTrack->SetNHitsPossible(nHitsPoss);
 
     float nsige = PidAlgorithm->numberOfSigma(Electron);
     //cout << "nsigpe\t\t" << nsigpe << endl;
@@ -415,95 +413,121 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
   delete PidAlgorithm;
 
-  printf("%8i non-global tracks skipped \n",iNoGlobal);
-  printf("%8i tracks skipped because of nHits=0 \n",iNoHits);
-  printf("%8i tracks skipped because of not tpcPidTraits \n",iNoPidTraits);
-  printf("%8i tracks failed the track cuts \n",iFailedCut);
-  printf("%8i(%i) tracks pushed into collection \n",hbtEvent->TrackCollection()->size(),mult); 
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i non-global tracks skipped \n",iNoGlobal);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks skipped because of nHits=0 \n",iNoHits);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks skipped because of not tpcPidTraits \n",iNoPidTraits);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks failed the track cuts \n",iFailedCut);
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) tracks pushed into collection \n",
+	 hbtEvent->TrackCollection()->size(),
+	 mult); 
 
   //Now do v0 stuff
 
 
   //Pick up pointer v0 minidst maker
-     StV0MiniDstMaker* v0Maker = (StV0MiniDstMaker *) mTheV0Maker;
-       if( ! v0Maker ) {
-	 cout << "Not doing v0 stuff" << endl;
-	 return hbtEvent; 
-       }
-       //Get collection
-
-      mCollection = v0Maker->GetCollection();
-      int n_v0 =0;
-      if( mCollection ){
-        n_v0 = mCollection->GetSize();
-	//Loop over all v0s in collection for this event
-
-        for( int i=mV0; i<n_v0; i++){
-        StV0MiniDst* v0FromMiniDst = (StV0MiniDst *) mCollection->At(i);
-        v0FromMiniDst->UpdateV0();
-        StHbtV0* hbtV0 = new StHbtV0;
-        hbtV0->SetdecayLengthV0(v0FromMiniDst->decayLengthV0());
-	hbtV0->SetdecayVertexV0(v0FromMiniDst->decayVertexV0());
-	hbtV0->SetdcaV0Daughters(v0FromMiniDst->dcaV0Daughters());
-	hbtV0->SetdcaV0ToPrimVertex(v0FromMiniDst->dcaV0ToPrimVertex());
-        hbtV0->SetdcaPosToPrimVertex(v0FromMiniDst->dcaPosToPrimVertex());
-        hbtV0->SetdcaNegToPrimVertex(v0FromMiniDst->dcaNegToPrimVertex());
-        hbtV0->SetmomPos(v0FromMiniDst->momPos());
-        hbtV0->SetmomNeg(v0FromMiniDst->momNeg());
-        hbtV0->SettpcHitsPos(v0FromMiniDst->tpcHitsPos());
-        hbtV0->SettpcHitsNeg(v0FromMiniDst->tpcHitsNeg());
-        hbtV0->SetmomV0(v0FromMiniDst->momV0());
-        hbtV0->SetalphaV0(v0FromMiniDst->alphaV0());
-        hbtV0->SetptArmV0(v0FromMiniDst->ptArmV0());
-        hbtV0->SeteLambda(v0FromMiniDst->eLambda());
-        hbtV0->SeteK0Short(v0FromMiniDst->eK0Short());
-        hbtV0->SetePosProton(v0FromMiniDst->ePosProton());
-        hbtV0->SetePosPion(v0FromMiniDst->ePosPion());
-        hbtV0->SeteNegPion(v0FromMiniDst->eNegPion());
-        hbtV0->SeteNegProton(v0FromMiniDst->eNegProton());
-        hbtV0->SetmassLambda(v0FromMiniDst->massLambda());
-        hbtV0->SetmassAntiLambda(v0FromMiniDst->massAntiLambda());
-        hbtV0->SetmassK0Short(v0FromMiniDst->massK0Short());
-        hbtV0->SetrapLambda(v0FromMiniDst->rapLambda());
-        hbtV0->SetrapK0Short(v0FromMiniDst->rapK0Short());
-        hbtV0->SetcTauLambda(v0FromMiniDst->cTauLambda());
-        hbtV0->SetcTauK0Short(v0FromMiniDst->cTauK0Short());
-        hbtV0->SetptV0(v0FromMiniDst->ptV0());
-        hbtV0->SetptotV0(v0FromMiniDst->ptotV0());
-        hbtV0->SetptPos(v0FromMiniDst->ptPos());
-        hbtV0->SetptotPos(v0FromMiniDst->ptotPos());
-        hbtV0->SetptNeg(v0FromMiniDst->ptNeg());
-        hbtV0->SetptotNeg(v0FromMiniDst->ptotNeg());
-
-	// By now, all track-wise information has been extracted and stored in hbtTrack
-	// see if it passes any front-loaded event cut
-	if (mV0Cut){
-	  if (!(mV0Cut->Pass(hbtV0))){                  // track failed - delete it and skip the push_back
-	    delete hbtV0;
-	    continue;
-	  }
-	}
-
-
-	hbtEvent->V0Collection()->push_back(hbtV0);
-	} // end of loop over strangeness groups v0's
-	//Store total number of v0s in v0minidst so can start from there next time
-        cout << "**** n_v0 = " << n_v0 << "**mV0"   << n_v0-mV0 << endl;        //  "       "
-	mV0 =n_v0;
+  //StV0MiniDstMaker* v0Maker = (StV0MiniDstMaker *) mTheV0Maker;
+  StStrangeMuDstMaker* v0Maker = (StStrangeMuDstMaker *) mTheV0Maker;
+  if( ! v0Maker ) {
+    cout << " StStandardHbtEventReader::ReturnHbtEvent() - Not doing v0 stuff" << endl;
+    return hbtEvent; 
+  }
+  //Get collection
+  
+  for( int i= 0; i < v0Maker->GetNV0(); i++){
+    StV0MuDst* v0FromMuDst = v0Maker->GetV0(i);
+    //v0FromMuDst->UpdateV0();
+    StHbtV0* hbtV0 = new StHbtV0;
+    hbtV0->SetdecayLengthV0(v0FromMuDst->decayLengthV0());
+    hbtV0->SetdecayVertexV0X(v0FromMuDst->decayVertexV0X());
+    hbtV0->SetdecayVertexV0Y(v0FromMuDst->decayVertexV0Y());
+    hbtV0->SetdecayVertexV0Z(v0FromMuDst->decayVertexV0Z());
+    hbtV0->SetdcaV0Daughters(v0FromMuDst->dcaV0Daughters());
+    hbtV0->SetdcaV0ToPrimVertex(v0FromMuDst->dcaV0ToPrimVertex());
+    hbtV0->SetdcaPosToPrimVertex(v0FromMuDst->dcaPosToPrimVertex());
+    hbtV0->SetdcaNegToPrimVertex(v0FromMuDst->dcaNegToPrimVertex());
+    hbtV0->SetmomPosX(v0FromMuDst->momPosX());
+    hbtV0->SetmomPosY(v0FromMuDst->momPosY());
+    hbtV0->SetmomPosZ(v0FromMuDst->momPosZ());
+    hbtV0->SetmomNegX(v0FromMuDst->momNegX());
+    hbtV0->SetmomNegY(v0FromMuDst->momNegY());
+    hbtV0->SetmomNegZ(v0FromMuDst->momNegZ());
+#ifdef STHBTDEBUG
+    cout << " hist pos ";
+    cout << v0FromMuDst->topologyMapPos().numberOfHits(kTpcId); 
+    cout << " hist neg ";
+    cout << v0FromMuDst->topologyMapNeg().numberOfHits(kTpcId) << endl;
+#endif
+    hbtV0->SettpcHitsPos(v0FromMuDst->topologyMapPos().numberOfHits(kTpcId));
+    hbtV0->SettpcHitsNeg(v0FromMuDst->topologyMapNeg().numberOfHits(kTpcId));
+    hbtV0->SetTrackTopologyMapPos(0,v0FromMuDst->topologyMapPos().data(0));
+    hbtV0->SetTrackTopologyMapNeg(1,v0FromMuDst->topologyMapNeg().data(1));
+    hbtV0->SetkeyPos(v0FromMuDst->keyPos());
+    hbtV0->SetkeyNeg(v0FromMuDst->keyNeg());
+#ifdef STHBTDEBUG
+    cout << " keyPos " << v0FromMuDst->keyPos() << endl;
+    cout << " keyNeg " << v0FromMuDst->keyNeg() << endl;
+#endif
+    hbtV0->SetmomV0X(v0FromMuDst->momV0X());
+    hbtV0->SetmomV0Y(v0FromMuDst->momV0Y());
+    hbtV0->SetmomV0Z(v0FromMuDst->momV0Z());
+#ifdef STHBTDEBUG
+    cout << " alpha  ";
+    cout << v0FromMuDst->alphaV0();
+    cout << " ptArm  ";
+    cout << v0FromMuDst->ptArmV0() << endl;
+#endif
+    hbtV0->SetalphaV0(v0FromMuDst->alphaV0());
+    hbtV0->SetptArmV0(v0FromMuDst->ptArmV0());
+    hbtV0->SeteLambda(v0FromMuDst->eLambda());
+    hbtV0->SeteK0Short(v0FromMuDst->eK0Short());
+    hbtV0->SetePosProton(v0FromMuDst->ePosProton());
+    hbtV0->SetePosPion(v0FromMuDst->ePosPion());
+    hbtV0->SeteNegPion(v0FromMuDst->eNegPion());
+    hbtV0->SeteNegProton(v0FromMuDst->eNegProton());
+    hbtV0->SetmassLambda(v0FromMuDst->massLambda());
+    hbtV0->SetmassAntiLambda(v0FromMuDst->massAntiLambda());
+    hbtV0->SetmassK0Short(v0FromMuDst->massK0Short());
+    hbtV0->SetrapLambda(v0FromMuDst->rapLambda());
+    hbtV0->SetrapK0Short(v0FromMuDst->rapK0Short());
+    hbtV0->SetcTauLambda(v0FromMuDst->cTauLambda());
+    hbtV0->SetcTauK0Short(v0FromMuDst->cTauK0Short());
+    hbtV0->SetptV0(v0FromMuDst->ptV0());
+    hbtV0->SetptotV0(v0FromMuDst->ptotV0());
+    hbtV0->SetptPos(v0FromMuDst->ptPos());
+    hbtV0->SetptotPos(v0FromMuDst->ptotPos());
+    hbtV0->SetptNeg(v0FromMuDst->ptNeg());
+    hbtV0->SetptotNeg(v0FromMuDst->ptotNeg());
+    
+    // By now, all track-wise information has been extracted and stored in hbtTrack
+    // see if it passes any front-loaded event cut
+    if (mV0Cut){
+      if (!(mV0Cut->Pass(hbtV0))){                  // track failed - delete it and skip the push_back
+	delete hbtV0;
+	continue;
       }
+    }
+    
+    
+    hbtEvent->V0Collection()->push_back(hbtV0);
+  } // end of loop over strangeness groups v0's
+  //Store total number of v0s in v0Mudst so can start from there next time
+  cout << " StStandardHbtEventReader::ReturnHbtEvent() - " << hbtEvent->V0Collection()->size();
+  cout << " V0s pushed in collection " << endl;
+  printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) V0s pushed into collection \n",
+	 hbtEvent->V0Collection()->size(),
+	 v0Maker->GetNV0());
 
-      // There might be event cuts that modify the collections of Tracks or V0 in the event.
-      // These cuts have to be done after the event is built. That's why we have the event cut
-      // at this point for the second time.
-      // An example of this kind of cuts will be an cut that removes spit tracks from the event.
-      if (mEventCut){
-	if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
-	  delete hbtEvent;
-	  return 0;
-	}
-      }
-
-
+  // There might be event cuts that modify the collections of Tracks or V0 in the event.
+  // These cuts have to be done after the event is built. That's why we have the event cut
+  // at this point for the second time.
+  // An example of this kind of cuts will be an cut that removes spit tracks from the event.
+  if (mEventCut){
+    if (!(mEventCut->Pass(hbtEvent))){    // event failed! - return null pointer (but leave Reader status flag as "good")
+      delete hbtEvent;
+      return 0;
+    }
+  }
+  
   return hbtEvent;
 }
 

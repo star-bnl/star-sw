@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.13 2000/02/18 22:01:56 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.14 2000/05/25 21:04:30 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.14  2000/05/25 21:04:30  laue
+ * StStandarsHbtEventReader updated for the new StStrangMuDstMaker
+ *
  * Revision 1.13  2000/02/18 22:01:56  laue
  * Implementation of a collections of StHbtEventWriters.
  * We now can write multiple microDsts at a time.
@@ -99,7 +102,8 @@
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 //#include "StChain.h"
 #include "StMaker.h"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
+//#include "StV0MiniDstMaker/StV0MiniDstMaker.h"
+#include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 
 class StPionPlus;
 class StKaonPlus;
@@ -113,8 +117,8 @@ class StStandardHbtEventReader : public StHbtEventReader{
 private:
 
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
-  StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
-  long              mV0;        //! Number of v0s looked at to date
+  //  StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
+  StStrangeMuDstMaker* mTheV0Maker; //! this is the chain where the StStrangeMuDstMaker is
 
  protected:
  TOrdCollection *mCollection; //!
@@ -128,8 +132,8 @@ public:
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
-  void SetTheV0Maker(StV0MiniDstMaker*);
-  StV0MiniDstMaker* TheV0Maker();
+  void SetTheV0Maker(StStrangeMuDstMaker*);
+  StStrangeMuDstMaker* TheV0Maker();
 
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
@@ -138,8 +142,8 @@ public:
 
 inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=maker;}
 inline StMaker* StStandardHbtEventReader::TheEventMaker(){return mTheEventMaker;}
-inline void StStandardHbtEventReader::SetTheV0Maker(StV0MiniDstMaker* maker){mTheV0Maker=maker;}
-inline StV0MiniDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0Maker;}
+inline void StStandardHbtEventReader::SetTheV0Maker(StStrangeMuDstMaker* maker){mTheV0Maker=maker;}
+inline StStrangeMuDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0Maker;}
 
 #endif
 
