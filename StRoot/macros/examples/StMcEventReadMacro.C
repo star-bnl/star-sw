@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.15 2000/06/06 03:03:30 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.16 2000/06/22 23:54:30 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.16  2000/06/22 23:54:30  calderon
+// add gSystemLoad->("libglobal_Tables"); because it is needed for year2a
+//
 // Revision 1.15  2000/06/06 03:03:30  calderon
 // Use with new Emc classes.
 //
@@ -76,6 +79,7 @@ const char *MainFile=
 // Load all the System libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+    gSystem->Load("libglobal_Tables");
     gSystem->Load("libgen_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("StUtilities");
@@ -103,7 +107,7 @@ const char *MainFile=
 
     // StMcEvent
     StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
-    mcEventReader->doPrintEventInfo = false;
+    mcEventReader->doPrintEventInfo = true;
     mcEventReader->doPrintMemoryInfo = false;
     mcEventReader->doUseTpc = true;
     mcEventReader->doUseSvt = true;
