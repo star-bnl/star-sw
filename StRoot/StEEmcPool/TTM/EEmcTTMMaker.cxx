@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.10 2004/01/27 20:38:42 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.11 2004/04/12 16:19:59 balewski Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -113,7 +113,7 @@
 #include "StEEmcUtil/StEEmcSmd/StEEmcSmdGeom.h"
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 #if !defined(ST_NO_NAMESPACES)
@@ -374,7 +374,7 @@ EEmcTTMMaker::Make(){
     emc->getEndcapTowerADC(i,adc,sec,sub,eta); 
     if (adc<=0) continue;          // how about zero suppression :))
     
-    const StEEmcDbIndexItem1 *dbi = mEEmcDb->getT(sec+1,sub+'A',eta+1); // fortran scheiss .... 
+    const EEmcDbItem *dbi = mEEmcDb->getT(sec+1,sub+'A',eta+1); // fortran scheiss .... 
     if(dbi==NULL) continue;
 
     adcped = float(adc) - dbi->ped; 
@@ -629,6 +629,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.11  2004/04/12 16:19:59  balewski
+// DB cleanup & update
+//
 // Revision 1.10  2004/01/27 20:38:42  zolnie
 // more docs
 //

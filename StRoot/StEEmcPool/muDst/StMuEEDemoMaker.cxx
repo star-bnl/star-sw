@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.6 2004/02/03 22:59:47 jwebb Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.7 2004/04/12 16:20:10 balewski Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -16,7 +16,7 @@
 
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h"
 
 ClassImp(StMuEEDemoMaker)
@@ -98,7 +98,7 @@ Int_t StMuEEDemoMaker::Make(){
     #endif
 
     // ....... Access  DB 
-    const StEEmcDbIndexItem1 *dbItem=eeDb->getT(isec+1,isub+'A',ieta+1);
+    const EEmcDbItem *dbItem=eeDb->getT(isec+1,isub+'A',ieta+1);
     assert(dbItem); //  fatal error in EEmcDb-maker
     dbItem->print();
   }
@@ -116,7 +116,7 @@ Int_t StMuEEDemoMaker::Make(){
     printf("  DB: name='%s'",name);
     int index=EEname2Index(name);
     printf(", index=%d, ", index);
-    const StEEmcDbIndexItem1 *dbItem=eeDb->getByIndex(index);
+    const EEmcDbItem *dbItem=eeDb->getByIndex(index);
     assert(dbItem); //  fatal error in EEmcDb-maker
     dbItem->print();
 
@@ -149,13 +149,9 @@ Int_t StMuEEDemoMaker::Make(){
 //	     st.end1.y(),st.end2.x(),st.end1.z(),st.end2.y(),st.end2.z());
       
 
-      // ....... Access  DB 
-      char name[20];
-      sprintf(name,"%2.2d%c%3.3d",isec+1,uv,istrip+1);
-      printf("   DB: name='%s'",name);
-      int index=EEname2Index(name);
-      printf(", index=%d, ", index);
-      const StEEmcDbIndexItem1 *dbItem=eeDb->getByIndex(index);
+      // ....... Access  DB
+
+      const EEmcDbItem *dbItem=eeDb-> getByStrip0(isec,iuv,istrip);
       assert(dbItem); //  fatal error in EEmcDb-maker
       dbItem->print();
  
@@ -188,6 +184,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.7  2004/04/12 16:20:10  balewski
+// DB cleanup & update
+//
 // Revision 1.6  2004/02/03 22:59:47  jwebb
 // *** empty log message ***
 //

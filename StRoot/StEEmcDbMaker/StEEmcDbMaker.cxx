@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.27 2004/04/09 18:38:10 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.28 2004/04/12 16:19:51 balewski Exp $
  
 
 #include <time.h>
@@ -17,7 +17,6 @@
 
 #include "StEEmcDbMaker.h"
 
-#include "StEEmcDbIndexItem1.h" // OLD
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/EEmcDbCrate.h"
 #include "StEEmcUtil/EEfeeRaw/EEname2Index.h" 
@@ -47,34 +46,21 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
  //................ allocate memory for lookup tables
   byIndex=new  EEmcDbItem[EEindexMax];
   
-  byCrate=new  EEmcDbItem ** [mxAdcCrate];
+  byCrate=new  EEmcDbItem ** [MaxAnyCrate];
   
   int i;
-  for(i=0;i<mxAdcCrate;i++){
+  for(i=0;i<MaxAnyCrate;i++){
     byCrate[i]=NULL;
-    if(i==0 || (i>maxTwCrateID && i<minMapmtCrateID) ) continue; // to save memory for nonexisting crates
-    byCrate[i]=new EEmcDbItem * [mxAdcChan];
-    memset(byCrate[i],0,sizeof(EEmcDbItem *)*mxAdcChan);// clear all pointers
+    if(i==0 || (i>MaxTwCrateID && i<MinMapmtCrateID) ) continue; // to save memory for nonexisting crates
+    byCrate[i]=new EEmcDbItem * [MaxAnyCh];
+    memset(byCrate[i],0,sizeof(EEmcDbItem *)*MaxAnyCh);// clear all pointers
   }
+
 
   mDbFiber=0; nFiber=0;
 
   setDBname("Calibrations/eemc");
   
-
-  //...... old
-  mDbItem1=new  StEEmcDbIndexItem1[EEindexMax];
-  mLookup=new  StEEmcDbIndexItem1 ** [mxAdcCrate];
-  
-
-  for(i=0;i<mxAdcCrate;i++){
-    mLookup[i]=NULL;
-    if(i==0 || (i>6 && i<64) ) continue; // to save memory for nonexisting crates
-    mLookup[i]=new StEEmcDbIndexItem1 * [mxAdcChan];
-    memset(mLookup[i],0,sizeof(StEEmcDbIndexItem1 *)*mxAdcChan);// clear all pointers
-  }
-
-
 }
 
 
@@ -94,17 +80,6 @@ StEEmcDbMaker::~StEEmcDbMaker(){
   }
 
   delete mDbFiber;
-
-  //.............old, drop it
-  delete [] mDbItem1;
-
-  int i;
-  for(i=0;i<mxAdcCrate;i++) {
-    if(mLookup[i])
-      delete [] mLookup[i];
-  }
-  delete [] mLookup;
-
 
 }
 
@@ -225,11 +200,14 @@ void StEEmcDbMaker::clearItemArray(){
     byIndex[i].clear();
 
   int j;
-  for(i=0;i<mxAdcCrate;i++) {
+  for(i=0;i<MaxAnyCrate;i++) {
     if(byCrate[i]==NULL) continue;
-    for(j=0;j<mxAdcChan;j++)
+    for(j=0;j<MaxAnyCh;j++)
       byCrate[i][j]=0;
   }
+
+  memset(byStrip,0,sizeof(byStrip));
+  printf("%s::clear, size of byStrip=%d\n",GetName(),sizeof(byStrip));//tmp
 
   if(mDbFiber) delete [] mDbFiber;
   nFiber=0;
@@ -248,20 +226,6 @@ void StEEmcDbMaker::clearItemArray(){
     mDbsectorID[i]=-1;
   }
 
-
-  //................ old .............
-  // clear old DB tables  ...................
-
-  for(i=0; i<EEindexMax; i++)
-    mDbItem1[i].clear();
-  
-
-  for(i=0;i<mxAdcCrate;i++) {
-    if(mLookup[i]==NULL) continue;
-    for(j=0;j<mxAdcChan;j++)
-      mLookup[i][j]=0;
-  }
-  
 }
 
 
@@ -422,11 +386,11 @@ void StEEmcDbMaker::mOptimizeMapping(int is){
     x->chan=t->channel[j];
     x->setName(name);
     x->key=key;
-    x->setDefaultTube(minMapmtCrateID);
+    x->setDefaultTube(MinMapmtCrateID);
     // x->print();
     
-    assert(x->crate>=0 && x->crate<mxAdcCrate);
-    assert(x->chan>=0 && x->chan<mxAdcChan);
+    assert(x->crate>=0 && x->crate<MaxAnyCrate);
+    assert(x->chan>=0 && x->chan<MaxAnyCh);
     assert(byCrate[x->crate]);// ERROR: duplicated crate ID from DB
     if(byCrate[x->crate][x->chan]) {
       printf("Fatal Error of eemc DB records: the same crate=%d / channel=%d entered twice for :\n",x->crate,x->chan);
@@ -435,6 +399,7 @@ void StEEmcDbMaker::mOptimizeMapping(int is){
       assert(1==2);
     }
     byCrate[x->crate][x->chan]=x;
+    if(x->isSMD()) byStrip[x->sec-1][x->plane-'U'][x->strip-1]=x;
   }
 }
 
@@ -652,17 +617,17 @@ const  EEmcDbItem*  StEEmcDbMaker::getByCrate(int crateID, int channel) {
   int type=0;
   int max=0;
   // printf("cr=%d ch=%d\n",crateID, channel);
-  if(crateID>=minTwCrateID && crateID<=maxTwCrateID) {
+  if(crateID>=MinTwCrateID && crateID<=MaxTwCrateID) {
     // Towers
     type =1;
-    max=maxTwCrateCh;
+    max=MaxTwCrateCh;
     if(channel>=max) return 0; // not all data blocks are used 
 
-  } else if (crateID>=minMapmtCrateID && crateID<=maxMapmtCrateID ){
+  } else if (crateID>=MinMapmtCrateID && crateID<=MaxMapmtCrateID ){
     //MAPMT
     type =2;
-    max=maxMapmtCrateCh;
-  } else if (crateID>=17 && crateID<=46 ){
+    max=MaxMapmtCrateCh;
+  } else if (crateID>=17 && crateID<=46 ){ // only if working with ezTree
     return 0;  //BTOW
   }
 
@@ -723,6 +688,20 @@ template <class St_T, class T_st> void StEEmcDbMaker
   return ; // copy the whole s-struct to allow flavor change;
 }
 
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+const EEmcDbItem*  
+StEEmcDbMaker::getByStrip0(int isec, int iuv, int istrip){
+  // printf("isec=%d iuv=%d istrip=%d \n",isec,iuv,istrip);
+  assert(isec>=0 & isec<MaxSectors);
+  assert(iuv>=0 && iuv<MaxSmdPlains);
+  assert(istrip>=0 && istrip<MaxSmdStrips);
+  return byStrip[isec][iuv][istrip];  
+}
+
+
 
 //__________________________________________________
 //__________________________________________________
@@ -741,109 +720,19 @@ StEEmcDbMaker::getTail(int sec, char sub, int eta, char type){
 //__________________________________________________
 
 const EEmcDbItem* 
-StEEmcDbMaker::getStrip(int sec, int strip, char type){
+StEEmcDbMaker::getStrip(int sec, char uv, int strip){
   char name[20];
-  sprintf(name,"%2.2d%c%3.3d",sec,type,strip);
+  sprintf(name,"%2.2d%c%3.3d",sec,uv,strip);
   int key=EEname2Index(name);
   return byIndex+key;
 }
 
 
 
-//================================================
-//  O L D  C O D  T O  B e   Erase it
-//================================================
-
-
-
-
-//__________________________________________________
-//__________________________________________________
-//__________________________________________________
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getT(int sec, char sub, int eta){
-  char name[20];
-  sprintf(name,"%2.2dT%c%2.2d",sec,sub,eta);
-  int key=EEname2Index(name);
-  return mDbItem1+key;  
-}
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getP(int sec, char sub, int eta){
-  char name[20];
-  sprintf(name,"%2.2dP%c%2.2d",sec,sub,eta);
-  int key=EEname2Index(name);
-  return mDbItem1+key;  
-}
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getQ(int sec, char sub, int eta){
-  char name[20];
-  sprintf(name,"%2.2dQ%c%2.2d",sec,sub,eta);
-  int key=EEname2Index(name);
-  return mDbItem1+key;  
-}
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getR(int sec, char sub, int eta){
-  char name[20];
-  sprintf(name,"%2.2dR%c%2.2d",sec,sub,eta);
-  int key=EEname2Index(name);
-  return mDbItem1+key;  
-}
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getU(int sec, int strip ) {
-  char name[20];
-  sprintf(name,"%2.2dU%3.3d",sec,strip);
-  int key=EEname2Index(name);
-  return mDbItem1+key;
-}
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getV(int sec, int strip ) {
-  char name[20];
-  sprintf(name,"%2.2dV%3.3d",sec,strip);
-  int key=EEname2Index(name);
-  return mDbItem1+key;
-}
-
-
-
-
-
-//__________________________________________________
-//__________________________________________________
-//__________________________________________________
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getByIndex(int key){
-  assert(key>=0);
-  assert(key<EEindexMax);
-  return mDbItem1+key;  
-}
-
-//__________________________________________________
-//__________________________________________________
-//__________________________________________________
-
-const StEEmcDbIndexItem1*  
-StEEmcDbMaker::get(int crate, int channel){
-  assert(crate>=0);
-  assert(crate<mxAdcCrate);
-  assert(channel>=0);
-  assert(channel<mxAdcChan);
-  
-  assert( mLookup[crate]);
-
-  return mLookup[crate][channel];  
-}
- 
-
-
-
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.28  2004/04/12 16:19:51  balewski
+// DB cleanup & update
+//
 // Revision 1.27  2004/04/09 18:38:10  balewski
 // more access methods, not important for 63GeV production
 //

@@ -1,52 +1,6 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.12 2003/11/17 15:47:04 balewski Exp $
-// $Log: St2eemcFeeRawMaker.cxx,v $
-// Revision 1.12  2003/11/17 15:47:04  balewski
-// fix of bug
-//
-// Revision 1.11  2003/09/02 17:57:55  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.10  2003/04/16 20:33:56  balewski
-// small fixes in eemc daq reader
-//
-// Revision 1.9  2003/03/26 21:16:42  balewski
-// *** empty log message ***
-//
-// Revision 1.8  2003/03/25 18:30:21  balewski
-// towards EEMC daq reader
-//
-// Revision 1.7  2003/03/22 19:37:24  balewski
-// *** empty log message ***
-//
-// Revision 1.6  2003/03/07 15:35:53  balewski
-// towards EEMC daq reader
-//
-// Revision 1.5  2003/02/21 22:21:39  balewski
-// time stamp added
-//
-// Revision 1.4  2003/02/18 22:01:47  balewski
-// fixes
-//
-// Revision 1.3  2003/02/18 19:56:07  balewski
-// add pedestals
-//
-// Revision 1.2  2003/02/17 18:45:40  balewski
-// change names
-//
-// Revision 1.1  2003/01/28 23:15:25  balewski
-// start
-//
-// Revision 1.1  2002/12/17 19:41:35  balewski
-// separated from EEmc to avoid some dependeces during compilation
-//
-// Revision 1.2  2002/12/05 14:21:58  balewski
-// cleanup, time stamp corrected
-//
-// Revision 1.1  2002/11/30 23:00:28  balewski
-// male poprawki
-//
+// $Id: St2eemcFeeRawMaker.cxx,v 1.13 2004/04/12 16:20:14 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -58,7 +12,7 @@
 #include "St2eemcFeeRawMaker.h"
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
 #include "EEfeeRaw/EEfeeDataBlock.h"
 #include "EEfeeRaw/EEfeeRawEvent.h"
 #include "EEfeeRaw/EEmcEventHeader.h"
@@ -196,7 +150,7 @@ Int_t St2eemcFeeRawMaker::Make(){
       int eta= emcTowerHits[j]->eta()+1;
       float energy=emcTowerHits[j]->energy();
           
-      const StEEmcDbIndexItem1 *dbItem=meeDb->getT(sec,sub,eta);
+      const EEmcDbItem *dbItem=meeDb->getT(sec,sub,eta);
       assert(dbItem); //  fatal error in EEmcDb-maker
  
       int chan=dbItem->chan;
@@ -243,3 +197,53 @@ Int_t St2eemcFeeRawMaker::Make(){
 
 
 
+
+// $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.13  2004/04/12 16:20:14  balewski
+// DB cleanup & update
+//
+// Revision 1.12  2003/11/17 15:47:04  balewski
+// fix of bug
+//
+// Revision 1.11  2003/09/02 17:57:55  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.10  2003/04/16 20:33:56  balewski
+// small fixes in eemc daq reader
+//
+// Revision 1.9  2003/03/26 21:16:42  balewski
+// *** empty log message ***
+//
+// Revision 1.8  2003/03/25 18:30:21  balewski
+// towards EEMC daq reader
+//
+// Revision 1.7  2003/03/22 19:37:24  balewski
+// *** empty log message ***
+//
+// Revision 1.6  2003/03/07 15:35:53  balewski
+// towards EEMC daq reader
+//
+// Revision 1.5  2003/02/21 22:21:39  balewski
+// time stamp added
+//
+// Revision 1.4  2003/02/18 22:01:47  balewski
+// fixes
+//
+// Revision 1.3  2003/02/18 19:56:07  balewski
+// add pedestals
+//
+// Revision 1.2  2003/02/17 18:45:40  balewski
+// change names
+//
+// Revision 1.1  2003/01/28 23:15:25  balewski
+// start
+//
+// Revision 1.1  2002/12/17 19:41:35  balewski
+// separated from EEmc to avoid some dependeces during compilation
+//
+// Revision 1.2  2002/12/05 14:21:58  balewski
+// cleanup, time stamp corrected
+//
+// Revision 1.1  2002/11/30 23:00:28  balewski
+// male poprawki
+//
