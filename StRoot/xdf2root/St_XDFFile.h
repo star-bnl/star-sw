@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.11 1998/09/20 22:50:38 fine Exp $
+// $Id: St_XDFFile.h,v 1.12 1998/10/01 17:09:51 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.12  1998/10/01 17:09:51  fine
+// St_XDFFile::GetName() method has been introduced
+//
 // Revision 1.11  1998/09/20 22:50:38  fine
 // New method to read XDF file has been introduced
 //
@@ -55,6 +58,7 @@ class St_XDFFile
     St_XDFFile(const Char_t *filename,const Char_t *mode="r");      // Create object and open file
     virtual ~St_XDFFile();
             Int_t       GetErrorCode(){ return fErrorCode;}
+    virtual const Char_t *GetName(){ return fName;}
     virtual Int_t       OpenXDF(const Char_t *filename,const Char_t *mode="r"); // Open file and read create the "root" St_DataSet (it is called from ctor)
     virtual Int_t       OpenXDF(TInetAddress address, const char *service,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(TInetAddress address, Int_t port,const Char_t *mode="r");      // Create object and open file
