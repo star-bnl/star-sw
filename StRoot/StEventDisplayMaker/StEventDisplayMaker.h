@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.22 2000/08/29 19:26:00 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.23 2000/09/25 01:29:53 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.23  2000/09/25 01:29:53  fine
+// new StFtpcTrackFilter for Janet has been introdcued
+//
 // Revision 1.22  2000/08/29 19:26:00  fine
 // New method to add/remove volumes and tables
 //
@@ -46,7 +49,7 @@ class TPaveLabel;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.22 2000/08/29 19:26:00 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.23 2000/09/25 01:29:53 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -116,17 +119,11 @@ class StEventDisplayMaker : public StMaker {
             kEndOfEventList
           } ;
 
-
  
      // --   Filters  --
  
      Int_t SetFlag(Int_t flag, EDisplayEvents filterIndex);
      StVirtualEventFilter *SetFilter(StVirtualEventFilter *filter, EDisplayEvents filterIndex);
-
-     // -- Vertex filters --
-
-     Int_t SetPrimaryVertexFlag(Int_t flag=1);
-     StVirtualEventFilter *SetPrimaryVertex(StVirtualEventFilter *filter);
 
      //  -- Table filter ---
      Int_t SetTableFlag(Int_t flag=1); // *MENU*
@@ -138,7 +135,7 @@ class StEventDisplayMaker : public StMaker {
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.22 2000/08/29 19:26:00 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.23 2000/09/25 01:29:53 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
