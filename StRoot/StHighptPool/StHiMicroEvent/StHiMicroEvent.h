@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroEvent.h,v 1.1 2002/04/02 19:36:15 jklay Exp $                                                         
+ * $Id: StHiMicroEvent.h,v 1.2 2002/04/02 23:34:52 jklay Exp $                                                         
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroEvent.h,v $
+ * Revision 1.2  2002/04/02 23:34:52  jklay
+ * Added L3RichTrigger information
+ *
  * Revision 1.1  2002/04/02 19:36:15  jklay
  * Bums highpt uDST format
  *
@@ -61,6 +64,7 @@ class StHiMicroEvent : public TObject {
   Int_t	  NGoodGlobalsE()			const { return mNGoodGlobalsE; }
   UInt_t  L0TriggerWord()			const { return mL0TriggerWord; }
   Bool_t  L3UnbiasedTrigger()			const { return mL3UnbiasedTrigger; }
+  Bool_t  L3RichTrigger()			const { return mL3RichTrigger; }
   Double_t CenterOfMassEnergy()			const { return mCenterOfMassEnergy; }
   Double_t MagneticField()			const { return mMagneticField; }
   Short_t  BeamMassNumberEast()			const { return mBeamMassNumberEast; }
@@ -92,6 +96,7 @@ class StHiMicroEvent : public TObject {
   void SetNGoodGlobalsE(Int_t val)			{ mNGoodGlobalsE=val; }
   void SetL0TriggerWord(UInt_t val)			{ mL0TriggerWord=val; }
   void SetL3UnbiasedTrigger(Bool_t val)			{ mL3UnbiasedTrigger=val; }
+  void SetL3RichTrigger(Bool_t val)			{ mL3RichTrigger=val; }
   void SetCenterOfMassEnergy(Double_t val)		{ mCenterOfMassEnergy=val; }
   void SetMagneticField(Double_t val)			{ mMagneticField=val; }
   void SetBeamMassNumberEast(Short_t val)		{ mBeamMassNumberEast=val; }	
@@ -126,6 +131,7 @@ class StHiMicroEvent : public TObject {
   //** new 01/28/02
   UInt_t    mL0TriggerWord; // l0 trigger word for > y1 data
   Bool_t    mL3UnbiasedTrigger; // for l3 triggered events, unbiased or not?
+  Bool_t    mL3RichTrigger; // for l3 Rich triggered events, see http://ikf1.star.bnl.gov/L3doc/algorithms/
   Double_t  mCenterOfMassEnergy;
   Double_t  mMagneticField;
   Short_t   mBeamMassNumberEast;
