@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.24  1999/04/28 19:46:12  ward
+// QA histograms.
+//
 // Revision 1.23  1999/04/09 23:30:04  ward
 // Version tag, Alan Funt.
 //
@@ -66,6 +69,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_ObjectSet.h"
+#include "TH1.h"
 #include "StTpcRawDataEvent.hh"
 // #include "StTrsMaker/include/StTrsRawDataEvent.hh"
 // #include "StTrsMaker/include/StDacRawDataEvent.hh"
@@ -88,6 +92,8 @@ ClassImp(St_tpcdaq_Maker)
 #define NSECT 24
 #define NROW  45
 #define DEBUG_ACTIVE_ROW 33
+#define HISTOGRAMS
+
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name):StMaker(name) 
 {
   printf("St_tpcdaq_Maker constructor.\n");
@@ -95,6 +101,20 @@ St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name):StMaker(name)
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
 Int_t St_tpcdaq_Maker::Init() {
+
+  m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
+                            "seq vs start bin" , 512 , 1.0 , 512.0 );
+  m_seq_sequnceLength = new TH1F("tpcdaq_seqLen" , 
+                            "seq vs seq len" , 100 , 1.0 , 100.0 );
+  m_seq_padNumber     = new TH1F("tpcdaq_padNum" , 
+                            "seq vs pad num" , 188 , 1.0 , 188.0 );
+  m_seq_padRowNumber  = new TH1F("tpcdaq_padrowNum" , 
+                            "seq vs padrow num" , 45 , 1.0 , 45.0 );
+  m_pad_numSeq        = new TH1F("tpcdaq_numSeq" , 
+                            "pad vs num seq" , 40 , 1.0 , 40.0 );
+  m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
+                            "pix vs ADC value" , 255 , 1.0 , 255.0 );
+
   return StMaker::Init();
 }
 void St_tpcdaq_Maker::PrintErr(int number,char letter) {
@@ -322,6 +342,9 @@ int St_tpcdaq_Maker::Output() {
           if(ipadrow>=13) dataOuter[isect-1]=7; else dataInner[isect-1]=7;
         } else continue; // So we don't write meaningless rows in pad table.
         timeOff=0; offIntoPixTbl=pixR; timeWhere=0; prevStartTimeBin=-123;
+#ifdef HISTOGRAMS
+        m_pad_numSeq->Fill((Float_t)nseq);
+#endif
         for(iseq=0;iseq<nseq;iseq++) {
           startTimeBin=listOfSequences[iseq].startTimeBin;
           if(startTimeBin<0) startTimeBin=0;
@@ -332,9 +355,18 @@ int St_tpcdaq_Maker::Output() {
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
           pointerToAdc=listOfSequences[iseq].firstAdc;
+#ifdef HISTOGRAMS
+          m_seq_sequnceLength->Fill((Float_t)seqLen);
+          m_seq_startTimeBin->Fill((Float_t)startTimeBin);
+          m_seq_padNumber->Fill((Float_t)pad);
+          m_seq_padRowNumber->Fill((Float_t)(ipadrow+1));
+#endif
           for(ibin=0;ibin<seqLen;ibin++) {
             // fprintf(BBB,"%2d %2d %2d %2d %3d %3d\n",
             // isect,ipadrow+1,pad,iseq,ibin+startTimeBin+1,*pointerToAdc);
+#ifdef HISTOGRAMS
+            m_pix_AdcValue->Fill((Float_t)(*pointerToAdc));
+#endif
             PixelWrite(pixel_data_gen,pixR++,*(pointerToAdc++));
             nPixelThisPadRow++; nPixelThisPad++;
           }
@@ -386,7 +418,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Alan Funt. St_tpcdaq_Maker::Make().\n");
+  printf("I am Doris Day. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -407,7 +439,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.23 1999/04/09 23:30:04 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.24 1999/04/28 19:46:12 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }
