@@ -1,9 +1,12 @@
 //*************************************************************
-// $Id: StRrsReader.cxx,v 1.3 2000/02/14 01:06:49 lasiuk Exp $
+// $Id: StRrsReader.cxx,v 1.4 2000/03/12 23:50:10 lasiuk Exp $
 //
 // $Log: StRrsReader.cxx,v $
-// Revision 1.3  2000/02/14 01:06:49  lasiuk
-// change structure StRichID
+// Revision 1.4  2000/03/12 23:50:10  lasiuk
+// order of arguments
+//
+// Revision 1.4  2000/03/12 23:50:10  lasiuk
+// order of arguments
 //
 // Revision 1.3  2000/02/14 01:06:49  lasiuk
 // change structure StRichID
@@ -25,7 +28,7 @@ StRrsReader::StRrsReader()
 
 StRrsReader::StRrsReader(StRichPadPlane* data, int version)
     : mData(data), mVersion(version) { /* nopt */ }
-unsigned short StRrsReader::GetADCFromCoord(int row, int col)
+
 StRrsReader::~StRrsReader() { /* nopt */ }
 
 unsigned short StRrsReader::GetADCFromCoord(int col, int row)
