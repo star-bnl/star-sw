@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.88 2000/04/05 02:45:13 fine Exp $
+// $Id: StMaker.cxx,v 1.89 2000/04/07 15:41:42 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -422,14 +422,8 @@ Int_t StMaker::Finish()
 //   place to make operations on histograms, normalization,etc.
    int nerr = 0;
    int run = GetRunNumber();
-   if (run>-1) FinishRun(run);
-   const char *tit[] = {"nStOK   ","nStWarn ","nStEOF  ","nStErr  ","nStFatal"};
-   
-   Printf("\n---------------------------------------------------------------------------------");
-   for( int i=0; i<=kStFatal; i++) {
-     int n = fgTallyMaker[i];   
-     Printf("QAInfo: %s = %6d  times\n",tit[i],n); 
-   }
+   if (run>-1) FinishRun(run);   
+
    TIter next(GetMakeList());
    StMaker *maker;
    Double_t totalCpuTime = 0;
@@ -455,6 +449,13 @@ Int_t StMaker::Finish()
                ,100*maker->RealTime()/totalRealTime
                ,100*maker->CpuTime()/totalCpuTime);
      }
+     if (!GetParent()) {// Only for top maker
+
+       printf("\n--------------Error Codes-------------------------\n");
+       printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
+       for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
+       printf("\n--------------------------------------------------\n");
+     }  
      Printf("=================================================================================\n");
    }
    
@@ -484,6 +485,8 @@ Int_t StMaker::Make()
 // 		Call Maker
      maker->StartMaker();
      ret = maker->Make();
+     assert(ret>=0 && ret<=kStFatal);     
+     fgTallyMaker[ret]++;
      maker->EndMaker(ret);
 
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
@@ -951,6 +954,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.89  2000/04/07 15:41:42  perev
+// Printout error codes improved
+//
 // Revision 1.88  2000/04/05 02:45:13  fine
 // call-counter has been added
 //
