@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.16 2003/09/19 16:39:15 caines Exp $ 
+ * $Id: StEstTracker.cxx,v 1.17 2003/10/11 02:51:20 perev Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.17  2003/10/11 02:51:20  perev
+ * Cleanup+bugfix: test for zer pointer, initialization added.
+ *
  * Revision 1.16  2003/09/19 16:39:15  caines
  * More fixed for the redhot upgrade
  *
@@ -325,6 +328,8 @@ Int_t StEstTracker::DoTracking() {
       if (mTrack[i]->GetDone()==1) {
 	OneIsGood=0;
 	for (j=0;j<mTrack[i]->GetNBranches();j++)
+          if (!mTrack[i]) 		continue;
+	  if (!mTrack[i]->GetBranch(j)) continue;
 	  if (mTrack[i]->GetBranch(j)->GetIsGood()==1) OneIsGood=1;
 	if (OneIsGood==0 && 
 	    onoffmatrix == (mTrack[i]->GetIdealPattern()& onoffmatrix) &&
@@ -334,16 +339,21 @@ Int_t StEstTracker::DoTracking() {
     RemoveHitSharing2();
     
     TrackDeadAfterRemoveSharing=0;
-    for (i=0;i<mNTrack;i++) 
-      if (mTrack[i]->GetDone()==1) {
-	OneIsGood=0;
-	for (j=0;j<mTrack[i]->GetNBranches();j++)
-	  if (mTrack[i]->GetBranch(j)->GetIsGood()==1) OneIsGood=1;
+    for (i=0;i<mNTrack;i++) {
+      StEstTrack *tr = mTrack[i];
+      if (!tr) 			continue;
+      if (tr->GetDone()!=1) 	continue;
+      OneIsGood=0;
+      for (j=0;j<tr->GetNBranches();j++) {
+        StEstBranch *br = tr->GetBranch(j);
+        if (!br) 		continue;
+        if (br->GetIsGood()==1) OneIsGood=1;
 	if (OneIsGood==0 && 
-	    onoffmatrix == (mTrack[i]->GetIdealPattern()& onoffmatrix) &&
-	    mTrack[i]->GetIdealPattern()>=nminhit)
+	    onoffmatrix == (tr->GetIdealPattern()& onoffmatrix) &&
+	    tr->GetIdealPattern()>=nminhit)
 	  TrackDeadAfterRemoveSharing++;
-      }
+        }
+    }
     gMessMgr->Info()<<"--> TrackDead (b/a) RemoveSharing = "<<TrackDeadBeforeRemoveSharing<<"  "<<TrackDeadAfterRemoveSharing<<endm;
     
 
