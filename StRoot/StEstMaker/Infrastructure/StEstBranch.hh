@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.hh,v 1.1 2000/12/07 11:14:27 lmartin Exp $
+ * $Id: StEstBranch.hh,v 1.2 2001/01/25 18:13:27 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,25 +10,21 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.hh,v $
+ * Revision 1.2  2001/01/25 18:13:27  lmartin
+ * Minor changes in the GetHit and SetHelix methods
+ *
  * Revision 1.1  2000/12/07 11:14:27  lmartin
  * First CVS commit
  *
  **************************************************************************/
 #ifndef StEstBranch_hh
 #define StEstBranch_hh
-#ifndef StMaker_H
+
 #include "StMaker.h"
-#endif
-
-#include "StHelix.hh"
-#include "StEstTrack.hh"
-#include "StEstTPCTrack.hh"
-#include "StEstHit.hh"
-#include "StEstWafer.hh"
-
+class StHelix;
 class StEstTrack;
 class StEstHit;
-class StEstMaker;
+class StEstTracker;
 
 class StEstBranch {
   
@@ -85,28 +81,9 @@ public :
   int GetIsGood();
   void SetIsGoodOld(int isgood);
   int GetIsGoodOld();
-  friend class StEstMaker;
+  friend class StEstTracker;
   //  StEstBranch& operator=(const StEstBranch);
 };
-
-
-
-inline StEstHit* StEstBranch::GetHit(long int nr) {
-  if(nr>=mNHits) {
-    cerr << "ERROR StEstBranch::GetHit  nr>=mNHits"<<endl;
-    return NULL;
-  }
-  if(nr>=mMaxHits) {
-    cout << "ERROR StEstBranch::GetHit  nr>=mMaxHits"<<endl;
-    cout << "      nr= "<<nr<<" mNHits= "<<mNHits<<" mMaxHits= "<<mMaxHits<<endl;
-    return NULL;
-  }
-  if(nr<0) {
-    cerr << "ERROR StEstBranch::GetHit  nr<0"<<endl;
-    return NULL;
-  }
-  return mHits[nr];
-}
  
 inline int StEstBranch::CheckAvailability() {
   if (mNHits<mMaxHits) return 1;
@@ -114,11 +91,6 @@ inline int StEstBranch::CheckAvailability() {
 }
 
 inline long int StEstBranch::GetNHits()             {return mNHits;};
-inline void     StEstBranch::SetHelix(StHelix *hel) {
-  if (mHelix!=NULL)
-    delete mHelix;
-  mHelix=hel;
-};
 inline StHelix* StEstBranch::GetHelix()             {return mHelix;};
 inline void     StEstBranch::SetChiSq(double chi)   {mChisq = chi;};
 inline void     StEstBranch::SetChiSqLin(double chi)   {mChisqLin = chi;};
@@ -138,9 +110,7 @@ inline int      StEstBranch::GetIsGoodOld() {return mIsGoodOld;};
 inline StEstTrack* StEstBranch::GetTrack() {return mTrack;};
 inline void     StEstBranch::SetNFit(long nf) {mNFit=nf;};
 inline long int StEstBranch::GetNFit() {return mNFit;};
-  
+
+
+
 #endif
-
-
-
-
