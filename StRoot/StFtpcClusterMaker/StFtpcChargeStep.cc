@@ -1,6 +1,10 @@
-// $Id: StFtpcChargeStep.cc,v 1.14 2001/11/21 12:50:02 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.15 2002/04/05 16:45:49 oldi Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.15  2002/04/05 16:45:49  oldi
+// Small code clean ups, to be sure that this part is recompiled. It relies
+// on StFtpcTracker/StFtpcPoint.* which were changed.
+//
 // Revision 1.14  2001/11/21 12:50:02  jcs
 // replace malloc/free with new/delete; prevent overstepping table boundaries
 //
@@ -110,7 +114,7 @@ int StFtpcChargeStep::histogram(int setPressure)
    /* allocate memory for padtrans table */
    double *pRadius = new double[mParam->numberOfDriftSteps()];
 
-   if(pRadius == NULL)
+   if(pRadius == 0)
      {
        printf("Padtrans memory allocation failed, exiting!\n");
        return 0;

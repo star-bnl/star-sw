@@ -1,6 +1,10 @@
-// $Id: StFtpcParamReader.hh,v 1.20 2002/03/01 14:22:21 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.21 2002/04/05 16:46:02 oldi Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.21  2002/04/05 16:46:02  oldi
+// Small code clean ups, to be sure that this part is recompiled. It relies
+// on StFtpcTracker/StFtpcPoint.* which were changed.
+//
 // Revision 1.20  2002/03/01 14:22:21  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -79,7 +83,7 @@ class StFtpcParamReader : public TObject
   
 protected:
   //STAF table pointers stored for writing back in destructor
-  //set to NULL if not set in constructor
+  //set to 0 if not set in constructor
   ftpcClusterPars_st *mClusterParsTable;
 
   //ClusterFinder parameters (also used by other classes)
