@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.45 2003/07/30 22:00:40 oldi Exp $
+// $Id: StFlowEvent.h,v 1.46 2004/03/11 17:58:42 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -69,6 +69,7 @@ public:
   Bool_t         ProbPid() const;
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
+  Bool_t         RanSubs() const;
   StFlowTrackCollection* TrackCollection() const;
 
   void SetSelections();
@@ -125,6 +126,7 @@ public:
   static void SetDcaGlobalFtpcCut(Float_t lo, Float_t hi);
   static void SetProbPid();
   static void SetEtaSubs();
+  static void SetRanSubs();
   static void SetPtWgtSaturation(Float_t);
   static void SetPtWgt(Bool_t);
   static void SetEtaWgt(Bool_t);
@@ -171,6 +173,7 @@ private:
   static Char_t       mPid[10];                                  // h+, h-, pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, e+, e-, e
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
+  static Bool_t       mRanSubs;                                  // flag for random subevents
   static Bool_t       mOnePhiWgt;                                // flag for old phi weights
   static Bool_t       mFirstLastPhiWgt;                          // flag for using z of first and last points for reading phi weights
   static Bool_t       mFirstLastPoints;                          // flag for using z of first and last points for generating phi weights
@@ -244,6 +247,8 @@ inline Char_t*  StFlowEvent::Pid() { return mPid; }
 inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
 
 inline Bool_t   StFlowEvent::EtaSubs() const { return mEtaSubs; }
+
+inline Bool_t   StFlowEvent::RanSubs() const { return mRanSubs; }
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
@@ -368,6 +373,8 @@ inline void StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 
 inline void StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 
+inline void StFlowEvent::SetRanSubs() { mRanSubs = kTRUE; }
+
 inline void StFlowEvent::SetOnePhiWgt() { mOnePhiWgt = kTRUE; }
 
 inline void StFlowEvent::SetFirstLastPhiWgt() { mFirstLastPhiWgt = kTRUE; }
@@ -385,6 +392,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.46  2004/03/11 17:58:42  posk
+// Added Random Subs analysis method.
+//
 // Revision 1.45  2003/07/30 22:00:40  oldi
 // Eta cuts for event plane selection separated for FTPC east and west.
 // PtWgtSaturation parameter introduced (default set to 2. -> no change of default behavior).

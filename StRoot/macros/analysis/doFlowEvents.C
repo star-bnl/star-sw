@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.53 2003/12/19 21:23:43 posk Exp $
+// $Id: doFlowEvents.C,v 1.54 2004/03/11 18:01:56 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -85,7 +85,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // First load some shared libraries we need
   // (Do it in this order)
   //
-
 //   gSystem->Load("St_base");
 //   gSystem->Load("StChain");
 //   gSystem->Load("St_Tables");
@@ -111,13 +110,12 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Make a chain with a file list
   chain  = new StChain("StChain");
   //chain->SetDebug();
-  StFileI *setFiles = 0;
   if (fileList) {	//Normal case
     setFiles = new StFile(fileList);
   } else        {	//Grand Challenge
     gSystem->Load("StChallenger");
     setFiles = StChallenger::Challenge();
-    setFiles->SetDebug();
+    //setFiles->SetDebug();
     const char *Argv[]= {
       "-s","dst runco",                               // list of components needed
       "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",  // example of user query
@@ -131,21 +129,21 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Make Selection objects and instantiate FlowMaker
   //
   char makerName[30];
-//    StFlowSelection flowSelect;
+//   StFlowSelection flowSelect;
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
-//   flowSelect->SetPidPart("h+");               // for parts. wrt plane
-//   flowSelect->SetPtPart(0., 8.);              // for parts. wrt plane
-//   flowSelect->SetPtBinsPart(256);             // for parts. wrt plane
-//   flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
-//   flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
-//   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
-//   flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
-//   flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-//   flowSelect->SetDcaGlobalPart(0., 0.5);      // for parts. wrt plane
-//   flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
+//   flowSelect.SetPidPart("pr-");               // for parts. wrt plane
+//   flowSelect.SetPtPart(0.15, 2.0);              // for parts. wrt plane
+//   flowSelect.SetPtBinsPart(256);              // for parts. wrt plane
+//   flowSelect.SetPPart(0.15, 5.);             // for parts. wrt plane
+//   flowSelect.SetEtaPart(-1.3, 1.3);             // for parts. wrt plane
+//   flowSelect.SetFitPtsPart(20, 50);          // for parts. wrt plane
+//   flowSelect.SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
+//   flowSelect.SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
+//   flowSelect.SetDcaGlobalPart(0., 2.0);      // for parts. wrt plane
+//   flowSelect.SetYPart(-0.5, 0.5);             // for parts. wrt plane
 
   // Uncomment next line if you make a selection object
-//    sprintf(makerName, "Flow");
+//   sprintf(makerName, "Flow");
 
   if (strstr(fileList[0], "MuDst.root")) {
     // Read mu-DST
@@ -182,8 +180,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");	//deactivate all branches
     if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    //IOMk->SetBranch("dstBranch",0,"r");
-    //IOMk->SetBranch("runcoBranch",0,"r");
     //IOMk->SetDebug();
     
     // Maker to read events from file or database into StEvent
@@ -237,7 +233,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // the default.
   // To make full use of it, the cuts for Har1 should allow for FTPC tracks only, 
   // while the cuts for Har2 should use TPC tracks only. This method works for 
-  // eta subevents (SetEtaSubs(kTRUE)) and random subevents (SetEtaSubs(kFALSE)).
+  // FTPC eta subevents (SetEtaSubs(kTRUE)) and random subevents (SetEtaSubs(kFALSE)).
   Bool_t v1Ep1Ep2 = kTRUE;
   //  Bool_t v1Ep1Ep2 = kFALSE;
 
@@ -292,7 +288,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   flowMaker->SetPicoEventDir("./");
   
   // Set Debug status
-//   flowMaker->SetDebug();
+//  flowMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
 //  flowPhiWgtMaker->SetDebug();
 //  flowCumulantMaker->SetDebug();
@@ -324,10 +320,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
-  StFlowCutEvent::SetVertexZ(-25., 25.);
+//   StFlowCutEvent::SetVertexZ(-25., 25.);
 //   StFlowCutEvent::SetEtaSymTpc(0., 0.);
 //   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
-  StFlowCutEvent::SetTrigger(1.);
+//   StFlowCutEvent::SetTrigger(1.);
   if (phiWgtOnly) { // all centralities
     StFlowCutEvent::SetCent(0, 0);
   }
@@ -372,8 +368,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
 //   StFlowEvent::SetPid("h-");                 // for event plane
 
-  // Make Eta subevents
+    // Make Eta or Random subevents
+    // These correlate each particle with the other subevent plane.
+    // With neither flag set the standard method is used, which
+    // corelates each particle with the event plane from the full event
+    // minus the particle of interest.
+    // Don't set both of these at the same time.
 //     StFlowEvent::SetEtaSubs();
+//     StFlowEvent::SetRanSubs();
 
   // Disable weights in the event plane calculation
 //   StFlowEvent::SetPtWgt(kFALSE);
@@ -381,7 +383,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowEvent::SetEtaWgt(kFALSE);
 
   // Use Aihong's probability PID method
-//   StFlowEvent::SetProbPid();
+//     StFlowEvent::SetProbPid();
 
   // Set the PID deviant windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
@@ -561,6 +563,9 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.54  2004/03/11 18:01:56  posk
+// Added Random Subs analysis method.
+//
 // Revision 1.53  2003/12/19 21:23:43  posk
 // Changed File->IsOpen() to File.IsOpen().
 //
