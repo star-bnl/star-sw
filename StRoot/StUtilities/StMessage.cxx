@@ -1,5 +1,10 @@
-// $Id: StMessage.cxx,v 1.17 1999/09/16 15:50:25 genevb Exp $
+// $Id: StMessage.cxx,v 1.18 1999/12/28 21:29:55 porter Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.18  1999/12/28 21:29:55  porter
+// added 'using std::vector' and a (char*) cast to allow compilation
+// using solaris CC5.  Many warnings of const char* vs char* still
+// exist but will await Gene's return to fix these
+//
 // Revision 1.17  1999/09/16 15:50:25  genevb
 // Fixed a bug in over-writing memory when calling from FORTRAN, use char=0 instead of strcpy
 //
@@ -125,7 +130,7 @@ int StMessage::Print(int nChars) {
     messBuffer << insert1 << message;                    // ": ",message
     if (nChars<=0) {
       if (!strchr(option,'T')) {                         // "No time" option
-        char* temp2 = strchr(messTime.AsString(),' ');
+        char* temp2 = strchr((char*)messTime.AsString(),' ');
         messBuffer << insert2 << (++temp2) << insert3 ;  // " (",time,")"
       }
       messBuffer << endofline;                           // "\n" end-line
@@ -159,7 +164,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.17 1999/09/16 15:50:25 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.18 1999/12/28 21:29:55 porter Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

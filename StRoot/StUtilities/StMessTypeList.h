@@ -1,5 +1,10 @@
-// $Id: StMessTypeList.h,v 1.6 1999/09/14 15:42:03 genevb Exp $
+// $Id: StMessTypeList.h,v 1.7 1999/12/28 21:29:55 porter Exp $
 // $Log: StMessTypeList.h,v $
+// Revision 1.7  1999/12/28 21:29:55  porter
+// added 'using std::vector' and a (char*) cast to allow compilation
+// using solaris CC5.  Many warnings of const char* vs char* still
+// exist but will await Gene's return to fix these
+//
 // Revision 1.6  1999/09/14 15:42:03  genevb
 // Some bug fixes, workaround for nulls in strings
 //
@@ -38,6 +43,7 @@
 #define StVector(T) vector<T, allocator<T> >
 typedef vector<int, allocator<int> > intVector;
 #else
+using std::vector;
 #define StVector(T) vector<T>
 typedef vector<int> intVector;
 #endif
