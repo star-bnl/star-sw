@@ -13,7 +13,7 @@
 
 #include "StEmcMipSpectra.h"
 #include "StEmcEqualSpectra.h"
-#include "StEmcEffPedSpectra.h"
+//#include "StEmcEffPedSpectra.h"
 
 #include "TArrayI.h"
 
@@ -110,7 +110,7 @@ class StEmcCalibrationMaker : public StMaker
    
            StEmcEqualSpectra*     EqualSpec;
            StEmcMipSpectra*       MipSpec;
-           StEmcEffPedSpectra*    EffPedSpec;
+  //StEmcEffPedSpectra*    EffPedSpec;
 
 
    ClassDef(StEmcCalibrationMaker, 1)  
