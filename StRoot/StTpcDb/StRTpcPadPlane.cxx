@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.cxx,v 1.11 2002/02/21 18:35:58 hardtke Exp $
+ * $Id: StRTpcPadPlane.cxx,v 1.12 2002/02/22 01:03:21 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.cxx,v $
+ * Revision 1.12  2002/02/22 01:03:21  jeromel
+ * Undo recent changes (don't understand it yet). Will be recoverable ...
+ *
  * Revision 1.11  2002/02/21 18:35:58  hardtke
  * Speed up by hardwiring number of inner rows and making array for numberOfRowsAt function
  *
@@ -27,6 +30,18 @@
 
 ClassImp(StRTpcPadPlane)
  
+//_____________________________________________________________________________
+int   StRTpcPadPlane::numberOfPadsAtRow(int row) const {
+ int npad = 0;
+ if (row >= 1 && row<=numberOfRows()) {
+    if ( row<=numberOfInnerRows() ) 
+      npad = (*mPadPlane)[0].innerPadsPerRow[row-1];
+    else 
+      npad = (*mPadPlane)[0].outerPadsPerRow[row-1-numberOfInnerRows()];
+ }
+ return npad;
+}
+
 //_____________________________________________________________________________
 double   StRTpcPadPlane::radialDistanceAtRow(int row) const {
  double radius = 0;
