@@ -123,7 +123,7 @@ int     StiMcTrack::getPointCount() const
   return mcTrack->tpcHits().size();
 }
 
-int     StiMcTrack::getFitPointCount() const
+int     StiMcTrack::getFitPointCount(int ) const
 {
   return mcTrack->tpcHits().size();
 }
@@ -133,7 +133,7 @@ int     StiMcTrack::getGapCount() const
   return 0;
 }
 
-int     StiMcTrack::getMaxPointCount() const
+int     StiMcTrack::getMaxPointCount(int) const
 {
   return 0;
 }
