@@ -261,68 +261,107 @@ Int_t StEventDisplayMaker::Make()
   if (m_Mode == 1)   return  kStOK;
   CreateCanvas();
   if (Debug()) PrintInfo();
+ //---  Temporary ---
+//   ClearCanvas();
  //_______________________________________
  //
  //   Creating tracks and hits shapes
  //_______________________________________
+  Int_t trackCounter  = 0;
+  Int_t hitCounter    = 0;
+  Int_t tpcHitCounter = 0;
+
   m_Event  = (StEvent *) GetDataSet("StEvent");
+  if (!m_Event) return kStErr;
   StTrackCollection *tracks = m_Event->trackCollection();
   if (tracks) {
      StGlobalTrackIterator next(tracks);
      StGlobalTrack *globTrack = 0;
-     Int_t trackCounter = 0;
      while ( ( globTrack = (StGlobalTrack *)next() ) && trackCounter < maxTrackCounter) {
         St_Node *thisTrack = 0;
-        if (!GlobalTrackFilter(globTrack))                               continue;
+        // ------------------- Global filter ------------------------- //
+        if (!GlobalTrackFilter(globTrack))                 continue;
+        // ------------------------ Tracks --------------------------- //
+        Color_t trackColor = kRed;
+        Style_t trackStyle = 1;
+        Width_t trackSize  = 2;
+        // ------------------- Tracks filter ------------------------- //
         if (TrackFilter(globTrack) ) {
+        // ----------------------------------------------------------- //
           StHelix3DPoints *helixPoints = new StHelix3DPoints(globTrack,globTrack->length(),30);
           m_TrackCollector->Add(helixPoints);  // Collect to remove
-          Int_t colorIndx = trackCounter%7;
+          trackColor = trackCounter%7;
           St_PolyLineShape *helixShape  = new St_PolyLineShape(helixPoints,"L");
-            helixShape->SetVisibility(1); helixShape->SetColorAttribute(colorIndx+kGreen);
-            helixShape->SetLineStyle(1);  helixShape->SetSizeAttribute(2);
-            thisTrack = new St_Node("hits","hits",helixShape);
+            helixShape->SetVisibility(1); helixShape->SetColorAttribute(trackColor+kGreen);
+            helixShape->SetLineStyle(trackStyle);  helixShape->SetSizeAttribute(trackSize);
+            thisTrack = new St_Node("tracks","tracks",helixShape);
             thisTrack->Mark(); thisTrack->SetVisibility();
-        }
-
-        const StVecPtrTpcHit &hits   = globTrack->tpcHits();
-        if ( HitsFilter(hits) )  {
-          StHits3DPoints *hitPoints    = new StHits3DPoints((StVecPtrTpcHit *)&hits);
-          St_PolyLineShape *trackShape = 0;
-          if (hitPoints->Size()>1) {
-            trackShape  = new St_PolyLineShape(hitPoints);
-            trackShape->SetVisibility(1); trackShape->SetColorAttribute(kYellow);
-            trackShape->SetLineStyle(1);  trackShape->SetSizeAttribute(1);
-            m_HitCollector->Add(hitPoints);  // Collect to remove  
-          } 
-          else {
-            delete hitPoints;
+            trackCounter++;
+            St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
+            if (!pp && trackCounter) {
+               printf(" no track position %d\n",trackCounter);
+            }
+         }
+         // ------------------------   Hits   ------------------------- //
+         Color_t hitColor = kYellow;
+         Style_t hitStyle = 1;
+         Width_t hitWidth = 1;
+         const StVecPtrTpcHit &hits   = globTrack->tpcHits();
+         // ---------------------- Hit filter ------------------------- //
+         if ( HitsFilter(hits) )  {
+         // ----------------------------------------------------------- //
+           StHits3DPoints *hitPoints    = new StHits3DPoints((StVecPtrTpcHit *)&hits);
+           St_PolyLineShape *trackShape = 0;
+           if (hitPoints->Size()>1) {
+             trackShape  = new St_PolyLineShape(hitPoints);
+             trackShape->SetVisibility(1); trackShape->SetColorAttribute(hitColor);
+             trackShape->SetLineStyle(hitStyle);  trackShape->SetSizeAttribute(hitWidth);
+             m_HitCollector->Add(hitPoints);  // Collect to remove  
+             thisTrack = new St_Node("hits","hits",trackShape);
+             thisTrack->Mark(); thisTrack->SetVisibility();
+             hitCounter++;
+             St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
+             if (!pp && hitCounter) {
+                printf(" no hit position %d\n",hitCounter);
+             }
           }
-          if (trackShape) {
-            if (!thisTrack) thisTrack = new St_Node("hits","hits",trackShape);
-            else            thisTrack->Add(trackShape);
-            thisTrack->Mark(); thisTrack->SetVisibility();
-          }
-        }
-
-        St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
-        if (thisTrack) trackCounter++;
-        if (!pp && trackCounter) {
-          // printf(" no position %d\n",trackCounter);
+          else 
+            delete hitPoints;         
         }
      }
-     printf(" %d tracks has been found\n",trackCounter);
-     if (trackCounter && m_ShortView){
-        // Create new one
-         m_EventsView = new St_NodeView(*m_EventsNode);
-         m_ShortView->Add(m_EventsView);
-     }
+     printf(" %d tracks %d hits have been found\n",trackCounter, hitCounter);
    }   
+   
+#if 0
+   // ------------------- TPC hits filter ------------------------- //
+     if (!tpcHitsFilter(globTrack))                 continue;
+   // ------------------------ Tracks --------------------------- //
+   StTpcHitCollection *t          = m_Event->tpcHitCollection();
+   StHits3DPoints *tpcHitsPoints  = new StHits3DPoints(t);
+   St_PolyLineShape *tpcHitsShape = new St_PolyLineShape(tpcHitsPoints);
+   trackShape->SetVisibility(1);
+   trackShape->SetLineColor(kYellow);
+   trackShape->SetLineStyle(1);
+   trackShape->SetLineWidth(2);
+   // Create a node to hold it
+    if (!thisTrack) {
+      thisTrack = new St_Node("hits","hits",trackShape);
+      thisTrack->Mark();
+      thisTrack->SetVisibility();
+      St_NodePosition *pp = hall->Add(thisTrack);
+      if (!pp) printf(" no position %d\n",ntrack);
+      tpcHitCounter++;
+   }
+#endif
+   if ( (trackCounter  || hitCounter || tpcHitCounter ) && m_ShortView){
+     // Create new one
+       m_EventsView = new St_NodeView(*m_EventsNode);
+       m_ShortView->Add(m_EventsView);
+   }
   printf(" updating view \n");
   m_PadBrowserCanvas->Update();
   return kStOK;
 }
-//_____________________________________________________________________________
 //_____________________________________________________________________________
 Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
 {
