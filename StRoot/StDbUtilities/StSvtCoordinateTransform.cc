@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.8 2001/04/03 15:24:53 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.9 2001/06/13 16:01:22 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -18,6 +18,9 @@
 #include "StSvtCoordinateTransform.hh"
 #include "StCoordinates.hh"        // coordinate definitions
 #include "StGlobals.hh"
+#include "St_DataSetIter.h"
+#include "St_ObjectSet.h"
+#include "StMessMgr.h"
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_svg_shape_Table.h"
@@ -28,6 +31,49 @@
 using namespace units;
 #endif
 
+//C and fortran routines
+
+//_______________________________________________________________________
+int type_of_call SvtGtoL_(float *x,float *xp,
+			   svg_geom_st* geom, int* index){
+
+  StThreeVector<double> a(x[0],x[1],x[2]);
+  StSvtCoordinateTransform transform;
+  
+  transform.setParamPointers(NULL, geom, NULL, NULL);
+  
+  StSvtLocalCoordinate b;
+  
+  transform.GlobaltoLocal(a, b, 0, *index);
+  
+  xp[0] = b.position().x();
+  xp[1] = b.position().y();
+  xp[2] = b.position().z();
+  
+  return 0;
+  
+}
+//____________________________________________________________________________
+int type_of_call SvtLtoG_(float *xp, float *x,
+			   svg_geom_st* geom, int* index){
+  StSvtLocalCoordinate a;
+
+  a.setPosition(StThreeVector<double>(xp[0],xp[1],xp[2]));
+
+  StSvtCoordinateTransform transform;
+  transform.setParamPointers(NULL, geom, NULL, NULL);
+
+  StThreeVector<double> b(0,0,0);
+  
+  transform.LocaltoGlobal(a, b, *index);
+  
+  x[0] = b.x();
+  x[1] = b.y();
+  x[2] = b.z();
+  return 0;
+
+}
+//_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
 }
 //_____________________________________________________________________________
@@ -77,10 +123,8 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
   double t = a.timebucket() - t0;
 
-  b.position().setX(CalcDriftLength(t));
-  b.position().setY(CalcTransLength(a.anode()));
-  b.position().setZ(0.015);
-
+  b.setPosition(StThreeVector<double>(CalcDriftLength(t),
+				      CalcTransLength(a.anode()),0.015));
   
   int idShape = 0;
   
@@ -383,9 +427,11 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
       x.setY(-999);
       x.setZ(-999);
       return 0;
+      
+      
     }
-    
   }
+
   xl[0] = a.position().x();
   xl[1] = a.position().y();
   xl[2] = a.position().z();
