@@ -1,6 +1,6 @@
 //******************************************************************************
 //                                                                            
-// StEmcFilter.h
+// StEmcFilter.cxx
 //
 // Authors: Alexandre Suaide & Marcia Maria de Moura
 //
@@ -48,7 +48,7 @@ StEmcFilter::StEmcFilter():TObject()
   mHaveVertex=kTRUE;
   mHavePrimaries=kTRUE;
   mZVertexCut=20;
-  mEmcETotalMin=0;
+  mEmcETotalMin=-100000;
   mEmcETotalMax=100000;
   mMinMult=0;
   mMaxMult=100000;
@@ -77,7 +77,7 @@ StEmcFilter::StEmcFilter():TObject()
   
   // EMC tower cuts
   mMaxTracksPerTower = 0;
-  mEMin = 0;
+  mEMin = -1000;
   mEMax = 1000;
   mPtMin = 0;
   mPtMax = 1000;
