@@ -13,7 +13,9 @@
 class StiDetector;
 class StiMaterial;
 class StiShape;
-class Messenger;
+class StMaker; 
+class StiPlanarShape;
+class StiCylindricalShape;
 template<class Factorized>class Factory;
 
 // Set up stl maps for by-name lookup of shapes and materials.
@@ -25,6 +27,7 @@ typedef shapeMap::value_type shapeMapValType;
 typedef map<NameMapKey, StiDetector*> detectorMap;
 typedef detectorMap::const_iterator detectorIterator;
 typedef detectorMap::value_type detectorMapValType;
+
 /*!
   Class defines the notion of a detector builder. It creates the various components of
   a detector and set their shape, placement, and material properties.
@@ -34,15 +37,11 @@ typedef detectorMap::value_type detectorMapValType;
 */
 class StiDetectorBuilder : public Named
 {
-
 public:
-
 
   StiDetectorBuilder(const string & name,bool active);
   virtual ~StiDetectorBuilder(); 
-  
   detectorMap getDetectors(){ return mDetectorMap; }
-  
   virtual StiMaterial * add(StiMaterial *material);
   virtual StiShape    * add(StiShape *shape);
   virtual StiDetector * add(StiDetector *detector);
@@ -56,30 +55,20 @@ public:
   virtual unsigned int  getNSectors(unsigned int row=0) const;
   virtual void setNRows(unsigned int nRows);
   virtual void setNSectors(unsigned int row, unsigned int nSectors);
-
   virtual bool hasMore() const;
   virtual StiDetector* next();
-  virtual void build();
-  virtual void buildMaterials();
-  virtual void buildShapes();
-  virtual void buildDetectors();
-  virtual void loadDb();
+  virtual void build(StMaker&source);
+  virtual void buildDetectors(StMaker&source);
+
   double nice(double angle) const;
-  friend class StiHit;
-  
-  double phiForSector(unsigned int iSector, 
-		      unsigned int nSectors) const;
-  double phiForWestSector(unsigned int iSector, 
-			  unsigned int nSectors) const;
-  double phiForEastSector(unsigned int iSector, 
-			  unsigned int nSectors) const;
   void setGroupId(int id);
   int  getGroupId() const;
-  void setTrackingParameters(StiTrackingParameters * pars);
-  StiTrackingParameters * getTrackingParameters();
+  void setTrackingParameters(const TrackingParameters_st & pars);
+  void setTrackingParameters(const StiTrackingParameters & pars);
+  StiTrackingParameters & getTrackingParameters();
 
  protected:
-  
+ 
   int                 _groupId;
   bool                _active;
   materialMap         mMaterialMap;
@@ -90,10 +79,7 @@ public:
   vector< unsigned int> _nSectors;
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
-  StiTrackingParameters * _trackingParameters;
-
-  Messenger&           _messenger;
-
+  StiTrackingParameters _trackingParameters;
 };
 
 ///Returns the number of active rows in the detector
@@ -193,55 +179,6 @@ inline  void StiDetectorBuilder::setDetector(unsigned int row, unsigned int sect
   _detectors[row][sector] = detector;
 }
 
-
-
-/// nSectors is the number of sectors in 360 degrees (one half of the
-/// TPC or all of the SVT, for example)
-inline double StiDetectorBuilder::phiForSector(unsigned int iSector, 
-					unsigned int nSectors) const
-{
-  if(iSector>=2*nSectors)
-    {
-      cerr << "StiDetectorBuilder::phiForSector(" << iSector << ", "
-	   << nSectors << "):  Error, invalid sector" << endl;
-    }
-  return (iSector < nSectors) ? 
-    phiForWestSector(iSector, nSectors) :
-    phiForEastSector(iSector, nSectors);
-}
-
-/// returns the reference angle for the given sector number (out of the 
-/// given total).  This assumes the star convention where the highest
-/// numbered sector is at "12 o'clock", or pi/2, and the sector numbering
-/// _decreases_ with increasing phi.  [I guess this must have seemed like
-/// a good idea at the time....]
-///
-/// returns in [-pi, pi)
-///
-/// nSectors is the number of sectors in the west half of the detector,
-/// not both halves.
-inline double StiDetectorBuilder::phiForWestSector(unsigned int iSector, 
-					    unsigned int nSectors) const
-{
-  int offset = nSectors/4;
-  double deltaPhi = 2.*M_PI/nSectors;
-  
-  // make phi ~ sector (not -sector) and correct offset
-  double dPhi = (offset - static_cast<int>(iSector+1))*deltaPhi;
-  return nice(dPhi);  
-} // phiForWestSector
-
-/// as above, but numbering _increases_ with increasing phi.
-inline double StiDetectorBuilder::phiForEastSector(unsigned int iSector, 
-					    unsigned int nSectors) const
-{
-  int offset = 3*nSectors/4;
-  double deltaPhi = 2.*M_PI/nSectors;
-  double dPhi = (static_cast<int>(iSector+1) - offset)*deltaPhi;
-  return nice(dPhi);  
-} // phiForEastSector
-
-
 inline void StiDetectorBuilder::setGroupId(int id)
 {
   _groupId = id;
@@ -252,12 +189,17 @@ inline int  StiDetectorBuilder::getGroupId() const
   return _groupId;
 }
 
-inline void StiDetectorBuilder::setTrackingParameters(StiTrackingParameters * pars)
+inline void StiDetectorBuilder::setTrackingParameters(const StiTrackingParameters & pars)
 {
   _trackingParameters = pars;
 }
 
-inline StiTrackingParameters * StiDetectorBuilder::getTrackingParameters()
+inline void StiDetectorBuilder::setTrackingParameters(const TrackingParameters_st & pars)
+{
+  _trackingParameters = pars;
+}
+
+inline  StiTrackingParameters & StiDetectorBuilder::getTrackingParameters()
 {
   return  _trackingParameters;
 }

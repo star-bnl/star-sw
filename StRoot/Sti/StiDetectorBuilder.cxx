@@ -1,23 +1,19 @@
 #include "Stiostream.h"
-#include "Sti/Base/Messenger.h"
-#include "Sti/Base/MessageType.h"
 #include "Sti/StiDetector.h"
 #include "Sti/StiShape.h"
 #include "Sti/StiMaterial.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiToolkit.h"
 #include "StThreeVector.hh"
+#include "StMaker.h"
 
 StiDetectorBuilder::StiDetectorBuilder(const string & name,bool active)
   : Named(name+"Builder"),
     _groupId(-1),
     _active(active),
-    _detectorFactory( StiToolkit::instance()->getDetectorFactory() ),
-    _trackingParameters(new StiTrackingParameters(name,name)),
-    _messenger(*Messenger::instance(MessageType::kDetectorMessage) )
+    _detectorFactory( StiToolkit::instance()->getDetectorFactory() )
 {
-  _messenger << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
-  //MessageType::getTypeByCode(MessageType::kDetectorMessage)->setOstream(new ofstream("DetectorMessageFile"));
+  cout << "StiDetectorBuilder::StiDetectorBuilder() - INFO - Instantiating builder named:"<<name<<endl;
 }
 
 StiDetectorBuilder::~StiDetectorBuilder()
@@ -25,13 +21,13 @@ StiDetectorBuilder::~StiDetectorBuilder()
 
 bool StiDetectorBuilder::hasMore() const 
 {
-  //_messenger<<"StiDetectorBuilder::hasMore() - INFO - Started"<<endl;
+  //cout<<"StiDetectorBuilder::hasMore() - INFO - Started"<<endl;
   return mDetectorIterator != mDetectorMap.end();
 } // hasMore()
 
 StiDetector * StiDetectorBuilder::next()
 {
-  //_messenger<<"StiDetectorBuilder::hasMore() - INFO - Started"<<endl;
+  //cout<<"StiDetectorBuilder::hasMore() - INFO - Started"<<endl;
   if (mDetectorIterator != mDetectorMap.end())
     return (mDetectorIterator++)->second;
   else 
@@ -85,7 +81,7 @@ StiDetector * StiDetectorBuilder::add(unsigned int row, unsigned int sector, Sti
       string message = "StiDetectorBuilder::add() - ERROR - argument sector out of bound";
       throw runtime_error(message.c_str());
     }
-  //_messenger<<"StiDetectorBuilder::add() - INFO - Row:"<<row<<" Sector:"<<sector<<" Name:"<<detector->getName()<<endl;
+  //cout<<"StiDetectorBuilder::add() - INFO - Row:"<<row<<" Sector:"<<sector<<" Name:"<<detector->getName()<<endl;
   _detectors[row][sector] = detector;
   return add(detector);
 }
@@ -93,7 +89,6 @@ StiDetector * StiDetectorBuilder::add(unsigned int row, unsigned int sector, Sti
 /*! Add the given detector to the list of detectors known to this builder.
     Complete the "build" of this detector. 
  */
-
 StiDetector * StiDetectorBuilder::add(StiDetector *detector)
 {
   NameMapKey key(detector->getName());
@@ -102,34 +97,17 @@ StiDetector * StiDetectorBuilder::add(StiDetector *detector)
   // in the base class nothing is actually done
   // but ROOT stuff is built in the drawable version of this class.
   detector->setGroupId(_groupId);
-  detector->setTrackingParameters(_trackingParameters);
+  detector->setTrackingParameters(&_trackingParameters);
   return detector;
 }
 
-
-void StiDetectorBuilder::build()
+void StiDetectorBuilder::build(StMaker& source)
 {
-  loadDb();
-  buildMaterials();
-  buildShapes();
-  buildDetectors();
+  buildDetectors(source);
   mDetectorIterator = mDetectorMap.begin();
 }
 
-void StiDetectorBuilder::buildMaterials()
-{
-  /* base class does nothing */
-}
-
-void StiDetectorBuilder::buildShapes()
-{
-  /* base class does nothing */
-}
-
-void StiDetectorBuilder::buildDetectors()
-{
-  /* base class does nothing */
-}
-void StiDetectorBuilder::loadDb()
+void StiDetectorBuilder::buildDetectors(StMaker& source)
 {}
+
 
