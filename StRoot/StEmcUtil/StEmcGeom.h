@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.2 2001/03/15 00:57:28 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.3 2001/03/15 20:56:11 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.3  2001/03/15 20:56:11  pavlinov
+ * Jose's scheme is default
+ *
  * Revision 1.2  2001/03/15 00:57:28  pavlinov
  * Created new methods getBinEnv and getIdEnv
  *
@@ -139,12 +142,9 @@ public:
   Int_t    checkSub(const Int_t );
   Int_t    checkId(const Int_t );
 
-  Int_t    getBin(const Int_t,Int_t &,Int_t &,Int_t &);
-  Int_t    getBin(const Float_t, const Float_t, Int_t &,Int_t &,Int_t &);
-  Int_t    getId(const Int_t,const Int_t,const Int_t,Int_t &);
-
-  Int_t    getBinEnv(const Int_t idEnv, Int_t &m, Int_t &e, Int_t &s);
-  Int_t    getIdEnv(const Int_t m,const Int_t e,const Int_t s,Int_t &idEnv);
+  Int_t    getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &e);
+  Int_t    getBin(const Int_t rid, Int_t &m, Int_t &e, Int_t &s);
+  Int_t    getId(const Int_t m,const Int_t e,const Int_t s,Int_t &rid);
 
   Int_t    getVolIdBemc(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
   Int_t    getVolIdBsmd(const Int_t,Int_t&, Int_t &,Int_t &,Int_t &);
@@ -225,23 +225,10 @@ inline Int_t   StEmcGeom::checkSub(const Int_t s)
 // _____________________________________________________________________
 inline Int_t   StEmcGeom::checkId(const Int_t rid)
 {
-  if(rid>=0 && rid<mNRaw) return 0;
+  if(rid>=1 && rid<=mNRaw) return 0; // 15-mar-2001 => use Jose scheme
   else cout<<" Bad raw# "<<rid<<endl; return 1;
 }
-// _____________________________________________________________________
-inline Int_t   StEmcGeom::getBin(const Int_t rid,Int_t &m, Int_t &e, Int_t &s)
-{
-// Transition from raw # to bin #
-  if(!checkId(rid)) { 
-    Int_t j = rid%mNes;     // =mod(rid,mNes)
-    m = rid/mNes + 1;
-    e = j/mNSub  + 1; 
-    s = j%mNSub  + 1;
-    //    if(checkModule(m) || checkEta(e) || checkSub(s)) {cout<<"Bad getBin"<<endl; return 1;} // Only for testing
-    return 0;
-  }
-  else return 1;
-}
+
 // _____________________________________________________________________
 inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, Int_t &e, Int_t &s)
 {
@@ -274,16 +261,7 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
   else return 1;                      // Out of Bemc
 
 }
-// _____________________________________________________________________
-inline Int_t StEmcGeom::getId(const Int_t m,const Int_t e,const Int_t s, Int_t &rid)
-{ // Check boundary
-  if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
-    rid = (m-1)*mNes + (e-1)*mNSub + s-1; // Change from 0 
-    //checkId(rid);  // Only for testing
-    return 0;
-  }
-  else return 1;
-}
+
 // _____________________________________________________________________
 inline Int_t StEmcGeom::getZlYl(const Int_t rid, Float_t &zl, Float_t &yl)
 {
@@ -382,63 +360,33 @@ inline Int_t StEmcGeom::getEtaPhi(const Int_t rid, Float_t &eta, Float_t &phi)
 }
 
 inline Int_t 
-StEmcGeom::getBinEnv(const Int_t idEnv,Int_t &m,Int_t &e,Int_t &s)
+StEmcGeom::getBin(const Int_t rid,Int_t &m,Int_t &e,Int_t &s)
 {
   //
-  // 14-mar-2001 for transition from environment (Jose) numeration to 
-  // usual EMC'c numbering (second variant).
+  // 15-mar-2001 for transition from environment (Jose) numeration to 
+  // usual EMC'c numbering. This is standard now !!!
+  // It is work only for BEMC and BPRS (15-mar-2001)
   //
-  if(idEnv<1 || idEnv>4800){cout<<" Wrong Environment number "<<idEnv<<endl;return 1;}
   if(mDetector<1 || mDetector>3) {cout<<" Wrong number of detector "
                                       <<mDetector<<endl; return 1;}
+  if(checkId(rid) == 1) return 1;
 
   Int_t idw;
-  m   = (idEnv - 1) / 40 + 1; // Module number 
-  idw = (idEnv - 1) % 40;     // change from 0 to 39
+  m   = (rid - 1) / 40 + 1; // Module number 
+  idw = (rid - 1) % 40;     // change from 0 to 39
   s   = idw/20 + 1;
   e   = 20 - idw%20;
   return 0;                   // zero is good
 }
 
 inline Int_t 
-StEmcGeom::getIdEnv(const Int_t m, const Int_t e, const Int_t s,Int_t &idEnv)
+StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
 {
   if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
-    idEnv = 40*(m-1) + 20*(s-1) + (21-e);
+    rid = 40*(m-1) + 20*(s-1) + (21-e);
     return 0;
   }
   else return 1;
 }
 
-/* For first scheme => obsolete now
-inline Int_t 
-StEmcGeom::getBinEnv(const Int_t idEnv,Int_t &m,Int_t &e,Int_t &s)
-{
-  //
-  // 13-mar-2001 for transition from environment (Jose) numeration to 
-  // usual EMC'c numbering
-  //
-  if(idEnv<1&&idEnv>4800){cout<<" Wrong Environment number "<<idEnv<<endl;return 1;}
-  if(mDetector<1 || mDetector>3){cout<<" Wrong number of detector "
-                                 <<mDetector<<endl; return 1;}
-
-  Int_t mw, mw2, ew;
-  mw = idEnv / 20; 
-  mw2 = mw/2;
-
-  if(mw%2 == 0) { // Even  number -> first  barrel
-    s   = 2 - mw2%2;
-    ew  = idEnv - 20*mw;
-    e   = 21 - ew;
-    m   = mw2/2 + 1;
-  } 
-  else{      // Odd number -> second barrel    
-    s   = 1 + mw2%2;
-    e   = idEnv - 20*mw + 1;
-    m   = 115 - mw2/2;
-    if(m<=0) m += 60;
-  }
-  return 0;
-}
-*/
 #endif

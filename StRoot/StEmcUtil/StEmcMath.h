@@ -18,7 +18,7 @@ class StEmcMath {
 
 private:
 public:
-  static Bool_t etaPhi(StMeasuredPoint* point, StMeasuredPoint* vertex, 
+  static Bool_t etaPhi(StMeasuredPoint* point, StMeasuredPoint* vertex,
                        Double_t &eta, Double_t &phi);
   static Double_t pseudoRapidity(StMeasuredPoint* point, StMeasuredPoint* vertex=0);
   static Double_t eta(StMeasuredPoint* point, StMeasuredPoint* vertex=0) 
@@ -28,8 +28,8 @@ public:
   ClassDef(StEmcMath, 1)   // Definition of patch
 };
 #endif
-// $Id: StEmcMath.h,v 1.1 2001/03/09 16:59:49 pavlinov Exp $
+// $Id: StEmcMath.h,v 1.2 2001/03/15 20:56:16 pavlinov Exp $
 // $Log: StEmcMath.h,v $
-// Revision 1.1  2001/03/09 16:59:49  pavlinov
-// Alpha Version
+// Revision 1.2  2001/03/15 20:56:16  pavlinov
+// Jose's scheme is default
 //
