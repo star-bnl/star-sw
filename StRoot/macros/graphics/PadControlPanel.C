@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.19 2001/09/01 23:36:57 perev Exp $
+// $Id: PadControlPanel.C,v 1.20 2003/10/09 18:11:54 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -52,6 +52,8 @@
 //
 ///////////////////////////////////////////////////////////////////////
 TGButtonGroup *mainBar=0;
+
+TVirtualPad *qPad(){ return  TVirtualPad::Pad() ;}
 
 class StPadControlPanel {
   private:
@@ -112,7 +114,7 @@ void  Build()
 static void SetBackround(Color_t color, TVirtualPad *pad=0)
 {
   TVirtualPad *thisPad = pad;
-  if (!thisPad) thisPad = gPad;
+  if (!thisPad) thisPad = qPad();
   if (thisPad)  {
     thisPad->SetFillColor(color);
     thisPad->Modified();
@@ -124,7 +126,7 @@ static void SetBackround(Color_t color, TVirtualPad *pad=0)
 static void SetBackroundStyle(TVirtualPad *pad=0)
 {
   TVirtualPad *thisPad = pad;
-  if (!thisPad) thisPad = gPad;
+  if (!thisPad) thisPad = qPad();
   if (thisPad) thisPad->SetFillAttributes();  
 }
 
@@ -132,7 +134,7 @@ static void SetBackroundStyle(TVirtualPad *pad=0)
 static void RotateView(Float_t phi, Float_t theta, TVirtualPad *pad=0)
 {
   TVirtualPad *thisPad = pad;
-  if (!thisPad) thisPad = gPad;
+  if (!thisPad) thisPad = qPad();
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (view) {
@@ -175,7 +177,7 @@ static void ToggleZoom(TVirtualPad *pad=0)
 //_______________________________________________________________________________________
 static void AddGrid()
 { 
-  TVirtualPad *thisPad = gPad;
+  TVirtualPad *thisPad = qPad();
 
   if (thisPad) {
  
@@ -206,7 +208,7 @@ static void AddGrid()
 //_______________________________________________________________________________________
 static void AdjustScales()
 {
-  TVirtualPad *thisPad = gPad;
+  TVirtualPad *thisPad = qPad();
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
@@ -227,7 +229,7 @@ static void AdjustScales()
 static void Centered3DImages()
 {
   // This macro prints out the sizes of the sekected 3d pad
-  TVirtualPad *thisPad = gPad;
+  TVirtualPad *thisPad = qPad();
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
@@ -244,7 +246,7 @@ static void Centered3DImages()
 //_______________________________________________________________________________________
 static void Decrease3DScale()
 {
-  TVirtualPad *thisPad = gPad;
+  TVirtualPad *thisPad = qPad();
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
@@ -261,7 +263,7 @@ static void Decrease3DScale()
 //_______________________________________________________________________________________
 static void Inscrease3DScale()
 {
-  TVirtualPad *thisPad = gPad;
+  TVirtualPad *thisPad = qPad();
   if (thisPad) {
     TView *view = thisPad->GetView(); 
     if (!view) return;
@@ -277,7 +279,7 @@ static void Inscrease3DScale()
 //_______________________________________________________________________________________
 void MakeFourView(TVirtualPad *pad=0)
 {
-//  Creates 4 pads view of the pad (or gPad)
+//  Creates 4 pads view of the pad (or qPad)
 //   ------------------------------
 //   |              |             |
 //   |              |             |
@@ -300,7 +302,7 @@ void MakeFourView(TVirtualPad *pad=0)
 // begin_html  <P ALIGN=CENTER> <IMG SRC="gif/FourStarView.gif" ></P> end_html
 //
   TVirtualPad *thisPad = pad;
-  if (!thisPad) thisPad = gPad;
+  if (!thisPad) thisPad = qPad();
   TView *view = 0; 
   TList *thisPrimitives = 0; 
   if (thisPad && (thisPrimitives = thisPad->GetListOfPrimitives()) && (view =  thisPad->GetView()) ) 
@@ -313,7 +315,7 @@ void MakeFourView(TVirtualPad *pad=0)
     TIter *next=  new TIter(thisPrimitives);
     for (int i =1; i <= 4; i++) {
       c->cd(i);
-      TList *newPrimitives = gPad->GetListOfPrimitives();
+      TList *newPrimitives = qPad()->GetListOfPrimitives();
       TObject *obj = 0;
       while (obj = next->Next()) newPrimitives->Add(obj);
       TView *newView = new TView(system);
@@ -337,7 +339,7 @@ void AddAxes(TVirtualPad *pad=0)
 {
   // Add red, green, blue - X, Y, Z axice to the "pad"
   TVirtualPad *thisPad = pad;
-  if (!thisPad) thisPad = gPad;
+  if (!thisPad) thisPad = qPad();
   if (thisPad) {
     if (!gROOT->GetClass("St_PolyLine3D"))  gSystem->Load("St_base");
     if ( gROOT->GetClass("St_PolyLine3D"))  gROOT->ProcessLineFast("St_PolyLine3D::Axis();");
@@ -349,6 +351,9 @@ StPadControlPanel __StPadControlPanel__;
 
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.20  2003/10/09 18:11:54  perev
+// calculate gPad pointer
+//
 // Revision 1.19  2001/09/01 23:36:57  perev
 // WindowName added
 //
