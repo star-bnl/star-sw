@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.6 1999/03/15 01:18:36 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.7 1999/03/20 22:07:43 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.7  1999/03/20 22:07:43  perev
+ * new maker schema
+ *
  * Revision 1.6  1999/03/15 01:18:36  genevb
  * Fixed Xi vertex typo
  *
@@ -78,8 +81,8 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.6 1999/03/15 01:18:36 genevb Exp $" << endl;
-    if (gStChain->Debug()) StMaker::PrintInfo();
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.7 1999/03/20 22:07:43 perev Exp $" << endl;
+    if (Debug()) StMaker::PrintInfo();
 }
 
 StrangeTag_st* StStrangeTagsMaker::tag()
