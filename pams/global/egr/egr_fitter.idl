@@ -7,7 +7,6 @@
 #include "tcl_tphit.idl"
 #include "dst_vertex.idl"
 #include "tpt_track.idl"
-#include "tte_eval.idl"
 #include "scs_spt.idl"
 #include "egr_egrpar.idl"
 #include "stk_track.idl"
@@ -20,7 +19,7 @@ interface egr_fitter   :        amiModule {
                 ( inout tcl_tphit       tphit
                 , in    dst_vertex      privert
                 , inout tpt_track       tptrack
-                , in    tte_eval        tpeval
+	        , inout sgr_groups      tpc_group
                 , inout scs_spt         svt_spt
                 , in    egr_egrpar      egrpar
                 , inout stk_track       svt_track
@@ -29,4 +28,4 @@ interface egr_fitter   :        amiModule {
                 , out   dst_track       globtrk
         );
 };
-/* Last mod. for egr_fitter: $Date: 1999/09/29 18:35:45 $ */
+/* Last mod. for egr_fitter: $Date: 2000/02/25 02:37:45 $ */

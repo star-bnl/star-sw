@@ -2,12 +2,12 @@
      1             tphit_h,             tphit ,
      2           privert_h,           privert ,
      3           tptrack_h,           tptrack ,
-     4            tpeval_h,            tpeval ,
-     5           svt_spt_h,           svt_spt ,
-     6            egrpar_h,            egrpar ,
-     7         svt_track_h,         svt_track ,
-     8         svt_group_h,         svt_group ,
-     9         evt_match_h,         evt_match , 
+     3         tpc_group_h,         tpc_group ,
+     4           svt_spt_h,           svt_spt ,
+     5            egrpar_h,            egrpar ,
+     6         svt_track_h,         svt_track ,
+     7         svt_group_h,         svt_group ,
+     8         evt_match_h,         evt_match , 
      9           globtrk_h,           globtrk) 
 C>--------------------------------------------------------------------
 C *********************************************************************
@@ -30,7 +30,8 @@ C ***  9/9/97 -  CAINES - Updated the SVT track-hit  identification   **
 C ***  12/2/97 - CAINES - Added message routine as official one now  **
 C ***                     unmanaged                                  **
 C ***  6/5/98 -  CAINES - Changed globtrk to dst_track and dst_track_aux*
-C ***  9/29/00 - CAINES - Removed scenario setting,now just usetpc etc *
+C ***  9/29/99 - CAINES - Removed scenario setting,now just usetpc etc *
+C ***  2/18/00 - CAINES - Removed MC abilities                         *
 C *********************************************************************
 
 C Input Arguments:
@@ -43,9 +44,6 @@ C     privert   =       rows of the privert table
 C     tptrack_h =       header for the tptrack table (TPC 
 C                              reconstructed tracks)
 C     tptrack   =       rows of the tptrack table
-C     tpeval_h  =       header for the tpeval table (for TPC 
-C                              track MC ID)
-C     tpeval    =       rows of the tpeval table
 C     svt_spt_h =       header for the svt_spt table (SVT space points)
 C     svt_spt   =       rows of the svt_spt table 
 C     svt_group_h =    header for the svt_group table (SVT 
@@ -69,6 +67,7 @@ C<----------------------------------------------------------------------
 #include "egr_track_pointers.inc"
 #include "math_constants.inc"
 #include "StDetectorId.inc"
+#include "StTrackMethod.inc"
 
 C ---------------------------------------------------------------------
 
@@ -76,7 +75,7 @@ C ---------------------------------------------------------------------
 
       INTEGER i,j,jj,iret,itrk,ient,imatch
       INTEGER igtrk,itpct,isvtt,ipriv,iglob,ishit,ithit
-      INTEGER tpcmc(1),lasthit,ifirst
+      INTEGER lasthit,ifirst
       INTEGER*4 egr_refit_track,egr_load_globtrk
       INTEGER*4 egr_refit_track_kal, egr_load_globtrk_kal
       INTEGER svt(1),tpc(1),mxtrack
@@ -98,7 +97,6 @@ C ---------------------------------------------------------------------
 
 
       pointer (gtrk_p, gtrk)
-      pointer (tpcmc_p,tpcmc)
       pointer (svt_p, svt)
       pointer (tpc_p,tpc)
 
@@ -108,7 +106,7 @@ C ---------------------------------------------------------------------
 C  Initialize number of refit tracks
 
       globtrk_h.nok = 0
-c      write(6,*) 'EGR: ',tphit_h.nok,tptrack_h.nok,tpeval_h.nok,globtrk_h.nok
+c      write(6,*) 'EGR: ',tphit_h.nok,tptrack_h.nok,globtrk_h.nok
 
 CCC  Initialize the local track-pointer array structure to zero:
 CCC  L. Ray, 9/16/98
@@ -118,13 +116,9 @@ CCC  L. Ray, 9/16/98
 
 
       mxtrack = svt_track_h.nok + tptrack_h.nok
-      if( tpeval_h.nok .gt. tptrack_h.nok) then
-         mxtrack = svt_track_h.nok + tpeval_h.nok
-      endif
       i = abs(loc(gtrk(2))-loc(gtrk(1)))
       gtrk_p = malloc(mxtrack*i)
       call vzero(gtrk(1),(mxtrack*i)/4)
-      tpcmc_p = malloc(mxtrack*4)
       svt_p = malloc(mxtrack*4)
       tpc_p = malloc(mxtrack*4)
 
@@ -136,6 +130,13 @@ CCC  L. Ray, 9/16/98
       write(6,*) 'Using a field of',bfield(3),' KGauss'  
 
 
+C Set whether to use primary vertex in fit or not
+
+      if (egrpar(1).usevert.eq.1.or.egrpar(1).usevert.eq.-2) then
+         ipriv=1
+      else
+         ipriv = 0
+      endif
 C *************************************************************************
 C  Fill the gtrk refitting array here.
 C  First work on the TPC hit information.  Set up hit assignments.
@@ -165,246 +166,62 @@ C** Spiros put this after Helen suggested it!
 C**
             tpc(tptrack(i).id) = i
 *--- reset foreign keys that are set here SM ---------*
-	    tptrack(i).id_globtrk = 0
+
+            tptrack(i).id_globtrk = -1*tptrack(i).id_globtrk
+            
          end do
-         do ithit=1,tphit_h.nok        ! Loop over number of hits
-            tphit(ithit).id_globtrk = 0     !  Zero out F.key - L. Ray 9/16/98
-            itrk = tphit(ithit).track/1000
-*VP*        if (itrk.ge.1.and.itrk.le.mxtrack) then
-            if (itrk.ge.1.and.itrk.le.tptrack_h.nok) then !!!*VP*
-               ient = tphit(ithit).track - itrk*1000
-               if (ient.ge.1.and.ient.le.mxpnt_tpc) then
-                  if ( gtrk(itrk).nhit .lt. mxpnt_tpc) then  !!*VP*
-                     gtrk(itrk).ipnt(ient) = ithit
-                     gtrk(itrk).pos(ient) = ient
-                     gtrk(itrk).det(ient) = 1
-                     gtrk(itrk).nhit = gtrk(itrk).nhit + 1
-                     gtrk(itrk).ntpc = gtrk(itrk).ntpc + 1
+         do ithit=1,tpc_group_h.nok        ! Loop over number of hits
+            if( tpc_group(ithit).ident .eq. 0) then
+               itrk = tpc_group(ithit).id1/1000
+*     VP*        if (itrk.ge.1.and.itrk.le.mxtrack) then
+               if (itrk.ge.1.and.itrk.le.tptrack_h.nok) then !!!*VP*
+                  ient = tpc_group(ithit).id1 - itrk*1000
+                  if (ient.ge.1.and.ient.le.mxpnt_tpc) then
+                     if ( gtrk(itrk).nhit .lt. mxpnt_tpc) then !!*VP*
+                        gtrk(itrk).ipnt(ient) = tpc_group(ithit).id2
+                        gtrk(itrk).pos(ient) = ient
+                        gtrk(itrk).det(ient) = 1
+                        gtrk(itrk).nhit = gtrk(itrk).nhit + 1
+                        gtrk(itrk).ntpc = gtrk(itrk).ntpc + 1
+                     endif
+                  else
+                     if( ient .eq. mxpnt_tpc+1) then 
+                        write (errmsg,'(A45,I5)')
+     +                       ' EGR_REFITTER-W: Too many hits on track', itrk
+                        call message(errmsg,1,imsg2)
+                     endif
                   endif
                else
-                  if( ient .eq. mxpnt_tpc+1) then 
-                     write (errmsg,'(A45,I5)')
-     +                 ' EGR_REFITTER-W: Too many hits on track', itrk
-                     call message(errmsg,1,imsg2)
+*     VP*           if (itrk.gt.mxtrack) then
+                  if (itrk.gt.tptrack_h.nok) then !!*VP*
+                     write (errmsg,'(A45,I8)')
+     +                    ' EGR_REFITTER-W: track id out of range',
+     +                    tpc_group(ithit).id1
+                     call message(errmsg,1,imsg3)
                   endif
                endif
-            else
-*VP*           if (itrk.gt.mxtrack) then
-               if (itrk.gt.tptrack_h.nok) then		!!*VP*
-                  write (errmsg,'(A45,I8)')
-     +                 ' EGR_REFITTER-W: track id out of range',
-     +                 tphit(ithit).track
-                  call message(errmsg,1,imsg3)
-               endif
-            endif
+            endif               ! Should hit be used in fit
          enddo                  ! Loop over ithit
       endif                     ! usetpc.gt.0
- 
-      if (egrpar(1).usevert.eq.1.or.egrpar(1).usevert.eq.-2) then
-         ipriv=1
-      else
-         ipriv = 0
-      endif
-
+         
+         
       do i=1,svt_track_h.nok
          if( svt_track(i).id .le. mxtrack) then
             svt(svt_track(i).id) = i
          endif
+         svt_track(i).id_globtrk = -1*svt_track(i).id_globtrk
       enddo
- 
-      if( egrpar(1).useglobal .eq. 1 ) then
-         do itpct = 1,tptrack_h.nok  
-            j=1
-            jj=0
-            do while (j.le.tpeval_h.nok.and.jj.eq.0)
-               if (tpeval(j).rtrk.eq.tptrack(itpct).id) then
-                  tpcmc(itpct) = tpeval(j).mtrk
-                  jj=1
-               endif
-               j = j+1
-            enddo
-c     Find svt track with matching mc_id for perfect track matching
-            
-            isvtt = 0
-            j = 1
-            do while (isvtt .eq. 0 .and. j .le. svt_track_h.nok)
-               if( svt_track(j).id_mctrack .eq. tpcmc(itpct)
-     +              .and. svt_track(j).flag .gt. 0) then
-                  isvtt = svt_track(j).id
-               endif
-               j = j +1 
-            enddo
-            if( isvtt .ne. 0) then
-c     Fill tracks
-               
-               if( egrpar(1).usesvt .eq. 0 .and. 
-     +              egrpar(1).usetpc .eq. 0) then
-		  ifull = 1
-		  if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
-                  globtrk_h.nok = globtrk_h.nok + 1
-		  ifull = 2
-                  igtrk = globtrk_h.nok
-                  globtrk(igtrk).id= igtrk
-                 globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
-     +                 +(sign(1.0,float(tptrack(itrk).flag)))*500
-     +                 +tptrack(itrk).flag
-                  globtrk(igtrk).det_id = kTpcSvtIdentifier 
-! Add SSD if there later
-                  globtrk(igtrk).n_point = 1000*svt_track(svt(isvtt)).nspt +
-     +                 tptrack(itpct).nrec
-                  globtrk(igtrk).n_max_point =  tptrack(itpct).npos
-              globtrk(igtrk).n_fit_point = 1000*svt_track(svt(isvtt)).nspt +
-     +                 tptrack(itpct).nfit
-                  globtrk(igtrk).icharge=tptrack(itpct).q ! tpc q
-                  if( abs(globtrk(igtrk).icharge) .ne. 1) then
-                     globtrk(igtrk).iflag = -1.0*
-     +                    abs(globtrk(igtrk).iflag+20)
-                  endif
-                  globtrk(igtrk).r0=svt_track(svt(isvtt)).r0
-                  globtrk(igtrk).phi0=svt_track(svt(isvtt)).phi0
-                  globtrk(igtrk).z0=svt_track(svt(isvtt)).z0
-                  globtrk(igtrk).psi=svt_track(svt(isvtt)).psi
-                  globtrk(igtrk).tanl=svt_track(svt(isvtt)).tanl
-                  globtrk(igtrk).invpt=abs(tptrack(itpct).invp) ! tpc pt
-                  globtrk(igtrk).covar(1)
-     +                 =svt_track(svt(isvtt)).cov(1)
-                  globtrk(igtrk).covar(2)
-     +                 =svt_track(svt(isvtt)).cov(2)
-                  globtrk(igtrk).covar(3)
-     +                 =svt_track(svt(isvtt)).cov(3)
-                  globtrk(igtrk).covar(4)
-     +                 =svt_track(svt(isvtt)).cov(4)
-                  globtrk(igtrk).covar(5)
-     +                 =svt_track(svt(isvtt)).cov(5) 
-                 globtrk(igtrk).covar(6)
-     +                 =svt_track(svt(isvtt)).cov(6)
-                  globtrk(igtrk).covar(7)
-     +                 =svt_track(svt(isvtt)).cov(7)
-                  globtrk(igtrk).covar(8)
-     +                 =svt_track(svt(isvtt)).cov(8)
-                  globtrk(igtrk).covar(9)
-     +                 =svt_track(svt(isvtt)).cov(9)
-                  globtrk(igtrk).covar(10)
-     +                 =svt_track(svt(isvtt)).cov(10) 
-                 globtrk(igtrk).covar(11)
-     +                 =svt_track(svt(isvtt)).cov(11)
-                  globtrk(igtrk).covar(12)
-     +                 =svt_track(svt(isvtt)).cov(12)
-                  globtrk(igtrk).covar(13)
-     +                 =svt_track(svt(isvtt)).cov(13)
-                  globtrk(igtrk).covar(14)
-     +                 =svt_track(svt(isvtt)).cov(14)
-                  globtrk(igtrk).covar(15)
-     +                 =svt_track(svt(isvtt)).cov(15) 
-                
-                  globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
-                  globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
-C     Now find first point on track
-                  rfirst = 99999.
-
-                  do ishit = 1,svt_group_h.nok
-                     if( svt_group(ishit).id1 .eq.
-     +                    svt_track(svt(isvtt)).id) then
-                        ient = svt_group(ishit).id2
-                        if( svt_spt(ient).id_wafer .gt. 6000 ) then
-                           globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
-C Adjusting from svt hit to ssd hit
-                           globtrk(igtrk).n_point = globtrk(igtrk).n_point
-     +                          -1000+10000
-                           globtrk(igtrk).n_fit_point = 
-     +                          globtrk(igtrk).n_fit_point
-     +                          -1000+10000
-                           if( svt_track(isvtt).nspt .eq.1) then
-                              globtrk(igtrk).det_id = kTpcSsdIdentifier
-                           endif
-
-                        endif
-                     r =  (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
-     +                       svt_spt(ient).x(3)**2)
-                        if( r .lt. rfirst) then
-                           rfirst = r
-                           ifirst = ient 
-                        endif   
-                     endif
-                  enddo
-                  
-                  globtrk(igtrk).x_first(1) = svt_spt(ifirst).x(1)
-                  globtrk(igtrk).x_first(2) = svt_spt(ifirst).x(2)
-                  globtrk(igtrk).x_first(3) = svt_spt(ifirst).x(3)
-C     Now find last point on track and calculate track length.
-                  
-                  if (tptrack(itpct).id.gt.0.and.
-     +                 tptrack(itpct).id.le.mxtrack) then
-                     lasthit = gtrk(tptrack(itpct).id).ipnt(1)
-                  else
-                     write (errmsg,'(A60)')
-     +                    'EGR_REFITTER-W: lasthit trk id error'
-                     call message(errmsg,1,imsg4)
-                  endif
-                  
-                  globtrk(igtrk).x_last(1) = tphit(lasthit).x
-                  globtrk(igtrk).x_last(2) = tphit(lasthit).y
-                  globtrk(igtrk).x_last(3) = tphit(lasthit).z
-C----->>>>  new calculation of .length   S.Margetis
-                  gseed = sqrt((globtrk(igtrk).x_last(1) 
-     +                - globtrk(igtrk).x_first(1))**2 +
-     +                 (globtrk(igtrk).x_last(2) 
-     +                - globtrk(igtrk).x_first(2))**2)
-
-                  gtanl = globtrk(igtrk).tanl
-                  ginvpt= globtrk(igtrk).invpt
-              call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
-                  globtrk(igtrk).length=glength
-C---<<<<<<<
-                  globtrk(igtrk).impact = 0.                  
-CSM                  globtrk(igtrk).id_start_vertex = 0
-                  globtrk(igtrk).curvature = tptrack(itpct).curvature
-                  globtrk(igtrk).method = 0
-                  globtrk(igtrk).map(1) = 0
-                  globtrk(igtrk).map(2) = 0
-                  globtrk(igtrk).pid = 0
-
- 
-                  if (globtrk(igtrk).length.gt.99999.9) then
-                     globtrk(igtrk).length=99999.9
-                  endif
-                  
-               else
-             iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
-     +                 svt(isvtt),ipriv,gtrk,tphit_h,tphit,privert_h,
-     +                 privert,svt_spt_h,svt_spt,svt_track_h,svt_track,
-     +                 svt_group_h,svt_group,egrpar_h,egrpar,
-     +                 evt_match_h,evt_match,cov)
-                  
-              iret = egr_load_globtrk(globtrk_h,globtrk,
-     +                 tptrack(itpct).id,gtrk,
-     +                 tphit_h,tphit,svt_spt_h,svt_spt,cov,itpct,
-     +                 isvtt,ipriv,bfield(3))
-               endif
-               tptrack(itpct).id_globtrk = globtrk_h.nok
-               svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
-            endif               ! isvtt>0
-c     mark spts as used
-            do ient = 1, gtrk(itpct).nhit
-               if( gtrk(itpct).det(ient) .eq. 1) then
-                  ithit = gtrk(itpct).ipnt(ient)
-                  tphit(ithit).id_globtrk = globtrk_h.nok
-               elseif( gtrk(itpct).det(ient) .eq. 2)  then     
-                  svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
-     +                 globtrk_h.nok
-               endif
-            enddo
-         enddo                  ! Loop over all tpc tracks
+      
          
-      elseif( egrpar(1).useglobal .gt. 1) then ! Use svms matching
+      if( egrpar(1).useglobal .gt. 1) then ! Use svms matching
          
          do imatch=1,evt_match_h.nok ! Loop over evt_match table
             itpct = evt_match(imatch).idtpc
             isvtt = evt_match(imatch).idsvt
-            if( egrpar(1).useglobal .eq. 2) then
+            if( egrpar(1).useglobal .eq. 2) then ! Standard refit
                
                igtrk = itpct  
-
+               
                iret = egr_refit_track(igtrk,itpct,svt(isvtt),ipriv,gtrk,
      +              tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
      +              svt_track_h,svt_track,svt_group_h,svt_group,
@@ -414,31 +231,49 @@ c     mark spts as used
      +              igtrk,gtrk,tphit_h,tphit,svt_spt_h,
      +              svt_spt,cov,itpct,isvtt,ipriv,bfield(3))
                
-c     mark spts as used
+c     mark spts as used if not using primary vertex
                do ient = 1, gtrk(itpct).nhit
-                  if( gtrk(itpct).det(ient) .eq. 1) then
-                     ithit = gtrk(itpct).ipnt(ient)
-                     tphit(ithit).id_globtrk = globtrk_h.nok
-                  elseif( gtrk(itpct).det(ient) .eq. 2)  then   
-                     svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
-     +                    globtrk_h.nok
+                  ithit = gtrk(itpct).ipnt(ient)
+                  if( gtrk(itpct).det(ient) .eq. 1 ) then
+                     
+                     if( gtrk(itpct).pos(ient) .lt. 0) then
+                        tpc_group(ithit).ident = -1
+                     endif
+                     if( ipriv .eq. 0) then
+                        tphit(ithit).id_globtrk = globtrk_h.nok
+                     endif
+                  elseif( gtrk(itpct).det(ient) .eq. 2)  then  
+                     if( gtrk(itpct).pos(ient) .lt. 0) then
+                        
+                        do ishit = 1, svt_group_h.nok
+                           if( svt_group(ishit).id2 .eq. 
+     +                          svt_spt(gtrk(itpct).ipnt(ient)).id) then
+                              svt_group(ishit).ident=-1
+                           endif
+                        enddo
+                     endif
+                     if( ipriv .eq.0) then
+                        svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
+     +                       globtrk_h.nok
+                     endif
                      if( gtrk(itpct).pos(ient) .gt. 0) then
-                       globtrk(globtrk_h.nok).n_fit_point = 
+                        globtrk(globtrk_h.nok).n_fit_point = 
      +                       globtrk(globtrk_h.nok).n_fit_point-1+1000
-                    endif
+                     endif
                      if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
      +                    .gt.6000) then
                         globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
-                     if( gtrk(itpct).pos(ient) .gt. 0) then
-                       globtrk(globtrk_h.nok).n_fit_point = 
-     +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
-                    endif
+                        if( gtrk(itpct).pos(ient) .gt. 0) then
+                           globtrk(globtrk_h.nok).n_fit_point = 
+     +                          globtrk(globtrk_h.nok).n_fit_point-1000+
+     +                          10000
+                        endif
                      endif
-                  
+                     
                   endif
                enddo
-            elseif( egrpar(1).useglobal.eq.4) then
+            elseif( egrpar(1).useglobal.eq.4) then ! Kalman refit
                igtrk = itpct
                
                param(1) = svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG
@@ -459,167 +294,59 @@ c     mark spts as used
      +              tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
      +              ipriv,bfield(3))
                
-c     mark spts as used
+c     mark spts as used if not using primary vertex
                do ient = 1, gtrk(itpct).nhit
+                  ithit = gtrk(itpct).ipnt(ient)
                   if( gtrk(itpct).det(ient) .eq. 1) then
-                     ithit = gtrk(itpct).ipnt(ient)
-                     tphit(ithit).id_globtrk = globtrk_h.nok
-                  elseif( gtrk(itpct).det(ient) .eq. 2)  then   
-                     svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
-     +                    globtrk_h.nok
+                     
+                     if( gtrk(itpct).pos(ient) .lt. 0) then
+                        tpc_group(ithit).ident = -1
+                     endif
+                     if( ipriv .eq. 0) then
+                        tphit(ithit).id_globtrk = globtrk_h.nok
+                     endif
+                  elseif( gtrk(itpct).det(ient) .eq. 2)  then 
+                     if( gtrk(itpct).pos(ient) .lt. 0) then
+                        
+                        do ishit = 1, svt_group_h.nok
+                           if( svt_group(ishit).id2 .eq. 
+     +                          svt_spt(gtrk(itpct).ipnt(ient)).id) then
+                              svt_group(ishit).ident=-1
+                           endif
+                        enddo
+                     endif
+                     if( ipriv .eq. 0) then
+                        svt_spt(gtrk(itpct).ipnt(ient)).id_globtrk =  
+     +                       globtrk_h.nok
+                     endif
                      if( gtrk(itpct).pos(ient) .gt. 0) then
-                       globtrk(globtrk_h.nok).n_fit_point = 
+                        globtrk(globtrk_h.nok).n_fit_point = 
      +                       globtrk(globtrk_h.nok).n_fit_point-1+1000
-                       endif
+                     endif
                      if(svt_spt(gtrk(itpct).ipnt(ient)).id_wafer 
      +                    .gt.6000) then
                         globtrk(globtrk_h.nok).n_point = 
      +                       globtrk(globtrk_h.nok).n_point-1000+10000
-                     if( gtrk(itpct).pos(ient) .gt. 0) then
-                       globtrk(globtrk_h.nok).n_fit_point = 
-     +                       globtrk(globtrk_h.nok).n_fit_point-1000+10000
-                       endif
-                     endif
-                  endif
-               enddo
-               
-               
-            elseif(egrpar(1).useglobal.eq.3) then
-               
-	       ifull = 1
-	       if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
-               globtrk_h.nok = globtrk_h.nok + 1
-	       ifull = 2
-               igtrk = globtrk_h.nok
-               globtrk(igtrk).id=igtrk              
-               globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
-     +              +(sign(1.0,float(tptrack(tpc(itpct)).flag)))*500
-     +              +tptrack(tpc(itpct)).flag             
-               globtrk(igtrk).det_id = kTpcSvtIdentifier
-C Adjust for ssd later
-               globtrk(igtrk).n_point = 1000*svt_track(svt(isvtt)).nspt +
-     +              tptrack(tpc(itpct)).nrec
-                globtrk(igtrk).n_max_point = tptrack(tpc(itpct)).npos  
-               globtrk(igtrk).n_fit_point = 1000*svt_track(svt(isvtt)).nspt +
-     +              tptrack(tpc(itpct)).nfit 
-               globtrk(igtrk).icharge=tptrack(tpc(itpct)).q ! tpc q
-               globtrk(igtrk).r0=svt_track(svt(isvtt)).r0           
-               globtrk(igtrk).phi0=svt_track(svt(isvtt)).r0
-               globtrk(igtrk).z0=svt_track(svt(isvtt)).z0
-               globtrk(igtrk).psi=svt_track(svt(isvtt)).psi               
-               globtrk(igtrk).tanl=svt_track(svt(isvtt)).tanl
-               globtrk(igtrk).invpt=abs(tptrack(tpc(itpct)).invp) ! tpc pt
-               globtrk(igtrk).covar(1)=svt_track(svt(isvtt)).cov(1)
-               globtrk(igtrk).covar(2)=svt_track(svt(isvtt)).cov(2)
-               globtrk(igtrk).covar(3)=svt_track(svt(isvtt)).cov(3)
-               globtrk(igtrk).covar(4)=svt_track(svt(isvtt)).cov(4)
-               globtrk(igtrk).covar(5)=svt_track(svt(isvtt)).cov(5)
-               globtrk(igtrk).covar(6)=svt_track(svt(isvtt)).cov(6)
-               globtrk(igtrk).covar(7)=svt_track(svt(isvtt)).cov(7)
-               globtrk(igtrk).covar(8)=svt_track(svt(isvtt)).cov(8)
-               globtrk(igtrk).covar(9)=svt_track(svt(isvtt)).cov(9)
-               globtrk(igtrk).covar(10)=svt_track(svt(isvtt)).cov(10)
-               globtrk(igtrk).covar(11)=svt_track(svt(isvtt)).cov(11)
-               globtrk(igtrk).covar(12)=svt_track(svt(isvtt)).cov(12)
-               globtrk(igtrk).covar(13)=svt_track(svt(isvtt)).cov(13)
-               globtrk(igtrk).covar(14)=svt_track(svt(isvtt)).cov(14)
-               globtrk(igtrk).covar(15)=svt_track(svt(isvtt)).cov(15)
-
-               globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
-               globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
-C     Now find first point on track
-               rfirst = 99999.
-               do ishit = 1,svt_group_h.nok
-                  if( svt_group(ishit).id1 .eq.
-     +                 svt_track(svt(isvtt)).id) then
-                     ient = svt_group(ishit).id2
-                     if( svt_spt(ient).id_wafer .gt. 6000) then
-                        globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
-C Adjusting from svt hit to ssd hit
-                        globtrk(igtrk).n_point = globtrk(igtrk).n_fit_point
-     +                       -1000+10000
-                        globtrk(igtrk).n_fit_point = 
-     +                       globtrk(igtrk).n_fit_point
-     +                       -1000+10000
-                        if( svt_track(isvtt).nspt .eq. 1) then
-                           globtrk(igtrk).det_id = kTpcSsdIdentifier
+                        if( gtrk(itpct).pos(ient) .gt. 0) then
+                           globtrk(globtrk_h.nok).n_fit_point = 
+     +                          globtrk(globtrk_h.nok).n_fit_point-1000
+     +                          +10000
                         endif
                      endif
-                     r = (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
-     +                    svt_spt(ient).x(3)**2)
-                     if( r .lt. rfirst) then
-                        rfirst = r
-                        ifirst = ient 
-                     endif   
                   endif
-               enddo
-               
-               globtrk(igtrk).x_first(1)= svt_spt(ifirst).x(1)
-               globtrk(igtrk).x_first(2)= svt_spt(ifirst).x(2)
-               globtrk(igtrk).x_first(3)= svt_spt(ifirst).x(3)
-
-C     Now find last point on track and calculate track length.
-
-               if (tptrack(tpc(itpct)).id.gt.0.and.
-     +              tptrack(tpc(itpct)).id.le.mxtrack) then
-                  lasthit = gtrk(tptrack(tpc(itpct)).id).ipnt(1)
-               else
-                  write (errmsg,'(A60)')
-     +                 'EGR_REFITTER-W: lasthit trk id error'
-                  call message(errmsg,1,imsg4)
-               endif
-               
-               globtrk(igtrk).x_last(1) = tphit(lasthit).x
-               globtrk(igtrk).x_last(2) = tphit(lasthit).y
-               globtrk(igtrk).x_last(3) = tphit(lasthit).z
-C----->>>>  new calculation of .length   S.Margetis
-                  gseed = sqrt((globtrk(igtrk).x_last(1) 
-     +                - globtrk(igtrk).x_first(1))**2 +
-     +                 (globtrk(igtrk).x_last(2) 
-     +                - globtrk(igtrk).x_first(2))**2)
-
-                  gtanl = globtrk(igtrk).tanl
-                  ginvpt= globtrk(igtrk).invpt
-             call egr_trk_length(gseed,gtanl,ginvpt,bfield(3),glength)
-                  globtrk(igtrk).length=glength
-C---<<<<<<<
-               if (globtrk(igtrk).length.gt.99999.9) then
-                  globtrk(igtrk).length=99999.9
-               endif
-           
-               globtrk(igtrk).impact = 0
-CSM               globtrk(igtrk).id_start_vertex = 0
-               globtrk(igtrk).curvature = tptrack(itpct).curvature
-               globtrk(igtrk).method = 0
-               globtrk(igtrk).map(1) = 0
-               globtrk(igtrk).map(2) = 0
-               globtrk(igtrk).pid = 0             
- 
-c     mark spts as used
-               
-               do ient = 1, gtrk(itpct).ntpc
-                  if( gtrk(itpct).det(ient) .eq. 1) then
-                     ithit = gtrk(itpct).ipnt(ient)
-                     tphit(ithit).id_globtrk = igtrk
-                  endif
-               enddo
-               
-               ient = gtrk(itpct).ntpc
-               do ishit = 1, svt_group_h.nok
-                  if( svt_group(ishit).id1 .eq. 
-     +                 svt_track(svt(isvtt)).id) then
-                     
-                     ient = ient+1
-                     ithit = svt_group(ishit).id2
-                     svt_spt(ithit).id_globtrk = igtrk
-                  endif
-               enddo
+               enddo 
             endif
-            
+         
+         
+         if( ipriv .eq. 0) then
             tptrack(tpc(itpct)).id_globtrk = globtrk_h.nok
             svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok
-            
-         enddo                  ! imatch
+         else
+            tptrack(tpc(itpct)).id_globtrk =
+     +           -1*tptrack(tpc(itpct)).id_globtrk
+         endif
+         
+      enddo                     ! imatch
       endif                     ! if useglobal>0
       
 C     Loop through unmatched TPC tracks here.  Straight copy of tptrack.
@@ -628,11 +355,11 @@ C     Loop through unmatched TPC tracks here.  Straight copy of tptrack.
          isvtt = 0
          do itrk = 1,tptrack_h.nok
 
-            if( tptrack(itrk).id_globtrk.eq.0 .and.
+            if( tptrack(itrk).id_globtrk.le.0 .and.
      +           tptrack(itrk).invp .ne. 0.0   .and.
      +           tptrack(itrk).flag .gt. 0) then
 C     +           tptrack(itrk).nrec .gt. 10 )    then
-
+               
                
                if( egrpar(1).usetpc .eq. 2) then
                   
@@ -694,21 +421,21 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                   globtrk(iglob).psi = tptrack(itrk).psi
                   globtrk(iglob).tanl = tptrack(itrk).tanl
                   globtrk(iglob).invpt = tptrack(itrk).invp
-                  globtrk(iglob).covar(1) = tptrack(itrk).cov(1)
-                  globtrk(iglob).covar(2) = tptrack(itrk).cov(2)
-                  globtrk(iglob).covar(3) = tptrack(itrk).cov(3)
-                  globtrk(iglob).covar(4) = tptrack(itrk).cov(4)
-                  globtrk(iglob).covar(5) = tptrack(itrk).cov(5)
-                  globtrk(iglob).covar(6) = tptrack(itrk).cov(6)
-                  globtrk(iglob).covar(7) = tptrack(itrk).cov(7)
-                  globtrk(iglob).covar(8) = tptrack(itrk).cov(8)
-                  globtrk(iglob).covar(9) = tptrack(itrk).cov(9)
+                  globtrk(iglob).covar(1) = tptrack(itrk).cov(3)
+                  globtrk(iglob).covar(2) = 0.
+                  globtrk(iglob).covar(3) = 0.
+                  globtrk(iglob).covar(4) = 0.
+                  globtrk(iglob).covar(5) = 0.
+                  globtrk(iglob).covar(6) = tptrack(itrk).cov(15)
+                  globtrk(iglob).covar(7) = 0.
+                  globtrk(iglob).covar(8) = 0.
+                  globtrk(iglob).covar(9) = 0.
                   globtrk(iglob).covar(10) = tptrack(itrk).cov(10)
-                  globtrk(iglob).covar(11) = tptrack(itrk).cov(11)
-                  globtrk(iglob).covar(12) = tptrack(itrk).cov(12)
-                  globtrk(iglob).covar(13) = tptrack(itrk).cov(13)
-                  globtrk(iglob).covar(14) = tptrack(itrk).cov(14)
-                  globtrk(iglob).covar(15) = tptrack(itrk).cov(15)
+                  globtrk(iglob).covar(11) = 0.
+                  globtrk(iglob).covar(12) = 0.
+                  globtrk(iglob).covar(13) = tptrack(itrk).cov(6)
+                  globtrk(iglob).covar(14) = 0.
+                  globtrk(iglob).covar(15) = tptrack(itrk).cov(1)
 
                   globtrk(iglob).chisq(1) = tptrack(itrk).chisq(1)/
      +            real(globtrk(iglob).n_fit_point-3)
@@ -762,20 +489,26 @@ C---<<<<<<<
 
 CSM                  globtrk(iglob).id_start_vertex= 0
                   globtrk(iglob).curvature = tptrack(itrk).curvature
-                  globtrk(iglob).method = 0
+                  globtrk(iglob).method = 2**8+2**kHelix2StepId
                   globtrk(iglob).map(1) = 0
                   globtrk(iglob).map(2) = 0
                   globtrk(iglob).pid = 0
 
 
-               endif            ! End of egrpar(1).perfect .ne. 1
-               do ient = 1, gtrk(itrk).ntpc
-                  if( ient .le .mxpnt_tpc) then
-                     ithit = gtrk(itrk).ipnt(ient)
-		     if (ithit.ne.-999) tphit(ithit).id_globtrk = globtrk_h.nok
-                  endif
-               enddo
-               tptrack(itrk).id_globtrk = globtrk_h.nok
+               endif            ! End of what type of tpc copying to do
+               
+               if( ipriv .eq. 0) then
+                  do ient = 1, gtrk(itrk).ntpc
+                     if( ient .le .mxpnt_tpc) then
+                        ithit = gtrk(itrk).ipnt(ient)
+                        if (ithit.ne.-999) tphit(ithit).id_globtrk 
+     +                       = globtrk_h.nok
+                     endif
+                  enddo
+                  tptrack(itrk).id_globtrk = globtrk_h.nok
+               else
+                  tptrack(itrk).id_globtrk = -1*tptrack(itrk).id_globtrk 
+               endif
             endif               ! End of test if good tpc track
          enddo                  ! End of tpc track loop
       endif                     ! End of if egrpar(1).usetpc .eq. 1
@@ -786,7 +519,7 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
          itpct = 0
          igtrk = tptrack_h.nok
          do itrk = 1,svt_track_h.nok
-            if (svt_track(itrk).id_globtrk.eq.0) then
+            if (svt_track(itrk).id_globtrk.le.0) then
                if (egrpar(1).svtchicut.eq.0.or.
      +              svt_track(itrk).chisq(1).le.
      +              egrpar(1).svtchicut) then ! only copy good SVT tracks
@@ -817,7 +550,9 @@ C     Adjust for ssd later
                               globtrk(iglob).n_fit_point = 
      +                         globtrk(iglob).n_fit_point-1000+10000
                            endif
-                           svt_spt(ient).id_globtrk = iglob
+                           if( ipriv .eq. 0) then
+                              svt_spt(ient).id_globtrk = iglob
+                           endif
                            r = (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                      svt_spt(ient).x(3)**2)
                            if( r .gt. rlast) then
@@ -899,7 +634,7 @@ C---<<<<<<<
                     globtrk(iglob).impact = 0
 CSM                    globtrk(iglob).id_start_vertex = 0
                     globtrk(iglob).curvature = 0
-                    globtrk(iglob).method = 0
+                    globtrk(iglob).method = 2**kHelix2StepId+2**7
                     globtrk(iglob).map(1) = 0
                     globtrk(iglob).map(2) = 0
                     globtrk(iglob).pid = 0
@@ -917,13 +652,15 @@ CSM                    globtrk(iglob).id_start_vertex = 0
      +                   igtrk,gtrk,tphit_h,
      +                   tphit,svt_spt_h,svt_spt,cov,itpct,isvtt
      +                   ,ipriv,bfield(3))
-                    
-                    do ishit = 1, gtrk(igtrk).nhit
-                       if( gtrk(igtrk).det(ishit) .eq. 2) then
-                          ient = gtrk(igtrk).ipnt(ishit)
-                          svt_spt(ient).id_globtrk = globtrk_h.nok
-                       endif
-                    enddo
+
+                    if( ipriv .eq.0) then
+                       do ishit = 1, gtrk(igtrk).nhit
+                          if( gtrk(igtrk).det(ishit) .eq. 2) then
+                             ient = gtrk(igtrk).ipnt(ishit)
+                             svt_spt(ient).id_globtrk = globtrk_h.nok
+                          endif
+                       enddo
+                    endif
                  elseIF( egrpar(1).usesvt .eq. 4) then
                     igtrk = igtrk + 1
 
@@ -947,10 +684,20 @@ CSM                    globtrk(iglob).id_start_vertex = 0
                     do ishit = 1, gtrk(igtrk).nhit
                        if( gtrk(igtrk).det(ishit) .eq. 2) then
                           ient = gtrk(igtrk).ipnt(ishit)
-                          svt_spt(ient).id_globtrk = globtrk_h.nok
+                          if( ipriv .eq. 0) then
+                             svt_spt(ient).id_globtrk = globtrk_h.nok
+                          endif
                         if( gtrk(igtrk).pos(ishit) .gt. 0) then
                            globtrk(globtrk_h.nok).n_fit_point = 
      +                          globtrk(globtrk_h.nok).n_fit_point-1+1000
+                        else
+                           do ient=1, svt_group_h.nok
+                              
+                              if( svt_group(ient).id2 .eq. 
+     +                             svt_spt(gtrk(igtrk).ipnt(ishit)).id) then
+                                 svt_group(ient).ident=-1
+                              endif
+                           enddo
                         endif
                           if( svt_spt(ient).id_wafer .gt. 6000) then
                        globtrk(globtrk_h.nok).n_point = 
@@ -967,8 +714,11 @@ CSM                    globtrk(iglob).id_start_vertex = 0
   
 
 
-               
+               if( ipriv .eq.0) then
                  svt_track(itrk).id_globtrk = globtrk_h.nok
+              else
+                svt_track(itrk).id_globtrk = -1*svt_track(itrk).id_globtrk
+              endif
                  
               endif             ! End of if egrpar(1).svtchicut
            endif                ! End of if svt_track(itrk).id_globtrk
@@ -1006,8 +756,7 @@ CSM        globtrk(i).iflag = -999
              
       egr_fitter = STAFCV_OK
 
- 999  call free(gtrk_p)
-      call free(tpcmc_p)
+ 999  call free(gtrk_p)    
       call free(svt_p)
       call free(tpc_p)
 

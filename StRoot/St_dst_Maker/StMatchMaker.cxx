@@ -1,9 +1,12 @@
-//////////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.14 2000/02/02 21:37:37 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.15 2000/02/25 02:38:27 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.15  2000/02/25 02:38:27  caines
+// Stuff to fill bit map, cov correctly
+//
 // Revision 1.14  2000/02/02 21:37:37  lbarnby
 // CC5
 //
@@ -43,6 +46,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 //#include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #if !defined(ST_NO_NAMESPACES)
@@ -396,13 +400,13 @@ Int_t StMatchMaker::Make(){
   PrintInfo();  
   
   int iMake = kStOK;
-  int iRes = 0;
+  int iRes = 0, i;
   
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
   
   dst_track_st* globtrkPtr  = globtrk->GetTable();
-  for( Int_t i=0; i<globtrk->GetTableSize(); i++, globtrkPtr++) {
+  for(  i=0; i<globtrk->GetTableSize(); i++, globtrkPtr++) {
     globtrkPtr->id_start_vertex = 0;
   } 
  
@@ -436,14 +440,14 @@ Int_t StMatchMaker::Make(){
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   
   St_stk_track   *stk_track   = 0;
-  St_sgr_groups  *groups      = 0;
+  St_sgr_groups  *svt_groups  = 0;
   St_scs_spt     *scs_spt     = 0;
   St_scs_cluster *scs_cluster = 0;
   
   // Case svt tracking performed
   if (svtracks) {
     stk_track = (St_stk_track  *) svtracks->Find("stk_track");
-    groups    = (St_sgr_groups *) svtracks->Find("groups");
+    svt_groups= (St_sgr_groups *) svtracks->Find("groups");
   }
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
@@ -454,11 +458,11 @@ Int_t StMatchMaker::Make(){
   
   // Case silicon not there
   if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
-  if (!groups)    {groups = new St_sgr_groups("groups",1); AddGarb(groups);}
+  if (!svt_groups)    {svt_groups = new St_sgr_groups("svt_groups",1); AddGarb(svt_groups);}
   if (!scs_spt)   {scs_spt = new St_scs_spt("scs_spt",1); AddGarb(scs_spt);}
   // 			Case running est tpc -> Si space point tracking
   if ( !(svtracks) && svthits ){
-    groups = new St_sgr_groups("groups",10000); AddGarb(groups);
+    svt_groups = new St_sgr_groups("svt_groups",10000); AddGarb(svt_groups);
     stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
     est_match    = (St_est_match *) m_GarbSet->Find("est_match");
@@ -505,7 +509,7 @@ Int_t StMatchMaker::Make(){
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
     if(Debug()) gMessMgr->Debug() << "Calling EST_TOGLOB2" << endm;
     iRes = est_toglob2(est_match, tphit,     tptrack, scs_spt,
-		       groups,stk_track,evt_match);
+		       svt_groups,stk_track,evt_match);
     //         ==================================================
     
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
@@ -518,11 +522,33 @@ Int_t StMatchMaker::Make(){
 #endif
   }
   
-  
+
+
+  // Create groups table for tpc
+
+
+   St_sgr_groups *tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());    AddData(tpc_groups); 
   // egr
+
+
+   tcl_tphit_st  *spc   = tphit->GetTable();
+   sgr_groups_st *tgroup = tpc_groups->GetTable();
+   int count = 0;
+
+   for( i=0; i<tphit->GetNRows(); i++, spc++){
+     
+       tgroup->id1 = spc->track;
+       tgroup->id2 = i+1;
+       tgroup->ident = 0;
+       count++;
+       tgroup++;
+   }
+
+   tpc_groups->SetNRows(count);
+
   
-  iRes = egr_fitter (tphit,    vertex,      tptrack,   evaltrk,
-		     scs_spt,m_egr_egrpar,stk_track,groups,
+  iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
+		     scs_spt,m_egr_egrpar,stk_track, svt_groups,
 		     evt_match,globtrk);
   //	 ======================================================
   
@@ -531,8 +557,93 @@ Int_t StMatchMaker::Make(){
     gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
   if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
   
+
+
+  // Fill bit map in glob trk
+
+  spc   = tphit->GetTable();
+  tgroup = tpc_groups->GetTable();
+  dst_track_st * track  = globtrk->GetTable();
+  
+  int spt_id = 0;
+  int track_id = 0;
+  int row = 0,y;
+  
+  for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+
+    if( tgroup->id1 != 0){
+      spt_id = tgroup->id2-1;
+      row = spc[spt_id].row/100;
+      row = spc[spt_id].row - row*100;
+      if( row < 25){
+	y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(2,(row+7)));
+	if( !fmod(y,2)){
+	  track[spc[spt_id].id_globtrk-1].map[0] += (1UL<<(row+7));
+	}
+	else{
+	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
+	  if( !fmod(y,2)){
+	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
+	  }
+	}
+	
+      }
+      else{
+	y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,(row-25)));
+	if( !fmod(y,2)){
+	  track[spc[spt_id].id_globtrk-1].map[1] += (1UL<<(row-25));
+	}
+	else{
+	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
+	  if( !fmod(y,2)){
+	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
+	    cout << "Got here " << endl;
+	  }
+	}
+	
+      }
+    }
+  }
+
+  //  cout << "Map[0] "<< PrintMap(track[0].map[0]) << " " << track[0].map[0] <<"\n" << endl;
+
+  //   cout << "Map[1] "<< PrintMap(track[0].map[1]) << "\n" << endl;
+
+  scs_spt_st *s_spc = scs_spt->GetTable();
+  sgr_groups_st *sgroup = svt_groups->GetTable();
+    
+  //for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+
+  // if( sgroup->id1 != 0){
+  //  spt_id = sgroup->id2;
+  //  row = s_spc[spt_id].id_wafer/1000;
+  //  if( row>7)row=7;
+  //   track[s_spc[spt_id].id_globtrk-1].map[0] += (1UL<<row);
+
+  // }
+ 
+  //}
+
+
   return iMake;
 }
 
 //_____________________________________________________________________________
 
+char* StMatchMaker::PrintMap( unsigned long x){
+
+ 
+  char b[31];
+
+  for( int i=30; i>=0; i--){
+    if( x >= pow(2,i)){
+      b[30-i] = 'x';
+      x -= pow(2,i);
+    }
+    else{
+      b[30-i]='-';
+    }
+  }
+  cout << b << endl;
+  return &b[0];
+}

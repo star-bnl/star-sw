@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.34 2000/02/16 16:13:09 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.35 2000/02/25 02:38:28 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.35  2000/02/25 02:38:28  caines
+// Stuff to fill bit map, cov correctly
+//
 // Revision 1.34  2000/02/16 16:13:09  genevb
 // Correction to not call evr_am with <1 tracks
 //
@@ -107,6 +110,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
 #include "TMath.h"
 #include "StPrimaryMaker.h"
 
@@ -249,6 +253,7 @@ Int_t StPrimaryMaker::Make(){
   
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
+  St_sgr_groups     *tpc_groups = (St_sgr_groups *) matchI("tpc_groups");
   St_dst_track     *primtrk     = 0;   
 
   St_dst_vertex *vertex = new St_dst_vertex("vertex", 4); 
@@ -271,13 +276,10 @@ Int_t StPrimaryMaker::Make(){
 
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
-  St_tte_eval   *evaltrk   = 0;
   if (tpctracks) {
     St_DataSetIter tpc_tracks(tpctracks); 
     tptrack   = (St_tpt_track  *) tpc_tracks("tptrack");
-    evaltrk   = (St_tte_eval   *) tpc_tracks("evaltrk");
   }
-  if (! evaltrk)    {evaltrk = new St_tte_eval("evaltrk",1); AddGarb(evaltrk);}
   if (! tptrack)    {tptrack = new St_tpt_track("tptrack",1); AddGarb(tptrack);}
   St_DataSet    *tpchits = GetInputDS("tpc_hits");
   St_tcl_tphit     *tphit     = 0;
@@ -290,13 +292,13 @@ Int_t StPrimaryMaker::Make(){
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   
   St_stk_track   *stk_track   = 0;
-  St_sgr_groups  *groups      = 0;
+  St_sgr_groups  *svt_groups      = 0;
   St_scs_spt     *scs_spt     = 0;
   
   // Case svt tracking performed
   if (svtracks) {
     stk_track = (St_stk_track  *) svtracks->Find("stk_track");
-    groups    = (St_sgr_groups *) svtracks->Find("groups");
+    svt_groups    = (St_sgr_groups *) svtracks->Find("groups");
   }
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
@@ -304,11 +306,11 @@ Int_t StPrimaryMaker::Make(){
   
   // Case silicon not there
   if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
-  if (!groups)    {groups = new St_sgr_groups("groups",1); AddGarb(groups);}
+  if (!svt_groups)    {svt_groups = new St_sgr_groups("groups",1); AddGarb(svt_groups);}
   if (!scs_spt)   {scs_spt = new St_scs_spt("scs_spt",1); AddGarb(scs_spt);}
   // 			Case running est tpc -> Si space point tracking
   if ( !(svtracks && svthits) ){
-    groups = new St_sgr_groups("groups",10000); AddGarb(groups);
+    svt_groups = new St_sgr_groups("groups",10000); AddGarb(svt_groups);
     stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
@@ -417,9 +419,9 @@ Int_t StPrimaryMaker::Make(){
       
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
-      iRes = egr_fitter (tphit,    vertex,       tptrack,  evaltrk,
-			 scs_spt,m_egr2_egrpar,stk_track,groups,
-			 evt_match,primtrk);
+      iRes = egr_fitter (tphit,    vertex,       tptrack, tpc_groups,
+			 scs_spt, m_egr2_egrpar, stk_track, svt_groups,
+			 evt_match, primtrk);
       //	   ======================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
@@ -428,6 +430,65 @@ Int_t StPrimaryMaker::Make(){
       
       if(Debug())
         gMessMgr->Debug() <<" finished calling egr_fitter - second time" << endm;
+
+      // Fill bit map in prim trk
+      
+
+      tcl_tphit_st  *spc   = tphit->GetTable();
+      sgr_groups_st *tgroup = tpc_groups->GetTable();
+      dst_track_st * track  = primtrk->GetTable();
+      
+      int spt_id = 0;
+      int row = 0,i,y;
+      
+      for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+	if( tgroup->id1 > 0){
+	  spt_id = tgroup->id2-1;
+	  row = spc[spt_id].row/100;
+	  row = spc[spt_id].row - row*100;
+	  if( row < 25){
+	    y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(2,(row+7)));
+	    if( !fmod(y,2)){
+	      track[spc[spt_id].id_globtrk-1].map[0] += (1UL<<(row+7));
+	    }
+	    else{
+	      y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
+	      if( !fmod(y,2)){
+		track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
+	      }
+	    }  
+	    
+	  }
+	  else{
+	    y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,(row-25)));
+	    if( !fmod(y,2)){
+	      track[spc[spt_id].id_globtrk-1].map[1] += (1UL<<(row-25));
+	    }
+	    else{
+	      y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
+	      if( !fmod(y,2)){
+		track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
+	      }
+	    }
+	  }
+	  
+	}
+      }
+
+      scs_spt_st *s_spc = scs_spt->GetTable();
+      sgr_groups_st *sgroup = svt_groups->GetTable();
+      
+      // for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
+	
+      //	if( sgroup->id1 > 0){
+      //	  spt_id = sgroup->id2-1;
+      //	  row = s_spc[spt_id].id_wafer/1000;
+      //	  if( row >7) row=7;
+      //	  track[s_spc[spt_id].id_globtrk-1].map[0] += pow(2,(row));
+      //	}
+	
+      // }
+      
     }
   }
   else {
@@ -459,6 +520,7 @@ Int_t StPrimaryMaker::Make(){
           //          if(primtrkPtr->id_start_vertex != 0)
           //  keep_vrtx_id=primtrkPtr->id_start_vertex;
           primtrkPtr->n_max_point = globtrkPtr->n_max_point;
+	  primtrkPtr->map[0] += (1UL<<1);
           Float_t xStart = primtrkPtr->r0 * cos(primtrkPtr->phi0 * C_RAD_PER_DEG);
           Float_t yStart = primtrkPtr->r0 * sin(primtrkPtr->phi0 * C_RAD_PER_DEG);
           Float_t zStart = primtrkPtr->z0;
