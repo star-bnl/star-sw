@@ -58,12 +58,12 @@
    domain='geometry sim/gstar sim/g2t' _
    chain='rgst rg2t' _
    phystype=hadr_on _
-   geomtype='complete 4th_off' _   
+   geomtype='complete4th_off' _   
    num_events=1 _
    debugger=on _
    intype=file _
    input_data_dir=$AFS_RHIC/star/data/samples/ _
-      input_file=muons_central_2.txt _
+   input_file=muons_central_2.txt _
    output_file=muons.xdf               
 * 
 *  this is an example!! you must change to fill your needs
@@ -100,17 +100,18 @@
    macro/global/import *
        
 * THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
+  message ' *** SET GEOMETRY: physics type -->   ' [phystype]
+  message ' *** SET GEOMETRY: geometry type -->  ' [geomtype]
    detp geometry [phystype] [geomtype]
-* exec bfc_util#bfc_gstar_setup    [chain]
    exec bfc_util#bfc_g2t_b4_load    [chain]
    exec load_libraries#run          [domain]
    exec bfc_util#bfc_g2t_after_load [chain]
- 
+
 ******** turn debugger on just for GSTAR! ******************************
  if [debugger].eq.on then
    debug on
  endif
-    
+   
 ****************** OPEN OUTPUT FILE *******************
  exec write_table_to_file#init outunit [output_file]
  
