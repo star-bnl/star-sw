@@ -110,7 +110,7 @@ int ssdReader(char *m)
 
 
 	for(sec=0;sec<1;sec++) {	// just one sector! I kept the for loop for compatibility
-		int last ;
+		int last, herb ;
 
 
 		if(ssdp->sb[sec].len == 0) continue ;
@@ -127,8 +127,8 @@ int ssdReader(char *m)
 
 			if(secp->rb[rb].len == 0) continue ;
 
-			{ int herb=b2h32(secp->rb[rb].off); assert(herb>0&&herb<99999); }
-			rbp = (struct TPCRBP *) ((u_int *)secp + b2h32(secp->rb[rb].off)) ;
+                        herb=b2h32(secp->rb[rb].off); assert(herb>0&&herb<999999); 
+			rbp = (struct TPCRBP *) ((u_int *)secp + herb ) ;
 			if(checkBank((char *)rbp,"SSDRBP") < 0) assert(0);
 
 			// at this point (RBP) data is different endianess...
@@ -212,7 +212,11 @@ int ssdReader(char *m)
 
 				padk = NULL ;
 				if(mzp->banks[TPC_PADK].len != 0) {	
-					{ int herb= b2h32(mzp->banks[TPC_PADK].off); assert(herb>0&&herb<99999); }
+					{
+                                          int herb= l2h32(mzp->banks[TPC_PADK].off); // Changed from b to l for 
+                                                                                     // ped data, Herb Mar 3 2004
+                                          assert(herb>0&&herb<99999);
+                                        }
 					padk = (struct TPCPADK *)((u_int *)mzp + l2h32(mzp->banks[TPC_PADK].off)) ; 
 
 					if(checkBank((char *)padk,"SSDPADK") < 0) assert(0);
