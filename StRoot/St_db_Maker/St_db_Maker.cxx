@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.77 2004/01/06 23:58:01 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.78 2004/03/16 04:00:16 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.78  2004/03/16 04:00:16  jeromel
+// Improper number of elements times[] array fixed
+//
 // Revision 1.77  2004/01/06 23:58:01  perev
 // (JL) More printing ...
 //
@@ -112,7 +115,7 @@ static const int   times[]=  {
         0,          0,         0,         0,          0,
         0,     120000,     80000,         0,          0,
    175430,          0,         0,         0,          0,        
-        0,          0,         0,         0
+        0,          0,         0,         0,          0
 };
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
