@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.7 1999/07/12 23:04:16 fisyak Exp $
+// $Id: StV0Maker.cxx,v 1.8 1999/07/14 15:48:19 caines Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.8  1999/07/14 15:48:19  caines
+// Correct check on stk_track when eval turned on
+//
 // Revision 1.7  1999/07/12 23:04:16  fisyak
 // Remove glob2
 //
@@ -170,8 +173,8 @@ Int_t StV0Maker::Make(){
     if (iRes !=kSTAFCV_OK) cout << " Problem on return from EV0 " << endl;
     if(m_ev0EvalOn){   
       //ev0_eval2
-      if (stk_track && tptrack && evaltrk) {
-	
+      if (tptrack && evaltrk) {
+	if (! stk_track)    {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
 	ev0_eval = new St_ev0_eval("ev0_eval",20000);
 	AddData(ev0_eval);
 	St_DataSetIter geant(GetInputDS("geant"));
@@ -193,7 +196,7 @@ Int_t StV0Maker::Make(){
 //_____________________________________________________________________________
 void StV0Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StV0Maker.cxx,v 1.7 1999/07/12 23:04:16 fisyak Exp $\n");
+  printf("* $Id: StV0Maker.cxx,v 1.8 1999/07/14 15:48:19 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
