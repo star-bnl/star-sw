@@ -5,6 +5,9 @@
 //
 //  A. Rose, M. Calderon
 // $Log: WriteStiEvents.C,v $
+// Revision 1.4  2002/09/20 22:46:10  jeromel
+// Misisng StEventMaker instance
+//
 // Revision 1.3  2002/09/19 05:47:21  jeromel
 // Make it read dst.root and produce _sti.event.root + embedding flag added
 // (suggestion by Lee).
@@ -77,6 +80,7 @@ void WriteStiEvents(Int_t nevents=1,
 
     chain  = new StChain("StChain");
     StIOMaker *IOMk = new StIOMaker("IO","r",Mainfile); 
+    if(usedst) StEventMaker *EvMk = new StEventMaker("events","title");
     IOMk->SetBranch("*",0,"0");	//deactivate all branches
     //IOMk->SetBranch("dstBranch",0,"r");
     //IOMk->SetBranch("runcoBranch",0,"r");
