@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.17 2004/07/26 12:01:31 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.18 2004/08/01 06:41:31 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.18  2004/08/01 06:41:31  subhasis
+ * nclust limit put to <200
+ *
  * Revision 1.17  2004/07/26 12:01:31  subhasis
  * sigmaL, sigmaS stored in one place till StPhmdCluster.h modified
  *
@@ -613,7 +616,7 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
   Double_t str[2000],str1[2000], cln[2000];
   Double_t xcl[2000], ycl[2000],clust_cell[200][2000];
   //Initialisation part starts
-  if(nclust>200 || ncell >2000){
+  if(nclust>=200 || ncell >=2000){
 	  cout<<"Number of cluster of Ncell crosses limit "<<nclust<<" "<<ncell<<endl;
 	  return kStWarn;
   }
