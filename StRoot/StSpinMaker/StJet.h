@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJet.h,v 1.6 2003/09/22 22:09:28 thenry Exp $
+// $Id: StJet.h,v 1.7 2003/09/23 19:37:02 thenry Exp $
 // $Log: StJet.h,v $
+// Revision 1.7  2003/09/23 19:37:02  thenry
+// Fixed et and ez (again) correctly this time.
+//
 // Revision 1.6  2003/09/22 22:09:28  thenry
 // Fixed formula for Et and Ez.
 //
@@ -64,8 +67,8 @@ public:
     Int_t        nCell;
     int     charge;
     
-    Float_t      ez() const {return E()/sinh(Eta());}
-    Float_t      et() const {return E()/cosh(Eta());}
+    Float_t      et() const {return E()*sqrt(1.0-tanh(Eta())*tanh(Eta()));}
+    Float_t      ez() const {return E()*fabs(tanh(Eta()));}
     ClassDef(StJet,3)
 };
 
