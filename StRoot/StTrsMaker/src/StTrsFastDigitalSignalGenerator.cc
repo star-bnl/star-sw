@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.5 1999/01/18 21:02:49 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.6 1999/01/22 08:08:36 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.5  1999/01/18 21:02:49  lasiuk
- * comment diagnostics
+ * Revision 1.6  1999/01/22 08:08:36  lasiuk
+ * unsigned char; use of pair<> for two arrays
  *
  * Revision 1.7  1999/01/23 02:32:22  lasiuk
  * sun friendly
@@ -40,6 +40,7 @@
  * Revision 1.2  1998/11/04 18:51:27  lasiuk
  * initialization in base class
  * incorporate electronics db
+ * Revision 1.1  1998/06/30 22:46:49  lasiuk
  * Initial Revision
  *
  **************************************************************************/
@@ -87,47 +88,66 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
     //PR(mSimpleConversion);
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
 {
-    vector<short> digitalPad;
+    // Loop over the sector
 
+
+    vector<unsigned char> digitalPadData;
     vector<unsigned char> digitalPadZeros;
 #else
-	    // should use an STL operation here
+    vector<unsigned char, allocator<unsigned char> > digitalPadData;
     vector<unsigned char, allocator<unsigned char> > digitalPadZeros;
 #endif
 	    cout << "r/p " << irow << '/' << ipad << endl;
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
-	    digitalPad.clear();
+	for(int ipad=1; ipad<=mSector->padsOfRow(irow).size(); ipad++) {
+	    //cout << "r/p " << irow << '/' << ipad << endl;
 	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad);
 	    if(!currentPad.size()) continue;
 // 	    cout << "dig() r/p " << irow << '/' << ipad << endl;
 	    // Make sure the digital Pad is clear!
 	    digitalPadData.clear();
 	    digitalPadZeros.clear();
+
+	    for(mTimeSequenceIterator  = currentPad.begin();
+		mTimeSequenceIterator != currentPad.end();
 		mTimeSequenceIterator++) {
-		    static_cast<short>(mTimeSequenceIterator->amplitude()/mSimpleConversion);
 
+		// Conversion
+		// Must take into account the 8 <--> 10 bit conversion
 		// TRS calculates on a linear scale and then must
-		    digitalPad.push_back(static_cast<short>(digitalAmplitude));
+		// convert to 8 bit data
+		int digitalAmplitude =
+		    mTimeSequenceIterator->amplitude()/mSimpleConversion;
+		if(digitalAmplitude>255) digitalAmplitude = 255;
+		
+		if(digitalAmplitude != 0) {
+		    digitalPadData.push_back(static_cast<unsigned char>(digitalAmplitude));
 		    digitalPadZeros.push_back(static_cast<unsigned char>(0));
-		else if(digitalPad.size() == 0) {
-		    digitalPad.push_back(static_cast<short>(-1));
-			digitalPadData.push_back(static_cast<unsigned char>(0));
-		else if(digitalPad.back() > 0) {
-		    digitalPad.push_back(static_cast<short>(-1));
-			digitalPadZeros.back()++;
-		else
-		    digitalPad.back()--;
-	    }
-
 		}
-	    PR(digitalPad.size());
-	    for(int ii=0; ii<digitalPad.size(); ii++) {
-		cout << (ii) << '\t' << (static_cast<short>(digitalPad[ii])) << endl;
+		// Otherwise there is no signals!
+		else if(digitalPadZeros.size() == 0) {
+		    digitalPadData.push_back(static_cast<unsigned char>(0));
+		    digitalPadZeros.push_back(static_cast<unsigned char>(1));
+		}
+		else if(digitalPadData.back() == static_cast<unsigned char>(0) ) {
+		    
+		    if (digitalPadZeros.back() == static_cast<unsigned char>(255)) {
+			digitalPadData.push_back(static_cast<unsigned char>(0));
+			digitalPadZeros.push_back(static_cast<unsigned char>(1));
+		    }
+		    else {
+			digitalPadZeros.back()++;
+		    }
+		}
+	    PR(digitalPadData.size());
+	    for(int ii=0; ii<digitalPadData.size(); ii++) {
+		cout << (ii) << '\t' << (static_cast<int>(digitalPadData[ii])) << '\t' << (static_cast<int>(digitalPadZeros[ii])) << endl;
 	    }
 	    cout << endl;
 
 	    // print it out:
-	    mDigitalSector->assignTimeBins(irow,ipad,digitalPad);
+// 	    PR(digitalPadData.size());
+// 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
 	    
 	    currentPad.clear();
 	    pair<digitalTimeBins*, digitalTimeBins*> tmp(&digitalPadData, &digitalPadZeros);
@@ -136,11 +156,14 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 
 	} // pads
     }// rows
-    cout << "correlated noise" << endl;
+    
+
 }
 
 void StTrsFastDigitalSignalGenerator::addCorrelatedNoise()
 {
+    cerr << "StTrsFastDigitalSignalGenerator::addCorrelatedNoise()" << endl;
+    cerr << "Not Implemented!" << endl;
 }
 
 void StTrsFastDigitalSignalGenerator::addWhiteNoise()
