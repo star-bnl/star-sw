@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.10 1999/09/29 20:29:10 wdeng Exp $
+// $Id: StXiMaker.cxx,v 1.11 1999/11/15 21:54:24 lbarnby Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.11  1999/11/15 21:54:24  lbarnby
+// changes in idl file to fix St_dst_Maker
+//
 // Revision 1.10  1999/09/29 20:29:10  wdeng
 // Accommodate dst_track and dst_vertex change
 //
@@ -110,6 +113,10 @@ Int_t StXiMaker::Make(){
   
   int iMake = kStOK;
   int iRes = 0;
+
+  //  float answer;
+  //cout << "Stopping for opportunity to set break points" << endl;
+  //cin >> answer;
 
   St_DataSet *match = GetDataSet("match"); 
   if (!match) return kStWarn;

@@ -253,7 +253,7 @@ c*** pgj: don't use tracks already used in the v0
 c*** pgj: convert to local parameters
 
           trki(1) = globtrk(i).r0
-          trki(2) = globtrk(i).r0*globtrk(i).phi0
+          trki(2) = globtrk(i).r0*globtrk(i).phi0*C_RAD_PER_DEG
           trki(3) = globtrk(i).z0
           trki(4) = globtrk(i).psi*C_RAD_PER_DEG
           trki(5) = globtrk(i).tanl

@@ -27,7 +27,7 @@ CC:<--------------------------------------------------------------------
      9   dms_ftpc_h,          dms_ftpc , 
      9   dms_global_h,        dms_global , 
      9   dms_svt_h,           dms_svt , 
-     9   dms_tpc_h,           dms_tpc ) 
+     9   dms_tpc_h,           dms_tpc )
 
       IMPLICIT NONE
 #include "dst_monitor_soft_filler.inc"
@@ -73,6 +73,7 @@ CC:  dms_svt     - DST reconstruction software monitor info.
 CC:  dms_svt_h    - Header Structure for dms_svt
 CC:  dms_tpc     - DST reconstruction software monitor info.
 CC:  dms_tpc_h    - Header Structure for dms_tpc
+
 CC: RETURNS:    STAF Condition Value
 CC:>--------------------------------------------------------------------
 
@@ -90,37 +91,48 @@ CC:  Local Variable Type Declarations:
       parameter (zmin = -200.0)
       parameter (zstep = 40.0)
 
-CC:  Set (all) dms_h***.nok to 1 row:
+CC:  Set (all) dms_***_h.nok to 1 row:
 
-CC: emc and ctb not ready to go in yet (LSB)
-CC:      dms_ctb-tof_h.nok = 1
-CC:      dms_emc_h.nok = 1
       dms_ftpc_h.nok = 1
       dms_global_h.nok = 1
       dms_svt_h.nok = 1
       dms_tpc_h.nok = 1
+CC:     dms_ctb_h.nok = 1
+CC:     dms_emc_h.nok = 1
+CC:     dms_l3_h.nok = 1
+CC:      dms_rich_h.nok = 1
 
 CC:  Set all unused (at this time) monitor values to zero
+CC:  This means the whole of ctb,emc,l3 and rich tables (LSB)
 
+CC:  CTB
+CC:      dms_ctb(1).mult_ctb_tot = 0
+CC:  EMC
+CC:      dms_emc(1).energy_emc = 0.0
+CC:  L3
+CC:      dms_l3(1).id_algorithm = 0
+CC:      dms_l3(1).id_hardware = 0
+CC:      do i = 1,24
+CC:         dms_l3(1).processorId(i) = 0
+CC:         dms_l3(1).vertex(1,i) = 0.0
+CC:         dms_l3(1).vertex(2,i) = 0.0
+CC:         dms_l3(1).vertex(3,i) = 0.0
+CC:         dms_l3(1).id_param(i) = 0
+CC:         dms_l3(1).nHits(i) = 0
+CC:         dms_l3(1).nTracks(i) = 0
+CC:         dms_l3(1).nPrimaryTracks(i) = 0
+CC:         dms_l3(1).cpuTime(i) = 0.0
+CC:      end do
+CC:      dms_l3(1).nTotalHits = 0
+CC:      dms_l3(1).nTotalTracks = 0
+CC:      dms_l3(1).nTotalPrimaryTracks = 0
+CC:      dms_l3(1).triggermask = 0 
+CC:  RICH
+CC:      dms_rich(1).mult_rich_tot = 0
+CC:  Unsed FTPC
       dms_ftpc(1).n_clus_ftpc(1)          = 0
       dms_ftpc(1).n_clus_ftpc(2)          = 0
-CC: Monitor table for emc not ready yet (LSB)
-CC:      dms_emc(1).energy_emc              = 0.0
 
-CC: CPU time no longer appears? (LSB)
-CC:      do i = 1,20
-CC:         dst_monitor_soft(1).cpu_time(i)          = 0.0
-CC:      end do
-
-CC:  Fill event and run ID numbers:
-
-CC:  event and prod_run not in monitor_soft tables now? (LSB)
-CC:      dst_monitor_soft(1).n_event(1) = 
-CC:     1                    dst_event_summary(1).n_event(1)
-CC:      dst_monitor_soft(1).n_event(2) = 
-CC:     1                    dst_event_summary(1).n_event(2)
-CC:      dst_monitor_soft(1).prod_run   =
-CC:     1                    dst_event_summary(1).prod_run
 
 CC:  Fill TPC cluster summary information:
 

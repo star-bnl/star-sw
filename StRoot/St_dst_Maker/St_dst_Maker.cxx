@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.31 1999/11/15 17:44:03 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.32 1999/11/15 21:54:24 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.32  1999/11/15 21:54:24  lbarnby
+// changes in idl file to fix St_dst_Maker
+//
 // Revision 1.31  1999/11/15 17:44:03  lbarnby
 // Add ctb,emc,l3,rich monitor soft tables (empty for now)
 //
@@ -96,7 +99,7 @@
 #include "tables/St_dst_run_summary_Table.h"
 
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.31 1999/11/15 17:44:03 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.32 1999/11/15 21:54:24 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -380,6 +383,7 @@ Int_t  St_dst_Maker::Filler(){
   dstI.Add(mon_soft_emc);
   dstI.Add(mon_soft_l3);
   dstI.Add(mon_soft_rich);
+
   //Make (empty) ctb,emc,l3,rich monitor soft tables
 
   mon_soft_ctb->SetNRows(1);
