@@ -303,6 +303,7 @@ class StiKalmanTrack : public StiTrack
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
   bool find(int direction=kOutsideIn);
+  int  refit();
   void prune();
   void reserveHits();
   bool extendToVertex(StiHit* vertex);
