@@ -4,12 +4,15 @@
 #ifndef EEsectorDst_h
 #define EEsectorDst_h
 /*********************************************************************
- * $Id: EEsectorDst.h,v 1.3 2003/02/20 20:13:15 balewski Exp $
+ * $Id: EEsectorDst.h,v 1.4 2003/10/02 20:52:45 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw Hits
  *********************************************************************
  * $Log: EEsectorDst.h,v $
+ * Revision 1.4  2003/10/02 20:52:45  balewski
+ * more functionality for print()
+ *
  * Revision 1.3  2003/02/20 20:13:15  balewski
  * fixxy
  * xy
@@ -64,7 +67,7 @@ public:
 
   EEsectorDst(int=1000);
   virtual ~EEsectorDst();
-  void print();
+  void print(int k=0);
   int getID(){return ID;}
 
   void addPre1Hit(char sub, int eta,float ener) {addTwHit(sub,eta,ener,Pre1Hits);}

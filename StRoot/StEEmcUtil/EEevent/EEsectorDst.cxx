@@ -1,5 +1,8 @@
-// $Id: EEsectorDst.cxx,v 1.5 2003/09/11 19:40:56 zolnie Exp $
+// $Id: EEsectorDst.cxx,v 1.6 2003/10/02 20:52:45 balewski Exp $
 // $Log: EEsectorDst.cxx,v $
+// Revision 1.6  2003/10/02 20:52:45  balewski
+// more functionality for print()
+//
 // Revision 1.5  2003/09/11 19:40:56  zolnie
 // updates for gcc3.2
 //
@@ -101,10 +104,22 @@ void EEsectorDst::clear(){
 //---------------------------------------------------
 //---------------------------------------------------
 //---------------------------------------------------
-void EEsectorDst::print(){
+void EEsectorDst::print(int k){
 
   printf("EEsectorDst(ID=%d)::print() nPre1Hit=%d  nPre2Hit=%d nSmdUHit=%d  nSmdVHit=%d nTowerHit=%d  nPostHit=%d \n",ID,Pre1Hits->GetEntries(),Pre2Hits->GetEntries(),SmdUHits->GetEntries(),SmdVHits->GetEntries(),TwHits->GetEntries(),PostHits->GetEntries());
+  
+  if(k<0) return;
+  
+  printf("EEsectorDst(Tower) nHit=%d\n",TwHits->GetEntries());
+  int i;
+  
+  TClonesArray *hitA=getTwHits();
+  for(i=0;i<hitA->GetEntries();i++){ 
+    EEtwHitDst *hit=(EEtwHitDst*)hitA->At(i);
+    hit->print();
+  }
 
+  printf("EEsectorDst(pre/post/SMD) not implemented\n");
 }
 
 
