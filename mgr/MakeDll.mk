@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.69 1999/03/04 00:18:26 fisyak Exp $
+# $Id: MakeDll.mk,v 1.70 1999/03/12 01:33:40 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.70  1999/03/12 01:33:40  fisyak
+# Take out -lI77 -lF77 for RedHat 5.1/5.2
+#
 # Revision 1.69  1999/03/04 00:18:26  fisyak
 # Add svt library for global
 #
@@ -234,7 +237,7 @@ FILES_TAB  := $(wildcard $(SRC_DIR)/St_*_Table.cxx)
 FILES_MOD  := $(wildcard $(SRC_DIR)/St_*_Module.cxx)
 FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
-ifneq (tables,$(PGGNAME))
+ifneq (tables,$(PKGNAME))
 FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
 ifneq (,$(FILES_HH))
 FILES_H    := $(foreach p, $(FILES_HH), $(shell grep -l ClassDef $(p)))
@@ -283,6 +286,7 @@ ifdef FILES_ORD
     NAMES_DEF    := $(shell  grep C++ $(LinkDef) | grep class | awk '{print $$5}')
     NAMES_DEF    := $(subst ;, ,$(NAMES_DEF))    
     NAMES_DEF    := $(subst -, ,$(NAMES_DEF))   
+    NAMES_DEF    := $(subst !, ,$(NAMES_DEF))   
     ifneq (,$(NAMES_DEF))
       NAMES_ORD  := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
     endif

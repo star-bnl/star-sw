@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.62  1999/03/12 01:33:41  fisyak
+#  Take out -lI77 -lF77 for RedHat 5.1/5.2
+#
 #  Revision 1.61  1999/03/10 20:56:52  fisyak
 #  Cleanup for SL99c tag
 #
@@ -262,7 +265,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/03/10 20:56:52 $ 
+#           Last modification $Date: 1999/03/12 01:33:41 $ 
 #  default setings
 # Current Working Directory
 #
@@ -316,14 +319,18 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-ifneq ($(USER),wenaus)
-#  SUBDIRS := $(filter-out StAnalysisMaker, $(SUBDIRS))
-#  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
-#  SUBDIRS := $(filter-out StSpectraTagsMaker, $(SUBDIRS))
-#  SUBDIRS := $(filter-out StStrangeTagsMaker, $(SUBDIRS))
-#  SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker, $(SUBDIRS)) 
-#  SUBDIRS := $(filter-out objy, $(SUBDIRS))
-endif
+#ifneq ($(USER),wenaus) # List makers to be converted into new scheme
+  SUBDIRS := $(filter-out StDisplay, $(SUBDIRS))
+  SUBDIRS := $(filter-out StAnalysisMaker StEventReaderMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StEbyeScaTagsMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StSpectraTagsMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StStrangeTagsMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker, $(SUBDIRS)) 
+  SUBDIRS := $(filter-out objy, $(SUBDIRS))
+  SUBDIRS := $(filter-out StTreeMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out St_emc_Maker St_evg_Maker St_ebye_Maker, $(SUBDIRS))
+  SUBDIRS := $(filter-out St_io_Maker St_laser_Maker St_run_summary_Maker St_tpctest_Maker St_xdfin_Maker, $(SUBDIRS))
+#endif
 #  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 #  ifndef OBJY_HOME
