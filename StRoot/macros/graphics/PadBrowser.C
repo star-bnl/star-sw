@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.5 1999/06/29 20:51:26 fine Exp $
+// $Id: PadBrowser.C,v 1.6 1999/09/08 19:35:19 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.6  1999/09/08 19:35:19  fine
+// PAdMonitor access to DAQ via IO Maker
+//
 // Revision 1.5  1999/06/29 20:51:26  fine
 // St_geom_Maker has been introduced
 //
@@ -28,8 +31,8 @@ StChain *chain = 0;
 void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("StDaqLib");
     gSystem->Load("St_geom_Maker");
+    gSystem->Load("StIOMaker");
     gSystem->Load("StPadDisplayMaker");
     gROOT->LoadMacro("PadControlPanel.C");
 }
@@ -90,16 +93,18 @@ void PadBrowser(const Int_t Nevents=1,Char_t *infile=0)
   // define input file
  // daq data
   if (!iNfile) 
-    iNfile ="/scr21/ward/990617.33";
+    iNfile ="/scr20/fine/datapool/st_physics_0003455_raw_0001.daq";
+//    iNfile ="/star/datapool/1/daq/st_physics_0003455_raw_0001.daq";
 //    iNfile ="/star/tpctest/taper1.R0000000033";
   // Dynamically link some shared libs
   if (gClassTable->GetID("StPadDisplayMaker") < 0) Load();
 
   // Create the main chain object
   chain = new StChain("PadBrowser");
+  inpMk = new StIOMaker("inputStream","r",iNfile);
+  chain->SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
   geomMaker = new St_geom_Maker();
   padMonitor = new StPadDisplayMaker("PadMonitor");
-  padMonitor->SetFileName(iNfile);
   chain->SetDebug();
 //  chain->MakeDoc();
   chain->PrintInfo();
