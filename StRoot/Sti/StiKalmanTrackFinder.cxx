@@ -172,7 +172,17 @@ void StiKalmanTrackFinder::findTracks()
             _trackContainer->push_back(track);
             static_cast<StiKalmanTrack*>(track)->reserveHits();
 	    //cout << "  ++++++++++++++++++++++++++++++ Added Track"<<endl;
+	    if (track->getChi2()<0) track->setFlag(2);
+
+
+	    //StiKalmanTrack * kt = static_cast<StiKalmanTrack*>(track);
+	    //StiKalmanTrackNode * n = kt->extrapolateToBeam();
+	    //if (n) cout << "node at beam:"<<*n<<endl;
+	    //n = kt->extrapolateToRadius(220.);
+	    //if (n) cout << "node at 220 cm:"<<*n<<endl;
+
             }
+
 	  //else
 	  //cout << " track not saved +++++++++++++++++++++++++++++++++++++!!!!!!" << endl;
         }
@@ -244,64 +254,39 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   int goodCount= 0;
   int plus=0;
   int minus=0;
-  int helPlus = 0;
-  int helMinus = 0;
   for (TrackToTrackMap::const_iterator it=_trackContainer->begin();
        it!=_trackContainer->end();
        ++it)
     {
-    try
-    {
-      rawCount++;
-      StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>((*it).second);
-      if (!track) continue;
-      bool extended = false;
-
-      StiKalmanTrackNode * inner = track->getInnerMostNode();
-      extended = track->extendToVertex(vertex);
-      /*if (inner->_x < 4.5) 
-      else
+      try
 	{
-	  //xxxxxxxxxxxxxxxxx
-	  cout << " SPECIAL extend to vertex attempted" << endl;
-	  _detectorContainer->setToDetector(inner->getDetector());
-	  StiDetector * currentDet = **_detectorContainer;
-	  _detectorContainer->moveIn();
-	  StiDetector * tDet = **_detectorContainer;   
-	  if (!tDet || currentDet==tDet)
-	    {
-	      cout << "no more detectors to go to..."<<endl;
-	    }
-	  cout << *tDet<<endl;
-	  track->extendToVertex(vertex,tDet);
-	  cout << " SPECIAL extend to vertex - end" << endl;
-	  }*/
-      // simple diagnostics
-      if (extended) goodCount++;
-      if (track->getCharge()>0)
-        plus++;
-      else
-        minus++;
-      //if (track->getHelicity()>0)
-      //  helPlus++;
-      //else
-      //  helMinus++;
-
-    }
-    catch (runtime_error & rte)
-    {
-      cout << "SKTF::extendTracksToVertex()"
-      << "-W- Run Time Error while extending a track to main vertex."<<endl
-      << "Error Message:" << endl
-      << rte.what() << endl;
-    }
+	  rawCount++;
+	  StiKalmanTrack * track = dynamic_cast<StiKalmanTrack*>((*it).second);
+	  if (!track) continue;
+	  bool extended = false;
+	  StiKalmanTrackNode * inner = track->getInnerMostNode();
+	  double r = inner->_refX;
+	  if (r>4.1 && r<50) find(track,kOutsideIn);
+	  extended = track->extendToVertex(vertex);
+	  // simple diagnostics
+	  if (extended) goodCount++;
+	  if (track->getCharge()>0)
+	    plus++;
+	  else
+	    minus++;
+	}
+      catch (runtime_error & rte)
+	{
+	  cout << "SKTF::extendTracksToVertex()"
+	       << "-W- Run Time Error while extending a track to main vertex."<<endl
+	       << "Error Message:" << endl
+	       << rte.what() << endl;
+	}
     }
   cout << "SKTF::extendTracksToVertex(StiHit* vertex) -I- rawCount:"<<rawCount<<endl
-    << "                                          extendedCount:"<<goodCount<<endl
-    << "                                                   plus:"<<plus<<endl
-    << "                                                  minus:"<<minus<<endl
-    << "                                                helPlus:"<<helPlus<<endl
-    << "                                               helMinus:"<<helMinus<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
+       << "                                          extendedCount:"<<goodCount<<endl
+       << "                                                   plus:"<<plus<<endl
+       << "                                                  minus:"<<minus<<endl;
 }
 
 /// Find extension (track) to the given track seed in the given direction
@@ -352,11 +337,16 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   if (debug) cout <<endl<< "lead node:" << *leadNode<<endl<<"lead det:"<<*leadDet<<endl;;
   while ( (direction==kOutsideIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial() )
     {
+      debug = false;
+      double angle;
+      double radius;
       vector<StiDetectorNode*>::const_iterator sector;
       vector<StiDetector*> detectors;
       if (debug) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
       if (direction==kOutsideIn) 	sector=_detectorContainer->beginPhi(rlayer);
       else 	sector=_detectorContainer->beginPhi(layer);
+
+      //find all relevant detectors to visit.
       while ( (direction==kOutsideIn)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer) )
 	{
 	  StiDetector * detector = (*sector)->getData();
@@ -368,12 +358,17 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	    {
 	      if (diff<ref1 || diff>ref2) detectors.push_back(detector);
 	    }
-	  else
+	  else if (radius>4.2)
 	    {
 	      if (diff<ref1a || diff>ref2a) detectors.push_back(detector);
 	    }
+	  else
+	    {
+	      if (diff<ref1 || diff>ref2) detectors.push_back(detector);
+	    }
 	  ++sector;
 	}
+      //if (radius<4.5) debug = true; else debug=false;
       int nDets = detectors.size(); 
       if (debug && nDets==0) cout << "no detector of interest on this layer"<<endl;
       if (nDets>0)
@@ -385,13 +380,9 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	      if (debug) cout << endl<< "target det:"<< *tDet;
 	      if (debug) cout << endl<< "lead angle:" << projAngle*radToDeg <<" this angle:" << radToDeg*(*d)->getPlacement()->getNormalRefAngle()<<endl;
 	      //begin tracking here...
-	      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
 	      testNode.reset();
 	      testNode.setChi2(1e50);
 	      position = testNode.propagate(leadNode,tDet);
-
-	      // CP Nov 2 Try doubling the chi2 in the SVT
-	      //if (testNode._x<40.) maxChi2 = 2* maxChi2;
 	      if(debug)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
 	      if (position<0 || position>kEdgeZplus)
 		{ 
@@ -406,9 +397,10 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  bool active = tDet->isActive(testNode._p0,testNode._p1);
 		  if (debug) cout << " vol active:" << active<<endl;
 		  // temporary elimination of the SVT
-		  // if (testNode._x<40.) active = false;
+		  //if (testNode._x<40.) active = false;
 		  if (active&&(testNode.nullCount<(_pars.maxNullCount+3)&&testNode.contiguousNullCount<(_pars.maxContiguousNullCount+3) ) )
 		    {
+		      double maxChi2 = tDet->getTrackingParameters()->getMaxChi2ForSelection();
 		      if (debug)cout<<" search hits";
 		      // active detector may have a hit
 		      vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);//,true);
@@ -419,7 +411,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 			  stiHit = *hitIter;
 			  chi2 = testNode.evaluateChi2(stiHit);
 			  if (debug)   cout<< " got chi2:"<< chi2 << " for hit:"<<*stiHit<<endl;
-			  if (chi2<maxChi2 && chi2<testNode.getChi2())
+			  if (chi2>0 && chi2<maxChi2 && chi2<testNode.getChi2())
 			    {
 			      testNode.setHit(stiHit); testNode.setChi2(chi2);
 			      if (debug) cout << " hit selected"<<endl;
@@ -459,7 +451,8 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		  //leadAngle = leadDet->getPlacement()->getNormalRefAngle();
 		  xg = leadNode->x_g();
 		  yg = leadNode->y_g();
-		  projAngle = atan2(yg,xg); //we added a node on the track, break scan of current layer, and move to next layer
+		  projAngle = atan2(yg,xg); 
+		  //we added a node on the track, break scan of current layer, and move to next layer
 		  break;
 		}
 	      //end tracking here...
@@ -570,3 +563,22 @@ bool CloserAngle::operator()(const StiDetector*lhs, const StiDetector* rhs)
   double rhsda = fabs(rhsa-_refAngle); if (rhsda>3.1415) rhsda-=3.1415;
   return lhsda<rhsda;
 }
+
+
+/*if (inner->_x < 4.5) 
+  else
+  {
+  //xxxxxxxxxxxxxxxxx
+  cout << " SPECIAL extend to vertex attempted" << endl;
+  _detectorContainer->setToDetector(inner->getDetector());
+  StiDetector * currentDet = **_detectorContainer;
+  _detectorContainer->moveIn();
+  StiDetector * tDet = **_detectorContainer;   
+  if (!tDet || currentDet==tDet)
+  {
+  cout << "no more detectors to go to..."<<endl;
+  }
+  cout << *tDet<<endl;
+  track->extendToVertex(vertex,tDet);
+  cout << " SPECIAL extend to vertex - end" << endl;
+  }*/
