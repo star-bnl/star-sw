@@ -4,8 +4,11 @@
 //
 // This is made by Kathy at 14th July, and added the globtrk
 //
-// $Id: St_QATestTables_Maker.cxx,v 1.1 1999/08/13 17:16:29 kathy Exp $
+// $Id: St_QATestTables_Maker.cxx,v 1.2 1999/09/02 21:47:22 kathy Exp $
 // $Log: St_QATestTables_Maker.cxx,v $
+// Revision 1.2  1999/09/02 21:47:22  kathy
+// changed code so that it uses TMath functions so will compile on HP
+//
 // Revision 1.1  1999/08/13 17:16:29  kathy
 // add new maker St_QATestTables_Maker in directory St_QA_Maker, written by Aya Ishihara, calculates and prints info about tables - used for QA
 //
@@ -174,7 +177,7 @@ void St_QATestTables_Maker::TestTables_testGlobtrk(St_DataSet *dst){
 	 if (pT >= 0 && pT <= 5)
          {
          sum_Pt_glob = sum_Pt_glob + pT;
-         Float_t sq_Pt = pow(pT , 2.);
+         Float_t sq_Pt = TMath::Power(pT , 2.);
          sum_sq_Pt_glob = sq_Pt + sum_sq_Pt_glob;
          }
          else
@@ -231,7 +234,7 @@ void St_QATestTables_Maker::TestTables_testPrimtrk(St_DataSet *dst){
         if(pT >= 0 && pT <= 5) 
 	  {
             sum_Pt_prim = sum_Pt_prim + pT;
-            Float_t sq_Pt = pow(pT , 2.);
+            Float_t sq_Pt = TMath::Power(pT , 2.);
             sum_sq_Pt_prim = sq_Pt + sum_sq_Pt_prim;
           }
         else
@@ -256,7 +259,7 @@ void St_QATestTables_Maker::TestTablesFinish(){
 
     mean_Pt_glob = sum_Pt_glob/number_good_trk_glob;
     Float_t mean_sq_Pt_glob = sum_sq_Pt_glob/number_good_trk_glob;
-    rms_Pt_glob = sqrt(mean_sq_Pt_glob);
+    rms_Pt_glob = TMath::Sqrt(mean_sq_Pt_glob);
 
     cout << "\n" << " ************* Globtrk *************** " << endl;
     cout << " *                                   * " << endl;                     
@@ -271,7 +274,7 @@ void St_QATestTables_Maker::TestTablesFinish(){
 
     mean_Pt_prim = sum_Pt_prim/number_good_trk_prim;
     Float_t mean_sq_Pt_prim = sum_sq_Pt_prim/number_good_trk_prim;
-    rms_Pt_prim = sqrt(mean_sq_Pt_prim);
+    rms_Pt_prim = TMath::Sqrt(mean_sq_Pt_prim);
 
     cout << "\n" << " ************* primtrk *************** " << endl;
     cout << " *                                   * " << endl;                     
@@ -291,7 +294,7 @@ void St_QATestTables_Maker::TestTablesFinish(){
 //---------------------------------------------------------------------------------------
 void St_QATestTables_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QATestTables_Maker.cxx,v 1.1 1999/08/13 17:16:29 kathy Exp $\n");
+  printf("* $Id: St_QATestTables_Maker.cxx,v 1.2 1999/09/02 21:47:22 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
