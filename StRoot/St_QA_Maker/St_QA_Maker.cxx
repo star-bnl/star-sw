@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.21 1999/04/23 14:04:07 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.22 1999/04/27 21:05:29 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.22  1999/04/27 21:05:29  kathy
+// clean up comments
+//
 // Revision 1.21  1999/04/23 14:04:07  kathy
 // just cleaning up comments
 //
@@ -317,41 +320,53 @@ St_QA_Maker::~St_QA_Maker(){
   SafeDelete(m_QACanvas);
 }
 //_____________________________________________________________________________
+// Method DrawHists -->
+// Plot the selected  histograms and generate the postscript file as well if any
+
 Int_t St_QA_Maker::DrawHists() 
-{
-  // Plots the seleted  histograms abd generate the postscript file as well if any
-  
-  const Int_t numPads = m_PadColumns*m_PadRows;
-  
-  gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight);
-  //  gStyle->SetOptStat(0);
-  //   TCanvas *QACanvas = new TCanvas("Banner","Canvas Title",30*height,30*width);
-  TPostScript *ps = 0;
+{  
+  cout << " **** Now in St_QA_Maker::DrawHists - beginning **** " << endl;
+
+
+// set output ps file name
+  TPostScript *psf = 0;
   const Char_t *psfileName = m_PsFileName.Data();
-  if (!m_PsFileName.IsNull()) ps = new TPostScript((char *)psfileName);  
+  if (!m_PsFileName.IsNull()) psf = new TPostScript((char *)psfileName);  
   
+//set papersize & options
+  const Int_t numPads = m_PadColumns*m_PadRows;  
+  gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
   gStyle->SetOptStat(111111);
+
+//setup canvas
   SafeDelete(m_QACanvas);
   TCanvas *QACanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
   QACanvas->SetFillColor(19);
-  QACanvas->SetBorderSize(2);
-  
+  QACanvas->SetBorderSize(2);  
   QACanvas->Divide(m_PadColumns,m_PadRows);
+
   
-  if (ps) ps->NewPage();
+  if (psf) psf->NewPage();
   const Char_t *firstHistName = m_FirstHistName.Data();
   const Char_t *lastHistName  = m_LastHistName.Data();
+
   TObject *obj = 0;
   TList *dirList = gDirectory->GetList();
   Int_t padCount = 0;
-  //_____________________
-  // Create an iterator
+  
+// Create an iterator
   TIter nextHist(dirList);
   Int_t histCounter = 0;
   Int_t histReadCounter = 0;
   Bool_t started = kFALSE;
+
+
   while (obj = nextHist()) {
+//    cout << " **** Now in St_QA_Maker::DrawHists - in loop: " << endl;
+//    cout << "               name = " << obj->GetName() << endl;
+
     if (obj->InheritsFrom("TH1")) { 
+//    cout << " **** Now in St_QA_Maker::DrawHists - obj->InheritsFrom(TH1)  **** " << endl;
       histReadCounter++;
       printf(" %d. Reading ... %s::%s; Title=\"%s\"\n",histReadCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
       if (! started && (strcmp("*",firstHistName)==0 || strcmp(obj->GetName(),firstHistName)==0 ))  started = kTRUE;
@@ -360,7 +375,7 @@ Int_t St_QA_Maker::DrawHists()
 	histCounter++;
 	printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
 	if (padCount == numPads) {
-	  if (ps) ps->NewPage();
+	  if (psf) psf->NewPage();
 	  padCount=0;
 	}
 	QACanvas->cd(++padCount);
@@ -370,9 +385,10 @@ Int_t St_QA_Maker::DrawHists()
       }
     }
   }
-  if (ps) {
-    ps->Close();
-    delete ps;
+
+  if (psf) {
+    psf->Close();
+    delete psf;
   }
   return histCounter;
 }
@@ -1061,7 +1077,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.21 1999/04/23 14:04:07 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.22 1999/04/27 21:05:29 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
