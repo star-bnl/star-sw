@@ -155,6 +155,7 @@ else {
 if ($#Defs > -1) {
   my @CintFiles = 
   ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h");#, $share . "/"  . "LinkDef.h"); 
+  Install $env2 $share, @Defs;
   my @defs = ();
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def);
