@@ -1,6 +1,7 @@
 #include "StHbtV0.hh"
 #include "StHbtTTreeV0.h"
 #include "phys_constants.h"
+#include "StHbtTTreeEvent.h"
 
 // -----------------------------------------------------------------------
 StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
@@ -40,6 +41,19 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mNumDedxPos = v.mNumDedxPos;
   mNumDedxNeg = v.mNumDedxNeg;
 
+  mHelixPos = v.mHelixPos;// Gael 12 Sept
+  mHelixNeg = v.mHelixNeg;// Gael 12 Sept
+//   cout <<"StHbtV0---mHelixPos->x==" << mHelixPos.origin().x() << endl;
+//   cout <<"StHbtV0---mHelixPos->y==" << mHelixPos.origin().y() << endl;
+//   cout <<"StHbtV0---mHelixPos->z==" << mHelixPos.origin().z() << endl;
+//   cout <<"StHbtV0---mHelixPos->xcenter==" << mHelixPos.xcenter() << endl;
+//   cout <<"StHbtV0---mHelixPos->ycenter==" << mHelixPos.ycenter() << endl;
+//   cout <<"StHbtV0---mHelixNeg->x==" << mHelixNeg.origin().x() << endl;
+//   cout <<"StHbtV0---mHelixNeg->y==" << mHelixNeg.origin().y() << endl;
+//   cout <<"StHbtV0---mHelixNeg->z==" << mHelixNeg.origin().z() << endl;
+//   cout <<"StHbtV0---mHelixNeg->xcenter==" << mHelixNeg.xcenter() << endl;
+//   cout <<"StHbtV0---mHelixNeg->ycenter==" << mHelixNeg.ycenter() << endl;
+
   UpdateV0();
 }
 // -----------------------------------------------------------------------
@@ -75,6 +89,7 @@ void StHbtV0::UpdateV0(){
    
    mRapK0Short = 0.5*log( (mEK0Short+mMomV0.z()) / (mEK0Short-mMomV0.z()) );
    mCTauK0Short = M_KAON_0_SHORT*(mDecayLengthV0) / sqrt( pow((double)mMomV0.mag(),2.) );
+
 }
 // -----------------------------------------------------------------------
 #ifdef __ROOT__
@@ -102,7 +117,6 @@ StHbtV0::StHbtV0( StV0MuDst& v){ // from strangess micro dst structure
   mTrackTopologyMapNeg[1] = ( v.topologyMapNeg().data(1) );
   mKeyPos = v.keyPos();
   mKeyNeg = v.keyNeg();
-
   mChi2V0 = v.chi2V0();
   mClV0 = v.clV0();
   mChi2Pos = v.chi2Pos();
@@ -117,8 +131,6 @@ StHbtV0::StHbtV0( StV0MuDst& v){ // from strangess micro dst structure
   mLenDedxNeg = v.lenDedxNeg();//Gael 04Fev2002
   mNumDedxPos = v.numDedxPos();
   mNumDedxNeg = v.numDedxNeg();
-
-
 
 #ifdef STHBTDEBUG
   cout << " keyPos " << v.keyPos() << endl;
@@ -160,6 +172,10 @@ StHbtV0::StHbtV0( StV0MuDst& v){ // from strangess micro dst structure
 StHbtV0::StHbtV0(const StHbtTTreeEvent* ev, const StHbtTTreeV0* v) {
   mDecayVertexV0 = StHbtThreeVector(v->mDecayVertexV0X,v->mDecayVertexV0Y,v->mDecayVertexV0Z);
 
+  mPrimaryVertex.setX(ev->mVertexX);
+  mPrimaryVertex.setY(ev->mVertexY);
+  mPrimaryVertex.setZ(ev->mVertexZ);
+
   mDecayLengthV0 = v->mDecayLengthV0;
   mDcaV0Daughters = v->mDcaV0Daughters;
   mDcaV0ToPrimVertex = v->mDcaV0ToPrimVertex;
@@ -199,8 +215,11 @@ StHbtV0::StHbtV0(const StHbtTTreeEvent* ev, const StHbtTTreeV0* v) {
 
   UpdateV0();
 }
-
-
-
 #endif // __ROOT__
+void StHbtV0::SetHelixPos(const StPhysicalHelixD& h){mHelixPos = h;}// Gael 12 Sept 02
+const StPhysicalHelixD& StHbtV0::HelixPos() const {return mHelixPos;}// Gael 12 Sept 02
+void StHbtV0::SetHelixNeg(const StPhysicalHelixD& h){mHelixNeg = h;}// Gael 12 Sept 02
+const StPhysicalHelixD& StHbtV0::HelixNeg() const {return mHelixNeg;}// Gael 12 Sept 02
+
+
 
