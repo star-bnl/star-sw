@@ -1,5 +1,8 @@
-// $Id: Prediction.cxx,v 1.2 2000/01/31 15:14:52 fisyak Exp $
+// $Id: Prediction.cxx,v 1.3 2000/06/10 23:15:12 fisyak Exp $
 // $Log: Prediction.cxx,v $
+// Revision 1.3  2000/06/10 23:15:12  fisyak
+// Add new W.Loeve table with Laser tracks
+//
 // Revision 1.2  2000/01/31 15:14:52  fisyak
 // Try to find out memory leak
 //
@@ -111,7 +114,7 @@ ClassImp(ZProf)
 ClassImp(Adc)
 //________________________________________________________________________________
 ClassImp(LTrack)
-LTrack::LTrack(const LaserTrack &L){
+LTrack::LTrack(const LaserTrack_st &L){
   Sector	= L.Sector;      
   Mirror	= L.Mirror;      
   ZBoundle	= L.ZBoundle;  
