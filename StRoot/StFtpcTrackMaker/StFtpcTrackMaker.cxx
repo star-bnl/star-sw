@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.21 2001/07/26 13:42:27 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.22 2001/09/19 20:58:40 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.22  2001/09/19 20:58:40  jcs
+// Use TPC preVertex if it exists, if not use ZDC vertex(slew correction hardwired)
+//
 // Revision 1.21  2001/07/26 13:42:27  oldi
 // Two messages added for the case of missing data.
 //
@@ -116,6 +119,8 @@
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 
+#include "tables/St_dst_TrgDet_Table.h"
+
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
@@ -196,95 +201,128 @@ Int_t StFtpcTrackMaker::Make()
   Int_t   primary_vertex_id = 0;
   Int_t iflag = 0;
   
-  // compute Holm's vertex (FTPC vertex estimation)
-  StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows(), m_vtx_pos);
+
+// Use TPC preVertex if it exists
 
   //pointer to preVertex dataset
-  St_DataSet *preVertex = GetDataSet("preVertex"); 
-  
-  //iterator
-  St_DataSetIter preVertexI(preVertex);
-  
-  //pointer to preVertex
-  St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-  dst_vertex_st *preVtxPtr = 0;
+  St_DataSet *preVertex = GetDataSet("preVertex");
+  if (preVertex) {
 
-  if (!isnan(vertex->GetZ())) { // handles problem if there are not enough tracks and therefore a vertex cannot be found
+    //iterator
+    St_DataSetIter preVertexI(preVertex);
 
-    if (preVtx) {
-      // add a row to preVertex
-      Int_t numRowPreVtx = preVtx->GetNRows(); 
-      preVtx->ReAllocate(numRowPreVtx+1);
-      preVtx->SetNRows(numRowPreVtx+1);
+    //pointer to preVertex
+    St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
+
+    dst_vertex_st *preVtxPtr = preVtx->GetTable();
+    for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
+
+      if (preVtxPtr->iflag == 101) {
+        iflag = 101;
+        primary_vertex_x =  preVtxPtr->x;
+        primary_vertex_y =  preVtxPtr->y;
+        primary_vertex_z =  preVtxPtr->z;
+        primary_vertex_id = preVtxPtr->id;
+        break;
+      }
     }
-    
-    else {
-      // no preVertex table exists
-      // create preVertex table with 1 row
-      preVtx = new St_dst_vertex("preVertex", 1);
-      preVtx->SetNRows(1);
-      AddData(preVtx);
-    }
+   }
+ 
 
-    preVtxPtr = preVtx->GetTable();
-    preVtxPtr = preVtxPtr + preVtx->GetNRows() - 1;
-
-    // save results in preVertex    
-    preVtxPtr->x = 0.0;
-    preVtxPtr->y = 0.0;
-    preVtxPtr->z = vertex->GetZ();
-    preVtxPtr->iflag = 301;
-    preVtxPtr->det_id = 4;
-    preVtxPtr->id = preVtx->GetNRows();
-    preVtxPtr->vtx_id = kEventVtxId;  
-    
-
-    gMessMgr->Message("", "I", "OST") << "Ftpc vertex estimation (" << vertex->GetX() << ", " << vertex->GetY() << ", " << vertex->GetZ() << ") stored as pre vertex." << endm;
-  }
-
-  else {
-    gMessMgr->Message("", "W", "OST") << "Ftpc vertex estimation failed!" << endm;
-  }
-
-  preVtxPtr = preVtx->GetTable();    
-
-  for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
-
-    if (preVtxPtr->iflag == 101) {
-      iflag = 101;
-      primary_vertex_x =  preVtxPtr->x;
-      primary_vertex_y =  preVtxPtr->y;
-      primary_vertex_z =  preVtxPtr->z;
-      primary_vertex_id = preVtxPtr->id;
-      break;
-    }
-  }
-
-  if (iflag !=101) {
-
-    if (isnan(vertex->GetZ())) {
-      // handles problem if there are not enough tracks and therefore a vertex cannot be found
-      *gMessMgr << endm;
-      gMessMgr->Message("", "E", "OST") << "No vertex found! Ftpc tracking stopped!" << endm;
-      delete vertex;
-      
-      // No Tracking
-      return kStWarn;
-    }
-    
-    else {    
-      // FTPC vertex used
-      primary_vertex_z = vertex->GetZ();
-      gMessMgr->Message("", "I", "OST") << "Ftpc vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z << ") used for Ftpc tracking." << endm;
-    }
-  }
-
-  else {
+  if (iflag == 101) {
     // TPC vertex used
     gMessMgr->Message("", "I", "OST") << "Tpc vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") used for Ftpc tracking." << endm;
   }
+  else {
+    // Otherwise use ZDC Vertex
+ 
+    // Find St_dst_TrgDet
+ 
+    St_dst_TrgDet *TrgDet = (St_dst_TrgDet *)GetDataSet("TrgDet");
+    if (TrgDet) {
+       dst_TrgDet_st *tt = (dst_TrgDet_st *) TrgDet->GetTable();
+   
+       Float_t EAP0 = 128.926;
+       Float_t EAP1 = 0.933384;
+       Float_t EAP2 = -0.0252811;
+       Float_t EAP3 = 0.000225592;
+       Float_t WAP0 = 113.291;
+       Float_t WAP1 = 0.491553;
+       Float_t WAP2 = -0.0143863;
+       Float_t WAP3 = 0.000148314;
+       Float_t VPAR = 3.32254;
+       Float_t  OFF = 4.58784;
 
-  delete vertex;
+       Float_t adcE = tt->adcZDC[15];
+       Float_t adcW = tt->adcZDC[12];
+       Float_t tdcE = tt->adcZDC[8];
+       Float_t tdcW = tt->adcZDC[9];
+ 
+       primary_vertex_x = 0.0;
+       primary_vertex_y = 0.0;
+       primary_vertex_z = 
+        ((tdcW-(WAP0+(WAP1*adcW)+(WAP2*pow(adcW,2))+(WAP3*pow(adcW,3))))
+          - (tdcE-(EAP0+(EAP1*adcE)+(EAP2*pow(adcE,2))+(EAP3*pow(adcE,3)))))
+        *(VPAR) + (OFF);
+       // ZDC  vertex used
+       gMessMgr->Message("", "I", "OST") << "ZDC vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") used for Ftpc tracking." << endm;
+    }
+    else {
+ 
+      // compute Holm's vertex (FTPC vertex estimation)
+      StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows(), m_vtx_pos);
+
+      //pointer to preVertex dataset
+      St_DataSet *preVertex = GetDataSet("preVertex"); 
+  
+      //iterator
+      St_DataSetIter preVertexI(preVertex);
+  
+      //pointer to preVertex
+      St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
+      dst_vertex_st *preVtxPtr = 0;
+
+      if (isnan(vertex->GetZ())) { 
+         // handles problem if there are not enough tracks and therefore a vertex cannot be found
+         gMessMgr->Message("", "W", "OST") << "Ftpc vertex estimation failed!" << endm;
+         delete vertex;
+         // No Tracking
+         return kStWarn;
+       }
+
+       if (preVtx) {
+         // add a row to preVertex
+          Int_t numRowPreVtx = preVtx->GetNRows(); 
+          preVtx->ReAllocate(numRowPreVtx+1);
+         preVtx->SetNRows(numRowPreVtx+1);
+       }
+       else {
+         // no preVertex table exists
+         // create preVertex table with 1 row
+         preVtx = new St_dst_vertex("preVertex", 1);
+         preVtx->SetNRows(1);
+         AddData(preVtx);
+       }
+
+       preVtxPtr = preVtx->GetTable();
+       preVtxPtr = preVtxPtr + preVtx->GetNRows() - 1;
+
+       // save results in preVertex    
+       preVtxPtr->x = 0.0;
+       preVtxPtr->y = 0.0;
+       preVtxPtr->z = vertex->GetZ();
+       preVtxPtr->iflag = 301;
+       preVtxPtr->det_id = 4;
+       preVtxPtr->id = preVtx->GetNRows();
+       preVtxPtr->vtx_id = kEventVtxId;  
+
+       // FTPC vertex used
+        primary_vertex_z = vertex->GetZ();
+        gMessMgr->Message("", "I", "OST") << "Ftpc vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z << ") used for Ftpc tracking." << endm;
+
+        delete vertex;
+      }    // end of Holm's loop
+  }   // end of no TPC preVertex found loop
 
   // check for the position of the main vertex
   Double_t z = TMath::Abs(primary_vertex_z);
@@ -413,7 +451,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.21 2001/07/26 13:42:27 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.22 2001/09/19 20:58:40 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
