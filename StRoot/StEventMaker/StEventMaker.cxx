@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.0 1999/11/04 19:03:00 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.1 1999/11/04 19:55:37 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.0  1999/11/04 19:03:00  ullrich
- * Revised to build new StEvent version
+ * Revision 2.1  1999/11/04 19:55:37  ullrich
+ * Corrected typo.
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -82,7 +82,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.0 1999/11/04 19:03:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.1 1999/11/04 19:55:37 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -182,7 +182,7 @@ StEventMaker::isNewRun()
     //  Checks if we reached a new run by comparing the run header table
     //  with the parameters of the current StRun instance.
     //
-        mCurrentRun = 0;
+    if (!mCurrentRun) return kTRUE;
 
         gMessMgr->Warning() << "StEventMaker::makeRun(): cannot load run_header_st, "
                             << "no StRun object created." << endm;
