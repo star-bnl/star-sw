@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.15 2001/12/21 04:54:46 porter Exp $
+ * $Id: StDbSql.cc,v 1.16 2001/12/21 22:47:33 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.16  2001/12/21 22:47:33  porter
+ * added DbRelease for new endtime checks - this caused problems with tpcGas
+ *
  * Revision 1.15  2001/12/21 04:54:46  porter
  * sped up table definition for emc and changed some ostrstream usage for
  * insure tests
@@ -376,14 +379,14 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
     table->setRowNumber(); // reset current row to 0
   }
 
-  if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
+  Db.Release();  
+   if(retVal) retVal=(int)updateEndTime(table,dataTable,reqTime);
 
   delete [] idMap;
   delete [] dataIDList;
   delete [] dataTable;
 
-  Db.Release();  
-  return retVal;
+ return retVal;
 #undef __METHOD__
 } 
 
