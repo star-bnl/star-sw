@@ -51,7 +51,7 @@ public:
   /// Resets the node to a "null" un-used state
   void reset();
   /// Resets errors for refit
-  void resetError();
+  void resetError(double fak=0);
   /// Initialize this node with the given hit information
   void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
@@ -106,6 +106,8 @@ public:
   double getEzz()   const 		{return ezz;}
   double getCyy()   const 		{return _c00;}
   double getCzz()   const 		{return _c11;}
+  double const *getPars()const          {return (&_p0);}
+  double getDiag(int idx)const          {return (&_c00)[(idx*(idx+3))/2];}
   int    getHitCount () const		{return hitCount;}
   int    getNullCount() const       	{return nullCount;}
   int    getContigHitCount () const 	{return contiguousHitCount ;}
