@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelInfo.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpChannelInfo.cc,v 1.2 2000/04/09 16:16:34 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelInfo.cc,v $
+ * Revision 1.2  2000/04/09 16:16:34  aihong
+ * change for adapting NHitsDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -48,12 +51,14 @@ bool StPidAmpChannelInfo::isInChannel(StPidAmpTrk* trk){
 // bydefault,
 // mCutVector[0] is Nhits cut.
 // mCutVector[1] is PtCut
+// mCutVector[2] is dca cut
 // Never change the order of Cuts in StPidAmpCutVector!!
 
   bool br=true;
 
   br=br && ((mCutVector[0]).isInCut(double(trk->nhits())));
   br=br && ((mCutVector[1]).isInCut(trk->pt()));
+  br=br && ((mCutVector[2]).isInCut(trk->dca()));
   
   return br;
 
@@ -73,7 +78,7 @@ void StPidAmpChannelInfo::makeName(){
   theCut=*iter;
 
   if (theCut.highEdge()==FLT_MAX) {
-  tempStream<<(theCut.name()).c_str()<<int(theCut.lowEdge()*100)/100<<"_"<<"Infinity";
+  tempStream<<(theCut.name()).c_str()<<int(theCut.lowEdge()*100)/100<<"_"<<"Inf_";
   }else {
     tempStream<<(theCut.name()).c_str()<<int(theCut.lowEdge()*100)/100<<"_"<<int(theCut.highEdge()*100)/100<<"_";
   }

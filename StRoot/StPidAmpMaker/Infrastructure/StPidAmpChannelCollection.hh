@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.hh,v 1.1.1.1 2000/03/09 17:48:35 aihong Exp $
+ * $Id: StPidAmpChannelCollection.hh,v 1.2 2000/04/09 16:16:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.hh,v $
+ * Revision 1.2  2000/04/09 16:16:33  aihong
+ * change for adapting NHitsDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:35  aihong
  * Installation of package
  *
@@ -54,7 +57,7 @@ public:
 
     StPidAmpChannelCollection();
     
-    StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry, StPidAmpNetType theNetType,TString fitOpt, TString drawOpt);
+    StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry, int d, double* dcaAry, StPidAmpNetType theNetType,TString fitOpt, TString drawOpt);
 
     ~StPidAmpChannelCollection();
 
@@ -88,7 +91,7 @@ public:
 private:
 
       void filterOptions(StPidAmpNetType theNetType,TString fitOpt, TString drawOpt);
-      void setUpChannels(int n, int* nhitsAry,int p, double* ptAry,StPidAmpNetType theNetType);
+      void setUpChannels(int n, int* nhitsAry,int p, double* ptAry,int d, double* dcaAry, StPidAmpNetType theNetType);
       void setDefaultBandParameters();
       void setDrawOpt(); //parse mDrawOpt, pass to channels.
       void processBGNet(bool fitBand, bool fitPath, bool fitAmp, bool fitReso,bool drawSlicesFit, bool drawPathsFit, bool drawAmpFit, bool drawBandFit, bool drawResoFit,StPidAmpNet& net);

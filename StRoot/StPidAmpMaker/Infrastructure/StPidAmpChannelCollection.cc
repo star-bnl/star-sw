@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.2 2000/03/24 17:47:18 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.3 2000/04/09 16:16:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.3  2000/04/09 16:16:33  aihong
+ * change for adapting NHitsDcaNet added
+ *
  * Revision 1.2  2000/03/24 17:47:18  aihong
  * modify writeBGBands2Disk()
  *
@@ -39,12 +42,15 @@
 #include "StPidAmpMaker/Include/StPidAmpConst.hh"
 
 //----------------------------
-StPidAmpChannelCollection::StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry,StPidAmpNetType theNetType,TString fitOpt, TString drawOpt){
+StPidAmpChannelCollection::StPidAmpChannelCollection(int n, int* nhitsAry,int p, double* ptAry,int d, double* dcaAry, StPidAmpNetType theNetType,TString fitOpt, TString drawOpt){
 
   //n is # of marks along nhits axis.like(0,15,35,45)
   //p is # of marks along pt axis
 
+
+
      setDefaultBandParameters();
+
      mWritePars2Disk=true;
      mDrawBGNet     =false;
      mNetType       =theNetType;
@@ -58,20 +64,31 @@ StPidAmpChannelCollection::StPidAmpChannelCollection(int n, int* nhitsAry,int p,
   
   mChannelCollect=new StPidAmpChannelVector();
 
-  setUpChannels(n,nhitsAry,p,ptAry,theNetType);
+  setUpChannels(n,nhitsAry,p,ptAry,d,dcaAry,theNetType);
+
 
   strstream mNameClone;
-  mNameClone<<"nhitsBin_";
   int i;
-  for (i=0; i<n; i++)  mNameClone<<nhitsAry[i]<<"_";
-  mNameClone<<"ptBin_";
 
+  mNameClone<<"nhitsBin_";
+  for (i=0; i<n; i++)  mNameClone<<nhitsAry[i]<<"_";
+
+  mNameClone<<"ptBin_";
   for (i=0; i<p; i++) {
-  if (ptAry[i]==FLT_MAX) mNameClone<<"Infinity_";
+  if (ptAry[i]==FLT_MAX) mNameClone<<"Inf_";
   else  mNameClone<<ptAry[i]<<"_";
   }
 
+  mNameClone<<"dcaBin_";
+  for (i=0; i<d; i++){
+  if (dcaAry[i]==FLT_MAX)  mNameClone<<"Inf"<<"_";
+  else mNameClone<<dcaAry[i]<<"_";
+  }
+
+
   mName=mNameClone.str();
+
+
 
   setUpBGNets();
 }
@@ -215,31 +232,53 @@ void StPidAmpChannelCollection::filterOptions(StPidAmpNetType theNetType,TString
 
 
 //----------------------------
-void StPidAmpChannelCollection::setUpChannels(int n, int* nhitsAry,int p, double* ptAry,StPidAmpNetType theNetType){
+void StPidAmpChannelCollection::setUpChannels(int n, int* nhitsAry,int p, double* ptAry,int d, double* dcaAry, StPidAmpNetType theNetType){
+
+
 
   //add asending value of nhitsAry and ptAry check here later.
 
   for (int i=0; i<(n-1); i++){
       StPidAmpCut nhitsCut;
       nhitsCut=StPidAmpCut("N", double(nhitsAry[i]),double(nhitsAry[i+1]));
-      
+
+
       for (int j=0; j<(p-1); j++){
             StPidAmpCut           ptCut;
+            ptCut=StPidAmpCut("P", ptAry[j],ptAry[j+1]);
+
+
+	    for (int k=0; k<(d-1);k++){
+	      StPidAmpCut     dcaCut;
+              dcaCut=StPidAmpCut("D", dcaAry[k], dcaAry[k+1]);
+
+
             StPidAmpChannelInfo   channelInfo;
             StPidAmpCutVector cutCollect;
-            StPidAmpChannel*       channel;
 
-            ptCut=StPidAmpCut("P", ptAry[j],ptAry[j+1]);
+
        
             cutCollect.push_back(nhitsCut); //nhits first always! do not change
             cutCollect.push_back(ptCut);
+            cutCollect.push_back(dcaCut);
       
-            channelInfo=StPidAmpChannelInfo(cutCollect);
-	    channel=new StPidAmpChannel(channelInfo,theNetType);
-	    mChannelCollect->push_back(channel);
-      }
 
+
+            channelInfo=StPidAmpChannelInfo(cutCollect);
+
+	  StPidAmpChannel* channel=new StPidAmpChannel(channelInfo,theNetType);
+
+	      mChannelCollect->push_back(channel);
+
+     
+
+	    }
+     
+      }
+     
 }
+
+
 
 }
 //----------------------------
@@ -338,6 +377,7 @@ void StPidAmpChannelCollection::drawMultiBGNets2Gether(){
 //----------------------------
 void StPidAmpChannelCollection::setUpBGNets(){//StPidAmpParticle def, StPidAmpChannelInfo channelInfo){
   
+
    strstream bgStr;
    strstream electronStr;
    strstream positronStr;
