@@ -1,5 +1,12 @@
-// $Id: StFtpcTracker.cc,v 1.24 2002/11/06 13:47:11 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.25 2002/11/28 09:39:33 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.25  2002/11/28 09:39:33  oldi
+// Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
+// It was used do decide for global or primary fit.
+// Code was prepared to fill momentum values at outermost points on tracks.
+// This feature is not used up to now.
+// Code cleanups.
+//
 // Revision 1.24  2002/11/06 13:47:11  oldi
 // Vertex handling simplifed.
 // Global/primary fit handling simplified.
@@ -791,7 +798,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t prima
     for (Int_t i=0; i<num_tracks; i++) {
       track = (StFtpcTrack *)mTrack->At(i);
       track->Fit(mVertex, mMaxDca, primary_fit);
-      track->WriteTrack(&(trackTable[i]), mVertex);
+      track->WriteTrack(&(trackTable[i]), mVertex, primary_fit);
     }
    
     trackTableWrapper->SetNRows(num_tracks);
@@ -964,8 +971,8 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
 
       if (StFtpcTrackingParams::Instance()->IdMethod() != 1) { 
 	// calculations done, write track
-	// if id_method == 1 the calculations go on and the track is writtem later
-	track->WriteTrack(&(trackTable[itrk]), mVertex);
+	// if id_method == 1 the calculations go on and the track is written later
+	track->WriteTrack(&(trackTable[itrk]), mVertex, primary_fit);
       }
     
       itrk_ok++;
@@ -1118,7 +1125,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
 	//cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl;
 
 	// write track
-	track->WriteTrack(&(trackTable[itrk]), mVertex);
+	track->WriteTrack(&(trackTable[itrk]), mVertex, primary_fit);
       }
     
       delete[] weighted;
