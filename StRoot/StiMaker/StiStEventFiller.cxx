@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.19 2002/09/05 05:47:36 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.20 2002/09/12 22:27:15 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.20  2002/09/12 22:27:15  andrewar
+ * Fixed signed curvature -> StHelixModel conversion bug.
+ *
  * Revision 1.19  2002/09/05 05:47:36  pruneau
  * Adding Editable Parameters and dynamic StiOptionFrame
  *
@@ -100,7 +103,8 @@ using namespace std;
 #include "StThreeVectorF.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
-
+#include "StTrackDefinitions.h"
+#include "StTrackMethod.h"
 #include "StDedxMethod.h"
 
 //StEvent
@@ -447,11 +451,37 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     short int h = (node->getCharge()*StiKalmanTrackNode::getFieldConstant() <= 0) ? 1 : -1;
     phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
     phase += h*halfpi;
+    double curv=fabs(node->getCurvature());
+    cout <<"Curvature: "<<curv<<endl;;
     StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
 						phase,
-						node->getCurvature(),
+						curv,
 						node->getDipAngle(),
 						origin, p, h);
+
+
+//     cout <<"Input Helicity: "  << h    
+//          <<"\tCharge: "    << short(node->getCharge())
+//          <<"\tPhase: "     << phase
+// 	 << "\tCurvature: "<< node->getCurvature()
+// 	 <<"\tDip angle:" <<node->getDipAngle()
+// 	 <<"\tOrigin: "<< origin
+// 	 <<"\tMomentum: "<< p
+// 	 <<endl
+// 	 <<"Helix Model Helicity: " << geometry->helicity()                
+// 	 <<"\tCharge: " << geometry->charge()
+//          <<"\tPhase: "     << geometry->psi()
+// 	 << "\tCurvature: "<< geometry->curvature()
+// 	 <<"\tDip angle:" <<geometry->dipAngle()
+// 	 <<"\tOrigin: "<< geometry->origin()
+// 	 <<"\tMomentum: "<< geometry->momentum()
+// 	 <<"\t Field: "<<StiKalmanTrackNode::getFieldConstant()<< endl;
+
+//     cout <<"New Helix: "     << geometry->helix()
+//          <<"\tCharge: "      << geometry->helix().charge(StiKalmanTrackNode::getFieldConstant())
+// 	 <<endl;
+
+
     if (outer)
 	gTrack->setOuterGeometry(geometry);
     else
@@ -571,7 +601,14 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     // finding 100000000000     
     // fitting             0010 
     //            32768    +    2 = 32770;
-    gTrack->setEncodedMethod(32770);
+    
+    unsigned short int mStiEncoded = kITKalmanFitId + (1<< tpcOther);
+    unsigned short int bit = 1<< tpcOther;
+    gTrack->setEncodedMethod(mStiEncoded);
+    cout <<"Encoded Method ID: "<<mStiEncoded
+	 <<"kId: "<< kITKalmanFitId
+	 <<"bit: "<<bit
+	 <<endl;
     
     gTrack->setImpactParameter(impactParameter(track));//gTrack->setImpactParamter(track->getDca(vertex)); // change: need to calculate impact parameter or use 
     gTrack->setLength(track->getTrackLength());
