@@ -1,3 +1,6 @@
+//*CMZ :          23/02/99  18.27.27  by  Valery Fine(fine@bnl.gov)
+//*-- Author :    Valery Fine(fine@bnl.gov)   03/07/98
+//
 //  
 //  
 //
@@ -11,6 +14,8 @@
 #include "St_io_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+#include "TSystem.h"
+#include "TFile.h"
 #include "TTree.h"
 #include "TClass.h"
 
@@ -64,6 +69,7 @@ ClassImp(St_io_Maker)
 
 //_____________________________________________________________________________
 St_io_Maker::St_io_Maker(const char *name, const char *title,TTree *tree):StMaker(name,title){
+   m_ListOfBranches = 0;
    SetTree(tree);
    drawinit=kFALSE;
 }
@@ -105,7 +111,8 @@ void St_io_Maker::Add(const Char_t *dataName, const Char_t *fileName)
 }
 
 //_____________________________________________________________________________
-void St_io_Maker::Add(TBranch *branch,const Char_t *dataName,const Char_t *fileName)
+void St_io_Maker::Add(TBranch *branch,const Char_t *,const Char_t *fileName)
+//void St_io_Maker::Add(TBranch *branch,const Char_t *dataName,const Char_t *fileName)
 {
 
 // Check whether we have Maker("dataName");
@@ -125,6 +132,13 @@ void St_io_Maker::Add(TBranch *branch,const Char_t *dataName,const Char_t *fileN
 void St_io_Maker::Add(TString &dataName,const Char_t *fileName)
 {
   Add(dataName.Data(),fileName);
+}
+//_____________________________________________________________________________
+void St_io_Maker::Clear(Option_t *option="")
+{
+  TTree *tree = GetTree();
+  if (tree) tree->AutoSave();
+  StMaker::Clear();
 }
 //_____________________________________________________________________________
 St_DataSet *St_io_Maker::DataSet(const Char_t *set) 
@@ -183,13 +197,22 @@ Int_t St_io_Maker::Make()
      NextEventPut();
      return kStOK;
   }
-  else
-     return NextEventGet(g_Chain->Event())? kStOK : kStErr;
+  else 
+       return  NextEventGet(g_Chain->Event()) ? kStOK : kStErr;
 
 }
 //_____________________________________________________________________________
 Int_t St_io_Maker::NextEventGet(Int_t nevent)
 {
+ // - Prepares the list of branches to be read when called for the first time
+ //
+ //   + This method creates a list of the branches to be read and 
+ //   + Changes the names of the branch file names.
+ //     It assumes the branch files should be resided at the same directory as
+ //     TTree file is
+ //
+ // - Reads next event.
+ //
 #ifdef tree
   TTree *tree = GetTree();
   if (!tree)   return 0;
@@ -207,8 +230,12 @@ Int_t St_io_Maker::NextEventGet(Int_t nevent)
     TIter next(branches);
     while (nextb = (TBranch *)next())  
     {
-         printf(" St_io_Maker::NextEventGet ----> %s \n", nextb->GetName());
-         Add(nextb);
+       const Char_t *treePathName   = gSystem->DirName(tree->GetCurrentFile()->GetName());
+       const Char_t *branchFileName = gSystem->BaseName(nextb->GetFileName());
+       Char_t *fileForThisBranch    = gSystem->ConcatFileName(treePathName,branchFileName);
+       Add(nextb,"",fileForThisBranch);
+       delete [] fileForThisBranch;
+       printf(" St_io_Maker::NextEventGet ----> %s from %s \n", nextb->GetName(),nextb->GetFileName());
     }
   }
   Int_t counter = 0;
@@ -219,18 +246,23 @@ Int_t St_io_Maker::NextEventGet(Int_t nevent)
 #else
   {
 #endif
-    TIter next(m_ListOfBranches);
-    StIOHeader *obj = 0;
-    while(obj = (StIOHeader *)next())  {
-     // determinate the recepient
-      TString name = obj->GetName();
-      name.ReplaceAll("_Branch","");
-      StMaker *maker = gStChain->Maker(name);
-      if (maker) {
+    if (m_ListOfBranches) 
+    {
+      counter = -1;
+      TIter next(m_ListOfBranches);
+      StIOHeader *obj = 0;
+      while(obj = (StIOHeader *)next())  {
+       // determinate the recepient
+        TString name = obj->GetName();
+        name.ReplaceAll("_Branch","");
+        StMaker *maker = gStChain->Maker(name.Data());
+        if (maker) {
 #ifndef tree
-          counter += obj->GetEvent(nevent);
+           if (counter == -1) counter = 0;
+           counter += obj->GetEvent(nevent);
 #endif
-          maker->SetDataSet((St_DataSet *)obj->ShuntData());
+           maker->SetDataSet((St_DataSet *)obj->ShuntData());
+        }
       }
     }
   }
@@ -286,7 +318,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.5 1999/02/08 16:51:24 fisyak Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.6 1999/02/24 16:06:35 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
