@@ -22,5 +22,7 @@
   float     ZDCvertexZ;     /* Z position of vertex from ZDC (corrected)*/
   unsigned short lastDSM[8];/* Jul 18 2001                           */
   unsigned short BCdata[16];/* Jul 18 2001                           */
+  octet          emcTrigPatch[300]; /* Oct 16 2001 */
+  octet          emcHiTower[300];   /* Oct 16 2001 */
 } ;
-/*  Last mod. for dst_TrgDet:   $Date: 2001/08/31 17:27:57 $ */
+/*  Last mod. for dst_TrgDet:   $Date: 2001/10/16 20:26:07 $ */

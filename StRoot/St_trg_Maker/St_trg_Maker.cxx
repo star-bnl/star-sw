@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.33 2001/09/11 21:49:46 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.34 2001/10/16 20:26:02 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.34  2001/10/16 20:26:02  ward
+// New code from Jennifer Klay for unpacking EMC data.
+//
 // Revision 1.33  2001/09/11 21:49:46  ward
 // Changes to StDaqLib/TRG for running year 2000 data.
 //
@@ -181,13 +184,52 @@ Int_t St_trg_Maker::Init(){
 // This section of code causes the functions in the file duplicated.code to appear twice
 // in this code file.  The second time is for trigger data in the year 2000 format.
 // The first time is for year 2001 format.
+
 #define SWITCH(x) x
+#define LATER_THAN_YEAR_2000
 #include "duplicated.code"
 #undef SWITCH
+#undef LATER_THAN_YEAR_2000
+
 #define SWITCH(x) x ## 2000
 #include "duplicated.code"
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
+void St_trg_Maker::unpack6bits( byte* value, byte* newbits) {
+
+  int index;
+  int i1,i2;
+
+  //Unpack the bits into 20 signals
+  for (index=0; index<5; index++) {
+    i1=index*3;
+    i2=index*4;
+
+    newbits[i2] = (value[i1] & 0xFC);           //Get the first 6 bits only of this char
+    newbits[i2] >>= 2;                          //Move them 2 bits to the right, add 2 leading zeros
+    newbits[i2+1] = ((value[i1] & 0x03) << 6) | ((value[i1+1] & 0xF0) >> 2);
+    newbits[i2+1] >>= 2;
+    newbits[i2+2] = ((value[i1+1] & 0x0F) << 4) | ((value[i1+2] & 0xC0) >> 4);
+    newbits[i2+2] >>= 2;
+    newbits[i2+3] = (value[i1+2] & 0x3F);
+  }
+
+  return;
+}
+void St_trg_Maker::swapByteOrder( byte *dsmOutput, byte* emcOrder) {
+
+  int index;
+  int i,j,k;
+
+  for (index=0; index<8; index++) {
+    i=7-index;
+    emcOrder[index] = dsmOutput[i];
+    j = 8+index; k = 15-index;
+    emcOrder[j] = dsmOutput[k];
+  }
+  return;
+}
 void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();

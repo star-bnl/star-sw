@@ -54,6 +54,49 @@ Int_t St_trg_Maker::SWITCH(SanityCheck)() {
   }
   return kStOK;
 }
+///////////////////////////// Here begins the stuff from Jennifer Klay.  Oct 16 2001.
+#ifdef LATER_THAN_YEAR_2000  // Year 2000 trgStructures.h does not have BEMC.
+#define NUML0DSM 3      //As more EMC is intrumented, this will go up
+#define TRIGTYPES 2     //Two types: highTower, trigPatch
+#define TRIGPERDSM 10   //10 per type handled by each DSM board
+#define BYTESPERDSM 16  //The number of output bytes the 20 signals are packed into
+#define PATCHTOT NUML0DSM*TRIGPERDSM
+typedef unsigned char byte;
+void St_trg_Maker::SWITCH(Emc)(St_dst_TrgDet *dst1) {
+  dst_TrgDet_st *tt = dst1->GetTable();
+  
+  byte preOrderedDSM[NUML0DSM][BYTESPERDSM];
+  byte orderedDSM[NUML0DSM][BYTESPERDSM];
+  byte trgSignals[NUML0DSM][TRIGPERDSM*TRIGTYPES];
+  byte highTower[PATCHTOT];
+  byte trigPatch[PATCHTOT];
+    
+  for (int i=0; i<NUML0DSM ; i++) {		//Loop through Patch rows
+    for (int j=0; j < BYTESPERDSM; j++) {
+      int index = 32 + (i*16) + j;		//Offset by 32 bytes to get to L0 DSM
+      preOrderedDSM[i][j] = SWITCH(gs)->RAW[0].BEMC[index];
+    }
+
+    //Convert the DSM output byte ordering to EMC output ordering
+    swapByteOrder( preOrderedDSM[i], orderedDSM[i] );
+
+    //Unpack the 20 trigger signals from the 16 byte DSM board data
+    unpack6bits( orderedDSM[i], trgSignals[i] );
+
+    //Display the unpacked 6-bit trigger signals as 8-bit unsigned chars (leading zeros)
+    for (int j = 0; j < TRIGPERDSM; j++) { 
+      int i1= j*2;    
+      int i2= j*2+1;
+      int sort = i*TRIGPERDSM+j;    
+
+      assert(sort>=0&&sort<300); // The limit 300 is in the idl file for dst_TrgDet.
+      tt->emcHiTower[sort] = trgSignals[i][i1];
+      tt->emcTrigPatch[sort] = trgSignals[i][i2];
+    }
+  }
+}
+#endif // LATER_THAN_YEAR_2000
+///////////////////////////// Here ends the stuff from Jennifer Klay.  Oct 16 2001.
 int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
       St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
 
@@ -90,6 +133,9 @@ int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Tri
   SWITCH(CtbMwcDaq)(dst1);    // has four lines
   SWITCH(SecondDstDaq)(dst2); // which are analogous to these four.
   SWITCH(TakeCareOfL1andL2Daq)(dst3,dst4);
+#ifdef LATER_THAN_YEAR_2000  // Year 2000 trgStructures.h does not have BEMC.
+  SWITCH(Emc)(dst1);
+#endif
 
   // SWITCH(dumpDataToScreenAndExit)();
 
