@@ -533,7 +533,8 @@ c           itdc(iclspix) = real(tdc_lo + tdc_hi)
 c           kseqpix = iand(idatum(2),seqmask)/'100'X
 c new way to unpack data
            kseqpix = ldatum/numseq_factor
-           itdc(iclspix) = real((ldatum - numseq_factor*kseqpix)/tdc_factor)
+           itdc(iclspix) = real((ldatum - numseq_factor*kseqpix)/
+     +		tdc_factor)
            iadc(iclspix) = real(ldatum - numseq_factor*kseqpix 
      +		- tdc_factor*int(itdc(iclspix)))
 
@@ -734,7 +735,7 @@ c  t0's
      +				 tau, mom2)
 	else
 	  id = 0
-	  call message('TPH_FIT_CLUSTER no good time peaks - taking max',
+	  call message('TPH_FIT_CLUSTER no good time peaks-taking max',
      +			1, id)
 	  imax = lvmax(iadc,nclspix)
 	  t0 = itdc(imax)
@@ -1316,7 +1317,8 @@ C-----------------------------------------------------------------------
            kseqpix = ldatum/nseq_factor
            itdc = (ldatum - kseqpix*nseq_factor)/tdc_factor
 c           iadc(iseq) = real(idatum(1))
-           iadc(iseq) = real(ldatum - kseqpix*nseq_factor - itdc*tdc_factor)
+           iadc(iseq) = real(ldatum - kseqpix*nseq_factor -
+     +		 itdc*tdc_factor)
 
            ipad(iseq) = real(tpseq(kseq).secpad-id_pad(irow))
 
@@ -1325,7 +1327,8 @@ c           kseqpix = iand(idatum(2),seqmask)/'100'X
            do indx = 2, kseqpix
               ldatum = tppixel(jpix+indx-1).datum
               itdc = (ldatum - kseqpix*nseq_factor)/tdc_factor
-              iadc(iseq) = iadc(iseq) + real(ldatum - kseqpix*nseq_factor - itdc*tdc_factor)
+              iadc(iseq) = iadc(iseq) + real(ldatum - 
+     +		kseqpix*nseq_factor - itdc*tdc_factor)
            enddo
 
         enddo

@@ -284,9 +284,9 @@ c    1	                 , tpclusterh, tpcluster, tpseqh, tpseq )
      1             , padptr )
     
               IF ( TAS_Code .NE. tucod_ok ) THEN
-                 CALL Message( 'TCL_Make_Clusters-E1  Failed.', 1, IDE1 )
-                 TCL_Make_Clusters = TAS_Code
-                 RETURN
+               CALL Message( 'TCL_Make_Clusters-E1  Failed.', 1, IDE1 )
+               TCL_Make_Clusters = TAS_Code
+               RETURN
               END IF
               
            END DO               !Row = 1, Nrows
@@ -450,7 +450,8 @@ c   secpad offset for each row....
 	  first = .false.
           secpad_offset(1) = 0
           do jrow=2,45
-             secpad_offset(jrow)=secpad_offset(jrow-1)+pad_plane(1).npads(jrow-1)
+             secpad_offset(jrow)=secpad_offset(jrow-1)+
+     +		pad_plane(1).npads(jrow-1)
           enddo
        endif
 c-------------------
@@ -532,11 +533,14 @@ c look to left of seed...
 	  do ipad_seq=1,nseqs_pad(ipad_seed-1)
 	    if (.not.used(ipad_seed-1,ipad_seq)) then
 	      iptr = pad_seqptr(ipad_seed-1,ipad_seq)
-	      if (((itlo(iptr).ge.itlo_seed).and.(itlo(iptr).le.ithi_seed))
+	      if (((itlo(iptr).ge.itlo_seed).and.
+     +		(itlo(iptr).le.ithi_seed))
      +		.or.
-     +		((ithi(iptr).ge.itlo_seed).and.(ithi(iptr).le.ithi_seed))
+     +		((ithi(iptr).ge.itlo_seed).and.
+     +		(ithi(iptr).le.ithi_seed))
      +		.or.
-     +		((ithi(iptr).ge.ithi_seed).and.(itlo(iptr).le.itlo_seed)))
+     +		((ithi(iptr).ge.ithi_seed).and.
+     +		(itlo(iptr).le.itlo_seed)))
      +		then
 		  nseq_in_cluster = nseq_in_cluster+1
 		  seq_in_cluster(nseq_in_cluster) = iptr
@@ -550,11 +554,14 @@ c look to right of seed...
 	  do ipad_seq=1,nseqs_pad(ipad_seed+1)
 	    if (.not.used(ipad_seed+1,ipad_seq)) then
 	      iptr = pad_seqptr(ipad_seed+1,ipad_seq)
-	      if (((itlo(iptr).ge.itlo_seed).and.(itlo(iptr).le.ithi_seed))
+	      if (((itlo(iptr).ge.itlo_seed).and.
+     +		(itlo(iptr).le.ithi_seed))
      +		.or.
-     +		((ithi(iptr).ge.itlo_seed).and.(ithi(iptr).le.ithi_seed))
+     +		((ithi(iptr).ge.itlo_seed).and.
+     +		(ithi(iptr).le.ithi_seed))
      +		.or.
-     +		((ithi(iptr).ge.ithi_seed).and.(itlo(iptr).le.itlo_seed)))
+     +		((ithi(iptr).ge.ithi_seed).and.
+     +		(itlo(iptr).le.itlo_seed)))
      +		then
 		  nseq_in_cluster = nseq_in_cluster+1
 		  seq_in_cluster(nseq_in_cluster) = iptr
@@ -591,7 +598,8 @@ c	  tpcluster(tpclusterh.nok).secpad=100*sector+row
 	    tpseq(tpseqh.nok).tpc_row = 100*sector+row
 	    tpseq(tpseqh.nok).secpad = ipad(seq_in_cluster(iseq))+
      +		secpad_offset(row)	! note we restore offset
-	    if (iseq.ne.nseq_in_cluster) tpseq(tpseqh.nok).next = tpseqh.nok+1
+	    if (iseq.ne.nseq_in_cluster) 
+     +		tpseq(tpseqh.nok).next = tpseqh.nok+1
 	  enddo
 	endif
 
