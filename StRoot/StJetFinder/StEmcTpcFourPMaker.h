@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.16 2003/10/01 16:39:29 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.17 2004/02/26 22:23:34 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.17  2004/02/26 22:23:34  thenry
+ * Fixed eta-Shift zVertex bug.
+ *
  * Revision 1.16  2003/10/01 16:39:29  thenry
  * Added new getter for StProjectedTracks to StEmcTpcFourPMaker, and used
  * in StJetOutputMaker so that StTrackStruct now contains track px, py, pz
@@ -120,13 +123,13 @@ class StCorrectedEmcPoint
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index, StThreeVectorD vertex) : 
       mPoint(p), index(_index)
     {
-      thetaShift = atan2(vertex.z()/100.0, SMDR);
+      thetaShift = (vertex.z()/100.0)/SMDR;
       correctedE = p->getEnergy();
     };
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index, double zv) : 
       mPoint(p), index(_index) 
     {
-      thetaShift = atan2(zv/100.0, SMDR);
+      thetaShift = (zv/100.0)/SMDR;
       correctedE = p->getEnergy();
     };
     StCorrectedEmcPoint(const StCorrectedEmcPoint& p)
@@ -149,13 +152,13 @@ class StCorrectedEmcPoint
         if(p)
 	    correctedE = p->getEnergy();
 	else return false;
-        thetaShift = atan2(zv/100.0, SMDR);
+        thetaShift = (zv/100.0)/SMDR;
 	return true;
       };
     inline double pEta(void) { return Eta(); };
     inline double Eta(void) { 
       if(!mPoint) return 0.0; 
-      return EtabyTheta(ThetabyEta(mPoint->getEta()) - thetaShift); 
+      return EtabyTheta(atan2(tan(ThetabyEta(mPoint->getEta())), 1.0-tan(ThetabyEta(mPoint->getEta()))*thetaShift)); 
     };
     inline double E(void) const{ return correctedE; };
     inline double Phi(void) { 
@@ -569,6 +572,7 @@ class StEmcTpcFourPMaker : public StFourPMaker {
 		     StEmcADCtoEMaker* adcToEMaker = NULL);
 
   virtual Int_t Make();
+  virtual Int_t Finish();
     
   StMuEmcCollection* getMuEmcCollection(void) { return muEmc; };
   void setUseType(EMCHitType uType) { useType = uType; };
@@ -595,11 +599,14 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   long maxPoints;
   long numberPoints;
   bool aborted;
+  bool noAbortions;
  public:
   createdPointVector fakePoints;
   double mPIDR, mKDR, mPRDR, mEDR, mCAD;
   EMCHitType useType;
 
+  // Stop abortions, useful for simulated data
+  void SetNoAbortions(void) { noAbortions = true; };
   // Number of tracks which land near EMC Points
   int getNumberCoincidences(void) { return numCoincidences; };
   // The sum of Pt of all the primary tracks in the event
