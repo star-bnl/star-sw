@@ -226,7 +226,10 @@ void StObjArray::Streamer(TBuffer &b)
 //______________________________________________________________________________
 const TIterator *StObjArray::Begin() const
 { 
-  return MakeIterator();
+  static  TIterator *iter=0;
+  if (iter) delete iter;
+  iter =  MakeIterator();
+  return iter;
 }
 //______________________________________________________________________________
 void StObjArray::Browse(TBrowser *b)
@@ -257,7 +260,9 @@ Bool_t StObjArray::IsFolder(){ return GetEntries();}
 //______________________________________________________________________________
 const TIterator *StObjArray::End() const
 { 
-  TIterator *iter =  MakeIterator();
+  static  TIterator *iter=0;  
+  if (iter) delete iter; 
+  iter =  MakeIterator();
   ((StObjArrayIter*)iter)->SetCursor(GetLast()+1);
   return iter;
 }
@@ -575,8 +580,11 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
-// $Id: StArray.cxx,v 1.24 2000/04/23 20:37:18 perev Exp $
+// $Id: StArray.cxx,v 1.25 2000/05/09 22:05:21 fine Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.25  2000/05/09 22:05:21  fine
+// re-invent wheel to fix the memeory leak
+//
 // Revision 1.24  2000/04/23 20:37:18  perev
 // random shuffle and one byte for empty collection I/O
 //
