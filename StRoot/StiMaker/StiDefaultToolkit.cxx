@@ -1,17 +1,29 @@
-///@file  StiDefaultToolkit.cxx
-///@brief Default Implementation of the StiToolkit Abstract interface
-///@author Claude A Pruneau, Wayne State University, 
-///@date   March 2001
-///@copyright 2001, STAR  Experiment at BNL, All rights reserved.  
-/// 
-///Permission to use, copy, modify and distribute this software and its
-///documentation strictly for non-commercial purposes is hereby granted 
-///without fee, provided that the above copyright notice appears in all
-///copies and that both the copyright notice and this permission notice
-///appear in the supporting documentation. The authors make no claims 
-///about the suitability of this software for any purpose. It is     
-///provided "as is" without express or implied warranty.             
-///
+/***************************************************************************
+ *
+ * $Id: StiDefaultToolkit.cxx,v 2.8 2003/02/11 10:38:18 andrewar Exp $
+ *
+ * @file  StiDefaultToolkit.cxx
+ * @brief Default Implementation of the StiToolkit Abstract interface
+ * @author Claude A Pruneau, Wayne State University, 
+ * @date   March 2001
+ * @copyright 2001, STAR  Experiment at BNL, All rights reserved.  
+ * 
+ * Permission to use, copy, modify and distribute this software and its
+ * documentation strictly for non-commercial purposes is hereby granted 
+ * without fee, provided that the above copyright notice appears in all
+ * copies and that both the copyright notice and this permission notice
+ * appear in the supporting documentation. The authors make no claims 
+ * about the suitability of this software for any purpose. It is     
+ * provided "as is" without express or implied warranty.             
+ *
+ ***************************************************************************
+ *
+ * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.8  2003/02/11 10:38:18  andrewar
+ * Changed limits for StiHitFactory:: maxIncrements (from 5 to 10).
+ *
+ */
+
 #include "StiDefaultToolkit.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Filter.h"
@@ -142,7 +154,7 @@ Factory<StiHit>* StiDefaultToolkit::getHitFactory()
 {
   if (_hitFactory)
     return _hitFactory;
-  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,5);
+  _hitFactory = new VectorizedFactory<StiHit,StiHit>("StiHitFactory",50000,20000,10);
   return _hitFactory;
 }
 
@@ -154,16 +166,16 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
   if (_guiEnabled)
     {
       if (_evaluatorEnabled)
-				_trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiRootDrawableStiEvaluableTrack,StiKalmanTrack>("StiRDEvaluableTrackFactory",10000,5000,10);
       else 
-				_trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
     }
   else // no gui needed
     {	
       if (_evaluatorEnabled)
-				_trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiEvaluableTrack,StiKalmanTrack>("StiEvaluableTrackFactory",10000,5000,10);
       else 
-				_trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
+	  _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
     }
   return _trackFactory;
 }
