@@ -31,13 +31,6 @@
 *                      **  ***     ***  **
 *                     **                 **
 
-	SUBROUTINE MSG_DUMMY
-*	Test the new installib business by forcing libmsg.a to change,
-*	by adding this subroutine.
-	IMPLICIT NONE
-	RETURN
-	END
-
 	SUBROUTINE MSG_CHECK(MSG,ID,ACTIVE,COUNTING)
 
 	IMPLICIT NONE
@@ -134,7 +127,6 @@
 	IF (LID.LE.0) THEN !Look up the message in the index:
 	  CALL MSG_GET_PREFIX(MSG,PREFIX)
 	  FOUND=MSG_FIND(PREFIX,LID,ACTIVE,COUNTING) !Set the ID & flags.
-
 	ELSE IF (LID.LE.MSG_Nprefixes) THEN !It's in the index:
 	  FOUND=.TRUE.
 	  ACTIVE=MSG_Active(LID)
@@ -170,7 +162,7 @@
 	  END IF !ACTIVE
 	ELSE !It's not in the index:
 	  FOUND=.FALSE.
-	END IF
+	END IF !LID.LE.0
 
 	IF (.NOT.FOUND) THEN !Enter the prefix in the index.
 	  CALL MSG_ENTER(PREFIX,LID)
@@ -181,6 +173,7 @@
 *	Check whether it's exceeded its counting limit:
 	IF (LID.GT.0) THEN
 	  IF (.NOT.MSG_Active(LID)) THEN
+	  ELSE IF (MSG_Count_limit(LID).LE.0) THEN !No counting limit.
 	  ELSE IF (MSG_Counts(LID).GE.MSG_Count_limit(LID)) THEN
 *	    Turn off messages -- continue counting, of course:
 	    MSG_Active(LID)=.FALSE.
@@ -207,7 +200,7 @@
 	END IF
 
 	IF (CALLER_BUG) THEN !Don't set the given ID.
-	ELSE IF (ID.EQ.0) THEN !Set it:
+	ELSE                 !Set it.
 	  ID=LID
 	END IF
 
@@ -251,11 +244,12 @@
 	  MSG_Prefix(ID)=PREFIX(1:MSG_Length(ID))
 	  MSG_Sample(ID)=' ' !Make sure it's blanked out first.
 	  MSG_Sample(ID)=PREFIX(1:MSG_Length(ID)) !Initialize sample with prefix.
-	  MSG_Active(ID)=.NOT.MSG_ALL_DISABLE
-	  MSG_Counting(ID)=.NOT.MSG_ALL_NOCOUNT
+	  MSG_Active(ID)=.NOT.MSG_All_Disable
+	  MSG_Counting(ID)=.NOT.MSG_All_Nocount
 	  MSG_Counts(ID)=0
 	  MSG_Lookups(ID)=0
 	  MSG_Count_limit(ID)=MSG_ALL_COUNT_LIMIT !The default.
+	  MSG_Abort_limit(ID)=0 !The default -- no abort limit.
 	ELSE !There's no room -- message:
 	  ID=0
 	  WRITE(M132,501) PREFIX
@@ -305,7 +299,7 @@
 
 	LOGICAL FOUND
 	INTEGER MID,MLEN
-	INTEGER L
+	INTEGER L, LID
 
 	FOUND=.FALSE.
 	CALL STREND(PREFIX,L) !Find last non-blank.
@@ -316,34 +310,36 @@
 
 	MSG_TOTAL_LOOKUPS = MSG_TOTAL_LOOKUPS + 1
 
-	ID=1
-	DO WHILE (.NOT.FOUND .AND. (ID.LE.MSG_Nprefixes))
-	  IF (MSG_Prefix(ID)(1:MSG_Length(ID)).EQ.PREFIX(:L)) THEN
+	LID=1
+	DO WHILE (.NOT.FOUND .AND. (LID.LE.MSG_Nprefixes))
+	  IF (MSG_Prefix(LID)(1:MSG_Length(LID)).EQ.PREFIX(:L)) THEN
 	    FOUND=.TRUE.
-	    MSG_Lookups(ID) = MSG_Lookups(ID) + 1 !Record this lookup.
+	    MSG_Lookups(LID) = MSG_Lookups(LID) + 1 !Record this lookup.
 	  ELSE
-	    ID=ID+1
+	    LID=LID+1
 	  END IF
-	END DO !WHILE (.NOT.FOUND .AND. (ID.LE.MSG_Nprefixes))
+	END DO !WHILE (.NOT.FOUND .AND. (LID.LE.MSG_Nprefixes))
 
 	IF (.NOT.FOUND) THEN
 *	  Not in index -- set these like this:
 	  ACTIVE=.FALSE.
 	  COUNTING=.FALSE.
-	  ID=0
+	  LID=0
 	ELSE !In index -- look up the flags:
-	  IF (.NOT.MSG_Active(ID)) THEN
-	  ELSE IF (MSG_Counts(ID).GE.MSG_Count_limit(ID)) THEN
+	  IF (.NOT.MSG_Active(LID)) THEN
+	  ELSE IF (MSG_Count_limit(LID).LE.0) THEN !No counting limit.
+	  ELSE IF (MSG_Counts(LID).GE.MSG_Count_limit(LID)) THEN
 *	    Turn off messages -- continue counting, of course:
-	    MSG_Active(ID)=.FALSE.
+	    MSG_Active(LID)=.FALSE.
 *	    And display a message-shut-off warning:
 	    CALL MESSAGE_OUT(
-     1	         MSG_Prefix(ID)//' Disabled -- count limit reached',1)
+     1	         MSG_Prefix(LID)//' Disabled -- count limit reached',1)
 	  END IF !.NOT.ACTIVE
-	  ACTIVE=MSG_Active(ID)
-	  COUNTING=MSG_Counting(ID)
+	  ACTIVE=MSG_Active(LID)
+	  COUNTING=MSG_Counting(LID)
 	END IF
 
+	ID = LID
 	MSG_FIND=FOUND
 
 	RETURN
