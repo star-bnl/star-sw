@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.1 2001/02/23 00:51:15 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.2 2001/03/06 17:41:33 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,8 +11,8 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
-// Revision 1.1  2001/02/23 00:51:15  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/03/06 17:41:33  posk
+// Put CheckEvent before fill event.
 //
 // Revision 1.45  2000/11/07 02:36:41  snelling
 //
@@ -289,13 +289,20 @@ Bool_t StFlowMaker::FillFromMicroDST(StEbyeEvent* pMicroEvent) {
   pFlowEvent->SetMeanCos(mMeanCos);
   pFlowEvent->SetMeanSin(mMeanSin);
 
+  // Check event cuts
+  if (!StFlowCutEvent::CheckEvent(pMicroEvent)) { 
+    gMessMgr->Info() << "##### FlowMaker: microevent cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+
   if (pMicroEvent->Version()==1) {
     FillFromMicroVer1(pMicroEvent);
   }
   
-  // Check event cuts and Eta Symmetry
-  if (!StFlowCutEvent::CheckEvent(pMicroEvent) ||
-      !StFlowCutEvent::CheckEtaSymmetry(pMicroEvent)) { 
+  // Check Eta Symmetry
+  if (!StFlowCutEvent::CheckEtaSymmetry(pMicroEvent)) { 
     gMessMgr->Info() << "##### FlowMaker: microevent cut" << endm;
     delete pFlowEvent;             // delete this event
     pFlowEvent = NULL;
