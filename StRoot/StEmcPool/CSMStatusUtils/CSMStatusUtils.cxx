@@ -121,6 +121,28 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(const Char_t* directory) {
   IntToPtrVecShortConstIter preiter = first;
   iter++;
 
+//first, we work on the "pedestal is very near the boundary" problem
+//ie, if a pedestal is very close to 60, we want to flag this channel
+  for(;iter!=last;iter++) {
+    tmpint = iter->first;
+    vector<Short_t>* statusVector = iter->second;
+    vector<Short_t>* oldStatusVector = preiter->second;
+    Short_t oldstatus, status, bitfour = 4;
+    Int_t statuscounter[1000];
+    for (UInt_t i = 1; i < statusVector->size(); i++) {
+      oldstatus = (*oldStatusVector)[i];
+      status = (*statusVector)[i];
+      if ((oldstatus & bitfour) != (status & bitfour))
+        statuscounter[i]++;
+    }
+    preiter = iter;
+  }
+  iter = first;
+  preiter = first;
+  iter++;
+  
+  Bool_t firstone = kTRUE;
+  
   for(;iter!=last;iter++) {
     tmpint = iter->first;
     tmpstr = directory;
@@ -133,13 +155,23 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(const Char_t* directory) {
     vector<Short_t>* statusVector = iter->second;
     vector<Short_t>* oldStatusVector = preiter->second;
     Short_t oldstatus, status;
+    Short_t bitfour = 4;
+    Short_t antibitfour = ~bitfour;
+    Int_t statuscounter[1000];
     for (UInt_t i = 1; i < statusVector->size(); i++) {
       oldstatus = (*oldStatusVector)[i];
       status = (*statusVector)[i];
-      if (oldstatus != status) ofs << i << "\t" << status << endl;
+//logic is - if bit four has disagreed a lot, write it in the first
+//file.  Otherwise, if the other bits disagree, write it out, but only
+//write out bit four disagreement if it's rare.
+      if ( (firstone && statuscounter[i] > 5) || 
+          ( ((oldstatus & antibitfour) != (status & antibitfour)) || 
+           ((oldstatus&bitfour)!=(status&bitfour) && (statuscounter[i]<5)) ) ) 
+        ofs << i << "\t" << status << endl;
     }
     ofs.close();
     preiter = iter;
+    firstone = kFALSE;
   }
 }
 
@@ -251,6 +283,8 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
   c2->SetLogy();
   c2->Draw();
 
+  Char_t buffer[2048];
+
   tmpstr = plotDir;
   tmpstr += "/";
   tmpstr += mDetectorFlavor;
@@ -280,7 +314,7 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
 	      if (goodTowers == 0) {
  	        htmlSummary << "<tr> <td>" << iter->first << "</td>" 
 	                    << "<td> - </td> <td> - </td> <td> - </td>"
-		            << "<td> - </td> <td> - </td> <td> - </td> </tr>"
+		            << "<td> - </td> <td> - </td> <td> - </td> </tr><br>"
 		            << endl;
 	        continue;
 	      }
@@ -301,9 +335,9 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
         (*mRunStatusMapPtr)[iter->first] = statusVector;
         
 	      htmlSummary << "<tr>" << endl 
-	                  << "<td> " << iter->first << " </td> " << endl 
-	                  << "<td> " << goodTowers << " </td>" << endl
-	                  << "<td> " << getNumberOfChangedTowers(tmpint) //run #
+	                  << "<td> " << "Run " << iter->first << " </td> " << endl 
+	                  << "<td> " << goodTowers << " good towers" << " </td>" << endl
+	                  << "<td> " << getNumberOfChangedTowers(tmpint) << " towers changed from previous run"//run #
 	                  << " </td>" << endl;
 
         tmpstr = "./run";
@@ -311,7 +345,7 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
         tmpstr += "_";
         tmpstr += mDetectorFlavor;
         tmpstr += "_badTowers.html";
-	      htmlSummary << "<td> <a href=\"" << tmpstr.Data() << "\"> list </a> </td>" 
+	      htmlSummary << "<td> <a href=\"" << tmpstr.Data() << "\"> list </a></td><br>" 
 	                  << endl;
 
 // save bad tower info
@@ -347,7 +381,7 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
 	            IntToPtrVecShortConstIter preIter = statusIter;
 	            preIter--;
 	            if ((*(statusIter->second))[i] == (*(preIter->second))[i]) {
-		            htmlout << "- </td> </tr>" << endl;
+		            htmlout << "- </td> </tr><br>" << endl;
 		            continue;
 	            }
 	          }
@@ -356,14 +390,13 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
 	          c2->cd();
 	          c2->Clear();
 	          hTemp->GetXaxis()->SetTitle("adc");
-//FIX	          hTemp->Draw();
+	          hTemp->Draw();
 	          c2->Update();
-//	          sprintf(buffer,"%s/runplots/run%dtower%d_adc.gif",plotDir,iter->first,i);
-//FIX	          c2->SaveAs(buffer);
-//	          sprintf(buffer,"./runplots/run%dtower%d_adc.gif",iter->first,i);
-	          htmlout << "<a href=\"" << "this space for rent" << "\" > plot </a>" 
+	          sprintf(buffer,"%s/run%dtower%d_adc.gif",plotDir,iter->first,i);
+	          c2->SaveAs(buffer);
+	          sprintf(buffer,"./run%dtower%d_adc.gif",plotDir,iter->first,i);
+	          htmlout << "<a href=\"" << buffer << "\" > plot </a>" 
 	              << "</td> </tr>" << endl;
-	          //c2->SaveAs(buffer);
 	          delete hTemp;
 	        }
 	      }
@@ -512,38 +545,40 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
       }
 
 //stuck bit test (off & on!)
+//brief rant here - for checking whether or not bits are stuck on,
+//I wanted to just include all bits from 1 to 64
+//problem is, sometimes a channel has a high pedestal, and you
+//only get hits above 64.  So that eliminates 64.  Also, sometimes
+//a channel has a pedestal above 32, but the hit spectrum doesn't
+//extend to 64 (this happens with surprising regularity).  That
+//eliminates 32.  Now the tricky one - 16.  I saw cases in which
+//channels had hit spectra which ran from 16 to 31.  I also saw cases
+//in which one of the outliers was above 48.  This made it appear
+//as though the 16 bit was stuck on.  In fact, I know of no good way
+//to say that it wasn't.  So I've taken the 16 bit out of the mix.
+//It's slightly upsetting to me to have to do that, but other than
+//adding together ALL the 2dhistos from ALL runs and seeing if a
+//channel had a permanently stuck bit (which should be done!!!), I
+//can't see a good workaround. -DRR
+
+      int numberofnonzerohits = 0;
       Short_t bitoff = 0;
-      Short_t biton = (1+2+4+8+16+32);
+      Short_t biton = (1+2+4+8);
       for(int i=1; i<maxBin; i++) {
         if(proj->GetBinContent(i) > 0) {
           bitoff = bitoff | i;
           biton = biton & i;
+          numberofnonzerohits++;
         }
       }
-      
-      Short_t bitcompare = (1+2+4+8+16);
-      bitcompare = 1;
-      if((bitoff & bitcompare) != bitcompare)
+//ok logic we have a problem with 128... so... what we should do
+//is see if the 
+      Short_t bitcompare = (1+2+4+8);
+      if((bitoff & bitcompare) != bitcompare && numberofnonzerohits > 10)
          statusVector[chanId] += 128;
 
-      bitcompare = 2;
-      if((bitoff & bitcompare) != bitcompare)
-         statusVector[chanId] += 256;
-
-      bitcompare = 4;
-      if((bitoff & bitcompare) != bitcompare)
-         statusVector[chanId] += 512;
-
-      bitcompare = 8;
-      if((bitoff & bitcompare) != bitcompare)
-         statusVector[chanId] += 1024;
-
-      bitcompare = 16;
-      if((bitoff & bitcompare) != bitcompare)
-         statusVector[chanId] += 2048;
-
-      if(biton != 0)
-         statusVector[chanId] += 64;
+      if(biton != 0 && numberofnonzerohits > 10)
+        statusVector[chanId] += 64;
 
       delete proj;
     } else {
@@ -625,12 +660,10 @@ CSMStatusUtils::getNumberOfChangedTowers(Int_t runnumber) {
   IntToPtrVecShortConstIter iter = mRunStatusMapPtr->find(runnumber);
 // first run - nothing to compare with
   if (iter == mRunStatusMapPtr->begin()) {
-    cout << "you killed my babyt " << runnumber << endl;
     return -1;
   }
 // run not found
   if (iter == mRunStatusMapPtr->end()) {
-    cout << "you killed my babyp " << runnumber << endl;
     return -1;
   }
 
