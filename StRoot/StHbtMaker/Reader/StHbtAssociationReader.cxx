@@ -5,33 +5,40 @@
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
 
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
+
 #include "StChain.h"
 #include "TOrdCollection.h"
 
-#include "StEvent.h"
-#include "StGlobalTrack.h"
-#include "StTrackNode.h"
-#include "StContainers.h"
-#include "StPrimaryVertex.h"
-#include "StVertex.h"
-#include "StMeasuredPoint.h"
-#include "StDedxPidTraits.h"
-#include "StTrackPidTraits.h"
-#include "StTrackGeometry.h"
-#include "StTrackDetectorInfo.h"
-
+#include "StEventTypes.h"
 #include "StParticleTypes.hh"
-#include "StTpcDedxPidAlgorithm.h"
-
-#include <math.h>
-
 #include "SystemOfUnits.h"   // has "tesla" in it
+#include "StTpcDedxPidAlgorithm.h"
+#include <math.h>
+// #include "StGlobalTrack.h"
+// #include "StTrackNode.h"
+// #include "StContainers.h"
+// #include "StPrimaryVertex.h"
+// #include "StVertex.h"
+// #include "StMeasuredPoint.h"
+// #include "StDedxPidTraits.h"
+// #include "StTrackPidTraits.h"
+// #include "StTrackGeometry.h"
+// #include "StTrackDetectorInfo.h"
+
+
+
 #include "StEventMaker/StEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 
+#include "StMcEvent/StMcEventTypes.hh"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -57,12 +64,12 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
-#include "StMcTpcHit.hh"
-#include "StMcFtpcHit.hh"
-#include "StMcSvtHit.hh"
-#include "StMcVertex.hh"
+// #include "StMcEvent.hh"
+// #include "StMcTrack.hh"
+// #include "StMcTpcHit.hh"
+// #include "StMcFtpcHit.hh"
+// #include "StMcSvtHit.hh"
+// #include "StMcVertex.hh"
 
 #include "StAssociationMaker/StTrackPairInfo.hh"
 #include "StParticleDefinition.hh"

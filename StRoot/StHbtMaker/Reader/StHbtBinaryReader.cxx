@@ -17,12 +17,19 @@
  **************************************************************************/
 
 
-#include "StHbtMaker/Reader/StHbtBinaryReader.h"
-#include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
+
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
 #include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
 #include "StFlowMaker/StFlowSelection.h"
+
+#include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
+#include "StHbtMaker/Reader/StHbtBinaryReader.h"
 
 #ifdef __ROOT__
 ClassImp(StHbtBinaryReader)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtStrangeMuDstEventReader.cxx,v 1.1 2000/12/13 20:45:00 laue Exp $
+ * $Id: StHbtStrangeMuDstEventReader.cxx,v 1.2 2001/06/21 19:18:42 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,17 @@
  ***************************************************************************
  *
  * $Log: StHbtStrangeMuDstEventReader.cxx,v $
+ * Revision 1.2  2001/06/21 19:18:42  laue
+ * Modified Files: (to match the changed base classes)
+ * 	StHbtAsciiReader.cxx StHbtAsciiReader.h
+ * 	StHbtAssociationReader.cxx StHbtAssociationReader.h
+ *  	StHbtBinaryReader.cxx StHbtBinaryReader.h
+ *  	StHbtGstarTxtReader.cxx StHbtGstarTxtReader.h
+ *  	StHbtStrangeMuDstEventReader.cxx
+ *  	StHbtStrangeMuDstEventReader.h StStandardHbtEventReader.cxx
+ * Added Files: new reader
+ *  	StHbtTTreeReader.cxx StHbtTTreeReader.h
+ *
  * Revision 1.1  2000/12/13 20:45:00  laue
  * New reader to read directly from the StStrangeMuDstMaker's V0 files
  *
@@ -23,6 +34,12 @@
 
 #include <math.h>
 
+
+#include "StHbtMaker/Reader/StHbtGstarTxtReader.h"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"

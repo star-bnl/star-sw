@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.32 2001/06/04 19:09:54 rcwells Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.33 2001/06/21 19:18:42 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,17 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.33  2001/06/21 19:18:42  laue
+ * Modified Files: (to match the changed base classes)
+ * 	StHbtAsciiReader.cxx StHbtAsciiReader.h
+ * 	StHbtAssociationReader.cxx StHbtAssociationReader.h
+ *  	StHbtBinaryReader.cxx StHbtBinaryReader.h
+ *  	StHbtGstarTxtReader.cxx StHbtGstarTxtReader.h
+ *  	StHbtStrangeMuDstEventReader.cxx
+ *  	StHbtStrangeMuDstEventReader.h StStandardHbtEventReader.cxx
+ * Added Files: new reader
+ *  	StHbtTTreeReader.cxx StHbtTTreeReader.h
+ *
  * Revision 1.32  2001/06/04 19:09:54  rcwells
  * Adding B-field, run number, and improved reaction plane functionality
  *
@@ -151,6 +162,7 @@
 #include "StTpcDedxPidAlgorithm.h"
 #include "StHit.h"
 #include "StEventInfo.h"
+#include "StuProbabilityPidAlgorithm.h" // new
 #include <math.h>
 
 
@@ -158,8 +170,14 @@
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
 #include "StHbtMaker/Infrastructure/StHbtKinkCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"  
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
+#include "StStrangeMuDstMaker/StKinkMuDst.hh"
 
 #include "StEventMaker/StEventMaker.h"
 
@@ -373,6 +391,9 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   }
   */
 
+    // For Aihong's pid
+    StuProbabilityPidAlgorithm aihongsPid(*rEvent);
+
   {for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
 #ifdef STHBTDEBUG
     cout << " track# " << icount << endl;
@@ -488,6 +509,40 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     
     hbtTrack->SetTopologyMap( 0, gTrack->topologyMap().data(0) ); // take map from globals
     hbtTrack->SetTopologyMap( 1, gTrack->topologyMap().data(1) ); // take map from globals
+
+
+    // >>> Fabrice 6/12/2001 add Aihong's pid probability
+    hbtTrack->SetNHitsDedx(PidAlgorithm->traits()->numberOfPoints());
+
+    pTrack->pidTraits(aihongsPid); //invoke functor.
+    int tPid;
+    hbtTrack->SetPidProbElectron(0.);
+    hbtTrack->SetPidProbPion(0.);
+    hbtTrack->SetPidProbKaon(0.);
+    hbtTrack->SetPidProbProton(0.);
+    for(int ti=0;ti<3;ti++){
+      tPid = aihongsPid.getParticleGeantID(ti);
+      if(tPid==8 || tPid==9){
+	hbtTrack->SetPidProbPion(aihongsPid.getProbability(ti));
+      }
+      else{
+	if(tPid==2 || tPid==3){
+	  hbtTrack->SetPidProbElectron(aihongsPid.getProbability(ti));
+	}
+	else{	  
+	  if(tPid==11 || tPid==12){
+	    hbtTrack->SetPidProbKaon(aihongsPid.getProbability(ti));
+	  }
+	  else{
+	    if(tPid==13 || tPid==15){
+	      hbtTrack->SetPidProbProton(aihongsPid.getProbability(ti));
+	    }	      
+	  }
+	}
+      }
+    }
+    // <<<
+
 
     // cout << "pushing..." <<endl;
 
@@ -619,7 +674,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   // Now do the Kink Stuff - mal 25May2001
   StKinkVertex* starKink;
   StHbtKink* hbtKink;
-  for (unsigned long int icount=0; icount<(unsigned long int)rEvent->kinkVertices().size(); icount++)
+  for (unsigned int icount=0; icount<(unsigned int)rEvent->kinkVertices().size(); icount++)
     {
       StKinkVertex* starKink = rEvent->kinkVertices()[icount];
       hbtKink = new StHbtKink(*starKink, vp);

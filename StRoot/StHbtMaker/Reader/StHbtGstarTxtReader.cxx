@@ -14,7 +14,13 @@
  * 
  **************************************************************************/
 #define HBT_BFIELD 0.5*tesla
+#include <iostream.h>
+#include <fstream.h>
 #include "StHbtMaker/Reader/StHbtGstarTxtReader.h"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 // hbt stuff
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
