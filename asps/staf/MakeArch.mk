@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.6  1998/05/01 12:16:32  fisyak
+#  Test automail
+#
 #  Revision 1.5  1998/04/06 00:00:52  fisyak
 #  hpux modification
 #
@@ -32,11 +35,11 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/04/06 00:00:52 $ 
+#             Last modification $Date: 1998/05/01 12:16:32 $ 
 #. default setings
 #include $(STAF_HOME)/MakeEnv.mk
 #
-#	Determine Make variables
+#	Determine Make   variables
 ALL_TAGS = $@
 ALL_DEPS = $^
 1ST_DEPS = $<
