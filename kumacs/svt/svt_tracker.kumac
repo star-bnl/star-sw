@@ -9,9 +9,28 @@
 ************************************************************************
 *******************************************************************
  
- macro process_event_stk nev
+ macro initialize_stk
+  macro/global/import *
+   message ' initializing svt_tracker stk '
+   exec init_stk
+   exec init_sgr 
+ return
+
+*****************************************************************
+
+ macro initialize_sgr
+  macro/global/import *
+   message 'initializing svt_tracker sgr '
+   exec init_sgr
+   exec init_stk 
+ return
+
+*****************************************************************
+
+macro process_event_stk nev
+  macro/global/import *
    
-      message ' SVT tracker STK: Processing Event # ' [nev]
+      message ' !! SVT tracker STK: Processing Event # ' [nev]
       
       exec run_stk  [nev] 
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
@@ -23,8 +42,9 @@
 * ***********************************************************
 
  macro process_event_sgr nev
+macro/global/import *
    
-      message ' SVT tracker STK: Processing Event # ' [nev]
+      message ' !! SVT tracker SGR: Processing Event # ' [nev]
       
       exec run_sgr  [nev] 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
