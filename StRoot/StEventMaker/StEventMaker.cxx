@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.64 2004/01/22 23:35:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.65 2004/02/11 02:20:27 ullrich Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -332,8 +332,18 @@ StEventMaker::makeEvent()
     dst_L0_Trigger_st* dstL0Trigger    = mEventManager->returnTable_dst_L0_Trigger(nrows);
     dst_L1_Trigger_st* dstL1Trigger    = mEventManager->returnTable_dst_L1_Trigger(nrows);
 
-    if (dstTriggerDetectors && !mCurrentEvent->triggerDetectorCollection())
-        mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
+    //
+    //  year 2001, 2002: use TrgDet tables
+    //  year >= 2003: use info from StTriggerData
+    //  Long term: get rid of StTriggerDetectorCollection
+    //             and use StTriggerData
+    //
+    if (!mCurrentEvent->triggerDetectorCollection()) {
+	if (mCurrentEvent->triggerData() && mCurrentEvent->triggerData()->year() >= 2003) 
+	    mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*(mCurrentEvent->triggerData())));
+	else if (dstTriggerDetectors) 
+	    mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
+    }
     
     StL0Trigger *l0t = mCurrentEvent->l0Trigger();
     if (!l0t) mCurrentEvent->setL0Trigger((l0t = new StL0Trigger()));
@@ -1613,8 +1623,12 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.64 2004/01/22 23:35:55 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.65 2004/02/11 02:20:27 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.65  2004/02/11 02:20:27  ullrich
+ * Load StTriggerDetectorCollection using StTriggerData for runs
+ * in 2003 and later. For 2001 and 2002 stick to TrgDet table.
+ *
  * Revision 2.64  2004/01/22 23:35:55  ullrich
  * Fill new member of StRunInfo (RICH scaler).
  *
