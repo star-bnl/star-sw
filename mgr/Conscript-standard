@@ -110,7 +110,8 @@ if ( $pkg =~ /^StTrsMaker$/ ) {
 if ( $pkg =~ /^StHbtMaker$/ ) {
     $CPPPATH = "#" . $Dir;
     foreach
-      my $subdir( "Base", "Infrastructure", "Reader", "Cut", "CorrFctn", "Fit" )
+      my $subdir( "Base", "Infrastructure", "Reader", "Cut", 
+		  "CorrFctn", "Fit", "ThCorrFctn")
     {
         $CPPPATH .= $main::PATH_SEPARATOR . "#" . $Dir . "/" . $subdir;
     }
