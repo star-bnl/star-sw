@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.20 2001/04/02 12:10:18 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.21 2001/04/04 17:08:42 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.21  2001/04/04 17:08:42  jcs
+// remove references to StFtpcParamReader from StFtpcDbReader
+//
 // Revision 1.20  2001/04/02 12:10:18  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -197,8 +200,7 @@ Int_t StFtpcClusterMaker::Make()
   
  
   // create FTPC data base reader
-  StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
-                                                m_dimensions,
+  StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
                                                 m_padrow_z,
                                                 m_efield,
                                                 m_vdrift,

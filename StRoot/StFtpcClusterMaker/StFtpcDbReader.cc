@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.3 2001/04/02 12:10:22 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.4 2001/04/04 17:08:42 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.4  2001/04/04 17:08:42  jcs
+// remove references to StFtpcParamReader from StFtpcDbReader
+//
 // Revision 1.3  2001/04/02 12:10:22  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -14,12 +17,10 @@
 //
 
 #include "StFtpcDbReader.hh"
-#include "StFtpcParamReader.hh"
 #include "StMessMgr.h"
 
 // for StFtpcClusterMaker
-StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
-                               St_ftpcDimensions    *dimensions,
+StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcPadrowZ       *zrow,
                                St_ftpcEField        *efield,
                                St_ftpcVDrift        *vdrift,
@@ -31,7 +32,6 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
                                St_ftpcTimeOffset    *timeoffset,
                                St_ftpcDriftField    *driftfield)
 {
-  mParam = paramReader;
 
   //  just copy dimensions table start to pointer
   ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();
@@ -138,8 +138,7 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
 
-StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
-                               St_ftpcDimensions    *dimensions,
+StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcPadrowZ       *zrow,
                                St_ftpcEField        *efield,
                                St_ftpcVDrift        *vdrift,
@@ -149,7 +148,6 @@ StFtpcDbReader::StFtpcDbReader(StFtpcParamReader *paramReader,
                                St_ftpcGas           *gas,
                                St_ftpcDriftField    *driftfield)
 {
-  mParam = paramReader;
 
   //  just copy dimensions table start to pointer
   ftpcDimensions_st* dimensionsTable = (ftpcDimensions_st*)dimensions->GetTable();

@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.6 2001/04/02 12:06:34 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.7 2001/04/04 17:08:52 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.7  2001/04/04 17:08:52  jcs
+// remove references to StFtpcParamReader from StFtpcDbReader
+//
 // Revision 1.6  2001/04/02 12:06:34  jcs
 // get FTPC calibrations,geometry from MySQL database
 //
@@ -113,8 +116,7 @@ Int_t StFtpcDriftMapMaker::Make(){
                                                          m_slowsimpars);
 
   // create FTPC data base reader
-  StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
-                                                m_dimensions,
+  StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
                                                 m_padrow_z,
                                                 m_efield,
                                                 m_vdrift,
