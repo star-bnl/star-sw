@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.h,v 1.8 2001/07/27 01:26:40 snelling Exp $
+// $Id: StFlowPicoTrack.h,v 1.9 2003/01/08 19:26:52 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -23,40 +23,42 @@ public:
 	    StFlowPicoTrack(StFlowPicoTrack* track);
    virtual  ~StFlowPicoTrack() {}
 
-   Float_t  Pt()            const { return mPt; }
-   Float_t  PtGlobal()      const { return mPtGlobal; }
-   Float_t  Eta()           const { return mEta; }
-   Float_t  EtaGlobal()     const { return mEtaGlobal; }
-   Float_t  Phi()           const { return mPhi; }
-   Float_t  PhiGlobal()     const { return mPhiGlobal; }
-   Short_t  Charge()        const { return mCharge; }
-   Float_t  Dca()           const { return mDca; }
-   Float_t  DcaSigned()     const { return mDcaSigned; }
-   Float_t  DcaGlobal()     const { return mDcaGlobal; }
-   Float_t  Chi2()          const { return mChi2; }
-   Int_t    FitPts()        const { return mFitPts; }
-   Int_t    MaxPts()        const { return mMaxPts; }
-   Int_t    Nhits()         const { return mNhits; }
-   Int_t    NdedxPts()      const { return mNdedxPts; }
-   Float_t  TrackLength()   const { return mTrackLength; }
-   Float_t  PidPion()       const { return mPidPion/1000.; }
-   Float_t  PidProton()     const { return mPidProton/1000.; }
-   Float_t  PidKaon()       const { return mPidKaon/1000.; }
-   Float_t  PidDeuteron()   const { return mPidDeuteron/1000.; }
-   Float_t  PidElectron()   const { return mPidElectron/1000.; }
-   Float_t  Dedx()          const { return mDedx; }
-   Int_t    MostLikelihoodPID()  const { return mMostLikelihoodPID; }
-   Float_t  MostLikelihoodProb() const { return mMostLikelihoodProb; }
-   Int_t    ExtrapTag()     const { return mExtrapTag; }
-   Float_t  ElectronPositronProb()  const { return mElectronPositronProb; }
-   Float_t  PionPlusMinusProb()     const { return mPionPlusMinusProb; }
-   Float_t  KaonPlusMinusProb()     const { return mKaonPlusMinusProb; }
-   Float_t  ProtonPbarProb()        const { return mProtonPbarProb; }
+   Float_t   Pt()            const { return mPt; }
+   Float_t   PtGlobal()      const { return mPtGlobal; }
+   Float_t   Eta()           const { return mEta; }
+   Float_t   EtaGlobal()     const { return mEtaGlobal; }
+   Float_t   Phi()           const { return mPhi; }
+   Float_t   PhiGlobal()     const { return mPhiGlobal; }
+   Short_t   Charge()        const { return mCharge; }
+   Float_t   Dca()           const { return mDca; }
+   Float_t   DcaSigned()     const { return mDcaSigned; }
+   Float_t   DcaGlobal()     const { return mDcaGlobal; }
+   Float_t   ZFirstPoint()   const { return mZFirstPoint; }
+   Float_t   ZLastPoint()    const { return mZLastPoint; }
+   Float_t   Chi2()          const { return mChi2; }
+   Int_t     FitPts()        const { return mFitPts; }
+   Int_t     MaxPts()        const { return mMaxPts; }
+   Int_t     Nhits()         const { return mNhits; }
+   Int_t     NdedxPts()      const { return mNdedxPts; }
+   Float_t   TrackLength()   const { return mTrackLength; }
+   Float_t   PidPion()       const { return mPidPion/1000.; }
+   Float_t   PidProton()     const { return mPidProton/1000.; }
+   Float_t   PidKaon()       const { return mPidKaon/1000.; }
+   Float_t   PidDeuteron()   const { return mPidDeuteron/1000.; }
+   Float_t   PidElectron()   const { return mPidElectron/1000.; }
+   Float_t   Dedx()          const { return mDedx; }
+   Int_t     MostLikelihoodPID()    const { return mMostLikelihoodPID; }
+   Float_t   MostLikelihoodProb()   const { return mMostLikelihoodProb; }
+   Int_t     ExtrapTag()     const { return mExtrapTag; }
+   Float_t   ElectronPositronProb() const { return mElectronPositronProb; }
+   Float_t   PionPlusMinusProb()    const { return mPionPlusMinusProb; }
+   Float_t   KaonPlusMinusProb()    const { return mKaonPlusMinusProb; }
+   Float_t   ProtonPbarProb()       const { return mProtonPbarProb; }
    Double_t  DcaGlobalX()           const { return (Double_t)mDcaGlobalX; }
    Double_t  DcaGlobalY()           const { return (Double_t)mDcaGlobalY; }
    Double_t  DcaGlobalZ()           const { return (Double_t)mDcaGlobalZ; }
-   UInt_t   TopologyMap0()          const { return mTopologyMap0; }
-   UInt_t   TopologyMap1()          const { return mTopologyMap1; }
+   UInt_t    TopologyMap0()         const { return mTopologyMap0; }
+   UInt_t    TopologyMap1()         const { return mTopologyMap1; }
 
    void  SetPt(Float_t pt)           { mPt = pt; }
    void  SetPtGlobal(Float_t gpt)    { mPtGlobal = gpt; }
@@ -69,6 +71,8 @@ public:
    void  SetDca(Float_t dca)         { mDca = dca; }
    void  SetDcaSigned(Float_t sdca)  { mDcaSigned = sdca; }
    void  SetDcaGlobal(Float_t gdca)  { mDcaGlobal = gdca; }
+   void  SetZFirstPoint(Float_t zFirst) { mZFirstPoint = zFirst; }
+   void  SetZLastPoint(Float_t zLast) { mZLastPoint = zLast; }
    void  SetChi2(Float_t chi2)       { mChi2 = chi2; }
    void  SetFitPts(Int_t fitPts)     { mFitPts = fitPts; }
    void  SetMaxPts(Int_t maxPts)     { mMaxPts = maxPts; }
@@ -81,7 +85,7 @@ public:
    void  SetPidDeuteron(Float_t pid) { mPidDeuteron = (Int_t)(pid*1000.); }
    void  SetPidElectron(Float_t pid) { mPidElectron = (Int_t)(pid*1000.); }
    void  SetMostLikelihoodPID(Int_t val){ mMostLikelihoodPID=val; } 
-   void  SetMostLikelihoodProb(Float_t val){ mMostLikelihoodProb=val; } 
+   void  SetMostLikelihoodProb(Float_t val) { mMostLikelihoodProb=val; } 
    void  SetExtrapTag(Int_t val){ mExtrapTag=val; }
    void  SetElectronPositronProb(Float_t val) { mElectronPositronProb = val; }
    void  SetPionPlusMinusProb(Float_t val) { mPionPlusMinusProb = val; }
@@ -105,6 +109,8 @@ private:
    Float_t   mDca;                        // distance of closest approach (? track model)
    Float_t   mDcaSigned;                  // 2D dca with sign (circle fit)
    Float_t   mDcaGlobal;                  // distance of closest approach for global track
+   Float_t   mZFirstPoint;                // z of the first point
+   Float_t   mZLastPoint;                 // z of the last point
    Float_t   mChi2;                       // chi squared
    Int_t     mFitPts;                     // number of hits used in fit
    Int_t     mMaxPts;                     // maximum possible number of hits 
@@ -129,7 +135,7 @@ private:
    UInt_t    mTopologyMap0;               // First 32 bits of Topology map
    UInt_t    mTopologyMap1;               // second 32 bits of Topology map
 
-   ClassDef(StFlowPicoTrack,4)
+   ClassDef(StFlowPicoTrack,5)
 };
 
 #endif
@@ -137,6 +143,10 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.h,v $
+// Revision 1.9  2003/01/08 19:26:52  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+// Version 6 of pico file.
+//
 // Revision 1.8  2001/07/27 01:26:40  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //

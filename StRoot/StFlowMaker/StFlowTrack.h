@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.23 2001/12/18 19:22:42 posk Exp $
+// $Id: StFlowTrack.h,v 1.24 2003/01/08 19:26:52 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -37,26 +37,28 @@ public:
   Float_t       PidElectron()     const;
   Float_t       PidPositron()     const;
 
-  const Char_t* Pid()        const;
-  Float_t       Phi()        const;
-  Float_t       PhiGlobal()  const;
-  Float_t       Eta()        const;
-  Float_t       EtaGlobal()  const;
-  Float_t       Dedx()       const;
-  Float_t       Pt()         const;
-  Float_t       PtGlobal()   const;
-  Float_t       P()          const;
-  Float_t       PGlobal()    const;
-  Float_t       Y()          const;
-  Short_t       Charge()     const;
-  Float_t       Dca()        const;
-  Float_t       DcaSigned()  const;
-  Float_t       DcaGlobal()  const;
-  Float_t       Chi2()       const;
-  Int_t         FitPts()     const;
-  Int_t         MaxPts()     const;
-  Int_t         Nhits()      const;
-  Int_t         NdedxPts()   const;
+  const Char_t* Pid()         const;
+  Float_t       Phi()         const;
+  Float_t       PhiGlobal()   const;
+  Float_t       Eta()         const;
+  Float_t       EtaGlobal()   const;
+  Float_t       ZFirstPoint() const;
+  Float_t       ZLastPoint()  const;
+  Float_t       Dedx()        const;
+  Float_t       Pt()          const;
+  Float_t       PtGlobal()    const;
+  Float_t       P()           const;
+  Float_t       PGlobal()     const;
+  Float_t       Y()           const;
+  Short_t       Charge()      const;
+  Float_t       Dca()         const;
+  Float_t       DcaSigned()   const;
+  Float_t       DcaGlobal()   const;
+  Float_t       Chi2()        const;
+  Int_t         FitPts()      const;
+  Int_t         MaxPts()      const;
+  Int_t         Nhits()       const;
+  Int_t         NdedxPts()    const;
   Float_t       TrackLength() const;
   Int_t Select(Int_t harmonic, Int_t selection, Int_t subevent= -1) const;
   Int_t         MostLikelihoodPID()    const; 
@@ -65,8 +67,8 @@ public:
   Float_t       ElectronPositronProb() const;
   Float_t       PionPlusMinusProb()    const; 
   Float_t       KaonPlusMinusProb()    const; 
-  Float_t       ProtonPbarProb()    const;
-  StThreeVectorD DcaGlobal3() const; 
+  Float_t       ProtonPbarProb()       const;
+  StThreeVectorD DcaGlobal3()          const; 
   const StTrackTopologyMap& TopologyMap() const;
 
   void SetPidPiPlus(Float_t);
@@ -84,6 +86,8 @@ public:
   void SetPhiGlobal(Float_t);
   void SetEta(Float_t);
   void SetEtaGlobal(Float_t);
+  void SetZFirstPoint(Float_t);
+  void SetZLastPoint(Float_t);
   void SetDedx(Float_t);
   void SetPt(Float_t);
   void SetPtGlobal(Float_t);
@@ -126,6 +130,8 @@ private:
   Float_t mPhiGlobal;
   Float_t mEta;
   Float_t mEtaGlobal;
+  Float_t mZFirstPoint;
+  Float_t mZLastPoint;
   Float_t mDedx;
   Float_t mPt;
   Float_t mPtGlobal;
@@ -170,6 +176,8 @@ inline Float_t  StFlowTrack::Phi()          const { return mPhi; }
 inline Float_t  StFlowTrack::PhiGlobal()    const { return mPhiGlobal; }   
 inline Float_t  StFlowTrack::Eta()          const { return mEta; }     
 inline Float_t  StFlowTrack::EtaGlobal()    const { return mEtaGlobal; }     
+inline Float_t  StFlowTrack::ZFirstPoint()  const { return mZFirstPoint; }     
+inline Float_t  StFlowTrack::ZLastPoint()   const { return mZLastPoint; }     
 inline Float_t  StFlowTrack::Dedx()         const { return mDedx; }     
 inline Float_t  StFlowTrack::Pt()           const { return mPt; }
 inline Float_t  StFlowTrack::PtGlobal()     const { return mPtGlobal; }
@@ -184,10 +192,10 @@ inline Int_t    StFlowTrack::Nhits()        const { return mNhits; }
 inline Int_t    StFlowTrack::NdedxPts()     const { return mNdedxPts; }  
 inline Float_t  StFlowTrack::TrackLength()  const { return mTrackLength; }  
 inline Int_t    StFlowTrack::MostLikelihoodPID() const
-{ return mMostLikelihoodPID;} 
+{ return mMostLikelihoodPID; } 
 inline Float_t  StFlowTrack::MostLikelihoodProb() const 
-{ return mMostLikelihoodProb;} 
-inline Int_t    StFlowTrack::ExtrapTag()    const { return mExtrapTag;} 
+{ return mMostLikelihoodProb; } 
+inline Int_t    StFlowTrack::ExtrapTag()    const { return mExtrapTag; } 
 inline Float_t  StFlowTrack::ElectronPositronProb() const { return mElectronPositronProb; }
 inline Float_t  StFlowTrack::PionPlusMinusProb() const { return mPionPlusMinusProb; }
 inline Float_t  StFlowTrack::KaonPlusMinusProb() const { return mKaonPlusMinusProb; }
@@ -294,6 +302,10 @@ inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }
 
 inline void StFlowTrack::SetEtaGlobal(Float_t geta) { mEtaGlobal = geta; } 
 
+inline void StFlowTrack::SetZFirstPoint(Float_t zFirst) { mZFirstPoint = zFirst; } 
+
+inline void StFlowTrack::SetZLastPoint(Float_t zLast) { mZLastPoint = zLast; } 
+
 inline void StFlowTrack::SetDedx(Float_t dedx)      { mDedx = dedx; }       
 
 inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }              
@@ -336,6 +348,10 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.24  2003/01/08 19:26:52  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+// Version 6 of pico file.
+//
 // Revision 1.23  2001/12/18 19:22:42  posk
 // "proton" and "antiproton" changed to "pr+" and "pr-".
 // Compiles on Solaris.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.76 2002/06/10 22:51:00 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.77 2003/01/08 19:26:49 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,6 +33,7 @@
 #include "TTree.h"
 #include "TBranch.h"
 #include "TChain.h"
+#include "TText.h"
 #include "StuRefMult.hh"
 #include "StPionPlus.hh"
 #include "StPionMinus.hh"
@@ -100,14 +101,12 @@ Int_t StFlowMaker::Make() {
 
     if (mEventFileName != mEventFileNameOld) { 
       if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
-//       gMessMgr->Info() << "##### FlowMaker: truncated filename " 
-// 		       <<  mEventFileName << endm;
       gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
-      if (mPicoEventWrite && pPicoDST->IsOpen()) {
-	pPicoDST->Write(0, TObject::kOverwrite);
-	pPicoDST->Close();
-      }
       if (mPicoEventWrite) {
+	if (pPicoDST->IsOpen()) {
+	  pPicoDST->Write(0, TObject::kOverwrite);
+	  pPicoDST->Close();
+	}
 	if (pPicoEvent) delete pPicoEvent;
 	if (pPicoDST) delete pPicoDST;
 	pPicoEvent = NULL;
@@ -121,7 +120,6 @@ Int_t StFlowMaker::Make() {
   
   // Get a pointer to StEvent
   if (!mPicoEventRead && !mMuEventRead) {
-
     pEvent = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
     if (!pEvent) {
       if (Debug()) { 
@@ -160,11 +158,11 @@ Int_t StFlowMaker::Make() {
     if (mEventFileName != mEventFileNameOld) { 
       if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
       gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
-      if (mPicoEventWrite && pPicoDST->IsOpen()) {
-        pPicoDST->Write(0, TObject::kOverwrite);
-        pPicoDST->Close();
-      }
       if (mPicoEventWrite) {
+	if (pPicoDST->IsOpen()) {
+	  pPicoDST->Write(0, TObject::kOverwrite);
+	  pPicoDST->Close();
+	}
         if (pPicoDST) delete pPicoDST;
         pPicoDST = NULL;
         InitPicoEventWrite();
@@ -223,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.76 2002/06/10 22:51:00 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.77 2003/01/08 19:26:49 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -279,6 +277,19 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
     gMessMgr->Info("##### FlowMaker: No PhiWgt file. Will set weights = 1.");
   }
   gDirectory = dirSave;
+
+  // Read text object
+  if (pPhiWgtFile->IsOpen()) {
+    TText* textInfo = dynamic_cast<TText*>(pPhiWgtFile->Get("info"));
+    if (textInfo) {
+      mFirstLastPhiWgt = kTRUE;
+      gMessMgr->Info("##### FlowMaker: PhiWgt file uses z of first-last points");
+      cout << "##### FlowMaker: PhiWgt file written with " ;
+      textInfo->ls();
+    } else {
+      gMessMgr->Info("##### FlowMaker: PhiWgt file uses vertex z and eta");
+    }
+  }
 
   // Fill mPhiWgt for each selection and each harmonic
   for (int k = 0; k < Flow::nSels; k++) {
@@ -357,12 +368,12 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 						     Get(histTitleFtpcEast->Data()));
 	TH1* phiWgtHistFtpcWest = dynamic_cast<TH1*>(pPhiWgtFile->
 						     Get(histTitleFtpcWest->Data()));
-	{for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	  mPhiWgtFtpcEast[k][j][n] = (phiWgtHistFtpcEast) ? 
 	    phiWgtHistFtpcEast->GetBinContent(n+1) : 1.;
 	  mPhiWgtFtpcWest[k][j][n] = (phiWgtHistFtpcWest) ? 
 	    phiWgtHistFtpcWest->GetBinContent(n+1) : 1.;
-	}}
+	}
       } else {
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n]        = 1.;
@@ -404,6 +415,7 @@ void StFlowMaker::FillFlowEvent() {
     pFlowEvent->SetOnePhiWgt();
     pFlowEvent->SetPhiWeight(mPhiWgt);
   } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
     pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
     pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
@@ -411,6 +423,7 @@ void StFlowMaker::FillFlowEvent() {
   }
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetFirstLastPoints();
 
   // Get Trigger information
   StL0Trigger* pTrigger = pEvent->l0Trigger();
@@ -521,6 +534,8 @@ void StFlowMaker::FillFlowEvent() {
 
 	pFlowTrack->SetTrackLength(pTrack->length());
 	pFlowTrack->SetNhits(pTrack->detectorInfo()->numberOfPoints(kTpcId));
+	pFlowTrack->SetZFirstPoint(pTrack->detectorInfo()->firstPoint().z());
+	pFlowTrack->SetZLastPoint(pTrack->detectorInfo()->lastPoint().z());
 	
 	pTrack->pidTraits(tpcDedxAlgo);       // initialize
 	nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionPlus::instance());
@@ -633,6 +648,7 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     pFlowEvent->SetOnePhiWgt();
     pFlowEvent->SetPhiWeight(mPhiWgt);
   } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
     pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
     pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
@@ -754,7 +770,7 @@ void StFlowMaker::FillPicoEvent() {
   }
   StFlowPicoTrack* pFlowPicoTrack = new StFlowPicoTrack();
   
-  pPicoEvent->SetVersion(5);         // version 5 
+  pPicoEvent->SetVersion(6);         // version 6 
   pPicoEvent->SetEventID(pFlowEvent->EventID());
   pPicoEvent->SetRunID(pFlowEvent->RunID());
   pPicoEvent->SetL0TriggerWord(pFlowEvent->L0TriggerWord());
@@ -792,6 +808,8 @@ void StFlowMaker::FillPicoEvent() {
     pFlowPicoTrack->SetDcaSigned(pFlowTrack->DcaSigned());
     pFlowPicoTrack->SetDca(pFlowTrack->Dca());
     pFlowPicoTrack->SetDcaGlobal(pFlowTrack->DcaGlobal());
+    pFlowPicoTrack->SetZFirstPoint(pFlowTrack->ZFirstPoint());
+    pFlowPicoTrack->SetZLastPoint(pFlowTrack->ZLastPoint());
     pFlowPicoTrack->SetChi2(pFlowTrack->Chi2());
     pFlowPicoTrack->SetFitPts(pFlowTrack->FitPts());
     pFlowPicoTrack->SetMaxPts(pFlowTrack->MaxPts());
@@ -851,6 +869,7 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     pFlowEvent->SetOnePhiWgt();
     pFlowEvent->SetPhiWeight(mPhiWgt);
   } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
     pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
     pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
     pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
@@ -876,6 +895,8 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
 
   switch (pPicoEvent->Version()) {
+  case 6: FillFromPicoVersion6DST(pPicoEvent);
+    break;
   case 5: FillFromPicoVersion5DST(pPicoEvent);
     break;
   case 4: FillFromPicoVersion4DST(pPicoEvent);
@@ -912,204 +933,6 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
     pFlowEvent->MakeSubEvents();
     
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
-Bool_t StFlowMaker::FillFromMuDST(){
-  // Make StFlowEvent from StMuDST
-
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuDST()" << endm;
-  
-  pMuEvents->Clear();
-  pMuTracks->Clear();
-  pMuGlobalTracks->Clear();
-      
-  if (!pMuChain->GetEntry(mPicoEventCounter++)) {
-    cout << "##### FlowMaker: no more events" << endl; 
-    return kFALSE; 
-  }
-
-  pMuEvent=(StMuEvent*)pMuEvents->UncheckedAt(0);
-
-  // Set phi weights
-  if (mOnePhiWgt) {
-    pFlowEvent->SetOnePhiWgt();
-    pFlowEvent->SetPhiWeight(mPhiWgt);
-  } else {
-    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
-  }
-  pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
-  pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
-  
-  
-  // Check event cuts
-  if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
-    Int_t eventID = pMuEvent->eventId();
-    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
-                     << " cut" << endm;
-    delete pFlowEvent;             // delete this event
-    pFlowEvent = NULL;
-    return kTRUE;
-  }
-
-  FillFromMuVersion0DST();
-
-  // Check Eta Symmetry
-  if (!StFlowCutEvent::CheckEtaSymmetry(pMuEvent)) {  
-    Int_t eventID = pMuEvent->eventId();
-    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
-                     << " cut" << endm;
-    delete pFlowEvent;             // delete this event
-    pFlowEvent = NULL;
-    return kTRUE;
-  }
-  
-  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
-    pFlowEvent->SetPidsDeviant();
-
-  pFlowEvent->TrackCollection()->random_shuffle();
-
-  pFlowEvent->SetSelections();
-  (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
-    pFlowEvent->MakeSubEvents();
-  
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
-Bool_t StFlowMaker::FillFromMuVersion0DST(){
-  // Make StFlowEvent from StMuEvent
-  
-  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST()" << endm;
-
-  pFlowEvent->SetEventID(pMuEvent->eventId());
-  pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
-  pFlowEvent->SetRunID(pMuEvent->runId());
-  pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord());
-
-  pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
-  pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
-  pFlowEvent->SetBeamMassNumberEast(pMuEvent->runInfo().beamMassNumber(east));
-  pFlowEvent->SetBeamMassNumberWest(pMuEvent->runInfo().beamMassNumber(west));
-
-
-  pFlowEvent->SetCTB(pMuEvent->ctbMultiplicity());
-  pFlowEvent->SetZDCe(pMuEvent->zdcAdcAttentuatedSumEast());
-  pFlowEvent->SetZDCw(pMuEvent->zdcAdcAttentuatedSumWest());
-  
-  UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
-  pFlowEvent->SetOrigMult(origMult);
-  PR(origMult);
-
-  pFlowEvent->SetUncorrNegMult(pMuEvent->refMultNeg());
-  pFlowEvent->SetUncorrPosMult(pMuEvent->refMultPos());
-  
-  pFlowEvent->SetMultEta(pMuEvent->refMult()); 
-  pFlowEvent->SetCentrality(); 
-  
-  int goodTracks = 0;
-  // Fill FlowTracks
-  for (Int_t nt=0; nt < pMuTracks->GetEntries(); nt++) {
-    StMuTrack* pMuTrack = (StMuTrack*)pMuTracks->UncheckedAt(nt);
-    if (pMuTrack && StFlowCutTrack::CheckTrack(pMuTrack)) {
-      // Instantiate new StFlowTrack
-      StFlowTrack* pFlowTrack = new StFlowTrack;
-      if (!pFlowTrack) return kFALSE;
-      pFlowTrack->SetPt(pMuTrack->pt());
-      StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->UncheckedAt(pMuTrack->index2Global());
-      if(!pMuGlobalTrack) {
-        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track" << endl;
-        continue;
-      }
-      pFlowTrack->SetPtGlobal(pMuGlobalTrack->pt());
-      pFlowTrack->SetPhi(pMuTrack->phi());
-      pFlowTrack->SetPhiGlobal(pMuGlobalTrack->phi());
-      pFlowTrack->SetEta(pMuTrack->eta());
-      pFlowTrack->SetEtaGlobal(pMuGlobalTrack->eta());
-      pFlowTrack->SetDedx(pMuTrack->dEdx());
-      pFlowTrack->SetCharge(pMuTrack->charge());
-      pFlowTrack->SetDcaSigned(CalcDcaSigned(pMuEvent->primaryVertexPosition(),pMuTrack->helix()));
-      pFlowTrack->SetDca(pMuTrack->dca().mag());
-      pFlowTrack->SetDcaGlobal(pMuTrack->dcaGlobal().mag());
-      pFlowTrack->SetChi2(pMuTrack->chi2xy()); 
-      pFlowTrack->SetFitPts(pMuTrack->nHitsFit());
-      pFlowTrack->SetMaxPts(pMuTrack->nHitsPoss()); 
-      pFlowTrack->SetNhits(pMuTrack->nHits());
-      pFlowTrack->SetNdedxPts(pMuTrack->nHitsDedx());
-      pFlowTrack->SetDcaGlobal3(pMuTrack->dcaGlobal());
-      pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->primaryVertexPosition())); //???
-
-      pFlowTrack->SetElectronPositronProb(pMuTrack->pidProbElectron()); 
-      pFlowTrack->SetPionPlusMinusProb(pMuTrack->pidProbPion()); 
-      pFlowTrack->SetKaonPlusMinusProb(pMuTrack->pidProbKaon()); 
-      pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
-      pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
-
-
-      if (pMuTrack->charge() < 0) {
-        pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
-        pFlowTrack->SetPidAntiProton(pMuTrack->nSigmaProton());
-        pFlowTrack->SetPidKaonMinus(pMuTrack->nSigmaKaon());
-	pFlowTrack->SetPidAntiDeuteron( 999.0 );
-        pFlowTrack->SetPidElectron(pMuTrack->nSigmaElectron());
-      } else {
-        pFlowTrack->SetPidPiPlus(pMuTrack->nSigmaPion()); 
-        pFlowTrack->SetPidProton(pMuTrack->nSigmaProton()); 
-        pFlowTrack->SetPidKaonPlus(pMuTrack->nSigmaKaon()); 
-	pFlowTrack->SetPidDeuteron( 999.0 );
-        pFlowTrack->SetPidPositron(pMuTrack->nSigmaElectron());
-      }
-
-      // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
-          
-      int mostLikelihoodPid=0;
-      double mostLikelihoodPidProbability=0;
-      if (pFlowTrack->ElectronPositronProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->ElectronPositronProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=3;
-        else
-          mostLikelihoodPid=2;
-      }
-      if (pFlowTrack->PionPlusMinusProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->PionPlusMinusProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=9;
-        else
-          mostLikelihoodPid=8;
-      }
-      if (pFlowTrack->KaonPlusMinusProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->KaonPlusMinusProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=12;
-        else
-          mostLikelihoodPid=11;
-      }
-      if (pFlowTrack->ProtonPbarProb()>mostLikelihoodPidProbability) {
-        mostLikelihoodPidProbability=pFlowTrack->ProtonPbarProb();
-        if (pMuTrack->charge() < 0) 
-          mostLikelihoodPid=15;
-        else
-          mostLikelihoodPid=14;
-      }
-      
-      pFlowTrack->SetMostLikelihoodPID(mostLikelihoodPid); 
-      pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
-    
-      pFlowTrack->SetTopologyMap(pMuTrack->topologyMap());
-    
-      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
-      goodTracks++;
-      
-    }
-  }
-  
   return kTRUE;
 }
 
@@ -1548,6 +1371,299 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
 
 //-----------------------------------------------------------------------
 
+Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
+  // Make StFlowEvent from StFlowPicoEvent
+  
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion5DST()" << endm;
+
+  pFlowEvent->SetFirstLastPoints();  
+  pFlowEvent->SetEventID(pPicoEvent->EventID());
+  UInt_t origMult = pPicoEvent->OrigMult();
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+  pFlowEvent->SetUncorrNegMult(pPicoEvent->UncorrNegMult());
+  pFlowEvent->SetUncorrPosMult(pPicoEvent->UncorrPosMult());
+  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+					  pPicoEvent->VertexY(),
+					  pPicoEvent->VertexZ()) );
+
+  pFlowEvent->SetRunID(pPicoEvent->RunID());
+  pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
+
+  pFlowEvent->SetCenterOfMassEnergy(pPicoEvent->CenterOfMassEnergy());
+  pFlowEvent->SetMagneticField(pPicoEvent->MagneticField());
+  pFlowEvent->SetBeamMassNumberEast(pPicoEvent->BeamMassNumberEast());
+  pFlowEvent->SetBeamMassNumberWest(pPicoEvent->BeamMassNumberWest());
+  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality();
+
+  pFlowEvent->SetCTB(pPicoEvent->CTB());
+  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+  
+  int goodTracks = 0;
+  // Fill FlowTracks
+  for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
+    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+      ->UncheckedAt(nt);
+    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+      // Instantiate new StFlowTrack
+      StFlowTrack* pFlowTrack = new StFlowTrack;
+      if (!pFlowTrack) return kFALSE;
+      pFlowTrack->SetPt(pPicoTrack->Pt());
+      pFlowTrack->SetPtGlobal(pPicoTrack->PtGlobal());
+      pFlowTrack->SetPhi(pPicoTrack->Phi());
+      pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
+      pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+      pFlowTrack->SetZFirstPoint(pPicoTrack->ZFirstPoint());
+      pFlowTrack->SetZLastPoint(pPicoTrack->ZLastPoint());
+      pFlowTrack->SetDedx(pPicoTrack->Dedx());
+      pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDcaSigned(pPicoTrack->DcaSigned());
+      pFlowTrack->SetDca(pPicoTrack->Dca());
+      pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
+      pFlowTrack->SetChi2(pPicoTrack->Chi2());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+      pFlowTrack->SetNhits(pPicoTrack->Nhits());
+      pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
+      pFlowTrack->SetDcaGlobal3(StThreeVectorD(pPicoTrack->DcaGlobalX(),
+					       pPicoTrack->DcaGlobalY(),
+					       pPicoTrack->DcaGlobalZ()) );
+      pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
+      pFlowTrack->SetMostLikelihoodPID(pPicoTrack->MostLikelihoodPID()); 
+      pFlowTrack->SetMostLikelihoodProb(pPicoTrack->MostLikelihoodProb());
+      pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+      pFlowTrack->SetElectronPositronProb(pPicoTrack->ElectronPositronProb()); 
+      pFlowTrack->SetPionPlusMinusProb(pPicoTrack->PionPlusMinusProb()); 
+      pFlowTrack->SetKaonPlusMinusProb(pPicoTrack->KaonPlusMinusProb()); 
+      pFlowTrack->SetProtonPbarProb(pPicoTrack->ProtonPbarProb()); 
+      if (pPicoTrack->Charge() < 0) {
+	pFlowTrack->SetPidPiMinus(pPicoTrack->PidPion());
+	pFlowTrack->SetPidAntiProton(pPicoTrack->PidProton());
+	pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaon());
+	pFlowTrack->SetPidAntiDeuteron(pPicoTrack->PidDeuteron());
+	pFlowTrack->SetPidElectron(pPicoTrack->PidElectron());
+      } else {
+	pFlowTrack->SetPidPiPlus(pPicoTrack->PidPion());
+	pFlowTrack->SetPidProton(pPicoTrack->PidProton());
+	pFlowTrack->SetPidKaonPlus(pPicoTrack->PidKaon());
+	pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
+	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
+      }
+
+      if (pPicoTrack->TopologyMap0() || pPicoTrack->TopologyMap1()) {
+	// topology map found
+	pFlowTrack->SetTopologyMap(StTrackTopologyMap(pPicoTrack->TopologyMap0(),
+						      pPicoTrack->TopologyMap1()) );
+      }
+
+      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+      goodTracks++;
+    }
+  }
+  
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowMaker::FillFromMuDST() {
+  // Make StFlowEvent from StMuDST
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuDST()" << endm;
+  
+  pMuEvents->Clear();
+  pMuTracks->Clear();
+  pMuGlobalTracks->Clear();
+      
+  if (!pMuChain->GetEntry(mPicoEventCounter++)) {
+    cout << "##### FlowMaker: no more events" << endl; 
+    return kFALSE; 
+  }
+
+  pMuEvent=(StMuEvent*)pMuEvents->UncheckedAt(0);
+
+  // Set phi weights
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
+  pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
+  pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+  pFlowEvent->SetFirstLastPoints();  
+  
+  // Check event cuts
+  if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
+    Int_t eventID = pMuEvent->eventId();
+    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
+                     << " cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+
+  FillFromMuVersion0DST();
+
+  // Check Eta Symmetry
+  if (!StFlowCutEvent::CheckEtaSymmetry(pMuEvent)) {  
+    Int_t eventID = pMuEvent->eventId();
+    gMessMgr->Info() << "##### FlowMaker: MuEvent " << eventID 
+                     << " cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+  
+  (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
+    pFlowEvent->SetPidsDeviant();
+
+  pFlowEvent->TrackCollection()->random_shuffle();
+
+  pFlowEvent->SetSelections();
+  (pFlowEvent->EtaSubs()) ? pFlowEvent->MakeEtaSubEvents() :
+    pFlowEvent->MakeSubEvents();
+  
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowMaker::FillFromMuVersion0DST() {
+  // Make StFlowEvent from StMuEvent
+  
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST()" << endm;
+
+  pFlowEvent->SetEventID(pMuEvent->eventId());
+  pFlowEvent->SetVertexPos(pMuEvent->primaryVertexPosition());
+  pFlowEvent->SetRunID(pMuEvent->runId());
+  pFlowEvent->SetL0TriggerWord(pMuEvent->l0Trigger().triggerWord());
+  pFlowEvent->SetCenterOfMassEnergy(pMuEvent->runInfo().centerOfMassEnergy());
+  pFlowEvent->SetMagneticField(pMuEvent->runInfo().magneticField());
+  pFlowEvent->SetBeamMassNumberEast(pMuEvent->runInfo().beamMassNumber(east));
+  pFlowEvent->SetBeamMassNumberWest(pMuEvent->runInfo().beamMassNumber(west));
+  pFlowEvent->SetCTB(pMuEvent->ctbMultiplicity());
+  pFlowEvent->SetZDCe(pMuEvent->zdcAdcAttentuatedSumEast());
+  pFlowEvent->SetZDCw(pMuEvent->zdcAdcAttentuatedSumWest());
+    UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+  pFlowEvent->SetUncorrNegMult(pMuEvent->refMultNeg());
+  pFlowEvent->SetUncorrPosMult(pMuEvent->refMultPos());
+  pFlowEvent->SetMultEta(pMuEvent->refMult()); 
+  pFlowEvent->SetCentrality(); 
+  
+  int goodTracks = 0;
+  // Fill FlowTracks
+  for (Int_t nt=0; nt < pMuTracks->GetEntries(); nt++) {
+    StMuTrack* pMuTrack = (StMuTrack*)pMuTracks->UncheckedAt(nt);
+    if (pMuTrack && StFlowCutTrack::CheckTrack(pMuTrack)) {
+      // Instantiate new StFlowTrack
+      StFlowTrack* pFlowTrack = new StFlowTrack;
+      if (!pFlowTrack) return kFALSE;
+      pFlowTrack->SetPt(pMuTrack->pt());
+      StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->UncheckedAt(pMuTrack->index2Global());
+      if(!pMuGlobalTrack) {
+        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track" << endl;
+        continue;
+      }
+      pFlowTrack->SetPtGlobal(pMuGlobalTrack->pt());
+      pFlowTrack->SetPhi(pMuTrack->phi());
+      pFlowTrack->SetPhiGlobal(pMuGlobalTrack->phi());
+      pFlowTrack->SetEta(pMuTrack->eta());
+      pFlowTrack->SetEtaGlobal(pMuGlobalTrack->eta());
+      pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z());
+      pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z());
+      pFlowTrack->SetDedx(pMuTrack->dEdx());
+      pFlowTrack->SetCharge(pMuTrack->charge());
+      pFlowTrack->SetDcaSigned(CalcDcaSigned(pMuEvent->primaryVertexPosition(),pMuTrack->helix()));
+      pFlowTrack->SetDca(pMuTrack->dca().mag());
+      pFlowTrack->SetDcaGlobal(pMuTrack->dcaGlobal().mag());
+      pFlowTrack->SetChi2(pMuTrack->chi2xy()); 
+      pFlowTrack->SetFitPts(pMuTrack->nHitsFit());
+      pFlowTrack->SetMaxPts(pMuTrack->nHitsPoss()); 
+      pFlowTrack->SetNhits(pMuTrack->nHits());
+      pFlowTrack->SetNdedxPts(pMuTrack->nHitsDedx());
+      pFlowTrack->SetDcaGlobal3(pMuTrack->dcaGlobal());
+      pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->primaryVertexPosition())); //???
+
+      pFlowTrack->SetElectronPositronProb(pMuTrack->pidProbElectron()); 
+      pFlowTrack->SetPionPlusMinusProb(pMuTrack->pidProbPion()); 
+      pFlowTrack->SetKaonPlusMinusProb(pMuTrack->pidProbKaon()); 
+      pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
+      pFlowTrack->SetProtonPbarProb(pMuTrack->pidProbProton()); 
+
+
+      if (pMuTrack->charge() < 0) {
+        pFlowTrack->SetPidPiMinus(pMuTrack->nSigmaPion()); 
+        pFlowTrack->SetPidAntiProton(pMuTrack->nSigmaProton());
+        pFlowTrack->SetPidKaonMinus(pMuTrack->nSigmaKaon());
+	pFlowTrack->SetPidAntiDeuteron( 999.0 );
+        pFlowTrack->SetPidElectron(pMuTrack->nSigmaElectron());
+      } else {
+        pFlowTrack->SetPidPiPlus(pMuTrack->nSigmaPion()); 
+        pFlowTrack->SetPidProton(pMuTrack->nSigmaProton()); 
+        pFlowTrack->SetPidKaonPlus(pMuTrack->nSigmaKaon()); 
+	pFlowTrack->SetPidDeuteron( 999.0 );
+        pFlowTrack->SetPidPositron(pMuTrack->nSigmaElectron());
+      }
+
+      // pFlowTrack->SetExtrapTag(pPicoTrack->ExtrapTag());
+          
+      int mostLikelihoodPid=0;
+      double mostLikelihoodPidProbability=0;
+      if (pFlowTrack->ElectronPositronProb()>mostLikelihoodPidProbability) {
+        mostLikelihoodPidProbability=pFlowTrack->ElectronPositronProb();
+        if (pMuTrack->charge() < 0) 
+          mostLikelihoodPid=3;
+        else
+          mostLikelihoodPid=2;
+      }
+      if (pFlowTrack->PionPlusMinusProb()>mostLikelihoodPidProbability) {
+        mostLikelihoodPidProbability=pFlowTrack->PionPlusMinusProb();
+        if (pMuTrack->charge() < 0) 
+          mostLikelihoodPid=9;
+        else
+          mostLikelihoodPid=8;
+      }
+      if (pFlowTrack->KaonPlusMinusProb()>mostLikelihoodPidProbability) {
+        mostLikelihoodPidProbability=pFlowTrack->KaonPlusMinusProb();
+        if (pMuTrack->charge() < 0) 
+          mostLikelihoodPid=12;
+        else
+          mostLikelihoodPid=11;
+      }
+      if (pFlowTrack->ProtonPbarProb()>mostLikelihoodPidProbability) {
+        mostLikelihoodPidProbability=pFlowTrack->ProtonPbarProb();
+        if (pMuTrack->charge() < 0) 
+          mostLikelihoodPid=15;
+        else
+          mostLikelihoodPid=14;
+      }
+      
+      pFlowTrack->SetMostLikelihoodPID(mostLikelihoodPid); 
+      pFlowTrack->SetMostLikelihoodProb(mostLikelihoodPidProbability);
+    
+      pFlowTrack->SetTopologyMap(pMuTrack->topologyMap());
+    
+      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+      goodTracks++;
+      
+    }
+  }
+  
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
 void StFlowMaker::PrintSubeventMults() {
   // Used for testing
 
@@ -1735,6 +1851,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.77  2003/01/08 19:26:49  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+// Version 6 of pico file.
+//
 // Revision 1.76  2002/06/10 22:51:00  posk
 // pt and eta weighting now default.
 // DcaGlobalPart default now 0 to 1 cm.

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.34 2002/06/10 22:50:59 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.35 2003/01/08 19:26:46 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -93,6 +93,8 @@ Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
 Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
+Bool_t  StFlowEvent::mFirstLastPhiWgt      = kFALSE;
+Bool_t  StFlowEvent::mFirstLastPoints      = kFALSE;
 Char_t  StFlowEvent::mPid[10]              = {'\0'};
 
 //-----------------------------------------------------------
@@ -132,7 +134,19 @@ Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
     n = (int)((phi/twopi)*Flow::nPhiBins);
     if (mOnePhiWgt) {
       phiWgt = mPhiWgt[selN][harN][n];
-    } else {
+    } else if (mFirstLastPhiWgt) {
+      float zFirstPoint = pFlowTrack->ZFirstPoint();
+      float zLastPoint  = pFlowTrack->ZLastPoint();
+      if (zFirstPoint > 0. && zLastPoint > 0.) {
+	phiWgt = mPhiWgtFarWest[selN][harN][n];
+      } else if (zFirstPoint > 0. && zLastPoint < 0.) {
+	phiWgt = mPhiWgtWest[selN][harN][n];
+      } else if (zFirstPoint < 0. && zLastPoint > 0.) {
+	phiWgt = mPhiWgtEast[selN][harN][n];
+      } else {
+	phiWgt = mPhiWgtFarEast[selN][harN][n];
+      }
+    } else {      
       float vertexZ = mVertexPos.z();
       if (eta > 0. && vertexZ > 0.) {
 	phiWgt = mPhiWgtFarWest[selN][harN][n];
@@ -856,6 +870,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.35  2003/01/08 19:26:46  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+// Version 6 of pico file.
+//
 // Revision 1.34  2002/06/10 22:50:59  posk
 // pt and eta weighting now default.
 // DcaGlobalPart default now 0 to 1 cm.
