@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.0 2000/07/14 12:56:50 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.1  2000/07/14 21:28:34  genevb
+// Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
+//
 // Revision 3.0  2000/07/14 12:56:50  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -90,9 +93,9 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
     pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(mcVert);
     rcV0Partner = (*mcV0Bounds.first).second;
     float x, y, z, delta;
-    x = (mcVert)->position().x();
-    y = (mcVert)->position().y();
-    z = (mcVert)->position().z();
+    x = mcVert->position().x();
+    y = mcVert->position().y();
+    z = mcVert->position().z();
     delta = (x - rcV0Partner->position().x())*(x - rcV0Partner->position().x())+
         (y - rcV0Partner->position().y())*(y - rcV0Partner->position().y())+
         (z - rcV0Partner->position().z())*(z - rcV0Partner->position().z());
@@ -121,12 +124,11 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
                          DTrackIt != Daughters.end(); DTrackIt++) {
     if (((*DTrackIt)->geantId()==8)||((*DTrackIt)->geantId()==14)) 
       Pos = (*DTrackIt);
-    if (((*DTrackIt)->geantId()==9)||((*DTrackIt)->geantId()==15))
+    else if (((*DTrackIt)->geantId()==9)||((*DTrackIt)->geantId()==15))
       Neg = (*DTrackIt);
   }
   if ((Pos)&&(Neg)) {
-    new((*mcArray)[mcEntries++]) 
-          StV0Mc(mcVert,Pos,Neg);
+    StV0Mc* v0Mc = new((*mcArray)[mcEntries++]) StV0Mc(mcVert,Pos,Neg);
     if((assocMaker)&&(count>0)) {
       new((*assocArray)[assocEntries++]) 
             StStrangeAssoc(indexRecoArray,mcEntries-1);
@@ -140,8 +142,7 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
 	       bestPairInfo = (*mcMapIt).second;
       } 
       if (mcTrackBounds.first != mcTrackBounds.second) {
-        ((StV0Mc*)
-   mcArray->At(mcEntries-1))->SetHitInfoPositive(bestPairInfo->commonTpcHits());
+        v0Mc->SetHitInfoPositive(bestPairInfo->commonTpcHits());
       }
 
       //		   pair<mcTrackMapIter,mcTrackMapIter> 
@@ -155,8 +156,7 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
               bestPairInfo = (*mcMapIt).second;
       } 
       if (mcTrackBounds.first != mcTrackBounds.second) {
-        ((StV0Mc*)
-   mcArray->At(mcEntries-1))->SetHitInfoNegative(bestPairInfo->commonTpcHits());
+        v0Mc->SetHitInfoNegative(bestPairInfo->commonTpcHits());
       }
     }
   }
