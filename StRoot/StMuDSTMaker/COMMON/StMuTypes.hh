@@ -16,7 +16,6 @@
 #include "StMuHelix.h"
 #include "StMuL3EventSummary.h"
 #include "StMuL3Filter.h"
-#include "StMuMcTrack.h"
 #include "StMuProbPidTraits.h"
 #include "StMuTimer.h"
 #include "StMuTrack.h"
