@@ -1,6 +1,9 @@
-* $Id: richgeo.g,v 1.8 2000/01/28 21:53:37 nevsky Exp $
+* $Id: richgeo.g,v 1.9 2000/02/22 20:34:14 nevski Exp $
 *
 * $Log: richgeo.g,v $
+* Revision 1.9  2000/02/22 20:34:14  nevski
+* LGAM added to HITs definition
+*
 * Revision 1.8  2000/01/28 21:53:37  nevsky
 * secondaries in Rich can be discarded
 *
@@ -219,9 +222,9 @@ endblock
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
     if (isopt>0) then
     HITS  OQUA x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)   ptot:18:(0,100),
-               Tof:16:(0,1.e-6)  Step:16:(0,10),
-               Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)    Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
+               Step:16:(0,10)     Eloss:16:(0,0.001) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -242,9 +245,9 @@ endblock
     Create and Position BARR z=21.7
     if (isopt>0) then
     HITS  QUAR x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)   ptot:18:(0,100),
-               Tof:16:(0,1.e-6)  Step:16:(0,10),
-               Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)    Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
+               Step:16:(0,10)     Eloss:16:(0,0.001) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -279,9 +282,9 @@ block rGAP is METANOL gap
     shape     BOX   dx=42.45  dy=0.2   dz=66.15
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
     HITS rGAP  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)   ptot:18:(0,100),
-               Tof:16:(0,1.e-6)  Step:16:(0,10),
-               Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)    Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
+               Step:16:(0,10)     Eloss:16:(0,0.001) 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
@@ -322,9 +325,9 @@ Block rCSI is Cesium Iodide
     shape     BOX   dx=19.60  dy=0.025   dz=32.0
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_CSI,EFFIC_CSI,RINDEX_methane)
     HITS rCSI  x:.005:   y:.01:   z:.005:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)   ptot:18:(0,100),
-               Tof:16:(0,1.e-6)  Step:16:(0,10),
-               USER:32:(-0.01,0.01) 
+               Slen:.1:(0,500)    Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
+               Step:16:(0,10)     USER:32:(-0.01,0.01) 
 endblock
 *- - - - - - - - - - - - - - - - - - - - - - - - - - -
 * 1330 /2 = 66.5 bigger than inside box 
@@ -359,9 +362,9 @@ block FREO is FREON
     enddo
     if (Isopt>0) then
     HITS FREO  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
-               Slen:.1:(0,500)   ptot:18:(0,100),
-               Tof:16:(0,1.e-6)  Step:16:(0,10),
-               Eloss:32:(0,0.1) 
+               Slen:.1:(0,500)    Lptot:18:(-3,2),
+               Tof:16:(0,1.e-6)   LGAM:16:(-2,2),
+               Step:16:(0,10)     Eloss:16:(0,0.001) 
     endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
