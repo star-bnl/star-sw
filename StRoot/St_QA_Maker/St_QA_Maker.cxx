@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.93 2000/03/13 22:01:47 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.94 2000/03/15 20:20:38 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.94  2000/03/15 20:20:38  lansdell
+// added Craig's changes to pid histogram
+//
 // Revision 1.93  2000/03/13 22:01:47  lansdell
 // changed good global tracks to include iflag=100,500
 //
@@ -1104,33 +1107,44 @@ void St_QA_Maker::MakeHistPID(){
   St_DataSetIter dstI(dst);        
   
   // spectra-PID diagnostic histograms
-  St_dst_track      *primtrk     = (St_dst_track     *) dstI["primtrk"];
-  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) dstI["dst_dedx"];
+  St_dst_track *globtrk = (St_dst_track *) dstI["globtrk"];
+  St_dst_dedx  *dst_dedx    = (St_dst_dedx *) dstI["dst_dedx"];
   
-  if (dst_dedx && primtrk) {
-    dst_dedx_st  *d   = dst_dedx->GetTable();
-    dst_track_st  *trk   = primtrk->GetTable();
-    Int_t no_of_tracks  = primtrk->GetNRows();
+  if (dst_dedx && globtrk) {
+    dst_dedx_st  *dedx   = dst_dedx->GetTable();
+    dst_track_st  *trk   = globtrk->GetTable();
+    dst_track_st *start_trk = trk;
+    Int_t no_of_tracks  =  globtrk->GetNRows();
+    Int_t no_of_dedx    =  dst_dedx->GetNRows();
+
     // loop over dedx entries
-    for (Int_t l = 0; l < dst_dedx->GetNRows(); l++,d++){
-      Float_t dedx_m = d->dedx[0];
-      Int_t igl = d->id_track;
-      Int_t igl_use = igl - 1;
-      // this is bad style, since it assumes the global track has not been sorted
-      // it works for now
-      if (igl_use >= 0 && igl_use < no_of_tracks) {
-	dst_track_st  *t = trk + igl_use ;
-	if (t->iflag>0) {
-	  Float_t invpt = t->invpt;
-	  Float_t pT = 9999.;
-	  if (invpt) pT = 1./TMath::Abs(invpt);
-	  Float_t pz = pT*t->tanl;
-	  Float_t  p = TMath::Sqrt(pT*pT+pz*pz);
-	  //	  Float_t x0 = t->x_first[0];
-	  //      Float_t y0 = t->x_first[1];
-	  
-	  if (d->det_id==1 && d->ndedx >15 ) { 
-	    m_p_dedx_rec->Fill(p,(float)(dedx_m*1e6)); // change from GeV/cm to keV/cm
+    for (Int_t l = 0; l < dst_dedx->GetNRows(); l++,dedx++){
+      if (dedx->det_id == 1 && dedx->method == 1) {
+        Float_t dedx_m = dedx->dedx[0];
+        Int_t igl = dedx->id_track;
+        Int_t igl_check;
+      // loop over tracks till this is found
+        trk = start_trk;
+        for (Int_t t = 0; t < globtrk->GetNRows(); t++,trk++) {
+	  igl_check = trk->id;
+          if (igl == igl_check) break;
+	}
+        if (igl==trk->id) {
+	  if (trk->iflag>0) {
+	    Float_t pT = -999.;
+	    pT = 1./TMath::Abs(trk->invpt);
+	    Float_t theta = TMath::ASin(1.) - TMath::ATan(trk->tanl);
+	    Float_t gmom  = pT/TMath::Sin(theta);
+	    // Float_t invpt = trk->invpt;
+	    // Float_t pT = 9999.;
+	    // if (invpt) pT = 1./TMath::Abs(invpt);
+	    // Float_t pz = pT*trk->tanl;
+	    // Float_t  p = TMath::Sqrt(pT*pT+pz*pz);
+
+	    if (dedx->ndedx >15 ) { 
+	      m_p_dedx_rec->Fill(gmom,dedx_m*1.e6); 
+	    // change from GeV/cm to keV/cm
+	    }
 	  }
 	}
       }

@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.33 2000/03/13 21:59:04 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.34 2000/03/15 20:20:38 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.34  2000/03/15 20:20:38  lansdell
+// added Craig's changes to pid histogram
+//
 // Revision 1.33  2000/03/13 21:59:04  lansdell
 // changed good global tracks to include iflag=500 for SVT+TPC histograms
 //
@@ -110,6 +113,7 @@
 #include "TH2.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
+#include "StTpcDedxPidAlgorithm.h"
 
 ClassImp(StEventQAMaker)
 
@@ -463,18 +467,37 @@ void StEventQAMaker::MakeHistDE() {
     cntrows++;
     StTrack *theTrack = theNodes[i]->track(0);
     if (!theTrack) continue;
+ 
     StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
     if (trkPidTr.size() > 0) {
+      //
+      // tpc pid algorithm , code change by Craig Ogilvie
+      //
+       
+       StDedxMethod dedxMethod =  kTruncatedMeanId; 
+       StTpcDedxPidAlgorithm tpcDedxAlgorithm(dedxMethod);
+       const StParticleDefinition* guess = theTrack->pidTraits(tpcDedxAlgorithm);
+       // checks that tpc truncated mean was successfully found
+       if (guess!=0) {
+        m_ndedxT->Fill(tpcDedxAlgorithm.traits()->numberOfPoints());
+        m_dedx0T->Fill(tpcDedxAlgorithm.traits()->mean());
+        m_dedx1T->Fill(tpcDedxAlgorithm.traits()->errorOnMean());
+       }
 
       //  should use dynamic_cast, but will crash in root4star (why?) -CPL
-      //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
-      StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
-      if (dedxPidTr) {
-	if (trkPidTr[0]->detector()==1) {
-	  m_ndedxT->Fill(dedxPidTr->numberOfPoints());
-	  m_dedx0T->Fill(dedxPidTr->mean());
-	  m_dedx1T->Fill(dedxPidTr->errorOnMean());
-	}
+      // StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr[0]);
+       // the next bit of code is incorrect, there is no guarantee that the
+       // the trkPidTr is a dedx object, it could be a tof object
+       // better to call a pid algorithm for the ftpcs
+       // 
+       StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr[0]);
+       if (dedxPidTr) {
+
+	//  if (trkPidTr[0]->detector()==1) {
+	//  m_ndedxT->Fill(dedxPidTr->numberOfPoints());
+	//  m_dedx0T->Fill(dedxPidTr->mean());
+	//  m_dedx1T->Fill(dedxPidTr->errorOnMean());
+	// }
 	if (trkPidTr[0]->detector()==4) {
 	  m_ndedxFW->Fill(dedxPidTr->numberOfPoints());
 	  m_dedx0FW->Fill(dedxPidTr->mean());
@@ -489,6 +512,7 @@ void StEventQAMaker::MakeHistDE() {
     }
   }
   m_ndedxr->Fill(cntrows);
+  cout << "out of dedx" << endl;
 }
 
 //_____________________________________________________________________________
@@ -684,80 +708,34 @@ void StEventQAMaker::MakeHistV0() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPID() {
-/*
+
   if (Debug()) cout << " *** in StEventQAMaker - filling PID histograms " << endl;
-  
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CPL
-
-  StPrimaryVertex *primVtx = event->primaryVertex();
-  UInt_t daughters=0;
-  UInt_t currentNumber=0;
-  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
-    currentNumber = event->primaryVertex(v)->numberOfDaughters();
-    if (currentNumber > daughters) {
-      daughters = currentNumber;
-      primVtx = event->primaryVertex(v);
-    }
-  }
-
+//
+// Craig Ogilvie code
+//
   StSPtrVecTrackNode &theNodes = event->trackNodes();
+
   for (UInt_t i=0; i<theNodes.size(); i++) {
     StTrack *theTrack = theNodes[i]->track(0);
     if (!theTrack) continue;
-    StTrackPidTraits *trkPidTr = theTrack->pidTraits()[0];
-    if (trkPidTr) {
-      //  should use dynamic_cast, but will crash in root4star (why?) -CPL
-      //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr);
-      StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr);
-      if (dedxPidTr) {
-	Float_t p = 
-      }
+
+    StSPtrVecTrackPidTraits &trkPidTr = theTrack->pidTraits();
+    if (trkPidTr.size() > 0) {
+      
+       StDedxMethod dedxMethod =  kTruncatedMeanId; 
+       StTpcDedxPidAlgorithm tpcDedxAlgorithm(dedxMethod);
+       const StParticleDefinition* guess = theTrack->pidTraits(tpcDedxAlgorithm);
+       // checks that tpc truncated mean was successfully found
+       if (guess!=0) {
+ 	 int ndedx = tpcDedxAlgorithm.traits()->numberOfPoints();
+	 double dedx = tpcDedxAlgorithm.traits()->mean();
+	 double p    = abs(theTrack->geometry()->momentum());
+	 if (ndedx > 15) {
+            m_p_dedx_rec->Fill((float)(p),(float)(dedx*1.e6));
+	 }
+       }
     }
   }
-
-  
-  if (primVtx) {
-    for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
-      StTrack *primtrk = primVtx->daughter(i);
-
-      if (primtrk->flag()>0) {
-*/
-/* ===== Old DST table-based code... -CPL
-
-  // spectra-PID diagnostic histograms
-  St_dst_track      *primtrk     = (St_dst_track     *) dstI["primtrk"];
-  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) dstI["dst_dedx"];
-  
-  if (dst_dedx && primtrk) {
-    dst_dedx_st  *d   = dst_dedx->GetTable();
-    dst_track_st  *trk   = primtrk->GetTable();
-    Int_t no_of_tracks  = primtrk->GetNRows();
-    // loop over dedx entries
-    for (Int_t l = 0; l < dst_dedx->GetNRows(); l++,d++){
-      Float_t dedx_m = d->dedx[0];
-      Int_t igl = d->id_track;
-      Int_t igl_use = igl - 1;
-      // this is bad style, since it assumes the global track has not been sorted
-      // it works for now
-      if (igl_use >= 0 && igl_use < no_of_tracks) {
-	dst_track_st  *t = trk + igl_use ;
-	if (t->iflag>0) {
-	  Float_t invpt = t->invpt;
-	  Float_t pT = 9999.;
-	  if (invpt) pT = 1./TMath::Abs(invpt);
-	  Float_t pz = pT*t->tanl;
-	  Float_t  p = TMath::Sqrt(pT*pT+pz*pz);
-	  Float_t x0 = t->x_first[0];
-	  Float_t y0 = t->x_first[1];
-	  
-	  if (d->det_id==1 && d->ndedx >15 ) { 
-	    m_p_dedx_rec->Fill(p,(float)(dedx_m*1e6)); // change from GeV/cm to keV/cm
-	  }
-	}
-      }
-    }
-  }
-*/
 }
 
 //_____________________________________________________________________________
