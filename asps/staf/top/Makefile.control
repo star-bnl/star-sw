@@ -5,7 +5,7 @@
 ######################################################################
 #
 # Specify ASPs and PAMs upon which this package depends.
-ASPS := top tbr tnt ami dio dui tdm spx soc
+ASPS := top ami dio dui tdm spx soc
 PAMS := pam
 #
 # Specify special user libraries against which to link.
@@ -17,7 +17,7 @@ DEBUG := TRUE
 #MOTIF := TRUE
 #
 # Specify which CERN libraries against which to link.
-#CERNLIBS := pawlib packlib mathlib kernlib
+#CERNLIBS := pawlib graflib grafX11 packlib mathlib kernlib
 #
 # Specify binaries to install.
 #INSTALL_BIN_FILES :=
