@@ -18,7 +18,7 @@ Replace[LIST #;] with [ #1 _
  "zebra  "   mzvolm,mzdred,zverif,
  "hbook  "   hplfun,hpagsz,hnoent,hnform,hbpro,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
- " math  "   sortrq,dgmlt1,dgmlt2,eisrs1,dsfeqn,mxuty,
+ " math  "   sortrq,dgmlt1,dgmlt2,eisrs1,dsfeqn,mxuty,rseqn,
  "spare  "   ie3tos,ie3fos,pkbyt,upkbyt,ucocop,vbias,vline,vdist2,vmaxa,
  " epio  "   epinit,epread,epsetw,epdefu
  "tr-prop    trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,Ssmt5t,Xmm55 "
