@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.17 2000/02/15 22:21:47 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.18 2000/02/23 21:03:17 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.18  2000/02/23 21:03:17  hardtke
+ * fix tpc_row_par -- causing tpt problems
+ *
  * Revision 1.17  2000/02/15 22:21:47  hardtke
  * Add effective drift distances
  *
@@ -60,7 +63,7 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    St_DataSetIter dataBase(input);
    for (int i = 0;i<lBases;i++,dataBase.Cd("/") )
      if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
-       gMessMgr->Error() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
+       gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
      }
  }
  else{
@@ -89,7 +92,7 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      dbFullPath += dbPath;
      if ( ( tpc[i] = maker->GetDataBase(dbPath)) || 
           ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
-     gMessMgr->Error() << "StTpcDb::Error Getting TPC database: " << bases[i] << "   " << endm;
+     gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i] << "   " << endm;
    }
  }
  else{
