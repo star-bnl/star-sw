@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.11 2000/08/07 00:20:03 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.12 2000/08/09 19:15:31 didenko Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.12  2000/08/09 19:15:31  didenko
+// remove unneeded include
+//
 // Revision 1.11  2000/08/07 00:20:03  jcs
 // save prevertex information correctly
 //
@@ -69,7 +72,6 @@
 #include "StChain.h"
 #include "StVertexId.h"
 
-#include "ftpc/St_fpt_Module.h"
 #include "ftpc/St_fde_Module.h"
 #include "tables/St_g2t_vertex_Table.h"
 
@@ -398,7 +400,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.11 2000/08/07 00:20:03 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.12 2000/08/09 19:15:31 didenko Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

@@ -1,6 +1,9 @@
-// $Id: StFtpcV0Maker.cxx,v 1.9 2000/07/04 02:36:50 perev Exp $
+// $Id: StFtpcV0Maker.cxx,v 1.10 2000/08/09 19:16:45 didenko Exp $
 //
 // $Log: StFtpcV0Maker.cxx,v $
+// Revision 1.10  2000/08/09 19:16:45  didenko
+// remove unneeded include
+//
 // Revision 1.9  2000/07/04 02:36:50  perev
 // formal corrections, gStChain removed
 //
@@ -32,7 +35,6 @@
 #include "StFtpcV0.hh"
 
 // Star Module and Table stuff
-#include "ftpc/St_fpt_Module.h"
 #include "ftpc/St_fte_Module.h"
 #include "tables/St_fv0_vertex_Table.h"
 
