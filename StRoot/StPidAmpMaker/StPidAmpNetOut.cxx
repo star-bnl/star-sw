@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNetOut.cxx,v 1.2 2000/03/24 15:10:44 aihong Exp $
+ * $Id: StPidAmpNetOut.cxx,v 1.3 2000/05/05 19:20:47 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNetOut.cxx,v $
+ * Revision 1.3  2000/05/05 19:20:47  aihong
+ * let StPidAmpNetOut::Get*ParArray() returns pointer instead of obj.
+ *
  * Revision 1.2  2000/03/24 15:10:44  aihong
  * add PrintContent()
  *
@@ -135,9 +138,9 @@ void StPidAmpNetOut::PrintContent(){
 
 
 
-TArrayD   StPidAmpNetOut::GetBandParArray() const{ return mBandParArray;}
-TArrayD   StPidAmpNetOut::GetAmpParArray() const{return mAmpParArray;}
-TArrayD   StPidAmpNetOut::GetResoParArray() const{return mResoParArray;}
+TArrayD*   StPidAmpNetOut::GetBandParArray() {return &mBandParArray;}
+TArrayD*   StPidAmpNetOut::GetAmpParArray()  {return &mAmpParArray;}
+TArrayD*   StPidAmpNetOut::GetResoParArray() {return &mResoParArray;}
 Int_t     StPidAmpNetOut::GetNBandPars() const{return mBandParArray.GetSize();}
 Int_t     StPidAmpNetOut::GetNAmpPars() const{return mAmpParArray.GetSize();}
 Int_t     StPidAmpNetOut::GetNResoPars() const{return mResoParArray.GetSize();}
@@ -152,13 +155,13 @@ ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut){
 
   s<<"band Parameters: { ";
 
-  TArrayD theBandParArray=netOut.GetBandParArray();
+ const TArrayD* theBandParArray=netOut.GetBandParArray();
 
-  for (i=0; i<theBandParArray.GetSize();i++){
+  for (i=0; i<theBandParArray->GetSize();i++){
 
-         s<<theBandParArray.At(i);
+         s<<theBandParArray->At(i);
 
-       if ( i!=(theBandParArray.GetSize()-1))    s<<", ";
+       if ( i!=(theBandParArray->GetSize()-1))    s<<", ";
        else s<<" ";
   }
 
@@ -166,14 +169,14 @@ ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut){
  
    s<<"amplitude Parameters: { ";
 
-  TArrayD theAmpParArray=netOut.GetAmpParArray();
+ const TArrayD* theAmpParArray=netOut.GetAmpParArray();
 
 
-  for (i=0; i<theAmpParArray.GetSize();i++){
+  for (i=0; i<theAmpParArray->GetSize();i++){
 
-         s<<theAmpParArray.At(i);
+         s<<theAmpParArray->At(i);
 
-       if ( i!=(theAmpParArray.GetSize()-1))    s<<", ";
+       if ( i!=(theAmpParArray->GetSize()-1))    s<<", ";
        else s<<" ";
   }
 
@@ -181,13 +184,13 @@ ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut){
   
   s<<"resolution Parameters: { ";
 
-  TArrayD theResoParArray=netOut.GetResoParArray();
+ const TArrayD* theResoParArray=netOut.GetResoParArray();
 
-  for (i=0; i<theResoParArray.GetSize();i++){
+  for (i=0; i<theResoParArray->GetSize();i++){
 
-         s<<theResoParArray.At(i);
+         s<<theResoParArray->At(i);
 
-       if ( i!=(theResoParArray.GetSize()-1))    s<<", ";
+       if ( i!=(theResoParArray->GetSize()-1))    s<<", ";
        else s<<" ";
   }
 

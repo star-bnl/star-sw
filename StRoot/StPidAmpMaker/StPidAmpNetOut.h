@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNetOut.h,v 1.2 2000/03/24 15:10:37 aihong Exp $
+ * $Id: StPidAmpNetOut.h,v 1.3 2000/05/05 19:20:46 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNetOut.h,v $
+ * Revision 1.3  2000/05/05 19:20:46  aihong
+ * let StPidAmpNetOut::Get*ParArray() returns pointer instead of obj.
+ *
  * Revision 1.2  2000/03/24 15:10:37  aihong
  * add PrintContent()
  *
@@ -59,9 +62,9 @@ class StPidAmpNetOut : public TNamed {
   void PrintContent();
 
 
-  TArrayD   GetBandParArray() const;
-  TArrayD   GetAmpParArray()  const;
-  TArrayD   GetResoParArray() const;
+  TArrayD*   GetBandParArray();
+  TArrayD*   GetAmpParArray();
+  TArrayD*   GetResoParArray();
 
   Int_t     GetNBandPars()    const;
   Int_t     GetNAmpPars()     const;
