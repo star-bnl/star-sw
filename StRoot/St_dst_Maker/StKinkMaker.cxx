@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.7 1999/07/08 19:09:51 fisyak Exp $
+// $Id: StKinkMaker.cxx,v 1.8 1999/07/12 19:06:59 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.8  1999/07/12 19:06:59  wdeng
+// New primary vertex scheme. Get B from gufld(). Use math__constants.h and phys_constants.h
+//
 // Revision 1.7  1999/07/08 19:09:51  fisyak
 // Add tabs, remove St_glb_Maker
 //
@@ -15,7 +18,6 @@
 //                                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,14 +30,33 @@
 
 #include "pams/global/inc/StDetectorId.h"
 #include "pams/global/inc/StVertexId.h"
+#include "pams/global/inc/math_constants.h"
+#include "pams/global/inc/phys_constants.h"
+
 #include "PhysicalConstants.h"
 #include "StThreeVector.hh"
 #include "TObjArray.h"
 #include "SystemOfUnits.h"
 
-ClassImp(StKinkMaker)
+#include "fortranc.h"
+extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
+#define gufld F77_NAME(gufld,GUFLD)
+
+#define kaonMass     M_KAON_PLUS
+#define pionMass     M_PION_PLUS
+#define muonMass     M_MUON_PLUS
+#define pi0Mass      M_PION_0
+
+#define kaonToMuonQ  0.236
+#define kaonToPionQ  0.205
+#define pionToMuonQ  0.030
+
+#define radToDeg     C_DEG_PER_RAD
+#define degToRad     C_RAD_PER_DEG               
   
 #define MAXNUMOFTRACKS 10000
+
+ClassImp(StKinkMaker)
   
   //_____________________________________________________________________________
   StKinkMaker::StKinkMaker(const char *name):
@@ -119,7 +140,10 @@ Int_t StKinkMaker::Make(){
   StKinkLocalTrack* tempTrack;
   TObjArray* trackArray = new TObjArray(MAXNUMOFTRACKS);
   
-  const Float_t B = 0.5*tesla;
+  Float_t x[3] = {0,0,0};
+  Float_t b[3];
+  gufld(x,b);
+  double B     = b[2]*kilogauss;
   
   Int_t i, j;
   
@@ -176,7 +200,7 @@ Int_t StKinkMaker::Make(){
       
       dst_vertex_st* dstVertexPtr = dstVertexStart;         
       while(1) {                                    
-        if( (dstVertexPtr->id==1) && (dstVertexPtr->vtx_id==1) )
+        if( (dstVertexPtr->iflag==1) && (dstVertexPtr->vtx_id==kEventVtxId) )
           {
             StThreeVectorD eventVertex(dstVertexPtr->x, dstVertexPtr->y, dstVertexPtr->z);
             parentImpact = myTrack1->helix().distance(eventVertex);
@@ -194,7 +218,7 @@ Int_t StKinkMaker::Make(){
 	  
 	  dst_vertex_st* dstVertexPtr1 = dstVertexStart;         
 	  while(1) {                                       
-	    if( (dstVertexPtr1->id==1) && (dstVertexPtr1->vtx_id==1) )
+	    if( (dstVertexPtr1->iflag==1) && (dstVertexPtr1->vtx_id==kEventVtxId) )
 	      {
 		StThreeVectorD eventVertex(dstVertexPtr1->x, dstVertexPtr1->y, dstVertexPtr1->z);
 		daughterImpact = myTrack2->helix().distance(eventVertex);
@@ -267,8 +291,8 @@ Int_t StKinkMaker::Make(){
 	  StThreeVectorD p1Project = myTrack1->helix().at(p1PathLength);
 	  StThreeVectorD p2Project = myTrack2->helix().at(p2PathLength);
 	  
-	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B);
-	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B);
+	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B/tesla);
+	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B/tesla);
 	  
 	  decayAngle = 57.3*parentMom.angle(daughterMom);
 	  if(decayAngle<tkfpar->thetaMin) continue;
@@ -536,7 +560,7 @@ Int_t StKinkMaker::Make(){
 //_____________________________________________________________________________
 void StKinkMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.7 1999/07/08 19:09:51 fisyak Exp $\n");
+  printf("* $Id: StKinkMaker.cxx,v 1.8 1999/07/12 19:06:59 wdeng Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
