@@ -26,7 +26,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.5 2001/06/06 13:53:40 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.6 2001/06/14 17:19:27 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -38,6 +38,8 @@ public:
     void setMaterialBuildPath(char* val);
     void setDetectorBuildPath(char* val);
     void setPolygonBuildPath(char* val);
+
+    void printStatistics() const;
     
     //Used for stepping to next action (via StiControlPad)
     static void reset();
