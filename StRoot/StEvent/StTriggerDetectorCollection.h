@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 1.2 1999/02/09 22:22:18 fisyak Exp $
+ * $Id: StTriggerDetectorCollection.h,v 1.3 1999/04/27 01:24:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
- * Revision 1.2  1999/02/09 22:22:18  fisyak
- * Import Torre stuff
+ * Revision 1.3  1999/04/27 01:24:29  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:39  fisyak
  * New version with pointer instead referencies
@@ -28,10 +28,7 @@
 #include "StZdcSummary.h"
 #include "StVpdSummary.h"
 #include "StZdcSegment.h"
-#include "StVecCtbCounter.h"
-#include "StVecMwcSector.h"
-#include "StVecVpdCounter.h"
-#include "StVecZdcSegment.h"
+#include "StCtbCounter.h"
 #include "StMwcSector.h"
 class StTriggerDetectorCollection : public TObject {
 #include "StZdcSegment.h"
@@ -48,10 +45,10 @@ public:
     StVecPtrVpdCounter& vpdCounters();
     StVecPtrZdcSegment& zdcSegments();
     StZdcSummary&    zdcSummary();
-    StVecCtbCounter mCtbCounters;
-    StVecMwcSector  mMwcSectors;
-    StVecVpdCounter mVpdCounters;
-    StVecZdcSegment mZdcSegments;
+    StVecCtbCounter mCtbCounters;//!
+    StVecMwcSector  mMwcSectors; //!
+    StVecVpdCounter mVpdCounters;//!
+    StVecZdcSegment mZdcSegments;//!
     StVpdSummary    mVpdSummary;
     StZdcSummary    mZdcSummary;
 #ifdef __ROOT__

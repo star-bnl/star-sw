@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.h,v 1.2 1999/02/09 21:06:30 fisyak Exp $
+ * $Id: StRun.h,v 1.3 1999/04/27 01:24:22 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,20 @@
  ***************************************************************************
  *
  * $Log: StRun.h,v $
- * Revision 1.2  1999/02/09 21:06:30  fisyak
- * Import new Torre staffs
+ * Revision 1.3  1999/04/27 01:24:22  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:34  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.7  1999/03/23 21:47:41  ullrich
+ * Member function made virtual
+ *
+ * Revision 1.6  1999/03/04 18:17:10  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
+ *
+ * Revision 1.5  1999/03/04 15:56:59  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.4  1999/02/10 21:50:32  wenaus
  * Plug memory leaks
@@ -33,32 +45,36 @@
 
 #include "tables/dst_run_header.h"
 #include "tables/dst_run_summary.h"
-#include <TString.h>
+#include "StEnumerations.h"
+#include "dst_run_header.h"
+#include "dst_run_summary.h"
+#include "TString.h"
 #if !defined(ST_NO_NAMESPACES)
 class StRun : public TObject {
 #endif
 
 class StRun : public St_DataSet {
 public:
+    StRun();
     virtual ~StRun();
     StRun(dst_run_header_st&, dst_run_summary_st&);
     StRun(dst_run_header_st&);
     
-    Long_t          id() const;
-    const TString& type() const;
-    Long_t          triggerMask() const;
-    Double_t        centerOfMassEnergy() const;
-    Short_t         beamMassNumber(StBeamDirection) const;
-    Short_t         beamCharge(StBeamDirection) const;
-    StRunSummary* summary();
+    Int_t operator!=(const StRun&) const;
+    
+    const char   *CVSTag(){return (const char *) mCVSTag;};
+    virtual Long_t          id() const;
+    virtual const TString& type() const;
+    virtual Long_t          triggerMask() const;
+    virtual Double_t        centerOfMassEnergy() const;
     virtual Short_t         beamMassNumber(StBeamDirection) const;
-    void setId(Long_t);
-    void setType(const Char_t*);
-    void setTriggerMask(Long_t);
-    void setCenterOfMassEnergy(Double_t);
-    void setBeamMassNumber(StBeamDirection, Short_t);
-    void setBeamCharge(StBeamDirection, Short_t);
-    void setSummary(StRunSummary*);
+    virtual Short_t         beamCharge(StBeamDirection) const;
+    virtual StRunSummary* summary();
+    
+    virtual void setId(Long_t);
+    virtual void setType(const Char_t*);
+    virtual void setTriggerMask(Long_t);
+    virtual void setCenterOfMassEnergy(Double_t);
     virtual void setBeamMassNumber(StBeamDirection, Short_t);
     virtual void setBeamCharge(StBeamDirection, Short_t);
     
@@ -74,9 +90,7 @@ public:
     Short_t         mWestZ;
     StRunSummary  *mSummary;
     
-#ifdef __ROOT__
-	ClassDef(StRun,1)  //StRun structure
-#endif
+    ClassDef(StRun,1)  //StRun structure
     const StRun& operator=(const StRun&);
     StRun(const StRun&);
   ClassDef(StRun,1)  //StRun structure

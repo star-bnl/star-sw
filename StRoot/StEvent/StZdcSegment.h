@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSegment.h,v 1.2 1999/02/09 19:52:33 fisyak Exp $
+ * $Id: StZdcSegment.h,v 1.3 1999/04/27 01:24:32 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcSegment.h,v $
- * Revision 1.2  1999/02/09 19:52:33  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:32  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies
@@ -20,9 +20,8 @@
  * version with constructors for table-based loading
  *
 
-#ifdef __ROOT__
-#include "TObject.h"
-#endif
+#ifndef StZdcSegment_hh
+
 class StZdcSegment : public TObject {
 #include "StObject.h"
 #include "StArray.h"
@@ -43,11 +42,10 @@ public:
     void setTdc(Float_t);
     
 protected:
-#ifdef __ROOT__
-	ClassDef(StZdcSegment,1)  //StZdcSegment structure
-#endif
+    ClassDef(StZdcSegment,1)  //StZdcSegment structure
     Float_t mAdc;
-
+    Float_t mTdc;
+typedef  StVecPtrZdcSegment StVecZdcSegment;
 };
 StCollectionDef(ZdcSegment)
 

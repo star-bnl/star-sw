@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSegment.cxx,v 1.2 1999/02/09 19:52:33 fisyak Exp $
+ * $Id: StZdcSegment.cxx,v 1.3 1999/04/27 01:24:32 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcSegment.cxx,v $
- * Revision 1.2  1999/02/09 19:52:33  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:32  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies
@@ -21,10 +21,8 @@
  *
  **************************************************************************/
 #include "StZdcSegment.h"
-#ifdef __ROOT__
 
 
-#endif
 ClassImp(StZdcSegment)
 StCollectionImp(ZdcSegment)
 
@@ -46,6 +44,8 @@ StZdcSegment::~StZdcSegment() { /* noop */ }
 
 void StZdcSegment::setId(Short_t val) { mId = val; }
 
+
+StCollectionImp(ZdcSegment)
 void StZdcSegment::setAdc(Float_t val) { mAdc = val; }
 
 void StZdcSegment::setTdc(Float_t val) { mTdc = val; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 1.2 1999/02/10 02:17:35 fisyak Exp $
+ * $Id: StL0Trigger.h,v 1.3 1999/04/27 01:24:21 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,14 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
- * Revision 1.2  1999/02/10 02:17:35  fisyak
- * Merging with new Torre stuff
+ * Revision 1.3  1999/04/27 01:24:21  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.5  1999/03/04 18:17:06  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.4  1999/03/04 15:56:59  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -26,10 +32,9 @@
 #include "TObject.h"
 #endif
 #ifndef StL0Trigger_hh
-#ifndef __CINT__
 #include "StObject.h"
-#else
-  template< class T > class vector;
+#ifndef __ROOT__
+#include <vector>
 #endif
 
 using namespace std;

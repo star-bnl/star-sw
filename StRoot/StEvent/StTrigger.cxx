@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.cxx,v 1.2 1999/02/10 02:17:36 fisyak Exp $
+ * $Id: StTrigger.cxx,v 1.3 1999/04/27 01:24:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrigger.cxx,v $
- * Revision 1.2  1999/02/10 02:17:36  fisyak
- * Merging with new Torre stuff
+ * Revision 1.3  1999/04/27 01:24:28  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:38  fisyak
  * New version with pointer instead referencies
@@ -23,7 +23,7 @@
 #include "StTrigger.h"
 #ifdef __ROOT__
 
-static const Char_t rcsid[] = "$Id: StTrigger.cxx,v 1.2 1999/02/10 02:17:36 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StTrigger.cxx,v 1.3 1999/04/27 01:24:28 fisyak Exp $";
 #endif
 
 ClassImp(StTrigger)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSummary.h,v 1.2 1999/02/09 19:52:35 fisyak Exp $
+ * $Id: StZdcSummary.h,v 1.3 1999/04/27 01:24:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcSummary.h,v $
- * Revision 1.2  1999/02/09 19:52:35  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:33  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:41  fisyak
  * New version with pointer instead referencies

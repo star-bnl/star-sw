@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDstEventSummary.h,v 1.2 1999/02/09 20:00:47 fisyak Exp $
+ * $Id: StDstEventSummary.h,v 1.3 1999/04/27 01:24:17 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDstEventSummary.h,v $
- * Revision 1.2  1999/02/09 20:00:47  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:17  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:30  fisyak
  * New version with pointer instead referencies
@@ -30,22 +30,24 @@ class StDstEventSummary : public TObject {
 
 class StDstEventSummary : public StObject {
 public:
-    
+    StDstEventSummary();
     ~StDstEventSummary();
     // StDstEventSummary(const StDstEventSummary &right);   use default
-    
+#if 0    
     StVecTH1F& histograms1D();
+    StVecTH2F& histograms2D();
 #endif    
 protected:
+#endif
 #ifdef __ROOT__
 	ClassDef(StDstEventSummary,1)  //StDstEventSummary structure
 #endif
     StVecTH2F mHistograms2D;
-
+#endif 
   ClassDef(StDstEventSummary,1)  //StDstEventSummary structure
 };
 #if 0
-
+#endif
 
 inline StVecTH2F& StDstEventSummary::histograms2D() { return mHistograms2D; }
 #endif 

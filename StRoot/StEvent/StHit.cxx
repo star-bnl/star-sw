@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 1.2 1999/02/09 21:01:24 fisyak Exp $
+ * $Id: StHit.cxx,v 1.3 1999/04/27 01:24:20 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 1.2  1999/02/09 21:01:24  fisyak
- * import new Torres staff
+ * Revision 1.3  1999/04/27 01:24:20  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:33  fisyak
+ * New version with pointer instead referencies
  *
  * Revision 1.4  1999/03/23 21:51:49  ullrich
  * Removed table-based constructor.
@@ -24,14 +27,13 @@
  *
  * Revision 1.2  1999/01/15 22:53:45  wenaus
  * version with constructors for table-based loading
-#include "StGlobalTrack.h"
-#include "StTrackCollection.h"
+#include <iostream.h>
  * Added member mFlag and access member flag() and setFlag().
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.2 1999/02/09 21:01:24 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.3 1999/04/27 01:24:20 fisyak Exp $";
 #include "StGlobalTrack.h"
 #ifdef __ROOT__
  *
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.2 1999/02/09 21:01:24 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.3 1999/04/27 01:24:20 fisyak Exp $";
 #endif
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -45,18 +47,6 @@ static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.2 1999/02/09 21:01:24 fisyak E
 
 	     const StThreeVectorF& e,
 	     Float_t q, UChar_t c)
-StHit::StHit(dst_point_st* pt)
-{
-  mCharge = pt->charge;
-  // Decode position. cf. pams/global/dst/dst_point_filler.F
-  mPosition.setX(pt->position[0]%1048576); // %220
-  mPosition.setY(pt->position[0]/1048576 + (pt->position[1]%1024)*1024);
-  mPosition.setZ(pt->position[1]/1024);
-  mPositionError.setX(pt->pos_err[0]%1048576); // %220
-  mPositionError.setY(pt->pos_err[0]/1048576 + (pt->pos_err[1]%1024)*1024);
-  mPositionError.setZ(pt->pos_err[1]/1024);
-}
-
     : mPosition(p), mPositionError(e), mCharge(q), mTrackRefCount(c)
 {
     : StMeasuredPoint(p), mPositionError(e), mHardwarePosition(hp),
@@ -81,8 +71,8 @@ void StHit::setCharge(Float_t val) { mCharge = val; }
         return kTpcSsdId;
 void StHit::setTrackReferenceCount(UChar_t val) { mTrackRefCount = val; }
     
-    os << "Error: " << h.positionError() << endl;
-    os << "Charge: " << h.charge() << endl;
+ostream& operator<<(ostream& os, const StHit& h)
+        return kSsdSvtId;
     os << "Position: " << h.position() << endl;
     os << "Error:    " << h.positionError() << endl;
     os << "Charge:   " << h.charge() << endl;
