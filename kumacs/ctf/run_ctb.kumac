@@ -4,7 +4,8 @@
 * 7/28/98 K. Turner - editted to make it standard
 * 7/29/98 K. Turner - editted to use new utility functions
 * 8/10/98  K. Turner - added nid to call to write_table_to_ntuple#close_disk
-************************************************************************
+* 10/14/98 K. Turner - put in read_default_params
+* ***********************************************************************
 ************************************************************************
 
  macro run__
@@ -51,7 +52,7 @@
    macro/global/import *
      
    exec load_libraries#run [domain]
-
+   exec read_default_params#init
 * **************************************************************
 * --------- Setup and run tpc fast simulator & tracker pams -------------*
    
