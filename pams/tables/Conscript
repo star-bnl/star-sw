@@ -3,105 +3,129 @@ Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 $my_env = $env->clone(
 		    'DEBUG'      => ' '
 		    );
-
 my $Dir = "pams";                           print "Build Tables for $Dir\n";
 my @idl = find_idl($Dir); # print "@idl\n"; 
 my @idlT = ();
-my @tgt_idlT = ();
 my %idl    = ();
 my @sources = ();
 my $src;
+my $DIR = cwd();# print "DIR = $DIR\n";
 my $obj = $OBJ . "/pams/tables"; 
-my $share  = "#.share/tables"; #print "share = $share\n";
+my $share  = "#.share/tables";# print "share = $share\n";
 Link $obj =>  $share; print "Link $obj =>  $share\n";
 my $SO_PKG = "St_Tables.so";
-for my $idl (@idl) {#  print "$idl \n";
-  if (! grep (/\/idl\//,$idl)) {next;} #  if (! grep (/vpd\//,$idl)) {next;}
-  push @idlT, '#' . $Dir . "/" . $idl; #print "i=",$i++," idl = ",$idl,"\n";
-  my $export_idl = $share . "/" . basename ($idl); #print "export_idl = $export_idl\n";
-  push @tgt_idlT, $export_idl;
-  my $stem = basename ($export_idl, ".idl"); #print "stem = $stem\n";
-  $idl{$stem} = $export_idl;
-} #print "idlT = @idlT\n";
+foreach my $idl (@idl) {#  print "$idl \n";
+  if (! grep (/\/idl\//,$idl)) {next;} 
+  my $IDL =  $DIR . '/' . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
+  push @idlT, $IDL; 
+  my $stem = basename ($IDL, ".idl");# print "stem = $stem\n";
+  $idl{$stem} = $IDL;
+}# print "idlT = @idlT\n";
 Install $my_env $share, @idlT;
 #___________________________________
 (my $build = $obj) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
 my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
 foreach my $stem (sort keys %idl) { 
-  my $idll = ($idl{$stem}); #print "@idll\n";
+  my $idll = ($idl{$stem});# print "stem = $stem; idll: $idl{$stem}\n";
   my $dir  = dirname ($idll); #print "dir = $dir\n"; 
   my $idl  = basename ($idl{$stem});
-  my $idlH = $dir . "/" . $stem . ".h"; 
-  my $idlI = $dir . "/" . $stem . ".inc"; 
+  my $idlH = $share . "/" . $stem . ".h"; 
+  my $idlI = $share . "/" . $stem . ".inc"; 
   (my $Dir = $dir) =~ s/\#//g; #print "Dir = $Dir \n";
-  my @Deps = ();
-  push  @Deps, $idll;
-  Command $my_env [$idlH, $idlI], @Deps, qq (cd $Dir; stic -H -q $idl );
-  my $idlHH = $obj . "/St_" . $stem . "_Table.h"; 
-  push @Deps, $idlH;
-  push @Deps, $idlI;
-  Command $my_env [$idlHH], @Deps, 
-  qq (
-      echo "#ifndef STAF_St_"$stem"_Table">%>
-      echo "#define STAF_St_"$stem"_Table">>%>
-      echo "#include \\"St_Table.h\\"">>%>
-      echo "#include \\""$stem".h\\"">>%>
-      echo "class St_"$stem" : public St_Table">>%>
-      echo "{">>%>
-      echo "protected:">>%>
-      echo "  static St_tableDescriptor *fgColDescriptors;">>%>
-      echo "  virtual St_tableDescriptor *GetRowDescriptors() const">>%>
-      echo "{ return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}">>%> 
-      echo "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}">>%>
-      echo "public:">>%>
-      echo "  St_"$stem"() : St_Table(\\""$stem"\\",sizeof("$stem"_st)) {SetType(\\""$stem"\\");}">>%>
-      echo "  St_"$stem"(Text_t *name) : St_Table(name,sizeof("$stem"_st)) {SetType(\\""$stem"\\");}">>%>
-      echo "  St_"$stem"(Int_t n): St_Table(\\""$stem"\\",n,sizeof("$stem"_st)) {SetType(\\""$stem"\\");}">>%>
-      echo "  St_"$stem"(Text_t *name,Int_t n): St_Table(name,n,sizeof("$stem"_st)) {SetType(\\""$stem"\\");}">>%>
-      echo "  "$stem"_st *GetTable(){ return ("$stem"_st *)s_Table;}">>%>
-      echo "  ClassDef(St_"$stem",0) // class particle STAF tables  ">>%>
-      echo "};">>%>
-      echo "#endif">>%>
-     );
+  my @Deps = ($idll);# print "Deps: $Deps[0]\n";
+  Command $my_env [$idlH, $idlI], @Deps, qq (cd %>:d  &&  stic -H -q %< );
+  my $idlHH = $obj . "/St_" . $stem . "_Table.h";# print "idlHH: $idlHH \n";
+  TableH   $my_env $idlHH, Conscript; 
+  my $idlCXX = $obj . "/St_" . $stem . "_Table.cxx";# print "idlCXX: $idlCXX \n";
+  TableCXX $my_env $idlCXX, Conscript, 
   Install $my_env  $share, $idlHH;
-  my $idlCXX = $obj . "/St_" . $stem . "_Table.cxx"; 
-  Command $my_env [$idlCXX], @Deps, 
-  qq (
-      echo "#include \\"St_"$stem"_Table.h\\"">%>
-      echo "/////////////////////////////////////////////////////////////////////////">>%>
-      echo "//">>%>
-      echo "//  Class St_"$stem" wraps the STAF table "$stem>>%>
-      echo "//  It has been generated "by automatic". Please don't change it \\"by hand\\"">>%>
-      echo "//">>%>
-      echo "/////////////////////////////////////////////////////////////////////////">>%>
-      echo "">>%>
-      echo "#include \\"Stypes.h\\"">>%>
-      echo "St_tableDescriptor *_NAME2_(St_,"$stem")::fgColDescriptors = 0;">>%>
-      echo "TableImp("$stem")">>%>
-      echo "TableStreamerImp("$stem")">>%>
-     );
   push @sources, $idlCXX;
   my $idlcintC = "St_" . $stem . "_TableCint.cxx";
   my $idlCintC = $obj . "/" . $idlcintC;   
   my $idlCintH = $obj . "/St_" . $stem . "_TableCint.h"; 
   my $idlhh    = basename($idlHH);
   (my $idlHHH = $idlHH) =~ s/$obj/$share/g;
-  push @Deps, $idlHHH;
-  my $cmdCint = "cd $build && rm -f LinkDef.h &&"; 
-     $cmdCint.= "echo \"#ifdef __CINT__\" > LinkDef.h&&";
-     $cmdCint.= "echo \"#pragma link off all globals;\" >> LinkDef.h&&";
-     $cmdCint.= "echo \"#pragma link off all classes;\" >> LinkDef.h&&";
-     $cmdCint.= "echo \"#pragma link off all functions;\" >> LinkDef.h&&";
-     $cmdCint.= "echo \"#pragma link C++ class St_\"$stem\"-;\" >> LinkDef.h&&";
-     $cmdCint.= "echo \"#pragma link C++ class \"$stem\"_st-!;\" >> LinkDef.h&&";
-     $cmdCint.= "echo \"#endif\" >> LinkDef.h&&";
-     $cmdCint.= " rootcint -f $idlcintC -c $CPPPATH  $idlhh LinkDef.h"; #print "$cmdCint\n";
-  Command $my_env [$idlCintC, $idlCintH], @Deps,  qq ($cmdCint);
+  my $LinkDef = $build . "/" . $stem . "LinkDef.h";# print "LinkDef = $LinkDef\n";
+  TableLinkDef $env $LinkDef, Conscript;
+  @Deps = ($idlHHH);
+  push @Deps, $idlH;
+  push @Deps, $idlI;
+  Command $my_env [$idlCintC, $idlCintH], @Deps,  qq (cd %>:d && rootcint -f $idlcintC -c $CPPPATH %1:f);
   push @sources, $idlCintC; 
 }
 LinkedModule $my_env $SO_PKG, @sources;
 Install $my_env $LIB, $SO_PKG;
+#________________________________________
+sub cons::TableH {
+#  my($env, $dst, $src) = shift;
+  my $env = shift;
+  (my $dst = shift) =~ s/^\#//g; 
+  my $dir = dirname($dst);
+  script::rmkdir($dir);
+  (my $stem = basename($dst,"_Table.h")) =~ s/^St_//g;# print "cons::TableH stem = $stem\n";
+  open (OUT,">$dst") or die "Can't open $dst\n";
+  print OUT "#ifndef STAF_St_$stem_Table\n";
+  print OUT "#define STAF_St_$stem_Table\n";
+  print OUT "#include \"St_Table.h\"\n";
+  print OUT "#include \"$stem.h\"\n";
+  print OUT "class St_$stem : public St_Table\n";
+  print OUT "{\n";
+  print OUT "protected:\n";
+  print OUT "  static St_tableDescriptor *fgColDescriptors;\n";
+  print OUT "  virtual St_tableDescriptor *GetRowDescriptors() const\n";
+  print OUT "{ return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}\n"; 
+  print OUT "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}\n";
+  print OUT "public:\n";
+  print OUT "  St_$stem() : St_Table(\"$stem\",sizeof($stem_st)) {SetType(\"$stem\");}\n";
+  print OUT "  St_$stem(Text_t *name) : St_Table(name,sizeof($stem_st)) {SetType(\"$stem\");}\n";
+  print OUT "  St_$stem(Int_t n): St_Table(\"$stem\",n,sizeof($stem_st)) {SetType(\"$stem\");}\n";
+  print OUT "  St_$stem(Text_t *name,Int_t n): St_Table(name,n,sizeof($stem_st)) {SetType(\"$stem\");}\n";
+  print OUT "  $stem_st *GetTable(){ return ($stem_st *)s_Table;}\n";
+  print OUT "  ClassDef(St_$stem,0) // class particle STAF tables  \n";
+  print OUT "};\n";
+  print OUT "#endif\n";
+  close (OUT);
+}
+#________________________________________
+sub cons::TableCXX {
+  my $env = shift;
+  (my $dst = shift) =~ s/^\#//g; 
+  (my $stem = basename($dst,"_Table.cxx")) =~ s/^St_//g;# print "cons::TableCXX stem = $stem\n";
+  my $dir = dirname($dst);
+  script::rmkdir($dir);
+  open (OUT,">$dst") or die "Can't open $dst\n";
+  print OUT "#include \"St_$stem_Table.h\"\n";
+  print OUT "/////////////////////////////////////////////////////////////////////////\n";
+  print OUT "//\n";
+  print OUT "//  Class St_$stem wraps the STAF table $stem\n";
+  print OUT "//  It has been generated \"by automatic\". Please don't change it \"by hand\"\n";
+  print OUT "//\n";
+  print OUT "////////////////x[/////////////////////////////////////////////////////////\n";
+  print OUT "\n";
+  print OUT "#include \"Stypes.h\"\n";
+  print OUT "St_tableDescriptor *_NAME2_(St_,$stem)::fgColDescriptors = 0;\n";
+  print OUT "TableImp($stem)\n";
+  print OUT "TableStreamerImp($stem)\n";
+  close (OUT);
+}
+#________________________________________
+sub cons::TableLinkDef {
+  my $env = shift;
+  my $dst = shift; 
+  my $stem = basename($dst,"LinkDef.h");#  print "cons::TableLinkDef : $dst\n";
+  my $dir = dirname($dst);
+  script::rmkdir($dir);
+  open (OUT,">$dst") or die "Can't open $dst\n";
+  print OUT "#ifdef __CINT__\n";                      #print "#ifdef __CINT__\n";
+  print OUT "#pragma link off all globals\n";         #print "#pragma link off all globals\n";
+  print OUT "#pragma link off all classes\n";         #print "#pragma link off all classes\n";
+  print OUT "#pragma link off all functions\n";       #print "#pragma link off all functions\n";
+  print OUT "#pragma link C++ class St_$stem-\n";     #print "#pragma link C++ class St_$stem-\n";
+  print OUT "#pragma link C++ class $stem_st-!\n";    #print "#pragma link C++ class $stem_st-!\n";
+  print OUT "#endif\n";                               #print "#endif\n";
+  close (OUT);
+}
 #________________________________________
 sub script::find_idl {
   if (defined($AFS)) {$File::Find::dont_use_nlink;}
