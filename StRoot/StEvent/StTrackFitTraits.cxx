@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.8 2001/04/05 04:00:58 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.9 2001/04/09 22:57:05 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.9  2001/04/09 22:57:05  perev
+ * forget STAR I/O
+ *
  * Revision 2.8  2001/04/05 04:00:58  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -50,7 +53,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.8 2001/04/05 04:00:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.9 2001/04/09 22:57:05 perev Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -156,42 +159,24 @@ void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
 //        Stream an object of class StTrackFitTraits.
 
-Version_t R__f = R__b.GetVersion();
-TBEvol R__e(Class(),&R__b);
   Version_t R__v = 0;
   if (R__b.IsReading()) {
     R__v = R__b.ReadVersion();
-    {  R__e.MemberBegin();
-       StObject::Streamer(R__b);
-       R__e.MemberEnd();}
+    StObject::Streamer(R__b);
 
     R__b >> (unsigned short&)mPidHypothesis;
     R__b >> (unsigned short&)mNumberOfFitPoints;
-    R__b.ReadStaticArray((float*)mChi2);
-    
-    if (R__v > 1)
-      {R__e.MemberBegin();
-       mCovariantMatrix.Streamer(R__b);
-       R__e.MemberEnd();
-    } else {
-      float tmp[15];
-      R__b.ReadStaticArray(tmp);
-      mCovariantMatrix.Set(15,tmp);
-    }
+    R__b.ReadFastArray(mChi2,2);
+    mCovariantMatrix.Streamer(R__b);
 
   } else {
     R__b.WriteVersion(Class());
-      {R__e.MemberBegin();
-       StObject::Streamer(R__b);
-       R__e.MemberEnd();}
+    StObject::Streamer(R__b);
     R__b << (unsigned short )mPidHypothesis;
     R__b << (unsigned short )mNumberOfFitPoints;
-    int R__i=0;if(R__i){};
- R__b.WriteArray((float*)mChi2, 2);
-      {R__e.MemberBegin();
-      mCovariantMatrix.Streamer(R__b);
-      R__e.MemberEnd();}
-   }
+    R__b.WriteFastArray(mChi2, 2);
+    mCovariantMatrix.Streamer(R__b);
+  }
 }
 
 
