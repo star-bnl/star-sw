@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.5  1999/11/11 10:02:58  ullrich
- * Added warning message in case some hits cannot be stored.
+ * Revision 2.6  1999/11/11 17:46:30  ullrich
+ * Added more checks and warning messages. Handling
+ * of primary vertices made safer
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -37,11 +38,8 @@
  *
  * Revision 2.21  2000/03/22 17:11:20  ullrich
  * Added further checks for case were tables exist but have
-#include "TClass.h"
 #include "StTrack.h"
  * zero length. Added for primary and global tracks.
-#include "St_ObjectSet.h"
-#include "St_DataSetIter.h"
  *
  * Revision 2.20  2000/02/23 12:11:49  ullrich
  * Added printout of covariant matrix to printTrackInfo().
@@ -88,7 +86,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -125,10 +123,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.5 1999/11/11 10:02:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.6 1999/11/11 17:46:30 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -277,7 +275,7 @@ StEventMaker::makeEvent()
     //        If we do not get the event header we better stop
     //  right away. If we cannot get the event summary
     //  we continue.
-    unsigned int               id, k;
+    //  create an empty instance only. This is OK in this
     //  case and therefore we do not return a warning or an
     //
     if (!dstEventHeader) {
@@ -314,21 +312,28 @@ StEventMaker::makeEvent()
     //
     //  Setup the software monitors.
     //
+    dst_mon_soft_ctb_st*  dstSoftMonCtb    = mEventManager->returnTable_dst_mon_soft_ctb(nrows);
     dst_mon_soft_emc_st*  dstSoftMonEmc    = mEventManager->returnTable_dst_mon_soft_emc(nrows);
     dst_mon_soft_ftpc_st* dstSoftMonFtpc   = mEventManager->returnTable_dst_mon_soft_ftpc(nrows);
     dst_mon_soft_glob_st* dstSoftMonGlobal = mEventManager->returnTable_dst_mon_soft_glob(nrows);
     dst_mon_soft_l3_st*   dstSoftMonL3     = mEventManager->returnTable_dst_mon_soft_l3(nrows);
     dst_mon_soft_rich_st* dstSoftMonRich   = mEventManager->returnTable_dst_mon_soft_rich(nrows);
     dst_mon_soft_svt_st*  dstSoftMonSvt    = mEventManager->returnTable_dst_mon_soft_svt(nrows);
+    dst_mon_soft_tpc_st*  dstSoftMonTpc    = mEventManager->returnTable_dst_mon_soft_tpc(nrows);
     
     mCurrentEvent->setSoftwareMonitor(new StSoftwareMonitor(dstSoftMonTpc,
+                                                            dstSoftMonSvt,
+                                                            dstSoftMonFtpc,
+                                                            dstSoftMonEmc,
+                                                            dstSoftMonCtb,
+	id = dstPrimaryTracks[i].id_start_vertex/10;
                                                             dstSoftMonGlobal,
-        vecPrimaryTracks[dstPrimaryTracks[i].id] = ptrack;
-        vecPrimaryVertexId[dstPrimaryTracks[i].id] = dstPrimaryTracks[i].id_start_vertex/10;
+                                                            dstSoftMonL3));
+    
     //
     //        Load trigger & trigger detector data
     //
-            ptrack->setDetectorInfo(ptrack->detectorInfo());
+    StSPtrVecTrackNode         &trackNodes   = mCurrentEvent->trackNodes();
     StSPtrVecV0Vertex          &v0Vertices   = mCurrentEvent->v0Vertices();
     StSPtrVecXiVertex          &xiVertices   = mCurrentEvent->xiVertices();
     StSPtrVecKinkVertex        &kinkVertices = mCurrentEvent->kinkVertices();
@@ -340,24 +345,40 @@ StEventMaker::makeEvent()
     //
     //  Create global tracks.
     //  Since the further setup depends on the id of the tracks
+    //  in dst_track we temporarily store the pointers in a vector
+    //  (vecGlobalTracks) sorted according to their dst_track::id.
+    //  This makes things a lot easier.
     //
     StGlobalTrack *gtrack = 0;
     dst_track_st *dstGlobalTracks = mEventManager->returnTable_dst_globtrk(nrows);
     maxId = dstPrimaryTracks ? max((long)dstPrimaryTracks[nrows-1].id, nrows) : 0;
+            ptrack->setDetectorInfo(vecGlobalTracks[id]->detectorInfo());
+
+    //
+		detectorInfo.push_back(info);
+	    }
 	    ptrack->setDetectorInfo(info);
     StVector(unsigned int)    vecPrimaryVertexId(maxId+1, 0U);
     nfailed = 0;
     
-        if (dstVertices[i].iflag == 1 && dstVertices[i].vtx_id == kEventVtxId) {
+    for (i=0; i<nrows; i++) {
         id = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!id) {
-                if (vecPrimaryTracks[k] &&
-                    vecPrimaryVertexId[k] == (unsigned int) dstVertices[i].id)
+            nfailed++;
+            continue;
         }
+        ptrack = new StPrimaryTrack(dstPrimaryTracks[i]);
+        vecPrimaryTracks[dstPrimaryTracks[i].id]   = ptrack;
     if (nfailed) 
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 			    << " primary tracks, no valid primary vertex found." << endm;
         if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
+            info = vecGlobalTracks[id]->detectorInfo();
+            //
+            //  Check if the existing detector info is still ok for the
+            //  primary track. If not we have to create a new one.
+            //  See also comments above on existing problems with this.
+            //
             StThreeVectorF firstPoint(dstPrimaryTracks[i].x_first);
 	k = 0;
 	id = dstDedx[i].id_track; 
@@ -426,7 +447,7 @@ StEventMaker::makeEvent()
 	else
 	    nfailed++;
     }
-        int  nfailed;
+    if (nfailed) 
 	gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
 			    << " Xi vertices, invalid foreign key to vertex table." << endm;
     if (nfailed)
@@ -784,7 +805,7 @@ StEventMaker::makeEvent()
              << (void*) mCurrentEvent->trackNodes()[0]                      << endl;
         cout << "---------------------------------------------------------" << endl;
         mCurrentEvent->trackNodes()[0]->Dump();
-    cout << "Dumping collection sizes and one hit only."                << endl;
+        for (i=0; i<mCurrentEvent->trackNodes()[0]->entries(); i++)
             printTrackInfo(mCurrentEvent->trackNodes()[0]->track(i));
 	 << mCurrentEvent->v0Vertices().size() << endl;
 
@@ -801,7 +822,7 @@ StEventMaker::makeEvent()
         cout << "# primary tracks in first element = "
              << mCurrentEvent->primaryVertex()->numberOfDaughters() << endl;
         cout << "---------------------------------------------------------" << endl;
-    cout << "Dumping collection sizes and one hit only."                << endl;
+	 << mCurrentEvent->xiVertices().size() << endl;
              << (void*) mCurrentEvent->primaryVertex()                      << endl;
         cout << "---------------------------------------------------------" << endl;
 	cout << "---------------------------------------------------------" << endl;
@@ -818,7 +839,7 @@ StEventMaker::makeEvent()
     
 	 << mCurrentEvent->kinkVertices().size() << endl;
         cout << "---------------------------------------------------------" << endl;
-    cout << "Dumping collection sizes and one hit only."                << endl;
+        cout << "StV0Vertex at "
 	cout << "---------------------------------------------------------" << endl;
 	cout << "StKinkVertex at "
 	     << (void*) mCurrentEvent->kinkVertices()[0]                    << endl;
