@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.2 1999/07/10 21:31:17 levine Exp $
+ * $Id: DetectorReader.cxx,v 1.3 1999/07/26 17:00:02 levine Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.3  1999/07/26 17:00:02  levine
+ * changes to RICH file organization
+ *
  * Revision 1.2  1999/07/10 21:31:17  levine
  * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
  * Existing user code will not have to change any calls to TPC-like detector
@@ -109,7 +112,7 @@ RICH_Reader *getRICHReader(EventReader *er)
     pRICP->header.CRC = 0;
     return new RICH_Reader(er,pRICP);
   }
-  return FALSE;
+  return NULL;
 }
 
 EMC_Reader *getEMCReader(EventReader *er)

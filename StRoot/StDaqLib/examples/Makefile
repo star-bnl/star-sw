@@ -13,8 +13,8 @@ FTPC_DIR = ../FTPC
 RICH_DIR = ../RICH
 TRG_DIR  = ../TRG
 
-client:	client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o 
-	g++ $(CFLAGS) client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o  TPCV1P0.Banks.o TPCV2P0.Banks.o swaps.o  -o client
+client:	client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o
+	g++ $(CFLAGS) client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o  TPCV1P0.Banks.o TPCV2P0.Banks.o swaps.o RICH_Reader.o  -o client
 
 client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh
 	g++ $(CFLAGS) -c client.cxx
@@ -66,6 +66,9 @@ TPCV2P0_CPP_SR.o:	$(IFACE_DIR)/EventReader.hh $(TPC_DIR)/TPCV2P0.hh $(TPC_DIR)/T
 
 TPCV2P0.Banks.o:	$(IFACE_DIR)/RecHeaderFormats.hh $(TPC_DIR)/TPCV2P0.Banks.hh $(TPC_DIR)/TPCV2P0.Banks.cxx
 	g++ $(CFLAGS) -c $(TPC_DIR)/TPCV2P0.Banks.cxx
+
+RICH_Reader.o:	$(RICH_DIR)/RICH_Reader.hh $(RICH_DIR)/RICH_Reader.cxx
+	g++ $(CFLAGS) -c $(RICH_DIR)/RICH_Reader.cxx
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
