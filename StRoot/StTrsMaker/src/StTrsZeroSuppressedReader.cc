@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.8 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.9 2003/09/19 22:17:50 jecc Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.9  2003/09/19 22:17:50  jecc
+ * Fix bug in getSequences intruced during gcc 3.2 updates
+ *
  * Revision 1.8  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -206,7 +209,7 @@ int StTrsZeroSuppressedReader::getSequences(int PadRow, int Pad, int *nSeq, Sequ
 	digitalTimeBinIterator rangeEnd = find(rangeBegin, TrsPadData->end(), static_cast<unsigned char>(0));
 	int length=0;
 //VP	distance(rangeBegin,rangeEnd,length);
-        length=rangeBegin-rangeEnd;
+        length=rangeEnd-rangeBegin;
 	if (length){
 	    Sequence aSequence;
 	    aSequence.startTimeBin = currentTimeBin;
