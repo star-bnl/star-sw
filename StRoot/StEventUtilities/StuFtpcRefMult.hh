@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StuFtpcRefMult.hh,v 1.3 2003/12/04 03:55:08 perev Exp $
+ * $Id: StuFtpcRefMult.hh,v 1.4 2004/02/06 15:04:25 putschke Exp $
  ***************************************************************************
  *
  * Description:
@@ -32,6 +32,9 @@
  *
  **************************************************************************
  * $Log: StuFtpcRefMult.hh,v $
+ * Revision 1.4  2004/02/06 15:04:25  putschke
+ * Update and fix multiplicity cuts
+ *
  * Revision 1.3  2003/12/04 03:55:08  perev
  * Simplify code for compiler
  *
@@ -131,7 +134,7 @@ uncorrectedBinOfFtpcEastCentrality(StEvent& evt)
 
   size_t countedTracks = uncorrectedNumberOfFtpcEastPrimaries(evt);
 
-  unsigned int cent[] = {0,12,18};
+  unsigned int cent[] = {0,10,17};
   if (countedTracks!=9999)
     {
       if (countedTracks < cent[1])       { return 1; }
