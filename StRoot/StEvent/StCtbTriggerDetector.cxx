@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.cxx,v 2.6 2002/11/19 20:21:00 ullrich Exp $
+ * $Id: StCtbTriggerDetector.cxx,v 2.7 2002/11/19 22:09:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.cxx,v $
+ * Revision 2.7  2002/11/19 22:09:08  ullrich
+ * Corrected bug: loop in mips() was off by one.
+ *
  * Revision 2.6  2002/11/19 20:21:00  ullrich
  * Added method to sum all mips.
  *
@@ -32,7 +35,7 @@
 #include "StCtbTriggerDetector.h"
 #include "tables/St_dst_TrgDet_Table.h"
 
-static const char rcsid[] = "$Id: StCtbTriggerDetector.cxx,v 2.6 2002/11/19 20:21:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StCtbTriggerDetector.cxx,v 2.7 2002/11/19 22:09:08 ullrich Exp $";
 
 ClassImp(StCtbTriggerDetector)
 
@@ -99,8 +102,8 @@ double
 StCtbTriggerDetector::mips(unsigned int evt) const
 {
     double sum = 0;
-    for (unsigned int i=1; i<mMaxTrays; i++) 
-	for (unsigned int j=1; j<mMaxSlats; j++)
+    for (unsigned int i=0; i<mMaxTrays; i++) 
+	for (unsigned int j=0; j<mMaxSlats; j++)
 	    sum += mMips[i][j][evt];
     return sum;
 }
