@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.6 1998/04/22 20:02:19 didenko Exp $
+* $Id: tpt_make_segment_uv.F,v 1.7 1998/09/01 13:32:36 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.7  1998/09/01 13:32:36  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.6  1998/04/22 20:02:19  didenko
 * replacing real to float
 *
@@ -59,6 +62,7 @@ C______________________________________________________________________
 
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/      tpar(*)
+
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
 
@@ -66,21 +70,29 @@ C______________________________________________________________________
 C______________________________________________________________________
 C
 C     Local variables
-      INTEGER ntrk,ir1,irlast,isect,nfound,iret,ip
-      INTEGER irow_last,irow_start,irow_step,ngap,isec1
-      INTEGER tgc_row_par
+      INTEGER ntrk,ir1,irlast,nfound,iret,ip
+      INTEGER irow_last,irow_start,irow_step,ngap
+      INTEGER isec1, isect, isect_trunc
+
       INTEGER ns,nf,drow,i,nh1,ilc,lsec
-      INTEGER tpt_fit_track,tpt_ptcrs_uv_p,tte_skip
+
+      INTEGER tpt_fit_track, tpt_ptcrs_uv_p,tte_skip
+      INTEGER tpt_find_slic, irets, tpt_fit_uv,i_s, tpt_fit_sz
+
       INTEGER islic,is_pnt,ipass
       INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
-      INTEGER tpt_find_slic, irets, tpt_fit_uv,i_s, tpt_fit_sz
-      real    xglobal(3), dummy
-      integer tgc_global_to_sector
+
+      INTEGER tgc_global_to_sector
+      INTEGER tgc_sec24_to_sec12
+      INTEGER tgc_row_par
+
       REAL    as,bs,xp1,yp1,xp(2),yp(2),xlast,ylast,zlast
       REAL    zp1,sr1,dis0,dy,dx,dz,dfir,tolr2,disr2,dist1,dist2,fact
       REAL    at,bt,az,bz,stot
       REAL    phi,x0,y0,rc,da,ds
+      REAL    xglobal(3), dummy
+
       LOGICAL sector_change
       
 
@@ -88,8 +100,9 @@ C     Find what was the innermost row number and continue the search
 C     towards the inside of the chamber
       irow_start = mod(hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row,100)-1
       isect      = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
+      iret       = tgc_sec24_to_sec12(isect,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
-      irow_step = -1
+      irow_step  = -1
 C
 C
 
@@ -131,7 +144,7 @@ C
          do while (ns.eq.0)
 C           find what is the parametrisation for the row ir1 in 
 C           sector isect
-            iret = tgc_row_par(isect,float(ir1),as,bs,dummy,dummy)
+            iret = tgc_row_par(isect_trunc,float(ir1),as,bs,dummy,dummy)
 C           find what is the prediction for this row
             iret = tpt_ptcrs_uv_p(as,bs,-1.0,at,bt,x0,y0,xp,yp)
 C           check whether there is a crossing point
@@ -148,7 +161,7 @@ C              find which solution is closer
                xglobal(3)=10.0
 C              and check whether it lies in the same sector
                iret = tgc_global_to_sector(isec1,xglobal)
-               if(isect.eq.isec1) then
+               if(isect_trunc.eq.isec1) then
                   ns=1
                else
                   ns=0
@@ -162,7 +175,7 @@ C              and check whether it lies in the same sector
 C              try to look into other sectors, find crossings with the 
 C	       boundaries and find which boundary is closer
                sector_change=.true.
-               lsec=15-isect
+               lsec=15-isect_trunc
                if(lsec.ge.12) lsec=lsec-12
                phi=float(lsec)*C_PI/6.0+C_PI/12.0
                dist1=-1.0
@@ -185,13 +198,13 @@ C	       boundaries and find which boundary is closer
                endif
                if(dist1.gt.0.and.dist2.gt.0.and.dist1.lt.dist2.or.
      >         dist1.gt.0.and.dist2.lt.0) then
-                      isec1=isect-1
+                      isec1=isect_trunc-1
                       if(isec1.eq.0)isec1=12
-                      isect=isec1
+                      isect_trunc=isec1
                else if(dist2.gt.0) then
-                      isec1=isect+1
+                      isec1=isect_trunc+1
                       if(isec1.eq.13)isec1=1
-                      isect=isec1
+                      isect_trunc=isec1
                else
                       ns=-1
                endif
@@ -213,12 +226,12 @@ C          prediction in the same sector, find 3 adjacent z-slices
            irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
 C
 C          check there are hits here
-           is_pnt = slice_loc(isect,ir1,islic)
+           is_pnt = slice_loc(isect_trunc,ir1,islic)
            nh1 = slice_pnt(2,is_pnt)
            if( nh1 .ne. 0 ) then
              dis0 = 10000000.0
 
-             is_pnt = slice_loc(isect,ir1,islic) 
+             is_pnt = slice_loc(isect_trunc,ir1,islic) 
              i = slice_pnt(1,is_pnt)
              do ilc = 1,slice_pnt(2,is_pnt)
                if(hit(i).track.eq.0) then

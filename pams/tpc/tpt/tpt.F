@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.11 1998/06/01 03:15:22 sakrejda Exp $
+* $Id: tpt.F,v 1.12 1998/09/01 13:32:33 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.12  1998/09/01 13:32:33  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.11  1998/06/01 03:15:22  sakrejda
 * inconsistency in calls to message fixed, TPT-I3 replaced by TPTI3-E1
 *
@@ -74,13 +77,12 @@ C             to row/sec field
 C             tpstart -pointer to the first hit in the row/sector
       INTEGER tpcount(mxrow,mxsector)
 C             tpcount -# of hits in a given row/sector
-      INTEGER tls_Index_Sort_i
-C             sort hits in the TPC table according to row/sec field
+
       INTEGER tpt_row_sect_pnt 
-      INTEGER tgc_sec24_to_sec12
       INTEGER tpt_form_segments
       INTEGER tpt_extend_segments
       INTEGER tpt_merge_segments
+
       INTEGER iret  !scratch integer
       INTEGER i,ipass
       INTEGER slice_loc(mxsector,mxrow,mxslic)
@@ -88,9 +90,6 @@ C             sort hits in the TPC table according to row/sec field
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic),last_track
       REAL    time_now,time_all
       REAL    time_sort,time_seguv,time_seg,time_ext,time_merge
-      real    xglobal(3)
-      integer tgc_global_to_sector
-      integer isec2, isec3, isect
 c
 c     message-related variables
       character*132 m132(5)  ! And some message-generating space.
@@ -147,33 +146,7 @@ c
       do i=1,hit_h.nok
 C        preset all the hit(i).track to 0
          hit(i).track=0
-C        clean up sector assignement.
-         xglobal(1)=hit(i).x
-         xglobal(2)=hit(i).y
-         xglobal(3)=hit(i).z
-c        check what xy and z says about the sector.
-         iret=tgc_global_to_sector(isec2,xglobal)
-         isec3=int(hit(i).row/100)
-         if(isec3.ne.isec2) then
-           write(m132,*) 'TPTI1-E1 sector missmatch',isec3,isec2,xglobal
-           call message(m132,1,idI1)
-           isec3=isec2
-         endif
-         iret=tgc_sec24_to_sec12(isec3,isect)
-         hit(i).row=isect*100+mod(hit(i).row,100)
       end do
-c
-      if(hit_h.nok.eq.1)then
-c       if there is just one hit, sorting routine has problems,
-c       so deal with it separately
-        loc_hit(1)=1
-      else
-        iret=tls_Index_Sort_i(hit_h.nok,hit(1).row,hit(2).row,loc_hit,
-     >  tpt_mxhit)
-      endif
-      call timed(time_now)
-      time_all = time_all + time_now
-      time_sort = time_now
 c
 c     Set up tables so that hit could be found within rows and sectors.
       iret=tpt_row_sect_pnt(hit_h,hit,loc_hit,tpstart,tpcount,

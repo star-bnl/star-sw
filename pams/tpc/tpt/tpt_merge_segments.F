@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.6 1998/07/07 14:27:26 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.7 1998/09/01 13:32:37 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.7  1998/09/01 13:32:37  sakrejda
+* restored sector numbering 1-24 in tphit.row
+*
 * Revision 1.6  1998/07/07 14:27:26  sakrejda
 * tracks, hits, id defined as integers
 *
@@ -63,7 +66,7 @@ C_________________________________________________________________
       INTEGER tracks,hits,id
       REAL    dis,min(5),cuta,cutb
       INTEGER firsti,lasti,firstj,lastj
-      INTEGER hipnt,lowpnt,isort,ipoint,itrack,ips,isect
+      INTEGER hipnt,lowpnt,isort,ipoint,itrack,ips
       INTEGER rfifj,rfilj,rlifj,rlilj,rowdiff
       INTEGER rfi,rli,rfj,rlj,mpnt,ncount
       REAL    xfi,yfi,zfi,xli,yli,zli
@@ -176,23 +179,19 @@ c                 assign rows and coords.
                   xfi = hit(firsti).x
                   yfi = hit(firsti).y
                   zfi = hit(firsti).z
-                  isect = hit(firsti).row/100
-                  rfi = hit(firsti).row-isect*100
+                  rfi = mod(hit(firsti).row,100)
                   xli = hit(lasti).x
                   yli = hit(lasti).y
                   zli = hit(lasti).z
-                  isect = hit(lasti).row/100
-                  rli = hit(lasti).row-isect*100
+                  rli = mod(hit(lasti).row,100)
                   xfj = hit(firstj).x
                   yfj = hit(firstj).y
                   zfj = hit(firstj).z
-                  isect = hit(firstj).row/100
-                  rfj = hit(firstj).row-isect*100
+                  rfj = mod(hit(firstj).row,100)
                   xlj = hit(lastj).x
                   ylj = hit(lastj).y
                   zlj = hit(lastj).z
-                  isect = hit(lastj).row/100
-                  rlj = hit(lastj).row-isect*100
+                  rlj = mod(hit(lastj).row,100)
 
 c                 Compute the distances and row differences
 c                 between endpoints.
