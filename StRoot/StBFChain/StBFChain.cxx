@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.264 2002/01/31 23:20:27 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.265 2002/02/02 22:53:38 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -115,10 +115,8 @@ Bfc_st BFC[] = {
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains -- Experimental ; will follow P2001* chains model
-  {"BPP2001"     ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
-                                                      ,"pp Base chain for 2001 (tpc+rhic, no tags)",kFALSE},
   {"pp2001"      ,""  ,"",
-   "pp,BPP2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "pp,B2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13",
    "",""                                                                                 ,"pp 2001",kFALSE},
 
 
