@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.8 2003/09/12 21:54:53 jeromel Exp $
+ * $Id: StEmcDetector.cxx,v 2.9 2003/09/12 22:00:57 jeromel Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.9  2003/09/12 22:00:57  jeromel
+ * Forgot the void
+ *
  * Revision 2.8  2003/09/12 21:54:53  jeromel
  * Zeroing
  *
@@ -40,7 +43,7 @@
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.8 2003/09/12 21:54:53 jeromel Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.9 2003/09/12 22:00:57 jeromel Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -66,6 +69,7 @@ StEmcDetector::~StEmcDetector()
     if (mClusters) delete mClusters;
 }
 
+void
 StEmcDetector::Zero()
 {
   for(int i=0; i<120;i++) mModules[i] = 0;
