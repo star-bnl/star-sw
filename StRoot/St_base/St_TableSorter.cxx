@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.cxx,v 1.25 2000/01/12 01:24:52 fine Exp $
+// $Id: St_TableSorter.cxx,v 1.26 2000/01/12 02:19:20 fine Exp $
 
 #include <stdlib.h> 
 #include "St_TableSorter.h"
@@ -73,7 +73,7 @@ static const St_Table &dummyTable = *dummy;
 ClassImp(St_TableSorter)
 //_____________________________________________________________________________
 //St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(*((const St_Table *)0))
-St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(dummyTable)
+St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(0)
 {
   // default ctor for RootCint dictionary
   m_LastFound    = -1;
@@ -86,7 +86,7 @@ St_TableSorter::St_TableSorter() : m_simpleArray(0),m_ParentTable(dummyTable)
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const table_head_st *header, TString &colName, Int_t firstRow
                                ,Int_t numberRows):
-                              m_simpleArray(0),m_ParentTable(*((St_Table *)header->dsl_pointer))
+                              m_simpleArray(0),m_ParentTable((St_Table *)header->dsl_pointer)
 {
   //
   // St_TableSorter ctor sort the input table define dby header along its column defined 
@@ -104,6 +104,23 @@ BuildSorter(colName, firstRow, numberRows); }
 
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t firstRow
+                               ,Int_t numberRows):m_simpleArray(0),m_ParentTable(&table)
+{
+  //
+  // St_TableSorter ctor sort the input table along its column defined with colName
+  //
+  //    - colName    - may be followed by the square brackets with integer number inside, 
+  //                   if that columm is an array (for example "phys[3]").
+  //                   NO expression inside of [], only a single integer number allowed !
+  //    - firstRow   - the first table row to sort from (=0 by default)
+  //    - numberRows - the number of the table rows to sort (=0 by default)
+  //                   = 0 means sort all rows from the "firstRow" by the end of table
+  //
+ BuildSorter(colName, firstRow, numberRows); 
+}
+
+//_____________________________________________________________________________
+St_TableSorter::St_TableSorter(const St_Table *table, TString &colName,Int_t firstRow
                                ,Int_t numberRows):m_simpleArray(0),m_ParentTable(table)
 {
   //
@@ -133,12 +150,14 @@ void St_TableSorter::BuildSorter(TString &colName, Int_t firstRow, Int_t numberR
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
 
+  assert(m_ParentTable!=0);
+
   m_LastFound    = -1;
   m_numberOfRows = 0;
   m_colType      = kNAN;
   m_simpleArray  = 0;
 
-  TString n = m_ParentTable.GetName();
+  TString n = m_ParentTable->GetName();
   n += ".";
   n += colName;
   SetName(n);
@@ -152,10 +171,10 @@ void St_TableSorter::BuildSorter(TString &colName, Int_t firstRow, Int_t numberR
   name = StrDup(colName.Data());
 
   // check bounds:
-  if (firstRow > m_ParentTable.GetNRows()) { MakeZombie(); return; }
+  if (firstRow > m_ParentTable->GetNRows()) { MakeZombie(); return; }
   m_firstRow = firstRow;
 
-  m_numberOfRows = m_ParentTable.GetNRows()- m_firstRow;
+  m_numberOfRows = m_ParentTable->GetNRows()- m_firstRow;
   if (numberRows > 0)  m_numberOfRows = TMath::Min(numberRows,m_numberOfRows);
 
   // Allocate index array
@@ -205,7 +224,7 @@ void St_TableSorter::BuildSorter(TString &colName, Int_t firstRow, Int_t numberR
 St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow
                                ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(dummyTable)
+                               ,m_ParentTable(0)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -240,7 +259,7 @@ St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_
 St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow
                                ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(dummyTable)
+                               ,m_ParentTable(0)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -275,7 +294,7 @@ St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int
 St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow
                                ,Int_t numberRows)
                                :m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(dummyTable)
+                               ,m_ParentTable(0)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -497,8 +516,8 @@ Int_t St_TableSorter::BSearch(const void *value) const {
         // calculate index:
        if (!m_simpleArray) 
           index =  m_firstRow + 
-                   (res - (((const Char_t *)m_ParentTable.At(m_firstRow))+ m_colOffset))
-                  /m_ParentTable.GetRowSize();
+                   (res - (((const Char_t *)m_ParentTable->At(m_firstRow))+ m_colOffset))
+                  /m_ParentTable->GetRowSize();
        else
          index = ULong_t(res) - ULong_t(m_simpleArray)/m_colSize;
     }
@@ -517,7 +536,7 @@ Int_t St_TableSorter::GetIndex(UInt_t sortedIndex) const
          const Char_t *res = (const Char_t *)p;
          // calculate index:
        if (!m_simpleArray) 
-         indx = m_firstRow + (res - (((const Char_t *)m_ParentTable.At(m_firstRow)) + m_colOffset))/m_ParentTable.GetRowSize();
+         indx = m_firstRow + (res - (((const Char_t *)m_ParentTable->At(m_firstRow)) + m_colOffset))/m_ParentTable->GetRowSize();
        else
          indx = (ULong_t(res) - ULong_t(m_simpleArray))/m_colSize;
      }
@@ -600,7 +619,7 @@ Int_t St_TableSorter::CountKeys() const
 void St_TableSorter::FillIndexArray(){
   if (!m_SortIndex) return;
   for (Int_t i=m_firstRow; i < m_firstRow+m_numberOfRows;i++) 
-           m_SortIndex[i-m_firstRow] = ((Char_t *)(m_ParentTable.At(i))) + m_colOffset;
+           m_SortIndex[i-m_firstRow] = ((Char_t *)(m_ParentTable->At(i))) + m_colOffset;
  
 }
 //_____________________________________________________________________________
@@ -630,13 +649,18 @@ Int_t St_TableSorter::FindFirstKey(const void *key) const
   return indx;
 }
 //_____________________________________________________________________________
-const Text_t * St_TableSorter::GetTableName() const { return m_ParentTable.GetName();}
+const Text_t * St_TableSorter::GetTableName() const {
+  return m_ParentTable ? m_ParentTable->GetName():"";
+}
 //_____________________________________________________________________________
-const Text_t * St_TableSorter::GetTableTitle() const { return m_ParentTable.GetTitle();}
+const Text_t * St_TableSorter::GetTableTitle() const {
+ return m_ParentTable ? m_ParentTable->GetTitle():"";}
 //_____________________________________________________________________________
-const Text_t * St_TableSorter::GetTableType() const { return m_ParentTable.GetType();}
+const Text_t * St_TableSorter::GetTableType() const {
+ return m_ParentTable ? m_ParentTable->GetType():"";
+}
 //_____________________________________________________________________________
-St_Table *St_TableSorter::GetTable() const { return (St_Table *)&m_ParentTable;}
+St_Table *St_TableSorter::GetTable() const { return (St_Table *)m_ParentTable;}
 
 //_____________________________________________________________________________
 void  St_TableSorter::SetSearchMethod()
@@ -735,7 +759,7 @@ void St_TableSorter::LearnTable()
 //  buildTree - if kTRUE, then add TBranches to the TTree for each table
 //              column (default=kFALSE)
 //
-  TClass *classPtr = m_ParentTable.GetRowClass();
+  TClass *classPtr = m_ParentTable->GetRowClass();
   if (!classPtr) return;
 
   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
@@ -782,7 +806,7 @@ void St_TableSorter::LearnTable()
       // Check dimensions
         if (dim != m_colDimensions) {
            Error("LearnTable","Wrong dimension");
-           St_Table *t = (St_Table *)&m_ParentTable;
+           St_Table *t = (St_Table *)m_ParentTable;
            t->Print();
            return;
         }
@@ -829,6 +853,9 @@ void St_TableSorter::ShowMembers(TMemberInspector &R__insp, char *R__parent)
 //______________________________________________________________________________
 //______________________________________________________________________________
 // $Log: St_TableSorter.cxx,v $
+// Revision 1.26  2000/01/12 02:19:20  fine
+// new ctor with a pointer to St_Table provided, internal ref to St_Table has been replaced with a regular pointer
+//
 // Revision 1.25  2000/01/12 01:24:52  fine
 // several methods to use St_Table class from the <converted> C program to C++
 //
