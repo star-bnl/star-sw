@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.12 2000/07/23 13:52:56 laue Exp $
+ * $Id: StHbtParticle.cc,v 1.13 2000/08/31 22:31:31 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,13 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.13  2000/08/31 22:31:31  laue
+ * StHbtAnalysis: output changed (a little bit less)
+ * StHbtEvent: new version, members for reference mult added
+ * StHbtIOBinary: new IO for new StHbtEvent version
+ * StHbtTypes: TTree typedef to StHbtTTree added
+ * StHbtVertexAnalysis: overflow and underflow added
+ *
  * Revision 1.12  2000/07/23 13:52:56  laue
  * NominalExitPoint set to (-9999.,-9999.-9999.) if helix.at()
  * returns nan (not a number).
@@ -62,7 +69,11 @@
 
 #include "StHbtMaker/Infrastructure/StHbtParticle.hh"
 #include "math_constants.h"
-#include "cmath"
+#ifdef __CC5__
+  #include <math.h>
+#else
+  #include <cmath>
+#endif
 //_____________________
 StHbtParticle::StHbtParticle() : mTrack(0), mV0(0) {
   /* no-op for default */
