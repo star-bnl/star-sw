@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EETowTrackMatchMaker
 #define STAR_EETowTrackMatchMaker
-// $Id: EEmcTTMMaker.h,v 1.4 2004/01/14 22:59:02 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.5 2004/01/19 22:07:51 zolnie Exp $
 
 /*!
  *                                                                     
@@ -158,6 +158,7 @@ public:
 
   static  Bool_t  ExtrapolateToZ    ( const StMuTrack *track , const double  z, TVector3 &r); 
 
+
   // control histograms for tracks
   TH1F *hTrackNHits; /**<- phi factor */
   TH1F *hTrackLen;   /**<- phi factor */
@@ -190,7 +191,7 @@ public:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.4 2004/01/14 22:59:02 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.5 2004/01/19 22:07:51 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -204,6 +205,9 @@ ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm);
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.5  2004/01/19 22:07:51  zolnie
+// toward track/tower display
+//
 // Revision 1.4  2004/01/14 22:59:02  zolnie
 // use doxygen for documentation
 //

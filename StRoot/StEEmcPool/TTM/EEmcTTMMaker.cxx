@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.4 2004/01/14 22:59:02 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.5 2004/01/19 22:07:50 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -61,7 +61,6 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
-
 
 #include "EETowTrackMatchMaker.h"
 
@@ -242,6 +241,8 @@ EETowTrackMatchMaker::Init(){
   hTrackDCA[2]  = new TH1F("hTrackDCAZ" , "z_vtxdca [cm]"     ,200,  -5.0,  5.0);
 
   mFile->cd("");
+
+  
   
   return StMaker::Init();
 }
@@ -259,7 +260,7 @@ EETowTrackMatchMaker::Make(){
   map<double,TString>::const_iterator zpos=mZ.begin();
   for(unsigned int k=0; zpos!=mZ.end() && k< kNTupleTTM_MaxZ ; ++zpos,k++)  mMatch->zpos[k]=zpos->first;
 
-  StMuDst   *muDst  = mMuDstMaker->muDst();   // get pointer to _the_ _data_
+  StMuDst    *muDst  = mMuDstMaker->muDst();   // get pointer to _the_ _data_
 
   // sanity checks
   if(muDst==NULL) { 
@@ -353,7 +354,6 @@ EETowTrackMatchMaker::Make(){
       TVector3 r(0.0,0.0,0.0);
       
       bool matched=false;
-      // REMOVE IT LATER
 
       zpos=mZ.begin();
       for(unsigned int k=0; zpos!=mZ.end() ; ++zpos,k++) { 
@@ -370,6 +370,7 @@ EETowTrackMatchMaker::Make(){
 	matched=true;
       }
       if(!matched) continue;
+
 
       mMatch->sector[ntrack]=sec;
       mMatch->subsec[ntrack]=sub;
@@ -392,7 +393,6 @@ EETowTrackMatchMaker::Make(){
       ntrack++;       
     }
   }
-
 
   mNMatched += ntrack;
   if(0<ntrack && ntrack<kNTupleTTM_MaxTracks)  mTree->Fill();
@@ -523,6 +523,9 @@ ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm)  {
 };
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.5  2004/01/19 22:07:50  zolnie
+// toward track/tower display
+//
 // Revision 1.4  2004/01/14 22:59:02  zolnie
 // use doxygen for documentation
 //
