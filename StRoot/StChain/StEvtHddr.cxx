@@ -46,6 +46,14 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
    mEventTime.Set(dat,tim);
 }
 //_____________________________________________________________________________
+  void  StEvtHddr::SetProdDateTime(UInt_t ut)
+{
+   TUnixTime unixTime(ut);
+   Int_t dat=0,tim=0;
+   unixTime.GetGTime(dat,tim);
+   mProdTime.Set(dat,tim);
+}
+//_____________________________________________________________________________
   UInt_t StEvtHddr::GetUTime() 	  const 
 {
     TUnixTime unixTime;
