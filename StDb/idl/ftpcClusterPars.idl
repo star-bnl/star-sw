@@ -35,4 +35,12 @@
 
        // run parameters
      float normalizedNowPressure;   /* normalized air pressure (in hPa) */
+     float adjustedAirPressureWest;  /* temperature adjusted air pressure for FTPC West */
+     float adjustedAirPressureEast;  /* temperature adjusted air pressure for FTPC East */
+     float minPressure;             /* minimum air pressure   */
+     float maxPressure;             /* maximum air pressure   */
+     float gasTemperatureWest;      /* temperature of gas in FTPC West */
+     float gasTemperatureEast;      /* temperature of gas in FTPC East */
+     float minGasTemperature;       /* minimum gas temperature  */
+     float maxGasTemperature;       /* maximum gas temperature  */
    };
