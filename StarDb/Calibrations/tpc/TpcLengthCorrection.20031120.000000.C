@@ -1,71 +1,73 @@
 TDataSet *CreateTable() { 
   if (!gROOT->GetClass("St_tpcCorrection")) return 0;
   tpcCorrection_st row;
-  St_tpcCorrection *tableSet = new St_tpcCorrection("TpcLengthCorrection",7);
-  memset(&row,0,tableSet->GetRowSize()); // versus Log(TrackLength) !
-  row.npar       =         -10;//Track lenths instead of log
-  row.min        =          10.;// TPoints70BGPHist720P04idA
-  row.max        =         135.;//FCN=724.888
-  row.a[0]	 = -7.32844e-02;//
-  row.a[1]	 =  8.42658e-03;//
-  row.a[2]	 = -1.39246e-03;//
-  row.a[3]	 =  9.17962e-05;//
-  row.a[4]	 = -3.09899e-06;//
-  row.a[5]	 =  6.01328e-08;//
-  row.a[6]	 = -6.98954e-10;//
-  row.a[7]	 =  4.81430e-12;//
-  row.a[8]	 = -1.81413e-14;//
-  row.a[9]	 =  2.88416e-17;//
-  tableSet->AddAt(&row,0);// 0 -> I70
-  memset(&row,0,tableSet->GetRowSize()); 
-  row.npar       =            6;//TPoints70BGPHist720P04idA
-  row.min        =          2.3;
-  row.max        =          5.0;
-  row.a[0]	 =  1.45305e+00; 
-  row.a[1]	 = -1.08117e+00;
-  row.a[2]	 =  2.41527e-01;
-  row.a[3]	 =  2.35459e-02;
-  row.a[4]	 = -1.52450e-02;
-  row.a[5]	 =  1.46365e-03;
-  tableSet->AddAt(&row,1);// 1 -> sigma.I70
-  memset(&row,0,tableSet->GetRowSize()); 
-  tableSet->AddAt(&row,2);// 2 -> I60
-  memset(&row,0,tableSet->GetRowSize()); 
-  tableSet->AddAt(&row,3);// 3 -> sigma.I60
-  memset(&row,0,tableSet->GetRowSize()); 
-  row.npar       =         -10;//Track lenths instead of log
-  row.min        =          10.;// TPointsBGPHist720P04idA
-  row.max        =         135.;//FCN=724.888
-  row.a[0]	 = -0.315464   ;//+TPointsBGPHist721P04idA  -3.07085e-01;//
-  row.a[1]	 =  0.0596776  ;//			     5.91617e-02;//
-  row.a[2]	 = -0.00600138 ;//			    -5.99748e-03;//
-  row.a[3]	 =  0.00030971 ;//			     3.09710e-04;//
-  row.a[4]	 = -9.11011e-06;//			    -9.11011e-06;//
-  row.a[5]	 =  1.62172e-07;//			     1.62172e-07;//
-  row.a[6]	 = -1.78017e-09;//			    -1.78017e-09;//
-  row.a[7]	 =  1.17849e-11;//			     1.17849e-11;//
-  row.a[8]	 = -4.31545e-14;//			    -4.31545e-14;//
-  row.a[9]	 =  6.71447e-17;//			     6.71447e-17;//
-  tableSet->AddAt(&row,4);// 4 -> I      
-  memset(&row,0,tableSet->GetRowSize()); 
-  row.npar       =            6;//TPointsBGPHist720P04idA
-  row.min        =          2.3;
-  row.max        =          5.0;
-  row.a[0]	 =  1.36517e+01; 
-  row.a[1]	 = -1.86623e+01;
-  row.a[2]	 =  1.02143e+01;
-  row.a[3]	 = -2.76073e+00;
-  row.a[4]	 =  3.67777e-01;
-  row.a[5]	 = -1.93335e-02;
-  tableSet->AddAt(&row,5);// 5 -> sigma.I
-  memset(&row,0,tableSet->GetRowSize()); 
-  row.npar       =            3;//TPoints70BGPHist721P04idA
-  row.min        =          2.3;
-  row.max        =          5.0;
-  row.a[0]	 = -6.45232e-02; 
-  row.a[1]	 =  3.30027e-02;
-  row.a[2]	 = -3.70043e-03;
-  tableSet->AddAt(&row,6);// 6 extra I70
-   // ----------------- end of code ---------------
+  St_tpcCorrection *tableSet = new St_tpcCorrection("TpcLengthCorrection",6);
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  row.npar       =         -10;//Track lenths instead of log TPoints70BGPHist845P04ifAuAu200
+  row.min        =          10.;//  default clustering == fcf                     
+  row.max        =         125.;//                         
+  row.a[0]	 = -3.48822e-01;//
+  row.a[1]	 =  8.50199e-02;//
+  row.a[2]	 = -7.84861e-03;//
+  row.a[3]	 =  3.74962e-04;//
+  row.a[4]	 = -1.05833e-05;//
+  row.a[5]	 =  1.86272e-07;//
+  row.a[6]	 = -2.06527e-09;//
+  row.a[7]	 =  1.40134e-11;//
+  row.a[8]	 = -5.31214e-14;//
+  row.a[9]	 =  8.61426e-17;//
+  tableSet->AddAt(&row);// 0 -> I70
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  row.npar       =            4;//TPoints70BGPHist846P04ifAuAu200A
+  row.a[0]	 =  4.41195e-01; 
+  row.a[1]	 = -1.35098e-01;
+  row.a[2]	 =  1.30491e-02;
+  row.a[3]	 = -3.00213e-04;
+  tableSet->AddAt(&row);// 1 -> sigma.I70
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 2 -> I60
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 3 -> sigma.I60
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  row.npar       =         -10;//Track lenths instead of log TPointsBGPHist845P04ifAuAu200
+  row.min        =          10.;//  default clustering == fcf                     
+  row.max        =         125.;//                         
+  row.a[0]	 = -7.68754e-01;//
+  row.a[1]	 =  1.59538e-01;//
+  row.a[2]	 = -1.34980e-02;//
+  row.a[3]	 =  6.11862e-04;//
+  row.a[4]	 = -1.66460e-05;//
+  row.a[5]	 =  2.84866e-07;//
+  row.a[6]	 = -3.08864e-09;//
+  row.a[7]	 =  2.05777e-11;//
+  row.a[8]	 = -7.68203e-14;//
+  row.a[9]	 =  1.22955e-16;//
+  tableSet->AddAt(&row);// 4 -> I
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  row.npar       =            6;//TPointsBGPHist845P04ifAuAu200
+  row.a[0]	 =  5.55266e+00; 
+  row.a[1]	 = -7.41100e+00;
+  row.a[2]	 =  4.07830e+00;
+  row.a[3]	 = -1.11718e+00;
+  row.a[4]	 =  1.51133e-01;
+  row.a[5]	 = -8.06903e-03;
+  tableSet->AddAt(&row);// 5 -> sigma.I
+#if 0
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 6 -> I70
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 7 -> sigma.I70
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 8 -> I60
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 9 -> sigma.I60
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 10 -> I70 extra correction for old clustering
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 11
+  memset(&row,0,tableSet->GetRowSize()); // 0
+  tableSet->AddAt(&row);// 12 -> I extra correction for old clustering
+#endif
+  // ----------------- end of code ---------------
   return (TDataSet *)tableSet;
 }
