@@ -169,9 +169,10 @@ if ( $pkg =~ m/^StEventDisplay/){
 
 # This block can be used for ANY maker having a 2 level
 # directory structure using auto-globbing
-} elsif ( $pkg =~ m/^StMuDSTMaker$/ ||
-	  $pkg =~ m/^StRichPool$/   ||
-	  $pkg =~ m/^StEmcUtil$/    ||
+} elsif ( $pkg =~ n/^StAssociationMaker$/ ||
+	  $pkg =~ m/^StEmcUtil$/          ||
+	  $pkg =~ m/^StMuDSTMaker$/       ||
+	  $pkg =~ m/^StRichPool$/         ||
 	  $pkg =~ m/^Sti/           ) {
     $CPPPATH = "#" . $Dir;
 
