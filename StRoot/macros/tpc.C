@@ -223,7 +223,7 @@ void tpc (const Int_t Nevents=1,
 #endif
 
 #ifdef MINIDAQ
-  StMagF         *field   = new StMagFC("field","STAR no field",0.);
+  StMagF         *field   = new StMagFC("field","STAR no field",0.00002);
   StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
   cout<<"initializing input for the tpc DB"<<endl;
   tpc_raw->SetInput("params","tpcdb:StDb/params"); 
