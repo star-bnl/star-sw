@@ -19,9 +19,9 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
       version  =  2        ! field version
       Bfield   =  B0       !  field value
       RmaxInn  = 264.265   !  Inner field volume radius
-      ZmaxInn  = 229.685   !  Inner field volume langth
+      ZmaxInn  = 312.500   !  Inner field volume length
       nrp      = 100       !  number of R nodes in the map
-      nzp      = 200       !  number of Z nodes in the map
+      nzp      = 400       !  number of Z nodes in the map
       zm       = 800.0     !  map max length
       rm       = 400.0     !  map max radius
       BBZ      = 0         !  axial field map
@@ -120,7 +120,7 @@ end
                 { int Nr, int Nz, int Np, RR(nr), ZZ(nz), PP(Np),
                   BBR(Nr,Nz), BBZ(Nr,Nz), BBP(Nr,Nz) }
       Complex   BBTOT,BSINTER,BBINTER,BBEXTER,zero/0/
-      Real      z, r, az, rm, d/0/,zmax/0/,rmax/0/
+      Real      z, r, az,rm,zm,wr,wz,w, d/0/,zmax/0/,rmax/0/
       Integer   Istat /0/
       logical   first /.true./
 *
@@ -138,8 +138,8 @@ end
       endif
 
       if   bfld_version<1    { BBTOT = zero; return  }
-*
-      az   = abs(z)  
+*     BBTOT = zero
+      az    = abs(z)  
       if mflg_version <= 2  
       {
         if      az<bfld_zz1    { BBTOT = BBINTER(az,r) }
@@ -149,14 +149,17 @@ end
      >                   (az-bfld_zz1)*BBEXTER(az,r))/d} 
       }
       else
-      { rm = min(r,rmax)    
-        if      az<bfld_zz1    { BBTOT = BSINTER(z,rm) }
-        elseif  az>bfld_zz2    { BBTOT = zero          }
-        elseif  az>zmax        { BBTOT = BBEXTER(az,r) }
-        elseif   R>rmax        { BBTOT = BBEXTER(az,r) }
-        else  { BBTOT = ((zmax-az)*BSINTER(z,rm)+(az-bfld_zz1)*BBEXTER(az,r))/
-     >                                     (zmax-bfld_zz1)} 
-      }
+      { 
+        if      az<zmax & r<rmax             { BBTOT = BSINTER(z,r) }
+        elseif  az>bfld_zz2                  { BBTOT = zero         }
+        elseif  az>bfld_zmaxx | r>bfld_rmaxx { BBTOT = BBEXTER(z,r) }
+        else   { wz = (az-zmax)/(bfld_zmaxx-zmax)
+                 wr = ( r-rmax)/(bfld_rmaxx-rmax)
+                 w  = min(max(0.,max(wz,wr)),1.)
+                 rm = min(r,rmax)    
+                 zm = sign(min(az,zmax),z)    
+                 BBTOT = (1-w)*BSINTER(zm,rm)+w*BBEXTER(z,r)
+      }        }
 
       BBTOT=BBTOT/1000.
       end
@@ -327,6 +330,7 @@ end
       wz  = (bdat_Zi-a)/(bdat_Zi-bdot_Zi)
       Br  = wz*Br1+(1-wz)*Br2      
       Bz  = wz*Bz1+(1-wz)*Bz2      
+      if (z<0) Br=-Br
       BBEXTER = cmplx(Bz,Br)
 
       if (Iprin>0) then
@@ -374,7 +378,7 @@ end
       BBZ = Real(BBTOT(abs(z),abs(r)))
       return
       entry      BRR(z,r)
-      x   = {0.,r,z};  call agufld(x,B);  BRR = B(2)
+      x   = {0.,r,z};  call agufld(x,B);  BRR = abs(B(2))
       return
       entry      BZZ(z,r)
       x   = {0.,r,z};  call agufld(x,B);  BZZ = B(3)

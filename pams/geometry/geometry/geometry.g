@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.46 2001/05/21 21:07:05 nevski Exp $
+* $Id: geometry.g,v 1.47 2001/05/22 17:40:47 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.47  2001/05/22 17:40:47  nevski
+* field find tuning
+*
 * Revision 1.46  2001/05/21 21:07:05  nevski
 * Steves field map added
 *
@@ -44,6 +47,7 @@
 *  12/04/98, PN: rich  + upstream part + zero degree calo                 *
 *  09/26/99, E.Cains: 1H geometry added - one svt ladder at layer 3       *
 *  01/27/99, PN: rich in 1H geometry is simulated with hits is quartz & fr*
+*  22.05.01, PN: starting with tag y2000 field is version 3 (direct map)  *
 ***************************************************************************
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
@@ -140,21 +144,21 @@ If LL>1
                   {vpdd,ecal,ftpc}=off;  {rich,ems,t1}=on;  Itof=1;
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;}
 
-  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
-*                 corrected: MWC readout, RICH reconstructed position, no TOF 
-                  {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5;
-                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7;        Nsi=-3;}
-
   on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                   {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
                   nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
 
+  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  nonf={3,0,0}        }
+  on COMPLETE   { Complete STAR geometry; Itof=2; tof=on; nonf={1,2,2}        }
+
+  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
+*                 corrected: MWC readout, RICH reconstructed position, no TOF 
+                  {vpdd,ecal,ftpc,svtw}=off; {rich,ems}=on; Field=2.5; 
+                  nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
+
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
                   nonf={0,2,2};  Itof=2;  Rv=2;  Mf=3;                 Nsi=6; }
-
-  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  nonf={3,0,0}        }
-  on COMPLETE   { Complete STAR geometry; Itof=2; tof=on; nonf={1,2,2}        }
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
