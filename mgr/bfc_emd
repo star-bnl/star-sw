@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc_emd,v 1.3 2000/08/25 20:21:42 didenko Exp $
+# $Id: bfc_emd,v 1.4 2000/08/28 21:35:05 didenko Exp $
 # $Log: bfc_emd,v $
+# Revision 1.4  2000/08/28 21:35:05  didenko
+# update bfcMixerL3
+#
 # Revision 1.3  2000/08/25 20:21:42  didenko
 # fixed typo
 #
@@ -117,14 +120,14 @@ my $input_fz = $input_file;
 $input_fz =~ s/daq/fz/g;
 
 my $fullinput;
-$fullinput = "/star/rcf/data06/reco/embedding/fz/pi-/old/" . $input_fz;
+$fullinput = "/star/rcf/data06/reco/embedding/fz/pi-" . $input_fz;
  
 symlink $fullinput, $input_fz;
 my $NofEvents = 1000;
 my $fzIn  = "fz";
 my $daqIn = "daq";
 
-my $cmd = " root4star -b -q 'bfcMixer.C(" . $NofEvents . ",\"" . $fzIn . "\",\"" . $input_fz . "\",\"" . $daqIn . "\",\"" . $input_file . "\")\'";
+my $cmd = " root4star -b -q 'bfcMixerL3.C(" . $NofEvents . ",\"" . $fzIn . "\",\"" . $input_fz . "\",\"" . $daqIn . "\",\"" . $input_file . "\")\'";
 print $cmd,"\n";
 system $cmd;
 system 'echo "Finished job execution at" `date` " on " `hostname`'; 
