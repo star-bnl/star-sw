@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.2 2001/05/14 23:04:15 posk Exp $
+// $Id: StFlowConstants.h,v 1.3 2001/08/17 22:10:13 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.3  2001/08/17 22:10:13  posk
+// Now also can do 40 GeV data.
+//
 // Revision 1.2  2001/05/14 23:04:15  posk
 // Can select PID for event plane particles. Protons not used for 1st har.
 // event plane.
@@ -27,7 +30,8 @@ class Flow{
 
  public:
 
-  enum { nHars         =   6, 
+  //enum { nHars         =   6, 
+  enum { nHars         =   3, 
 	 nSels         =   2,
 	 nSubs         =   2,
 	 nPhiBins      = 120,
@@ -44,6 +48,7 @@ class Flow{
   static const Float_t sinCosPtMax;
   static const Float_t yCM;
   static const Float_t qMax;
+  static const Int_t   eBeam;
 
   ClassDef(Flow,1)               // macro for rootcint
 };

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.3 2001/05/14 23:04:29 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.4 2001/08/17 22:10:24 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.4  2001/08/17 22:10:24  posk
+// Now also can do 40 GeV data.
+//
 // Revision 1.3  2001/05/14 23:04:29  posk
 // Can select PID for event plane particles. Protons not used for 1st har.
 // event plane.
@@ -238,9 +241,9 @@ void StFlowEvent::SetSelections() {
 	Float_t meanSin = MeanSin(rapidity, pt, harN);
 	Float_t meanCos = MeanCos(rapidity, pt, harN);
 	if (mMeanSinCosCuts[1] > mMeanSinCosCuts[0] && 
-	    (meanSin < mMeanSinCosCuts[0] ||
+	    (meanSin < mMeanSinCosCuts[0]  ||
 	     meanSin >= mMeanSinCosCuts[1] ||
-	     meanCos < mMeanSinCosCuts[0] ||
+	     meanCos < mMeanSinCosCuts[0]  ||
 	     meanCos >= mMeanSinCosCuts[1])) continue;
 	
       	pFlowTrack->SetSelect(harN, selN);
@@ -360,22 +363,45 @@ void StFlowEvent::SetPids() {
     double prUp = 0.87 + 0.0678*lnp + 0.0176*lnp2;
     double piLo = 0.931 + 0.136*lnp - 0.001 *lnp2;
     double piUp = 1.232 + 0.159*lnp - 0.0152*lnp2;
-    if (dedxMain > 0.) {
-      if (charge == 1 && p > 7.5 && dedx < prUp) {
-	pFlowTrack->SetPid("proton");
-      } else if (dedx > piLo && dedx < piUp) {
-	if (charge == 1) { 
-	  pFlowTrack->SetPid("pi+");
-	} else if (charge == -1) { 
-	  pFlowTrack->SetPid("pi-");
+    if (Flow::eBeam == 158) {
+      if (dedxMain > 0.) {
+	if (charge == 1 && p > 7.5 && dedx < prUp) {
+	  pFlowTrack->SetPid("proton");
+	} else if (dedx > piLo && dedx < piUp) {
+	  if (charge == 1) { 
+	    pFlowTrack->SetPid("pi+");
+	  } else if (charge == -1) { 
+	    pFlowTrack->SetPid("pi-");
+	  }
+	}
+      } else {
+	if ((dedx > piLo || p < 3. || charge != +1) && dedx < piUp) {
+	  if (charge == 1) {
+	    pFlowTrack->SetPid("pi+");
+	  } else if (charge == -1) {
+	    pFlowTrack->SetPid("pi-");
+	  }
 	}
       }
-    } else {
-      if ((dedx > piLo || p < 3. || charge != +1) && dedx < piUp) {
-	if (charge == 1) {
-	  pFlowTrack->SetPid("pi+");
-	} else if (charge == -1) {
-	  pFlowTrack->SetPid("pi-");
+    } else if (Flow::eBeam == 40) {
+    double prUp = 0.8913 + 0.089*lnp + 0.0103*lnp2;
+      if (dedxMain > 0.) {
+ 	if (charge == 1 && lnp > 1.2 && dedx < prUp) { 
+ 	  pFlowTrack->SetPid("proton");
+ 	} else if (dedx > piLo && dedx < piUp) {
+ 	  if (charge == 1) { 
+ 	    pFlowTrack->SetPid("pi+");
+ 	  } else if (charge == -1) { 
+ 	    pFlowTrack->SetPid("pi-");
+ 	  }
+ 	}
+      } else {
+ 	if ((dedx > piLo || p < 3. || charge != +1) && dedx < piUp) {
+ 	  if (charge == 1) {
+ 	    pFlowTrack->SetPid("pi+");
+ 	  } else if (charge == -1) {
+ 	    pFlowTrack->SetPid("pi-");
+ 	  }
 	}
       }
     }

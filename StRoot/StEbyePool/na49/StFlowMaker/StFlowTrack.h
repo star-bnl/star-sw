@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.2 2001/05/14 23:04:47 posk Exp $
+// $Id: StFlowTrack.h,v 1.3 2001/08/17 22:10:31 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.3  2001/08/17 22:10:31  posk
+// Now also can do 40 GeV data.
+//
 // Revision 1.2  2001/05/14 23:04:47  posk
 // Can select PID for event plane particles. Protons not used for 1st har.
 // event plane.
@@ -123,7 +126,7 @@ inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }
 
 inline void StFlowTrack::SetDedx(Float_t dedx)      { mDedx = dedx; }       
 
-inline void StFlowTrack::SetDedxMain(Float_t dedx)  { mDedxMain = dedx; }       
+inline void StFlowTrack::SetDedxMain(Float_t dedx)  { mDedxMain = dedx; }
 
 inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }              
 

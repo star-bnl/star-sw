@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.2 2001/05/14 23:04:17 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.3 2001/08/17 22:10:17 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.3  2001/08/17 22:10:17  posk
+// Now also can do 40 GeV data.
+//
 // Revision 1.2  2001/05/14 23:04:17  posk
 // Can select PID for event plane particles. Protons not used for 1st har.
 // event plane.
@@ -23,6 +26,8 @@
 #include "StFlowCutEvent.h"
 #include "StFlowCutTrack.h"
 #include "StEbyeEvent.h"
+#include "StFlowEvent.h"
+#include "StFlowConstants.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #define PR(x) cout << "##### FlowCutEvent: " << (#x) << " = " << (x) << endl;
@@ -31,22 +36,25 @@ ClassImp(StFlowCutEvent)
 
 //-----------------------------------------------------------------------
 
-Int_t    StFlowCutEvent::mCentCuts[2]    = {0, 0};
-Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
-Float_t  StFlowCutEvent::mVertexXCuts[2] = {-0.5, 0.5};
-Float_t  StFlowCutEvent::mVertexYCuts[2] = {-0.5, 0.3};
-Float_t  StFlowCutEvent::mVertexZCuts[2] = {-579.5, -578.3};
-Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {0.35, 0.75};
-UInt_t   StFlowCutEvent::mEventN         = 0;     
-UInt_t   StFlowCutEvent::mGoodEventN     = 0;
-UInt_t   StFlowCutEvent::mCentCut        = 0;
-UInt_t   StFlowCutEvent::mMultCut        = 0;
-UInt_t   StFlowCutEvent::mVertexXCut     = 0;
-UInt_t   StFlowCutEvent::mVertexYCut     = 0;
-UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
-UInt_t   StFlowCutEvent::mVertexFlagCutN = 0;     
-UInt_t   StFlowCutEvent::mAdcS3CutN = 0;     
+Int_t    StFlowCutEvent::mCentCuts[2]      = {0, 0};
+Int_t    StFlowCutEvent::mMultCuts[2]      = {10, 10000};
+Int_t    StFlowCutEvent::mFinalMultCuts[2] = {6, 10000};
+Float_t  StFlowCutEvent::mVertexXCuts[2]   = {-0.5, 0.5};
+Float_t  StFlowCutEvent::mVertexYCuts[2]   = {-0.5, 0.3};
+Float_t  StFlowCutEvent::mVertexZCuts[2]   = {-579.5, -578.3};
+Float_t  StFlowCutEvent::mEtaSymCuts[2]    = {0.35, 0.75};
+UInt_t   StFlowCutEvent::mEventN           = 0;     
+UInt_t   StFlowCutEvent::mGoodEventN       = 0;
+UInt_t   StFlowCutEvent::mGoodFinalEventN  = 0;
+UInt_t   StFlowCutEvent::mCentCut          = 0;
+UInt_t   StFlowCutEvent::mMultCut          = 0;
+UInt_t   StFlowCutEvent::mFinalMultCut     = 0;
+UInt_t   StFlowCutEvent::mVertexXCut       = 0;
+UInt_t   StFlowCutEvent::mVertexYCut       = 0;
+UInt_t   StFlowCutEvent::mVertexZCut       = 0;
+UInt_t   StFlowCutEvent::mEtaSymCutN       = 0;     
+UInt_t   StFlowCutEvent::mVertexFlagCutN   = 0;     
+UInt_t   StFlowCutEvent::mAdcS3CutN        = 0;     
 
 //-----------------------------------------------------------------------
 
@@ -72,7 +80,7 @@ Bool_t StFlowCutEvent::CheckEvent(StEbyeEvent* pMicroEvent) {
       (cent < mCentCuts[0] || cent > mCentCuts[1])) {
     mCentCut++;
     return kFALSE;
-  }
+  }    
   
   mEventN++;
 
@@ -115,12 +123,38 @@ Bool_t StFlowCutEvent::CheckEvent(StEbyeEvent* pMicroEvent) {
   }
 
   // S3 ADC
-  if (pMicroEvent->ADCS3() >= 83) {
-    mAdcS3CutN++;
+  if (Flow::eBeam == 158) {
+    if (pMicroEvent->ADCS3() >= 83) {
+      mAdcS3CutN++;
+      return kFALSE;
+    }
+  } else if (Flow::eBeam == 40) {
+    if (pMicroEvent->ADCS3() >= 24) {
+      mAdcS3CutN++;
+      return kFALSE;
+    }
+  }
+  
+  mGoodEventN++;
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowCutEvent::CheckEvent(StFlowEvent* pFlowEvent) {
+  // Returns kTRUE if flowevent survives all the cuts
+  
+  if (!pFlowEvent) return kFALSE;
+
+  // Multiplicity
+  Int_t mult = pFlowEvent->FlowEventMult();
+  if (mFinalMultCuts[1] > mFinalMultCuts[0] && 
+     (mult < mFinalMultCuts[0] || mult >= mFinalMultCuts[1])) {
+    mFinalMultCut++;
     return kFALSE;
   }
-
-  mGoodEventN++;
+   
+  mGoodFinalEventN++;
   return kTRUE;
 }
 
@@ -180,6 +214,11 @@ void StFlowCutEvent::PrintCutList() {
        << "% cut)" << endl; 
   cout << "# Good Events = " << mGoodEventN << ", " << setprecision(3) <<
     (float)mGoodEventN/(float)mEventN/perCent << "%" << endl;
+  cout << "#   Final Mult cuts= " << mFinalMultCuts[0] << ", " << mFinalMultCuts[1]
+       << " :\t Events Cut= " << mFinalMultCut << "\t (" <<  setprecision(3) << 
+    (float)mFinalMultCut/(float)mEventN/perCent << "% cut)" << endl;
+  cout << "# Good Final Events = " << mGoodFinalEventN << ", " << setprecision(3) <<
+    (float)mGoodFinalEventN/(float)mEventN/perCent << "%" << endl;
   cout << "#######################################################" << endl;
 
 }
