@@ -1,3 +1,9 @@
+* $Id: g2tmain.g,v 1.35 2000/01/12 00:10:46 nevski Exp $
+* $Log: g2tmain.g,v $
+* Revision 1.35  2000/01/12 00:10:46  nevski
+* add cvs headers
+*
+*
 **:>-----------------------------------------------------------------------
 module    G2Tmain  is g2t converter
 author    Pavel Nevski

@@ -1,3 +1,9 @@
+* $Id: g2t_tpc.F,v 1.10 2000/01/12 00:10:45 nevski Exp $
+* $Log: g2t_tpc.F,v $
+* Revision 1.10  2000/01/12 00:10:45  nevski
+* add cvs headers
+*
+*
       FUNCTION  G2T_TPC (g2t_track_h,   g2t_track , 
      >                   g2t_tpc_hit_h, g2t_tpc_hit ) 
       IMPLICIT  NONE
