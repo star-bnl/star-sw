@@ -12,10 +12,27 @@
 //#include "St_io_Maker/St_io_Maker.h"
 #include "St_xdfin_Maker/St_xdfin_Maker.h"
 
-enum { kStTREE=1,kStXDF=2,kStMDC2=3,kStDAQ=4, kStMuDst=5 };
+enum { kStTREE=1,
+       kStXDF=2,
+       kStMDC2=3,
+       kStDAQ=4, 
+       kStMuDst=5 
+};
 const char  IOFMTS[] = "root  xdf   mdc2  daq   mudst ";
-const char *IOCLAS[] = {0,"StTreeMaker","St_xdfin_Maker","St_io_Maker","StDAQMaker","StMuIOMaker"};
-const char *IONAME[] = {0,"Root","XDF","MDC2","DAQ","MuDst"};
+const char *IOCLAS[] = {0,
+			"StTreeMaker",
+			"St_xdfin_Maker",
+			"St_io_Maker",
+			"StDAQMaker",
+			"StMuIOMaker"
+};
+const char *IONAME[] = {0,
+			"Root",
+			"XDF",
+			"MDC2",
+			"DAQ",
+			"MuDst"
+};
 
 ClassImp(StIOMaker)
 
@@ -117,7 +134,7 @@ Int_t StIOMaker::OpenRead()
 
   fNextFile = fFileSet->GetFileName(0);
   if (fNextFile.IsNull()) return kStEOF;
-  if(GetDebug()) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
+  if(GetDebug()) (void) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
   TString fmt = fFileSet->GetFormat(0);
   TString bra = fFileSet->GetCompName(0);
 
@@ -142,7 +159,7 @@ Int_t StIOMaker::OpenWrite()
   if (fCurrMk) return 0;
   fNumEvent = 0;
   if (fNextFile.IsNull()) return kStEOF;
-  if(GetDebug()) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
+  if(GetDebug()) (void) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
   fCase = 1; 
 
   if (!fFmtMk[fCase-1]) fFmtMk[fCase-1] = Load();
@@ -235,13 +252,21 @@ StIOInterFace *StIOMaker::Load()
   TClass *klass;
 
   const char *className = IOCLAS[fCase];
+  (void) printf("<StIOMaker::Load() trying to GetClass(%s) case %d\n",className,fCase);
   klass = gROOT->GetClass(className);
   
-  if (! klass ) {//lib not loaded
+  if (! klass ) {        // lib not loaded
+    Int_t Loaded=0;      // library load stack may be self-sufficient, set to 1
     if (fCase==kStXDF)   gSystem->Load("xdf2root");
     if (fCase==kStDAQ)   gSystem->Load("StDaqLib");
-    if (fCase==kStMuDst) gSystem->Load("StMuDSTMaker");
-    gSystem->Load(className);
+    if (fCase==kStMuDst){
+      Loaded = 1;
+      gSystem->Load("St_Tables");
+      gSystem->Load("StEmcUtil");
+      gSystem->Load("StStrangeMuDstMaker");
+      gSystem->Load("StMuDSTMaker");
+    }
+    if (! Loaded) gSystem->Load(className);
     klass = gROOT->GetClass(className);
   }
   if ( ! klass ){
