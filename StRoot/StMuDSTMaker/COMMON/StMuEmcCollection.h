@@ -48,15 +48,15 @@ class StMuEmcCollection: public TObject
     // EEMC utility methods
     int   getNEndcapTowerADC(){ return 720;}
     void  getEndcapTowerADC(int ihit, 
-			    int &adc, int &isec, int &isub, int & ieta);
+			    int &adc, int &sec, int &sub, int & eta);
 
     int   getNEndcapPrsHits(){ return getNPrsHits(eprs);}
     StMuEmcHit *getEndcapPrsHit(int ihit, 
-			  int &isec, int &isub, int & ieta, int &ipre);
+			  int &sec, int &sub, int & eta, int &pre);
 
     int   getNEndcapSmdHits(char uv); // set 'U' or 'V'
     StMuEmcHit * getEndcapSmdHit(char uv, int ihit,
-				 int &isec, int &istrip);
+				 int &sec, int &strip);
 
         
     void              setTowerADC(int,int, int detector = bemc);

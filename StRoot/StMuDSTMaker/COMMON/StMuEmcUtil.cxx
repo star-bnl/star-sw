@@ -1,5 +1,6 @@
 #include "StMuEmcUtil.h"
 #include "StEvent.h"
+#include "StMessMgr.h"
 #include "StEventTypes.h"
 #include "StMuEmcCollection.h"
 #include "SystemOfUnits.h"
@@ -78,7 +79,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
                 }
                 else
                 {
-                  getEndcapId(EmcDet,m,e,s,rid);
+                  if(getEndcapId(EmcDet,m,e,s,rid)) continue;// on error
                 }
                 HitsId[rid-1] = HitIndex;
                 HitIndex++;
@@ -144,7 +145,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
               }
               else
               {
-                getEndcapId(EmcDet,m,e,s,rid);
+                if(getEndcapId(EmcDet,m,e,s,rid)) continue;// on error
               }
               Int_t index = HitsId[rid-1];
               if(EmcDet==1||EmcDet==5) index=rid;
@@ -282,7 +283,9 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
       {
         a = muEmc->getTowerADC(j+1,det);
         if(det==1) mGeo[det-1]->getBin(j+1,m,e,s);
-        else getEndcapBin(det,j+1,m,e,s);
+        else  {
+	  if( getEndcapBin(det,j+1,m,e,s)) continue ;// on error
+	}
         energy = 0;
         cal = 0;
         if(a==0) save = kFALSE;
@@ -294,7 +297,9 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
         {
           rid=hit->getId();
           if(det==2) mGeo[det-1]->getBin(rid,m,e,s);
-          else getEndcapBin(det,rid,m,e,s);
+          else {
+	    if( getEndcapBin(det,rid,m,e,s)) continue ;// on error
+	  }
           a=hit->getAdc();
           cal=hit->getCalType();
           energy=hit->getEnergy();
@@ -307,7 +312,9 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
         {
           rid=hit->getId();
           if(det<5) mGeo[det-1]->getBin(rid,m,e,s);
-          else getEndcapBin(det,rid,m,e,s);
+          else {
+	    if( getEndcapBin(det,rid,m,e,s)) continue ;// on error
+	  }
           a=hit->getAdc();
           cal=hit->getCalType();
           energy=hit->getEnergy();
@@ -370,7 +377,9 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
             if(rid!=-1)
             {
               if(det<5) mGeo[det-1]->getBin(rid,m,e,s);
-              else getEndcapBin(det,rid,m,e,s);
+              else { 
+		if ( getEndcapBin(det,rid,m,e,s)) continue ;// on error
+	      }
               StEmcModule *module = detector->module(m);
               if(module)
               {
@@ -510,60 +519,128 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
   
   return;
 }
-void StMuEmcUtil::getEndcapId(int d,int m, int e, int s,int &rid)
-{
-  rid = -1;
-  if(d==5) // endcap tower
-  {
-    rid = 60*m+12*s+e+84;
-    if(rid>719) rid-=720;
+
+//=================================================
+//=================================================
+int  StMuEmcUtil::getEndcapId(int d,int m, int e, int s,int &rid){
+  rid=1;
+  /*  first tower or first strip is default,
+      I do not like it, but it is the only safe value,JB
+  */
+ 
+  TString text;
+
+  if(     m<=0 || m >12 || d<5 || d>8 ) {
+    text="m<=0 || m >12 || d<5 || d>8 ";
+    goto abort;
   }
-  if(d==6) // pre shower
-  {
-    int a = 720;
-    int ss = s;
-    if(s>=5 && s<10) { a = 1440; ss-=5; }
-    if(s>=10)        { a = 2160; ss-=10; } 
-    rid = 60*m+12*ss+e+84;
-    if(rid>719) rid-=720;
-    rid+=a;
+  
+  switch (d) {
+
+  case 5: 
+    if(     e<=0 || e>12 || s<=0 || s>5 ) {
+      text="e<=0 || e>12 || s<=0 || s>5 ,towers";
+      goto abort;
+    } 
+    rid = 60*(m-1) + 12*(s-1) + e-1;
+    break;
+
+  case 6: 
+    if(     e<=0 || e>12 || s<=0 || s>15 ) {
+      text="e<=0 || e>12 || s<=0 || s>15 ,  pre/post";
+      goto abort;
+    } 
+    rid = 180*(m-1) + 12*(s-1) + e-1;
+    break;
+
+  case 7: 
+  case 8:
+    if(     s!=1 || e<=0 || e>288 ) {
+      text=" s!=1 || e<=0 || e>288,  SMD";
+      goto abort;
+    } 
+    rid = 300*(m-1) + e-1;
+    break;
+  default:;
   }
-  if(d==7 || d==8) // SMD
-  {
-    rid = m*288+e;
-  }
-  return;
+
+  rid++; // to compensate for counting from 1
+
+  if(     rid<=0 ) {
+      text=" rid<=0";
+      goto abort;
+    } 
+
+  return 0;  // all went OK
+
+ abort:
+  gMessMgr->Error() <<"StMuEmcUtil::getEndcapId(), FATAL internal error: "
+		    <<text<<"\n d="<<d<<" m="<<m<<" e="<<" s="<<s<<" rid "<<rid
+		    <<"\n ENDCAP data may be wrong, "
+		    <<" assert() should be here, JB"<<endm;
+  return 1;
 }
-void StMuEmcUtil::getEndcapBin(int d,int rid,int &m, int &e, int &s)
+
+
+int StMuEmcUtil::getEndcapBin(int d,int rid0,int &m, int &e, int &s)
 {
-  int id = rid;
-  if(d==5) // tower
-  {
-    if(id<84) id+=720;
-    id-=84;
-    m = (int)(id/60);
-    id = id%60;
-    s  = (int)(id/12);
-    e = id%12;
+  m=e=s=1;
+  /*  first tower or first strip is default,
+      I do not like it, but it is the only safe value,JB
+  */
+ 
+  TString text;
+  int rid=rid0-1;
+  int x;
+
+  if(     rid0<=0 || d<5 || d>8 ) {
+    text="rid0<=0 || d<5 || d>8 ";
+    goto abort;
   }
-  if(d==6) // pre shower
-  {
-    int a  = 720;
-    int ss = 0;
-    if(id>1440 && id<=2160) { a= 1440; ss = 5; }
-    if(id>2160 ) { a= 2160; ss = 10; }
-    id-=a;
-    if(id<84) id+=720;
-    id-=84;
-    m = (int)(id/60);
-    id = id%60;
-    s  = (int)(id/12)+ss;
-    e = id%12;    
+
+  switch (d) {
+
+  case 5: 
+    m=1+ rid/60;
+    x=rid%60;
+    s=1 +x/12;
+    e=1 + x%12;
+    if     ( m>12 || s<1 || s>5 || e>12 ) {
+      text=" m>12 || s<1 || s>5 || e>12 , tower";
+      goto abort;
+    }
+    break;
+
+  case 6:
+    m=1+ rid/180;
+    x=rid%180;
+    s=1 +x/12;
+    e=1 + x%12;
+    if     ( m>12 || s<1 || s>15 || e>12 ) {
+      text=" m>12 || s<1 || s>15 || e>12 , pre/post";
+      goto abort;
+    }
+    break;
+
+  case 7:
+  case 8:
+    m=1+ rid/300;
+    s=1;
+    e=1 + rid%300;
+    if     ( m>12 || e>288 || e <1 ) {
+      text=" m>12 || s<=0 || s>5 || e>12 , smd";
+      goto abort;
+    }
+    break;
+  default: ;
   }
-  if(d==7 || d==8) // SMD
-  {
-    s = 1;
-    m = (int)(id/288);
-    e = id%288;
-  }
+  
+  return 0; // all went OK
+  
+ abort:
+  gMessMgr->Error() <<"StMuEmcUtil::getEndcapBin(), FATAL internal error: "
+		    <<text<<"\n d="<<d<<" m="<<m<<" e="<<" s="<<s<<" rid0 "<<rid0
+		    <<"\n ENDCAP data may be wrong, "
+		    <<" assert() should be here, JB"<<endm;
+  return 1;
 }
