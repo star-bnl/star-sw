@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.26 2003/10/02 15:07:34 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.27 2003/10/08 12:48:25 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.27  2003/10/08 12:48:25  jcs
+// initialize mNumMainVertexTracks which I overlooked the first time
+//
 // Revision 1.26  2003/10/02 15:07:34  jcs
 // initialize mNumMainVertexTracks
 //
@@ -355,6 +358,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 
   CalcEtaMinMax();
 
+  mMainVertexTracks = 0;
   mMergedTracks = 0;
   mMergedTracklets = 0;
   mMergedSplits = 0;
