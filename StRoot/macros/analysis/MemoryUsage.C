@@ -1,5 +1,8 @@
-//$Id: MemoryUsage.C,v 1.4 2000/01/21 22:01:32 kathy Exp $
+//$Id: MemoryUsage.C,v 1.5 2000/01/31 16:14:17 kathy Exp $
 //$Log: MemoryUsage.C,v $
+//Revision 1.5  2000/01/31 16:14:17  kathy
+//update memory usage macro to read the input file twice and calculate the binning on the histogram by itself
+//
 //Revision 1.4  2000/01/21 22:01:32  kathy
 //updated to print box plot and to input lower and upper range of vertical axis
 //
@@ -30,30 +33,78 @@
 
 void MemoryUsage(    
        const Char_t *InFile=
-         "/afs/rhic/star/data/samples/mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.txt",
+       "/afs/rhic/star/data/samples/mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.txt",
        const Char_t *OutFile=
-         "mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.ps",
-       Int_t nevents=500,
-       Float_t lowy=250000,
-       Float_t highy=350000)
+         "mem_usage_dev_tfs_lin_y1b_hc_lowdensity_21jan00.ps")
 {
  
    gROOT->Reset();
 
    cout << "MemoryUsage.C, input file name = " << InFile << endl;
-   cout << "MemoryUsage.C, # entries in input file = " << nevents << endl;
-   cout << "MemoryUsage.C, lower y range of plot =" << lowy << endl;
-   cout << "MemoryUsage.C, upper y range of plot =" << highy << endl;
    cout << "MemoryUsage.C, output postscript file = " << OutFile << endl;
 
-   FILE *fp = fopen(InFile,"r");
-
+// --- open output ps file
    TPostScript *psf = 0;
    psf = new TPostScript(OutFile);  
 
+   Int_t memmax=0;
+   Int_t memmin=999999;
+   Int_t x=0;
+   Int_t ncols = 0;
+   Int_t nlines = 0;
 
+// --- read input file first time to get # entries, min & max values
+   FILE *fp = fopen(InFile,"r");
+   while (1) {
+      ncols = fscanf(fp,"%d",&x);
+      if (ncols < 0) break;    
+      if (nlines < 5) printf("x=%8d \n",x);
+      if (x > memmax) memmax = x;
+      if (x < memmin) memmin = x;
+      nlines++;
+   }
+   cout << " 1: num entries = " << nlines << endl;
+   cout << " 1: min entry   = " << memmin << endl;
+   cout << " 1: max entry   = " << memmax << endl;
+   fclose(fp);
+
+
+// determine # bins, low & high values of x axis:
+   Int_t nevents=0;
+   if (nlines <= 100) 
+       nevents=100;
+   elseif (nlines > 100 && nlines <= 1000){
+      nevents = nlines/100;
+      nevents = nevents + 1;
+      nevents = nevents*100;
+   }
+   elseif (nlines > 1000)
+       nevents=1000;
+
+   Int_t lowy  = 0;
+   if (memmin > 10000 ){
+      lowy = memmin/10000;
+      lowy = lowy*10000;
+   }
+   else 
+      lowy = 10000;
+
+   Int_t highy = 0;
+   if (memmax > 10000 ){
+      highy = memmax/10000;
+      highy = highy + 1;
+      highy = highy*10000;
+   }
+   else 
+      highy = 10000;
+
+   cout << "  use # bins =     " << nevents << endl;
+   cout << "  use low scale  = " << lowy    << endl;
+   cout << "  use high scale = " << highy   << endl;
+
+// now book histogram
    TH2F *h1 = new TH2F("MemUsage","memory usage vs event number",
-      nevents,0.,Float_t(nevents),100,lowy,highy);
+      nevents,0.,Float_t(nevents),100,Float_t(lowy),Float_t(highy));
    h1->SetXTitle("event number");
    h1->SetYTitle("memory usage in bytes");
    h1->GetXaxis()->SetLabelSize(0.02);
@@ -66,19 +117,21 @@ void MemoryUsage(
    Int_t x=0;
    Int_t ncols = 0;
    Int_t nlines = 0;
+// --- read input file 2nd time to fill histogram
+   FILE *fp2 = fopen(InFile,"r");
 
    while (1) {
-      ncols = fscanf(fp,"%d",&x);
+      ncols = fscanf(fp2,"%d",&x);
       if (ncols < 0) break;    
-      if (nlines < 5) printf("x=%8d \n",x);
+//      if (nlines < 5) printf("x=%8d \n",x);
       h1->Fill(Float_t(nlines),Float_t(x));
       nlines++;
    }
+//   printf(" found %d points\n",nlines);
+   fclose(fp2);
 
-   printf(" found %d points\n",nlines);
-
-   fclose(fp);
-// -----------------------------------
+// ------------------------------------------------------------
+// Now draw hist to canvas and save on ps file
 
    TCanvas *HistCanvas = 
      new TCanvas("CanvasName","STAR Histogram Canvas",600,780);
