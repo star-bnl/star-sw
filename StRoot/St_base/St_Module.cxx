@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.14 2000/03/30 05:20:51 fine Exp $
+// $Id: St_Module.cxx,v 1.15 2000/07/30 01:40:12 perev Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -183,7 +183,7 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
            if (errcode == 1) 
                fprintf(stderr, "\n \t ***** Error calling module <%s> *****\n"
                              ,GetName()); 
-           Char_t *suffix[4]={"st","nd","d","th"};
+           const Char_t *suffix[4]={"st","nd","d","th"};
            Int_t indx = i%10;
            if ( (10 < i && i < 20) || indx > 3 || indx == 0) indx = 4;
            indx--;
@@ -221,7 +221,7 @@ Int_t St_Module::CheckResults(Int_t res, const Char_t *names[])
                  fprintf(stderr,
                  "\n \t ***** module  <%s>  returned the corrupted table %s *****\n \t * The number of the used rows more (or equal) of the allocated ones *\n"
                                ,GetName(), table->GetName()); 
-          Char_t *suffix[4]={"st","nd","rd","th"};
+          const Char_t *suffix[4]={"st","nd","rd","th"};
           Int_t indx = i%10;
           if ( (10 < i && i < 20) || indx > 3 || indx == 0) indx = 4;
           indx--;
@@ -322,6 +322,9 @@ void St_Module::Streamer(TBuffer &)
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.15  2000/07/30 01:40:12  perev
+// StMem class added
+//
 // Revision 1.14  2000/03/30 05:20:51  fine
 // bug fixed
 //
