@@ -13,7 +13,7 @@ C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER iflag
       REAL    trk(6),xc(2),r,beta
-      REAL    x,y,p(3),a,b,ab,rxp,test
+      REAL    x,y,p(3),a,b,ab,test
 C--------find the radius and the (hit)x-y coordinates------------------
       IF(trk(1).eq.0.) trk(1)=0.01
       x=trk(1)*cos( trk(2) )
@@ -25,23 +25,13 @@ C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)
       b = sqrt( r*r/(a*a+1) )
-C     yt1= b + y
-C     yt2=-b + y
-C     xt1=-a*b + x
-C     xt2= a*b + x
       ab = a*b
 C-------decide which one is the right one------------------------------
-C     rxp=(xt1-x)*p(2) - b*p(1)
-      rxp=-(ab*p(2) + b*p(1))
-      test=rxp*trk(6)*beta
-      IF(test.gt.0.0) THEN
-C	xc(1)=xt1
-C	xc(2)=yt1
+      test=(ab*p(2) + b*p(1))*trk(6)*beta
+      IF(test.lt.0.0) THEN
 	xc(1)=-ab + x
 	xc(2)= b + y
       ELSE
-C	xc(1)=xt2
-C	xc(2)=yt2
 	xc(1)=ab + x
 	xc(2)=-b + y
       ENDIF 	!test.lt.0.0
@@ -422,10 +412,10 @@ C----------------------------------------------------------------------
       INTEGER	iflag
       REAL	xc1(2),xc2(2),r1,r2
       REAL	x(2),y(2)
-      REAL      c1x,c1y,c2x,c2y
+      REAL      c1x,c1y,c2x,c2y,cut
       REAL*8	om1,om2,ph1,ph2,r1sq,r2sq
-      REAL*8	a,b,c,d,dia,dtouch,cut
-      REAL*8	asq_plus_bsq,r1sq_minus_om1sq,r1_dia,r1sq_minus_om2sq
+      REAL*8	a,b,c,d,dia,dtouch
+      REAL*8	asq_plus_bsq,r1sq_minus_om1sq,r_dia,r1sq_minus_om2sq
       REAL*8	ph1_plus_a_sq,ph2_plus_a_sq,om_1,om_2
       REAL*8	om1_plus_b_sq_minus_r2sq,om2_plus_b_sq_minus_r2sq
       LOGICAL   first
@@ -507,13 +497,16 @@ C----------------------------------------------------------------------
   137 continue
       dia=sqrt(asq_plus_bsq)
       dtouch=dia-r1-r2
-      r1_dia = r1/dia
-      IF(dtouch .le. sqrt(cut))  THEN
-        iflag=3
-        x(1)=xc1(1) + r1_dia*(xc2(1)-xc1(1))
-        y(1)=xc1(2) + r1_dia*(xc2(2)-xc1(2))
-        x(2)=x(1)
-        y(2)=y(1)
+      IF(dtouch .le. cut)  THEN
+        iflag=30
+        r_dia = r1/dia
+        a = xc2(1)-xc1(1)
+        b = xc2(2)-xc1(2)
+        x(1)=xc1(1) + r_dia*a
+        y(1)=xc1(2) + r_dia*b
+        r_dia = r2/dia
+        x(2)=xc2(1) - r_dia*a
+        y(2)=xc2(2) - r_dia*b
       ELSE
         iflag=5
       RETURN
