@@ -2,13 +2,13 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: EventControlPanel.C,v 1.2 2001/08/14 21:06:27 fine Exp $
+// $Id: EventControlPanel.C,v 1.3 2001/09/01 19:58:14 perev Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
 //
 // This macro generates a Controlbar panel: 
-// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
+// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/EventControlPanel.gif" ></P> end_html
 //
 // To execute an item, click with the left mouse button.
 //  
@@ -16,14 +16,14 @@
 //
 //  From Root/Cint macro:
 //  --------------------
-//   .x PadControlPanel.C
-//   .L PadControlPanel.C
+//   .x EventControlPanel.C
+//   .L EventControlPanel.C
 // or
-//   gROOT->LoadMacro("PadControlPanel.C");
+//   gROOT->LoadMacro("EventControlPanel.C");
 //
 //  From the compiled C++ code:
 //  --------------------
-//   gROOT->LoadMacro("PadControlPanel.C");
+//   gROOT->LoadMacro("EventControlPanel.C");
 //
 //  After that one may "click" <4 views> button to get from the single "view"
 //  the expanded view as follows:
@@ -52,83 +52,158 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+class StChain;
+class StMaker;
+class StEventDisplayMaker;
+class StEventDisplayInfo;
 class StEventControlPanel {
-  private:
-   TControlBar *fBar;
-   
-  protected:
-   //_______________________________________________________________________________________
-   void Bar(const Char_t *buttonName, const Char_t *statement,const Char_t *tipText)
-   {   fBar->AddButton(buttonName,statement,tipText); }
+public:
 
-  public:
-   StEventControlPanel(){ fBar=PadControlPanel();}
-  //_______________________________________________________________________________________
-   static TControlBar *PadControlPanel(TControlBar *bar=0){
-//
-// This macro generates a Controlbar panel: 
-// begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
-//
-// To execute an item, click with the left mouse button.
-//  
-// Just start this macro wheneven you want:
-//
-//  From Root/Cint macro:
-//  --------------------
-//   .x EventControlPanel.C
-//   .L EventControlPanel.C
-// or
-//   gROOT->LoadMacro("PadControlPanel.C");
-//
-//  From the compiled C++ code:
-//  --------------------
-//   gROOT->LoadMacro("PadControlPanel.C");
-//
-   if (bar) delete bar;
-   bar = new TControlBar("vertical", "Pad Control Panel");
-   const char *listEvents[] = {"StEvent(vo)","StEvent(track)"};
-   int size = sizeof(listEvents)/4;
-   int i;
-   for (i=0;i<size;i++) {
-     TString n = "StEventControlPanel::ToggleDisplayName(\"";
-     n += listEvents[i];
-     n += "\"0;";
-     bar->AddButton(listEvents[i],n.Data(),"Element of StEvent geometry");
+   TGButtonGroup *fBar;  
+   TGLayoutHints *fL1;
+
+static StMaker       *fgChain;
+static StEventDisplayMaker *fgDispMk;
+static TGButtonGroup *fgBar;  
+static StEventDisplayInfo *fgHlp;  
+
+protected:
+
+
+//_______________________________________________________________________________________
+   TGTextButton *AddButt(const Char_t *buttonName, const Char_t *command)
+   {   
+       TGTextButton *tb = new TGTextButton(fBar,buttonName,command);
+       fBar->AddFrame(tb,fL1);   
+       fBar->Show();
+       return tb;
    }
-   bar->AddSeparator();
-   bar->AddButton("Print names", "StEventControlPanel::PrintNames();", "Print the names of all active elements");
 
-   bar->Show();
-   return bar;
+
+public:
+   StEventControlPanel()
+   { 
+     fgChain = 0;  fgDispMk=0; fgHlp = 0;
+     TClass *kl = gROOT->GetClass("StChain");
+     if (kl && kl->GetClassInfo())
+     {
+       fgChain  = StMaker::GetChain();
+       fgDispMk = (StEventDisplayMaker*)fgChain->GetMaker("EventDisplay");
+     }
+     Build();
+   }
+
+//_______________________________________________________________________________________
+   void Build(){
+//
+   const char *listEvents[] = {
+      "dst/point"		,"dst/point(id_track,position[0]:position[1]:charge)",
+      "dst/primtrk"		,"dst/primtrk"			,
+      "dst/globtrk"		,"dst/globtrk"			,
+      "dst/vertex"		,"dst/vertex(vtx_id,x:y:z)"	,
+      "All Used Hits"  		,"StEvent(All Used Hits)"	,
+      "All Unused Hits"		,"StEvent(All Unused Hits)"	, 
+      "TPC Used Hits"  		,"StEvent(TPC Used Hits)"	,
+      "TPC Unused Hits"		,"StEvent(TPC Unused Hits)"	, 
+      "RICH Used Hits" 		,"StEvent(RICH Used Hits)"	,
+      "RICH Unused Hits"	,"StEvent(RICH Unused Hits)"	, 
+      "All Tracks",    		,"StEvent(All Tracks)"		,
+      "All Track Hits"		,"StEvent(All Track Hits)"	,
+      "Primary Tracks" 		,"StEvent(Primary Tracks)"	,
+      "Primary Track Hits"	,"StEvent(Primary Track Hits)"	, 
+      "Kink Tracks"    		,"StEvent(Kink Tracks)"		,
+      "Kink Track Hits"  	,"StEvent(Kink Track Hits)"	, 
+      "V0 Tracks"      		,"StEvent(V0 Tracks)"		,
+      "V0 Track Hits"		,"StEvent(V0 Track Hits)"	,  
+      "Xi Tracks"      		,"StEvent(Xi Tracks)"		,
+      "Xi Track Hits"		,"StEvent(Xi Track Hits)"	, 
+      0}; 
+      
+   fBar = new TGButtonGroup(gClient->GetRoot(), "Event Control Panel");
+   fgBar = fBar;
+   fL1  = new TGLayoutHints(kLHintsCenterY | kLHintsExpandX, 1, 1, 1, 1);
+      
+   int i;
+   char cbuf[200];
+   for (i=0;listEvents[i];i+=2) {
+     TGTextButton *button = new TGTextButton(fBar,listEvents[i],"");
+     sprintf(cbuf,"StEventControlPanel::ToggleDisplayName(\"%s\",(TGTextButton*)%p)"
+     ,listEvents[i+1],button);
+
+//   printf("%s == %s\n",listEvents[i],cbuf);
+     button->SetCommand(cbuf);
+     fBar->AddFrame(button, fL1);
+//     fBar->Insert(button);
+   }
+
+   AddButt("Show selections", "StEventControlPanel::PrintNames();");
+   Refresh();
+   fBar->Show();
 }
 //_______________________________________________________________________________________
-~StEventControlPanel(){ if(fBar) delete fBar; fBar = 0;}
-//_______________________________________________________________________________________
- TControlBar *Bar() const { return fBar;}  
+~StEventControlPanel(){ delete fBar; delete fL1;}
+
 //_______________________________________________________________________________________
 static void PrintNames()
 {
-    if (chain) {
-      StEventDisplayMaker *dsm = (StEventDisplayMaker *)chain->Maker("EventDisplay");
-      if (dsm) dsmfDsmk->PrintNames();
+  if (!fgDispMk) return;
+  TList *tl = fgDispMk->GetNameList();
+  if (!fgHlp) new StEventDisplayInfo(&fgHlp, "Draw Selections", 200, 100);
+  TListIter nextOne(tl);
+  TObject *n=0;
+  int nk=0;
+  while ((n=nextOne())) {
+    if (nk) {fgHlp->AddText(n->GetName());}
+    else    {fgHlp->SetText(n->GetName());}
+    nk=1;
+  }
+  fgHlp->Popup();
+}
+//_______________________________________________________________________________________
+static void Refresh()
+{
+  if (!fgDispMk) return;
+  TList *tl = fgDispMk->GetNameList();
+  if (!tl) return;
+  int id; TGButton *but=0;TObject *n=0;
+  for (id=1;but=fgBar->GetButton(id);id++) {
+    TListIter nextOne(tl);
+    while ((n=nextOne())) {
+      if (strchr(n->GetName(),'(')==0) continue;
+      if (strstr(but->GetCommand(),n->GetName())) break; }
+    int state = (n) ? kButtonDown:kButtonUp;
+    but->SetState(state);
+ }
+ fgBar->Show();
+}
+//_______________________________________________________________________________________
+static void ToggleDisplayName(const char *name,TGTextButton *button)
+{
+  fgBar->Show();
+  if (!fgDispMk) return;
+  TList *lis = fgDispMk->GetNameList(); 
+  if (!lis) return;
+  if (!(lis->FindObject(name))) {
+       fgDispMk->AddName(name);
+       button->SetState(kButtonDown);
+    } else {
+       fgDispMk->RemoveName(name);
+       button->SetState(kButtonUp);
     }
 }
 //_______________________________________________________________________________________
-static void ToggleDisplayName(const char *name)
-{
-  if (!chain) return;
-  StEventDisplayMaker *dsm = (StEventDisplayMaker *)chain->Maker("EventDisplay");
-  if (dsm) {
-    TList *l = dsm->GetNameList();
-    if (!l || !(o=l->FindObject(name))) dsm->AddName(name);
-    else dsm->RemoveName(name);
-  } else {
-    printf("there is no StEventDisplayMaker yet\n");
-  }
+   TGTextButton *AddFilter(TObject *filter)
+{   
+  char cbuf[100];
+  sprintf(cbuf,"((StFilterABC*)%p)->Update();",filter);
+  printf("AddFilter: %s::%s\n",filter->GetName(),cbuf);
+  return AddButt(filter->GetName(), cbuf);
 }
+
+
 //_______________________________________________________________________________________
 };
 
-StEventControlPanel __ee__;
-void EventControlPanel(){}
+StEventControlPanel __StEventControlPanel__;
+
 
