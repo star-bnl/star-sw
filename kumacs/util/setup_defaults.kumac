@@ -1,6 +1,7 @@
  
 * 28Jul98 K. Turner - separate from bfc_util.kumac
-
+* 5Aug98  K. Turner - made default a global macro so you can add to it 
+*                     in your own kumac in your area
 *********************************************************************
 *********************************************************************
 *********************************************************************
@@ -9,7 +10,7 @@ macro run
   
   macro/global/import *
     
-  DEFAULT = _
+  default = _
 [TOP],_
 [TOP]/kumacs/chain,_
 [TOP]/kumacs/ctf,_
@@ -64,9 +65,11 @@ $STAR/pams/tpc/kumac,_
 $STAR/pams/trg/kumac,_
 $STAR/pams/vpd/kumac
 
- def [DEFAULT]
+ def [default]
  message ' bfc_defaults: Define default kumac search path as' [default]
  
+ macro/global/create default [default]
+   
 return
 
 **********************************************************************
