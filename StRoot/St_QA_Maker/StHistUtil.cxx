@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.17 1999/12/16 23:12:03 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.18 1999/12/17 22:11:32 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.18  1999/12/17 22:11:32  kathy
+// add psi vs phi hist, change limits
+//
 // Revision 1.17  1999/12/16 23:12:03  kathy
 // fixed list of default histograms, had wrong title and added a few for tables and stevent; rescaled some histograms and fixed titles in booking
 //
@@ -58,6 +61,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strstream.h>
 
 #include "PhysicalConstants.h"
 #include "TStyle.h"
@@ -160,6 +164,18 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   Ldatetime->SetTextSize(0.6);
   Ldatetime->Draw();
 
+
+// now put in page # at bottom left of canvas - first page
+    Int_t Ipagenum=1;
+  //convert to character
+    Char_t Ctmp[10];
+    ostrstream Cpagenum(Ctmp,10);
+    Cpagenum << Ipagenum << ends;
+    cout << " Ipage " << Ipagenum << " Cpage " << Cpagenum << endl;
+  TPaveLabel *Lpage = new TPaveLabel(0.1,0.01,0.2,0.03,"PageNum","br");
+  Lpage->SetTextSize(0.6);
+  Lpage->Draw();
+
 // Make 1 big pad on the canvas - make it a little bit inside the  canvas 
 //    - must cd to get to this pad! 
 // order is x1 y1 x2 y2 
@@ -210,6 +226,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
 	if (padCount == numPads) {
 	  if (psf) psf->NewPage();
+          Ipagenum++;
+          Cpagenum << Ipagenum << ends;
+          cout << " Ipage " << Ipagenum << " Cpage " << Cpagenum << endl;
 // must redraw the histcanvas for each new page of postscript file!
 	  //    HistCanvas->cd();
         HistCanvas->Modified();
