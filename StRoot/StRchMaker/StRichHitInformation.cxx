@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHitInformation.cxx,v 2.1 2000/09/13 21:01:58 lasiuk Exp $
+ * $Id: StRichHitInformation.cxx,v 2.2 2000/09/29 19:05:23 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichHitInformation.cxx,v $
- * Revision 2.1  2000/09/13 21:01:58  lasiuk
- * Initial Revision
+ * Revision 2.2  2000/09/29 19:05:23  lasiuk
+ * number of pads added as well as ostream operator
  *
  * Revision 2.1  2000/09/13 21:01:58  lasiuk
  * Initial Revision
@@ -48,4 +48,11 @@ void StRichHitInformation::setPositionError(double dx, double dy, double dz)
 void StRichHitInformation::setPosition2(double x2, double y2, double z2)
 {
     mPosition2 = StThreeVector<double>(x2,y2,z2);
+}
+
+ostream& operator<<(ostream& os, StRichHitInformation& hit)
+{
+    return (os
+	    << " x=" << hit.position() << " q=" << hit.charge()
+	    << " q_max=" << hit.maxAdc() << " #=" << hit.clusterNumber());
 }
