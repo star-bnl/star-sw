@@ -40,7 +40,7 @@ created   22 april 98
    first = .false.
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
-     nsys    = 20                 ! number of subsystems
+     nsys    = 21                 ! number of subsystems
      edir    = {'Even','t',' '}   ! event output directory name 
      rdir    = {'Run ',' ',' '}   ! run output directory name 
 
@@ -97,6 +97,12 @@ created   22 april 98
      spec  = 'ctf'        ! specification type
      csys  = 'BTOF'       ! Geant Subsystem
      cdet  = 'BCSA'       ! Sensitive detector
+
+   fill dete       ! star subsystem
+     ctab  = 'rch'        ! table name
+     spec  = 'ctf'        ! specification type
+     csys  = 'RICH'       ! Geant Subsystem
+     cdet  = 'RGAP'       ! Sensitive detector
 
    fill dete       ! star subsystem
      ctab  = 'rch'        ! table name
