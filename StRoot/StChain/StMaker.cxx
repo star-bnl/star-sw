@@ -1,10 +1,10 @@
-// $Id: StMaker.cxx,v 1.120 2001/11/18 00:58:07 perev Exp $
+// $Id: StMaker.cxx,v 1.121 2002/02/02 23:31:14 jeromel Exp $
 //
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StChain virtual base class for StMaker                              //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+/*!
+ *                                                                      
+ * StChain virtual base class for StMaker                              
+ *                                                                     
+ */
 #include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -409,11 +409,11 @@ Int_t StMaker::Init()
 
    while ((maker = (StMaker*)nextMaker())) {
 
-// 		save last created histogram in current Root directory
+     // save last created histogram in current Root directory
       gROOT->cd();
       objLast = gDirectory->GetList()->Last();
 
-// 		Initialise maker
+      // Initialise maker
 
       Assert(maker->TestBit(kInitBeg|kInitEnd)==0);
       maker->SetBit(kInitBeg);
@@ -476,10 +476,12 @@ void StMaker::EndMaker(int ierr)
 }
 
 //_____________________________________________________________________________
+/*!
+  Terminate a run.
+  Place to make operations on histograms, normalization,etc.
+ */
 Int_t StMaker::Finish()
 {
-//    Terminate a run
-//   place to make operations on histograms, normalization,etc.
    int nerr = 0;
    int run = GetRunNumber();
    if (run>-1) FinishRun(run);   
@@ -533,6 +535,16 @@ Int_t StMaker::Finish()
 }
 
 //_____________________________________________________________________________
+/*!
+  The Make() method is the one responsible for calling the
+  maker's InitRun(). Note that that InitRun() is called for
+  real data and if both of the following are true
+  - a header exists
+  - the run number changes
+
+  This is the ONLY place calling the InitRun() routine.
+
+ */
 Int_t StMaker::Make()
 {
 //   Loop on all makers
@@ -1096,8 +1108,14 @@ const char *StMaker::GetBroadcast(const char *subj,const char *author) const
 {
   return fgBroadcast->GetBroadcast(subj,author);
 }
+
+
+
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.121  2002/02/02 23:31:14  jeromel
+// doxygenized. Added some text for the Make() method.
+//
 // Revision 1.120  2001/11/18 00:58:07  perev
 // Broadcast method added
 //

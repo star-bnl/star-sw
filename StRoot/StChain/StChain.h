@@ -1,5 +1,65 @@
-// $Id: StChain.h,v 1.38 2001/04/10 22:32:43 perev Exp $
+/*!
+ * \class StChain 
+ *
+ *                                                                     
+ * Main base class to control chains for the different STAR "chains"   
+ *                                                                     
+ * This class :                                                        
+ *   - Initialises the run default parameters                          
+ *   - Provides API to Set/Get run parameters                           
+ *   - Creates the support lists (TClonesArrays) for the Event structure
+ *   - Creates the physics objects makers                               
+ *                                                                      
+ */
+
+#ifndef STAR_StChain
+#define STAR_StChain
+
+#include <stdlib.h>
+#include <stdio.h>
+
+#ifndef StMaker_H
+#include "StMaker.h"
+#endif
+
+class StEvtHddr;
+enum EChainBits {  
+  kIsCalibrated = BIT(24)   // if the TObject has been created after calibration 
+};
+
+
+class StChain : public StMaker {
+ private:
+   Int_t               m_Version;    	//StChain version number
+   Int_t               m_VersionDate;   //StChain version date
+ protected:
+   StEvtHddr         *m_EvtHddr;     	//Header of event
+ public:
+                      StChain(const char *name="bfcChain");
+   virtual           ~StChain();
+   virtual void       Clear(Option_t *option="");
+   virtual Int_t      Finish();   // *MENU*
+   virtual Int_t      Init();
+   virtual Int_t      Make();
+   virtual Int_t      Make(Int_t num){return IMake(num);}
+   virtual Int_t      IsChain() const {return 1;}
+   virtual Int_t      MakeEvent(); // *MENU*
+   Int_t              GetVersion() {return m_Version;}
+   Int_t              GetVersionDate() {return m_VersionDate;}
+
+ virtual const char *GetCVS() const 
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.39 2002/02/02 23:31:14 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   ClassDef(StChain, 0)   //StChain control class
+};
+
+#endif
+
+
+// $Id: StChain.h,v 1.39 2002/02/02 23:31:14 jeromel Exp $
 // $Log: StChain.h,v $
+// Revision 1.39  2002/02/02 23:31:14  jeromel
+// doxygenized. Added some text for the Make() method.
+//
 // Revision 1.38  2001/04/10 22:32:43  perev
 // Overload clean
 //
@@ -81,55 +141,3 @@
 // Revision 1.6  1998/07/20 15:08:08  fisyak
 // Add tcl and tpt
 //
-
-#ifndef STAR_StChain
-#define STAR_StChain
-
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StChain                                                              //
-//                                                                      //
-// Main base class to control chains for the different STAR "chains"    //
-//                                                                      //
-// This class :                                                         //
-//   - Initialises the run default parameters                           //
-//   - Provides API to Set/Get run parameters                           //
-//   - Creates the support lists (TClonesArrays) for the Event structure//
-//   - Creates the physics objects makers                               //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
-#include <stdlib.h>
-#include <stdio.h>
-
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
-class StEvtHddr;
-enum EChainBits {
-  kIsCalibrated = BIT(24)   // if the TObject has been created after calibration
-};
-class StChain : public StMaker {
-private:
-   Int_t               m_Version;    	//StChain version number
-   Int_t               m_VersionDate;   //StChain version date
- protected:
-   StEvtHddr         *m_EvtHddr;     	//Header of event
-public:
-                      StChain(const char *name="bfcChain");
-   virtual           ~StChain();
-   virtual void       Clear(Option_t *option="");
-   virtual Int_t      Finish();   // *MENU*
-   virtual Int_t      Init();
-   virtual Int_t      Make();
-   virtual Int_t      Make(Int_t num){return IMake(num);}
-   virtual Int_t      IsChain() const {return 1;}
-   virtual Int_t      MakeEvent(); // *MENU*
-   Int_t              GetVersion() {return m_Version;}
-   Int_t              GetVersionDate() {return m_VersionDate;}
-
- virtual const char *GetCVS() const 
- {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.38 2001/04/10 22:32:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-   ClassDef(StChain, 0)   //StChain control class
-};
-
-#endif
