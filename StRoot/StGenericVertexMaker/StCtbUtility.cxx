@@ -57,7 +57,7 @@ void StCtbUtility::ctb_get_slat_from_data(int slat, int tray, float & phiRad, fl
 
   phiRad=phi/180*C_PI;
   eta=(1-2*iz)*(1+2*slat)*0.25;
-  printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,phi,eta);
+  // printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,phi,eta);
   
 }
 
