@@ -12,7 +12,7 @@
 
 StiRDEvaluableTrackFactory::StiRDEvaluableTrackFactory(const string& newName,int original,
 						       int incremental, int maxInc)
-    : StiObjectFactoryInterface<StiKalmanTrack>(newName, original, incremental, maxInc)
+	: StiObjectFactoryInterface<StiKalmanTrack>(newName, original, incremental, maxInc)
 {
     initialize();
 }
@@ -52,7 +52,8 @@ void* StiRDKalmanTrackFactory::makeNewObject() const
 StiRDDetectorFactory::StiRDDetectorFactory(const string& newName, int original, int incremental, int maxInc)
     : StiObjectFactoryInterface<StiDetector>(newName, original, incremental, maxInc)
 {
-    initialize();
+	cout << " StiRDDetectorFactory::StiRDDetectorFactory() executing" << endl;
+	initialize();
 }
 
 StiRDDetectorFactory::~StiRDDetectorFactory()
@@ -61,6 +62,7 @@ StiRDDetectorFactory::~StiRDDetectorFactory()
 
 void* StiRDDetectorFactory::makeNewObject() const
 {
-    return new StiRootDrawableDetector();
+	//cout << "StiRDDetectorFactory::makeNewObject() called - making StiRootDrawableDetector()" << endl;
+	return new StiRootDrawableDetector();
 }
 

@@ -7,7 +7,7 @@
 #include "StThreeVectorF.hh"
 
 //StiGui
-#include "StiDisplayManager.h"
+#include "StiRootDisplayManager.h"
 #include "StiRootDrawableHitContainer.h"
 #include "StiGuiIOBroker.h"
 
@@ -21,7 +21,7 @@ StiRootDrawableHitContainer::StiRootDrawableHitContainer()
     setMarkerStyle( broker->unMarkedHitStyle() );
     
     setName("AStiRootDrawableHitContainer"); //must come first in list of drawable!!!
-    StiDisplayManager::instance()->addDrawable(this);
+    StiRootDisplayManager::instance()->addDrawable(this);
 }
 
 StiRootDrawableHitContainer::~StiRootDrawableHitContainer()
