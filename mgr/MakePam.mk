@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.110 1999/08/20 23:07:28 fisyak Exp $
+# $Id: MakePam.mk,v 1.111 1999/08/22 23:09:35 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.111  1999/08/22 23:09:35  fisyak
+# remove dir path from library linkage
+#
 # Revision 1.110  1999/08/20 23:07:28  fisyak
 # Fix new StAF include path
 #
@@ -368,6 +371,9 @@ ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
     SL_NEW := $(SL_PKG).$(QWE)
   endif
 endif
+SL_PKG_NOTDIR := $(notdir $(SL_PKG))
+SL_NEW_NOTDIR := $(notdir $(SL_NEW))
+
 ifneq (,$(NAMES_IDM))          
   FILES_init  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.$(O))
 endif                      
@@ -423,9 +429,8 @@ $(LIB_PKG):$(OBJS)
     endif                          
     ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))
-	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB)
-	$(RM) $(SL_PKG)
-	$(LN) $(SL_NEW) $(SL_PKG)
+	$(SO) $(SOFLAGS) $(FILES_SL) $(FILES_OG) $(FILES_init)  -o $(SL_NEW)  $(LIBRARIES) $(SL_EXTRA_LIB) && \
+        $(RM) $(SL_PKG) &&  cd $(LIB_DIR) &&  $(LN) $(SL_NEW_NOTDIR) $(SL_PKG_NOTDIR) 
 	@echo "           Shared library " $(SL_PKG) " has been created"   
 #--------- module --------- 
       ifneq ($(NAMES_IDM),)           
