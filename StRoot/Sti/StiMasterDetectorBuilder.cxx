@@ -1,7 +1,7 @@
 #include "StiMasterDetectorBuilder.h"
 
 StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
-  : StiDetectorBuilder("MasterDetectorBuilder",active)
+  : StiDetectorBuilder("MasterDetectorBuilder",active,"none")
 {}
 
 StiMasterDetectorBuilder::~StiMasterDetectorBuilder()

@@ -1,7 +1,10 @@
 /*!
- * $Id: StiTrackingParameters.cxx,v 2.4 2004/01/30 21:29:42 pruneau Exp $  
+ * $Id: StiTrackingParameters.cxx,v 2.5 2004/02/19 20:42:01 pruneau Exp $  
  *
  * $Log: StiTrackingParameters.cxx,v $
+ * Revision 2.5  2004/02/19 20:42:01  pruneau
+ * Added the noton of loadable
+ *
  * Revision 2.4  2004/01/30 21:29:42  pruneau
  * Added load function to load values from db
  *
@@ -74,15 +77,6 @@ const StiTrackingParameters & StiTrackingParameters::operator=(const StiTracking
   return *this;
 }
 
-const StiTrackingParameters & StiTrackingParameters::operator=(const TrackingParameters_st & pars)
-{
-  _minSearchWindow = pars.minSearch;
-  _maxSearchWindow = pars.maxSearch;
-  _searchWindowScaling = pars.scaling;
-  _maxChi2ForSelection = pars.maxChi2;
-  return *this;
-}
-
 void StiTrackingParameters::initialize()
 { 
   add(new EditableParameter("MinSearch", "Minimum Search Window",&_minSearchWindow,_minSearchWindow,0.,10.,0.1,0));
@@ -92,28 +86,34 @@ void StiTrackingParameters::initialize()
 
 }
 
-void StiTrackingParameters::setPar(ifstream& inFile)
+/// Load values from the given file stream.
+void StiTrackingParameters::loadFS(ifstream& inFile)
 {
+	cout << "StiTrackingParameters::loadFS(ifstream& inFile) -I- Starting" << endl;
   inFile >> _used;
   inFile >> _active;
   inFile >> _maxChi2ForSelection;
   inFile >> _minSearchWindow;
   inFile >> _maxSearchWindow;
   inFile >> _searchWindowScaling;
-
-
-  return;
+	cout << *this;
+	cout << "StiTrackingParameters::loadFS(ifstream& inFile) -I- Done" << endl;
 }
 
-void StiTrackingParameters::load(TDataSet *ds)
+/// Load values from the given data set.
+void StiTrackingParameters::loadDS(TDataSet &ds)
 {
-	// validate source
-	if (!ds) throw runtime_error("StiTrackingParameters::load(TDataSet * ds)");
-	St_TrackingParameters * a = dynamic_cast<St_TrackingParameters*>(ds->Find(getName().c_str() ));
-  if (!a) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet * ds) -E- a==0");
+	cout << "StiTrackingParameters::loadDS(TDataSet&ds) -I- Starting" << endl;
+	St_TrackingParameters * a = dynamic_cast<St_TrackingParameters*>(ds.Find(getName().c_str() ));
+  if (!a) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet&ds) -E- a==0");
 	TrackingParameters_st * b = a->GetTable();
-	if (!b) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet * ds) -E- b==0");
-	*this = *b;
+	if (!b) throw runtime_error("StiKalmanTrackFitterParameters::load(TDataSet&ds) -E- b==0");
+  _minSearchWindow = b->minSearch;
+  _maxSearchWindow = b->maxSearch;
+  _searchWindowScaling = b->scaling;
+  _maxChi2ForSelection = b->maxChi2;
+	cout << *this;
+	cout << "StiTrackingParameters::loadDS(TDataSet*ds) -I- Done" << endl;
 }
 
 

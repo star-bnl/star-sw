@@ -1,7 +1,10 @@
 /*!
- * $Id: StiTrackingParameters.h,v 2.4 2004/01/30 21:29:42 pruneau Exp $  
+ * $Id: StiTrackingParameters.h,v 2.5 2004/02/19 20:42:03 pruneau Exp $  
  *
  * $Log: StiTrackingParameters.h,v $
+ * Revision 2.5  2004/02/19 20:42:03  pruneau
+ * Added the noton of loadable
+ *
  * Revision 2.4  2004/01/30 21:29:42  pruneau
  * Added load function to load values from db
  *
@@ -45,25 +48,20 @@ public:
   StiTrackingParameters(const StiTrackingParameters & pars);
   ~StiTrackingParameters();
   const StiTrackingParameters & operator=(const StiTrackingParameters & p);
-  const StiTrackingParameters & operator=(const TrackingParameters_st & p);
-
   virtual void initialize();
-	void load(TDataSet*);
-
+	virtual void loadDS(TDataSet&);
+  virtual void loadFS(ifstream& inFile);
   void setMaxChi2ForSelection(double chi);
   void setMinSearchWindow(double val);
   void setMaxSearchWindow(double val);
   void setSearchWindowScaling(double val);
-  void setPar(ifstream& inFile);
-  
   friend ostream& operator<<(ostream& os, const StiTrackingParameters& par);
-
   bool   active() const;
   double getMinSearchWindow() const;
   double getMaxSearchWindow() const;
   double getSearchWindowScale() const;
   double getMaxChi2ForSelection() const;
-
+	void setDefaults(){};
  protected:
   bool   _active;
   bool   _used;
@@ -71,8 +69,6 @@ public:
   double _maxSearchWindow;
   double _searchWindowScaling;
   double _maxChi2ForSelection;
-
-
 };
 
 inline void StiTrackingParameters::setMaxChi2ForSelection(double chi)
