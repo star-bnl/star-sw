@@ -27,11 +27,9 @@ typedef struct {
 } MarilynMonroe_t;
 MarilynMonroe_t *GS;
 //////////////////////////////////////////////  functions  /////////////////////
-int Bank_TRGD::HerbSwap(void *theTRGDbank) {
+int Bank_TRGD::HerbSwap() {
   int numToSwap,returnValue,i;
 
-  // GS is used later in SanityCheck().
-  char *ptr=(char*)theTRGDbank; ptr+=40; /* skip header */ GS=(MarilynMonroe_t*)ptr;
 
   assert(header.ByteOrder==0x01020304||header.ByteOrder==0x04030201);
   if(header.ByteOrder==0x04030201) return 0;
@@ -95,8 +93,9 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
-  if(pBankTRGD->HerbSwap(pBankTRGD)<0) { printf("Swap error %s %d.\n"__FILE__,__LINE__); }
-  //  SanityCheck();
+  char *ptr=(char*)pBankTRGD; ptr+=40; /* skip header */ GS=(MarilynMonroe_t*)ptr;
+  SanityCheck();
+  if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n"__FILE__,__LINE__); }
   printf("Trigger reader instantiated, distance to data = %d bytes.\n",pBankTRGP->theData.offset);
 }
 void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {
