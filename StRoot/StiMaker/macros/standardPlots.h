@@ -1,9 +1,12 @@
 /*
- * $Id: standardPlots.h,v 1.2 2002/06/26 14:34:13 andrewar Exp $
+ * $Id: standardPlots.h,v 1.3 2002/07/02 18:59:30 andrewar Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.3  2002/07/02 18:59:30  andrewar
+ * fixed bug with constructor
+ *
  * Revision 1.2  2002/06/26 14:34:13  andrewar
  * Added cut handles.
  *
@@ -621,7 +624,8 @@ class standardPlots {
    TBranch        *b_fUniqueID;   //!
    TBranch        *b_fBits;   //!
 
-   standardPlots(TTree *tree=0, char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
+   standardPlots(TTree *tree=0,char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
+   standardPlots(char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
    ~standardPlots();
 
    //cut arrays
@@ -663,6 +667,11 @@ class standardPlots {
 #endif
 
 #ifdef standardPlots_cxx
+standardPlots::standardPlots(char* infile)
+{
+  TTree *dummy=0;
+  standardPlots(dummy, infile);
+}
 standardPlots::standardPlots(TTree *tree, char* infile)
 {
 // if parameter tree is not specified (or zero), connect the file
