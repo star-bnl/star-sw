@@ -4,7 +4,9 @@
 * editted 6/9/98 Kathy Turner
 * 6/10/98 Kathy Turner
 *         - works for old version of tpc tables
-* ***********************************************************************
+*  6/25/98 Lidia Didenko
+*  6/25/98 Kathy Turner
+***********************************************************************
 ************************************************************************
 macro run__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
