@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.13 2001/06/14 22:12:11 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.14 2001/06/15 00:52:15 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.14  2001/06/15 00:52:15  jhthomas
+ * Protect discontinuity in distortions at CM
+ *
  * Revision 1.13  2001/06/14 22:12:11  jhthomas
  * Speedup UndoBDistorion by adding table lookups
  *
@@ -415,6 +418,7 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[3], Float_t Xprime[3] 
 
 //________________________________________
 
+
 #define  GAP13_14      1.595            // Width of the gap between the grids at row 13 and row 14 (cm)
 #define  GAPRADIUS     121.8            // Radius of gap between rows 13 & 14 at phi = zero degrees (cm)
 #define  NYARRAY       33               // Dimension of the vector to contain the YArray
@@ -441,7 +445,7 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[3], Float_t Xprime[3] 
 				     130.2, 131.195,
 				     132.2, 133.195, 137.195, 150., 200. } ;
 
-  static Float_t  C[TERMS] ;                     // Coefficients for series
+  static Double_t C[TERMS] ;                     // Coefficients for series
   static Int_t    Flag = 0 ;                     // Calculate only once
   static Float_t  SumArray[NZDRIFT][NYARRAY] ;
   static Int_t    ilow, jlow, ORDER ;
@@ -482,10 +486,12 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[3], Float_t Xprime[3] 
   ORDER = 2 ;                                       // Quadratic Interpolation of the table
   Search ( NZDRIFT, ZDriftArray,  Zdrift, ilow ) ;
   Search ( NYARRAY, YArray, y, jlow ) ;
+
   if ( ilow < 0 ) ilow = 0 ;   // artifact of Root's binsearch, returns -1 if out of range
   if ( jlow < 0 ) jlow = 0 ;
   if ( ilow + ORDER  >=    NZDRIFT - 1 ) ilow =   NZDRIFT - 1 - ORDER ;
   if ( jlow + ORDER  >=    NYARRAY - 1 ) jlow =   NYARRAY - 1 - ORDER ;
+
   for ( Int_t i = ilow ; i < ilow + ORDER + 1 ; i++ )
     {
       save_sum[i-ilow]   = Interpolate( &YArray[jlow], &SumArray[i][jlow], ORDER, y )   ;
@@ -513,7 +519,7 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[3], Float_t Xprime[3] 
 
 {
 
-  Float_t         Zdrift ;
+  Double_t        Zdrift ;
   Int_t           sign ;
 
   // Work in TPC coordinates but note that XTWIST and YTWIST reported in Magnet coord system 
@@ -565,8 +571,8 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[3], Float_t Xprime[
   phi    =  TMath::ATan2(x[1],x[0]) ;
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
   z      =  x[2] ;
-  if ( z > 0 && z <  0.1 ) z =  0.5 ;               // Protect against discontinuity at CM
-  if ( z < 0 && z > -0.1 ) z = -0.5 ;               // Protect against discontinuity at CM
+  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
  
   InterpolateEdistortion( r, phi, z, Er_integral, Ephi_integral ) ;
 
@@ -582,7 +588,7 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[3], Float_t Xprime[
   Xprime[2] = x[2] ;
 
 }
- 
+
 void StMagUtilities::UndoEndcapDistortion( const Float_t x[3], Float_t Xprime[3] )
 
 {
@@ -592,9 +598,12 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[3], Float_t Xprime[3]
 
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
-  z      =  x[2] ;
-
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
+  z      =  x[2] ;
+  if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
+  if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
+
+
   InterpolateEEdistortion( r, phi, z, Er_integral, Ephi_integral ) ;
 
   // Subtract to Undo the distortions
@@ -663,7 +672,7 @@ void StMagUtilities::ReadField( )
       
   printf("Reading Magnetic Field:  %s,  Scale factor = %f \n",comment.Data(),gFactor);
   printf("Filename is %s, Adjusted Scale factor = %f \n",filename.Data(),gFactor*gRescale);
-  printf("Version: 3D Mag Field Distortions + Twist + PadRow13 + Clock + Membrane + Endcap\n" ) ;
+  printf("Version: 3D Mag Field Distortions + Twist + PadRow13 + Clock + Membrane\n" ) ;
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   magfile = fopen(MapLocation.Data(),"r") ;
