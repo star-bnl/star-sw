@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.15 2004/07/19 13:23:34 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.16 2004/07/21 13:02:31 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.16  2004/07/21 13:02:31  subhasis
+ * refclust called only when incr <2000
+ *
  * Revision 1.15  2004/07/19 13:23:34  subhasis
  * checks applied on clust_cell dimension
  *
@@ -155,8 +158,8 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 		    {
 		      ypad=spmcl->Row();          //! row of the hit = 1 - 72
 		      xpad=spmcl->Column();       //! column of the hit = 1 - 96
-		      edep=spmcl->Edep();         //! Cell Edep in keV
-		      //	      edep=spmcl->Adc();        
+		      //edep=spmcl->Edep();         //! Cell Edep in keV
+		      edep=spmcl->Adc();        
 		      gsuper = spmcl->Gsuper();   //! supermodule = 1 - 12
 		      idet=spmcl->SubDetector();  //! detector(= 1) for Pmd and (=2) for CPV
 		      
@@ -198,7 +201,7 @@ void StPmdClustering::findPmdClusters(StPmdDetector *mdet)
 	      
 	      arrange(incr);  //! arrange cells in each supercluster
 	      
-	      refclust(mdet,incr, id, idet,pmdclus);  //! resolve superclusters into clusters //new
+	      if(incr<2000)refclust(mdet,incr, id, idet,pmdclus);  //! resolve superclusters into clusters //new
 	    }
 	}
     }
@@ -331,7 +334,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
     }
   }
   
-  for(i=0; i<1000; i++){
+  for(i=0; i<2000; i++){
     ncl[i]=-1; // ncl[i] --> initialization starts from '-1'
     rcl[i] = 0.; // initialization of rcs and rcl
     rcs[i] = 0.;
