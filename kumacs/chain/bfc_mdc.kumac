@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.12 1998/07/29 20:53:37 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.13 1998/07/30 00:26:04 fisyak Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.13  1998/07/30 00:26:04  fisyak
+* Add pritout
+*
 * Revision 1.12  1998/07/29 20:53:37  kathy
 * corrected for unecessary inputs to macros
 *
@@ -223,9 +226,13 @@ MACRO bfc_mdc _
    
  message ' *** TOP level directory     --> ' [TOP]
  message ' *** Input file              --> ' [input_file]        
+ message ' *** First event             --> ' [first]
+ message ' *** no_in_bunch             --> ' [no_in_bunch]
  message ' *** Num Events to process   --> ' [no_events]
  message ' *** domains to load         --> ' [domain]
  message ' *** modules to process      --> ' [chain]   
+ message ' *** prefix_in               --> ' [prefix_in]
+ message ' *** prefix_out              --> ' [prefix_out]
  message ' *** Output file name        --> ' [output_file]
  message ' *** tpc_sector_first        --> ' [tpc_sector_first]
  message ' *** tpc_sector_last         --> ' [tpc_sector_last]
