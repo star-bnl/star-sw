@@ -21,6 +21,7 @@
 #include "StEvent.h"
 #include <TNtuple.h>
 #include "StTrackForPool.h"
+#include "StAngleCorrFunction.h"
 
 class StDiagnosticTool {
 public:
@@ -30,10 +31,11 @@ public:
   virtual  void        Fill(StTrackForPool* t);
   virtual  void        Fill(StTrackForPool* t1, StTrackForPool* t2);
   virtual  void        Write();
-  virtual  TString GetName();
+  virtual  void        SetCorrelationFunction(StAngleCorrFunction* func);
+  virtual  TString   GetName();
 
 private:
-  
+  StAngleCorrFunction* corrFunc;
 };
 
 #endif

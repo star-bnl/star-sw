@@ -10,11 +10,31 @@ StAzimuthalAngle::Fill(StTrackForPool* tp1, StTrackForPool* tp2, TH1D* hist)
   // calculates  angle between the momenta of two tracks
   // 0 < alphadiff < pi
   weight = 1.0;
-  tp1->GetMomentum(px1,py1,pz1);
-  tp2->GetMomentum(px2,py2,pz2);
+  correlation = func(tp1,tp2);
+  hist->Fill(correlation,weight);
+}
+
+double
+StAzimuthalAngle::GetCorr(StTrackForPool* t1, StTrackForPool* t2)
+{
+  return func(t1,t2);
+}
+
+TString
+StAzimuthalAngle::GetName() 
+{
+  TString name = "azimuthalAngle";
+  return name;
+}
+
+double
+StAzimuthalAngle::func(StTrackForPool* t1, StTrackForPool* t2)
+{
+  t1->GetMomentum(px1,py1,pz1);
+  t2->GetMomentum(px2,py2,pz2);
   Double_t rap1,rap2;
-  tp1->GetPseudoRapidity(rap1);
-  tp2->GetPseudoRapidity(rap2);
+  t1->GetPseudoRapidity(rap1);
+  t2->GetPseudoRapidity(rap2);
 
   Double_t phi1 = atan2(py1,px1);
   Double_t phi2 = atan2(py2,px2);
@@ -29,14 +49,6 @@ StAzimuthalAngle::Fill(StTrackForPool* tp1, StTrackForPool* tp2, TH1D* hist)
     {
       phidiff = 2.*pi - phidiff ;
     }
-  correlation = (180./pi)*phidiff;
-  hist->Fill(correlation,weight);
-}
 
-
-TString
-StAzimuthalAngle::GetName() 
-{
-  TString name = "azimuthalAngle";
-  return name;
+  return  (180./pi)*phidiff;
 }

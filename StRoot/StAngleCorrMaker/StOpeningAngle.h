@@ -27,7 +27,9 @@ public:
           ~StOpeningAngle();
   void    Fill(StTrackForPool* t1, StTrackForPool* t2, TH1D* hist);
   TString GetName();
+  double GetCorr(StTrackForPool* t1, StTrackForPool* t2);
 private:
+  double func(StTrackForPool* t1, StTrackForPool* t2);
 
 Double_t correlation,weight;
 Double_t p1,p2;
