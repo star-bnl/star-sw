@@ -103,12 +103,12 @@ void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {
   int i;
   unsigned int *pp;
   pp=(unsigned int*)pBankTRGD;
-  if(sizeof(unsigned int)!=4) { PP"Error 77b in %s.\n",__FILE__); exit(2); }
+  if(sizeof(unsigned int)!=4) { PP"Error 77b in %s.\n",__FILE__); assert(0); }
   for(i=0;i<nwords;i++) {
     PP"word number %3d: 0x%08x\n",i+1,pp[i]);
   }
   PP"Exiting from diagnostic function.\n"); 
-  exit(0); // Do not remove this exit.  If you don't want to exit, don't call this function.
+  assert(0); // Do not remove this exit.  If you don't want to exit, don't call this function.
 }
 char *Bank_TRGD::PrintHelp(char *msg,int nn) {
   static char rv[100];

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.19 2000/01/31 19:26:11 levine Exp $
+ * $Id: EventReader.cxx,v 1.20 2000/06/07 15:06:08 jml Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -22,6 +22,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.20  2000/06/07 15:06:08  jml
+ * Changed exit() calls to assert(0) to aid in debugging
+ *
  * Revision 1.19  2000/01/31 19:26:11  levine
  * restore run number to memory-mapped version
  *
@@ -195,7 +198,7 @@ EventReader::EventReader(const char *logfile) //pass a string with name of logfi
   if (logfd==NULL) {
     perror("EventReader::EventReader() logfile failure");
     printf("ERR: failed to open log file %s !!!!!!!\n",logfile);
-    exit(-1);
+    assert(0);
   }
   fprintf(logfd,"opening logfile...\n");
 }
