@@ -27,7 +27,9 @@ The software consists of 2.3k lines of code in 16 files in three directories.
 The three "maker" modules are called from the STAR software chain and described
 in the overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/HTML_Presentation/index.htm">presentation</a>.
 The presentation is also available as a <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/Presentation.ps">postscript</a>
-file. The chain of three makers is run by the macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/macros/examples/doFlowEvents.C">doFlowEvents.C</a>
+file together with an overview <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowMaker/doc/Diagram.ps">diagram</a>
+using the Unified Modeling Language. The chain of three makers is run by
+the macro <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/macros/examples/doFlowEvents.C">doFlowEvents.C</a>
 .
 <p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/">StFlowMaker</a></b>
 is the interface with the STAR DST. It creates the microDST <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowEvent.cc">StFlowEvent</a>
@@ -45,9 +47,9 @@ document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/S
 the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowMaker.cxx">implementation,</a>
 and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowMaker.html">interface</a>.
 Constants which are needed in more than one file are kept in <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowMaker/StFlowConstants.hh">StFlowConstants</a>.
-At the moment particle ID is not used.
 <p><b><a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/">StFlowTagMaker</a></b>
-fills the tag database from StFlowEvent. This is described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowTagMaker/README">README</a>
+fills the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/St_FlowTag.html">tag</a>
+database from StFlowEvent. This is described in the <a href="http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StFlowTagMaker/README">README</a>
 document. One can also view the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/StFlowTagMaker.hh">header</a>,
 the <a href="http://duvall.star.bnl.gov/lxr/source/StRoot/StFlowTagMaker/StFlowTagMaker.cxx">implementation,</a>
 and the <a href="http://www.star.bnl.gov/star/starlib/doc/www/html/comp_l/root/html/StFlowTagMaker.html">interface</a>.
@@ -86,8 +88,8 @@ Rev. C <b>58</b>, 1671 (1998)</a>.</font>
 and N. Xu, "Novel Rapidity Dependence of Directed Flow in High Energy Heavy
 Ion Collisions", <a href="http://arXiv.org/abs/nucl-ex/9908001">nucl-ex/9908001</a>.</font>
 <p><font size=-1>4. S.A. Voloshin and A.M. Poskanzer, "The Physics of the
-Centrality Dependence of Elliptic Flow", Phys. Letters <b>B</b>, to be
-published<b> </b>(2000), <a href="http://xxx.lanl.gov/abs/nucl-th/9906075">nucl-th/9906075</a>.</font></td>
+Centrality Dependence of Elliptic Flow", Phys. Letters <b>B474</b>, 27
+(2000). <a href="http://xxx.lanl.gov/abs/nucl-th/9906075">nucl-th/9906075</a>.</font></td>
 </tr>
 </table>
 
