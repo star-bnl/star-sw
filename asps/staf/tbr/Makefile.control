@@ -1,0 +1,11 @@
+# tbr/Makefile.control
+#
+ASPS := tbr dio dui tdm soc
+#PAMS := 
+#
+USER_LIBS := -ldsu -ldsl -lasu
+#
+DEBUG := TRUE
+#SHARE := TRUE
+MOTIF := TRUE
+#
