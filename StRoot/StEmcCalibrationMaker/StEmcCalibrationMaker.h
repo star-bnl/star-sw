@@ -13,7 +13,7 @@
 
 #include "StEmcMipSpectra.h"
 #include "StEmcEqualSpectra.h"
-//#include "StEmcEffPedSpectra.h"
+#include "StEmcEffPedSpectra.h"
 
 #include "TArrayI.h"
 
@@ -79,7 +79,6 @@ class StEmcCalibrationMaker : public StMaker
            Bool_t  FillEffPed();
            Bool_t  CheckTracks();
            Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*);
-           Bool_t  GetPedestal();
            Bool_t  SubtractPedestal();
            void    ClearCalibTable();
            void    SetCalibStatus();
@@ -110,7 +109,7 @@ class StEmcCalibrationMaker : public StMaker
    
            StEmcEqualSpectra*     EqualSpec;
            StEmcMipSpectra*       MipSpec;
-  //StEmcEffPedSpectra*    EffPedSpec;
+           StEmcEffPedSpectra*    EffPedSpec;
 
 
    ClassDef(StEmcCalibrationMaker, 1)  
