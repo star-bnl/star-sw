@@ -63,6 +63,13 @@ $STAR/pams/trg/kumac
  exec fpt_init
  exec fte_init
 
+* Read in fcl_padtrans table
+
+ exec read_table_from_file#init padtrans_in /afs/rhic/star/users/jcs/public/fcl_padtrans.tab
+* exec read_table_from_file#init padtrans_in /home/iws112/jcs/SL98d/fcl_padtrans.tab
+  exec read_table_from_file#read padtrans_in [params]
+  exec read_table_from_file#close padtrans_in
+
 * Initialize input data stream
   exec input_g2t_file#init [input_g2t_file]
 
