@@ -1,5 +1,9 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.4 2000/01/27 09:47:18 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.5 2000/02/02 15:20:33 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.5  2000/02/02 15:20:33  hummler
+// correct acceptance at sector boundaries,
+// take values from fcl_det
+//
 // Revision 1.4  2000/01/27 09:47:18  hummler
 // implement raw data reader, remove type ambiguities that bothered kcc
 //
@@ -202,7 +206,8 @@ Int_t StFtpcClusterMaker::Make()
 					       ffs_gepoint->GetTable(),
 					       &numGepoint, maxGepoint,
 					       fcl_fppoint->GetTable(),
-					       &numFppoint, maxFppoint);
+					       &numFppoint, maxFppoint,
+					       m_det->GetTable());
       ffs_gepoint->SetNRows(numGepoint);				      
       fcl_fppoint->SetNRows(numFppoint);				      
       if(Debug())cout<<"finished running StFtpcFastSimu"<<endl;

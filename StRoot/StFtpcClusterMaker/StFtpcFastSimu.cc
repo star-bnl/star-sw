@@ -1,6 +1,10 @@
-// $Id: StFtpcFastSimu.cc,v 1.7 2000/01/27 14:48:06 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.8 2000/02/02 15:20:36 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.8  2000/02/02 15:20:36  hummler
+// correct acceptance at sector boundaries,
+// take values from fcl_det
+//
 // Revision 1.7  2000/01/27 14:48:06  hummler
 // correct hit smearing
 //
@@ -35,7 +39,8 @@ StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
 			       int ffs_gepoint_maxlen,
 			       FCL_FPPOINT_ST* fcl_fppoint,
 			       int *fcl_fppoint_nok,
-			       int fcl_fppoint_maxlen)
+			       int fcl_fppoint_maxlen,
+			       FCL_DET_ST* fcl_det)
 {
   //-----------------------------------------------------------------------
   
@@ -49,7 +54,7 @@ StFtpcFastSimu::StFtpcFastSimu(G2T_FTP_HIT_ST* g2t_ftp_hit,
   else
     {
       //  Read paramenter tables and inititialize  
-      ffs_ini(ffs_fspar, ffs_gaspar);
+      ffs_ini(ffs_fspar, ffs_gaspar, fcl_det);
       
       // hh Transfer the usable g2t_ftp_hit-data into fppoint and gepoint
       ffs_hit_rd(g2t_ftp_hit_nok, g2t_ftp_hit, g2t_track_nok,
@@ -435,17 +440,18 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
   }
 
 int StFtpcFastSimu::ffs_ini(FFS_FSPAR_ST *ffs_fspar,   
-			    FFS_GASPAR_ST *ffs_gaspar)
+			    FFS_GASPAR_ST *ffs_gaspar,
+			    FCL_DET_ST* fcl_det)
   {
     //------   TEMPORARY:  put in parameter table   ------------------
     const float phi_origin=90.;
-    const float phi_sector=60.;
+    const float phi_sector=360/fcl_det->n_sectors;
     //------   TEMPORARY:  put in parameter table   ------------------
     //-----------------------------------------------------------------------
     // mk
-    ri = 8;
-    ra = 29.8;
-    padrows = 10.;
+    ri = fcl_det->r_in+0.25;
+    ra = fcl_det->r_out-0.25;
+    padrows = fcl_det->n_rows/2;
     // mk
     //     pad response function (prf)
 	
@@ -503,14 +509,12 @@ int StFtpcFastSimu::ffs_ini(FFS_FSPAR_ST *ffs_fspar,
     phisec = C_RAD_PER_DEG * phi_sector;
 
     //     a cluster is too close to lower sector boundary if it is
-    //     not more than 2 pads away (160 pads in 60 degrees, 
-    //     2 pads = .75 degrees = 0.013089969 rads)
-    sector_phi_min = 0.013089969;
+    //     not more than 2 pads away 
+    sector_phi_min = fcl_det->rad_per_gap/2 + 2*fcl_det->rad_per_pad;
 
     //     a cluster is too close to upper sector boundary if it is
-    //     not more than 3 pads away (160 pads in 60 degrees, 
-    //     160 -3 pads = 157 pads = 58.875 degrees = 1.0275626 rads)
-    sector_phi_max = 1.0275626;
+    //     not more than 2 pads away 
+    sector_phi_max = phisec-sector_phi_min;
 
     return TRUE;
   }
