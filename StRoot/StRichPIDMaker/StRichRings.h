@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichRings.h,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichRings.h,v 2.2 2000/11/01 17:42:08 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.h,v $
- *  Revision 2.1  2000/09/29 01:35:38  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/11/01 17:42:08  lasiuk
+ *  return containers and 3vectors by reference where applicable
  *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -40,8 +39,8 @@ public:
   StRichRings(StRichTrack* , StParticleDefinition* );  
   ~StRichRings();
   
-  vector<StThreeVectorF > getInnerPoints(int );
-  vector<StThreeVectorF > getOuterPoints(int );
+  vector<StThreeVectorF>& getInnerPoints(int );
+  vector<StThreeVectorF>& getOuterPoints(int );
 
   StRichTrack* getTrack();
   StParticleDefinition* getParticle();

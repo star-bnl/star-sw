@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichRings.cxx,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichRings.cxx,v 2.2 2000/11/01 17:42:05 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:38  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/11/01 17:42:05  lasiuk
+ *  return containers and 3vectors by reference where applicable
  *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -59,7 +58,8 @@ StRichRings::StRichRings(StRichTrack* track, StParticleDefinition* particle) {
 
 StRichRings::~StRichRings() {}
 
-vector<StThreeVectorF > StRichRings::getInnerPoints(int points/* number of points*/) {
+vector<StThreeVectorF>&
+StRichRings::getInnerPoints(int points/* number of points*/) {
   
   mInnerPoints.clear();
   mInnerPoints.resize(0);
@@ -82,7 +82,8 @@ vector<StThreeVectorF > StRichRings::getInnerPoints(int points/* number of point
   return mInnerPoints;
 }
 
-vector<StThreeVectorF > StRichRings::getOuterPoints(int points) {
+vector<StThreeVectorF>&
+StRichRings::getOuterPoints(int points) {
 
   mOuterPoints.clear();
   mOuterPoints.resize(0);
