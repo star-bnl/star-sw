@@ -9,6 +9,8 @@
 StDetectorDbRichScalers::StDetectorDbRichScalers(StMaker* maker){
     cout << "StDetectorDbRichScalers::StDetectorDbRichScalers" << endl;
     mRunNumber = 0;
+    mEventTime = 0;
+    mNumEntries = 0;
     mTimes = 0;
     mCTBWest = 0;
     mCTBEast = 0;
