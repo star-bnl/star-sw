@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.54 2000/01/31 21:29:19 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.55 2000/02/01 18:49:54 love Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.55  2000/02/01 18:49:54  love
+// Protect against empty TPC data
+//
 // Revision 1.54  2000/01/31 21:29:19  snelling
 // Made CC5 compatible (strstr in CC5 returns const char* if called
 // as strstr(const char*, const char *))
@@ -404,24 +407,30 @@ Int_t St_tcl_Maker::Make() {
 	
 	if (m_tclPixTransOn) {	  // call the pixel translation
 	  if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
-	  
+	  // Need to guard against zero size output tables
+          if(adcxyz->GetTableSize()){	  
 	  Int_t res = xyz_newtab(m_tpg_detector,
 				 m_tcl_sector_index,raw_sec_m,
 				 raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
 				 raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
 				 adcxyz,m_tsspar);
+	  
 	  if (res != kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
+	  }
 	}
 	
 	//     	TCL
         if(Debug()) printf("Starting %20s for sector %2d.\n","tcl",indx);
 	
+	  // Need to guard against zero size output tables
+          if(tpcluster->GetTableSize()){	  
 	Int_t tcl_res = tcl(m_tpg_pad_plane, m_tcl_sector_index, raw_sec_m,
                             raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
                             raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
                             tpcluster,tpseq);
+	  
         if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
-
+	  }
 	// Create morphology table only if needed
 	if (m_tclMorphOn) {
 	  if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
@@ -436,11 +445,14 @@ Int_t St_tcl_Maker::Make() {
 	if (sector_tot == 1) {k = -k;}
 	tcl_sector_index->CurrentSector = k;
         if(Debug()) printf("Starting %20s for sector %2d.\n","tph",indx);
+	  // Need to guard against zero size output tables
+          if(tpcluster->GetTableSize()){	  
 	Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
 			    m_tpg_pad_plane,
 			    pixel_data_in, pixel_data_out,
 			    tpseq, tpcluster, tphit);
         if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
+	  }      
       }
     }
 
@@ -533,7 +545,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.54 2000/01/31 21:29:19 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.55 2000/02/01 18:49:54 love Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
