@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.105 1999/08/11 13:30:31 fisyak Exp $
+// $Id: bfc.C,v 1.106 1999/09/02 16:13:52 fine Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -19,7 +19,7 @@ class StEventMaker; StEventMaker *evMk = 0;
 void Load(){
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-}
+  gSystem->Load("StBFChain");}
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Nevents=1,
