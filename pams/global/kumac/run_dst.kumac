@@ -58,6 +58,9 @@ return
 
        message ' run_dst: Calling fill_dst_run_summary'
        
+*  zero run summary if it exists
+tdm/table/rowcount [run_dst]/run_summary   1
+       
 ami/mod/call fill_dst_run_summary_
         [run_dst]/run_header _
         [dst]/event_header _
@@ -74,7 +77,7 @@ endif
 message ' run_dst: finished calling fill_dst_run_summary'
  return
  
-******************************************************
+
 ***************************************************************
 
 macro dst_ehead
@@ -101,6 +104,17 @@ RETURN
      macro/global/import *
 
        message ' run_dst: Calling fill_dst_event_summary'
+       
+       
+* check if event_summary table is full (i.e. we got an old one) and
+* then remove it and create a new one if it does
+       
+* rowcount [dst]/event_summary
+* if (staf_result(1).ne.0) then
+* rm [dst]/event_summary
+* tdm/newtable event_summary   dst_event_summary  1
+* endif
+	 
        
 ami/mod/call fill_dst_event_summary_
         [run_dst]/run_header _
