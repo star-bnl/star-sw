@@ -5,5 +5,5 @@ void LoadLogger() {
   gSystem->Load("liblog4cxx.so");
   gSystem->Load("St_base.so");
   gSystem->Load("StStarLogger.so");
-  StLoggerManager::Instance();
+  StLoggerManager::StarLoggerInit();
 }
