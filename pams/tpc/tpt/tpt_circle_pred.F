@@ -1,5 +1,8 @@
-* $Id: tpt_circle_pred.F,v 1.2 1998/01/27 00:35:43 fisyak Exp $
+* $Id: tpt_circle_pred.F,v 1.3 1998/04/07 16:28:53 sakrejda Exp $
 * $Log: tpt_circle_pred.F,v $
+* Revision 1.3  1998/04/07 16:28:53  sakrejda
+* bug in y coordinate calculation for rows with abs(tan alpha)<1.0 fixed
+*
 * Revision 1.2  1998/01/27 00:35:43  fisyak
 * Split sources
 *
@@ -32,7 +35,7 @@ C<---------------------------------------------------------------------
       INTEGER  n
 C
       n = 0
-      if(abs(as).gt.0.000001)then
+      if(abs(as).gt.abs(bs))then
         a = (1.0+bs**2/as**2)
         b = -2.0*(bs/as*(1.0/as - acent)+bcent)
         c = bcent**2+(acent-1.0/as)**2-r**2
@@ -57,8 +60,8 @@ C
         else
           xp(1) = (-b-sqrt(delta))/a*0.5
           xp(2) = (-b+sqrt(delta))/a*0.5
-          yp(1) = 1.0/as-xp(1)*bs/as
-          yp(2) = 1.0/as-xp(2)*bs/as
+          yp(1) = 1.0/bs-xp(1)*as/bs
+          yp(2) = 1.0/bs-xp(2)*as/bs
           n=2
           tpt_circle_pred = 0
         endif
