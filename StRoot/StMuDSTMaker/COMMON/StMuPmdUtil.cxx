@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdUtil.cxx,v 1.2 2004/04/14 17:15:57 subhasis Exp $
+ * $Id: StMuPmdUtil.cxx,v 1.3 2004/04/26 00:12:33 perev Exp $
  *
  * Class : StMuPmdUtil
  * Author: Supriya Das
@@ -9,6 +9,9 @@
  *              StEvent to StMuDst and vice versa
  * ****************************************************************
  * $Log: StMuPmdUtil.cxx,v $
+ * Revision 1.3  2004/04/26 00:12:33  perev
+ * include StMuPmdCluster.h added
+ *
  * Revision 1.2  2004/04/14 17:15:57  subhasis
  * Xin's TOF reinclusion
  *
@@ -20,6 +23,7 @@
 #include "StMuPmdUtil.h"
 #include "StEvent.h"
 #include "StEventTypes.h"
+#include "StMuPmdCluster.h"
 #include "StMuPmdCollection.h"
 
 #include "StPhmdDetector.h"
