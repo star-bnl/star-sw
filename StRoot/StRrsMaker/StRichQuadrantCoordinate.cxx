@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StRichQuadrantCoordinate.cxx,v 1.2 2000/02/08 23:45:48 lasiuk Exp $
+ * $Id: StRichQuadrantCoordinate.cxx,v 1.3 2000/02/29 18:06:27 lasiuk Exp $
  *
  * Author: brian Jan 20, 2000
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StRichQuadrantCoordinate.cxx,v $
+ * Revision 1.3  2000/02/29 18:06:27  lasiuk
+ * change operator<< to reflect proper x,y,z
+ *
  * Revision 1.2  2000/02/08 23:45:48  lasiuk
  * Default constructor initializer changed for CC4.2
  *
@@ -34,9 +37,9 @@ StRichQuadrantCoordinate::~StRichQuadrantCoordinate() {/**/}
 // Non-member Functions
 ostream& operator<<(ostream& os, const StRichQuadrantCoordinate& a)
 {
-    return os << "Rich_Quad: "
-              << a.position().z() << ", "
+    return os << "Rich_Quad: x,y,z "
+              << a.position().x() << ", "
               << a.position().y() << ", "
-              << a.position().x() << ": "
+              << a.position().z() << ": "
 	      << a.quadrant();
 }
