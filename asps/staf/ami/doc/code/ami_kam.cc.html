@@ -1,0 +1,271 @@
+<HTML>
+<PRE>
+<H2>file: ami/src/ami_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         ami_kam.c
+*:DESCRIPTION:  C KUIP Action Modules for <A HREF="ami_macros.h.html#AMI">AMI</A>
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      12dec95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#undef CORBA
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+
+#include "kuip.h"
+
+#include "<A HREF="ami_macros.h.html">ami_macros.h</A>"
+#include "<A HREF="ami_types.h.html">ami_types.h</A>"
+#include "<A HREF="ami_globals.h.html">ami_globals.h</A>"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_ami_count_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/COUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_ami_count_">kam_ami_count_(</A>){<A HREF="#kam_ami_count">kam_ami_count(</A>);}</B>
+<B>int <A NAME="kam_ami_count">kam_ami_count(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   printf("<A HREF="ami_macros.h.html#AMI">AMI</A>:\tObject count = %d \n",ami-&gt;count());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_ami_list_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/LIST
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_ami_list_">kam_ami_list_(</A>){<A HREF="#kam_ami_list">kam_ami_list(</A>);}</B>
+<B>int <A NAME="kam_ami_list">kam_ami_list(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+
+   if( !ami-&gt;<A HREF="amiClasses.cc.html#list">list</A>() ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_ami_call_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/MODULE/RANK
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_ami_call_">kam_ami_call_(</A>){<A HREF="#kam_ami_call">kam_ami_call(</A>);}</B>
+<B>int <A NAME="kam_ami_call">kam_ami_call(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* PAM name */
+   STRING_SEQ_T tables;		/* table names */
+
+//- Get table names. -**
+   tables._length = tables._maximum = npars - 1;
+   tables._buffer = new char*[tables._length];
+   for( int i=0;i&lt;tables._length;i++ ){
+      tables._buffer[i] = NULL;
+      char* tbl = ku_gets();
+      tables._buffer[i] = new char[strlen(tbl) +1];
+      strcpy(tables._buffer[i],tbl);
+   }
+
+//- Tell the <A HREF="ami_macros.h.html#AMI">AMI</A> Broker to invoke the PAM.
+   if( !ami-&gt;<A HREF="amiClasses.cc.html#callInvoker">callInvoker</A>(name, tables) ){
+      EML_ERROR(KAM_METHOD_FAILURE);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_amiinvoker_rank_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/MODULE/RANK PAM
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_amiinvoker_rank_">kam_amiinvoker_rank_(</A>){<A HREF="#kam_amiinvoker_rank">kam_amiinvoker_rank(</A>);}</B>
+<B>int <A NAME="kam_amiinvoker_rank">kam_amiinvoker_rank(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* PAM name */
+
+   amiInvoker* pam;		/* amiInvoker object */
+
+   if( !ami-&gt;<A HREF="amiClasses.cc.html#findInvoker">findInvoker</A>(name, pam) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   printf("<A HREF="ami_macros.h.html#AMI">AMI</A>:\tAnalysis module <A HREF="amiClasses.cc.html#rank">rank</A> = %d \n",pam-&gt;<A HREF="amiClasses.cc.html#rank">rank</A>());
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_amiinvoker_show_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/MODULE/TBLSPEC PAM [ NTBL ]
+*:&lt;---------------------------------------------------------------------
+*/
+/*=HACK========================== THIS SUBROUTINE SHOULD BE CHANGED. =*/
+<B>void <A NAME="kam_amiinvoker_show_">kam_amiinvoker_show_(</A>){<A HREF="#kam_amiinvoker_show">kam_amiinvoker_show(</A>);}</B>
+<B>int <A NAME="kam_amiinvoker_show">kam_amiinvoker_show(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* PAM name */
+   char* opts = ku_gets();	/* Options */
+
+   amiInvoker* pam;		/* amiInvoker object */
+
+   if( !ami-&gt;<A HREF="amiClasses.cc.html#findInvoker">findInvoker</A>(name, pam) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+   char *c = pam-&gt;<A HREF="amiClasses.cc.html#tableSpec">tableSpec</A>(-1);
+   printf("<A HREF="ami_macros.h.html#AMI">AMI</A>:\tTable Specification = \n%s \n",c);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/***********************************************************************
+************************************************************************
+********	THE FOLLOWING COMMANDS ARE NOT IMPLEMENTED.	********
+********	SHOULD THEY BE?					********
+************************************************************************
+***********************************************************************/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_amiinvoker_init_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/MODULE/INIT PAM
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_amiinvoker_init_">kam_amiinvoker_init_(</A>){<A HREF="#kam_amiinvoker_init">kam_amiinvoker_init(</A>);}</B>
+<B>int <A NAME="kam_amiinvoker_init">kam_amiinvoker_init(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* PAM name */
+
+   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_amiinvoker_start_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/MODULE/START PAM
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_amiinvoker_start_">kam_amiinvoker_start_(</A>){<A HREF="#kam_amiinvoker_start">kam_amiinvoker_start(</A>);}</B>
+<B>int <A NAME="kam_amiinvoker_start">kam_amiinvoker_start(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* PAM name */
+
+   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_amiinvoker_stop_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="ami_macros.h.html#AMI">AMI</A>/MODULE/STOP PAM
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_amiinvoker_stop_">kam_amiinvoker_stop_(</A>){<A HREF="#kam_amiinvoker_stop">kam_amiinvoker_stop(</A>);}</B>
+<B>int <A NAME="kam_amiinvoker_stop">kam_amiinvoker_stop(</A>)</B>
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char* name = ku_gets();	/* PAM name */
+
+   EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>

@@ -1,0 +1,337 @@
+<HTML>
+<PRE>
+<H2>file: ami/src/amiClasses.cc</H2>
+
+
+//:Copyright 1995, Lawrence Berkeley National Laboratory
+//:&gt;--------------------------------------------------------------------
+//:FILE:        amiClasses.C
+//:DESCRIPTION: <A HREF="ami_macros.h.html#AMI">AMI</A> Classes
+//:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+//:BUGS:        06feb96-Broker does not care whether table is RO/WO/RW
+//:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     12dec95-v000a-cet- creation
+//:&lt;--------------------------------------------------------------------
+
+//:----------------------------------------------- INCLUDES           --
+#include "duiLib.h"
+#include "<A HREF="ami_macros.h.html">ami_macros.h</A>"
+#include "<A HREF="amiClasses.hh.html">amiClasses.hh</A>"
+
+//:----------------------------------------------- MACROS             --
+
+//:=============================================== CLASS              ==
+// amiInvoker
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>amiInvoker:: <A NAME="amiInvoker">amiInvoker(</A>const char * name, long <A HREF="#rank">rank</A></B>
+		, <A HREF="ami_types.h.html#FNC_PTR_T">FNC_PTR_T</A> pam
+		, const STRING_SEQ_T& specs)
+		: socObject(name, "amiInvoker") {
+   myPtr = (SOC_PTR_T)this;
+   if( <A HREF="#rank">rank</A> != specs._length){
+      printf("ERROR -- Wrong <A HREF="#rank">rank</A> of analysis module\n");
+      myRank=-1;
+      return;
+   }
+   myRank = <A HREF="#rank">rank</A>;
+   myTblSpecs = new char* [myRank];
+   for( int i=0;i&lt;myRank;i++ ){
+      myTblSpecs[i] = new char[strlen(specs._buffer[i]) +1];
+      strcpy(myTblSpecs[i], specs._buffer[i]);
+   }
+   myPamFtn = pam;
+}
+
+//----------------------------------
+<B>amiInvoker:: ~<A NAME="amiInvoker">amiInvoker(</A>) { }</B>
+
+//:----------------------------------------------- ATTRIBUTES         --
+<B>long amiInvoker::  <A NAME="rank">rank</A> () {</B>
+   return myRank;
+}
+
+//----------------------------------
+<B><A HREF="ami_types.h.html#FNC_PTR_T">FNC_PTR_T</A> amiInvoker::  <A NAME="pFunction">pFunction</A> () {</B>
+   return myPamFtn;
+}
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+<B>STAFCV_T amiInvoker:: <A NAME="call">call</A> (<A HREF="ami_types.h.html#TABLE_SEQ_T">TABLE_SEQ_T</A>& tbl) {</B>
+
+//- Check number of tables in sequence.
+   if( tbl._length != <A HREF="#rank">rank</A>() ){
+      EML_PRINTF("PAM = (%s) \n",name());
+      EML_ERROR(WRONG_PAM_RANK);
+   }
+//- Create arrays of TAS-structs for tables.
+   TABLE_HEAD_ST **h;
+   char **d;
+   if( tbl._length &gt; 0 ){
+      h = new TABLE_HEAD_ST* [tbl._length];
+      d = new char* [tbl._length];
+   }
+   for( int i=0;i&lt;tbl._length;i++ ){
+//- Check types of tables in sequence.
+      if( !((tbl._buffer[i])-&gt;isType(myTblSpecs[i])) ){
+	 EML_PRINTF("table #%d (%s) is wrong type\n",i
+			,(tbl._buffer[i])-&gt;name());
+	 delete[] h;
+	 delete[] d;
+	 EML_ERROR(WRONG_TABLE_TYPE);
+      }
+//- Convert table objs to 2-struct (TAS-like) tables.
+      if( !((tbl._buffer[i])-&gt;cvtTasStructs(h[i],d[i])) ){
+	 printf("table #%d (%s) can't be converted\n",i
+			,(tbl._buffer[i])-&gt;name());
+	 delete[] h;
+	 delete[] d;
+	 EML_ERROR(TABLE_CONVERSION_FAILURE);
+      }
+   }
+//- Call user-written Physics Analysis Module.
+   STAFCV_T status = <A HREF="ami_pamSwitch.cc.html#ami_pamSwitch">ami_pamSwitch(</A>myRank, myPamFtn, h, d);
+
+//- Setting NOK for tables.
+   for( i=0;i&lt;tbl._length;i++ ){
+      (tbl._buffer[i])-&gt;rowCount(h[i]-&gt;nok);
+   }
+//- Deleteing TAS-structures.
+   if( tbl._length &gt; 0 ){
+      delete[] h;
+      delete[] d;
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T amiInvoker:: <A NAME="init">init</A> () {</B>
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T amiInvoker:: <A NAME="start">start</A> () {</B>
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>STAFCV_T amiInvoker:: <A NAME="stop">stop</A> () {</B>
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+<B>char * amiInvoker:: <A NAME="tableSpec">tableSpec</A> (long ntbl) {</B>
+
+   char * c = new char[strlen(myTblSpecs[ntbl]) + 1];
+   strcpy(c,myTblSpecs[ntbl]);
+   return c;
+}
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+// **NONE**
+
+// ---------------------------------------------------------------------
+
+//:=============================================== CLASS              ==
+// amiBroker
+
+//:----------------------------------------------- CTORS & DTOR       --
+<B>amiBroker:: <A NAME="amiBroker">amiBroker(</A>const char * name)</B>
+		: socObject(name, "amiBroker") {
+   myPtr = (SOC_PTR_T)this;
+   lock(TRUE);
+}
+
+//----------------------------------
+<B>amiBroker:: ~<A NAME="amiBroker">amiBroker(</A>) {</B>
+}
+
+//:----------------------------------------------- ATTRIBUTES         --
+//:**NONE**
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+<B>STAFCV_T amiBroker:: <A NAME="callInvoker">callInvoker</A> (const char * name</B>
+		, const STRING_SEQ_T& tables) {
+
+//- Find the correct invoker.
+   amiInvoker* invoker=NULL;
+   if( !<A HREF="#findInvoker">findInvoker</A>(name, invoker) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+//- Check number of tables passed.
+   if( tables._length &gt; <A HREF="ami_macros.h.html#AMI_MAX_TABLES">AMI_MAX_TABLES</A> ){
+      EML_ERROR(TOO_MANY_TABLES);
+   }
+//- Find tables and marshal into sequence.
+//- (or create tables when they do not exist)
+   <A HREF="ami_types.h.html#TABLE_SEQ_T">TABLE_SEQ_T</A> tbls;
+   tbls._length = tables._length;
+   tbls._maximum = tables._maximum;
+   tbls._buffer = new tdmTable* [tables._maximum];
+
+   for( int i=0;i&lt;tables._length;i++ ){
+      if( !dui-&gt;findTablePath(tables._buffer[i]
+			,tbls._buffer[i])
+      &&  !(dui-&gt;mkTable(tables._buffer[i]
+			,invoker-&gt;<A HREF="#tableSpec">tableSpec</A>(i),0)
+            &&dui-&gt;findTablePath(tables._buffer[i]
+			,tbls._buffer[i]))
+      ){
+	 EML_ERROR(OBJECT_NOT_FOUND);
+      }
+   }
+//- Call the actual invoker object.
+   invoker-&gt;<A HREF="#call">call</A>(tbls);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T amiBroker:: <A NAME="deleteInvoker">deleteInvoker</A> (const char * name ) {</B>
+   if( !soc-&gt;deleteObject(name,"amiInvoker") ){
+      EML_ERROR(CANT_DELETE_OBJECT);
+   }
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T amiBroker:: <A NAME="findInvoker">findInvoker</A> (const char * name</B>
+		, amiInvoker*& invoker ) {
+   socObject* obj;
+   if( !soc-&gt;findObject(name,"amiInvoker",obj) ){
+      invoker = NULL;
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   invoker = <A HREF="ami_macros.h.html#AMIINVOKER">AMIINVOKER(</A>obj);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T amiBroker:: <A NAME="getInvoker">getInvoker</A> (IDREF_T id</B>
+		, amiInvoker*& invoker ) {
+   socObject* obj;
+   if( !soc-&gt;getObject(id,obj) ){
+      invoker = NULL;
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   if( 0 != strcmp(obj-&gt;type(),"amiInvoker") ){
+      invoker = NULL;
+      EML_ERROR(WRONG_OBJECT_TYPE);
+   }
+   invoker = <A HREF="ami_macros.h.html#AMIINVOKER">AMIINVOKER(</A>obj);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T amiBroker:: <A NAME="list">list</A> () {</B>
+   socObject* obj;
+
+   printf("\n"
+"**********************************************************************"
+   "\n"
+"************** <A HREF="ami_macros.h.html#AMI">AMI</A> - Analysis Module Interface listing ***************"
+   "\n"
+"**********************************************************************"
+   "\n"
+"* IDREF * NAME            * TYPE            * RANK *                  "
+   "\n"
+"**********************************************************************"
+    "\n");
+   for( int i=0;i&lt;count();i++ ){
+      if( soc-&gt;getObject(entry(i),obj) ){
+         if( 0 == strcmp("amiInvoker",obj-&gt;type()) ){
+            printf("* %5d * %-15s * %-15s * %4d * \n"
+                        ,obj-&gt;idRef(),obj-&gt;name(),obj-&gt;type()
+			,<A HREF="ami_macros.h.html#AMIINVOKER">AMIINVOKER(</A>obj)-&gt;<A HREF="#rank">rank</A>()
+                        );
+         }
+      } else {
+         printf("* %5d * %-15s * %-15s * %4s * \n"
+                        ,entry(i),"**DELETED**","**DELETED**","***");
+      }
+   }
+   printf(
+"**********************************************************************"
+   "\n\n");
+
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+//----------------------------------
+<B>STAFCV_T amiBroker:: <A NAME="newInvoker">newInvoker</A> (const char * name</B>
+		, long <A HREF="#rank">rank</A>
+		, <A HREF="ami_types.h.html#FNC_PTR_T">FNC_PTR_T</A> pam
+		, const STRING_SEQ_T& specs) {
+   IDREF_T id;
+   if( soc-&gt;idObject(name,"amiInvoker",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static amiInvoker* p;
+   p = new <U>amiInvoker(</U>name,<A HREF="#rank">rank</A>,pam,specs);        //OVERLOAD CALL: amiInvoker: <A HREF="amiClasses.cc.html#amiInvoker">amiClasses.cc(?)</A>, <A HREF="amiClasses.cc.html#amiInvoker">amiClasses.cc(?)</A>
+   if( !soc-&gt;idObject(name,"amiInvoker",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+
+}
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+
+// ---------------------------------------------------------------------
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
