@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.59 2003/09/30 18:15:39 starlib Exp $
+# $Id: ConsDefs.pm,v 1.60 2003/10/08 19:32:04 starlib Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -235,7 +235,13 @@
             $SOFLAGS = $CXXOPT;
         } else {
             if ($PGI) { 
-		$CLIBS  = "-L$PGI/linux86/lib -lpgc ";
+		# BEWARE : PGI introduced a libpgc.so at version 4.0
+		# and we use to have a .a only
+		if ( -e "$PGI/linux86/lib/libpgc.a"){
+		    $CLIBS  = " $PGI/linux86/lib/libpgc.a ";
+		} else {
+		    $CLIBS  = " -L$PGI/linux86/lib -lpgc ";
+		}
 	    }
 	    $CLIBS .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 ".
 		" -lm -ldl  -rdynamic ";
@@ -253,7 +259,19 @@
 
         if ($PGI) {
             $FC    = "pgf77";
-            $FLIBS = "-L" . $PGI . "/linux86/lib -lpgftnrtl -lpgc";
+	    # BEWARE : PGI introduced a libpgc.so at version 4.0
+	    # and we use to have a .a only
+	    if ( -e "$PGI/linux86/lib/lpgftnrtl.a"){
+		$FLIBS = " $PGI/linux86/lib/lpgftnrtl.a ";
+	    } else {
+		$FLIBS = " -L$PGI/linux86/lib -lpgftnrtl ";
+	    }
+	    if ( -e "$PGI/linux86/lib/libpgc.a"){
+		$FLIBS .= " $PGI/linux86/lib/libpgc.a ";
+	    } else {
+		$FLIBS .= " -L$PGI/linux86/lib -lpgc";
+	    }
+
 	    if( -e "$OPTSTAR/lib/libpgf77S.so"){
 		$FLIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
 		if( -e "$OPTSTAR/lib/libpgf77A.a"){
