@@ -61,9 +61,9 @@ class StiKalmanTrack : public StiTrack
   StiHit * getHit(int index);
   StiKalmanTrackNode * findHit(StiHit * h);
   
-  void initialize(double eta,
-		  double curvature,
+  void initialize(double curvature,
 		  double tanl,
+		  const StThreeVectorD& origin,
 		  const hitvector &);
   StiKalmanTrackNode *  getNodeNear(double x) const;
   StThreeVector<double> getPointNear(double x) const;

@@ -8,6 +8,9 @@
 #include "StiKalmanTrack.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
+#include "StiGeometryTransform.h"
+//#include "StiKalmanTrackNodeFactory
+//#include "StEventTypes.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -288,74 +291,90 @@ StiHit * StiKalmanTrack::getHit(int index)
   return 0;
 }
 
-void StiKalmanTrack::initialize(double eta,
-				double curvature,
+void StiKalmanTrack::initialize(double curvature,
 				double tanl,
+				const StThreeVectorD& origin,
 				const hitvector & v)
 {
-  //cout <<"StiKalmanTrack::initialize()"<<endl;
-  if (!trackNodeFactory) 
-    {
-      cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
-    }
-
-  double alpha;
-  
-  hitvector::const_iterator it;
-  StiKalmanTrackNode * newNode;
-  StiHit * hit;
+  // Input parameters_________________________________________
+  // origin    : origin of the track in global coordinates
+  // curvature : 1/Radius of the track
+  // tanl      : tan(pith angle)
+  // v         : vector of hits to be added to this track
+  //
+  // Generated parameters_____________________________________
   // state[0] = y  ordinate
   // state[1] = z  position along beam axis
   // state[2] = eta=C*x0
   // state[3] = C  (local) curvature of the track
   // state[4] = tan(l) 
+  // e[0] = fC00;
+  // e[1] = fC10;e[2] = fC11;
+  // e[3] = fC20;e[4] = fC21;e[5] = fC22;
+  // e[6] = fC30;e[7] = fC31;e[8] = fC32;
+  // e[9] = fC33;e[10]= fC40;e[11]= fC41;e[12]= fC42;e[13]= fC43;e[14]= fC44;
+
+  //cout <<"StiKalmanTrack::initialize()"<<endl;
+  if (!trackNodeFactory) 
+    {
+      cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
+      return;
+    }
+  StiGeometryTransform * t = StiGeometryTransform::instance();
+  StiKalmanTrackNodeFactory * fac = dynamic_cast<StiKalmanTrackNodeFactory *>(trackNodeFactory);
+  StThreeVectorD stiOrigin;
+  double alpha,alphaP,eta;  
+  hitvector::const_iterator it;
   double state[5];  
   double error[15];
-  state[2]=eta;
+
+  // These are constant for all hits
   state[3]=curvature;
   state[4]=tanl;
-  //e[0] = fC00;
-  //e[1] = fC10;
-  //e[2] = fC11;
-  //e[3] = fC20;
-  //e[4] = fC21;
-  //e[5] = fC22;
-  //e[6] = fC30;
-  //e[7] = fC31;
-  //e[8] = fC32;
-  //e[9] = fC33;
-  //e[10] = fC40;
-  //e[11] = fC41;
-  //e[12] = fC42;
-  //e[13] = fC43;
-  //e[14] = fC44;
-  error[0] = 1.;
-  error[1] = 0.;
-  error[2] = 1.;
-  error[3] = 0.;
-  error[4] = 0.;
-  error[5] = 1.;
-  error[6] = 0.;
-  error[7] = 0.;
-  error[8] = 0.;
-  error[9] = 1.;
-  error[10] = 0.;
-  error[11] = 0.;
-  error[12] = 0.;
-  error[13] = 0.;
-  error[14] = 1.;
+  // For the time being set a diagonal error matrx
+  error[0] = 1.;  
+  error[1] = 0.; error[2] = 1.;  
+  error[3] = 0.; error[4] = 0.; error[5] = 1.;  
+  error[6] = 0.; error[7] = 0.; error[8] = 0.;  error[9]  = 1.;  
+  error[10]= 0.; error[11] = 0.;error[12] = 0.; error[13] = 0.;  error[14] = 1.;
 
+  // do the transfer here
+  StiHit * hit;
+  StiKalmanTrackNode * node  = 0;
+  StiKalmanTrackNode * pNode = 0;
   int i =0;
-  for (it=v.begin(); it!=v.end(); ++it) {
-    hit = *it;
-    //cout <<"Adding Hit: "<<(*(*it))<<endl;
-    //newNode = addHit(hit); this is done in the set call below...
-    state[0] = hit->y(); 
-    state[1] = hit->z(); 
-    alpha = hit->detector()->getPlacement()->getNormalRefAngle();
-    newNode->set(i, hit, alpha, hit->x(), state,error, 0., 0.);
-    i++;
-  }
+  for (it=v.begin(); it!=v.end(); ++it)
+    {
+      hit = *it;      //cout <<"Adding Hit: "<<(*(*it))<<endl;
+      alpha = hit->detector()->getPlacement()->getNormalRefAngle();
+      node = fac->getObject();
+      if (node==0)
+	{
+	  cout << "StiKalmanTrackNode::initilize() - Severe Error - "
+	       << "trackNodeFactor returned null object" << endl;
+	  return;
+	}
+      if (pNode==0)
+	alphaP = -99999.; // no parent, set crazy value
+      else
+	alphaP = pNode->fAlpha; // value of the parent
+      if (alphaP!=alpha)
+	{
+	  stiOrigin = t->operator()(origin, alpha);
+	  eta = curvature*stiOrigin.x();
+	}
+      state[0] = hit->y(); 
+      state[1] = hit->z(); 
+      state[2] = eta;
+      node->set(i, hit, alpha, hit->x(), state,error, 0., 0.);
+      if (pNode==0) 
+	  firstNode = node;
+      else
+	  pNode->add(node);
+      pNode = node;
+      i++;
+    }
+  lastNode = node;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
