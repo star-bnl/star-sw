@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.9 2000/06/19 01:32:16 perev Exp $
+ * $Id: StEventTypes.h,v 2.10 2000/08/17 00:12:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.9  2000/06/19 01:32:16  perev
- * Thomas StEvent branches added
+ * Revision 2.10  2000/08/17 00:12:55  ullrich
+ * Added StTptTrack.h
  *
  * Revision 2.9  2000/06/19 01:32:16  perev
  *  Thomas StEvent branches added
@@ -105,6 +105,7 @@
 #include "StTpcPixel.h"
 #include "StTpcSectorHitCollection.h"
 #include "StTpcSoftwareMonitor.h"
+#include "StTptTrack.h"
 #include "StTrack.h"
 #include "StTrackDetectorInfo.h"
 #include "StTrackFitTraits.h"
