@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.14 2001/05/25 16:31:20 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.15 2001/05/25 17:46:59 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.15  2001/05/25 17:46:59  lansdell
+// commented out unnecessary emccol cout statement
+//
 // Revision 2.14  2001/05/25 16:31:20  lansdell
 // more updates to qa shift histograms
 //
@@ -1554,7 +1557,7 @@ void StEventQAMaker::MakeHistEMC() {
     gMessMgr->Info(" *** in StEventQAMaker - filling EMC histograms ");
 
   StEmcCollection* emccol = event->emcCollection();
-  cout <<"emccol = "<<emccol<<"\n";
+  //cout <<"emccol = "<<emccol<<"\n";
   if (!emccol) return;
 
   //Get vertex
