@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.88 2004/02/02 03:02:41 perev Exp $
+// $Id: doEvents.C,v 1.89 2004/02/24 16:45:26 fisyak Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -108,6 +108,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   //
   // First load some shared libraries we need
   //
+  gSystem->Load("libGeom");
   gSystem->Load("libTable");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -343,6 +344,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.89  2004/02/24 16:45:26  fisyak
+// Add load of libGeom
+//
 // Revision 1.88  2004/02/02 03:02:41  perev
 // Defence against qaflag==0
 //
