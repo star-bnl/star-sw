@@ -1,6 +1,6 @@
 #include <iostream>
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
-#include "StiTpc/StiTpcIsActiveFunctor.h"
+#include "StiTpcIsActiveFunctor.h"
 
 StDetectorDbTpcRDOMasks *StiTpcIsActiveFunctor::s_pRdoMasks = 0;
 

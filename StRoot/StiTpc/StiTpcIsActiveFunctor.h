@@ -10,7 +10,7 @@
 #ifndef STI_TPC_IS_ACTIVE_FUNCTOR
 #define STI_TPC_IS_ACTIVE_FUNCTOR
 
-#include "StiTpc/StiIsActiveFunctor.h"
+#include "Sti/StiIsActiveFunctor.h"
 
 class StDetectorDbTpcRDOMasks;
 

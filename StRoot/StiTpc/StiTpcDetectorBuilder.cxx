@@ -4,8 +4,6 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
 #include "StTpcDb/StTpcDimensionsI.h"
-#include "StiTpc/StiTpcDetectorBuilder.h" 
-#include "StiTpc/StiTpcIsActiveFunctor.h"
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
 #include "Sti/StiMaterial.h"
@@ -18,6 +16,9 @@
 #include "Sti/Base/Messenger.h"
 #include <stdio.h>
 #include "Sti/StiHitErrorCalculator.h"
+
+#include "StiTpcDetectorBuilder.h" 
+#include "StiTpcIsActiveFunctor.h"
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder()
   : StiDetectorBuilder("TpcBuilder")

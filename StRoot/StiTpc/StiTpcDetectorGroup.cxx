@@ -1,8 +1,8 @@
 #include <stdexcept>
 #include "StEvent.h"
-#include "StiTpc/StiTpcDetectorGroup.h"
-#include "StiTpc/StiTpcDetectorBuilder.h"
-#include "StiTpc/StiTpcHitLoader.h"
+#include "StiTpcDetectorGroup.h"
+#include "StiTpcDetectorBuilder.h"
+#include "StiTpcHitLoader.h"
 
 
 StiTpcDetectorGroup::StiTpcDetectorGroup(bool active)
