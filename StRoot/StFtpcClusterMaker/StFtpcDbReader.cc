@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.6 2001/07/12 10:26:34 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.7 2001/08/16 18:32:20 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.7  2001/08/16 18:32:20  jcs
+// set value of tzero = 1.937
+//
 // Revision 1.6  2001/07/12 10:26:34  jcs
 // temporarily set mMicrosecondsPerTimeBin and mTZero in code instead of in MySQLDB
 //
@@ -143,10 +146,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
 
-//  mTZero              = 0.0;
-//  mTZero              = 0.934;
-//  mTZero              = 1.5;
-    mTZero              = 1.385;
+    mTZero              = 1.937;
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
@@ -266,10 +266,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
 
-//  mTZero              = 0.0;
-//  mTZero              = 0.934;
-//  mTZero              = 1.5;
-    mTZero              = 1.385;
+    mTZero              = 1.937;
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
