@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.6 2000/06/14 08:20:19 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.7 2000/07/03 12:38:06 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.7  2000/07/03 12:38:06  jcs
+// globtrk - save unconstrained fit,impact parameter and id for preVertex
+//
 // Revision 1.6  2000/06/14 08:20:19  jcs
 // Combine the 2 loops over the track hits into 1
 //
@@ -63,6 +66,7 @@
 #include "fill_ftpc_dst.h"
 #include "StDetectorId.h"
 #include "StVertexId.h"
+#include "StTrackMethod.h"
 #include "StDedxMethod.h"
 #include "math_constants.h"
 
@@ -224,8 +228,9 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
       }
 
 //  Track finding and track fitting method 
-//   (FTPC Current - set bit 11 )          
-     dst_track[dst_track_h->nok].method = (1<<11);
+//   (Method: FTPC Conformal Mapping - set bit 10 )          
+//   (Fitter: kHelix2StepId)
+     dst_track[dst_track_h->nok].method = (1<<10) + (1<<kHelix2StepId);
 
 //  Geant particle ID number for mass hypothesis used in tracking
 //   (Currently not set for FTPC)                               
@@ -240,22 +245,23 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 //  Charge 
     dst_track[dst_track_h->nok].icharge      = fptrack[itrk].q;
 
-//  Initialized to zero by FTPC dst filler module
-    dst_track[dst_track_h->nok].id_start_vertex  = 0;
+//  If this is a primary track candidate, fptrack[itrk].id_start_vertex = -preVertx.id 
+    dst_track[dst_track_h->nok].id_start_vertex  = fptrack[itrk].id_start_vertex*10;
 
 
 //  radius at start of track (cm) 
     dst_track[dst_track_h->nok].r0   = 
-           sqrt(fptrack[itrk].v[0]*fptrack[itrk].v[0] 
-                 + fptrack[itrk].v[1]*fptrack[itrk].v[1]);
+           sqrt(dst_track[dst_track_h->nok].x_first[0]*dst_track[dst_track_h->nok].x_first[0]
+              + dst_track[dst_track_h->nok].x_first[1]*dst_track[dst_track_h->nok].x_first[1]);
 
 //  azimuthal angle at start of track (deg)
     dst_track[dst_track_h->nok].phi0 = 
-                 atan2(fptrack[itrk].v[1],fptrack[itrk].v[0])
+                 atan2(dst_track[dst_track_h->nok].x_first[1],
+                       dst_track[dst_track_h->nok].x_first[0])
                      * C_DEG_PER_RAD;
 
 //  z-coordinate at start of track 
-    dst_track[dst_track_h->nok].z0           = fptrack[itrk].v[2];
+    dst_track[dst_track_h->nok].z0 = dst_track[dst_track_h->nok].x_first[2];
 
 //  momentum angle at start 
     dst_track[dst_track_h->nok].psi = 
@@ -327,7 +333,7 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].length  = sqrt(xsq + ysq + zsq);
 
 
-    dst_track[dst_track_h->nok].impact  = 0;
+    dst_track[dst_track_h->nok].impact  = fptrack[itrk].impact;
 
 //  Maximum number of points 
     dst_track[dst_track_h->nok].n_max_point  = fptrack[itrk].nmax;
