@@ -14,10 +14,11 @@
 #include "StiPlacement.h"
 #include "StiHit.h"
 #include "StiMaterial.h"
-
+class StiMaker;
 class StiDetector;
 class StiMaterial;
 class Messenger;
+class StiElossCalculator;
   
 typedef enum {
   kFailed = -1,         // could not find intersection
@@ -141,13 +142,13 @@ public:
   int  locate(StiPlacement*place,StiShape*sh);
   int  propagate(double x,int option);
   void propagateError();
-  void propagateMCS(StiKalmanTrackNode * previousNode,
-		    float elossSign);
+  void propagateMCS(StiKalmanTrackNode * previousNode, const StiDetector * tDet);
   
   /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
   /// the track at that point.
   StThreeVector<double> getPointAt(double xk) const;
   
+  void nudge();
   double evaluateChi2(const StiHit *hit); 
   void updateNode(); 
   void rotate(double alpha); 
@@ -175,6 +176,8 @@ public:
 
   double getX0() const;
   double getGasX0() const;
+  double getDensity() const;
+  double getGasDensity() const;
 
   /// rotation angle of local coordinates wrt global coordinates
 
@@ -212,8 +215,11 @@ public:
   short int nullCount;
   short int contiguousHitCount;
   short int contiguousNullCount;
+
+  static StiMaker * maker;
   
  protected:   
+  static const StiElossCalculator * _elossCalculator;
   const StiDetector * _detector;
   static Messenger &  _messenger;
 
@@ -361,7 +367,7 @@ inline double StiKalmanTrackNode::getP() const
 
 inline double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2)
 {
-  return 14.1*14.1/(beta2*p2*1e6)*relRadThickness;
+  return 14.1*14.1*relRadThickness/(beta2*p2*1e6);
 }
 
 //stl helper functor
@@ -471,6 +477,22 @@ inline double StiKalmanTrackNode::getGasX0() const
   if (!det)
     return 0.;
   return det->getGas()->getX0();
+}
+
+inline double StiKalmanTrackNode::getDensity() const
+{
+  const StiDetector * det = getDetector();
+  if (!det)
+    return 0.;
+  return det->getMaterial()->getDensity();
+}
+
+inline double StiKalmanTrackNode::getGasDensity() const
+{
+  const StiDetector * det = getDetector();
+  if (!det)
+    return 0.;
+  return det->getGas()->getDensity();
 }
 
 
