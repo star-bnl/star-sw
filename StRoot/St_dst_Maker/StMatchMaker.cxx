@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.6 1999/07/17 00:31:24 genevb Exp $
+// $Id: StMatchMaker.cxx,v 1.7 1999/07/28 02:18:19 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.7  1999/07/28 02:18:19  caines
+// Add in kalman filter flags
+//
 // Revision 1.6  1999/07/17 00:31:24  genevb
 // Use StMessMgr
 //
@@ -56,11 +59,11 @@ ClassImp(StMatchMaker)
   m_est_ctrl(0)
 {
   drawinit=kFALSE;
-  m_scenario  = 8;
+  m_scenario  = 0;
   m_svtchicut = 0;
-  m_useglobal = 2;
-  m_usesvt    = 1;
-  m_usetpc    = 1;
+  m_useglobal = 4;
+  m_usesvt    = 0;
+  m_usetpc    = 4;
   m_usevert   = 0;
   m_flag      = 2;
 }
@@ -86,26 +89,38 @@ Int_t StMatchMaker::Init(){
   //egr 
   m_egr_egrpar = (St_egr_egrpar *) params("egrpars/egr_egrpar");  
   AddConst(m_egr_egrpar);
+  m_egr_egrpar->ReAllocate(2);
+  m_egr_egrpar->SetNRows(2);
   egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
   egr_egrpar->scenario =   0;
   egr_egrpar->mxtry =     10;
   egr_egrpar->minfit =     2;
-  egr_egrpar->prob[0] =    2;
-  egr_egrpar->prob[1] =    2;
+  egr_egrpar->prob[0] =    10;
+  egr_egrpar->prob[1] =    10;
   memset(egr_egrpar->debug, 0, 9*sizeof(Int_t));  
   egr_egrpar->debug[0] =   1; 
   egr_egrpar->svtchicut =  0;
+  // Helix
   egr_egrpar->usetpc =     1;
+  //Kalman
+  // egr_egrpar->usetpc =     4;
   egr_egrpar->usesvt =     0;
   egr_egrpar->usevert =    0;
+  // Helix
   egr_egrpar->useglobal =  2;
+  //Kalman
+  //egr_egrpar->useglobal =     4;
   //  egr_egrpar->scenario  = m_scenario;
   //  egr_egrpar->svtchicut = m_svtchicut;
   //  egr_egrpar->useglobal = m_useglobal;
   //  egr_egrpar->usetpc    = m_usetpc;
   //  egr_egrpar->usesvt    = m_usesvt; 
   //  egr_egrpar->usevert   = m_usevert;
-  
+
+  //Use this as the GEANT pid to be used for the kalman filter for now 
+  egr_egrpar++;
+  egr_egrpar->useglobal = 8;
+
   St_DataSetIter  svtpars(GetInputDB("params/svt"));
   m_svt_shape      = (St_svg_shape   *) svtpars("svgpars/shape");
   m_svt_config     = (St_svg_config  *) svtpars("svgpars/config");
@@ -177,7 +192,7 @@ Int_t StMatchMaker::Make(){
   if (!groups)    {groups = new St_sgr_groups("groups",1); AddGarb(groups);}
   if (!scs_spt)   {scs_spt = new St_scs_spt("scs_spt",1); AddGarb(scs_spt);}
   // 			Case running est tpc -> Si space point tracking
-  if ( !(svtracks && svthits) ){
+  if ( !(svtracks) && svthits ){
     groups = new St_sgr_groups("groups",10000); AddGarb(groups);
     stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
