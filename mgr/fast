@@ -1,6 +1,9 @@
 #!/usr/local/bin/tcsh
-#  $Id: fast,v 1.4 1998/05/15 21:44:37 fisyak Exp $
+#  $Id: fast,v 1.5 1998/05/15 21:51:02 fisyak Exp $
 #  $Log: fast,v $
+#  Revision 1.5  1998/05/15 21:51:02  fisyak
+#  check commitlog once again
+#
 #  Revision 1.4  1998/05/15 21:44:37  fisyak
 #  check commitlog
 #
@@ -28,7 +31,7 @@
 # submitted the script. Check if your quota space is enough.
 #
 #
-# DQS embedded directives  follow
+# DQS  embedded directives  follow
 #@$ -a 12241200  # date-time to run, format [[CC]yy]MMDDhhmm[.SS]
 #$ -eo           # merge std error and out
 #$ -m bes        # Mail at beginning/end/on suspension
