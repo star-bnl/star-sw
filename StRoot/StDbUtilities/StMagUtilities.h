@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.30 2005/02/09 23:50:36 jeromel Exp $
+ * $Id: StMagUtilities.h,v 1.31 2005/02/17 02:00:51 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.31  2005/02/17 02:00:51  jhthomas
+ * Make GetSpaceChargeMode() a public member function.
+ *
  * Revision 1.30  2005/02/09 23:50:36  jeromel
  * Changes by JHT for SpaceCharge / Leak corrections
  *
@@ -158,7 +161,6 @@ class StMagUtilities {
   virtual void    GetSpaceChargeR2 () ;  
   virtual void    GetShortedRing ()   ;  
   virtual void    GetOmegaTau ()      ;
-  virtual Int_t   GetSpaceChargeMode();
   virtual void    GetGridLeak()       ;
 
   virtual void    CommonStart ( Int_t mode ) ;
@@ -287,12 +289,11 @@ class StMagUtilities {
 						const unsigned int RowMask2, 
 						Float_t &pSpace ) ;
 
-  virtual void    ManualSpaceCharge(Double_t SpcChg)
-          { SpaceCharge   = SpcChg; fSpaceCharge   = 0;}
-  virtual void    ManualSpaceChargeR2(Double_t SpcChg)
-          { SpaceChargeR2 = SpcChg; fSpaceChargeR2 = 0;}
-  virtual void    AutoSpaceCharge()   {GetSpaceCharge()  ;} // use DB
-  virtual void    AutoSpaceChargeR2() {GetSpaceChargeR2();} // use DB
+  virtual Int_t    GetSpaceChargeMode();
+  virtual void     ManualSpaceCharge(Double_t SpcChg)   { SpaceCharge   = SpcChg ; fSpaceCharge   = 0 ; }
+  virtual void     ManualSpaceChargeR2(Double_t SpcChg) { SpaceChargeR2 = SpcChg ; fSpaceChargeR2 = 0 ; }
+  virtual void     AutoSpaceCharge()   {GetSpaceCharge()  ; } // use DB
+  virtual void     AutoSpaceChargeR2() {GetSpaceChargeR2(); } // use DB
   virtual Double_t CurrentSpaceCharge()   {return SpaceCharge  ;}
   virtual Double_t CurrentSpaceChargeR2() {return SpaceChargeR2;}
 
