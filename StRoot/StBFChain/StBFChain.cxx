@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.424 2004/07/23 01:03:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.425 2004/07/23 02:25:49 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -851,10 +851,11 @@ Bfc_st BFC2[] = {
 
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
-  {"beamLine"    ,""  ,"","",""                                      ,"","LMV Beam line constraint",kFALSE},
-  {"CtbMatchVtx" ,""  ,"","",""                             ,"","CTB Matching ON in Vertex Finding",kFALSE},
-  {"VFMinuit"      ,""  ,"","",""                                       ,"","Minuit Vertex Finding",kFALSE}, 
-  {"VFppLMV"       ,""  ,"","",""                                        ,"","ppLMV Vertex Finding",kFALSE}, 
+  // in ITTF mode, all options may apply
+  {"beamLine"    ,""  ,"","",""                                ,"","... Beam line constraint in ON",kFALSE},
+  {"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
+  {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE}, 
+  {"VFppLMV"       ,""  ,"","",""                        ,"","... Generic VF will use ppLMV method",kFALSE}, 
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
@@ -1036,12 +1037,12 @@ Bfc_st BFC2[] = {
   //  Reminder: You are within the ITTF chain definitions
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
-  {"genvtx"     ,"","","",      "StGenericVertexMaker","StGenericVertexMaker","Minuit Vertex Finder",kFALSE},
+  {"genvtx"      ,"","","",   "StGenericVertexMaker","StGenericVertexMaker","Generic Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent","StiMaker",
       "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
-  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
+  {"dEdxY2"      ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
 
