@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//   $Id: StFtpcGasUtilities.cc,v 1.10 2004/07/18 14:12:45 jcs Exp $
+//   $Id: StFtpcGasUtilities.cc,v 1.11 2004/07/20 18:30:17 jcs Exp $
 //
 //   StFtpcGasUtilities
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////
 //
 //   $Log: StFtpcGasUtilities.cc,v $
+//   Revision 1.11  2004/07/20 18:30:17  jcs
+//   change temperature output information
+//
 //   Revision 1.10  2004/07/18 14:12:45  jcs
 //   use adjustAverageWest/East from database
 //   always output temperature calculation information since this is a critical value for the FTPC
@@ -163,6 +166,7 @@ Int_t StFtpcGasUtilities::averageTemperatureWest(Int_t dbDate, Int_t runNumber) 
   //  if no body temperature readings return warning
   else {
      cout<<"No FTPC West body temperatures found for "<<dbDate<<endl;
+     if (mParam->gasTemperatureWest() != 0) cout<<"Using defaultTemperatureWest = "<<mParam->gasTemperatureWest()<<endl; 
       return kStWarn;
   }	  
 }
@@ -195,7 +199,6 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
    }  
 
    else {
-
 
       if (mGas->getBody1East() >= mDb->minGasTemperature() && mGas->getBody1East() <= mDb->maxGasTemperature()) {      
 		 averageBodyTemperatureEast = averageBodyTemperatureEast + mGas->getBody1East();
@@ -246,6 +249,7 @@ Int_t StFtpcGasUtilities::averageTemperatureEast(Int_t dbDate, Int_t runNumber) 
      //  if no body temperature readings return warning
      else {
         cout<<"No FTPC East body temperatures found for "<<dbDate<<endl;
+        if (mParam->gasTemperatureEast() != 0) cout<<"Using defaultTemperatureEast = "<<mParam->gasTemperatureEast()<<endl; 
         return kStWarn;
      }	  
 }
@@ -259,12 +263,12 @@ Int_t StFtpcGasUtilities::defaultTemperatureWest(Int_t dbDate,Bool_t SVT_On) {
 	if (dbDate < 20021105) {
 	   // for year 2001 data (AuAu,pp) FTPC west gas temperature is higher when SVT on
            mParam->setGasTemperatureWest(mDb->defaultTemperatureWest() + mDb->temperatureDifference());
-           cout<<"No valid body temperatures available for FTPC West; Initialize to mDb->defaultTemperatureWest() + mDb->temperatureDifference() (for year2001 data, SVT on) = "<<mParam->gasTemperatureWest()<<endl;
+           cout<<"No valid body temperatures available for FTPC West; Initialize to mDb->defaultTemperatureWest() + mDb->temperatureDifference() (for year2001 data,SVT on) = "<<mParam->gasTemperatureWest()<<endl;
 	}	   
         if (dbDate >= 20021105) { 
-           // for year 2003 data (dAu,pp) FTPC west gas temperature is not effected by SVT
+           // starting in year 2003,the FTPC west gas temperature is not effected by SVT
            mParam->setGasTemperatureWest(mDb->defaultTemperatureWest());
-           cout<<"No valid body temperatures available for FTPC West; Initialize to mDb->defaultTemperatureWest() (for year2003 data, SVT on) = "<<mParam->gasTemperatureWest()<<endl;
+           cout<<"No valid body temperatures available for FTPC West; Initialize to mDb->defaultTemperatureWest() (as of year2003, SVT on) = "<<mParam->gasTemperatureWest()<<endl;
 	}
   }	  
   return kStOK;
@@ -282,9 +286,9 @@ Int_t StFtpcGasUtilities::defaultTemperatureEast(Int_t dbDate,Bool_t SVT_On) {
            cout<<"No valid body temperatures available for FTPC East; Initialize to mDb->defaultTemperatureEast() (for year2001 data, SVT on) = "<<mParam->gasTemperatureEast()<<endl;
 	}	   
         if (dbDate >= 20021105) { 
-           // for year 2003 data (dAu,pp) FTPC east gas temperature is higher when SVT on
+           // starting in year 2003 data the FTPC east gas temperature is higher when SVT on
            mParam->setGasTemperatureEast(mDb->defaultTemperatureEast() + mDb->temperatureDifference());
-           cout<<"No valid body temperatures available for FTPC East; Initialize to mDb->defaultTemperatureEast() + mDb->temperatureDifference() (for year2003 data, SVT on) = "<<mParam->gasTemperatureEast()<<endl;
+           cout<<"No valid body temperatures available for FTPC East; Initialize to mDb->defaultTemperatureEast() + mDb->temperatureDifference() (as of year2003,SVT on) = "<<mParam->gasTemperatureEast()<<endl;
 	}
     }	
   return kStOK;
