@@ -1,36 +1,39 @@
-* $Id: tpi_pid.F,v 1.2 1998/01/27 01:54:48 fisyak Exp $
+* $Id: tpi_pid.F,v 1.3 1998/11/03 15:14:18 ogilvie Exp $
 * $Log: tpi_pid.F,v $
+* Revision 1.3  1998/11/03 15:14:18  ogilvie
+* tpi_pid.F now reads in dst_dedx tables
+*
 * Revision 1.2  1998/01/27 01:54:48  fisyak
 * Split sources
 *
-       INTEGER FUNCTION  tpi_pid(parm_h,parm,trk_h,trk,gl_h,gl,
-     >                   hypo_h,hypo)
+       INTEGER FUNCTION tpi_pid(parm_h,parm,gl_h,gl,dedx_h,dedx,hypo_h,hypo)
        IMPLICIT  NONE
 C       
 C        
 C Input arguments
-C      track_h = header for the tptrack table (reconstructed tracks)
-C      track = rows of the tptrack table
 C
 C Output arguments:
 C	hypo-pid filled for tpc dedx vs p, i.e.
-C	the probability  each global track is an e, pi, K, p
+C	how far the measured dE/dx is from the
+c       the mean dE/dx expected for an e, pi, K, p
 C
 C Functional description:
-C      A module that takes the dE/dx from tde and evaluates the probality
+C      A module that takes the dE/dx from tde and fills the deviates
 C	of various pid hypotheses.
+c      Cureently limited to Z=1 particles by hard-wiring
 C
-C Contact: C. Ogilvie, MIT, (617) 253-4184 Ogilvie@mitlns.mit.edu
+C Contact: C. Ogilvie, MIT, (617) 253-4184 Ogilvie@mit.edu
 C-----------------------------------------------------------------------
 
 #include "tpi_pid.inc" 
-
+#include "phys_constants.inc"
+#include "math_constants.inc"
 C-----------------------------------------------------------------------
 C
 C-----------------------------------------------------------------------
 
-      INTEGER  i,j
-      REAL     pt,pz,p,invpt,tanl,dedx1,dedx2
+      INTEGER  i,j,igl,ii
+      REAL     pt,pz,p,invpt,tanl,dedx1,dedx2,vert
       INTEGER  nrec
 
       REAL     mass(4),gpid_pos(4),gpid_neg(4)
@@ -38,7 +41,7 @@ C-----------------------------------------------------------------------
 
       REAL     z,x,satura,beta,gamma,bethe,rise
       REAL     ave_dedx(4),sigma(4),t
-      REAL     pi
+
 
       INTEGER  nid,num_deg,method,nid1,nid2,n
       INTEGER  id,highest_id, current_id
@@ -51,16 +54,32 @@ C-----------------------------------------------------------------------
   
 
 
-      LOGICAL  no_track
+      LOGICAL  no_dedx,primary
 C-----------------------------------------------------------------------
 
-      write(6,*) 'In the probability tpi module. '
-      write(6,*) ' # global, tpc tracks ', gl_h.nok,trk_h.nok
 
 C***********************************************************************
 
       istart = parm(1).method(1)
       method = parm(1).method(2)
+
+c      method = 0  ! test
+
+c
+c a quick loop to see if hypo_h is long enough
+c
+      n=0
+      do j=1, dedx_h.nok    ! Loop over dst dedx valuse
+         if (dedx(j).det_id.eq.1) n=n+1 ! tpc    
+      enddo
+      if (hypo_h.nok+4*n.gt.hypo_h.maxlen) then
+             write (6,10)
+ 10          format(2x,'adding in tpc dedx deviants would exceed size of hypo')
+             tpi_pid = STAFCV_BAD
+             return
+      endif
+      n=0  
+         
 c
 c find the highest identifier in the hypo-pid table
 c
@@ -73,20 +92,18 @@ c
       enddo
 
       current_id = highest_id +1
-      write(6,*) '# entries in hypo-pid table', hypo_h.nok
-      write(6,*) 'current id for hypo-pid', current_id
- 
-      pi = 3.14159
-      mass(1) = 0.000511   ! electron
+
+
+      mass(1) = M_ELECTRON   ! electron
       gpid_pos(1) = 2
       gpid_neg(1) = 3
-      mass(2) = 0.13957    ! pion
+      mass(2) = M_PION_PLUS    ! pion
       gpid_pos(2) = 8
       gpid_neg(2) = 9
-      mass(3) = 0.4936     ! kaon
+      mass(3) = M_KAON_PLUS     ! kaon
       gpid_pos(3) = 11
       gpid_neg(3) = 12
-      mass(4) = 0.9383     ! proton
+      mass(4) = M_PROTON     ! proton
       gpid_pos(4) = 14
       gpid_neg(4) = 15
 c
@@ -119,10 +136,10 @@ C     satura = assigned saturation value of dE/dx (in Gev/cm)
        dedxpar(3,3) = parm(1).mean3(3)  
        dedxpar(4,3) = parm(1).mean3(4)
 
-       write(6,*) 1,dedxpar(1,1),dedxpar(1,2)
-       write(6,*) 2,dedxpar(2,1),dedxpar(2,2)
-       write(6,*) 3,dedxpar(3,1),dedxpar(3,2)
-       write(6,*) 4,dedxpar(4,1),dedxpar(4,2)
+c       write(6,*) 1,dedxpar(1,1),dedxpar(1,2)
+c       write(6,*) 2,dedxpar(2,1),dedxpar(2,2)
+c       write(6,*) 3,dedxpar(3,1),dedxpar(3,2)
+c       write(6,*) 4,dedxpar(4,1),dedxpar(4,2)
        
 c    
 c     sigma = sigmapar(i,1) + 1/p*sigmapar(i,2)
@@ -141,228 +158,138 @@ c currently sigma2 = 0
        sigmapar(3,2) = parm(1).sigma2(3)
        sigmapar(4,2) = parm(1).sigma2(4)
 
-
-
+c
+c hardwired z =1
+c
       z=1.0
       satura=5.0e-4
 
-
+c
+c
 C***********************************************************************
 
-      do j=1, gl_h.nok    ! Loop over global tracks
+      do j=1, dedx_h.nok    ! Loop over dst dedx valuse
 
+         if (dedx(j).det_id.eq.1) then ! tpc 
+           igl= dedx(j).id_track
 c
-c this requires that id_hypo_pid is initialised to zero, 
-c and only becomes non-zero if a partition is looked at the
+c id_hypo_pid only becomes non-zero if a partition is looked at the
 c PID for that track
-         if (gl(j).id_hypo_pid.eq.0) then
+c
+           if (gl(igl).id_hypo_pid.eq.0) then
 		use_this_id = current_id
-                gl(j).id_hypo_pid = use_this_id
+                gl(igl).id_hypo_pid = use_this_id
                 current_id = current_id + 1
-         else
-c correct
-c		use_this_id = gl(j).id_hypo_pid
+           else
+		use_this_id = gl(igl).id_hypo_pid
+	   endif
 c
-c the next lines are a 
-c temporary hack that presumes no-one else has done any PID yet
-c
-            	use_this_id = current_id
-                gl(j).id_hypo_pid = use_this_id
-                current_id = current_id + 1
-	 endif
-
-c         write (6,*) gl(j).id_hypo_pid
-c         pause
 C     Extract momentum values of the track
 c
-         icharge = gl(j).icharge
-         invpt = gl(j).invpt
-         tanl = gl(j).tanl
-         if (invpt.gt.0.0) then
-            pt = 1.0/invpt
-         else
-            pt = 0.0
-         endif
-         pz = pt*tanl
-         p = sqrt(pt*pt+pz*pz)
-c
-c find the tptrack (i) that corresponds to this global track (j)
-c
-         i = 1
-         no_track = .false.
-         do while (trk(i).id_globtrk.ne.gl(j).id)
-           i=i+1
-           if (i.gt.trk_h.nok) then
-c
-c do something drastic
-c
-               no_track = .true.
-               goto 2
+           icharge = gl(igl).icharge
+           invpt = gl(igl).invpt
+           tanl = gl(igl).tanl
+           if (invpt.gt.0.0) then
+             pt = 1.0/invpt
+           else
+             pt = 0.0
            endif
-         enddo
-         
-c look at only those global tracks with a TPC track
- 2     continue
-       if (.not.no_track) then
-      
-c	  write(6,*) 'matched a tpc track with global track '
-c          write(6,*) 'trk.id_globtk', i
+           pz = pt*tanl
+           p = sqrt(pt*pt+pz*pz)
+c
+c rough cut on primary
+c
+           primary=.true.
+           vert=sqrt(gl(igl).x_first(1)**2+gl(igl).x_first(2)**2)
 
+            if (vert.gt.20) then
+               primary=.false.
+            endif        
+            if (abs(gl(igl).x_first(3)).gt.20) then
+               primary=.false.
+            endif
+           
  
-          dedx1 = trk(i).dedx(1)
-          dedx2 = trk(i).dedx(2)
-          nrec = trk(i).nrec
+           dedx1 = dedx(j).dedx(1)
+           dedx2 = dedx(j).dedx(2)
+           nrec = dedx(j).ndedx
+          
+          if (method.eq.0) then    ! test
+c
+c temporary fill dedx table
+c
+             dedx(j).dedx(2)= p
+             if (.not.primary) then
+                dedx(j).iflag=1
+             endif
+          endif
+          if (method.ne.0) then
+c
+c cmpare to Bethe-Block
 
-c	  write(6,*) 'info dedx, p, nrec', dedx1, p,nrec
-     
-c       
-c loop thru the 4 hypotheses, e,pi,K, p
-c	
-          do nid=istart,4
+             do nid=1,4
  
 C     Calculate the mean dedx, and sigma 
 
-
 c Bethe-Bloch form 1997
 c
-	    gamma=sqrt((p/mass(nid))**2+1.)
-            beta=sqrt(abs(-1./(gamma**2)+1.))
-            rise=abs(dedxpar(nid,3))*(beta*gamma)**2
-         bethe=dedxpar(nid,1)/(beta**2)*
-     >         (0.5*log(rise)-beta**2+dedxpar(nid,2))
-             ave_dedx(nid)=bethe
+                gamma=sqrt((p/mass(nid))**2+1.)
+                beta=sqrt(abs(-1./(gamma**2)+1.))
+                rise=abs(dedxpar(nid,3))*(beta*gamma)**2
+                bethe=dedxpar(nid,1)/(beta**2)*
+     >               (0.5*log(rise)-beta**2+dedxpar(nid,2))
+                ave_dedx(nid)=bethe
  
-            if (ave_dedx(nid).gt.satura) ave_dedx(nid)=satura
+                if (ave_dedx(nid).gt.satura) ave_dedx(nid)=satura
 
 c
 c form of calculation 1997, constant percentage of dedx (temporary
 c
-	    sigma(nid) = sigmapar(nid,1)*ave_dedx(nid)
+                sigma(nid) = sigmapar(nid,1)*ave_dedx(nid)
             
-            if (sigma(nid).lt.0.01e-05) sigma(nid)=0.01e-05
-
-c 
-c calculate the probability that this measurement occured
-c
-	    x = ((dedx1-ave_dedx(nid))**2)/2./(sigma(nid)**2)
-            prob_of_meas(nid) = 
-     >      1./(sigma(nid)*sqrt(2.*pi))*exp(-x)
+                if (sigma(nid).lt.0.01e-05) sigma(nid)=0.01e-05
 c
 c calc number of sigma measurement is away from mean, 
 c	+ve=above mean, -ve = below mean
 c
-            nsigma(nid) = (dedx1-ave_dedx(nid))/sigma(nid)
-c	  write(6,*) 'info dedx, p, nid, nsigma', dedx1, p,nid,nsigma(nid)
-c          pause
+                nsigma(nid) = (dedx1-ave_dedx(nid))/sigma(nid)
             
-c
-c     calculate t-statistic , and f(t)
-c 
-           if (dedx2.ne.0.) then
-             t = sqrt(real(nrec))*(dedx1-ave_dedx(nid))/dedx2
-             num_deg = nrec - 1
-c
-c          calc f(t)
-c          prob_of_hypo(nid) = f
-c
-           endif
-         enddo  ! end loop over hypotheses
-         
-c
-c choose option for pid
-c
-         if (method.eq.2) then
-           do nid=istart,4
-            prob(nid) = prob_of_meas(nid)
-           enddo
-         elseif (method.eq.3) then
-           do nid=istart,4
-            prob(nid) = prob_of_hypo(nid)
-           enddo
-         endif
-c
-c calculate probability that measurement is a particular species by forming
-c prob_species = prob / sum of prob
-c
-         sum = 0.
-         do nid=istart,4
-          sum = sum + prob(nid)
-         enddo
-         if (sum.ne.0.) then
-            do nid=istart,4
-              prob_species(nid) = prob(nid)/sum
-            enddo  
-         endif
-c
-c calculate weight for this track. This is used by global pid when
-c combining info from each detector.
-c first find the two most probable hypotheses, find the separation between
-c them , weight = separation/sqrt(dedx2**2+0.5*sigma1**2+0.5*sigma2*2)
-c
-         large1 = prob_species(istart)
-         large2 = prob_species(istart)
-         nid1 = istart
-         nid2 = istart
-         do nid=istart+1,4
-          if (prob_species(nid).gt.large2) then
-            if (prob_species(nid).gt.large1) then
-               nid2 = nid1
-               nid1 = nid
-               large2 = prob_species(nid2)
-               large1 = prob_species(nid1)
-            else
-               nid2 = nid
-               large2 = prob_species(nid2)
-            endif
-          endif
-         enddo
-         if (nid1.gt.0.and.nid2.gt.0) then
-           sep = abs(ave_dedx(nid1)-ave_dedx(nid2))
-           weight = sep /sqrt(dedx2**2 + 0.5*sigma(nid1)**2 + 
-     1                      0.5*sigma(nid2)**2)
-         else
-           weight =0.
-         endif
-c        write (6,*) weight
-c
-c temp
-c
-c        weight = dedx1 - ave_dedx(nid1)
-c
-        do nid=istart,4 
-c
-c fill hypo pid table
-c
-          n = hypo_h.nok+1
-          hypo(n).id = use_this_id
-          if (icharge.gt.0) then   
-            hypo(n).gid = gpid_pos(nid)
-          else
-            hypo(n).gid = gpid_neg(nid)
-          endif
-          hypo(n).prob = prob_species(nid)
-          hypo(n).nsigma = nsigma(nid)
-          hypo(n).method = method
-          hypo(n).weight = weight
-          hypo(n).det    = 2
-c
-c temporary filling for debugging
-cc
-c          hypo(n).det = int(prob_species(nid)*100.+0.5)
-c          hypo(n).weight = dedx1 
-c	  hypo(n).nsigma = p
-c          hypo(n).method = nrec
-          hypo_h.nok = hypo_h.nok + 1
-         enddo
+            enddo ! hypothe    
 
+         endif   ! method ne 0
 c
-        endif   ! end if there was a tpc track associated with global track
+c fill deviants
+c
+          do nid=1,4 
+             n = hypo_h.nok+1
+ 
+             hypo(n).id = use_this_id
+             if (icharge.gt.0) then   
+                hypo(n).gid = gpid_pos(nid)
+             else
+                hypo(n).gid = gpid_neg(nid)
+             endif
+             hypo(n).prob = 0.
+             hypo(n).nsigma = nsigma(nid)
+             hypo(n).method = method
+             if (.not.primary) then
+              hypo(n).weight = 1.
+             else
+              hypo(n).weight = 0.
+             endif
+              
+             hypo(n).det    = 2
+          
+             hypo_h.nok = hypo_h.nok + 1
+           enddo ! hypothes
+        endif    ! tpc dedx 
+      enddo ! loop ove dst-dedx
 
-      enddo   ! End loop over tracks
-
-*      write (6,*) 'finished tpi pid'
 
       tpi_pid = STAFCV_ok
 
       return
       end
+
+
+
