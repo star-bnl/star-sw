@@ -11,9 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $mdir_log      = "/star/rcf/disk00001/star/P00hf/log/";
-my $mdir_sum      = "/star/rcf/disk00001/star/P00hf/sum/"; 
-my @dir_ext      = ("daq","tfs");  
+my $dir_log      = "/star/rcf/disk00001/star/P00hi/log/daq";
+my $dir_sum      = "/star/rcf/disk00001/star/P00hi/sum/daq";   
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -27,8 +26,6 @@ my $file_sum;
 my $dir_lg       = "../log";
 my $name_log;
 my $f_flag = 0;
-my $dir_log;
-my $dir_sum;
 my $size;
 my $mTime;
 my $flname;
@@ -38,11 +35,6 @@ my $fullname;
 
 #=========================================================
 my $ii =0;
-
-#for ($ii =0; $ii<2; $ii++) {
- $ii = 0;
-$dir_log = $mdir_log . $dir_ext[$ii];
-$dir_sum = $mdir_sum . $dir_ext[$ii];
 
 
 struct FileAttr => {
