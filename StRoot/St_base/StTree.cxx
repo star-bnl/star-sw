@@ -631,6 +631,16 @@ Int_t StFile::GetNextBundle()
   return !(fIter->Next());
 }
 //_____________________________________________________________________________
+void StFile::RefreshIter()
+{
+  if (!fIter) return;
+  
+  TDataSetIter *it = new St_DataSetIter(fDS);
+  for (; *(*it) && *(*it)!=*(*fIter);it->Next()) {}
+  delete fIter;
+  fIter = it;
+}
+//_____________________________________________________________________________
 Int_t StFile::GetNBundles()
 {
   if (!fIter) fIter = new St_DataSetIter(fDS);
@@ -726,6 +736,7 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   ds->SetTitle(tit);
     
 
+  RefreshIter();
   if (GetDebug()) printf("<%s::AddFile> Added file %s %s\n",
                   ClassName(),ds->GetName(),ds->GetTitle());
          
