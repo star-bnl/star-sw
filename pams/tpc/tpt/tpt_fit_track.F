@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.12 2000/07/24 18:32:31 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.13 2000/07/25 06:37:49 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.13  2000/07/25 06:37:49  sakrejda
+* Initialisation of errors added
+*
 * Revision 1.12  2000/07/24 18:32:31  sakrejda
 * *** empty log message ***
 *
@@ -78,14 +81,15 @@ C#include "tpt_pointers.inc"
 
       INTEGER ipt, ncir,i,ntry,j,iret,ibad,ient ,ient1
       INTEGER tpt_helix_fit, tpt_find_outlier
-      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow
+      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow, tpc_local_to_global
       INTEGER n_good, ipnt_temp(mxpnt)
       LOGICAL enough, good_hit(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       REAL    wcir(mxpnt),wlin(mxpnt)
       INTEGER pnt(mxpnt), rowNextToLast, rowLast
-      REAL    as,bs,cf,xold,yold,theta
-      REAL    r1,tanphi0
+      REAL    as,bs,cf,xold,yold,theta, xlocal(3), xglobal(3)
+      REAL    r1,tanphi0, lambda, sigx, sigz
+      data xlocal,xglobal /6*0/
 
 C
 C     at the beginning mark all the points that belong to a track as good
@@ -126,15 +130,23 @@ C          crossing angle
            ipadrow=mod(hit(ient).row,100)
            if(ncir.gt.1) then
                 lambda = atan(abs(zcir(ncir)-zcir(ncir-1))/
-     >                   sqrt((x(ncir)-x(ncir-1))**2+(y(ncir)-y(ncir-1))**2))
-                call hit_uncert(zcir(ncir),theta,lambda,ipadrow,sigX,sigZ)
+     >                   sqrt((xcir(ncir)-xcir(ncir-1))**2+(ycir(ncir)-ycir(ncir-1))**2))
+                call tpt_hit_uncert(zcir(ncir),theta,lambda,ipadrow,sigX,sigZ)
                 wcir(i)=1.0/sigx**2/cf
                 wlin(i)=1.0/sigz**2
+                xlocal(1)=sigx
+                iret=tpc_local_to_global(int(hit(ient).row/100),xlocal,xglobal)
+                hit(ient).dx=xglobal(1)
+                hit(ient).dy=xglobal(2)
+                hit(ient).dz=sigz
            else if(ncir.eq.1) then
                 ient1 = ient
            else if(ncir.eq.2) then
                 wcir(1) = wcir(2)
                 wlin(1) = wlin(2)
+                hit(trk(ipt).ipnt(trk(ipt).nhit)).x=hit(ient).x
+                hit(trk(ipt).ipnt(trk(ipt).nhit)).y=hit(ient).y
+                hit(trk(ipt).ipnt(trk(ipt).nhit)).z=hit(ient).z
            endif
            xold = xcir(ncir)
            yold = ycir(ncir)
