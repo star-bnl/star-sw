@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.384 2004/03/01 17:32:16 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.385 2004/03/01 18:46:45 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1371,15 +1371,15 @@ Int_t StBFChain::Instantiate()
 	    pars->activeTpc     = kTRUE;
 	    pars->doStEventInput=kTRUE; // We always want to have this I think?
 	    pars->doStEventOutput=kTRUE;
-	    pars->trackerInputFile = "StRoot/StiMaker/macros/trackFinderPars.dat";
-	    pars->fitterInputFile  = "StRoot/StiMaker/macros/trackFitterPars.dat";
-	    pars->emcInputFile     = "none";
-	    pars->eemcInputFile    = "none";
-	    pars->svtInputFile     = "StRoot/StiMaker/macros/svtInputFile.dat";
-	    pars->ssdInputFile     = "none";
-	    pars->tpcInputFile     = "StRoot/StiMaker/macros/tpcInputFile.dat";
-	    pars->ftpcInputFile    = "none";
-	    pars->pixelInputFile   = "none";
+	    //pars->trackerInputFile = "StRoot/StiMaker/macros/trackFinderPars.dat";
+	    //pars->fitterInputFile  = "StRoot/StiMaker/macros/trackFitterPars.dat";
+	    //pars->emcInputFile     = "none";
+	    //pars->eemcInputFile    = "none";
+	    //pars->svtInputFile     = "StRoot/StiMaker/macros/svtInputFile.dat";
+	    //pars->ssdInputFile     = "none";
+	    //pars->tpcInputFile     = "StRoot/StiMaker/macros/tpcInputFile.dat";
+	    //pars->ftpcInputFile    = "none";
+	    //pars->pixelInputFile   = "none";
            
 	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
