@@ -103,7 +103,8 @@ void StEmcEnergy::energyInBtow()
 //------------------------------------------------------------------------------
 void StEmcEnergy::chHadEnergyInBtow()
 {  
-  for (UInt_t i=1; i<4800; i++) mChHadEnergyInBtow[i]=0;
+  mNTracks=0;
+	for (UInt_t i=1; i<4800; i++) mChHadEnergyInBtow[i]=0;
 
   StSPtrVecTrackNode& trackNodes = mEvent->trackNodes();
 
@@ -133,7 +134,8 @@ void StEmcEnergy::chHadEnergyInBtow()
         mBemcGeom->getId(m, e, s, id);
         if (mEmcFilter->getEmcStatus(1,id)==kGOOD)
         {  
-          Float_t dist;
+          mNTracks++;
+					Float_t dist;
           Int_t nTowersdEta = 0, nTowersdPhi = 0;
           Int_t towerId=0, towerNdx = -1;
 
