@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.56 2002/03/01 14:56:42 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.57 2002/03/04 16:38:58 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.57  2002/03/04 16:38:58  jeromel
+// More info printed before assert()
+//
 // Revision 1.56  2002/03/01 14:56:42  jeromel
 // Finalized the timestamp as per June 15th.
 //
@@ -508,8 +511,13 @@ SWITCH:  switch (kase) {
               }
               goto SWITCH;
 
-    case 4:   assert((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent));
-              break;
+    case 4:   
+      if( ! (val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent)){
+	(void) printf("CheckFail:: Assert will fail for Table %s TimeMin=%d TimeMax=%d uevent=%d\n",
+		      ds->GetName(),val->fTimeMin.Get(),val->fTimeMax.Get(),uevent);
+      }
+      assert((val->fTimeMin.Get()<= uevent) && (val->fTimeMax.Get()>uevent));
+      break;
 
     default:  assert(0);
   }
