@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.12 2001/11/20 21:53:45 lansdell Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.13 2002/01/21 22:09:24 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.13  2002/01/21 22:09:24  genevb
+// Include some ftpc histograms from StFtpcClusterMaker
+//
 // Revision 2.12  2001/11/20 21:53:45  lansdell
 // added x-y dist of hits, tpc east&west histos
 //
@@ -163,6 +166,9 @@
   "StEQaGRpvtxDx",
   "StEQaGRpvtxDy",
   "StEQaGRpvtxDz",
+  "fcl_chargestepW",
+  "fcl_chargestepE",
+  "fcl_radius",
 
   "StELMQaPointTpc",
   "StELMQaPointSvt",

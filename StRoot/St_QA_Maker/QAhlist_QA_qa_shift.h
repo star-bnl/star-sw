@@ -1,5 +1,8 @@
-// $Id: QAhlist_QA_qa_shift.h,v 2.4 2001/05/16 20:57:02 lansdell Exp $
+// $Id: QAhlist_QA_qa_shift.h,v 2.5 2002/01/21 22:09:24 genevb Exp $
 // $Log: QAhlist_QA_qa_shift.h,v $
+// Revision 2.5  2002/01/21 22:09:24  genevb
+// Include some ftpc histograms from StFtpcClusterMaker
+//
 // Revision 2.4  2001/05/16 20:57:02  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -80,6 +83,10 @@
      "TabQaXiVtxTot",
      "TabQaXiaMass",
      "TabQaKinkTot",
+     "fcl_chargestepW",
+     "fcl_chargestepW",
+     "fcl_radius",
+
      "TabLMQaGtrkRnfT",
      "TabLMQaGtrkR0T",
      "TabLMQaGtrkPhi0T",
