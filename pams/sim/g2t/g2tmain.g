@@ -22,14 +22,12 @@ created   22 april 98
 *
       structure GTTC { int version, int nsys , char edir(3), char rdir(3) }
       structure dete { onoff, char ctab, char spec, char csys, char cdet }
-      Integer        G2T_MAIN,AgFHIT0,DUI_CDIR,TDM_MAP_TABLE
-      Integer        TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE,AMI_MODULE_CALL
-      External       TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE,AMI_MODULE_CALL
+      Integer        G2T_MAIN,AgFHIT0,DUI_CDIR
+      Integer        TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE
+      External       TDM_NEW_TABLE,AMI_CALL,G2T_NEW_TABLE
       Integer        i,j,ld,nhits,nnhits,Iprin
       Character*16   ctab,ctabo,names(3)
       Character      o*1,cdir*20,edir*20
-      Record /G2T_EVENT_ST/  g2t_event
-      save                   g2t_event
 *
   entry  g2t 
   entry  g2t_start
@@ -179,15 +177,17 @@ created   22 april 98
       call agstrut('/evnt/@HEPE',Edir)
       call agstrut('/evnt/@GHEA',Edir)
 
-      i = TDM_map_table(edir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
       if (ld>0) i = DUI_CDIR (edir)
+      i = TDM_NEW_TABLE('g2t_event'//o, G2T_EVENT_SPEC//o, 1)
       i = TDM_NEW_TABLE('g2t_vertex'//o,G2T_VERTEX_SPEC//o,NVERTX)
       i = TDM_NEW_TABLE('g2t_track'//o, G2T_TRACK_SPEC//o, NTRACK)
+
+*  order of calls IS importrant:
 
       names(1)='g2t_vertex'//o
       names(2)='g2t_track'//o
 
-      i = AMI_MODULE_CALL ('g2t_get_kine'//o,2,names)
+      i = AMI_CALL ('g2t_get_kine'//o,2,names)
       prin5 i; (' g2tmain: get_kine done with i=',i6)
 
       Use GTTC
@@ -214,15 +214,57 @@ created   22 april 98
         prin5 i; (' g2tmain ===> ami_call g2t_get_hits  = ',i6)
 
       enddo
-
-      if (ld>0) i = DUI_CDIR('..'//o)
 *
-      call g2t_get_event(g2t_event)
+      print *, ' **** calling g2t_get_event ****'
+      i = AMI_CALL ('g2t_get_event'//o,1,'g2t_event'//o)
+      prin0 i; (' g2tmain: get_event done with i=',i6)
+*
+      if (ld>0) i = DUI_CDIR('..'//o)
       IQUEST(1)   = IEOTRI
       IQUEST(100) = NTRACK
       G2T_MAIN = i
+      print *,' === gt2 main done ==='
       END
 
+
+      FUNCTION   G2T_NEW_TABLE (name,spec,L)
+      implicit   none
+#include "g2t_hits.inc"
+#include "g2t_svt_hit.inc"
+#include "g2t_tpc_hit.inc"
+#include "g2t_mwc_hit.inc"
+#include "g2t_ctf_hit.inc"
+#include "g2t_emc_hit.inc"
+#include "g2t_smd_hit.inc"
+#include "g2t_eem_hit.inc"
+#include "g2t_esm_hit.inc"
+#include "g2t_ftp_hit.inc"
+#include "g2t_vpd_hit.inc"
+      character  name*(*),spec*(*),o*1
+      integer    G2T_NEW_TABLE,TDM_NEW_TABLE,i,L 
+
+      i = 0
+      o = char(0)  
+      if (spec=='svt') { i=TDM_NEW_TABLE (name, g2t_svt_hit_spec//o, L) } 
+  elseif (spec=='tpc') { i=TDM_NEW_TABLE (name, g2t_tpc_hit_spec//o, L) } 
+  elseif (spec=='mwc') { i=TDM_NEW_TABLE (name, g2t_mwc_hit_spec//o, L) } 
+  elseif (spec=='ctf') { i=TDM_NEW_TABLE (name, g2t_ctf_hit_spec//o, L) } 
+  elseif (spec=='emc') { i=TDM_NEW_TABLE (name, g2t_emc_hit_spec//o, L) } 
+  elseif (spec=='smd') { i=TDM_NEW_TABLE (name, g2t_smd_hit_spec//o, L) } 
+  elseif (spec=='eem') { i=TDM_NEW_TABLE (name, g2t_eem_hit_spec//o, L) } 
+  elseif (spec=='esm') { i=TDM_NEW_TABLE (name, g2t_esm_hit_spec//o, L) } 
+  elseif (spec=='ftp') { i=TDM_NEW_TABLE (name, g2t_ftp_hit_spec//o, L) } 
+  elseif (spec=='vpd') { i=TDM_NEW_TABLE (name, g2t_vpd_hit_spec//o, L) }
+  else                 { i=TDM_NEW_TABLE (name, g2t_hits_spec//o,    L) }
+  G2T_NEW_TABLE=i
+  end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%obsolete%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+      Record /G2T_EVENT_ST/  g2t_event
+      save                   g2t_event
+
+      call g2t_get_event(g2t_event)
 
       subroutine g2t_get_event(g2t_event)
       implicit   none
@@ -270,40 +312,5 @@ created   22 april 98
       g2t_event.time_offset        = 0
 
       END
-
-
-      Integer FUNCTION G2T_NEW_TABLE(name,spec,L)
-      implicit   none
-      character  name*(*),spec*(*),o*1
-      integer    TDM_NEW_TABLE,i,L 
-
-*include "PAM.inc"
-#include "g2t_hits.inc"
-#include "g2t_svt_hit.inc"
-#include "g2t_tpc_hit.inc"
-#include "g2t_mwc_hit.inc"
-#include "g2t_ctf_hit.inc"
-#include "g2t_emc_hit.inc"
-#include "g2t_smd_hit.inc"
-#include "g2t_eem_hit.inc"
-#include "g2t_esm_hit.inc"
-#include "g2t_ftp_hit.inc"
-#include "g2t_vpd_hit.inc"
-
-      i = 0
-      o = char(0)  
-      if (spec=='svt') { i=TDM_NEW_TABLE (name, g2t_svt_hit_spec//o, L) } 
-  elseif (spec=='tpc') { i=TDM_NEW_TABLE (name, g2t_tpc_hit_spec//o, L) } 
-  elseif (spec=='mwc') { i=TDM_NEW_TABLE (name, g2t_mwc_hit_spec//o, L) } 
-  elseif (spec=='ctf') { i=TDM_NEW_TABLE (name, g2t_ctf_hit_spec//o, L) } 
-  elseif (spec=='emc') { i=TDM_NEW_TABLE (name, g2t_emc_hit_spec//o, L) } 
-  elseif (spec=='smd') { i=TDM_NEW_TABLE (name, g2t_smd_hit_spec//o, L) } 
-  elseif (spec=='eem') { i=TDM_NEW_TABLE (name, g2t_eem_hit_spec//o, L) } 
-  elseif (spec=='esm') { i=TDM_NEW_TABLE (name, g2t_esm_hit_spec//o, L) } 
-  elseif (spec=='ftp') { i=TDM_NEW_TABLE (name, g2t_ftp_hit_spec//o, L) } 
-  elseif (spec=='vpd') { i=TDM_NEW_TABLE (name, g2t_vpd_hit_spec//o, L) }
-  else                 { i=TDM_NEW_TABLE (name, g2t_hits_spec//o,    L) }
-  G2T_NEW_TABLE=i
-  end
 
 
