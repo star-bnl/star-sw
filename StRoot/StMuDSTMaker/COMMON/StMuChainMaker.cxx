@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.16 2003/03/19 18:58:04 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.17 2003/04/15 16:15:29 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -124,10 +124,12 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
 
   if (file!="") {
     if (file.find(".lis")!=string::npos) {
-      if (file.find(".list")!=string::npos) 
-	fromFileCatalog(file, maxFiles);
-      else
-	fromList(file, maxFiles);
+	/*
+	  if (file.find(".list")!=string::npos) 
+	  fromFileCatalog(file, maxFiles);
+	  else
+	*/
+      fromList(file, maxFiles);
     }
     if (file.find(".files")!=string::npos) fromList(file, maxFiles);
     if (file.find(".MuDst.root")!=string::npos) fromFile(file, maxFiles);
@@ -334,6 +336,11 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.17  2003/04/15 16:15:29  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.16  2003/03/19 18:58:04  laue
  * StMuChainMaker: updates for moved file catalog
  * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
