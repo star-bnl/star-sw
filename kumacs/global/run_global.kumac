@@ -141,6 +141,9 @@
     if STAF_STATUS(1).eq.stafcv_bad goto ENDOFDATA
 * count the total number of events processed .    DSW  Aug 28, 1998
    ntotevent=[ntotevent]+1
+* fill event_header table - must be done in event loop or it
+* gets wiped out!!!
+    exec init_dst#init_ehead
 * svm
      exec run_svm#run_svm
 * evr  - must be before egr
@@ -160,9 +163,6 @@
 * dst_run_summary - must be called in every event to update sum variables.
 * DSW  Aug 28, 1998
     exec  run_dst#dst_run_summary
-* fill event_header table - must be done in event loop or it
-* gets wiped out!!!
-    exec init_dst#init_head
 * write table to ntuple
     exec write_table_to_ntuple#write_event_disk [nid] [dst]/[table]
 * Count the total #of events processed successfully.  DSW  Aug 28, 1998
