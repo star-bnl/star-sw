@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.59 2000/04/26 05:07:35 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.60 2000/05/03 01:19:42 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -154,7 +154,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
   TDataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
-  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
+//  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
+  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
@@ -918,6 +919,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.60  2000/05/03 01:19:42  fine
+// emc geometry has been introduced
+//
 // Revision 1.59  2000/04/26 05:07:35  fine
 // buildgeometry method adjusted to new version of TVolumeView ctor
 //
