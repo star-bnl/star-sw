@@ -1,13 +1,12 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.14 2000/11/14 22:32:50 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.13  2000/11/07 14:30:58  lasiuk
- * d<3 adjustment and checkTrack() naming of varaiables
- * corrected
+ * Revision 2.14  2000/11/14 22:32:50  lasiuk
+ * order of setting flags corrected
  *
  * Revision 2.21  2000/11/27 17:19:40  lasiuk
  * fill the constant area in teh PID structure
@@ -166,7 +165,7 @@ using std::max;
 #include "StRichPid.h"
 #include "StRichPhotonInfo.h"
 #include "StRichPidTraits.h"
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.14 2000/11/14 22:32:50 lasiuk Exp $";
 
 #include "StEventMaker/StRootEventManager.hh"
 
@@ -200,7 +199,7 @@ static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 
     mPtCut = 0.*GeV; // GeV/c
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.13 2000/11/07 14:30:58 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.14 2000/11/14 22:32:50 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1283,10 +1282,12 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 
 // 	int charge, bin;
 	// For helix h>0
-	    (*hitIter)->setBit(eAssignedToRingPi);
+// 	if(trackDipAngle<-10)
 // 	    bin = 0;
 // 	else if(trackDipAngle>-10 && trackDipAngle<-5)
 // 	    bin = 1;
+// 	else if(trackDipAngle>-5 && trackDipAngle<0)
+// 	    bin = 2;
 	    if( (*hitIter)->isSet(eAssignedToRingPi) )
 		(*hitIter)->setBit(eMultiplyAssignedToRing);
 // 	else if(trackDipAngle>5 && trackDipAngle<10)
@@ -1300,9 +1301,10 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	//
 	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1SigmaPi);
 	    if( fabs(sigma)<2 ) {pi2++;(*hitIter)->setBit(e2SigmaPi);}
-	    (*hitIter)->setBit(eAssignedToRingK);
 // 	    if( (*hitIter)->isSet(eAssignedToRingPi) )
 // 		(*hitIter)->setBit(eMultiplyAssignedToRing);
+
+	    (*hitIter)->setBit(eAssignedToRingPi);
 
 // 	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1SigmaPi);
 // 	    if( fabs(sigma)<2 ) {pi2++;(*hitIter)->setBit(e2SigmaPi);}
@@ -1317,9 +1319,10 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	    
 	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1SigmaK);
 	    if( fabs(sigma)<2 ) {ka2++;(*hitIter)->setBit(e2SigmaK);}
-	    (*hitIter)->setBit(eAssignedToRingp);
 // 	    if( (*hitIter)->isSet(eAssignedToRingK) )
 // 		(*hitIter)->setBit(eMultiplyAssignedToRing);
+
+	    (*hitIter)->setBit(eAssignedToRingK);
 
 // 	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1SigmaK);
 // 	    if( fabs(sigma)<2 ) {ka2++;(*hitIter)->setBit(e2SigmaK);}
