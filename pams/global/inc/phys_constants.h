@@ -1,5 +1,8 @@
-/* $Id: phys_constants.h,v 1.1 1998/02/19 15:56:21 fisyak Exp $ */
+/* $Id: phys_constants.h,v 1.2 1998/03/05 00:16:07 fisyak Exp $ */
 /* $Log: phys_constants.h,v $
+ * Revision 1.2  1998/03/05 00:16:07  fisyak
+ * Missing C_D_CURVATURE
+ *
  * Revision 1.1  1998/02/19 15:56:21  fisyak
  * Math. Phys. constants from H.Ward
  * */
@@ -19,6 +22,7 @@
 #define C_K_BOLTZMAN         8.617385E-14    /* Boltzman k (GeV/deg. K) */
 #define C_G_GRAV             9.80665E2       /* Grav., sea level (cm/s^2) */
 #define C_MOLAR_VOL          2.241410E4      /* STP Molar volume (cm^3/mol) */
+#define C_D_CURVATURE        0.000299792458  /* (GeV/c)(1/kG)(1/cm) */
 
 #define  M_GAMMA            0.               /* mass     in GeV */
 #define  L_GAMMA            1.E+15           /* lifetime in sec */
