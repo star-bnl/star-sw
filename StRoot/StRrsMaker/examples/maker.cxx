@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: maker.cxx,v 1.2 2000/02/08 16:35:29 lasiuk Exp $
+ * $Id: maker.cxx,v 2.0 2000/08/09 16:10:28 gans Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: maker.cxx,v $
+ * Revision 2.0  2000/08/09 16:10:28  gans
+ * Cosmetic Changes. Naming convention of StRichDrawableT(foo)
+ *
  * Revision 1.2  2000/02/08 16:35:29  lasiuk
  * Hp compatible
  *
