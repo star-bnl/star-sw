@@ -1,9 +1,12 @@
 #ifndef EEmcEventHeader_h
 #define EEmcEventHeader_h
 /*********************************************************************
- * $Id: EEmcEventHeader.h,v 1.2 2003/05/27 19:11:44 zolnie Exp $
+ * $Id: EEmcEventHeader.h,v 1.3 2003/06/02 18:55:00 zolnie Exp $
  *********************************************************************
  * $Log: EEmcEventHeader.h,v $
+ * Revision 1.3  2003/06/02 18:55:00  zolnie
+ * added run number to the header
+ *
  * Revision 1.2  2003/05/27 19:11:44  zolnie
  * added dE/dx info
  *
@@ -25,6 +28,7 @@ class EEmcEventHeader : public TObject {
   unsigned mStatus;            // event status 
   int      mCommentLen;        //
   char    *mComment;           //[mCommentLen];
+  unsigned mRunNumber;         //
   
  public:
   EEmcEventHeader();
@@ -33,6 +37,7 @@ class EEmcEventHeader : public TObject {
   void         clear();
 
   void         setEventNumber   ( unsigned en) { mEventNumber    = en; }
+  void         setRunNumber     ( unsigned rn) { mRunNumber      = rn; }
   void         setToken         ( unsigned et) { mToken          = et; }
   void         setTimeStamp     ( time_t    t) { mTimeStamp      = t;  }
   void         setProcessingTime( time_t    t) { mProcessingTime = t;  }
@@ -41,13 +46,14 @@ class EEmcEventHeader : public TObject {
 
 
   unsigned     getEventNumber()    const { return mEventNumber;    }
+  unsigned     getRunNumber  ()    const { return mRunNumber;      }
   unsigned     getToken()          const { return mToken;          }
   time_t       getTimeStamp()      const { return mTimeStamp;      }
   time_t       getProcessingTime() const { return mProcessingTime; }
   unsigned     getStatus        () const { return mStatus;         }
   const char * getComment ()       const { return mComment;        }
   
-  ClassDef(EEmcEventHeader,2) 
+  ClassDef(EEmcEventHeader,3) 
 
 };
 #endif
