@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.69 1999/06/22 14:23:50 fisyak Exp $
+// $Id: bfc.C,v 1.70 1999/06/23 12:20:27 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.70  1999/06/23 12:20:27  fisyak
+// Herb's & Iwona's change to read event from DAQ
+//
 // Revision 1.69  1999/06/22 14:23:50  fisyak
 // Add StDaqLib to St_tpcdaq_Maker
 //
@@ -611,7 +614,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     }
   }
   else {
-    if (ChainFlags[kTDAQ])  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
+    if (ChainFlags[kTDAQ])  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker("tpc_raw",InFile->Data());
     else {
       if (ChainFlags[kTRS]) {//		trs
 	StTrsMaker   *trs = new StTrsMaker;
@@ -619,7 +622,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
 	  cout<<"initializing input for the trs DB"<<endl;
 	  //	trs->SetInput("params","tpcdb:params");
 	}
-	St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker;
+	St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker("tpc_raw",0);
       }
     }
     else { 
