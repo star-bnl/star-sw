@@ -1,6 +1,9 @@
-// $Id: StFtpcV0.cc,v 1.4 2000/11/16 12:48:05 jcs Exp $
+// $Id: StFtpcV0.cc,v 1.5 2001/01/27 19:52:38 jcs Exp $
 //
 // $Log: StFtpcV0.cc,v $
+// Revision 1.5  2001/01/27 19:52:38  jcs
+// get pi constants from PhysicalConstants.h
+//
 // Revision 1.4  2000/11/16 12:48:05  jcs
 // Save FTPC vzero inforamtion in correct banks
 // Use correct FTPC track class
@@ -412,7 +415,6 @@ void StFtpcV0::ComputeDecayVertex()
   // program, and fills the correct members.
   /////////////////////////////////////////////////////////////////////
   const double first_ftpc_row =162.65;// this is temporary
-  double PI = 2*asin(1.);
   double xcH1 = mTrack1.xcenter()/centimeter;
   double ycH1 = mTrack1.ycenter()/centimeter;
   double radiusH1;
@@ -427,8 +429,8 @@ void StFtpcV0::ComputeDecayVertex()
   double zH1 = mTrack1.z(0)/centimeter;
   //double phiH1 = mTrack1.GetLocationOfMomentum().phi()/radian;
   double phiH1=mTrack1.phase();
-  if (phiH1<0) phiH1 += 2*PI;
-  if (phiH1>2*PI) phiH1 -= 2*PI;
+  if (phiH1<0) phiH1 += twopi;
+  if (phiH1>twopi) phiH1 -= twopi;
   //cout<<"phiH1 "<<phiH1<<endl;
   phiH1 -= (first_ftpc_row-zH1)*pitchH1/radiusH1;
   zH1=first_ftpc_row;
@@ -447,8 +449,8 @@ void StFtpcV0::ComputeDecayVertex()
   double zH2 = mTrack2.z(0)/centimeter;
   // double phiH2 = mTrack2.GetLocationOfMomentum().phi()/radian;
   double phiH2=mTrack2.phase();
-  if (phiH2<0) phiH2 += 2*PI;
-  if (phiH2>2*PI) phiH2 -= 2*PI;
+  if (phiH2<0) phiH2 += twopi;
+  if (phiH2>twopi) phiH2 -= twopi;
   //cout<<"phiH2 "<<phiH2<<endl;
 
   phiH2 -= (first_ftpc_row-zH2)*pitchH2/radiusH2;
@@ -519,39 +521,38 @@ int StFtpcV0::HelixInter(double xcH1,double ycH1,double pitchH1,double radiusH1,
 
   double Zmin = 0;  // This is the minimum z that the V0 vertex can have
 
-  double PI = 2*asin(1.);
 
   int status = 0;
   double w = sqrt( (xcH1-xcH2)*(xcH1-xcH2) + (ycH1-ycH2)*(ycH1-ycH2) ); //dist between centers
 
   double theta=atan2(ycH2-ycH1,xcH2-xcH1);  // angle between centers
-  if (theta<0) theta = theta + 2*PI;
+  if (theta<0) theta = theta + twopi;
   
   if(w>=radiusH1+radiusH2){ // circles don't cross, or just touch
 
     double IPH1a = theta-phiH1; //Intersection point helix 1, transformed as in notebook
-    if (IPH1a<0) IPH1a=IPH1a+2*PI;
-    if (IPH1a>2*PI) IPH1a=IPH1a-2*PI;
+    if (IPH1a<0) IPH1a=IPH1a+twopi;
+    if (IPH1a>twopi) IPH1a=IPH1a-twopi;
   
-    double IPH2a = theta-phiH2+PI; //Intersection point helix 2
-    if(theta>PI) IPH2a = theta-phiH2-PI;
-    if (IPH2a<0) IPH2a=IPH2a+2*PI;
-    if (IPH2a>2*PI) IPH2a=IPH2a-2*PI;
+    double IPH2a = theta-phiH2+pi; //Intersection point helix 2
+    if(theta>pi) IPH2a = theta-phiH2-pi;
+    if (IPH2a<0) IPH2a=IPH2a+twopi;
+    if (IPH2a>twopi) IPH2a=IPH2a-twopi;
   
     double zCanidateH1a[2];
     double zCanidateH2a[2];
     double DeltaTheta=0;
   
     // find z of closest points
-    if(pitchH1>0) DeltaTheta=2*PI-IPH1a;
+    if(pitchH1>0) DeltaTheta=twopi-IPH1a;
     if(pitchH1<0) DeltaTheta=IPH1a;
     zCanidateH1a[0] = zH1 - radiusH1*DeltaTheta*fabs(pitchH1);
-    zCanidateH1a[1] = zH1 - radiusH1*(DeltaTheta+2*PI)*fabs(pitchH1);
+    zCanidateH1a[1] = zH1 - radiusH1*(DeltaTheta+twopi)*fabs(pitchH1);
   
-    if(pitchH2>0) DeltaTheta=2*PI-IPH2a;
+    if(pitchH2>0) DeltaTheta=twopi-IPH2a;
     if(pitchH2<0) DeltaTheta=IPH2a;
     zCanidateH2a[0] = zH2 - radiusH2*DeltaTheta*fabs(pitchH2);
-    zCanidateH2a[1] = zH2 - radiusH2*(DeltaTheta+2*PI)*fabs(pitchH2);
+    zCanidateH2a[1] = zH2 - radiusH2*(DeltaTheta+twopi)*fabs(pitchH2);
 
     //set deltaZ and z, based on smallest deltaZ
     deltaZ=9999;
@@ -605,53 +606,53 @@ int StFtpcV0::HelixInter(double xcH1,double ycH1,double pitchH1,double radiusH1,
     double IPH1[2]; //Intersection points helix 1, transformed as in notebook
     IPH1[0] = theta-phiH1+acos(cosdthH1);
     IPH1[1] = theta-phiH1-acos(cosdthH1);    
-    if (IPH1[0]<0) IPH1[0]=IPH1[0]+2*PI;
-    if (IPH1[1]<0) IPH1[1]=IPH1[1]+2*PI;
-    if (IPH1[0]>=2*PI) IPH1[0]=IPH1[0]-2*PI;
-    if (IPH1[1]>=2*PI) IPH1[1]=IPH1[1]-2*PI;
+    if (IPH1[0]<0) IPH1[0]=IPH1[0]+twopi;
+    if (IPH1[1]<0) IPH1[1]=IPH1[1]+twopi;
+    if (IPH1[0]>=twopi) IPH1[0]=IPH1[0]-twopi;
+    if (IPH1[1]>=twopi) IPH1[1]=IPH1[1]-twopi;
     
     double IPH2[2]; //Intersection points helix 2, transformed as in notebook
-    IPH2[0] = theta-phiH2-acos(cosdthH2)+PI;
-    IPH2[1] = theta-phiH2+acos(cosdthH2)+PI;
-    if(theta>PI) {
-      IPH2[0] = theta-phiH2-acos(cosdthH2)-PI;
-      IPH2[1] = theta-phiH2+acos(cosdthH2)-PI;
+    IPH2[0] = theta-phiH2-acos(cosdthH2)+pi;
+    IPH2[1] = theta-phiH2+acos(cosdthH2)+pi;
+    if(theta>pi) {
+      IPH2[0] = theta-phiH2-acos(cosdthH2)-pi;
+      IPH2[1] = theta-phiH2+acos(cosdthH2)-pi;
     }
-    if (IPH2[0]<0) IPH2[0]=IPH2[0]+2*PI;
-    if (IPH2[1]<0) IPH2[1]=IPH2[1]+2*PI;
-    if (IPH2[0]>=2*PI) IPH2[0]=IPH2[0]-2*PI;
-    if (IPH2[1]>=2*PI) IPH2[1]=IPH2[1]-2*PI;
+    if (IPH2[0]<0) IPH2[0]=IPH2[0]+twopi;
+    if (IPH2[1]<0) IPH2[1]=IPH2[1]+twopi;
+    if (IPH2[0]>=twopi) IPH2[0]=IPH2[0]-twopi;
+    if (IPH2[1]>=twopi) IPH2[1]=IPH2[1]-twopi;
 
     double zCanidateH1[2][2];
     double zCanidateH2[2][2];
     double DeltaTheta=0;
   
     // find z of closest points
-    if(pitchH1>0) DeltaTheta=2*PI-IPH1[0];
+    if(pitchH1>0) DeltaTheta=twopi-IPH1[0];
     if(pitchH1<0) DeltaTheta=IPH1[0];
     zCanidateH1[0][0] = zH1 - radiusH1*DeltaTheta*fabs(pitchH1);
-    zCanidateH1[1][0] = zH1 - radiusH1*(DeltaTheta+2*PI)*fabs(pitchH1);
+    zCanidateH1[1][0] = zH1 - radiusH1*(DeltaTheta+twopi)*fabs(pitchH1);
   
     //cout<<"deltatheta"<<DeltaTheta<<endl;
 
-    if(pitchH1>0) DeltaTheta=2*PI-IPH1[1];
+    if(pitchH1>0) DeltaTheta=twopi-IPH1[1];
     if(pitchH1<0) DeltaTheta=IPH1[1];
     zCanidateH1[0][1] = zH1 - radiusH1*DeltaTheta*fabs(pitchH1);
-    zCanidateH1[1][1] = zH1 - radiusH1*(DeltaTheta+2*PI)*fabs(pitchH1);
+    zCanidateH1[1][1] = zH1 - radiusH1*(DeltaTheta+twopi)*fabs(pitchH1);
 
     //cout<<"deltatheta"<<DeltaTheta<<endl;
   
-    if(pitchH2>0) DeltaTheta=2*PI-IPH2[0];
+    if(pitchH2>0) DeltaTheta=twopi-IPH2[0];
     if(pitchH2<0) DeltaTheta=IPH2[0];
     zCanidateH2[0][0] = zH2 - radiusH2*DeltaTheta*fabs(pitchH2);
-    zCanidateH2[1][0] = zH2 - radiusH2*(DeltaTheta+2*PI)*fabs(pitchH2);
+    zCanidateH2[1][0] = zH2 - radiusH2*(DeltaTheta+twopi)*fabs(pitchH2);
 
     //cout<<"deltatheta"<<DeltaTheta<<endl;
 
-    if(pitchH2>0) DeltaTheta=2*PI-IPH2[1];
+    if(pitchH2>0) DeltaTheta=twopi-IPH2[1];
     if(pitchH2<0) DeltaTheta=IPH2[1];
     zCanidateH2[0][1] = zH2 - radiusH2*DeltaTheta*fabs(pitchH2);
-    zCanidateH2[1][1] = zH2 - radiusH2*(DeltaTheta+2*PI)*fabs(pitchH2);
+    zCanidateH2[1][1] = zH2 - radiusH2*(DeltaTheta+twopi)*fabs(pitchH2);
 
     //cout<<"deltatheta"<<DeltaTheta<<endl;
 
