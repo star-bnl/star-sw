@@ -1,0 +1,18 @@
+/* svg_nml.idl
+*     Module: svg_nml
+*     description fills SVT geometry tables
+*/
+
+#include "PAM.idl"
+#include "svg_config.idl"
+#include "svg_shape.idl"
+#include "svg_geom.idl"
+
+interface svg_nml : amiModule {
+      STAFCV_T call
+      ( out svg_config config
+      , out svg_shape  shape
+      , out svg_geom   geom
+      );
+};
+/* Last mod. for svg_nml: $Date: 1998/02/12 13:53:11 $ */
