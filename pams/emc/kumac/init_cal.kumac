@@ -1,4 +1,5 @@
- macro write
+* ****************************************************************
+ macro fill
    macro/global/import *
    cd [params]/emc/cal
    
@@ -27,5 +28,12 @@
    tdm/table/cell/putvalue 'emc_adc_hist_control[0].max'           256
    tdm/table/cell/putvalue 'emc_adc_hist_control[0].nbin'          256
    tdm/table/cell/putvalue 'emc_adc_hist_control[0].id_base'       0
+   
  return
+* **********************************************************************
  
+ macro init
+   macro/global/import *
+     
+ return
+* ******************************************************************
