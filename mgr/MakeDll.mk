@@ -304,8 +304,11 @@ clean :
 	-$(RMDIR)  $(OUPUT_DIRS)
 
 
+else
+.PHONY : all
+all: 
+	@echo "Nothing to be done for Dll"
 endif # end of DoIt
-
 test: 
 	@echo MAKE        := $(MAKE)
 	@echo MAKEFLAGS   := $(MAKEFLAGS)
