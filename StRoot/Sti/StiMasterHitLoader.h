@@ -107,14 +107,14 @@ void StiMasterHitLoader<Source1, Source2,Detector>::loadEvent(Source1 *source1,
   HitLoaderConstIter iter;
   for (iter=begin();iter!=end();iter++)
     (*iter)->loadHits(source1,trackFilter, hitFilter);
-  _hitContainer->sortHits();
-  _hitContainer->reset();//declare all hits as unused...
     if (source2)
       {
       loadAllMcHits(source2,_useMcAsRec,trackFilter,hitFilter);
       _mcHitContainer->sortHits();
       _mcHitContainer->reset();
       }
+  _hitContainer->sortHits();
+  _hitContainer->reset();//declare all hits as unused...
 }
 
 template<class Source1, class Source2,class Detector>
