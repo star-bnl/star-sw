@@ -1,5 +1,5 @@
 /*!\class EMC_Reader
-/author Subhasis, Herbert Ward and Alexandre A. P. Suaide
+\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
 
 Main EMC reader for towers and SMD.
 */ 

@@ -1,10 +1,26 @@
 /*!\class StEmcDecoder
-/author Alexandre A. P. Suaide
+\author Alexandre A. P. Suaide
 
 This class makes the decodification from EMC daq
 and electronics scheme to software scheme. This class
 has methods to decode the numbers in both directions and
-it works for SMD and towers.
+it works for SMD and towers.<br><br>
+
+The current id's definitions are:<br>
+      - for Towers
+            - 0 <= RDO (daq_id)            <= 4799
+            - 1 <= Crate                   <= 30
+            - 0 <= Crate_sequency          <= 159
+            - 1 <= crate board             <= 5
+            - 0 <= position on board       <= 31
+            - 0 <= TDC                     <= 29
+            - 0 <= TDC channels            <= 29
+            - 0 <= tdc sequency on channel <= 159
+            - 1 <= Tower (jose) id         <= 4800       
+      - for SMD
+            - 0 <= RDO             <= 7
+            - 0 <= index           <= 4799
+            
 */ 
 #include "StEmcDecoder.h"
 #include <time.h>
@@ -296,6 +312,30 @@ int StEmcDecoder::GetDaqIdFromTowerId(int id,int& RDO)
 int StEmcDecoder::GetTowerIdFromCrate(int Crate,int crate_sequency,
                                              int& id)
 {
+  if(Crate>15 && Crate<31)
+  {
+    int start=Init_Crate[Crate-1];
+    id=Getjose_towerWest(start,crate_sequency);
+    return 1;
+  }
+  if(Crate>0 && Crate<16)
+  {
+    int start=Init_Crate[Crate-1];
+    id=Getjose_towerEast(start,crate_sequency);
+    return 1;
+  }
+  return 0;
+}
+//--------------------------------------------------------
+///Get Software Id from TDC channel number and position in TDC for towers
+int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency,
+                                             int& id)
+{
+  
+  int Crate;
+  int crate_sequency=tdc_sequency;
+  if(GetTowerCrateFromTDC(TDC, Crate)==0) return 0;
+  
   if(Crate>15 && Crate<31)
   {
     int start=Init_Crate[Crate-1];

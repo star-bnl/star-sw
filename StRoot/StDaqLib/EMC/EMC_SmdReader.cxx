@@ -1,7 +1,7 @@
-/*!\class EMC_BarrelReader
-/author Subhasis, Herbert Ward and Alexandre A. P. Suaide
+/*!\class EMC_SmdReader
+\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
 
-EMC Barrel reader.
+EMC Barrel SMD reader.
 */ 
 
 #include "EMC_SmdReader.hh"
