@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.6 2001/02/13 17:54:40 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.7 2001/02/21 20:41:58 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.7  2001/02/21 20:41:58  yepes
+// Add ctb signals to tree
+//
 // Revision 1.6  2001/02/13 17:54:40  yepes
 // still problems on differnt platforms
 //
@@ -45,6 +48,7 @@ StPeCEvent::~StPeCEvent() {
   clear() ;
   delete pPairs ;
   delete sPairs ;
+  delete tracks ;
 }
 
 

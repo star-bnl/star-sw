@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.3 2001/02/12 21:16:01 yepes Exp $
+// $Id: StPeCPair.h,v 1.4 2001/02/21 20:42:14 yepes Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.4  2001/02/21 20:42:14  yepes
+// Add ctb signals to tree
+//
 // Revision 1.3  2001/02/12 21:16:01  yepes
 // New version of StPeCMaker, lots of changes
 //
@@ -70,6 +73,7 @@ private:
   Float_t                         pPt ;
   Float_t                         pPz ;
   Float_t                         pAngle ;
+  Float_t                         pXyAngle ;
   Float_t                         pPtArm ; // Armenteros pt: pt positive along pair momentum
   Float_t                         pAlpha ; // Armerteros alpha:
                                            //  (pl_pos-pl_neg)/(pl_pos+pl_neg)
