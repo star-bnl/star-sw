@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.32 2000/05/20 01:00:43 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.33 2000/06/20 20:39:49 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.33  2000/06/20 20:39:49  fisyak
+// Add debug print out
+//
 // Revision 1.32  2000/05/20 01:00:43  perev
 // SetFlavor() added
 //
@@ -487,6 +490,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
   
     case 1: // .xdf file
     newdat = St_XDFFile::GetXdFile(dbfile);assert (newdat);
+    if (GetDebug()) printf("Load XdfFile:   %s\n",(const char*)dbfile);
     break;
 
     case 2: // .C file
@@ -506,6 +510,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
       to = StIO::Read (tf, "*");
       delete tf;
       if (!to) break;
+      if (GetDebug()) printf("Load TFile:   %s\n",(const char*)dbfile);
       if (strcmp(to->ClassName(),"StIOEvent")==0) to = ((StIOEvent*)to)->fObj;
       if (!to) break;
       if (to->InheritsFrom(TDataSet::Class())) 	{
