@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.42 1999/07/11 23:32:00 fisyak Exp $
+// $Id: St_QA_Maker.cxx,v 1.43 1999/07/12 16:39:33 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.43  1999/07/12 16:39:33  kathy
+// hopefully last change for globtrk,event_summary and primtrk histograms
+//
 // Revision 1.42  1999/07/11 23:32:00  fisyak
 // St_dst_TriggerDetectors => St_dst_TrgDet
 //
@@ -265,11 +268,11 @@ ClassImp(St_QA_Maker)
   m_max_point=0;
   m_fit_point=0;
   m_glb_charge=0;
-  m_glb_x0=0;
+  m_glb_xf0=0;
   m_glb_xf=0;
-  m_glb_y0=0;
+  m_glb_yf0=0;
   m_glb_yf=0;     
-  m_glb_z0=0;     
+  m_glb_zf0=0;     
   m_glb_zf=0;     
   m_psi=0;        
   m_tanl=0;       
@@ -284,7 +287,8 @@ ClassImp(St_QA_Maker)
   m_glb_ndf=0;    
 
   m_pT_eta_rec = 0;
-  m_tanl_z0  = 0;
+  m_globtrk_xf_yf = 0;
+  m_tanl_zf  = 0;
   m_mom_trklength = 0;
   m_eta_trklength = 0;
   m_npoint_length = 0;		  
@@ -295,8 +299,8 @@ ClassImp(St_QA_Maker)
   m_chisq1_eta = 0;
   m_chisq0_dip = 0;
   m_chisq1_dip = 0;
-  m_chisq0_z0 = 0;
-  m_chisq1_z0 = 0;
+  m_chisq0_zf = 0;
+  m_chisq1_zf = 0;
   m_nfptonpt_mom = 0;
   m_nfptonpt_eta = 0;
 
@@ -316,11 +320,11 @@ ClassImp(St_QA_Maker)
   m_pmax_point=0;
   m_pfit_point=0;
   m_prim_charge=0;
-  m_prim_x0=0;
+  m_prim_xf0=0;
   m_prim_xf=0;
-  m_prim_y0=0;
+  m_prim_yf0=0;
   m_prim_yf=0;     
-  m_prim_z0=0;     
+  m_prim_zf0=0;     
   m_prim_zf=0;     
   m_ppsi=0;        
   m_ptanl=0;       
@@ -335,7 +339,8 @@ ClassImp(St_QA_Maker)
   m_prim_ndf=0;    
 
   m_ppT_eta_rec = 0;
-  m_ptanl_z0  = 0;
+  m_primtrk_xf_yf = 0;
+  m_ptanl_zf  = 0;
   m_pmom_trklength = 0;
   m_peta_trklength = 0;
   m_pnpoint_length = 0;		  
@@ -346,8 +351,8 @@ ClassImp(St_QA_Maker)
   m_pchisq1_eta = 0;
   m_pchisq0_dip = 0;
   m_pchisq1_dip = 0;
-  m_pchisq0_z0 = 0;
-  m_pchisq1_z0 = 0;
+  m_pchisq0_zf = 0;
+  m_pchisq1_zf = 0;
   m_pnfptonpt_mom = 0;
   m_pnfptonpt_eta = 0;
 
@@ -711,11 +716,11 @@ void St_QA_Maker::SetDefaultLogYList(){
  "QaGlobtrkNPntFit",
  "QaGlobtrkPt",
  "QaGlobtrkP",
- "QaGlobtrkX0",
+ "QaGlobtrkXf0",
  "QaGlobtrkXf",
- "QaGlobtrkY0",
+ "QaGlobtrkYf0",
  "QaGlobtrkYf",
- "QaGlobtrkZ0",
+ "QaGlobtrkZf0",
  "QaGlobtrkZf",
  "QaGlobtrkTanl ",
  "QaGlobtrkTheta ",
@@ -732,11 +737,11 @@ void St_QA_Maker::SetDefaultLogYList(){
  "QaPrimtrkNPntFit",
  "QaPrimtrkPt",
  "QaPrimtrkP",
- "QaPrimtrkX0",
+ "QaPrimtrkXf0",
  "QaPrimtrkXf",
- "QaPrimtrkY0",
+ "QaPrimtrkYf0",
  "QaPrimtrkYf",
- "QaPrimtrkZ0",
+ "QaPrimtrkZf0",
  "QaPrimtrkZf",
  "QaPrimtrkTanl ",
  "QaPrimtrkTheta ",
@@ -869,12 +874,12 @@ void St_QA_Maker::BookHistGlob(){
   m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,50.);
   m_fit_point  = new TH1F("QaGlobtrkNPntFit", "globtrk: N fit points on track", 50, 0.,50.);
   m_glb_charge = new TH1F("QaGlobtrkChrg",    "globtrk: charge ", 20,-2.,2.);
-  m_glb_x0     = new TH1F("QaGlobtrkX0",      "globtrk: x of first tpc hit ", 50,-200.,200.);
-  m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first tpc hit - on helix at start",50,-20.,20.);
-  m_glb_y0     = new TH1F("QaGlobtrkY0",      "globtrk: y of first tpc hit ", 50,-200.,200.);
-  m_glb_yf     = new TH1F("QaGlobtrkYf",      "globtrk: y of first tpc hit - on helix at start",50,-20.,20.);
-  m_glb_z0     = new TH1F("QaGlobtrkZ0",      "globtrk: z of first tpc hit ", 50,-250.,250.);
-  m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first tpc hit - on helix at start",50,-20.,20.);
+  m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first tpc hit ", 50,-200.,200.);
+  m_glb_xf0    = new TH1F("QaGlobtrkXf0",     "globtrk: x of first tpc hit - on helix at start",50,-20.,20.);
+  m_glb_yf     = new TH1F("QaGlobtrkYf",      "globtrk: y of first tpc hit ", 50,-200.,200.);
+  m_glb_yf0    = new TH1F("QaGlobtrkYf0",     "globtrk: y of first tpc hit - on helix at start",50,-20.,20.);
+  m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first tpc hit ", 50,-250.,250.);
+  m_glb_zf0    = new TH1F("QaGlobtrkZf0",     "globtrk: z of first tpc hit - on helix at start",50,-20.,20.);
   m_psi        = new TH1F("QaGlobtrkPsi",     "globtrk: psi distribution", 36, 0.,360.);
   m_tanl       = new TH1F("QaGlobtrkTanl",    "globtrk: tanl distribution",32,-4.,4.);
   m_glb_theta  = new TH1F("QaGlobtrkTheta",   "globtrk: theta distribution",20,0.,4.);
@@ -897,9 +902,9 @@ void St_QA_Maker::BookHistGlob(){
     m_globtrk_xf_yf->SetXTitle("x first");
     m_globtrk_xf_yf->SetYTitle("y first");
 
-  m_tanl_z0 = new TH2F("QaGlobtrkTanlz0","globtrk: tanl(dip) versus zfirst",50,-250.,250.,60,-3.,3.);
-    m_tanl_z0->SetXTitle("zfirst");
-    m_tanl_z0->SetYTitle("tanl");
+  m_tanl_zf = new TH2F("QaGlobtrkTanlzf","globtrk: tanl(dip) versus zfirst",50,-250.,250.,60,-3.,3.);
+    m_tanl_zf->SetXTitle("zfirst");
+    m_tanl_zf->SetYTitle("tanl");
 
 
   m_mom_trklength = new TH2F("QaGlobtrkPVsTrkLength","globtrk: log mom vs trk length",
@@ -949,13 +954,13 @@ void St_QA_Maker::BookHistGlob(){
     m_chisq1_dip->SetXTitle("dip angle");
     m_chisq1_dip->SetYTitle("chisq1");
 
-  m_chisq0_z0 = new TH2F("QaGlobtrkChi0z0","globtrk: Chisq0 vs zfirst",20,-250.,250.,20,0.,15.);
-    m_chisq0_z0->SetXTitle("zfirst");
-    m_chisq0_z0->SetYTitle("chisq0");
+  m_chisq0_zf = new TH2F("QaGlobtrkChi0zf","globtrk: Chisq0 vs zfirst",20,-250.,250.,20,0.,15.);
+    m_chisq0_zf->SetXTitle("zfirst");
+    m_chisq0_zf->SetYTitle("chisq0");
 
-  m_chisq1_z0 = new TH2F("QaGlobtrkChi1z0","globtrk: Chisq1 vs zfirst",20,-250.,250.,20,0.,15.);
-    m_chisq1_z0->SetXTitle("zfirst");
-    m_chisq1_z0->SetYTitle("chisq1");
+  m_chisq1_zf = new TH2F("QaGlobtrkChi1zf","globtrk: Chisq1 vs zfirst",20,-250.,250.,20,0.,15.);
+    m_chisq1_zf->SetXTitle("zfirst");
+    m_chisq1_zf->SetYTitle("chisq1");
 
   m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs log mom.",40,0.,4.,40,0.,2.0); 
      m_nfptonpt_mom->SetXTitle("log P (MeV)");
@@ -984,12 +989,12 @@ void St_QA_Maker::BookHistPrim(){
   m_pmax_point  = new TH1F("QaPrimtrkNPntMax", "primtrk: N max points on track", 50, 0.,50.);
   m_pfit_point  = new TH1F("QaPrimtrkNPntFit", "primtrk: N fit points on track", 50, 0.,50.);
   m_prim_charge = new TH1F("QaPrimtrkChrg",    "primtrk: charge ", 20,-2.,2.);
-  m_prim_x0     = new TH1F("QaPrimtrkX0",      "primtrk: x of first tpc hit ", 50,-200.,200.);
-  m_prim_xf     = new TH1F("QaPrimtrkXf",      "primtrk: x of first tpc hit - on helix at start",50,-200.,200.);
-  m_prim_y0     = new TH1F("QaPrimtrkY0",      "primtrk: y of first tpc hit ", 50,-200.,200.);
-  m_prim_yf     = new TH1F("QaPrimtrkYf",      "primtrk: y of first tpc hit - on helix at start",50,-200.,200.);
-  m_prim_z0     = new TH1F("QaPrimtrkZ0",      "primtrk: z of first tpc hit ", 50,-200.,200.);
-  m_prim_zf     = new TH1F("QaPrimtrkZf",      "primtrk: z of first tpc hit - on helix at start",50,-200.,200.);
+  m_prim_xf     = new TH1F("QaPrimtrkXf",      "primtrk: x of first tpc hit ", 50,-200.,200.);
+  m_prim_xf0    = new TH1F("QaPrimtrkXf0",     "primtrk: x of first tpc hit - on helix at start",50,-200.,200.);
+  m_prim_yf     = new TH1F("QaPrimtrkYf",      "primtrk: y of first tpc hit ", 50,-200.,200.);
+  m_prim_yf0    = new TH1F("QaPrimtrkYf0",     "primtrk: y of first tpc hit - on helix at start",50,-200.,200.);
+  m_prim_zf     = new TH1F("QaPrimtrkZf",      "primtrk: z of first tpc hit ", 50,-200.,200.);
+  m_prim_zf0    = new TH1F("QaPrimtrkZf0",     "primtrk: z of first tpc hit - on helix at start",50,-200.,200.);
   m_ppsi        = new TH1F("QaPrimtrkPsi",     "primtrk: psi distribution", 36, 0.,360.);
   m_ptanl       = new TH1F("QaPrimtrkTanl",    "primtrk: tanl distribution",32,-4.,4.);
   m_prim_theta  = new TH1F("QaPrimtrkTheta",   "primtrk: theta distribution",20,0.,4.);
@@ -1008,14 +1013,14 @@ void St_QA_Maker::BookHistPrim(){
     m_ppT_eta_rec->SetXTitle("eta");
     m_ppT_eta_rec->SetYTitle(" log pT (MeV)");
 
-  m_primtrk_xf_yf = new TH2F("QaGlobtrkXfYf","primtrk: Y vs X of first hit on trk", 40,-200.,200.,40,-200.,200.);
+  m_primtrk_xf_yf = new TH2F("QaPrimtrkXfYf","primtrk: Y vs X of first hit on trk", 40,-200.,200.,40,-200.,200.);
     m_primtrk_xf_yf->SetXTitle("x first");
     m_primtrk_xf_yf->SetYTitle("y first");
 
 
-  m_ptanl_z0 = new TH2F("QaPrimtrkTanlz0","primtrk: tanl(dip) versus zfirst",50,-250.,250.,60,-3.,3.);
-    m_ptanl_z0->SetXTitle("zfirst");
-    m_ptanl_z0->SetYTitle("tanl");
+  m_ptanl_zf = new TH2F("QaPrimtrkTanlzf","primtrk: tanl(dip) versus zfirst",50,-250.,250.,60,-3.,3.);
+    m_ptanl_zf->SetXTitle("zfirst");
+    m_ptanl_zf->SetYTitle("tanl");
 
 
   m_pmom_trklength = new TH2F("QaPrimtrkPVsTrkLength","primtrk: log mom vs trk length",
@@ -1065,13 +1070,13 @@ void St_QA_Maker::BookHistPrim(){
     m_pchisq1_dip->SetXTitle("dip angle");
     m_pchisq1_dip->SetYTitle("chisq1");
 
-  m_pchisq0_z0 = new TH2F("QaPrimtrkChi0z0","primtrk: Chisq0 vs zfirst",20,-250.,250.,35,0.,7.);
-    m_pchisq0_z0->SetXTitle("zfirst");
-    m_pchisq0_z0->SetYTitle("chisq0");
+  m_pchisq0_zf = new TH2F("QaPrimtrkChi0zf","primtrk: Chisq0 vs zfirst",20,-250.,250.,35,0.,7.);
+    m_pchisq0_zf->SetXTitle("zfirst");
+    m_pchisq0_zf->SetYTitle("chisq0");
 
-  m_pchisq1_z0 = new TH2F("QaPrimtrkChi1z0","primtrk: Chisq1 vs z0",20,-250.,250.,35,0.,7.);
-    m_pchisq1_z0->SetXTitle("zfirst");
-    m_pchisq1_z0->SetYTitle("chisq1");
+  m_pchisq1_zf = new TH2F("QaPrimtrkChi1zf","primtrk: Chisq1 vs z0",20,-250.,250.,35,0.,7.);
+    m_pchisq1_zf->SetXTitle("zfirst");
+    m_pchisq1_zf->SetYTitle("chisq1");
 
   m_pnfptonpt_mom = new TH2F("QaPrimtrkRPntMom","primtrk: ratio Nfitpnt,Npnt vs log mom.",40,0.,4.,40,0.,2.0); 
      m_pnfptonpt_mom->SetXTitle("log P (MeV)");
@@ -1245,12 +1250,12 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	m_max_point->Fill(t->n_max_point);
 	m_fit_point->Fill(t->n_fit_point);
         m_glb_charge->Fill(t->icharge);
-        m_glb_x0->Fill(t->x_first[0]);
-        m_glb_y0->Fill(t->x_first[1]);
-        m_glb_z0->Fill(t->x_first[2]);
-        m_glb_xf->Fill(xdif);
-        m_glb_yf->Fill(ydif);
-        m_glb_zf->Fill(zdif);
+        m_glb_xf->Fill(t->x_first[0]);
+        m_glb_yf->Fill(t->x_first[1]);
+        m_glb_zf->Fill(t->x_first[2]);
+        m_glb_xf0->Fill(xdif);
+        m_glb_yf0->Fill(ydif);
+        m_glb_zf0->Fill(zdif);
 	m_psi->Fill(t->psi);
         m_tanl->Fill(t->tanl);
         m_glb_theta->Fill(theta);
@@ -1265,7 +1270,7 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 
 	m_pT_eta_rec->Fill(eta,lmevpt);
         m_globtrk_xf_yf->Fill(t->x_first[0],t->x_first[1]);
-        m_tanl_z0->Fill(t->z0,t->tanl);
+        m_tanl_zf->Fill(t->x_first[2],t->tanl);
 	m_mom_trklength->Fill(t->length,lmevmom);
         m_eta_trklength->Fill(eta,t->length);
 	m_npoint_length->Fill(t->length,float(t->n_point));
@@ -1276,8 +1281,8 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	m_chisq1_eta->Fill(eta,chisq1_p);
 	m_chisq0_dip->Fill(t->tanl,chisq0_p);
 	m_chisq1_dip->Fill(t->tanl,chisq1_p);
-	m_chisq0_z0->Fill(t->z0,chisq0_p);
-	m_chisq1_z0->Fill(t->z0,chisq1_p);
+	m_chisq0_zf->Fill(t->x_first[2],chisq0_p);
+	m_chisq1_zf->Fill(t->x_first[2],chisq1_p);
         m_nfptonpt_mom->Fill(lmevmom,nfitntot);
         m_nfptonpt_eta->Fill(eta,nfitntot);
 
@@ -1351,12 +1356,12 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 	m_pmax_point->Fill(t->n_max_point);
 	m_pfit_point->Fill(t->n_fit_point);
         m_prim_charge->Fill(t->icharge);
-        m_prim_x0->Fill(t->x_first[0]);
-        m_prim_y0->Fill(t->x_first[1]);
-        m_prim_z0->Fill(t->x_first[2]);
-        m_prim_xf->Fill(xdif);
-        m_prim_yf->Fill(ydif);
-        m_prim_zf->Fill(zdif);
+        m_prim_xf->Fill(t->x_first[0]);
+        m_prim_yf->Fill(t->x_first[1]);
+        m_prim_zf->Fill(t->x_first[2]);
+        m_prim_xf0->Fill(xdif);
+        m_prim_yf0->Fill(ydif);
+        m_prim_zf0->Fill(zdif);
 	m_ppsi->Fill(t->psi);
         m_ptanl->Fill(t->tanl);
         m_prim_theta->Fill(theta);
@@ -1371,7 +1376,7 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 
 	m_ppT_eta_rec->Fill(eta,lmevpt);
         m_primtrk_xf_yf->Fill(t->x_first[0],t->x_first[1]);
-        m_ptanl_z0->Fill(t->z0,t->tanl);
+        m_ptanl_zf->Fill(t->x_first[2],t->tanl);
 	m_pmom_trklength->Fill(t->length,lmevmom);
         m_peta_trklength->Fill(eta,t->length);
 	m_pnpoint_length->Fill(t->length,float(t->n_point));
@@ -1382,8 +1387,8 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
 	m_pchisq1_eta->Fill(eta,chisq1_p);
 	m_pchisq0_dip->Fill(t->tanl,chisq0_p);
 	m_pchisq1_dip->Fill(t->tanl,chisq1_p);
-	m_pchisq0_z0->Fill(t->z0,chisq0_p);
-	m_pchisq1_z0->Fill(t->z0,chisq1_p);
+	m_pchisq0_zf->Fill(t->x_first[2],chisq0_p);
+	m_pchisq1_zf->Fill(t->x_first[2],chisq1_p);
         m_pnfptonpt_mom->Fill(lmevmom,nfitntot);
         m_pnfptonpt_eta->Fill(eta,nfitntot);
 
@@ -1562,7 +1567,7 @@ void St_QA_Maker::MakeHistXi(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.42 1999/07/11 23:32:00 fisyak Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.43 1999/07/12 16:39:33 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
