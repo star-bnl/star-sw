@@ -219,6 +219,8 @@ Int_t StiMaker::Init()
     //EvaluableTrack SeedFinder
     mEvaluableSeedFinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
     mEvaluableSeedFinder->setFactory(mtrackfactory);
+    mEvaluableSeedFinder->setBuildPath("StRoot/StiMaker/RunTimeParameters/EvaluableSeedFinder.txt");
+    mEvaluableSeedFinder->build();
 
     //The StiDetector factory
     mdetectorfactory = new detector_factory("DrawableDetectorFactory");

@@ -1,0 +1,10 @@
+//EvaluableSeedFinder.txt
+//Run-time configuration for the evaluable seed finder
+
+hitFilterType:		 StTpcPadrowHitFilter
+
+//min padrow
+mMinPadrow:		10
+
+//max padrow
+mMaxPadrow:		35
