@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdAbsClustering.cxx,v 1.1 2002/08/27 12:07:44 subhasis Exp $
+ * $Id: StPmdAbsClustering.cxx,v 1.2 2003/05/12 12:12:18 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,8 +11,8 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.cxx,v $
- * Revision 1.1  2002/08/27 12:07:44  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:12:18  subhasis
+ * StEvent added
  *
  *
  ******************************************************/

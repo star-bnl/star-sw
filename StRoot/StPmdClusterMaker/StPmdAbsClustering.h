@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdAbsClustering.h,v 1.1 2002/08/27 12:08:39 subhasis Exp $
+ * $Id: StPmdAbsClustering.h,v 1.2 2003/05/12 12:12:18 subhasis Exp $
  *
  * Author: Subhasis
  ******************************************************
@@ -14,8 +14,8 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.h,v $
- * Revision 1.1  2002/08/27 12:08:39  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:12:18  subhasis
+ * StEvent added
  *
  *
  ******************************************************/
@@ -36,8 +36,10 @@ class StPmdAbsClustering
   private:
 
   protected:
-  StPmdDetector *m_pmd_det;  //! pointer for detector Pmd
-  StPmdDetector *m_cpv_det;  //! pointer for detector Cpv
+ //! pointer for detector Pmd
+  StPmdDetector *m_pmd_det; 
+//! pointer for detector Cpv
+  StPmdDetector *m_cpv_det;  
 
    public:
   StPmdAbsClustering(StPmdDetector *, StPmdDetector*);

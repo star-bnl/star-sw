@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.1 2002/08/27 12:08:12 subhasis Exp $
+ * $Id: StPmdClustering.h,v 1.2 2003/05/12 12:12:18 subhasis Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,8 +13,8 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
- * Revision 1.1  2002/08/27 12:08:12  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:12:18  subhasis
+ * StEvent added
  *
  *
  ******************************************************/
@@ -26,7 +26,8 @@
 #include <TArrayF.h>
 #include <TArrayI.h>
 #include "StPmdAbsClustering.h"
-
+class StPmdHit;
+class StPmdCluster;
 class StPmdDetector;
 class StPmdClusterCollection;
 class StPmdClustering:public StPmdAbsClustering
@@ -39,21 +40,36 @@ class StPmdClustering:public StPmdAbsClustering
 //  StPmdDetector *m_cpv_det;
 
    public:
-  //! functions for clustering
-
-  StPmdClustering(StPmdDetector *, StPmdDetector*); 
-  StPmdClustering();
+  // functions for clustering
+//!constructor 
+  StPmdClustering(StPmdDetector *, StPmdDetector*);
+  //!constructor
+  StPmdClustering();                             
+  //!destructor
   virtual ~StPmdClustering();
-  void findPmdClusters();    //! for Pmd clusters
-  void findCpvClusters();    //! for Cpv clusters
-  Int_t crclust(Double_t , Double_t, Int_t, Int_t);  //! crude clustering
-  void refclust(Int_t, Int_t, Int_t,StPmdClusterCollection*); //! refined clustering
-  Double_t ranmar();  //!random number generator
-  void order(Int_t);   //! for ordering
-  void arrange(Int_t);  
-  Double_t Dist(Double_t, Double_t, Double_t, Double_t);  //! distance between two points
-  void gaussfit(Int_t, Int_t, Double_t &, Double_t &, Double_t &, Double_t &, Double_t &,Double_t &,Double_t & );  //! for parametrization
-  void printclust(Int_t, Int_t, Int_t,StPmdClusterCollection*);  //! printing clusters
+  //! for Pmd clusters                     
+  void findPmdClusters();
+  //! for Cpv clusters
+  void findCpvClusters(); 
+
+ //! crude clustering
+  Int_t crclust(Double_t , Double_t, Int_t, Int_t); 
+  //! refined clustering
+  void refclust(StPmdDetector*,Int_t, Int_t, Int_t,StPmdClusterCollection*);
+  //!random number generator
+  Double_t ranmar(); 
+  //! for ordering
+  void order(Int_t);  
+  //! ordering 
+  void arrange(Int_t);
+  Double_t Dist(Double_t, Double_t, Double_t, Double_t);  //! distance between two clusters
+  //! for parametrization
+  void gaussfit(Int_t, Int_t, Double_t &, Double_t &, Double_t &, Double_t &, Double_t &,Double_t &,Double_t & ); 
+  //  void printclust(Int_t, Int_t, Int_t,StPmdClusterCollection*,StPmdCluster*); 
+  //! printing clusters
+  void printclust(Int_t,Int_t, StPmdCluster*); 
+  //! for getting hits of each cluster
+  StPmdHit* GetHit(StPmdDetector*, Int_t, Int_t, Int_t);
 
   ClassDef(StPmdClustering, 1) 
     };
