@@ -1,6 +1,7 @@
 **************************************************************************
 
 MACRO init alias file_name
+macro/global/import *
 
 *** make place to keep the input
 cd /dui
@@ -15,6 +16,7 @@ return
 ****************************************************************
 
 MACRO read alias table_directory 
+macro/global/import *
 
  cd /dui
 
@@ -27,6 +29,7 @@ return
 *******************************************************************
 
 MACRO close alias
+macro/global/import *
 
  cd /dui
  
