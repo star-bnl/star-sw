@@ -58,9 +58,9 @@ private:
   double         mSamplingFrequency;
   double         mPadRespondFunctionSigma;
 
-#ifndef ST_NO_DEF_TEMPLATE_ARGS
-  vector<double, allocator<double> > mChargeFraction;
-  vector<double, allocator<double> > mErrorFuctionTable;
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+  vector<double> mChargeFraction;
+  vector<double> mErrorFuctionTable;
 #else
   vector<double, allocator<double> > mChargeFraction;
   vector<double, allocator<double> > mErrorFuctionTable;
