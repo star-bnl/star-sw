@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.61 1999/06/09 01:15:06 snelling Exp $
+// $Id: bfc.C,v 1.62 1999/06/10 17:01:41 snelling Exp $
 // $Log: bfc.C,v $
+// Revision 1.62  1999/06/10 17:01:41  snelling
+// changed order switches so Eval would not turn on defaultchain
+//
 // Revision 1.61  1999/06/09 01:15:06  snelling
 // added switches for year1a,b,c and 2a geometry (y1a,..,y2a)
 //
@@ -85,7 +88,7 @@
 //
 //=======================================================================
 // owner:  Yuri Fisyak
-// what it does: 
+// what it does: Macro for running chain with different inputs   
 //=======================================================================
 //
 //////////////////////////////////////////////////////////////////////////
@@ -123,14 +126,14 @@ Int_t NoEvents = 0;
 Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
-  kNULL =0 ,kEval    ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,
+  kFIRST   ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,kEval    ,
   kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
   kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
   kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
 };
 Char_t *ChainOptions[] = {
-  "NULL    ","Eval    ","Y1a     ","Y1b     ","Y1c     ","Y2a     ",
+  "FIRST   ","Y1a     ","Y1b     ","Y1c     ","Y2a     ","Eval    ",
   "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","FZIN    ","GEANT   ","CTEST   ",
   "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
   "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
@@ -138,11 +141,11 @@ Char_t *ChainOptions[] = {
 };
 Char_t *ChainComments[] = {
   "Nothing to comment",
-  "Turn on evaluation switch for different makers",
   "Turn on Year 1a geometry (and corresponding Makers)",
   "Turn on Year 1b geometry (and corresponding Makers)",
   "Turn on Year 1c geometry (and corresponding Makers)",
   "Turn on Year 2a geometry (and corresponding Makers)",
+  "Turn on evaluation switch for different makers",
   "Read XDF input file with g2t",
   "Write dst to XDF file",
   "Run gstar for 10 muon track with pT = 10 GeV in |eta|<1",
@@ -181,13 +184,17 @@ UChar_t  ChainFlags[] = {
 };
 //_____________________________________________________________________
 void SetChainOff(){// set all OFF
-  for (Int_t k = kEval;k<=kLAST;k++) ChainFlags[k] = kFALSE;
+  for (Int_t k = kFIRST;k<=kLAST;k++) ChainFlags[k] = kFALSE;
 }
 //_____________________________________________________________________
 void SetDefaultChain(){// default for standard chain
   if (! DefaultSet) {
     printf ("Set default options\n");
-    for (Int_t k = kTPC;k<kLAST;k++) if (k != kTSS && k != kTFS) ChainFlags[k] = kTRUE;
+    for (Int_t k = kTPC; k<kLAST; k++) {
+      if (k != kTSS && k != kTFS) {
+	ChainFlags[k] = kTRUE;
+      }
+    }
     DefaultSet = kTRUE;
   } 
 }
@@ -200,8 +207,8 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   printf ("============= You are in %s ===============\n",STAR_VERSION.Data());
   Int_t k, kgo;
   if (!strlen(Chain)) {
-                               printf ("============= \tPossible Chain Options are: \n");
-    for (k=kEval;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
+    printf ("============= \tPossible Chain Options are: \n");
+    for (k=kFIRST;k<kLAST;k++) printf ("============ %2d \t[-]%s : \t%s \n",k,ChainOptions[k],ChainComments[k]);
     gSystem->Exit(1);
   }
   TString opt;
@@ -209,7 +216,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   TString tChain(Chain);
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
   SetChainOff();
-  for (k = kEval; k<kLAST; k++){
+  for (k = kFIRST; k<kLAST; k++) {
     opt = TString(ChainOptions[k],3);
     opt.ToLower();
     if (!strstr(tChain.Data(),opt.Data())) continue;
@@ -217,7 +224,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     nopt = TString("-");
     nopt += opt;
     if (strstr(tChain.Data(),nopt.Data())) kgo = -k;
-    //    printf ("Option %s/%s %d\n",opt.Data(),nopt.Data(),kgo);
+
     switch (kgo) {
     case kMINIDAQ:
       SetChainOff();
@@ -324,12 +331,14 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     default:
       if (k <= 0 || k > kLAST ) {printf ("Option %s unrecognized\n",ChainOptions[k]);}
       if (!ChainFlags[kY1a] && !ChainFlags[kY1b] && !ChainFlags[kY1c] && !ChainFlags[kY2a]) {
-      SetDefaultChain();
+	SetDefaultChain(); 
+	printf ("no setup defined: using all existing Makers with GSTAR input \n");
       }
       if (kgo<0) {ChainFlags[k] = kFALSE; printf(" Switch off %s\n",ChainOptions[k]);}
       else       {ChainFlags[k] = kTRUE;  printf(" Switch on  %s\n",ChainOptions[k]);}
     }
   }
+
   if (!strcmp("SL99c",STAR_VERSION.Data())) {
     //    ChainFlags[kTREE]     = kFALSE;
     ChainFlags[kEVENT]    = kFALSE;
@@ -339,11 +348,18 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     ChainFlags[kFZIN]  = kTRUE;
     ChainFlags[kGEANT] = kTRUE;
   }
-  if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field]) ChainFlags[kField_On] = kTRUE;
-  if (ChainFlags[kAllEvent]) {ChainFlags[kEval] = kTRUE; printf(" Switch on  %s\n",ChainOptions[kEval]);}
-  for (k = kEval; k<kLAST;k++) 
-    if (ChainFlags[k]     ) 
+  if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field]) { 
+    ChainFlags[kField_On] = kTRUE;
+  }
+  if (ChainFlags[kAllEvent]) {
+    ChainFlags[kEval] = kTRUE; 
+    printf(" Switch on  %s\n",ChainOptions[kEval]);
+  }
+  for (k = kFIRST; k<kLAST;k++) {
+    if (ChainFlags[k]) {
       printf ("================== %2d \t%s \tis ON: \t%s \n",k,ChainOptions[k],ChainComments[k]);
+    }
+  }
   //  gSystem->Exit(1);
 }
 //_____________________________________________________________________
