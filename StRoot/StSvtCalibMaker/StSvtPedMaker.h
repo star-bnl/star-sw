@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.h,v 1.1 2000/08/23 13:08:12 munhoz Exp $
+ * $Id: StSvtPedMaker.h,v 1.2 2000/11/30 20:32:03 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.h,v $
+ * Revision 1.2  2000/11/30 20:32:03  caines
+ * Use MessMgr
+ *
  * Revision 1.1  2000/08/23 13:08:12  munhoz
  * SVT pedestal calculation
  *
@@ -67,8 +70,8 @@ class StSvtPedMaker : public StMaker {
   virtual Int_t  Make();
   virtual Int_t  CalcPed();
   virtual Int_t  CalcPed2ndOrd();
-  virtual Int_t  WriteToFile(char* fileName = "svtPedestal.root", char* option = "NEW");
-  virtual Int_t  ReadFromFile(char* fileName = "svtPedestal.root");
+  virtual Int_t  WriteToFile(const char* fileName = "svtPedestal.root", char* option = "NEW");
+  virtual Int_t  ReadFromFile(const char* fileName = "svtPedestal.root");
   virtual Int_t  ResetStat();
   virtual Int_t  ResetPed();
   virtual Int_t  Finish();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.1 2000/08/23 13:08:12 munhoz Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.2 2000/11/30 20:32:02 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.2  2000/11/30 20:32:02  caines
+ * Use MessMgr
+ *
  * Revision 1.1  2000/08/23 13:08:12  munhoz
  * SVT pedestal calculation
  *
@@ -23,6 +26,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
+#include "StMessMgr.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StarClassLibrary/StSequence.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
@@ -89,7 +93,7 @@ Int_t StSvtPedMaker::SetSvtData()
 {
   St_DataSet *dataSet;
 
-  dataSet = GetDataSet("StSvtData");
+  dataSet = GetDataSet("StSvtRawData");
   assert(dataSet);
   fSvtData = (StSvtData*)(dataSet->GetObject());
   assert(fSvtData);
@@ -130,7 +134,7 @@ Int_t StSvtPedMaker::SetSvtPed2ndOrd()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::Make()
 {
-  //cout << "StSvtPedMaker::Make" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::Make" << endm;
 
   return kStOK;
 }
@@ -138,7 +142,7 @@ Int_t StSvtPedMaker::Make()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::AddStat()
 {
-  //cout << "StSvtPedMaker::AddStat" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::AddStat" << endm;
 
   int anodeID, nAnodes, nSeq, iseq, time, timeSeq, status;
   int capacitor, nSCAZero;
@@ -240,8 +244,6 @@ Int_t StSvtPedMaker::AddStat()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::AddStat2ndOrd()
 {
-  //cout << "StSvtPedMaker::AddStat" << endl;
-
   int anodeID, nAnodes, nSeq, iseq, time, timeSeq, status;
   int capacitor, nSCAZero;
   int* anodeList;
@@ -336,8 +338,10 @@ Int_t StSvtPedMaker::AddStat2ndOrd()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::CalcPed()
 {
-  //cout << "StSvtPedMaker::CalcPed" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::CalcPed" << endm;
 
+  float rms = 0;
+  
   for (int barrel = 1;barrel <= fSvtData->getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= fSvtData->getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= fSvtData->getNumberOfWafers(barrel);wafer++) {
@@ -360,8 +364,16 @@ Int_t StSvtPedMaker::CalcPed()
 	    for (int time=0; time<fPed->getNumberOfTimeBins();time++) {
 
 	      fPed->AddAt(fStat->getMean(anode,time),fPed->getPixelIndex(anode,time));
+	      // if ((anode == 120) && (time == 64))
+	      //	cout << fPed->getPixelContent(anode,time) << endl;
+	      rms += fStat->getRMS(anode,time);
 	    }
 	  }
+
+	  rms /= fPed->getNumberOfAnodes()*fPed->getNumberOfTimeBins();
+	  fPed->setRMS(rms);
+
+	  // cout << "rms = " << fPed->getRMS() << endl;
 
 	  fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid))= fPed;	   
 	}
@@ -375,8 +387,6 @@ Int_t StSvtPedMaker::CalcPed()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::CalcPed2ndOrd()
 {
-  //  cout << "StSvtPedMaker::CalcPed2ndOrd" << endl;
-
   for (int barrel = 1;barrel <= fSvtData->getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= fSvtData->getNumberOfLadders(barrel);ladder++) {
       for (int wafer = 1;wafer <= fSvtData->getNumberOfWafers(barrel);wafer++) {
@@ -422,8 +432,10 @@ Int_t StSvtPedMaker::CalcPed2ndOrd()
 }
 
 //_____________________________________________________________________________
-Int_t StSvtPedMaker::WriteToFile(char* fileName, char* option)
+Int_t StSvtPedMaker::WriteToFile(const char* fileName, char* option)
 {
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::WriteToFile" << endm;
+
   TFile *file = new TFile(fileName,"RECREATE");
   char name[20];
 
@@ -451,8 +463,10 @@ Int_t StSvtPedMaker::WriteToFile(char* fileName, char* option)
 }
 
 //_____________________________________________________________________________
-Int_t StSvtPedMaker::ReadFromFile(char* fileName)
+Int_t StSvtPedMaker::ReadFromFile(const char* fileName)
 {
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::ReadFromFile" << endm;
+
   TFile *file = new TFile(fileName);
   char name[20];
 
@@ -484,7 +498,7 @@ Int_t StSvtPedMaker::ReadFromFile(char* fileName)
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::ResetStat()
 {
-  cout << "StSvtPedMaker::ResetStat" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::ResetStat" << endm;
 
   for (int i=0; i<fSvtStat->getTotalNumberOfHybrids();i++) {
     fStat = (StSvtHybridStat*)fSvtStat->at(i);
@@ -498,7 +512,7 @@ Int_t StSvtPedMaker::ResetStat()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::ResetPed()
 {
-  cout << "StSvtPedMaker::ResetPed" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::ResetPed" << endm;
 
   for (int i=0; i<fSvtPed->getTotalNumberOfHybrids();i++) {
     fPed = (StSvtHybridPed*)fSvtPed->at(i);
@@ -512,7 +526,7 @@ Int_t StSvtPedMaker::ResetPed()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::Finish()
 {
-  //cout << "StSvtPedMaker::Finish" << endl;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::Finish" << endm;
 
   return kStOK;
 }
@@ -521,7 +535,7 @@ Int_t StSvtPedMaker::Finish()
 void StSvtPedMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtPedMaker.cxx,v 1.1 2000/08/23 13:08:12 munhoz Exp $\n");
+  printf("* $Id: StSvtPedMaker.cxx,v 1.2 2000/11/30 20:32:02 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
