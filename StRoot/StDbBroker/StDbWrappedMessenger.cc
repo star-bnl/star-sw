@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.4 2001/06/05 22:08:34 perev Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.5 2003/09/12 01:48:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.5  2003/09/12 01:48:06  porter
+ * removed all strstream objects in favor of stringstream+string directly
+ *
  * Revision 1.4  2001/06/05 22:08:34  perev
  * HP corr
  *
@@ -80,16 +83,14 @@ printMessage(message,(const char*)lString,lineNumber,className,methodName);
 void 
 StDbWrappedMessenger::printMessage(const char* message, const char* levelString, int lineNumber, const char* className, const char* methodName) {
 
-#ifdef __hpux
+  //
+  // limit here of 1024 only hits us for the StDbManager in verbose mode 
+  // which isn't available directly in StRoot 
+  //
+
   char str[1024];
   sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
   mMessenger->Message(str,levelString);
-#else
-  ostrstream mtxt;  
-  mtxt<<className<<"::"<<methodName<<" line="<<lineNumber<<" "<<message<<ends;
-  mMessenger->Message(mtxt.str(),levelString);
-  mtxt.freeze(0);
-#endif /*__hpux*/
 }
 
 
