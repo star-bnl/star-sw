@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.19 2004/02/12 16:54:22 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.20 2004/05/24 15:13:10 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.20  2004/05/24 15:13:10  genevb
+// Range limit on FTPC radial step hists
+//
 // Revision 2.19  2004/02/12 16:54:22  genevb
 // Separate MinBias histos
 //
@@ -400,6 +403,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName) {
 	    else hobj->Draw();
             if (!oName.CompareTo("fcl_radialW") ||
                 !oName.CompareTo("fcl_radialE")) {
+	      hobj->GetXaxis()->SetRangeUser(7.0,9.0);
+              gPad->Modified();	      
               ruler.SetLineColor(46);
               ruler.SetLineWidth(2);
               ruler.DrawLine(7.73,0.,7.73,hobj->GetMaximum());
