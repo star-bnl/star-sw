@@ -1,3 +1,9 @@
+// $Id: RdoFinder.cxx,v 1.2 2002/02/19 16:07:56 wdeng Exp $
+// $Log: RdoFinder.cxx,v $
+// Revision 1.2  2002/02/19 16:07:56  wdeng
+// cvs control strings.
+//
+
 #include <iostream.h>
 #include <math.h>
 
