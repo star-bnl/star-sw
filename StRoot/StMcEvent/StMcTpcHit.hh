@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcTpcHit.hh,v 2.5 2000/03/06 18:05:23 calderon Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.5  2000/03/06 18:05:23  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -32,8 +38,6 @@
 
 #include "StMcHit.hh"
 #include "StMemoryPool.hh"
-#include "StDbUtilities/StTpcPadCoordinate.hh"
-#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
 
 class StMcTrack;
 class StThreeVectorF;

@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.5 2000/03/06 18:05:21 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.5  2000/03/06 18:05:21  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.4  2000/01/18 20:52:31  calderon
  * Works with CC5
  *
@@ -34,13 +40,14 @@
 #include "StMcTrack.hh"
 #include "StMcTpcHit.hh"
 #include "StMcFtpcHit.hh"
+#include "StMcRichHit.hh"
 #include "StMcSvtHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.4 2000/01/18 20:52:31 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.5 2000/03/06 18:05:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.5 2000/03/06 18:05:21 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -49,12 +56,14 @@ void StMcEvent::initToZero()
     mTpcHits = 0;             
     mSvtHits = 0;             
     mFtpcHits = 0;            
+    mRichHits = 0;            
     
     // Create the collections
     
     mTpcHits = new StMcTpcHitCollection();
     mSvtHits = new StMcSvtHitCollection();
     mFtpcHits = new StMcFtpcHitCollection();
+    mRichHits = new StMcRichHitCollection();
     
 }
 
@@ -100,6 +109,9 @@ StMcEvent::~StMcEvent()
 
     if (mFtpcHits) delete mFtpcHits;
     mFtpcHits=0;
+
+    if (mRichHits) delete mRichHits;
+    mRichHits=0;
 
     for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
@@ -183,4 +195,10 @@ void StMcEvent::setFtpcHitCollection(StMcFtpcHitCollection* val)
 {
     if (mFtpcHits && mFtpcHits!= val) delete mFtpcHits;
     mFtpcHits = val;
+}              
+
+void StMcEvent::setRichHitCollection(StMcRichHitCollection* val)
+{
+    if (mRichHits && mRichHits!= val) delete mRichHits;
+    mRichHits = val;
 }              

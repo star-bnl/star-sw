@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcPlaneHitCollection.hh,v 2.0 1999/11/17 02:00:59 calderon Exp $
+ * $Id: StMcFtpcPlaneHitCollection.hh,v 2.1 2000/03/06 18:05:21 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StMcFtpcPlaneHitCollection.hh,v $
+ * Revision 2.1  2000/03/06 18:05:21  calderon
+ * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
+ * barrel-ladder-wafer.
+ * 2) Added Rich Hit class and collection, and links to them in other
+ * classes.
+ *
  * Revision 2.0  1999/11/17 02:00:59  calderon
  * Completely revised for new StEvent
  *
@@ -24,16 +30,9 @@
 
 #include "StMcContainers.hh"
 
-#ifdef PERSISTENT
-#include "StObject.h"
-#endif
-
 class StMcFtpcHit;
 
 class StMcFtpcPlaneHitCollection
-#ifdef PERSISTENT
-    : public StObject
-#endif
 {
 public:
     StMcFtpcPlaneHitCollection();
@@ -47,8 +46,5 @@ public:
 private:
     StSPtrVecMcFtpcHit mHits;
         
-#ifdef PERSISTENT
-    ClassDef(StMcFtpcPlaneHitCollection,1)
-#endif
 };
 #endif
