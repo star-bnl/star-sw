@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.h,v 2.1 1999/10/13 19:43:02 ullrich Exp $
+ * $Id: StEventSummary.h,v 2.2 2000/01/14 19:06:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.h,v $
- * Revision 2.1  1999/10/13 19:43:02  ullrich
- * Initial Revision
+ * Revision 2.2  2000/01/14 19:06:51  ullrich
+ * Made code more robust if read-in table is not well defined.
  *
  * Revision 2.1  1999/10/13 19:43:02  ullrich
  * Initial Revision
@@ -53,6 +53,8 @@ public:
     Float_t  meanPt2() const;
     Float_t  meanEta() const;
     Float_t  rmsEta() const;
+    Double_t magneticField() const;
+    
     const StThreeVectorF& primaryVertexPosition() const;
 
     UInt_t   numberOfBins() const;
@@ -68,7 +70,6 @@ public:
     Float_t  upperEdgePhiBin(UInt_t) const;
     Float_t  lowerEdgePtBin(UInt_t) const;
     Float_t  upperEdgePtBin(UInt_t) const;
-    Double_t magneticField()        const;
     
     void setNumberOfTracks(Long_t);
     void setNumberOfGoodTracks(Long_t);

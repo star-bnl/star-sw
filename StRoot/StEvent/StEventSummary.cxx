@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.4 2000/01/11 16:11:40 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.5 2000/01/14 19:06:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
- * Revision 2.4  2000/01/11 16:11:40  ullrich
- * Magnetic field in kGauss.
+ * Revision 2.5  2000/01/14 19:06:47  ullrich
+ * Made code more robust if read-in table is not well defined.
  *
  * Revision 2.5  2000/01/14 19:06:47  ullrich
  * Made code more robust if read-in table is not well defined.
@@ -36,10 +36,10 @@
 #include "tables/St_dst_event_summary_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.4 2000/01/11 16:11:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.5 2000/01/14 19:06:47 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.4 2000/01/11 16:11:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.5 2000/01/14 19:06:47 ullrich Exp $";
 
 ClassImp(StEventSummary)
 
@@ -71,6 +71,8 @@ StEventSummary::StEventSummary()
     mMagneticFieldZ = 0;    
 }
 
+StEventSummary::StEventSummary(const dst_event_summary_st& runSum,
+                               const dst_summary_param_st& sumPar)
 {
     int i;
     
@@ -78,26 +80,50 @@ StEventSummary::StEventSummary()
     mNumberOfGoodTracks        = runSum.glb_trk_good;
     mNumberOfGoodPrimaryTracks = runSum.glb_trk_prim;
     mNumberOfPositiveTracks    = runSum.glb_trk_plus;
-    mNumberOfVertexTypes.Set(mVertexTypeArraySize,
-                             const_cast<long*>(runSum.n_vert_type));
     mNumberOfNegativeTracks    = runSum.glb_trk_minus;
     mNumberOfExoticTracks      = runSum.glb_trk_exotic;
     mNumberOfVertices          = runSum.n_vert_total;
     mNumberOfPileupVertices    = runSum.n_vert_pileup;
     mMeanPt                    = runSum.mean_pt;
     mMeanPt2                   = runSum.mean_pt2;
+    mMeanEta                   = runSum.mean_eta;
     mRmsEta                    = runSum.rms_eta;
-    mEtaBins.Set(mPtAndEtaBinsSize, const_cast<float*>(sumPar.eta_bins));
-    mPtBins.Set(mPtAndEtaBinsSize, const_cast<float*>(sumPar.pt_bins));
-    mPhiBins.Set(mPhiBinsSize, const_cast<float*>(sumPar.phi_bins));
+    mPrimaryVertexPos          = StThreeVectorF(runSum.prim_vrtx);
+    mMagneticFieldZ            = runSum.field;
 
-    mEtaOfTracksHisto.Set(mHistogramSize, const_cast<long*>(runSum.mult_eta));
-    mPtOfTracksHisto.Set(mHistogramSize, const_cast<long*>(runSum.mult_pt));
-    mPhiOfTracksHisto.Set(mHistogramSize, const_cast<long*>(runSum.mult_phi));
-    mEneryVsEtaHisto.Set(mHistogramSize, const_cast<float*>(runSum.energy_emc_eta));
-    mEnergyVsPhiHisto.Set(mHistogramSize, const_cast<float*>(runSum.energy_emc_phi));
+    //
+    //   Vertex counts
+    //
+    mNumberOfVertexTypes.Set(mVertexTypeArraySize);
+    for(i=0; i<mVertexTypeArraySize; i++)
+	mNumberOfVertexTypes[i] = runSum.n_vert_type[i];
+    
+    //
+    //   Set the 'histo' bins
+    //
+    mEtaBins.Set(mPtAndEtaBinsSize);
+    mPtBins.Set(mPtAndEtaBinsSize);
+    mPhiBins.Set(mPhiBinsSize);
 
-    mMagneticFieldZ = runSum.field;
+    for(i=0; i<mPtAndEtaBinsSize; i++) {
+	mEtaBins[i] = sumPar.eta_bins[i];
+	mPtBins[i] = sumPar.pt_bins[i];
+    }
+    for(i=0; i<mPhiBinsSize; i++) mPhiBins[i] = sumPar.phi_bins[i]*degree;
+    
+    //
+    //   Fill 'histos'
+    //
+    mEtaOfTracksHisto.Set(mHistogramSize);
+    mPtOfTracksHisto.Set(mHistogramSize);
+    mPhiOfTracksHisto.Set(mHistogramSize);
+    mEneryVsEtaHisto.Set(mHistogramSize);
+    mEnergyVsPhiHisto.Set(mHistogramSize);
+
+    for(i=0; i<mHistogramSize; i++) {
+	mEtaOfTracksHisto[i] = runSum.mult_eta[i];
+	mPtOfTracksHisto[i] = runSum.mult_pt[i];
+	mPhiOfTracksHisto[i] = runSum.mult_phi[i];
 	mEneryVsEtaHisto[i] = runSum.energy_emc_eta[i];
 	mEnergyVsPhiHisto[i] = runSum.energy_emc_phi[i];
     }
@@ -209,7 +235,7 @@ StEventSummary::energyInPhiBin(UInt_t i) const
 #endif
 }
 
-    if (i < mPtAndEtaBinsSize) {
+Float_t
 StEventSummary::lowerEdgeEtaBin(UInt_t i) const
 {
     if (i <= mPtAndEtaBinsSize) {
@@ -226,9 +252,9 @@ StEventSummary::lowerEdgeEtaBin(UInt_t i) const
         return 0;
 }
 
-    if (i < mPtAndEtaBinsSize) {
-       if (i == mPtAndEtaBinsSize-1)
-           return FLT_MAX;       // no upper limit
+Float_t
+StEventSummary::upperEdgeEtaBin(UInt_t i) const
+{
     if (i <= mPtAndEtaBinsSize) {
        if (i == mPtAndEtaBinsSize)
            return FLT_MAX;
@@ -243,7 +269,7 @@ StEventSummary::lowerEdgeEtaBin(UInt_t i) const
         return 0;
 }
 
-    if (i < mPtAndEtaBinsSize) {
+Float_t
 StEventSummary::lowerEdgePtBin(UInt_t i) const
 {
     if (i <= mPtAndEtaBinsSize) {
@@ -260,9 +286,9 @@ StEventSummary::lowerEdgePtBin(UInt_t i) const
         return 0;
 }
 
-    if (i < mPtAndEtaBinsSize) {
-       if (i == mPtAndEtaBinsSize-1)
-           return FLT_MAX;       // no upper limit
+Float_t
+StEventSummary::upperEdgePtBin(UInt_t i) const
+{
     if (i <= mPtAndEtaBinsSize) {
        if (i == mPtAndEtaBinsSize)
            return FLT_MAX;
