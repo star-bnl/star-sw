@@ -1,6 +1,10 @@
-* $Id: gstar_input.g,v 1.39 2003/07/30 03:52:49 potekhin Exp $
+* $Id: gstar_input.g,v 1.40 2003/12/19 17:55:09 potekhin Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.40  2003/12/19 17:55:09  potekhin
+* Changed the debug print to a more descriptive one,
+* when initializing the MPAR event header struct.
+*
 * Revision 1.39  2003/07/30 03:52:49  potekhin
 * Add the rejected events scaler
 *
@@ -632,7 +636,7 @@ Replace [READ[DIGIT](#)#;] with _
         NWW     = 0      ! number of wounded nucleons in the west nucleus
         NJETS   = 0      ! number of jets
         NREJ    = 0      ! number of rejected events, prior to the current one
-	write(*,*) '*********************************** FILL ********************'
+	write(*,*) 'gstar_input: initializing the MPAR structure (event header such as Pythia process id etc)'
      endfill
 ***
      IrbDIV=IxDIV;         LKARP2=LkEvnt
