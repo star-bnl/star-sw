@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.68 2001/10/25 23:02:00 hardtke Exp $
+// $Id: St_tpt_Maker.cxx,v 1.69 2002/02/02 00:52:03 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.69  2002/02/02 00:52:03  jeromel
+// Modified mask (extended options). Instantiaion f MagUtilities() uses db.
+//
 // Revision 1.68  2001/10/25 23:02:00  hardtke
 // 2 changes: 1) Use db in constructor for StMagUtilities, 2) Invert order of transformations.  First align sectors, then undo distortions, then transform to global coordinates
 //
@@ -430,14 +433,14 @@ Int_t St_tpt_Maker::Make(){
     if(m_Mode & 0x01)
       {
 	Float_t x[3], xprime[3] ;
-	Int_t   option = (m_Mode & 0xFE) >> 1;
+	Int_t   option = (m_Mode & 0x3FFE) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
 	(void) printf("St_tpt_Maker: ExB StMagUtilities(0x%X)\n\n",option);
 	if ( m_ExB == 0 ) {
-         m_ExB = new StMagUtilities( option, gStTpcDb ) ;
-
+	  TDataSet *RunLog = GetDataBase("RunLog");
+	  m_ExB = new StMagUtilities( option, gStTpcDb, RunLog ) ;
         }
 	tcl_tphit_st *spc = tphit -> GetTable() ;
 	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
