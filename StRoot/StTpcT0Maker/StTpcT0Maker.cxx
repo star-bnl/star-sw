@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.10 2001/07/18 20:52:13 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.11 2001/08/21 18:48:38 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.11  2001/08/21 18:48:38  hardtke
+// Add StMatchMaker::InitRun() call to handle no field data
+//
 // Revision 1.10  2001/07/18 20:52:13  hardtke
 // Extend range of histogram for t0 result
 //
@@ -143,6 +146,7 @@ Int_t StTpcT0Maker::Make(){
   tcl->Make();  
   GetMaker("tpc_tracks")->Make();
   //  GetMaker("PreVtx")->Make();
+  GetMaker("match")->InitRun(0);
   GetMaker("match")->Make();
   GetMaker("primary")->Make();
   GetMaker("dst")->Make();
@@ -170,6 +174,10 @@ Int_t StTpcT0Maker::Make(){
   GetMaker("dst")->Clear();
   tcl->AllOn();
   //check to see if event is OK
+  if (zVertexWest<-998) {
+    gMessMgr->Info() << "StTpcT0Maker::No Vertex Found in West End" << endm;
+    return kStOK;
+  }
   if (zVertexWest<zVertexMin||zVertexWest>zVertexMax){
     gMessMgr->Info() << "StTpcT0Maker::Vertex out of range, skip event" << endm;
     return kStOK;
@@ -197,6 +205,10 @@ Int_t StTpcT0Maker::Make(){
        break;    // found primary vertex
      }    
     }}
+  if (zVertexEast<-998) {
+    gMessMgr->Info() << "StTpcT0Maker::No Vertex Found in East End" << endm;
+    return kStOK;
+  }
 
     if (zVertexEast>-999&&zVertexWest>-999&&zVertexEast>zVertexMin&&zVertexEast<zVertexMax){
       t0current = (zVertexEast-zVertexWest)/(2*dvel_assumed) + t0guess;
@@ -261,7 +273,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.10 2001/07/18 20:52:13 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.11 2001/08/21 18:48:38 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
