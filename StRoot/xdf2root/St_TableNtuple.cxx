@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.cxx,v 1.5 1999/02/19 21:13:29 genevb Exp $
+// $Id: St_TableNtuple.cxx,v 1.6 1999/02/20 22:15:39 fine Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.6  1999/02/20 22:15:39  fine
+// Clean up to avoid g++ compilation warnings
+//
 // Revision 1.5  1999/02/19 21:13:29  genevb
 // Fixed const problems for pickier compilers
 //
@@ -178,9 +181,9 @@ Int_t St_TableNtuple::AddTFile(TFile &f, Char_t *dataset, Char_t *tname, Int_t f
   Int_t j=0;
   for (Int_t i=firstEvent; i<stopEvent; i++) {
     printf("Adding event %d to ntuple.\n",i);
-    if (set = (St_DataSet *) f.GetKey(dataset,i)->ReadObj()) {
+    if ( (set = (St_DataSet *) f.GetKey(dataset,i)->ReadObj()) ) {
       St_DataSetIter iter(set);
-      if (table = (St_Table *) iter(tname)) {
+      if ((table = (St_Table *) iter(tname)) ) {
         Fill(*table);
         j++;
       } else {
@@ -238,9 +241,9 @@ Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, 
   while ((event = f.NextEventGet()) && ((i < nEvents) || (nEvents < 0))) {
     printf("Adding event %d to ntuple.\n",(firstEvent+(i++)));
     St_DataSetIter event_iter(event);
-    if (set = event_iter(dataset)) {
+    if ( (set = event_iter(dataset)) ) {
       St_DataSetIter iter(set);
-      if (table = (St_Table *) iter(tname)) {
+      if ( (table = (St_Table *) iter(tname)) ) {
         Fill(*table);
         j++;
       } else {
@@ -370,7 +373,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
   TIter next(mClassPtr->GetListOfDataMembers());
   next.Reset();
   TDataMember *member = 0;
-  while (member = (TDataMember *) next()) {
+  while ( (member = (TDataMember *) next()) )  {
     varname = (Char_t *) member->GetName();   
     TDataType *memberType = member->GetDataType();
     types = memberType->GetTypeName();
@@ -398,7 +401,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
       mType[count] = kNAN;
     }
     if (mType[count]) {
-      if (memberDim = member->GetArrayDim()) {
+      if ( (memberDim = member->GetArrayDim()) ) {
         memberSize = memberType->Size();
         tempvar = varname;
         varname = vartemp;
@@ -450,7 +453,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.5 1999/02/19 21:13:29 genevb Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.6 1999/02/20 22:15:39 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
