@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.10 2000/01/12 20:29:15 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.11 2000/01/19 21:00:40 kathy Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.11  2000/01/19 21:00:40  kathy
+// update macros to use standard default xdf files in /afs/rhic/star/data/samples
+//
 // Revision 1.10  2000/01/12 20:29:15  calderon
 // Changed default file to the one produced weekly by Lidia in
 // /star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/
@@ -53,7 +56,8 @@ TBrowser *brow=0;
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
 void StMcEventReadMacro(Int_t nevents=1,
-const char *MainFile="/star/rcf/test/dev/tfs_Linux/Tue/year_2a/hc_standard/*.geant.root")
+const char *MainFile=
+ "/afs/rhic/star/data/samples/*.geant.root")
 {
 // Load all the System libraries
     gSystem->Load("St_base");
