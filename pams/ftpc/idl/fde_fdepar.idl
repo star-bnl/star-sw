@@ -10,7 +10,8 @@
                              /* level <  8: print input parameters */
                              /* level < 11: print output results */
        long      id_method;  /* which algorithm to use for evaluation */
-                             /* default=0, truncated mean */
+                             /* default=0: truncated mean */
+                             /* 1: truncate mean over chamber */ 
        long      no_angle;   /* 0 to consider dip/cross angles */
        long      max_track;  /* max. tracks to process */
        long      nok_track;  /* no. tracks accepted */
@@ -30,4 +31,4 @@
        float     total_charge;   /* total charge (energy loss/a_i_p) */
       
    };
-/*  Last mod. for fde_fdepar:   $Date: 1998/12/21 15:36:47 $  */
+/*  Last mod. for fde_fdepar:   $Date: 1999/03/31 22:38:06 $  */
