@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.70  1999/04/18 23:36:05  fisyak
+#  Add -lpgc for new pgf77
+#
 #  Revision 1.69  1999/04/18 21:22:28  wenaus
 #  Builds HTML to browse CVS commit history
 #
@@ -286,7 +289,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/04/18 21:22:28 $ 
+#           Last modification $Date: 1999/04/18 23:36:05 $ 
 #  default setings
 # Current Working Directory
 #
@@ -345,6 +348,9 @@ ifndef SUBDIRS
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 ifndef OBJY_HOME
+  SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
+endif
+ifneq (wenuas,$(USER))
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
    SUBDIRS := $(filter-out StPeCMaker, $(SUBDIRS))
