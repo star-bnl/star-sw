@@ -164,7 +164,7 @@ class StEmcFilter: public TObject
                 StEmcFilter();                        ///< StEmcFilter constructor
                 ~StEmcFilter();                       ///< StEmcFilter destructor
 
-    void        initEmcTowers(StEvent*);              ///< Use this function before using accept() and getNTracksTower() methods for towers. This initializes all vectors necessary to these methods.
+    void        initEmcTowers(StEvent*,Int_t=0);      ///< Use this function before using accept(), getNTracksTower() and getPtTower() methods for towers. This initializes all vectors necessary to these methods.
                 
     Bool_t      accept(StEvent*);                     ///< Returns kTRUE/kFALSE if StEvent is accepted
     Bool_t      accept(StTrack*);                     ///< Returns kTRUE/kFALSE if StTrack is accepted
@@ -176,7 +176,10 @@ class StEmcFilter: public TObject
     
     Int_t       getNTracksTower(Int_t);               ///< Returns number of tracks pointing to the tower with given id
     Int_t       getNTracksTower(Int_t,Int_t,Int_t);   ///< Returns number of tracks pointing to the tower with given module, eta, sub
-    
+
+    Float_t     getPtTower(Int_t);                    ///< Returns the total pt from projected tracks in tower with id    
+    Float_t     getPtTower(Int_t,Int_t,Int_t);        ///< Returns the total pt from projected tracks in tower with with module, eta, sub    
+
     EmcStatus   getEmcStatus(Int_t,Int_t);            ///< Return EMC status (kGOOD, kBAD, kOTHER) for a given detector and bin.
         
     Bool_t      getTrackId(StTrack*,Float_t&,Int_t&); ///< Return track id based on dE/dX
