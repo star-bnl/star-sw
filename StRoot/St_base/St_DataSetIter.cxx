@@ -379,7 +379,7 @@ St_DataSet *St_DataSetIter::Next()
       // Go upstair if the current one has been escaped
       if (!fDataSet) {
         // go backwards direction
-        while (!fDataSet && fDepth) {
+        while (!fDataSet && fDepth>1) {
           fDepth--;
           delete next;
           next = fNextSet[fDepth-1];
