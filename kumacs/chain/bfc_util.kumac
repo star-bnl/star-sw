@@ -397,13 +397,13 @@ macro bfc_init _
             if output_dst_file="" then
               message "empty dst output file"
             else
-	      exec write_table_to_file#init dstrp  runpar_[output_dst_file]
+*	      exec write_table_to_file#init dstrp  runpar_[output_dst_file]
 	      exec write_table_to_file#init dstout [output_dst_file]
               if (STAF_STATUS(1).ne. STAFCV_OK) then
                 message "Cannot open dst output file"
                 goto EOF
               endif
-	      exec write_table_to_file#write dstrp  [params]
+*	      exec write_table_to_file#write dstrp  [params]
               exec write_table_to_file#write dstout [run_dst]         
             endif
     (esout)
