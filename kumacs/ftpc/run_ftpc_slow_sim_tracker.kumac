@@ -10,6 +10,8 @@
 *                         changed some names of utility kumacs
 *                         write out [run] and [event]
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk 
+* editted Oct 5, 1998 - Janet Seyboth
+*                       converted to new kumac standards
 ************************************************************************
 ************************************************************************
 
@@ -102,12 +104,12 @@
     exec create_tables_ftpc#fpt_tables
     exec create_tables_ftpc#fte_tables
 
-* initialize tables
+* read in parameter tables from $STAR_PARAMS
     
-    exec fss_init#init
-    exec fcl_init#init 
-    exec fpt_init#init
-    exec fte_init#init
+    exec init_fss#read
+    exec init_fcl#read 
+    exec init_fpt#read
+    exec init_fte#read
 
 * write run directory to output table file
    exec write_table_to_file#write evout [run]
@@ -124,22 +126,22 @@
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 * ftpc slow simulator 
-    exec fss_run#run
+    exec run_fss#run
       if STAF_STATUS(1).eq.0 then
         message ' problem with fss '
       endif
 * ftpc cluster finder
-      exec fcl_run#run
+      exec run_fcl#run
         if STAF_STATUS(1).eq.0 then
           message ' problem with fcl '
         endif
 * ftpc tracking
-	exec fpt_run#run_slow_sim
+	exec run_fpt#run_slow_sim
 	if STAF_STATUS(1).eq.0 then
 	  message ' problem with fpt '
 	endif  
 * ftpc track evaluation
-	exec fte_run#run_slow_sim
+	exec run_fte#run_slow_sim
 	if STAF_STATUS(1).eq.0 then
 	  message ' problem with fte '
 	 endif 
