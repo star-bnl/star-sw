@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.10 1999/03/27 22:44:59 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.11 1999/03/30 22:30:14 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.11  1999/03/30 22:30:14  fine
+// Visibility test has been added for Paint method
+//
 // Revision 1.10  1999/03/27 22:44:59  fine
 // Working 3D St_node with X3d and OpenGL
 //
@@ -349,7 +352,13 @@ void St_NodePosition::Paint(Option_t *option)
    gGeomLevel--;
 #endif 
 }
-   
+ 
+//_______________________________________________________________________
+void St_NodePosition::SavePrimitive(ofstream &out, Option_t *option)
+{
+
+}
+  
 //_______________________________________________________________________
 void St_NodePosition::UpdatePosition(Option_t *)
 {
