@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.74 2003/12/24 13:44:42 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.75 2004/03/31 19:45:57 jeromel Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.75  2004/03/31 19:45:57  jeromel
+// Initialize data member (valgrind report)
+//
 // Revision 1.74  2003/12/24 13:44:42  fisyak
 // Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
 //
@@ -380,7 +383,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.74 2003/12/24 13:44:42 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.75 2004/03/31 19:45:57 jeromel Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -390,17 +393,17 @@ ClassImp(StTrsMaker)
 
 
 
-StTrsMaker::StTrsMaker(const char *name):
-StMaker(name),
-    //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
-mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
-mFirstSectorToProcess(1),
-mLastSectorToProcess(24), 
-mWriteToFile(0),
-mReadFromFile(0),
-mUseParameterizedSignalGenerator(1) // test trial,Hui Long
+StTrsMaker::StTrsMaker(const char *name):StMaker(name),
+					 //  mMiniSegmentLength(400.*millimeter),  // used to be 4mm
+					 mMiniSegmentLength(4.*millimeter),  // test trial,Hui Long
+					 mFirstSectorToProcess(1),
+					 mLastSectorToProcess(24), 
+					 mWriteToFile(0),
+					 mReadFromFile(0),
+					 mUseParameterizedSignalGenerator(1) // test trial,Hui Long
 {
     mTrsNtupleFile = 0;
+    mWireHistogram = 0;
     mWireNtuple = mContinuousAnalogNtuple = mDiscreteAnalogNtuple = mDigitalNtuple = 0;
     normalFactor = 1.0;
 }
