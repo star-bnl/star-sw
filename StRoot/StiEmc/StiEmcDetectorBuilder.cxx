@@ -18,15 +18,15 @@ StiEmcDetectorBuilder::StiEmcDetectorBuilder(bool active)
 StiEmcDetectorBuilder::~StiEmcDetectorBuilder()
 {}
 
-void StiEmcDetectorBuilder::buildMaterials()
+void StiEmcDetectorBuilder::buildDetectors(StMaker & source)
 {
-  // fix this
+  string name;
+  setNRows(3); //preshower, shower-max, tower
+  for (unsigned int barrel = 0; barrel<3; barrel++)
+    setNSectors(barrel,16);
+
   _gas  = add(new StiMaterial("Pb",82., 208., 1., 1., 1.));
   _lead = add(new StiMaterial("Pb",82., 208., 1., 1., 1.));
-}
-
-void StiEmcDetectorBuilder::buildShapes()
-{
   //    ideally get the following based on some db calls.
   float halfDepth=1; // half length along beam axis
   float thickness=1; // radial thickness
@@ -34,11 +34,7 @@ void StiEmcDetectorBuilder::buildShapes()
   _preShower = add(new StiPlanarShape("Emc/PreShower",halfDepth,thickness,halfWidth));
   _showerMax = add(new StiPlanarShape("Emc/ShowerMax",halfDepth,thickness,halfWidth));
   _tower = add(new StiPlanarShape("Emc/Tower",halfDepth,thickness,halfWidth));
-}
 
-void StiEmcDetectorBuilder::buildDetectors()
-{
-  string name;
   // loop over all EMC "sectors"
   int nSector=16;
   int iSector, iLayer=0;
@@ -118,9 +114,3 @@ void StiEmcDetectorBuilder::buildDetectors()
     }
 }
 
-void StiEmcDetectorBuilder::loadDb()
-{
-  setNRows(3); //preshower, shower-max, tower
-  for (unsigned int barrel = 0; barrel<3; barrel++)
-    setNSectors(barrel,16);
-}
