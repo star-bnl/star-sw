@@ -15,19 +15,6 @@
 * Kathy put new set in on 10/7/98 (dev) following *Official request*
 * from Ken Wilson  on  10/1/98 (sorry it took me so long!)
 *
-* this set is to include the primary vertex in the fit.
-*  things that have changed are: scenario & usesvt
- tdm/table/cell/putvalue 'egr_egrpar[0].scenario'  0
- tdm/table/cell/putvalue 'egr_egrpar[0].mxtry'    10
- tdm/table/cell/putvalue 'egr_egrpar[0].minfit'    2
- tdm/table/cell/putvalue 'egr_egrpar[0].prob'      2  2
- tdm/table/cell/putvalue 'egr_egrpar[0].debug'  1 0 0 0 0 0 0 0 0
- tdm/table/cell/putvalue 'egr_egrpar[0].svtchicut' 0
- tdm/table/cell/putvalue 'egr_egrpar[0].usetpc'    2
- tdm/table/cell/putvalue 'egr_egrpar[0].usesvt'    2
- tdm/table/cell/putvalue 'egr_egrpar[0].usevert'   1
- tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
-* 
 *  things that have changed are: scenario & usesvt
 * tdm/table/cell/putvalue 'egr_egrpar[0].scenario'  0
 * tdm/table/cell/putvalue 'egr_egrpar[0].mxtry'    10
