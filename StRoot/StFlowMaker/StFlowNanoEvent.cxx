@@ -1,112 +1,86 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowNanoEvent.cxx,v 1.3 2000/05/11 20:00:37 posk Exp $
+// $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
 // Description:  A persistent Flow nano DST
 //
 //  The StFlowNanoEvent class has a simple event structure:
-//     public:
-//        Int_t          fNtrack;
-//        EventHeader    fEvtHdr;
-//        TClonesArray  *fTracks;
+//        TClonesArray    *fTracks;
 //
-//   The StFlowNanoEventHeader class has 3 data members (integers):
-//     public:
-//        Int_t          fEvtNum;
-//        Int_t          fRun;
-//        Int_t          fDate;
+//   The StFlowNanoEventHeader class:
+//        Int_t           mNtrack;                  // track number
+//        Long_t          mEventID;                 // event ID
+//        //UInt_t          mEventNumber;             // number of the event
+//        UInt_t          mOrigMult;                // number of StEvent tracks
+//        UInt_t          mCentrality;              // centrality bin
+//        StThreeVectorF  mVertexPos;               // primary vertex position
 //
 //   The StFlowNanoEvent data member fTracks is a pointer to a TClonesArray.
 //   It is an array of a variable number of tracks per Event.
-//   Each element of the array is an object of class Track with the members:
-//     private:
-//        Float_t      fPt;
-//        Float_t      fPhi;
-//        Float_t      fEta;
+//   Each element of the array is an object of class StFlowTrack 
 //
 ////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowNanoEvent.cxx,v $
-// Revision 1.3  2000/05/11 20:00:37  posk
-// Preparation for micro and nano DSTs.
+// Revision 1.4  2000/05/16 20:59:33  posk
+// Voloshin's flownanoevent.root added.
 //
 // Revision 1.2  2000/03/08 15:10:48  posk
-// Added $Id: StFlowNanoEvent.cxx,v 1.3 2000/05/11 20:00:37 posk Exp $ and $Log: StFlowNanoEvent.cxx,v $
-// Added $Id$ and Revision 1.3  2000/05/11 20:00:37  posk
-// Added $Id$ and Preparation for micro and nano DSTs.
+// Added $Id: StFlowNanoEvent.cxx,v 1.4 2000/05/16 20:59:33 posk Exp $ and $Log: StFlowNanoEvent.cxx,v $
+// Added $Id$ and Revision 1.4  2000/05/16 20:59:33  posk
+// Added $Id$ and Voloshin's flownanoevent.root added.
 // Added $Id$ and.
 //
 //
+// 
 //////////////////////////////////////////////////////////////////////////
 
 #include "StFlowNanoEvent.h"
+#include "StFlowTrack.h"
+#define PR(x) cout << "##### FlowNanoEvent: " << (#x) << " = " << (x) << endl;
 
-ClassImp(StFlowNanoEventHeader)
 ClassImp(StFlowNanoEvent)
-ClassImp(StFlowNanoTrack)
 
 TClonesArray *StFlowNanoEvent::fgTracks = 0;
 
 //-----------------------------------------------------------------------
 StFlowNanoEvent::StFlowNanoEvent()
 {
-   // Create an StFlowNanoEvent object.
-   // When the constructor is invoked for the first time, the class static
-   // variable fgTracks is 0 and the TClonesArray fgTracks is created.
-
-   if (!fgTracks) fgTracks = new TClonesArray("StFlowNanoTrack", 1000);
-   fTracks = fgTracks;
-   fNtrack = 0;
+  // Create an StFlowNanoEvent object.
+  // When the constructor is invoked for the first time, the class static
+  // variable fgTracks is 0 and the TClonesArray fgTracks is created.
+  
+  if (!fgTracks) fgTracks = new TClonesArray("StFlowTrack", 4000);
+  fTracks = fgTracks;
+  mNtrack = 0;
 }
 
 //-----------------------------------------------------------------------
-StFlowNanoEvent::~StFlowNanoEvent()
+void StFlowNanoEvent::AddTrack(StFlowTrack* pFlowTrack )
 {
-   Clear();
-}
-
-//-----------------------------------------------------------------------
-void StFlowNanoEvent::AddTrack(Float_t pt, Float_t phi, Float_t eta )
-{
-   // Add a new track to the list of tracks for this StFlowNanoEvent.
-   // To avoid calling the very time consuming operator new for each track,
-   // the standard but not well know C++ operator "new with placement"
-   // is called. If tracks[i] is 0, a new Track object will be created
-   // otherwise the previous Track[i] will be overwritten.
-
-   TClonesArray &tracks = *fTracks;
-   new(tracks[fNtrack++]) StFlowNanoTrack(pt,phi,eta);
+  // Add a new track to the list of tracks for this StFlowNanoEvent.
+  // To avoid calling the very time consuming operator new for each track,
+  // the standard but not well know C++ operator "new with placement"
+  // is called. If tracks[i] is 0, a new Track object will be created
+  // otherwise the previous Track[i] will be overwritten.
+  
+  TClonesArray &tracks = *fTracks;
+  tracks[mNtrack++] = pFlowTrack;
 }
 
 //-----------------------------------------------------------------------
 void StFlowNanoEvent::Clear(Option_t *option)
 {
-   fTracks->Clear(option);
+  fTracks->Clear(option);
+  mNtrack=0;
 }
 
-//-----------------------------------------------------------------------
-void StFlowNanoEvent::Reset(Option_t *option)
-{
-// Static function to reset all static objects for this StFlowNanoEvent
-//   fgTracks->Delete(option);
-   delete fgTracks; fgTracks = 0;
-}
 
-//-----------------------------------------------------------------------
-void StFlowNanoEvent::SetHeader(Int_t i, Int_t run, Int_t date)
-{
-   fNtrack = 0;
-   fEvtHdr.Set(i, run, date);
-}
 
-//-----------------------------------------------------------------------
-StFlowNanoTrack::StFlowNanoTrack(Float_t pt, Float_t phi, Float_t eta) : TObject()
-{
-   // Create a track object.
 
-   fPt = pt;
-   fPhi = phi;
-   fEta = eta;
-}
+
+
+
+

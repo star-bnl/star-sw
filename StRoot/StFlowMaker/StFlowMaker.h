@@ -1,9 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.6 2000/05/12 22:42:04 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.7 2000/05/16 20:59:32 posk Exp $
 //
 // Author List: 
-//  Raimond Snellings and Art Poskanzer, LBNL, 6/99
+//  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.7  2000/05/16 20:59:32  posk
+//  Voloshin's flownanoevent.root added.
+//
 //  Revision 1.6  2000/05/12 22:42:04  snelling
 //  Additions for persistency and minor fix
 //
@@ -90,44 +93,53 @@ public:
   void          PrintInfo();
   Int_t         Make();
   Int_t         Finish();
-  StFlowEvent*  FlowEventPointer() const;  // returns pointer to the StFlowEvent
-  void          NanoFlowEventOn() {NanoFlowEvent(kTRUE);}
-  void          NanoFlowEventOff(){NanoFlowEvent();} 
+  StFlowEvent*  FlowEventPointer() const;
+  void          NanoEventWrite(Bool_t flag=kFALSE);
+  void          NanoEventRead(Bool_t flag=kFALSE);
   void          FlowEventWrite(Bool_t flag=kFALSE);
   void          FlowEventRead(Bool_t flag=kFALSE);
-  virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.6 2000/05/12 22:42:04 snelling Exp $ built "__DATE__" "__TIME__ ;
-    return cvs;}
-
+  //void          SetNanoEventFileName(const Char_t*);
+  void          SetNanoEventFileName(Char_t* name="flownanoevent.root");
+  virtual const char *GetCVS() const { static const char cvs[]=
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.7 2000/05/16 20:59:32 posk Exp $ built "__DATE__" "__TIME__ ;
+    return cvs; }
+  
 protected:
 
   Flow::PhiWgt_t   mPhiWgt;                   // To make event plane isotropic
 
 private:
-  Bool_t           mNanoFlowEventOn;          // switch for nano DST fill and write
-  Bool_t           mFlowEventWrite;           // switch for StFlowEvent write
-  Bool_t           mFlowEventRead;            // switch for StFlowEvent read
-  void             NanoFlowEvent(Bool_t flag=kFALSE){ mNanoFlowEventOn=flag; }
-  StFlowSelection* pFlowSelect;               // selection object
+  Char_t*          mNanoEventFileName;        // nano-DST file name
+  Bool_t           mNanoEventWrite;           // switch for nano-DST
+  Bool_t           mNanoEventRead;            // switch for nano-DST
+  Bool_t           mFlowEventWrite;           // switch for StFlowEvent
+  Bool_t           mFlowEventRead;            // switch for StFlowEvent
+  UInt_t           mNanoEventCounter;         // number of Bytes in nano event
+  StFlowSelection* pFlowSelect;               //! selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
-  void             InitFlowNanoEvent();       // fill a persistent nano dst
+  void             InitNanoEventWrite();      // open nano-DST
+  void             InitNanoEventRead();       // open nano-DST
   void             InitEventRead();           // open StEvent
   void             InitFlowEventWrite();      // open StFlowEvent
   void             InitFlowEventRead();       // open StFlowEvent
   void             FillFlowEvent();           // fill the flow event
-  void             FillFlowNanoEvent();       // fill a persistent nano dst
-  void             CloseFlowNanoEvent();      // Close the NanoEvent output file
-  void             CloseFlowEventWrite();     // close StFlowEvent output file  
-  void             CloseFlowEventRead();      // close StFlowEvent input file
+  void             FillNanoEvent();           // fill nano-DST
+  Int_t            FillFromNanoDST(const StFlowNanoEvent* pFlowNanoEvent);
+  void             WriteFlowEvent();          // write StFlowEvent
+  void             CloseNanoEventWrite();     // Close nano-DST
+  void             CloseNanoEventRead();      // Close nano-DST
+  void             CloseEventRead();          // close StEvent
+  void             CloseFlowEventWrite();     // close StFlowEvent
+  void             CloseFlowEventRead();      // close StFlowEvent
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                // pointer to micro-DST data
-  StFlowNanoEvent* pFlowNanoEvent;            // pointer to the nano DST Event
-  TTree*           pFlowNanoTree;             // pointer to the nano DST Tree
-  TTree*           pFlowMicroTree;            // pointer to the nano DST Tree
-  TFile*           pFlowNanoDST;              //! pointer to the nano DST File
-  TFile*           pFlowDST;                  //! pointer to the micro DST File
-  ClassDef(StFlowMaker, 1)                    // macro for rootcint
+  StFlowNanoEvent* pFlowNanoEvent;            // pointer to nano-DST Event
+  TTree*           pFlowTree;                 // pointer to nano-DST Tree
+  TTree*           pFlowMicroTree;            // pointer to the micro DST Tree
+  TFile*           pFlowNanoDST;              //! pointer to nano-DST File
+  TFile*           pFlowDST;                  //! pointer to micro-DST File
 
+  ClassDef(StFlowMaker, 1)                    // macro for rootcint
 };
 
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
@@ -136,8 +148,16 @@ inline void StFlowMaker::FlowEventWrite(Bool_t flag)
           { mFlowEventWrite=flag; mFlowEventRead=kFALSE; }
 
 inline void StFlowMaker::FlowEventRead(Bool_t flag) 
-          { mFlowEventRead=flag; mFlowEventWrite=kFALSE;}
+          { mFlowEventRead=flag; mFlowEventWrite=kFALSE; mNanoEventRead=kFALSE;}
 
+inline void StFlowMaker::NanoEventWrite(Bool_t flag) 
+          { mNanoEventWrite=flag; mNanoEventRead=kFALSE; }
+
+inline void StFlowMaker::NanoEventRead(Bool_t flag) 
+          { mNanoEventRead=flag; mNanoEventWrite=kFALSE; mFlowEventRead=kFALSE;}
+
+//inline void StFlowMaker::SetNanoEventFileName(const Char_t* name) { mNanoEventFileName="flownanoevent.root";
+inline void StFlowMaker::SetNanoEventFileName(Char_t* name) { mNanoEventFileName=name;
+  //strncpy(mNanoEventFileName, name, 32); mNanoEventFileName[32] = '\0'; }
+}
 #endif
-
-
