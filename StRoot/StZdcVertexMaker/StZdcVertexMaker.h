@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.h,v 1.1 2001/08/30 16:17:36 macross Exp $
+ * $Id: StZdcVertexMaker.h,v 1.2 2001/08/31 19:07:36 macross Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.h,v $
- * Revision 1.1  2001/08/30 16:17:36  macross
- * Initial Revition.
+ * Revision 1.2  2001/08/31 19:07:36  macross
+ * Modified code to retrieve ADC and TDC pulses from TrgDet table
  *
  **************************************************************************/
 #ifndef StZdcVertexMaker_hh
