@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.1 2001/10/29 18:53:13 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.2 2002/01/31 17:57:17 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.2  2002/01/31 17:57:17  munhoz
+ * removed incorrect line
+ *
  * Revision 1.1  2001/10/29 18:53:13  munhoz
  * starting SVT Data base
  *
@@ -58,7 +61,6 @@ Int_t StSvtDbMaker::Init()
   //setSvtDbReader();
   //setSvtDbWriter();
 
-  ((St_db_Maker*) GetMaker("db"))->Make();
   readSvtConfig();
   readSvtGeometry();
 
