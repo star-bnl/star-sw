@@ -381,6 +381,28 @@ Int_t StEventDisplayMaker::Make()
  return kStOK;
 }
 
+#if 0
+//_____________________________________________________________________________
+cinst Char_t StEventDisplayMaker::ParseName(const Char_t *inName)
+{
+  //  "name" - StEvent
+  //  "g2t_tpc_hit(track_id,x[0],x[1],x[2])"
+  // look for the first bracket:
+  const Char_t *pos = 0;
+  const Char_t *positions[5] = {0,0,0,0,0};
+  const Int_t lenExpr = sizeof(positions)/sizeof(Char_t *);
+  const Char_t openBracket  = '(';
+  const Char_t closeBracket = ')';
+  const Char_t comma        = ',';
+  const Char_t delimiters[5] = {openBracket,comma,comma,comma,closeBracket };
+  Int_t i = 0;
+  positions[0] = inName;
+  for (i=1;i<lenExpr;i++)  {
+     if( pos = strchr(inName,delimiters[i]) ) 
+              position[i] = pos;
+  }
+}
+#endif
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeEvent()
 {
@@ -538,9 +560,6 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
   TString tr;
   tr = GetKeyColumn(); 
   ULong_t keyOffset = GetKeyOffset();
-  // GetXColumn() GetYColumn; GetZColumn()
-  // Track2Line MUST be on heap otherwise 3D view will crash just code leaves this
-  // subroutine
 //  g2t_tpc_hit_st *p = points->GetTable();
    const Char_t *p = points->GetArray();
   if (ttt.GetNRows() ) {
@@ -548,7 +567,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
     m_TableCollector->Add(track2Line);    // Collect to remove  
 
     Int_t   hitCounter = 0;
-    Color_t hitColor = kYellow;
+    Color_t hitColor = kGreen;
     Style_t hitStyle = 1;
     Width_t hitSize  = 2;
 
@@ -670,6 +689,10 @@ DISPLAY_FILTER_DEFINITION(Track)
 DISPLAY_FILTER_DEFINITION(TrackTpcHits)
 DISPLAY_FILTER_DEFINITION(TrackSvtHits)
 DISPLAY_FILTER_DEFINITION(TrackFtpcHits)
+
+// -- Generic St_Table  filters --
+
+DISPLAY_FILTER_DEFINITION(Table)
 
 // --  end of filter list --
 
