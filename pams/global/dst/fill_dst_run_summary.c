@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "asuAlloc.h"
 
 /* ------- STAF/ROOT generated includes ------- */
 #include "fill_dst_run_summary.h"
@@ -82,7 +83,7 @@ long  type_of_call fill_dst_run_summary_ (
   int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
   double  pi, piov2;
-  double  *mt_histo, *pt_histo, *eta_histo, *phi_histo;
+  double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS];
   float   pt_binsize, mt_binsize, eta_binsize, phi_binsize; 
   float   dmt, deta1, deta2, mtweight1, mtweight2;
   float   pt, mt, eta ,phi, theta;
@@ -133,23 +134,11 @@ long  type_of_call fill_dst_run_summary_ (
     fprintf(stderr, "Null dst_event_summary...exiting.\n");
     return STAFCV_BAD;
   }
-  /* Allocate dynamic memory for histograms  */
-  if( !(pt_histo  = (double *)malloc(sizeof(double) * NBINS)) )       {
-    fprintf(stderr, "Unable to allocate pt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(mt_histo       = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate mt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(eta_histo      = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate eta_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
+
   /* Reset pt, mt, eta & phi  histograms  */
-  memset (pt_histo,      0, sizeof(double)*NBINS);
-  memset (mt_histo,      0, sizeof(double)*NBINS);
-  memset (eta_histo,     0, sizeof(double)*NBINS);
+  memset (&pt_histo,      0, sizeof(double)*NBINS);
+  memset (&mt_histo,      0, sizeof(double)*NBINS);
+  memset (&eta_histo,     0, sizeof(double)*NBINS);
 
   /* Claculate  histogram bin size */
   pt_binsize  = (PT_MAX  - PT_MIN )/NBINS;
@@ -199,7 +188,7 @@ long  type_of_call fill_dst_run_summary_ (
     /*  Fill histograms.  Protect against going out of range. */
     if (iptbin<NBINS)
       pt_histo[iptbin]++;    /* pt histogram    */
-    if (ietabin<NBINS)
+    if (0 <= ietabin && ietabin<NBINS)
       eta_histo[ietabin]++;  /* eta histogram   */
     if (imtbin<NBINS) 
       mt_histo[imtbin]++;    /* mt histogram    */
@@ -232,11 +221,6 @@ long  type_of_call fill_dst_run_summary_ (
       dst_runsummary->eta_bins[irange] +=  eta_histo[ibin];     
     }  /* end of looping over bins */
   }  /* end of looping over ranges */
-  
-  /* Release  dynamical memory */
-  free (pt_histo);
-  free (mt_histo);
-  free (eta_histo);
   
   /*  
       I assume here that dst_runsummary->n_events_good will only be filled at
