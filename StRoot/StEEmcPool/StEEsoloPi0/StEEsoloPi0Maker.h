@@ -1,4 +1,4 @@
-// $Id: StEEsoloPi0Maker.h,v 1.5 2004/09/03 04:50:52 balewski Exp $
+// $Id: StEEsoloPi0Maker.h,v 1.6 2004/10/27 18:07:51 balewski Exp $
 
 #ifndef STAR_StEEsoloPi0Maker
 #define STAR_StEEsoloPi0Maker
@@ -27,12 +27,7 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
   bool unpackMuTrig(); // BBC, CTB
 
   int MCflag;
-
-  // ideal calibration used by Fast simulator 
-  float * mfixEmTgain; ///<  (adc=g*de )ideal electromagnetic gains for Towers
-  float mfixPgain; ///< (adc=g*de ) fixed gain for pre/post shower
-  float mfixSMDgain; ///< (adc=g*de ) fixed gain for SMD
-
+  
   // old:
   int getEEmcAdc();
   float getCtbSum();
@@ -50,7 +45,7 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEsoloPi0Maker.h,v 1.5 2004/09/03 04:50:52 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEsoloPi0Maker.h,v 1.6 2004/10/27 18:07:51 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -61,6 +56,9 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
 
 // $Log: StEEsoloPi0Maker.h,v $
+// Revision 1.6  2004/10/27 18:07:51  balewski
+// practical use of 'sim' flavor for M-C
+//
 // Revision 1.5  2004/09/03 04:50:52  balewski
 // big clenup
 //
