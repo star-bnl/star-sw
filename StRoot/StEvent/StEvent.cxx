@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.28 2001/11/07 21:19:42 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.29 2001/11/10 23:53:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.29  2001/11/10 23:53:23  ullrich
+ * Added calibration vertices.
+ *
  * Revision 2.28  2001/11/07 21:19:42  ullrich
  * Added L1 trigger.
  *
@@ -107,6 +110,7 @@
 #include <algorithm>
 #include "TClass.h"
 #include "TDataSetIter.h"
+#include "StCalibrationVertex.h"
 #include "StEvent.h"
 #include "StEventClusteringHints.h"
 #include "StEventInfo.h"
@@ -137,8 +141,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.28 2001/11/07 21:19:42 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.28 2001/11/07 21:19:42 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.29 2001/11/10 23:53:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.29 2001/11/10 23:53:23 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -191,6 +195,7 @@ _LOOKUP(StTriggerDetectorCollection)
 _LOOKUP(StSPtrVecTrackDetectorInfo)
 _LOOKUP(StSPtrVecTrackNode)
 _LOOKUP(StSPtrVecPrimaryVertex)
+_LOOKUP(StSPtrVecCalibrationVertex)
 _LOOKUP(StSPtrVecV0Vertex)
 _LOOKUP(StSPtrVecXiVertex)
 _LOOKUP(StSPtrVecKinkVertex)
@@ -623,6 +628,36 @@ StEvent::primaryVertex(unsigned int i) const
         return 0;
 }
 
+unsigned int
+StEvent::numberOfCalibrationVertices() const
+{
+    StSPtrVecCalibrationVertex *vertices = 0;
+    _lookupOrCreate(vertices, mContent);
+    return vertices ? vertices->size() : 0;
+}
+
+StCalibrationVertex*
+StEvent::calibrationVertex(unsigned int i)
+{
+    StSPtrVecCalibrationVertex *vertices = 0;
+    _lookup(vertices, mContent);
+    if (vertices && i < vertices->size())
+        return (*vertices)[i];
+    else
+        return 0;
+}
+
+const StCalibrationVertex*
+StEvent::calibrationVertex(unsigned int i) const
+{
+    StSPtrVecCalibrationVertex *vertices = 0;
+    _lookup(vertices, mContent);
+    if (vertices && i < vertices->size())
+        return (*vertices)[i];
+    else
+        return 0;
+}
+
 StSPtrVecV0Vertex&
 StEvent::v0Vertices()
 {
@@ -897,6 +932,16 @@ StEvent::addPrimaryVertex(StPrimaryVertex* vertex)
 }
 
 void
+StEvent::addCalibrationVertex(StCalibrationVertex* vertex)
+{
+    if (vertex) {
+        StSPtrVecCalibrationVertex* vertexVector = 0;
+        _lookupOrCreate(vertexVector, mContent);
+        vertexVector->push_back(vertex);
+    }
+}
+
+void
 StEvent::addPsd(StPsd* p)
 {
     if (p) {
@@ -950,6 +995,8 @@ void StEvent::statistics()
     cout << "\tStTriggerDetectorCollection: " << static_cast<void*>(triggerDetectorCollection());
     cout << "\tStPrimaryVertex:             " << static_cast<void*>(primaryVertex(0));
     cout << "\tnumberOfPrimaryVertices:     " << numberOfPrimaryVertices() << endl;
+    cout << "\tStCalibrationVertex:         " << static_cast<void*>(calibrationVertex(0));
+    cout << "\tnumberOfCalibrationVertices: " << numberOfCalibrationVertices() << endl;
     cout << "\t# of TPC hits:               " << (tpcHitCollection() ? tpcHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of FTPC hits:              " << (ftpcHitCollection() ? ftpcHitCollection()->numberOfHits() : 0) << endl;
     cout << "\t# of SVT hits:               " << (svtHitCollection() ? svtHitCollection()->numberOfHits() : 0) << endl;
@@ -967,87 +1014,68 @@ void StEvent::statistics()
 
 void StEvent::Split()
 {
-  StEventClusteringHints *clu = clusteringHints();  
-  assert(clu);
-  TDataSetIter next(this);
-  TDataSet *ds;
-  while ((ds=next())) 
-  { if (ds->IsA()!=StEventBranch::Class()) continue;
-    Remove(ds); delete ds;
-  }
+    StEventClusteringHints *clu = clusteringHints();  
+    assert(clu);
+    TDataSetIter next(this);
+    TDataSet *ds;
+    while ((ds=next())) {
+	if (ds->IsA()!=StEventBranch::Class()) continue;
+	Remove(ds); delete ds;
+    }
 
-  vector<string> brs = clu->listOfBranches();       // list of all branches for given mode (miniDST or DST)         
-  int nbrs = brs.size();
-  for (int ibr =0; ibr < nbrs; ibr++) { //loop over branches
-    string sbr = brs[ibr];
-    if(sbr.size()==0)		continue;
-    const char *brName = sbr.c_str();
-    assert(strncmp(brName,"evt_",4)==0 || strcmp(brName,"event")==0);
-
-    UInt_t tally = ((clu->branchId(brName)) << 22) | 1 ;
-
-    StEventBranch *obr = new StEventBranch(brName,this,tally);
-    vector<string> cls = clu->listOfClasses(sbr.c_str());
-    int ncls = cls.size();
-    for (int icl =0; icl < ncls; icl++) { //loop over clases
-      string scl = cls[icl];
-      if(scl.size()==0) 	continue;
-      obr->AddKlass(scl.c_str());
-    } //end clases
-  } //end branches
+    vector<string> brs = clu->listOfBranches();       // list of all branches for given mode (miniDST or DST)         
+    int nbrs = brs.size();
+    for (int ibr =0; ibr < nbrs; ibr++) { //loop over branches
+	string sbr = brs[ibr];
+	if(sbr.size()==0)		continue;
+	const char *brName = sbr.c_str();
+	assert(strncmp(brName,"evt_",4)==0 || strcmp(brName,"event")==0);
+	
+	UInt_t tally = ((clu->branchId(brName)) << 22) | 1 ;
+	
+	StEventBranch *obr = new StEventBranch(brName,this,tally);
+	vector<string> cls = clu->listOfClasses(sbr.c_str());
+	int ncls = cls.size();
+	for (int icl =0; icl < ncls; icl++) { //loop over clases
+	    string scl = cls[icl];
+	    if(scl.size()==0) 	continue;
+	    obr->AddKlass(scl.c_str());
+	} //end clases
+    } //end branches
 }
-//______________________________________________________________________________
-Bool_t StEvent::Notify(){Split();return 0;}  
-//______________________________________________________________________________
+
+Bool_t StEvent::Notify() {Split();return 0;}  
+
 void StEvent::Streamer(TBuffer &R__b)
 {
-   // Stream an object of class StEvent.
-
-   UInt_t R__s, R__c;
-   if (R__b.IsReading()) {
-
-      Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-      if (R__v == 1) {
-         TDataSet::Streamer(R__b); 
-         mContent.Streamer(R__b);
-         R__b.CheckByteCount(R__s, R__c, Class());
-         Split();
-         return;
-      } else { // version >=2
-         StXRefMain::Streamer(R__b);
-         R__b.CheckByteCount(R__s, R__c, Class());
-      }
-
-   }  else /*writing*/ {
-
-      TDataSetIter next(this);
-      TDataSet *ds;
-      while ((ds=next())) 
-      { if (ds->IsA()==StEventBranch::Class()) break;}
-      if (!ds) Split();
-
-      R__c = R__b.WriteVersion(Class(), kTRUE);
-      StXRefMain::Streamer(R__b);
-      R__b.SetByteCount(R__c, kTRUE);   
-   } 
-}  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-
-
-
-
+    // Stream an object of class StEvent.
+    
+    UInt_t R__s, R__c;
+    if (R__b.IsReading()) {
+	
+	Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+	if (R__v == 1) {
+	    TDataSet::Streamer(R__b); 
+	    mContent.Streamer(R__b);
+	    R__b.CheckByteCount(R__s, R__c, Class());
+	    Split();
+	    return;
+	} else { // version >=2
+	    StXRefMain::Streamer(R__b);
+	    R__b.CheckByteCount(R__s, R__c, Class());
+	}
+	
+    }  else /*writing*/ {
+	
+	TDataSetIter next(this);
+	TDataSet *ds;
+	while ((ds=next())) {
+	    if (ds->IsA()==StEventBranch::Class()) break;
+	}
+	if (!ds) Split();
+	
+	R__c = R__b.WriteVersion(Class(), kTRUE);
+	StXRefMain::Streamer(R__b);
+	R__b.SetByteCount(R__c, kTRUE);   
+    } 
+}

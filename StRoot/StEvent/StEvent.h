@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.23 2001/11/07 21:19:42 ullrich Exp $
+ * $Id: StEvent.h,v 2.24 2001/11/10 23:53:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.24  2001/11/10 23:53:23  ullrich
+ * Added calibration vertices.
+ *
  * Revision 2.23  2001/11/07 21:19:42  ullrich
  * Added L1 trigger.
  *
@@ -96,6 +99,7 @@
 
 class event_header_st;
 class dst_event_summary_st;
+class StCalibrationVertex;
 class StEventClusteringHints;
 class StEventInfo;
 class StEventSummary;
@@ -183,6 +187,10 @@ public:
     StPrimaryVertex*                    primaryVertex(unsigned int = 0);
     const StPrimaryVertex*              primaryVertex(unsigned int = 0) const;
 
+    unsigned int                        numberOfCalibrationVertices() const;
+    StCalibrationVertex*                calibrationVertex(unsigned int);
+    const StCalibrationVertex*          calibrationVertex(unsigned int) const;
+
     StSPtrVecV0Vertex&                  v0Vertices();
     const StSPtrVecV0Vertex&            v0Vertices() const;
     StSPtrVecXiVertex&                  xiVertices();
@@ -200,7 +208,7 @@ public:
     const StEventClusteringHints*       clusteringHints() const; // for IO purposes only
     StEventClusteringHints*             clusteringHints();       // for IO purposes only
     
-    void                                statistics();      // *MENU*
+    void                                statistics();            // *MENU*
 
     void setType(const char*);
     void setRunId(int);
@@ -224,6 +232,7 @@ public:
     void setL1Trigger(StL1Trigger*);
     void setL3Trigger(StL3Trigger*);
     void addPrimaryVertex(StPrimaryVertex*);
+    void addCalibrationVertex(StCalibrationVertex*);
     void addPsd(StPsd*);
     void removePsd(StPsd*);
     
