@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.15 2004/12/23 15:07:19 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.16 2005/01/17 03:43:23 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.16  2005/01/17 03:43:23  pruneau
+ * change track container to vector
+ *
  * Revision 2.15  2004/12/23 15:07:19  pruneau
  * added point of closest approach to vertex (pca) histos
  *
@@ -65,7 +68,7 @@ class StiTrackingPlots : public HistogramGroup
 
   void initialize();
   void setOutFileName(string nme){mOutFile = nme;}
-  void fill(StiTrackContainer* mTrackStore);
+  void fill(StiTrackContainer* mTrackStore, StiHit * vertex=0);
   void addFilter(StiDefaultTrackFilter *filter){mFilter.push_back(filter);}
 
  private:
