@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.8 2001/10/24 14:47:16 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.9 2001/10/24 15:46:28 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.9  2001/10/24 15:46:28  suaide
+// delete hits with adc==0
+//
 // Revision 1.8  2001/10/24 14:47:16  suaide
 // type correction
 //
@@ -419,12 +422,61 @@ Bool_t StEmcADCtoEMaker::FillHistograms(Int_t detnum,Int_t nhits,Float_t energy)
       }
     }
   }
-  if(totaladc>0) m_adc1d[detnum]->Fill(log(totaladc));
+  if(totaladc>0) 
+  {
+    cout <<"Total ADC sum for detector "<<detname[detnum].Data()<<" = "<<totaladc<<endl;
+    m_adc1d[detnum]->Fill(log(totaladc));
+  }
   return kTRUE;
 }
 //_____________________________________________________________________________
 Bool_t StEmcADCtoEMaker::FillStEvent()
 {  
+  // first need to clean hits with adc = 0
+  
+  StEmcCollection *emcold=m_emc;
+  m_emc =new StEmcCollection(); 
+  
+  cout <<"pointers for emcold = "<<emcold<<"  m_emc = "<<m_emc<<endl;
+  for(Int_t det=0;det<4;det++) 
+  {
+    Int_t totalhits=0,totalhitsused=0;
+    StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
+    StEmcDetector* detectorold = emcold->detector(id);
+    if(detectorold)
+    {
+      StEmcDetector* detector = new StEmcDetector(id,120);
+      for(UInt_t mod=1;mod<=120;mod++)
+      {
+        StEmcModule *moduleold=detectorold->module(mod);
+        if(moduleold)
+        {
+          StSPtrVecEmcRawHit& hitsold=moduleold->hits();
+          for(Int_t k=0;k<(Int_t)hitsold.size();k++)
+          {
+            Int_t m=hitsold[k]->module();
+            Int_t e=hitsold[k]->eta();
+            Int_t s=abs(hitsold[k]->sub());
+            Float_t energy=hitsold[k]->energy();
+            Float_t adc=(Float_t)hitsold[k]->adc();
+            if (adc>0) // if hit adc > 0 create a new hit
+            {
+              StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)adc);
+              hit->setEnergy(energy);
+              detector->addHit(hit);
+              totalhitsused++;
+            }
+            totalhits++;
+          }
+        }
+      }     
+      m_emc->setDetector(detector);
+      cout <<"Total hits for detector "<<detname[det].Data()<<" = "<<totalhits<<"  after clean up = "<<totalhitsused<<endl;
+    }
+  }
+  delete emcold;
+  // finished clean up
+  
   StEvent* event = (StEvent*)GetInputDS("StEvent");
   if(!event) return kFALSE;
   StEmcCollection* emctemp=event->emcCollection();
