@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.6 2002/08/20 19:55:48 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.7 2002/08/27 21:20:07 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -224,7 +224,7 @@ void StMuChainMaker::fromList(string list, int maxFiles) {
       add(temp);
     }
     delete []temp;
-    if (mFileCounter>maxFiles) break;
+    if (mFileCounter>=maxFiles) break;
   }   
   delete inputStream;
   DEBUGVALUE2(mFileCounter);
@@ -252,6 +252,11 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.7  2002/08/27 21:20:07  laue
+ * Fei Du's request
+ * fileCouter>maxFiles changed to fileCounter>=maxFiles
+ * Now maxFiles and not maxFiles+1 are added to the list
+ *
  * Revision 1.6  2002/08/20 19:55:48  laue
  * Doxygen comments added
  *
