@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.16 2001/09/22 01:07:09 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.17 2002/01/28 23:42:10 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.17  2002/01/28 23:42:10  caines
+ * Move to SVT database with StSvtDbMaker
+ *
  * Revision 1.16  2001/09/22 01:07:09  caines
  * Fixes now that AddData() is cleared everyevent
  *
@@ -75,9 +78,11 @@
 
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StCoordinates.hh"
-#include "StTpcDb/StTpcDb.h"
+//#include "StTpcDb/StTpcDb.h"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtAnalysedHybridClusters.hh"
 #include "StSvtSimulationMaker/StSvtGeantHits.hh"
 
@@ -120,24 +125,26 @@ Int_t StSvtHitMaker::Init()
 
 
  // 		geometry parameters
-   m_shape       = (St_svg_shape   *) local("svgpars/shape");
 
-   if(  !strncmp(mSvtData->getConfiguration(), "Y1L", strlen("Y1L"))){
-   m_geom        = (St_svg_geom    *) local("svgpars/geomy1l");
-   }
-   else{
-   m_geom        = (St_svg_geom    *) local("svgpars/geom");
-   }
+  GetSvtGeometry();
+ //   m_shape       = (St_svg_shape   *) local("svgpars/shape");
 
-   if (!m_geom) {
-     if (!(m_shape)){
+//    if(  !strncmp(mSvtData->getConfiguration(), "Y1L", strlen("Y1L"))){
+//    m_geom        = (St_svg_geom    *) local("svgpars/geomy1l");
+//    }
+//    else{
+//    m_geom        = (St_svg_geom    *) local("svgpars/geom");
+//    }
+
+//    if (!m_geom) {
+//      if (!(m_shape)){
  
-       gMessMgr->Error() << "SVT- StSvtHitMaker:svt shapes not exist" << endm;
-       return kStWarn;
-     }
-   }
+//        gMessMgr->Error() << "SVT- StSvtHitMaker:svt shapes not exist" << endm;
+//        return kStWarn;
+//      }
+//    }
    
-   m_srs_srspar  = (St_srs_srspar  *) local("srspars/srs_srspar");
+//    m_srs_srspar  = (St_srs_srspar  *) local("srspars/srs_srspar");
    
    //srs_srspar_st *srs_par = m_srs_srspar->GetTable();
   
@@ -241,6 +248,17 @@ Int_t StSvtHitMaker::GetSvtClusterData()
  
 }
 //___________________________________________________________________________
+Int_t StSvtHitMaker::GetSvtGeometry()
+{
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtGeometry");
+ 
+  m_geom = (StSvtGeometry*)dataSet->GetObject();
+  
+  return kStOK;
+
+}
+//___________________________________________________________________________
 Int_t StSvtHitMaker::Make()
 {
   if (Debug()) gMessMgr->Debug() << "In StSvtHitMaker::Make() ..."  << endm;
@@ -276,12 +294,13 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 
   int index, TotHits=0, GoodHit=0;
   
-  srs_srspar_st *srs_par = m_srs_srspar->GetTable();
-  svg_geom_st* geom = m_geom->GetTable();
-  svg_shape_st* shape = m_shape->GetTable();
+  // srs_srspar_st *srs_par = m_srs_srspar->GetTable();
+//   svg_geom_st* geom = m_geom->GetTable();
+//   svg_shape_st* shape = m_shape->GetTable();
   
-  StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform(gStTpcDb);
-  SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
+  StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
+  //SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
+  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig());
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
@@ -316,7 +335,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    SvtGeomTrans->operator()(waferCoord,localCoord);
 
 
-	    // Flag aas bad those hits not in the drift region
+	    // Flag as bad those hits not in the drift region
 	    if( (localCoord.position().x() < -0.01 && localCoord.hybrid()==2)
 		|| (localCoord.position().x() > 0.01 && localCoord.hybrid()==1)
 		|| fabs(localCoord.position().x())> 3.01){
