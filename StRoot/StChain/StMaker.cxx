@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.38 1999/05/10 15:37:51 perev Exp $
+// $Id: StMaker.cxx,v 1.39 1999/05/10 17:16:44 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.39  1999/05/10 17:16:44  perev
+// AddHist typo
+//
 // Revision 1.38  1999/05/10 15:37:51  perev
 // Save of hisogramm in StMaker::Init
 //
@@ -102,7 +105,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.38 1999/05/10 15:37:51 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.39 1999/05/10 17:16:44 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -196,7 +199,7 @@ St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   if (dir){/*unused*/}
   if (!h) {AddObj(0,".hist");return;}
   if (h->InheritsFrom(TH1::Class())) h->SetDirectory(0);
-  return AddObj(h,".hist");
+  AddObj(h,".hist");
 }    
 
 
