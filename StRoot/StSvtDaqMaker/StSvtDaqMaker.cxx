@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.5 2000/08/04 21:03:51 perev Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.6 2000/08/23 22:29:08 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.6  2000/08/23 22:29:08  munhoz
+ * add time to StSvtData object
+ *
  * Revision 1.5  2000/08/04 21:03:51  perev
  * Leaks + Clear() cleanup
  *
@@ -139,6 +142,7 @@ Int_t StSvtDaqMaker::GetSvtData()
   for( int i=1; i<=N_SECTORS; i++){
     fSvtData->setTimeZero(128*40-(32*105)-(12*105)+svtReader->getTimeZero(),i); 
   }
+  fSvtData->setUnixTime(daqReader->getUnixTime());
   return kStOK;
 }
 
@@ -177,16 +181,6 @@ void StSvtDaqMaker::Clear(const char*)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Clear" << endm;
 
-  if (fSvtData) {
-    fSvtData->Delete();
-    fData = NULL;
-  }
-
-  if (fHybridSet) {
-    fHybridSet->Delete();
-    fData = NULL;
-  }
-
   StMaker::Clear();
 }
 
@@ -195,15 +189,9 @@ Int_t StSvtDaqMaker::Reset()
 {
   if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Reset" << endm;
 
-  //Clear();
-
-  if (fSvtSet) {
-    fSvtSet->Delete();
-    fSvtData = NULL;
-  }
-
-  fSvtSet = 0;
-  fHybridSet = 0;
+  fSvtData = NULL;
+  fSvtSet = NULL;
+  fHybridSet = NULL;
   m_ConstSet->Delete();
 
   return kStOK;
@@ -223,7 +211,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.5 2000/08/04 21:03:51 perev Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.6 2000/08/23 22:29:08 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
