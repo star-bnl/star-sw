@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.20 2001/11/05 17:09:11 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.21 2001/12/04 22:05:50 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.21  2001/12/04 22:05:50  suaide
+// new QA histogram for tower
+//
 // Revision 1.20  2001/11/05 17:09:11  suaide
 // small changes
 //
@@ -85,6 +88,14 @@ Int_t StEmcADCtoEMaker::Init()
     m_energy[i] = new TH2F(name_e,title_e,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     m_adc[i]    = new TH2F(name_a,title_a,nx[i],xl[i],xu[i],ny[i],-rpi, rpi);
     m_adc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);
+    
+    if(i==0) //tower spectra for gain monitoring
+    {
+      m_tower=new TH2F("TowerSpectra","Tower Spectra up to ADC = 500",4800,0.5,4800.5,500,0,500);
+      m_towerMean=new TH1F("TowerMean","Mean ADC value for tower",4800,0.5,4800.5);
+      m_towerRMS=new TH1F("TowerRMS","RMS of ADC value for tower",4800,0.5,4800.5);
+      m_towerSum=new TH1F("TowerSum","Total number of hits for tower",4800,0.5,4800.5);     
+    }
 
     // creating geometry ...
     geo[i]=new StEmcGeom(detname[i].Data());
@@ -96,6 +107,32 @@ Int_t StEmcADCtoEMaker::Init()
 //_____________________________________________________________________________
 Int_t StEmcADCtoEMaker::Finish()
 {
+  cout <<"Creating gain monitor histogram for EMC towers\n";
+  for(Int_t i=1;i<4801;i++) // loop over towers
+  {
+    Float_t x=0,x2=0,n=0,nlin=0;
+    for(Int_t j=30;j<140;j++) // loop over adc
+    {
+      Float_t xt=m_tower->GetBinContent(i-1,j);
+      if(xt>0)
+      {
+        x+=log(xt)*(Float_t)j;
+        x2+=pow((Float_t)j,2)*log(xt);
+        n+=log(xt);
+        nlin++;
+      }
+    }
+    if(n>0)
+    {
+      Float_t mean=x/n;
+      Float_t rms=sqrt(x2/n-mean*mean);
+      m_towerMean->Fill((Float_t)i,mean);
+      m_towerRMS->Fill((Float_t)i,rms);
+      m_towerSum->Fill((Float_t)i,nlin);
+      //cout <<"Tower "<<i<<"  mean = "<<mean<<"  rms = "<<rms<<"  sum = "<<nlin<<"  n = "<<n<<endl;
+    }
+  }
+  return kStOk;
 }
 //_____________________________________________________________________________
 Int_t StEmcADCtoEMaker::Make()
@@ -515,7 +552,13 @@ Bool_t StEmcADCtoEMaker::FillHistograms(Int_t detnum,Int_t nhits,Float_t energy)
         geo[detnum]->getId(m,e,s,idh);
         Float_t eta,phi;
         geo[detnum]->getEtaPhi(idh,eta,phi);
-        if(adc>0) {m_hits[detnum]->Fill(eta,phi); m_adc[detnum]->Fill(eta,phi);totaladc+=adc;}
+        if(adc>0) 
+        {
+          m_hits[detnum]->Fill(eta,phi); 
+          m_adc[detnum]->Fill(eta,phi);
+          totaladc+=adc;
+          if(detnum==0 && adc<500) m_tower->Fill(idh,adc); // gain monitor histogram for tower
+        }
         if(energy>0) m_energy[detnum]->Fill(eta,phi,energy);
       }
     }

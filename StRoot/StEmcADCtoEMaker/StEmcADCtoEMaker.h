@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.9 2001/10/31 15:01:07 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.10 2001/12/04 22:05:50 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.10  2001/12/04 22:05:50  suaide
+// new QA histogram for tower
+//
 // Revision 1.9  2001/10/31 15:01:07  suaide
 // modified to discard bad EMC events
 //
@@ -42,9 +45,15 @@ class StEmcADCtoEMaker : public StMaker
            TH2F              *m_nhit;           //! 
            TH2F              *m_etot;           //!
            TH2F              *m_hits[MAXDET];   //!
-           TH2F              *m_adc[MAXDET];   //!
+           TH2F              *m_adc[MAXDET];    //!
            TH2F              *m_energy[MAXDET]; //!
-           TH1F              *m_adc1d[MAXDET]; //!
+           TH1F              *m_adc1d[MAXDET];  //!
+           
+           TH2F              *m_tower;          //!
+           TH1F              *m_towerMean;      //!
+           TH1F              *m_towerRMS;       //!
+           TH1F              *m_towerSum;       //!
+           
            TDataSet          *m_CalibDb;
            TDataSet          *m_StatusDb;
            StEmcCollection   *m_emc;            //!
