@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.54 2000/09/01 13:27:50 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.55 2000/09/02 22:47:29 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.55  2000/09/02 22:47:29  fisyak
+// Accout the fact that event_header might be created in St_trg_Maker
+//
 // Revision 1.54  2000/09/01 13:27:50  fisyak
 // Fix EventHeader
 //
@@ -167,7 +170,7 @@
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_sgr_groups_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.54 2000/09/01 13:27:50 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.55 2000/09/02 22:47:29 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -190,7 +193,7 @@ Int_t St_dst_Maker::Init(){
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",
     "rch:",    "dst_rch_pixel",
-    "trg:",    "TrgDet", "L0_Trigger","L1_Trigger","L2_Trigger",
+    "trg:",    "TrgDet", "L0_Trigger","L1_Trigger","L2_Trigger","event_header",
     "l3Tracks:","l3Track","l3Dedx",
     "l3Clufi:","l3Hit",
     0};
@@ -322,13 +325,11 @@ Int_t  St_dst_Maker::Filler(){
   St_svm_evt_match *evt_match   = (St_svm_evt_match *) dstI("evt_match");
   //St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
   
-  St_DataSet *trg = GetDataSet("trg");
-  St_DataSetIter trgI(trg);
-  St_event_header  *event_header = (St_event_header *) trgI("event_header");
+  St_event_header  *event_header = (St_event_header *) dst->Find("event_header");
   if (!event_header){
-    St_event_header  *event_header  = new St_event_header("event_header",1);
+    event_header  = new St_event_header("event_header",1);
+    dstI.Add(event_header);
   }
-  dstI.Add(event_header);
   event_header->SetNRows(1);
   event_header_st  event =   {"Collision", //event_type
                               0,           // n_event
