@@ -6,40 +6,27 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: mverif.cxx,v 1.1 1999/09/23 18:33:10 fine Exp $
-// $Log: mverif.cxx,v $
+// $Id: StMicky.cxx,v 1.1 1999/09/26 19:35:12 fine Exp $
+// $Log: StMicky.cxx,v $
+// Revision 1.1  1999/09/26 19:35:12  fine
+// Micky test has been rearranged
+//
 // Revision 1.1  1999/09/23 18:33:10  fine
 // test system for RMath class has been introduced
 //
 //
 
 #include <iostream.h>
+#include "StMicky.h"
 
-void timing_(){ cout << "timimg" << endl;}
-void timed_(){ cout << "Timed" << endl;}
 inline double dabs(double d){ return d>0?d: -d;}
 inline int min(int n1, int n2){ return n1 < n2 ? n1 : n2;}
-/* Common Block Declarations */
-
-extern struct {
-    int iqbitw, iqchaw, itb, nlines, itimes;
-    float timerd;
-    int iflgu, lungu;
-    float zergu, zerov[5], zerlev;
-    int loglev, nfaipr, neachp, nfailt, nfail, ntest, mtestv[20];
-} param_;
-
-#define param_1 param_
-
-extern struct {
-    float a[1000], b[1010];
-    int ibcd[47], intg[100];
-} _BLNK__;
- 
-#define _BLNK__1 _BLNK__
 
 //___________________________________________________________________________
-void prtest_(){
+StMicky::StMicky(){ Minit(); }
+
+//___________________________________________________________________________
+void StMicky::Prtest(){
   if (param_1.ntest <= 0 ) return;
   if (param_1.nfail)  cout << " TESTS FAIL ";
   else                cout << " Tests pass ";
@@ -48,20 +35,83 @@ void prtest_(){
   param_1.ntest = 0;
 };
 
+//__________________________________________________________________
+void StMicky::Minit()
+{
+    /* Initialized data */
+
+    static struct {
+	char e_1[188];
+	int e_2;
+	} equiv_7 = { {' ', ' ', ' ', ' ', '0', ' ', ' ', ' ', '1', ' ', ' ', 
+		' ', '2', ' ', ' ', ' ', '3', ' ', ' ', ' ', '4', ' ', ' ', 
+		' ', '5', ' ', ' ', ' ', '6', ' ', ' ', ' ', '7', ' ', ' ', 
+		' ', '8', ' ', ' ', ' ', '9', ' ', ' ', ' ', 'A', ' ', ' ', 
+		' ', 'B', ' ', ' ', ' ', 'C', ' ', ' ', ' ', 'D', ' ', ' ', 
+		' ', 'E', ' ', ' ', ' ', 'F', ' ', ' ', ' ', 'G', ' ', ' ', 
+		' ', 'H', ' ', ' ', ' ', 'I', ' ', ' ', ' ', 'J', ' ', ' ', 
+		' ', 'K', ' ', ' ', ' ', 'L', ' ', ' ', ' ', 'M', ' ', ' ', 
+		' ', 'N', ' ', ' ', ' ', 'O', ' ', ' ', ' ', 'P', ' ', ' ', 
+		' ', 'Q', ' ', ' ', ' ', 'R', ' ', ' ', ' ', 'S', ' ', ' ', 
+		' ', 'T', ' ', ' ', ' ', 'U', ' ', ' ', ' ', 'V', ' ', ' ', 
+		' ', 'W', ' ', ' ', ' ', 'X', ' ', ' ', ' ', 'Y', ' ', ' ', 
+		' ', 'Z', ' ', ' ', ' ', '+', ' ', ' ', ' ', '-', ' ', ' ', 
+		' ', '=', ' ', ' ', ' ', '*', ' ', ' ', ' ', '/', ' ', ' ', 
+		' ', '(', ' ', ' ', ' ', ')', ' ', ' ', ' ', '.', ' ', ' ', 
+		' ', ',', ' ', ' ', ' ', '\'', ' ', ' ', ' '}, 0 };
+
+#define mbcd ((int *)&equiv_7)
+
+
+    /* Local variables */
+    int j;
+
+    ia = (int *)(&(_BLNK__1.a));
+    ib = (int *)(&(_BLNK__1.b));
+
+    param_1.iqbitw = 32;
+    param_1.iqchaw = 4;
+    param_1.itb = 6;
+    param_1.itimes = 0;
+    for (j = 1; j <= 47; ++j)   _BLNK__1.ibcd[j - 1] = mbcd[j - 1];
+    for (j = 1; j <= 100; ++j) 	_BLNK__1.intg[j - 1] = j;
+
+/* ----     ZEROV(1-5)  CONTAIN THE LEVELS OF PRECISION EXPECTED AFTER */
+/* -        (1) NO, (2) LITTLE, (3) SOME, (4) FAIR, (5) MUCH FLOATING CALC
+ */
+    param_1.zerov[0] = (float)1e-10;
+    param_1.zerov[1] = (float)1e-6;
+    param_1.zerov[2] = (float)1e-5;
+    param_1.zerov[3] = (float)1e-4;
+    param_1.zerov[4] = (float).001;
+    param_1.zergu = param_1.zerov[0];
+    param_1.zerlev = param_1.zerov[0];
+    param_1.nfaipr = 4;
+    param_1.neachp = 0;
+    param_1.nfailt = 0;
+    param_1.nfail = 0;
+    param_1.ntest = 0;
+    /* Format strings */
+    cout << " MICKY executing." << endl;
+    cout << "   MICKY    2.71  950712  9.30" << endl;
+
+
+//    kerngt_(&param_1.itb);
+} /* minit_ */
+
 
 //___________________________________________________________________________
-void mverif_(int ntt, float *have, float *amust, int nn)
+void StMicky::Mverif(int ntt, float *have, float *amust, int nn)
 {
     /* System generated locals */
     float r__1;
 
     /* Local variables */
-    static float diff, test[200], zeru;
-    static int j, nhave, ntuse, n1, n2;
-#define ia ((int *)&_BLNK__1)
-#define ib ((int *)&_BLNK__1 + 1000)
-    static int jj;
-    static float sum;
+    float diff, test[200], zeru;
+    int j, nhave, ntuse, n1, n2;
+
+    int jj;
+    float sum;
 
 
 /* -----------------------------------------------------------------------
@@ -76,7 +126,7 @@ void mverif_(int ntt, float *have, float *amust, int nn)
     if (nhave >= 201) goto L91; 
 
     zeru = param_1.zerlev;
-    if (param_1.ntest >= 10) prtest_();    
+    if (param_1.ntest >= 10) StMicky::Prtest();    
 
 /* ----              Verify */
     for (jj = 1; jj <= nhave; ++jj) {
@@ -89,14 +139,14 @@ void mverif_(int ntt, float *have, float *amust, int nn)
     }
 /* ----              VERIFY OK. */
     if (param_1.nfail) {
-      prtest_();
+      StMicky::Prtest();
       param_1.nfail = 0;
     }
 L39:
     ++param_1.ntest;
     param_1.mtestv[param_1.ntest - 1] = ntuse;
     if (param_1.neachp == 0) return ;
-    prtest_();
+    StMicky::Prtest();
     return ;
 /* ----              VERIFY FAILURE */
 L41:
@@ -107,7 +157,7 @@ L41:
     ++param_1.nfail;
     goto L39;
 L47:
-    prtest_();
+    StMicky::Prtest();
 L48:
     cout << " TEST " << ntuse << " FAILED, Dump follows" << endl;
     ++param_1.nfail;
@@ -180,10 +230,19 @@ L60:
     cout << endl;
     return;
 L91:
-    prtest_();
+    StMicky::Prtest();
     cout << endl << " VERIFF VECTOR FOR TEST" << ntuse 
          << "  MORE THAN 200 WORDS, namely " << nhave << endl;
     return;
 
 
 } /* mverif_ */
+
+//____________________________________________________________________________________
+void  StMicky::Newguy(const char *t1, const char *t2) {
+ Prtest();
+ param_1.nfail = 0;
+ cout << " ---------------------------------------------------------------" << endl <<
+         " Routing " << t2 << " testing " << t1 << endl;
+}
+
