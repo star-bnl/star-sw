@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.19 2000/04/12 21:32:36 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.20 2000/04/17 23:01:56 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.20  2000/04/17 23:01:56  calderon
+ * proper casting to remove a comparison warning
+ *
  * Revision 1.19  2000/04/12 21:32:36  calderon
  * check for eg_label in range of particle table
  *
@@ -118,7 +121,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.19 2000/04/12 21:32:36 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.20 2000/04/17 23:01:56 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -516,7 +519,7 @@ Int_t StMcEventMaker::Make()
 		// Now make sure that this track is really from the table,
 		// When embedding, the particle got an eg_label = 99999 even
 		// though there was only one entry in the particle table.
-		if (iEventGeneratorLabel < ttempParticle.size()) {
+		if (iEventGeneratorLabel < static_cast<long>(ttempParticle.size())) {
 		    // Track should already be loaded from the particle table
 		    // i.e. t & ttempParticle[iEventGeneratorLabel] are the same tracks,
 		    // obtained from different tables.
