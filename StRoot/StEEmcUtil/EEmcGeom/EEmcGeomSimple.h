@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.21 2005/02/05 00:57:38 perev Exp $
+ * $Id: EEmcGeomSimple.h,v 1.22 2005/02/07 19:26:09 jwebb Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -49,11 +49,14 @@ public:
   /// \return tower center as TVector3
   TVector3 getTowerCenter(const UInt_t  sec, const UInt_t sub, const UInt_t etabin) const;
 
-  /// gets 'direction' vector from (0,0,0) toward a point on EEMC
-  /// \param xetaBin
-  /// \param xphiBin
+  /// gets 'direction' vector from (0,0,0) toward a point on EEMC.
+  /// detaBin is defined from [-0.5,11.5).  [-0.5,0.5) returns a point
+  /// within etabin 1, [0.5,1.5) within etabin 2, etc...  dphiBin is
+  /// defined similarly.
+  /// \param detaBin [-0.5,11.5)
+  /// \param dphiBin [-0.5,55.5)
   /// \return direction as TVector3
-  TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
+  TVector3 getDirection  (const Float_t detaBin, const Float_t dphiBin) const;
 
   /// gets tower ID given 'direction' vector r (only eta and phi are relevant, z is ignored)
   /// \param  r   - direction vecrot
@@ -197,6 +200,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.22  2005/02/07 19:26:09  jwebb
+ * Clarified documentation for EEmcGeomSimple::getDirection(...).
+ *
  * Revision 1.21  2005/02/05 00:57:38  perev
  * TMath is namespace now
  *
