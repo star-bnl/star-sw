@@ -25,7 +25,7 @@ TDataSet *CreateTable() {
       if(boardid[iboard]=="mx38163") boardid[iboard]="mx38162";
       sprintf(tmpchr,"$STAR/StarDb/Calibrations/tof/inltabledat/%s-tdc%s-h%s.inl-1024",boardid[iboard].c_str(),
               filetdcid[itdc].c_str(),filehitid[itdc].c_str());
-      if(itdc==3)sprintf(tmpchr,"inltabledat/%s-tdc%s-h%s.inl-256",boardid[iboard].c_str(),
+      if(itdc==3)sprintf(tmpchr,"$STAR/StarDb/Calibrations/tof/inltabledat/%s-tdc%s-h%s.inl-256",boardid[iboard].c_str(),
               filetdcid[itdc].c_str(),filehitid[itdc].c_str());
       //--------------------------
       ifstream infile(tmpchr);
@@ -41,15 +41,13 @@ TDataSet *CreateTable() {
       int totbin=0;
       while(infile>>bin>>data){
         int ibin=int(bin-0.5);
-        int datax1000=int(data*1000);
-        float rdata=datax1000/1000.;
+        int datax1000=int(data*1000);float rdata=datax1000/1000.;//need only 3 digits after float point.
         row.INLcorrection[ibin]=rdata;
         //cout<<"readin bin="<<bin<<" ibin="<<ibin<<" data="<<data<<endl;
         totbin++;
       }
       cout<<"totbin="<<totbin<<endl;
       infile.close();
-      // upload data to DB here.
       cout<<"board id ="<<row.boardID<<" board number= "<<row.boardNumber<<" TDCID="<<row.TDCID<<endl;
       for(int i=0;i<10;i++){cout<<i<<" "<<row.INLcorrection[i]<<endl;}
       for(int i=1014;i<1024;i++){cout<<i<<" "<<row.INLcorrection[i]<<endl;}
