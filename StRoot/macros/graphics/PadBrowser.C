@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.4 1999/06/25 18:34:00 fine Exp $
+// $Id: PadBrowser.C,v 1.5 1999/06/29 20:51:26 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.5  1999/06/29 20:51:26  fine
+// St_geom_Maker has been introduced
+//
 // Revision 1.4  1999/06/25 18:34:00  fine
 // MakeDoc was commented out
 //
@@ -18,13 +21,15 @@
 //////////////////////////////////////////////////////////////////////////
 
 class StPadDisplayMaker;
-StPadDisplayMaker *chain = 0;
+class StChain;
+StChain *chain = 0;
 
 //_______________________________________________________________________________________
 void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StDaqLib");
+    gSystem->Load("St_geom_Maker");
     gSystem->Load("StPadDisplayMaker");
     gROOT->LoadMacro("PadControlPanel.C");
 }
@@ -91,8 +96,10 @@ void PadBrowser(const Int_t Nevents=1,Char_t *infile=0)
   if (gClassTable->GetID("StPadDisplayMaker") < 0) Load();
 
   // Create the main chain object
-  chain = new StPadDisplayMaker("PadMonitor");
-  chain->SetFileName(iNfile);
+  chain = new StChain("PadBrowser");
+  geomMaker = new St_geom_Maker();
+  padMonitor = new StPadDisplayMaker("PadMonitor");
+  padMonitor->SetFileName(iNfile);
   chain->SetDebug();
 //  chain->MakeDoc();
   chain->PrintInfo();
