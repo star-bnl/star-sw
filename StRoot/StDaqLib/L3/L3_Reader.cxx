@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.9 2001/07/17 19:16:11 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.10 2001/08/17 17:12:27 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.10  2001/08/17 17:12:27  struck
+ * cs: getI960ClusterReader() now returns NULL pointer if number of clusters == 0
+ *
  * Revision 1.9  2001/07/17 19:16:11  struck
  * update to 2001 data format (backwards compatible)Z
  *
@@ -581,6 +584,7 @@ int I960ClusterReader::initialize (int sec)
     unsigned short flags;
     unsigned short q;
   };
+
   // is this sector already initialized?
   if (mSector!=sec) {
         // set sector number
@@ -614,6 +618,12 @@ int I960ClusterReader::initialize (int sec)
 	}
 	if (mCluster==NULL) {
 	      cout << "failed to allocate cluster structures " << endl;
+	      return FALSE;
+	}
+	// check number of clusters
+	// convenient: if mNCluster==0 return FALSE
+	if (mNCluster==0) {
+	      cout << "no i960 clusters found" << endl;
 	      return FALSE;
 	}
 
