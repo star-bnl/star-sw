@@ -17,8 +17,14 @@ definitions for types and datasets
 #ifndef DSTYPE_H
 #define DSTYPE_H 
 #include <stdio.h>
+/* rpc.h already defines TRUE, FALSE ... */
+#ifdef FALSE
+#undef FALSE
+#endif
+#ifdef TRUE
+#undef TRUE
+#endif
 #include <rpc/rpc.h>
-#include "dscodes.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
