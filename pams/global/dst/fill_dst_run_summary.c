@@ -21,8 +21,8 @@
 
 long  type_of_call fill_dst_run_summary_ (
   TABLE_HEAD_ST  *dst_summary_param_h, DST_SUMMARY_PARAM_ST  *dst_summaryparam,
-  TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dst_runheader,
-  TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dst_eventheader,
+  TABLE_HEAD_ST  *run_header_h,        RUN_HEADER_ST         *dst_runheader,
+  TABLE_HEAD_ST  *event_header_h,      EVENT_HEADER_ST       *dst_eventheader,
   TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dst_eventsummary,
   TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
   TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
@@ -41,10 +41,10 @@ long  type_of_call fill_dst_run_summary_ (
    *:
    *: ARGUMENTS:
    *:          IN:
-   *:             dst_runheader        - DST run header table
-   *:             dst_run_header_h     - Header Structure for dst_runheader  
-   *:             dst_eventheader      - DST event header table
-   *:             dst_event_header_h   - Header Structure for dst_eventheader
+   *:             run_header           - run header table
+   *:             run_header_h         - Header Structure for run_header  
+   *:             event_header         - event header table
+   *:             event_header_h       - Header Structure for event_header
    *:             dst_eventsummary     - DST event summary table 
    *:             dst_event_summary_h  - Header Structure for dst_eventsummary
    *:             dst_track            - DST tracks table       
@@ -77,7 +77,7 @@ long  type_of_call fill_dst_run_summary_ (
    *:                                       dst_run_summary table at the
    *:                                       very end of the event loop.
    *:
-   *:
+   *:      Sep 29, 1999       Margetis S.   Make it comply with new DSTs
    *:>--------------------------------------------------------------------
    */
 
@@ -112,7 +112,7 @@ long  type_of_call fill_dst_run_summary_ (
     } 
     dst_runsummary->cpu_total         = 0;
     
-    for (i=0; i<6; i++) {                         
+    for (i=0; i<2; i++) {                         
       dst_runsummary->eta_bins[i]     = 0;        
       dst_runsummary->pt_bins[i]      = 0;        
       dst_runsummary->mt_bins[i]      = 0;        
@@ -222,3 +222,6 @@ long  type_of_call fill_dst_run_summary_ (
  NextEvent:
   return STAFCV_OK;
 }  /*  End of fill_dst_run_summary  */
+
+
+
