@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.15 1999/03/30 19:41:17 ullrich Exp $
+% $Id: StEvent.tex,v 1.16 1999/03/31 19:03:50 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.15  1999/03/30 19:41:17  ullrich
-% Added Torres 'how to' tutorial. Text pasted from web.
+% Revision 1.16  1999/03/31 19:03:50  ullrich
+% Corrected typos in UML appendix
 %
 % Revision 1.18  1999/04/13 23:27:23  genevb
 % Slightly refined vertex code, updated V0, Xi vertex documentation
@@ -155,14 +155,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 19:41:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/31 19:03:50 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.15 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 19:41:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.16 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/31 19:03:50 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -306,7 +306,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/30 19:41:17 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/31 19:03:50 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -4055,10 +4055,9 @@ tags:
 \item[--] private    
         \item adc[15] = zdcEast1Att;     
 These abbreviations match exactly the three levels of visibility provided
-    double z();
 in C++. The class shown in Fig.~\ref{fig:umlClass} is then translated into
 C++ code as follows:
-    double mX, mY, mZ;
+    The reason why there are only 2 single modules in the attenuated
     part is that we don't have enough ADC channels. However, the sum
     is however still the sum of all 3 channels per module. The most
     relevant are the sum channels.
