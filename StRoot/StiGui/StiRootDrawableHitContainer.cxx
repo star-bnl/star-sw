@@ -39,11 +39,12 @@ void StiRootDrawableHitContainer::update()
 {
     cout <<"StiRootDrawableHitContainer::update()"<<endl;
     const hitmap& theMap = hits();
-    
-    for (hitmap::const_iterator it=theMap.begin(); it!=theMap.end(); it++) {
+    StiRootDrawableHits::clear();
+    for (hitmap::const_iterator it=theMap.begin(); it!=theMap.end(); ++it) {
 	//const hitvector& tempvec = (*it).second;
 	const hitvector& tempvec = (*it).second.theHitVec;
-	for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
+	hitvector::const_iterator end = (*it).second.theEffectiveEnd;
+	for (hitvector::const_iterator vit=tempvec.begin(); vit!=end; ++vit) {
 	    const StThreeVectorF& pos = (*vit)->globalPosition();
 	    
 	    //StiRootDrawableHits::push_back( StThreeVector<double>(pos.x(), pos.y(), pos.z() ) );
