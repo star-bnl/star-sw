@@ -1,15 +1,18 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.9 2000/02/14 01:08:02 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.10 2000/02/15 18:07:20 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.9  2000/02/14 01:08:02  lasiuk
- * write the data set
- * add two member functions for pedestal and noise switches
- * add coordinate conditional and StCoordinateTransform
- * incorporate track_p into GHit
+ * Revision 1.10  2000/02/15 18:07:20  lasiuk
+ * check if pointer exists.  If not, return a warning status.
  *
+ * singleton classes
+ *
+ * Revision 1.11  2000/02/29 18:05:00  lasiuk
+ * include FREO, QUAR volumes
+ * rotate coordinate inputs (x->-x, y->-y) for local
+ * use units consistently
  *
  * Revision 1.10  2000/02/15 18:07:20  lasiuk
  * check if pointer exists.  If not, return a warning status.
@@ -271,6 +274,8 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		cout << "\tNo g2t_tpc_hit pointer";
 		cout << "\treturn from StRrsMaker::Make()" << endl;
 		return kStWarn;
+	    if(!g2t_rch_hit) return kStWarn;
+	    
 	    // can we check if the dataset exists?
 	    St_g2t_rch_hit *g2t_rch_hit =
 		static_cast<St_g2t_rch_hit *>(geant("g2t_rch_hit"));
