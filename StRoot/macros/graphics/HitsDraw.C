@@ -1,10 +1,24 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   23/04/99  
-// $Id: HitsDraw.C,v 1.1 1999/04/23 22:42:59 fine Exp $
+// $Id: HitsDraw.C,v 1.2 1999/04/27 15:29:58 fine Exp $
 // $Log: HitsDraw.C,v $
+// Revision 1.2  1999/04/27 15:29:58  fine
+// Make up plus Polyline was replaced by PolyMarker3D
+//
 // Revision 1.1  1999/04/23 22:42:59  fine
 // How to draw Geometry and hits all together
 //
+// Forward declarations
+class St_Node;
+class St_NodeView;
+
+// Global variables to access from an interactive session
+St_Node     *hall        = 0;
+St_NodeView *fullView    = 0;
+St_NodeView *shortView = 0;
+St_NodeView *sensible    = 0;
+
 void x3dHelpDraw(){
+ // Subroutine to draw a separate "HELP" TCanvas object
  TCanvas *paveCanvas =  new TCanvas("x3d","X3D Help",500,20,540,220);
  TPaveText *label  = new TPaveText(0,0,1,1);
  const Char_t *myMessage[] = {"Plot  3D view"
@@ -84,7 +98,8 @@ void HitsDraw(){
 //  Float_t  minrange[3] = {0,0,0};
 //  Float_t  maxrange[3] = {0,0,0};
 
-  TPolyLine3D *track = 0;
+//  TPolyLine3D *track = 0;
+  TPolyMarker3D *track = 0;
   TString tr;
   tr = "track_p";
   St_Table &ttt = *((St_Table *)points);
@@ -110,10 +125,14 @@ void HitsDraw(){
 
    if (newId != currentId)  {
      printf(".");
-     track =  new TPolyLine3D;   
-     track->SetLineColor(kYellow);
+//     track =  new TPolyLine3D;   
+     track =  new TPolyMarker3D;   
+//     track->SetLineColor(kYellow);
+     track->SetMarkerColor(kYellow);
 //     track->SetLineWidth(5);
-     track->SetLineWidth(2);
+//     track->SetLineWidth(2);
+     track->SetMarkerSize(1);
+     track->SetMarkerStyle(7);
      // Create a shape for this node
      St_PolyLineShape *trackShape  =  new St_PolyLineShape(track);
      trackShape->SetVisibility(1);
@@ -162,37 +181,46 @@ void HitsDraw(){
 //       }
   gBenchmark->Stop("Draw time");
 // Select sensors
-   St_NodeView *fullView = new St_NodeView(*hall);
+   fullView = new St_NodeView(*hall); 
    // Create the "open" sub-structure from the full one
-   St_NodeView *s = new St_NodeView(fullView);
-   s->Draw();
+   sensible = new St_NodeView(fullView);
+   printf(" drawing the STAR geometry sensible volumes and hits \n");
+   sensible->Draw();
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
 
    gPad->Update();
-   // Draw help for x3d picture
+   // Draw a help for x3d picture
+   printf(" drawing the HELP windows\n");
    x3dHelpDraw();
    // make simple view
-   // Select node to be left
-   s->Mark(); 
-   St_NodeView *shortView = (St_NodeView *)s->FindByName("TPGV");
-   if (shortView) shortView->Mark();
-   // Select all hits
-   St_DataSetIter nextHits(s);
 
+   // Select node to be left
+   printf(" Marking the current strucutre to create another simplified one\n");
+   sensible->Mark();                                                      //  Select HALL
+   St_NodeView *shortView = (St_NodeView *)sensible->FindByName("TPGV");  // Select TPGV
+   if (shortView) shortView->Mark();     
+
+   // Select all hits                                              // Select ALL Hits
+   St_DataSetIter nextHits(sensible);
    while (shortView = (St_NodeView *) nextHits()) { shortView->Mark();}
    
-   // Create new short view
-   St_NodeView *shortView = new St_NodeView(s);
+   // Create new short view                                        // New "short" dataset
+   printf(" Creating a new structure simplified structure\n");
+   shortView = new St_NodeView(sensible);
    TCanvas *m_simpleD = new TCanvas("Detector","Simple view and hits",500,500,400,400);
    shortView->Draw();
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawSimpleView.gif"> </P> End_Html // 
 
+   printf(" Drawing the new structure simplified structure\n");
    gPad->Update();
    gBenchmark->Summary();
+   printf(" Drawing 3d solid view of the last structure\n");
    m_simpleD->x3d();
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawX3D.gif"> </P> End_Html // 
 
+  printf(" The following global variable are available:\n");
+  printf("\tSt_Node     *hall\n\tSt_NodeView *fullView\n\tSt_NodeView *shortView\n\tSt_NodeView *sensible\n");
 }
