@@ -1,3 +1,12 @@
+* $Id: tdi_fit.F,v 1.2 1998/01/27 00:59:18 fisyak Exp $
+* $Log: tdi_fit.F,v $
+* Revision 1.2  1998/01/27 00:59:18  fisyak
+* Split sources
+*
+      REAL FUNCTION TDI_FIT( fit_pars_h, fit_pars,
+     >                       tphit_h, tphit,
+     >                       strack_h, strack,
+     >                       residual_h, residual)
 C>----------------------------------------------------------------------
 C TDI_FIT - Residual Calculator for Straight (Cosmic/Laser) Tracks
 C
@@ -27,10 +36,6 @@ C              since tracks are nearly vertical in sector 5. The proper
 C              way to do this would be to fit in local coordinates,
 C              since the measurement error is along the padrow. PGJ
 C<----------------------------------------------------------------------
-      REAL FUNCTION TDI_FIT( fit_pars_h, fit_pars,
-     >                       tphit_h, tphit,
-     >                       strack_h, strack,
-     >                       residual_h, residual)
 
       IMPLICIT NONE
 
