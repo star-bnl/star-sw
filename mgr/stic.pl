@@ -22,7 +22,11 @@ if (! -d $dir    && !mkdir ($dir,    0755)) {
 
 # From where we are, get the STIC command
 my $STIC;
+my $tmp;
+
+chomp($tmp = `pwd`);
 chomp($STIC=`which stic`);
+
 if ($STIC eq ""){
     # try one more thing which is to find it locally
     # This would happen if we freshly created stic and
@@ -31,12 +35,15 @@ if ($STIC eq ""){
     my $lexec=".".$ENV{STAR_SYS}."/bin/stic";
     if ( -x $lexec || -l $lexec ){
 	# make it absolute 
-	my $tmp;
-	chomp($tmp = `pwd`);
 	$STIC = $tmp."/".$lexec;
     } else {
 	# Ho well ... we tried 2 method now
 	die "$0 :: FATAL : Cannot find stic anywhere\n";
+    }
+} else {
+    if ( substr($STIC,0,1) ne "/" ){
+	# Not an absolute path
+	$STIC = $tmp."/".$lexec;
     }
 }
 
