@@ -15,9 +15,9 @@ class EMC_SmdReader
 {
   public:
     //  move the constructor guts {...} to a .cxx file
-                  EMC_SmdReader(EventReader*er,Bank_EMCP *pEMCP);//!<EMC_SmdReader constructor
-                  ~EMC_SmdReader();//!<EMC_SmdReader destructor
-    void          Initialize();//!<Initialization of arrays
+                  EMC_SmdReader(EventReader*er,Bank_EMCP *pEMCP);///<EMC_SmdReader constructor
+                  ~EMC_SmdReader();///<EMC_SmdReader destructor
+    void          Initialize();///<Initialization of arrays
     int           ProcessBarrelSmd(const Bank_EMCP*);
     int           FillBarrelSmd(Bank_SMDADCR*,int);
     Bank_EMCSECP* getBarrelSmdSection(const Bank_EMCP*,int);

@@ -15,8 +15,8 @@ class EMC_BarrelReader
 {
 
     public:
-                       EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP);//!<EMC_BarrelReader constructor
-      void             Initialize();//!<Initialization of arrays
+                       EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP);///<EMC_BarrelReader constructor
+      void             Initialize();///<Initialization of arrays
       int              ProcessBarrelTower(const Bank_EMCP*);
       Bank_EMCSECP*    getBarrelSection(const Bank_EMCP*,int);
       Bank_EMCRBP*     getBarrelTowerFiber(Bank_EMCSECP*,int);
@@ -24,7 +24,7 @@ class EMC_BarrelReader
       int              FillBarrelTower(Bank_TOWERADCR*);
       void             PrintTowerArray();
       Bank_BTOWERADCR& getBTOWERADCR();
-                       ~EMC_BarrelReader(); //!<EMC_BarrelReader destructor
+                       ~EMC_BarrelReader(); ///<EMC_BarrelReader destructor
 
 
     protected:
