@@ -1,5 +1,8 @@
-// $Id: tpctest.C,v 1.1 1998/09/08 13:53:33 love Exp $
+// $Id: tpctest.C,v 1.2 1998/09/16 17:58:45 love Exp $
 // $Log: tpctest.C,v $
+// Revision 1.2  1998/09/16 17:58:45  love
+// tpctest slice plotting added
+//
 // Revision 1.1  1998/09/08 13:53:33  love
 // laser.C divided into load.C and a new laser.C package of routines.  tpctest.C created to use tpt tracking
 //
@@ -31,13 +34,15 @@ void start(){
 #include "St_Module.h"
 #include "St_Table.h"
 #endif
-
+// The following file is 1039 full 42+ track laser events.
 // Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p274-t23-f6-las.xdf";
+   Char_t *filename="/scr20/love/star/test/log-p274-t23-f6-las.xdf"; 
+// The following file is 44 events of central membrane pattern only.
 // Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p285-t28-f6-las.xdf";
+//  Char_t *filename="/scr20/love/star/test/log-p285-t28-f6-las.xdf";
+// The following file is >3000 cosmic ray triggers.
 // Char_t *filename="/star/mds/data/SD97/cosmic/Sept/log-p284-t27-f4-cos.xdf";
-// Char_t *filename="/scr20/love/star/test/log-p284-t27-f4-cos.xdf";
-// Char_t *filename="/scr20/love/star/test/log-p274-t23-f6-las.xdf"; 
-  Char_t *filename="/scr20/love/star/test/log-p285-t28-f6-las.xdf";
+//Char_t *filename="/scr20/love/star/test/log-p284-t27-f4-cos.xdf";
  
   St_XDFFile *xdffile_in = new St_XDFFile (filename,"r");
 // Create the main chain object
@@ -47,6 +52,10 @@ void start(){
   chain->SetInputXDFile(xdffile_in);
   St_run_Maker *run_Maker = new St_run_Maker ("run_Maker","run/params");
   St_tpctest_Maker *tpctest_Maker = new St_tpctest_Maker ("tpctest_Maker","event");
+  // Set slice selector.   nslice <0 plots all z in one view. 
+  // 0 < nslice < 7 plots only the slice selected.  
+  // nslice =7 plots seven slices in succession.
+   tpctest_Maker->Set_nslice(7);
   //
   chain->PrintInfo();
    // Create a root file to hold the ntuple.
