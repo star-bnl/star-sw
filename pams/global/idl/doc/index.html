@@ -13,6 +13,12 @@
 </DIV>
 
 <P>
+<p><B> September 28, 1999 : 
+- dst_track.idl: replaced x0,y0 with r0,phi0 <br>
+- create new dst_monitor_soft_l3.idl (Thomas' request)
+</B>
+<BR>
+<P>
 <p><B> September 24, 1999 : 
  Initial release in .dev of Lanny's idl files. Below is a summary of the changes
 </B>
@@ -122,7 +128,7 @@ the BFC run are stored in a new variable, <TT>mag_field</TT>.
   float  mag_field[4];    /* Magnetic field used by TPC, SVT-SSD,       */
                           /* FTPC-East and FTPC-West, respect. in Tesla */
  } ;
-/*  Last mod. for run_header:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for run_header:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -191,7 +197,7 @@ numbering scheme in <TT>StDetectorDefinitions</TT>.
   float  mean_mult[30];   /* Mean multiplicity (energy) per detector for run */ 
   float  rms_mult[30];    /* RMS multiplicity (energy) per detector for run  */
  } ;
-/*  Last mod. for dst_run_summary:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_run_summary:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -254,7 +260,7 @@ e
   float  pt_bins[9];      /* Transverse momentum bin domain limits (GeV/c) */
   float  phi_bins[10];    /* Azimuthal angle bin domain limits (deg)       */ 
  } ;
-/*  Last mod. for dst_summary_param:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_summary_param:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -294,7 +300,7 @@ table.
   long   trig_mask;         /* Trigger mask                                */
   long   bunch_cross;       /* Beam-Beam bunch crossing number             */
  } ;
-/*  Last mod. for event_header:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for event_header:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -391,7 +397,7 @@ quantity is BFC run dependent, it belongs in this table rather than in
   float  mag_field[4];      /* Magnetic field used by TPC, SVT-SSD,        */
                             /* FTPC-East and FTPC-West, respect. in Tesla  */
  } ;
-/*  Last mod. for dst_event_summary:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_event_summary:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -441,7 +447,7 @@ something reasonable is put in.
   float  res_drf_tpc[2];     /* Avg. resid, drift dir,  TPC          */
                              /* -OR- Avg. chisq(2) of fit,tanl&lt;0,=&gt;0 */
  } ;
-/*  Last mod. for dst_monitor_soft_tpc:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_tpc:   $Date: 1999/09/29 02:47:16 $ */
 
 
 
@@ -469,7 +475,7 @@ something reasonable is put in.
   float  res_drf_svt;        /* Avg. resid., drift direction, SVT         */
                              /* -OR- Avg. chisq(2) of fit,                */
  } ;
-/*  Last mod. for dst_monitor_soft_svt:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_svt:   $Date: 1999/09/29 02:47:16 $ */
 
 
 
@@ -495,7 +501,7 @@ something reasonable is put in.
   float  res_pad_ftpc[2];    /* Avg. residual, pad direction,FTPC E/W*/
   float  res_drf_ftpc[2];    /* Avg. resid., drift direction,FTPC E/W*/
  } ;
-/*  Last mod. for dst_monitor_soft_ftpc:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_ftpc:   $Date: 1999/09/29 02:47:16 $ */
 
 
 
@@ -513,7 +519,7 @@ something reasonable is put in.
  struct dst_monitor_soft_emc  {
   float  energy_emc;         /* Total energy (or ADC sum) in EMC     */
  } ;
-/*  Last mod. for dst_monitor_soft_emc:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_emc:   $Date: 1999/09/29 02:47:16 $ */
 
 
 
@@ -531,7 +537,7 @@ something reasonable is put in.
  struct dst_monitor_soft_ctb-tof  {
   long   mult_ctb_tot;       /* Total mult. (or ADC sum) in CTB      */ 
  } ;
-/*  Last mod. for dst_monitor_soft_ctb-tof:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_ctb-tof:   $Date: 1999/09/29 02:47:16 $ */
 
 
 
@@ -549,7 +555,7 @@ something reasonable is put in.
  struct dst_monitor_soft_rich  {
   long   mult_rich_tot;      /* Total mult. (or ADC sum) in RICH      */ 
  } ;
-/*  Last mod. for dst_monitor_soft_rich:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_rich:   $Date: 1999/09/29 02:47:16 $ */
 
 
 
@@ -570,7 +576,7 @@ something reasonable is put in.
   float  prim_vrtx_cov[6];   /* Primary vrtx covariance matrix            */
   float  prim_vrtx_chisq;    /* Primary vertex chi-square of fit          */
  } ;
-/*  Last mod. for dst_monitor_soft_global:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_monitor_soft_global:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -623,7 +629,7 @@ refers to the particles in <TT>dst_track</TT>.
   short secrow;       /* Packed det ID, sec., row. numbers       */
   long  padtimeadc;   /* Packed pad#, time bucket and ADC        */
  } ;
-/*  Last mod. for dst_pixel::   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_pixel::   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -738,7 +744,7 @@ after review and update of the <TT>dst_point</TT> filler module.
   long      pos_err[2];      /* compressed x,y,z space-point error      */
   long      charge;          /* total charge and max_adc                */
  } ;
-/*  Last mod. for dst_point:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_point:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -774,7 +780,7 @@ assignments.
   short     id_track;      /* F.key to dst_track table       */ 
   long      id_point;      /* F.key to dst_point table       */
  } ;
-/*  Last mod. for dst_point_track_index: $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_point_track_index: $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -1057,7 +1063,7 @@ track fitting methods using a packing algorithm (still to be defined).
   float      impact;           /* impact parameter based on 3D DCA from  */
                                /* primary vertex (cm)                    */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_track:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -1133,7 +1139,7 @@ reduction techniques.
   short  ndedx;      /* number of points used in dE/dx calcu.            */
   float  dedx[2];    /* dE/dx summary info; depends on method (see above)*/
  } ;
-/*  Last mod. for dst_dedx:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_dedx:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -1242,7 +1248,7 @@ Expanded definitions and explicit algorithms for 'det_id' given.
   float     chisq[2];      /* Chi-square per degree of freedom and probab. */
                            /* of chisq P(chi^2,ndf) of vertex fit          */
  } ;
-/*  Last mod. for dst_vertex:   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_vertex:   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
@@ -1269,7 +1275,7 @@ This is a new DST table to hold ADC data from the STAR RICH detector.
   short pad;   /* Packed module and channel numbers (see above)  */
   short adc;   /* ADC value for the hit                          */
  } ;
-/*  Last mod. for dst_pixel::   $Date: 1999/09/27 20:41:48 $ */
+/*  Last mod. for dst_pixel::   $Date: 1999/09/29 02:47:16 $ */
 </PRE>
 <P>
 <BR>
