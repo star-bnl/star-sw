@@ -13,6 +13,7 @@
 #include "asuAlloc.h"
 #include "dstype.h"
 #include "dui_types.h"
+#include "emlLib.h"
 
 /*------------------------------------------------ GLOBALS            */
 #define DUI_LST_FORMAT "%1s %16s * %16s * %8d * %8d * %8d\n"
@@ -41,7 +42,7 @@ int dui_ls_l_Table(DS_DATASET_T *pDS, char*& listing)
    ||  !dsTableMaxRowCount(&maxrowcount,pDS)
    ||  !dsTableRowSize(&rowsize,pDS)
    ){
-      dsPerror("invalid DSL table");
+      EML_PUSHERROR(dsError("invalid DSL table"));
       return FALSE;
    }
    char* result = (char*)MALLOC(256);
@@ -73,7 +74,7 @@ int dui_ls_ld_Dataset(DS_DATASET_T *pDS,char*& listing)
    ||  !dsDatasetMaxEntryCount(&maxelcount,pDS)
 #endif /*OLD_DSL*/
    ){
-      dsPerror("invalid DSL dataset");
+      EML_PUSHERROR(dsError("invalid DSL dataset"));
       return FALSE;
    }
    char* result = (char*)MALLOC(256);
@@ -101,7 +102,7 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
    ||  !isDataset
    ||  !dsDatasetEntryCount(&elcount,pDS)
    ){
-      dsPerror("invalid DSL dataset");
+      EML_PUSHERROR(dsError("invalid DSL dataset"));
       return FALSE;
    }
    dui_ls_l_Header(listing);
@@ -111,7 +112,8 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
       ||  !dsIsDataset(&isDataset, pEntry)
       ||  !(isTable || isDataset)
       ){
-	 dsPerror("bad DSL entry");
+	 EML_PUSHERROR(dsError("bad DSL entry"));
+	 return FALSE;
       } else {
 	 if(isTable)dui_ls_l_Table(pEntry,listing);
 	 if(isDataset)dui_ls_ld_Dataset(pEntry,listing);

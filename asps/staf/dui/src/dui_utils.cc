@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "emlLib.h"
 #include "asuAlloc.h"
 #include "dui_types.h"
 
@@ -181,7 +182,7 @@ int duiFindDS(DS_DATASET_T *& node, DS_DATASET_T* root, char* path)
       ||  !isDataset
       ||  !dsFindEntry(&pDSc, pDSr, s)
       ){
-	 dsPerror("can't find DSL node");
+	 EML_PUSHERROR(dsError("DSL-NODE_NOT_FOUND"));
 //printf("elem = %s ??? \t",s);			.. ***** DEBUG *****
 //printf("base = %s ??? \n",pDSr->name);	.. ***** DEBUG *****
 	 FREE(s);

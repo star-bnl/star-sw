@@ -29,9 +29,23 @@ Commands for the Dataset Unix-like Interface ASP.
 +
 PATH 'Directory Path' C D='/dui'
 >GUIDANCE
-Change current working directory.
+Change current working dataset.
 .
 >ACTION KAM_DUI_CD
+
+** ---------------------------------------------------------------------
+** DUI/LN SOURCE TARGET
+>COMMAND LN
+>PARAMETERS
+SOURCE 'Link from source ...' C
+TARGET '... to target' C
+>GUIDANCE
+Links tables and/or datasets, similar to a UNIX soft link.
+.
+You can use either a directory or a table for the target.
+You can use paths.  The paths can be absolute or relative.
+.
+>ACTION KAM_DUI_LN
 
 ** ---------------------------------------------------------------------
 ** DUI/CP SOURCE TARGET
@@ -40,11 +54,10 @@ Change current working directory.
 SOURCE 'Copy from source ...' C
 TARGET '... to target' C
 >GUIDANCE
-Copy tables and/or datasets.
+Copy tables.
 .
- ************************
- * Not yet Implemented  *
- ************************
+The target can be either a directory or a table, just like UNIX.
+Caution: not all of the STAF UNIX-like commands are like UNIX.
 .
 >ACTION KAM_DUI_CP
 
@@ -78,9 +91,7 @@ TARGET '... to TARGET' C
 >GUIDANCE
 Move tables and/or datasets.
 .
- ************************
- * Not yet Implemented  *
- ************************
+The target MUST BE A DIRECTORY.
 .
 >ACTION KAM_DUI_MV
 
@@ -99,11 +110,10 @@ Show current working directory.
 >PARAMETERS
 PATH 'Table Path' C
 >GUIDANCE
-Remove tables.
+Remove a table.
 .
- ************************
- * Not yet Implemented  *
- ************************
+You can use a path to the table, eg. rm a/b/c, where a and b are
+'directories' (datasets).
 .
 >ACTION KAM_DUI_RM
 
@@ -115,9 +125,8 @@ PATH 'Directory Path' C
 >GUIDANCE
 Remove datasets.
 .
- ************************
- * Not yet Implemented  *
- ************************
+Caution: this is like 'rm -rf' in UNIX,
+it removes the directory and all directories and tables thereunder.
 .
 >ACTION KAM_DUI_RMDIR
 

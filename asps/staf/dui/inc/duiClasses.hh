@@ -42,17 +42,25 @@ public:
 //----------------------------------
 // Unix-Like commands
    virtual STAFCV_T cd (const char * dirPath);
+   virtual STAFCV_T ln (const char * fromPath, const char * toPath); 
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);
    virtual char * ls (const char * path);
    virtual STAFCV_T mkdir (const char * dirPath);
    virtual STAFCV_T mv (const char * fromPath, const char * toPath);
    virtual char * pwd ();
-   virtual STAFCV_T rm (const char * filePath);
+   virtual STAFCV_T rm ( const char * filePath);
    virtual STAFCV_T rmdir (const char * dirPath);
 
 //----------------------------------
 // Unix-Related commands
    virtual char * cvtRelAbs (const char * relPath);
+   virtual STAFCV_T unlinkAndMaybeFreeMemory (char freeTheMemory,
+       const char * filePath);
+//- cet-14nov97 make ln look like ln
+   virtual STAFCV_T lnmv (char unLinkSrc, const char * fromPath, 
+          const char * toPath);  // The unLinkSrc arg allows mv() to be
+                                 // simply lnmv(TRUE,xx,xx).
+				 // and ln to be lnmv(FALSE,xx,xx).
 
 //----------------------------------
 // Over-ride tdmFactory methods

@@ -4,12 +4,18 @@
 //:DESCRIPTION: Dataset Unix-like Interface Classes
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
+//:HISTORY:     14nov97-v030c-cet- Rename ln to lnmv and use for ln
+//:HISTORY:     03sep97-v030b-cet- merge CET & HJW versions (minimal)
+//:HISTORY:     22Jul97-v030a-hjw- add rm,rmdir,ln,cp,mv
 //:HISTORY:     13may97-v020a-cet- lock '/dui'
 //:HISTORY:     23dec96-v010a-cet- OLD_DSL -> NEW_DSL default
 //:HISTORY:     01feb96-v001a-cet- make more like tdmFactory
 //:HISTORY:     08dec95-v000a-cet- creation
 //:<--------------------------------------------------------------------
 
+//:----------------------------------------------- DEFINES           --
+#define MAXPATH 123
+#define PP printf(
 //:----------------------------------------------- INCLUDES           --
 #include <string.h>
 #include "asuAlloc.h"
@@ -45,7 +51,7 @@ duiFactory:: duiFactory(const char * name)
 #else   /*OLD_DSL*/
    if( !dsNewDataset(&pDSroot, (char*)name, DSET_DIM) ){
 #endif  /*OLD_DSL*/
-      dsPerror("duiFactory -- Error creating root dataset");
+      EML_WARNING(dsError("DUI-NO_ROOT")); // v030b
    }
    IDREF_T id;
    if( soc->idObject(myCwd,"tdmDataset",id) ){
@@ -128,9 +134,77 @@ STAFCV_T duiFactory:: cd (const char * dirPath) {
 }
 
 //----------------------------------
+#define BUF 256
+STAFCV_T duiFactory:: lnmv (char unlinkSrc, const char * fromPath , 
+       const char * tgtDir) {      // also called for mv (with unlinkSrc true)
+
+  DS_DATASET_T *from=NULL,*to=NULL;
+  bool_t isDataset;
+
+  if(!findNode_ds(fromPath,from))  EML_ERROR(SRC_NOT_FOUND);
+
+  if(!findNode_ds(tgtDir,to))     EML_ERROR(SECOND_PARAM_MUST_BE_DIR);
+  if(!dsIsDataset(&isDataset,to)) EML_ERROR(INVALID_TGT_DIRECTORY);
+  if(!isDataset)                  EML_ERROR(TGT_MUST_BE_DIR_NOT_TABLE_NAME);
+  
+  if(!dsLinkAcyclic(to,from)) EML_ERROR(LINK_FAILED);
+
+  if(unlinkSrc) unlinkAndMaybeFreeMemory(FALSE,fromPath);
+
+  EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T duiFactory:: ln (const char * fromPath
+		, const char * toPath) {
+   return lnmv(FALSE,fromPath,toPath);
+}
+
+//----------------------------------
 STAFCV_T duiFactory:: cp (const char * fromPath
 		, const char * toPath) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+  DS_DATASET_T *from=NULL,*to=NULL,*pDS;
+  char *toPathExtended,*slash;
+  long nmaxLong;
+  char *spec;
+  size_t nmax,nok,nbytes,rowSize;
+  char *pDataTo,*pDataFrom;
+  int ii;
+  bool_t isDirectory;
+
+  // If toPath is a directory, add the table name to the end of it.
+  if(findNode_ds(toPath,pDS)) {
+    if(!dsIsDataset(&isDirectory,pDS)) EML_ERROR(TGT_NOT_FOUND);
+    if(!isDirectory) EML_ERROR(TGT_ALREADY_EXISTS);
+    for(ii=strlen(fromPath)-1;ii>=0;ii--) if(fromPath[ii]=='/') break;
+    ii++;
+    toPathExtended=(char*)MALLOC(strlen(toPath)+strlen(fromPath+ii)+3);
+    if(toPath[strlen(toPath)-1]=='/') slash=""; else slash="/";
+    sprintf(toPathExtended,"%s%s%s",toPath,slash,fromPath+ii);
+  } else {
+    toPathExtended=(char*)MALLOC(strlen(toPath)+1);
+    strcpy(toPathExtended,toPath);
+  }
+
+  if(!findNode_ds(fromPath,from))         EML_ERROR(SRC_NOT_FOUND);
+  if(!dsTableRowCount(&nok,from))         EML_ERROR(TABLE_NOT_FOUND);
+  if(!dsTableMaxRowCount(&nmax,from))     EML_ERROR(TABLE_NOT_FOUND);
+  if(!dsTableTypeSpecifier(&spec,from))   EML_ERROR(SPECS_NOT_FOUND);
+  nmaxLong=nmax;
+  newTable(toPathExtended,spec,nmaxLong);
+  if(!findNode_ds(toPathExtended,to))      EML_ERROR(TGT_NOT_CREATED);
+  if(!dsSetTableRowCount(to,nok))          EML_ERROR(NROW_NOT_SET);
+  if(!dsAllocTables(to))                   EML_ERROR(TBL_MEMORY_NOT_ALLOCATED);
+  if(!dsTableDataAddress(&pDataTo,to))     EML_ERROR(TGT_DATA_ADDR_NOT_FOUND);
+  if(!dsTableDataAddress(&pDataFrom,from)) EML_ERROR(SRC_DATA_ADDR_NOT_FOUND);
+  if(!dsTableRowSize(&rowSize,to))         EML_ERROR(ROW_SIZE_NOT_FOUND);
+  nbytes=nok*rowSize;
+  memcpy(pDataTo,pDataFrom,nbytes);
+
+  FREE(toPathExtended);
+
+
+  EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
@@ -138,7 +212,8 @@ char * duiFactory:: ls (const char * path) {
 
    DS_DATASET_T *pDS;
    bool_t isTable, isDataset;
-   char * result;
+
+   char *result;
    char* errormessage = "*** No such DUI table or directory ***";
 
    if( !findNode_ds(path,pDS) ){
@@ -152,6 +227,10 @@ char * duiFactory:: ls (const char * path) {
    ){
       dsPerror("invalid DSL type");
    }
+
+   result=(char*)MALLOC(5000);   // 24jul97 hjw
+   result[0]=0;                  // 24jul97 hjw, initialization.
+
    if( isTable ) dui_ls_l_Table(pDS,result);
    if( isDataset ) dui_ls_l_Dataset(pDS,result);
 /*-16jul97-   EML_SUCCESS(STAFCV_OK); -*/
@@ -190,7 +269,7 @@ STAFCV_T duiFactory:: mkdir (const char * dirPath) {
 //----------------------------------
 STAFCV_T duiFactory:: mv (const char * fromPath
 		, const char * toPath) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+   return lnmv(TRUE,fromPath,toPath);
 }
 
 //----------------------------------
@@ -202,14 +281,89 @@ char * duiFactory:: pwd () {
 }
 
 //----------------------------------
-STAFCV_T duiFactory:: rm (const char * filePath) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+STAFCV_T duiFactory:: rm ( const char * filePath) {
+  if(unlinkAndMaybeFreeMemory(TRUE,filePath)!=STAFCV_OK) {
+    EML_ERROR(REMOVAL_FAILED);
+  }
+  EML_SUCCESS(STAFCV_OK);
 }
+STAFCV_T duiFactory:: unlinkAndMaybeFreeMemory (char freeMemory, 
+        const char * filePath) {
+  // Arg freeMemory is false when
+  // fnct is called from mv (move).  In this case we do only the
+  // unlink.  Arg freeMemory is true when fnct is called
+  // as part of a bona fide rm (remove).
+
+  DS_DATASET_T *parentOfFrom=NULL; 
+  int ii;
+  char* fullPath,tmp[MAXPATH+1];
+  DS_DATASET_T *from=NULL;
+  size_t numLinks;
+  bool_t isTable;
+
+  if(!findNode_ds(filePath,from))  EML_ERROR(TABLE_NOT_FOUND);
+
+  if(!dsIsTable(&isTable,from)) EML_ERROR(DATASET_NOT_FOUND);
+  if(!dsRefcount(&numLinks,from)) EML_ERROR(DATASET_NOT_FOUND);
+
+  fullPath=(char*)dui_pathof(myCwd,filePath);
+  if(!fullPath) EML_ERROR(FAIL_CREATE_FULL_PATH_OF_SRC);
+  if(strlen(fullPath)>MAXPATH) EML_ERROR(FULL_PATH_OF_SRC_TOO_LONG);
+  strcpy(tmp,fullPath);
+  for(ii=strlen(tmp)-1;ii>=0;ii--) if(tmp[ii]=='/') break; tmp[ii]=0;
+  if(!strstr(tmp,"/")) EML_ERROR(NO_PARENT_DIR_FOR_SRC);
+  if(!findNode_ds(tmp,parentOfFrom)) EML_ERROR(PARENT_DIR_OF_SRC_NOT_FOUND);
+  if(!dsUnlink(parentOfFrom,from)) EML_ERROR(UNLINK_OF_SRC_FAILED);
+  if(freeMemory&&numLinks<2) {
+    if(!dsFreeDataset(from)) EML_ERROR(MEMORY_NOT_FREED);
+  }
+
+  EML_SUCCESS(STAFCV_OK);
+
+} // filePath
 
 //----------------------------------
-STAFCV_T duiFactory:: rmdir (const char * dirPath) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
+STAFCV_T duiFactory:: rmdir (const char * dirPath) { // www
+
+  DS_DATASET_T *dsp=NULL,*pp=NULL;
+  size_t ii,nentry;
+  char *theName=NULL,*newPath=NULL,*fullpath=NULL;
+  bool_t isDir;
+
+  if(!findNode_ds(dirPath,pp)) EML_ERROR(DIR_NOT_FOUND);
+  if(!dsIsDataset(&isDir,pp))  EML_ERROR(DATASET_NOT_FOUND);
+  if(!isDir)                   EML_ERROR(USE_RM_FOR_TABLES_NOT_RMDIR);
+  if(!dsDatasetEntryCount(&nentry,pp)) EML_ERROR(DATASET_NOT_FOUND);
+  fullpath=(char*)dui_pathof(myCwd,dirPath);
+
+  for(ii=0;ii<nentry;ii++) {
+    if(!dsDatasetEntry(&dsp,pp,ii)) EML_ERROR(ENTRY_NOT_FOUND);
+    if(!dsIsDataset(&isDir,dsp))  EML_ERROR(DATASET_NOT_FOUND);
+    if(isDir) {
+      if(!dsDatasetName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
+      newPath=(char*)malloc((size_t)(strlen(fullpath)+strlen(theName)+2));
+      if(!newPath) EML_ERROR(MEM_ALLOC_FAILED);
+      sprintf(newPath,"%s/%s",fullpath,theName);
+      rmdir(newPath);
+      free(newPath);
+    } else {
+      if(!dsTableName(&theName,dsp)) EML_ERROR(DATASET_NOT_FOUND);
+      newPath=(char*)malloc((size_t)(strlen(fullpath)+strlen(theName)+2));
+      if(!newPath) EML_ERROR(MEM_ALLOC_FAILED);
+      sprintf(newPath,"%s/%s",fullpath,theName);
+      unlinkAndMaybeFreeMemory(TRUE,newPath);
+      free(newPath);
+    }
+  }
+  
+  // We have eliminated all sub dirs and their tables, so we can now
+  // elim the dir itself.
+  unlinkAndMaybeFreeMemory(TRUE,fullpath);
+
+  FREE(fullpath);
+  
+  EML_SUCCESS(STAFCV_OK);
+} // dirPath fullPath fullpath
 
 //----------------------------------
 char * duiFactory:: cvtRelAbs (const char * relPath) {
@@ -301,6 +455,7 @@ tdmDataset* duiFactory:: newDataset (const char * name, long setDim){
 tdmTable* duiFactory:: newTable (const char * name
 		, const char * spec, long rows ){
    IDREF_T id;
+
    if( soc->idObject(name,"tdmTable",id) ){
       // EML_ERROR(DUPLICATE_OBJECT_NAME);
       return NULL;
