@@ -1,5 +1,10 @@
+BASE_DIR := $(shell pwd)
+HPATH := $(BASE_DIR)/inc
+LPATH := $(BASE_DIR)/lib/$(STAR_ARCH)
 
-all: dslib dsbin
+all: dslib dsbin install
+
+most: dslib dsbin
 
 dslib:
 	cd lib; $(MAKE) all
@@ -18,6 +23,12 @@ realclean:
 	cd tcp; $(MAKE) clean
 tcp:
 	cd tcp; $(MAKE) all
+
+install:
+	cd $(LPATH); \
+	cp libdsl*.a $(STAR_LIB)/$(STAR_LEVEL)/sys/lib
+	cd $(HPATH); \
+	cp ds*.h $(STAR_LIB)/$(STAR_LEVEL)/sys/inc
 
 vwall: vwlib vwtest
 
