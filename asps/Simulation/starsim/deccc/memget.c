@@ -1,7 +1,11 @@
 /*
-* $Id: memget.c,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $
+* $Id: memget.c,v 1.2 2004/06/26 00:17:51 potekhin Exp $
 * $Log: memget.c,v $
+* Revision 1.2  2004/06/26 00:17:51  potekhin
+* Added stdlib.h
+*
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+*
 *
 * Revision 1.2  2001/03/05 11:55:22  nevski
 * headers clean-up
@@ -22,6 +26,8 @@
  * malloc() requires unsigned arg. FORTRAN passes signed integers
  * malloc() returns a pointer;     memget(f) returns an integer.
  */
+
+#include <stdlib.h>
 
 unsigned long memget_  (unsigned int *n)
 {  return ( (unsigned long) malloc(*n) );  }
