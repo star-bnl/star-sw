@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.4 2000/05/25 15:00:05 vanyashi Exp $
+// $Id: StTagsMaker.cxx,v 1.5 2000/06/05 22:06:26 vanyashi Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.5  2000/06/05 22:06:26  vanyashi
+// added const needed for tableDescriptor
+//
 // Revision 1.4  2000/05/25 15:00:05  vanyashi
 // save structure names
 //
@@ -124,7 +127,7 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
       leaflist = colName;
       Int_t nDim = td.Dimensions(i);
       if (nDim) {
-	UInt_t *indx = td.IndexArray(i);
+	const UInt_t *indx = td.IndexArray(i);
 	Char_t buf[64];
 	for (Int_t k=0; k<nDim; k++) {
 	  sprintf(buf,"[%d]",indx[k]);
