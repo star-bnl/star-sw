@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.19 2002/02/22 17:44:19 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.20 2002/09/18 22:21:35 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.20  2002/09/18 22:21:35  jhthomas
+ * Add new option for 1/R**2 space charge density distribution.  Flag = 0x800
+ *
  * Revision 1.19  2002/02/22 17:44:19  jhthomas
  * Get CathodeV and GG from DB. Change Defaults.  Change Instantiation argument
  * order. Update D'Oxygen documentation.  Remove 2000/2001 E field switch.
@@ -84,7 +87,8 @@ enum   DistortSelect
   kMembrane          = 0x80,     // Bit 8
   kEndcap            = 0x100,    // Bit 9
   kIFCShift          = 0x200,    // Bit 10
-  kSpaceCharge       = 0x400     // Bit 11
+  kSpaceCharge       = 0x400,    // Bit 11
+  kSpaceChargeR2     = 0x800     // Bit 12
 } ;
 
 // DO NOT change the numbering of these constants. StBFChain depends
@@ -107,6 +111,7 @@ class StMagUtilities {
   StTpcDb*  thedb ;  
   TDataSet* thedb2 ;
   StDetectorDbSpaceCharge* fSpaceCharge ;
+  StDetectorDbSpaceCharge* fSpaceChargeR2 ;  // Check that this is correct after updating DB !!!
   StDetectorDbTpcVoltages* fTpcVolts ;
 
   virtual void    CommonStart ( Int_t mode, StTpcDb* dbin , TDataSet* dbin2 ) ;
@@ -118,9 +123,11 @@ class StMagUtilities {
 					Float_t &Br_value, Float_t &Bz_value ) ;
   virtual void    Interpolate3DBfield ( const Float_t r, const Float_t z, const Float_t phi, 
 					Float_t &Br_value, Float_t &Bz_value, Float_t &Bphi_value ) ;
-  virtual void    InterpolateEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
-                                           const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
-					   Float_t &Er_value, Float_t &Ephi_value ) ;
+  virtual void    Interpolate2DEdistortion ( const Float_t r, const Float_t z, 
+					     const Float_t Er[neZ][neR], Float_t &Er_value ) ;
+  virtual void    Interpolate3DEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
+					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
+					     Float_t &Er_value, Float_t &Ephi_value ) ;
 
   Int_t    mDistortionMode;             // Distortion mode - determines which corrections are run
 
@@ -137,7 +144,7 @@ class StMagUtilities {
   Float_t  StarMagE ;                   // STAR Electric Field (V/cm) Magnitude
   Float_t  IFCShift ;                   // Shift of the IFC towards the West Endcap (cm)
   Float_t  Const_0, Const_1, Const_2 ;  // OmegaTau parameters
-  Double_t SpaceCharge ;                // Space Charge parameter (uniform in the TPC - arbitrary units)
+  Double_t SpaceCharge, SpaceChargeR2 ; // Space Charge parameters (uniform or 1/R**2 in the TPC - arbitrary units)
 
   Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
   Float_t  Radius[nR], ZList[nZ] ;         
@@ -145,8 +152,9 @@ class StMagUtilities {
   Float_t  R3D[nR], Z3D[nZ], Phi3D[nPhi] ;         
   Float_t  cmEr[neZ][nePhi][neR],    cmEphi[neZ][nePhi][neR] ;
   Float_t  endEr[neZ][nePhi][neR],   endEphi[neZ][nePhi][neR] ;
-  Float_t  shiftEr[neZ][nePhi][neR], shiftEphi[neZ][nePhi][neR] ;
-  Float_t  spaceEr[neZ][nePhi][neR], spaceEphi[neZ][nePhi][neR] ;
+  Float_t  shiftEr[neZ][neR] ;
+  Float_t  spaceEr[neZ][neR] ;
+  Float_t  spaceR2Er[neZ][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
   
  public:
@@ -172,6 +180,7 @@ class StMagUtilities {
   virtual void    UndoMembraneDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoEndcapDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+  virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
