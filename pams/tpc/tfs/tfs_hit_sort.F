@@ -1,5 +1,9 @@
-* $Id: tfs_hit_sort.F,v 1.2 1999/12/17 16:34:10 sakrejda Exp $
+* $Id: tfs_hit_sort.F,v 1.3 1999/12/21 01:16:03 sakrejda Exp $
 * $Log: tfs_hit_sort.F,v $
+* Revision 1.3  1999/12/21 01:16:03  sakrejda
+* tls_Quick_Sort_i (written to sort integers) replaced by tls_Quick_Sort_ii
+* provided by Victor to sort Shorts.
+*
 * Revision 1.2  1999/12/17 16:34:10  sakrejda
 * Introduced additional variable to avoid mod(short,int)
 *
@@ -48,7 +52,7 @@ C     IROW  - 2 number of hits
 
 C Local variables
       integer ih, jrow, jsect, iret
-      integer tls_Quick_Sort_i
+      integer tls_Quick_Sort_ii
       integer longrow
 
 C=========================== Begin Executable Code =======================
@@ -57,7 +61,7 @@ C     Sort hits according to the encoded sector-row information. Then
 C     set up pointers to the beginning and end of each sector-row. This
 C     is to be used later to sort each sector-row according to drift.
 
-      iret = tls_Quick_Sort_i(tphit_h.nok,tphit(1).row,
+      iret = tls_Quick_Sort_ii(tphit_h.nok,tphit(1).row,
      >     tphit(2).row,tphit)
       call vzero(irow,2*mxrow*mxsector)
       longrow=tphit(1).row
