@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.11 2004/08/05 22:24:32 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.12 2004/08/10 14:20:21 calderon Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.12  2004/08/10 14:20:21  calderon
+ * Putting the streamers back in.  They should not be needed, but
+ * apparently removing them causes more problems.  Yuri tested that
+ * putting them back in allows reading files again.
+ *
  * Revision 2.11  2004/08/05 22:24:32  ullrich
  * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
  *
@@ -60,7 +65,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.11 2004/08/05 22:24:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.12 2004/08/10 14:20:21 calderon Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -231,4 +236,32 @@ StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
     default:
 	break;
     }
+}
+//______________________________________________________________________________
+void StTrackFitTraits::Streamer(TBuffer &R__b)
+{
+//        Stream an object of class StTrackFitTraits.
+
+  Version_t R__v = 0;
+  if (R__b.IsReading()) {
+    R__v = R__b.ReadVersion();
+    StObject::Streamer(R__b);
+
+    R__b >> (unsigned short&)mPidHypothesis;
+    R__b >> (unsigned short&)mNumberOfFitPoints;
+
+    if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
+       { Int_t dumy; R__b >> dumy;}
+
+    R__b.ReadFastArray(mChi2,2);
+    mCovariantMatrix.Streamer(R__b);
+
+  } else {
+    R__b.WriteVersion(Class());
+    StObject::Streamer(R__b);
+    R__b << (unsigned short )mPidHypothesis;
+    R__b << (unsigned short )mNumberOfFitPoints;
+    R__b.WriteFastArray(mChi2, 2);
+    mCovariantMatrix.Streamer(R__b);
+  }
 }

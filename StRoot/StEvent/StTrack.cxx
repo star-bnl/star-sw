@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.23 2004/08/05 22:24:51 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.24 2004/08/10 14:20:21 calderon Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.24  2004/08/10 14:20:21  calderon
+ * Putting the streamers back in.  They should not be needed, but
+ * apparently removing them causes more problems.  Yuri tested that
+ * putting them back in allows reading files again.
+ *
  * Revision 2.23  2004/08/05 22:24:51  ullrich
  * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
  *
@@ -96,7 +101,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.23 2004/08/05 22:24:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.24 2004/08/10 14:20:21 calderon Exp $";
 
 StTrack::StTrack()
 {
@@ -467,3 +472,47 @@ int StTrack::bad() const
     if (di             && di->bad()            )   return 50;
     return 0;
 }
+void StTrack::Streamer(TBuffer &R__b)
+{
+    // Stream an object of class .
+
+    if (R__b.IsReading()) {
+       UInt_t R__s, R__c;
+       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
+       if (R__v > 1) {
+          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
+          return;
+       }
+       //====process old versions before automatic schema evolution
+       StObject::Streamer(R__b);
+       R__b >> mKey;
+       R__b >> mFlag;
+
+//     R__b >> mEncodedMethod;
+       UChar_t oldEncodedMethod;
+       R__b >> oldEncodedMethod;
+       mEncodedMethod=oldEncodedMethod;
+
+       R__b >> mImpactParameter;
+       R__b >> mLength;
+       R__b >> mNumberOfPossiblePoints;
+       mTopologyMap.Streamer(R__b);
+       mFitTraits.Streamer(R__b);
+       R__b >> mGeometry;
+
+//     R__b >> mDetectorInfo;
+       R__b >> (StTrackDetectorInfo*&)mDetectorInfo;
+
+//     R__b >> mNode;
+       R__b >> (StTrackNode*&)mNode;
+
+
+       mPidTraitsVec.Streamer(R__b);
+
+       R__b.CheckByteCount(R__s, R__c, Class());
+       //====end of old versions
+      
+    } else {
+       Class()->WriteBuffer(R__b,this);
+    }
+} 
