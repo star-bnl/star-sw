@@ -14,7 +14,6 @@ set OUT = $cwd
 echo OUT_DIR = $OUT
 
 # define where all Make*.mk are. Here the place is the same as input area
-#setenv STAF_MAKE_HOME ${INP}
 if ( -e $cwd/MakeArch.mk ) then
   setenv STAF_MAKE_HOME $cwd
 else

@@ -1,6 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.11  1998/07/10 12:23:15  nevski
-#  Add backup for PAMs shared libraries
+#  Revision 1.12  1998/07/13 00:37:39  perev
+#  *.mk and *.csh
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -23,14 +23,14 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/10 12:23:15 $ 
+#             Last modification $Date: 1998/07/13 00:37:39 $ 
 #. default setings
 
 RM := rm -f
 MV := mv -f
 RMDIR := rm -rf
 CP := cp
-LN := ln -s
+LN := ln -sf
 SLASH :=/
 MKDIR := mkdir -p
 
@@ -72,7 +72,7 @@ YACCLIB  := -ly
 LEX      := lex
 LEXLIB   := -ll
 
-DEBUG := -g
+DEBUG := -g 
 ifdef NODEBUG
   DEBUG := -O
 endif

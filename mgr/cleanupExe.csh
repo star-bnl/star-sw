@@ -24,3 +24,9 @@ if ( -e $DIR ) then
   echo rm -rf $cwd/$DIR/Staf
   rm -rf $DIR/Staf
 endif
+
+set DIR = .$ARCH/dep
+if ( -e $DIR ) then
+  echo rm -rf $cwd/$DIR/*.d
+  rm -rf $DIR/*.d
+endif

@@ -228,9 +228,18 @@ FILES_O := $(addsuffix .o, $(notdir $(basename $(FILES_O))))
 FILES_DIDLM :=$(addsuffix .didlm, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_IDLM)))))
 
 MY_LIB := $(LIB_DIR)/lib$(PKGNAME).a 
+
+# 	MY_SO
 MY_SO  := $(LIB_DIR)/lib$(PKGNAME).$(So)
-MY_NEW_SO := $(LIB_DIR)/lib$(PKGNAME)_NEW.$(So)
-MY_OLD_SO := $(wildcard $(MY_SO))
+QWE  := $(wildcard $(MY_SO).*)
+NEW_MY_SO := $(MY_SO).1000
+ifdef QWE
+  NQWE := $(words $(QWE))
+  QWE  := $(word $(NQWE),$(QWE))
+  QWE  := $(subst $(MY_SO).,,$(QWE))
+  QWE  := $(shell expr $(QWE) + 1)
+  NEW_MY_SO := $(MY_SO).$(QWE)
+endif
 
 #	for SDD only
 ifdef PKG_SDD
@@ -316,11 +325,8 @@ $(MY_LIB) : $(FILES_O)
 	touch $(MY_LIB)
 
 $(MY_SO) : $(FILES_O)
-	$(SO) $(SOFLAGS) -o $(MY_NEW_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
-ifdef MY_OLD_SO
-	$(MV) $(MY_SO) $(MY_SO).BAK
-endif
-	$(MV) $(MY_NEW_SO) $(MY_SO)
+	$(SO) $(SOFLAGS) -o $(NEW_MY_SO) $(addprefix $(OBJ_DIR)/,$(FILES_O))
+	$(LN) $(NEW_MY_SO) $(MY_SO)
 	
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
