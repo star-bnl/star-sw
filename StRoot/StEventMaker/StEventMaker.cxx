@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.15 1999/07/24 00:25:49 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.16 1999/07/25 04:29:57 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.16  1999/07/25 04:29:57  genevb
+// Correction for V0-Xi associated, better code in locating the primary vertex
+//
 // Revision 1.15  1999/07/24 00:25:49  fisyak
 // Gene corrections
 //
@@ -123,8 +126,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.15 1999/07/24 00:25:49 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.16 1999/07/25 04:29:57 genevb Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.16  1999/07/25 04:29:57  genevb
+// Correction for V0-Xi associated, better code in locating the primary vertex
+//
 // Revision 1.15  1999/07/24 00:25:49  fisyak
 // Gene corrections
 //
@@ -257,11 +263,12 @@
   typedef StThreeVector<float> StThreeVectorF;
   typedef StThreeVector<double> StThreeVectorD;
 #endif
+#include "global/inc/StVertexId.h"
 #include "StEventMaker/StRootEventManager.hh"
 #include <new.h>
 static const char thisClass[] = "StEventMaker: ";
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.15 1999/07/24 00:25:49 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.16 1999/07/25 04:29:57 genevb Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 #include <vector>
@@ -534,10 +541,12 @@ Int_t StEventMaker::Make(){
       // Add V0 vertices to vertex collection
       if (doLoad) {
         StVertex* vtx = NULL;
+	long v0vertex_id;
         long vertex_id;
         long track_id;
         long xi_id;
         for (i=0; i<nV0Vertex; i++) {
+	  v0vertex_id = dstV0Vertex[i].id - 1;
           vertex_id = dstV0Vertex[i].id_vertex - 1;
           track_id = dstV0Vertex[i].idneg - 1;
           if (vertex_id >= nVertex)
@@ -558,15 +567,16 @@ Int_t StEventMaker::Make(){
           currentEvent->vertexCollection()->push_back(vtx);
           vtxPtr.push_back(vtx);
           // Add associated v0's to xi's
-          while (!v0XiIndex[vertex_id].empty()) {
-            xi_id = v0XiIndex[vertex_id].back();
-            v0XiIndex[vertex_id].pop_back();
+          while (!(v0XiIndex[v0vertex_id].empty())) {
+            xi_id = v0XiIndex[v0vertex_id].back();
+            v0XiIndex[v0vertex_id].pop_back();
             ((StXiVertex*) (vtxPtr[xi_id]))->setV0Vertex((StV0Vertex*) vtx);
           }
         if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
       }
-    }  
+    }
         id = dstKinkVertices[i].idp;
+    // Kink vertex code should go here
     if (nfailed)
     // Last for the vertices, add any un-accounted-for vertices (primary)
     if (dstVertex) {
@@ -574,6 +584,8 @@ Int_t StEventMaker::Make(){
       // Build vertex collection
       if (doLoad) {
         StVertex* vtx = NULL;
+        int primaryFound=0;
+        int unknownFound=0;
         for (i=0; i<nVertex; i++) {
           if (vertexMatchIndex[i]<0) {
             vertexMatchIndex[i] = indexCount;
@@ -581,10 +593,22 @@ Int_t StEventMaker::Make(){
             vtx->setIndex(indexCount++);
             currentEvent->vertexCollection()->push_back(vtx);
             vtxPtr.push_back(vtx);
+            // Assign the primary vertex (only once!)
+            if (dstVertex[i].vtx_id == kEventVtxId) {
+              if (primaryFound) {
+                gMessMgr->Warning() << thisClass <<
+                  "Additional primary vertex found - ignoring!" << endm;
+              } else {
+                currentEvent->setPrimaryVertex(vtx);
+                primaryFound = 1;
+              }
+            } else unknownFound++;
           }
                 buf += sizeof(StTpcHit);
-        // Last remaining vertex is primary? Should be...
-        if (vtx) currentEvent->setPrimaryVertex(vtx);
+        if (!primaryFound) gMessMgr->Warning() << thisClass <<
+          "No primary vertex found!" << endm;
+        if (unknownFound) gMessMgr->Info() << thisClass <<
+          unknownFound << " unknown vertices found." << endm;
       }
     }
     // *** END VERTEX BUILDING ***
