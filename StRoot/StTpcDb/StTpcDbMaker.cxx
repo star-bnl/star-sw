@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.18 2000/08/09 14:54:54 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.19 2000/11/14 22:00:06 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.19  2000/11/14 22:00:06  genevb
+ * Switched several functions from float to double
+ *
  * Revision 1.18  2000/08/09 14:54:54  hardtke
  * Add Clear option, set trigger table pointer to 0 after each event
  *
@@ -267,8 +270,8 @@ Int_t StTpcDbMaker::Init(){
      StTpcCoordinateTransform transform(gStTpcDb);
      transform(pad1,gc1);
      transform(pad2,gc2);
-     float x1,y1,x2,y2;
-     float m,bb; // y = mx + bb
+     double x1,y1,x2,y2;
+     double m,bb; // y = mx + bb
      x1 = gc1.position().x();
      y1 = gc1.position().y();
      x2 = gc2.position().x();
@@ -284,8 +287,8 @@ Int_t StTpcDbMaker::Init(){
       gMessMgr->Warning() << "StTpcDbMaker::Init() Row intersects 0,0" << endm;
       continue;
      }
-     aline[i][j] = -m/bb;
-     bline[i][j] = 1/bb;
+     aline[i][j] = (float) -m/bb;
+     bline[i][j] = (float) 1.0/bb;
     }
   }
 //

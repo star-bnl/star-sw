@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcDimensions.h,v 1.8 2000/02/15 22:21:47 hardtke Exp $
+ * $Id: StRTpcDimensions.h,v 1.9 2000/11/14 22:00:06 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcDimensions.h,v $
+ * Revision 1.9  2000/11/14 22:00:06  genevb
+ * Switched several functions from float to double
+ *
  * Revision 1.8  2000/02/15 22:21:47  hardtke
  * Add effective drift distances
  *
@@ -52,29 +55,29 @@ public:
     int   numberOfSectors()     const;
 
   //TPC field cage parameters:
-    float ifcRadius()           const;
-    float ofcRadius()           const;
-    float tpcTotalLength()      const;
+    double ifcRadius()           const;
+    double ofcRadius()           const;
+    double tpcTotalLength()      const;
 
   //TPC wheel parameters:
-    float wheelInnerRadius()    const;
-    float wheelOuterRadius()    const;
-    float wheelThickness()      const;
+    double wheelInnerRadius()    const;
+    double wheelOuterRadius()    const;
+    double wheelThickness()      const;
 
-    float senseGasOuterRadius() const;
-    float tpeaThickness()       const;
+    double senseGasOuterRadius() const;
+    double tpeaThickness()       const;
 
   //TPC cathode parameters:
-    float cathodeInnerRadius()  const;
-    float cathodeOuterRadius()  const;
-    float cathodeThickness()    const; 
+    double cathodeInnerRadius()  const;
+    double cathodeOuterRadius()  const;
+    double cathodeThickness()    const; 
 
   //TPC distances
-    float innerEffectiveDriftDistance()  const;
-    float outerEffectiveDriftDistance()  const;
-    float gatingGridZ()                  const;
-    float zInnerOffset()                 const;
-    float zOuterOffset()                 const;
+    double innerEffectiveDriftDistance()  const;
+    double outerEffectiveDriftDistance()  const;
+    double gatingGridZ()                  const;
+    double zInnerOffset()                 const;
+    double zOuterOffset()                 const;
 
 
     ClassDef(StRTpcDimensions,0)
@@ -90,55 +93,55 @@ inline int StRTpcDimensions::numberOfSectors() const {
 return (*mTpc)[0].numberOfSectors;
 }
 
-inline float StRTpcDimensions::ifcRadius() const {
+inline double StRTpcDimensions::ifcRadius() const {
 return (*mTpc)[0].tpcInnerRadius;
 }
     
-inline float StRTpcDimensions::ofcRadius() const {
+inline double StRTpcDimensions::ofcRadius() const {
 return (*mTpc)[0].tpcOuterRadius;
 }
     
-inline float StRTpcDimensions::tpcTotalLength() const {
+inline double StRTpcDimensions::tpcTotalLength() const {
 return (*mTpc)[0].tpcTotalLength;
 }
 
-inline float StRTpcDimensions::wheelInnerRadius() const {
+inline double StRTpcDimensions::wheelInnerRadius() const {
 return (*mTpc)[0].wheelInnerRadius;
 }
 
-inline float StRTpcDimensions::wheelOuterRadius() const {
+inline double StRTpcDimensions::wheelOuterRadius() const {
 return (*mTpc)[0].wheelOuterRadius;
 }
 
-inline float StRTpcDimensions::wheelThickness() const {
+inline double StRTpcDimensions::wheelThickness() const {
 return (*mTpc)[0].wheelThickness;
 }
 
-inline float StRTpcDimensions::senseGasOuterRadius() const {
+inline double StRTpcDimensions::senseGasOuterRadius() const {
 return (*mTpc)[0].senseGasOuterRadius;
 }
     
-inline float StRTpcDimensions::tpeaThickness() const {
+inline double StRTpcDimensions::tpeaThickness() const {
 return (*mTpc)[0].tpeaThickness; 
 }
 
-inline float StRTpcDimensions::cathodeInnerRadius() const {
+inline double StRTpcDimensions::cathodeInnerRadius() const {
 return (*mTpc)[0].cathodeInnerRadius;
 }
     
-inline float StRTpcDimensions::cathodeOuterRadius() const {
+inline double StRTpcDimensions::cathodeOuterRadius() const {
 return (*mTpc)[0].cathodeOuterRadius;
 }
     
-inline float StRTpcDimensions::cathodeThickness() const {
+inline double StRTpcDimensions::cathodeThickness() const {
 return (*mTpc)[0].cathodeThickness;
 } 
 
-inline float StRTpcDimensions::zInnerOffset() const {
+inline double StRTpcDimensions::zInnerOffset() const {
   return (*mEffGeo)[0].z_inner_offset;
 }
 
-inline float StRTpcDimensions::zOuterOffset() const {
+inline double StRTpcDimensions::zOuterOffset() const {
   return (*mEffGeo)[0].z_outer_offset;
 }
 
