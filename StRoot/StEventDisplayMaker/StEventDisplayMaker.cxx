@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.69 2000/08/27 16:55:09 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.70 2000/08/29 04:39:22 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -234,12 +234,18 @@ void StEventDisplayMaker::AddName(const Char_t *name)
   //   Attention:     NO EXPRESSION, yet !!!
 
   if (!m_ListDataSetNames) m_ListDataSetNames = new TList;
-  // check name
-  TIter next(m_ListDataSetNames);
-  TObjString *str = 0;
-  while ((str = (TObjString *)next()) && str->String() != name);
-  if (!str) m_ListDataSetNames->Add(new TObjString(name));
+  if (!m_LockedNames->FindObject(name)) m_LockedNames->Add(new TObjString(name));
 }
+//______________________________________________________________________________
+inline void StEventDisplayMaker::RemoveName(const char *name)
+{
+   TObject *o = 0;
+   if (m_ListDataSetNames) {
+     o = m_ListDataSetNames->FindObject(name);
+     if (o) delete m_ListDataSetNames->Remove(o);
+  }
+}
+
 //______________________________________________________________________________
 void StEventDisplayMaker::ClearEvents()
 {
@@ -438,7 +444,6 @@ Int_t StEventDisplayMaker::Make()
            }
         }
         // printf(" no %s found !!!\n",track2Draw); 
-
 #endif
       }
     }
@@ -756,6 +761,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.70  2000/08/29 04:39:22  fine
+// RemoveName method introduced
+//
 // Revision 1.69  2000/08/27 16:55:09  fine
 // Title with Run event number etc
 //

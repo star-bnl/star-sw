@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.3 2000/08/27 19:30:48 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.4 2000/08/29 04:39:14 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -171,9 +171,11 @@ Int_t StDefaultFilter::SubChannel(const TTableSorter *tableObject, Int_t index,S
   dst_point_st &point = *hit->GetTable(tableObject->GetIndex(index));
   // Set "small" marker for the "noice" points
   if (point.id_track == 0) {
+     // small gray points
      style = 1;  
      color = 18;
   } else {
+    // "regular" circles
     style = 4;
     size  = 0.35;
     color = StVirtualEventFilter::Channel(tableObject,index,size,style);
@@ -197,6 +199,9 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
 
 
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.4  2000/08/29 04:39:14  fine
+// RemoveName method introduced
+//
 // Revision 1.3  2000/08/27 19:30:48  fine
 // Bug fix: SubChannel(dst_point) fixed
 //
