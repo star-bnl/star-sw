@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.6 2001/02/16 15:17:43 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.7 2001/03/02 16:03:11 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.7  2001/03/02 16:03:11  lmartin
+ * Finish method written to print out the cumulated tracking performances.
+ * Call to the CumulEval method.
+ * Second superpass (2 hit segment) switched on.
+ *
  * Revision 1.6  2001/02/16 15:17:43  lmartin
  * SSD off by default. cout replaced by gMessMgr.
  *
@@ -63,6 +68,62 @@ StEstMaker::~StEstMaker() {
 
 Int_t StEstMaker::Finish() {
 
+  float Efficiency,EfficiencyPrim,EfficiencySeco;
+  float Purity,PurityPrim,PuritySeco;
+  Efficiency=0;
+  EfficiencyPrim=0;
+  EfficiencySeco=0;
+  Purity=0;
+  PurityPrim=0;
+  PuritySeco=0;
+
+  gMessMgr->Info()<<"******************** EST Evaluation Summary ************************"<<endm;
+  gMessMgr->Info()<<" Total number of events :\t"<<mCumulNEvents<<"\t\t\t"<<endm;
+  gMessMgr->Info()<<" Total number of ideal tracks \t"<<mCumulNIdealPrim+mCumulNIdealSeco
+		  <<"\t"<<mCumulNIdealPrim
+		  <<"\t"<<mCumulNIdealSeco
+		  <<"\t (all/prim/seco)"<<endm;
+  gMessMgr->Info()<<" Number of ideal tracks/event \t"<<(mCumulNIdealPrim+mCumulNIdealSeco)/(mCumulNEvents*1.)
+		  <<"\t"<<mCumulNIdealPrim/(mCumulNEvents*1.)
+		  <<"\t"<<mCumulNIdealSeco/(mCumulNEvents*1.)
+		  <<"\t (all/prim/seco)"<<endm;
+  gMessMgr->Info()<<"  Total number of good tracks \t"<<mCumulNGoodPrim+mCumulNGoodSeco
+		  <<"\t"<<mCumulNGoodPrim
+		  <<"\t"<<mCumulNGoodSeco
+		  <<"\t (all/prim/seco)"<<endm;
+  gMessMgr->Info()<<"  Number of good tracks/event \t"<<(mCumulNGoodPrim+mCumulNGoodSeco)/(mCumulNEvents*1.)
+		  <<"\t"<<mCumulNGoodPrim/(mCumulNEvents*1.)
+		  <<"\t"<<mCumulNGoodSeco/(mCumulNEvents*1.)
+		  <<"\t (all/prim/seco)"<<endm;
+  gMessMgr->Info()<<"   Total number of bad tracks \t"<<mCumulNBadPrim+mCumulNBadSeco
+		  <<"\t"<<mCumulNBadPrim
+		  <<"\t"<<mCumulNBadSeco
+		  <<"\t (all/prim/seco)"<<endm;
+  gMessMgr->Info()<<"   Number of bad tracks/event \t"<<(mCumulNBadPrim+mCumulNBadSeco)/(mCumulNEvents*1.)
+		  <<"\t"<<mCumulNBadPrim/(mCumulNEvents*1.)
+		  <<"\t"<<mCumulNBadSeco/(mCumulNEvents*1.)
+		  <<"\t (all/prim/seco)"<<endm;
+  if ((mCumulNIdealPrim+mCumulNIdealSeco)!=0)
+    Efficiency=100.*(mCumulNGoodPrim+mCumulNGoodSeco)/(1.*(mCumulNIdealPrim+mCumulNIdealSeco));
+  if (mCumulNIdealPrim!=0)
+    EfficiencyPrim=100.*mCumulNGoodPrim/(1.*mCumulNIdealPrim);
+  if (mCumulNIdealSeco!=0)
+    EfficiencySeco=100.*mCumulNGoodSeco/(1.*mCumulNIdealSeco);
+  if ((mCumulNGoodPrim+mCumulNGoodSeco+mCumulNBadPrim+mCumulNBadSeco)!=0)
+    Purity=100.*(mCumulNGoodPrim+mCumulNGoodSeco)/(1.*(mCumulNGoodPrim+mCumulNGoodSeco+mCumulNBadPrim+mCumulNBadSeco));
+  if ((mCumulNGoodPrim+mCumulNBadPrim)!=0)
+    PurityPrim=100.*(mCumulNGoodPrim)/(1.*(mCumulNGoodPrim+mCumulNBadPrim));
+  if ((mCumulNGoodSeco+mCumulNBadSeco)!=0)
+    PuritySeco=100.*(mCumulNGoodSeco)/(1.*(mCumulNGoodSeco+mCumulNBadSeco));
+
+  gMessMgr->Info()<<"      Tracking efficiency (%) \t"<<Efficiency
+		  <<"\t"<<EfficiencyPrim
+		  <<"\t"<<EfficiencySeco
+		  <<"\t (all/prim/seco)"<<endm;
+  gMessMgr->Info()<<"                   Purity (%) \t"<<Purity
+		  <<"\t"<<PurityPrim
+		  <<"\t"<<PuritySeco
+		  <<"\t (all/prim/seco)"<<endm;
   return StMaker::Finish();
 
 }
@@ -209,7 +270,7 @@ Int_t StEstMaker::Init(){
 
   // superpass settings
 
-  mNSuperPass = 1;
+  mNSuperPass = 2;
   mSegments = new StEstSegments*[mNSuperPass];
   for (i=0;i<mNSuperPass;i++) mSegments[i] = new StEstSegments;
 
@@ -222,14 +283,14 @@ Int_t StEstMaker::Init(){
   mSegments[0]->slay[1]=2;
   mSegments[0]->slay[0]=2;
   
-//   mSegments[1]->chisqcut = 100;
-//   mSegments[1]->minhits=3;
-//   mSegments[1]->rminTPC=500;
-//   mSegments[1]->minTPChits=0;
-//   mSegments[1]->slay[3]=1;
-//   mSegments[1]->slay[2]=1;
-//   mSegments[1]->slay[1]=1;
-//   mSegments[1]->slay[0]=1;
+  mSegments[1]->chisqcut = 100;
+  mSegments[1]->minhits=2;
+  mSegments[1]->rminTPC=500;
+  mSegments[1]->minTPChits=0;
+  mSegments[1]->slay[3]=0;
+  mSegments[1]->slay[2]=1;
+  mSegments[1]->slay[1]=1;
+  mSegments[1]->slay[0]=1;
 
 //   mSegments[2]->chisqcut = 30;
 //   mSegments[2]->minhits=1;
@@ -262,6 +323,15 @@ Int_t StEstMaker::Init(){
   
 
   PrintSettings();
+
+  mCumulNIdealPrim=0;
+  mCumulNIdealSeco=0;
+  mCumulNGoodPrim=0;
+  mCumulNGoodSeco=0;
+  mCumulNBadPrim=0;
+  mCumulNBadSeco=0;
+  mCumulNEvents=0;
+
   gMessMgr->Info("StEstMaker::Init STOP");
   return kStOK;
 
@@ -417,6 +487,16 @@ Int_t StEstMaker::Make() {
   gMessMgr->Info()<<"StEstMaker : Doing the tracking"<<endm;
   Tracker->DoTracking();
 
+  if (mIdealTracking==1) {
+    gMessMgr->Info()<<"StEstMaker : Cumulating the evaluation"<<endm;
+    Tracker->CumulEval(&mCumulNIdealPrim,
+		       &mCumulNIdealSeco,
+		       &mCumulNGoodPrim,
+		       &mCumulNGoodSeco,
+		       &mCumulNBadPrim,
+		       &mCumulNBadSeco,
+		       &mCumulNEvents);
+  }
   gMessMgr->Info()<<"StEstMaker : Saving into tables"<<endm;
   Tracker->EsttoGlobtrk(svttrk,
 			svtgrps,
