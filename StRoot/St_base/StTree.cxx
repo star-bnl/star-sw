@@ -439,7 +439,10 @@ void StBranch::OpenTFile()
   if (fTFile) return;
   TFile *tf= gROOT->GetFile(GetFile());
   fTFile = tf;
-  if (!fTFile) fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
+  if (!fTFile) {
+    fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
+    if (fTFile && fIOMode==2 && strstr(GetName(),"eventBranch")) fTFile->SetFormat(3);
+  }
   if (!fTFile) {
     Error("OpenTFile","File %s NOT OPENED ***\n",GetFile());
     Error("OpenTFile","Branch %s desactivated ***\n",GetName());
