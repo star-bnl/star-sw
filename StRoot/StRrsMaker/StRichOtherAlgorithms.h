@@ -1,5 +1,5 @@
-/*******************************************OtherAlgorithms.h**\
- * $Id: StRichOtherAlgorithms.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
+/*********************************************************************
+ * $Id: StRichOtherAlgorithms.h,v 1.3 2000/02/08 16:29:02 lasiuk Exp $
  *  This file contains two small classes: Randoms encapsulates
  *  random number generation algorithms, such as poisson,
  *  gauss, flat and polia. MyRound rounds doubles to the nearest
@@ -13,14 +13,15 @@
  *  Flat comes from the C++ Standard Library.
  *
  * $Log: StRichOtherAlgorithms.h,v $
- * Revision 1.2  2000/01/25 22:02:21  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:29:02  lasiuk
+ * rm use of UNIX random number generators from FLAT gen
  *
  * Revision 1.4  2000/03/13 18:03:37  lasiuk
  * nearest integer
  *
-\**************************************************************/
-
+ * Revision 1.3  2000/02/08 16:29:02  lasiuk
+ * rm use of UNIX random number generators from FLAT gen
+ *
  * Revision 1.2  2000/01/25 22:02:21  lasiuk
  * Second Revision
  *
@@ -39,11 +40,13 @@
 // SCL
 #include "Randomize.h"
 
-    mGauss = new RandGauss( hjr );
-
+// CernLib
+extern "C" float rngama_( float* );
+public:
   Randoms() { 
     HepJamesRandom hjr;
-
+    mPoisson = new RandPoisson( hjr );
+    mGauss   = new RandGauss( hjr );
     mFlat    = new RandFlat(hjr);
     
     if ( !mPoisson ) cerr << "Error initializing SCL_RandPoisson!!!\n";
@@ -58,18 +61,21 @@
     delete mGauss;
   }
 
-  int Flat(int n) const { return ((int(rand())/RAND_MAX) * n); }
-  double Flat(double n=1) const { return ((double(rand())/RAND_MAX) * n); }
-
-  double Polia(double theta) {
-    float theta_plus_1 = theta + 1;   
-    if (theta>-1) return (::rngama_(&theta_plus_1) / (theta_plus_1));
-    else return 0;
+  int Poisson(int n) const { return mPoisson->shoot(n); }
+  
+  double Gauss(double mean =0, double std_dev =1) const { 
+    return mGauss->shoot(mean,std_dev); 
   }
+
+    int Poisson(int n) const;
+    double Gauss(double mean =0, double std_dev =1) const;
+    int Flat(int n) const { return mFlat->shoot(n); }
+    double Flat(double width=1) const { return mFlat->shoot(width); }
     //double Flat(double n=1) const { return ((double(rand())/RAND_MAX) * n); }
     double Polia(double theta) {
-  RandPoisson * mPoisson;
-  RandGauss * mGauss;
+	float theta_plus_1 = theta + 1;   
+	if (theta>-1) return (::rngama_(&theta_plus_1) / (theta_plus_1));
+	else return 0;
     }
     double Flat(double width=1) const;
 
@@ -77,6 +83,7 @@
     RandGauss*   mGauss;
     RandFlat*    mFlat;
 };
+
 
 struct MyRound {
   int operator()(double d) const {
