@@ -1,10 +1,7 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
-// Revision 1.45  2000/01/12 15:43:49  ward
-// Added helpful error message when sectors are not in order in noiseElim.tpcdaq.
-//
-// Revision 1.44  1999/12/31 03:39:11  ward
-// Fixed a bug in setting SeqModBreak with noise elim on.
+// Revision 1.46  2000/01/14 15:29:42  ward
+// Implementation of ASICS thresholds for Iwona and Dave H.
 //
 // Revision 1.43  1999/12/07 21:31:54  ward
 // Eliminate 2 compile warnings, as requested by Lidia.
@@ -173,8 +170,46 @@ St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
+#ifdef ASIC_THRESHOLDS
+void St_tpcdaq_Maker::LookForAsicFile() {
+  FILE *ff; int lnum=0,cnt=0; char line[85],fo;
+  mNseqLo=-123; mNseqHi=-123; mThreshLo=-123; mThreshHi=-123;
+  ff=fopen("asic.tpcdaq","r"); if(!ff) return;
+  while(fgets(line,80,ff)) {
+    lnum++; fo=0;
+    if(strstr(line,"thresh_lo")) { cnt++; fo=7; mThreshLo=atoi(line+10); }
+    if(strstr(line,"thresh_hi")) { cnt++; fo=7; mThreshHi=atoi(line+10); }
+    if(strstr(line, "n_seq_lo")) { cnt++; fo=7; mNseqLo  =atoi(line+ 9); }
+    if(strstr(line, "n_seq_hi")) { cnt++; fo=7; mNseqHi  =atoi(line+ 9); }
+    if(!fo) {
+      PP"I did not understand line %d of your file asic.tpcdaq.  Here is a sample file:\n",lnum);
+      PP"thresh_lo 10\n");
+      PP"thresh_hi 100\n");
+      PP"n_seq_lo 15\n");
+      PP"n_seq_hi 5\n");
+      assert(0);
+    }
+  } fclose(ff);
+  if(cnt!=4) {
+    PP"Your file asic.tpcdaq is garbled.  Here is a sample file:\n");
+    PP"thresh_lo 10\n");
+    PP"thresh_hi 100\n");
+    PP"n_seq_lo 15\n");
+    PP"n_seq_hi 5\n");
+    assert(0);
+  }
+}
+#endif
 Int_t St_tpcdaq_Maker::Init() {
   St_DataSet *herb; int junk;
+#ifdef NOISE_ELIM
+  // This is for noise elimination, added July 99 for Iwona.
+  SetNoiseEliminationStuff();
+  /*WriteStructToScreenAndExit();*/
+#endif
+#ifdef ASIC_THRESHOLDS
+  LookForAsicFile();
+#endif
   junk=log10to8_table[0]; /* to eliminate the warnings from the compiler. */
   
   m_seq_startTimeBin  = new TH1F("tpcdaq_startBin" , 
@@ -338,17 +373,58 @@ int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   }
   return rv;
 }
-int St_tpcdaq_Maker::getSequences(int row,int pad,int *nseq,StSequence **lst) {
+#ifdef ASIC_THRESHOLDS
+#define MSSPS 600 /* MSSPS = max sub sequences per sequence */
+void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
+  static StSequence *pp=0; /* The new sequences are held here. */
+  static int numberAllocated=0,call=0;
+  unsigned char *pointerToAdc,*beg[MSSPS],*end[MSSPS],*tmp;
+  int npp=0,iss,nss; /* nss = Number of SubSequences */
+  int numberAboveThresh,npix,ipix,iseq,nseqNew=0,length;
+  unsigned short conversion;
+  char inSeq; /* boolean (true/false) value */
+  if(mNseqLo<0) return; /* There is no asic.tpcdaq file. */
+  call++;
+  for(iseq=0;iseq<*nseqOld;iseq++) {
+    npix=(*lst)[iseq].length; pointerToAdc=(*lst)[iseq].firstAdc; nss=0; inSeq=0;
+    for(ipix=0;ipix<npix;ipix++) {
+      conversion=gain*(*pointerToAdc);
+      if(conversion> mThreshLo&&!inSeq) { inSeq=7; assert(nss<MSSPS); beg[nss  ]=pointerToAdc;   }
+      if(conversion<=mThreshLo&& inSeq) { inSeq=0; assert(nss<MSSPS); end[nss++]=pointerToAdc-1; }
+      pointerToAdc++;
+    }
+    if(inSeq) { inSeq=0; assert(nss<MSSPS); end[nss++]=pointerToAdc-1; }
+    for(iss=0;iss<nss;iss++) { /* loop over candidate sequences */
+      length=end[iss]-beg[iss]+1;
+      if(length<=mNseqLo) continue; numberAboveThresh=0;
+      for(tmp=beg[iss];tmp<=end[iss];tmp++) { if(gain*(*tmp)>mThreshHi) numberAboveThresh++; }
+      if(numberAboveThresh<=mNseqHi) continue;
+      if(npp>=numberAllocated) { /* allocate extra memory if necessary */
+        numberAllocated=numberAllocated*1.3+5;
+        pp=(StSequence*)realloc(pp,(size_t)(numberAllocated*sizeof(StSequence))); assert(pp);
+      }
+      pp[npp].length=length;
+      pp[npp].firstAdc=beg[iss];
+      pp[npp].startTimeBin=(*lst)[iseq].startTimeBin+(int)(beg[iss]-(*lst)[iseq].firstAdc);
+      npp++;
+    }
+  }
+  *nseqOld=npp; *lst=pp;
+}
+#endif
+int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst) {
   int rv,nseqPrelim; TPCSequence *lstPrelim;
   if(gDAQ) { // Use DAQ.
     rv=victor->getSequences(gSector,row,pad,nseqPrelim,lstPrelim);
     *nseq=nseqPrelim;
     *lst=(StSequence*)lstPrelim;
-    return rv;
   } else {           // Use TRS.
     assert(sizeof(Sequence)==sizeof(StSequence));
     rv=mZsr->getSequences(row,pad,nseq,(Sequence**)lst);
   }
+#ifdef ASIC_THRESHOLDS
+  AsicThresholds(gain,nseq,lst);
+#endif
   return rv; // < 0 means serious error.
 }
 #ifdef GAIN_CORRECTION
@@ -382,16 +458,17 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
     cc=strtok(NULL," \n"); assert(!cc); /* If this assert fails, there is junk in tpcgains.txt. */
   }
   fclose(ff);
-  PP"Read gain corr. sector %2d, min=%4.2f (row=%02d pad=%02d), max=%4.2f (row=%02d pad=%02d)\n",
+  PP"I have read gain corr. sector %2d, min=%4.2f (row=%02d pad=%02d), max=%4.2f (row=%02d pad=%02d)\n",
     sector,min,minRow,minPad,max,maxRow,maxPad);
 }
 #endif
 #ifdef NOISE_ELIM
-void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
+void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
   int prevsector=-123,zz,sector,row; FILE *ff; char line[200],*cc,*dd,*ee;
   for(sector=0;sector<24;sector++) { noiseElim[sector].npad=0; noiseElim[sector].nbin=0; }
   ff=fopen("noiseElim.tpcdaq","r");
   if(!ff) return;
+  PP"Setting noise elimination (tpcdaq) from file \"noiseElim.tpcdaq\".\n");
   sector=0;
   while(fgets(line,196,ff)) {
     if(line[0]=='*') continue; if(strstr(line,"$")) continue;
@@ -400,7 +477,7 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
       cc=strtok(line," ,\n"); cc=strtok(NULL," \n"); if(cc) sector=atoi(cc); else sector=0;
       if(sector>=1&&sector<=24) {
         if(sector<=prevsector) {
-          PP"You have a format error in noiseElim.tpcdaq.  The sectors do not\n"); 
+          PP"You have a format error in noiseElim.tpcdaq.  The sectors do not\n");
           PP"appear in order.  For example:\n");
           PP"Correct:\n  sector 1 time bins 1-20\n  sector 5 time bins 1-20\n  sector 6 time bins 1-20\n");
           PP"Wrong:\n  sector 1 time bins 1-20\n  sector 6 time bins 1-20\n  sector 5 time bins 1-20\n");
@@ -409,13 +486,9 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
         prevsector=sector;
         cc=strtok(NULL," ,\n");
         while(cc) {
-          PP"bbb sector = %3d (%3d), cc='%s'.\n",sector,sector-1,cc);
           dd=strstr(cc,"-");
-          if(noiseElim[sector-1].nbin>=BINRANGE) {
-            PP"noiseElim[%d].nbin = %d >= %d\n",sector-1,noiseElim[sector-1].nbin,BINRANGE);
-            PP"Error 81z tpcdaq, exiting...\n"); exit(2);
-          }
-          if(!dd) { PP"Error 82n tpcdaq (please check noiseElim.tpcdaq).  Exiting...\n"); exit(2); }
+          if(!dd) { PP"Format error in noiseElim.tpcdaq, St_tpcdaq_Maker is exiting...\n"); exit(2); }
+          if(noiseElim[sector-1].nbin>=BINRANGE) { PP"Error 18o tpcdaq, exiting...\n"); exit(2); }
           noiseElim[sector-1].low[noiseElim[sector-1].nbin]=atoi(cc);
           noiseElim[sector-1].up[noiseElim[sector-1].nbin]=atoi(dd+1);
           (noiseElim[sector-1].nbin)++;
@@ -440,7 +513,7 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
   }
   fclose(ff);
 }
-void St_tpcdaq_Maker::WriteStructToScreenAndExit(tpcdaq_noiseElim *noiseElim) {
+void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
   int jj,ii;
   for(ii=0;ii<24;ii++) {
     PP"---------------------------------------------- sector %2d\n",ii+1);
@@ -456,7 +529,7 @@ void St_tpcdaq_Maker::WriteStructToScreenAndExit(tpcdaq_noiseElim *noiseElim) {
 #endif /* NOISE_ELIM */
 int St_tpcdaq_Maker::Output() {
 #ifdef NOISE_ELIM
-  tpcdaq_noiseElim noiseElim[24]; char skip; int hj,lgg;
+  char skip; int hj,lgg;
 #endif
   int pixCnt=0;
   St_raw_row *raw_row_in,*raw_row_out,*raw_row_gen;
@@ -485,11 +558,6 @@ int St_tpcdaq_Maker::Output() {
     raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
   }
 
-  // This is for noise elimination, added July 99 for Iwona.
-#ifdef NOISE_ELIM
-  SetNoiseEliminationStuff(noiseElim);
-  /*WriteStructToScreenAndExit(noiseElim);*/
-#endif
 
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
@@ -530,7 +598,7 @@ int St_tpcdaq_Maker::Output() {
         if(skip) continue;
 #endif
         nPixelThisPad=0;
-        seqStatus=getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
+        seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences);
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
         if(nseq) {
           numPadsWithSignal++; 
@@ -628,7 +696,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Roy Rogers.\n"); 
+  printf("I am Santa Clause (Jan 14 2000).  St_tpcdaq_Maker::Make().\n"); 
   errorCode=GetEventAndDecoder();
   if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);

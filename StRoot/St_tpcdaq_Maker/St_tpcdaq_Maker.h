@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.16 1999/11/23 22:26:45 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.17 2000/01/14 15:29:42 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.17  2000/01/14 15:29:42  ward
+// Implementation of ASICS thresholds for Iwona and Dave H.
+//
 // Revision 1.16  1999/11/23 22:26:45  ward
 // forward declaration for daq ZeroSuppressedReader
 //
@@ -76,6 +79,7 @@ class TH1F;
 #define GAIN_CORRECTION
 #define MAXROWPADPERSECTOR 400
 #define BINRANGE 3
+#define ASIC_THRESHOLDS
 class ZeroSuppressedReader;
 class StTrsDetectorReader;
 class StTrsZeroSuppressedReader;
@@ -93,6 +97,9 @@ class St_tpcdaq_Maker : public StMaker {
    void SetGainCorrectionStuff(int);
 #ifdef GAIN_CORRECTION
    float fGain[45][182];
+#endif
+#ifdef NOISE_ELIM
+  tpcdaq_noiseElim noiseElim[24]; //!
 #endif
 
    StTrsDetectorReader* mTdr; //!
@@ -139,9 +146,14 @@ class St_tpcdaq_Maker : public StMaker {
    int Output();
    int getSector(Int_t isect);
    int getPadList(int whichPadRow,unsigned char **padlist);
-   int getSequences(int whichPadRow,int pad,int *nseq,StSequence **seqList);
-   void SetNoiseEliminationStuff(tpcdaq_noiseElim*);
-   void WriteStructToScreenAndExit(tpcdaq_noiseElim*);
+#ifdef ASIC_THRESHOLDS
+   int mNseqLo,mNseqHi,mThreshLo,mThreshHi; // ASICS parameters
+   void AsicThresholds(float gain,int *nseq,StSequence **lst);
+   void LookForAsicFile();
+#endif
+   int getSequences(float gain,int whichPadRow,int pad,int *nseq,StSequence **seqList);
+   void SetNoiseEliminationStuff();
+   void WriteStructToScreenAndExit();
    void SetConfig(Char_t *conf) {gConfig = conf;  
      printf("St_tpcdaq_Maker::SetConfig, getting data from %s.\n",gConfig);
    }
@@ -152,7 +164,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.16 1999/11/23 22:26:45 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.17 2000/01/14 15:29:42 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
