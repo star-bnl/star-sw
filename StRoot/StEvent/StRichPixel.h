@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.h,v 2.3 2000/01/13 21:06:22 lasiuk Exp $
+ * $Id: StRichPixel.h,v 2.4 2001/02/07 16:04:05 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.h,v $
+ * Revision 2.4  2001/02/07 16:04:05  lasiuk
+ * check the 11th bit for overflow.
+ * Overflow is 1024
+ *
  * Revision 2.3  2000/01/13 21:06:22  lasiuk
  * add rich pixel info/containers
  *
@@ -72,7 +76,14 @@ StRichPixel::row() const
 inline UShort_t
 StRichPixel::adc()  const
 {
-    return ( (mPackedData>>16) & 0x3ff); // 10bits
+    //
+    // 11 bits are stored.  The 11th bit is the overflow
+    // if the 11th bit is set, return saturated
+    // otherwise, return the 10 bit value
+    //return ( (mPackedData>>16) & 0x3ff); // 10bits
+    
+    return ( ( (mPackedData>>26) & 0x1) ? 1024 : ( (mPackedData>>16) & 0x3ff) );
+
 }
 
 #endif
