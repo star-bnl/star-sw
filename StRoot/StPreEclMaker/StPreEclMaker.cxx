@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.14 2001/05/02 15:28:19 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.15 2001/07/13 23:41:14 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.15  2001/07/13 23:41:14  suaide
+// small modification
+//
 // Revision 1.14  2001/05/02 15:28:19  suaide
 // the default option is not to clear the old emc info. use it only
 // if you want to re-run cluster finder
@@ -111,7 +114,7 @@ int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
 
 emcClusterParam_st *parTable=0;
 Bool_t        kCheckClustersOkConf[8];
-StEmcCollection* emc;
+StEmcCollection* ecmpreecl;
 
 //_____________________________________________________________________________
 StPreEclMaker::StPreEclMaker(const char *name, const char *title):StMaker(name,title){
@@ -211,36 +214,36 @@ Int_t StPreEclMaker::Make()
   }
   else{
     cout << "***** StEvent pointer Ok\n";
-    emc = currevent->emcCollection();
+    ecmpreecl = currevent->emcCollection();
 
-    if(emc == 0){
+    if(ecmpreecl == 0){
     // Try to get from simulator(s) ==============================================
       simnew = (StEmcSimulatorMaker*)GetMaker("emcRaw");
       if(simnew) {
-        emc = (StEmcCollection*)simnew->getEmcCollection();
+        ecmpreecl = (StEmcCollection*)simnew->getEmcCollection();
         cout <<"***** New simulator in chain";
       }
       else {
         simold = (St_ems_Maker*)GetMaker("emc_raw");;
         if(simold){
-          emc = (StEmcCollection*)simold->getEmcCollection();
+          ecmpreecl = (StEmcCollection*)simold->getEmcCollection();
           cout <<"***** Old simulator in chain\n";
         }
       }
-      if(emc){ // Emc from simulator(s)  
+      if(ecmpreecl){ // Emc from simulator(s)  
         cout<<" => Get EmcCollection from simulator\n";
-	currevent->setEmcCollection(emc);
+	currevent->setEmcCollection(ecmpreecl);
 	if(simnew) simnew->clearStEventStaf();  // We move StEmcCollection from new simulator to StEvent 
       }
       else cout<<" => No EmcCollection from simulator\n";
     }
     else cout<<"***** Get EmcCollection from StEvent\n";
 
-    if(emc == 0) {
+    if(ecmpreecl == 0) {
     // Try to get from calibration (will be define later)
     }
 
-    if(emc==0) return kStWarn;
+    if(ecmpreecl==0) return kStWarn;
 
   }
   
@@ -255,7 +258,7 @@ Int_t StPreEclMaker::Make()
   {  
     cout <<"***** Doing clustering on detector "<<detname[i].Data()<<"\n";
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
-    StEmcDetector* mDet=emc->detector(id); // getting detector pointer
+    StEmcDetector* mDet=ecmpreecl->detector(id); // getting detector pointer
     StEmcPreClusterCollection* cc=new StEmcPreClusterCollection(detname[i].Data(),mDet);
     if(Debug()>=2) AddData(cc);  // 17-apr-2001 by PAI
     if(cc->IsOk())
@@ -273,7 +276,7 @@ Int_t StPreEclMaker::Make()
     if(Debug()<2) delete cc;  
   }
   
-  AddData(new St_ObjectSet("PreEclEmcCollection",emc));  // for what ??
+  AddData(new St_ObjectSet("PreEclEmcCollection",ecmpreecl));  // for what ??
   cout <<"***** New EmcCollection on local .data\n";
     
   return kStOK;
@@ -282,7 +285,7 @@ Int_t StPreEclMaker::Make()
 Int_t StPreEclMaker::ClearEmc()
 {
   cout <<"Deleting old emc info ...\n";
-  StSPtrVecEmcPoint& pvec = emc->barrelPoints();
+  StSPtrVecEmcPoint& pvec = ecmpreecl->barrelPoints();
   if(pvec.size()>0) 
   {
     cout <<"Deleting old EMC points...\n"; 
@@ -292,7 +295,7 @@ Int_t StPreEclMaker::ClearEmc()
   for(Int_t i=0; i<4; i++)
   {
     StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
-    StEmcDetector* detector=emc->detector(id);
+    StEmcDetector* detector=ecmpreecl->detector(id);
     if(detector)
     {
       StSPtrVecEmcCluster& cluster=detector->cluster()->clusters();
@@ -356,7 +359,7 @@ Int_t StPreEclMaker::fillStEvent(Int_t idet,StEmcPreClusterCollection* cluster)
     if(cluster> 0)
     {
       StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
-      StEmcDetector* detector = emc->detector(id);           
+      StEmcDetector* detector = ecmpreecl->detector(id);           
 
       StEmcClusterCollection* cluscoll = new StEmcClusterCollection();
       cluscoll->setDetector(id);
@@ -446,7 +449,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.14 2001/05/02 15:28:19 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.15 2001/07/13 23:41:14 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
