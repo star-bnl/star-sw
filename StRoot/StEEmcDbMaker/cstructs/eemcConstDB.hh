@@ -48,7 +48,7 @@ channels from a particular analysis, but let other
 analysis make a different choice.
 */
 
-// status bits (short int)
+// status bits (short int) -- please keep EEezAnalysis::addMask() comments up to date. 
 #define EEMCSTAT_ONLPED   0x0001 // only pedestal
 #define EEMCSTAT_STKBT    0x0002 // sticky lower bits
 #define EEMCSTAT_HOTHT    0x0004 // hot for HT trigger
