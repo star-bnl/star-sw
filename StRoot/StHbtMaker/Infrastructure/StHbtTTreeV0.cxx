@@ -51,7 +51,13 @@ StHbtTTreeV0::StHbtTTreeV0(const StHbtEvent* event, const StHbtV0* v){ // copy c
   mClNeg   = v->mClNeg;
 
   mDedxPos = v->mDedxPos;
+  mErrDedxPos = v->errdedxPos(); //Gael 04Fev2002
+  mLenDedxPos = v->lendedxPos(); //Gael 04Fev2002
+
   mDedxNeg = v->mDedxNeg;
+  mErrDedxNeg = v->errdedxNeg(); //Gael 04Fev2002
+  mLenDedxNeg = v->lendedxNeg(); //Gael 04Fev2002
+
   mNumDedxPos = v->mNumDedxPos;
   mNumDedxNeg = v->mNumDedxNeg;
 }
@@ -61,6 +67,9 @@ ClassImp(StHbtTTreeV0)
 /***********************************************************************
  *
  * $Log: StHbtTTreeV0.cxx,v $
+ * Revision 1.3  2002/02/09 19:25:36  laue
+ * updates (dedx length)
+ *
  * Revision 1.2  2001/09/05 20:41:42  laue
  * Updates of the hbtMuDstTree microDSTs
  *
