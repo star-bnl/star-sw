@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.10  1998/08/22 23:35:10  fisyak
+#  Add St_base.so dependence
+#
 #  Revision 1.9  1998/08/21 15:44:48  fisyak
 #  Add reco_ds
 #
@@ -109,7 +112,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/21 15:44:48 $ 
+#           Last modification $Date: 1998/08/22 23:35:10 $ 
 #  default setings
 # Current Working Directory
 #
@@ -223,7 +226,22 @@ endif
 .PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) St_Tables StChain test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
 all:  $(BASE) $(XDF2ROOT) $(addsuffix _all, $(SUBDIRS)) $(TARGETS)
-%_all:; $(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
+ifndef NOROOT
+St_base:   $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+xdf2root:  $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
+St_Tables: St_base $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so St_base
+StChain:   $(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
+$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so:   $(wildcard $(ROOT_DIR)/StRoot/base/*.*) 
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base    SO_LIB=$(ALL_TAGS)
+$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so:   $(wildcard $(ROOT_DIR)/StRoot/xdf2root/*.*) $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ALL_TAGS)
+$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so: $(wildcard $(ROOT_DIR)/.share/tables/St*.*) $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS)
+$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so: $(wildcard $(ROOT_DIR)/StRoot/StChain/St*.*) $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ALL_TAGS)
+endif
+%_all:  $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+	$(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
 test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
 	$(MAKE) -f $(MakePam) -C $(STEM) test $(MAKFLAGS) 
@@ -255,20 +273,6 @@ clean_share:;$(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_share
 clean_obj:;  $(MAKE) -f $(Makepam) $(MAKFLAGS)  clean_obj
 clean_test:; $(MAKE) -f $(Makepam) $(MAKFLAGS)  test
 endif
-endif
-ifndef NOROOT
-St_base:   $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
-xdf2root:  $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so
-St_Tables: $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so
-StChain:   $(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
-$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so:   $(wildcard $(ROOT_DIR)/StRoot/xdf2root/*.*) 
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ALL_TAGS)
-$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so:   $(wildcard $(ROOT_DIR)/StRoot/base/*.*) 
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base    SO_LIB=$(ALL_TAGS)
-$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so: $(wildcard $(ROOT_DIR)/.share/tables/St*.*)
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS)
-$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so: $(wildcard $(ROOT_DIR)/StRoot/StChain/St*.*)
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ALL_TAGS)
 endif
 test: test_level
 test_level:
