@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.65 2000/02/10 00:47:08 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.66 2000/02/11 00:10:02 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.66  2000/02/11 00:10:02  fisyak
+// Add dependence of tpc on globT
+//
 // Revision 1.65  2000/02/10 00:47:08  fisyak
 // Add dependence of dst_Maker versus SCL
 //
@@ -344,7 +347,7 @@ BfcItem BFC[] = {
   {"calib"       ,""  ,"","xdf2root"             ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"tpc"         ,"tpc","","tpc_T,tls,db,tpcDB,tcl,tpt,PreVtx"         ,"StChainMaker","StChain","",kFALSE},
+  {"tpc"         ,"tpc","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc","dbutil"                               ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"Trs"         ,"","tpc","scl"                      ,"StTrsMaker","St_tpcdaq_Maker,StTrsMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc","tpc_T"                   ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
