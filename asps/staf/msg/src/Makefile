@@ -8,6 +8,7 @@ CC          = cc
 CCFLAGS     = -c -O -ansi -fullwarn -prototypes
 CCFLAGS4    = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG = -c -g -ansi -fullwarn -prototypes
+LD         = f77
 MSGLIB     = ../lib
 STRLIB     = ../../str/lib
 MSGLIBS    = ../lib/$(STAR_ARCH)
@@ -31,22 +32,22 @@ test : msgtest msgctest
 tests : msgtests msgctests
 
 msgtest : msgtest.o $(MSGLIB)/libmsg.a $(STRLIB)/libstr.a
-	$(FF) msgtest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr -o msgtest
+	$(LD) msgtest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgtest
 	msgtest
 
 msgtests : msgtest.o $(MSGLIBS)/libmsg.a $(STRLIBS)/libstr.a
-	$(FF) msgtest.o -L$(MSGLIBS) -L$(STRLIBS) -lmsg -lstr -o msgtest
+	$(LD) msgtest.o -L$(MSGLIBS) -L$(STRLIBS) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgtest
 	msgtest
 
 msgtest.o : msgtest.f
 	$(FF) $(FFLAGS) msgtest.f
 
 msgctest : msgctest.o $(MSGLIB)/libmsg.a $(STRLIB)/libstr.a
-	$(FF) msgctest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgctest
+	$(LD) msgctest.o -L$(MSGLIB) -L$(STRLIB) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgctest
 	msgctest
 
 msgctests : msgctest.o $(MSGLIBS)/libmsg.a $(STRLIBS)/libstr.a
-	$(FF) msgctest.o -L$(MSGLIBS) -L$(STRLIBS) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgctest
+	$(LD) msgctest.o -L$(MSGLIBS) -L$(STRLIBS) -lmsg -lstr $(FFCC_LINK_FLAGS) -o msgctest
 	msgctest
 
 msgctest.o : msgctest.c
