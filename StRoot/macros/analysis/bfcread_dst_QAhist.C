@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.15 1999/12/01 21:30:11 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.16 1999/12/03 20:20:23 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.16  1999/12/03 20:20:23  kathy
+// correct the event number counter in bfcread_dst*.C macros
+//
 // Revision 1.15  1999/12/01 21:30:11  kathy
 // added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
 //
@@ -146,13 +149,12 @@ void bfcread_dst_QAhist(
   cout << " bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
 // loop over events:
-  int iev=0,iret=0;
-  //for (iev=0;iev<nevents; iev++) {     // for loop code
+  int iev=0,iret=0, evnum=0;
  EventLoop: if (iev<nevents && !iret) {  // goto loop code
-   cout <<  " bfcread_dst_QAhist.C, processing event !!! " << iev << endl ;
+   evnum=iev+1;
+   cout <<  " bfcread_dst_QAhist.C, processing event !!! " << evnum << endl ;
    chain->Clear();
    iret = chain->Make();
-   //if (iret) break;                    // for loop code
    iev++;                                // goto loop code
    goto EventLoop;                       // goto loop code
  }
