@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.7 2000/12/29 14:36:29 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.8 2000/12/30 21:06:50 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -164,12 +164,12 @@ Int_t StdEdxMaker::Init(){
     cout << "TpcDriftDistCorr is missing <=========== switch off dirft dependent calibration" << endl;
     //    assert(m_drift); 
   }
+  m_tpcFeeGain = (St_tpcFeeGainCor *) tpc_calib->Find("tpcFeeGain"); assert(m_tpcFeeGain); 
   if (m_Mode > 0) {// calibration mode
     StMaker *tpcdaq = GetMaker("tpc_raw");
     if (!tpcdaq) {
       m_tpcGain = (St_tpcGain *) tpc_calib->Find("tpcGain"); assert(m_tpcGain); 
     }
-    m_tpcFeeGain = (St_tpcFeeGainCor *) tpc_calib->Find("tpcFeeGain"); assert(m_tpcFeeGain); 
     TFile *f = (TFile *) ((StBFChain *)GetChain())->GetTFile();
     if (f) {
       f->cd();
