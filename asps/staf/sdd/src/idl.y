@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.27 2001/05/28 03:15:35 fine Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.28 2001/07/16 23:58:34 fine Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -803,17 +803,6 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
     FF"  );\n");
-
-    FF"  Int_t ExecuteModule(\n");
-/*    for(i=1;i<gNIncFile;i++) {
-       FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       }*/
-      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"     St_%s *o%d",gDataType[ii][jj],jj);
-       if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
-    FF"  );\n");
     FF"  Int_t operator()(\n");
 /*    for(i=1;i<gNIncFile;i++) {
        FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
@@ -884,28 +873,6 @@ if (gNArgName[ii] > 0 ) {
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
     FF"   ){}\n");
-    FF"//_______________________________________________________________\n");
-    FF"Int_t St_%s::ExecuteModule(\n",sifn);
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"  St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-    ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"  St_%s *o%d",Nq(gDataType[ii][jj]),jj);
-       if(jj<gNArgName[ii]-1) FF","); FF"\n");
-       }
-    FF"  ) { \n");
-    FF"return St_Module::ExecuteModule(\n");
-/*yf  for(i=1;i<gNIncFile;i++) {
-      FF"   o%d->GetHeader(),o%d->GetTable()",i,i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-    ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"   o%d",jj);
-       if(jj<gNArgName[ii]-1) FF","); FF"\n");
-       }
-    FF" );\n}\n");
-
   FF"//_______________________________________________________________\n");
   FF"Int_t St_%s::operator()(\n",sifn);
 /*yf  for(i=1;i<gNIncFile;i++) {
@@ -917,7 +884,7 @@ if (gNArgName[ii] > 0 ) {
       if(jj<gNArgName[ii]-1) FF","); FF"\n");
 }
   FF"  )\n");
-  FF"{return ExecuteModule(");
+  FF"{return InvokeModule(");
 /*yf  for(i=1;i<gNIncFile;i++) {
      FF"o%d",i);
      if(i<gNIncFile-1) FF",");
