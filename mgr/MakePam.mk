@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.55 1998/09/26 02:26:06 fisyak Exp $
+# $Id: MakePam.mk,v 1.56 1998/10/06 19:52:30 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.56  1998/10/06 19:52:30  fisyak
+# Add g2t script
+#
 # Revision 1.55  1998/09/26 02:26:06  fisyak
 # Fix NOROOT option
 #
@@ -435,9 +438,6 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
         > $(GEN_DIR)/$(STEM).didl; 
 	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl; 
 	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-ifndef NOROOT
-	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
-endif
 	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
 endif #IDM
 $(DEP_DIR)/%.d:%.cc 
