@@ -19,9 +19,9 @@ static StMagF *gMagfield = 0;
 void type_of_call agufld_(Float_t *x, Float_t *b)
 {
   if (!gMagfield) 
-    gMagfield = new StMagFCM("Star Full Field",
-			     "$STAR/StDb/params/StMagF/bfp112.map",
-			     kConMesh,1.0);
+    new StMagFCM("Star Full Field",
+		 "$STAR/StDb/params/StMagF/bfp112.map",
+		 kConMesh,1.0);
   gMagfield->Field(x,b);
 }
 
@@ -68,7 +68,7 @@ StMagFC::StMagFC(const char *name, const char *title,const Float_t factor)
   : StMagF(name,title,kConst,factor)
 {
   printf("Constant Field %s created: map= %d, factor= %f\n",fName.Data(),fMap,fFactor);
-
+  gMagfield = this;
 }
 
 //________________________________________
@@ -76,8 +76,8 @@ void StMagFC::Field(Float_t *x, Float_t *b)
 {
   b[0]=b[1]=b[2]=0;
   if(fMap==kConst) {
-    if(TMath::Abs(x[2])<280 && x[0]*x[0]+x[1]*x[1] < 240*240) 
-      b[2]=5.0;
+    if(fFactor != 0 && TMath::Abs(x[2])<280 && x[0]*x[0]+x[1]*x[1] < 240*240) 
+      b[2]=5.0*fFactor;
   } else {
     printf("Invalid field map for constant field %d\n",fMap);
     exit(1);
@@ -94,6 +94,7 @@ StMagFCM::StMagFCM(const char *name, const char *title, const EField map,
   printf("Constant Mesh Field %s created: map= %d, factor= %f, file= %s\n",
 	 fName.Data(),fMap,fFactor,fTitle.Data());
   ReadField();
+  gMagfield = this;
 }
 
 //________________________________________
