@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.5 2001/05/30 17:45:55 perev Exp $
+ * $Id: StXiVertex.cxx,v 2.6 2001/06/05 21:58:26 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.6  2001/06/05 21:58:26  perev
+ * HPcorr
+ *
  * Revision 2.5  2001/05/30 17:45:55  perev
  * StEvent branching
  *
@@ -38,7 +41,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.5 2001/05/30 17:45:55 perev Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.6 2001/06/05 21:58:26 perev Exp $";
 
 ClassImp(StXiVertex)
 
@@ -141,7 +144,7 @@ float
 StXiVertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 
 StV0Vertex*
-StXiVertex::v0Vertex() const { return mV0Vertex; }
+StXiVertex::v0Vertex() const { return (StV0Vertex*&)mV0Vertex; }
 
 StTrack*
 StXiVertex::bachelor() { return mDaughter; }
