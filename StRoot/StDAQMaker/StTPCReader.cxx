@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.3 2002/10/13 20:43:36 ward Exp $
+ * $Id: StTPCReader.cxx,v 1.4 2003/03/24 18:12:10 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.4  2003/03/24 18:12:10  ward
+ * Full support for EEMC from Herbert Ward.
+ *
  * Revision 1.3  2002/10/13 20:43:36  ward
  * Support for decoding DAQ100 data and writing it into a table.
  *
@@ -95,6 +98,7 @@ int StTPCReader::setSector(int sector)
    delete fTPCImpReader;
    ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
    fTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getTPCVersion());
+   assert(fTPCImpReader);
    fSector = -1999;
    if(!fTPCImpReader) return 1;
    ptrTPCP=fTPCImpReader->motherPointerBank; // Herb Oct 2002 for DAQ100.

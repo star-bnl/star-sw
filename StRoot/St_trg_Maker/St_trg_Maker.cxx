@@ -128,6 +128,16 @@ Int_t St_trg_Maker::Make(){
   m_DataSet->Add(dst3);
   m_DataSet->Add(dst4);
 
+  /////////////////// EXAMPLE:  HOW TO GET THE EEMC DATA /////////////////////////
+  // St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
+  // StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
+  // StEEMCReader *steemcreader  = fromVictor->getEEMCReader();   assert(steemcreader);
+  // for(int crate=3;crate<=5;crate++) { for(int chan=0;chan<128;chan++) {
+  //    printf("EEMC crate=%3d chan=%3d ADC=%5d\n",crate,chan,steemcreader->getTowerAdc(crate,chan));
+  // } }
+  /////////////////// END OF EXAMPLE:  HOW TO GET THE EEMC DATA /////////////////////////
+  
+
   St_DataSet *DAQdset = GetDataSet("StDAQReader");
   if(DAQdset) {
     switch(YearOfData(DAQdset)) {
@@ -979,8 +989,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.42 2003/01/21 04:41:29 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.43 2003/03/24 18:12:16 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.43  2003/03/24 18:12:16  ward
+// Full support for EEMC from Herbert Ward.
+//
 // Revision 1.42  2003/01/21 04:41:29  jeromel
 // float to int fix
 //
