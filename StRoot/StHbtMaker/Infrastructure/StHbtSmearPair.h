@@ -1,5 +1,5 @@
 /***************************************
- * $Id: StHbtSmearPair.h,v 1.2 2003/01/31 19:00:38 magestro Exp $
+ * $Id: StHbtSmearPair.h,v 1.3 2003/02/05 21:16:10 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State lisa@mps.ohio-state.edu
  ****************************************
@@ -13,6 +13,9 @@
  ******************************************
  *
  * $Log: StHbtSmearPair.h,v $
+ * Revision 1.3  2003/02/05 21:16:10  magestro
+ * Reverted back to non-virtual destructor because library wouldn't load (not understood yet)
+ *
  * Revision 1.2  2003/01/31 19:00:38  magestro
  * Destructor made virtual, due to virtual destructor of a data member
  *
@@ -32,7 +35,7 @@ class StHbtSmearPair{
 
   StHbtSmearPair();
   StHbtSmearPair(const StHbtPair* unSmearedPair);
-  virtual ~StHbtSmearPair();
+  ~StHbtSmearPair();
 
   void SetUnsmearedPair(const StHbtPair* unSmearedPair);  // essentially same as c'tor
 
