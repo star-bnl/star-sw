@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.6 1999/08/08 18:57:41 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.7 1999/09/21 12:26:39 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
+# Revision 1.7  1999/09/21 12:26:39  wenaus
+# Add calib/param databases to backup list
+#
 # Revision 1.6  1999/08/08 18:57:41  wenaus
 # Show all HPSS files for a run
 #
@@ -74,6 +77,11 @@ if ( $showLog ) {
     &displayLog();
 } elsif ( $q->param('events') ne '') {
     &printMainHeader("Events for run ".$q->param('events'));
+    print <<END;
+The pad count and sector list may appear only for the first few events, to
+save time in the scanner that generates these event tags.
+END
+<p>
     &displayEvents($q->param('events'));
 } else {
     &printMainHeader("Online Run Log and Comment Log");
@@ -85,7 +93,9 @@ exit;
 
 ######################################################################
 sub displayLog {
-    @daqfiles = </disk1/star/daq/*.daq>;
+    $hpssVolume = 0;
+    @daqfiles = </disk1/star/daq/*.daq /star/datapool/1/daq/*.daq>;
+    @dstfiles = </disk1/star/dst/*.dst.xdf /star/datapool/1/dst/*.dst.xdf>;
     # connect to the DB
     &StDbConnect();
 
@@ -135,15 +145,17 @@ Commissioning forum</a> -
 <a href="/STARAFS/comp/prod/">Production</a>
 </font></center>
 <p>
-Links at right (you need a wide window) give access to event summaries and allow editing or deleting of run log entries. 
-Updated every three hours. Problems and suggestions to wenaus\@bnl.gov
+Links at right (you need a wide window) give access to event summaries
+(if existing; buffer box <-> DB link still to be established)
+and allow editing or deleting of run log entries. 
+Problems and suggestions to wenaus\@bnl.gov
 <p>
 <table border=0 cellpadding=0 cellspacing=0 width="100%">
 <tr><td align=left>
 <font size="-1">$fullLogUrl - $runLogUrl - $logLogUrl <!-- - $hpssLogUrl --></font>
 </td><td align=right>
 <font size="-1">
-Last update started at $timestamp
+<!-- Last update started at $timestamp -->
 </font>
 </td></tr></table>
 <hr>
@@ -211,7 +223,7 @@ END
                                    $val{'name'},
                                    substr($val{'user'},0,15),
                                    substr($val{'starttime'},2,14),
-                                   $val{'nevents'},
+                                   $val{'events'},
                                    $val{'trig'},
                                    $val{'zerosup'},
                                    $val{'pedmode'},
@@ -291,8 +303,30 @@ END
                             my ($fmode, $uid, $gid, $filesize, 
                                 $readTime, $writeTime, $cTime) =
                                     (stat($daqf))[2,4,5,7,8,9,10];
-                            printf("<b>Disk: %-35s %6dMB</b>\n",$daqf,$filesize/1000000);
-                            $gotTheFile = 1;
+                            $daqf =~ m/([a-z0-9_.]+)$/;
+                            $runname = $1;
+
+                            $sql="select name,size,events,hpss from $RunFileT where runname='$runname'";
+                            $cursor2 =$dbh->prepare($sql)
+                                || die "Cannot prepare statement: $DBI::errstr\n";
+                            $cursor2->execute;
+                            
+                            my $nDbfiles = 0;
+                            $nev = 0;
+                            while(@fields2 = $cursor2->fetchrow) {
+                                my $cols2=$cursor2->{NUM_OF_FIELDS};
+                                for($i=0;$i<$cols2;$i++) {
+                                    my $fvalue=$fields2[$i];
+                                    my $fname=$cursor2->{NAME}->[$i];
+                                    if ( lc($fname) eq 'events' ) {if ($fvalue > $nev) {$nev = $fvalue} }
+                                }
+                            }
+                            if ( $nev > 0 ) {
+                                $nevstr = sprintf("%6d events",$nev);
+                            } else {
+                                $nevstr = '';
+                            }
+                            printf("<b>Disk: %-35s %6dMB $nevstr</b>\n",$daqf,$filesize/1000000);
                         }
                     }
                     if($hpssCheck) {
@@ -315,6 +349,7 @@ END
                                 $hpssFilename =~ s/\/\//\//g;
                                 printf("<b>HPSS: %-35s %6dMB</b>\n",$hpssFilename,
                                        $filesize/1000000);
+                                $hpssVolume += $filesize;
                             }
                         }
                     }       
@@ -337,10 +372,29 @@ END
                 }
                 print "</blockquote></blockquote>";
             }
+            if ( @dstfiles>0 ) {
+                my $gotHpssFile = 0;
+                my $hpssFilename = '';
+                print "<blockquote><blockquote>";
+                my $name = $val{'name'};
+                if ( $name =~ m/[0-9]+/ ) {
+                    foreach $dstf ( @dstfiles ) {
+                        if ( ( $dstf =~ m/\.$name(\.[0-9]+)*\.dst\.xdf$/ )
+                            || ( $dstf =~ m/st_([0-9a-z]+)_0*$name(.*)\.dst\.xdf$/ ) ) {
+                            my ($fmode, $uid, $gid, $filesize, 
+                                $readTime, $writeTime, $cTime) =
+                                    (stat($dstf))[2,4,5,7,8,9,10];
+                            printf("<b>Disk DST: %-35s %6dMB</b>\n",$dstf,$filesize/1000000);
+                        }
+                    }
+                }
+                print "</blockquote></blockquote>";
+            }
         }
     }
     print "</pre><p>\n";
-
+    printf("<b>Total raw data volume in HPSS: %d MB\n<p>\n",
+           $hpssVolume/1000000);
     # finished
     &StDbDisconnect();
 }
@@ -404,7 +458,7 @@ print <<END;
 </td>
 </tr><tr>
 <td><b><font color="darkgreen">Number of events:</font></b></td><td>
-<input type="text" name="nevents" size=7>
+<input type="text" name="events" size=7>
 </td></tr><tr>
 <td><b><font color="darkgreen">DAQ configuration:</font></b></td><td>
 <input type="checkbox" name="zerosup" value="Y"> Zero suppressed
