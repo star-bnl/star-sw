@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.14 2001/02/07 19:15:05 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.15 2001/03/22 20:47:10 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.15  2001/03/22 20:47:10  caines
+ * Comment out some of the QA histograms
+ *
  * Revision 1.14  2001/02/07 19:15:05  caines
  * Change char[3] to char[4] for full SVT running
  *
@@ -314,7 +317,7 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
 {
    // Create Histograms
 
-   mInvProdSeqAdj= new TH1D*[tNuOfHyb];
+  
    mInvProdSeqAdj= new TH1D*[tNuOfHyb];
    mRawAdc = new TH1F*[tNuOfHyb];
    mAdcAfter = new TH1F*[tNuOfHyb];
@@ -343,9 +346,9 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
             RawTitle_cut = strcat(RawTitle,Index);
 	    AdcAf_cut = strcat(AdcAfterTitle,Index);	    
 
-	    mInvProdSeqAdj[index] = new TH1D(prodTitle_cut,"freqOfInvProd vs log10 of InvProd After Seq Adusting",100,0.,30.);
-	    mRawAdc[index] = new TH1F(RawTitle_cut,"freq Of Adc Values Before Seq Adjusting",150,-50.,100.);
-	    mAdcAfter[index] = new TH1F(AdcAf_cut,"freq Of Adc Values After Seq Adjusting",150,-50.,100.);
+	    //mInvProdSeqAdj[index] = new TH1D(prodTitle_cut,"freqOfInvProd vs log10 of InvProd After Seq Adusting",100,0.,30.);
+	    //mRawAdc[index] = new TH1F(RawTitle_cut,"freq Of Adc Values Before Seq Adjusting",150,-50.,100.);
+	    //mAdcAfter[index] = new TH1F(AdcAf_cut,"freq Of Adc Values After Seq Adjusting",150,-50.,100.);
 	}
       }
     }
@@ -627,7 +630,7 @@ void StSvtSeqAdjMaker::MakeHistogramsProb(int index,int Anode){
       for(int j = 0 ; j < len; j++)
 	{
 	  tempBuffer = mInvProd->GetBuffer(stTimeBin + j);
-	  mInvProdSeqAdj[index]->Fill(tempBuffer);
+	  //mInvProdSeqAdj[index]->Fill(tempBuffer);
 	}
     }
   
@@ -652,8 +655,8 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
       len = svtSequence[mSeq].length;
       for(int j = 0 ; j < len; j++)
 	{
-	  if( Count ==1) mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
-	  else  mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
+	  // if( Count ==1) mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
+	  //else  mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
 	}
     }
   

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.10 2001/02/19 23:55:34 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.11 2001/03/22 20:46:54 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.11  2001/03/22 20:46:54  caines
+ * Comment out some of the QA histograms
+ *
  * Revision 1.10  2001/02/19 23:55:34  caines
  * Even get id correct (start from 1 not 0)
  *
@@ -179,12 +182,18 @@ Int_t StSvtHitMaker::Init()
 
   if (mSvtGeantHitColl){
     
-    mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-2.0,2.0);
-    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-2.0,2.0);			      
+    mTimeHitResolution = new TH1F("hitTRes","Delta X for Hits",1000,-2.0,2.0);
+    mAnodeHitResolution = new TH1F("hitARes","Delta Z for Hits",1000,-2.0,2.0);
+    mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-.1,.1);
+    mYHitResolution = new TH1F("hitYRes","Delta Y for Hits",1000,-.1,.1);
+    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-.1,.1);		      
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",1000,-2.0,2.0,1000,-2.0,2.0);
     
-    mXHitResolution->SetXTitle("delta X (timebucket)");
-    mZHitResolution->SetYTitle("delta Z (anode)");
+    mTimeHitResolution->SetXTitle("delta X (timebucket)");
+    mAnodeHitResolution->SetYTitle("delta Z (anode)");
+    mXHitResolution->SetXTitle("delta X (cm)");
+    mYHitResolution->SetYTitle("delta Y (cm)");
+    mZHitResolution->SetYTitle("delta Z (cm)");
     mHitResolution->SetXTitle("delta X (timebucket)");
     mHitResolution->SetYTitle("delta Z (anode)");
   }
@@ -450,7 +459,7 @@ Int_t StSvtHitMaker::Eval()
             float tim =  mSvtBigHit->WaferPosition()[clu].x();
             float anod =  mSvtBigHit->WaferPosition()[clu].y();
 
-            float diffTime = 0,diffAnode = 0;
+            float diffTime = 0,diffAnode = 0, diffX = 0, diffY = 0, diffZ = 0;
 
              for( int gHit = 0; gHit < mSvtGeantHit->numberOfHits(); gHit++){
                if(gHit == 0)
@@ -462,12 +471,17 @@ Int_t StSvtHitMaker::Eval()
 		   (fabs(anod - mSvtGeantHit->waferCoordinate()[gHit].anode()) < fabs(diffAnode))) {
 		 diffTime = tim - mSvtGeantHit->waferCoordinate()[gHit].timebucket();
 		 diffAnode = anod - mSvtGeantHit->waferCoordinate()[gHit].anode();
+		 diffX =  mSvtBigHit->svtHit()[clu].position().x() - mSvtGeantHit->globalCoordinate()[gHit].position().x();
+		 diffY =  mSvtBigHit->svtHit()[clu].position().y() - mSvtGeantHit->globalCoordinate()[gHit].position().y();
+		 diffZ =  mSvtBigHit->svtHit()[clu].position().z() - mSvtGeantHit->globalCoordinate()[gHit].position().z();
 	       }
 	     }
 
-             mXHitResolution->Fill(diffTime);
-             mZHitResolution->Fill(diffAnode);
-
+             mTimeHitResolution->Fill(diffTime);
+             mAnodeHitResolution->Fill(diffAnode);
+             mXHitResolution->Fill(diffX);
+             mYHitResolution->Fill(diffY);
+             mZHitResolution->Fill(diffZ);
 	     mHitResolution->Fill(diffTime,diffAnode);
 	  }
 	}

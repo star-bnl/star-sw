@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.9 2001/02/18 00:10:48 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.10 2001/03/22 20:46:53 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.10  2001/03/22 20:46:53  caines
+ * Comment out some of the QA histograms
+ *
  * Revision 1.9  2001/02/18 00:10:48  caines
  * Improve and use StSvtConfig
  *
@@ -226,9 +229,9 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
 	   titlerawc = strcat(titleraw,title2);
 	   titleadcc = strcat(titleadc,title2);
 	   //	   cout << title3 <<" " << titlerawc << " " << titleadcc << " " << index << " " <<  tNuOfHyb << endl;
-	   m_time_anode_clu[index] = new TH2F(title3 ,"Time bucket vs anode",240,0.,240.,128.,0.,128.);	   
-	   m_time_anode_raw[index] = new TH2F(titlerawc ,"Time bucket vs anode",240,0.,240.,128.,0.,128.);
-	   m_sumADC[index] = new TH1F(titleadcc,"Sum of ADC counts in cluster",100,0,1000);
+	   //m_time_anode_clu[index] = new TH2F(title3 ,"Time bucket vs anode",240,0.,240.,128.,0.,128.);	   
+	   //m_time_anode_raw[index] = new TH2F(titlerawc ,"Time bucket vs anode",240,0.,240.,128.,0.,128.);
+	   //m_sumADC[index] = new TH1F(titleadcc,"Sum of ADC counts in cluster",100,0,1000);
 	  
 	}
       }
@@ -312,7 +315,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	    
 	    if( index != 11 && index !=10){
 	      for( int clu=0; clu<mSvtAnalysis->GetnSvtClu(); clu++){
-		m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
+		//m_sumADC[index]->Fill(mSvtAnalysis->GetCluCharge(clu));
 		m_SumADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluCharge(clu));
 		m_n_seq->Fill(mSvtAnalysis->GetCluNumPixels(clu));
 		
@@ -470,8 +473,8 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 
          //Reset histogram each event
  
-         m_time_anode_clu[index]->Reset();
-         m_time_anode_raw[index]->Reset();
+         //m_time_anode_clu[index]->Reset();
+         //m_time_anode_raw[index]->Reset();
 
          mHybridAdjData = (StSvtHybridData *)mSvtAdjEvent->at(index); 
 	 if( !mHybridAdjData) continue;
@@ -508,8 +511,8 @@ void StSvtClusterAnalysisMaker::MakeHistograms(){
 	       for(int k = 0; k < len ; k++)
                  {
 	          count = (int) adc[k];
-	          m_time_anode_clu[index]->Fill(actualAn,stTimeBin + k,clu + 1);
-	          m_time_anode_raw[index]->Fill(actualAn,stTimeBin + k,count); 
+	          //m_time_anode_clu[index]->Fill(actualAn,stTimeBin + k,clu + 1);
+	          //m_time_anode_raw[index]->Fill(actualAn,stTimeBin + k,count); 
 	         }
 	       
 	      }

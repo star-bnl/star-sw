@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.4 2000/11/30 20:42:08 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.5 2001/03/22 20:46:54 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.5  2001/03/22 20:46:54  caines
+// Comment out some of the QA histograms
+//
 // Revision 1.4  2000/11/30 20:42:08  caines
 // Some more evaluation and use dataase
 //
@@ -84,7 +87,10 @@ class StSvtHitMaker : public StMaker
   TFile   *m_hfile;                           //!
 
   // Evaluation histos
+  TH1F *mTimeHitResolution;  //!
+  TH1F *mAnodeHitResolution;  //!
   TH1F *mXHitResolution;  //!
+  TH1F *mYHitResolution;  //!
   TH1F *mZHitResolution;  //!
   TH2F *mHitResolution;   //!
 
