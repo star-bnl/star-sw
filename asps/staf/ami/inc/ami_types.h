@@ -17,7 +17,7 @@
 #include "table_header.h"
 
 #ifdef CORBA
-#include "ami_i.hh"
+#include <ami_i.hh>
 #endif
 
 /*-------------------------------------------- CORBA                --*/

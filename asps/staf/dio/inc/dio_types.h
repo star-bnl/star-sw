@@ -15,7 +15,7 @@
 #include "dstype.h"
 
 #ifdef CORBA
-#include "dio_i.hh"
+#include <dio_i.hh>
 #endif
 
 /*-------------------------------------------- CORBA                --*/

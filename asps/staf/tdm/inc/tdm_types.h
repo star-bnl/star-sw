@@ -18,7 +18,7 @@
 
 /*-------------------------------------------- CORBA                --*/
 #ifdef CORBA
-#include "tdm_i.hh"
+#include <tdm_i.hh>
 #endif /*CORBA*/
 
 /*-------------------------------------------- TYPEDEFS             --*/

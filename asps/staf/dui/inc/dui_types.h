@@ -16,7 +16,7 @@
 #include "dstype.h"
 
 #ifdef CORBA
-#include "dui_i.hh"
+#include <dui_i.hh>
 #endif
 
 /*-------------------------------------------- CORBA                --*/
