@@ -1,3 +1,10 @@
+//*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@bnl.gov)
+//*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
+//  &
+// $Log: testdataset.c,v $
+// Revision 1.8  1999/04/07 15:41:22  fine
+// Extra test for St_DataSetIter::Du() was introduced
+//
 {
  gROOT->Reset();
   // Determinate the brand of the OS
@@ -40,8 +47,15 @@
   d.Pwd("v1/v21/v3212");
   d("v1/v21/v3212")->ls();
   d.ls("v1/v21/v3212");
-                                  cout << endl;
-  d.Du();
+   
+                                 cout << endl;
+  cout << "--------------------" << " Testing St_DataSetIter::Du() method: " <<
+          "--------------------" << endl;  
+  Int_t total = d.Du();                               
+  cout << "---------------------" << endl;  
+  cout << "Total: " << total << " datasets were listed" << endl;
+ cout << "-----------------" << " End of Testing St_DataSetIter::Du() method: " <<
+          "----------------" << endl;  
                                   cout << endl;
   cout << "We'll try some \"wrong\" path now" << endl;
   d.Ls("unknown");
