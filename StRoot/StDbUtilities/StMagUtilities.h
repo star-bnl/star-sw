@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.23 2004/01/06 20:09:26 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.24 2004/03/01 17:23:36 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.24  2004/03/01 17:23:36  jhthomas
+ * Add function to get shorted ring parameters.
+ *
  * Revision 1.23  2004/01/06 20:09:26  jhthomas
  * Add new routine to handle shorted stripe on East end of TPC
  *
@@ -129,6 +132,7 @@ class StMagUtilities {
   virtual void    GetTPCVoltages ()   ;
   virtual void    GetSpaceCharge ()   ;
   virtual void    GetSpaceChargeR2 () ;  
+  virtual void    GetShortedRing ()   ;  
 
   virtual void    CommonStart ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
@@ -161,6 +165,8 @@ class StMagUtilities {
   Float_t  IFCShift ;                   // Shift of the IFC towards the West Endcap (cm)
   Float_t  Const_0, Const_1, Const_2 ;  // OmegaTau parameters
   Double_t SpaceCharge, SpaceChargeR2 ; // Space Charge parameters (uniform or 1/R**2 in the TPC - arbitrary units)
+  Float_t  Ring ;                       // Location of short on field cage (rings)
+  Float_t  Resistor ;                   // Value of compensating resistor for field cage short (M-Ohm)
 
   Float_t  Bz[nZ][nR], Br[nZ][nR] ;         
   Float_t  Radius[nR], ZList[nZ] ;         
@@ -173,7 +179,7 @@ class StMagUtilities {
   Float_t  spaceR2Er[neZ][neR] ;
   Float_t  shortEr[neZ][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
-  
+
  public:
 
   StMagUtilities () ;
