@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.7 2000/04/18 20:37:26 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.8 2000/04/20 22:05:24 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -42,6 +42,7 @@ void bfcread_geantBranch(
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("libsim_Tables");
+    gSystem->Load("libgen_Tables");
     gSystem->Load("StIOMaker");
 
 
@@ -64,16 +65,27 @@ void bfcread_geantBranch(
 
 
   Float_t tottabcntr=0;
-// Event loop
-  int istat=0,i=0;
+  Float_t totobjcntr=0;
 
+
+  int istat=0;
+  int i=0;
+  int countev=0;
+  int countevgds=0;
+  int countevobj=0;
+  int countevtab=0;
+
+// Event loop
 EventLoop: if (i < nevents && !istat) {
 
     chain->Clear();
     istat = chain->Make(i);
     
-//    cout << "     istat value returned from chain Make = " << istat << endl;
+//  count # times Make is called
+    i++;
 
+    //    cout << " Call Make # " << i << endl; 
+    //    cout << "     istat value returned from chain Make = " << istat << endl;
 
 // Now look at the data in the event:
     int countObj=0;
@@ -81,61 +93,81 @@ EventLoop: if (i < nevents && !istat) {
 
     if (!istat) {
 
-    i++;
-    cout << " start event # " << i << endl;
+    countev++;
+
+    cout << " start event # " << countev << endl;
 
       ds=chain->GetDataSet("geant");
       TDataSetIter tabiter(ds);
       if (ds) {
+        countevgds++;
 //        ds->ls(2);  
         while (obj = tabiter.Next()) {
-//	  cout << " I have found an object! " <<endl;
+	  cout << " QAInfo: found object: " << obj->GetName() << endl;
+	  fout << " QAInfo: found object: " << obj->GetName() << endl;
+
           countObj++;
+          totobjcntr++;
 
 //.. count all tables that exist:
           if (obj->InheritsFrom("TTable")) {
             tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
               countTable++;
-	      // cout << " Found Object (Table) " << endl;
-              cout << " QAInfo: Found table, Name = " 
-                   <<  obj->GetName() << 
-                      "    # rows =  " << tabl->GetNRows() << endl;
-
-             fout << " QAInfo: Found table, Name = " 
-                   <<  obj->GetName() << 
-                      "    # rows =  " << tabl->GetNRows() << endl;
               tottabcntr++;
-             }
-          }
+              cout << " QAInfo: it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+              fout << " QAInfo: it's a table with #rows = " 
+                        << tabl->GetNRows() << endl;
+
+	    } // tabl
+          }  // obj
 //.. end of counting all tables that exist
+	}  // while
+           if (countObj) countevobj++;
+           if (countTable) countevtab++;
+      }   // ds
 
-	}      
-      }
-    }
-    cout << " QAInfo: event # " << i << ", # objects found = " 
+    cout << " QAInfo: event # " << countev << ", # objects found = " 
          << countObj << ", # tables found = " << countTable << endl << endl;
-    fout << " QAInfo: event # " << i << ", # objects found = " 
+    fout << " QAInfo: event # " << countev << ", # objects found = " 
          << countObj << ", # tables found = " << countTable << endl << endl;
 
+    }  // istat
 
-    if (istat) {
+    else   // if (istat)
+      {
       cout << "Last event processed. Status = " << istat << endl;
     }
 
-
     goto EventLoop;
-   }
+
+}  // EventLoop
      
-  tottabcntr /= i;
+  tottabcntr /= countev;
+  totobjcntr /= countev;
+ 
+  cout << endl;
+  cout << "QAInfo: End of Job " << endl; 
+  cout << "QAInfo: # times Make called = " << i << endl;
+  cout << "QAInfo:  # events read = " << countev << endl;
+  cout << "QAInfo:   # events with geant dataset = " << countevgds << endl;
+  cout << "QAInfo:     # with objects = " << countevobj << endl;
+  cout << "QAInfo:     # with tables  = " << countevtab << endl;
+  cout << "QAInfo: avg # tables per event  = " << tottabcntr << endl;
+  cout << "QAInfo: avg # objects per event = " << totobjcntr << endl << endl;
 
-  cout <<  endl << "QAInfo:  total # events read  = " << i << endl;
-  cout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl << endl;
-
-  fout <<  endl << "QAInfo:  total # events read  = " << i << endl;
-  fout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl << endl;
+  fout << endl;
+  fout << "QAInfo: # times Make called = " << i << endl;
+  fout << "QAInfo:  # events read = " << countev << endl;
+  fout << "QAInfo:   # events with geant dataset = " << countevgds << endl;
+  fout << "QAInfo:     # with objects = " << countevobj << endl;
+  fout << "QAInfo:     # with tables  = " << countevtab << endl;
+  fout << "QAInfo: avg # tables per event  = " << tottabcntr << endl;
+  fout << "QAInfo: avg # objects per event = " << totobjcntr << endl << endl;
 
  chain->Finish();   
+
 }
  
 
