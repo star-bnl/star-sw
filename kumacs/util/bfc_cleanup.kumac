@@ -1,0 +1,42 @@
+ macro run _
+       chain
+   
+   macro/global/import *
+     
+  message ' Now running BFC_cleanup'
+     
+  message ' --> bfc_cleanup - delete directories'     
+* delete directories/tables
+   cd /dui
+   ls
+   rmdir run
+   cd /dui
+   rmdir event
+   cd /dui
+   rmdir calib
+   cd dui
+   
+  message ' --> bfc_cleanup - delete vectors'      
+* delete vectors
+   vec/delete havedstrunsum
+   vec/delete totime
+   vec/delete cpupev
+   vec/delete setup_done
+   vec/delete readprob
+   
+* do only if you want to re-load stuff
+* vec/delete make_done
+* vec/delete randst
+* vec/delete readprob
+   
+  test = [chain]
+  nw = $words([test])
+  do i = 1, [nw]
+    mod = $word([test],[i],1)
+    vec/delete v[mod]
+    vec/delete t[mod] 
+  enddo
+ 
+ return
+ 
+* **********************************************************************
