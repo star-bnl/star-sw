@@ -1,5 +1,8 @@
-// $Id: Example_read_hist_file_list_draw_ps.C,v 1.3 1999/11/03 19:03:05 kathy Exp $
+// $Id: Example_read_hist_file_list_draw_ps.C,v 1.4 1999/11/30 20:04:17 kathy Exp $
 // $Log: Example_read_hist_file_list_draw_ps.C,v $
+// Revision 1.4  1999/11/30 20:04:17  kathy
+// fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables
+//
 // Revision 1.3  1999/11/03 19:03:05  kathy
 // changes to default input files and output file names - needed by perl script for testing
 //
@@ -17,8 +20,8 @@
 //
 //   This macro assumes you don't know what's in the file a priori.
 //
-//   You can first run  Example_read_xdf_makehist.C to create 
-//     an output Kathy_hist.root file (flat file).  
+//   You can first run  Example_read_dst_makehist.C to create 
+//     an output *hist.root file (flat file).  
 //   This macro then reads in the histogram file and draws 
 //     histogram h1.
 //
@@ -35,7 +38,7 @@
 //  *-*
 //
 
-void Example_read_hist_file_list_draw_ps(const char* filein="Example_read_xdf_makehist.root")
+void Example_read_hist_file_list_draw_ps(const char* filein="Example_read_dst_makehist.root")
 {
 
 // open file

@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_print_tables.C,v 1.2 1999/11/03 16:57:00 kathy Exp $
+// $Id: Example_read_dst_print_tables.C,v 1.3 1999/11/30 20:04:17 kathy Exp $
 // $Log: Example_read_dst_print_tables.C,v $
+// Revision 1.3  1999/11/30 20:04:17  kathy
+// fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables
+//
 // Revision 1.2  1999/11/03 16:57:00  kathy
 // fix macros to use StIOMaker instead of StTreeMaker
 //
@@ -11,7 +14,7 @@
 // owner: Kathy Turner  
 // what it does: 
 // Kathy's notes (10/11/99):
-//     - read dstbranch from *.dst.root file
+//     - read dstbranch from *.dst.root or *.dst.xdf file
 //     - read 1 event and print out information from the tables
 //======================================================================
 
@@ -21,8 +24,10 @@ StChain *chain;
 class St_DataSet;
 St_DataSet *Event;
 
-void Example_read_dst_print_tables(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.root")
+void Example_read_dst_print_tables(
+ Int_t nevents=1, 
+ const char *MainFile=
+ "/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root")
 
 {
 //
@@ -104,25 +109,26 @@ table_head_st *tdt_h = glob->GetHeader();
  cout << " header maxlen = " << tdt_h->maxlen << endl;
  cout << " header nok    = " << tdt_h->nok << endl;
 
+ glob->ls();
+
 // get the table and print out info about it (it's printing row 0)
-dst_track_st *sth = glob->GetTable();
+ dst_track_st *sth = glob->GetTable();
  cout << " globtrk: row0 " << endl; 
- cout << "  ndegf   = " << sth->ndegf  << endl;
- cout << "  x0      = " << sth->x0     << endl;
+ cout << "  r0      = " << sth->r0     << endl;
  cout << "  impact  = " << sth->impact << endl;
  cout << "  invpt   = " << sth->invpt  << endl;
- cout << "  y0      = " << sth->y0     << endl;
+ cout << "  z0      = " << sth->z0     << endl;
+
 // now go to next row 
 //  - just increment the pointer to do this (probably just STAR-specific
 //    way - can't always increment pointers and get to right place!
 
  sth++;
  cout << " globtrk: row1 " << endl; 
- cout << "  ndegf   = " << sth->ndegf  << endl;
- cout << "  x0      = " << sth->x0     << endl;
+ cout << "  r0      = " << sth->r0     << endl;
  cout << "  impact  = " << sth->impact << endl;
  cout << "  invpt   = " << sth->invpt  << endl;
- cout << "  y0      = " << sth->y0     << endl;
+ cout << "  z0      = " << sth->z0     << endl;
 
 }
 

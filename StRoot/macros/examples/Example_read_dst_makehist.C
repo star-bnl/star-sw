@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_makehist.C,v 1.3 1999/11/03 19:03:05 kathy Exp $
+// $Id: Example_read_dst_makehist.C,v 1.4 1999/11/30 20:04:17 kathy Exp $
 // $Log: Example_read_dst_makehist.C,v $
+// Revision 1.4  1999/11/30 20:04:17  kathy
+// fix Example macros so that they work from .dst.root files or .dst.xdf files & update documentation; also had to change which values printed in *read_dst_print_tables* macro since the names have changed in dst tables
+//
 // Revision 1.3  1999/11/03 19:03:05  kathy
 // changes to default input files and output file names - needed by perl script for testing
 //
@@ -15,15 +18,17 @@
 //=======================================================================
 // owner: Kathy Turner
 // what it does:
-//    Reads an .dst.root file, finds a table (dst/vertex) and fills
+//    Reads an .dst.root or .dst.xdf file, finds a table (dst/vertex) and fills
 //    histogram with variable "z" from the table.  Draws hist. to
 //    canvas and sends to output ps file at the end.
 //
 //=======================================================================
 
 
-void Example_read_dst_makehist(Int_t nevents=3, const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.root")
+void Example_read_dst_makehist(
+  Int_t nevents=3, 
+  const char *MainFile=
+  "/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root")
 {
  
     gSystem->Load("St_base");
@@ -56,7 +61,12 @@ void Example_read_dst_makehist(Int_t nevents=3, const char
  hist_outfile = new TFile(root_file,"RECREATE");
 
 // book histogram
- TH1F *h1 = new TH1F("h1","my first hist",100,-100.,100.);
+ TH1F *h1 = new TH1F("h1","z position of primary vertex",100,-100.,100.);
+   h1->SetXTitle("vertex z position ");
+   h1->SetYTitle("num events");
+ TH1F *h2 = new TH1F("h2","z position of all vtx in event",100,-100.,100.);
+   h2->SetXTitle("vertex z position ");
+   h2->SetYTitle("num events");
 
   for (int iev=0;iev<nevents; iev++)
   {
@@ -77,25 +87,50 @@ void Example_read_dst_makehist(Int_t nevents=3, const char
 // data on it. After this record is passed, the while loop ends
   if (!vert)  continue;
 
-   // get the table header data using member function of St_Table
+// get the table header data using member function of St_Table
   table_head_st *tdt_h = vert->GetHeader();
    cout << " header name   = " << tdt_h->name << endl;
    cout << " header type   = " << tdt_h->type << endl;
    cout << " header maxlen = " << tdt_h->maxlen << endl;
    cout << " header nok    = " << tdt_h->nok << endl;
 
+  vert->ls();
+
+// get actual values in table
+
   dst_vertex_st *sth = vert->GetTable();
   cout << "   prim vtx z : " << sth->z   << endl;
+
+// fill hist h1
   h1->Fill(sth->z);
+
+// Now setup loop over all rows in table and fill histogram h2
+ Int_t ij = 0;
+ for (ij=0; ij< vert->GetNRows(); ij++)
+  { 
+   h2->Fill(sth[ij]->z);
+  }
+
 }
 
  cout << " ==> finished loop" << endl;
 
  TCanvas *c1 = new TCanvas("c1"," from table dst/vertex",200,10,600,880);
+
+  // to set grid
+ c1->SetGrid();
+  // to do zone(1,2)
+  c1->Divide(1,2);
+  // can also do: c1->SetLogz();
+
  TPostScript ps("Example_read_dst_makehist.ps",111);
 
+  // update histogram in canvas - can do this every event or at end of loop!
+  // Draw histogram  - this should be done ONCE to link hist with canvas
  h1->Draw();
  c1->Update();
+ h2->Draw();
+ c1->Update(); 
 
  hist_outfile->Write();
  hist_outfile->ls();
