@@ -66,8 +66,3 @@ c: Variables for STAF_STATUS and STAF_RESULT vectors.
      +                      , STAF_RESULT_COUNT
      +                      , STAF_RESULT_LLOW,STAF_RESULT_LHIGH
 
-c     INTEGER*4 STAF_STATUS(1)
-c     EQUIVALENCE (IQ(STAF_STATUS_LLOW),STAF_STATUS(1))
-c     REAL*4 STAF_RESULT(1,1)
-c     EQUIVALENCE (Q(STAF_RESULT_LLOW),STAF_RESULT(1,1))
-
