@@ -1,5 +1,8 @@
-* $Id: vpddgeo.g,v 1.5 2001/03/14 01:29:55 nevski Exp $
+* $Id: vpddgeo.g,v 1.6 2001/03/14 01:42:35 nevski Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.6  2001/03/14 01:42:35  nevski
+* add few konly=MANY to make I-beam real
+*
 * Revision 1.5  2001/03/14 01:29:55  nevski
 * more detailed VPD description
 *
@@ -113,8 +116,8 @@ Created 21 June 2000
      USE  VPDG  
 *
      Create VPDD
-     Position VPDD in Cave   z=+vpdg_zpos
-     Position VPDD in Cave   z=-vpdg_zpos   ThetaZ=180
+     Position VPDD in Cave   z=+vpdg_zpos               Konly='Many'
+     Position VPDD in Cave   z=-vpdg_zpos   ThetaZ=180  Konly='Many'
 
      if (vpdg_IBchoice != 0) then
        Position IBEM in Cave z=+vpdg_IBPosZc y=vpdg_IBposYc
@@ -412,7 +415,7 @@ Block  VRNG  is a single VPD Ring
                 dz=vpdg_CLlength/2
      do isec=1,vpdg_NumPMT
        detangle=-30+isec*(360/vpdg_NumPMT)
-       Create and Position VSEC alphaz=detangle
+       Create and Position VSEC alphaz=detangle  Konly='Many'
      enddo
 Endblock
 *
