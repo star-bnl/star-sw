@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.26 1999/07/19 22:23:19 fisyak Exp $
+// $Id: doEvents.C,v 1.27 1999/07/21 21:12:02 perev Exp $
 // $Log: doEvents.C,v $
-// Revision 1.26  1999/07/19 22:23:19  fisyak
-// Remove EventDisplay
+// Revision 1.27  1999/07/21 21:12:02  perev
+// supress debug print
+//
+// Revision 1.27  1999/07/21 21:12:02  perev
+// supress debug print
 //
 // Revision 1.26  1999/07/19 22:23:19  fisyak
 // Remove EventDisplay
@@ -165,7 +168,7 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   for (int ifil=0; fileList[ifil]; ifil++)
   { setFiles->AddFile(fileList[ifil]);}
   // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
-  IOMk->SetDebug();
+  // StIOMAker in future.
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
 // 		Maker to read events from file or database into StEvent
 
@@ -191,10 +194,10 @@ EventLoop: if (i <= nevents && !istat) {
       chain->Clear();
       break;
     }
-    St_DataSet *set = chain->DataSet("dst");
-    if (set)  {
-      St_DataSetIter dirt(set);
-      dirt.Du();
+//    St_DataSet *set = chain->DataSet("dst");
+//    if (set)  {
+//      St_DataSetIter dirt(set);
+//      dirt.Du();
     }
 }
   }
@@ -203,7 +206,7 @@ EventLoop: if (i <= nevents && !istat) {
   if (nevents > 1) {
     chain->Clear();
     chain->Finish();
-       b = new TBrowser;
+  } else {
     if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
     b = new TBrowser;
