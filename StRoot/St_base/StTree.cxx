@@ -734,7 +734,7 @@ Int_t StFile::GetNextBundle()
 {
   if (!fDS)	return 1;
   if (fIter>-1 && !fDS->At(fIter)) return 1;
-  return (!fDS->At(fIter++));
+  return (!fDS->At(++fIter));
   
 }
 //_____________________________________________________________________________
@@ -952,7 +952,7 @@ void StFile::ls(Option_t *opt)
   TList blist;
   int ibr=0,i;
   Cat *cat;
-
+  int savIter = fIter; fIter=-1;
   int numFile=0;
   TString oldirname("_");
   while (!GetNextBundle()) {    //Bundle loop
@@ -1038,7 +1038,7 @@ void StFile::ls(Option_t *opt)
              cat->fNFiles);
   }
   blist.Delete();
-
+  fIter = savIter;
 }
 //_____________________________________________________________________________
 const Char_t *StFile::GetAttr(TDataSet *ds,const char *att)
