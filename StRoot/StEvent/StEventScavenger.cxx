@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventScavenger.cxx,v 2.5 2001/04/05 04:00:49 ullrich Exp $
+ * $Id: StEventScavenger.cxx,v 2.6 2001/06/10 21:02:49 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventScavenger.cxx,v $
+ * Revision 2.6  2001/06/10 21:02:49  perev
+ * Solaris: <typeinfo> removed
+ *
  * Revision 2.5  2001/04/05 04:00:49  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -26,7 +29,6 @@
  * Initial Revision.
  *
  **************************************************************************/
-#include <typeinfo>
 #include "StEventScavenger.h"
 #include "StEventTypes.h"
 
