@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.9 2001/04/25 17:33:02 perev Exp $ 
+ * $Id: StEstTracker.cxx,v 1.10 2001/07/15 20:31:31 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.10  2001/07/15 20:31:31  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.9  2001/04/25 17:33:02  perev
  * HPcorrs
  *
@@ -303,7 +306,7 @@ Int_t StEstTracker::DoTracking() {
 	    mTrack[i]->GetIdealPattern()>=nminhit)
 	  TrackDeadBeforeRemoveSharing++;
       }
-    RemoveHitSharing();
+    RemoveHitSharing2();
     
     TrackDeadAfterRemoveSharing=0;
     for (i=0;i<mNTrack;i++) 
@@ -681,6 +684,7 @@ void StEstTracker::CleanUp(){
   if (mDebugLevel>0) gMessMgr->Info()<<"CleanUp : deleting the "<<mNTrack<<" Tracks"<<endm;
   for (i=0;i<mNTrack;i++) {
     if (mTrack[i]->mNBranch<1) gMessMgr->Error()<<"Warning, this track does not have any branch"<<endm;
+    mTrack[i]->StEstTrackDestructor();
     delete mTrack[i];
   }
   delete [] mTrack;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.11 2001/04/25 15:05:55 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.12 2001/07/15 20:31:30 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.12  2001/07/15 20:31:30  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.11  2001/04/25 15:05:55  lmartin
  * Retuned tracking parameters (mostly geometrical cuts).
  *
@@ -77,6 +80,11 @@ StEstMaker::StEstMaker(const char* name):StMaker(name) {
 
 StEstMaker::~StEstMaker() {
 
+  //  delete m_egrpar_h[0];
+  delete[] m_egrpar_h;
+
+  for (int i=0;i<mNPass;i++) delete mParams[i] ;
+  delete[] mParams;
 }
 
 Int_t StEstMaker::Finish() {
@@ -190,8 +198,8 @@ Int_t StEstMaker::Init(){
   mIdealTracking=0;
 
  // ideal tracking: mIdealTracking = 1
-    mIdealTracking = 1;
-  mDebugLevel = 0;
+  mIdealTracking = 0;
+  mDebugLevel = 1;
 
   mParams = new StEstParams*[mNPass];
   for (i=0;i<mNPass;i++) mParams[i] = new StEstParams;

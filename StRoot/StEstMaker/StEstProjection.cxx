@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.6 2001/04/25 17:31:10 perev Exp $
+ * $Id: StEstProjection.cxx,v 1.7 2001/07/15 20:31:30 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.7  2001/07/15 20:31:30  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.6  2001/04/25 17:31:10  perev
  * HPcorrs
  *
@@ -40,9 +43,9 @@
 #include "Infrastructure/StEstWafer.hh"
 #include "Infrastructure/StEstHit.hh"
 
-int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
+int StEstTracker::Preprojection(StEstBranch *branch, int slayer) {
   
-  StHelix*              helix = branch.GetHelix();
+  StHelix*              helix = branch->GetHelix();
   StThreeVector<double> vect1; 
   pair<double,double>   s;      // intersection
 
@@ -172,6 +175,140 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
 
   return(ret); // 0=O.K.  1=no wafers 2=too many wafers 3=too many neighbours
 } // end of Preprojection method
+
+
+// int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
+  
+//   StHelix*              helix = branch.GetHelix();
+//   StThreeVector<double> vect1; 
+//   pair<double,double>   s;      // intersection
+
+//   StEstWafer*         pNeighbour;
+
+//   double    sd;      // path length
+//   int       phi;     // phi bin
+//   int       z;       // z bin
+//   int      il,jl;
+//   int       ns;      
+//   int       ret = 0;
+//   int       nneighbours = mParams[mPass]->nneighbours[slayer];
+//   int       nwaf;
+
+//   const int     FREE     = 0;
+//   const int     OCCUPIED = 1; 
+
+//   mPreprojNumber=0;
+
+
+//   if(mDebugLevel>4){
+//     gMessMgr->Info()<<"     branch  = "<<&branch<<endm;
+//     gMessMgr->Info()<<"     slayer  = "<<slayer<<endm;
+//   }
+  
+//   switch(slayer){
+//   case 0:
+//   case 1:
+//   case 2:
+//     ns=2;
+//     break;
+//   case 3:
+//     ns=1;
+//     break;
+//   default:
+//     ret = 4;
+//     gMessMgr->Error()<<"ERROR in Preprojection !!! slay<1 or slay>4 !!!"<<endm;
+//     gMessMgr->Error()<<"     slay = "<<slayer<<"     branch* = "<<int(&branch)<<endm;
+//     return(ret);
+//   }
+
+//   for(;ns>0;ns--){ //loop over layers
+    
+//     // intersection of helix and cylinder
+//     s = helix->pathLength(mParams[mPass]->lrad[slayer][ns-1]);  
+
+//     // we expect small negative values for the two solutions.
+//     // In some cases, one or two big positive values are return by pathLength
+//     // In such case, we need to subtract a period.
+//     if (s.first>0) {
+//       s.first=s.first-helix->period();
+//     }
+//     if (s.second>0) {
+//       s.second=s.second-helix->period();
+//     }
+//     if(fabs(s.first)<fabs(s.second))
+//     //    if(s.first>s.second)
+//       sd=s.first;
+//     else
+//       sd=s.second;
+
+//     if(fabs(sd)>=1000){
+//       ret = 1;
+//     }
+//     else{
+//       vect1 = helix->at(sd);
+//       phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mPhiBin);
+//       z=floor(vect1.z()/mZBin)+mNZBins/2; 
+
+//       //last chance for track
+//       // need to be verified
+
+//       if(z==-1)
+// 	z++;
+//       if(z==mNZBins)
+//       z--;
+      
+//       if(z>=0 && z<mNZBins && phi>=0 && phi<mNPhiBins) {
+// 	for(jl=0; jl<mIndexGeom->getNWaf(phi,z,slayer); jl++){
+// 	  if(mPreprojNumber>=MAXFINDWAF){
+// 	    gMessMgr->Warning()<<"Preprojection : too many wafers. "<<endm;
+// 	    ret = 2;
+// 	    goto PREPROJ_FINISH;
+// 	  }
+// 	  if(mIndexGeom->getWafTab(phi,z,slayer)[jl]->mPreprojection==FREE){
+// 	    mPreprojTable[mPreprojNumber++]=mIndexGeom->getWafTab(phi,z,slayer)[jl];
+// 	    mIndexGeom->getWafTab(phi,z,slayer)[jl]->mPreprojection=OCCUPIED;
+// 	  }
+// 	} // end of for(jl...
+//       } // end of if(z...
+//     } // end of if(fabs(sd)>=1000)...
+//   } // end of for(;ns...
+
+//   while(nneighbours>0){
+//     nwaf=mPreprojNumber;
+//     for(il=0; il<nwaf; il++){
+//       for(jl=0; jl<8; jl++){
+// 	if(mPreprojNumber>=MAXFINDWAF){
+// 	  if(mDebugLevel>0) 
+// 	    gMessMgr->Warning()<<"Prepojection : too many neighbours. mPreprojNumber="<<mPreprojNumber<<endm;
+// 	  ret=3;
+// 	  goto PREPROJ_FINISH;
+// 	}
+// 	pNeighbour=mPreprojTable[il]->neighbour[jl];
+// 	if(pNeighbour==NULL)
+// 	  continue;  // empty bin
+// 	if(pNeighbour->mPreprojection==FREE){
+// 	  mPreprojTable[mPreprojNumber++]=pNeighbour;
+// 	  pNeighbour->mPreprojection=OCCUPIED;
+// 	}
+//       }
+//     }
+//     nneighbours--;
+//   } // end of while(nneighbours...
+
+//  PREPROJ_FINISH:;
+//   for(jl=0; jl<mPreprojNumber; jl++) {
+//     if(mDebugLevel>4)
+//       gMessMgr->Info()<<"wafer ="<<mPreprojTable[jl]->mId<<" nhits ="<<mPreprojTable[jl]->GetNHits()<<endm;
+//     mPreprojTable[jl]->mPreprojection=FREE;
+//   }
+    
+//   if(mDebugLevel>2){
+//     gMessMgr->Info()<<"    Wafers found: "<<mPreprojNumber<<endm;
+//     gMessMgr->Info()<<"**** Preprojection STOP ****"<<endm;
+//   }
+
+//   return(ret); // 0=O.K.  1=no wafers 2=too many wafers 3=too many neighbours
+// } // end of Preprojection method
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.9 2001/04/25 17:33:36 perev Exp $
+ * $Id: StEstTracker.h,v 1.10 2001/07/15 20:31:31 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.10  2001/07/15 20:31:31  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.9  2001/04/25 17:33:36  perev
  * HPcorrs
  *
@@ -135,7 +138,7 @@ class StEstTracker {
   int    mNBadPrim; //! number of Bad primary track in the event
   int    mNBadSeco; //! number of Bad primary track in the event
 
-  int  Preprojection(StEstBranch&, int);
+  int  Preprojection(StEstBranch*, int); //int  Preprojection(StEstBranch&, int);
   int  Tracking(int);
   int  RefitBranch(StEstBranch *br, int usevertex=0, int *fitstatus=NULL);
   int  Projection(StEstBranch* branch, int slay);
@@ -143,6 +146,7 @@ class StEstTracker {
   void ChooseBestBranch(StEstTrack *tr, int overPass);
   void ChooseBestNBranches(StEstTrack *tr, int slay);
   void RemoveHitSharing();
+  void RemoveHitSharing2();
   void ChooseSegment(int overPass,int layer);
   void BuildIdealBranches();
   void BuildFindableBranches();

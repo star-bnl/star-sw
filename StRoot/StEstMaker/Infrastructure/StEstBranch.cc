@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.cc,v 1.4 2001/02/23 13:01:10 lmartin Exp $
+ * $Id: StEstBranch.cc,v 1.5 2001/07/15 20:31:33 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.cc,v $
+ * Revision 1.5  2001/07/15 20:31:33  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.4  2001/02/23 13:01:10  lmartin
  * cout replaced by gMessMgr.
  *
@@ -31,9 +34,9 @@
 #include "StHelix.hh"
 
 StEstBranch::StEstBranch(StEstTrack *tr, 
-			     long int maxhits, 
-			     long int nf, 
-			     long int nh, 
+			     long maxhits, 
+			     long nf, 
+			     long nh, 
 			     StEstHit **hit, 
 			     double *dist, 
 			     int isgood) {
@@ -112,7 +115,7 @@ StEstBranch::~StEstBranch() {
 };
 
 
-StEstHit* StEstBranch::GetHit(long int nr) {
+StEstHit* StEstBranch::GetHit(long nr) {
   if(nr>=mNHits) {
     gMessMgr->Error()<<"ERROR StEstBranch::GetHit  nr>=mNHits"<<endm;
     return NULL;
@@ -149,7 +152,9 @@ StEstBranch* StEstBranch::Duplicate() {
     br->mLastFitStatus=this->mLastFitStatus;
     br->SetIsGoodOld(this->GetIsGoodOld());
     if (this->GetHelix()) {
-      StHelix *helix = new StHelix(*this->GetHelix());
+//       StHelix *helix = new StHelix((StHelix)(*(this->GetHelix())));
+      const StHelix helixTemp = (StHelix)(*(this->GetHelix()));
+      StHelix *helix = new StHelix(helixTemp);
       br->SetHelix(helix);
     }
   }
@@ -158,7 +163,7 @@ StEstBranch* StEstBranch::Duplicate() {
   
 void StEstBranch::LeaveTrack() {
   if (mDebugLevel>0) gMessMgr->Info()<<"StEstBranch::LeaveTrack ***START***" <<endm;
-  long int i;
+  long i;
   for (i=0;i<mTrack->GetNBranches();i++) {
     if (mTrack->GetBranch(i) == this) {
       gMessMgr->Info()<<"LeaveTrack this="<<this<<" i="<<i<<endm;
@@ -233,7 +238,7 @@ int StEstBranch::AddHit(StEstHit *hit, double dist) {
   return 0;
 }
 
-int StEstBranch::RemoveHit(long int nr) {
+int StEstBranch::RemoveHit(long nr) {
   
 
   int i;

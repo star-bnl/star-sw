@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.10 2001/04/25 17:34:46 perev Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.11 2001/07/15 20:31:31 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.11  2001/07/15 20:31:31  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.10  2001/04/25 17:34:46  perev
  * HPcorrs
  *
@@ -221,6 +224,49 @@ void StEstTracker::RemoveHitSharing() {
     for (j=0;j<brmax;j++) track[j]=0;
     delete [] track;
     delete [] br_index;
+  }
+  gMessMgr->Info()<<HowMany<<" branches cleared"<<endm;
+  if(mDebugLevel>2)
+        gMessMgr->Info()<<"StEstMaker::RemoveHitSharing ****STOP****"<<endm;
+}
+void StEstTracker::RemoveHitSharing2() {
+  // Hit sharing removal.
+  // For each hit shared by several branches, we determine the branch (brmin)
+  // with the lowest chisq (minbr). The  other branches are deleted. We assume
+  // here that when this method is called only one branch per track survives
+  // the previous selection (such as ChooseBestBranch).
+  
+  int brmax,i,j,k,brmin;
+  int HowMany;
+  double minbr;
+
+  if(mDebugLevel>2)
+    gMessMgr->Info()<<"StEstMaker::RemoveHitSharing ****START****"<<endm;
+
+  HowMany=0;
+  for (i=0;i<mNSvtHit;i++) {    
+    if (mSvtHit[i]->GetNBranch()<2) continue;
+    brmin=0;
+    minbr=1.e+99;
+    StEstTrack *mytrack;
+
+    for (j=0;j<mSvtHit[i]->GetNBranch();j++){
+      if (mSvtHit[i]->mBranch[j]->GetChiSq()<minbr){
+	brmin=j;
+	minbr=mSvtHit[i]->mBranch[j]->GetChiSq();
+      }
+      cout<<"j,nbranch,chisq,brmin,minbr = "<<j<<" "<<mSvtHit[i]->GetNBranch()
+	  <<" "<<mSvtHit[i]->mBranch[j]->GetChiSq()<<" "<<brmin<<" "<<minbr<<endl;
+    }
+
+    brmax = mSvtHit[i]->GetNBranch(); 
+
+    for (j=0;j<brmax;j++) {
+      if(j==brmin) continue;
+      mytrack=mSvtHit[i]->mBranch[j]->mTrack;
+      mytrack->RemoveBranch(0);
+      HowMany++;
+    }
   }
   gMessMgr->Info()<<HowMany<<" branches cleared"<<endm;
   if(mDebugLevel>2)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.9 2001/04/25 17:29:23 perev Exp $
+ * $Id: StEstInit.cxx,v 1.10 2001/07/15 20:31:30 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.10  2001/07/15 20:31:30  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.9  2001/04/25 17:29:23  perev
  * HPcorrs
  *
@@ -76,6 +79,9 @@ int StEstTracker::VertexSetup(St_dst_vertex *preVertex){
   StThreeVectorD* xg = new StThreeVectorD(0,0,0);
   StThreeVectorD* xl = new StThreeVectorD(0,0,0);
 
+  StThreeVectorD* eg = new StThreeVectorD(0,0,0);
+  StThreeVectorD* el = new StThreeVectorD(0,0,0);
+
   if( preVertex){
     dst_vertex_st *preVtxPtr = preVertex->GetTable();
     
@@ -89,7 +95,7 @@ int StEstTracker::VertexSetup(St_dst_vertex *preVertex){
     }
   }
   else gMessMgr->Warning()<<"StEstTracker::VertexSetup : Prevertex not found. Main vertex set to (0,0,0)"<<endm;
-  mVertex = new StEstHit(9999,xg,xl,1,1,mIndexWaf[0]);
+  mVertex = new StEstHit(9999,xg,xl,eg,el,1,1,mIndexWaf[0]);
   
   return kStOK;
 }
@@ -135,10 +141,16 @@ int StEstTracker::BranchInit(){
 	  // assigned to the tpc track
 	  int fitstatus;
 	  fitstatus=0;
- 	  if (mTPCTrack[i]->GetHelix()->distance(a)<3.) 
+	  cout << "primary vertex at : " << a << " dca of track : " << mTPCTrack[i]->GetHelix()->distance(a) << endl;
+ 	  if (mTPCTrack[i]->GetHelix()->distance(a)<3.){ 
 	    RefitBranch(branch,1,&fitstatus);
-	  else
+	    cout << "refit track with primary vertex " << endl;
+	  }
+	  else {
 	    RefitBranch(branch,0,&fitstatus);
+	    cout << "refit track with-out primary vertex " << endl;
+	  }
+	  cout << " fitstatus " << fitstatus << endl; 
 	if(mDebugLevel>3)
 	  gMessMgr->Info()<<" Branch refitted"<<endm;
 	  //	  branch->mTrack->mTPCTrack->mChiSq = branch->GetChiSq();
@@ -210,6 +222,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   for (il=0;il<Stscsspt->GetNRows();il++) {
     if( scsspt[il].flag < 4){
       HitPerWafer[scsspt[il].id_wafer]++; 
+      mNSvtHit++;
     }
   }
   for(il=0; il<mNWafers; il++){ // loop over the wafers
@@ -350,9 +363,9 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 
   maxwaf=0;
   maxl=Stscsspt->GetNRows();
-  mNSvtHit = maxl;
+//   mNSvtHit = maxl;
 
-  mSvtHit  =  new StEstHit*[maxl];
+  mSvtHit  =  new StEstHit*[mNSvtHit];
   if(!mSvtHit){
     gMessMgr->Error()<<"ERROR!!! not enougth memory"<<endm;
     gMessMgr->Error()<<"StEstMaker::SVTInit mSvtHit = new StEstHit*["<<maxl<<"];"<<endm;
@@ -361,6 +374,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 
   StThreeVectorD *xg;
   StThreeVectorD *xl;
+  StThreeVectorD *eg;
+  StThreeVectorD *el;
   // we have to determine the maximum allowed use of a given hit
   // For a given branch it is limited to ntotbranch*max(nbranch(lay=3),nbranch(lay=2)..)
   int ExtremeBranching=mParams[0]->nbranch[3]*mParams[0]->onoff[3];
@@ -379,10 +394,13 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 	
 	xg = new StThreeVectorD(scsspt[il].x[0],scsspt[il].x[1],scsspt[il].x[2]);
 	xl = new StThreeVectorD(scsspt[il].xl[0],scsspt[il].xl[1],0);
+	eg = new StThreeVectorD(sqrt(scsspt[il].cov[0]),sqrt(scsspt[il].cov[1]),sqrt(scsspt[il].cov[2]));
+	el = new StThreeVectorD(0,0,0);
 	
 	//create a hit object
 	// the total number of allowed use of the hit is 
-	mSvtHit[ill] = new StEstHit(scsspt[il].id,xg,xl,ExtremeBranching,mParams[0]->share[lay],mIndexWaf[jl]);
+// 	mSvtHit[ill] = new StEstHit(scsspt[il].id,xg,xl,ExtremeBranching,mParams[0]->share[lay],mIndexWaf[jl]);
+	mSvtHit[ill] = new StEstHit(scsspt[il].id,xg,xl,eg,el,ExtremeBranching,mParams[0]->share[lay],mIndexWaf[jl]);
 	
 	if(!mSvtHit[ill]){
 	  gMessMgr->Error()<<"ERROR!!! not enougth memory"<<endm;

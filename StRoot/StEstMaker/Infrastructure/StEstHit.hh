@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.hh,v 1.3 2001/01/26 09:49:25 lmartin Exp $
+ * $Id: StEstHit.hh,v 1.4 2001/07/15 20:31:33 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstHit.hh,v $
+ * Revision 1.4  2001/07/15 20:31:33  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.3  2001/01/26 09:49:25  lmartin
  * Minor changes. Useless data member mEvalTrack removed. Short description of the
  * data members added.
@@ -37,6 +40,8 @@ protected:
   StEstBranch** mBranch; // list of pointer to the branches using the hit
   StThreeVectorD* mXL;   // local coordinates
   StThreeVectorD* mXG;   // global coordinates
+  StThreeVectorD* mEL;   // Errors in local coordinates (Not used now)
+  StThreeVectorD* mEG;   // Errors in global coordinates
   long mNShare; // number of tracks sharing the hit
   long mMaxShare; // maximum number of tracks sharing the hit
   long mNBranch; // number of branches sharing the hit
@@ -49,6 +54,7 @@ protected:
 public:
   
   StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbranches, long maxsh, StEstWafer *det);
+  StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, StThreeVectorD *eg, StThreeVectorD *el, long maxbranches, long maxsh, StEstWafer *det);
   ~StEstHit();
   
   int  GetNBranch();
@@ -62,6 +68,8 @@ public:
   int  CheckAvailability();
   StThreeVectorD* GetGlobX();
   StThreeVectorD* GetLocX();
+  StThreeVectorD* GetGlobE();
+  StThreeVectorD* GetLocE();
   StEstWafer*  GetWafer();
   void DetachFromWafer();
   StEstBranch* GetBranch(int i);
@@ -81,6 +89,8 @@ inline int StEstHit::CheckAvailability() {
 };
 inline StThreeVectorD* StEstHit::GetGlobX() {return mXG;};
 inline StThreeVectorD* StEstHit::GetLocX()  {return mXL;};
+inline StThreeVectorD* StEstHit::GetGlobE() {return mEG;};
+inline StThreeVectorD* StEstHit::GetLocE()  {return mEL;};
 inline StEstWafer* StEstHit::GetWafer() {return mDetector;};
 inline int StEstHit::GetNBranch() {return mNBranch;};
 inline int StEstHit::GetMaxBranches() {return mMaxBranches;};

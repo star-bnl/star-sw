@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.hh,v 1.3 2001/01/26 10:16:44 lmartin Exp $
+ * $Id: StEstBranch.hh,v 1.4 2001/07/15 20:31:33 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.hh,v $
+ * Revision 1.4  2001/07/15 20:31:33  caines
+ * Fixes from Insure++ debugging
+ *
  * Revision 1.3  2001/01/26 10:16:44  lmartin
  * Minor changes. Unused mLastLay data member removed. Short description of the data members added.
  *
@@ -36,10 +39,10 @@ protected:
   StEstTrack* mTrack; // pointer to the mother track
   StEstHit**  mHits; // list of pointers to the hits in the branch
   StHelix* mHelix; // pointer to the branch helix
-  long int mNHits; // number of hits in the branch
-  long int mMaxHits; //maximum number of hits in the branch 
-  long int mNFit; // number of hits used in the fit
-  long int mLastFitStatus; // Status flag return by the egr fitting routine
+  long mNHits; // number of hits in the branch
+  long mMaxHits; //maximum number of hits in the branch 
+  long mNFit; // number of hits used in the fit
+  long mLastFitStatus; // Status flag return by the egr fitting routine
   double mChisq; // Total chisq
   double mChisqCir; // Circular chisq
   double mChisqLin; // Linear chisq
@@ -51,13 +54,13 @@ protected:
   int mHitPosition; //Rank of the selected hit according to the hits-projection distance
   
 public :
-  StEstBranch(StEstTrack* tr=NULL, long int maxhits=1, long int nf=0, long int nh=0, StEstHit** hit=NULL, double *dist=0, int isgood=1);
+  StEstBranch(StEstTrack* tr=NULL, long maxhits=1, long nf=0, long nh=0, StEstHit** hit=NULL, double *dist=0, int isgood=1);
   ~StEstBranch();
   int AddHit(StEstHit *hit, double dist);
-  int RemoveHit(long int nr);
+  int RemoveHit(long nr);
   int RemoveHit(StEstHit* hit);
-  long int GetNHits();
-  StEstHit* GetHit(long int nr);
+  long GetNHits();
+  StEstHit* GetHit(long nr);
   int CheckAvailability();
   StEstBranch* Duplicate();
   int JoinTrack(StEstTrack *tr, int IsIdeal);
@@ -68,13 +71,13 @@ public :
   void SetChiSq(double chi);
   void SetChiSqCir(double chi);
   void SetChiSqLin(double chi);
-  void SetNFit(long int nf);
+  void SetNFit(long nf);
   double GetChiSq();
   double GetChiSqCir();
   double GetChiSqLin();
   double GetDist(long nr);
   double GetDist(StEstHit* hit);
-  long int GetNFit();
+  long GetNFit();
   void SetDebugLevel(int deb);
   void SetStep(int step);
   int GetStep();
@@ -90,7 +93,7 @@ inline int StEstBranch::CheckAvailability() {
   else return 0;
 }
 
-inline long int StEstBranch::GetNHits()             {return mNHits;};
+inline long StEstBranch::GetNHits()             {return mNHits;};
 inline StHelix* StEstBranch::GetHelix()             {return mHelix;};
 inline void     StEstBranch::SetChiSq(double chi)   {mChisq = chi;};
 inline void     StEstBranch::SetChiSqLin(double chi)   {mChisqLin = chi;};
@@ -108,7 +111,7 @@ inline void     StEstBranch::SetIsGoodOld(int isgood) {mIsGoodOld = isgood;};
 inline int      StEstBranch::GetIsGoodOld() {return mIsGoodOld;};
 inline StEstTrack* StEstBranch::GetTrack() {return mTrack;};
 inline void     StEstBranch::SetNFit(long nf) {mNFit=nf;};
-inline long int StEstBranch::GetNFit() {return mNFit;};
+inline long StEstBranch::GetNFit() {return mNFit;};
 
 
 
