@@ -113,6 +113,9 @@ void RunStiMaker(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, c
     
     cout <<"Loading StiEvaluator"<<endl;
     gSystem->Load("StiEvaluator");
+
+    cout <<"Loading libGui"<<endl;
+    gSystem->Load("libGui");
     
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
