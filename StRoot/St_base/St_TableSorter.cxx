@@ -113,7 +113,7 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   // count the open "["
   m_colDimensions = 0;
   Char_t *br = name - 1;
-  while(br = strchr(br+1,'[')) {
+  while((br = strchr(br+1,'['))) {
     if (!m_colDimensions) *br = 0; 
     m_colDimensions++;
   }
@@ -146,10 +146,12 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   SortArray();
   SetSearchMethod();
 }
+
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow
-                               ,Int_t numberRows):m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(*((const St_Table *)0))
+                               ,Int_t numberRows,const St_Table &table)
+                               :m_simpleArray((const Char_t*)simpleArray)
+                               ,m_ParentTable(table)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -180,8 +182,9 @@ St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_
 }
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow
-                               ,Int_t numberRows):m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(*((const St_Table *)0))
+                               ,Int_t numberRows,const St_Table &table)
+                               :m_simpleArray((const Char_t*)simpleArray)
+                               ,m_ParentTable(table)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -212,8 +215,9 @@ St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int
 }
 //_____________________________________________________________________________
 St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow
-                               ,Int_t numberRows):m_simpleArray((const Char_t*)simpleArray)
-                               ,m_ParentTable(*((const St_Table *)0))
+                               ,Int_t numberRows,const St_Table &table)
+                               :m_simpleArray((const Char_t*)simpleArray)
+                               ,m_ParentTable(table)
 {
   //
   // St_TableSorter ctor sort the input "simpleArray" 
@@ -351,7 +355,6 @@ int St_TableSorter::Search##valuetype  (const void *elem1, const void **elem2) {
          valuetype *value1 = (valuetype *)(elem1);    \
          valuetype *value2 = (valuetype *)(*elem2);   \
          return    *value1-*value2;                   \
-         Int_t res = 0;                               \
 }                                                     \
 int St_TableSorter::Compare##valuetype  (const void **elem1, const void **elem2) { \
          valuetype *value1 = (valuetype *)(*elem1);   \
@@ -430,7 +433,7 @@ Int_t St_TableSorter::BSearch(const void *value){
 Int_t St_TableSorter::GetIndex(UInt_t index) const
 {
    Int_t indx = -1;
-   if (index < m_numberOfRows )  {
+   if (index < UInt_t(m_numberOfRows) )  {
      void *p = m_SortIndex[index];
      if (p) {
          const Char_t *res = (const Char_t *)p;
@@ -578,15 +581,12 @@ void St_TableSorter::LearnTable()
   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
   if (!(classPtr->GetNdata())) return;
 
-  Int_t rowSize = m_ParentTable.GetRowSize();
-
   const Char_t *types;
   Char_t *varname;
-  Int_t count = 0;
 
   TIter next(classPtr->GetListOfDataMembers());
   TDataMember *member = 0;
-  while (member = (TDataMember *) next()) {
+  while ( (member = (TDataMember *) next()) ) {
     varname = (Char_t *) member->GetName();   
 
     if (strcmp(varname,m_colName.Data())) continue;
@@ -618,7 +618,7 @@ void St_TableSorter::LearnTable()
     if (m_colType != kNAN) {
       Int_t dim = 0;
       Int_t globalIndex = 0;
-      if (dim = member->GetArrayDim()) {
+      if ( (dim = member->GetArrayDim()) ) {
       // Check dimensions
         if (dim != m_colDimensions) {
            Error("LearnTable","Wrong dimension");
