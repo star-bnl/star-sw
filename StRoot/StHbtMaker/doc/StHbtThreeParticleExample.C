@@ -7,8 +7,7 @@ class Q3invCorrFctn;
 Q3invCorrFctn* Q3invCF;
 
 void StHbtThreeParticleExample(Int_t nevents=1,
-		  const char *MainFile="/star/rcf/disk00001/star/auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on/tfs_5/set0149_07_63evts.dst.root")
-  ///star/rcf/pwg/hbt/willson/roberts.dst.root")
+		  const char *MainFile="/star/rcf/pwg/hbt/July2000/HalfFieldData_new2.microDst")
 {
 
     // Dynamically link needed shared libs
@@ -23,7 +22,6 @@ void StHbtThreeParticleExample(Int_t nevents=1,
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker");
     gSystem->Load("StHbtMaker");
-    gSystem->Load("StV0MiniDstMaker");
 
     cout << "Dynamic loading done" << endl;
 
@@ -32,18 +30,6 @@ void StHbtThreeParticleExample(Int_t nevents=1,
    
 
     // Now we add Makers to the chain...
-
-    StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
-    ioMaker->SetDebug();
-
-    ioMaker->SetIOMode("r");
-    ioMaker->SetDebug();
-    ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-    ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
-
-
-    StEventMaker* eventMaker = new StEventMaker("events","title");
-    cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
 
     StHbtMaker* hbtMaker = new StHbtMaker("HBT","title");
     cout << "StHbtMaker instantiated"<<endl;
@@ -55,10 +41,9 @@ void StHbtThreeParticleExample(Int_t nevents=1,
 
     StHbtManager* TheManager = hbtMaker->HbtManager();
 
-    // here, we instantiate the appropriate StHbtEventReader
-    // for STAR analyses in root4star, we instantiate StStandardHbtEventReader
-    StStandardHbtEventReader* Reader = new StStandardHbtEventReader;
-    Reader->SetTheEventMaker(eventMaker);     // gotta tell the reader where it should read from
+    // use the binary reader
+    StHbtBinaryReader* Reader = new StHbtBinaryReader;
+    Reader->SetFileName(MainFile);
 
     // here would be the palce to plug in any "front-loaded" Event or Particle Cuts...
     TheManager->SetEventReader(Reader);
@@ -88,7 +73,7 @@ void StHbtThreeParticleExample(Int_t nevents=1,
     trkcut->SetNSigmaProton(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal proton dEdx
     trkcut->SetNHits(5,50);            // range on number of TPC hits on the track
     trkcut->SetPt(0.1,1.0);            // range in Pt
-    trkcut->SetRapidity(-.01,.01);     // range in rapidity
+    trkcut->SetRapidity(-10.0,10.0);     // range in rapidity
     trkcut->SetDCA(0.0,0.5);           // range in Distance of Closest Approach to primary vertex
     trkcut->SetCharge(-1);             // want negative pions
     trkcut->SetMass(0.139);            // pion mass
@@ -99,10 +84,10 @@ void StHbtThreeParticleExample(Int_t nevents=1,
     GenericTripletCut* tripletcut = new GenericTripletCut;  // use gereric triplet cut object
     anal->SetTripletCut(tripletcut);         // this is the triplet cut for this analysis
     // 4) set the number of events to mix (per event)
-    anal->SetNumEventsToMix(5);        
+    anal->SetNumEventsToMix(2);        
     // 5) now set up the correlation functions that this analysis will make
     // this particular analysis will have one: a Q-invariant correlation function
-    Q3invCF = new Q3invCorrFctn("Q3invCF",500,0.0,0.4);  // defines a Q3inv correlation function
+    Q3invCF = new Q3invCorrFctn("Q3invCF",100,0.0,1.0);  // defines a Q3inv correlation function
     anal->AddCorrFctn(Q3invCF); // adds the just-defined correlation function to the analysis
     
     // now add as many more correlation functions to the Analysis as you like..
