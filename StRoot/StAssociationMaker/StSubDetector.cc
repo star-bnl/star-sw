@@ -109,10 +109,7 @@ StSubDetector::~StSubDetector(){
 
 //__________________________________
 void StSubDetector::addHit(const StTpcHit* hit){
-    
-  
   StThreeVectorF xglbvec = hit->position();
-  
   int iSector;
   int iPadrow;
   float xLocal;
