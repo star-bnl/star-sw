@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.2 1999/07/09 12:42:31 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.3 1999/07/10 13:18:06 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
+# Revision 1.3  1999/07/10 13:18:06  wenaus
+# add 'run only' and 'log only' views
+#
 # Revision 1.2  1999/07/09 12:42:31  wenaus
 # Change default seq limits
 #
@@ -28,15 +31,35 @@ require "dbsetup.pl";
 $debugOn = 0;
 
 &cgiSetup();
-$showLog = $q->param('show') if ( $q->param('show') ne '');
-if ( $q->param('show') ne '' ) {
-    &printMainHeader("Run Log Display",1);
+
+@paramlist = $q->param();
+foreach $par ( @paramlist ) {
+    $logOnly = 1 if ( $par eq 'log' );
+    $runOnly = 1 if ( $par eq 'run' );
+    $showLog = 1 if ( $par eq 'show' );
+}
+
+$logLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&log\">Comments only</a>";
+$runLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&run\">Run log only</a>";
+$fullLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes\">Full log</a>";
+if ( $showLog ) {
+    if ( $logOnly ) {
+        $title = "Online comment log";
+        $logLogUrl = "Comments only";
+    } elsif ( $runOnly ) {
+        $title = "Run log";
+        $runLogUrl = "Run log only";
+    } else {
+        $title = "Run log and online comments";
+        $fullLogUrl = "Full log";
+    }
+    &printMainHeader($title,1);
     &displayLog();
 } elsif ( $q->param('events') ne '') {
     &printMainHeader("Events for run ".$q->param('events'));
     &displayEvents($q->param('events'));
 } else {
-    &printMainHeader("Run Log");
+    &printMainHeader("Online Run Log and Comment Log");
     &logEntryForm();
 }
 
@@ -80,7 +103,9 @@ Links at right (you need a wide window) give access to event summaries and allow
 of run log entries. To kill a junk entry like a 'testing' comment,
 edit it and set status=-1 (if you just delete it it will reappear if
 the database is rebuilt from the entry log). Updated hourly.
-<p><hr>
+<p>
+<font size="-1">$fullLogUrl - $runLogUrl - $logLogUrl</font>
+<hr>
 <p><pre>
 END
     $nrow=0;
@@ -107,75 +132,98 @@ END
         $eventsLink="<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?events=$nrun\"><u>Events</u></a>";
         $outline = '';
         if ($val{'name'} eq '') {
-            ## if a comment, don't print if status<0
-            if ($val{'status'} >= 0) {
-                ## If not a run record, don't print the run params
-                $outline = sprintf(&lineFormat("darkgreen","darkgreen",1),
-                       'Comment',
-                       substr($val{'user'},0,15),
-                       substr($val{'starttime'},2,14),
-                       '',
-                       '',
-                       '',
-                       '',
-                       '',
-                       '',
-                       '',
-                       '',
-                       '',
-                       '','',
-                       '',
-                       $editLink,
-                       $delLink
-                       );
+            if (! $runOnly) {
+                ## if a comment, don't print if status<0
+                if ($val{'status'} >= 0) {
+                    ## If not a run record, don't print the run params
+                    $outline = sprintf(&lineFormat("darkgreen","darkgreen",1),
+                                       'Comment',
+                                       substr($val{'user'},0,15),
+                                       substr($val{'starttime'},2,14),
+                                       '',
+                                       '',
+                                       '',
+                                       '',
+                                       '',
+                                       '',
+                                       '',
+                                       '',
+                                       '',
+                                       '','',
+                                       '',
+                                       $editLink,
+                                       $delLink
+                                       );
+                }
             }
         } else {
-            if ( $val{'field'} eq '' ) {
-                $pct='';
-            } else {
-                $pct='%';
+            if ( ! $logOnly ) {
+                if ( $val{'field'} eq '' ) {
+                    $pct='';
+                } else {
+                    $pct='%';
+                }
+                $outline = sprintf(&lineFormat("darkgreen","darkgreen",1),
+                                   $val{'name'},
+                                   substr($val{'user'},0,15),
+                                   substr($val{'starttime'},2,14),
+                                   $val{'nevents'},
+                                   $val{'trig'},
+                                   $val{'zerosup'},
+                                   $val{'pedmode'},
+                                   $val{'gainmode'},
+                                   $val{'thrlo'},
+                                   $val{'thrhi'},
+                                   $val{'seqlo'},
+                                   $val{'seqhi'},
+                                   $val{'field'},$pct,
+                                   $val{'rawformat'},
+                                   $eventsLink,
+                                   $editLink,
+                                   $delLink
+                                   );
             }
-            $outline = sprintf(&lineFormat("darkgreen","darkgreen",1),
-                   $val{'name'},
-                   substr($val{'user'},0,15),
-                   substr($val{'starttime'},2,14),
-                   $val{'nevents'},
-                   $val{'trig'},
-                   $val{'zerosup'},
-                   $val{'pedmode'},
-                   $val{'gainmode'},
-                   $val{'thrlo'},
-                   $val{'thrhi'},
-                   $val{'seqlo'},
-                   $val{'seqhi'},
-                   $val{'field'},$pct,
-                   $val{'rawformat'},
-                   $eventsLink,
-                   $editLink,
-                   $delLink
-                   );
         }
         if ( $outline ne '' ) {
             $nrow++;
             if ($nrow%8 == 1) {
-                printf(&lineFormat("blueviolet","blueviolet",1),
-                       'Run',
-                       'Submitter',
-                       'Submitted at',
-                       'Nevents',
-                       'Trig',
-                       'Zero',
-                       'Ped',
-                       'Gain',
-                       'Lo',
-                       'Hi',
-                       'Lo',
-                       'Hi',
-                       'Field','',
-                       'Raw'
-                       );
-                printf("<font color=\"blueviolet\"><b>%66s %26s %4s %11s</b></font>\n",
-                       'Sup','Thres','Seq','Fmt');
+                if ( $logOnly ) {
+                    printf(&lineFormat("blueviolet","blueviolet",1),
+                           '',
+                           'Submitter',
+                           'Submitted at',
+                           '',
+                           '',
+                           '',
+                           '',
+                           '',
+                           '',
+                           '',
+                           '',
+                           '',
+                           '','',
+                           ''
+                           );
+                } else {
+                    printf(&lineFormat("blueviolet","blueviolet",1),
+                           'Run',
+                           'Submitter',
+                           'Submitted at',
+                           'Nevents',
+                           'Trig',
+                           'Zero',
+                           'Ped',
+                           'Gain',
+                           'Lo',
+                           'Hi',
+                           'Lo',
+                           'Hi',
+                           'Field','',
+                           'Raw'
+                           );
+                    printf("<font color=\"blueviolet\"><b>%66s %26s %4s %11s</b></font>\n",
+                           'Sup','Thres','Seq','Fmt');
+                }
             }
             print $outline;
             if ($val{'title'} ne '') {
@@ -218,9 +266,14 @@ Commissioning forum</a> -
 <a href="http://daq.star.bnl.gov/~daq/">DAQ</a> -
 <a href="/STARAFS/comp/prod/">Production</a>
 </font></center>
-<h3><a href="http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes">
-    Browse the log</a> (<a href="http://redford.star.bnl.gov/staronline/shifts/shiftLogEntry.htm">old log</a>)</h3>
-<h3>Make a log entry
+<h3>Browse the log:</h3>
+<blockquote>
+<h3>
+$fullLogUrl - $runLogUrl - $logLogUrl - 
+<a href="http://redford.star.bnl.gov/staronline/shifts/shiftLogEntry.htm">Old log</a></h3>
+</h3>
+</blockquote>
+<h3>Make a log entry:
 <font color="red">Continue to use the
 <a href="http://redford.star.bnl.gov/staronline/shifts/shiftLogEntry.htm">old log</a> for the moment to make entries)</font>
 </h3>
