@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.30 1999/04/06 19:40:08 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.31 1999/04/07 12:59:45 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.31  1999/04/07 12:59:45  fine
+// Fixed bug for PCON and PGON shapes
+//
 // Revision 1.30  1999/04/06 19:40:08  nevski
 // variable size volumes
 //
@@ -439,7 +442,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.30 1999/04/06 19:40:08 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.31 1999/04/07 12:59:45 fine Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -772,9 +775,21 @@ void St_geant_Maker::Work()
         case PARA: t=new TPARA(name,"PARA","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
         case PGON: t=new TPGON(name,"PGON","void",
-                         p[0],p[1],p[2],p[3]);                    break;
+                         p[0],p[1],p[2],p[3]);  
+                   {
+                    Float_t *pp = p+4;
+                    for(Int_t i=0;i<p[3];i++) 
+                       (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                   }
+                                                                  break;
         case PCON: t=new TPCON(name,"PCON","void",
-                         p[0],p[1],p[2]);                         break;
+                         p[0],p[1],p[2]);                         
+                   {
+                     Float_t *pp = p+3;
+                     for(Int_t i=0;i<p[2];i++)
+                        ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
+                   }
+                                                                  break;
         case ELTU: t=new TELTU(name,"ELTU","void",
                          p[0],p[1],p[2]);                         break;
 //      case HYPE: t=new THYPE(name,"HYPE","void",
@@ -794,7 +809,7 @@ void St_geant_Maker::Work()
     ivol  = (Int_t) *(position+1);
     irot  = (Int_t) *(position+3);
 
-    strncpy(nick,(const Char_t*)(cvolu+ivol),4);
+    strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
 
     // to build a compressed tree, name should be checked for repetition
     newNode = new St_Node(name,nick,t);
