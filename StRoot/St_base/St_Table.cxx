@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.26 1998/12/04 19:54:40 fine Exp $ 
+// $Id: St_Table.cxx,v 1.27 1998/12/06 00:38:16 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.26  1998/12/04 19:54:40  fine
-// Advanced version for St_Table::Print (it can manage arrays now)
+// Revision 1.27  1998/12/06 00:38:16  fisyak
+// Add SavePrimitive
 //
 // Revision 1.25  1998/12/04 01:54:44  fine
 // St_Table::Print(...) - The first version of the table browser has been introduced
@@ -274,6 +274,7 @@ Char_t *St_Table::Create()
 void St_Table::Browse(TBrowser *b){
   St_DataSet::Browse(b);
   Inspect();
+  Print(0,10);
 }
 //______________________________________________________________________________
 void St_Table::Clear(Option_t *opt)
@@ -569,6 +570,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
            indx++;
          }
          cout << "\t";
+         if ( strlen(member->GetName())+3*dim < 8) cout << "\t";
 
          // Encode data value or pointer value
          Int_t offset = member->GetOffset();
@@ -584,7 +586,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                 ArrayIndex(arrayIndex,arraySize,dim);
                 cout << "\t";
                 for (Int_t i=0;i<dim;i++) cout << "["<<arrayIndex[i]<<"]";
-                cout << "\t";
+                cout << "\t\t";
            }
 
            for (thisStepRows = 0;thisStepRows < thisLoopLenth; thisStepRows++,nextRow += GetRowSize())
@@ -627,9 +629,17 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                    cdatime = (UInt_t*)pointer;
                    TDatime::GetDateTime(cdatime[0],cdate,ctime);
                    cout << cdate << "/" << ctime;
-                } else {
-                   cout << membertype->AsString((void *)pointer) <<" : ";
-                }
+                } else if (strcmp(membertype->GetFullTypeName(),"char")==0 && dim == 1) {
+                    char charbuffer[11];
+                    strncpy(charbuffer,pointer,TMath::Min(10,arrayLength));
+                    charbuffer[10] = 0;
+                    cout << "\"" << charbuffer;
+                    if (arrayLength > 10) cout << " . . . ";
+                    cout << "\"";
+                    breakLoop = kTRUE;
+                 }
+                 else
+                    cout << membertype->AsString((void *)pointer) <<" : ";
              else
                 cout << "->" << (Long_t)pointer;
            }
@@ -651,6 +661,15 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
   return 0;
  }
 
+//______________________________________________________________________________
+void St_Table::SavePrimitive(ofstream &out, Option_t *)
+{
+   // Save a primitive as a C++ statement(s) on output stream "out".
+ 
+   out << "//Primitive: " << GetName() << "/" << GetTitle()
+       <<". You must implement " << ClassName() << "::SavePrimitive" << endl;
+}
+ 
 //______________________________________________________________________________
 Int_t St_Table::ReadGenericArray(TBuffer &b, void *&ii, EBufSizes membersize)
 {
