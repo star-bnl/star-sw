@@ -16,20 +16,19 @@ C :>--------------------------------------------------------------------
       RECORD          /TABLE_HEAD_ST/    p_vert_h
       RECORD          /TABLE_HEAD_ST/    p_track_h
       RECORD          /TABLE_HEAD_ST/    p_hits_h
-      Integer         Lnmax,Lnam0,Lnam,Nbytpw,Nmh
+      Integer         Lnmax,Lnam0,Lnam,Nbytpw,Nmh,Npar,Ish
       Parameter       (Lnmax=50,Lnam0=35,Nbytpw=4,Nmh=25)
       INTEGER         G2T_GET_HITS,p_hits(*),p_track(*),p_vert(*)
-      integer         nh/0/,i,j,k,l,e,f,m,n,ip,in,jX,jP,iX,iC,iPT,iLP,
+      Integer         nh/0/,i,j,k,l,e,f,m,n,ip,in,jX,jP,iX,iC,iPT,iLP,
      >                iET,LenT,LenH,xD2M,pD2M,IH,JTRA,Iprin
-      Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
-      integer         IQQ(Lnmax),iadr(Nmh),jadr(Nmh),NUMBV(Nmh),phits(Nmh)
+      Real            VMOD,Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh),Par(50)
+      Integer         IQQ(Lnmax),iadr(Nmh),jadr(Nmh),NUMBV(Nmh),phits(Nmh)
       Character*4     Csys*4/' '/,chit(Nmh)*4,cnam
-      Character*80    col,typ
+      Character*80    col,typ,cp
       real            xxx(3),ccc(3),QQ(Lnmax)
       Equivalence     (QQ(1),IQQ(1),id)
-
       character*4     Gname(Lnmax),Tname(Lnmax)
-      integer         iflg(Lnmax), jflg(Lnmax)
+      Integer         iflg(Lnmax), jflg(Lnmax)
       Integer         id,trac,next,volume
       Real            x,   xx,   c,   p   ,r,rr,phi,the,eta,
      >                tdr,tof,Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn
@@ -49,13 +48,19 @@ C :>--------------------------------------------------------------------
       External        TDM_GET_SPEC, TDM_GET_COLUMN, TDM_GET_CCOUNT
       Integer         AgFHIT1, ISLFLAG, G2T_VOLUME_ID, IG2TPOS
       External        AgFHIT1, ISLFLAG, G2T_VOLUME_ID, IG2TPOS
-      Integer         IPOS
+      Real            G2T_FIELD, vert(4),pvert(4),Ub(10),
+     >                Pt,Vr,mass,charge,tlf,dphi,dtr,Vc,FieldZ
+      Integer         IPOS,Iprt,Ip0/0/,Ivert,It0/0/,Nu,tp
       IPOS(cnam) =    IG2TPOS(cnam,Gname,Lnam0)
-*   
+* - -    
       G2T_GET_HITS = STAFCV_BAD
-      Iprin = ISLFLAG('G2TM','PRIN')
-      LenH  = p_hits_h.rbytes/NBytPW
-      LenT  = p_track_h.rbytes/NBytPW
+      Iprin  = ISLFLAG('G2TM','PRIN')
+
+      FieldZ = G2T_FIELD (0.)
+      If (Iprin.gt.0)  print *,' G2T Mag. Field  =',FieldZ
+
+      LenH   = p_hits_h.rbytes/NBytPW
+      LenT   = p_track_h.rbytes/NBytPW
       call vzero (QQ,   Lnmax)
       call vzero (iflg, Lnmax)
       call vzero (iadr, Nmh)
@@ -117,8 +122,8 @@ C :>--------------------------------------------------------------------
          n=n+e
       enddo
       if (Iprin.gt.0) then
-      if (ip.eq.0) print *,'hit_'//Csys(1:3)//'_p not found in g2t_track'
-      if (in.eq.0) print *,'n_'//Csys(1:3)//'_hit not found in g2t_track'
+         if (ip.eq.0) print *,'hit_'//Csys(1:3)//'_p not found in g2t_track'
+         if (in.eq.0) print *,'n_'//Csys(1:3)//'_hit not found in g2t_track'
       endif
 *
 *     3. prepare map to unfold an input hit into the full hit
@@ -197,24 +202,58 @@ C :>--------------------------------------------------------------------
 * - - -     
       DO WHILE (agfhit1(ih,jtra,numbv,hits).eq.0)
 *
-         nh     = nh + 1
-         id     = nh
          trac   = abs(jtra)
+         if (abs(ih).eq.1) then
+            call Agfpath(numbv)
+            call Agfpara(ish,npar,par)
+         endif 
          do k=1,Nmh
             if (iadr(k).gt.0) QQ(iadr(k))=(hits(k))
          enddo
 
 C        overwrite global coordinates with local if they are not measured
-         if (abs(ih).eq.1)  call Agfpath(numbv)
+
          volume  =   g2t_volume_id (Csys,NUMBV)
-         if ( xD2M .ne. 0)  call GDTOM(x,xxx,1)
-         if ( pD2M .ne. 0)  call GDTOM(c,ccc,2)
          if ( iflg(iPT).le.0.and.iflg(iLP).gt.0) p(4)=10.**Lpto
          if ( iflg(iLP).le.0.and.iflg(iPT).gt.0) Lpto=alog10(p(4))
+         Vc  = VMOD(c,3)
+         do i=1,3
+            c(i)=c(i)/Vc
+         enddo
+
+C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
+         if (Csys.eq.'tpc') then
+            if (user.lt.0) then
+
+               If (Ish.ne.1)    print *,' Awful error in TPC, shape=',Ish,Npar
+               if (trac.ne.it0) call gfkine(trac,vert,pvert,iprt,ivert,Ub,nu)
+               if (iprt.ne.ip0) call gfpart(iprt,cp,tp,mass,charge,tlf,Ub,nu)
+               Vr  = 1.e9 
+               Pt  = p(4)*sqrt(c(1)**2+c(2)**2)
+               if (Pt.gt.0) Vr = 0.0003*FieldZ/Pt
+               dphi = min (Step*Vr,1.0)
+               dtr  = dphi/8*charge*(3-2*NumBV(1))*Step
+
+               x(1) = min(max(-par(1),x(1)+c(2)*dtr),par(1))
+               x(2) = min(max(-par(2),x(2)-c(1)*dtr),par(2))              
+               it0 = trac
+               ip0 = iprt
+            endif
+            if (abs(Step*c(1))<2*par(1)-0.1) User=-abs(User)
+            if (step.lt.0.01) go to 190
+         endif
+C                 - - - - - - - - - - - - - - - - - - - - - - - - - -
+         if ( xD2M .ne. 0)  call GDTOM(x,xxx,1)
+         if ( pD2M .ne. 0)  call GDTOM(c,ccc,2)
+
          do i=1,3
             if (iflg(jX+i-1).le.0.and.xD2M.gt.0) xx(i)=(xxx(i))
             if (iflg(jP+i-1).le.0.and.pD2M.gt.0) p(i)=(ccc(i)*p(4))
          enddo
+
+* hit is selected:
+         nh     = nh + 1
+         id     = nh
 *         print *,nh,' X, c =',x,c
 *         print *,nh,' XX,cc=',xxx,ccc
 *
@@ -235,14 +274,14 @@ C        overwrite global coordinates with local if they are not measured
          enddo
          call ucopy (phits,p_hits(LenH*(nh-1)+1),LenH)
          p_hits_h.nok = nh
-      enddo
+ 190  enddo
 
-      G2T_GET_HITS = STAFCV_OK
-
-      RETURN
+ 200  G2T_GET_HITS = STAFCV_OK
       end
 
-      function Ig2tpos(name,table,L)
+*****************************************************************************
+
+      Function IG2TPOS(name,table,L)
       character*4  name,table(L)
       do i=1,L
          Ig2tpos=i
@@ -250,3 +289,4 @@ C        overwrite global coordinates with local if they are not measured
       enddo
          Ig2tpos=0
       end
+

@@ -6,7 +6,7 @@
       integer  g2t_volume_id
 * 
       Character*3      Csys
-      Integer          NUMBV(15)
+      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
@@ -18,7 +18,7 @@
       Integer          Iprin,Nvb
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
-      structure  TPCG  {version}
+      Structure  TPCG  {version}
       Structure  BTOG  {version, choice, posit1, posit2 }
       Structure  CALG  {version, Nmodule(2) }
       logical          first/.true./
@@ -28,14 +28,17 @@
           first=.false.
           call RBPUSHD
           btog_posit1 = 23
-          USE  /DETM/TPCE/TPCG
-          USE  /DETM/BTOF/BTOG
-          USE  /DETM/CALB/CALG
+          USE  /DETM/TPCE/TPCG  stat=itpc
+          USE  /DETM/BTOF/BTOG  stat=ibtf
+          USE  /DETM/CALB/CALG  stat=ical
+
           call RBPOPD
-          print *,' g2t_volume_id: TPC version =',tpcg_version
-          print *,'              : TOF version =',btog_version,
-                                 ' TOF choice  =',btog_choice,btog_posit1
+          if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
+          if (ibtf>=0) print *,'              : TOF version =',btog_version,
+                                   ' choice  =',btog_choice,btog_posit1
+          if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
       endif
+
       volume_id = 0
 *
       If    (Csys=='svt') then
