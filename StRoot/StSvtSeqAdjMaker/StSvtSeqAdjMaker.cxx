@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.52 2004/02/11 00:42:17 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.53 2004/03/18 04:05:01 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.53  2004/03/18 04:05:01  caines
+ * Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour, also initialise some variables that valgrind was complaining about - didnt really need to as they are sent back from function which initialises them properly always but doesnt hurt
+ *
  * Revision 1.52  2004/02/11 00:42:17  caines
  * Put common mode back
  *
@@ -185,9 +188,7 @@
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 
-int* anolist; 
-TFile *hfile;
-unsigned long Evt_counts=0;
+
 
 //___________________________________________________________________________________________
 StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
@@ -1090,6 +1091,8 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
   unsigned char* adc;
 
   StSequence* svtSequence;
+  mSequence = 0;
+  svtSequence = NULL;
 
   // Anode goes between 1-240
   
