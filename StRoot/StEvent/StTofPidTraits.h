@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofPidTraits.h,v 2.1 2000/12/08 03:52:42 ullrich Exp $
+ * $Id: StTofPidTraits.h,v 2.2 2000/12/09 02:13:23 perev Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofPidTraits.h,v $
+ * Revision 2.2  2000/12/09 02:13:23  perev
+ * default StObject::clone() used
+ *
  * Revision 2.1  2000/12/08 03:52:42  ullrich
  * Initial Revision
  *
@@ -28,7 +31,7 @@ public:
     //StTofPidTraits& operator=(const StTofPidTraits&) {/* nopt */}
         
 private:
-    StObject* clone();
+//VP    StObject* clone();
     ClassDef(StTofPidTraits,1)
 };
 #endif
