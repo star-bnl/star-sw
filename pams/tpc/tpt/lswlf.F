@@ -1,5 +1,8 @@
-* $Id: lswlf.F,v 1.3 1999/07/19 19:15:53 genevb Exp $
+* $Id: lswlf.F,v 1.4 2000/11/14 22:29:07 genevb Exp $
 * $Log: lswlf.F,v $
+* Revision 1.4  2000/11/14 22:29:07  genevb
+* Switched from float to double in many places
+*
 * Revision 1.3  1999/07/19 19:15:53  genevb
 * Use StMessMgr
 *
@@ -46,7 +49,7 @@ C Modified: 13-NOV-1997 by R.Bossingham
 C           Comment out unused variable VARSQ.
 C
       IMPLICIT NONE
-      DOUBLE PRECISION  SUM,SX,SY,SXX,SXY,SYY,DET
+      DOUBLE PRECISION  SUM,SX,SY,SXX,SXY,DET
 C     REAL       varsq
       REAL       a,b,siga,sigb,chi,chisq
       REAL  X(*),Y(*),W(*)
@@ -72,7 +75,6 @@ C     initialization
         SY =0.D0
         SXX=0.D0
         SXY=0.D0
-        SYY=0.D0
 C__________________________________________________________________
 C     find sum , sumx ,sumy, sumxx, sumxy
 C__________________________________________________________________
@@ -82,7 +84,6 @@ C__________________________________________________________________
             SY =SY  + W(I)*Y(I)
             SXX=SXX + W(I)*X(I)*X(I)
             SXY=SXY + W(I)*X(I)*Y(I)
-            SYY=SYY + W(I)*Y(I)*Y(I)
       end do
 
       DET= SUM*SXX -SX*SX
