@@ -45,13 +45,17 @@ int Bank_TRGD::SWITCH(HerbSwap)() {
   assert(header.ByteOrder==0x04030201);
   return returnValue;
 }
-void TRG_Reader::SWITCH(SanityCheck)() {
-  assert( SWITCH(gs)->RAW[0].RawDetHeader[0]=='R');  // If one of these asserts()s
-  assert( SWITCH(gs)->RAW[0].RawDetHeader[1]=='D');  // fails, it probably means that the
-  assert(SWITCH(gs)->RAW[0].CTBdataHeader[0]=='C');  // trigger group wrote the .daq bank
-  assert(SWITCH(gs)->RAW[0].CTBdataHeader[1]=='T');  // with a new version of trgStructures.h.
-  assert(SWITCH(gs)->RAW[0].MWCdataHeader[0]=='M');  // If so, then you will have to modify all
-  assert(SWITCH(gs)->RAW[0].MWCdataHeader[1]=='W');  // the offline code to 
-  assert(SWITCH(gs)->RAW[0].EMCdataHeader[0]=='E');  // switch
-  assert(SWITCH(gs)->RAW[0].EMCdataHeader[1]=='M');  // between versions of trgStructures.h.
+void TRG_Reader::SWITCH(SanityCheck)(int check_s=1) {
+  if ( check_s){
+    assert( SWITCH(gs)->RAW[0].RawDetHeader[0]=='R');  // If one of these asserts()s
+    assert( SWITCH(gs)->RAW[0].RawDetHeader[1]=='D');  // fails, it probably means that the
+    assert(SWITCH(gs)->RAW[0].CTBdataHeader[0]=='C');  // trigger group wrote the .daq bank
+    assert(SWITCH(gs)->RAW[0].CTBdataHeader[1]=='T');  // with a new version of trgStructures.h.
+    assert(SWITCH(gs)->RAW[0].MWCdataHeader[0]=='M');  // If so, then you will have to modify all
+    assert(SWITCH(gs)->RAW[0].MWCdataHeader[1]=='W');  // the offline code to 
+    assert(SWITCH(gs)->RAW[0].EMCdataHeader[0]=='E');  // switch
+    assert(SWITCH(gs)->RAW[0].EMCdataHeader[1]=='M');  // between versions of trgStructures.h.
+  } else {
+    cout << "TRG_Reader::SanityCheck200x : Bank position sanity check is disabled" << endl;
+  }
 }
