@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.20 1999/09/22 03:51:50 fine Exp $
+// $Id: St_NodeView.h,v 1.21 1999/11/13 16:59:17 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.21  1999/11/13 16:59:17  fine
+// St_Node and St_NodeView headers adjusted to ROOT 2.23/ not compatible with ROOT 2.22 anymore though!
+//
 // Revision 1.20  1999/09/22 03:51:50  fine
 // New method and RMath class to manage different transformation have been introduced
 //
@@ -60,7 +63,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-class St_NodeView : public St_ObjectSet {
+class St_NodeView : public St_ObjectSet, public TAtt3D  {
 protected:
   TList          *fListOfShapes;     //Pointer to the list of the "extra" shape definitions
 //  TList          *fListOfAttributes;  //Pointer to the list of this node attributes

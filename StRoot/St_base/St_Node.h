@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.17 1999/08/03 14:52:23 fine Exp $
+// $Id: St_Node.h,v 1.18 1999/11/13 16:59:17 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.18  1999/11/13 16:59:17  fine
+// St_Node and St_NodeView headers adjusted to ROOT 2.23/ not compatible with ROOT 2.22 anymore though!
+//
 // Revision 1.17  1999/08/03 14:52:23  fine
 // make up to make Linux compiler happy
 //
@@ -84,7 +87,7 @@ class St_NodePosition;
 class TRotMatrix;
 class TList;
 
-class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill { 
+class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill, public TAtt3D { 
  public:
   enum ENodeSEEN {kBothVisible  = 00,                              //'00'
                   kSonUnvisible =  1,                              //'01'
