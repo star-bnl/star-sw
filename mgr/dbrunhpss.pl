@@ -1,8 +1,11 @@
 #! /opt/star/bin/perl
 #
-# $Id: dbrunhpss.pl,v 1.2 1999/08/08 18:56:33 wenaus Exp $
+# $Id: dbrunhpss.pl,v 1.3 1999/10/30 15:09:12 wenaus Exp $
 #
 # $Log: dbrunhpss.pl,v $
+# Revision 1.3  1999/10/30 15:09:12  wenaus
+# Eliminate password
+#
 # Revision 1.2  1999/08/08 18:56:33  wenaus
 # Include handling of new name format - WD
 #
@@ -41,10 +44,21 @@ my $debugOn=0;
 &StDbConnect();
 
 ## Find all the Daq dirs, files in HPSS
+my $hpssHost = 'rmds01.rhic.bnl.gov';
+my $netrc = $ENV{HOME}.'/.netrc';
+open(NETRC,"<$netrc");
+my $pass = '';
+while (<NETRC>) {
+    if ( m/.*$hpssHost\s.*password\s([\S]*)\s/ ) {$pass = $1}
+}
+if ( $pass eq '' ) {
+    print "Password not found in .netrc\n";
+    exit;
+}
 my $ftpDaqHome = "/home/starsink/raw/daq";
-my $ftpDaq = Net::FTP->new("rmds02.rhic.bnl.gov", Port => 2121, Timeout=>10)
-    or die "rmds01 connect failed";
-$ftpDaq->login("starsink","MockData") or die "Login failed";
+my $ftpDaq = Net::FTP->new($hpssHost, Port => 2121, Timeout=>10)
+    or die "$hpssHost connect failed";
+$ftpDaq->login("starsink",$pass) or die "Login failed";
 my $nDaqFiles = 0;
 my @theDaqDirs;
 my @checkedDaqDirs;
