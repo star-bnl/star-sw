@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.h,v 1.2 1999/04/30 13:16:29 fisyak Exp $
+ * $Id: StTpcDedxPid.h,v 1.3 1999/05/02 00:00:17 fisyak Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.h,v $
- * Revision 1.2  1999/04/30 13:16:29  fisyak
- * add StArray for StRootEvent
+ * Revision 1.3  1999/05/02 00:00:17  fisyak
+ * Add default ctors
+ *
+ * Revision 1.3  1999/05/02 00:00:17  fisyak
+ * Add default ctors
  *
  * Revision 1.2  1999/04/30 13:16:29  fisyak
  * add StArray for StRootEvent
@@ -26,15 +29,16 @@
 #ifndef StTpcDedxPid_hh
 
 #define StTpcDedxPid_hh
-public: 
-    StTpcDedxPid(StGlobalTrack*);
-    ~StTpcDedxPid();
+#include "StObject.h"
+#include "StDedxPid.h"
+class StTpcDedxPid : public StDedxPid {
+public:
     
-    Int_t detectorInfoAvailable() const;
-    Int_t meetsStandardPid() const;
-    Double_t numberOfSigma(Double_t mass) const;
-    Double_t meanPidFunction(Double_t mass) const;
-    Double_t sigmaPidFunction(Double_t mass) const;
+  StTpcDedxPid() : StDedxPid() { /* noop */ };
+  StTpcDedxPid(StGlobalTrack*);
+  ~StTpcDedxPid();
+  Int_t detectorInfoAvailable() const;
+  Int_t meetsStandardPid() const;
   static Int_t quickPid(Float_t rig, Float_t dedx);
 
 

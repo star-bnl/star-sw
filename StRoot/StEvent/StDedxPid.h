@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPid.h,v 1.2 1999/04/30 13:16:27 fisyak Exp $
+ * $Id: StDedxPid.h,v 1.3 1999/05/02 00:00:16 fisyak Exp $
  *
  * Author: Craig Ogilvie and Thomas Ullrich, April 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDedxPid.h,v $
- * Revision 1.2  1999/04/30 13:16:27  fisyak
- * add StArray for StRootEvent
+ * Revision 1.3  1999/05/02 00:00:16  fisyak
+ * Add default ctors
+ *
+ * Revision 1.3  1999/05/02 00:00:16  fisyak
+ * Add default ctors
  *
  * Revision 1.2  1999/04/30 13:16:27  fisyak
  * add StArray for StRootEvent
@@ -28,18 +31,19 @@
 
 class StGlobalTrack;
 
-    StDedxPid(StGlobalTrack*);
-    virtual ~StDedxPid();
+#include "StObject.h"
+class StDedxPid : public StObject {
+public: 
   StDedxPid() : mTrack(0) { /* noop */ };
-    virtual Int_t    detectorInfoAvailable() const       = 0;
-    virtual Int_t    meetsStandardPid() const            = 0;
-    virtual Double_t numberOfSigma(Double_t mass) const    = 0;
-    virtual Double_t meanPidFunction(Double_t mass) const  = 0;
-    virtual Double_t sigmaPidFunction(Double_t mass) const = 0;
+  StDedxPid(StGlobalTrack*);
+  virtual ~StDedxPid();
+
+  virtual Int_t    detectorInfoAvailable() const       = 0;
+  virtual Int_t    meetsStandardPid() const            = 0;
   virtual Double_t numberOfSigma(Double_t mass) const    = 0;
   virtual Double_t meanPidFunction(Double_t mass) const  = 0;
-    StGlobalTrack* mTrack;
-    ClassDef(StDedxPid,1)  //StDedxPid structure
+  virtual Double_t sigmaPidFunction(Double_t mass) const = 0;
+    
 protected:
   StGlobalTrack* mTrack;
   ClassDef(StDedxPid,1)  //StDedxPid structure

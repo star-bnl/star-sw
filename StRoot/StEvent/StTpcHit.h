@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 1.3 1999/04/28 22:27:37 fisyak Exp $
+ * $Id: StTpcHit.h,v 1.4 1999/05/02 00:00:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 1.3  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
+ * Revision 1.4  1999/05/02 00:00:18  fisyak
+ * Add default ctors
+ *
+ * Revision 1.4  1999/05/02 00:00:18  fisyak
+ * Add default ctors
  *
  * Revision 1.3  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies
@@ -45,12 +48,13 @@ class StGlobalTrackCollection;
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
-    StTpcHit(const StThreeVectorF&,
-	     const StThreeVectorF&,
-	     Float_t, UChar_t = 0);
-    StTpcHit(dst_point_st*);
-    
-    StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
+  StTpcHit() : StHit () {/* noop */};
+ * Memory now allocated using StMemoryPool via overloaded new/delete
+ *
+  StTpcHit(){/* noop */};
+  StTpcHit(const StThreeVectorF&,
+  
+	   Float_t, UChar_t = 0);
 #ifndef __CINT__  
   StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
 #endif
