@@ -40,7 +40,7 @@
 #else
 
 /* Let's get the target CPU */
-#if defined(i386)	/* assume linux, GCC 3.X (new!) */
+#if defined(__i386__)	/* assume linux, GCC 3.X (new!) */
 
 #define RTS_LITTLE_ENDIAN
 
@@ -73,7 +73,7 @@
 /*********************** Find the TARGET_SYSTEM unless already defined *******************************/
 #ifndef TARGET_SYSTEM
 
-#if defined(linux)
+#if defined(__linux__)
 #define TARGET_SYSTEM "LINUX"
 #elif defined(sun)
 #define TARGET_SYSTEM "SUN"
@@ -120,7 +120,7 @@
 
 /* ********************** BYTESWAPPING STUFF ***********************/
 
-#ifdef linux
+#ifdef __linux__
 /* linux has its own (fast) swaps */
 #include <byteswap.h>
 
