@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.13 1999/12/19 16:07:01 perev Exp $
+// $Id: St_TLA_Maker.cxx,v 1.14 2000/06/23 16:50:07 fisyak Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.14  2000/06/23 16:50:07  fisyak
+// remove params
+//
 // Revision 1.13  1999/12/19 16:07:01  perev
 // Add README
 //
@@ -61,7 +64,6 @@ Int_t St_TLA_Maker::Init(){
  //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
 
 // Create tables
-   St_DataSetIter       local(GetDataBase("params"));
 // Create Histograms    
    return StMaker::Init();
 }

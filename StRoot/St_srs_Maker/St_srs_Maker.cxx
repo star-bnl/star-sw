@@ -1,10 +1,13 @@
-  //$Id: St_srs_Maker.cxx,v 1.22 2000/04/07 14:36:09 caines Exp $
+  //$Id: St_srs_Maker.cxx,v 1.23 2000/06/23 16:52:41 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.23  2000/06/23 16:52:41  fisyak
+//remove params
+//
 //Revision 1.22  2000/04/07 14:36:09  caines
 //Correct x y histogram filling
 //
@@ -41,7 +44,7 @@ St_srs_Maker::~St_srs_Maker(){
 Int_t St_srs_Maker::Init(){
 
 // 		Create tables
-   St_DataSetIter       local(GetInputDB("params/svt"));
+   St_DataSetIter       local(GetInputDB("svt"));
 
 
 // 		geometry parameters

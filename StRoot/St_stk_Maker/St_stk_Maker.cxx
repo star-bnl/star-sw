@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.20 2000/06/01 21:10:01 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.21 2000/06/23 16:52:51 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.21  2000/06/23 16:52:51  fisyak
+// remove params
+//
 // Revision 1.20  2000/06/01 21:10:01  caines
 // Turn off mc track filling as default
 //
@@ -138,12 +141,11 @@ St_stk_Maker::~St_stk_Maker(){
 //_____________________________________________________________________________
 Int_t St_stk_Maker::Init(){
   // Create tables
-  St_DataSetIter       local(GetDataBase("params"));
-  St_DataSetIter       gime(GetDataBase("params/global/vertices"));
+  St_DataSetIter       gime(GetDataBase("global/vertices"));
   m_stk_vtx        = (St_stk_vtx *)        gime("stk_vtx");
   m_stk_vtx_direct = (St_stk_vtx_direct *) gime("stk_vtx_direct");
   
-  gime.Reset(GetDataBase("params/svt"));
+  gime.Reset(GetDataBase("svt"));
   
   m_config         = (St_svg_config *)     gime("svgpars/config");
   m_geom           = (St_svg_geom *)       gime("svgpars/geom");
