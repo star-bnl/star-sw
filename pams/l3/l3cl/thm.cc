@@ -75,6 +75,7 @@ extern "C" long thm_(
 //    Construct cells
 //
 #ifdef DEBUG
+  printf ( " debug %d \n ", ctrl->debug ) ;
   if ( ctrl->debug > 1 ) cout << " Initializing "<< geometry.maxCells <<" cells... " <<flush;
 #endif
   thmCell*  cells  = new thmCell[geometry.maxCells];
@@ -131,6 +132,12 @@ extern "C" long thm_(
     else {
        recoPoints[i].pCell = 0 ;
     }
+#ifdef DEBUG
+    if ( ctrl->debug > 5 ) {
+       printf ( " Reco point %d %f %f %f assign to Cell %d \n ", i, 
+                            tHit[i].x, tHit[i].y, tHit[i].z, iCell ) ;
+    }
+#endif
   } 
 #ifdef DEBUG
   if ( ctrl->debug > 1 ) {
@@ -150,7 +157,7 @@ extern "C" long thm_(
   thmLink *x;
   mHitElt mIt, minMcHit;
   thmPoint*   minMcPoint ;
-  dMax = 10.*10. ;
+  dMax = 100.*100. ;
 
   for (i=0;i<tHitH->nok;i++) { 
 //   if (i%10000 == 0) cout << "i= "<< i << "\n" <<flush;
@@ -163,10 +170,11 @@ extern "C" long thm_(
 //   Loop over cells around
 //
     dMin = dMax ;
+//  printf ( " Reco point in search of Mc point %d \n " ) ;
     for (n=0;n<9 && dMin>filter;n++) {   //Iterate over nearest neighbours
       j=cellPointer->nn(n, geometry);
       if (j != -1) {
-	      for( x= cells[j].mcHits.first(); x!=0 && dMin>filter ; x=x->succ) {  
+	 for( x= cells[j].mcHits.first(); x!=0 && dMin>filter ; x=x->succ) {  
 	         thmPoint* mcTempPoint  = (thmPoint *)(x->e);
             mIt = (G2T_TPC_HIT_ST *)(mcTempPoint->pTable);
 //           dz2  = dz*dz; 
@@ -175,7 +183,8 @@ extern "C" long thm_(
             if ( dphi >  pi ) dphi  = (float)twoPi - dphi ;
             if ( dphi < -pi ) dphi += (float)twoPi  ;
             drphi = recoPoints[i].r * dphi ;
-            d    = drphi*drphi + dz*dz ;
+            d    = drphi*drphi + dz2 ;
+//          printf ( " MC point dphi %f r %f drphi %f d %f \n ", dphi, recoPoints[i].r, drphi, d  ) ;
 	       if ( d < dMin){
                dMin       = d; 
                drPhiMin   = drphi ;
