@@ -6,11 +6,9 @@
 #CC=gcc
 CPPFLAGS= $(patsubst %, -I%, $(HPATH))
 #CFLAGS= -Wall
-ifeq "$(STAR_ARCH)" "sun4os5"
-LDFLAGS= -lnsl -lsocket
-endif
-ifeq "$(STAR_ARCH)" "sun4os5pc"
-LDFLAGS= -lnsl -lsocket
+UN := $(shell uname -sr | sed -e 's/ //g' -e 's/\.//g' -e 's/OS5.*/OS5/' )
+ifeq "$(UN)" "SunOS5"
+LDFLAGS += -lnsl -lsocket
 endif
 vpath %.c $(SPATH)
 vpath %.h $(HPATH)
@@ -24,11 +22,6 @@ DSOBJ=testds.o tcptest.o
 DSPROGS=$(basename $(DSOBJ))
 OBJ=$(TESTOBJ) $(DSOBJ) $(TCPOBJ)
 #
-CC68K=cc68k
-LD68K=ld68k
-CC68FLAGS=-c -DCPU=MC68040 -DVXWORKS -I$(VX_VW_BASE)/h $(CPPFLAGS) -Wall 
-VWTEST=dstest.68o
-VWOBJ=testlib.68o
 
 all:		dstest
 
@@ -44,22 +37,12 @@ test:
 	@echo x$(SUN5)x
 	@echo x$(LDFLAGS)x
 
-vwtest:		$(VWTEST)
-
-%.68o : %.c
-		 $(CC68K) $(CC68FLAGS) $< -o $@
-
 $(TESTLIB):	$(TESTOBJ)
 		ar r $@ $?
 		-ranlib $@
 
-$(OBJ) $(VWOBJ) : dscodes.h dstype.h dsxdr.h sample.h xdrtape.h
-
-$(VWTEST):	$(VWOBJ)
-		$(LD68K) -o $(VWTEST) -r $(VWOBJ)
+$(OBJ) : dscodes.h dstype.h dsxdr.h sample.h xdrtape.h
 
 clean:	
 		-rm $(TESTLIB) $(OBJ) $(DSPROGS) *.bin *.txt
 
-vwclean:
-		-rm $(VWTEST) $(VWOBJ)

@@ -34,15 +34,3 @@ install:
 	cp libdsl*.a $(INSTALLROOT)/lib
 	cd $(HPATH); \
 	cp ds*.h $(INSTALLROOT)/inc
-
-vwall: vwlib vwtest
-
-vwlib:
-	cd lib; $(MAKE) vwlib
-
-vwtest:
-	cd bin; $(MAKE) vwtest
-
-vwclean:
-	cd bin; $(MAKE) vwclean
-	cd lib; $(MAKE) vwclean

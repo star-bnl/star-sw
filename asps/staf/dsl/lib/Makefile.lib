@@ -10,21 +10,17 @@
 CFLAGS= -g
 CPPFLAGS= -I. -I$(HPATH)
 LIB=libdsl.a
-LIBFILES=dscheck.c dsdata.c dserror.c dsjoin.c dslib.c dslock.c\
+LIBCFILES=dscheck.c dsdata.c dserror.c dsjoin.c dslib.c dslock.c\
 	dsmem.c dsprint.c dsqsort.c dstable.c dstid.c dstodo.c dstype.c\
 	dsutil.c dsxdrlib.c
 #	dsutil.c dsxdrlib.c xdrtape.c
-LIBOBJ=$(patsubst %.c,%.o, $(LIBFILES))
+LIBCXXFILES=dscpp.cpp
+LIBFILES=$(LIBCXXFILES) $(LIBCFILES)
+LIBOBJ= $(patsubst %.cpp,%.o, $(LIBCXXFILES)) $(patsubst %.c,%.o, $(LIBCFILES))
 vpath %.c $(SPATH)
+vpath %.cpp $(SPATH)
 vpath %.h $(HPATH)
 #
-# VxWorks defs
-CC68K=cc68k
-LD68K=ld68k
-VWLIB=dsdlib.68o
-VWOBJ=$(patsubst %.o, %.68o, $(LIBOBJ))
-CC68FLAGS=  -DCPU=MC68040 -DVXWORKS -I$(VX_VW_BASE)/h $(CPPFLAGS) -Wall
-
 
 all: lib
 
@@ -37,11 +33,9 @@ test:
 
 lib:	$(LIB)
 
-vwlib:	$(VWLIB)
+$(LIBOBJ) : dscpp.h dscodes.h dstype.h dsxdr.h
 
-$(LIBOBJ) $(VWOBJ) : dscodes.h dstype.h dsxdr.h xdrtape.h
-
-dscodes.h:	stamp-dscodes ; @true
+dscodes.h:	stamp-dscodes
 
 stamp-dscodes:	tmp-dscodes.h
 		if cmp -s tmp-dscodes.h $(HPATH)/dscodes.h ; then\
@@ -62,15 +56,12 @@ tmp-dscodes.h:	$(LIBFILES)
 		echo "}DS_ERROR_CODE_T;" >>tmp-dscodes.h
 		echo "#endif /* DSCODES_H */" >>tmp-dscodes.h
 
+%.o : %.cpp
+	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c $<
+
 $(LIB):		$(LIBOBJ)
-			ar r $@ $?
-			-ranlib $@
-
-%.68o : %.c
-		$(CC68K) $(CC68FLAGS) -c $< -o $@
-
-$(VWLIB):	$(VWOBJ)
-		$(LD68K) -r -o $(VWLIB) $(VWOBJ)
+		ar r $@ $?
+		-ranlib $@
 
 clean:		cleancodes
 		-rm $(LIB) $(LIBOBJ)
@@ -78,5 +69,3 @@ clean:		cleancodes
 cleancodes:
 		-rm stamp-dscodes tmp-dscodes.h
 
-vwclean:	cleancodes
-		-rm $(VWLIB) $(VWOBJ)

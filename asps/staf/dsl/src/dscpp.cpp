@@ -17,10 +17,9 @@ C++ classes to wrap dsl C functions
 #include <string.h>
 #include "dscpp.h"
 
-#ifndef DS_ABORT
-#define DS_ABORT(m) {cerr << m << " " << __FILE__ << "." << __LINE__ << "\n"; exit(0);}
-#endif
-
+#define DS_ABORT(m) {cerr << m << " " << __FILE__ << "." << __LINE__ <<\
+						"\n" << flush; exit(0);}
+//////////////////////////////////////////////////////////////////////////////
 static int dsetCreate = 0, dsetDelete = 0, tblCreate = 0, tblDelete = 0;
 
 void printCount(void)
@@ -33,15 +32,21 @@ void printCount(void)
 // wrappers for dsDataset
 //
 //----------------------------------------------------------------------------
-dsDataset::dsDataset(void)
+dsDataset::dsDataset(DS_DATASET_T *pDataset)
 {
-	pSet = NULL;
+	if (!DS_IS_DATASET(pDataset) || pDataset->cppWrap) {
+		throw dsDatasetConstructFailure();
+	}
+	pSet = pDataset;
+	pSet->cppWrap = (void *)this;
 	dsetCreate++;
 }
 //----------------------------------------------------------------------------
-dsDataset::dsDataset(DS_DATASET_T *pDataset)
+dsDataset::dsDataset(char *name)
 {
-	pSet = pDataset;
+	if (!dsNewDataset(&pSet, name)) {
+		throw dsDatasetConstructFailure();
+	}
 	pSet->cppWrap = (void *)this;
 	dsetCreate++;
 }
@@ -93,11 +98,12 @@ bool dsDataset::allocTables()
 //----------------------------------------------------------------------------
 dsDataset * dsDataset::create(char *name)
 {
-	DS_DATASET_T *d;
-	if (!dsNewDataset(&d, name)) {
+	try {
+		return new dsDataset(name);
+	}
+	catch (dsDataset::dsDatasetConstructFailure) {
 		return NULL;
 	}
-	return new dsDataset(d);
 }
 //----------------------------------------------------------------------------
 dsDataset *dsDataset::decode(XDR *xdrs)
@@ -227,17 +233,12 @@ bool dsDataset::link(dsDataset *pDataset)
 //----------------------------------------------------------------------------
 bool dsDataset::link(dsTable *pTable)
 {
-	return dsLink(pSet, pTable->pTable) ? true : false;
+	return dsLink(pSet, dsTable::cPtr(pTable)) ? true : false;
 }
 //----------------------------------------------------------------------------
-bool dsDataset::unlink(dsDataset *pDataset)
+bool dsDataset::linkAcyclic(dsDataset *pDataset)
 {
-	return dsUnlink(pSet, pDataset->pSet) ? true : false;
-}
-//----------------------------------------------------------------------------
-bool dsDataset::unlink(dsTable *pTable)
-{
-	return dsUnlink(pSet, pTable->pTable) ? true : false;
+	return dsLinkAcyclic(pSet, pDataset->pSet) ? true : false;
 }
 //----------------------------------------------------------------------------
 size_t dsDataset::maxEntryCount()
@@ -248,6 +249,23 @@ size_t dsDataset::maxEntryCount()
 char *dsDataset::name()
 {
 	return pSet->name;
+}
+//----------------------------------------------------------------------------
+int dsDataset::refcount()
+{
+	size_t n;
+
+	return dsRefcount(&n, pSet) ? n : -1;
+}
+//----------------------------------------------------------------------------
+bool dsDataset::unlink(dsDataset *pDataset)
+{
+	return dsUnlink(pSet, pDataset->pSet) ? true : false;
+}
+//----------------------------------------------------------------------------
+bool dsDataset::unlink(dsTable *pTable)
+{
+	return dsUnlink(pSet, dsTable::cPtr(pTable)) ? true : false;
 }
 //----------------------------------------------------------------------------
 dsDataset *dsDataset::wrap(DS_DATASET_T *d)
@@ -269,6 +287,11 @@ dsField::dsField(DS_FIELD_T *pMyField)
 	pField->fieldWrap = (void *)this;
 }
 //----------------------------------------------------------------------------
+size_t dsField::dim(size_t index)
+{
+	return index < dimCount() ? pField->dim[index] : 0;
+}
+//----------------------------------------------------------------------------
 size_t dsField::dimCount(void)
 {
 	size_t count;
@@ -278,11 +301,6 @@ size_t dsField::dimCount(void)
 		}
 	}
 	return count;
-}
-//----------------------------------------------------------------------------
-size_t dsField::dim(size_t index)
-{
-	return index < dimCount() ? pField->dim[index] : 0;
 }
 //----------------------------------------------------------------------------
 size_t dsField::elcount()
@@ -326,31 +344,37 @@ dsType *dsField::type()
 //
 // wrappers for dsTable
 //
-dsTable::dsTable(void)
-{
-}
 //----------------------------------------------------------------------------
 dsTable::dsTable(DS_DATASET_T *pDataset)
 {
+	if (!DS_IS_TABLE(pDataset) || pDataset->cppWrap) {
+		throw dsTableConstructFailure();
+	}
 	pTable = pDataset;
 	pTable->cppWrap = (void *)this;
 	tblCreate++;
 }
 //----------------------------------------------------------------------------
-dsTable * dsTable::create(char *name, char *spec)
+dsTable::dsTable(char *name, char *spec)
 {
-	dsTable *pObj;
-	DS_DATASET_T *pTable;
-
 	if (!dsNewTable(&pTable, name, spec, 0, NULL)) {
-		return NULL;
+		throw dsTableConstructFailure();
 	}
-	pObj = new dsTable();
-	pTable->cppWrap = (void *)pObj;
-	pObj->pTable = pTable;
+	pTable->cppWrap = (void *)this;
 	tblCreate++;
-	return pObj;
 }
+//----------------------------------------------------------------------------
+//int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
+//	char *typeSpecifier, unsigned rowCount, void *pData)
+dsTable::dsTable(char *name, char *spec, size_t rowCount, void *pData)
+{
+	if (!dsNewTable(&pTable, name, spec, rowCount, pData)) {
+		throw dsTableConstructFailure();
+	}
+	pTable->cppWrap = (void *)this;
+	tblCreate++;
+}
+
 //----------------------------------------------------------------------------
 dsTable::~dsTable(void)
 {
@@ -370,26 +394,39 @@ bool dsTable::allocTable()
 void *dsTable::cellAddress(size_t rowNumber , size_t colNumber)
 {
 	char *p;
+cout << "row " << rowNumber << ", col " << colNumber << ", elcount " << pTable->elcount << endl;
 	return dsCellAddress(&p, pTable, rowNumber, colNumber) ?
 		(void *)p : NULL;
 }
 //----------------------------------------------------------------------------
-
+dsTable * dsTable::create(char *name, char *spec)
+{
+	try {
+		return new dsTable(name, spec);
+	}
+	catch (dsTable::dsTableConstructFailure) {
+		return NULL;
+	}
+}
+//----------------------------------------------------------------------------
 char *dsTable::dataAddress()
 {
 	return (char *)pTable->p.data;
+}
+//----------------------------------------------------------------------------
+//int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne,
+//	DS_DATASET_T *pTableTwo, char *aliases, char *joinLst, char *projectList);
+bool dsTable::equijoin(dsTable *tableOne, dsTable *tableTwo,
+			  char *aliases, char *joinLst, char *projectList)
+{
+	return dsEquijoin(pTable, cPtr(tableOne), cPtr(tableTwo),
+		aliases, joinLst, projectList) ? true : false;
 }
 //----------------------------------------------------------------------------
 bool dsTable::getCell(char *address, size_t rowNumber , size_t colNumber)
 {
 	return dsGetCell(address, pTable, rowNumber, colNumber) ? true : false;
 }
-//----------------------------------------------------------------------------
-//int dsMapTable(DS_DATASET_T *pDataset, char *name,
-//	char *typeSpecifier, size_t *pCount, char **ppData);
-//int mapData(char *pData, size_t rowCount)
-//{
-//}
 //----------------------------------------------------------------------------
 size_t dsTable::maxRowCount()
 {
@@ -399,6 +436,22 @@ size_t dsTable::maxRowCount()
 char *dsTable::name()
 {
 	return pTable->name;
+}
+//----------------------------------------------------------------------------
+void dsTable::printData(FILE *stream)
+{
+	dsPrintTableData(stream, pTable);
+}
+//----------------------------------------------------------------------------
+void dsTable::printType(FILE *stream)
+{
+	dsPrintTableType(stream, pTable);
+}
+//----------------------------------------------------------------------------
+//int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
+bool dsTable::project(dsTable *srcTable, char *projectList)
+{
+	return dsProjectTable(pTable, cPtr(srcTable), projectList) ? true : false;
 }
 //----------------------------------------------------------------------------
 //int dsPutCell(char *address, DS_DATASET_T *pTable,
@@ -420,12 +473,6 @@ size_t dsTable::rowCount()
 	return pTable->elcount;
 }
 //----------------------------------------------------------------------------
-//int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount);
-bool dsTable::setRowCount(size_t rowCount)
-{
-	return dsSetTableRowCount(pTable, rowCount) ? true : false;
-}
-//----------------------------------------------------------------------------
 dsType *dsTable::rowType(void)
 {
 	DS_TYPE_T *p;
@@ -438,6 +485,32 @@ dsType *dsTable::rowType(void)
 		new dsType(p);
 	}
 	return (dsType *)p->typeWrap;
+}
+//----------------------------------------------------------------------------
+//int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount);
+bool dsTable::setRowCount(size_t rowCount)
+{
+	return dsSetTableRowCount(pTable, rowCount) ? true : false;
+}
+//----------------------------------------------------------------------------
+dsTable *dsTable::targetTable(char *tableName, char *typeName,
+							  dsTable *srcTable, char *projectList)
+{
+	DS_DATASET_T *pTarget;
+	return dsTargetTable(&pTarget, tableName, typeName, cPtr(srcTable),
+		NULL, NULL, projectList) ? wrap(pTarget) : NULL;
+}
+//----------------------------------------------------------------------------
+//int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
+//	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
+//	char *aliases, char *projectList);
+dsTable *dsTable::targetTable(char *tableName, char *typeName,
+							  dsTable *parentOne, dsTable *parentTwo,
+							  char *aliases, char *projectList)
+{
+	DS_DATASET_T *pTarget;
+	return dsTargetTable(&pTarget, tableName, typeName, cPtr(parentOne),
+		cPtr(parentTwo), aliases, projectList) ? wrap(pTarget) : NULL;
 }
 //----------------------------------------------------------------------------
 dsTable *dsTable::wrap(DS_DATASET_T *d)
@@ -464,11 +537,6 @@ int dsType::code(void)
 	return pType->code;
 }
 //----------------------------------------------------------------------------
-size_t dsType::fieldCount(void)
-{
-	return pType->nField;
-}
-//----------------------------------------------------------------------------
 //int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, char *name);
 dsField * dsType::field(char *name)
 {
@@ -476,7 +544,7 @@ dsField * dsType::field(char *name)
 
 	for (i = 0; i < pType->nField; i++) {
 		if (strcmp(name, pType->field[i].name) == 0) {
-			return (dsField *)pType->field[i].fieldWrap;;
+			return field(i);
 		}
 	}
 	return NULL;
@@ -493,6 +561,21 @@ dsField * dsType::field(size_t index)
 	return NULL;
 }
 //----------------------------------------------------------------------------
+size_t dsType::fieldCount(void)
+{
+	return pType->nField;
+}
+//----------------------------------------------------------------------------
+bool dsType::isSpecifier(char *spec)
+{
+	size_t tid;
+
+	if (!dsTypeId(&tid, spec, NULL)) {
+		return false;
+	}
+	return tid == pType->tid ? true : false;
+}
+//----------------------------------------------------------------------------
 char *dsType::name(void)
 {
 	return pType->name;
@@ -503,7 +586,6 @@ size_t dsType::size(void)
 	return pType->size;
 }
 //----------------------------------------------------------------------------
-//int dsTableTypeSpecifier(char **pSpecifier, DS_DATASET_T *pTable);
 char *dsType::specifier(void)
 {
 	char *str;
@@ -514,15 +596,4 @@ char *dsType::specifier(void)
 size_t dsType::stdsize()
 {
 	return pType->stdsize;
-}
-//----------------------------------------------------------------------------
-//int dsTableIsType(int *pResult, DS_DATASET_T *pTable, char *specifier);
-bool dsType::isSpecifier(char *spec)
-{
-	size_t tid;
-
-	if (!dsTypeId(&tid, spec, NULL)) {
-		return false;
-	}
-	return tid == pType->tid ? true : false;
 }

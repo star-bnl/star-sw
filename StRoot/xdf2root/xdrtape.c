@@ -50,11 +50,11 @@ typedef long INLINE;
 *
 */
 static void xdrtape_destroy(XDR *xdrs);
-static bool_t xdrtape_getbytes(XDR *xdrs, void *addr, unsigned len);
+static bool_t xdrtape_getbytes(XDR *xdrs, void *addr, int len);
 static bool_t xdrtape_getlong(XDR *xdrs, long *lp);
 static unsigned xdrtape_getpos(XDR *xdrs);
 static INLINE *xdrtape_inline(XDR *xdrs, int len);
-static bool_t xdrtape_putbytes(XDR *xdrs, void *addr, unsigned len);
+static bool_t xdrtape_putbytes(XDR *xdrs, void *addr, int len);
 static bool_t xdrtape_putlong(XDR *xdrs, long *lp);
 static bool_t xdrtape_setpos(XDR *xdrs, unsigned pos);
 /*****************************************************************************
@@ -184,7 +184,7 @@ int xdrtape_flush(XDR *xdrs)
 * xdrtape_getbytes - return bytes from xdr stream
 *
 */
-static bool_t xdrtape_getbytes(XDR *xdrs, void *addr, unsigned len)
+static bool_t xdrtape_getbytes(XDR *xdrs, void *addr, int len)
 {
  	TAPEBUF_T *pTape = (TAPEBUF_T *)xdrs->x_private;
 	int  n;
@@ -208,7 +208,7 @@ static bool_t xdrtape_getbytes(XDR *xdrs, void *addr, unsigned len)
 			pTape->out = pTape->first;
 			pTape->in = pTape->first + n;
 		}
-		if ((unsigned)n > len) {
+		if (n > len) {
 			n = len;
 		}
 		memcpy(addr, pTape->out, n);
@@ -272,7 +272,7 @@ void xdrtape_perror(XDR *xdrs, char *msg)
 * xdrtape_putbytes - transfer bytes to xdr stream
 *
 */
-static bool_t xdrtape_putbytes(XDR *xdrs, void *addr, unsigned len)
+static bool_t xdrtape_putbytes(XDR *xdrs, void *addr, int len)
 {
  	TAPEBUF_T *pTape = (TAPEBUF_T *)xdrs->x_private;
 	int n;
@@ -290,7 +290,7 @@ static bool_t xdrtape_putbytes(XDR *xdrs, void *addr, unsigned len)
 			n = BUFSPACE(pTape);
 			assert(n > 0);
 		}
-		if ((unsigned)n > len) {
+		if (n > len) {
 			n = len;
 		}
 		memcpy(pTape->in, addr, n);

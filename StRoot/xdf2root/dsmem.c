@@ -28,6 +28,7 @@ static int dsDsetSize = 0;
 static int dsListSize = 0;
 static int dsMemCalls = 0;
 static int dsTidSize = 0;
+static int dsTmpSize = 0;
 /******************************************************************************
 *
 * dsAllocStats - print dataset allocation stats
@@ -36,8 +37,8 @@ static int dsTidSize = 0;
 */
 void dsAllocStats(void)
 {
-	printf("AllocStats: dsetSize %d, listSize %d, memCalls %d, tidSize %d\n",
-		dsDsetSize, dsListSize, dsMemCalls, dsTidSize);
+	printf("AllocStats: dsetSize %d, listSize %d, tmpSize %d, memCalls %d, tidSize %d\n",
+		dsDsetSize, dsListSize, dsTmpSize, dsMemCalls, dsTidSize);
 }
 /******************************************************************************
 *
@@ -49,11 +50,7 @@ int dsFreeDataset(DS_DATASET_T *dataset)
 {
 	DS_LIST_T list;
 
-	if (!dsMakeFreeList(&list, dataset) ||
-		!dsFreeListed(&list)) {
-		return FALSE;
-	}
-	return TRUE;
+	return 	dsMakeFreeList(&list, dataset) && dsFreeListed(&list);
 }
 /******************************************************************************
 *
@@ -293,7 +290,7 @@ int dsRealloc(DS_DATASET_T *dataset, size_t maxcount)
 	else {
 		DS_ERROR(DS_E_SYSTEM_ERROR);
 	}
-	size =elsize*maxcount;
+	size = elsize*maxcount;
 	delta = size - (dataset->p.data == NULL ? 0 : elsize*dataset->maxcount);
 	if (size != 0) {
 		if ((ptr = DS_REALLOC(dataset->p.data, size)) == NULL) {
@@ -325,6 +322,43 @@ int dsReallocTable(DS_DATASET_T *pTable, size_t nRow)
 		DS_ERROR(DS_E_INVALID_TABLE);
 	}
 	return dsRealloc(pTable, nRow);
+}
+/******************************************************************************
+*
+* dsTmpAlloc - allocate memory for tmp structures
+*
+* RETURNS: pointer to memory or NULL if size is zero or not enough memory
+*/
+void *dsTmpAlloc(size_t size)
+{
+	char *ptr;
+
+	if (size == 0){
+		DS_LOG_ERROR(DS_E_ZERO_LENGTH_ALLOC);
+	}
+	else if ((ptr = malloc(size)) != NULL) {
+		dsMemCalls++;
+		dsTmpSize += size;
+		return ptr;
+	}	
+	else {
+		DS_LOG_ERROR(DS_E_NOT_ENOUGH_MEMORY);
+	}
+	return NULL;
+}
+/******************************************************************************
+*
+* dsTmpFree - allocate memory for tmp structures
+*
+* RETURNS: pointer to memory or NULL if size is zero or not enough memory
+*/
+void dsTmpFree(void *ptr, size_t size)
+{
+	if (ptr != NULL) {
+		free((char *)ptr);
+		dsMemCalls++;
+		dsTmpSize -= size;
+	}
 }
 /******************************************************************************
 *

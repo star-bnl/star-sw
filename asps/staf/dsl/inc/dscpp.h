@@ -22,17 +22,23 @@ typedef int bool;
 
 class dsTable;
 class dsType;
+// To do
+//int dsMapTable(DS_DATASET_T *pDataset, char *name,
+//	char *typeSpecifier, size_t *pCount, char **ppData);
 
-// Stuff to think about or do
+// Following not wrapped
 //bool_t xdr_dataset_skip(XDR *xdrs);
-//int dsLinkAcyclic(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
-//int dsRefcount(size_t *pCount, DS_DATASET_T *pDataset);
+
 //int dsAddTable(DS_DATASET_T *pDataset, char *name,
 //	char *typeSpecifier, size_t nRow, char **ppData);
 //**********use new dsTable() and dsDataset::link()
+
 //int dsInitTable(DS_DATASET_T *pTable, char *tableName,
 //	char *typeSpecifier, unsigned rowCount, void *pData);
-//************use new dsTable and dsTable::map
+//**********use new dsTable()
+
+//int dsTasProject(DS_DATASET_T *pDataset, char *name,
+//	char *typeSpecifier, size_t *pCount, void *ppData);
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -41,14 +47,17 @@ class dsType;
 class dsDataset {
 private:
 	DS_DATASET_T *pSet;
-	dsDataset& operator=(const dsDataset& d);
-	static dsDataset *wrap(DS_DATASET_T *d);
-protected:
-	dsDataset(void);
 	dsDataset(DS_DATASET_T *pDataset);
 	dsDataset(const dsDataset& d);
-//cet	dsDataset(const char* n);
+	dsDataset& operator=(const dsDataset& d);
+	static dsDataset *wrap(DS_DATASET_T *d);
 public:
+	// only public constructor
+	dsDataset(char *name);
+
+	// exception class for failure of "new dsDataset(name)"
+	class dsDatasetConstructFailure {};
+
 	//int dsFreeDataset(DS_DATASET_T *pDataset);
 	~dsDataset();
 
@@ -94,15 +103,21 @@ public:
 	//int dsIsAcyclic(DS_DATASET_T *dataset);
 	bool isAcyclic(void);
 
+	//int dsLink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
+	bool link(dsDataset *pSet);
+	bool link(dsTable *pTable);
+
+	//int dsLinkAcyclic(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
+	bool linkAcyclic(dsDataset *pSet);
+
 	//int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset);
 	size_t maxEntryCount(void);  //NEEDED??
 
 	//int dsDatasetName(char **pName, DS_DATASET_T *pDataset);
 	char *name(void);
 
-	//int dsLink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
-	bool link(dsDataset *pSet);
-	bool link(dsTable *pTable);
+	//int dsRefcount(size_t *pCount, DS_DATASET_T *pDataset);
+	int refcount(void);
 
 	// int dsUnlink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
 	bool unlink(dsDataset *pSet);
@@ -119,13 +134,14 @@ private:
 	dsField(DS_FIELD_T *pField);
 	dsField(const dsField& f);
 	dsField& operator=(const dsField& f);
+	~dsField();
 	friend class dsType;
 public:
-	//int dsColumnDimCount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber);
-	size_t dimCount(void);
-
 	//int dsColumnDimensions(size_t *dims, DS_DATASET_T *pTable, size_t colNumber);
 	size_t dim(size_t index);
+
+	//int dsColumnDimCount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber);
+	size_t dimCount(void);
 
 	//int dsColumnElcount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber);
 	size_t elcount(void);
@@ -151,20 +167,26 @@ public:
 class dsTable {
 private:
 	DS_DATASET_T *pTable;
+	static DS_DATASET_T *cPtr(dsTable *cppPtr) {return cppPtr ? cppPtr->pTable : NULL;}
+	dsTable(DS_DATASET_T *pTable);
+	dsTable(const dsTable& t);
 	dsTable& operator=(const dsTable& t);
 	static dsTable *wrap(DS_DATASET_T *p);
 	friend class dsDataset;
-protected:
-	dsTable(void);
-	dsTable(DS_DATASET_T *pTable);
-	dsTable(const dsTable& t);
-//cet	dsTable(const char* n, const char* s, const size_t r);
 public:
+	//int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
+	//	char *typeSpecifier, unsigned rowCount, void *pData)
+	dsTable(char *name, char *spec);
+	dsTable(char *name, char *spec, size_t rowCount, void *pData);
+
+	// exception class for failure of "new dsTable(name, spec)"
+	class dsTableConstructFailure {};
+
 	// dsFreeDataset(
 	~dsTable(void);
 
 	//int dsAllocTables(DS_DATASET_T *pDataset);
-	bool allocTable(void);
+	bool allocTable();
 
 	//int dsCellAddress(char **pAddress, DS_DATASET_T *pTable,
 	//	size_t rowNumber , size_t colNumber);
@@ -177,19 +199,29 @@ public:
 	//int dsTableDataAddress(char **pAddress, DS_DATASET_T *pTable);
 	char *dataAddress(void);
 
+	//int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne,
+	//	DS_DATASET_T *pTableTwo, char *aliases, char *joinLst, char *projectList);
+	bool equijoin(dsTable *tableOne, dsTable *tableTwo,
+		char *aliases, char *joinLst, char *projectList);
+
 	//int dsGetCell(char *address, DS_DATASET_T *pTable,
 	//	size_t rowNumber , size_t colNumber); 
 	bool getCell(char *address, size_t rowNumber , size_t colNumber);
-
-	//int dsMapTable(DS_DATASET_T *pDataset, char *name,
-	//	char *typeSpecifier, size_t *pCount, char **ppData);
-	bool map(char *pData, size_t rowCount, size_t maxCount);
 
 	//int dsTableMaxRowCount(size_t *pCount, DS_DATASET_T *pTable);
 	size_t maxRowCount(void);
 
 	//int dsTableName(char **pName, DS_DATASET_T *pTable);
 	char *name(void);
+
+	//void dsPrintTableData(FILE *stream, DS_DATASET_T *table);
+	void printData(FILE *stream);
+
+	//void dsPrintTableType(FILE *stream, DS_DATASET_T *pTable);
+	void printType(FILE *stream);
+
+	//int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
+	bool project(dsTable *srcTable, char *projectList);
 
 	//int dsPutCell(char *address, DS_DATASET_T *pTable,
 	//	size_t rowNumber , size_t colNumber);
@@ -201,10 +233,18 @@ public:
 	//int dsTableRowCount(size_t *pRowCount, DS_DATASET_T *pTable);
 	size_t rowCount(void);
 
+	dsType *rowType(void);
+
 	//int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount);
 	bool setRowCount(size_t rowCount);
 
-	dsType *rowType(void);
+	//int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
+	//	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
+	//	char *aliases, char *projectList);
+	static dsTable *targetTable(char *tableName, char *typeName, dsTable *parentOne,
+		dsTable *parentTwo, char *aliases, char *projectList);
+	static dsTable *targetTable(char *tableName, char *typeName,
+		dsTable *srcTable, char *projectList);
 
 };
 //////////////////////////////////////////////////////////////////////////////
@@ -217,6 +257,7 @@ private:
 	dsType(DS_TYPE_T *pMyType);
 	dsType(const dsType& t);
 	dsType& operator=(const dsType& t);
+	~dsType();
 	friend class dsTable;
 	friend class dsField;
 
@@ -224,13 +265,16 @@ public:
 	//int dsColumnTypeCode(DS_TYPE_CODE_T *pCode, DS_DATASET_T *pTable, size_t colNumber);
 	int code(void);
 
-	//int dsTableColumnCount(size_t *pCount, DS_DATASET_T *pTable);
-	size_t fieldCount(void);
-
 	//int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, char *name);
 	dsField * field(char *name);
 	dsField * field(size_t index);
 	
+	//int dsTableColumnCount(size_t *pCount, DS_DATASET_T *pTable);
+	size_t fieldCount(void);
+
+	//int dsTableIsType(int *pResult, DS_DATASET_T *pTable, char *specifier);
+	bool isSpecifier(char *spec);
+
 	//int dsColumnTypeName(char **pName, DS_DATASET_T *pTable, size_t colNumber);
 	//int dsTableTypeName(char **pName, DS_DATASET_T *pTable);
 	char *name(void);
@@ -242,36 +286,4 @@ public:
 	char *specifier(void);
 
 	size_t stdsize(void);
-
-	//int dsTableIsType(int *pResult, DS_DATASET_T *pTable, char *specifier);
-	bool isSpecifier(char *spec);
-
 };
-
-/******************************************************************************
-*
-* Other
-*
-*/
-/*
-
-int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne,
-	DS_DATASET_T *pTableTwo, char *aliases, char *joinLst, char *projectList);
-
-int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
-
-int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
-	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
-	char *aliases, char *projectList);
-
-int dsTasProject(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t *pCount, void *ppData);
-
-
-void dsAllocStats(void);
-const char * dsError(char *msg);
-int dsErrorCode(void);
-void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line);
-void dsPerror(char *msg);
-
-*/
