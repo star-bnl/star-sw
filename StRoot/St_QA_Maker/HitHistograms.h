@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.h,v 1.2 2000/08/09 18:57:44 lansdell Exp $
+// $Id: HitHistograms.h,v 1.3 2000/08/25 16:04:09 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: HitHistograms.h,v $
+// Revision 1.3  2000/08/25 16:04:09  genevb
+// Introduction of files
+//
 // Revision 1.2  2000/08/09 18:57:44  lansdell
 // improvements in TPC gains code reduces CPU time per event by factor of 2
 //
@@ -23,14 +26,13 @@
 #include "TpcHitUtilities.h"
 
 class TH1F;
-class StMultiH1F;
+class TH2F;
 
 class HitHistograms : public TpcHitUtilities {
 public:
     HitHistograms();
     HitHistograms(const char *name,const char *title,
-		  Int_t nbinsx,Axis_t xlow,Axis_t xup,
-		  Int_t nbinxy,Axis_t ylow,Axis_t yup);
+		  Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinxy);
     virtual ~HitHistograms();
 
     //Access---------------------------------------
@@ -51,7 +53,7 @@ public:
 protected:
     TH1F* m_innerSectorDeDxHist;
     TH1F* m_outerSectorDeDxHist;
-    StMultiH1F *m_allSectorsDeDxHist;
+    TH2F *m_allSectorsDeDxHist;
     //map<const int, TH1F*> m_InnerSectorDeDxHistMap; // ! Map of Inner Sector dE/dx Histograms
     //map<const int, TH1F*> m_OuterSectorDeDxHistMap; //! Map of Outer Sector dE/dx Histograms
     

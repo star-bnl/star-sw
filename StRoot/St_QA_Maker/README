@@ -1,0 +1,37 @@
+QAhlist_*.h files are used by StHistUtil to determine which histograms to
+draw. They are located here because the names of the histograms should all
+be kept here in the St_QA_Maker package as much as possible, not burried
+in StHistUtil.
+
+StQAMakerBase is the base class for the QA makers:
+St_QA_Maker    : uses tables
+StEventQAMaker : uses StEvent
+
+StQAMakerBase contains any histograms which are not multiplicity-specific.
+StQABookHist contains histograms to be made for each multiplicity.
+
+StQAMakerBase uses instances of StQABookHist for each multiplicity class
+it will be analyzing. Both StQABookHist and StQAMakerBase use the QAH
+class's static functions to instantiate the histograms with the appropriate
+names and titles.
+                                                    _______
+                                                    | QAH |
+                                                    |_____|
+                                                     ^  ^
+              ___________       ________________     |  |
+              | StMaker |       | StQABookHist |_____|  |
+              |_________|       |______________|        |
+                   ^                   ^                |
+                  /_\                  |                |
+                   |                   |                |
+           ________|________           |                |
+           | StQAMakerBase |___________|________________|
+           |_______________|
+            ^             ^
+           /_\           /_\
+            |             |
+   _________|_____  ______|___________
+   | St_QA_Maker |  | StEventQAMaker |
+   |_____________|  |________________|
+
+
