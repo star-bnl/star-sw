@@ -1,12 +1,12 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.20 2000/11/26 15:08:56 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.21 2000/11/27 17:19:40 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.20  2000/11/26 15:08:56  lasiuk
- * move the setting of all flags to the pidtraits
+ * Revision 2.21  2000/11/27 17:19:40  lasiuk
+ * fill the constant area in teh PID structure
  *
  * Revision 2.22  2000/11/28 19:21:01  lasiuk
  * correct memory leak in writing to StEvent
@@ -203,7 +203,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.20 2000/11/26 15:08:56 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.21 2000/11/27 17:19:40 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1667,6 +1667,8 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 	    //
 	    bool inArea          = false;
 	    bool inConstantAngle = false;
+	    bool inConstantArea  = false;
+
 	    if ( (normalizedD >= 0) && (normalizedD <= 1) ) {
 		inArea = true;
 		totalHitsInArea++;
@@ -3161,7 +3163,7 @@ StRichPIDMaker::fillPIDNtuple() {
 }
 
 
-    file = new TFile("/star/rcf/scratch/lasiuk/test.root","RECREATE");
+
 void StRichPIDMaker::initNtuples() {
 #ifdef  myRICH_WITH_NTUPLE
 //     char finalname[200];
