@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.63 1999/06/11 23:27:04 fisyak Exp $
+// $Id: bfc.C,v 1.64 1999/06/16 12:43:29 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.64  1999/06/16 12:43:29  fisyak
+// Add OFF option to switch off default chain
+//
 // Revision 1.63  1999/06/11 23:27:04  fisyak
 // Change Event type from St_DataSet to StEvent
 //
@@ -131,14 +134,14 @@ Int_t NoEvents = 0;
 Bool_t DefaultSet = kFALSE;
 //_____________________________________________________________________
 enum EChainOptions { 
-  kFIRST   ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,kEval    ,
+  kFIRST   ,kY1a     ,kY1b     ,kY1c     ,kY2a     ,kEval    ,kOFF     ,
   kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kFZIN    ,kGEANT   ,kCTEST   ,
   kField_On,kNo_Field,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT     ,kGLOBAL  ,
   kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent,kLAST    
 };
 Char_t *ChainOptions[] = {
-  "FIRST   ","Y1a     ","Y1b     ","Y1c     ","Y2a     ","Eval    ",
+  "FIRST   ","Y1a     ","Y1b     ","Y1c     ","Y2a     ","Eval    ","OFF     ",
   "XINDF   ","XOUTDF  ","GSTAR   ","MINIDAQ ","FZIN    ","GEANT   ","CTEST   ",
   "FieldOn ","NoField ","TPC     ","TSS     ","TRS     ","TFS     ","FPC     ",
   "FSS     ","EMC     ","CTF     ","L3      ","RICH    ","SVT     ","GLOBAL  ",
@@ -150,6 +153,7 @@ Char_t *ChainComments[] = {
   "Turn on Year 1b geometry (and corresponding Makers)",
   "Turn on Year 1c geometry (and corresponding Makers)",
   "Turn on Year 2a geometry (and corresponding Makers)",
+  "Turn off default chain",
   "Turn on evaluation switch for different makers",
   "Read XDF input file with g2t",
   "Write dst to XDF file",
@@ -181,7 +185,7 @@ Char_t *ChainComments[] = {
   "Nothing to comment",
 };
 UChar_t  ChainFlags[] = {
-  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,
   kTRUE    ,kFALSE   ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kFALSE  ,
   kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,kTRUE    ,
@@ -231,6 +235,10 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     if (strstr(tChain.Data(),nopt.Data())) kgo = -k;
 
     switch (kgo) {
+    case kOFF:
+      SetChainOff();
+      DefaultSet = kTRUE;
+      break;
     case kMINIDAQ:
       SetChainOff();
       ChainFlags[kXINDF]   = kTRUE;
@@ -368,7 +376,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
   //  gSystem->Exit(1);
 }
 //_____________________________________________________________________
-void Load(const Char_t *Chain="tfs"){
+void Load(const Char_t *Chain="gstar tfs"){
   SetFlags(Chain);
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -490,7 +498,7 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
   }
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, Char_t *outfile=0)
+void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // Only the first 3 symbols are significant
   // "-" sign before requiest means that this option is disallowed
