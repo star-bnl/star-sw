@@ -16,6 +16,7 @@
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "tables/St_spaceChargeCor_Table.h"
 
+#include "TH2.h"
 #include "TH3.h"
 #include "TFile.h"
 #include "TF1.h"
@@ -44,7 +45,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
 
   HN=32;  // max events used, cannot exceed 32 used in header file
   MINTRACKS=1500;
-  SCALER_ERROR = 0.0005; // by eye from hist: SCvsZDCEpW.gif (liberal)
+  SCALER_ERROR = 0.0006; // by eye from hist: SCvsZDCEpW.gif (liberal)
 
   // MAXDIFFE is maximum different in sc from last ebye sc
   MAXDIFFE =   SCALER_ERROR;
@@ -54,6 +55,9 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
 
   runid = 0;
   memset(evts,0,HN*sizeof(int));
+  memset(times,0,HN*sizeof(int));
+  memset(evtstbin,0,HN*sizeof(float));
+  evtsnow = 0;
 
   SetMode(0); // default is mode 0 (no QA, no PrePass)
   //QAmode=kTRUE; // For testing
@@ -168,19 +172,30 @@ Int_t StSpaceChargeEbyEMaker::Make() {
   }
   curhist = imodHN(curhist+1);
   schists[curhist]->Reset();
+
+  // Keep time and event number
   times[curhist] = thistime;
   evts[curhist]=evt;
+
+  // Keep track of # of events in the same time bin
+  if (thistime == lasttime) evtsnow++;
+  else evtsnow = 1;
+  evtstbin[curhist] = evtsnow;
+
   lastsc = m_ExB->CurrentSpaceChargeR2();
-  if (QAmode)  gMessMgr->Info()
-    << "StSpaceChargeEbyEMaker: used (for this event) SpaceCharge = "
-    << lastsc << " (" << thistime << ")" << endm;
+  if (QAmode) {
+    gMessMgr->Info()
+      << "StSpaceChargeEbyEMaker: used (for this event) SpaceCharge = "
+      << lastsc << " (" << thistime << ")" << endm;
+    gMessMgr->Info()
+      << "StSpaceChargeEbyEMaker: zdc west+east = "
+      << runinfo->zdcWestRate()+runinfo->zdcEastRate() << endm;
+  }
 
 
   // Track loop
   unsigned int i,j;
   StThreeVectorD ooo = pvtx->position();
-
-  printf("GGGGGGGGGGG Makin3 %f\n",(float) (runinfo->zdcWestRate()+runinfo->zdcEastRate()));
 
   for (i=0; i<nnodes; i++) {
       for (j=0; j<theNodes[i]->entries(global); j++) {
@@ -188,6 +203,7 @@ Int_t StSpaceChargeEbyEMaker::Make() {
         if (!tri) continue;
 
           const StTrackTopologyMap& map = tri->topologyMap();
+          //if (! map.trackTpcOnly()) continue;
           if (! map.hasHitInDetector(kTpcId)) continue;
           if (map.numberOfHits(kTpcId) < 25) continue;
           StTrackGeometry* triGeom = tri->geometry();
@@ -206,13 +222,14 @@ Int_t StSpaceChargeEbyEMaker::Make() {
           StPhysicalHelixD hh = triGeom->helix();
 
           Float_t eta=pvec.pseudoRapidity();
+          //Float_t DCA=hh.geometricSignedDistance(0,0); // for testing only
           Float_t DCA=hh.geometricSignedDistance(ooo.x(),ooo.y());
           Int_t ch = (int) triGeom->charge();
           Float_t space = 10000.;
           if (!(m_ExB->PredictSpaceChargeDistortion(ch,oldPt,ooo.z(),
 	     eta,DCA,map.data(0),map.data(1),space))) continue;
 
-	  space += lastsc;
+	  space += lastsc;  // Assumes additive linearity of space charge!
 	  schists[curhist]->Fill(space);
           FillQAHists(DCA,space,ch,hh,e_or_w);
 
@@ -254,10 +271,11 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
     maxdiff = MAXDIFFA - (MAXDIFFA-MAXDIFFE)*oldness(imodHN(curhist-1));
 
   // More than 30 seconds since last used event? Forget it...
+  int timedif = time-lasttime;
   if (QAout) gMessMgr->Info() <<
     "StSpaceChargeEbyEMaker: time since last event = " <<
-    time-lasttime << endm;
-  if ((lasttime==0) || (time-lasttime < 30)) {
+    timedif << endm;
+  if ((lasttime==0) || (timedif < 30)) {
   
     int isc;
     float ntrkstot = 0; // running sum using oldness scale factor
@@ -315,8 +333,10 @@ Int_t StSpaceChargeEbyEMaker::DecideSpaceCharge(int time) {
 
   did_auto = do_auto;
 
-  if (do_auto) m_ExB->AutoSpaceChargeR2();
-  else {
+  if (do_auto) {
+    gMessMgr->Info("StSpaceChargeEbyEMaker: using auto SpaceCharge");
+    m_ExB->AutoSpaceChargeR2();
+  } else {
     gMessMgr->Info() << "StSpaceChargeEbyEMaker: using SpaceCharge = "
       << sc << " +/- " << esc << " (" << time << ")" << endm;
     scehist->SetBinContent(evt,sc);
@@ -356,16 +376,20 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 		      EVN,0.,EVN);
   timehist = new TH1F("EvtTime","Event Times",
 		      EVN,0.,EVN);
-  myhist   = new TH3F("SpcEvt","SpaceCharge vs. Phi vs. Event",
-		      EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
-  dcahist  = new TH3F("DcaEvt","psDCA vs. Phi vs. Event",
-		      EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
+  dcehist  = new TH2F("DcaEve","psDCA vs. Event",
+		      EVN,0.,EVN,DCN,DCL,DCH);
+  dcphist  = new TH2F("DcaPhi","psDCA vs. Phi",
+		      PHN,0,PI2,DCN,DCL,DCH);
   AddHist(scehist);
   AddHist(timehist);
-  AddHist(myhist);
-  AddHist(dcahist);
+  AddHist(dcehist);
+  AddHist(dcphist);
 
   if (QAmode) {
+    myhist   = new TH3F("SpcEvt","SpaceCharge vs. Phi vs. Event",
+		        EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
+    dcahist  = new TH3F("DcaEvt","psDCA vs. Phi vs. Event",
+		        EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     myhistN  = new TH3F("SpcEvtN","SpaceCharge vs. Phi vs. Event Neg",
 			EVN,0.,EVN,PHN,0,PI2,SCN,SCL,SCH);
     myhistP  = new TH3F("SpcEvtP","SpaceCharge vs. Phi vs. Event Pos",
@@ -382,6 +406,8 @@ void StSpaceChargeEbyEMaker::InitQAHists() {
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
     dcahistW = new TH3F("DcaEvtW","psDCA vs. Phi vs. Event West",
 			EVN,0.,EVN,PHN,0,PI2,DCN,DCL,DCH);
+    AddHist(myhist);
+    AddHist(dcahist);
     AddHist(myhistN);
     AddHist(myhistP);
     AddHist(myhistE);
@@ -416,6 +442,8 @@ void StSpaceChargeEbyEMaker::WriteQAHists() {
 
   TFile ff(fname.Data(),"RECREATE");
   myhist->Write();
+  dcehist->Write();
+  dcphist->Write();
   dcahist->Write();
   myhistN->Write();
   dcahistN->Write();
@@ -450,9 +478,12 @@ void StSpaceChargeEbyEMaker::FillQAHists(float DCA, float space, int ch,
   // while (Phi >= TMath::Pi()/6.) Phi -= TMath::Pi()/6.;
 
   float evtn = (float) evt - 1;
-  myhist->Fill(evtn,Phi,space);
-  dcahist->Fill(evtn,Phi,DCA);
+  dcehist->Fill(evtn,DCA);
+  dcphist->Fill(Phi,DCA);
+
   if (QAmode) {
+    myhist->Fill(evtn,Phi,space);
+    dcahist->Fill(evtn,Phi,DCA);
     if (ch > 0) {
       myhistP->Fill(evtn,Phi,space);
       dcahistP->Fill(evtn,Phi,DCA);
@@ -478,10 +509,25 @@ int StSpaceChargeEbyEMaker::imodHN(int i) {
 float StSpaceChargeEbyEMaker::oldness(int i, int j) {
   // Deterime how to treat relative "age" of event
   // In PrePassmode, earliest events are most important!
+  static float decay_const = -0.12;
+  //static float decay_const = -0.15;
   float s = 1.0;
   if (!PrePassmode) { // Weight newest the most (or evenly for PrePass)
     if (j<0) j = curhist;
-    s = exp(-0.15*(times[j]-times[i]));
+
+    // Weight in sub-second intervals by # of events because
+    // times have only 1 second granularity (best we can do).
+    // Method assumes time-ordering of events, which is violated
+    // perhaps only occasionally from DAQ.
+    int k = i;
+    while (k!=j) {
+      k = imodHN(k+1);
+      if (times[k] != times[i]) { k = imodHN(k-1); break; }
+    }
+    // # seconds + fraction of a second:
+    float time_factor = (times[j]-times[i]) + (1.-(evtstbin[i]/evtstbin[k]));
+    //float time_factor = (times[j]-times[i]);
+    s = exp( decay_const * time_factor );
   }
   return s;
 }
@@ -498,8 +544,11 @@ void StSpaceChargeEbyEMaker::BuildHist(int i) {
 }
 //_____________________________________________________________________________
 void StSpaceChargeEbyEMaker::SetTableName() {
-  int date = GetDate();
-  int time = GetTime();
+  // Problem caused if first event comes later in time than other events.
+  // Solution: subtract 10 seconds...
+  TDatime firsttime(GetDateTime().Convert()-10);
+  int date = firsttime.GetDate();
+  int time = firsttime.GetTime();
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event date = " << date << endm;
   gMessMgr->Info() << "StSpaceChargeEbyEMaker: first event time = " << time << endm;
   tabname = Form("./StarDb/Calibrations/rich/spaceChargeCorR2.%08d.%06d.C",date,time);
@@ -547,8 +596,11 @@ float StSpaceChargeEbyEMaker::FakeAutoSpaceCharge() {
   return sc;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.3 2004/08/02 01:19:27 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.4 2004/08/13 20:49:12 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.4  2004/08/13 20:49:12  genevb
+// Improve upon keeping method locked on for each event, and timestamp change
+//
 // Revision 1.3  2004/08/02 01:19:27  genevb
 // minor fixes for getting directories correct
 //
