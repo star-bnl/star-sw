@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.15 2001/11/21 12:44:44 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.16 2002/02/10 21:14:44 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.16  2002/02/10 21:14:44  jcs
+// create separate radial chargestep histograms for Ftpc west and east
+//
 // Revision 1.15  2001/11/21 12:44:44  jcs
 // make ftpcGas database table available to FTPC cluster maker
 //
@@ -85,7 +88,7 @@ class St_ftpcElectronics;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.15 2001/11/21 12:44:44 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.16 2002/02/10 21:14:44 jcs Exp $";
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
    St_ftpcFastSimPars   *m_fastsimpars;           //!
@@ -105,7 +108,8 @@ class StFtpcClusterMaker : public StMaker {
    void             MakeHistograms();// Histograms for FTPC cluster finder
  
  protected:
-   TH1F            *m_cluster_radial; //! radial position of clusters
+   TH1F            *m_cluster_radial_West; //! radial position of clusters in FTPC West
+   TH1F            *m_cluster_radial_East; //! radial position of clusters in FTPC East
    TH1F            *m_chargestep_West; //! FTPC West charge step
    TH1F            *m_chargestep_East; //! FTPC East charge step
    TH1F            *m_flags;       //! quality control flags
@@ -124,7 +128,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.15 2001/11/21 12:44:44 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.16 2002/02/10 21:14:44 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.33 2002/01/22 02:53:09 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.34 2002/02/10 21:15:38 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.34  2002/02/10 21:15:38  jcs
+// create separate radial chargestep histograms for Ftpc west and east
+//
 // Revision 1.33  2002/01/22 02:53:09  jcs
 // remove extra test from if statement
 //
@@ -248,7 +251,8 @@ m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5,
 //m_timebins   = new TH1F("fcl_timebins","FTPC timebins"		,100,1.,257.);
 //m_row_sector = new TH2F("fcl_row_sector","FTPC(fcl) row vs. sector"	,20,1.,21.,6,1.,7.);
 //m_npad_nbin  = new TH2F("fcl_pad_bin"	,"FTPC(fcl) pad vs. timebin"	,80,1.,161.,100,1.,257.);
-m_cluster_radial = new TH1F("fcl_radius","FTPC cluster radial position",700,0.,35.);
+m_cluster_radial_West = new TH1F("fcl_radialW","FTPCW cluster radial position",700,0.,35.);
+m_cluster_radial_East = new TH1F("fcl_radialE","FTPCE cluster radial position",700,0.,35.);
 
   return StMaker::Init();
 }
@@ -544,8 +548,13 @@ void StFtpcClusterMaker::MakeHistograms()
 //  Float_t nbin = r->n_bins;
 //  m_timebins->Fill(nbin);
 //    m_npad_nbin->Fill(npad,nbin);
+  
+  // Fill cluster radius histograms
     Float_t rpos = sqrt(r->x*r->x + r->y*r->y);
-    m_cluster_radial->Fill(rpos);
+    if (r->row <=10 ) 
+       m_cluster_radial_West->Fill(rpos);
+    else if (r->row >=11 ) 
+       m_cluster_radial_East->Fill(rpos);
   }//end rows loop 
 }
                                    
