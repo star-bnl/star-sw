@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.9 1999/02/14 20:46:09 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.10 1999/02/15 03:38:16 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
- * Revision 1.9  1999/02/14 20:46:09  lasiuk
- * debug info
+ * Revision 1.10  1999/02/15 03:38:16  lasiuk
+ * protection if min()<0
+ *
+ * Revision 1.14  1999/02/28 20:12:50  lasiuk
+ * threshold/noise additions
  *
  * Revision 1.13  1999/02/26 18:26:09  lasiuk
  * to offset must be used uniformly.  Correction to
@@ -246,7 +249,7 @@ double StTrsSlowAnalogSignalGenerator::signalOnPad(double xo, double yo, double 
 // 	    exit(0);
 //  	    break;
 // 	case dipole:
-    if(wireHistogram->min()>0) {
+// // 	    cout << "********************DIPOLE" << endl;
 // 	    return imageChargeIntegral(xo,yo,xl,xu,yl,yu);
 // 	    break;
 // 	default:
