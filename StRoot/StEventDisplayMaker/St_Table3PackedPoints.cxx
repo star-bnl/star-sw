@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3PackedPoints.cxx,v 1.4 2000/04/05 03:58:21 fine Exp $
+// $Id: St_Table3PackedPoints.cxx,v 1.5 2000/07/21 15:50:19 fine Exp $
 
 #include <assert.h>
 
@@ -108,19 +108,18 @@ void St_Table3PackedPoints::SetAnyColumn(const Char_t *anyName, EPointDirection 
 Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 {
  TTable  *table = 0;
- if (fTableSorter) table = fTableSorter->GetTable();
+ if (fTableSorter)  table = fTableSorter->GetTable();
+  
  if (table) {
     Int_t size = TMath::Min(idx+num,Size());
     const Char_t *tablePtr = (Char_t *)fRows;
     Int_t rowSize = table->GetRowSize();
-  //    St_TableElementDescriptor *tableDsc = GetDescriptor(kXPoints);
-  //    Long_t offSet = tableDsc->GetOffset();
-    Long_t offSet = fColumnOffset[0] ;
+    Char_t *offset = (Char_t *)fRows + fColumnOffset[0] ;
     for (Int_t i=idx;i<size;i++) {
-      tablePtr += Indx(i)*rowSize + offSet;     
+      tablePtr = offset + Indx(i)*rowSize;     
       ULong_t *pos = (ULong_t *)tablePtr;  
       ULong_t *pos1 = pos+1;
-      Int_t detId = (*(pos-1)) & 0xF;
+      Int_t detId = (*(pos-1)) & 0xF;     
       if (GetLastDetectorId() != detId ) {
         ((St_Table3PackedPoints *)this)->SetDetectorId(detId);
         ((St_Table3PackedPoints *)this)->m_MaxFactor = factor(((St_Table3PackedPoints *)this)->m_MaxRange,detId);        
@@ -145,6 +144,9 @@ Float_t *St_Table3PackedPoints::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 }
 //____________________________________________________________________________
 // $Log: St_Table3PackedPoints.cxx,v $
+// Revision 1.5  2000/07/21 15:50:19  fine
+// Bug fix: needs some correction in ROOT/star as well
+//
 // Revision 1.4  2000/04/05 03:58:21  fine
 // Adjusted for ROOT 2.24
 //

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   03/08/99  (E-mail: fine@bnl.gov)
-// $Id: StVertices3DPoints.cxx,v 1.2 2000/07/03 02:07:48 perev Exp $
+// $Id: StVertices3DPoints.cxx,v 1.3 2000/07/21 15:50:19 fine Exp $
 // $Log: StVertices3DPoints.cxx,v $
+// Revision 1.3  2000/07/21 15:50:19  fine
+// Bug fix: needs some correction in ROOT/star as well
+//
 // Revision 1.2  2000/07/03 02:07:48  perev
 // StEvent: vector<TObject*>
 //
@@ -29,7 +32,7 @@ StVertices3DPoints::~StVertices3DPoints(){;}
  
 //________________________________________________________________________________
 Int_t  StVertices3DPoints::GetLastPosition()const {
-  return m_VertexCollection?m_VertexCollection->size()-1:-1;
+  return m_VertexCollection? Int_t(m_VertexCollection->size())-1:-1;
 }
 
 //________________________________________________________________________________
