@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*******************************************************
- * $Id: EEsmdCal.h,v 1.8 2004/09/11 04:57:34 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.9 2004/09/22 00:45:50 balewski Exp $
  *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -55,7 +55,7 @@ class EEsmdCal {
   EEmcSmdMap *mapSmd;  
   EEmcGeomSimple *geoTw;
   EEmcSmdGeom *geoSmd;
-  
+
   // cuts: 0=inclusive, 1=tagged with PostShower,  2=Tagged & UxVinTower, etc.
   enum {kCut='h'-'a'}; 
 
@@ -106,6 +106,9 @@ class EEsmdCal {
   void findSectorMip();
   void calibAllwithMip(int iStrU, int iStrV);
   EEDB *eeDb; /// DB access point
+  unsigned short killStat; // fatal stat bits
+  float maxStripAdc; // suppress large jump in ped or sticky bits
+
   TObjArray  *HList; /// output histo access point
 
  public:
@@ -131,6 +134,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.9  2004/09/22 00:45:50  balewski
+ * ready for calib of smd
+ *
  * Revision 1.8  2004/09/11 04:57:34  balewski
  * cleanup
  *

@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.10 2004/09/14 19:38:43 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.11 2004/09/22 00:45:50 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -41,7 +41,7 @@ void EEsmdCal::initTileHistoAdc(char cut, char *title, int col) {
 	sprintf(tt1,"%c%s",cut,core);
 	sprintf(tt2,"%s(%c) %s , %s; ADC-ped",cTile[iT],cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
-	TH1F *h=new TH1F(tt1,tt2,220,-20,200.);
+	TH1F *h=new TH1F(tt1,tt2,400,-200,200.);
 	h->SetLineColor(col);
 	HList->Add(h);
 	hT[iCut][iT][iEta][iPhi]=h;
@@ -185,7 +185,8 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 	sprintf(tt1,"%c%s",cut,core);
 	sprintf(tt2,"SMD(%c) %s , %s; ADC-ped",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
-	TH1F *h=new TH1F(tt1,tt2,300,-50,250);
+	TH1F *h=new TH1F(tt1,tt2,400,-200,200);
+	//TH1F *h=new TH1F(tt1,tt2,4400,-400,4000);//tmp
 	h->SetLineColor(col);
 
 	HList->Add(h);
@@ -279,7 +280,7 @@ void EEsmdCal::histoGains(){
     for(istrip=0;istrip<MaxSmdStrips;istrip++) {
       const EEmcDbItem *x=dbS[iuv][istrip];
       if(x==0) continue;
-      if(x->fail) continue;
+      //if(x->fail) continue; // use any non-zero gain
       if(x->gain<=0) continue;
       hA[16+iuv]->Fill(x->strip,x->gain);
       // dig out MAPMT pixel
@@ -302,7 +303,7 @@ void EEsmdCal::histoGains(){
       for(iPhi=0;iPhi<MaxPhiBins;iPhi++){
 	const EEmcDbItem *x=dbT[iT][iEta][iPhi];
 	if(x==0) continue;
-	if(x->fail) continue;
+	// if(x->fail) continue;  // use any non-zero gain
 	if(x->gain<=0) continue;
 	// dig out the MAPMT pixel
 	const char *tube=x->tube+2;
