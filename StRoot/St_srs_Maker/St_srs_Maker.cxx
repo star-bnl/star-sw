@@ -180,6 +180,10 @@ Int_t St_srs_Maker::Make(){
 }
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
+  printf("**************************************************************\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.4 1998/07/21 00:36:45 fisyak Exp $    *\n");
+  //  printf("* %s    *\n",m_VersionCVS);
+  printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
