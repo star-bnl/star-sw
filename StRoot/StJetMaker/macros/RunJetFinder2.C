@@ -5,12 +5,11 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(int nevents=200,
+void RunJetFinder2(int nevents=300,
 		   const char* dir = "",
-		   //const char* file = "/star/data35/reco/productionPP/ReversedFullField/DEV/2004/132/st_physics_5132053_raw_2020005.MuDst.root",
-		   const char* file = "/star/data16/reco/dAuCombined/FullField/P03ih/2003/065/st_physics_4065003_raw_0040054.MuDst.root",
+		   const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0010005.MuDst.root",
 		   const char *filter = "",
-		   const char *outfile="Jets_out_")
+		   const char *outfile="4150010_raw_0010005")
 {
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
@@ -55,10 +54,10 @@ void RunJetFinder2(int nevents=200,
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
     //PrecEclMaker
-    StPreEclMaker *pecl = new StPreEclMaker();
+    //StPreEclMaker *pecl = new StPreEclMaker();
 
     //EpcMaker
-    StEpcMaker *epc = new StEpcMaker();
+    //StEpcMaker *epc = new StEpcMaker();
   
     //Instantiate the StEmcTpcFourPMaker
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
@@ -84,7 +83,7 @@ void RunJetFinder2(int nevents=200,
     anapars->setJetEtaMax(100.0);
     anapars->setJetEtaMin(0);
     anapars->setJetNmin(0);
-    
+
     //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
     StConePars* cpars = new StConePars();
     cpars->setGridSpacing(56, -1.6, 1.6, 120, -pi, pi);
@@ -108,7 +107,6 @@ void RunJetFinder2(int nevents=200,
     ccdfpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ccdfpars, "MkCdfChargedJetsPt02R07");
 
-
     //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
@@ -117,6 +115,46 @@ void RunJetFinder2(int nevents=200,
   
     chain->Init();
     chain->PrintInfo();
+
+    cout <<"\tLoop on branches"<<endl;
+
+    TChain* muchain = muDstMaker->chain();
+    assert(chain);
+    TObjArray* branches = muchain->GetListOfBranches();
+    assert(branches);
+    TObjArray branchesToKill;
+    branchesToKill.Add( new TObjString("KingAssoc") );
+    branchesToKill.Add( new TObjString("McKink") );
+    branchesToKill.Add( new TObjString("Xi") );
+    branchesToKill.Add( new TObjString("L3AlgoAccept") );
+    branchesToKill.Add( new TObjString("McV0") );
+    branchesToKill.Add( new TObjString("RichSpectra") );
+    branchesToKill.Add( new TObjString("XiAssoc") );
+    branchesToKill.Add( new TObjString("L3AlgoReject") );
+    branchesToKill.Add( new TObjString("McXi") );
+    branchesToKill.Add( new TObjString("StrangeCuts") );
+    branchesToKill.Add( new TObjString("L3Tracks") );
+    branchesToKill.Add( new TObjString("V0") );
+    branchesToKill.Add( new TObjString("Kink") );
+    branchesToKill.Add( new TObjString("McEvent") );
+    branchesToKill.Add( new TObjString("OtherTracks") );
+    branchesToKill.Add( new TObjString("V0Assoc") );
+    for (int ib=0; ib<branches->GetLast()+1; ++ib) {
+	TBranch* branch = dynamic_cast<TBranch*>((*branches)[ib]);
+	if (!branch) {cout <<"\tNull branch"<<endl; abort();}
+	const char* bname = branch->GetName();
+	TString bnameString(bname);
+	cout <<"\t--- Found branch:\t"<<bnameString<<endl;
+	for (int jb=0; jb<branchesToKill->GetLast()+1; ++jb) {
+	    TObjString* tos = static_cast<TObjString*>( branchesToKill[jb] );
+	    TString btk = tos->GetString();
+	    //cout <<"\t\tcompare to:\t"<<btk<<endl;
+	    if (bnameString.Contains(btk)) {
+		cout <<"\tdeactivating branch:\t"<<bname<<endl;
+		muchain->SetBranchStatus(bname, 0);
+	    }
+	}
+    }
 
     for (Int_t iev=0;iev<nevents; iev++) {
 	cout << "****************************************** " << endl;
