@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.5 1999/02/19 17:37:42 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.6 1999/02/20 18:49:16 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.6  1999/02/20 18:49:16  fisyak
+// Add event/run information
+//
 // Revision 1.5  1999/02/19 17:37:42  fisyak
 // Add RICH hits to dst
 //
@@ -81,53 +84,58 @@ Int_t St_dst_Maker::Make(){
     if (geant) {
       St_DataSetIter geantI(geant);
       St_particle *particle = (St_particle *) geantI["particle"];
-      if (particle) m_DataSet->Add(particle);
+      if (particle) m_DataSet->Shunt(particle);
       St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) geantI("g2t_rch_hit");
-      if (g2t_rch_hit) m_DataSet->Add(g2t_rch_hit);
+      if (g2t_rch_hit) m_DataSet->Shunt(g2t_rch_hit);
     }
     St_DataSet *global = gStChain->DataSet("global");
     if (global) {
-      St_DataSetIter dst(global);
-      dst.Cd("dst");
-      St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
-      St_dst_track      *globtrk     = (St_dst_track     *) dst("globtrk");
-      St_dst_track_aux  *globtrk_aux = (St_dst_track_aux *) dst("globtrk_aux");
-      St_dst_track      *globtrk2     = (St_dst_track     *) dst("globtrk2");
-      St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
-      St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
-      St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
-      St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dst("dst_v0_vertex"); 
-      St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex    *) dst("dst_xi_vertex");
-      St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
-      St_dst_point      *point       = (St_dst_point     *) dst("point");
-      St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
-      St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dst("monitor_soft");
+      St_DataSetIter dstI(global);
+      St_DataSet *dst = dstI("dst");
+      m_DataSet->Update(dst);
+#if 0
+      dstI.Cd("dst");
+      St_dst_event_header  *event_header  = (St_dst_event_header  *) dstI("event_header");
+      St_dst_track      *globtrk     = (St_dst_track     *) dstI("globtrk");
+      St_dst_track_aux  *globtrk_aux = (St_dst_track_aux *) dstI("globtrk_aux");
+      St_dst_track      *globtrk2     = (St_dst_track     *) dstI("globtrk2");
+      St_dst_track      *primtrk     = (St_dst_track     *) dstI("primtrk");
+      St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dstI("primtrk_aux");
+      St_dst_vertex     *vertex      = (St_dst_vertex    *) dstI("vertex");
+      St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dstI("dst_v0_vertex"); 
+      St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex    *) dstI("dst_xi_vertex");
+      St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dstI("dst_dedx");
+      St_dst_point      *point       = (St_dst_point     *) dstI("point");
+      St_dst_event_summary *event_summary = (St_dst_event_summary *) dstI("event_summary");
+      St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dstI("monitor_soft");
+      
 
-      if (event_header) m_DataSet->Add(event_header);
-      if (globtrk)      m_DataSet->Add(globtrk);
-      if (globtrk2)     m_DataSet->Add(globtrk2);
-      if (globtrk_aux)  m_DataSet->Add(globtrk_aux);
-      if (primtrk)      m_DataSet->Add(primtrk);
-      if (primtrk_aux)  m_DataSet->Add(primtrk_aux);
-      if (vertex)       m_DataSet->Add(vertex);
-      if (dst_v0_vertex)m_DataSet->Add(dst_v0_vertex);
-      if (dst_xi_vertex)m_DataSet->Add(dst_xi_vertex);
-      if (dst_dedx)     m_DataSet->Add(dst_dedx);
-      if (point)        m_DataSet->Add(point);
-      if (event_summary)m_DataSet->Add(event_summary);
-      if (monitor_soft) m_DataSet->Add(monitor_soft);
+      if (event_header) m_DataSet->Shunt(event_header);
+      if (globtrk)      m_DataSet->Shunt(globtrk);
+      if (globtrk2)     m_DataSet->Shunt(globtrk2);
+      if (globtrk_aux)  m_DataSet->Shunt(globtrk_aux);
+      if (primtrk)      m_DataSet->Shunt(primtrk);
+      if (primtrk_aux)  m_DataSet->Shunt(primtrk_aux);
+      if (vertex)       m_DataSet->Shunt(vertex);
+      if (dst_v0_vertex)m_DataSet->Shunt(dst_v0_vertex);
+      if (dst_xi_vertex)m_DataSet->Shunt(dst_xi_vertex);
+      if (dst_dedx)     m_DataSet->Shunt(dst_dedx);
+      if (point)        m_DataSet->Shunt(point);
+      if (event_summary)m_DataSet->Shunt(event_summary);
+      if (monitor_soft) m_DataSet->Shunt(monitor_soft);
+#endif
     }
     St_DataSet *trg = gStChain->DataSet("trg");
     if (trg) {
       St_DataSetIter trgI(trg);
       St_dst_TriggerDetectors *dst = (St_dst_TriggerDetectors *) trgI("dst_TriggerDetectors");
-      if (dst)          m_DataSet->Add(dst);
+      if (dst)          m_DataSet->Shunt(dst);
     }
     St_DataSet *l3t = gStChain->DataSet("l3Tracks");
     if (l3t) {
       St_DataSetIter l3tI(l3t);
       St_tpt_track   *track = (St_tpt_track *) l3tI("tptrack");
-      if (track)         m_DataSet->Add(track);
+      if (track)         m_DataSet->Shunt(track);
     }
   }
   return kStOK;
@@ -135,7 +143,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.5 1999/02/19 17:37:42 fisyak Exp $\n");
+  printf("* $Id: St_dst_Maker.cxx,v 1.6 1999/02/20 18:49:16 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
