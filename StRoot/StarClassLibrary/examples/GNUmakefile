@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.4 1999/12/21 15:14:39 ullrich Exp $
+# $Id: GNUmakefile,v 1.5 1999/12/21 16:30:17 ullrich Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.4  1999/12/21 15:14:39  ullrich
-# Modified to cope with new compiler version on Sun (CC5.0).
+# Revision 1.5  1999/12/21 16:30:17  ullrich
+# Added test program for StFastCircleFitter.
 #
 # Revision 1.6  2000/03/16 16:30:58  ullrich
 # Added new example randomTest4.
@@ -97,6 +97,11 @@ endif
 
 %.o:	../%.cc
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
+	
+memInfoTest:	memInfoTest.cc StMemoryInfo.o
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< \
+	StMemoryInfo.o  \
+	-o memInfoTest $(LDFLAGS)
 
 circleFitTest:	circleFitTest.cc StFastCircleFitter.o
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< \
@@ -203,7 +208,7 @@ particlesTest:	particlesTest.cc \
 	StXiMinus.o StXiZero.o StXicPlus.o \
 	StXicZero.o \
 	-o particlesTest $(LDFLAGS)
-		SunWS_cache
+
 clean:
 	rm -rf *.o hbook.ntp getConfigTest hbookTest1 hbookTest2 helixTest1 \
 		helixTest2 helixTest3 matrixTest particlesTest physicalHelixTest \
