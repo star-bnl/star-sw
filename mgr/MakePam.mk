@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.46 1998/08/25 02:10:09 fisyak Exp $
+# $Id: MakePam.mk,v 1.47 1998/08/25 02:34:27 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.47  1998/08/25 02:34:27  fisyak
+# Library directory nodeb -> LIB
+#
 # Revision 1.46  1998/08/25 02:10:09  fisyak
 # Add nodebug
 #
@@ -67,7 +70,7 @@ ifeq (,$(findstring $(LEVEL),0 1))
     ifndef NODEBUG
       LIB_DIR := $(SYS_DIR)/lib
     else
-      LIB_DIR := $(SYS_DIR)/nodeb
+      LIB_DIR := $(SYS_DIR)/LIB
     endif
     OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
     DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
