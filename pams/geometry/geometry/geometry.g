@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.64 2003/10/10 23:12:56 potekhin Exp $
+* $Id: geometry.g,v 1.65 2003/10/10 23:15:35 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.65  2003/10/10 23:15:35  potekhin
+* In previous check-n: forgot to mention the new CorrNum=3
+* which actually programmatically modifies the inner radius of
+* the shield in the SVT -- otherwise the pixel detector won't
+* fit. Plus, put in extra flags PIXL_ON and PIPE_OFF to facilitate
+* experimentation.
+*
 * Revision 1.64  2003/10/10 23:12:56  potekhin
 * The fact is, we will need a suitable specialized geometry
 * for the pixel detector development, as it will require
@@ -171,7 +178,9 @@
 *  09/30/03, MP: see the many new CVS comments about recent check-ins     *
 *  09/30/03, MP: converted the sub into a MODULE to allow for ZEBRA access*
 ***************************************************************************
+
    Structure  GDAT {real mfscale, char gtag(2)}
+
 * system list 
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
               zcal,mfld,bbcm,fpdm,phmd,pixl
