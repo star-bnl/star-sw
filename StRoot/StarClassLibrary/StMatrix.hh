@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.12 2001/10/31 15:11:36 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.13 2002/07/02 22:20:53 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
+ * Revision 1.13  2002/07/02 22:20:53  ullrich
+ * Add dummy return statements to get rid of warnings under Linux.
+ *
  * Revision 1.12  2001/10/31 15:11:36  ullrich
  * Rewrote swap() to work as non-friend to StMatrix.
  *
@@ -486,9 +489,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<X>& m1)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
 		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
 	    }
+	return (*this);
     }
-    return (*this);
-
 }
 
 template<class DataType>
@@ -509,9 +511,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<DataType>& m1)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
 		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
 	    }
+	return (*this);
     }
-    return (*this);
-
 }
 #else // ST_NO_MEMBER_TEMPLATES
 template<class DataType>
@@ -532,9 +533,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<float>& m1)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
 		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
 	    }
+	return (*this);
     }
-    return (*this);
-
 }
 template<class DataType>
 StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<double>& m1)
@@ -554,9 +554,8 @@ StMatrix<DataType>& StMatrix<DataType>::operator=(const StMatrix<double>& m1)
 	    for(unsigned int jj=0; jj<mCol; jj++) {
 		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
 	    }
+	return (*this);
     }
-    return (*this);
-
 }
 
 #endif
@@ -662,8 +661,6 @@ StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<X>& m2)
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) += m2(ii+1,jj+1);
-
-	return (*this);
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -672,6 +669,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<X>& m2)
 	cerr << "StMatrix<T>::operator+=(): Matrices are not same size!" << endl;
 #endif
     }	
+    return (*this);
 }
 
 template<class DataType>
@@ -682,8 +680,6 @@ StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<X>& m2)
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) -= m2(ii+1,jj+1);
-
-	return (*this);
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -692,6 +688,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<X>& m2)
 	cerr << "StMatrix<T>::operator-=(): Matrices are not same size!" << endl;
 #endif
     }
+    return (*this);
 }
 
 template<class DataType>
@@ -699,8 +696,7 @@ template<class X>
 StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<X>& m2)
 {
     if(mCol == m2.numRow() ) {
-	StMatrix<DataType> mret(mRow, m2.numCol(), 0);
-	
+	StMatrix<DataType> mret(mRow, m2.numCol(), 0);	
 	for(unsigned int i=0; i<mRow; i++)
 	    for(unsigned int j=0; j<m2.numCol(); j++) {
 		for(unsigned int kk=0; kk<mCol; kk++)
@@ -714,6 +710,7 @@ StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<X>& m2)
 #else
 	cerr << "StMatrix<T>::dot(): incompatible matrix sizes" << endl;
 #endif
+	return StMatrix();
     }
 }
 #else  // ST_NO_MEMBER_TEMPLATES
@@ -725,8 +722,6 @@ StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<float>& m2)
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) += m2(ii+1,jj+1);
-
-	return (*this);
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -735,6 +730,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<float>& m2)
 	cerr << "StMatrix<float>::operator+=(): Matrices are not same size!" << endl;
 #endif
     }	
+    return (*this);
 }
 
 template<class DataType>
@@ -744,8 +740,6 @@ StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<double>& m2)
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) += m2(ii+1,jj+1);
-
-	return (*this);
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -754,6 +748,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator+=(const StMatrix<double>& m2)
 	cerr << "StMatrix<double>::operator+= Matrices are not same size!" << endl;
 #endif
     }	
+    return (*this);
 }
 
 // operator -=
@@ -764,8 +759,6 @@ StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<float>& m2)
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) -= m2(ii+1,jj+1);
-
-	return (*this);
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -774,6 +767,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<float>& m2)
 	cerr << "StMatrix<float>::operator-=(): Matrices are not same size!" << endl;
 #endif
     }
+    return (*this);
 }
 
 template<class DataType>
@@ -783,8 +777,6 @@ StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<double>& m2)
 	for(unsigned int ii=0; ii<mRow; ii++)
 	    for(unsigned int jj=0; jj<mCol; jj++)
 		*(mElement+(ii)*mCol+jj) -= m2(ii+1,jj+1);
-
-	return (*this);
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -793,6 +785,7 @@ StMatrix<DataType>& StMatrix<DataType>::operator-=(const StMatrix<double>& m2)
 	cerr << "StMatrix<double>::operator-=(): Matrices are not same size!" << endl;
 #endif
     }
+    return (*this);
 }
 
 // operator::dot
@@ -815,6 +808,7 @@ StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<float>& m2)
 #else
 	cerr << "StMatrix<float>::dot(): Incompatible matrix sizes" << endl;
 #endif
+	return StMatrix();
     }
 }
 
@@ -837,6 +831,7 @@ StMatrix<DataType> StMatrix<DataType>::dot(const StMatrix<double>& m2)
 #else
 	cerr << "StMatrix<double>::dot(): Incompatible matrix sizes" << endl;
 #endif
+	return StMatrix();
     }
 }
 
@@ -1470,7 +1465,6 @@ vector<DataType> operator*(const StMatrix<X>& m1, const vector<DataType>& v)
 		temp += m1(i+1,j+1)*v[j];
 	    mret[i]=temp;
 	}
-	return mret;
     }
     else {
 #ifndef ST_NO_EXCEPTIONS
@@ -1479,6 +1473,7 @@ vector<DataType> operator*(const StMatrix<X>& m1, const vector<DataType>& v)
 	cerr << "operator*(): StMatrix * STL vector Sizes are incompatible" << endl;
 #endif
     }
+    return mret;
 }
 
 template <class DataType, class X>
@@ -1506,6 +1501,7 @@ vector<DataType> operator*(const vector<DataType>& v, const StMatrix<X>& m1)
 #else
 	cerr << "operator*(): STL vector * StMatrix : Matrix Sizes are incompatible" << endl;
 #endif
+	return vector<DataType>();
     }
 }
 
@@ -1524,6 +1520,7 @@ StThreeVector<DataType> operator*(const StMatrix<X>& m1, const StThreeVector<Dat
 #else
 	cerr << "StMatrix<> * StThreeVector<>: Matrix Must be 3x3" << endl;
 #endif
+	return StThreeVector<DataType>();
     }
 }
 
@@ -1543,6 +1540,7 @@ StThreeVector<DataType> operator*(const StThreeVector<DataType>& v3, const StMat
 #else
 	cerr << "operator*(): StThreeVector<> * StMatrix<>: Matrix Must be 3x3" << endl;
 #endif
+	return StThreeVector<DataType>();
     }
 }
 
@@ -1562,6 +1560,7 @@ StLorentzVector<DataType> operator*(const StMatrix<X>& m1, const StLorentzVector
 #else
 	cerr << "operator*(): StMatrix<> * StLorentzVector<>: Matrix Must be 4x4" << endl;
 #endif
+	return StLorentzVector<DataType>();
     }	
 }
 
@@ -1581,6 +1580,7 @@ StLorentzVector<DataType> operator*(const StLorentzVector<DataType>& v4, const S
 #else
 	cerr << "StLorentzVector<> * StMatrix<>: Matrix Must be 3x3" << endl;
 #endif
+	return StLorentzVector<DataType>();
     }
 }
 
@@ -1599,6 +1599,7 @@ StMatrix<DataType> operator+(const StMatrix<DataType>& m1,const StMatrix<X>& m2)
 #else
 	cerr << "operator+(): Matrix Sizes must be the same." << endl;
 #endif
+	return StMatrix<DataType>();
     }	
 }
 
@@ -1615,6 +1616,7 @@ StMatrix<DataType> operator-(const StMatrix<DataType>& m1,const StMatrix<X>& m2)
 #else
 	cerr << "operator-(): Matrix Sizes must be the same." << endl;
 #endif
+	return StMatrix<DataType>();
     }
 }
 
