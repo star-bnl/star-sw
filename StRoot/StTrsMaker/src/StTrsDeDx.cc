@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.6 1999/01/26 20:43:29 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.7 1999/03/17 17:11:30 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.6  1999/01/26 20:43:29  lasiuk
- * Jan 26
+ * Revision 1.7  1999/03/17 17:11:30  lasiuk
+ * comment out debug output
+ *
+ * Revision 1.7  1999/03/17 17:11:30  lasiuk
+ * comment out debug output
  *
  * Revision 1.6  1999/01/26 20:43:29  lasiuk
  * Jan 26
@@ -226,10 +229,10 @@ int StTrsDeDx::secondary(double* primaryEnergy) const
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 void StTrsDeDx::electrons(vector<int>& sum, double bg) const
 #else
-    PR(StTrsDeDx::numberOfElectrons);
+void StTrsDeDx::electrons(vector<int, allocator<int> >& sum, double bg) const    
 #endif
 {
-    PR(sum.size());
+    //PR(StTrsDeDx::numberOfElectrons);
     if(sum.size() != StTrsDeDx::numberOfElectrons)
 	sum.resize(StTrsDeDx::numberOfElectrons);
     //PR(sum.size());
