@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.78 2004/01/19 22:53:27 potekhin Exp $
+* $Id: geometry.g,v 1.79 2004/01/22 00:21:32 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.79  2004/01/22 00:21:32  potekhin
+* Provide a facility to position the SVT with the MANY option,
+* which we'll likely need due to overlap of the PIXL (embedded
+* in SVT) and the mother volume of the beampipe
+*
 * Revision 1.78  2004/01/19 22:53:27  potekhin
 * A small additional piece of logic to steer the
 * construction of the barrel calorimeter, better
@@ -816,16 +821,16 @@ If LL>1
 
    If (LL>1 & svtt) then
      call AgDETP new ('SVTT')
-     if (Nsi < 7)   call AgDETP add ('svtg.nlayer=',   Nsi,1)
-     if (Wfr > 0)   call AgDETP add ('svtl(3).nwafer=',wfr,1)
-     if (wdm > 0)   call AgDETP add ('swca.WaferWid=', wdm,1)
-     if (wdm > 0)   call AgDETP add ('swca.WaferLen=', wdm,1)
-     if (.not.svtw) call AgDETP add ('swam.Len=',       0, 1)
+     if (Nsi < 7)           call AgDETP add ('svtg.nlayer=',   Nsi,1)
+     if (pipeConfig >= 4)   call AgDETP add ('svtg.ifMany=',     1,1)
+     if (Wfr > 0)           call AgDETP add ('svtl(3).nwafer=',wfr,1)
+     if (wdm > 0)           call AgDETP add ('swca.WaferWid=', wdm,1)
+     if (wdm > 0)           call AgDETP add ('swca.WaferLen=', wdm,1)
+     if (.not.svtw)         call AgDETP add ('swam.Len=',       0, 1)
    endif
 
 ******************************************************************
 * Take care of the correction level and call the appropriate constructor:
-
   if(svtt) then
     if    (CorrNum==0) then
        call svttgeo
