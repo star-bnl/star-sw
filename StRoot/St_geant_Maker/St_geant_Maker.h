@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.27 2001/06/01 03:03:57 perev Exp $
+// $Id: St_geant_Maker.h,v 1.28 2002/03/12 21:22:39 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.28  2002/03/12 21:22:39  fisyak
+// Set only one StEvtHddr as default option (due to Embedding)
+//
 // Revision 1.27  2001/06/01 03:03:57  perev
 // overloaded GetDataSet -> FindDataSet
 //
@@ -60,7 +63,6 @@ public:
    virtual Int_t  Init();
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
    virtual void   Draw(const char*);
-   virtual void   G2root();
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
    virtual void   SetNwGEANT (Int_t n=2000000);
@@ -68,6 +70,7 @@ public:
    virtual void   SetIwtype  (Int_t n=      0);
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
    virtual TVolume *Work();
+   virtual void   Mark(TVolume *topvol);
    virtual void   Call(const Char_t *name); // *MENU 
    virtual TRotMatrix *GetMatrix(float theta1, float phi1,
                                  float theta2, float phi2,
@@ -115,7 +118,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.27 2001/06/01 03:03:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.28 2002/03/12 21:22:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

@@ -40,7 +40,7 @@ class StBFChain : public StChain {
   Int_t               FTime;      // floating timestamp time (unused)
   
  public:
-                       StBFChain(const char *name="bfc");
+                       StBFChain(const char *name="bfc", const Bool_t UseOwnHeader = kFALSE);
    virtual            ~StBFChain();
    virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
    virtual Int_t       Make(){return StChain::Make();};
@@ -79,7 +79,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) const {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.21 2002/02/22 00:34:06 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.22 2002/03/12 21:23:09 fisyak Exp $ built "__DATE__" "__TIME__ ; 
        return cvs;
    }
    /// StBFChain control class

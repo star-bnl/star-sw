@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.25 2002/02/23 17:42:27 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.26 2002/03/12 21:23:47 fisyak Exp $
 #include <iostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
@@ -193,12 +193,14 @@ m_Simulation(kFALSE), m_InitDone (kFALSE) {}
 StdEdxMaker::~StdEdxMaker(){}
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Init(){
-  if (((StBFChain *)GetChain())->GetOption("Simu")) {
+  if (m_Mode < 0) {
     m_Simulation = kTRUE;
     gMessMgr->Warning() << "StdEdxMaker:: use Simulation mode (no calibration) " << endm;
   }
   if (m_Mode > 0) {// calibration mode
-    TFile *f = (TFile *) ((StBFChain *)GetChain())->GetTFile();
+    StBFChain *chain = dynamic_cast<StBFChain*>(GetChain());
+    TFile *f = 0;
+    if (chain) f = chain->GetTFile();
     if (f) {
       f->cd();
       //      XYZ = new TProfile2D("XYZ","xyz for clusters",100,-200,200,100,-200,200,100,-200,200);

@@ -36,17 +36,16 @@
 #include "StChain.h"
 #include "StEvtHddr.h"
 
-StChain *fgStChain=0;
-
 ClassImp(StChain)
 
 //_____________________________________________________________________________
-StChain::StChain(const char *name):
-StMaker(name)
+StChain::StChain(const char *name,  const Bool_t UseOwnHeader):
+StMaker(name),m_EvtHddr(0)
 {
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
-   m_EvtHddr  	= new StEvtHddr(m_ConstSet);
+   if ( UseOwnHeader || !(dynamic_cast<StEvtHddr*>(GetDataSet("EvtHddr"))))  
+			  m_EvtHddr = new StEvtHddr(m_ConstSet); 
    gROOT->GetListOfBrowsables()->Add(this,GetName());
 
 }
@@ -55,6 +54,7 @@ StMaker(name)
 StChain::~StChain()
 {
 }
+//_____________________________________________________________________________
 void StChain::Streamer(TBuffer &)
 { Error("Streamer"," attempt to write %s\n ",GetName());
   assert(0);
@@ -101,8 +101,11 @@ Int_t StChain::MakeEvent()
 
 
 
-// $Id: StChain.cxx,v 1.46 2002/02/02 23:31:13 jeromel Exp $
+// $Id: StChain.cxx,v 1.47 2002/03/12 21:19:00 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.47  2002/03/12 21:19:00  fisyak
+// Set only one StEvtHddr as default option (due to Embedding)
+//
 // Revision 1.46  2002/02/02 23:31:13  jeromel
 // doxygenized. Added some text for the Make() method.
 //
