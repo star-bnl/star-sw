@@ -4,19 +4,23 @@
  */
 /*********************************************************
  *
- * $Id: StPmdDBUtil.h,v 1.3 2004/03/11 11:31:21 subhasis Exp $
+ * $Id: StPmdDBUtil.h,v 1.4 2004/03/11 12:17:11 subhasis Exp $
  *
- * Author: Dipak Mishra
+ * Author: Subhasis Chattopadhyay
  *
  ************************************************************
  *
- * Description: This is the class of PMD geometry for offline 
+ * Description: This is the class of PMD Utility which provides
+ *              FEE boardwise info. 
  *
  *************************************************************
  *
  * $Log: StPmdDBUtil.h,v $
- * Revision 1.3  2004/03/11 11:31:21  subhasis
- * Board status based mapping added
+ * Revision 1.4  2004/03/11 12:17:11  subhasis
+ * *** empty log message ***
+ *
+ * Revision 1.2  2003/12/03 11:55:59  subhasis
+ * Comment header changed by Supriya
  *
  *************************************************************/
 #ifndef STAR_StPmdDBUtil
@@ -56,7 +60,6 @@ class StPmdDBUtil {
   void ChannelInBoard( Int_t,  Int_t, Int_t, Int_t& ); 
   void Chain( Int_t,  Int_t, Int_t, Int_t& ); 
   
-  
   ClassDef(StPmdDBUtil, 1)
     };
     
@@ -68,18 +71,5 @@ inline void StPmdDBUtil::ChannelInBoard(Int_t sm, Int_t row, Int_t col, Int_t& c
 
 inline void StPmdDBUtil::Chain(Int_t sm, Int_t row, Int_t col, Int_t& chain)
 {chain=m_Chain[sm][row][col];}
-
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
 
