@@ -72,26 +72,26 @@ int StHbtIOBinary::writeTrack(StHbtTrack& trk){
   mOStream->write( (char*)&trk, sizeof(trk) );
   byteCounterEvent+=sizeof(trk);
   //cout << " track size " << sizeof(trk) << endl;
-  return 0;
+  return ioOK;
 }
 int StHbtIOBinary::readTrack(StHbtTrack& trk){
   mIStream->read( (char*)&trk, sizeof(trk) );
   byteCounterEvent+=sizeof(trk);
   //cout << " track size " << sizeof(trk) << endl;
-  return 0;
+  return ioOK;
 }
 //------------------------- StHbtV0 --------------------------------------
 int StHbtIOBinary::writeV0(StHbtV0& v0){
   mOStream->write( (char*)&v0, sizeof(v0) );
   byteCounterEvent+=sizeof(v0);
   //cout << " track size " << sizeof(v0) << endl;
-  return 0;
+  return ioOK;
 }
 int StHbtIOBinary::readV0(StHbtV0& v0){
   mIStream->read( (char*)&v0, sizeof(v0) );
   byteCounterEvent+=sizeof(v0);
   //cout << " track size " << sizeof(v0) << endl;
-  return 0;
+  return ioOK;
 }
 //------------------------- StHbtEvent -----------------------------------
 int StHbtIOBinary::writeEvent(StHbtEvent& ev){
@@ -126,7 +126,7 @@ int StHbtIOBinary::writeEvent(StHbtEvent& ev){
     writeV0(**iterv0);
   } 
   byteCounterTotal+=byteCounterEvent;
-  return 0;
+  return ioOK;
 }
 
 //------------------------- StHbtEvent -----------------------------------
@@ -147,7 +147,7 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
   byteCounterEvent += binaryRead( mIStream, eventNumber);
   if (mIStream->eof()) {
     cout << "Hit end of file " << endl;
-    return -1; 
+    return ioEOF; 
   } 
   ev.SetEventNumber(eventNumber);
 
@@ -166,7 +166,7 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
   //
   if (!(mIStream->good())){
     cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
-    return -1;
+    return ioERR;
   } 
   //  ev.mTrackCollection = new StHbtTrackCollection; <-- NO!
   //  the TrackCollection is instantiated by constructor!!
@@ -189,7 +189,7 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
     if ( readTrack(*trk) ){
       cout << "StHbtEvent input operator finds stream in bad state during track read ! ";
       cout << itrk << " of " << NtracksInCollection << " intended" << endl;
-      return -1;
+      return ioERR;
     }
     //cout << " track read " << endl;
     ev.TrackCollection()->push_back(trk);  // ?ok?
@@ -214,7 +214,7 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
   cout << " reading " << NV0sInCollection << " V0s " << endl;
   if ( !(mIStream->good()) ) {
     cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
-    return -1;
+    return ioERR;
   }
  
   for (unsigned int iv0=0; iv0<NV0sInCollection; iv0++){
@@ -222,12 +222,12 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
     if ( readV0(*v0) ){
       cout << "StHbtEvent input operator finds stream in bad state during v0 read ! ";
       cout << iv0 << " of " << NV0sInCollection << " intended" << endl;
-      return -1;
+      return ioERR;
     }
     ev.V0Collection()->push_back(v0);  // ?ok?
     //cout << " " << iv0;
   }
   byteCounterTotal+=byteCounterEvent;
-  return 0;
+  return ioOK;
 } 
 

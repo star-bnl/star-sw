@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.7 2000/02/13 17:17:12 laue Exp $
+ * $Id: StHbtAnalysis.h,v 1.8 2000/03/16 02:07:04 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,15 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.8  2000/03/16 02:07:04  laue
+ * Copy constructor added to StHbtAnalysis (only known cuts, corrfctn).
+ *
+ * StHbtBinaryReader can now derive filename from StIOMaker and read a list
+ * of files.
+ *
+ * StHbtManager now holds a collection of StHbtEventWriters (multiple writes
+ * possible now)
+ *
  * Revision 1.7  2000/02/13 17:17:12  laue
  * Calls to the EventBegin() and EventEnd() functions implemented
  * The actual analysis is moved from StHbtManager to StHbtAnalysis
@@ -83,6 +92,7 @@ class StHbtAnalysis{
 public:
 
   StHbtAnalysis();
+  StHbtAnalysis(const StHbtAnalysis&);  // copy constructor
   virtual ~StHbtAnalysis();
 
   // Gets and Sets
