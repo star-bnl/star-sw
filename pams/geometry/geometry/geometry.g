@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.94 2004/10/26 21:11:00 potekhin Exp $
+* $Id: geometry.g,v 1.95 2004/10/26 21:46:23 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.95  2004/10/26 21:46:23  potekhin
+* 1) Cleaned out the remaining test code from Y2004B
+* 2) Created Y2005X which is same as Y2004B except for
+* the full barrel calorimeter as per Thomas' request
+*
 * Revision 1.94  2004/10/26 21:11:00  potekhin
 * 1) Moved filling of GDAT to the end of code after a consultation
 * with Pavel -- this is less error prone as by this time the main
@@ -973,7 +978,6 @@ If LL>1
 * control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
-
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
@@ -1006,15 +1010,15 @@ If LL>1
 
 *
 ****************************************************************************************
-  on Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+FTRO with standard GSTPAR in PHMD;
+  on Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD with standard GSTPAR in PHMD;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
 
                   "tpc: standard, i.e.  "
-                     mwc=off " Wultiwire chambers are read-out ";
-                     pse=off " inner sector has pseudo padrows ";
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
 
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
@@ -1022,16 +1026,13 @@ If LL>1
                      BtofConfig=7;
 
                   "calb" 
-                     calb=off
-                     ems=off
                      CalbConfig = 1  " Please see note in Y2004A"
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
-
 
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
-                     ecal=off
+
                   "beam-beam counter "
                      bbcm=on
 
@@ -1056,12 +1057,6 @@ If LL>1
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 20;
-
-* Until thorougly tested, this is deferred:
-*
-*                  "FTPC Readout barrel "
-*                     ftro=on;
-*                     FtroConfig = 1;
 
                 }
 
@@ -1128,6 +1123,63 @@ If LL>1
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 2;
+                }
+
+****************************************************************************************
+  on Y2005X    { first cut if full CALB 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+* note the full barrel same as in y2003x:
+                  "calb" 
+                     ems=on ;
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                  "geometry correction "
+                     CorrNum = 3;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 20;
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
                 }
 
   on HADR_ON    { all Geant Physics On;                                       }
