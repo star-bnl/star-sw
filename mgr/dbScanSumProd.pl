@@ -29,6 +29,7 @@ my @SetS = (
              "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/trigger/year_1h/hadronic_on",  
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
+             "auau200/venus412/default/b0_3/year_1h/hadronic_on", 
              "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",

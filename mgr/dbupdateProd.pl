@@ -31,6 +31,7 @@ my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
+             "auau200/venus412/default/b0_3/year_1h/hadronic_on",
              "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
              "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on", 
