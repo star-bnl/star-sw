@@ -31,7 +31,15 @@ public:
     double getFlowAr();
     double getFlowCO2();
     double getGasOutEast();
+    double getBody1East();
+    double getBody2East();
+    double getBody3East();
+    double getBody4East();
     double getGasOutWest();
+    double getBody1West();
+    double getBody2West();
+    double getBody3West();
+    double getBody4West();
     double getBarometricPressure();
 
     void update(StMaker*);
