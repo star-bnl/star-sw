@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.309 2002/12/04 15:26:04 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.310 2002/12/16 17:29:07 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -400,6 +400,7 @@ Bfc_st BFC1[] = {
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
 
   {"tofDat"      ,"tof_raw","","db,Tofutil","StTofMaker","StEvent,StTofMaker","TOF Data base chain",kFALSE},
+  {"tofsim"      ,"","","TofUtil","StTofSimMaker","StEvent,StTofMaker,StTofSimMaker","TOF Simulator",kFALSE},
 
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
   {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
