@@ -6,7 +6,7 @@
 # commits and a number of commit statistics.
 #
 $commitlog = "/afs/rhic/star/packages/repository/CVSROOT/commitlog";
-$cvsHtml = "/star/starlib/doc/www/cvs";
+$cvsHtml = "/star/starlib/doc/www/html/comp-nfs/cvs";
 $cvsUrl = "/cgi-bin/cvsweb.cgi";
 $currentTime = localtime time;
 
