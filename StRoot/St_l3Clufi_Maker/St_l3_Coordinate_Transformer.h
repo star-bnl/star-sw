@@ -22,6 +22,11 @@ private:
     double drift_length_outer ;
     double lengthPerTb;
 
+    // max tb
+    double max_tb_inner;
+    double max_tb_outer;
+    int transformation_errors;
+
 public:
     // Constructors
     St_l3_Coordinate_Transformer() ;  // Init parameters and variables
@@ -41,9 +46,14 @@ public:
     // Set paramaters needed for the transformation in different ways
     // This is only for the transformation z <-> timebucket the others are fixed
     void Set_parameters_by_hand() ;
+    void Set_parameters_by_hand(const double lengthPerTb, const double drift_length_inner, const double drift_length_outer) ;
     void Get_parameters_from_db() ;
     void Use_transformation_provided_by_db() ;
     void Print_parameters() ;
+    double Get_drift_length_inner() { return drift_length_inner ;} ;
+    double Get_drift_length_outer() { return drift_length_outer ;} ;
+    double Get_lengthPerTb() { return lengthPerTb ; } ;
+    int Get_transformation_errors() { return transformation_errors; } ;
 
     #ifdef OFFLINE
     // Root connection

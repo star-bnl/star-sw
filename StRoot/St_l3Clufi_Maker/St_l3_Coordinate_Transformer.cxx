@@ -21,15 +21,23 @@ St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
     // initialize transformations
     
     //Use_transformation_provided_by_db() ;
-    //Set_parameters_by_hand() ;
-    Get_parameters_from_db() ;
+  Set_parameters_by_hand() ;
+  //Get_parameters_from_db() ;
     //Use_transformation_provided_by_db() ;
-    //Print_parameters() ;    
+    //Print_parameters() ;   
+
+  // set values
+   max_tb_inner =0;
+   max_tb_outer =0;
+   transformation_errors =0;
 }
 //______________________________
 St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
 {
-    ;
+   if (transformation_errors>0)
+       {
+	   cout << transformation_errors << " transformation errors occured.\n";
+       }
 }
 //______________________________
 void St_l3_Coordinate_Transformer::raw_to_global(const St_l3_ptrs_Coordinate &raw ,St_l3_xyz_Coordinate &global )
@@ -50,10 +58,12 @@ void St_l3_Coordinate_Transformer::raw_to_local(const St_l3_ptrs_Coordinate &raw
     if( raw.Getr() <= 13 )
 	{
 	    local.Setz(drift_length_inner - raw.Gett() * lengthPerTb) ;
+	    if (raw.Gett()>max_tb_inner) {transformation_errors++;}
 	}
     else 
 	{
 	    local.Setz(drift_length_outer - raw.Gett() * lengthPerTb) ;
+	    if (raw.Gett()>max_tb_outer) {transformation_errors++;}
 	}
 }
 //______________________________
@@ -76,23 +86,137 @@ void St_l3_Coordinate_Transformer::local_to_global(const St_l3_ptrs_Coordinate &
 //______________________________
 void St_l3_Coordinate_Transformer::global_to_raw(const St_l3_xyz_Coordinate &global , St_l3_ptrs_Coordinate &raw )
 {
+    St_l3_xyz_Coordinate local(0,0,0) ;
+    global_to_local( global, local, raw ) ;
+    local_to_raw( global ,local ,raw ) ;
 }
 //______________________________
 void St_l3_Coordinate_Transformer::global_to_local(const St_l3_xyz_Coordinate &global, St_l3_xyz_Coordinate &local ,St_l3_ptrs_Coordinate &raw) 
 {
+    // Get xyz right
+    double y = global.Gety() ;
+    double x = 0;
+    if(global.Getz()>=0)
+	{
+	    x = global.Getx() ; 
+	    local.Setz(global.Getz());
+	}
+    else
+	{
+	    x = -(global.Getx()) ; // ATTENTION must be mirrowed for sectors 13 - 24 !!!
+	    local.Setz(-(global.Getz()));
+	}
+
+    // Prepare turn operation
+    double pi = 3.14159265358979323846;
+    double sec_border = tan(pi/12) ; // 15 degree
+    double turn_angle = -pi/6 ;  // 30 degree
+    double sin_turn_angle = sin(turn_angle);
+    double cos_turn_angle = cos(turn_angle);
+    double sector = 0 ; 
+    
+    if (y>=0 && fabs(x/y)<=sec_border)
+	{
+	    // We are already in sector 12 
+	    sector = 12 ;
+	}
+    else
+	{
+	    // We have to turn system until we are in first sector
+	    while( y<0 || (fabs(x/y)>sec_border))
+		{
+		    double xn = x*cos_turn_angle + y*sin_turn_angle ;
+		    double yn = -x*sin_turn_angle + y*cos_turn_angle ;
+		    x = xn ;
+		    y = yn ;
+		    sector++;
+		}
+	}
+
+    // Set it
+    local.Setx(x);
+    local.Sety(y);
+    
+    if (global.Getz()<0)
+      {
+	raw.Sets(sector+12);
+      }
+    else
+      {
+	raw.Sets(sector);
+      }
+
 }
 //______________________________
 void St_l3_Coordinate_Transformer::local_to_raw(const St_l3_xyz_Coordinate &global ,const St_l3_xyz_Coordinate &local , St_l3_ptrs_Coordinate &raw ) 
 {
+  // first lets find the row
+  double y = local.Gety() ;
+  int row = 0;
+  int row_index = 0 ;
+  while( (fabs(radialDistanceAtRow[row_index]-y) > 0.5) && (row_index < 46) )
+    {
+      row_index++;
+    }
+  if (row_index==45 || y<59)
+    {
+      // no matching row found
+      cout << "Alert row not found !" << endl;
+      return ;
+    }
+  else 
+    {
+      // yes row found !
+      row = row_index+1;
+    }
+
+  // then lets go for the pad
+  double x = local.Getx();
+  double  pitch = (row<=13) ?    innerSectorPadPitch : outerSectorPadPitch ;
+  int  half_num_pads_this_row = numberOfPadsAtRow[row-1]/2 ;
+  double pad = half_num_pads_this_row + x/pitch + 0.5 ;
+
+  // finally lets get the bucket
+  double bucket = 0;
+  double z = local.Getz();
+  if (row<=13)
+    {
+      bucket = ( drift_length_inner - z )/lengthPerTb ;
+      if (z>drift_length_inner) {transformation_errors++;}
+    }
+  else 
+    {
+      bucket = ( drift_length_outer - z )/lengthPerTb ;
+      if (z>drift_length_outer) {transformation_errors++;}
+    }
+  
+  // fill it
+  raw.Setp(pad);
+  raw.Sett(bucket);
+  raw.Setr(row);
+}
+//______________________________
+void St_l3_Coordinate_Transformer::Set_parameters_by_hand(const double mlengthPerTb, const double mdrift_length_inner, const double mdrift_length_outer)
+{
+    lengthPerTb = mlengthPerTb ;
+    drift_length_inner = mdrift_length_inner ;
+    drift_length_outer = mdrift_length_outer ;
+    
+    // set max timebucket
+    max_tb_inner = drift_length_inner/lengthPerTb;
+    max_tb_outer = drift_length_outer/lengthPerTb;
 }
 //______________________________
 void St_l3_Coordinate_Transformer::Set_parameters_by_hand()
 {
   // Set the parameters straight forward
-  lengthPerTb =  0.570997;
-  drift_length_inner = 205.878 ;
-  drift_length_outer = 206.348 ;
+  lengthPerTb =  0.561;
+  drift_length_inner =  200.668 ;
+  drift_length_outer = 201.138  ;
     
+  // set max timebucket
+  max_tb_inner = drift_length_inner/lengthPerTb;
+  max_tb_outer = drift_length_outer/lengthPerTb;
   //cout << "Constants for transformation set by hand." << endl;
 }
 //______________________________
@@ -156,6 +280,9 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
     }
   cout << "Constants set by using official transformation." << endl;
 
+  // set max timebucket
+  max_tb_inner = drift_length_inner/lengthPerTb;
+  max_tb_outer = drift_length_outer/lengthPerTb;
 #else
   cout << "This is not functional online.\n" ;
 #endif 
@@ -212,6 +339,10 @@ void St_l3_Coordinate_Transformer::Get_parameters_from_db()
 	  cout << "lengthPerTb        : " << lengthPerTb << endl;
       }
   
+  // set max timebucket
+  max_tb_inner = drift_length_inner/lengthPerTb;
+  max_tb_outer = drift_length_outer/lengthPerTb;
+
 #else
   cout << "This is not functional online.\n" ;
 #endif 
@@ -223,7 +354,10 @@ void St_l3_Coordinate_Transformer::Print_parameters()
     cout << "Used parameters : " << endl ;
     cout << "Length per tb  : " << lengthPerTb << endl ;
     cout << "drift_length_inner: " << drift_length_inner << endl ;
-    cout << "drift_length_outer: " << drift_length_outer << endl << endl;
+    cout << "drift_length_outer: " << drift_length_outer << endl ;
+    cout << "max_tb_inner: " << max_tb_inner << endl ;
+    cout << "max_tb_outer: " << max_tb_outer  << endl ;
+    
 }
 
 /////////
