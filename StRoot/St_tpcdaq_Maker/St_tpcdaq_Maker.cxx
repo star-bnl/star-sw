@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.54  2000/06/24 19:18:41  ward
+// changed meaning of SetMinMaxTimeBucket args
+//
 // Revision 1.53  2000/06/24 19:13:27  ward
 // added SetMinMaxTimeBucket(int lo,int hi) for Dave H.
 //
@@ -491,8 +494,8 @@ void St_tpcdaq_Maker::SetMinMaxTimeBucket(int lo,int hi) {
   alreadySet=7; // TRUE
   for(sector=0;sector<24;sector++) {
     noiseElim[sector].nbin=1;
-    noiseElim[sector].low[0]=lo-1;
-    noiseElim[sector].up [0]=hi+1;
+    noiseElim[sector].low[0]=lo;
+    noiseElim[sector].up [0]=hi;
   }
 }
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
