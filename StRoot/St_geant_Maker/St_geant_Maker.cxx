@@ -124,6 +124,7 @@ St_geant_Maker::~St_geant_Maker(){
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
 // Initialize GEANT
+  PrintInfo();
   if (! geant) {
     geant  = new TGeant3("Geant","C++ Interface to Geant3",nwgeant,nwpaw,iwtype); 
   }
@@ -132,29 +133,29 @@ Int_t St_geant_Maker::Init(){
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make(){
-  int nhits;
-  PrintInfo();
-
-  gtrig();
-  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
-  m_DataSet->Add(g2t_vertex);
-  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
-  m_DataSet->Add(g2t_track);
-  Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
-
-  gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
-  St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
-  m_DataSet->Add(g2t_tpc_hit);
-
-  Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
+  if (!m_DataSet->GetList()) {
+    Int_t nhits;
+    gtrig();
+    St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
+    m_DataSet->Add(g2t_vertex);
+    St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
+    m_DataSet->Add(g2t_track);
+    Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
+    
+    gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
+    St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
+    m_DataSet->Add(g2t_tpc_hit);
+    
+    Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
 
 
 #if 0
-  Char_t *g2t = "g2t_";
-  Int_t  narg = 0;
-  addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
-  if (address) csjcal(&address,&narg);
+    Char_t *g2t = "g2t_";
+    Int_t  narg = 0;
+    addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
+    if (address) csjcal(&address,&narg);
 #endif
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -166,7 +167,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.8 1999/01/26 16:01:43 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.9 1999/01/28 17:10:33 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }

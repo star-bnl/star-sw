@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.36 1999/01/28 00:11:54 fisyak Exp $
+// $Id: bfc.C,v 1.37 1999/01/28 17:10:35 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.37  1999/01/28 17:10:35  fisyak
+// allow to switch between xdf and fz
+//
 // Revision 1.36  1999/01/28 00:11:54  fisyak
 // add g2r
 //
@@ -161,12 +164,12 @@ files require a maker to read in the data file.
   //  Create the makers to be called by the current chain
   St_params_Maker  *params = new St_params_Maker("params","params");
   St_TLA_Maker       *geom = new St_TLA_Maker("geom","run/geant/Run");
-  St_geant_Maker    *geant = new St_geant_Maker("geant","event/geant/Event");
-  geant->LoadGeometry("detp geometry field_only");
   if (xdf_in) {
     St_xdfin_Maker *xdfin = new St_xdfin_Maker("xdfin");
     chain->SetInputXDFile(xdf_in);
   }
+  St_geant_Maker    *geant = new St_geant_Maker("geant","event/geant/Event");
+  geant->LoadGeometry("detp geometry field_only");
   St_calib_Maker    *calib = new St_calib_Maker("calib","calib"); 
   St_evg_Maker      *evgen = new St_evg_Maker("evgen","event/evgen");
   //  St_fss_Maker   *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
