@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.9 1999/07/13 15:34:34 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.10 1999/07/14 14:58:33 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.10  1999/07/14 14:58:33  wdeng
+// Check if there is primary vertex. Uncomment PrintInfo().
+//
 // Revision 1.9  1999/07/13 15:34:34  wdeng
 // Add protections in case that some tables are not there
 //
@@ -108,7 +111,8 @@ Int_t StKinkMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StKinkMaker::Make(){
-  //PrintInfo();
+  PrintInfo();
+
   St_DataSet *match = GetDataSet("match"); 
   if (!match) {
     cout << " StKinkMaker: match is missing" << endl;
@@ -133,6 +137,16 @@ Int_t StKinkMaker::Make(){
     return kStWarn;
   }
   
+  dst_vertex_st *vrtx = vertex->GetTable();
+  Int_t whichRow = 0;
+  for( whichRow=0; whichRow<vertex->GetNRows(); whichRow++,vrtx++) {
+    if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
+  }
+  if( whichRow == vertex->GetNRows() ) {
+    cout << " StKinkMaker: no primary vertex." << endl;
+    return kStWarn;
+  }
+
   St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
   
   Int_t numOfGlbtrk = globtrk->GetNRows();
@@ -142,7 +156,6 @@ Int_t StKinkMaker::Make(){
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
     AddData(kinkVertex);
   }
-  
   Int_t NoVertex = vertex->GetNRows()+ tkf_limit;
   vertex->ReAllocate(NoVertex); 
   
@@ -574,8 +587,6 @@ Int_t StKinkMaker::Make(){
   
   return kStOK; 
 }
-
-//_____________________________________________________________________________
 
 //_____________________________________________________________________________
 Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
