@@ -1,4 +1,3 @@
-
 CC:>--------------------------------------------------------------------
 CC: FILE:       evr_am.F
 CC: HISTORY:    
@@ -139,7 +138,7 @@ C=== decide which tracks to use===
               b = 5.0
               xp(1) = 0.0
               xp(2) = 0.0
-              call project_track(psi,icharge,p,tanla,r0,phi,b,z,xp,x)
+              call evr_project_track(psi,icharge,p,tanla,r0,phi,b,z,xp,x)
               k = k + 1
 	      x0(k) = x(1)
 	      y0(k) = x(2)
@@ -183,7 +182,7 @@ C=== decide which tracks to use===
 	   endif
 10	continue
 
-	CALL VERTEX_FIT(k)
+	CALL EVR_VERTEX_FIT(k)
 
 	k=0
 	do 105 i=1,ntrk
@@ -199,7 +198,7 @@ C=== decide which tracks to use===
 	endif
 105	continue
 
-	CALL VERTEX_FIT(k)
+	CALL EVR_VERTEX_FIT(k)
 
 	k=0
 	do 205 i=1,ntrk
@@ -215,11 +214,13 @@ C=== decide which tracks to use===
 	endif
 205	continue
 
-	CALL VERTEX_FIT(k)
+	CALL EVR_VERTEX_FIT(k)
 C
 C save results
 C
         index=privert_h.nok + 1
+        privert_h.nok = index
+
         if (evrpar(1).use.eq.0) then
            privert(index).det_id = 1
            privert(index).sigma(1)  = 0.0150
@@ -250,7 +251,6 @@ cc        privert(index).ntch = k
         privert(index).pchi2  = 0
         privert(index).id_aux_ent  = 0
 
-        privert_h.nok = index
 
         evr_am = STAFCV_OK
 
@@ -258,7 +258,7 @@ cc        privert(index).ntch = k
       END
 C-------------------------------------------------------------------
 
-	SUBROUTINE VERTEX_FIT(NT)
+	SUBROUTINE EVR_VERTEX_FIT(NT)
 	IMPLICIT NONE
 CC:>--------------------------------------------------------------------
 CC:Passed parameters:  NT = number of tracks invloved in the fit
@@ -389,7 +389,7 @@ c  Calcualate the determinant
 999	return
 	end
 C
-      SUBROUTINE PROJECT_TRACK(psi,q,p,tanl,r0,phi,bfld,z0,xp,x)
+      SUBROUTINE EVR_PROJECT_TRACK(psi,q,p,tanl,r0,phi,bfld,z0,xp,x)
       IMPLICIT NONE
 CC:>----------------------------------------------------------------------
 CC: INPUT ARGUMENTS  :	
