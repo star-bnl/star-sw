@@ -121,12 +121,7 @@ Bool_t StEmcMipSpectra::CalibrateEtaBin(Int_t etabin,Int_t mode)
     TArrayF SpectraTemp=GetEtaBinSpectra(etabin);
     Int_t mi,mf,ei,ef;
     CalcEtaBin(etabin,etaBinWidth,&mi,&mf,&ei,&ef);
-    Int_t si=1,sf=GetNSub();
-    
-    emcCalibration_st*  calib=CalibTable->GetTable();
-    emcEqualization_st* equal=EqualTable->GetTable();
-    
-    
+        
     Int_t firstadc=5;   // first adc to fit
     
     Int_t nadcMax=GetNAdcMax();
@@ -149,8 +144,6 @@ Bool_t StEmcMipSpectra::CalibrateBin(Int_t bin,Int_t mode)
   if (mode==0) 
   {
     TArrayF SpectraTemp=GetSpectra(bin);
-    
-    emcCalibration_st* calib=CalibTable->GetTable();
     
     Int_t firstadc=5;   // first adc to fit
     
