@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.11  2001/04/20 22:23:33  pavlinov
+// Clean up
+//
 // Revision 1.10  2001/04/17 23:51:35  pavlinov
 // Clean up before MDC4
 //
@@ -80,10 +83,12 @@
 // collection. 
 //
 //////////////////////////////////////////////////////////////////////////
-#include <TBrowser.h>
 #include "StEmcPreClusterCollection.h"
+#include <TBrowser.h>
+#include <TTableSorter.h>
+#include <TDataSetIter.h>
 #include <math.h>
-#include "emc_def.h"
+//#include "emc_def.h"
 #include "StEvent/StEvent.h" 
 #include "StEvent/StEventTypes.h"
 #include "StEmcUtil/StEmcGeom.h"
@@ -98,17 +103,17 @@ StEmcDetector* mDet;
 StEmcGeom *geo;
 
 //_____________________________________________________________________________
-StEmcPreClusterCollection::StEmcPreClusterCollection():St_DataSet("Default")
+StEmcPreClusterCollection::StEmcPreClusterCollection():TDataSet("Default")
 {
   SetTitle("ecl");
 }
 //_____________________________________________________________________________
-StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name):St_DataSet("Default")
+StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name):TDataSet("Default")
 {
   SetTitle("ecl");
 }
 //_____________________________________________________________________________
-StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDetector* stdet):St_DataSet(Name)
+StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDetector* stdet):TDataSet(Name)
 {
   SetTitle("ecl");
   mNclusters=0;
@@ -117,28 +122,29 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
   geo=new StEmcGeom(Name);
   kCheckClustersOk=kFALSE;
    
+  // Default values were tuned for PI0 business at 20-apr by PAI 
   if(!strcmp(Name,"bemc"))
   {
-    mDetector  = 1;     mEnergySeed         = 0.1;  
-    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.02;
-    mSizeMax = 4; 
+    mDetector  = 1;     mEnergySeed         = 0.4;  
+    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.7;
+    mSizeMax = 4;
   }
   else if(!strcmp(Name,"bprs"))
   {
     mDetector  = 2;     mEnergySeed         = 0.1;  
-    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.02;
-    mSizeMax = 4; 
+    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.1;
+    mSizeMax = 1; 
   }
   else if(!strcmp(Name,"bsmde"))
   {
     mDetector  = 3;     mEnergySeed         = 0.08; 
-    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.001;  
+    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.4;  
     mSizeMax = 5;       kCheckClustersOk = kTRUE; 
   }
   else if(!strcmp(Name,"bsmdp"))
   {
     mDetector  = 4;     mEnergySeed         = 0.08; 
-    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.001;  
+    mEnergyAdd = 0.001; mEnergyThresholdAll = 0.4;  
     mSizeMax = 5;       kCheckClustersOk = kTRUE;
   }
   else
@@ -148,7 +154,7 @@ StEmcPreClusterCollection::StEmcPreClusterCollection(const Char_t *Name, StEmcDe
     kIsOk=kFALSE;
     return; 
   }
-     
+  mLoop = (mDetector==1)?2:1; // 20-apr     
   
   kIsOk=kTRUE;
 }
@@ -223,11 +229,12 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
 {
   used.Set(nh);   // array with flags of used hits in the module
   used.Reset();
+  Float_t eClW; // energy of cluster candidate
 
 // only one hit in this module
   if(nh == 1) 
   { 
-    if(energyw[0]>mEnergySeed)
+    if(energyw[0] > mEnergyThresholdAll)
     {
       hitsid.Set(1); 
       hitsid[0]=first;
@@ -240,12 +247,12 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
 
 // more than one hit in this module
 
-  St_TableSorter index(energyw.GetArray(), nh); // The last element is biggest
+  TTableSorter index(energyw.GetArray(), nh); // The last element is biggest
   hitsid.Set(10);
   hitsid.Reset();
 
   Int_t i, ii,l;
-  Int_t loop=1;
+
   for(i=nh-1; i>=0; i--) //loop from the more energetic hit to the less one
   { 
     Int_t j = index.GetIndex(i); //get index of the hit
@@ -259,36 +266,47 @@ void StEmcPreClusterCollection::findClustersInModule(Int_t mod)
       used[j]=1;
       keyEta=0; 
       keyPhi=0;
+      eClW  = energyw[j]; // 19-apr
+      if(mSizeMax == 1) goto TESTClUSTER; // cluster = hit
 
-      for(l=0;l<loop;l++)
+      for(l=0; l<mLoop; l++)
       {
-       if(l==1 &&nhit==4) break;
-       for(ii=i-1; ii>=0; ii--)
-       {
-        int jj = index.GetIndex(ii);
-        if(energyw[jj] < mEnergyThresholdAll) break;
-        if(used[jj] == 0)
+        for(ii=i-1; ii>=0; ii--)
         {
-          if(testOnNeighbor(jj)==0)
+          int jj = index.GetIndex(ii);
+          if(energyw[jj] < mEnergyAdd) break; // 19-apr
+          if(used[jj] == 0)
           {
-            used[jj]=1;
-            hitsid[nhit]=jj; 
-            nhit++; 
-            if(nhit == mSizeMax) break;
+            if(testOnNeighbor(jj)==0)
+            {
+              used[jj]=1;
+              hitsid[nhit]=jj; 
+              nhit++;
+              eClW += energyw[jj]; // 19-apr
+              if(nhit == mSizeMax) goto TESTClUSTER;
+            }
           }
         }
-       }
       }
+      TESTClUSTER:
       if(nhit>0)
       {
-        TArrayI *hidw = new TArrayI(nhit);
-        for(Int_t i1=0; i1<nhit; i1++)
-        {
-          (*hidw)[i1] = hitsid[i1] + first; // Trans. from module to all
+        if(eClW > mEnergyThresholdAll){ // 19-apr
+	  TArrayI hidw(nhit);
+          for(Int_t i1=0; i1<nhit; i1++)
+          {
+            hidw[i1] = hitsid[i1] + first; // Trans. from module to all
+          }
+          addPreCluster(mod, &hidw);
+          nhit = 0; 
         }
-        addPreCluster(mod, hidw);
-        nhit = 0; 
-        delete hidw;
+        else { // 19 apr => free used hits
+          Int_t jj;
+          for(Int_t i1=0; i1<nhit; i1++) {
+            jj = hitsid[i1];
+            used[jj] = 0;
+          }
+        }
       }
     }
   }
@@ -724,16 +742,17 @@ StEmcPreClusterCollection::Browse(TBrowser *b)
   printClusters(10,0); // Print 10 clusters or less
   b->Add((TObject*)(Clusters()), GetName());
   TDataSet::Browse(b);
+  //  StAutoBrowse::Browse(this,b);
 }
 //_____________________________________________________________________________
 void StEmcPreClusterCollection::printConf()
 {
     cout <<"\n******************* PREECL INFO\n";
-    cout <<"For detector: "<<GetName()<<"\n";
+    cout <<"For detector: "<<GetName()<<" number "<<mDetector<<"\n";
     cout <<"mEnergySeed            = "<<mEnergySeed<<"\n";  
     cout <<"mEnergyThresholdAll    = "<<mEnergyThresholdAll<<"\n";  
     cout <<"mEnergyAdd             = "<<mEnergyAdd<<"\n";  
     cout <<"mSizeMax               = "<<mSizeMax<<"\n";  
+    cout <<"mLoop                   = "<<mLoop<<"\n";
     cout <<"*******************\n\n";
-  
 }

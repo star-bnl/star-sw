@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.11 2001/04/17 23:51:50 pavlinov Exp $
+// $Id: StPreEclMaker.cxx,v 1.12 2001/04/20 22:23:44 pavlinov Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.12  2001/04/20 22:23:44  pavlinov
+// Clean up
+//
 // Revision 1.11  2001/04/17 23:51:50  pavlinov
 // Clean up before MDC4
 //
@@ -80,11 +83,12 @@
 #include <iostream.h>
 #include <cmath>
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include "TDataSetIter.h"
 #include "StPreEclMaker.h"
 #include "StEmcSimulatorMaker/StEmcSimulatorMaker.h"
 #include "St_ems_Maker/St_ems_Maker.h"
 #include "StEmcUtil/StEmcMath.h"
+#include "tables/St_emcClusterParam_Table.h"
 
 // added for StEvent
 
@@ -95,12 +99,9 @@ ClassImp(StPreEclMaker)
 
 
 int nModule[8] = {120, 120, 120, 120, 24, 24, 24, 24}; // temp.->database
-const TString detname[] = {"bemc", "bprs", "bsmde", "bsmdp","eemc", "eprs", "esmde", "esmdp"};
+#include "StEmcUtil/emcDetectorName.h"
 
-TArrayI       mSizeMaxConf(8);      
-TArrayF       mEnergySeedConf(8);
-TArrayF       mEnergyAddConf(8);
-TArrayF       mEnergyThresholdAllConf(8);
+emcClusterParam_st *parTable=0;
 Bool_t        kCheckClustersOkConf[8];
 StEmcCollection* emc;
 
@@ -115,14 +116,20 @@ StPreEclMaker::~StPreEclMaker()
 //_____________________________________________________________________________
 Int_t StPreEclMaker::Init()
 {
-  //Setting default cluster conditions ...
-  SetClusterConditions("bemc",4,0.1,0.001,0.02,kFALSE);
-  SetClusterConditions("bprs",4,0.1,0.001,0.2,kFALSE);
-  SetClusterConditions("bsmde",5,0.08,0.001,0.001,kFALSE);
-  SetClusterConditions("bsmdp",5,0.08,0.001,0.001,kFALSE);
-  
+  //Setting default cluster conditions ... for pi0 business
+  mParam = new St_emcClusterParam("emcClustParam", BSMDP);
+  AddRunco((TDataSet*)mParam);
+  parTable = mParam->GetTable();
+
+  SetClusterConditions("bemc",  4, 0.4, 0.001, 0.7,kFALSE);
+  SetClusterConditions("bprs",  1, 0.1, 0.001, 0.1,kFALSE); // Cluster is one hit
+  SetClusterConditions("bsmde", 5, 0.08,0.001, 0.4,kFALSE);
+  SetClusterConditions("bsmdp", 5, 0.08,0.001, 0.4,kFALSE);
+  mParam->Purge();
+  parTable = mParam->GetTable();
+
   Int_t greta[4]={40,40,300,20};   // eta bins
-  Int_t grphi[4]={120,120,60,900}; // phi bins ?? 16-apr by PAI
+  Int_t grphi[4]={120,120,60,900}; // phi bins  => 16-apr by PAI
   Float_t myPI = M_PI + 0.0001;
   
   //Making QA histgrams
@@ -173,6 +180,7 @@ Int_t StPreEclMaker::Init()
       m_PhiInCl[i]   = new TH1F(name_phi, tit_phi, grphi[i], -myPI, myPI);
     }
   }
+  Histograms()->SetName("PreClustHist");  
   return StMaker::Init();
 }  
 //_____________________________________________________________________________
@@ -240,10 +248,10 @@ Int_t StPreEclMaker::Make()
     if(Debug()>=2) AddData(cc);  // 17-apr-2001 by PAI
     if(cc->IsOk())
     {
-      cc->setSizeMax(mSizeMaxConf[i]);
-      cc->setEnergySeed(mEnergySeedConf[i]);
-      cc->setEnergyAdd(mEnergyAddConf[i]);
-      cc->setEnergyThresholdAll(mEnergyThresholdAllConf[i]);
+      cc->setSizeMax(Int_t(parTable[i].sizeMax));
+      cc->setEnergySeed(Float_t(parTable[i].energySeed));
+      cc->setEnergyAdd(Float_t(parTable[i].energyAdd));
+      cc->setEnergyThresholdAll(Float_t(parTable[i].energyThreshold));
       cc->setCheckClusters(kCheckClustersOkConf[i]);
 //      cc->printConf();
   	  if(cc->findClusters()!= kStOK) cout<<"***** ERR: StEmcClusterCollection: No hits\n";
@@ -354,36 +362,44 @@ Int_t StPreEclMaker::fillStEvent(Int_t idet,StEmcPreClusterCollection* cluster)
     } 
   return kStOK;
 }                                                                               
-//_____________________________________________________________________________
-void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
-                                            Float_t mEnergySeed,
-                                            Float_t mEnergyAdd,
-                                            Float_t mEnergyThresholdAll)
+
+void 
+StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
+                                            Float_t energySeed,
+                                            Float_t energyAdd,
+                                            Float_t energyThresholdAll)
 {
   for(Int_t i=0;i<8;i++)
   {
     if(!strcmp(cdet,detname[i].Data()))
     {
-      mSizeMaxConf[i]=mSizeMax;
-      mEnergySeedConf[i]=mEnergySeed;
-      mEnergyAddConf[i]=mEnergyAdd;
-      mEnergyThresholdAllConf[i]=mEnergyThresholdAll;
+      parTable[i].detector        = i + 1;
+      parTable[i].sizeMax         = sizeMax;
+      parTable[i].energySeed      = energySeed;
+      parTable[i].energyAdd       = energyAdd;
+      parTable[i].energyThreshold = energyThresholdAll;
+      if(parTable[i].energyThreshold < parTable[i].energySeed) // check parameter adjustment 
+      parTable[i].energyThreshold = parTable[i].energySeed;
+      if(i <= mParam->GetNRows()) mParam->SetNRows(i+1);
+      break;
     }
   }
 }
-//_____________________________________________________________________________
-void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
-                                            Float_t mEnergySeed,
-                                            Float_t mEnergyAdd,
-                                            Float_t mEnergyThresholdAll,
+
+void 
+StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
+                                            Float_t energySeed,
+                                            Float_t energyAdd,
+                                            Float_t energyThresholdAll,
                                             Bool_t  kCheckClustersOk)
 {
-  SetClusterConditions(cdet,mSizeMax,mEnergySeed,mEnergyAdd,mEnergyThresholdAll);
+  SetClusterConditions(cdet,sizeMax,energySeed,energyAdd,energyThresholdAll);
   for(Int_t i=0;i<8;i++)
   {
     if(!strcmp(cdet,detname[i].Data()))
     {
       kCheckClustersOkConf[i]=kCheckClustersOk;
+      break;
     }
   }
 }
@@ -391,7 +407,7 @@ void StPreEclMaker::SetClusterConditions(char *cdet,Int_t mSizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.11 2001/04/17 23:51:50 pavlinov Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.12 2001/04/20 22:23:44 pavlinov Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
