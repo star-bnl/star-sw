@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.7 1999/11/30 23:20:32 didenko Exp $
+ * $Id: StTrack.h,v 2.8 1999/12/01 15:58:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.7  1999/11/30 23:20:32  didenko
- * temporary solution to get library compiled
+ * Revision 2.8  1999/12/01 15:58:10  ullrich
+ * New decoding for dst_track::method. New enum added.
  *
  * Revision 2.7  1999/11/30 23:20:32  didenko
  * temporary solution to get library compiled
@@ -68,8 +68,7 @@ public:
     virtual UShort_t               key() const;
     Short_t                        flag() const;
     UShort_t                       encodedMethod() const;
-//    StTrackFindingMethod           findingMethod() const;
-//    StTrackQualityScheme           qualityScheme() const;
+    Bool_t                         finderMethod(StTrackFinderMethod) const;
     StTrackFittingMethod           fittingMethod() const;
     Float_t                        impactParameter() const;
     Float_t                        length() const;
