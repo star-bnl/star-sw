@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.7 2002/10/11 15:47:33 oldi Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.8 2002/10/29 15:57:56 jcs Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.8  2002/10/29 15:57:56  jcs
+// inactivate all code necessary for redoing track fit with primary vertex
+//
 // Revision 1.7  2002/10/11 15:47:33  oldi
 // Code cleanup (several lines of code changed due to *params -> Instance()).
 //
@@ -71,29 +74,34 @@ Int_t StFtpcGlobalMaker::Make(){
   PrintInfo();  
   int iMake = kStOK;
 
+#ifdef REFIT_FTPC_TRACKS
+// if FTPC tracking is done before the primary vertex is found, 
+// i.e. if fpt is in ftpcChain instead of in globalChain,
+// the  tracks must be refit 
   St_DataSet *primary = GetDataSet("primary");
   if (!primary) {
      gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): primary is missing" << endm;
      return kStWarn;
   }
 
-   St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
-   if (!vertex) {
+  St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
+  if (!vertex) {
      gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): vertex is missing" << endm;
      return kStWarn;
-   }
+  }
 
-    dst_vertex_st *primvtx = vertex->GetTable();
+  dst_vertex_st *primvtx = vertex->GetTable();
 
- if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
+  if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,primvtx++){
       if( primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1 ) break;
     }
   }
- if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
+  if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
      gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): primary vertex is missing" << endm;
      return kStWarn;
-   }
+  }
+#endif
 
   St_DataSet *ftpc_tracks = GetDataSet("ftpc_tracks");
   if (!ftpc_tracks) {
@@ -154,7 +162,7 @@ Int_t StFtpcGlobalMaker::Make(){
     fde_fdepar_st *fdepar = m_fdepar->GetTable();
 
     gMessMgr->Info() << "Global fit for FTPC tracks not redone, because used vertex for tracking was the primary vertex." << endm;
-    /*
+#ifdef REFIT_FTPC_TRACKS
 // Redo unconstrained fit with primary vertex instead of preVertex
     StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
     gMessMgr->Info() << "Using primary vertex: "<< refit_vertex->GetX() << "+-" << refit_vertex->GetXerr() << ", " << refit_vertex->GetY() << "+-" << refit_vertex->GetYerr()  << ", " << refit_vertex->GetZ()  << "+-" << refit_vertex->GetZerr() << endm;
@@ -164,7 +172,7 @@ Int_t StFtpcGlobalMaker::Make(){
     refitter->FitAnddEdxAndWrite(fpt_fptrack,fdepar,-primvtx->id);
     delete refitter;
     delete refit_vertex;
-    */
+#endif
 
 const int  MAXHITS = 10;       // Maximum number of hits on an FTPC track
 Int_t ihit, iPoint;
@@ -348,8 +356,8 @@ fppoint[iPoint].row = fppoint[iPoint].row + 100*globtrk[iglobtrk].id;
 
    }    // End of processing current track
 
-dst_track->SetNRows(iglobtrk);
-dst_dedx->SetNRows(idedx);
+   dst_track->SetNRows(iglobtrk);
+   dst_dedx->SetNRows(idedx);
 
 // Now save all hits
 
@@ -461,7 +469,7 @@ dst_dedx->SetNRows(idedx);
 
    }  // end of loop over all hits
 
-dst_point->SetNRows(ipnt);
+  dst_point->SetNRows(ipnt);
 
   return iMake;
 }
