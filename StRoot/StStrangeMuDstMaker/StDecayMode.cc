@@ -1,28 +1,9 @@
 /***********************************************************************
  *
- * $Id: StDecayMode.cc,v 3.2 2002/04/30 16:02:47 genevb Exp $
- * $Log: StDecayMode.cc,v $
- * Revision 3.2  2002/04/30 16:02:47  genevb
- * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
- *
- * Revision 3.1  2001/05/04 20:15:13  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- * Revision 3.0  2000/07/14 12:56:47  genevb
- * Revision 3 has event multiplicities and dedx information for vertex tracks
- *
- * Revision 2.1  2000/06/09 22:17:09  genevb
- * Allow MC data to be copied between DSTs, other small improvements
- *
- * Revision 2.0  2000/06/05 05:19:37  genevb
- * New version of Strangeness micro DST package
- *
- *
- ***********************************************************************
- *
- * Description: Singleton class for determining decay modes of MC vertices
+ * StDecayMode: Singleton class for determining decay modes of MC vertices
  *
  ***********************************************************************/
+
 #include "StDecayMode.hh"
 
 StDecayMode* StDecayMode::mInstance = 0;
@@ -56,8 +37,9 @@ StDecayMode::~StDecayMode() { mInstance=0; }
     K0l -> Pi- E Nu       9 2 4          |15 / 72 (11 / 18)
     K0l -> Pi- Pi+        9 8            |17 / 72
 
-16  K0s -> Pi+ Pi-    8  9               |17 
-    K0s -> Pi0 Pi0    7  7               |14
+16  K0s -> Pi+ Pi-        8  9           |17 
+    K0s -> Pi0 Pi0        7  7           |14
+    K0s -> Pi+ Pi- Gamma  8  9 -1        |16 
 
  8  Pi+ -> Mu+ Nu         5 4            |9 (5)
     Pi+ -> Mu+ Nu Gamma   5 4 -1         |8 (4)
@@ -73,11 +55,19 @@ StDecayMode::~StDecayMode() { mInstance=0; }
  6  Mu- -> E Nu Nu        3 4 4          |11 (3,7)
     Mu- -> E Nu Nu Gamma  3 4 4 -1       |10 (2,6)
 
-18  Lambda -> P Pi-  14 9                |23  
-    Lambda -> N Pi0  13 7                |20
+18  Lambda -> P Pi-        14 9          |23 / 126
+    Lambda -> N Pi0        13 7          |20 / 91
+    Lambda -> N Gamma      13 -1         |12 / -13
+    Lambda -> P Pi- Gamma  14 9 -1       |22 / -126
+    Lambda -> P E Nu       14 3 4        |21 / 168 (17 / 42)
+    Lambda -> P Mu Nu      14 6 4        |20 / 336 (24 / 84)
 
-26  AntiLambda -> AntiP Pi+  15 8        |23
-    AntiLambda -> AntiN Pi0  25 7        |32
+26  AntiLambda -> AntiP Pi+        15 8       |23 / 120
+    AntiLambda -> AntiN Pi0        25 7       |32 / 175
+    AntiLambda -> AntiN Gamma      25 -1      |24 / -25
+    AntiLambda -> AntiP Pi+ Gamma  15 8 -1    |22 / -120
+    AntiLambda -> AntiP E Nu       15 2 4     |21 / 120 (17 / 30)
+    AntiLambda -> AntiP Mu Nu      15 5 4     |20 / 300 (24 / 75)
 
 23  Cascade     -> Lambda Pi-      18  9      |27  
 31  AntiCascade -> AntiLambda Pi+  26  8      |34
@@ -120,8 +110,8 @@ Int_t StDecayMode::Process(StMcVertex* mcVertex)
       case (11) : return KPlusProcess(ID2);
       case (12) : return KMinusProcess(ID2);
       case (16) : return KShortProcess(ID);
-      case (18) : return LambdaProcess(ID);
-      case (26) : return AntiLambdaProcess(ID);
+      case (18) : return LambdaProcess(ID2);
+      case (26) : return AntiLambdaProcess(ID,ID2);
       case (23) : return XiProcess(ID);
       case (31) : return AntiXiProcess(ID);
       case (24) : return OmegaProcess(ID2);
@@ -186,6 +176,7 @@ Int_t StDecayMode::KShortProcess(Int_t ID)
   switch (ID) {
     case (17) : return kKShort2PiPlusPiMinus;
     case (14) : return kKShort2PiZeroPiZero;
+    case (16) : return kKShort2PiPlusPiMinusGamma;
     default   : return kWrongDecay;
   }
 }
@@ -245,17 +236,28 @@ Int_t StDecayMode::MuMinusProcess(Int_t ID)
 Int_t StDecayMode::LambdaProcess(Int_t ID) 
 {
   switch (ID) {
-    case (23) : return kLambda2ProtonPiMinus;
-    case (20) : return kLambda2NeutronPiZero;
-    default   : return kWrongDecay;
+    case ( 126) : return kLambda2ProtonPiMinus;
+    case (  91) : return kLambda2NeutronPiZero;
+    case ( -13) : return kLambda2NeutronGamma;
+    case (-126) : return kLambda2ProtonPiMinusGamma;
+    case (  42) :
+    case ( 168) : return kLambda2ProtonENu;
+    case (  84) :
+    case ( 336) : return kLambda2ProtonMuNu;
+    default     : return kWrongDecay;
   }
 }
 //____________________________________________________________________
-Int_t StDecayMode::AntiLambdaProcess(Int_t ID) 
+Int_t StDecayMode::AntiLambdaProcess(Int_t ID, Int_t ID2) 
 {
   switch (ID) {
     case (23) : return kAntiLambda2AntiProtonPiPlus;
     case (32) : return kAntiLambda2AntiNeutronPiZero;
+    case (24) : if (ID2 == -25) return kAntiLambda2AntiNeutronGamma;
+    case (20) : return kAntiLambda2AntiProtonMuNu;
+    case (22) : return kAntiLambda2AntiProtonPiPlusGamma;
+    case (17) :
+    case (21) : return kAntiLambda2AntiProtonENu;
     default   : return kWrongDecay;
   }
 }
@@ -332,3 +334,27 @@ Int_t StDecayMode::ParentCharge(Int_t mode)
   }
   return 0;                                                                     
 }
+
+/***********************************************************************
+ *
+ * $Id: StDecayMode.cc,v 3.3 2002/05/29 19:08:44 genevb Exp $
+ * $Log: StDecayMode.cc,v $
+ * Revision 3.3  2002/05/29 19:08:44  genevb
+ * Some additional decay modes, better organization of enumeration
+ *
+ * Revision 3.2  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
+ * Revision 3.1  2001/05/04 20:15:13  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ * Revision 3.0  2000/07/14 12:56:47  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
+ * Revision 2.1  2000/06/09 22:17:09  genevb
+ * Allow MC data to be copied between DSTs, other small improvements
+ *
+ * Revision 2.0  2000/06/05 05:19:37  genevb
+ * New version of Strangeness micro DST package
+ *
+ ***********************************************************************/
