@@ -1,5 +1,8 @@
-// $Id: EEeventDst.cxx,v 1.3 2003/07/01 14:13:13 balewski Exp $
+// $Id: EEeventDst.cxx,v 1.4 2003/09/11 19:40:56 zolnie Exp $
 // $Log: EEeventDst.cxx,v $
+// Revision 1.4  2003/09/11 19:40:56  zolnie
+// updates for gcc3.2
+//
 // Revision 1.3  2003/07/01 14:13:13  balewski
 // no clue
 //
@@ -47,7 +50,7 @@
 // Initial revision
 //
 
-#include <assert.h>
+#include <cassert>
 #include <TClonesArray.h>
 
 #include "EEsectorDst.h"

@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 #include "EEtwHitDst.h"
 
 ClassImp(EEtwHitDst);

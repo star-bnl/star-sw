@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.15 2003/09/05 15:04:24 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.16 2003/09/11 19:41:06 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.16  2003/09/11 19:41:06  zolnie
+// updates for gcc3.2
+//
 // Revision 1.15  2003/09/05 15:04:24  zolnie
 // remove Stiostream/iostream from the source code
 //
@@ -36,8 +39,7 @@
 // Revision 1.1  2003/01/16 19:33:50  zolnie
 // added a simple Geom class to conver a track hit -> tower hit
 //
-//#include <Stiostream.h>
-#include <math.h>
+#include <cmath>
 
 #include "TVector3.h"
 

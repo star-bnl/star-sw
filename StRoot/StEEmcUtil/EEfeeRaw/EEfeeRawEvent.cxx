@@ -1,4 +1,4 @@
-#include <assert.h>
+#include <cassert>
 
 #include "EEfeeDataBlock.h"
 #include "EEfeeRawEvent.h"

@@ -1,5 +1,8 @@
-// $Id: EEmcException.cxx,v 1.3 2003/09/02 17:57:56 perev Exp $
+// $Id: EEmcException.cxx,v 1.4 2003/09/11 19:41:08 zolnie Exp $
 // $Log: EEmcException.cxx,v $
+// Revision 1.4  2003/09/11 19:41:08  zolnie
+// updates for gcc3.2
+//
 // Revision 1.3  2003/09/02 17:57:56  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -21,8 +24,9 @@
 // 	introducing exceptions (rather assert)
 //
 
-#include <stdio.h>
-#include <Stiostream.h>
+#include <cstdio>
+#include <iostream>
+using namespace std;
 
 #include "EEmcException.h"
 

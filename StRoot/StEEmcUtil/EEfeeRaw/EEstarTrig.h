@@ -1,10 +1,13 @@
 #ifndef EEstarTrig_h
 #define EEstarTrig_h
 /*********************************************************************
- * $Id: EEstarTrig.h,v 1.6 2003/06/16 16:03:54 zolnie Exp $
+ * $Id: EEstarTrig.h,v 1.7 2003/09/11 19:41:03 zolnie Exp $
  *********************************************************************
  * container for STAR trigger data
  * $Log: EEstarTrig.h,v $
+ * Revision 1.7  2003/09/11 19:41:03  zolnie
+ * updates for gcc3.2
+ *
  * Revision 1.6  2003/06/16 16:03:54  zolnie
  * updated root version number
  *
@@ -25,7 +28,6 @@
  *
  *
  *********************************************************************/
-//#include <time.h>
 
 #include <TObject.h>
 #define u_int unsigned int

@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.7 2003/09/02 17:57:56 perev Exp $
+// $Id: EEmcMCData.cxx,v 1.8 2003/09/11 19:41:08 zolnie Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.8  2003/09/11 19:41:08  zolnie
+// updates for gcc3.2
+//
 // Revision 1.7  2003/09/02 17:57:56  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -119,7 +122,8 @@
 #include "StEEmcUtil/EEevent/EEeventDst.h"
 #include "StEEmcUtil/EEevent/EEsectorDst.h"
 
-#include <Stiostream.h>
+#include <iostream>
+using namespace std;
 
 
 ClassImp(EEmcMCData)
