@@ -35,6 +35,30 @@ class TTable;
 class TMemStat;
 class StEvtHddr;
 
+class StMessMgr;
+
+#ifndef __CINT__
+#ifdef LOGGERMESSAGE
+#error An attempt to redefine the LOGGERMESSAGE macro
+#else
+#  define LOGGERMESSAGE(MESSAGELEVEL)                            \
+   GetLogger(ClassName())->MESSAGELEVEL("",__FUNCTION__, __LINE__) 
+
+#  define LOG_INFO  LOGGERMESSAGE(Info)
+#  define LOG_WARN  LOGGERMESSAGE(Warning)
+#  define LOG_ERROR LOGGERMESSAGE(Error)
+#  define LOG_FATAL LOGGERMESSAGE(Fatal)
+#  define LOG_DEBUG LOGGERMESSAGE(Debug)
+#  define LOG_QA    LOGGERMESSAGE(QAInfo)
+
+#define STAR_INFO(name) \
+   GetLogger(_QUITE_(name))->MESSAGELEVEL__FUNCTION__, __LINE__) 
+
+#define MSG_INFO(name) \
+   GetLogger(_QUITE_(name))->MESSAGELEVEL__FUNCTION__, __LINE__) 
+
+#endif
+#endif 
 class StMaker : public TDataSet{
 public:
    typedef  enum {kNormal, kDebug} EDebugLevel;
@@ -66,6 +90,10 @@ protected:
    TMemStat       *fMemStatMake;	//!TMemStat for Make
    TMemStat       *fMemStatClear;	//!TMemStat for Clear
 
+   StMessMgr      *fLogger;
+
+protected:
+   inline StMessMgr    *GetLogger(){return fLogger;}
 public:
 
    /// Constructor & Destructor
@@ -191,7 +219,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.64 2004/04/15 00:21:17 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.65 2004/04/15 16:05:29 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -221,8 +249,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.64 2004/04/15 00:21:17 perev Exp $
+// $Id: StMaker.h,v 1.65 2004/04/15 16:05:29 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.65  2004/04/15 16:05:29  fine
+// Add extra data-mmeber and method for the coming STAR logger
+//
 // Revision 1.64  2004/04/15 00:21:17  perev
 // SetDateTime(int,int) added
 //

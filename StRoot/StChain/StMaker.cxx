@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.146 2004/04/15 00:21:32 perev Exp $
+// $Id: StMaker.cxx,v 1.147 2004/04/15 16:05:28 fine Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -81,8 +81,8 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
    fMemStatClear = 0;
    memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
    StMkDeb::Register(this);
-   
-   
+
+   // fLoggger = StStarLogger::Instance(ClassName());   
 }
 
 //_____________________________________________________________________________
@@ -1240,6 +1240,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.147  2004/04/15 16:05:28  fine
+// Add extra data-mmeber and method for the coming STAR logger
+//
 // Revision 1.146  2004/04/15 00:21:32  perev
 // SetDateTime(int,int) added
 //
