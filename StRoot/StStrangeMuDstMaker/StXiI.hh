@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StXiI.hh,v 3.6 2002/04/30 16:02:48 genevb Exp $
+ * $Id: StXiI.hh,v 3.7 2002/07/30 20:07:52 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StXiI.hh,v $
+ * Revision 3.7  2002/07/30 20:07:52  genevb
+ * Better cTau calcs
+ *
  * Revision 3.6  2002/04/30 16:02:48  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -261,11 +264,11 @@ inline Float_t StXiI::rapXi() {
 }
 
 inline Float_t StXiI::cTauOmega() {
-  return massOmega()*decayLengthXi()/sqrt(Ptot2Xi());
+  return M_OMEGA_MINUS*decayLengthXi()/sqrt(Ptot2Xi());
 }
 
 inline Float_t StXiI::cTauXi() {
-  return massXi()*decayLengthXi()/sqrt(Ptot2Xi());
+  return M_XI_MINUS*decayLengthXi()/sqrt(Ptot2Xi());
 }
 
 inline Float_t StXiI::ptBachelor() {
