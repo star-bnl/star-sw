@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.cxx,v 1.5 2002/06/12 01:42:27 jklay Exp $                                    
+ * $Id: StHiAnalysis.cxx,v 1.6 2002/06/12 21:48:43 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,14 +12,8 @@
  ***************************************************************************
  *
  * $Log: StHiAnalysis.cxx,v $
- * Revision 1.5  2002/06/12 01:42:27  jklay
- * Bug fix
- *
- * Revision 1.4  2002/06/12 01:40:31  jklay
- * Filling of event variables after cuts
- *
- * Revision 1.3  2002/05/31 21:58:29  jklay
- * Updated analysis code to use new cut class
+ * Revision 1.6  2002/06/12 21:48:43  jklay
+ * Fixed the way East and West are filled
  *
  * Revision 1.2  2002/04/03 00:23:27  jklay
  * Fixed private member access bugs in analysis code
@@ -402,7 +396,7 @@ StHiAnalysis::trackLoop()
   //Need this for EAST/WEST analysis
   Float_t vertexZ = mHiMicroEvent->VertexZ();
 
-  Float_t flowCent   = mHiMicroEvent->Centrality();
+  Float_t flowCent   = flowCentrality(mHiMicroEvent->NUncorrectedPrimaries());
 
   Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
@@ -411,11 +405,7 @@ StHiAnalysis::trackLoop()
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
 
     Int_t iCharge = (track->Charge()>0) ? 0 : 1; //plus is 0
-    //This definition of iSide only requires the track be on
-    //one half or the other and doesn't specify vertex position
-    //Need to make that cut explicitly using the cutList
-    Int_t iSide = (CutRc::AcceptEastSideTrack(track)) ? 0 : 1; //east is 0 
-    
+
     Float_t ptPr  = track->PtPr();
     Float_t ptGl  = track->PtGl();
     Float_t resPtPrGlPr = (ptPr-ptGl)/ptPr;
@@ -441,8 +431,7 @@ StHiAnalysis::trackLoop()
 
     h1FitPts->Fill(fitPts);
 
-    if(CutRc::AcceptEta(track) && CutRc::AcceptFirstPadrow(track)) {
-// && CutRc::AcceptSameSector(track)) {
+    if(CutRc::AcceptEta(track) && CutRc::AcceptFirstPadrow(track) && CutRc::AcceptSameSector(track)) {
       
       if(CutRc::AcceptSDcaGl(track)) {
         h2FitPtsVsSector->Fill(sector,fitPts);
@@ -455,7 +444,7 @@ StHiAnalysis::trackLoop()
       }
     }
 
-    //Standard track cuts are |eta|<0.5,fitpts>20,SDca<1cm
+    //Standard track cuts are |eta|<0.75,fitpts>20,SDca<1cm
     if(CutRc::Accept(track)) {
       h1YieldVsSector->Fill(sector);  
       h2PrPtVsSector->Fill(sector,ptPr);
@@ -469,14 +458,22 @@ StHiAnalysis::trackLoop()
     //*********** AcceptNoeta = dca, fitpts and samesector
     
     if(CutRc::AcceptNoEta(track)){
-	ew[iSide].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
-        ew[iSide].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
-	ew[2].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
-        ew[2].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
-	ew[iSide].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
-        ew[iSide].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
-	ew[2].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
-        ew[2].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+      if(CutRc::AcceptEastSideTrack(track)) {
+	ew[0].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[0].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+	ew[0].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[0].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+      }
+      if(CutRc::AcceptWestSideTrack(track)) {
+	ew[1].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[1].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+	ew[1].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[1].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+      }
+      ew[2].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+      ew[2].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+      ew[2].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+      ew[2].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
     }
 
     //****** Eta cut
@@ -485,24 +482,40 @@ StHiAnalysis::trackLoop()
       if(CutRc::AcceptFitPts(track)){
 
          // sector,dcaxy,pt
-         ew[iSide].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-         ew[iSide].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-         ew[2].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-         ew[2].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-         ew[iSide].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-         ew[iSide].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
-         ew[2].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
-         ew[2].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+	if(CutRc::AcceptEastSideTrack(track)) {
+         ew[0].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[0].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         ew[0].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[0].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+         ew[1].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[1].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         ew[1].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[1].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+	}
+        ew[2].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+        ew[2].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+        ew[2].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+        ew[2].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
 
          // dca3d, dcaxy,pt
-         ew[iSide].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
-         ew[iSide].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
-         ew[2].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
-         ew[2].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
-         ew[iSide].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
-         ew[iSide].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
-         ew[2].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
-         ew[2].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+	if(CutRc::AcceptEastSideTrack(track)) {
+         ew[0].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[0].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         ew[0].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[0].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+         ew[1].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[1].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         ew[1].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[1].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+	}
+        ew[2].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+        ew[2].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+        ew[2].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+        ew[2].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
 
         // respt, pt,dcaxy
         // no charge difference
@@ -510,15 +523,27 @@ StHiAnalysis::trackLoop()
         h3ResPtPrGlPtGlDcaXYGl->Fill(resPtPrGlGl,ptGl,dcaXYGl);
       
         // rebin?
-        ew[iSide].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+	if(CutRc::AcceptEastSideTrack(track)) {
+          ew[0].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+          ew[0].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+          ew[1].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+          ew[1].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+	}
         ew[2].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-        ew[iSide].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
         ew[2].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
         
         // dcaxy,pt
-        ew[iSide].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+	if(CutRc::AcceptEastSideTrack(track)) {
+          ew[0].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+          ew[0].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+          ew[1].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+          ew[1].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+	}
         ew[2].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-        ew[iSide].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
         ew[2].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
 
       }//AcceptFitPts(track)
@@ -526,27 +551,51 @@ StHiAnalysis::trackLoop()
       //*********eta and dca cut
       if(CutRc::AcceptSDcaGl(track)){
         // sector,fit pts, pt
-        ew[iSide].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+	if(CutRc::AcceptEastSideTrack(track)) {
+          ew[0].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+          ew[0].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+          ew[1].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+          ew[1].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+	}
         ew[2].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
-        ew[iSide].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
         ew[2].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
     
         // sector, all pts, pt
-        ew[iSide].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+	if(CutRc::AcceptEastSideTrack(track)) {
+         ew[0].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+         ew[0].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+         ew[1].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+         ew[1].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+	}
         ew[2].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
-        ew[iSide].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
         ew[2].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
 
         // sector, max pts, pt
-        ew[iSide].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+	if(CutRc::AcceptEastSideTrack(track)) {
+         ew[0].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+         ew[0].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+         ew[1].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+         ew[1].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+	}
         ew[2].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
-        ew[iSide].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
         ew[2].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
       
         // flow, fit pts, pt
-        ew[iSide].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+	if(CutRc::AcceptEastSideTrack(track)) {
+         ew[0].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+         ew[0].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+	}
+	if(CutRc::AcceptWestSideTrack(track)) {
+         ew[1].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+         ew[1].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+	}
         ew[2].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
-        ew[iSide].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
         ew[2].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
       } //dca
     }//eta
@@ -554,48 +603,88 @@ StHiAnalysis::trackLoop()
     //******** dca and tight eta cut
     if(CutRc::AcceptSDcaGl(track) && fabs(etaPr)<.1){
       // vtx z, fit pts, pt
-      ew[iSide].pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+      if(CutRc::AcceptEastSideTrack(track)) {
+        ew[0].pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+        ew[0].pm[2].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+      }
+      if(CutRc::AcceptWestSideTrack(track)) {
+        ew[1].pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+        ew[1].pm[2].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+      }
       ew[2].pm[2].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
-      ew[iSide].pm[2].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
       ew[2].pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
     } 
 
     // dca and pt
     if(CutRc::AcceptSDcaGl(track) && ptPr>4 && ptPr<6){
       // vtx z, fit pts, eta
-      ew[iSide].pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      if(CutRc::AcceptEastSideTrack(track)) {
+        ew[0].pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+        ew[0].pm[2].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      }
+      if(CutRc::AcceptWestSideTrack(track)) {
+        ew[1].pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+        ew[1].pm[2].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      }
       ew[2].pm[2].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
-      ew[iSide].pm[2].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
       ew[2].pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
     }
 
     // all cuts
     if(CutRc::Accept(track)){
       // count and centrality
-//      ew[iSide].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//	if(CutRc::AcceptEastSideTrack(track)) {
+//       ew[0].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//       ew[0].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//	}
+//	if(CutRc::AcceptWestSideTrack(track)) {
+//       ew[1].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//       ew[1].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//	}
 //      ew[2].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-//      ew[iSide].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
 //      ew[2].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-      ew[iSide].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+      if(CutRc::AcceptEastSideTrack(track)) {
+       ew[0].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+       ew[0].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
+      }
+      if(CutRc::AcceptWestSideTrack(track)) {
+       ew[1].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+       ew[1].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
+      }
       ew[2].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
-      ew[iSide].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
       ew[2].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
        
-      ew[iSide].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
-      ew[iSide].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
+      if(CutRc::AcceptEastSideTrack(track)) {
+        ew[0].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
+        ew[0].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
+        ew[0].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
+        ew[0].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
+      }
+      if(CutRc::AcceptWestSideTrack(track)) {
+        ew[1].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
+        ew[1].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
+        ew[1].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
+        ew[1].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
+      }
       ew[2].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
       ew[2].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
-      ew[iSide].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
-      ew[iSide].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
       ew[2].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
       ew[2].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
 
-      ew[iSide].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
-      ew[iSide].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+      if(CutRc::AcceptEastSideTrack(track)) {
+       ew[0].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
+       ew[0].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+       ew[0].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
+       ew[0].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
+      }
+      if(CutRc::AcceptWestSideTrack(track)) {
+       ew[1].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
+       ew[1].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+       ew[1].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
+       ew[1].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
+      }
       ew[2].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
       ew[2].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
-      ew[iSide].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
-      ew[iSide].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
       ew[2].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
       ew[2].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
     }
@@ -611,15 +700,15 @@ StHiAnalysis::trackLoop()
 void
 StHiAnalysis::fillEventHistograms()
 {
-     Float_t flowCent   = mHiMicroEvent->Centrality();
-     Float_t Nch = mHiMicroEvent->CentMult();
-     Float_t NGoodGlobals = mHiMicroEvent->NGoodGlobals();  
+     Float_t flowCent   = flowCentrality(mHiMicroEvent->NUncorrectedPrimaries());
+     Float_t Nch = mHiMicroEvent->NUncorrectedPrimaries();
+     Float_t NGoodGlobals = mHiMicroEvent->NGoodGlobals();
      Float_t ZDCSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
-     Float_t CTB = mHiMicroEvent->CTB();   
-     Float_t zvtx = mHiMicroEvent->VertexZ();
-     Float_t yvtx = mHiMicroEvent->VertexY();
-     Float_t xvtx = mHiMicroEvent->VertexX();
-     
+     Float_t CTB = mHiMicroEvent->CTB();
+     Float_t zvtx = mHiMicroEvent->VertexZ(); 
+     Float_t yvtx = mHiMicroEvent->VertexY(); 
+     Float_t xvtx = mHiMicroEvent->VertexX(); 
+
    //This comes before we make event cuts
    //Except we need to make sure and do trigger word cut!!!!
    if (CutRc::AcceptTrgWord(mHiMicroEvent)) {
@@ -630,12 +719,11 @@ StHiAnalysis::fillEventHistograms()
       h1FlowCent->Fill(flowCent);
       h2ZDCSumVsCTB->Fill(CTB,ZDCSum);
      }
-     
-     if (acceptEvent(mHiMicroEvent)) {   
+
+     if (acceptEvent(mHiMicroEvent)) {
        h2NGoodGlobalsVsNch->Fill(Nch,NGoodGlobals);
      }
    } //Check Trigger Word
-
 }
 
 //______________________
