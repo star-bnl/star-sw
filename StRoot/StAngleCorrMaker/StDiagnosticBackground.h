@@ -28,6 +28,10 @@ public:
                    StDiagnosticBackground();
                   ~StDiagnosticBackground();
   void        Fill(StTrackForPool* t1, StTrackForPool* t2);
+//VP warnoff
+  void        Fill(StEvent& ev){StDiagnosticTool::Fill(ev);}
+  void        Fill(StTrackForPool* t){StDiagnosticTool::Fill(t);}
+
   void        Write();
   TString   GetName();
   void        SetCorrelationFunction(StAngleCorrFunction* func);

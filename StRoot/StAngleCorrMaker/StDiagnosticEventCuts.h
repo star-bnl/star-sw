@@ -28,6 +28,10 @@ public:
                    StDiagnosticEventCuts();
                   ~StDiagnosticEventCuts();
   void        Fill(StEvent& ev);
+// avoid hidden warning
+  void        Fill(StTrackForPool* t)                     {StDiagnosticTool::Fill(t);}
+  void        Fill(StTrackForPool* t1, StTrackForPool* t2){StDiagnosticTool::Fill(t1,t2);}
+
   void        Write();
   TString GetName();
 private:

@@ -27,6 +27,10 @@ public:
                    StDiagnosticTrack2();
                   ~StDiagnosticTrack2();
   void        Fill(StTrackForPool* t);
+// avoid warning
+  void        Fill(StEvent& ev){StDiagnosticTool::Fill(ev);}
+  void        Fill(StTrackForPool* t1, StTrackForPool* t2){StDiagnosticTool::Fill(t1,t2);}
+
   void        Write();
   TString GetName();
 private:
