@@ -28,10 +28,10 @@ StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeNa
 StTreeMaker::~StTreeMaker(){
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::Init()
+Int_t StTreeMaker::Open(const char*)
 {
   assert(strchr("rwu",fIOMode[0]));
-  assert(!fTree);
+  if(fTree) return 0;
 
   if (fTreeName.IsNull()) SetTreeName();
 
@@ -65,7 +65,8 @@ Int_t StTreeMaker::Init()
     }
 
 //   
-    Open();
+    UpdateTree(0);
+    fTree->SetUKey(0);
     
   } else            { //Write mode  
 
@@ -101,17 +102,16 @@ Int_t StTreeMaker::Init()
     }//end of new tree
     
 
-    Open();
+    UpdateTree(0);
+    fTree->SetUKey(0);
     fTree->Close("keep");
   } 
   return 0;
 }
 //_____________________________________________________________________________
-Int_t StTreeMaker::Open(const char *)
+Int_t StTreeMaker::Init()
 {
-  UpdateTree(0);
-  fTree->SetUKey(0);
-  return 0;
+  return Open();
 }
 //_____________________________________________________________________________
 Int_t StTreeMaker::Make(){
@@ -175,6 +175,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
     updName = upd->GetName();
     updFile = ""; updMode = "";
     isSetBr = (strncmp("SetBranch:",updTitl,10)==0);
+    if (isSetBr && flag!=0)	continue;
 
     if (isSetBr) {//SetBranch block
       cc = strstr(updTitl,"file="); 
@@ -182,22 +183,20 @@ void StTreeMaker::UpdateTree(Int_t flag)
       cc = strstr(updTitl,"mode="); 
       if (cc) updMode.Replace(0,0,cc+5,strcspn(cc+5," "));
   
-      if (updName[0]=='*') { //Wild Card
-      if (!updMode.IsNull() || !updFile.IsNull()) fTree->SetFile(updFile,updMode,1);  
-        delete upd; continue;
-      } 
+      if (!updFile.IsNull())	delete upd;	//delete SetBranch with concrete filename
     } //endif SetBranch block*
     
+    if (updName[0]=='*') { //Wild Card
+        if (!updMode.IsNull() || !updFile.IsNull()) fTree->SetFile(updFile,updMode,1);  
+        continue;}
+        
     br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode!="r") { 
-      br = new StBranch(updName,fTree);
-      updMode = "w";
-    }
-    if (!br) 					continue;
+    if (!br && fIOMode!="r") { br = new StBranch(updName,fTree); updMode = "w";}
+      
+    if (!br) 				continue;
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
     
-    if (isSetBr) {delete upd; continue;}
-    if (flag==0) continue;
+    if (flag==0) 	continue;
     
     isHist = (strncmp("hist",updName,4)==0); 
     if ( (flag==1) != (!isHist)) 	continue;
@@ -278,13 +277,14 @@ Int_t StTreeMaker::Save()
 //_____________________________________________________________________________
 void StTreeMaker::Close(Option_t *)
 { 
-  fTree->Close(); fTree->SetUKey(0);
+  if (fTree) {fTree->Close(); delete fTree; fTree=0;}
+  SetFile("");
 }
 //_____________________________________________________________________________
 void StTreeMaker::Clear(Option_t *opt)
 {
   if (opt){/*touch*/}
-  fTree->Clear();
+  if (fTree) fTree->Clear();
 }
 
 
