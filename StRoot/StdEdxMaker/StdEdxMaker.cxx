@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.24 2001/12/13 12:56:52 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.25 2002/02/23 17:42:27 fisyak Exp $
 #include <iostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
@@ -33,7 +33,6 @@
 #include "tables/St_TpcTimeGain_Table.h"
 #include "tables/St_TpcDriftDistCorr_Table.h"
 #include "tables/St_fee_vs_pad_row_Table.h"
-#include "tables/St_tpcBadPad_Table.h"
 #include "tables/St_dst_event_summary_Table.h"
 
 // global
@@ -188,7 +187,7 @@ ClassImp(StdEdxMaker)
 
 //_____________________________________________________________________________
 StdEdxMaker::StdEdxMaker(const char *name):StMaker(name), 
-m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), m_badpads(0), 
+m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), 
 m_Simulation(kFALSE), m_InitDone (kFALSE) {}
 //_____________________________________________________________________________
 StdEdxMaker::~StdEdxMaker(){}
@@ -434,8 +433,6 @@ Int_t StdEdxMaker::InitRun(Int_t RunNumber){
 	     << "switch off dirft dependent calibration" << endl;
 	assert(m_drift); 
       }
-      m_badpads = (St_tpcBadPad *) tpc_calib->Find("BadPad");
-      if (!m_badpads) cout << "=== List of bad pads is missing ===" << endl;
       m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
     }
   }
@@ -457,7 +454,6 @@ Int_t StdEdxMaker::FinishRun(Int_t OldRunNumber) {
   SafeDelete(m_fee_vs_pad_row); 
   SafeDelete(m_tpcTime); 
   SafeDelete(m_drift); 
-  SafeDelete(m_badpads); 
   m_InitDone = kFALSE;
   return StMaker::FinishRun(OldRunNumber);
 }
