@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.37 2000/03/29 14:34:19 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.38 2000/04/10 22:36:46 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.38  2000/04/10 22:36:46  wdeng
+// Use StHelix model to calculate impact parameters for globtrk and primtrk as Spiros suggested.
+//
 // Revision 1.37  2000/03/29 14:34:19  caines
 // Fixed topology map for TPC only
 //
@@ -121,8 +124,11 @@
 #include "StPrimaryMaker.h"
 
 #include "math_constants.h"
-
+#include "PhysicalConstants.h"
+#include "SystemOfUnits.h"
 #include "StVertexId.h"
+#include "StThreeVectorD.hh"
+#include "StHelixD.hh"
 
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -142,7 +148,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 
 ClassImp(StPrimaryMaker)
   
-  //_____________________________________________________________________________
+//_____________________________________________________________________________
   StPrimaryMaker::StPrimaryMaker(const char *name):StMaker(name),
   m_evr_evrpar(0),
   m_egr_egrpar(0),
@@ -393,7 +399,6 @@ Int_t StPrimaryMaker::Make(){
     gMessMgr->Warning() << "Problem on return from Track_Propagator" << endm;
   
   dst_track_st *glob  = globtrk->GetTable();
-  dst_track_st *glob2 = globtrk2->GetTable();
   dst_vertex_st *vrtx = vertex->GetTable();
   if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
@@ -402,16 +407,21 @@ Int_t StPrimaryMaker::Make(){
   }
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     
-    Float_t *v0 = &vrtx->x;
-    for( Int_t no_rows=0; no_rows<globtrk2->GetNRows() &&
-                          no_rows<globtrk->GetNRows(); no_rows++, glob++,glob2++)
+    Float_t *pv = &vrtx->x;
+    for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, glob++)
       {
-	Float_t xStart = glob2->r0 * cos(glob2->phi0 * C_RAD_PER_DEG);
-	Float_t yStart = glob2->r0 * sin(glob2->phi0 * C_RAD_PER_DEG);
-	Float_t zStart = glob2->z0;
-	double qwe = pow(xStart-v0[0],2)+pow(yStart-v0[1],2)+pow(zStart-v0[2],2);
+	Float_t dip   = atan(glob->tanl);
+	Int_t    h    = (glob->icharge > 0 ? -1 : 1);
+	Float_t phase = glob->psi*degree-h*pi/2;
+	Float_t curvature = glob->curvature;
+	Float_t x0 = glob->r0 * cos(glob->phi0 * degree);
+	Float_t y0 = glob->r0 * sin(glob->phi0 * degree);
+	Float_t z0 = glob->z0;
+	StThreeVectorD origin(x0, y0, z0);  
+	StHelixD globHelix(curvature, dip, phase, origin, h);
 	
-	glob->impact = TMath::Sqrt(qwe);
+	StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
+	glob->impact = globHelix.distance(primVertex);
       }
     
     if(Debug()) gMessMgr->Debug() << " finished calling track-propagator" << endm;
@@ -501,7 +511,7 @@ Int_t StPrimaryMaker::Make(){
   if (myvrtx->vtx_id == kEventVtxId && myvrtx->iflag == 1) 
     {
       
-      Float_t *myv0 = &myvrtx->x;
+      Float_t *pv = &myvrtx->x;
       
       dst_track_st* globtrkPtr = globtrk->GetTable();
       dst_track_st* primtrkPtr = primtrk->GetTable();  
@@ -512,12 +522,19 @@ Int_t StPrimaryMaker::Make(){
           //  keep_vrtx_id=primtrkPtr->id_start_vertex;
           primtrkPtr->n_max_point = globtrkPtr->n_max_point;
 	  primtrkPtr->map[0] += (1UL<<1);
-          Float_t xStart = primtrkPtr->r0 * cos(primtrkPtr->phi0 * C_RAD_PER_DEG);
-          Float_t yStart = primtrkPtr->r0 * sin(primtrkPtr->phi0 * C_RAD_PER_DEG);
-          Float_t zStart = primtrkPtr->z0;
-          double qwe = pow(xStart-myv0[0],2)+pow(yStart-myv0[1],2)+pow(zStart-myv0[2],2);
-          
-          primtrkPtr->impact = TMath::Sqrt(qwe);
+
+	  Float_t dip   = atan(primtrkPtr->tanl);
+	  Int_t    h    = (primtrkPtr->icharge > 0 ? -1 : 1);
+	  Float_t phase = primtrkPtr->psi*degree-h*pi/2;
+	  Float_t curvature = primtrkPtr->curvature;
+	  Float_t x0 = primtrkPtr->r0 * cos(primtrkPtr->phi0 * degree);
+	  Float_t y0 = primtrkPtr->r0 * sin(primtrkPtr->phi0 * degree);
+	  Float_t z0 = primtrkPtr->z0;
+	  StThreeVectorD origin(x0, y0, z0);  
+	  StHelixD primHelix(curvature, dip, phase, origin, h);
+	  
+	  StThreeVectorD primVertex(pv[0],pv[1],pv[2]);
+          primtrkPtr->impact = primHelix.distance(primVertex);
         }
     } 
   
