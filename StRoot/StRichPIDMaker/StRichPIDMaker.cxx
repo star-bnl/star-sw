@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.8 2000/10/19 06:12:52 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.9 2000/10/19 15:41:57 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.8  2000/10/19 06:12:52  horsley
- * fixed pointer problem in fillPIDNtuple member function
+ * Revision 2.9  2000/10/19 15:41:57  horsley
+ * added set format option to TFile, file->SetFormat(1);
+ *
+ * Revision 2.20  2000/11/26 15:08:56  lasiuk
+ * move the setting of all flags to the pidtraits
  *
  * Revision 2.19  2000/11/25 12:27:12  lasiuk
  * mean angle -> psi.  Fill the photonInfo.  take care of flag
@@ -137,10 +140,10 @@ using std::max;
 //#include "StarCallf77.h"
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.8 2000/10/19 06:12:52 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.9 2000/10/19 15:41:57 horsley Exp $";
 
 	track->geometry() && 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.8 2000/10/19 06:12:52 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.9 2000/10/19 15:41:57 horsley Exp $";
 	(fabs(track->geometry()->momentum().pseudoRapidity()) < mEtaCut) &&
 Int_t StRichPIDMaker::Make() { 
   
@@ -1991,7 +1994,8 @@ Int_t StRichPIDMaker::Init() {
 
 #ifdef  myRICH_WITH_NTUPLE
 #ifdef  myRICH_WITH_NTUPLE 
-  file = new TFile(finalname,"RECREATE");  
+  char finalname[200];
+  sprintf(finalname,"%s.root",mySaveDirectory);
 
   file = new TFile(finalname,"RECREATE");
   file->SetFormat(1);
