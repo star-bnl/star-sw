@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.95 2004/11/24 04:09:42 jeromel Exp $
+// $Id: St_geant_Maker.cxx,v 1.96 2005/02/07 21:09:20 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.96  2005/02/07 21:09:20  fisyak
+// rename antique TGeant3 to TGiant3
+//
 // Revision 1.95  2004/11/24 04:09:42  jeromel
 // Loss of one GtHash object per call fixed
 //
@@ -127,10 +130,10 @@
 // Add missing defines
 //
 // Revision 1.52  2000/01/04 21:51:11  fisyak
-// Move TGeant3 to root4star
+// Move TGiant3 to root4star
 //
 // Revision 1.51  1999/12/07 15:44:25  fisyak
-// Add geane, new TGeant3 from Alice
+// Add geane, new TGiant3 from Alice
 //
 // Revision 1.50  1999/11/13 17:30:05  fine
 // scope for i within for loop fixed
@@ -339,9 +342,9 @@
 #include "TGeoPcon.h"
 #include "TGeoPgon.h"
 #ifdef __CC5__
-#include <TGeant3.h>
+#include <TGiant3.h>
 #else
-#include "TGeant3.h"
+#include "TGiant3.h"
 #endif
 #include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_event_Table.h"
@@ -460,7 +463,7 @@ extern "C"
 ClassImp(St_geant_Maker)
   
   TDataSet *St_geant_Maker::fgGeom = 0;
-TGeant3  *St_geant_Maker::geant3 = 0;
+TGiant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
   StMaker(name), 
@@ -475,7 +478,7 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   
   if (! geant3) {
     PrintInfo();
-    geant3 = new TGeant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+    geant3 = new TGiant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
     assert(geant3);
     cquest = (Quest_t  *) geant3->Quest();
     clink  = (Gclink_t *) geant3->Gclink();

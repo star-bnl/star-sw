@@ -62,11 +62,11 @@ $LIBS .= $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 my $FEXTEND   = $env->{FEXTEND};
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^sl/ or $STAR_SYS =~ /^i386/) {$FPPFLAGS .= " -DCERNLIB_LINUX";}
 if ($FC =~ /^pgf/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
-  $FPPFLAGS .= " -DCERNLIB_LINUX";
 }
 $LIBS .= " -lgeant321 -lgcalor"; 
 $LIBS  .= " " . $env->{CERNLIBS};

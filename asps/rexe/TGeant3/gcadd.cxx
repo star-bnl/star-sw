@@ -15,8 +15,11 @@
 
 /*
 $Log: gcadd.cxx,v $
+Revision 1.2  2005/02/07 21:08:51  fisyak
+rename antique TGeant3 to TGiant3
+
 Revision 1.1  2000/01/04 16:04:06  fisyak
-move TGeant3 to root4star executable
+move TGiant3 to root4star executable
 
 Revision 1.3  1999/09/29 09:24:14  fca
 Introduction of the Copyright and cvs Log

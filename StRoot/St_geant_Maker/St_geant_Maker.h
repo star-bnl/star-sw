@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.33 2004/02/10 23:16:34 potekhin Exp $
+// $Id: St_geant_Maker.h,v 1.34 2005/02/07 21:09:20 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.34  2005/02/07 21:09:20  fisyak
+// rename antique TGeant3 to TGiant3
+//
 // Revision 1.33  2004/02/10 23:16:34  potekhin
 // First version of Ag2Geom
 //
@@ -49,7 +52,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
 class TVolume;
-class TGeant3;
+class TGiant3;
 class TRotMatrix;
 class TH1F;
 class TShape;
@@ -136,7 +139,7 @@ public:
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
    static TDataSet *fgGeom; //!
-   static TGeant3    *geant3; //!
+   static TGiant3    *geant3; //!
 
    // histogram pointers:
   TH1F     *m_histvx;        //! geant g2t_vertex table, x of prim vtx
@@ -146,7 +149,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.33 2004/02/10 23:16:34 potekhin Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.34 2005/02/07 21:09:20 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
