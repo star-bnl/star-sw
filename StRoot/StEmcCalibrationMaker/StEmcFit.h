@@ -1,5 +1,9 @@
-// $Id: StEmcFit.h,v 1.1 2001/10/17 13:51:31 suaide Exp $
+// $Id: StEmcFit.h,v 1.2 2001/11/02 15:28:38 jeromel Exp $
 // $Log: StEmcFit.h,v $
+// Revision 1.2  2001/11/02 15:28:38  jeromel
+// No declaration for function sqrt found. Actual return type double, Implicitly declared int.
+// Fixed by adding <math.h>.
+//
 // Revision 1.1  2001/10/17 13:51:31  suaide
 // new modifications to work with real data
 //
@@ -9,6 +13,7 @@
 #ifndef STAR_StEmcFit
 #define STAR_StEmcFit
 #include "TObject.h"
+#include <math.h>
 class StEmcFit : public TObject 
 {
   private: 
