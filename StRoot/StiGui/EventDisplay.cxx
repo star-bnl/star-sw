@@ -501,6 +501,11 @@ void EventDisplay::createFilters()
   _trackFilter->add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
   _trackFilter->add(new EditableParameter("chargeMin", "Min Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
   _trackFilter->add(new EditableParameter("chargeMax", "Max Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge));
+
+  _trackFilter->add(new EditableParameter("lengthUsed","Use Length",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kTrackLength));
+  _trackFilter->add(new EditableParameter("lengthMin", "Min Length", -300., -300., -300.,   300.,2,Parameter::Double, StiTrack::kTrackLength));
+  _trackFilter->add(new EditableParameter("lengthMax", "Max Length",  300.,  300., -300.,   300.,2,Parameter::Double, StiTrack::kTrackLength));
+
   dynamic_cast<Subject*>(_trackFilter)->attach(obs);
   //cout << "EventDisplay::createFilters() -I- Setup of reco track filter completed" << endl;
   //cout << "EventDisplay::createFilters() -I- Setting up mc track filter" << endl;
