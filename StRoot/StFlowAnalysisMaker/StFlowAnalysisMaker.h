@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.30 2001/04/25 17:45:52 perev Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.31 2001/05/22 20:11:15 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -45,7 +45,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.30 2001/04/25 17:45:52 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.31 2001/05/22 20:11:15 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -123,7 +123,8 @@ private:
   TH2F*     mHistEtaSymVerZ2D;         //!
   TH1F*     mHistEtaSymVerZ;           //!
   TH2F*     mHistCTBvsZDC2D;           //!
-  TH2F*     mHistMeanDedx2D;           //!
+  TH2F*     mHistMeanDedxPos2D;        //!
+  TH2F*     mHistMeanDedxNeg2D;        //!
   TH2F*     mHistMeanDedxPiPlus2D;     //!
   TH2F*     mHistMeanDedxPiMinus2D;    //!
   TH2F*     mHistMeanDedxProton2D;     //!
@@ -203,6 +204,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.31  2001/05/22 20:11:15  posk
+// Changed dEdx graphs.
+//
 // Revision 1.30  2001/04/25 17:45:52  perev
 // HPcorrs
 //
