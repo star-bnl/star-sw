@@ -1,5 +1,8 @@
-* $Id: control.g,v 1.13 2000/03/04 18:20:55 nevski Exp $
+* $Id: control.g,v 1.14 2000/03/09 00:35:09 nevski Exp $
 * $Log: control.g,v $
+* Revision 1.14  2000/03/09 00:35:09  nevski
+* bad ReadNt events rejected
+*
 * Revision 1.13  2000/03/04 18:20:55  nevski
 * add filter for events with wrong ITRA in hits
 *
@@ -9,7 +12,7 @@
 *
       subroutine control
 +CDE,gcbank,gcnum,gcflag,gcunit,quest.
-      <w>; (' control ready ')
+      <w>; (' new control ready ')
       IQUEST(100) = JVOLUM
       call agsbegm('CONTROL',IPRIN)
       if (ISLFLAG('CONT','HIST')<=0) return
@@ -26,25 +29,31 @@
       implicit   none
 +CDE,gcbank,gcnum,gcflag,gcunit,quest.
       integer ISLFLAG,AGDIGC,IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
-     >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
+     >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,Iprin,
      >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
       real    VMOD,Tofg,vert(4),pvert(4),ubuf(100),Digi(15),
               P(5),V(5),theta,y,R,AMASS,TIME,pt
 *
-   
 * do not allow run without geometry
+      Iprin = ISLFLAG('CONT','PRIN')
       if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
       if (JHEAD <=0) then
-         <W>; ('CONTROL: event without header rejected ');   go to :e:
+         Prin1; ('CONTROL: event without header rejected ');   go to :e:
       endif
       if (IQ(JHEAD+5)>0 & IQ(JHEAD+6)==0) then
-         <W>; ('CONTROL: splitted event header skipped ');   go to :r:
+         Prin1; ('CONTROL: splitted event header skipped ');   go to :r:
       endif
       if (JVERTX<=0 | JKINE<=0) then
-         <W>; ('CONTROL: empty event rejected');             go to :e:
+         Prin1; ('CONTROL: empty event rejected');             go to :e:
       endif
 * 
-      if (AGDIGC(0)!=0)              goto :e:
+      call AgNZGETP(1,1,1,ISTAT,IDPDG,P,AMASS,MOTH,TIME,IDAU,V)
+      if (ISTAT!=11|IDPDG!=999997) then
+         Prin1; ('CONTROL: bad EVNT bank, event rejected');    go to :e:
+      endif
+      if (AGDIGC(0) != 0)    then
+         Prin1; ('CONTROL: bad HITS bank, event rejected');    go to :e:
+      endif
       if (ISLFLAG('CONT','HIST')<=0) goto :r:
 
       call xntup ('Ieotri',Ieotri)
@@ -57,7 +66,7 @@
       do Itrac=1,Ntrack
          call GFKINE(Itrac,vert,Pvert, Ipart,Ivert,Ubuf,Nu)
          if (0>=Ivert | Ivert > Nvertx | Ipart<=0 ) then
-             <W> Itrac,Ivert,Ipart;('CONTROL: error in Itrac,Ivert,Ipart=',3i8)
+             Prin1 Itrac,Ivert,Ipart;('CONTROL: error in Itrac,Ivert,Ipart=',3i8)
              go to :e:
          endif
          call GFVERT(Ivert,vert,Nttarg,Ntbeam,Tofg,Ubuf,Nu)
@@ -116,7 +125,7 @@
 
 :r:   IEV=IEV+1
       iquest(100)=Iev
-      if (ISLFLAG('CONT','PRIN')>0) <W> IEV;(' EVENT ',i6,'  DONE ')
+      Prin1 IEV;(' EVENT ',i6,'  DONE ')
       return
 :e:
       IEOTRI = 1
@@ -130,7 +139,7 @@
 **********************************************************************
 +CDE,TYPING,GCBANK,GCUNIT,GCNUM,GCFLAG.
   CHARACTER*4 Cset
-  Integer     AGDIGC,Iset,Idet,JS,JD,JH,JX,JXD,NW,I,J,X,dummy,Last,LTRA
+  Integer     AGDIGC,Iset,Idet,JS,JD,JH,JX,JXD,NW,I,X,dummy,Last,LTRA
 * - - - - - - - - - - - - - - - - - - - - - - - - -
 
    AGDIGC = 0
@@ -150,8 +159,7 @@
        DO i=1,Last,Nw { LTRA=IQ(JXD+i); if (0>=Ltra|Ltra>Ntrack) go to :e:; }
    } }
    return
-:e:Print *,' CONTROL: hits wrong ',Cset,Idet,i,Ltra,Ntrack,', event rejected'
-   AGDIGC = Iset*100+Idet
+:e:AGDIGC = Iset*100+Idet
    END
 
 
