@@ -1,5 +1,6 @@
 ARCH_TAG     = _sgi
 ARFLAGS      = vqs
+FF           = f77
 FFLAGS       = -c -O -w -extend_source
 FFLAGS4      = -c -O -w -extend_source -irix4
 FFLAGS_DBG   = -c -g -w -extend_source
@@ -8,7 +9,7 @@ CCFLAGS      = -c -O -ansi -fullwarn -prototypes
 CCFLAGS4     = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -prototypes
 
-all : libstr.a libstr_dbg.a doc
+all : libstr.a libstr_dbg.a
 
 str4 : libstr4.a
 
@@ -53,83 +54,83 @@ strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
 
 
 strlib.o4 : strlib.f
-	f77 $(FFLAGS4) strlib.f -o strlib.o4
+	$(FF) $(FFLAGS4) strlib.f -o strlib.o4
 
 strlib.o : strlib.f
-	f77 $(FFLAGS) strlib.f
+	$(FF) $(FFLAGS) strlib.f
 
 strlib_dbg.o : strlib.f
-	f77 $(FFLAGS_DBG) strlib.f -o strlib_dbg.o
+	$(FF) $(FFLAGS_DBG) strlib.f -o strlib_dbg.o
 
 
 strlib$(ARCH_TAG).o4 : strlib$(ARCH_TAG).f str_time_inc
-	f77 $(FFLAGS4) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG).o4
+	$(FF) $(FFLAGS4) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG).o4
 
 strlib$(ARCH_TAG).o : strlib$(ARCH_TAG).f str_time_inc
-	f77 $(FFLAGS) strlib$(ARCH_TAG).f
+	$(FF) $(FFLAGS) strlib$(ARCH_TAG).f
 
 strlib$(ARCH_TAG)_dbg.o : strlib$(ARCH_TAG).f str_time_inc
-	f77 $(FFLAGS_DBG) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG)_dbg.o
+	$(FF) $(FFLAGS_DBG) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG)_dbg.o
 
 
 strmth.o4 : strmth.f
-	f77 $(FFLAGS4) strmth.f -o strmth.o4
+	$(FF) $(FFLAGS4) strmth.f -o strmth.o4
 
 strmth.o : strmth.f
-	f77 $(FFLAGS) strmth.f
+	$(FF) $(FFLAGS) strmth.f
 
 strmth_dbg.o : strmth.f
-	f77 $(FFLAGS_DBG) strmth.f -o strmth_dbg.o
+	$(FF) $(FFLAGS_DBG) strmth.f -o strmth_dbg.o
 
 
 strplot.o4 : strplot.f
-	f77 $(FFLAGS4) strplot.f -o strplot.o4
+	$(FF) $(FFLAGS4) strplot.f -o strplot.o4
 
 strplot.o : strplot.f
-	f77 $(FFLAGS) strplot.f
+	$(FF) $(FFLAGS) strplot.f
 
 strplot_dbg.o : strplot.f
-	f77 $(FFLAGS_DBG) strplot.f -o strplot_dbg.o
+	$(FF) $(FFLAGS_DBG) strplot.f -o strplot_dbg.o
 
 
 strterm$(ARCH_TAG).o4 : strterm$(ARCH_TAG).f
-	f77 $(FFLAGS4) strterm$(ARCH_TAG).f -o strterm$(ARCH_TAG).o4
+	$(FF) $(FFLAGS4) strterm$(ARCH_TAG).f -o strterm$(ARCH_TAG).o4
 
 strterm$(ARCH_TAG).o : strterm$(ARCH_TAG).f
-	f77 $(FFLAGS) strterm$(ARCH_TAG).f
+	$(FF) $(FFLAGS) strterm$(ARCH_TAG).f
 
 strterm$(ARCH_TAG)_dbg.o : strterm$(ARCH_TAG).f
-	f77 $(FFLAGS_DBG) strterm$(ARCH_TAG).f -o strterm$(ARCH_TAG)_dbg.o
+	$(FF) $(FFLAGS_DBG) strterm$(ARCH_TAG).f -o strterm$(ARCH_TAG)_dbg.o
 
 
 str_file.o4 : str_file.f str_file_inc
-	f77 $(FFLAGS4) str_file.f -o str_file.o4
+	$(FF) $(FFLAGS4) str_file.f -o str_file.o4
 
 str_file.o : str_file.f str_file_inc
-	f77 $(FFLAGS) str_file.f
+	$(FF) $(FFLAGS) str_file.f
 
 str_file_dbg.o : str_file.f str_file_inc
-	f77 $(FFLAGS_DBG) str_file.f -o str_file_dbg.o
+	$(FF) $(FFLAGS_DBG) str_file.f -o str_file_dbg.o
 
 
 str_parse.o4 : str_parse.f str_parse_inc
-	f77 $(FFLAGS4) str_parse.f -o str_parse.o4
+	$(FF) $(FFLAGS4) str_parse.f -o str_parse.o4
 
 str_parse.o : str_parse.f str_parse_inc
-	f77 $(FFLAGS) str_parse.f
+	$(FF) $(FFLAGS) str_parse.f
 
 str_parse_dbg.o : str_parse.f str_parse_inc
-	f77 $(FFLAGS_DBG) str_parse.f -o str_parse_dbg.o
+	$(FF) $(FFLAGS_DBG) str_parse.f -o str_parse_dbg.o
 
 
 str_time.o4 : str_time.f
-	f77 $(FFLAGS4) str_time.f -o str_time.o4
+	$(FF) $(FFLAGS4) str_time.f -o str_time.o4
 
 str_time.o : str_time.f
-	f77 $(FFLAGS) str_time.f
+	$(FF) $(FFLAGS) str_time.f
 
 str_time_dbg.o : str_time.f
-	f77 $(FFLAGS_DBG) str_time.f -o str_time_dbg.o
+	$(FF) $(FFLAGS_DBG) str_time.f -o str_time_dbg.o
 
 
 strbyte$(ARCH_TAG).o4 : strbyte$(ARCH_TAG).c
