@@ -1,5 +1,8 @@
-// $Id: tagFiller.cc,v 1.2 1999/03/30 15:33:43 wenaus Exp $
+// $Id: tagFiller.cc,v 1.3 1999/03/30 20:37:49 wenaus Exp $
 // $Log: tagFiller.cc,v $
+// Revision 1.3  1999/03/30 20:37:49  wenaus
+// Explicit StGlobalTrack include
+//
 // Revision 1.2  1999/03/30 15:33:43  wenaus
 // eliminate obsolete branch methods
 //
@@ -28,13 +31,13 @@
 ///////////////////////////////////////////////////////////////////////////////
  * Revision for new StEvent
 #include "StEvent/StEvent.hh"
+#include "StEvent/StGlobalTrack.hh"
 #include "tables/HighPtTag.h"
 #include "SystemOfUnits.h"
-static const char rcsid[] = "$Id: tagFiller.cc,v 1.2 1999/03/30 15:33:43 wenaus Exp $";
+static const char rcsid[] = "$Id: tagFiller.cc,v 1.3 1999/03/30 20:37:49 wenaus Exp $";
 #include "HighPtTag.h"
 void tagFiller(StEvent& event, HighPtTag_st& hptTag)
 
-  /*
   // get pt thresholds from somewhere!
   float ptThres[4];
   ptThres[0] = .5;
@@ -75,7 +78,6 @@ void tagFiller(StEvent& event, HighPtTag_st& hptTag)
     hptTag.Ntracks_gt_thres[1] << " " <<
     hptTag.Ntracks_gt_thres[2] << " " <<
     hptTag.Ntracks_gt_thres[3] << " " << endl;
-*/
 	hptTag.Ntracks_gt_thres[1] << " " <<
 	hptTag.Ntracks_gt_thres[2] << " " <<
 	hptTag.Ntracks_gt_thres[3] << " " << endl;
