@@ -1,16 +1,19 @@
 #include "StSsdBarrel.hh"
 
+#include "TFile.h"
 #include "StEvent.h"
 #include "StSsdHit.h"
 #include "StSsdHitCollection.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
 
-#include "tables/St_svg_geom_Table.h"
 #include "tables/St_spa_strip_Table.h"
 #include "tables/St_scf_cluster_Table.h"
 #include "tables/St_scm_spt_Table.h"
 #include "tables/St_sdm_calib_db_Table.h"
-#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_ssdConfiguration_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_ssdStripCalib_Table.h"
 
 #include "StSsdLadder.hh"
 #include "StSsdWafer.hh"
@@ -23,12 +26,15 @@
 #include "StSsdPointList.hh"
 #include "StSsdPoint.hh"
 
-StSsdBarrel::StSsdBarrel(sdm_geom_par_st  *geom_par)
+/*!
+Constructor using the ssdDimensions_st and ssdConfiguration_st tables from the db
+ */
+StSsdBarrel::StSsdBarrel(ssdDimensions_st  *dimensions, ssdConfiguration_st *configuration)
 {
-  mSsdLayer        = geom_par[0].N_layer; // all layers : 1->7
-  mNLadder         = geom_par[0].N_ladder;
-  mNWaferPerLadder = geom_par[0].N_waf_per_ladder;
-  mNStripPerSide   = geom_par[0].N_strip_per_side;
+  mSsdLayer        = 7; // all layers : 1->7
+  mNLadder         = configuration[0].nMaxLadders;
+  mNWaferPerLadder = dimensions[0].wafersPerLadder;
+  mNStripPerSide   = dimensions[0].stripPerSide;
 
   mLadders = new StSsdLadder*[mNLadder];
   for (int iLad=0; iLad < mNLadder; iLad++)
@@ -41,10 +47,23 @@ StSsdBarrel::~StSsdBarrel()
     delete mLadders[iLad];
 }
 
-void StSsdBarrel::initLadders(St_svg_geom *geom_class)
+void StSsdBarrel::debugUnPeu (int monladder, int monwafer)
+{
+  cout<<"Number of ladders : "<<this->getNumberOfLadders()<<endl;
+  for (int i=0;i<this->getNumberOfLadders();i++)
+    {
+      if (this->mLadders[i]->getLadderNumb()==monladder) 
+	{
+	  cout<<" Ladder "<<monladder<<" found"<<endl;
+	  this->mLadders[i]->debugUnPeu(monwafer);
+	}
+    }
+}
+
+void StSsdBarrel::initLadders(St_ssdWafersPosition *wafpos)
 {
   for (int iLad = 0; iLad < mNLadder; iLad++)
-    mLadders[iLad]->initWafers(geom_class);
+    mLadders[iLad]->initWafers(wafpos);
 }
 
 // int StSsdBarrel::readDeadStripFromTable(table_head_st *condition_db_h, sdm_condition_db_st *condition_db)
@@ -116,7 +135,7 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
   int iLad          = 0;
   int nStrip        = 0;
   int iSide         = 0;
-  int sigma         = 0;
+  float sigma         = 0;
   int idMcHit[5]    = {0,0,0,0,0};
   int e = 0;
   for (int i = 0 ; i < spa_strip->GetNRows(); i++)
@@ -133,7 +152,27 @@ int StSsdBarrel::readStripFromTable(St_spa_strip *spa_strip)
   NumberOfStrip = spa_strip->GetNRows();  
   return NumberOfStrip;
 }
-
+int  StSsdBarrel::writeNoiseToFile(St_spa_strip *spa_strip)
+{
+  spa_strip_st *strip = spa_strip->GetTable();
+  St_ssdStripCalib *stripCal = new St_ssdStripCalib("ssdStripCalib",spa_strip->GetNRows());
+  ssdStripCalib_st noise_strip;
+  for (int i = 0 ; i < spa_strip->GetNRows(); i++)
+    {
+      noise_strip.id=strip[i].id_strip;
+      noise_strip.pedestals=strip[i].id_mchit[0];
+      noise_strip.rms=strip[i].adc_count;
+      noise_strip.isActive=1;
+      stripCal->AddAt(&noise_strip);
+    }
+  TFile f1("ssdStripCalib.root","NEW");
+  stripCal->Write();
+  f1.Close();
+  return spa_strip->GetNRows();
+}
+/*!
+  Old method reading noise from the spa_noise table
+ */
 int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicControl *dynamicControl)
 {
   sdm_calib_db_st *noise = spa_noise->GetTable();
@@ -155,6 +194,38 @@ int  StSsdBarrel::readNoiseFromTable(St_sdm_calib_db *spa_noise, StSsdDynamicCon
     }
 
   NumberOfNoise = spa_noise->GetNRows();
+  return NumberOfNoise;
+//   return noise_h->nok;
+}
+/*!
+New method reading from the ssdStripCalib table
+ */
+int  StSsdBarrel::readNoiseFromTable(St_ssdStripCalib *strip_calib, StSsdDynamicControl *dynamicControl)
+{
+  ssdStripCalib_st *noise = strip_calib->GetTable();
+  
+  int NumberOfNoise = 0;
+  int idWaf  = 0;
+  int iWaf   = 0;
+  int iLad   = 0;
+  int nStrip = 0;
+  int iSide  = 0;
+  for (int i = 0 ; i < strip_calib->GetNRows(); i++)
+    {
+      nStrip  = (int)(noise[i].id/100000.);
+      idWaf   = noise[i].id-10000*((int)(noise[i].id/10000.));
+      iWaf    = (int)((idWaf - mSsdLayer*1000)/100 - 1);
+      iLad    = (int)(idWaf - mSsdLayer*1000 - (iWaf+1)*100 - 1);
+      iSide   = (noise[i].id - nStrip*100000 - idWaf)/10000;
+      mLadders[iLad]->mWafers[iWaf]->setSigmaStrip(nStrip, iSide, noise[i].rms, dynamicControl);
+      //       if (iLad==11 && iWaf==8 && nStrip <10) 
+      //	cout<<"iLad,idWaf,nStrip,iSide,rms = "<<iLad
+      //	    <<" "<<idWaf
+      //	    <<" "<<nStrip
+      //	    <<" "<<iSide
+      //	    <<" "<<noise[i].rms<<endl;
+    }
+  NumberOfNoise = strip_calib->GetNRows();
   return NumberOfNoise;
 //   return noise_h->nok;
 }
@@ -378,7 +449,7 @@ void StSsdBarrel::doSideClusterisation(int *barrelNumbOfCluster, StSsdClusterCon
 }
 
 
-int StSsdBarrel::doClusterMatching(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl)
+int StSsdBarrel::doClusterMatching(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl)
 {
   int NumberOfPackage = 0;
   int nSolved = 0;
@@ -386,11 +457,11 @@ int StSsdBarrel::doClusterMatching(sdm_geom_par_st *geom_par, StSsdClusterContro
   for (int iLad = 0; iLad < mNLadder; iLad++)
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       { 
-	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(geom_par, clusterControl);
-	nPerfect  = mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(geom_par, clusterControl);
+	NumberOfPackage += mLadders[iLad]->mWafers[iWaf]->doFindPackage(dimensions, clusterControl);
+	nPerfect  = mLadders[iLad]->mWafers[iWaf]->doSolvePerfect(dimensions, clusterControl);
 	nSolved  += nPerfect;
 	            mLadders[iLad]->mWafers[iWaf]->doStatPerfect(nPerfect, clusterControl);
-	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(geom_par, clusterControl);
+	nSolved  += mLadders[iLad]->mWafers[iWaf]->doSolvePackage(dimensions, clusterControl);
       }
   cout<<"****       Remark: "<<nSolved<<"  solved packages     ****\n";
   return NumberOfPackage;
@@ -409,12 +480,12 @@ void StSsdBarrel::convertDigitToAnalog(StSsdDynamicControl *dynamicControl)
       mLadders[iLad]->mWafers[iWaf]->convertDigitToAnalog(convFactor);
 }
 
-void StSsdBarrel::convertUFrameToOther(sdm_geom_par_st *geom_par)
+void StSsdBarrel::convertUFrameToOther(ssdDimensions_st *dimensions)
 {
   for (int iLad = 0; iLad < mNLadder; iLad++)
     for (int iWaf = 0; iWaf < mNWaferPerLadder; iWaf++)
       {
-	mLadders[iLad]->mWafers[iWaf]->convertUFrameToLocal(geom_par);
+	mLadders[iLad]->mWafers[iWaf]->convertUFrameToLocal(dimensions);
 	mLadders[iLad]->mWafers[iWaf]->convertLocalToGlobal();
       }
 }

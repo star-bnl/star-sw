@@ -2,23 +2,19 @@
  * \file StSsdConfig.hh
  */
 /***************************************************************************
- *
- * $Id: StSsdConfig.hh,v 1.1 2004/03/12 04:24:20 jeromel Exp $
- *
  * Author: christelle Roy
- ***************************************************************************
- *
  * Description: SSD Geometry object. It makes the link with the Data Base
- *
  **************************************************************************/
 
 #ifndef STSSDCONFIG_HH
 #define STSSDCONFIG_HH
 
-#define MAX_NUMBER_OF_BARRELS 1                                        /*! \def MAX_NUMBER_OF_BARRELS */
+#define MaxNumberOfLadders 20
 
 #include "StObject.h"
 #include "TString.h"
+
+class ssdConfiguration_st;
 
 class StSsdConfig: public StObject
 {
@@ -29,47 +25,37 @@ public:
   StSsdConfig(const StSsdConfig&);
   StSsdConfig& operator = (const StSsdConfig&);
 
-  int getNumberOfBarrels() {return mNumberOfBarrels;}
-  int getNumberOfLadders(int barrel) {return mNumberOfLadders[barrel-1];}
-  int getNumberOfWafers(int barrel)  {return mNumberOfWafers[barrel-1];}
+  int getNumberOfLadders() {return mNumberOfLadders;}
+  int getNumberOfWafers()  {return mNumberOfWafers;}
   int getNumberOfHybrids() {return mNumberOfHybrids;}
+  int getTotalNumberOfLadders() {return mTotalNumberOfLadders;}
   int getTotalNumberOfHybrids() {return mTotalNumberOfHybrids;}
-
   int getNumberOfStrips() {return mNumberOfStrips;}
-  int getNumberOfTimeBins() {return mNumberOfTimeBins;}
 
-  void setNumberOfBarrels(int barrels) {mNumberOfBarrels = barrels;}
-  void setNumberOfLadders(int barrel, int ladders) {mNumberOfLadders[barrel-1] = ladders;}
-  void setNumberOfWafers(int barrel, int wafers)  {mNumberOfWafers[barrel-1] = wafers;}
+  void setNumberOfLadders(int ladders){mNumberOfLadders = ladders;}
+  void setNumberOfWafers(int wafers)  {mNumberOfWafers = wafers;}
   void setNumberOfHybrids(int hybrids) {mNumberOfHybrids = hybrids;}
   void setTotalNumberOfHybrids(int hybrids) {mTotalNumberOfHybrids = hybrids;}
-
+  void setTotalNumberOfLadders(int totladders) {mTotalNumberOfLadders = totladders;}
   void setNumberOfStrips(int strips) {mNumberOfStrips = strips;}
-  void setNumberOfTimeBins(int timeBins) {mNumberOfTimeBins = timeBins;}
 
   void setConfiguration(); // set the SSD configuration
   void setConfiguration(const char* config); // set the SSD configuration
 
-  int getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
-  int getProperHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
-  int getBarrel(int index);
-  int getLayer(int index);
-  int getLadder(int index);
-  int getWafer(int index);
-  int getHybrid(int index);
-  
+  void setLadderIsActive(int ladder, int status){mStatus[ladder-1] = status;} 
+  int  getLadderIsActive(int ladder){return mStatus[ladder-1];}
+
   const char* getConfiguration(); // Returns the SSD configuration
 
 protected:
-  int mNumberOfBarrels;                        // Number of Barrels
-  int mNumberOfLadders[MAX_NUMBER_OF_BARRELS]; // Number of Ladders of each Barrel
-  int mNumberOfWafers[MAX_NUMBER_OF_BARRELS];  // Number of Wafers of each Ladder (Barrel dependent)
+  int mStatus[MaxNumberOfLadders]; 
+  int mNumberOfLadders;        // Number of Present Ladders 
+  int mNumberOfWafers;         // Number of Wafers of each Ladder (Barrel dependent)
   int mNumberOfHybrids;        // Number of Hybrids of each Wafer 
-  
+  int mTotalNumberOfLadders;   // Total Number of Ladders (entire SSD)  
   int mTotalNumberOfHybrids;   // Total Number of Hybrids (entire SSD)
   
   int mNumberOfStrips;   // Number of Strips in one hybrid
-  int mNumberOfTimeBins; // Number of Time Bins in one hybrid
 
   TString mConfig;       // SSD Configuration 
 

@@ -9,10 +9,11 @@
 
 #ifndef STAR_StSsdClusterControl
 #define STAR_StSsdClusterControl
-
+class St_clusterControl;
 class StSsdClusterControl{
  public:
   StSsdClusterControl();
+  StSsdClusterControl(St_clusterControl *clusterCtrl);
  ~StSsdClusterControl();
 
  float  getHighCut();
