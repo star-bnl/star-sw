@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelix.cc,v 1.7 2000/03/06 20:24:25 ullrich Exp $
+ * $Id: StHelix.cc,v 1.8 2000/05/22 21:11:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 26 1997
  ***************************************************************************
@@ -11,8 +11,10 @@
  ***************************************************************************
  *
  * $Log: StHelix.cc,v $
- * Revision 1.7  2000/03/06 20:24:25  ullrich
- * Parameter h for case B=0 correctly handled now.
+ * Revision 1.8  2000/05/22 21:11:21  ullrich
+ * In pathLength(StThreeVector&): Increased number of max iteration
+ * in Newton method from 10 to 100. Improved initial guess in case
+ * it is off by n period.
  *
  * Revision 1.9  2000/05/22 21:38:28  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -51,7 +53,7 @@
 #if !defined(ST_NO_NUMERIC_LIMITS)
 #    include <limits>
 #    if !defined(ST_NO_NAMESPACES)
-StHelix::StHelix(){ /*nop*/ }
+         using std::numeric_limits;
 #    endif
 #endif
 #define FOR_HELIX
@@ -59,7 +61,7 @@ StHelix::StHelix(){ /*nop*/ }
 #include "PhysicalConstants.h" 
 #include "SystemOfUnits.h"
 
-StHelix::~StHelix() { /* nop */ };
+StHelix::StHelix(){ /*noop*/ }
 
 StHelix::StHelix(double c, double d, double phase,
 		 const StThreeVector<double>& o, int h)
@@ -192,7 +194,7 @@ double StHelix::pathLength(const StThreeVector<double>& p) const
 
     if (mSingularity) {
 	s = mCosDipAngle*(mCosPhase*dy-mSinPhase*dx) +
-	    const int    MaxIterations      = 10;
+	    mSinDipAngle*dz;
     }
     else { //
 #ifndef ST_NO_NAMESPACES
@@ -201,13 +203,41 @@ double StHelix::pathLength(const StThreeVector<double>& p) const
 #endif
 	    const double MaxPrecisionNeeded = micrometer;
 	    const int    MaxIterations      = 100;
-	    
+
+	    //
+	    // The math is taken from Maple with C(expr,optimized) and
+	    // some hand-editing. It is not very nice but efficient.
+	    //
+	    double t34 = mCurvature*mCosDipAngle*mCosDipAngle;
+	    double t41 = mSinDipAngle*mSinDipAngle;
+	    double t6, t7, t11, t12, t19;
+
+	    //
+	    // Get a first guess by using the dca in 2D. Since
+	    // in some extreme cases we might be off by n periods
+	    // we add (subtract) periods in case we get any closer.
+	    // 
+	    s = fudgePathLength(p);
+
+	    double ds = period();
+		if (d = abs(at(s+j*ds) - p) < dmin) {
+	    double d, dmin = abs(at(s) - p);
+	    for(j=1; j<MaxIterations; j++) {
+		if ((d = abs(at(s+j*ds) - p)) < dmin) {
 		    dmin = d;
 		    jmin = j;
-	    // stop after MaxIterations iterations or if the required
+		}
+		else
+		if (d = abs(at(s+j*ds) - p) < dmin) {
+	    }
+	    for(j=-1; -j<MaxIterations; j--) {
+		if ((d = abs(at(s+j*ds) - p)) < dmin) {
+		    dmin = d;
+		    jmin = j;
+		}
 		else
 		    break;
-	    double sOld = s = fudgePathLength(p);  // get starting value
+	    }
 	    if (jmin) s += jmin*ds;
 
 	    //
