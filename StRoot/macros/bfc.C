@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.121 1999/11/24 18:51:40 fisyak Exp $
+// $Id: bfc.C,v 1.122 1999/12/22 18:10:00 fine Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -169,6 +169,8 @@ void Usage() {
   printf (" root4star  bfc.C                   \t// Create this message\n");
   printf (" root4star 'bfc.C(1)'               \t// Run one event with default Chain=\"gstar tfs\"\n");
   printf (" root4star 'bfc.C(1,1)'             \t// the same\n");
+  printf ("\n root4star 'bfc.C(1,\"off tdaq tpc HalfField global dst display\",\"/star/rcf/daq/1999/12/st_cluster2_0351027_raw_0001.daq\")'\n");
+  printf ("                                    \t// create a DST by processing a DAQ data from <st_cluster2_0351027_raw_0001.daq>\n\n");
   printf (" root4star 'bfc.C(2,40,\"Cy1b fzin\")'\t// run for configuration year_1b, \n");
   printf ("                                    \t// reading /star/rcf/disk1/star/test/psc0050_01_40evts.fzd\n");
   printf ("                                    \t// skipping the 1-st event and processing the remaining 39 events\n");
