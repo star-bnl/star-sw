@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.31 2001/08/14 18:18:03 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.32 2002/02/06 18:39:13 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.32  2002/02/06 18:39:13  hardtke
+ * Add tpc Field Cage structure
+ *
  * Revision 1.31  2001/08/14 18:18:03  hardtke
  * Add sector position structures
  *
@@ -101,6 +104,7 @@ ClassImp(StTpcPadPlaneI)
 ClassImp(StTpcSlowControlSimI)
 ClassImp(StTpcT0I)
 ClassImp(StTpcGlobalPositionI)
+ClassImp(StTpcFieldCageI)
 ClassImp(StTpcSectorPositionI)
 #endif
 //_____________________________________________________________________________
@@ -304,6 +308,22 @@ StTpcGlobalPositionI* StTpcDb::GlobalPosition(){
    }
   }
  return GlobPos;
+}
+
+//_____________________________________________________________________________
+StTpcFieldCageI* StTpcDb::FieldCage(){
+  if (!FC){            // get field cage from data base
+   const int dbIndex = kGeometry;
+   if (tpc[dbIndex]){
+    St_DataSet* tpd = tpc[dbIndex]->Find("tpcFieldCage");
+    if (!(tpd && tpd->HasData()) ){
+     gMessMgr->Message("StTpcDb::Error Finding Tpc Field Cage Info","E");
+     return 0;
+    }
+    FC = new StRTpcFieldCage((St_tpcFieldCage*)tpd);
+   }
+  }
+ return FC;
 }
 
 //_____________________________________________________________________________
