@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.13  1998/04/20 22:39:10  fisyak
+#  Correct dependencies
+#
 #  Revision 1.12  1998/04/20 15:06:47  fisyak
 #  user CERNLIN include
 #
@@ -64,7 +67,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/20 15:06:47 $ 
+#           Last modification $Date: 1998/04/20 22:39:10 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -226,7 +229,7 @@ ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
         SL_PKG  := $(LIB_DIR)/$(PKG_SL)
 endif                           
 endif                          
-MKDEPFLAGS:= -traditional -MG -MM -w -x c
+MKDEPFLAGS:= -traditional -MG -MM -w
 ifndef NODEPEND                
 FILES_D  :=                          $(addsuffix .d,   $(basename $(FILES_O)))
 FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
@@ -337,12 +340,12 @@ clean_obj:
 clean_lib:
 	rm -rf $(SL_PKG) $(LIB_PKG)
 #-----dependencies--------------------------
-ifneq ($(EMPTY), $(strip $(FILES_D))) 
-include $(FILES_D)
-endif                               #
 ifneq ($(EMPTY), $(strip $(FILES_DM)))
 include $(FILES_DM)
 endif                               # 
+ifneq ($(EMPTY), $(strip $(FILES_D))) 
+include $(FILES_D)
+endif                               #
 endif                            # end if of FILES_O FILES_SL
 endif       # LEVEL 4
 #--------  idm, idl --------
@@ -370,8 +373,8 @@ $(OBJ_DIR)/%.o: %.cdf
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR);\
         $(STIC) $(STICFLAGS) $(FIRST_DEP); \
-        gcc  $(MKDEPFLAGS) $(STICFLAGS) $(FIRST_DEP) | \
-        sed -e 's/.idl.o/.didl/g' > $(GEN_DIR)/$(STEM).didl; \
+        gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(FIRST_DEP) | \
+        sed -e 's/$(STEM)\.idl\.o/$(GEN_DIR)\/$(STEM)\.didl/g' > $(GEN_DIR)/$(STEM).didl; \
         $(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" \
         >> $(GEN_DIR)/$(STEM).didl; $(RM) $(STEM).idl
 #       temporarly, until stic is fixed:
@@ -379,16 +382,16 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
                 $(GEN_DIR)/$(STEM)_i.cc > temp
 	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
 $(OBJ_DIR)/%.d: %.cc 
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEPQ) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
+        sed -e 's/$(notdir $(STEM))\.o/$(subst /,\/,$(OBJ_DIR)/$(STEM)\.o) $(subst /,\/,$(ALL_TAGS))/g'\
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.c
 	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        sed -e 's/$(notdir $(STEM))\.o/$(subst /,\/,$(OBJ_DIR)/$(STEM)\.o) $(subst /,\/,$(ALL_TAGS))/g'\
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.F
-	gcc  $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+	gcc  $(MKDEPFLAGS)  -x c $(CPPFLAGS) $(FIRST_DEP) | \
+        sed -e 's/$(notdir $(STEM))\.o/$(subst /,\/,$(OBJ_DIR)/$(STEM)\.o) $(subst /,\/,$(ALL_TAGS))/g'\
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.cdf
 	cd $(SRC_DIR); \
