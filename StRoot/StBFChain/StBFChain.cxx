@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.8 1999/09/17 22:09:24 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.9 1999/09/17 22:57:17 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.9  1999/09/17 22:57:17  fisyak
+// Add l3t to default chain
+//
 // Revision 1.8  1999/09/17 22:09:24  fisyak
 // Fix typo
 //
@@ -233,7 +236,6 @@ void StBFChain::SetFlags(const Char_t *Chain )
       (GetOption(kMATCH) || GetOption(kPRIMARY) || GetOption(kV0) ||
        GetOption(kXI)    || GetOption(kKINK))) SetOption(kGLOBAL);
   if (!GetOption(kEval) && GetOption(kAllEvent))  SetOption(kEval); 
-  //  SetOption(-kL3T);
   SetOption(-kEMC);
   //  SetOption(-kKINK);
   // Print set values
@@ -705,6 +707,7 @@ void StBFChain::SetOption(int k){// set all OFF
     if (!GetOption(kDEFAULT)) {
       SetOption(kFTPC);
       SetOption(kTRG);
+      SetOption(kL3T);
     }
   case kSD97:
   case kSD98:
@@ -731,6 +734,7 @@ void StBFChain::SetOption(int k){// set all OFF
       SetOption(kFTPC);
       SetOption(kTRG);
       SetOption(kGLOBAL);
+      SetOption(kL3T);
       SetOption(kDST);
       SetOption(kQA);
       SetOption(kEVENT);
