@@ -602,23 +602,26 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
 		, const char * name) {
    DS_DATASET_T *pTbl1=table1->dslPointer();
    DS_DATASET_T *pTbl2=table2->dslPointer();
+   char herb26June98;
    tdmTable * table3=NULL;
    DS_DATASET_T *pTbl3=NULL;
    char *n=NULL;
    if( NULL == name ){
 //   n=(char*)id2name("projection",soc->nextIDref());
      n=(char*)id2name("join",111); // HACK 
+     herb26June98=7;
    }
    else {
      n=(char*)name;
+     herb26June98=0;
    }
    if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsTargetTable(&pTbl3, n, n, pTbl1, pTbl2, NULL, 
              mySelectSpec) ){
-      FREE(n);
+      if(herb26June98) FREE(n);
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   FREE(n);
+   if(herb26June98) FREE(n);
 // table3 = new tdmTable(pTbl3);                // HACK !!!
    char *n3=NULL;
    char *s3=NULL;
