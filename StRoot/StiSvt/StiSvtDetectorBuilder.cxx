@@ -5,6 +5,7 @@
 #include "StiSvt/StiSvtDetectorBuilder.h" 
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSvtDbMaker/St_SvtDb_Reader.hh"
 #include "Sti/Base/Messenger.h"
@@ -81,10 +82,10 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
     }
   else
     {
-      trackingPars->setMaxChi2ForSelection(50.);
+      trackingPars->setMaxChi2ForSelection(500000.);
       trackingPars->setMinSearchWindow(1.6);
-      trackingPars->setMaxSearchWindow(40.);
-      trackingPars->setSearchWindowScaling(60.);
+      trackingPars->setMaxSearchWindow(4.);
+      trackingPars->setSearchWindowScaling(60000.);
       cout <<"Tracking Parameters set from default. "<<endl;
     }
   cout <<*trackingPars<<endl;
@@ -106,7 +107,7 @@ StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active, char* baseName)
   else
     {
       cout <<"Setting Hit Error Calculator parameters from defaults:"<<endl;
-      _calc->set(.1,0.,0.,.1,0.,0.); 
+      _calc->set(.01,0.,0.,.01,0.,0.); 
     }
 
 
@@ -187,64 +188,93 @@ void StiSvtDetectorBuilder::buildDetectors()
       float fHalfGap = fGapRadius*tan(fHalfGapPhi);
       // determine the radius for the detector (ladders + hybrids)
       float fLayerRadius = (fLadderRadius + fGapRadius)/2.;
-      for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)
-	{
-	  StiPlacement *pPlacement = new StiPlacement;
-	  pPlacement->setZcenter(0.);
-	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  float fLadderPhi = phiForSvtBarrelLadder(layer, ladder);
-	  pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
-	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
-	  StiDetector *pLadder = _detectorFactory->getInstance();
-	  pLadder->setName(name);
-	  pLadder->setIsOn(true);
-	  pLadder->setIsActive(new StiIsActiveFunctor(_active));
-	  pLadder->setIsContinuousMedium(true);
-	  pLadder->setIsDiscreteScatterer(true);
-	  pLadder->setGas(_gasMat);
-	  pLadder->setMaterial(_siMat);
-	  pLadder->setShape(_waferShape[layer]);
-	  pLadder->setPlacement(pPlacement); 
-	  pLadder->setHitErrorCalculator(_calc);
-	  add(layer,ladder,pLadder);
 
-	  double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
-	  // hybrid 1
-	  pPlacement = new StiPlacement;
-	  pPlacement->setZcenter(0.);
-	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, 
-				   fGapRadius,
-				   -offset);
-	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_1", layer, ladder);
-	  StiDetector *pHybrid1 = _detectorFactory->getInstance();
-	  pHybrid1->setName(name);
-	  pHybrid1->setIsOn(true);
-	  pHybrid1->setIsActive(new StiNeverActiveFunctor);
-	  pHybrid1->setIsContinuousMedium(true);
-	  pHybrid1->setIsDiscreteScatterer(true);
-	  pHybrid1->setGas(_gasMat);
-	  pHybrid1->setMaterial(_hybridMat);
-	  pHybrid1->setShape(_hybridShape[layer]);
-	  pHybrid1->setPlacement(pPlacement);
-	  add(pHybrid1);
-	  // hybrid 2
-	  pPlacement = new StiPlacement;
-	  pPlacement->setZcenter(0.);
-	  pPlacement->setLayerRadius(fLayerRadius);
-	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, 
-				   fGapRadius,
-				   offset);
-	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_2", layer, ladder);
-	  StiDetector *pHybrid2 = _detectorFactory->getInstance();
-	  pHybrid2->copy(*pHybrid1);
-	  pHybrid2->setName(name);
-	  pHybrid2->setPlacement(pPlacement);
-	  add(pHybrid2);
-	} // for ladder
+			double x,y,z,rc,rn, nx,ny,nz,dx,dy,dz,yOff;
+			StSvtWaferGeometry* waferGeom;
+			float fLadderPhi;
+			float phiC, phiN, dPhi;
+      for(unsigned int ladder = 0; ladder<getNSectors(layer); ladder++)
+				{
+					cout << " layer:"<<layer<<" ladder:"<<ladder;
+					//detector wafers placement 
+					if (layer==0 || layer==2 || layer==4)
+						waferGeom = (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(1+layer/2,2*ladder+2,1));		
+					else
+						waferGeom = (StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(1+layer/2,2*ladder+1,1));		
+					x = waferGeom->x(0);
+					y = waferGeom->x(1);
+					z = waferGeom->x(2);
+					nx = waferGeom->n(0);
+					ny = waferGeom->n(1);
+					nz = waferGeom->n(2);
+					dx = waferGeom->d(0);
+					dy = waferGeom->d(1);
+					dz = waferGeom->d(2);
+					cout << " x:"<<x<<" y:"<<y<<" z:"<<z<<endl;
+					rc = sqrt(x*x+y*y);
+					rn = x*nx+y*ny;
+					dPhi = acos((x*nx+y*ny)/rc);
+					phiC = fLadderPhi = atan2(y,x);
+					phiN = atan2(ny,nx);
+					dPhi = phiC-phiN;
+					yOff = sqrt(rc*rc-rn*rn);
+					cout << "  phiN:"<< 180*phiN/3.1415927 << " phiC:"<< 180*phiC/3.1415927<< " dPhi:"<<180*dPhi/3.1415927<<"  yOff:"<<yOff<<endl;
+					StiPlacement *pPlacement = new StiPlacement;
+					pPlacement->setZcenter(0.);
+					pPlacement->setLayerRadius(fLayerRadius);
+					pPlacement->setRegion(StiPlacement::kMidRapidity);
+					//float fLadderPhi = phiForSvtBarrelLadder(layer, ladder);
+					pPlacement->setCenterRep(phiC, rc, -dPhi); 
+					sprintf(name, "Svt/Layer_%d/Ladder_%d/Wafers", layer, ladder);
+					StiDetector *pLadder = _detectorFactory->getInstance();
+					pLadder->setName(name);
+					pLadder->setIsOn(true);
+					pLadder->setIsActive(new StiIsActiveFunctor(_active));
+					pLadder->setIsContinuousMedium(true);
+					pLadder->setIsDiscreteScatterer(true);
+					pLadder->setGas(_gasMat);
+					pLadder->setMaterial(_siMat);
+					pLadder->setShape(_waferShape[layer]);
+					pLadder->setPlacement(pPlacement); 
+					pLadder->setHitErrorCalculator(_calc);
+					add(layer,ladder,pLadder);
+					
+					double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
+					// hybrid 1
+					pPlacement = new StiPlacement;
+					pPlacement->setZcenter(0.);
+					pPlacement->setLayerRadius(fLayerRadius);
+					pPlacement->setRegion(StiPlacement::kMidRapidity);
+					pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, 
+																	 fGapRadius,
+																	 -offset);
+					sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_1", layer, ladder);
+					StiDetector *pHybrid1 = _detectorFactory->getInstance();
+					pHybrid1->setName(name);
+					pHybrid1->setIsOn(true);
+					pHybrid1->setIsActive(new StiNeverActiveFunctor);
+					pHybrid1->setIsContinuousMedium(true);
+					pHybrid1->setIsDiscreteScatterer(true);
+					pHybrid1->setGas(_gasMat);
+					pHybrid1->setMaterial(_hybridMat);
+					pHybrid1->setShape(_hybridShape[layer]);
+					pHybrid1->setPlacement(pPlacement);
+					add(pHybrid1);
+					// hybrid 2
+					pPlacement = new StiPlacement;
+					pPlacement->setZcenter(0.);
+					pPlacement->setLayerRadius(fLayerRadius);
+					pPlacement->setRegion(StiPlacement::kMidRapidity);
+					pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, 
+																	 fGapRadius,
+																	 offset);
+					sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_2", layer, ladder);
+					StiDetector *pHybrid2 = _detectorFactory->getInstance();
+					pHybrid2->copy(*pHybrid1);
+					pHybrid2->setName(name);
+					pHybrid2->setPlacement(pPlacement);
+					add(pHybrid2);
+				} // for ladder
     } // for layer
 }
 
@@ -275,6 +305,45 @@ void StiSvtDetectorBuilder::loadDb()
       cout << "SVT Layer"<<layer<<" N Ladders:"<<_config->getNumberOfLadders(layer/2)/2<<endl;
       setNSectors(layer, _config->getNumberOfLadders(1+layer/2)/2);
     }
+
+	/////
+		double x,y,z;
+		StSvtWaferGeometry* waferGeom;
+		for (unsigned int barrel=1; barrel<=_config->getNumberOfBarrels();barrel++) 
+			{ // loop over barrels
+				for (unsigned int ladder=1;
+						 ladder<=_config->getNumberOfLadders(barrel); ladder++) 
+					{ //	loop over ladders
+						for (unsigned int wafer=1;
+								 wafer<=_geometry->getNumberOfWafers(barrel);
+								 wafer++) { // loop over wafers
+							
+							waferGeom =
+								(StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(barrel,ladder,wafer));
+							
+							x = waferGeom->x(0);
+							y = waferGeom->x(1);
+							z = waferGeom->x(2);
+						cout << "x:"<<x<<" y:"<<y<<" z:"<<z<<endl;
+						}
+				}
+			}
+
+	/*
+		double x,y,z;
+		for (int barrel=0;barrel<3;++barrel)
+			{
+				for (unsigned int wafer=1;
+						 wafer<=_geometry->barrel(barrel)->ladder(barrel)->numberOfWafers();
+						 wafer++) 
+					{ // loop over wafers						
+						waferGeom =
+							(StSvtWaferGeometry*) _geometry->at(_geometry->getWaferIndex(barrel,ladder,wafer));
+						x = waferGeom->x(0);
+						y = waferGeom->x(1);
+						z = waferGeom->x(2);
+					}
+					}*/
 }
 
 
@@ -361,3 +430,34 @@ double StiSvtDetectorBuilder::phiForSvtBarrelLadder(unsigned int layer,
   cout << "  Layer:"<<layer<<" LADDER:"<<ladder<<" ANGLE PHI:"<< angle*M_PI/180.;
   return  angle*M_PI/180.;
 } // phiForSvtLayerLadder
+
+
+
+/*
+
+
+
+
+
+  StSvtGeometry* mSvtGeom = (StSvtGeometry*)dataSet->GetObject();
+  assert(mSvtGeom);
+
+  for (unsigned int barrel=1; barrel<=mSvtGeom->numberOfBarrels();
+barrel++) { // loop over barrels
+     for (unsigned int ladder=1;
+ladder<=mSvtGeom->barrel(barrel-1)->numberOfLadders(); ladder++) { //
+loop over ladders
+        for (unsigned int wafer=1;
+wafer<=mSvtGeom->barrel(barrel-1)->ladder(barrel-1)->numberOfWafers();
+wafer++) { // loop over wafers
+
+             waferGeom =
+(StSvtWaferGeometry*)mSvtGeom->at(mSvtGeom->getWaferIndex(barrel,ladder,wafer));
+
+             x = waferGeom->x(0);
+             y = waferGeom->x(1);
+             z = waferGeom->x(2);
+          }
+       }
+   }
+*/
