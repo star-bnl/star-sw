@@ -14,8 +14,7 @@
      9            mckine_h,            mckine ,
      9            filler_h,            filler ,
      9            config_h,            config ,
-     9              geom_h,              geom ,
-     9           globtrk_h,           globtrk ) 
+     9              geom_h,              geom ) 
       IMPLICIT NONE
 C     SYNOPSIS:
 C     stk steering routine
@@ -56,7 +55,6 @@ c     ---------
       integer stk_am_fit
       integer stk_am_select
       integer stk_am_kine
-      integer stk_am_globfil
 
       data sfactor/1.0,1.5,2.0,4.0/
 
@@ -505,14 +503,6 @@ c     sgr may have been called
       end if
 
 
-
-c      if (stkpar(1).globfil.ne.0) then
-c         status = STK_AM_GLOBFIL(
-c     1            stkpar_h,            stkpar ,
-c     2             track_h,             track ,
-c     5           mctrack_h,           mctrack ,
-c     6           globtrk_h,           globtrk )
-c      endif
 
       WRITE(*,*) 'STK_AM: Stopping #################################'
       STK_AM=STAFCV_OK
