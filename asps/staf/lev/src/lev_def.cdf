@@ -54,5 +54,33 @@ is written automatically.
  ************************
 .
 >ACTION KAM_LEV_UPDATE
+** ---------------------------------------------------------------------
+** LEV/REGISTER_VERSION NAME VERSION
+>COMMAND REGISTER_VERSION
+>PARAMETERS
+NAME 'name of kumac file' C
+VERSION 'version string from CVS' C
+>GUIDANCE
+This command is meant to register the version of a kumac file.
+.
+SPECIAL NOTE: Please convert the @ signs below to $ signs.  This
+maneuver is because STAF's KUIP cdf files go thru CVS.
+.
+This command is meant to register the version of a kumac file
+into LEV's table of versions for inclusion into the final output file.
+Thus, if the name of the kumac file is cat_fude.kumac, 
+you would insert the following into it:  
+LEV/REGISTER_VERSION cat_fude.kumac @Id:@ 
+The @Id:@ will be overwritten by CVS with an informative version 
+'timestamp' the first time you check the package in (assuming that you have 
+run sl_add_file for the kumac file).  You do not have to sl_retrieve_pkg to 
+have the @Id:@ overwritten, only sl_store_pkg.  Further, you don't have to 
+change it back to @Id:@ every time you want to update the overwrite.
+.
+ ************************
+ * Still In Development *
+ ************************
+.
+>ACTION KAM_LEV_REGISTER_VERSION
 
 
