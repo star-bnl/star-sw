@@ -1859,22 +1859,22 @@ void EntryTestDlg::SetLimits()
 	const string& name = (*it).first;
 	
 	if (name=="MarkedHitColor") {
-	    broker->setMarkedHitColor( (*it).second->GetNumber() );
+	    broker->setMarkedHitColor( static_cast<unsigned int>( (*it).second->GetNumber() ) );
 	}
 	else if (name=="UnMarkedHitColor") {
-	    broker->setUnMarkedHitColor( (*it).second->GetNumber() );
+	    broker->setUnMarkedHitColor( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MarkedHitStyle") {
-	    broker->setMarkedHitStyle( (*it).second->GetNumber() );
+	    broker->setMarkedHitStyle( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="UnMarkedHitStyle") {
-	    broker->setUnMarkedHitStyle( (*it).second->GetNumber() );
+	    broker->setUnMarkedHitStyle( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MarkedHitSize") {
-	    broker->setMarkedHitSize( (*it).second->GetNumber() );
+	    broker->setMarkedHitSize( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="UnMarkedHitSize") {
-	    broker->setUnMarkedHitSize( (*it).second->GetNumber() );
+	    broker->setUnMarkedHitSize( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else {
 	    cout <<"EntryTestDlg::SetLimits(). ERROR:\t"
@@ -2090,16 +2090,16 @@ void SeedFinderIO::SetLimits()
 	const string& name = (*it).first;
 	
 	if (name=="MinimumPadrow") {
-	    broker->setTPHFMinPadrow( (*it).second->GetNumber() );
+	    broker->setTPHFMinPadrow( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MaximumPadrow") {	
-	    broker->setTPHFMaxPadrow( (*it).second->GetNumber() );
+	    broker->setTPHFMaxPadrow( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="LowerBound") {	
-	    broker->setETSFLowerBound( (*it).second->GetNumber() );
+	    broker->setETSFLowerBound( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MaxHits") {
-	    broker->setETSFMaxHits( (*it).second->GetNumber() );
+	    broker->setETSFMaxHits( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else {
 	    cout <<"SeedFinderIO::SetLimits(). ERROR:\t"
@@ -2389,22 +2389,22 @@ void LocalSeedFinderIO::SetLimits()
 	    broker->setLTSFZWindow( (*it).second->GetNumber() );
 	}
 	else if (name=="SeedLength") {
-	    broker->setLTSFSeedLength( (*it).second->GetNumber() );
+	    broker->setLTSFSeedLength( static_cast<unsigned int>( (*it).second->GetNumber() ));
 	}
 	else if (name=="ExtrapYWindow") {
-	    broker->setLTSFExtrapYWindow( (*it).second->GetNumber() );
+	    broker->setLTSFExtrapYWindow( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="ExtrapZWindow") {
-	    broker->setLTSFExtrapZWindow( (*it).second->GetNumber() );
+	    broker->setLTSFExtrapZWindow( static_cast<unsigned int>((*it).second->GetNumber()) );
 	}
 	else if (name=="ExtrapMaxSkipped") {
-	    broker->setLTSFExtrapMaxSkipped( (*it).second->GetNumber() );
+	    broker->setLTSFExtrapMaxSkipped( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="ExtrapMinLength") {
-	    broker->setLTSFExtrapMinLength( (*it).second->GetNumber() );
+	    broker->setLTSFExtrapMinLength( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="ExtrapMaxLength") {
-	    broker->setLTSFExtrapMaxLength( (*it).second->GetNumber() );
+	    broker->setLTSFExtrapMaxLength( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else {
 	    cout <<"LocalSeedFinderIO::SetLimits(). ERROR:\t"
@@ -2750,13 +2750,13 @@ void KalmanTrackFinderIO::SetLimits()
 	    broker->setKTFMassHypothesis( (*it).second->GetNumber() );
 	}
 	else if (name=="MinContHitCount") {
-	    broker->setKTFMinContiguousHitCount( (*it).second->GetNumber() );
+	    broker->setKTFMinContiguousHitCount( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MaxNullCount") {
-	    broker->setKTFMaxNullCount( (*it).second->GetNumber() );
+	    broker->setKTFMaxNullCount( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MaxContNullCount") {
-	    broker->setKTFMaxContiguousNullCount( (*it).second->GetNumber() );
+	    broker->setKTFMaxContiguousNullCount( static_cast<unsigned int>((*it).second->GetNumber() ));
 	}
 	else if (name=="MinSearchRadius") {
 	    broker->setKTFMinSearchRadius( (*it).second->GetNumber() );
