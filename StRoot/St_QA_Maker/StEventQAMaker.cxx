@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.17 2000/01/08 03:27:34 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.18 2000/01/11 00:10:08 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.18  2000/01/11 00:10:08  lansdell
+// totalled hits from detectors; made code for xdif, ydif, zdif, radf more readable (search for dif and radf)
+//
 // Revision 1.17  2000/01/08 03:27:34  lansdell
 // fixed nfit/nmax ratio in Tab version; separated hits by detector; changed vertex histograms to allow for events with 0 vertices
 //
@@ -118,6 +121,7 @@ void StEventQAMaker::MakeHistEvSum() {
     m_glb_trk_tot->Fill(trk_tot);
     m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
     m_vert_total->Fill(event_summary->numberOfVertices());
+    m_glb_trk_prim->Fill(event_summary->numberOfGoodPrimaryTracks());
 
     m_mean_pt->Fill(event_summary->meanPt());
     m_mean_eta->Fill(event_summary->meanEta());
@@ -129,13 +133,6 @@ void StEventQAMaker::MakeHistEvSum() {
       m_prim_vrtx1->Fill(event_summary->primaryVertexPosition()[1]);
     if(!isnan((double)(event_summary->primaryVertexPosition()[2])))
       m_prim_vrtx2->Fill(event_summary->primaryVertexPosition()[2]);
-
-// not in 99i tables
-    m_glb_trk_prim->Fill(event_summary->numberOfGoodPrimaryTracks());
-//      m_T_average->Fill(tt->T_average);    
-//      m_vert_V0->Fill(tt->n_vert_V0);
-//      m_vrtx_chisq->Fill(tt->prim_vrtx_chisq); 
-
   }
 }
 
@@ -154,12 +151,11 @@ void StEventQAMaker::MakeHistGlob() {
     if (globtrk->flag()>0) {
       cnttrkg++;
       Float_t pT = -999.;
-      pT = TMath::Abs(globtrk->geometry()->momentum().perp());
+      pT = globtrk->geometry()->momentum().perp();
       Float_t lmevpt = TMath::Log10(pT*1000.0);
       Float_t theta = TMath::ASin(1.) - globtrk->geometry()->dipAngle();
       Float_t thetad = theta/degree;
       Float_t eta = globtrk->geometry()->momentum().pseudoRapidity();
-      //      Float_t gmom  = pT/TMath::Sin(theta);
       Float_t gmom = abs(globtrk->geometry()->momentum());
       Float_t lmevmom = TMath::Log10(gmom*1000.0);
       Float_t chisq0 = globtrk->fitTraits().chi2(0);
@@ -168,15 +164,9 @@ void StEventQAMaker::MakeHistGlob() {
 	                 (Float_t(globtrk->detectorInfo()->numberOfPoints()));
       Float_t nfitnmax = (Float_t(globtrk->fitTraits().numberOfFitPoints())) /
                          (Float_t(globtrk->numberOfPossiblePoints()));
-      Float_t xdif = (globtrk->detectorInfo()->firstPoint().x()) -
-	             (globtrk->geometry()->origin().x());
-      Float_t ydif = (globtrk->detectorInfo()->firstPoint().y()) -
-	             (globtrk->geometry()->origin().y());
-      Float_t zdif = (globtrk->detectorInfo()->firstPoint().z()) -
-	             (globtrk->geometry()->origin().z());
-      Float_t radf = pow((globtrk->detectorInfo()->firstPoint().x()),2) +
-	             pow((globtrk->detectorInfo()->firstPoint().y()),2);
-      radf = TMath::Sqrt(radf);
+      StThreeVectorF dif = globtrk->detectorInfo()->firstPoint() -
+	                   globtrk->geometry()->origin();
+      Float_t radf = globtrk->detectorInfo()->firstPoint().perp();
 
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -193,9 +183,9 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->flag()>100 && globtrk->flag()<200) {
 
 // these are TPC only
-	m_glb_xf0->Fill(xdif);
-	m_glb_yf0->Fill(ydif);
-	m_glb_zf0->Fill(zdif);
+	m_glb_xf0->Fill(dif.x());
+	m_glb_yf0->Fill(dif.y());
+	m_glb_zf0->Fill(dif.z());
 	m_glb_impactT->Fill(globtrk->impactParameter());
 
 // these are TPC & FTPC
@@ -215,10 +205,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfT->Fill(radf);
 	m_glb_ratioT->Fill(nfitntot);
         m_glb_ratiomT->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent
-	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_psiT->Fill(globtrk->geometry()->psi()/degree);
-	//originally was t->tanl -CL
 	m_tanlT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
 	m_glb_thetaT->Fill(thetad);
 	m_etaT->Fill(eta);
@@ -263,9 +250,9 @@ void StEventQAMaker::MakeHistGlob() {
 
       if (globtrk->flag()>500 && globtrk->flag()<600 ) {
 
-        m_glb_xf0TS->Fill(xdif);
-        m_glb_yf0TS->Fill(ydif);
-        m_glb_zf0TS->Fill(zdif);
+        m_glb_xf0TS->Fill(dif.x());
+        m_glb_yf0TS->Fill(dif.y());
+        m_glb_zf0TS->Fill(dif.z());
 	m_glb_impactTS->Fill(globtrk->impactParameter());
 
 	m_pointTS->Fill(globtrk->detectorInfo()->numberOfPoints());
@@ -284,10 +271,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfTS->Fill(radf);
 	m_glb_ratioTS->Fill(nfitntot);
         m_glb_ratiomTS->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent
-	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_psiTS->Fill(globtrk->geometry()->psi()/degree);
-	//originally was t->tanl -CL
 	m_tanlTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()));
 	m_glb_thetaTS->Fill(thetad);
 	m_etaTS->Fill(eta);
@@ -340,10 +324,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfFE->Fill(radf);
 	m_glb_ratioFE->Fill(nfitntot);
         m_glb_ratiomFE->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent
-	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_psiFE->Fill(globtrk->geometry()->psi()/degree);
-	//originally was t->tanl -CL
 	m_etaFE->Fill(eta);
 	m_pTFE->Fill(pT);
 	m_momFE->Fill(gmom);
@@ -376,10 +357,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_radfFW->Fill(radf);
 	m_glb_ratioFW->Fill(nfitntot);
         m_glb_ratiomFW->Fill(nfitnmax);
-	//originally t->psi... but psi()=t->psi*degree in StEvent
-	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_psiFW->Fill(globtrk->geometry()->psi()/degree);
-	//originally was t->tanl -CL
 	m_etaFW->Fill(eta);
 	m_pTFW->Fill(pT);
 	m_momFW->Fill(gmom);
@@ -471,29 +449,20 @@ void StEventQAMaker::MakeHistPrim() {
       if (primtrk->flag()>0) {
         cnttrkg++;
 	Float_t pT = -999.;
-	pT = TMath::Abs(primtrk->geometry()->momentum().perp());
+	pT = primtrk->geometry()->momentum().perp();
         Float_t lmevpt = TMath::Log10(pT*1000.0);
 	Float_t theta = TMath::ASin(1.) - primtrk->geometry()->dipAngle();
 	Float_t thetad = theta/degree;
 	Float_t eta   = primtrk->geometry()->momentum().pseudoRapidity();
-	//	Float_t gmom  = pT/TMath::Sin(theta);
 	Float_t gmom = abs(primtrk->geometry()->momentum());
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = primtrk->fitTraits().chi2(0);
 	Float_t chisq1 = primtrk->fitTraits().chi2(1);
         Float_t nfitntot = (Float_t(primtrk->fitTraits().numberOfFitPoints()))/
 	                   (Float_t(primtrk->detectorInfo()->numberOfPoints()));
-        Float_t xdif = (primtrk->detectorInfo()->firstPoint().x()) -
-	               (primtrk->geometry()->origin().x());
-        Float_t ydif = (primtrk->detectorInfo()->firstPoint().y()) -
-	               (primtrk->geometry()->origin().y());
-        Float_t zdif = (primtrk->detectorInfo()->firstPoint().z()) -
-	               (primtrk->geometry()->origin().z());
-        Float_t radf = TMath::Power((primtrk->detectorInfo()->firstPoint().x())
-				    ,2) + 
-                       TMath::Power((primtrk->detectorInfo()->firstPoint().y())
-				    ,2);
-	radf = TMath::Sqrt(radf); 
+	StThreeVectorF dif = primtrk->detectorInfo()->firstPoint() -
+	                     primtrk->geometry()->origin();
+        Float_t radf = primtrk->detectorInfo()->firstPoint().perp();
 
 	for (UInt_t k=0; k<primtrk->pidTraits().size(); k++)
 	  m_pdet_id->Fill(primtrk->pidTraits()[k]->detector());
@@ -504,15 +473,12 @@ void StEventQAMaker::MakeHistPrim() {
         m_prim_xf->Fill(primtrk->detectorInfo()->firstPoint().x());
         m_prim_yf->Fill(primtrk->detectorInfo()->firstPoint().y());
         m_prim_zf->Fill(primtrk->detectorInfo()->firstPoint().z());
-        m_prim_xf0->Fill(xdif);
-        m_prim_yf0->Fill(ydif);
-        m_prim_zf0->Fill(zdif);
+        m_prim_xf0->Fill(dif.x());
+        m_prim_yf0->Fill(dif.y());
+        m_prim_zf0->Fill(dif.z());
         m_prim_radf->Fill(radf);
         m_prim_ratio->Fill(nfitntot);
-	//originally t->psi... but psi()=t->psi*degree in StEvent
-	//(degree=(pi/180)*radian, where radian=1.) -CL
 	m_ppsi->Fill(primtrk->geometry()->psi()/degree);
-	// originally was t->tanl -CL
         m_ptanl->Fill(TMath::Tan(primtrk->geometry()->dipAngle()));
         m_prim_theta->Fill(thetad);
 	m_peta->Fill(eta);
@@ -562,56 +528,43 @@ void StEventQAMaker::MakeHistGen() {
   Int_t totpart = 0;
 
   for (UInt_t i=0; i<theNodes.size(); i++) {
-    StParticleDefinition *theTrack = theNodes[i]->track(i);
+    StTrack *theTrack = theNodes[i]->track(global);  // need primary too? -CL
     if (!theTrack) continue;
-    StParticleDefinition *part = theTrack->
+    totpart++;
+    StParticleDefinition *part = theTrack->fitTraits().pidHypothesis();
+
+    //  select only particles which can be detected
+    //  in the STAR detector. Here we restrict us to/
+    //  the most common species.
+
+    // for some reason, name() isn't found when compiling -CL
+    if (part->name() == "e-" || "mu-" || "pi+" || "kaon+" || "proton") {
+      nchgpart++;	    
+      Double_t pT = theTrack->geometry()->momentum().perp();
+      Float_t eta = theTrack->geometry()->momentum().pseudoRapidity();
+
+      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+      m_H_pT_gen->Fill((Float_t) pT);
+      m_H_eta_gen->Fill(eta);
+      //m_H_vtxx->Fill(p->vhep[0]);
+      //m_H_vtxy->Fill(p->vhep[1]);
+      //m_H_vtxz->Fill(p->vhep[2]);
+    }
+  }
+  m_H_npart->Fill(totpart);
+  m_H_ncpart->Fill(nchgpart);
 */
+}
 /*
-  St_DataSetIter dstI(dst);
-  
-  St_particle   *part     = (St_particle  *) dstI["particle"];
-  if (!part) part = (St_particle  *) DataSet("geant/particle");
-  if (part){
-    particle_st *p = part->GetTable();
-    Int_t nchgpart=0;
-    Int_t totpart=0;
-    for (Int_t l=0; l < part->GetNRows(); l++, p++){
-      //
-      //  select only particles which can be detected
-      //  in the STAR detector. Here we restrict us to/
-      //  the most common species.
-      //
-      if(l!=0){                        // first row of table is header, so skip it!
 	if (p->isthep == 1) {            // select good status only
-	  totpart++;
-	  if (TMath::Abs(p->idhep) == 11   ||       // electrons
-	      TMath::Abs(p->idhep) == 13   ||       // muon
-	      TMath::Abs(p->idhep) == 211  ||       // pion
-	      TMath::Abs(p->idhep) == 321  ||       // kaon
-	      TMath::Abs(p->idhep) == 2212) {       // proton/
-	    
-	    nchgpart++;	    
-	    Double_t px = p->phep[0];
-	    Double_t py = p->phep[1];
-	    Double_t pz = p->phep[2];
-	    Double_t pT    =  TMath::Sqrt(px*px+py*py);
-	    Double_t theta =  TMath::ATan2( pT, pz );
-	    Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-	    m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
-	    m_H_pT_gen->Fill((Float_t) pT);
-	    m_H_eta_gen->Fill(eta);
+
 	    m_H_vtxx->Fill(p->vhep[0]);
 	    m_H_vtxy->Fill(p->vhep[1]);
 	    m_H_vtxz->Fill(p->vhep[2]);
-	  }
-	}
-      }
-    }
     m_H_npart->Fill(totpart);
     m_H_ncpart->Fill(nchgpart);
   }
 */
-}
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistV0() {
@@ -837,14 +790,13 @@ void StEventQAMaker::MakeHistXi() {
 
   StSPtrVecXiVertex &xi = event->xiVertices();
   Int_t cntrows=0;
-  cntrows = xi.size();  //Is there a better way of getting this? -CL
+  cntrows = xi.size();
   m_xi_tot->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPoint() {
 
-  // This only counts the hits from the TPC for now! -CL
   if (Debug()) cout << " *** in StEventQAMaker - filling point histograms " << endl;
 
   StTpcHitCollection *tpcHits = event->tpcHitCollection();
@@ -852,16 +804,26 @@ void StEventQAMaker::MakeHistPoint() {
   StFtpcHitCollection *ftpcHits = event->ftpcHitCollection();
   StSsdHitCollection *ssdHits = event->ssdHitCollection();
 
-  if (tpcHits)
+  UInt_t totalHits = 0;
+
+  if (tpcHits) {
     m_pnt_tpc->Fill(tpcHits->numberOfHits());
-  if (svtHits)
+    totalHits += tpcHits->numberOfHits();
+  }
+  if (svtHits) {
     m_pnt_svt->Fill(svtHits->numberOfHits());
+    totalHits += svtHits->numberOfHits();
+  }
   if (ftpcHits) {
     //m_pnt_ftpcE->Fill(ftpcHits-> );
     //m_pnt_ftpcW->Fill(ftpcHits-> );
+    //totalHits += ftpcHits-> ;
   }
-  if (ssdHits)
+  if (ssdHits) {
     m_pnt_ssd->Fill(ssdHits->numberOfHits());
+    totalHits += ssdHits->numberOfHits();
+  }
+  m_pnt_tot->Fill(totalHits);
 }
 
 //_____________________________________________________________________________
@@ -871,7 +833,7 @@ void StEventQAMaker::MakeHistKink() {
 
   StSPtrVecKinkVertex &kink = event->kinkVertices();
   Int_t cntrows=0;
-  cntrows = kink.size();   // Is there a better way of doing this? -CL
+  cntrows = kink.size();
   m_kink_tot->Fill(cntrows);
 }
 
