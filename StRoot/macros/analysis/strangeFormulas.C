@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 1.1 2000/04/07 16:14:53 genevb Exp $
+// $Id: strangeFormulas.C,v 1.2 2000/04/07 16:22:48 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 1.2  2000/04/07 16:22:48  genevb
+// Remove ambiguity on supplying just one parameter
+//
 // Revision 1.1  2000/04/07 16:14:53  genevb
 // Introduction of strangeFormulas.C
 //
@@ -42,7 +45,7 @@
 //
 
 TTree* strangeFormulas(const char* doing="", const char* fname=0);
-TTree* strangeFormulas(const char* doing="", TFile* fptr=0);
+TTree* strangeFormulas(const char* doing="", TFile* fptr);
 Int_t strangeFormulas(const char* doing="", TTree* tree);
 
 TTree* strangeFormulas(const char* doing, const char* fname) {
