@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.59 2005/02/09 23:50:35 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.60 2005/02/17 01:59:41 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.60  2005/02/17 01:59:41  jhthomas
+ * Make GetSpaceCharge a public member function.
+ * Change InnerOuterPadRatio to 0.7 for GridLeak.  Note that it is 1.3 if you do not use
+ * the GridLeak.  This is a kludge and InnerOuterPadRatio should come out of the DB, someday.
+ * Fix typo in UndoShortedRing.
+ *
  * Revision 1.59  2005/02/09 23:50:35  jeromel
  * Changes by JHT for SpaceCharge / Leak corrections
  *
@@ -296,7 +302,7 @@ StMagUtilities::StMagUtilities ( StTpcDb* dbin , TDataSet* dbin2, Int_t mode )
   GetOmegaTau ()        ;    // Get Omega Tau parameters
   GetSpaceCharge()      ;    // Get the spacecharge variable from the DB
   GetSpaceChargeR2()    ;    // Get the spacecharge variable R2 from the DB
-  // ManualSpaceChargeR2(0.01); //JT Test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  // ManualSpaceChargeR2(0.01); //JT test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   GetShortedRing()      ;    // Get the parameters that describe the shorted ring on the field cage
   GetGridLeak()         ;    // Get the parameters that describe the gating grid leaks
   CommonStart( mode )   ;    // Read the Magnetic and Electric Field Data Files, set constants
@@ -314,7 +320,7 @@ StMagUtilities::StMagUtilities ( const EBField map, const Float_t factor, Int_t 
   fOmegaTau      =  0 ;      // Do not get OmegaTau out of the DB      - use defaults in CommonStart
   ManualSpaceCharge(0);      // Do not get SpaceCharge out of the DB   - use defaults inserted here.
   ManualSpaceChargeR2(0);    // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
-  // ManualSpaceChargeR2(0.01); //JT Test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
+  // ManualSpaceChargeR2(0.01); //JT test  // Do not get SpaceChargeR2 out of the DB - use defaults inserted here.
   fGridLeak      =  0 ;      // Do not get Grid Leak data from the DB  - use defaults in CommonStart
   CommonStart( mode ) ;      // Read the Magnetic and Electric Field Data Files, set constants
 }
@@ -507,8 +513,8 @@ void StMagUtilities::CommonStart ( Int_t mode )
       OuterGridLeakStrength  =  0.0   ;  // Relative strength of the Outer grid leak
       OuterGridLeakRadius    =  195.0 ;  // Location (in local Y coordinates) of the Outer grid leak 
       OuterGridLeakWidth     =  0.0   ;  // Half-width of the Outer grid leak.  
-      // InnerGridLeakStrength  =  1.0   ;  // JT Test (Note that GainRatio is taken into account, below.)
-      // OuterGridLeakStrength  =  1.0   ;  // JT Test (keep these the same unless you really know what you are doing.) 
+      // InnerGridLeakStrength  =  1.0   ;  // JT test (Note that GainRatio is taken into account, below.)
+      // OuterGridLeakStrength  =  1.0   ;  // JT test (keep these the same unless you really know what you are doing.) 
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected GridLeak parameters. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using GridLeak parameters from the DB."   << endl ; 
@@ -1493,7 +1499,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 /*!
   Space Charge distortion using space charge from a real event.  Any charge distribution can 
   be simulated by this method.  However, the best charge distribution is Howard's fit to 
-  HiJet events.  It is approximately independent due to the Bjorken Plateau a mid-rapidity.  The 
+  HiJet events.  It is approximately independent of Z due to the Bjorken Plateau a mid-rapidity.  The 
   radial distribution is approximately 1/R**2, however we use a better parameterization in the code.
   Many different charge distributions are hidden in the comments of the code.  All candidate distributions
   have been integrated over Z to simulate the linear increase of space charge in Z due to the slow 
@@ -1648,60 +1654,62 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
 { 
 
-  const Float_t R0        = 2.130 ;            // First resistor (R0) between CM and ring number one (Mohm)
-  const Float_t R182      = 0.310 ;            // Last resistor in the IFC chain
-  const Float_t RStep     = 2.000 ;            // Resistor chain value (except the first one) (Mohm)
-  const Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
-  const Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
+  const   Float_t R0        = 2.130 ;            // First resistor (R0) between CM and ring number one (Mohm)
+  const   Float_t R182      = 0.310 ;            // Last resistor in the IFC chain
+  const   Float_t RStep     = 2.000 ;            // Resistor chain value (except the first one) (Mohm)
+  const   Float_t Pitch     = 1.150 ;            // Ring to Ring pitch (cm)
+  const   Float_t Z01       = 1.225 ;            // Distance from CM to center of first ring (cm)
 
-  // Parse the Table and separate out the four different resistor chains
-  // Definition: A "missing" resistor is a shorted resistor, an "extra" resistor is a compensating resistor added at the end of the string
-  Int_t   NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
-  Float_t EastInnerMissingSum = 0,     EastOuterMissingSum = 0,      WestInnerMissingSum = 0,     WestOuterMissingSum = 0 ; 
-  Float_t EastInnerExtraSum = 0,       EastOuterExtraSum = 0,        WestInnerExtraSum = 0,       WestOuterExtraSum = 0 ;   
-  Float_t EastInnerMissingOhms[10],    EastOuterMissingOhms[10],     WestInnerMissingOhms[10],    WestOuterMissingOhms[10] ; 
-  Float_t EastInnerShortZ[10],         EastOuterShortZ[10],          WestInnerShortZ[10],         WestOuterShortZ[10] ;
+  static  Int_t DoOnce = 0 ;
+  static  Int_t NumberOfEastInnerShorts = 0, NumberOfEastOuterShorts = 0 , NumberOfWestInnerShorts = 0, NumberOfWestOuterShorts = 0 ;
 
-  for ( Int_t i = 0 ; i < ShortTableRows ; i++ )
-    {
-      if ( ( Side[i] + Cage[i] + Ring[i] + MissingResistance[i] + Resistor[i] ) == 0.0 ) continue ;
-      if ( Side[i] == 0 && Cage[i] == 0 ) 
-	{ NumberOfEastInnerShorts++ ; EastInnerMissingSum += MissingResistance[i] ; EastInnerExtraSum += Resistor[i] ; 
-	  EastInnerMissingOhms[NumberOfEastInnerShorts-1]  = MissingResistance[i] ; 
-	  EastInnerShortZ[NumberOfEastInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
-      if ( Side[i] == 0 && Cage[i] == 1 ) 
-	{ NumberOfEastOuterShorts++ ; EastOuterMissingSum += MissingResistance[i] ; EastOuterExtraSum += Resistor[i] ; 
-	  EastOuterMissingOhms[NumberOfEastOuterShorts-1]  = MissingResistance[i] ; 
-	  EastOuterShortZ[NumberOfEastOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
-      if ( Side[i] == 1 && Cage[i] == 0 ) 
-	{ NumberOfWestInnerShorts++ ; WestInnerMissingSum += MissingResistance[i] ; WestInnerExtraSum += Resistor[i] ; 
-	  WestInnerMissingOhms[NumberOfWestInnerShorts-1]  = MissingResistance[i] ; 
-	  WestInnerShortZ[NumberOfWestInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
-      if ( Side[i] == 1 && Cage[i] == 1 ) 
-	{ NumberOfWestOuterShorts++ ; WestOuterMissingSum += MissingResistance[i] ; WestOuterExtraSum += Resistor[i] ; 
-	  WestOuterMissingOhms[NumberOfWestOuterShorts-1]  = MissingResistance[i] ; 
-	  WestOuterShortZ[NumberOfWestOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
-    }
-
-  if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
-    { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
-
-  Float_t Rtot   =  R0 + 181*RStep + R182     ;    // Total resistance of the (normal) resistor chain
-  Float_t Rfrac  =  RStep*TPC_Z0/(Rtot*Pitch) ;    // Fraction of full resistor chain inside TPC drift volume (~1.0)
-  Float_t EastInnerRtot = Rtot - EastInnerExtraSum - EastInnerMissingSum ;  // Total resistance of the real resistor chain
-  Float_t EastOuterRtot = Rtot - EastOuterExtraSum - EastOuterMissingSum ;  // Total resistance of the real resistor chain
-  Float_t WestInnerRtot = Rtot - WestInnerExtraSum - WestInnerMissingSum ;  // Total resistance of the real resistor chain
-  Float_t WestOuterRtot = Rtot - WestOuterExtraSum - WestOuterMissingSum ;  // Total resistance of the real resistor chain
-  
-  //Float_t deltaV    = GG*0.99 - CathodeV * (1.0-TPC_Z0*RStep/(Pitch*Rtot)) ;    // (test) Error on GG voltage from nominal (99% effective)
- 
   Float_t  Er_integral, Ephi_integral ;
   Double_t r, phi, z ;
 
-  static Int_t DoOnce = 0 ;
-
   if ( DoOnce == 0 )
     {
+
+      // Parse the Table and separate out the four different resistor chains
+      // Definition: A "missing" resistor is a shorted resistor, an "extra" resistor is a compensating resistor added at the end of the string
+      Float_t EastInnerMissingSum = 0,     EastOuterMissingSum = 0,      WestInnerMissingSum = 0,     WestOuterMissingSum = 0 ; 
+      Float_t EastInnerExtraSum = 0,       EastOuterExtraSum = 0,        WestInnerExtraSum = 0,       WestOuterExtraSum = 0 ;   
+      Float_t EastInnerMissingOhms[10],    EastOuterMissingOhms[10],     WestInnerMissingOhms[10],    WestOuterMissingOhms[10] ; 
+      Float_t EastInnerShortZ[10],         EastOuterShortZ[10],          WestInnerShortZ[10],         WestOuterShortZ[10] ;
+      
+      for ( Int_t i = 0 ; i < ShortTableRows ; i++ )
+	{
+	  if ( ( Side[i] + Cage[i] + Ring[i] + MissingResistance[i] + Resistor[i] ) == 0.0 ) continue ;
+	  if ( Side[i] == 0 && Cage[i] == 0 ) 
+	    { NumberOfEastInnerShorts++ ; EastInnerMissingSum += MissingResistance[i] ; EastInnerExtraSum += Resistor[i] ; 
+	    EastInnerMissingOhms[NumberOfEastInnerShorts-1]  = MissingResistance[i] ; 
+	    EastInnerShortZ[NumberOfEastInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	  if ( Side[i] == 0 && Cage[i] == 1 ) 
+	    { NumberOfEastOuterShorts++ ; EastOuterMissingSum += MissingResistance[i] ; EastOuterExtraSum += Resistor[i] ; 
+	    EastOuterMissingOhms[NumberOfEastOuterShorts-1]  = MissingResistance[i] ; 
+	    EastOuterShortZ[NumberOfEastOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	  if ( Side[i] == 1 && Cage[i] == 0 ) 
+	    { NumberOfWestInnerShorts++ ; WestInnerMissingSum += MissingResistance[i] ; WestInnerExtraSum += Resistor[i] ; 
+	    WestInnerMissingOhms[NumberOfWestInnerShorts-1]  = MissingResistance[i] ; 
+	    WestInnerShortZ[NumberOfWestInnerShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	  if ( Side[i] == 1 && Cage[i] == 1 ) 
+	    { NumberOfWestOuterShorts++ ; WestOuterMissingSum += MissingResistance[i] ; WestOuterExtraSum += Resistor[i] ; 
+	    WestOuterMissingOhms[NumberOfWestOuterShorts-1]  = MissingResistance[i] ; 
+	    WestOuterShortZ[NumberOfWestOuterShorts-1]  = TPC_Z0 - ( Z01 + (Ring[i]-1)*Pitch) ; }
+	}
+      
+      // Don't fill the tables if there aren't any shorts
+      if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
+	  { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; DoOnce = 1 ; return ; }
+      
+      Float_t Rtot   =  R0 + 181*RStep + R182     ;    // Total resistance of the (normal) resistor chain
+      Float_t Rfrac  =  RStep*TPC_Z0/(Rtot*Pitch) ;    // Fraction of full resistor chain inside TPC drift volume (~1.0)
+      Float_t EastInnerRtot = Rtot + EastInnerExtraSum - EastInnerMissingSum ;  // Total resistance of the real resistor chain
+      Float_t EastOuterRtot = Rtot + EastOuterExtraSum - EastOuterMissingSum ;  // Total resistance of the real resistor chain
+      Float_t WestInnerRtot = Rtot + WestInnerExtraSum - WestInnerMissingSum ;  // Total resistance of the real resistor chain
+      Float_t WestOuterRtot = Rtot + WestOuterExtraSum - WestOuterMissingSum ;  // Total resistance of the real resistor chain
+      
+      //Float_t deltaV    = GG*0.99 - CathodeV * (1.0-TPC_Z0*RStep/(Pitch*Rtot)) ;    // (test) Error on GG voltage from nominal (99% effective)
+      
       Int_t Nterms = 100 ;
       for ( Int_t i = 0 ; i < neZ ; ++i ) 
 	{
@@ -1757,11 +1765,15 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 		  IntegralOverZ += TPC_Z0 * zterm * qwe ;
 	          if ( n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe) ) break;   // Assume series converges, break if small terms
 		}
-	      shortEr[i][j] = IntegralOverZ ; 	    }
+	      shortEr[i][j] = IntegralOverZ ;
+ 	    }
 	}
-      DoOnce = 1 ;
+     DoOnce = 1 ;
     }
   
+  if ( (NumberOfEastInnerShorts + NumberOfEastOuterShorts + NumberOfWestInnerShorts + NumberOfWestOuterShorts) == 0 ) 
+       { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
+
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
   phi    =  TMath::ATan2(x[1],x[0]) ;
   if ( phi < 0 ) phi += 2*TMath::Pi() ;             // Table uses phi from 0 to 2*Pi
@@ -2931,7 +2943,7 @@ void StMagUtilities::FixSpaceChargeDistortion ( const Int_t Charge, const Float_
 //________________________________________
 
 
-/// Apply the (1/R**2) space charge correction to data already on the microDSTs. 
+/// Apply the (1/R**2) space charge correction to selected data from the microDSTs. 
 /*! 
   Given the charge and momentum of a particle and a point on the circular path described by the particle , 
   this function returns the new position of the point (cm) and the new momentum of the particle (GeV).  
@@ -2971,7 +2983,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    // Return default values if passed a whacko input value (i.e. infinite or NaN)
    if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
-   const Float_t InnerOuterRatio = 0.5 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0)
+   const Float_t InnerOuterRatio = 0.7 ; // Ratio of size of the inner pads to the outer pads (real world == 0.5, GVB likes 0.7)
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sectors
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
@@ -3038,6 +3050,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
        xx[0] = Xtrack[i] ; xx[1] = Ytrack[i] ; xx[2] = Ztrack[i] ;
        //UndoShortedRingDistortion(xx,xxprime) ;        // JT test of shorted ring distortion
        UndoSpaceChargeR2Distortion(xx,xxprime) ;        // Undo the distortion for the hits
+       // JT Test ... Note that GridLeak does not appear hear ... should it?
        Xtrack[i] = xxprime[0] ; Ytrack[i] = xxprime[1] ;  Ztrack[i] = xxprime[2] ;  // This line to undo the distortion
        //Xtrack[i] = 2*xx[0] - xxprime[0] ; Ytrack[i] = 2*xx[1] - xxprime[1] ;  Ztrack[i] = 2*xx[2] - xxprime[2] ; // JT test
        if ( i == RefIndex )
@@ -3164,7 +3177,6 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
    if ( (Charge != 1) && (Charge != -1) )                    return(0) ; // Fail
    if ( (DCA < -4.0) || (DCA > 4.0) )                        return(0) ; // Fail
 
-   const Float_t InnerOuterRatio = 0.5 ; // Ratio of size of the inner pads to the outer pads (real world == 1.0 or 1.3)
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sector
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
@@ -3198,6 +3210,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        else              R[i] = 127.195 + (i-INNER)*2.0 ;
      }
 
+   Float_t InnerOuterRatio = 0.0 ; // JT test. Ratio of size of the inner pads to the outer pads (Set after daisy chain, below)
    Xreference = Yreference = 0.0 ;
    Direction = 1.0 ; // Choose sqrt solution so ray shoots out at 45 degrees
    for ( Int_t i = 0 ; i < ROWS ; i++ )
@@ -3216,14 +3229,18 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
 
        if (mDistortionMode & kSpaceChargeR2) {    // Daisy Chain all possible distortions and sort on flags
 	 UndoSpaceChargeR2Distortion ( xx, xxprime ) ;
-	 for (unsigned int j=0; j<3; ++j) {
-	   xx[j] = xxprime[j];
-	 }
+	 InnerOuterRatio = 1.3 ;  // JT test.  Without the GridLeak, GVB prefers 1.3  (real world == 0.5)  
+	 for ( unsigned int j = 0 ; j < 3; ++j ) 
+	   {
+	     xx[j] = xxprime[j];
+	   }
        }
        if (mDistortionMode & kGridLeak) { 
 	 UndoGridLeakDistortion ( xx, xxprime ) ;
-	 for (unsigned int j=0; j<3; ++j) {
-	   xx[j] = xxprime[j];
+	 InnerOuterRatio = 0.7 ; // JT test.  With the GridLeak, GVB prefers 0.7  (note that order is important in this loop).
+	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
+	   {
+	     xx[j] = xxprime[j];
 	 }
        }
 
@@ -3344,6 +3361,9 @@ void StMagUtilities::UndoGridLeakDistortion( const Float_t x[], Float_t Xprime[]
   Double_t  r, phi, z ;
 
   static Int_t DoOnce = 0 ;
+
+  if ( InnerGridLeakStrength == 0 && MiddlGridLeakStrength == 0 && OuterGridLeakStrength == 0 )
+    { Xprime[0] = x[0] ; Xprime[1] = x[1] ; Xprime[2] = x[2] ; return ; }
 
   if ( DoOnce == 0 )
     {
