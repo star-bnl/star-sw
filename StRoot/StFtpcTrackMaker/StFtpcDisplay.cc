@@ -1,5 +1,13 @@
-// $Id: StFtpcDisplay.cc,v 1.4 2000/05/15 14:28:09 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.5 2000/06/07 11:33:01 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.5  2000/06/07 11:33:01  oldi
+// Changed 0 pointers to NULL pointers.
+// Names of variables changed to make the code easier to understand.
+// Major changes to allow to display unclean, split and good (found) tracks and
+// clusters with different colors.
+// Major changes to allow to display electron, non main vertex and good (GEANT) \tracks and clusters with different colors.
+// Allow to display specific momentum ranges only.
+//
 // Revision 1.4  2000/05/15 14:28:09  oldi
 // problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
 // refitting procedure completed and included in StFtpcTrackMaker (commented),
@@ -19,7 +27,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 11.05.2000
+//----------Last Modified: 18.05.2000
 //----------Copyright:     &copy MDO Production 2000
 
 #include "StFtpcDisplay.hh"
@@ -31,11 +39,10 @@
 #include "TH2.h"
 #include "TH3.h"
 #include "TPolyMarker.h"
+#include "TPolyMarker3D.h"
 #include "TLine.h"
 #include "TGraph.h"
 #include "TMarker.h"
-#include "TPolyLine3D.h"
-#include "TPolyMarker3D.h"
 #include "TTUBE.h"
 #include "TBRIK.h"
 
@@ -59,11 +66,42 @@ StFtpcDisplay::StFtpcDisplay()
   mNumEtaSegment = 200;
   mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
   
-  mTrack = 0;
-  mHit = 0;
-  mGeantTrack = 0;
-  mGeantHit = 0;
+  mTrack = NULL;
+  mHit = NULL;
+  mGeantTrack = NULL;
+  mGeantHit = NULL;
   
+  mX_Y_Z = NULL;
+  mX_Y_Zplus = NULL;
+  mX_Y_Zminus = NULL;
+
+  mNode0 = NULL;
+  mNode1 = NULL;
+  mNode2 = NULL;
+
+  current_line = NULL;
+  line = NULL;
+
+  found_hit = new TPolyMarker3D();
+  found_hit_plus = new TPolyMarker3D();
+  found_hit_minus = new TPolyMarker3D();
+  unused_hit = new TPolyMarker3D();
+  unused_hit_plus = new TPolyMarker3D();
+  unused_hit_minus = new TPolyMarker3D();
+  wrong_hit = new TPolyMarker3D();
+  wrong_hit_plus = new TPolyMarker3D();
+  wrong_hit_minus = new TPolyMarker3D();
+
+  found_value = NULL;
+  found_value_minus = NULL;
+  found_value_plus = NULL;
+  unused_value = NULL;
+  unused_value_minus = NULL;
+  unused_value_plus = NULL;
+  wrong_value = NULL;
+  wrong_value_minus = NULL;
+  wrong_value_plus = NULL;
+
   mIsGeant = (Bool_t) false;
 }
 
@@ -78,8 +116,39 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
 
   mTrack = tracks;
   mHit = hits;
-  mGeantHit = 0;
-  mGeantTrack = 0;
+  mGeantHit = NULL;
+  mGeantTrack = NULL;
+
+  mX_Y_Z = NULL;
+  mX_Y_Zplus = NULL;
+  mX_Y_Zminus = NULL;
+
+  mNode0 = NULL;
+  mNode1 = NULL;
+  mNode2 = NULL;
+
+  current_line = NULL;
+  line = NULL;
+
+  found_hit = new TPolyMarker3D();
+  found_hit_plus = new TPolyMarker3D();
+  found_hit_minus = new TPolyMarker3D();
+  unused_hit = new TPolyMarker3D();
+  unused_hit_plus = new TPolyMarker3D();
+  unused_hit_minus = new TPolyMarker3D();
+  wrong_hit = new TPolyMarker3D();
+  wrong_hit_plus = new TPolyMarker3D();
+  wrong_hit_minus = new TPolyMarker3D();
+
+  found_value = NULL;
+  found_value_minus = NULL;
+  found_value_plus = NULL;
+  unused_value = NULL;
+  unused_value_minus = NULL;
+  unused_value_plus = NULL;
+  wrong_value = NULL;
+  wrong_value_minus = NULL;
+  wrong_value_plus = NULL;
 
   mIsGeant = (Bool_t) false;
 }
@@ -87,7 +156,7 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
 
 StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *geanthits, TObjArray *geanttracks)
 {
-  // Constructor for evaluator.
+  // Constructor for evaluator output.
 
   mNumRowSegment = 20;
   mNumPhiSegment = 100;
@@ -99,6 +168,37 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
   mGeantTrack = geanttracks;
   mGeantHit = geanthits;
 
+  mX_Y_Z = NULL;
+  mX_Y_Zplus = NULL;
+  mX_Y_Zminus = NULL;
+
+  mNode0 = NULL;
+  mNode1 = NULL;
+  mNode2 = NULL;
+
+  current_line = NULL;
+  line = NULL;
+
+  found_hit = new TPolyMarker3D();
+  found_hit_plus = new TPolyMarker3D();
+  found_hit_minus = new TPolyMarker3D();
+  unused_hit = new TPolyMarker3D();
+  unused_hit_plus = new TPolyMarker3D();
+  unused_hit_minus = new TPolyMarker3D();
+  wrong_hit = new TPolyMarker3D();
+  wrong_hit_plus = new TPolyMarker3D();
+  wrong_hit_minus = new TPolyMarker3D();
+
+  found_value = NULL;
+  found_value_minus = NULL;
+  found_value_plus = NULL;
+  unused_value = NULL;
+  unused_value_minus = NULL;
+  unused_value_plus = NULL;
+  wrong_value = NULL;
+  wrong_value_minus = NULL;
+  wrong_value_plus = NULL;
+
   mIsGeant = (Bool_t) false;
 } 
 
@@ -106,6 +206,18 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
 StFtpcDisplay::~StFtpcDisplay()
 {
   // Destructor.
+  
+  Delete();
+
+  delete found_hit;
+  delete found_hit_plus;
+  delete found_hit_minus;
+  delete unused_hit;
+  delete unused_hit_plus;
+  delete unused_hit_minus;
+  delete wrong_hit;
+  delete wrong_hit_plus;
+  delete wrong_hit_minus;
 }
 
 
@@ -171,11 +283,11 @@ void StFtpcDisplay::TrackInfo()
   Int_t trackcluster;
   Int_t entries = mTrack->GetEntriesFast();
 
-  TPolyMarker *phi_track = 0;
-  TPolyMarker *eta_track = 0;
+  TPolyMarker *phi_track = NULL;
+  TPolyMarker *eta_track = NULL;
 
-  TPolyMarker *circle_track = 0;
-  TPolyMarker *z_track = 0;
+  TPolyMarker *circle_track = NULL;
+  TPolyMarker *z_track = NULL;
 
   StFtpcTrack *track;
  
@@ -638,19 +750,19 @@ void StFtpcDisplay::ShowClusters()
   X_Yminus->cd();
   xy->Draw();
 
-  TMarker *m = new TMarker[cluster_anz];
+  TMarker *ma = new TMarker[cluster_anz];
   StFtpcConfMapPoint *h;
   for (Int_t i = 0; i < cluster_anz; i++) {
     h = (StFtpcConfMapPoint *)mHit->At(i);
-    m[i] = TMarker(h->GetX(), h->GetY(), 4);
+    ma[i] = TMarker(h->GetX(), h->GetY(), 4);
 
-    m[i].SetMarkerSize((TMath::Sqrt(h->GetX()*h->GetX()+h->GetY()*h->GetY()+h->GetZ()*h->GetZ())-163.)/98.*10.*0.1);
+    ma[i].SetMarkerSize((TMath::Sqrt(h->GetX()*h->GetX()+h->GetY()*h->GetY()+h->GetZ()*h->GetZ())-163.)/98.*10.*0.1);
 
     Int_t tn = h->GetTrackNumber();
 
     if (tn == -1) {
-      m[i].SetMarkerColor(2);
-      m[i].SetMarkerStyle(8);
+      ma[i].SetMarkerColor(2);
+      ma[i].SetMarkerStyle(8);
     }
 
     else {
@@ -661,18 +773,18 @@ void StFtpcDisplay::ShowClusters()
       if (style >= 6) style+=18;
       if (style == 29) style=30;
       
-      m[i].SetMarkerColor(color);
-      m[i].SetMarkerStyle(style);
+      ma[i].SetMarkerColor(color);
+      ma[i].SetMarkerStyle(style);
     }
     if (h->GetZ() > 0) X_Yplus->cd();
     else X_Yminus->cd();
-    m[i].Draw("same");
+    ma[i].Draw("same");
   }
   
   X_Yplus->Update();
   X_Yminus->Update();
 
-  delete[] m;
+  delete[] ma;
 }
 
 
@@ -765,7 +877,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       
       StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
-      l = new TPolyLine3D[track_entries];
+      line = new TPolyLine3D[track_entries];
       
       // loop over all tracks
       for (Int_t tracks = 0; tracks < track_entries; tracks++) {
@@ -789,18 +901,18 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 	}
 	
 	// fill PolyLine for this track
-	k = &(l[tracks]);
-	k = new TPolyLine3D(cluster_entries, x, y, z, "");
+	current_line = &(line[tracks]);
+	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
 	
 	// set colors
 	Int_t color = tracks%50+51;
-	k->SetLineColor(color);
+	current_line->SetLineColor(color);
 
 	// draw track in the right canvas
-	k->Draw("Csame");
+	current_line->Draw("Csame");
 	// and draw track in the canvas for both Ftpcs
 	X_Y_Z->cd();
-	k->Draw("Csame");
+	current_line->Draw("Csame");
       }
     }
     
@@ -809,7 +921,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       
       StFtpcConfMapPoint *cluster;
       StFtpcTrack *track;
-      l = new TPolyLine3D[track_entries];
+      line = new TPolyLine3D[track_entries];
       
       // loop over all tracks specified by the given trackarray      
       for (Int_t tracks = 0; tracks < track_entries; tracks++) {
@@ -833,17 +945,17 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 	}
 
 	// fill PolyLine for this track
-	k = &(l[tracks]);
-	k = new TPolyLine3D(cluster_entries, x, y, z, "");
+	current_line = &(line[tracks]);
+	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
 	
 	// set colors
-	k->SetLineColor(3);
+	current_line->SetLineColor(3);
 	
 	// draw track in the right canvas
-	k->Draw("same");
+	current_line->Draw("same");
 	// and draw track in the canvas for both Ftpcs
 	X_Y_Z->cd();
-	k->Draw("same");
+	current_line->Draw("same");
       }
     }
   }
@@ -852,9 +964,9 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
     Int_t cluster_anz = mHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    value_plus = new Float_t[3*cluster_anz];
-    value_minus = new Float_t[3*cluster_anz];
-    value = new Float_t[3*cluster_anz];
+    found_value_plus = new Float_t[3*cluster_anz];
+    found_value_minus = new Float_t[3*cluster_anz];
+    found_value = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
@@ -870,39 +982,39 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
       }
 
       // fill (+, -, both) cluster arrays
-      value[cl++] = h->GetX();
-      value[cl++] = h->GetY();
+      found_value[cl++] = h->GetX();
+      found_value[cl++] = h->GetY();
       
-      if ((value[cl++] = h->GetZ())>0) {
-	value_plus[cl_plus++] = h->GetX();
-	value_plus[cl_plus++] = h->GetY();
-	value_plus[cl_plus++] = h->GetZ();
+      if ((found_value[cl++] = h->GetZ())>0) {
+	found_value_plus[cl_plus++] = h->GetX();
+	found_value_plus[cl_plus++] = h->GetY();
+	found_value_plus[cl_plus++] = h->GetZ();
       }
       
       else {
-	value_minus[cl_minus++] = h->GetX();
-	value_minus[cl_minus++] = h->GetY();
-	value_minus[cl_minus++] = h->GetZ();
+	found_value_minus[cl_minus++] = h->GetX();
+	found_value_minus[cl_minus++] = h->GetY();
+	found_value_minus[cl_minus++] = h->GetZ();
       }
     }
     
     // create PolyMarkers
-    TPolyMarker3D *m = new TPolyMarker3D(cl/3, value, 1);      
-    TPolyMarker3D *m_plus = new TPolyMarker3D(cl_plus/3, value_plus, 1);      
-    TPolyMarker3D *m_minus = new TPolyMarker3D(cl_minus/3, value_minus, 1);      
+    found_hit->SetPolyMarker(cl/3, found_value, 1);      
+    found_hit_plus->SetPolyMarker(cl_plus/3, found_value_plus, 1);      
+    found_hit_minus->SetPolyMarker(cl_minus/3, found_value_minus, 1);      
 
     // set colors
-    m->SetMarkerColor(2);
-    m_plus->SetMarkerColor(2);
-    m_minus->SetMarkerColor(2);
+    found_hit->SetMarkerColor(2);
+    found_hit_plus->SetMarkerColor(2);
+    found_hit_minus->SetMarkerColor(2);
     
     // switch to right canvas and draw clusters
     X_Y_Z->cd();
-    m->Draw("same");
+    found_hit->Draw("same");
     X_Y_Zplus->cd();
-    m_plus->Draw("same");
+    found_hit_plus->Draw("same");
     X_Y_Zminus->cd();
-    m_minus->Draw("same");
+    found_hit_minus->Draw("same");
   }
 
   // draw nodes in right canvases
@@ -940,18 +1052,15 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
   delete X_Y_Zminus;
   delete X_Y_Z;
 
-  if (l) delete[] l;
-  if (value) delete[] value;
-  if (value_plus) delete[] value_minus;
-  if (value_minus) delete[] value_minus;
+  Delete();
 
   return;
 }
 
 
-void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr) 
+void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr, MIntArray *clusterArr) 
 {
-  // Displays the found tracks and the clusters in a nice 3D view.
+  // Displays the tracks and the clusters in a nice 3D view (GEANT ant found!).
 
   // create 3 canvases (for +, -, and both Ftpcs)
   mX_Y_Zplus = new TCanvas("X_Y_Zplus", "Event +", 600, 600);
@@ -1029,8 +1138,18 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr)
   Bool_t unclean = (Bool_t) true;
   Bool_t found_hits = (Bool_t) true;
 
+  Float_t eta_low_geant = 2.0;
+  Float_t eta_up_geant  = 4.4;
+  Float_t pt_low_geant  = 0.0;
+  Float_t pt_up_geant   = 5.0;
+
+  Float_t eta_low_found = 2.0;
+  Float_t eta_up_found  = 4.4;
+  Float_t pt_low_found  = 0.0;
+  Float_t pt_up_found   = 5.0;
+
   while (1) {
-    gSystem->Exec("/usr/bin/clear");
+    //gSystem->Exec("/usr/bin/clear");
     
     if (mIsGeant) {
       cout << "Display of GEANT tracks (type 'f' for found tracks)" << endl;
@@ -1043,11 +1162,14 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr)
       OnOff(good);
       cout << "     (c)lusters................[grey]: ";
       OnOff(geant_hits);
+      cout << "------------------------------------------" << endl;
+      cout << "(E)ta range           (2.0 - 4.4)    : " << eta_low_geant << " - " << eta_up_geant << endl;
+      cout << "(p)t range            (0.0 - 5.0 GeV): " << pt_low_geant << " - " << pt_up_geant << endl;
       cout << endl;
       cout << "Show (+), (-), or (b)oth Ftpcs or (q)uit: ";
       cin >> a;
 
-      if (a == 'e' || a == 'n' || a == 'g' || a == 'c' || a == 'G' || a == 'f') {
+      if (a == 'e' || a == 'n' || a == 'g' || a == 'c' || a == 'G' || a == 'f' || a == 'E' || a == 'p') {
 	
 	if (a == 'e') electrons = !electrons;
 	if (a == 'n') non_vtx = !non_vtx;
@@ -1055,14 +1177,25 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr)
 	if (a == 'c') geant_hits = !geant_hits;
 	if (a == 'G') mIsGeant = (Bool_t)true;
 	if (a == 'f') mIsGeant = (Bool_t)false;
+	
+	if (a == 'E') {
+	  cout << endl;
+	  cout << "Enter eta lower and upper limit (" << eta_low_geant << " - " << eta_up_geant << "): ";
+	  cin >> eta_low_geant >> eta_up_geant;
+	}
+	  
+	if (a == 'p') {
+	  cout << endl;
+	  cout << "Enter pt lower and upper limit (" << pt_low_geant << " - " << pt_up_geant << "): ";
+	  cin >> pt_low_geant >> pt_up_geant;
+	}  
       }
-
 
       else {
 	if (a == 'q') break;
 	
 	else {
-	  FillGeant(electrons, non_vtx, good, geant_hits);
+	  FillGeant(electrons, non_vtx, good, geant_hits, eta_low_geant, eta_up_geant, pt_low_geant, pt_up_geant);
     
 	  // call the x3d function (this does the actual 3D displaying) for the right canvas
 	  if (a == '+') mX_Y_Zplus->x3d();
@@ -1081,13 +1214,16 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr)
       OnOff(split);
       cout << "     (u)nclean tracks....[yellow]: ";
       OnOff(unclean);
-      cout << "     (c)lusters............[grey]: ";
+      cout << "     (c)lusters..................: ";
       OnOff(found_hits);
+      cout << "------------------------------------------" << endl;
+      cout << "(E)ta range           (2.0 - 4.4)    : " << eta_low_found << " - " << eta_up_found << endl;
+      cout << "(p)t range            (0.0 - 5.0 GeV): " << pt_low_found << " - " << pt_up_found << endl;
       cout << endl;
       cout << "Show (+), (-), or (b)oth Ftpcs or (q)uit: ";
       cin >> a;
 
-      if (a == 'g' || a == 's' || a == 'u' || a == 'c' || a == 'G' || a == 'f') {
+      if (a == 'g' || a == 's' || a == 'u' || a == 'c' || a == 'G' || a == 'f' || a == 'E' || a == 'p') {
 	
 	if (a == 'g') good_found = !good_found;
 	if (a == 's') split = !split  ;
@@ -1095,19 +1231,34 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr)
 	if (a == 'c') found_hits = !found_hits;
 	if (a == 'G') mIsGeant = (Bool_t)true;
 	if (a == 'f') mIsGeant = (Bool_t)false;
+
+	if (a == 'E') {
+	  cout << endl;
+	  cout << "Enter eta lower and upper limit (" << eta_low_found << " - " << eta_up_found << "): ";
+	  cin >> eta_low_found >> eta_up_found;
+	}
+	  
+	if (a == 'p') {
+	  cout << endl;
+	  cout << "Enter et lower and upper limit (" << pt_low_found << " - " << pt_up_found << "): ";
+	  cin >> pt_low_found >> pt_up_found;
+	}  
       }
 
       else{
 	if (a == 'q') break;
 	
 	else {
-	  MIntArray *sp = 0;
-	  MIntArray *uncl = 0;
+	  cout << endl;
+	  MIntArray *sp = NULL;
+	  MIntArray *uncl = NULL;
+	  MIntArray *hits = NULL;
 
 	  if (split) sp = splitArr;
 	  if (unclean) uncl = uncleanArr;
+	  if (found_hits) hits = clusterArr;
 
-	  FillFound(good_found, sp, uncl, found_hits);
+	  FillFound(good_found, sp, uncl, hits, eta_low_found, eta_up_found, pt_low_found, pt_up_found);
     
 	  // call the x3d function (this does the actual 3D displaying) for the right canvas
 	  if (a == '+') mX_Y_Zplus->x3d();
@@ -1123,16 +1274,13 @@ void StFtpcDisplay::ShowEvalTracks(MIntArray *splitArr, MIntArray *uncleanArr)
   delete mX_Y_Zminus;
   delete mX_Y_Z;
   
-  if (l) delete[] l;
-  if (value) delete[] value;
-  if (value_plus) delete[] value_minus;
-  if (value_minus) delete[] value_minus;
+  Delete();
   
   return;
 }
 
 
-void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Bool_t geant_hits)
+void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Bool_t geant_hits, Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up)
 {
   // Fill histograms with tracks and clusters.
 
@@ -1149,10 +1297,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
   mNode0->cd();
   mNode0->Draw("");
 
-  if (l) delete[] l;
-  if (value) delete[] value;
-  if (value_plus) delete[] value_minus;
-  if (value_minus) delete[] value_minus;
+  Delete();
   
   StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
@@ -1163,7 +1308,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
   Float_t z[100];
 
   Int_t track_entries = mGeantTrack->GetEntriesFast();   
-  l = new TPolyLine3D[track_entries];
+  line = new TPolyLine3D[track_entries];
   
   // loop over all tracks
   for (Int_t tracks = 0; tracks < track_entries; tracks++) {
@@ -1171,7 +1316,9 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
 
     if ((track->GetPid() <= 3 && !electrons) || 
 	(!track->ComesFromMainVertex() && track->GetPid()>3 && !non_vtx) || 
-	(track->ComesFromMainVertex() && track->GetPid()>3 && !good)) {
+	(track->ComesFromMainVertex() && track->GetPid()>3 && !good) ||
+	TMath::Abs(track->GetEta()) < eta_low || TMath::Abs(track->GetEta()) > eta_up ||
+	track->GetPt() < pt_low || track->GetPt() > pt_up) {
       continue;
     }
     
@@ -1194,8 +1341,8 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       }
       
       // fill PolyLine for this track
-      k = &(l[tracks]);
-      k = new TPolyLine3D(cluster_entries, x, y, z, "");
+      current_line = &(line[tracks]);
+      current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
       
       // set colors
       Int_t color;
@@ -1215,13 +1362,13 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
 	}
       }
       
-      k->SetLineColor(color);
+      current_line->SetLineColor(color);
   
       // draw track in the right canvas
-      k->Draw("same");
+      current_line->Draw("same");
       // and draw track in the canvas for both Ftpcs
       mX_Y_Z->cd();
-      k->Draw("same");
+      current_line->Draw("same");
     }  
   }
 
@@ -1230,9 +1377,9 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
     Int_t cluster_anz = mGeantHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    value_plus = new Float_t[3*cluster_anz];
-    value_minus = new Float_t[3*cluster_anz];
-    value = new Float_t[3*cluster_anz];
+    found_value_plus = new Float_t[3*cluster_anz];
+    found_value_minus = new Float_t[3*cluster_anz];
+    found_value = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
@@ -1244,39 +1391,39 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
       h = (StFtpcConfMapPoint *)mGeantHit->At(i);
       
       // fill (+, -, both) cluster arrays
-      value[cl++] = h->GetX();
-      value[cl++] = h->GetY();
+      found_value[cl++] = h->GetX();
+      found_value[cl++] = h->GetY();
       
-      if ((value[cl++] = h->GetZ())>0) {
-	value_plus[cl_plus++] = h->GetX();
-	value_plus[cl_plus++] = h->GetY();
-	value_plus[cl_plus++] = h->GetZ();
+      if ((found_value[cl++] = h->GetZ())>0) {
+	found_value_plus[cl_plus++] = h->GetX();
+	found_value_plus[cl_plus++] = h->GetY();
+	found_value_plus[cl_plus++] = h->GetZ();
       }
       
       else {
-	value_minus[cl_minus++] = h->GetX();
-	value_minus[cl_minus++] = h->GetY();
-	value_minus[cl_minus++] = h->GetZ();
+	found_value_minus[cl_minus++] = h->GetX();
+	found_value_minus[cl_minus++] = h->GetY();
+	found_value_minus[cl_minus++] = h->GetZ();
       }
     }
     
     // create PolyMarkers
-    TPolyMarker3D *m = new TPolyMarker3D(cl/3, value, 1);      
-    TPolyMarker3D *m_plus = new TPolyMarker3D(cl_plus/3, value_plus, 1);      
-    TPolyMarker3D *m_minus = new TPolyMarker3D(cl_minus/3, value_minus, 1);      
+    found_hit->SetPolyMarker(cl/3, found_value, 1);      
+    found_hit_plus->SetPolyMarker(cl_plus/3, found_value_plus, 1);      
+    found_hit_minus->SetPolyMarker(cl_minus/3, found_value_minus, 1);      
 
     // set colors
-    m->SetMarkerColor(1);
-    m_plus->SetMarkerColor(1);
-    m_minus->SetMarkerColor(1);
+    found_hit->SetMarkerColor(1);
+    found_hit_plus->SetMarkerColor(1);
+    found_hit_minus->SetMarkerColor(1);
     
     // switch to right canvas and draw clusters
     mX_Y_Z->cd();
-    m->Draw("same");
+    found_hit->Draw("same");
     mX_Y_Zplus->cd();
-    m_plus->Draw("same");
+    found_hit_plus->Draw("same");
     mX_Y_Zminus->cd();
-    m_minus->Draw("same");
+    found_hit_minus->Draw("same");
   }
   
   // update canvases
@@ -1288,7 +1435,7 @@ void StFtpcDisplay::FillGeant(Bool_t electrons, Bool_t non_vtx, Bool_t good, Boo
 }
 
 
-void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *unclean, Bool_t found_hits)
+void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *unclean, MIntArray *found_hits, Float_t eta_low, Float_t eta_up, Float_t pt_low, Float_t pt_up)
 {
   // Fill histograms with tracks and clusters.
 
@@ -1305,11 +1452,8 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
   mNode0->cd();
   mNode0->Draw("");
 
-  if (l) delete[] l;
-  if (value) delete[] value;
-  if (value_plus) delete[] value_minus;
-  if (value_minus) delete[] value_minus;
-  
+  Delete();
+
   StFtpcConfMapPoint *cluster;
   StFtpcTrack *track;
   
@@ -1321,10 +1465,18 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
   Int_t track_entries = mTrack->GetEntriesFast();
   Bool_t *good_track_to_show = new Bool_t[track_entries];
 
-  l = new TPolyLine3D[track_entries];
+  line = new TPolyLine3D[track_entries];
   
   for (Int_t good_counter = 0; good_counter < track_entries; good_counter++) {
-    good_track_to_show[good_counter] = (Bool_t) true;
+   StFtpcTrack *track = (StFtpcTrack *)mTrack->At(good_counter);
+   
+   if (TMath::Abs(track->GetEta()) < eta_low || TMath::Abs(track->GetEta()) > eta_up || track->GetPt() < pt_low || track->GetPt() > pt_up) {
+     good_track_to_show[good_counter] = (Bool_t) false;
+   }
+   
+   else {
+     good_track_to_show[good_counter] = (Bool_t) true;
+   }
   }
 
   if (unclean) {
@@ -1347,6 +1499,10 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
     for (Int_t split_counter = 0; split_counter < split->GetSize(); split_counter++) {
       track = (StFtpcTrack *)mTrack->At(split->At(split_counter));
 
+      if (TMath::Abs(track->GetEta()) < eta_low || TMath::Abs(track->GetEta()) > eta_up || track->GetPt() < pt_low || track->GetPt() > pt_up) {
+	continue;
+      }
+
       Int_t cluster_entries = track->GetNumberOfPoints();
       
       // loop over all clusters
@@ -1365,18 +1521,17 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
       }
       
       // fill PolyLine for this track
-      k = &(l[entry++]);
-      k = new TPolyLine3D(cluster_entries, x, y, z, "");
+      current_line = &(line[entry++]);
+      current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
       
       // set colors
-
-      k->SetLineColor(3);
+      current_line->SetLineColor(3);
     
       // draw track in the right canvas
-      k->Draw("same");
+      current_line->Draw("same");
       // and draw track in the canvas for both Ftpcs
       mX_Y_Z->cd();
-      k->Draw("same");
+      current_line->Draw("same");
     }  
   }
 
@@ -1385,6 +1540,10 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
     for (Int_t unclean_counter = 0; unclean_counter < unclean->GetSize(); unclean_counter++) {
       track = (StFtpcTrack *)mTrack->At(unclean->At(unclean_counter));
 
+      if (TMath::Abs(track->GetEta()) < eta_low || TMath::Abs(track->GetEta()) > eta_up || track->GetPt() < pt_low || track->GetPt() > pt_up) {
+	continue;
+      }
+
       Int_t cluster_entries = track->GetNumberOfPoints();
       
       // loop over all clusters
@@ -1403,18 +1562,17 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
       }
       
       // fill PolyLine for this track
-      k = &(l[entry++]);
-      k = new TPolyLine3D(cluster_entries, x, y, z, "");
+      current_line = &(line[entry++]);
+      current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
       
       // set colors
-
-      k->SetLineColor(5);
+      current_line->SetLineColor(5);
     
       // draw track in the right canvas
-      k->Draw("same");
+      current_line->Draw("same");
       // and draw track in the canvas for both Ftpcs
       mX_Y_Z->cd();
-      k->Draw("same");
+      current_line->Draw("same");
     }  
   }
 
@@ -1448,17 +1606,17 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
 	}
 	
 	// fill PolyLine for this track
-	k = &(l[tracks]);
-	k = new TPolyLine3D(cluster_entries, x, y, z, "");
+	current_line = &(line[tracks]);
+	current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
 	
 	// set colors
-	k->SetLineColor(2);
+	current_line->SetLineColor(2);
 	
 	// draw track in the right canvas
-	k->Draw("same");
+	current_line->Draw("same");
 	// and draw track in the canvas for both Ftpcs
 	mX_Y_Z->cd();
-	k->Draw("same");
+	current_line->Draw("same");
       }   
     }
   }
@@ -1468,59 +1626,186 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
     Int_t cluster_anz = mHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    value_plus = new Float_t[3*cluster_anz];
-    value_minus = new Float_t[3*cluster_anz];
-    value = new Float_t[3*cluster_anz];
+    found_value_plus = new Float_t[3*cluster_anz];
+    found_value_minus = new Float_t[3*cluster_anz];
+    found_value = new Float_t[3*cluster_anz];
+    unused_value_plus = new Float_t[3*cluster_anz];
+    unused_value_minus = new Float_t[3*cluster_anz];
+    unused_value = new Float_t[3*cluster_anz];
+    wrong_value_plus = new Float_t[3*cluster_anz];
+    wrong_value_minus = new Float_t[3*cluster_anz];
+    wrong_value = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
-    Int_t cl_plus = 0;
-    Int_t cl_minus = 0;  
-    Int_t cl = 0;
+    Int_t found_cl_plus = 0;
+    Int_t found_cl_minus = 0;  
+    Int_t found_cl = 0;
+    Int_t unused_cl_plus = 0;
+    Int_t unused_cl_minus = 0;  
+    Int_t unused_cl = 0;
+    Int_t wrong_cl_plus = 0;
+    Int_t wrong_cl_minus = 0;  
+    Int_t wrong_cl = 0;
     
     // loop over all clusters
     for (Int_t i = 0; i < cluster_anz; i++) {
       h = (StFtpcConfMapPoint *)mHit->At(i);
-      
-      // fill (+, -, both) cluster arrays
-      value[cl++] = h->GetX();
-      value[cl++] = h->GetY();
-      
-      if ((value[cl++] = h->GetZ())>0) {
-	value_plus[cl_plus++] = h->GetX();
-	value_plus[cl_plus++] = h->GetY();
-	value_plus[cl_plus++] = h->GetZ();
+
+      if (found_hits->At(h->GetHitNumber()) == 1) {
+	
+	// fill (+, -, both) cluster arrays
+	found_value[found_cl++] = h->GetX();
+	found_value[found_cl++] = h->GetY();
+	
+	if ((found_value[found_cl++] = h->GetZ())>0) {
+	  found_value_plus[found_cl_plus++] = h->GetX();
+	  found_value_plus[found_cl_plus++] = h->GetY();
+	  found_value_plus[found_cl_plus++] = h->GetZ();
+	}
+	
+	else {
+	  found_value_minus[found_cl_minus++] = h->GetX();
+	  found_value_minus[found_cl_minus++] = h->GetY();
+	  found_value_minus[found_cl_minus++] = h->GetZ();
+	}
       }
-      
-      else {
-	value_minus[cl_minus++] = h->GetX();
-	value_minus[cl_minus++] = h->GetY();
-	value_minus[cl_minus++] = h->GetZ();
+
+      else if (found_hits->At(h->GetHitNumber()) == 0) {
+
+	unused_value[unused_cl++] = h->GetX();
+	unused_value[unused_cl++] = h->GetY();
+	
+	if ((unused_value[unused_cl++] = h->GetZ())>0) {
+	  unused_value_plus[unused_cl_plus++] = h->GetX();
+	  unused_value_plus[unused_cl_plus++] = h->GetY();
+	  unused_value_plus[unused_cl_plus++] = h->GetZ();
+	}
+	
+	else {
+	  unused_value_minus[unused_cl_minus++] = h->GetX();
+	  unused_value_minus[unused_cl_minus++] = h->GetY();
+	  unused_value_minus[unused_cl_minus++] = h->GetZ();
+	}
+      }
+	
+      else if (found_hits->At(h->GetHitNumber()) == -1) {
+	
+	wrong_value[wrong_cl++] = h->GetX();
+	wrong_value[wrong_cl++] = h->GetY();
+	
+	if ((wrong_value[wrong_cl++] = h->GetZ())>0) {
+	  wrong_value_plus[wrong_cl_plus++] = h->GetX();
+	  wrong_value_plus[wrong_cl_plus++] = h->GetY();
+	  wrong_value_plus[wrong_cl_plus++] = h->GetZ();
+	}
+	
+	else {
+	  wrong_value_minus[wrong_cl_minus++] = h->GetX();
+	  wrong_value_minus[wrong_cl_minus++] = h->GetY();
+	  wrong_value_minus[wrong_cl_minus++] = h->GetZ();
+	}
       }
     }
     
     // create PolyMarkers
-    TPolyMarker3D *m = new TPolyMarker3D(cl/3, value, 1);      
-    TPolyMarker3D *m_plus = new TPolyMarker3D(cl_plus/3, value_plus, 1);      
-    TPolyMarker3D *m_minus = new TPolyMarker3D(cl_minus/3, value_minus, 1);      
-
+    found_hit->SetPolyMarker(found_cl/3, found_value, 1);
+    found_hit_plus->SetPolyMarker(found_cl_plus/3, found_value_plus, 1);      
+    found_hit_minus->SetPolyMarker(found_cl_minus/3, found_value_minus, 1);      
+    unused_hit->SetPolyMarker(unused_cl/3, unused_value, 1);
+    unused_hit_plus->SetPolyMarker(unused_cl_plus/3, unused_value_plus, 1);      
+    unused_hit_minus->SetPolyMarker(unused_cl_minus/3, unused_value_minus, 1);      
+    wrong_hit->SetPolyMarker(wrong_cl/3, wrong_value, 1);
+    wrong_hit_plus->SetPolyMarker(wrong_cl_plus/3, wrong_value_plus, 1);      
+    wrong_hit_minus->SetPolyMarker(wrong_cl_minus/3, wrong_value_minus, 1);      
+    
     // set colors
-    m->SetMarkerColor(1);
-    m_plus->SetMarkerColor(1);
-    m_minus->SetMarkerColor(1);
+    found_hit->SetMarkerColor(5);
+    found_hit_plus->SetMarkerColor(5);
+    found_hit_minus->SetMarkerColor(5);
+    unused_hit->SetMarkerColor(1);
+    unused_hit_plus->SetMarkerColor(1);
+    unused_hit_minus->SetMarkerColor(1);
+    wrong_hit->SetMarkerColor(2);
+    wrong_hit_plus->SetMarkerColor(2);
+    wrong_hit_minus->SetMarkerColor(2);
     
     // switch to right canvas and draw clusters
     mX_Y_Z->cd();
-    m->Draw("same");
+    found_hit->Draw("same");
+    unused_hit->Draw("same");
+    wrong_hit->Draw("same");
     mX_Y_Zplus->cd();
-    m_plus->Draw("same");
+    found_hit_plus->Draw("same");
+    unused_hit_plus->Draw("same");
+    wrong_hit_plus->Draw("same");
     mX_Y_Zminus->cd();
-    m_minus->Draw("same");
+    found_hit_minus->Draw("same");
+    unused_hit_minus->Draw("same");
+    wrong_hit_minus->Draw("same");
   }
   
   // update canvases
   mX_Y_Zplus->Update();
   mX_Y_Zminus->Update();
   mX_Y_Z->Update();
+
+  return;
+}
+
+
+void StFtpcDisplay::Delete()
+{
+  // Deletes objects.
+
+  if (line) {
+    delete[] line;
+    line = NULL;
+  }
+
+  if (found_value) {
+    delete[] found_value;
+    found_value = NULL;
+  }
+
+  if (found_value_plus) {
+    delete[] found_value_plus;
+    found_value_plus = NULL;
+  }
+
+  if (found_value_minus) {
+    delete[] found_value_minus;
+    found_value_minus = NULL;
+  }
+
+  if (unused_value) {
+    delete[] unused_value;
+    unused_value = NULL;
+  }
+
+  if (unused_value_plus) {
+    delete[] unused_value_plus;
+    unused_value_plus = NULL;
+  }
+
+  if (unused_value_minus) {
+    delete[] unused_value_minus;
+    unused_value_minus = NULL;
+  }
+
+  if (wrong_value) {
+    delete[] wrong_value;
+    wrong_value = NULL;
+  }
+
+  if (wrong_value_plus) {
+    delete[] wrong_value_plus;
+    wrong_value_plus = NULL;
+  }
+
+  if (wrong_value_minus) {
+    delete[] wrong_value_minus;
+    wrong_value_minus = NULL;
+  }
 
   return;
 }
