@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.48 1999/07/09 22:00:22 perev Exp $
+// $Id: StMaker.cxx,v 1.49 1999/07/11 01:33:33 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.49  1999/07/11 01:33:33  fine
+// makedoc some corrections for MakeDoc
+//
 // Revision 1.48  1999/07/09 22:00:22  perev
 // GetCVS into StMaker
 //
@@ -133,7 +136,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.48 1999/07/09 22:00:22 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.49 1999/07/11 01:33:33 fine Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -152,7 +155,7 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
      Warning("StMaker","GetCVS is not overloaded");
      printf("  Please add into file %s the following line: \n",IsA()->GetDeclFileName());
      printf("  virtual const char *GetCVS()\n");
-     printf("  {static const char cvs[]=\"Tag $Name:  $ $Id: StMaker.cxx,v 1.48 1999/07/09 22:00:22 perev Exp $ built \"__DATE__\" \"__TIME__ ; return cvs;}\n\n");  
+     printf("  {static const char cvs[]=\"Tag $Name:  $ $Id: StMaker.cxx,v 1.49 1999/07/11 01:33:33 fine Exp $ built \"__DATE__\" \"__TIME__ ; return cvs;}\n\n");  
    }
    SetTitle(ts);
    
@@ -668,6 +671,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  //            $(stardir) + "StRoot/StChain"
  //            $(stardir) + "StRoot/xdf2root"
  //            $(stardir) + ".share/tables"
+ //            $(stardir) + "StRoot/StUtilities"
  //            $(stardir) + "inc",
  //            $(stardir) + "StRoot/<this class name>",
  //
@@ -694,16 +698,21 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   if (!gHtml) gHtml = new THtml;
 
   // Define the set of the subdirectories with the STAR class sources
-  //                       | --------------  | ----------  | ------------------ |
-  //                       | Directory name    Class name    Share library name |
-  //                       | --------------  | ----------  | ------------------ |
-  const Char_t *source[] = {"StRoot/St_base" ,"St_DataSet",     "St_base"
-                           ,"StRoot/StChain" ,"StMaker"   ,     "StChain"
-                           ,"StRoot/xdf2root","St_XDFFile",     "xdf2root"
-                           ,".share/tables"  , ""         ,     ""
-                           ,"inc"            , ""         ,     ""
+  //                       | ----------------------  | ------------  | ------------------ |
+  //                       | Directory name            Class name      Share library name |
+  //                       | ----------------------  | ------------  | ------------------ |
+  const Char_t *source[] = {"StRoot/St_base"         , "St_DataSet"  ,    "St_base"
+                           ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
+                           ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
+                           ,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
+                           ,"StRoot/StarClassLibrary", ""            ,    ""
+                           ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
+                           ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
+                           ,".share/tables"          , ""            ,     ""
+                           ,"inc"                    , ""            ,     ""
                            };
-  const Int_t lsource = sizeof(source)/4;
+
+  const Int_t lsource = sizeof(source)/sizeof(const Char_t *);
  
   TString lookup = STAR;
   lookup += "/StRoot/";
@@ -759,7 +768,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
 
   // Update the docs of the base classes
-  if (baseClasses) for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+  static Bool_t makeAllAtOnce = kTRUE;
+  if (makeAllAtOnce && baseClasses) { 
+     makeAllAtOnce = kFALSE;
+     gHtml->MakeAll(); 
+     for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+  }
 
   // Create the doc for this class
   printf(" Making html for <%s>\n",c);
