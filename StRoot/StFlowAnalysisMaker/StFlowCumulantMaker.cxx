@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.3 2001/11/09 21:14:50 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.4 2001/12/06 01:21:14 jeromel Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -117,9 +117,10 @@ Int_t StFlowCumulantMaker::Init() {
   const float ptMin           =    0.;
   const float ptMax           =    8.;
 
-  enum { // commit with this value
-	 nEtaBins          = 90,
-	 nPtBins           = 40,
+  // commit with this value
+  enum { 
+    nEtaBins          = 90,
+    nPtBins           = 40
   };
   
 
@@ -370,7 +371,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.3 2001/11/09 21:14:50 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.4 2001/12/06 01:21:14 jeromel Exp $");
 
   return StMaker::Init();
 }
@@ -1008,6 +1009,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.4  2001/12/06 01:21:14  jeromel
+// Mandatory correction : Extraneous comma removed.
+//
 // Revision 1.3  2001/11/09 21:14:50  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //
