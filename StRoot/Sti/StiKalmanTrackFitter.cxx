@@ -6,6 +6,7 @@
 
 StiKalmanTrackFitter::StiKalmanTrackFitter()
 {
+  StiKalmanTrack::setFitParameters(&_pars);
   _pars.setName("KalmanTrackFitterParameters");
 }
 

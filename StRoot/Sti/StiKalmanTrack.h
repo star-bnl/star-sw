@@ -18,25 +18,22 @@
  */
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
-//Sti
-#include "StThreeVector.hh"
-#include "StThreeVectorF.hh"
-#include "StThreeVectorD.hh"
+
 //STD
-#include <math.h>
 #include <vector>
-#include <stdexcept>
 using namespace std;
 //Sti
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/MessageType.h"
 #include "Sti/Base/Factory.h"
-#include "StiKalmanTrackNode.h"
-#include "StiHitContainer.h"
 #include "StiKTNIterator.h"
-#include "StiHit.h"
 #include "StiTrack.h"
-#include "StiKalmanTrackFinderParameters.h"
+
+class StThreeVectorD;
+class StiHit;
+class StiKalmanTrackNode;
+class StiKalmanTrackFinderParameters;
+class StiKalmanTrackFitterParameters;
 
 #define TRACKMESSENGER *(Messenger::instance(MessageType::kTrackMessage))
 /*! 
@@ -114,6 +111,7 @@ class StiKalmanTrack : public StiTrack
   /// Set the factory used for the creation of kalman track nodes.
   static void setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>*);
   static void setParameters(StiKalmanTrackFinderParameters* p);
+  static void setFitParameters(StiKalmanTrackFitterParameters* p);
 
   void    reset();
   
@@ -265,7 +263,9 @@ class StiKalmanTrack : public StiTrack
     reference frame of the detector.
   */
   StiKalmanTrackNode *  getNodeNear(double x) const;
-  
+
+    /// Method to return the pointer to the fitter parameters.
+    StiKalmanTrackFitterParameters* fitPars() const {return fitpars;}
   /*! Convenience method returns a point corresponding to the node
     of this track which is the closest to the given position.
   */
@@ -302,6 +302,7 @@ class StiKalmanTrack : public StiTrack
 protected:
     
   static StiKalmanTrackFinderParameters * pars;
+  static StiKalmanTrackFitterParameters * fitpars;
   static Factory<StiKalmanTrackNode> * trackNodeFactory;
   
   StiDirection trackingDirection;
