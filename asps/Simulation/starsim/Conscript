@@ -49,24 +49,25 @@ $env2 = $env->clone('FC'           => $FC,
 		    'FPPFLAGS'     => $FPPFLAGS,
 		    'FFLAGS'       => $FFLAGS,
 		    'FCPATH'       => $FCPATH,
-		    'FEXTEND'      => $FEXTEND,
+		    'FEXTEND'      => "",
 		    'CPPFLAGS'     => $CPPFLAGS,
 		    'CPPPATH'      => $CPPPATH,
-#		    'LIBPATH'      => $LIBPATH,
+		    #		    'LIBPATH'      => $LIBPATH,
 		    'LIBS'         => $LIBS,
 		    'ObjDir'       => $obj_dir,
 		    'Libraries'    => $Libraries
 		   );
-my @Sources = qw(aversion.F 
-#		 atmain/*.age atmain/*.F atmain/*.c atmain/*.cxx 
-#		 atgeant/*.age 
-#		 atutil/*.age atutil/*.F
-#		 agzio/*.age agzio/*.F  
-#		 rebank/*.age  
-#		 dzdoc/*.F  
-#		 geant/*.F geant/*.c  
-#		 comis/*.F  
-#		 deccc/*.c);
+#my @Sources = qw(aversion.F 
+		 #		 atmain/*.age atmain/*.F atmain/*.c atmain/*.cxx 
+		 #		 atgeant/*.age 
+		 #		 atutil/*.age atutil/*.F
+		 #		 agzio/*.age agzio/*.F  
+		 #		 rebank/*.age  
+		 #		 dzdoc/*.F  
+		 #		 geant/*.F geant/*.c  
+		 #		 comis/*.F  
+		 #		 deccc/*.c
+#		);
 my @src  = find_sources($Dir);
 my $pwd = Cwd::cwd();# print "pwd = $pwd  Dir => $Dir\n";
 my @sources = ();
@@ -76,11 +77,11 @@ foreach my $s (@src) {
     $ss =~ s/$Dir\///;# print "$ss\n";
     next if $ss =~ /atlroot/;
     next if $ss =~ /acmain\.cxx/;
-    next if $ss =~ /deccc\/traceqc\.c/;
+    #    next if $ss =~ /deccc\/traceqc\.c/;
     next if $ss =~ /atmain\/etime\.F/ and $FC !~ /g77/;
-    next if $ss =~ /atmain\/agxinit\.F/;
-    next if $ss =~ /atmain\/guinti\.F/;
-#    next if $ss =~ /deccc\/fputools\.c/ and $CC !~ /gcc/;
+    next if $ss =~ /atmain\/agxinit\.cdf/;
+    next if $ss =~ /atmain\/guinti\.cdf/;
+    #    next if $ss =~ /deccc\/fputools\.c/ and $CC !~ /gcc/;
     push @sources, $ss; 
   }
 }
@@ -89,7 +90,8 @@ if ($#sources > -1) {
   Library      $env2 $LIBPKG, @sources;  
   Install $env2 $LIB, $LIBPKG;
 }
-my @atlsim = qw(acmain.cxx deccc/traceqc.c);
+#my @starsim = qw(acmain.cxx deccc/traceqc.c);
+my @starsim = qw(acmain.cxx);
 my $pgm = "starsim";
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
@@ -113,24 +115,52 @@ $LDFLAGS .= " -export-dynamic -rdynamic -Wl,-noinhibit-exec,-Bdynamic";
 my $LIBPATH    = $env->{LIBPATH};
 if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 
-$LIBPATH .= $env->{Packages}->{QT}->{LIBDIR};
+#$LIBPATH .= $env->{Packages}->{QT}->{LIBDIR};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 my $LIBS    = $env->{LIBS};
 if ($PGILIBS) {$LIBS .= " " . $PGILIBS;}
-$LIBS .= " -Wl,--whole-archive -Wl,-Bstatic -lstarsim -lstdc++ -Wl,--no-whole-archive -Wl,-Bdynamic -lg2c";
-$LIBS .= " -lgeant321";
+$LIBS .= " -Wl,--whole-archive -Wl,-Bstatic -lstarsim -lstdc++ -Wl,--no-whole-archive -Wl,-Bdynamic";# -lg2c";
+		 $LIBS .= " -lgeant321";
 $LIBS .= " -lgcalor";
 my $Libraries = $env->{Libraries};
-
-$Libraries .= " " . $env->{CERNLIBS} . " " . $env->{Packages}->{MYSQL}->{LIBS} . " " . 
-  $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS};
+		 my $LD = $env->{CC};
+		 $Libraries .= " " . $env->{CERNLIBS} . " " . $env->{Packages}->{MYSQL}->{LIBS} . " " . 
+		 $env->{FLIBS} . " " . $env->{CLIBS} . " " . $env->{SYSLIBS};
 $envP = $env2->clone('LDFLAGS'   => $LDFLAGS,
 		     'LIBPATH'   => $LIBPATH,
 		     'LIBS'      => $LIBS,
+		     'LD'        => $LD,
+		     'FEXTEND'      => "",
 		     'Libraries' => $Libraries
 		    );
 #print "LIBPATH = $envP->{LIBPATH}\n";
-Program      $envP $pgm, @starsim;
-Install $envP $BIN, $pgm;
+Program      $envP $pgm . ".new", @starsim;
 InstallAs $envP $BIN . "/gstar", $pgm;
-
+my $d = $Dir . "/";
+my @list = glob $d . "atlsim.*";# print "Dir  = $Dir; list = @list\n";
+my @Deps = ($pgm . ".new","#" . $d . "atlsim.makefile","#" . $d . "atlsim.bank","#" . $d . "atlsim.logon.kumac");
+foreach my $l (@list) {
+  my $f = File::Basename::basename($l); 
+  my $s = $f; $s =~ s/atlsim/starsim/; #  print "$l => $s\n";
+  InstallAs $envP $BIN . $s, "#" . $d . $f;
+  push @Deps, $BIN . $s;
+}		 
+Command      $env  $pgm, @Deps, 
+		 q(
+		   cp     %1  %>
+		   echo  '#######.makefile########' >> %>
+		   echo  '#chto v imeni tebe moem#' >> %>
+		   echo  '#######.makefile.#######' >> %>
+		   cat      %2      >> %>
+		   echo  '#######.endfile.########' >> %>
+		   echo  '#########.bank##########' >> %>
+		   echo  '#chto v imeni tebe moem#' >> %>
+		   echo  '#########.bank.#########' >> %>
+		   cat      %3          >> %>
+		   echo  '#######.endfile.########' >> %>
+		   echo  '#chto v imeni tebe moem#' >> %>
+		   echo  '#####.logon.kumac#######' >> %>
+		   cat      %4   >> %>
+		   echo  '#######.endfile.########' >> %>
+);
+Install $envP $BIN, $pgm;
