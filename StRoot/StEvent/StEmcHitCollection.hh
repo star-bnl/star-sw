@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcHitCollection.hh,v 1.1 1999/01/15 20:39:42 wenaus Exp $
+ * $Id: StEmcHitCollection.hh,v 1.2 1999/01/15 22:53:36 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,14 +10,14 @@
  ***************************************************************************
  *
  * $Log: StEmcHitCollection.hh,v $
- * Revision 1.1  1999/01/15 20:39:42  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:36  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:53:36  wenaus
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StEmcHit.hh"
+#ifndef StEmcHitCollection_hh
 #define StEmcHitCollection_hh
 #include <vector>
 #include "StEvent/StEmcHit.hh"

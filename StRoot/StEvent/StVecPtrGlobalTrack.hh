@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecPtrGlobalTrack.hh,v 1.1 1999/01/15 20:40:22 wenaus Exp $
+ * $Id: StVecPtrGlobalTrack.hh,v 1.2 1999/01/15 22:54:18 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecPtrGlobalTrack.hh,v $
- * Revision 1.1  1999/01/15 20:40:22  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:18  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.4  1999/03/04 18:17:38  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined

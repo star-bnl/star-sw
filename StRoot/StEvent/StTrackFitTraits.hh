@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.hh,v 1.1 1999/01/15 20:40:14 wenaus Exp $
+ * $Id: StTrackFitTraits.hh,v 1.2 1999/01/15 22:54:07 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,18 +13,20 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.hh,v $
- * Revision 1.1  1999/01/15 20:40:14  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:07  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StTrackFitTraits_hh
 #define StTrackFitTraits_hh
 #include "StMatrix.hh"
+#include "StTables/dst_track.h"
 
 class StTrackFitTraits {
 public:
     StTrackFitTraits();
     ~StTrackFitTraits();
+    StTrackFitTraits(dst_track_st*);
     // StTrackFitTraits(const StTrackFitTraits&);   use default
     // const StTrackFitTraits & operator=(const StTrackFitTraits&);
 

@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StVertex.cc,v 1.1 1999/01/15 20:40:26 wenaus Exp $
+ * $Id: StVertex.cc,v 1.2 1999/01/15 22:54:22 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,11 +13,13 @@
  ***************************************************************************
  *
  * $Log: StVertex.cc,v $
- * Revision 1.1  1999/01/15 20:40:26  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:22  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StVertex.hh"
+#include "StEvent/StVertex.hh"
+
+static const char rcsid[] = "$Id: StVertex.cc,v 1.2 1999/01/15 22:54:22 wenaus Exp $";
 
 StVertex::StVertex()
 {
@@ -22,6 +27,18 @@ StVertex::StVertex()
     mParent = 0;                
     mQualityBitmask = 0;        
     mChiSquared = 0;            
+}
+
+StVertex::StVertex(dst_vertex_st* vtx)
+{
+  mPosition.setX(vtx->x);
+  mPosition.setY(vtx->y);
+  mPosition.setZ(vtx->z);
+  mPositionError.setX(vtx->sigma[0]);
+  mPositionError.setY(vtx->sigma[1]);
+  mPositionError.setZ(vtx->sigma[2]);
+  mChiSquared = vtx->pchi2;
+  mQualityBitmask = vtx->iflag;
 }
 
 StVertex::~StVertex() { /* noop */}

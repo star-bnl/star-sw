@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.cc,v 1.1 1999/01/15 20:39:55 wenaus Exp $
+ * $Id: StMwcSector.cc,v 1.2 1999/01/15 22:53:48 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.cc,v $
- * Revision 1.1  1999/01/15 20:39:55  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:48  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StMwcSector.hh"
+#include "StEvent/StMwcSector.hh"
+
+static const char rcsid[] = "$Id: StMwcSector.cc,v 1.2 1999/01/15 22:53:48 wenaus Exp $";
 
 StMwcSector::StMwcSector()
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cc,v 1.1 1999/01/15 20:40:02 wenaus Exp $
+ * $Id: StSvtHit.cc,v 1.2 1999/01/15 22:53:54 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,16 +10,18 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cc,v $
- * Revision 1.1  1999/01/15 20:40:02  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:54  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:53:54  wenaus
-#include "StSvtHit.hh"
-#include "StGlobalTrack.hh"
-#include "StTrackCollection.hh"
+ * version with constructors for table-based loading
+ *
+ **************************************************************************/
+#include "StEvent/StSvtHit.hh"
+#include "StEvent/StGlobalTrack.hh"
 #include "StEvent/StTrackCollection.hh"
 
-static const char rcsid[] = "$Id: StSvtHit.cc,v 1.1 1999/01/15 20:40:02 wenaus Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cc,v 1.2 1999/01/15 22:53:54 wenaus Exp $";
 
 StSvtHit::StSvtHit(const StThreeVector<float>& p,
 	           const StThreeVector<float>& e,

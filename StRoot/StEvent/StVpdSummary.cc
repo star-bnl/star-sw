@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.cc,v 1.1 1999/01/15 20:40:29 wenaus Exp $
+ * $Id: StVpdSummary.cc,v 1.2 1999/01/15 22:54:26 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,14 +10,16 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.cc,v $
- * Revision 1.1  1999/01/15 20:40:29  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:26  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:54:26  wenaus
-#include "StVpdSummary.hh"
+ * version with constructors for table-based loading
+ *
+ **************************************************************************/
 #include "StEvent/StVpdSummary.hh"
 
-static const char rcsid[] = "$Id: StVpdSummary.cc,v 1.1 1999/01/15 20:40:29 wenaus Exp $";
+static const char rcsid[] = "$Id: StVpdSummary.cc,v 1.2 1999/01/15 22:54:26 wenaus Exp $";
 
 StVpdSummary::StVpdSummary()
 {

@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.1 1999/01/15 20:39:48 wenaus Exp $
+ * $Id: StGlobalTrack.cc,v 1.2 1999/01/15 22:53:44 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,11 +13,13 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.1  1999/01/15 20:39:48  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:44  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.5  1999/02/15 16:17:02  wenaus
-#include "StGlobalTrack.hh"
+ * fix double& -> double referencing bug
+ *
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.2 1999/01/15 22:53:44 wenaus Exp $";
  * New track constructor to load helix params independently of table
  *
  * Revision 1.3  1999/02/10 21:50:30  wenaus
@@ -23,6 +28,10 @@
 
  *
  * Revision 1.2  1999/01/15 22:53:44  wenaus
+ * version with constructors for table-based loading
+ *
+StGlobalTrack::StGlobalTrack(dst_track_st* trk) : StTrack(trk)
+{
 
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
 StGlobalTrack::~StGlobalTrack() { /* noop */ }

@@ -1,6 +1,25 @@
 README file for Transient OO Data Model developer.
 Time-stamp: <99/01/14 15:07:50 ullrich> 
 
+Package coordinator: Thomas Ullrich
+
+Modification history
+====================
+
+01/15/1999 T. Wenaus
+  - table-based constructors added throughout so event can be loaded 
+    from Objy or ROOT via tables
+  - changed StEvent constructor to create its collections
+  - StEventSummary renamed back to StDstEventSummary; it is the
+    DST-level event summary
+  - installed as package StEvent; include references #include "StEvent/"
+
+01/14/1999 Original version. Author: Thomas Ullrich
+
+
+Description
+===========
+
 Memory Management:
 ------------------
 The tree has to be set up by hand, i.e. the elements have

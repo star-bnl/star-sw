@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSummary.hh,v 1.1 1999/01/15 20:40:32 wenaus Exp $
+ * $Id: StZdcSummary.hh,v 1.2 1999/01/15 22:54:30 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,13 +10,13 @@
  ***************************************************************************
  *
  * $Log: StZdcSummary.hh,v $
- * Revision 1.1  1999/01/15 20:40:32  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:30  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StZdcSummary_hh
 #define StZdcSummary_hh
-#include "StEnumerations.hh"
+#include "StEvent/StEnumerations.hh"
 
 class StZdcSummary {
 public:

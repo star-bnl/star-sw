@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StVertex.hh,v 1.1 1999/01/15 20:40:27 wenaus Exp $
+ * $Id: StVertex.hh,v 1.2 1999/01/15 22:54:22 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,19 +13,21 @@
  ***************************************************************************
  *
  * $Log: StVertex.hh,v $
- * Revision 1.1  1999/01/15 20:40:27  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:22  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.4  1999/01/30 23:03:18  wenaus
  * table load intfc change; include ref change
  *
-#include "StEnumerations.hh"
+ * Revision 1.3  1999/01/27 12:53:39  ullrich
  * Made setType() virtual. See StV0Vertex for reason.
-#include "StVecPtrGlobalTrack.hh"
+ *
+ * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
  *
 #include "StTables/dst_vertex.h"
 #ifndef StVertex_hh
+#define StVertex_hh
 #include "StEvent/StEnumerations.hh"
 #include "StThreeVector.hh"
 #include "StEvent/StVecPtrGlobalTrack.hh"

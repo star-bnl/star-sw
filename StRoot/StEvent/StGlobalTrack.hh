@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.1 1999/01/15 20:39:49 wenaus Exp $
+ * $Id: StGlobalTrack.hh,v 1.2 1999/01/15 22:53:45 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,28 +13,30 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.1  1999/01/15 20:39:49  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:45  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.6  1999/02/23 21:23:59  ullrich
  * Removed obsolete EMC/SMD hit information (future cluster).
  *
  * Revision 1.5  1999/02/15 16:17:03  wenaus
-#include "StFtpcHit.hh"
-#include "StTpcHit.hh"
-#include "StSvtHit.hh"
-#include "StDedx.hh"
-#include "StTrack.hh"
-#include "StEmcHit.hh"
-#include "StSmdHit.hh"
-#include "StVecPtrTpcHit.hh"
-#include "StVecPtrSvtHit.hh"
-#include "StVecPtrFtpcHit.hh"
+ * fix double& -> double referencing bug
+ *
+ * New track constructor to load helix params independently of table
+ *
+using namespace std;
+#include "StEvent/StEmcHit.hh"
+#include "StEvent/StSmdHit.hh"
+ * table load intfc change; include ref change
+ *
+ * Revision 1.2  1999/01/15 22:53:45  wenaus
+#include "StTables/dst_track.h"
  *
  **************************************************************************/
 #ifndef StGlobalTrack_hh
 #define StGlobalTrack_hh
 
+    StGlobalTrack(dst_track_st*);
 #include "tables/dst_track.h"
 
                   StThreeVector<double>& origin);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.hh,v 1.1 1999/01/15 20:39:51 wenaus Exp $
+ * $Id: StL0Trigger.hh,v 1.2 1999/01/15 22:53:47 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,13 +10,13 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.hh,v $
- * Revision 1.1  1999/01/15 20:39:51  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:47  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:53:47  wenaus
  * version with constructors for table-based loading
  *
-#include "StTrigger.hh"
+ **************************************************************************/
 #define StL0Trigger_hh 
 #include "StEvent/StTrigger.hh"
 using namespace std;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSegment.cc,v 1.1 1999/01/15 20:40:30 wenaus Exp $
+ * $Id: StZdcSegment.cc,v 1.2 1999/01/15 22:54:27 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,13 @@
  ***************************************************************************
  *
  * $Log: StZdcSegment.cc,v $
- * Revision 1.1  1999/01/15 20:40:30  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:27  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StZdcSegment.hh"
+#include "StEvent/StZdcSegment.hh"
+
+static const char rcsid[] = "$Id: StZdcSegment.cc,v 1.2 1999/01/15 22:54:27 wenaus Exp $";
 
 StZdcSegment::StZdcSegment()
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackCollection.hh,v 1.1 1999/01/15 20:40:12 wenaus Exp $
+ * $Id: StTrackCollection.hh,v 1.2 1999/01/15 22:54:03 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackCollection.hh,v $
- * Revision 1.1  1999/01/15 20:40:12  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:03  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:54:03  wenaus
  * version with constructors for table-based loading

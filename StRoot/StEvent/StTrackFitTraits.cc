@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cc,v 1.1 1999/01/15 20:40:13 wenaus Exp $
+ * $Id: StTrackFitTraits.cc,v 1.2 1999/01/15 22:54:05 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,11 +13,13 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cc,v $
- * Revision 1.1  1999/01/15 20:40:13  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:05  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StTrackFitTraits.hh"
+#include "StEvent/StTrackFitTraits.hh"
+
+static const char rcsid[] = "$Id: StTrackFitTraits.cc,v 1.2 1999/01/15 22:54:05 wenaus Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -25,6 +30,20 @@ StTrackFitTraits::StTrackFitTraits()
     mNumberOfFitPoints = 0;           
     mNumberOfPossiblePoints = 0;      
     mQualityBitmap = 0;                  
+}
+
+StTrackFitTraits::StTrackFitTraits(dst_track_st* trk)
+{
+    mDegreesOfFreedom = trk->ndegf;
+    mQualityBitmap = trk->iflag;
+    mNumberOfFitPoints = trk->n_fit_point;
+    mNumberOfPossiblePoints = trk->n_max_point;
+    mChiSquaredInXY = trk->chisq[0];
+    mChiSquaredInPlaneZ = trk->chisq[1];
+    mCovariantMatrix = StMatrix<float>(5,5,0);
+    int i; for (i=0; i<5; i++) {
+      mCovariantMatrix[i][i] = trk->covar_diag[i];
+    }
 }
 
 StTrackFitTraits::~StTrackFitTraits() { /* noop */ }

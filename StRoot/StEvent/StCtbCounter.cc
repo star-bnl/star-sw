@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCtbCounter.cc,v 1.1 1999/01/15 20:39:37 wenaus Exp $
+ * $Id: StCtbCounter.cc,v 1.2 1999/01/15 22:53:28 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,13 @@
  ***************************************************************************
  *
  * $Log: StCtbCounter.cc,v $
- * Revision 1.1  1999/01/15 20:39:37  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:28  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StCtbCounter.hh"
+#include "StEvent/StCtbCounter.hh"
+
+static const char rcsid[] = "$Id: StCtbCounter.cc,v 1.2 1999/01/15 22:53:28 wenaus Exp $";
 
 StCtbCounter::StCtbCounter()
 {

@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StHit.hh,v 1.1 1999/01/15 20:39:50 wenaus Exp $
+ * $Id: StHit.hh,v 1.2 1999/01/15 22:53:46 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHit.hh,v $
- * Revision 1.1  1999/01/15 20:39:50  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:46  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:53:46  wenaus
  * version with constructors for table-based loading
@@ -19,6 +22,7 @@
  **************************************************************************/
 #ifndef StHit_hh
 #define StHit_hh
+#include "StTables/dst_point.h"
 #include <iostream.h>
 #include "StThreeVector.hh"
 #include "tables/dst_point.h"
@@ -26,6 +30,7 @@
 class StHit {
 public:
     StHit();
+    StHit(const StThreeVector<float>&,
 	  const StThreeVector<float>&,
 	  float, unsigned char = 0);
     StHit(dst_point_st*);

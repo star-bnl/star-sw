@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.hh,v 1.1 1999/01/15 20:40:17 wenaus Exp $
+ * $Id: StTriggerDetectorCollection.hh,v 1.2 1999/01/15 22:54:14 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,22 +10,22 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.hh,v $
- * Revision 1.1  1999/01/15 20:40:17  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:14  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StTriggerDetectorCollection_hh
 #define StTriggerDetectorCollection_hh
-#include "StZdcSummary.hh"
-#include "StVpdSummary.hh"
-#include "StZdcSegment.hh"
-#include "StVpdCounter.hh"
-#include "StMwcSector.hh"
-#include "StCtbCounter.hh"
-#include "StVecCtbCounter.hh"
-#include "StVecMwcSector.hh"
-#include "StVecVpdCounter.hh"
-#include "StVecZdcSegment.hh"
+#include "StEvent/StZdcSummary.hh"
+#include "StEvent/StVpdSummary.hh"
+#include "StEvent/StZdcSegment.hh"
+#include "StEvent/StVpdCounter.hh"
+#include "StEvent/StMwcSector.hh"
+#include "StEvent/StCtbCounter.hh"
+#include "StEvent/StVecCtbCounter.hh"
+#include "StEvent/StVecMwcSector.hh"
+#include "StEvent/StVecVpdCounter.hh"
+#include "StEvent/StVecZdcSegment.hh"
 
 class StTriggerDetectorCollection {
 public:

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrigger.cc,v 1.1 1999/01/15 20:40:15 wenaus Exp $
+ * $Id: StTrigger.cc,v 1.2 1999/01/15 22:54:11 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrigger.cc,v $
- * Revision 1.1  1999/01/15 20:40:15  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:11  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StTrigger.hh"
+#include "StEvent/StTrigger.hh"
+
+static const char rcsid[] = "$Id: StTrigger.cc,v 1.2 1999/01/15 22:54:11 wenaus Exp $";
 
 StTrigger::StTrigger()
 {
