@@ -18,14 +18,15 @@
 //:----------------------------------------------- PROTOTYPES         --
 #include "sutLib.h"
 
+//:#####################################################################
 //:=============================================== CLASS              ==
-// duiDispatcher
+// duiFactory
 
 //:----------------------------------------------- CTORS & DTOR       --
-duiDispatcher:: duiDispatcher(const char * name)
+duiFactory:: duiFactory(const char * name)
 		: tdmFactory()
 		, socFactory()
-		, socObject(name, "duiDispatcher") {
+		, socObject(name, "duiFactory") {
 //- normal socObject stuff
    myPtr = (SOC_PTR_T)this;
 //- normal object factory stuff
@@ -43,28 +44,28 @@ duiDispatcher:: duiDispatcher(const char * name)
 #else   /*OLD_DSL*/
    if( !dsNewDataset(&pDSroot, (char*)name, DSET_DIM) ){
 #endif  /*OLD_DSL*/
-      dsPerror("duiDispatcher -- Error creating root dataset");
+      dsPerror("duiFactory -- Error creating root dataset");
    }
    IDREF_T id;
    if( soc->idObject(myCwd,"tdmDataset",id) ){
-      EML_LOG_ERROR(DUPLICATE_OBJECT_NAME);
+      EML_WARNING(DUPLICATE_OBJECT_NAME);
    }
    myRoot = new tdmDataset(myCwd,pDSroot);
    if( !soc->idObject(myCwd,"tdmDataset",id) ){
-      EML_LOG_ERROR(OBJECT_NOT_FOUND);
+      EML_WARNING(OBJECT_NOT_FOUND);
    }
    addEntry(id);
    findNode_ds(myCwd,dui_pDScwd);
 }
 
 //----------------------------------
-duiDispatcher:: ~duiDispatcher() {
+duiFactory:: ~duiFactory() {
 // delete[] myRoot;
    FREE(myCwd);
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
-void duiDispatcher::  cwd (const char * cwd) {
+void duiFactory::  cwd (const char * cwd) {
    if(myCwd)FREE(myCwd);
    myCwd = (char*)MALLOC(strlen(cwd) +1);
    strcpy(myCwd,cwd);
@@ -72,25 +73,33 @@ void duiDispatcher::  cwd (const char * cwd) {
 }
 
 //----------------------------------
-char * duiDispatcher::  cwd () {
+char * duiFactory::  cwd () {
    char *c = (char*)MALLOC(strlen(myCwd)+1);
    strcpy(c,myCwd);
    return c;
 }
 
 //----------------------------------
-tdmDataset* duiDispatcher::  cwdDO () {
+tdmDataset* duiFactory::  cwdDO () {
     return NULL;	/* NOT YET IMPLEMENTED */
 }
 
 //----------------------------------
-tdmDataset* duiDispatcher::  rootDO () {
+tdmDataset* duiFactory::  rootDO () {
     return myRoot;
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char duiFactory :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("duiFactory",iface)
+   ||  tdmFactory::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 //----------------------------------
-STAFCV_T duiDispatcher:: cd (const char * dirPath) {
+STAFCV_T duiFactory:: cd (const char * dirPath) {
 
    DS_DATASET_T *pDS=NULL;
    bool_t result;
@@ -114,13 +123,13 @@ STAFCV_T duiDispatcher:: cd (const char * dirPath) {
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: cp (const char * fromPath
+STAFCV_T duiFactory:: cp (const char * fromPath
 		, const char * toPath) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: ls (const char * path, char *& result) {
+STAFCV_T duiFactory:: ls (const char * path, char *& result) {
 
    DS_DATASET_T *pDS;
    bool_t isTable, isDataset;
@@ -143,7 +152,7 @@ STAFCV_T duiDispatcher:: ls (const char * path, char *& result) {
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
+STAFCV_T duiFactory:: mkdir (const char * dirPath) {
 
    DS_DATASET_T *pDSbase=NULL, *pDSnew=NULL;
    bool_t isDataset;
@@ -172,30 +181,30 @@ STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: mv (const char * fromPath
+STAFCV_T duiFactory:: mv (const char * fromPath
 		, const char * toPath) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: pwd (char *& result) {
+STAFCV_T duiFactory:: pwd (char *& result) {
    result = (char*)MALLOC(strlen(myCwd) +1);
    strcpy(result,myCwd);
    EML_SUCCESS(STAFCV_OK);
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: rm (const char * filePath) {
+STAFCV_T duiFactory:: rm (const char * filePath) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: rmdir (const char * dirPath) {
+STAFCV_T duiFactory:: rmdir (const char * dirPath) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-char * duiDispatcher:: cvtRelAbs (const char * relPath) {
+char * duiFactory:: cvtRelAbs (const char * relPath) {
    char *absPath=NULL;
    if( relPath == NULL ){
       return absPath;	// bad relPath
@@ -210,7 +219,7 @@ char * duiDispatcher:: cvtRelAbs (const char * relPath) {
 // Over-ride tdmFactory methods
 
 //----------------------------------
-tdmDataset* duiDispatcher:: findDataset (const char * dirPath) {
+tdmDataset* duiFactory:: findDataset (const char * dirPath) {
 
    DS_DATASET_T* pDS=NULL;
    char *fullPath=NULL;
@@ -235,7 +244,7 @@ tdmDataset* duiDispatcher:: findDataset (const char * dirPath) {
 }
 
 //----------------------------------
-tdmTable* duiDispatcher:: findTable (const char * filePath) {
+tdmTable* duiFactory:: findTable (const char * filePath) {
 
    DS_DATASET_T* pDS=NULL;
    char *fullPath=NULL;
@@ -260,7 +269,7 @@ tdmTable* duiDispatcher:: findTable (const char * filePath) {
 }
 
 //----------------------------------
-tdmDataset* duiDispatcher:: newDataset (const char * name, long setDim){
+tdmDataset* duiFactory:: newDataset (const char * name, long setDim){
    IDREF_T id;
    if( soc->idObject(name,"tdmDataset",id) ){
       // EML_ERROR(DUPLICATE_OBJECT_NAME);
@@ -281,7 +290,7 @@ tdmDataset* duiDispatcher:: newDataset (const char * name, long setDim){
 }
 
 //----------------------------------
-tdmTable* duiDispatcher:: newTable (const char * name
+tdmTable* duiFactory:: newTable (const char * name
 		, const char * spec, long rows ){
    IDREF_T id;
    if( soc->idObject(name,"tdmTable",id) ){
@@ -307,7 +316,7 @@ tdmTable* duiDispatcher:: newTable (const char * name
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
-STAFCV_T duiDispatcher:: findNode_ds (const char * path
+STAFCV_T duiFactory:: findNode_ds (const char * path
 		, DS_DATASET_T*& pNode) {
    char* fullPath;
    if( !(fullPath = cvtRelAbs(path))

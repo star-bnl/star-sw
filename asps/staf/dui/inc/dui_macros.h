@@ -17,7 +17,7 @@
 
 /*-------------------------------------------- MACROS               --*/
 
-#define DUIDISPATCHER(OBJ) ((duiDispatcher*)(OBJ->ptr()))
+#define DUIFACTORY(OBJ) ((duiFactory*)(OBJ->ptr()))
 
 #endif /* DUI_MACROS_H */
 

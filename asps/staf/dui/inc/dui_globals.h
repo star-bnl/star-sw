@@ -19,7 +19,7 @@
 /*-------------------------------------------- TYPEDEFS             --*/
 /*-------------------------------------------- GLOBALS              --*/
 #ifdef __cplusplus
-   extern duiDispatcher *dui;
+   extern duiFactory *dui;
 #endif /*__cplusplus*/
 /*- This is a global that may not be preserved. -*/
    extern DS_DATASET_T *dui_pDScwd;	/* HACK - REMOVE !!! */

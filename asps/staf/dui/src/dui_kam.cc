@@ -15,6 +15,7 @@
 #include <stdio.h>
 
 #include "kuip.h"
+#define KUIP
 
 #include "asuAlloc.h"
 #include "emlLib.h"
@@ -45,7 +46,7 @@ void kam_dui_cd_()
 STAFCV_T dui_cd(char* path)
 {
    if( !dui->cd(path) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -70,7 +71,7 @@ void kam_dui_cp_()
 STAFCV_T dui_cp(char* fromPath, char* toPath)
 {
    if( !dui->cp(fromPath,toPath) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -96,7 +97,7 @@ STAFCV_T dui_ls(char* path)
    char * result = (char*)MALLOC(2048);
    strncpy(result,"",1);
    if( !dui->ls(path, result) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    printf("DUI:\tListing = ...\n%s\n.\n",result);
    EML_SUCCESS(STAFCV_OK);
@@ -121,7 +122,7 @@ void kam_dui_mkdir_()
 STAFCV_T dui_mkdir(char* path)
 {
    if( !dui->mkdir(path) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -146,7 +147,7 @@ void kam_dui_mv_()
 STAFCV_T dui_mv(char* fromPath, char* toPath)
 {
    if( !dui->mv(fromPath,toPath) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -171,7 +172,7 @@ STAFCV_T dui_pwd()
    char* result=NULL;
 
    if( !dui->pwd(result) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    printf("DUI:\tCurrent Working Directory = (%s) \n",result);
    EML_SUCCESS(STAFCV_OK);
@@ -196,7 +197,7 @@ void kam_dui_rm_()
 STAFCV_T dui_rm(char* path)
 {
    if( !dui->rm(path) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -220,7 +221,7 @@ void kam_dui_rmdir_()
 STAFCV_T dui_rmdir(char* path)
 {
    if( !dui->rmdir(path) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_FAILURE(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
