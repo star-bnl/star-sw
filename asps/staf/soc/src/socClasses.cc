@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.17 1998/01/03 02:34:17 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.18 1998/01/23 21:25:21 ward Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -20,6 +20,7 @@
 #include "soc_globals.h"
 #include "socdl.h"
 
+#undef VALID_IDREF
 #define VALID_IDREF(A)  ( (0 <= A && A < count() && A < maxCount()) \
 	&& ( myObjs[A] != NULL ) )
 

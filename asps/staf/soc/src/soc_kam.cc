@@ -202,6 +202,7 @@ STAFCV_T soc_count()
 {
    long i = soc->count();
    printf("SOC:\tObject count = %d \n",i);
+   float f=i; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -289,7 +290,7 @@ STAFCV_T soc_deleteobject(char* name, char* type)
 *:DESCRIPTION:  KUIP Action Module to identify object
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
-*:* SOC/CATALOG/FINDOBJECT NAME [ TYPE ]
+*: * SOC/IDOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
 void kam_soc_idobject_()
@@ -308,6 +309,7 @@ STAFCV_T soc_idobject(char* name, char* type)
       EML_FAILURE(KAM_INVALID_IDREF);
    }
    printf("SOC:\tObject idRef =  %d \n",id);
+   float f = id; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -403,6 +405,7 @@ STAFCV_T socobject_lock(long idref, char l)
       break;
    }
 
+   float f = lorig; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -438,10 +441,12 @@ STAFCV_T socobject_implements(long idref, char* iface)
    if( p->implementsInterface(iface) ){
       printf("SOC:\tObject (%s) DOES implement (%s) \n",n=p->name()
 		,iface);
+      set_staf_result(1.0);
    }
    else {
       printf("SOC:\tObject (%s) DOES NOT implement (%s) \n",n=p->name()
 		,iface);
+      set_staf_result(0.0);
    }
    FREE(n);
 
@@ -497,6 +502,7 @@ STAFCV_T socobject_oid(char* name, char* type)
       EML_FAILURE(KAM_INVALID_IDREF);
    }
    printf("SOC:\tObject idRef =  %d \n",id);
+   float f = id; set_staf_result(f);
    EML_SUCCESS(STAFCV_OK);
 }
 

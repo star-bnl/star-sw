@@ -14,7 +14,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef irix
+#include <sys/time.h>
+#else
 #include <time.h>
+#endif
 #include <unistd.h>
 
 #include "kuip.h"

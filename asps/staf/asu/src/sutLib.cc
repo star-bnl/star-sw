@@ -28,7 +28,7 @@
 #endif /*SOLARIS*/
 
 #ifdef HPUX
-#include <unistd.h>
+#include <fnmatch.h>	/*06jan98- HPUX 10.2*/
 #endif /*HPUX*/
 
 #include "sutLib.h"
