@@ -27,6 +27,23 @@ private:
     StiRDEvaluableTrackFactory(); //Not implemented
 };
 
+//Factory for StiRDEvaluableTrack objects
+class StiRootDrawableKalmanTrack;
+
+class StiRDKalmanTrackFactory : public StiObjectFactoryInterface<StiKalmanTrack>
+{
+public:
+    StiRDKalmanTrackFactory(const string& newName, int original=-1, int 
+			       incremental=-1, int maxInc=-1);
+    virtual ~StiRDKalmanTrackFactory();
+    
+protected:
+    virtual void* makeNewObject() const;
+    
+private:
+    StiRDKalmanTrackFactory(); //Not implemented
+};
+
 //Factory for StiRDDetector objects
 class StiRootDrawableDetector;
 

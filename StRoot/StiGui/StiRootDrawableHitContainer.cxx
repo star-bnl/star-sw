@@ -41,7 +41,8 @@ void StiRootDrawableHitContainer::update()
     const hitmap& theMap = hits();
     
     for (hitmap::const_iterator it=theMap.begin(); it!=theMap.end(); it++) {
-	const hitvector& tempvec = (*it).second;
+	//const hitvector& tempvec = (*it).second;
+	const hitvector& tempvec = (*it).second.theHitVec;
 	for (hitvector::const_iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
 	    const StThreeVectorF& pos = (*vit)->globalPosition();
 	    

@@ -78,6 +78,7 @@ void StiDisplayManager::kill()
 void StiDisplayManager::cd()
 {
     //mnode->cd();
+    mcanvas->cd();
     return;
 }
 
