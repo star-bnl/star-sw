@@ -15,7 +15,14 @@ my @Process = ("tfs", "trs", "tss");
 my $Nevent = 10;
 my @gyear = ("y1b", "y2a");
 my @dir_year = ("/year_1b/", "/year_2a/");
-my $input_dir = "/star/rcf/disk0/star/test/venus412/b0_3";
+my @input_dir = ("/star/rcf/disk0/star/test/venus412/b0_3",
+                "/star/rcf/disk0/star/test/auau200/hadronic_cocktail/highdensity/year_1b/hadronic_on/Gstardata/",
+                "/star/rcf/disk0/star/test/auau200/hadronic_cocktail/lowdensity/year_1b/hadronic_on/Gstardata/",
+                "/star/rcf/disk0/star/test/auau200/hadronic_cocktail/standard/year_1b/hadronic_on/Gstardata/",
+                "/star/rcf/disk0/star/test/auau200/hadronic_cocktail/highdensity/year_2a/hadronic_on/Gstardata/",
+                "/star/rcf/disk0/star/test/auau200/hadronic_cocktail/lowdensity/year_2a/hadronic_on/Gstardata/",
+                "/star/rcf/disk0/star/test/auau200/hadronic_cocktail/standard/year_2a/hadronic_on/Gstardata/");
+my @hadronic = ("hc_highdensity", "hc_lowdensity", "hc_standard");
 my $sec;
 my $min;
 my $hour;
@@ -28,7 +35,7 @@ my $isdst;
 my $thisday;
 my $thistime;
 my @node_dir = ("tfs_Linux/", "tfs_Solaris/", "trs_Linux/", "trs_Solaris/");
-my @input_file = ("set0352_01_35evts.fzd","psc0208_01_40evts.fzd"); 
+my @input_file = ("set0352_01_35evts.fzd","psc0208_01_40evts.fzd", "gstar.fzd"); 
 my @log_file;
 my $log_name;
 my @input_ygeo;
@@ -52,14 +59,20 @@ my $j = 0;
 # Set input and log file names
 
 for ($i = 0; $i < 2; $i++) {
-   $input_ygeo[$i] = $input_dir . $dir_year[$i] . $input_file[$i];
+   $input_ygeo[$i] = $input_dir[0] . $dir_year[$i] . $input_file[$i];
    $log_name = $input_file[$i];
    $log_name =~ s/.fzd//g;
    $log_file[$i] = $log_name . "." . "log";
-   print ("log file: ", $log_file[$i], "\n");
-   print ("input file:", $input_ygeo[$i], "\n");
 }
-#
+#Set input and log file names for hadronic_coctail
+   $log_file[2] = "gstar.log";
+
+my $jj = 2;
+for ($i= 1; $i < 7; $i++) {
+    $input_ygeo[$jj] = $input_dir[$i] . $input_file[2];
+    $jj++;
+}   
+  
 # Set names of output directories
 #
    my $ii = 0;
@@ -67,39 +80,100 @@ for ($i = 0; $i < 2; $i++) {
   for ($j = 0; $j < 2; $j++) {
  
    $output_dir[$ii] = $TOP_DIR . $node_dir[$i] . $thisday . $dir_year[$j];
-     print ("Output directories:", $output_dir[$ii], "\n");
         $ii++;
       }
 }
+   $jj = 4;
+  for ( $i = 0; $i < 2; $i++) {
+   for ($j = 0; $j < 3; $j++) {
+  $output_dir[$jj] = $output_dir[$i] . $hadronic[$j] ;
+    $jj++;
+   }
+ }    
+  
 # submitt job on tfs_Linux/.../year_1b
 
    $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[0],$Nevent,$Process[0],$gyear[0],$eval,$input_fm,$xdf_out,$input_ygeo[0]);
 
-   $cmd = "ssh rcas0212 \"$cmd_str >& $log_file[0] \&\"";
+  print ("Chain: ", $cmd_str, "\n");
+  $cmd = "ssh rcas0212 \"$cmd_str >& $log_file[0] \&\"";
+   system("$cmd &");
+
+ $Nevent = 16;
+   $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[4],$Nevent,$Process[0],$gyear[0],$eval,$input_fm,$xdf_out,$input_ygeo[2]); 
+
+   print ("Chain: ", $cmd_str, "\n"); 
+   $cmd = "ssh rcas0213 \"$cmd_str >& $log_file[2] \&\"";
+
+   system("$cmd &");
+    
+ $Nevent = 400;
+   $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[5],$Nevent,$Process[0],$gyear[0],$eval,$input_fm,$xdf_out,$input_ygeo[3]); 
+ 
+   print ("Chain: ", $cmd_str, "\n");   
+   $cmd = "ssh rcas0214 \"$cmd_str >& $log_file[2] \&\"";
+
+   system("$cmd &");
+
+ $Nevent = 40;
+   $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[6],$Nevent,$Process[0],$gyear[0],$eval,$input_fm,$xdf_out,$input_ygeo[4]); 
+ 
+   print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rcas0216 \"$cmd_str >& $log_file[2] \&\"";
 
    system("$cmd &");
 
 #submitt job on tfs_Linux/.../year_2a
 
+$Nevent = 10;
     $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[1],$Nevent,$Process[0],$gyear[1],$eval,$input_fm,$xdf_out,$input_ygeo[1]);
 
-   $cmd = "ssh rcas0213 \"$cmd_str >& $log_file[1] \&\"";
+ print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rcas0206 \"$cmd_str >& $log_file[1] \&\"";
 
    system("$cmd &");
  
-#submitt job on rsun00 tfs_Solaris/.../year_1b
+ $Nevent = 16;
+   $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[7],$Nevent,$Process[0],$gyear[1],$eval,$input_fm,$xdf_out,$input_ygeo[5]); 
+ 
+  print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rcas0207 \"$cmd_str >& $log_file[2] \&\"";
+
+   system("$cmd &");
+    
+ $Nevent = 400;
+   $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[8],$Nevent,$Process[0],$gyear[1],$eval,$input_fm,$xdf_out,$input_ygeo[6]); 
+ 
+  print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rcas0208 \"$cmd_str >& $log_file[2] \&\"";
+
+   system("$cmd &");
+
+ $Nevent = 40;
+   $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[9],$Nevent,$Process[0],$gyear[1],$eval,$input_fm,$xdf_out,$input_ygeo[7]); 
+ 
+ print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rcas0209 \"$cmd_str >& $log_file[2] \&\"";
+
+   system("$cmd &");
+
+
+#submitt job on rmine02 tfs_Solaris/.../year_1b
+$Nevent = 10;
 
     $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[2],$Nevent,$Process[0],$gyear[0],$eval,$input_fm,$xdf_out,$input_ygeo[0]);
 
-   $cmd = "ssh rsun00 \"$cmd_str >& $log_file[0] \&\"";
+  print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rmine02 \"$cmd_str >& $log_file[0] \&\"";
 
    system ("$cmd &");
 
-#submitt job on rmds03 tfs_Solaris/.../year_2a 
+#submitt job on rmine02 tfs_Solaris/.../year_2a 
 
     $cmd_str = sprintf ("cd %s; root4star -b -q 'bfc.C(%d, \\\"%s %s %s %s %s\\\",\\\"%s\\\")'",$output_dir[3],$Nevent,$Process[0],$gyear[1],$eval,$input_fm,$xdf_out,$input_ygeo[1]);
 
-   $cmd = "ssh rmds03 \"$cmd_str >& $log_file[1] \&\"";
+ print ("Chain: ", $cmd_str, "\n");
+   $cmd = "ssh rmine02 \"$cmd_str >& $log_file[1] \&\"";
 
    system ("$cmd &");
 
