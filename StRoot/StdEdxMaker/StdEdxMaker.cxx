@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.11 2001/04/17 21:08:08 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.12 2001/05/08 16:52:55 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -10,6 +10,7 @@
 #include "TStyle.h"
 #include "TF1.h"
 #include "TProfile.h"
+#include "TProfile2D.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "TFile.h"
@@ -27,8 +28,6 @@
 #include "tables/St_stk_track_Table.h"
 #include "tables/St_dst_dedx_Table.h"
 #include "tables/St_dst_track_Table.h"
-#include "tables/St_tpg_pad_plane_Table.h"
-#include "tables/St_tpcGain_Table.h"
 #include "tables/St_TpcSecRowCor_Table.h"
 #include "tables/St_TpcTimeGain_Table.h"
 #include "tables/St_TpcDriftDistCorr_Table.h"
@@ -52,7 +51,8 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
 const Int_t NRows =  45;
-const Int_t NPads = 144;
+const Int_t NPads = 185;
+const Int_t NTimeBins = 513;
 BetheBloch BB;
 const Int_t NHYPS = 5;
 const Char_t *Names[] = {"p",
@@ -66,7 +66,18 @@ const Double_t Masses[] = {0.93827231,
 			   0.51099907e-3,
 			   1.87561339};
 
-
+#include "dEdxPoint.h"
+TableClassImpl(St_dEdxPoint,dEdxPoint);
+class MyTableSorter : public TTableSorter {
+public: 
+  MyTableSorter() : TTableSorter() {;}
+  MyTableSorter(const TTable &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0) :
+    TTableSorter(table,colName, firstRow, numbeRows) {;}
+  MyTableSorter(const TTable *table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0) :
+    TTableSorter(table, colName, firstRow, numbeRows){;}
+  virtual ~MyTableSorter() {;}
+  void **GetSortIndex() {return fSortIndex;}
+};
 struct dEdx_t {
   Int_t sector;
   Int_t row;
@@ -82,34 +93,199 @@ struct dEdx_t {
   Double_t dEdxLU; // log of dEdx
   Double_t dEdxN; // normolized to BB
   Double_t dEdxNP; // normolized to BB
+  Double_t dETot; 
   Double_t xyz[3];
   Double_t Prob; 
   Double_t SigmaFee;
   Double_t xscale;
+  Double_t dEIpad;  // total charge integrated so far in the pad
+  Double_t dEI3pad; // total charge integrated so far in the pad +/-
+  Double_t dEIrow;  // total charge integrated so far in the row
+  Double_t dETrow;  // total charge not integrated (time bucket only) in the row
+  Double_t dET3row; // total charge not integrated (+0 + 2 time buckets only) in the row
+  Double_t dET5row; // total charge not integrated (+0 + 4 time buckets only) in the row
   Double_t zdev; 
+  Double_t dY;      // Projection on the wire
+  Double_t RMS;     // rms from volume charge
 };
 enum EFitCase {kVal, kGrad};
 enum ESector  {kTpcInner, kTpcOuter};
 dEdx_t CdEdx[60]; // corrected
 dEdx_t FdEdx[60]; // fit
 Int_t NdEdx = 0, NPoints = 0;
-Double_t dEdxS[60]; // dEdx sorted
+dEdx_t dEdxS[60]; // dEdx sorted
 Double_t dE, dEP, dx, dEdx, Sigma_dEdx;
+Int_t NoSector = 24;
+Int_t NoRow    = 45;
 
 TF1 *fFunc = 0;
 TCanvas *fCanvas = 0;
 TH1F    *h1 = 0;
 TMinuit *gMinuit = new TMinuit(2);
-// correction for signal width versus Half Fee no.
-Double_t FeeSigma[2][3] = {
-     {  3.57800e-01, -9.97264e-05,  4.85553e-07},
-     {  1.11623e+00, -5.02868e-03,  9.04828e-06}
+static const Double_t VolChargeRMS[2][3] = {
+  { 6.07200e-01, 2.69551e+03,-9.37022e+06}, // Inner
+  { 5.03490e-01, 5.79999e+02,-1.17173e+06}  // Outer
 };
+static const Double_t VolChargePars[2][3] = {
+  { 3.74430e-02,-4.61520e+03, 1.21373e+07}, // Inner
+  { 4.50309e-02,-8.74618e+02, 8.21877e+05}  // Outer
+};
+static const Double_t VolChargePar2[2][3] = {
+  {-4.77366e-02, 2.14448e-02, 7.71856e+05},
+  {-6.43962e-02, 2.56413e-02, 3.54593e+05}
+};
+static const Double_t TimeBucketPars[2][3] = {
+  { 2.65854e-02,-7.27281e+02, 1.76017e+06}, // Inner
+  { 3.97145e-02,-2.23166e+02, 1.22639e+05}  // Outer
+};
+// correction for signal width versus Half Fee no.
+// Shape 
+static const Double_t ShapeMean[2][3] = {
+  {-2.32656e-01, 7.63952e-02, 6.59020e-03}, // Inner
+  {-3.75038e-01, 1.28860e-01,-6.93063e-02}	// Outer
+};
+static const Double_t ShapeMean2[2][3] = {
+//{-3.33717e-02,-6.35287e-02,-2.80961e-02}, // Inner
+//{-3.62925e-02,-2.16005e-02,-4.50694e-02}, // Inner hist104
+//{-3.14945e-02, 2.71034e-02,-1.32465e-01}, // Inner
+//{-3.26109e-02, 1.37051e-01,-9.43474e-02}, // Outer hist104
+//{-7.71826e-02, 2.30737e-01,-1.65576e-01}
+  {-3.35910e-02,-2.99541e-03,-1.11952e-01}, // Inner hist105
+  {-5.83643e-02, 2.27074e-01,-1.64927e-01}  // Outer hist105
+};
+static const Double_t ShapeMean3[2][3] = {
+  { 1.06973e-02, 6.54256e-03,-6.50178e-02},
+  {-4.25648e-02, 1.14774e-01,-7.74049e-02}
+};
+
+static const Double_t ShapeSigma[2][3] = {
+  { 6.41952e-01,-2.19547e-01, 9.63439e-03}, // Inner
+  { 8.29636e-01,-3.71708e-01, 8.65136e-02}	// Outer
+};
+#if 0
+static const Int_t NpGaus = 15;
+static const Double_t parGaus[2][NpGaus] = {
+  { 2.46036e-02, 1.40498e+00, 2.47055e+00, // inner FCN=901.311
+    6.16982e-02, 5.61142e-02, 1.66826e+00,
+    3.32510e-01, 3.37850e-01, 1.11764e+00,
+    -1.50531e-01, 9.43012e-01, 9.06190e-01,
+    3.04151e-06, 1.12750e+01, 4.30190e-01},
+  { 1.59304e-02, 2.47379e+00, 2.20052e+00, // outer  FCN=565.111
+    1.05286e-01, 6.35479e-01, 1.44485e+00,
+    2.25293e-01,-6.02424e-02, 9.03555e-01,
+    7.60663e-03,-1.60403e+00, 8.79636e-01,
+    5.08059e-04, 3.27906e+00, 2.96808e+00}
+  { 2.44360e-02, 1.41908e+00, 2.46617e+00, // inner  FCN=763.674
+    5.41521e-02, 4.51835e-02, 1.68407e+00,
+    3.30108e-01, 3.38426e-01, 1.13457e+00,
+   -1.42026e-01, 9.91257e-01, 8.94599e-01,
+    4.23050e-06, 1.12672e+01, 3.25012e-01},
+  { 8.27670e-02, 8.53089e-01, 1.40245e+00, // outer  FCN=595.211
+    6.41931e-02,-2.60920e-01, 1.21457e+00,
+    1.90489e-01,-4.05723e-02, 8.77975e-01,
+    1.63469e-02, 2.41924e+00, 2.21906e+00,
+    4.63142e-04, 3.36123e+00, 2.97301e+00}
+  { 2.40849e-02, 1.49413e+00, 2.46344e+00, // inner FCN=854.658
+    5.26513e-02, 1.22069e-01, 1.68625e+00,
+    3.31619e-01, 3.99863e-01, 1.13330e+00,
+   -1.40664e-01, 1.06100e+00, 8.88679e-01,
+    4.11536e-07, 2.80579e+01, 2.34485e+01},
+  { 6.31978e-04, 3.25692e+00, 2.91068e+00, // outer FCN=710.717
+    2.68356e-01, 5.83134e-01, 1.34926e+00,
+    1.73532e-01,-6.64869e-02, 8.67080e-01,
+    1.63670e-02, 2.41529e+00, 2.20291e+00,
+   -1.26642e-01, 9.01957e-01, 1.19632e+00}
+#endif
+#if 0
+  // hist105
+  {2.51236e-02, 1.49499e+00, 2.44650e+00,  //inner  FCN=712.118
+   2.53359e-02,-3.88057e-01, 1.68834e+00,
+   1.94876e-01, 1.12537e-01, 9.04175e-01,
+   7.70180e-02,-5.78698e-01, 1.04802e+00,
+   3.47170e-02, 1.71196e+00, 1.08821e+00},
+  {4.06648e-04, 3.46670e+00, 2.99457e+00, // outer FCN=786.88 
+   1.03770e-01, 6.45510e-01, 1.43389e+00,
+   2.24613e-01,-7.05268e-02,-8.98582e-01,
+   1.17338e-02,-1.36852e+00, 9.49288e-01,
+   1.61464e-02, 2.43735e+00, 2.22696e+00}
+#endif 
+#if 0
+  // hist106
+  {2.54573e-02, 1.46158e+00, 2.45209e+00, // inner FCN=849.208
+   1.68554e-02,-8.49510e-01, 1.63215e+00,
+   1.93666e-01, 1.07226e-01, 9.02329e-01,
+   8.18786e-02,-5.74588e-01, 1.06865e+00,
+   4.13393e-02, 1.60599e+00, 1.13103e+00},
+  {1.34596e-02, 2.80908e+00, 2.21314e+00, // outer FCN=15396.7 
+   1.10674e-01, 5.41840e-01,-1.50869e+00,
+   2.20954e-01,-8.18191e-02,-9.15525e-01,
+   2.98126e-06,-4.47518e+00, 1.94091e+00,
+  -1.43647e-04,-3.97706e+00, 6.03893e-01}
+#endif
+#if 0
+  // hist107
+  {2.52509e-02, 1.47556e+00, 2.44826e+00, //inner FCN=717.525
+   1.69754e-02,-7.97257e-01, 1.65429e+00,
+   2.05275e-01, 9.77761e-02, 9.05026e-01,
+   7.19835e-02,-6.69662e-01, 1.05186e+00,
+   4.18627e-02, 1.58204e+00, 1.13563e+00},
+  {4.91703e-04, 3.48585e+00, 2.89921e+00, //outer FCN=732.4
+   1.69263e-02, 2.34496e+00, 2.23209e+00,
+   2.47852e-01,-8.09770e-02, 9.21522e-01,
+   1.55330e-02,-1.46922e+00, 1.00418e+00,
+   8.53491e-02, 9.06487e-01, 1.35601e+00}
+#endif
+#if 0 
+  // hist108
+  {2.53450e-02, 1.46585e+00, 2.45121e+00, // FCN=849.256
+   1.73587e-02,-7.93981e-01, 1.65257e+00,
+   1.93423e-01, 1.02432e-01, 9.01621e-01,
+   8.10181e-02,-5.80975e-01, 1.07027e+00,
+   4.13832e-02, 1.58944e+00, 1.13628e+00},
+  {1.31826e-02, 2.86877e+00, 2.19400e+00, // FCN=23418.7 
+   1.08564e-01, 5.58779e-01,-1.50950e+00,
+   2.23409e-01,-8.53954e-02,-9.22558e-01,
+   5.40738e-06,-6.10004e+00, 4.50896e-01,
+   1.49403e-06,-6.96996e+00, 7.74218e-01}
+};
+#endif
+#if 1
+static const Int_t NpGaus = 18;  // hist108
+static const Double_t parGaus[2][NpGaus] = {
+  {2.57760e-02, 1.44032e+00, 2.45484e+00, // inner  FCN=827.986
+   7.05363e-02,-7.36314e-01, 1.12509e+00,
+   2.27172e-02, 1.76234e+00, 8.55844e-01,
+   1.29267e-02, 2.48337e+00, 9.63194e-01,
+   2.33560e-01, 1.12666e-01, 9.40526e-01,
+   3.68642e-03,-2.55756e+00, 1.28595e+00},
+  {3.98911e-01, 3.62377e-02, 1.39581e+00, // outer FCN=1299.15 
+   1.85302e-01,-7.82685e-02, 8.77156e-01,
+   8.66260e-03, 2.37183e+00, 1.06643e+00,
+   1.08442e-03, 3.07282e+00, 2.79578e+00,
+  -2.64447e-01,-8.55225e-02, 1.40087e+00,
+   1.70728e-02, 2.29372e+00, 2.21135e+00}
+//   // hist109 
+//   { 3.18766e-02, 1.33053e+00, 2.42907e+00, //inner FCN=1182.04
+//     2.27104e-01, 9.24565e-01, 1.72365e+00,
+//     2.84830e-01, 3.25272e-01, 1.09503e+00,
+//    -1.63260e-01, 1.28070e+00, 1.69563e+00,
+//    -1.19206e-01, 1.02090e+00, 8.82685e-01,
+//     3.50740e-04, 3.79671e+00, 5.87450e-01},// outer FCN=57017.9
+//   { 1.38222e-01, 2.01722e+00, 1.93379e+00,
+//     4.69376e-01, 3.26876e-01, 1.11854e+00,
+//     1.65910e-01, 2.02170e+00, 8.72250e-01,
+//     3.34840e-01, 2.97259e+00, 1.19772e+00,
+//    -2.88727e-02, 3.68941e+00, 9.47871e-01,
+//    -5.96186e-01, 2.12406e+00, 1.52948e+00}
+};
+
+#endif
 extern    void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *u, Int_t flag);
 extern    void fGaus(Double_t x, Double_t *val, ESector l = kTpcInner);
-extern    void MDFcorrOw(Double_t *x, Double_t *y);
+extern    Double_t II3padC(Double_t x, Double_t y, Int_t IO);
 // Histograms
-TH3F *Z = 0, *ZC = 0, *ETA = 0, *SecRow = 0, *TPoints = 0, *Fee = 0, *FeeC = 0;// *sXY = 0, *SXY = 0;
+TProfile2D *Z = 0, *ZC = 0, *ETA = 0, *SecRow = 0, *MulRow = 0, *ZRow = 0, *Fee = 0, *FeeC = 0;// *sXY = 0, *SXY = 0;
+TH2F *TPoints = 0, *TPoints60 = 0, *TPoints70 = 0;
 TH2F *Time = 0, *Points70 = 0, *Points60 = 0, *Points70B = 0, *Points60B = 0, *SR = 0, *PointsFit = 0;
 TH2F *FShapeI = 0, *FShapeO = 0, *FShapeIC = 0, *FShapeOC = 0;
 TH2F *corrI = 0, *corrO = 0, *corrI2 = 0, *corrO2 = 0, *corrI5 = 0, *corrO5 = 0;
@@ -117,68 +293,61 @@ TH2D *hist70[NHYPS][2], *hist60[NHYPS][2], *histz[NHYPS][2];
 TH2F *FitPull = 0;
 TH2F *corrIw = 0, *corrOw = 0, *corrI2w = 0, *corrO2w = 0, *corrI5w = 0, *corrO5w = 0;
 TH1F *corrI1w = 0, *corrO1w = 0;
+//TProfile2D *XYZ = 0, *XYZbad = 0;
+TProfile2D *Ipad = 0, *I3pad = 0, *II3padI = 0,*II3padO = 0, *Irow = 0, *Trow = 0, *T3row = 0, *T5row = 0, *dYrow = 0;
 TProfile *histB[NHYPS][2], *histBB[NHYPS][2]; 
 ClassImp(StdEdxMaker)  
 
 //_____________________________________________________________________________
-StdEdxMaker::StdEdxMaker(const char *name):StMaker(name), m_tpcGain(0), 
-m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), m_badpads(0) {}
+StdEdxMaker::StdEdxMaker(const char *name):StMaker(name), 
+m_TpcSecRow(0),m_fee_vs_pad_row(0), m_tpcTime(0), m_drift(0), m_badpads(0), m_Simulation(kFALSE) {}
 //_____________________________________________________________________________
 StdEdxMaker::~StdEdxMaker(){}
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Init(){
-// 		TPG parameters
-      // Normal to Sector
-  Int_t NoSector = gStTpcDb->Dimensions()->numberOfSectors();
-  Int_t NoRow    = 45;
-  for (Int_t sector=1; sector<=NoSector; sector++) {
-    Double_t beta = (sector > 12) ?
-      (NoSector-sector)*2.*M_PI/(static_cast<double>(NoSector)/2.): 
-      sector*2.*M_PI/(static_cast<double>(NoSector)/2.);
-    mNormal[sector-1] = new StThreeVectorD(sin(beta), cos(beta), 0.);
-  }
-  if (m_Mode <= -1) {
-    gMessMgr->Warning() << "StdEdxMaker::" <<
-      " Calibration is switched OFF ==============" << endm;
-  }
-  else {
-    TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
-    m_tpcTime = (St_TpcTimeGain *) tpc_calib->Find("TpcTimeGain"); 
-    TDataSet *tpc_daq  = GetDataBase("tpc/daq"); assert(tpc_daq);
-    m_fee_vs_pad_row = (St_fee_vs_pad_row *) tpc_daq->Find("fee_vs_pad_row");
-    if (!m_tpcTime) {
-      cout << "TpcTimeGain is missing <=========== switch off time dependent calibration" << endl;
-      assert(m_tpcTime); 
-    }
-    m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); 
-    if (!m_drift) {
-      cout << "TpcDriftDistCorr is missing <=========== switch off dirft dependent calibration" << endl;
-      assert(m_drift); 
-    }
-    m_badpads = (St_tpcBadPad *) tpc_calib->Find("BadPad");
-    if (!m_badpads) cout << "=== List of bad pads is missing ===" << endl;
-    m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
+  if (((StBFChain *)GetChain())->GetOption("Simu")) {
+    m_Simulation = kTRUE;
+    gMessMgr->Warning() << "StdEdxMaker:: use Simulation mode (no calibration) " << endm;
   }
   if (m_Mode > 0) {// calibration mode
-    
     TFile *f = (TFile *) ((StBFChain *)GetChain())->GetTFile();
     if (f) {
       f->cd();
-      Z   = new TH3F("Z","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
-		     2*NoSector,1,2*NoSector+1,100,0.,200., 200,-5.,5.);
-      ZC  = new TH3F("ZC","dEdxN versus sector(inner <= 24 and outter > 24)  and Z",
-		     2*NoSector,1,2*NoSector+1,100,0.,200., 200,-5.,5.);
-      ETA   = new TH3F("ETA","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and #{eta}",
-		       2*NoSector,1,2*NoSector+1, 125,-.25,2.25, 200,-5.,5.);
+      //      XYZ = new TProfile2D("XYZ","xyz for clusters",100,-200,200,100,-200,200,100,-200,200);
+      //      XYZbad = new TProfile2D("XYZbad","xyz for clusters with mismatched sectors",
+      //			100,-200,200,100,-200,200,100,-200,200);
+      Z   = new TProfile2D("Z","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and Z",
+		     2*NoSector,1., 2*NoSector+1,100,0.,200.);
+      ZC  = new TProfile2D("ZC","dEdxN versus sector(inner <= 24 and outter > 24)  and Z",
+		     2*NoSector,1., 2*NoSector+1,100,0.,200.);
+      ETA   = new TProfile2D("ETA","log(dEdx/Pion) versus sector(inner <= 24 and outter > 24)  and #{eta}",
+		       2*NoSector,1., 2*NoSector+1, 125,-.25,2.25);
       SR = new TH2F("SR","sector and row from points (input)",
-		       NoSector,1,NoSector+1, NoRow,1.,NoRow+1);
-      SecRow = new TH3F("SecRow","log(dEdx/Pion) versus sector  and row",
-		       NoSector,1,NoSector+1, NoRow,1.,NoRow+1, 200,-5.,5.);
-      Int_t noFee = 182;
-      Fee    = new TH3F("Fee","dEdx versus sector and Fee after pulser correction only",
-			NoSector,1,NoSector+1,  2*noFee,0,2*noFee, 200,-5.,5.);
-      FeeC   = new TH3F("FeeC","dEdx versus sector and Fee",
-			NoSector,1,NoSector+1,  2*noFee,0,2*noFee, 200,-5.,5.);
+		       NoSector,1., NoSector+1, NoRow,1., NoRow+1);
+      SecRow = new TProfile2D("SecRow","log(dEdx/Pion) versus sector  and row",
+		       NoSector,1., NoSector+1, NoRow,1., NoRow+1);
+      MulRow = new TProfile2D("MulRow","log(dEdx/Pion) versus Multiplicity of global tracks and row",
+		       36,0.,6000., NoRow,1.,NoRow+1);
+      ZRow = new TProfile2D("ZRow","log(dEdx/Pion) versus Z and row",
+		       80,-200.,200., NoRow,1., NoRow+1);
+      Ipad = new TProfile2D("Ipad","log(dEdx/Pion) versus charge collected on given pad and row",
+		       200,0,200e-6, NoRow,1.,NoRow+1);
+      I3pad = new TProfile2D("I3pad","log(dEdx/Pion) versus charge collected +/- pad and row",
+		       200,0,400e-6, NoRow,1.,NoRow+1);
+      II3padI = new TProfile2D("II3padI","log(dEdx/Pion) versus charge collected Ipad vs I3pad-Ipad Inner",
+		       200,0,200e-6, 200, 0, 400e-6);
+      II3padO = new TProfile2D("II3padO","log(dEdx/Pion) versus charge collected Ipad vs I3pad-Ipad Outer",
+		       200,0,200e-6, 200, 0, 400e-6);
+      Irow = new TProfile2D("Irow","log(dEdx/Pion) versus charge collected on given row and row",
+		       200,0,1e-3, NoRow,1., NoRow+1);
+      Trow = new TProfile2D("Trow","log(dEdx/Pion) versus charge collected on given row at given time and row",
+		       200,0,200e-6, NoRow,1., NoRow+1);
+      T3row = new TProfile2D("T3row","log(dEdx/Pion) versus charge collected on given row at given time and row",
+		       200,0,200e-6, NoRow,1., NoRow+1);
+      T5row = new TProfile2D("T5row","log(dEdx/Pion) versus charge collected on given row at given time and row",
+		       200,0,200e-6, NoRow,1., NoRow+1);
+      dYrow = new TProfile2D("dYrow","log(dEdx/Pion) versus cluseer projection on the wire for given row",
+		       100,-2.5,2.5, NoRow,1., NoRow+1);
       corrI   = new TH2F("corrI","Correlation for Inner Sector for pair of nearest rows",
 			100,-10.,10., 100,-10.,10.);
       corrO   = new TH2F("corrO","Correlation for Outer Sector for pair of nearest rows",
@@ -211,8 +380,12 @@ Int_t StdEdxMaker::Init(){
       Points60B = new TH2F("Points60B","dEdx(I60) versus no. of measured points BB",50,0,50.,200,-1.,1.);
       PointsFit  = new TH2F("PointsFit","dEdx(fit) versus no. of measured points",
 			    50,0,50., 200,-1.,1.);
-      TPoints  = new TH3F("TPoints","dEdx(fit) versus no. of measured points and length", 
-			  50,0,50., 150,10.,160., 200,-1.,1.);
+      TPoints  = new TH2F("TPoints","dEdx(fit) versus length", 
+			  150,10.,160., 200,-1.,1.);
+      TPoints60= new TH2F("TPoints60","dEdx(fit) versus length", 
+			  150,10.,160., 200,-1.,1.);
+      TPoints70= new TH2F("TPoints70","dEdx(fit) versus length", 
+			  150,10.,160., 200,-1.,1.);
       FShapeI  = new TH2F("FShapeI","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Inner Sector", 
 			  26,0.1, 1.4, 800,-15.,25.);
       FShapeO  = new TH2F("FShapeO","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Outer Sector", 
@@ -258,27 +431,114 @@ Int_t StdEdxMaker::Init(){
 			150,10.,160, 200,-5.,5.);
     }
   }
+  gMessMgr->SetLimit("StdEdxMaker:: mismatched Sector",20);
+  gMessMgr->SetLimit("StdEdxMaker:: Helix Pediction",20);
+  gMessMgr->SetLimit("StdEdxMaker:: Coordinates",20);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
+Int_t StdEdxMaker::InitRun(Int_t RunNumber){
+// 		TPG parameters
+      // Normal to Sector
+  StTpcCoordinateTransform transform(gStTpcDb);
+  Double_t alpha = 2.*TMath::Pi()/NoSector;
+  for (Int_t sector=1; sector<=NoSector; sector++) {
+    Double_t beta = (sector > 12) ? 2*(NoSector-sector)*alpha: 2*sector*alpha;
+    mNormal[sector-1] = new StThreeVectorD(sin(beta), cos(beta), 0.);
+    for (Int_t row = 1; row <= NoRow; row++) {
+      StTpcPadCoordinate padCoord(sector, row, 1, 1);
+      StTpcLocalSectorCoordinate lsMidCoord; transform(padCoord, lsMidCoord);
+      StTpcLocalSectorCoordinate  lsPos(0,lsMidCoord.position().y(),0, sector);
+      StGlobalCoordinate          gMidCoord; transform(lsPos, gMidCoord);
+      mRowPosition[sector-1][row-1][0] = new  StThreeVectorD(gMidCoord.position().x(), // gMidPos 
+							     gMidCoord.position().y(),
+							     gMidCoord.position().z());
+      Double_t padlength;
+      if (row<14) padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
+      else 	  padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
+      StTpcLocalSectorCoordinate lsTopCoord(0,
+					    lsPos.position().y()+padlength/2.,
+					    0,
+					    sector);
+      StTpcLocalSectorCoordinate lsBotCoord(0,
+					    lsPos.position().y()-padlength/2.,
+					    0,
+					    sector);
+      //Transform back to global coordinates
+      StGlobalCoordinate gTopCoord; transform(lsTopCoord, gTopCoord);
+      StGlobalCoordinate gBotCoord; transform(lsBotCoord, gBotCoord);
+      mRowPosition[sector-1][row-1][1] = new StThreeVectorD(gTopCoord.position().x(), // gTopPos
+							    gTopCoord.position().y(),
+							    gTopCoord.position().z());
+      mRowPosition[sector-1][row-1][2] = new StThreeVectorD(gBotCoord.position().x(), // gBotPos
+							    gBotCoord.position().y(),
+							    gBotCoord.position().z());
+    }
+  }
+  if (m_Mode >= 0) {
+    // calibration constants
+    if (!m_tpcTime) {
+      TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
+      m_tpcTime = (St_TpcTimeGain *) tpc_calib->Find("TpcTimeGain"); 
+      TDataSet *tpc_daq  = GetDataBase("tpc/daq"); assert(tpc_daq);
+      m_fee_vs_pad_row = (St_fee_vs_pad_row *) tpc_daq->Find("fee_vs_pad_row");
+      if (!m_tpcTime) {
+	cout << "TpcTimeGain is missing <=========== switch off time dependent calibration" << endl;
+	assert(m_tpcTime); 
+      }
+      m_drift = (St_TpcDriftDistCorr *) tpc_calib->Find("TpcDriftDistCorr"); 
+      if (!m_drift) {
+	cout << "TpcDriftDistCorr is missing <=========== "
+	     << "switch off dirft dependent calibration" << endl;
+	assert(m_drift); 
+      }
+      m_badpads = (St_tpcBadPad *) tpc_calib->Find("BadPad");
+      if (!m_badpads) cout << "=== List of bad pads is missing ===" << endl;
+      m_TpcSecRow = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRow"); assert(m_TpcSecRow); 
+    }
+  }
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t StdEdxMaker::FinishRun(Int_t OldRunNumber) {
+  // Clean up
+  Int_t NoSector = 24;
+  Int_t NoRow    = 45;
+  for (Int_t sector=1; sector<=NoSector; sector++) {
+    SafeDelete(mNormal[sector-1]);
+    for (Int_t row = 1; row <= NoRow; row++) {
+      for (int i = 0; i<3; i++) SafeDelete(mRowPosition[sector-1][row-1][i]);
+    }
+  }
+  SafeDelete(m_TpcSecRow);
+  SafeDelete(m_fee_vs_pad_row); 
+  SafeDelete(m_tpcTime); 
+  SafeDelete(m_drift); 
+  SafeDelete(m_badpads); 
+  return StMaker::FinishRun(OldRunNumber);
+}
+//_____________________________________________________________________________
+Int_t StdEdxMaker::Finish() {
+  FinishRun(0);
+  return StMaker::Finish();
+}
+//_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
-  Double_t Scale2keV = 1.7428;
   Double_t Scale70   = 1.2315;
   Double_t Scale60   = 1.3146;
+  StTpcCoordinateTransform transform(gStTpcDb);
   St_DataSet *Dst = GetDataSet("dst"); assert(Dst);
   St_DataSet *dst = Dst->Find(".data/dst");
   if (!dst) dst = Dst;
   St_dst_dedx *dst_dedx     = (St_dst_dedx *) dst->Find("dst_dedx");
-  if (m_tpcGain) {SafeDelete(dst_dedx);}
-  if (!dst_dedx) {
-    dst_dedx = new St_dst_dedx("dst_dedx",20000); dst->Add(dst_dedx);
-  }
-  else dst_dedx->ReAllocate(20000);
+  SafeDelete(dst_dedx);
   St_dst_track     *globtrk     = (St_dst_track *)  dst->Find("globtrk");
   if (! globtrk) { 
     gMessMgr->Error() << "StdEdxMaker::Make(): global track table is not found " << endm; 
     return kStOK;
   }
+  Double_t GMult = globtrk->GetNRows();
+  dst_dedx = new St_dst_dedx("dst_dedx",20000); dst->Add(dst_dedx);
   St_dst_track     *primtrk     = (St_dst_track *)  dst->Find("primtrk");
   St_stk_track     *stk_track   = (St_stk_track *) GetDataSet("stk_track");
   if (stk_track) {//Silicon if any
@@ -296,12 +556,128 @@ Int_t StdEdxMaker::Make(){
     }
   }
   St_dst_point     *point      = (St_dst_point *)  dst->Find("point");
-  if (! point) {gMessMgr->Error() << "StdEdxMaker::Make(): dst points is not found " << endm; return kStOK;}
+  if (! point) {
+    gMessMgr->Error() << "StdEdxMaker::Make(): dst points is not found " 
+		      << endm; return kStOK;
+  }
+  // Corrections 
+  StDstPointChair  *pointC     = new StDstPointChair(point);
+  NPoints = point->GetNRows();
+  St_dEdxPoint *dedx_point = new St_dEdxPoint("dEdxPoint",NPoints);
+  AddGarb(dedx_point);
+  dEdxPoint dEdxp;
+  Int_t ipoint;
+  for (ipoint = 0; ipoint< NPoints; ipoint++) {
+    if (pointC->DetectorId(ipoint) != kTpcId) continue;
+//     // remove mismatched 
+//     if (pointC->Sector(ipoint) <=12 && pointC->GetZ(ipoint) < 0 ||
+// 	pointC->Sector(ipoint) > 12 && pointC->GetZ(ipoint) > 0) continue;
+    memset (&dEdxp, 0, sizeof(dEdxPoint));
+    dEdxp.id_track = pointC->TrackId(ipoint);
+    dEdxp.FitFlag  = pointC->GetFitFlag(ipoint);
+    dEdxp.iflag    = pointC->GetFlag(ipoint);
+    dEdxp.dE = pointC->GetCharge(ipoint);
+    dEdxp.sector   = pointC->Sector(ipoint);
+    dEdxp.row      = pointC->PadRow(ipoint);
+    dEdxp.xyz[0]   = pointC->GetX(ipoint);
+    dEdxp.xyz[1]   = pointC->GetY(ipoint);
+    dEdxp.xyz[2]   = pointC->GetZ(ipoint);
+    StGlobalCoordinate global(dEdxp.xyz[0],dEdxp.xyz[1],dEdxp.xyz[2]);
+    StTpcPadCoordinate Pad;      transform(global,Pad);
+    //    if (XYZ) XYZ->Fill(dEdxp.xyz[0],dEdxp.xyz[1],dEdxp.xyz[2]);
+    dEdxp.pad = Pad.pad();
+    dEdxp.timeBucket = Pad.timeBucket() + 10;
+    if (dEdxp.sector != Pad.sector() ||
+	dEdxp.row    != Pad.row()) continue;
+    if (dEdxp.pad    < 1             ||
+	dEdxp.pad    >= NPads        ||
+	dEdxp.timeBucket < 0         ||
+	dEdxp.timeBucket >= NTimeBins) {
+      //      if (XYZbad) XYZbad->Fill(dEdxp.xyz[0],dEdxp.xyz[1],dEdxp.xyz[2]);
+      gMessMgr->Warning() << "StdEdxMaker:: mismatched Sector " 
+			  << Pad.sector() << " / " << dEdxp.sector
+			  << " Row " << Pad.row() << " / " << dEdxp.row 
+			  << "pad " << dEdxp.pad << " TimeBucket :" << dEdxp.timeBucket 
+			  << " x: " << dEdxp.xyz[0] << " y: "
+			  << dEdxp.xyz[1] << " z: " << dEdxp.xyz[2] 
+			  << endm;
+      continue;
+    }
+    dEdxp.sortId = dEdxp.timeBucket + 1000*(dEdxp.pad + 1000*(dEdxp.row + 100*dEdxp.sector));
+    dedx_point->AddAt(&dEdxp);
+  }
+  TString sortId("sortId");
+  MyTableSorter     *dedx_pointS     = new MyTableSorter(dedx_point,sortId);
+  dEdxPoint *dEdxP = dedx_point->GetTable();
+  Double_t PadTime[NPads][NTimeBins];
+  NPoints = dedx_pointS->GetNRows();
+  dEdxPoint **fdEdxP = (dEdxPoint **) dedx_pointS->GetSortIndex();
+  Double_t RowTime[NTimeBins];
+  UInt_t idPT = 0;
+  Int_t padOrdered[NPads];
+  Int_t timeList[NTimeBins], timeOrdered[NTimeBins];
+  Int_t nTimeBinT, nTimeBins;
+  Int_t nPadBins;
+  Int_t index[NTimeBins];
+  for (int k=0; k < NPoints;k++) {
+    if (fdEdxP[k]->sortId/1000000 !=idPT) {// get integral of charge
+      idPT = fdEdxP[k]->sortId/1000000;
+      int k1;
+      nTimeBinT = nTimeBins = nPadBins = 0;
+      for (k1=k; k1 < NPoints && fdEdxP[k1]->sortId/1000000 == idPT; k1++) {
+	padOrdered[nPadBins] = fdEdxP[k1]->pad;
+	if (nPadBins == 0 || padOrdered[nPadBins] != padOrdered[nPadBins-1]) nPadBins++;
+	timeList[nTimeBinT] = fdEdxP[k1]->timeBucket;
+	nTimeBinT++;
+      }
+      TMath::Sort(nTimeBinT,timeList, index, kFALSE); 
+      for (int i=0; i<nTimeBinT; i++) {
+	timeOrdered[nTimeBins] = timeList[index[i]];
+	if (nTimeBins == 0 || timeOrdered[nTimeBins] != timeOrdered[nTimeBins-1]) nTimeBins++;
+      }
+      Int_t k2 = k1;
+      memset (PadTime, 0, NPads*NTimeBins*sizeof(Double_t));
+      for (k1 = k; k1 < k2; k1++) {
+	Int_t padI = TMath::BinarySearch(nPadBins,padOrdered,fdEdxP[k1]->pad);
+	Int_t timeI = TMath::BinarySearch(nTimeBins,timeOrdered,fdEdxP[k1]->timeBucket);
+	PadTime[padI][timeI] += fdEdxP[k1]->dE;
+      }
+      memset (RowTime, 0, NTimeBins*sizeof(Double_t));
+      for (int pad=0; pad<nPadBins; pad++) {
+	for (int time=0; time<nTimeBins; time++) {
+	  RowTime[time]    += PadTime[pad][time];
+          if (time>0) {
+	    PadTime[pad][time] += PadTime[pad][time-1];
+	    PadTime[nPadBins][time] += PadTime[pad][time-1];
+	  }
+	}
+      }
+      for (k1 = k; k1 < k2; k1++) {
+	Int_t padI  = TMath::BinarySearch(nPadBins,padOrdered,fdEdxP[k1]->pad);
+	Int_t timeI = TMath::BinarySearch(nTimeBins,timeOrdered,fdEdxP[k1]->timeBucket);
+	if (timeI > 0) {
+	  fdEdxP[k1]->dEIpad  = PadTime[padI][timeI-1];
+	  fdEdxP[k1]->dEI3pad = fdEdxP[k1]->dEIpad;
+	  if (padI > 0 && padOrdered[padI] - padOrdered[padI-1] == 1) 
+	    fdEdxP[k1]->dEI3pad += 	PadTime[padI-1][timeI-1];
+	  if (padI < nPadBins - 1 && padOrdered[padI+1] - padOrdered[padI] == 1) 
+	    fdEdxP[k1]->dEI3pad += 	PadTime[padI+1][timeI-1];
+	  fdEdxP[k1]->dEIrow  = PadTime[nPadBins][timeI-1];
+	}
+	fdEdxP[k1]->dETrow  = RowTime[timeI] - fdEdxP[k1]->dE;
+	Int_t t=timeI;
+	fdEdxP[k1]->dET3row = -fdEdxP[k1]->dE + RowTime[t] + RowTime[t+1] + RowTime[t+2];
+	fdEdxP[k1]->dET5row =  fdEdxP[k1]->dET3row + RowTime[t+3] +  RowTime[t+4];
+      }
+      k = k2 - 1;
+    }
+  }  
+  SafeDelete(dedx_pointS);
+
   TString          id_track("id_track");
   TString          id("id");
-  TTableSorter     *pointS     = new TTableSorter(point,id_track);
+  TTableSorter     *pointS     = new TTableSorter(dedx_point,id_track);
   TTableSorter     *globtrkS   = new TTableSorter(globtrk,id);
-  StDstPointChair  *pointC     = new StDstPointChair(point);
   StTrackChair     *globtrkC   = new StTrackChair(globtrk);
   
   TTableSorter     *primtrkS   = 0;
@@ -313,8 +689,7 @@ Int_t StdEdxMaker::Make(){
   Double_t TimeScale = 1;
   if (m_tpcTime) {TimeScale = (*m_tpcTime)[0].ScaleFactor;}
   StHelixD         *helix      = 0;
-  StTpcCoordinateTransform transform(gStTpcDb);
-  Int_t iprim, jprim, iglob, ipoint; 
+  Int_t iprim, jprim, iglob; 
   Int_t nPrimaryTracks = 0;
   Double_t pTinv = 0;
   Double_t p = 0;
@@ -323,19 +698,22 @@ Int_t StdEdxMaker::Make(){
   dst_track_st *primTrk = 0, *globTrk = 0, *primTRK = 0;
   if (primtrk) {
     primTrk = primtrk->GetTable();
-    for (iprim = 0; iprim < primtrk->GetNRows(); iprim++, primTrk++) 
+    Int_t N = primtrk->GetNRows();
+    for (iprim = 0; iprim < N; iprim++, primTrk++) 
       if (primTrk->iflag > 0) nPrimaryTracks++;
   }
   Int_t kglob = 0, kprim = 0, kpoint = 0; 
-  for (; kglob < globtrkS->GetNRows();kglob++) {
+  Int_t N =  globtrkS->GetNRows();
+  Int_t NP = 0; if (primtrkS) NP = primtrkS->GetNRows();
+  for (; kglob < N;kglob++) {
     iglob = globtrkS->GetIndex(kglob); assert (iglob >= 0);
     globTrk = globtrk->GetTable() + iglob;
     primTrk = 0;
     iprim = -1;
     if (globTrk->iflag < 0) continue;
     Int_t Id = globTrk->id;
-    if (primtrkS && kprim < primtrkS->GetNRows()) {
-      for (; kprim < primtrkS->GetNRows(); kprim++) {
+    if (primtrkS && kprim < NP) {
+      for (; kprim < NP; kprim++) {
 	jprim = primtrkS->GetIndex(kprim); assert(jprim >=0);
 	primTRK = primtrk->GetTable() + jprim;
 	if (primTRK->iflag < 0) continue;
@@ -351,7 +729,7 @@ Int_t StdEdxMaker::Make(){
 	  pTinv  = primtrkC->Invpt(iprim);
 	  p = 1.e6;
 	  if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
-	  Double_t Theta = TMath::ATan(tanl);
+	  Double_t Theta = TMath::Pi()/2 - TMath::ATan(tanl);
 	  Eta = - TMath::Log(TMath::Tan(Theta/2.));
 	}
 	break;
@@ -365,7 +743,7 @@ Int_t StdEdxMaker::Make(){
 	pTinv  = globtrkC->Invpt(iglob);
 	p = 1.e6;
 	if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
-	Double_t Theta = TMath::ATan(tanl);
+	Double_t Theta = TMath::Pi()/2 - TMath::ATan(tanl);
 	Eta = - TMath::Log(TMath::Tan(Theta/2.));
       }
     }
@@ -373,51 +751,24 @@ Int_t StdEdxMaker::Make(){
     NPoints = 0;
     Int_t NFitPoints=0;
     NdEdx = 0;
-    Double_t TrackLength = 0;
+    Double_t TrackLength60 = 0, TrackLength70 = 0, TrackLength = 0;
     Double_t avrgZ = 0;
-    for (;kpoint < pointS->GetNRows();kpoint++) {
+    Int_t NoPoints =  pointS->GetNRows();
+    for (;kpoint < NoPoints;kpoint++) {
       ipoint = pointS->GetIndex(kpoint); assert (ipoint >= 0);
-      if (pointC->TrackId(ipoint) < Id) continue;
-      if (pointC->TrackId(ipoint) > Id) break;
+//       if (pointC->TrackId(ipoint) < Id) continue;
+//       if (pointC->TrackId(ipoint) > Id) break;
+      if (dEdxP[ipoint].id_track < Id) continue;
+      if (dEdxP[ipoint].id_track > Id) break;
       NPoints++;
-      if (!pointC->GetFitFlag(ipoint)) continue;
+      if (!dEdxP[ipoint].FitFlag) continue;
       NFitPoints++;
-      if (pointC->GetFlag(ipoint)) continue;
-      if (pointC->DetectorId(ipoint) != kTpcId) continue;
-      Int_t sector = pointC->Sector(ipoint);
-      Int_t row = pointC->PadRow(ipoint);
-      Double_t pointX = pointC->GetX(ipoint);
-      Double_t pointY = pointC->GetY(ipoint);
-      Double_t pointZ = pointC->GetZ(ipoint);
-      
-      StGlobalCoordinate global(pointX,pointY,pointZ);
-      StTpcPadCoordinate Pad;      transform(global,Pad);
-#ifdef DEBUG
-      if (sector != Pad.sector() || 
-	  row != Pad.row()) {
-	gMessMgr->Warning() << "StdEdxMaker::" <<
-	  " Sector = " << PadOnPlane.sector() << "/"  << "/" << Pad.sector() << "/" << sector <<
-	  " Row = " << PadOnPlane.row() << "/" << Pad.row() << "/" << row << 
-	  " Pad = " << PadOnPlane.pad() << "/" << Pad.pad() <<
-	  " from Helix  is not matched with point/" << endm;
-	gMessMgr->Warning() << "StdEdxMaker:: Coordinates " << 
-	  " x: " << xyzOnPlane.x() << "/" << pointX <<
-	  " y: " << xyzOnPlane.y() << "/" << pointY <<
-	  " z: " << xyzOnPlane.z() << "/" << pointZ << endm;
-	continue;
-      }
-      sector = Pad.sector();
-      row = Pad.row();
-#endif
+      if (dEdxP[ipoint].iflag) continue;
+      Int_t sector = dEdxP[ipoint].sector;
+      Int_t row    = dEdxP[ipoint].row;
       //      if (row == 13) continue; // Skip row 13
       StThreeVectorD &normal = *mNormal[sector-1];
-      //Get the position of the row center, transform to local sector coordinates
-      StTpcPadCoordinate padCoord(sector, row, 1, 1);
-      StTpcLocalSectorCoordinate lsMidCoord; transform(padCoord, lsMidCoord);
-      StGlobalCoordinate          gMidCoord; transform(lsMidCoord, gMidCoord);
-      const StThreeVectorD  gMidPos = StThreeVectorD(gMidCoord.position().x(),
-						     gMidCoord.position().y(),
-						     gMidCoord.position().z());
+      const StThreeVectorD  &gMidPos = *mRowPosition[sector-1][row-1][0];
       // check that helix prediction is consistent with measurement
       Double_t s = helix->pathLength(gMidPos, normal);
       StThreeVectorD xyzOnPlane = helix->at(s);
@@ -425,91 +776,97 @@ Int_t StdEdxMaker::Make(){
       StTpcPadCoordinate PadOnPlane;      transform(globalOnPlane,PadOnPlane);
       if (sector != PadOnPlane.sector() || 
 	  row != PadOnPlane.row() ||
-	  TMath::Abs(Pad.pad()-PadOnPlane.pad()) > 5) {
+	  TMath::Abs(dEdxP[ipoint].pad-PadOnPlane.pad()) > 5) {
 	if (iprim >= 0  && Debug() > 1) {
-	  gMessMgr->Warning() << "StdEdxMaker::" <<
-	    " Sector = " << PadOnPlane.sector() << "/"  << "/" << Pad.sector() << 
-	    "/" << sector <<
-	    " Row = " << PadOnPlane.row() << "/" << Pad.row() << "/" << row << 
-	    " Pad = " << PadOnPlane.pad() << "/" << Pad.pad() <<
-	    " from Helix  is not matched with point/" << endm;;
+	  gMessMgr->Warning() << "StdEdxMaker::	Helix Pediction " 
+			      << "Sector = " 
+			      << PadOnPlane.sector() << "/" 
+			      << dEdxP[ipoint].sector << "/" << sector 
+			      << " Row = " << PadOnPlane.row() << "/" 
+			      << dEdxP[ipoint].row << "/" << row 
+			      << " Pad = " << PadOnPlane.pad() << "/" 
+			      << dEdxP[ipoint].pad 
+			      << " from Helix  is not matched with point/" << endm;;
 	  gMessMgr->Warning() << "StdEdxMaker:: Coordinates " << 
-	    " x: " << xyzOnPlane.x() << "/" << pointX <<
-	    " y: " << xyzOnPlane.y() << "/" << pointY <<
-	    " z: " << xyzOnPlane.z() << "/" << pointZ << endm;
+	    " x: " << xyzOnPlane.x() << "/" << dEdxP[ipoint].xyz[0] <<
+	    " y: " << xyzOnPlane.y() << "/" << dEdxP[ipoint].xyz[1] <<
+	    " z: " << xyzOnPlane.z() << "/" << dEdxP[ipoint].xyz[2] << endm;
 	}
 	continue;
       }
-      Double_t padlength;
-      if (row<14) padlength = gStTpcDb->PadPlaneGeometry()->innerSectorPadLength();
-      else 	     padlength = gStTpcDb->PadPlaneGeometry()->outerSectorPadLength();
-      //Boost the local y value by +- padlength / 2.
-      const StThreeVectorD  lsPos = StThreeVectorD(lsMidCoord.position().x(),
-						   lsMidCoord.position().y(),
-						   lsMidCoord.position().z());
-      StTpcLocalSectorCoordinate lsTopCoord(lsPos.x(),
-					    lsPos.y()+padlength/2.,
-					    lsPos.z(),
-					    sector);
-      StTpcLocalSectorCoordinate lsBotCoord(lsPos.x(),
-					    lsPos.y()-padlength/2.,
-					    lsPos.z(),
-					    sector);
-      //Transform back to global coordinates
-      StGlobalCoordinate gTopCoord; transform(lsTopCoord, gTopCoord);
-      StGlobalCoordinate gBotCoord; transform(lsBotCoord, gBotCoord);
-      const StThreeVectorD  gTopPos = StThreeVectorD(gTopCoord.position().x(),
-						     gTopCoord.position().y(),
-						     gTopCoord.position().z());
-      const StThreeVectorD  gBotPos = StThreeVectorD(gBotCoord.position().x(),
-						     gBotCoord.position().y(),
-						     gBotCoord.position().z());
+      const StThreeVectorD  &gTopPos = *mRowPosition[sector-1][row-1][1];
+      const StThreeVectorD  &gBotPos = *mRowPosition[sector-1][row-1][2];
       double s_out = helix->pathLength(gTopPos, normal);
       double s_in  = helix->pathLength(gBotPos, normal);
       dx = TMath::Abs(s_out-s_in);
       if (dx < 0.5 || dx > 25.) continue;
-      dE = pointC->GetCharge(ipoint)*Scale2keV;
-      // Correctionsd
+      Double_t dY = 
+	normal.x()*(helix->y(s_in) - helix->y(s_out))  - 
+	normal.y()*(helix->x(s_in) - helix->x(s_out));
+      dE = dEdxP[ipoint].dE;
+      // Corrections
       dE *= TimeScale;
-      Int_t pad = Pad.pad();
+      Int_t pad = dEdxP[ipoint].pad;
+      // Volume charge
+      ESector lsc = kTpcInner;
+      if (row > 13) lsc = kTpcOuter;
+      double gc = 0;
+      Double_t RMS = 1;
       dEP = dE;
-      double gc = 1;
-      Int_t fee = -1;
       CdEdx[NdEdx].SigmaFee = 1;
-      if (m_TpcSecRow) {
-	TpcSecRowCor_st *gain = m_TpcSecRow->GetTable() + sector - 1;
-	gc =  gain->GainScale[row-1];
-	CdEdx[NdEdx].SigmaFee = gain->GainRms[row-1];
+      if (!m_Simulation) {
+	Double_t dEpad = dEdxP[ipoint].dEIpad;
+	RMS = VolChargeRMS[lsc][0] + dEpad*(VolChargeRMS[lsc][1] + dEpad*VolChargeRMS[lsc][2]);
+	gc = VolChargePars[lsc][0] + dEpad*(VolChargePars[lsc][1] + dEpad*VolChargePars[lsc][2]);
+	gc += VolChargePar2[lsc][0] + VolChargePar2[lsc][1]*TMath::TanH(VolChargePar2[lsc][2]*dEpad);
+	Double_t dETrow = dEdxP[ipoint].dETrow;
+	gc += TimeBucketPars[lsc][0] + dETrow*(TimeBucketPars[lsc][1] + dETrow*TimeBucketPars[lsc][2]);
+	gc += II3padC(dEdxP[ipoint].dEIpad,dEdxP[ipoint].dEI3pad-dEdxP[ipoint].dEIpad,lsc);
+	dE *= TMath::Exp(-gc);
+	gc = 1;
+	if (m_TpcSecRow) {
+	  TpcSecRowCor_st *gain = m_TpcSecRow->GetTable() + sector - 1;
+	  gc =  gain->GainScale[row-1];
+	  CdEdx[NdEdx].SigmaFee = gain->GainRms[row-1];
+	}
+	if (gc < 0.0) continue;
+	dE *= gc;
+	Int_t SectN = sector; // drift distance
+	if (row < 14) SectN += 24;
+	Double_t z = dEdxP[ipoint].xyz[2];
+	if (sector > 12) z = - z;
+	if (m_drift) {
+	  TpcDriftDistCorr_st *cor = m_drift->GetTable();
+	  if (row <= 13) cor++;
+	  Double_t DriftCorr = 8.26477e-02 + 
+	    cor->a[0]+z*(cor->a[1]+z*cor->a[2]);
+	  dE *= TMath::Exp(-DriftCorr);
+	}
       }
-      if (gc < 0.0) continue;
-      dE *= gc;
-      Int_t SectN = sector; // drift distance
-      if (row < 14) SectN += 24;
-      Double_t z = pointZ;
-      if (sector > 12) z = - z;
-      if (m_drift) {
-	TpcDriftDistCorr_st *cor = m_drift->GetTable();
-	if (row <= 13) cor++;
-	Double_t DriftCorr = 8.26477e-02 + 
-	  cor->a[0]+z*(cor->a[1]+z*cor->a[2]);
-	dE *= TMath::Exp(-DriftCorr);
-      }
-      TrackLength += dx;
-      CdEdx[NdEdx].sector = sector;
-      CdEdx[NdEdx].row = row;
-      CdEdx[NdEdx].pad = pad;
-      CdEdx[NdEdx].dx = dx;
-      CdEdx[NdEdx].dEU= pointC->GetCharge(ipoint);;
-      CdEdx[NdEdx].dE = dE; // corrected
-      CdEdx[NdEdx].dEdxU = CdEdx[NdEdx].dEU/CdEdx[NdEdx].dx;
-      CdEdx[NdEdx].dEdx  = CdEdx[NdEdx].dE/CdEdx[NdEdx].dx;
-      CdEdx[NdEdx].dEdxP = dEP/CdEdx[NdEdx].dx;
-      CdEdx[NdEdx].dEdxLU= TMath::Log(CdEdx[NdEdx].dEdxU);
-      CdEdx[NdEdx].dEdxL = TMath::Log(CdEdx[NdEdx].dEdx);
-      CdEdx[NdEdx].xyz[0] = pointX;
-      CdEdx[NdEdx].xyz[1] = pointY;
-      CdEdx[NdEdx].xyz[2] = pointZ;
-      CdEdx[NdEdx].Fee    = -1;
+      TrackLength         += dx;
+      CdEdx[NdEdx].sector  = sector;
+      CdEdx[NdEdx].row     = row;
+      CdEdx[NdEdx].pad     = pad;
+      CdEdx[NdEdx].dx      = dx;
+      CdEdx[NdEdx].dEU     = dEdxP[ipoint].dE;
+      CdEdx[NdEdx].dE      = dE; // corrected
+      CdEdx[NdEdx].dEdxU   = CdEdx[NdEdx].dEU/CdEdx[NdEdx].dx;
+      CdEdx[NdEdx].dEdx    = CdEdx[NdEdx].dE/CdEdx[NdEdx].dx;
+      CdEdx[NdEdx].dEdxP   = dEP/CdEdx[NdEdx].dx;
+      CdEdx[NdEdx].dEdxLU  = TMath::Log(CdEdx[NdEdx].dEdxU);
+      CdEdx[NdEdx].dEdxL   = TMath::Log(CdEdx[NdEdx].dEdx);
+      CdEdx[NdEdx].xyz[0]  = dEdxP[ipoint].xyz[0];
+      CdEdx[NdEdx].xyz[1]  = dEdxP[ipoint].xyz[1];
+      CdEdx[NdEdx].xyz[2]  = dEdxP[ipoint].xyz[2];
+      CdEdx[NdEdx].dEIpad  = dEdxP[ipoint].dEIpad;
+      CdEdx[NdEdx].dEI3pad = dEdxP[ipoint].dEI3pad;
+      CdEdx[NdEdx].dEIrow  = dEdxP[ipoint].dEIrow;
+      CdEdx[NdEdx].dETrow  = dEdxP[ipoint].dETrow;
+      CdEdx[NdEdx].dET3row = dEdxP[ipoint].dET3row;
+      CdEdx[NdEdx].dET5row = dEdxP[ipoint].dET5row;
+      CdEdx[NdEdx].Fee     = -1;
+      CdEdx[NdEdx].dY      = dY;
+      CdEdx[NdEdx].RMS      = RMS;
       avrgZ += CdEdx[NdEdx].dEdxL;
       NdEdx++;
     }
@@ -521,11 +878,13 @@ Int_t StdEdxMaker::Make(){
     Int_t N60 = NdEdx - (int) (0.4*NdEdx + 0.5);
     Int_t k;
     for (k = 0; k < N70; k++) {
-      I70 += dEdxS[k];
-      D70 += dEdxS[k]*dEdxS[k];
+      I70 += dEdxS[k].dEdx;
+      D70 += dEdxS[k].dEdx*dEdxS[k].dEdx;
+      TrackLength70 += dEdxS[k].dx;
       if (k < N60) {
-	I60 += dEdxS[k];
-	D60 += dEdxS[k]*dEdxS[k];
+	I60 += dEdxS[k].dEdx;
+	D60 += dEdxS[k].dEdx*dEdxS[k].dEdx;
+	TrackLength60 += dEdxS[k].dx;
       }
     }
     if (N70 > 0) {
@@ -536,9 +895,10 @@ Int_t StdEdxMaker::Make(){
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
       dedx.method    =  kTruncatedMeanIdentifier;
-      dedx.ndedx     =  N70;
+      dedx.ndedx     =  N70 + 100*((int) TrackLength70);
       dedx.dedx[0]   =  I70;
       dedx.dedx[1]   =  D70;
+      // dedx.dedx[1] = 5.14815e-01/pow(TrackLength70, 4.46279e-01); //hist103
       dst_dedx->AddAt(&dedx);
     }
     if (N60 > 0) {
@@ -549,14 +909,16 @@ Int_t StdEdxMaker::Make(){
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
       dedx.method    =  kOtherMethodIdentifier;
-      dedx.ndedx     =  N60;
+      dedx.ndedx     =  N60 + 100*((int) TrackLength60);
       dedx.dedx[0]   =  I60;
       dedx.dedx[1]   =  D60;
+      // dedx.dedx[1] = 5.06546e-01/pow(TrackLength60,4.57148e-01); //hist103
       dst_dedx->AddAt(&dedx);
     }
     Double_t chisq, fitZ, fitdZ;
     DoFitZ(chisq, fitZ, fitdZ);
-    fitdZ *= 1.32920/(1.01405e+00 -8.12759e-04*TrackLength); // scale errors
+    //    fitdZ *= 1.32920/(1.01405e+00 -8.12759e-04*TrackLength); // scale errors
+    fitdZ *= (1.35095e+00 -1.10405e-03*TrackLength); // hist 110 scale errors
     if (chisq > 0 && chisq < 10000.0) {
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
@@ -573,6 +935,7 @@ Int_t StdEdxMaker::Make(){
       if (primtrkC->Charge(iprim) < 0) sCharge = 1;
       for (int l = 0; l < NHYPS; l++) {
 	Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],TrackLength,l==3); 
+	//	Pred[l] = 1.e-6*BetheBloch::Sirrf(p/Masses[l],60.,l==3); 
 	PredBB[l] = BB(p/Masses[l]);
       }
       for (k = 0; k < NdEdx; k++) {
@@ -581,7 +944,7 @@ Int_t StdEdxMaker::Make(){
 	if (SR) SR->Fill(FdEdx[k].sector,FdEdx[k].row);
 	if (chisq > 0 && chisq < 10000.0) {
 	  Double_t zk  = FdEdx[k].zdev;
-	  if (FdEdx[k].Prob > 1.e-6) {
+	  if (FdEdx[k].Prob > 1.e-12) {
 	    if (FdEdx[k].row > 13) corrO1w->Fill(zk,1./FdEdx[k].Prob);
 	    else                   corrI1w->Fill(zk,1./FdEdx[k].Prob);
 	  }
@@ -591,36 +954,36 @@ Int_t StdEdxMaker::Make(){
 	    if (FdEdx[l].row%2 == 1 && FdEdx[l].row - FdEdx[k].row  == 1) {
 	      if (FdEdx[k].row > 13) {
 		corrO->Fill(zk,zl); 
-		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
+		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-12) 
 		  corrOw->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
 	      }
 	      else {
 		corrI->Fill(zk,zl); 
-		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
+		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-12) 
 		  corrIw->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
 	      }
 	    }
 	    if (FdEdx[l].row%2 == 1 && FdEdx[l].row - FdEdx[k].row  == 2) {
 	      if (FdEdx[k].row > 13) {
 		corrO2->Fill(zk,zl); 
-		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
+		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-12) 
 		  corrO2w->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
 	      }
 	      else {
 		corrI2->Fill(zk,zl); 
-		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
+		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-12) 
 		  corrI2w->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
 	      }
 	    }
 	    if (FdEdx[l].row%2 == 1 && FdEdx[l].row - FdEdx[k].row  == 5) {
 	      if (FdEdx[k].row > 13) {
 		corrO5->Fill(zk,zl); 
-		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
+		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-12) 
 		  corrO5w->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
 	      }
 	      else {
 		corrI5->Fill(zk,zl); 
-		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-6) 
+		if (FdEdx[k].Prob*FdEdx[l].Prob > 1.e-12) 
 		  corrI5w->Fill(zk,zl,1./(FdEdx[k].Prob*FdEdx[l].Prob));
 	      }
 	    }
@@ -638,37 +1001,44 @@ Int_t StdEdxMaker::Make(){
 	  if (FdEdx[k].sector > 12) eta = -eta;
 	  if (ETA) ETA->Fill(SectN,eta,FdEdx[k].dEdxN);
 	  if (SecRow) SecRow->Fill(FdEdx[k].sector+0.5,FdEdx[k].row+0.5,FdEdx[k].dEdxNP);
-	  if (Fee && FdEdx[k].Fee >= 0) {
-	    Double_t fee1 =  FdEdx[k].Fee + 0.5;
-	    Double_t Sect = FdEdx[k].sector + 0.5;
-	    Double_t z = FdEdx[k].dEdxP;
-	    Fee->Fill(Sect,fee1,z);
-	    if (FeeC && FdEdx[k].SigmaFee > 0.) FeeC->Fill(Sect,fee1,FdEdx[k].dEdxN/FdEdx[k].SigmaFee);
-	  }
+	  if (MulRow) MulRow->Fill(GMult,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (ZRow) ZRow->Fill(FdEdx[k].xyz[2],FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (Ipad) Ipad->Fill(FdEdx[k].dEIpad,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (I3pad) I3pad->Fill(FdEdx[k].dEI3pad,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (II3padI && FdEdx[k].row <  14) II3padI->Fill(FdEdx[k].dEIpad,FdEdx[k].dEI3pad-FdEdx[k].dEIpad,FdEdx[k].dEdxN);
+	  if (II3padO && FdEdx[k].row >= 14) II3padO->Fill(FdEdx[k].dEIpad,FdEdx[k].dEI3pad-FdEdx[k].dEIpad,FdEdx[k].dEdxN);
+	  if (Trow) Trow->Fill(FdEdx[k].dETrow,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (T3row) T3row->Fill(FdEdx[k].dET3row,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (T5row) T5row->Fill(FdEdx[k].dET5row,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
+	  if (dYrow) dYrow->Fill(FdEdx[k].dY,FdEdx[k].row+0.5,FdEdx[k].dEdxN);
 	}
       }
-      Points70->Fill(NdEdx,TMath::Log(I70/Pred[2]));
-      Points60->Fill(NdEdx,TMath::Log(I60/Pred[2]));
-      Points70B->Fill(NdEdx,TMath::Log(I70/PredBB[2]));
-      Points60B->Fill(NdEdx,TMath::Log(I60/PredBB[2]));
+      Points70->Fill(N70,TMath::Log(I70/Pred[2]));
+      Points60->Fill(N60,TMath::Log(I60/Pred[2]));
+      Points70B->Fill(N70,TMath::Log(I70/PredBB[2]));
+      Points60B->Fill(N60,TMath::Log(I60/PredBB[2]));
       PointsFit->Fill(NdEdx,fitZ-TMath::Log(Pred[2]));
-      TPoints->Fill(NdEdx,TrackLength,fitZ-TMath::Log(Pred[2]));
+      TPoints->Fill(TrackLength,fitZ-TMath::Log(Pred[2]));
+      TPoints60->Fill(TrackLength60,TMath::Log(I60/Pred[2]));
+      TPoints70->Fill(TrackLength70,TMath::Log(I70/Pred[2]));
       if (NdEdx > 30) {
 	for (k = 0; k < NdEdx; k++) {
 	  if (FdEdx[k].SigmaFee > 0) {
 	    Double_t xscale = 1;
-	    if (FdEdx[k].row > 13) xscale = pow(FdEdx[k].dx,0.41);
-	    else                   xscale = pow(FdEdx[k].dx,0.31);
-	    xscale /= FdEdx[k].SigmaFee;
-	    Double_t dEdxLog = FdEdx[k].dEdxL + 8.26477e-02;
 	    Double_t dxLog   = TMath::Log(FdEdx[k].dx);
+	    Double_t dEdxLog = FdEdx[k].dEdxL;
+	    xscale /= FdEdx[k].RMS;
 	    Double_t Shift   = (dEdxLog-fitZ)*xscale;
+	    ESector lsc = kTpcInner;
+	    if (FdEdx[k].row > 13) lsc = kTpcOuter;
+	    Shift -= ShapeMean[lsc][0]  + dxLog*(ShapeMean[lsc][1]  + dxLog*ShapeMean[lsc][2]);
+	    Shift /= ShapeSigma[lsc][0] + dxLog*(ShapeSigma[lsc][1] + dxLog*ShapeSigma[lsc][2]);
+	    Shift -= ShapeMean2[lsc][0] + dxLog*(ShapeMean2[lsc][1] + dxLog*ShapeMean2[lsc][2]);
+	    Shift -= ShapeMean3[lsc][0] + dxLog*(ShapeMean3[lsc][1] + dxLog*ShapeMean3[lsc][2]);
 	    if (FdEdx[k].row <= 13) {
-	      Shift -=  -1.84183e-01 + 1.62618e-01*dxLog;
 	      FShapeI->Fill(dxLog,Shift);
 	    }
 	    else {
-	      Shift -= -1.58130e-01 -4.87002e-02*dxLog;
 	      FShapeO->Fill(dxLog,Shift);
 	    }
 	  }
@@ -707,13 +1077,13 @@ Int_t StdEdxMaker::Make(){
   return kStOK;
 }
 //________________________________________________________________________________
-void StdEdxMaker::SortdEdx(Double_t *dEdxS, Int_t NdEdx) {
+void StdEdxMaker::SortdEdx(dEdx_t *dEdxS, Int_t NdEdx) {
   int i;
-  for (i = 0; i < NdEdx; i++) dEdxS[i] = CdEdx[i].dEdx;
+  for (i = 0; i < NdEdx; i++) dEdxS[i] = CdEdx[i];
   for (i = 0; i < NdEdx-1; i++) {
     for (int j = i+1; j < NdEdx; j++) {
-      if (dEdxS[i] > dEdxS[j]) {
-	double temp = dEdxS[i];
+      if (dEdxS[i].dEdx > dEdxS[j].dEdx) {
+	dEdx_t temp = dEdxS[i];
 	dEdxS[i] = dEdxS[j];
 	dEdxS[j] = temp;
       }
@@ -738,104 +1108,13 @@ Double_t StdEdxMaker::MyDate(Int_t date,Int_t time) {// combine date in time in 
 }
 //________________________________________________________________________________
 void fGaus(Double_t x, Double_t *val, ESector l){
-  static const Int_t NpGaus = 12;
-  static Double_t parGaus[2][NpGaus] = {
-#if 0
-  {0.023172, 1.437271, 2.460729, // inner
-   0.103880, 0.242696, 1.577239,
-   0.195327,-0.024190, 0.889409,
-   0.007452,-1.433872, 0.582710},
-  {0.014107, 2.636221, 2.435468, // outer
-   0.073707, 0.963552, 1.515737,
-   0.048300,-0.318190, 1.308623,
-   0.200573,-0.038547,-0.945790}
-  {0.025611, 1.418447,2.220133,  // inner 
-   0.121489, 0.201385,1.415622,
-   0.000408,-4.223811,0.757573,
-   0.202918, 0.006651,0.836666},
-  {0.013792, 2.854905, 2.672949, // outer
-   0.068082, 1.024063, 1.654282,
-   0.066709,-0.199578,-1.401709,
-   0.156028,-0.045180,-1.000343}
-  {0.027301, 1.259608,2.255916, // inner
-   0.119186, 0.233070,1.401950,
-   0.009470,-1.188956,0.585663,
-   0.205339, 0.030715,0.802100},
-  {0.013503, 2.878258,2.676623,
-   0.070468, 0.971207,1.674857,
-   0.064795,-0.199962,-1.387658,
-   0.153726,-0.041741,-1.008292}
-#endif
-  {0.025665, 1.423958,2.213710,
-   0.123577, 0.193294,1.408513,
-   0.000420,-4.221713,0.769640,
-   0.203597, 0.005066,0.823813},
-  {0.013443, 2.874708,2.680563,
-   0.064505, 1.049656,1.669515,
-   0.070611,-0.159342,1.408693,
-   0.154166,-0.044689,1.011159}
-  };
   val[0] = val[1] = 0;
   for (Int_t j=0; j<NpGaus; j+=3){
+    //    if (parGaus[l][j+2] > 0) {
     Double_t dev = (x - parGaus[l][j+1])/parGaus[l][j+2];
     val[1] += parGaus[l][j]*exp(-0.5*dev*dev)*(-dev/parGaus[l][j+2]);
     val[0] += parGaus[l][j]*exp(-0.5*dev*dev);
-  }
-}
-//________________________________________________________________________________
-void MDFcorrOw(Double_t *x, Double_t *Value) {
-  // Static data variables
-  static Int_t    gNVariables    = 2;
-  static Int_t    gNCoefficients = 12;
-  static Double_t gDMean         = -2.13744407349024695e-01;//2.11349e-05;
-  static Double_t gXMin[] = {  -7.3, -7.3 };
-  static Double_t gXMax[] = {  9.9, 9.9 };
-  static Double_t gCoefficient[] = {  0.200633,  6.14428,  0.477188, -0.699637,
-				     -0.705071, -2.41774, -1.00517,  -4.03022,
-				      2.25038,  -2.53387,  3.29628,   0.214115};
-// The powers are stored row-wise, that is p_ij = gPower[i * NVariables + j];
-  static Int_t    gPower[] = {
-    1,  1,  2,  2,  1,  2,  3,  1,  1,  3,  3,  2,
-    2,  3,  4,  2,  3,  3,  2,  4,  5,  2,  2,  1};
-
-  Value[0] = gDMean;
-  Value[1] = Value[2] = 0;
-  Int_t i,j,k;
-  for (i = 0; i < gNCoefficients ; i++) {
-    // Evaluate the ith term in the expansion
-    Double_t term[3];
-    term[0] = gCoefficient[i];
-    term[1] = gCoefficient[i];
-    term[2] = gCoefficient[i];
-    for (j = 0; j < gNVariables; j++) {
-      // Evaluate the polynomial in the jth variable.
-      Int_t power = gPower[gNVariables * i + j]; 
-      Double_t p1 = 1, p2 = 0, p3 = 0, r = 0, px = 0;
-      Double_t v =  1 + 2. / (gXMax[j] - gXMin[j]) * (x[j] - gXMax[j]);
-      Double_t vg =     2. / (gXMax[j] - gXMin[j]);
-      // what is the power to use!
-      switch(power) {
-      case 1: r = 1; px = 0; break; 
-      case 2: r = v; px = 1; break; 
-      default: 
-        p2 = v; 
-	px = 1;
-        for (k = 3; k <= power; k++) { 
-	  px = p2;
-          p3 = p2 * v;
-          p1 = p2; p2 = p3; 
-        }
-        r = p3;
-      }
-      // multiply this term by the poly in the jth var
-      term[0] *= r; 
-      for (int l = 0; l < gNVariables; l++) {
-	if (j == l) term[l+1] *= (power-1)*px*vg;
-	else        term[l+1] *= r;
-      } 
-    }
-    // Add this term to the final result
-    for (j = 0; j < 3; j ++) Value[j] += term[j];
+    //    }
   }
 }
 //________________________________________________________________________________
@@ -846,45 +1125,27 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   gin[1] = 0.;
   Double_t Val[2];
   for (int i=0;i<NdEdx; i++) {
-    Double_t dx =FdEdx[i].dx; 
-    if (dx <  1.) dx = 1.;
-    if (dx > 10.) dx = 10.;
     ESector l = kTpcInner;
     if (FdEdx[i].row > 13) l = kTpcOuter;
     FdEdx[i].xscale = 1;
-    switch (l) {
-    case kTpcInner: FdEdx[i].xscale = pow(FdEdx[i].dx,0.31);      break;
-    default:   FdEdx[i].xscale = pow(FdEdx[i].dx,0.41);
-    }
-    FdEdx[i].xscale /= FdEdx[i].SigmaFee;
-    Double_t dEdxLog = FdEdx[i].dEdxL + 8.26477e-02;
-    Double_t dxLog   = TMath::Log(FdEdx[i].dx);
-    FdEdx[i].zdev   = (dEdxLog-par[0])*FdEdx[i].xscale;
-    switch (l) {
-    case kTpcInner: FdEdx[i].zdev -= -1.84183e-01 + 1.62618e-01*dxLog; break;
-    default:        FdEdx[i].zdev -= -1.58130e-01 - 4.87002e-02*dxLog;
-    }
+    ESector lsc = kTpcInner;
+    if (FdEdx[i].row > 13) lsc = kTpcOuter;
+    Double_t dx =FdEdx[i].dx; 
+    if (dx <  1.) dx = 1.;
+    if (dx > 10.) dx = 10.;
+    Double_t dxLog   = TMath::Log(dx);
+    Double_t Scale   = ShapeSigma[lsc][0] + dxLog*(ShapeSigma[lsc][1] + dxLog*ShapeSigma[lsc][2]);
+    FdEdx[i].xscale /= FdEdx[i].RMS;
+    FdEdx[i].zdev    = (FdEdx[i].dEdxL-par[0])*FdEdx[i].xscale;
+    FdEdx[i].zdev   -= ShapeMean[lsc][0] + dxLog*(ShapeMean[lsc][1] + dxLog*ShapeMean[lsc][2]);
+    FdEdx[i].zdev   /= Scale;
+    FdEdx[i].zdev   -= ShapeMean2[lsc][0] + dxLog*(ShapeMean2[lsc][1] + dxLog*ShapeMean2[lsc][2]);
+    FdEdx[i].xscale /= Scale;
     fGaus(FdEdx[i].zdev,Val,l);
     FdEdx[i].Prob = Val[0];
     f -= TMath::Log( FdEdx[i].Prob );
     Double_t gg = Val[1];
     gin[0] +=  FdEdx[i].xscale*gg/FdEdx[i].Prob;
-#if 0
-    // correlations
-    if (i > 0 && FdEdx[i].row > 14) {
-      Int_t j = i - 1;
-      if (FdEdx[i].sector == FdEdx[j].sector &&
-	  FdEdx[i].row    == FdEdx[j].row + 1) {
-	Double_t x[2];
-	x[0] =  FdEdx[j].zdev;
-	x[1] =  FdEdx[i].zdev;
-	Double_t Corr[3];
-	MDFcorrOw(x,Corr);
-	f -= Corr[2];
-	gin[0] -= FdEdx[j].xscale*Corr[1] + FdEdx[i].xscale*Corr[2];
-      }
-    }
-#endif
   }
 }
 //________________________________________________________________________________
@@ -919,22 +1180,16 @@ void StdEdxMaker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ)
     arglist[0] = 0.5;
     gMinuit->mnexcm("SET ERR", arglist ,1,ierflg);
     gMinuit->mnparm(0, "mean", avz, 0.01,0.,0.,ierflg); //First Guess
-//     gMinuit->mnparm(1, "scale", 1.0, 0.01, 0.2, 20.0, ierflg);
-//     arglist[0] = 2;
-//     gMinuit->mnexcm("FIX",arglist,1,ierflg);
 #if 1    
     arglist[0] = 1.;   // 1.
 #else
     arglist[0] = 0.;   // Check gradient 
 #endif
     gMinuit->mnexcm("SET GRAD",arglist,1,ierflg);
-    //    gMinuit->mnexcm("SET STRAT",arglist,1,ierflg);
     arglist[0] = 500;
     arglist[1] = 1.;
     gMinuit->mnexcm("MIGRAD", arglist ,2,ierflg);
     gMinuit->mnexcm("HESSE  ",arglist,0,ierflg);
-    //    gMinuit->mnexcm("end",arglist,0,ierflg);
-// Print results
     Double_t edm,errdef;
     Int_t nvpar,nparx,icstat;
     gMinuit->mnstat(chisq,edm,errdef,nvpar,nparx,icstat);
