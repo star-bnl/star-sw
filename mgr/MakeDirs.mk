@@ -1,5 +1,8 @@
-# $Id: MakeDirs.mk,v 1.7 1999/08/20 22:59:14 fisyak Exp $
+# $Id: MakeDirs.mk,v 1.8 1999/08/24 13:27:27 fisyak Exp $
 # $Log: MakeDirs.mk,v $
+# Revision 1.8  1999/08/24 13:27:27  fisyak
+# Fix St_Tables name
+#
 # Revision 1.7  1999/08/20 22:59:14  fisyak
 # Fix problem with / in ROOT_DIR
 #
@@ -24,21 +27,21 @@
 
 SRC_DIR := $(INP_DIR)
 SYS_DIR := $(ROOT_DIR)/.$(STAR_HOST_SYS)
-ifndef NODEBUG
+#ifndef NODEBUG
   LIB_DIR := $(SYS_DIR)/lib
   DEP_DIR := $(SYS_DIR)/dep/$(branch)/$(DOMAIN)
   OBJ_DIR := $(SYS_DIR)/obj/$(branch)/$(DOMAIN)
   ifndef STAR_OBJ_DIR 
     STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/obj/$(branch)/$(PKG)
   endif
-else
-  LIB_DIR := $(SYS_DIR)/LIB
-  DEP_DIR := $(SYS_DIR)/DEP/$(branch)/$(DOMAIN)
-  ifndef STAR_OBJ_DIR
-    OBJ_DIR := $(SYS_DIR)/OBJ/$(branch)/$(DOMAIN)
-    STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/OBJ/$(branch)/$(PKG)
-  endif
-endif
+#else
+#  LIB_DIR := $(SYS_DIR)/LIB
+#  DEP_DIR := $(SYS_DIR)/DEP/$(branch)/$(DOMAIN)
+#  ifndef STAR_OBJ_DIR
+#    OBJ_DIR := $(SYS_DIR)/OBJ/$(branch)/$(DOMAIN)
+#    STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/OBJ/$(branch)/$(PKG)
+#  endif
+#endif
 DIR_GEN := $(ROOT_DIR)/.share
 GEN_TMP := $(DIR_GEN)/tmp
 GEN_TAB := $(DIR_GEN)/tables

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.94  1999/08/24 13:27:29  fisyak
+#  Fix St_Tables name
+#
 #  Revision 1.93  1999/08/23 20:37:29  fisyak
 #  Fix nodebug fro tables
 #
@@ -358,7 +361,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/23 20:37:29 $ 
+#           Last modification $Date: 1999/08/24 13:27:29 $ 
 #  default setings
 # Current Working Directory
 #
@@ -424,8 +427,7 @@ St_TablesDoc:
 	$(MAKE)  -f $(MakeDll)
 St_Tables:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend NODEPEND=1999 NODEBUG=1999
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
-         SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=1999
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables NODEBUG=1999
 test:   $(addsuffix _test, $(SUBDIRS))
 %_test:
 	$(MAKE)  -f $(Makeloop) -C $(STEM) test 
