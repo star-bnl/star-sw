@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.77 2002/11/26 02:30:29 perev Exp $
+// $Id: doEvents.C,v 1.78 2003/01/17 16:26:13 fine Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -236,10 +236,16 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 //   		 StEventDisplayMaker
     if (eventDisplay) {
 
-      StEventDisplayMaker *displayMk = new StEventDisplayMaker();
-      displayMk->AddName("StEvent(All Tracks)");
-      displayMk->AddFilter(new StFilterDef("MainFilter"));
-     
+       StEventDisplayMaker *displayMk = new StEventDisplayMaker();
+
+       // Set the default to display all StEvent tracks
+       displayMk->AddName("StEvent(Primary Tracks)");
+       displayMk->AddName("StEvent(Kink Tracks)");
+       displayMk->AddName("StEvent(V0 Tracks)");
+       displayMk->AddName("StEvent(Xi Tracks)");
+       //      displayMk->AddName("StEvent(All Tracks)");
+       // Set the default StEvent events filter
+       displayMk->AddFilter(new StFilterDef("MainFilter"));
     }
 
     //
@@ -311,6 +317,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.78  2003/01/17 16:26:13  fine
+// chnage display default parameters
+//
 // Revision 1.77  2002/11/26 02:30:29  perev
 // EventLoop added
 //
