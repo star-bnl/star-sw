@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.4 2004/06/25 03:13:01 porter Exp $
+ * $Id: StEStructPythia.cxx,v 1.5 2004/07/01 00:35:29 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -69,7 +69,7 @@ StEStructEvent* StEStructPythia::generateEvent(){
 void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
 
   mstarTrigger=false;
-  bool subtrig[3]={false,false,false};
+  bool subtrig[3]={false,false,true};
   mrefMult=0;
   Pyjets_t* pstr= mpythia->GetPyjets();
   int numParticles=mpythia->GetN();
@@ -104,9 +104,9 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
     float theta=acos(p[2]/ptotal);
     eta=-1.0*log(tan(theta/2.0));
 
-    if(eta<-3.5 && eta>-5.0 && pt>0.2)subtrig[0]=true;
-    if(eta>3.5 && eta<5.0 && pt>0.2)subtrig[1]=true;
-    if(fabs(eta)<0.5 && pt>0.15)subtrig[2]=true;
+    if( eta<-3.5 && eta>-5.0 )subtrig[0]=true;
+    if( eta> 3.5 && eta< 5.0 )subtrig[1]=true;
+    //    if(fabs(eta)<0.5 && pt>0.15)subtrig[2]=true;
 
 
     float* gdca = globalDCA(p,v);    
@@ -207,6 +207,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.5  2004/07/01 00:35:29  porter
+ * modified 'startrigger'... still need to make this a switch
+ *
  * Revision 1.4  2004/06/25 03:13:01  porter
  * added simple trigger selection implemented like BBC-AND plus CTB
  *
