@@ -2,7 +2,7 @@
 #include "StDetectorDbTriggerID.h"
 #include "tables/St_triggerID_Table.h"
 #include "tables/St_trigPrescales_Table.h"
-
+#include "tables/St_defaultTrgLvl_Table.h"
 #include "TUnixTime.h"
 
 /*!
@@ -26,6 +26,8 @@ StDetectorDbTriggerID* StDetectorDbTriggerID::instance()
 	sInstance->mTriggerID = (triggerID_st*)(sInstance->mIDTable->GetArray());
     if(sInstance->mSTable)
 	sInstance->mTrigPrescales = (trigPrescales_st*)(sInstance->mSTable->GetArray());
+    if(sInstance->mDefTrgLvlTable)
+	sInstance->mDefaultTriggerLevel = (defaultTrgLvl_st*)(sInstance->mDefTrgLvlTable->GetArray());
     
     return sInstance;
 };
@@ -36,8 +38,8 @@ void StDetectorDbTriggerID::update(StMaker* maker){
     mMaker = maker;
     
     if(maker){
-	// RDO in RunLog_onl
-// TTable of triggerID	
+	
+	// TTable of triggerID	
 	TDataSet* dataSet = maker->GetDataBase("RunLog/onl");
 	
 	if(dataSet){
@@ -47,16 +49,28 @@ void StDetectorDbTriggerID::update(StMaker* maker){
 		mIDNumRows = mIDTable->GetNRows();
 		mTriggerID = (triggerID_st*)(mIDTable->GetArray());
 	    }
-// TTable of trigPrescales	
-	
+	    // TTable of trigPrescales	
 	    mSTable = dynamic_cast<TTable*>(dataSet->Find("trigPrescales"));
 	    
 	    if(mSTable){
 		mSNumRows = mSTable->GetNRows();
 		mTrigPrescales = (trigPrescales_st*)(mSTable->GetArray());
-	    
             }
+
 	}
+
+	dataSet = 0;
+	dataSet = maker->GetDataBase("Calibrations/trg");
+	
+	if(dataSet){
+	    // TTable of default trigger levels
+	    mDefTrgLvlTable = dynamic_cast<TTable*>(dataSet->Find("defaultTrgLvl"));
+	    if(mDefTrgLvlTable){
+		mDefaultTriggerLevel = (defaultTrgLvl_st*)(mDefTrgLvlTable->GetArray());
+	    }
+	}
+	
+	
     }
 };
 
@@ -70,6 +84,10 @@ StDetectorDbTriggerID::StDetectorDbTriggerID(){
     mTrigPrescales = 0;
     mSNumRows = 0;
     mSTable = 0;
+
+    mDefaultTriggerLevel = 0;
+    mDefTrgLvlTable = 0;
+    
 };
 
 /// triggerID members
@@ -196,26 +214,36 @@ float StDetectorDbTriggerID::getPs(unsigned int entry){
     return value;
 };
 
+unsigned int StDetectorDbTriggerID::getDefaultTriggerLevel(){
+    unsigned int value = 999;
+    if(mDefaultTriggerLevel)
+	value = mDefaultTriggerLevel->level;
+    return value;
+};
+
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbTriggerID& v){
     os << "Run shown in triggerID: " << v.getIDRunNumber() << endl;
-
-	for(unsigned int i = 0; i < v.getIDNumRows(); i++){
-	    os << "idx_trg: " << v.getIdxTrg(i) 
-               << "  daqTrg: " << v.getDaqTrgId(i)  
-               << "  offlineTrgId: " << v.getOfflineTrgId(i)  
-               << "  trgNameVersion: " << v.getTrgNameVersion(i) << endl
-               << "  trgVersion: " << v.getTrgVersion(i)  
-               << "  threashVersion: " << v.getThreashVersion(i)  
-               << "  psVersion: " << v.getPsVersion(i) << endl;
-	}
+    
+    for(unsigned int i = 0; i < v.getIDNumRows(); i++){
+	os << "idx_trg: " << v.getIdxTrg(i) 
+	   << "  daqTrg: " << v.getDaqTrgId(i)  
+	   << "  offlineTrgId: " << v.getOfflineTrgId(i)  
+	   << "  trgNameVersion: " << v.getTrgNameVersion(i) << endl
+	   << "  trgVersion: " << v.getTrgVersion(i)  
+	   << "  threashVersion: " << v.getThreashVersion(i)  
+	   << "  psVersion: " << v.getPsVersion(i) << endl;
+    }
     os << "Run shown in trigPreScales: " << v.getSRunNumber() << endl;
+    
+    for(unsigned int i = 0; i < v.getSNumRows(); i++){
+	os << "idxTrigger: " << v.getIdxTrigger(i) 
+	   << "  idxLevel: " << v.getIdxLevel(i)  
+	   << "  id (algorithm) : " << v.getId(i)  
+	   << "  prescale : " << v.getPs(i) << endl; 
+    }
 
-	for(unsigned int i = 0; i < v.getSNumRows(); i++){
-	    os << "idxTrigger: " << v.getIdxTrigger(i) 
-               << "  idxLevel: " << v.getIdxLevel(i)  
-               << "  id (algorithm) : " << v.getId(i)  
-               << "  prescale : " << v.getPs(i) << endl; 
-	}
+    os << "Default Trigger Level: " << v.getDefaultTriggerLevel() << endl;
+    
     return os;
 };
