@@ -1,6 +1,9 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.32  1998/09/24 18:01:42  didenko
+#  correcotion
+#
 #  Revision 1.31  1998/09/24 15:43:51  perev
-#  -muldef added for sun
+#   -muldef added for sun
 #
 #  Revision 1.30  1998/09/22 02:21:31  fisyak
 #  Fix NOROOT version
@@ -74,7 +77,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/24 15:43:51 $ 
+#             Last modification $Date: 1998/09/24 18:01:42 $ 
 #. default setings
 
 RM := rm -f
@@ -222,7 +225,7 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic  
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
