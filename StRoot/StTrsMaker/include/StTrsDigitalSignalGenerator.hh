@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.6 2000/01/10 23:11:32 lasiuk Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.7 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
+ * Revision 1.7  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.6  2000/01/10 23:11:32  lasiuk
  * Include MACROS for compatibility with SUN CC5.0
  *
@@ -66,6 +69,8 @@ public:
     virtual void digitizeSignal()     = 0;
     virtual void addWhiteNoise()      = 0;
     virtual void addCorrelatedNoise() = 0;
+  void         SetSectorNo(int sect) {mSectorNo = sect;}
+  int          GetSectorNo() {return mSectorNo;}
 
     void         fillSector(StTrsDigitalSector*);
     
@@ -79,6 +84,7 @@ protected:
     StTpcElectronics*   mElectronicsDb;
     StTrsSector*        mSector;
     StTrsDigitalSector* mDigitalSector;
+  int                 mSectorNo;
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
       vector<StTrsAnalogSignal>::iterator mTimeSequenceIterator;

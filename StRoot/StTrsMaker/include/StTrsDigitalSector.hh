@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.7 2000/06/23 00:12:24 snelling Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.8 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.8  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.7  2000/06/23 00:12:24  snelling
  * Removed dependence on local files now pointed to StDbUtilities
  *
@@ -34,7 +37,7 @@
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
- * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader for DAQ type
  * data access.
  *
  * Revision 1.4  1999/10/19 21:17:57  calderon
@@ -74,20 +77,30 @@ using std::vector;
 
 #include "StDbUtilities/StTpcPadCoordinate.hh"
 
+class digitalPair : public pair<unsigned char,int> {
+public:
+  digitalPair(unsigned char adc, int id) : pair<unsigned char,int>(adc,id) {}
+  ~digitalPair() {}
+  operator unsigned char () {return first;}
+  operator unsigned char *() {return &first;}
+  int id() { return second;}
+};
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<unsigned char>      digitalTimeBins;
+typedef vector<unsigned char>      digitalPadData;
+typedef vector<digitalPair>        digitalTimeBins;
 typedef vector<digitalTimeBins>    digitalPadRow;
 typedef vector<digitalPadRow>      digitalSector;
-
-typedef vector<unsigned char>::iterator digitalTimeBinIterator;
+typedef vector<digitalPair>::iterator digitalTimeBinIterator;
 #else
-typedef vector<unsigned char, allocator<unsigned char> >     digitalTimeBins;
+typedef vector<unsigned char, allocator<unsigned char> >     digitalPadData;
+typedef vector<digitalPair, allocator<digitalPair> >         digitalTimeBins;
 typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
 typedef vector<digitalPadRow, allocator<digitalPadRow> >     digitalSector;
-
-typedef vector<unsigned char, allocator<unsigned char> >::iterator digitalTimeBinIterator;
+typedef vector<digitalPair, allocator<digitalPair> >::iterator digitalTimeBinIterator;
 #endif
 
+typedef digitalPadData::iterator                 digitalPadDataIterator;
+typedef digitalTimeBins::iterator                digitalTimeBinsIterator;
 typedef digitalPadRow::iterator                  digitalPadRowIterator;
 typedef digitalSector::iterator                  digitalRowIterator;
 
@@ -109,6 +122,7 @@ public:
     // Adding
     void clear();
 
+    void assignTimeBins(int, int, digitalPadData*);
     void assignTimeBins(int, int, digitalTimeBins*);
     void assignTimeBins(StTpcPadCoordinate&, digitalTimeBins*);
     // When writing, make sure we don't carry unnecessary zeros:

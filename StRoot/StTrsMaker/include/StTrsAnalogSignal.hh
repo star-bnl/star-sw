@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.hh,v 1.5 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTrsAnalogSignal.hh,v 1.6 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.hh,v $
+ * Revision 1.6  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.5  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -42,7 +45,7 @@ using std::pair;
 class StTrsAnalogSignal {
 public:
     StTrsAnalogSignal();
-    StTrsAnalogSignal(float, float);
+    StTrsAnalogSignal(float, float, int id=0);
     ~StTrsAnalogSignal();
     //StTrsAnalogSignal(const StTrsAnalogSignal&);            // use default
     //StTrsAnalogSignal& operator=(const StTrsAnalogSignal&); // use default
@@ -50,12 +53,15 @@ public:
     // access functions
     float time()         const;
     float amplitude()    const;
-    
+    int   id()           const   {return mId;}
+
     void   setTime(float);
     void   setAmplitude(float);
     void   scaleAmplitude(float);
+    void   setId(int id)         {mId = id;}
     
 protected:
+    int                   mId; // geant track no.
     pair<float, float>    mAnalogSignal;
 };
 

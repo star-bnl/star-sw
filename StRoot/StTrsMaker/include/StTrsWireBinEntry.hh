@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.7 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.8 2003/12/24 13:44:52 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.8  2003/12/24 13:44:52  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.7  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -53,7 +56,7 @@
 
 class StTrsWireBinEntry {
 public:
-    StTrsWireBinEntry(StThreeVector<double>&, float,double,double,double *);
+    StTrsWireBinEntry(StThreeVector<double>&, float,double,double,double *, int);
     ~StTrsWireBinEntry();
     //StTrsWireBinEntry(const StTrsWireBinEntry&);
     //StTrsWireBinEntry& operator=(cont StTrsWireBinEntry&);
@@ -66,6 +69,7 @@ public:
      double *              d();
     
     StThreeVector<double>& position()                  ;
+    int                   id() const {return mId;} 
     void                  setNumberOfElectrons(float)  ;
     void                  scaleNumberOfElectrons(float);
 
@@ -79,6 +83,7 @@ private:
     double                mSigmaL;
     double                mSigmaT;  
     double                mD[3];
+    int                   mId;
 };
 inline const StThreeVector<double>&
 StTrsWireBinEntry::position() const {return mPosition;}

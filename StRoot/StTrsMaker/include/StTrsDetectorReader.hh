@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDetectorReader.hh,v 1.2 1999/12/08 02:10:25 calderon Exp $
+ * $Id: StTrsDetectorReader.hh,v 1.3 2003/12/24 13:44:51 fisyak Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDetectorReader.hh,v $
+ * Revision 1.3  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.2  1999/12/08 02:10:25  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -28,19 +31,20 @@
 
 #include "StTpcRawDataEvent.hh" 
 
-#include "StDaqLib/GENERIC/EventReader.hh"
+//#include "StDaqLib/GENERIC/EventReader.hh"
 class StTrsZeroSuppressedReader;
-
-class StTrsDetectorReader : public DetectorReader {
+//typedef StTrsZeroSuppressedReader ZeroSuppressedReader;
+class StTrsDetectorReader {//: public DetectorReader {
 public:
     StTrsDetectorReader();
     //    StTrsDetectorReader(string& fd, string& ver = "0");
     //    StTrsDetectorReader(St_DataSet& ev, string& ver = "0");
-    StTrsDetectorReader(StTpcRawDataEvent* ev, string ver = string("TrsDatav1.0"));
+    StTrsDetectorReader(StTpcRawDataEvent* ev, std::string ver = std::string("TrsDatav1.0"));
     
     ~StTrsDetectorReader();
     
-    ZeroSuppressedReader* getZeroSuppressedReader(int sector);
+    StTrsZeroSuppressedReader* getZeroSuppressedReader(int sector);
+#if 0
     ADCRawReader*         getADCRawReader(int sector);
     PedestalReader*       getPedestalReader(int sector);
     PedestalRMSReader*    getPedestalRMSReader(int sector);
@@ -49,9 +53,9 @@ public:
     BadChannelReader*     getBadChannelReader(int sector);
     
     int MemUsed();
-    
+#endif    
 protected:
-    
+#if 0    
     // Buffer and index functions for the various readers.
     // Initially these will do nothing.  Add functionality 
     // to increase performance
@@ -76,11 +80,11 @@ protected:
     int errnum;
     //char errstr0[250];
     
-    
+#endif    
 private:
     StTrsDetectorReader(const StTrsDetectorReader&);
     StTrsDetectorReader& operator=(const StTrsDetectorReader& rhs);
-    string                     mVersion;
+    std::string                mVersion;
     StTpcRawDataEvent*         mTheEvent;
     StTrsZeroSuppressedReader* mZSR;
 };

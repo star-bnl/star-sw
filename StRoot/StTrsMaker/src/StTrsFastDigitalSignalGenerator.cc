@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.26  2003/12/24 13:44:53  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.25  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -40,7 +43,7 @@
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
- * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader for DAQ type
  * data access.
  * Removed vestigial for loop in sampleAnalogSignal() method.
  * Write version of data format in .trs data file.
@@ -129,9 +132,9 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
    
     // Make a digital Pad!
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<unsigned char> digitalPadData;
+    vector<digitalPair> digitalPadData;
 #else
-    vector<unsigned char, allocator<unsigned char> > digitalPadData;
+    vector<digitalPair, allocator<digitalPair> > digitalPadData;
 #endif
     // Remember mSector is the "normal" analog sector! 
       cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
@@ -160,15 +163,15 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		if (timeBinIndex > currentTimeBin) {
 		    //cout << "Positive time shift" << endl;
 		    // remove previous zero if any
-		    if (digitalPadData.size() && !digitalPadData.back()) digitalPadData.pop_back(); 
+		    if (digitalPadData.size() && !((char)digitalPadData.back())) digitalPadData.pop_back(); 
 		    // add zeros
 		    zeroCounter += timeBinIndex - currentTimeBin; 
 		    for (int j=0; j < floor(zeroCounter/255.); j++) {
-			digitalPadData.push_back(0);
-			digitalPadData.push_back(255);
+			digitalPadData.push_back(digitalPair(0,0));
+			digitalPadData.push_back(digitalPair(255,0));
 			zeroCounter -= 255;
 		    }
-		    if (zeroCounter) digitalPadData.push_back(0);
+		    if (zeroCounter) digitalPadData.push_back(digitalPair(0,0));
 		    currentTimeBin = timeBinIndex;
 		}
 		else if (timeBinIndex < currentTimeBin){
@@ -201,26 +204,26 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		
 		if(digitalAmplitude != 0) {
 		    if (zeroCounter) {
-			digitalPadData.push_back(static_cast<unsigned char>(zeroCounter));
+			digitalPadData.push_back(digitalPair(static_cast<unsigned char>(zeroCounter),0));
 			zeroCounter = 0;
 		    }
-		    digitalPadData.push_back(static_cast<unsigned char>(digitalAmplitude));
+		    digitalPadData.push_back(digitalPair(static_cast<unsigned char>(digitalAmplitude),mTimeSequenceIterator->id()));
 		    currentTimeBin++;
 		    if (currentTimeBin==mNumberOfTimeBins)
 			break; //In case the time sequence hasn't finished, because of a time shift.
 		}
 		// Otherwise there is no signal!
 		else {
-		    if (!zeroCounter) digitalPadData.push_back(static_cast<unsigned char>(0));
+		    if (!zeroCounter) digitalPadData.push_back(digitalPair(0,0));
 		    else if(zeroCounter==255) {
-			digitalPadData.push_back(static_cast<unsigned char>(255));
-			digitalPadData.push_back(static_cast<unsigned char>(0));
+			digitalPadData.push_back(digitalPair(255,0));
+			digitalPadData.push_back(digitalPair(0,0));
 			zeroCounter=0;
 		    }
 		    zeroCounter++;
 		    currentTimeBin++;
 		    if (currentTimeBin==mNumberOfTimeBins){
-			digitalPadData.push_back(static_cast<unsigned char>(zeroCounter));
+			digitalPadData.push_back(digitalPair(static_cast<unsigned char>(zeroCounter),0));
 			zeroCounter = 0;
 			break;
 		    }
@@ -228,14 +231,14 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 	    } // the iterator (mTimeSequence)
 	    if (currentTimeBin < mNumberOfTimeBins) {
 		//cout << "Adding remaining zeros (should couple with - time shift)" << endl;
-		if (zeroCounter == 0) digitalPadData.push_back(0);
+		if (zeroCounter == 0) digitalPadData.push_back(digitalPair(0,0));
 		zeroCounter += mNumberOfTimeBins - currentTimeBin;
 		for (int k=0; k<floor(zeroCounter/255.); k++) {
-		    digitalPadData.push_back(255);
-		    digitalPadData.push_back(0);
+		    digitalPadData.push_back(digitalPair(255,0));
+		    digitalPadData.push_back(digitalPair(0,0));
 		    zeroCounter-=255;
 		}
-		if (zeroCounter) digitalPadData.push_back(zeroCounter);
+		if (zeroCounter) digitalPadData.push_back(digitalPair(static_cast<unsigned char>(zeroCounter),0));
 		else digitalPadData.pop_back();
 	    }
 // 	    PR(currentTimeBin);

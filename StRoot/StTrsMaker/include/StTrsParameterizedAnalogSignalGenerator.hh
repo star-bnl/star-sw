@@ -23,6 +23,7 @@
 #include "TRandom.h"
 #include <Stiostream.h>
 #include "StTrsAnalogSignalGenerator.hh"
+class SignalSum_t;
 class StTrsParameterizedAnalogSignalGenerator : public  StTrsAnalogSignalGenerator {
 public:
 
@@ -43,6 +44,8 @@ public:
     double signalSampler(double, StTrsAnalogSignal&);
     double addNoise(double );
     void setNormalFactor(double FudgeFactor);
+  void addSignal(const int id, const double signal, SignalSum_t &sum);
+  int SignalId(SignalSum_t &sum);
 
 private:
     // sampling

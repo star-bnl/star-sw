@@ -1,7 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.73 2003/09/02 17:59:14 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.74 2003/12/24 13:44:42 fisyak Exp $
 //
 
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.74  2003/12/24 13:44:42  fisyak
+// Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+//
 // Revision 1.73  2003/09/02 17:59:14  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -110,7 +113,7 @@
 // Revision 1.47  1999/11/05 22:10:13  calderon
 // Added Clear() method in StTrsMaker.
 // Removed StTrsUnpacker from maker.
-// Added StTrsDetectorReader and StTrsZeroSuppressedReader
+// Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader
 // for DAQ type interface to event data.
 // Made private copy constructor and operator= in classes that needed it.
 // Renamed the DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast,
@@ -264,9 +267,6 @@
 //                                                                      //
 // StTrsMaker class for Makers                                          //
 //                                                                      //
-#define uNPACK_ALL 1
-#define vERBOSITY  0
-#define hISTOGRAM
 //
 // You must select a data base initializer method
 // When using TPC_DATABASE, change also definition in
@@ -284,7 +284,6 @@
 
 #include <Stiostream.h>
 #include <unistd.h>    // needed for access()/sleep()
-#include "Stiostream.h"
 #include <math.h>
 #include <string>
 #include <algorithm>
@@ -307,10 +306,8 @@ using std::max;
 #include "StGlobals.hh"
 #include "Randomize.h"
 
-#ifdef HISTOGRAM
 #include "TNtuple.h"
 #include "TFile.h"
-#endif
 
 
 // TRS
@@ -373,8 +370,6 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 #include "StTrsZeroSuppressedReader.hh"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StSequence.hh"
-#include "StTrsIstream.hh"
-#include "StTrsOstream.hh"
 
 // g2t tables
 #include "tables/St_g2t_tpc_hit_Table.h"
@@ -385,7 +380,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.73 2003/09/02 17:59:14 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.74 2003/12/24 13:44:42 fisyak Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -405,30 +400,13 @@ mWriteToFile(0),
 mReadFromFile(0),
 mUseParameterizedSignalGenerator(1) // test trial,Hui Long
 {
-#ifdef HISTOGRAM
     mTrsNtupleFile = 0;
     mWireNtuple = mContinuousAnalogNtuple = mDiscreteAnalogNtuple = mDigitalNtuple = 0;
-#endif
     normalFactor = 1.0;
 }
 
 StTrsMaker::~StTrsMaker() { /* nopt */ }
 
-int StTrsMaker::readFile(char* file)
-{
-    mInputFileName = file;
-    mReadFromFile = 1;
-    PR(mReadFromFile);
-    return kStOK;
-}
-
-int StTrsMaker::writeFile(char* file, int numEvents)
-{
-    mOutputFileName = file;
-    mNumberOfEvents = numEvents;
-    mWriteToFile = 1;
-    return kStOK;
-}
 
 Int_t StTrsMaker::Init(){
   mAllTheData = 0;
@@ -449,17 +427,17 @@ Int_t StTrsMaker::InitRun(int runnumber)
     }
     mGeometryDb =
      StTpcDbGeometry::instance(gStTpcDb);
-  //mGeometryDb->print();
+    if (Debug()) mGeometryDb->print();
 
     // The print statements are done in Make() because the SlowControl DB is only available then.
 
   mElectronicsDb =
       StTpcDbElectronics::instance(gStTpcDb);
-  //mElectronicsDb->print();
+  if (Debug()) mElectronicsDb->print();
 
   mSlowControlDb =
        StTpcDbSlowControl::instance(gStTpcDb);
-  //mSlowControlDb->print();
+  if (Debug()) mSlowControlDb->print();
 
 //   mMagneticFieldDb =
 //       StTpcDbMagneticField::instance();  // default is .5T field in z direction
@@ -493,11 +471,11 @@ Int_t StTrsMaker::InitRun(int runnumber)
 
   mGeometryDb =
      StTpcROOTGeometry::instance(Geometry);
-  //mGeometryDb->print();
+  if (Debug()) mGeometryDb->print();
 
   mSlowControlDb =
        StTpcROOTSlowControl::instance(SlowControl);
-  //mSlowControlDb->print();
+  if (Debug()) mSlowControlDb->print();
 
 //   mMagneticFieldDb =
 //       StROOTMagneticField::instance();  // default is .5T field in z direction
@@ -513,7 +491,7 @@ Int_t StTrsMaker::InitRun(int runnumber)
   
   mElectronicsDb =
       StTpcROOTElectronics::instance(Electronics);
-   //mElectronicsDb->print();
+   if (Debug()) mElectronicsDb->print();
 #endif
 #ifdef ASCII_DATABASE_PARAMETERS
     //
@@ -553,34 +531,27 @@ Int_t StTrsMaker::InitRun(int runnumber)
    //
    mGeometryDb =
      StTpcSimpleGeometry::instance(geoFile.c_str());
-   //mGeometryDb->print();
+   if (Debug()) mGeometryDb->print();
 
    mSlowControlDb =
        StTpcSimpleSlowControl::instance(scFile.c_str());
-   //mSlowControlDb->print();
+   if (Debug()) mSlowControlDb->print();
 
    mMagneticFieldDb =
        StSimpleMagneticField::instance(magFile.c_str());
 
    mElectronicsDb =
        StTpcSimpleElectronics::instance(electronicsFile.c_str());
-   //mElectronicsDb->print();
+   if (Debug()) mElectronicsDb->print();
 #endif
 
    //
    // Select the gas: Ar, NeCO2, P10 available
    string gas = "P10";
    mGasDb = new StTrsDeDx(gas);
-   //mGasDb->print();
+   if (Debug()) mGasDb->print();
    
 
-   // Stream Instantiation
-   if (mWriteToFile) mOutputStream = new StTrsOstream(mOutputFileName,mNumberOfEvents,mGeometryDb);
-   if (mReadFromFile)  {
-       mInputStream = new StTrsIstream(mInputFileName,mGeometryDb);
-   }
-   else {
-   
    //
    // Containers
    //
@@ -659,9 +630,6 @@ Int_t StTrsMaker::InitRun(int runnumber)
    mDigitalSignalGenerator =
 	    StTrsFastDigitalSignalGenerator::instance(mElectronicsDb, mSector);
    
-   } // 'else' from condition to read from file or process normally 
-   //
-
    //
    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
    // which is accessible via the StTrsUnpacker.  Initialize the pointers!
@@ -682,14 +650,13 @@ Int_t StTrsMaker::InitRun(int runnumber)
     mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
     AddConst(new St_ObjectSet("Event"  , mAllTheData, 0));
    }
-#ifdef HISTOGRAM
-   mTrsNtupleFile          = new TFile("TrsOutput.root","RECREATE","Trs Ntuples");
-   mWireNtuple             = new TNtuple("WireNtuple", "Wire Histogram Info.", "electrons:wire:sector");
-   mContinuousAnalogNtuple = new TNtuple("CAnalogNtuple", "Cont. Analog Sector", "charge:time:pad:row");
-   mDiscreteAnalogNtuple   = new TNtuple("DAnalogNtuple", "Disc. Analog Sector", "charge:timebin:pad:row");
-   mDigitalNtuple    = new TNtuple("DigitalSignalNtuple", "Digital Sector", "adc:timebin:pad:row");
-   
-#endif
+   if ((Debug()/10)%10 > 0) {
+     mTrsNtupleFile          = new TFile("TrsOutput.root","RECREATE","Trs Ntuples");
+     mWireNtuple             = new TNtuple("WireNtuple", "Wire Histogram Info.", "electrons:wire:sector:id");
+     mContinuousAnalogNtuple = new TNtuple("CAnalogNtuple", "Cont. Analog Sector", "charge:time:pad:row:id");
+     mDiscreteAnalogNtuple   = new TNtuple("DAnalogNtuple", "Disc. Analog Sector", "charge:timebin:pad:row:id");
+     mDigitalNtuple          = new TNtuple("DigitalSignalNtuple", "Digital Sector", "adc:timebin:pad:row:id");
+   }
    return kStOK;
 }
 
@@ -737,11 +704,7 @@ Int_t StTrsMaker::Make(){
    mWireHistogram->setGasGainInnerSector(mSlowControlDb->innerSectorGasGain());
    mWireHistogram->setGasGainOuterSector(mSlowControlDb->outerSectorGasGain());
     
-    if (mReadFromFile) { // Read mAllTheData from file
-	mInputStream->fillTrsEvent(mAllTheData);
-	cout << "Done Filling Trs Raw Data Event." << endl;
-    }
-    else { // Normal processing of TRS through GEANT   
+    // Normal processing of TRS through GEANT   
     //cout << "Make ofstream" << endl;
     //ofstream ofs("/star/u2b/lasiuk/geantdebug.txt", ios::out);
     //ofstream raw("/star/u2b/lasiuk/event.txt",ios::out);
@@ -934,7 +897,7 @@ Int_t StTrsMaker::Make(){
 	   
 	    // WARNING:  cannot use "abs" (not overloaded (double) for LINUX!
 	     StTrsChargeSegment aSegment(sector12Coordinate,
-					hitMomentum,
+					 hitMomentum,id2,
 					(fabs(tpc_hit->de*GeV)),
 					tpc_hit->ds*centimeter,
 					geantPID);
@@ -1032,7 +995,7 @@ Int_t StTrsMaker::Make(){
 		//#endif
 	       //	mWireHistogram->addEntry(anEntry); 
              
-               StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge(),SigmaL,SigmaT,d);//HL,for field on ,08/02/00
+               StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge(),SigmaL,SigmaT,d,(*iter).id());//HL,for field on ,08/02/00
 	        mWireHistogram->addEntry(anEntry,bsectorOfHit);	
 	    } // Loop over the list of iterators
 
@@ -1043,8 +1006,9 @@ Int_t StTrsMaker::Make(){
 	} // if (currentSector == bsectorOfHit)
 	// Otherwise, do the digitization...
 	
-#ifdef HISTOGRAM
-	float wireValues[3];
+	if (mWireNtuple) {
+	if (mWireHistogram->minWire() >= 0) {
+	float wireValues[4];
 	// Loop over Wire Histogram
 	for(int jj=mWireHistogram->minWire(); jj<=mWireHistogram->maxWire(); jj++) {
 	    aTpcWire currentWire = mWireHistogram->getWire(jj);
@@ -1055,11 +1019,13 @@ Int_t StTrsMaker::Make(){
 		wireValues[0] = iter->numberOfElectrons();
 		wireValues[1] = jj;
 		wireValues[2] = currentSectorProcessed;
+		wireValues[3] = iter->id();
 		mWireNtuple->Fill(wireValues);
 	    }
 	}
 	mWireNtuple->Write();
-#endif
+	}
+	}
 	PR(currentSectorProcessed);
      
 	//
@@ -1072,10 +1038,10 @@ Int_t StTrsMaker::Make(){
 	double inducedChargeTime = difftime(inducedChargeEnd,inducedChargeBegin);
 	cout << "Time to process induced Charge: " << inducedChargeTime << " sec\n\n";
 
-#ifdef HISTOGRAM
+	if (mContinuousAnalogNtuple) {
 	tpcTimeBins continuousAnalogTimeSequence;
 	timeBinIterator timeSeqIter;
-	float cAnalogValues[4];
+	float cAnalogValues[5];
 	// Loop over Continuous Analog Sector
 	for(int jrow=1; jrow<=mGeometryDb->numberOfRows(); jrow++) {
 	    for (int jpad=1; jpad<=mGeometryDb->numberOfPadsAtRow(jrow); jpad++){
@@ -1088,12 +1054,13 @@ Int_t StTrsMaker::Make(){
 		    cAnalogValues[1] = timeSeqIter->time();
 		    cAnalogValues[2] = jpad;
 		    cAnalogValues[3] = jrow;
+		    cAnalogValues[4] = timeSeqIter->id();
 		    mContinuousAnalogNtuple->Fill(cAnalogValues);
 		}
 	    }
 	}
 	mContinuousAnalogNtuple->Write();
-#endif
+	}
 
 	time_t sampleAnalogSignalBegin = time(0);
 	cout << "--->sampleAnalogSignal()..." << endl;
@@ -1102,10 +1069,10 @@ Int_t StTrsMaker::Make(){
 	double sampleAnalogSignalTime = difftime(sampleAnalogSignalEnd,sampleAnalogSignalBegin);
 	cout << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n\n";
 
-#ifdef HISTOGRAM
+	if (mDiscreteAnalogNtuple) {
 	tpcTimeBins discreteAnalogTimeSequence;
 	timeBinIterator timeBinIter;
-	float dAnalogValues[4];
+	float dAnalogValues[5];
 	// Loop over Discrete Analog Sector
 	for(int drow=1; drow<=mGeometryDb->numberOfRows(); drow++) {
 	    for (int dpad=1; dpad<=mGeometryDb->numberOfPadsAtRow(drow); dpad++){
@@ -1118,12 +1085,13 @@ Int_t StTrsMaker::Make(){
 		    dAnalogValues[1] = timeBinIter->time();
 		    dAnalogValues[2] = dpad;
 		    dAnalogValues[3] = drow;
+		    dAnalogValues[4] = timeBinIter->id();
 		    mDiscreteAnalogNtuple->Fill(dAnalogValues);
 		}
 	    }
 	}
 	mDiscreteAnalogNtuple->Write();
-#endif
+	}
 	
 	//
 	// Digitize the Signals
@@ -1135,7 +1103,7 @@ Int_t StTrsMaker::Make(){
 	// Point to the object you want to fill
 	//
 	mDigitalSignalGenerator->fillSector(aDigitalSector);
-
+	mDigitalSignalGenerator->SetSectorNo(currentSectorProcessed);
 	//
 	// ...and digitize it
 	time_t digitizeSignalBegin = time(0);
@@ -1166,11 +1134,9 @@ Int_t StTrsMaker::Make(){
         
 	//
     } // loop over all segments: for(int i...
-  } // normal processing of TRS
-  if(mWriteToFile) mOutputStream->writeTrsEvent((mAllTheData));
   
   // The access stuff:
-#ifdef UNPACK_ALL
+    if (Debug() > 2) {
   //
   // Access the data with
   //   *mDetectorReader 
@@ -1182,13 +1148,13 @@ Int_t StTrsMaker::Make(){
     //
   //  for(int isector=1; isector<=mGeometryDb->numberOfSectors(); isector++) {
   for(int isector=mFirstSectorToProcess; isector<=mLastSectorToProcess; isector++) {
-      ZeroSuppressedReader* zsr = mDetectorReader.getZeroSuppressedReader(isector);
+      StTrsZeroSuppressedReader* zsr = mDetectorReader.getZeroSuppressedReader(isector);
       if(!zsr) continue; 
 // 	PR(isector);
       // otherwise, let's decode it
       unsigned char* padList;
-#ifdef HISTOGRAM
-      float digitalValues[4];
+      if (mDigitalNtuple) {
+      float digitalValues[5];
       for (int irow=1; irow<=mGeometryDb->numberOfRows();irow++) {
 	  int numberOfPads = zsr->getPadList(irow, &padList);
 	  // If there are no pads, go to the next row...
@@ -1197,33 +1163,34 @@ Int_t StTrsMaker::Make(){
 	      //PR(static_cast<int>(padList[ipad]));
 	      int nseq;
 	      
-	      //StSequence* listOfSequences;
-	      Sequence* listOfSequences;
+	      StSequence* listOfSequences;
+	      //Sequence* listOfSequences;
+	      int      ** listOfIds = 0;
 	      zsr->getSequences(irow,
 				static_cast<int>(padList[ipad]),
 				&nseq,
-				&listOfSequences);
+				&listOfSequences, &listOfIds);
 	      //PR(getSequencesStatus);
 	      for(int kk=0; kk<nseq; kk++) {
-#ifdef VERBOSITY
-		  PR(listOfSequences[kk].Length);
-#endif
-		  for(int zz=0; zz<listOfSequences[kk].Length; zz++) {
+		  for(int zz=0; zz<listOfSequences[kk].length; zz++) {
+		    if (Debug()%10 > 2 && kk < Debug()) {
+		    cout << "sector\t" << isector << "\trow\t" << irow 
+		     << "\tpad\t" << ipad  << "\tseq\t" << kk 
+		     << "\tz\t" << zz + (int)(listOfSequences[kk].startTimeBin)
+		     << "\tADC\t" << (int)(*(listOfSequences[kk].firstAdc)) 
+		     << "\tid\t" << (int)(*(listOfIds[kk])) 
+		     << endl;
+		    }
+		    digitalValues[0] = (int)(*(listOfSequences[kk].firstAdc)) ;
+		    digitalValues[1] = zz + (int)(listOfSequences[kk].startTimeBin);
+		    digitalValues[2] = ipad;
+		    digitalValues[3] = irow;
+		    digitalValues[4] = (int)(*(listOfIds[kk]));
+		    mDigitalNtuple->Fill(digitalValues);
 		      
-#ifdef VERBOSITY
-		      cout << " " << kk
-			   << " " << zz << '\t'
-			   << static_cast<int>(*(listOfSequences[kk].FirstAdc)) << endl;
-#endif
-		      digitalValues[0] = static_cast<int>(*(listOfSequences[kk].FirstAdc));
-		      digitalValues[1] = listOfSequences[kk].startTimeBin+zz;
-		      digitalValues[2] = static_cast<int>(padList[ipad]);
-		      digitalValues[3] = irow;
-		      mDigitalNtuple->Fill(digitalValues);
-		      
-		      listOfSequences[kk].FirstAdc++;
+		    listOfSequences[kk].firstAdc++;
+		    listOfIds[kk]++;
 		  } // zz
-		  
 	      } // Loop kk
 	  } // loop over pads
 	  //
@@ -1233,9 +1200,9 @@ Int_t StTrsMaker::Make(){
 	  //  	    zsr->clear();
       } // Loop over rows!
       mDigitalNtuple->Write();
-#endif
+      }
   } // Loop over sectors
-#endif
+    }
     
     //cout << "Got to the end of the maker" << endl;
     // CAUTION: ROOT is resposible for the memory at this point
@@ -1280,10 +1247,6 @@ Int_t StTrsMaker::Finish()
     mAnalogSignalGenerator = 0;
     if (mDigitalSignalGenerator)delete mDigitalSignalGenerator;
     mDigitalSignalGenerator = 0;    
-    if(mInputStream)  		delete(mInputStream);
-    mInputStream = 0;
-    if(mOutputStream) 		delete(mOutputStream);
-    mOutputStream = 0;
     return kStOK;
 }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.3 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.4 2003/12/24 13:44:53 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.cc,v $
+ * Revision 1.4  2003/12/24 13:44:53  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.3  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -21,7 +24,7 @@
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
- * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader for DAQ type
  * data access.
  * Removed vestigial for loop in sampleAnalogSignal() method.
  * Write version of data format in .trs data file.

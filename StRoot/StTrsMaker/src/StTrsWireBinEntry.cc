@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.cc,v 1.4 2000/07/30 02:41:07 long Exp $
+ * $Id: StTrsWireBinEntry.cc,v 1.5 2003/12/24 13:44:53 fisyak Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.cc,v $
+ * Revision 1.5  2003/12/24 13:44:53  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.4  2000/07/30 02:41:07  long
  * add dx dy dz,add function d()
  *
@@ -39,8 +42,8 @@
 StTrsWireBinEntry::StTrsWireBinEntry() { /* nopt */ }
 #endif
 
-StTrsWireBinEntry::StTrsWireBinEntry(StThreeVector<double>& x, float elec,double SigmaL,double SigmaT,double *D)
-    : mPosition(x), mNumberOfElectrons(elec) ,mSigmaL(SigmaL),mSigmaT(SigmaT){/* nopt */mD[0]=D[0];mD[1]=D[1];mD[2]=D[2]; }
+StTrsWireBinEntry::StTrsWireBinEntry(StThreeVector<double>& x, float elec,double SigmaL,double SigmaT,double *D, int id)
+    : mPosition(x), mNumberOfElectrons(elec) ,mSigmaL(SigmaL),mSigmaT(SigmaT), mId(id){/* nopt */mD[0]=D[0];mD[1]=D[1];mD[2]=D[2]; }
 
 StTrsWireBinEntry::~StTrsWireBinEntry() {/* nopt */ }
 
@@ -55,5 +58,6 @@ double *   StTrsWireBinEntry::d() {return mD; }
 // Non-member function
 ostream& operator<<(ostream& os, const StTrsWireBinEntry& entry)
 {
-    return os << '(' << entry.position() << ',' << entry.numberOfElectrons() << ')';
+    return os << "WireBin(Pos:" << entry.position() << ",No.of e:" << entry.numberOfElectrons() 
+	      << ",id:" << entry.id() << ")";
 }

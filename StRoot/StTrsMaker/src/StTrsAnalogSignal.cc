@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.cc,v 1.4 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsAnalogSignal.cc,v 1.5 2003/12/24 13:44:52 fisyak Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.cc,v $
+ * Revision 1.5  2003/12/24 13:44:52  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.4  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -29,14 +32,16 @@
 #include <Stiostream.h>
 #include "StTrsAnalogSignal.hh"
 
-StTrsAnalogSignal::StTrsAnalogSignal(float t, float amp)
+StTrsAnalogSignal::StTrsAnalogSignal(float t, float amp, int id) 
 {
+    mId                  = id;
     mAnalogSignal.first  = t;
     mAnalogSignal.second = amp;
 }
 
 StTrsAnalogSignal::StTrsAnalogSignal()
 {
+    mId                  = 0;
     mAnalogSignal.first  = 0;
     mAnalogSignal.second = 0;
 }

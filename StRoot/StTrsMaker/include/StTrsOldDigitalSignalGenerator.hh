@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.hh,v 1.2 2003/09/02 17:59:16 perev Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.hh,v 1.3 2003/12/24 13:44:51 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.hh,v $
+ * Revision 1.3  2003/12/24 13:44:51  fisyak
+ * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+ *
  * Revision 1.2  2003/09/02 17:59:16  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -17,7 +20,7 @@
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
  * and use new "Fast" as default.
- * Added StTrsDetectorReader and StTrsZeroSuppressedReader for DAQ type
+ * Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader for DAQ type
  * data access.
  *
  * Revision 1.3  1999/02/04 18:35:17  lasiuk

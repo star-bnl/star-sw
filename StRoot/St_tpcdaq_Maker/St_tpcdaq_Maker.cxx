@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.78  2003/12/24 13:44:55  fisyak
+// Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+//
 // Revision 1.77  2003/10/28 20:35:54  ward
 // Chain control of NOISE_ELIM GAIN_CORRECTION ASIC_THRESHOLDS.
 //
@@ -340,7 +343,8 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
       St_raw_row **raw_row_in,St_raw_row **raw_row_out,
       St_raw_pad **raw_pad_in,St_raw_pad **raw_pad_out, 
       St_raw_seq **raw_seq_in,St_raw_seq **raw_seq_out,
-      St_type_shortdata **pixel_data_in,St_type_shortdata **pixel_data_out) {
+      St_type_shortdata **pixel_data_in,St_type_shortdata **pixel_data_out,
+      St_type_shortdata **pixel_indx_in,St_type_shortdata **pixel_indx_out) {
 
   St_DataSetIter sect(sector);
 
@@ -379,11 +383,21 @@ void St_tpcdaq_Maker::MkTables(int isect,St_DataSet *sector,
     *pixel_data_in=new St_type_shortdata("pixel_data_in",100);
     sect.Add(*pixel_data_in);
   }
+  *pixel_indx_in=(St_type_shortdata*) sect("pixel_indx_in");
+  if (!(*pixel_indx_in)) {
+    *pixel_indx_in=new St_type_shortdata("pixel_indx_in",100);
+    sect.Add(*pixel_indx_in);
+  }
 
   *pixel_data_out=(St_type_shortdata*) sect("pixel_data_out");
   if (!(*pixel_data_out)) {
     *pixel_data_out=new St_type_shortdata("pixel_data_out",100);
     sect.Add(*pixel_data_out);
+  }
+  *pixel_indx_out=(St_type_shortdata*) sect("pixel_indx_out");
+  if (!(*pixel_indx_out)) {
+    *pixel_indx_out=new St_type_shortdata("pixel_indx_out",100);
+    sect.Add(*pixel_indx_out);
   }
 }
 //________________________________________________________________________________
@@ -401,14 +415,19 @@ void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
   raw_pad_gen->AddAt(&singlerow,padR);
 }
 //________________________________________________________________________________
-inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,
-      int rownum,unsigned short datum) {
+inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,St_type_shortdata *pixel_indx_gen,
+      int rownum,unsigned short datum, unsigned short id) {
   int nAlloc,nUsed;
   type_shortdata_st singlerow;
   singlerow.data=datum;
+  type_shortdata_st singleid;
+  singleid.data=id;
   nAlloc=pixel_data_gen->GetTableSize(); nUsed=pixel_data_gen->GetNRows();
   if(nUsed>nAlloc-10) { pixel_data_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
   pixel_data_gen->AddAt(&singlerow,rownum);
+  nAlloc=pixel_indx_gen->GetTableSize(); nUsed=pixel_indx_gen->GetNRows();
+  if(nUsed>nAlloc-10) { pixel_indx_gen->ReAllocate(Int_t(nAlloc*ALLOC+10)); }
+  pixel_indx_gen->AddAt(&singleid,rownum);
 }
 //________________________________________________________________________________
 void St_tpcdaq_Maker::SeqWrite(St_raw_seq *raw_seq_gen,int rownumber,
@@ -503,7 +522,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
   *nseqOld=npp; *lst=pp;
 }
 //________________________________________________________________________________
-int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst) {
+int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst, int ***listOfIds) {
   int rv,nseqPrelim; TPCSequence *lstPrelim;
   if(m_Mode != 1) { // Use DAQ.
     rv=victor->getSequences(gSector,row,pad,nseqPrelim,lstPrelim);
@@ -511,7 +530,7 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
     *lst=(StSequence*)lstPrelim;
   } else {           // Use TRS.
     assert(sizeof(Sequence)==sizeof(StSequence));
-    rv=mZsr->getSequences(row,pad,nseq,(Sequence**)lst);
+    rv=mZsr->getSequences(row,pad,nseq,lst,listOfIds);
   }
   if(m_CorrectionMask&0x04) AsicThresholds(gain,nseq,lst);
   return rv; // < 0 means serious error.
@@ -667,6 +686,7 @@ int St_tpcdaq_Maker::Output() {
   St_raw_pad *raw_pad_in,*raw_pad_out,*raw_pad_gen;
   St_raw_seq *raw_seq_in,*raw_seq_out,*raw_seq_gen;
   St_type_shortdata *pixel_data_in,*pixel_data_out,*pixel_data_gen;
+  St_type_shortdata *pixel_indx_in,*pixel_indx_out,*pixel_indx_gen;
   unsigned char *padlist;
   unsigned char *pointerToAdc;
   unsigned short conversion;
@@ -683,6 +703,7 @@ int St_tpcdaq_Maker::Output() {
   int isect,pixSave,pixR;
   unsigned long int nPixelThisPadRow;
   StSequence *listOfSequences;
+  int       **listOfIds = 0;
   St_raw_sec_m  *raw_sec_m;
 
   raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
@@ -702,16 +723,16 @@ int St_tpcdaq_Maker::Output() {
       sector=raw_data_tpc(NameOfSector(isect));
     }
     MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
-        &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
+        &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out,&pixel_indx_in,&pixel_indx_out);
     sectorStatus=getSector(isect);
     if(sectorStatus) continue;
     raw_row_gen=raw_row_out; raw_pad_gen=raw_pad_out; rowR=0; padR=0;
-    raw_seq_gen=raw_seq_out; pixel_data_gen=pixel_data_out; seqR=0; pixR=0;
+    raw_seq_gen=raw_seq_out; pixel_data_gen=pixel_data_out; pixel_indx_gen=pixel_indx_out;seqR=0; pixR=0;
     nPixelPreviousPadRow=0;
     for(ipadrow=NROW-1;ipadrow>=0;ipadrow--) {
       if(ipadrow==12) { // switch to the inner part of this sector
         raw_row_gen=raw_row_in; raw_pad_gen=raw_pad_in; rowR=0; padR=0;
-        raw_seq_gen=raw_seq_in; pixel_data_gen=pixel_data_in; seqR=0; 
+        raw_seq_gen=raw_seq_in; pixel_data_gen=pixel_data_in; pixel_indx_gen=pixel_indx_in; seqR=0; 
         pixR=0; nPixelPreviousPadRow=0;
       }
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
@@ -737,9 +758,9 @@ int St_tpcdaq_Maker::Output() {
         }
         nPixelThisPad=0;
         if(m_CorrectionMask&0x01) {
-          seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences);
+          seqStatus=getSequences(fGain[ipadrow][pad-1],ipadrow+1,pad,&nseq,&listOfSequences, &listOfIds);
         } else {
-          seqStatus=getSequences(                  1.0,ipadrow+1,pad,&nseq,&listOfSequences);
+          seqStatus=getSequences(                  1.0,ipadrow+1,pad,&nseq,&listOfSequences, &listOfIds);
         }
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=2; return 1; }
         if(nseq) {
@@ -782,11 +803,13 @@ int St_tpcdaq_Maker::Output() {
             assert(pad>0&&pad<=182);
             if (fGain[ipadrow][pad-1] < 0.125 || fGain[ipadrow][pad-1] > 8.0)  continue;
 //          if (m_Mode == 2) gaincorrection = 1; // Trs
-            if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
+	    if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
+//yf (not ready yet to use uncorrected Trs)     if(m_CorrectionMask&0x01) gaincorrection = fGain[ipadrow][pad-1];
           }
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
-            pixCnt++; conversion=log8to10_table[*(pointerToAdc++)]; 
+            pixCnt++; conversion=log8to10_table[*(pointerToAdc++)];
+	    unsigned short id =  0; if (listOfIds && listOfIds[iseq]) {id = *listOfIds[iseq]; listOfIds[iseq]++;}
             if(m_CorrectionMask&0x01) {
               if(fGain[ipadrow][pad-1]>22.0) {
                 printf("Fatal error in %s, line %d.\n",__FILE__,__LINE__);
@@ -798,7 +821,7 @@ int St_tpcdaq_Maker::Output() {
 #ifdef HISTOGRAMS
             m_pix_AdcValue->Fill((Float_t)(conversion));
 #endif
-            PixelWrite(pixel_data_gen,pixR++,conversion);
+            PixelWrite(pixel_data_gen,pixel_indx_gen,pixR++,conversion,id);
             nPixelThisPadRow++; nPixelThisPad++;
           }
           seqR++;

@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.19 2003/09/10 19:47:41 perev Exp $
+// $Id: StTrsMaker.h,v 1.20 2003/12/24 13:44:47 fisyak Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.20  2003/12/24 13:44:47  fisyak
+// Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
+//
 // Revision 1.19  2003/09/10 19:47:41  perev
 // ansi corrs
 //
@@ -24,7 +27,7 @@
 // Revision 1.13  1999/11/05 22:10:13  calderon
 // Added Clear() method in StTrsMaker.
 // Removed StTrsUnpacker from maker.
-// Added StTrsDetectorReader and StTrsZeroSuppressedReader
+// Added StTrsZeroSuppressedReader and StTrsZeroSuppressedReader
 // for DAQ type interface to event data.
 // Made private copy constructor and operator= in classes that needed it.
 // Renamed the DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast,
@@ -122,19 +125,15 @@ class StTrsDigitalSector;
 
 // Output Data
 class StTrsRawDataEvent;
-class StTrsIstream;
-class StTrsOstream;
 
-#ifdef HISTOGRAM
 class TFile;
 class TNtuple;
-#endif
 
 class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.19 2003/09/10 19:47:41 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.20 2003/12/24 13:44:47 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -159,13 +158,6 @@ class StTrsMaker : public StMaker {
     // Output
     StTrsRawDataEvent           *mAllTheData;//!
 
-    // I/O streams
-    char*                        mInputFileName;//!
-    char*                        mOutputFileName;//!
-    StTrsIstream*                mInputStream;//!
-    StTrsOstream*                mOutputStream;//!
-    int                          mNumberOfEvents;//!
-
     // Calculation and Initialization Done Internally in the Maker
     double                       mMiniSegmentLength;
     int                          mFirstSectorToProcess;
@@ -184,13 +176,11 @@ class StTrsMaker : public StMaker {
 protected:
 
 public:
-#ifdef HISTOGRAM    
     TFile*   mTrsNtupleFile; //!
     TNtuple* mWireNtuple; //!
     TNtuple* mContinuousAnalogNtuple;
     TNtuple* mDiscreteAnalogNtuple; //!
     TNtuple* mDigitalNtuple; //!
-#endif
     StTrsMaker(const char *name="Trs");
     ~StTrsMaker();
     Int_t  Init();
@@ -209,7 +199,7 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.19 2003/09/10 19:47:41 perev Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.20 2003/12/24 13:44:47 fisyak Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker,0)   //StAF chain virtual base class for Makers
 
