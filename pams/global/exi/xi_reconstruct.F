@@ -1,38 +1,35 @@
-C
-      INTEGER FUNCTION XI_RECONSTRUCT(nok,trak,
+C>---------------------------------------------------------------------
+      INTEGER FUNCTION XI_RECONSTRUCT(nok,idd,trak,
      +                                exipar_h,exipar,
-     +                                mvertex_h,mvertex,
+     +                                privert_h,privert,
      +                                ev0out_h,ev0out,
      +                                exiout_h,exiout   )
- 
-      IMPLICIT NONE
+c--------------------------------------------------------------------- 
 C   Functional Description : Search for secondaries 
 C                            X and Omega particles and
 C			     and anti-particles are 
 C			     considered. Only charged decay modes.
-C   Created  MARCH-1994	  S. Margetis 
+C   Created  MARCH-1994         S. Margetis 
+C   Modified by                 WK.Wilson
+C   Moved to STAF JUNE-1997     S. Margetis
 C   Error conditions	: None-Yet
-C   Status		: Tested with svt_hits
+C   Status		: Tested 
+C<----------------------------------------------------------------------
+      IMPLICIT NONE
+#include "PAM.inc"
+#include "exi_exipar.inc"
+#include "evr_privert.inc"
+#include "ev0_ev0out.inc"
+#include "exi_exiout.inc"
 C----------------------------------------------------------------------
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "exi_exipar_pars.inc"
-#include "exi_exipar_st.inc"
-#include "evr_privert_pars.inc"
-#include "evr_privert_st.inc"
-#include "ev0_ev0out_pars.inc"
-#include "ev0_ev0out_st.inc"
-#include "exi_exiout_pars.inc"
-#include "exi_exiout_st.inc"
-C----------------------------------------------------------------------
-      RECORD/ table_head_st/ exipar_h
-      RECORD/ exipar_row_st/ exipar(*)
-      RECORD/ table_head_st/ mvertex_h
-      RECORD/ privert_row_st/ mvertex(*)
-      RECORD/ table_head_st/ ev0out_h
-      RECORD/ ev0out_row_st/ ev0out(*)
-      RECORD/ table_head_st/ exiout_h
-      RECORD/ exiout_row_st/ exiout(*)
+      RECORD/ TABLE_HEAD_ST/ exipar_h
+      RECORD/ EXI_EXIPAR_ST/ exipar(*)
+      RECORD/ TABLE_HEAD_ST/ privert_h
+      RECORD/ EVR_PRIVERT_ST/ privert(*)
+      RECORD/ TABLE_HEAD_ST/ ev0out_h
+      RECORD/ EV0_EV0OUT_ST/ ev0out(*)
+      RECORD/ TABLE_HEAD_ST/ exiout_h
+      RECORD/ EXI_EXIOUT_ST/ exiout(*)
 
 C---for testing purposes only
       STRUCTURE/local_track/
@@ -50,9 +47,10 @@ C---------------
  
       INTEGER nok,id,idd(10000),id1,id2
       INTEGER ierr,ii,kk,ll,iflag,iflag1
-      INTEGER i,j,k,l,q
+      INTEGER i,j,k,l
  
       REAL	rd_cut,rv_cut,rmin_cut,dmass,mass_id(4)
+      REAL      lmass_check,mass_error
 
       INTEGER 	maxtr,matchl,npid1,npid2,ok
       PARAMETER	(maxtr=5000)
@@ -68,6 +66,7 @@ C---------------
       REAL	xc1(2),xc2(2),r1,r2,xcom(2),ycom(2),invms,rmin
       REAL	xp(2),xn1(2),xn2(2),rd,xpp(3),massl(2),pp(3)
       REAL      env0,bv0,gv0,ep,ppar_cm,mainv(3)
+      real      p1,p2,dot,open ! wkw
       LOGICAL	tpc
       COMMON	/local/	ptrk(maxtr,6)
       REAL MASST(50),QQT(50)
@@ -110,10 +109,11 @@ C---------------
 	rd_cut=exipar(1).dca
 	rv_cut=exipar(1).dlen
 	rmin_cut=exipar(1).dcaxi
+        mass_error=exipar(1).dmass ! wkw cut for lambda mass
 *
-c        mainv(1) = mvertex(1).x
-c        mainv(2) = mvertex(1).y
-c        mainv(3) = mvertex(1).z
+c        mainv(1) = privert(1).x
+c        mainv(2) = privert(1).y
+c        mainv(3) = privert(1).z
         mainv(1) = 0.
         mainv(2) = 0.
         mainv(3) = 0.
@@ -130,9 +130,9 @@ c        mainv(3) = mvertex(1).z
 *if yes .and. it is a pion/proton pair proceed if not
 *take GEANT ID or a (hypothetical) mass will be assigned
 *
-c        IF(id.ne.0) THEN
-c	IF(idd(i).ne.id1) GOTO 10
-c        ENDIF
+        IF(id.ne.0) THEN
+	IF(idd(i).ne.id1) GOTO 10
+        ENDIF
 
         trki(1)=trak(i).r
         trki(2)=trak(i).rf
@@ -147,8 +147,8 @@ c test for xi...must be a negative
 
         IF(id.ne.0) THEN
 	IF(ev0out(j).inv_mass(index).eq.0.0) GOTO 20
-	IF( abs(ev0out(j).inv_mass(index)-1.11563)
-     +      .gt.0.020 ) GOTO 20
+c	IF( abs(ev0out(j).inv_mass(index)-1.11563) ! put in elsewhere by wkw
+c     +      .gt.0.020 ) GOTO 20
         ENDIF
 
         trkj(1)=ev0out(j).p(1)
@@ -189,13 +189,20 @@ C----two possible intersection points ---------------------------
 *
 *---decide here if it is a good candidate
 *
-		IF( (rd.le.rd_cut).and.(rv.gt.rv_cut).and.(rv.lt.30.) ) THEN
+                lmass_check=abs(ev0out(j).inv_mass(2)-1.11563) ! wkw
+		IF( (rd.le.rd_cut).and.(rv.gt.rv_cut).and.(rv.lt.30.).and.
+     &               lmass_check.lt.mass_error) THEN 
 		massl(1)=0.139
 		massl(2)=1.11563
 		call inv_mass(trk1,trkj,massl,pp,invms,8)
 * be careful. Impact parameter needs main vertex at (0,0,0)
 		call casc_impact_param(mainv,xpp,pp,rmin,iflag)
                 IF((rmin.le.rmin_cut).and.(iflag.ne.2)) THEN
+
+c               wkw: breakout if ok=maxlen
+                if (ok.eq.exiout_h.maxlen) then
+                   return
+                endif
 
                 ok=ok+1
                 exiout_h.nok= exiout_h.nok+1
@@ -211,16 +218,43 @@ C----two possible intersection points ---------------------------
                 exiout(ok).idba=trak(i).id
                 exiout(ok).idv0=ev0out(j).id
                 exiout(ok).inv_mass(1)=invms
+                exiout(ok).tau(1)=invms*rv/pxi     
+                exiout(ok).tmin(1)=invms*rv_cut/pxi
 C--calculate Armenteros variables---
-c        	call track_mom(trk1,0,pst1)
-c                pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3)   !dot product of p+ and p(v0)
-c                ndotp=pv0(1)*pp(1)+pv0(2)*pp(2)+pv0(3)*pp(3)     !dot product of v0 and p(Xi)
+        	call track_mom(trk1,0,pst1)
+        	call track_mom(trk2,0,pst2)
+                pdotp=pst1(1)*pp(1)+pst1(2)*pp(2)+pst1(3)*pp(3)   !dot product of p+ and p(Xi)
+                ndotp=pv0(1)*pp(1)+pv0(2)*pp(2)+pv0(3)*pp(3)     !dot product of v0 and p(Xi)
                 pxi  =sqrt(pp(1)*pp(1)+pp(2)*pp(2)+pp(3)*pp(3)) 
-c                ppar=pdotp/pxi
-c                npar=ndotp/pxi
-c                pper=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+pst1(3)*pst1(3)-ppar*ppar)
-c                exiout(ok).pt=pper
-c                exiout(ok).alpha=(ppar-npar)/(ppar+npar)
+                ppar=pdotp/pxi
+                npar=ndotp/pxi
+                pper=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+pst1(3)*pst1(3)-ppar*ppar)
+                exiout(ok).pt=pper
+                exiout(ok).alpha=(ppar-npar)/(ppar+npar)
+C--calculate impact parameters--- wkw
+		xp(1)=0.
+		xp(2)=0.
+c               negative track
+		call project_track(xc1,r1,xp,xn1)
+c		call ev0_update_track_param(xc1,r1,xn1,trki,trk1)
+                exiout(ok).chi2=sqrt(xn1(1)**2.+xn1(2)**2.)
+
+
+
+
+c     put some ev0 info in exiout cov and unused variables (wkw)
+                exiout(ok).cov(1)=ev0out(j).dcapn
+                exiout(ok).cov(2)=ev0out(j).dcav0
+                exiout(ok).cov(3)=ev0out(j).tau(1)/ev0out(j).tmin(1)
+                exiout(ok).cov(4)=ev0out(j).inv_mass(2)
+                exiout(ok).cov(5)=ev0out(j).alpha
+                exiout(ok).cov(6)=ev0out(j).pt
+                exiout(ok).inv_mass(2)=ev0out(j).cos_th_cm(1)
+                exiout(ok).inv_mass(3)=ev0out(j).dcap
+                exiout(ok).inv_mass(4)=ev0out(j).dcan
+                
+                
+
 *
 *---if blind run test all mass hypothesis
 *
