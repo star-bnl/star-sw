@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.6 2000/11/07 14:13:24 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.7 2000/11/14 22:31:51 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.6  2000/11/07 14:13:24  lasiuk
- *  add possibility of .4*px/pz correction to the track extrapolation
+ *  Revision 2.7  2000/11/14 22:31:51  lasiuk
+ *  associated MIP (commented)
+ *  return copy instead of reference
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -408,7 +409,7 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
     this->setLastHitDCA(lastHitDCA);
     this->setLastHit(tpcTrack->detectorInfo()->lastPoint());
 }
-vector<StRichRingHit*>&
+
 void StRichTrack::init()
 {
     myGeometryDb  = StRichGeometryDb::getDb();  
@@ -601,29 +602,56 @@ bool StRichTrack::correct() {
 
 
 
+
       setProjectedMIP(correctedProjectedMIP);
       setImpactPoint(impact);
-
+      setMomentum(tempRichLocalMomentum);
+    }
   }
   
-    double adcCut=200;
+  return true;
 }
-    if (hits) {
 
-	StSPtrVecRichHitConstIterator hitIndex;
-	for (hitIndex = hits->begin(); hitIndex != hits->end(); hitIndex++) { 
-	    testThisResidual = ((*hitIndex)->local() - mProjectedMIP).perp();      
+    typedef pair<StRichHit*, double> candidate;
+    //double adcCut=200;
 
-	    //
-	    // should look at ePhotoElectron or eMip flag (StRichHitFlag)
-	    //
-	    if (testThisResidual<smallestResidual && (*hitIndex)->charge()>adcCut) {
-		smallestResidual = testThisResidual;   
-		mAssociatedMIP   = *hitIndex;
-	    }
+    //
+    // proximity matching between TPC track's predicted MIP and 
     // RICH pad plane MIP 
+    //
+
     
+    double smallestResidual=10e10;
+    double testThisResidual=0;
+
+    if (!hits) {
+	cout << "StRichTrack::assignMIP()\n";
+	cout << "\tHits were not passed properly\n";
+	cout << "\tReturning" << endl;
+	if(testThisResidual < 3.*centimeter)
+    vector<candidate> candidateHits;
+    
+    StSPtrVecRichHitConstIterator hitIndex;
     for (hitIndex = hits->begin(); hitIndex != hits->end(); hitIndex++) { 
+	testThisResidual = ((*hitIndex)->local() - mProjectedMIP).perp();      
+
+	if(testThisResidual>5.*centimeter) continue;
+	
+
+	    candidateHits.push_back( candidate((*hitIndex), testThisResidual) );
+
+	if (testThisResidual<smallestResidual) {
+	    smallestResidual = testThisResidual;   
+	    mAssociatedMIP   = *hitIndex;
+//     if(candidateHits.size()>1) {
+// 	cout << "StRichTrack::associateHit()\n";
+// 	cout << "\tMore than 1 hit is associated\n";
+// 	cout << "\tTake highest amplitude with smallest residual\n" << endl;
+
+//     double highestAmplitude = 0;
+// 	for(size_t ii=0; ii<candidateHits.size(); ii++) {
+//     if(highestAmplitude<candidateHits[ii].second) {
+// 	mAssociatedMIP = candidateHits[ii].first;
 // 	break;
 
 // 	}

@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.6 2000/11/07 14:13:27 lasiuk Exp $
+ * $Id: StRichTrack.h,v 2.7 2000/11/14 22:31:54 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
- *  Revision 2.6  2000/11/07 14:13:27  lasiuk
- *  add possibility of .4*px/pz correction to the track extrapolation
+ *  Revision 2.7  2000/11/14 22:31:54  lasiuk
+ *  associated MIP (commented)
+ *  return copy instead of reference
  *
  *  Revision 2.6  2000/11/07 14:13:27  lasiuk
  *  add possibility of .4*px/pz correction to the track extrapolation
@@ -106,7 +107,7 @@ public:
     
     void  clearHits();
     void  addHit(StRichHit*, double, double, double, double, double, StParticleDefinition* );
-    vector<StRichRingHit*>& getRingHits(StParticleDefinition* );
+    vector<StRichRingHit*> getRingHits(StParticleDefinition* );
 
     StThreeVectorF& getProjectedCTBPoint();
     StThreeVectorF& getLastHit();
