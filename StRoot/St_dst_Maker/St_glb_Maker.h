@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.12 1999/02/12 22:27:39 ogilvie Exp $
+// $Id: St_glb_Maker.h,v 1.13 1999/02/13 20:22:32 caines Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.13  1999/02/13 20:22:32  caines
+// Added exi and temp dir for when svt not there
+//
 // Revision 1.12  1999/02/12 22:27:39  ogilvie
 // added in spectra/pid QA histograms
 //
@@ -67,6 +70,8 @@ class St_egr_propagate;
 class St_egr_egrpar;
 class St_ev0_ev0par;
 class St_ev0_ev0par2;
+class St_exi_exipar;
+class St_exi_aux;
 class St_mft_control; 
 class St_particle_dst_param;
 
@@ -74,7 +79,7 @@ class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.12 1999/02/12 22:27:39 ogilvie Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.13 1999/02/13 20:22:32 caines Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -127,6 +132,8 @@ class St_glb_Maker : public StMaker {
   St_egr_propagate *m_tp_param;  //!
   St_ev0_ev0par  *m_ev0par;      //!
   St_ev0_ev0par2 *m_ev0par2;     //!
+  St_exi_exipar  *m_exipar;      //!
+  St_exi_aux     *m_exiaux;      //!
   St_mft_control *m_magf;        //!
   St_egr_egrpar  *m_egr_egrpar;  //!
   St_egr_egrpar  *m_egr2_egrpar; //!
@@ -148,7 +155,8 @@ class St_glb_Maker : public StMaker {
   TH1F     *m_tlength;     //! dst track length
   TH1F     *m_chi2xd;      //! x chisq/degf
   TH1F     *m_chi2yd;      //! y chisq/degf
-  TH1F     *m_lameffm;     //! Lambda effective mass
+  TH1F     *m_ev0_lama_hist;//! Lambda mass
+  TH1F     *m_ev0_k0ma_hist;//! K0 mass
   TH2F     *m_p_dedx_rec;   //! dedx vs p
  public: 
   St_glb_Maker(const char *name="global", const char *title="event/data/global");
