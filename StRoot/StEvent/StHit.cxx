@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 1.4 1999/04/28 22:27:33 fisyak Exp $
+ * $Id: StHit.cxx,v 1.5 1999/05/03 01:36:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 1.4  1999/04/28 22:27:33  fisyak
- * New version with pointer instead referencies
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.5  1999/05/03 01:36:18  fisyak
+ * Add Print
  *
  * Revision 1.4  1999/04/28 22:27:33  fisyak
  * New version with pointer instead referencies
@@ -30,10 +33,10 @@
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.4 1999/04/28 22:27:33 fisyak Exp $";
+#include "StGlobalTrack.h"
 #include "StGlobalTrack.h"
  *
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.4 1999/04/28 22:27:33 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.5 1999/05/03 01:36:18 fisyak Exp $";
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:17  ullrich
@@ -75,6 +78,12 @@ ostream& operator<<(ostream& os, const StHit& h)
     os << "Position: " << h.position() << endl;
     os << "Error:    " << h.positionError() << endl;
     os << "Charge:   " << h.charge() << endl;
+    os << "RefCount: " << h.trackReferenceCount() << endl;
+    return os;
+
+//______________________________________________________________________________
+void StHit::Print(Option_t *opt)
+StMatrixF
   cout << *this << endl;
 
 //______________________________________________________________________________

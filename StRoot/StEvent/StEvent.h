@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.5 1999/04/30 13:16:28 fisyak Exp $
+ * $Id: StEvent.h,v 1.6 1999/05/03 01:36:18 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.5  1999/04/30 13:16:28  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
+ *
+ * Revision 1.6  1999/05/03 01:36:18  fisyak
+ * Add Print
  *
  * Revision 1.5  1999/04/30 13:16:28  fisyak
  * add StArray for StRootEvent
@@ -119,16 +122,12 @@ class StVecPtrZdcSegment;
 #include "dst_event_header.h"
 #include "dst_event_summary.h"
 
-struct pairL
+#if !defined(ST_NO_NAMESPACES)
 using namespace std;
-    Long_t first;
-    Long_t second;
-    pairL(Long_t, Long_t);
-    pairL();
-  //ClassDef(pairL,1)
+#endif
+struct pairL : public TObject
+{
   Long_t first;
-inline pairL::pairL(Long_t a, Long_t b) : first(a), second(b) {}
-inline pairL::pairL() : first(0), second(0) {}
   Long_t second;
   pairL(Long_t a=0, Long_t b=0): first(a), second(b) {};
 };
@@ -148,11 +147,13 @@ inline pairL::pairL() : first(0), second(0) {}
     Int_t     	             GetDate()     const {return ((TDatime *)&mTime)->GetDate();};
     Int_t     	             GetTime()     const {return ((TDatime *)&mTime)->GetTime();};
     TDatime                  GetDateTime() const {return mTime;};
+    TString                  CvsTag()      const {return mCvsTag;};
    
     virtual ULong_t                runNumber() const;              
     virtual ULong_t                triggerMask() const;
     virtual ULong_t                bunchCrossingNumber() const;
     virtual Double_t                       luminosity() const;
+    virtual void                   Print(Option_t *opt=""); // *MENU*
     virtual StRun*                       run();
     virtual StVertex*                    primaryVertex();
     virtual StDstEventSummary*           summary();
@@ -170,6 +171,7 @@ inline pairL::pairL() : first(0), second(0) {}
     virtual Float_t                      beamPolarization(StBeamDirection, 
 							  StBeamPolarizationAxis);
 
+    virtual void SetCvsTag(const Char_t* tag){mCvsTag = tag;}; 
     virtual void setType(const Char_t*);
     virtual void setId(const pairL&);
     virtual void setTime(Int_t dt)                 {SetDateTime(dt,0);};
@@ -197,9 +199,10 @@ inline pairL::pairL() : first(0), second(0) {}
     virtual void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
     virtual void setL0Trigger(StL0Trigger*);                      
     virtual void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t); // *MENU*
-    pairL                        mId;       //!                      
+    const StFtpcHitCollection*          ftpcHitCollection() const;
     
     
+    TString                      mCvsTag;
     pairL                        mId;        //!
     ULong_t                      mRunNumber;
     TDatime                      mTime;
