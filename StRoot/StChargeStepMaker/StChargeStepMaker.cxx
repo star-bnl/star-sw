@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.8 2000/08/17 23:28:38 hardtke Exp $
+// $Id: StChargeStepMaker.cxx,v 1.9 2000/09/15 21:19:50 fisyak Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.9  2000/09/15 21:19:50  fisyak
+// No FindObject in TDataSet
+//
 // Revision 1.8  2000/08/17 23:28:38  hardtke
 // read tpcChargeStepCalib parameters for database
 //
@@ -127,7 +130,7 @@ Int_t StChargeStepMaker::Make() {
       for (int sec = 1;sec<=24;sec++){
       Char_t sectorname[10]; //= "Sector_1" ;
       sprintf(sectorname, "Sector_%d", sec);
-      St_DataSet *sector = rawdata.FindObject(sectorname) ;
+      St_DataSet *sector = rawdata(sectorname) ;
       //      cout << " Examining sector : " << sectorname << endl ;	
       
       if (!sector) return kStOK;
@@ -321,7 +324,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.8 2000/08/17 23:28:38 hardtke Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.9 2000/09/15 21:19:50 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
