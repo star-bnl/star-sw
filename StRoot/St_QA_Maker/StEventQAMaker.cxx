@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.21 2001/08/31 21:29:50 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.22 2001/09/01 14:24:40 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.22  2001/09/01 14:24:40  genevb
+// Allow trigger word=0 for MC data
+//
 // Revision 2.21  2001/08/31 21:29:50  genevb
 // Check if trigger info exists
 //
@@ -142,8 +145,9 @@ Int_t StEventQAMaker::Make() {
 
   event = (StEvent *)GetInputDS("StEvent");
   if (event) {
+    Bool_t realData = (event->info()->type() == "NONE");
     if (firstEvent) {
-      if (event->info()->type() == "NONE") {
+      if (realData) {
         histsSet = 1;
       } else {
         // process Monte Carlo events
@@ -155,7 +159,7 @@ Int_t StEventQAMaker::Make() {
     Bool_t doEvent = kTRUE;
     StTrigger* l0Trig = event->l0Trigger();
     if (l0Trig) {
-      doEvent = kFALSE;
+      if (realData) doEvent = kFALSE;
       tword = l0Trig->triggerWord();
       if (tword) {
         if ((tword >= 0x1000) && (tword < 0x1100)) {
@@ -175,7 +179,8 @@ Int_t StEventQAMaker::Make() {
             mTrigBits->Fill((Float_t) bitn);
         }
       } else {
-        gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
+        if (realData)
+          gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
       }
     } else { // No trigger info!
       gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
