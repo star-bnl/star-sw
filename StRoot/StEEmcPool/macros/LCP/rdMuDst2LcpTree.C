@@ -2,11 +2,13 @@ class StChain;
 StChain *chain=0;
 
 int rdMuDst2LcpTree(  const char *muDstList="400K.lis", // sample of R3012008+10+12+13
-		    int maxList=10,
-		    char * wrkDir="./wrkLcpX/",
-		    int off48=0, 
-		    int maxEve=500
-		    ){ 
+		      int maxList=6,
+		      char * wrkDir="./wrkLcpX/",
+		      int off48=0, 
+		      int maxEve=3000,
+		      float maxEta=1.0
+		      ){ 
+
   if (gClassTable->GetID("TTable") < 0) {
     gSystem->Load("libTable");
     gSystem->Load("libPhysics");
@@ -18,7 +20,7 @@ int rdMuDst2LcpTree(  const char *muDstList="400K.lis", // sample of R3012008+10
   cout << " loading done " << endl;
   
   // Load my maker
-  assert(gSystem->Load("StEEmcPoolLCP")==0 );
+  assert(gSystem->Load("LCP")==0 );
   //assert(gSystem->Load("MikesRejector")==0 );// Mike's rejector
    
   // create chain    
@@ -32,11 +34,11 @@ int rdMuDst2LcpTree(  const char *muDstList="400K.lis", // sample of R3012008+10
   StMuLcp2TreeMaker *myMk = new StMuLcp2TreeMaker("jasEE","MuDst");
   myMk->SetOutDir(wrkDir);
   myMk->SetOff48(off48);
- 
+  
   // avaliable switches
   // myMk->SetMinNFitPoint(nFitP); 
   // myMk->SetMaxDCAxy(maxDCAxy);
-  // myMk->SetMaxEta(maxEta);
+  myMk->SetMaxEta(maxEta);
   // myMk->SetMinPt(minPt);
   // myMk->SetMinFitPfrac(FitPfrac);
   // myMk->InitRunFromMake(xRun); // if used turns off TTree, saves only histo, allows to add runs 
