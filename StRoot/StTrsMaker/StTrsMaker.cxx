@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.9 1999/02/05 23:08:34 fisyak Exp $
+// $Id: StTrsMaker.cxx,v 1.10 1999/02/10 04:30:02 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.10  1999/02/10 04:30:02  lasiuk
+// add unpacker and rawevent as data members/ passed by dataset
+//
 // Revision 1.9  1999/02/05 23:08:34  fisyak
 // Add Valery's update of DataSet
 //
@@ -91,7 +94,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.9 1999/02/05 23:08:34 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.10 1999/02/10 04:30:02 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -148,7 +151,7 @@ Int_t StTrsMaker::Init()
    //
    mGeometryDb =
      StTpcSimpleGeometry::instance(geoFile.c_str());
-   mGeometryDb->print();
+   //mGeometryDb->print();
 
    mSlowControlDb =
        StTpcSimpleSlowControl::instance(scFile.c_str());
@@ -161,7 +164,7 @@ Int_t StTrsMaker::Init()
 
    string gas =("Ar");
    mGasDb = new StTrsDeDx(gas);
-   mGasDb->print();
+   //mGasDb->print();
 
    //
    // Containers
@@ -179,7 +182,9 @@ Int_t StTrsMaker::Init()
    mSector = 
        new StTrsSector(mGeometryDb);
 
-    // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
+   // Output is into an StTpcRawDataEvent* vector<StTrsDigitalSector*>
+   // which is accessible via the StTrsUnpacker
+   mUnPacker = new StTrsUnpacker;
 
    mAllTheData =
        new StTrsRawDataEvent();
@@ -189,11 +194,11 @@ Int_t StTrsMaker::Init()
     mChargeTransporter =
       StTrsFastChargeTransporter::instance(mGeometryDb, mSlowControlDb, mGasDb, mMagneticFieldDb);
     // set status:
-    mChargeTransporter->setChargeAttachment(true);
-    mChargeTransporter->setGatingGridTransparency(true);
-    mChargeTransporter->setTransverseDiffusion(true);
-    mChargeTransporter->setLongitudinalDiffusion(true);
-    mChargeTransporter->setExB(true);
+    //mChargeTransporter->setChargeAttachment(true);
+    //mChargeTransporter->setGatingGridTransparency(true);
+    //mChargeTransporter->setTransverseDiffusion(true);
+    //mChargeTransporter->setLongitudinalDiffusion(true);
+    //mChargeTransporter->setExB(true);
 
 
     mAnalogSignalGenerator =
@@ -249,247 +254,294 @@ Int_t StTrsMaker::Make(){
     //
     St_DataSetIter geant(gStChain->DataSet("geant"));
     // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
-
-      St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
-      Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows(); // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
-      g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
-
-      //StTpcCoordinateTransform transformer(mGeometryDb, mSlowControlDb);
-
-
-      cout << "Loop over: " << no_tpc_hits << endl;
-      cout << "First sector" << endl;
-      int currentSectorProcessed = 1;
-
-      int bisdet, bsectorOfHit, bpadrow;
-
-      whichSector(tpc_hit->id, &bisdet, &bsectorOfHit, &bpadrow);
-
-      PR(bsectorOfHit);
-      
-      for (int i=0; i< 1; i++){
-	  cout << tpc_hit->id                << ' '
-	       << (tpc_hit->de/eV)           << ' '
-	       << (tpc_hit->ds/centimeter)   << ' '
-	       << tpc_hit->volume_id         << endl;
-
-	  int pID = 1;  // I need to know the PID for ionization calculations
-	
-	  StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
-					    tpc_hit->x[1]*centimeter,
-					    tpc_hit->x[2]*centimeter); 
-	  PR(hitPosition);
-	
-	  int decodedNumber = tpc_hit->volume_id;
-	  cout << decodedNumber << endl;
-	  int isdet = (decodedNumber/100000);
-	  decodedNumber -= isdet*100000;
-	  int sectorOfHit = decodedNumber/100;
-	  decodedNumber -= sectorOfHit*100;
-	  int padrow = decodedNumber;
-	
-	  PR(isdet);
-	  PR(sectorOfHit);
-	  PR(padrow);
-
-	  whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-	  PR(bisdet);
-	  PR(bsectorOfHit);
-	  PR(bpadrow);
-
-	  if(currentSectorProcessed == sectorOfHit) { 
-	      double fgOffSet = (padrow <= mGeometryDb->numberOfInnerRows()) ?
-		  mGeometryDb->innerSectorFrischGridPadPlaneSeparation() :
-		  mGeometryDb->innerSectorFrischGridPadPlaneSeparation();
-
-	      StThreeVector<double>
-		  sector12Coordinate(tpc_hit->x[0]*centimeter,
-				     tpc_hit->x[1]*centimeter + mGeometryDb->radialDistanceAtRow(padrow),
-				     tpc_hit->x[2]*centimeter + mGeometryDb->frischGrid() + fgOffSet);
-
-	      StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
-						tpc_hit->p[1]*GeV,
-						tpc_hit->p[2]*GeV);
-
-	      StTrsChargeSegment aSegment(sector12Coordinate,
-					  hitMomentum,
-					  tpc_hit->de*GeV,
-					  tpc_hit->ds*centimeter,
-					  pID);
-
-	      PR(hitMomentum.mag());
-	      
-	      PR(aSegment);
-	      sleep(2);
-	      cout << "*****************" << '\n' << endl;
-	      
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-	      vector<int> all[3];
-#else
-	      vector<int,allocator<int> > all[3];
-#endif
-
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-	      list<StTrsMiniChargeSegment> comp;
-	      list<StTrsMiniChargeSegment>::iterator iter;
-#else
-	      list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> > comp;
-	      list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
-#endif
-	      int breakNumber = 1;
-	      cout << "StTrsSegment::split() into " << breakNumber << " segments." << endl;
-	      aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
-
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-	      copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
-#endif
-	      cout << endl;
     
-	      cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
+    St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+    // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
+    Int_t no_tpc_hits =  g2t_tpc_hit->GetNRows();
+    g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
 
-    // Loop over the miniSegments
-	      for(iter = comp.begin();
-		  iter != comp.end();
-		  iter++) {
+    //StTpcCoordinateTransform transformer(mGeometryDb, mSlowControlDb);
 
-		  cout << endl;
-		  cout << " *iter " << (*iter) << endl;
-		  PR(*iter);
+
+    cout << "Loop over: " << no_tpc_hits << endl;
+    cout << "First sector" << endl;
+    int currentSectorProcessed;
+    //int nextSectorProcessed;
+      
+    int bisdet, bsectorOfHit, bpadrow;
+
+    // Where is the first hit in the TPC
+    PR(tpc_hit->id);
+    whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
+    PR(bisdet);
+    PR(bsectorOfHit);
+    PR(bpadrow);
+    currentSectorProcessed = bsectorOfHit;
+    PR(currentSectorProcessed);
+
+    // process 5
+    no_tpc_hits = 20;
+      
+    for (int i=1; i<=no_tpc_hits; i++){
+	cout << "********************tpc_hit number:  " << i << "  ************" << endl;
+	cout << tpc_hit->id                << ' '
+	     << (tpc_hit->de/eV)           << ' '
+	     << (tpc_hit->ds/centimeter)   << ' '
+	     << tpc_hit->volume_id         << endl;
+
+
+	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
+	PR(bisdet);
+	PR(bsectorOfHit);
+	PR(bpadrow);
+	
+	// Process until the next sector is reached.
+	PR(currentSectorProcessed);
+	PR(bsectorOfHit);
+	if( (currentSectorProcessed == bsectorOfHit) &&
+	    (i                      != no_tpc_hits)) { 
+	    
+	    int pID = 1;  // I need to know the PID for ionization calculations
+	    
+	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
+					      tpc_hit->x[1]*centimeter,
+					      tpc_hit->x[2]*centimeter); 
+	    PR(hitPosition);
+	    
+	    double fgOffSet = (bpadrow <= mGeometryDb->numberOfInnerRows()) ?
+		mGeometryDb->innerSectorFrischGridPadPlaneSeparation() :
+		mGeometryDb->innerSectorFrischGridPadPlaneSeparation();
+
+	    PR(mGeometryDb->radialDistanceAtRow(bpadrow));
+	    PR(mGeometryDb->radialDistanceAtRow(bpadrow)/centimeter);
+	    PR(mGeometryDb->frischGrid());
+	    PR(fgOffSet);
+	    
+	    StThreeVector<double>
+		sector12Coordinate(tpc_hit->x[0]*centimeter,
+				   tpc_hit->x[1]*centimeter + mGeometryDb->radialDistanceAtRow(bpadrow),
+				   tpc_hit->x[2]*centimeter + mGeometryDb->frischGrid() + fgOffSet);
+	    
+	    StThreeVector<double> hitMomentum(tpc_hit->p[0]*GeV,
+					      tpc_hit->p[1]*GeV,
+					      tpc_hit->p[2]*GeV);
+	    
+	    StTrsChargeSegment aSegment(sector12Coordinate,
+					hitMomentum,
+					(fabs(tpc_hit->de*GeV)),
+					tpc_hit->ds*centimeter,
+					pID);
+	    
+	    PR(hitMomentum.mag());
+	    
+	    PR(aSegment);
+	    sleep(2);
+	    cout << "^^^^Segment Definition^^^^" << '\n' << endl;
+	    
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+	    vector<int> all[3];
+#else
+	    vector<int,allocator<int> > all[3];
+#endif
+	    
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+	    list<StTrsMiniChargeSegment> comp;
+	    list<StTrsMiniChargeSegment>::iterator iter;
+#else
+	    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> > comp;
+	    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
+#endif
+	    int breakNumber = 1;
+	    cout << "StTrsSegment::split() into " << breakNumber << " segments." << endl;
+	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
+	    
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
+#endif
+	    cout << endl;
+	    
+	    cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
+	    
+	    // Loop over the miniSegments
+	    for(iter = comp.begin();
+		iter != comp.end();
+		iter++) {
+		
+		cout << endl;
+		cout << " *iter " << (*iter) << endl;
+		PR(*iter);
 		//
 	        // TRANSPORT HERE
 	        //
-		  mChargeTransporter->transportToWire(*iter);
-		  PR(*iter);
-
+		mChargeTransporter->transportToWire(*iter);
+		PR(*iter);
+		
 		//
 		// CHARGE COLLECTION AND AMPLIFICATION
 	        //
-
+		
 #ifndef __sun
-		  StTrsWireBinEntry anEntry(iter->position(), iter->charge());
-		  PR(anEntry);
+		StTrsWireBinEntry anEntry(iter->position(), iter->charge());
+		PR(anEntry);
 #else
-		  StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
+		StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
 #endif
-		  mWireHistogram->addEntry(anEntry);
+		mWireHistogram->addEntry(anEntry);
+		
+	    } // Loop over the list of iterators
+
+	    //
+	    // Evaluate the situation:
+	    // are you at the end of a data file?
+	    // should you continue processing this sector?
+	    // if eof, break;
+	    PR(i);
+	    PR(no_tpc_hits);
+	    
+	    tpc_hit++;
+	    continue;
+	} // if (currentSector == bsectorOfHit)
+	// Otherwise, do the digitization...
 	
-	      } // Loop over the list of iterators
+	cout << "\a**********End Of Current Sector***************\a\n" << endl;
+	sleep(3);
+	//
+	// Generate the ANALOG Signals on pads
+	//
+	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
+	
+	mAnalogSignalGenerator->sampleAnalogSignal();
+	
+	//
+	// Digitize the Signals
+	//
+	// First make a sector where the data can go...
+	StTrsDigitalSector* aDigitalSector =
+	    new StTrsDigitalSector(mGeometryDb);
+	
+	// Point to the object you wnat to fill
+	mDigitalSignalGenerator->fillSector(aDigitalSector);
+	
+	// ...and digitize it
+	mDigitalSignalGenerator->digitizeSignal();
+	
+	// Fill it into the event structure...
+	// and you better check the sector number!
+	PR(currentSectorProcessed);
+	PR(mAllTheData->mSectors.size());
+	
+	cout << "Try add it" << endl;
+	mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
+	//PR(mAllTheData->mSectors[(currentSectorProcessed-1)].size())
+	cout << "okay" << endl;
+	
+	// Clear and reset for next sector:
+	mWireHistogram->clear();
+	mSector->clear();
+	
+	// Just temporary
+// 	  pair<digitalTimeBins*, digitalTimeBins*>
+// 	      tmpPad = mAllTheData->mSectors[(currentSectorProcessed-1)]->timeBinsOfRowAndPad(theRow,thePad);
+// 	  PR(tmpPad.first->size());
+// 	  PR(tmpPad.second->size());
+// 	  break;
 
-	      tpc_hit++;
-	      
-	  } // if (currentSector == sectorOfHit)
-      
-      cout << "\a**********End Of Current Sector***************\a\n" << endl;
-
-      //
-      // Generate the ANALOG Signals on pads
-      //
-      mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
-
-      mAnalogSignalGenerator->sampleAnalogSignal();
-
-      //
-      // Digitize the Signals
-      //
-      // First make a sector where the data can go...
-      StTrsDigitalSector* aDigitalSector =
-	  new StTrsDigitalSector(mGeometryDb);
-      
-      cout << "Print out the specs of the new digital Sector" << endl;
-
-      // Point to the object you wnat to fill
-      mDigitalSignalGenerator->fillSector(aDigitalSector);
-
-      // ...and digitize it
-      mDigitalSignalGenerator->digitizeSignal();
-
-      // Fill it into the event structure...
-      // and you better check the sector number!
-      PR(currentSectorProcessed);
-      PR(mAllTheData->mSectors.size());
-
-      //Diagnostic for aDigitalSector:
-      int theRow = 1;
-      int thePad = 44;
-      
-      PR(aDigitalSector->numberOfRows());
-      PR(aDigitalSector->numberOfPadsInRow(theRow));
-      PR(aDigitalSector->numberOfTimeBins(theRow, (thePad-1)));
-      PR(aDigitalSector->numberOfTimeBins(theRow, thePad));
-      PR(aDigitalSector->numberOfTimeBins(theRow, (thePad+1)));
-      
-      
-      cout << "Try add it" << endl;
-      mAllTheData->mSectors[(currentSectorProcessed-1)] = aDigitalSector;
-      //PR(mAllTheData->mSectors[(currentSectorProcessed-1)].size())
-      cout << "okay" << endl;
-
-      // Clear and reset for next sector:
-      mWireHistogram->clear();
-      mSector->clear();
-
-      // Just temporary
-      pair<digitalTimeBins*, digitalTimeBins*>
-	  tmpPad = mAllTheData->mSectors[(currentSectorProcessed-1)]->timeBinsOfRowAndPad(theRow,thePad);
-      PR(tmpPad.first->size());
-      PR(tmpPad.second->size());
-      break;
-      } // loop over all segments
-  }
-
+	// Go to the nexe sector
+	PR(currentSectorProcessed);
+	currentSectorProcessed = bsectorOfHit;
+	PR(currentSectorProcessed);
+	
+    } // loop over all segments: for(int i...
+  } // mDataSet
+  
   // The access stuff:
 
-    PR(mAllTheData->mSectors.size());
-    cout << endl;
-    //
-    // Access it! -->  *digitalSector
-    // with:
-    //      StTrsDecoder myDecoder();
-    StTrsUnpacker myUnPacker;
-    
-    // Loop around the sectors:
-    for(int isector=1; isector<=24; isector++) {
-	int getSectorStatus = myUnPacker.getSector(isector,
-						   static_cast<StTpcRawDataEvent*>(mAllTheData));
-	PR(getSectorStatus);
-	int irow = 1;
-	int ipad = 44;
-	int nseq;
+  PR(mAllTheData->mSectors.size());
+  cout << endl;
+  //
+  // Access it! -->  *digitalSector
+  // with:
+  //      StTrsDecoder myDecoder();
+  //StTrsUnpacker myUnPacker;
+  
+  // Loop around the sectors:
+  for(int isector=1; isector<=24; isector++) {
+      int getSectorStatus =
+	  mUnPacker->getSector(isector,
+			       static_cast<StTpcRawDataEvent*>(mAllTheData));
+      //PR(getSectorStatus);
 
-	if(!getSectorStatus) {
-	    StSequence* listOfSequences;
-	    int getSequencesStatus =
-		myUnPacker.getSequences(irow, ipad, &nseq, &listOfSequences);
+      // if getSectorStatus is bad move on to the next sector
+      if(getSectorStatus) continue;
 
-	    PR(getSequencesStatus);
-
-	    for(int kk=0; kk<nseq; kk++) {
-		PR(listOfSequences[kk].length);
-		for(int zz=0; zz<listOfSequences[kk].length; zz++) {
-		    cout << " " << kk
-			 << " " << zz << '\t'
-			 << '\t' << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
-		    listOfSequences[kk].firstAdc++;
-		}
-		cout << endl;
-	    }
-	    myUnPacker.clear();
-	} // if status is bad, go to next sector
-	cout << "tmp for now" << endl;
-	break;
-    } // Loop over sectors
-    cout << "Got totheend of the maker" << endl;
-  if (m_DataSet) delete m_DataSet;
-  m_DataSet =  new St_DataSet(GetName());
-  m_DataSet->Add(new St_ObjectSet("Event",mAllTheData));
-  m_DataSet->Add(new St_ObjectSet("Decoder",&myUnPacker));
+      // otherwise, let's decode it
+      unsigned char* padList;
+      for(int irow=1; irow<=45; irow++) {
+	  //PR(irow);
+	  int numberOfPads = mUnPacker->getPadList(irow, &padList);
+	  //PR(numberOfPads);
+	      
+	  if(!numberOfPads)
+	      continue;  // That is, go to the next row...
+	      
+	  for(int ipad = 0; ipad<numberOfPads; ipad++) {
+	      PR(static_cast<int>(padList[ipad]));
+	      int nseq;
+		  
+	      StSequence* listOfSequences;
+	      int getSequencesStatus =
+		  mUnPacker->getSequences(irow, padList[ipad], &nseq, &listOfSequences);
+		      
+	      //PR(getSequencesStatus);
+		      
+	      for(int kk=0; kk<nseq; kk++) {
+		  PR(listOfSequences[kk].length);
+		  for(int zz=0; zz<listOfSequences[kk].length; zz++) {
+		      cout << " " << kk
+			   << " " << zz << '\t'
+			   << '\t' << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
+		      listOfSequences[kk].firstAdc++;
+		  } // zz
+		  cout << endl;
+	      } // Loop kk
+	  } // loop over pads
+	  // Do the data manipulation here!
+	  mUnPacker->clear();
+      } // Loop over rows!
+  } // Loop over sectors
+  cout << "Got to the end of the maker" << endl;
+  
+  // Pass the decoder and data
+  //     if (m_DataSet) delete m_DataSet;
+  //     m_DataSet =  new St_DataSet(GetName());
+  //     m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
+  //     m_DataSet->Add(new St_ObjectSet("Decoder", myUnPacker));
   
   return kStOK;
 }
 
+// void StTrsMaker::Finish()
+//{
+// Clean up all the pointers that were initialized in StTrsMaker::Init()
+//     delete mGeometryDb;
+//     delete mSlowControlDb;
+//     delete mMagneticFieldDb;
+//     delete mElectronicsDb;
+//     delete mGasDb;
+
+//     delete mWireHistogram;
+//     delete mSector;
+//     delete mUnPacker;
+//     delete mAllTheData;
+    
+//     delete mChargeTransporter;
+//     delete mAnalogSignalGenerator;
+//     delete mDigitalSignalGenerator;
+//}
+
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.9 1999/02/05 23:08:34 fisyak Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.10 1999/02/10 04:30:02 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
