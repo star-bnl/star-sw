@@ -365,6 +365,7 @@ foreach my $dir ("StRoot","pams") {
 #	  $sub_dir =~ /^StMcAnalysisMaker$/    ||
 #	  $sub_dir =~ /^StHbt/    ||
 #	  $sub_dir =~ /^St_baseTest$/    ||
+	  $sub_dir =~ /^StEvent/    ||
 	  $sub_dir =~ /^StTpcDb$/    ||
 #	  $sub_dir =~ /^StDbMaker$/    ||
           $sub_dir =~ /^test$/)  {next;}
@@ -385,6 +386,7 @@ foreach my $dir ("StRoot","pams") {
 	    if ($subsub_dir =~  /\./     || $subsub_dir =~ /\.\./  || 
 		$subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/  ||
 		$subsub_dir =~ /^local/  || $subsub_dir =~ /^run/  ||
+		$subsub_dir =~ /^inc$/   ||
 		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/) {next;}
 	    if ($subsub_dir =~ /^idl$/) {   
                opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";   
@@ -397,27 +399,27 @@ foreach my $dir ("StRoot","pams") {
                }   
                next;   
              }   
-	    #print "subsub : sub_dir = $sub_dir subsub_dir/DIR = $subsub_dir /  $subsub_DIR\n";
-	    if ($sub_dir =~ /^StHbtMaker$/ ||
-		$sub_dir =~ /^StTrsMaker$/ ||
-		$sub_dir =~ /^StDaqLib$/) { #print "sub_dir ===> $sub_dir\n";
-	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
-	      my @inchbt = readdir DIR; 
-	      my @incHbt = ();
-	      closedir DIR; #print "incs = @incs\n";
-	      foreach my $inc (@inchbt) {
-		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
-		  push @incHbt, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
-		}
-	      }
-	      if ($#incHbt > -1) {
-		my $include_Hbt = $INCLUDE . "/" . $sub_dir . "/" . $subsub_dir; 
-#		if ($sub_dir =~ /^StDaqLib$/) {$include_Hbt = $INCLUDE . "/" . $sub_dir . "/" . $subsub_dir;}
-		#print "Install  $include_Hbt, @incHbt\n";
-		Install $env $include_Hbt, @incHbt; 
-	      }
-	      next;
-	    }
+#	    #print "subsub : sub_dir = $sub_dir subsub_dir/DIR = $subsub_dir /  $subsub_DIR\n";
+#	    if ($sub_dir =~ /^StHbtMaker$/ ||
+#		$sub_dir =~ /^StTrsMaker$/ ||
+#		$sub_dir =~ /^StDaqLib$/) { #print "sub_dir ===> $sub_dir\n";
+#	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
+#	      my @inchbt = readdir DIR; 
+#	      my @incHbt = ();
+#	      closedir DIR; #print "incs = @incs\n";
+#	      foreach my $inc (@inchbt) {
+#		if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
+#		  push @incHbt, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
+#		}
+#	      }
+#	      if ($#incHbt > -1) {
+#		my $include_Hbt = $INCLUDE . "/" . $sub_dir . "/" . $subsub_dir; 
+##		if ($sub_dir =~ /^StDaqLib$/) {$include_Hbt = $INCLUDE . "/" . $sub_dir . "/" . $subsub_dir;}
+#		#print "Install  $include_Hbt, @incHbt\n";
+#		Install $env $include_Hbt, @incHbt; 
+#	      }
+#	      next;
+#	    }
 	    if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) && 
 		($subsub_dir !~ /^g2t$/ || $subsub_dir !~ /^g2t$/)) {
 	      # one more level for gen & sim
