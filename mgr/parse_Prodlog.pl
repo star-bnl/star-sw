@@ -154,6 +154,7 @@ sub parse_log($) {
   my $segmentation_violation;
   my $break_buss;
   my $Err_messg = "none";
+  my $exmessg = "none";
   my $previous_line = "";
 #----------------------------------------------------------
 
@@ -224,7 +225,6 @@ sub parse_log($) {
   my $first_line;
   my $star_level = "n/\a";
   my $root_level = "n/\a"; 
-  my $exmessg = "none";
    my $Anflag = 0;
 #---------------------------------------------------------
   
@@ -236,7 +236,8 @@ sub parse_log($) {
      chop $line ;
       $num_line++;
 # get STAR_LEVEL and ROOT_LEVEL
-    
+
+     
     if ( $line =~ /QAInfo:You are using STAR_LEVEL/) {
        @nparts = split (" ", $line);
       $star_level = $nparts[5];
@@ -357,6 +358,10 @@ sub parse_log($) {
              $Err_messg = "segmentation violation";
     }
 
+     if ($line =~ /Interpreter error recovered/)  {
+             $Err_messg = "Interpreter error recovered";
+	   }
+
     $previous_line = $line;
 
 # check how many events have been skiped
@@ -373,9 +378,6 @@ sub parse_log($) {
           
           $jrun = "Done";      
 	}
-    if ( $Err_messg ne "none") {
-     $jrun = $Err_messg;
-   }
    
     if ( $line =~ /Finished job execution/) {
       @word_tr = split(" ",$line);
@@ -398,7 +400,7 @@ sub parse_log($) {
   foreach $mline (@err_out){
           chop $mline;
        if ( $mline =~ /No space left on device/)  {
-        $Err_messg = "No space left on device";
+        $exmessg = "No space left on device";
      } 
 	elsif ($mline =~ /Error calling module/) {
        chop $mline;  
@@ -423,9 +425,16 @@ sub parse_log($) {
   
        $Err_messg = "Fatal in <operator new>";   
   }
+      elsif ($mline =~ /Error: Unexpected EOF/) {
+      $Err_messg = "Unexpected EOF";
+  } 
 
   }
   
+      if ( $Err_messg ne "none") {
+     $jrun = $Err_messg;
+   } 
+
 #--------------------------------------------------------------------------
    $EvDone = $no_event;
  
@@ -536,7 +545,7 @@ sub parse_log($) {
     print '=' x 80, "\n";    
 
    if ($num_event ne 0) {
- @cpu_output = `tail -750 $job_log`;
+ @cpu_output = `tail -1000 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
    if ($end_line =~ /seconds Cpu Time/) {
