@@ -275,9 +275,9 @@ c
 c          perhaps consistency with simulation demands use of pad_sep_in/out ???
 c
            if(mod(isec,2).eq.0)then
-              pad_width = pad_plane(1).pad_wid_in
-           else
               pad_width = pad_plane(1).pad_wid_out
+           else
+              pad_width = pad_plane(1).pad_wid_in
            endif
            tphit(tphith.nok).prf 
      +                         = sqrt(tphit(tphith.nok).prf) * pad_width
