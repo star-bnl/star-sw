@@ -1,8 +1,29 @@
 #!/opt/star/bin/perl
 
+use lib "/star/u2d/wenaus/datadb";
 use File::Basename;
 require "dbheader.pl";
 require "dbsetup.pl";
+
+$curTime = time();
+
+&cgiSetup();
+$q->param('ver','dev') if ( $q->param('ver') eq '');
+$q->param('detail','1') if ( $q->param('detail') eq '');
+
+$dynamic = $q->param('dynamic');
+if ( $dynamic ne "yes" && $q->param('pkg') eq '' && $q->param('find') eq '') {
+    # just display the pre-prepared page
+    $fpath = "/usr/local/apache/htdocs/code";
+    $fname = $fpath."/swguide-".$q->param('ver')."-".$q->param('detail').".html";
+    if ( -e $fname ) {
+        open(FILE,"< $fname");
+        while (<FILE>) { print; }
+        exit;
+    } else {
+        print "$fname not found<br>\n";
+    }
+}
 
 %okExtensions = (
                  ".hh" => "C++",
@@ -47,13 +68,16 @@ Pointers and comments...
     cross-referenced source code browsers for the package.
     <li> The package list with details adds summary info about
     the package: currently owner (from the karma file),
-                 file count, line count
+                 file count, line count, date of most recent mod,
+    days since most recent mod, associated PAM.
     <li> The full listing adds all files (the same level of detail
     as the individual package listings)
     <li> The file listings report the username of the most recent
     modifier, if it can be determined from the file, ie. if a 
     comment line containing \$Id\$ has been included in the file (such
     a line should be in every file).
+    <li> Ball color indicates time since most recent mod:
+    <img src="/images/redball.gif">=2days, <img src="/images/greenball.gif">=2weeks, <img src="/images/blueball.gif">=2months, <img src="/images/whiteball.gif">=older
 </ul>
 END
 
@@ -94,29 +118,14 @@ if ($qstring = $ENV{'QUERY_STRING'}) {
     }
 }
 
-if ( exists($input{"ver"}) ) {
-    $ver = $input{"ver"};
-} else {
-    $ver = "dev";
-}
+$ver = $q->param('ver');
+$ver = '.dev' if ( $ver eq ".dev" );
 
-if ( exists($input{"detail"}) ) {
-    $showFlag = $input{"detail"};
-} else {
-    $showFlag = 0;
-}
+$showFlag = $q->param('detail');
 
-if ( exists($input{"find"}) ) {
-    $find = $input{"find"};
-} else {
-    $find = "";
-}
+$find = $q->param('find');
 
-if ( exists($input{"pkg"}) ) {
-    $pkg = $input{"pkg"};
-} else {
-    $pkg = "";
-}
+$pkg = $q->param('pkg');
 
 #read in avail file of package owners
 open(AVAIL,"< /afs/rhic/star/packages/repository/CVSROOT/avail")
@@ -124,21 +133,31 @@ open(AVAIL,"< /afs/rhic/star/packages/repository/CVSROOT/avail")
 @availFile=<AVAIL>;
 close AVAIL;
 
+#read in loginfo file of package mod notification email
+open(LOGINFO,"< /afs/rhic/star/packages/repository/CVSROOT/loginfo")
+    or die "Can't open loginfo file: $!";
+@loginfoFile=<LOGINFO>;
+close LOGINFO;
+
 $STAR = "/afs/rhic/star/packages/$ver";
 $root = $STAR;
 $rel = readlink("/afs/rhic/star/packages/$ver");
 ($f, $d, $e) = fileparse($rel);
 $rel = $f;
 
+$ddevVer = (fileparse(readlink("/afs/rhic/star/packages/.dev")))[0];
 $devVer = (fileparse(readlink("/afs/rhic/star/packages/dev")))[0];
 $newVer = (fileparse(readlink("/afs/rhic/star/packages/new")))[0];
 $proVer = (fileparse(readlink("/afs/rhic/star/packages/pro")))[0];
 $oldVer = (fileparse(readlink("/afs/rhic/star/packages/old")))[0];
 
 $verChecked{$ver} = "checked";
+$detailChecked{$showFlag} = "checked";
 print <<END;
 <form method="GET" action="http://duvall.star.bnl.gov/cgi-bin/prod/swguide.pl">
 <b>Version:</b>
+    <input type="radio" $verChecked{".dev"} name="ver" value=".dev"> .dev
+    ($ddevVer)
     <input type="radio" $verChecked{"dev"} name="ver" value="dev"> dev
     ($devVer)
     <input type="radio" $verChecked{"new"} name="ver" value="new"> new
@@ -149,12 +168,15 @@ print <<END;
     ($oldVer)
 <br>
 <b>Detail:</b>
-    <input type="radio" checked name="detail" value="0"> Package list
-    <input type="radio" name="detail" value="1"> Package list with details
-    <input type="radio" name="detail" value="2"> Full listing <br>
+    <input type="radio" $detailChecked{"0"} name="detail" value="0"> Package list
+    <input type="radio" $detailChecked{"1"} name="detail" value="1"> Detailed package list
+    <input type="radio" $detailChecked{"2"} name="detail" value="2"> Full listing <br>
 <b>Find package:</b> <input type="text" name="pkg" value="$pkg">
 <b>or Find file:</b> <input type="text" name="find" value="$find"><br>
-
+<input type="checkbox" name="dynamic" value="yes">
+    Force regeneration of page. Slow; only for debugging or if displayed 
+page is too old.
+<br>
 <input type="submit"> &nbsp; <input type="reset"><br>
 </form>
 
@@ -165,12 +187,29 @@ print <<END;
 <pre>
 END
 
+# Build list of pams
+@pamList = `cd $root; find pams -maxdepth 2 -mindepth 2 -type d`;
+foreach $pm (@pamList) {
+    $pm =~ m/pams\/([a-zA-Z0-9]+)\/([a-zA-Z0-9]+)/;
+    if ( $1 ne "CVS" && $1 ne "idl" && $1 ne "inc" && $1 ne "kumac" ) {
+        $pams{$2} = "$1/$2";
+        $pams{$1} = "$1";
+    }
+}
+if ( $debugOn ) {
+    foreach $p ( keys %pams ) {
+        print $p." ".$pams{$p}."\n";
+    }
+}
+
 $totlines = 0;
 $totfiles = 0;
 #### Loop through packages
 
 @allDirs = (
             "StRoot",
+            "StDb",
+            "mgr",
             "pams/ctf",
             "pams/db",
             "pams/ebye",
@@ -187,9 +226,7 @@ $totfiles = 0;
             "pams/svt",
             "pams/tpc",
             "pams/trg",
-            "pams/vpd",
-            "StDb",
-            "mgr"
+            "pams/vpd"
             );
 
 %oneLevel = (
@@ -219,13 +256,23 @@ for ($idr=0; $idr<@allDirs; $idr++) {
     }
     print "Open $root/$dir<br>\n" if $debugOn;
     opendir(DIR, "$root/$dir");
+    @files = 0;
+    $if=0;
     while (defined ($file = readdir DIR)) {
+        $files[$if] = $file;
+        $if++;
+    }
+    @files = sort @files;
+    foreach $file ( @files ) {
         next if (exists($ignoreStuff{$file}));
         if ( $pkg ne "" ) {
-            if ( $file eq $pkg || $dir."/".$file eq $pkg ) {
+            if ( $file eq $pkg ||
+                 $dir."/".$file eq $pkg ||
+                 $dir."/".$file eq "pams/".$pkg ) {
                 &showPackage($root,$dir,$file);
                 last;
             } else {
+                if ( $dir eq "pams/".$pkg ) { &showPackage($root,$dir,$file); }
                 next;
             }
         } else {
@@ -263,6 +310,7 @@ END
 
 sub showPackage {
     my ( $theRoot, $theDir, $thePkg ) = @_;
+    $lastMod = 0;
     $linecount = 0;
     $filecount = 0;
     # if the package searched for is this one, display it
@@ -308,11 +356,11 @@ sub showPackage {
         } else {
             $dr = $theDir;
         }
-        if ( $availFile[$ia] =~ m/$dr\/$thePkg/ ) {
+        if ( $availFile[$ia] =~ m/$dr\/$thePkg\/*\s*$/ ) {
             $own = $availFile[$ia];
             $own =~ m/(avail\s+\|)([a-z]+)/;
             $pkgOwner = $2;
-        } elsif ( $availFile[$ia] =~ m/$dr/ ) {
+        } elsif ( $availFile[$ia] =~ m/$dr\/*\s*$/ ) {
             if ( $pkgOwner eq "" ) {
                 $own = $availFile[$ia];
                 $own =~ m/^\s*([a-z]+\s*\|)([a-z]+)/;
@@ -320,6 +368,29 @@ sub showPackage {
             }
         }
     }
+    ### Find the people who get CVS commit email
+    $eList = "";
+    @eListH = 0;
+    for ($ia=0; $ia<@loginfoFile; $ia++) {
+        if ( $theDir =~ m/(\S+)\/(\S+)/ ) {
+            $dr = "$1\\\/$2";
+        } else {
+            $dr = $theDir;
+        }
+        if ( $loginfoFile[$ia] =~ m/^ALL.*-m/ ) {
+            print $loginfoFile[$ia]."\n" if $debugOn;
+            $eList = &getList($loginfoFile[$ia]);
+        } else {
+            if ( $loginfoFile[$ia] =~ m/$dr\/$thePkg\/*\s+/ ) {
+                print $loginfoFile[$ia]."\n" if $debugOn;
+                $eList .= &getList($loginfoFile[$ia]);
+            } elsif ( $loginfoFile[$ia] =~ m/$dr\/*\s+/ ) {
+                print $loginfoFile[$ia]."\n" if $debugOn;
+                $eList .= &getList($loginfoFile[$ia]);
+            }
+        }
+    }
+
     ### subdirectories
 #    if ( -d "$theRoot/$theDir/$thePkg/doc" ) {
 
@@ -340,32 +411,80 @@ sub showPackage {
     $theSubDir = "";
     $details = &showFiles ($theRoot, $theDir, $thePkg, $theSubDir, $level);
 
-    ### Find the newest file in the package
     ### Print results
-    $pkgUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/swguide.pl?ver=$ver&pkg=$thePkg&detail=2\">";
+    if ( $theDir =~ m/pams\/([a-z0-9A-Z]+)/ ) {
+        # for pams, include domain in package name
+        $pkgName = $1."/".$thePkg;
+    } else {
+        $pkgName = $thePkg;
+    }
+    $pkgUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/swguide.pl?ver=$ver&pkg=$pkgName&detail=2\">";
     if ( $showFlag > 0 ) { # print all pkg info
+
+        ## associated pam?
+        $thePamUrl = "";
+        if ( $thePkg =~ m/St_([a-z0-9]+)_/ ) {
+            if ( exists($pams{$1}) ) {
+                $thePam = $pams{$1};
+                $thePamUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/swguide.pl?ver=$ver&pkg=$thePam&detail=2\">$thePam</a>";
+            }
+        }
+        ## time since last mod
+        $sinceMod = $curTime - $lastMod;
+        $sinceMod = $sinceMod/3600/24; # days
+        if ( $sinceMod < 3 ) {
+            $ball="red";
+        } elsif ( $sinceMod < 14 ) {
+            $ball="green";
+        } elsif ( $sinceMod < 60 ) {
+            $ball="blue";
+        } else {
+            $ball="white";
+        }
+        $ballUrl="<img src=\"/images/".$ball."ball.gif\">";
+        ($dy, $mo, $yr) = (localtime($lastMod))[3,4,5];
+        if ($yr == 69 ) {
+            $dy = 0;
+            $mo = -1;
+            $yr = 0;
+            $sinceMod = 999;
+        }
         if ($linecount == 0) {
-            $disp1="<font color=\"gray\">";
+            $disp1="<font color=\"gray\">$ballUrl";
             $disp2="</font>";
         } else {
-            $disp1="<b>";
+            $disp1="<b>$ballUrl";
             $disp2="</b>";
         }
-        $pkgLine = sprintf("$disp1%s%-30s%s %s %s %s %s %12s %3d files %6d lines$disp2\n",
-                           $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src,$pkgOwner,$filecount,$linecount);
+        $pkgLine = sprintf("$disp1%s%-27s%s %s %s %s %s%9s%4d Files%5d Lines %02d/%02d/%02d %3d Days %s$disp2\n",
+                           $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src,$pkgOwner,$filecount,$linecount,$mo+1,$dy,$yr,$sinceMod,$thePamUrl);
     } else {
-        $pkgLine = sprintf("%s%-30s%s %s %s %s %s\n",
+        $pkgLine = sprintf("%s%-27s%s %s %s %s %s\n",
                            $pkgUrl,$theDir."/".$thePkg,"</a>",$readme,$doc,$cvs,$src);
     }
     if ( $showFlag >= 0 ) { print $pkgLine; }
     if ( $showFlag > 1 ) {
+        print "<blockquote>\n";
         print $details;
         if ($nsub>0) {
             for ($ns=0; $ns<$nsub; $ns++) {
-                print "<br><b>&nbsp;&nbsp;$subDirs[$ns]/</b>\n";
+                print "<br><b>$subDirs[$ns]/</b>\n";
                 print $subdetails[$ns];
             }
         }
+        print "\n<b>CVS email recipients:</b>";
+        print "    <a href=\"mailto:";
+        foreach $e ( sort keys %eListH ) {
+            print $e." ";
+        }
+        print "\">[Click to send email to recipients]</a>\n";
+        $i=0;
+        foreach $e ( sort keys %eListH ) {
+            $i++;
+            printf("%-25s",$e);
+            if ($i%3 == 0) { print "\n"; }
+        }
+        print "</blockquote>\n";
     }
 }
 
@@ -392,16 +511,25 @@ sub showFiles {
             $filecount++;
             $cver = $tokens[2];
             $cdate = $tokens[3];
+
+            # stat
+            $fullname = "$theRoot/$theDir/$thePkg/$fname";
+            ($fmode, $uid, $gid, $filesize, 
+             $readTime, $writeTime, $cTime) =
+                 (stat($fullname))[2,4,5,7,8,9,10];
+            $grnam = (getgrgid($gid))[0];
+            $owner = (getpwuid($uid))[0];
+            if ( $writeTime > $lastMod ) { $lastMod = $writeTime; }
+
             $count = 0;
             $showLines = 0;
             if ($showFlag > 0) {
                 $ee = "";
-                ($ff, $dd, $ee) = fileparse(
-                    "$theRoot/$theDir/$thePkg/$fname",'\.[a-zA-z]*');
+                ($ff, $dd, $ee) = fileparse("$fullname",'\.[a-zA-z]*');
                 print "\"$ff\" \"$dd\" \"$ee\"\n" if $debugOn;
                 $isScript = 0;
                 if ( $ee eq "" ) {
-                    open(FL,"< $theRoot/$theDir/$thePkg/$fname") or die "Can't open file $fname: $!";
+                    open(FL,"< $fullname") or next;
                     $line1=<FL>;
                     close FL;
                     if ( $line1 =~ m/^#!/ ) {
@@ -419,9 +547,10 @@ sub showFiles {
                     } else {
                         $ftype = $okExtensions{$ee};
                     }
-                    open(FILE,"< $theRoot/$theDir/$thePkg/$fname") or die "Can't open file $fname: $!";
+                    open(FILE,"< $theRoot/$theDir/$thePkg/$fname") or next;
                     @lines=<FILE>;
                     close FILE;
+                    $inComment=0;
                     for ($ii=0; $ii<@lines; $ii++) {
                         ## Don't count comments. Imperfect but should get
                         ## most.
@@ -436,7 +565,7 @@ sub showFiles {
                              || $ftype eq "IDL" || $ftype eq "DDL" ) {
                             next if ( $lines[$ii] =~ m/^\s*\/\// );
                             if ( $lines[$ii] =~ m/^\s*\/\*/ ) { $cstart=1; }
-                            if ( $lines[$ii] =~ m/\*\/\s*$/ ) { $cend=1; }
+                            if ( $lines[$ii] =~ m/\*\// ) { $cend=1; }
                             if ( $cstart==1 ) { $inComment=1; $cstart=0; }
                             # Bug: it includes the last line of a multi-line comment block
                             if ( $cend==1 ) { $inComment=0; $cend=0; }
@@ -455,7 +584,7 @@ sub showFiles {
                     $typeCounts{$ftype} = $typeCounts{$ftype} +$count;
                 }
                 if ($showLines) {
-                    $theLines = sprintf("%5d Lines",$count);
+                    $theLines = sprintf("%5dLines",$count);
                 } else {
                     $theLines = "";
                 }
@@ -471,8 +600,21 @@ sub showFiles {
                     $owner = (getpwuid($uid))[0];
                 }
 
-                $output .= sprintf("    %-35s %s%-7s%s %s %s %s %12s %s\n",
-                                   $fname,
+                $sinceMod = $curTime - $writeTime;
+                $sinceMod = $sinceMod/3600/24; # days
+                if ( $sinceMod < 3 ) {
+                    $ball="red";
+                } elsif ( $sinceMod < 14 ) {
+                    $ball="green";
+                } elsif ( $sinceMod < 60 ) {
+                    $ball="blue";
+                } else {
+                    $ball="white";
+                }
+                $ballUrl="<img src=\"/images/".$ball."ball.gif\">";
+
+                $output .= sprintf("%s%-35s %s%-7s%s %s %s %s%9s %s\n",
+                                   $ballUrl,$fname,
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname?rev=$cver&content-type=text/x-cvsweb-markup\">",$cver,"</a>",
                                    $date,
                                    "<a href=\"http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/$theDir/$thePkg/$fname\">CVS</a>",
@@ -484,4 +626,21 @@ sub showFiles {
         }
     }
     return $output;
+}
+
+######################
+sub getList {
+    my ( $line ) = @_;
+    my @tks = split(/\s/,$line);
+    my $i=0;
+    my $list = "";
+    foreach $t ( @tks ) {
+        if ( $t eq "-m" ) {
+            if ( $list ne "" ) { $list .= " "; }
+            $list .= $tks[$i+1];
+            $eListH{$tks[$i+1]}++;
+        }            
+        $i++;
+    }
+    return $list;
 }
