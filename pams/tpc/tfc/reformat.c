@@ -950,6 +950,8 @@ long reformat_
 			return STAFCV_BAD;
 		    }
 		    gain_pad = gain[gnok].gain;
+		    /* not a good idea to divide by zero */
+                    if(gain_pad<=0.0)gain_pad=1.0;
 		}
 		else {
 		    gain_pad = 1.;
