@@ -42,7 +42,7 @@ C<----------------------------------------------------------------------
 #include "math_constants.inc"
 #include "StDetectorId.inc"
 
-      INTEGER nok
+      INTEGER nok,detect_id_i
       INTEGER i
 
       CHARACTER*132 m132
@@ -83,15 +83,30 @@ C convert to Tesla
         nok=0
         if((globtrk_h.nok).eq.0) return
         DO i=1,globtrk_h.nok
-           if (globtrk(i).iflag .gt. 0 .and. 
-     +          globtrk(i).det_id .eq. kTpcId .or.
-     +          globtrk(i).det_id .eq. kSvtId .or.  
-     +          globtrk(i).det_id .eq. kSsdId .or.
-     +          globtrk(i).det_id .eq. kTpcSsdId .or.
-     +          globtrk(i).det_id .eq. kTpcSvtId .or.
-     +          globtrk(i).det_id .eq. kTpcSsdSvtId .or.
-     +          globtrk(i).det_id .eq. kSsdSvtId) then
-             IF(nok .ge. trak_h.maxlen)   then
+
+C     Only write tracks that have more than a certain number of hits in a detector
+
+           if( globtrk(i).det_id .eq. kTpcId )then
+              detect_id_i = 1
+           elseif( globtrk(i).det_id .eq. kSvtId .or.
+     +             trak(i).det_id .eq.  kSsdSvtId .or.
+     )             trak(i).det_id .eq. kSsdId )then
+              detect_id_i = 2
+           else
+              detect_id_i = 3
+           endif
+
+           IF(globtrk(i).n_point .ge. ev0par(detect_id_i).n_point) then
+
+              if (globtrk(i).iflag .gt. 0 .and. 
+     +             globtrk(i).det_id .eq. kTpcId .or.
+     +             globtrk(i).det_id .eq. kSvtId .or.  
+     +             globtrk(i).det_id .eq. kSsdId .or.
+     +             globtrk(i).det_id .eq. kTpcSsdId .or.
+     +             globtrk(i).det_id .eq. kTpcSvtId .or.
+     +             globtrk(i).det_id .eq. kTpcSsdSvtId .or.
+     +             globtrk(i).det_id .eq. kSsdSvtId) then
+                 IF(nok .ge. trak_h.maxlen)   then
                 call StError('Internal track table too small quiting')
                 EV0_AM2= STAFCV_BAD
                 return
@@ -115,52 +130,53 @@ C convert to Tesla
              trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
              trak(nok).dca = globtrk(i).impact
           endif
-        ENDDO
- 35     CONTINUE
-                
-        trak_h.nok = nok
-        write(m132,*) ' No. of trak rows is:',trak_h.nok
-        call StInfo(m132)
+       endif
+      ENDDO
+ 35   CONTINUE
+      
+      trak_h.nok = nok
+      write(m132,*) ' No. of trak rows is:',trak_h.nok
+      call StInfo(m132)
 c     
 c     call reconstruction program
 c     
-        CALL V0_RECONSTRUCT2(trak_h, trak,
-     +       ev0par_h,ev0par,
-     +       vertex_h,vertex,
-     +       ev0out_h,ev0out,
-     +       bfield)
-c
-c call analysis (clean up) module, ev0par(1).iflag=1
-c
-
-        if( ev0out_h.nok .gt. ev0out_h.maxlen )then
-           ev0out_h.nok = ev0out_h.maxlen
-           EV0_AM2= STAFCV_BAD
-           return
-        endif
-        if( vertex_h.nok .gt. vertex_h.maxlen) then
-           vertex_h.nok = vertex_h.maxlen
-           EV0_AM2 = STAFCV_BAD
-           return
-        endif
-
-C V0_CLEAN does nothing??? - gvb (2/25/99)
-C       IF( ev0par(1).iflag.eq.1) THEN
-C          CALL V0_CLEAN(ev0out_h,ev0out)
-C       ENDIF
-        
-
-        trak_h.nok = 0
+      CALL V0_RECONSTRUCT2(trak_h, trak,
+     +     ev0par_h,ev0par,
+     +     vertex_h,vertex,
+     +     ev0out_h,ev0out,
+     +     bfield)
+c     
+c     call analysis (clean up) module, ev0par(1).iflag=1
+c     
+      
+      if( ev0out_h.nok .gt. ev0out_h.maxlen )then
+         ev0out_h.nok = ev0out_h.maxlen
+         EV0_AM2= STAFCV_BAD
+         return
+      endif
+      if( vertex_h.nok .gt. vertex_h.maxlen) then
+         vertex_h.nok = vertex_h.maxlen
+         EV0_AM2 = STAFCV_BAD
+         return
+      endif
+      
+C     V0_CLEAN does nothing??? - gvb (2/25/99)
+C     IF( ev0par(1).iflag.eq.1) THEN
+C     CALL V0_CLEAN(ev0out_h,ev0out)
+C     ENDIF
+      
+      
+      trak_h.nok = 0
 C     return a normal success code
-        
-        write(m132,*) 'Found ',ev0out_h.nok,' v0 candidates'
-        call StInfo(m132)
-        EV0_AM2=STAFCV_OK
- 999    CONTINUE
-        RETURN
-        END
-
-
+      
+      write(m132,*) 'Found ',ev0out_h.nok,' v0 candidates'
+      call StInfo(m132)
+      EV0_AM2=STAFCV_OK
+ 999  CONTINUE
+      RETURN
+      END
+      
+      
 
 
 

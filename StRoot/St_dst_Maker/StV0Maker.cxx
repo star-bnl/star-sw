@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.13 1999/09/29 20:29:09 wdeng Exp $
+// $Id: StV0Maker.cxx,v 1.14 1999/11/02 11:27:56 macl Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.14  1999/11/02 11:27:56  macl
+// added n_point quality cut to V0 daughter tracks
+//
 // Revision 1.13  1999/09/29 20:29:09  wdeng
 // Accommodate dst_track and dst_vertex change
 //
@@ -78,6 +81,7 @@ Int_t StV0Maker::Init(){
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin=         0.7; // Min. value of tracks at interaction ;
+    row.n_point  =         11; // Min. number of TPC hits on a track ;
     m_ev0par2->AddAt(&row,0);
     memset(&row,0,m_ev0par2->GetRowSize());
   //SVT only cuts
@@ -88,6 +92,7 @@ Int_t StV0Maker::Init(){
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin=         100; // Min. value of tracks at interaction ;
+    row.n_point  =         1; // Min. number of SVT hits on a track ;
     m_ev0par2->AddAt(&row,1);
     memset(&row,0,m_ev0par2->GetRowSize());
   // SVT+TPC cuts
@@ -98,6 +103,7 @@ Int_t StV0Maker::Init(){
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin =        0.7; // Min. value of tracks at interaction ;
+    row.n_point  =         11; // Min. number of SVT+TPC hits on a track ;
     m_ev0par2->AddAt(&row,2);
   }
   AddRunCont(m_ev0par2);
