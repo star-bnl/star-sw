@@ -21,6 +21,16 @@ void tu_ctime();
 #include <string.h>
 #endif /* HPUX */
 
+#ifdef AIX
+#include <time.h>
+#include <string.h>
+#endif /* AIX */
+
+#ifdef IRIX
+#include <time.h>
+#include <string.h>
+#endif /* IRIX */
+
 #ifdef VMS
 
 #include <descrip.h>

@@ -50,6 +50,21 @@ int tu_machine_type_( type, len )
 
 #endif /* HPUX */
 
+#ifdef AIX
+
+#define MACH_TYPE "AIX"
+#define MACH_NUMB 4
+
+int tu_machine_type_( type, len )
+     char *type;
+     int len;
+{
+    strncpy( type, MACH_TYPE, len );
+    return MACH_NUMB;
+}
+
+#endif /* AIX */
+
 #ifdef IRIX
 
 #define MACH_TYPE "IRIX"
