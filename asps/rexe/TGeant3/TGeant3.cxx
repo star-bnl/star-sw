@@ -14,6 +14,9 @@
  **************************************************************************/
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.13  2004/03/16 03:05:53  jeromel
+Beware of termination character in Data(). READ/WRITE OVERFLOW now fixed.
+
 Revision 1.12  2004/03/15 18:00:16  fisyak
 Clean up argument handling (Insure++ reports)
 
@@ -98,6 +101,7 @@ Introduction of the Copyright and cvs Log
 #include <THIGZ.h>
 #endif
 #include <ctype.h> 
+#include <stdlib.h> 
 #include <TDatabasePDG.h>
 #ifndef __CINT__
 #include "StarCallf77.h" 
@@ -3637,14 +3641,15 @@ void TGeant3::Aginit(Int_t &nwgeant, Int_t &nwpaw, Int_t &iwtype) {
 //______________________________________________________________________________
 void TGeant3::Aginit(const Char_t *command) {
   TString tChain(command);
-  //  static Int_t argc = 0;
-  //  static Char_t *argv[200];
-  static Int_t MargC = 0;
+  static Int_t   MargC = 0;
   static Char_t *MargV[500];
   static TString ProgName(Margv[0]);
+
+  // treat argument 0 (program name)
   ProgName.ReplaceAll("root4star","starsim");
-  MargV[MargC]   = (Char_t *) calloc(ProgName.Length(), 1);
+  MargV[MargC]   = (Char_t *) malloc( (ProgName.Length()+1) * sizeof(Char_t));
   strcpy(MargV[MargC],ProgName.Data()); MargC++;
+
   Ssiz_t begin, index, end, end2;
   begin = index = end = end2 = 0;
   TRegexp separator("[^ ;,\\t\\s]+");
@@ -3669,7 +3674,7 @@ void TGeant3::Aginit(const Char_t *command) {
     index = tChain.Index(separator,&end,begin);
     if (index >= 0 && end >= 1) {
       TString t(tChain(index,end));
-      MargV[MargC]   = (Char_t *) calloc(t.Length(), 1);
+      MargV[MargC]   = (Char_t *) malloc( (t.Length()+1) * sizeof(Char_t));
       strcpy(MargV[MargC],t.Data()); MargC++;
     }
     begin += end+1;
