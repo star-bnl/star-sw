@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc2_cas,v 1.7 2001/04/28 00:44:22 didenko Exp $
+# $Id: bfc2_cas,v 1.8 2001/04/28 01:17:21 didenko Exp $
 # $Log: bfc2_cas,v $
+# Revision 1.8  2001/04/28 01:17:21  didenko
+# fix syntax
+#
 # Revision 1.7  2001/04/28 00:44:22  didenko
 # remove pile-up for FTPC
 #
@@ -123,7 +126,7 @@ else {
 }
 die "No input file has been defined" if ! $input_file;
 
-my $evts
+my $evts;
 my $nSeq;
 my $Nevts;
 my $nSeqi;
