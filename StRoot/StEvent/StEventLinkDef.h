@@ -23,6 +23,7 @@
 #pragma link C++ class StTriggerData+;
 #pragma link C++ class StTriggerData2003+;
 #pragma link C++ class StTriggerData2004+;
+#pragma link C++ class StTriggerData2005+;
 
 //IncFile=StDaqLib/TRG/trgStructures.h
 #pragma link C++ class TrgDataType+;
@@ -70,6 +71,13 @@
 #pragma link C++ class TrgSumData2004+;  
 #pragma link C++ class RawTrgDet2004+; 
 #pragma link C++ class L0_DSM_Data2004+;
+
+//IncFile=StDaqLib/TRG/trgStructures2005.h
+#pragma link C++ class TrgDataType2005+;
+#pragma link C++ class EvtDescData2005+;   
+#pragma link C++ class TrgSumData2005+;  
+#pragma link C++ class RawTrgDet2005+; 
+#pragma link C++ class L0_DSM_Data2005+;
 
 #pragma link C++ function operator<<(ostream&, const StTpcPixel&);        
 #endif
