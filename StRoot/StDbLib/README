@@ -1,0 +1,53 @@
+
+Package: StDbLib
+Author: R. Jeff Porter
+
+Purpose: General Database API (Application Programming Interface) 
+         To provide access to Database to all STAR codes ( Online, Offline,
+         & StandAlone)
+
+
+The package, StDbLib, is a general interface to the database that provides
+data in the form of c-structs to the user code based on a simplified
+query. To sum up the functionality of this API with the classes that
+perform these functions,
+
+1)  Database API
+
+    Manages Access to Servers & DataBases 
+      - class StDbManager
+      - class StDbServer
+
+    Decodes "Key" definitions into complex navigations & Queries
+      - class StDbConfigNode 
+      - class mysqlAccessor 
+
+    Handles low level Query of the Database (e.g. SQL)
+      - class mysqlAccessor
+      - class MysqlDb
+
+    Extracts & Loads Data from the underlying Database structure (Db Buffer)
+      - class StDbBuffer
+      - class StDbTable
+
+    Can provide user codes directly with Database data
+            (but usually this is done via the framework infrastructure)
+      - class StDbConfigNode
+      - class StDbTable
+      - class TableIter
+
+2) Not Database API
+
+    StDbMaker :: Offline Chain's connection to the Database API
+
+    OnlServer :: Online's connection to the Database API
+
+
+
+
+
+
+
+
+
+
