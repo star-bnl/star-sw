@@ -347,7 +347,8 @@ TTreeHelperCast &TTreeHelper::operator() (const char *varname)
      mem = new TTreeHelperMem(br->GetName(),tyCode,fUnits);
      fMemList.Add(mem);
      pddr = mem->GetMem();
-     br->SetAddress(*pddr);
+//     br->SetAddress(*pddr);
+     fTree->SetBranchAddress(br->GetName(),*pddr);
      br->ResetBit  (kDoNotProcess);
      fBraList.Add(br);
    } else {
