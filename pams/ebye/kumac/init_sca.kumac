@@ -1,0 +1,24 @@
+* sca_init.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* ----------------------------------------------------------------
+* this is the initialization kumac for the sca event by event package
+* ----------------------------------------------------------------
+* 8/4/98 - K. Turner - editted to make standard
+ 
+* ***************************************************************
+macro init
+  
+  macro/global/import *
+  message ' Initializing sca tables'
+  
+  cd [params]
+  
+  dio/newfilestream      SCAPARAM  $STAR/params/ebye/scaconst.xdf r 
+  dio/stream/getevent    SCAPARAM
+  dio/stream/close       SCAPARAM
+  
+  cd /dui
+  
+return
+
+* ******************************************************
