@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.5 1999/07/10 21:31:25 levine Exp $
+ * $Id: TPCV2P0.cxx,v 1.6 1999/07/21 21:32:39 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -13,9 +13,28 @@
  *   lower banks are at arbitrary positions
  * 09-Jul-99 MJL removed navigation code from TPC_Reader. Introduced
  *               Bank_TPCP argument to TPCV2P0_Reader constructor
+ * 20-Jul-99 MJL add error logging. Add bank type checking for every getBank...()
+ *
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.6  1999/07/21 21:32:39  levine
+ * changes to include error logging to file.
+ *
+ * There are now 2 constructors for EventReader:
+ *
+ *  EventReader();
+ *  EventReader(const char *logfilename);
+ *
+ * Constructed with no argument, there is no error logging. Supplying a file name
+ * sends all diagnostic output to the named file (N.B. opens in append mode)
+ *
+ * See example in client.cxx for constructing a log file name based on the
+ * datafile name.
+ *
+ * It is strongly advised to use the log file capability. You can grep it for
+ * instances of "ERROR:" to trap anything noteworthy (i.e., corrupted data files).
+ *
  * Revision 1.5  1999/07/10 21:31:25  levine
  * Detectors RICH, EMC, TRG now have their own (defined by each detector) interfaces.
  * Existing user code will not have to change any calls to TPC-like detector
@@ -228,8 +247,8 @@ TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er, classname(Bank_TPCP) *ptpc)
   pBankTPCP = ptpc; // copy pointer into class variable
   ercpy = er; // squirrel away pointer eventreader for our friends
 
-  if (!pBankTPCP->test_CRC()) ERROR(ERR_CRC);
-  if (pBankTPCP->swap() < 0) ERROR(ERR_SWAP);
+  if (!pBankTPCP->test_CRC()) ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,"TPCP");
+  if (pBankTPCP->swap() < 0) ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,"TPCP");
   pBankTPCP->header.CRC = 0;
   // We can have a padk for each of 24 sectors
   for(int i=0;i<TPC_SECTORS;i++)
@@ -265,7 +284,7 @@ classname(Bank_TPCSECP) *TPCV2P0_Reader::getBankTPCSECP(int hypersector)
 {
   if((hypersector <= 0) || (hypersector >= 24))
   {
-    pERROR(ERR_BAD_ARG);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,"TPCSECP");
     return NULL;
   }
   hypersector--; //convert to internal represenation
@@ -273,7 +292,9 @@ classname(Bank_TPCSECP) *TPCV2P0_Reader::getBankTPCSECP(int hypersector)
   if((!pBankTPCP->HyperSector[hypersector].offset) ||
      (!pBankTPCP->HyperSector[hypersector].length))
   {
-    pERROR(ERR_BANK);
+    char str0[40];
+    sprintf(str0,"getBankTPCSECP(hs %d)",hypersector);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0);
     return NULL;
   }
 
@@ -281,8 +302,21 @@ classname(Bank_TPCSECP) *TPCV2P0_Reader::getBankTPCSECP(int hypersector)
                       (((INT32 *)pBankTPCP) + 
 			pBankTPCP->HyperSector[hypersector].offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCSECP",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCSECP(hs %d)",hypersector);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__, str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCSECP(hs %d)",hypersector);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCSECP(hs %d)",hypersector);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
  
   return ptr;
@@ -291,9 +325,12 @@ classname(Bank_TPCSECP) *TPCV2P0_Reader::getBankTPCSECP(int hypersector)
 classname(Bank_TPCRBP) *TPCV2P0_Reader::getBankTPCRBP(int interleaved_rb, 
 					   classname(Bank_TPCSECP) *secp)
 {
+  int sector = secp->header.BankId;
   if ((interleaved_rb < 0) || (interleaved_rb >= 12))
   {
-    pERROR(ERR_BAD_ARG);
+    char str0[40];
+    sprintf(str0,"getBankTPCRBP(sec %d rb %d )",sector,interleaved_rb);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
 
@@ -311,8 +348,21 @@ classname(Bank_TPCRBP) *TPCV2P0_Reader::getBankTPCRBP(int interleaved_rb,
                      (((INT32 *)secp) + 
 		      secp->RcvBoard[interleaved_rb].offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCRBP",6)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCRBP(sec %d rb %d )",sector,interleaved_rb);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) {
+    char str0[40];
+    sprintf(str0,"getBankTPCRBP(sec %d rb %d )",sector,interleaved_rb);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) {
+    char str0[40];
+    sprintf(str0,"getBankTPCRBP(sec %d rb %d )",sector,interleaved_rb);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;
@@ -320,15 +370,20 @@ classname(Bank_TPCRBP) *TPCV2P0_Reader::getBankTPCRBP(int interleaved_rb,
 
 classname(Bank_TPCMZP) *TPCV2P0_Reader::getBankTPCMZP(int mz, classname(Bank_TPCRBP) *rbp)
 {
+  int rb = rbp->header.BankId;
   if ((mz < 0) || (mz >= 3))
   {
-    pERROR(ERR_BAD_ARG);
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(rb %d  mz %d )",rb,mz);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
 
   if ((!rbp->Mz[mz].offset) || (!rbp->Mz[mz].length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(rb %d  mz %d )",rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -336,8 +391,21 @@ classname(Bank_TPCMZP) *TPCV2P0_Reader::getBankTPCMZP(int mz, classname(Bank_TPC
                      (((INT32 *)rbp) +
 		      rbp->Mz[mz].offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCMZP",6)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(rb %d  mz %d )",rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) {
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(rb %d  mz %d )",rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(rb %d  mz %d )",rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
 //    printf("getBankTPCMZP Mezz: %d\n",mz);
@@ -350,17 +418,23 @@ classname(Bank_TPCMZP) *TPCV2P0_Reader::getBankTPCMZP(int sector, int rb, int mz
 {
   if ((sector < 0) || (sector >= TPC_SECTORS))
   {
-    pERROR(ERR_BAD_ARG);
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(sec %d, rb %d, mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
   if ((rb < 0) || (rb >= 6))
   {
-    pERROR(ERR_BAD_ARG);
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(sec %d, rb %d, mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
   if ((mz < 0) || (mz >= 3))
   {
-    pERROR(ERR_BAD_ARG);
+    char str0[40];
+    sprintf(str0,"getBankTPCMZP(sec %d, rb %d, mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
 
@@ -396,7 +470,9 @@ classname(Bank_TPCADCD) *TPCV2P0_Reader::getBankTPCADCD(int sector, int rb, int 
 
   if((!mzp->TPCADCD.offset) || (!mzp->TPCADCD.length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCADCD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -404,8 +480,21 @@ classname(Bank_TPCADCD) *TPCV2P0_Reader::getBankTPCADCD(int sector, int rb, int 
                       (((INT32 *)mzp) +
 		       mzp->TPCADCD.offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCADCD",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCADCD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCADCD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;
@@ -424,7 +513,9 @@ classname(Bank_TPCSEQD) *TPCV2P0_Reader::getBankTPCSEQD(int sector, int rb, int 
 
   if((!mzp->TPCSEQD.offset) || (!mzp->TPCSEQD.length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCSEQD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -432,8 +523,21 @@ classname(Bank_TPCSEQD) *TPCV2P0_Reader::getBankTPCSEQD(int sector, int rb, int 
                       (((INT32 *)mzp) +
 		       mzp->TPCSEQD.offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCSEQD",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCSEQD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCSEQD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCSEQD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;}
@@ -451,7 +555,9 @@ classname(Bank_TPCADCX) *TPCV2P0_Reader::getBankTPCADCX(int sector, int rb, int 
 
   if((!mzp->TPCADCX.offset) || (!mzp->TPCADCX.length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCADCX(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -459,8 +565,21 @@ classname(Bank_TPCADCX) *TPCV2P0_Reader::getBankTPCADCX(int sector, int rb, int 
                       (((INT32 *)mzp) +
 		       mzp->TPCADCX.offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCADCX",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCX(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCX(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCX(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;}
@@ -478,7 +597,9 @@ classname(Bank_TPCPADK) *TPCV2P0_Reader::getBankTPCPADK(int sector, int rb, int 
 
   if((!mzp->TPCPADK.offset) || (!mzp->TPCPADK.length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCPADK(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -486,8 +607,21 @@ classname(Bank_TPCPADK) *TPCV2P0_Reader::getBankTPCPADK(int sector, int rb, int 
                       (((INT32 *)mzp) +
 		       mzp->TPCPADK.offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCPADK",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCPADK(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) {
+    char str0[40];
+    sprintf(str0,"getBankTPCPADK(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) {
+    char str0[40];
+    sprintf(str0,"getBankTPCPADK(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;
@@ -503,7 +637,9 @@ classname(Bank_TPCCPPR) *TPCV2P0_Reader::getBankTPCCPPR(int sector, int rb, int 
 
   if((!mzp->TPCCPPR.offset) || (!mzp->TPCCPPR.length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCCPPR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -511,8 +647,21 @@ classname(Bank_TPCCPPR) *TPCV2P0_Reader::getBankTPCCPPR(int sector, int rb, int 
                       (((INT32 *)mzp) +
 			mzp->TPCCPPR.offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCCPPR",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCCPPR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) {
+    char str0[40];
+    sprintf(str0,"getBankTPCCPPR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCCPPR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;       
@@ -528,7 +677,9 @@ classname(Bank_TPCADCR) *TPCV2P0_Reader::getBankTPCADCR(int sector, int rb, int 
 
   if((!mzp->TPCADCR.offset) || (!mzp->TPCADCR.length))
   { 
-    pERROR(ERR_BANK); 
+    char str0[40];
+    sprintf(str0,"getBankTPCADCR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
     return NULL; 
   }
 
@@ -536,12 +687,66 @@ classname(Bank_TPCADCR) *TPCV2P0_Reader::getBankTPCADCR(int sector, int rb, int 
                       (((INT32 *)mzp) +
 			mzp->TPCADCR.offset);
 
-  if(!ptr->test_CRC()) { pERROR(ERR_CRC); return NULL; }
-  if(ptr->swap() < 0) { pERROR(ERR_SWAP); return NULL; }
+  if(strncmp(ptr->header.BankType,"TPCADCR",7)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) {
+    char str0[40];
+    sprintf(str0,"getBankTPCADCR(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
   ptr->header.CRC = 0;
 
   return ptr;       
 }
+
+classname(Bank_TPCMZCLD) *TPCV2P0_Reader::getBankTPCMZCLD(int sector, int rb, int mz)
+{
+  errnum = 0;
+  errstr0[0] = '\0';
+  
+  classname(Bank_TPCMZP) *mzp = getBankTPCMZP(sector, rb, mz);
+  if(!mzp) return NULL;
+
+  if((!mzp->TPCMZCLD.offset) || (!mzp->TPCMZCLD.length))
+  { 
+    char str0[40];
+    sprintf(str0,"getBankTPCMZCLD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(INFO_MISSING_BANK,__FILE__,__LINE__,str0); 
+    return NULL; 
+  }
+
+  classname(Bank_TPCMZCLD) *ptr = (classname(Bank_TPCMZCLD) *)
+                      (((INT32 *)mzp) +
+			mzp->TPCMZCLD.offset);
+
+  if(strncmp(ptr->header.BankType,"TPCMZCLD",8)) {
+    char str0[40];
+    sprintf(str0,"getBankTPCMZCLD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_BAD_HEADER,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(!ptr->test_CRC()) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCMZCLD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_CRC,__FILE__,__LINE__,str0); return NULL; 
+  }
+  if(ptr->swap() < 0) { 
+    char str0[40];
+    sprintf(str0,"getBankTPCMZCLD(sec %d rb %d  mz %d )",sector,rb,mz);
+    ercpy->fprintError(ERR_SWAP,__FILE__,__LINE__,str0); return NULL; 
+  }
+  ptr->header.CRC = 0;
+
+  return ptr;       
+}
+
 
 classname(Bank_TPCCFGR) *TPCV2P0_Reader::getBankTPCCFGR(int sector, int rb, int mz)
 {

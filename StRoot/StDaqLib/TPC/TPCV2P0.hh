@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.hh,v 1.2 1999/07/02 04:43:24 levine Exp $
+ * $Id: TPCV2P0.hh,v 1.3 1999/07/21 21:32:38 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: declarations For TPC version 2.0
@@ -8,9 +8,27 @@
  *   change log
  * 22-Jun-99 MJL added TPCV2P0_CPP_SR::getAsicParams(ASIC_params *);
  * 25-Jun-99 MJL remove #include "MemMan.hh"
+ * 20-Jul-99 MJL add #include "Error.hh"
  *
  ***************************************************************************
  * $Log: TPCV2P0.hh,v $
+ * Revision 1.3  1999/07/21 21:32:38  levine
+ * changes to include error logging to file.
+ *
+ * There are now 2 constructors for EventReader:
+ *
+ *  EventReader();
+ *  EventReader(const char *logfilename);
+ *
+ * Constructed with no argument, there is no error logging. Supplying a file name
+ * sends all diagnostic output to the named file (N.B. opens in append mode)
+ *
+ * See example in client.cxx for constructing a log file name based on the
+ * datafile name.
+ *
+ * It is strongly advised to use the log file capability. You can grep it for
+ * instances of "ERROR:" to trap anything noteworthy (i.e., corrupted data files).
+ *
  * Revision 1.2  1999/07/02 04:43:24  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -25,6 +43,7 @@
 #define TPCV2P0_HH
 
 #include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/GENERIC/Error.hh"
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 #include "TPCV2P0.Banks.hh"
 //#include "MemMan.hh"
@@ -41,6 +60,8 @@ class TPCV2P0_ZS_SR : public ZeroSuppressedReader
 public:
   int getPadList(int PadRow, unsigned char **padList);
   int getSequences(int PadRow, int Pad, int *nSeq, Sequence **SeqData);
+  int getSpacePts(int PadRow, int *nSpacePts, SpacePt **SpacePts);
+
   int MemUsed();
 
   TPCV2P0_ZS_SR(int sector, TPCV2P0_Reader *);
@@ -54,7 +75,11 @@ private:
   classname(Bank_TPCADCD) *adcd_p[6][3];
   classname(Bank_TPCADCX) *adcx_p[6][3];
   classname(Bank_TPCSEQD) *seqd_p[6][3];
+  classname(Bank_TPCMZCLD) *cld_p[6][3];
+  
   int sector;
+  int nsptrow[TPC_PADROWS]; // num space pts each pad row
+  SpacePt *RowSpacePts[TPC_PADROWS]; // pointer to SpacePt array for each padrow 
   struct Pad Pad_array[TPC_PADROWS][TPC_MAXPADS];
   struct PadRow Row_array[TPC_PADROWS];
   u_char padlist[TPC_PADROWS][TPC_MAXPADS];
@@ -63,6 +88,7 @@ private:
   TPCV2P0_PADK_SR *padkr;
 
 };
+
 
 // Reads Raw ADC values
 class TPCV2P0_ADCR_SR : public ADCRawReader
