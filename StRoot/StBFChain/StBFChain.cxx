@@ -170,7 +170,7 @@ BfcItem BFC[] = {
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
-  {"TagsChain"   ,"","TagsChain",""                                    ,"StChainMaker","StChain","",kFALSE},
+  {"TagsChain"   ,"TagsChain","",""                                    ,"StChainMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
@@ -757,8 +757,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.98 2000/06/11 21:41:33 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.99 2000/06/11 22:27:31 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.99  2000/06/11 22:27:31  fisyak
+// Restore Tags subchain
+//
 // Revision 1.98  2000/06/11 21:41:33  fisyak
 // replace sim -> sim+ofl
 //
