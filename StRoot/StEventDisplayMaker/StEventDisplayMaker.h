@@ -32,7 +32,7 @@ class StVirtualEventFilter;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.10 1999/08/02 14:43:26 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.11 1999/08/03 19:18:37 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -67,6 +67,7 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t  MakeGlobalTracks();
    virtual Int_t  MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter);
    virtual Int_t  MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter);
+   virtual Int_t  MakeVertices(const StObjArray *verticesCollection,StVirtualEventFilter *filter);
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
@@ -154,7 +155,7 @@ class StEventDisplayMaker : public StMaker {
   // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.10 1999/08/02 14:43:26 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.11 1999/08/03 19:18:37 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

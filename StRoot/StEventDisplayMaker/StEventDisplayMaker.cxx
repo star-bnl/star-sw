@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.13 1999/08/03 14:50:02 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.14 1999/08/03 19:18:37 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.14  1999/08/03 19:18:37  fine
+// Vertices collections have been introduced
+//
 // Revision 1.13  1999/08/03 14:50:02  fine
 // Clean up
 //
@@ -53,6 +56,7 @@
 #include "St_NodePosition.h"
 #include "St_PolyLine3D.h"
 #include "StHits3DPoints.h"
+#include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
 #include "StVirtualEventFilter.h"
 #include "St_Table.h"
@@ -524,7 +528,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   filter = (StVirtualEventFilter *)m_FilterArray->At(kVertices);
   if (!filter || filter->IsOn() ) {
     StVertexCollection *vertices   = m_Event->vertexCollection();
-    hitCounter += MakeHits(vertices,filter);
+    hitCounter +=  MakeVertices(vertices,filter);
     if (Debug()) printf(" VertexCollection: %d \n", hitCounter);
   }
 
@@ -572,6 +576,37 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
   return 0;
 }
 
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirtualEventFilter *filter)
+{
+  if (eventCollection && eventCollection->GetLast() ) {
+    Int_t   hitCounter = 0;
+    Color_t hitColor = kYellow;
+    Style_t hitStyle = 1;
+    Width_t hitSize  = 2;
+
+    // ---------------------------- hits filter ----------------------------- //
+    if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
+    // ---------------------------------------------------------------------- //
+    if (hitColor > 0) {
+      StVertices3DPoints *hitsPoints  = new StVertices3DPoints((StObjArray *)eventCollection);
+       m_HitCollector->Add(hitsPoints);    // Collect to remove  
+       St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
+         hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
+         hitsShape->SetLineStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
+       // Create a node to hold it
+       St_Node *thisHit = new St_Node("hits",eventCollection->GetName(),hitsShape);
+         thisHit->Mark();
+         thisHit->SetVisibility();
+       St_NodePosition *pp = m_EventsNode->Add(thisHit); 
+       if (!pp && hitCounter) {
+          printf(" no track position %d\n",hitCounter);
+       }
+       return hitsPoints->Size(); // hitColor;
+    }
+  }
+  return 0;
+}
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter)
 {
