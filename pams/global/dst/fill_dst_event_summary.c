@@ -71,8 +71,11 @@ long  type_of_call fill_dst_event_summary_ (
    *:                                       T_eta_bins[3] to dst_event_summary 
    *:                                       table.
    *:                                       Tested successfully on 500 Lanny's
-   *:                                       DST events
-   *:                                            
+   *:                                       DST events.
+   *:      Sep 08, 1998       Dhammika W.   Fixed the check on global track
+   *:                                       iflag to make it work properly
+   *:                                       with fastdst chain.
+   *:
    *:>-------------------------------------------------------------------- 
    */
 
@@ -136,7 +139,9 @@ long  type_of_call fill_dst_event_summary_ (
   dst_eventsummary->vrtx_qual[i]              = 0;
   if (i<6)
     dst_eventsummary->prim_vrtx_cov[i]        = 0;
-  }
+  if (i<3)
+    dst_eventsummary->prim_vrtx[i]            = 0;
+}
 
   if (!dst_track_h->nok){
     fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...exiting.\n");
@@ -209,10 +214,9 @@ long  type_of_call fill_dst_event_summary_ (
       glb_trk_plus++;     /*  charge = 1             */
     if ( dst_track[itrk].icharge < 0 )
       glb_trk_minus++;    /*  charge = -1            */
-    if ( dst_track[itrk].iflag > 0 )
-      glb_trk_good++;     /*  good tracks            */
-    else
+    if ( dst_track[itrk].iflag < 0 )
       continue;
+    glb_trk_good++;     /*  good tracks            */
     /*  Calculate kinematic varialbles for good tracks only */
     theta = piov2 - atan(dst_track[itrk].tanl);
     eta   = -log(tan(theta/2.));
