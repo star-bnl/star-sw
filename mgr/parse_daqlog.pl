@@ -365,6 +365,7 @@ sub parse_log($) {
     print ">>>>>>>>>>>>>>>  Average CPU TIME per EVENT for Makers <<<<<<<<<<<<<<<\n";
     print '=' x 80, "\n";    
 
+   if ($num_event ne 0) {
  @cpu_output = `tail -150 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
@@ -385,6 +386,7 @@ sub parse_log($) {
   }
  }   
 } 
+}
   print '=' x 80, "\n";
    print "End of file";
    close (STDOUT);
