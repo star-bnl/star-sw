@@ -74,6 +74,12 @@ void CreateMenuItems(Widget mbar,int whichWindow);
 XtCP TextCB(Widget w,caddr_t cld,caddr_t cad);
 void Say(char *mess);
 /***********************************************************  FUNCTIONS  **/
+void SaveValueOfCalcAve(void) {
+  FILE *ff;
+  ff=fopen("browser.cDef","w");
+  if(ff==NULL) return;
+  fprintf(ff,"%d\n",gCalculateAverages); fclose(ff);
+}
 void Ose(void) {
   PP"------------------------------------------------  STAR TABLE BROWSER\n");
 }
@@ -202,12 +208,16 @@ Widget Row(Widget parent) {
   rv=XmCreateRowColumn(parent,"lrc",args,nn); XtManageChild(rv);
   return rv;
 }
+void ReadCalcAve(void) {
+  FILE *ff; char line[53];
+  ff=fopen("browser.cDef","r");
+  if(ff==NULL) { gCalculateAverages=TRUE; return; }
+  if(!fgets(line,50,ff)) { gCalculateAverages=TRUE; return; }
+  gCalculateAverages=atoi(line);
+}
 void DoOnce2(void) {
-  gCalculateAverages=TRUE;
-  /* SendMail(); */
-  gLast=-1;
-  gNGraphicsUp=0;
-  gNWin=0;
+  ReadCalcAve(); /* SendMail(); */
+  gLast=-1; gNGraphicsUp=0; gNWin=0;
 }
 XtCP CutsCancelCB(Widget w,caddr_t cld,caddr_t cad) {
   gDone2=63;
@@ -446,7 +456,8 @@ myBool UserMod(char *tableName,char *xx) {
   return TRUE; /* User said OK. */
 }
 myBool GetCuts(char *out,char *tableName) {
- FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; myBool fo;
+  FILE *ff; char *tok,fn[150],line[MAX_CUTS_STRING+5]; myBool fo;
+  tok=NULL;
   sprintf(fn,"browser.cuts"); ff=fopen(fn,"r");
   if(ff!=NULL) {
     fo=FALSE;
@@ -457,7 +468,7 @@ myBool GetCuts(char *out,char *tableName) {
     } fclose(ff);
     if(!fo) tok=""; else tok=strtok(NULL," \n\t");
   }
-  strcpy(out,tok);
+  if(tok!=NULL) strcpy(out,tok); else *out='\0';
   return UserMod(tableName,out); /* whether user cancels */
 }
 char *ColName(int ln,int whWin) {
@@ -869,9 +880,11 @@ void DumpPsCB(Widget w,caddr_t cld,caddr_t cad) {
 }
 void DoCB(Widget w,caddr_t cld,caddr_t cad) {
   gCalculateAverages=TRUE;
+  SaveValueOfCalcAve();
 }
 void SkipCB(Widget w,caddr_t cld,caddr_t cad) {
   gCalculateAverages=FALSE;
+  SaveValueOfCalcAve();
 }
 void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
   Say("This does not work yet.");
