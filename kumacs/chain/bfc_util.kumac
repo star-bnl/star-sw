@@ -146,6 +146,13 @@
 *                     separate run/params file
 *                   - fix dchkt so that it checks if run_summary table
 *                     exists before executing finish stuff
+* 10/13/98 K. Turner - change "dout" so that it writes out full run
+*                      directory during bfc_init, not just run/params
+* 10/14/98 K. Turner - remove "dwntp" - not needed
+* 10/14/98 K. Turner - fix dout so it writes out whole run dir during init
+*                    - fix dstin for backwards compatibility
+*                    - default params read with read_default_params 
+*                      instead of load_libraries  
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -165,7 +172,9 @@
    detp geometry [gstar_settings] split_off
    exec bfc_util#bfc_g2t_b4_load    [chain]
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
-   exec load_libraries#run          [domain]
+   exec load_libraries#run          [domain]   
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
+   exec read_default_params#init     
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
    exec bfc_util#bfc_g2t_after_load [chain]
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
@@ -181,8 +190,6 @@
 END:
  
 return
-
-
  
 *********************************************************************
 *********************************************************************
@@ -230,16 +237,29 @@ macro bfc_init _
 	  endif
     (dstin) 
 	  exec read_table_from_file#init ind [input_file]
-	   if ($vexist(readprob).ne.0) then 
+	  if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot open dstin file - quit '
             goto EOF
-	   endif
-	  exec read_table_from_file#read ind [run]
+	  endif
+* must take care of old type of dsts (before 98i) that only had
+* dst tables in first event -- if we get dst directory here, copy
+* tables to run/dst and then delete from dst
+	  exec read_table_from_file#read ind  
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read dstin file - quit '
             goto EOF
-	   endif  
-     (esin)
+	  endif  
+* now check if we have dst directory here:
+	  ls dst
+	  if (staf_status(2).eq.stafcv_ok) then
+	    message ' have dst directory in run directory! '
+	    cp dst/run_header  [run_dst]
+	    cp dst/run_summary [run_dst]
+	    rm dst/run_header
+	    rm dst/run_summary
+	    rmdir dst
+	  endif	  
+    (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
           dio/stream/getevent inev
@@ -378,7 +398,6 @@ macro bfc_init _
     (dchkt)
 	    exec dst_chk_tabl#init
 	    exec dst_chk_tabl#run_header
-    (dwntp) exec dst_wr_ntup#init
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
     (fzout) user/output o [output_fzd_file]
@@ -402,7 +421,7 @@ macro bfc_init _
                 message "Cannot open dst output file"
                 goto EOF
               endif
-              exec write_table_to_file#write dstout [run_dst]         
+              exec write_table_to_file#write dstout [run]         
             endif
     (esout)
             if output_xdf_file="" then
@@ -658,7 +677,6 @@ return
                exec dst_chk_tabl#event_header
                exec dst_chk_tabl#dst_tables
 *              exec dst_chk_tabl#event_summary    
-    (dwntp)    exec dst_wr_ntup#run
      (user)     exec run_user
      (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
     (evout)    if [output_xdf_file]="" then
@@ -668,9 +686,9 @@ return
               endif
     (dout)    if [output_dst_file]="" then
                  message "Empty dst output file"
-               else
+              else
 		 exec write_table_to_file#write dstout [dst]
-               endif
+              endif
     (esout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -751,7 +769,6 @@ macro bfc_finish _
 		exec dst_chk_tabl#run_summary
 	      endif
             endif
-    (dwntp) exec dst_wr_ntup#finish
      (user) exec finish_user
      (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
      (evout,esout) 
@@ -850,7 +867,7 @@ macro bfc_g2t_b4_load chain
            
  test1 = [chain]
  nw1=$words([test1])
- message ' !!! bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
+ message ' bfc_util#bfc_g2t_b4_load ==> Number of words in chain = ',[nw1]
  do i=1,[nw1]
    mod1 = $word([test1],[i],1)
    CASE [mod1] in
@@ -885,7 +902,7 @@ return
 *  has to be done after loading
  test2 = [chain]
  nw2=$words([test2])
- message ' !!! bfc_g2t_after_load ==> Number of words in chain = ',[nw2]
+ message ' bfc_util#bfc_g2t_after_load ==> Number of words in chain = ',[nw2]
  do i=1,[nw2]
    mod2 = $word([test2],[i],1)
    CASE [mod2] in
