@@ -1,7 +1,7 @@
-// $Id: bfc.C,v 1.14 1998/09/25 02:31:23 fisyak Exp $
+// $Id: bfc.C,v 1.15 1998/09/26 00:17:27 fisyak Exp $
 // $Log: bfc.C,v $
-// Revision 1.14  1998/09/25 02:31:23  fisyak
-// Add Benchmarks for i/o
+// Revision 1.15  1998/09/26 00:17:27  fisyak
+// Add SetWrite
 //
 // Revision 1.13  1998/09/23 20:23:23  fisyak
 // Prerelease SL98h
@@ -113,7 +113,8 @@
   if (root_out) {
     gBenchmark->Start("root i/o");
     root_out->cd();
-    chain.GetRun()->Write();// root output
+    St_DataSet *run = chain.GetRun();// root output
+    run->SetWrite();
     gBenchmark->Stop("root i/o");
   }
   gBenchmark->Start("bfc");
@@ -132,7 +133,7 @@
     if (root_out){
       gBenchmark->Start("root i/o");
       root_out->cd();
-      evnt->Write();// root output
+      evnt->SetWrite();// root output
       gBenchmark->Stop("root i/o");
     }
     //    root_tree->cd();
