@@ -35,6 +35,8 @@ StrangeMuDstPlayer::StrangeMuDstPlayer() {
   v0DecayLength = 2.0;
   v0DcaDaughtersToPrimVertex = 0.7;
   v0DcaToPrimVertex = 0.8;
+  v0DcaDaughters = 0.75;
+  v0NumTpcHits = 15;
   xiDcaDaughters = 0.7;
   xiDcaV0Daughters = 0.7;
   xiDcaToPrimVertex = 0.7;
@@ -226,6 +228,10 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   v0MuDstMaker->Cuts().Add("dcaPosToPrimVertex || dcaNegToPrimVertex",buff);
   sprintf(buff,"< %f",v0DcaToPrimVertex);
   v0MuDstMaker->Cuts().Add("v0DcaToPrimVertex",buff);
+  sprintf(buff,"< %f",v0DcaDaughters);
+  v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
+  sprintf(buff,"> %f",v0NumTpcHits);
+  v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
   sprintf(buff,"< %f",xiDcaDaughters);
   xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
   sprintf(buff,"< %f",xiDcaV0Daughters);
@@ -243,6 +249,8 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   gMessMgr->Info() << "v0DcaToPrimVertex < " << v0DcaToPrimVertex << endm;
   gMessMgr->Info() << "v0DcaDaughtersToPrimVertex > " << 
     v0DcaDaughtersToPrimVertex << endm;
+  gMessMgr->Info() << "v0DcaDaughters < " << v0DcaDaughters << endm;
+  gMessMgr->Info() << "v0NumTpcHits > " << v0NumTpcHits << endm;
   gMessMgr->Info() << "xiDcaDaughters < " << xiDcaDaughters << endm;
   gMessMgr->Info() << "xiDcaV0Daughters < " << xiDcaV0Daughters << endm;
   gMessMgr->Info() << "xiDcaToPrimVertex < " << xiDcaToPrimVertex << endm;
@@ -277,7 +285,10 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 	if( v0j->decayLengthV0() > v0DecayLength && 
 	    v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
 	    ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
-	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) )
+	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) &&
+	    v0j->dcaV0Daughters() < v0DcaDaughters &&
+	    v0j->topologyMapPos().numberOfHits(kTpcId) > v0NumTpcHits &&
+	    v0j->topologyMapNeg().numberOfHits(kTpcId) > v0NumTpcHits )
 	  v0MuDstMaker->SelectV0(j);
       }}
       // Apply selection criteria to the Xis
@@ -414,6 +425,10 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   v0MuDstMaker->Cuts().Add("dcaPosToPrimVertex || dcaNegToPrimVertex",buff);
   sprintf(buff,"< %f",v0DcaToPrimVertex);
   v0MuDstMaker->Cuts().Add("v0DcaToPrimVertex",buff);
+  sprintf(buff,"< %f",v0DcaDaughters);
+  v0MuDstMaker->Cuts().Add("v0DcaDaughters",buff);
+  sprintf(buff,"> %f",v0NumTpcHits);
+  v0MuDstMaker->Cuts().Add("v0NumTpcHits",buff);
   sprintf(buff,"< %f",xiDcaDaughters);
   xiMuDstMaker->Cuts().Add("xiDcaDaughters",buff);
   sprintf(buff,"< %f",xiDcaV0Daughters);
@@ -431,6 +446,8 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   gMessMgr->Info() << "v0DcaToPrimVertex < " << v0DcaToPrimVertex << endm;
   gMessMgr->Info() << "v0DcaDaughtersToPrimVertex > " << 
     v0DcaDaughtersToPrimVertex << endm;
+  gMessMgr->Info() << "v0DcaDaughters < " << v0DcaDaughters << endm;
+  gMessMgr->Info() << "v0NumTpcHits > " << v0NumTpcHits << endm;
   gMessMgr->Info() << "xiDcaDaughters < " << xiDcaDaughters << endm;
   gMessMgr->Info() << "xiDcaV0Daughters < " << xiDcaV0Daughters << endm;
   gMessMgr->Info() << "xiDcaToPrimVertex < " << xiDcaToPrimVertex << endm;
@@ -465,7 +482,10 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
 	if( v0j->decayLengthV0() > v0DecayLength && 
 	    v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
 	    ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
-	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) )
+	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) &&
+	    v0j->dcaV0Daughters() < v0DcaDaughters &&
+	    v0j->topologyMapPos().numberOfHits(kTpcId) > v0NumTpcHits &&
+	    v0j->topologyMapNeg().numberOfHits(kTpcId) > v0NumTpcHits )
 	  v0MuDstMaker->SelectV0(j);
       }
       // Apply selection criteria to the Xis
