@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.78 1999/01/30 04:08:23 fisyak Exp $
+# $Id: MakePam.mk,v 1.79 1999/01/31 22:31:44 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.79  1999/01/31 22:31:44  fisyak
+# Ad includes in dependencies
+#
 # Revision 1.78  1999/01/30 04:08:23  fisyak
 # Add StRootEvent
 #
@@ -571,19 +574,19 @@ else
 endif #/* NT */
 endif #IDM
 $(DEP_DIR)/%.d:%.cc 
-	$(MAKEDEPEND)  $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(MAKEDEPEND)  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.c
-	$(MAKEDEPEND)  $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(MAKEDEPEND)  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.F
-	$(MAKEDEPEND) -traditional -x c  $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(MAKEDEPEND) -traditional -x c  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.g
-	$(MAKEDEPEND) -traditional -x c  $(CPPFLAGS) $(1ST_DEPS) | sed -e \
+	$(MAKEDEPEND) -traditional -x c  $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
 's/$(notdir $(STEM))\.g\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.cdf
