@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.7 2000/07/18 21:22:15 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.8 2000/07/24 02:42:47 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.8  2000/07/24 02:42:47  oldi
+// Problem of memory exhaustion solved. This was introduced during the last changes.
+//
 // Revision 1.7  2000/07/18 21:22:15  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -134,6 +137,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TClonesArray("StFtpcConfMapPoint", n_clusters);    // create TClonesArray
+  mHitsCreated = (Bool_t)true;
 
   TClonesArray &hit = *mHit;
   
