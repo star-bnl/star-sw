@@ -36,6 +36,7 @@ macro dir
  macro/global/create geometry  [constants]/params
  macro/global/create geantR    [run]/geant    
  macro/global/create geant_Run [geantR]/Run
+ macro/global/create run_dst    [run]/dst    
    
  macro/global/create evgen       [event]/evgen    
  macro/global/create geantE      [event]/geant    
@@ -51,7 +52,11 @@ macro dir
  mkdir  [calib]
  mkdir  [event]
  
+* ===================================================================
+* tables under run or calib directory ********************************
+ 
 * constants tables ----------------------------------
+ mkdir  [run_dst]
  mkdir  [geantR]
  mkdir  [geant_Run]
  mkdir  [params]
@@ -61,6 +66,8 @@ macro dir
   endfor
  mkdir  [params]/global/magnetic_field
  
+* ============================================================
+* tables under event directory *****************************
  
 *  event generator tables ----------------------------
  mkdir  [evgen]
