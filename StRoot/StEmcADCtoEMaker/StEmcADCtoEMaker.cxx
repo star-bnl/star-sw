@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.29 2002/02/25 16:23:24 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.30 2002/05/15 15:05:28 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.30  2002/05/15 15:05:28  suaide
+// bugs fixed to recalibrate EMC after production
+//
 // Revision 1.29  2002/02/25 16:23:24  suaide
 // reduced SMD threshold
 //
@@ -498,7 +501,7 @@ Bool_t StEmcADCtoEMaker::subtractPedestal(Int_t det)
     {
       //cout <<"id = "<<id<<"  ADC = "<<ADCTemp[id-1]<<"  ped = "<<pedestal;
       mADCPedSub[det][id-1]=mADC[det][id-1]-pedestal;
-      if(mADCPedSub[det][id-1]<0) mADCPedSub[det][id-1]=0;
+      //if(mADCPedSub[det][id-1]<0) mADCPedSub[det][id-1]=0;
       //cout <<"  ADCSub = "<<ADCTemp[id-1]<<endl;
     }
     else mADCPedSub[det][id-1]=0;
@@ -535,8 +538,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det,Int_t* NHITS,Float_t* ENERGY)
   {
     Float_t adc=mADCPedSub[det][id-1];
     Float_t energy=0;
-    if(adc>0 && 
-       mStatus[det][id-1]==1 && 
+    if(mStatus[det][id-1]==1 && 
        cal_st[id-1].Status==1 && 
        cal_st[id-1].CalibStatus==1)
     {
@@ -544,9 +546,10 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det,Int_t* NHITS,Float_t* ENERGY)
       for(Int_t i=0;i<5;i++) 
       {
         energy+=cal_st[id-1].AdcToE[i]*adcpower; 
-        adcpower*=adc;
+        adcpower*=fabs(adc);
       }            
-      if (energy<0) energy=0;
+      if(adc<0) energy*=-1;
+			//if (energy<0) energy=0;
       nhits++;
       //cout <<"id = "<<id<<" ADC = "<<mADC[det][id-1]<<"  ADC ped Sub = "<<adc<<"  energy = "<<energy<<endl;
       totalenergy+=energy;
@@ -607,8 +610,13 @@ This method makes a clean up of StEvent before store it in the .data
 Bool_t StEmcADCtoEMaker::fillStEvent()
 {  
   // first need to clean hits with adc = 0
+	
+	StEvent* event = (StEvent*)GetInputDS("StEvent");
   
   mEmc = NULL;
+	
+	if(event) mEmc = event->emcCollection();
+	if(mEmc) clearOldEmc();
   
   for(Int_t det=0;det<MAXDET;det++) if(mControlADCtoE->Calibration[det]==1 && mNChannels[det]>0)
   {
@@ -621,9 +629,18 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
 
     if(saveDet)
     {
-      if(!mEmc) mEmc =new StEmcCollection();
+      if(!mEmc) 
+			{
+				mEmc =new StEmcCollection();
+				if(event)event->setEmcCollection(mEmc);
+			}
       StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
-      StEmcDetector* detector = new StEmcDetector(id,120);
+      StEmcDetector* detector=mEmc->detector(id);
+			if(!detector)
+			{
+				detector = new StEmcDetector(id,120); 
+				mEmc->setDetector(detector);
+			}
     
       for(Int_t idh=1;idh<=Max;idh++)
       {      
@@ -648,17 +665,11 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
           if(ADC>0) totalhits++;
          }
       }
-      mEmc->setDetector(detector);
     }
     cout <<"Total hits for detector "<<detname[det].Data()<<" = "<<totalhits<<"  after clean up = "<<totalhitsused<<endl;
   }  
   // finished clean up
   
-  StEvent* event = (StEvent*)GetInputDS("StEvent");
-  if(!event) return kFALSE;
-  StEmcCollection* emctemp=event->emcCollection();
-  if(mEmc) event->setEmcCollection(mEmc);
-  if(emctemp) delete emctemp;
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -673,13 +684,45 @@ Bool_t StEmcADCtoEMaker::saveHit(Int_t det,Int_t idh)
   
   Bool_t save = kTRUE;
       
-  if(ADC<=0) save = kFALSE;
+  if(ADC==0) save = kFALSE;
   if(mControlADCtoE->AdcCutOff[det]!=-1) if(ADCPedSub<mControlADCtoE->AdcCutOff[det]) save = kFALSE;
-  if(mControlADCtoE->OnlyCalibrated[det]==1) if(Energy<=0) save = kFALSE;
+  if(mControlADCtoE->OnlyCalibrated[det]==1) if(Energy==0) save = kFALSE;
   
   return save;
 }
-
+//_____________________________________________________________________________
+Bool_t StEmcADCtoEMaker::clearOldEmc()
+{  
+	if(!mEmc) return kFALSE;
+	StSPtrVecEmcPoint& pvec = mEmc->barrelPoints();
+  if(pvec.size()>0)  pvec.clear(); 
+ 
+  for(Int_t i=0; i<4; i++)
+  {
+    StDetectorId id = static_cast<StDetectorId>(i+kBarrelEmcTowerId);
+    StEmcDetector* detector=mEmc->detector(id);
+    if(detector)
+    {
+      if(detector->cluster())
+			{
+      	StSPtrVecEmcCluster& cluster=detector->cluster()->clusters();
+      	if(cluster.size()>0) cluster.clear();  
+      }
+			for(UInt_t j=1;j<=detector->numberOfModules() ;j++)
+			{
+				StEmcModule *module = detector->module(j);
+				if(module)
+				{
+					StSPtrVecEmcRawHit&  hits=module->hits();
+					hits.clear();
+					//delete module;
+				}
+			}
+			//delete detector;
+    }
+  }
+	return kTRUE;
+}
 
 
 
