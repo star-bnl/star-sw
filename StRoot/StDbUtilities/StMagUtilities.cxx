@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.39 2003/10/25 00:57:02 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.40 2003/10/28 02:09:45 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.40  2003/10/28 02:09:45  perev
+ * r<IFCRadius skipped
+ *
  * Revision 1.39  2003/10/25 00:57:02  perev
  * Redundand debug print removed
  *
@@ -1052,6 +1055,7 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	      r = eRadius[j] ;
 	      Double_t IntegralOverZ = 0 ;
 	      spaceEr[i][j] = 0. ; 
+              if (r<IFCRadius) continue;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
 		  Double_t k  = n * TMath::Pi() / TPC_Z0 ;  // Integrated Charge Density
@@ -1067,7 +1071,10 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 		  Double_t Denominator =
 		    TMath::BesselK0( k*OFCRadius ) * TMath::BesselI0( k*IFCRadius ) -
 		    TMath::BesselK0( k*IFCRadius ) * TMath::BesselI0( k*OFCRadius ) ;
-		  IntegralOverZ += Cn * Zterm * Numerator / Denominator ;
+                  Double_t qwe = Numerator / Denominator;
+                  
+		  IntegralOverZ += Cn * Zterm * qwe ;
+                  if (n>10 && fabs(IntegralOverZ)*1.e-10 > fabs(qwe)) break;
 		}
 	      spaceEr[i][j] = IntegralOverZ ; 
 	    }
