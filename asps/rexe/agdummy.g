@@ -76,5 +76,8 @@ Replace[LIST #;] with [ #1 _
         (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
    prin5 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
 *
+  open (99,file='/dev/null',STATUS= 'UNKNOWN')
+  write (99,*) 'no sense'	
+  close (99)	
   END
  
