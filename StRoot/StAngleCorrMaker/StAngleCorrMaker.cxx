@@ -37,11 +37,12 @@ Int_t StAngleCorrMaker::Init() {
 
   mCollectionOfTracks= new TOrdCollection(TRACKSMAX);
   mNumberEventsInPool= 0;
+  mNumberTracksInPool =0;
   // output file
   mOutput = new TFile("corr.root","RECREATE");
 
   // book an histogram for the numerator of the angular correlation
-  int nbin = 180;
+  int nbin = 60;
   float lbin =0. ;
   float ubin = 180.;
   mHistPhiNumerator = new TH1F("phiNumerator",
@@ -78,11 +79,17 @@ Int_t StAngleCorrMaker::Make() {
   // include in this decision some estimate of average tracks per event
   //
   double numPossiblePairs = pow((float(poolCounter) - aveTracksPerEvent),2);
-  if (numPossiblePairs > 1000000 ) {
+  if (numPossiblePairs > 2000000 ) {
     analyseMixedPairs();
     //  empty collection 
+    //   delete mCollectionOfTracks;
+    // mCollectionOfTracks= new TOrdCollection(TRACKSMAX);
     mCollectionOfTracks->Delete();
-    mNumberEventsInPool = 0;       
+    mNumberEventsInPool = 0;
+    mNumberTracksInPool = 0;  
+    trackfrompool = (StTrackForPool* ) mCollectionOfTracks->Last();
+    poolCounter = mCollectionOfTracks->IndexOf(trackfrompool);
+    cout << "empty pool has " << poolCounter << " tracks" <<endl;     
   };
   return kStOK;
 }
@@ -97,7 +104,7 @@ StAngleCorrMaker::~StAngleCorrMaker() {
 
 void StAngleCorrMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAngleCorrMaker.cxx,v 1.3 1999/04/29 16:53:26 ogilvie Exp $\n");
+  printf("* $Id: StAngleCorrMaker.cxx,v 1.4 1999/05/03 17:19:28 ogilvie Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -109,8 +116,12 @@ void StAngleCorrMaker::Clear(Option_t *opt) {
 
 Int_t StAngleCorrMaker::Finish() {
 
+  analyseMixedPairs();
+  //  empty collection 
+  mCollectionOfTracks->Delete();
+  mNumberEventsInPool = 0; 
   // write out histograms
-
+  cout << "writing out histograms" << endl;
   mOutput->Write("MyKey",kSingleKey);
   mOutput->Close();
 

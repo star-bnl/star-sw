@@ -34,7 +34,7 @@ private:
   // Maker generates a container of tracks 
   TOrdCollection* mCollectionOfTracks;
   int mNumberEventsInPool ;
-
+  int mNumberTracksInPool ;
   void analyseRealPairs(StEvent&, int);
   void analyseMixedPairs();
 
