@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.3 2002/03/09 18:46:49 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.4 2002/03/10 15:49:54 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.4  2002/03/10 15:49:54  dunlop
+ * Remove StRichCollection if detectorState(kRichId) is bad
+ *
  * Revision 1.3  2002/03/09 18:46:49  dunlop
  * Modified logic when bad RICH event (don't try v0's, don't keep l3).
  * Keep event even if no rich or tof tracks, for scalars in minbias.
@@ -361,7 +364,8 @@ bool StRichTofMuDstMaker::accept(StEvent* event)
     
 // Also check if there is a rich collection
     if (event->detectorState(kRichId) && !(event->detectorState(kRichId)->good())) {
-	cout << "Bad rich event: detectorState(kRichId)->good():" << event->detectorState(kRichId)->good() << endl;
+	cout << "Bad rich event: detectorState(kRichId)->good():" << event->detectorState(kRichId)->good() << " time " << event->time() << " Dropping richCollection" << endl;
+	StEventScavenger::removeRichCollection(event);
 	
 	mEventAcceptedRich = false;
     }
