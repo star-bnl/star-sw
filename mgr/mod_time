@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 my $atime;   # Last access time since the epoch
 my $mtime;   # Last modify time since the epoch
 my $ctime;   # Inode change time (NOT creation time!) since the epoch
