@@ -1,13 +1,14 @@
 #include <fstream.h>
 
 #include "Messenger.h"
+#include "MessageType.h"
 #include "StiDetector.h"
 #include "StiDetectorBuilder.h"
 
 StiDetectorBuilder::StiDetectorBuilder():
-        m_messenger(*Messenger::instance(kDetectorMessage)){
-  Messenger::setMessageOstream(kDetectorMessage, 
-                               new ofstream("DetectorMessageFile"));
+        m_messenger(*Messenger::instance(MessageType::kDetectorMessage)){
+  MessageType::getTypeByCode(MessageType::kDetectorMessage)->setOstream(
+      new ofstream("DetectorMessageFile"));
 }
 
 StiDetectorBuilder::~StiDetectorBuilder(){

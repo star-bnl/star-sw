@@ -10,7 +10,7 @@
 
 StiSeedFinder::StiSeedFinder()
     : mFactory(0), mBuildPath("empty"), mBuilt(false),
-      mMessenger(*(Messenger::instance(kSeedFinderMessage)))
+      mMessenger(*(Messenger::instance(MessageType::kSeedFinderMessage)))
 {
     //cout <<"StiSeedFinder::StiSeedFinder()"<<endl;
 }

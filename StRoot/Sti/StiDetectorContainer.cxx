@@ -45,7 +45,7 @@ void StiDetectorContainer::kill()
 
 StiDetectorContainer::StiDetectorContainer()
     : mroot(0), mregion(0), mLeafIt(0),
-      mMessenger( *Messenger::instance(kDetectorMessage) )
+      mMessenger( *Messenger::instance(MessageType::kDetectorMessage) )
 {
     mMessenger <<"StiDetectorContainer::StiDetectorContainer()"<<endl;
     sinstance = this;

@@ -14,7 +14,7 @@
 #include "StiCircleCalculator.h"
 
 StiCircleCalculator::StiCircleCalculator()
-    : mMessenger( *(Messenger::instance(kSeedFinderMessage))),
+    : mMessenger( *(Messenger::instance(MessageType::kSeedFinderMessage))),
       mRadius(-1.), mXCenter(0.), mYCenter(0.), mProbableH(0.)
 {
 }

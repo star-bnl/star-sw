@@ -18,7 +18,7 @@
 
 // can't initialize this to the actual messenger until after
 // Messenger::init() is called in StiMaker, certainly not at dll load time.
-static Messenger *StiMaterialInteraction::s_pMessenger = NULL;
+Messenger *StiMaterialInteraction::s_pMessenger = NULL;
 
 void StiMaterialInteraction::nameForIntersection(
     StiIntersection &intersection, string &name){
@@ -41,10 +41,13 @@ void StiMaterialInteraction::nameForIntersection(
 StiIntersection StiMaterialInteraction::findIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
-
   // make sure we have our output device initialized
-  if(s_pMessenger==NULL){s_pMessenger = Messenger::instance(kGeometryMessage);}
-  Messenger::clearRoutingBits(kGeometryMessage);
+  if(s_pMessenger==NULL){
+    s_pMessenger = Messenger::instance(MessageType::kGeometryMessage);
+    MessageType::getTypeByCode(MessageType::kGeometryMessage)->setOstream(
+        new ofstream("GeometryMessageFile"));
+    //Messenger::setRoutingBits(MessageType::kGeometryMessage);
+  }
 
   switch(pDetector->getShape()->getShapeCode()){
   case kPlanar:  
@@ -157,21 +160,20 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   double dZoffset = intersection.z() - pPlacement->getZcenter();
 
   // find limits of various regions
-  double dInnerY = pShape->getHalfWidth() - EDGE_HALF_WIDTH;
-  double dOuterY = dInnerY + 2.*EDGE_HALF_WIDTH;
-  double dInnerZ = pShape->getHalfDepth() - EDGE_HALF_WIDTH;
-  double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
+  double dEdgeHalfWidth = (strstr(pDetector->getName().c_str(), "Tpc")==NULL) ?
+      SVG_EDGE_HALF_WIDTH : TPC_EDGE_HALF_WIDTH;
+  double dInnerY = pShape->getHalfWidth() - dEdgeHalfWidth;
+  double dOuterY = dInnerY + 2.*dEdgeHalfWidth;
+  double dInnerZ = pShape->getHalfDepth() - dEdgeHalfWidth;
+  double dOuterZ = dInnerZ + 2.*dEdgeHalfWidth;
 
-  *s_pMessenger << "innerY:" << dInnerY
+  *s_pMessenger << pDetector->getName() << ":" << endl
+                << "  innerY:" << dInnerY
                 << " outerY:" << dOuterY
                 << " innerZ:" << dInnerZ
-                << " outerZ:" << dOuterZ 
-                << " yOffset:" << dYoffset 
+                << " outerZ:" << dOuterZ << endl
+                << "  yOffset:" << dYoffset 
                 << " zOffset:" << dZoffset << endl;
-
-  *s_pMessenger << pDetector->getName() 
-                << " has intersection (" << dXlocal << ", " << dYoffset
-                << ", " << dZoffset << ") = ";
 
   StiIntersection iIntersection = kFailed;
 
@@ -195,7 +197,9 @@ double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
   }
 
   string name; nameForIntersection(iIntersection, name);
-  *s_pMessenger << name << endl;
+  *s_pMessenger << "  intersection (" << dXlocal << ", " << dYoffset
+                << ", " << dZoffset << ") = " << name << endl;
+
   return iIntersection;
 
 } // findPlanarIntersection
@@ -292,10 +296,12 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
   double dZoffset = intersection.z() - pPlacement->getZcenter();
 
   // find limits of various regions
-  double dInnerPhi = pShape->getOpeningAngle()/2. - EDGE_HALF_WIDTH/radius;
-  double dOuterPhi = dInnerPhi + 2.*EDGE_HALF_WIDTH/radius;
-  double dInnerZ = pShape->getHalfDepth() - EDGE_HALF_WIDTH;
-  double dOuterZ = dInnerZ + 2.*EDGE_HALF_WIDTH;
+  double dEdgeHalfWidth = (strstr(pDetector->getName().c_str(), "Tpc")==NULL) ?
+      SVG_EDGE_HALF_WIDTH : TPC_EDGE_HALF_WIDTH;
+  double dInnerPhi = pShape->getOpeningAngle()/2. - dEdgeHalfWidth/radius;
+  double dOuterPhi = dInnerPhi + 2.*dEdgeHalfWidth/radius;
+  double dInnerZ = pShape->getHalfDepth() - dEdgeHalfWidth;
+  double dOuterZ = dInnerZ + 2.*dEdgeHalfWidth;
   
   StiIntersection iIntersection = kFailed;
 

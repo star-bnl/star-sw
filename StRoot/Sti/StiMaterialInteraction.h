@@ -9,7 +9,8 @@
 #define STI_MATERIAL_INTERACTION_H
 
 // uncertainty along detector edges (in cm)
-#define EDGE_HALF_WIDTH 1.
+#define TPC_EDGE_HALF_WIDTH 2.0
+#define SVG_EDGE_HALF_WIDTH 0.5
 
 class StiKalmanTrackNode;
 class StThreeVectorD;

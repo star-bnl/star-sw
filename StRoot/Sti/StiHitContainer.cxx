@@ -72,7 +72,7 @@ void StiHitContainer::kill()
 }
 
 StiHitContainer::StiHitContainer()
-    : mMessenger(*(Messenger::instance(kHitMessage)))
+    : mMessenger(*(Messenger::instance(MessageType::kHitMessage)))
 {
     mMessenger <<"StiHitContainer::StiHitContainer()"<<endl;
     mminpoint = new StiHit();

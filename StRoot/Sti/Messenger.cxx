@@ -1,37 +1,18 @@
-#include <fstream.h>
-
 #include "Messenger.h"
 
+// statics
 messengerMap Messenger::s_messengerMap;
- 
-void Messenger::setMessageOstream(unsigned int routing, ostream *pNewStream){
-
-  // find index of routing code
-  if(routing==0){ return; }
-  int iMessageType = 0;
-  while( (routing /= 2) > 0 ){ iMessageType++; }
-
-  ostream *pOstream = g_apMessageOstreams[iMessageType];
-  if( pOstream!=&cout && pOstream!=&cerr ){
-    pOstream->flush();
-    ofstream *pOfstream = dynamic_cast<ofstream *>(pOstream);
-    if(pOfstream != NULL){ pOfstream->close(); }
-    delete pOstream;
-  }
-  g_apMessageOstreams[iMessageType] = pNewStream;
-
-} // setMessageOstream
+unsigned int Messenger::s_routing = 0;
 
 void Messenger::init(unsigned int routing){
 
   // default is that all routes are valid
   if(routing==0){
-    for(int iMessageType = 0; iMessageType<g_nMessageTypes; iMessageType++){
-      routing |= (1 << iMessageType);
-    }
+    s_routing = (1 << MessageType::getNtypes()) - 1;
+  }else{
+    s_routing = routing;
   }
 
-  MessengerBuf::setRoutingMask(routing);
 } // init
 
 void Messenger::kill(){
@@ -43,8 +24,9 @@ void Messenger::kill(){
   }
 
   // note: we should delete here any ofstreams we may have created on the heap
-  for(int iMessageType = 0; iMessageType<g_nMessageTypes; iMessageType++){
-    setMessageOstream(1 << iMessageType, NULL);
+  for(unsigned int iMessageType = 0; iMessageType<MessageType::getNtypes(); 
+      iMessageType++){
+    delete MessageType::getTypeByIndex(iMessageType);
   }
 } // kill
 

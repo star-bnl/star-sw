@@ -20,6 +20,7 @@ using std::copy;
 #include "StiDetector.h"
 #include "StiDetectorFinder.h"
 #include "StiCompositeSeedFinder.h"
+#include "MessageType.h"
 
 StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath);
 
@@ -121,7 +122,7 @@ StiTrackSeedFinder* gTrackSeedFinderBuilder(const string& buildPath)
 {
     StiTrackSeedFinder* sf=0;
 
-    Messenger& mMessenger = *(Messenger::instance(kSeedFinderMessage));
+    Messenger& mMessenger = *(Messenger::instance(MessageType::kSeedFinderMessage));
     
     mMessenger <<" gTrackSeedFinderBuilder().  Build from:\t"<<buildPath<<endl;
 

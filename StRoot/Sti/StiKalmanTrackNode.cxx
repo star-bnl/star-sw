@@ -29,7 +29,7 @@ double StiKalmanTrackNode::unitCharge = 1;
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
 { 
-	if (StiDebug::isReq(StiDebug::Flow)) *(Messenger::instance(kNodeMessage)) <<"StiKalmanTrackNode:reset() - Beginning" << endl;
+	if (StiDebug::isReq(StiDebug::Flow)) *(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode:reset() - Beginning" << endl;
 	
 	// Base class reset
   StiTrackNode::reset();
@@ -76,12 +76,12 @@ void StiKalmanTrackNode::set(int   depth,
 			     const double dEdx,
 			     const double chi2)
 {
-	if (StiDebug::isReq(StiDebug::Flow)) *(Messenger::instance(kNodeMessage)) <<"StiKalmanTrackNode:set(...) - Beginning" << endl;
+	if (StiDebug::isReq(StiDebug::Flow)) *(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode:set(...) - Beginning" << endl;
   StiTrackNode::set(depth, hit);
   fAlpha  = alpha;
   if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
   if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
-  *(Messenger::instance(kNodeMessage))  << "rotate() - fAlpha:" << fAlpha*180/3.1415927 << " degs" << endl;
+  *(Messenger::instance(MessageType::kNodeMessage))  << "rotate() - fAlpha:" << fAlpha*180/3.1415927 << " degs" << endl;
 
   fX      = xRef;
   fdEdx   = dEdx;
@@ -112,7 +112,7 @@ void StiKalmanTrackNode::set(int   depth,
 void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 {
 	if (StiDebug::isReq(StiDebug::Flow)) 
-		*(Messenger::instance(kNodeMessage)) <<"StiKalmanTrackNode:setState(const StiKalmanTrackNode * node) - Beginning" << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode:setState(const StiKalmanTrackNode * node) - Beginning" << endl;
 	fAlpha = node->fAlpha;
   if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
   if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
@@ -146,7 +146,7 @@ void StiKalmanTrackNode::setState(const StiKalmanTrackNode * node)
 void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
 {
 	if (StiDebug::isReq(StiDebug::Flow)) 
-		*(Messenger::instance(kNodeMessage)) <<"StiKalmanTrackNode:: setAsCopyOf(const StiKalmanTrackNode * node)- Beginning" << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode:: setAsCopyOf(const StiKalmanTrackNode * node)- Beginning" << endl;
 
   StiTrackNode::setAsCopyOf(node);
   fX    = node->fX;
@@ -237,8 +237,8 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   double ss = sinPhi*sinPhi;
   if (ss>1.)
     {
-      *(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::getMomentum - ERROR - sin(phi)^2 > 1" << endl;
-      *(Messenger::instance(kNodeMessage)) << " fP3/fx/fP2/sin(phi):" << fP3 << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
+      *(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::getMomentum - ERROR - sin(phi)^2 > 1" << endl;
+      *(Messenger::instance(MessageType::kNodeMessage)) << " fP3/fx/fP2/sin(phi):" << fP3 << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
       ss = 1.;
     }
   p[0] = pt*sqrt(1-ss);
@@ -250,7 +250,7 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   double sa = 1-ss;
   if (sa<0)
     {
-      *(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::getMomentum() - Error - sa<0 - Value was:" << sa << " - reset to sa=0." << endl;
+      *(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::getMomentum() - Error - sa<0 - Value was:" << sa << " - reset to sa=0." << endl;
       sa = 0.;
     }
 	double c = fP3;
@@ -415,12 +415,12 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 
 	/////////////////////
   double dAlpha = tAlpha - fAlpha;
-	*(Messenger::instance(kNodeMessage)) << " Propagate : tAlpha/fAlpha :"
+	*(Messenger::instance(MessageType::kNodeMessage)) << " Propagate : tAlpha/fAlpha :"
 			 << tAlpha*180./3.1415927 << " degs\t"
 			 << fAlpha*180./3.1415927 << " degs" << endl;
   if (fabs(dAlpha)>1e-4)   // perform rotation if needed
 		{
-			*(Messenger::instance(kNodeMessage)) << " requesting rotation by " << dAlpha*180./3.1415927 << "degs"<<endl;
+			*(Messenger::instance(MessageType::kNodeMessage)) << " requesting rotation by " << dAlpha*180./3.1415927 << "degs"<<endl;
 			rotate(dAlpha);
 		}
   double x, x0, rho, pathLength;
@@ -444,7 +444,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 		dedx = -2; // signals absence of hit - node has no hit and is not
 	// a measurement
   if (StiDebug::isReq(StiDebug::Node))
-		*(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::propagate(...)\tx/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
   return position;
 }
@@ -459,7 +459,7 @@ void  StiKalmanTrackNode::propagate(double xk,
   double c1sq = c1*c1; 
   if (c1sq>1.) 
       {
-	  *(Messenger::instance(kNodeMessage)) << "c1sq:" << c1sq << endl;
+	  *(Messenger::instance(MessageType::kNodeMessage)) << "c1sq:" << c1sq << endl;
 	  c1sq = 0.99999999;
       }
   double r1=sqrt(1.- c1sq );
@@ -467,7 +467,7 @@ void  StiKalmanTrackNode::propagate(double xk,
   double c2sq = c2*c2; 
   if (c2sq>1.) 
       {
-				*(Messenger::instance(kNodeMessage)) << "c2sq:" << c2sq << endl;
+				*(Messenger::instance(MessageType::kNodeMessage)) << "c2sq:" << c2sq << endl;
 				c2sq = 0.99999999;
       }
   double r2=sqrt(1.- c2sq );
@@ -475,7 +475,7 @@ void  StiKalmanTrackNode::propagate(double xk,
 	double dddd = c1*r2 + c2*r1;
 	if (fabs(dddd)<1e-20)
 		{
-			*(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::propagate() - dddd==0  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+			*(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::propagate() - dddd==0  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
 			dddd = 1e-20;
 		}
   fP1 = fP1 + dx*(c1+c2)/(dddd)*fP4; 
@@ -566,11 +566,11 @@ StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
   //-----------------------------------------------------------------
 	// Update Measurement Error Matrix, calculate its determinant
 	if (isnan(fC00))
-		*(Messenger::instance(kNodeMessage)) << "SKTN::evaluateChi2() fC00 NaN " << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "SKTN::evaluateChi2() fC00 NaN " << endl;
 	if (isnan(fC10))
-		*(Messenger::instance(kNodeMessage)) << "SKTN::evaluateChi2() fC10 NaN " << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "SKTN::evaluateChi2() fC10 NaN " << endl;
 	if (isnan(fC11))
-		*(Messenger::instance(kNodeMessage)) << "SKTN::evaluateChi2() fC11 NaN " << endl;
+		*(Messenger::instance(MessageType::kNodeMessage)) << "SKTN::evaluateChi2() fC11 NaN " << endl;
 
 	double r00=hit->syy()+fC00;
   double r01=hit->syz()+fC10;
@@ -578,8 +578,8 @@ StiKalmanTrackNode::evaluateChi2() 	//throw ( Exception)
   double det=r00*r11 - r01*r01;
   if (fabs(det)< 1.e-20)
 		{
-			*(Messenger::instance(kNodeMessage)) <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
-      *(Messenger::instance(kNodeMessage)) <<"det test failed line 535.  return 0."<<endl;
+			*(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode::evaluateChi2(). ERROR:\t";
+      *(Messenger::instance(MessageType::kNodeMessage)) <<"det test failed line 535.  return 0."<<endl;
       //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
       return 0.;
 		}
@@ -600,8 +600,8 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
   //__________________________________________________________________
 	// Update Measurement Error Matrix, calculate its determinant
     if (hit==0)		{
-	*(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
-	*(Messenger::instance(kNodeMessage)) <<" - Null HIT, line 558.  return" << endl;
+	*(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+	*(Messenger::instance(MessageType::kNodeMessage)) <<" - Null HIT, line 558.  return" << endl;
 	return;
 	//throw new Exception(" KalmanTrack warning: Singular matrix !\n");
     }
@@ -611,8 +611,8 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
     double det=r00*r11 - r01*r01;
     if (det< 1.e-10 && det>-1.e-10) 
       {
-	  *(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
-	  *(Messenger::instance(kNodeMessage)) <<" - Singular matrix line 568. return" << endl;
+	  *(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+	  *(Messenger::instance(MessageType::kNodeMessage)) <<" - Singular matrix line 568. return" << endl;
 	  //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
 	  return;
       }
@@ -631,8 +631,8 @@ void StiKalmanTrackNode::updateNode() //throw (Exception)
   double eta = fP2 + k20*dy + k21*dz;
   double ddd = cur*fX-eta;
   if (ddd >= 0.99999 || ddd<-0.99999) 		{
-      *(Messenger::instance(kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
-      *(Messenger::instance(kNodeMessage)) <<" - extrapolation failed line 588. return"<< endl;
+      *(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::updateNode(). ERROR:\t";
+      *(Messenger::instance(MessageType::kNodeMessage)) <<" - extrapolation failed line 588. return"<< endl;
       //throw new Exception("StiKalmanTrackNode - Warning - Filtering failed !\n");
       return;
   }
@@ -675,7 +675,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   fAlpha += alpha;
   if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
   if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
-  *(Messenger::instance(kNodeMessage))  << "rotate() - new fAlpha:" << alpha*180/3.1415927 << " degs" << endl;
+  *(Messenger::instance(MessageType::kNodeMessage))  << "rotate() - new fAlpha:" << alpha*180/3.1415927 << " degs" << endl;
   double x1=fX;
   double y1=fP0;
   double ca=cos(alpha);
@@ -693,8 +693,8 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   if (r2<=-1) r2 = -0.99999;
   double y0=fP0 + sqrt(1.- r2*r2)/fP3;
   if ((fP0-y0)*fP3 >= 0.)     {
-      *(Messenger::instance(kNodeMessage)) <<"StiKalmanTrackNode::rotate(double). ERROR:\t";
-      *(Messenger::instance(kNodeMessage)) <<"Rotation failed, line 650. return"<<endl;
+      *(Messenger::instance(MessageType::kNodeMessage)) <<"StiKalmanTrackNode::rotate(double). ERROR:\t";
+      *(Messenger::instance(MessageType::kNodeMessage)) <<"Rotation failed, line 650. return"<<endl;
       //throw new Exception(" StiKalmanTrackNode - Warning: Rotation failed - case 2 !\n");
       return;
     }

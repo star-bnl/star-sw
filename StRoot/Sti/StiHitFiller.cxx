@@ -27,7 +27,7 @@
 
 ostream& operator<<(ostream&, const StiDetector&);
 
-StiHitFiller::StiHitFiller() : mMessenger(*(Messenger::instance(kHitMessage))),
+StiHitFiller::StiHitFiller() : mMessenger(*(Messenger::instance(MessageType::kHitMessage))),
 			       mtranslator(StiGeometryTransform::instance())
 {
     mMessenger <<"\nStiHitFiller::StiHitFiller()\n"<<endl;

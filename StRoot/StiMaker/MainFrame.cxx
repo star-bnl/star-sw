@@ -1104,18 +1104,13 @@ TestMsgBox::TestMsgBox(const TGWindow *p, const TGWindow *main,
     fL4 = new TGLayoutHints(kLHintsTop | kLHintsLeft,
 			    0, 0, 5, 0);
 
-    fC.push_back( MessengerPair( kHitMessage,
-				 new TGCheckButton(fG1, new TGHotString("kHitMessage"), -1) ));
-    fC.push_back( MessengerPair( kTrackMessage,
-				 new TGCheckButton(fG1, new TGHotString("kTrackMessage"), -1) ));
-    fC.push_back( MessengerPair( kNodeMessage,
-				 new TGCheckButton(fG1, new TGHotString("kNodeMessage"), -1) ));
-    fC.push_back( MessengerPair( kDetectorMessage,
-				 new TGCheckButton(fG1, new TGHotString("kDetectorMessage"), -1) ));
-    fC.push_back( MessengerPair( kGeometryMessage,
-				 new TGCheckButton(fG1, new TGHotString("kGeometryMessage"), -1) ));
-    fC.push_back( MessengerPair( kSeedFinderMessage,
-				 new TGCheckButton(fG1, new TGHotString("kSeedFinderMessage"), -1) ));
+    for(unsigned int iMessageType=0; iMessageType<MessageType::getNtypes();
+        iMessageType++){
+      MessageType *pType = MessageType::getTypeByIndex(iMessageType);
+
+      fC.push_back( MessengerPair( pType->getCode(),
+                                   new TGCheckButton(fG1, new TGHotString(pType->getName().c_str()), -1) ));
+    }
 
     for (unsigned int i=0; i<fC.size(); ++i) {
 	//cout <<"Adding Frame: "<<i<<endl;

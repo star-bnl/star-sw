@@ -5,6 +5,7 @@
 #include <math.h>
 #include <iostream>
 #include "Messenger.h"
+#include "MessageType.h"
 #include "StFastLineFitter.h"
 
 using std::cout;
@@ -12,12 +13,12 @@ using std::endl;
 
 StFastLineFitter::StFastLineFitter()
 {
-    *(Messenger::instance(kSeedFinderMessage)) <<"StFastLineFitter::StFastLineFitter()"<<endl;
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<"StFastLineFitter::StFastLineFitter()"<<endl;
 }
 
 StFastLineFitter::~StFastLineFitter()
 {
-    *(Messenger::instance(kSeedFinderMessage)) <<"StFastLineFitter::~StFastLineFitter()"<<endl;
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<"StFastLineFitter::~StFastLineFitter()"<<endl;
 }
 
 void StFastLineFitter::clear()
@@ -32,14 +33,14 @@ void StFastLineFitter::clear()
 
 void StFastLineFitter::print() const
 {
-    *(Messenger::instance(kSeedFinderMessage)) <<"\nStFastLineFitter::print()-------------------"<<endl;
-    *(Messenger::instance(kSeedFinderMessage)) <<"slope\tintercept\tchi2\tsigmaA\tsigmaB\tsize"<<endl;
-    *(Messenger::instance(kSeedFinderMessage)) <<slope()<<"\t"<<intercept()<<"\t"<<chiSquared()<<"\t";
-    *(Messenger::instance(kSeedFinderMessage)) <<sigmaA()<<"\t";
-    *(Messenger::instance(kSeedFinderMessage)) <<sigmaB()<<"\t"<<numberOfPoints()<<endl;
-    *(Messenger::instance(kSeedFinderMessage)) <<"Point Collection------------------"<<endl;
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<"\nStFastLineFitter::print()-------------------"<<endl;
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<"slope\tintercept\tchi2\tsigmaA\tsigmaB\tsize"<<endl;
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<slope()<<"\t"<<intercept()<<"\t"<<chiSquared()<<"\t";
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<sigmaA()<<"\t";
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<sigmaB()<<"\t"<<numberOfPoints()<<endl;
+    *(Messenger::instance(MessageType::kSeedFinderMessage)) <<"Point Collection------------------"<<endl;
     for (int i=0; i<numberOfPoints(); ++i) {
-	*(Messenger::instance(kSeedFinderMessage)) <<mx[i]<<"\t"<<my[i]<<"\t"<<mw[i]<<endl;
+	*(Messenger::instance(MessageType::kSeedFinderMessage)) <<mx[i]<<"\t"<<my[i]<<"\t"<<mw[i]<<endl;
     }
     return;
 }
