@@ -1,0 +1,50 @@
+* 10/9/98 K. Turner
+* - this kumac reads in an ntuple with the event_summary table made from dst
+*   with i.d. 111 and makes plots
+* - input the ntuple file name!
+******************************************************************
+macro run ntuple_file
+
+* trace on
+
+message ' input ntuple is ==> ' [ntuple_file]
+ 
+* --- open ntuple----------------------------------------------------
+hi/file 21 [ntuple_file]
+ 
+   
+* --- Book Histograms----------------------------------------------------
+ 1dhist 101 'Num Global Tracks total'   100 0. 5000.
+ 1dhist 102 'Num Global Tracks good '   100 0. 5000.
+ 1dhist 103 'Num Global Tracks primary' 100 0. 5000.
+ 
+
+* --- Fill Histograms ---------------------------------------------------- 
+ nt/proj 101 111.glb_trk_tot
+ nt/proj 102 111.glb_trk_good
+ nt/proj 103 111.glb_trk_prim
+ 
+ 
+* or use nt/plot 
+ 
+* --- Write out histograms to ps file -------------------------------------
+ for/file 40 analyse_event_summary.ps
+ meta 40 -111
+ title_global [ntuple_file]
+ opt htit
+ opt stat
+ set stat 111100
+ opt date
+  zone 2 2
+  opt logy
+    hi/pl 101
+    hi/pl 102
+    hi/pl 103
+ close 40
+ 
+* trace off
+
+return
+
+
+
