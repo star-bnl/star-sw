@@ -213,13 +213,13 @@ Int_t StiMaker::Init()
     //The Evalualbe Track Factory
     if (mUseGui==true) {
 	mtrackfactory =
-	    new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory");
+	    new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
     }
     else {
 	mtrackfactory =
 	    new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
     }
-    mtrackfactory->setIncrementalSize(1000);
+    mtrackfactory->setIncrementalSize(50);
     mtrackfactory->setMaxIncrementCount(10);
 
     //The Track node factory
