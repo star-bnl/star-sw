@@ -1,6 +1,9 @@
 /*********************************************************
-* $Id: readlink.c,v 1.2 2004/06/26 00:16:28 potekhin Exp $
+* $Id: readlink.c,v 1.3 2004/09/18 01:38:49 jeromel Exp $
 * $Log: readlink.c,v $
+* Revision 1.3  2004/09/18 01:38:49  jeromel
+* Removed implict dec
+*
 * Revision 1.2  2004/06/26 00:16:28  potekhin
 * Added size_t to the variable La in strncat
 *
@@ -18,6 +21,7 @@
 *
 *********************************************************/
 #include <unistd.h>
+#include <string.h>
 int readlink_(char* a, char *b, int La, int Lb)
 {
    char path[256];
