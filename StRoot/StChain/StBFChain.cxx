@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.3 1999/08/04 16:28:59 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.4 1999/08/05 17:10:27 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.4  1999/08/05 17:10:27  fisyak
+// Change strstr to ==
+//
 // Revision 1.3  1999/08/04 16:28:59  fisyak
 // remove ambiguity between XI and XIN
 //
@@ -34,7 +37,7 @@ enum EChainOptions {
   kFIRST   ,
   kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,          // time stamps
   kES99    ,kER99    ,kY1d     ,kY1e     ,kY2a     ,
-  kEval    ,kOFF     ,kIN      ,kXOUT    ,kGSTAR   ,          // Chains, options
+  kEval    ,kOFF     ,kXIN     ,kXOUT    ,kGSTAR   ,          // Chains, options
   kTDAQ    ,kFZIN    ,kGEANT   ,
   kFieldOn ,kFieldOff,kHalfField,                             // Magnetic Field
   kTPC     ,kTSS     ,kTRS     ,kMINIDAQ ,kTFS     ,kTCL     ,kTPT     ,// TPC
@@ -53,7 +56,7 @@ Char_t  *ChainOptions[] = {
   "FIRST"
  ,"SD97"   ,"SD98"   ,"Y1a"    ,"Y1b"    ,"Y1c"
  ,"ES99"   ,"ER99"   ,"Y1d"    ,"Y1e"    ,"Y2a"
- ,"Eval"   ,"OFF"    ,"IN"     ,"XOUT"   ,"GSTAR"
+ ,"Eval"   ,"OFF"    ,"XIN"    ,"XOUT"   ,"GSTAR"
  ,"TDAQ"   ,"FZIN"   ,"GEANT"
  ,"FieldOn","FieldOff","HalfField"
  ,"TPC"    ,"TSS"    ,"TRS"    ,"MINIDAQ","TFS"    ,"TCL"    ,"TPT"
@@ -177,27 +180,22 @@ void StBFChain::SetFlags(const Char_t *Chain )
   TString Tag, opt, nopt;
   while ( (begin < tChain.Length()) && (index != kNPOS) ) { // loop over given Chain options 
     index = tChain.Index(separator,&end,begin);
-    if (index >= 0) {
-      Tag = tChain(index,end);
-    }
+    if (index >= 0) Tag = tChain(index,end);
     begin += end+1;
-    for (k = kFIRST+1; k<NoChainOptions; k++) {
-      opt = TString(ChainOptions[k]);
-      opt.ToLower();
-      if (!strstr(Tag.Data(),opt.Data())) continue;
-      kgo = k;
-      nopt = TString("-");
-      nopt += opt;
-      if (strstr(Tag.Data(),nopt.Data())) kgo = -k;
-      if (k <= 0 || k >  NoChainOptions) 
-	{printf ("Option %s unrecognized\n",ChainOptions[k]);}
-      if (kgo<0) SetOption(-k);
-      else       SetOption(k);
+    if (index >=0) {
+      for (k = kFIRST+1; k<NoChainOptions; k++) {
+	opt = TString(ChainOptions[k]);
+	opt.ToLower();
+	nopt = TString("-");
+	nopt += opt;
+	if       (Tag ==  opt) SetOption(k);
+	else {if (Tag == nopt) SetOption(-k);}
+      }
     }
   }
   // Check flags consistency   
   if (!ChainFlags[kFZIN] && !ChainFlags[kGEANT] &&
-      !ChainFlags[kIN] && !ChainFlags[kGSTAR] &&!ChainFlags[kTDAQ]) {
+      !ChainFlags[kXIN] && !ChainFlags[kGSTAR] &&!ChainFlags[kTDAQ]) {
     SetOption(kFZIN);
     SetOption(kGEANT);
   }
@@ -233,7 +231,7 @@ Int_t StBFChain::Load()
   if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField])
        gSystem->Load("StMagF");
   else gSystem->Load("geometry");
-  if (ChainFlags[kIN]) gSystem->Load("StIOMaker");
+  if (ChainFlags[kXIN]) gSystem->Load("StIOMaker");
   if (ChainFlags[kGEANT])  {
     gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
@@ -331,7 +329,7 @@ Int_t StBFChain::Load()
   if (ChainFlags[kFieldOff]) field   = new StMagFC("field","STAR no field",0.00002);
   if (ChainFlags[kFieldOn])  field   = new StMagFC("field","STAR Normal field",1.);
   if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Half field",0.5);
-  if (ChainFlags[kIN]) {
+  if (ChainFlags[kXIN]) {
     StIOMaker *inpMk = new StIOMaker("inputStream","r",InFile->Data());
     if (inpMk && ChainFlags[kDEBUG]) inpMk->SetDebug();
     SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
@@ -590,7 +588,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       else { 
 	if (!ChainFlags[kGSTAR]) {
 	  Infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
-	  printf ("Use default input file %s for %s \n",Infile,ChainOptions[kIN]);
+	  printf ("Use default input file %s for %s \n",Infile,ChainOptions[kXIN]);
 	}
       }
     }
@@ -697,7 +695,7 @@ void StBFChain::SetOption(int k){// set all OFF
     break;
   case kMINIDAQ:
     if (!ChainFlags[kDEFAULT]) {
-      SetOption(kIN);
+      SetOption(kXIN);
       SetOption(kFieldOff);
       SetOption(kSD97);
       SetOption(kEval);
@@ -705,7 +703,7 @@ void StBFChain::SetOption(int k){// set all OFF
     break;
   case kTDAQ:
     SetOption(kER99);
-    SetOption(kIN);
+    SetOption(kXIN);
     break;
   case  kY1b:
     if (!ChainFlags[kDEFAULT]) {
