@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTPCTrack.hh,v 1.1 2000/12/07 11:14:27 lmartin Exp $
+ * $Id: StEstTPCTrack.hh,v 1.2 2001/01/25 18:17:56 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,21 +10,21 @@
  ***************************************************************************
  *
  * $Log: StEstTPCTrack.hh,v $
+ * Revision 1.2  2001/01/25 18:17:56  lmartin
+ * Delete of mR and mdR arrays added to the destructor.
+ *
  * Revision 1.1  2000/12/07 11:14:27  lmartin
  * First CVS commit
  *
  **************************************************************************/
 #ifndef StEstTPCTrack_hh
 #define StEstTPCTrack_hh
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
-
 #include "StThreeVector.hh"
 #include "StHelix.hh"
 #include "StThreeVectorD.hh"
 
-class StEstMaker;
+class StEstTracker;
 
 class StEstTPCTrack {
   
@@ -44,7 +44,6 @@ protected:
   long int mNHits;
   long int mMaxHits;
   long int *mHitIndex;
-  long int *mHitTrack;
   int mType; // type of track (1=primary, 2 = secondary)
   int    mFlag;
   int    mFlagSP;                 // flag for SuperPasses
@@ -99,7 +98,6 @@ public:
       cerr << "ERROR!!! StEstTPCTrack::StEstTPCTrack mHitId=NULL"<<endl;
     mHitIndex = new long int[mMaxHits];
     mHitFlag = new int[mMaxHits];
-    mHitTrack = new long int[mMaxHits];
     mHelix    = hel;
     mPt       = pt;
     mId       = id;
@@ -112,12 +110,18 @@ public:
   };  
   
   ~StEstTPCTrack() {
+    long i;
+    for (i=0;i<mMaxHits;i++) {
+      delete mR[i];
+      delete mdR[i];
+    }
     delete [] mR;
     delete [] mdR;
     delete [] mHitId;
     delete [] mHitIndex;
     delete [] mHitFlag;
     delete [] row;
+    if (mHelix!=NULL) delete mHelix;
   };
   
   void SetR(double rr) { mr = rr;};
@@ -127,16 +131,17 @@ public:
   void SetFlagSP(int fl) {mFlagSP = fl;};
   int GetFlagSP() {return mFlagSP;};
 
-  int AddHit(long int id, StThreeVectorD *x, StThreeVectorD *dx, int nrow,int flag,long track) {
+  int AddHit(long int id, StThreeVectorD *x, StThreeVectorD *dx, int nrow,int flag) {
     if(mNHits>=mMaxHits) 
       return 0;
     mHitId[mNHits] = id;
     mHitIndex[mNHits]=mNHits;
+    if (mR[mNHits]!=NULL) delete mR[mNHits];
     mR[mNHits] =x; 
+    if (mdR[mNHits]!=NULL) delete mdR[mNHits];
     mdR[mNHits]=dx;
     row[mNHits]=nrow;
     mHitFlag[mNHits]=flag;
-    mHitTrack[mNHits]=track;
     mNHits++;
     return 1;
   };
@@ -172,12 +177,11 @@ public:
   long int GetVid() {return mVid;};
   void SetVid(long int vid) {mVid = vid;};
 
-  friend class StEstMaker;
+  friend class StEstTracker;
 
 };
 
 #endif
-
 
 
 
