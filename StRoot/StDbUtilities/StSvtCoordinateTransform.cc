@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.26 2004/07/29 01:38:06 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.27 2004/07/29 16:48:33 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -690,15 +690,17 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	  vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
 	    mDeltaDriftVelocity;
 	  td = 3.0*10e5 / vd;  // time for longest drift (3 cm)
-	  if (x<=80)
+	  if (a.anode()<=80)
 	    anode=1;  // anode 40 fit
-	  else if (x>80 && x<=160)
+	  else if (a.anode()>80 && a.anode()<=160)
 	    anode=2;  // anode 120 fit
-	  else if (x>160)
+	  else if (a.anode()>160)
 	    anode=3;  // anode 200 fit
 	  else
 	    gMessMgr->Warning() << "Error: non-sensical anode number: " << x << endm;
 	
+// 	  cout << "Working on anode: " << a.anode() << endl;
+
 	  for(Int_t j=1; j<=10; j++)
 	    {
 	      mPoly9->SetParameter(j-1,((StSvtHybridDriftCurve*)mDriftCurve->at(index))->getParameter(anode,j));
@@ -740,6 +742,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   return distance;
   
 }
+
 //_____________________________________________________________________________
 
 double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a, double x){
