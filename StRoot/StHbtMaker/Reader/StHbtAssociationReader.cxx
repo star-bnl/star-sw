@@ -80,8 +80,6 @@
   using namespace units;
 #endif
 
-#define __2POWER16__ 65536
-
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
@@ -246,10 +244,8 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   hbtEvent->SetZdcAdcWest(0.);
   hbtEvent->SetNumberOfTpcHits(0.);
   hbtEvent->SetNumberOfTracks(rMult);
-  hbtEvent->SetReactionPlane(0.,0);
-  hbtEvent->SetReactionPlane(0.,1);
-  hbtEvent->SetReactionPlaneSubEventDifference(0.,0);
-  hbtEvent->SetReactionPlaneSubEventDifference(0.,1);
+  hbtEvent->SetReactionPlane(0.);
+  hbtEvent->SetReactionPlaneSubEventDifference(0.);
   hbtEvent->SetPrimVertPos(rVertexPosition); 
 
   // By now, all event-wise information has been extracted and stored in hbtEvent
@@ -374,7 +370,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     
     //cout << "StHbtTrack instantiated " << endl;
     
-    hbtTrack->SetTrackId(rTrack->key()+motherTrackId*__2POWER16__);
+    hbtTrack->SetTrackId(rTrack->key()+motherTrackId*pow(2,16));
 
     hbtTrack->SetNHits(nhits);
     

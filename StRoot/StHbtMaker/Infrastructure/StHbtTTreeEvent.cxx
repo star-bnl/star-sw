@@ -2,14 +2,18 @@
 #include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h"
 #include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h"
 #include "StHbtMaker/Infrastructure/StHbtTTreeV0.h"
+#include "StHbtMaker/Infrastructure/StHbtTTreeXi.h"
 #include "StHbtMaker/Infrastructure/StHbtTTreeKink.h"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtXiCut.h"
 #include "StHbtMaker/Base/StHbtKinkCut.h"
 
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StHbtMaker/Infrastructure/StHbtXiCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtKinkCollection.hh"
 
 #include "StExceptions.hh"
 #include "StarClassLibrary/SystemOfUnits.h"
@@ -19,6 +23,7 @@ ClassImp(StHbtTTreeEvent)
 int StHbtTTreeEvent::mDebug = 0;
 TClonesArray *StHbtTTreeEvent::fgTracks = 0;
 TClonesArray *StHbtTTreeEvent::fgV0s = 0;
+TClonesArray *StHbtTTreeEvent::fgXis = 0;
 TClonesArray *StHbtTTreeEvent::fgKinks = 0;
 
 //-----------------------------------------------------------------------
@@ -35,9 +40,11 @@ StHbtTTreeEvent::~StHbtTTreeEvent(){
   if (mDebug) cout << "StHbtTTreeEvent::~StHbtTTreeEvent()" << endl;
   fgTracks->Clear("");
   fgV0s->Clear("");
+  fgXis->Clear("");
   fgKinks->Clear("");
   mNtracks=0;
   mNv0s=0;
+  mNxis=0;
   mNkinks=0;
 }
 //-----------------------------------------------------------------------
@@ -59,6 +66,13 @@ void StHbtTTreeEvent::initClonesArrays(){
     mNv0s=0;
   }
   fV0s = fgV0s;
+  /* *** array to hold Xis *** */
+  if (!fgXis) {
+    if (mDebug) cout << "StHbtTTreeEvent::initClonesArrays() create fgXis" << endl;
+    fgXis = new TClonesArray("StHbtTTreeXi", 4000);
+    mNxis=0;
+  }
+  fXis = fgXis;
   /* *** array to hold Kinks *** */
   if (!fgKinks) {
     if (mDebug) cout << "StHbtTTreeEvent::initClonesArrays() create fgKinks" << endl;
@@ -72,7 +86,7 @@ void StHbtTTreeEvent::initClonesArrays(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-StHbtTTreeEvent::StHbtTTreeEvent(const StHbtEvent* event, StHbtTrackCut* trackCut, StHbtV0Cut* v0Cut, StHbtKinkCut* kinkCut){
+StHbtTTreeEvent::StHbtTTreeEvent(const StHbtEvent* event, StHbtTrackCut* trackCut, StHbtV0Cut* v0Cut, StHbtXiCut* xiCut, StHbtKinkCut* kinkCut){
   try {
     initClonesArrays();
     fillEventInfo(event);
@@ -91,6 +105,11 @@ StHbtTTreeEvent::StHbtTTreeEvent(const StHbtEvent* event, StHbtTrackCut* trackCu
   for (StHbtV0Iterator iter=event->V0Collection()->begin(); iter != event->V0Collection()->end(); iter++){
     if (!v0Cut || v0Cut->Pass(*iter)) addV0(event,*iter);
   }
+  // loop over xis
+  if (mDebug) cout << "StHbtTTreeEvent::StHbtTTreeEvent(...) - now fill " << event->XiCollection()->size() << " xis" << endl;
+  for (StHbtXiIterator iter=event->XiCollection()->begin(); iter != event->XiCollection()->end(); iter++){
+    if (!xiCut || xiCut->Pass(*iter)) addXi(event,*iter);
+  }
   // loop over kinks
   if (mDebug) cout << "StHbtTTreeEvent::StHbtTTreeEvent(...) - now fill " << event->KinkCollection()->size() << " kinks" << endl;
   for (StHbtKinkIterator iter=event->KinkCollection()->begin(); iter != event->KinkCollection()->end(); iter++){
@@ -100,7 +119,7 @@ StHbtTTreeEvent::StHbtTTreeEvent(const StHbtEvent* event, StHbtTrackCut* trackCu
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StHbtTTreeEvent::fill(const StHbtEvent* event, StHbtTrackCut* trackCut, StHbtV0Cut* v0Cut, StHbtKinkCut* kinkCut){
+void StHbtTTreeEvent::fill(const StHbtEvent* event, StHbtTrackCut* trackCut, StHbtV0Cut* v0Cut, StHbtXiCut* xiCut, StHbtKinkCut* kinkCut){
   clear();
   try {
     fillEventInfo(event);
@@ -117,6 +136,11 @@ void StHbtTTreeEvent::fill(const StHbtEvent* event, StHbtTrackCut* trackCut, StH
   if (mDebug) cout << "StHbtTTreeEvent::StHbtTTreeEvent(...) - now fill " << event->V0Collection()->size() << " v0s" << endl;
   for (StHbtV0Iterator iter=event->V0Collection()->begin(); iter != event->V0Collection()->end(); iter++){
     if (!v0Cut || v0Cut->Pass(*iter)) addV0(event,*iter);
+  }
+  // loop over xis
+  if (mDebug) cout << "StHbtTTreeEvent::StHbtTTreeEvent(...) - now fill " << event->XiCollection()->size() << " xis" << endl;
+  for (StHbtXiIterator iter=event->XiCollection()->begin(); iter != event->XiCollection()->end(); iter++){
+    if (!xiCut || xiCut->Pass(*iter)) addXi(event,*iter);
   }
   // loop over kinks
   if (mDebug) cout << "StHbtTTreeEvent::StHbtTTreeEvent(...) - now fill " << event->KinkCollection()->size() << " kinks" << endl;
@@ -140,8 +164,6 @@ void StHbtTTreeEvent::fillEventInfo(const StHbtEvent* event){
   mUncorrectedNumberOfNegativePrimaries = event->mUncorrectedNumberOfNegativePrimaries;
   mReactionPlane[0] = event->mReactionPlane[0];              
   mReactionPlane[1] = event->mReactionPlane[1];              
-  mReactionPlanePtWgt[0] = event->mReactionPlanePtWgt[0];              
-  mReactionPlanePtWgt[1] = event->mReactionPlanePtWgt[1];              
   mVertexX = event->mPrimVertPos.x();
   mVertexY = event->mPrimVertPos.y();
   mVertexZ = event->mPrimVertPos.z();
@@ -159,14 +181,17 @@ void StHbtTTreeEvent::clear(){
   if (mDebug) cout << "StHbtTTreeEvent::clear(...)" << endl;
 //  for (unsigned short i=0; i<mNtracks; i++) delete (StHbtTTreeTrack*)fTracks->UncheckedAt(i);
 //  for (unsigned short i=0; i<mNv0s; i++) delete (StHbtTTreeV0*)fV0s->UncheckedAt(i);
+//  for (unsigned short i=0; i<mNxis; i++) delete (StHbtTTreeXi*)fXis->UncheckedAt(i);
 //  for (unsigned short i=0; i<mNkinks; i++) delete (StHbtTTreeKink*)fKinks->UncheckedAt(i);
 
   fTracks->Clear();
   fV0s->Clear();
+  fXis->Clear();
   fKinks->Clear();
 
   mNtracks=0;
   mNv0s=0;
+  mNxis=0;
   mNkinks=0;
 }
 //---------------------------------------------------------------------
@@ -190,6 +215,19 @@ void StHbtTTreeEvent::addV0(const StHbtEvent* event, const StHbtV0* v0) {
   TClonesArray &v0s = *fV0s;
   try {
     new(v0s[mNv0s++]) StHbtTTreeV0(event, v0);
+  }
+  catch (StException e) {
+    e.print();
+  }
+}
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+//---------------------------------------------------------------------
+void StHbtTTreeEvent::addXi(const StHbtEvent* event, const StHbtXi* xi) {
+  if (mDebug>1) cout << "StHbtTTreeEvent::addXi(...) " << endl;
+  TClonesArray &xis = *fXis;
+  try {
+    new(xis[mNxis++]) StHbtTTreeXi(event, xi);
   }
   catch (StException e) {
     e.print();

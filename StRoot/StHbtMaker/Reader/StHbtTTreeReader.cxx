@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeReader.cxx,v 1.1 2001/06/21 19:18:42 laue Exp $
+ * $Id: StHbtTTreeReader.cxx,v 1.2 2001/09/05 20:42:18 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -25,19 +25,17 @@
 #include "StHbtMaker/Infrastructure/StExceptions.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StHbtMaker/Infrastructure/StHbtXiCollection.hh"
 #include "StHbtMaker/Reader/StHbtGstarTxtReader.h"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtXiCut.h"
 #include "StHbtMaker/Base/StHbtKinkCut.h"
-// #include "StHbtMaker/Base/StHbtKinkCut.h"
-// #include "StHbtMaker/Base/StHbtEventCut.h"
-// #include "StHbtMaker/Base/StHbtTrackCut.h"
-// #include "StHbtMaker/Base/StHbtV0Cut.h"
-// #include "StHbtMaker/Base/StHbtKinkCut.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"  
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
+#include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 
 #include "StFlowTagMaker/StFlowTagMaker.h"
@@ -78,6 +76,7 @@ StHbtTTreeReader::~StHbtTTreeReader(){
   if (mEventCut) delete mEventCut;
   if (mTrackCut) delete mTrackCut;
   if (mV0Cut) delete mV0Cut;
+  if (mXiCut) delete mXiCut;
   if (mKinkCut) delete mKinkCut;
 
 
@@ -105,6 +104,13 @@ StHbtString StHbtTTreeReader::Report(){
   temp += "\n---> V0Cuts in Reader: ";
   if (mV0Cut) {
     temp += mV0Cut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> XiCuts in Reader: ";
+  if (mXiCut) {
+    temp += mXiCut->Report();
   }
   else {
     temp += "NONE";
@@ -203,7 +209,7 @@ StHbtEvent* StHbtTTreeReader::write(StHbtEvent* event){
   if (mEventCut->Pass(event)) {
     try{
       mHbtTTreeEvent->clear();
-      mHbtTTreeEvent->fill(event, mTrackCut, mV0Cut, mKinkCut);
+      mHbtTTreeEvent->fill(event, mTrackCut, mV0Cut, mXiCut, mKinkCut);
       if (mDebug) cout << "StHbtTTreeReader::write() - now fill the tree " << endl;
       mTTree->Fill();
     }
@@ -224,7 +230,7 @@ int StHbtTTreeReader::initWrite(string ioMakerFileName, string extention){
     string::size_type pos =  fileName.find("/");
     fileName.erase(0, pos+1 );
   }
-  fileName = fileName + extention;
+  fileName = mDir +fileName + extention;
   if (mDebug) cout << "StHbtTTreeReader::initWrite(...) - new fileName: " << fileName.c_str() << endl; 
   // creat a Picoevent and and output file
   if (mDebug) cout << "StHbtTTreeReader::initWrite(...) - now create file " << endl; 
@@ -273,6 +279,7 @@ StHbtEvent* StHbtTTreeReader::read(){
   }
  
   unsigned int nEvents = (unsigned int)mTChain->GetEntries();
+  if (!nEvents) throw StException("StHbtTTreeReader::read() - no events to read ");
   mHbtTTreeEvent->clear();
   int iBytes= mTChain->GetEntry(mEventIndex++);
   if (mDebug) cout << "StHbtTTreeReader::read() - bytes read :" << iBytes << endl;
@@ -337,6 +344,9 @@ int StHbtTTreeReader::fillChain(TChain* chain, const char* dir, const char* filt
 /***************************************************************************
  *
  * $Log: StHbtTTreeReader.cxx,v $
+ * Revision 1.2  2001/09/05 20:42:18  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:18:42  laue
  * Modified Files: (to match the changed base classes)
  * 	StHbtAsciiReader.cxx StHbtAsciiReader.h

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtClassImp.cxx,v 1.3 2001/06/01 16:30:26 laue Exp $
+ * $Id: StHbtClassImp.cxx,v 1.4 2001/09/05 20:40:42 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtClassImp.cxx,v $
+ * Revision 1.4  2001/09/05 20:40:42  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.3  2001/06/01 16:30:26  laue
  * ClassDef added for StHbtKinkCut
  *
@@ -35,6 +38,7 @@
 #include "StHbtMaker/Base/StHbtTripletCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtXiCut.h"
 #include "StHbtMaker/Base/StHbtKinkCut.h"
 
 #ifdef __ROOT__
@@ -45,5 +49,6 @@
   ClassImp(StHbtTripletCut)
   ClassImp(StHbtTrackCut)
   ClassImp(StHbtV0Cut)
+  ClassImp(StHbtXiCut)
   ClassImp(StHbtKinkCut)
 #endif

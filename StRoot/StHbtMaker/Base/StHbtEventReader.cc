@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.cc,v 1.1 2001/06/21 19:06:49 laue Exp $
+ * $Id: StHbtEventReader.cc,v 1.2 2001/09/05 20:41:00 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.cc,v $
+ * Revision 1.2  2001/09/05 20:41:00  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:06:49  laue
  * Some minor structural changes (forward declarations, etc)
  *
@@ -28,6 +31,7 @@
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtXiCut.h"
 #include "StHbtMaker/Base/StHbtKinkCut.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
 
@@ -58,6 +62,13 @@ StHbtString StHbtEventReader::Report(){
   else {
     temp += "NONE";
   }
+  temp += "\n---> XiCuts in Reader: ";
+  if (mXiCut) {
+    temp += mXiCut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
   temp += "\n---> KinkCuts in Reader: ";
   if (mKinkCut) {
     temp += mKinkCut->Report();
@@ -72,10 +83,12 @@ StHbtString StHbtEventReader::Report(){
 void StHbtEventReader::SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
 void StHbtEventReader::SetTrackCut(StHbtTrackCut* pcut){cout << pcut << endl; mTrackCut=pcut;}
 void StHbtEventReader::SetV0Cut(StHbtV0Cut* pcut){mV0Cut=pcut;}
+void StHbtEventReader::SetXiCut(StHbtXiCut* pcut){mXiCut=pcut;}
 void StHbtEventReader::SetKinkCut(StHbtKinkCut* pcut){mKinkCut=pcut;}
 StHbtEventCut* StHbtEventReader::EventCut(){return mEventCut;}
 StHbtTrackCut* StHbtEventReader::TrackCut(){return mTrackCut;}
 StHbtV0Cut*    StHbtEventReader::V0Cut(){return mV0Cut;} 
+StHbtXiCut*    StHbtEventReader::XiCut(){return mXiCut;} 
 StHbtKinkCut*    StHbtEventReader::KinkCut(){return mKinkCut;}
 
 

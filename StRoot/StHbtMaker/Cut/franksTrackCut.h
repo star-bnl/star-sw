@@ -38,6 +38,10 @@ class franksTrackCut : public StHbtTrackCut
   virtual StHbtString Report();
 
 
+  void SetPidProbElectron(const float& lo, const float& hi);
+  void SetPidProbPion(const float& lo, const float& hi);
+  void SetPidProbKaon(const float& lo, const float& hi);
+  void SetPidProbProton(const float& lo, const float& hi);
   void SetNSigmaElectron(const float& lo, const float& hi);
   void SetNSigmaPion(const float& lo, const float& hi);
   void SetNSigmaKaon(const float& lo, const float& hi);
@@ -57,6 +61,7 @@ class franksTrackCut : public StHbtTrackCut
   void SetRapidity(const float& lo, const float& hi);
   void SetEta(const float& lo, const float& hi);
   void SetDCA(const float& lo, const float& hi);
+  void SetDCAGlobal(const float& lo, const float& hi);
   void SetCharge(const int&);
 
   franksTrackCut* Clone();
@@ -64,6 +69,10 @@ class franksTrackCut : public StHbtTrackCut
 private:   // here are the quantities I want to cut on...
 
   int               mCharge;
+  float             mPidProbElectron[2];
+  float             mPidProbPion[2];
+  float             mPidProbKaon[2];
+  float             mPidProbProton[2];
   float             mNSigmaElectron[2];
   float             mNSigmaPion[2];
   float             mNSigmaKaon[2];
@@ -81,6 +90,7 @@ private:   // here are the quantities I want to cut on...
   float             mRapidity[2];
   float             mEta[2];
   float             mDCA[2];
+  float             mDCAGlobal[2];
 
   long              mNTracksPassed;
   long              mNTracksFailed;
@@ -91,6 +101,10 @@ private:   // here are the quantities I want to cut on...
 };
 
 
+inline void franksTrackCut::SetPidProbElectron(const float& lo, const float& hi){mPidProbElectron[0]=lo; mPidProbElectron[1]=hi;}
+inline void franksTrackCut::SetPidProbPion(const float& lo, const float& hi){mPidProbPion[0]=lo; mPidProbPion[1]=hi;}
+inline void franksTrackCut::SetPidProbKaon(const float& lo, const float& hi){mPidProbKaon[0]=lo; mPidProbKaon[1]=hi;}
+inline void franksTrackCut::SetPidProbProton(const float& lo, const float& hi){mPidProbProton[0]=lo; mPidProbProton[1]=hi;}
 inline void franksTrackCut::SetNSigmaElectron(const float& lo, const float& hi){mNSigmaElectron[0]=lo; mNSigmaElectron[1]=hi;}
 inline void franksTrackCut::SetNSigmaPion(const float& lo, const float& hi){mNSigmaPion[0]=lo; mNSigmaPion[1]=hi;}
 inline void franksTrackCut::SetNSigmaKaon(const float& lo, const float& hi){mNSigmaKaon[0]=lo; mNSigmaKaon[1]=hi;}
@@ -113,6 +127,7 @@ inline void franksTrackCut::SetPz(const float& lo, const float& hi){mPz[0]=lo; m
 inline void franksTrackCut::SetRapidity(const float& lo,const float& hi){mRapidity[0]=lo; mRapidity[1]=hi;}
 inline void franksTrackCut::SetEta(const float& lo,const float& hi){mEta[0]=lo; mEta[1]=hi;}
 inline void franksTrackCut::SetDCA(const float& lo,const float& hi){mDCA[0]=lo; mDCA[1]=hi;}
+inline void franksTrackCut::SetDCAGlobal(const float& lo,const float& hi){mDCAGlobal[0]=lo; mDCAGlobal[1]=hi;}
 inline void franksTrackCut::SetCharge(const int& ch){mCharge = ch;}
 inline franksTrackCut* franksTrackCut::Clone() { franksTrackCut* c = new franksTrackCut(*this); return c;}
 

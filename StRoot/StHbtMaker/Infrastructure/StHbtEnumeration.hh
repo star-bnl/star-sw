@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEnumeration.hh,v 1.1 2001/06/21 19:15:45 laue Exp $
+ * $Id: StHbtEnumeration.hh,v 1.2 2001/09/05 20:41:42 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEnumeration.hh,v $
+ * Revision 1.2  2001/09/05 20:41:42  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:15:45  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -31,7 +34,7 @@
 #pragma link C++ enum StHbtParticleType;
 #pragma link C++ enum StHbtIOMode;
 #endif
-enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0, hbtKink};
+enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0, hbtKink, hbtXi};
 enum StHbtIOMode {hbtRead, hbtWrite};
 
 #endif

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtTTreeKink.h,v 1.1 2001/06/21 19:15:47 laue Exp $
+ * $Id: StHbtTTreeKink.h,v 1.2 2001/09/05 20:41:42 laue Exp $
  *
  * Author: Frank Laue, BNL;
  *
@@ -18,6 +18,7 @@ class StHbtKink;
 class StHbtEvent;
 
 #include "TObject.h"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h"
 
 class StHbtTTreeKink : public TObject {
@@ -51,6 +52,9 @@ protected:
 
 /***********************************************************************
  * $Log: StHbtTTreeKink.h,v $
+ * Revision 1.2  2001/09/05 20:41:42  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
  *   CTH.hh : new constructor added

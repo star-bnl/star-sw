@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.15 2001/07/20 20:03:53 rcwells Exp $
+ * $Id: StHbtEvent.hh,v 1.16 2001/09/05 20:41:42 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
- * Revision 1.15  2001/07/20 20:03:53  rcwells
- * Added pT weighting and moved event angle cal. to event cut
+ * Revision 1.16  2001/09/05 20:41:42  laue
+ * Updates of the hbtMuDstTree microDSTs
  *
  * Revision 1.14  2001/06/21 19:15:45  laue
  * Modified fiels:
@@ -84,10 +84,12 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StHbtMaker/Infrastructure/StHbtXiCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtKinkCollection.hh"
 
 class StHbtTrackCut;
 class StHbtV0Cut;
+class StHbtXiCut;
 class StHbtKinkCut;
 #ifdef __ROOT__
 class StHbtTTreeEvent;
@@ -99,7 +101,7 @@ public:
 #ifdef __ROOT__
   StHbtEvent(const StHbtTTreeEvent* ); // copy constructor with track and v0 cuts
 #endif
-  StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0, StHbtKinkCut* =0); // copy constructor with track and v0 cuts
+  StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0,  StHbtXiCut* =0, StHbtKinkCut* =0); // copy constructor with track and v0 cuts
   ~StHbtEvent();
   void RotateZ(const double);
 
@@ -118,6 +120,7 @@ public:
   float ReactionPlaneSubEventDifference(const int& wgt=0) const;
   StHbtThreeVector PrimVertPos() const;
   StHbtV0Collection* V0Collection() const;
+  StHbtXiCollection* XiCollection() const;
   StHbtKinkCollection* KinkCollection() const;
   StHbtTrackCollection* TrackCollection() const;
   double MagneticField() const;
@@ -153,18 +156,20 @@ private:
   unsigned short mNumberOfGoodTracks; // number of "good" tracks
   unsigned int mUncorrectedNumberOfPositivePrimaries;
   unsigned int mUncorrectedNumberOfNegativePrimaries;
-  float mReactionPlane[2]; //reaction plane/error without pT weight //   
-  float mReactionPlanePtWgt[2]; //reaction plane/error with pT weight //   
+  float mReactionPlane[2]; //reaction plane/error  //   
+  float mReactionPlanePtWgt[2]; //reaction plane/error with pT weight //     
   double mMagneticField; // magnetic field in Z direction
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
   StHbtV0Collection* mV0Collection;
+  StHbtXiCollection* mXiCollection;
   StHbtKinkCollection* mKinkCollection;
 
   friend class StHbtIOBinary;
   friend class StHbtTTreeEvent;
   friend class StHbtTTreeTrack;
   friend class StHbtTTreeV0;
+  friend class StHbtTTreeXi;
   friend class StHbtTTreeKink;
 };
 

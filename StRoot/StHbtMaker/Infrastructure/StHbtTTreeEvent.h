@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeEvent.h,v 1.3 2001/07/20 20:03:53 rcwells Exp $
+ * $Id: StHbtTTreeEvent.h,v 1.4 2001/09/05 20:41:42 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
@@ -8,12 +8,8 @@
  ***************************************************************************
  *
  * $Log: StHbtTTreeEvent.h,v $
- * Revision 1.3  2001/07/20 20:03:53  rcwells
- * Added pT weighting and moved event angle cal. to event cut
- *
- * Revision 1.2  2001/06/23 21:55:17  laue
- * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
- * Some output turned off
+ * Revision 1.4  2001/09/05 20:41:42  laue
+ * Updates of the hbtMuDstTree microDSTs
  *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
@@ -45,32 +41,40 @@
 class StHbtEvent;
 class StHbtTrack;
 class StHbtV0;
+class StHbtXi;
 class StHbtKink;
 class StHbtEventCut;
 class StHbtTrackCut;
 class StHbtV0Cut;
+class StHbtXiCut;
 class StHbtKinkCut;
 
-class StHbtTTreeEvent{
+class StHbtTTreeEvent : public TObject {
 public:
   StHbtTTreeEvent();
-  StHbtTTreeEvent(const StHbtEvent*, StHbtTrackCut*, StHbtV0Cut*, StHbtKinkCut*);
+  StHbtTTreeEvent(const StHbtEvent*, StHbtTrackCut*, StHbtV0Cut*, StHbtXiCut*, StHbtKinkCut*);
   virtual ~StHbtTTreeEvent();
   void clear();
-  void fill(const StHbtEvent*, StHbtTrackCut*, StHbtV0Cut*, StHbtKinkCut*); //!
+  void fill(const StHbtEvent*, StHbtTrackCut*, StHbtV0Cut*, StHbtXiCut*, StHbtKinkCut*); //!
   void SetMagneticField(double);
 private:
   void initClonesArrays();
-  void fillEventInfo(const StHbtEvent* event);  //!
+  void fillEventInfo(const StHbtEvent* event);  //! 
   void addTrack(const StHbtEvent*, const StHbtTrack*); //!
   void addV0(const StHbtEvent*, const StHbtV0*); //! 
+  void addXi(const StHbtEvent*, const StHbtXi*); //! 
   void addKink(const StHbtEvent*, const StHbtKink*); //!
   TClonesArray* tracks() const {return fTracks;}
   TClonesArray* v0s() const {return fV0s;}
+  TClonesArray* xis() const {return fXis;}
   TClonesArray* kinks() const {return fKinks;}
 
   UShort_t mEventNumber;           //
   UShort_t mRunNumber;             //
+  
+  UShort_t mTriggerWord;
+  UShort_t mTriggerActionWord;
+
   UShort_t mTpcNhits;              // number of TPC hits
   UShort_t mNumberOfTracks;        // total number of TPC tracks
   UShort_t mNumberOfGoodTracks;    // number of "good" tracks
@@ -80,7 +84,6 @@ private:
   Float_t mZdcAdc[2];             // Zero-degree calorimeter 
                                        //values east/west
   Float_t mReactionPlane[2];              
-  Float_t mReactionPlanePtWgt[2];              
   Float_t mVertexX;
   Float_t mVertexY;
   Float_t mVertexZ;
@@ -95,6 +98,10 @@ private:
   TClonesArray*        fV0s;
   static TClonesArray* fgV0s;
 
+  UShort_t       mNxis;
+  TClonesArray*        fXis;
+  static TClonesArray* fgXis;
+
   UShort_t       mNkinks;
   TClonesArray*        fKinks;   
   static TClonesArray* fgKinks;
@@ -102,11 +109,15 @@ private:
   static Int_t mDebug; //! do not write this to disk
   Short_t mTrackType;  //! do not write this to disk
 
+  Float_t mReactionPlanePtWgt[2];              
+
   friend class StHbtEvent;
   friend class StHbtTrack;
   friend class StHbtV0;
+  friend class StHbtXi;
   friend class StHbtKink;
-  ClassDef(StHbtTTreeEvent,1)
+
+  ClassDef(StHbtTTreeEvent,4)
 };
 
 

@@ -10,8 +10,8 @@
 #define StHbtTTreeV0_h
 
 #include "TObject.h"
+#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StarClassLibrary/StThreeVectorF.hh"
-#include "StEvent/StTrackTopologyMap.h"
 
 class StHbtEvent;
 class StHbtV0;
@@ -28,17 +28,24 @@ public:
   friend class StHbtTTreeReader;
   friend class StHbtV0;
 protected:
-  StThreeVectorF mDecayVertexV0;
+  float mDecayLengthV0;
+  float mDecayVertexV0X;
+  float mDecayVertexV0Y;
+  float mDecayVertexV0Z;
   float mDcaV0Daughters;
   float mDcaV0ToPrimVertex;
   float mDcaPosToPrimVertex;
   float mDcaNegToPrimVertex;
-  StThreeVectorF mMomPos;
-  StThreeVectorF mMomNeg;
+  float mMomPosX;
+  float mMomPosY;
+  float mMomPosZ;
+  float mMomNegX;
+  float mMomNegY;
+  float mMomNegZ;
   unsigned short  mKeyPos;
   unsigned short  mKeyNeg;
-  StTrackTopologyMap mTopologyMapPos;
-  StTrackTopologyMap mTopologyMapNeg;
+  unsigned int mTrackTopologyMapPos[2];
+  unsigned int mTrackTopologyMapNeg[2];
   float mChi2V0;
   float mClV0;
   float mChi2Pos;
@@ -49,8 +56,9 @@ protected:
   float mDedxNeg;
   unsigned short mNumDedxPos;
   unsigned short mNumDedxNeg;
-
-  ClassDef(StHbtTTreeV0,1)
+  unsigned short mTpcHitsPos;
+  unsigned short mTpcHitsNeg;
+  ClassDef(StHbtTTreeV0,2)
 };
 
 #endif
@@ -58,6 +66,9 @@ protected:
 /***********************************************************************
  *
  * $Log: StHbtTTreeV0.h,v $
+ * Revision 1.2  2001/09/05 20:41:43  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
