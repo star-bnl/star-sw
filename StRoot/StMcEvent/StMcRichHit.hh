@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.hh,v 2.3 2000/05/05 15:25:44 calderon Exp $
+ * $Id: StMcRichHit.hh,v 2.4 2000/05/26 21:42:11 calderon Exp $
  * $Log: StMcRichHit.hh,v $
+ * Revision 2.4  2000/05/26 21:42:11  calderon
+ * Added volumeId() method.
+ *
  * Revision 2.3  2000/05/05 15:25:44  calderon
  * Reduced dependencies and made constructors more efficient
  *
@@ -38,8 +41,8 @@ public:
 
     unsigned short  pad() const;
     unsigned short  row() const;
-
-    float          tof() const;
+    long       volumeId() const;
+    float           tof() const;
     
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
@@ -51,6 +54,10 @@ private:
 };
 
 ostream&  operator<<(ostream& os, const StMcRichHit&);
+inline long
+StMcRichHit::volumeId() const
+{    return (mVolumeId); }
+
 inline unsigned short
 StMcRichHit::pad() const
 {
