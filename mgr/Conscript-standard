@@ -62,9 +62,7 @@ if ($pkg =~ /^pyth$/){
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g;# print "new share $share\n";
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
-my $CPPP =  $INCLUDE . "/" . $pkg . ":" . $Dir . ":" . $env->{CPPPATH}; #$Dir";# print "CPPP = $CPPP\n";
-my $CPP  = "";
-$CPPP .= $CPP;#  print " --- $CPPP\n";
+my $CPPP =  ":#" . $Dir . ":" . $env->{CPPPATH};# print "CPPP = $CPPP\n";
 my $include = $INCLUDE . "/" . $pkg;
 my $LIBPKG = "";
 if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
