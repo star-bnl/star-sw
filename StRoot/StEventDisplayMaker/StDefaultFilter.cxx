@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.4 2000/08/29 04:39:14 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.5 2000/08/30 17:22:00 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -8,6 +8,9 @@
 #include "tables/St_dst_dedx_Table.h"
 #include "tables/St_dst_point_Table.h"
 #include "StCL.h"
+
+#include "TStyle.h"
+
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -67,6 +70,10 @@ Int_t StDefaultFilter::Reset(Int_t reset)
 
   STFLowColor  = 51; 
   STFHighColor = 100;
+  STFLowColor  = 0; 
+  STFHighColor = 51;
+
+
   STFLowEnergy = 0;
   STFHighEnergy = 0.00001;
   STFSize  = 0;
@@ -190,7 +197,7 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
   if (mDedx) {
     const St_dst_dedx &t = *(St_dst_dedx *)mDedx->GetTable();
     Double_t energy = t.GetTable((*mDedx)[rowNumber-1])->dedx[0];   
-    return MakeColor(energy);
+    return gStyle->GetColorPalette(MakeColor(energy));
   } else {
     printf(" no dedx !!!!\n");
     return StVirtualEventFilter::Channel(&track,rowNumber,size,style);
@@ -199,6 +206,9 @@ Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t 
 
 
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.5  2000/08/30 17:22:00  fine
+// Clean up
+//
 // Revision 1.4  2000/08/29 04:39:14  fine
 // RemoveName method introduced
 //
