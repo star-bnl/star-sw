@@ -3,7 +3,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_io_Maker class for Makers                                        //
+// St_io_Maker class for Makers                                         //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -12,7 +12,7 @@
 #include "St_DataSetIter.h"
 #include "TTree.h"
 
-class StBranchObject : public TObject 
+class StIOHeader : public TObject 
 {
  private:
     TString    m_BranchName;
@@ -20,29 +20,40 @@ class StBranchObject : public TObject
     TBranch   *m_Branch; 
 
  public:
-  StBranchObject(const Char_t *name, TBranch *branch, TObject *obj=0) : m_BranchName(name),m_Branch(branch),m_DataSet(obj){SetAddress();}
-  StBranchObject(TString &name, TBranch *branch, TObject *obj=0) : m_BranchName(name),m_Branch(branch),m_DataSet(obj){SetAddress();}    
-  StBranchObject(TString &name, TTree *tree) : m_BranchName(name),m_DataSet(0){
+  StIOHeader(const Char_t *name, TBranch *branch, TObject *obj=0) : m_BranchName(name),
+                                                                    m_Branch(branch),
+                                                                    m_DataSet(obj){SetAddress();}
+  StIOHeader(TString &name, TBranch *branch, TObject *obj=0)      : m_BranchName(name),
+                                                                    m_Branch(branch),
+                                                                    m_DataSet(obj){SetAddress();}    
+  StIOHeader(TString &name, TTree *tree)                          : m_BranchName(name),m_DataSet(0)
+  {
     if (tree) m_Branch = tree->Branch(m_BranchName.Data(),"St_DataSet", &m_DataSet, 4000,0); 
   }
-  StBranchObject(TBranch *branch) : m_BranchName(branch?branch->GetName():""),m_DataSet(0),m_Branch(branch){SetAddress();}
-  StBranchObject(TBranch *branch,TString &name) : m_BranchName(name),m_DataSet(0),m_Branch(branch){SetAddress();}
+  StIOHeader(TBranch *branch)                                     : m_BranchName(branch?branch->GetName():""),
+                                                                    m_DataSet(0),m_Branch(branch){SetAddress();}
+  StIOHeader(TBranch *branch,TString &name)                       : m_BranchName(name),
+                                                                    m_DataSet(0),
+                                                                    m_Branch(branch){SetAddress();}
 
         void     SetAddress();
         TObject *ShuntData() { TObject *obj = m_DataSet; m_DataSet = 0; return obj;}
         TBranch *GetBranch() const { return m_Branch;}
         Int_t    GetEvent(Int_t nevent=0) { return m_Branch ? m_Branch->GetEvent(nevent):0;}
         Int_t    Fill(TObject *obj) {
-            m_DataSet = obj; if (m_Branch) {SetAddress(); return m_Branch->Fill();}
+#ifndef tree
+            if (m_Branch) { m_DataSet = obj; SetAddress(); return m_Branch->Fill();}
+#else
+            if (m_Branch) { m_DataSet = obj; SetAddress(); }
+#endif
             return 0;
         }
         void     SetData(TObject *data){ m_DataSet = data;}
   const Text_t  *GetName() const { return m_BranchName;}
 };
 
-
 //_____________________________________________________________________________
-inline void StBranchObject::SetAddress(){ 
+inline void StIOHeader::SetAddress(){ 
  if (m_Branch)  m_Branch->SetAddress(&m_DataSet); 
 }
 
@@ -79,12 +90,12 @@ void St_io_Maker::Add(const Char_t *dataName)
 #if 0
   b = tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize,0); 
 #endif
-  StBranchObject *o =  new StBranchObject(dataName,tree);
+  StIOHeader *o =  new StIOHeader(dataName,tree);
   m_BranchName += ".root";
   b = o->GetBranch();
   b->SetFile(m_BranchName);
   m_ListOfBranches->Add(o);
-//  m_ListOfBranches->Add(new StBranchObject(dataName,b));
+//  m_ListOfBranches->Add(new StIOHeader(dataName,b));
 }
 
 //_____________________________________________________________________________
@@ -99,7 +110,7 @@ void St_io_Maker::Add(TBranch *branch,const Char_t *dataName)
   if (!CreateBranchList()) return;
 //  TString name = dataName;
 //  name.ReplaceAll("_Branch","");
-  StBranchObject *o =  new StBranchObject(branch);
+  StIOHeader *o =  new StIOHeader(branch);
   m_ListOfBranches->Add(o);
 }
 
@@ -129,8 +140,12 @@ Int_t St_io_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_io_Maker::Finish()
 {
- TTree *tree = GetTree();
- if (tree) tree->Write();
+ if (strcmp(GetName(),"Output")==0) {
+   TTree *tree = GetTree();
+   if (tree) 
+       SetActive();
+       tree->Write();
+ }
  return 0;
 }
 //_____________________________________________________________________________
@@ -147,28 +162,44 @@ Int_t St_io_Maker::Make(){
 //_____________________________________________________________________________
 Int_t St_io_Maker::NextEventGet(Int_t nevent)
 {
+#ifdef tree
+  TTree *tree = GetTree();
+  if (!tree)   return 0;
+#endif
+
   if (!m_ListOfBranches) {
-    // Let' s create it from the TTree of any
+#ifndef tree
     TTree *tree = GetTree();
-    if (!tree)           return 0;
+    if (!tree)   return 0;
+#endif
+    // Let' s create it from the TTree if any
     TBranch *nextb = 0;
     TObjArray *branches = tree->GetListOfBranches();
     if (!branches)       return 0;
     TIter next(branches);
-    while (nextb = (TBranch *)next())  Add(nextb);
+    while (nextb = (TBranch *)next())  { printf(" St_io_Maker::NextEventGet ----> %s \n", nextb->GetName()); Add(nextb);}
   }
-  TIter next(m_ListOfBranches);
-  StBranchObject *obj = 0;
   Int_t counter = 0;
-  while(obj = (StBranchObject *)next())  {
-   // determinate the recepient
-    TString name = obj->GetName();
-    name.ReplaceAll("_Branch","");
-    StMaker *maker = gStChain->Maker(name);
-    if (maker) {
-     // GetEvent
-        counter += obj->GetEvent(nevent);
-        maker->SetDataSet((St_DataSet *)obj->ShuntData());
+#ifdef tree
+  if (SetActive()) 
+  {
+    counter = tree->GetEvent(nevent);
+#else
+  {
+#endif
+    TIter next(m_ListOfBranches);
+    StIOHeader *obj = 0;
+    while(obj = (StIOHeader *)next())  {
+     // determinate the recepient
+      TString name = obj->GetName();
+      name.ReplaceAll("_Branch","");
+      StMaker *maker = gStChain->Maker(name);
+      if (maker) {
+#ifndef tree
+          counter += obj->GetEvent(nevent);
+#endif
+          maker->SetDataSet((St_DataSet *)obj->ShuntData());
+      }
     }
   }
   return counter;
@@ -177,17 +208,34 @@ Int_t St_io_Maker::NextEventGet(Int_t nevent)
 //_____________________________________________________________________________
 Int_t St_io_Maker::NextEventPut()
 {
-  if (!m_ListOfBranches) return -1;
-  TIter next(m_ListOfBranches);
-  StBranchObject *obj = 0;
+#ifdef tree
+  TTree *tree = GetTree();
+  if (!tree) return 0;
+#endif
+
   Int_t counter = 0;
-  while(obj = (StBranchObject *)next())  {
-    // Collect data
-    TString name = obj->GetName();
-    name.ReplaceAll("_Branch","");
-    St_DataSet *dataSet = gStChain->DataSet(name);
-    // Fill branch buffer
-    counter += obj->Fill(dataSet);
+  if (!m_ListOfBranches) return -1;
+#ifdef tree
+  if (SetActive()) 
+#endif
+  {
+    TIter next(m_ListOfBranches);
+    StIOHeader *obj = 0;
+    while(obj = (StIOHeader *)next())  {
+      // Collect data
+      TString name = obj->GetName();
+      name.ReplaceAll("_Branch","");
+      St_DataSet *dataSet = gStChain->DataSet(name);
+      // Fill branch buffer
+#ifndef tree
+      counter += obj->Fill(dataSet);
+#else
+      obj->Fill(dataSet);
+#endif
+    }
+#ifdef tree
+    counter = tree->Fill();
+#endif
   }
   printf(" =========== >>>>>>> %d bytes have been written\n",counter);
 
@@ -206,9 +254,37 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.1 1999/01/16 01:01:51 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.2 1999/01/19 04:58:49 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
+}
+
+//_____________________________________________________________________________
+Int_t St_io_Maker::SetActive()
+{
+  // Disactivate all branches of the currebt tree then 
+  // Mark all branches of this maker as active ones
+  //
+  // Return: number of active branches if any
+  //
+  Int_t numberActive = 0;
+  TTree *tree = GetTree();
+  if (!tree) return numberActive;
+
+  tree->SetBranchStatus("*",kFALSE);
+  TIter next(m_ListOfBranches);
+  StIOHeader *obj = 0;
+  while(obj = (StIOHeader *)next())  
+  {
+    TString name = obj->GetName();
+    name.ReplaceAll("_Branch","");
+    StMaker *maker = g_Chain->Maker(name);
+    if (maker) {
+       tree->SetBranchStatus(name,kTRUE);
+       numberActive++;
+    }
+  }
+  return numberActive;
 }
 
