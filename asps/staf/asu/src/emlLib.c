@@ -7,9 +7,10 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include "emlLib.h"
-
+#include "asuAlloc.h"
 
 int emlMessage(char *fmt, ...)
 {
@@ -61,9 +62,9 @@ void emlPrettifyErrorMessage(char *errmsg,int maxlen) {
   if(!eml_pretty_on) return;
   pathsave[0]=0;
   len = strlen(errmsg);
-  copy=(char*)malloc(len+1); if(!copy) return; strcpy(copy,errmsg);
-  buf1=(char*)malloc(len+1); if(!buf1) { free(copy);             return; }
-  buf2=(char*)malloc(len+1); if(!buf2) { free(copy); free(buf1); return; }
+  copy=(char*)MALLOC(len+1); if(!copy) return; strcpy(copy,errmsg);
+  buf1=(char*)MALLOC(len+1); if(!buf1) { FREE(copy);             return; }
+  buf2=(char*)MALLOC(len+1); if(!buf2) { FREE(copy); FREE(buf1); return; }
   buf1[0]=0; buf2[0]=0; x=strtok(copy,"\n");
   while(x) {
     if(x[0]=='E'&&x[1]=='R'&&x[2]=='R'&&x[3]=='O'&&x[4]=='R') {
@@ -123,7 +124,7 @@ void emlPrettifyErrorMessage(char *errmsg,int maxlen) {
     }
   }
 
-  free(copy); free(buf1); free(buf2);
+  FREE(copy); FREE(buf1); FREE(buf2);
 }
 
 /*
