@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.26 1999/12/21 00:36:40 fisyak Exp $
+# $Id: cons,v 1.27 2000/01/06 20:10:18 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.26 1999/12/21 00:36:40 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.27 2000/01/06 20:10:18 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -351,6 +351,18 @@ sub Override {
 
 package main;
 # Check script inclusion regexps
+my $pwd = cwd();# print "Pwd = $pwd\n"; 
+(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps).*//;# print "Root pwd = $Rpwd\n";
+if ($1) {
+  chdir($Rpwd) if $Rpwd;
+  (my $Lpwd = $pwd) =~ s/$Rpwd\///;#print "Local pwd = $Lpwd\n";
+  if ($Lpwd) {
+    $Lpwd .= "/";
+    push @param::include, $Lpwd;# print "tagets = @param::include\n";
+    print "------------->Go to $Rpwd from $pwd and \n";
+    print "------------->add $Lpwd to targets\n";
+  }
+}
 for $re (@param::include) {
     if (! defined eval {"" =~ /$re/}) {
 	my($err) = $@;
