@@ -33,6 +33,7 @@ void EEmcSmdMap::getRangeSmd2Smd( Int_t isector, Int_t iuv, Int_t istrip,
   assert(istrip>=0 && istrip<kEEmcNumStrips);
   jMin = mSmd2SmdMap[isector][iuv][istrip].iMin;
   jMax = mSmd2SmdMap[isector][iuv][istrip].iMax;
+  juv=1-iuv;
 }
 
 /////////////////////////////////////////////////////////////////////////////
