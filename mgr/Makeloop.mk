@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.4  1998/08/12 21:45:27  fisyak
+#  Add test on StRoot directories
+#
 #  Revision 1.3  1998/08/10 23:20:54  fisyak
 #  Add test for base and tables
 #
@@ -91,7 +94,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/10 23:20:54 $ 
+#           Last modification $Date: 1998/08/12 21:45:27 $ 
 #  default setings
 # Current Working Directory
 #
@@ -186,13 +189,13 @@ ifeq ($(NAME),$(PKG))
 endif                          
 ifneq ($(EMPTY),$(SUBDIRS))     
 ifneq (,$(findstring $(LEVEL),0 1))
-ifneq (,$(wildcard $(OUT_DIR)/StRoot/base))
+ifneq (,$(wildcard $(ROOT_DIR)/StRoot/base))
 TARGETS += St_base 
 endif
-ifneq (,$(wildcard $(OUT_DIR)/.share/tables))
+ifneq (,$(wildcard $(ROOT_DIR)/.share/tables))
 TARGETS += St_Tables
 endif
-ifneq (,$(wildcard $(OUT_DIR)/StRoot/StChain))
+ifneq (,$(wildcard $(ROOT_DIR)/StRoot/StChain))
 TARGETS += StChain
 endif
 endif
