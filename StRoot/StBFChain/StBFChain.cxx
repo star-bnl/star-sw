@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.401 2004/03/25 15:19:22 calderon Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.402 2004/03/30 03:06:51 calderon Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -33,6 +33,7 @@
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "St_tpt_Maker/St_tpt_Maker.h"
 #include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StAssociationMaker/StAssociationMaker.h"
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
@@ -558,6 +559,9 @@ Bfc_st BFC1[] = {
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"MiniMcEvent" ,"","","","",                   "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
+  {"MiniMcMk"    ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker",
+                                                                 "Creates tree in minimc.root file",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -999,8 +1003,6 @@ Bfc_st BFC2[] = {
   {"genvtx"     ,"","","",      "StGenericVertexMaker","StGenericVertexMaker","Minuit Vertex Finder",kFALSE},
   {"Mc"          ,"McChain","McEvent","sim_T,globT,McAss,McAna"             ,"StMaker","StChain","",kFALSE},
   {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
-  {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
-  {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"Sti"         ,"Sti","","SCL,StEvent,tables,McEvent","StiMaker",
       "StSvtDbMaker,StTpcDb,libGui,Sti,StiGui,StiMaker,StiTpc,StiSvt,StiEmc,StiFtpc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StdEdxY2Maker",
@@ -1107,6 +1109,11 @@ Bfc_st BFC2[] = {
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","TbUtil,St_geom",
                        "StEventDisplayMaker","StEventUtilities,StEventDisplayMaker","Event Display",kFALSE},
+  {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
+  {"McAna"       ,"","McChain","McEvent,McAss",          "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
+  {"MiniMcEvent" ,"","","","",                   "StMiniMcEvent","Loads StMiniMcEvent library only",kFALSE},
+  {"MiniMcMk"    ,"","","McAss,MiniMcEvent","StMiniMcMaker","StMiniMcMaker",
+                                                                 "Creates tree in minimc.root file",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
   {"SpinTag" ,"SpinTag","","","StSpinTagMaker","StppSpin","tag for analysis of polarized pp events",kFALSE},
@@ -1422,6 +1429,12 @@ Int_t StBFChain::Instantiate()
 	      if (GetOption("CtbMatchVtx")) {
 		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
 		  gvtxMk->UseCTB();
+	      }
+	  }
+	  if (maker=="StAssociationMaker") {
+	      if (GetOption("ITTF")) {
+		  StAssociationMaker* assMk = (StAssociationMaker*) mk;
+		  assMk->useInTracker();
 	      }
 	  }
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
