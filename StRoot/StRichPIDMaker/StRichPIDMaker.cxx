@@ -1,13 +1,12 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.22 2000/11/28 19:21:01 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.23 2000/11/30 23:29:28 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.22  2000/11/28 19:21:01  lasiuk
- * correct memory leak in writing to StEvent
- * add additional WARNING for tracks without assigned MIP
+ * Revision 2.23  2000/11/30 23:29:28  lasiuk
+ * rectify constant area (pion flags)
  *
  * Revision 2.22  2000/11/28 19:21:01  lasiuk
  * correct memory leak in writing to StEvent
@@ -204,7 +203,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.22 2000/11/28 19:21:01 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.23 2000/11/30 23:29:28 lasiuk Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -1303,7 +1302,8 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[25] = minDistToConsPsiRefLine;
 	
 	distHits[26] = abs(trackMomentum);
-	distHits[27] = currentTrack->getStTrack()->geometry()->helix().h();
+	//distHits[27] = currentTrack->getStTrack()->geometry()->helix().h();
+	distHits[27] = currentTrack->getStTrack()->geometry()->charge();
 	distHits[28] = mVertexPos.z();
 
 	distup->Fill(distHits);
@@ -1722,14 +1722,15 @@ void StRichPIDMaker::fillPIDTraits(StRichRingCalculator* ringCalc) {
 		    if( fabs(sigma)<1 ) {theCurrentHit->setBit(e1SigmaPi);sig1++;}
 		    if( fabs(sigma)<2 ) {theCurrentHit->setBit(e2SigmaPi);sig2++;}
 		}
-	    }
+	    
 
-	    if(inConstantArea) {
-		if( theCurrentHit->isSet(eInConstantAreaPi) ) {
-		    theCurrentHit->setBit(eInMultipleCAreaPi);
-		}
-		else {
-		    theCurrentHit->setBit(eInConstantAreaPi);
+		if(inConstantArea) {
+		    if( theCurrentHit->isSet(eInConstantAreaPi) ) {
+			theCurrentHit->setBit(eInMultipleCAreaPi);
+		    }
+		    else {
+			theCurrentHit->setBit(eInConstantAreaPi);
+		    }
 		}
 	    }
 	    
@@ -3176,7 +3177,7 @@ void StRichPIDMaker::initNtuples() {
 //     sprintf(finalname,"%s.root",mySaveDirectory);
 //     file = new TFile(finalname,"RECREATE");
 
-    file = new TFile("/star/rcf/scratch/lasiuk/exb/dtuple.root","RECREATE");
+    file = new TFile("/star/rcf/scratch/lasiuk/exb/dtuplerev.root","RECREATE");
     file->SetFormat(1);
 
     distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx");
