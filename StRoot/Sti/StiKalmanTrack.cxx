@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.32 2004/03/31 00:23:41 calderon Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.33 2004/04/04 23:19:28 jeromel Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.33  2004/04/04 23:19:28  jeromel
+ * isfinite() -> finite()
+ *
  * Revision 2.32  2004/03/31 00:23:41  calderon
  * -Fixed memory leak in StiDetectorTreeBuilder::hangWhere (100 chars were lost
  *  every time this function was called)
@@ -637,7 +640,7 @@ double StiKalmanTrack::getTrackLength() const
   double dz=out.z()-in.z();
   double curvature = inNode->getCurvature();
   double s = 2*asin(::sqrt(dx*dx+dy*dy)*fabs(curvature)/2.)/fabs(curvature);
-  if (!isfinite(sqrt(dz*dz+s*s))) {
+  if (!finite(sqrt(dz*dz+s*s))) {
       double lengthSum = 0;
       if (firstNode) {
 	  StiKTNBidirectionalIterator node1,node2;
@@ -648,7 +651,7 @@ double StiKalmanTrack::getTrackLength() const
 	      lengthSum += (*node2).pathLToNode(&(*node1));
 	  }
       }
-      if (!isfinite(lengthSum)) {
+      if (!finite(lengthSum)) {
 	  cout << "I give up!! Length sum is not finite" << endl;
 	  return -9999;
       }
