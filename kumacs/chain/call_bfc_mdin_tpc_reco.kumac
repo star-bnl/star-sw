@@ -1,3 +1,4 @@
+* 1/26/99 - K.Turner
 * 12/17/98 setup by K. Turner (for 98l) - taken from Li Qun's example
 * Run BFC in following manner:
 * - read in tpc minidaq data file
@@ -14,6 +15,6 @@
    chain=' mdin tpg tfc_r tcl evout' _
    skip=1 _
    no_events=2 _
-   input_data_file=/disk1/star/kathy/tpc_s01w_981022_15h_cos_t8_f7.xdf _
+  input_data_file=/disk00000/star/test_data/tpc_s01w_981022_15h_cos_t8_f7.xdf _
    output_file=test_cos_t8_f7_new _
    log=bfc_mdin_tpc_reco.log

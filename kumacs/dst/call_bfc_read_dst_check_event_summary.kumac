@@ -1,3 +1,4 @@
+* 1/26/99 K. Turner
 * 9/30/98 K. Turner (for 98i)
 * Run BFC in following manner:
 * - read in simulated data file that has ONLY dst tables on it 
@@ -17,7 +18,7 @@
    chain=' dstin ntup' _
    skip=0 _
    no_events=70 _
-   input_data_file=/disk1/star/kathy/rcf002_12_61evts_h_dst.xdf _
+   input_data_file=/disk00000/star/test_data/rcf002_12_61evts_h_dst.xdf _
    output_file=rcf002_12_61evts_h_dst _
    log=rcf002_12_61evts_h_dst.log _
    nunit=21 _

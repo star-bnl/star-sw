@@ -19,7 +19,7 @@
    chain=' g2tin tpg svg tfs srs tpt tid tte_e sgr svm egr evr ev02 ev0d sdst2 ntup ' _
    skip=0 _
    no_events=1000 _
-   input_data_file=/afs/rhic/star/data/samples/hijet-g2t.xdf _
+   input_data_file=$AFS_RHIC/star/data/samples/hijet-g2t.xdf _
    output_file=hijet-g2t_v0_test _
    log=bfc_test_v0.log _
    nunit=21 _

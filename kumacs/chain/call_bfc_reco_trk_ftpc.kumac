@@ -1,3 +1,4 @@
+* 1/26/99 K. Turner
 * 9/14/98 K. Turner (for 98h)
 * Run BFC in following manner:
 * - read in simulated data file (thru tss & srs)
@@ -14,6 +15,6 @@
    chain=' evin tpg svg tcl tcl_e tpt tid tte_e sgr fss fcl fpt fte evout' _
    skip=0 _
    no_events=1 _
-   input_data_file=/star/data/kathy/set100_01_1ev.xdf _ 
+   input_data_file=/disk00000/data/test_data/set100_01_1ev.xdf _ 
    output_file=set100_01_1ev_tpc_svt_tracks_ftpc _
    log=bfc_reco_trk_ftpc_set100_01_1ev.log
