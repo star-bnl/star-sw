@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.7 2004/06/24 13:48:33 subhasis Exp $
+ * $Id: StPmdClusterMaker.h,v 1.8 2004/09/03 14:31:44 subhasis Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.8  2004/09/03 14:31:44  subhasis
+ * OptHist introduced
+ *
  * Revision 1.7  2004/06/24 13:48:33  subhasis
  * several changes in clustering code
  *
@@ -47,10 +50,15 @@ class StPmdDetector;
 class StPmdClusterMaker: public StMaker{
 
    private:
-  
+ Bool_t mOptHist; 
    protected:
   
   // booking Pmd cluster histograms
+  TH1F *mNclust;      //!  supermodule no for Pmd
+  TH1F *mNclust1;      //!  supermodule no for Pmd
+  TH1F *mNclust2;      //!  supermodule no for Pmd
+  TH1F *mNclust3;      //!  supermodule no for Pmd
+  
   TH1F *mSmPmdCluster;      //!  supermodule no for Pmd
   TH1F *mEdepPmdCluster;    //!  cluster edep in Pmd
   TH1F *mSigmaLPmdCluster;    //!  cluster SigmaL in Pmd
@@ -95,10 +103,11 @@ class StPmdClusterMaker: public StMaker{
 
   void  bookHistograms(); //! booking histograms
   void  FillHistograms(StPmdDetector*, StPmdDetector*); //! filling histograms
+  void  setPrint(Bool_t a) { mOptHist = a;}
   void  Browse(TBrowser* b); 
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.7 2004/06/24 13:48:33 subhasis Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.8 2004/09/03 14:31:44 subhasis Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  
