@@ -78,21 +78,26 @@ macro run_reformat_newtab tpc_sector_first=1 tpc_sector_last=24
   message 'start run_reformat_newtab'
 
   
-  do j =  [tpc_sector_first],[tpc_sector_last] 
-     cd  [params]/tpc/tfcpars
-     rowcount tfc_sector_index 1
-     tdm/table/cell/putvalue 'tfc_sector_index[0].CurrentSector' [j]
-     cd /dui 
-     ami/module/call init_raw_table _
+  do j =  1,24
+    cd /dui 
+    ami/module/call init_raw_table _
                               [params]/tpc/tsspars/tsspar_
                               [raw_data]/tpc/raw_sec_m_
                               [raw_data]/tpc/Sector_[j]/raw_row_in_
                               [raw_data]/tpc/Sector_[j]/raw_row_out
-     do ii=6,1,-1
-       tdm/table/cell/getvalue '/dui/event/raw_data/tpc/TPC_DATA/IT'//[ii]//'[0].sector' 
-       if (staf_result(1)=[j]) then
-            mess 'current sector and readout board' [j],[ii]
-            ami/module/call reformat_new_
+
+ enddo
+
+ do j =  [tpc_sector_first],[tpc_sector_last] 
+     cd  [params]/tpc/tfcpars
+     rowcount tfc_sector_index 1
+     tdm/table/cell/putvalue 'tfc_sector_index[0].CurrentSector' [j]
+      do ii=6,1,-1
+            cd /dui 
+            tdm/table/cell/getvalue '/dui/event/raw_data/tpc/TPC_DATA/IT'//[ii]//'[0].sector' 
+            if (staf_result(1)=[j]) then
+              mess 'current sector and readout board' [j],[ii]
+              ami/module/call reformat_new_
                               [params]/tpc/tsspars/tsspar_
                               [params]/tpc/tfcpars/tfc_sector_index _
                               [raw_data]/tpc/TPC_DATA/IT[ii]_
@@ -108,12 +113,12 @@ macro run_reformat_newtab tpc_sector_first=1 tpc_sector_last=24
                               [raw_data]/tpc/Sector_[j]/raw_seq_out_
                               [raw_data]/tpc/Sector_[j]/pixel_data_out
 
-            if ( staf_status(1) .ne. STAFCV_OK) then
+               if ( staf_status(1) .ne. STAFCV_OK) then
                     message 'Problem running tfc...'
                     goto RTRN
-           endif
-      endif 
-   enddo
+             endif
+       endif
+    enddo
 enddo      
  
    RTRN:
