@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtProbValues.cc,v 1.4 2001/04/25 18:59:45 perev Exp $
+ * $Id: StSvtProbValues.cc,v 1.5 2001/04/30 22:25:43 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtProbValues.cc,v $
+ * Revision 1.5  2001/04/30 22:25:43  caines
+ * Add Warning message
+ *
  * Revision 1.4  2001/04/25 18:59:45  perev
  * HPcorrs
  *
@@ -48,7 +51,7 @@ void StSvtProbValues::SetProbValue(float sigma)
   double num = 0;
 
   if (!sigma){
-    gMessMgr->Warning() << "StSvtSeqAdjMaker: No sigma set using default" << endm;
+ 
     sigma = mSigma;
   }
  for(int i = 0; i < MAX_ADC_COUNTS; i++)
