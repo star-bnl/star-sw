@@ -9,7 +9,7 @@ void RunStiMaker(Int_t nevents=1,
 		 bool simulated=true, //sim or data?
 		 //bool doFit=true, // true->fit track only
 		 bool doFit=false, // false->find track only
-		 //const char* outfile = "/star/data22/ITTF/evaluation/Miller/Evaluation.root",
+		 //const char* outfile = "/star/rcf/pwg/spectra/mmiller/Evaluation.root",
 		 const char* outfile = "Evaluation.root",
 		 bool doProfile=false, // produce profiling output? 
 		 //const char* MainFile="/a1/pruneau/data/EvalData/MCNtuple/muon_100_neg.event.root")
@@ -19,7 +19,7 @@ void RunStiMaker(Int_t nevents=1,
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
 		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_standard/hc_standard.40_evts.event.root")
-		 //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Fri/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
+		 //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Wed/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
     //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
     //This file points to 5 muons /event
     //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
@@ -58,6 +58,9 @@ void RunStiMaker(Int_t nevents=1,
     cout <<"Loading StEvent"<<endl;
     gSystem->Load("StEvent");
 
+    cout <<"Loading StDetectorDbMaker"<<endl;
+    gSystem->Load("StDetectorDbMaker");
+    
     cout <<"Loading StEventMaker"<<endl;
     gSystem->Load("StEventMaker");
 
