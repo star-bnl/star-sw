@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.94 2004/08/12 00:13:45 perev Exp $
+// $Id: doEvents.C,v 1.95 2004/08/12 16:43:26 perev Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -81,7 +81,8 @@ void doEvents()
   cout << "       doEvents.C(nEvents, \"path/file.dst.root\", \"display\") //EventDispay" << endl;	
   cout << "       doEvents.C(nEvents, \"path/file.dst.root\", \"dbon\") //DB on" << endl;	
   cout << "       doEvents.C(nEvents, \"@file.lis\") //list of files in file.lis " << endl;	
-  cout << "       doEvents.C(nEvents, \"SELECT [MuDST|event] WHERE production=P04ih and zdc1Energy>50\", \"gc\") //GridCollector " << endl;	
+  cout << "       doEvents.C(nEvents, \"SELECT MuDST WHERE production=P04ih and zdc1Energy>50\", \"gc\") //GridCollector selects MuDST.root files " << endl;
+  cout << "       doEvents.C(nEvents, \"SELECT event WHERE production=P04ih and zdc1Energy>50\", \"gc\") //GridCollector selects event.root files" << endl;
   cout << "       doEvents.C(nEvents, \"@GridCollector_commands.txt\", \"gc,evout\") //GridCollector commands in file" << endl;	
 }
 
@@ -366,7 +367,7 @@ int gcReadCommands(const char *file, TString& cmds)
     inp = fopen(file, "r");
     if (!inp) { // File not found
       printf("doEvents: ERROR.  File Not Found // %s\n",req+1);
-      return 13;
+      return -1;
     }
 
     char line[500], *comm, *fst;
@@ -420,8 +421,8 @@ int gcInit(const char *request)
   }
   else if (*request == '@') { // read the command file
     TString cmds;
-    gcReadCommands(request+1, cmds);
-    ierr = req->Init(cmds.Data());
+    ierr = gcReadCommands(request+1, cmds);
+    if (!ierr) ierr = req->Init(cmds.Data());
     if (0 != ierr) {
       std::cout << "doEvents.C can not initialize the Grid Collector "
 		<< "with argument \"" << cmds.Data()
@@ -455,6 +456,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.95  2004/08/12 16:43:26  perev
+// Cleanup from JohnVu & VP
+//
 // Revision 1.94  2004/08/12 00:13:45  perev
 // JohnWu GC corrections
 //
