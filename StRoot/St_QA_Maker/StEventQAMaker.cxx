@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.44 2000/07/11 18:10:38 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.45 2000/07/26 19:57:49 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.45  2000/07/26 19:57:49  lansdell
+// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
+//
 // Revision 1.44  2000/07/11 18:10:38  lansdell
 // replaced call to pidTraits with numberOfHits to get detector ids for tracks
 //
@@ -141,6 +144,10 @@
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
 #include "StTpcDedxPidAlgorithm.h"
+#include "StMultiH1F.h"
+#include "StDbUtilities/StCoordinates.hh"
+#include "HitHistograms.h"
+#include "StTpcDb/StTpcDb.h"
 
 ClassImp(StEventQAMaker)
 
@@ -165,6 +172,7 @@ Int_t StEventQAMaker::Init() {
 
 // StEventQAMaker - Init; book histograms and set defaults for member functions
 
+  mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2,-0.5,1.5);
   return StQABookHist::Init();
 }
 
@@ -207,12 +215,23 @@ void StEventQAMaker::MakeHistEvSum() {
     m_mean_eta->Fill(event_summary->meanEta());
     m_rms_eta->Fill(event_summary->rmsEta());
 
-    if(!isnan((double)(event_summary->primaryVertexPosition()[0])))
-      m_prim_vrtx0->Fill(event_summary->primaryVertexPosition()[0]);
-    if(!isnan((double)(event_summary->primaryVertexPosition()[1])))
-      m_prim_vrtx1->Fill(event_summary->primaryVertexPosition()[1]);
-    if(!isnan((double)(event_summary->primaryVertexPosition()[2])))
-      m_prim_vrtx2->Fill(event_summary->primaryVertexPosition()[2]);
+    m_prim_vrtr->Fill(event_summary->primaryVertexPosition().perp());
+    m_prim_vrtx0->Fill(event_summary->primaryVertexPosition()[0]);
+    m_prim_vrtx1->Fill(event_summary->primaryVertexPosition()[1]);
+    m_prim_vrtx2->Fill(event_summary->primaryVertexPosition()[2]);
+  }
+
+  if (event->softwareMonitor()) {
+    StTpcSoftwareMonitor *tpcMon = event->softwareMonitor()->tpc();
+    Float_t tpcChgWest=0;
+    Float_t tpcChgEast=0;
+    for (UInt_t i=0; i<24; i++) {
+      if (i<12)
+	tpcChgWest += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
+      else
+	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
+    }
+    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest);
   }
 }
 
@@ -307,11 +326,23 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
 
 // these are TPC only
+	// m_glb_f0 uses hist class StMultiH1F
+        m_glb_f0->Fill(dif.x(),0.);
+        m_glb_f0->Fill(dif.y(),1.);
+        m_glb_f0->Fill(dif.z(),2.);
+
 	m_glb_xf0->Fill(dif.x());
 	m_glb_yf0->Fill(dif.y());
 	m_glb_zf0->Fill(dif.z());
 	m_glb_impactT->Fill(logImpact);
 	m_glb_impactrT->Fill(globtrk->impactParameter());
+
+	// TPC padrow histogram
+	StTpcCoordinateTransform transformer(gStTpcDb);
+	StGlobalCoordinate globalHitPosition(globtrk->detectorInfo()->firstPoint());
+	StTpcPadCoordinate padCoord;
+	transformer(globalHitPosition,padCoord);
+	m_glb_padfT->Fill(padCoord.row());
 
 // these are TPC & FTPC
 	m_pointT->Fill(globtrk->detectorInfo()->numberOfPoints());
@@ -327,6 +358,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_z0T->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvT->Fill(logCurvature);
 
+	m_glb_rfT->Fill(globtrk->detectorInfo()->firstPoint().perp());
 	m_glb_xfT->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfT->Fill(globtrk->detectorInfo()->firstPoint().y());
 	m_glb_zfT->Fill(globtrk->detectorInfo()->firstPoint().z());
@@ -354,7 +386,8 @@ void StEventQAMaker::MakeHistGlob() {
 
 // these are TPC only
 	m_pT_eta_recT->Fill(eta,lmevpt);
-	m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),
+	m_tanl_zfT->Fill(globtrk->detectorInfo()->firstPoint().z() -
+			 event->primaryVertex()->position().z(),
 		         Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
 	m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
 	m_chisq0_momT->Fill(lmevmom,chisq0);
@@ -365,6 +398,10 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1_dipT->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
 	m_chisq0_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
 	m_chisq1_zfT->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
+	if (globtrk->geometry()->origin().phi() < 0)
+	  m_chisq0_phiT->Fill(360+globtrk->geometry()->origin().phi()/degree,chisq0);
+	else
+	  m_chisq0_phiT->Fill(globtrk->geometry()->origin().phi()/degree,chisq0);
 	m_nfptonpt_momT->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaT->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
@@ -381,6 +418,10 @@ void StEventQAMaker::MakeHistGlob() {
 // now fill all TPC+SVT histograms --------------------------------------------
 
       if (globtrk->flag()>=500 && globtrk->flag()<600 ) {
+
+        m_glb_f0TS->Fill(dif.x(),0.);
+        m_glb_f0TS->Fill(dif.y(),1.);
+        m_glb_f0TS->Fill(dif.z(),2.);
 
         m_glb_xf0TS->Fill(dif.x());
         m_glb_yf0TS->Fill(dif.y());
@@ -401,6 +442,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvTS->Fill(logCurvature);
 
+	m_glb_rfTS->Fill(globtrk->detectorInfo()->firstPoint().perp());
 	m_glb_xfTS->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfTS->Fill(globtrk->detectorInfo()->firstPoint().y());
 	m_glb_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z());
@@ -425,8 +467,9 @@ void StEventQAMaker::MakeHistGlob() {
 			       Float_t(globtrk->fitTraits().numberOfFitPoints()));
 
 	m_pT_eta_recTS->Fill(eta,lmevpt);
-	m_tanl_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),
-		         Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
+	m_tanl_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z() -
+			  event->primaryVertex()->position().z(),
+			  Float_t(TMath::Tan(globtrk->geometry()->dipAngle())));
 	m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
 	m_chisq0_momTS->Fill(lmevmom,chisq0);
 	m_chisq1_momTS->Fill(lmevmom,chisq1);
@@ -436,6 +479,11 @@ void StEventQAMaker::MakeHistGlob() {
 	m_chisq1_dipTS->Fill(TMath::Tan(globtrk->geometry()->dipAngle()),chisq1);
 	m_chisq0_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq0);
 	m_chisq1_zfTS->Fill(globtrk->detectorInfo()->firstPoint().z(),chisq1);
+	if (globtrk->geometry()->origin().phi() < 0)
+	  m_chisq0_phiTS->Fill(360+globtrk->geometry()->origin().phi()/degree,chisq0);
+	else
+	  m_chisq0_phiTS->Fill(globtrk->geometry()->origin().phi()/degree,chisq0);
+
 	m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
 	m_nfptonpt_etaTS->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
@@ -457,6 +505,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_max_pointFE->Fill(globtrk->numberOfPossiblePoints());
 	m_fit_pointFE->Fill(globtrk->fitTraits().numberOfFitPoints());
 	m_glb_chargeFE->Fill(globtrk->geometry()->charge());
+	m_glb_rfFE->Fill(globtrk->detectorInfo()->firstPoint().perp());
 	m_glb_xfFE->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfFE->Fill(globtrk->detectorInfo()->firstPoint().y());
 	m_glb_zfFE->Fill(globtrk->detectorInfo()->firstPoint().z());
@@ -490,6 +539,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_max_pointFW->Fill(globtrk->numberOfPossiblePoints());
 	m_fit_pointFW->Fill(globtrk->fitTraits().numberOfFitPoints());
 	m_glb_chargeFW->Fill(globtrk->geometry()->charge());
+	m_glb_rfFW->Fill(globtrk->detectorInfo()->firstPoint().perp());
 	m_glb_xfFW->Fill(globtrk->detectorInfo()->firstPoint().x());
 	m_glb_yfFW->Fill(globtrk->detectorInfo()->firstPoint().y());
 	m_glb_zfFW->Fill(globtrk->detectorInfo()->firstPoint().z());
@@ -579,7 +629,6 @@ void StEventQAMaker::MakeHistDE() {
     }
   }
   m_ndedxr->Fill(cntrows);
-  cout << "out of dedx" << endl;
 }
 
 //_____________________________________________________________________________
@@ -669,11 +718,24 @@ void StEventQAMaker::MakeHistPrim() {
 	if (primtrk->flag()>=300 && primtrk->flag()<400) {
 
 // these are TPC only
+	  m_prim_f0->Fill(dif.x(),0.);
+	  m_prim_f0->Fill(dif.y(),1.);
+	  m_prim_f0->Fill(dif.z(),2.);
+
 	  m_prim_xf0->Fill(dif.x());
 	  m_prim_yf0->Fill(dif.y());
 	  m_prim_zf0->Fill(dif.z());
 	  m_prim_impactT->Fill(logImpact);
 	  m_prim_impactrT->Fill(primtrk->impactParameter());
+
+	  // TPC gains histograms
+	  if (event->summary()) {
+	    mHitHist->clear();
+	    mHitHist->setTrack(primtrk);
+	    mHitHist->setBField(event->summary()->magneticField());
+	    mHitHist->findHits();
+	    mHitHist->fillHistograms();
+	  }
 
 // these are TPC & FTPC
 	  m_ppointT->Fill(primtrk->detectorInfo()->numberOfPoints());
@@ -716,7 +778,8 @@ void StEventQAMaker::MakeHistPrim() {
 
 // these are TPC only
 	  m_ppT_eta_recT->Fill(eta,lmevpt);
-	  m_ptanl_zfT->Fill(primtrk->detectorInfo()->firstPoint().z(),
+	  m_ptanl_zfT->Fill(primtrk->detectorInfo()->firstPoint().z() -
+			    event->primaryVertex()->position().z(),
 			    Float_t(TMath::Tan(primtrk->geometry()->dipAngle())));
 	  m_pmom_trklengthT->Fill(primtrk->length(),lmevmom);
 	  m_pchisq0_momT->Fill(lmevmom,chisq0);
@@ -743,6 +806,10 @@ void StEventQAMaker::MakeHistPrim() {
 // now fill all TPC+SVT histograms --------------------------------------------
 
 	if (primtrk->flag()>=600 && primtrk->flag()<700) {
+
+	  m_prim_f0TS->Fill(dif.x(),0.);
+	  m_prim_f0TS->Fill(dif.y(),1.);
+	  m_prim_f0TS->Fill(dif.z(),2.);
 
 	  m_prim_xf0TS->Fill(dif.x());
 	  m_prim_yf0TS->Fill(dif.y());
@@ -788,7 +855,8 @@ void StEventQAMaker::MakeHistPrim() {
 				   Float_t(primtrk->fitTraits().numberOfFitPoints()));
 
 	  m_ppT_eta_recTS->Fill(eta,lmevpt);
-	  m_ptanl_zfTS->Fill(primtrk->detectorInfo()->firstPoint().z(),
+	  m_ptanl_zfTS->Fill(primtrk->detectorInfo()->firstPoint().z() -
+			     event->primaryVertex()->position().z(),
 			     Float_t(TMath::Tan(primtrk->geometry()->dipAngle())));
 	  m_pmom_trklengthTS->Fill(primtrk->length(),lmevmom);
 	  m_pchisq0_momTS->Fill(lmevmom,chisq0);
@@ -809,7 +877,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  else
 	    phi_deg = primtrk->geometry()->origin().phi()/degree;
 	  Float_t psi_deg = primtrk->geometry()->psi()/degree;
-	  m_psi_phiTS->Fill(phi_deg,psi_deg);
+	  m_ppsi_phiTS->Fill(phi_deg,psi_deg);
 	}
 
 /* The following are for the FTPC, which doesn't do primary tracking yet.

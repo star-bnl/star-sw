@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.h,v 1.5 2000/05/25 03:52:11 lansdell Exp $
+// $Id: StEventQAMaker.h,v 1.6 2000/07/26 19:57:50 lansdell Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 1.6  2000/07/26 19:57:50  lansdell
+// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
+//
 // Revision 1.5  2000/05/25 03:52:11  lansdell
 // mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
 //
@@ -23,14 +26,16 @@
 #include "StQABookHist.h"
 
 class StEvent;
+class HitHistograms;
 
 //////////////////////////////////////////////////////////////////////////
 
 class StEventQAMaker : public StQABookHist {
  private:
-  //! static Char_t m_VersionCVS = "$Id: StEventQAMaker.h,v 1.5 2000/05/25 03:52:11 lansdell Exp $";
+  //! static Char_t m_VersionCVS = "$Id: StEventQAMaker.h,v 1.6 2000/07/26 19:57:50 lansdell Exp $";
  
-  StEvent *event;       //! pointer to current event
+  StEvent *event;          //! pointer to current event
+  HitHistograms *mHitHist; //!
  
 //------------------------------------------------------------------------
   
@@ -57,7 +62,7 @@ class StEventQAMaker : public StQABookHist {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 1.5 2000/05/25 03:52:11 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 1.6 2000/07/26 19:57:50 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker, 1)   //StAF chain virtual base class for Makers
     };
