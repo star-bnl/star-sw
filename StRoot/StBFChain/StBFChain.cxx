@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.307 2002/11/27 03:09:18 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.308 2002/12/02 16:17:14 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -355,9 +355,6 @@ Bfc_st BFC1[] = {
   {"emcDY2","",""                    ,"db,StEvent,EmcUtil,PreEcl,Epc","StEmcADCtoEMaker","StEmcADCtoEMaker",
                                                                                     "EMC raw chain",kFALSE},
 
-  {"bbcSim"         ,"","","db,geant","StBbcSimulationMaker","StBbcSimulationMaker","BBC Simulator",kFALSE},
-
-
 
   {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -385,7 +382,11 @@ Bfc_st BFC1[] = {
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil",         "StdEdxMaker","StdEdxMaker","",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
-  {"Event"       ,"","","StEvent,tpcDB"         ,"StEventMaker","StDetectorDbMaker,StEventMaker","",kFALSE},
+
+
+  {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
+                                                                               "<StEvent creation>",kFALSE},
+
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
                           
@@ -405,6 +406,8 @@ Bfc_st BFC1[] = {
   {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
   {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
+
+  {"bbcSim"         ,"","","db,geant","StBbcSimulationMaker","StBbcSimulationMaker","BBC Simulator",kFALSE},
 
   {"analysis"    ,"","","Event"          ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
