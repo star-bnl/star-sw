@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.16 2003/09/10 19:47:45 perev Exp $
+// $Id: StKinkMaker.h,v 1.17 2004/03/16 20:59:37 jeromel Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.17  2004/03/16 20:59:37  jeromel
+// Naming clash resolved by changing name
+//
 // Revision 1.16  2003/09/10 19:47:45  perev
 // ansi corrs
 //
@@ -70,7 +73,7 @@ class StKinkTrkIdCheck;
 class StPhysicalHelixD;
 
 
-class StKinkMaker : public StMaker {
+class StOldKinkMaker : public StMaker {
  private:
   Bool_t            m_kinkEvalOn;   //switch for the evaluation
   St_tkf_tkfpar    *m_tkfpar;          //!
@@ -104,16 +107,16 @@ class StKinkMaker : public StMaker {
   void     FillIflag();
  
  public: 
-  StKinkMaker(const char *name="kink");
-  virtual  ~StKinkMaker(); 
+  StOldKinkMaker(const char *name="kink");
+  virtual  ~StOldKinkMaker(); 
   virtual  Int_t  Init();
   virtual  Int_t  Make();
   virtual  void   kinkEval(Bool_t flag=kTRUE){m_kinkEvalOn=flag;} // *MENU*
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.16 2003/09/10 19:47:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-  ClassDef(StKinkMaker,0)  
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.17 2004/03/16 20:59:37 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  ClassDef(StOldKinkMaker,0)  
 };
     
 #endif
