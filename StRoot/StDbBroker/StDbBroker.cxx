@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.24 2000/08/15 22:53:14 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.25 2000/11/03 18:57:53 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.25  2000/11/03 18:57:53  porter
+ * modified sanity check from "IsNode()" to the results of a dynamic_cast
+ * this check prevents mistaking a directory for a table
+ *
  * Revision 1.24  2000/08/15 22:53:14  porter
  * Added 2 write methods.
  *  - 1 works once "list" is requested from database
@@ -354,21 +358,29 @@ void * StDbBroker::Use(int tabID, int parID)
   //      m_descriptor[i].fColumnName[31]='\0';
   //  }
 
+
   void* pData = 0;
   m_nRows = 0;
+  SetNRows(0);
+  SetBeginDate(19950101);
+  SetBeginTimeStamp(788918400);
+  SetBeginTime(0);
+  SetEndDate(20380101);
+  SetEndTimeStamp(2145916799);
+  SetEndTime(0);
 
   StDbNode* anode = m_Nodes->getNode(tabID);
-  StDbTable* node=0;
-  if(anode && !anode->IsNode())node=(StDbTable*)anode;
-  if(node && !(node->hasDescriptor()))node->setDescriptor(GetTableDescriptor());
-  
-  if(node && mgr->fetchDbTable(node)){
+  StDbTable* node=dynamic_cast<StDbTable*>(anode);
+
+  if(!node) return pData;
+  if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
+
+  if(mgr->fetchDbTable(node)){
+
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
-  }
 
-  if(node){
-
+    // reformat timestamp for StRoot
     char* thisTime;
     m_beginTimeStamp = node->getBeginTime();
     thisTime = node->getBeginDateTime();
@@ -392,16 +404,6 @@ void * StDbBroker::Use(int tabID, int parID)
     m_EndTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
 
-  } else {
-
-    //cout<<"Broker is Returning Null for table = " << node->getMyName()<<endl;
-      SetNRows(0);
-      SetBeginDate(19950101);
-      SetBeginTimeStamp(788918400);
-      SetBeginTime(0);
-      SetEndDate(20380101);
-      SetEndTimeStamp(2145916799);
-      SetEndTime(0);
    }
 
 return pData;
@@ -420,14 +422,13 @@ Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
   }
 
   StDbNode* anode= m_Nodes->getNode(tabID);
-  if(!anode || anode->IsNode()){
-    cerr<<"WRITE FAILED StDbBroker::WriteToDb :tabID="<<tabID<<" does not reference a TABLE"<<endl;
+  StDbTable* table=dynamic_cast<StDbTable*>(anode);
+  if(!table){
+   cerr<<"WRITE FAILED StDbBroker::WriteToDb :tabID="<<tabID<<" does not reference a TABLE"<<endl;
     return 0;
   }
 
-  StDbTable* table=(StDbTable*)anode;
   if(!table->hasDescriptor())table->setDescriptor(GetTableDescriptor());
-  
   table->SetTable((char*)pArray,m_nRows);
 
   // WARNING :: A Cludge -> StDbManager has separate 'store' & 'request' times
@@ -610,7 +611,6 @@ StDbBroker::InitConfig(const char* configName, int& numRows, char* versionName)
     m_Nodes = 0;
   }
 
-
 if(m_Tree) delete m_Tree;
 
  char* dbTypeName=0;
@@ -708,7 +708,6 @@ dbConfig_st* cTab= 0;
 m_Nodes->reset();
 int numNodes = m_Nodes->getNumNodes();
 
-
 StDbNode* node;
 StDbNode* parent;
 char* parName;
@@ -721,16 +720,10 @@ unsigned int typsize=sizeof(cTab[0].tabtype)-1;
 int parID;
 int cRow;
 
-// if m_ParentType, then 1st row is built for dbType information
-
- if(m_ParentType){
-
     numRows = numNodes;
 
     cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
     node  = m_Nodes->getNode(0);
-    strncpy(cTab[0].parname,m_ParentType,parsize); 
-    cTab[0].parname[parsize]='\0';  
     strncpy(cTab[0].tabname,node->getMyName(),tabsize); 
     cTab[0].tabname[tabsize]='\0';  
     strncpy(cTab[0].tabtype,".node",typsize); 
@@ -738,11 +731,12 @@ int cRow;
     cTab[0].parID=cTab[0].tabID=0;
     cRow = 1;
 
+ if(m_ParentType){
+    strncpy(cTab[0].parname,m_ParentType,parsize); 
  } else {
-    numRows = numNodes-1;
-    cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
-    cRow = 0;
+    strncpy(cTab[0].parname,node->getMyName(),parsize); 
  }
+    cTab[0].parname[parsize]='\0';  
 
  for(int i=1; i<numNodes;i++){
 
@@ -770,10 +764,9 @@ int cRow;
    cTab[cRow].tabID=i;
    cTab[cRow].parID=parID;
    cRow++;
-
  }
 
- if(m_isVerbose){
+if(m_isVerbose){
    cout <<"****************************************************"<<endl;
    cout <<"********* Will print dbConfig table "<<endl;
  for(int k=0; k<numRows; k++) {
@@ -783,7 +776,7 @@ int cRow;
  }   
    cout <<"********* End print dbConfig table "<<endl;
    cout <<"****************************************************"<<endl;
- }
+}
 
 return cTab;
 }
