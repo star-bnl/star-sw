@@ -19,26 +19,27 @@ C :>--------------------------------------------------------------------
       Integer         Lnmax,Lnam0,Lnam,Nbytpw,Nmh
       Parameter       (Lnmax=50,Lnam0=35,Nbytpw=4,Nmh=15)
       INTEGER         G2T_GET_HITS,p_hits(*),p_track(*),p_vert(*)
-      integer         nh/0/,i,j,k,l,e,f,m,n,ip,in,jX,jP,iX,iC,
-     >                LenT,LenH,xD2M,pD2M,IH,JTRA,Iprin
+      integer         nh/0/,i,j,k,l,e,f,m,n,ip,in,jX,jP,iX,iC,iPT,iLP,
+     >                iET,LenT,LenH,xD2M,pD2M,IH,JTRA,Iprin
       Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
-      integer         IQQ(100),iadr(Nmh),jadr(Nmh),NUMBV(Nmh),phits(Nmh)
-      Character*4     Csys*4/' '/,chit(Nmh)*4,col*80,typ*80
-      real            xxx(3),ccc(3),QQ(100)
+      integer         IQQ(Lnmax),iadr(Nmh),jadr(Nmh),NUMBV(Nmh),phits(Nmh)
+      Character*4     Csys*4/' '/,chit(Nmh)*4,cnam
+      Character*80    col,typ
+      real            xxx(3),ccc(3),QQ(Lnmax)
       Equivalence     (QQ(1),IQQ(1),id)
 
       character*4     Gname(Lnmax),Tname(Lnmax)
       integer         iflg(Lnmax), jflg(Lnmax)
       Integer         id,trac,next,volume
       Real            x,   xx,   c,   p   ,r,rr,phi,the,eta,
-     >                tdr,tof,Slen,Step,Etot,Lgam,Shtn,Elos,User,Unkn
+     >                tdr,tof,Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn
       common /genhit/ id,trac,next,volume,
      >                x(3),xx(3),c(3),p(4),r,rr,phi,the,eta,
-     >                tdr,tof,Slen,Step,Etot,Lgam,Shtn,Elos,User,Unkn(3)
+     >                tdr,tof,Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       data        (Gname(i),i=1,Lnam0) /'id','trac','next','volume',
      >  'X','Y','Z','XX','YY','ZZ','CX','CY','CZ','PX','PY','PZ',
      >  'PTOT','R','RR','PHI','THE','ETA','TDR','TOF','SLEN','STEP',
-     >  'ETOT','LGAM','SHTN','ELOS','USER','BIRK','DE','NONE','UNKN'/
+     >  'ETOT','LGAM','LPTO','ELOS','USER','BIRK','DE','NONE','UNKN'/
       data        (Tname(i),i=1,Lnam0) /'id','trac','next','volume',
      >  '_', '_', '_', 'x', '_', '_', '_', '_', '_', 'p', '_','_',
      >  '_', '_', '_', '_', '_', '_', '_','tof','s_tr','ds',  
@@ -46,15 +47,16 @@ C :>--------------------------------------------------------------------
       data            Lnam/Lnam0/
       Integer         TDM_GET_SPEC, TDM_GET_COLUMN, TDM_GET_CCOUNT
       External        TDM_GET_SPEC, TDM_GET_COLUMN, TDM_GET_CCOUNT
-      Integer         AgFHIT1, ISLFLAG, G2T_VOLUME_ID
-      External        AgFHIT1, ISLFLAG, G2T_VOLUME_ID
-      real            FSHORT
+      Integer         AgFHIT1, ISLFLAG, G2T_VOLUME_ID, IG2TPOS
+      External        AgFHIT1, ISLFLAG, G2T_VOLUME_ID, IG2TPOS
+      Integer         IPOS
+      IPOS(cnam) =    IG2TPOS(cnam,Gname,Lnam0)
 *   
       G2T_GET_HITS = STAFCV_BAD
       Iprin = ISLFLAG('G2TM','PRIN')
       LenH  = p_hits_h.rbytes/NBytPW
       LenT  = p_track_h.rbytes/NBytPW
-      call vzero (QQ,   100)
+      call vzero (QQ,   Lnmax)
       call vzero (iflg, Lnmax)
       call vzero (iadr, Nmh)
       call vzero (phits,Nmh)
@@ -71,19 +73,26 @@ C :>--------------------------------------------------------------------
 *     - what comes directly (not measurments) should be in both tables - (T&G)
 *     - set D2M conversion flags if any of xyz or Cxyz are measured.
 *      
-      iX=0
-      iC=0
-      jX=0
-      jP=0
+      iX  = 0
+      iC  = 0
+      jX  = 0
+      jP  = 0
+      iET = 0
+      iPT = 0
+      iLP = 0
       do j=1,Lnam
-         If (Gname(j).eq.Tname(j)) iflg(j)=99
-         If (Gname(j).eq. 'X'  )   iX=j
-         If (Gname(j).eq. 'CX' )   iC=j
-         If (Gname(j).eq. 'XX' )   jX=j
-         If (Gname(j).eq. 'PX' )   jP=j
+         If (Gname(j).eq.Tname(j))  iflg(j)=99
+         If (Gname(j).eq. 'X'   )   iX=j
+         If (Gname(j).eq. 'CX'  )   iC=j
+         If (Gname(j).eq. 'XX'  )   jX=j
+         If (Gname(j).eq. 'PX'  )   jP=j
+         If (Gname(j).eq. 'ETOT')   iET=j
+         If (Gname(j).eq. 'PTOT')   iPT=j
+         If (Gname(j).eq. 'LPTO')   iLP=j
       enddo
-      if (iX*iC*jX*jP.le.0) print *,' errenious G table ',iX,iP,jX,jP
-
+      if (iX*iC*jX*jP.le.0) print *,' errenious G1 table ',iX,iP,jX,jP
+      if (iET*iPT*iLP.le.0) print *,' errenious G2 table ',iET,iPT,iLP
+*
       nh = p_hits_h.nok
 *     STAR system TLA code is extracted from the table header:
       if   (  p_hits_h.name(1:4) .eq.'g2t_' 
@@ -109,9 +118,11 @@ C :>--------------------------------------------------------------------
       if (ip.eq.0) print *,'hit_'//Csys(1:3)//'_p not found in g2t_track'
       if (in.eq.0) print *,'n_'//Csys(1:3)//'_hit not found in g2t_track'
 *
-*     3. prepare map to unfold an input hit into full hit
+*     3. prepare map to unfold an input hit into the full hit
 *     Each filled variable in the extended hit is flagged by iflg - 
 *     its position in measurements. Iadr is measurement reference.
+*     Positive Iflg means direct filling (unpacking),
+*     negative Iflg means this variable should be calculated
 *
       Call AgFDPAR (hits,Chit,FHmin,FHmax,FHbin)
       if  (Iprin.ge.4)  print *,' chit=',chit
@@ -136,11 +147,20 @@ C :>--------------------------------------------------------------------
          print *,' D2M  flags  are = ',xD2M,pD2M
          print *,' pointer/counter position =',ip,in
       endif
+
+*     transformation rules: Ptot<->LPtot, Etot<->Ptot
+      if (iflg(iPT).eq.0) iflg(iPT)=-iflg(iLP)
+      if (iflg(iLP).eq.0) iflg(iLP)=-iflg(iPT)
+
+*     transformation rules: cos<->Pi, Xloc<->Xglob
       do i=0,2
-         if (iflg(iC+i).gt.0.and.iflg(jP+i).eq.0) iflg(jP+i)=-iflg(iC+i)
-         if (iflg(iX+i).gt.0.and.iflg(jX+i).eq.0) iflg(jX+i)=-iflg(iX+i)
+         if (iflg(jP+i).eq.0) iflg(jP+i)=-iflg(iC+i)
+         if (iflg(iC+i).eq.0) iflg(iC+i)=-iflg(jP+i)
+         if (iflg(jX+i).eq.0) iflg(jX+i)=-iflg(iX+i)
+         if (iflg(iX+i).eq.0) iflg(iX+i)=-iflg(jX+i)
       enddo
-      If (Iprin.gt.1) then
+      
+      If (Iprin.ge.3) then
          print *,'hits are filling the following standard elements'     
          print *,Gname
          print *,iflg
@@ -171,8 +191,6 @@ C :>--------------------------------------------------------------------
       endif
 
       call VZERO(numbv,Nmh)
-******      if (pD2M.gt.0) jadr
-*
 * - - -     
       DO WHILE (agfhit1(ih,jtra,numbv,hits).eq.0)
 *
@@ -183,16 +201,18 @@ C :>--------------------------------------------------------------------
          if (csys(1:3).eq.'tpc' .and. numbv(1).le.1 .and. hits(3).le.0)
      >      print *,' tpc hit ',(numbv(i),i=1,3),(hits(i),i=1,3)
          do k=1,Nmh
-            if (iadr(k).gt.0) QQ(iadr(k))=fshort(hits(k))
+            if (iadr(k).gt.0) QQ(iadr(k))=(hits(k))
          enddo
 
 C        overwrite global coordinates with local if they are not measured
          if (abs(ih).eq.1)  call Agfpath(numbv)
          if ( xD2M .ne. 0)  call GDTOM(x,xxx,1)
          if ( pD2M .ne. 0)  call GDTOM(c,ccc,2)
+         if ( iflg(iPT).le.0.and.iflg(iLP).gt.0) p(4)=10.**Lpto
+         if ( iflg(iLP).le.0.and.iflg(iPT).gt.0) Lpto=alog10(p(4))
          do i=1,3
-            if (iflg(jX+i-1).le.0.and.xD2M.gt.0) xx(i)=fshort(xxx(i))
-            if (iflg(jP+i-1).le.0.and.pD2M.gt.0) p(i)=fshort(ccc(i)*p(4))
+            if (iflg(jX+i-1).le.0.and.xD2M.gt.0) xx(i)=(xxx(i))
+            if (iflg(jP+i-1).le.0.and.pD2M.gt.0) p(i)=(ccc(i)*p(4))
          enddo
 *         print *,nh,' X, c =',x,c
 *         print *,nh,' XX,cc=',xxx,ccc
@@ -221,19 +241,11 @@ C        overwrite global coordinates with local if they are not measured
       RETURN
       end
 
-      function fshort(r)
-      common /gcflag/ IDEBUG
-      fshort=r
-      return
-      if (r.eq.0) return
-      s=sign(1.,r)
-      a=abs(r)
-      l=alog10(a)+100
-      e=10.**(l-100)
-      i=a/e*1000+0.5
-      fshort=i*0.001*e*s
-      if (Idebug.ge.3) print *,'short:',r,s,a,l,e,i,fshort
+      function Ig2tpos(name,table,L)
+      character*4  name,table(L)
+      do i=1,L
+         Ig2tpos=i
+         if (name.eq.table(i)) return
+      enddo
+         Ig2tpos=0
       end
-
-
-

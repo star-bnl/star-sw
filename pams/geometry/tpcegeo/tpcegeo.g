@@ -301,14 +301,14 @@ block TPAD is a real padrow with dimensions defined at positioning time
 *
 *     The following is the corrected hits definition: 25-dec-98 (PN)
       HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10:   cy:10:   cz:10:,
-                     Ptot:18:(0,100)      Sleng:.1:(0,500),
+                     LPtot:18:(-3,2)      Sleng:.1:(0,500),
                      ToF:16:(0,1.e-6)     LGAM:16:(-2,2),    
                      Step:11:(0,5)        USER:21:(-0.1,0.1) 
 *
-*     HITS     TPAD  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
-*                    px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
-*                    Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-*                    LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
+*     HITS     TPAD  xx:16:SHX(-250,250)  yy:16:(-250,250)   zz:32:(-250,250),
+*                    px:20:(-100,100)     py:20:(-100,100)   pz:20:(-100,100),
+*                    Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,10),
+*                    LGAM:16:(-2,2)       USER:32:(-0.1,0.1) 
 endblock
 *
 ********************************************************************************
