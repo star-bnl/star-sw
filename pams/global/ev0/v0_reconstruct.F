@@ -241,10 +241,14 @@ C---- find square of impact param of reconstructed particle------
      +                   ,iflag)
                     IF((rmin.le.rmin_cut).and.(iflag.ne.2)) THEN
                        ok=ok+1
-                       if (ok.gt.ev0out_h.maxlen .or.
-     +                      vertex_h.nok .eq.  vertex_h.maxlen) return ! wkw
                        ev0out_h.nok= ev0out_h.nok+1
                        vertex_h.nok = vertex_h.nok +1
+                       if (ok.gt.ev0out_h.maxlen .or.
+     +                      vertex_h.nok .eq.  vertex_h.maxlen) then
+                          write(6,*) 'Too many v0s'
+                          
+                          return ! wkw
+                       endif
                        vertex(vertex_h.nok).x=xpp(1)
                        vertex(vertex_h.nok).y=xpp(2)
                        vertex(vertex_h.nok).z=xpp(3)
