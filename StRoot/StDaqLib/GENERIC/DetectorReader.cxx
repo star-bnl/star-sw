@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.7 2000/06/13 17:29:30 jml Exp $
+ * $Id: DetectorReader.cxx,v 1.8 2000/06/30 21:51:15 perev Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.8  2000/06/30 21:51:15  perev
+ * L3 stuff added
+ *
  * Revision 1.7  2000/06/13 17:29:30  jml
  * Adding L3 Detector reader and template L3 Reader
  *
@@ -164,8 +167,8 @@ TRG_Reader *getTRGReader(EventReader *er)
 
 L3_Reader *getL3Reader(EventReader *er)
 {
-  Bank_L3P *pL3P;
-  pL3P = (Bank_L3P *)er->findBank("L3P");
+  Bank_L3_P *pL3P;
+  pL3P = (Bank_L3_P *)er->findBank("L3_P");
   if(pL3P)
   {
     if(!pL3P->test_CRC()) printf("CRC error in L3P: %s %d\n",

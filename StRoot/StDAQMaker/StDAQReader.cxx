@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.17 2000/06/27 23:56:47 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.18 2000/06/30 21:53:40 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.18  2000/06/30 21:53:40  perev
+ * L3 stuff added
+ *
  * Revision 1.17  2000/06/27 23:56:47  perev
  * Helen DAQ SVT update
  *
@@ -84,10 +87,11 @@ StDAQReader::StDAQReader(const char *file)
 {
   fFd = -1;
   fVerbose = 0;
-  fEventReader = 0;
-  fTPCReader = 0;
-  fRICHReader = 0;
-  fSVTReader = 0;
+  fEventReader	= 0;
+  fTPCReader 	= 0;
+  fRICHReader 	= 0;
+  fL3Reader 	= 0;
+  fSVTReader 	= 0;
   fOffset = 0;
   fFile = 0;
   fEventInfo = new DAQEventInfo;
@@ -126,6 +130,7 @@ int StDAQReader::close()
   if(fTPCReader) 	fTPCReader ->close();  
   if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
+//if (fL3Reader) 	fL3Reader  ->close();  
   fOffset = -1;
   return 0;
 }
@@ -137,8 +142,9 @@ StDAQReader::~StDAQReader()
 //_____________________________________________________________________________
 int StDAQReader::readEvent()
 {  
-  delete fEventReader;
-  delete fRICHReader; fRICHReader = 0;
+  delete fEventReader;	fEventReader=0;
+  delete fRICHReader; 	fRICHReader = 0;
+  delete fL3Reader; 	fL3Reader = 0;
   if (fOffset == -1) return kStEOF;
   fEventReader = new EventReader();
   fEventReader->setVerbose(fVerbose);
@@ -223,6 +229,14 @@ StRICHReader *StDAQReader::getRICHReader()
     fRICHReader = ::getRICHReader(fEventReader);
   }
   return fRICHReader;
+}
+//_____________________________________________________________________________
+StL3Reader *StDAQReader::getL3Reader() 
+{
+  if (!fL3Reader) {
+    fL3Reader = ::getL3Reader(fEventReader);
+  }
+  return fL3Reader;
 }
 //_____________________________________________________________________________
 StFTPCReader *StDAQReader::getFTPCReader() 
