@@ -2,13 +2,15 @@
 // Author: Piotr A. Zolnierczuk
 class StChain;
 class StMuTrack;
+class EEmcTower;
+class TList;
 
 StChain *chain=0;
 
 void
 ttm
 (
- char* inpDir  = "/star/fy2003/mudst/",                        // MuDST directory
+ char* inpDir  = "/star/2003/mudst/",                        // MuDST directory
  char* inpFile = "",// "st_physics_4145010_raw_0010001.MuDst.root",  // MuDST file(s)
  char* outFile = "R4145010.root",
  Int_t nFiles  = 1,                                            // # of MuDST file(s)
@@ -16,6 +18,7 @@ ttm
  )
 { 
   gErrorIgnoreLevel=1999;
+  cerr << "<?xml version=\"1.0\">" << endl;
 
   // load root/root4star libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
@@ -50,7 +53,7 @@ ttm
   // finally after so many lines we arrive at the good stuff
   EETowTrackMatchMaker *mm = new  EETowTrackMatchMaker ("TTM",muDstMaker,eemcDbMaker);
   mm->SetFileName(outFile);
-  mm->Summary(cout);    // 
+  mm->Summary(cerr);    // 
 
   StMuDebug::setLevel(0);
 
@@ -61,8 +64,25 @@ ttm
   //---------------------------------------------------
   for(int counter=0; nEvents<0 || counter<nEvents ; ++counter) {
     if( (stat = chain->Make()) != 0 ) break;
-    if(counter%1000==0) cerr << "analyzed " << counter << " events" << endl;
-  }
+    if(counter%1000==0) cout << "analyzed " << counter << " events" << endl;
 
-  mm->Summary(cout);    // 
+    TIter  nextTower(mm->GetTowers());
+    TIter  nextMatch(mm->GetMatch()->GetTable());
+    
+    EEmcTower *tower;
+    StMuTrack *track;
+    TPair     *mapPair;
+ 
+    if(mm->GetMatch()->GetTable()->IsEmpty()) continue;
+
+    cerr << "<Event>\n";
+    while ((mapPair = (TPair*) nextMatch())) {
+      tower = (EEmcTower *)mapPair->Key();
+      track = (StMuTrack *)mapPair->Value();
+      towerHit->Out(cerr);
+    }
+    cerr << "</Event>" << endl;
+    //while( (tower=(EEmcTower *)nextTower()) != NULL ) tower->Out(cout);
+  }
+  mm->Summary(cerr);    // 
 }
