@@ -1,24 +1,22 @@
-// StDaqClfMaker
-//
-// Offline version of DAQ cluster finder
-// 
-// Input:   TPC Table Dataset
-// Output:  tphit Table 
-//
-//
-
-////////////////////////////////////////////////////////////////////////////  
-//                                                                        //
-// St_TLA_Maker class for Makers                                          //
-//                                                                        //
-// This commented block at the top of the source file is considered as    //
-// this class description to be present on the this class Web page.       //
-//  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html                //
-//                                                                        //
-//  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html   //
-//                                                                        //
-////////////////////////////////////////////////////////////////////////////
-
+/***************************************************************************
+ *
+ * $Id: StDaqClfMaker.cxx,v 1.2 2002/03/02 15:45:07 jml Exp $
+ *
+ * Author: Jeff Landgraf, BNL Feb 2002
+ ***************************************************************************
+ *
+ * Description:  Offline version of DAQ cluster finder
+ *               
+ * Input:  TPC RAW table dataset
+ * Output: tphit Table
+ *
+ ***************************************************************************
+ *
+ * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.2  2002/03/02 15:45:07  jml
+ * updated the CVS log comments
+ *
+ **************************************************************************/
 
 #include "StBFChain.h"
 #include "St_DataSetIter.h"
