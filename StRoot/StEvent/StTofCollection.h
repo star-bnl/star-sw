@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.5 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofCollection.h,v 2.6 2003/05/23 16:10:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.6  2003/05/23 16:10:59  ullrich
+ * Changed name of access functions.
+ *
  * Revision 2.5  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -54,11 +57,11 @@ public:
     //const StSPtrVecTofUnit&    tofUnits() const;
     //StSPtrVecTofUnit&          tofUnits();
 
-    const StSPtrVecTofCell&    tofCell() const;
-    StSPtrVecTofCell&          tofCell();
+    const StSPtrVecTofCell&    tofCells() const;
+    StSPtrVecTofCell&          tofCells();
 
-    const StSPtrVecTofSlat&    tofSlat() const;
-    StSPtrVecTofSlat&          tofSlat();
+    const StSPtrVecTofSlat&    tofSlats() const;
+    StSPtrVecTofSlat&          tofSlats();
     
     const StSPtrVecTofHit&     tofHits() const;
     StSPtrVecTofHit&           tofHits();
