@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireBinEntry.hh,v 1.8 2003/12/24 13:44:52 fisyak Exp $
+ * $Id: StTrsWireBinEntry.hh,v 1.9 2004/04/07 18:56:26 perev Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireBinEntry.hh,v $
+ * Revision 1.9  2004/04/07 18:56:26  perev
+ * Improve alignment
+ *
  * Revision 1.8  2003/12/24 13:44:52  fisyak
  * Add (GEANT) track Id information in Trs; propagate it via St_tpcdaq_Maker; account interface change in StTrsZeroSuppressedReaded in StMixerMaker
  *
@@ -79,10 +82,10 @@ public:
     
 private:
     StThreeVector<double> mPosition;
-    float                 mNumberOfElectrons;
     double                mSigmaL;
     double                mSigmaT;  
     double                mD[3];
+    float                 mNumberOfElectrons;
     int                   mId;
 };
 inline const StThreeVector<double>&
