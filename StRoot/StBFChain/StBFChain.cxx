@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.370 2003/12/30 14:30:41 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.371 2004/01/02 20:21:22 starreco Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -159,7 +159,7 @@ Bfc_st BFC1[] = {
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
 
-  // Year 3 chains 
+  // Year 3 chains
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
@@ -683,7 +683,7 @@ Bfc_st BFC2[] = {
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
 
-  // Year 3 chains 
+  // Year 3 chains
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
@@ -1337,7 +1337,7 @@ Int_t StBFChain::Instantiate()
 	    pars->doStEventInput=kTRUE; // We always want to have this I think?
 	    pars->doStEventOutput=kTRUE;
 	    pars->baseName="_pars.txt";
-	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ?? 
+	    pars->useSvt=kTRUE;         // SVT used in IT but not active. ??
 	                                // Pre-2001 data, will build only 1 ladder?
 	    if (GetOption("SvtIT")) pars->activeSvt=kTRUE;
 	    if (GetOption("FtpcIT")){
@@ -1472,7 +1472,7 @@ Int_t StBFChain::Instantiate()
 	    // bit 1  =   do NOISE_ELIM
 	    // bit 2  =   do ASIC_THRESHOLDS
 	    if ( GetOption("fcf")   ){
-	      if ( GetOption("Trs")   )  tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN 
+	      if ( GetOption("Trs")   )  tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN
 	      else                       tcpdaqMk->SetCorrection(0x0); // fcf && ! trs => no corrections
 	    } else {
 	      tcpdaqMk->SetCorrection(0x7);
