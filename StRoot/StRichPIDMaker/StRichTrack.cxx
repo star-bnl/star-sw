@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.5 2000/11/01 17:43:10 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.6 2000/11/07 14:13:24 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.5  2000/11/01 17:43:10  lasiuk
- *  default arguments initialization in c'tor.  Addition of init() member
- *  function to handle generic DB initialization and removal of virtual keyword
+ *  Revision 2.6  2000/11/07 14:13:24  lasiuk
+ *  add possibility of .4*px/pz correction to the track extrapolation
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -119,12 +118,16 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     : mStTrack(0),              mPidTrait(0),    mAssociatedMIP(0),
       mMagneticField(magField), mL3Track(track),
 {
-    StRichLocalCoordinate richAnodeWirePlane_Local(0.0, 0.0, 0.0 + anodeDistanceToPadPlane);	
+
+    //
+       
     // define system parameters
-    (*coordinateTransformation)(edgeOfRichRadiator_Local,edgeOfRichRadiator_Global);
+    this->init();
+    
     // need to include mwpc gap correction, 
     // origin is located in center of gap, not on padplane --> 2 mm
-    (*coordinateTransformation)(richAnodeWirePlane_Local,richAnodeWirePlane_Global);
+    double anodeDistanceToPadPlane = myGeometryDb->anodeToPadSpacing();
+    StRichLocalCoordinate edgeOfRichRadiator_Local(0.0,
 						   0.0,
 						   myGeometryDb->proximityGap() +
 						   myGeometryDb->quartzDimension().z() +
@@ -132,7 +135,6 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     
     // MIP is measured at anode position
     StRichLocalCoordinate richAnodeWirePlane_Local(0.,
-    
 						   0.,
 						   0.+anodeDistanceToPadPlane);	
     StGlobalCoordinate edgeOfRichRadiator_Global;
@@ -154,15 +156,17 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     double py=track->pt * sin(track->psi);
     double pz=track->pt * track->tanl;
 
-    StThreeVectorD tpcMom(0,0,0);
+    StPhysicalHelixD mHelix(StThreeVectorD(px,py,pz),
 			    StThreeVectorD(x0,y0,z0),
 			    magField*kilogauss,
 			    track->q);    
     
-    StThreeVector<double> tpcMomentum(tpcMom.x(), tpcMom.y(), tpcMom.z());    
+    StThreeVectorD rr(edgeOfRichRadiator_Global.position().x(),
+		      edgeOfRichRadiator_Global.position().y(),
+		      edgeOfRichRadiator_Global.position().z());
     
     StThreeVectorD rp(richAnodeWirePlane_Global.position().x(),
-    StThreeVector<double> richLocalMomentum(0,0,0);
+		      richAnodeWirePlane_Global.position().y(),
 		      richAnodeWirePlane_Global.position().z());
     
     double mPathLengthAtRadiator  = mHelix.pathLength(rr,richNormal);
@@ -172,63 +176,84 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     if (mPathLengthAtRadiator<10e10 && mPathLengthAtRadiator>0) {
 	tpcMom = mHelix.momentumAt(mPathLengthAtRadiator,magField*kilogauss);	
     }
+
+    StThreeVector<double> tpcMomentum(tpcMom.x(),
+				      tpcMom.y(),
+				      tpcMom.z());    
     
-    StThreeVectorD ppMomentum(0,0,0);
+    // do the momentum vector rotation here
+    StThreeVector<double> richLocalMomentum;
+    momentumTransformation->localMomentum(tpcMomentum,richLocalMomentum);
+    
+    // impact point on radiator
+    StGlobalCoordinate globalImpactPoint(mHelix.x(mPathLengthAtRadiator),
+					 mHelix.y(mPathLengthAtRadiator),
+					 mHelix.z(mPathLengthAtRadiator));
+    
     StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
     (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
 //     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
     double xCorrection = 0.;
     // correction to the x position of the impact point
     // If this correction is really due to the effect of
+    // the offline software cluster finder artificially
     // shifting the x position (z Global) of the track,
     // this may not be appropriate in the L3 unless we
     // use the offline hits as well
+    //
     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
     //double xCorrection = 0.;
+    richTransformedImpactPoint.position().setX(richTransformedImpactPoint.position().x()-xCorrection);
+
+    StThreeVectorD ppMomentum;
+    
     // pad plane intersection (projected MIP)
     StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
     StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
 
     if (mPathLengthAtPadPlane < 10e10  && mPathLengthAtRadiator>0) {
 
-    setMomentum(richLocalMomentum);
-    setUnCorrectedMomentum(richLocalMomentum);
-    setImpactPoint(richTransformedImpactPoint.position());
-    setProjectedMIP(localImpactPointAtAnodeWirePlane.position());
-    setPathLength(mPathLengthAtRadiator);
+	globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
+	globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
+	globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));	
+
+	(*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,
 				    localImpactPointAtAnodeWirePlane);
 
 	localImpactPointAtAnodeWirePlane.position()
 	    .setX(localImpactPointAtAnodeWirePlane.position().x()-xCorrection);
-    : mStTrack(tpcTrack),  mPidTrait(0),  mAssociatedMIP(0),mMagneticField(magField)
 
+	ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,magField*kilogauss);
     }
-    
-    // define system parameters
 
     StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
-
-        
+    momentumTransformation->localMomentum(padPlaneMomentum,mMomentumAtPadPlane);
 
     this->setMomentum(richLocalMomentum);
     this->setUnCorrectedMomentum(richLocalMomentum);
-    StRichLocalCoordinate edgeOfRichRadiator_Local(0.0,
-						   0.0,
-						   myGeometryDb->proximityGap() +
-						   myGeometryDb->quartzDimension().z() +
-						   myGeometryDb->radiatorDimension().z());
-    
-    : mStTrack(tpcTrack),       mPidTrait(0),  mAssociatedMIP(0),
-    StRichLocalCoordinate richAnodeWirePlane_Local(0.0, 0.0, myGeometryDb->anodeToPadSpacing());
+    this->setImpactPoint(richTransformedImpactPoint.position());
+    this->setProjectedMIP(localImpactPointAtAnodeWirePlane.position());
+    this->setPathLength(mPathLengthAtRadiator);
+}
+#endif
 
+StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
+    : mStTrack(tpcTrack),       mPidTrait(0),  mAssociatedMIP(0),
+      mMagneticField(magField)
+{
+    this->init();
+
+    //
     // need to include mwpc gap correction, 
+    // origin is located in center of gap, not on padplane --> 2 mm
     // make correction for gap distance of 4 mm
     //
     StRichLocalCoordinate
 	edgeOfRichRadiator_Local(0., 0., myGeometryDb->proximityGap() +
 				 myGeometryDb->quartzDimension().z() +
 				 myGeometryDb->radiatorDimension().z());
-    (*coordinateTransformation)(richAnodeWirePlane_Local,richAnodeWirePlane_Global);
+
+    //
     // MIP is measured at anode position
     //
     StRichLocalCoordinate
@@ -249,12 +274,11 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     StGlobalCoordinate CTB_Global;
     (*coordinateTransformation)(CTB_Local,CTB_Global);
 
-
     
     StPhysicalHelixD  mHelix = tpcTrack->geometry()->helix();    
 
     mRadiatorGlobal.setX(edgeOfRichRadiator_Global.position().x());
-    StThreeVectorF tpcMom(0,0,0);
+    mRadiatorGlobal.setY(edgeOfRichRadiator_Global.position().y());
     mRadiatorGlobal.setZ(edgeOfRichRadiator_Global.position().z());
 		     
  
@@ -265,7 +289,9 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     mCTBGlobal.setX(CTB_Global.position().x());
     mCTBGlobal.setY(CTB_Global.position().y());
     mCTBGlobal.setZ(CTB_Global.position().z());
-    StThreeVectorF richLocalMomentum(tempRichLocalMomentum.x(),tempRichLocalMomentum.y(),tempRichLocalMomentum.z());
+    
+    float mPathLengthAtRadiator  = mHelix.pathLength(mRadiatorGlobal,mRichNormal);
+    float mPathLengthAtPadPlane  = mHelix.pathLength(mAnodeGlobal,mRichNormal);
     float mPathLengthAtCTB       = mHelix.pathLength(mCTBGlobal,mRichNormal);
     
     StThreeVectorF tpcMom;
@@ -286,15 +312,15 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     // impact point in CTB
     StThreeVectorF localCTBImpactPoint(-999,-999,-999);
     if (mPathLengthAtCTB>0 && mPathLengthAtCTB<10e10) {
-    
-    
+      StGlobalCoordinate CTBGlobal(mHelix.x(mPathLengthAtCTB),
 				   mHelix.y(mPathLengthAtCTB),
 				   mHelix.z(mPathLengthAtCTB));
-    
-    
-    StThreeVectorF ppMomentum(0,0,0);
-    
+
+      StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
+      (*coordinateTransformation)(CTBGlobal,richTransformedImpactPoint);
+
       localCTBImpactPoint.setX(richTransformedImpactPoint.position().x());
+      localCTBImpactPoint.setY(richTransformedImpactPoint.position().y());
       localCTBImpactPoint.setZ(richTransformedImpactPoint.position().z());
     }
 
@@ -303,54 +329,68 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
 					 mHelix.y(mPathLengthAtRadiator),
 					 mHelix.z(mPathLengthAtRadiator));
 
-      (*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,localImpactPointAtAnodeWirePlane);
+    StRichLocalCoordinate richTransformedImpactPoint(-999,-999,-999);
+    (*coordinateTransformation)(globalImpactPoint,richTransformedImpactPoint);
         
     StThreeVectorF ppMomentum;
 
     //
-  StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
-  StThreeVector<double> tempMomentum(0,0,0);
-  momentumTransformation->localMomentum(padPlaneMomentum,tempMomentum);
-  mMomentumAtPadPlane.setX(tempMomentum.x());
-  mMomentumAtPadPlane.setY(tempMomentum.y());
-  mMomentumAtPadPlane.setZ(tempMomentum.z());
-  float lastHitDCA = mHelix.distance(tpcTrack->detectorInfo()->lastPoint());
+    // pad plane intersection (projected MIP)
+    //
+    StGlobalCoordinate    globalImpactPointAtAnodeWirePlane(-999,-999,-999);
+    StRichLocalCoordinate localImpactPointAtAnodeWirePlane(-999,-999,-999);  
+    
+    if (mPathLengthAtPadPlane < 10e10  && mPathLengthAtPadPlane>0) {
+      globalImpactPointAtAnodeWirePlane.position().setX(mHelix.x(mPathLengthAtPadPlane));
+      globalImpactPointAtAnodeWirePlane.position().setY(mHelix.y(mPathLengthAtPadPlane));
+      globalImpactPointAtAnodeWirePlane.position().setZ(mHelix.z(mPathLengthAtPadPlane));
+      
+      (*coordinateTransformation)(globalImpactPointAtAnodeWirePlane,
+				  localImpactPointAtAnodeWirePlane);
+      
+      ppMomentum =  mHelix.momentumAt(mPathLengthAtPadPlane,mMagneticField*kilogauss);
+    }
+    
+    StThreeVector<double> padPlaneMomentum(ppMomentum.x(),ppMomentum.y(),ppMomentum.z());
+    StThreeVector<double> tempMomentum;
+    momentumTransformation->localMomentum(padPlaneMomentum,tempMomentum);
+    mMomentumAtPadPlane.setX(tempMomentum.x());
+    mMomentumAtPadPlane.setY(tempMomentum.y());
+    mMomentumAtPadPlane.setZ(tempMomentum.z());
+    
+    float lastHitDCA = mHelix.distance(tpcTrack->detectorInfo()->lastPoint());
 
-	//
-	// Topology Map (functionality should probably be put in Topology Map)
-	//
-	const StTrackTopologyMap& tMap = mStTrack->topologyMap();
-	vector<int> rows;
-	vector<int> emptyRows(1,0);
-	for (int i=1; i<46; ++i) {
-	  if (tMap.hasHitInRow(kTpcId,i)) { rows.push_back(i);} 
-	  else { emptyRows.push_back(i);} 
-	}
-	emptyRows.push_back(46);
+    //
+    // Topology Map (functionality should probably be put in Topology Map)
+    //
+    const StTrackTopologyMap& tMap = mStTrack->topologyMap();
+    vector<int> rows;
+    vector<int> emptyRows(1,0);
+    for (int i=1; i<46; ++i) {
+	if (tMap.hasHitInRow(kTpcId,i)) { rows.push_back(i);} 
+	else { emptyRows.push_back(i);} 
+    }
+    emptyRows.push_back(46);
+    
+    this->setMaxGap(maxSeq(rows)); // max number of continuous empty rows
+    this->setMaxChain(maxSeq(emptyRows)); // max number of continuous used rows
+    this->setFirstRow(rows.front());
+    this->setLastRow(rows.back());
+//     double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
+    double xCorrection = 0.;
+    this->setUnCorrectedMomentum(richLocalMomentum);
 
-	setMaxGap(maxSeq(rows)); // max number of continuous empty rows
-	setMaxChain(maxSeq(emptyRows)); // max number of continuous used rows
-	setFirstRow(rows.front());
-	setLastRow(rows.back());
-
-
-  setMomentum(richLocalMomentum);
-  setUnCorrectedMomentum(richLocalMomentum);
-
-  StThreeVectorF tempHit(richTransformedImpactPoint.position().x(),
-			 richTransformedImpactPoint.position().y(),
-			 richTransformedImpactPoint.position().z());
-
-  setImpactPoint(tempHit);
-
-  StThreeVectorF tempMip(localImpactPointAtAnodeWirePlane.position().x(),
-			 localImpactPointAtAnodeWirePlane.position().y(),
-			 localImpactPointAtAnodeWirePlane.position().z());
-  setProjectedMIP(tempMip);
-  setProjectedCTB(localCTBImpactPoint);
-  setPathLength(mPathLengthAtRadiator);
-  setLastHitDCA(lastHitDCA);
-  setLastHit(tpcTrack->detectorInfo()->lastPoint());
+    //
+    // This is the radiator impact position
+    // --> the x component must be shifted by:
+    //  .4*px/pz
+    //
+    double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
+    //double xCorrection = 0.;
+    
+    StThreeVectorF tempHit(richTransformedImpactPoint.position().x() - xCorrection,
+			   richTransformedImpactPoint.position().y(),
+			   richTransformedImpactPoint.position().z());
     
     this->setImpactPoint(tempHit);
 
@@ -365,7 +405,7 @@ StRichTrack::StRichTrack(globalTrack *track, double magField)
     this->setProjectedMIP(tempMip);
     this->setProjectedCTB(localCTBImpactPoint);
     this->setPathLength(mPathLengthAtRadiator);
-vector<StRichRingHit*>
+    this->setLastHitDCA(lastHitDCA);
     this->setLastHit(tpcTrack->detectorInfo()->lastPoint());
 }
 vector<StRichRingHit*>&
