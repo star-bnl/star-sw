@@ -1,7 +1,10 @@
-* $Id: btofgeo2.g,v 1.8 2004/03/12 20:32:29 llope Exp $
+* $Id: btofgeo2.g,v 1.9 2004/03/16 18:10:23 llope Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
+* Revision 1.9  2004/03/16 18:10:23  llope
+* fixed posit1 pieces and added comments for readabilityd
+*
 * Revision 1.8  2004/03/12 20:32:29  llope
 * only added print statement to confirm "choice" selection at run-time
 *
@@ -72,8 +75,7 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 
 *
 *   Data Base interface staff:
-      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2, 
-                       posit1b }
+      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1(2), posit2 }
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -132,9 +134,9 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          dz        = 246.0     ! CTB/TOF tube half length
          choice    = 7         ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
                                ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV
-         posit1    = 32        ! TOFp tray position for choice 4 or 5
+         posit1    = {32,33}   ! TOFp tray position: (0) choice 4 or 5 -> run-2,3 posn, 
+                               !                     (1) choice 7 -> run-4 posn
          posit2    = 23        ! TOFr tray position for choice 5 
-         posit1b   = 33        ! TOFp tray position for choice 7 (run-IV)
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height(8.89)
@@ -382,16 +384,17 @@ Block BTOH is a half of trigger system (west-east)
       Attribute BTOH      seen=0  colo=1  serial=choice
       Shape     Tube      dz=btog_dz/2
 
+      ! tof=0 means ctb, tof=1 means TOFp, tof=2 means TOFr, tof=3 means TOFr'
       do is=1,60
-         tof=0
-         if (choice==2)                      tof=1
-         if (choice==3 & 46<=is&is<=60)      tof=1
-         if (choice==4 & is==btog_posit1)    tof=1
-         if (choice==5 & is==btog_posit1)    tof=1
-         if (choice==5 & is==btog_posit2)    tof=2
-         if (choice==6)                      tof=2
-         if (choice==7 & is==btog_posit1b)   tof=1		!TOFp posn in Run-IV
-         if (choice==7 & is==btog_posit2)    tof=3		!TOFrp posn in Run-IV!
+         tof=0		                                !-> all CTB for choice=1                     
+         if (choice==2)                      tof=1	!-> all TOFp
+         if (choice==3 & 46<=is&is<=60)      tof=1	!-> big TOFp patch, rest CTB
+         if (choice==4 & is==btog_posit1(1)) tof=1	!-> Run-2 (one TOFp tray)
+         if (choice==5 & is==btog_posit1(1)) tof=1	!-> Run-3 (one TOFp tray
+         if (choice==5 & is==btog_posit2)    tof=2	!      and one TOFr tray)
+         if (choice==6)                      tof=2	!-> all TOFr
+         if (choice==7 & is==btog_posit1(2)) tof=1	!-> Run-4 (one TOFp tray moved 1 slot
+         if (choice==7 & is==btog_posit2)    tof=3	!      and one TOFrp tray)
 !         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
          Create and Position BSEC  alphaz = 102+6*is
       enddo
