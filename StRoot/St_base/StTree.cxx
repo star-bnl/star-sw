@@ -1,7 +1,7 @@
 #include "StTree.h"
 
-const char* TFOPT[9] = {"0","read","new",   "update",
-                        "0","read","create","update",0};
+const char* TFOPT[9] = {"0","read","recreate","update",
+                        "0","read","recreate","update",0};
 const char  RWU[] = "0rwu0rnu0rcu";
 char IOMODE[] = "0";
 
