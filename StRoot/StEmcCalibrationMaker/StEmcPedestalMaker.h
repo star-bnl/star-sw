@@ -40,6 +40,7 @@ class StEmcPedestalMaker : public StEmcCalibMaker
               void              saveToDb(char*); 
               void              saveToDb(int,int);
 							void              savePedestals(int,int,bool = false); 
+							void              loadPedestals(char*); 
               void              setNPedEvents(int a) { mNPedEvents = a;}
               void              setPedInterval(float time) { mPedInterval = time;}
               float             getPedestal(int id) {return mPedestal->GetBinContent(id);}
