@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.7 2000/09/28 10:56:33 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.8 2000/11/25 11:52:21 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.7  2000/09/28 10:56:33  ullrich
- * Added Rich PID classes.
+ * Revision 2.8  2000/11/25 11:52:21  lasiuk
+ * addition of Rich Photon Info
  *
  * Revision 2.7  2000/09/28 10:56:33  ullrich
  * Added Rich PID classes.
@@ -43,6 +43,7 @@
 #include "StRichHit.h"
 #include "StRichPixel.h"
 #include "StRichPid.h"
+#include "StRichPhotonInfo.h"
 #include "StRichCluster.h"
 #include "StRichMCInfo.h"
 #include "StEmcRawHit.h"
@@ -69,6 +70,7 @@ StCollectionImp(RichHit)
 StCollectionImp(RichCluster)
 StCollectionImp(RichPixel)
 StCollectionImp(RichPid)
+StCollectionImp(RichPhotonInfo)
 StCollectionImp(RichMCInfo)
 StCollectionImp(EmcRawHit)
 StCollectionImp(EmcCluster)
