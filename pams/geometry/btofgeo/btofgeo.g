@@ -32,7 +32,7 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
                 BCPM,BCSK,BTSK,BZEL,BCEL,BFEE,BCOO,BRAI,BPIP
 *
 *   Data Base interface staff:
-      Structure BTOG { Version, Rmin, Rmax, dz, choice }
+      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2 }
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -69,6 +69,7 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
          choice    = 4         ! 1=CTB, 2=TOF, 3=25% TOF+CTB, 4=1 tray TOF+CTB
+         posit1    = 24        ! TOF tray position for choice 4
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height
@@ -154,7 +155,7 @@ Block BTOF is the whole CTF system envelope
       Shape     Tube      rmin=btog_Rmin  Rmax=btog_Rmax  dz=btog_dz
       choice = btog_choice
       Create and Position BTOH  z=+btog_dz/2    alphay=180
-      choice = 1
+      if (choice != 2) choice = 1
       Create and Position BTOH  z=-btog_dz/2
 EndBlock
 *
@@ -169,9 +170,9 @@ Block BTOH is a half of trigger system (west-east)
 
       do is=1,60
          tof=0
-         if (choice==2)                    tof=1
-         if (choice==3 & 51<=is&is<=65)    tof=1
-         if (choice==4 &     is==23   )    tof=1
+         if (choice==2)                      tof=1
+         if (choice==3 & 51<=is&is<=65)      tof=1
+         if (choice==4 & is==btog_posit1)    tof=1
          Create and Position BSEC  alphaz = 102+6*is
       enddo
 EndBlock
@@ -340,9 +341,7 @@ Block BXSA  is  the active trigger scintillator SLAB for ctb
       Attribute BXSA      seen=1   colo=3
       Material polystyren
       Medium   sensitive    IsVol=1
-      Shape   BOX    dx=ctbb_SlabThck/2,
-                     dy=ctbb_SlabWid/2,
-                     dz=ctbb_Slab1Len/2
+      Shape   BOX    dx=ctbb_SlabThck/2  dy=ctbb_SlabWid/2  dz=ctbb_Slab1Len/2
 *
 *   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
 *                S - Single step
