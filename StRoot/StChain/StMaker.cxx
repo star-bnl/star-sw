@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.17 1999/02/22 22:25:10 fisyak Exp $
+// $Id: StMaker.cxx,v 1.18 1999/02/27 19:09:40 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.18  1999/02/27 19:09:40  fine
+// St_Maker::MakeDoc() name of the directory has been adjusted from base to St_base
+//
 // Revision 1.17  1999/02/22 22:25:10  fisyak
 // No Fruits(=0) by default
 //
@@ -219,7 +222,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
  // outdir  - directory to write the generated HTML and Postscript files into
  //
  //            The following subdirectories are used to look it up:
- //            $(stardir) + "StRoot/base"
+ //            $(stardir) + "StRoot/St_base"
  //            $(stardir) + "StRoot/StChain"
  //            $(stardir) + "StRoot/xdf2root"
  //            $(stardir) + ".share/tables"
@@ -247,7 +250,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
   THtml html;
 
   // Define the set of the subdirectories with the STAR class sources
-  const Char_t *source[] = {"StRoot/base"
+  const Char_t *source[] = {"StRoot/St_base"
                            ,"StRoot/StChain"
                            ,"StRoot/xdf2root"
                            ,".share/tables"
