@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StProbPidTraits.cxx,v 2.4 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StProbPidTraits.cxx,v 2.5 2004/07/21 14:09:57 fisyak Exp $
  *
  * Author: Yuri Fisyak, Oct 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StProbPidTraits.cxx,v $
+ * Revision 2.5  2004/07/21 14:09:57  fisyak
+ * Add GetChi2Prob method
+ *
  * Revision 2.4  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -29,7 +32,7 @@
 #include "TMath.h"
 ClassImp(StProbPidTraits)
 
-static const char rcsid[] = "$Id: StProbPidTraits.cxx,v 2.4 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StProbPidTraits.cxx,v 2.5 2004/07/21 14:09:57 fisyak Exp $";
 StParticleDefinition *StProbPidTraits::mPidParticleDefinitions[KPidParticles] = {
     StElectron::instance(),
     StProton::instance(),     
@@ -71,20 +74,27 @@ Double_t StProbPidTraits::GetProbability(Int_t PartId) {
     if (mSum > 0) for (i=kPidElectron; i< N; i++) mProbability[i] /= mSum;
     return mSum > 0 ? mProbability[PartId] : 0;
 }
-
+//________________________________________________________________________________
+Double_t StProbPidTraits::GetChi2Prob(Int_t k) const {
+  if (mNDF < 1 || ! mPidArray ) return -1;
+  Int_t N = mPidArray->GetSize();
+  if (k >= N) return -1;
+  const Float_t *Array = mPidArray->GetArray();
+  return TMath::Prob(Array[k],mNDF);
+}
 //________________________________________________________________________________
 void StProbPidTraits::Print(Option_t *opt) const {
-    StProbPidTraits *This = (StProbPidTraits *)this;
-    Int_t N = mPidArray->GetSize();
-    const Float_t *Array = mPidArray->GetArray();
-    Int_t i;
-    cout << "\tNDF = \t" << mNDF << endl;
-    for (i = 0; i < N; i++) {
-	cout << "Particle : \t" << mPidParticleDefinitions[i]->name();
-	if (mFractions) cout << "\tFraction : \t" << mFractions[i];
-	cout << "\tProbability :\t" << This->GetProbability(i) 
-	     << "\tChisq :\t" << Array[i];
-	if (mNDF > 0) cout << "\t Chisq Prob:\t" << TMath::Prob(Array[i],mNDF);
-	cout << endl;
-    }
+  StProbPidTraits *This = (StProbPidTraits *) this;
+  Int_t N = mPidArray->GetSize();
+  const Float_t *Array = mPidArray->GetArray();
+  Int_t i;
+  cout << "\tNDF = \t" << mNDF << endl;
+  for (i = kPidElectron; i < N; i++) {
+    cout << "Particle : \t" << mPidParticleDefinitions[i]->name();
+    if (mFractions) cout << "\tFraction : \t" << mFractions[i];
+    cout << "\tProbability :\t" << This->GetProbability(i)
+	 << "\tChisq :\t" << Array[i];
+    if (mNDF > 0) cout << "\t Chisq Prob:\t" << GetChi2Prob(i);
+    cout << endl;
+  }
 }

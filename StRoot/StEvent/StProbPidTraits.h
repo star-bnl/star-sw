@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StProbPidTraits.h,v 2.4 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StProbPidTraits.h,v 2.5 2004/07/21 14:09:57 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -40,7 +40,8 @@ public:
     virtual ~StProbPidTraits();
     Int_t    GetNDF()      {return mNDF;}
     TArrayF *GetPidArray() {return mPidArray;}
-    Double_t GetProbability(Int_t PartId);
+    Double_t GetProbability(Int_t PartId) ;
+    Double_t GetChi2Prob(Int_t PartId) const; // 
     Double_t GetSum() { return mSum;}
     void     SetFractions(Double_t *Fractions) {mFractions = Fractions; mSum = 0;}
     void     SetNDF(Int_t ndf)                 {mNDF = ndf;}
