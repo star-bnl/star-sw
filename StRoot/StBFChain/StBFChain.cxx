@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.27 1999/11/10 20:45:03 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.28 1999/11/11 01:54:37 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.28  1999/11/11 01:54:37  fisyak
+// Fix Trs name
+//
 // Revision 1.27  1999/11/10 20:45:03  fisyak
 // Fix Xi maker, remove dependence tpc_daq->xin
 //
@@ -176,7 +179,7 @@ BfcItem BFC[] = {
   {"GEANT","geant","","tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","initailize GEANT",kFALSE}, 
   {"TPC"         ,"tpc","","tables,tls,db,-tss,-trs,tcl,tpt"                ,"StMaker","StChain","",kFALSE},
   {"TSS"         ,"tpc_raw","tpc","tls,-trs"               ,"St_tss_Maker","St_tpc,St_tss_Maker","",kFALSE},  
-  {"TRS"         ,"tpc_raw","tpc","scl,-tss,tpc_daq"                  ,"StTrsMaker","StTrsMaker","",kFALSE},
+  {"TRS"         ,"","tpc","scl,-tss,tpc_daq"                         ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"MINIDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"TFS"         ,""  ,"","tpc,-trs,-tss","",""     ,"use TFS       (no St_[tss_ and no Trs]Maker)",kFALSE},
