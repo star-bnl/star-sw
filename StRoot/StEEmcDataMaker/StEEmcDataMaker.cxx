@@ -1,5 +1,8 @@
-// $Id: StEEmcDataMaker.cxx,v 1.5 2003/07/18 18:31:45 perev Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.6 2003/08/18 21:31:42 balewski Exp $
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.6  2003/08/18 21:31:42  balewski
+// new adc--> energy formula, still no absolute gain
+//
 // Revision 1.5  2003/07/18 18:31:45  perev
 // test for nonexistance of XXXReader added
 //
@@ -146,8 +149,11 @@ Int_t StEEmcDataMaker::Make(){
       float adc=rawAdc - x->ped;
       float energy=-1.;
             
-      if(rawAdc>x->thr){
-	energy=adc*x->gain;
+      if(rawAdc>x->thr){ // changed 8-18-03, JB
+	if(x->gain>0) 
+	  energy=adc/x->gain; // note: it corrects only relative gains, SF not 
+	else
+	  energy=-2.;
 	nOver++;
       }
       
