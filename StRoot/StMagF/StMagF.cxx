@@ -16,7 +16,7 @@
 
 static StMagF *gMagfield = 0;
 //________________________________________
-void type_of_call agufld_(Float_t *x, Float_t *b)
+void type_of_call lovefield_(Float_t *x, Float_t *b)
 {
   if (!gMagfield) 
     new StMagFCM("Star Full Field",

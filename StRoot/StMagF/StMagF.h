@@ -6,9 +6,9 @@
 
 #ifndef __CINT__
 #include "StarCallf77.h"
-#define agufld_ F77_NAME(agufld,AGUFLD)
+#define lovefield_ F77_NAME(lovefield,LOVEFIELD)
 extern "C" {
-R__EXTERN  void type_of_call agufld_(Float_t *x, Float_t *b);
+R__EXTERN  void type_of_call lovefield_(Float_t *x, Float_t *b);
 }
 #endif
 enum EField   {kUndef=0, kConst=1, kConMesh=2};
