@@ -24,38 +24,26 @@ my $LIBS = "";#$env->{LIBS};
 my $Libraries = $env->{Libraries};
 my $FC        = $env->{FC};
 my $PGI       = $env->{ENV}->{PGI};
+my $PGILIB    = $env->{ENV}->{PGILIB};
 my $FLIBS     = $env->{FLIBS};
-$LDFLAGS .= $env->{LDEXPORT};
-$LIBS    .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
+
+$LDFLAGS     .= $env->{LDEXPORT};
+$LIBS        .= $env->{LDALL} . "  -lstarsim " . $env->{LDNONE};
+
 if ($FC =~ /pgf77/) {
-#  if ($env->{CXX_VERSION} < 3) {
-#    if( -e "$OPTSTAR/lib/libpgf77S.so"){
-#      $LIBS .= " -L" . $OPTSTAR . "/lib -lpgf77S";
-#      if( -e "$OPTSTAR/lib/libpgf77A.a"){
-#	$LIBS .= " -lpgf77A";
-#      }
-#    }
-#  }
-#  else {
-  my $PGILIB = $PGI . "/linux86/lib";
-  if (! -d $PGILIB) {
-    $PGILIB = $PGI . "/linux86/5.1/lib";
-  }
-  if (-d $PGILIB) {
-    $LIBS .= " -L" . $PGILIB . " " . $env->{LDALL};
-    if ( -e "$PGILIB/libpgftnrtl.a"){
-      $LIBS .= " $PGILIB/libpgftnrtl.a";
-    } 
-    if ( -e "$PGILIB/libpgc.a"){
-      $LIBS .= " $PGILIB/libpgc.a";
+    if ($PGILIB ne ""){
+	if (-d $PGILIB) {
+	    $LIBS .= " -L" . $PGILIB . " " . $env->{LDALL};
+	    if ( -e "$PGILIB/libpgftnrtl.a"){
+		$LIBS .= " $PGILIB/libpgftnrtl.a";
+	    } 
+	    if ( -e "$PGILIB/libpgc.a"){
+		$LIBS .= " $PGILIB/libpgc.a";
+	    }
+	}
+	$LIBS  .= $env->{LDNONE};
+	$FLIBS .= " -lpgf90  -lpgf90_rpm1 -lpgf902 -lpgf90rtl";
     }
-  }
-#    if ( -e "$PGILIB/libpgnod_prof.a"){
-#      $LIBS .= " -lpgnod_prof";
-#    }
-    $LIBS .= $env->{LDNONE};
-#  }
-    $FLIBS .= " -lpgf90  -lpgf90_rpm1 -lpgf902 -lpgf90rtl";
 }
 #if ($LD eq 'gcc' or $LD eq 'g++' or $LD eq 'icc') {
 #  $LIBS .= $env->{LDALL} . " " . $env->{LIBG2C};
