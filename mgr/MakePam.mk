@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.89 1999/03/06 20:13:30 fisyak Exp $
+# $Id: MakePam.mk,v 1.90 1999/03/30 15:51:53 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.90  1999/03/30 15:51:53  fisyak
+# Make silent test for geant3.def
+#
 # Revision 1.89  1999/03/06 20:13:30  fisyak
 # fix cleanup
 #
@@ -471,8 +474,8 @@ endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
-	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
-	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
+	@test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
+	@test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
 ifndef NT
 #$(LIB_PKG)($(notdir $(FILES_OG)): $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
