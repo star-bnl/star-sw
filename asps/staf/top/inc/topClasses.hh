@@ -56,6 +56,44 @@ private:
 
 //:#####################################################################
 //:=============================================== CLASS              ==
+class topSort : public virtual socObject {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   topSort();
+   topSort(const char* name, const char* whichColumn);
+   virtual ~topSort();
+//:----------------------------------------------- ATTRIBUTES         --
+char* whichColumn();
+void  whichColumn(char *);
+
+//- OVERRIDE VIRTUAL
+// Craig virtual char * listing();
+
+//:----------------------------------------------- INTERFACE METHODS  --
+STAFCV_T sort(tdmTable *table);
+STAFCV_T SortTheTable(tdmTable *table);
+float Value(int *errorFlag,DS_DATASET_T* dsPtr,int rownum,size_t colNum);
+void     SwapRows(void *tableDataAddress,size_t rowsize,void *tmp,
+    DS_DATASET_T* dsPtr,int row1,int row2);
+void top_qsort(void *beginningOfData,size_t rowsize,void *temp,
+    DS_DATASET_T* dsPtr,int left,int right,size_t colNum,int *errorFlag);
+
+protected:
+//:----------------------------------------------- PROT VARIABLES     --
+char * myWhichColumn;
+
+//:----------------------------------------------- PROT FUNCTIONS     --
+//:**NONE**
+
+private:
+//:----------------------------------------------- PRIV VARIABLES     --
+//:**NONE**
+//:----------------------------------------------- PRIV FUNCTIONS     --
+//:**NONE**
+};
+//:######################################################################
+//:=============================================== CLASS              ==
 class topJoin : public virtual topProject {
 
 public:
@@ -72,6 +110,7 @@ void whereClause(const char* clause);
 virtual char * listing();
 
 //:----------------------------------------------- INTERFACE METHODS  --
+STAFCV_T fastjoin(tdmTable * table1, tdmTable * table2, tdmTable *& table3);
 STAFCV_T join(tdmTable * table1, tdmTable * table2, tdmTable *& table3);
 tdmTable * jTarget(tdmTable * table1, tdmTable * table2
 		, const char * name);
@@ -158,6 +197,9 @@ public:
                 , topJoin*& agent);
    virtual STAFCV_T newJoin (const char * name
                 , const char * spec, const char * clause);
+//:-  Sort---------------------------
+   virtual STAFCV_T newSort (const char * name , const char * whichColumn);
+   virtual STAFCV_T findSort (const char * name , topSort*& agent);
 //:-  Cut ---------------------------
    virtual STAFCV_T deleteCut (const char * name);
    virtual STAFCV_T findCut (const char * name

@@ -19,6 +19,7 @@
 
 #define TOPPROJECT(OBJ) ((topProject*)(OBJ->ptr()))
 #define TOPJOIN(OBJ) ((topJoin*)(OBJ->ptr()))
+#define TOPSORT(OBJ) ((topSort*)(OBJ->ptr()))
 #define TOPCUT(OBJ) ((topCut*)(OBJ->ptr()))
 #define TOPFACTORY(OBJ) ((topFactory*)(OBJ->ptr()))
 
