@@ -66,6 +66,7 @@ delete PadPlane;
 delete WirePlane;
 delete dimensions;
 delete slowControlSim;
+delete electronics;
 delete gain;
 delete t0;
 gStTpcDb = 0;
