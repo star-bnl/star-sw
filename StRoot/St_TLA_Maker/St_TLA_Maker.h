@@ -1,4 +1,4 @@
-// $Id: St_TLA_Maker.h,v 1.13 2002/04/28 01:28:36 jeromel Exp $
+// $Id: St_TLA_Maker.h,v 1.14 2002/11/26 23:49:40 jeromel Exp $
 
 #ifndef STAR_St_TLA_Maker
 #define STAR_St_TLA_Maker
@@ -23,32 +23,47 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-//class St_stk_stkpar;
+
+
+// You may forward declare other classes if you have data-members
+// used in pointer-only context by using declaration like
+// class St_SomeExternClass;
+//
+// You do need in such simple case to add the include file
+// (and compilation is much faster).
+
 class St_TLA_Maker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.13 2002/04/28 01:28:36 jeromel Exp $";
+  // Private method declaration if any
  
  protected:
+  // Protected method if any
+
  public: 
-                  St_TLA_Maker(const char *name="TLA");
-   virtual       ~St_TLA_Maker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
-// virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
-// virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
+  St_TLA_Maker(const char *name="TLA");
+  virtual       ~St_TLA_Maker();
+  virtual Int_t Init();
+  virtual Int_t  Make();
 
-   virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.13 2002/04/28 01:28:36 jeromel Exp $ built "__DATE__" "__TIME__ ; 
-     return cvs;
-   }
+  // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
+  // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
-   ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
+  /// Displayed on session exit, leave it as-is please ...
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.14 2002/11/26 23:49:40 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+
+  ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.14  2002/11/26 23:49:40  jeromel
+// Small modif after Art's note ... doxygen issue + cleanup
+//
 // Revision 1.13  2002/04/28 01:28:36  jeromel
 // Reshaped comments for doxygen. Hopefully, users will propagate this good
 // habit.
