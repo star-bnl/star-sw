@@ -15,8 +15,7 @@
 #include "StMessMgr.h"
 #include "StEmcUtil/emcDetectorName.h"
 #include "StarClassLibrary/SystemOfUnits.h"
-
-#include "tables/St_emcPedestal_Table.h" 
+#include "tables/St_MagFactor_Table.h"
 
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
@@ -27,13 +26,6 @@ ClassImp(StEmcCalibrationMaker);
 #ifdef StEmcCalibrationMaker_DEBUG
 ofstream emclog("StEmcCalibrationMaker.emclog");
 #endif
-
-Int_t                nbins;
-
-TRandom*             ran=new TRandom();
-StEmcGeom*           Geo;
-StEmcCollection*     emc;
-StEvent*             event;
 
 //_____________________________________________________________________________
 StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
@@ -129,10 +121,10 @@ Int_t StEmcCalibrationMaker::Init()
   }
 
   evnumber=0;
-  if(Geo) delete Geo;
+  if(calibGeo) delete calibGeo;
   //Geo=new StEmcGeom(detname[detnum].Data());
-  Geo=StEmcGeom::getEmcGeom(detname[detnum].Data());
-  nbins=Geo->NModule()*Geo->NEta()*Geo->NSub();
+  calibGeo=StEmcGeom::getEmcGeom(detname[detnum].Data());
+  nbins=calibGeo->NModule()*calibGeo->NEta()*calibGeo->NSub();
   
   emcHits.Set(nbins);
   emcHits.Reset();
@@ -327,6 +319,21 @@ Int_t StEmcCalibrationMaker::Make()
     gMessMgr->Warning("StEmcCalibrationMaker::Make() - Can not get Emc Hits or Tracks");
     return kStWarn;
   }
+  
+  // reading B field from Database
+  TDataSet *RunLog=GetInputDB("RunLog");
+  BField=0.5;
+  if(RunLog)
+  {
+    St_MagFactor *mag=(St_MagFactor*)RunLog->Find("MagFactor");
+    if(mag)
+    {
+      MagFactor_st *magst=mag->GetTable();
+      BField=0.5*magst[0].ScaleFactor;
+      cout <<"Magnetic Field = "<<BField<<endl;
+    }
+  }
+  //
  
   if(!CalcZVertex()) 
   {
@@ -337,6 +344,14 @@ Int_t StEmcCalibrationMaker::Make()
     return kStWarn;
   }
   
+  if(fabs(zVertex)>fabs(Settings_st[0].ZVertexCut)) 
+  {
+    #ifdef StEmcCalibrationMaker_DEBUG
+    emclog <<"***** zVertex out of limit... Exiting StEmcCalibrationMaker::Make()\n";
+    cout   <<"***** zVertex out of limit... Exiting StEmcCalibrationMaker::Make()\n";
+    #endif    
+    return kStWarn;  
+  }
   emcHits.Reset();
   if(!FillEmcVector())
   {
@@ -439,8 +454,8 @@ Int_t StEmcCalibrationMaker::Finish()
 //_____________________________________________________________________________
 void StEmcCalibrationMaker::Clear(const Option_t *option)
 {
-  if(emc) delete emc;
-  if(event) delete event;
+  //if(emc) delete emc;
+  //if(event) delete event;
   return;
 }
 //_____________________________________________________________________________
@@ -473,6 +488,7 @@ Bool_t StEmcCalibrationMaker::ReadHitsOffline()
     {
       StSPtrVecTrackNode& tracks=event->l3Trigger()->trackNodes();
       nTracks=tracks.size();
+      //cout <<"Number of tracks = "<<nTracks<<endl;
       if(nTracks==0)
       {
         #ifdef StEmcCalibrationMaker_DEBUG
@@ -608,11 +624,11 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
       track=tracks[i]->track(0);
     }    
     
-    if(ProjectTrack(track,(double)Geo->Radius(),&eta,&phi))
+    if(ProjectTrack(track,(double)calibGeo->Radius(),&eta,&phi))
     {
-      if(Geo->getBin(phi,eta,mtr,etr,str)==0) if(str!=-1) Geo->getId(mtr,etr,str,idtr);
-      if(ProjectTrack(track,(double)(Geo->Radius()+Geo->YWidth()),&eta,&phi))
-        if(Geo->getBin(phi,eta,mtr1,etr1,str1)==0) if(str1!=-1) Geo->getId(mtr1,etr1,str1,idtr1);
+      if(calibGeo->getBin(phi,eta,mtr,etr,str)==0) if(str!=-1) calibGeo->getId(mtr,etr,str,idtr);
+      if(ProjectTrack(track,(double)(calibGeo->Radius()+calibGeo->YWidth()),&eta,&phi))
+        if(calibGeo->getBin(phi,eta,mtr1,etr1,str1)==0) if(str1!=-1) calibGeo->getId(mtr1,etr1,str1,idtr1);
       
       if(idtr!=0 && idtr==idtr1) tmp2[i]=idtr; // good track candidate
       if(idtr!=0) tmp1[idtr-1]++;
@@ -626,32 +642,32 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
       trackTower[i]=1;
       Int_t id=i+1;
       Float_t eta,phi;
-      Geo->getEtaPhi(id,eta,phi);
+      calibGeo->getEtaPhi(id,eta,phi);
       for(Int_t j=-1;j<=1;j++)
         for(Int_t k=-1;k<=1;k++)
           if(!(j==0 && k==0))
           {
             Int_t m,e,s,m1,e1,s1,id1;
-            Geo->getBin(id,m,e,s);
+            calibGeo->getBin(id,m,e,s);
             e+=j; s+=k;
-            if(e==0) {e=1; Geo->getBin(phi,-eta,m1,e1,s1); m=m1;}
+            if(e==0) {e=1; calibGeo->getBin(phi,-eta,m1,e1,s1); m=m1;}
             if(s==0) 
             {
-              s=Geo->NSub(); 
+              s=calibGeo->NSub(); 
               m--;
               if(m==60) m=120;
               if(m==0) m=60;
             }
-            if(s>Geo->NSub()) 
+            if(s>calibGeo->NSub()) 
             {
               s=1;
               m++;
               if(m==121) m=61;
               if(m==61) m=1;
             }
-            if(e<=Geo->NEta())
+            if(e<=calibGeo->NEta())
             {
-              Geo->getId(m,e,s,id1);
+              calibGeo->getId(m,e,s,id1);
               if(tmp1[id1-1]>0) trackTower[i]=0; // there is one track in neigh. tower
             }
           }
@@ -662,6 +678,8 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
   // at this point if trackTower[i]=0 this tower is not good anyway
   // and trackTower[i]=1 if the tower is good. 
   // now check if tower is good for each case (pedestal,mip,etc)
+  
+  Int_t nmips=0,cand=0;
   
   for(Int_t i=0;i<nTracks;i++)
   {
@@ -680,14 +698,29 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
       
       StTrackGeometry* trgeo = track->geometry();
       const StThreeVectorF momentum=trgeo->momentum();
+      StTrackFitTraits&  fit=track->fitTraits();
+      Int_t npoints=fit.numberOfFitPoints();
         
-      if(momentum.mag()>=Settings_st[0].MipMinimumMomentum)
+      if(momentum.mag()>=Settings_st[0].MipMinimumMomentum && npoints>10)
       {
-        if(trackTower[tmp2[i]-1]==1) trackTower[tmp2[i]-1]=2; // good MIP candidate
+        if(trackTower[tmp2[i]-1]==1) 
+        {
+          trackTower[tmp2[i]-1]=2; 
+          cand++;
+          cout   <<"TRACKCHECK: MIP TowerCandidate = "<<tmp2[i]<<"  TowerStatus = "<<Calib_st[tmp2[i]].Status<<"  momentum = "<<momentum.mag()<<"  npoints = "<<npoints<<"  adc = "<<emcHits[tmp2[i]-1]<<"\n";
+          #ifdef StEmcCalibrationMaker_DEBUG
+          emclog <<"TRACKCHECK: MIP TowerCandidate = "<<tmp2[i]<<"  TowerStatus = "<<Calib_st[tmp2[i]].Status<<"  momentum = "<<momentum.mag()<<"  npoints = "<<npoints<<"  adc = "<<emcHits[tmp2[i]-1]<<"\n";
+          #endif
+        }// good MIP candidate
+        nmips++;
       }
       else trackTower[tmp2[i]-1]=0;
     }
   }
+  cout   <<"TRACKCHECK: NMips = "<<nmips<<"  TowersCandidates = "<<cand<<"\n";
+  #ifdef StEmcCalibrationMaker_DEBUG
+  emclog <<"TRACKCHECK: NMips = "<<nmips<<"  TowersCandidates = "<<cand<<"\n";
+  #endif
   
   // check for valid pedestals bins
   for(Int_t i=0;i<nbins;i++) if(trackTower[i]==1 && tmp1[i]!=0) trackTower[i]=0;
@@ -701,7 +734,8 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
   Short_t charge=trgeo->charge();
   const StThreeVectorF origin=trgeo->origin();
   const StThreeVectorF momentum=trgeo->momentum();
-  StPhysicalHelixD helix(momentum,origin,0.5*tesla,(double)charge);
+   
+  StPhysicalHelixD helix(momentum,origin,BField*tesla,(double)charge);
   
   pairD s=helix.pathLength(radius);
   
@@ -717,7 +751,7 @@ Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t
   
   *ETA=eta;
   *PHI=phi;
-  if(fabs(eta)>Geo->EtaMax()) return kFALSE;
+  if(fabs(eta)>calibGeo->EtaMax()) return kFALSE;
   
   return kTRUE;
   
@@ -730,13 +764,32 @@ Bool_t StEmcCalibrationMaker::SubtractPedestal()
   
   if(detnum==0) // bemc
   {
-    St_emcPedestal *ped=(St_emcPedestal*)emcDb->Find("bemcPedestal");
+    /*if(!ped)
+    {
+      TDataSet *emcDb=GetInputDB("Calibrations/emc");
+      if(!emcDb) return kFALSE;
+      St_emcPedestal *ped1=(St_emcPedestal*)emcDb->Find("bemcPedestal");
+      if(!ped1) return kFALSE;
+      ped=new St_emcPedestal("bemcPed",4800);
+      ped->SetNRows(4800);
+      emcPedestal_st *pedst=ped->GetTable();
+      emcPedestal_st *ped1st=ped1->GetTable();
+      for(Int_t j=0;j<4800;j++)
+      {
+        pedst[j].AdcPedestal=ped1st[j].AdcPedestal;
+        pedst[j].AdcPedestalRMS=ped1st[j].AdcPedestalRMS;
+        pedst[j].Status=ped1st[j].Status;
+      }
+    }*/
+    ped=(St_emcPedestal*)emcDb->Find("bemcPedestal");
     if(!ped) return kFALSE;
+    
     emcPedestal_st *pedst=ped->GetTable();
     for(Int_t i=0;i<nbins;i++)
     {
-      emcHits[i]-=pedst[i].AdcPedestal;
-      if(emcHits[i]<pedst[i].AdcPedestalRMS) emcHits[i]=0;
+      //if (pedst[i].AdcPedestal!=0)cout <<"Id = "<<i+1<<"  Pedestal = "<<pedst[i].AdcPedestal<<"  RMS = "<<pedst[i].AdcPedestalRMS<<endl;
+      emcHits[i]-=(Int_t)pedst[i].AdcPedestal;
+      if(emcHits[i]<2.*pedst[i].AdcPedestalRMS) emcHits[i]=0;
     }
   }
   
@@ -778,9 +831,9 @@ Bool_t StEmcCalibrationMaker::FillEqual()
   #ifdef StEmcCalibrationMaker_DEBUG
   emclog <<"EQUALIZATION: Avg Nevents/bin = "<<x<<" +- "<<y<<"\n";
   emclog <<"EQUALIZATION: fraction of bins nevents > minimum = "<<z<<"\n";
+  #endif
   cout   <<"EQUALIZATION: Avg Nevents/bin = "<<x<<" +- "<<y<<"\n";
   cout   <<"EQUALIZATION: fraction of bins nevents > minimum = "<<z<<"\n";
-  #endif
 
   if(z<Settings_st[0].EqMinOccupancy) return kTRUE;  // minimum occupancy not reached yed...
   
@@ -800,13 +853,26 @@ Bool_t StEmcCalibrationMaker::Equalize()
   Int_t ndiv=Settings_st[0].NEtaBins;
   Float_t etabin=Settings_st[0].EtaBinWidth;
   
+  Float_t sum=0,nb=0;
+  for(Int_t i=1;i<=EqualSpec->GetNBin();i++)
+    if(EqualSpec->GetStatus(i)>0 && EqualSpec->GetSum(i)>=Settings_st[0].EqEventsPerBin)
+    {
+      Float_t mean,rms;
+      EqualSpec->GetMeanAndRms(i,&mean,&rms);
+      sum+=mean;
+      nb++;
+    }
+  if(nb==0) return kFALSE;
+  Float_t MEAN=sum/nb; // global mean value used to choose reference spectra
+  
   for(Int_t i=1;i<=ndiv;i++)
   {
     #ifdef StEmcCalibrationMaker_DEBUG
     emclog <<"***** Equalizing EtaBin "<< i<<"\n";
     #endif
     gMessMgr->Info()<<"StEmcCalibrationMaker::Equalize() - Equalizing EtaBin "<< i<<endm;
-    
+    sum=0;
+    nb=0;
     Int_t mi,mf,ei,ef;
     CalcEtaBin(i,etabin,&mi,&mf,&ei,&ef);
     Int_t numberReady=0;
@@ -816,13 +882,18 @@ Bool_t StEmcCalibrationMaker::Equalize()
         {
           Int_t id1=EqualSpec->GetID(m,e,s); 
           if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>=Settings_st[0].EqEventsPerBin) 
+          {
             numberReady++;
+            Float_t mean,rms;
+            EqualSpec->GetMeanAndRms(id1,&mean,&rms);
+            sum+=mean;
+          }
         }      
 
     if(numberReady>0)
     {
-      Int_t l=(Int_t)(ran->Uniform()*(Double_t)numberReady);
-      Int_t l1=0;
+      Float_t LOCALMEAN = sum/numberReady;
+      Float_t dmean=5000,refmean=0;
       Int_t ref=0;
       for(Int_t m=mi;m<mf+1;m++)
         for(Int_t e=ei;e<ef+1;e++)
@@ -831,13 +902,20 @@ Bool_t StEmcCalibrationMaker::Equalize()
             Int_t id1=EqualSpec->GetID(m,e,s); 
             if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>=Settings_st[0].EqEventsPerBin)
             {
-              if (l1==l && ref==0) ref=id1;
-              else l1++;
+              Float_t mean,rms;
+              EqualSpec->GetMeanAndRms(id1,&mean,&rms);
+              Float_t dmean1=fabs(mean-MEAN);
+              if(dmean1<dmean) {dmean=dmean1; refmean=mean; ref=id1;}
             }
           }
       #ifdef StEmcCalibrationMaker_DEBUG
-      emclog <<"***** Reference spectrum choice for etabin = "<<i<<"   ref = "<<ref<<"\n";
+      emclog <<"***** Ref spectrum for etabin = "<<i
+             <<"  ref = "<<ref<<"  mean = "<<refmean<<"  Global mean = "<<MEAN
+             <<"  Local mean = "<<LOCALMEAN<<"\n";
       #endif
+      cout   <<"***** Ref spectrum for etabin = "<<i
+             <<"  ref = "<<ref<<"  mean = "<<refmean<<"  Global mean = "<<MEAN
+             <<"  Local mean = "<<LOCALMEAN<<"\n";
       for(Int_t m=mi;m<mf+1;m++)
         for(Int_t e=ei;e<ef+1;e++)
           for(Int_t s=1;s<EqualSpec->GetNSub()+1;s++)
@@ -846,6 +924,13 @@ Bool_t StEmcCalibrationMaker::Equalize()
             if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>Settings_st[0].EqEventsPerBin) 
               EqualSpec->Equalize(ref,id1,Settings_st[0].EqualizationMethod);
           }
+    }
+    else
+    {
+      #ifdef StEmcCalibrationMaker_DEBUG
+      emclog <<"***** No Equalization done for etabin  = "<<i<<endl;
+      #endif   
+      cout   <<"***** No Equalization done for etabin  = "<<i<<endl;
     }
   }
 
@@ -862,22 +947,28 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
   if(fabs(zVertex)>fabs(Settings_st[0].ZVertexCut)) return kFALSE;  
   
   Bool_t ok=kFALSE;
+  Int_t mipCandidate=0,mipAccepted=0;
   
   for(Int_t did=1;did<=nbins;did++)
+  {
     if(trackTower[did-1]==2 && MipSpec->GetStatus(did)==1 && emcHits[did-1]>0) 
     {
       MipSpec->FillSpectra(did,emcHits[did-1]);
       m_MipOccupancy->Fill(did);
       ok=kTRUE;
-      #ifdef StEmcCalibrationMaker_DEBUG
+      mipAccepted++;
       cout <<"CALIBRATION: MIP Hit. id = "<<did<<"  adc = "<<emcHits[did-1]<<endl;
+      #ifdef StEmcCalibrationMaker_DEBUG
       emclog <<"CALIBRATION: MIP Hit. id = "<<did<<"  adc = "<<emcHits[did-1]<<endl;
       #endif
     }
-    
+    if(trackTower[did-1]==2 && MipSpec->GetStatus(did)==1) mipCandidate++;  
+  }
   if(ok) m_mipCounter++;
-
+  cout   <<"CALIBRATION: MIP Candidates = "<<mipCandidate<<"  accepted = "<<mipAccepted<<endl;
+  cout   <<"CALIBRATION: MIP Nevents = "<<m_mipCounter<<"\n";
   #ifdef StEmcCalibrationMaker_DEBUG
+  emclog <<"CALIBRATION: MIP Candidates = "<<mipCandidate<<"  accepted = "<<mipAccepted<<endl;
   emclog <<"CALIBRATION: MIP Nevents = "<<m_mipCounter<<"\n";
   #endif
   
@@ -892,11 +983,12 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
   else
     MipSpec->GetOccupancy(Settings_st[0].MipEventsPerBin,&x,&y,&occ);
 
+  cout   <<"CALIBRATION: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
+  cout   <<"CALIBRATION: fraction of bins nevents > minimum = "<<occ<<"\n";
+
   #ifdef StEmcCalibrationMaker_DEBUG
   emclog <<"CALIBRATION: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
   emclog <<"CALIBRATION: fraction of bins nevents > minimum = "<<occ<<"\n";
-  cout   <<"CALIBRATION: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
-  cout   <<"CALIBRATION: fraction of bins nevents > minimum = "<<occ<<"\n";
   #endif
   
   if(occ<Settings_st[0].MipMinOccupancy) return kTRUE;
@@ -1066,7 +1158,7 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
       else // use eta bin
       {
         Int_t m,e,s;
-        Geo->getBin(bin,m,e,s);
+        calibGeo->getBin(bin,m,e,s);
         Int_t etabin=MipSpec->GetEtaBinId(m,e);
         if(Mip_st[etabin-1].Status==1 && Equal_st[bin-1].EqStatus==1 && Equal_st[bin-1].EqSlope!=0)
         {
@@ -1100,7 +1192,7 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
       y[0]=0; ey[0]=0;
       y[1]=Settings_st[0].EOverMipCte; ey[1]=0;
       Float_t eta=0,phi=0;
-      Geo->getEtaPhi(bin,eta,phi);
+      calibGeo->getEtaPhi(bin,eta,phi);
       Float_t theta=2.*atan(exp(-eta));
       y[1]*=(1.+0.056)/sin(theta); // from V.Rykov
     }
@@ -1357,12 +1449,12 @@ void StEmcCalibrationMaker::SetCalibStatus()
 
   for(Int_t i=1;i<=nbins;i++)
   { 
-    Int_t m,e,s;
-    Geo->getBin(i,m,e,s);
     Calib_st[i-1].Status=0;
-    if (m>=1 && m<=9)    Calib_st[i-1].Status=1; // initial 2001 configuration
-    if (m>=46 && m<=60)  Calib_st[i-1].Status=1; // initial 2001 configuration    
+    if (i>=1861 && i<=2340) Calib_st[i-1].Status=1; // initial 2001 configuration
+    if (i>=2021 && i<=2100) Calib_st[i-1].Status=0; // initial 2001 configuration    
   } 
+  
+  Calib_st[2309-1].Status=0;
   //for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
 }
 //_____________________________________________________________________________
@@ -1395,7 +1487,7 @@ void StEmcCalibrationMaker::ClearMipTable()
     for(Int_t i=1;i<=nb;i++) 
     {
       Int_t m,e,s;
-      Geo->getBin(i,m,e,s);
+      calibGeo->getBin(i,m,e,s);
       Mip_st[i-1].FirstModule=m;
       Mip_st[i-1].LastModule=m;
       Mip_st[i-1].FirstEta=e;
@@ -1410,7 +1502,7 @@ void StEmcCalibrationMaker::ClearMipTable()
     Float_t ebin=Settings_st[0].EtaBinWidth;
     for(Int_t i=1;i<=nb;i++) 
     {
-      Int_t mi,mf,ei,ef,si=1,sf=Geo->NSub();
+      Int_t mi,mf,ei,ef,si=1,sf=calibGeo->NSub();
       CalcEtaBin(i,ebin,&mi,&mf,&ei,&ef);
       Mip_st[i-1].FirstModule=mi;
       Mip_st[i-1].LastModule=mf;
@@ -1446,7 +1538,7 @@ void StEmcCalibrationMaker::CalcEtaBin(Int_t i,Float_t ebin,
 { 
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();  
   Int_t nb=Settings_st[0].NEtaBins;
-  Int_t neta=Geo->NEta();
+  Int_t neta=calibGeo->NEta();
   Int_t eei=1;
   Int_t eef=eei+(Int_t)ebin-1;
   Int_t mmi=1;
@@ -1464,8 +1556,8 @@ void StEmcCalibrationMaker::CalcEtaBin(Int_t i,Float_t ebin,
   *ei=eei; *ef=eef;
   *mi=mmi; *mf=mmf;
   Float_t etai,etaf;
-  Geo->getEta(mmi,eei,etai);
-  Geo->getEta(mmi,eef,etaf);
+  calibGeo->getEta(mmi,eei,etai);
+  calibGeo->getEta(mmi,eef,etaf);
   
   gMessMgr->Info()<<"StEmcCalibrationMaker: EtaBin "<<i<<"  etai="<<etai<<"  etaf="<<etaf<<"  mi="<<*mi<<"  mf="<<*mf<<"  ei="<<*ei<<"  ef="<<*ef<<endm;
   #ifdef StEmcCalibrationMaker_DEBUG
@@ -1492,7 +1584,7 @@ Bool_t StEmcCalibrationMaker::FillEmcVector()
          Int_t mod=rawHit[k]->module();
          Int_t e=rawHit[k]->eta(); 
          Int_t s=abs(rawHit[k]->sub());
-         Geo->getId(mod,e,s,did);
+         calibGeo->getId(mod,e,s,did);
          emcHits[did-1]=rawHit[k]->adc();
        }
      }

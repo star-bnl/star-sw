@@ -22,26 +22,34 @@
 #include "tables/St_emcCalibration_Table.h"
 #include "tables/St_emcEqualization_Table.h"
 #include "tables/St_emcMipCalib_Table.h"
-#include "TRandom.h"
+#include "tables/St_emcPedestal_Table.h" 
 
-#define StEmcCalibrationMaker_DEBUG 1
+//#define StEmcCalibrationMaker_DEBUG 1
 
 #define maxdet 8
 
 class StTrack;
+class StEvent;
+class StEmcCollection;
+class StEmcGeom;
 
 class StEmcCalibrationMaker : public StMaker 
 {
   private:
+           
            
            //QA histograms ******************
            TH1F* m_EqualOccupancy;        //!
            TH1F* m_MipOccupancy;          //!
            TH1F* m_EffPedOccupancy;       //!
            //********************************
+           StEmcGeom*           calibGeo;//!
+           StEmcCollection*     emc;   //!
+           StEvent*             event; //!
            
            Int_t   detnum;
-           
+           Int_t   nbins;
+
            Float_t zVertexMax;
            Float_t zVertex;
            Float_t ptMip;
@@ -50,6 +58,7 @@ class StEmcCalibrationMaker : public StMaker
            Float_t evnumber;
            Float_t avg;
            Float_t sigma;
+           Float_t BField;
            
            TArrayI emcHits;
            TArrayI trackTower,tmp1,tmp2;
@@ -106,6 +115,7 @@ class StEmcCalibrationMaker : public StMaker
            St_emcCalibration*     CalibTable;
            St_emcEqualization*    EqualTable;
            St_emcMipCalib*        MipTable;
+           St_emcPedestal*        ped;
    
            StEmcEqualSpectra*     EqualSpec;
            StEmcMipSpectra*       MipSpec;
