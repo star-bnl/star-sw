@@ -1,7 +1,7 @@
-// $Id: St_glb_Maker.cxx,v 1.36 1999/02/23 02:09:03 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.37 1999/02/23 03:13:52 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
-// Revision 1.36  1999/02/23 02:09:03  fisyak
-// Add emc hits to dst
+// Revision 1.37  1999/02/23 03:13:52  fisyak
+// Take out fake tof
 //
 // Revision 1.35  1999/02/22 21:27:20  kathy
 // moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
@@ -154,9 +154,6 @@
 #include "global/St_particle_dst_filler_Module.h"
 #include "global/St_dst_point_filler_Module.h"
 #include "global/St_fill_dst_event_summary_Module.h"
-
-#include "St_dst_tof_Table.h"
-
 
 ClassImp(St_glb_Maker)
 
@@ -608,7 +605,6 @@ Int_t St_glb_Maker::Make(){
       cout << " run_dst: Calling dst_point_filler" << endl;
       // dst_point_filler
       if (! point) {point = new St_dst_point("point",200000); dst.Add(point);}
-      St_dst_tof *tof = new St_dst_tof("tof",2000); dst.Add(tof);
       Int_t Res_dst_point_filler = dst_point_filler(tphit, scs_spt, point);
     
       if ( Res_dst_point_filler != kSTAFCV_OK) {
@@ -702,7 +698,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.36 1999/02/23 02:09:03 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.37 1999/02/23 03:13:52 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
