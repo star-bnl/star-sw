@@ -163,6 +163,22 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 					    mytclhits_st[tphit_index].row = (Short_t) 100 * sector + row; // to store the sector 
 					    mytclhits_st[tphit_index].id  = (Long_t)  1 + tphit_index; // to start with 1
 
+					    // fill constant values to make tpt-tracker happy
+					    mytclhits_st[tphit_index].dq = charge * 0.05 ;
+					    mytclhits_st[tphit_index].dx = 0.25 ;
+					    mytclhits_st[tphit_index].dy = 0.25 ;
+					    mytclhits_st[tphit_index].dz = 0.25 ;
+					    mytclhits_st[tphit_index].prf = 3 ;
+					    mytclhits_st[tphit_index].zrf =3 ;
+					    mytclhits_st[tphit_index].nseq = 3 ;
+					    mytclhits_st[tphit_index].npads = 3 ;
+					    mytclhits_st[tphit_index].minpad = (short)(pad-2) ;
+					    mytclhits_st[tphit_index].maxpad = (short)(pad+2) ;
+					    mytclhits_st[tphit_index].ntmbk = 15 ;
+					    mytclhits_st[tphit_index].mintmbk =(short)( time - 2) ;
+					    mytclhits_st[tphit_index].maxtmbk = (short)(time + 2) ; 
+					      
+
 					    // add
 					    mytclhits->AddAt(&mytclhits_st[tphit_index],tphit_index);
 
