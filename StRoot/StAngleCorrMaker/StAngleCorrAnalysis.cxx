@@ -1,15 +1,23 @@
 #include "StAngleCorrAnalysis.h"
 #include "StAngleCorrFunction.h"
 #include "StEvent.h"
+#include <vector>
 #include "StTrackForPool.h"
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
 #include "SystemOfUnits.h"
+#include <time.h>
+
+// ROOT classes
 #include <TH1.h>
 #include <TFile.h>
-#include <vector>
 #include "TString.h"
+#include "TRandom.h"
+
+
+// cut classes
 #include "StTrackCuts.h"
+#include "StEventCuts.h"
 
 // correlation functions
 #include "StOpeningAngle.h"
@@ -26,9 +34,6 @@
 #include "StDiagnosticFastestTrack.h"
 #include "StDiagnosticSignal.h"
 #include "StDiagnosticBackground.h"
-
-#include <time.h>
-#include "TRandom.h"
 
 StAngleCorrAnalysis::StAngleCorrAnalysis() 
 {
@@ -72,7 +77,7 @@ StAngleCorrAnalysis::StAngleCorrAnalysis()
   
   // add functions to diagnostics library here
   TString outputfile = name;
-  outputfile.Append(".root");
+  outputfile.Append("Diagnostic.root");
   mOutput = new TFile(outputfile,"RECREATE");
   diagnosticsLibrary.push_back(new StDiagnosticEventStream());
   diagnosticsLibrary.push_back(new StDiagnosticEventCuts());
@@ -126,7 +131,7 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   
   // add functions to diagnostics library here
   TString outputfile = name;
-  outputfile.Append(".root");
+  outputfile.Append("Diagnostic.root");
   mOutput = new TFile(outputfile,"RECREATE");
   diagnosticsLibrary.push_back(new StDiagnosticEventStream());
   diagnosticsLibrary.push_back(new StDiagnosticEventCuts());
@@ -144,33 +149,22 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   if (mBackgroundTracks2.size()!=0)   mBackgroundTracks2.clear();
 }
 
-void
-StAngleCorrAnalysis::SetNBackgroundEvents(int number) 
-{
-  minimumNumberOfBackgroundEvents=number;
-}
+void StAngleCorrAnalysis::SetNBackgroundEvents(int number) 
+{ minimumNumberOfBackgroundEvents=number;}
 
-void
-StAngleCorrAnalysis::SetNBackgroundPairs(int number, Double_t fraction) 
+void StAngleCorrAnalysis::SetNBackgroundPairs(int number, Double_t fraction) 
 {
   minimumNumberOfBackgroundPairs=number;
   fractionToConsider=fraction;
 }
 
-void 
-StAngleCorrAnalysis::SetSignalHist(TH1D* sHist) 
-{
-  signal = sHist;
-}
+void StAngleCorrAnalysis::SetSignalHist(TH1D* sHist) 
+{ signal = sHist;}
 
-void 
-StAngleCorrAnalysis::SetBackgroundHist(TH1D* bHist) 
-{
-  background = bHist;
-}
+void StAngleCorrAnalysis::SetBackgroundHist(TH1D* bHist) 
+{ background = bHist;}
 
-void
-StAngleCorrAnalysis::SetCorrelationFunction(TString functionName)
+void StAngleCorrAnalysis::SetCorrelationFunction(TString functionName)
 {
   uint index=0;
   for (index=0;index<functionLibrary.size();index++) 
@@ -179,8 +173,7 @@ StAngleCorrAnalysis::SetCorrelationFunction(TString functionName)
     }
 }
 
-void
-StAngleCorrAnalysis::WriteDiagnostic()
+void StAngleCorrAnalysis::WriteDiagnostic()
 {
   mOutput->Write();
   mOutput->Close();
@@ -228,30 +221,17 @@ StAngleCorrAnalysis::TracksWithinCuts(StTrackForPool* t1, StTrackForPool* t2)
   return 1;
 }
 
+int StAngleCorrAnalysis::Track1WithinCuts(StTrackForPool* t1)
+{ return track1Cuts->TrackSatisfiesCuts(t1);}
 
-int
-StAngleCorrAnalysis::Track1WithinCuts(StTrackForPool* t1)
-{
-  return track1Cuts->TrackSatisfiesCuts(t1);
-}
+int StAngleCorrAnalysis::Track2WithinCuts(StTrackForPool* t2)
+{ return track2Cuts->TrackSatisfiesCuts(t2);}
 
-int
-StAngleCorrAnalysis::Track2WithinCuts(StTrackForPool* t2)
-{
-  return track2Cuts->TrackSatisfiesCuts(t2);
-}
+int StAngleCorrAnalysis::EventWithinCuts(StEvent& ev)
+{ return eventCuts->EventSatisfiesCuts(ev);}
 
-int 
-StAngleCorrAnalysis::EventWithinCuts(StEvent& ev)
-{
-  return 1;
-}
-
-TString 
-StAngleCorrAnalysis::GetName()
-{
-  return name;
-}
+TString StAngleCorrAnalysis::GetName()
+{ return name;}
 
 StTrackCuts*
 StAngleCorrAnalysis::GetTrackCuts(TString whichTrack)
@@ -263,11 +243,23 @@ StAngleCorrAnalysis::GetTrackCuts(TString whichTrack)
   return NULL;
 }
 
+StEventCuts*
+StAngleCorrAnalysis::GetEventCuts()
+{
+ return eventCuts;
+}
+
 void
 StAngleCorrAnalysis::SetTrackCuts(StTrackCuts* t1Cuts, StTrackCuts* t2Cuts)
 {
   track1Cuts = t1Cuts;
   track2Cuts = t2Cuts;
+}
+
+void
+StAngleCorrAnalysis::SetEventCuts(StEventCuts* evCuts)
+{
+  eventCuts = evCuts;
 }
 
 void
@@ -278,7 +270,7 @@ StAngleCorrAnalysis::SetTrackForPool(StGlobalTrack* globalTrack, StTrackForPool*
 
   // get track characteristics
   Double_t chiSquareXY,chiSquareZ,numberDegreeOfFreedom,
-                    reducedChiSquareXY,reducedChiSquareZ;
+                  reducedChiSquareXY,reducedChiSquareZ;
  
   numberDegreeOfFreedom = globalTrack->fitTraits().degreesOfFreedom();
   chiSquareXY                          = globalTrack->fitTraits().chiSquaredInXY();
