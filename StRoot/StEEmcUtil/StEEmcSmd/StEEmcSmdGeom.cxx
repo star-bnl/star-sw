@@ -1,7 +1,7 @@
 
 /*******************************************************************
  *
- * $Id: StEEmcSmdGeom.cxx,v 1.7 2003/12/05 00:06:10 jwebb Exp $
+ * $Id: StEEmcSmdGeom.cxx,v 1.8 2004/01/12 14:34:09 wzhang Exp $
  *
  * Author: Wei-Ming Zhang 
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StEEmcSmdGeom.cxx,v $
+ * Revision 1.8  2004/01/12 14:34:09  wzhang
+ * Corrected the usage of EEmcStripPtrVecIter
+ *
  * Revision 1.7  2003/12/05 00:06:10  jwebb
  * Member function added to return a vector pointing to the intersection of
  * two strips.
@@ -366,13 +369,15 @@ StructEEmcStrip* StEEmcSmdGeom::getDcaStripPtr(const Int_t iPlane,
     int iStrip = -1;
     int iUV;
     float x1,y1,x2,y2,mu,d;
+    EEmcStripPtrVec stripPtrVec;  
     EEmcStripPtrVecIter p;  
 
 //    int iSec = getEEmcISec(iPlane, point);
     if(iSec >= 0 && IsSectorIn(iSec)) {
        iUV = kEEmcSmdMapUV[iPlane][iSec];
-         p =  getEEmcSector(iUV,iSec).stripPtrVec.begin();
-         while(p != getEEmcSector(iUV,iSec).stripPtrVec.end()) {
+         stripPtrVec =  getEEmcSector(iUV,iSec).stripPtrVec;
+         p =  stripPtrVec.begin();
+         while(p != stripPtrVec.end()) {
            x1 = (*p)->end1.x();
            y1 = (*p)->end1.y();
            x2 = (*p)->end2.x();
@@ -546,9 +551,9 @@ void StEEmcSmdGeom::printStrip(const StructEEmcStrip strip, ostream& os) const {
 
   os << "------StEEmcSmdGeom::printStrip()------" << std::endl;
 
-    os << "Strip:  sectorId, stripId, planeId    = "
+    os << "Strip:  sectorId, planeUV, stripId, planeId    = "
+       << " " << strip.stripStructId.sectorId
        << " " << UVChar 
-              << strip.stripStructId.sectorId
        << " " << strip.stripStructId.stripId
        << " " << strip.stripStructId.planeId << std::endl;
     os << "        x1, y1, x2, y2, z     = "
