@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.1 2004/07/01 17:23:48 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.2 2004/07/15 18:11:22 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.2  2004/07/15 18:11:22  dongx
+ * -introduce two new tables in dbase: tofAdcRange & tofResolution
+ *  -continue update on writing StTofPidTraits
+ *
  * Revision 1.1  2004/07/01 17:23:48  dongx
  * first release
  *
@@ -111,6 +115,12 @@ private:
     Double_t   mPVPDTDCLowLimit;
     Double_t   mPVPDTDCHighLimit;
 
+    // add more ADC cut for RUN IV tofp
+    Double_t   mTofrADCMin[mNTOFr];
+    Double_t   mTofrADCMax[mNTOFr];
+    Double_t   mTofpADCMin[mNTOFp];
+    Double_t   mTofpADCMax[mNTOFp];
+
     Bool_t     mYear2;
     Bool_t     mYear3;
     Bool_t     mYear4;
@@ -132,6 +142,10 @@ private:
     Int_t      mPVPDEastHitsCut;
     Int_t      mPVPDWestHitsCut;
 
+    Double_t   mTofrRes[mNTOFr];    // resolution of each channel;
+    Double_t   mTofpRes[mNTOFp];    //
+    Double_t   mPVPDRes[mNPVPD];
+
     TF1*       mTofrSlewing;
     TF1*       mTofpSlewing;
     TF1*       mZCorr;
@@ -142,9 +156,9 @@ private:
     Bool_t            mOuterGeometry;
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.1 2004/07/01 17:23:48 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.2 2004/07/15 18:11:22 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
-    ClassDef(StTofCalibMaker,1)
+    ClassDef(StTofCalibMaker,2)
 };
 
 inline void StTofCalibMaker::setTDCLimits(const Double_t tmin, const Double_t tmax) { mTDCLowLimit = tmin; mTDCHighLimit = tmax; }
