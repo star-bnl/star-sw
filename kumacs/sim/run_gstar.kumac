@@ -45,14 +45,15 @@
  macro run__
    TOP=$STAR _
    domain='geometry sim/gstar sim/g2t' _
+   chain='rgst rg2t' _
    phystype=on _
    geomtype=all _   
    num_events=1 _
    debugger=off _
    intype=file _
-   input_data_dir=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
-   input_file=auau_ce_d0-2_1_200.xdf _
-   output_file=gstar_output.xdf
+   input_data_dir=/star/mds/data/SD98/auau200/evg/central/ven-4.12/set0001/ _
+   input_file=venauau200_301_400.xdf _
+   output_file=auau_central_venus.xdf
  
 * 
 *  this is an example!! you must change to fill your needs
@@ -65,6 +66,7 @@
    
   message ' *** TOP directory to search for kumacs --> ' [TOP]
   message ' *** domains to load  -->                   ' [domain]
+  message ' *** chain to use -->                       ' [chain]
   message ' *** physics type -->                       ' [phystype]
   message ' *** geometry type -->                      ' [geomtype]
   message ' *** Num Events to process -->              ' [num_events]
@@ -75,19 +77,20 @@
   message ' *** output file -->                        ' [output_file]
 
 * ----------- General setup stuff ------------------------*
-  macro/global/create TOP              [TOP]
-  macro/global/create phystype
-  macro/global/create geomtype
+  macro/global/create TOP           [TOP]
+  macro/global/create phystype [phystype]
+  macro/global/create geomtype [geomtype]
 * 
 * setup default directories to search for kumacs in
 * setup default table directory structure in STAF
 
-    exec $STAR/kumacs/chain/bfc_util#bfc_defaults [domain]
+    exec $STAR/kumacs/chain/bfc_util#bfc_defaults 
 * 
    exec setup#setup
 * 
    macro/global/import *
      
+ 
 *  THESE NEXT 3 MUST BE DONE IN THIS ORDER!!!!
    exec bfc_util#bfc_gstar [chain]
    exec bfc_util#bfc_load [domain]
