@@ -35,6 +35,9 @@ class StTclHitChair : public StHitChair {
     virtual Float_t GetXError(Int_t i)       const{return fTab_tcl[i].dx;}
     virtual Float_t GetYError(Int_t i)       const{return fTab_tcl[i].dy;}
     virtual Float_t GetZError(Int_t i)       const{return fTab_tcl[i].dz;}
+    virtual void    SetX       (Float_t x,Int_t i)     {fTab_tcl[i].x=x;}
+    virtual void    SetY       (Float_t y,Int_t i)     {fTab_tcl[i].y=y;}
+    virtual void    SetZ       (Float_t z,Int_t i)     {fTab_tcl[i].z=z;}
 //===============================================
     Bool_t   IsValid(Int_t i)         const;
     static Long_t   GetTrackFactor(); 

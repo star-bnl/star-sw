@@ -41,9 +41,9 @@ class StDstPointChair : public StHitChair {
     virtual Float_t GetXError  (Int_t i)       	const;
     virtual Float_t GetYError  (Int_t i)       	const;
     virtual Float_t GetZError  (Int_t i)       	const;
-    virtual Float_t GetCharge  (Int_t i)       	const;
-    virtual ULong_t GetFlag    (Int_t i)       	const;
-    virtual ULong_t GetFitFlag (Int_t i)       	const;
+    virtual Float_t GetCharge  (Int_t i)        const;
+    virtual ULong_t GetFlag    (Int_t i)        const;
+    virtual ULong_t GetFitFlag (Int_t i)        const;
 
 
     dst_point_st   &operator[](Int_t i);
@@ -216,7 +216,7 @@ inline Float_t  StDstPointChair::GetZError(Int_t i)       const
   return GetRealError(UpckZ(row->position));
 }
 //______________________________________________________________
-inline Float_t StDstPointChair::GetCharge  (Int_t i)       	const
+inline Float_t StDstPointChair::GetCharge  (Int_t i)          const
 {
   dst_point_st *row = GetTable(i);
   const ULong_t iflag = row->charge/(1L<<16);
@@ -224,14 +224,14 @@ inline Float_t StDstPointChair::GetCharge  (Int_t i)       	const
   return Float_t(tpcq)/(1<<25); // mCharge
 }
 //______________________________________________________________
-inline ULong_t  StDstPointChair::GetFlag    (Int_t i)       	const
+inline ULong_t  StDstPointChair::GetFlag    (Int_t i)         const
 {
   dst_point_st *row = GetTable(i);
   const ULong_t iflag = row->charge/(1L<<16);
   return (iflag&255);  // First 8 bits mFlag
 }
 //______________________________________________________________
-inline ULong_t StDstPointChair::GetFitFlag (Int_t i)       	const
+inline ULong_t StDstPointChair::GetFitFlag (Int_t i)          const
 {
   dst_point_st *row = GetTable(i);
   const ULong_t iflag = row->charge/(1L<<16);

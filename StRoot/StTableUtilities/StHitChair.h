@@ -1,5 +1,6 @@
 #ifndef STAR_StHitChair
 #define STAR_StHitChair
+#include <assert.h>
 #include "TChair.h"
 ///////////////////////////////////////////////////////////////////////////////////
 // This basic chair provides the custom methods for all hits
@@ -30,6 +31,9 @@ class StHitChair : public TChair {
     virtual Float_t GetX       (Int_t i)        const  {return -999999;};
     virtual Float_t GetY       (Int_t i)        const  {return -999999;};
     virtual Float_t GetZ       (Int_t i)        const  {return -999999;};
+    virtual void    SetX       (Float_t x,Int_t i)     {assert(0);};
+    virtual void    SetY       (Float_t y,Int_t i)     {assert(0);};
+    virtual void    SetZ       (Float_t z,Int_t i)     {assert(0);};
     virtual Float_t GetXError  (Int_t i)       	const  {return -999999;};
     virtual Float_t GetYError  (Int_t i)       	const  {return -999999;};
     virtual Float_t GetZError  (Int_t i)       	const  {return -999999;};
