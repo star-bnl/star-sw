@@ -1,7 +1,4 @@
 /***************************************************************************
- *
- * $Id: StHbtAnalysis.cxx,v 1.23 2002/11/20 00:09:26 renault Exp $
- *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
  *
@@ -12,7 +9,7 @@
  *
  ***************************************************************************
  *
- * $Log: StHbtAnalysis.cxx,v $
+ *
  * Revision 1.23  2002/11/20 00:09:26  renault
  * fill a new monitor with (hbtEvent,partCollection)
  *
@@ -393,8 +390,8 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
           MakePairs("mixed",mPicoEvent->FirstParticleCollection(),
                             storedEvent->SecondParticleCollection() );
 
-          MakePairs("mixed",mPicoEvent->SecondParticleCollection(),
-                            storedEvent->FirstParticleCollection() );
+          MakePairs("mixed",storedEvent->FirstParticleCollection(),
+                            mPicoEvent->SecondParticleCollection() );
         }
       }
       cout << "StHbtAnalysis::ProcessEvent() - mixed done   ";
