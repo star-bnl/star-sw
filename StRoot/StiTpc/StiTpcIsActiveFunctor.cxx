@@ -21,8 +21,7 @@ StiTpcIsActiveFunctor::~StiTpcIsActiveFunctor(){
 
 bool StiTpcIsActiveFunctor::operator()(double dYlocal, double dZlocal)
 {
-  return true;
-  //return (m_bWestActive && dZlocal>-2.0 ||
-  //        m_bEastActive && dZlocal< 2.0);
+  return (m_bWestActive && dZlocal>-2.0 ||
+          m_bEastActive && dZlocal< 2.0);
 } // operator()
 
