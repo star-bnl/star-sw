@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.17 2001/06/21 19:15:48 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.18 2001/07/12 23:20:42 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.18  2001/07/12 23:20:42  laue
+ * mDCAGlobal,mPGlobal,mPtGlobal added
+ *
  * Revision 1.17  2001/06/21 19:15:48  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -141,10 +144,14 @@ public:
   float dEdx() const;
   float DCAz() const;
   float DCAxy() const;
+  float DCAzGlobal() const;
+  float DCAxyGlobal() const;
   float ChiSquaredXY() const;
   float ChiSquaredZ() const;
   StHbtThreeVector P() const;
   float Pt() const;
+  StHbtThreeVector PGlobal() const;
+  float PtGlobal() const;
   const StPhysicalHelixD& Helix() const;
   const StPhysicalHelixD& HelixGlobal() const;
   unsigned int TopologyMap(const unsigned int word) const;
@@ -166,10 +173,14 @@ public:
   void SetdEdx(const float&);
   void SetDCAxy(const float&);
   void SetDCAz(const float&);
+  void SetDCAxyGlobal(const float&);
+  void SetDCAzGlobal(const float&);
   void SetChiSquaredXY(const float&);
   void SetChiSquaredZ(const float&);
   void SetP(const StHbtThreeVector&);
   void SetPt(const float&);
+  void SetPGlobal(const StHbtThreeVector&);
+  void SetPtGlobal(const float&);
   void SetHelix(const StPhysicalHelixD&);
   void SetHelixGlobal(const StPhysicalHelixD&);
   void SetTopologyMap(const int word, const unsigned int map);
@@ -202,6 +213,8 @@ private:
   float mdEdx;
   float mDCAxy;
   float mDCAz; 
+  float mDCAxyGlobal;
+  float mDCAzGlobal; 
   float mChiSqXY;
   float mChiSqZ;
   unsigned int mMap[2];
@@ -210,6 +223,8 @@ private:
 
   StHbtThreeVector mP;
   float mPt;
+  StHbtThreeVector mPGlobal;
+  float mPtGlobal;
   StPhysicalHelixD mHelix;
   StPhysicalHelixD mHelixGlobal;
 
