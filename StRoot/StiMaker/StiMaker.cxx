@@ -80,7 +80,7 @@ StiMaker::~StiMaker()
     delete mhitfiller;
     mhitfiller = 0;
     
-    delete mdisplay;
+    StiDisplayManager::kill();
     mdisplay = 0;
 
     delete mtrackfactory;
@@ -104,9 +104,6 @@ StiMaker::~StiMaker()
     delete mtracknodefactory;
     mtracknodefactory = 0;
 
-    delete mkalmantracknodefactory;
-    mkalmantracknodefactory = 0;
-
     delete mkalmanseedfinder;
     mkalmanseedfinder = 0;
 
@@ -115,6 +112,8 @@ StiMaker::~StiMaker()
 
     delete mkalmantrackfactory;
     mkalmantrackfactory=0;
+
+    StiGeometryTransform::kill();
 }
 
 void StiMaker::Clear(const char*)
@@ -133,7 +132,6 @@ void StiMaker::Clear(const char*)
 
     //Reset EvaluableTrackFactory
     mtrackfactory->reset();
-    mkalmantracknodefactory->reset();
     mtracknodefactory->reset();
 
     //Reset KalmanTrackFactory
@@ -177,11 +175,6 @@ Int_t StiMaker::Init()
     mtracknodefactory->setMaxIncrementCount(100);
     StiKalmanTrack::trackNodeFactory = mtracknodefactory;
     
-    //The Kalman Track Node Factory
-    mkalmantracknodefactory = new StiKalmanTrackNodeFactory("KalmanTrackNodeFactory");
-    mkalmantracknodefactory->setIncrementalSize(1000);
-    mkalmantracknodefactory->setMaxIncrementCount(10);
-
     //The Kalman Track Factory
     mkalmantrackfactory = new StiKalmanTrackFactory("KalmanTrackFactory");
     mkalmantrackfactory->setIncrementalSize(1000);
@@ -343,7 +336,6 @@ void StiMaker::initSeedFinderForStart()
     for (int i=0; i<3; ++i) {
 	rdet.moveOut();
     }
-    //mkalmanseedfinder->init();
     //mkalmanseedfinder->print();
     return;
 }
