@@ -9,7 +9,7 @@
 class StChain;
 StChain *chain=0;
 
-void doBemcMuDst(char* list = "test.list", int nFiles = 5, int nevents = 2000000)
+void doBemcMuDst(bool StEv = true, char* list = "test.list", int nFiles = 5, int nevents = 2000000)
 {
   Bool_t  debug            = kFALSE; // debug mode. If true, prints a lot of information
   Bool_t  fillExtraHisto   = kFALSE; // create and fill extra QA histograms 
@@ -27,6 +27,7 @@ void doBemcMuDst(char* list = "test.list", int nFiles = 5, int nevents = 2000000
   gSystem->Load("St_db_Maker");
   gSystem->Load("libgeometry_Tables");
   gSystem->Load("StDaqLib");
+  gSystem->Load("StEmcRawMaker");
   gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StPreEclMaker");
   gSystem->Load("StEpcMaker");
@@ -44,7 +45,7 @@ void doBemcMuDst(char* list = "test.list", int nFiles = 5, int nevents = 2000000
   /////////////////////////////////////////////////////////////
   StMuDstMaker* muDst = new StMuDstMaker(0,0,"",list,"",nFiles);
   StMuDbReader* muDB = StMuDbReader::instance();
-  StMuDst2StEventMaker *muDst2StEvent = new StMuDst2StEventMaker();
+  if(StEv) StMuDst2StEventMaker *muDst2StEvent = new StMuDst2StEventMaker();
   
   /////////////////////////////////////////////////////////////
   // This is the DB Maker and it is the interface to Star database 
@@ -62,21 +63,20 @@ void doBemcMuDst(char* list = "test.list", int nFiles = 5, int nevents = 2000000
   
   // This is the maker that applies the calibration to the data
   StEmcADCtoEMaker *adc=new StEmcADCtoEMaker();
-  adc->setFillHisto(fillExtraHisto); // if kTRUE it fillls extra histograms
   adc->saveAllStEvent(saveAllStEvent); // if set to kTRUE, saves all the hits into StEvent.
   adc->setPrint(debug); // if true, prints extra information 
   controlADCtoE_st* c = adc->getControlTable(); // get control table. You can have access to detailed configuration for each sub detector
    
   /////////////////////////////////////////////////////////////
   // the constol table has the following parameters
-  // short DeductPedestal[8];    // switch for deducting pedestal, should be = 1 to deduct pedestals 
-  // short Calibration[8];       // switch for calibration, should be = 1 to do the calibration    
-  // float CutOff[8];            // cutoff value for hits close to pedestal. -1 = none 
-  // short CutOffType[8];        // cutoff type (0 = energy, 1 = pedestal RMS) 
-  // short OnlyCalibrated[8];    // save only calibrated hits 
+  // short DeductPedestal[det-1];    // switch for deducting pedestal, should be = 1 to deduct pedestals 
+  // short Calibration[det-1];       // switch for calibration, should be = 1 to do the calibration    
+  // float CutOff[det-1];            // cutoff value for hits close to pedestal. -1 = none 
+  // short CutOffType[det-1];        // cutoff type (0 = energy, 1 = pedestal RMS) 
+  // short OnlyCalibrated[det-1];    // save only calibrated hits 
   // short messLimit;            // limit for warning message 
   // 
-  // where 0 = bemc; 1 = bprs; 2 = bsmde; 3 = bsmdp; 4-7 = not used
+  // where 1 = bemc; 2 = bprs; 3 = bsmde; 4 = bsmdp;
   /////////////////////////////////////////////////////////////  
    
   // This maker does clustering in the detectors
