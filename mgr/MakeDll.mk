@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.90 1999/06/21 12:46:04 fisyak Exp $
+# $Id: MakeDll.mk,v 1.91 1999/06/24 22:25:38 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.91  1999/06/24 22:25:38  fisyak
+# Add StUtilities in include path
+#
 # Revision 1.90  1999/06/21 12:46:04  fisyak
 # Fix rtti and exceptions for ROOT_LEVEL < 2.22
 #
@@ -199,7 +202,7 @@ endif
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StarClassLibrary StRootEvent) \
+INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StRootEvent) \
               StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIR) $(SRC_DIR)/include)
@@ -325,6 +328,7 @@ endef
 ifdef FILES_ORD
   ifneq (,$(strip $(FILES_H)))
     NAMES_ORD  := $(shell $(AWK))
+    NAMES_ORD_TEST := $(NAMES_ORD)
     NAMES_DD   := $(shell $(AWK2))
 #    NAMES_DD   := $(strip $(filter-out %StArray.h, $(NAMES_DD)))
     ifneq (,$(NAMES_DD))
@@ -582,6 +586,7 @@ test:
 	@echo FILES_H   := $(FILES_H)
 
 	@echo NAMES_ORD := $(NAMES_ORD) 
+	@echo NAMES_ORD_TEST := $(NAMES_ORD_TEST) 
 	@echo NAMES_ORDD:= $(NAMES_ORDD) 
 	@echo NAMES_DD  := $(NAMES_DD) 
 	@echo NAMES_DEF := $(NAMES_DEF) 
