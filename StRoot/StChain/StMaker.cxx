@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.68 1999/09/13 16:39:24 fine Exp $
+// $Id: StMaker.cxx,v 1.69 1999/09/13 23:22:53 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.69  1999/09/13 23:22:53  fine
+// improved version of MakeDoc with MakeAssociatedClassList function
+//
 // Revision 1.68  1999/09/13 16:39:24  fine
 // MakeDoc ExpandPath removed to keep path short
 //
@@ -166,6 +169,7 @@
 // StChain virtual base class for StMaker                              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include <iostream.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -723,10 +727,13 @@ void StMaker::PrintTimer(Option_t *option)
    Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
                                          ,m_Timer.RealTime(),m_Timer.CpuTime());
 }
-#if DRAFT
+
 //_____________________________________________________________________________
-MakeAssociatedClassList(const Char_t classDir=0)
+static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0)
 {
+ //
+ // This function creates the html docs of the classes pointed within
+ // <obj> class source directory
  //
  // classDir - the name of the directory to search in
  //
@@ -734,81 +741,115 @@ MakeAssociatedClassList(const Char_t classDir=0)
  // with the classDir directory of provided otherwise
  // within  this class source directory
 
+  if (!obj) return;
   const Char_t *thisDir = classDir;
   if (thisDir == 0 || thisDir[0] == 0) 
-       thisDir = gSystem->DirName(IsA()->GetImplFileName());
+       thisDir = gSystem->DirName(obj->IsA()->GetImplFileName());
+  const Char_t *thisClassName = obj->IsA()->GetName();
   // Loop over all *.h files within <thisDir> to find
   // C++ class declarations
   void *dirhandle = 0;
-  if (dirhandle = gSystem->OpenDirectory(sourcedir)) 
+  TString className;
+  if ( (dirhandle = gSystem->OpenDirectory(thisDir)) ) 
   {
-    Char_t *n = 0;
-    while (n = gSystem->GetDirEntry(dirhandle)) {
-      // look for *.h* files
-      if (!strstr(name,".h")) continue; 
-      ifstream headerFile(n);
-      headerFile >> nextSymbol;
+    const Char_t *n = 0;
+    ifstream headerFile;
+    Char_t inBuffer[128] = {0};
+    Int_t lBuf = sizeof(inBuffer);
+    Char_t *nextSym = inBuffer;
+    Int_t status = 0;
+    const Char_t keyWord[] = "class";
+    const Int_t lKeyWord = sizeof(keyWord);
 
-      |<===========================================+
-      |                                            |
- $-->(1)<===+                                      |
-      | ' ' |                                      |
-      |---->|                                      |
-      |"class"   ' '                               |
-      |------>(2)--->(3)<===+                      |
-                      | ' ' |                      |
-                      |---->|                      | 
-                      | name                       |
-                      |------>(4)<===+             |
-                               | ' ' |             | 
-                               |---->|             | 
-                               | ";"               | 
-                               |------>(5)-------->|
-                               |        | add2list    
-                               |  ":"   |
-                               |------->|
-      switch (status) {
-        case 1:
-           if (*nextSym == ' ') break;            
-           const Char_t *class = strstr(nextSym,"class");
-           if ( class && class == nextSym) {
-                status = 2;
-                nextSym += strlen("class");
-           }
-           else status = 999;
-           break;
-        case 2:
-           if (*nextSym == ' ') break;            
-           status = 999;
-           while (isalpha(*nextSym)) {
-             name += *nextSym;
-             nextSym++;
-             status = 3;
-           }                   
-           break;
-        case 3:
-           if (*nextSym == ' ') break;            
-           status = 999;
-           if (*nextSym ==  0   ||
-               *nextSym == ':'  || 
-               *nextSym == ';'  ||
-               ( *nextSym == '/' && 
-                 (*(nextSym+1) == '/' || *(nextSym+1) == '*') 
-               )
-              ) 
-              status = 4;
-           break;
-        case 4:
-           list->Add(name);
-           break;
-        default:
-           break;
-       };
+    while ( (n = gSystem->GetDirEntry(dirhandle)) ) {
+      // look for *.h* files but *Cint.h
+      if (!strstr(n,".h") || strstr(n,"Cint.h") ) continue; 
+      Char_t *fullFile = gSystem->ConcatFileName(thisDir,n);
+      headerFile.open(fullFile);
+      if (headerFile.fail()) continue;
+      while (headerFile.getline(inBuffer,lBuf) && !headerFile.eof()) {
+        nextSym = inBuffer;
+        if (status==0)  status = 1;
+        do {
+ /* 
+  ************************************************************
+  *
+  *      |<===========================================+
+  *      |                                            |
+  * $-->(1)<===+                                      |
+  *      | ' ' |                                      |
+  *      |---->|                                      |
+  *      |"class"   ' '                               |
+  *      |------>(2)--->(3)<===+                      |
+  *                      | ' ' |                      |
+  *                      |---->|                      | 
+  *                      | name                       |
+  *                      |------>(4)<===+             |
+  *                               | ' ' |             | 
+  *                               |---->|             | 
+  *                               | ";"               | 
+  *                               |------>(5)-------->|
+  *                               |        | add2list    
+  *                               |  ":"   |
+  *                               |------->|
+  *
+  ************************************************************
+  */
+          switch (status) {
+            case 1: {
+                if (*nextSym == ' ' || *nextSym == '\t') break;    
+                const Char_t *classFound = strstr(nextSym,keyWord);
+                if ( classFound && classFound == nextSym){
+                                                       status = 2;
+                   nextSym += lKeyWord-2;
+                }
+                else                         status = 0;             
+                break;
+              }
+            case 2:                       status = 0;
+              if (*nextSym == ' ' || *nextSym == '\t')  status = 3;
+              break;
+            case 3:
+              if (*nextSym == ' ' || *nextSym == '\t') break;    
+                                           status = 0;
+              if (isalpha(*nextSym)) {
+                 className = *nextSym;
+                 nextSym++;
+                 while (isalnum(*nextSym) || *nextSym == '_' ) { 
+                    className += *nextSym++;            status = 4;
+                 }
+                 nextSym--;
+              }
+              break;
+            case 4:
+              if (*nextSym == ' ' || *nextSym == '\t') break;    
+                                          status = 0;
+              if (*nextSym ==  0   ||
+                  *nextSym == ':'  || 
+                  *nextSym == '{'  ||
+                  ( *nextSym == '/' && 
+                    (*(nextSym+1) == '/' || *(nextSym+1) == '*') 
+                  )
+                 )                                      status = 5;                 
+              break;
+            case 5:
+              if (strcmp(thisClassName,className.Data())) {
+                TClass *cl = gROOT->GetClass(className.Data());
+                if (cl && !cl->InheritsFrom("StMaker") ) {
+                    gHtml->MakeClass((Text_t *)className.Data());
+                }
+              }
+            default:                                     status = 1;
+               break;
+          };
+        }   while (*(++nextSym) && status ); // end of buffer
+      } // eof()
+      headerFile.close();
+      delete [] fullFile;
     } 
   }
   
 }
-#endif
 //_____________________________________________________________________________
 void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses)
 {
@@ -876,12 +917,13 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   const Int_t lsource = sizeof(source)/sizeof(const Char_t *);
  
+  TString classDir = gSystem->DirName(IsA()->GetImplFileName());
   TString lookup = STAR;
   lookup += delim;
 
   lookup += STAR;
   lookup += "/";
-  lookup += gSystem->DirName(IsA()->GetImplFileName());
+  lookup += classDir;
   lookup += delim;
 
   lookup += STAR;
@@ -936,14 +978,16 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   // Update the docs of the base classes
   static Bool_t makeAllAtOnce = kTRUE;
   if (makeAllAtOnce && baseClasses) { 
-     makeAllAtOnce = kFALSE;
-   //  gHtml->MakeAll();  // VF 10/09/99
-     for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+      makeAllAtOnce = kFALSE;
+      //  gHtml->MakeAll();  // VF 10/09/99
+      for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+      MakeAssociatedClassList(this, classDir.Data());
   }
 
   // Create the doc for this class
   printf(" Making html for <%s>\n",classname.Data());
   gHtml->MakeClass((Char_t *)classname.Data());
+  // Create the associated classes docs
 //   Loop on all makers
    TList *tl = GetMakeList();
    if (tl) {
