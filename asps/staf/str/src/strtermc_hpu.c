@@ -1,6 +1,6 @@
 /*
 
-	         This file is:  strtermc_sgi.c
+	         This file is:  strtermc_hpu.c
 
 	              Version:  1.00
 
@@ -53,11 +53,15 @@ doesn't work.
 /*
 	File-wide "global" definitions:
 */
+#define _INCLUDE_XOPEN_SOURCE
+#define _INCLUDE_POSIX_SOURCE
+#define _INCLUDE_TERMIO
+#define _INCLUDE_HPUX_SOURCE
 
+#include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <termio.h>
-#include <unistd.h>
 
 	int	ioctl( int, int, ... );
 	int	msg_enabled_trace_( char *, int *, size_t );
@@ -94,7 +98,7 @@ char strterm_get_next_char(void)
 	char  -- contains the next byte read from the terminal, or a null if
 	nothing is ready, or -1 if some kind of low-level read error occured.
 
-  Functional description:
+  Description:
 	Get a single character from the terminal buffer, w/o waiting (asynchronous),
 	and without waiting for a complete line (ie, no EOT character needed to make
 	characters available).  Return with the null byte as the character if no
@@ -174,12 +178,12 @@ void strterm_get_char_( long int *i1 )
 	              !returns set to zero.  Unfortunately, a Unix bug
 	              !renders the same effect on EOF (^D).
 
-  Output argument:
+  Output:
 	integer i1 -- passed by reference (pointer or address).
 
   Return value:  none ("void")
 
-  Functional description:
+  Description:
 	Get a single character from the terminal, w/o waiting, and without
 	waiting for a complete line (ie, no EOT character needed to make
 	characters available).
@@ -236,12 +240,12 @@ void strterm_get_char_from_line_(long int *i1)
 /*
   FORTRAN callable.
 
-  Output argument:
+  Output:
 	integer i1 -- passed by reference (pointer or address).
 
   Return value:  none ("void")
 
-  Functional description:
+  Description:
 	Get a character from the terminal, w/o waiting.
 	Wait for a complete line before transmitting.
 	Return with the null byte as the character if no
@@ -304,7 +308,7 @@ void strterm_set_char_(void)
 
   Return value:  none
 
-  Functional description:
+  Description:
 	Set the terminal into single-character ("punctual") I/O mode.
 	ie, make characters available immediately, without waiting for
 	an EOT (End Of Transmission, eg, a Return, Line Feed, etc.).
@@ -365,7 +369,7 @@ void strterm_set_line_(void)  /* Set terminal to wait-for-line mode  */
 
   Return value:  none ("void")
 
-  Functional description:
+  Description:
 	Set the terminal into "line" I/O mode.  ie, characters are not
 	available until an EOT (End Of Transmission, eg, a Return, Line Feed,
 	etc.) is sent.
@@ -416,7 +420,7 @@ void strterm_set_normal_(void)
 
   Return value:  none ("void")
 
-  Functional description:
+  Description:
 	Set the terminal into "normal" I/O mode.  ie, wait at a read for
 	input to be typed, and do not make characters available until an
 	EOT (End Of Transmission, eg, a Return, Line Feed, etc.) is sent.
@@ -443,7 +447,7 @@ void strterm_set_nowait_(void) /* Turn terminal I/O waiting off */
 
   Return value:  none ("void")
 
-  Functional description:
+  Description:
 	Set the terminal into "nowait", or asynchronous I/O mode.  ie, if
 	no characters are available at a read, a null byte is returned
 	and program flow continues, rather than waiting for something to be
@@ -509,7 +513,7 @@ void strterm_set_wait_(void) /* Turn terminal I/O waiting on */
 
   Return value:  none ("void")
 
-  Functional description:
+  Description:
 	Set the terminal into "wait", or synchronous I/O mode.  ie, if
 	no characters are available at a read,  program flow halts,
 	waiting for something to be transmitted, rather than returning

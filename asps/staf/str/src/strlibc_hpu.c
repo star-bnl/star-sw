@@ -7,6 +7,7 @@
 
 /*	Define structures, types etc., from the system:      */
 
+#define _INCLUDE_POSIX_SOURCE
 #include <sys/times.h>
 #include <sys/unistd.h>  /* This appears in the wrong place -- man pages say no "sys/" */
 
