@@ -36,7 +36,8 @@ protected:
    const St_DataSet *fDataSet;        // Pointer to the last selected St_DataSet
    St_DataSet       *fRootDataSet;    // Pointer to the root St_DataSet
    St_DataSet       *fWorkingDataSet; // Pointer to the working St_DataSet
- 
+   St_DataSet       *NextDataSet(TIter &next);
+   St_DataSet       *NextDataSet(Int_t nDataSet);
 public:
   St_DataSetIter(St_DataSet *l=0, Int_t depth=1, Bool_t dir=kIterForward);
   St_DataSetIter(St_DataSet *l, Bool_t dir);
@@ -87,6 +88,8 @@ public:
   virtual void           Reset(St_DataSet *l=0,Int_t depth=0);
   ClassDef(St_DataSetIter,0)
 };
- 
+
+inline St_DataSet *St_DataSetIter::NextDataSet(TIter &next){ return (St_DataSet *)next(); } 
+
 #endif
 

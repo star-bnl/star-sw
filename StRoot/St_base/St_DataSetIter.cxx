@@ -42,14 +42,14 @@ ClassImp(St_DataSetIter)
  {
   fRootDataSet=l; fWorkingDataSet=l;fDepth=1;fMaxDepth=1;
   fDataSet=0;
-  fNext = l ? new TIter(l->fList,dir):0;
+  fNext = l ? new TIter(l->GetList() ,dir):0;
  }
  
 //______________________________________________________________________________
  St_DataSetIter::St_DataSetIter(St_DataSet *l, Int_t depth, Bool_t dir)
 { 
   fRootDataSet=l; fWorkingDataSet=l; fMaxDepth=depth;fDepth=1;fDataSet=0; 
-  fNext = (l)? new TIter(l->fList,dir):0;
+  fNext = (l)? new TIter(l->GetList() ,dir):0;
 
   // Create a DataSet iterator to pass all nodes of the 
   //     "depth"  levels
@@ -110,7 +110,7 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
        delete fNext; 
        fNext = 0;
      }
-     fNext = new TIter(s->fList);
+     fNext = new TIter(s->GetList() );
   }
   return s;
 }
@@ -354,7 +354,7 @@ St_DataSet *St_DataSetIter::Next()
  //         = 0 if all objects have been returned.
  //
 
-  if (fMaxDepth==1) fDataSet = fNext ? (St_DataSet *)fNext->Next():0;
+  if (fMaxDepth==1) fDataSet = fNext ? NextDataSet(*fNext) :0;
   else {
 
     // Check the whether the next level does exist 
@@ -375,7 +375,7 @@ St_DataSet *St_DataSetIter::Next()
     // Pick the next object of the current level
     TIter *next = fNextSet[fDepth-1];
     if (next) {
-      fDataSet = (St_DataSet *)next->Next();
+      fDataSet = NextDataSet(*next);
 
       // Go upstair if the current one has been escaped
       if (!fDataSet) {
@@ -383,9 +383,10 @@ St_DataSet *St_DataSetIter::Next()
         while (!fDataSet && fDepth > 1) {
           fDepth--;
           delete next;
-          next = fNextSet[fDepth-1];
-          if (next) 
-             fDataSet = (St_DataSet *)next->Next();
+          next =  fNextSet[fDepth-1];
+          St_DataSet *set = NextDataSet(*next);
+          if (set) 
+             fDataSet = set;
         }
       }
     }
@@ -393,6 +394,14 @@ St_DataSet *St_DataSetIter::Next()
   return (St_DataSet *)fDataSet;
 }
 
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::NextDataSet(Int_t nDataSet)
+{
+ // Pick the next object of the  level provided
+    TIter *next = fNextSet[nDataSet];
+    if (next) return NextDataSet(*next);
+    return 0;
+}
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
                                  Bool_t mkdirflag)
@@ -414,8 +423,8 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
 //  ------                                                                    //
 ////////////////////////////////////////////////////////////////////////////////
    St_DataSet *dataset=0,*dsnext=0,*ds=0;
-   int len=0,nextlen=0,yes=0,anywhere=0,rootdir=0;
-   const char *name=0,*nextname=0;
+   Int_t len=0,nextlen=0,yes=0,anywhere=0,rootdir=0;
+   const Char_t *name=0,*nextname=0;
    TList *tl=0;
    
    name = path;
@@ -435,47 +444,61 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
    if (!dataset) goto NOTFOUND;
 
 //	Check name of root directory
-   if (rootdir) {
-   nextname = dataset->GetName();
-   nextlen  = strlen(nextname);
-   if (nextlen==len && !strncmp(name,nextname,len)) 
-     return Find(name+len,dataset,mkdirflag);}
-
-
+   if (rootdir) 
+   {
+     nextname = dataset->GetName();
+     nextlen  = strlen(nextname);
+     if (nextlen==len && !strncmp(name,nextname,len)) 
+        return Find(name+len,dataset,mkdirflag);
+   }
 
    tl = dataset->GetList();
-   if (!tl) goto NOTFOUND;
-
-   {TIter next(tl);
-   while ((dsnext = (St_DataSet*)next())) { //horisontal loop 
-     nextname = dsnext->GetName();
-     if (!nextname)	continue;
-     yes = name[0]=='*';	// wildcard test
-     if (!yes) {		// real     test
-       nextlen  = strlen(nextname);
-       yes = (len == nextlen);
-       if (yes) yes = !strncmp(name,nextname,len);}
+   if (tl) {
+     TIter next(tl);
+     while ( (dsnext = NextDataSet(next)) ) 
+     { //horisontal loop 
+        nextname = dsnext->GetName();
+        if (!nextname)	continue;
+        yes = name[0]=='*';	// wildcard test
+        if (!yes) {		// real     test
+           nextlen  = strlen(nextname);
+           yes = (len == nextlen);
+           if (yes) 
+              yes = !strncmp(name,nextname,len);
+        }
       
-     if (yes) {//go down
-       Notify(dsnext);
-       ds = Find(name+len,dsnext,mkdirflag);
-       if (ds) return ds;}
+        if (yes) 
+        {//go down
+          Notify(dsnext);
+          ds = Find(name+len,dsnext,mkdirflag);
+          if (ds) 
+             return ds;
+        }
        
-     if (!anywhere) continue; 	// next horizontal
-       ds = Find(name,dsnext,mkdirflag);
-       if (ds) return ds;
-   }}; 					// end of while
+        if (!anywhere) continue; 	// next horizontal
+        ds = Find(name,dsnext,mkdirflag);
+        if (ds) 
+             return ds;
+     } 					// end of while
+   }
 
 NOTFOUND:
-   if (mkdirflag) {// create dir 
+   if (mkdirflag) 
+   {
+     // create dir 
      char buf[512];buf[0]=0; strncat(buf,name,len);
      ds = new St_DataSet(buf);
      if (!fRootDataSet) 	fRootDataSet    = ds;
      if (!fWorkingDataSet) 	fWorkingDataSet = ds;
-     if (dataset) { // 
-       dataset->Add(ds);} else { dataset = ds; name +=len;}
+     if (dataset)
+        dataset->Add(ds);
+     else {
+        dataset = ds;
+        name +=len;
+     }
      
-     return Find(name,dataset,mkdirflag);}
+     return Find(name,dataset,mkdirflag);
+   }
   
    return 0;
 }     
@@ -503,15 +526,15 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
     fRootDataSet    = l;
     fWorkingDataSet = l;
     SafeDelete(fNext);
-    if (fRootDataSet->fList)
-             fNext = new TIter(fRootDataSet->fList);
+    if (fRootDataSet->GetList() )
+             fNext = new TIter(fRootDataSet->GetList() );
   }
   else {
     fWorkingDataSet = fRootDataSet;
     if (fNext)
         fNext->Reset();
-    else if (fRootDataSet->fList)
-        fNext = new TIter(fRootDataSet->fList);
+    else if (fRootDataSet->GetList() )
+        fNext = new TIter(fRootDataSet->GetList() );
   }
   // set the new value of the maximum depth to bypass
   if (depth) fMaxDepth = depth;
@@ -552,7 +575,7 @@ St_DataSet *St_DataSetIter::Shunt(St_DataSet *set, St_DataSet *dataset)
        delete fNext; 
        fNext = 0;
      }
-     fNext = new TIter(s->fList);
+     fNext = new TIter(s->GetList() );
   }
   return s;
 }

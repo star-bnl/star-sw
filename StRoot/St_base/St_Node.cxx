@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.13 1999/02/04 19:22:22 fine Exp $
+// $Id: St_Node.cxx,v 1.14 1999/03/21 22:38:53 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.14  1999/03/21 22:38:53  fine
+// StDataSetIter make up + new NextDataSet method introced
+//
 // Revision 1.13  1999/02/04 19:22:22  fine
 // Severak drawing method have been added to draw STAR nodes
 //
@@ -340,8 +343,16 @@ void St_Node::Browse(TBrowser *b)
    if (GetListOfPositions()){
        St_NodePosition *nodePosition = 0;
        TIter next(GetListOfPositions());
-       while (nodePosition = (St_NodePosition *)next())
-         b->Add(nodePosition,nodePosition->GetNode()->GetName());       
+       Int_t posNumber = 0;
+       while (nodePosition = (St_NodePosition *)next()) {
+         TString posName = nodePosition->GetNode()->GetName();
+         char num[20];
+         posName += ";";
+         sprintf(num,"%d",posNumber);
+         posName += num;
+         b->Add(nodePosition,posName.Data());       
+         posNumber++;
+       }
 //       GetListOfPositions()->Browse(b);
    }
 //    if( GetList() ) {
