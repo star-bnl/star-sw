@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.64 2004/10/28 00:11:33 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.65 2004/10/31 23:43:21 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -408,7 +408,7 @@ void StMuDstMaker::fill(){
   mStEvent = (StEvent*) GetInputDS("StEvent");
   if (!mStEvent) {
     DEBUGMESSAGE2("no StEvent");
-    return;
+    throw StMuExceptionNullPointer("no StEvent",__PRETTYF__);
   }
   /// once per event the pid algorithm has to be set up
   /// we make it static for the StMuTrack, because all tracks use the same instance
@@ -433,6 +433,7 @@ void StMuDstMaker::write(){
     fill();
   }
   catch (StMuException e) {
+    e.print();
     return;
   }
 
@@ -531,14 +532,17 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
     assert(tb->GetAddress() == (char*)(mAArrays+i));
   }
   if (emc_oldformat) {
-    Warning("setBranchAddresses","Using backward compatibility mode for EMC");
-    if (!mEmcCollectionArray) {
-      mEmcCollectionArray=new TClonesArray("StMuEmcCollection",1);
+    TBranch *branch=chain->GetBranch("EmcCollection");
+    if (branch) {
+      chain->SetBranchStatus("EmcCollection*",1);
+      chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray);
+      Warning("setBranchAddresses","Using backward compatibility mode for EMC");
+      if (!mEmcCollectionArray) {
+         mEmcCollectionArray=new TClonesArray("StMuEmcCollection",1);
+      }
+      StMuEmcHit::Class()->IgnoreTObjectStreamer(0);
+      mStMuDst->set(this);
     }
-    chain->SetBranchStatus("EmcCollection*",1);
-    chain->SetBranchAddress("EmcCollection",&mEmcCollectionArray);
-    StMuEmcHit::Class()->IgnoreTObjectStreamer(0);
-    mStMuDst->set(this);
   }
   else if (!mEmcCollection) {
     mEmcCollection=new StMuEmcCollection();
@@ -547,14 +551,17 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   }
 
   if (pmd_oldformat) {
-    Warning("setBranchAddresses","Using backward compatibility mode for PMD");
-    if (!mPmdCollectionArray) {
-      mPmdCollectionArray=new TClonesArray("StMuPmdCollection",1);
+    TBranch *branch=chain->GetBranch("PmdCollection");
+    if (branch) {
+      Warning("setBranchAddresses","Using backward compatibility mode for PMD");
+      if (!mPmdCollectionArray) {
+        mPmdCollectionArray=new TClonesArray("StMuPmdCollection",1);
+      }
+      chain->SetBranchStatus("PmdCollection*",1);
+      chain->SetBranchAddress("PmdCollection",&mPmdCollectionArray);
+      StMuPmdCluster::Class()->IgnoreTObjectStreamer(0);
+      mStMuDst->set(this);
     }
-    chain->SetBranchStatus("PmdCollection*",1);
-    chain->SetBranchAddress("PmdCollection",&mPmdCollectionArray);
-    StMuPmdCluster::Class()->IgnoreTObjectStreamer(0);
-    mStMuDst->set(this);
   }
   else if (!mPmdCollection) {
     mPmdCollection=new StMuPmdCollection();
@@ -804,6 +811,8 @@ void StMuDstMaker::fillTof(StEvent* ev) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::fillEzt(StEvent* ev) {
+  if (ev==0)
+    return;
   char *eztArrayStatus=&mStatusArrays[__NARRAYS__+__NSTRANGEARRAYS__+
 				      __NEMCARRAYS__+__NPMDARRAYS__+
 				      __NTOFARRAYS__];
@@ -1195,6 +1204,10 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.65  2004/10/31 23:43:21  mvl
+ * Removed some warnings for files without EMC, PMD info.
+ * Prevent filling of empty event when no stevent pointer.
+ *
  * Revision 1.64  2004/10/28 00:11:33  mvl
  * Added stuff to support ezTree mode of MuDstMaker.
  * This is a special mode for fast-online processing of fast-detector data.
