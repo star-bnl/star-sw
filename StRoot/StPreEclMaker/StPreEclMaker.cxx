@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.19 2001/10/15 01:40:20 pavlinov Exp $
+// $Id: StPreEclMaker.cxx,v 1.20 2001/10/24 14:36:54 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.20  2001/10/24 14:36:54  suaide
+// small modifications
+//
 // Revision 1.19  2001/10/15 01:40:20  pavlinov
 // Added Clear method and EmcCollection not in .data
 //
@@ -144,10 +147,10 @@ Int_t StPreEclMaker::Init()
   AddRunco((TDataSet*)mParam);
   parTable = mParam->GetTable();
 
-  SetClusterConditions("bemc",  4, 0.4, 0.001, 0.7,kFALSE);
+  SetClusterConditions("bemc",  4, 0.7, 0.001, 0.1,kFALSE);
   SetClusterConditions("bprs",  1, 0.1, 0.001, 0.1,kFALSE); // Cluster is one hit
-  SetClusterConditions("bsmde", 5, 0.08,0.001, 0.4,kFALSE);
-  SetClusterConditions("bsmdp", 5, 0.08,0.001, 0.4,kFALSE);
+  SetClusterConditions("bsmde", 5, 0.4,0.001, 0.1,kFALSE);
+  SetClusterConditions("bsmdp", 5, 0.4,0.001, 0.1,kFALSE);
   mParam->Purge();
   parTable = mParam->GetTable();
 
@@ -379,21 +382,22 @@ void StPreEclMaker::MakeHistograms(Int_t idet,StEmcPreClusterCollection* cluster
 Int_t StPreEclMaker::fillStEvent(Int_t idet,StEmcPreClusterCollection* cluster)
 {
        
-    if(cluster> 0)
+    if(cluster)
     {
+      cout <<"Filling StEvent clusters for detector "<<idet<<endl;
       StDetectorId id = static_cast<StDetectorId>(idet+kBarrelEmcTowerId); 
       StEmcDetector* detector = ecmpreecl->detector(id);           
 
-      StEmcClusterCollection* cluscoll = new StEmcClusterCollection();
-      cluscoll->setDetector(id);
-      cluscoll->setClusterFinderId(1);
-      cluscoll->setClusterFinderParamVersion(1); 
-
-      detector->setCluster(cluscoll);
- 
       Int_t n = cluster->Nclusters();
       if(n>0)
       {
+        StEmcClusterCollection* cluscoll = new StEmcClusterCollection();
+        cluscoll->setDetector(id);
+        cluscoll->setClusterFinderId(1);
+        cluscoll->setClusterFinderParamVersion(1); 
+
+        detector->setCluster(cluscoll);
+ 
         Int_t det = cluster->Detector(); 
         if(det){}
  
@@ -472,7 +476,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.19 2001/10/15 01:40:20 pavlinov Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.20 2001/10/24 14:36:54 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
