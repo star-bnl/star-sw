@@ -8,9 +8,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.11 2002/02/13 22:36:32 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.12 2002/02/26 21:40:38 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.12  2002/02/26 21:40:38  struck
+//  move GetDataSet("StDAQReader") from Init() to Make(), solves a seg. fault in current dev release
+//
 //  Revision 1.11  2002/02/13 22:36:32  struck
 //  major code clean-up for Stl3RawReaderMaker, first version of Stl3CounterMaker
 //
@@ -71,7 +74,7 @@ Int_t Stl3RawReaderMaker::Init(){
   //  Init - is a first method the top level StChain calls to initialize all its makers
 
   // Make Connection to raw data
-  DAQReaderSet = GetDataSet("StDAQReader");
+  //DAQReaderSet = GetDataSet("StDAQReader");
  
   // set switches
   mWriteStEvent   = kTRUE;
@@ -115,6 +118,12 @@ Int_t Stl3RawReaderMaker::Make()
     
 
     // get the l3 daqreader
+    // Make Connection to raw data
+    DAQReaderSet = GetDataSet("StDAQReader");
+    if (!DAQReaderSet) {
+          gMessMgr->Error() << "Stl3RawReaderMaker::Make():  no DaqReader found!" << endm;
+	  return kStWarn;
+    }
     StDAQReader *daqReader = (StDAQReader*)(DAQReaderSet->GetObject()) ;
     if (daqReader) { 
           ml3reader = daqReader->getL3Reader();

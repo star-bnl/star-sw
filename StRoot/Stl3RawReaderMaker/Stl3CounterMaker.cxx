@@ -17,9 +17,12 @@
 //////////////////////////////////////////////////////////////////////////
 //
 //
-//  $Id: Stl3CounterMaker.cxx,v 1.3 2002/02/20 23:31:10 struck Exp $
+//  $Id: Stl3CounterMaker.cxx,v 1.4 2002/02/26 21:40:38 struck Exp $
 //
 //  $Log: Stl3CounterMaker.cxx,v $
+//  Revision 1.4  2002/02/26 21:40:38  struck
+//  move GetDataSet("StDAQReader") from Init() to Make(), solves a seg. fault in current dev release
+//
 //  Revision 1.3  2002/02/20 23:31:10  struck
 //  final tune-up
 //
@@ -63,9 +66,6 @@ Stl3CounterMaker::~Stl3CounterMaker(){
 Int_t Stl3CounterMaker::Init(){
   //  Init - is a first method the top level StChain calls to initialize all its makers
 
-  // Make Connection to raw data
-  DAQReaderSet = GetDataSet("StDAQReader");
- 
   // set switches
   mL3On = kFALSE;
   mStoreDbTables = kTRUE;
@@ -147,6 +147,12 @@ Int_t Stl3CounterMaker::Make()
     cout << "Now we start l3Counter Maker. \n" ;
 
     // get the l3 daqreader
+    // Make Connection to raw data
+    DAQReaderSet = GetDataSet("StDAQReader");
+    if (!DAQReaderSet) {
+          gMessMgr->Error() << "Stl3CounterMaker::Make():  no DaqReader found!" << endm;
+	  return kStWarn;
+    }
     StDAQReader *daqReader = (StDAQReader*)(DAQReaderSet->GetObject()) ;
     if (daqReader) { 
           ml3reader = daqReader->getL3Reader();
