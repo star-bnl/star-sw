@@ -23,8 +23,12 @@
 
 #include "math_constants.h"
 #include "phys_constants.h"
+#include "SystemOfUnits.h"
 
-
+//Stuff to get correct Bfield
+#include "StarCallf77.h"   
+ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}   
+ #define gufld F77_NAME(gufld,GUFLD) 
 
 
 #define MAXTRACKS 10000
@@ -45,19 +49,7 @@ static unsigned short STATtrkID[MAXTRACKS];
 
 
 
-
-
-
-
-
 ClassImp(StV0FinderMaker)
-
-
-
-
-
-
-
  
 //_____________________________________________________________________________
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
@@ -211,9 +203,14 @@ Int_t StV0FinderMaker::Init()
  return StMaker::Init();
  }
 
+//____________________________________________________________________________
 
-
-
+Int_t StV0FinderMaker::InitRun( int RunNumber){
+	  float gufldX[3]= {0,0,0};
+	  float gufldB[3];
+	  gufld(gufldX,gufldB);
+	  Bfield = gufldB[2]*kilogauss;
+}
 
 
 
@@ -302,21 +299,14 @@ Int_t StV0FinderMaker::Prepare() {
        
         p = triGeom->momentum();
 
- pt[trks] = p.perp();
+	pt[trks] = p.perp();
         ptot[trks] = p.mag();
- trkID[trks]=tri->key();
+	trkID[trks]=tri->key();
 
         // Determine number of hits (in SVT+TPC)
         hits[trks] = map.numberOfHits(kTpcId) +
                      map.numberOfHits(kSvtId) +
                      map.numberOfHits(kSsdId);
-
-        if (!trks) {
-          StThreeVectorD p1 = triGeom->momentum();
-          StThreeVectorD p2 = heli[trks].momentum(Bfield);
-          if (p2.x() != 0) Bfield *= p1.x()/p2.x();
-          else Bfield *= p1.y()/p2.y();
-        }
 
         if (triGeom->charge() > 0) ptrk[ptrks++] = trks;
         else if (triGeom->charge() < 0) ntrk[ntrks++] = trks;
@@ -692,7 +682,7 @@ Int_t StV0FinderMaker::Make() {
   } // i-Loop
 
   gMessMgr->Info()<<"StV0FinderMaker : now I have "<<v0Vertices.size()<<" V0s."<<endm;
-  gMessMgr->Info()<<"StV0FinderMaker : using magnetic field : "<<Bfield*1.e13<<" T."<<endm;
+  gMessMgr->Info()<<"StV0FinderMaker : using magnetic field : "<<Bfield/tesla<<" T."<<endm;
 
   // Any cleanup involved for using KeepV0()
   
@@ -742,8 +732,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.9 2003/07/17 17:01:10 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.10 2003/08/22 17:47:14 caines Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.10  2003/08/22 17:47:14  caines
+// Get sign AND magnitude of mag field correctly for Xi and V0 finder
+//
 // Revision 1.9  2003/07/17 17:01:10  faivre
 // Add one causality check. Exhaustive listing of cuts. Tab->spaces.
 //
