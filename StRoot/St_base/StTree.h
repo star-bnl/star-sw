@@ -45,7 +45,6 @@ public:
   virtual Option_t *GetIOMode();
   virtual void SetOption(Option_t *opt);
   virtual Option_t     *GetOption() const {return fOption;};
-  virtual Int_t 	SetFile(const Char_t *file);
   virtual Int_t UpdateFile(const Char_t *file);
   virtual const Char_t *GetFile() const {return (const Char_t*)fFile;};
   virtual Int_t SetFile(const Char_t *file,const Char_t *iomode=0);
