@@ -1,16 +1,8 @@
 /*****************************************************************************
 *   Table: emc_adcslope
-*        description: Table which contains ADC to energy conversion parameters
+*        description: Table which contains adc slope
 *        auther:      OGAWA, Akio
 */
    struct emc_adcslope { 
-       long        date;          /* date */
-       long        time;          /* time */
-       long        flag;          /* flag */
-       long        det;           /* see emc_def.h */
-       long        neta;          /* number of eta bin */
-       long        nphi;          /* number of phi bin */
-       long        fun;           /* function selection */
-       float       p0[120][40];   /* pedestal for low energy ADC channel */
+       float       p0;		/* adc slope for ADC channel */
    };
-
