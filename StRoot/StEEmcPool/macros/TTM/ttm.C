@@ -11,7 +11,7 @@ ttm
  char* inpDir  = "/star/fy2003/mudst/",                        // MuDST directory
  char* inpFile = "",// "st_physics_4145010_raw_0010001.MuDst.root",  // MuDST file(s)
  char* outFile = "R4145010.root",
- Int_t nFiles  = 50,                                            // # of MuDST file(s)
+ Int_t nFiles  = 1,                                            // # of MuDST file(s)
  Int_t nEvents = -1
  )
 { 
