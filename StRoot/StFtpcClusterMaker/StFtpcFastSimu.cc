@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.16 2000/12/11 16:38:59 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.17 2000/12/11 17:05:24 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.17  2000/12/11 17:05:24  jcs
+// use micrometers to convert from microns to cms
+//
 // Revision 1.16  2000/12/11 16:38:59  jcs
 // move FTPC geant volume id and cluster flags from code to parameter reader
 //
@@ -394,10 +397,10 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     // and transverse direction
     
     *st_dev_x = sqr(cos(phi)) * sqr(st_dev_l) + sqr(sin(phi)) * sqr(st_dev_t);
-    *st_dev_x = (sqrt(*st_dev_x))/10000.;  // microns -> cm
+    *st_dev_x = (sqrt(*st_dev_x))*micrometer;
 
     *st_dev_y = sqr(sin(phi)) * sqr(st_dev_l) + sqr(cos(phi)) * sqr(st_dev_t);
-    *st_dev_y = sqrt (*st_dev_y)/10000.;   // microns -> cm
+    *st_dev_y = sqrt (*st_dev_y)*micrometer;
 
     smear=(float) quasiRandom->shoot();
     err_pad = st_dev_t*smear; // box->sigma
@@ -410,10 +413,10 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
     // Evaluate hit-shift in x- and y-direction as well as the new points xo and yo
 
     err_x = cos(phi) * err_drft - sin(phi) * err_pad;
-    *xo = xi + (err_x/10000);  
+    *xo = xi + err_x*micrometer;  
 
     err_y = sin(phi) * err_drft + cos(phi) * err_pad;
-    *yo = yi + (err_y/10000);
+    *yo = yi + err_y*micrometer;
     
     //        ZO = ZI + err_Z
     *zo = zi;
@@ -537,9 +540,9 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	
 	sig_azi_1 = s_azi[0] + s_azi[1]*r1[i] + 
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
-	mPoint[i].SetSigmaPhi(sig_azi_1/10000*(r1[i]/ra));
+	mPoint[i].SetSigmaPhi(sig_azi_1*micrometer*(r1[i]/ra));
 
-	sig_azi_1 = (2.5*sig_azi_1)/10000; // micron -> cm
+	sig_azi_1 = (2.5*sig_azi_1)*micrometer;
 	sigazi[i] = sig_azi_1*(r1[i]/ra);
 
 	// radial direction
@@ -548,9 +551,9 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	sig_rad_1 = s_rad[0] + s_rad[1]*r1[i] +  
 	  s_rad[2]*sqr(r1[i]) + s_rad[3]*sqr(r1[i])*r1[i];
 
-	mPoint[i].SetSigmaR(sig_rad_1/10000*(v1/Va));
+	mPoint[i].SetSigmaR(sig_rad_1*micrometer*(v1/Va));
 
-	sig_rad_1 = (2.5*sig_rad_1)/10000; // micron -> cm
+	sig_rad_1 = (2.5*sig_rad_1)*micrometer;
 	sigrad[i] = sig_rad_1*(v1/Va);
 
       }
