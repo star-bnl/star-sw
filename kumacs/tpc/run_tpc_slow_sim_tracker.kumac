@@ -15,7 +15,7 @@
 * 7/30/98 - K. Turner - change to use new utility kumacs
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 8/10/98 - K. Turner - fixed for change to tpg_init
-* 8/26/98 - K. Turner - fix for change to tss_init
+* 8/26/98 - K. Turner - fix for change to init kumacs
 * 
 ************************************************************************
 ************************************************************************
@@ -107,8 +107,8 @@
 
 * tpc slow sim init
   exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
-    exec tss_init#read
-    exec tss_init#init [tpc_sector_first] [tpc_sector_last] 
+  exec tss_init#read
+      exec tss_init#init [tpc_sector_first] [tpc_sector_last] 
     
 * tpc unpack raw init
     if [adcxyzon].eq.1 then
@@ -117,16 +117,16 @@
     
 * tpc cluster init
    exec create_tables_tpc#tcl_slow
-   exec tcl_init#init  
+   exec tcl_init#read  
         
 * tpc tracker init
    exec create_tables_tpc#tpt
-   exec tpt_init#init
-   exec tid_init#init
+   exec tpt_init#read
+   exec tid_init#read
 
 * tpc evaluation init
    exec create_tables_tpc#tte
-   exec tte_init#init
+   exec tte_init#read
    
 * **************************************************************
 *  Run tpc slow sim & tracking
