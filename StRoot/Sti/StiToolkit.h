@@ -40,6 +40,7 @@ class 	StiTrackMerger;
 class   StiIOBroker;
 class   StiDisplayManager;
 class   StAssociationMaker;
+class   StiHitErrorCalculator;
 
 /** 
  * @class StiToolkit
@@ -49,42 +50,44 @@ class StiToolkit
 {
 public:
   
- 	virtual StiObjectFactoryInterface<StiHit> * getHitFactory()=0;
-	//virtual StiTrackFactory * getTrackFactory()=0;
-	virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory()=0;
-	virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory()=0;
-	virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory()=0;
-	virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory()=0;
-	
-	// common object containers
-	virtual StiDetectorContainer  * getDetectorContainer()=0;
-	virtual StiHitContainer       * getHitContainer()=0;
-	virtual StiTrackContainer     * getTrackContainer()=0;
+  virtual StiObjectFactoryInterface<StiHit> * getHitFactory()=0;
+  //virtual StiTrackFactory * getTrackFactory()=0;
+  virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory()=0;
+  virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory()=0;
+  virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory()=0;
+  virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory()=0;
+  
+  // common object containers
+  virtual StiDetectorContainer  * getDetectorContainer()=0;
+  virtual StiHitContainer       * getHitContainer()=0;
+  virtual StiTrackContainer     * getTrackContainer()=0;
+  
+  // service and convenience class objects.
+  virtual StiGeometryTransform * getGeometryTransform()=0;
+  virtual StiCoordinateTransform * getCoordinateTransform()=0;
+  virtual StiDetectorFinder    * getDetectorFinder()=0;
+  virtual StiSeedFinder        * getTrackSeedFinder()=0;
+  virtual StiTrackFinder       * getTrackFinder()=0;
+  virtual StiTrackFilter       * getTrackFilter()=0;
+  virtual StiTrackFitter       * getTrackFitter()=0;
+  virtual StiTrackMerger       * getTrackMerger()=0;
+  virtual StiDisplayManager    * getDisplayManager()=0;
+  //	virtual StiEvaluator         * getEvaluator(const string&)=0;
+  //virtual StiEvaluator         * getEvaluator()=0;
+  //virtual StiEventAssociator   * getEventAssociator()=0;
+  virtual StiIOBroker * getIOBroker()=0;
+  virtual StAssociationMaker * getAssociationMaker()=0;
+  virtual void setAssociationMaker(StAssociationMaker * a)=0;
+  virtual StiHitFiller * getHitFiller()=0;
+  
+  virtual StiHitErrorCalculator * getHitErrorCalculator() = 0;
 
-	// service and convenience class objects.
-	virtual StiGeometryTransform * getGeometryTransform()=0;
-	virtual StiCoordinateTransform * getCoordinateTransform()=0;
-	virtual StiDetectorFinder    * getDetectorFinder()=0;
-	virtual StiSeedFinder        * getTrackSeedFinder()=0;
-	virtual StiTrackFinder       * getTrackFinder()=0;
-	virtual StiTrackFilter       * getTrackFilter()=0;
-	virtual StiTrackFitter       * getTrackFitter()=0;
-	virtual StiTrackMerger       * getTrackMerger()=0;
-	virtual StiDisplayManager    * getDisplayManager()=0;
-	//	virtual StiEvaluator         * getEvaluator(const string&)=0;
-	//virtual StiEvaluator         * getEvaluator()=0;
-	//virtual StiEventAssociator   * getEventAssociator()=0;
-	virtual StiIOBroker * getIOBroker()=0;
-	virtual StAssociationMaker * getAssociationMaker()=0;
-	virtual void setAssociationMaker(StAssociationMaker * a)=0;
-	virtual StiHitFiller * getHitFiller()=0;
-	
-	static StiToolkit *instance();
-	static void kill();
-
+  static StiToolkit *instance();
+  static void kill();
+  
  protected:
 
-	static StiToolkit * sInstance;
+  static StiToolkit * sInstance;
 };
 
 #endif

@@ -109,9 +109,9 @@ private:
     void initSearch(StiKalmanTrackNode * node);
     
     Messenger & trackMes;
-		StiKalmanTrackFinderParameters * pars;
-		Subject * mSubject;
-
+    StiKalmanTrackFinderParameters * pars;
+    Subject * mSubject;
+    
 };
 
 //inlines
@@ -146,7 +146,7 @@ inline void StiKalmanTrackFinder::forgetSubject(Subject* obsolete)
 inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *par)
 {
 	pars = par;
-	StiKalmanTrackNode::pars = par;
+	StiKalmanTrackNode::setParameters(par);
 }
 
 
