@@ -1,0 +1,3 @@
+#export SHELL := csh
+install_slm:
+	cp $(BASE_DIR)/SLM_DIR/* $(SLM_DIR)
