@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.2 1999/06/30 02:50:12 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.3 1999/06/30 16:27:41 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.3  1999/06/30 16:27:41  fine
+// Comments make up
+//
 // Revision 1.2  1999/06/30 02:50:12  fine
 // Some comments
 //
@@ -39,7 +42,7 @@
 // begin_html  <P ALIGN=CENTER> <IMG SRC="gif/geomMakerBrowse.gif" ></P> end_html
 //  root [6] ((St_Node *)geomMaker.GetDataSet("HALL"))->Draw();
 // begin_html  <P ALIGN=CENTER> <IMG SRC="gif/geomMakerPad.gif" ></P> end_html
-//  root [7] // One can two extra lines to get "Control Panel"
+//  root [7] // One can add two extra lines to get "Control Panel"
 //  root [8] .x PadControlPanel.C
 // begin_html  <P ALIGN=CENTER> <IMG SRC="gif/PadControlPanel.gif" ></P> end_html
 //  root [9] // Plot 3D axice as follows:
@@ -103,7 +106,7 @@ Int_t St_geom_Maker::Make(){
 //_____________________________________________________________________________
 void St_geom_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.2 1999/06/30 02:50:12 fine Exp $\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.3 1999/06/30 16:27:41 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
