@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.10 1999/11/21 01:40:48 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.11 2001/06/01 03:04:25 perev Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.11  2001/06/01 03:04:25  perev
+// overloaded GetDataSet -> FindDataSet
+//
 // Revision 1.10  1999/11/21 01:40:48  fine
 // Temporary mark TPC and SVT modes unless Pavel does it
 //
@@ -96,10 +99,10 @@ St_geom_Maker::~St_geom_Maker(){
   if (m_ConstSet) m_ConstSet->Delete();
 }
 //_____________________________________________________________________________
-St_DataSet  *St_geom_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
+St_DataSet  *St_geom_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
                                         const StMaker *dowMk) const 
 {
-  St_DataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
+  St_DataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
   if (!ds && strcmp(logInput,"HALL")==0) { 
 #if 0
      Init();

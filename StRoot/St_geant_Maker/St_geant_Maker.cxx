@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.64 2000/12/19 18:35:11 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.65 2001/06/01 03:03:57 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.65  2001/06/01 03:03:57  perev
+// overloaded GetDataSet -> FindDataSet
+//
 // Revision 1.64  2000/12/19 18:35:11  fisyak
 // make proper allocation for cgnam
 //
@@ -379,10 +382,10 @@ fInputFile("")
   }
 }
 //_____________________________________________________________________________
-TDataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
+TDataSet  *St_geant_Maker::FindDataSet (const char* logInput,const StMaker *uppMk,
                                         const StMaker *dowMk) const 
 {
-  TDataSet *ds = StMaker::GetDataSet(logInput,uppMk,dowMk);
+  TDataSet *ds = StMaker::FindDataSet(logInput,uppMk,dowMk);
 
   if (ds || strcmp(logInput,"HALL")) return ds;
 
@@ -610,7 +613,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
   Agstroot();
 }
 //_____________________________________________________________________________
-void St_geant_Maker::Draw()
+void St_geant_Maker::Draw(const char*)
 { 
   Int_t two = 2;
   Int_t zero = 0;
@@ -1029,7 +1032,7 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
    return pattern;
 }
 //_____________________________________________________________________________
-void  St_geant_Maker::SetDebug(EDebugLevel dbl)
+void  St_geant_Maker::SetDebug(Int_t dbl)
 {
   StMaker::SetDebug(dbl);
   if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
