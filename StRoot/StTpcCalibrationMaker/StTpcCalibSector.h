@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.h,v 1.6 1999/10/11 08:04:12 fretiere Exp $
+// $Id: StTpcCalibSector.h,v 1.7 1999/11/09 20:36:13 fisyak Exp $
 // $Log: StTpcCalibSector.h,v $
+// Revision 1.7  1999/11/09 20:36:13  fisyak
+// Add protection for rootcint
+//
 // Revision 1.6  1999/10/11 08:04:12  fretiere
 // Fix bugg + add README, LOG and ID
 //
@@ -15,7 +18,8 @@ class StTPCReader;
 class TH1F;
 class TH2F;
 class TH2S;
-
+class ifstream;
+class ofstream;
 class StTpcCalibSector {
 private :
   int mSectorId; //!
