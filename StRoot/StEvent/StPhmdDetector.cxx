@@ -1,6 +1,6 @@
 /********************************************************************
  *
- * $Id: StPhmdDetector.cxx,v 2.1 2002/12/20 22:33:00 ullrich Exp $
+ * $Id: StPhmdDetector.cxx,v 2.2 2003/11/07 18:33:03 perev Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -10,6 +10,9 @@
  ********************************************************************
  *
  * $Log: StPhmdDetector.cxx,v $
+ * Revision 2.2  2003/11/07 18:33:03  perev
+ * Zeroing in constructor added
+ *
  * Revision 2.1  2002/12/20 22:33:00  ullrich
  * Initial Revision.
  *
@@ -22,11 +25,20 @@
 
 ClassImp(StPhmdDetector)
 
-StPhmdDetector::StPhmdDetector() { /* noop */ }
+StPhmdDetector::StPhmdDetector() 
+{
+   mDetectorId = kUnknownId;
+   memset(mModulesNHit,0,sizeof(mModulesNHit));
+   memset(mModules    ,0,sizeof(mModules    ));
+   mClusters = 0;	
+}
 
 StPhmdDetector::StPhmdDetector(StDetectorId id)
 {
     mDetectorId = id;
+    memset(mModulesNHit,0,sizeof(mModulesNHit));
+    memset(mModules    ,0,sizeof(mModules    ));
+    mClusters = 0;	
     for (int i=0; i<mMaxModules; i++)
 	this->setModule(new StPhmdModule(), i);
 }
@@ -34,6 +46,8 @@ StPhmdDetector::StPhmdDetector(StDetectorId id)
 StPhmdDetector::~StPhmdDetector()
 {
     for (int i=0; i<mMaxModules; i++) delete mModules[i];
+    memset(mModules    ,0,sizeof(mModules    ));
+    delete mClusters; mClusters = 0;
 }
 
 bool
