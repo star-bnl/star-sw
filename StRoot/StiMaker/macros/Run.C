@@ -59,7 +59,7 @@ void Run(int firstEvent=0,
 //  	 bool doProfile=false
 
 	 //Example of switch setup for minimctree output
-	 bool useGui=false,
+	 bool useGui=true,
 	 bool doSimulation=true,
 	 bool doAssociation=true,
 	 bool doMiniMcEvent=true,

@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.111  2003/02/25 14:21:06  pruneau
+// *** empty log message ***
+//
 // Revision 1.110  2003/01/24 06:12:28  pruneau
 // removing centralized io
 //
@@ -183,13 +186,13 @@ Int_t StiMaker::Make()
       tracker->initialize();
       tracker->clear();
       if (_toolkit->isGuiEnabled())
-				{
-					cout << "StiMaker::Make() -I- Instantiate/Setup DisplayManager" <<  endl;
-					_toolkit->getDisplayManager()->cd();
-					_toolkit->getDisplayManager()->setView(0);
-					_toolkit->getDisplayManager()->draw();
-					_toolkit->getDisplayManager()->update();
-				}
+	{
+	  cout << "StiMaker::Make() -I- Instantiate/Setup DisplayManager" <<  endl;
+	  _toolkit->getDisplayManager()->cd();
+	  _toolkit->getDisplayManager()->setView(0);
+	  _toolkit->getDisplayManager()->draw();
+	  _toolkit->getDisplayManager()->update();
+	}
       cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
   eventIsFinished = false;
