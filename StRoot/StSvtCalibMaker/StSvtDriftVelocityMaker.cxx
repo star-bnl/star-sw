@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.cxx,v 1.5 2003/09/02 17:59:05 perev Exp $
+ * $Id: StSvtDriftVelocityMaker.cxx,v 1.6 2004/01/26 23:10:49 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.cxx,v $
+ * Revision 1.6  2004/01/26 23:10:49  perev
+ * Leak off
+ *
  * Revision 1.5  2003/09/02 17:59:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -28,6 +31,7 @@
  *
  **************************************************************************/
 
+#include <assert.h>
 #include "StSvtDriftVelocityMaker.h"
 
 #include "StMessMgr.h"
@@ -57,10 +61,9 @@ ClassImp(StSvtDriftVelocityMaker)
 //_____________________________________________________________________________
   StSvtDriftVelocityMaker::StSvtDriftVelocityMaker(const char *name):StMaker(name)
 {
-  mSvtData = NULL;    
-  mSvtDriftVeloc = NULL;
-  mSvtRawData = NULL;
-  mEventCounter = mHitCounter = 0;
+  int n = (char*)&mDebug - (char*)&mSvtData + sizeof(mDebug);
+  memset(&mSvtData,0,n);
+
   mNumTimeBins = 128;
   mMaximumTB = 128;
   mMinimumTB = 0;
@@ -72,7 +75,22 @@ ClassImp(StSvtDriftVelocityMaker)
 
 //_____________________________________________________________________________
 StSvtDriftVelocityMaker::~StSvtDriftVelocityMaker()
-{}
+{
+  delete mSvtDriftVeloc; mSvtDriftVeloc=0;
+  for (int i=0;i<mNHybridDriftVelocityHisto;i++) {
+    delete mHybridDriftVelocityHisto[i]; 
+    delete mHybridDriftVelocity2DHisto[i];}
+  delete [] mHybridDriftVelocityHisto;
+  delete [] mHybridDriftVelocity2DHisto;
+
+  delete mGlobalDriftVelocityHisto; 
+  delete mGlobalDriftVelocity2DHisto; 
+  delete mCalculatedDriftVelocity; 
+  delete mLaserSpotDistL07B3_1; 
+  delete mLaserSpotDistL15B3_1; 
+  delete mLaserSpotDistL15B3_2; 
+
+}
 
 //_____________________________________________________________________________
 Int_t StSvtDriftVelocityMaker::Init()
@@ -89,11 +107,11 @@ Int_t StSvtDriftVelocityMaker::Init()
   TH2D* hybrid2DHisto;
   char CharString1[100];
   char CharString2[100];
-  
-  mHybridDriftVelocityHisto = new TH1D*[mSvtRawData->getTotalNumberOfHybrids()];
+  mNHybridDriftVelocityHisto  = mSvtRawData->getTotalNumberOfHybrids();
+  mHybridDriftVelocityHisto = new TH1D*[mNHybridDriftVelocityHisto];
   
   if (mDebug)
-    mHybridDriftVelocity2DHisto = new TH2D*[mSvtRawData->getTotalNumberOfHybrids()];
+    mHybridDriftVelocity2DHisto = new TH2D*[mNHybridDriftVelocityHisto];
 
   // Loop over barrels, ladders, wafers and hybrids
   for (int barrel = 1;barrel <= mSvtRawData->getNumberOfBarrels();barrel++) {
@@ -180,6 +198,7 @@ Int_t StSvtDriftVelocityMaker::SetSvtData()
 //_____________________________________________________________________________
 Int_t StSvtDriftVelocityMaker::SetSvtDriftVelocity()
 {
+  assert(!mSvtDriftVeloc);
   if (mSvtRawData)
     mSvtDriftVeloc = new StSvtHybridCollection(mSvtRawData->getConfiguration());
   else

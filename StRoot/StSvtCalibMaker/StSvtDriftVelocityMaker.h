@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.h,v 1.6 2003/09/10 19:47:34 perev Exp $
+ * $Id: StSvtDriftVelocityMaker.h,v 1.7 2004/01/26 23:11:44 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.h,v $
+ * Revision 1.7  2004/01/26 23:11:44  perev
+ * Leak off
+ *
  * Revision 1.6  2003/09/10 19:47:34  perev
  * ansi corrs
  *
@@ -53,6 +56,7 @@ class StSvtDriftVelocityMaker : public StMaker {
   StSvtHybridCollection* mSvtData;        //!
   StSvtData* mSvtRawData;                 //!
   StSvtHybridCollection* mSvtDriftVeloc;  //!
+  int mNHybridDriftVelocityHisto;
   TH1D** mHybridDriftVelocityHisto; //!
   TH2D** mHybridDriftVelocity2DHisto; //!
   TH1D* mGlobalDriftVelocityHisto; //!
