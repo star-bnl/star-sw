@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.22 1999/11/02 00:49:44 fisyak Exp $
+# $Id: cons,v 1.23 1999/11/27 16:29:34 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.22 1999/11/02 00:49:44 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.23 1999/11/27 16:29:34 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -127,6 +127,8 @@ Arguments can be any of the following, in any order:
   -R <repos>	Search for files in <repos>.  Multiple -R <repos>
 		directories are searched in the order specified.
 
+  -noR 	        Do not search for files in repositories.
+
   -v		Show cons version and continue processing.
   -V            Show cons version and exit.
   -x		Show this message and exit.
@@ -160,7 +162,7 @@ $param::rep_sig_times_ok = 1;	# Repository .consign times are in sync
 				#   w/files.
 $param::quiet = 0;		# should we show the command being executed.
 $param::debug = 0;		# should we print out debug information
-
+$param::noRepository = 0;       # should we use sources from repository
 # Display a command while executing or otherwise. This
 # should be called by command builder action methods.
 sub showcom {
@@ -277,6 +279,8 @@ sub option {
 	my($repository) = shift(@ARGV);
 	die("$0: -R option requires a repository argument.\n") if !$repository;
 	script::Repository($repository);
+    } elsif ($_ eq 'noR') {
+	$param::noRepository = 1;
     } else {
 	die qq($0: unrecognized option "-$_". Use -x for a usage message.\n)
 	    if $_;
@@ -1008,6 +1012,7 @@ sub _subst {
     while (($str =~ s/\%\{([_a-zA-Z]\w*)\}/$env->{$1}/ge) ||
 	   ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge)) {}
     $str =~ s/-features=no_/-features=no\%/g; # no% option for Sun
+    $str =~ s/-library=iostream,no_Cstd/-library=iostream,no%Cstd/g;
     return $str;
 }
 
