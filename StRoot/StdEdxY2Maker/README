@@ -1,0 +1,15 @@
+<pre>
+-*- mode:outline -*-
+Time-stamp: <02/11/19 14:02:55 fisyak>
+
+* Package: StdEdxY2Maker
+
+* Purpose: replacement for StdEdxMaker with new dE/dx calibration scheme
+  Description of new calibartion schme can be found at 
+  http://www.star.bnl.gov/~fisyak/star/PiD/Y2002Calib/Status%20of%20dEdx.ppt
+and 
+  http://www.star.bnl.gov/~fisyak/star/PiD/Y2002Calib/Fast%20Offline%20%20dEdx.ppt
+* History:
+  Originated with StdEdxMaker which has been used for Y1 and Y2 
+* Status:
+</pre>
