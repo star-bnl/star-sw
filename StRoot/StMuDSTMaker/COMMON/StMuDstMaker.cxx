@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.17 2002/08/27 19:05:56 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.18 2002/11/07 17:12:22 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -61,12 +61,17 @@ ClassImp(StMuDstMaker)
   using namespace units;
 #endif
 
+
+
+//TClonesArray* StMuDstMaker::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
+//TClonesArray* StMuDstMaker::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
+ 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
    The default constructor as it is right now was written in order to run the StMuDstMaker during reconstruction in the bfc.
-   Since Jerome doesn't want to pass the PID table that is needed for muDst production as an argument to the bfc, this default constructor
+   Since the PID table that is needed for muDst production is not passed as an argument to the bfc, this default constructor
    sets a specific PID table. This table has to be updated when changing to a new production version.
    Also, the standard track and l3 track filters are set.
  */
@@ -77,7 +82,6 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
   mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
-  StMuDebug::setLevel(0);
   mDirName="./";
   mFileName="";
   streamerOff();
@@ -120,9 +124,19 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 StMuDstMaker::~StMuDstMaker() {
+  DEBUGMESSAGE1("");
+  clear();
   delete mStMuDst;
-  for ( int i=0; i<__NARRAYS__; i++) delete arrays[i];
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) delete strangeArrays[i];
+  for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
+  saveDelete(mProbabilityPidAlgorithm);
+  saveDelete(mTrackFilter);
+  saveDelete(mL3TrackFilter);
+  if (mIoMode== ioWrite ) closeWrite();
+  if (mIoMode== ioRead ) closeRead();
+  delete mChain; mChain=0; saveDelete(mChain);
+  delete mTTree; mTTree=0; saveDelete(mTTree);
+
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -146,12 +160,12 @@ void  StMuDstMaker::streamerOff() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::createArrays() {
   for ( int i=0; i<__NARRAYS__; i++) {
-    arrays[i] = 0;
+    DEBUGVALUE2(arrays[i]);
     mArrays[i]= clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
-  }
+    DEBUGVALUE2(arrays[i]);
+  } 
   /// from strangeness group
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    strangeArrays[i] = 0;
     mStrangeArrays[i]= clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
   }
   mStMuDst->set(mArrays,mStrangeArrays);
@@ -179,7 +193,7 @@ void StMuDstMaker::clear(TClonesArray* t, int& counter){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TClonesArray* StMuDstMaker::clonesArray(TClonesArray* p, const char* type, int size, int& counter) {
+TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int size, int& counter) {
   DEBUGMESSAGE2("");
   if (!p) {
     DEBUGVALUE2(type);
@@ -356,6 +370,7 @@ void StMuDstMaker::openRead() {
  
   StMuChainMaker* chainMaker = new StMuChainMaker("MuDst");
   mChain = chainMaker->make(mDirName, mFileName, mFilter, mMaxFiles);
+  delete chainMaker;
   DEBUGVALUE3(mChain);
 
   setBranchAddresses(mChain);
@@ -386,6 +401,10 @@ void StMuDstMaker::read(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::closeRead(){
+  DEBUGMESSAGE2("");
+  if (mChain) mChain->Delete();
+  //  delete mChain;
+  mChain =0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -764,6 +783,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.18  2002/11/07 17:12:22  laue
+ * Comment changed.
+ *
  * Revision 1.17  2002/08/27 19:05:56  laue
  * Minor updates to make the muDst from simulation work
  *
