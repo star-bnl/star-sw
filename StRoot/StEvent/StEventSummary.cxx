@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.3 1999/12/21 15:08:50 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.4 2000/01/11 16:11:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
- * Revision 2.3  1999/12/21 15:08:50  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.4  2000/01/11 16:11:40  ullrich
+ * Magnetic field in kGauss.
  *
  * Revision 2.5  2000/01/14 19:06:47  ullrich
  * Made code more robust if read-in table is not well defined.
@@ -36,10 +36,10 @@
 #include "tables/St_dst_event_summary_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.3 1999/12/21 15:08:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.4 2000/01/11 16:11:40 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.3 1999/12/21 15:08:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.4 2000/01/11 16:11:40 ullrich Exp $";
 
 ClassImp(StEventSummary)
 
@@ -94,7 +94,7 @@ StEventSummary::StEventSummary()
     mEtaOfTracksHisto.Set(mHistogramSize, const_cast<long*>(runSum.mult_eta));
     mPtOfTracksHisto.Set(mHistogramSize, const_cast<long*>(runSum.mult_pt));
     mPhiOfTracksHisto.Set(mHistogramSize, const_cast<long*>(runSum.mult_phi));
-    mMagneticFieldZ = runSum.field*tesla;
+    mEneryVsEtaHisto.Set(mHistogramSize, const_cast<float*>(runSum.energy_emc_eta));
     mEnergyVsPhiHisto.Set(mHistogramSize, const_cast<float*>(runSum.energy_emc_phi));
 
     mMagneticFieldZ = runSum.field;
