@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.5 1999/05/01 01:49:15 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.6 1999/05/04 21:00:44 fisyak Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.6  1999/05/04 21:00:44  fisyak
+// Step back to MDC2 version
+//
 // Revision 1.5  1999/05/01 01:49:15  fisyak
 // Add StRootEvent fill
 //
@@ -43,16 +46,10 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMaker.h"
-class StEventManager;
-class StEvent;
-class StRun;
 class St_dst_Maker : public StMaker {
  private:
   const Char_t **fSelect;
   Char_t collectionName[256];
-  StEventManager* theEventManager; //!
-  StEvent* currentEvent; //!
-  StRun* currentRun; //!
   
  protected:
  public: 
@@ -62,11 +59,6 @@ class St_dst_Maker : public StMaker {
    virtual Int_t  Make();
    virtual void   SetSelection(const Char_t **sel ){fSelect=sel;};
    virtual void   PrintInfo();
-   virtual void   setEventManager(StEventManager* mgr); 
-   virtual Int_t  EventReader();
-   virtual StEventManager* eventManager(){return theEventManager;};
-   virtual StEvent* event() { return currentEvent;}; 
-   virtual StRun* run() {return currentRun;};
    
    ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
 };
