@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLabFrame3DCorrFctn.cxx,v 1.4 2000/10/26 19:48:50 rcwells Exp $
+ * $Id: BPLabFrame3DCorrFctn.cxx,v 1.5 2003/01/31 19:21:09 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLabFrame3DCorrFctn.cxx,v $
+ * Revision 1.5  2003/01/31 19:21:09  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.4  2000/10/26 19:48:50  rcwells
  * Added functionality for Coulomb correction of <qInv> in 3D correltions
  *
@@ -112,7 +115,7 @@ StHbtString BPLabFrame3DCorrFctn::Report(){
   stemp += ctemp;
   sprintf(ctemp,"Number of pairs in Normalization region was:\n");
   stemp += ctemp;
-  sprintf(ctemp,"In numerator:\t%u\t In denominator:\t%u\n",mNumRealsNorm,mNumMixedNorm);
+  sprintf(ctemp,"In numerator:\t%lu\t In denominator:\t%lu\n",mNumRealsNorm,mNumMixedNorm);
   stemp += ctemp;
   if (mCorrection)
     {

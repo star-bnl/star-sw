@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: NonIdReal3DCorrFctn.cxx,v 1.1 2002/12/12 17:02:49 kisiel Exp $
+ * $Id: NonIdReal3DCorrFctn.cxx,v 1.2 2003/01/31 19:21:09 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: NonIdReal3DCorrFctn.cxx,v $
+ * Revision 1.2  2003/01/31 19:21:09  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.1  2002/12/12 17:02:49  kisiel
  * Use KStar instead of 2*KStar for non-identical particles
  *
@@ -115,7 +118,7 @@ StHbtString NonIdReal3DCorrFctn::Report(){
   stemp += ctemp;
   sprintf(ctemp,"Number of pairs in Normalization region was:\n");
   stemp += ctemp;
-  sprintf(ctemp,"In numerator:\t%u\t In denominator:\t%u\n",mNumRealsNorm,mNumMixedNorm);
+  sprintf(ctemp,"In numerator:\t%lu\t In denominator:\t%lu\n",mNumRealsNorm,mNumMixedNorm);
   stemp += ctemp;
 
   stemp += ctemp;

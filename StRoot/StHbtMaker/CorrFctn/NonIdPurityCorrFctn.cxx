@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: NonIdPurityCorrFctn.cxx,v 1.1 2002/12/12 17:02:49 kisiel Exp $
+ * $Id: NonIdPurityCorrFctn.cxx,v 1.2 2003/01/31 19:21:09 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: NonIdPurityCorrFctn.cxx,v $
+ * Revision 1.2  2003/01/31 19:21:09  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.1  2002/12/12 17:02:49  kisiel
  * Use KStar instead of 2*KStar for non-identical particles
  *
@@ -290,7 +293,7 @@ StHbtString NonIdPurityCorrFctn::Report(){
 //____________________________
 void NonIdPurityCorrFctn::AddRealPair(const StHbtPair* pair){
   double tKStar = fabs(pair->KStar());
-  double tPStar = 2*fabs(pair->KStarFlipped());
+  //double tPStar = 2*fabs(pair->KStarFlipped());
   double tCVK = pair->CVK();
   double pPurity = 0.0;
   double tKOut = pair->dKOut();
@@ -361,7 +364,7 @@ void NonIdPurityCorrFctn::AddRealPair(const StHbtPair* pair){
 //____________________________
 void NonIdPurityCorrFctn::AddMixedPair(const StHbtPair* pair){
   double tKStar = 2*fabs(pair->KStar());
-  double tPStar = 2*fabs(pair->KStarFlipped());
+  //double tPStar = 2*fabs(pair->KStarFlipped());
   double tCVK = pair->CVK();
 //   mHKCVKDiff->Fill(tCVK,tKStar,1.);
   if(tCVK>0.){
