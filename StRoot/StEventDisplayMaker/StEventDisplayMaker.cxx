@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.61 2000/07/03 02:07:47 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.62 2000/07/21 15:50:19 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -757,7 +757,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const TTable *points,StVirtualEventFilt
   Int_t totalHits = 0;
   TTable &ttt = *((TTable *)points);
   TString tr = keyColumn; 
-  const Char_t *packedList[] = {"dst_point"};
+  const Char_t *packedList[] = {"dst_point_st"};
   const Int_t lPackedList = sizeof(packedList)/sizeof(Char_t *);
   Bool_t packed = kFALSE;
   Int_t i = 0;
@@ -919,6 +919,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.62  2000/07/21 15:50:19  fine
+// Bug fix: needs some correction in ROOT/star as well
+//
 // Revision 1.61  2000/07/03 02:07:47  perev
 // StEvent: vector<TObject*>
 //
