@@ -38,8 +38,8 @@
 //           V               v      v                     v      v                  //
 //    St_PolyLineShape     TBRIK  TTUBE                 TPCON  TTRD1                //
 //       |        ^                                                                 //
-//       |        |       begin_html <a href="http://root.cern.ch/root/html/TShape.html#TShape:description">G  E  A  N  T     S  H  A  P  E  S</a>end_html                          //
-//       V        |                                                                 //
+//       |        |       begin_html <a href="http://root.cern.ch/root/html/TShape.html#TShape:description">R  O  O  T        S  H  A  P  E  S</a>end_html                          //
+//       V        |       (see begin_html <a href="http://wwwinfo.cern.ch/asdoc/geant_html3/node109.html#SECTION041000000000000000000000">GEANT 3.21 shapes</a>end_html as well)                           //
 // St_PolyLine3D  |                                                                 //
 //                |                                                                 //
 //           TPoints3DABC                                                           //
@@ -384,7 +384,7 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 
     St_Node node("SegmentNode","SegmentNode", shape);
     node.SetLineColor(color);
-    if (!m_Shape) node.SetVisibility(2);
+    if (!m_Shape) node.SetVisibility();
     node.SetLineColor(color);
 
     TRotMatrix matrix ("rotate","rotate",&mrot[0][0]);
