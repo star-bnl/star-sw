@@ -265,21 +265,26 @@ void StiCodedDetectorBuilder::buildDetectors(){
     //   finally half the gap distance
     float fHalfGap = fGapRadius*tan(fHalfGapPhi);
 
-    // determine the radius for the detector's barrel
-    float fBarrelRadius = fLadderRadius;
+    // determine the radius for the detector's (ladders + hybrids)
+    float fLayerRadius = fLadderRadius;
     if(iLayer < nLayers - 1){
-      fBarrelRadius += fGapRadius;
-      fBarrelRadius /= 2.;
+      fLayerRadius += fGapRadius;
+      fLayerRadius /= 2.;
     }
 
     for(Int_t iLadder = 0; iLadder<nLadders; iLadder++){
 
       // ladder
+      int jLadder = iLadder + 1; // formal ladder number
+      if(iLayer<nLayers-1){
+        jLadder = 2*(iLadder + 1) - iLayer%2; // count by 2s in svt
+      }
+
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
-      pPlacement->setLayerRadius(fBarrelRadius);
+      pPlacement->setLayerRadius(fLayerRadius);
       float fLadderPhi = pGeometryTransform->phiForSector(
-          2*(iLadder + 1) - iLayer%2, 2*nLadders);
+          jLadder, (iLayer<nLayers-1) ? 2*nLadders : nLadders);
 
       if(iLayer < nLayers - 1){
         pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
@@ -287,7 +292,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
         pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.09); 
       }
       sprintf(szName, "Svg/Layer_%d/Ladder_%d/Ladder", 
-              iLayer + 1, iLadder + 1);
+              iLayer + 1, jLadder);
 
       StiDetector *pLadder = new StiDetector;
       pLadder->setName(szName);
@@ -311,12 +316,12 @@ void StiCodedDetectorBuilder::buildDetectors(){
       // hybrid 1
       pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
-      pPlacement->setLayerRadius(fBarrelRadius);
+      pPlacement->setLayerRadius(fLayerRadius);
       pPlacement->setNormalRep(fLadderPhi + fDeltaPhi/2., fGapRadius,
                                pHybridShape->getHalfWidth() - fHalfGap);
       
       sprintf(szName, "Svg/Layer_%d/Ladder_%d/Hybrid_1", 
-              iLayer + 1, iLadder + 1);
+              iLayer + 1, jLadder);
 
       StiDetector *pHybrid1 = new StiDetector;
       pHybrid1->setName(szName);
@@ -339,12 +344,12 @@ void StiCodedDetectorBuilder::buildDetectors(){
 
       pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
-      pPlacement->setLayerRadius(fBarrelRadius);
+      pPlacement->setLayerRadius(fLayerRadius);
       pPlacement->setNormalRep(fLadderPhi - fDeltaPhi/2., fGapRadius,
                                fHalfGap - pHybridShape->getHalfWidth());
       
       sprintf(szName, "Svg/Layer_%d/Ladder_%d/Hybrid_2", 
-              iLayer + 1, iLadder + 1);
+              iLayer + 1, jLadder);
 
       StiDetector *pHybrid2 = new StiDetector;
       pHybrid2->copy(*pHybrid1);
