@@ -16,11 +16,10 @@
 #include "StiRootDrawableHits.h"
 
 StiRootDrawableHits::StiRootDrawableHits() :
-    mpoly( new StiTPolyMarker3D() ), marray(0), mcolor(4), mvisible(true)
+    mpoly( new StiTPolyMarker3D() ), marray(0), mcolor(4), mvisible(true) , mmarker(8)
 {
     marray = new double[0];
-
-    mpoly->SetPolyMarker(0, marray, 8);
+    mpoly->SetPolyMarker(0, marray, mmarker);
 
     mpoly->SetMarkerStyle(8);
     mpoly->SetMarkerSize(.5);
@@ -34,9 +33,20 @@ StiRootDrawableHits::~StiRootDrawableHits()
 {
 }
 
+void StiRootDrawableHits::setMarkerStyle(unsigned int val)
+{
+    mmarker = val;
+    mpoly->SetMarkerStyle(mmarker);
+}
+
+void StiRootDrawableHits::setMarkerSize(double val)
+{
+    mpoly->SetMarkerSize(val);
+}
+
 void StiRootDrawableHits::fillHitsForDrawing()
 {
-    mpoly->SetPolyMarker(0, marray, 8);
+    mpoly->SetPolyMarker(0, marray, mmarker);
     mpoly->SetMarkerColor(mcolor);
     mpoly->ResetBit(kCanDelete);
 

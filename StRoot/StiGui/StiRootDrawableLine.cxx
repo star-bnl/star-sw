@@ -34,6 +34,16 @@ StiRootDrawableLine::~StiRootDrawableLine()
 {
 }
 
+void StiRootDrawableLine::setMarkerStyle(unsigned int val)
+{
+    return;
+}
+
+void StiRootDrawableLine::setMarkerSize(double val)
+{
+    //    mpoly->SetMarkerSize(10.);
+}
+
 void StiRootDrawableLine::fillHitsForDrawing()
 {
     mline->SetPolyLine(0, marray);
