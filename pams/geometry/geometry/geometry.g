@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.53 2002/12/05 23:28:41 potekhin Exp $
+* $Id: geometry.g,v 1.54 2002/12/10 01:48:25 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.54  2002/12/10 01:48:25  potekhin
+* Important: the hadronic interactions are now indeed actuated in GCALOR
+*
 * Revision 1.53  2002/12/05 23:28:41  potekhin
 * Streamlined the btof config logic
 *
@@ -158,6 +161,7 @@ If LL>1
                   <W>;('               : year_1a,s,b,h,c;  year_2a    ');
                   <W>;('               : year2000, year2001           ');
                   <W>;('               : year2002, year2003           ');
+                  <W>;('Gcalor     : Gcalor_on, Gcalor_off        ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off            ');
                   <W>;('Geant Physics  : Phys_off, Decay_Only         ');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
@@ -261,6 +265,9 @@ If LL>1
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
+  on GCALOR_ON { setting hadr 6 to activate hadronic showers;
+                              IHADR=6;}
+
   on PHYS_OFF   { No Physics: only energy loss;
       {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY,IMULS}=0; Iloss=2}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
