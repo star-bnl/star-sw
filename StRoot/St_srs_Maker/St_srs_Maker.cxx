@@ -12,17 +12,8 @@
 ClassImp(St_srs_Maker)
 
 //_____________________________________________________________________________
-St_srs_Maker::St_srs_Maker():
-m_config(0),
-m_shape(0),
-m_srs_activea(0),
-m_srs_srspar(0),
-m_srs_direct(0)
-{
-   drawinit=kFALSE;
-}
-//_____________________________________________________________________________
-St_srs_Maker::St_srs_Maker(const char *name, const char *title):StMaker(name,title),
+  St_srs_Maker::St_srs_Maker(const char *name, const char *title):
+StMaker(name,title),
 m_config(0),
 m_shape(0),
 m_srs_activea(0),
@@ -37,7 +28,7 @@ St_srs_Maker::~St_srs_Maker(){
 //_____________________________________________________________________________
 Int_t St_srs_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->GetParams());
+   St_DataSetIter       local(gStChain->DataSet("params"));
 // geometry parameters
    m_shape       = (St_svg_shape   *) local("svt/svgpars/shape");
    m_config      = (St_svg_config  *) local("svt/svgpars/config");
@@ -52,12 +43,10 @@ Int_t St_srs_Maker::Init(){
 Int_t St_srs_Maker::Make(){
 // Create output tables
    if (!m_DataSet->GetList())  {
-     St_DataSetIter local(m_DataSet);
-     St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",20000); local.Add(scs_spt);
-     St_srs_result *srs_result = new St_srs_result("srs_result",20000); local.Add(srs_result);
-     St_DataSetIter geant(gStChain->GetGeant());
-     St_DataSetIter g2t(geant("Event"));
-     St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("Event/g2t_svt_hit");
+     St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",20000);       m_DataSet->Add(scs_spt);
+     St_srs_result *srs_result = new St_srs_result("srs_result",20000); m_DataSet->Add(srs_result);
+     St_DataSetIter geant(gStChain->DataSet("geant"));
+     St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
      if (g2t_svt_hit ) {
 
        Int_t res =  srs_am (srs_result,g2t_svt_hit,scs_spt,
@@ -71,7 +60,7 @@ Int_t St_srs_Maker::Make(){
 //_____________________________________________________________________________
 void St_srs_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_srs_Maker.cxx,v 1.11 1998/10/06 18:00:45 perev Exp $\n");
+  printf("* $Id: St_srs_Maker.cxx,v 1.12 1998/10/31 00:26:20 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.6 1998/10/06 18:00:29 perev Exp $
+// $Id: St_TLA_Maker.cxx,v 1.7 1998/10/31 00:25:45 fisyak Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.7  1998/10/31 00:25:45  fisyak
+// Makers take care about branches
+//
 // Revision 1.6  1998/10/06 18:00:29  perev
 // cleanup
 //
@@ -27,10 +30,6 @@
 ClassImp(St_TLA_Maker)
 
 //_____________________________________________________________________________
-St_TLA_Maker::St_TLA_Maker(){
-   drawinit=kFALSE;
-}
-//_____________________________________________________________________________
 St_TLA_Maker::St_TLA_Maker(const char *name, const char *title):StMaker(name,title){
    drawinit=kFALSE;
 }
@@ -40,7 +39,7 @@ St_TLA_Maker::~St_TLA_Maker(){
 //_____________________________________________________________________________
 Int_t St_TLA_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->GetParams());
+   St_DataSetIter       local(gStChain->DataSet("params"));
 // Create Histograms    
    return StMaker::Init();
 }
@@ -54,7 +53,7 @@ Int_t St_TLA_Maker::Make(){
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.6 1998/10/06 18:00:29 perev Exp $\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.7 1998/10/31 00:25:45 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

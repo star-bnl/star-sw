@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.20 1998/10/21 20:30:56 fine Exp $
+// $Id: bfc.C,v 1.21 1998/10/31 00:26:26 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.21  1998/10/31 00:26:26  fisyak
+// Makers take care about branches
+//
 // Revision 1.20  1998/10/21 20:30:56  fine
 // makedoc macro creates "gif" directories and fill it up
 //
@@ -54,44 +57,55 @@
 // Revision 1.2  1998/07/20 15:08:19  fisyak
 // Add tcl and tpt
 //
-void bfc(const Char_t *fileinp = 
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc340_04_90evts.xdf", 
+void bfc(
+         const Char_t *fileinp = 
+"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf",
          const Char_t *fileout=
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.xdf",
+"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.xdf",
          const Char_t *FileOut=
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.root",
-         const Int_t  Nevents=1000)
+"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts_dst.root",
+         const Int_t  Nevents=2)
 {
-   gSystem->Load("St_base.so");
-   gSystem->Load("StChain.so");
-   gSystem->Load("xdf2root.so");
-   gSystem->Load("St_Tables.so");
-   gSystem->Load("libmsg.so");
-   gSystem->Load("libtls.so");
-   gSystem->Load("tpc.sl");
-   gSystem->Load("St_tpc.so");
-   gSystem->Load("St_tss_Maker.so");
-   gSystem->Load("St_tcl_Maker.so");
-   gSystem->Load("St_tpt_Maker.so");
-   gSystem->Load("svt.sl");
-   gSystem->Load("St_svt.so");
-   gSystem->Load("St_srs_Maker.so");
-   gSystem->Load("St_stk_Maker.so");
-   //   gSystem->Load("ftpc.sl");
-   //   gSystem->Load("St_ftpc.so");
-   //   gSystem->Load("St_fss_Maker.so");
-   //   gSystem->Load("St_fcl_Maker.so");
-   //   gSystem->Load("St_fpt_Maker.so");
-   gSystem->Load("global.sl");
-   gSystem->Load("St_global.so");
-   gSystem->Load("St_dst_Maker.so");
-   gSystem->Load("St_run_Maker.so");
-   gSystem->Load("St_xdfin_Maker.so");
-
-
-   //  Char_t *fileinp ="$SCRATCH/input.xdf";
-   //  Char_t *fileout ="$SCRATCH/ouput.xdf";
-   //  Char_t *FileOut ="$SCRATCH/ouput.root";
+  gSystem->Load("St_base.so");
+  gSystem->Load("StChain.so");
+  gSystem->Load("xdf2root.so");
+  gSystem->Load("St_Tables.so");
+  gSystem->Load("libmsg.so");
+  gSystem->Load("libtls.so");
+  gSystem->Load("St_xdfin_Maker.so");
+  gSystem->Load("St_calib_Maker.so");
+  gSystem->Load("St_evg_Maker.so");
+  gSystem->Load("St_geant_Maker.so");
+  gSystem->Load("St_geom_Maker.so");
+  gSystem->Load("St_TLA_Maker.so");
+  gSystem->Load("tpc.sl");
+  gSystem->Load("St_tpc.so");
+  gSystem->Load("St_params_Maker.so");
+  gSystem->Load("St_tss_Maker.so");
+  gSystem->Load("St_tcl_Maker.so");
+  gSystem->Load("St_tpt_Maker.so");
+  gSystem->Load("svt.sl");
+  gSystem->Load("St_svt.so");
+  gSystem->Load("St_srs_Maker.so");
+  gSystem->Load("St_stk_Maker.so");
+  gSystem->Load("ftpc.sl");
+  gSystem->Load("St_ftpc.so");
+  gSystem->Load("St_fss_Maker.so");
+  gSystem->Load("St_fcl_Maker.so");
+  //  gSystem->Load("St_fpt_Maker.so");
+  gSystem->Load("global.sl");
+  gSystem->Load("St_global.so");
+  gSystem->Load("St_dst_Maker.so");
+  gSystem->Load("St_run_summary_Maker.so");
+#if 0
+         const Char_t *fileinp = 
+"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf";
+         const Char_t *fileout=
+"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts.xdf";
+         const Char_t *FileOut=
+"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts.root";
+         const Int_t  Nevents=1;
+#endif
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
   St_XDFFile  *xdf_out   = 0;
@@ -100,44 +114,49 @@ void bfc(const Char_t *fileinp =
   if (FileOut) root_out  =  new TFile(FileOut,"RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
-//  StChain chain("StChain");
+  //  StChain chain("bfc");
   StChainSpy chain("bfc");
 
 //  Create the makers to be called by the current chain
-  St_run_Maker run_Maker("params","run/params");
-  St_run_Maker run_Maker("params/geant","run/params/geant/Run");
+  St_params_Maker params("params","run/params");
+  St_geom_Maker     geom("geom","run/geant/Run");
   if (xdf_in) {
-    St_xdfin_Maker xdfin("xdfin","event/geant");
+    St_xdfin_Maker xdfin("xdfin");
     chain.SetInputXDFile(xdf_in);
   }
-//St_calib_Maker calib("calib","run/calib"); 
-//  St_evg_Maker evg_Maker("evg_Maker","event");
-  St_srs_Maker srs_Maker("srs_Maker","event/data/svt/hits");
-  //  St_fss_Maker fss_Maker("fss_Maker","event/raw_data/ftpc/pixels");
-  //  St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
+  St_calib_Maker    calib("calib","calib"); 
+  St_evg_Maker      evgen("evgen","event/evgen");
+  St_geant_Maker    geant("geant","event/geant/Event");
+//  St_fss_Maker   ftpc_raw("ftpc_raw","event/raw_data/ftpc");
+//  St_tss_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
 // Set parameters
-//  tss_Maker.adcxyzon();
-  St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
-  St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
-  St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
-  St_dst_Maker dst_Maker("dst_Maker","event/data/global");
+//  tpc_raw.adcxyzon();
+  St_srs_Maker         svt_hits("svt_hits","event/data/svt/hits");
+  St_tcl_Maker         tpc_hits("tpc_hits","event/data/tpc/hits");
+  St_TLA_Maker         ctf_hits("ctf_hits","event/data/ctf/hits");
+  St_fcl_Maker         fcl_hits("ftpc_hits","event/data/ftpc/hits");
+  St_stk_Maker       stk_tracks("svt_tracks","event/data/svt/tracks");
+  St_tpt_Maker       tpc_tracks("tpc_tracks","event/data/tpc/tracks");
+  St_TLA_Maker      ftpc_tracks("ftpc_tracks","event/data/ftpc/tracks");
+  St_TLA_Maker           global("global","event/data/global");
+  St_dst_Maker              dst("dst","event/data/global/dst");
+  St_run_summary_Maker  summary("run_summary","run/dst");
   chain.PrintInfo();
 // Init the mai chain and all its makers
-
   int iInit = chain.Init();
   if (iInit) chain.Fatal(iInit,"on init");
 //  chain.MakeTree("StChainTree","Title");
 // Prepare TCanvas to show some histograms created by makers
   if (xdf_out){
     gBenchmark->Start("xdf out");
-    xdf_out->NextEventPut(chain.GetRun()); // xdf output
+    //    xdf_out->NextEventPut(chain.GetRun()); // xdf output
     gBenchmark->Stop("xdf out");
   }
   if (root_out) {
     gBenchmark->Start("root i/o");
     root_out->cd();
-    St_DataSet *run = chain.GetRun();// root output
-    run->SetWrite();
+    //    St_DataSet *run = chain.GetRun();// root output
+    //    run->SetWrite();
     gBenchmark->Stop("root i/o");
   }
   gBenchmark->Start("bfc");
@@ -145,7 +164,7 @@ void bfc(const Char_t *fileinp =
   for (Int_t i =1; i <= Nevents; i++){
     if (chain.Make(i)) break;
     St_DataSetIter local(chain.DataSet());
-    local.Cd(chain.GetName());
+    //    local.Cd(chain.GetName());
     St_DataSet *evnt = local("event");
     if (xdf_out){
       gBenchmark->Start("xdf out");
@@ -183,4 +202,6 @@ void bfc(const Char_t *fileinp =
     gBenchmark->Print("bfc");
   }
   else TBrowser b;
+#if 0
+#endif
 }

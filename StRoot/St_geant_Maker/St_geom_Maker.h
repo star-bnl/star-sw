@@ -1,6 +1,6 @@
-// $Id: St_TLA_Maker.h,v 1.7 1998/10/31 00:25:45 fisyak Exp $
-// $Log: St_TLA_Maker.h,v $
-// Revision 1.7  1998/10/31 00:25:45  fisyak
+// $Id: St_geom_Maker.h,v 1.1 1998/10/31 00:28:31 fisyak Exp $
+// $Log: St_geom_Maker.h,v $
+// Revision 1.1  1998/10/31 00:28:31  fisyak
 // Makers take care about branches
 //
 // Revision 1.6  1998/10/06 18:00:31  perev
@@ -18,34 +18,37 @@
 // Revision 1.2  1998/07/20 15:08:15  fisyak
 // Add tcl and tpt
 //
-#ifndef STAR_St_TLA_Maker
-#define STAR_St_TLA_Maker
+#ifndef STAR_St_geom_Maker
+#define STAR_St_geom_Maker
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_TLA_Maker virtual base class for Maker                            //
+// St_geom_Maker virtual base class for Maker                            //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
 //class St_stk_stkpar;
-class St_TLA_Maker : public StMaker {
+class St_geom_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.7 1998/10/31 00:25:45 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_geom_Maker.h,v 1.1 1998/10/31 00:28:31 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
  protected:
  public: 
-                  St_TLA_Maker(const char *name="TLA", const char *title="TLA_something");
-   virtual       ~St_TLA_Maker();
-   virtual Int_t Init();
+                  St_geom_Maker(const char *name="geom", const char *title="run/geant/Run");
+   virtual       ~St_geom_Maker();
+   virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
+   virtual Int_t  Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
+   virtual void   Clear(Option_t *option){}; // No clearance for parameters
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
-   ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_geom_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
 #endif
+

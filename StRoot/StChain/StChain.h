@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.13 1998/10/07 18:43:59 perev Exp $
+// $Id: StChain.h,v 1.14 1998/10/31 00:21:31 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.14  1998/10/31 00:21:31  fisyak
+// Makers take care about branches
+//
 // Revision 1.13  1998/10/07 18:43:59  perev
 // Add Spy classes for Farm Monitor
 //
@@ -72,7 +75,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.13 1998/10/07 18:43:59 perev Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.14 1998/10/31 00:21:31 fisyak Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
 public:
@@ -106,14 +109,7 @@ public:
    virtual void       FillXDF(St_XDFFile &file);
    virtual Int_t      Finish();
    virtual Int_t      GetEvent(Int_t event=1);  // *MENU*
-   St_DataSet        *GetRun(); 
-   St_DataSet        *GetCalib();
    St_DataSet        *GetEventSet(){return m_EventSet;}
-   St_DataSet        *GetGeant();
-   St_DataSet        *GetGeometry();
-   St_DataSet        *GetParams();
-   St_DataSet        *GetData();
-   St_DataSet        *GetRawData();
    St_XDFFile        *GetXDF_in(){return m_File;} 
    St_XDFFile        *GetXDF_out(){ return m_FileOut;} 
    virtual Int_t Init();

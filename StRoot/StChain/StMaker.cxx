@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.10 1998/10/06 18:00:27 perev Exp $
+// $Id: StMaker.cxx,v 1.11 1998/10/31 00:21:31 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.11  1998/10/31 00:21:31  fisyak
+// Makers take care about branches
+//
 // Revision 1.10  1998/10/06 18:00:27  perev
 // cleanup
 //
@@ -48,7 +51,12 @@ StMaker::StMaker(const char *name, const char *title)
    m_Clones     = 0;
    m_IsClonable = kTRUE;
    m_DataSet    = 0;
-   gStChain->Makers()->Add(this);  
+   TList *list =  gStChain->Makers();
+   if (list) {
+     StMaker *maker =  (StMaker *) list->FindObject(name);
+     if (!maker) list->Add(this);
+     //   gStChain->Makers()->Add(this);  
+   }
 }
 
 //_____________________________________________________________________________
@@ -65,6 +73,7 @@ void StMaker::Browse(TBrowser *b)
   char name[64];
   if( b == 0) return;
   if (m_Histograms) b->Add(m_Histograms,"Histograms");
+  if (m_DataSet) b->Add(m_DataSet,m_DataSet->GetName()); 
   if (m_Fruits == 0) return;
    TObject *obj;
 
@@ -83,13 +92,12 @@ void StMaker::Browse(TBrowser *b)
   } else {
       b->Add( m_Fruits, m_Fruits->GetName());
   }
-
 }
 
 //_____________________________________________________________________________
 void StMaker::Clear(Option_t *option)
 {
- if (m_DataSet) {delete m_DataSet; m_DataSet = 0;}
+ SafeDelete(m_DataSet);
 }
 
 //_____________________________________________________________________________
