@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.8 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTrsIstream.cc,v 1.9 2000/01/25 20:26:03 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.9  2000/01/25 20:26:03  calderon
+ * fix istream>> string for both CC5 and Linux.
+ *
  * Revision 1.8  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -82,7 +85,7 @@ typedef ostream_iterator<int> ostream_iter_int;
 #endif
 #endif
 
-#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
+#if defined (__SUNPRO_CC)
 inline istream& operator>>( istream& stream, string& str )
 {
     char buffer[ 1024 ];
@@ -105,8 +108,8 @@ StTrsIstream::StTrsIstream(string streamName, StTpcGeometry* dB)
     //
     // Read Header
     //
-    //string oneWord;
-    char* oneWord = 0;
+    string oneWord;
+    
     
     const string eohMarker = "##";
     while (oneWord != eohMarker.c_str()) {
