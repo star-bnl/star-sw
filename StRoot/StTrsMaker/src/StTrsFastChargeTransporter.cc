@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.1 1998/11/10 17:12:24 fisyak Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.2 1999/01/18 10:14:26 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
- * Revision 1.1  1998/11/10 17:12:24  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1999/01/18 10:14:26  lasiuk
+ * pressure in mbar
  *
  * Revision 1.3  1999/01/18 21:02:14  lasiuk
  * frisch grid for +/-z
@@ -87,6 +87,7 @@ StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
     // O2 abosorption (stat)
     if(mChargeAttachment) {
     PR(seg.charge());
+    }
     
 //     PR(seg.charge());
 	PR(wireGridTransmission());
@@ -102,11 +103,15 @@ StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 double StTrsFastChargeTransporter::wireGridTransmission()
 {
     if(mDoTransparencyCalc)
-    //    using namespace units;
-    double suppression = 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(760*atmosphere)*driftL;
-    PR(suppression);
+	mTransparency = transparencyCalculation();
+    return mTransparency;
+}
+
+double StTrsFastChargeTransporter::chargeAttachment(double driftL) const
+{
+//     PR(mAttachment);
 //     PR(mO2Concentration);
-    return suppression; 
+//     PR(.760*bar);
 //     PR(driftL);
 //     PR(mSCDb->driftVelocity());
 //     double suppression = 1.-mAttachment*(mO2Concentration/1.e+6)*sqr(.760*bar)*driftL/mSCDb->driftVelocity();
