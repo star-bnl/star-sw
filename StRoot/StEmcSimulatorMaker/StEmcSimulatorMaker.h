@@ -46,9 +46,10 @@ protected:
   TH2F *m_energy[MAXDET]; //!
   TH1F *m_adc[MAXDET];    //!
 
-  TH1F *mModule[MAXDET];    //! For testing only
-  TH1F *mDiffNumHits[4];    //! 
-  TH1F *mDiffDe[4];         //!
+  TH1F *mhModule[MAXDET];    //! For testing only
+  TH1F *mhSub[MAXDET];
+  TH1F *mhDiffNumHits[4];    //! 
+  TH1F *mhDiffDe[4];         //!
 public: 
   StEmcSimulatorMaker(const char *name="EmcSimulator"); 
   ~StEmcSimulatorMaker();
@@ -89,7 +90,7 @@ public:
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.4 2001/03/22 22:04:45 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.5 2001/09/22 00:29:47 pavlinov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
 };
@@ -97,8 +98,11 @@ public:
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.4 2001/03/22 22:04:45 pavlinov Exp $ 
+// $Id: StEmcSimulatorMaker.h,v 1.5 2001/09/22 00:29:47 pavlinov Exp $ 
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.5  2001/09/22 00:29:47  pavlinov
+// No public constructor for StEmcGeom
+//
 // Revision 1.4  2001/03/22 22:04:45  pavlinov
 // Clean up for mdc4
 //

@@ -1,6 +1,9 @@
-// $Id: StEmcPreCluster.cxx,v 1.9 2001/04/17 23:51:22 pavlinov Exp $
+// $Id: StEmcPreCluster.cxx,v 1.10 2001/09/22 00:30:08 pavlinov Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.10  2001/09/22 00:30:08  pavlinov
+// No public constructor for StEmcGeom
+//
 // Revision 1.9  2001/04/17 23:51:22  pavlinov
 // Clean up before MDC4
 //
@@ -128,7 +131,7 @@ StEmcPreCluster::StEmcPreCluster(Int_t mod,TArrayI *hits,Int_t detector,StEmcDet
 void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
 {
 // For caclulation of cluster's characteristics.
-  emcgeo=new StEmcGeom(mDetector);
+  emcgeo=StEmcGeom::getEmcGeom(mDetector);
   StSPtrVecEmcRawHit& mStEventHits=mDet->module(mod)->hits();
   Float_t etah, phih;
   Int_t m, e, s, indh;

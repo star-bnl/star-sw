@@ -79,7 +79,7 @@ StEmcMath::getPhiPlusMinusPi(const Double_t phi)
 TArrayD  *StEmcMath::binForSmde(Bool_t kprint)
 {
   // Calculate correct eta binnig for smd eta
-  StEmcGeom* geom = new StEmcGeom(3);   // For SMDE
+  StEmcGeom* geom = StEmcGeom::getEmcGeom(3);   // For SMDE
   Int_t neta = geom->NEta(), iw1, iw2;
   Float_t *eb = geom->Eta();
   TArrayD *xb = new TArrayD(2*neta+1); 
