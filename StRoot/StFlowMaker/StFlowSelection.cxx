@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.17 2002/06/10 22:51:02 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.18 2002/06/12 22:36:44 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -106,7 +106,7 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
 
   // Fit Points over Max Points
   int maxPts = pFlowTrack->MaxPts();
-  float fitOverMaxPts = (float) fitPts / (float) maxPts;
+  float fitOverMaxPts = (float)(fitPts-1) / (float)maxPts;
   if (mFitOverMaxPtsPart[1] > mFitOverMaxPtsPart[0] && 
       (fitOverMaxPts < mFitOverMaxPtsPart[0] || 
        fitOverMaxPts >= mFitOverMaxPtsPart[1])) return kFALSE;
@@ -163,6 +163,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.18  2002/06/12 22:36:44  posk
+// FitOverMax points cut/selection is now done on (FitPts - 1)/MaxPts.
+//
 // Revision 1.17  2002/06/10 22:51:02  posk
 // pt and eta weighting now default.
 // DcaGlobalPart default now 0 to 1 cm.
