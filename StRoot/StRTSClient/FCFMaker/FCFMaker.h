@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.9 2004/03/10 21:55:54 jml Exp $
+ * $Id: FCFMaker.h,v 1.10 2004/04/21 20:30:54 tonko Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.10  2004/04/21 20:30:54  tonko
+ * Added back-annotation and misc. cleanup
+ *
  * Revision 1.9  2004/03/10 21:55:54  jml
  * support for simulations in FCFMaker
  *
@@ -144,7 +147,7 @@ class StRTSClientFCFMaker:public StMaker
 
   StDaqClfCppRow *GetCPPRow(int r, int i, StDaqClfCppRow *storage);     // split the row along mezzanine banks
 
-  void saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector,int id_simtrk, int id_quality);
+  void saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector, int cl_id, int id_simtrk, int id_quality);
   void fillStEvent(tcl_tphit_st *hit);
   void filltphit(tcl_tphit_st *hit);
 

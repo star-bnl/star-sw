@@ -52,9 +52,9 @@ void fcfAfterburner::print_hit(char *str, struct fcfHit *h)
                 fprintf(stdout,"%s: ",str) ; 
         }
 
-	fprintf(stdout,"%d %f %f %d %d %d %d %d %d %d %d\n",
+	fprintf(stdout,"%d %f %f %d %d %d %d %d %d %d %d %d\n",
 		row,(double)h->pad/64.0+0.5,(double)h->tm/64.0+0.5,h->c,h->f,
-		h->p1,h->p2,h->t1,h->t2,h->id_simtrk,h->id_quality) ;
+		h->p1,h->p2,h->t1,h->t2,h->cl_id,h->id_simtrk,h->id_quality) ;
 
 	return  ;
 }
@@ -115,11 +115,13 @@ void fcfAfterburner::decode(u_int *ptr, struct fcfHit *hit, u_int *sim)
 		// there is no need to check for endianess...
 		hit->id_simtrk = s->id_simtrk ;
 		hit->id_quality = s->id_quality ;
+		hit->cl_id = s->cl_id ;
 	}
 	else {
 		// these are the defaults which FCF will also use - don't change!
 		hit->id_simtrk = 0 ;
 		hit->id_quality = 100 ;
+		hit->cl_id = -1 ;
 	}
 
 
@@ -195,21 +197,20 @@ int fcfAfterburner::check_merge(struct fcfHit *hit_l, struct fcfHit *hit_r)
 
 		// adjust track ids 
 		if(hit_r->id_simtrk != hit_l->id_simtrk) {
-
 			// choose the ID with the larger charge
 			if(hit_r->c > hit_l->c) {
 				hit_l->id_simtrk = hit_r->id_simtrk ;
 			}
 
-			// mark the quality as non-100
-			hit_l->id_quality = 99 ;	// 99 is a marker 
 		}
-		else {
-			// if any of the hits has a non-100 quality, the merged hit
-			// must also have a non-100 quality
-			if((hit_l->id_quality != 100) || (hit_r->id_quality != 100)) {
-				hit_l->id_quality = 98 ;	// 98 is a marker
-			}
+
+		// quality is the weighted mean...
+		hit_l->id_quality = (hit_l->id_quality * hit_l->c + hit_r->id_quality * hit_r->c) / charge ;
+
+
+		// adjust cluster ids
+		if(hit_r->cl_id != hit_l->cl_id) {
+			hit_l->cl_id = 0xFFFF ;	// mark as unknown...
 		}
 
 		hit_l->tm = (short)((tm[0]*(double)hit_l->c + tm[1]*(double)hit_r->c)/(double)charge) ;

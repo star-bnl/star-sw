@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.18 2004/03/22 16:41:11 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.19 2004/04/21 20:30:54 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.19  2004/04/21 20:30:54  tonko
+ * Added back-annotation and misc. cleanup
+ *
  * Revision 1.18  2004/03/22 16:41:11  tonko
  * Added output to FCFMaker if FCF_DEBUG_OUTPUT is defined
  *
@@ -130,9 +133,9 @@
 #include <StThreeVectorF.hh>
 
 
+
 #include <rtsSystems.h>
 #include <fcfClass.hh>
-//#include <fcfAfterburner.hh>
 #include <TPC/padfinder.h>
 #include <TPC/rowlen.h>
 
@@ -145,10 +148,9 @@
 
 ClassImp(StRTSClientFCFMaker);
 
-//#define FCF_DEBUG_OUTPUT
 
 #ifdef FCF_DEBUG_OUTPUT
-static FILE *ff ;
+static FILE *ff ;	// used for the cluster dump
 #endif
 
 
@@ -161,6 +163,8 @@ class StMaker;
 class St_g2t_tpc_hit;
 class g2t_tpc_hit_st;
 #endif
+
+#ifdef FCF_DEBUG_OUTPUT
 struct Hit_t {
   double x, y, z, charge ; 
 };
@@ -200,7 +204,7 @@ static Hit_t *getHitInfo(int sector=1, int row=1, int track_id=1) {
   } 
   return 0;
 }
-
+#endif
 
 // Tonko: added a static global which counts events i.e. calls to "Make"
 static int Event_counter ;
@@ -216,6 +220,7 @@ static u_int croat_simu_out[24][45][(FCF_MAX_CLUSTERS+2)* 2];
 
 // [sector][rb][mz][result_buffer]
 static u_int daq_file_out[24][6][3][(FCF_MAX_CLUSTERS + 2) * 2 * 6];
+
 
 // points to the raw data contributing...
 
@@ -347,6 +352,7 @@ Int_t StRTSClientFCFMaker::Init()
 
 #ifdef FCF_DEBUG_OUTPUT
   ff = fopen("fcf.dta","w") ;
+//  fcf_annotate_f = fopen("fcf_shape.dta","w") ;
 #endif
 
   for(int i=0;i<24;i++) {
@@ -405,8 +411,16 @@ Int_t StRTSClientFCFMaker::Make()
 
 
   Event_counter++ ;	// got one more event...
+  clustercount = 0 ;	// initialize clustercount...
 
   PrintInfo();
+
+
+
+#ifdef FCF_ANNOTATE_CLUSTERS
+	// zap the annotation structures in case we use them...
+	memset(fcfPixA,0,sizeof(fcfPixA)) ;
+#endif
 
   printf("<FCFMaker::Make> Making event %d...\n",Event_counter);
 
@@ -536,7 +550,7 @@ Int_t StRTSClientFCFMaker::Make()
 	  n_burned_daq_file_cl_sector++;
 
 	  if(use_daq_file_clusters) {
-	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,0,0);
+	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,-1,0,0);
 	  }
 	}
       }
@@ -553,7 +567,7 @@ Int_t StRTSClientFCFMaker::Make()
 	  n_burned_croat_cl_sector++;
 
 	  if(!use_daq_file_clusters) {
-	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,h.id_simtrk, h.id_quality);
+	    saveCluster(h.pad,h.tm,h.f,h.c,h.p1,h.p2,h.t1,h.t2,pr,s+1,h.cl_id,h.id_simtrk, h.id_quality);
 	  }
 	}
       }
@@ -831,23 +845,34 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
   for(pad=0;pad<tpc_rowlen[row+1];pad++) {
     double gain, t0;
 
-    double pg=0; double po=0;
+//    double pg=0; double po=0;
 
-    if(mask->isOn(sector,tRDOFromRowAndPad[row][pad]))
-      { 
-	po=1;
-      }
-    pg = gains[sector-1].Gain[row][pad];
-	
-    if(mask->isOn(sector,tRDOFromRowAndPad[row][pad]))
-      gain = gains[sector-1].Gain[row][pad];
-    else
-      gain = 0.0;
+//    if(mask->isOn(sector,tRDOFromRowAndPad[row][pad]))
+//      { 
+//	po=1;
+//      }
+//    pg = gains[sector-1].Gain[row][pad];
 
+    // The "gain" logic is this:
+    //	If the RDO is ON - abide by the doGainCorrections flag
+    //  If the RDO is OFF - kill the gain!
 
-    // Tonko: HACK! to eliminate gain calc. in FCF to cross-check TCL
-    // but _still_ kill bad channels
-    if(!doGainCorrections) if(gain > 0.001) gain = 1.0 ;
+    if(mask->isOn(sector,tRDOFromRowAndPad[row][pad])) {	// RDO is ON
+	if(doGainCorrections) {
+		gain = gains[sector-1].Gain[row][pad] ;
+	}
+	else {
+		gain = 1.0 ;
+		// Tonko: HACK! to eliminate gain calc. in FCF to cross-check TCL
+		// but _still_ kill bad channels
+		// if(gains[sector-1].Gain[row][pad] < 0.001) gain = 0.0 ;
+	}
+
+    }
+    else {
+	gain = 0.0 ;	
+    }
+
     
     // gainCorr starts from 1!
     gainCorr[sector-1][row][pad+1] = (int)(gain*64.0 + 0.5);
@@ -860,24 +885,15 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
     }
     else t0 = 0.0 ;
 
-
-//     printf("GAINS: %d %d %d --> %f %f %f (%f)\n",
-// 	   sector,row,pad,po,pg,gain,t0);
-
     // t0Corr starts from 1!
     t0Corr[sector-1][row][pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
     if(t0 < 0.0) t0Corr[sector-1][row][pad+1] *= -1 ;
 
 #ifdef FCF_DEBUG_OUTPUT
-
-    t0Corr[sector-1][row][pad+1] = 0 ;
-    gainCorr[sector-1][row][pad+1] = 64 ;
-#endif
-
-#ifdef FCF_DEBUG_OUTPUT
-//     fprintf(ff, "%d %d %d %1.3f %1.3f\n",
+//     fprintf(ff, "Gains: %d %d %d %1.3f %1.3f\n",
 // 	    sector, row+1, pad+1, gain, t0);
 #endif
+
   }
 }
 
@@ -887,7 +903,7 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
 // Assumes that sector is from 1...24
 //              r      is from 0...44
 //
-void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector, int id_simtrk, int id_quality)
+void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector, int cl_id, int id_simtrk, int id_quality)
 {
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
 
@@ -905,7 +921,16 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   tcl_tphit_st hit;
   memset(&hit,0,sizeof(hit));
 
-  hit.cluster = clustercount;	  
+
+  if(cl_id != -1) {
+	hit.cluster = cl_id ;
+	hit.id = cl_id;
+  }
+  else {
+	hit.cluster = clustercount ;
+	hit.id = clustercount;
+  }
+  clustercount++ ;	// increment per event counter...
 
   // Filling in the flag causes very bad tracking performance
   // for some events.  I don't know why.
@@ -921,7 +946,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   }
 
   
-  hit.id = clustercount;
+
   hit.row = (r+1) + sector * 100;
 
   // Tonko: move all to double.
@@ -979,7 +1004,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 #ifdef FCF_DEBUG_OUTPUT
   struct Hit_t *ht = getHitInfo(hit.row/100,hit.row%100,hit.id_simtrk) ;
   
-  fprintf(ff,"%d %d %d %d %d %f %f %f %f %d %d %d %d ",Event_counter, hit.row/100, hit.row%100, hit.id_simtrk,hit.id_quality,
+  fprintf(ff,"%d %d %d %d %d %d %f %f %f %f %d %d %d %d ",Event_counter, hit.row/100, hit.row%100, hit.id, hit.id_simtrk,hit.id_quality,
 	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_f,cl_c,p2-p1+1,t2-t1+1) ;
 
   if(!ht) {
@@ -988,7 +1013,25 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   else {
 	fprintf(ff,"%f %f %f %f\n",ht->x,ht->y,ht->z,ht->charge*1000000.0) ;
   }
- 
+
+#ifdef FCF_ANNOTATE_CLUSTERS
+  {
+	int i, j ;
+
+	int sec = hit.row/100 - 1 ;
+	int row = hit.row%100 -1 ;
+
+	for(i=0;i<192;i++) {
+		for(j=0;j<512;j++) {
+			if(fcfPixA[sec][row][i][j].cl_id == hit.id) {
+				fprintf(ff,"  s %d %d %d %d %d\n",i+1,j,fcfPixA[sec][row][i][j].adc,
+					fcfPixA[sec][row][i][j].cl_id,fcfPixA[sec][row][i][j].id_simtrk) ;
+			}
+		}
+	}
+  }
+#endif
+				
   // Raw....
   // This line is to compare with the output from special
   // Special uses a very strange pad origin:
@@ -1113,6 +1156,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   fcf->t0Corr = t0Corr[sector-1][row];
   fcf->gainCorr = gainCorr[sector-1][row];
 
+  fcf->sb = sector ;	// sector starts from 1 
 
   //cppRowStorage = &cpp[r] ;
 
@@ -1135,6 +1179,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     //cppRow = GetCPPRow(r,i,&cppRowStorage);
     //cppRow = cpp ;
     //if(!cppRow) continue;
+
 
     fcf->row = row+1;   // row starts from 1
     fcf->padStart = 1000000;

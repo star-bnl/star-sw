@@ -1,4 +1,5 @@
 /*
+	Version 5.20	Added ADC cluster back-annotation if defined
 	Version 5.12	Added track ID
 	Version 5.11	Production for FY04
 	Version 5.00	07/11/2003	Many small fixes
@@ -24,11 +25,12 @@
 #include <stdarg.h>
 
 
-#define FCF_VERSION	"5.12"	
+#define FCF_VERSION	"5.20"	
 
 
-
-#define FCF_EXTENTS
+#include <rts.h>
+#include <rtsSystems.h>
+#include <fcfClass.hh>
 
 
 // need to define "ROOT" for use in offline
@@ -36,30 +38,17 @@
 
 #include "StDaqLib/TPC/trans_table.hh"
 #define FCF_10BIT_ADC	// ADC data is already in 10 bits!
-#define FCF_DONT_USE_LOG
+//#define FCF_DONT_USE_LOG
 
+#define LOG(x1,x2,x3,x4,x5,x6,x7) 
+	
 #endif
 
-#ifdef __unix
-#define FCF_SIM_ON	1	// enable simulation track IDs if under unix
-#endif
 
-
-
-
-
-// use for systems without the RTS Logging facility!
-#ifdef FCF_DONT_USE_LOG
-#define LOG(x1,x2,x3,x4,x5,x6,x7)
-#else
-#include <rtsLog.h>
-#endif
 
 //static u_int delta[20] ;
 
-#include <rts.h>
-#include <rtsSystems.h>
-#include <fcfClass.hh>
+
 
 
 
@@ -77,9 +66,8 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 	short mean ;		// short
 
 	u_int pad ;
-#ifdef FCF_EXTENTS
-	u_short	 t1, t2, p1, p2 ;	
-#endif
+
+	u_short	 t1, t2, p1, p2 ;	// extents
 
 #ifdef FCF_SIM_ON
 	// new - test only...
@@ -88,7 +76,7 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 
 	short quality ;		// sim. quality
 	short id ;		// sim. id
-	
+	u_short cl_id ;		// global cluster id!
 #endif
 
 } ;
@@ -97,6 +85,9 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 #pragma pack 0
 #pragma align 0
 #endif
+
+
+
 
 
 #ifdef __unix
@@ -114,7 +105,20 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 
 // simulation global
 #ifdef FCF_SIM_ON
-u_int *simout ;
+static u_int *simout ;
+
+static struct fcfPixAnnotate pixStruct[183][512] ;
+
+#endif
+
+
+#ifdef FCF_DEBUG_OUTPUT
+//FILE *fcf_annotate_f ; // used for the annotation dump - GLOBAL
+#endif
+
+#ifdef FCF_ANNOTATE_CLUSTERS 
+// annotation data - GLOBAL!
+struct fcfPixAnnotate fcfPixA[24][45][182][512] ;
 #endif
 
 extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int mean, u_int flags)
@@ -206,6 +210,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 	*cl_found_pointer = 0 ;
 	*row_pointer = row ;
+
+	simout = NULL ;
+
 #ifdef FCF_SIM_ON
 	u_int *sim_found_ptr, *sim_row_ptr ;
 	short *simin ;
@@ -223,6 +230,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 	else {
 		simout = 0 ;
 	}
+
+	u_short cl_id = 1 ;	// start global cluster id with 1
+	memset(pixStruct,0,sizeof(pixStruct)) ;
 #endif
 
 	new_res_ix = 0 ;
@@ -482,9 +492,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				int max_sim  = sim_id ;
 #endif
 
-#ifdef FCF_EXTENTS
-				stop = start ;	// take this out when running!
-#endif
+
+				stop = start ;	// necessary for the EXTENETS calc
+
 				//delta[1] = mzFastTimerDelta(mark) ;
 				//asm("#second") ;
 				do {
@@ -536,6 +546,10 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					if(max_sim != sim_id) {
 						sim_quality = 2 ;
 					}
+
+					pixStruct[pad][start].adc = a ;
+					pixStruct[pad][start].cl_id = cl_id ;
+					pixStruct[pad][start].id_simtrk = sim_id ;
 #endif
 
 
@@ -586,13 +600,13 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				// store the new results via some assembly inline...
 				mstore(rn,av,charge,mean,flags) ;
 
-#ifdef FCF_EXTENTS
+
 				rn->p1 = pad ;
 				rn->p2 = pad ;
 				rn->t1 = stop ;		// this is actually the first...
 				rn->t2 = start-1 ;	// this is actually the last...
 
-#endif
+
 				//LOG(WARN,"Pad %d, stored max at %d, t1 %d, t2 %d",pad,mean,rn->t1,rn->t2,0) ;
 				
 #ifdef FCF_SIM_ON
@@ -600,6 +614,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				rn->adc_max = max_a ;
 				rn->id = max_sim ;
 				rn->quality = sim_quality ;
+				rn->cl_id = cl_id++ ;		// global cluster id...
+
+
 #endif				
 
 				//if(((u_int)adc_p & 0xF)==0) preburst4(adc_p) ;
@@ -700,10 +717,10 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 							rr->flags = old_flags | FCF_DOUBLE_PAD ;	// old one
 								
-#ifdef FCF_EXTENTS
+
 							nresx->p1 = pad - 1 ;
 							rr->p2 = pad ;
-#endif
+
 							new_start = j+1 ;
 
 							break ;	// and create a new one; break out of old results scan
@@ -734,11 +751,11 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					// mean stays the same????
 					// I'm not sure this is good!
 
-#ifdef FCF_EXTENTS
+
 					nresx->p1 = rr->p1 ;	// the old guy has the smaller pad
 					if(rr->t1 < nresx->t1) nresx->t1 = rr->t1 ;
 					if(rr->t2 > nresx->t2) nresx->t2 = rr->t2 ; 
-#endif
+
 
 #ifdef FCF_SIM_ON
 					nresx->pix += rr->pix ;
@@ -755,6 +772,16 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 						
 						nresx->id = rr->id ;
 					}
+
+					// copy over the pixel data
+					// and take over the old clusters ID
+					for(int ii=0;ii<512;ii++) {
+						if(nresx->cl_id == pixStruct[pad][ii].cl_id) {
+							pixStruct[pad][ii].cl_id = rr->cl_id ;
+						}
+					}
+					nresx->cl_id = rr->cl_id ;	// the new id
+
 #endif
 					new_start = j + 1 ;
 
@@ -1060,7 +1087,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 			continue ;
 		}
 
-#ifdef FCF_EXTENTS
+
 		u_int p = (pad_c >> 6)  ;
 		u_int fl ;
 		
@@ -1110,7 +1137,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		if(fla & FCF_BROKEN_EDGE) fl |= 0x4000 ;
 
 //		fla = fl ;
-#endif	
+
 
 
 		// watchout for ordering!
@@ -1118,17 +1145,79 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		*output++ = (cha << 16) | fl ;
 
 #ifdef FCF_SIM_ON
+		{
+		int i, j ;
+
+		int quality = 1 ;
+
 		if(simout) {
+
+			u_int sim_cha, all_cha ;
+
+			sim_cha = all_cha = 0 ;
+
+			for(i=1;i<=182;i++) {
+				for(j=0;j<512;j++) {
+					if(pixStruct[i][j].cl_id == rr->cl_id) {
+						if(rr->id == pixStruct[i][j].id_simtrk) {
+							sim_cha += pixStruct[i][j].adc ;
+						}
+						all_cha += pixStruct[i][j].adc ;
+					}
+				}
+			}
+
+			if(all_cha) {
+				quality = (int)(100.0*(double)sim_cha/(double)all_cha) ;
+			}
+			else {
+				quality = 0 ;
+			}
+
+
 			struct FcfSimOutput *s = (struct FcfSimOutput *) simout ;
 
 			s->id_simtrk = rr->id ;
-			s->id_quality = rr->quality ;
+			s->id_quality = quality ;
 
-			s->reserved = time_c ;	// put something for test...
+			s->cl_id = rr->cl_id ;	// put the local cluster id
 
 			simout += sizeof(struct FcfSimOutput)/4 ;	// advance here
+		
+
+
 		}
+
+		fla &= (~FCF_FALLING) ;
+
+		for(i=1;i<=182;i++) {
+			for(j=0;j<512;j++) {
+#ifdef FCF_ANNOTATE_CLUSTERS
+				if(pixStruct[i][j].adc) {
+					fcfPixA[sb-1][row-1][i-1][j] = pixStruct[i][j] ;
+				}
 #endif
+
+#ifdef FCF_DEBUG_OUTPUT2
+				// dump only clean clusters!
+				if((fla==0) && (pixStruct[i][j].cl_id == rr->cl_id)) {
+					fprintf(fcf_annotate_f,"%d %d %d %d %d %d %d %d\n",sb,this->row,rr->cl_id,quality,i,j,
+						pixStruct[i][j].adc,pixStruct[i][j].id_simtrk) ;
+				}
+#endif
+			}
+		}
+#ifdef FCF_DEBUG_OUTPUT2
+		// mark the end of cluster...
+		if(fla==0) fprintf(fcf_annotate_f,"-1 -1 -1 -1 -1 -1 -1 -1\n") ;
+#endif
+
+
+
+		}
+
+#endif	// FCF_SIM_ON!
+
 		//LOG(WARN,"time 0x%02X, pad 0x%02X, cha 0x%02X, fla 0x%02X",
 		//   time_c, pad_c, cha, fl,0) ;
 
