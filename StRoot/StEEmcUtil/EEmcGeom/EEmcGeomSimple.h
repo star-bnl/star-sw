@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.22 2005/02/07 19:26:09 jwebb Exp $
+ * $Id: EEmcGeomSimple.h,v 1.23 2005/02/07 19:44:37 jwebb Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -54,7 +54,7 @@ public:
   /// within etabin 1, [0.5,1.5) within etabin 2, etc...  dphiBin is
   /// defined similarly.
   /// \param detaBin [-0.5,11.5)
-  /// \param dphiBin [-0.5,55.5)
+  /// \param dphiBin [-0.5,59.5)
   /// \return direction as TVector3
   TVector3 getDirection  (const Float_t detaBin, const Float_t dphiBin) const;
 
@@ -200,6 +200,9 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.23  2005/02/07 19:44:37  jwebb
+ * *** empty log message ***
+ *
  * Revision 1.22  2005/02/07 19:26:09  jwebb
  * Clarified documentation for EEmcGeomSimple::getDirection(...).
  *
