@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.310 2002/12/16 17:29:07 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.311 2003/01/11 21:38:43 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -356,7 +356,7 @@ Bfc_st BFC1[] = {
                                                                                     "EMC raw chain",kFALSE},
 
 
-  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdxY2"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -379,13 +379,18 @@ Bfc_st BFC1[] = {
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
+
                                                                      "Performs vertex seed finding",kFALSE},
-  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil",         "StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
+                                                                         "Regular dEdx calculation",kFALSE},
   {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
+  {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
+                                                                     "Bichsel method used for dEdx",kFALSE},
+
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -1201,7 +1206,8 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("PulserSvt")) mode += 4;
 	    if (mode) mk->SetMode(mode);
 	  }
-	  if (maker == "StdEdxMaker" &&GetOption("Simu"))  mk->SetMode(-10);
+	  if ((maker == "StdEdxMaker" || maker == "StdEdxY2Maker" ) && 
+	      GetOption("Simu"))  mk->SetMode(-10);
 	  if (maker == "StTpcDbMaker"){  
             mk->SetMode(0);
 	    // this change may be temporary i.e. if Simulation includes
