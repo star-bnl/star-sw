@@ -4,7 +4,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StPadControlPanel.h,v 1.1 2003/01/17 01:49:42 fine Exp $
+// $Id: StPadControlPanel.h,v 1.2 2003/01/24 21:14:43 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ Q_OBJECT
      QButtonGroup *fBar;  
 
 protected:
-  void AddButt(const Char_t *buttonName, const Char_t *command);
+  void AddButt(const Char_t *buttonName, const Char_t *command,const Char_t *tip=0);
 
 public slots:
      void Clicked(int id);

@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.90 2003/01/22 15:42:05 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.91 2003/01/24 21:14:42 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -94,8 +94,6 @@
 
 #include "StTrackChair.h"
 
-#include "StArray.h"
-#include "StEvent.h"
 #include "StDefaultFilter.h"
 #include "StEventHelper.h"
 #include "StEventDisplayInfo.h"
@@ -105,6 +103,7 @@
 #  include <qapplication.h>
 #  include <qpixmap.h>
 #  include <qbuttongroup.h>
+#  include <qtooltip.h>
     StEventControlPanel *fEventControlPanel=0;  //!
 #endif 
 
@@ -204,6 +203,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   // int myFontSize = myFont. pointSize ();
   myFont.setPointSize(8);
   QApplication::setFont(myFont);
+  QToolTip::setGloballyEnabled(kTRUE);
 #include "starIcon.xpm"
   QPixmap qStarIcon(starIcon);
   fEventControlPanel  = new StEventControlPanel();
@@ -1105,6 +1105,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.91  2003/01/24 21:14:42  fine
+// remove the redundant include file
+//
 // Revision 1.90  2003/01/22 15:42:05  fine
 // fix compilation prpblem with no Qt
 //

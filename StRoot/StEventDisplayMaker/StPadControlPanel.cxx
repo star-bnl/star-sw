@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StPadControlPanel.cxx,v 1.1 2003/01/17 01:49:42 fine Exp $
+// $Id: StPadControlPanel.cxx,v 1.2 2003/01/24 21:14:43 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -68,6 +68,7 @@
 #include <qbuttongroup.h>
 #include <qvbuttongroup.h>
 #include <qpushbutton.h>
+#include <qtooltip.h> 
 
 QButtonGroup *mainBar=0;
 
@@ -75,27 +76,28 @@ QButtonGroup *mainBar=0;
 //_______________________________________________________________________________________
 StPadControlPanel::StPadControlPanel(QWidget *parent) { Build(parent);}
 //_______________________________________________________________________________________
-void StPadControlPanel::AddButt(const Char_t *buttonName, const Char_t *command)
+void StPadControlPanel::AddButt(const Char_t *buttonName, const Char_t *command,const Char_t *tip)
 {   
-   new QPushButton(buttonName,fBar,command);
+   QPushButton *button = new QPushButton(buttonName,fBar,command);
+   if (tip && tip[0])  QToolTip::add( button, tip);
 }
 //_______________________________________________________________________________________
 void  StPadControlPanel::Build(QWidget *parent)
 {
    const char *fills[] = {
-    "Black background",	"StPadControlPanel::SetBackround(kBlack);"
-   ,"White background",	"StPadControlPanel::SetBackround    (19);"
-   ,"Adjust scales",	"StPadControlPanel::AdjustScales    ();"
-   ,"Centered",		"StPadControlPanel::Centered3DImages();"
-   ,"Scale +",		"StPadControlPanel::Inscrease3DScale();"
-   ,"Scale -",		"StPadControlPanel::Decrease3DScale ();"
-   ,"Top View (X-Y)",	"StPadControlPanel::TopView     ();"
-   ,"Side View (Y-Z)",	"StPadControlPanel::SideView    ();"
-   ,"Front View (X-Z)",	"StPadControlPanel::FrontView   ();"
-   ,"4 views",		"StPadControlPanel::MakeFourView();"
-   ,"Add Axes",		"StPadControlPanel::AddAxes     ();"
-   ,"Rulers",		"StPadControlPanel::ToggleRulers();"
-   ,"Zoom",		"StPadControlPanel::ToggleZoom  ();"
+    "Black background",	"StPadControlPanel::SetBackround(kBlack);","Change the current gPad background color"
+   ,"White background",	"StPadControlPanel::SetBackround    (19);","Change the current gPad background color"
+   ,"Adjust scales",	"StPadControlPanel::AdjustScales    ();","Reduce the 3D distortion, caused by the scale/zoom commands"
+   ,"Centered",		"StPadControlPanel::Centered3DImages();","Move the center of 3D prohection to the center of the TCanvas center"
+   ,"Scale +",		"StPadControlPanel::Inscrease3DScale();","Inscrease the scale and move the projection to the corner"
+   ,"Scale -",		"StPadControlPanel::Decrease3DScale ();","Descrease the scale and move the projection to the corner"
+   ,"Top View (X-Y)",	"StPadControlPanel::TopView     ();","Turn to see South end of the STAR"
+   ,"Side View (Y-Z)",	"StPadControlPanel::SideView    ();",""
+   ,"Front View (X-Z)",	"StPadControlPanel::FrontView   ();",""
+   ,"4 views",		"StPadControlPanel::MakeFourView();"," Create a separate TCanvas with 4 projections simultaneosuly"
+   ,"Add Axes",		"StPadControlPanel::AddAxes     ();", "Add 3 small arror like axes: Red - for Ox, Green for Oy, Blue for Oz"
+   ,"Rulers",		"StPadControlPanel::ToggleRulers();", "Add / remove 3 axes to the view"
+   ,"Zoom",		"StPadControlPanel::ToggleZoom  ();","move / zoom view. <em>It doesn't preserver an aspect ratio!.</em>"
   // ,"End of Chain",	"StEventDisplayMaker::MakeLoop(3);"
    ,0};
 
@@ -103,7 +105,7 @@ void  StPadControlPanel::Build(QWidget *parent)
    fBar = new QVButtonGroup("Pad Control Panel",parent,"Pad");
    fBar->setCaption("Pad Control Panel");
    mainBar=fBar;
-   for (int i=0;fills[i];i+=2) {AddButt(fills[i],fills[i+1]);}
+   for (int i=0;fills[i];i+=3) {AddButt(fills[i],fills[i+1],fills[i+2]);}
    connect(fBar,SIGNAL(clicked(int)),this,SLOT(Clicked(int)));
    fBar->show();
 }
