@@ -122,7 +122,7 @@ extern "C" long type_of_call cts_(
 //
 //   Check there are input hits
 //
-   printf(" cts: entering cts\n");  //WJL
+//   printf(" cts: entering cts\n");  //WJL
    if ( mhit_h->nok < 1 ) {
      sprintf ( OutMessage, " No input hits " ) ;
      MessageOut ( OutMessage ) ;
@@ -219,7 +219,7 @@ extern "C" long type_of_call cts_(
 //
 //  That's it
 //
-   printf(" cts: leaving cts\n");
+//   printf(" cts: leaving cts\n");
    return STAFCV_OK;
 }
 //
@@ -273,7 +273,7 @@ long cts_detector_response (
 //
 //   Loop over hits
 //
-   printf(" CTS: starting hit loop for detector=%d\n",geo->detector);
+//   printf(" CTS: starting hit loop for detector=%d\n",geo->detector);
    for ( int i_hit = 0 ; i_hit < mhit_h->nok ; i_hit++ ) {
 //
 //   Get indexes
@@ -439,20 +439,24 @@ long cts_detector_response (
 //WJL these lines moved up (just above)...
 //
 //---- Generate noise only in phys_noise% of slats
-//WJL      if ( rndm_(1) < mpara->phys_noise ) 
-//WJL             cts_physical_noise ( i_phi, i_eta, n_slats_on,
-//WJL                                  n_phe, time,
-//WJL                                  mslat_h, mslat,   
-//WJL                                  geo_h,   geo   ) ;
+      if ( rndm_(1) < mpara->phys_noise ) 
+             cts_physical_noise ( i_phi, i_eta, n_slats_on,
+                                  n_phe, time,
+                                  mslat_h, mslat,   
+                                  geo_h,   geo   ) ;
 //
    } // end loop over hits
 //
 //---- Store number of slats with signal
-   printf(" cts: n_slats_on = %d\n", n_slats_on); 
-   mslat_h->nok  = n_slats_on ;
+	if (geo->detector == 2) {     //WJL
+      printf(" cts: No. struck TOF slats = %d\n", n_slats_on); 
+    } else {
+      printf(" cts: No. struck CTB slats = %d\n", n_slats_on); 
+    }
+    mslat_h->nok  = n_slats_on ;
 //
 //---- That's it
-   printf(" cts: leaving cts_detector_response\n");  //WJL
+//   printf(" cts: leaving cts_detector_response\n");  //WJL
    return STAFCV_OK;
 }
 //
@@ -508,7 +512,6 @@ void cts_fill_event (
       }
    }
 //
-   printf(" cts: n_event+1  = %d\n", n_event+1); 
    event_h->nok = n_event + 1 ;
 }
 void cts_fill_raw (
@@ -547,7 +550,8 @@ void cts_fill_raw (
 //
 //   Set Adc Tdc to zero
 //
-   for ( index = 0 ; index < n_eta*n_phi ; index++ ) {
+//WJL   for ( index = 0 ; index < n_eta*n_phi ; index++ ) {
+   for ( index = 0 ; index < raw_h->nok ; index++ ) {
        raw[index].adc = 0. ;
        raw[index].tdc = 0. ;
    }
@@ -600,7 +604,6 @@ void cts_fill_raw (
 //   If zero suppression stop here
 //
    if ( mpara->zero_suppression ) {
-   printf(" cts: mslat nok  = %d\n", mslat_h->nok); 
       raw_h->nok = mslat_h->nok ;
       return ;
    }
@@ -619,7 +622,6 @@ void cts_fill_raw (
 //
 //   Set number of slats with raw data
 //
-   printf(" cts: nphi*neta  = %d\n", n_phi*n_eta); 
    raw_h->nok = n_phi * n_eta ;
 //
 //  That's it
@@ -693,7 +695,6 @@ void cts_electronic_noise (
 //
 //   Update # entries
 //
-   printf(" noi: n_slats_on = %d\n", n_slats_on); 
    raw_h->nok = n_slats_on ;
 //
 //  That's it
