@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.19 2000/03/10 21:54:18 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.20 2000/03/29 14:33:40 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.20  2000/03/29 14:33:40  caines
+// Fixed topology map for TPC only
+//
 // Revision 1.19  2000/03/10 21:54:18  lbarnby
 // Turn on Kalman fitter as default for global tracks
 //
@@ -586,9 +589,8 @@ Int_t StMatchMaker::Make(){
   dst_track_st * track  = globtrk->GetTable();
   
   int spt_id = 0;
-  int track_id = 0;
   int row = 0;
-  float y,two=2.,thirty=30.;
+  bool isset;
   
   for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 
@@ -596,32 +598,16 @@ Int_t StMatchMaker::Make(){
       spt_id = tgroup->id2-1;
       row = spc[spt_id].row/100;
       row = spc[spt_id].row - row*100;
+
       if( row < 25){
-	y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(two,(float)(row+7)));
-	if( !fmod(y,two)){
-	  track[spc[spt_id].id_globtrk-1].map[0] += (1UL<<(row+7));
-	}
-	else{
-	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,thirty));
-	  if( !fmod(y,2)){
-	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
-	  }
-	}
-	
+	  isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
+	  track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
       }
       else{
-	y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,(float)(row-25)));
-	if( !fmod(y,two)){
-	  track[spc[spt_id].id_globtrk-1].map[1] += (1UL<<(row-25));
-	}
-	else{
-	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,thirty));
-	  if( !fmod(y,two)){
-	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
-	  }
-	}
-	
+	  isset = track[spc[spt_id].id_globtrk-1].map[1] & 1UL<<(row-25);
+	  track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<(row-25);
       }
+      if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
     }
   }
 

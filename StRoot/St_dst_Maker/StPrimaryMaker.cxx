@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.36 2000/03/01 14:48:09 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.37 2000/03/29 14:34:19 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.37  2000/03/29 14:34:19  caines
+// Fixed topology map for TPC only
+//
 // Revision 1.36  2000/03/01 14:48:09  caines
 // Removed references to scs_cluster
 //
@@ -442,7 +445,7 @@ Int_t StPrimaryMaker::Make(){
       
       int spt_id = 0;
       int row = 0,i;
-      float y,two=2.,thirty=30.;
+      bool isset;
       
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 	if( tgroup->id1 > 0){
@@ -450,36 +453,21 @@ Int_t StPrimaryMaker::Make(){
 	  row = spc[spt_id].row/100;
 	  row = spc[spt_id].row - row*100;
 	  if( row < 25){
-	    y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(two,(float)(row+7)));
-	    if( !fmod(y,two)){
-	      track[spc[spt_id].id_globtrk-1].map[0] += (1UL<<(row+7));
-	    }
-	    else{
-	      y=track[spc[spt_id].id_globtrk-1].map[1]/pow(two,thirty);
-	      if( !fmod(y,two)){
-		track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
-	      }
-	    }  
-	    
+	    isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
+	    track[spc[spt_id].id_globtrk-1].map[0] |= 1UL<<(row+7);
 	  }
 	  else{
-	    y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,(float)(row-25)));
-	    if( !fmod(y,two)){
-	      track[spc[spt_id].id_globtrk-1].map[1] += (1UL<<(row-25));
-	    }
-	    else{
-	      y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,thirty));
-	      if( !fmod(y,two)){
-		track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
-	      }
-	    }
+	    isset = track[spc[spt_id].id_globtrk-1].map[1] & 1UL<<(row-25);
+	    track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<(row-25);
 	  }
-	  
+	  if (isset) track[spc[spt_id].id_globtrk-1].map[1] |= 1UL<<30; 
 	}
       }
+      
+      
 
-      scs_spt_st *s_spc = scs_spt->GetTable();
-      sgr_groups_st *sgroup = svt_groups->GetTable();
+      //scs_spt_st *s_spc = scs_spt->GetTable();
+      //      sgr_groups_st *sgroup = svt_groups->GetTable();
       
       // for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
 	
