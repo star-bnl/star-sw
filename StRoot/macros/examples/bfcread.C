@@ -1,7 +1,7 @@
 class StChain;
 class St_DataSet;
 St_DataSet *dst;
-StChain *cnain;
+StChain *chain;
 TBrowser *brow=0;
 
 void bfcread(Int_t nevents=1, const char *MainFile="gtrack.dst.root")
