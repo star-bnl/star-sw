@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.14 1999/07/19 21:39:19 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.15 1999/10/04 16:17:33 long Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.15  1999/10/04 16:17:33  long
+ * wireCoordinate(kk)--> bin.position().y()
+ *
  * Revision 1.14  1999/07/19 21:39:19  lasiuk
  * - addEntry() distributes charge on a (user) settable range of wires
  * - setRangeOfWiresForChargeDistribution(int) added (default is 0)
@@ -199,13 +202,18 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    //
 	    // Make a new StTrsWireBinEntry
 	    //
-	    StThreeVector<double>
-		position(bin.position().x(),
-			 wireCoordinate(kk),
-			 bin.position().z());
+	    //    StThreeVector<double>
+	    //	position(bin.position().x(),
+	    //		 wireCoordinate(kk),
+	    //		 bin.position().z()); 
+       StThreeVector<double>	
+                position(bin.position().x(),
+                   	 bin.position().y(),
+	    		 bin.position().z());//HL,8/31/99
+             
 	    StTrsWireBinEntry
 		theNewSegment(position,0);
-	    
+	     
 	    //
 	    // Establish integration Limits:
 	    // Take care of charge conservatione (Integral to +/- infinity)
@@ -218,6 +226,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 	    double arg2 = (yLower-yCoordinateOfHit)/(M_SQRT2*sigma);
 
 	    chargeFraction = 0.5*(erf(arg1)-erf(arg2));
+            chargeFraction=1.0;//HL,8/31/99
 
 	    //
 	    // Gas Gain
@@ -232,9 +241,10 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 			gaussianAvalanche(kk, bin.numberOfElectrons()*chargeFraction);
 		}
 	    }  // end of gas gain
-
+           
+	    
 	    theNewSegment.setNumberOfElectrons(avalancheFactor);	
-      
+	  
 	    // Time Delay
 	    // Increase DriftLength Proportional to the Distance from the Wire
 	    // Keeping in mind a 2mm shift is approximately .1 timebins
@@ -406,6 +416,9 @@ double StTrsWireHistogram::gaussianAvalanche(int iWire, double numElec)
     else {
 	innerFluc = 0.;
 	outerFluc = 0.;
+        return  (iWire < mNumberOfInnerSectorAnodeWires) ?//HL
+	  mInnerSectorGasGain*numElec ://HL
+	  mOuterSectorGasGain*numElec ;//HL
     }
 
     return (iWire < mNumberOfInnerSectorAnodeWires) ?
