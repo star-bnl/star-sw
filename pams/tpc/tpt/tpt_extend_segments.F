@@ -1,5 +1,8 @@
-* $Id: tpt_extend_segments.F,v 1.7 1999/09/30 07:52:44 sakrejda Exp $
+* $Id: tpt_extend_segments.F,v 1.8 2000/03/03 23:32:25 sakrejda Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.8  2000/03/03 23:32:25  sakrejda
+* Add refit if no field (straigth line).
+*
 * Revision 1.7  1999/09/30 07:52:44  sakrejda
 * Tracks that cannot be refit are marked as bad. Also after segment extension
 * all the hits that belong to that track are marked again even if number
@@ -87,11 +90,15 @@ C     Local variables
       INTEGER iret,ng,naf,save_nhit,save_nfit,laf(mxpnt)
       INTEGER save_ipnt(mxpnt),save_flag,tpt_project
       INTEGER itrack, ihit(mxpnt),ipass
-      REAL    save_p(9)
+      INTEGER tpt_fit_track_line, gufield, tpt_load_track
+      REAL    save_p(9),xlocal(3),bfield(3)
       LOGICAL lfound
       CHARACTER*132 m132
+      data xlocal  /3*0/
 C_____________________________________________________________________
 C
+c     check the field
+      call gufld(xlocal,bfield)
 C     collect information on number of hits per track to use it 
 C     for selecting tracks for extentions
 C
@@ -214,6 +221,11 @@ c                    mark that the track needs to be re-fit
                      tmp(laf(k))=real(ng)
                   end do
                endif
+         endif
+
+         if(bfield(3).lt.0.1.and.trk(ipos).flag.gt.0)then
+           iret = tpt_fit_track_line(ipos,trk,hit_h,hit,tpar_h,tpar,ipass)
+           iret = tpt_load_track(ipos,track_h,track,trk,hit_h,hit)
          endif
       end do
       tpt_extend_segments=STAFCV_OK
