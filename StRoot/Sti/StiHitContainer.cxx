@@ -24,7 +24,7 @@ ostream& operator<<(ostream& os, const StiHit& hit);
 //Non member functions
 ostream& operator<<(ostream&, const HitMapKey&);
 ostream& operator<<(ostream&, const DetectorMapKey&);
-ostream& operator<<(ostream&, const MaterialMapKey&);
+ostream& operator<<(ostream&, const NameMapKey&);
 
 
 StiHitContainer* StiHitContainer::instance()

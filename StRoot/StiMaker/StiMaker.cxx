@@ -35,6 +35,7 @@
 #include "Sti/StiGeometryTransform.h"
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
+//#include "Sti/TrackNodeTest.h"
 #include "Sti/StiKalmanTrackFinder.h"
 
 //StiGui
@@ -215,7 +216,6 @@ Int_t StiMaker::Init()
     mdisplay->addDrawable(mdrawablehits);
 
     //The Detector Tree
-    //Must build Materials before detectors
     mdetector = StiDetectorContainer::instance();
     mdetector->buildDetectors(mdetectorbuildpath, mdatanodefactory, mdetectorfactory);
     mdetector->reset();
@@ -229,6 +229,9 @@ Int_t StiMaker::Init()
     mhitfiller->addDetector(kTpcId);
     mhitfiller->addDetector(kSvtId);
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+    
+//    TrackNodeTest *pTest = new TrackNodeTest();
+//    pTest->doTest();
 
     //The Tracker
     mtracker = new StiKalmanTrackFinder();

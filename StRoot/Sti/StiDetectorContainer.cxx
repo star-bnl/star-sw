@@ -28,7 +28,7 @@ using std::find_if;
 
 StiDetectorContainer* StiDetectorContainer::sinstance = 0;
 
-ostream& operator<<(ostream&, const MaterialMapKey&);
+ostream& operator<<(ostream&, const NameMapKey&);
 
 StiDetectorContainer* StiDetectorContainer::instance()
 {

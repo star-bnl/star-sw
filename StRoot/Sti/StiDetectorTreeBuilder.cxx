@@ -18,6 +18,7 @@
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
 #include "StiCodedDetectorBuilder.h"
+#include "StiDetectorFinder.h" 
 
 ostream& operator<<(ostream&, const StiDetector&);
 
@@ -123,6 +124,10 @@ void StiDetectorTreeBuilder::loopOnDetectors(const char* buildDirectory)
     mDetectorBuilder->fillNext(layer);
 
     addToTree(layer);
+
+    // add to by-name map
+    StiDetectorFinder *pFinder = StiDetectorFinder::instance();
+    pFinder->addDetector(layer);
 
     cout << "Added detector " << layer->getName() << endl;
   }
