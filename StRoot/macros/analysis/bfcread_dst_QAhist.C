@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.8 1999/11/05 16:30:15 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.9 1999/11/05 22:50:39 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.9  1999/11/05 22:50:39  kathy
+// now input global title for all output pages in the macro for printing & drawing histograms
+//
 // Revision 1.8  1999/11/05 16:30:15  kathy
 // minor changes to documentation in macro
 //
@@ -71,7 +74,8 @@ St_DataSet *Event;
 void bfcread_dst_QAhist(Int_t nevents=1, 
              const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.dst.root",
              const Char_t *MakerHist="QA",
-             const Char_t *psFile="QA_hist.ps")
+             const Char_t *psFile="QA_hist.ps",
+             const Char_t *PageTitle="")
 {
 //
   cout << "bfcread_dst_QAhist.C, input file name       " << MainFile << endl;
@@ -145,6 +149,9 @@ void bfcread_dst_QAhist(Int_t nevents=1,
     HU->SetZones(2,3);
     HU->SetPaperSize();
     HU->SetDefaultLogYList(MakerHist);
+      if (PageTitle=="") PageTitle=MainFile;
+    HU->SetGlobalTitle(PageTitle);
+
 
   Int_t numLog = 0;
   numLog = HU->ExamineLogYList();
