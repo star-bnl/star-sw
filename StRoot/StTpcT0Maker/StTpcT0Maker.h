@@ -1,5 +1,8 @@
-// $Id: StTpcT0Maker.h,v 1.4 2000/09/11 17:48:51 hardtke Exp $
+// $Id: StTpcT0Maker.h,v 1.5 2001/03/09 22:44:43 hardtke Exp $
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.5  2001/03/09 22:44:43  hardtke
+// Add vertex diagnostic histograms, create root file with these histograms by default
+//
 // Revision 1.4  2000/09/11 17:48:51  hardtke
 // save values of trig offset, dvel, and tpc length for use in Finish()
 //
@@ -50,13 +53,16 @@ class StTpcT0Maker : public StMaker {
    void HistFileByDefault();   // Write out file on Finish
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.4 2000/09/11 17:48:51 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.5 2001/03/09 22:44:43 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 
  private:
   TH1F* t0result;
   TH1F* t0guessError;
+  TH1F* zVertexDiff;
+  TH1F* yVertexDiff;
+  TH1F* xVertexDiff;
   float t0guess;
   float t0current;
   float dvel_assumed;
@@ -64,6 +70,10 @@ class StTpcT0Maker : public StMaker {
   float length_assumed;
   float zVertexWest;
   float zVertexEast;
+  float yVertexWest;
+  float yVertexEast;
+  float xVertexWest;
+  float xVertexEast;
   float T0HIST_MIN;
   float T0HIST_MAX;
   StTpcDb* theDb; //!
