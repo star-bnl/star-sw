@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.25 2004/08/13 18:15:08 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.26 2004/10/17 03:35:10 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.26  2004/10/17 03:35:10  perev
+ * Error check improved
+ *
  * Revision 2.25  2004/08/13 18:15:08  ullrich
  * Added +1 to the number of possible points when primary track.
  *
@@ -104,7 +107,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.25 2004/08/13 18:15:08 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.26 2004/10/17 03:35:10 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -462,20 +465,33 @@ StTrack::setNode(StTrackNode* val) { mNode = val; }
 int StTrack::bad() const
 {
     static const double world = 1.e+5;
-    if (mFlag <=0                     )                 return 01;
-    if (!StMath::Finite(mImpactParameter)   ) 	        return 10;
-    if (::fabs(mImpactParameter)>world) 		return 11;
-    if (!StMath::Finite(mLength)            )    	return 20;
-    if (::fabs(mLength)         >world) 		return 21;
-    if (mLength <1./world	           )    	return 22;
-    if (mGeometry      && mGeometry->bad()     )	return 30;
-    //if (mOuterGeometry && mOuterGeometry->bad())  return 40;
-    if (mOuterGeometry && mOuterGeometry->bad())  {//Hope temporary HACK
-	StTrack *This = (StTrack *)this;
-	This->setOuterGeometry(new StHelixModel());}
+    int ierr;
+    if (!StMath::Finite(mImpactParameter))	return   12;
+    if (!StMath::Finite(mLength)         )    	return   13;
+    if (mFlag  <0                        )	return   21;
+    if (mFlag ==0                        )	return   31;
+    if (::fabs(mImpactParameter)>world   )	return   22;
+    if (::fabs(mLength)         >world   ) 	return   23;
+    if (mLength <1./world	         )    	return   33;
+    if (!mGeometry                       )	return   24;
+    ierr = mGeometry->bad();
+    if (ierr                             )	return    4+100*ierr;
+    if (!mOuterGeometry                  )	return   25;
+    ierr = mOuterGeometry->bad();
+    if (ierr                             )      return    5+100*ierr;
     
     const StTrackDetectorInfo *di = mDetectorInfo;
-    if (di             && di->bad()            )   return 50;
+    if (!di                              )   	return   26;
+    ierr = di->bad();
+    if (ierr                             )   	return    6+100*ierr;
+    StPhysicalHelixD hlx1 = mGeometry->helix();
+    StThreeVectorD   ori2 = mOuterGeometry->origin();
+    double len12 = hlx1.pathLength(ori2);
+    if (fabs(mLength-len12)>0.9)                return   43;
+     
+    if (fabs(hlx1.z(mLength))>kStarMaxZ  )      return   53;
+    double qwe = pow(hlx1.x(mLength),2)+pow(hlx1.y(mLength),2);
+    if (sqrt(qwe)>kStarMaxR)			return   63;
     return 0;
 }
 void StTrack::Streamer(TBuffer &R__b)

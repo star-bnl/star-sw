@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.12 2004/10/13 16:11:59 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.13 2004/10/17 03:35:10 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.13  2004/10/17 03:35:10  perev
+ * Error check improved
+ *
  * Revision 2.12  2004/10/13 16:11:59  ullrich
  * Added optional arg to addHit() to allow NOT to increase ref counter.
  *
@@ -47,6 +50,8 @@
  * Initial Revision
  *
  **************************************************************************/
+#include <math.h>
+#include "StDetectorId.h"
 #include "StTrackDetectorInfo.h"
 #include "StFunctional.h"
 #include "StHit.h"
@@ -54,7 +59,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.12 2004/10/13 16:11:59 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.13 2004/10/17 03:35:10 perev Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -242,7 +247,16 @@ StTrackDetectorInfo::removeHit(StHit*& hit)
 }
 int  StTrackDetectorInfo::bad() const
 {
-   if(!mFirstPoint.valid()) return 1;
-   if(!mLastPoint.valid() ) return 2;
+   int ierr;
+   
+   ierr = mFirstPoint.bad();
+   if(ierr) return 1+100*ierr;
+   ierr = mLastPoint.bad();
+   if(ierr) return 2+100*ierr;
+   if (fabs(mFirstPoint.z())>kStarMaxZ) return 21;
+   if (fabs(mLastPoint.z ())>kStarMaxZ) return 22;
+   if (mFirstPoint.perp  () >kStarMaxR) return 31;
+   if (mLastPoint.perp   () >kStarMaxR) return 32;
+
    return 0;
 }
