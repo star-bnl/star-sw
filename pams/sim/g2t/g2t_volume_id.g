@@ -5,7 +5,7 @@
       implicit none
       integer  g2t_volume_id
 * 
-      Character*3      Csys
+      Character*4      Csys
       Integer          NUMBV(15)
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
@@ -19,7 +19,7 @@
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       structure  TPCG  {version}
-      Structure  BTOG  {version, choice, posit1, posit2 }
+      Structure  BTOG  {version, choice }
       Structure  CALG  {version, Nmodule(2) }
       logical          first/.true./
 *c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -27,7 +27,6 @@
       if (First) then
           first=.false.
           call RBPUSHD
-          btog_posit1 = 23
           USE  /DETM/TPCE/TPCG
           USE  /DETM/BTOF/BTOG
           USE  /DETM/CALB/CALG
@@ -104,7 +103,7 @@
         else
            if (btog_choice==4) then
               rileft     = 1
-              sector     = btog_posit1
+              sector     = 23
               sub_sector = numbv(1) 
               innout     = numbv(2)
               volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
@@ -211,11 +210,6 @@
 *12*
       else If (Csys=='psc') then
 *13*
-      else If (Csys=='rch') then
-        volume_id = numbv(1)
-      else If (Csys=='zdc') then
-        volume_id = numbv(1)*1000+numbv(2)
-*14*
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
