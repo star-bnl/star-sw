@@ -1,12 +1,15 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.6 2000/02/08 16:36:49 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.7 2000/02/08 23:46:46 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.6  2000/02/08 16:36:49  lasiuk
- * Bring into line with HP
+ * Revision 1.7  2000/02/08 23:46:46  lasiuk
+ * comment to prevent streamer for ionize and inducesignal. Remove filter
  *
+ * add two member functions for pedestal and noise switches
+ * add coordinate conditional and StCoordinateTransform
+ * incorporate track_p into GHit
  *
  * Revision 1.8  2000/02/12 21:54:25  lasiuk
  * Introduce provisions to read in local coordinates
@@ -194,7 +197,6 @@ int StRrsMaker::whichVolume(int val, string* vName)
     ofstream raw("/afs/rhic/star/users/lasiuk/junk/rrs.txt");
 //       char c = cin.get();
 #ifdef USE_MEMORY_INFO
-    StRichGeantReader input;
     StMemoryInfo* info = StMemoryInfo::instance();
     info->snapshot();
     info->print();
@@ -236,7 +238,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		cout << "StRrsMaker::Make()";
 		cout << "\tNo g2t_rch_hit pointer";
 		cout << "\treturn from StRrsMaker::Make()" << endl;
-	    //while( input(hit) == 0 )  {   // if OK
+
 	    string volumeName;
 	    int    quadrant;
 
@@ -245,11 +247,11 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		double step = 10;
 		hit.fill(rch_hit->x[0], rch_hit->x[1], rch_hit->x[2],
 			 rch_hit->id,
-			 (momentum.x()/abs(momentum)),
-			 (momentum.y()/abs(momentum)),
-			 (momentum.z()/abs(momentum)),
-			 step,
-			 rch_hit->de,
+			 (momentum.x()/abs(momentum))*GeV,
+			 (momentum.y()/abs(momentum))*GeV,
+			 (momentum.z()/abs(momentum))*GeV,
+			 step*centimeter,
+		    (!mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))) ?
 			 rch_hit->volume_id,
 		    
 		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
@@ -264,9 +266,9 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    << " egpid= "     << track[(rch_hit->track_p-1)].eg_pid << endl;
 // 			    << tpc_hit[zz].x[1] << " "
 // 			    << tpc_hit[zz].x[2] << " ";
-		mFilter( hit );
-		PR(hit.volumeID());
-		if ( hit.volumeID() != "RCSI" ) { 
+		PR((hit.volumeID().c_str()));
+// 		if ( hit.volumeID() != "RCSI" ) { 
+		if ( hit.volumeID() == "RGAP" ) { 
 		    mIonize( hit );		 
 		
 		else {
