@@ -21,7 +21,7 @@ TH2D etaLength("etaLength","etaLength",20,-1,+1,200,0.,200.);
 
 void examplePt(const char* dir="", const char* file="/star/u/laue/afsWork/test.list",const char* filter="st:MuDst.root", const 
 char* outFile="test.root") {
-  gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
    StMuDebug::setLevel(2);  

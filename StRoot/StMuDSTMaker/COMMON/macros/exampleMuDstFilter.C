@@ -14,7 +14,7 @@ StMuDstMaker* maker;
 StMuDstFilterMaker* filter;
 
 void exampleMuDstFilter(const char* in="/star/u/laue/afsWork/dAu200.lis", const char* out="test.MuDst.root") {
-    gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+    gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
     
     int counter=0;
