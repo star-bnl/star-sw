@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.20 2000/04/12 15:29:05 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.21 2000/04/12 15:31:50 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.21  2000/04/12 15:31:50  kathy
+// keep libtpc table library in by default
+//
 // Revision 1.20  2000/04/12 15:29:05  kathy
 // comment out libtpc by default
 //
@@ -90,7 +93,7 @@ void QA_bfcread_dst_tables(
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-  //  gSystem->Load("libtpc_Tables");
+  gSystem->Load("libtpc_Tables");
 
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
