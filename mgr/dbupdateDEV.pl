@@ -85,7 +85,7 @@ for ($i = 0; $i < scalar(@node_dir); $i++) {
   }
 }
 
-my $jj = 0;
+my $jj = 1;
 for ($i = 0; $i < scalar(@node_daq); $i++) {
       for ($ll = 0; $ll < scalar(@daq_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_daq[$i] . "/" . $testDay . "/". $dir_year[$jj] . "/" . $daq_dir[$ll];
@@ -106,7 +106,7 @@ for ($i = 0; $i < scalar(@node_dir); $i++) {
   }
 }
 
-$jj = 0;
+$jj = 1;
 for ($i = 0; $i < scalar(@node_daq); $i++) {
       for ($ll = 0; $ll < scalar(@daq_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_daq[$i] . "/" . $beforeDay . "/". $dir_year[$jj] . "/" . $daq_dir[$ll];
