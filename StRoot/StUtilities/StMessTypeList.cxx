@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.cxx,v 1.1 1999/06/23 15:17:44 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.2 1999/06/24 16:30:41 genevb Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.2  1999/06/24 16:30:41  genevb
+// Fixed some memory leaks
+//
 // Revision 1.1  1999/06/23 15:17:44  genevb
 // Introduction of StMessageManager
 //
@@ -17,6 +20,7 @@
 #include "TROOT.h"
 #include "StMessTypeList.h"
 #include <iostream.h>
+#include <ctype.h>
 
 ClassImp(StMessTypePair)
 StMessTypePair::StMessTypePair(const Char_t* ty, const Char_t* te) :
@@ -32,6 +36,8 @@ StMessTypeList::StMessTypeList() {
 }
 //________________________________________
 StMessTypeList::~StMessTypeList() {
+  for (int i=0; i<messList.size(); i++)
+    delete (messList[i]);
 }
 //_____________________________________________________________________________
 StMessTypeList* StMessTypeList::Instance() {
@@ -51,10 +57,11 @@ Int_t StMessTypeList::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 Int_t StMessTypeList::FindTypeNum(Char_t* type) {
   StMessTypeVecIter iter;
+  Char_t ty=toupper(*type);
   Int_t j=0;
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
     j++;
-    if (*((*iter)->Type())==(*type)) return j;
+    if (*((*iter)->Type())==ty) return j;
   }
   return 0;
 }

@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.1 1999/06/23 15:17:49 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.2 1999/06/24 16:30:42 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.2  1999/06/24 16:30:42  genevb
+// Fixed some memory leaks
+//
 // Revision 1.1  1999/06/23 15:17:49  genevb
 // Introduction of StMessageManager
 //
@@ -26,9 +29,19 @@ ClassImp(StMessageCounter)
 //_____________________________________________________________________________
 StMessageCounter::StMessageCounter() : limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
+  outMessage = new Char_t[5000];
 }
 //_____________________________________________________________________________
 StMessageCounter::~StMessageCounter() {
+  int i;
+  for (i=0; i<limitTList.size(); i++) {
+    delete (limitTList[i]);
+    delete (limitTCountList[i]);
+  }
+  for (i=0; i<limitNList.size(); i++) {
+    delete (limitNList[i]);
+    delete (limitNCountList[i]);
+  }
 }
 //_____________________________________________________________________________
 StMessageCounter* StMessageCounter::Instance() {
@@ -42,9 +55,21 @@ void StMessageCounter::SetLimit(Char_t* str, Int_t n) {
   const int len = strlen(str);
   if (len==1) {
     int typeN = messTypeList->FindTypeNum(str);
-    delete limitTList[typeN];
-    limitTList[typeN] = new Int_t(n);
+    if (typeN) {
+      delete (limitTList[typeN]);
+      limitTList[typeN] = new Int_t(n);
+    }
   } else {
+    messCharVecIter curString;
+    int index=0;
+    for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
+      if (!strcmp(str,(*curString))) {
+        delete (limitNList[index]);
+        limitNList[index] = new Int_t(n);
+        return;
+      }
+      index++;
+    }
     Char_t* temp = new Char_t[len];
     strcpy(temp,str);
     limitList.push_back(temp);
@@ -54,47 +79,58 @@ void StMessageCounter::SetLimit(Char_t* str, Int_t n) {
   return;
 }
 //_____________________________________________________________________________
-Char_t* StMessageCounter::CheckLimit(Char_t* mess, Char_t* type) {
-  Bool_t printIt=kTRUE;
-  Char_t* temp=new Char_t[80];
-  strcpy(temp,"");
+void StMessageCounter::ListLimits() {
+//  cout<<"Limits on message types: (a negative number means no limit)"<<endl;
+  cout << "  Limits :   counts : on message strings";
+  cout << " (a negative number means no limit)" << endl;
   messCharVecIter curString;
   int index=0;
   for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
-//      cout << "HHHK: " << mess << ":::" << (*curString) << endl;
+    cout.width(8);
+    cout << *(limitNList[index]) << " : ";
+    cout.width(8);
+    cout << *(limitNCountList[index++]) << " : ";
+    cout << (*curString) << endl;
+  }
+  return;
+}
+//_____________________________________________________________________________
+int StMessageCounter::CheckLimit(Char_t* mess, Char_t* type) {
+  int printIt = 1;
+  strcpy(outMessage,"");
+  messCharVecIter curString;
+  int index=0;
+  int limit;
+  for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
     if (strstr(mess,(*curString))) {
-      Int_t counts = *(limitNCountList[index]);
-//      cout << "HHHL: " << mess << " " << counts << endl;
-      if (counts == *(limitNList[index])) {
-//        cout << "HHHN: " << endl;
-        printIt = kFALSE;
-        continue;
-      }
-      delete limitNCountList[index];
-      limitNCountList[index] = new Int_t(++counts);
-      if (counts==*(limitNList[index])) {
-//        cout << "HHHO: " << endl;
-        strcat(temp,"StMessage: ");
-        strcat(temp,(*curString));
-        strcat(temp,limitMessage);
+      Int_t counts = *(limitNCountList[index]) + 1;
+      delete (limitNCountList[index]);
+      limitNCountList[index] = new Int_t(counts);
+      limit = *(limitNList[index]);
+      if (counts==limit) {
+        strcat(outMessage,"StMessage: ");
+        strcat(outMessage,(*curString));
+        strcat(outMessage,limitMessage);
+      } else if ((limit >= 0) && (counts > limit)) {
+        printIt = 0;
       }
     }
     index++;
   }
   int typeN = messTypeList->FindTypeNum(type);
   int typeNewSize = *(limitTCountList[typeN]) + 1;
-  delete limitTCountList[typeN];
+  delete (limitTCountList[typeN]);
   limitTCountList[typeN] = new Int_t(typeNewSize);
-  if (typeNewSize == *(limitTList[typeN])) {
-    strcat(temp,"St");
-    strcat(temp,(messTypeList->FindType(type)->Text()));
-    strcat(temp,": ");
-    strcat(temp,limitMessage);
-  } else if ((*(limitTList[typeN])>=0) && (typeNewSize > *(limitTList[typeN]))) {
-    printIt = kFALSE;
+  limit = *(limitTList[typeN]);
+  if (typeNewSize == limit) {
+    strcat(outMessage,"St");
+    strcat(outMessage,(messTypeList->FindType(type)->Text()));
+    strcat(outMessage,": ");
+    strcat(outMessage,limitMessage);
+  } else if ((limit >= 0) && (typeNewSize > limit)) {
+    printIt = 0;
   }
-  if (!printIt) temp=strcat("<||>",temp);
-  return temp;
+  return printIt;
 }
 //_____________________________________________________________________________
 void StMessageCounter::AddType() {

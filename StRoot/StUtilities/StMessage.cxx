@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.1 1999/06/23 15:17:46 genevb Exp $
+// $Id: StMessage.cxx,v 1.2 1999/06/24 16:30:41 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.2  1999/06/24 16:30:41  genevb
+// Fixed some memory leaks
+//
 // Revision 1.1  1999/06/23 15:17:46  genevb
 // Introduction of StMessageManager
 //
@@ -28,22 +31,20 @@ ostream& operator<<(ostream& os, StMessage* mm) {
   mm->Print();
   return os;
 }
+static Char_t* leader = "St";
+static StMessageCounter* messCounter = StMessageCounter::Instance();
 
 ClassImp(StMessage)
 
 //_____________________________________________________________________________
 StMessage::StMessage(Char_t *mess, Char_t *ty, Char_t* opt) : ostrstream(),
-type(new Char_t), messTime(new TDatime()) {
-  leader = "St";
-  option = opt;
-  option.ToUpper();
-  location = "Unknown";
-  runNumber = 0;
-  Char_t t0 = toupper(*ty);
-  if (StMessTypeList::Instance()->FindType(&t0))
-    strncpy(type,&t0,1);
-  else
-    strncpy(type,"I",1);       // default is Info
+type(new Char_t(toupper(*ty))), messTime(new TDatime()) {
+  Int_t len = strlen(opt);
+  option = new Char_t[len];
+  while (len--)
+    option[len] = toupper(opt[len]);
+//  location = "Unknown";
+//  runNumber = 0;
   operator<<(mess);
   if (strcmp(mess,""))
     Print();
@@ -52,26 +53,24 @@ type(new Char_t), messTime(new TDatime()) {
 }
 //_____________________________________________________________________________
 StMessage::~StMessage() {
+  delete messTime;
 }
 //_____________________________________________________________________________
 Int_t StMessage::Print(Int_t nChars) {
   operator<<(ends);
   TString outstr;
-  Char_t* limString;
+  int printIt=1;
   if (!nChars) {
-    limString = StMessageCounter::Instance()->CheckLimit(str(),type);
-  } else {
-    limString = "";
-    if (nChars==-1) nChars=0;
+    printIt = messCounter->CheckLimit(str(),type);
   }
-  if (strncmp(limString,"<||>",4)) {
+  if (printIt) {
     outstr = leader;
     const Char_t* temp(StMessTypeList::Instance()->Text(type));
     if (temp) outstr += temp;
     outstr += ": ";
     outstr += str();
-    if (!nChars) {
-      if (!strchr(option.Data(),'T')) {
+    if (nChars<=0) {
+      if (!strchr(option,'T')) {
         outstr += " (";
         Char_t* temp2 = strchr(messTime->AsString(),' ');
         outstr += ++temp2;
@@ -79,16 +78,20 @@ Int_t StMessage::Print(Int_t nChars) {
       }
       outstr += "\n";
     }
-  } else {       // If comparison is zero (is there), do not print message
-    limString = &(limString[4]);
   }
-  outstr += limString;
-  if (nChars>0) outstr = outstr(0,nChars);
-  if ((strchr(option.Data(),'O')) || (nChars)) {
+  if (!nChars) {
+    outstr += messCounter->GetOutMessage();
+  } else {
+    if (nChars>0) 
+      outstr = outstr(0,nChars);
+    else
+      nChars = 0;
+  }
+  if ((strchr(option,'O')) || (nChars)) {
     cout << outstr;
     cout.flush();
   }
-  if ((strchr(option.Data(),'E')) && !(nChars)) {
+  if ((strchr(option,'E')) && !(nChars)) {
     cerr << outstr;
     cerr.flush();
   }
@@ -97,7 +100,7 @@ Int_t StMessage::Print(Int_t nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.1 1999/06/23 15:17:46 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.2 1999/06/24 16:30:41 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

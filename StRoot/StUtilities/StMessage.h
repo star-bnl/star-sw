@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.1 1999/06/23 15:17:47 genevb Exp $
+// $Id: StMessage.h,v 1.2 1999/06/24 16:30:41 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.2  1999/06/24 16:30:41  genevb
+// Fixed some memory leaks
+//
 // Revision 1.1  1999/06/23 15:17:47  genevb
 // Introduction of StMessageManager
 //
@@ -31,12 +34,11 @@ class StMessage : public ostrstream {
  private:
 
  protected:
-   TString leader;
    const Char_t* type;
-   TString location;
-   unsigned long runNumber;
+//   Char_t* location;
+//   unsigned long runNumber;
 //   pair<long, long> eventId;
-   TString option;
+   Char_t* option;
    const TDatime* messTime; //!
 
  public:
@@ -48,7 +50,7 @@ class StMessage : public ostrstream {
    virtual const TDatime* GetTime() const {return messTime;}
    virtual const  Char_t* GetType() const {return type;}
    virtual        Char_t* GetMessage() {return str();}
-   virtual        Char_t* GetOptions() {return option.Data();}
+   virtual        Char_t* GetOptions() {return option;}
    virtual           void SetOption(Char_t* opt) {option = opt;}
    ClassDef(StMessage,1)
 };
