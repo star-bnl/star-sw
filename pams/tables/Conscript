@@ -7,14 +7,14 @@ my $Dir = "pams";                           print "Build Tables for $Dir\n";
 my @idl = find_idl($Dir); # print "@idl\n"; 
 my @idlT = ();
 my %idl    = ();
-my @sources = ();
+my @sources = (); 
 my $src;
 my $DIR = cwd();# print "DIR = $DIR\n";
 my $obj = $OBJ . "/pams/tables"; 
 my $share  = "#.share/tables";# print "share = $share\n";
 Link $obj =>  $share; print "Link $obj =>  $share\n";
 my $SO_PKG = "St_Tables.so";
-foreach my $idl (@idl) {#  print "$idl \n";
+foreach my $idl (@idl) {#  print "$idl\n";
   if (! grep (/\/idl\//,$idl)) {next;} 
   my $IDL =  $DIR . '/' . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
   push @idlT, $IDL; 
@@ -32,12 +32,12 @@ foreach my $stem (sort keys %idl) {
   my $idl  = basename ($idl{$stem});
   my $idlH = $share . "/" . $stem . ".h"; 
   my $idlI = $share . "/" . $stem . ".inc"; 
-  (my $Dir = $dir) =~ s/\#//g; #print "Dir = $Dir \n";
+  (my $Dir = $dir) =~ s/\#//g; #print "Dir = $Dir\n";
   my @Deps = ($idll);# print "Deps: $Deps[0]\n";
-  Command $my_env [$idlH, $idlI], @Deps, qq (cd %>:d  &&  stic -H -q %< );
-  my $idlHH = $obj . "/St_" . $stem . "_Table.h";# print "idlHH: $idlHH \n";
+  Command $my_env [$idlH, $idlI], @Deps, qq (cd %>:d  &&  stic -H -q %1 );
+  my $idlHH = $obj . "/St_" . $stem . "_Table.h";# print "idlHH: $idlHH\n";
   TableH   $my_env $idlHH, Conscript; 
-  my $idlCXX = $obj . "/St_" . $stem . "_Table.cxx";# print "idlCXX: $idlCXX \n";
+  my $idlCXX = $obj . "/St_" . $stem . "_Table.cxx";# print "idlCXX: $idlCXX\n";
   TableCXX $my_env $idlCXX, Conscript, 
   Install $my_env  $share, $idlHH;
   push @sources, $idlCXX;
@@ -67,14 +67,16 @@ sub cons::TableH {
   open (OUT,">$dst") or die "Can't open $dst\n";
   print OUT "#ifndef STAF_St_$stem_Table\n";
   print OUT "#define STAF_St_$stem_Table\n";
+  print OUT "\n";
   print OUT "#include \"St_Table.h\"\n";
+  print OUT "\n";
   print OUT "#include \"$stem.h\"\n";
+  print OUT "\n";
   print OUT "class St_$stem : public St_Table\n";
   print OUT "{\n";
   print OUT "protected:\n";
   print OUT "  static St_tableDescriptor *fgColDescriptors;\n";
-  print OUT "  virtual St_tableDescriptor *GetRowDescriptors() const\n";
-  print OUT "{ return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}\n"; 
+  print OUT "  virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}\n";
   print OUT "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}\n";
   print OUT "public:\n";
   print OUT "  St_$stem() : St_Table(\"$stem\",sizeof($stem_st)) {SetType(\"$stem\");}\n";
@@ -82,8 +84,10 @@ sub cons::TableH {
   print OUT "  St_$stem(Int_t n): St_Table(\"$stem\",n,sizeof($stem_st)) {SetType(\"$stem\");}\n";
   print OUT "  St_$stem(Text_t *name,Int_t n): St_Table(name,n,sizeof($stem_st)) {SetType(\"$stem\");}\n";
   print OUT "  $stem_st *GetTable(){ return ($stem_st *)s_Table;}\n";
-  print OUT "  ClassDef(St_$stem,0) // class particle STAF tables  \n";
+  print OUT "\n";
+  print OUT "  ClassDef(St_$stem,0) // class particle STAF tables\n";
   print OUT "};\n";
+  print OUT "\n";
   print OUT "#endif\n";
   close (OUT);
 }
@@ -101,7 +105,7 @@ sub cons::TableCXX {
   print OUT "//  Class St_$stem wraps the STAF table $stem\n";
   print OUT "//  It has been generated \"by automatic\". Please don't change it \"by hand\"\n";
   print OUT "//\n";
-  print OUT "////////////////x[/////////////////////////////////////////////////////////\n";
+  print OUT "/////////////////////////////////////////////////////////////////////////\n";
   print OUT "\n";
   print OUT "#include \"Stypes.h\"\n";
   print OUT "St_tableDescriptor *_NAME2_(St_,$stem)::fgColDescriptors = 0;\n";
