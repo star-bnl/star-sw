@@ -99,6 +99,7 @@ C-----------------------------------------------------------------------
          integer istat
          integer indx, ihit
          integer isect,irow,iwire,nseq,numbv
+         integer kdummy
 
          integer mxhits
          parameter (mxhits = 45)
@@ -213,7 +214,12 @@ c
                  if(tphit(ihit).row.ge.40)then
                     nhitrk2 = nhitrk2 + 1
                  endif
-                 dtptr(tphit(ihit).row) = ihit
+c
+c                stupidity for HPUX compiler
+c
+c                dtptr(tphit(ihit).row) = ihit
+                 kdummy = tphit(ihit).row
+                 dtptr(kdummy) = ihit
                  tphit_q(nhitrk)=tphit(ihit).q
               endif
            enddo
