@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.3 2000/03/21 15:45:07 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.4 2000/03/23 19:54:35 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -8,6 +8,13 @@
 //                - finds data set "geant"
 //                - loops over and prints out list of objects 
 //                   and tables
+//
+// Inputs to macro:
+//   nevents  -  # events to process
+//   MainFile - input *.dst.root file  (you can use any branch here)
+//   fname    - output file name with qa info
+//   
+//
 //=======================================================================
 
 class StChain;
@@ -16,9 +23,22 @@ StChain *chain;
 void bfcread_geantBranch(
  Int_t nevents=2, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root")
+ "/afs/rhic/star/data/samples/gstar.dst.root",
+ const char *fname="qa_geant.out") 
 {
 //
+  cout << " events to process  = " << nevents << endl;
+  cout << " Input File Name = " << MainFile << endl;
+  cout << " Output file containing printouts = " << fname << endl;
+
+  ofstream fout(fname);
+
+  fout << " Running: bfcread_geantBranch.C " << endl;
+  fout << " events to process  = " << nevents << endl;
+  fout << " Input File Name = " << MainFile << endl;
+  fout << " Output file containing printouts = " << fname << endl;
+  fout << endl << endl;
+
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
@@ -78,6 +98,10 @@ EventLoop: if (i < nevents && !istat) {
               cout << " QAInfo: Found table, Name = " 
                    <<  obj->GetName() << 
                       "    # rows =  " << tabl->GetNRows() << endl;
+
+             fout << " QAInfo: Found table, Name = " 
+                   <<  obj->GetName() << 
+                      "    # rows =  " << tabl->GetNRows() << endl;
               tottabcntr++;
              }
           }
@@ -87,6 +111,8 @@ EventLoop: if (i < nevents && !istat) {
       }
     }
     cout << " QAInfo: event # " << i << ", # objects found = " 
+         << countObj << ", # tables found = " << countTable << endl << endl;
+    fout << " QAInfo: event # " << i << ", # objects found = " 
          << countObj << ", # tables found = " << countTable << endl << endl;
 
 
@@ -98,11 +124,13 @@ EventLoop: if (i < nevents && !istat) {
     goto EventLoop;
    }
      
-  cout <<  endl << "QAInfo:  total # events read  = " << i << endl;
-        
   tottabcntr /= i;
+
+  cout <<  endl << "QAInfo:  total # events read  = " << i << endl;
   cout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl << endl;
 
+  fout <<  endl << "QAInfo:  total # events read  = " << i << endl;
+  fout <<  "QAInfo:  # tables per event   = " << tottabcntr << endl << endl;
 
  chain->Finish();   
 }

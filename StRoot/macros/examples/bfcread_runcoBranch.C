@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.5 2000/03/21 15:45:07 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.6 2000/03/23 19:54:36 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.6  2000/03/23 19:54:36  kathy
+// update branch macros so they write out to a file, and clean up
+//
 // Revision 1.5  2000/03/21 15:45:07  kathy
 // updated the bfcread_*Branch.C macros so they printout info that can be used by autoQA system
 //
@@ -28,6 +31,12 @@
 //                    info if it is
 //
 //  - the runco branch only has 1 "event" per dst run!
+//
+// Inputs to macro:
+//   nevents  -  # events to process  (should always leave at 1 !!)
+//   MainFile - input *.dst.root file  (you can use any branch here)
+//   fname    - output file name with qa info
+//  
 //=======================================================================
 
 class StChain;
@@ -36,9 +45,22 @@ StChain *chain;
 void bfcread_runcoBranch(
  Int_t nevents=1, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root")
+ "/afs/rhic/star/data/samples/gstar.dst.root",
+  const char *fname="qa_runco.out")
 {
 //
+  cout << " events to process  = " << nevents << endl;
+  cout << " Input File Name = " << MainFile << endl;
+  cout << " Output file containing printouts = " << fname << endl;
+
+  ofstream fout(fname);
+
+  fout << " Running: bfcread_runcoBranch.C " << endl;
+  fout << " events to process  = " << nevents << endl;
+  fout << " Input File Name = " << MainFile << endl;
+  fout << " Output file containing printouts = " << fname << endl;
+  fout << endl << endl;
+
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
@@ -103,8 +125,10 @@ EventLoop: if (i < nevents && !istat) {
             tabl = (St_Table *)objindiriter.Find(objindir->GetName());
             if (tabl) {
               countTable++;
-              cout << "  QAInfo: found table, #rows = " <<  objindir->GetName() 
-                 << ",  "     << tabl->GetNRows() << endl;
+              cout << "  QAInfo: found table, #rows = " << 
+                 objindir->GetName() << ",  " << tabl->GetNRows() << endl;
+              fout << "  QAInfo: found table, #rows = " << 
+                 objindir->GetName() << ",  " << tabl->GetNRows() << endl;
             }
           }
          
@@ -117,6 +141,11 @@ EventLoop: if (i < nevents && !istat) {
     cout << endl << endl <<" QAInfo: finished event " << i << endl;
     cout << " QAInfo: # objects (directories) found = " << countObj << endl;
     cout << " QAInfo: # sub-objects, tables found = "
+	 << countObjInDir << ", " << countTable << endl << endl;
+
+    fout << endl << endl <<" QAInfo: finished event " << i << endl;
+    fout << " QAInfo: # objects (directories) found = " << countObj << endl;
+    fout << " QAInfo: # sub-objects, tables found = "
 	 << countObjInDir << ", " << countTable << endl << endl;
 
     if (istat) {
