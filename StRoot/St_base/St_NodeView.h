@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.10 1999/04/13 14:26:41 fine Exp $
+// $Id: St_NodeView.h,v 1.11 1999/04/23 00:09:19 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.11  1999/04/23 00:09:19  fine
+// Working verion of PolyLineShape. Some correction for St_Node family as well
+//
 // Revision 1.10  1999/04/13 14:26:41  fine
 // Geometry-based dataset implementation, next step
 //
@@ -40,6 +43,7 @@ public:
               const Char_t *thisNodePath, const Char_t *matrixName=0, const Int_t matrixType=0);
   St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition);
   virtual ~St_NodeView();
+  virtual St_Node *AddNode(St_Node *node);
   virtual void Browse(TBrowser *b);
   virtual void Draw(Option_t *option); // *MENU* 
   virtual Int_t DistancetoPrimitive(Int_t px, Int_t py);
