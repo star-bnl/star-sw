@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.6 2000/02/24 18:20:58 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.7 2000/03/30 17:03:24 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.7  2000/03/30 17:03:24  hardtke
+ * add pad-by-pad t0 offsets to z calculation
+ *
  * Revision 1.6  2000/02/24 18:20:58  hardtke
  * use drift distance and offsets from the database
  *
@@ -212,7 +215,12 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
 //       :gTpcDbPtr->PadPlaneGeometry()->innerSectorzOffSet() ;
 	mOuterSectorzOffset
 	:mInnerSectorzOffset;
-    int tb = tBFromZ(a.position().z()+zoffset);
+    double t0zoffset = 
+      gTpcDbPtr->SlowControlSim()->driftVelocity()*
+      (gTpcDbPtr->T0(sector)->getT0(row,probablePad) *mTimeBinWidth);  
+      //t0 offset -- DH  27-Mar-00
+
+    int tb = tBFromZ(a.position().z()+zoffset-t0zoffset);  
     b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b)
@@ -224,7 +232,12 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
 	mOuterSectorzOffset
 	:mInnerSectorzOffset;
 
-    tmp.setZ(zFromTB(a.timeBucket())-zoffset);
+    double t0zoffset = 
+      gTpcDbPtr->SlowControlSim()->driftVelocity()*
+      (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
+      //t0 offset -- DH  27-Mar-00
+
+    tmp.setZ(zFromTB(a.timeBucket())-zoffset+t0zoffset);
     b = StTpcLocalSectorCoordinate(tmp,a.sector());
 }
 //  Tpc Local Sector <--> Global
