@@ -52,7 +52,14 @@ extern "C" long l3cl_(
   l3clInitOther() ;
   l3clInitClusters     ( pad_h, pad, pixel );
   l3clFindClusters     ( para->StartRow, para->EndRow );
+  int  initialNok = hit_h->nok ;
   l3clWriteDataToTable ( hit_h, hit );  
+//
+//   Include sector in row
+//
+  for ( int ihit = initialNok ; ihit < hit_h->nok ; ihit++ ) {
+      hit[ihit].row = hit[ihit].row + 100 * para->sector ; 
+  }
 //
   l3clFreeMemory() ;
 // 
