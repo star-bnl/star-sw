@@ -24,7 +24,7 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s)
   cout << "StiStarDetectorBuilder::buildDetectors() -I- Started" << endl;
   setNRows(1);
   setNSectors(0,12);
-  float radius = 4.;  // Kai - set this to 1.45
+  float radius = 1.45;  // Kai - set this to 1.45
   float thickness = 0.076;
   float dPhi=M_PI/6.;
   float depth = 200.; // was 20...
