@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.11 2000/02/02 21:37:37 lbarnby Exp $
+// $Id: lmv.cc,v 1.12 2000/03/04 02:41:37 nystrand Exp $
 // $Log: lmv.cc,v $
+// Revision 1.12  2000/03/04 02:41:37  nystrand
+// bugfix and update
+//
 // Revision 1.11  2000/02/02 21:37:37  lbarnby
 // CC5
 //
@@ -72,6 +75,7 @@ using namespace units;
 #include "StDetectorDefinitions.h"
 //#include "St_base/Stypes.h"
 #include "Stypes.h"
+#include "StVertexId.h"
 #include "math_constants.h"
 
 #include "StarCallf77.h"
@@ -80,7 +84,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.11 2000/02/02 21:37:37 lbarnby Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.12 2000/03/04 02:41:37 nystrand Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -98,13 +102,13 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   double X_X0_SVTBarrel  = 0.015;   //  ---- " ----
 
   // Parameters
-  double Rmincut      = 4.0;
+  double Rmincut      = 3.9;
   long   MinTrkPoints = 10;
   double DVtxMax      = 4.0;
 
   // Determine if SVT is in or not, depending on geometry and date in db
   long Is_SVT = 0;
-  if( mdate > 20000000 )Is_SVT=1;
+  if( mdate > 20000700 )Is_SVT=1;
 
   // Get BField from gufld(,) 
   //  cout<<"Trying to Get the BField the old way..."<<endl;
@@ -491,7 +495,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }
 
     if( dmax > DVtxMax ){
-      cout<<"Removing a track! dmax= "<<dmax<<endl;
+      //      cout<<"Removing a track! dmax= "<<dmax<<endl;
       helices.erase(i1keep);
       sigma.erase(i2keep);
       index.erase(i3keep);
@@ -504,7 +508,8 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 
   chi2pdof = chi2/(helices.size()-1);
 
-  long IVertex = 1; //By definition
+  Int_t nrows = vertex->GetNRows();
+  long IVertex = nrows+1; //By definition
 
   // Mark the vertex tracks in the global_trk table
   for (long ll=0; ll<Ntrk; ll++){
@@ -514,43 +519,40 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     for(unsigned int ine=0; ine < index.size(); ine++){
       if( idt == index[ine] )icheck=1;
     }  
+    Int_t istart_old;
     if( icheck == 1 ){
       // This track was included in the Vertex
-      sec_pointer->id_start_vertex = 10*IVertex + 1;
+      istart_old = sec_pointer->id_start_vertex;
+      sec_pointer->id_start_vertex = 10*IVertex + istart_old;
     }
-    else{
-      // This track was NOT included in the Vertex
-      sec_pointer->id_start_vertex = 10*IVertex;
-    } 
     sec_pointer++;
   }
 
   // Fill the dst_vertex table
-  Int_t nrows = 1;
-  vertex->SetNRows(nrows);
-  dst_vertex_st *dst_vertex_pointer = vertex->GetTable();
-  dst_vertex_pointer->vtx_id      = 1;
-  dst_vertex_pointer->n_daughters = helices.size();
-  dst_vertex_pointer->id          = 1;
-  dst_vertex_pointer->iflag       = 1;
+  dst_vertex_st primvtx;
+  primvtx.vtx_id      = kEventVtxId;
+  primvtx.n_daughters = helices.size();
+  primvtx.id          = IVertex;
+  primvtx.iflag       = 1;
   if( (Is_SVT == 1) ){
-    dst_vertex_pointer->det_id    = kTpcSsdSvtIdentifier; 
+    primvtx.det_id    = kTpcSsdSvtIdentifier; 
   }
   else{
-    dst_vertex_pointer->det_id    = kTpcIdentifier; //TPC track by definition
+    primvtx.det_id    = kTpcIdentifier; //TPC track by definition
   }
-  dst_vertex_pointer->id_aux_ent  = 0;
-  dst_vertex_pointer->x           = XVertex.x();
-  dst_vertex_pointer->y           = XVertex.y();
-  dst_vertex_pointer->z           = XVertex.z();
-  dst_vertex_pointer->covar[0]    = C11;
-  dst_vertex_pointer->covar[1]    = C12;
-  dst_vertex_pointer->covar[2]    = C22;
-  dst_vertex_pointer->covar[3]    = C13;
-  dst_vertex_pointer->covar[4]    = C23;
-  dst_vertex_pointer->covar[5]    = C33;
-  dst_vertex_pointer->chisq[0]    = chi2pdof;
-  dst_vertex_pointer->chisq[1]    = 1.0; // Need to find the prob func in Root
+  primvtx.id_aux_ent  = 0;
+  primvtx.x           = XVertex.x();
+  primvtx.y           = XVertex.y();
+  primvtx.z           = XVertex.z();
+  primvtx.covar[0]    = C11;
+  primvtx.covar[1]    = C12;
+  primvtx.covar[2]    = C22;
+  primvtx.covar[3]    = C13;
+  primvtx.covar[4]    = C23;
+  primvtx.covar[5]    = C33;
+  primvtx.chisq[0]    = chi2pdof;
+  primvtx.chisq[1]    = 1.0; // Need to find the prob func in Root
+  vertex->AddAt(&primvtx,nrows);
 
   cout<<"lmv: Primary Vertex found! Position: "<<XVertex<<endl;
   return kStOK;
