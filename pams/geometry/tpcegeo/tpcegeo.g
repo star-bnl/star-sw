@@ -507,20 +507,23 @@ Block TMWC  is a wire chamber volume with both gated and sensitive volumes
 
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-Block TMEA  is a double sensitive volume
-      Material  sensitive_gas
-      Medium    sensitive_gas
+Block TMEA  is a double sensitive layer around gating grid
+      material p10
+      material sensitive_gas  ISVOL=1  stemax=5
       attribute TMEA seen=1   colo=4
       SHAPE     TRD1 dx1=tecw_MWCinn/2        dx2=tecw_MWCout/2,
                      dy=tecw_MWCdepth/2       dz=tecw_MWChei/2
       Create    TMSE
+      Call      GSTPAR(ag_imed,'STRA',1.)
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TMSE  is a single sensitive volume
 
       SHAPE   division  Iaxis=3 Ndiv=tecw_MwcNwir
-      HITS    TMSE   Z:.01:S  Y:.01:   X:.01:    Sleng:0.1:(0,800),  
-                     cx:10:   cy:10:   cz:10:    Step:.01:,  
+*     until now AGI does not get proper dimensions here (!), force to max:
+      HITS    TMSE   Z:.01:S  Y:.01:   X:.01:(-tecw_MWCout/2,tecw_MWCout/2),
+                     cx:10:   cy:10:   cz:10:,
+                     Sleng:0.1:(0,800) Step:.01:,  
                      ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
                      LGAM:16:(-2,2)    Elos:16:(0,0.01) 
 
