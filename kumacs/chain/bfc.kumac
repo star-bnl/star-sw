@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.34 1998/08/17 14:34:09 fisyak Exp $
+* $Id: bfc.kumac,v 1.35 1998/08/19 21:43:27 fisyak Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.35  1998/08/19 21:43:27  fisyak
+* Add spr
+*
 * Revision 1.34  1998/08/17 14:34:09  fisyak
 * Add splitted output
 *
@@ -181,7 +184,9 @@
 * tcl        - TPC clustering - slow sim only !
 * tcl_e      - TPC cluster evaluation - slow sim only
 * tfs        - TPC fast simulator
+* stk        - SVT tracker
 * sgr        - grouping SVT hits into tracks 
+* spr        - SVT dE/dX
 * tpt        - TPC track finding
 * tte_t      - TPC tte tracker
 * tte_e      - TPC track evaluator
@@ -210,7 +215,7 @@
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
 *      gstar_settings=field_only _
-*      chain=' g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout'_
+*      chain=' g2tin svg tpg srs tfs sgr spr tpt tte_e tid svm egr ev0 evout'_
 *      domain=' geometry tpc svt global'
 * 
 * 2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
@@ -219,7 +224,7 @@
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
 * gstar_settings=field_only _
-* chain=' g2tin svg tpg srs tss tcl tcl_e sgr tpt tte_e tid svm egr ev0 evout'_
+* chain=' g2tin svg tpg srs tss tcl tcl_e sgr spr tpt tte_e tid svm egr ev0 evout'_
 * domain=' geometry tpc svt global'
 * 
 * 3. read from geant file, svt fast sim, sgr tracker & write event out
