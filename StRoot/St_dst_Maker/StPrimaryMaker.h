@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.8 2001/04/12 15:46:27 balewski Exp $
+// $Id: StPrimaryMaker.h,v 1.9 2001/06/12 22:59:38 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.9  2001/06/12 22:59:38  balewski
+// reject pileup in ppLMV
+//
 // Revision 1.8  2001/04/12 15:46:27  balewski
 // *** empty log message ***
 //
@@ -56,8 +59,10 @@ class StPrimaryMaker : public StMaker {
   dst_vertex_st  *m_fixedVertex; //!
   float zCutppLMV;
   long ppLMV(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
+  long ppLMV3(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
   TH1F *hppLMV1[16];
   TH1F *hppLMV2[16];
+  TH1F *hPiFi[16];
  protected:
   
   
@@ -71,7 +76,7 @@ class StPrimaryMaker : public StMaker {
   void ppLMVuse(float z)
     { zCutppLMV=z; printf("ppLMVuse(z=%f cm) called\n", zCutppLMV=z);}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.8 2001/04/12 15:46:27 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.9 2001/06/12 22:59:38 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
