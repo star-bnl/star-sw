@@ -156,9 +156,8 @@ void St_io_Maker::Clear(Option_t *option)
                   nextb->GetFile()->Flush();
          }
        }
-     }
+    }
   }
-  printf ("St_io_Maker::Clear\n");
   StMaker::Clear();
 }
 //_____________________________________________________________________________
@@ -207,6 +206,9 @@ Int_t St_io_Maker::Finish()
    if (tree) 
        SetActive();
        tree->Write();
+ }
+ else { // delete this list to be able to read the next file
+   SafeDelete(m_ListOfBranches)
  }
  return 0;
 }
@@ -339,7 +341,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.8 1999/02/25 17:14:14 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.9 1999/02/28 23:23:20 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -375,3 +377,30 @@ Int_t St_io_Maker::SetActive()
   return numberActive;
 }
 
+#if 0
+//_____________________________________________________________________________
+Bool_t St_io_Maker::SetFile(const Char_t *rootFileName)
+{
+
+  // SetFile opens a new ROOT file and look it up to fund OUTPUT Tree
+  // IT closes the previous ROOT fiel and deletes the previous old TTree if any
+
+  if (rootFileName && strlen(rootFileName) {
+    if (m_Tree) delete m_Tree; m_Tree = 0;  
+    // delete the previous TFile if any
+    SafeDelete(m_TreeRootFile)
+    // Open new TFile 
+    m_TreeRootFile  =  new TFile(rootFileName);
+    if (m_TreeRootFile) 
+         m_Tree=(TTree *)root_file->Get("Output");
+    else 
+        return kFALSE;
+   
+    if (m_Tree) {
+       m_Tree->Print();
+       chain->SetTree(tree);
+    }
+  }
+  return kTRUE;
+}
+#endif
