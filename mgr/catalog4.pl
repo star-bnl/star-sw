@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/star/bin/perl
 #
 # Script to print production statistics and produce job script files
 #
