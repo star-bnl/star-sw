@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.12 1999/11/03 19:05:02 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.13 1999/11/10 14:57:57 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.13  1999/11/10 14:57:57  kathy
+// changed QA_bfcread_dst_tables.C to take into account new tables in 99i and above
+//
 // Revision 1.12  1999/11/03 19:05:02  kathy
 // another small fix for output file name - now .out instead of .txt
 //
@@ -59,7 +62,7 @@ St_DataSet *Event;
 void QA_bfcread_dst_tables(
  Int_t nevents=1, 
  const char *MainFile=
- "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
+  "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
  const char *fname="qa_tables.out") {
 
   gSystem->Load("St_base");
@@ -106,16 +109,16 @@ void QA_bfcread_dst_tables(
   Int_t cnt_dst_dedx=0;
   Int_t cnt_particle=0;
   Int_t cnt_TrgDet=0;
-  Int_t cnt_monitor_soft=0;
+  Int_t cnt_mon_soft_ftpc=0;
+  Int_t cnt_mon_soft_glob=0;
+  Int_t cnt_mon_soft_svt=0;
+  Int_t cnt_mon_soft_tpc=0;
   Int_t cnt_g2t_rch_hit=0;
   Int_t cnt_kinkVertex=0;
   Int_t cnt_ev0_eval=0;
 
 
   ofstream fout(fname);
-  fout << "Tester: " << endl;
-  fout << "Date tested: " << endl;
-  fout << "Date DST created: " << endl;
   fout << "QAInfo: " << MainFile << endl << endl;
   fout << "QAInfo: table name";
   fout.width(18);
@@ -124,9 +127,6 @@ void QA_bfcread_dst_tables(
   fout.width(18);
   fout << "______"<< endl << endl;
 /*
-  cout << "QA-> Tester: " << endl;
-  cout << "QA-> Date tested: " << endl;
-  cout << "QA-> Date DST created: " << endl;
   cout << "QAInfo: " << MainFile << endl << endl;
   cout << "QAInfo: table name";
   cout.width(18);
@@ -157,7 +157,10 @@ void QA_bfcread_dst_tables(
    cnt_dst_dedx=0;
    cnt_particle=0;
    cnt_TrgDet=0;
-   cnt_monitor_soft=0;
+   cnt_mon_soft_ftpc=0;
+   cnt_mon_soft_glob=0;
+   cnt_mon_soft_svt=0;
+   cnt_mon_soft_tpc=0;
    cnt_g2t_rch_hit=0;
    cnt_kinkVertex=0;
    cnt_ev0_eval=0;
@@ -229,8 +232,14 @@ void QA_bfcread_dst_tables(
                 cnt_particle++;
               if (strcmp(obj->GetName(),"TrgDet")==0) 
                 cnt_TrgDet++;
-              if (strcmp(obj->GetName(),"monitor_soft")==0) 
-                cnt_monitor_soft++;
+              if (strcmp(obj->GetName(),"mon_soft_ftpc")==0) 
+                cnt_mon_soft_ftpc++;
+              if (strcmp(obj->GetName(),"mon_soft_glob")==0) 
+                cnt_mon_soft_glob++;
+              if (strcmp(obj->GetName(),"mon_soft_svt")==0) 
+                cnt_mon_soft_svt++;
+              if (strcmp(obj->GetName(),"mon_soft_tpc")==0) 
+                cnt_mon_soft_tpc++;
               if (strcmp(obj->GetName(),"g2t_rch_hit")==0) 
                 cnt_g2t_rch_hit++;
 
@@ -326,9 +335,24 @@ void QA_bfcread_dst_tables(
           fout << endl << "QA-> Missing Table: " << "TrgDet" << endl;
           tabmiss++;
         } 
-        if (cnt_monitor_soft == 0){
-          cout << endl << "QA-> Missing Table: " << "monitor_soft" << endl;
-          fout << endl << "QA-> Missing Table: " << "monitor_soft" << endl;
+        if (cnt_mon_soft_ftpc == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_ftpc" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_ftpc" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_glob == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_glob" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_glob" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_svt == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_svt" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_svt" << endl;
+          tabmiss++;
+        } 
+       if (cnt_mon_soft_tpc == 0){
+          cout << endl << "QA-> Missing Table: " << "mon_soft_tpc" << endl;
+          fout << endl << "QA-> Missing Table: " << "mon_soft_tpc" << endl;
           tabmiss++;
         } 
         if (cnt_g2t_rch_hit == 0){
