@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.10 2000/03/12 19:28:28 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.11 2000/03/23 03:21:49 munhoz Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.11  2000/03/23 03:21:49  munhoz
+// added V0 classes
+//
 // Revision 1.10  2000/03/12 19:28:28  ogilvie
 // added new analysis class, StNoPidSpectraAnalysis, for inclusive spectra
 //
@@ -42,6 +45,7 @@
 #include "StSpectraAnalysis.h"
 #include "StTpcDeviantSpectraAnalysis.h"
 #include "StNoPidSpectraAnalysis.h"
+#include "StV0SpectraAnalysis.h"
 #include "StMessMgr.h"
 #include "StEfficiency.h"
 #include "StSpectraAxesEnumeration.h"
@@ -60,7 +64,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.10 2000/03/12 19:28:28 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.11 2000/03/23 03:21:49 munhoz Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -75,12 +79,11 @@ Int_t StSpectraMaker::Init() {
   // 
 
   ifstream from("StRoot/StSpectraMaker/analysis.dat");
+  StSpectraAnalysisType analysisType;
+  string analysisSType = readString(from);
   while (!from.eof()) {
     //
-    // deviant as safety default
-    StSpectraAnalysisType analysisType = kTpcDeviant;
 
-    string analysisSType = readString(from);
     if (analysisSType == "TpcDeviant") {
       analysisType= kTpcDeviant;
     } else if (analysisSType == "TpcDedx") {
@@ -91,6 +94,8 @@ Int_t StSpectraMaker::Init() {
       analysisType= kNoPid;
     } else {
       // protection?
+      gMessMgr->Message("There is no type specified here!","E");
+      return kStErr;
     }
     cout << "particle name " ;
     string particleName = readString(from);
@@ -125,6 +130,10 @@ Int_t StSpectraMaker::Init() {
     } else if (analysisType == kNoPid) {       
        StNoPidSpectraAnalysis* local_anal = new StNoPidSpectraAnalysis;
        anal = local_anal;
+    } else if (analysisType == kV0) { 
+       StV0SpectraAnalysis* local_anal = new StV0SpectraAnalysis;
+       local_anal->setParticle(particleName);
+       anal = local_anal;
     } else {
       continue;
     }
@@ -136,10 +145,12 @@ Int_t StSpectraMaker::Init() {
  
     mSpectraAnalysisContainer.push_back(anal);
 
-    string comment = readString(from); 
+    string comment = readString(from);
+    analysisSType = readString(from);
    }
   from.close();
  
+  //
   //
   // loop through the analyses and book histograms
   // 

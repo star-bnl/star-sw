@@ -2,6 +2,8 @@
 #include <fstream.h>
 #include "StSpectraCutNhit.h"
 #include "StSpectraCutDCA.h"
+#include "StSpectraCutDcaParent.h"
+#include "StSpectraCutDcaDaughters.h"
 #include "StGetConfigValue.hh"
 #include "TFile.h"
 #include "StParticleTable.hh"
@@ -20,23 +22,40 @@ StEfficiency::StEfficiency(char* efficFile) {
   int *nhitRange = new int[2];
   StGetConfigValue(efficFile, "nhit", nhitRange, 2);
   cout << "nhit "<< nhitRange[0] << " " << nhitRange[1] << endl;
-  mSpectraCutContainer.
-    push_back(new StSpectraCutNhit(nhitRange[0],nhitRange[1]));
+  if (nhitRange[0] || nhitRange[1])
+    mSpectraCutContainer.
+      push_back(new StSpectraCutNhit(nhitRange[0],nhitRange[1]));
 
   double *dcaRange = new double[2];  
   StGetConfigValue(efficFile, "dca", dcaRange, 2);
   cout << "dca " << dcaRange[0] << " " << dcaRange[1] << endl;
-  mSpectraCutContainer.
-    push_back(new StSpectraCutDCA(dcaRange[0], dcaRange[1]));
+  if (dcaRange[0] || dcaRange[1])
+    mSpectraCutContainer.
+      push_back(new StSpectraCutDCA(dcaRange[0], dcaRange[1]));
   //
   
+  double *dcaParentRange = new double[2];  
+  StGetConfigValue(efficFile, "v0DcaParent", dcaParentRange, 2);
+  cout << "dcaParent " << dcaParentRange[0] << " " << dcaParentRange[1] << endl;
+  if (dcaParentRange[0] || dcaParentRange[1])
+    mSpectraCutContainer.
+      push_back(new StSpectraCutDcaParent(dcaParentRange[0], dcaParentRange[1]));
+
+  double *dcaDaughtersRange = new double[2];  
+  StGetConfigValue(efficFile, "v0DcaDaughters", dcaDaughtersRange, 2);
+  cout << "dcaDaughters " << dcaDaughtersRange[0] << " " << dcaDaughtersRange[1] << endl;
+  if (dcaDaughtersRange[0] || dcaDaughtersRange[1])
+    mSpectraCutContainer.
+      push_back(new StSpectraCutDcaDaughters(dcaDaughtersRange[0], dcaDaughtersRange[1]));
+
+
   char* histRootFileName = new char[100];
   StGetConfigValue(efficFile,"histogram", histRootFileName, 100);
   //
   // read histogram from file and copy it into mEfficHist
   //
   cout << histRootFileName << endl;
-  TFile histRootFile(histRootFileName);
+  TFile* histRootFile = new TFile(histRootFileName);
   //
   // how do I check that this was successful use isOpen()
   //
@@ -44,7 +63,7 @@ StEfficiency::StEfficiency(char* efficFile) {
   //
   bool efficHistogramFound = false ;
 
-  TObject* fromFile = histRootFile.Get("efficYPt");
+  TObject* fromFile = histRootFile->Get("efficYPt");
   if (fromFile != 0 ){
     mEfficHistogram = *((TH2D*)fromFile);
     efficHistogramFound = true; 
@@ -53,7 +72,7 @@ StEfficiency::StEfficiency(char* efficFile) {
   } 
 
   if (efficHistogramFound == false) {
-    fromFile = histRootFile.Get("efficEtaPt");
+    fromFile = histRootFile->Get("efficEtaPt");
     if (fromFile != 0 ){
       mEfficHistogram = *((TH2D*)fromFile);
       efficHistogramFound = true; 
@@ -66,7 +85,7 @@ StEfficiency::StEfficiency(char* efficFile) {
     // set failure mode of constructor
   }
  //
-  histRootFile.Close();
+  // histRootFile.Close();
 }
 
 StEfficiency::~StEfficiency() {
@@ -79,6 +98,33 @@ void StEfficiency::setParticle(string particle) {
 double StEfficiency::efficiency(StTrack* track) {
 
  StThreeVectorD mom = track->geometry()->momentum();
+ double p = abs(mom);
+ double pz = mom.z();
+ double pperp = mom.perp();
+ double mass = mParticle->mass();
+ double E = sqrt(p*p + mass*mass);
+ double y = 0.5*log((E+pz)/(E-pz)); 
+ 
+ double effic;
+ if ((y < (*this).getLowEdge('x')) ||
+     (y > (*this).getUpEdge('x')) ||
+     (pperp < (*this).getLowEdge('y')) ||
+     (pperp > (*this).getUpEdge('y')) ) {
+   //
+   // outside acceptance
+   //
+   effic = 0.0 ;
+ } else {
+   int globalBin = mEfficHistogram.FindBin(float(y),float(pperp),0.);
+   effic = mEfficHistogram.GetBinContent(globalBin);
+ }
+
+return effic;
+}
+
+double StEfficiency::efficiency(StV0Vertex* v0) {
+
+ StThreeVectorD mom = v0->momentum();
  double p = abs(mom);
  double pz = mom.z();
  double pperp = mom.perp();
