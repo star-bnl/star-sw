@@ -29,6 +29,7 @@
 *  editted 6/10/98 Kathy Turner - new tpc tables in new version of tpc kumac
 *  editted 6/12/98 Kathy Turner - put in tpc slow sim - had to add new inputs
 *                               to macro (adcxyzon,tpc_sector_first,_last)
+*  editted 7/2/98 Kathy Turner - tpc code required geometry libraries now!
 * ******************************************************************************
 * TOP        top level directory 
 * domain     list of domains to load [domain='tpc svt global]
@@ -59,7 +60,7 @@ MACRO bfc _
    adcxyzon=0 _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
-   domain='tpc svt global' _
+   domain='geometry tpc svt global' _
    chain='gethij gst svg tpg srs tss'_ 
    first=401 _
    no_events=200 _

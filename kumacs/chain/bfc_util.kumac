@@ -1,8 +1,10 @@
+* editted 7/2/98 K. Turner - tpc code now requires geometry so make it default
+*                            in domain
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
-macro bfc_start domain='tpc svt global'
+macro bfc_start domain='geometry tpc svt global'
   
 * SETUP DEFAULT DIRECTORIES TO GET KUMACS FROM
   exec bfc_defaults
