@@ -361,7 +361,10 @@ macro bfc_init _
             exec init_ev0#init
             exec init_magf#init
      (ev02) 
-	    exec init_ev0#ev02    
+	    exec create_tables_global#ev0
+            exec create_tables_global#ev02
+	    exec init_ev0#fill_ev02
+	    exec init_ev0#init_ev02
     (ev0_e) exec create_tables_global#ev0_eval2
     (ctf)   exec create_tables_ctf#init
             exec ctg_init#init
@@ -650,7 +653,7 @@ return
       (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	
       (ev0)    exec run_ev0#ev0_am 
-      (ev02)   wait 
+      (ev02)   
                exec run_ev0#ev0_am2
      (ev0_e)   exec run_ev0#ev0_eval2  
       (ctf)    exec cts_run
