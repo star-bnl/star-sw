@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.4 2001/04/25 21:35:26 genevb Exp $ 
+// $Id: StQABookHist.cxx,v 2.5 2001/04/26 16:34:28 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.5  2001/04/26 16:34:28  genevb
+// Fixed some histogram ranges
+//
 // Revision 2.4  2001/04/25 21:35:26  genevb
 // Added V0 phi distributions
 //
@@ -499,7 +502,8 @@ void StQABookHist::BookHistGlob(){
 
 // general
 
-  m_globtrk_tot      = QAH::H1F("QaGtrkTot","globtrk: tot num tracks - all",40,0.,10000.);
+  m_globtrk_tot      = QAH::H1F("QaGtrkTot","globtrk: tot num tracks - all",
+                            40,0.,12500.);
   m_globtrk_tot_sm   = QAH::H1F("QaGtrkTotsm","globtrk: tot num tracks - all",40,0.,20.);
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
@@ -834,10 +838,10 @@ void StQABookHist::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot     = QAH::H1F("QaPtrkTot",   "primtrk: tot num tracks",100,0.,5000.);
-  m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",100,0.,20.);
+  m_primtrk_tot     = QAH::H1F("QaPtrkTot",   "primtrk: tot num tracks",50,0.,5000.);
+  m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",50,0.,20.);
   m_primtrk_iflag   = QAH::H1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,801.);
-  m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,3000.);
+  m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,20.);
   m_pdet_id     = QAH::H1F("QaPtrkDetId",   "primtrk: Detector ID good tracks - all",25,0.,25.);
 
@@ -1108,10 +1112,12 @@ void StQABookHist::BookHistDE(){
 void StQABookHist::BookHistGen(){
 
   // for MakeHistGen - from table particle
-  m_H_npart     = QAH::H1F("QaEvgenNPart",      "particle:total num particles (generated)",100,0.,30000.);
-  m_H_npart_sm  = QAH::H1F("QaEvgenNPartsm",    "particle:total num particles (generated)",20,0.,20.);
+  m_H_npart     = QAH::H1F("QaEvgenNPart",      "particle:total num particles (generated)",
+                       100,0.,50000.);
+  m_H_npart_sm  = QAH::H1F("QaEvgenNPartsm",    "particle:total num particles (generated)",
+                       20,0.,20.);
   m_H_ncpart    = QAH::H1F("QaEvgenNChgPart",   "particle:num chg (e,mu,pi,K,p) part (generated)",
-                       100,0.,20000.);
+                       100,0.,40000.);
   m_H_ncpart_sm = QAH::H1F("QaEvgenNChgPartsm", "particle:num chg (e,mu,pi,K,p) part (generated)",
                        20,0.,20.);
   m_H_pT_gen  = QAH::H1F("QaEvgenPt",         "particle: charged pt (generated)",nxpT,xminpT,xmaxpT);
@@ -1143,7 +1149,7 @@ void StQABookHist::BookHistVertex(){
   // for MakeHistVertex - from table dst_vertex
   
   
-  m_v_num   = QAH::H1F("QaVtxNum",  " vertex: num vertices ",50,0.,2000.);
+  m_v_num   = QAH::H1F("QaVtxNum",  " vertex: num vertices ",50,0.,10000.);
   m_v_num_sm= QAH::H1F("QaVtxNumsm",  " vertex: num vertices ",50,0.,20.);
 
   m_v_vtxid = QAH::H1F("QaVtxVtxId"," vertex,2ndary: Vertex ID ",10,0.,10.);
@@ -1173,7 +1179,7 @@ void StQABookHist::BookHistVertex(){
   m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
   m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
 
-  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices ",80,0.,800.);
+  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices",50,0.,4000.);
   m_xi_ma_hist = QAH::H1F("QaXiaMass",  "dst_xi_vertex: Xi mass",50,1.2,1.4);
 
   m_kink_tot   = QAH::H1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
@@ -1184,13 +1190,13 @@ void StQABookHist::BookHistPoint(){
 
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
 
-  m_pnt_tot     = QAH::H1F("QaPointTot", "point: # hits total ",100, 0.,250000.);
+  m_pnt_tot     = QAH::H1F("QaPointTot", "point: # hits total ",100, 0.,400000.);
   m_pnt_tot_med = QAH::H1F("QaPointTotmed","point: # hits total ",100, 0.,2500.);
   m_pnt_tot_sm  = QAH::H1F("QaPointTotsm", "point: # hits total ",100, 0.,250.);
   m_pnt_id      = QAH::H1F("QaPointId","point: detector ID of hit",30,0.,30.);
 
-  m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,250000.);
-  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,10000.);
+  m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,300000.);
+  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,15000.);
   m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,10000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,10000.);
