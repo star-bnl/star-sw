@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.5 1999/02/18 15:41:42 ullrich Exp $
+ * $Id: StV0Vertex.hh,v 1.6 1999/02/21 20:32:48 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
- * Revision 1.5  1999/02/18 15:41:42  ullrich
- * Momemtum of daughter tracks added.
+ * Revision 1.6  1999/02/21 20:32:48  genevb
+ * Improve StV0Vertex code
+ *
+ * Revision 1.6  1999/02/21 20:32:48  genevb
+ * Improve StV0Vertex code
  *
  * Revision 1.5  1999/02/18 15:41:42  ullrich
  * Momemtum of daughter tracks added.
@@ -31,6 +34,7 @@
  *
  **************************************************************************/
 #ifndef StV0Vertex_hh
+#define StV0Vertex_hh
 #include "StEvent/StVertex.hh"
 #include "StEvent/StEnumerations.hh"
 #include "tables/dst_vertex.h"
@@ -38,7 +42,7 @@
 #include <float.h>
 
 class StV0Vertex : public StVertex {
-    StV0Vertex(dst_v0_vertex_st*);
+public:
     StV0Vertex();
     ~StV0Vertex();
     StV0Vertex(dst_v0_vertex_st*,dst_vertex_st*);
