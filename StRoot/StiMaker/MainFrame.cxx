@@ -2504,10 +2504,37 @@ void KalmanTrackFinderIO::makeNumberEntries()
     fLabel.push_back( new TGLabel(fF.back(), "Max. Contiguous Null Count") );
     fF.back()->AddFrame(fLabel.back(), fL2);
 
+    //Min Search Radius
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MinSearchRadius",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMinSearchRadius() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealFour, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 10);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Min. Search Radius") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
+    //Max Search Radius
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    fNumericEntries.push_back( NamedNumberEntry("MaxSearchRadius",
+						new TGNumberEntry( fF.back() ) ) );
+    fNumericEntries.back().second->SetNumber( broker->ktfMaxSearchRadius() );
+    fNumericEntries.back().second->SetFormat(TGNumberFormat::kNESRealFour, TGNumberFormat::kNEAPositive);
+    fNumericEntries.back().second->SetLimits(TGNumberFormat::kNELLimitMinMax, 0, 10);
+    fNumericEntries.back().second->Associate(this);
+    fF.back()->AddFrame(fNumericEntries.back().second, fL2);
+    fLabel.push_back( new TGLabel(fF.back(), "Max. Search Radius") );
+    fF.back()->AddFrame(fLabel.back(), fL2);
+
     //Toggle for Mcs Calculation
     fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
     fF1->AddFrame(fF.back(), fL2);
-    TGCheckButton* tempButton = new TGCheckButton(fF.back(), new TGHotString("MCS Calculated"), -1);
+    TGCheckButton* tempButton = new TGCheckButton(fF.back(),
+						  new TGHotString("MCS Calculated"), -1);
     if ( broker->ktfMcsCalculated()==true) {
 	tempButton->SetState(kButtonDown);
     }
@@ -2518,22 +2545,35 @@ void KalmanTrackFinderIO::makeNumberEntries()
     //Toggle for Eloss Calculation
     fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
     fF1->AddFrame(fF.back(), fL2);
-    TGCheckButton* tempButton2 = new TGCheckButton(fF.back(), new TGHotString("E-Loss Calculated"), -1);
+    TGCheckButton* tempButton2 = new TGCheckButton(fF.back(),
+						   new TGHotString("E-Loss Calculated"), -1);
     if ( broker->ktfElossCalculated()==true) {
 	tempButton2->SetState(kButtonDown);
     }
     DetectorActivatePair tempPair2("ELossCalculated", tempButton2);
     fC.push_back(tempPair2);
-    fF.back()->AddFrame(tempButton, fL2);
+    fF.back()->AddFrame(tempButton2, fL2);
+
+    //Toggle for Helix Extrapolation    
+    fF.push_back( new TGHorizontalFrame(fF1, 200, 30) );
+    fF1->AddFrame(fF.back(), fL2);
+    TGCheckButton* tempButton3 = new TGCheckButton(fF.back(),
+						   new TGHotString("Helix Extrapolation"), -1);
+    if ( broker->ktfUseHelixExtrapolation()==true) {
+	tempButton3->SetState(kButtonDown);
+    }
+    DetectorActivatePair tempPair3("HelixExtrapolation", tempButton3);
+    fC.push_back(tempPair3);
+    fF.back()->AddFrame(tempButton3, fL2);
 
 }
 
 KalmanTrackFinderIO::~KalmanTrackFinderIO()
 {
-    if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
-	cout <<"KalmanTrackFinderIO::~KalmanTrackFinderIO. ERROR:\t"
-	     <<"Mismatch in cleanup vector size"<<endl;
-    }
+    //if (fNumericEntries.size()!=fLabel.size() || fLabel.size()!=fF.size()) {
+    //cout <<"KalmanTrackFinderIO::~KalmanTrackFinderIO. ERROR:\t"
+    //     <<"Mismatch in cleanup vector size"<<endl;
+    //}
     for (unsigned int i=0; i<fNumericEntries.size(); ++i) {
 	delete fNumericEntries[i].second;
 	fNumericEntries[i].second=0;
@@ -2595,6 +2635,12 @@ void KalmanTrackFinderIO::SetLimits()
 	else if (name=="MaxContNullCount") {
 	    broker->setKTFMaxContiguousNullCount( (*it).second->GetNumber() );
 	}
+	else if (name=="MinSearchRadius") {
+	    broker->setKTFMinSearchRadius( (*it).second->GetNumber() );
+	}
+	else if (name=="MaxSearchRadius") {
+	    broker->setKTFMaxSearchRadius( (*it).second->GetNumber() );
+	}
 	else {
 	    cout <<"KalmanTrackFinderIO::SetLimits(). ERROR:\t"
 		 <<"Unknown name for NumberEntry:\t"<<name
@@ -2611,6 +2657,9 @@ void KalmanTrackFinderIO::SetLimits()
 	}
 	else if (tag=="ELossCalculated") {
 	    broker->setKTFElossCalculated( fC[j].second->GetState()==kButtonDown );
+	}
+	else if (tag=="HelixExtrapolation") {
+	    broker->setKTFUseHelixExtrapolation( fC[j].second->GetState()==kButtonDown );
 	}
 	else {
 	    cout <<"KalmanTrackFinderIO::ProcessMessage. ERROR:\t"
