@@ -1,0 +1,7 @@
+If raw data already exists, either produced by the FTPC slow simulator 
+(St_fss_Maker) or from a daq data import, StFtpcClusterMaker will
+immediately invoke the clusterfinder StFtpcClusterFinder . Otherwise, 
+the FTPC fast simulator StFtpcFastSimu will be invoked to generate hits 
+from geant data.
+
+This maker was written by Holm Hümmler (hummler@mppmu.mpg.de)
