@@ -15,23 +15,22 @@ use Net::FTP;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
 require "/afs/rhic/star/packages/DEV00/mgr/dbOnLineSetup.pl";
-#require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
-
-#require "/afs/rhic/star/packages/DEV00/mgr/dbDAQSetup.pl";
 
 my $debugOn=0;
 
 
-my $DISK1 = "/star/rcf/disk00001/star";
-
-my $prodSr = "P00hm";
-my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
+my $DISK1 = "/star/rcf/prodlog";
+my $DISK = "/star/data18/reco"; 
+my $prodSr = "P01he";
+my $jobFDir = "/star/u/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD;
 my @SetS;
+my @diskRecoDirs;
 
+my @trgDir = ("minbias","central");
 my @DirD = (
 #            "2000/06",
 #            "2000/07",
@@ -39,14 +38,22 @@ my @DirD = (
             "2000/09",
 );
 
+my $kk = 0;
+
  for( $k = 0; $k<scalar(@DirD); $k++) {
-  $SetD[$k] =  $prodSr . "/" . $DirD[$k];
   $SetS[$k] = "daq" . "/" . $DirD[$k];
-print "Production DIR :", $SetD[$k], "\n";
+ for ( $i = 0; $i<scalar(@trgDir); $i++) {
+  $SetD[$kk] =  $trgDir[$i] ."/" . $prodSr . "/" . $DirD[$k]; 
+print "Production DIR :", $SetD[$kk], "\n";
+  $kk++;
+}
 print "DAQ files DIR :", $SetS[$k], "\n";
 }
 
-
+for( $ll = 0; $ll<scalar(@SetD); $ll++) { 
+  $diskRecoDirs[$ll] = $DISK . "/" . $SetD[$ll];
+  print "diskRecoDir: $diskRecoDirs[$ll]\n";
+}
 
 my $recoDir = ("daq");
 
@@ -111,23 +118,23 @@ my @jobSum_set;
 my $jobSum_no = 0;
 my @jobFSum_set;
 my $jobFSum_no = 0;
-my $jbSt = "n\/a";
+my $jbSt = "n/a";
 my @runDescr;
 my $nrunDescr = 0;
 
 ########## Find reco for daq files on HPSS
 
-my $nDHpssFiles = 0;
-my $nDHpssDirs = 3;
+my $nHpssFiles = 0;
+my $nHpssDirs = 4;
 my @hpssDstDirs;
 my @hpssDstFiles;
 my @dbDaqFiles;
 my $ndbDaqFiles = 0;
 my @dbOnFiles;
 my $ndbOnFiles = 0;
+my $nDiskFiles = 0;
 
-
- $nDHpssFiles = 0;
+ $nHpssFiles = 0;
 
 &StDbOnLineConnect();
 
@@ -156,7 +163,7 @@ my $ndbOnFiles = 0;
        $dbOnFiles[$ndbOnFiles] = $fObjAdr;
        $ndbOnFiles++; 
 }
-   print "Total Number of files = ", $ndbOnFiles, "\n";
+#   print "Total Number of files = ", $ndbOnFiles, "\n";
 
  &StDbOnLineDisconnect();
 
@@ -175,6 +182,56 @@ my $ndbOnFiles = 0;
  print "Total files: ".@hpssDstFiles."\n";
   $ftpRDaq->quit();
 
+print "\nFinding reco files in disk\n";
+ 
+foreach my $diskDir (@diskRecoDirs) {
+  if (-d $diskDir) {
+  opendir(DIR, $diskDir) or die "can't open $diskDir\n";
+  while( defined($flname = readdir(DIR)) ) {
+     next if $flname =~ /^\.\.?$/;
+     next if $flname =~ /hold/;
+
+        $maccess = "-rw-r--r--"; 
+        $mdowner = "starreco";
+
+     $fullname = $diskDir."/".$flname;
+     my @dirF = split(/\//, $diskDir); 
+     my $set = sprintf("%s\/%s\/%s\/%s",$dirF[4],$dirF[5],$dirF[6],$dirF[7]);
+                                                
+#    print "Dst Set = ", $set, "\n"; 
+    ($size, $mTime) = (stat($fullname))[7, 9];
+    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
+    $mo = sprintf("%2.2d", $mo+1);
+    $dy = sprintf("%2.2d", $dy);
+
+  
+    if( $yr > 97 ) {
+      $fullyear = 1900 + $yr;
+    } else {
+      $fullyear = 2000 + $yr;
+    }
+
+
+#    $timeS = sprintf ("%4.4d%2.2d%2.2d",
+#                      $fullyear,$mo,$dy);
+    $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
+                        $fullyear,$mo,$dy,$hr,$min);
+    
+    $fObjAdr = \(FileAttr->new());
+    ($$fObjAdr)->filename($flname);
+    ($$fObjAdr)->fpath($diskDir);
+    ($$fObjAdr)->dsize($size);
+    ($$fObjAdr)->timeS($timeS);
+    ($$fObjAdr)->faccess($maccess);
+    ($$fObjAdr)->fowner($mdowner);
+    $hpssDstFiles[$nHpssFiles] = $fObjAdr;
+   $nHpssFiles++;
+   $nDiskFiles++;
+  }
+closedir DIR;
+}
+}
+print "Total reco files: $nDiskFiles\n";
 
 my $maccess; 
 my $mdowner; 
@@ -246,8 +303,9 @@ my $flname;
    }
  }
 
+for ($ll = 0; $ll<scalar(@SetS); $ll++) {
 
- $sql="SELECT runID, dataset, trigger FROM FileCatalog WHERE fName like '%daq' ";
+ $sql="SELECT DISTINCT runID, dataset, trigger FROM $FileCatalogT WHERE path like '%$SetS[$ll]%' AND dataset like 'AuAu%' AND fName like '%daq' ";
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -270,11 +328,11 @@ my $flname;
      $runDescr[$nrunDescr] = $fObjAdr;
      $nrunDescr++;
  } 
-
+}
 
 ##### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like '$prodSr%' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
 
 
    $cursor =$dbh->prepare($sql)
@@ -320,8 +378,8 @@ my $flname;
 
 ######### declare variables needed to fill the JobStatus table
 
- my $msJobId = "n\/a";
- my $mjobSt = "n\/a";
+ my $msJobId = "n/a";
+ my $mjobSt = "n/a";
  my $mNev  = 0;
  my $mEvtSk = 0;
  my $mCPU = 0;
@@ -329,7 +387,7 @@ my $flname;
  my $mmemSz = 0;
  my $mNoTrk = 0;
  my $mNoVert = 0;
- my $mnodeId = "n\/a";
+ my $mnodeId = "n/a";
  my $jb_sumFile;
  my $msumFile;
  my $msumDir;
@@ -349,18 +407,16 @@ my $flname;
       $first_evts = 0;
       $last_evts = 0;
       $mEvtSk = 0;
-      $mjobSt = "n\/a";
+      $mjobSt = "n/a";
       $mNev  = 0;
       $mCPU = 0;
       $mRealT = 0; 
       $mmemSz = 0;
       $mNoTrk = 0;
       $mNoVert = 0;
-      $mnodeId = "n\/a";
+      $mnodeId = "n/a";
 
-      @parts = split ("/",$msumDir);
- 
-     $JOB_DIR = $jobFDir . $parts[7];
+     $JOB_DIR = $jobFDir . $recoDir ;
 #    print "Job Dir = ", $JOB_DIR, "\n";
  
     $jb_news = $JOB_DIR . "/new_jobs/" . $mjobFname;
@@ -379,11 +435,11 @@ my $flname;
         if ( $filename =~ /$msumFile/ ) {
       $jb_sumFile = $msumDir . "/" . $msumFile;
        $mjobDg = "none";
-       $mjobSt = "n\/a"; 
+       $mjobSt = "n/a"; 
 
            &sumInfo("$jb_sumFile",1);
 
-      print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt,"\n";
+      print "JobFile=", $mjobFname," % ",$jb_sumFile," % ", "Job Status: ", $mjobSt,"\n";
 #     print "Event first, last, Done, Skip :", $first_evts," % ",$last_evts," % ",$mNev," % ", $mEvtSk, "\n";
 
 ##### update JobStatus table with info for jobs completed
@@ -418,24 +474,24 @@ my $flname;
 
 ######## declare variables needed to fill the database table
 
- my $mJobId = "n\/a";
+ my $mJobId = "n/a";
  my $mrunId = 0;
  my $mfileSeq = 0;
  my $mevtType = 0;
- my $mfName = "n\/a";
- my $mpath  = "n\/a";
- my $mdataSet = "n\/a";
+ my $mfName = "n/a";
+ my $mpath  = "n/a";
+ my $mdataSet = "n/a";
  my $msize = 0;
  my $mcTime = 00-00-00;
- my $mowner = "n\/a";
+ my $mowner = "n/a";
  my $mprotc = "-rw-r-----";
- my $mtype = "n\/a";
- my $mcomp = "n\/a";
- my $mformat = "n\/a";
- my $msite = "n\/a";
+ my $mtype = "n/a";
+ my $mcomp = "n/a";
+ my $mformat = "n/a";
+ my $msite = "n/a";
  my $mhpss = "Y";
  my $mstatus = 0;
- my $mdtstat = "OK";
+ my $mdtStat = "OK";
  my $mcomnt = " ";
  my $mcalib = "n/a";
  my $mtrigger = "n/a";
@@ -456,30 +512,30 @@ my $flname;
 
 ##### reinitialize variables
 
- $mJobId = "n\/a"; 
+ $mJobId = "n/a"; 
  $mrunId = 0;
  $mfileSeq = 0;
  $mevtType = 0;
- $mfName = "n\/a";
- $mpath  = "n\/a";
- $mdataSet = "n\/a";
+ $mfName = "n/a";
+ $mpath  = "n/a";
+ $mdataSet = "n/a";
  $msize = 0;
  $mcTime = 00-00-00;
  $mNevts = 0;
  $mNevtLo = 0;
  $mNevtHi = 0;
- $mowner = "n\/a";
+ $mowner = "n/a";
  $mprotc = "-rw-r-----";
- $mtype = "n\/a";
- $mcomp = "n\/a";
- $mformat = "n\/a";
- $msite = "n\/a";
+ $mtype = "n/a";
+ $mcomp = "n/a";
+ $mformat = "n/a";
+ $msite = "n/a";
  $mhpss = "Y";
  $mstatus = 0;
- $mdtstat = "OK";
+ $mdtStat = "OK";
  $mcomnt = " ";   
  $mcalib = "on-fly";
- $mtrigger = "n\/a";
+ $mtrigger = "n/a";
  
 ##### end of reinitialization
 
@@ -527,7 +583,7 @@ my $daqType = 0;
        $mtrig      = ($$runDsc)->dtrg;
 
         if ($mrunId == $Numrun) {
-         $mdataset = $mdtSet;
+         $mdataSet = $mdtSet;
          $mtrigger = $mtrig;
          last;
       }else {
@@ -535,12 +591,6 @@ my $daqType = 0;
       }
   }      
 
-#  foreach my $daqFile (@dbOnFiles){
-#        $daqName =  ($$daqFile)->dName;
-#        $daqType =  ($$daqFile)->evType;
-#        $daqName =~ s/.daq//g; 
-# 	if ($mfName =~ /$daqName/) {
-#           $mevtType = $daqType;
 
  foreach my $jobnm (@jobFSum_set){
        $mproSr   = ($$jobnm)->prSer;
@@ -555,16 +605,15 @@ my $daqType = 0;
  
      chop $mjobSt;        
     if ( $mfName =~ /$dfile/) {
-     if ( $mjobSt ne "Done") {
-
-       $mdtStat = "notOK";
-       $mcomnt = $mjobSt;
+     if ( $mjobSt eq "Done") {
+       $mdtStat = "OK";
+       $mcomnt = " ";
 } else{
-  $mdtStat = "OK";
-  $mcomnt = " ";
+      $mdtStat = "notOK";
+      $mcomnt = $mjobSt;
 }
 
- print "File Name :", $mpath, " % ", $mfName, " % ", $mdataset, " % ", $mtrigger," % ", "Num Events :", $mNevts, "\n";     
+ print "File Name :", $mpath, " % ", $mfName, " % ", $mdataSet, " % ", $mtrigger," % ",$mdtStat ," % ",$mcomnt," % ",$mNevts, " % ", $mcTime, "\n";     
     print "updating FileCatalogT table\n";
  
     &fillDbTable();   
@@ -574,11 +623,6 @@ my $daqType = 0;
         next;
      }
    }   
-#    last;
-#  }else{
-#  next;
-#   } 
-#  }
  }else{
   next;
  }
@@ -677,7 +721,7 @@ sub fillDbTable {
  my $fullDir;
  my $set; 
  
-  for ($ii=0; $ii<$nDHpssDirs; $ii++) {
+  for ($ii=0; $ii<$nHpssDirs; $ii++) {
     my @dird = $ftp->dir($dirs->[$ii]);
 
      for ($jj=0; $jj<@dird; $jj++) {
@@ -713,7 +757,7 @@ sub fillDbTable {
         $year = $year - 1900;
       }
       
-      if( $year > 98 ) {
+      if( $year > 97 ) {
         $year = 1900 + $year;
       } else {
         $year = 2000 + $year;
@@ -734,8 +778,8 @@ sub fillDbTable {
       ($$fObjAdr)->faccess($access);
       ($$fObjAdr)->fowner($downer);
 
-      $files->[$nDHpssFiles] = $fObjAdr;
-      $nDHpssFiles++;
+      $files->[$nHpssFiles] = $fObjAdr;
+      $nHpssFiles++;
       print "File ".$name."\n" if $debugOn;
       }
     } 
@@ -769,9 +813,9 @@ my @output = `more $jb_sum`;
       if ($sum_line =~ /Segmentation violation/) {
               $mjobDg = "Segmentation violation";
           }
-     elsif ($sum_line =~ /buss error/) {
+     elsif ($sum_line =~ /Bus error/) {
              $mjobDg = "bus_error";
-        }  
+        } 
     if($sum_line =~ /Error message/)  {
         @word_sum = split (":", $sum_line); 
            $mjobDg = $word_sum[1];
@@ -808,7 +852,7 @@ my @output = `more $jb_sum`;
               
             }
 ##get max memory size during execution
-            if ($sum_line =~ /Package   tree:/ ) {
+            if ($sum_line =~ /Package   outputStream/ ) {
               @word_sum = split (" ", $sum_line);
                 $mmemSz = $word_sum[5];
             }

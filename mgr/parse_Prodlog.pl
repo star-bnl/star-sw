@@ -385,7 +385,7 @@ sub parse_log($) {
     }
 
     elsif ($line =~ /eventIsCorrupted/)  {
-            $Err_messg = "Corrupted event";
+            $exmessg = "Corrupted event";
     } 
     if ($line =~ /Interpreter error recovered/)  {
              $Err_messg = "Interpreter error recovered";
@@ -503,6 +503,10 @@ sub parse_log($) {
    if($jrun eq "Run not completed" & $Err_messg ne "none") {
      $jrun = $Err_messg ;
    }
+   if( $EvDone == 0 & $exmessg eq "Corrupted event") {
+    $jrun = $exmessg;
+   }
+ 
    print("Job status:", $jrun, " \n");
    print("Extra error message: ", $exmessg, "\n");
 
@@ -521,7 +525,7 @@ sub parse_log($) {
 
   $num_event = $no_event - $EvSkip;
 
-  if( $num_event ne 0 )  {
+  if( $num_event != 0 )  {
    $avr_tracks    = $tot_tracks/$num_event;
    $avr_vertices  = $tot_vertices/$num_event;
    $avr_tpc_hits  = $tot_tpc_hits/$num_event;
@@ -574,7 +578,7 @@ sub parse_log($) {
     print ">>>>>>>>>>>>>>>  Average CPU TIME per EVENT for Makers <<<<<<<<<<<<<<<\n";
     print '=' x 80, "\n";    
 
-   if ($num_event ne 0) {
+   if ($num_event != 0) {
  @cpu_output = `tail -1500 $job_log`;
   foreach $end_line (@cpu_output){
           chop $end_line;
