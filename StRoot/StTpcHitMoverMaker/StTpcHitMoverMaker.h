@@ -14,7 +14,7 @@ class StMagUtilities;
 
 class StTpcHitMover : public StMaker {
  public:
-  StTpcHitMover(const char *name="tpc_hits");
+  StTpcHitMover(const char *name="tpc_hit_mover");
   virtual ~StTpcHitMover();
 
   virtual Int_t Init();
@@ -34,7 +34,7 @@ class StTpcHitMover : public StMaker {
   inline Int_t getOutputMode() const {return mOutputMode;}
 
   virtual const Char_t *GetCVS() const { 
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.2 2004/01/27 01:55:29 jeromel Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.3 2004/01/27 03:57:33 jeromel Exp $ built "__DATE__" "__TIME__; 
     return cvs; 
   }
  protected:
