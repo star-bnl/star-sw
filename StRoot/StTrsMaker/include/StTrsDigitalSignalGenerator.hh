@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.hh,v 1.2 1999/01/18 10:23:00 lasiuk Exp $
+ * $Id: StTrsDigitalSignalGenerator.hh,v 1.3 1999/02/04 18:33:48 lasiuk Exp $
  *
  * Author: brian, October 1998 
  ***************************************************************************
@@ -10,9 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.hh,v $
- * Revision 1.2  1999/01/18 10:23:00  lasiuk
- * add StTrsDigitalSector
+ * Revision 1.3  1999/02/04 18:33:48  lasiuk
+ * remove digSector from constructor;
+ * add fillSector for designation
  *
+ * Revision 1.3  1999/02/04 18:33:48  lasiuk
+ * remove digSector from constructor;
+ * add fillSector for designation
  *
  * Revision 1.2  1999/01/18 10:23:00  lasiuk
  * add StTrsDigitalSector
@@ -42,9 +46,11 @@ class StTrsDigitalSignalGenerator {
 public:
     virtual ~StTrsDigitalSignalGenerator();
 
+    virtual void digitizeSignal()     = 0;
+    virtual void addWhiteNoise()      = 0;
     virtual void addCorrelatedNoise() = 0;
 
-    StTrsDigitalSignalGenerator(StTpcElectronics*, StTrsSector*, StTrsDigitalSector*);
+    void         fillSector(StTrsDigitalSector*);
     
 protected:
     //StTrsDigitalSignalGenerator();
