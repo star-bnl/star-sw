@@ -2,43 +2,12 @@
 
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.1.1.3 1999/09/13 15:14:25 fisyak Exp $
+# $Id: cons,v 1.1.1.4 1999/10/29 23:13:06 fisyak Exp $
 
-$cons_history =
-  q(
-    Modification History:
-
-    Created by Bob Sidebotham <rns@fore.com>
-    Cons Win32 Port by Chriss Stephens <chriss@fore.com>
-    Win32 port bugfixes by Rajesh Vaidheeswarran <rv@fore.com>
-    Win32 bugfixes by Jochen Schwarze <schwarze@isa.de>
-    1.3 Merge for Win32 and UNIX by Rajesh Vaidheeswarran <rv@fore.com>
-    Minimal Shared lib support by Gary Oberbrunner <garyo@genarts.com>
-    1.4 Caching, signatures changes, QuickScan, cleanup <rns@fore.com>
-
-    1.5
-
-    CPPPATH and open file handle fix for Win32 - <Anthony_Kolarik@pilotsw.com>
-    PATHS as arrays <rns@fore.com>
-    Default targets can be specified Steven Knight <knight@baldmt.com>
-    Local Help Functionality (cons flag -h) - <rv@fore.com>
-    Repository method, -R flag, and related methods - <knight@baldmt.com>
-
-    1.6
-
-    Add -q flag to be quiet about Installs and Removals. - <rv@fore.com>
-    More Robust Consign mechanism. - <knight@baldmt.com>
-    InstallAs method to install a file as another - <rv@fore.com>
-    Fix Repository to include appropriate library paths. - <rv@fore.com>
-    Fix SourcePath to return correct repository path. - <rv@fore.com>
-    Win32 Fix to work with generic perl. - <v-ronaar@Exchange.Microsoft.com>
-    Fix futil::copy - <rv@fore.com>
-);
-
-$ver_num = 1.6;
-$ver_rev = "b1";
+$ver_num = 1.7;
+$ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.1.1.3 1999/09/13 15:14:25 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.1.1.4 1999/10/29 23:13:06 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -93,7 +62,7 @@ $| = 1;
 srand(time . $$); # this works better than time ^ $$ in perlfunc manpage.
 
 $usage = q(
-Usage: cons <arguments>
+Usage: cons <arguments> -- <construct-args>
 
 Arguments can be any of the following, in any order:
 
@@ -135,13 +104,11 @@ Arguments can be any of the following, in any order:
 
   -k		Keep going as far as possible after errors.
 
-  -m            Show cons modification history and exit.
-
   -p		Show construction products in specified trees.
   -pa		Show construction products and associated actions.
   -pw		Show products and where they are defined.
 
-  -q		Don't be verbose about Installing and Removing targets.
+  -q		Be quiet about Installing and Removing targets.
 
   -wf <file>    Write all filenames considered into <file>.
 
@@ -161,7 +128,7 @@ Arguments can be any of the following, in any order:
    User documentation of cons is contained in cons and can be obtained
    by doing 'perldoc /path/to/cons'.
 
-   The Official cons site is: http://www.dsmit.com/cons
+   The Official cons site is: http://www.dsmit.com/cons/
 );
 
 # Simplify program name, if it is a path.
@@ -175,7 +142,8 @@ $param::show = 1;		# Show building of targets.
 $param::sigpro = 'md5';		# Signature protocol.
 $param::depfile = '';		# Write all deps out to this file
 $param::salt = undef;		# Salt derived file signatures with this.
-$param::rep_sig_times_ok = 1;	# Repository .consign times are in sync w/files.
+$param::rep_sig_times_ok = 1;	# Repository .consign times are in sync
+				#   w/files.
 $param::quiet = 0;		# should we show the command being executed.
 
 # Display a command while executing or otherwise. This
@@ -189,6 +157,9 @@ sub showcom {
      'CC'	    => 'cc',
      'CFLAGS'	    => '',
      'CCCOM'	    => '%CC %CFLAGS %_IFLAGS -c %< -o %>',
+     'CXX'          => '%CC',
+     'CXXFLAGS'     => '%CFLAGS',
+     'CXXCOM'       => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
      'LINK'	    => '%CC',
      'LINKCOM'	    => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
      'LINKMODULECOM'=> '%LD -r -o %> %<',
@@ -206,12 +177,14 @@ sub showcom {
      'SUFLIBS'      => '.so:.a',
      'SUFMAP'       => {
 	 '.c'  => 'build::command::cc',
-	 '.C'  => 'build::command::cc',
 	 '.s'  => 'build::command::cc',
 	 '.S'  => 'build::command::cc',
-	 '.cc' => 'build::command::cc',
-	 '.cxx'=> 'build::command::cc',
-	 '.cpp'=> 'build::command::cc',
+	 '.C'  => 'build::command::cxx',
+	 '.cc' => 'build::command::cxx',
+	 '.cxx'=> 'build::command::cxx',
+	 '.cpp'=> 'build::command::cxx',
+	 '.c++'=> 'build::command::cxx',
+	 '.C++'=> 'build::command::cxx',
      },
      'SUFOBJ'	    => '.o',
      'ENV'	    => { 'PATH' => '/bin:/usr/bin' },
@@ -224,7 +197,8 @@ if ($main::_WIN32) {
 
 # Handle command line arguments.
 while (@ARGV) {
-    $_ = shift(@ARGV);
+    $_ = shift @ARGV;
+    last if /^--$/;		# Argument passing to Construct.
     &option, next			if s/^-//;
     push (@param::include, $_), next	if s/^\+//;
     &equate, next			if /=/;
@@ -232,21 +206,22 @@ while (@ARGV) {
 }
 
 sub option {
-    if ($_ eq 'm') {
-	print($version, $cons_history), exit(0);
-    } elsif ($_ eq 'v') {
+    if ($_ eq 'v') {
 	print($version);
     } elsif ($_ eq 'V') {
 	print($version), exit(0);
     } elsif ($_ eq 'o') {
 	$param::overfile = shift(@ARGV);
-	die("$0: -o option requires a filename argument.\n") if !$param::overfile;
+	die("$0: -o option requires a filename argument.\n")
+	    if !$param::overfile;
     } elsif ($_ eq 'f') {
 	$param::topfile = shift(@ARGV);
-	die("$0: -f option requires a filename argument.\n") if !$param::topfile;
+	die("$0: -f option requires a filename argument.\n")
+	    if !$param::topfile;
     } elsif ($_ eq 'wf') {
        $param::depfile = shift(@ARGV);
-       die("$0: -wf option requires a filename argument.\n") if !$param::depfile;
+       die("$0: -wf option requires a filename argument.\n")
+	   if !$param::depfile;
     } elsif ($_ eq 'k') {
 	$param::kflag = 1;
     } elsif ($_ eq 'p') {
@@ -284,7 +259,8 @@ sub option {
 	die("$0: -R option requires a repository argument.\n") if !$repository;
 	script::Repository($repository);
     } else {
-	die qq($0: unrecognized option "-$_". Use -x for a usage message.\n) if $_;
+	die qq($0: unrecognized option "-$_". Use -x for a usage message.\n)
+	    if $_;
     }
 }
 
@@ -333,7 +309,7 @@ if ($param::topfile =~ s#(.*)/##) {
 package override;
 if ($param::overfile) {
     my($ov) = $param::overfile;
-    die qq($0: can't read override file "$ov" ($!)\n) if ! -f $ov; #'
+    die qq($0: can\'t read override file "$ov" ($!)\n) if ! -f $ov; #'
     do $ov;
     if ($@) {
 	chop($@);
@@ -387,7 +363,7 @@ for $tgt (map($dir::top->lookup($_), @targets)) {
 	} elsif ($status eq "none") {
 	    #???
 	} else {
-	    print qq($0: don't know how to construct "$path".\n"); #'
+	    print qq($0: don\'t know how to construct "$path".\n); #'
 	    $errors++;
 	}
     }
@@ -497,7 +473,8 @@ sub main::doscripts {
 	    undef %priv::script;
 	}
     }
-    die("$0: script errors encountered: construction aborted\n") if $run::errors;
+    die("$0: script errors encountered: construction aborted\n")
+	if $run::errors;
 }
 
 # Link a directory to another. This simply means set up the *source*
@@ -565,8 +542,10 @@ sub Import {
 	    die qq($0: variable "$var" not exported by file "$path"\n);
 	}
 	if (!defined $imports->{$var}) {
-	    my($path) = $parent->{script}->path;
-	    die qq($0: variable "$var" exported but not defined by file "$path"\n);
+	    my $path = $parent->{script}->path;
+	    my $err = "$0: variable \"$var\" exported but not " .
+		      "defined by file \"$path\"\n";
+	    die $err;
 	}
 	${"script::$var"} = $imports->{$var};
     }
@@ -674,7 +653,7 @@ sub UseCache($@) {
 	    $param::salt = 'M' . $param::salt;
 	    $param::mixtargets = 1;
 	} else {
-	    die qq($0: UseCache unrecognized option "$_"\n");
+	    die qq($0: UseCache unrecognized option "$_"\n);
 	}
     }
     if ($param::cachedisable) {
@@ -758,13 +737,14 @@ sub _resolve {
 # Internal function/method.
 sub _subst {
     my($env, $str) = @_;
-    while ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge) {}
+    while (($str =~ s/\%\{([_a-zA-Z]\w*)\}/$env->{$1}/ge) ||
+	   ($str =~ s/\%([_a-zA-Z]\w*)/$env->{$1}/ge)) {}
     $str;
 }
 
 sub Install {
     my($env) = shift;
-    my($tgtdir) = $dir::cwd->lookupdir(shift);
+    my($tgtdir) = $dir::cwd->lookupdir($env->_subst(shift));
     for $file (map($dir::cwd->lookup($_), @_)) {
 	my($tgt) = $tgtdir->lookup($file->{entry});
 	$tgt->bind(find build::install, $file);
@@ -797,7 +777,7 @@ sub InstallAs {
 	    "are inconsistent in length!\n";
     } else {
 	foreach (0..$#sources) {
-	    my $tfile = $dir::cwd->lookup($targets[$_]);
+	    my $tfile = $dir::cwd->lookup($env->_subst($targets[$_]));
 	    my $sfile = $dir::cwd->lookup($sources[$_]);
 	    $tfile->bind(find build::install, $sfile);
 	}
@@ -847,43 +827,45 @@ sub _Object {
     if ($builder) {
 	$obj->bind((find $builder($objenv)), $src);
     } else {
-	die("don't know how to construct ${\$obj->path} from ${\$src->path}.\n");
+	die("don't know how to construct ${\$obj->path} from " .
+	    "${\$src->path}.\n");
     }
     $obj
 }
 
 sub Program {
     my($env) = shift;
-    my($tgt) = $dir::cwd->lookup(shift);
+    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
     my($progenv) = $env->_resolve($tgt);
     $tgt->bind(find build::command::link($progenv, $progenv->{LINKCOM}),
-	       $env->_Objects(map($dir::cwd->lookup($_), @_)));
+	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
 }
 
 sub Module {
     my($env) = shift;
-    my($tgt) = $dir::cwd->lookup(shift);
+    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
     my($modenv) = $env->_resolve($tgt);
     my($com) = pop(@_);
     $tgt->bind(find build::command::link($modenv, $com),
-	       $env->_Objects(map($dir::cwd->lookup($_), @_)));
+	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
 }
 
 sub LinkedModule {
     my($env) = shift;
-    my($tgt) = $dir::cwd->lookup(shift);
+    my($tgt) = $dir::cwd->lookup($env->_subst(shift));
     my($progenv) = $env->_resolve($tgt);
     $tgt->bind(find build::command::linkedmodule
 	       ($progenv, $progenv->{LINKMODULECOM}),
-	       $env->_Objects(map($dir::cwd->lookup($_), @_)));
+	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
 }
 
 sub Library {
     my($env) = shift;
-    my($lib) = $dir::cwd->lookup(file::addsuffix(shift, $env->{SUFLIB}));
+    my($lib) = $dir::cwd->lookup(file::addsuffix($env->_subst(shift),
+						 $env->{SUFLIB}));
     my($libenv) = $env->_resolve($lib);
     $lib->bind(find build::command::library($libenv),
-	       $env->_Objects(map($dir::cwd->lookup($_), @_)));
+	       $env->_Objects(map($dir::cwd->lookup($env->_subst($_)), @_)));
 }
 
 # Simple derivation: you provide target, source(s), command.
@@ -892,9 +874,9 @@ sub Library {
 # to be a multiple target (all targets built at once).
 sub Command {
     my($env) = shift;
-    my($tgt) = shift;
+    my($tgt) = $env->_subst(shift);
     my($com) = pop(@_);
-    my(@sources) = map($dir::cwd->lookup($_), @_);
+    my(@sources) = map($dir::cwd->lookup($env->_subst($_)), @_);
     if (ref($tgt)) {
 	# A multi-target command.
 	my(@tgts) = map($dir::cwd->lookup($_), @$tgt);
@@ -927,7 +909,7 @@ sub Depends {
 sub QuickScan {
     my($env, $code, $file, $path) = @_;
     $dir::cwd->lookup($file)->{srcscan,$env} =
-	find scan::quickscan($code, $env, $path);
+	find scan::quickscan($code, $env, $env->_subst($path));
 }
 
 # Generic builder module. Just a few default methods.  Every derivable
@@ -997,7 +979,8 @@ sub cachin {
 	if ($param::cachecom) {
 	    map { main::showcom($_) } $self->getcoms($tgt);
 	} else {
-	    printf("Retrieved %s from cache\n", $tgt->path) unless ($param::quiet);
+	    printf("Retrieved %s from cache\n", $tgt->path)
+		unless ($param::quiet);
 	}
 	return 1;
     }
@@ -1064,8 +1047,8 @@ sub getcoms {
 	    my($subst) =
 		join(' ',
 		     $2 eq 'f' ? map($_ && $_->{entry} || (), @src) :
-		     $2 eq 'd' ? map($_ && $_->rfile->{dir}->path || (), @src) :
-		     map($_ && $_->rpath || (), @src));
+		     $2 eq 'd' ? map($_ && $_->rfile->{dir}->path || (), @src)
+			       : map($_ && $_->rpath || (), @src));
 	    $com =~ s/$match/$subst/;
 	}
 
@@ -1121,8 +1104,10 @@ sub action {
 		my($core, $sig) = ($b0 & 0200, $b0 & 0177);
 		my($coremsg) = $core ? "; core dumped" : "";
 		$com =~ s/\s.*//;
-		my($path) = $tgt->path;
-		warn qq($0: *** [$path] $com terminated by signal $sig$coremsg\n);
+		my $path = $tgt->path;
+		my $err = "$0: *** \[$path\] $com terminated by signal " .
+			  "$sig$coremsg\n";
+		warn $err;
 		return undef;
 	      }
 	      if ($b1) {
@@ -1174,7 +1159,7 @@ sub find {
 	# Move its invariant calculation outside the loop
 	# <knight@baldmt.com> 1998-09-22
 	my($flagprefix) = " ${main::LIB_FLAG_PREFIX}";
-	for $dir (map($wd->lookupdir($_), @$pdirs)) {
+	for $dir (map($wd->lookupdir($env->_subst($_)), @$pdirs)) {
 	    my($dpath) = $dir->path;
 	    $ldirs .= $flagprefix . $dpath;
 	    next if $dpath =~ m#^$dir::MATCH_SEPARATOR#o;
@@ -1300,11 +1285,35 @@ BEGIN { @ISA = qw(build::command) }
 sub find {
     $_[1]->{_cc} || do {
 	my($class, $env) = @_;
-	my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
+	my($cpppath) = $env->_subst($env->{CPPPATH});
+	my($cscanner) = find scan::cpp($env->{_cwd}, $cpppath);
 	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
 	my($self) = find build::command($env, $env->{CCCOM});
 	$self->{scanner} = $cscanner;
 	bless $env->{_cc} = $self;
+    }
+}
+
+# Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+
+# Builder for a C++ module
+package build::command::cxx;
+
+BEGIN { @ISA = qw(build::command) }
+
+sub find {
+    $_[1]->{_cxx} || do {
+	my($class, $env) = @_;
+	my($cpppath) = $env->_subst($env->{CPPPATH});
+	my($cscanner) = find scan::cpp($env->{_cwd}, $cpppath);
+	$env->{_IFLAGS} = "%(" . $cscanner->iflags . "%)";
+	my($self) = find build::command($env, $env->{CXXCOM});
+	$self->{scanner} = $cscanner;
+	bless $env->{_cxx} = $self;
     }
 }
 
@@ -1745,7 +1754,8 @@ sub prefix {
 sub srcprefix {
     return $_[0]->{srcprefix} if exists $_[0]->{srcprefix};
     my($srcdir) = $_[0]->srcdir;
-    $srcdir->{srcprefix} = $srcdir eq $_[0] ? $srcdir->prefix : $srcdir->srcprefix;
+    $srcdir->{srcprefix} = $srcdir eq $_[0] ? $srcdir->prefix
+					    : $srcdir->srcprefix;
 }
 
 # Return the related source directory.
@@ -1761,8 +1771,10 @@ sub is_linked {
 }
 
 sub accessible {
-    my($path) = $_[0]->path;
-    die(qq($0: you have attempted to use path "$path" both as a file and as a directory!\n));
+    my $path = $_[0]->path;
+    my $err = "$0: you have attempted to use path \"$path\" both as a file " .
+	      "and as a directory!\n";
+    die $err;
 }
 
 
@@ -1835,7 +1847,7 @@ sub rsrcpath {
     return $_[0]->{rsrcpath} if exists $_[0]->{rsrcpath};
     my($self) = @_;
     my($path) = $self->{rsrcpath} = $self->srcpath;
-    if (@param::rpath && $path !~ m#^$dir::MATCH_SEPARATOR#o && ! -f $path) {
+    if (@param::rpath && $path !~ m+^$dir::MATCH_SEPARATOR+o && ! -f $path) {
 	my($dir);
 	foreach $dir (@param::rpath) {
 	    my($t) = $dir->prefix . $path;
@@ -2044,7 +2056,8 @@ sub _build {
 	    # our calculated signature).
 	    if ($self->local) {
 		# ...but they want a local copy, so provide it.
-		main::showcom("Local copy of ${\$self->path} from ${\$self->rpath}");
+		main::showcom("Local copy of ${\$self->path} from " .
+			      "${\$self->rpath}");
 		futil::install($self->rpath, $self);
 		sig->set($self, $sig);
 	    }
@@ -2070,7 +2083,8 @@ sub _build {
 	    sig->set($self, $sig);
 	    return $self->{status} = 'built';
 	} else {
-	    die("$0: errors constructing ${\$self->path}\n") unless $param::kflag;
+	    die("$0: errors constructing ${\$self->path}\n")
+		unless $param::kflag;
 	    return $self->{status} = 'errors';
 	}
     } else {
@@ -2097,8 +2111,10 @@ sub bind {
 	# the same and the sources are the same.
 	if ("$self->{builder} @{$self->{sources}}" ne "$builder @sources") {
 	    $main::errors++;
-	    my($path) = $self->path;
-	    die("$0: attempt to build ${\$self->path} twice, in different ways!\n");
+	    my $path = $self->path;
+	    my $err = "$0: attempt to build ${\$self->path} twice, " .
+		      "in different ways!\n";
+	    die $err;
 	}
 	return;
     }
@@ -2141,9 +2157,9 @@ sub copy {
     # binary copies. <schwarze@isa.de> 1998-06-18
     File::Copy::copy($sp, $tp) || return undef;
     utime $atime, $mtime, $tp
-	|| die qq($0: can't set modification time for file "$tp" ($!)\n); #'
+	|| die qq($0: can\'t set modification time for file "$tp" ($!)\n); #'
     chmod $mode, $tp
-	|| die qq($0: can't set mode on file "$tp" ($!)\n); #'
+	|| die qq($0: can\'t set mode on file "$tp" ($!)\n); #'
     return 1;
 }
 
@@ -2214,7 +2230,8 @@ sub END {
 	    if (futil::copy($constemp, $consign)) {
 		unlink($constemp);
 	    } else {
-		die("$0: could not rename or copy $constemp to $consign ($!)\n");
+		die("$0: couldn't rename or copy $constemp to $consign " .
+		    "($!)\n");
 	    }
 	}
     }
@@ -2347,8 +2364,11 @@ sub current {
     my($self, $file, $sig) = @_;
     # Uncomment this to debug checks for signature currency.
     # <knight@baldmt.com> 1998-10-29
-#   my $fsig = $self->signature($file); print STDOUT "\$self->signature(${\$file->path}) '$fsig' eq \$sig '$sig'\n"; return $fsig eq $sig;
-    $self->signature($file) eq $sig
+    # my $fsig = $self->signature($file);
+    # print STDOUT "\$self->signature(${\$file->path})
+    #    '$fsig' eq \$sig '$sig'\n";
+    # return $fsig eq $sig;
+    $self->signature($file) eq $sig;
 }
 
 # Store the signature for a file.
@@ -2368,10 +2388,13 @@ sub collect {
 
     # Uncomment this to debug dependency signatures.
     # <schwarze@isa.de> 1998-05-08
-#   my $buf = join(', ', $param::salt, @sigs); print STDOUT "sigbuf=|$buf|\n";
+    # my $buf = join(', ', $param::salt, @sigs);
+    # print STDOUT "sigbuf=|$buf|\n";
     # Uncomment this to print the result of dependency signature calculation.
     # <knight@baldmt.com> 1998-10-13
-#   $buf = unpack("H*", $md5->digest()); print STDOUT "\t=>|$buf|\n"; return $buf;
+    # $buf = unpack("H*", $md5->digest());
+    # print STDOUT "\t=>|$buf|\n";
+    # return $buf;
 
     unpack("H*", $md5->digest());
 }
@@ -2386,7 +2409,9 @@ sub srcsig {
     close(FILE);
     # Uncomment this to print the result of file signature calculation.
     # <knight@baldmt.com> 1998-10-13
-#   my $buf = unpack("H*", $md5->digest()); print STDOUT "$path=|$buf|\n"; return $buf;
+    # my $buf = unpack("H*", $md5->digest());
+    # print STDOUT "$path=|$buf|\n";
+    # return $buf;
     unpack("H*", $md5->digest());
 }
 
@@ -2406,7 +2431,7 @@ the original.
 
 by Bob Sidebotham F<rns@fore.com>
 
-A guide and reference for version 1.6b1
+A guide and reference for version 1.7
 
 Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 
@@ -4307,7 +4332,7 @@ directory). The command is invoked as follows:
 
 
 
-  cons <arguments>
+  cons <arguments> -- <construct-args>
 
 where I<arguments> can be any of the following, in any order:
 
@@ -4373,10 +4398,6 @@ Read override file I<file>.
 
 Keep going as far as possible after errors.
 
-=item C<-m>
-
-Show cons modification history and exit.
-
 =item C<-p>
 
 Show construction products in specified trees. No build is attempted.
@@ -4421,6 +4442,25 @@ Show a help message similar to this one, and exit.
 
 =back
 
+And I<construct-args> can be any arguments that you wish to process in the
+Construct file. Note that there should be a B<--> separating the arguments
+to cons and the arguments that you wish to process in the Construct file.
+
+Processing of I<construct-args> can be done by any standard package like
+B<Getopt> or its variants, or any user defined package. B<cons> will pass in
+the I<construct-args> as B<@ARGV> and will not attempt to interpret anything
+after the B<-->.
+
+    cons -R /usr/local/repository -d os=solaris +driver -- -c test -f DEBUG
+
+would pass the following to cons
+
+    -R /usr/local/repository -d os=solaris +driver
+
+and the following, to the top level Construct file as B<@ARGV>
+
+    -c test -f DEBUG
+
 Note that C<cons -r .> is equivalent to a full recursive C<make clean>, but
 requires no support in the C<Construct> file or any C<Conscript> files. This
 is most useful if you are compiling files into source directories (if you
@@ -4438,8 +4478,81 @@ installs C<export/include/foo.h>, for example, just type:
 
 =head1 B<Using and writing dependency scanners>
 
-T.B.S.
+QuickScan allows simple target-independent scanners to be set up for source
+files. Only one QuickScan scanner may be associated with any given source
+file and environment.
 
+QuickScan is invoked as follows:
+
+	QuickScan CONSENV CODEREF, FILENAME [, PATH]
+
+The subroutine referenced by CODEREF is expected to return a list of
+filenames included directly by FILE. These filenames will, in turn, be
+scanned. The optional PATH argument supplies a lookup path for finding
+FILENAME and/or files returned by the user-supplied subroutine. The
+subroutine is called once for each line in the file, with $_ set to the
+current line. If the subroutine needs to look at additional lines, or, for
+that matter, the entire file, then it may read them itself, from the
+filehandle SCAN. It may also terminate the loop, if it knows that no further
+include information is available, by closing the filehandle.
+
+Whether or not a lookup path is provided, QuickScan first tries to lookup
+the file relative to the current directory (for the top-level file supplied
+directly to QuickScan), or from the directory containing the file which
+referenced the file. This is not very general, but seems good
+enough--especially if you have the luxury of writing your own utilities and
+can control the use of the search path in a standard way. Finally, the
+search path is, currently, colon separated. This may not make the NT camp
+happy.
+
+Here's a real example, taken from a Construct file here:
+
+sub cons::SMFgen {
+    my($env, @tables) = @_;
+    foreach $t (@tables) {
+	$env->QuickScan(sub { /\b\S*?\.smf\b/g }, "$t.smf",
+			$env->{SMF_INCLUDE_PATH});
+	$env->Command(
+	    ["$t.smdb.cc","$t.smdb.h","$t.snmp.cc","$t.ami.cc", "$t.http.cc"],
+	    "$t.smf",
+	    q(
+	      smfgen %( %SMF_INCLUDE_OPT %) %<
+	    )
+	);
+    }
+}
+
+[NOTE that the form $env->QuickScan ...  and $env->Command ... should not be
+necessary, but, for some reason, is required for this particular
+invocation. This appears to be a bug in Perl or a misunderstanding on my
+part; this invocation style does not always appear to be necessary.]
+
+This finds all names of the form <name>.smf in the file. It will return the
+names even if they're found within comments, but that's OK (the mechanism is
+forgiving of extra files; they're just ignored on the assumption that the
+missing file will be noticed when the program, in this example, smfgen, is
+actually invoked).
+
+A scanner is only invoked for a given source file if it is needed by some
+target in the tree. It is only ever invoked once for a given source file.
+
+Here is another way to build the same scanner. This one uses an
+explicit code reference, and also (unecessarily, in this case) reads
+the whole file itself:
+
+sub myscan {
+    my(@includes);
+    do {
+	push(@includes, /\b\S*?\.smf\b/g);
+    } while <SCAN>;
+    @includes
+}
+
+Note that the order of the loop is reversed, with the loop test at the
+end. This is because the first line is already read for you. This scanner
+can be attached to a source file by:
+
+    QuickScan $env \myscan, "$_.smf";
 
 =head1 B<Support and Suggestions>
 
@@ -4449,4 +4562,4 @@ B<cons-discuss-request@eng.fore.com> with body B<subscribe>.
 Please report any bugs/fixes/suggestions through the
 cons-discuss@eng.fore.com mailing list.
 
-The Official cons site is: http://www.dsmit.com/cons
+The Official cons site is: http://www.dsmit.com/cons/
