@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtBadAnode.hh,v 1.1 2000/08/21 12:56:47 caines Exp $
+ * $Id: StSvtBadAnode.hh,v 1.2 2001/09/28 15:36:51 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -29,8 +29,8 @@ protected:
 };
 
 inline void StSvtBadAnode::SetBadAnode(int AnodeNumber, int value)
-{mBadAnode[AnodeNumber] = value;}
+{mBadAnode[AnodeNumber-1] = value;}
 inline int StSvtBadAnode::IsBadAnode(int AnodeNumber)
-{ return ((mBadAnode[AnodeNumber]>0) ? 1 : 0);}
+{ return ((mBadAnode[AnodeNumber-1]>0) ? 1 : 0);}
 
 #endif
