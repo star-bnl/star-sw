@@ -49,6 +49,7 @@ public:
   double maxSearchWindow;
   double searchWindowScale;
   double maxChi2ForSelection;
+  double maxChi2Vertex;
   double massHypothesis;
 };
 

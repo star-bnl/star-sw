@@ -57,7 +57,7 @@ ostream& operator<<(ostream&, const StiTrack&);
 void StiKalmanTrackFinder::initialize()
 {
   //set the cached variables
-	cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
+  cout << "StiKalmanTrackFinder::initialize() -I- Started"<<endl;
   _toolkit = StiToolkit::instance();
   _trackSeedFinder   = _toolkit->getTrackSeedFinder();
   _trackNodeFactory  = _toolkit->getTrackNodeFactory(); 
@@ -71,7 +71,7 @@ void StiKalmanTrackFinder::initialize()
   _mcTrackContainer  = _toolkit->getMcTrackContainer();
   _vertexFinder      = _toolkit->getVertexFinder();
   _eventFiller       = new StiStEventFiller();
-	cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
+  cout << "StiKalmanTrackFinder::initialize() -I- Done"<<endl;
 }
 
 StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit*toolkit)
@@ -158,57 +158,55 @@ void StiKalmanTrackFinder::findTracks()
 {
   if (!_trackContainer)
     throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackContainer==0");
-	if (!_trackSeedFinder)
-		throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackSeedFinder==0");
+  if (!_trackSeedFinder)
+    throw runtime_error("StiKalmanTrackFinder::findTracks() -F- _trackSeedFinder==0");
   StiKalmanTrack * track;
   // find global tracks
-	_messenger<<"StiKalmanTrackFinder::findTracks() -I- Begin tracking loop"<<endl;
-	try
-		{
-			while (_trackSeedFinder->hasMore())
-				{ 
-					try
-						{
-							// obtain track seed from seed finder
-							track = _trackSeedFinder->next();
-							if (!track) break;
-							track->find();
-							//cout << "T: maxpoints:"<< track->getMaxPointCount();
-							//cout << " points:"<< track->getPointCount()<<endl;
-							StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-							if (t) t->update();
-							if (_trackFilter && _trackFilter->filter(track)) 
-								_trackContainer->push_back(track);
-							else
-								_trackContainer->push_back(track);
-						}
-					catch (runtime_error & rte)
-						{
-							_messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
-						}
-				}
-				if (_eventFiller)
-					_eventFiller->fillEvent(_event, _trackContainer);
-				if (_vertexFinder)
-					{
-						StiHit *vertex=0;
-						vertex = _vertexFinder->findVertex(_event);
-						if (vertex)
-							{
-								extendTracksToVertex(vertex);
-								if (_eventFiller)
-								_eventFiller->fillEventPrimaries(_event, _trackContainer);
-							}						
-					}
-		}
-	catch (runtime_error & rte)
-		{
-			_messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
-		}
+  _messenger<<"StiKalmanTrackFinder::findTracks() -I- Begin tracking loop"<<endl;
+  try
+    {
+      while (_trackSeedFinder->hasMore())
+	{ 
+	  try
+	    {
+	      // obtain track seed from seed finder
+	      track = _trackSeedFinder->next();
+	      if (!track) break;
+	      track->find();
+	      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+	      if (t) t->update();
+	      if (_trackFilter && _trackFilter->filter(track)) 
+		_trackContainer->push_back(track);
+	      else
+		_trackContainer->push_back(track);
+	    }
+	  catch (runtime_error & rte)
+	    {
+	      _messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
+	    }
+	}
+      if (_eventFiller)
+	_eventFiller->fillEvent(_event, _trackContainer);
+      if (_vertexFinder)
+	{
+	  StiHit *vertex=0;
+	  vertex = _vertexFinder->findVertex(_event);
+	  if (vertex)
+	    {
+	      extendTracksToVertex(vertex);
+	      if (_eventFiller)
+		_eventFiller->fillEventPrimaries(_event, _trackContainer);
+	    }						
+	}
+    }
+  catch (runtime_error & rte)
+    {
+      _messenger<< "StiKalmanTrackFinder::findTracks() - Run Time Error :" << rte.what() << endl;
+    }
 }
   
 /*! Fit all track produced by the track seed finder. 
- <p>
+  <p>
  This method is useful when the seed finder returns full tracks produced
  by a 3rd party track finder e.g. the tpt package.
  <p>Fitted tracks are added to the track container if no track 
@@ -268,6 +266,8 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   int goodCount= 0;
   int plus=0;
   int minus=0;
+  int helPlus = 0;
+  int helMinus = 0;
   for (TrackMap::const_iterator it=_trackContainer->begin(); 
        it!=_trackContainer->end(); 
        ++it) 
@@ -281,6 +281,12 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 	    plus++;
 	  else
 	    minus++;
+	  const StiKalmanTrack* tempo = dynamic_cast<const StiKalmanTrack*>((*it).second);
+	  if (tempo->getInnerMostHitNode()->getHelicity()>0)
+	    helPlus++;
+	  else
+	    helMinus++;
+	   
 	}
       catch (runtime_error & rte) 
 	{
@@ -293,9 +299,10 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
   cout << "SKTF::extendTracksToVertex(StiHit* vertex) -I- rawCount:"<<rawCount<<endl
        << "                                          extendedCount:"<<goodCount<<endl
        << "                                                   plus:"<<plus<<endl
-       << "                                                  minus:"<<minus<<endl;
+       << "                                                  minus:"<<minus<<endl
+       << "                                                helPlus:"<<helPlus<<endl
+       << "                                               helMinus:"<<helMinus<<endl;
 }
-
 
 /// Find extension (track) to the given track seed
 /// Return Ok      if operation was successful

@@ -199,34 +199,26 @@ void StiKalmanTrack::initialize(double curvature,
   double alpha;
   StThreeVectorD temp;
   const StiDetector* detector;
-  TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -1----------------------------"<<endl;
   for (it=hits.begin(); it!=hits.end(); ++it)
     {
-      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -2----------------------------"<<endl;
       detector = (*it)->detector();
-      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -3----------------------------"<<endl;
-
       if (!detector) 
 	{
 	  cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
 	  throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
 	}
       // if alpha is same, avoid recalculating eta
-      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -4----------------------------"<<endl;
       alpha = detector->getPlacement()->getNormalRefAngle();
       if (alphaP!=alpha)
 	{
-	  TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -4a----------------------------"<<endl;
-
 	  temp = origin;
 	  temp.rotateZ(-alpha);
 	  eta = curvature*temp.x();
 	  alphaP=alpha;
 	}
-      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -5----------------------------"<<endl;
       TRACKMESSENGER << *add((*it),alpha,eta,curvature,tanl);
     }
-  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Done -----------------------------"<<endl;
+  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Done"<<endl;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
@@ -553,6 +545,10 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
    </ol>
 	 \return outer most hit node on this track
 */
+
+int bozo;
+
+
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
   if (firstNode==0 || lastNode==0)
@@ -563,6 +559,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
     {
       for (it=begin();it!=end();it++)
 	{
+	  if (bozo>0) cout << "--------- 1 ----------- HIT:"<< *it<<endl;
 	  if ((*it).getHit())
 	    return &*it;
 	}
@@ -571,6 +568,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
     {	
       for (it=end();it!=begin();it--)
 	{
+	  if (bozo>0) cout << "--------- 2 ----------- HIT:"<< *it<<endl;
 	  if ((*it).getHit())
 	    return &*it;
 	}
@@ -588,9 +586,11 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 */
 bool  StiKalmanTrack::isPrimary() const
 {
-  //modified 2-14-2003; fX -> _x, correct???
+  bozo =1;
   StiKalmanTrackNode * node = getInnerMostHitNode();
-  return (node->_x<2.) ? true : false;
+  bozo =0;
+  cout << "StiKalmanTrack::isPrimary() -I- innerMostHitNode->_x :" << node->_x<<endl;
+  return (fabs(node->_x)<2.) ? true : false;
 }
 
 /*! Swap the track node sequence inside-out
@@ -770,45 +770,30 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   StiHit localVertex = *vertex;
   sNode = lastNode;
   localVertex.rotate(sNode->getRefAngle());
-  cout << "vx:"<<localVertex.x()
-       << "vy:"<<localVertex.y()
-       << "vz:"<<localVertex.z()<<endl;
-
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
-
-  cout << "StiKalmanTrack::extendToVertex() -I- original pt:"<< getPt()<<endl;
-
-
   tNode->reset();
-	//  if (tNode->propagate(sNode, vertex))
-  bool propagateResult=tNode->propagate(sNode,vertex);
-  cout <<"Propagate Result= "<<propagateResult<<endl;
-  if (propagateResult)
-  {
-     chi2 = tNode->evaluateChi2(&localVertex); 
-     if (chi2<2000.)// pars->maxChi2ForSelection)
+  StiHit *myHit;
+  cout << "x,y,z:"<< localVertex.x() << " " <<  localVertex.y() << localVertex.z() << endl;
+  cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
+  cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
+  if (tNode->propagate(sNode, &localVertex))
+    { 
+      cout << "SKT::extendToVertex() -I-1 tNode->_x:"<< tNode->_x<<endl;
+      chi2 = tNode->evaluateChi2(&localVertex); 
+      if (chi2<pars->maxChi2Vertex)
 	{
-	  // storing a pointer to the vertex 
-	  // should I use localVertex?
-	  StiHit * myHit = StiToolkit::instance()->
-	    getHitFactory()->getInstance();
+	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
 	  tNode->setHit(myHit);
 	  tNode->setChi2(chi2);
 	  tNode->setDetector(0);
 	  add(tNode);
-	  cout << "StiKalmanTrack::extendToVertex() -I- updated  pt:"<< getPt()<<endl;
-	  cout << "inout fit"<<endl;
-	  fit(kInsideOut);
-	  cout << "out-in fit"<<endl;
-	  fit(kOutsideIn);
+	  cout << "SKT::extendToVertex() -I-2 tNode->_x:"<< tNode->_x<<endl;
 	  trackExtended = true;
-	  cout << "StiKalmanTrack::extendToVertex() -I- refitted  pt:"<< getPt()<<endl;
 	}
-     return trackExtended;
-  }//end if (propogate returns true)
-  return false;
+    }
+  return trackExtended;
 }
 
 bool StiKalmanTrack::find(int direction)
