@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.2 2003/05/12 12:12:18 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.3 2003/05/14 10:49:12 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,8 +9,8 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
- * Revision 1.2  2003/05/12 12:12:18  subhasis
- * StEvent added
+ * Revision 1.3  2003/05/14 10:49:12  subhasis
+ * CPV clustering added
  *
  *
  *************************************************/
@@ -72,7 +72,7 @@ void StPmdClusterMaker::bookHistograms()
   mPmdCluster  = new TH1F("PmdCluster"," NCluster in PMD",100,0,5000);
   mPhi2ModPmd  = new TH2F("Phi2ModPmd","Phi vs Mod",12,0.5,12.5,360,-3.14,3.14);
   mHitVscluster  = new TH2F("Pmd_hitvsClus","Hit vsclusPMD",50,0.5,50.5,50,0.5,50.5);
-
+  mSigmaCpvCluster = new TH1F("SigmaClusterCpv","Cluster Sigma",50,0.5,4.5);  
   mSmCpvCluster   = new TH1F("Smno_cpv","CPV SuperModule No",24,1.,24.);
   mEdepCpvCluster = new TH1F("EdepCpv","Cpv Energy deposited",600,0.,0.00004);  
   mNcellCpvCluster = new TH1F("NcellCpv","No of Cellsper cls (CPV)",50,-0.5,49.5);  
@@ -159,9 +159,10 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
       Int_t mod=spmcl1->Module();
       Int_t ncell=spmcl1->NumofMems();
       //      cout<<"Eta,Phi,Edep,Sigma,Ncell "<<eta<<" "<<phi<<" "<<edep<<" "<<sigma<<" "<<ncell<<endl;
+
       TIter next1(spmcl1->HitCollection());
       StPmdHit  *hit;
-
+      //! loop over each cluster for getting hits
       for(Int_t im=0;im<ncell;im++){
 	hit = (StPmdHit*)next1();
 
@@ -193,11 +194,26 @@ void StPmdClusterMaker::FillHistograms(StPmdDetector* pmd_det, StPmdDetector* cp
       Float_t phi=spmcl2->CluPhi();
       Float_t edep=spmcl2->CluEdep();
       Int_t mod=spmcl2->Module();
-      Int_t ncell=spmcl1->NumofMems();
+      Float_t sigma=spmcl2->CluSigma();
+      Int_t ncell1=spmcl2->NumofMems();
+
+      TIter next1(spmcl2->HitCollection());
+      StPmdHit  *hit;
+      //! loop over each cluster for getting hits
+      for(Int_t im=0;im<ncell1;im++){
+	hit = (StPmdHit*)next1();
+
+	if(hit){
+	  //	  Int_t row = hit->Row();
+	  //	  Int_t super = hit->Gsuper();
+	  //	  Int_t col = hit->Column();
+
+	}
+      }
       mSmCpvCluster->Fill(Float_t(mod));
       mEdepCpvCluster->Fill(edep);
-      
-      mNcellCpvCluster->Fill(Float_t(ncell));
+      mSigmaCpvCluster->Fill(sigma);
+      mNcellCpvCluster->Fill(Float_t(ncell1));
       mEtaCpvCluster->Fill(eta);
       mPhiCpvCluster->Fill(phi);
     }

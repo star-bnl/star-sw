@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.2 2003/05/12 12:12:18 subhasis Exp $
+ * $Id: StPmdClusterMaker.h,v 1.3 2003/05/14 10:49:12 subhasis Exp $
  *
  * Author:
  *
@@ -14,8 +14,8 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
- * Revision 1.2  2003/05/12 12:12:18  subhasis
- * StEvent added
+ * Revision 1.3  2003/05/14 10:49:12  subhasis
+ * CPV clustering added
  *
  * Initial version:
  ************************************************************/
@@ -53,6 +53,7 @@ class StPmdClusterMaker: public StMaker{
 
   TH1F *mSmCpvCluster;      //!  supermodule no for Cpv
   TH1F *mEdepCpvCluster;    //!  cluster edep in Cpv
+  TH1F *mSigmaCpvCluster;    //!  cluster Sigma in Cpv
   TH1F *mNcellCpvCluster;    //!  cluster edep in Cpv
   TH1F *mEtaCpvCluster;     //!  cluster eta in Cpv 
   TH1F *mPhiCpvCluster;     //!  cluster phi in Cpv 
