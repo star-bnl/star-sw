@@ -44,7 +44,7 @@ my $debugOn = 0;
 
 # my @dirSet = ("auau100", "auau128", "auau200", "augas100", "pau200", "pp200", "sisi200");
 my @dirSet = ("auau128","auau130","auau200");
-my @dirSet = 
+#my @dirSet = ("augas100","pau200","pp200");
 my $topHpssSink  =  "/home/starsink/raw";
 my $topHpssReco  =  "/home/starreco/reco";
 
@@ -77,6 +77,7 @@ my @hpssGeantFiles;
 my @checkedSimuDirs;
 
 my $nHpssDirs = 3;
+#my $nHpssDirs = 1;
 my $nHpssFiles = 0;
 
 my @jobIn_set;
@@ -88,10 +89,14 @@ my $jobIn_no = 0;
  $hpssGeantDirs[0] = $topHpssSink . "/" . "auau200";
  $hpssGeantDirs[1] = $topHpssSink . "/" . "auau128";
  $hpssGeantDirs[2] = $topHpssSink . "/" . "auau130";
+# $hpssGeantDirs[0] = $topHpssSink . "/" . "augas100";
+# $hpssGeantDirs[1] = $topHpssSink . "/" . "pau200";
+# $hpssGeantDirs[2] = $topHpssSink . "/" . "pp200";
+
  $checkedSimuDirs[0] = 0; 
  $checkedSimuDirs[1] = 0;
  $checkedSimuDirs[2] = 0;
-my $ftpSimu = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
+my $ftpSimu = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
   or die "HPSS access failed";
 $ftpSimu->login("starsink","MockData") or die "HPSS access failed";
 
@@ -275,7 +280,7 @@ elsif ( $gflag eq 2) {
  print "Set: ", $mdataSet, "Path: ", $mpath,"File:", $mfName, "Date:", $mcTime, "\n";
 
 ## update GEANT files in Files Catalog 
-#   print "Updating Files Catalog\n";
+   print "Updating Files Catalog\n";
 #   &updateDbTable();  
 
 }
@@ -407,6 +412,7 @@ sub walkHpss {
       my $sec = 0;
       my $min = 0;
       my $hr = 0;
+# print "Initial year: ", $fname," % ",$year, "\n";
       if ( $year =~ m/:/ ) {
         ( $hr, $min ) = split(/:/,$year);
         $year = (localtime())[5];
@@ -414,13 +420,13 @@ sub walkHpss {
         $year = $year - 1900;
       }
       
-      if( $year > 98 ) {
+      if( $year > 97 ) {
         $year = 1900 + $year;
       } else {
         $year = 2000 + $year;
       }
       $fflag = 1;   
-   
+
       $timeS = sprintf ("%4.4d%2.2d%2.2d",
                         $year,$monthD,$day);
       
@@ -447,6 +453,7 @@ sub walkHpss {
       my $sec = 0;
       my $min = 0;
       my $hr = 0;
+
       if ( $year =~ m/:/ ) {
 	( $hr, $min ) = split(/:/,$year);
 	$year = (localtime())[5];
@@ -454,13 +461,13 @@ sub walkHpss {
 	$year = $year - 1900;
       }
       
-      if( $year > 98 ) {
+      if( $year > 97 ) {
 	$year = 1900 + $year;
       } else {
 	$year = 2000 + $year;
       }
       $fflag = 1;   
-   
+
 #     $timeS = sprintf ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:00",
 #                        $year,$monthD,$day,$hr,$min);
    
