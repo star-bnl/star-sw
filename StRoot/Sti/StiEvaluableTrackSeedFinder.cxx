@@ -119,7 +119,11 @@ bool StiEvaluableTrackSeedFinder::hasMore()
 
 StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 {
-    return makeTrack(*(mCurrentMc++));
+    StiKalmanTrack* track = 0;
+    while (track==0 && hasMore()) {
+	track = makeTrack(*(mCurrentMc++));
+    }
+    return track;
 }
 
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
@@ -136,10 +140,12 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 	return 0;
     }
 
-    pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range = mcToStTrackMap->equal_range(mcTrack);
+    pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range =
+	mcToStTrackMap->equal_range(mcTrack);
     if (range.first==mcToStTrackMap->end()) {
-	cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
-	cout <<"No valid range found.  Abort"<<endl;
+	//These return values are now caught before exiting the seedFinder control
+	//cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
+	//cout <<"No valid range found.  Abort"<<endl;
 	return 0;
     }
     
@@ -150,8 +156,9 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     StTrackPairInfo* bestPair = theBest.pair();
     
     if (!bestPair) {
-	cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
-	cout <<"BestPair==0.  Abort"<<endl;
+	//These return values are now caught before exiting the seedFinder control
+	//cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
+	//cout <<"BestPair==0.  Abort"<<endl;
 	return 0;
     }
     else {
@@ -159,10 +166,12 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     }
     track->setStTrackPairInfo(bestPair);
 
-    //StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track); //unfiltered
-    StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track, mTpcHitFilter); //fitlered
+    //fitlered
+    StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(),
+						 track, mTpcHitFilter);
 
-    //Set StiDetectorContainer to layer corresponding to the innermost point on the track seed
+    //Set StiDetectorContainer to layer corresponding to
+    //the innermost point on the track seed
     StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
     if (!node) {
 	cout <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
