@@ -44,6 +44,7 @@ public:
    	operator const UShort_t* 	&();	//type 32
    	operator const UInt_t* 		&();	//type 33
    	operator const ULong_t*		&();	//type 34
+        void *Addr(){return fV;}
 
 private:
         void *Addr(Int_t outType);
