@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.2 2001/04/24 18:20:13 ullrich Exp $
+ * $Id: StTofCollection.h,v 2.3 2001/10/01 19:40:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.3  2001/10/01 19:40:58  ullrich
+ * Added methods and members for StTofData.
+ *
  * Revision 2.2  2001/04/24 18:20:13  ullrich
  * Added hits and slats to collection.
  *
@@ -29,13 +32,12 @@
 #include "StEnumerations.h"
 #include "StTofHit.h"
 #include "StTofSlat.h"
+#include "StTofData.h"
 
 class StTofCollection : public StObject {
 public:
     StTofCollection();
     ~StTofCollection();
-//  StTofCollection(const StTofCollection&) { /* use default */ }
-//  StTofCollection& operator=(const StTofCollection&) {/* use default */}
 
     const StSPtrVecTofSlat&    tofSlats() const;
     StSPtrVecTofSlat&          tofSlats();
@@ -43,16 +45,22 @@ public:
     const StSPtrVecTofHit&     tofHits() const;
     StSPtrVecTofHit&           tofHits();
 
+    const StSPtrVecTofData&    tofData() const;
+    StSPtrVecTofData&          tofData();
+
     void addSlat(const StTofSlat*);
     void addHit(const StTofHit*);
+    void addData(const StTofData*); 
 
     bool slatsPresent()    const;
     bool hitsPresent()     const;
+    bool dataPresent()     const;
     
 private:
     StSPtrVecTofSlat           mTofSlats;
     StSPtrVecTofHit            mTofHits;
+    StSPtrVecTofData           mTofData;
   
-    ClassDef(StTofCollection, 1)
+    ClassDef(StTofCollection, 2)
 };
 #endif
