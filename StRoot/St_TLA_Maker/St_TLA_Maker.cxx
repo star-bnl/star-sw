@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.9 1999/03/11 03:33:16 perev Exp $
+// $Id: St_TLA_Maker.cxx,v 1.10 1999/03/20 20:52:38 fisyak Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.10  1999/03/20 20:52:38  fisyak
+// New scheme
+//
 // Revision 1.9  1999/03/11 03:33:16  perev
 // new schema
 //
@@ -38,7 +41,7 @@
 ClassImp(St_TLA_Maker)
 
 //_____________________________________________________________________________
-St_TLA_Maker::St_TLA_Maker(const char *name, const char *title):StMaker(name,title){
+St_TLA_Maker::St_TLA_Maker(const char *name):StMaker(name){
 }
 //_____________________________________________________________________________
 St_TLA_Maker::~St_TLA_Maker(){
@@ -59,7 +62,7 @@ Int_t St_TLA_Maker::Make(){
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.9 1999/03/11 03:33:16 perev Exp $\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.10 1999/03/20 20:52:38 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
