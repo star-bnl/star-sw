@@ -67,8 +67,6 @@ C---------------
          iv2s = 0
          iv1t = 0
          iv2t = 0
-
-
          
          do j=start_tpc,tpt_track_h.nok
             if( tpt_track(j).id_globtrk .eq. iv1) then
