@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.5 2001/08/24 20:58:35 caines Exp $
+ * $Id: StSvtHybridData.cc,v 1.6 2002/01/05 21:44:06 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.6  2002/01/05 21:44:06  caines
+ * Initialise TimeZero and first sca always
+ *
  * Revision 1.5  2001/08/24 20:58:35  caines
  * Zero Seq and nseq for getSequences
  *
@@ -41,6 +44,8 @@ StSvtHybridData::StSvtHybridData() : StSvtHybridObject()
 {
   // Default Constructor
   nAnodes = 0;
+  mSCAZero =0;
+  mTimeZero = 0;
   anodeList = NULL;       
   nSeq = NULL;            
   seq = NULL;    
@@ -51,6 +56,8 @@ StSvtHybridData::StSvtHybridData(int barrel, int ladder, int wafer, int hybrid) 
 {
   //This constructor has four input parameters: Barrel, Ladder, Wafer and Hybrid number (as expected).
   nAnodes = 0;
+  mSCAZero = 0;
+  mTimeZero = 0;
   anodeList = NULL;       
   nSeq = NULL;            
   seq = NULL;    
@@ -73,6 +80,8 @@ StSvtHybridData::StSvtHybridData(const StSvtHybridData& hybrid)
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
   nAnodes   = hybrid.nAnodes;
+  mTimeZero = hybrid.getTimeZero();
+  mSCAZero  = hybrid.getSCAZero();
 
   anodeList = new int[nAnodes];
   nSeq = new int[nAnodes];
@@ -101,6 +110,8 @@ StSvtHybridData& StSvtHybridData::operator = (const StSvtHybridData& hybrid)
   mWafer    = hybrid.mWafer;
   mHybrid   = hybrid.mHybrid;
   nAnodes   = hybrid.nAnodes;
+  mTimeZero = hybrid.getTimeZero();
+  mSCAZero  = hybrid.getSCAZero();
   
   anodeList = new int[nAnodes];
   nSeq = new int[nAnodes];
