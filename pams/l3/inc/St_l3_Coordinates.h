@@ -1,14 +1,20 @@
 #ifndef St_l3_Coordinates_hh
 #define St_l3_Coordinates_hh
 
-//#define OFFLINE
-#ifdef OFFLINE
-//#include <StObject.h>
+#undef L3OFFLINE
+//#define L3OFFLINE
+#ifdef L3OFFLINE
+#include "Rtypes.h"
+#include <StObject.h>
 #endif
 
+#ifdef L3OFFLINE
+class St_l3_xyz_Coordinate { //:public StObject {
+#else
 class St_l3_xyz_Coordinate  {
+#endif
 
- private:
+ private: 
     double xyz[3] ;
   
  public:
@@ -36,18 +42,19 @@ class St_l3_xyz_Coordinate  {
 	    xyz[2] = Z ;  
 	}
 
-#ifdef OFFLINE
+#ifdef L3OFFLINE
     // Root connection
-    ClassDef(St_l3_xyz_Coordinate,1)
+    ClassDef(St_l3_xyz_Coordinate,0)
 #endif 
 } ;
 
-
-
-class St_l3_ptrs_Coordinate {
-
- private:
-    double ptrs[4] ; // pad, time, row, sec as double !
+#ifdef L3OFFLINE
+ class St_l3_ptrs_Coordinate { //:public StObject {
+#else
+   class St_l3_ptrs_Coordinate {
+#endif
+   private:
+     double ptrs[4] ; // pad, time, row, sec as double !
   
  public:
      St_l3_ptrs_Coordinate() { ptrs[0] = ptrs[1] = ptrs[2] = ptrs[3] = 0 ; }  ;  // empty constructor
@@ -79,9 +86,9 @@ class St_l3_ptrs_Coordinate {
 	     ptrs[3] = S ; 
 	 } ;
 
-#ifdef OFFLINE 
+#ifdef L3OFFLINE 
      // Root connection
-     ClassDef(St_l3_ptrs_Coordinate, 1)
+     ClassDef(St_l3_ptrs_Coordinate, 0)
 #endif 
 } ;
 

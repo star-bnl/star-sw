@@ -15,18 +15,18 @@
 
 #include <stdio.h>
 #include <iostream.h>
-//#include <strings.h>
-//#include <sys/types.h>
 #include <stdlib.h>
 #include "St_l3_Coordinate_Transformer.h"
 #include "St_l3_Coordinates.h"
-
-#ifdef OFFLINE
+#undef L3OFFLINE
+//#define L3OFFLINE
+//#ifdef L3OFFLINE
 #include "StDbUtilities/StCoordinates.hh"
 #include "StTpcDb/StTpcDb.h"
-
-ClassImp(St_l3_Coordinate_Transformer);
-#endif
+//ClassImp(St_l3_Coordinate_Transformer);
+//ClassImp(St_l3_xyz_Coordinate);
+//ClassImp(St_l3_ptrs_Coordinate);
+//#endif
 
 //______________________________
 St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
@@ -46,7 +46,7 @@ St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
 //______________________________
 St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
 {
-   if (transformation_errors>0)
+   if (transformation_errors>1000)
        {
 	   cout << transformation_errors << " transformation errors occured.\n";
        }
@@ -119,11 +119,6 @@ void St_l3_Coordinate_Transformer::global_to_raw(int sector, int row,
     local_to_raw( row ,local ,raw ) ;
 }
 //______________________________
-
-
-
-
-
 void St_l3_Coordinate_Transformer::global_to_local(const St_l3_xyz_Coordinate &global, St_l3_xyz_Coordinate &local ,St_l3_ptrs_Coordinate &raw) 
 {
 
@@ -182,8 +177,7 @@ void St_l3_Coordinate_Transformer::global_to_local(const St_l3_xyz_Coordinate &g
       }
 
 }
-
-
+//______________________________
 void St_l3_Coordinate_Transformer::global_to_local(
         int sector, int row,  
         const St_l3_xyz_Coordinate &global, St_l3_xyz_Coordinate &local ) 
@@ -258,8 +252,7 @@ void St_l3_Coordinate_Transformer::local_to_raw(const St_l3_xyz_Coordinate &glob
   raw.Sett(bucket);
   raw.Setr(row);
 }
-
-
+//______________________________
 void St_l3_Coordinate_Transformer::local_to_raw( int row ,const St_l3_xyz_Coordinate &local , St_l3_ptrs_Coordinate &raw ) 
 {
   // then lets go for the pad
@@ -291,7 +284,6 @@ void St_l3_Coordinate_Transformer::local_to_raw( int row ,const St_l3_xyz_Coordi
   raw.Sett(bucket);
   raw.Setr(row);
 }
-
 //______________________________
 void St_l3_Coordinate_Transformer::Set_parameters_by_hand(const double mlengthPerTb, const double mdrift_length_inner, const double mdrift_length_outer)
 {
@@ -319,7 +311,7 @@ void St_l3_Coordinate_Transformer::Set_parameters_by_hand()
 //______________________________
 void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
 {
-#ifdef OFFLINE
+  //#ifdef L3OFFLINE
   // perform official transform and recalulate parameters
   // the official transform doesn't take doubles for pad and time
   // that's why we must extract the parameters ...
@@ -380,15 +372,16 @@ void St_l3_Coordinate_Transformer::Use_transformation_provided_by_db()
   // set max timebucket
   max_tb_inner = drift_length_inner/lengthPerTb;
   max_tb_outer = drift_length_outer/lengthPerTb;
-#else
-  cout << "This is not functional online.\n" ;
-#endif 
+
+  //#else
+  // cout << "This is not functional online.\n" ;
+  //#endif 
 
 }
 //______________________________
 void St_l3_Coordinate_Transformer::Get_parameters_from_db()
 {
-#ifdef OFFLINE
+#ifdef L3OFFLINE
   // connect to database
   double driftvelocity = gStTpcDb->DriftVelocity();
   double inner_effective_driftlength = gStTpcDb->Dimensions()->innerEffectiveDriftDistance();
