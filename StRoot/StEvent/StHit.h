@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.14 2004/08/06 15:37:09 fisyak Exp $
+ * $Id: StHit.h,v 2.15 2004/08/18 19:00:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.15  2004/08/18 19:00:19  ullrich
+ * Added access function hardwarePosition().
+ *
  * Revision 2.14  2004/08/06 15:37:09  fisyak
  * Add clster id
  *
@@ -95,10 +98,13 @@ public:
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
     int             usedInFit() const;
-    UShort_t        idTruth() const {return mIdTruth;}
-    UShort_t        quality() const {return mQuality;}
-    UShort_t        id()      const {return mId;}
-    StHit*          nextHit() const {return mNextHit;}
+    unsigned short  idTruth() const;
+    unsigned short  quality() const;
+    unsigned short  id()      const;
+    StHit*          nextHit() const;
+    unsigned int    hardwarePosition() const;
+    
+    
     void setCharge(float);
     void setFlag(unsigned char);
     void setFitFlag(unsigned char);
@@ -130,4 +136,10 @@ inline unsigned int StHit::bits(unsigned int bit, unsigned int nbits) const
 {
     return (mHardwarePosition>>bit) & ~(~0UL<<nbits);
 }
+
+inline unsigned short  StHit::idTruth() const {return mIdTruth;}
+inline unsigned short  StHit::quality() const {return mQuality;}
+inline unsigned short  StHit::id()      const {return mId;}
+inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
+
 #endif
