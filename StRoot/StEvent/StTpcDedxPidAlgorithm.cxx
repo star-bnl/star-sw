@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.5 1999/12/21 15:09:11 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.6 2000/03/02 12:43:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.5  1999/12/21 15:09:11  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 2.6  2000/03/02 12:43:49  ullrich
+ * Method can be passed as argument to constructor. Default
+ * method is truncated mean.
  *
  * Revision 2.7  2000/04/20 16:47:31  ullrich
  * Check for null pointer added.
@@ -41,12 +42,12 @@
 #include <math.h>
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTrack.h"
-StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm()
-    : mTraits(0),  mTrack(0)
+#include "StParticleTypes.hh"
+#include "StEnumerations.h"
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.5 1999/12/21 15:09:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.6 2000/03/02 12:43:49 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -61,39 +62,34 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     mParticles.push_back(StKaonPlus::instance());
     mParticles.push_back(StProton::instance());
 }
-    //  the TPC and select the first we find. A check for
-    //  vec[i]->method() might be needed later.
+
 StParticleDefinition*
 StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPidTraits& vec)
 {
     //
     //  Select the info we need.
-	const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
+    //  Here we ignore different kinds of dE/dx calculations in
     //  the TPC and select the method
-	const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>(vec[i]);
+    //
     mTraits = 0;
-        if (p && vec[i]->detector() == kTpcId) mTraits = p;
+    mTrack  = &track;
     for (unsigned int i=0; i<vec.size(); i++) {
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
         const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
 #else
-    //  Check if we have enough points
-    //
-    //  if (mTraits->numberOfPoints() < 5) return 0;
-
-    //
         const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>(vec[i]);
 #endif
         if (p && p->detector() == kTpcId && p->method() == mDedxMethod) mTraits = p;
     }
     if (!mTraits) return 0;    // no info available
-    for (unsigned int k=0; k<mParticles.size(); k++)
-        if (mParticles[k]->charge()*mTrack->geometry()->charge() > 0)  // require same charge sign
-            if ((sigma = numberOfSigma(mParticles[k])) < minSigma) {
-    //  return the most probable.
-                minSigma = sigma;
-    double       sigma, minSigma = 100000;
 
+    //
+    //  Scan the list of particles we want to check and
+    //  return the most probable.
+    //
+    double       sigma, minSigma = 100000;
+    unsigned int minIndex = mParticles.size();
+    for (unsigned int k=0; k<mParticles.size(); k++) {
         if (mParticles[k]->charge()*mTrack->geometry()->charge() > 0)  { // require same charge sign
             if ((sigma = fabs(numberOfSigma(mParticles[k]))) < minSigma) {
                 minIndex = k;
