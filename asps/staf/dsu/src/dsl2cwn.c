@@ -80,7 +80,12 @@ long xdf2rzd(int lunn, char* inFile)
       dsFreeDataset(pInputDS);
       XDR_DESTROY(&inputXdr);
       fclose(inputFile);
-      dsDatasetAllocStats();
+#ifndef OLD_DSL
+      dsAllocStats();                      /* show allocation stats */
+#else   /*OLD_DSL*/
+      dsDatasetAllocStats();               /* show allocation stats */
+#endif  /*OLD_DSL*/
+
    }
 
 /*- Close OUTPUT file, cleanup ZEBRA directory. -*/
