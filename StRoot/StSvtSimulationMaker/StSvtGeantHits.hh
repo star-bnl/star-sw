@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.4 2001/04/03 15:24:24 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.5 2001/08/13 15:34:18 bekele Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.5  2001/08/13 15:34:18  bekele
+ * Debugging tools added
+ *
  * Revision 1.4  2001/04/03 15:24:24  caines
  * Increase hit space size again
  *
@@ -37,6 +40,7 @@ using std::vector;
 #include "StThreeVector.hh"
 
 class StSvtWaferCoordinate;
+class StSvtLocalCoordinate;
 class StGlobalCoordinate;
 
 class StSvtGeantHits : public StSvtHybridObject
@@ -46,17 +50,21 @@ public:
   virtual ~StSvtGeantHits();
 
   void setNumOfHits(int nhits);
+  void setGeantHit(int index ,int* svtAtt, float* AnTime);
   void setGeantHit(int index , StSvtWaferCoordinate& waferCoord);
+  void setLocalCoord( int index, StThreeVector<double>& x );
   void setGlobalCoord(int index, StThreeVector<double>& x);
 
   int numberOfHits();
   StSvtWaferCoordinate* waferCoordinate();
+  StSvtLocalCoordinate* localCoordinate();
   StGlobalCoordinate*   globalCoordinate();
 
 private:
 
   int mNumOfHits;
   StSvtWaferCoordinate* mWaferCoord;  //!
+  StSvtLocalCoordinate* mLocalCoord;  //!
   StGlobalCoordinate*   mGlobalCoord; //!
  
   ClassDef(StSvtGeantHits,1)
@@ -65,5 +73,6 @@ private:
 inline int StSvtGeantHits::numberOfHits(){return mNumOfHits;}
 inline StSvtWaferCoordinate* StSvtGeantHits::waferCoordinate(){return mWaferCoord;}
 inline StGlobalCoordinate* StSvtGeantHits::globalCoordinate(){return mGlobalCoord;}
+inline StSvtLocalCoordinate* StSvtGeantHits::localCoordinate(){ return mLocalCoord;}
 
 #endif

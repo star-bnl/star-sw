@@ -40,11 +40,12 @@ class StSvtSignal
     double freq(double num);
     double prob1(double anOrTimeDiff , double  sigma);
     double prob2(double num , double  sigma);
+    double getTimeCenter();
     double getTimeWidth();
     double getPeak();
     double getMinUnderShoot();
     double getSignal(int n);
-    void setPeak();
+    void setPeakAndUnderShoot();
     void setSignal();
 
   private:

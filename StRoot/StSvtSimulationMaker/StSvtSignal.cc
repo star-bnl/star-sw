@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.2 2001/04/25 19:04:38 perev Exp $
+ * $Id: StSvtSignal.cc,v 1.3 2001/08/13 15:34:18 bekele Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.3  2001/08/13 15:34:18  bekele
+ * Debugging tools added
+ *
  * Revision 1.2  2001/04/25 19:04:38  perev
  * HPcorrs
  *
@@ -214,7 +217,7 @@ int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
 
  mTimeCenter = mTimeHit + (relTimeCenter/mDriftVel);       //micro seconds
  //cout<<" mTimeCenter = "<< mTimeCenter<<endl;
- mTimeWidth = sqrt((timeWidth2/driftVel2)); // + GAP_TWIDTH);          //micro seconds 
+ mTimeWidth = sqrt((timeWidth2/driftVel2) + GAP_TWIDTH);          //micro seconds 
  //cout<<"mTimeWidth = "<<mTimeWidth<<endl;
 
  if(isnan(mTimeWidth))
@@ -224,7 +227,7 @@ int StSvtSignal::timeCenterAndWidth(double anHit,double timeHit)
 }
 
 
-void StSvtSignal::setPeak()
+void StSvtSignal::setPeakAndUnderShoot()
 {
   mPeakSignal = 0.0;
   mMinUnderShoot = 0.0;
@@ -246,11 +249,12 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
  tStep = mTimeBinSize;     //microseconds
 
   //nMin = (int)((mTimeCenter - 4*mTimeWidth)/tStep);
-  nMin = (int)(mTimeCenter/tStep) - 20;
-  if(nMin < 0) nMin = 1;
+  int mTCenter = (int)(mTimeCenter/tStep);
+  nMin = mTCenter - 10;
+  if(nMin <= 0) nMin = 1;
 
   //nMax = (int)((mTimeCenter + 5*mTimeWidth)/tStep);
-  nMax = (int)(mTimeCenter/tStep) + 20;
+  nMax = mTCenter + 20;
   if(nMax > 128) nMax = 128;
 
  if(mOption == 1)
@@ -266,7 +270,7 @@ void StSvtSignal::calcConvSignal(double chargeOnAnode)
  else
    {
      //cout<<"using both versions"<<endl;
-    if(mTimeWidth > 0.02 && mTimeWidth< 0.16)
+    if(mTimeWidth > 0.02 && mTimeWidth< 0.14)
      {
        //cout<<"now using Rykove's version"<<endl;
       rykovSignal(nMin,nMax, tStep);
@@ -288,8 +292,10 @@ void  StSvtSignal::rykovSignal(int nMin,int nMax, double tStep)
     {
       t = n*tStep;
       mSignal[n - 1] = signal(t)*1000000.0;      // [micro volts]
+      if(n < (int)(mTimeCenter/tStep) && mSignal[n - 1] < 0.0)
+	mSignal[n - 1] = 0;
       if(mSignal[n - 1] > mPeakSignal)
-	mPeakSignal = mSignal[n - 1];      // [mV]
+	mPeakSignal = mSignal[n - 1];      
       if(mSignal[n - 1] < mMinUnderShoot)
         mMinUnderShoot = mSignal[n - 1];
     }
@@ -308,6 +314,8 @@ void  StSvtSignal::selemonSignal(int nMin,int nMax, double tStep, double charge)
      {
       sig = analConvInt(t,mTimeWidth,mTimeCenter);
       mSignal[n - 1] = charge*mPasaGain*sig; // [micro volts]
+      if(n < (int)(mTimeCenter/tStep) && mSignal[n - 1] < 0.0)
+	mSignal[n - 1] = 0;
       if(mSignal[n - 1] > mPeakSignal)
          mPeakSignal = mSignal[n - 1];
        if(mSignal[n - 1] < mMinUnderShoot)
@@ -319,6 +327,8 @@ void  StSvtSignal::selemonSignal(int nMin,int nMax, double tStep, double charge)
        sig = simpsonInt(nMin, n, numOfIntPoints, tStep, t);
        //cout<<"sig = "<<sig<<endl;
        mSignal[n - 1] = charge*mPasaGain*sig; // [micro volts]
+       if(n < (int)(mTimeCenter/tStep) && mSignal[n - 1] < 0.0)
+	mSignal[n - 1] = 0;
        if(mSignal[n - 1] > mPeakSignal)
          mPeakSignal = mSignal[n - 1];
        if(mSignal[n - 1] < mMinUnderShoot)
@@ -860,6 +870,11 @@ double StSvtSignal::prob2(double num , double  sigma)
 double StSvtSignal::getTimeWidth()
 {
  return mTimeWidth;
+}
+
+double StSvtSignal::getTimeCenter()
+{
+ return mTimeCenter;
 }
 
 double StSvtSignal::getPeak()

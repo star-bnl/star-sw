@@ -2,6 +2,7 @@
 #include <math.h>
 
 //#include "StThreeVector.hh"
+#include "tables/St_svg_geom_Table.h"
 #include "StSvtAngles.hh"
 
 //ClassImp(StSvtAngles)
@@ -50,5 +51,43 @@ void StSvtAngles::svtPhi(const StThreeVector <double>& V, const StThreeVector <d
 
  csPhi = Vx/sqrt(Vx*Vx + Vy*Vy);
  mPhi = acos(csPhi);
+
+}
+
+void StSvtAngles::calcAngles(svg_geom_st *geom_st, double x, double y, double z, int mLayer, int mLadder, int mWafer )
+{
+  int hardWarePosition ,index = 0;
+  StThreeVector<double> mom(0,0,0);
+  StThreeVector<double> uVecN(0,0,0);
+  StThreeVector<double> uVecD(0,0,0);
+  StThreeVector<double> uVecT(0,0,0);
+
+  //hardWarePosition = getLayerID()*1000 + 100*wafer + ladder;
+
+   hardWarePosition = mLayer*1000 + 100*mWafer + mLadder;
+
+   for( index=0; index < 216; index++){
+    if( geom_st[index].id == hardWarePosition) 
+       break;
+     }
+    
+    mom.setX(x);
+    mom.setY(y);
+    mom.setZ(z);
+
+    uVecN.setX(geom_st[index].n[0]);
+    uVecN.setY(geom_st[index].n[1]);
+    uVecN.setZ(geom_st[index].n[2]);
+
+    uVecD.setX(geom_st[index].d[0]);
+    uVecD.setY(geom_st[index].d[1]);
+    uVecD.setZ(geom_st[index].d[2]);
+
+    uVecT.setX(geom_st[index].t[0]);
+    uVecT.setY(geom_st[index].t[1]);
+    uVecT.setZ(geom_st[index].t[2]);
+
+    svtTheta(mom,uVecN);
+    svtPhi(mom,uVecD,uVecT);
 
 }

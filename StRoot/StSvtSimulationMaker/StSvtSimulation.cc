@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulation.cc,v 1.4 2001/03/19 22:25:53 caines Exp $
+ * $Id: StSvtSimulation.cc,v 1.5 2001/08/13 15:34:18 bekele Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulation.cc,v $
+ * Revision 1.5  2001/08/13 15:34:18  bekele
+ * Debugging tools added
+ *
  * Revision 1.4  2001/03/19 22:25:53  caines
  * Catch wrong wafer ids more elegantly
  *
@@ -28,14 +31,14 @@
 
 #include "StSvtClassLibrary/StSvtHybridPixels.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
-#include "StDbUtilities/StSvtCoordinateTransform.hh"
-#include "StDbUtilities/StSvtWaferCoordinate.hh"
+//#include "StDbUtilities/StSvtCoordinateTransform.hh"
+//#include "StDbUtilities/StSvtWaferCoordinate.hh"
 
 #include "StSvtAngles.hh"
 #include "StSvtSignal.hh"
 #include "StSvtSimulation.hh"
 
-#include "tables/St_svg_geom_Table.h"
+//#include "tables/St_svg_geom_Table.h"
 
 //ClassImp(StSvtSimulation)
 
@@ -51,6 +54,7 @@ StSvtSimulation::StSvtSimulation()
  mElectronCloud = NULL;
  mSvtSignal = NULL;
  mSvtAngles = NULL;
+
 }
 
 StSvtSimulation::~StSvtSimulation()
@@ -72,66 +76,26 @@ void StSvtSimulation::setPointers(StSvtElectronCloud* elCloud, StSvtSignal* svtS
 
 }
 
-void StSvtSimulation::setParam(double timBinSize, double anodeSize)
+void StSvtSimulation::setAnodeTime(double timBinSize, double anodeSize)
  {
   mTimeBinSize = timBinSize ;
   mAnodeSize = anodeSize;
  
  }
 
+void StSvtSimulation::setPasaSigAttributes(int pasaSigAttributes,int numOfHitsPerHyb)
+ {
+   mNumOfHitsPerHyb = numOfHitsPerHyb;
+   mPasaSigAttributes = pasaSigAttributes;
+   
+   if(mNumOfHitsPerHyb && mPasaSigAttributes ){
 
-StSvtWaferCoordinate StSvtSimulation::toLocalCoord(StThreeVector<double>& pos,StSvtCoordinateTransform  *coTransform)
-{
- 
-   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
-   StGlobalCoordinate globalCor;
-     
-   globalCor.setPosition(pos);
+     if(mPasaSignals)  delete [] mPasaSignals;
 
-   coTransform->operator()(globalCor,waferCoord);
+     mPasaSignals = new PasaSignalAttributes[mNumOfHitsPerHyb];
 
-   return  waferCoord;
-
+      }
  }
-
-
-void StSvtSimulation::calcAngles(svg_geom_st *geom_st, double x, double y, double z, int mLayer, int mLadder, int mWafer )
-{
-  int hardWarePosition ,index = 0;
-  StThreeVector<double> mom(0,0,0);
-  StThreeVector<double> uVecN(0,0,0);
-  StThreeVector<double> uVecD(0,0,0);
-  StThreeVector<double> uVecT(0,0,0);
-
-  //hardWarePosition = getLayerID()*1000 + 100*wafer + ladder;
-
-   hardWarePosition = mLayer*1000 + 100*mWafer + mLadder;
-
-   for( index=0; index < 216; index++){
-    if( geom_st[index].id == hardWarePosition) 
-       break;
-     }
-    
-    mom.setX(x);
-    mom.setY(y);
-    mom.setZ(z);
-
-    uVecN.setX(geom_st[index].n[0]);
-    uVecN.setY(geom_st[index].n[1]);
-    uVecN.setZ(geom_st[index].n[2]);
-
-    uVecD.setX(geom_st[index].d[0]);
-    uVecD.setY(geom_st[index].d[1]);
-    uVecD.setZ(geom_st[index].d[2]);
-
-    uVecT.setX(geom_st[index].t[0]);
-    uVecT.setY(geom_st[index].t[1]);
-    uVecT.setZ(geom_st[index].t[2]);
-
-    mSvtAngles->svtTheta(mom,uVecN);
-    mSvtAngles->svtPhi(mom,uVecD,uVecT);
-
-}
 
 //____________________________________________________________________________
 void StSvtSimulation::doCloud(double time, double Energy,double mTheta,double mPhi)
@@ -147,6 +111,7 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, double backgrsi
  {
    float chargeOnAnode = 0.0, adc, back;
    int counter = 0, anode,status ;
+   static int hit = 0;
  
    float t = 0.0;
 
@@ -163,8 +128,9 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, double backgrsi
          //cout<<"\n";
          //cout<<"chargeOnAnode = "<<chargeOnAnode<<endl;
        
-	 mCharge[counter] = chargeOnAnode;
-
+         if(mPasaSigAttributes){
+	  mPasaSignals[hit].mCharge[counter] = chargeOnAnode;
+	 }
          if(chargeOnAnode == 0.0)
            continue;
 
@@ -180,8 +146,10 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, double backgrsi
 
             if(adc == 0.0) continue;
 
-             mTempBuffer[counter][n-1] = adc;
+             if(mPasaSigAttributes){
+              mPasaSignals[hit].mTempBuffer[counter][n-1] = adc;
              // cout<<"adc = "<<adc;
+	     }
 
              int pixelIndex = svtSimDataPixels->getPixelIndex(anode + an, n - 1);
 	     double adc1 = svtSimDataPixels->getPixelContent(anode + an,n - 1);
@@ -201,13 +169,27 @@ void StSvtSimulation::fillBuffer(double mAnHit, double mTimeHit, double backgrsi
 	     else {	      
                    adc = adc1 + adc;
                    svtSimDataPixels->addToPixel(pixelIndex,adc);
-	        }
-	      } 
+	     }
+	  }
+
+         if(mPasaSigAttributes){
         
-         mPeakArray[counter] = mSvtSignal->getPeak();
+         mPasaSignals[hit].anode[counter] = anode + an;                   //actual anode
+         mPasaSignals[hit].mPeak[counter] = mSvtSignal->getPeak()/4;             //in counts (not exactly an integer)
+         mPasaSignals[hit].mTimeCenter[counter] = mSvtSignal->getTimeCenter();
+         mPasaSignals[hit].mTimeWidth[counter] = mSvtSignal->getTimeWidth();
+         mPasaSignals[hit].mUnderShoot[counter] = mSvtSignal->getMinUnderShoot();
+
+         mSvtSignal->setPeakAndUnderShoot();
+
+         ++hit;
+
+         if(hit == mNumOfHitsPerHyb)
+           hit = 0;
 
          ++counter;
- 
+	 }
+
          mSvtSignal->setSignal();
        }
      }
@@ -245,14 +227,29 @@ double StSvtSimulation::makeGausDev(double sigma)
     }
 }
 
-void StSvtSimulation::reset()
+void StSvtSimulation::resetPasaSignalAttributes()
 {
-  for(int i = 0; i < 7; i++){
-    mCharge[i] = 0;
-    for(int n = 0; n <128; n++){
-     mTempBuffer[i][n] = 0;
+  int numOfAnodes = 7;
+
+  if(mPasaSignals){
+
+    for(int hit = 0; hit <mNumOfHitsPerHyb; hit++){
+
+      for(int j = 0; j <numOfAnodes; j++){
+
+      mPasaSignals[hit].anode[j] = 0;                   //actual anode
+      mPasaSignals[hit].mPeak[j] = 0;
+      mPasaSignals[hit].mTimeCenter[j] = 0;
+      mPasaSignals[hit].mTimeWidth[j] = 0;
+      mPasaSignals[hit].mUnderShoot[j] = 0;
+
+       for(int n = 1; n <= 128; n++)
+          {
+	    mPasaSignals[hit].mTempBuffer[j][n-1] = 0;    //adc counts
+	  }
+      }
     }
- }
+  }
 }
  
 
