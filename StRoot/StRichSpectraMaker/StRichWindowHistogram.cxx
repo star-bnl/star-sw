@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichWindowHistogram.cxx,v 1.1 2001/12/19 20:18:38 lasiuk Exp $
+ * $Id: StRichWindowHistogram.cxx,v 1.2 2002/01/12 00:10:24 lasiuk Exp $
  *
  * Author:  bl Nov 2, 2001
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichWindowHistogram.cxx,v $
+ * Revision 1.2  2002/01/12 00:10:24  lasiuk
+ * debin addition; quartz cerenkov angle, tuple modification, shift
+ * to 183 nm for ray tracing, no temperature effect yet
+ *
  * Revision 1.1  2001/12/19 20:18:38  lasiuk
  * Changeover in algorithm of isolating the Cherenkov angle
  *
@@ -29,38 +33,35 @@ using std::max_element;
 #endif
 
 ostream& operator<<(ostream& os, const StRichWindowBin& win) {
-    return (os << (win.mAngle/degree) << '\t' << win.mWeight << '\t' << (win.mSigma/degree));
+    return (os << (win.mAngle/degree) << '\t' << (win.mNumber) << '\t' << win.mWeight << '\t' << (win.mSigma/degree) << '\t' << (win.mSymmetry/degree));
 }
 
 StRichWindowHistogram::StRichWindowHistogram(double binSize, double phiCut)
     : mBinSize(binSize), mPhiCut(phiCut)
 {
-    cout << "StRichWindowHistogram::StRichWindowHistogram()\n" << endl;
     this->init();
 }
 
 // ----------------------------------------------------
 StRichWindowHistogram::~StRichWindowHistogram()
 {
-    this->clearData();
+    this->clear();
 }
 
 // ----------------------------------------------------
 void StRichWindowHistogram::init()
 {
-    cout << "StRichWindowHistogram::init()" << endl;
+//     cout << "StRichWindowHistogram::init()" << endl;
 
-    this->clearData();
-    
+    this->clear();    
 }
 
 // ----------------------------------------------------
-void StRichWindowHistogram::clearData()
+void StRichWindowHistogram::clear()
 {
-    cout << "StRichWindowHistogram::clearData()" << endl;
+//     cout << "StRichWindowHistogram::clear()" << endl;
     mMaxBin=0;
     
-    PR(mWindowHistogram.size());
     mWindowHistogram.clear();
 }
 
@@ -68,9 +69,7 @@ void StRichWindowHistogram::clearData()
 // ----------------------------------------------------
 bool StRichWindowHistogram::addEntry(StRichWindowBin entry)
 {
-    cout << "StRichWindowHistogram::addEntry()" << endl;
-
-
+//     cout << "StRichWindowHistogram::addEntry()" << endl;
     mWindowHistogram.push_back(entry);
 
     return true;
@@ -94,11 +93,14 @@ int StRichWindowHistogram::numberOfEntries(int threshold) const
 // ----------------------------------------------------
 void StRichWindowHistogram::process() {
 
+    //
+    // The values of the bins are available here
+    // First: sort them
+    //
     cout << "StRichWindowHistogram::process() " << endl;
     size_t ii;
     
     sort(mWindowHistogram.begin(),mWindowHistogram.end(),weight());
-    this->status();
     for(ii=0; ii<mWindowHistogram.size(); ii++) {
 	// is angle consistent with D, prediction and momentum
 	mMaxBin = &mWindowHistogram[ii];
@@ -112,19 +114,21 @@ void StRichWindowHistogram::process() {
 // ----------------------------------------------------
 void StRichWindowHistogram::status() {
 
-    cout << "--------StRichWindowHistogram::status()----------" << endl;
+    cout << "========StRichWindowHistogram::status()==========" << endl;
     cout << "Bin Size= " << (this->binSize()/milliradian)
+	 << "(" << this->binSize()/degree << ")"
 	 << " mrad  PhiCut= " << (this->phiCut()/degree) << endl;
-    cout << "-------------------------------------------------------" << endl;
-
-    cout.width(8);
+    cout << "-------------------------------------------------" << endl;
+    cout << "Angle  Number  Weight   Sigma    Symmetry" << endl;
+    cout << "-------------------------------------------------" << endl;
+//     cout.width(8);
     cout.precision(4);
     for(size_t ii=0; ii<mWindowHistogram.size(); ii++) {
 	cout << mWindowHistogram[ii] << endl;
     }
 
     if(mMaxBin)
-	cout << "\tAll: " << (this->maxBin()->mAngle) << endl;
+	cout << "\tAll: " << (this->maxBin()->mAngle/degree) << endl;
 
     cout.precision(6);
     cout.width(0);

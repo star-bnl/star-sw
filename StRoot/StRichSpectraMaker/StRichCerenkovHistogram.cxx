@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.cxx,v 1.3 2001/12/19 20:18:38 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.cxx,v 1.4 2002/01/12 00:10:23 lasiuk Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.cxx,v $
+ * Revision 1.4  2002/01/12 00:10:23  lasiuk
+ * debin addition; quartz cerenkov angle, tuple modification, shift
+ * to 183 nm for ray tracing, no temperature effect yet
+ *
  * Revision 1.3  2001/12/19 20:18:38  lasiuk
  * Changeover in algorithm of isolating the Cherenkov angle
  *
@@ -53,34 +57,31 @@ void StRichCerenkovHistogram::init()
 {
     cout << "StRichCerenkovHistogram::init()" << endl;
 
-    this->clearData();
-    
     //
-    // constant angle default
+    // 1 time only settings:
     //
-    mPhiCut     = 0.*degree;
-    mWindowSize = 40.*milliradian;
-    
     mDoPhiCut   = false;
+    mInitialWindowSize = 40.*milliradian;
+
+    this->clearData();
 }
 
 // ----------------------------------------------------
 bool StRichCerenkovHistogram::setCerenkovQuantities(pair<double,double> quant)
 {
-    cout << "StRichCerenkovHistogram::setCerenkovQuantities()" << endl;
-    PR(mCerenkovQuantities.size());
+    //cout << "StRichCerenkovHistogram::setCerenkovQuantities()" << endl;
     mCerenkovQuantities.push_back(quant);
 
-    PR(mCerenkovQuantities.back().first/degree);
-    PR(mCerenkovQuantities.back().second);
+//     PR(mCerenkovQuantities.back().first/degree);
+//     PR(mCerenkovQuantities.back().second); // #photon fraction
     return true;
 }
 
 // ----------------------------------------------------
 bool StRichCerenkovHistogram::addEntry(StRichCerenkovPhoton gamma)
 {
-    cout << "StRichCerenkovHistogram::addEntry()" << endl;
-    PR(gamma);
+//     cout << "StRichCerenkovHistogram::addEntry()" << endl;
+     PR(gamma);
 //     PR(gamma.theta()/degree);
 //     PR(gamma.phi()/degree);
 
@@ -88,219 +89,177 @@ bool StRichCerenkovHistogram::addEntry(StRichCerenkovPhoton gamma)
     if(gamma.theta()<mSmallestTheta) mSmallestTheta = gamma.theta();
     mHistogram.push_back(gamma);
 
-    PR(mSmallestTheta/degree);
-    PR(mLargestTheta/degree);
+//     PR(mSmallestTheta/degree);
+//     PR(mLargestTheta/degree);
     return true;
 }
 
 // ----------------------------------------------------
 void StRichCerenkovHistogram::clearData()
 {
-    cout << "StRichCerenkovHistogram::clearData()" << endl;
-    PR(mHistogram.size());
+//     cout << "StRichCerenkovHistogram::clearData()" << endl;
     mHistogram.clear();
 
-    PR(mCerenkovQuantities.size());
     mCerenkovQuantities.clear();
 
-    PR(mResults.size());
     mResults.clear();
     
+    mIteration1.clear();
 
+    //
+    // Cerenkov angle ranges
+    //
     mSmallestTheta = 90.*degree;
     mLargestTheta = 0;
 
+    //
+    // results
+    //
     mCerenkovAngle = 0;
     mNumberOfPhotons = 0;
-    
+
+    //
+    // flags
+    //
     mCalculationDone = false;
+    //mFlag = 1;  initialized in ::evaluate();
+
+    //
+    // Cut Values and Parameters
+    mPhiCut     = 0.*degree;
+    mWindowSize = mInitialWindowSize;
+    mPeakBin    = StRichWindowBin();
 }
-
-
-
-
-
 
 // ----------------------------------------------------
 bool StRichCerenkovHistogram::checkHypothesis() {
 
-    cout << "StRichCerenkovHistogram::checkHypothesis()" << endl;
-    PR(mCerenkovAngle/degree);
+//     cout << "StRichCerenkovHistogram::checkHypothesis()" << endl;
+
     //
     // loop over the hypothesis
     // first is the angle
     // second is the fraction
     //
 
-    vector<double> counts;
-    counts.resize(3); counts[0] = 0; counts[1] = 0; counts[2]=0;
     for(size_t ii=0; ii<mCerenkovQuantities.size(); ii++) {
 	double angle = mCerenkovQuantities[ii].first;
-	cout << ii << "\tangle=" << angle/degree << endl;
-	if(angle > 1) {
-	    cout << "StRichCerenkovHistogram::checkHypothesis() BAD (" << ii << ")" << endl;
-	    continue;
-	}
-
-	//
-	//
-	// Calculate 1,2,3 sigma effects
-	//
-	//
-	
-// 	for(size_t jj=0; jj<mHistogram.size(); jj++) {
-
-// 	    double theta = mHistogram[jj].theta();
-// 	    PR(theta/degree);
-// 	    PR(windowSize/degree);
-// 	    if( (angle>(theta-mWindowSize)) && (angle<(theta+mWindowSize)) ) {
-// 		counts[ii] += this->weight(theta);
-// 	    }
-	    
-// 	}
+	cout << ii << "\tangle="
+	     << angle/degree << "\tfraction="
+	     << mCerenkovQuantities[ii].second <<endl;
     }
 
-    //
-    //
-    // Reassigne if it is not compatible
-    //
-    //
-	
     return true;
 }
 
 // ----------------------------------------------------
-double StRichCerenkovHistogram::mean() const {
-
-    double sum = 0;
-    double numberOfEntries = 0;
-    double mean = 0;
-
-    numberOfEntries = mHistogram.size();
-    for(size_t ii=0; ii<numberOfEntries; ii++) {
-
-	sum += mHistogram[ii].theta();
-
-    }
-
-    if(numberOfEntries) {
-	mean = (sum/numberOfEntries);
-    }
-
-    return mean;
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::secondMoment() const {
-
-    double sum = 0;
-    double numberOfEntries = mHistogram.size();
-    double secondMoment = 0;
-    for(size_t ii=0; ii<mHistogram.size(); ii++) {
-
-	sum += sqr(mHistogram[ii].theta());
-
-    }
-
-    if(numberOfEntries) {
-	secondMoment = (sum/numberOfEntries);
-    }
-
-    return secondMoment;
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::sigma() const {
-
-    return ( sqrt(this->rms()) );
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::rms() const {
-
-    return (this->secondMoment() - sqr(this->mean()) );
-}
-
-// ----------------------------------------------------
-double StRichCerenkovHistogram::bestAngle() {
+double StRichCerenkovHistogram::peakAngle(short* numberOfPhotons) {
 
     //
     // the maximum Cerenkov angle here is;
     // 38.9 => that is saturated
     //
 
-    return 0.0;
+    *numberOfPhotons = mPeakBin.mNumber;
+    return mPeakBin.mAngle;
 }
 
 
+// ----------------------------------------------------
+StRichWindowBin
+StRichCerenkovHistogram::calculateBinStatistics(double lowerBound, double upperBound) {
 
+    cout << "StRichCerenkovHistogram::calculateBinStatistics()" << endl;
+    PR(lowerBound/degree);
+    PR(upperBound/degree);
+
+    double binValue = 0.;
+    double binSigma = 0.;
+    double binSymmetry = 0.;
+    
+    double moment1=0;
+    double moment2=0;
+    double sumWeight=0;
+
+    vector<double> binAngles;
+    for(size_t ii=0; ii< mHistogram.size(); ii++) {
+
+	double theta = mHistogram[ii].theta();
+
+// 	PR(theta/degree);
+	if((theta>=lowerBound) && (theta<upperBound) ) {
+// 	    cout << "add->" << theta/degree << endl;
+	    binAngles.push_back(theta);
+	    double weight = this->weight(theta);
+	    moment1 += weight*theta;
+	    moment2 += weight*sqr(theta);
+	    sumWeight += weight;
+		
+	}
+    } // for loop
+
+    //
+    // put it in...
+//     PR(sumWeight);
+//     PR(moment1);
+//     PR(moment2);
+//     PR(binAngles.size());
+
+    if(binAngles.size()>0) {
+	binValue = moment1/sumWeight;
+	binSigma = sqrt(fabs((moment2/sumWeight) - sqr(binValue)));
+
+	for(size_t jj=0; jj<binAngles.size(); jj++) {
+	    binSymmetry += (binValue-binAngles[jj])*this->weight(binAngles[jj]);
+	}
+	binSymmetry /= sumWeight;
+    }
+    else {
+	binValue = (lowerBound+upperBound)/2.;
+	binSymmetry = 999;
+    }
+//     PR(sumWeight);
+//     PR(binValue/degree);
+//     PR(binSigma/degree);
+//     PR(binSymmetry/degree);
+    
+    return StRichWindowBin(binValue,sumWeight,binSigma,binSymmetry,binAngles.size());
+}
 
 
 // ----------------------------------------------------
-void StRichCerenkovHistogram::calculateSlidingWindow() {
+void StRichCerenkovHistogram::calculateSlidingWindowHistogram() {
 
-    cout << "StRichCerenkovHistogram::calculateSlidingWindow()" << endl;
+    cout << "StRichCerenkovHistogram::calculateSlidingWindowHistogram()" << endl;
     PR(mWindowSize/milliradian);
     
     double lowerBound = (mSmallestTheta-mWindowSize/2);
-    StRichWindowHistogram result(mWindowSize, mPhiCut);
+    mResults.setWindowSize(mWindowSize);
+    mResults.setPhiCut(mPhiCut);
 
     
-    do { //
-	 // Initialization for each bin calculation
-	 //
- 	double binValue  = 0;
- 	double binSigma  = 0;
-
+    do {
+	//
+	// Initialization for each bin calculation
+	//
 	double upperBound = lowerBound+mWindowSize;
-	PR(lowerBound/degree);
-	PR(upperBound/degree);
+// 	PR(lowerBound/degree);
+// 	PR(upperBound/degree);
 
-	double moment1=0;
-	double moment2=0;
-	double sumWeight=0;
+	//mResult.addEntry(this->calculateBinStatistics(lowerBound,upperBound));
 
-	for(size_t ii=0; ii< mHistogram.size(); ii++) {
-
-	    double theta = mHistogram[ii].theta();
-
-	    PR(theta/degree);
-	    if((theta>=lowerBound) && (theta<upperBound) ) {
-		cout << "add->" << theta/degree << endl;
-		double weight = this->weight(theta);
-		moment1 += weight*theta;
-		moment2 += weight*sqr(theta);
-		sumWeight += weight;
-		
-	    }
-	} // for loop
+	StRichWindowBin bin = this->calculateBinStatistics(lowerBound,upperBound);
+	PR(bin);
+	mResults.addEntry(bin);
 
 	//
-	// put it in...
-	PR(sumWeight);
-	PR(moment1);
-	PR(moment2);
-
-	if(sumWeight) {
-	    binValue = moment1/sumWeight;
-	    binSigma = (moment2/sumWeight) - sqr(binValue);
-	}
-	else {
-	    binValue = lowerBound+mWindowSize/2.;
-	}
-	
-	result.addEntry(StRichWindowBin(binValue,sumWeight,binSigma));
- 	PR(binValue/degree);
+	// Increase to the next bin
 	//
-	//
-	cout << "increase" << endl;
 	lowerBound += mWindowSize;
-	PR(lowerBound/degree);
+// 	PR(lowerBound/degree);
 
     } while (lowerBound<mLargestTheta);
 
-    PR(mResults.size());
-    mResults.push_back(result);
     PR(mResults.size());
 }
 
@@ -308,26 +267,130 @@ void StRichCerenkovHistogram::calculateSlidingWindow() {
 // ----------------------------------------------------
 void StRichCerenkovHistogram::evaluate() {
 
+    //
+    // The binning effect must be removed before
+    // the Cherenkov angle can be quoted.
+    // First sort the Histogram bins for further processeing
+    //
+    
     cout << "StRichCerenkovHistogram::evaluate()" << endl;
     size_t ii;
-    for(ii=0; ii<mResults.size(); ii++) {
-	mResults[ii].process();
-    }
 
+    PR(mIteration1.size());
+    mIteration1.clear();
+    PR(mWindowSize/radian);
+    double it1WindowSize = mWindowSize/2;
+    //double it1WindowSize = mWindowSize/4;
+    PR(it1WindowSize/radian);
+
+    mIteration1.setWindowSize(it1WindowSize);
+    mIteration1.setPhiCut(mPhiCut);
+
+    StRichWindowBin newBin;
+    for(ii=0; ii<mResults.size(); ii++) {
+	StRichWindowBin binUnderEvaluation = mResults.bin(ii);
+
+	double centralValue = 0;
+	double currentValue = binUnderEvaluation.mAngle;
+	if(currentValue/degree >41.5) break;
+	short maxCnt = 20;
+	short ctr = 0;
+	do {
+	    centralValue = currentValue;
+	    PR(centralValue/degree);
+	    double lowerBound = centralValue - it1WindowSize/2.;
+	    double upperBound = centralValue + it1WindowSize/2.;
+	    PR(lowerBound/degree);
+	    PR(upperBound/degree);
+	    
+	    newBin =
+		this->calculateBinStatistics(lowerBound,upperBound);
+	    currentValue = newBin.mAngle;
+	    PR(newBin);
+	    PR(currentValue/degree);
+	    ctr++;
+	    if(ctr>maxCnt) break;
+	} while (currentValue != centralValue);
+	
+	PR(newBin);
+	
+	mIteration1.addEntry(newBin);
+
+	PR(mIteration1.size());
+	
+    } // loop over all bins
+    
+    //
+    //
+    // mIteration1 contains the "debinned" angles
+    // Resort them to make sure that in the recalculation
+    // the bin value hasn't changed.
+    //
+    // If the extracted Cherenkov angle is within
+    // several degrees of the "expected" hypothesis,
+    // return a flag value of 0
+    //
+
+    mIteration1.process();
+    mIteration1.status();
+    
+    double deltaTheta = 3.*degree;
+    StRichWindowBin theResult;
+    mFlag = 1;
+
+    theResult = mIteration1.bin(0);
+    if( (theResult.mAngle > (mCerenkovQuantities[0].first-deltaTheta) &&
+	 theResult.mAngle < (mCerenkovQuantities[0].first+deltaTheta)) ||
+	(theResult.mAngle > (mCerenkovQuantities[1].first-deltaTheta) &&
+	 theResult.mAngle < (mCerenkovQuantities[1].first+deltaTheta)) ||
+	(theResult.mAngle > (mCerenkovQuantities[2].first-deltaTheta) &&
+	 theResult.mAngle < (mCerenkovQuantities[2].first+deltaTheta)) ) {
+
+	mFlag = 0;
+	PR(theResult);
+	    
+    }
+    
     //
     // Assign the Cherenkov angle
     //
-    //
-    // compare phiCut and noPhiCut values
-    //
-    PR(mResults[0].maxBin());
-    mCerenkovAngle = mResults[0].maxBin()->mAngle;
-    mCerenkovSigma = mResults[0].maxBin()->mSigma;
-    mNumberOfPhotons = mResults[0].maxBin()->mWeight;
+
+    cout << "This is the result that will be quoted" << endl;
+    PR(theResult);
+    mCerenkovAngle = theResult.mAngle;
+    mCerenkovSigma = theResult.mSigma;
+    mNumberOfPhotons = theResult.mNumber;
     
     PR(mCerenkovAngle/degree);
     PR(mCerenkovSigma/degree);
     PR(mNumberOfPhotons);
+
+    //
+    //
+    //
+}
+
+// ----------------------------------------------------
+void StRichCerenkovHistogram::findPeakAngle() {
+
+//     cout << "StRichCherenkovHistogram::findPeakAngle()" << endl;
+
+    mResults.process();
+    mResults.status();
+
+    cout << "Peak angle is: " << endl;
+    int numberOfPhotons = 0;
+    StRichWindowBin bin;
+    for(size_t ii=0; ii<mResults.size(); ii++) {
+
+	if(mResults.bin(ii).mNumber > numberOfPhotons) {
+	    bin = mResults.bin(ii);
+	    numberOfPhotons = mResults.bin(ii).mNumber;
+	}
+	
+    }
+    mPeakBin = bin;
+    PR(mPeakBin);
 }
 
 // ----------------------------------------------------
@@ -338,16 +401,17 @@ void StRichCerenkovHistogram::calculate() {
     PR(mSmallestTheta/degree);
     PR(mLargestTheta/degree);
 
-    double initialWindowSize = 40.*milliradian;
-    this->setWindowSize(initialWindowSize);
+    //mInitialWindowSize = 20.*milliradian;
+    this->setWindowSize(mInitialWindowSize);
     PR(mWindowSize/milliradian);
 
     PR(mResults.size());
-    this->calculateSlidingWindow();
+    this->calculateSlidingWindowHistogram();
     PR(mResults.size());
     
     cout << "StRichCerenkovHistogram  Sliding window done" << endl;
 
+    this->findPeakAngle();
     //
     // Assign a Cherenkov angle based on the
     // collection of Rich Cherekov Windows
@@ -357,7 +421,7 @@ void StRichCerenkovHistogram::calculate() {
     //
     // secondary check
     //
-    this->setWindowSize(initialWindowSize);
+    this->setWindowSize(mInitialWindowSize);
     this->checkHypothesis();
 
 
@@ -367,11 +431,7 @@ void StRichCerenkovHistogram::calculate() {
 // ----------------------------------------------------
 double StRichCerenkovHistogram::cerenkovAngle(unsigned short *flag) {
 
-    ///
-    // should be in init
-//     double mfraction = .50;
-//     double mdeviation = 2.*degree;
-   
+    *flag = mFlag;
     return mCerenkovAngle;
 }
 
@@ -389,16 +449,18 @@ void StRichCerenkovHistogram::status() {
 	cout << "Must Call calculate() first" << endl;
 	return;
     }
+//     cout << "Smallest Angle: " << (mSmallestTheta/degree) << endl;
+//     cout << "Largest Angle:  " << (mLargestTheta/degree) << endl;
     cout << "-------------------------------------------------------" << endl;
-    cout << "Bin Value   All Counts    Phi Cut"   << endl;
+    cout << "Angle  #photons  Weight  Sigma  Symmetry"   << endl;
     cout << "-------------------------------------------------------" << endl;
 
-    cout.width(8);
-    cout.precision(4);
-    for(size_t ii=0; ii<mResults.size(); ii++) {
-	mResults[ii].status();
+    if(mIteration1.size()) {
+	cout << (mIteration1.bin(0)) << endl;
+	cout << (mPeakBin) << endl;
     }
-    cout.precision(6);
-    cout.width(0);
+    else {
+	cout << "undefined value mFlag=(" << mFlag << ")" << endl;
+    }
     cout << "===========================================" << endl;
 }

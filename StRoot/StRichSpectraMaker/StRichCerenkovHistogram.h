@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.h,v 1.2 2001/12/19 20:18:38 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.h,v 1.3 2002/01/12 00:10:23 lasiuk Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.h,v $
+ * Revision 1.3  2002/01/12 00:10:23  lasiuk
+ * debin addition; quartz cerenkov angle, tuple modification, shift
+ * to 183 nm for ray tracing, no temperature effect yet
+ *
  * Revision 1.2  2001/12/19 20:18:38  lasiuk
  * Changeover in algorithm of isolating the Cherenkov angle
  *
@@ -69,7 +73,7 @@ public:
     //
     void   calculate();
     void   evaluate();
-
+    
     //
     // these are the interface to be called
     //
@@ -77,17 +81,16 @@ public:
     double cerenkovAngle(unsigned short*);
     double numberOfPhotons()      const;
     double cerenkovSigma()        const;
-    double bestAngle();
+    double peakAngle(short*);
 
 protected:
-    void calculateSlidingWindow();
+    void calculateSlidingWindowHistogram();
+    StRichWindowBin calculateBinStatistics(double, double);
+    void findPeakAngle();
+    
     double weight(double) const;
 
     
-    double mean()         const;
-    double secondMoment() const;
-    double sigma()        const;
-    double rms()          const;
     double mostProbable() const;
 
 
@@ -103,14 +106,18 @@ private:
     //
     // Expected Values
     vector<pair<double, double> > mCerenkovQuantities;//!
+
+    // Calculated Histogram from sliding windows
+    StRichWindowHistogram mResults;//!
+    StRichWindowHistogram mIteration1; //!
     
-    vector<StRichWindowHistogram> mResults;//!
 #endif
     double      mSmallestTheta;
     double      mLargestTheta;
 
     double      mPhiCut;
     double      mWindowSize;
+    double      mInitialWindowSize;
     
     bool        mDoPhiCut;
     bool        mCalculationDone;
@@ -118,6 +125,9 @@ private:
     double      mCerenkovAngle;
     double      mCerenkovSigma;
     double      mNumberOfPhotons;
+    short       mFlag;
+    
+    StRichWindowBin mPeakBin;
 };
 
 inline int StRichCerenkovHistogram::numberOfEntries() const { return mHistogram.size(); }
@@ -126,7 +136,7 @@ inline double StRichCerenkovHistogram::phiCut() const { return mPhiCut;}
 inline void   StRichCerenkovHistogram::setWindowSize(double windowSize) { mWindowSize = windowSize; }
 inline double StRichCerenkovHistogram::windowSize() const { return mWindowSize;}
 inline void   StRichCerenkovHistogram::doPhiCut(bool doit) { mDoPhiCut = doit; }
-inline double StRichCerenkovHistogram::weight(double value) const {cout << "histo weight" << (1./tan(value)) << endl;return 1./tan(value); }
+inline double StRichCerenkovHistogram::weight(double value) const {return 1./tan(value); }
 inline double StRichCerenkovHistogram::numberOfPhotons() const { return mNumberOfPhotons; }
 
 #endif
