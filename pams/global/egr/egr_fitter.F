@@ -70,6 +70,8 @@ C<----------------------------------------------------------------------
 #include "egr_fitter.inc"
 #include "egr_track_pointers.inc"
 #include "math_constants.inc"
+#include "StDetectorId.inc"
+
 C ---------------------------------------------------------------------
 
       RECORD  /track_pointers/ gtrk(1)
@@ -355,7 +357,7 @@ c     Fill tracks
                  globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
      +                 +(sign(1.0,float(tptrack(itrk).flag)))*500
      +                 +tptrack(itrk).flag
-                  globtrk(igtrk).det_id = 3
+                  globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
                   globtrk(igtrk).n_point = svt_track(svt(isvtt)).nspt +
      +                 tptrack(itpct).nrec
                   globtrk(igtrk).n_max_point = 0
@@ -385,7 +387,9 @@ c     Fill tracks
                   globtrk(igtrk).covar_diag(5)
      +                 =svt_track(svt(isvtt)).cov(15)                 
                   globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
+     +                 / real((2.*globtrk(igtrk).n_fit_point)-3)
                   globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
+     +                 /real(2*globtrk(igtrk).n_fit_point-2)
 C     Now find first point on track
                   rfirst = 99999.
 
@@ -537,7 +541,7 @@ c     mark spts as used
                globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
      +              +(sign(1.0,float(tptrack(tpc(itpct)).flag)))*500
      +              +tptrack(tpc(itpct)).flag             
-               globtrk(igtrk).det_id = 3
+               globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
                globtrk(igtrk).n_point = svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nrec
                 globtrk(igtrk).n_max_point = 0  
@@ -557,8 +561,10 @@ c     mark spts as used
                globtrk(igtrk).covar_diag(3)=svt_track(svt(isvtt)).cov(6)
               globtrk(igtrk).covar_diag(4)=svt_track(svt(isvtt)).cov(10)
               globtrk(igtrk).covar_diag(5)=svt_track(svt(isvtt)).cov(15)
-               globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
-               globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
+               globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)/
+     +             real(2*globtrk(igtrk).n_fit_point -3)
+               globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)/
+     +             real(2*globtrk(igtrk).n_fit_point -2)
 C     Now find first point on track
                rfirst = 99999.
                do ishit = 1,svt_group_h.nok
@@ -707,9 +713,9 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
      +                 (tptrack(itrk).flag)))*100
      +                 +tptrack(itrk).flag
 
-                  globtrk(iglob).det_id = 1
+                  globtrk(iglob).det_id = kTpcId
                   globtrk(iglob).n_point = tptrack(itrk).nrec
-                  globtrk(iglob).n_max_point = 0
+                  globtrk(iglob).n_max_point = tptrack(itrk).npos
                   globtrk(iglob).n_fit_point = tptrack(itrk).nfit          
                   globtrk(iglob).icharge = tptrack(itrk).q
                   if( abs(globtrk(iglob).icharge) .ne. 1) then
@@ -729,8 +735,10 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                   globtrk(iglob).covar_diag(3) = tptrack(itrk).cov(6)
                   globtrk(iglob).covar_diag(4) = tptrack(itrk).cov(10)
                   globtrk(iglob).covar_diag(5) = tptrack(itrk).cov(15)
-                  globtrk(iglob).chisq(1) = tptrack(itrk).chisq(1)
-                  globtrk(iglob).chisq(2) = tptrack(itrk).chisq(2)
+                  globtrk(iglob).chisq(1) = tptrack(itrk).chisq(1)/
+     +            real(2*globtrk(iglob).n_fit_point-3)
+                  globtrk(iglob).chisq(2) = tptrack(itrk).chisq(2)/
+     +                 real(2*globtrk(iglob).n_fit_point-2)
 C     Now find first point on track.
                   if (tptrack(itrk).id.gt.0.and.
      +                 tptrack(itrk).id.le.mxtrack) then
@@ -837,9 +845,9 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
                      globtrk(iglob).iflag = (sign(1.0,float(
      +                    svt_track(itrk).flag)))*200.
      +                    +svt_track(itrk).flag
-                     globtrk(iglob).det_id = 2
+                     globtrk(iglob).det_id = kSsdSvtIdentifier
                      globtrk(iglob).n_point = svt_track(itrk).nspt
-                     globtrk(iglob).n_max_point = 3
+                     globtrk(iglob).n_max_point = 0
                      globtrk(iglob).n_fit_point =  svt_track(itrk).nspt
                      globtrk(iglob).icharge = 
      +                    sign(1.0,svt_track(itrk).invpt)
@@ -861,8 +869,10 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
      +                       svt_track(itrk).cov(10)
                     globtrk(iglob).covar_diag(5) = 
      +                       svt_track(itrk).cov(15)
-                    globtrk(iglob).chisq(1) = svt_track(itrk).chisq(1)
-                    globtrk(iglob).chisq(2) = svt_track(itrk).chisq(2)
+                    globtrk(iglob).chisq(1) = svt_track(itrk).chisq(1)/
+     +                   real(2*globtrk(iglob).n_fit_point-3)
+                    globtrk(iglob).chisq(2) = svt_track(itrk).chisq(2)/
+     +                   real(2*globtrk(iglob).n_fit_point-2)
                     globtrk(iglob).x_first(1) = svt_spt(ifirst).x(1)
                     globtrk(iglob).x_first(2) = svt_spt(ifirst).x(2)
                     globtrk(iglob).x_first(3) = svt_spt(ifirst).x(3)
