@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.4 2002/11/18 14:29:31 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.5 2002/11/22 18:08:53 laue Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -122,7 +122,7 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   StDedxPidTraits* dedxPidTraits =0;
   unsigned int size = traits.size();
   for (unsigned int i = 0; i < size; i++) {
-    if ( (dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
+    if ( !(dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
     if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
     if (dedxPidTraits->method() == kLikelihoodFitIdentifier)  mProbPidTraits.setdEdxFit( dedxPidTraits->mean() ); 
   }
@@ -145,6 +145,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.5  2002/11/22 18:08:53  laue
+ * Bug in logic fixed. Checking for null pointers was wrong.
+ *
  * Revision 1.4  2002/11/18 14:29:31  laue
  * update for Yuri's new StProbPidTraits
  *
