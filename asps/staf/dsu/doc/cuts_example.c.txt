@@ -55,11 +55,11 @@ void DoTheRecipe(void) {
   printf("The number of rows is %d.\n",nBytes);
   gRows=nBytes;
   if(nBytes/8>NBYTES-2) Err(112);
-  printf("Above DoCuts\n");
-  if(!DoCuts(NBYTES,ba,gCuts,gPtr)) Err(113);
-  printf("Below DoCuts\n");
+  printf("Above dsuDoCuts\n");
+  if(!dsuDoCuts(NBYTES,ba,gCuts,gPtr)) Err(113);
+  printf("Below dsuDoCuts\n");
   for(jj=0;jj<nBytes;jj++) {
-    if(RowPassedCuts(ba,jj)) printf("Row %d passed cuts.\n",jj+1);
+    if(dsuRowPassedCuts(ba,jj)) printf("Row %d passed cuts.\n",jj+1);
   }
 }
 void main(argc,argv) int argc; char **argv; {
