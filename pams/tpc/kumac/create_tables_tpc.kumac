@@ -69,12 +69,13 @@ macro/global/import *
 
   cd [data]/tpc/hits
   
-    tdm/newtable tphit     tcl_tphit     100000
-    tdm/newtable tphitau   tcl_tphit_aux 100000
+    tdm/newtable tphit     tcl_tphit     200000
+    tdm/newtable tphitau   tcl_tphit_aux 200000
+    tdm/newtable index     tcl_tpc_index 200000
 
   cd [data]/tpc/hits
   
-    tdm/newtable tpcluster tcl_tpcluster   20000
+    tdm/newtable tpcluster tcl_tpcluster   200000
     tdm/newtable tpseq     tcl_tp_seq     2000000
     
   cd [params]/tpc
