@@ -1,0 +1,25 @@
+* 9/14/98 K. Turner
+*
+* - Runs $STAR/kumacs/chain/run_dst which
+*    is basically same as bfc but allows running
+*    personal packages in more obvious way 
+*   --> look for !!! in run_dst.kumac to see where to put stuff
+*  
+* setup of this kumac:
+* - reads in dst file created from "dout" in bfc.
+*
+
+ exec $STAR/kumacs/chain/dst_chain _
+   TOP=$STAR _
+   domain=' ' _
+   chain=' dstin '_
+   skip=0 _
+   first=1 _
+   no_events=1 _
+   input_data_file=/star/data/kathy/set100_01_2ev_dst_dst.xdf _
+   output_file=dst_out _
+   funit=21 _
+   nfile=global.ntup _
+   nid=111 _
+   table=globtrk   
+

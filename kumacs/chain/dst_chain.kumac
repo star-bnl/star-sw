@@ -1,0 +1,191 @@
+* *************************************************************************
+* run_dst.kumac
+* 
+* - reads in dst xdf file that was created from using "dout" in bfc
+* - uses same basic structure as bfc.kumac but just lets one add in their
+*   own kumacs easily (look for !!! )
+* 
+* 09/14/98 K. Turner - created
+*
+************************************************************************
+************************************************************************
+
+ macro run__
+   TOP=$STAR _
+   domain=' ' _
+   chain=' dstin '_
+   skip=0 _
+   first=1 _
+   no_events=1 _
+   input_data_file=/star/data/kathy/set100_01_2ev_dst_dst.xdf _
+   output_file=dst_out _
+   funit=21 _
+   nfile=global.ntup _
+   nid=111 _
+   table=globtrk   
+
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_dst
+* 
+* ***********************************************************
+* CALCULATE STUFF FROM MACRO INPUTS 
+***********************************************************
+
+ input_file = [input_data_file]
+ last = [first]+[no_events]-1
+ 
+  output_xdf_file = [output_file].xdf
+  output_fzd_file = [output_file].fzd
+  output_dst_file = [output_file]_dst.xdf 
+    
+
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+   
+   
+ message ' *** TOP level directory     --> ' [TOP]
+ message ' *** Input file              --> ' [input_file]        
+ message ' *** Num Events to process   --> ' [no_events]
+ message ' *** domains to load         --> ' [domain]
+ message ' *** modules to process      --> ' [chain]  
+ message ' *** gstar settings          --> ' [gstar_settings]
+ message ' *** output xdf (evout)file name  --> ' [output_file].xdf
+ message ' *** output fzd (fzout)file name  --> ' [output_file].fzd
+ message ' *** output dst (dout) file name  --> ' [output_file]_dst.xdf
+ message ' *** tpc_sector_first        --> ' [tpc_sector_first]
+ message ' *** tpc_sector_last         --> ' [tpc_sector_last]
+
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+
+***********************************************************
+* GLOBAL VARIABLES 
+* **********************************************************
+ 
+ macro/global/create input_file  [input_file]   'Input file name'
+ macro/global/create output_file [output_file]  'Output file name'
+ macro/global/create tpc_sector_first [tpc_sector_first] 'first sector in TPC'
+ macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
+ macro/global/create ievent           1          'Event counter'
+ macro/global/create TOP              [TOP]
+ macro/global/create gstar_settings   [gstar_settings]
+ macro/global/create output_xdf_file  [output_xdf_file] 
+ macro/global/create output_fzd_file  [output_fzd_file]
+ macro/global/create output_dst_file  [output_dst_file]
+  
+***********************************************************
+* BEGINNING STUFF 
+***********************************************************
+  
+ exec $STAR/kumacs/util/setup_defaults 
+   
+ exec setup#setup
+
+ exec bfc_util#bfc_start _
+   domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
+ 
+ if (STAF_STATUS(1).ne. 1) goto ABEND
+ 
+ macro/global/import *
+ 
+ exec bfc_util#bfc_init chain=[chain]
+ if (STAF_STATUS(1).ne. 1) goto ABEND
+
+*!!!!!!! Add DST init stuff here !!!!!!!!!
+* exec create_tables_mydst#part1
+* exec init_mydst#init
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+***********************************************************
+* SKIP EVENTS 
+***********************************************************
+
+   if [skip].ge.1 then
+     test=[chain]
+     nw=$words([test])
+     do i=1,[nw]
+       mod=$word([test],[i],1)
+       if [mod].eq.dstin then
+           message ' SKIP EVENTS FOR ' [mod]
+	   do ievent = 1,[skip]
+	       message 'skip event # ',[ievent]
+               exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=[mod]
+               if (STAF_STATUS(1).ne. 1) goto ABEND
+           enddo
+       endif
+     enddo
+   endif
+
+*****************************************
+*  MAIN EVENT LOOP 
+***************************************** 
+ 
+ message cpu time = $cptime
+ do ievent=[first],[last]	| loop over events
+   message ' =====> BFC is processing event # ' [ievent]
+   tabclear [event]          | zero all tables
+   exec bfc_util#bfc_process [chain]
+   if (STAF_STATUS(1).ne. 1) goto ABEND
+   if ($vexist(havedstrunsum).ne.0) then
+     message ' BFC: skip to bfc_finish because got to run_summary'
+     goto FINISH
+   endif
+   if ($vexist(readprob).ne.0) then
+     message ' BFC: skip to bfc_finish because problem reading input file'
+     goto FINISH
+   endif
+*!!!! Now add the dst finish stuff here !!!!!!!!!!!!!
+*  exec run_mydst#run
+  exec write_table_to_ntuple#write_event_disk [nid] [dst]/[table]
+*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   nevents = [nevents] + 1
+ enddo
+
+
+*****************************************
+*  FINISH
+* ****************************************
+ 
+FINISH:
+  exec bfc_util#bfc_finish [chain]
+  if (STAF_STATUS(1).ne. 1) goto ABEND
+
+
+*!!!! Now add the dst finish stuff here !!!!!!!!!!!!!
+* exec finish_mydst#finish
+ exec write_table_to_ntuple#close_disk [funit] [nid]
+*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  goto END
+  
+
+ABEND:
+ message "<bfc> Fatal error"
+ 
+END:
+ 
+RETURN 
+
+***************************************************************
+*****************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
