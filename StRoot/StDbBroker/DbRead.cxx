@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbRead.cxx,v 1.6 2000/04/13 20:22:56 porter Exp $
+ * $Id: DbRead.cxx,v 1.7 2001/01/22 18:40:24 porter Exp $
  *
  * Author: S. Vanyashin 
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: DbRead.cxx,v $
+ * Revision 1.7  2001/01/22 18:40:24  porter
+ * Added a wrapper for StMessage so one can use it in StDbLib
+ *
  * Revision 1.6  2000/04/13 20:22:56  porter
  * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
  * - added unix timestamp as standard
@@ -25,7 +28,7 @@
  *
  **************************************************************************/
 // #include <stdio.h>
-// #include <stdlib.h>
+#include <stdlib.h>
 // #include <string.h>
 
 #include "StDbLib/StDbManager.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.25 2000/11/03 18:57:53 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.26 2001/01/22 18:40:24 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.26  2001/01/22 18:40:24  porter
+ * Added a wrapper for StMessage so one can use it in StDbLib
+ *
  * Revision 1.25  2000/11/03 18:57:53  porter
  * modified sanity check from "IsNode()" to the results of a dynamic_cast
  * this check prevents mistaking a directory for a table
@@ -118,6 +121,9 @@
 #include "StDbLib/StDbTableIter.hh"
 #include "StDbLib/StDbBuffer.h"  // for inputting the descriptor
 #include "StDbLib/StDbTableDescriptor.h" 
+#include "StDbWrappedMessenger.hh"
+
+#define __CLASS__ "StDbBroker"
 
 //
 ClassImp(StDbBroker)
@@ -154,12 +160,14 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0), m_flavor(0), m_prodTime(0) {
 
   mgr=StDbManager::Instance();
+  StDbMessService* ms=new StDbWrappedMessenger();
+  mgr->setMessenger(ms);
 
 } 
 
 //_____________________________________________________________________________
 StDbBroker::~StDbBroker(){
-
+  printStatistics();
   if(m_tableName) delete [] m_tableName;
   if(m_structName) delete [] m_structName;
   if(m_tableVersion) delete [] m_tableVersion;
@@ -168,10 +176,13 @@ StDbBroker::~StDbBroker(){
   if(m_Nodes) delete m_Nodes;
   if(m_Tree) delete m_Tree;
   if(mgr) delete mgr;
-
 }
 
-
+//_____________________________________________________________________________
+void StDbBroker::printStatistics(){
+  if(m_Tree)m_Tree->printNumberStats();
+  if(mgr) mgr->printTimeStats();
+}  
 //_____________________________________________________________________________
 
 void StDbBroker::CloseAllConnections(){
@@ -303,9 +314,7 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
  }
 
 return descriptor;
-
 }
-
 
 //_____________________________________________________________________________
 void
@@ -327,9 +336,6 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
    os<<m_DateTime[1]<<ends;
 
    mgr->setRequestTime(dateTime);
-
-   //   cout << "ReQuested Time = " << mgr->getDateCheckTime() << endl;
-
 }
 
 //____________________________________________________________________________
@@ -357,8 +363,6 @@ void * StDbBroker::Use(int tabID, int parID)
   //  for (i=0;i<m_nElements;i++) {
   //      m_descriptor[i].fColumnName[31]='\0';
   //  }
-
-
   void* pData = 0;
   m_nRows = 0;
   SetNRows(0);
@@ -403,49 +407,51 @@ void * StDbBroker::Use(int tabID, int parID)
     m_EndDate = (UInt_t)atoi(tmp1);
     m_EndTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
-
    }
-
 return pData;
 }
 
-//______________________________________________________________________________
+//_____________________________________________________________________________
 Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
+#define __METHOD__ "WriteToDb(pArray,tabID)"
 
+  char errMessage[256];
+  ostrstream em(errMessage,256);
   if(!pArray || tabID==0) {
-    cerr<<"WRITE FAILED  StDbBroker::WriteToDb : insufficient input data"<<endl;
-    return 0;
+    em<<" Write Failed -> either data-array or tableID is incomplete"<<ends;
+    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
   if(!m_Nodes){
-    cerr<<"WRITE FAILED StDbBroker::WriteToDb : must 1st call InitConfig()"<<endl;
-    return 0;
+    em<<"Write Failed -> incomplete table context. Try InitConfig() 1st"<<ends;
+    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
-
   StDbNode* anode= m_Nodes->getNode(tabID);
   StDbTable* table=dynamic_cast<StDbTable*>(anode);
   if(!table){
-   cerr<<"WRITE FAILED StDbBroker::WriteToDb :tabID="<<tabID<<" does not reference a TABLE"<<endl;
-    return 0;
+    em<<"Write Failed -> tableID="<<tabID<<" is not known " <<ends;
+    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
 
   if(!table->hasDescriptor())table->setDescriptor(GetTableDescriptor());
   table->SetTable((char*)pArray,m_nRows);
 
-  // WARNING :: A Cludge -> StDbManager has separate 'store' & 'request' times
-  // StDbBroker does not
-
+  // WARNING :: A Cludge -> StDbManager has separate 
+  //'store' & 'request' times whilr StDbBroker does not
   mgr->setStoreTime(mgr->getUnixCheckTime());
   if(!mgr->storeDbTable(table))return 0;
-
   return 1;
+#undef __METHOD__
 }
 
-//______________________________________________________________________________
+//_____________________________________________________________________________
 Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
+#define __METHOD__ "WriteToDb(pArray,fullPath,idList)"
+  char errMessage[256];
+  ostrstream em(errMessage,256);
 
   if(!pArray || !fullPath) {
-    cerr<<"WRITE FAILED  StDbBroker::WriteToDb : insufficient input data"<<endl;
-    return 0;
+    em<<" Write Failed:: either data-array or path is incomplete"<<ends;
+    return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
   }
 
   char* path=new char[strlen(fullPath)+1]; 
@@ -491,26 +497,20 @@ Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
    }
 
    if(!table){
-     cerr<<"WRITE FAILED  StDbBroker::WriteToDb : table"<<m_tableName;
-     cerr<<" not found in database of Name="<<dbName<<endl;
+     em<<"Write Failed table="<<m_tableName<<" not found in db="<<dbName<<ends;
      delete [] path;
-     return 0;
+     return mgr->printInfo(errMessage,dbMErr,__LINE__,__CLASS__,__METHOD__);
    }
 
    table->setDescriptor(GetTableDescriptor());
-   if(idList)table->setElementID(idList,m_nRows);
-   
-   table->SetTable((char*)pArray,m_nRows);
-   
+   table->SetTable((char*)pArray,m_nRows,idList);
    mgr->setStoreTime(mgr->getUnixCheckTime());
    bool iswritten=mgr->storeDbTable(table);
    delete table;
 
-   if(iswritten) return 1;
-
-return 0;
+   return (iswritten) ? 1 : 0;
+#undef __METHOD__
 }
-
 
 //_____________________________________________________________________________
 StDbTable*
@@ -525,7 +525,7 @@ StDbBroker::findTable(const char* databaseName){
   return table;
 }
   
-//______________________________________________________________________________
+//_____________________________________________________________________________
 void * StDbBroker::Use()
 {
 //convert event datetime to date and time
@@ -712,7 +712,6 @@ StDbNode* node;
 StDbNode* parent;
 char* parName;
 char* nodeName;
-char* typeName;
 char* id;
 unsigned int parsize=sizeof(cTab[0].parname)-1;
 unsigned int tabsize=sizeof(cTab[0].tabname)-1;
@@ -724,7 +723,7 @@ int cRow;
 
     cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
     node  = m_Nodes->getNode(0);
-    strncpy(cTab[0].tabname,node->getMyName(),tabsize); 
+    strncpy(cTab[0].tabname,node->printName(),tabsize); 
     cTab[0].tabname[tabsize]='\0';  
     strncpy(cTab[0].tabtype,".node",typsize); 
     cTab[0].tabtype[typsize]='\0';
@@ -734,7 +733,7 @@ int cRow;
  if(m_ParentType){
     strncpy(cTab[0].parname,m_ParentType,parsize); 
  } else {
-    strncpy(cTab[0].parname,node->getMyName(),parsize); 
+    strncpy(cTab[0].parname,node->printName(),parsize); 
  }
     cTab[0].parname[parsize]='\0';  
 
@@ -744,9 +743,8 @@ int cRow;
    parent= m_Nodes->getParent(i);
    parID   = m_Nodes->getParentID(i);
 
-   nodeName = node->getMyName();
-   typeName = node->getCstrName();
-   parName  = parent->getMyName();
+   nodeName = node->printName();
+   parName  = parent->printName();
 
    strncpy(cTab[cRow].parname,parName,parsize); 
     cTab[cRow].parname[parsize]='\0';
@@ -754,12 +752,12 @@ int cRow;
     cTab[cRow].tabname[tabsize]='\0';
 
    id=cTab[cRow].tabtype; *id='.'; id++;
-
-   if(strstr(typeName,"None")){
-     strcpy(id,"node");
+   if(node->IsTable()){
+     strcpy(id,((StDbTable*)node)->printCstructName());
    } else {
-     strncpy(id,typeName,typsize); cTab[cRow].tabtype[typsize]='\0';
-   }
+     strcpy(id,"node");
+   }          
+   cTab[cRow].tabtype[typsize]='\0';
 
    cTab[cRow].tabID=i;
    cTab[cRow].parID=parID;
@@ -781,21 +779,7 @@ if(m_isVerbose){
 return cTab;
 }
 
-
 //_____________________________________________________________________________
-int StDbBroker::DbInit(const char * dbName)
-{  return ::DbInit(dbName) ;}
+int StDbBroker::DbInit(const char * dbName) {  return ::DbInit(dbName) ;}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#undef __CLASS__
