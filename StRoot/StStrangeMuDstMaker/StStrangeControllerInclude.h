@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerInclude.h,v 3.1 2000/07/17 20:28:40 genevb Exp $
+// $Id: StStrangeControllerInclude.h,v 3.2 2003/05/23 20:10:43 genevb Exp $
 // $Log: StStrangeControllerInclude.h,v $
+// Revision 3.2  2003/05/23 20:10:43  genevb
+// No message accounting for PrintNumCand()
+//
 // Revision 3.1  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -30,7 +33,7 @@
 
 //_____________________________________________________________________________
 inline void StStrangeControllerBase::PrintNumCand(const char* text, Int_t num) {
-  gMessMgr->Info() << IsA()->GetName() << ": " << text << " "
+  gMessMgr->Info("","O-") << IsA()->GetName() << ": " << text << " "
                    << num << " " << GetName() << " candidates" << endm;
 }
 //_____________________________________________________________________________
