@@ -107,6 +107,9 @@ c
 c  4apr96 malisa - we now get rid of the old convention that numbered pads in the
 c       *sector*.  We now number pads in the *row*.
 c
+c  03-NOV-1997 R.Bossingham
+c       Eliminate a number of unused variables to reduce compilation warnings
+c
 
 #include "tcl_make_clusters.inc"
 #include "tls_ecvalues.inc"
@@ -120,9 +123,7 @@ C----------------------------------------------------------------------
 
 	INTEGER TPG_Nrows_in_Sector
 	INTEGER TPG_Nsectors
-	INTEGER TCL_Make_Cluster_Row
 	INTEGER TCL_ClsRow
-	LOGICAL MSG_Enabled_Trace
 
 	INTEGER IDE1
 	SAVE    IDE1
@@ -131,10 +132,6 @@ C----------------------------------------------------------------------
 
         integer padptr(1:45,1:24),itpp
         integer tls_quick_sort_i
-
-c     the following are just temporary
-        integer jjpix,numseq,istart_seq,numpix,idatum
-        integer iseq,iadc,itdc,ipix,itdc_last
 
 C----------------------------------------------------------------------
 
@@ -270,6 +267,11 @@ c
 c   modificattions:
 c   ==============
 c
+C   03-Nov-1997 R.Bossingham
+C   * Reduce max. length of pad rows from 184 to 182
+C   * Eliminate some unused, but declared, variables
+C   * Eliminate dead code "return" statement
+c   
 #include "PAM.inc"
 #include "tpg_pad_plane.inc"
 	RECORD /TABLE_HEAD_ST/PAD_PLANE_H
@@ -301,7 +303,6 @@ C----------------------------------------------------------------------
 	INTEGER     Nrowseqs_max
 	PARAMETER ( Nrowseqs_max = 40000 ) !Max. #sequences in one row.
 
-	INTEGER Nclusters
 	INTEGER Nrowseqs !No. of pixels in this row, unpacked by PADUNP.
 
 *	The following arrays are returned by the routine tcl_get_row_seq
@@ -316,7 +317,8 @@ C----------------------------------------------------------------------
 c	The following are local arrays used to group the sequences into
 c	clusters....
 	integer max_nseqs_on_pad,max_pads_in_row
-	parameter(max_nseqs_on_pad=100,max_pads_in_row=184)
+c RRB: correct 184->182
+	parameter(max_nseqs_on_pad=100,max_pads_in_row=182)
 c number of sequences on a pad...
 	integer*2 nseqs_pad(1:max_pads_in_row)
 c for sequence on each pad, a pointer into the arrays returned 
@@ -331,11 +333,10 @@ c tells whether a sequence is already claimed by a cluster...
         integer ipad_seed,itlo_seed,ithi_seed
 
 	integer jpad,iseq,jpad_seq,seed_sequence
-	integer pads_in_row,row_temp
+	integer pads_in_row
         integer ipad_seq,iptr
 
 	logical first/.true./
-	integer jsect,jrow
 
         save first
 
@@ -532,7 +533,6 @@ ccc no more!!!     +             secpad_offset(row) ! note we restore offset
 	endif
 
 	goto 100	! find another cluster
-        return
 	end
 
 
@@ -598,6 +598,9 @@ c   18dec94 MALisa - fixed a major and insidious bug which did not
 c		     properly index pixel pointer if there are more than
 c		     one sequence on a pad
 c
+c   03nov97 R.Bossingham -
+c		     Eliminate some declared, but unused, variables
+c
 #include "PAM.inc"
 #include "tss_tppad.inc"
         RECORD      /TABLE_HEAD_ST/                 tppad_h
@@ -627,15 +630,14 @@ C----------------------------------------------------------------------
 	INTEGER TPG_Nsectors
 
 	LOGICAL Done
-	LOGICAL Started
 c        LOGICAL First
-	INTEGER Ipixel, Nseqpix, Isequence, Nsequences, Iseqpix
+	INTEGER Nseqpix, Isequence, Nsequences
 	INTEGER Jpixel
-	INTEGER TDC, ADC, ADCraw, PAD, MCid
+	INTEGER TDC, ADC, PAD, MCid
 	INTEGER Jsector, Jrow
 
 c->RJM  this should eventually be fixed! (tppad is not "logically" packed)
-        integer     mxsect,mxrow,isec,irow,ksec,lsec
+        integer     mxsect,mxrow
         parameter   (mxsect = 24, mxrow = 45)
 c->MAL        integer     padptr(mxrow,mxsect),saveptr,saveoff
         integer padptr(1:45,1:24)
@@ -651,7 +653,7 @@ c new necessary baggage for unpacking data
         integer nseq_factor/'100000'X/
         integer tdc_factor/'400'X/
         integer Sector, Row, Nseqs_max
-        integer jndx,kseqpix,pix_offset
+        integer jndx
 
 	INTEGER IDE1
 	SAVE    IDE1
