@@ -37,8 +37,9 @@ echo Use makefiles from $STAF_MAKE_HOME
 #  info about INP_DIR and OUT_DIR is saved into this file
 
 gmake -f ${STAF_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
-
-
+set StarBin = ${OUT}/.$(STAR_SYS)/bin
+if ( ! -e  $StarBin/root4star) ln -s $StarBin/Root.exe $StarBin/root4star 
+i
 #real run of makefile. It creates executable
 
 
