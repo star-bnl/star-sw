@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.20 1999/10/11 16:40:25 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.21 1999/10/12 23:37:50 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1486,7 +1486,7 @@ void ReadOptions(int nnn,char *aaa[]) {
       } else {  /* single-letter options may be combined (eg, -it) */
         for(jj=1;aaa[ii][jj];jj++) {
                if(aaa[ii][jj]=='H') gOptionH=7;
-               if(aaa[ii][jj]=='s') gOptions=7;
+          else if(aaa[ii][jj]=='s') gOptions=7;
           else if(aaa[ii][jj]=='t') gOptiont=7;
           else if(aaa[ii][jj]=='M') gOptionM=7;
           else if(aaa[ii][jj]=='T') gOptionT=7;
