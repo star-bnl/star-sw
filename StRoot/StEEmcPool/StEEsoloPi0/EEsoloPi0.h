@@ -3,7 +3,7 @@
 #ifndef EEsoloPi0_h
 #define EEsoloPi0_h
 /******************************************************
- * $Id: EEsoloPi0.h,v 1.5 2004/08/26 04:39:40 balewski Exp $
+ * $Id: EEsoloPi0.h,v 1.6 2004/09/03 04:50:52 balewski Exp $
  ******************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
@@ -30,6 +30,7 @@ class EEmcDbItem;
   typedef StEEmcDbMaker EEDB;
 #endif
 
+
 class EEsoloPi0 {
  protected:
   enum {MxTwEta=12, MxTwPhi=60, MxTw=12*60};
@@ -53,13 +54,13 @@ class EEsoloPi0 {
   struct EEsoloMipA{int key,id; float e;};
   struct Cluster {int k1; float eH,eC,fphi,feta; } clust[MxTw] ,oldClust;
 
+
   float scaleFactor; // converts energy from eeTree --> GeV, old
 
   TH1F *hA[32], *hR[64], *hM[64]; // all, real , mixed eve
   EEsoloMipA soloMip[MxTw]; // stores all towers
 
   int dbMapped;
-  const  EEmcDbItem  *soloMipDb[MxTw]; // stores DB pointers for all towers
 
   void clear();
   void tagCluster(int k0,int d=1);
@@ -83,26 +84,19 @@ class EEsoloPi0 {
 
   void set(float a, float b,  float d, float m1=0.11, float m2=0.16 )
     {scaleFactor =a; seedEnergy=b;  shapeLimit=d;  mLo=m1; mHi=m2; }
-
  
   ClassDef(EEsoloPi0,1) 
 };
 #endif
 
-#if 0
-  int getTowerAdc(EEfeeRawEvent  *feeEve, EEstarTrig *eTrig=0,EEmcEventHeader *eHead=0, int n1=0, int n2=240);
-
-#endif
-
-/* fix in St-code
-1) clear soloMipDb[MxTw] in InitRun
-
-*/
  
 
 
 /*****************************************************************
  * $Log: EEsoloPi0.h,v $
+ * Revision 1.6  2004/09/03 04:50:52  balewski
+ * big clenup
+ *
  * Revision 1.5  2004/08/26 04:39:40  balewski
  * towards pi0
  *

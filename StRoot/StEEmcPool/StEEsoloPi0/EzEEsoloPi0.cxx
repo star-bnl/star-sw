@@ -1,14 +1,14 @@
-// $Id: EzEEsoloPi0.cxx,v 1.1 2004/08/26 04:39:40 balewski Exp $
+// $Id: EzEEsoloPi0.cxx,v 1.2 2004/09/03 04:50:52 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
 
 
 #include <TClonesArray.h>
-
 #include <TObjArray.h> 
 
 #include "EzEEsoloPi0.h"
+ #include <TH1.h> //tmp
 
 #include "StEEmcUtil/EEfeeRaw/EEfeeRawEvent.h"
 #include "StEEmcUtil/EEfeeRaw/EEstarTrig.h"
@@ -72,6 +72,8 @@ void EzEEsoloPi0::unpackEzTree(){
 
   unpackEzTail();
   unpackEzSmd();
+  unpackEzTrig();
+
   return ;
 }
 
@@ -101,7 +103,9 @@ void EzEEsoloPi0:: unpackEzTail(){
       // (assuming pre/post/tw is not mixed with SMD pixels) 
      
       if(x->fail ) continue; // drop broken channels
-      
+      float rawAdc=data[chan];  
+      if(rawAdc<x->thr) continue; // drop small ADC values
+
       // accept this hit
       int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
       int ieta=x->eta-1;
@@ -118,9 +122,7 @@ void EzEEsoloPi0:: unpackEzTail(){
       }
       assert(iT>=0 && iT<mxTile);
 
-      float rawAdc=data[chan];  
       float adc=rawAdc-x->ped; 
-      adc=adc;//aa
       //aa      tileAdc[iT][ieta][iphi]=adc; 
       //aa tileThr[iT][ieta][iphi]=rawAdc>x->thr;
 
@@ -128,14 +130,15 @@ void EzEEsoloPi0:: unpackEzTail(){
       // ........ only elements with valid gains are processed below
       float  ene=adc/x->gain;
       float recoEner=ene/scaleFactor; // ideal 
-     //aa tileEne[iT][ieta][iphi]=adc/x->gain; 
       if(iT==0)   soloMip[ispir].e= recoEner;
+      //aa tileEne[iT][ieta][iphi]=adc/x->gain; 
+      
     }
   }
   
   return ;
-
 }
+
 //--------------------------------------------------
 //--------------------------------------------------
 void EzEEsoloPi0:: unpackEzSmd(){
@@ -174,5 +177,23 @@ void EzEEsoloPi0:: unpackEzSmd(){
   }
   
   return ;
+  
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+void EzEEsoloPi0:: unpackEzTrig(){// BBC, CTB 
+
+  assert(eTrig);
+
+  // .........check CTB multiplicity , for fun
+  
+  int ctbSum=0;
+  int isl;
+  for ( isl = 0; isl < 240; isl++ ) {
+    ctbSum+= eTrig -> CTB[isl];
+  }
+  // printf("ctbSum=%d \n",ctbSum);
+  hA[7]->Fill(ctbSum); //tmp
   
 }
