@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.1 1999/02/21 23:35:11 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.2 1999/02/22 16:44:16 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.2  1999/02/22 16:44:16  genevb
+ * Switched to PhysicalConstants.h
+ *
  * Revision 1.1  1999/02/21 23:35:11  genevb
  * Strangeness Tags Maker
  *
@@ -20,7 +23,7 @@
 #include "StEvent/StV0Vertex.hh"
 #include "StChain/StChain.h"
 #include "TMath.h"
-#include "phys_constants.h"
+#include "PhysicalConstants.h"
 
 ClassImp(StStrangeTagsMaker)
 
@@ -40,8 +43,8 @@ StStrangeTagsMaker::Init()
 {
     mRange = 0.02;
     m2Range = 2*mRange;
-    mMasspi2 = M_PION_PLUS*M_PION_PLUS;
-    mMasspr2 = M_PROTON*M_PROTON;
+    mMasspi2 = pion_plus_mass_c2 * pion_plus_mass_c2;
+    mMasspr2 = proton_mass_c2 * proton_mass_c2;
 
     return StMaker::Init();
 }
@@ -61,7 +64,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.1 1999/02/21 23:35:11 genevb Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.2 1999/02/22 16:44:16 genevb Exp $" << endl;
     if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
@@ -108,17 +111,17 @@ void StStrangeTagsMaker::fillTag()
       Float_t maLa = TMath::Sqrt(eLa*eLa - pV2);
       Float_t maLb = TMath::Sqrt(eLb*eLb - pV2);
 
-      Float_t perc = (maK0/M_KAON_0_SHORT) - 1.;
+      Float_t perc = (maK0/kaon_0_short_mass_c2) - 1.;
       if (TMath::Abs(perc) < mRange) nK0++;
       else if (TMath::Abs(perc + m2Range) < mRange) nbelowK0++;
       else if (TMath::Abs(perc - m2Range) < mRange) naboveK0++;
 
-      perc = (maLa/M_LAMBDA) - 1.;
+      perc = (maLa/lambda_mass_c2) - 1.;
       if (TMath::Abs(perc) < mRange) nLa++;
       else if (TMath::Abs(perc + m2Range) < mRange) nbelowLa++;
       else if (TMath::Abs(perc - m2Range) < mRange) naboveLa++;
 
-      perc = (maLb/M_ANTILAMBDA) - 1.;
+      perc = (maLb/antilambda_mass_c2) - 1.;
       if (TMath::Abs(perc) < mRange) nLb++;
       else if (TMath::Abs(perc + m2Range) < mRange) nbelowLb++;
       else if (TMath::Abs(perc - m2Range) < mRange) naboveLb++;
