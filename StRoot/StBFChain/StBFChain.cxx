@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.49 2000/01/14 00:44:18 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.50 2000/01/14 01:16:36 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.50  2000/01/14 01:16:36  fisyak
+// Add xdf2root for calib
+//
 // Revision 1.49  2000/01/14 00:44:18  fisyak
 // Add calib to chain
 //
@@ -265,9 +268,10 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"in"          ,""  ,"","xin"                                                  ,"","Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
+  {"xdf2root"    ,""  ,"",""                        ,"","xdf2root","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"geant","geant","","NoFieldSet,tables","St_geant_Maker","geometry,St_g2r,St_geant_Maker","GEANT",kFALSE}, 
-  {"db"          ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
-  {"calib"       ,""  ,"","tables"               ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"db"          ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
+  {"calib"       ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,tables,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt"                     ,"StChainMaker","StChain","",kFALSE},
