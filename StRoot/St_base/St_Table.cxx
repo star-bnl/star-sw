@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.53 1999/05/06 02:17:37 perev Exp $ 
+// $Id: St_Table.cxx,v 1.54 1999/06/25 01:35:53 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.54  1999/06/25 01:35:53  fine
+// New streamers for St_Tables
+//
 // Revision 1.53  1999/05/06 02:17:37  perev
 // Supress warnings in Table if <100 rows
 //
@@ -149,6 +152,7 @@
 #include "TDataMember.h"
 #include "TDataType.h"
 #include "St_Table.h"
+#include "St_TableElementDescriptor.h"
 
 //______________________________________________________________________________
 void *ReAllocate(table_head_st *header, Int_t newsize) 
@@ -221,6 +225,28 @@ static void AsString(void *buf, const char *name, Int_t width=0)
 
 ClassImp(St_Table)
  
+
+//______________________________________________________________________________
+TList *St_Table::GetTableDescriptors() {
+  // Create a new list of the columns descriptors
+   TClass *classPtr = GetRowClass();
+   if (classPtr == 0)         return 0;
+   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
+   if (!classPtr->GetNdata()) return 0;
+
+   TIter      next( classPtr->GetListOfDataMembers());
+
+   TDataMember *member = 0;
+   TList *dscList = 0;
+   while ((member = (TDataMember*) next())) {
+     if (!dscList) dscList = new TList;
+     const Char_t *memberName = member->GetName();
+     St_TableElementDescriptor *dsc = new St_TableElementDescriptor(this, memberName);
+     if (dsc->IsZombie()) { delete dsc; dsc = 0; MakeZombie();}
+     else dscList->Add(dsc);
+  }
+  return dscList;
+}
 
 //______________________________________________________________________________
 Int_t St_Table::MakeWrapClass(Text_t *name)
@@ -1489,7 +1515,7 @@ void St_Table::Set(Int_t n, Char_t *array)
 }
  
 //_______________________________________________________________________
-void St_Table::Streamer(TBuffer &b)
+void St_Table::StreamerTable(TBuffer &b)
 {
    // Stream a St_Table object.
    // Stream an object of class St_Table.
@@ -1558,6 +1584,96 @@ Int_t St_Table::SetfN(Long_t len)
    } 
    return fN;
 }
+
+//____________________________________________________________________________
+#ifdef StreamElelement
+#define __StreamElelement__ StreamElelement
+#undef StreamElelement
+#endif
+
+#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):          \
+ if (nextCol->GetDimensions())                                   \
+   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()));    \
+ else                                                            \
+   R__b << *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());      \
+ break
+
+#define StreamElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):          \
+ if (nextCol->GetDimensions())                                   \
+    R__b.WriteArray((_NAME2_(type,_t) *)(row+nextCol->GetOffset()), nextCol->GetSize()/sizeof(_NAME2_(type,_t))); \
+ else                                                            \
+    R__b >> *(_NAME2_(type,_t) *)(row+nextCol->GetOffset());     \
+ break
+
+//______________________________________________________________________________
+TList *St_Table::GetRowDescritors() { return 0;}
+//______________________________________________________________________________
+void St_Table::Streamer(TBuffer &R__b)
+{
+   // Stream an array of the "plain" C-structures
+
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+      St_Table::StreamerTable(R__b);
+      if (*s_MaxIndex <= 0) return; 
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+        char *row= s_Table;
+        TIter nextColDescriptor(GetRowDescritors());
+        St_TableElementDescriptor *nextCol = 0;
+        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        {
+          // Stream one table row supplied
+          switch(nextCol->GetType()) {
+           StreamElementIn(Float);
+           StreamElementIn(Int);
+           StreamElementIn(Long);
+           StreamElementIn(Short);
+           StreamElementIn(Double);
+           StreamElementIn(UInt);
+           StreamElementIn(ULong);
+           StreamElementIn(UChar);
+           StreamElementIn(Char);
+          default:
+            break;
+        };
+      }
+      row += GetRowSize();
+     }
+   } else {
+//      R__b.WriteVersion(St_ev0_track2::IsA());
+      St_Table::StreamerTable(R__b);
+      if (*s_MaxIndex <= 0) return; 
+
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
+        char *row= s_Table;
+        TIter nextColDescriptor(GetRowDescritors());
+        St_TableElementDescriptor *nextCol = 0;
+        while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
+        {
+          // Stream one table row supplied
+          switch(nextCol->GetType()) {
+           StreamElementOut(Float);
+           StreamElementOut(Int);
+           StreamElementOut(Long);
+           StreamElementOut(Short);
+           StreamElementOut(Double);
+           StreamElementOut(UInt);
+           StreamElementOut(ULong);
+           StreamElementOut(UChar);
+           StreamElementOut(Char);
+          default:
+            break;
+        };
+      }
+      row += GetRowSize();
+     }
+   }   
+}
+#ifdef __StreamElelement__
+#define StreamElelement __StreamElelement__ 
+#undef __StreamElelement__ 
+#endif
+
 //_______________________________________________________________________
 void St_Table::Update(){;}
 //_______________________________________________________________________
