@@ -13,7 +13,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#ifdef irix
+#define ARCH_DL_SUPPORTED
+#endif /*irix*/
+#ifdef sun
+#define ARCH_DL_SUPPORTED
+#endif /*sun*/
+#ifdef ARCH_DL_SUPPORTED
 #include <dlfcn.h>
+#endif
 
 #include "asuAlloc.h"
 #include "asuLib.h"
@@ -43,6 +51,7 @@ int kam_soc_bind()
    char* aspName = ku_gets();	/* ASP name */
    char* solibName = ku_gets();	/* shared library */
 
+#ifdef ARCH_DL_SUPPORTED
    void *solibHandle;
    char funcName[9];
 // void **funcHandle;
@@ -65,6 +74,9 @@ int kam_soc_bind()
 
    ASUFREE(solibName);
    EML_SUCCESS(STAFCV_OK);
+#else /*ARCH_DL_SUPPORTED*/
+   EML_ERROR(NO_DYNAMIC_LINKING);
+#endif /*ARCH_DL_SUPPORTED*/
 }
 
 /*
@@ -80,6 +92,7 @@ int kam_soc_bind()
 void kam_soc_release_(){kam_soc_release();}
 int kam_soc_release()
 {
+#ifdef ARCH_DL_SUPPORTED
    long npars = ku_npar();	/* number of KUIP parameters */
    char* aspName = ku_gets();	/* ASP name */
    char* solibName = ku_gets();	/* shared library */
@@ -102,6 +115,9 @@ int kam_soc_release()
 
    ASUFREE(solibName);
    EML_SUCCESS(STAFCV_OK);
+#else /*ARCH_DL_SUPPORTED*/
+   EML_ERROR(NO_DYNAMIC_LINKING);
+#endif /*ARCH_DL_SUPPORTED*/
 }
 
 /*
