@@ -275,13 +275,16 @@ strbyte_read( int *Nbytes, void *buffer )
 	  {
 	    printf("strbyte_read-E1 Number of bytes read: %d is not the number expected: %d .\n"
 	          , Nbytes_from_file, *Nbytes );
-	    *Nbytes=Nbytes_from_file;
 
 	  }
 */
 /*	  end if (Nbytes_from_file != *Nbytes)    */
 
+	  *Nbytes=Nbytes_from_file;
+
 	}
+	else
+	  *Nbytes = 0;
 /*	end if (fpr)       */
 }
 
