@@ -1,8 +1,11 @@
-$Id: dzdbnk.F,v 1.1 2000/01/06 01:01:07 nevski Exp $
-$Log: dzdbnk.F,v $
-Revision 1.1  2000/01/06 01:01:07  nevski
-dzdoc for agi
-
+* $Id: dzdbnk.F,v 1.2 2000/01/06 23:48:22 nevski Exp $
+* $Log: dzdbnk.F,v $
+* Revision 1.2  2000/01/06 23:48:22  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:07  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZDBNK(LB,IB,L,X0, Y0, DX, DY, HID, HIDNX, HIDU,
      &          NID, ND)
 *.
