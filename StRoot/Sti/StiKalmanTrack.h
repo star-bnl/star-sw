@@ -145,9 +145,11 @@ class StiKalmanTrack : public StiTrack
    * @return dca in cm.
    */
    double  getDca()    const;
+   double  getGlobalDca()    const;
    virtual double  getDca(const StiHit * vertex)    const;
 
    void setDca(double dca);
+   void setGlobalDca(double dca);
    
   /*!
    * Returns the distance of closest approach of this track to the give track.
@@ -166,6 +168,7 @@ class StiKalmanTrack : public StiTrack
 
 	 /// Returns the number of hits associated and used in the fit of this track.
    int getFitPointCount() const;  
+   int getFitPointCount(int detectorId) const;  
    
 	 /// Return the number of gaps on this track. 
    int getGapCount() const;
@@ -327,6 +330,7 @@ protected:
   double  m;             // mass hypothesis
 
   double  _dca;
+  double  _gdca;
 
  public:
   double _vDca; // tempo dca 
@@ -502,10 +506,18 @@ inline double  StiKalmanTrack::getDca()    const
 {
   return _dca;
 }
+inline double  StiKalmanTrack::getGlobalDca()    const
+{
+  return _gdca;
+}
 
 inline void  StiKalmanTrack::setDca(double dca)  
 {
   _dca = dca;
+}
+inline void  StiKalmanTrack::setGlobalDca(double dca)  
+{
+  _gdca = dca;
 }
 
 
@@ -626,16 +638,14 @@ inline StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
 {
   if (node->getHit())
     {
-      //TRACKMESSENGER <<"StiKalmanTrack::add() - I - node HAS a hit"<<endl;
       if (node->nudge()) return 0;
       int status = node->updateNode();
       if (status<0) 
 	return 0;
-      else if (status>0) // remove the hit (CP Oct 21, 04 ) if the track direction has changed from update..
-      node->setHit(0);
+      else if (status>0) 
+	// remove the hit (CP Oct 21, 04 ) if the track direction has changed from update..
+	node->setHit(0);
     }
-  //else
-  //  TRACKMESSENGER <<"StiKalmanTrack::add() - I - node WITHOUT a hit"<<endl;
   lastNode->add(node);
   lastNode = node;
   return lastNode;

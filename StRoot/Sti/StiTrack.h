@@ -103,6 +103,10 @@ public:
   virtual double  getTanL()           const=0;   // tan(lambda)
   virtual double  getDca(const StiHit*)const;   // distance of closest approach to main vertex
   virtual double  getDca()            const=0;   // distance of closest approach to main vertex
+  virtual double  getGlobalDca()      const
+    {
+      return 0;
+    }   // distance of closest approach to main vertex
   virtual double  getDca2(StiTrack *t) const=0;   // distance of closest approach to given track - 2D calc
   virtual double  getDca3(StiTrack *t) const=0;   // distance of closest approach to given track - 3D calc
   virtual int     getPointCount() const=0;

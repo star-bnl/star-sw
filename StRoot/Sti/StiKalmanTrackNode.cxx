@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.40 2004/11/10 21:46:02 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.41 2004/11/22 19:23:20 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.41  2004/11/22 19:23:20  pruneau
+ * minor changes
+ *
  * Revision 2.40  2004/11/10 21:46:02  pruneau
  * added extrapolation function; minor change to updateNode function
  *
@@ -464,30 +467,46 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   int position = 0;
   setState(pNode);
   StiPlacement * place = tDet->getPlacement();
-  double tAlpha = nice(place->getNormalRefAngle());
-  double dAlpha = tAlpha - _alpha;
-	// bail out if the rotation fails...
-  if (fabs(dAlpha)>0.5e-2) 
-    if (rotate(dAlpha)) return -10;
   StiShape * sh = tDet->getShape();
-  planarShape = 0;
-  cylinderShape = 0;
+  int shapeCode = sh->getShapeCode();
   _refX = place->getLayerRadius();
   _refAngle = place->getLayerAngle();
-  //_refX = place->getNormalRadius();
+
+  if(shapeCode!=kCylindrical)
+    { //flat volume
+      double tAlpha = nice(place->getNormalRefAngle());
+      double dAlpha = tAlpha - _alpha;
+      // bail out if the rotation fails...
+      if (fabs(dAlpha)>0.5e-2)
+	if (rotate(dAlpha)) return -10;
+    }
+  //planarShape = 0;
+  //cylinderShape = 0;
+
+
   if (false&&_refX<20.) cout << "Node:refX<4.5 pNode:"<< *pNode;
   position = propagate(place->getNormalRadius(),sh->getShapeCode()); 
-  if (false&&_refX<20.) 
+  if (position<0) 
     {
-      cout << " position after propagate:"<<position;
-      cout << *this;
+      //if (shapeCode==kCylindrical) cout << "cylinder returns:"<<position<<endl;
+      return position;
     }
-  if (position<0) return position;
+  if (shapeCode==kCylindrical)
+    {
+      double rotA = atan2(_p0,_x);
+      /*      cout << " rotA:"<<180.*rotA/3.1415<<endl;
+      cout << " cylinder has x:" << _x << " p0:" << _p0 << " p1:" << _p1 << " _p2:"<<_p2<<" _p3:" << _p3 <<" p4:"<<_p4 << endl;
+      cout << " sinCA:"<< _sinCA; if (fabs(_sinCA)<=1.) cout << " CA:"<<asin(_sinCA);
+      cout << endl;
+      cout << " while alpha:" << 180*_alpha/3.1415<<endl;
+      */
+      if (rotate(rotA)!=0)
+	{
+	  cout << " cylinder return -50"<<endl;
+	  return -50;
+	}
+    }
   position = locate(place,sh);
-  if (false&&_refX<20.) 
-    {
-      cout << " position after locate:"<<position<<endl;
-    }
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
   // Multiple scattering
@@ -578,29 +597,22 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
       double x_m = a*(x0-y0*sq)/r0sq;
       x2 = ( x_p>x_m) ? x_p : x_m;
       if (x2<=0) return -3;
+
     }
   dx=x2-x1;  
   sinCA2=_p3*x2 - _p2; 
   if (fabs(sinCA2)>1.) return -4;
-  /*if (sinCA2>1.) 
-    sinCA2 = 0.999999;
-  else if (sinCA2<-1.) 
-  sinCA2 = -0.999999;*/
   cosCA2   = ::sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
   sinCA1plusCA2    = sinCA1*cosCA2 + sinCA2*cosCA1;
-  if (sinCA1plusCA2==0) 
-    {
-      //cout << "======================================================= fabs(sinCA1plusCA2)==0" << endl;
-      return -5;
-    }
+  if (sinCA1plusCA2==0)   return -5;
   sumCos   = cosCA1+cosCA2;
   _p0      += dx*sumSin/sumCos;
-	//	if (fabs(_p1)>200.) cout << "propagate()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
+  //	if (fabs(_p1)>200.) cout << "propagate()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
   _p1      += dx*_p4*sumSin/sinCA1plusCA2;
-	//if (fabs(_p1)>200.) cout << "propagate()[2] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
-	// sanity check - to abandon the track
-	if (fabs(_p0)>200. || fabs(_p1)>200. ) return -6;
+  //if (fabs(_p1)>200.) cout << "propagate()[2] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
+  // sanity check - to abandon the track
+  if (fabs(_p0)>200. || fabs(_p1)>200. ) return -6;
   _x       = x2;
   _sinCA   = sinCA2;
   _cosCA   = cosCA2;
@@ -954,7 +966,6 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       r01=hit->syz()+_c10;  
       r11=hit->szz()+_c11;
     }
-  //double det=fabs(r00*r11 - r01*r01); //cp Nov1
   double det=r00*r11 - r01*r01;
   if (_c00<=0 || _c11<=0 || det<=0)
     cout << endl << "evalChi2 c00:"<<_c00<< " c10:"<<_c10<<" c11:"<<_c11<<" det:"<<det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
@@ -1015,35 +1026,22 @@ int StiKalmanTrackNode::updateNode()
   double dp2  = k20*dy + k21*dz;
   double dp4  = k40*dy + k41*dz;
 
-  //if (_c00>0 && _c11>0 && hitCount>20) 
-  //  {
-  //    cout << " _x:"<<_x<< " hit:"<<hitCount<<" c22:"<<sqrt(_c22)<<" c44:"<<sqrt(_c44)<<" dp2:"<<dp2<<" dp4:"<<dp4<<endl;
-  //  }
-  //if (_x>50.)
-  //{
-  if (fabs(dp4)>0.27 || fabs(dp2)>3) return 1;
-  //}
-  //else
-  //{
-  //if (fabs(dp4)>0.1 || fabs(dp2)>0.5) return 1;
-  //}
   if (_x>2.)
     {
       if ( (dp4*dp4/16.>_c44) || (dp3*dp3/16. > _c33) || (dp2*dp2/16.>_c22) ) return 1;
     }
-  /*  else
-    {
-      if ((dy*dy/16.>_c00) || (dz*dz/16.>_c11)) return 1;
-    }
-  */
 
-  double cur  = _p3 + dp3;
   double eta  = _p2 + dp2;
+  double cur  = _p3 + dp3;
   double tanl = _p4 + dp4;
   StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode*>(getParent());
-  if (parent)
+  if (parent && _x>2.)
     {
-      if (fabs(eta-parent->_p2)>3 || fabs(tanl-parent->_p4)>0.27) return 2;
+      double d_p2 = parent->_p2 - eta;
+      double d_p3 = parent->_p3 - cur;
+      double d_p4 = parent->_p4 - tanl;
+      if ( (d_p4*d_p4/16.>_c44) || (d_p3*d_p3/16. > _c33) || (d_p2*d_p2/16.>_c22) ) return 1;
+      //if (fabs(eta-parent->_p2)>3 || fabs(tanl-parent->_p4)>0.27) return 2;
     }
   
   // Check if any of the quantities required to pursue the update
@@ -1053,11 +1051,11 @@ int StiKalmanTrackNode::updateNode()
   if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))  return -11;
   // update Kalman state
   _p0 += k00*dy + k01*dz;
-	if (fabs(_p0)>200.) 
-		{
-			cout << "updateNode()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
-			return -12;
-		}
+  if (fabs(_p0)>200.) 
+    {
+      cout << "updateNode()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
+      return -12;
+    }
   _p1 += k10*dy + k11*dz;
   if (fabs(_p1)>200.) 
     {
