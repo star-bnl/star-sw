@@ -194,8 +194,10 @@ Int_t StTreeMaker::MakeWrite()
   UpdateHddr();
 
 //		Write StTree
-  StUKey ukey(GetRunNumber(),GetEventNumber());
-//  ULong_t ukey = GetNumber();
+  Int_t k1 = GetRunNumber();
+  Int_t k2 = GetEventNumber();
+  if (k2 <= 0) { k1 = GetNumber(); k2=0; }  
+  StUKey ukey(k1,k2);
   fTree->WriteEvent(ukey);	
   fTree->Clear(); 
   return 0;
