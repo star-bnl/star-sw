@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*******************************************************
- * $Id: EEsmdCal.h,v 1.9 2004/09/22 00:45:50 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.10 2004/10/08 14:34:39 balewski Exp $
  *******************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -101,6 +101,7 @@ class EEsmdCal {
   /// 30 deg (only for  this sector)
   float smdAdc[MaxSmdPlains][MaxSmdStrips]; // adc-ped
   float smdEne[MaxSmdPlains][MaxSmdStrips]; // adc-ped/gain (if exist)
+  bool killT[mxTile][MaxEtaBins][MaxPhiBins]; // mark tiles excluded from ana
 
   void clear();
   void findSectorMip();
@@ -134,6 +135,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.10  2004/10/08 14:34:39  balewski
+ * as used for PQRUV calib for pp200, 2004
+ *
  * Revision 1.9  2004/09/22 00:45:50  balewski
  * ready for calib of smd
  *
