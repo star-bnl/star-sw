@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.12 2000/09/15 22:51:35 posk Exp $
+// $Id: StFlowTrack.h,v 1.13 2000/09/16 22:20:35 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.13  2000/09/16 22:20:35  snelling
+// Added selection on P and global DCA and fixed rapidity calulation
+//
 // Revision 1.12  2000/09/15 22:51:35  posk
 // Added pt weighting for event plane calcualtion.
 //
@@ -210,6 +213,7 @@ inline Float_t StFlowTrack::Y()            const {
   if (strcmp(mPid, "e-") == 0)       M = 0.0005;
   if (strcmp(mPid, "e+") == 0)       M = 0.0005;
   float Pz = sqrt(this->P()*this->P() - mPt*mPt); 
+  if (mEta < 0) {Pz = -Pz;}
   float E = sqrt(this->P()*this->P() + M*M);
   float rapidity = 0.5*log((E + Pz)/(E - Pz));
   return rapidity; }
