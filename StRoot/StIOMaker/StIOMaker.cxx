@@ -60,24 +60,26 @@ Int_t StIOMaker::Init()
   return Open();
 }
 //_____________________________________________________________________________
+ void  StIOMaker::SetFile(const char *file)
+{
+  if (!file || !file[0]) return;
+//		Add file to StFile
+  if(!fFileSet) fFileSet = new StFile();
+  fFileSet->AddFile(file);
+}
+//_____________________________________________________________________________
 Int_t StIOMaker::Open()
 {
-
+  
   fNumEvent = 0;
-  if (!fFile.IsNull()) {//File is set
-    if (!fFileSet) fFileSet = new StFile();
-    fFileSet->AddFile(fFile);
-    SetFile("");
-  }
   if (!fFileSet) return kStEOF;
 
   int nBr = fFileSet->GetNBranches();
 
   for (int iBr=0; iBr<nBr; iBr++) { //branch loop
   
-    const char *nextFile= fFileSet->NextFileName();
-    if (!nextFile) return kStEOF;
-    SetFile(nextFile);
+    fNextFile = fFileSet->NextFileName();
+    if (!fNextFile) return kStEOF;
     TString fmt = fFileSet->GetFormat();
     TString bra = fFileSet->GetBraName();
 
@@ -89,7 +91,8 @@ Int_t StIOMaker::Open()
     fCurrMk = fFmtMk[fCase-1];
 
     if (!fCurrMk) return kStErr;
-    fCurrMk->SetBranch(bra,nextFile,0);
+    fCurrMk->SetBranch(bra,fNextFile,0);
+    fCurrMk->SetFile(fNextFile);
   
   }//end branch loop
   
@@ -130,13 +133,15 @@ Int_t StIOMaker::Finish()
   for(int i=0;i<n;i++) {
     if (!fFmtMk[i]) continue;
     fFmtMk[i]->Finish();
-    delete fFmtMk[i]; fFmtMk[i]=0;}
+    fFmtMk[i]=0;}
+  fCurrMk = 0;
   return 0;
 }
 //_____________________________________________________________________________
 void StIOMaker::Close(Option_t *)
 { 
-  fCurrMk->Close();
+  if (fCurrMk) fCurrMk->Close();
+  fCurrMk = 0;
 }
 //_____________________________________________________________________________
 void StIOMaker::Clear(Option_t *opt)
@@ -176,8 +181,7 @@ StIOInterFace *StIOMaker::Load()
   Mk->SetName(ts);
   Mk->SetIOMode(fIOMode);
   Mk->SetTreeName(fTreeName);
-  Mk->SetFile(GetFile());
-  SetFile("");
+  Mk->SetFile(fNextFile);
   if (GetDebug()) Mk->SetDebug();
   St_DataSet *brs = Find(".branches");
   if (brs) brs->Shunt(Mk);

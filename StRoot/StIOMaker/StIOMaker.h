@@ -30,11 +30,11 @@ public:
            void   Close(Option_t *opt=0);
    virtual Int_t  Finish();
    virtual void Clear(Option_t *opt);
-   
+   virtual void   SetFile(const char *file);   
            void   SetMaxEvent(Int_t mx=10000000){fMaxEvent=mx;fNumEvent=0;};
 
    StFile         *fFileSet;    //!Chain of files
-
+   const char     *fNextFile;	//!next file from file set
    StIOInterFace  *fCurrMk;	//!Pointer to Current Maker
    StIOInterFace  *fFmtMk[9];	//!Pointers to TreeMaker,xdfin_Maker,St_io_Maker,StDAQMaker
 
@@ -51,7 +51,6 @@ protected:
    Int_t  fMaxEvt;
    Int_t  fNumEvt;
 
-
 void Build(StFile *fileSet,const char *treeName);
 StIOInterFace *Load();
 
@@ -61,7 +60,7 @@ StIOInterFace *Load();
 Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2,4=daq
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.3 1999/07/15 13:57:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.4 1999/07/19 01:57:54 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };
