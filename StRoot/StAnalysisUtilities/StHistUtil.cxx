@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.13 2003/01/22 21:32:46 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.14 2003/02/15 22:00:14 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.14  2003/02/15 22:00:14  genevb
+// Add tpcSectors
+//
 // Revision 2.13  2003/01/22 21:32:46  genevb
 // Fix Solaris compilation errors
 //
@@ -1184,6 +1187,15 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
     };
     sdefList = sdefList8;
     lengofList = sizeof(sdefList8)/4;
+  }
+
+// St_QA_Maker histograms for tpcSectors......................................
+  if ((!strcmp(dirName,"EventQA")) && (!strcmp(analType,"tpcSectors"))) {
+    Char_t* sdefList9[] = {
+      #include "St_QA_Maker/QAhlist_tpcSectors.h"
+    };
+    sdefList = sdefList9;
+    lengofList = sizeof(sdefList9)/4;
   }
 
   Int_t numPrt = 0;
