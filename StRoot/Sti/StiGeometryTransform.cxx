@@ -164,31 +164,13 @@ void StiGeometryTransform::kill()
 
 void StiGeometryTransform::setStiHitError(const StHit* stHit, StiHit* stiHit, double theta)
 {
-    //Note, we currently assume a diagonal error matrix from StHit, since that is all it stores.
-    //This will have to be changed in the future:
-    double sinTheta = sin(theta);
-    double cosTheta = cos(theta);
-    //this is a temp. kludge to bypass the problem stated above:
-    double syyMin = 1.E-1;
-    double szzMin = 1.E-1;
-    
-    StThreeVectorF error = stHit->positionError();
-    
-    //diagonal elements
-    stiHit->setSxx( error.x()*cosTheta*cosTheta + error.y()*sinTheta*sinTheta );
+    //For now, set all hit errors to fixed values:
 
-    //Have to catch here:
-    double syy = error.x()*sinTheta*sinTheta + error.y()*cosTheta*cosTheta;
-    stiHit->setSyy( (syy>=syyMin) ? syy : syyMin  );
-
-    //Have to catch again:
-    double szz = error.z();
-    stiHit->setSzz( (szz>=szzMin) ? szz : szzMin );
-    
-    //off-diagonal elements
-    stiHit->setSxy( -1.*error.x()*sinTheta*cosTheta + error.y()*sinTheta*cosTheta );
-    stiHit->setSxz( 0. );
-    stiHit->setSyz( 0. );
+    stiHit->setSxx(1.E-6); //cm
+    stiHit->setSxy(1.E-6); //cm
+    stiHit->setSyz(1.E-6); //cm
+    stiHit->setSyy(150.E-4); //cm
+    stiHit->setSzz(300.E-4); //cm
 }
 
 // returns the reference angle for the given sector number (out of the 
@@ -670,7 +652,11 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		    return;
 		}
 		else {
-		    hitvec.push_back(*where);
+		    StiHit* theStiHit = *where;
+		    //Push up the errors by 10x for these hits
+		    //theStiHit->setSyy(theStiHit->syy()*10.);
+		    //theStiHit->setSzz(theStiHit->szz()*10.);
+		    hitvec.push_back(theStiHit);
 		}
 	    }
 	}
