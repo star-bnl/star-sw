@@ -40,7 +40,7 @@ c calculate the pads used by this hit
           ret=tgc_global_to_local(jsect,xglobal,xlocal)
 
           if(jsect.ne.isect) 
-     >   print *,"wrong sector number,isect=",isect,"jsect=",jsect
+     >   print *,'wrong sector number,isect=',isect,'jsect=',jsect
           row=irow
           ret=tgc_x_to_pad(row,xlocal(1),pad,pad_plane_h,pad_plane)
 
