@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.17 1999/11/06 23:05:01 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.18 1999/11/11 05:16:30 fine Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -55,6 +55,10 @@ public:
                                  float theta2, float phi2,
                                  float theta3, float phi3);
 
+   virtual St_DataSet  *GetDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
+
    virtual void  SetDebug(EDebugLevel dbl=kDebug); 
            Int_t SetInputFile(const char* file);
 
@@ -65,7 +69,7 @@ static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Ch
 protected:
    static St_DataSet *fgGeom;
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.17 1999/11/06 23:05:01 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.18 1999/11/11 05:16:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
