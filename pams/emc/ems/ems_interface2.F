@@ -11,9 +11,10 @@ c:>------------------------------------------------------------------
      3    ,g2t_track_h,    g2t_track    
      4    ,g2t_emc_hit_h,  g2t_emc_hit  ,g2t_smd_hit_h,  g2t_smd_hit 
      5    ,g2t_eem_hit_h,  g2t_eem_hit  ,g2t_esm_hit_h,  g2t_esm_hit
-     6    ,ems_control_h,  ems_control
-     7    ,ems_hits_bemc_h,ems_hits_bemc,ems_hits_bsmd_h,ems_hits_bsmd
-     8    ,ems_hits_eemc_h,ems_hits_eemc,ems_hits_esmd_h,ems_hits_esmd)     
+     6    ,calb_calg_h,    calb_calg
+     7    ,ems_control_h,  ems_control
+     8    ,ems_hits_bemc_h,ems_hits_bemc,ems_hits_bsmd_h,ems_hits_bsmd
+     9    ,ems_hits_eemc_h,ems_hits_eemc,ems_hits_esmd_h,ems_hits_esmd)     
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_INTERFACE
 C:DESCRIPTION:  produces input tables for ems from g2t tables
@@ -55,7 +56,7 @@ c----
             ivid = g2t_emc_hit(ihit).volume_id            
             itrk = g2t_emc_hit(ihit).track_p
             de = g2t_emc_hit(ihit).de
-            call volid_bemc(ivid,eta,phi,dep)
+            call volid_bemc(ivid,eta,phi,dep,calb_calg(1).shift)
             call find_parent_b(ems_control_h, ems_control,
      +           g2t_vertex_h,g2t_vertex,g2t_track_h,g2t_track,itrk,ipartrk)
             iparpid  = g2t_track(itrk).ge_pid
@@ -95,7 +96,7 @@ c----
          do ihit = 1, g2t_smd_hit_h.nok
             ivid = g2t_smd_hit(ihit).volume_id            
             de = g2t_smd_hit(ihit).de
-            call volid_bsmd(ivid,eta,phi,type,strip)
+            call volid_bsmd(ivid,eta,phi,type,strip,calb_calg(1).shift)
             if(tbsmd(eta,phi,type,strip).eq.0) then
                nout=nout+1
                if(ems_hits_bsmd_h.maxlen.le.nout) then
