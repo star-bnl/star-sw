@@ -31,49 +31,20 @@ my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
              "auau200/nexus/default/b0_3/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
-             "auau200/mevsim/vanilla/resonance/year_1h/hadronic_on", 
-             "auau200/mevsim/vanilla/trigger/year_1h/hadronic_on", 
+             "auau200/nexus/default/minbias/year_1h/hadronic_on",
              "auau200/vni/default/b0_3/year_1h/hadronic_on",
              "auau200/vni/default/b0_3/year_1h1/hadronic_on", 
              "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on", 
-             "auau200/hbt/default/peripheral/year_1h/hadronic_on",
-             "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
-             "auau200/hbt/default/middle/year_1h/hadronic_on",
-             "auau200/hbt/default/central/year_1h/hadronic_on",
-             "auau200/hbt/default/midcentral/year_1h/hadronic_on",
-             "auau200/starlight/2gamma/halffield/year_1h/hadronic_on",
-             "auau200/starlight/2gamma/none/year_1h/hadronic_on",
-             "auau200/starlight/vmeson/halffield/year_1h/hadronic_on",
-             "auau200/starlight/vmeson/none/year_1h/hadronic_on",
-             "auau200/dtunuc/two_photon/halffield/year_1h/hadronic_on",
-             "auau200/dtunuc/two_photon/none/year_1h/hadronic_on",
-             "auau200/hemicosm/default/none/year_1h/hadronic_on",
-             "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
-             "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
-             "pau200/hijing/b0_7/gam15/year_1h/hadronic_on",
-             "pau200/hijing/b0_7/jet15/year_1h/hadronic_on", 
-             "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
-             "pau200/hijing/b0_7/jet15/year_2a/hadronic_on",
-#             "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau200/hijing135/default/b0_3/year_1h/hadronic_on",
              "auau200/strongcp/broken/eb-400_90/year_1h/hadronic_on",
              "auau200/strongcp/broken/eb-400_00/year_1h/hadronic_on",
-             "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
-             "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
-             "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
-             "auau200/mevsim/vcascade/resonance/year_1h/hadronic_on", 
-             "auau200/mevsim/vcascade/trigger/year_1h/hadronic_on",
-             "auau200/mevsim/cascade/central/year_1h/hadronic_on",
-             "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
-             "auau200/hijing_quark/b0_3_jetq_off/jet05/year_1h/hadronic_on",
-             "auau200/hijing_quark/b0_3_jetq_on/jet05/year_1h/hadronic_on",
-             "auau200/hijing_antinuc/b0_3_jetq_off/jet05/year_1h/hadronic_on",
-             "auau200/hijing_antinuc/b0_3_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/venus/default/b3_6/year_1h/hadronic_on",
+             "auau200/venus/default/b6_9/year_1h/hadronic_on", 
              "auau200/venus412/default/b0_3/year_1h/hadronic_on",
+            
 );
 
 my $SetD = "dst/prod5/1999/12";
@@ -196,19 +167,10 @@ my @diskRecoDirs;
 
 my $inext =scalar(@SetG); 
 
-#for( $ll = 0; $ll<scalar(@SetG); $ll++) {
-#  $diskRecoDirs[$ll] = $DISK1 . "/" . $SetG[$ll] . "/tfs_6";
-#  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
-#}
-for( $ll = 0; $ll< 36; $ll++) { 
+for( $ll = 0; $ll< scalar(@SetG); $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $SetG[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 36; $ii< 43; $ii++) { 
-$diskRecoDirs[$ii] = $DISK1 . "/" . $SetG[$ii] . "/tfs_6";
-  print "diskRecoDir: $diskRecoDirs[$ii]\n";
-}
-
 
 print "\nFinding reco files in disk\n";
  
