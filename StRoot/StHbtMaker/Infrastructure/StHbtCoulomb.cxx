@@ -1,8 +1,24 @@
-// This is a Coulomb correction class which
-// 1. Reads in the dat from a file
-// 2. Performs a linear interpolation in R and creates any array of interpolations
-// 3. Interpolates in eta and returns the Coulomb correction to user
-//////////////////////////////////////////////////////////////////////////////////
+/***************************************************************************
+ *
+ * $Id: StHbtCoulomb.cxx,v 1.12 2000/05/31 20:12:53 rcwells Exp $
+ *
+ * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
+ ***************************************************************************
+ *
+ * Description: part of STAR HBT Framework: StHbtMaker package
+ *    This is a Coulomb correction class which
+ *  1. Reads in the dat from a file
+ *  2. Performs a linear interpolation in R and creates any array of interpolations
+ *  3. Interpolates in eta and returns the Coulomb correction to user
+ *
+ ***************************************************************************
+ *
+ * $Log: StHbtCoulomb.cxx,v $
+ * Revision 1.12  2000/05/31 20:12:53  rcwells
+ * Modified StHbtCoulomb for Id and Log entries
+ *
+ *
+ **************************************************************************/
 
 #include "StHbtCoulomb.h"
 #include <fstream.h>
