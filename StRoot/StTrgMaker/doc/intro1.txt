@@ -40,9 +40,8 @@ SECTION 2, USE THE TRACK EXTENSION SOFTWARE THAT HERB WROTE.
 
 This will be much easier on Solaris. See the documentation for StTrgMaker:
    $ cd  $STAR/StRoot/StTrgMaker/doc
-   $ more README
-Note: as of May 28 2001, this documentation is not there yet.  Give me a
-few days.  
+   $ # Note that intro1.txt is this file that you're currently reading.
+   $ more intro2.txt
 
 ================================================================
 SECTION 3, DO NOT USE THE TRACK EXTENSION SOFTWARE THAT HERB WROTE.
