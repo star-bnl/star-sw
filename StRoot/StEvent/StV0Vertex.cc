@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cc,v 1.5 1999/02/21 20:32:48 genevb Exp $
+ * $Id: StV0Vertex.cc,v 1.6 1999/04/09 19:34:03 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cc,v $
+ * Revision 1.6  1999/04/09 19:34:03  genevb
+ * Added vertex daughter functionality
+ *
  * Revision 1.5  1999/02/21 20:32:48  genevb
  * Improve StV0Vertex code
  *
@@ -30,7 +33,7 @@
 #include <iostream.h>
 #include "StEvent/StV0Vertex.hh"
 
-static const char rcsid[] = "$Id: StV0Vertex.cc,v 1.5 1999/02/21 20:32:48 genevb Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cc,v 1.6 1999/04/09 19:34:03 genevb Exp $";
 
 StV0Vertex::StV0Vertex() : 
  StVertex()
@@ -61,6 +64,19 @@ StV0Vertex::StV0Vertex(dst_v0_vertex_st* v0vtx, dst_vertex_st* vtx) :
 }
 
 StV0Vertex::~StV0Vertex() { /* noop */ }
+
+StGlobalTrack* StV0Vertex::daughter(StTrackSign sign, double B)
+{
+    int i = 0;
+    int agree = 1;
+    if (sign == negativeTrack) agree = -1;
+    while (i < numberOfDaughters()) {
+      StGlobalTrack* ithDaughter = daughters()[i++];
+      // Check for charge and field sign agreement
+      if ( (agree * ithDaughter->helix().charge(B)) > 0) return ithDaughter;
+    }
+    return 0;
+}
 
 void StV0Vertex::setDcaDaughterToPrimaryVertex(StTrackSign sign, float val)
 {

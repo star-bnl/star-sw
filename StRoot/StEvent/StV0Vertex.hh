@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.7 1999/03/23 21:47:48 ullrich Exp $
+ * $Id: StV0Vertex.hh,v 1.8 1999/04/09 19:34:04 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
+ * Revision 1.8  1999/04/09 19:34:04  genevb
+ * Added vertex daughter functionality
+ *
  * Revision 1.7  1999/03/23 21:47:48  ullrich
  * Member function made virtual
  *
@@ -37,6 +40,7 @@
 #define StV0Vertex_hh
 #include "StEvent/StVertex.hh"
 #include "StEvent/StEnumerations.hh"
+#include "StEvent/StGlobalTrack.hh"
 #include "tables/dst_vertex.h"
 #include "tables/dst_v0_vertex.h"
 #include <float.h>
@@ -49,6 +53,7 @@ public:
     // StV0Vertex(const StV0Vertex&);        use default
     // const StV0Vertex & operator=(const StV0Vertex&);
 
+    virtual StGlobalTrack* daughter(StTrackSign sign, double B);
     virtual float dcaDaughterToPrimaryVertex(StTrackSign sign) const;
     virtual float dcaDaughters() const;
     virtual float dcaParentToPrimaryVertex() const;

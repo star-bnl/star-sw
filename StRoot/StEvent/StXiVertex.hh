@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.3 1999/02/23 16:13:26 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.4 1999/04/09 19:34:06 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.4  1999/04/09 19:34:06  genevb
+ * Added vertex daughter functionality
+ *
  * Revision 1.3  1999/02/23 16:13:26  genevb
  * Add v0 pointers for xi's outside constructor
  *
@@ -26,6 +29,7 @@
 #define StXiVertex_hh
 #include "StEvent/StVertex.hh"
 #include "StEvent/StV0Vertex.hh"
+#include "StEvent/StGlobalTrack.hh"
 #include "StEvent/StEnumerations.hh"
 #include "tables/dst_vertex.h"
 #include "tables/dst_xi_vertex.h"
@@ -46,6 +50,8 @@ public:
     const StThreeVector<float>& momentumOfBachelor() const;
     StThreeVector<float>& momentumOfV0() const;
     StV0Vertex* v0Vertex() const;
+    StGlobalTrack* bachelor() const;
+    double chargeOfBachelor(double B) const;
 
     void setDcaBachelorToPrimaryVertex(float);
     void setMomentumOfBachelor(const StThreeVector<float>&);
@@ -69,10 +75,7 @@ inline float StXiVertex::dcaBachelorToPrimaryVertex () const
 }
 
 inline const StThreeVector<float>&
-StXiVertex::momentumOfBachelor() const
-{
-    return mMomentumOfBachelor;
-}
+StXiVertex::momentumOfBachelor() const { return mMomentumOfBachelor; }
 
 inline float StXiVertex::dcaDaughters() const { return mDcaDaughters; }
 
