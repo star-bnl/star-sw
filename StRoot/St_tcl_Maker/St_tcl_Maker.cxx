@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.48 1999/11/11 16:27:46 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.49 1999/11/20 20:53:51 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.49  1999/11/20 20:53:51  snelling
+// Removed hitclus table and added entries to tphit table
+//
 // Revision 1.48  1999/11/11 16:27:46  fisyak
 // Add cast to ceil for HP
 //
@@ -163,6 +166,10 @@
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "StMessMgr.h"
+#include "tables/St_type_shortdata_Table.h"
+#include "tables/St_tcl_tpcluster_Table.h"
+#include "tables/St_tcl_tp_seq_Table.h"
+#include "tables/St_tcc_morphology_Table.h"
 #include "tpc/St_tpg_main_Module.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
@@ -175,42 +182,40 @@
 ClassImp(St_tcl_Maker)
   
 //_____________________________________________________________________________
-  St_tcl_Maker::St_tcl_Maker(const char *name):
-    StMaker(name),
-    m_tclPixTransOn(kFALSE),
-    m_tclEvalOn(kFALSE),
-    m_tclMorphOn(kFALSE),
-    m_tpg_detector(0),
-    m_tpg_pad(0),
-    m_tpg_pad_plane(0),
-    m_tsspar(0),
-    m_tclpar(0),
-    m_type(0),
-    m_tfs_fspar(0),
-    m_tfs_fsctrl(0)
-{
+St_tcl_Maker::St_tcl_Maker(const char *name):
+  StMaker(name),
+  m_tclPixTransOn(kFALSE),
+  m_tclEvalOn(kFALSE),
+  m_tclMorphOn(kFALSE),
+  m_tpg_detector(0),
+  m_tpg_pad(0),
+  m_tpg_pad_plane(0),
+  m_tsspar(0),
+  m_tclpar(0),
+  m_type(0),
+  m_tfs_fspar(0),
+  m_tfs_fsctrl(0) {
 }
-//_____________________________________________________________________________
 
+//_____________________________________________________________________________
 St_tcl_Maker::~St_tcl_Maker() {
 }
 
 //_____________________________________________________________________________
 
-Int_t St_tcl_Maker::Init()
-{
+Int_t St_tcl_Maker::Init() {
   // Limit Error Messages
   gMessMgr->SetLimit("TPSEQ",10);
   gMessMgr->SetLimit("TPHAM",10);
   gMessMgr->SetLimit("TCL_Get_Row_Seq-E2",5);
 
 
-// 		Create tables
+  // 		Create tables
   St_DataSet *tpc = GetDataBase("params/tpc");
   assert(tpc);
   St_DataSetIter   local(tpc);
 
-// 		geometry parameters
+  // 		geometry parameters
 
   St_DataSet *tpgpar = local("tpgpar");
   assert(tpgpar);
@@ -226,7 +231,7 @@ Int_t St_tcl_Maker::Init()
   Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
   if(res!=kSTAFCV_OK) Warning("Init","tpg_main = %d",res);
 
-// 		TCL parameters
+  // 		TCL parameters
   St_DataSet *tclpars = local("tclpars");
   assert(tclpars);
 
@@ -237,7 +242,7 @@ Int_t St_tcl_Maker::Init()
   m_type             = (St_tcl_tpc_index_type *) tclpars->Find("type");
   assert(m_tclpar && m_type);
 
-// 		TSS parameters
+  // 		TSS parameters
   St_DataSet *tsspars = local("tsspars");
   assert(tsspars);
   m_tsspar = (St_tss_tsspar *) tsspars->Find("tsspar");
@@ -246,14 +251,14 @@ Int_t St_tcl_Maker::Init()
   tsspar->threshold = 1;
 
 
-// 		TFS parameters
+  // 		TFS parameters
   St_DataSet *tfspars = local("tfspars");
   assert(tfspars);
   m_tfs_fspar = (St_tfs_fspar *) local("tfspars/tfs_fspar");
   m_tfs_fsctrl= (St_tfs_fsctrl*) local("tfspars/tfs_fsctrl");
 
 
-//		Histograms     
+  //		Histograms     
   InitHistograms(); // book histograms
   
   return StMaker::Init();
@@ -275,7 +280,6 @@ Int_t St_tcl_Maker::Make() {
   St_tcl_tphit* tphit = 0;
   St_tcl_tpcluster* tpcluster = 0;
   St_tcc_morphology* morph = 0;
-  St_tcl_hitclus* tphitclus = 0;
 
   St_DataSet* sector;
   St_DataSet* raw_data_tpc = GetInputDS("tpc_raw");
@@ -332,15 +336,6 @@ Int_t St_tcl_Maker::Make() {
     tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); 
     local.Add(tpcluster);
 
-    tphitclus = new St_tcl_hitclus("tphitclus",max_hit);
-    local.Add(tphitclus);
-
-    //    if(!tphitclus && m_tclMorphOn) {
-      // Li Qun's tracking study
-    //      tphitclus = new St_tcl_hitclus("tphitclus",max_hit);
-    //      local.Add(tphitclus);
-    //    }
-
     if(!morph && m_tclMorphOn) {
       // UW morphology study 
       morph = new St_tcc_morphology("morph",max_hit);    
@@ -358,7 +353,7 @@ Int_t St_tcl_Maker::Make() {
 
     next.Reset();
 
-    while ((sector=next())) {// loop over sectors
+    while ((sector=next())) {  // loop over sectors
       Char_t *name= 0;
       if ((name = strstr(sector->GetName(),"Sector"))) {
 	// look for the sector number
@@ -378,8 +373,7 @@ Int_t St_tcl_Maker::Make() {
 	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
 	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
 	
-	if (m_tclPixTransOn){
-	  // call the pixel translation
+	if (m_tclPixTransOn) {	  // call the pixel translation
 	  if(Debug()) printf("Starting %20s for sector %2d.\n","xyz_newtab",indx);
 	  
 	  Int_t res = xyz_newtab(m_tpg_detector,
@@ -387,7 +381,7 @@ Int_t St_tcl_Maker::Make() {
 				 raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
 				 raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
 				 adcxyz,m_tsspar);
-	  if (res!=kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
+	  if (res != kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
 	}
 	
 	//     	TCL
@@ -417,7 +411,7 @@ Int_t St_tcl_Maker::Make() {
 	Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
 			    m_tpg_pad_plane,
 			    pixel_data_in, pixel_data_out,
-			    tpseq, tpcluster, tphit, tphitclus);
+			    tpseq, tpcluster, tphit);
         if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
       }
     }

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.16 1999/10/07 03:24:51 snelling Exp $
+// $Id: St_tcl_Maker.h,v 1.17 1999/11/20 20:53:51 snelling Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.17  1999/11/20 20:53:51  snelling
+// Removed hitclus table and added entries to tphit table
+//
 // Revision 1.16  1999/10/07 03:24:51  snelling
 // created tables dynamically, correct for TFS - TRS/DATA ipix/10
 //
@@ -67,25 +70,26 @@ const float LINEARIZATION 		= 1.2;
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
+class St_type_shortdata;
+
 class St_tpg_pad_plane;
 class St_tpg_detector;
 class St_tpg_pad;
 
 class St_tss_tsspar;
+class St_tfs_fspar;
+class St_tfs_fsctrl;
 
 class St_tcl_sector_index;
 class St_tcl_tclpar;
 class St_tcl_tpc_index_type;
+class St_tcl_tpcluster;
+class St_tcl_tp_seq;
 
-class St_tfs_fspar;
-class St_tfs_fsctrl;
+class St_tcc_morphology;
+
 
 class TH1F;
-
-#include "tables/St_type_shortdata_Table.h"
-#include "tables/St_tcl_tpcluster_Table.h"
-#include "tables/St_tcl_tp_seq_Table.h"
-#include "tables/St_tcc_morphology_Table.h"
 
 class St_tcl_Maker : public StMaker {
 
@@ -198,7 +202,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.16 1999/10/07 03:24:51 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.17 1999/11/20 20:53:51 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };
