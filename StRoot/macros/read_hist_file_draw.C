@@ -1,7 +1,6 @@
-// root_read_hist_file_draw.C
+// read_hist_file_draw.C
 //
-// - first use root_read_xdffile_make_hist.C to make a hist file (*.root)
-// - then use this macro to read it back in and draw it
+// - reads in root histogram file (e.g. Kathy_hist.root) and draws hist h1
 //
 {
 TFile f1("Kathy_hist.root");
