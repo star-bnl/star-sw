@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpWindow.cc,v 1.2 2000/03/30 20:23:44 aihong Exp $
+ * $Id: StPidAmpWindow.cc,v 1.3 2000/04/09 16:18:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpWindow.cc,v $
+ * Revision 1.3  2000/04/09 16:18:23  aihong
+ * add screen stuff
+ *
  * Revision 1.2  2000/03/30 20:23:44  aihong
  * Modified getWindowIdex() & isIn*Window()
  *
@@ -28,6 +31,7 @@
 //---------------------------
 StPidAmpWindow::StPidAmpWindow(){
   mWindows.clear();
+  mScreens.clear();
 }
 
 //---------------------------
@@ -42,6 +46,7 @@ StPidAmpWindow::StPidAmpWindow(double s1, double e1){
 
       s1=fabs(s1);     e1=fabs(e1);
       StPidAmpCut cut("R", s1,e1);
+      mScreens.clear();
       mWindows.clear();
       mWindows.push_back(cut);
 }
@@ -52,6 +57,7 @@ StPidAmpWindow::StPidAmpWindow(double s1, double e1, double s2, double e2){
 
       StPidAmpCut cut1("R", s1,e1);
       StPidAmpCut cut2("R", s2,e2);
+       mScreens.clear();
        mWindows.clear();
        mWindows.push_back(cut1);
        mWindows.push_back(cut2);
@@ -65,6 +71,8 @@ StPidAmpWindow::StPidAmpWindow(double s1, double e1, double s2, double e2, doubl
        StPidAmpCut cut1("R", s1,e1);
        StPidAmpCut cut2("R", s2,e2);
        StPidAmpCut cut3("R", s3,e3);
+
+       mScreens.clear();
 
        mWindows.clear();
        mWindows.push_back(cut1);
@@ -81,6 +89,8 @@ StPidAmpWindow::StPidAmpWindow(double s1, double e1, double s2, double e2, doubl
        StPidAmpCut cut2("R", s2,e2);
        StPidAmpCut cut3("R", s3,e3);
        StPidAmpCut cut4("R", s4,e4);
+     
+       mScreens.clear();
 
        mWindows.clear();
        mWindows.push_back(cut1);
@@ -98,11 +108,24 @@ void StPidAmpWindow::addWindow(double s1, double e1){
       mWindows.push_back(cut);
 }
 
+//---------------------------
+void StPidAmpWindow::addScreen(double s1, double e1){
+      s1=fabs(s1);     e1=fabs(e1);
+      StPidAmpCut cut("R", s1,e1);
+      mScreens.push_back(cut);
+}
+
 
 //---------------------------
 void StPidAmpWindow::removeLastWindow(){
 
      if (mWindows.size()>0) mWindows.pop_back();
+     else return;
+}
+//---------------------------
+void StPidAmpWindow::removeLastScreen(){
+
+     if (mScreens.size()>0) mScreens.pop_back();
      else return;
 }
 
@@ -120,6 +143,25 @@ void StPidAmpWindow::removeWindow(int i){
      }
      }
 }
+//---------------------------
+void StPidAmpWindow::removeScreen(int i){
+
+     int j=0;
+     if (i>0 && i<mScreens.size()){ 
+     StPidAmpCutIter iter;
+     StPidAmpCutIter tmpIter;
+     
+     for (iter=mScreens.begin(); iter!=mScreens.end(); iter++){
+       if (j==i) mScreens.erase(iter);
+         j++;
+     }
+     }
+}
+//---------------------------
+void StPidAmpWindow::removeAllScreens(){
+  mScreens.clear();
+}
+
 
 //---------------------------
 bool StPidAmpWindow::isInWindow(double x){
@@ -132,14 +174,32 @@ bool StPidAmpWindow::isInWindow(double x){
       theCut=*iter;
       b= b || (theCut.isInCut(x));
       }
+   
+      b = b && (!isInScreen(x));
+
+      return b;
+}
+
+//---------------------------
+bool StPidAmpWindow::isInScreen(double x){
+      
+      bool b=false;
+
+      StPidAmpCutIter iter;
+      StPidAmpCut theCut;
+      for (iter=mScreens.begin(); iter!=mScreens.end(); iter++){
+      theCut=*iter;
+      b= b || (theCut.isInCut(x));
+      }
 
       return b;
 }
 //---------------------------
 bool StPidAmpWindow::isInFirstWindow(double x){
-      
-  if (mWindows.size()>0){
 
+      bool b=false;      
+
+  if (mWindows.size()>0){
 
       StPidAmpCutIter iter;
       StPidAmpCut theCut;
@@ -147,48 +207,61 @@ bool StPidAmpWindow::isInFirstWindow(double x){
       theCut=*iter;
       
 
-      return theCut.isInCut(x);
+      b=theCut.isInCut(x);
  
       //  } else if (mWindows.size()<=0) {return false;}
-  } else  return false;
+  } else  b=false;
+
+      b = b && (!isInScreen(x));
+  
+      return b;
 
 
 }
 //---------------------------
 bool StPidAmpWindow::isInSecondWindow(double x){
+
+      bool b=false;      
       
   if (mWindows.size()>1){
 
-      return mWindows[1].isInCut(x);
+      b=mWindows[1].isInCut(x);
  
-  } else return false;
+  } else b=false;
 
-
+      b = b && (!isInScreen(x));
+      return b;
 
 }
 
 //---------------------------
 bool StPidAmpWindow::isInThirdWindow(double x){
+
+  bool b=false;
       
   if (mWindows.size()>2){
 
-      return mWindows[2].isInCut(x);
+      b=mWindows[2].isInCut(x);
  
-  } else return false;
+  } else b=false;
 
-
+      b = b && (!isInScreen(x));
+      return b;
 
 }
 //---------------------------
 bool StPidAmpWindow::isInForthWindow(double x){
-      
+
+  bool b=false;      
+
   if (mWindows.size()>3){
 
-      return mWindows[3].isInCut(x);
+      b=mWindows[3].isInCut(x);
  
-  } else return false;
+  } else b=false;
 
-
+      b = b && (!isInScreen(x));
+      return b;
 
 }
 
@@ -299,10 +372,15 @@ int StPidAmpWindow::NWindows(){
      return mWindows.size();
 }
 
- //--------------------------
+//--------------------------
 StPidAmpCutVector StPidAmpWindow::cutVector(){
 
      return mWindows;
+}
+ //--------------------------
+StPidAmpCutVector StPidAmpWindow::screenVector(){
+
+     return mScreens;
 }
 
  

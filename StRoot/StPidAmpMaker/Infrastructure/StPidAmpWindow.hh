@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpWindow.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpWindow.hh,v 1.2 2000/04/09 16:18:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpWindow.hh,v $
+ * Revision 1.2  2000/04/09 16:18:23  aihong
+ * add screen stuff
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -38,9 +41,13 @@ public:
       ~StPidAmpWindow();
 
       void addWindow(double s1, double e1); 
+      void addScreen(double s1, double e1);
 
       void removeLastWindow();
+      void removeLastScreen();
       void removeWindow(int i);
+      void removeScreen(int i);
+      void removeAllScreens();
 
       double firstWindowBegin();
       double firstWindowEnd();
@@ -58,9 +65,10 @@ public:
       double windowEnd(int i);
 
       int    NWindows();//number of windows
-
+      int    NScreens(); //number of screens
      
       bool isInWindow(double x); //see whether x is in  windows
+      bool isInScreen(double x);
       bool isInFirstWindow(double x);
       bool isInSecondWindow(double x);
       bool isInThirdWindow(double x);
@@ -71,15 +79,24 @@ public:
       double length(int i);//length of the ith window     
 
       StPidAmpCutVector cutVector();
-
+      StPidAmpCutVector screenVector();
 
 private:
 
 
 
       StPidAmpCutVector mWindows;
+      StPidAmpCutVector mScreens;
+
 
 };
 
 
 #endif
+
+//mScreens can screen out the active regeon defined by mWindows.
+//such screen out regeon can span over multiple windows.
+//the purpose of introducing screen is for band fitting 
+//coz we need to screen out muon regeon when fitting BetheBlock,
+//but we do not want to screen out muons when fitting amp. at the moment.
+//see StPidAmpNet::fillSlices().
