@@ -156,7 +156,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     
     pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range =
 	mcToStTrackMap->equal_range(mcTrack);
-    if (range.first==mcToStTrackMap->end()) {
+    if (range.first==range.second) {
 	//These return values are now caught before exiting the seedFinder control
 	//mMessenger <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
 	//mMessenger <<"No valid range found.  Abort"<<endl;
@@ -173,12 +173,14 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     // StTrackPairInfo* bestPair = theBest.pair();
 
     //Start kludge here
-    mcTrackMapType::iterator first = range.first;
-    mcTrackMapType::iterator second = range.second;    
-    mcTrackMapType::iterator end = second++;    
+    //mcTrackMapType::iterator first = range.first;
+    //mcTrackMapType::iterator second = range.second;    
+    //mcTrackMapType::iterator end = second++;    
     StTrackPairInfo* bestPair=0;
     unsigned int mostCommon=mLowerBound;
-    for (mcTrackMapType::iterator it=first; it!=end; ++it) {	
+
+    //for (mcTrackMapType::iterator it=first; it!=end; ++it) {	
+    for (mcTrackMapType::iterator it=range.first; it!=range.second; ++it) {	
 	StTrackPairInfo* info = (*it).second;
 	if (info->commonTpcHits()>mostCommon) { //update, remember
 	    mostCommon = info->commonTpcHits();
