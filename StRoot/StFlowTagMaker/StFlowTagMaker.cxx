@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.5 1999/12/04 00:13:35 posk Exp $
+// $Id: StFlowTagMaker.cxx,v 1.6 1999/12/07 23:39:15 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 // Description:  Maker to fill the Flow EbyE Tag database
@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.6  1999/12/07 23:39:15  snelling
+// Fixed Linux warnings
+//
 // Revision 1.5  1999/12/04 00:13:35  posk
 // Works with StFlowEvent which works with the new StEvent
 //
@@ -87,7 +90,7 @@ Int_t StFlowTagMaker::Make()
 
 void StFlowTagMaker::PrintInfo() 
 {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.5 1999/12/04 00:13:35 posk Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.6 1999/12/07 23:39:15 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -199,7 +202,7 @@ void StFlowTagMaker::fillFlowTag() {
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxa[j]  = Q.X();
     pFlowTag->qya[j]  = Q.Y();
-    pFlowTag->na[j]   = (float)(pFlowEvent->Mult(j, selN, subN));
+    pFlowTag->na[j]   = pFlowEvent->Mult(j, selN, subN);
     pFlowTag->spta[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub2 tags
@@ -207,7 +210,7 @@ void StFlowTagMaker::fillFlowTag() {
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxb[j]  = Q.X();
     pFlowTag->qyb[j]  = Q.Y();
-    pFlowTag->nb[j]   = (float)(pFlowEvent->Mult(j, selN, subN));
+    pFlowTag->nb[j]   = pFlowEvent->Mult(j, selN, subN);
     pFlowTag->sptb[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub3 tags
@@ -215,7 +218,7 @@ void StFlowTagMaker::fillFlowTag() {
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxc[j]  = Q.X();
     pFlowTag->qyc[j]  = Q.Y();
-    pFlowTag->nc[j]   = (float)(pFlowEvent->Mult(j, selN, subN));
+    pFlowTag->nc[j]   = pFlowEvent->Mult(j, selN, subN);
     pFlowTag->sptc[j] = pFlowEvent->MeanPt(j, selN, subN);
 
     // fill sub4 tags
@@ -223,7 +226,7 @@ void StFlowTagMaker::fillFlowTag() {
     Q = pFlowEvent->Q(j, selN, subN);
     pFlowTag->qxd[j]  = Q.X();
     pFlowTag->qyd[j]  = Q.Y();
-    pFlowTag->nd[j]   = (float)(pFlowEvent->Mult(j, selN, subN));
+    pFlowTag->nd[j]   = pFlowEvent->Mult(j, selN, subN);
     pFlowTag->sptd[j] = pFlowEvent->MeanPt(j, selN, subN);
 
   }
