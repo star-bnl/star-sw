@@ -7,9 +7,7 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
 #include "StTree.h"
 #include "StIOInterFace.h"
 
@@ -25,6 +23,7 @@ public:
    virtual Int_t  Init();
    virtual Int_t  Make();
            Int_t  MakeRead();
+           Int_t  MakeRead(const StUKey &){abort();return 2001;}
            Int_t  MakeWrite();
            Int_t  Open();
            void   Close(Option_t *opt=0);
@@ -53,7 +52,7 @@ StIOInterFace *Load();
    Int_t  fCase    ;		//! case 1=root,2=xdf,3=mdc2,4=daq
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.8 2000/08/07 22:42:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.9 2001/05/31 02:43:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
 };
