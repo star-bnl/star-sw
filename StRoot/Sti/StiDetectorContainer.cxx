@@ -103,8 +103,8 @@ void StiDetectorContainer::setToDetector(StiDetector* layer)
     if (where==mLeafIt->const_end()) {
 	cout <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 	cout <<"StiDetectorContainer::setToDetector(StiDetector*)\tError:\t";
-	cout <<"layer not found in leaves.  Seg-fault"<<endl;
-	cout <<"\tlayer:\t"<<(*layer)<<"\n"<<endl;
+	//cout <<"layer not found in leaves.  Seg-fault"<<endl;
+	//cout <<"\tlayer:\t"<<(*layer)<<"\n"<<endl;
 	cout <<"\t\t!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"<<endl;
 	StiDetector* dummy=0;
 	//dummy->isOn(); //This ought to cause a seg-fault!
