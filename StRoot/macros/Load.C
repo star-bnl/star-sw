@@ -1,5 +1,8 @@
-// $Id: Load.C,v 1.11 2000/05/15 20:06:21 perev Exp $
+// $Id: Load.C,v 1.12 2000/05/20 01:21:24 perev Exp $
 // $Log: Load.C,v $
+// Revision 1.12  2000/05/20 01:21:24  perev
+// StarClassLibrary & StEvent added
+//
 // Revision 1.11  2000/05/15 20:06:21  perev
 // Two libs added
 //
@@ -27,6 +30,8 @@ void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StUtilities");
+    gSystem->Load("StarClassLibrary");
+    gSystem->Load("StEvent");
     gSystem->Load("StBFChain");
     gSystem->Load("xdf2root");
     gSystem->Load("St_Tables");
