@@ -1,7 +1,12 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.9 2003/07/30 20:33:36 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.10 2003/08/27 18:08:39 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.10  2003/08/27 18:08:39  thenry
+ * Added Cuts on number of points above threshold and total EMC energy.
+ * Added set point threshold.
+ * Fixed bug in Eta and Theta math.
+ *
  * Revision 1.9  2003/07/30 20:33:36  thenry
  * Added sanity check for total EMC energy, and some variables are now stored
  * for possible access later (per event).
@@ -85,26 +90,26 @@ class StCorrectedEmcPoint
     static const double HSMDR = 1.13125;
     static const double twoPi = M_PI*2.0;
 
-    StCorrectedEmcPoint() : correctedE(0), mPoint(0), etaShift(0), index(0) {};
+    StCorrectedEmcPoint() : correctedE(0), mPoint(0), thetaShift(0), index(0) {};
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index) : correctedE(0), 
-      mPoint(p), etaShift(0), index(_index) {};
+      mPoint(p), thetaShift(0), index(_index) {};
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index, StThreeVectorD vertex) : 
       mPoint(p), index(_index)
     {
-      etaShift = atan2(vertex.z()/100.0, SMDR);
+      thetaShift = atan2(vertex.z()/100.0, SMDR);
       correctedE = p->getEnergy();
     };
     StCorrectedEmcPoint(StMuEmcPoint* p, int _index, double zv) : 
       mPoint(p), index(_index) 
     {
-      etaShift = atan2(zv/100.0, SMDR);
+      thetaShift = atan2(zv/100.0, SMDR);
       correctedE = p->getEnergy();
     };
     StCorrectedEmcPoint(const StCorrectedEmcPoint& p)
     {
       mPoint = p.getPoint();
       correctedE = p.E();
-      etaShift = p.getEtaShift();
+      thetaShift = p.getThetaShift();
       index = p.getIndex();
     };
 
@@ -119,12 +124,12 @@ class StCorrectedEmcPoint
 	mPoint = p;
         if(p)
 	  correctedE = p->getEnergy();
-        etaShift = atan2(zv/100.0, SMDR);
+        thetaShift = atan2(zv/100.0, SMDR);
       };
     inline double pEta(void) { return Eta(); };
     inline double Eta(void) { 
       if(!mPoint) return 0.0; 
-      return mPoint->getEta() - etaShift; 
+      return EtabyTheta(ThetabyEta(mPoint->getEta()) - thetaShift); 
     };
     inline double E(void) const{ return correctedE; };
     inline double Phi(void) { 
@@ -134,27 +139,29 @@ class StCorrectedEmcPoint
       while(phi > twoPi) phi -= twoPi;
       return phi;
     };
-    inline double pTheta(void) { return asinh(Eta()); };
-    inline double Theta(void) { return asinh(Eta()); };
+    inline double pTheta(void) { return 2.0*atan(exp(-Eta())); };
+    inline double Theta(void) { return 2.0*atan(exp(-Eta())); };
+    inline double ThetabyEta(double veta) { return 2.0*atan(exp(-veta)); };
+    inline double EtabyTheta(double vtheta) { return -log(tan(vtheta/2.0)); };
     inline double pPhi(void) { return Phi(); };
     inline void SetE(double newE) { correctedE = newE; };
     inline void SubE(double subE) { correctedE -= subE; };
     inline bool PhotonRemaining(void) { return correctedE > 0.0; };
     inline StLorentzVectorD P(void)
     {
-      return StLorentzVectorD(correctedE*cos(Phi())*cos(Theta()), 
-			      correctedE*sin(Phi())*cos(Theta()), 
-			      correctedE*sin(Theta()), 
+      return StLorentzVectorD(correctedE*cos(Phi())*sin(Theta()), 
+			      correctedE*sin(Phi())*sin(Theta()), 
+			      correctedE*cos(Theta()), 
 			      correctedE);
     };
     inline StMuEmcPoint* getPoint(void) const{ return mPoint; };
-    inline double getEtaShift(void) const{ return etaShift; };
+    inline double getThetaShift(void) const{ return thetaShift; };
     inline int getIndex(void) const{ return index; };
 
  protected:
     double correctedE;
     StMuEmcPoint* mPoint;
-    double etaShift;
+    double thetaShift;
     int index;
 };
 
@@ -248,7 +255,7 @@ class StProjectedTrack
     inline double pEta(void) { return projection.pseudoRapidity(); };
     inline double pPhi(void) { return projection.phi(); };
     inline StMuTrack* getTrack(void) const { return mTrack; };
-    inline double pTheta(void) { return asinh(pEta()); };
+    inline double pTheta(void) { return 2.0*atan(exp(-pEta())); };
     inline double getProbPion(void) const { return probPion; };
     inline double getProbKaon(void) const { return probKaon; };
     inline double getProbProton(void) const { return probProton; };
@@ -505,6 +512,19 @@ public:
 
 typedef vector<StMuEmcPoint> createdPointVector;
 
+class SafetyArray : public StMaker
+{
+ public:
+  SafetyArray(const char* name) : StMaker(name) {};
+  virtual bool isGood(unsigned int runNumber, long index) { return true; };
+  virtual long adcFunction(unsigned int runNumber, long index, 
+			   long adc, double energy) 
+    { return adc; };
+  virtual double energyFunction(unsigned int runNumber, long index, 
+				long adc, double energy) 
+    { return energy; };
+};
+
 class StEmcTpcFourPMaker : public StFourPMaker {
  public: 
   enum EMCHitType {Hits=0, Clusters=1, Points=2};
@@ -528,12 +548,15 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   StMuEmcCollection* getMuEmcCollection(void) { return muEmc; };
   void setUseType(EMCHitType uType) { useType = uType; };
   EMCHitType getUseType(void) { return useType; };
+  void setMaxPoints(long mPoints) { maxPoints = mPoints; };
+  long getMaxPoints(void) { return maxPoints; };
 
   StEmcTpcBinMap binmap;   
  protected:
   StEmcADCtoEMaker* adc2E;
   StMuEmcCollection* muEmc;
   StEmcCollection* emc;
+  SafetyArray* towerProxy;
   int maxHits;
   int numCoincidences;
   double sumPtTracks;
@@ -541,6 +564,10 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   double EMCSanityThreshold;
   double sumSubtracted;
   double sumTheorySubtracted;
+  double minPointThreshold;
+  long maxPoints;
+  long numberPoints;
+  bool aborted;
  public:
   createdPointVector fakePoints;
   double mPIDR, mKDR, mPRDR, mEDR, mCAD;
@@ -552,7 +579,12 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   double getSumSubtracted(void) { return sumSubtracted; };
   double getSumTheorySubtracted(void) { return sumTheorySubtracted; };
   void setEMCSanityThreshold(double EST) { EMCSanityThreshold = EST; };
-
+  void setMinPointThreshold(double threshold) 
+    { minPointThreshold = threshold; };
+  long getNumPoints(void) { return numberPoints; };
+  bool isAborted(void) { return aborted; };
+  void setTowerProxy(SafetyArray* sa) { towerProxy = sa; };
+ 
   ClassDef(StEmcTpcFourPMaker,1)
 };
 
