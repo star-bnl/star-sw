@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.28 2001/10/25 23:03:06 hardtke Exp $
+* $Id: tph.F,v 1.29 2003/10/11 04:04:58 perev Exp $ 
 * $Log: tph.F,v $
+* Revision 1.29  2003/10/11 04:04:58  perev
+* BugFix rad  was used before seting
+*
 * Revision 1.28  2001/10/25 23:03:06  hardtke
 * return hits in tpc local coordinates using function tpc_localsector_to_local.  We now do the global coordinate transformation in St_tpt_Maker
 *
@@ -160,6 +163,9 @@ c
 c-----------------------------------------------------------------------
       real dvel                 !drift velocity
       real dummy1               !it is what it says
+c-----------------------------------------------------------------------
+      real xqwe,yqwe
+      integer nokqwe
 c-----------------------------------------------------------------------
       integer CurrentSector,istart,last_cluster_index
       save last_cluster_index
@@ -386,6 +392,11 @@ c     Calculate "orientation" of hit in terms of spatial quantities
               tphit(tphit_h.nok).phi = atand(phi(ihit) / pad_width)
 c     fill the lambda field of tphit,
 c     with the ansatz that the track comes from (0,0,0)
+      nokqwe = tphit_h.nok 
+      xqwe = tphit(nokqwe).x
+      yqwe = tphit(nokqwe).y
+              rad = sqrt(xqwe**2 + yqwe**2)
+
               tphit(tphit_h.nok).lambda = 
      &             abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda > 0 always
 c     Set dlambda to 0 can be filled later by global
