@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.12 2004/10/08 14:34:43 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.13 2004/11/02 21:29:06 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -345,7 +345,7 @@ void EEsmdCal::initAuxHisto(){
   // tower gains
   sprintf(tt1,"ug%02dT",sectID);
   sprintf(tt2,"used tower gains sec=%d ; x=spiral=(eta-1)*5+subs-A; gain [ch/GeV]",sectID);
-  h=new TH1F(tt1,tt2, 60,0.5,60.5);
+  h=new TH1F(tt1,tt2, 60,-0.5,59.5);
   hA[4]=h;    
 
   for(i=0;i<4;i++) {
