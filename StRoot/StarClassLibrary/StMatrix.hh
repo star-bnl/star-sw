@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrix.hh,v 1.6 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: StMatrix.hh,v 1.7 1999/12/21 15:14:13 ullrich Exp $
  *
  * Author: Original code from CLHEP by Mike Smyth
  *         Modified April 17, 1998 Brian Lasiuk (templated version)
@@ -18,8 +18,8 @@
  ***************************************************************************
  *
  * $Log: StMatrix.hh,v $
- * Revision 1.6  1999/12/07 23:43:04  ullrich
- * Modified to get rid of warnings on Linux.
+ * Revision 1.7  1999/12/21 15:14:13  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.6  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
@@ -190,11 +190,16 @@
 #include <iostream.h>
 #include <math.h>
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+#endif
+
 #ifndef ST_NO_EXCEPTIONS
 #   include <stdexcept>
-#endif
-#if !defined(ST_NO_NAMESPACES)
-using namespace std;
+#   if !defined(ST_NO_NAMESPACES)
+        using std::out_of_range;
+        using std::domain_error;
+#   endif
 #endif
 
 #include "StThreeVector.hh"

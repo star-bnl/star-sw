@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- *  $Id: hbookTest2.cc,v 1.2 1999/05/19 21:12:48 ullrich Exp $
+ *  $Id: hbookTest2.cc,v 1.3 1999/12/21 15:14:46 ullrich Exp $
  *
  *  Author: brian
  *
@@ -11,8 +11,8 @@
  *************************************************************************
  *
  * $Log: hbookTest2.cc,v $
- * Revision 1.2  1999/05/19 21:12:48  ullrich
- * Change printout
+ * Revision 1.3  1999/12/21 15:14:46  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/05/19 21:12:48  ullrich
  * Change printout
@@ -31,6 +31,9 @@
 #include "JamesRandom.h"
 #include "RandGauss.h"
 #include "StHbook.hh"
+#if !defined(ST_NO_NAMESPACES)
+using std::string;
+#endif
 
 //
 // This books the histograms/ntuples by pointer
@@ -48,9 +51,9 @@ StHbookHisto *theHisto;
 // Functions:
 void init_files(string name)
 {
-    cout << "HBOOK file is: " << name << endl;    
+    cout << "HBOOK file is: " << name.c_str() << endl;    
     if (!access(name.c_str(),F_OK|R_OK)) {
-	cerr << "Hbook File: `" << name << "' already exists." << endl;
+	cerr << "Hbook File: `" << name.c_str() << "' already exists." << endl;
 	exit(1);
     }
     

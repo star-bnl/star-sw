@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.1 1999/10/28 22:28:01 ullrich Exp $
+ * $Id: StV0Vertex.cxx,v 2.2 1999/12/21 15:09:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
- * Revision 2.1  1999/10/28 22:28:01  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/12/21 15:09:21  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.1  1999/10/28 22:28:01  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -26,10 +26,14 @@
 #include "StTrackGeometry.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_v0_vertex_Table.h"
+#if !defined(ST_NO_NAMESPACES)
+using std::fill_n;
+using std::copy;
+#endif
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.1 1999/10/28 22:28:01 ullrich Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.2 1999/12/21 15:09:21 ullrich Exp $";
 
 StV0Vertex::StV0Vertex()
 {

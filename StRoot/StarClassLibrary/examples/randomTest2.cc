@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: randomTest2.cc,v 1.1 1999/02/17 12:44:02 ullrich Exp $
+ * $Id: randomTest2.cc,v 1.2 1999/12/21 15:14:58 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 1998 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: randomTest2.cc,v $
- * Revision 1.1  1999/02/17 12:44:02  ullrich
- * New Revision
+ * Revision 1.2  1999/12/21 15:14:58  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.1  1999/02/17 12:44:02  ullrich
  * New Revision
@@ -74,7 +74,7 @@ int main()
     HepJamesRandom jr;
 
     cout << "All these numbers are the same:" << endl;
-    for(ii=0; ii<size;ii++) {
+    for(int iii=0; iii<size; iii++) {
      	jr.saveStatus();
      	PR(jr.flat());
     	jr.restoreStatus();        // restoring status keeps engine same

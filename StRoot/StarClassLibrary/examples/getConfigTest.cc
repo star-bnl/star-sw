@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: getConfigTest.cc,v 1.2 1999/05/19 21:14:42 ullrich Exp $
+ * $Id: getConfigTest.cc,v 1.3 1999/12/21 15:14:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: getConfigTest.cc,v $
- * Revision 1.2  1999/05/19 21:14:42  ullrich
- * Corrected path of input file
+ * Revision 1.3  1999/12/21 15:14:41  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/05/19 21:14:42  ullrich
  * Corrected path of input file
@@ -23,11 +23,15 @@
  * Initial Revision
  *
  **************************************************************************/
+#include <iostream.h>
 #include "StGlobals.hh"
 #include "StGetConfigValue.hh"
 #include "StThreeVector.hh"
 #include <vector>
 #include <unistd.h>
+#if !defined(ST_NO_NAMESPACES)
+using std::vector;
+#endif
 
 int main()
 {
@@ -66,9 +70,11 @@ int main()
     StGetConfigValue(filename, "vec3", vec3);
     cout << "vec3 = " << vec3 << endl;
     
+#if !defined(__SUNPRO_CC)
     string anyName("default");
     StGetConfigValue(filename, "anyName", anyName);
-    cout << "anyName = " << anyName << endl;
+    cout << "anyName = " << anyName.c_str() << endl;
+#endif
     
     float xfoo = 3.14;
     StGetConfigValue(filename, "xfoo", xfoo);

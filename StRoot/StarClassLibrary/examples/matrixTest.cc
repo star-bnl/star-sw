@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: matrixTest.cc,v 1.1 1999/02/17 12:44:00 ullrich Exp $
+ * $Id: matrixTest.cc,v 1.2 1999/12/21 15:14:53 ullrich Exp $
  *
  * Author: Brian Lasiuk, April 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: matrixTest.cc,v $
- * Revision 1.1  1999/02/17 12:44:00  ullrich
- * New Revision
+ * Revision 1.2  1999/12/21 15:14:53  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.1  1999/02/17 12:44:00  ullrich
  * New Revision
@@ -29,6 +29,10 @@
 #define SYMMETRIC
 #ifndef SYMMETRIC
 #	define ASYMMETRIC
+#endif
+
+#if !defined(ST_NO_NAMESPACES) && !defined(ST_NO_EXCEPTIONS)
+using std::logic_error;
 #endif
 
 template <class X>
@@ -131,7 +135,7 @@ int main()
     try {
         Z = K*A;
     }
-    catch(exception &e){
+    catch(logic_error &e){
 	cout << "Caught exception: " << e.what() << endl;
     }
 #else

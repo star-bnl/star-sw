@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandomEngine.h,v 1.2 1999/03/07 15:02:50 wenaus Exp $
+ * $Id: RandomEngine.h,v 1.3 1999/12/21 15:13:56 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -32,8 +32,8 @@
  ***************************************************************************
  *
  * $Log: RandomEngine.h,v $
- * Revision 1.2  1999/03/07 15:02:50  wenaus
- * missing std
+ * Revision 1.3  1999/12/21 15:13:56  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/03/07 15:02:50  wenaus
  * missing std
@@ -53,7 +53,7 @@
 #include <math.h>
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+using std::vector;
 #endif
 
 #include "StGlobals.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMemoryInfo.hh,v 1.1 1999/06/04 17:57:02 ullrich Exp $
+ * $Id: StMemoryInfo.hh,v 1.2 1999/12/21 15:14:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, June 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMemoryInfo.hh,v $
- * Revision 1.1  1999/06/04 17:57:02  ullrich
- * Initial Revision
+ * Revision 1.2  1999/12/21 15:14:18  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/12/21 15:14:18  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -22,10 +22,6 @@
  **************************************************************************/
 #ifndef StMemoryInfo_hh
 #define StMemoryInfo_hh
-
-#ifndef ST_NO_NAMESPACES
-using namespace std;
-#endif
 
 #include <malloc.h>
 #include <iostream.h>

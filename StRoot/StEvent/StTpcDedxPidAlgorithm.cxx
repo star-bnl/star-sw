@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.4 1999/12/03 13:18:18 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.5 1999/12/21 15:09:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.4  1999/12/03 13:18:18  ullrich
- * Fixed problem on Sun CC4.2 (dynamic_cast) and switched
- * off cut on number of points.
+ * Revision 2.5  1999/12/21 15:09:11  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.7  2000/04/20 16:47:31  ullrich
  * Check for null pointer added.
@@ -29,7 +28,7 @@
  * off cut on number of points.
  *
  * Revision 2.3  1999/12/02 16:35:34  ullrich
-#include <cmath>
+ * Added method to return the stored dE/dx traits
  *
  * Revision 2.2  1999/10/28 22:27:01  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -47,7 +46,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm()
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.4 1999/12/03 13:18:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.5 1999/12/21 15:09:11 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -65,7 +64,7 @@ StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     //  the TPC and select the first we find. A check for
     //  vec[i]->method() might be needed later.
 StParticleDefinition*
-#if defined(__SUNPRO_CC)
+StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPidTraits& vec)
 {
     //
     //  Select the info we need.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.cxx,v 2.2 1999/10/28 22:28:21 ullrich Exp $
+ * $Id: StZdcTriggerDetector.cxx,v 2.3 1999/12/21 15:09:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.cxx,v $
- * Revision 2.2  1999/10/28 22:28:21  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/21 15:09:28  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.3  1999/12/21 15:09:28  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -23,11 +23,15 @@
  * Initial Revision
  *
  **************************************************************************/
+#include <algorithm>
+#include "StZdcTriggerDetector.h"
+#include "tables/St_dst_TrgDet_Table.h"
+#if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.2 1999/10/28 22:28:21 ullrich Exp $";
+static const char rcsid[] = "$Id: StZdcTriggerDetector.cxx,v 2.3 1999/12/21 15:09:28 ullrich Exp $";
 
 ClassImp(StZdcTriggerDetector)
 

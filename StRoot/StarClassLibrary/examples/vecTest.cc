@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: vecTest.cc,v 1.2 1999/06/04 18:04:57 ullrich Exp $
+ * $Id: vecTest.cc,v 1.3 1999/12/21 15:15:01 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 1998
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: vecTest.cc,v $
- * Revision 1.2  1999/06/04 18:04:57  ullrich
- * Added testing of new features
+ * Revision 1.3  1999/12/21 15:15:01  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/06/04 18:04:57  ullrich
  * Added testing of new features
@@ -25,9 +25,6 @@
  **************************************************************************/
 #include "StGlobals.hh"
 #include "StLorentzVector.hh"
-#ifndef ST_NO_EXCEPTIONS
-#include <stdexcept>
-#endif
 
 int main()
 {
@@ -112,7 +109,7 @@ int main()
 	try {
 	    PR(vec4[3]);
 	}
-	catch (exception &e) {
+	catch (out_of_range &e) {
   	    cout << "Caught exception: " << e.what() << endl;
   	}
 #else
@@ -218,8 +215,7 @@ int main()
  	try {
  	    PR(lvec4[4]);
  	}
-	//  	catch (exception &e) {
-  	catch (exception &e) {
+  	catch (out_of_range &e) {
  	    cout << "Caught exception: " << e.what() << endl;
  	}
 #else

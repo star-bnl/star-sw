@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.3 1999/10/28 22:25:53 ullrich Exp $
+ * $Id: StKinkVertex.cxx,v 2.4 1999/12/21 15:08:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
- * Revision 2.3  1999/10/28 22:25:53  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.4  1999/12/21 15:08:57  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.3  1999/10/28 22:25:53  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -28,10 +28,14 @@
 #include "StParticleTable.hh"
 #include "StTrack.h"
 #include "tables/St_dst_tkf_vertex_Table.h"
+#if !defined(ST_NO_NAMESPACES)
+using std::fill_n;
+using std::copy;
+#endif
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.3 1999/10/28 22:25:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.4 1999/12/21 15:08:57 ullrich Exp $";
 
 StKinkVertex::StKinkVertex()
 {

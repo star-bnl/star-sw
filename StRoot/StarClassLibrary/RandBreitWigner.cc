@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: RandBreitWigner.cc,v 1.2 1999/12/07 23:43:04 ullrich Exp $
+ * $Id: RandBreitWigner.cc,v 1.3 1999/12/21 15:13:53 ullrich Exp $
  *
  * Author: Gabriele Cosmo - Created: 5th September 1995
  *         modified for SCL bl
@@ -18,8 +18,8 @@
  ***************************************************************************
  *
  * $Log: RandBreitWigner.cc,v $
- * Revision 1.2  1999/12/07 23:43:04  ullrich
- * Modified to get rid of warnings on Linux.
+ * Revision 1.3  1999/12/21 15:13:53  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.2  1999/12/07 23:43:04  ullrich
  * Modified to get rid of warnings on Linux.
@@ -33,6 +33,9 @@
  **************************************************************************/
 #include "RandBreitWigner.h"
 #include <algorithm>        // for max(), tu
+#if !defined(ST_NO_NAMESPACES)
+using std::max;
+#endif
 
 RandBreitWigner::~RandBreitWigner() {
   if ( deleteEngine ) delete localEngine;

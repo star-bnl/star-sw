@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.3 1999/12/07 23:40:28 ullrich Exp $
+# $Id: GNUmakefile,v 1.4 1999/12/21 15:14:39 ullrich Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,8 +10,8 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.3  1999/12/07 23:40:28  ullrich
-# Modified options for Linux
+# Revision 1.4  1999/12/21 15:14:39  ullrich
+# Modified to cope with new compiler version on Sun (CC5.0).
 #
 # Revision 1.6  2000/03/16 16:30:58  ullrich
 # Added new example randomTest4.
@@ -27,8 +27,8 @@
 #
 # Revision 1.2  1999/06/04 18:04:12  ullrich
 # Added dependencies for memInfoTest
-CXXFLAGS      := -g 
-LDFLAGS       := -L$(CERN)/pro/lib -lpacklib
+#
+# Revision 1.1  1999/05/19 22:23:47  ullrich
 # Initial Revision
 #
 ############################################################################
@@ -40,7 +40,7 @@ CXXFLAGS      := -g
 LDFLAGS       := 
 
 #
-        LDFLAGS      += -Wl,+vnocompatwarnings
+#   Architecture dependent variables...
 #
 
 # -------- hp_ux102 ---------
@@ -50,20 +50,31 @@ ifeq ($(STAR_SYS),hp_ux102)
 	CXXFLAGS     += +d 
         LD           := aCC
         LDFLAGS      += -Wl,+vnocompatwarnings -L$(CERN)/pro/lib -lpacklib
-	LDFLAGS      += -lcrypt -ldl -lg2c
+endif
 
 # -------- Linux ---------
 
+ifeq ($(findstring i386, $(STAR_SYS)),i386)
 	CXX          := g++ 
 	CPPFLAGS     += -DGNU_GCC -DST_NO_NUMERIC_LIMITS
-	CXX          := CC
-	STDHOME      := /afs/rhic/star/packages/ObjectSpace/2.0m
-	CPPFLAGS     += -I$(STDHOME) -I$(STDHOME)/ospace/std 
-	CPPFLAGS     += -DST_NO_MEMBER_TEMPLATES -DST_NO_NUMERIC_LIMITS
-	CPPFLAGS     += -DST_NO_EXCEPTIONS -DST_NO_TEMPLATE_DEF_ARGS
-	CXXFLAGS     += -Qoption ld -t
-	LD	     := $(CXX)
-	LDFLAGS      += -L$(STDHOME)/lib -lospace -lF77 -lM77 -lsocket -lnsl -lsunmath
+	CXXFLAGS     += 
+	LD           := g++ 
+	LDFLAGS      += $(CERN_ROOT)/lib/libpacklib.a -lg2c -lnsl -lcrypt -lm -ldl -rdynamic
+endif
+
+# -------- sun4x_54, sun4x_55, sun4x_56 ---------
+#
+
+ifeq ($(findstring sun4x, $(STAR_SYS)),sun4x)
+	ifdef USE_CC5
+		CXX 	     := /opt/WS5.0/bin/CC
+		LD	     := $(CXX)
+		CPPFLAGS     := -I.. -DST_NO_MEMBER_TEMPLATES
+		CXXFLAGS     += -library=iostream,no%Cstd -Qoption ld -t
+		LDFLAGS      += -L$(CERN)/pro/lib -lpacklib
+		LDFLAGS      += -L/opt/WS5.0/SC5.0/lib -lCstd -lF77 -lM77 -lsocket -lnsl -lsunmath -lmalloc
+        else
+		CXX 	     := CC
 		STDHOME      := /afs/rhic/star/packages/ObjectSpace/2.0m
 		CPPFLAGS     += -I$(STDHOME) -I$(STDHOME)/ospace/std 
 		CPPFLAGS     += -DST_NO_MEMBER_TEMPLATES -DST_NO_NUMERIC_LIMITS
@@ -83,6 +94,10 @@ endif
 
 %:	%.cc
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< -o $@ $(LDFLAGS)
+
+%.o:	../%.cc
+	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) $<
+
 circleFitTest:	circleFitTest.cc StFastCircleFitter.o
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< \
 	StFastCircleFitter.o  \
@@ -184,8 +199,8 @@ particlesTest:	particlesTest.cc \
 	StRhoMinus.o StRhoPlus.o StRhoZero.o \
 	StSigmaMinus.o StSigmaPlus.o StSigmaZero.o \
 	StSigmacPlus.o StSigmacPlusPlus.o StSigmacZero.o \
-		vecTest2 vecTest3 units JamesRand.conf Templates.DB memInfoTest
-
+	StTauMinus.o StTauPlus.o StTriton.o \
+	StXiMinus.o StXiZero.o StXicPlus.o \
 	StXicZero.o \
 	-o particlesTest $(LDFLAGS)
 		SunWS_cache

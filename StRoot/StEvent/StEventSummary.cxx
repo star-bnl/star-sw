@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.2 1999/10/28 22:25:13 ullrich Exp $
+ * $Id: StEventSummary.cxx,v 2.3 1999/12/21 15:08:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
- * Revision 2.2  1999/10/28 22:25:13  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/12/21 15:08:50  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.5  2000/01/14 19:06:47  ullrich
  * Made code more robust if read-in table is not well defined.
@@ -26,6 +26,9 @@
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:44:35  ullrich
+ * Initial Revision
+ *
+ **************************************************************************/
 #include <algorithm>
 #include <float.h>
 #include "StEventSummary.h"
@@ -33,10 +36,10 @@
 #include "tables/St_dst_event_summary_Table.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.2 1999/10/28 22:25:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.3 1999/12/21 15:08:50 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.2 1999/10/28 22:25:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.3 1999/12/21 15:08:50 ullrich Exp $";
 
 ClassImp(StEventSummary)
 
@@ -116,7 +119,7 @@ StEventSummary::numberOfGoodPrimaryTracks() const { return mNumberOfGoodPrimaryT
 
 Long_t
 StEventSummary::numberOfExoticTracks() const { return mNumberOfExoticTracks; }
-#if defined (__SUNPRO_CC)
+
 Long_t
 StEventSummary::numberOfVertices() const { return mNumberOfVertices; }
 
@@ -150,7 +153,7 @@ StEventSummary::meanEta() const { return mMeanEta; }
 Float_t
 StEventSummary::rmsEta() const { return mRmsEta; }
 
-#if defined (__SUNPRO_CC)
+const StThreeVectorF&
 StEventSummary::primaryVertexPosition() const { return mPrimaryVertexPos; }
 
 UInt_t
@@ -160,7 +163,7 @@ Long_t
 StEventSummary::tracksInEtaBin(UInt_t i) const
 {
 #if defined(__SUNPRO_CC)
-#if defined (__SUNPRO_CC)
+        return i < mHistogramSize ? (*(const_cast<TArrayL*>(&mEtaOfTracksHisto)))[i] : 0;
 #else
         return i < mHistogramSize ? const_cast<TArrayL>(mEtaOfTracksHisto)[i] : 0;
 #endif
@@ -170,7 +173,7 @@ Long_t
 StEventSummary::tracksInPhiBin(UInt_t i) const
 {
 #if defined(__SUNPRO_CC)
-#if defined (__SUNPRO_CC)
+        return i < mHistogramSize ? (*(const_cast<TArrayL*>(&mPhiOfTracksHisto)))[i] : 0;
 #else
         return i < mHistogramSize ? const_cast<TArrayL>(mPhiOfTracksHisto)[i] : 0;
 #endif
@@ -180,7 +183,7 @@ Long_t
 StEventSummary::tracksInPtBin(UInt_t i) const
 {
 #if defined(__SUNPRO_CC)
-#if defined (__SUNPRO_CC)
+        return i < mHistogramSize ? (*(const_cast<TArrayL*>(&mPtOfTracksHisto)))[i] : 0;
 #else
         return i < mHistogramSize ? const_cast<TArrayL>(mPtOfTracksHisto)[i] : 0;
 #endif
@@ -190,7 +193,7 @@ Float_t
 StEventSummary::energyInEtaBin(UInt_t i) const
 {
 #if defined(__SUNPRO_CC)
-#if defined (__SUNPRO_CC)
+        return i < mHistogramSize ? (*(const_cast<TArrayF*>(&mEneryVsEtaHisto)))[i] : 0;
 #else
         return i < mHistogramSize ? const_cast<TArrayF>(mEneryVsEtaHisto)[i] : 0;
 #endif
@@ -204,7 +207,7 @@ StEventSummary::energyInPhiBin(UInt_t i) const
 #else
         return i < mHistogramSize ? const_cast<TArrayF>(mEnergyVsPhiHisto)[i] : 0;
 #endif
-#if defined (__SUNPRO_CC)
+}
 
     if (i < mPtAndEtaBinsSize) {
 StEventSummary::lowerEdgeEtaBin(UInt_t i) const
@@ -221,7 +224,7 @@ StEventSummary::lowerEdgeEtaBin(UInt_t i) const
     }
     else
         return 0;
-#if defined (__SUNPRO_CC)
+}
 
     if (i < mPtAndEtaBinsSize) {
        if (i == mPtAndEtaBinsSize-1)
@@ -238,7 +241,7 @@ StEventSummary::lowerEdgeEtaBin(UInt_t i) const
     }
     else
         return 0;
-#if defined (__SUNPRO_CC)
+}
 
     if (i < mPtAndEtaBinsSize) {
 StEventSummary::lowerEdgePtBin(UInt_t i) const
@@ -255,7 +258,7 @@ StEventSummary::lowerEdgePtBin(UInt_t i) const
     }
     else
         return 0;
-#if defined (__SUNPRO_CC)
+}
 
     if (i < mPtAndEtaBinsSize) {
        if (i == mPtAndEtaBinsSize-1)
@@ -269,7 +272,7 @@ StEventSummary::lowerEdgePtBin(UInt_t i) const
 #else
            return const_cast<TArrayF>(mPtBins)[i];
 #endif
-#if defined (__SUNPRO_CC)
+    }
     else
         return 0;
 }
@@ -283,13 +286,13 @@ StEventSummary::lowerEdgePhiBin(UInt_t i) const
 #else
         return const_cast<TArrayF>(mPhiBins)[i];
 #endif
-#if defined (__SUNPRO_CC)
+    else
         return 0;
 }
 
 Float_t
 StEventSummary::upperEdgePhiBin(UInt_t i) const
-#if defined (__SUNPRO_CC)
+{
     if (i < mPhiBinsSize) {
        if (i == mPhiBinsSize-1)
 #if defined(__SUNPRO_CC)

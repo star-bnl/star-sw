@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.2 1999/11/01 12:45:14 ullrich Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.3 1999/12/21 15:09:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 2.2  1999/11/01 12:45:14  ullrich
- * Modified unpacking of point counter
+ * Revision 2.3  1999/12/21 15:09:18  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.4  2000/01/20 14:43:39  ullrich
  * Fixed bug in numberOfFitPoints(). Sum was wrong.
@@ -28,6 +28,10 @@
  * Revision 2.0  1999/10/12 18:42:59  ullrich
  * Completely Revised for New Version
  *
+ **************************************************************************/
+#include <algorithm>
+#include "StTrackFitTraits.h"
+#include "StParticleTypes.hh"
 #include "StParticleTable.hh"
 #include "tables/St_dst_track_Table.h"
 #if !defined(ST_NO_NAMESPACES)
@@ -37,7 +41,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.2 1999/11/01 12:45:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.3 1999/12/21 15:09:18 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {

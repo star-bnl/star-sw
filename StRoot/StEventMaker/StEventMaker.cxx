@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.9  1999/12/07 18:58:39  ullrich
- * Modified to get rid of some warnings on Linux
+ * Revision 2.10  1999/12/21 15:13:13  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.27  2000/05/26 11:36:19  ullrich
  * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
@@ -57,8 +57,14 @@
  * Revision 2.15  2000/01/14 18:51:06  ullrich
  * Added printout of quasi-histos in the event summary
  * to printEventInfo().
+ *
+ * Revision 2.14  2000/01/14 13:58:03  ullrich
+ * Create and fill the RICH pixel collection. Added also
+ * the debug output for the RICH to printEventInfo().
+ *
+ * Revision 2.13  2000/01/11 16:05:34  ullrich
  * With Victors help now possible to read the dst_summary_param
-#if defined(__SUNPRO_CC)
+ * table from the runco branch and build StEventSummary objects.
  *
  * Revision 2.12  2000/01/10 18:20:32  ullrich
  * Create new StTrackDetectorInfo object for primary tracks if
@@ -84,7 +90,7 @@
     doPrintRunInfo    = kTRUE;  // TMP 
     doPrintEventInfo  = kTRUE;  // TMP
  *
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $";
  * Delete hit if it cannot be added to collection.
  *
  * Revision 2.3  1999/11/08 17:04:59  ullrich
@@ -121,10 +127,10 @@ static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ull
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.9 1999/12/07 18:58:39 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.10 1999/12/21 15:13:13 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.h,v 2.4 1999/12/02 16:35:40 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.h,v 2.5 1999/12/21 15:09:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.h,v $
- * Revision 2.4  1999/12/02 16:35:40  ullrich
- * Added method to return the stored dE/dx traits
+ * Revision 2.5  1999/12/21 15:09:14  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.5  1999/12/21 15:09:14  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -30,6 +30,9 @@
  *
  **************************************************************************/
 #ifndef StTpcDedxPidAlgorithm_hh
+#define StTpcDedxPidAlgorithm_hh
+#include <vector>
+#include "StFunctional.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif

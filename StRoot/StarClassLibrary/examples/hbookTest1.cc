@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- *  $Id: hbookTest1.cc,v 1.1 1999/02/17 12:43:57 ullrich Exp $
+ *  $Id: hbookTest1.cc,v 1.2 1999/12/21 15:14:44 ullrich Exp $
  *
  *  Author: brian
  *
@@ -11,8 +11,8 @@
  *************************************************************************
  *
  * $Log: hbookTest1.cc,v $
- * Revision 1.1  1999/02/17 12:43:57  ullrich
- * New Revision
+ * Revision 1.2  1999/12/21 15:14:44  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 1.1  1999/02/17 12:43:57  ullrich
  * New Revision
@@ -28,6 +28,9 @@
 #include "JamesRandom.h"
 #include "RandGauss.h"
 #include "StHbook.hh"
+#if !defined(ST_NO_NAMESPACES)
+using std::string;
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -35,10 +38,10 @@ int main(int argc, char* argv[])
     // Can be read in from command line
     string filename("hbook.ntp");
 
-    cout << "HBOOK file is: " << filename << endl;
+    cout << "HBOOK file is: " << filename.c_str() << endl;
     
     if (!access(filename.c_str(),F_OK|R_OK)) {
-	cerr << "Hbook File: `" << filename << "' already exists." << endl;
+	cerr << "Hbook File: `" << filename.c_str() << "' already exists." << endl;
 	exit(1);
     }
 
