@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.3 1999/01/28 02:51:27 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.4 1999/02/10 04:23:24 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,10 +16,13 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.3  1999/01/28 02:51:27  lasiuk
- * add ()localSector --> Raw
- * add ()localSector --> Local
+ * Revision 1.4  1999/02/10 04:23:24  lasiuk
+ * HP namespace
  *
+ * instantiate with electronics db
+ *
+ * Revision 1.7  1999/02/16 23:28:59  lasiuk
+ * matrix(3) is a data member to avoid constructor calls
  * protection against pad<1
  * const removed from several functions (because of matrix)
  *
@@ -359,8 +362,17 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
     return(dist2move);
 
     double z = mTPCdb->frischGrid() - (mSCdb->driftVelocity()*tb);
+    //double frischGrid = 2098.998*millimeter;
+    //PR(mElectronicsDb->tZero());
+    //double z = mTPCdb->frischGrid() - (mSCdb->driftVelocity()*(tb*mTimeBinWidth));
+    double z = mTPCdb->frischGrid() - mSCdb->driftVelocity()*(mElectronicsDb->tZero() + tb*mTimeBinWidth);
+    
+    return(z);
 }
 
+int StTpcCoordinateTransform::tBFromZ(const double z) const
+{
+    double tb = (mTPCdb->frischGrid() - z)/mSCdb->driftVelocity();
 #ifndef ST_NO_NAMESPACES
     // I do not like this.  This should be passed via the electronics data base!
     // We will have to see what is decided about this code!
