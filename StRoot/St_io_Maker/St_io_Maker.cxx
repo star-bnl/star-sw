@@ -134,7 +134,7 @@ void St_io_Maker::Add(TString &dataName,const Char_t *fileName)
   Add(dataName.Data(),fileName);
 }
 //_____________________________________________________________________________
-void St_io_Maker::Clear(Option_t *option="")
+void St_io_Maker::Clear(Option_t *option)
 {
   TTree *tree = GetTree();
   if (tree) tree->AutoSave();
@@ -318,7 +318,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.6 1999/02/24 16:06:35 fisyak Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.7 1999/02/24 17:12:26 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
