@@ -1,9 +1,9 @@
-// $Id: bfc_tss.C,v 1.21 1999/05/01 02:12:40 fisyak Exp $
+// $Id: bfc_tss.C,v 1.22 1999/05/05 00:41:26 fisyak Exp $
 // $Log: bfc_tss.C,v $
-// Revision 1.21  1999/05/01 02:12:40  fisyak
-// change default no. of Events
+// Revision 1.22  1999/05/05 00:41:26  fisyak
+// Add StEvent
 //
-// Revision 1.20  1999/05/01 01:47:31  fisyak
+// Revision 1.17  1999/05/01 01:47:37  fisyak
 // Add new set of bfc s'
 //
 // Revision 1.16  1999/04/29 23:54:18  fisyak
@@ -62,6 +62,7 @@
 #define CTF
 #define L3
 #define GLOBAL
+//#define DST
 #define ANALYSIS
 #endif  /* new data only FZIN or GTRACK */
 //#define XDFOUT
@@ -145,6 +146,7 @@ void Load(){
     gSystem->Load("St_global");
     gSystem->Load("StRootEvent");
     gSystem->Load("St_dst_Maker");
+    gSystem->Load("StEventMaker");
 #ifdef ANALYSIS
     gSystem->Load("StRAnalysisMaker");
 #endif
@@ -153,7 +155,7 @@ void Load(){
 #endif /* GLOBAL */
 }
 
-void bfc_tss (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
+void bfc_tss (const Int_t Nevents=1,Char_t *infile=0, Char_t *outfile=0)
 {
   Int_t NoEvents = Nevents;
   // define input file
@@ -249,7 +251,8 @@ void bfc_tss (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
   St_xdfin_Maker *xdfMk = new St_xdfin_Maker("xdfin",InFile.Data());
 #ifdef MINIDAQ
   // defined for MINIDAQ
-  //  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
+  chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
+  chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
 #else /* no MINIDAQ */
   // fix for xdf files to get geant input
 #endif /* MINIDAQ */
@@ -366,11 +369,6 @@ void bfc_tss (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
   tptMk->SetDebug();
 #endif /* TPC */
 
-#ifdef L3
-//		l3t
-  St_l3t_Maker  *l3tMk  = new St_l3t_Maker("l3Tracks");
-  l3tMk->SetDebug();
-#endif /* L3 */
 
 #ifdef SVT
 //		stk
@@ -388,36 +386,77 @@ void bfc_tss (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
   St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc");
   St_trg_Maker         *trg      = new St_trg_Maker("trg");
 #endif
-#ifdef L3
-  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks");
-#endif
 #ifdef GLOBAL
 //		global
   St_dst_Maker *dstMk = 0;
   St_glb_Maker *glbMk = new St_glb_Maker("global");
+#ifndef DST
+  chain->SetInput("dst",".make/global/.data/dst");
+#endif
   glbMk->SetDebug();
+#ifdef L3
+//		l3t
+  St_l3t_Maker  *l3tMk  = new St_l3t_Maker("l3Tracks");
+  l3tMk->SetDebug();
+#endif /* L3 */
 //		dst
-                dstMk = new St_dst_Maker("dst");
-  dstMk->SetDebug();
+#ifdef DST
+                 dstMk = new St_dst_Maker("dst");
+    chain->SetInput("dst",".make/dst/.data/dst");
+    dstMk->SetDebug();
+#endif  
+  StEventMaker *evMk  = new StEventMaker;
 #ifdef ANALYSIS
   StAnalysisMaker *anaMk = new StAnalysisMaker;
 #endif
   St_QA_Maker          *qa         = new St_QA_Maker;  
+#ifdef GLOBAL
 //		Tree
-  if (dstMk) {
+  if (dstMk || evMk) {
     StTreeMaker *treeMk = new StTreeMaker("tree",FileOut.Data());
     treeMk->SetIOMode("w");
     treeMk->SetDebug();
-    treeMk->IntoBranch("dstBranch","dst/.data/dst");
-    //    treeMk->IntoBranch("geantBranch","geant/.data");
-    //  treeMk->SetInput("global","global");
-    //treeMk->SetInput(".default","Others");
-     
+#ifdef GEANT
+//  treeMk->IntoBranch("geantBranch","geant/.data");
+//  treeMk->SetBranch("geantBranch",FileOut.Data());
+    //    treeMk->IntoBranch("geantBranch","geant/.data/particle");
+    //    treeMk->IntoBranch("geantBranch","geant/.data/g2t_rch_hit");
+#endif
+#if definde(TSS) || defined(TRS)
+//  treeMk->SetBranch("tpc_rawBranch",FileOut.Data());
+    treeMk->IntoBranch("tpc_rawBranch","tpc_raw/.data");
+#endif
+#ifdef FSS
+//  treeMk->SetBranch("ftpc_rawBranch",FileOut.Data());
+    treeMk->IntoBranch("ftpc_rawBranch","ftpc_raw/.data");
+#endif
+#ifdef CTF
+//  treeMk->SetBranch("trgBranch",FileOut.Data());
+    treeMk->IntoBranch("trgBranch","ctf");
+    treeMk->IntoBranch("trgBranch","mwc");
+    treeMk->IntoBranch("trgBranch","trg");
+//  treeMk->IntoBranch("trgBranch","trg/.data/dst_TriggerDetectors");
+#endif
+#ifdef L3
+//  treeMk->SetBranch("l3TBranch",FileOut.Data());
+    treeMk->IntoBranch("l3TBranch","l3Tracks");
+#endif
+//  treeMk->SetBranch("globalBranch",FileOut.Data());
+//    treeMk->IntoBranch("globalBranch","global/.data/dst");
+    if (dstMk) {
+  //  treeMk->SetBranch("dstBranch",FileOut.Data());
+      treeMk->IntoBranch("dstBranch","dst");
+    }
+    if (evMk){
+  //  treeMk->SetBranch("EventBranch",FileOut.Data());
+      treeMk->IntoBranch("EventBranch","StEventMaker/.data/Event");
+    }
+//  treeMk->SetInput(".default","Others");
   }
 #endif  /* GLOBAL */
   
   // START the chain (may the force be with you)
-  // Create HTML docs of all Maker's involved
+  // Create HTML docs of all Maker's inv#ifdef CTF
   //   chain->MakeDoc();
 
   chain->PrintInfo();
@@ -440,7 +479,7 @@ void bfc_tss (const Int_t Nevents=10000,Char_t *infile=0, Char_t *outfile=0)
     printf ("Run completed ");
     gSystem->Exec("date");
   }
-  else {b = new TBrowser("BFC chain",chain);}
+  //  else {b = new TBrowser("BFC chain",chain);}
 }
 
 
