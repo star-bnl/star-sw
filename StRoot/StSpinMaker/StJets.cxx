@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.7 2003/09/02 17:59:01 perev Exp $
+// $Id: StJets.cxx,v 1.8 2004/05/06 22:55:27 thenry Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.8  2004/05/06 22:55:27  thenry
+// This works better.
+//
 // Revision 1.7  2003/09/02 17:59:01  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -70,6 +73,8 @@
 ClassImp(StJets)
 ClassImp(TrackToJetIndex)
 
+int* global_index;
+
 StJets::StJets()
     : mJets( new TClonesArray("StJet",100)), mTrackToJetIndices( new TClonesArray("TrackToJetIndex",200)) 
 {
@@ -110,10 +115,13 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    return;
 	}
 	int muTrackIndex = track->getIndex();
+	//cout << "muTrackIndex: " << track->getIndex();
 	if (muTrackIndex >=0) {
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
 	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( jetIndex, muTrackIndex);
+	    ((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setTrackIndex(muTrackIndex);
+	    ((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setJetIndex(jetIndex);
 	}
 	if(track->particle())
 	    if( track->charge() ) {  // If charge != 0, increment the number of cp
@@ -121,10 +129,9 @@ void StJets::addProtoJet(StProtoJet& pj)
 	}
 	if(track->particle())
 	    charge += track->particle()->charge();
-	
-	//add in the jet container
-	new((*mJets)[jetIndex]) StJet( pj.e(), pj.px(), pj.py(), pj.pz(), nCell, charge );
     }
+    //add in the jet container
+    new((*mJets)[jetIndex]) StJet( pj.e(), pj.px(), pj.py(), pj.pz(), nCell, charge );
 }
 
 void StJets::print()
@@ -168,7 +175,8 @@ vector<int> StJets::jetTrackIndices(int jetIndex)
       ( mTrackToJetIndices->UncheckedAt(i) );
     if(id) {
       int trackIndex = id->trackIndex();
-      vec.push_back( trackIndex ); }
+      if(id->jetIndex() == jetIndex)
+	vec.push_back( trackIndex ); }
   }
   
   return vec;
