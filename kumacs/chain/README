@@ -79,6 +79,7 @@
 * sss        - SVT slow simulator - not implemented yet
 * tss        - TPC slow simulator
 * tfc        - unpacks tpc raw data into adcxyz table for diagnostics
+* tfc_r      - unpacks minidaq tpc data and reformats
 * tcl        - TPC clustering - slow sim only !
 * tcl_e      - TPC cluster evaluation - slow sim only
 * tfs        - TPC fast simulator
@@ -120,7 +121,8 @@
 * smdst - strange micro dst analysis
 * dchkt - dumps from dst files
 * user  - user kumacs called here: init_user,run_user,finish_user
-* ntup  - create output ntuple file
+* ntup  - create output ntuple file with 1 ntuple
+* ntup2 - add 2nd ntuple to output ntuple file (must also use ntup chain!)
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
 * dout  - write run/dst and event/data/global/dst directories into xdf file
