@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerIdCollection.h,v 2.1 2003/01/30 18:14:15 ullrich Exp $
+ * $Id: StTriggerIdCollection.h,v 2.2 2003/02/19 16:35:05 jeromel Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerIdCollection.h,v $
+ * Revision 2.2  2003/02/19 16:35:05  jeromel
+ * $LINK mechanism removed
+ *
  * Revision 2.1  2003/01/30 18:14:15  ullrich
  * Initial Revision.
  *
@@ -37,7 +40,7 @@ private:
     StTriggerId  *mL1TriggerId;
     StTriggerId  *mL2TriggerId;
     StTriggerId  *mL3TriggerId;
-    StTriggerId  *mNominalTriggerId; //$LINK
+    StTriggerId  *mNominalTriggerId; 
     
     ClassDef(StTriggerIdCollection,1)
 };
