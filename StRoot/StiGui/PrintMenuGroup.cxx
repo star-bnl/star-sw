@@ -96,7 +96,11 @@ void PrintMenuGroup::printTracks()
 	{
 	  filter->reset();
 	  if (filter->filter((*iter).second) )
-	    cout << *((*iter).second) <<endl;
+	    {
+	      double chi2 = (*iter).second->getChi2();
+	      double ndf  = (*iter).second->getPointCount();
+	      cout << *((*iter).second) << "chi2/ndf:"<< chi2/ndf<<endl;
+	    }
 	}
     }
   cout << "PrintMenuGroup::printTracks() -I- Done"<<endl;
