@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.7 1997/12/22 17:39:42 tull Exp $
+ #(@)$Id: tdm_def.cdf,v 1.8 1998/01/03 01:31:22 tull Exp $
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -26,10 +26,69 @@ Each ASP is comprised of an object factory interface (eg. tdmFactory)
 and zero or more worker object interfaces.
 .
 TDM worker objects include:
-   tdmObject - See TDM/OBJECT
-	       - More guidance needed here.
+   tdmDataset - See TDM/DATASET
+      - C++ representation of DSL datasets.
+   tdmTable - See TDM/TABLE
+      - C++ representation of DSL tables.
 .
-More guidance needed here.
+The TDM package is a C++ classs library implementation of the DSL
+package for memory-resident datasets and tables.
+.
+TDM is responsible for memory allocation and management for DSL
+datasets and tables, and management of the data dictionary of table
+types.
+.
+tdmDataset objects are container objects which can contain other
+tdmDataset objects and/or tdmTable objects. The recursive inclusion of
+datasets within datasets forms a hierarchic organization of datasets
+which can be thought of as a tree or file-system-like hierarchy.
+.
+With the ability to link datasets and tables to more than one place,
+datasets can form any general directed graph. The TDM interface limits
+this more general organization to directed acyclical graphs (ie. When
+navigating in only one direction along each node of the graph, each
+dataset appears at most once on a navigational path.). This means that
+no dataset can contain another dataset which eventually contains the
+original dataset (eg. The Unix-like path foo/blah/foo/blah/foo is a
+valid path iff each of the foo and blah datasets are distict. foo is
+not the same dataset as foo/blah/foo or foo/blah/foo/blah/foo.).
+.
+Datasets are named, can be contained within other datasets, and can
+contain other datasets, and/or tables.
+.
+DSL tables can be considered arrays of C structs of fixed length
+definable in IDL (Interface Definition Language) from the base types:
+char, octet, short, unsigned short, long, unsigned long, float, double.
+.
+Tables are named and typed, can be contained within datasets, and
+contain data organized into columns (fields within a C struct) and rows
+(elements within the array).
+.
+Each table column has a name (variable name), a type (a simple or
+complex variable type), a rank (the number of dimensions), and a shape
+(the sequence of the dimension sizes). Variable types can be scalars,
+vectors, multi-dimensional arrays (current limit of 4 indicies),
+structs, or any derived type from these complex types.
+.
+Table types are named (for convienence) and define the columns of a
+table in IDL.
+.
+Some sample IDL table type definitions are:
+.
+   struct point { float x,y; };
+.
+   struct point { float x,y,z; };
+.
+   struct cartisian { float x,y,z; };
+.
+   struct namedLine {char name[32]; struct point {float x,y,z;}p[2];};
+.
+Although two of the IDLs above have the same type name, and two have
+identical column definitions, these four table types can exist in the
+DSL managed data dictionary at the same time and will be treated as
+four seperate table types (Obviously, the shortcut of using a type name
+instead of the entire type definition will not behave in a
+deterministic fashion for the two types named "point".).
 .
 ** ---------------------------------------------------------------------
 ** TDM/COUNT
@@ -46,7 +105,10 @@ Constructing a new TDM worker object increments COUNT by 1,
 destructing an existing TDM worker object decrements COUNT by 1.
 .
 TDM worker objects include:
-   More guidance needed here.
+   tdmDataset - See TDM/DATASET
+      - C++ representation of DSL datasets.
+   tdmTable - See TDM/TABLE
+      - C++ representation of DSL tables.
 .
 ARGUMENTS: 
 .
@@ -112,7 +174,10 @@ of that object's listing method. The typical content of this listing is:
 	   More guidance needed here.
 .
 TDM worker objects include:
-   More guidance needed here.
+   tdmDataset - See TDM/DATASET
+      - C++ representation of DSL datasets.
+   tdmTable - See TDM/TABLE
+      - C++ representation of DSL tables.
 .
 ARGUMENTS: 
 .
@@ -936,7 +1001,7 @@ SEE ALSO:
 SOREF 'tdmTable object SORef' C
 +
 NROWS   'Number of rows to print' I D=10
-IFIRST  'First row to print' I D=1
+IFIRST  'First row to print' I D=0
 >GUIDANCE
 More guidance needed here.
 .
