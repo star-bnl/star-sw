@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfcS.C,v 1.1 2001/04/13 02:56:10 didenko Exp $
+// $Id: bfcS.C,v 1.2 2001/04/13 13:19:06 didenko Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -53,7 +53,7 @@ void Load(){
   gSystem->Load("StChallenger");
 }
 //_____________________________________________________________________
-void bfc(const Int_t First,
+void bfcS(const Int_t First,
 	 const Int_t Last,
 	 const Char_t *Chain="gstar Cy2b tfs -NoHits",
 	 const Char_t *infile=0,
