@@ -174,14 +174,14 @@ int StFtpcFastSimu::ffs_gen_padres(int *g2t_ftp_hit_nok,
 
 	    // crossing-angle: 
             cross_ang = C_DEG_PER_RAD*
-	      atan2((pt*cos(abs(90.-twist)*C_RAD_PER_DEG)),   
-		   ((g2t_ftp_hit[k].x[2]/abs(g2t_ftp_hit[k].x[2]))*
+	      atan2((pt*cos(fabs(90.-twist)*C_RAD_PER_DEG)),   
+		   ((g2t_ftp_hit[k].x[2]/fabs(g2t_ftp_hit[k].x[2]))*
 		    g2t_ftp_hit[k].p[2]));
-	    alpha  = abs(cross_ang*C_RAD_PER_DEG);
+	    alpha  = fabs(cross_ang*C_RAD_PER_DEG);
             if(alpha>(C_PI_2))
 	      alpha=C_PI-alpha;
 
-	    lambda = abs(theta*C_RAD_PER_DEG);
+	    lambda = fabs(theta*C_RAD_PER_DEG);
             if(lambda>(C_PI_2)) 
 	      lambda=C_PI-lambda;
 
