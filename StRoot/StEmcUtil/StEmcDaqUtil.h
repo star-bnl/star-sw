@@ -33,17 +33,17 @@ StEmcCollection* GetEmcCollectionFromDaq(TDataSet* daq)
   StEMCReader* TheEmcReader=TheDataReader->getEMCReader();
   if(!TheEmcReader) return 0;
    
-  for(Int_t det=0;det<4;det++)
+  for(Int_t det=1;det<=4;det++)
   {
-    StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId); 
+    StDetectorId id = static_cast<StDetectorId>((det-1)+kBarrelEmcTowerId); 
     StEmcDetector* detector = new StEmcDetector(id,120);
     
     for(UInt_t m=1;m<=120;m++)
-      for(UInt_t e=1;e<=eta[det];e++)
-        for(UInt_t s=1;s<=sub[det];s++)
+      for(UInt_t e=1;e<=eta[det-1];e++)
+        for(UInt_t s=1;s<=sub[det-1];s++)
         {
           unsigned short ADC=0;
-          if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
+          if(det==1) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
           if(det==3) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,ADC)) goto next; 
           if(det==4) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,ADC)) goto next;
           if(ADC>0)
