@@ -9,7 +9,9 @@
 #include "r_tpc.h"
 #include "TTracker.hpp"
 #include "TpcTrackFrame.hpp"
+#ifdef LEDA
 #include "_memory.hpp"
+#endif
 
 
 
@@ -33,8 +35,9 @@ extern "C" long r_tpc_(
 **:        tpt_track      - TPC Tracks
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
-
+#ifdef LEDA
   memory_manager_init init_my_memory;
+#endif
   TpcTrackFrame trackFrame;
   TTrackerFFT Tracker;
 

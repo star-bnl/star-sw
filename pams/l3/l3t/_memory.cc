@@ -21,7 +21,7 @@
 // S. N"aher C. Uhrig  (1996)
 //------------------------------------------------------------------------------
 
-
+#ifdef LEDA
 #include "_memory.hpp"
 #include <stdio.h>
 #include <stdlib.h>
@@ -466,4 +466,7 @@ int memory_management::used_memory()
   return help;
 }
 
+#endif
+#else
+void dummy ( ) { }
 #endif

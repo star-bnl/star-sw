@@ -3,9 +3,11 @@
 #include "THit.hpp"
 #include "TTracker.hpp"
 #include "TMerger.hpp"
+#ifdef LEDA
 #include "_memory.hpp"
-
 memory_manager std_memory_mgr;
+#endif
+
 double TTrack::FSBField = 0.5F;
 
 double THit::FSErrorScaleXy = 5.0F;

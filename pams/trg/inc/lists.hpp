@@ -17,7 +17,9 @@
 
 #include <stdlib.h>
 
+#ifdef LEDA
 #include "_memory.hpp"
+#endif
 
 class slink;
 
@@ -30,101 +32,106 @@ public:
   void* e;
 
   slink(void* a, slink* suc) { e = a; succ = suc; };
-
-  LEDA_MEMORY(slink)
-
+  slink* operator++(){ return succ ; } ; 
+#ifdef LEDA
+    LEDA_MEMORY(slink)
+#endif
 };
 
 template <class T> class slist
 {
 private:
-	slink* h;                     //head
-	slink* t;                     //tail
-	int    count;                 //length of List
+   slink* h;                     //head
+   slink* t;                     //tail
+   int    count;                 //length of List
 
 public:
-	slist() {h = 0; t = 0; count = 0;};
-	~slist() 
-	{
-		clear();
-	};					// !!!!!!!!!!!!!!!!!! definieren!!!!!!!!!
-	slink* first() {return h;};
-  	const T& inf(slink* item) const { return ((T&) (item->e));};
-	T inf(slink* item)  {return (T) (item->e);};
-	slink* succ(slink* item) const {return item->succ;};
-	slink* append(T a)
-	{ count++;
-		if (t) t = t->succ = new slink((void*)a,0); 
-		else   t = h = new slink((void*)a,0); 
-		return t;
-	};
-	void remove(slink* item)
-	{
-		slink* temp;
-		count--;
-		// search succ(el) == item
-		if (item == h)
-		{
-			h = item->succ;
-			if (h == 0)
-			{
-				t = 0;
-				count = 0;
-			}
-			delete item;
-		}
-		else
-		for(temp = h; temp != 0; temp = temp->succ)
-			if (temp->succ == item)
-			{
-				// found, relink and remove item
-				temp->succ = item->succ;
-				if (temp->succ == 0)
-					t = temp;
-				delete item;
-				break;
-			}
-	};
+   slist() {h = 0; t = 0; count = 0;};
+   ~slist() 
+   {
+	clear();
+   };					// !!!!!!!!!!!!!!!!!! definieren!!!!!!!!!
+   slink* first() {return h;};
+   const T& inf(slink* item) const { return ((T&) (item->e));};
+   T inf(slink* item)  {return (T) (item->e);};
+   slink* succ(slink* item) const {return item->succ;};
+   slink* append(T a)
+   { count++;
+      if (t) t = t->succ = new slink((void*)a,0); 
+      else   t = h = new slink((void*)a,0); 
+      return t;
+   };
+   void remove(slink* item)
+   {
+      slink* temp;
+      count--;
+// search succ(el) == item
+      if (item == h) {
+         h = item->succ;
+         if (h == 0) {
+            t = 0;
+            count = 0;
+         }
+         delete item;
+      }
+      else
+         for(temp = h; temp != 0; temp = temp->succ)
+         if (temp->succ == item) {
+// found, relink and remove item
+            temp->succ = item->succ;
+            if (temp->succ == 0) t = temp;
+            delete item;
+            break;
+       }
+   };
 
-	const T tail() const {return (T) t->e;};
-	const T head() const {return (T) h->e;};
-	int size() {return count;};
-	void clear() 
-	{
-		if (h==0) return;
+//      const T tail() const {return (T) t->e;};
+//      const T head() const {return (T) h->e;};
+   const T head() const {return (T)h->e;};
+   const T tail() const {return (T)t->e;};
+   const T itsObject  ( slink* &s ) { if ( s == 0 ) return 0 ;
+                                     else return (T)s->e;} ;
+   const T nextObject ( slink* &s ) { if ( s == 0 ) return 0 ; 
+                                     s = s->succ ;
+                                     if ( s != 0 )  return (T)s->e;
+                                     else     return 0 ; } ;
+      
+   int size() {return count;};
+   void clear() {
+      if (h==0) return;
 
-		register slink* p, *old;
+      register slink* p, *old;
 
-		for(p = h; p; )
-		{
-			// get next element before deleting this one
-			old = p;
-			p = p->succ;
-			delete old;
-		}
+      for(p = h; p; ) {
+// get next element before deleting this one
+         old = p;
+         p = p->succ;
+         delete old;
+       }
 
-		h=t=0;
-		count=0;
-	};				// !!!!!!!!!!!!!!!!!! definieren!!!!!!!!!
-	void conc(slist<T>& l)
-    { 
+       h=t=0;
+       count=0;
+   }
+   void conc(slist<T>& l)
+   { 
       if (count > 0) 
-	{ t->succ = l.h;
-	if (l.count > 0) t = l.t; 
-	}
+      { t->succ = l.h;
+         if (l.count > 0) t = l.t; 
+      }
       else 
 	{ h = l.h; 
 	t = l.t; 
-	}
+      }
       count = count+l.count;
       l.h = l.t = 0;
       l.count = 0;
-    };
-
-	LEDA_MEMORY(slist)
+   };
+#ifdef LEDA
+     LEDA_MEMORY(slist)
+#endif
 };
 
-
+#ifdef LEDA
 #if defined(__GNUC__) || defined(__ELSE_SCOPE_BUG__)
 #define LEDA_FORALL_PREAMBLE
 #define LOOP_CAT(x,y) x ## y 
@@ -159,5 +166,11 @@ inline int LedaLoopSucc(const T& S, void*& p)
 LEDA_FORALL_PREAMBLE \
 for(void* LOOP_VAR(__LINE__) = (S).first();\
 LedaLoopInf(S,x,LOOP_VAR(__LINE__)), LedaLoopSucc(S,(void*)LOOP_VAR(__LINE__)); )
+#else
+#define forall(x,S)\
+slink* link = (S).first();\
+for( x = (S).itsObject(link); link != 0; x = (S).nextObject(link) )
+  
+#endif
 
 #endif

@@ -25,7 +25,9 @@
 #include "VTrack.hpp"			// include virtual track-interface
 #include "Common.h"			// include common definitions
 #include "types.h"			// include common types
+#ifdef LEDA
 #include "_memory.hpp"	// include the LEDA memory manager (that's the most efficient mm i know)
+#endif
 //
 // class declaration
 //
@@ -108,10 +110,13 @@ void FinishPrimaryTrack(float vertexx, float vertexy, float vertexr,
 //
    THitList* GetHits() {return &FHits; };
 //
+#ifdef LEDA
+//
 // needed for LEDA
 //	friend istream& operator>>(istream& I, TTrack& s) {return I;};
 //	friend ostream& operator<<(ostream& O, const TTrack& s) {return O;};
    LEDA_MEMORY(TTrack);
+#endif
 };
 
 

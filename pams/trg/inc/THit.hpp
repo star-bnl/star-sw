@@ -36,7 +36,9 @@
 #include <math.h>
 #include "Common.h"     // include common definitions
 #include "stdlib.h"
+#ifdef LEDA
 #include "_memory.hpp"  // include the LEDA memory manager (that's the most efficient mm i know)
+#endif
 
 class TTrack ;
  
@@ -183,8 +185,10 @@ public:
    void SetChi2Sz(double NewValue) {FChi2Sz = NewValue;}; // Chi2 in sz                 
    void SetMCID(double NewValue) {FMCID = (int)NewValue;};// mc track id for this hit
 
+#ifdef LEDA
 // setup the LEDA memory managment for Hits
    LEDA_MEMORY(THit)
+#endif
 };
 //
 // construct and calculate cylinder coordinates and conformal coordinates
