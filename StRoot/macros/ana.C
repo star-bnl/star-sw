@@ -1,4 +1,5 @@
-void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/tfs_dst/",const Char_t *root_file="b0_3_y1a_off.root")
+//void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/tfs_dst/",const Char_t *root_file="b0_3_y1a_off.root")
+void ana(const Char_t *Path="/disk1/star/tfs_dsts/",const Char_t *root_file="all.root")
 {
 //Char_t *xdffilename="/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tfs_dst/psc148_02_48evts_h_dst.xdf"
   gROOT->Reset();
