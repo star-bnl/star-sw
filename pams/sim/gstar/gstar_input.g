@@ -2,7 +2,6 @@
 +CDE,typing,gcnum.
    print *,' Gstar User Input for TEXT, TXOLD and FZ formats activated '
    print *,' To activate XDF format readout do " gexec gstar_readxdf " '
-   if (Npart<=100) call GUPART
    end
 
 *************************************************************************
