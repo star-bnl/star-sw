@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.10 2000/11/30 20:42:58 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.11 2001/04/21 21:47:39 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.11  2001/04/21 21:47:39  caines
+ * Fix int to double problem
+ *
  * Revision 1.10  2000/11/30 20:42:58  caines
  * Fix flag error and anode position error, use database
  *
@@ -580,13 +583,13 @@ void StSvtAnalysis::finalMoments(int clu,int numAnodes)
 
      if (mNeff>1)                                                     //the ones which are not are really bad 
      {
-       mNeff = (double) mSumAdc*mSumAdc/mNeff;  
-       if (mNeff>1.5)                                                 //make sure calc. does not mess up
+       double Neff = (double) mSumAdc*mSumAdc/mNeff;  
+       if (Neff>1.5)                                                 //make sure calc. does not mess up
        {
-         mDriftMom2 = mDriftMom2 * sqrt( (mNeff/(mNeff-1)) );
-         mAnodeMom2 = mAnodeMom2 * sqrt( (mNeff/(mNeff-1)) );
-         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/sqrt(mNeff); /*is 0 for 1 drift wonders. Units: cm*/
-         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/sqrt(mNeff); /*is 0 for 1 anode wonders. Units: cm*/
+         mDriftMom2 = mDriftMom2 * sqrt( (Neff/(Neff-1)) );
+         mAnodeMom2 = mAnodeMom2 * sqrt( (Neff/(Neff-1)) );
+         if (mDriftMom2!=0) mY_err = 260.e-4*mDriftMom2/sqrt(Neff); /*is 0 for 1 drift wonders. Units: cm*/
+         if (mAnodeMom2!=0) mX_err = 250.e-4*mAnodeMom2/sqrt(Neff); /*is 0 for 1 anode wonders. Units: cm*/
        }
    
        if (numAnodes==1 && mAnodeMom2==0) mAnodeMom2=0.288;    //bin width/sqrt(12)
