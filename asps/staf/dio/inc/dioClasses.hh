@@ -13,7 +13,12 @@
 #define DIOCLASSES_HH
 
 //:----------------------------------------------- INCLUDES           --
+#ifndef WIN32
 #include <stream.h>
+#else
+#include <stdio.h>
+#include <iostream.h>
+#endif
 #include "dstype.h"
 #include "dsxdr.h"
 #include "asuLib.h"

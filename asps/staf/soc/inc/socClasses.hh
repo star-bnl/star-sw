@@ -14,7 +14,11 @@
 #define SOCCLASSES_HH
 
 //:----------------------------------------------- INCLUDES           --
+#ifndef WIN32
 #include <stream.h>
+#else
+#include <stdio.h>
+#endif
 #include "stafCorba.h"
 #include "asu_types.h"
 #include "asu_globals.h"
