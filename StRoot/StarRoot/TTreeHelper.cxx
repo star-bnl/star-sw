@@ -236,8 +236,7 @@ void TTreeHelper::Init()
 #endif
   SetBranchObject(fTree->GetListOfBranches());
   fTree->SetBranchStatus("*",0);
-  if (fTree->IsA()==TChain::Class()) 
-    ((TChain*)fTree)->SetNotify(this);
+  if (fChain) fChain->SetNotify(this);
 
 }
 //______________________________________________________________________________
@@ -617,6 +616,7 @@ Int_t TTreeHelper::AddFile(const Char_t *file)
     fChain->Add(fullname);
   }
   gSystem->FreeDirectory(dir);
+  Init();
   return num;
 }
 //______________________________________________________________________________
