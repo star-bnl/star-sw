@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.8 1999/12/03 01:01:33 calderon Exp $
+// $Id: StMcEventReadMacro.C,v 1.9 1999/12/14 18:18:01 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.9  1999/12/14 18:18:01  calderon
+// using new StMcEvent, StEvent & StAssociationMaker
+//
 // Revision 1.8  1999/12/03 01:01:33  calderon
 // Updated for new StMcEvent 2.0 and StMcEventMaker.
 // Uses StTpcDb to get the geometry info (calib has some problems still).
@@ -46,22 +49,17 @@ TBrowser *brow=0;
 // The acual file to be used is passed as an argument to the macro, or a default can be set
 
 void StMcEventReadMacro(Int_t nevents=1,
-const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0372_05_35evts.geant.root")
+const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0372_02_35evts.geant.root")
 {
 // Load all the System libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StUtilities");
-    gSystem->Load("StDbLib");
-    gSystem->Load("StDbBroker");
-    gSystem->Load("St_db_Maker");
-    gSystem->Load("StTpcDb");
 
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("StDbUtilities");
-   
+    
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     
@@ -76,22 +74,13 @@ const char *MainFile="/star/rcf/disk00001/star/auau200/venus412/default/b0_3/yea
     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("geantBranch",0,"r");
 
-    // Db
-    St_db_Maker *dbMk = new St_db_Maker("Geometry","MySQL:Geometry");
-    dbMk->SetDebug();
-
-    //St_db_Maker *calibMk = new St_db_Maker("calib","MySQL:calib");
-    //calibMk->SetDebug();
-
-    StTpcDbMaker* tpcDbMk = new StTpcDbMaker("tpcDb");
-    tpcDbMk->SetDebug();
-  
+    // StMcEvent
     StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
 
     // now execute the chain member functions
     
-    chain->Init(); // This should call the Init() method in ALL makers
     chain->PrintInfo();
+    chain->Init(); // This should call the Init() method in ALL makers
 
     int istat=0,iev=1;
  EventLoop: if (iev<=nevents && !istat) {
