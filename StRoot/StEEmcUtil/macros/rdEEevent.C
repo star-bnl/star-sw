@@ -1,7 +1,7 @@
 // read TTree
 
-rdEEevent(int neve=300,  TString Tname0="../dataFeb11/run00005.eetree", int flag=0, float Emax=40.){  
-  TString Tname0="eve400.eetree";
+rdEEevent(int neve=300,  TString Tname0="/star/u/eemcdb/dataFeb11/run00006.eeTree", int flag=0, float Emax=40.){  
+  //TString Tname0="eve400.eetree";
   gSystem->Load("StRoot/StEEmcUtil/EEevent/libEEevent.so");
   
   //  gStyle->SetPalette(1,0);
@@ -17,7 +17,7 @@ rdEEevent(int neve=300,  TString Tname0="../dataFeb11/run00005.eetree", int flag
   assert(t4);
   // create a pointer to an event object. This will be used
   // to read the branch values.
-  EEevent *event = new EEevent();
+  EEeventDst *event = new EEeventDst();
   
   //if (gROOT->IsBatch()) return;  new TBrowser();  t4->StartViewer();  return;
   TBranch *br = t4->GetBranch("EEdst");
