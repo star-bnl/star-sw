@@ -7,7 +7,7 @@
 
 struct tofr5INLtable {
   octet boardID[8]; /*  10 TDIG boards in tofr5  */
-  short boardNumber /* TDIG board number   */
+  short boardNumber; /* TDIG board number   */
   short TDCID;    /*  40 TDCs on 10 TDIG boards */
   float INLcorrection[1024];  /* 40*1024 INL table corrections, 
                                 TDC4 on each TDIG boards have only 
