@@ -221,6 +221,7 @@ void RunStiMaker(Int_t nevents=1,
 	guiIO->setUnMarkedHitSize(.3);
 	guiIO->setUnMarkedHitColor(4);
 	guiIO->setUnMarkedHitStyle(8);
+	guiIO->setUpdateEachTrack(true);
 	
 	//Values for hits assigned to tracks
 	guiIO->setMarkedHitSize(.3);
