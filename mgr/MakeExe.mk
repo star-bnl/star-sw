@@ -139,7 +139,7 @@ $(OBJ_DIR)/%.o : %.cc
 #
 #
 geant3: $(GST_DIR)/geant3/geant3.f 
-	$(GEA) -o $(EXE_DIR)/geant3 $(GST_DIR)/geant3/geant3.f `cernlib kernlib`
+	$(GEA) -o $(EXE_DIR)/geant3 $(GST_DIR)/geant3/geant3.f `cernlib kernlib` $(FLIBS)
 #
 $(CMDS): $(FILES_O)
 	$(DOEXE)   $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
@@ -174,7 +174,6 @@ cleanall :
 	$(RMDIR) $(OUT_DIR)
 clean:
 	$(RMDIR) $(OBJ_DIR) $(EXE_DIR)
-	
 atlas:	geant3 atlsim detm clean
 star:	geant3 gstar  detm clean
 
@@ -200,4 +199,4 @@ show:
 	@echo FILES_O=$(FILES_O)
 	@echo SRC_DIRS=$(SRC_DIRS)
 	@echo INCL=$(INCL)
-	
+	@echo FLIBS = $(FLIBS)

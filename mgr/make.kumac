@@ -97,7 +97,7 @@ macro ld_private
 *  wait
   shell gmake NOROOT=YES SILENT=YES -f $STAR/mgr/MakePam.mk -C [pam]
   for/call  csrmsl($quote([p]))
-  slib = .$STAR_SYS/[lib]/[p].sl
+  slib = .$STAR_HOST_SYS/[lib]/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
     message  '================ Load private shared library:' [slib] '================'

@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.59  1999/01/27 23:46:25  fisyak
+#  Add Templates
+#
 #  Revision 1.58  1999/01/25 23:49:12  fisyak
 #  Add MAKEFLAG
 #
@@ -152,7 +155,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/25 23:49:12 $ 
+#             Last modification $Date: 1999/01/27 23:46:25 $ 
 #. default setings
 
 MAKE  := gmake
@@ -357,75 +360,7 @@ ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50))
-#    case linux
-#  ====================
-ifndef EGCS_ON
-  MOTIF :=
-  LINUX :=YESS
-  MOTIF :=
-  CERN_LEVEL :=pgf98
-  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON
-  STRID    := lnx
-  FC       := /usr/pgi/linux86/bin/pgf77
-  LD       := $(CXX)
-  SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC -Wall
-  CFLAGS   := $(DEBUG) -fPIC -Wall
-  CPPFLAGS += f2cFortran
-  LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
-  SOFLAGS  := $(DEBUG) -shared  
-##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
-##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
-  FFLAGS   := -DPGI  $(DEBUG)
-  FEXTEND  := -Mextend
-  YACC     := bison -y
-  YACCLIB  := 
-  LEX      := flex
-  LEXLIB   := -lfl
-
-else 
-#   	EGCS compiler
-
-#  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
-#   CC  := /usr/local/egcs/bin/gcc 
-#   CXX := /usr/local/egcs/bin/g++ 
-  CC  := /usr/local/i386_redhat51/bin/gcc 
-  CXX := /usr/local/i386_redhat51/bin/g++ 
-
-  MOTIF :=
-  LINUX :=YESS
-  MOTIF :=
-  CERN_LEVEL :=pgf98
-  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON
-  STRID    := lnx
-  FC       := /usr/pgi/linux86/bin/pgf77
-  LD       := $(CXX)
-  SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC -Wall
-  CFLAGS   := $(DEBUG) -fPIC -Wall
-  CPPFLAGS += f2cFortran
-  LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
-  SOFLAGS  := $(DEBUG) -shared  
-##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/local/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
-##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
-  FLIBS    += -L/opt/rhic/lib/gcc-lib/i686-pc-linux-gnu/2.8.1 -lg2c
-  FFLAGS   := -DPGI  $(DEBUG)
-  FEXTEND  := -Mextend
-  YACC     := bison -y
-  YACCLIB  := 
-  LEX      := flex
-  LEXLIB   := -lfl
-endif
-endif
-
-ifneq (,$(findstring $(STAR_SYS),i386_redhat51 i386_redhat52))
+ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_redhat52))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
@@ -445,7 +380,9 @@ ifneq (,$(findstring $(STAR_SYS),i386_redhat51 i386_redhat52))
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c
+#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
+#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -L /usr/local/egcs-1.1.1-l/g2clib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lI77 -lF77
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y

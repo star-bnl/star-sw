@@ -42,7 +42,7 @@ VPATH := $(SRC_DIR) $(EXE_DIR)
 #
 #
 geant3: geant3.f 
-	$(GEA) -o $(EXE_DIR)/geant3 $(1ST_DEPS) `cernlib kernlib`
+	$(GEA) -o $(EXE_DIR)/geant3 $(1ST_DEPS) `cernlib kernlib` $(FLIBS)
 
 
 setup:  $(EXE_DIR)  $(AFS_EXE_DIR)
@@ -59,4 +59,3 @@ show:
 	@echo INP_DIR=$(INP_DIR)
 	@echo OUT_DIR=$(OUT_DIR)
 	@echo STAF_ARCH=$(STAF_ARCH)
-	

@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.44  1999/01/27 23:46:29  fisyak
+#  Add Templates
+#
 #  Revision 1.43  1999/01/25 23:49:14  fisyak
 #  Add MAKEFLAG
 #
@@ -208,7 +211,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/01/25 23:49:14 $ 
+#           Last modification $Date: 1999/01/27 23:46:29 $ 
 #  default setings
 # Current Working Directory
 #
@@ -381,8 +384,6 @@ Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 Makers  :=  $(filter-out St_laser_Maker, $(Makers))
 Makers  :=  $(filter-out St_mev_Maker, $(Makers))
 Makers  :=  $(filter-out St_hbt_Maker, $(Makers))
-Makers  :=  $(filter-out St_params_Maker, $(Makers))
-Makers  :=  $(filter-out St_db_Maker, $(Makers))
 ifneq ($(EMPTY),$(Makers))
 StRoot += St_Makers
 endif
@@ -401,6 +402,8 @@ St_base:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base     SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_base.$(So)
 xdf2root:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/xdf2root.$(So) 
+StCl:
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StCl SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StCl.$(So) 
 StDisplay:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StDisplay SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/StDisplay.$(So) 
 St_Makers: $(Makers)
