@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.114 2001/04/09 19:25:14 fisyak Exp $
+# $Id: Construct,v 1.115 2001/06/01 03:08:37 perev Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -173,122 +173,106 @@ if ( !$param::quiet ) {
 my @subdirs = ();
 
 # make Targets and install includes
-foreach my $dir( "pams", "StRoot", "StPiD" ) {
+foreach my $dir( "pams", "StRoot" ) {
     next if !-d $dir;
     opendir( DIR, $dir ) or die "Can't open $dir\n";
     my @subdirS = readdir DIR;
     closedir DIR;
 
-    foreach my $sub_dir(@subdirS) {
+    foreach my $sub_dir (@subdirS) {
         next if $sub_dir eq '.' || $sub_dir eq '..';
         if ( $SKIP_DIRS && $SKIP_DIRS =~ $sub_dir ) {
             print "skip dir: $sub_dir \t=> $SKIP_DIRS\n";
             next;
         }
 
-        if ( $#Repo == -1 ) {
-            if ( $STAR_SYS =~ /^sun4x_5.$/ && ( $sub_dir =~ /StHbtMaker/
-              || $sub_dir =~ /StMiniDstMaker/ )  #   || $sub_dir =~ /StppSpin/)
-              )
-            {
-                print "skip dir: $sub_dir\n";
-                next;
-            }
-        }
         my $sub_DIR = $dir . "/" . $sub_dir;
 
-        if ( -d $sub_DIR ) {
-            if ( $sub_dir =~ /^macros$/ || $sub_dir =~ /^test$/ ) { next; }
-            if ( $sub_dir =~ /\./ || $sub_dir =~ /\.\./ || $sub_dir =~ /CVS/
-              || $sub_dir =~ /^html$/ || $sub_dir =~ /^test$/
-              || $sub_dir =~ /^doc/ )
-            {
-                next;
-            }
+        if (! -d $sub_DIR ) 		{next;}
+        if ( $sub_dir =~ /^\./     ) 	{next;}
+        if ( $sub_dir =~ /^macros$/) 	{next;}
+        if ( $sub_dir =~ /^test/   )	{next;}
+        if ( $sub_dir =~ /CVS/     )	{next;}
+        if ( $sub_dir =~ /^html/   )	{next;}
+        if ( $sub_dir =~ /^doc/    )	{next;}
 
-            if ( $sub_dir =~ /^St_base$/ || $sub_dir =~ /^Star2Root$/
-              || $sub_dir =~ /^StChain$/ || $sub_dir =~ /^StBFChain$/
-              || $sub_dir =~ /^StTableUtilities$/ || $sub_dir =~ /^StUtilities$/
-              || $sub_dir =~ /^StAnalysisUtilities$/ || $sub_dir =~ /^xdf2root$/
-              || $sub_dir =~ /^StarClassLibrary$/ || $sub_dir    =~ /^StEvent$/
-              || $sub_dir =~ /^StEventUtilities$/ || $sub_dir =~ /^StMcEvent$/
-	      || $sub_dir =~ /^StEmcUtil$/
-              || $sub_dir =~ /^erdeck$/ )
-            {
-                opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
-                my @incs = readdir DIR;
-                closedir DIR;
-                my @incT = ();
-
-                foreach my $inc(@incs) {
-                    if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.inc$/ )
-                    {
-                        push @incT, $sub_DIR . "/" . $inc;
-                    }
-                }
-
-                if ( $#incT > -1 && !$param::rflag ) {
-                    Install $env $INCLUDE, @incT;
-                }
-            }
+        my $ExportInc = $sub_DIR . "/.includes_for_export.flg";
+        if ( -f $ExportInc)
+        {
             opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
-            my @subsubdirS = readdir DIR;
+            my @incs = readdir DIR;
             closedir DIR;
+            my @incT = ();
 
-            foreach my $subsub_dir(@subsubdirS) {
-                my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
-                if ( -d $subsub_DIR ) {
-                    if ( $subsub_dir =~ /\./ || $subsub_dir =~ /\.\./
-                      || $subsub_dir =~ /CVS/ || $subsub_dir    =~ /^doc/
-                      || $subsub_dir =~ /^local/ || $subsub_dir =~ /^run/
-                      || $subsub_dir =~ /^wrk$/ || $subsub_dir  =~ /^example/
-                      || $subsub_dir =~ /^kumac/ )
-                    {
-                        next;
-                    }
-
-                    if ( $subsub_dir =~ /^inc$/ || $subsub_dir =~ /^idl$/ ) {
-                        opendir( DIR, $subsub_DIR )
-                          or die "Can't open $sub_DIR\n";
-                        my @incs = readdir DIR;
-                        closedir DIR;
-                        my @incT = ();
-
-                        foreach my $inc(@incs) {
-                            if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/
-                              || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/
-                              || $inc =~ /\.idl$/ )
-                            {
-                                push @incT, $subsub_DIR . "/"
-                                  . $inc;    #print "+++ add $inc\n";
-                            }
-                        }
-
-                        if ( $#incT > -1 && !$param::rflag ) {
-                            Install $env $INCLUDE, @incT;
-                        }
-                        next;
-                    }
-
-                    if ( ( $sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/
-                      || $sub_dir =~ /Pool$/ ) )
-                    {
-                        if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
-                            print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
-                            next;
-                        }
-                        push @subdirs, $subsub_DIR;
-                        print "================== add $subsub_DIR\n"
-                          if ($param::debug);
-                    }
+            foreach my $inc(@incs) {
+                if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.inc$/ )
+                {
+                    push @incT, $sub_DIR . "/" . $inc;
                 }
             }
-            if ( $sub_dir =~ /Pool$/ ) { next; }
-            push @subdirs, $sub_DIR;
-            print "================== add $sub_DIR\n" if ($param::debug);
+
+            if ( $#incT > -1 && !$param::rflag ) {
+                Install $env $INCLUDE, @incT;
+            }
         }
-    }
+        opendir( DIR, $sub_DIR ) or die "Can't open $sub_DIR\n";
+        my @subsubdirS = readdir DIR;
+        closedir DIR;
+
+        foreach my $subsub_dir(@subsubdirS) {
+            my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
+            if ( -d $subsub_DIR ) {
+                if ( $subsub_dir =~ /\./ || $subsub_dir =~ /\.\./
+                  || $subsub_dir =~ /CVS/ || $subsub_dir    =~ /^doc/
+                  || $subsub_dir =~ /^local/ || $subsub_dir =~ /^run/
+                  || $subsub_dir =~ /^wrk$/ || $subsub_dir  =~ /^example/
+                  || $subsub_dir =~ /^kumac/ )
+                {
+                    next;
+                }
+
+                if ( $subsub_dir =~ /^inc$/ || $subsub_dir =~ /^idl$/ ) {
+                    opendir( DIR, $subsub_DIR )
+                      or die "Can't open $sub_DIR\n";
+                    my @incs = readdir DIR;
+                    closedir DIR;
+                    my @incT = ();
+
+                    foreach my $inc(@incs) {
+                        if ( $inc =~ /\.h$/ || $inc =~ /\.hh$/
+                          || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/
+                          || $inc =~ /\.idl$/ )
+                        {
+                            push @incT, $subsub_DIR . "/"
+                              . $inc;    #print "+++ add $inc\n";
+                        }
+                    }
+
+                    if ( $#incT > -1 && !$param::rflag ) {
+                        Install $env $INCLUDE, @incT;
+                    }
+                    next;
+                }
+
+                if ( ( $sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/
+                  || $sub_dir =~ /Pool$/ ) )
+                {
+                    if ( $SKIP_DIRS && $SKIP_DIRS =~ $subsub_dir ) {
+                        print "skip dir: $subsub_dir \t=> $SKIP_DIRS\n";
+                        next;
+                    }
+                    push @subdirs, $subsub_DIR;
+                    print "================== add $subsub_DIR\n"
+                      if ($param::debug);
+                }
+            }
+        }
+        if ( $sub_dir =~ /Pool$/ ) { next; }
+        push @subdirs, $sub_DIR;
+        print "================== add $sub_DIR\n" if ($param::debug);
+        }
 }
+
 print "subdirs = @subdirs\n" if $param::debug;
 my @Targets = ();
 
