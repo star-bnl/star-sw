@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.451 2004/11/02 01:57:51 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.452 2004/11/24 02:42:47 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -22,6 +22,7 @@
 #include "St_dst_Maker/StVertexMaker.h"
 #include "St_tpcdaq_Maker/St_tpcdaq_Maker.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "St_QA_Maker/StEventQAMaker.h"
 #include "StMessMgr.h"
@@ -300,6 +301,10 @@ Bfc_st BFC1[] = { // standard chains
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
+
+  {"ezTree" ,""  ,"","",""                                               ,"","Create ezTree branch",kFALSE},
+  {"BEmcDebug","" ,"","",""                            ,"","Turn OFF B-EMC hit reconstruction cuts",kFALSE},
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -923,6 +928,10 @@ Bfc_st BFC2[] = { // ITTF Chains
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
+
+  {"ezTree" ,""  ,"","",""                                               ,"","Create ezTree branch",kFALSE},
+  {"BEmcDebug","" ,"","",""                            ,"","Turn OFF B-EMC hit reconstruction cuts",kFALSE},
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1588,6 +1597,10 @@ Int_t StBFChain::Instantiate()
 		  assMk->useInTracker();
 	      }
 	  }
+
+	  // usually, we do maker first and option second but the
+	  // logic is more readable with option first here (as it
+	  // got a bit out of hand)
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
 	    if (maker == "StTrsMaker"){
 	      mk->SetMode(1);       // Pile-up correction
@@ -1627,13 +1640,36 @@ Int_t StBFChain::Instantiate()
 	    }
 	  }
 
-	  if (GetOption("CMuDST") && GetOption("StrngMuDST")) {
-	    if (maker == "StStrangeMuDstMaker"){
-	      StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) mk;
-	      pMk->DoV0();                                  // Set StrangeMuDstMaker parameters
-	      pMk->DoXi();
-	      pMk->DoKink();
-	      pMk->SetNoKeep();                             // Set flag for output OFF
+	  if (maker == "StStrangeMuDstMaker"){
+	    if (GetOption("CMuDST") ){
+	      if ( GetOption("StrngMuDST") ) {
+		StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) mk;
+		pMk->DoV0();                                  // Set StrangeMuDstMaker parameters
+		pMk->DoXi();
+		pMk->DoKink();
+		pMk->SetNoKeep();                             // Set flag for output OFF
+	      }
+	    }
+	  }
+	   
+	  // Alex requested an option (not turned by default) to disable all
+	  // hit reco cuts. This will make allm hits saved to MuDST /ezTree.
+	  if ( maker == "StEmcRawMaker"){
+	    if (GetOption("BEmcDebug")){
+	      mk->SetMode(1); // only one option now, bit a bitmask
+	    }
+	  }
+
+
+	  // MuDST and ezTree. Combinations are
+	  //  ezTree         -> ezTree only
+	  //  CMuDST         -> regular MuDST only
+	  //  ezTree,CMuDST  -> both
+	  if (maker == "StMuDstMaker"){
+	    if ( GetOption("ezTree") ){
+	      StMuDstMaker *pMk = (StMuDstMaker *) mk;
+	      if ( ! GetOption("CMuDST")) pMk->SetStatus("*",0); 
+	      pMk->SetStatus("EztAll",1); 
 	    }
 	  }
 
