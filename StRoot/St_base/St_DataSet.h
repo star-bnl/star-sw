@@ -36,7 +36,7 @@ class St_DataSet : public TNamed
  friend class St_DataSetIter;
  friend class St_DataSetTree;
  protected: 
-    TObject     *fMother; //!pointer to mother of the directory
+    TObject     *fMother; // pointer to mother of the directory
     TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetParent(St_DataSet *parent);
     virtual void SetMother(TObject *mother) {fMother = mother;}
@@ -67,6 +67,7 @@ class St_DataSet : public TNamed
     virtual EDataSetPass Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth=0);
     virtual Int_t        Purge(Option_t *opt="");   
     virtual void         Remove(St_DataSet *set);
+    virtual void         SetWrite();
     virtual void         Shunt(St_DataSet *dataset);
     ClassDef(St_DataSet,1)
 };

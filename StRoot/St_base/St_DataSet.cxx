@@ -279,6 +279,16 @@ void  St_DataSet::SetParent(St_DataSet *parent){
   SetMother(parent);                  // Adjust St_DataSet::fMother poiner as well
 }
 //______________________________________________________________________________
+void St_DataSet::SetWrite()
+{
+  St_DataSet *set = new St_DataSet(GetName());
+  set->Update(this);
+  set->Write();
+  this->Delete();
+  this->Update(set);
+  delete set;
+}
+//______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)
 {
   // Remove object from the original dataset and insert into this one
