@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.21 2002/02/16 22:05:06 jeromel Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.22 2002/02/22 18:43:39 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.22  2002/02/22 18:43:39  caines
+ * Add SetFileNames function
+ *
  * Revision 1.21  2002/02/16 22:05:06  jeromel
  * Marcelo's recen changes to StSvtClusterMaker (needed to be in sync with
  * StDbUtilities changes)
@@ -186,12 +189,12 @@ Int_t StSvtHitMaker::Init()
   }
 
   if( iWrite >0){
-    m_hfile = new TFile("/home/scratch/caines/clusters.root","RECREATE","Clusters");
+    m_hfile = new TFile(filenameN,"RECREATE","Clusters");
     
     m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
     
     if( iWrite > 1){
-      cluInfo.open("ClusterInfo.dat",ios::out);    
+      cluInfo.open(filenameC,ios::out);    
     }
   }
 
@@ -604,3 +607,8 @@ Int_t StSvtHitMaker::Finish(){
  return kStOK;
 }
 
+//________________________________________________________________________
+void StSvtHitMaker::SetFileNames(char* filen, char* filec){
+  filenameN = filen;
+  filenameC = filec;
+}

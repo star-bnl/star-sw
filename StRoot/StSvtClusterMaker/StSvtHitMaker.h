@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.9 2002/02/16 22:05:06 jeromel Exp $
+// $Id: StSvtHitMaker.h,v 1.10 2002/02/22 18:43:43 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.10  2002/02/22 18:43:43  caines
+// Add SetFileNames function
+//
 // Revision 1.9  2002/02/16 22:05:06  jeromel
 // Marcelo's recen changes to StSvtClusterMaker (needed to be in sync with
 // StDbUtilities changes)
@@ -73,9 +76,10 @@ class StSvtHitMaker : public StMaker
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
+  void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.9 2002/02/16 22:05:06 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.10 2002/02/22 18:43:43 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -105,6 +109,9 @@ class StSvtHitMaker : public StMaker
   TH1F *mYHitResolution;  //!
   TH1F *mZHitResolution;  //!
   TH2F *mHitResolution;   //!
+
+  char* filenameN;
+  char* filenameC;
 
   ClassDef(StSvtHitMaker,1)   //virtual base class for Makers
 
