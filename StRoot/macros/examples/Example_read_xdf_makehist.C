@@ -1,5 +1,8 @@
-// $Id: Example_read_xdf_makehist.C,v 1.1 1999/10/11 17:17:59 kathy Exp $
+// $Id: Example_read_xdf_makehist.C,v 1.2 1999/11/03 19:03:06 kathy Exp $
 // $Log: Example_read_xdf_makehist.C,v $
+// Revision 1.2  1999/11/03 19:03:06  kathy
+// changes to default input files and output file names - needed by perl script for testing
+//
 // Revision 1.1  1999/10/11 17:17:59  kathy
 // changed names of some macros to make them more standard; changed default input file to MakeHists since previous no longer existed; combined some macros so that the one example will show all functionality
 //
@@ -37,7 +40,7 @@ void Example_read_xdf_makehist(const Char_t *InputXdfFile=
 
   // open output file:
  TFile *hist_outfile = 0;
- const Char_t *root_file = "Kathy_hist.root";
+ const Char_t *root_file = "Example_read_xdf_makehist.root";
  hist_outfile = new TFile(root_file,"RECREATE");
 
   // book the 1d histogram
@@ -119,7 +122,7 @@ void Example_read_xdf_makehist(const Char_t *InputXdfFile=
   // can also do: c1->SetLogz();
 
 // open output ps file 
- TPostScript ps("MyHist.ps",111);
+ TPostScript ps("Example_read_xdf_makehist.ps",111);
 
   // update histogram in canvas - can do this every event or at end of loop!
   // Draw histogram  - this should be done ONCE to link hist with canvas

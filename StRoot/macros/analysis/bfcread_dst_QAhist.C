@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.6 1999/09/21 15:07:02 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.7 1999/11/03 19:02:54 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.7  1999/11/03 19:02:54  kathy
+// changes to default input files and output file names - needed by perl script for testing
+//
 // Revision 1.6  1999/09/21 15:07:02  kathy
 // change to have notes on input values at top of each macro, also clean up notes on usage and remove the usage of method St_QA_Maker::SetPntrToHistUtil which is not going to be used now that I made St_QA_Maker totally independent of the histogram printing
 //
@@ -84,7 +87,7 @@ St_DataSet *Event;
 
 
 void bfcread_dst_QAhist(Int_t nevents=1, 
-             const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/set0352_01_35evts.dst.root",
+             const char *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.dst.root",
              const Char_t *MakerHist="QA",
              const Char_t *psFile="QA_hist.ps")
 {

@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.4 1999/11/03 17:13:02 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.5 1999/11/03 19:02:55 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.5  1999/11/03 19:02:55  kathy
+// changes to default input files and output file names - needed by perl script for testing
+//
 // Revision 1.4  1999/11/03 17:13:02  kathy
 // fixed macros so they use StIOMaker instead of StTreeMaker
 //
@@ -68,7 +71,7 @@ StIOMaker *IOMk=0;
 //------------------------------------------------------------------------
 
 void bfcread_hist_to_ps(
-  const Char_t *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/set0352_01_35evts.hist.root",
+  const Char_t *MainFile="/disk00000/star/test/new/tfs_Solaris/year_1b/set0352_01_35evts.hist.root",
   const Char_t *MakerHist="QA",
   const Char_t *psFile="QA_hist.ps")
 {             
