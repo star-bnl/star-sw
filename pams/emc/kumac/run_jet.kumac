@@ -7,7 +7,7 @@
   ami/module/call emc_egrid _
 		       [data]/emc/hits/ems_hits_bemc _
                        [data]/emc/hits/ems_hits_eemc _ 
-                       [data]/global/tracks/globtrk _
+                       [dst]/globtrk _
                        [params]/emc/ems_control _
                        [data]/emc/tracks/emc_energy
   
@@ -36,3 +36,4 @@
  return
  
 ************************************************************
+
