@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.26 2000/07/26 19:53:44 lansdell Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.27 2000/08/02 00:46:25 lansdell Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.27  2000/08/02 00:46:25  lansdell
+// call Finish() only if in batch mode, otherwise causes seg violation
+//
 // Revision 1.26  2000/07/26 19:53:44  lansdell
 // made changes for creating new QA histograms
 //
@@ -247,18 +250,20 @@ void bfcread_dst_EventQAhist(
   cout << " bfcread_dst_EventQAhist.C, Number hist to print = " << numPrint << endl;
 
 
-//  Now draw the actual histograms to canvas and to ps file
+// Now draw the actual histograms to canvas and to ps file
   HU->DrawHists(MakerHistDir);
 
-//  overlay two histograms and print to screen
-  Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkRT");
-  if (result == kStErr)
-    cout << " !!! There was an error in Overlay1D !!!" << endl;  
-
-  result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEtaT");
-  if (result == kStErr)
-    cout << " !!! There was an error in Overlay2D !!!" << endl;  
-
-  chain->Finish();
-  cout <<  "bfcread_dst_EventQAhist.C, passed chain->Finish" << endl ; 
+// overlay two histograms and print to screen if not in batch mode
+  if (!gROOT->IsBatch()) {
+    Int_t result = HU->Overlay1D(MakerHistDir,"StEQaGtrkRT","StEQaPtrkRT");
+    if (result == kStErr)
+      cout << " !!! There was an error in Overlay1D !!!" << endl;
+    result = HU->Overlay2D(MakerHistDir,"StEQaGtrkLengthVEtaT","StEQaPtrkLengthVEtaT");
+    if (result == kStErr)
+      cout << " !!! There was an error in Overlay2D !!!" << endl;  
+  }
+  else {  // finish causes segmentation violations for some reason, so else it
+    chain->Finish();
+    cout <<  "bfcread_dst_EventQAhist.C, passed chain->Finish" << endl;
+  }
 }
