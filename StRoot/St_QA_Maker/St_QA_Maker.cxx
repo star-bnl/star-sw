@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.3 1999/02/22 21:27:17 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.4 1999/02/23 22:22:22 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.4  1999/02/23 22:22:22  kathy
+// changes to histograms: titles changed so they'll be in order and redundant ones removed
+//
 // Revision 1.3  1999/02/22 21:27:17  kathy
 // moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
 //
@@ -109,110 +112,87 @@ Int_t St_QA_Maker::Init(){
 
  //book histograms --------------
 
- //for MakeGen
-
-   m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
-                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-     m_pT_eta_gen->SetXTitle("eta");
-     m_pT_eta_gen->SetYTitle("pT (GeV)");
-  
- //for MakeGlob
-   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
-                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-     m_pT_eta_rec->SetXTitle("eta");
-     m_pT_eta_rec->SetYTitle("pT (GeV)");
-
-   m_trk_tot_gd = new TH2F("glb_trk","number of good track versus total",
+// for method MakeEvSum - from table event_summary
+   m_trk_tot_gd = new TH2F("QA_evsum_glb_trk","number of good track versus total",
                              ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
      m_trk_tot_gd->SetXTitle("total number of tracks");
      m_trk_tot_gd->SetYTitle("number of good tracks");
-   m_trk_pls_mns = new TH2F("trk_pls_mns", "number of (+) vs (-) trks",  
+   m_glb_trk_plus = new TH1F("QA_evsum_plus_trk", "number of positive tracks",
+                                                     ntrk, mintrk, maxtrk);   
+   m_glb_trk_minus = new TH1F("QA_evsum_minus_trk", "number of negative tracks",
+                                                     ntrk, mintrk, maxtrk);
+   m_trk_pls_mns = new TH2F("QA_evsum_trk_pls_mns", "number of (+) vs (-) trks",  
                                   ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
      m_trk_pls_mns->SetXTitle("number of (+) tracks");
      m_trk_pls_mns->SetYTitle("number of (-) tracks");
-      
-   m_pT    = new TH1F("pT_rec","pT distribution",nxpT,xminpT,xmaxpT);
-   m_eta   = new TH1F("eta_rec","eta distribution",nyeta,ymineta,ymaxeta);
-   m_psi   = new TH1F("phi_rec","azimutal distribution", npsi, minpsi,maxpsi);
-   m_pTv   = new TH1F("pTV_rec","V0 pT distribution",nxpT,xminpT,xmaxpT);
-   m_etav  = new TH1F("etaV_rec","V0 eta distribution",nyeta,ymineta,ymaxeta);
-   m_pTK_gen   = new TH1F("pTK_gen","K0 pT distribution generated", 
-                                                    nxpT,xminpT,xmaxpT);
-   m_etaK_gen  = new TH1F("etaK_gen","K0 eta distribution generated",
-                                                 nyeta,ymineta,ymaxeta);
-   m_pTL_gen   = new TH1F("pTL_gen","Lambda pT distribution generated",
-                                                    nxpT,xminpT,xmaxpT);
-   m_etaL_gen  = new TH1F("etaL_gen","Lambda eta distribution generated",
-                                                 nyeta,ymineta,ymaxeta);
-   m_pTC_gen   = new TH1F("pTC_gen","Charged particles pT  generated", 
-                                                  nxpT,xminpT,xmaxpT);
-   m_etaC_gen  = new TH1F("etaC_gen","Charged particles eta  generated",
-                                               nyeta,ymineta,ymaxeta);
-   m_point = new TH1F("npoint","N points on track", npnt, minpnt, maxpnt);
-   m_fit_point = new TH1F("n_fit_point","N fit points on track", npnt,
-                                                          minpnt, maxpnt);
-   m_length  = new TH1F("length","Length of track", nleng,minleng,maxleng);
-   m_chisq0  = new TH1F("chisq0_p","chisq[0]", nchisq, minchisq, maxchisq);
-   m_chisq1  = new TH1F("chisq1_p","chisq[1]", nchisq, minchisq, maxchisq);
-   m_mass_la = new TH1F("mass_la","inv_mas_La", nmass, minmass, maxmass);
-   m_mass_lb = new TH1F("mass_lb","inv_mas_Lb", nmass, minmass, maxmass);
-   m_mass_k0 = new TH1F("mass_k0","inv_mas_k0", nmass, minmass, maxmass);
-   m_tau_la  = new TH1F("tau_la","time of life for La candidate", ntau,
-                                                          mintau, maxtau);
-   m_tau_lb  = new TH1F("tau_lb","time of life for Lb candidate", ntau,
-                                                          mintau, maxtau);
-   m_tau_k0  = new TH1F("tau_k0","time of life for_k0 candidate", ntau,
-                                                          mintau, maxtau);   
-   m_ndedx   = new TH1F("ndedx", "number of point to define dE/dx", npnt,
-                                                          minpnt, maxpnt);  
-   m_dedx0   = new TH1F("dedx0","dE/dx[0]", ndedx, mindedx, maxdedx);
-   m_dedx1   = new TH1F("dedx1","dE/dx[1]", ndedx, mindedx, maxdedx);
-   m_glb_trk_plus = new TH1F("plus_trk", "number of positive tracks",
-                                                     ntrk, mintrk, maxtrk);   
-   m_glb_trk_minus = new TH1F("minus_trk", "number of negative tracks",
-                                                     ntrk, mintrk, maxtrk);
-   m_vert_total = new TH1F("vert_total", "total number of vertices",nvrt,
+
+
+   m_vert_total = new TH1F("QA_evsum_vert_total", "total number of vertices",nvrt,
                                                       minvrt, maxvrt);
-   m_vert_V0 = new TH1F("vert_V0", "number of V0 vertices", nvrt,minvrt,maxvrt);
-   m_vert_La = new TH1F("vert_La", "number of La vertices", nvrt,minvrt,maxvrt);
-   m_vert_Ala= new TH1F("vert_Lb", "number of Lb vertices", nvrt,minvrt,maxvrt);
-   m_vert_K0 = new TH1F("vert_K0", "number of K0 vertices", nvrt,minvrt,maxvrt);   
-   m_mean_pt = new TH1F("mean_pt", "mean pt", nmnpt, minmpt, maxmpt);
-   m_mean_eta = new TH1F("mean_eta","mean eta", nmneta, minmeta, maxmeta);
-   m_prim_vrtx0 = new TH1F("prim_vrtx_X","X of primary vertex", nxyz,
+   m_vert_V0 = new TH1F("QA_evsum_vert_V0", "number of V0 vertices", nvrt,minvrt,maxvrt);
+   m_vert_La = new TH1F("QA_evsum_vert_La", "number of La vertices", nvrt,minvrt,maxvrt);
+   m_vert_Ala= new TH1F("QA_evsum_vert_Lb", "number of Lb vertices", nvrt,minvrt,maxvrt);
+   m_vert_K0 = new TH1F("QA_evsum_vert_K0", "number of K0 vertices", nvrt,minvrt,maxvrt);   
+   m_mean_pt = new TH1F("QA_evsum_mean_pt", "mean pt", nmnpt, minmpt, maxmpt);
+   m_mean_eta = new TH1F("QA_evsum_mean_eta","mean eta", nmneta, minmeta, maxmeta);
+   m_prim_vrtx0 = new TH1F("QA_evsum_prim_vrtx_X","X of primary vertex", nxyz,
                                                         minxyz, maxxyz);
-   m_prim_vrtx1 = new TH1F("prim_vrtx_Y","Y of primary vertex", nxyz,
+   m_prim_vrtx1 = new TH1F("QA_evsum_prim_vrtx_Y","Y of primary vertex", nxyz,
                                                         minxyz, maxxyz);
-   m_prim_vrtx2 = new TH1F("prim_vrtx_Y","Y of primary vertex", nxyz,
+   m_prim_vrtx2 = new TH1F("QA_evsum_prim_vrtx_Y","Y of primary vertex", nxyz,
                                                         minxyz, maxxyz);
-   m_vrtx_chisq = new TH1F("vrtx_chisq", "chisq of primary vertex",
+   m_vrtx_chisq = new TH1F("QA_evsum_vrtx_chisq", "chisq of primary vertex",
                                             nchisq, minchisq, maxchisq); 
      
- // for MakeHistGen:
-  m_H_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
+
+// for method MakeGlob - from table globtrk
+   m_pT    = new TH1F("QA_globtrk_pT_rec","pT distribution",nxpT,xminpT,xmaxpT);
+   m_eta   = new TH1F("QA_globtrk_eta_rec","eta distribution",nyeta,ymineta,ymaxeta);
+   m_pT_eta_rec = new TH2F("QA_globtrk_pT_eta_rec","pT versus eta (reconstructed)",
+                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+     m_pT_eta_rec->SetXTitle("eta");
+     m_pT_eta_rec->SetYTitle("pT (GeV)");
+   m_point = new TH1F("QA_globtrk_npoint","N points on track", npnt, minpnt, maxpnt);
+   m_fit_point = new TH1F("QA_globtrk_n_fit_point","N fit points on track", npnt,
+                                                          minpnt, maxpnt);
+   m_length  = new TH1F("QA_globtrk_length","Length of track", nleng,minleng,maxleng);
+   m_chisq0  = new TH1F("QA_globtrk_chisq0_p","chisq[0]", nchisq, minchisq, maxchisq);
+   m_chisq1  = new TH1F("QA_globtrk_chisq1_p","chisq[1]", nchisq, minchisq, maxchisq);
+   m_psi   = new TH1F("QA_globtrk_phi_rec","azimutal distribution", npsi, minpsi,maxpsi);
+      
+   
+// for method MakeDE - from table dst_dedx
+   m_ndedx   = new TH1F("QA_dst_dedx_ndedx", "number of point to define dE/dx", npnt,
+                                                          minpnt, maxpnt);  
+   m_dedx0   = new TH1F("QA_dst_dedx_dedx0","dE/dx[0]", ndedx, mindedx, maxdedx);
+   m_dedx1   = new TH1F("QA_dst_dedx_dedx1","dE/dx[1]", ndedx, mindedx, maxdedx);
+
+
+// for MakeHistPrim - from table primtrk
+  m_prim_pT   = new TH1F("QA_primtrk_pT","primtrk: pT distribution",nxpT,xminpT,xmaxpT);
+  m_prim_eta  = new TH1F("QA_primtrk_eta","primtrk: eta distribution",nyeta,ymineta,ymaxeta);
+  m_prim_pT_eta_rec = new TH2F("QA_primtrk_pT_eta_rec","primtrk: pT versus eta (reconstructed)",
+			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+    m_prim_pT_eta_rec->SetXTitle("eta");
+    m_prim_pT_eta_rec->SetYTitle("pT (GeV)");
+  m_prim_tlength = new TH1F("QA_primtrk_tlength","primtrk: track length",100,0.,200.);
+  m_prim_chi2xd  = new TH1F("QA_primtrk_chi2xd","primtrk: - x chisq/degf",100,0.,10.);
+  m_prim_chi2yd  = new TH1F("QA_primtrk_chi2yd","primtrk: - y chisq/degf",100,0.,10.);
+
+
+// for MakeHistGen - from table particle
+  m_H_pT_eta_gen = new TH2F("QA_particle_pT_eta_gen","pT versus eta (generated)",
 			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
     m_H_pT_eta_gen->SetXTitle("eta");
     m_H_pT_eta_gen->SetYTitle("pT (GeV)");
 
 
- // for MakeHistPrim:
-  m_prim_pT_eta_rec = new TH2F("primtrk_pT_eta_rec","primtrk: pT versus eta (reconstructed)",
-			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-    m_prim_pT_eta_rec->SetXTitle("eta");
-    m_prim_pT_eta_rec->SetYTitle("pT (GeV)");
-
-  m_prim_pT   = new TH1F("primtrk_pT","primtrk: pT distribution",nxpT,xminpT,xmaxpT);
-  m_prim_eta  = new TH1F("primtrk_eta","primtrk: eta distribution",nyeta,ymineta,ymaxeta);
-  m_prim_tlength = new TH1F("primtrk_tlength","primtrk: track length",100,0.,200.);
-  m_prim_chi2xd  = new TH1F("primtrk_chi2xd","primtrk: - x chisq/degf",100,0.,10.);
-  m_prim_chi2yd  = new TH1F("primtrk_chi2yd","primtrk: - y chisq/degf",100,0.,10.);
-
-  // for MakeHistV0:
-  m_ev0_lama_hist  = new TH1F("ev0_lama","dst_v0_vertex: Lambda mass",50,1.05,1.25);
-  m_ev0_k0ma_hist  = new TH1F("ev0_k0ma","dst_v0_vertex: k0 mass",50,.4,.6);
+// for MakeHistV0 - from table dst_v0_vertex
+  m_ev0_lama_hist  = new TH1F("QA_dst_v0_vertex_lama","dst_v0_vertex: Lambda mass",50,1.05,1.25);
+  m_ev0_k0ma_hist  = new TH1F("QA_dst_v0_vertex_k0ma","dst_v0_vertex: k0 mass",50,.4,.6);
 
 
-  // for MakeHistPID:
+// for MakeHistPID - from tables primtrk & dst_dedx 
   // Spectra/pid histograms. C.Ogilvie
   Int_t cnp = 100;
   Int_t cndedx = 100;
@@ -220,11 +200,42 @@ Int_t St_QA_Maker::Init(){
   Float_t cmaxp = 2.0;
   Float_t cmindedx = 0.0;
   Float_t cmaxdedx =  0.1e-04;
-  m_p_dedx_rec = new TH2F("p_dedx_rec","primtrk-dst_dedx: p versus dedx (reconstructed)",
+
+  m_p_dedx_rec = new TH2F("QA_primtrk_dst_dedx_p_dedx_rec","primtrk-dst_dedx: p versus dedx (reconstructed)",
                            cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
     m_p_dedx_rec->SetYTitle("dedx");
     m_p_dedx_rec->SetXTitle("p (GeV)");
 
+// for method MakeV0 - from table dst_v0_vertex - doesn't work because using ev0out table
+   //   m_pTv   = new TH1F("pTV_rec","V0 pT distribution",nxpT,xminpT,xmaxpT);
+   //m_etav  = new TH1F("etaV_rec","V0 eta distribution",nyeta,ymineta,ymaxeta);
+   //m_mass_la = new TH1F("mass_la","inv_mas_La", nmass, minmass, maxmass);
+   //m_mass_lb = new TH1F("mass_lb","inv_mas_Lb", nmass, minmass, maxmass);
+   //m_mass_k0 = new TH1F("mass_k0","inv_mas_k0", nmass, minmass, maxmass);
+   //m_tau_la  = new TH1F("tau_la","time of life for La candidate", ntau,
+   //                                                       mintau, maxtau);
+   //m_tau_lb  = new TH1F("tau_lb","time of life for Lb candidate", ntau,
+   //                                                       mintau, maxtau);
+   //m_tau_k0  = new TH1F("tau_k0","time of life for_k0 candidate", ntau,
+   //                                                       mintau, maxtau);  
+
+// for method MakeGen - from table particle & table hepe_gent
+   //m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
+   //                        nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+   //  m_pT_eta_gen->SetXTitle("eta");
+   //  m_pT_eta_gen->SetYTitle("pT (GeV)");
+   //m_pTK_gen   = new TH1F("pTK_gen","K0 pT distribution generated", 
+   //                                                 nxpT,xminpT,xmaxpT);
+   //m_etaK_gen  = new TH1F("etaK_gen","K0 eta distribution generated",
+   //                                              nyeta,ymineta,ymaxeta);
+   //m_pTL_gen   = new TH1F("pTL_gen","Lambda pT distribution generated",
+   //                                                 nxpT,xminpT,xmaxpT);
+   //m_etaL_gen  = new TH1F("etaL_gen","Lambda eta distribution generated",
+   //                                              nyeta,ymineta,ymaxeta);
+   //m_pTC_gen   = new TH1F("pTC_gen","Charged particles pT  generated", 
+   //                                               nxpT,xminpT,xmaxpT);
+   //m_etaC_gen  = new TH1F("etaC_gen","Charged particles eta  generated",
+   //                                            nyeta,ymineta,ymaxeta);
 
    return StMaker::Init();
 }
@@ -232,17 +243,26 @@ Int_t St_QA_Maker::Init(){
 Int_t St_QA_Maker::Make(){
   //  PrintInfo();
 
-  // Call methods to fill histograms
+// Call methods to fill histograms
 
+// histograms from table event_summary
   MakeEvSum();
-  MakeV0();
+// histograms from table globtrk
   MakeGlob();
+// histograms from table dst_dedx
   MakeDE();
-  MakeGen();
+// histograms from table primtrk
   MakeHistPrim();
-  MakeHistGen();
+// histograms from table particle
+ MakeHistGen();
+// histograms from table dst_v0_vertex
   MakeHistV0();
+// histograms from table primtrk & dst_dedx
   MakeHistPID();
+// histograms from table dst_v0_vertex - doesn't work
+//  MakeV0();   
+// histograms from table particle & hepe_gent - doesn't work
+//  MakeGen();    
 
   return kStOK;
 }
@@ -250,11 +270,10 @@ Int_t St_QA_Maker::Make(){
 void St_QA_Maker::MakeEvSum(){
  //  PrintInfo();
  // Fill histograms for event summary
-  St_DataSet *global = gStChain->DataSet("global");
-  St_DataSetIter dst(global);         // data/global/dst
-  dst.Cd("dst");
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
    
-  St_dst_event_summary *event_summary = (St_dst_event_summary *) dst["event_summary"];
+  St_dst_event_summary *event_summary = (St_dst_event_summary *) dstI["event_summary"];
   if (event_summary) {
       dst_event_summary_st  *it_m = event_summary->GetTable();
       for (Int_t j = 0; j < event_summary->GetNRows(); j++) {
@@ -281,47 +300,16 @@ void St_QA_Maker::MakeEvSum(){
       }
    }
 } 
-//_____________________________________________________________________________
-
-// *** need to fix this!
-
-void St_QA_Maker::MakeV0(){
-   // Fill histograms for V0
-  St_DataSet *global = gStChain->DataSet("global");
-  St_DataSetIter dst(global);         // data/global/dst
-  dst.Cd("dst");
-
-  St_dst_v0_vertex *ev0out = (St_dst_v0_vertex *) dst["dst_v0_vertex"];
-   if(ev0out) {
-       dst_v0_vertex_st *evopat = ev0out->GetTable();
-       for (Int_t i = 0; i < ev0out->GetNRows(); i++){
-       dst_v0_vertex_st *ev = evopat + i;
-       //Float_t pvx = ev->px;
-       //Float_t pvy = ev->py;
-       //Float_t thetav = ev->theta;
-       //Float_t pTv = sqrt(pvx*pvx + pvy*pvy);
-       //Float_t etav = -log(tan(thetav/2.));
-       //     m_pTv->Fill(pTv);
-       //m_etav->Fill(etav);
-       //m_mass_la->Fill(ev->inv_mass_la) ;
-       //m_mass_lb->Fill(ev->inv_mass_lb) ;
-       //m_mass_k0->Fill(ev->inv_mass_k0) ;
-       //m_tau_la->Fill(ev->tau_la);
-       //m_tau_lb->Fill(ev->tau_lb);
-       //m_tau_k0->Fill(ev->tau_k0); 
-     }       
-  }
-}
 
 //-----------------------------------------------------------------
 
 void St_QA_Maker::MakeGlob(){
 
    // Fill histograms for globtrk
-  St_DataSet *global = gStChain->DataSet("global");
-  St_DataSetIter dst(global);         // data/global/dst
-  dst.Cd("dst");
-  St_dst_track *globtrk = (St_dst_track *) dst["globtrk"];
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
+
+  St_dst_track *globtrk = (St_dst_track *) dstI["globtrk"];
   if (globtrk) {
     table_head_st *trk_h = globtrk->GetHeader();
     dst_track_st  *trk   = globtrk->GetTable();
@@ -354,11 +342,11 @@ void St_QA_Maker::MakeGlob(){
  void St_QA_Maker::MakeDE() {
    // Fill histograms for dE/dx
 
-  St_DataSet *global = gStChain->DataSet("global");
-  St_DataSetIter dst(global);         // data/global/dst
-  dst.Cd("dst");
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);
+
   
-   St_dst_dedx *dst_dedx = (St_dst_dedx *) dst["dst_dedx"];
+   St_dst_dedx *dst_dedx = (St_dst_dedx *) dstI["dst_dedx"];
    if(dst_dedx) {
       dst_dedx_st *dedx = dst_dedx->GetTable();
       for (Int_t i = 0; i < dst_dedx->GetNRows(); i++) {
@@ -372,14 +360,14 @@ void St_QA_Maker::MakeGlob(){
 
 //_____________________________________________________________________________
 
+
 void St_QA_Maker::MakeGen() {
   //  Fill histograms for event generator
 
-  St_DataSet *global = gStChain->DataSet("global");
-  St_DataSetIter dst(global);         // data/global/dst
-  dst.Cd("dst");
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
 
-   St_hepe_gent *hepev = (St_hepe_gent *) dst["hepe_gent"];
+   St_hepe_gent *hepev = (St_hepe_gent *) dstI["hepe_gent"];
     if (hepev) {
       table_head_st *t1_h = hepev->GetHeader();
       hepe_gent_st *particle = hepev->GetTable();
@@ -444,8 +432,9 @@ void St_QA_Maker::MakeGen() {
 
 void St_QA_Maker::MakeHistPrim(){
    cout << " *** in St_QA_Maker - filling primtrk histograms " << endl;
-  St_DataSetIter global(m_DataSet);         // data/global
-  St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);
+  St_dst_track      *primtrk     = (St_dst_track *) dstI["primtrk"];
 
   if (primtrk) {
     table_head_st *trk_h = primtrk->GetHeader();
@@ -473,34 +462,14 @@ void St_QA_Maker::MakeHistPrim(){
 
 
 void St_QA_Maker::MakeHistGen(){
-   cout << " *** in St_QA_Maker - filling generator histograms " << endl;
-  St_DataSetIter global(m_DataSet);         // data/global
+   cout << " *** in St_QA_Maker - filling particle histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);
 
-
-  St_hepe_gent *hepev = (St_hepe_gent *) global("dst/particle");
-  St_particle  *particle=0;
-  if (hepev) {
-    hepe_gent_st *p = hepev->GetTable();
-    for (Int_t l=0; l < hepev->GetNRows(); l++, p++){
-      if (p->isthep == 1) {
-	Double_t px = p->phep[0];
-	Double_t py = p->phep[1];
-	Double_t pz = p->phep[2];
-	Double_t pT    =  TMath::Sqrt(px*px+py*py);
-	Double_t theta =  TMath::ATan2 ( pT, pz );
-	Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-	m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
-      }
-    }
-  }
-  else {
-    St_DataSet *evgen = gStChain->DataSet("evgen");
-    if (evgen) {
-      St_DataSetIter local(evgen);
-      St_particle *pa = (St_particle *) local("particle");
-      if (pa){
-        particle_st *p = pa->GetTable();
-        for (Int_t l=0; l < pa->GetNRows(); l++, p++){
+  St_particle   *part     = (St_particle  *) dstI["particle"];
+      if (part){
+        particle_st *p = part->GetTable();
+        for (Int_t l=0; l < part->GetNRows(); l++, p++){
           if (p->isthep == 1) {
             Double_t px = p->phep[0];
             Double_t py = p->phep[1];
@@ -513,22 +482,18 @@ void St_QA_Maker::MakeHistGen(){
 	  }
 	}
       }
-    }
-  }
 }
 
 //_____________________________________________________________________________
 
 
 void St_QA_Maker::MakeHistV0(){
-   cout << " *** in St_QA_Maker - filling V0 histograms " << endl;
-  St_DataSetIter global(m_DataSet);         // data/global
+   cout << " *** in St_QA_Maker - filling dst_v0_vertex histograms " << endl;
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);         
 
-  // V0
-  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) global("dst/dst_v0_vertex");
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dstI["dst_v0_vertex"];
   if (dst_v0_vertex) {
-
-    cout << "Filling ev0 histos" << endl;
     dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
     Float_t m_pimass2 = (0.139567*0.139567);
@@ -559,11 +524,13 @@ void St_QA_Maker::MakeHistV0(){
 
 void St_QA_Maker::MakeHistPID(){
    cout << " *** in St_QA_Maker - filling PID histograms " << endl;
-  St_DataSetIter global(m_DataSet);         // data/global
+
+  St_DataSet *dst = gStChain->DataSet("dst");
+  St_DataSetIter dstI(dst);        
 
   // spectra-PID diagnostic histograms
-  St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
-  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) global("dst/dst_dedx");
+  St_dst_track      *primtrk     = (St_dst_track     *) dstI["primtrk"];
+  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) dstI["dst_dedx"];
 
   if (dst_dedx && primtrk) {
      	dst_dedx_st  *de   = dst_dedx->GetTable();
@@ -591,7 +558,38 @@ void St_QA_Maker::MakeHistPID(){
 		 m_p_dedx_rec->Fill(p,dedx_m);
 	       }
 	}
-	cout << "  finished filling dedx histograms" << endl;
+  }
+}
+
+//_____________________________________________________________________________
+
+// doesn't work - tables have changed  - now use MakeHistV0 instead
+
+void St_QA_Maker::MakeV0(){
+   // Fill histograms for V0
+  St_DataSet *global = gStChain->DataSet("global");
+  St_DataSetIter dst(global);         // data/global/dst
+  dst.Cd("dst");
+
+  St_dst_v0_vertex *ev0out = (St_dst_v0_vertex *) dst["dst_v0_vertex"];
+   if(ev0out) {
+       dst_v0_vertex_st *evopat = ev0out->GetTable();
+       for (Int_t i = 0; i < ev0out->GetNRows(); i++){
+       dst_v0_vertex_st *ev = evopat + i;
+       //Float_t pvx = ev->px;
+       //Float_t pvy = ev->py;
+       //Float_t thetav = ev->theta;
+       //Float_t pTv = sqrt(pvx*pvx + pvy*pvy);
+       //Float_t etav = -log(tan(thetav/2.));
+       //m_pTv->Fill(pTv);
+       //m_etav->Fill(etav);
+       //m_mass_la->Fill(ev->inv_mass_la) ;
+       //m_mass_lb->Fill(ev->inv_mass_lb) ;
+       //m_mass_k0->Fill(ev->inv_mass_k0) ;
+       //m_tau_la->Fill(ev->tau_la);
+       //m_tau_lb->Fill(ev->tau_lb);
+       //m_tau_k0->Fill(ev->tau_k0); 
+     }       
   }
 }
 
@@ -600,7 +598,7 @@ void St_QA_Maker::MakeHistPID(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.3 1999/02/22 21:27:17 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.4 1999/02/23 22:22:22 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.h,v 1.2 1999/02/22 21:27:18 kathy Exp $
+// $Id: St_QA_Maker.h,v 1.3 1999/02/23 22:22:22 kathy Exp $
 // $Log: St_QA_Maker.h,v $
+// Revision 1.3  1999/02/23 22:22:22  kathy
+// changes to histograms: titles changed so they'll be in order and redundant ones removed
+//
 // Revision 1.2  1999/02/22 21:27:18  kathy
 // moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
 //
@@ -54,7 +57,7 @@
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.2 1999/02/22 21:27:18 kathy Exp $";
+// static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.3 1999/02/23 22:22:22 kathy Exp $";
    // Histograms
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -64,33 +67,8 @@ class St_QA_Maker : public StMaker {
    static const Float_t ymaxeta;
 
  protected:
-   TH2F     *m_pT_eta_rec;    // pT versus eta Spectra for reconstructed
-   TH2F     *m_pT_eta_gen;    // pT versus eta Spectra for generated
-   TH1F     *m_pT;            // pT  recostructed
-   TH1F     *m_eta;           // eta recostructed
-   TH1F     *m_psi;           // phi reconstructed 
-   TH1F     *m_pTv;           // pT of V0 recostructed
-   TH1F     *m_etav;          // eta of V0 recostructed
-   TH1F     *m_pTK_gen;       // pT of K generated
-   TH1F     *m_etaK_gen;      // eta of K generated
-   TH1F     *m_pTL_gen;       // pT of Lambda generated
-   TH1F     *m_etaL_gen;      // pT of Lambds generated
-   TH1F     *m_pTC_gen;       // pT of Charged particles generated
-   TH1F     *m_etaC_gen;      // pT of Charged particles generated
-   TH1F     *m_point;         // number of points on the track
-   TH1F     *m_fit_point;     // number of track points used for fitting
-   TH1F     *m_length;        // length of track
-   TH1F     *m_chisq0;        // chi square [0]
-   TH1F     *m_chisq1;        // chi square [1]
-   TH1F     *m_mass_la;       // V0 mass for Lambda candidate 
-   TH1F     *m_mass_lb;       // V0 mass for ALambda candidate 
-   TH1F     *m_mass_k0;       // V0 mass for K0 candidate
-   TH1F     *m_tau_la;        // V0 tau for Lambda candidate 
-   TH1F     *m_tau_lb;        // V0 tau for ALambda candidate 
-   TH1F     *m_tau_k0;        // V0 tau for K0 candidate    
-   TH1F     *m_ndedx;         // number of point to find dE/dx
-   TH1F     *m_dedx0;         // dE/dx [0]
-   TH1F     *m_dedx1;         // dE/dx [1] 
+
+// for method MakeEvSum - from table event_summary
    TH2F     *m_trk_tot_gd;    // number of good global tracks versus total
    TH1F     *m_glb_trk_plus;  // number of (+) global tracks    
    TH1F     *m_glb_trk_minus; // number of (-) global tracks
@@ -107,25 +85,64 @@ class St_QA_Maker : public StMaker {
    TH1F     *m_prim_vrtx2;    // primary vrtx z position
    TH1F     *m_vrtx_chisq;    // primary vrtx chisq
 
-   // for MakeHistGen
-   TH2F     *m_H_pT_eta_gen;  //! pT versus eta Spectra for generated
+// for method MakeV0 - from table dst_v0_vertex
+   TH1F     *m_pTv;           // pT of V0 recostructed
+   TH1F     *m_etav;          // eta of V0 recostructed
+   TH1F     *m_mass_la;       // V0 mass for Lambda candidate 
+   TH1F     *m_mass_lb;       // V0 mass for ALambda candidate 
+   TH1F     *m_mass_k0;       // V0 mass for K0 candidate
+   TH1F     *m_tau_la;        // V0 tau for Lambda candidate 
+   TH1F     *m_tau_lb;        // V0 tau for ALambda candidate 
+   TH1F     *m_tau_k0;        // V0 tau for K0 candidate    
 
-   // for MakeHistPrim
-   TH2F     *m_prim_pT_eta_rec;  //! pT versus eta Spectra for reconstructed
+// for method MakeGlob - from table globtrk
+   TH1F     *m_pT;            // pT  recostructed
+   TH1F     *m_eta;           // eta recostructed
+   TH2F     *m_pT_eta_rec;    // pT versus eta Spectra for reconstructed
+   TH1F     *m_point;         // number of points on the track
+   TH1F     *m_fit_point;     // number of track points used for fitting
+   TH1F     *m_length;        // length of track
+   TH1F     *m_chisq0;        // chi square [0]
+   TH1F     *m_chisq1;        // chi square [1]
+   TH1F     *m_psi;           // phi reconstructed 
+
+// for method MakeDE - from table dst_dedx
+   TH1F     *m_ndedx;         // number of point to find dE/dx
+   TH1F     *m_dedx0;         // dE/dx [0]
+   TH1F     *m_dedx1;         // dE/dx [1] 
+
+// for method MakeGen - from table particle
+   TH2F     *m_pT_eta_gen;    // pT versus eta Spectra for generated
+//                    - from table hepe_gent
+   TH1F     *m_pTK_gen;       // pT of K generated
+   TH1F     *m_etaK_gen;      // eta of K generated
+   TH1F     *m_pTL_gen;       // pT of Lambda generated
+   TH1F     *m_etaL_gen;      // pT of Lambds generated
+   TH1F     *m_pTC_gen;       // pT of Charged particles generated
+   TH1F     *m_etaC_gen;      // pT of Charged particles generated
+
+
+// for method MakeHistPrim - from table primtrk
    TH1F     *m_prim_pT;          //! pT  recostructed
    TH1F     *m_prim_eta;         //! eta recostructed
+   TH2F     *m_prim_pT_eta_rec;  //! pT versus eta Spectra for reconstructed
    TH1F     *m_prim_tlength;     //! dst track length
    TH1F     *m_prim_chi2xd;      //! x chisq/degf
    TH1F     *m_prim_chi2yd;      //! y chisq/degf
 
-   // for MakeHistV0
+
+// for method MakeHistGen - from table particle
+   TH2F     *m_H_pT_eta_gen;  //! pT versus eta Spectra for generated
+
+
+// for MakeHistV0 - from table dst_v0_vertex
    TH1F     *m_ev0_lama_hist;//! Lambda mass
    TH1F     *m_ev0_k0ma_hist;//! K0 mass
 
-   // for MakeHistPID
+// for MakeHistPID - from tables primtrk & dst_dedx 
    TH2F     *m_p_dedx_rec;   //! dedx vs p
 
-//------
+//------------------------------------------------------------------------
 
  public: 
                   St_QA_Maker(const char *name="QA", const char *title="evet/QA");
