@@ -1,7 +1,17 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.26 2004/02/08 00:13:05 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.27 2004/03/30 03:11:18 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.27  2004/03/30 03:11:18  calderon
+ * Added information about the matching into the track Ntuple:
+ *  - Dominatrack... (track with most common IdTruth, a.k.a. dominant contributor
+ *  - nHitsIdTruth (should be very similar to commonTpcHits, but the distance cut
+ *    option might make them different)
+ *  - n MC hits for the dominatrack
+ *  - n Fit points for the reconstructed track
+ *  - n Points (from StDetectorInfo).
+ *  - "quality" = average hit quality of the reco hits belonging to the dominatrack.
+ *
  * Revision 1.26  2004/02/08 00:13:05  calderon
  * Check that the size of the map is non-zero to get the first track.
  *
@@ -110,7 +120,9 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include <math.h>
+#include <set>
+#include <map>
+#include <cmath>
 
 #include "TStyle.h"
 #include "TCanvas.h"
@@ -243,7 +255,7 @@ Int_t StMcAnalysisMaker::Init()
 	mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
 //     }
     
-    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ";
+    char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ:mcTrkId:mostCommIdTruth:nHitsIdTruth:nMcHits:nFitPts:nDetPts:quality";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
     mTrackNtuple->SetAutoSave(100000000);
     mTpcHitNtuple = new TNtuple("TpcHitNtuple","the TPC hit pairs Info",vTpcHitMRPair);
@@ -499,7 +511,7 @@ Int_t StMcAnalysisMaker::Make()
   StThreeVectorD pmc(0,0,0);
   float diff =0;
   
-  float* values = new float[12];
+  float* values = new float[19];
   
   for (rcTrackMapIter tIter=theTrackMap->begin();
        tIter!=theTrackMap->end(); ++tIter){
@@ -530,12 +542,15 @@ Int_t StMcAnalysisMaker::Make()
     StThreeVectorF mHitPos(0,0,0);
     
     StPtrVecHit recTpcHits = recTrack->detectorInfo()->hits(kTpcId);
-    
+    multimap<int,float> idTruths;
+    set<int> uniqueIdTruths;
     for (StHitIterator hi=recTpcHits.begin();
 	 hi!=recTpcHits.end(); hi++) {
       StHit* hit = *hi;
       StTpcHit* rHit = dynamic_cast<StTpcHit*>(hit);
       if (!rHit) { cout << "This Hit is not a TPC Hit"<< endl; continue;}
+      idTruths.insert( multimap<int,float>::value_type(rHit->idTruth(),rHit->quality()));
+      uniqueIdTruths.insert(static_cast<int>(rHit->idTruth()));
       pair<rcTpcHitMapIter,rcTpcHitMapIter> rBounds = theHitMap->equal_range(rHit);
       for (rcTpcHitMapIter hIter=rBounds.first; hIter!=rBounds.second; hIter++) {
 	const StMcTpcHit* mHit = (*hIter).second;
@@ -549,6 +564,34 @@ Int_t StMcAnalysisMaker::Make()
     rHitPos /=(float) (*tIter).second->commonTpcHits();
     mHitPos /=(float) (*tIter).second->commonTpcHits();
     for (int jj=0; jj<3; jj++) values[9+jj] = rHitPos[jj] - mHitPos[jj];
+    values[12] = mcTrack->key();
+    // Figure out the most common IdTruth; the dominatrix track!
+    int mostCommonIdTruth = -9; 
+    int cachedNHitsIdTruth = 0;
+    for (set<int>::iterator si=uniqueIdTruths.begin(); si!=uniqueIdTruths.end(); ++si) {
+	int currentNHitsIdTruth = idTruths.count(static_cast<int>(*si));
+	if (currentNHitsIdTruth>cachedNHitsIdTruth) {
+	    mostCommonIdTruth = *si; 
+	    cachedNHitsIdTruth = currentNHitsIdTruth;
+	}
+    }
+    // at this point we know the most common IdTruth,
+    // now calculate the track "quality" for this track, averaging
+    // the hit qualities
+    float idQuality = 0;
+    
+    pair<multimap<int,float>::iterator,multimap<int,float>::iterator> mostCommRange = idTruths.equal_range(mostCommonIdTruth);
+    for (multimap<int,float>::iterator mi=mostCommRange.first; mi!=mostCommRange.second; ++mi) {
+	idQuality+=mi->second;
+    }
+    idQuality/=cachedNHitsIdTruth;
+    
+    values[13] = mostCommonIdTruth;
+    values[14] = cachedNHitsIdTruth;
+    values[15] = mcTrack->tpcHits().size();
+    values[16] = recTrack->fitTraits().numberOfFitPoints(kTpcId);
+    values[17] = recTpcHits.size();
+    values[18] = idQuality;
     mTrackNtuple->Fill(values);
   } // Tracks in Map Loop
   cout << "Finished Track Loop, Made Ntuple" << endl;
