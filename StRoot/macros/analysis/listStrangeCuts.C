@@ -34,7 +34,7 @@ void listStrangeCuts(const char* fileName) {
 
   cutArray = new TClonesArray("TCut",0);
   treePtr->SetBranchStatus("*",0);
-  treePtr->SetBranchStatus("StrangeCuts",1);
+  treePtr->SetBranchStatus("StrangeCuts.*",1);
   treePtr->SetBranchAddress("StrangeCuts",&cutArray);
   treePtr->GetEvent();
   cout << "Found cuts branch with " << cutArray->GetEntriesFast()
@@ -45,8 +45,11 @@ void listStrangeCuts(const char* fileName) {
 }
 
 //_____________________________________________________________
-// $Id: listStrangeCuts.C,v 3.1 2002/04/30 01:29:17 genevb Exp $
+// $Id: listStrangeCuts.C,v 3.2 2002/05/10 20:59:31 genevb Exp $
 // $Log: listStrangeCuts.C,v $
+// Revision 3.2  2002/05/10 20:59:31  genevb
+// Fixed bug with branch status and changed cuts split level
+//
 // Revision 3.1  2002/04/30 01:29:17  genevb
 // Updated macros for common micro DST
 //
