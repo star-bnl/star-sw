@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "TSystem.h"
 #include "TMath.h"
-#include "TDirectory.h"
+#include "TFile.h"
 #else
 #define BIT(n)       (1 << (n))
 #endif

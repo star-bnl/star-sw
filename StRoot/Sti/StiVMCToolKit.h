@@ -9,7 +9,7 @@
 #include "TGeoMedium.h"
 #include "TGeoMatrix.h"
 #include "TGeoCone.h"
-#include "TGeoParaboloid.h"
+//#include "TGeoParaboloid.h"
 #include "TGeoPara.h"
 #include "TGeoArb8.h"
 #include "TGeoPatternFinder.h"
