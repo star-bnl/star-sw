@@ -1,23 +1,14 @@
-//StiDetectorContainer.cxx
-//M.L. Miller (Yale Software)
-//02/02/01
-
-//Std
 #include <Stiostream.h>
 #include <math.h>
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <string>
-
 #include <stdexcept>
 #include <algorithm>
 using std::find_if;
 using std::for_each;
 using std::binary_search;
-
-//Sti
-#include "Sti/Base/Messenger.h"
 #include "StiMapUtilities.h"
 #include "StiDetector.h"
 #include "StiDetectorBuilder.h"
@@ -35,23 +26,20 @@ StiDetectorContainer::StiDetectorContainer(const string & name, const string & d
     : Named(name),
       Described(description),
       mroot(0), 
-      //mregion(0), 
-      mLeafIt(0),
-      mMessenger( *Messenger::instance(MessageType::kDetectorMessage) )
+      mLeafIt(0)
 {
     cout <<"StiDetectorContainer::StiDetectorContainer() -I- Started/Done"<<endl;
 }
 
 StiDetectorContainer::~StiDetectorContainer()
 {
-    mMessenger <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
-    if (mLeafIt) {
-	delete mLeafIt;
-	mLeafIt=0;
+	cout <<"StiDetectorContainer::~StiDetectorContainer()"<<endl;
+	if (mLeafIt) 
+		{
+			delete mLeafIt;
+			mLeafIt=0;
     }
 }
-
-
 
 /*! This is used, e.g., to set the iterators to a certain point in
   preparation  for propogation of a new track.  If no StiDetector pointer is
@@ -62,7 +50,7 @@ void StiDetectorContainer::setToDetector(const StiDetector* layer)
 {
 
     if (!layer->getTreeNode()) {
-	mMessenger <<"StiDetectorContainer::setToDetector(StiDetector*). ERROR:\t"
+	cout <<"StiDetectorContainer::setToDetector(StiDetector*). ERROR:\t"
 		   <<"Detector has null node pointer.  Abort"<<endl;
 	return;
     }
@@ -166,8 +154,8 @@ bool StiDetectorContainer::moveIn()
 {
     //if (mradial_it == mregion->begin() ) { //change (MLM)
     if (mradial_it == (*mregion)->begin() ) { //change (MLM)
-	// mMessenger <<"StiDetectorContainer::moveIn():\t";
-	// mMessenger <<"Nowhere to go. return false"<<endl;
+	// cout <<"StiDetectorContainer::moveIn():\t";
+	// cout <<"Nowhere to go. return false"<<endl;
 	return false;
     }
     
@@ -178,12 +166,12 @@ bool StiDetectorContainer::moveIn()
     mphi_it = (*mradial_it)->begin();
 
     if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
-	// mMessenger <<"Index into array"<<endl;
+	// cout <<"Index into array"<<endl;
 	mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
 	return true;
     }
     else {
-	// mMessenger <<"Do linear search"<<endl;
+	// cout <<"Do linear search"<<endl;
 	return setPhi( oldPhiNode->getOrderKey() );
     }
 }
@@ -193,12 +181,12 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
     mphi_it = gFindClosestOrderKey((*mradial_it)->begin(),
 				   (*mradial_it)->end(), oldOrder);
     if (mphi_it == (*mradial_it)->end()) {
-	mMessenger <<"StiDetectorContainer::setPhiIterator()\tError:\t";
-	mMessenger <<"Find Phi failed"<<endl;
+	cout <<"StiDetectorContainer::setPhiIterator()\tError:\t";
+	cout <<"Find Phi failed"<<endl;
 	reset();
 	return false;
     }
-    //mMessenger <<"setPhi(): oldOrder: "<<oldOrder<<"\tnewOrder: "<<(*mphi_it)->getOrderKey()<<endl;
+    //cout <<"setPhi(): oldOrder: "<<oldOrder<<"\tnewOrder: "<<(*mphi_it)->getOrderKey()<<endl;
     return true;
 }
 
@@ -221,24 +209,24 @@ bool StiDetectorContainer::moveOut()
     const StiDetectorNode* oldPhiNode = *mphi_it;
     
     //if there's nowher to go, get out before doing work!
-    // mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
+    // cout <<"StiDetectorContainer::moveOut()"<<endl;
 
     //if ( (++mradial_it<mregion->end())==false) { //change (MLM)
     if ( (++mradial_it<(*mregion)->end())==false) { //change (MLM)
 
-	// mMessenger <<"StiDetectorContainer::moveOut():\t";
-	// mMessenger <<"Nowhere to go. return false"<<endl;
+	// cout <<"StiDetectorContainer::moveOut():\t";
+	// cout <<"Nowhere to go. return false"<<endl;
 	--mradial_it;
 	return false;
     }
     
     if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
-	// mMessenger <<"Index into array"<<endl;
+	// cout <<"Index into array"<<endl;
 	mphi_it = (*mradial_it)->begin()+oldPhiNode->getOrderKey().index;
 	return true;
     }
     else {
-	// mMessenger <<"Do linear search"<<endl;
+	// cout <<"Do linear search"<<endl;
 	return setPhi( oldPhiNode->getOrderKey() );
     }
 }
@@ -275,44 +263,17 @@ void StiDetectorContainer::moveMinusPhi()
 void
 StiDetectorContainer::build(StiDetectorBuilder * builder)
 {
-    mMessenger <<"StiDetectorContainer::build() - INFO - Starting"<<endl;
-    mMessenger <<"StiDetectorContainer::build() - INFO - Building using builder:"<<builder->getName()<<endl;
+    cout <<"StiDetectorContainer::build() - INFO - Starting"<<endl;
+    cout <<"StiDetectorContainer::build() - INFO - Building using builder:"<<builder->getName()<<endl;
     // build the volumes
-    builder->build();
+    //builder->build();
     // pass volumes to TreeBuilder before we make like a tree and leave...
     StiDetectorTreeBuilder treeBuilder;
     mroot = treeBuilder.build(builder);
     if (!mroot)
-	throw runtime_error("StiDetectorContainer::build() - ERROR - mroot==0");
-
-    //Don't need any of this!!!!!
-    /*
-      //Set region to midrapidity, hard-coded for now, update later to allow for other regions
-      SameName<StiDetector> mySameName;
-      mySameName.mname = "midrapidity";
-      StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameName);
-      if (where==mroot->end()) 
-      throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - where==0");
-      if (!(*where))
-      throw runtime_error("StiDetectorContainer::build() - ERROR - mid-rapidity region not found - *where==0");
-      mMessenger <<"StiDetectorContainer::build() - INFO - Find Leaves and set mregion"<<endl;
-      //Sort by name for O(::log(n)) calls to setDetector()
-      //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<StiDetector>() );
-      
-      mregion = (*where); //change (MLM)
-    */
-    
+			throw runtime_error("StiDetectorContainer::build() - ERROR - mroot==0");
     mLeafIt = new StiCompositeLeafIterator<StiDetector>(mroot);
-    
-    mMessenger <<"StiDetectorContainer::build() - INFO - reset()"<<endl;
-
-    //temp MLM
-    //cout <<" \n---------------------------- Detector Container ---------------------\n"<<endl;
-    //RecursiveStreamNode<StiDetector> myStreamer;
-    //myStreamer( mroot );
-    //end temp
-
-    
+    cout <<"StiDetectorContainer::build() - INFO - reset()"<<endl;
     return;
 }
 /*
@@ -328,7 +289,7 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
     //Now we try the new index-iterator scheme:
     mphi_it = leaf->whereInParent();
     if (mphi_it == leaf->end()) {
-	mMessenger <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
+	cout <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
 		   <<"Node not found in parent.  Abort"<<endl;
 	reset();
 	return;
@@ -337,15 +298,15 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
     StiDetectorNode* parentInRadius = (*mphi_it)->getParent();
     mradial_it = parentInRadius->whereInParent();
     if (mradial_it == parentInRadius->end()) {
-	mMessenger <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
+	cout <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
 		   <<"Node not found in parent.  Abort"<<endl;
 	reset();
 	return;
     }
     
-    //mMessenger <<"\nleaf: "<<leaf->getName()<<" "<<leaf->getOrderKey()<<endl;
-    //mMessenger <<"*mradial_it: "<<(*mradial_it)->getName()<<" "<<(*mradial_it)->getOrderKey()<<endl;
-    //mMessenger <<"*mphi_it: "<<(*mphi_it)->getName()<<" "<<(*mphi_it)->getOrderKey()<<endl;
+    //cout <<"\nleaf: "<<leaf->getName()<<" "<<leaf->getOrderKey()<<endl;
+    //cout <<"*mradial_it: "<<(*mradial_it)->getName()<<" "<<(*mradial_it)->getOrderKey()<<endl;
+    //cout <<"*mphi_it: "<<(*mphi_it)->getName()<<" "<<(*mphi_it)->getOrderKey()<<endl;
 
 }
 
@@ -360,8 +321,8 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
    //if (mphi_it == mregion->end()) { //change (MLM)
    if (mphi_it == (*mregion)->end()) { //change (MLM)
    
-   mMessenger <<"StiDetectorContainer::setToDetector(double)\tError:\t";
-   mMessenger <<"Find radius failed"<<endl;
+   cout <<"StiDetectorContainer::setToDetector(double)\tError:\t";
+   cout <<"Find radius failed"<<endl;
    
    mradial_it = mregion->begin(); (//change (MLM)
    }
@@ -386,8 +347,8 @@ void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
   (*mradial_it)->end(), theKey);
   if (mphi_it == (*mradial_it)->end()) {
   
-  mMessenger <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
-  mMessenger <<"Find Phi failed"<<endl;
+  cout <<"StiDetectorContainer::setToDetector(double, double)\tError:\t";
+  cout <<"Find Phi failed"<<endl;
   
   mphi_it = (*mradial_it)->begin();
   }
