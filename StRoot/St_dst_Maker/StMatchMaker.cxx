@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.36 2001/02/28 18:25:33 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.37 2001/05/01 18:00:41 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.37  2001/05/01 18:00:41  lbarnby
+// Zero globtrk map before filling
+//
 // Revision 1.36  2001/02/28 18:25:33  caines
 // Update bit map for SVT
 //
@@ -417,6 +420,8 @@ Int_t StMatchMaker::Make(){
   dst_track_st *globtrkPtr1  = globtrk->GetTable();
   for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, globtrkPtr1++)
     {
+      //Convenient place to also zero globtrk bitmap
+      globtrkPtr1->map[0]= 0UL; globtrkPtr1->map[1]= 0UL;
       if( globtrkPtr1->iflag<0 ) { globtrkPtr1->length = 0; continue; }
       Float_t dip   = atan(globtrkPtr1->tanl);
       Int_t    h    = (globtrkPtr1->icharge > 0 ? -1 : 1);
@@ -496,7 +501,7 @@ Int_t StMatchMaker::Make(){
 	assert(0);
       }
       if( row>7)row=7;
-      track[s_spc[spt_id].id_globtrk-1].map[0] += (1UL<<row);
+      track[s_spc[spt_id].id_globtrk-1].map[0] |= (1UL<<row);
       
     }
     
