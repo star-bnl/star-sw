@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.2 2001/02/07 19:13:51 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.3 2001/02/18 00:10:42 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.3  2001/02/18 00:10:42  caines
+// Improve and use StSvtConfig
+//
 // Revision 1.2  2001/02/07 19:13:51  caines
 // Small fixes to allow to run without setup from command line
 //
@@ -75,8 +78,9 @@ class StSvtSimulationMaker : public StMaker
   void  histChargeDist();
 
  private:
-  TString                      mConfig;  
-
+  TString                      mConfigString;  
+  
+  StSvtConfig                  *mConfig;             //!
   StSvtAngles                  *mSvtAngles;          //!
   StSvtElectronCloud           *mElectronCloud;      //!
   StSvtSimulation              *mSvtSimulation;      //!
@@ -131,7 +135,7 @@ class StSvtSimulationMaker : public StMaker
   TH2D** geant_hit;            //!
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.2 2001/02/07 19:13:51 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.3 2001/02/18 00:10:42 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,1)
 

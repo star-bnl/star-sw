@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.8 2000/11/30 20:43:17 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.9 2001/02/18 00:10:48 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.9  2001/02/18 00:10:48  caines
+ * Improve and use StSvtConfig
+ *
  * Revision 1.8  2000/11/30 20:43:17  caines
  * Use database
  *
@@ -215,7 +218,6 @@ Int_t StSvtClusterAnalysisMaker::CreateClusterHist(Int_t tNuOfHyb)
            
 	   int index = mSvtClusterColl->getHybridIndex(barrel,ladder,wafer,hybrid);
 	   if(index < 0) continue;
-	   
 	   sprintf(title1,"TimAnodecluster");
 	   sprintf(titleraw,"TimAnodeRaw");
 	   sprintf(titleadc,"ADC");

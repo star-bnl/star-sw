@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.2 2001/02/07 19:13:51 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.3 2001/02/18 00:10:42 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.3  2001/02/18 00:10:42  caines
+ * Improve and use StSvtConfig
+ *
  * Revision 1.2  2001/02/07 19:13:51  caines
  * Small fixes to allow to run without setup from command line
  *
@@ -60,7 +63,7 @@ int* counter = 0;
 //___________________________________________________________________________
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 {
-  mConfig = TString("FULL");  // SVT config
+  mConfigString = TString("FULL");  // SVT config
   mNumOfHybrids = 0;          
   mExpOption = "both";     // both, coulomb, diffusion
   mWrite = 0;              // Debug option
@@ -118,7 +121,7 @@ Int_t StSvtSimulationMaker::setOneHit(int oneHit, double anode, double time,doub
 Int_t StSvtSimulationMaker::setConfig(const char* config)
 {
   gMessMgr->Message() <<"StSvtSim:Setting configuration to "<< config << endm;
-  mConfig = TString(config);
+  mConfigString = TString(config);
 
   return kStOK;
 }
@@ -127,8 +130,8 @@ Int_t StSvtSimulationMaker::setConfig(const char* config)
 
 Int_t StSvtSimulationMaker::setConfig(StSvtConfig* config)
 {
-  mConfig = TString(config->getConfiguration());
-
+  mConfigString = TString(config->getConfiguration());
+  mConfig = config;
   return kStOK;
 }
 
@@ -140,9 +143,17 @@ Int_t StSvtSimulationMaker::Init()
 
   St_DataSet *dataSet = GetDataSet("StSvtConfig");
 
-  if (dataSet)
+  if (dataSet){
     setConfig((StSvtConfig*)(dataSet->GetObject()));
+  }
+  else{
+    dataSet = new St_ObjectSet("StSvtConfig");
+    AddConst(dataSet);  
+    mConfig = new StSvtConfig();
+    mConfig->setConfiguration(mConfigString.Data());
+    dataSet->SetObject((TObject*)mConfig);
 
+  }
 
   setSvtRawData();
   setTables();
@@ -171,7 +182,7 @@ Int_t StSvtSimulationMaker::Init()
   mSvtSimulation->setPointers(mElectronCloud,mSvtSignal,mSvtAngles);
   mSvtSimulation->setParam(mTimeBinSize , mAnodeSize);
 
-  mSvtSimPixelColl = new StSvtHybridCollection(mConfig.Data());
+  mSvtSimPixelColl = new StSvtHybridCollection(mConfig);
 
   mSvtSimulation->setParam(mTimeBinSize , mAnodeSize);
 
@@ -189,7 +200,7 @@ Int_t  StSvtSimulationMaker::setSvtRawData()
   mSimDataSet = new St_ObjectSet("StSvtRawData");
   AddData(mSimDataSet);  
 
-  mSvtSimDataColl = new StSvtHybridCollection(mConfig.Data());
+  mSvtSimDataColl = new StSvtHybridCollection(mConfig);
   mSimDataSet->SetObject((TObject*)mSvtSimDataColl); 
   assert(mSvtSimDataColl);
 
@@ -228,7 +239,7 @@ Int_t  StSvtSimulationMaker::setEval()
   mGeantHitSet =  new St_ObjectSet("StSvtGeantHits");
   AddData(mGeantHitSet);
 
-  mSvtGeantHitColl = new StSvtHybridCollection(mConfig.Data());
+  mSvtGeantHitColl = new StSvtHybridCollection(mConfig);
   mGeantHitSet->SetObject((TObject*)mSvtGeantHitColl);
   assert(mSvtGeantHitColl);
 
@@ -343,7 +354,7 @@ Int_t StSvtSimulationMaker::Make()
       St_DataSetIter       local(GetInputDB("svt"));
       SvtShape = (St_svg_shape   *) local("svgpars/shape");
       
-      if ( !strncmp(mConfig.Data(), "Y1L", strlen("Y1L")) )
+      if ( !strncmp(mConfigString.Data(), "Y1L", strlen("Y1L")) )
 	SvtGeom  = (St_svg_geom    *) local("svgpars/geomy1l");
       else
 	SvtGeom = (St_svg_geom    *) local("svgpars/geom");
@@ -387,16 +398,20 @@ Int_t StSvtSimulationMaker::Make()
 	    barrel = 2;
 	  else
 	    barrel = 3;
-	  if ( !strncmp(mConfig.Data(), "Y1L", strlen("Y1L")) ) {
+	  if ( !strncmp(mConfigString.Data(), "Y1L", strlen("Y1L")) ) {
 	    if ((wafer == 1) || (wafer == 2) || (wafer == 3))
 	      ladder = 2;
 	  }	   
 
+
+	  if( 1000*layer+100*wafer+ladder !=volId){
+	    cout << "trouble" << endl;
+	  }
 	  int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
 
 	  if( index < 0) continue; 
 
-	  mSvtSimDataPixels  = (StSvtHybridPixels*)mSvtSimPixelColl->at(index);
+ 	  mSvtSimDataPixels  = (StSvtHybridPixels*)mSvtSimPixelColl->at(index);
 
 
 	  if(!mSvtSimDataPixels) {
