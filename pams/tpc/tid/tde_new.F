@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.15 1999/06/01 17:55:57 ogilvie Exp $
+* $Id: tde_new.F,v 1.16 1999/06/09 14:28:57 ogilvie Exp $
 * $Log: tde_new.F,v $
+* Revision 1.16  1999/06/09 14:28:57  ogilvie
+* *** empty log message ***
+*
 * Revision 1.15  1999/06/01 17:55:57  ogilvie
 * fixed bug in sign of track rotation, now includes sign of bz
 * comments added throughout for path-length across a pad-row for each hit
@@ -95,6 +98,10 @@ C-----------------------------------------------------------------------
       REAL    xa,xb,ya,yb,a,b,bi,bo,ai,ao,ds,half_pad
       REAL    rowtmp
       real weight,sum_weight
+      REAL fndedx,fract,frndm
+      real z(10),erf(10),frachalf(10),zcut,nontrunc,slope
+      real average,sigma,dedx_upper,ran
+      INTEGER iseed, nde_old, ipos
 C
 c     variables for maximumum likeihood
 c
@@ -114,6 +121,11 @@ c      DATA    bconv /0.00299792458/
 c      DATA    dtorad /0.0174532925/
 c      DATA    cpi /3.14159265/
       DATA    imsg1 /0/, imsg2 /0/, imsg3 /0/
+      DATA iseed /1000001/
+      data z / 0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6/
+c            /0.75,0.8,0.85,0.9,0.95,1.0,1.05,1.15,1.20,1.25/
+      data erf /0.168,0.223,0.276,0.329,0.379,0.428,0.475,0.521,0.563,0.604/
+c            /0.7116,0.7420,0.7707,0.7969,0.8209,0.8427,0.8624,0.8802,0.8961,.9103/
 
       EXTERNAL landau2
 C-----------------------------------------------------------------------
@@ -158,7 +170,6 @@ C Abort if there are too many TPC tracks to work with
 
       call gufld(xlocal,bfield)
       if(abs(bfield(3)).lt.0.00001) return 
-
       
 c
 c  this only once on initialisation-
@@ -171,13 +182,34 @@ c if this works, find a more efficient way later
 c C. Ogilvie June 1998
 c
 c to run this option use
-c      =2
 c      tdpar(1).truncopt=4
-c      tdpar(1).truncfact=0.3 
+c      tdpar(1).truncfact=0.3
+c       tdpar(1).truncopt = 5
 
-c      write(6,*) "averaging method"
-c      write(6,*)  tdpar(1).averaging_method            
-
+       if (tdpar(1).truncopt.eq.5) then
+        nontrunc = 2.*( (1 - tdpar(1).truncfact) - 0.5)
+        do i=1, 10
+          frachalf(i)=1-erf(i)
+          write(6,*) erf(i),frachalf(i),z(i)
+        enddo
+        ipos = 1
+        do while ((erf(ipos).lt.nontrunc).and.ipos.lt.10)
+           ipos=ipos+1
+        enddo
+        if (ipos.lt.10.and.ipos.gt.1) then
+           slope = (z(ipos)-z(ipos-1))/(erf(ipos)-erf(ipos-1))
+           zcut  = z(ipos) + (nontrunc-erf(ipos))*slope
+        else
+           zcut = z(ipos)
+        endif
+       endif
+      
+      write(6,*) "averaging, truncation methods"
+      write(6,*)  tdpar(1).averaging_method, tdpar(1).truncopt           
+      if (tdpar(1).usemerge.ne.0) then
+           write(6,*) "using merged hits!!!"
+      endif
+         
 C Sort the hit array according to the track number
       
       iret = tls_Index_Sort_i(hit_h.nok,hit(1).track,
@@ -226,7 +258,7 @@ c        xc, yc are the coordinates of center of the circle
 c
          radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
          psic=track(j).psi*C_RAD_PER_DEG+
-     >      sign(1,track(j).q*bfield(3))*C_PI*0.5
+     >      sign(1.,track(j).q*bfield(3))*C_PI*0.5
          xc = x1 - radius*cos(psic)
          yc = y1 - radius*sin(psic)
          cosl= sqrt(1.0+track(j).tanl**2)
@@ -236,9 +268,14 @@ C        and average charge
 *   Calculate dE/dx for each track & output to tptrack table  (TdEdx)  *
 ************************************************************************
 C
-C        tdpar.truncopt=1   not used
-C        tdpar.truncopt=2   use all dedx points
-C        tdpar.truncopt=4   truncate truncfrac% of points with larger dE/dx
+C        tdpar.truncopt=1   use all dedx points
+C        tdpar.truncopt=2   tries to smooth out integerization
+c                       e.g if nhit = 11, truncfac = 0.3, 
+c                              fndedx = 11 - 3.3 = 7.7
+c                              mod(7.7,1)=0.7
+c                              nde = 7 + 1 (if rndm.lt.0.7)
+c        tdpar.trucnopt=3   truncate nint(truncfrac%) of points with larger dE/dx
+C        tdpar.truncopt=4   truncate int(truncfrac%) of points with larger dE/dx
 C
 C        tdpar.averaging_method=0   calculate dE/dx=(sum of q)/(sum of s)
 C
@@ -249,13 +286,11 @@ C
 c        tdpar.averaging_method=3   dE/dx=(sum of weight*q/s)/(# of weight)
 c                           weight = sqrt(s)
 c
-C        tdpar.usemerge=1   skipp  point flagged as merged 
-c                           implemented as default, with no
-c                           option yet to include merged
+C        tdpar.usemerge=0   skipp point flagged as merged 
+c        tdpar.usemerge.ne.0 use merged hit
 C
 C        if row less than tdpar.minrow skipp the point
-C        options based on Jeff Mitchell's 
-
+C        options based on Jeff Mitchell's  
 
          nde=0
          do while (int(hit(loc_hit(l)).track/1000).
@@ -328,12 +363,20 @@ c
                   hit(loc_hit(l)).dq=ds
 c
 c check on quality of hit before including it into dedx
-c but currently (June 98) merged hits are filtered out before
-c they reach tde_new
 c
-c             write(6,*)'flag',hit(loc_hit(l)).flag ,ds
-             if ((hit(loc_hit(l)).flag.eq.0).and.(nde.lt.ndemax)) then
+c             if (hit(loc_hit(l)).flag.ne.0) then
+c                write(6,*)'flag',hit(loc_hit(l)).flag ,ds
+c              endif   
+            if (((hit(loc_hit(l)).flag.eq.0).or.(tdpar(1).usemerge.ne.0))
+     >       .and.nde.lt.ndemax) then
+               if (hit(loc_hit(l)).flag.ne.0) then
+                 write(6,*)'flag',hit(loc_hit(l)).flag ,ds
+               endif  
                     nde=nde+1
+c
+c test
+c                    ds=1.
+c
                     dedx(nde).length=ds
                     dedx(nde).charge=hit(loc_hit(l)).q
                     dedx(nde).adedx=dedx(nde).charge/ds
@@ -378,18 +421,54 @@ c
 c truncating options
 c
          nde_orig=nde
+         if (tdpar(1).truncopt.eq.5) then
+            average = 0.
+            do k=1,nde_orig
+               average = average + dedx(k).adedx
+            enddo
+            average = average /real(nde_orig)
+            sigma = 0.6*average /sqrt(real(nde_orig))
+            dedx_upper = average + zcut*sigma
+            nde = 0
+            do k=1,nde_orig
+               if (dedx(k).adedx.lt.dedx_upper) then
+                  nde=nde+1
+               endif
+            enddo
+         elseif (tdpar(1).truncopt.eq.4) then
+            nde=nde_orig-int(tdpar(1).truncfact*real(nde_orig))
+c
+c removes fewest number of points
+c
+         elseif (tdpar(1).truncopt.eq.3) then
+c 
+c may be the logical choice
+c
+            nde=nde_orig-nint(tdpar(1).truncfact*real(nde_orig))
 
-         if(tdpar(1).truncopt.eq.4) then
-            nde=nde-int(tdpar(1).truncfact*real(nde))
-            if(nde.lt.0) nde=0
-         elseif (tdpar(1).truncopt.eq.2) then
-c
-c            no truncation nde=nde
-c
-         endif
+         elseif (tdpar(1).truncopt.eq.2) then 
+c tries to smooth out nde
+            fndedx = real(nde_orig) - tdpar(1).truncfact*real(nde_orig)
+            fract = mod(fndedx,1.)
+            frndm = ran(iseed)
+            if (frndm.lt.fract) then
+              nde = int(fndedx)+1
+            else
+              nde = int(fndedx)
+            endif
+         else
+c no truncation
+            nde=nde_orig
+         endif   
+         if(nde.lt.0) nde=0
+ 
          track(j).ndedx=nde
          track(j).dedx(1)=0.
          track(j).dedx(2)=0.
+c         if (track(j).flag .lt. 0) then
+c            write(6,*) track(j).flag, nde
+c            pause
+c         endif   
 c
 c options for dE/dx calc
 c
