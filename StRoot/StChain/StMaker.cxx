@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.104 2000/08/04 21:03:38 perev Exp $
+// $Id: StMaker.cxx,v 1.105 2000/08/07 22:41:37 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -522,7 +522,7 @@ Int_t StMaker::Make()
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
      if (ret>kStWarn) { 
-       maker->ls(3); fgFailedMaker = maker; return ret;}
+       fgFailedMaker = maker; return ret;}
      
    }
    return kStOK;
@@ -1071,6 +1071,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.105  2000/08/07 22:41:37  perev
+// remove redundant print in case of error
+//
 // Revision 1.104  2000/08/04 21:03:38  perev
 // Leaks + Clear() cleanup
 //
