@@ -1,5 +1,8 @@
-// $Id: Root2XDF.C,v 1.8 2000/08/01 19:20:36 fine Exp $
+// $Id: Root2XDF.C,v 1.9 2000/08/02 01:46:14 fine Exp $
 // $Log: Root2XDF.C,v $
+// Revision 1.9  2000/08/02 01:46:14  fine
+// Bug fix: wrong event counter
+//
 // Revision 1.8  2000/08/01 19:20:36  fine
 // Parameter to skip the input events has been introduced
 //
@@ -92,7 +95,6 @@ void Root2XDF(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
        chain->Clear();
        iret = chain->Make();
        if (iret) break;
-       iev++;                                      // goto loop code
        ds=chain->GetDataSet("dst");
        if (ds) xdf->NextEventPut(ds);
     }
