@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.41 2002/06/11 21:54:16 posk Exp $
+// $Id: plot.C,v 1.40 2002/05/21 18:42:18 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -435,21 +435,13 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 // 	  hist->Fit("SubCorr", "Q");
 // 	  delete funcSubCorr;
 	} else {
-// 	  TF1* funcCos2 = new TF1("funcCos2",
-// 	 "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi);
-// 	  funcCos2->SetParNames("n=har", "n=har+1", "har");
-// 	  funcCos2->SetParameters(0, 0, j+1);               // initial values
-// 	  funcCos2->SetParLimits(2, 1, 1);                  // har is fixed
-// 	  hist->Fit("funcCos2");
-// 	  delete funcCos2;
-	  TF1* funcCos3 = new TF1("funcCos3",
-	 "1+[0]*2/100*cos([3]*x)+[1]*2/100*cos(([3]+1)*x)+[2]*2/100*cos(([3]+2)*x)",
-				  0., twopi);
-	  funcCos3->SetParNames("n=har", "n=har+1", "n=har+2", "har");
-	  funcCos3->SetParameters(0, 0, 0, j+1);            // initial values
-	  funcCos3->SetParLimits(3, 1, 1);                  // har is fixed
-	  hist->Fit("funcCos3");
-	  delete funcCos3;
+	  TF1* funcCos2 = new TF1("funcCos2",
+	 "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi);
+	  funcCos2->SetParNames("k=1", "k=2", "har");
+	  funcCos2->SetParameters(0, 0, j+1);               // initial values
+	  funcCos2->SetParLimits(2, 1, 1);                  // har is fixed
+	  hist->Fit("funcCos2");
+	  delete funcCos2;
 	}
 	if (strstr(shortName[pageNumber],"Phi")!=0)
 	  hist->SetMinimum(0.9*(hist->GetMinimum()));
@@ -665,9 +657,6 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
-// Revision 1.41  2002/06/11 21:54:16  posk
-// Kirill's further correction to minBias.C for bins with one count.
-//
 // Revision 1.40  2002/05/21 18:42:18  posk
 // Kirill's correction to minBias.C for bins with one count.
 //

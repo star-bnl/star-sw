@@ -1,6 +1,12 @@
-// $Id: StFtpcClusterFinder.hh,v 1.13 2002/06/04 12:33:13 putschke Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.15 2002/08/02 11:26:41 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.15  2002/08/02 11:26:41  oldi
+// Chargestep corrected (it was looping over the sequences twice).
+//
+// Revision 1.14  2002/07/15 13:31:01  jcs
+// incorporate charge step histos into cluster finder and remove StFtpcChargeStep
+//
 // Revision 1.13  2002/06/04 12:33:13  putschke
 // new 2-dimenisional hitfinding algorithm
 // correct error in padposition numbering
@@ -39,7 +45,7 @@
 
 #ifndef STAR_StFtpcClusterFinder
 #define STAR_StFtpcClusterFinder
-//#define DEBUG 1
+// #define DEBUG 1
 /*#define DEBUGFILE 1*/
 
 
@@ -53,7 +59,9 @@
 #include "StDAQMaker/StFTPCReader.h"
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
+#include "TH1.h"
 #include "TH2.h"
+
 
 #define TRUE 1
 #define FALSE 0
@@ -113,6 +121,9 @@ class StFtpcClusterFinder
   StFTPCReader *mReader; 
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
+  TH1F *mHistoW;
+  TH1F *mHistoE;
+  TH2F *mHisto;
   TH2F *mhpad, *mhtime;
 
   int MAXSEQPEAKS;
@@ -131,7 +142,10 @@ class StFtpcClusterFinder
                       StFtpcDbReader    *dbReader,
 		      TObjArray *pointarray,
 		      TH2F *hpad,
-		      TH2F *htime);
+		      TH2F *htime,
+                      TH2F *histo,
+                      TH1F *histoW,
+                      TH1F *histoE);
 
   ~StFtpcClusterFinder();
   int search();

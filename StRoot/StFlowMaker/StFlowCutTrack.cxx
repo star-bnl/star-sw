@@ -1,10 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.35 2002/06/12 22:36:42 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.32 2002/04/05 12:10:57 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
-//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 // Description:  Class for applying track cuts
 //
@@ -23,7 +22,6 @@
 #include "StEnumerations.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorD.hh"
-#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #define PR(x) cout << "##### FlowCutTrack: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowCutTrack)
@@ -96,7 +94,7 @@ Int_t StFlowCutTrack::CheckTrack(StTrack* pTrack) {
   float chiSq = (float)(pTrack->fitTraits().chi2());
   Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints();
   Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
-  float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
 
   if (pTrack->topologyMap().numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       (pTrack->topologyMap().data(0) == 0 && pTrack->topologyMap().data(1) == 0)) {
@@ -246,7 +244,7 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
   float chiSq = pPicoTrack->Chi2();
   Int_t nFitPoints = pPicoTrack->FitPts();
   Int_t nMaxPoints = pPicoTrack->MaxPts();
-  float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
   StTrackTopologyMap map(pPicoTrack->TopologyMap0(),pPicoTrack->TopologyMap1());
 
   if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
@@ -387,156 +385,6 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
-  // Returns kTRUE if the micotrack survives all the cuts
-
-  float charge =  (float) (pMuTrack->charge());
-  float eta = pMuTrack->eta();
-  float dca = pMuTrack->dca().mag();
-  float pt = pMuTrack->pt();
-  float chiSq = pMuTrack->chi2xy(); 
-  Int_t nFitPoints = pMuTrack->nHitsFit();
-  Int_t nMaxPoints = pMuTrack->nHitsPoss();
-  float fitOverMax = (nMaxPoints) ? (float)(nFitPoints-1)/(float)nMaxPoints : 0.0;
-  StTrackTopologyMap map(pMuTrack->topologyMap());
-
-  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (map.data(0) == 0 && map.data(1) == 0)) {
-      mTpcTrackN++;
-  } else if (map.numberOfHits(kFtpcEastId)) {
-      mFtpcTrackN++;
-      mFtpcEastTrackN++;
-  } else if (map.numberOfHits(kFtpcWestId)) {
-      mFtpcTrackN++;
-      mFtpcWestTrackN++;
-  }
-
-  mTrackN++;
-      
-  if (map.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
-      (map.data(0) == 0 && map.data(1) == 0)) {
-      
-    // pt
-    if (mPtTpcCuts[1] > mPtTpcCuts[0] && 
-        (pt < mPtTpcCuts[0] || pt >= mPtTpcCuts[1])) {
-      mPtTpcCutN++;
-      return kFALSE;
-    }
-
-    // ChiSq
-    if (mChiSqTpcCuts[1] > mChiSqTpcCuts[0] && 
-        (chiSq < mChiSqTpcCuts[0] || chiSq >= mChiSqTpcCuts[1])) {
-      mChiSqTpcCutN++;
-      return kFALSE;
-    }
-
-    // Fit Points
-    if (mFitPtsTpcCuts[1] > mFitPtsTpcCuts[0] && 
-        (nFitPoints < mFitPtsTpcCuts[0] || nFitPoints >= mFitPtsTpcCuts[1])) {
-      mFitPtsTpcCutN++;
-      return kFALSE;
-    }
-      
-    // Fit points / max points
-    if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-        (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-      mFitOverMaxTpcCutN++;
-      mFitOverMaxCutN++;
-      return kFALSE;
-    }
-      
-    // eta
-    if (mEtaTpcCuts[1] > mEtaTpcCuts[0] && 
-        (eta < mEtaTpcCuts[0] || eta >= mEtaTpcCuts[1])) {
-      mEtaTpcCutN++;
-      return kFALSE;
-    }
-
-   // charge
-    if (mChgTpcCuts[1] > mChgTpcCuts[0] && 
-        (charge < mChgTpcCuts[0] || charge > mChgTpcCuts[1])) {
-      mChgTpcCutN++;
-      return kFALSE;
-    }
-      
-    // Increment counters for Eta symmetry cut
-    if (eta > 0.) { 
-      mEtaSymPosTpcN++;
-      mEtaSymPosN++;
-    } else { 
-      mEtaSymNegTpcN++;
-      mEtaSymNegN++;
-    }
-      
-    mGoodTpcTrackN++;
-  } else if (map.numberOfHits(kFtpcEastId) || 
-             map.numberOfHits(kFtpcWestId)) { // Ftpc track
-      
-    // dca
-    if (mDcaFtpcCuts[1] > mDcaFtpcCuts[0] && 
-        (dca < mDcaFtpcCuts[0] || dca >= mDcaFtpcCuts[1])) {
-      mDcaFtpcCutN++;
-      return kFALSE;
-    }
-
-    // pt
-    if (mPtFtpcCuts[1] > mPtFtpcCuts[0] && 
-        (pt < mPtFtpcCuts[0] || pt >= mPtFtpcCuts[1])) {
-      mPtFtpcCutN++;
-      return kFALSE;
-    }
-
-    // ChiSq
-    if (mChiSqFtpcCuts[1] > mChiSqFtpcCuts[0] && 
-        (chiSq < mChiSqFtpcCuts[0] || chiSq >= mChiSqFtpcCuts[1])) {
-      mChiSqFtpcCutN++;
-      return kFALSE;
-    }
-      
-    // Fit Points
-    if (mFitPtsFtpcCuts[1] > mFitPtsFtpcCuts[0] && 
-        (nFitPoints < mFitPtsFtpcCuts[0] || nFitPoints >= mFitPtsFtpcCuts[1])) {
-      mFitPtsFtpcCutN++;
-      return kFALSE;
-    }
-      
-    // Fit points / max points
-    if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
-        (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
-      mFitOverMaxFtpcCutN++;
-      mFitOverMaxCutN++;
-      return kFALSE;
-    }
-      
-    // eta
-    if ((eta < 0 && mEtaFtpcCuts[1] > mEtaFtpcCuts[0] &&
-         (eta < mEtaFtpcCuts[0] || eta >= mEtaFtpcCuts[1])) ||
-        (eta > 0 && mEtaFtpcCuts[3] > mEtaFtpcCuts[2] &&
-         (eta < mEtaFtpcCuts[2] || eta >= mEtaFtpcCuts[3]))) {
-      mEtaFtpcCutN++;
-      return kFALSE;
-    }
-      
-    // Increment counters for Eta symmetry cut
-    if (eta > 0.) { 
-      mEtaSymPosFtpcN++;
-      mEtaSymPosN++;
-    } else { 
-      mEtaSymNegFtpcN++;
-      mEtaSymNegN++;
-    }
-      
-    mGoodFtpcTrackN++;
-  } else { // neither Tpc nor Ftpc track
-    return kFALSE;
-  }
-
-  mGoodTrackN++;
-  return kTRUE;
-}
-
-//-----------------------------------------------------------------------
-
 void StFlowCutTrack::PrintCutList() {
   // Prints the list of cuts
   // Call in Finish
@@ -598,17 +446,6 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
-// Revision 1.35  2002/06/12 22:36:42  posk
-// FitOverMax points cut/selection is now done on (FitPts - 1)/MaxPts.
-//
-// Revision 1.34  2002/06/10 22:50:58  posk
-// pt and eta weighting now default.
-// DcaGlobalPart default now 0 to 1 cm.
-// Event cut order changed.
-//
-// Revision 1.33  2002/06/07 22:18:39  kirill
-// Introduced MuDst reader
-//
 // Revision 1.32  2002/04/05 12:10:57  oldi
 // Default values for FTPC eta cuts changed. FTPC is excluded now.
 //

@@ -1,6 +1,17 @@
-// $Id: StFtpcClusterFinder.cc,v 1.35 2002/06/04 12:33:09 putschke Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.38 2002/08/02 13:03:55 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.38  2002/08/02 13:03:55  oldi
+// Wrong pad ordering was corrected in previous version already
+// (see code changes there).
+//
+// Revision 1.37  2002/08/02 11:26:33  oldi
+// Chargestep corrected (it was looping over the sequences twice).
+// Pad ordering corrected in this version already.
+//
+// Revision 1.36  2002/07/15 13:30:35  jcs
+// incorporate charge step histos into cluster finder and remove StFtpcChargeStep
+//
 // Revision 1.35  2002/06/04 12:33:09  putschke
 // new 2-dimenisional hitfinding algorithm
 // correct error in padposition numbering
@@ -119,6 +130,8 @@
 
 #include "PhysicalConstants.h"
 
+#include "asic_map_correction.h"
+
 //TH1F *clfradius;
 
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
@@ -126,13 +139,19 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          StFtpcDbReader *dbReader,
 					 TObjArray *pointarray,
 					 TH2F *hpad,
-					 TH2F *htime)
+					 TH2F *htime,
+                                         TH2F *histo,
+                                         TH1F *histoW,
+                                         TH1F *histoE)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
   mReader = reader;
   mParam = paramReader; 
   mDb    = dbReader;
   mPoint = pointarray;
+  mHisto=histo;
+  mHistoW=histoW;
+  mHistoE=histoE;
 
   MAXSEQPEAKS = mParam->maxNumSeqPeaks();
   MAXPEAKS = mParam->maxNumPeaks();
@@ -280,7 +299,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	  iHardRow = iRow%2 + 1;
 
 #ifdef DEBUG
-	  printf("Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
+	  printf("Cluster Finder: Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
 #endif
 
 	  // get list of occupied pads in sector
@@ -290,9 +309,28 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 
 	  // loop over occupied pads
 	  int iThPad;
-	  for(iThPad=0; iThPad<iOccPads; iThPad++)
+//===============================================================
+      int newpadlist[160];
+
+      for (iThPad=0; iThPad<160; iThPad++) 
+               newpadlist[iThPad]=0;
+  
+      for(iThPad=0; iThPad<iOccPads; iThPad++)
+      {
+         iPad=padlist[iHardRow-1][iThPad];
+//cout<<"iPad=padlist["<<iHardRow-1<<"]["<<iThPad<<"] = "<<iPad<<endl;
+         if ( iRow>=10 && (iPad>=65 && iPad<=96))
+             newpadlist[padkey[iPad-1]-1] = iPad; 
+         else
+             newpadlist[iPad-1] = iPad;
+      }
+      
+//===============================================================
+	  for(iThPad=0; iThPad<160; iThPad++)
 	    {
-	      iPad=padlist[iHardRow-1][iThPad];
+//cout<<"newpadlist["<<iThPad<<"] = "<<newpadlist[iThPad]<<endl;
+              if (newpadlist[iThPad] == 0 ) continue;
+	      iPad=iThPad+1;
 
 	      // search, fit and remove finished CUCs  
 	      for(CurrentCUC = FirstCUC; CurrentCUC!=0; 
@@ -372,9 +410,8 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      // reset beginning of sequence comparison
 	      iOldSeqBuf=0;
 
-
 	      // get sequences on this pad
-	      mReader->getSequences(iHardSec, iHardRow, iPad, &iNewSeqNumber,
+	      mReader->getSequences(iHardSec, iHardRow, newpadlist[iThPad], &iNewSeqNumber,
 				   SequencePointer[iHardRow]);
 	      NewSequences=SequencePointer[iHardRow];
 	      
@@ -382,6 +419,30 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      for(iNewSeqIndex=0; iNewSeqIndex < iNewSeqNumber; 
 		  iNewSeqIndex++)
 		{
+//+++++++++++++++++++ fill charge step histograms +++++++++++++++
+		  // This loop is running already, but the running variable is called iNewSeqIndex instead of iSeqIndex .
+		  //int iSeqIndex;
+		  //for(iSeqIndex=0; iSeqIndex < iNewSeqNumber; iSeqIndex++)
+		  //{
+                  int entry;
+                  for(entry=0; entry<NewSequences[iNewSeqIndex].Length; entry++)
+                    {
+                      mHisto->Fill(iHardSec-1, // sector
+                                   entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
+                                   NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
+                      if (iHardSec >= 1 && iHardSec <= 30 ) {
+			mHistoW->Fill( entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
+				       NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
+                      }
+                      if (iHardSec >= 31 && iHardSec <= 60 ) {
+			mHistoE->Fill( entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
+				       
+				       NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
+                      }
+                    }
+		  //}
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		  // mark sequence as unused 
 		  SequenceInCUC = 0;

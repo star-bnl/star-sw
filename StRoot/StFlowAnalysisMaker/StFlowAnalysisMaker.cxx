@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.65 2002/06/15 23:03:56 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.64 2002/05/23 18:57:08 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -272,13 +272,13 @@ Int_t StFlowAnalysisMaker::Init() {
   // Tpc
   mHistFitOverMaxTpc = new TH1F("Flow_FitOverMax_Tpc", "Flow_FitOverMax_Tpc",
       nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
-  mHistFitOverMaxTpc->SetXTitle("(Fit Points - 1) / Max Points");
+  mHistFitOverMaxTpc->SetXTitle("Fit Points / Max Points");
   mHistFitOverMaxTpc->SetYTitle("Counts");
     
   // Ftpc
   mHistFitOverMaxFtpc = new TH1F("Flow_FitOverMax_Ftpc", "Flow_FitOverMax_Ftpc",
       nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
-  mHistFitOverMaxFtpc->SetXTitle("(Fit Points - 1) / Max Points");
+  mHistFitOverMaxFtpc->SetXTitle("Fit Points / Max Points");
   mHistFitOverMaxFtpc->SetYTitle("Counts");
     
 
@@ -1057,7 +1057,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.65 2002/06/15 23:03:56 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.64 2002/05/23 18:57:08 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1262,7 +1262,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       mHistChi2Ftpc     ->Fill(chi2);
       mHistFitPtsFtpc   ->Fill((float)fitPts);
       mHistMaxPtsFtpc   ->Fill((float)maxPts);
-      if (maxPts) mHistFitOverMaxFtpc->Fill((float)(fitPts-1)/(float)maxPts);
+      if (maxPts) mHistFitOverMaxFtpc->Fill((float)fitPts/(float)maxPts);
     }
     
     else { // Tpc track or otherwise!!!
@@ -1283,7 +1283,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
       mHistChi2Tpc     ->Fill(chi2);
       mHistFitPtsTpc   ->Fill((float)fitPts);
       mHistMaxPtsTpc   ->Fill((float)maxPts);
-      if (maxPts) mHistFitOverMaxTpc->Fill((float)(fitPts-1)/(float)maxPts);
+      if (maxPts) mHistFitOverMaxTpc->Fill((float)fitPts/(float)maxPts);
       
       if (charge == 1) {
 	hPlusN++;
@@ -1789,9 +1789,6 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
-// Revision 1.65  2002/06/15 23:03:56  posk
-// Changed Fit/Max histogram to (Fit - 1)/Max.
-//
 // Revision 1.64  2002/05/23 18:57:08  posk
 // changed label on MultHist histogram
 //

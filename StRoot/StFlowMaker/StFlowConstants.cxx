@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.8 2002/06/05 16:30:24 posk Exp $
+// $Id: StFlowConstants.cxx,v 1.7 2002/05/23 18:54:08 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -23,7 +23,7 @@ ClassImp(Flow)
   Float_t Flow::ptMax     = 2.;
   Float_t Flow::ptMaxPart = 6.;
 
-  Int_t Flow::cent200Full[nCents] = {14,30,56,94,146,217,312,431,510}; // new
+  Int_t Flow::cent200Full[nCents] = {14,33,59,98,150,221,311,428,500};
   Int_t Flow::cent200Half[nCents] = {14,32,59,98,149,216,302,409,474};
   Int_t Flow::cent130[nCents]     = {20,100,180,270,360,460,560,660,870};
   Int_t Flow::cent22[nCents]      = {20,100,180,270,360,460,560,660,870}; // No!
@@ -31,9 +31,6 @@ ClassImp(Flow)
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
-// Revision 1.8  2002/06/05 16:30:24  posk
-// Updated the full field 200 GeV centrality cuts.
-//
 // Revision 1.7  2002/05/23 18:54:08  posk
 // Moved centrality cuts into StFlowConstants
 //

@@ -1,10 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.9 2002/06/10 22:50:57 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.7 2002/01/30 13:04:20 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
-//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 // Description:  Class for applying flow event cuts
 //               If lo >= hi no cut is applied
@@ -21,7 +20,6 @@
 #include "Rtypes.h"
 class StEvent;
 class StFlowPicoEvent;
-class StMuEvent;
 
 class StFlowCutEvent {
 
@@ -32,10 +30,8 @@ class StFlowCutEvent {
 
   static Bool_t CheckEvent(StEvent* pEvent);
   static Bool_t CheckEvent(StFlowPicoEvent* pPicoEvent);
-  static Bool_t CheckEvent(StMuEvent* pMuEvent);
   static Bool_t CheckEtaSymmetry(StEvent* pEvent);
   static Bool_t CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent);
-  static Bool_t CheckEtaSymmetry(StMuEvent* pMuEvent);
   static void   PrintCutList();
   static void   SetCent(const Int_t lo, const Int_t hi);
   static void   SetMult(const Int_t lo, const Int_t hi);
@@ -100,14 +96,6 @@ inline void StFlowCutEvent::SetTrigger(const Float_t value) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
-// Revision 1.9  2002/06/10 22:50:57  posk
-// pt and eta weighting now default.
-// DcaGlobalPart default now 0 to 1 cm.
-// Event cut order changed.
-//
-// Revision 1.8  2002/06/07 22:18:38  kirill
-// Introduced MuDst reader
-//
 // Revision 1.7  2002/01/30 13:04:20  oldi
 // Trigger cut implemented.
 //
