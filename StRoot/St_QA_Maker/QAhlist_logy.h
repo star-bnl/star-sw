@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.10 2002/07/29 18:54:43 genevb Exp $
+// $Id: QAhlist_logy.h,v 2.11 2003/01/24 15:02:41 genevb Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.11  2003/01/24 15:02:41  genevb
+// Updates for FTPC histos
+//
 // Revision 2.10  2002/07/29 18:54:43  genevb
 // Some FTPC updates
 //
@@ -228,12 +231,6 @@
  "QaPtrkChisq0T",
  "QaPtrkChisq0TS",
  "QaPtrkChisq0TTS",
- "QaPtrkChisq0F",
- "QaPtrkChisq0FE",
- "QaPtrkChisq0FW",
- "QaPtrkChisq1F",
- "QaPtrkChisq1FE",
- "QaPtrkChisq1FW",
  "QaPtrkChisq1T",
  "QaPtrkChisq1TS",
  "QaPtrkChisq1TTS",
