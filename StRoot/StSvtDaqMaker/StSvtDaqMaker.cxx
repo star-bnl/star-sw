@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.10 2001/10/24 16:49:42 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.11 2002/02/15 02:39:28 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.11  2002/02/15 02:39:28  munhoz
+ * switching from .const to .data
+ *
  * Revision 1.10  2001/10/24 16:49:42  munhoz
  * adding capability to retrieve t0 and first SCA
  *
@@ -46,6 +49,7 @@
 #include "StSvtHybridDaqData.hh"
 #include "StSvtDaqMaker.h"
 #include "StMessMgr.h"
+#include "StSvtClassLibrary/StSvtConfig.hh"
 
 ClassImp(StSvtDaqMaker)
 
@@ -90,22 +94,34 @@ Int_t StSvtDaqMaker::Init()
   return StMaker::Init();
 }
 
+/*
+//_____________________________________________________________________________
+Int_t StSvtDaqMaker::InitRun(int runnumber)
+{
+  if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::InitRun" << endm;
+
+  SetSvtData();
+
+  return 0;
+}
+*/
+
 //_____________________________________________________________________________
 Int_t StSvtDaqMaker::SetSvtData()
 {
   fSvtSet = new TObjectSet("StSvtRawData");
-  AddConst(fSvtSet);  
+  AddData(fSvtSet);  
 
-  St_DataSet *dataSet;
+  St_DataSet *dataSet = NULL;
   dataSet = GetDataSet("StSvtConfig");
 
-  if (!fSvtData) {
-    if (dataSet)
-      fSvtData = new StSvtDaqData((StSvtConfig*)(dataSet->GetObject()));
-    else
-      fSvtData = new StSvtDaqData(fConfig);
-    fSvtSet->SetObject((TObject*)fSvtData);
-  }
+
+  if (dataSet)
+    fSvtData = new StSvtDaqData((StSvtConfig*)(dataSet->GetObject()));
+  else
+    fSvtData = new StSvtDaqData(fConfig);
+
+  fSvtSet->SetObject((TObject*)fSvtData);
 
   return kStOK;
 }
@@ -196,18 +212,12 @@ Int_t StSvtDaqMaker::GetSvtData()
 
   if(  !daqReader->SVTPresent ()){
     gMessMgr->Error() << "SVT -No SVT Present but trying to read it" << endm;
-    if( fSvtData) Reset();
     return kStErr;
   }
   svtReader = daqReader->getSVTReader();
   assert(svtReader);
 
   if( !fSvtSet) SetSvtData();
-
-  if (!fSvtData) {
-    fSvtData = new StSvtDaqData(fConfig);
-    fSvtSet->SetObject((TObject*)fSvtData);
-  }
 
   fSvtData->setData(svtReader, fDataType);
 
@@ -311,6 +321,11 @@ void StSvtDaqMaker::Clear(const char*)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Clear" << endm;
 
+  fSvtData = NULL;
+  fHybridSet = NULL;
+  fSvtPed = NULL;
+  fSvtSet = NULL;
+
   StMaker::Clear();
 }
 
@@ -318,13 +333,13 @@ void StSvtDaqMaker::Clear(const char*)
 Int_t StSvtDaqMaker::Reset()
 {
   if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Reset" << endm;
-
+  /*
   fSvtData = NULL;
   fHybridSet = NULL;
   fSvtPed = NULL;
   fSvtSet = NULL;
   m_ConstSet->Delete();
-
+  */
   return kStOK;
 }
 
@@ -333,8 +348,6 @@ Int_t StSvtDaqMaker::Finish()
 {
   if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Finish" << endm;
 
-  Reset();
-
   return kStOK;
 }
 
@@ -342,7 +355,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.10 2001/10/24 16:49:42 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.11 2002/02/15 02:39:28 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

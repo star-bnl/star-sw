@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.6 2001/10/24 16:49:43 munhoz Exp $
+ * $Id: StSvtDaqMaker.h,v 1.7 2002/02/15 02:39:28 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.7  2002/02/15 02:39:28  munhoz
+ * switching from .const to .data
+ *
  * Revision 1.6  2001/10/24 16:49:43  munhoz
  * adding capability to retrieve t0 and first SCA
  *
@@ -85,6 +88,7 @@ class StSvtDaqMaker : public StMaker {
   Int_t  GetSvtEvpData(){return kStErr;}
 
   virtual Int_t  Init();
+  //  virtual Int_t  InitRun(int runnumber);
   virtual Int_t  Make();
   virtual void   Clear(const char *opt);
   virtual Int_t  Finish();
