@@ -138,6 +138,7 @@ class StEmcCalibrationMaker : public StMaker
            void    SetDoGain(Bool_t a)            {   mDoGain = a; }
            void    SetDoMip(Bool_t a)             {   mDoMip = a; }
            void    SetDoPed(Bool_t a)             {   mDoPed = a; }
+           void    SetPedInterval(Float_t a)      {   mPedInterval = a; }
            void    SetWaitForPed(Bool_t a)        {   mWaitForPed = a; }
            void    SetUseLocalPed(Bool_t a)       {   mUseLocalPed = a; }
            void    SetSavePedToDB(Bool_t a)       {   mSavePedToDB = a; }

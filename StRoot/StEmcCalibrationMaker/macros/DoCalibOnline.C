@@ -5,6 +5,54 @@
 class StChain;
 StChain *chain=0;
 
+int nEventsProc = 0;
+int MaxEvents = 0;
+int ntries = 0;
+int delay = 1;
+
+Bool_t realOnline = kFALSE;
+
+TTimer time(1);
+
+void Start(int miliseconds = 1) { time.Start(miliseconds,kFALSE); }
+
+void Stop() { time.Stop(); }
+
+void ProcessEvent()
+{
+  
+  int istat=0;
+  chain->Clear();
+  cout << "---------------------- Processing Event : " << nEventsProc+1 << " ----------------------" << endl;
+  istat = chain->Make(nEventsProc); // This should call the Make() method in ALL makers
+  nEventsProc++;
+  
+  if(!realOnline && (istat==2 || istat ==4 || (nEventsProc>=MaxEvents && MaxEvents!=0))) // reading file.... should stop
+  {
+    time.Stop();
+    if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
+    if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
+    if (istat == 4) { cout << "Fatal Event Processed. Status = " << istat << endl; }
+    if (nEventsProc>=MaxEvents && MaxEvents!=0) { cout << "Last Event requested" <<  endl; }
+  }
+
+  if(istat == 0) ntries = 0;
+  else 
+  {
+    ntries++;
+    cout <<"No events in event pool... ntries = "<<ntries<<". will try again in "<<(float)delay/1000.0<<" seconds \n";
+  }
+
+  time.Start(delay,kFALSE);
+  
+  if(ntries==0)  delay = 1;
+  if(ntries>10)  delay = 1000;
+  if(ntries>50)  delay = 10000;
+  if(ntries>100) delay = 60000;
+  
+  return;
+}
+
 void DoCalibOnline(char* file = "", Int_t nevents = 0)
 {
 // Load needed shared libs
@@ -35,23 +83,17 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
     gSystem->Load("StEmcADCtoEMaker");
   
     gSystem->Load("StEmcOnlineUtil");
-    gSystem->Load("StEmcNewCalib");
+    gSystem->Load("StEmcCalibrationMaker");
 
 // create chain ///////////////////////////////////////////////    
     chain = new StChain("StChain"); 
    
-    // create Event pool interface
-    evpReader *evp;
-    if(!strcmp(file,"")) 
-    {
-      evp = new evpReader(NULL);
-      evp->setEvpDisk("/evp");
-    }
-    else evp = new evpReader(file);
-
     // create StEmcOnl    
     StEmcOnl *emcIo = new StEmcOnl();
-    emcIo->setEvPool(evp);
+    emcIo->createEvPool(file,"/evp");
+    emcIo->setPrintInfo(kFALSE);
+    if(!strcmp(file,"")) realOnline = kTRUE;
+    
     
     // create database   
     St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");  
@@ -95,10 +137,10 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
     }
     // options fto save information on OFFLINE DATABASE
     
-    calib->SetSavePedToDB(kTRUE);
+    calib->SetSavePedToDB(kFALSE);
     calib->SetSaveCalibToDB(kFALSE);
     
-    if(smdPed) smdPed->SetSavePedToDB(kTRUE);
+    if(smdPed) smdPed->SetSavePedToDB(kFALSE);
 
     // initializing chain
     Int_t initStat = chain->Init(); 
@@ -112,43 +154,33 @@ void DoCalibOnline(char* file = "", Int_t nevents = 0)
     
     if(PED)
     {
-      ped = calib->GetPedSpectra();
-      ped->SetMinHits(4000);
+      ped = calib->GetPedSpec();
+      ped->SetMinHits(4950);
     }
     if(GAIN)
     {
-      gain = calib->GetGainSpectra();
+      gain = calib->GetGainSpec();
       gain->SetMinHits(4000);
     }
     if(EQUAL)
     {
-      equal = calib->GetEqualSpectra();
+      equal = calib->GetEqualSpec();
       equal->SetMinHits(4000);      
     }
     if(MIP)
     {
-      mip = calib->GetMipSpectra();
+      mip = calib->GetMipSpec();
       mip->SetMinHits(4000);      
       mip->SetMaxMultiplicity(1000);
       mip->SetMinMomentum(1.2);
     }
     
 ///////////////////////////////////////////////////////////////
+    MaxEvents = nevents;
     
-    int istat=0,iev=1;
-EventLoop: 
-     if ((iev<=nevents && nevents!=0) && istat!=2 && istat!=4) 
-     {
-       chain->Clear();
-       cout << "---------------------- Processing Event : " << iev << " ----------------------" << endl;
-       istat = chain->Make(iev); // This should call the Make() method in ALL makers
-       if (istat == 2) { cout << "Last  Event Processed. Status = " << istat << endl; }
-       if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
-       if (istat == 4) { cout << "Fatal Event Processed. Status = " << istat << endl; }
-       iev++; 
-       goto EventLoop;
-     } // Event Loop
+    time.SetCommand("ProcessEvent()");
+    time.Start(1,kFALSE);
      
-     chain->Finish();
+     //chain->Finish();
 }
 

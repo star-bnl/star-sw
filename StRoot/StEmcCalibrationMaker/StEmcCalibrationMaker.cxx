@@ -173,7 +173,7 @@ Int_t StEmcCalibrationMaker::Make()
       else 
       {
         cout <<"last pedestal time = "<<mPedDate<<"  "<<mPedTime<<endl;
-        cout <<"time left for new pedestal round = "<<dt<<" hours"<<endl;
+        cout <<"time left for new pedestal round = "<<mPedInterval-dt<<" hours"<<endl;
       }
     }
     if(mPedStatus>=0)
@@ -261,11 +261,10 @@ Bool_t StEmcCalibrationMaker::GetEvent()
 {
 	Bool_t kReadOk=ReadStEvent();
   if(!kReadOk) return kFALSE;	
-	
-	StL0Trigger* trg = mEvent->l0Trigger();
+	/*StL0Trigger* trg = mEvent->l0Trigger();
 	Int_t trigger=0;
 	if(trg) trigger = trg->triggerWord();
-	if(trigger!=8192 && trigger!=4096) return kFALSE;
+	if(trigger!=8192 && trigger!=4096) return kFALSE;*/
 	
   // reading B field from Database//////////
   TDataSet *RunLog=GetInputDB("RunLog");
@@ -279,11 +278,12 @@ Bool_t StEmcCalibrationMaker::GetEvent()
       mBField=0.5*magst[0].ScaleFactor;
     }
   }
+  cout <<"Magnetic Field = "<<mBField<<" Tesla\n";
   mFilter->setBField(mBField);
   //////////////////////////////////////////
 	
-	if(!CalcZVertex()) return kFALSE;
-  if(fabs(mZVertex)>mZVertexMax) return kFALSE;
+	//if(!CalcZVertex()) return kFALSE;
+  //if(fabs(mZVertex)>mZVertexMax) return kFALSE;
 
   if(!FillEmcVector()) return kFALSE;  
   
@@ -312,7 +312,7 @@ Bool_t StEmcCalibrationMaker::ReadStEvent()
   if(!mEvent) return kFALSE;
   mEmc=mEvent->emcCollection();
   if(!mEmc) return kFALSE;    
-  if(mDoUseL3) // use L3Tracks
+  /*if(mDoUseL3) // use L3Tracks
   {
     if(mEvent->l3Trigger())
     {
@@ -327,7 +327,7 @@ Bool_t StEmcCalibrationMaker::ReadStEvent()
     StSPtrVecTrackNode& tracks=mEvent->trackNodes();
     mNTracks=tracks.size();
     if (mNTracks==0) return kFALSE;
-  }    
+  }*/    
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -500,19 +500,23 @@ void StEmcCalibrationMaker::SetStatus()
   for(Int_t i=1;i<=mNBins;i++)
   {
     status[i-1]=0;
-		if (i>=1861 && i<=2340) status[i-1]=1; // initial AuAu 2001 configuration
-    if (i>=2021 && i<=2100) status[i-1]=0; // initial AuAu 2001 configuration
+		//if (i>=1861 && i<=2340) status[i-1]=1; // initial AuAu 2001 configuration
+    //if (i>=2021 && i<=2100) status[i-1]=0; // initial AuAu 2001 configuration
 
 		//if (i>=1941 && i<=2400) status[i-1]=1; // pp conf
 		//if (i>=1    && i<=180 ) status[i-1]=1; // pp conf
+		
+    if (i>=1 && i<=2400) status[i-1]=1; // initial Y3 configuration for towers
   }
-  status[2309-1]=0;
-  status[2254-1]=0;
-  status[2288-1]=0;
-  status[2325-1]=0;
-  status[2150-1]=0;
-  status[1986-1]=0;
-  status[1979-1]=0;
+  
+  //year 2001 dead channels
+  //status[2309-1]=0;
+  //status[2254-1]=0;
+  //status[2288-1]=0;
+  //status[2325-1]=0;
+  //status[2150-1]=0;
+  //status[1986-1]=0;
+  //status[1979-1]=0;
 	
 	for(Int_t i=1;i<=mNBins;i++)
 	{
@@ -639,6 +643,31 @@ void StEmcCalibrationMaker::SavePedestals(Int_t date, Int_t time)
   sprintf(file ,"%sPedestal.%08d.%06d.data.root",detname[mDetNum].Data(),date,time);
   TFile *f=new TFile(file,"RECREATE");
   mPed->Write();
+  TH1F *h1=new TH1F("pedestals","Pedestal values",mNBins,1.0,(Float_t)mNBins+1.);
+  TH1F *h2=new TH1F("rms","RMS values",mNBins,1.0,(Float_t)mNBins+1.);
+  TH1F *h3=new TH1F("chi","Chi values",mNBins,1.0,(Float_t)mNBins+1.);
+  TH1F *h4=new TH1F("status","Status values",mNBins,1.0,(Float_t)mNBins+1.);
+	for(Int_t id=1;id<=4800;id++)
+	{
+      Int_t ibin = mPed->FindBin(id,0); //pedestal
+      Float_t p  = mPed->GetBinContent(ibin);
+      ibin       = mPed->FindBin(id,1); //rms
+      Float_t rms= mPed->GetBinContent(ibin);
+      ibin       = mPed->FindBin(id,2); //chi2
+      Float_t chi= mPed->GetBinContent(ibin);
+      ibin       = mPed->FindBin(id,3); //status
+      Float_t stat = (Float_t)mPed->GetBinContent(ibin);
+      h1->Fill((Float_t)id,p);
+      h2->Fill((Float_t)id,rms);
+      h3->Fill((Float_t)id,chi);
+      h4->Fill((Float_t)id,stat);
+  }
+  h1->Write();
+  h2->Write();
+  h3->Write();
+  h4->Write();
+  delete h1; delete h2; delete h3; delete h4;
+  f->Close();
   delete f;
   
   if(!mSavePedToDB) return;
