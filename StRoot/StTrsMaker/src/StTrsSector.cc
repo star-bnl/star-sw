@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSector.cc,v 1.4 1999/02/12 01:26:37 lasiuk Exp $
+ * $Id: StTrsSector.cc,v 1.5 1999/02/16 23:36:42 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSector.cc,v $
- * Revision 1.4  1999/02/12 01:26:37  lasiuk
- * Limit debug output
+ * Revision 1.5  1999/02/16 23:36:42  lasiuk
+ * carefull...row>0
  *
  * Revision 1.4  1999/02/12 01:26:37  lasiuk
  * Limit debug output
@@ -54,7 +54,6 @@ StTrsSector::StTrsSector(StTpcGeometry* geoDb)
 	mSector.push_back(padRow);
     }
 
-    
     // tmp
     // check size at creation?
 //     cout << "  NumberOfRows in Sector: " << mSector.size() << endl;
@@ -67,7 +66,7 @@ StTrsSector::~StTrsSector() {/* nopt */}
 
 void StTrsSector::clear() // clears only the time bins
 {
-    cout << "in StTrsSector::clear()" << endl;
+    //cout << "in StTrsSector::clear()" << endl;
     for(int irow=0; irow<mSector.size(); irow++) {
 	for(int ipad=0; ipad<mSector[irow].size(); ipad++) {
 	    mSector[irow][ipad].clear();
