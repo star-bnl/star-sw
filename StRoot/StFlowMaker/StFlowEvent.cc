@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.6 1999/12/15 22:01:25 posk Exp $
+// $Id: StFlowEvent.cc,v 1.7 1999/12/16 18:05:22 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.7  1999/12/16 18:05:22  posk
+// Fixed Linux compatability again.
+//
 // Revision 1.6  1999/12/15 22:01:25  posk
 // Added StFlowConstants.hh
 //
@@ -112,7 +115,7 @@ Int_t StFlowEvent::checkInput(Int_t harN, Int_t selN, Int_t subN) const {
 
 //-------------------------------------------------------------
 
-void StFlowEvent::SetPhiWeight(const PhiWgt_t &pPhiWgt) {
+void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt) {
   // Transfers PhiWgt array from StFlowMaker
 
   static const int& nHars    = Flow::nHars;
@@ -239,7 +242,7 @@ void StFlowEvent::SetSelections() {
     Float_t mPt  = pFlowTrack->Pt();
     for (int selN = 0; selN < nSels; selN++) {
       for (int harN = 0; harN < nHars; harN++) {
-	
+
 	// Eta
 	if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
 	    (fabs(mEta) < mEtaCuts[0][harN][selN] || 
