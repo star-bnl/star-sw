@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.78 2004/12/10 02:04:08 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.79 2005/02/02 23:13:50 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -65,10 +65,16 @@
     $SRPFLAGS = "";                  # -DR__SRP -I" . $SRPDIR . "/include";
     $SRPLIBS  = "";                  # -L" . $SRPDIR . "/lib -lsrp -lgmp";
 
-    chomp($HOST = `hostname`);
+    chomp($HOST = `/bin/hostname`);
     $CPPPATH       = "";
     $CPPFLAGS      = "";
     $EXTRA_CPPPATH = "";
+
+    # We make the assumption that STAR_HOST_SYS will contain the string 64_
+    # 64 bits test does not suffice. It comes in two flavors with lib and lib64
+    # depending of backward 32 support or not. We can extend here later
+    $IS_64BITS     = ($STAR_HOST_SYS =~ m/64_/ && -e "/usr/X11R6/lib64" );
+
 
     $G77           = "g77";
     $G77FLAGS      = "-fno-second-underscore -w -fno-automatic -Wall -W -Wsurprising -fPIC";
@@ -277,11 +283,18 @@
 	}
         $CFLAGS    = "-pipe -fPIC -Wall -Wshadow";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
-        $XLIBS     = "-L/usr/X11R6/lib -lXpm -lX11";
+
+	if ( $IS_64BITS ){
+	    $XLIBS     = "-L/usr/X11R6/lib64 -lXpm -lX11";
+	    $CLIBS    .= " -L/usr/X11R6/lib64 -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
+	} else {
+	    $XLIBS     = "-L/usr/X11R6/lib -lXpm -lX11";
+	    $CLIBS    .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
+	}
         $THREAD    = "-lpthread";
         $CRYPTLIBS = "-lcrypt";
         $SYSLIBS   = "-lm -ldl -rdynamic";
-	$CLIBS    .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 -lm -ldl  -rdynamic ";
+
         if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
             print "Use INSURE++\n";
             $CC  = "insure -g -Zoi \"compiler_c gcc\"";
@@ -417,10 +430,10 @@
     $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
 
 
-    # --- packages ---
+    # ------- packages -------
     # MySQL
-    my $os_name = `uname`;
-    chomp($os_name);
+    #my $os_name = `uname`;
+    #chomp($os_name);
     my ($MYSQLINCDIR,$mysqlheader) =
 	script::find_lib($MYSQL . " " .
 			 "/include /usr/include ".
@@ -435,7 +448,12 @@
 	die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";
     }
 
-    (my $mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib/;
+    my $mysqllibdir;
+    if ( $IS_64BITS ){
+	($mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib64/;
+    } else {
+	($mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib/;
+    }
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/lib/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
@@ -449,8 +467,9 @@
     }
     print "Use MYSQLLIBDIR = $MYSQLLIBDIR  \tMYSQLLIB = $MYSQLLIB\n" if $MYSQLLIBDIR && ! $param::quiet;
 
+
     # QT
-    if (defined($QTDIR) && -d $QTDIR) {
+    if ( defined($QTDIR) && -d $QTDIR) {
 	if (-e $QTDIR . "/bin/moc") {
 	    $QTLIBDIR = $QTDIR . "/lib";
 	    $QTBINDIR = $QTDIR . "/bin";
