@@ -322,10 +322,8 @@ EOF:
 	     
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
-   ccc = '---'
-   fmt = [ccc]//'<bfc>: Event  '//[ievent]//[ccc]//[mod]//' =' 
-   fmt = $quote($quote([fmt]))//',2f12.5'
-   vec/wr  v[mod],t[mod] ! [fmt]
+   fmessage '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
+    message '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
    vec/inp v[mod] 0.0
    
   enddo
@@ -368,10 +366,8 @@ return
   nw = $words([test])
   do i = 1, [nw]
     mod = $word([test],[i],1)
-    ccc = '---'
-    fmt = '<bfc>: Event'//[ievent]//[ccc]//[mod]//[ccc]//' =' 
-    fmt = $quote($quote([fmt]))//',2f10.5'
-    vec/wr  v[mod],t[mod] ! [fmt]
+   fmessage '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
+    message '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
   enddo
   
  return
