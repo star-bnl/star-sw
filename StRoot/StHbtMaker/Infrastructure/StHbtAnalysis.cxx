@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.19 2001/11/06 20:20:53 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.20 2002/06/22 17:53:31 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.20  2002/06/22 17:53:31  lisa
+ * implemented switch to allow user to require minimum number of particles in First and Second ParticleCollections - default value is zero so if user does not Set this value then behaviour is like before
+ *
  * Revision 1.19  2001/11/06 20:20:53  laue
  * Order of event-mixing fixed.
  *
@@ -193,6 +196,9 @@ StHbtAnalysis::StHbtAnalysis(){
   mMixingBuffer = new StHbtPicoEventCollection;
   mNeventsProcessed = 0;
   mPicoEvent=0;
+
+  mMinSizePartCollection=0;  // minimum # particles in ParticleCollection
+
 }
 //____________________________
 
@@ -245,6 +251,8 @@ StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) : StHbtBaseAnalysis() {
   }
 
   mNumEventsToMix = a.mNumEventsToMix;
+
+  mMinSizePartCollection = a.mMinSizePartCollection;  // minimum # particles in ParticleCollection
 
   cout << " StHbtAnalysis::StHbtAnalysis(const StHbtAnalysis& a) - analysis copied " << endl;
 
@@ -330,141 +338,151 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     cout <<"StHbtAnalysis::ProcessEvent - #particles in First, Second Collections: " <<
       mPicoEvent->FirstParticleCollection()->size() << " " <<
       mPicoEvent->SecondParticleCollection()->size() << endl;
+    
+    // mal - implement a switch which allows only using events with ParticleCollections containing a minimum
+    // number of entries (jun2002)
+    if ((mPicoEvent->FirstParticleCollection()->size() >= mMinSizePartCollection )
+	&& (mPicoEvent->SecondParticleCollection()->size() >= mMinSizePartCollection )) {
+
+
+      // OK, pico event is built
+      // make real pairs...
       
-    // OK, pico event is built
-    // make real pairs...
+      // Fabrice points out that we do not need to keep creating/deleting pairs all the time
+      // We only ever need ONE pair, and we can just keep changing internal pointers
+      // this should help speed things up
+      StHbtPair* ThePair = new StHbtPair;
       
-    // Fabrice points out that we do not need to keep creating/deleting pairs all the time
-    // We only ever need ONE pair, and we can just keep changing internal pointers
-    // this should help speed things up
-    StHbtPair* ThePair = new StHbtPair;
-      
-    StHbtParticleIterator PartIter1;
-    StHbtParticleIterator PartIter2;
-    StHbtCorrFctnIterator CorrFctnIter;
-    StHbtParticleIterator StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();  // always
-    StHbtParticleIterator EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();    // will be one less if identical
-    StHbtParticleIterator StartInnerLoop;
-    StHbtParticleIterator EndInnerLoop;
-    if (AnalyzeIdenticalParticles()) {             // only use First collection
-      EndOuterLoop--;                                               // outer loop goes to next-to-last particle in First collection
-      EndInnerLoop = mPicoEvent->FirstParticleCollection()->end() ;  // inner loop goes to last particle in First collection
-    }
-    else {                                                          // nonidentical - loop over First and Second collections
-      StartInnerLoop = mPicoEvent->SecondParticleCollection()->begin(); // inner loop starts at first particle in Second collection
-      EndInnerLoop   = mPicoEvent->SecondParticleCollection()->end() ;  // inner loop goes to last particle in Second collection
-    }
-    for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-      if (AnalyzeIdenticalParticles()){
-	StartInnerLoop = PartIter1;
-	StartInnerLoop++;
+      StHbtParticleIterator PartIter1;
+      StHbtParticleIterator PartIter2;
+      StHbtCorrFctnIterator CorrFctnIter;
+      StHbtParticleIterator StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();  // always
+      StHbtParticleIterator EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();    // will be one less if identical
+      StHbtParticleIterator StartInnerLoop;
+      StHbtParticleIterator EndInnerLoop;
+      if (AnalyzeIdenticalParticles()) {             // only use First collection
+	EndOuterLoop--;                                               // outer loop goes to next-to-last particle in First collection
+	EndInnerLoop = mPicoEvent->FirstParticleCollection()->end() ;  // inner loop goes to last particle in First collection
       }
-      ThePair->SetTrack1(*PartIter1);
-      for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
-	ThePair->SetTrack2(*PartIter2);
-	// The following lines have to be uncommented if you want pairCutMonitors
-	// they are not in for speed reasons
-	// bool tmpPassPair = mPairCut->Pass(ThePair);
-	// mPairCut->FillCutMonitor(ThePair, tmpPassPair);
-	// if ( tmpPassPair ) {
-	if (mPairCut->Pass(ThePair)){
-	  for (CorrFctnIter=mCorrFctnCollection->begin();
-	       CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-	    StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-	    CorrFctn->AddRealPair(ThePair);
-	  }
-	}  // if passed pair cut
-      }    // loop over second particle
-    }      // loop over first particle
-      
-    // ok, now make mixed pairs, if the Mixing buffer is full
-      
-    cout << "StHbtAnalysis::ProcessEvent() - reals done   ";
-    if (MixingBufferFull()){
-      cout << "Mixing Buffer is full - lets rock and roll" << endl;
-    }
-    else {
-      cout << "Mixing Buffer not full -gotta wait " << MixingBuffer()->size() << endl;
-    }
-    if (MixingBufferFull()){
-      StHbtPicoEvent* storedEvent;
-      StHbtPicoEventIterator mPicoEventIter;
-      for (mPicoEventIter=MixingBuffer()->begin();mPicoEventIter!=MixingBuffer()->end();mPicoEventIter++){
-	storedEvent = *mPicoEventIter;
+      else {                                                          // nonidentical - loop over First and Second collections
+	StartInnerLoop = mPicoEvent->SecondParticleCollection()->begin(); // inner loop starts at first particle in Second collection
+	EndInnerLoop   = mPicoEvent->SecondParticleCollection()->end() ;  // inner loop goes to last particle in Second collection
+      }
+      for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
 	if (AnalyzeIdenticalParticles()){
-	  StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();
-	  EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();
-	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
-	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
-	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	    ThePair->SetTrack1(*PartIter1);
-	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      ThePair->SetTrack2(*PartIter2);
-	      // testing...	      cout << "ThePair defined... going to pair cut... ";
-	      if (mPairCut->Pass(ThePair)){
-		// testing...		cout << " ThePair passed PairCut... ";
-		for (CorrFctnIter=mCorrFctnCollection->begin();
-		     CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-		  CorrFctn->AddMixedPair(ThePair);
-		  // testing...cout << " ThePair has been added to MixedPair method " << endl;
-		} // loop over correlation function
-	      } // if passed pair cut
-	    } // loop over second particle
-	  } // loop over first particle
-	} /* if identical particles */ 
-	else { // non identical particles
-	  // mix current first collection with second collection from the mixing buffer
-	  StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();
-	  EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();
- 	  StartInnerLoop = storedEvent->SecondParticleCollection()->begin();
-	  EndInnerLoop = storedEvent->SecondParticleCollection()->end();
-	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	    ThePair->SetTrack1(*PartIter1);
-	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      ThePair->SetTrack2(*PartIter2);
-	      // testing...	      cout << "ThePair defined... going to pair cut... ";
-	      if (mPairCut->Pass(ThePair)){
-		// testing...		cout << " ThePair passed PairCut... ";
-		for (CorrFctnIter=mCorrFctnCollection->begin();
-		     CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-		  CorrFctn->AddMixedPair(ThePair);
-		  // testing...cout << " ThePair has been added to MixedPair method " << endl;
-		} // loop over correlation function
-	      } // if passed pair cut
-	    } // loop over second particle
-	  } // loop over first particle
-	  // mix current second collection with first collection from the mixing buffer
-	  StartOuterLoop = mPicoEvent->SecondParticleCollection()->begin();
-	  EndOuterLoop   = mPicoEvent->SecondParticleCollection()->end();
- 	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
-	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
-	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	    ThePair->SetTrack2(*PartIter1);
-	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      ThePair->SetTrack1(*PartIter2);
-	      // testing...	      cout << "ThePair defined... going to pair cut... ";
-	      if (mPairCut->Pass(ThePair)){
-		// testing...		cout << " ThePair passed PairCut... ";
-		for (CorrFctnIter=mCorrFctnCollection->begin();
-		     CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
-		  StHbtCorrFctn* CorrFctn = *CorrFctnIter;
-		  CorrFctn->AddMixedPair(ThePair);
-		  // testing...cout << " ThePair has been added to MixedPair method " << endl;
-		} // loop over correlation function
-	      } // if passed pair cut
-	    } // loop over second particle
-	  } // loop over first particle
-	} // else non identical particles
-      }        // loop over pico-events stored in Mixing buffer
-      // Now get rid of oldest stored pico-event in buffer.
-      // This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
-      delete MixingBuffer()->back();
-      MixingBuffer()->pop_back();
-    }  // if mixing buffer is full
-    delete ThePair;
-    MixingBuffer()->push_front(mPicoEvent);  // store the current pico-event in buffer
+	  StartInnerLoop = PartIter1;
+	  StartInnerLoop++;
+	}
+	ThePair->SetTrack1(*PartIter1);
+	for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
+	  ThePair->SetTrack2(*PartIter2);
+	  // The following lines have to be uncommented if you want pairCutMonitors
+	  // they are not in for speed reasons
+	  // bool tmpPassPair = mPairCut->Pass(ThePair);
+	  // mPairCut->FillCutMonitor(ThePair, tmpPassPair);
+	  // if ( tmpPassPair ) {
+	  if (mPairCut->Pass(ThePair)){
+	    for (CorrFctnIter=mCorrFctnCollection->begin();
+		 CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
+	      StHbtCorrFctn* CorrFctn = *CorrFctnIter;
+	      CorrFctn->AddRealPair(ThePair);
+	    }
+	  }  // if passed pair cut
+	}    // loop over second particle
+      }      // loop over first particle
+      
+      // ok, now make mixed pairs, if the Mixing buffer is full
+      
+      cout << "StHbtAnalysis::ProcessEvent() - reals done   ";
+      if (MixingBufferFull()){
+	cout << "Mixing Buffer is full - lets rock and roll" << endl;
+      }
+      else {
+	cout << "Mixing Buffer not full -gotta wait " << MixingBuffer()->size() << endl;
+      }
+      if (MixingBufferFull()){
+	StHbtPicoEvent* storedEvent;
+	StHbtPicoEventIterator mPicoEventIter;
+	for (mPicoEventIter=MixingBuffer()->begin();mPicoEventIter!=MixingBuffer()->end();mPicoEventIter++){
+	  storedEvent = *mPicoEventIter;
+	  if (AnalyzeIdenticalParticles()){
+	    StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();
+	    EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();
+	    StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
+	    EndInnerLoop = storedEvent->FirstParticleCollection()->end();
+	    for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
+	      ThePair->SetTrack1(*PartIter1);
+	      for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
+		ThePair->SetTrack2(*PartIter2);
+		// testing...	      cout << "ThePair defined... going to pair cut... ";
+		if (mPairCut->Pass(ThePair)){
+		  // testing...		cout << " ThePair passed PairCut... ";
+		  for (CorrFctnIter=mCorrFctnCollection->begin();
+		       CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
+		    StHbtCorrFctn* CorrFctn = *CorrFctnIter;
+		    CorrFctn->AddMixedPair(ThePair);
+		    // testing...cout << " ThePair has been added to MixedPair method " << endl;
+		  } // loop over correlation function
+		} // if passed pair cut
+	      } // loop over second particle
+	    } // loop over first particle
+	  } /* if identical particles */ 
+	  else { // non identical particles
+	    // mix current first collection with second collection from the mixing buffer
+	    StartOuterLoop = mPicoEvent->FirstParticleCollection()->begin();
+	    EndOuterLoop   = mPicoEvent->FirstParticleCollection()->end();
+	    StartInnerLoop = storedEvent->SecondParticleCollection()->begin();
+	    EndInnerLoop = storedEvent->SecondParticleCollection()->end();
+	    for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
+	      ThePair->SetTrack1(*PartIter1);
+	      for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
+		ThePair->SetTrack2(*PartIter2);
+		// testing...	      cout << "ThePair defined... going to pair cut... ";
+		if (mPairCut->Pass(ThePair)){
+		  // testing...		cout << " ThePair passed PairCut... ";
+		  for (CorrFctnIter=mCorrFctnCollection->begin();
+		       CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
+		    StHbtCorrFctn* CorrFctn = *CorrFctnIter;
+		    CorrFctn->AddMixedPair(ThePair);
+		    // testing...cout << " ThePair has been added to MixedPair method " << endl;
+		  } // loop over correlation function
+		} // if passed pair cut
+	      } // loop over second particle
+	    } // loop over first particle
+	    // mix current second collection with first collection from the mixing buffer
+	    StartOuterLoop = mPicoEvent->SecondParticleCollection()->begin();
+	    EndOuterLoop   = mPicoEvent->SecondParticleCollection()->end();
+	    StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
+	    EndInnerLoop = storedEvent->FirstParticleCollection()->end();
+	    for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
+	      ThePair->SetTrack2(*PartIter1);
+	      for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
+		ThePair->SetTrack1(*PartIter2);
+		// testing...	      cout << "ThePair defined... going to pair cut... ";
+		if (mPairCut->Pass(ThePair)){
+		  // testing...		cout << " ThePair passed PairCut... ";
+		  for (CorrFctnIter=mCorrFctnCollection->begin();
+		       CorrFctnIter!=mCorrFctnCollection->end();CorrFctnIter++){
+		    StHbtCorrFctn* CorrFctn = *CorrFctnIter;
+		    CorrFctn->AddMixedPair(ThePair);
+		    // testing...cout << " ThePair has been added to MixedPair method " << endl;
+		  } // loop over correlation function
+		} // if passed pair cut
+	      } // loop over second particle
+	    } // loop over first particle
+	  } // else non identical particles
+	}        // loop over pico-events stored in Mixing buffer
+	// Now get rid of oldest stored pico-event in buffer.
+	// This means (1) delete the event from memory, (2) "pop" the pointer to it from the MixingBuffer
+	delete MixingBuffer()->back();
+	MixingBuffer()->pop_back();
+      }  // if mixing buffer is full
+      delete ThePair;
+      MixingBuffer()->push_front(mPicoEvent);  // store the current pico-event in buffer
+    }  // if ParticleCollections are big enough (mal jun2002)
+    else{
+      delete mPicoEvent;
+    }
   }   // if currentEvent is accepted by currentAnalysis
   EventEnd(hbtEvent);  // cleanup for EbyE 
   //cout << "StHbtAnalysis::ProcessEvent() - return to caller ... " << endl;
