@@ -88,9 +88,10 @@ class StiKalmanTrack : public StiTrack
   StiKalmanTrackNode *  getNodeNear(double x) const;
   StThreeVector<double> getPointNear(double x) const;
   StThreeVector<double> getGlobalPointNear(double x) const;
-  StThreeVector<double> getMomentumAtOrigin();
-  StThreeVector<double> getMomentumNear(double x);
-	StThreeVector<double> getHitPositionNear(double x) const;
+    
+    virtual StThreeVector<double> getMomentumAtOrigin();
+    virtual StThreeVector<double> getMomentumNear(double x);
+    virtual StThreeVector<double> getHitPositionNear(double x) const;
 
 protected:
     

@@ -1,8 +1,16 @@
 #ifndef StiTrack_H
 #define StiTrack_H 1
 
+//std
 #include <math.h>
+
+//SCL
+#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
+
+//sti
 #include "Exception.h"
+
 class StiHit;
 class StiTrackFitter;
 
@@ -30,8 +38,15 @@ public:
   virtual double  getMass()           const=0;   // mass when pid known
   virtual int     getCharge()         const=0;   // charge of the particle
   virtual double  getChi2()           const=0;   // chi2 of fit
-  
+
+    //This is for full state (3 mom + error matrix) 
     virtual void    getMomentum(double p[3], double e[6]) const =0;
+
+    //Simple gets
+    virtual StThreeVector<double> getMomentumAtOrigin() =0; //3-momentum at first point
+    virtual StThreeVector<double> getMomentumNear(double x) =0; //3-momentum at arb. point
+    virtual StThreeVector<double> getHitPositionNear(double x) const =0; //3-position at arb. point
+    
     virtual double  getPt()             const                   =0;   // transverse momentum
     virtual double  getRapidity()       const                   =0;   // rapidity
     virtual double  getPseudoRapidity() const                   =0;   // pseudo rapidity
