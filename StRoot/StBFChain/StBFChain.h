@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.11 2000/03/14 01:12:52 fisyak Exp $
+// $Id: StBFChain.h,v 1.12 2000/05/20 01:03:49 perev Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.12  2000/05/20 01:03:49  perev
+// Sequential event IventNumber added
+//
 // Revision 1.11  2000/03/14 01:12:52  fisyak
 // Split chain files
 //
@@ -91,6 +94,7 @@ class StBFChain : public StChain {
  public:
                        StBFChain(const char *name="bfc");
    virtual            ~StBFChain();
+   virtual Int_t       Make(int number){ SetIventNumber(number); return StMaker::Make(number);};
    virtual Int_t       Load();      // *MENU*
    virtual Int_t       Instantiate();      // *MENU*
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1); 
@@ -119,7 +123,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.11 2000/03/14 01:12:52 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.12 2000/05/20 01:03:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
