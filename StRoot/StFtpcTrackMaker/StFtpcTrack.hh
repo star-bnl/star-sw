@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.hh,v 1.3 2000/06/07 11:43:30 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.4 2000/07/03 12:42:57 jcs Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.4  2000/07/03 12:42:57  jcs
+// save (pre)Vertex id and unconstrained fit results
+//
 // Revision 1.3  2000/06/07 11:43:30  oldi
 // New data members added: mRowsWithPoints, mChi2Circle, mChi2Length, mRFirst, mRLast, mAlphaFirst, mAlphaLast.
 // Added the getters and setters for the new data members.
@@ -69,10 +72,10 @@ public:
               StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits = 0);  // constructor if STAF track is given
     virtual  ~StFtpcTrack();                                                  // destructor
        void   Fit();                                                          // momentum fit
-       void   Fit(StFtpcVertex *vertex, Double_t max_Dca);                    // momentum fit with vertex
+       void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex);                    // momentum fit with vertex
        void   CalculateNMax();                                                // calculates the max. possible number of points
    Double_t   CalcDca(StFtpcVertex *vertex);                                  // calculation of distance of closest approach (dca) to main vertex
-      Int_t   Write(fpt_fptrack_st *trackTableEntry);                         // writes track to table
+      Int_t   Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);  // writes track to table
 
   // getter
               TObjArray  *GetHits()             const { return mPoints;                          }
