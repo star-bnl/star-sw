@@ -1,3 +1,11 @@
+// $Id: StSsdWafer.cc,v 1.8 2005/03/18 13:55:50 lmartin Exp $
+//
+// $Log: StSsdWafer.cc,v $
+// Revision 1.8  2005/03/18 13:55:50  lmartin
+// missing CVS header added
+//#include "StSsdBarrel.hh"
+
+
 #include "StSsdWafer.hh"
 
 #include <Stiostream.h>

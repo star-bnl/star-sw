@@ -1,3 +1,11 @@
+// $Id: StSsdWafer.hh,v 1.3 2005/03/18 13:55:50 lmartin Exp $
+//
+// $Log: StSsdWafer.hh,v $
+// Revision 1.3  2005/03/18 13:55:50  lmartin
+// missing CVS header added
+//
+
+#include "StSsdBarrel.hh"
 /*!
  * \class StSsdWafer
  * \author to be filled - doc by L.Martin
