@@ -4,7 +4,7 @@
  */
 /********************************************************************
  *
- * $Id: StPhmdDetector.h,v 2.1 2002/12/20 22:33:00 ullrich Exp $
+ * $Id: StPhmdDetector.h,v 2.2 2003/04/22 00:08:13 ullrich Exp $
  *
  * Author: Subhasis Chattopadhyay, Dec 2002
  ********************************************************************
@@ -14,6 +14,9 @@
  ********************************************************************
  *
  * $Log: StPhmdDetector.h,v $
+ * Revision 2.2  2003/04/22 00:08:13  ullrich
+ * Removed //! comments
+ *
  * Revision 2.1  2002/12/20 22:33:00  ullrich
  * Initial Revision.
  *
@@ -56,8 +59,8 @@ private:
     StDetectorId             mDetectorId;
     
     Int_t                    mModulesNHit[mMaxModules];
-    StPhmdModule*            mModules[mMaxModules];  //! pointer for hits
-    StPhmdClusterCollection* mClusters;              //! pointer for clusters
+    StPhmdModule*            mModules[mMaxModules];  // pointer for hits
+    StPhmdClusterCollection* mClusters;              // pointer for clusters
     
     ClassDef(StPhmdDetector,1)
 };
