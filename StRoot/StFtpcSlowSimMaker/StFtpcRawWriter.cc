@@ -1,5 +1,9 @@
-// $Id: StFtpcRawWriter.cc,v 1.5 2002/11/26 02:20:39 perev Exp $
+// $Id: StFtpcRawWriter.cc,v 1.6 2003/01/29 12:06:34 fsimon Exp $
 // $Log: StFtpcRawWriter.cc,v $
+// Revision 1.6  2003/01/29 12:06:34  fsimon
+// Include switch to enable/disable turning of pad order for ASIC 2 in FTPC E
+// Was an error on Y2001/2002 DAQ mapping
+//
 // Revision 1.5  2002/11/26 02:20:39  perev
 // iostream added
 //
@@ -18,14 +22,17 @@
 
 #include <iostream.h>
 #include "StFtpcRawWriter.hh"
+#include "StMessMgr.h"
 
 StFtpcRawWriter::StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
 				 St_fcl_ftpcsqndx *ftpcsqndxIn,
-				 St_fcl_ftpcadc *ftpcadcIn)
+				 St_fcl_ftpcadc *ftpcadcIn,
+				 const int inAsic2EastNotInverted)
 {
   ftpcndx=ftpcndxIn;
   ftpcsqndx=ftpcsqndxIn;
   ftpcadc=ftpcadcIn;
+  mAsic2EastNotInverted = inAsic2EastNotInverted;
 
   ndx=ftpcndx->GetTable();
   numNdx=ftpcndx->GetNRows();
@@ -36,6 +43,7 @@ StFtpcRawWriter::StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
   adc=ftpcadc->GetTable();
   numAdc=ftpcadc->GetNRows();
   maxAdc=ftpcadc->GetTableSize();
+  gMessMgr->Info() << "FTPC RawWriter created with Asic2EastNotInverted = " << mAsic2EastNotInverted <<endm;
 }
 
 StFtpcRawWriter::~StFtpcRawWriter()
@@ -87,9 +95,9 @@ int StFtpcRawWriter::writeArray(float *array,
 	    +numberTimebins*numberPads*sec
 	    +numberTimebins*numberPads*numberSectors*row;
 	  if (row>=10)
-	    if ((pad>63)&&(pad<96)) // no turning for center FEE card in each sector
-	      newi=bin
-		+numberTimebins*pad
+	    if (mAsic2EastNotInverted && (pad>63)&&(pad<96)) // no turning for center FEE card in each sector for old data (prior to 2003)
+	      newi=bin              // Turning for simulator db access in StFtpcSlowSimReadout::GetHardPad
+ 		+numberTimebins*pad
 		+numberTimebins*numberPads*sec
 		+numberTimebins*numberPads*numberSectors*row; 
 	    else

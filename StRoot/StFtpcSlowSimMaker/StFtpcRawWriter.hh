@@ -1,5 +1,9 @@
-// $Id: StFtpcRawWriter.hh,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcRawWriter.hh,v 1.2 2003/01/29 12:06:36 fsimon Exp $
 // $Log: StFtpcRawWriter.hh,v $
+// Revision 1.2  2003/01/29 12:06:36  fsimon
+// Include switch to enable/disable turning of pad order for ASIC 2 in FTPC E
+// Was an error on Y2001/2002 DAQ mapping
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -18,7 +22,8 @@ class StFtpcRawWriter
 public:
   StFtpcRawWriter(St_fcl_ftpcndx *ftpcndxIn,
 		  St_fcl_ftpcsqndx *ftpcsqndxIn,
-		  St_fcl_ftpcadc *ftpcadcIn);
+		  St_fcl_ftpcadc *ftpcadcIn,
+		  const int inAsic2EastNotInverted);
   ~StFtpcRawWriter();
   int writeArray(float *array, 
 		 int numberPadrows, 
@@ -27,6 +32,7 @@ public:
 		 int numberTimebins,
 		 int threshold);
 private:
+  int mAsic2EastNotInverted;
   FCL_FTPCNDX_ST *ndx; 
   int numNdx;
   int maxNdx; 
