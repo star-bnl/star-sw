@@ -21,7 +21,7 @@ MinvCorrFctn.o \
 MinvCorrFctnArmenteros.o \
 MinvCorrFctnM_vs_Pt.o \
 Q3invCorrFctn.o \
-ExitSepCorrFctn.o \
+hbtExitSepCorrFctn.o \
 ParityCorrFctn.o \
 MinvCorrFctnY_vs_Pt.o \
 QinvCorrFctn.o \
@@ -235,7 +235,7 @@ hbt:	hbt.o $(HBTOBJ) $(STARCLASSOBJ)
 	echo $(LDFLAGS)
 
 hbtQinv: hbtQinv.o $(HBTOBJ) $(STARCLASSOBJ)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< $(HBTOBJ) $(STARCLASSOBJ) -o hbt
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $< $(HBTOBJ) $(STARCLASSOBJ) -o hbtQinv
 	echo $(LDFLAGS)
 
 StarClass: $(STARCLASSOBJ)
