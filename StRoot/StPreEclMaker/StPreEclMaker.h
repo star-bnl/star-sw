@@ -1,8 +1,12 @@
 //
-// $Id: StPreEclMaker.h,v 1.10 2001/05/01 18:17:16 suaide Exp $
+// $Id: StPreEclMaker.h,v 1.11 2001/05/02 15:28:19 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.11  2001/05/02 15:28:19  suaide
+// the default option is not to clear the old emc info. use it only
+// if you want to re-run cluster finder
+//
 // Revision 1.10  2001/05/01 18:17:16  suaide
 // modified to erase old EMC points and clusters if they exist, so it
 // is possible to run cluster maker again with different thresholds
@@ -98,6 +102,8 @@ public:
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t);
           void  SetClusterConditions(char*,Int_t,Float_t,Float_t,Float_t,Bool_t);
   St_emcClusterParam* getParam() {return mParam;} 
+  
+          Bool_t doClearEmc;
         
   ClassDef(StPreEclMaker, 1)// Electromagnetic PreClusters maker
 };

@@ -1,7 +1,11 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.13 2001/05/01 18:17:13 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.14 2001/05/02 15:28:19 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.14  2001/05/02 15:28:19  suaide
+// the default option is not to clear the old emc info. use it only
+// if you want to re-run cluster finder
+//
 // Revision 1.13  2001/05/01 18:17:13  suaide
 // modified to erase old EMC points and clusters if they exist, so it
 // is possible to run cluster maker again with different thresholds
@@ -120,6 +124,9 @@ StPreEclMaker::~StPreEclMaker()
 //_____________________________________________________________________________
 Int_t StPreEclMaker::Init()
 {
+  
+  doClearEmc=kFALSE;
+  
   //Setting default cluster conditions ... for pi0 business
   mParam = new St_emcClusterParam("emcClustParam", BSMDP);
   AddRunco((TDataSet*)mParam);
@@ -237,7 +244,7 @@ Int_t StPreEclMaker::Make()
 
   }
   
-  ClearEmc(); 
+  if (doClearEmc) ClearEmc(); // clear old emc info
 //
 // At this point, StEmcCollection should be Ok.
 //
@@ -274,6 +281,7 @@ Int_t StPreEclMaker::Make()
 //_____________________________________________________________________________
 Int_t StPreEclMaker::ClearEmc()
 {
+  cout <<"Deleting old emc info ...\n";
   StSPtrVecEmcPoint& pvec = emc->barrelPoints();
   if(pvec.size()>0) 
   {
@@ -438,7 +446,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.13 2001/05/01 18:17:13 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.14 2001/05/02 15:28:19 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
