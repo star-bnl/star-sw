@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.12 2004/07/15 16:36:23 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.13 2004/10/11 22:58:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.13  2004/10/11 22:58:35  ullrich
+ * Changed order of initialization in constructor.
+ *
  * Revision 2.12  2004/07/15 16:36:23  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -54,20 +57,20 @@
 #include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.12 2004/07/15 16:36:23 ullrich Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.13 2004/10/11 22:58:35 ullrich Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
-    mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
+    mNumberOfPoints(0), mMethod(0), mDedx(0), mSigma(0) { /* noop */ }
 
 StDedxPidTraits::StDedxPidTraits(StDetectorId det, short meth,
                                  unsigned short n, float dedx, float sig) :
     StTrackPidTraits(det),
-    mNumberOfPoints(n), mDedx(dedx), mSigma(sig), mMethod(meth) { /* noop */ }
+    mNumberOfPoints(n), mMethod(meth), mDedx(dedx), mSigma(sig) { /* noop */ }
 
 StDedxPidTraits::StDedxPidTraits(const dst_dedx_st& t) :
     StTrackPidTraits(t),
-    mNumberOfPoints(t.ndedx), mDedx(t.dedx[0]),
-    mSigma(t.dedx[1]), mMethod(t.method){ /* noop */ }
+    mNumberOfPoints(t.ndedx), mMethod(t.method), mDedx(t.dedx[0]),
+    mSigma(t.dedx[1]) { /* noop */ }
 
 StDedxPidTraits::~StDedxPidTraits() { /* noop */ }
 
