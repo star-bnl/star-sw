@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.25 1998/05/19 16:36:41 perev Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.26 1998/06/26 19:54:39 ward Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -25,6 +25,7 @@
 #include "socClasses.hh"
 #include "soc_globals.h"
 #include "socdl.h"
+#define PP printf(
 
 #undef VALID_IDREF
 #define VALID_IDREF(A)  ( (0 <= A && A < count() && A < maxCount()) \
@@ -413,7 +414,8 @@ STAFCV_T socCatalog:: idObject (const char * name
    char *n, *t;
    for( int i=0; i<count(); i++ ){
       if( myObjs[i] ) {
-	 if(  0 == strcmp(n=myObjs[i]->name(),name) ){
+         n=myObjs[i]->name();
+	 if(  0 == strcmp(n,name) ){
 	    if( 0 == strcmp(t=myObjs[i]->type(),type) 
 	    ||  0 == strcmp("-",type) ){
 	       id = i;
