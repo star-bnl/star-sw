@@ -31,6 +31,8 @@ C     ---------------------------------------------------------------------
 C     argument declaration
 C     --------------------
 #include "stk_am_kine.inc"
+#include "phys_constants.inc"
+#include "math_constants.inc"
       
 C     Local Declarations:
 C     -------------------
@@ -42,7 +44,7 @@ C     -------------------
       real      x0, y0, z0, r0, phi0       ! 1st point position (reference
 C                                            cylinder)
       real      xh,  yh,  rh, phi, ch
-      real     konst, bfield
+      real     bfield(3),x(3)
       real     x1, y1, z1
       real     ptot, pt, p(3), costh, sinth, cosl, sinl, ph, th
       real     infinity/1.e9/
@@ -69,6 +71,17 @@ C     ----------------
 C      call StInfo('STK_AM_KINE: Starting ###############################')
 
       stk_am_kine = stafcv_ok
+c     Get the field as its uniform just get it at 0,0,0
+
+      x(1) = 0.
+      x(2) = 0.
+      x(3) = 0.
+      bfield(1) = 0
+      bfield(2) = 0.
+      bfield(3) = 0.
+      call gufld(x,bfield)
+
+
 
 c     set error id 
       
@@ -104,8 +117,6 @@ c     assume uniform field of 0.5 tesla = 5 kgauss
          invpt = track(itrack).invpt 
          if (abs(invpt) .gt. 0.000001 .and. 
      &        abs(invpt).le.infinity ) then
-            bfield  = 5.        ! kgauss
-            konst   = 2.99792458e-4 ! GeV c-1 kgauss-1 cm-1
             
             pid  = track(itrack).pid  
 
@@ -141,7 +152,7 @@ c     track sign
 
 c     radius of curvature and momentum
 
-            rh   = 1./abs(invpt*konst*bfield)
+            rh   = 1./abs(invpt*C_D_CURVATURE*bfield(3))
             pt   = 1./abs(invpt)
 
 c     azimuthal angle
