@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.10 1999/07/19 19:15:49 genevb Exp $
+* $Id: tfs_tpchit_merge.F,v 1.11 1999/08/12 19:58:47 liq Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.11  1999/08/12 19:58:47  liq
+* check the distance along x instead of y when decided whether it should be merged
+*
 * Revision 1.10  1999/07/19 19:15:49  genevb
 * Use StMessMgr
 *
@@ -324,25 +327,25 @@ C     check overlap in the r-phi direction
                if( rlap.ge.rsizk ) then
 C     kth hit is completely overlapped
                   rsiz = rsizl
-                  rmin = xoutl(2) - tphit(l).prf
-                  rmax = xoutl(2) + tphit(l).prf
+                  rmin = xoutl(1) - tphit(l).prf
+                  rmax = xoutl(1) + tphit(l).prf
                elseif ( rlap.ge.rsizl ) then
 C     lth hit is completely overlapped
                   rsiz = rsizk
-                  rmin = xoutk(2) - tphit(k).prf
-                  rmax = xoutk(2) + tphit(k).prf
+                  rmin = xoutk(1) - tphit(k).prf
+                  rmax = xoutk(1) + tphit(k).prf
                else
 C     sum of the full widths minus the overlap
                   rsiz = 2*rwid - rlap
 C     in this case hits aren't sorted in any order ...
-                  rmink = xoutk(2) - tphit(k).prf
-                  rminl = xoutl(2) - tphit(l).prf
+                  rmink = xoutk(1) - tphit(k).prf
+                  rminl = xoutl(1) - tphit(l).prf
                   if ( rmink .lt. rminl ) then
                      rmin = rmink
-                     rmax = xoutl(2) + tphit(l).prf
+                     rmax = xoutl(1) + tphit(l).prf
                   else
                      rmin = rminl
-                     rmax = xoutk(2) + tphit(k).prf
+                     rmax = xoutk(1) + tphit(k).prf
                   endif
                endif
                
@@ -370,7 +373,7 @@ C     add the amplitudes and quadrature the errors
                       call Message( m132, 1, idI3 )
                       tphit(l).dq = 0.
                      endif
-               xoutl(2) = (rmax + rmin) / 2.
+               xoutl(1) = (rmax + rmin) / 2.
                xoutl(3) = (zmax + zmin) / 2.
                IsectorDummy=i
                iret  = tgc_local_to_global(IsectorDummy,xoutl,xglob) 
