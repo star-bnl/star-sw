@@ -17,6 +17,9 @@
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE.
+*  temporarely until GCTLIT is not part of GCTMED:
+   Integer        Thrind   ,Jmin,ItCkov,ImCkov,NpCkov
+   common/GCTLIT/ Thrind(4),Jmin,ItCkov,ImCkov,NpCkov
 * - - - - - - - - - - - - - - - - -
 replace[;ON#{#;] with [
   IF Index(Commands,'#1')>0 
@@ -114,6 +117,7 @@ If LL>1
    If (LL>1) call AgDETP new ('Trac')
    call AgDETP add ('TracDCAY',dcay,4)
 *
+   if (rich) ItCKOV = 1
    if (cave) Call cavegeo
    if (pipe) Call pipegeo
    if (upst) Call upstgeo
@@ -150,9 +154,14 @@ If LL>1
    if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
    if (ems)  call AgDETP add ('calg.shift=',shift,2)
    if (calb) Call calbgeo
-   if (rich) Call richgeo
    if (ecal) Call ecalgeo
    if (magp) Call magpgeo
+
+   if (rich) then
+     Call AGSFLAG('SIMU',2)
+     Call richgeo
+     Call AGSFLAG('SIMU',1)
+   endif
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (LL>1) call AgDETP new ('MFLD')
