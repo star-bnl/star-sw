@@ -60,7 +60,7 @@ print "build $pkg with cons\n";
 my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{LIBPATH};
 $LIBS .= $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
-if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable -lStar2Root";}
+if ($env->{ENV}->{STAR}) {$LIBS .= " -lGeom -lTable";}# -lStar2Root";}
 my $FEXTEND   = $env->{FEXTEND};
 if ($FC =~ /^pgf/) {
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
