@@ -29,7 +29,7 @@
   float      x_last[3];        /* coord. of last measured point          */
   float      length;           /* track length from first to last point  */
   float      impact;           /* impact parameter from primary vertex   */
-  short      ndegf;            /* no. deg. of freedom for track fit.     */ 
+  long       ndegf;            /* no. deg. of freedom for track fit.     */ 
   long       id_global_pid;    /* F.key to global PID table              */
   long       id_hypo_pid;      /* F.key to PID hypothesis table          */
   long       id_start_vertex;  /* F.key to dst_vertex for starting vrtx. */
@@ -37,4 +37,4 @@
   long       id_emc;           /* F.key to EMC tower energy table        */
   long       id_smd;           /* F.key to SMD energy table              */
  } ;
-/*  Last mod. for dst_track:   $Date: 1998/06/03 13:52:02 $ */
+/*  Last mod. for dst_track:   $Date: 1998/06/03 22:26:50 $ */
