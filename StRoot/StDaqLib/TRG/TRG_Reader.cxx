@@ -7,7 +7,8 @@
  *
  *   change log
  *  14-Jan-00 MJL added TRGD::PrintDataCompact()
- *  04-Feb-00 hjw adaptations for "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in trgStructures.h (BYTE = uchar)
+ *  04-Feb-00 hjw adaptations for "ushort ZDCDSM[8]" to "BYTE ZDC[16]" in 
+ *            trgStructures.h (BYTE = uchar)
  *                
  *************************************************************************** 
 */
@@ -47,43 +48,62 @@ MarilynMonroe2000 *gs2000; // CAUTION: this is used in duplicated.code, even
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////  functions  /////////////////////
 
+/// This routine also exists in St_trg_Maker
 int TRG_Reader::YearOfData(char *data) {
   data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
+
   if(*data==0x12) return 2000; // These years (2000, 2001, 2003, ...) correspond
   if(*data==0x13) return 2001; // roughly to the file names for the various
   if(*data==0x20) return 2003; // trgStructures.h versions (eg, trgStructures2003.h).
   assert(0);  // Should not be here.  My ne dolzhny byt6 zdec6.
+
   return 0;
 }
+
+
 TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   pBankTRGP=pTRGP; //copy into class data member for use by other methods
   ercpy=er; // squirrel away pointer eventreader for our friends
-  if(!pBankTRGP->test_CRC()) { printf("CRC error: %s %d\n",__FILE__,__LINE__); }
-  if(pBankTRGP->swap()<0) { printf("swap error: %s %d\n",__FILE__,__LINE__); } // Use default swap.
+  if(!pBankTRGP->test_CRC()) { 
+    printf("CRC error: %s %d\n",__FILE__,__LINE__); 
+  }
+  if(pBankTRGP->swap()<0) { 
+    // Use default swap.
+    printf("swap error: %s %d\n",__FILE__,__LINE__); 
+  }
   pBankTRGP->header.CRC=0;
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
+
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
   char *ptr=(char*)pBankTRGD; ptr+=40; /* Skip the 10-word TRGD bank header. */ 
+
   switch(YearOfData(ptr)) {
     case 2000:
       gs2000=(MarilynMonroe2000*)ptr;
-      SanityCheck2000();
+      SanityCheck2000(1);
       if(pBankTRGD->HerbSwap2000()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
+
     case 2001:
       gs=(MarilynMonroe*)ptr;
-      SanityCheck();
+      SanityCheck(1);
       if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
+
     case 2003:
-      SanityCheck2003(ptr);
+      SanityCheck2003(ptr,S_mode);
       if(pBankTRGD->HerbSwap2003(ptr)<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
       break;
+
     default: assert(0);
   }
-  printf("Trigger reader instantiated, distance to data = %d bytes.\n",pBankTRGP->theData.offset);
+  printf("Trigger reader instantiated, distance to data = %d bytes.\n",
+	 pBankTRGP->theData.offset);
 }
+
+
+
 void TRG_Reader::dumpWordsToScreenInHexAndExit(int nwords) {
   int i;
   unsigned int *pp;
