@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.4 1999/04/14 23:12:07 fisyak Exp $
+ * $Id: StLorentzVector.hh,v 1.5 1999/06/04 18:01:36 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,8 +20,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
- * Revision 1.4  1999/04/14 23:12:07  fisyak
- * Add __CINT__ to handle references
+ * Revision 1.5  1999/06/04 18:01:36  ullrich
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.5  1999/06/04 18:01:36  ullrich
  * New operators operator() and operator[] which can be used
@@ -85,6 +86,9 @@ public:
     T t()                     const;
     T px()                    const;
     T py()                    const;
+    T pz()                    const;
+    T e()                     const;
+    T operator()  (size_t)    const;
     T operator[]  (size_t)    const;
     
     T& operator()  (size_t);
@@ -299,7 +303,41 @@ inline T StLorentzVector<T>::operator() (size_t i) const
 }
 
 template<class T>
+inline T& StLorentzVector<T>::operator() (size_t i)
+{
+    if (i < 3)
+        return mThreeVector(i);
+    else if (i == 3)
+        return mX4;
+    else {
+#ifndef ST_NO_EXCEPTIONS
+      throw out_of_range("StLorentzVector<T>::operator(): bad index");  
+#else
+      cerr << "StLorentzVector<T>::operator(): bad index." << endl;
+#endif
+      return mX4;
+    }
+}
+
+template<class T>
 inline T StLorentzVector<T>::operator[] (size_t i) const
+{
+    if (i < 3)
+        return mThreeVector[i];
+    else if (i == 3)
+        return mX4;
+    else {
+#ifndef ST_NO_EXCEPTIONS
+      throw out_of_range("StLorentzVector<T>::operator[]: bad index"); 
+#else
+      cerr << "StLorentzVector<T>::operator[]: bad index." << endl;
+#endif
+      return 0;
+    }
+}
+
+template<class T>
+inline T& StLorentzVector<T>::operator[] (size_t i)
 {
     if (i < 3)
         return mThreeVector[i];

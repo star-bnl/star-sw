@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorF.hh,v 1.1 1999/01/30 03:59:03 fisyak Exp $
+ * $Id: StLorentzVectorF.hh,v 1.2 1999/06/04 18:01:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,9 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorF.hh,v $
- * Revision 1.1  1999/01/30 03:59:03  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/06/04 18:01:41  ullrich
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.2  1999/06/04 18:01:41  ullrich
  * New operators operator() and operator[] which can be used
@@ -64,6 +65,9 @@ public:
     float t()                     const;
     float px()                    const;
     float py()                    const;
+    float pz()                    const;
+    float e()                     const;
+    float operator()  (size_t)    const;
     float operator[]  (size_t)    const;
     
     float& operator()  (size_t);
@@ -237,11 +241,35 @@ inline float StLorentzVectorF::operator() (size_t i) const
         return mX4;
     else {
       cerr << "StLorentzVectorF::operator(): bad index." << endl;
+      return 0;
+    }
+}
+
+inline float& StLorentzVectorF::operator() (size_t i)
+{
+    if (i < 3)
+        return mThreeVector(i);
+    else if (i == 3)
+        return mX4;
+    else {
+      cerr << "StLorentzVectorF::operator(): bad index." << endl;
       return mX4;
     }
 }
 
 inline float StLorentzVectorF::operator[] (size_t i) const
+{
+    if (i < 3)
+        return mThreeVector[i];
+    else if (i == 3)
+        return mX4;
+    else {
+      cerr << "StLorentzVectorF::operator[]: bad index." << endl;
+      return 0;
+    }
+}
+
+inline float& StLorentzVectorF::operator[] (size_t i) 
 {
     if (i < 3)
         return mThreeVector[i];
