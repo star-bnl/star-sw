@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.18 2002/01/21 22:14:56 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.19 2002/02/26 13:16:40 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.19  2002/02/26 13:16:40  jcs
+// get cluster unfolding paramteres from ftpcClusterPars
+//
 // Revision 1.18  2002/01/21 22:14:56  jcs
 // added values for temperature/pressure calculations to ftpcClusterPars
 //
@@ -104,6 +107,14 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
     mGasTemperatureEast = detTable->gasTemperatureEast;
     mMinGasTemperature = detTable->minGasTemperature;
     mMaxGasTemperature = detTable->maxGasTemperature;
+    mMaxNumSequences = detTable->maxNumSequences ; 
+    mMaxNumSeqPeaks = detTable->maxNumSeqPeaks;
+    mMaxNumPeaks = detTable->maxNumPeaks;          
+    mMaxNumCUC = detTable->maxNumCUC;           
+    mMaxLoops = detTable->maxLoops;         
+    mMaxFastLoops = detTable->maxFastLoops;    
+    mUnfoldLimit = detTable->unfoldLimit;      
+    mUnfoldFailedLimit = detTable->unfoldFailedLimit; 
   } else {
     gMessMgr->Message( " No data in table class St_ftpcClusterPars","E");
   }
