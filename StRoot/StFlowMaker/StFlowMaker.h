@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.34 2003/01/10 16:42:31 oldi Exp $
+//  $Id: StFlowMaker.h,v 1.35 2003/05/06 20:38:05 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.34 2003/01/10 16:42:31 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.35 2003/05/06 20:38:05 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -91,7 +91,7 @@ private:
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
   Bool_t           mMuEventRead;              // switch for common Mu-DST
-  UInt_t           mPicoEventCounter;         // number of Bytes in pico event
+  UInt_t           mEventCounter;         // number of Bytes in pico event
   Bool_t           mOnePhiWgt;                // use old phi weights
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
@@ -103,11 +103,11 @@ private:
   void             FillFlowEvent();           // fill the flow event
   void             FillPicoEvent();           // fill pico-DST
   Bool_t           FillFromPicoDST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent);
-  Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
+/*   Bool_t           FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent); */
+/*   Bool_t           FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent); */
+/*   Bool_t           FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent); */
+/*   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent); */
+/*   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent); */
   Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromMuDST();
@@ -171,6 +171,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.35  2003/05/06 20:38:05  posk
+//  Removed all but last two versions of pico file read.
+//
 //  Revision 1.34  2003/01/10 16:42:31  oldi
 //  Several changes to comply with FTPC tracks:
 //  - Switch to include/exclude FTPC tracks introduced.
