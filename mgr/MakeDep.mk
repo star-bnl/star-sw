@@ -18,18 +18,18 @@ $(DEP_DIR)/%.d: %.c
 $(DEP_DIR)/%.d: %.cxx
 	$(RM) $(ALL_TAGS)
 	$(MAKEDEPEND) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+'s/$(notdir $(STEM))\.$(O)/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).$(O))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cc
 	$(RM) $(ALL_TAGS)
 	$(MAKEDEPEND) $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+'s/$(notdir $(STEM))\.$(O)/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).$(O))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.g
 	$(RM) $(ALL_TAGS)
 	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.g\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+'s/$(notdir $(STEM))\.g\.$(O)/$(subst .,\.,$(subst /,\/,$(OBJ)/$(STEM).$(O))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.cdf
 	$(RM) $(ALL_TAGS)
@@ -39,10 +39,10 @@ $(DEP_DIR)/%.d:%.cdf
 $(DEP_DIR)/%.d:%.F
 	$(RM) $(ALL_TAGS)
 	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(OBJ)/$(STEM).$(O))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
 $(DEP_DIR)/%.d:%.f
 	$(RM) $(ALL_TAGS)
 	$(MAKEDEPEND) -traditional -x c $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS) | sed -e \
-'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(LIB_PKG)($(STEM).$(O)))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+'s/$(notdir $(STEM))\.F\.$(O)/$(subst .,\.,$(subst /,\/,$(OBJ)/$(STEM).$(O))) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)

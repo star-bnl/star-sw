@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.104 1999/08/14 00:37:35 fisyak Exp $
+# $Id: MakePam.mk,v 1.105 1999/08/15 19:09:05 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.105  1999/08/15 19:09:05  fisyak
+# keep objects for pams
+#
 # Revision 1.104  1999/08/14 00:37:35  fisyak
 # New Cons stuff
 #
@@ -418,7 +421,8 @@ ifneq ($(STAR_PATH),$(OUT_DIR))
   endif                           
 endif                           
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
-OBJS    := $(LIB_PKG)($(NAMES_O))
+#OBJS    := $(LIB_PKG)($(NAMES_O))
+OBJS    := $(FILES_O);
 ifeq (,$(strip $(LIB_PKG) $(SL_PKG)))
 all:
 	@echo Nothing to do for package $(PKG)
@@ -437,7 +441,8 @@ ifneq (,$(strip $(FILES_O) $(FILES_SL) $(FILES_OG) $(FILES_init)))
 #                 I have NO idl- and NO g-files
 ifneq ($(FILES_O),)    
 $(LIB_PKG):$(OBJS) 
-#	$(AR) $(ARFLAGS) $(LIB_PKG) $(FILES_O); $(RM) $(FILES_O)
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(FILES_O); 
+#$(RM) $(FILES_O)
 endif                          
 ifneq ($(strip $(FILES_SL) $(FILES_OG) $(FILES_init)),)   
 $(SL_PKG): $(FILES_SL) $(FILES_OG) $(FILES_init) $(LIB_PKG) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))
@@ -539,33 +544,20 @@ $(GEN_TAB)/St_%_Table.h:
 endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
-$(FILES_OG): $(OBJ_DIR)/%.$(O):%.g
+$(OBJ_DIR)/%.$(O):%.g
 	$(CP) $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o):%.g
-	cp $(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
-	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(OBJ_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
-#	$(RM) $(OBJ_DIR)/$(STEM).F 
-	$(AR) $(ARFLAGS) $(LIB_PKG)  $(OBJ_DIR)/$(STEM).o
-$(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.o: %.cxx
+$(OBJ_DIR)/%.o: %.cxx
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o
-$(FILES_SL) : $(OBJ_DIR)/%.o: %.cc
+$(OBJ_DIR)/%.o: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o): %.F
+$(OBJ_DIR)/%.$(O): %.F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o): %.c
+$(OBJ_DIR)/%.$(O): %.c
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o): %.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
-$(LIB_PKG)(%.o): %.cdf
+$(OBJ_DIR)/%.$(O): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(OBJ_DIR)/$(STEM).c
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(OBJ_DIR)/$(STEM).c $(COUT) $(OBJ_DIR)/$(STEM).$(O); \
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
-#       $(RM)  $(OBJ_DIR)/$(STEM).c
 #_______________________dependencies_________________________________
 ifneq (,$(FILES_IDM))
 $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
