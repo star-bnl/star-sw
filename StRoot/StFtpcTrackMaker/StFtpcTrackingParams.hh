@@ -5,6 +5,17 @@
 #include "Rtypes.h"
 #endif
 
+// SCL
+#include "SystemOfUnits.h"
+#include "StThreeVector.hh"
+#include "StMatrixD.hh"
+
+//#include "StTpcDb/StTpcDb.h"
+
+class StGlobalCoordinate;
+class StFtpcLocalCoordinate;
+class StTpcDb;
+
 class StFtpcTrackingParams
 {
  private:
@@ -66,6 +77,19 @@ class StFtpcTrackingParams
   Double_t mPadLength;
   Double_t mFracTrunc;
   Double_t mALargeNumber;
+
+  // transformation due to rotated and displaced TPC
+  StMatrixD mTpcToGlobalRotation; // (3X3)
+  StMatrixD mGlobalToTpcRotation; // (3X3)
+  StThreeVectorD mTpcPositionInGlobal; 
+
+  // internal FTPC rotation (East only)
+  StMatrixD mFtpcRotation;
+  StMatrixD mFtpcRotationInverse;
+  Double_t mInstallationPointZ;
+  Double_t mObservedVertexOffsetY;
+  
+  //StTpcDb*                gTpcDbPtr; // pointer to TPC database
 
 
  protected:
@@ -138,6 +162,16 @@ class StFtpcTrackingParams
   Double_t PadLength();
   Double_t FracTrunc();
   Double_t ALargeNumber();
+
+  // transformation due to rotated and displaced TPC
+  StMatrixD TpcToGlobalRotation();
+  StMatrixD GlobalToTpcRotation();
+  StThreeVectorD TpcPositionInGlobal(); 
+
+  StMatrixD FtpcRotation();
+  StMatrixD FtpcRotationInverse();
+  Double_t InstallationPointZ();
+  Double_t ObservedVertexOffsetY();
 
   ClassDef(StFtpcTrackingParams,0)  // Parameters for FTPC tracking
 };    

@@ -4,6 +4,8 @@
 
 #include "StFtpcTrackingParams.hh"
 #include "SystemOfUnits.h"
+
+#include "TMath.h"
 #include "iostream.h"
 
 ////////////////////////////////////////////////////////////////////////
@@ -35,7 +37,9 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug) {
 }
 
 
-StFtpcTrackingParams::StFtpcTrackingParams() {
+StFtpcTrackingParams::StFtpcTrackingParams() : mTpcToGlobalRotation(3, 3, 1), mGlobalToTpcRotation(3, 3, 1), 
+					       mFtpcRotation(3, 3, 1), mFtpcRotationInverse(3, 3, 1)
+{
   // default constructor
 
   InitFromFile();
@@ -136,15 +140,15 @@ Int_t StFtpcTrackingParams::InitFromFile() {
   mMinTrackLength[2] = 5;
   mMinTrackLength[3] = 5;
 
-  mRowScopeTracklet[0] = 1;
-  mRowScopeTracklet[1] = 1;
+  mRowScopeTracklet[0] = 2; // was set to 1 for Markus' PhD thesis
+  mRowScopeTracklet[1] = 2;
   mRowScopeTracklet[2] = 2;
   mRowScopeTracklet[3] = 3;
 
-  mRowScopeTrack[0] = 2;
-  mRowScopeTrack[1] = 2;
-  mRowScopeTrack[2] = 2;
-  mRowScopeTrack[3] = 2;
+  mRowScopeTrack[0] = 3; // was set to 2 for Markus' PhD thesis
+  mRowScopeTrack[1] = 3;
+  mRowScopeTrack[2] = 3;
+  mRowScopeTrack[3] = 3;
 
   mPhiScope[0] = 1;
   mPhiScope[1] = 1;
@@ -152,50 +156,139 @@ Int_t StFtpcTrackingParams::InitFromFile() {
   mPhiScope[3] = 2;
 
   mEtaScope[0] =  1;
-  //mEtaScope[0] =  3;  //loose cuts
-  mEtaScope[1] =  1;
+  mEtaScope[1] =  3;
   mEtaScope[2] =  3;
   mEtaScope[3] = 15;
 
   mMaxDca[0] = 2.5 * centimeter;
-  mMaxDca[1] = 1.0 * centimeter;
+  mMaxDca[1] = 2.5 * centimeter;
   mMaxDca[2] = 1.0 * centimeter;
   mMaxDca[3] = 1.0 * centimeter;
 
   // Tracklets
-  mMaxAngleTracklet[0] = 0.020 * radian;
-  mMaxAngleTracklet[1] = 0.007 * radian;
+  mMaxAngleTracklet[0] = 0.015 * radian;
+  mMaxAngleTracklet[1] = 0.030 * radian;
   mMaxAngleTracklet[2] = 0.030 * radian;
   mMaxAngleTracklet[3] = 0.050 * radian;
-  // mMaxAngleTracklet[0] = 0.007 * radian;  //Markus
-  // mMaxAngleTracklet[0] = 0.030 * radian;  //loose cuts
+  // mMaxAngleTracklet[0] = 0.007 * radian;  // Markus' PhD thesis
 
   // Tracks
-  mMaxAngleTrack[0] = 0.060 * radian;
-  mMaxAngleTrack[1] = 0.007 * radian;
+  mMaxAngleTrack[0] = 0.030 * radian; // was set to 0.007 * radian for Markus' PhD thesis
+  mMaxAngleTrack[1] = 0.080 * radian;
   mMaxAngleTrack[2] = 0.007 * radian; // not used
   mMaxAngleTrack[3] = 0.007 * radian; // not used
-  //mMaxAngleTrack[0] = 0.007 * radian;  //Markus
-  //mMaxAngleTrack[0] = 0.070 * radian;  //loose cuts
 
-  mMaxCircleDist[0] = 0.03 * 1/centimeter;
-  mMaxCircleDist[1] = 0.03 * 1/centimeter;
+  mMaxCircleDist[0] = 0.05 * 1/centimeter; // was set to 0.03 * 1/centimeter for Markus' PhD thesis
+  mMaxCircleDist[1] = 0.05 * 1/centimeter;
   mMaxCircleDist[2] = 0.03 * 1/centimeter; // not used
   mMaxCircleDist[3] = 0.03 * 1/centimeter; // not used
-  //mMaxCircleDist[0] = 0.03 * 1/centimeter;  //Markus
-  //mMaxCircleDist[0] = 0.30 * 1/centimeter;  //loose cuts
 
   mMaxLengthDist[0] = 30. * centimeter;
   mMaxLengthDist[1] = 70. * centimeter;
   mMaxLengthDist[2] = 30. * centimeter; // not used
   mMaxLengthDist[3] = 30. * centimeter; // not used
-  //mMaxLengthDist[0] = 30. * centimeter;  //Markus
-  //mMaxLengthDist[0] = 50. * centimeter;  //loose cuts
   
   // Split tracks
   mMaxDist       = 0.11;
   mMinPointRatio = 0.50;
   mMaxPointRatio = 0.50; 
+
+  // dE/dx (still missing!)
+
+  // transformation due to rotated and displaced TPC
+  // lines commented out go in if TPC database is available
+
+  //gTpcDbPtr = globalDbPointer;  
+  //if (gTpcDbPtr->GlobalPosition()) 
+  {
+
+    Double_t phi = 0.0;  //large uncertainty, so set to 0
+    
+    //double theta = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisY();
+    //double psi = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisX();
+    
+    Double_t theta = -0.000381;
+    Double_t psi   = -0.000156;
+    
+    // Debug :
+    // cout << TMath::Cos(theta) << " " << TMath::Cos(phi) << endl;
+        
+    mGlobalToTpcRotation(1, 1) =  TMath::Cos(theta) * TMath::Cos(phi);
+    mGlobalToTpcRotation(1, 2) =  TMath::Cos(theta) * TMath::Sin(phi);
+    mGlobalToTpcRotation(1, 3) = -TMath::Sin(theta);
+    mGlobalToTpcRotation(2, 1) =  TMath::Sin(psi) * TMath::Sin(theta) * TMath::Cos(phi) - TMath::Cos(psi) * TMath::Sin(phi);
+    mGlobalToTpcRotation(2, 2) =  TMath::Sin(psi) * TMath::Sin(theta) * TMath::Sin(phi) + TMath::Cos(psi) * TMath::Cos(phi);
+    mGlobalToTpcRotation(2, 3) =  TMath::Cos(theta) * TMath::Sin(psi);
+    mGlobalToTpcRotation(3, 1) =  TMath::Cos(psi) * TMath::Sin(theta) * TMath::Cos(phi)+TMath::Sin(psi) * TMath::Sin(phi);
+    mGlobalToTpcRotation(3, 2) =  TMath::Cos(psi) * TMath::Sin(theta) * TMath::Sin(phi)-TMath::Sin(psi) * TMath::Cos(phi);
+    mGlobalToTpcRotation(3, 3) =  TMath::Cos(theta) * TMath::Cos(psi);
+    
+    UInt_t ierr;
+    mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
+    
+    if (ierr!=0) { 
+      cerr << "Cant invert rotation matrix" << endl;
+      cout << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endl;
+      cout << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endl;
+    }
+    
+    //mTpcPositionInGlobal.setX(gTpcDbPtr->GlobalPosition()->TpcCenterPositionX());
+    //mTpcPositionInGlobal.setY(gTpcDbPtr->GlobalPosition()->TpcCenterPositionY());
+    //mTpcPositionInGlobal.setZ(gTpcDbPtr->GlobalPosition()->TpcCenterPositionZ());
+    mTpcPositionInGlobal.setX(-0.256);
+    mTpcPositionInGlobal.setY(-0.082);
+    mTpcPositionInGlobal.setZ(-0.192);
+    
+    // Debug :
+    // cout<<"mTpcPositionInGlobal = " << mTpcPositionInGlobal << endl;
+  }
+  /* 
+ else {
+   cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
+   assert(gTpcDbPtr->GlobalPosition());
+ }
+  */ 
+  
+   // internal FTPC rotation (East only) [has do be done before local -> global]
+   mInstallationPointZ    = -235.8855 * centimeter;
+   mObservedVertexOffsetY =    0.2987 * centimeter;
+ 
+   // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
+   Double_t alpha = TMath::ATan(mObservedVertexOffsetY / TMath::Abs(mInstallationPointZ)); // radians and > 0
+   
+   // define rotation axis
+   Double_t rx = 1.0;
+   Double_t ry = 0.0;
+   Double_t rz = 0.0;
+   // simplify to rotation about x-axis because of very small y-z-offset
+ 
+   // take the normal vector as rotation vector
+   Double_t norm_r = TMath::Sqrt(rx*rx + ry*ry + rz*rz);
+   rx = rx/norm_r;
+   ry = ry/norm_r;
+   rz = rz/norm_r;
+ 
+   // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha [please check!]
+   // before that the coordinate system has to be transformed to x_installation, 
+   // y_installation, z_installation as new coordinate system origin
+   mFtpcRotation(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) + TMath::Cos(alpha);
+   mFtpcRotation(1, 2) = ry * rx * (1 - TMath::Cos(alpha)) - rz * TMath::Sin(alpha);
+   mFtpcRotation(1, 3) = rz * rx * (1 - TMath::Cos(alpha)) + ry * TMath::Sin(alpha);
+   mFtpcRotation(2, 1) = rx * ry * (1 - TMath::Cos(alpha)) + rz * TMath::Sin(alpha);
+   mFtpcRotation(2, 2) = ry * ry * (1 - TMath::Cos(alpha)) + TMath::Cos(alpha);
+   mFtpcRotation(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
+   mFtpcRotation(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
+   mFtpcRotation(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
+   mFtpcRotation(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) + TMath::Cos(alpha);
+
+   UInt_t ierr;
+   mFtpcRotationInverse = mFtpcRotation.inverse(ierr);
+   
+   if (ierr!=0) { 
+     cerr << "Cant invert FTPC rotation matrix" << endl;
+     cout << "FTPC rotation matrix:" << mFtpcRotation << endl;
+     cout << "Inverse FTPC rotation matrix:" << mFtpcRotationInverse << endl;
+   }
 
   return 1;
 }
@@ -348,3 +441,13 @@ inline Int_t StFtpcTrackingParams::MinHit()     { return StFtpcTrackingParams::m
 inline Double_t StFtpcTrackingParams::PadLength()    { return StFtpcTrackingParams::mPadLength;     }
 inline Double_t StFtpcTrackingParams::FracTrunc()    { return StFtpcTrackingParams::mFracTrunc;     }
 inline Double_t StFtpcTrackingParams::ALargeNumber() { return StFtpcTrackingParams::mALargeNumber;  }
+
+// transformation due to rotated and displaced TPC
+inline      StMatrixD StFtpcTrackingParams::TpcToGlobalRotation() { return mTpcToGlobalRotation; }
+inline      StMatrixD StFtpcTrackingParams::GlobalToTpcRotation() { return mGlobalToTpcRotation; }
+inline StThreeVectorD StFtpcTrackingParams::TpcPositionInGlobal() { return mTpcPositionInGlobal; } 
+
+inline StMatrixD StFtpcTrackingParams::FtpcRotation()          { return mFtpcRotation;          }
+inline StMatrixD StFtpcTrackingParams::FtpcRotationInverse()   { return mFtpcRotationInverse;   }
+inline  Double_t StFtpcTrackingParams::InstallationPointZ()    { return mInstallationPointZ;    }
+inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetY() { return mObservedVertexOffsetY; }
