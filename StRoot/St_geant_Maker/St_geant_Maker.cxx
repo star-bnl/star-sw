@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.68 2001/07/06 17:34:24 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.69 2001/11/18 00:58:14 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.69  2001/11/18 00:58:14  perev
+// Broadcast method added
+//
 // Revision 1.68  2001/07/06 17:34:24  nevski
 // type fixed
 //
@@ -1061,6 +1064,7 @@ void  St_geant_Maker::SetDebug(Int_t dbl)
 //_____________________________________________________________________________
 Int_t St_geant_Maker::SetInputFile(const char *file)
 {
+  Broadcast("GeantFile",file);
   fInputFile = file;
   TString kuip("gfile p "); kuip += fInputFile;
   Do((const char*)kuip); 

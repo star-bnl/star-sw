@@ -48,6 +48,7 @@ Int_t StDAQMaker::Init()
 Int_t StDAQMaker::Open(const char*)
 {
   if (fDAQReader && fDAQReader->isOpened()) return 0;
+  Broadcast("DAQFile",GetFile());
   printf("*** StDAQMaker::Open:  Open Input file %s ***\n",GetFile());
   if(!fDAQReader) fDAQReader = new StDAQReader();
   fDAQReader->setVerbose(GetDebug());
