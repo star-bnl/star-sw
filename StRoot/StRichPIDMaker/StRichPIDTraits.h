@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDTraits.h,v 1.2 2000/05/19 19:06:10 horsley Exp $
+ * $Id: StRichPIDTraits.h,v 1.3 2000/06/16 02:37:12 horsley Exp $
  *
  * Author: Matt Horsley, March 29, 2000
  ***************************************************************************
@@ -10,7 +10,7 @@
 #ifndef StRichPIDTraits_hh
 #define StRichPIDTraits_hh
 
-#include "StTrackPidTraits.h"
+#include "StEvent/StTrackPidTraits.h"
 #include "StParticleDefinition.hh"
 #include "TArrayD.h"
 

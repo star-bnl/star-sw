@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDAlgorithm.cxx,v 1.1 2000/05/19 19:09:15 horsley Exp $
+ * $Id: StRichPIDAlgorithm.cxx,v 1.2 2000/06/16 02:37:11 horsley Exp $
  *
  * Author: Matt Horsley, apr 8,2000
  ***************************************************************************
@@ -10,13 +10,11 @@
 #include <typeinfo>
 #include <math.h>
 #include "StRichPIDAlgorithm.h"
-#include "StTrack.h"
-#include "StParticleTypes.hh"
-#include "StEnumerations.h"
+#include "StEvent/StTrack.h"
 #include "StRichPIDTraits.h"
-#include "StTrackGeometry.h"
+#include "StEvent/StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StRichPIDAlgorithm.cxx,v 1.1 2000/05/19 19:09:15 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDAlgorithm.cxx,v 1.2 2000/06/16 02:37:11 horsley Exp $";
 
 StRichPIDAlgorithm::StRichPIDAlgorithm() {
   
