@@ -278,10 +278,12 @@ print "Total files: $nDiskFiles\n";
  my $mdstEvts = 0;
  my $msumFile = "no";
  my $mjobFile = "no";
+ my $mjobName = "n\/a";
  my $mmemSize = 0;
  my $mcpu = 0;
  my $mTrk = 0;
  my $mVtx = 0;
+ my $mnode = "n\/a";
 
 
 ##  start loop over daq files on HPSS
@@ -315,10 +317,12 @@ my $mdaqhpssFl;
   $mdstEvts = 0;
   $msumFile = "no";
   $mjobFile = "no";
+  $mjobName = "n\/a"; 
   $mmemSize = 0;
   $mcpu = 0;
   $mTrk = 0;
   $mVtx = 0;
+  $mnode = "n\/a";
 
 my $dir_set;
 my $dir_dset;
@@ -391,6 +395,7 @@ my $dir_dset;
          $jSet = $dir_set;
          $jSet =~ s/\//_/g;
          $jobfile_nm = $jSet . "_" . $basename;
+         $mjobName = $jobfile_nm;  
 #      print "Jobfile name: ",$jobfile_nm, "\n"; 
          job_file($prodPeriod[0], $run_chain,$jobfile_nm);
 
@@ -465,11 +470,13 @@ my $dir_dset;
       $sql.="dstEvents='$mdstEvts',";
       $sql.="jobStatus='$mjobStatus',";
       $sql.="summaryfile='$msumFile',";
-      $sql.="jobfile='$mjobFile',";
+      $sql.="jobfile_dir='$mjobFile',";
       $sql.="mem_size_MB='$mmemSize',";
       $sql.="CPU_per_evt_sec='$mcpu',";
       $sql.="avg_no_tracks='$mTrk',";
-      $sql.="avg_no_vertex='$mVtx'";  
+      $sql.="avg_no_vertex='$mVtx'";
+      $sql.="jobfile_name='$mjobName'"; 
+      $sql.="node='$mnode'";  
       print "$sql\n" if $debugOn;
       $rv = $dbh->do($sql) || die $dbh->errstr;
 
@@ -511,6 +518,12 @@ my $dir_dset;
  my @output = `more $jb_sum`; 
    foreach my $sum_line (@output) {
             chop $sum_line;
+
+# get node name
+	    if ($sum_line =~ /Starting job execution/) {
+             @word_sum = split (" ", $sum_line);
+             $mnode = $word_sum[11];
+	   }
 
 #  get job status
       if ($sum_line =~ /Segmentation violation/) {
