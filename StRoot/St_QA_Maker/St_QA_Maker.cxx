@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.100 2000/06/13 00:32:38 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.101 2000/06/16 15:53:41 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.101  2000/06/16 15:53:41  kathy
+// Gene's fix --- fixes a bug that the 2ndary histograms get filled presently with primary vertices where the iflag != 1
+//
 // Revision 1.100  2000/06/13 00:32:38  lansdell
 // added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
 //
@@ -1288,23 +1291,24 @@ void St_QA_Maker::MakeHistVertex(){
 
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
       if (t->iflag == 201) z_svt = t->z;
-      if (t->iflag == 101) z_tpc = t->z;
+      else if (t->iflag == 101) z_tpc = t->z;
+      else if (t->iflag == 1) {
 
-      if (t->iflag==1 && t->vtx_id==kEventVtxId){      // plot of primary vertex only
-	m_pv_vtxid->Fill(t->vtx_id);
-	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
-	if (!isnan(double(t->y))) m_pv_y->Fill(t->y);     
-	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
-	m_pv_pchi2->Fill(t->chisq[0]);
-	m_pv_r->Fill(t->x*t->x + t->y*t->y);
-      }
-      else {                                           // plot of 2ndary vertices only
-	m_v_vtxid->Fill(t->vtx_id);
-	if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
-	if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
-	if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
-	m_v_pchi2->Fill(t->chisq[0]); 
-	m_v_r->Fill(t->x*t->x + t->y*t->y);
+        if (t->vtx_id==kEventVtxId){            // plot of primary vertex only
+          m_pv_vtxid->Fill(t->vtx_id);
+          if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
+          if (!isnan(double(t->y))) m_pv_y->Fill(t->y);     
+          if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
+          m_pv_pchi2->Fill(t->chisq[0]);
+          m_pv_r->Fill(t->x*t->x + t->y*t->y);
+        } else {                                // plot of 2ndary verticex only
+          m_v_vtxid->Fill(t->vtx_id);
+          if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
+          if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
+          if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
+          m_v_pchi2->Fill(t->chisq[0]); 
+          m_v_r->Fill(t->x*t->x + t->y*t->y);
+        }
       }
     }
     m_vtx_z->Fill(z_tpc-z_svt);
