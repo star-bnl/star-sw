@@ -26,22 +26,22 @@ my $LD        = $env->{LD}; #!
 my $LDFLAGS   = $env->{LDFLAGS};
 my $CERNLIBS  = $env->{CERNLIBS};
 if ($FC eq 'pgf77') { 
-#  $LD = "g77";
-#  $LDFLAGS .= " -Wl,-Bstatic";
   $CERNLIBS = `cernlib kernlib`;
   chomp($CERNLIBS);
-  $CERNLIBS .= " -Wl,-Bdynamic";
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
   $FFLAGS   = $env->{G77FLAGS}; 
   $FEXTEND  = $env->{G77EXTEND};
 }
 my $LD        = $env->{LD}; #!
+if ($LD eq 'g++') {
+  $LD = "gcc";
+}
+
+if ($LD eq 'gcc') {$LDFLAGS = "-Wl,-Bstatic";}
 my $Libraries = $CERNLIBS .  " " . $FLIBS . " " . $CLIBS;
-#if ($FC eq 'g77' or $FC eq 'ifort') { $Libraries .= " ". $env->{LIBG2C} . " -lfrtbegin"; }
 if ($FC eq 'g77') { 
-  $Libraries .= " " . $env->{LIBG2C};
   if ($env->{CXX_VERSION} >= 3) {$Libraries .= " -lfrtbegin";}
-#  print "CXX_VERSION $env->{CXX_VERSION} Libraries = $Libraries\n";
+  $Libraries .= " " . $env->{LIBG2C};
 }
 if ($FC eq 'ifort') { 
   my $LIBIFCPATH    = `which ifort | sed -e 's|bin/ifort|lib|'`; chomp($LIBIFCPATH);
@@ -58,8 +58,6 @@ $env2 = $env->clone('FC'           => $FC,
 		    'ObjDir'       => $obj_dir,
 		    'Libraries'    => $Libraries
 		   );
-#		    'LIBPATH'      => $LIBPATH,
-#		    'LIBS'         => $LIBS,
 my @srcc = script::find_sources($Dir);# print "src = @srcc\n";
 my @src = ();
 foreach my $s (@srcc) {
