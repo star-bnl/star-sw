@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.28 1999/05/21 02:46:18 sakrejda Exp $
+* $Id: tte.F,v 1.29 1999/07/21 04:03:35 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.29  1999/07/21 04:03:35  sakrejda
+* possible maximum id of a reconstructed hit was not identified correctly, an attempt to fix it
+*
 * Revision 1.28  1999/05/21 02:46:18  sakrejda
 * pointers for malloc initialised - were causing crashes in peripheral events
 *
@@ -300,18 +303,32 @@ C
          list_g2t_hits(g2t_hit(i).id)=i
       end do
 c
-c     check how big table do we need for the reconstructed hits
+
+C     sort the index table according to the type key
+      iret = tls_qsort_herb_i(tindex_h.nok,tindex(1).type,
+     >       tindex(2).type,tindex)
+c
+c     find where the first mc_hit <-> real hit assignement is and
+c     count them
+c     At the same time check how big table do we need for the 
+c     reconstructed hits
       big_id_of_rec_hits=1
-      do i=1,hit_h.nok
-         if(hit(i).id.gt.big_id_of_rec_hits) then
-            big_id_of_rec_hits = hit(i).id
-         else if(hit(i).id.lt.1) then
-             tte=STAFCV_BAD
-             write(m132(1),*) 'Reconstructed hit id less than 1 ','i= ',i
-             write(m132(2),*) 'hit(i).id = ', hit(i).id
-             call Message (m132, 2, idI2 )
-             go to 999
+      ng2t=0
+      do i=1,tindex_h.nok
+         if(tindex(i).type.eq.tindex_type(1).tphit_mhitstpc) then
+            ng2t=ng2t+1
+            if(ng2t.eq.1) istart = i
+            if(tindex(i).key2.gt.big_id_of_rec_hits) then
+               big_id_of_rec_hits = tindex(i).key2
+            endif
          endif
+      end do
+
+c     write(6,*) 'number of mc hits used to create tfs hits = ',ng2t
+
+
+      do i=1,hit_h.nok
+
       end do
 c
 c     allocate memory for list_hits
@@ -370,22 +387,6 @@ c
          if(track(i).flag.gt.0) list_tracks(track(i).id)=i 
       end do  
     
-C     sort the index table according to the type key
-      iret = tls_qsort_herb_i(tindex_h.nok,tindex(1).type,
-     >       tindex(2).type,tindex)
-c
-c     find where the first mc_hit <-> real hit assignement is and
-c     count them
-
-      ng2t=0
-      do i=1,tindex_h.nok
-         if(tindex(i).type.eq.tindex_type(1).tphit_mhitstpc) then
-            ng2t=ng2t+1
-            if(ng2t.eq.1) istart = i
-         endif
-      end do
-
-c     write(6,*) 'number of mc hits used to create tfs hits = ',ng2t
 c
 c     sort on the mc hit id (key1)
       iret = tls_qsort_herb_i(ng2t,tindex(istart).key1,
@@ -674,7 +675,7 @@ c     translation table, clean up and zero the list_index_rec first
           call Message(m132, 1, idI12)
         else
           write(m132,*)'TTEI12-E1 Strange reconstructed hit in the index table',
-     >    tindex(i).key2                     
+     >    tindex(i).key2 , big_id_of_rec_hit                   
           call Message(m132, 1, idI12)
           tte=STAFCV_BAD
           go to 996
