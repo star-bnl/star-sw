@@ -19,7 +19,7 @@ my @dirEntries = readdir DIR;
 closedir DIR; #print "dirEntries = @dirEntries\n";
 my @h_filesL = ();
 foreach my $entry (@dirEntries) {
-  next if $entry !~ /\.[h|hh]$/;
+  next if $entry !~ /\.h$/ && $entry !~ /\.hh$/;
   push @h_filesL, $entry;
 }
 foreach my $Rep (@Repo) {
@@ -35,7 +35,7 @@ foreach my $Rep (@Repo) {
     my @dirEntries = readdir DIR;
     closedir DIR; #print "dirEntries = @dirEntries\n";
     foreach my $entry (@dirEntries) {
-      next if $entry !~ /\.[h|hh]$/;
+      next if $entry !~ /\.h$/ && $entry !~ /\.hh$/;
       push @h_filesL, $entry;
     }
   }
