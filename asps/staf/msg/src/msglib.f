@@ -813,8 +813,11 @@
 
 *	Open a journal file in a machine-independent fashion:
 	IF (STROPENVER( MSG_JL, FILE_NAME
-     1	              , 'STATUS=NEW, CARRIAGECONTROL=LIST'
+     1	              , 'STATUS=NEW'
      2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
+c->rm AIX FORTRAN forbids cariagecontrol=list
+c->rm1	              , 'STATUS=NEW, CARRIAGECONTROL=LIST'
+c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	  MSG_JOURNAL_OPEN=.TRUE.
 

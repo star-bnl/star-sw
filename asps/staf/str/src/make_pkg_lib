@@ -54,8 +54,8 @@ else if ( "$STAR_ARCH" == "irix" ) then
 else if ( "$STAR_ARCH" == "aix" ) then
    setenv ARCH_TAG    "_aix"
    setenv ARFLAGS     " slqv "
-   setenv FFLAGS      " -qfixed=132 -c -O -w -qextname -qextchk -qnosave -qctyplss -qintlog -qxflag=oldtab"
-   setenv FFLAGS_DBG  " -qfixed=132 -c -g -w -qextname -qextchk -qnosave =qctyplss -qintlog -qxflag=oldtab"
+   setenv FFLAGS      " -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
+   setenv FFLAGS_DBG  " -g -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
    setenv CCFLAGS     " -c -O -qlanglvl=ansi -v -DAIX "
    setenv CCFLAGS_DBG " -c -g -qlanglvl=ansi -v -DAIX "
    alias f77 xlf
