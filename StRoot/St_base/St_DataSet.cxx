@@ -303,7 +303,7 @@ void St_DataSet::Shunt(St_DataSet *dataset)
 {
   // Remove object from the original dataset and insert into this one
   if (!dataset) return;
- 
+
   if (!fList) {
        fList = new TList;
 //       if (fMother) fList->SetParent(fMother);
@@ -336,17 +336,17 @@ void St_DataSet::Update(St_DataSet* set,UInt_t opt)
       const Char_t *newname = newset->GetName(); 
       St_DataSet *oldset = 0;
       while ( ((oldset = (St_DataSet *)nextold())!=0) && !found) {
-         // if the "new" set does contain the dataset 
-         // with the same name as ours update it too
-         if (oldset->IsThisDir(newname)) {
-            oldset->Update(newset);
-            found = kTRUE;
-         }
+        // if the "new" set does contain the dataset 
+        // with the same name as ours update it too
+        if (oldset->IsThisDir(newname)) {
+           oldset->Update(newset);
+           found = kTRUE;
+        }
       }
-     }
-     // If the new "set" contains some new dataset with brand-new name
-     // move it into the our dataset and remove it from its old location
-     if (!found) Shunt(newset);
+    }
+    // If the new "set" contains some new dataset with brand-new name
+    // move it into the our dataset and remove it from its old location
+    if (!found) Shunt(newset);
   }
 }
 //______________________________________________________________________________

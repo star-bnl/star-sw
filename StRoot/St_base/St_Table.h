@@ -48,6 +48,7 @@ private:
 protected:
    void       CopyStruct(Char_t *dest, const Char_t *src);
    Char_t    *Create();
+   void       Clear();  
    void       Delete(Option_t *opt="");
    void       LinkHeader();
    void       SetHeadFields(Text_t *name);

@@ -1,6 +1,11 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.20 1998/10/04 02:20:12 fine Exp $ 
+// $Id: St_Table.cxx,v 1.21 1998/10/07 15:22:38 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.21  1998/10/07 15:22:38  fine
+// St_Table protected Clear() method has been intriduced to solve a clash with public Delete
+//      apart Delete the Clear method doesn't remove this object from the list of sons of the parent
+//      class. It just frees memeory the STAF table has occupied.
+//
 // Revision 1.20  1998/10/04 02:20:12  fine
 // St_Table.h Some clashes with TNamed and TObject have been fixed (affected Delete() method)
 //
@@ -177,7 +182,7 @@ void St_Table::Adopt(Int_t n, void *arr)
    // Adopt array arr into St_Table, i.e. don't copy arr but use it directly
    // in St_Table. User may not delete arr, St_Table dtor will do it.
  
-   Delete();
+   Clear();
  
    SetfN(n);
    s_Table = (char *)arr;
@@ -220,7 +225,7 @@ void St_Table::Browse(TBrowser *b){
   Inspect();
 }
 //______________________________________________________________________________
-void St_Table::Delete(Option_t *opt)
+void St_Table::Clear(Option_t *opt)
 {
   if (s_Table)
   {
@@ -229,6 +234,12 @@ void St_Table::Delete(Option_t *opt)
    *s_MaxIndex = 0;
     fN = 0;
   } 
+}
+
+//______________________________________________________________________________
+void St_Table::Delete(Option_t *opt)
+{
+  Clear();
   St_DataSet::Delete(opt);
 }
 
@@ -312,7 +323,7 @@ void St_Table::ls(Option_t *option)
              <<"\t Used rows: "<<*s_MaxIndex
              <<"\t Row size: "      << *s_Size << " bytes"
       <<endl;
-  Print();
+  //  Print();
   DecreaseDirLevel();
 }
 //_____________________________________________________________________________
@@ -326,7 +337,7 @@ void St_Table::ls(Option_t *option)
              <<"\t Used rows: "<<*s_MaxIndex
              <<"\t Row size: " << *s_Size << " bytes"
       <<endl;
-   Print();
+   //   Print();
    DecreaseDirLevel();
 }
 
@@ -440,7 +451,7 @@ void St_Table::Set(Int_t n)
 {
    // Set array size of St_Table object to n longs. If n<0 leave array unchanged.
    if (n < 0) return;
-   if (fN != n)  Delete();
+   if (fN != n)  Clear();
    SetfN(n);
    if (fN == 0) return;
    if (!s_Table) s_Table = Create();
@@ -849,7 +860,7 @@ void St_Table::Set(Int_t n, Char_t *array)
    // If n<0 leave array unchanged.
  
    if (n < 0) return;
-   if (fN != n) Delete();
+   if (fN != n) Clear();
 
    SetfN(n);
 
@@ -936,7 +947,6 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
 {
  // Kill the table current data
  // and adopt those from set
-
   if (set->HasData()) 
   {
     // Check whether the new table has the same type 
