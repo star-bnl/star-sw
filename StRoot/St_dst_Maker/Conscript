@@ -1,52 +1,18 @@
 #!/usr/local/bin/perl
+use Env;
 Import qw ( env INCLUDE LIB BIN OBJ );
 $pwd = DirPath '.';
-my $PKG  = basename($pwd);
-print $PKG,"::cons\n";
-print "pwd = ",$pwd,"\n";
-($up_two_dirs = $pwd) =~ s#/[^/]+/[^/]+$##;
-print "up_two_dirs = ",$up_two_dirs,"\n";
-#Link "$up_two_dirs/.$OS" => 'src';
+#my @list = find ($pwd);
+#print "list = ",@list,"\n";
+my $PKG  = basename($pwd); print "Run cons for ",$PKG,"\n";
+#for my $dir (@paths) { print $dir::cwd->lookupdir($pwd)->{srcdir},"\n";}
 my $SO_PKG = $PKG . ".so";
-my @h_files = find_files_by_extention("*.h*");
-my $no_of_rootcint_includes = 0;
-my @root_cint_includes = 0;
-my $n = 0;
-my @ClassDefs;
-my $m = 0;
-my @CollectionDefs;
-foreach my $file (@h_files) {
-  print "H file:",$file,"\n";
-  next unless open (SCAN, $pwd . "/" . $file);
-  my $classdef = 0;
-  while (<SCAN>) {
-    if (/ClassDef/) {
-      if (!$classdef) { $classdef=1; 
-			$root_cint_includes[$no_of_rootcint_includes] = $file;
-			$no_of_rootcint_includes++;
-		      }
-      my @words = split '([\(\)\,])', $_;
-      my $class = $words[2];
-      $ClassDefs[$n] = $class; $n++;
-      next;
-    }
-    if (/StCollectionDef/) {
-      next;
-    }
-  }
-  close (SCAN);
-}
-my $list_of_objects; 
-$list_of_objects[0] = $env;
-$list_of_objects[1] = $SO_PKG;
-my @c_files = find_files_by_extention("*.c*");
-my $i=1;
-foreach my $file (@c_files) {
-  $i++;
-  $list_of_objects[$i] = $file; 
-  print "\tfile:", $list_of_objects[$i],"\n";  
-} 
-@_ = @list_of_objects;
-&cons::LinkedModule;
-#cons::LinkedModule ($env, $SO_PKG, @list_of_objects);
+my $CPPFLAGS = cppflags();
+#scan::cpp::iflags(); print "IFLAGS = ",$IFLAGS," iflags = ",$iflags,"\n";
+my @CintFiles = ($PKG . "_Cint.cxx", $PKG . "_Cint.h", $PKG . "_LinkDef.h");
+my @Defs = find_files_by_extention("*.h*");
+Command $env [@CintFiles], @Defs,  qq( RootCint.pl "%>" "%<" "$CPPFLAGS" );
+my @src = find_files_by_extention("*.c*");
+@src[$#src] = $CintFiles[0]; 
+LinkedModule $env $SO_PKG, @src;
 Install $env $LIB, $SO_PKG;
