@@ -1,5 +1,9 @@
-// $Id: StAssociator.C,v 1.31 2002/04/05 02:34:22 calderon Exp $
+// $Id: StAssociator.C,v 1.32 2002/04/24 18:25:21 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.32  2002/04/24 18:25:21  calderon
+// added gSystem->Load("libtpc_Tables");
+//       ioMaker->SetBranch("eventBranch",0,"r");
+//
 // Revision 1.31  2002/04/05 02:34:22  calderon
 // Added
 //   gSystem->Load("StDetectorDbMaker");
@@ -135,6 +139,8 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   gSystem->Load("libgeometry_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libgen_Tables");
+  gSystem->Load("libtpc_Tables"); // needed for StTpcDb
+  //gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
@@ -161,6 +167,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
   ioMaker->SetIOMode("r");
   ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
   ioMaker->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  ioMaker->SetBranch("eventBranch",0,"r"); //activate geant Branch
 //   ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
 //   ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
