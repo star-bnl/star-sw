@@ -1,16 +1,29 @@
 /* tableDescriptor.h */
 #ifndef TABLEDESCRIPTOR_H
 #define TABLEDESCRIPTOR_H
-#define TABLEDESCRIPTOR_SPEC   \
-"struct tableDescriptor {      \
-    char         *m_ColumnName;\
-    unsigned int m_Offset;     \
-    unsigned int m_Size;       \
-    unsigned int m_TypeSize;   \
-    unsigned int m_Dimensions; \
-    unsigned int* m_IndexArray;\
-    EColumnType  m_Type;       \
+#ifdef NORESTRICTIONS
+# define TABLEDESCRIPTOR_SPEC   \
+ "struct tableDescriptor {      \
+    char         *m_ColumnName; \
+    unsigned int *m_IndexArray; \
+    unsigned int m_Offset;      \
+    unsigned int m_Size;        \
+    unsigned int m_TypeSize;    \
+    unsigned int m_Dimensions;  \
+    EColumnType  m_Type;        \
 };"
+#else
+# define TABLEDESCRIPTOR_SPEC      \
+ "struct tableDescriptor {         \
+    char         m_ColumnName[20]; \
+    unsigned int m_IndexArray[2];  \
+    unsigned int m_Offset;         \
+    unsigned int m_Size;           \
+    unsigned int m_TypeSize;       \
+    unsigned int m_Dimensions;     \
+    EColumnType  m_Type;           \
+};"
+#endif
  
 /*   this is a name clas with ROOT 
  * enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
@@ -20,7 +33,7 @@
 /*  This is to introduce an artificial restriction demanded by STAR database group
  *
  *    1. the name may be 19 symbols at most
- *    2. the number the dimension is 2 at mots
+ *    2. the number of the dimensions is 2 at most
  *
  *  To lift this restriction one has to provide -DNORESTRICTIONS CPP symbol and
  *  recompile code.
