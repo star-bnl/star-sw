@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.8 2000/02/15 02:49:24 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.9 2000/03/10 08:16:09 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.9  2000/03/10 08:16:09  sakrejda
+* Single point on the track end removed
+*
 * Revision 1.8  2000/02/15 02:49:24  sakrejda
 * educed weight for edge and merged hits
 *
@@ -71,7 +74,7 @@ C#include "tpt_pointers.inc"
       LOGICAL enough, good_hit(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       REAL    wcir(mxpnt),wlin(mxpnt)
-      INTEGER pnt(mxpnt)
+      INTEGER pnt(mxpnt), rowNextToLast, rowLast
       REAL    as,bs,cf,xold,yold,theta
       REAL    r1,tanphi0
 
@@ -80,6 +83,10 @@ C     at the beginning mark all the points that belong to a track as good
       do i=1,trk(ipt).nhit
 	 good_hit(i) = .true.
       end do
+C     prune singletons
+      rowNextToLast = mod(hit(trk(ipt).ipnt(trk(ipt).nhit-1)).row,100)
+      rowLast = mod(hit(trk(ipt).ipnt(trk(ipt).nhit)).row,100)
+      if(abs(rowNextToLast-rowLast).gt.2) good_hit(trk(ipt).nhit)=.false.
 C
       ntry   = 1            ! count number of iterations
       enough = .false.      ! enough= .true. means fit was successful
