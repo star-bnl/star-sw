@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.7 2000/01/10 20:31:16 porter Exp $
+ * $Id: StDbBroker.h,v 1.8 2000/01/14 14:49:10 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.8  2000/01/14 14:49:10  porter
+ * set verbose level for checking, added $Id & $Logs, & made node container
+ * more robust for interactions with StDbLib
+ *
  * Revision 1.7  2000/01/10 20:31:16  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -69,6 +73,7 @@ class StDbBroker  {
     char*        m_tableVersion; // name of the version of the table
     char*        m_database;     // name of the database for this table
 
+    int       m_isVerbose;
     dbNodeArray *m_Nodes;
     StDbConfigNode* m_Tree;
 
@@ -143,8 +148,9 @@ class StDbBroker  {
     void   SetEndDate(UInt_t EndDate)     {m_EndDate = EndDate;    }
     void   SetEndTime(UInt_t EndTime)     {m_EndTime = EndTime;    }
     static int DbInit(const char *);  		//dbInit
- 
- //-> here's all the real stuff now
+
+    void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 
+  //-> here's all the real stuff now
    
     dbConfig_st* InitConfig(const char* configName, int& numRows, char* versionName=0);
 
@@ -185,3 +191,14 @@ extern "C" void *DbRead(unsigned int*,           //&nRows,
 extern "C" int DbInit(const char *);  		//dbInit
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
