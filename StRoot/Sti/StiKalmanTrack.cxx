@@ -17,6 +17,7 @@
 ostream& operator<<(ostream&, const StiHit&);
 
 StiObjectFactoryInterface<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
+StiKalmanTrackFinderParameters* StiKalmanTrack::pars = 0;
 
 /*! 
    Reset the class members to their default state.
@@ -31,135 +32,24 @@ StiObjectFactoryInterface<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory 
  */
 void StiKalmanTrack::reset()
 {
-	StiTrack::reset();
   firstNode = 0;
-	lastNode = 0;
+  lastNode = 0;
   trackingDirection = kOutsideIn;
   fittingDirection  = kOutsideIn;
+  mSeedHitCount = 0;
+  m      = -1.;
+  mFlag  = 0;
 }
 
-void StiKalmanTrack::update()
-{
-  //cout<<"void StiKalmanTrack::update()"<<endl;
-  return;
-}
  
 
 /*! 
-	Set the factory used for the creation of kalman track nodes.
-	\see StiKalmanTrackNodeFactory
+  Set the factory used for the creation of kalman track nodes.
+  \see StiKalmanTrackNodeFactory
 */
 void StiKalmanTrack::setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>* val)
 {
   trackNodeFactory = val;
-}
-
-/*! 
-   Calculates and returns the momentum and error of the track 
-	 <p>
-   This method calculates and returns in the two arrays provided as arguments the 
-   3-momentum and error of the track in Star global coordinates. The 3-momentum 
-   is calculated at the inner most point associated with the track. The inner-most 
-   point may or may not be the main vertex of the event. Care should thus be exercised 
-   while using this method. 
-	 <p>
-   The error is calculated (and returned) only if a non null array is passed as a second
-   argument. It is thus possible to get the momentum without a lengthy calculation 
-   of the error matrix. The error error matrix corresponds to a full covariance matrix.
-   The definition of the error matrix is described in the introduction of this class
-   definition. Note that the actual calculation of the momentum and associated error 
-   is delegated to the track node class and uses the inner most node of the track.
- */
-void StiKalmanTrack::getMomentum(double p[3], double e[6]) const
-{
-	// return the momentum of the track at the inner most node held by this track
-    // which may (or not) be the primary vertex. 
-    // this will need to be refined...
-    getInnerMostHitNode()->getMomentum(p,e);
-}
-
-/*!
-   Calculates and returns the transverse momentum of the track at the inner most node 
-   held by this track which may or (or not) be the primary vertex. 
-*/
-double  StiKalmanTrack::getPt() const
-{
-    return getInnerMostHitNode()->getPt();
-}
-
-/*!
-   Calculates and returns the track curvature at the inner most node held by this track.
-	 <p>
-	 Obtains the curvature from the inner most hit node associated with this track.
-*/
-double StiKalmanTrack::getCurvature() const
-{
-  return getInnerMostHitNode()->fP3;
-}
-
-/*!
-	Returns the rapidity of the track if the mass is known.
-	<p>
-	<ol>
-  <li>Obtains the momentum from the inner most hit node associated with the track.</li>
-  <li>Obtains the mass of this track using the getMass() method. If the mass returned
-	is negative, throws a runtime_error exception.</li>
-	</ol>
-	\throws runtime_error
-	\return rapidity
- */
-double  StiKalmanTrack::getRapidity()       const 
-{
-  // returns the rapidity of the particle at the inner most node held by this track
-  // which may (or not) be the primary vertex. 
-  double p[3];
-  StiKalmanTrackNode *  inner = getInnerMostHitNode();
-  inner->getMomentum(p,0);
-  double mass = getMass();
-  if (mass<0)
-    throw runtime_error("StiKalmanTrack::getRapidity() - particle mass unknown");
-  double e = sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-	if (e<=p[2])
-		throw runtime_error("StiKalmanTrack::getRapidity() - Error: e<=pz");
-	return 0.5*log(e+p[2]/e-p[2]);
-}
-
-/*!
-	Returns the pseudo-rapidity of the track.
-	<p>
-	<ol>
-  <li>Obtains the helix pitch angle from the inner most hit node associated with the track.</li>
-  <li>Calculate/return the pseudo-rapidity using the pitch angle.</li>
-	</ol>
-	\return pseudo-rapidity
- */
-double  StiKalmanTrack::getPseudoRapidity() const
-{
-  // Return pseudo rapidity of the particle at the inner most node held by this track
-  // which may (or not) be the primary vertex. 
-  return -log(tan(M_PI/4.-(getInnerMostHitNode()->getTanL()/2.)));
-}
-
-/*! 
-	Returns the azimuthal angle of the track determined at the inner most point of the track
-	hich may or may not be a vertex.
-	\return phi in radian
-*/
-double  StiKalmanTrack::getPhi()            const 
-{
-  double p[3];
-  getInnerMostHitNode()->getMomentum(p,0);
-  return atan2(p[1],p[0]);
-}
-
-/*!
-	Return tan(lambda) of the particle at the inner most node held by this track
-	which may (or not) be the primary vertex. 
-	\return tan(lambda)
-*/
-double  StiKalmanTrack::getTanL()           const 
-{
-  return getInnerMostHitNode()->getTanL();
 }
 
 
@@ -200,15 +90,6 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
     }
 }
 
-double StiKalmanTrack::getTpcDedx() const
-{
-  return 0.; // to be changed...
-}
-
-double StiKalmanTrack::getSvtDedx() const
-{
-  return 0.; // to be changed...
-}
 
 StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targetParent)
 {
@@ -670,12 +551,6 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
     return p3;
 }
 
-/*! Return the mass hypothesis used in the resconstruction of this track.
-*/
-double  StiKalmanTrack::getMass() const   
-{
-  return m;
-}
 
 /*! Return the track sign
    <h3>Notes</h3> 
@@ -696,69 +571,22 @@ int StiKalmanTrack::getCharge() const
 */
 double  StiKalmanTrack::getChi2() const
 {
-	if (fittingDirection==kOutsideIn)
-		{
-			if (trackingDirection==kOutsideIn)
-				return lastNode->fChi2;
-			else
-				return firstNode->fChi2;
-		}
-	else // insideOut
-		{
-			if (trackingDirection==kOutsideIn)
-				return firstNode->fChi2;
-			else
-				return lastNode->fChi2;			
-		}
+  if (fittingDirection==kOutsideIn)
+    {
+      if (trackingDirection==kOutsideIn)
+	return lastNode->fChi2;
+      else
+	return firstNode->fChi2;
+    }
+  else // insideOut
+    {
+      if (trackingDirection==kOutsideIn)
+	return firstNode->fChi2;
+      else
+	return lastNode->fChi2;			
+    }
 }
 
-/*! Calculate and return the distance of closest approach to given hit
-   <h3>Notes</h3> 
-   <ol>
-   <li>No implementation.</li>
-   <li>Returns 0</li>
-   </ol>
-*/
-double  StiKalmanTrack::getDca(StiHit * h)    const
-{
-	return 0;
-}
-
-/*! Calculate and return the distance of closest approach to given track
-   <h3>Notes</h3> 
-   <ol>
-   <li>No implementation.</li>
-   <li>Returns 0</li>
-   </ol>
-*/
-double  StiKalmanTrack::getDca(StiTrack *t)   const
-{
-  return 0;
-}
-
-/*! Calculate and return the distance of closest approach to given track - 2D calc
-   <h3>Notes</h3> 
-   <ol>
-   <li>No implementation.</li>
-   <li>Returns 0</li>
-   </ol>
-*/
-double  StiKalmanTrack::getDca2(StiTrack *t)   const
-{
-    return 0;
-}
-
-/*! Calculate and return the distance of closest approach to given track - 3D calc
-   <h3>Notes</h3> 
-   <ol>
-   <li>No implementation.</li>
-   <li>Returns 0</li>
-   </ol>
-*/
-double  StiKalmanTrack::getDca3(StiTrack *t)   const
-{
-    return 0;
-}
 
 /*! 
 	Calculate and return the number of hits on this track. 
@@ -801,16 +629,16 @@ int StiKalmanTrack::getMaxPointCount() const
     {
       StiKTNBidirectionalIterator it;
       for (it=begin();it!=end();it++)
-				{
-					const StiDetector * detector = (*it).getDetector();
-					if (detector)
-						{
-							if (detector->isActive((*it).fP0,(*it).fP1))
-								nPts++;
-						}
-					else
-						nPts++; // vertex have no detector...
-				}
+	{
+	  const StiDetector * detector = (*it).getDetector();
+	  if (detector)
+	    {
+	      if (detector->isActive((*it).fP0,(*it).fP1))
+		nPts++;
+	    }
+	  else
+	    nPts++; // vertex have no detector...
+	}
     }
   return nPts;
 }
@@ -818,12 +646,12 @@ int StiKalmanTrack::getMaxPointCount() const
 
 /*! Return the number of gaps (active layers with no hits) along this track.
   <h3>Notes</h3> 
-   <ol>
-   <li>A gap consists of one or multiple contiguous active layers through which this track
-       passes.</li>
-   <li>There can be gaps on the inside or the outside of the track if no hits are found there.</li>
-   </ol>
-	 \returns number of gaps.
+  <ol>
+  <li>A gap consists of one or multiple contiguous active layers through which this track
+  passes.</li>
+  <li>There can be gaps on the inside or the outside of the track if no hits are found there.</li>
+  </ol>
+  \returns number of gaps.
 */
 int    StiKalmanTrack::getGapCount()    const  
 {
@@ -833,64 +661,44 @@ int    StiKalmanTrack::getGapCount()    const
       StiKTNBidirectionalIterator it;
       bool inGap = false;
       for (it=begin();it!=end();it++)
-				{
-					const StiDetector * detector = (*it).getDetector();
-					if (detector && detector->isActive())
-						{
-							if ((*it).getHit())
-								{
-									if (inGap) 
-										inGap = false;
-								}
-							else
-								{
-									if (!inGap)
-										{
-											inGap = true;
-											gaps++;
-										}										
-								}
-						}
-				}
+	{
+	  const StiDetector * detector = (*it).getDetector();
+	  if (detector && detector->isActive())
+	    {
+	      if ((*it).getHit())
+		{
+		  if (inGap) 
+		    inGap = false;
+		}
+	      else
+		{
+		  if (!inGap)
+		    {
+		      inGap = true;
+		      gaps++;
+		    }										
+		}
+	    }
+	}
     }
   return gaps;
 }
 
 /*! Return the number of hits (points) used in the fit of this track.
   <h3>Notes</h3> 
-   <ol>
-   <li>Currently no difference is made between points on the track and fit points 
-       on the track.</li>
-   <li>Call "getPointCount()" to get the count.</li>
-   </ol>
-	 \return number of hits on this track.
+  <ol>
+  <li>Currently no difference is made between points on the track and fit points 
+  on the track.</li>
+  <li>Call "getPointCount()" to get the count.</li>
+  </ol>
+  \return number of hits on this track.
 */
 int StiKalmanTrack::getFitPointCount()    const  
 {
-	return getPointCount();
+  return getPointCount();
 }
 
-/*! Convenience method used to return a track node iterator initialized to the track first node.
-	\return Bidirectional Itertator of KalmanTrackNodes 
-	\throws runtime_error 	
-*/
-StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
-{
-	if (!firstNode)
-		throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
-  return StiKTNBidirectionalIterator(firstNode);
-}
 
-/*! Convenience method used to return a track node iterator initialized to the track last node.
-	\return Bidirectional Itertator of KalmanTrackNodes 
-	\throws runtime_error 	
-*/
-StiKTNBidirectionalIterator StiKalmanTrack::end() const 
-{
-	if (!firstNode)
-		throw runtime_error("StiKalmanTrack::end() - ERROR - firstNode==0");
-	return StiKTNBidirectionalIterator(lastNode);
-}
 
 /*! Calculate and return the track length.
   <h3>Note</h3> 
@@ -915,128 +723,86 @@ double StiKalmanTrack::getTrackLength() const
 	length = helix.pathLength(point);
 	return length;
 }
-	/*
-		StiKTNBidirectionalIterator it;
-		x1=(*first).fX; y1=(*first).fP0; z1=(*first).fP1; 
-		e1=(*first).fP2; a1=(*first).fAlpha; c1=(*first).fP3; t1=(*first).fP4;
-		cos1=c1*x1-e1;
-		x2=(*last).fX; y2=(*last).fP0; z2=(*last).fP1; 
-		e2=(*last).fP2; a2=(*last).fAlpha; c2=(*last).fP3; t2=(*last).fP4;
-		if (a2!=a1)
-		{//rotate (x0,y0) first as we need x2,y2 in the original frame
-		if (a1<0) a1+=2*M_PI;
-		if (a2<0) a2+=2*M_PI;
-		da=a1-a2; cda=cos(da); sda=sin(da);
-		x0=e2/c2; //center of circle
-		d=c2*x2-e2;
-		y0=y2+sqrt(1-d*d)/c2;
-		cout << "(x0,y0)="<<x0<<"\t"<<y0<<endl;
-		xp=cda*x0-sda*y0;
-		e2=c2*xp;
-		// now rotate (x2,y2)
-		cout << "(x2,y2)="<<x2<<"\t"<<y2<<endl;
-		xp=cda*x2-sda*y2;
-		yp=sda*x2+cda*y2;
-		x2=xp;y2=yp;
-		cout << "(x2',y2')="<<x2<<"\t"<<y2<<endl;
-		}
-		cos2=c2*x2-e2;
-		if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
-		{	// straight track case
-		cout <<"SL:";
-		dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
-		length += sqrt(dx*dx+dy*dy+dz*dz);
-		}
-		else
-		{	// helix case
-		cout <<"H:";
-		length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
-		}
-		
-		//ignore this patch of code...
-		x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
-		it = first;
-		x1=(*it).fX; y1=(*it).fP0; z1=(*it).fP1; e1=(*it).fP2; a1=(*it).fAlpha; c1=(*it).fP3; t1=(*it).fP4;
-		cos1=c1*x1-e1;
-		while (it!=last)
-		{
-		cout << " a1:"<<a1<<" c1:"<<c1<<" cos1:"<<cos1;
-		it++;
-		x2=(*it).fX; y2=(*it).fP0; z2=(*it).fP1; e2=(*it).fP2; a2=(*it).fAlpha; c2=(*it).fP3; t2=(*it).fP4;
-		if (a2!=a1)
-		{//rotate (x0,y0) first as we need x2,y2 in the original frame
-		da=a2-a1; cda=cos(da); sda=sin(da);
-		cout << " rotby:" << da*180/3.1415;
-		x0=e2/c2; //center of circle
-		d=c2*x2-e2;
-		y0=y2+sqrt(1-d*d)/c2;
-		xp=cda*x0-sda*y0;
-		// now rotate (x2,y2)
-		e2=c2*xp;
-		xp=cda*x2-sda*y2;
-		yp=sda*x2+cda*y2;
-		x2=xp;y2=yp;
-		}
-		cos2=c2*x2-e2;
-		if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
-		{	// straight track case
-		dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
-		length += sqrt(dx*dx+dy*dy+dz*dz);
-		}
-		else
-		{	// helix case
-		length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
-		}
-		x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
-		cout << "\n : " << length<<endl;
-		}
-	*/
-
-/*! Accessor method to get the dca.
-  <h3>Note</h3> 
-	<ol>
-	<li>Not implemented</li>
-	</ol>
-*/
-double StiKalmanTrack::getPrimaryDca() const
-{
-  return 0;
-}
-
-
-/*! Accessor method returns the outer most node associated with the track.
-   <h3>Notes</h3>
-   <ol>
-   <li>Node returned depends on the direction of tracking. </li>
-   <li>Return firstNode if tracking was done outside-in, lastNode otherwise.</li>
-   <li>No check done to determine whether returned value is non null.</li>
-   </ol>
-	 \return outer most node on this track
-*/
-StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const 
-{ 
-  if (trackingDirection==kOutsideIn)
-    return firstNode;
+/*
+  StiKTNBidirectionalIterator it;
+  x1=(*first).fX; y1=(*first).fP0; z1=(*first).fP1; 
+  e1=(*first).fP2; a1=(*first).fAlpha; c1=(*first).fP3; t1=(*first).fP4;
+  cos1=c1*x1-e1;
+  x2=(*last).fX; y2=(*last).fP0; z2=(*last).fP1; 
+  e2=(*last).fP2; a2=(*last).fAlpha; c2=(*last).fP3; t2=(*last).fP4;
+  if (a2!=a1)
+  {//rotate (x0,y0) first as we need x2,y2 in the original frame
+  if (a1<0) a1+=2*M_PI;
+  if (a2<0) a2+=2*M_PI;
+  da=a1-a2; cda=cos(da); sda=sin(da);
+  x0=e2/c2; //center of circle
+  d=c2*x2-e2;
+  y0=y2+sqrt(1-d*d)/c2;
+  cout << "(x0,y0)="<<x0<<"\t"<<y0<<endl;
+  xp=cda*x0-sda*y0;
+  e2=c2*xp;
+  // now rotate (x2,y2)
+  cout << "(x2,y2)="<<x2<<"\t"<<y2<<endl;
+  xp=cda*x2-sda*y2;
+  yp=sda*x2+cda*y2;
+  x2=xp;y2=yp;
+  cout << "(x2',y2')="<<x2<<"\t"<<y2<<endl;
+  }
+  cos2=c2*x2-e2;
+  if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
+  {	// straight track case
+  cout <<"SL:";
+  dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
+  length += sqrt(dx*dx+dy*dy+dz*dz);
+  }
   else
-    return lastNode;
-}
-
-/*! Accessor method returns the inner most node associated with the track.
-   <h3>Notes</h3>
-   <ol>
-   <li>Node returned depends on the direction of tracking. </li>
-   <li>Return firstNode if tracking was done inside-out, lastNode otherwise.</li>
-   <li>No check done to determine whether returned value is non null.</li>
-   </ol>
-	 \return outer most node on this track
-*/
-StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const 
-{ 
-  if (trackingDirection==kInsideOut)
-    return firstNode;
+  {	// helix case
+  cout <<"H:";
+  length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
+  }
+  
+  //ignore this patch of code...
+  x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
+  it = first;
+  x1=(*it).fX; y1=(*it).fP0; z1=(*it).fP1; e1=(*it).fP2; a1=(*it).fAlpha; c1=(*it).fP3; t1=(*it).fP4;
+  cos1=c1*x1-e1;
+  while (it!=last)
+  {
+  cout << " a1:"<<a1<<" c1:"<<c1<<" cos1:"<<cos1;
+  it++;
+  x2=(*it).fX; y2=(*it).fP0; z2=(*it).fP1; e2=(*it).fP2; a2=(*it).fAlpha; c2=(*it).fP3; t2=(*it).fP4;
+  if (a2!=a1)
+  {//rotate (x0,y0) first as we need x2,y2 in the original frame
+  da=a2-a1; cda=cos(da); sda=sin(da);
+  cout << " rotby:" << da*180/3.1415;
+  x0=e2/c2; //center of circle
+  d=c2*x2-e2;
+  y0=y2+sqrt(1-d*d)/c2;
+  xp=cda*x0-sda*y0;
+  // now rotate (x2,y2)
+  e2=c2*xp;
+  xp=cda*x2-sda*y2;
+  yp=sda*x2+cda*y2;
+  x2=xp;y2=yp;
+  }
+  cos2=c2*x2-e2;
+  if (c1<1e-12 || (fabs(cos1)>1.) || (fabs(cos2)>1.) )
+  {	// straight track case
+  dx = x2-x1;	dy = y2-y1;	dz = z2-z1;
+  length += sqrt(dx*dx+dy*dy+dz*dz);
+  }
   else
-    return lastNode;
-}
+  {	// helix case
+  length += fabs(acos(cos1)-acos(cos2))*sqrt(1+t1*t1)/c1;
+  }
+  x1=x2;y1=y2;z1=z2;e1=e2;c1=c2;t1=t2,cos1=cos2; //a does not change...
+  cout << "\n : " << length<<endl;
+  }
+*/
+
+
+
+
 
 /*! Return the inner most hit associated with this track.
    <h3>Notes</h3>
@@ -1052,23 +818,23 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 {
   if (firstNode==0 || lastNode==0)
     throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - firstNode||lastNode==0");
-	StiKTNBidirectionalIterator it;
-	
+  StiKTNBidirectionalIterator it;
+  
   if (trackingDirection==kOutsideIn)
     {
-			for (it=begin();it!=end();it++)
-				{
-					if ((*it).getHit())
-						return &*it;
-				}
-		}
-	else
-		{	
-			for (it=end();it!=begin();it--)
-				{
-					if ((*it).getHit())
-						return &*it;
-				}
+      for (it=begin();it!=end();it++)
+	{
+	  if ((*it).getHit())
+	    return &*it;
+	}
+    }
+  else
+    {	
+      for (it=end();it!=begin();it--)
+	{
+	  if ((*it).getHit())
+	    return &*it;
+	}
     }
   throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - Track has no hit");
 }
@@ -1134,58 +900,197 @@ bool  StiKalmanTrack::isPrimary() const
  */
 void StiKalmanTrack::swap()
 {
-	StiKalmanTrackNode * parent = 0;
-	StiKalmanTrackNode * child  = 0;
-	StiKalmanTrackNode * grandChild = 0;
-	
-	parent = firstNode;
-	firstNode = lastNode;
-	lastNode = parent; 
-	if (parent && parent->getChildCount()>0)
-		{
-			child  = dynamic_cast<StiKalmanTrackNode *>(parent->getFirstChild());
-			parent->removeAllChildren();			
-			while (child)
-				{
-					if (child->getChildCount()>0)
-						{
-							grandChild = dynamic_cast<StiKalmanTrackNode *>(child->getFirstChild());
-							child->removeAllChildren();
-						}
-					else
-						grandChild = 0;
-					child->addChild(parent);
-					parent = child;
-					child = grandChild;
-				}
-			// last parent has no parent
-			parent->setParent(0);
-		}
-	if (trackingDirection==kOutsideIn)
-		trackingDirection = kInsideOut;
-	else
-		trackingDirection = kOutsideIn;
+  StiKalmanTrackNode * parent = 0;
+  StiKalmanTrackNode * child  = 0;
+  StiKalmanTrackNode * grandChild = 0;
+  
+  parent = firstNode;
+  firstNode = lastNode;
+  lastNode = parent; 
+  if (parent && parent->getChildCount()>0)
+    {
+      child  = dynamic_cast<StiKalmanTrackNode *>(parent->getFirstChild());
+      parent->removeAllChildren();			
+      while (child)
+	{
+	  if (child->getChildCount()>0)
+	    {
+	      grandChild = dynamic_cast<StiKalmanTrackNode *>(child->getFirstChild());
+	      child->removeAllChildren();
+	    }
+	  else
+	    grandChild = 0;
+	  child->addChild(parent);
+	  parent = child;
+	  child = grandChild;
+	}
+      // last parent has no parent
+      parent->setParent(0);
+    }
+  if (trackingDirection==kOutsideIn)
+    trackingDirection = kInsideOut;
+  else
+    trackingDirection = kOutsideIn;
 }
 
 ///return hits;
 //vector<StHit*> StiKalmanTrack::stHits() const
 vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
 {
-	StiKalmanTrackNode* leaf = getLastNode();
-	StiKTNForwardIterator it(leaf);
-	StiKTNForwardIterator end = it.end();
-	//vector<StHit*> hits;
-	vector<StMeasuredPoint*> hits;
-	while (it!=end) {
-		const StiKalmanTrackNode& node = *it;
-		StiHit* hit = node.getHit();
-		if (hit) {
-			StMeasuredPoint * stHit = const_cast<StMeasuredPoint*>( hit->stHit() );
-			if (stHit)
-				hits.push_back(stHit);
-		}
-		++it;
-	}
-	return hits;
+  StiKalmanTrackNode* leaf = getLastNode();
+  StiKTNForwardIterator it(leaf);
+  StiKTNForwardIterator end = it.end();
+  //vector<StHit*> hits;
+  vector<StMeasuredPoint*> hits;
+  while (it!=end) {
+    const StiKalmanTrackNode& node = *it;
+    StiHit* hit = node.getHit();
+    if (hit) {
+      StMeasuredPoint * stHit = const_cast<StMeasuredPoint*>( hit->stHit() );
+      if (stHit)
+	hits.push_back(stHit);
+    }
+    ++it;
+  }
+  return hits;
 }
 
+
+/*! Prune the track to select the best branch of the tree identified by given leaf node.
+  <p>
+  The best brach is assumed to be the one given by the leaf "node".
+  All siblings of the given node, are removed, and iteratively
+  all siblings of its parent are removed from the parent of the
+  parent, etc.
+*/
+void StiKalmanTrack::prune()
+{
+  StiKalmanTrackNode * node   = lastNode;
+  StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode *>(node->getParent());
+  while (parent)
+    {
+      parent->removeAllChildrenBut(node);
+      node = parent;
+      parent = static_cast<StiKalmanTrackNode *>(node->getParent());
+    }
+}
+
+/*! Declare hits associated with given track as used.
+  <p>
+  Declare hits on the track ending at "node" as used. 
+  This method starts with the last node and seeks the
+  parent of each node recursively. The hit associated with each
+  node (when there is a hit) is set to "used".
+*/	
+void StiKalmanTrack::reserveHits()
+{
+  StiKTNForwardIterator it(lastNode);
+  for_each( it, it.end(), SetHitUsed() );
+}
+
+/*! Extend track encapsulated by "sNode" to the given vertex.
+  <p>
+  Attempt an extension of the track encapsulated by sNode the given vertex. 
+  <p>
+  <ol>
+  <li>Get node from node factory.</li>
+  <li>Reset node.</li>
+  <li>Propagate the node from given parent node "sNode", to the given vertex using a 
+  call to "propagate".</li>
+  <li>Evaluate the chi2 of the extrapolated if the vertex is added to the track. Done
+  using a call to "evaluateChi2".</li>
+  <li>If chi2 is less than max allowed "maxChi2ForSelection", update track parameters
+  using the vertex as a measurement and add the vertex to the track as the last node.</li>
+  </ol>
+  <h3>Notes</h3>
+  <ul>
+  <li>Throws logic_error if no node can be obtained from the node factory.</li>
+  <li>The methods "propagate", "evaluateChi2", and "updateNode" may throw 
+  runtime_error exceptions which are NOT caught here...</li>
+  </ul>
+*/
+void StiKalmanTrack::extendToVertex(StiHit* vertex)
+{
+  if (trackingDirection==kInsideOut)
+    throw logic_error("SKT::extendToVertex(const StiHit*) - LOGIC ERROR - Extension to vtx only allowed for OutsideIn");
+  
+	//cout << "SKT::extendToVertex(StiHit* vertex) - starting"<<endl;
+  double chi2;
+  StiKalmanTrackNode * sNode=0;
+	StiKalmanTrackNode * tNode=0;
+  
+  sNode = lastNode;
+	tNode = trackNodeFactory->getObject();
+  if (tNode==0) 
+    throw logic_error("SKTF::extendTrackToVertex()\t- ERROR - tNode==null");
+  tNode->reset();
+	//cout  << "tNode->propagate(sNode, vertex)"<<endl;
+  tNode->propagate(sNode, vertex);
+	//cout  << "tNode->setHit(vertex);"<<endl;
+  tNode->setHit(vertex);
+	//cout << "chi2 = tNode->evaluateChi2()"<<endl;
+	chi2 = tNode->evaluateChi2(); 
+	//cout << "if (chi2<pars->maxChi2ForSelection)"<<endl;
+  if (chi2<pars->maxChi2ForSelection)
+    {
+			//cout << "	tNode->updateNode();"<<endl;
+			tNode->updateNode();
+			//cout << "sNode->add(tNode);"<<endl;
+      sNode->add(tNode);	
+      lastNode = tNode;
+    }
+	//cout << "SKT::extendToVertex(StiHit* vertex) - done"<<endl;
+}
+
+void StiKalmanTrack::find(int direction)
+{
+  setFlag(0);
+  //cout << "StiKalmanTrack::find(int direction) called with direction:"<<direction<<endl;
+
+  // invoke tracker to find or extend this track
+  trackFinder->find(this,kOutsideIn);
+  
+  // prune the undesirable nodes
+  prune();
+  
+  // decide if an outward pass is needed.
+  const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
+
+	//cout << "outermost hit is at:"<<outerMostNode->fX <<endl;
+  if (outerMostNode->fX<170. )
+    {
+			//cout << "inside out tracking will be done for this track"<<endl;
+      // swap the track inside-out in preparation for the outward search/extension
+      swap();      
+      setTrackingDirection(kInsideOut);
+
+      // fit the track to get good parameters
+      // at the outmost node
+
+			//cout << "fit(kInsideOut)"<<endl;
+      fit(kInsideOut);
+
+      // proceed to search/extension
+
+			//cout << "trackFinder->find(this,kInsideOut)"<<endl;
+
+      trackFinder->find(this,kInsideOut);
+
+      // swap the track back to allow for extension to the main vertex.
+      // re-fit outside-in to get the track parameters
+      // at the inner most node.
+			//cout << "swap()"<<endl;
+      swap();
+			//cout << "fit(kOutInside)"<<endl;
+      fit(kOutsideIn);
+    }
+	//cout << "Inside most hit is at x:" << getInnerMostHitNode()->fX<<endl;
+	//cout << "Outside most hit is at x:" << getOuterMostHitNode()->fX<<endl;
+  reserveHits();
+  setFlag(1);
+}
+
+void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)
+{
+	pars = parameters;
+}

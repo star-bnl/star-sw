@@ -3,12 +3,11 @@
 
 class StiTrackFinderParameters
 {
-	StiTrackFinderParameters()
-		{}
-
-	~StiTrackFinderParameters()
-		{}
-
+  StiTrackFinderParameters()
+    {}
+  
+  ~StiTrackFinderParameters()
+    {}
 }
 
 

@@ -6,6 +6,7 @@ using std::cout;
 using std::endl;
 
 #include "StiTrackFinder.h"
+#include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
 #include "StiKalmanTrackFinderParameters.h"
 #include "Messenger.h"
@@ -17,7 +18,15 @@ using std::endl;
 class StiDetector;
 class StiDectorContainer;
 class StiTrack;
-class StiKalmanTrack;
+class StiToolkit;
+class StiSeedFinder;
+class StiKalmanTrackFactory;
+class StiTrackFilter;
+class StiDetectorContainer;
+class StiHitContainer;
+class StiTrackContainer;
+class StiDynamicTrackFilter;
+class StiTrack;
 
 enum StiFindStep {StepByLayer=1,StepByDetector=2 };
 
@@ -34,30 +43,22 @@ public:
     
     //inherited
     virtual void findTracks();
-		virtual void fitTracks(); 
-		virtual void extendTracksToVertex(StiHit* vertex);
-		virtual void findNextTrack();
-		virtual void fitNextTrack();
-		virtual void findNextTrackSegment();
+    virtual void fitTracks(); 
+    virtual void extendTracksToVertex(StiHit* vertex);
+    virtual void findNextTrack();
+    virtual void fitNextTrack();
+    virtual void findNextTrackSegment();
+    virtual void find(StiTrack *track, int direction);
     
-		virtual void reset();
+    virtual void reset();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher
     
     virtual bool hasMore();
     
-		void setParameters(StiKalmanTrackFinderParameters *par);
-		StiKalmanTrackFinderParameters * getParameters();
-
-    //Local
-    virtual void findTrack(StiTrack * t); //throw ( Exception);
-    void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
-    void pruneNodes(StiKalmanTrackNode * node);
-    void reserveHits(StiKalmanTrackNode * node);
-    void extendTrackToVertex(StiKalmanTrackNode * node, StiHit* vertex);
-
-    void doInitTrackSearch();
-    void doScanLayer();
-    void doInitLayer();
+    void setParameters(StiKalmanTrackFinderParameters *par);
+    StiKalmanTrackFinderParameters * getParameters();
+    
+    void doInitLayer(int trackingDirection);
     void doNextDetector();
     void doFinishLayer();
     void doFinishTrackSearch();
@@ -74,13 +75,20 @@ public:
 protected:
 
     void getNewState();
-    
-    //int    singleNodeFrom;
-    //bool   singleNodeDescent;
-    //double massHypothesis;
-    //double maxChi2ForSelection;
     void printState();
-    
+
+    // Local cache of pointers
+    // none of the following are owned by this class.
+    StiToolkit                * toolkit;
+    StiTrackFilter            * trackFilter;
+    StiSeedFinder             * trackSeedFinder;
+    StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
+    StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
+    StiDetectorContainer      * detectorContainer;
+    StiHitContainer           * hitContainer;
+    StiTrackContainer         * trackContainer;
+    StiKalmanTrackFinderParameters * pars;
+
 private:
     
     StiFindStep mode;
@@ -106,10 +114,7 @@ private:
     bool hasHit;
     bool hasDet;
     
-    void initSearch(StiKalmanTrackNode * node);
-    
     Messenger & trackMes;
-    StiKalmanTrackFinderParameters * pars;
     Subject * mSubject;
     
 };
@@ -146,6 +151,7 @@ inline void StiKalmanTrackFinder::forgetSubject(Subject* obsolete)
 inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *par)
 {
 	pars = par;
+	StiKalmanTrack::setParameters(par);
 	StiKalmanTrackNode::setParameters(par);
 }
 

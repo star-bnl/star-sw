@@ -10,51 +10,61 @@
 #include "StiConstants.h"
 #include "StiTrack.h"
 #include "StiTrackFitter.h"
+
+StiTrackFinder * StiTrack::trackFinder = 0;
 StiTrackFitter * StiTrack::trackFitter = 0;
-
-void StiTrack::reset()
-{
-  //q = 0;
-  //nPts = 0;
-  //nFitPts = 0;
-  mSeedHitCount = 0;
-  //vertex = 0;
-  m      = -1.;
-  //chi2   = 0.;
-  mFlag = 0;
-}
-
-
 
 ostream& operator<<(ostream& os, const StiTrack& track)
 {
-	try 
-		{
-			os <<"q: "<<track.getCharge()
-				 <<" pt: "<<track.getPt()
-				 <<" eta: "<<track.getPseudoRapidity()
-				 <<" tanLambda: "<<track.getTanL()
-				 <<" Chi2: "<<track.getChi2()
-				 <<" points: "<<track.getPointCount()
-				 <<" fitPoints: "<<track.getFitPointCount();
-		}
-	catch (runtime_error & rte)
-		{
-			os << " Run-time Error while accessing track parameters: " << rte.what() << endl;
-		}
-	catch (logic_error & le)
-		{
-			os << " Logic Error while accessing track parameters: " << le.what() << endl;
-		}
-	return os;
+  try 
+    {
+      os <<" Chi2: "<<track.getChi2()
+	 <<" q: "<<track.getCharge()
+	 <<" pt: "<<track.getPt()
+	 <<" eta: "<<track.getPseudoRapidity()
+	 <<" tanLambda: "<<track.getTanL()
+	 <<" points/fit/max: "<<track.getPointCount()
+	 <<"/"<<track.getFitPointCount()
+	 <<"/"<<track.getMaxPointCount()<<endl;
+    }
+  catch (runtime_error & rte)
+    {
+      os << " Run-time Error while accessing track parameters: " << rte.what() << endl;
+    }
+  catch (logic_error & le)
+    {
+      os << " Logic Error while accessing track parameters: " << le.what() << endl;
+    }
+  return os;
+}
+
+void StiTrack::setTrackFinder(StiTrackFinder * finder)
+{
+  trackFinder = finder;
 }
 
 void StiTrack::setTrackFitter(StiTrackFitter * fitter)
 {
-	trackFitter = fitter;
+  trackFitter = fitter;
+}
+
+StiTrackFinder * StiTrack::getTrackFinder()
+{
+  return trackFinder;
 }
 
 StiTrackFitter * StiTrack::getTrackFitter()
 {
-	return trackFitter;
+  return trackFitter;
+}
+
+
+void StiTrack::fit(int direction)
+{
+  trackFitter->fit(this,direction);
+}
+
+void StiTrack::find(int direction)
+{
+  trackFinder->find(this,direction);
 }

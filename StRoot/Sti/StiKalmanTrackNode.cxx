@@ -1117,3 +1117,8 @@ double StiKalmanTrackNode::getPt() const
   else
     return 0.003*pars->field/c;
 }
+
+void StiKalmanTrackNode::setParameters(StiKalmanTrackFinderParameters *parameters)
+{
+	pars = parameters;
+}

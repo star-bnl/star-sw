@@ -3,6 +3,7 @@
 
 class StiKalmanTrackFinder;
 class StiKalmanTrackNode;
+class StiKalmanTrack;
 
 class StiKalmanTrackFinderParameters
 {
@@ -17,25 +18,6 @@ public:
     ~StiKalmanTrackFinderParameters()
     {}
 
-    /*
-      void setDefaults()
-      {
-      setElossCalculated(true);
-      setMCSCalculated(true);
-      setField(0.5);
-      setMinContiguousHitCount(2);
-      setMaxNullCount(20);
-      setMaxContiguousNullCount(15);
-      setMaxChi2ForSelection(20.);
-      setMinSearchWindow(0.1);
-      setMaxSearchWindow(4.);
-      setSearchWindowScale(3.);
-      setMassHypothesis(0.139);
-      setXtrapolateToMainVertex(true);
-      setUseTrackFilter(true);
-      }
-    */
-    
     void setUseTrackFilter(bool option)
     {
 	useTrackFilter = option;
@@ -132,6 +114,7 @@ public:
     }
 
     friend StiKalmanTrackFinder;
+    friend StiKalmanTrack;
     friend StiKalmanTrackNode;
 	
 protected:
