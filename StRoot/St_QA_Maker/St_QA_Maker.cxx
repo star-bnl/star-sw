@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.72 1999/12/16 19:52:37 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.73 1999/12/17 22:11:33 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.73  1999/12/17 22:11:33  kathy
+// add psi vs phi hist, change limits
+//
 // Revision 1.72  1999/12/16 19:52:37  kathy
 // fix hist titles in QABookHist; unpack n_point,n_fit_point,n_max_point correctly for globtrk table - must still fix for primtrk table - in St_QA_Maker
 //
@@ -357,86 +360,141 @@ void St_QA_Maker::MakeHistGlob(){
        Int_t ssdpnt = 0;
        Int_t  hold1 = 0;
        Int_t svtpnt = 0;
-       Int_t  hold2 = 0;
        Int_t tpcpnt = 0;
        Int_t trkpnt = 0;
 
        Int_t ssdfpnt = 0;
        Int_t  holdf1 = 0;
        Int_t svtfpnt = 0;
-       Int_t  holdf2 = 0;
        Int_t tpcfpnt = 0;
        Int_t trkfpnt = 0;
 
        Int_t ssdmpnt = 0;
        Int_t  holdm1 = 0;
        Int_t svtmpnt = 0;
-       Int_t  holdm2 = 0;
        Int_t tpcmpnt = 0;
        Int_t trkmpnt = 0;
 
-       //if (cnttrkg<10){
-       //   cout << "Before: n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
-       //                  " n_max = " << t->n_max_point << endl;
-       //	}
+ 
         ssdpnt = (t->n_point)/10000;
          hold1 = ((t->n_point)%10000);
         svtpnt = hold1/1000;
-         hold2 = (hold1%1000);
-        tpcpnt = hold2;
+        tpcpnt = (hold1%1000);
         trkpnt = tpcpnt+svtpnt+ssdpnt;
 
         ssdfpnt = (t->n_fit_point)/10000;
          holdf1 = ((t->n_fit_point)%10000);
         svtfpnt = holdf1/1000;
-         holdf2 = (holdf1%1000);
-        tpcfpnt = holdf2;
+        tpcfpnt = (holdf1%1000);
         trkfpnt = tpcfpnt+svtfpnt+ssdfpnt;
 
         ssdmpnt = (t->n_max_point)/10000;
          holdm1 = ((t->n_max_point)%10000);
         svtmpnt = holdm1/1000;
-         holdm2 = (holdm1%1000);
-        tpcmpnt = holdm2;
+        tpcmpnt = (holdm1%1000);
         trkmpnt = tpcmpnt+svtmpnt+ssdmpnt;
 
-	//        if (cnttrkg<10){
-        //  cout << "After:  #ssd   = " << ssdpnt <<
-	//        " #hold1 = " << hold1  <<         
-	//        " #svt   = " << svtpnt <<
-	//        " #hold2 = " << hold2  << 
-        //        " #tpc   = " << tpcpnt <<
-	// 	" #tot   = " << trkpnt << endl; 
-        //}    
-        //if (cnttrkg<10){
-        //  cout << "After:  #ssdf   = " << ssdfpnt <<
-	//        " #hold1f = " << holdf1  <<         
-	//        " #svtf   = " << svtfpnt <<
-	//        " #hold2f = " << holdf2  << 
-        //        " #tpcf   = " << tpcfpnt <<
-	// 	" #totf   = " << trkfpnt << endl; 
-        //}    
-        //if (cnttrkg<10){
-        //  cout << "After:  #ssdm   = " << ssdmpnt <<
-	//        " #hold1m = " << holdm1  <<         
-	//        " #svtm   = " << svtmpnt <<
-	//        " #hold2m = " << holdm2  << 
-        //        " #tpcm   = " << tpcmpnt <<
-	// 	" #totm   = " << trkmpnt << endl; 
-        //}
+	//if (cnttrkg<2){
+        //  cout << "   trk # " << i << endl;
+        //  cout << " n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
+        //                 " n_max = " << t->n_max_point << endl;
+        //  cout << "  iflag = " << t->iflag << " det-id = " << t->det_id << endl;
+        //  cout << "    #ssd   =  " << ssdpnt <<
+	//             " #hold1 =  " << hold1  <<         
+	//             " #svt   =  " << svtpnt <<
+        //             " #tpc   =  " << tpcpnt <<
+	// 	     " #tot   =  " << trkpnt << endl; 
+        //  cout << "    #ssdf   = " << ssdfpnt <<
+	//             " #hold1f = " << holdf1  <<         
+	//             " #svtf   = " << svtfpnt <<
+        //             " #tpcf   = " << tpcfpnt <<
+	// 	     " #totf   = " << trkfpnt << endl; 
+        //  cout << "    #ssdm   = " << ssdmpnt <<
+	//             " #hold1m = " << holdm1  <<         
+	//             " #svtm   = " << svtmpnt <<
+        //             " #tpcm   = " << tpcmpnt <<
+	// 	     " #totm   = " << trkmpnt << endl; 
+	//	}
+
+	//if (t->n_point<0){
+        //  cout << "   trk # " << i << endl;
+        //  cout << "!!! n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
+        //                 " n_max = " << t->n_max_point << endl;
+        //  cout << "  iflag = " << t->iflag << " det-id = " << t->det_id << endl;
+        //  cout << "    #ssd    = " << ssdpnt <<
+	//             " #hold1  = " << hold1  <<         
+	//             " #ssd    = " << ssdpnt <<
+	//             " #svt    = " << svtpnt <<
+        //             " #tpc    = " << tpcpnt <<
+	// 	     " #tot    = " << trkpnt << endl; 
+        //  cout << "    #ssdf   = " << ssdfpnt <<
+	//             " #hold1f = " << holdf1  <<         
+	//             " #svtf   = " << svtfpnt <<
+        //             " #tpcf   = " << tpcfpnt <<
+	// 	     " #totf   = " << trkfpnt << endl; 
+        //  cout << "    #ssdm   = " << ssdmpnt <<
+	//             " #hold1m = " << holdm1  <<         
+	//             " #svtm   = " << svtmpnt <<
+        //             " #tpcm   = " << tpcmpnt <<
+	// 	     " #totm   = " << trkmpnt << endl; 
+	//       	}
+
+	//if (t->n_point<1000 && cnttrkg<50){
+        // cout << " trk # " << i << endl;
+        // cout << "ccc n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
+        //                 " n_max = " << t->n_max_point << endl;
+        //  cout << "  iflag = " << t->iflag << " det-id = " << t->det_id << endl;
+          //cout << "    #ssd    = " << ssdpnt <<
+       	  //           " #hold1  = " << hold1  <<         
+       	  //           " #ssd    = " << ssdpnt <<
+       	  //           " #svt    = " << svtpnt <<
+          //           " #tpc    = " << tpcpnt <<
+	  // 	     " #tot    = " << trkpnt << endl; 
+          //cout << "    #ssdf   = " << ssdfpnt <<
+       	  //           " #hold1f = " << holdf1  <<         
+       	  //           " #svtf   = " << svtfpnt <<
+          //           " #tpcf   = " << tpcfpnt <<
+	  // 	     " #totf   = " << trkfpnt << endl; 
+          //cout << "    #ssdm   = " << ssdmpnt <<
+       	  //           " #hold1m = " << holdm1  <<         
+       	  //           " #svtm   = " << svtmpnt <<
+          //           " #tpcm   = " << tpcmpnt <<
+	  // 	     " #totm   = " << trkmpnt << endl; 
+	//}
+
+	//if (t->n_point < t->n_fit_point){
+        //  cout << "*** n_point = " << t->n_point << " n_fit = " << t->n_fit_point << 
+        //                 " n_max = " << t->n_max_point << endl;
+        //  cout << "  iflag = " << t->iflag << " det-id = " << t->det_id << endl;
+        //  cout << "    #ssd    = " << ssdpnt <<
+	//            " #hold1  = " << hold1  <<         
+	//             " #ssd    = " << ssdpnt <<
+	//             " #svt    = " << svtpnt <<
+        //             " #tpc    = " << tpcpnt <<
+	// 	     " #tot    = " << trkpnt << endl; 
+        //  cout << "    #ssdf   = " << ssdfpnt <<
+	//             " #hold1f = " << holdf1  <<         
+	//             " #svtf   = " << svtfpnt <<
+        //             " #tpcf   = " << tpcfpnt <<
+	// 	     " #totf   = " << trkfpnt << endl; 
+        //  cout << "    #ssdm   = " << ssdmpnt <<
+	//             " #hold1m = " << holdm1  <<         
+	//             " #svtm   = " << svtmpnt <<
+        //             " #tpcm   = " << tpcmpnt <<
+	// 	     " #totm   = " << trkmpnt << endl; 
+	//	}
+
     
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
         Float_t lmevpt = TMath::Log10(pT*1000.0);
-	Float_t theta = TMath::ASin(1.) - TMath::ATan(t->tanl);
-	Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
-	Float_t gmom  = pT/TMath::Sin(theta);
+	Float_t theta  = TMath::ASin(1.) - TMath::ATan(t->tanl);
+        Float_t thetad = theta *(360./twopi);
+	Float_t eta    =-TMath::Log(TMath::Tan(theta/2.));
+	Float_t gmom   = pT/TMath::Sin(theta);
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-	//	Float_t degoffree = t->n_fit_point;
-	//Float_t chisq0_p = chisq0/(degoffree-3);
-	//Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
         Float_t nfitnmax = (Float_t(trkmpnt))/(Float_t(trkpnt));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
@@ -484,7 +542,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_ratiomT->Fill(nfitnmax);
 	m_psiT->Fill(t->psi);
         m_tanlT->Fill(t->tanl);
-        m_glb_thetaT->Fill(theta);
+        m_glb_thetaT->Fill(thetad);
 	m_etaT->Fill(eta);
 	m_pTT->Fill(pT);
         m_momT->Fill(gmom);
@@ -512,6 +570,7 @@ void St_QA_Maker::MakeHistGlob(){
 	m_chisq1_zfT->Fill(t->x_first[2],chisq1);
         m_nfptonpt_momT->Fill(lmevmom,nfitntot);
         m_nfptonpt_etaT->Fill(eta,nfitntot);
+        m_psi_phiT->Fill(t->phi0,t->psi);
         }
 
 
@@ -539,7 +598,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_ratiomTS->Fill(nfitnmax);
 	m_psiTS->Fill(t->psi);
         m_tanlTS->Fill(t->tanl);
-        m_glb_thetaTS->Fill(theta);
+        m_glb_thetaTS->Fill(thetad);
 	m_etaTS->Fill(eta);
 	m_pTTS->Fill(pT);
         m_momTS->Fill(gmom);
@@ -565,7 +624,7 @@ void St_QA_Maker::MakeHistGlob(){
 	m_chisq1_zfTS->Fill(t->x_first[2],chisq1);
         m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
         m_nfptonpt_etaTS->Fill(eta,nfitntot);
-
+        m_psi_phiTS->Fill(t->phi0,t->psi);
         }
 
 //  now fill all FTPC East histograms ------------------------------------------------
@@ -697,14 +756,12 @@ void St_QA_Maker::MakeHistPrim(){
 	pT = 1./TMath::Abs(t->invpt);
         Float_t lmevpt = TMath::Log10(pT*1000.0);
 	Float_t theta = TMath::ASin(1.) - TMath::ATan(t->tanl);
+        Float_t thetad = theta *(360./twopi);
 	Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
 	Float_t gmom  = pT/TMath::Sin(theta);
         Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
-	//Float_t degoffree = t->n_fit_point;
-	//Float_t chisq0_p = chisq0/(degoffree-3);
-	//Float_t chisq1_p = chisq1/(degoffree-2);
         Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
         Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
         Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
@@ -730,7 +787,7 @@ void St_QA_Maker::MakeHistPrim(){
         m_prim_ratio->Fill(nfitntot);
 	m_ppsi->Fill(t->psi);
         m_ptanl->Fill(t->tanl);
-        m_prim_theta->Fill(theta);
+        m_prim_theta->Fill(thetad);
 	m_peta->Fill(eta);
 	m_ppT->Fill(pT);
         m_pmom->Fill(gmom);

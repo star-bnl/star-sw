@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.12 1999/12/15 20:32:17 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.13 1999/12/17 22:11:33 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.13  1999/12/17 22:11:33  kathy
+//! add psi vs phi hist, change limits
+//!
 //! Revision 1.12  1999/12/15 20:32:17  kathy
 //! separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
 //!
@@ -53,7 +56,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.12 1999/12/15 20:32:17 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.13 1999/12/17 22:11:33 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -254,6 +257,7 @@ class StQABookHist : public StMaker {
   TH2F     *m_chisq1_zfT;      //! chisq1 vs zfirst, tpc 
   TH2F     *m_nfptonpt_momT;   //! mom vs ratio of n fit pnts over n pnts, tpc
   TH2F     *m_nfptonpt_etaT;   //! eta vs ratio of n fit pnts over n pnts, tpc
+  TH2F     *m_psi_phiT;        //! psi vs phi, tpc
 
 // TPC + SVT HISTOGRAMS - 2D
   TH2F     *m_pT_eta_recTS;     //! pT versus eta, tpc+svt
@@ -273,7 +277,7 @@ class StQABookHist : public StMaker {
   TH2F     *m_chisq1_zfTS;      //! chisq1 vs zfirst, tpc+svt
   TH2F     *m_nfptonpt_momTS;   //! mom vs ratio of n fit pnts over n pnts, tpc+svt
   TH2F     *m_nfptonpt_etaTS;   //! eta vs ratio of n fit pnts over n pnts, tpc+svt
-
+  TH2F     *m_psi_phiTS;        //! psi vs phi, tpc+svt
   
 // for method MakeDE - from table dst_dedx
   
@@ -458,7 +462,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.12 1999/12/15 20:32:17 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.13 1999/12/17 22:11:33 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
