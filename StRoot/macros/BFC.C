@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: BFC.C,v 1.5 1999/10/14 22:08:09 fisyak Exp $
+// $Id: BFC.C,v 1.6 1999/11/01 18:13:41 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -464,6 +464,7 @@ void Load(){
   gSystem->Load("StUtilities");
   //  gSystem->Load("libmsg");
   gSystem->Load("libtls");
+  gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField])
