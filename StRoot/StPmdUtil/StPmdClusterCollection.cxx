@@ -1,6 +1,6 @@
 /********************************************************************
  *
- * $Id: StPmdClusterCollection.cxx,v 1.1 2002/08/27 12:16:41 subhasis Exp $
+ * $Id: StPmdClusterCollection.cxx,v 1.2 2003/05/12 12:07:12 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  ********************************************************************
@@ -9,8 +9,8 @@
  *              PMD cluster collection. 
  *
  * $Log: StPmdClusterCollection.cxx,v $
- * Revision 1.1  2002/08/27 12:16:41  subhasis
- * First version
+ * Revision 1.2  2003/05/12 12:07:12  subhasis
+ * Mapping added
  *
  ********************************************************************/
 #include "StPmdClusterCollection.h"
@@ -53,6 +53,7 @@ void StPmdClusterCollection::addCluster(StPmdCluster* cluster)
       mNclusters  += 1;
 
     }
+
 
 
 
