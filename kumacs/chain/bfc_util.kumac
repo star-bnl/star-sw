@@ -6,24 +6,58 @@
 * 9Jul98 K. Turner - changed to use tfc_run#run_newtab - can set adcxyzon=1
 * 10Jul98 K. Turner - changed to use new version of global pam kumacs
 * 11Jul98 K. Turner - changed to used tfc for adcxyz table
+* 11Jul98 K. Turner - changed to load gstar more standard way 
+*                    - changed inputs to bfc_start!
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
-macro bfc_start domain='geometry tpc svt global'
-  
+ macro bfc_start domain='geometry tpc svt global'  chain=' ' 
+
 * SETUP DEFAULT DIRECTORIES TO GET KUMACS FROM
   exec bfc_defaults
   
 * SETUP TABLE DIRECTORIES
   exec setup#setup
 
-* SETUP LOCAL VARIABLES & IMPORT MACROS
+* SETUP LOCAL VARIABLES 
  alias/create STAFCV_OK  1
  alias/create STAFCV_BAD 0
+ 
+* import global macros
  macro/global/import *
    
+* set parameters needed for running gstar & g2t - if loading geometry
+ testgeom = [domain]
+ nw1=$words([testgeom])
+ message ' !!! bfc_util#start ==> Number of words in domain = ',[nw1]
+ do i=1,[nw1]
+   mod1 = $word([testgeom],[i],1)
+   if ([mod1].eq.geometry) then
+     message ' setup for domain = ' [mod1]
+* initialize physics types for running gstar
+	  exec set_hadr_phys_[phystype]
+          message ' gstar: set hadronic physics ' [phystype]
+* initialize geometry for running gstar
+         if ([geomtype].eq.all) then 
+           message ' gstar: load star geometry - all '
+           exec load_star_geom#all
+         elseif ([geomtype].eq.tpc_nofield) then
+           message ' gstar: load star geometry - tpc only, no mag.field '
+           exec load_star_geom#tpc_nofield
+	 elseif ([geomtype].eq.tpc_field) then
+	   message ' gstar: load star geometry - tpc only with mag field'
+	   exec load_star_geom#tpc_field
+         else 
+           message ' gstar: geometry type not available!! '
+         endif
+* initialize for g2t: tell g2t where to put tables
+         detp g2tmain gttc.rdir=0     
+   endif
+ enddo
+     
+ 
 *  LOAD LIBRARIES
  if $vexist(make_done)=0 then
    message "Load domains:" [domain]
@@ -36,17 +70,7 @@ macro bfc_start domain='geometry tpc svt global'
      test_done = [module]_done
      if ($vexist([test_done])=0) then
        vec/cre [test_done]
-       if ([module]=geometry) then
-            exec  set_hadr_phys_on
-            Mode TRAC  SIMU 1  | save secondaries which produced TPC hits
-            detp TRAC  DCAY 210 210 0.1 0.01
-            mode tpce  simu 2
-            mode svtt  simu 2
-            mode ftpc  simu 2
-            detp svtt  svtg.nlayer = 6 | switch off shell 4
-            ghist star.his  STAR
-            gstat time size mult stak
-        endif
+	message ' doing make for domain:' [mod]
         make [mod]
         if $iquest(1)<>0 then
             message "<bfc> Shared libraries have not been loaded : ABend"
@@ -58,7 +82,22 @@ macro bfc_start domain='geometry tpc svt global'
    enddo
    vec/cre make_done
  endif
-
+ 
+ 
+*  must fill Run tables if running g2t (rg2t in chain)
+ testrg2t = [chain]
+ nw2=$words([testrg2t])
+ message ' !!! bfc_util#start ==> Number of words in chain = ',[nw2]
+ do i=1,[nw2]
+   mod2 = $word([testrg2t],[i],1)
+   CASE [mod2] in
+     (rg2t) 
+        message ' !!! bfc_util#start ==> setup for chain:' [mod2]
+* this command fills geant Run tables
+        tables ' ' [geant_Run]
+   ENDCASE
+ enddo
+       
 return
  
 **********************************************************************
@@ -72,11 +111,11 @@ macro bfc_init _
     
  test = [chain]
  nw = $words([test])
- message ' !!! bfc_util ==> Number of words in chain = ' [nw]
+ message ' !!! bfc_util#init ==> Number of words in chain = ' [nw]
  
  do i = 1, [nw]
    mod = $word([test],[i],1)
-   message ' !!! bfc_util ==> chain initialization for  ' [mod]
+   message ' !!! bfc_util#init ==> chain initialization for  ' [mod]
    vec/create v[mod]
    vec/create t[mod]
    CASE [mod] in 
@@ -84,8 +123,11 @@ macro bfc_init _
            newfile hij_in [input_file] r; 
            user/input u evgen/particle.staf
    (gst)   if ($vexist(geometry_done)=0) then
-             exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=geometry
-           endif
+             exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=geometry 
+           endif  
+  (evgin)  user/input dummy [input_file]
+   (rgst)
+   (rg2t)
     (fzd)  user/output o [output_fzd_file]
     (g2t)  
            exec input_g2t_file#init [input_file]
@@ -93,18 +135,9 @@ macro bfc_init _
               message 'problem opening input file '
               goto EOF 
             endif
-    (evout) if output_file="" then
-              message "empty output file"
-            else
-              newfile evout [output_file] w     | open new output file
-              if (STAF_STATUS(1).ne. STAFCV_OK) then
-                message "Cannot open output file"
-                goto eof
-              endif
-              if ($vexist(geometry_done)=1) then
-                dio/stream/putevent evout [run]              
-              endif
-            endif
+    (evin)
+          exec read_table_from_file#init inev [input_file]
+          exec read_table_from_file#read inev 
       (svg) exec init_svg         | SVT initialization - geometry
       (tpg) exec tpg_init#init    | TPC geometry initialization
       (sss) exec svt_slow_sim#initialize | SVT initialization - slow simulation
@@ -156,6 +189,17 @@ macro bfc_init _
       (emc)
             exec init_ems;  
             exec init_jet;     |  EMC geometry &  pam initialization 
+   (evout) if output_file="" then
+              message "empty output file"
+            else
+	      exec write_table_to_file#init evout [output_file]
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open output file"
+                goto eof
+              endif
+*             exec write_table_to_file#write evout [geant_Run]
+     *        exec write_table_to_file#write evout [run]         
+            endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
     
@@ -183,9 +227,14 @@ EOF:
                cd [event]; getev hij_in
                user/input u evgen/particle.staf
       (gst)    trig 1; cd [geant]; for/call g2t; cd /dui; 
+    (evgin) nextl 1
+     (rgst) trig 1
+     (rg2t) cd [geantE]
+            for/call g2t
       (g2t)    
                exec input_g2t_file#read
                if (staf_status(1).ne.STAFCV_OK) goto EOF
+     (evin)    exec read_table_from_file#read inev 
       (svg)    nextl 1
       (tpg)    nextl 1
       (sss)    exec svt_slow_sim#process_event;
@@ -237,8 +286,8 @@ EOF:
     (evout)    if [output_file]="" then
                  message "Empty output file"
                else
-                 dio/stream/putevent evout [event]
-               endif
+		 exec write_table_to_file#write evout [event]
+	       endif
         (*)    message " !!! bfc_util: No process stage for package " [mod]
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
@@ -276,8 +325,7 @@ macro bfc_finish _
       (gst)   ge/rz/cd //PAWC; 
 	       hi/list;		| show histograms
       (g2t)  exec input_g2t_file#close
-      (evout) dio/stream/close evout;   
-              soc/object/oid evout; 
+      (evout) exec write_table_to_file#close evout;
               oid = staf_result(1); 
               soc/deleteoid [oid] 
       (*) message " !!! bfc_util: No final stage for package " [mod]
