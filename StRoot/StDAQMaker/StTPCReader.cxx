@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTPCReader.cxx,v 1.5 2003/04/22 20:12:43 ward Exp $
+ * $Id: StTPCReader.cxx,v 1.6 2003/04/29 16:22:44 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTPCReader.cxx,v $
+ * Revision 1.6  2003/04/29 16:22:44  perev
+ * non TPCoriented cleanup
+ *
  * Revision 1.5  2003/04/22 20:12:43  ward
  * So the chain can run when there is no TPC data.
  *
@@ -66,6 +69,12 @@ int StTPCReader::Update()
   return setSector(-1);
 }
 //_____________________________________________________________________________
+int StTPCReader::empty()
+{
+  if(!fTPCImpReader) Update();
+  return (!fTPCImpReader);
+}
+//_____________________________________________________________________________
 StTPCReader::~StTPCReader()
 { close();}
 
@@ -87,7 +96,7 @@ int StTPCReader::close()
 //_____________________________________________________________________________
 int StTPCReader::setSector(int sector)
 {
-  if (sector == fSector) return 0;
+  if (fTPCImpReader && sector == fSector) return 0;
 
   delete fZeroSuppressedReader;	fZeroSuppressedReader 	= 0;
   delete fADCRawReader ;	fADCRawReader 		= 0;
@@ -97,7 +106,7 @@ int StTPCReader::setSector(int sector)
   delete fCPPReader;		fCPPReader 		= 0;
   delete fBadChannelReader;	fBadChannelReader 	= 0;
 
-  if (sector == -1) {
+  if (!fTPCImpReader || sector == -1) {
    delete fTPCImpReader;
    ptrTPCP=NULL; // Herb Oct 2002 for DAQ100.
    fTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),fDAQReader->getTPCVersion());
@@ -105,7 +114,7 @@ int StTPCReader::setSector(int sector)
    fSector = -1999;
    if(!fTPCImpReader) return 1;
    ptrTPCP=fTPCImpReader->motherPointerBank; // Herb Oct 2002 for DAQ100.
-   return 0;
+   if (sector == -1) return 0;
   }
 
   fSector = sector;
@@ -140,17 +149,17 @@ int StTPCReader::getMaxPad(int padrow) const
 //_____________________________________________________________________________
 int StTPCReader::getPadList(int Sector, int PadRow, unsigned char *&padList)
 {
-  setSector(Sector);  
-  if (!fZeroSuppressedReader) return -1;
+  if (setSector(Sector)) 	return -1;  
+  if (!fZeroSuppressedReader) 	return -1;
   return fZeroSuppressedReader->getPadList(PadRow, &padList);  
 } 
 //_____________________________________________________________________________
   int StTPCReader::getSequences(int Sector, int PadRow, int Pad, int &nSeq,
 			   TPCSequence *&SeqData) 
 {
-  setSector(Sector);
+  if (setSector(Sector)) 	return -1;
   nSeq = 0; SeqData = 0;
-  if (!fZeroSuppressedReader) return -1;
+  if (!fZeroSuppressedReader) 	return -1;
   Sequence *seq;
   int iret = fZeroSuppressedReader->getSequences(PadRow,Pad,&nSeq,&seq);
   assert (sizeof(TPCSequence)==sizeof(Sequence));
@@ -162,7 +171,7 @@ int StTPCReader::getPadList(int Sector, int PadRow, unsigned char *&padList)
 int StTPCReader::getRawADC(int Sector,int PadRow, int Pad, int &nArray,
                         unsigned char *&Array)
 {
-  setSector(Sector);
+  if (setSector(Sector)) 	return -1;
   nArray = 0; Array=0;
   if (!fADCRawReader) return -1;
   return fADCRawReader->getSequences(PadRow,Pad,&nArray,&Array);
@@ -171,26 +180,26 @@ int StTPCReader::getRawADC(int Sector,int PadRow, int Pad, int &nArray,
 int StTPCReader::getPedestals(int Sector,int PadRow, int Pad, int &nArray,
                            unsigned char *&Array)
 {  
-  setSector(Sector);
+  if (setSector(Sector)) 	return -1;
   nArray = 0; Array=0;
-  if (!fPedestalReader) return -1;
+  if (!fPedestalReader) 	return -1;
   return fPedestalReader->getSequences(PadRow,Pad,&nArray,&Array);
 }  
 //_____________________________________________________________________________
 int StTPCReader::getRMSPedestals(int Sector,int PadRow, int Pad, int &nArray,
                            unsigned char *&Array)
 {  
-  setSector(Sector);
+  if (setSector(Sector)) 	return -1;
   nArray = 0; Array=0;
-  if (!fPedestalRMSReader) return -1;
+  if (!fPedestalRMSReader) 	return -1;
   return fPedestalRMSReader->getSequences(PadRow,Pad,&nArray,&Array);
 }  
 //_____________________________________________________________________________
 int StTPCReader::getGain(int Sector, int PadRow, int Pad, TPCGain *&gain)
 {  
-  setSector(Sector);
+  if (setSector(Sector)) 	return -1;
   gain = 0;
-  if (!fGainReader) return -1; 
+  if (!fGainReader) 		return -1; 
   struct Gain *gainqq;
   int iret = fGainReader->getGain(PadRow,Pad,&gainqq);
   assert(sizeof(TPCGain)==sizeof(struct Gain));
@@ -201,9 +210,9 @@ int StTPCReader::getGain(int Sector, int PadRow, int Pad, TPCGain *&gain)
 int StTPCReader::getClusters(int Sector, int PadRow, int Pad, int &nClusters, 
 			     TPCCluster *&clusters)
 {  
-  setSector(Sector);
+  if (setSector(Sector)) 	return -1;
   nClusters=0; clusters=0;
-  if (!fCPPReader) return -1;
+  if (!fCPPReader) 		return -1;
   struct ASIC_Cluster *clustersqq;
   int iret = fCPPReader->getClusters(PadRow,Pad,&nClusters,&clustersqq);
   assert(sizeof(TPCCluster)==sizeof(struct ASIC_Cluster));
@@ -213,8 +222,8 @@ int StTPCReader::getClusters(int Sector, int PadRow, int Pad, int &nClusters,
 //_____________________________________________________________________________
 int StTPCReader::IsBad(int Sector, int PadRow, int Pad)
 {
-  setSector(Sector);
-  if (!fBadChannelReader) return 1;
+  if (setSector(Sector)) 	return -1;
+  if (!fBadChannelReader) 	return -1;
   return fBadChannelReader->IsBad(PadRow,Pad);
 }
   
