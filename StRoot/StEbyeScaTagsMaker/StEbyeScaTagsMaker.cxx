@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.10 2000/01/25 15:31:15 fisyak Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.11 2000/02/04 22:44:30 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.11  2000/02/04 22:44:30  jgreid
+ * added functionality for ScaTags to be picked up by the TagDB after filling
+ *
  * Revision 1.10  2000/01/25 15:31:15  fisyak
  * Add namespace for CC5
  *
@@ -24,7 +27,6 @@
  *
  * Revision 1.6  1999/06/27 22:45:27  fisyak
  * Merge StRootEvent and StEvent
-
  *
  * Revision 1.5  1999/05/27 17:19:24  jgreid
  * fixed rapidity calculation bug and added additional QC cuts
@@ -60,8 +62,6 @@ using namespace units;
 ClassImp(StEbyeScaTagsMaker)
 
 StEbyeScaTagsMaker::StEbyeScaTagsMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
-  drawinit = kFALSE;
-  theTag = 0;
 }
 
 StEbyeScaTagsMaker::~StEbyeScaTagsMaker() {
@@ -80,19 +80,31 @@ Int_t StEbyeScaTagsMaker::Make() {
 
   // OK, we've got the event. Do what thou wilst.
 
-  // Create and fill the tag
-  if (theTag) delete theTag;
-  theTag = new ScaTag_st;
-  fillTag(ev,*theTag);
+  // tag filling based on StFlowTagMaker
+  // Create a new tag
+  mTagHeader = NULL;
+  mTag = NULL;
+  
+  // instantiate new St_ScaTag class
+  mTagHeader = new St_ScaTag("ScaTag",1); // table header
+  // set the size of the table
+  mTagHeader->SetNRows(1);
+  // add ScaTag table to the root .data directory
+  AddData(mTagHeader,".data");
+  // get a pointer to the c-struct containing the variables
+  mTag = mTagHeader->GetTable(); // table structure
+
+  //and fill the tag
+  fillTag(ev);
 
   return kStOK;
 }
 
 ScaTag_st* StEbyeScaTagsMaker::tag() {
-    return theTag;
+    return mTag;
 }
 
-void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
+void StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
   double mt_histo[NBINS];
   
@@ -140,10 +152,11 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
 
   double dcaX, dcaY, dcaZ, dcaM;
   
+  // temporarily use the first (currently only) primary vertex
   StVertex *primeVertex = event.primaryVertex();
 
   StThreeVectorD origin(0,0,0);
-  StThreeVectorD primaryVertexPosition = primeVertex->position();
+  StThreeVectorD primaryVertexPosition;
 
   // uncomment the next line (and 'outFile' << line below) to APPEND output to a file
   //  !! If this file already exists it will just add the new data to the end !!
@@ -152,6 +165,7 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   // Loop over 'event' vertices and their primary tracks
   // ** track loop **
   if (primeVertex) {
+    primaryVertexPosition = primeVertex->position();
     const StSPtrVecTrackNode& theNodes = event.trackNodes();
     for (unsigned int k=0; k<theNodes.size(); k++) {
 
@@ -176,7 +190,7 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
 
       // calculate mt (needed for temperature calculation)
       mt = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
-      imtbin  = (mt - mt_min)/mt_binsize;
+      imtbin  = (int) ((mt - mt_min)/mt_binsize);
 
       // calculate eta
       dip = theNodes[k]->track(global)->geometry()->dipAngle();
@@ -185,7 +199,6 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
 
       // ** transverse DCA cut [cut #3] 
       if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY > dcaY_min) && (dcaY < dcaY_max))) {
-
         // ** rapidity cut [cut #2] 
         if ((eta > eta_min) && (eta < eta_max)) {
 
@@ -219,18 +232,18 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
     // fill the chargedParicles_Means array in the sca Tag
 
     // 0 - event multiplicity
-    scaTag.chargedParticles_Means[0] = trackCount;
+    mTag->chargedParticles_Means[0] = trackCount;
     // 1 - eventwise mean transverse momentum
-    scaTag.chargedParticles_Means[1] = meanPt;
+    mTag->chargedParticles_Means[1] = meanPt;
     // 2 - eventwise mean transverse momentum squared
-    scaTag.chargedParticles_Means[2] = meanPtSquared;
+    mTag->chargedParticles_Means[2] = meanPtSquared;
     // 3 - eventwise mean rapidity
-    scaTag.chargedParticles_Means[3] = meanEta;
+    mTag->chargedParticles_Means[3] = meanEta;
     // 4 - eventwise mean rapidity squared
-    scaTag.chargedParticles_Means[4] = meanEtaSquared;
+    mTag->chargedParticles_Means[4] = meanEtaSquared;
     // 5 - estimated temperature of the event
     //     (based on slope fit to 1/mt dN/dmt)
-    scaTag.chargedParticles_Means[5] = mtInverseSlope(mt_histo, 0, NBINS);
+    mTag->chargedParticles_Means[5] = mtInverseSlope(mt_histo, 0, NBINS);
 
     //uncomment the next line to send the analysis results to cout
     //cout << trackCount << " " << meanPt/GeV << " " << meanPtSquared/(GeV*GeV) << endl;
@@ -251,8 +264,8 @@ float StEbyeScaTagsMaker::mtInverseSlope(double *mthisto, int ibegin, int istop)
   float mt_min  = 0;
   float mt_max  = 1.5;
  
-  float eta_min = -1;
-  float eta_max = 1;
+  //float eta_min = -1;
+  //float eta_max = 1;
 
   mt_binsize  = (mt_max - mt_min)/NBINS;
 
@@ -276,14 +289,14 @@ float StEbyeScaTagsMaker::mtInverseSlope(double *mthisto, int ibegin, int istop)
 
 void StEbyeScaTagsMaker::printTag(ostream& os) {
     os << "--- Event-by-Event SCA Tag Table ---" << endl; 
-    if (!theTag) os << "(tag is empty)" << endl;
+    if (!mTag) os << "(tag is empty)" << endl;
     else {
-      os <<  "N = " << theTag->chargedParticles_Means[0] << endl;
-      os <<  "<pt> = " << theTag->chargedParticles_Means[1] << endl;
-      os <<  "<pt^2> = " << theTag->chargedParticles_Means[2] << endl;
-      os <<  "<y> = " << theTag->chargedParticles_Means[3] << endl;
-      os <<  "<y^2> = " << theTag->chargedParticles_Means[4] << endl;
-      os <<  "T = " << theTag->chargedParticles_Means[5] << endl;
+      os <<  "N = " << mTag->chargedParticles_Means[0] << endl;
+      os <<  "<pt> = " << mTag->chargedParticles_Means[1] << endl;
+      os <<  "<pt^2> = " << mTag->chargedParticles_Means[2] << endl;
+      os <<  "<y> = " << mTag->chargedParticles_Means[3] << endl;
+      os <<  "<y^2> = " << mTag->chargedParticles_Means[4] << endl;
+      os <<  "T = " << mTag->chargedParticles_Means[5] << endl;
       os <<  "...and more to be filled later" << endl;
     }
 }
@@ -293,10 +306,10 @@ Int_t StEbyeScaTagsMaker::Init() {
 }
 
 void StEbyeScaTagsMaker::Clear(Option_t *opt) {
-  if (theTag) {
-    delete theTag;
-    theTag = 0;
-  }
+  //if (mTag) {
+  //  delete mTag;
+  //  mTag = NULL;
+  //}
   StMaker::Clear();
 }
 
