@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.17 1999/08/20 13:13:30 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.18 1999/08/20 22:59:15 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.18  1999/08/20 22:59:15  fisyak
+# Fix problem with / in ROOT_DIR
+#
 # Revision 1.17  1999/08/20 13:13:30  fisyak
 # Devorce StAF and STAR Library
 #
@@ -174,7 +177,7 @@ ifdef STAF_SYS
 #	default staf libs
   STAF_SYS_LIB := $(STAF_SYS)/.$(STAF_ARCH)/lib
   STAF_SYS_BIN := $(STAF_SYS)/.$(STAF_ARCH)/bin
-  STIC := $(STAF_SYS_BIN)/stic
+  STIC := $(STAF_BIN)/stic
   STAFGEN := $(STAF_SYS_BIN)/stafGen
   PAMIGEN := $(STAF_SYS_BIN)/pamiGen.csh
   MAKE_PAMSWITCH := $(STAF_SYS_BIN)/make_pamSwitch
@@ -246,7 +249,11 @@ ifndef PAMS
     branch  :=$(PAMS)
   endif
 endif
-ROOT_DIR:=$(word 1,$(subst $(PAMS), ,$(INP_DIR)))
+ifndef PAMS
+ROOT_DIR:=$(INP_DIR)
+else
+ROOT_DIR:=$(word 1,$(subst /$(PAMS), ,$(INP_DIR)))
+endif
 D       := $(subst /, ,$(subst $(ROOT_DIR),,$(INP_DIR)))
 DOMAIN  := $(word 2, $(D))
 ifneq (,$(findstring $(DOMAIN),gen sim))

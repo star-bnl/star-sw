@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.92  1999/08/20 22:59:15  fisyak
+#  Fix problem with / in ROOT_DIR
+#
 #  Revision 1.91  1999/08/17 14:45:35  fisyak
 #  take out StAssociationMaker for SUN/HP
 #
@@ -352,7 +355,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/08/17 14:45:35 $ 
+#           Last modification $Date: 1999/08/20 22:59:15 $ 
 #  default setings
 # Current Working Directory
 #
@@ -379,11 +382,9 @@ ifndef SUBDIRS
   SUBDIRS := $(filter StChain, $(SUBDIRS)) $(filter-out StChain, $(SUBDIRS)) 
   SUBDIRS := $(filter-out ctf, $(SUBDIRS)) $(filter ctf, $(SUBDIRS)) 
   SUBDIRS := $(filter St_base, $(SUBDIRS)) $(filter-out St_base, $(SUBDIRS)) 
-  ifdef NT
-    SUBDIRS := $(filter-out db sim g2t gstar dig trg strange, $(SUBDIRS))
-  endif
   SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
   SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
+  SUBDIRS := $(filter-out StDbLib StDbMaker StTpcDb, $(SUBDIRS)) 
   ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
     SUBDIRS := $(filter-out StPeCMaker StHbtMaker StAssociationMaker, $(SUBDIRS))
   endif
