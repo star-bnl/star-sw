@@ -38,13 +38,16 @@ C---------------
     
       INTEGER 	ok
       INTEGER  	jk,det_id
+      INTEGER   jkk
       INTEGER   ll,iflag,iflag1
       INTEGER   i,j,index
       
-      REAL	mass1(3),mass2(3),pi,pst1(3)
+      REAL	mass1(3),mass2(3),pst1(3)
       REAL	rv,pst2(3)
       REAL	pdotp,ndotp,pv0,pv0sq,ppar,npar,pper
       REAL	trk1(6),trk2(6)
+      REAL      trk1sav(6),trk2sav(6)
+      REAL      xn1sav(2),xn2sav(2)
       REAL	xcom(2),ycom(2),inv_mass,rmin
       REAL	xp(2),xn1(2),xn2(2),rd,xpp(3),massl(2),pp(3)
       REAL      env0,bv0,gv0,ep,ppar_cm,mainv(3),rap
@@ -52,12 +55,11 @@ C---------------
       LOGICAL	first, updated
       DATA MASS1/0.139567,.93828,.139567/
       DATA MASS2/0.139567,.139567,.93828/
-
 *
 *
 *-----executable statements--------------------------------------------
 *
-      pi=acos(-1.)
+*      pi=acos(-1.)
 *
 *
 CC:  Load Primary vertex position coordinates:
@@ -94,6 +96,20 @@ C--   calculate impact parameter at main vertex--- wkw
            
            call ev0_project_track(trak(i).xc,trak(i).rc,mainv,xn1)
            trak(i).dca=sqrt(xn1(1)**2.+xn1(2)**2.)
+
+C--   skip all tracks with impact parameter .lt. dcapnmin
+           if( trak(i).det_id .eq. 1 )then
+                 det_id = 1
+           elseif( trak(i).det_id .eq. 2 ) then
+                 det_id = 2
+           else
+                 det_id = 3
+           endif
+           IF( (trak(i).dca.le.ev0par(det_id).dcapnmin)) GO TO 10 
+C******************
+C-- skip all SVT only tracks
+           if(det_id.eq.2)go to 10
+C******************
            call ev0_track_mom(trak(i).r0,trak(i).rc,0,pst1,bfield(3))
            trak(i).p=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)
      +          +pst1(3)*pst1(3))
@@ -105,7 +121,18 @@ C--   calculate impact parameter at main vertex--- wkw
 
 *     second track is a negative
               IF(trak(j).q .gt.0) GOTO 20
-              
+
+                 if( trak(j).det_id .eq. 1 )then
+                     det_id = 1
+                 elseif( trak(j).det_id .eq. 2 ) then
+                     det_id = 2
+                 else
+                     det_id = 3
+                 endif
+C******************
+C-- skip all SVT only tracks
+           if(det_id.eq.2)go to 20
+C******************
 
               if( first ) then
 
@@ -115,11 +142,21 @@ C--    and total mom for trak(j) first time I see it---
 
                  call ev0_project_track(trak(j).xc,trak(j).rc,mainv,xn2)
                  trak(j).dca=sqrt(xn2(1)**2.+xn2(2)**2.)
+
+C--   skip all tracks with impact parameter .lt. dcapnmin
+                IF((trak(j).dca.gt.ev0par(det_id).dcapnmin)) then 
+
                  call ev0_track_mom(trak(j).r0,trak(j).rc,0,
      +                pst2,bfield(3))
                  trak(j).p=sqrt(pst2(1)*pst2(1)+pst2(2)*pst2(2)
      +                +pst2(3)*pst2(3))
+
+                endif
               endif
+                 
+                 
+C--   skip all tracks with impact parameter .lt. dcapnmin
+                IF((trak(j).dca.le.ev0par(det_id).dcapnmin)) GO TO 20 
 
 
               if( trak(i).det_id .eq. 1 .or. trak(j).det_id .eq. 1)then
@@ -144,10 +181,11 @@ c
               rdcheck(1) = 9999999.0
               rdcheck(2) = 9999990.0
               updated = .false.
+
               DO jk=1,2
                  xp(1)=xcom(jk)
                  xp(2)=ycom(jk)
-                
+             
                  call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
                  call ev0_update_track_param(trak(i).xc,trak(i).rc,
      +                xn1,trak(i).r0,trk1)
@@ -162,19 +200,40 @@ c
      +                   +(trk1(3)-trk2(3))**2
                     updated = .true.
                  endif
-             
+
+              if(jk.eq.1)then
+C               save current point so that no swimming back is necessary
+                DO jkk=1,6
+                 trk1sav(jkk)=trk1(jkk)
+                 trk2sav(jkk)=trk2(jkk)
+                enddo
+                DO jkk=1,2
+                 xn1sav(jkk)=xn1(jkk)
+                 xn2sav(jkk)=xn2(jkk)
+                enddo
+              endif 
                  if( iflag1 .eq. 3) goto 12
               enddo
  12           continue
               if (rdcheck(1).lt.rdcheck(2) ) then ! go back to it
                  xp(1)=xcom(1)
                  xp(2)=ycom(1)
-                 call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
-                 call ev0_update_track_param(trak(i).xc,trak(i).rc,
-     +                xn1,trak(i).r0,trk1)
-                 call ev0_project_track(trak(j).xc,trak(j).rc,xp,xn2)
-                 call ev0_update_track_param(trak(j).xc,trak(j).rc,
-     +                xn2,trak(j).r0,trk2)
+C restore first point so that no swimming back is necessary
+              DO jk=1,6
+                 trk1(jk)=trk1sav(jk)
+                 trk2(jk)=trk2sav(jk)
+              enddo
+              DO jk=1,2
+                 xn1(jk)=xn1sav(jk)
+                 xn2(jk)=xn2sav(jk)
+              enddo
+ 
+C                 call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
+C                 call ev0_update_track_param(trak(i).xc,trak(i).rc,
+C     +                xn1,trak(i).r0,trk1)
+C                 call ev0_project_track(trak(j).xc,trak(j).rc,xp,xn2)
+C                 call ev0_update_track_param(trak(j).xc,trak(j).rc,
+C     +                xn2,trak(j).r0,trk2)
               endif
 
               if( updated) then 
