@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: DbFill.cxx,v 1.2 2000/01/10 20:31:16 porter Exp $
+ * $Id: DbFill.cxx,v 1.3 2000/01/31 17:11:18 porter Exp $
  *
  * Author: S. Vanyashin
  ***************************************************************************
@@ -11,6 +11,16 @@
  ***************************************************************************
  *
  * $Log: DbFill.cxx,v $
+ * Revision 1.3  2000/01/31 17:11:18  porter
+ * fix break caused by the interaction design between
+ * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
+ * Now  StDbBroker::Descriptor==tableDescriptor_st
+ * And  StDbBroker::GetTableDescriptor() returns abstract StTableDescriptorI*
+ * Interface to StDbLib is (and was) handle correctly.
+ * StDbBroker is now tied to StRoot/St_base via tableDescriptor.h
+ * No problems would have occured if St_base interactions were based
+ * on StTableDesciptorI in the first place.
+ *
  * Revision 1.2  2000/01/10 20:31:16  porter
  * modified StDbBroker to be an interface to the DB-interface, StDbLib.
  *  - old functionality is retained for the short-term & modifications
@@ -219,22 +229,22 @@ for (i=0;i<num_struct;i++)
 		  {
 		    row = mysql_fetch_row(result);
 		    
-		    if (strcmp(d[j].name,row[0]))
+		    if (strcmp(d[j].m_ColumnName,row[0]))
 		      break;
 		    
 		    //same name: check offset
 		    //cout<<"offset: \""<<d[j].offset<<"\" \""<<row[1]<<"\""<<endl;
-		    if ( d[j].offset!=atoi(row[1]) )
+		    if ( d[j].m_Offset!=(unsigned int)atoi(row[1]) )
 		      break;
 		    
 		    //same offset: check nDims
 		    //cout<<"nDims: \""<<d[j].dimensions<<"\" \""<<row[2]<<"\""<<endl;
-		    if ( d[j].dimensions!=atoi(row[2]) )
+		    if ( d[j].m_Dimensions!=(unsigned int)atoi(row[2]) )
 		      break;
 		    
 		    //same nDims: check firstDim
 		    //cout<<"nDims: \""<<d[j].firstDimension<<"\" \""<<row[3]<<"\""<<endl;
-		    if ( d[j].firstDimension!=atoi(row[3]) )
+		    if ( d[j].m_IndexArray[0]!=(unsigned int)atoi(row[3]) )
 		      break;
 		    
 		    //same value: check comment
@@ -303,11 +313,11 @@ if (same==0)//we have to insert this structure
       {
 	Query.seekp(0);
 	Query << "INSERT INTO headers SET strID=\""<<structureID
-	      <<"\", name=\""<<d[j].name
-	      <<"\", type=\""<<StDbBroker::GetTypeName(d[j].type)
-	      <<"\", nDims=\""<<d[j].dimensions//ENUM has to be as string
-	      <<"\", firstDim="<<d[j].firstDimension
-	      <<", offset="<<d[j].offset
+	      <<"\", name=\""<<d[j].m_ColumnName
+	      <<"\", type=\""<<StDbBroker::GetTypeName((StDbBroker::EColumnType)d[j].m_Type)
+	      <<"\", nDims=\""<<d[j].m_Dimensions//ENUM has to be as string
+	      <<"\", firstDim="<<d[j].m_IndexArray[0]
+	      <<", offset="<<d[j].m_Offset
 	      <<", comment=\""<<ends;
 
 	//we have to escape comments
@@ -387,6 +397,7 @@ mysql_close(&mysql);
 return;
 
 }
+
 
 
 

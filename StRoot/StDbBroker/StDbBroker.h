@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.9 2000/01/27 20:30:40 porter Exp $
+ * $Id: StDbBroker.h,v 1.10 2000/01/31 17:11:18 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,16 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.10  2000/01/31 17:11:18  porter
+ * fix break caused by the interaction design between
+ * 'StRoot/St_base/tableDescriptor.h' & 'StDbBroker::Descriptor'
+ * Now  StDbBroker::Descriptor==tableDescriptor_st
+ * And  StDbBroker::GetTableDescriptor() returns abstract StTableDescriptorI*
+ * Interface to StDbLib is (and was) handle correctly.
+ * StDbBroker is now tied to StRoot/St_base via tableDescriptor.h
+ * No problems would have occured if St_base interactions were based
+ * on StTableDesciptorI in the first place.
+ *
  * Revision 1.9  2000/01/27 20:30:40  porter
  * cleaned up dtor & error logic
  *
@@ -34,20 +44,32 @@
 #include "Rtypes.h"
 #include "dbNodeArray.h"
 #include "dbConfig.h"
+//
+// --> had to remove independence from 'St_base'
+//     since St_base doesn't know interface
+//    
+//     Now Broker uses StDbLib's descriptor interface
+//     and St_base's concrete descriptor.
+//
+#include "tableDescriptor.h" 
 
 class StDbConfigNode;
 class StDbManager;
-
+class StTableDescriptorI;
 
 /* needed for GetComments only   */
 class St_Table;
 /*this is a temporary quick-and-dirty class for db access*/
 
+
 class StDbBroker  {
   public:
       enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
                              ,kULong, kUShort, kUChar, kChar };
-     struct Descriptor{
+
+typedef tableDescriptor_st Descriptor;
+
+  /*     struct Descriptor{
      char name[32];		//variable name 
      int firstDimension;		//first dimension, if this is an array
      int secondDimension;	//second dimension
@@ -57,6 +79,7 @@ class StDbBroker  {
      int dimensions;		//number of dimensions
      EColumnType type;		//type of element
      };
+  */
 
   protected:
     Descriptor  *m_descriptor;
@@ -102,6 +125,8 @@ class StDbBroker  {
     UInt_t GetEndDate()              {return m_EndDate;     }
     UInt_t GetEndTime()              {return m_EndTime;     }
 
+    StTableDescriptorI* GetTableDescriptor();
+
     static const Char_t * GetTypeName( EColumnType type) {
       switch (type)
 	{
@@ -121,6 +146,7 @@ class StDbBroker  {
 	default:      return "";
 	} 
     };
+
 
     void   SetDateTime(UInt_t date,UInt_t time);
 
