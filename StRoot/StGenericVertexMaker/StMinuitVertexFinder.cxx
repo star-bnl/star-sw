@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.5 2003/10/06 04:37:58 perev Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.6 2003/10/09 16:40:12 perev Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.6  2003/10/09 16:40:12  perev
+ * delete helix object added
+ *
  * Revision 1.5  2003/10/06 04:37:58  perev
  * delete helix
  *
@@ -415,6 +418,7 @@ void StMinuitVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz
     double py   = p0*mdydz;
     double pz   = p0; // approximation: nx,ny<<0
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
+    delete mBeamHelix;
     mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
 
     //re-initilize minuit for 1D fitting
