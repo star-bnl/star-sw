@@ -92,7 +92,7 @@ C     Local variables
       INTEGER i_index(mxpnt)
       LOGICAL good_hit(mxpnt), good_hit_tpc(mxpnt)
       DOUBLE PRECISION    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
-      DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt),pnt(mxpnt)
+      DOUBLE PRECISION    xerr(mxpnt),yerr(mxpnt),zerr(mxpnt)
       DOUBLE PRECISION    chisquare, param(*)
 
       REAL    as,bs,cf,xold,yold,theta
@@ -163,13 +163,13 @@ C     load the fitting arrays for the primary vertex
             ncir = ncir + 1
             write(6,*) ' EGR not designed to work this way'
             good_hit_tpc(ncir) = .true.
-            i_index(ncir) = ncir ! Store index for reference
+            i_index(ncir) =  gtrk(igtrk).nhit! Store index for reference
             xcir(ncir) = prim_vrtx_x
             ycir(ncir) = prim_vrtx_y 
             zcir(ncir) = prim_vrtx_z
 CCC            wcir(ncir) = 500.0        ! Arbitrary, but large, for now
 CCC            wlin(ncir) = 1000.0
-            pnt(ncir) = gtrk(igtrk).nhit
+
          endif
 
 C     Load the fitting arrays with the SVT space points
@@ -193,13 +193,9 @@ C     Load the fitting arrays with the SVT space points
                   xerr(ncir) = 0.01;
                   yerr(ncir) = 0.01;
                   zerr(ncir) = 0.01;
-                  
-                  pnt(ncir) = iplane ! Used to identify outliers
                endif            ! good spt
             enddo               ! iplane
          endif   ! isvtt
-
-
 
 C Load the fitting arrays with the TPC points
 
