@@ -588,11 +588,11 @@ tdmDataset:: tdmDataset(const char* name, long setDim)
 		: socObject(name, "tdmDataset") {
    myPtr = (SOC_PTR_T)this;
    pDSthis = NULL;
-#ifdef	OLD_DSL
+#ifndef	NEW_DSL
    if( !dsNewDataset(&pDSthis, (char*)name, setDim) ){
-#else	/*OLD_DSL*/
+#else	/*NEW_DSL*/
    if( !dsNewDataset(&pDSthis, (char*)name) ){
-#endif	/*OLD_DSL*/
+#endif	/*NEW_DSL*/
       dsPerror("unable to create dataset pointer");
       pDSthis = NULL;
    }
