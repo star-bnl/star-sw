@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.3 2000/05/11 20:00:34 posk Exp $
+// $Id: StFlowEvent.h,v 1.4 2000/05/12 22:42:04 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.4  2000/05/12 22:42:04  snelling
+// Additions for persistency and minor fix
+//
 // Revision 1.3  2000/05/11 20:00:34  posk
 // Preparation for micro and nano DSTs.
 //
@@ -58,21 +61,20 @@
 
 #ifndef StFlowEvent_h
 #define StFlowEvent_h
-#include <iostream.h>
-#include <stdlib.h>
+//#include "St_DataSet.h"
+#include "StObject.h"
 #include "StFlowTrackCollection.h"
-#include "StFlowConstants.h"
 #include "StThreeVectorF.hh"
 #include "Rtypes.h"
-#include "SystemOfUnits.h"
 #include "TVector2.h"
 class StFlowSelection;
 
-class StFlowEvent{
+//class StFlowEvent  : public St_DataSet {
+class StFlowEvent  : public StObject {
 
 public:
 
-                 StFlowEvent();
+  StFlowEvent();
   virtual        ~StFlowEvent();
 
   Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
@@ -103,10 +105,6 @@ public:
   static void SetPiMinusCut(Float_t lo, Float_t hi);
   static void SetProtonCut(Float_t lo, Float_t hi);
 
-  // For I/O of this object -- functions defined in StHbtIO.cc
-  friend ostream& operator<<(ostream& out, StFlowEvent& ev);
-  friend istream& operator>>(istream& in,  StFlowEvent& ev);
-
 private:
 
   UInt_t          mEventNumber;                         // number of the event
@@ -121,7 +119,7 @@ private:
   static Float_t  mProtonCuts[2];
 
   StFlowEvent*           pFlowEvent;         //!
-  StFlowTrackCollection* pTrackCollection;   //!
+  StFlowTrackCollection* pTrackCollection;   
 
   ClassDef(StFlowEvent,1)                    // macro for rootcint
 };
