@@ -24,3 +24,13 @@ void StIOInterFace::IntoBranch(const Char_t *brName,const Char_t *logNames)
 }
 //_____________________________________________________________________________
 //void StIOInterFace::Streamer(TBuffer &b) {};
+//_____________________________________________________________________________
+Int_t StIOInterFace::Skip(int nskip)
+{  
+  for (int skp=0; skp<nskip; skp++) 
+  {
+    Clear(); int ret = MakeRead(); 
+    if (ret) return ret;
+  }
+  return kStOK;
+}
