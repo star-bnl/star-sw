@@ -145,7 +145,7 @@ ami/module/call ctg [params]/ctf/ctb _
  
 *
 * write geometry tables out to file
-  /dio/newfilestream  output_file ctg_pars_ctb.dsl w
+  /dio/newfilestream  output_file ctg_pars_ctb.xdf w
   putevent output_file [params]/ctf
  
  
@@ -156,7 +156,7 @@ RETURN
  macro/global/import *
    
    cd [params]
-   /dio/newfilestream  input_file ctg_pars_ctb.dsl r
+   /dio/newfilestream  input_file ctg_pars_ctb.xdf r
    getevent input_file 
    cd /dui
    
