@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.58  1999/02/19 15:07:56  fisyak
+#  take out StTrsMaker from main loop
+#
 #  Revision 1.57  1999/02/19 14:40:14  fisyak
 #  remove extra dependencies for idls
 #
@@ -250,7 +253,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/19 14:40:14 $ 
+#           Last modification $Date: 1999/02/19 15:07:56 $ 
 #  default setings
 # Current Working Directory
 #
@@ -304,8 +307,8 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-  SUBDIRS := $(filter-out vpd, $(SUBDIRS))
-  SUBDIRS := $(filter-out par crs egz fri g2x mev, $(SUBDIRS))
+  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
 #  ifndef OBJY_HOME
     SUBDIRS := $(filter-out objy, $(SUBDIRS))
 #  endif
