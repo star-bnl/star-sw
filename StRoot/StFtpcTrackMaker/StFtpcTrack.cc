@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.29 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcTrack.cc,v 1.30 2003/11/26 11:34:45 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.30  2003/11/26 11:34:45  jcs
+// change Sign(Float_t, Double_t) to Sign(Double_t,Double_t)
+//
 // Revision 1.29  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -482,8 +485,8 @@ void StFtpcTrack::CalculateNMax()
   Double_t r, x;
     
   for (Int_t i = 0; i < StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(); i++) {
-    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(StFtpcTrackingParams::Instance()->PadRowPosZ(i), z1) - z1) + r1;
-    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(StFtpcTrackingParams::Instance()->PadRowPosZ(i), z1) - z1) + x1;
+    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(Double_t(StFtpcTrackingParams::Instance()->PadRowPosZ(i)), z1) - z1) + r1;
+    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(Double_t(StFtpcTrackingParams::Instance()->PadRowPosZ(i)), z1) - z1) + x1;
     
     if (i == 0) {
       mRFirst = r;
