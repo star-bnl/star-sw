@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.43 2000/03/23 00:15:22 fine Exp $
+// $Id: StMaker.h,v 1.44 2000/04/03 23:46:49 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.44  2000/04/03 23:46:49  perev
+// Increased error check
+//
 // Revision 1.43  2000/03/23 00:15:22  fine
 // Adjusted to libSTAR for ROOT 2.24
 //
@@ -144,6 +147,8 @@ protected:
    TDataSet     *m_Runco;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
+   static StMaker *fgFailedMaker;     	//current pointer to failed maker
+   static Int_t fgTallyMaker[kStFatal+1]; //counters
    Int_t	   m_Mode;		// Integer mode of maker
    Int_t           m_Number;        	//Serial event number
    Int_t           m_DebugLevel;    	//Debug level
@@ -194,6 +199,7 @@ public:
    virtual void   	SetNumber(Int_t number) ;
    virtual TDataSet*  UpdateDB(TDataSet* ds){if (ds){};return 0;};
    static  StMaker     *GetChain(){return fgStChain;}
+   static  StMaker     *GetFailedMaker(){return fgFailedMaker;}
    virtual StMaker     *GetParentChain() const;
    virtual Int_t        GetEventNumber() const ;
    virtual Int_t        GetRunNumber() const ;
@@ -262,7 +268,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.43 2000/03/23 00:15:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.44 2000/04/03 23:46:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };

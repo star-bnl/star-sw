@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.86 2000/03/23 00:15:22 fine Exp $
+// $Id: StMaker.cxx,v 1.87 2000/04/03 23:46:48 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -28,6 +28,8 @@
 #include "StMemoryInfo.hh"
 
 StMaker *StMaker::fgStChain = 0;
+StMaker *StMaker::fgFailedMaker = 0;
+Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
 
 ClassImp(StMaker)
@@ -387,12 +389,11 @@ void StMaker::StartMaker()
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
-  if (GetDebug()) {
+  if (GetDebug()>1) {
     printf("\n*** Call %s::Make() ***\n\n", ClassName());
-    if (GetDebug()>1) {
-      StMemoryInfo* info = StMemoryInfo::instance();
-      info->snapshot(); info->print();
-  } }
+    StMemoryInfo* info = StMemoryInfo::instance();
+    info->snapshot(); info->print();
+  }
 
 
   StartTimer();}
@@ -406,12 +407,11 @@ void StMaker::EndMaker(int ierr)
   if (gar) gar->Delete();
   ::doPs(GetName(),"EndMaker");
   
-  if (GetDebug()) {
+  if (GetDebug()>1) {
     printf("\n*** End of %s::Make() ***\n\n", ClassName());
-    if (GetDebug()>1) {
-      StMemoryInfo* info = StMemoryInfo::instance();
-      info->snapshot(); info->print();
-  } }
+    StMemoryInfo* info = StMemoryInfo::instance();
+    info->snapshot(); info->print();
+  }
   StopTimer();
 }
 
@@ -423,6 +423,13 @@ Int_t StMaker::Finish()
    int nerr = 0;
    int run = GetRunNumber();
    if (run>-1) FinishRun(run);
+   const char *tit[] = {"nStOK   ","nStWarn ","nStEOF  ","nStErr  ","nStFatal"};
+   
+   Printf("\n---------------------------------------------------------------------------------");
+   for( int i=0; i<=kStFatal; i++) {
+     int n = fgTallyMaker[i];   
+     Printf("QAInfo: %s = %6d  times\n",tit[i],n); 
+   }
    TIter next(GetMakeList());
    StMaker *maker;
    Double_t totalCpuTime = 0;
@@ -437,7 +444,7 @@ Int_t StMaker::Finish()
 
    // Print relative time
    if (totalCpuTime && totalRealTime) {
-     Printf("---------------------------------------------------------------------------------");
+     Printf("\n---------------------------------------------------------------------------------");
      Printf("QAInfo: Total: %-12s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
                                ,GetName(),totalRealTime,totalCpuTime);
      Printf("---------------------------------------------------------------------------------");
@@ -465,6 +472,7 @@ Int_t StMaker::Make()
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");   
    TIter nextMaker(tl);
    StMaker *maker;
+   fgFailedMaker = 0;
    while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
      if (hd && hd->IsNewRun()) {
@@ -478,9 +486,10 @@ Int_t StMaker::Make()
      ret = maker->Make();
      maker->EndMaker(ret);
 
-     if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
+     if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
-     if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
+     if (ret>kStWarn) { 
+       maker->ls(3); fgFailedMaker = maker; return ret;}
      
    }
    return kStOK;
@@ -939,6 +948,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.87  2000/04/03 23:46:48  perev
+// Increased error check
+//
 // Revision 1.86  2000/03/23 00:15:22  fine
 // Adjusted to libSTAR for ROOT 2.24
 //
