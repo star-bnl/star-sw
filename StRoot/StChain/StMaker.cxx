@@ -1,22 +1,7 @@
-// $Id: StMaker.cxx,v 1.20 1999/03/02 03:20:52 fine Exp $
+// $Id: StMaker.cxx,v 1.21 1999/03/11 01:23:59 perev Exp $
 // $Log: StMaker.cxx,v $
-// Revision 1.20  1999/03/02 03:20:52  fine
-// Table counter has been  moved from StMaker to StChain
-//
-// Revision 1.19  1999/03/01 19:24:47  fine
-// StMaker::Clear() wasted statistic has been added
-//
-// Revision 1.18  1999/02/27 19:09:40  fine
-// St_Maker::MakeDoc() name of the directory has been adjusted from base to St_base
-//
-// Revision 1.17  1999/02/22 22:25:10  fisyak
-// No Fruits(=0) by default
-//
-// Revision 1.16  1999/01/20 23:44:48  fine
-// The special Input/Output makers and the static variable StChain::g_Chain have been introduced
-//
-// Revision 1.15  1999/01/02 19:08:12  fisyak
-// Add ctf
+// Revision 1.21  1999/03/11 01:23:59  perev
+// new schema StChain
 //
 // Revision 1.14  1998/12/21 19:42:51  fisyak
 // Move ROOT includes to non system
@@ -46,8 +31,7 @@
 // StChain virtual base class for StMaker                              //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include <iostream.h>
-#include <iomanip.h>
+
 #include "TSystem.h"
 #include "TClass.h"
 #include "TROOT.h"
@@ -62,331 +46,276 @@
 #include "StMaker.h"
 #include "StChain.h"
 #include "St_Table.h"
-
-static StMaker *thisMakers[100];
-static Int_t     thisMakerIndx=0;
-
-StChain *StMaker::g_Chain = 0;
+StMaker *StMaker::fgStChain = 0;
 
 ClassImp(StMaker)
 
 //_____________________________________________________________________________
 StMaker::StMaker()
 {
-  //  cout << "Default ctor for " << GetName() << " - " << GetTitle() << endl;
-   m_BranchName = "";
-   m_Save       = 0;
-   m_Histograms = 0;
-   m_Fruits     = 0;
-   //   m_Clones     = 0;
-   m_IsClonable = kTRUE;
-   m_DataSet    = 0;
 }
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name, const char *title)
-       :TNamed(name,title)
+StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
 {
-  //   cout << "ctor for " << GetName() << " - " << GetTitle() << endl;   
-   m_BranchName = "";
-   m_Save       = 0;
-   m_Histograms = new TList();
-   m_Fruits     = 0;
-   //   m_Clones     = 0;
-   m_IsClonable = kTRUE;
-   m_DataSet    = 0;
-   if (!g_Chain) g_Chain = gStChain;
-   TList *list =  g_Chain->Makers();
-   if (list) {
-     StMaker *maker =  (StMaker *) list->FindObject(name);
-     if (!maker) list->Add(this);
-     //   gStChain->Makers()->Add(this);  
+   m_Inputs = 0;
+   if (!fgStChain) {	// it is first maker, it is chain
+     fgStChain = this;
+     AddData(0,".make");
+   } else         {	// add this maker to chain  
+     fgStChain->AddData(this,".make");
    }
+   m_DataSet  = new St_ObjectSet(".data") ;Add(m_DataSet);
+   m_ConstSet = new St_ObjectSet(".const");Add(m_ConstSet);
+   m_GarbSet  = new St_ObjectSet(".garb" );Add(m_GarbSet);
+
+   gStChain = this; //?????????????????????????????????????????????????????
+
 }
 
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
-  //  cout << "Default destructor for " << GetName() << " - " << GetTitle() << endl;
   Finish();
 }
-
 //______________________________________________________________________________
-void StMaker::Browse(TBrowser *b)
-{
-//  Insert Maker objects in the list of objects to be browsed.
-
-  char name[64];
-  if( b == 0) return;
-  if (m_Histograms) b->Add(m_Histograms,"Histograms");
-  if (m_DataSet) b->Add(m_DataSet,m_DataSet->GetName()); 
-  if (m_Fruits == 0) return;
-   TObject *obj;
-
-// If m_Fruits is a ClonesArray, insert all the objects in the list
-// of browsable objects
-  if (m_Fruits->InheritsFrom("TClonesArray")) {
-     TClonesArray *clones = (TClonesArray*)m_Fruits;
-     Int_t nobjects = clones->GetEntries();
-     for (Int_t i=0;i<nobjects;i++) {
-        obj = clones->At(i);
-        sprintf(name,"%s_%d",obj->GetName(),i);
-        if (strstr(name,"St")) b->Add(obj, &name[4]);
-        else                   b->Add(obj, &name[0]);
-     }
-// m_Fruits points to an object in general. Insert this object in the browser
-  } else {
-      b->Add( m_Fruits, m_Fruits->GetName());
-  }
+StMaker *StMaker::GetParentMaker() const
+{ 
+  St_DataSet *par = GetParent(); if (!par) return 0;
+  return (StMaker*)par->GetParent();
 }
-
-//_____________________________________________________________________________
-void StMaker::Clear(Option_t *opt)
+//______________________________________________________________________________
+TObject *StMaker::GetDirObj(const char *dir) const
 {
- // print some statistics
-#if 0
- const Float_t percent = 15.0;
- if (m_DataSet) {
-   St_DataSetIter nextSet(m_DataSet,0);
-   St_DataSet *set = 0;
-   Int_t nTotalAlloc = 0;
-   Int_t nTotalUsed  = 0;
-   Int_t isPrinted   = kFALSE;
-   while (set =  (St_DataSet *)nextSet()) {
-     if (!set->InheritsFrom("St_Table")) continue;
-     St_Table *tab = (St_Table *)set;
-     Int_t nAlloc  =  tab->GetTableSize();
-     Int_t nUsed   =  tab->GetNRows();
-     Int_t nSize   =  tab->GetRowSize();
-     nTotalAlloc  += nAlloc*nSize;
-     nTotalUsed   += nUsed*nSize;
-     Float_t wastePercent = 0;
-     if (nAlloc > 0) wastePercent = 100*(1.0-Float_t(nUsed)/Float_t(nAlloc));
-     if ( wastePercent > percent) {
-        if (!isPrinted) {
-            isPrinted = kTRUE;
-            const Char_t *n = GetName();
-            cout << " --------  Statistics of tables \"wasted\" > " 
-                 <<  percent << "% of the allocated by maker < " << n << " > ------------"
-                 << endl;
-        }
-        cout << "Table: "<< setw(25) << tab->GetName()
-                                    << ": Allocated = "  << setw(6) << nAlloc 
-                                    << " rows : Used = " << setw(6) << nUsed << " rows : Wasted: " 
-                                    << wastePercent << "% space"
-                                    << endl;
-
-     }
-   }
-   if (nTotalAlloc > 0 && isPrinted) {
-      Float_t totalWastePercent = 100*(1-Float_t(nTotalUsed)/Float_t(nTotalAlloc));
-      if ( totalWastePercent  >  percent )
-        cout << "Maker: "      << setw(10) << GetName()   << " : " 
-            << "Allocated = " << setw(8)  << nTotalAlloc << " bytes : " 
-            << "Used = "      << setw(8)  << nTotalUsed  << " bytes : " 
-            << "Wasted: " << totalWastePercent << "% of the space"
-            << endl
-            << " -----------------------" << endl << endl;
-   }     
- }
-#endif
- SafeDelete(m_DataSet);
+  St_ObjectSet *h = (St_ObjectSet*)Find(dir);
+  if (!h) return 0;
+  return h->GetObject();
 }
+//______________________________________________________________________________
+void StMaker::SetDirObj(TObject *obj,const char *dir)
+{ 
+  St_ObjectSet *set = (St_ObjectSet *)Find(dir);
+  if (!set) { // No dir, make it
+    set = new St_ObjectSet(dir); Add(set);}
+  set->SetObject(obj);
+}
+//______________________________________________________________________________
+void   StMaker::AddObj(TObject *obj,const char *dir)
+{ 
+  St_ObjectSet *set = (St_ObjectSet*)GetDataSet(dir);
+  if (!set) { // No dir, make it
+    set = new St_ObjectSet(dir); Add(set);}
 
-//_____________________________________________________________________________
-void StMaker::Draw(Option_t *)
+  TList *list = (TList *)set->GetObject();
+  if (!list) {// No list, make it
+    list = new TList();
+    set->SetObject((TObject*)list);}
+  list->Add(obj);
+}
+//______________________________________________________________________________
+void   StMaker::AddData(St_DataSet *ds, const char* dir)
+{ 
+  assert(!m_DataSet || ds!=m_DataSet);
+  St_DataSet *set = GetDataSet(dir);
+  if (!set) { // No dir, make it
+    set = (St_ObjectSet*) new St_ObjectSet(dir);
+    Add(set);}
+  set->Add(ds);
+}
+//______________________________________________________________________________
+TList *StMaker::GetMakeList() const
+{ St_DataSet *ds = Find(".make");
+  if (!ds) return 0;
+  return ds->GetList();
+}
+//______________________________________________________________________________
+void StMaker::SetInput(const char* logInput,const char* actInput)
 {
-//    Insert products of this maker in graphics pad list
+//	defines relations between logical input and actual input names
+  TNamed *inp = new TNamed(logInput,actInput);
+  if (!m_Inputs) m_Inputs = new TList();
+  m_Inputs->Add(inp);
+}
+//______________________________________________________________________________
+TString StMaker::GetInput(const char* logInput) const
+{
+  TString actInput;
+  if (! m_Inputs) return actInput;
+  int nspn = strcspn(logInput," /");
+  actInput.Prepend(logInput,nspn);
+  TNamed *in = (TNamed*)m_Inputs->FindObject(actInput);
+  actInput ="";
+  if (in) {actInput = in->GetTitle(); actInput += logInput+nspn;}
+  return actInput;
+}
+//______________________________________________________________________________
+St_DataSet *StMaker::GetDataSet(const char* logInput) const
+{
+TString actInput,makerName,findString;
+St_DataSet *dataset;
+StMaker    *parent;
+int icol,idat,nspn;
+  actInput = GetInput(logInput);
+  if (actInput.IsNull()) actInput = logInput;
 
-  TObject *obj;
+//		Direct try
+  dataset = Find(actInput);
+  if (dataset) return dataset;
 
-// If m_Fruits is a ClonesArray, insert all the objects in the list
-// of objects to be painted
-  if (m_Fruits->InheritsFrom("TClonesArray")) {
-     TClonesArray *clones = (TClonesArray*)m_Fruits;
-     Int_t nobjects = clones->GetEntries();
-     for (Int_t i=0;i<nobjects;i++) {
-        obj = clones->At(i);
-        if (obj) obj->AppendPad();
-     }
-// m_Fruits points to an object in general. Insert this object in the pad
-  } else {
-     m_Fruits->AppendPad();
+//		Not so evident, do some editing
+  icol = actInput.Index(":");
+  idat = actInput.Index("/.data");
+  if (icol<0 && idat < 0) {
+
+//		MAKER/Dataset -> .make/MAKER/.data/Dataset
+    findString = ".make/";
+    nspn = strcspn((const char*)actInput,"/ ");
+    findString.Append(actInput,nspn);
+    findString.Append("/.data");
+    findString.Append((const char*)actInput+nspn);
+    dataset = Find(findString);  
+    if (dataset) return dataset;
   }
-} 
 
-//_____________________________________________________________________________
-void StMaker::FillClone()
+
+//		AAA/BBB/CCC -> .make/*/.data/AAA/BBB/CCC
+//		AAA:BBB/CCC -> .make/AAA/.data/BBB/CCC
+  makerName="*";
+  if (icol>=0) makerName.Replace(0,9999,actInput,icol);
+  findString = ".make/"; findString += makerName; findString+="/.data/";
+  findString += (const char*)actInput+icol+1;
+
+  dataset = Find(findString);  
+  if (dataset) return dataset;
+
+  parent = GetMaker(this);         if (!parent) return 0;
+  dataset = parent->GetInputDS(actInput);
+  if (!dataset && GetDebug()) //Print Warning message
+    Warning("GetInputDS"," \"%s\" Not Found ***\n",(const char*)actInput);
+  return dataset;
+
+}
+//______________________________________________________________________________
+St_DataSet *StMaker::GetDataBase(const char* logInput)
 {
-   if (!m_Save) return;
-
-
-   TTree *tree = GetTree();
-#if 0
-// Fill the maker's owned tree if any
-//   if (!tree) {
-//     TString name = GetName();
-//     name += "_Tree";
-//     tree = new TTree(name.Data(),GetTitle());
-//     thisMakers[thisMakerIndx]=this;     
-//     tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
-/     name.ReplaceAll("Tree","Branch");
-//     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
-//     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx],32000,0)->GetName());
-//     printf(" Maker number %d \n",thisMakerIndx++);
-//     SetTree(tree);
-//     SetBranch();
-//   }
-#else
-   if (tree) 
-     tree->Fill();
-#endif
+  St_DataSet *ds;
+  StMaker *mk;
+  ds = GetInputDS(logInput);
+  if (!ds) return 0;
+  mk = GetMaker(ds); if (!mk) return 0;
+  return mk->UpdateDB(ds);
+}
+//_____________________________________________________________________________
+void StMaker::Clear(Option_t *option)
+{
+if(option){};
+if (m_DataSet) m_DataSet->Delete();
 
 }
 
 //_____________________________________________________________________________
 Int_t StMaker::Init()
 {   
-  return kStOK; //dummy
+   TObject *objfirst, *objlast;
+   TList *tl = GetMakeList();
+   if (!tl) return kStOK;
+   
+   TIter nextMaker(tl);
+   StMaker *maker;
+
+   while ((maker = (StMaker*)nextMaker())) {
+     // save last created histogram in current Root directory
+      objlast = gDirectory->GetList()->Last();
+
+     // Initialise maker
+      gBenchmark->Start((const char *)maker->GetName());
+      if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
+      if ( maker->Init()) return kStErr;
+      gBenchmark->Stop((const char *) maker->GetName());
+     // Add the Maker histograms in the Maker histograms list
+      if (objlast) objfirst = gDirectory->GetList()->After(objlast);
+      else         objfirst = gDirectory->GetList()->First();
+      while (objfirst) {
+         maker->AddHist((TH1*)objfirst);
+         objfirst = gDirectory->GetList()->After(objfirst);
+      }
+   }
+  return kStOK; 
+}
+void StMaker::StartMaker()
+{
+  if (GetDebug()) printf("\n*** Call %s::Make() ***\n\n", ClassName());
+  gBenchmark->Start(GetName());
+}
+void StMaker::EndMaker(int ierr)
+{
+  if (ierr){};
+  St_DataSet *dat = Find(".data");
+  if (dat) dat->Pass(ClearDS,0);
+
+  gBenchmark->Stop(GetName());
 }
 
 //_____________________________________________________________________________
 Int_t StMaker::Finish()
 {
- Clear();
- return kStOK;
+//    Terminate a run
+//   place to make operations on histograms, normalization,etc.
+   int nerr = 0;
+
+   TIter next(GetMakeList());
+   StMaker *maker;
+   while ((maker = (StMaker*)next())) {
+      if ( maker->Finish() ) nerr++;
+      gBenchmark->Print((char *) maker->GetName());
+   }
+  Clear();
+ return nerr;
 }
 
 //_____________________________________________________________________________
 Int_t StMaker::Make()
 {
-   Warning("Make","Dummy function called");
+//   Loop on all makers
+   Int_t ret;
+   TList *tl = GetMakeList();
+   if (!tl) return kStOK;
+   
+   TIter nextMaker(tl);
+   StMaker *maker;
+   while ((maker = (StMaker*)nextMaker())) {
+  // Call Maker
+     maker->StartMaker();
+     ret = maker->Make();
+     maker->EndMaker(ret);
+     
+     if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
+
+     if (ret==kStErr) { if (Debug()) maker->ls(3); return ret;}
+   }
    return kStOK;
 }
-
-//_____________________________________________________________________________
-void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
+void StMaker::Fatal(int Ierr, const char *com)
 {
- //
- // MakeDoc - creates the HTML doc for this class and for the base classes:
- //         *  St_XDFFile  St_Module      St_Table       *
- //         *  St_DataSet  St_DataSetIter St_FileSet     *
- //         *  StMaker     StChain                       *
- //
- // stardir - the "root" directory to lookup the subdirectories as follows.
- // outdir  - directory to write the generated HTML and Postscript files into
- //
- //            The following subdirectories are used to look it up:
- //            $(stardir) + "StRoot/St_base"
- //            $(stardir) + "StRoot/StChain"
- //            $(stardir) + "StRoot/xdf2root"
- //            $(stardir) + ".share/tables"
- //            $(stardir) + "inc",
- //            $(stardir) + "StRoot/<this class name>",
- //
- //   where $(stardir) is the input parameter (by default = "$(afs)/rhic/star/packages/dev/")
- //
-
-  // Define the type of the OS
-  TString STAR= stardir;
-  TString delim = ":";
-  Bool_t NT=kFALSE;
-
-  if (strcmp(gSystem->GetName(),"WinNT") == 0 ) {
-     NT=kTRUE;
-     delim = ";";
-     STAR.ReplaceAll("$(afs)","//sol/afs");
-  }
-  else 
-     STAR.ReplaceAll("$(afs)","/afs");
-
-  TString classname = ClassName();
-
-  THtml html;
-
-  // Define the set of the subdirectories with the STAR class sources
-  const Char_t *source[] = {"StRoot/St_base"
-                           ,"StRoot/StChain"
-                           ,"StRoot/xdf2root"
-                           ,".share/tables"
-                           ,"inc"
-                           };
-  const Int_t lsource = 5;
- 
-  TString lookup = STAR;
-  lookup += "StRoot/";
-  lookup += classname;
-  Int_t i = 0;
-  for (i=0;i<lsource;i++) {
-    lookup += delim;
-    lookup += STAR;
-    lookup += "/";
-    lookup += source[i];
-  }
-  
-  const Char_t *c = ClassName();  // This tric has to be done since a bug within ROOT
-
-    lookup += delim;
-    lookup += STAR;
-    lookup += "/StRoot/";
-    lookup += c;
-
-  html.SetSourceDir(lookup);
-
-  TString odir = outdir;
-  odir.ReplaceAll("$(star)",STAR);
-   
-  html.SetOutputDir(odir);
-
-  // Create the list of the classes defined with the loaded DLL's to be documented
-
-  Char_t *classes[] = { "St_XDFFile",  "St_Module",      "St_Table"
-                       ,"St_DataSet",  "St_DataSetIter", "St_FileSet"
-                       ,"StMaker",     "StChain"
-                       ,"table_head_st"
-                      };
-  Int_t nclass = 9;
-  // Create the definitions of the classes not derived from TObjects
-  TString header = STAR;
-  header += "/inc/table_header.h";
-
-  gROOT->LoadMacro(header);
-
-  TClass header1("table_head_st",1,"table_header.h","table_header.h");
-
-  // Update the docs of the base classes
-  for (i=0;i<nclass;i++) 
-                   html.MakeClass(classes[i]);
-
-  // Create the doc for this class
-  printf(" Making html for <%s>\n",c);
-  html.MakeClass((Char_t *)c);
+   printf("%s::Fatal: Error %d %s\n",GetName(),Ierr,com);
+   StMaker *parent = (StMaker *)GetParent();
+   if (parent) ((StMaker*)parent)->Fatal(Ierr,com);
+   fflush(stdout);
 }
-
-
 //_____________________________________________________________________________
-TTree *StMaker::MakeTree(const char* name, const char*title)
-{
-   TTree *tree = Tree();
-  // Fill the maker's owned tree if any
-   if (!tree) {
-     TString treeName = GetName();
-     treeName += "_Tree";
-     tree = new TTree(treeName.Data(),GetTitle());
-//     thisMakers[thisMakerIndx]=this;     
-//     tree->Branch(m_DataSet->GetName(),m_DataSet->IsA()->GetName(),&m_DataSet,0);
-//     name.ReplaceAll("Tree","Branch");
-//     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
-     //     printf(" Branch %s \n", tree->Branch(name.Data(),IsA()->GetName(),&thisMakers[thisMakerIndx],32000,0)->GetName());
-//     printf(" Maker number %d \n",thisMakerIndx++);
-     SetTree(tree);
-//     SetBranch();
-   }
-  return tree;
+StMaker *StMaker::GetMaker(const St_DataSet *ds) 
+{ 
+  const St_DataSet *par = ds;
+  while (par && (par = par->GetParent()) && strcmp(".maker",par->GetTitle())) {}
+  return (StMaker*)par;
 }
-
 //_____________________________________________________________________________
-void StMaker::PrintInfo()
+EDataSetPass StMaker::ClearDS (St_DataSet* ds,void * )
+{  ds->Clear("Garbage");
+   return kContinue; 
+}
+//_____________________________________________________________________________
+void StMaker::PrintInfo() const
 {
    printf("*********************************\n");
    printf("*                               *\n");
@@ -394,108 +323,47 @@ void StMaker::PrintInfo()
    printf("*                               *\n");
    printf("*********************************\n");
 
-   if (g_Chain->Debug()) Dump();
 }
 //_____________________________________________________________________________
-void StMaker::PrintTimer(Option_t *option)
+Int_t        StMaker::GetEventNumber() const 
 {
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
+   if (hd) return hd->GetEventNumber();
+   Warning("GetEventNumber"," EvtHddr not found");
+   return 0;
+}
+//_____________________________________________________________________________
+Int_t        StMaker::GetRunNumber() const 
+{
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
+   if (hd) return hd->GetRunNumber();
+   Warning("GetRunNumber"," EvtHddr not found");
+   return 0;
+}
+
+
+//_____________________________________________________________________________
+TDatime  StMaker::GetDateTime() const 
+{
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
+   if (hd) return hd->GetDateTime();
+   Warning("GetDateTime"," EvtHddr not found");
+   TDatime td; return td;   
+}
+Int_t    StMaker::GetDate()  const {return GetDateTime().GetDate();}
+Int_t    StMaker::GetTime()  const {return GetDateTime().GetTime();}
+//_____________________________________________________________________________
+const Char_t *StMaker::GetEventType() const
+{
+   StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
+   if (hd) return hd->GetEventType();
+   Warning("GetEventType"," EvtHddr not found");
+   return 0;
+}
+
+//_____________________________________________________________________________
+void StMaker::PrintTimer(Option_t *option) 
+{
+   if(option){};
    Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName(),m_Timer.RealTime(),m_Timer.CpuTime());
-}
-//_____________________________________________________________________________
-void StMaker::MakeBranch()
-{
-//   Adds the list of physics objects to the STAR tree as a new branch
-
-   if (m_Save == 0) return;
-
-   TTree *tree = GetTree();
-   if (!tree) return;
-
-//   if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
-
-//  Make a branch tree if a branch name has been set
-   Int_t buffersize = 4000;
-
-//   thisMakers[thisMakerIndx]=this;     
-//   printf(" Branch %s \n", tree->Branch(GetName(),IsA()->GetName(),&thisMakers[thisMakerIndx])->GetName());
-
-//   return;
-
-   if (m_Fruits){
-     if (m_Fruits->InheritsFrom("TClonesArray")) {
-       tree->Branch(m_BranchName.Data(), &m_Fruits, buffersize);
-     } else {
-       tree->Branch(m_BranchName.Data(),m_Fruits->ClassName(), &m_Fruits, buffersize);
-     }
-   }
-///==   if (m_DataSet)
-   {
-//     m_BranchName = m_DataSet->GetName();
-     m_BranchName = GetName();
-     m_BranchName += "_Branch";
-     TBranch *b = tree->Branch(m_BranchName.Data(),m_DataSet->ClassName(), &m_DataSet, buffersize,0); 
-   }
-}
-
-//_____________________________________________________________________________
-void  StMaker::SetBranch(){
-    TTree *tree = GetTree();
-    if (!tree) return;
-//    m_BranchName = GetName();
-    TBranch *dstBranch = tree->GetBranch(m_BranchName.Data());
-    printf(" ---- Branch name %s, address %x, %x \n", m_BranchName.Data(), dstBranch,&m_DataSet);
-    if (dstBranch) dstBranch->SetAddress(&m_DataSet);
-}
-//_____________________________________________________________________________
-void StMaker::SetChainAddress(TChain *chain)
-{
-//   Set Chain address
-
-   if (chain == 0) return;
-
-   chain->SetBranchAddress(m_BranchName.Data(), &m_Fruits);
-}
-//_____________________________________________________________________________
-void StMaker::SetDataSet(St_DataSet *set)
-{
-//   Set m_DataSet
-  if (m_DataSet != set) {
-    if (m_DataSet) delete m_DataSet;
-    m_DataSet = set;
-  }  
-}
-
-//______________________________________________________________________________
-#ifdef WIN32
-void StMaker::Streamer(TBuffer &R__b)
-{
-   // Stream an object of class StMaker.
-
-   if (R__b.IsReading()) {
-      R__b.ReadVersion(); // Version_t R__v = R__b.ReadVersion();
-      TNamed::Streamer(R__b);
-      R__b >> m_Save;
-      R__b >> m_Fruits;
-      m_BranchName.Streamer(R__b);
-      R__b >> m_Histograms;
-          //this is an addition to the standard rootcint version of Streamer
-          //branch address for this maker is set automatically
-      TTree *tree = g_Chain->Tree();
-      if (tree == 0  || m_Fruits == 0  || m_BranchName.Length() == 0) return;
-      TBranch *branch = tree->GetBranch(m_BranchName.Data());
-      if (branch)  branch->SetAddress(&m_Fruits);
-   } else {
-      R__b.WriteVersion(StMaker::IsA());
-      TNamed::Streamer(R__b);
-      R__b << m_Save;
-      R__b << m_Fruits;
-      m_BranchName.Streamer(R__b);
-      R__b << m_Histograms;
-   }
-}
-#endif
-
-//_____________________________________________________________________________
-TTree *StMaker::GetTree(){
-  return m_Tree ? m_Tree : g_Chain->Tree();
 }

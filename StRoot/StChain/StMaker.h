@@ -1,16 +1,7 @@
-// $Id: StMaker.h,v 1.14 1999/03/10 14:26:49 fisyak Exp $
+// $Id: StMaker.h,v 1.15 1999/03/11 01:23:59 perev Exp $
 // $Log: StMaker.h,v $
-// Revision 1.14  1999/03/10 14:26:49  fisyak
-// Clean up for SL99c
-//
-// Revision 1.13  1999/02/27 20:13:46  fine
-// Total job time and relative time have been introduced
-//
-// Revision 1.12  1999/01/20 23:44:48  fine
-// The special Input/Output makers and the static variable StChain::g_Chain have been introduced
-//
-// Revision 1.11  1999/01/02 19:08:13  fisyak
-// Add ctf
+// Revision 1.15  1999/03/11 01:23:59  perev
+// new schema StChain
 //
 // Revision 1.10  1998/12/21 19:42:51  fisyak
 // Move ROOT includes to non system
@@ -38,83 +29,121 @@
 // StMaker virtual base class for Makers                                //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
-#include "TStopwatch.h"
+#include <assert.h>
 #include "Stypes.h"
 #include "St_DataSet.h"
+#include "St_DataSetIter.h"
+#include "St_ObjectSet.h"
 #include "TString.h"
+#include "TDatime.h"
+#include "TH1.h"
+#include "StEvtHddr.h"
 #ifndef ROOT_TClonesArray
 #include "TClonesArray.h"
 #endif
+#include "TStopwatch.h"
 
 class TList;
 class TBrowser;
 class TChain;
 class TTree;
-class StChain;
 
-class StMaker : public TNamed {
+class StMaker : public St_DataSet{
+public:
+   typedef  enum {kNormal, kDebug} EDebugLevel;
+   enum {kSTAFCV_BAD, kSTAFCV_OK} EModule_return_Status;
 
 protected:
 
-   Bool_t         m_IsClonable;  //!True if Maker objects are clonable
-   Int_t          m_Save;        // = 1 if m-Maker to be saved in the Tree
-   TObject       *m_Fruits;      //Pointer to maker fruits (result)
-   //   TClonesArray  *m_Clones;      //Pointer to clones of fruits
-   TString        m_BranchName;  //Name of branch (if any)
-   St_DataSet    *m_DataSet;     //!Pointer to the Maker's dataset
-   TString        m_BranchFile;  //
-   TTree         *m_Tree;        //! TTree to write this branch out
-   TList         *m_Histograms;  // Pointer to list supporting Maker histograms
-   TStopwatch     m_Timer;       // Timer object
-   TString        m_BranchWriteFile;  // The where this maker is written in
+   St_DataSet     *m_DataSet;		//!  
+   St_DataSet     *m_ConstSet;		//!  
+   St_DataSet     *m_GarbSet;		//!  
+   TList          *m_Inputs;	 	//!list of logInput:ActualInput
+   static StMaker *fgStChain;     	//current pointer to StChain
+   Int_t	   m_Mode;		// Integer mode of maker
+   Int_t           m_Number;        	//Serial event number
+   EDebugLevel     m_DebugLevel;    	//Debug level
+   TStopwatch      m_Timer;             //Timer object
 
-      
+   StMaker        *gStChain;  		//???? Temporary ?????
 public:
 
-   static StChain   *g_Chain;       // Refs pointer to the parent;
+//		Constructor & Destructor
 
-   enum {kSTAFCV_BAD, kSTAFCV_OK} EModule_return_Status;
+                  	StMaker();
+                  	StMaker(const char *name,const char *dummy=0);
+   virtual       	~StMaker();
 
-                  StMaker();
-                  StMaker(const char *name, const char *title="");
-   virtual       ~StMaker();
-   virtual void   Browse(TBrowser *b);
-   virtual void Clear(Option_t *option="");
-   virtual St_DataSet *DataSet() const {return m_DataSet;}
-   virtual St_DataSet *DataSet(const Char_t *set) { return 0; }
-   virtual St_DataSet *DataSet(TString &set) {return DataSet(set.Data());}
-   void           SetDataSet (St_DataSet *set);
-   virtual void   Draw(Option_t *option="");
-   virtual Int_t  Finish();
-   TList         *Histograms() {return m_Histograms;}
-   virtual TTree *GetTree();  
-   virtual Int_t  Init();
-   Bool_t         IsFolder() {return kTRUE;}
-   TObject       *Fruit()  {return m_Fruits;}
-   St_DataSet    *Fruits() {return (St_DataSet*)m_Fruits;}
-   //   TObject       *Clones() {return m_Clones;}
-   virtual void   FillClone();
-   virtual Int_t  IsToSave(){return m_Save;}
-   virtual Int_t  Make() = 0;
-   virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html");
-   virtual TTree *MakeTree(const char* name="", const char*title="");
-   virtual void   PrintInfo();
-   virtual void   MakeBranch();
-   virtual void   Save(Int_t save=1) {m_Save = save;}
-   virtual void   SetBranch();
-   virtual void   SetTree(TTree *tree=0){ m_Tree = tree;}
-   virtual void   StartTimer(Bool_t reset = kFALSE){m_Timer.Start(reset);}
-   virtual Double_t RealTime(){ return m_Timer.RealTime();}
-   virtual Double_t CpuTime() { return m_Timer.CpuTime();}
-   virtual void   StopTimer(){m_Timer.Stop();}
-   virtual void   PrintTimer(Option_t *option="");
-   virtual void   SetChainAddress(TChain *chain);
-   virtual void   SetBranchFile (TString &name){m_BranchFile = name;}  // *MENU*
-           TTree *Tree(){return m_Tree; }
+//		User defined functions
+   virtual Int_t  	Init();
+   virtual void   	StartMaker();
+   virtual Int_t  	Make();
+   virtual Int_t  	Make(int number){SetNumber(number);return Make();};
+   virtual void   	EndMaker  (int ierr);
+   virtual Int_t  	Finish();
+   virtual void	       	Fatal(int Ierr, const char *Com);  
+   virtual void   	PrintInfo() const;
 
-   virtual TString  GetBranchFile (){return m_BranchFile;}
-   ClassDef(StMaker, 1)   //StChain virtual base class for Makers
+//		User methods
+   virtual void        	AddData (St_DataSet *data=0,const char *dir=".data");
+   virtual void	       	AddObj  (TObject *obj,const char *dir);
+   virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
+   virtual void        	AddHist(TH1 *h){AddObj(h,".hist");};
+   virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
+   virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
+
+   virtual void   	Clear(Option_t *option="");
+
+//		STAR methods
+   virtual Int_t  	GetNumber() const {return m_Number;}
+   virtual void   	SetNumber(int number) {m_Number = number;}
+   virtual St_DataSet*  UpdateDB(St_DataSet* ds){if (ds){};return 0;};
+   virtual Int_t        GetEventNumber() const ;
+   virtual Int_t        GetRunNumber() const ;
+   virtual TDatime      GetDateTime() const;
+   virtual Int_t     	GetDate()  const ;
+   virtual Int_t     	GetTime()  const ;
+   virtual const Char_t *GetEventType() const ;
+
+//		Get
+   virtual St_DataSet  *GetDataSet (const char* logInput) const ;
+   virtual St_DataSet  *   DataSet (const char* logInput) const 
+                           {return GetDataSet(logInput);};
+   virtual St_DataSet  *GetInputDS (const char* logInput) const 
+                           {return GetDataSet(logInput);};
+
+   virtual St_DataSet  *GetDataBase(const char* logInput);
+   virtual St_DataSet  *GetInputDB (const char* logInput)
+                          {return GetDataBase(logInput);};
+
+
+   virtual EDebugLevel 	GetDebug() const {return m_DebugLevel;}
+   virtual EDebugLevel 	   Debug() const {return GetDebug();};
+   virtual TList       *Histograms()  const {return GetHistList();}
+   virtual TString      GetInput(const char* logInput) const ;
+   virtual TList       *GetMakeList() const ;
+   virtual StMaker     *GetParentMaker () const;
+
+
+//    Setters for flags and switches
+
+   virtual void        	SetDebug(EDebugLevel l=kDebug){m_DebugLevel=l;}
+   virtual void       	SetInput(const char* logInput,const char* actInput);
+   virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}
+
+
+   virtual void   	StartTimer(Bool_t reset = kFALSE){m_Timer.Start(reset);}
+   virtual void   	StopTimer(){m_Timer.Stop();}
+   virtual void   	PrintTimer(Option_t *option="");
+
+//		Static functions
+   static  StMaker     *GetMaker(const St_DataSet *ds)  ;
+   static EDataSetPass  ClearDS (St_DataSet* ds,void *user );
+
+protected:
+TObject        *GetDirObj(const char *dir) const;
+void            SetDirObj(TObject *obj,const char *dir);
+   ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
 
 #endif
