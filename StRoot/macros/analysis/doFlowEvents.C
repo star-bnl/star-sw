@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.34 2001/12/11 22:14:33 posk Exp $
+// $Id: doFlowEvents.C,v 1.35 2001/12/18 19:32:02 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -24,8 +24,6 @@
 //      file = a. file names in directory (takes all files)
 //             b. the 1 particular full file name (with directory) you want
 //      qaflag = "off"  - doesn't do anything now
-//      wrStEOut = flag to turn on=1, off=0 writing of output test.event.root
-//                 file --- set to off by default 
 //
 // Usage: 
 // doFlowEvents.C(nevents, "-", "some_directory/some_dst_file.root")
@@ -56,16 +54,14 @@ Int_t    RunType;
 const char *dstFile = 0;
 const char *fileList[] = {dstFile, 0};
 
-void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "",
-		  const Int_t wrStEOut = 0);
+//--------- Prototypes -----------
+void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "");
 void doFlowEvents(Int_t, const Char_t *, const Char_t *, 
-		  const char *qaflag = "off", const Int_t wrStEOut = 0);
+		  const char *qaflag = "off");
 void doFlowEvents(Int_t nevents = 2);
 
-
-// ------------------ Here is the actual method ----------------------------------
-void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
-		  const Int_t wrStEOut)
+// -------- Here is the actual method ----------
+void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
   cout <<  endl << endl <<" doFlowEvents -  input # events = " << nevents << endl;
   Int_t ilist = 0;
@@ -73,8 +69,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
       cout << " doFlowEvents -  input fileList = " << fileList[ilist] << endl;
       ilist++; 
     }
-  cout << " doFlowEvents -  input qaflag   = " << qaflag << endl;
-  cout << " doFlowEvents -  input wrStEOut = " << wrStEOut << endl << endl << endl;
+  cout << " doFlowEvents -  input qaflag   = " << qaflag << endl << endl << endl;
  
   //
   // First load some shared libraries we need
@@ -103,7 +98,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Make a chain with a file list
   chain  = new StChain("StChain");
   //chain->SetDebug();
-  
   StFileI *setFiles = 0;
   if (fileList) {	//Normal case
     setFiles = new StFile(fileList);
@@ -112,9 +106,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     setFiles = StChallenger::Challenge();
     setFiles->SetDebug();
     const char *Argv[]= {
-      "-s","dst runco",                           // list of components needed
-      "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",   // example of user query
-      "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // GC servers for daq
+      "-s","dst runco",                               // list of components needed
+      "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",  // example of user query
+      "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc" // GC servers for daq
     };
     Int_t Argc=sizeof(Argv)/4;
     setFiles->Init(Argc,Argv);
@@ -124,25 +118,34 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Make Selection objects and instantiate FlowMaker
   //
   char makerName[30];
-  //StFlowSelection flowSelect;
-  // particles:  pi+, pi-, pi, k+, k-, e-, e+, pbar, proton, d and dbar
-  //flowSelect->SetPidPart("pi");               // for parts. wrt plane
-  //flowSelect->SetPtPart(0., 8.);             // for parts. wrt plane
-  //flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
-  //flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
-  //flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
-  //flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
-  //flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-  //flowSelect->SetDcaGlobalPart(0., 0.8);      // for parts. wrt plane
-  //flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
+//   StFlowSelection flowSelect;
+  // particles:  pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
+//   flowSelect->SetPidPart("pr");               // for parts. wrt plane
+//   flowSelect->SetPtPart(0., 8.);              // for parts. wrt plane
+//   flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
+//   flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
+//   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
+//   flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
+//   flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
+//   flowSelect->SetDcaGlobalPart(0., 0.8);      // for parts. wrt plane
+//   flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
   // uncomment next line if you make a selection object
-  //sprintf(makerName, "Flow");
+//   sprintf(makerName, "Flow");
 
-  if (strstr(fileList[0], ".dst.root")) {
+  if (strstr(fileList[0], "picoevent.root")) {
+    //Read pico-DST
+    //cout << "pico file" << endl;
+    if (makerName[0]=='\0') {
+      StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
+     flowMaker->PicoEventRead(kTRUE);
+     flowMaker->SetPicoEventFileName(setFiles);
+ 
+  } else if (strstr(fileList[0], ".dst.root")) {
     // Read raw events and make StEvent
-    //cout << "dst file" << endl;
-    gSystem->Load("StEventMaker");
     TString mainBranch;
     if (fileList && fileList[0] && strstr(fileList[0],".root")) {
       mainBranch = fileList[0];
@@ -150,38 +153,24 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
       int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
       mainBranch.Replace(0,idot+1,"");
       mainBranch+="Branch";
+      printf("*** mainBranch=%s ***\n",mainBranch.Data());
     }
     StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
     if (!mainBranch.IsNull()) IOMk->SetBranch(mainBranch,0,"r");  
-    //IOMk->SetBranch("dstBranch", 0, "r");
+    IOMk->SetBranch("dstBranch", 0, "r");
     //IOMk->SetBranch("runcoBranch", 0, "r");
     //IOMk->SetDebug();
-    StEventMaker *readerMaker = new StEventMaker("events", "title");
-    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
+    if (!mainBranch.Contains("eventBranch")) {
+      gSystem->Load("StEventMaker");
+      StEventMaker *readerMaker =  new StEventMaker("events","title");
+    }
+    if (makerName[0]=='\0') {
+      StFlowMaker* flowMaker = new StFlowMaker();
     } else {
       StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
     }
-    if (wrStEOut) {
-      // Write out StEvent
-      cout << "doFlowEvents - will write out .event.root file" << endl << endl;
-      StTreeMaker *outMk = new StTreeMaker("EvOut", "", "bfcTree");
-      outMk->SetIOMode("w");
-      outMk->SetBranch("eventBranch", "test.event.root", "w");
-      outMk->IntoBranch("eventBranch", "StEvent");
-    }
-    
-  } else if (strstr(fileList[0], "picoevent.root")) {
-    //Read pico-DST
-    //cout << "pico file" << endl;
-    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
-    } else {
-      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
-    }
-     flowMaker->PicoEventRead(kTRUE);
-     flowMaker->SetPicoEventFileName(setFiles);
- 
   } else if (strstr(fileList[0], ".event.root")) {
     // Read StEvent files
     //cout << "StEvent file" << endl;
@@ -191,7 +180,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     IOMk->SetBranch("eventBranch", 0, "r");
     //IOMk->SetBranch("runcoBranch", 0, "r");
     //IOMk->SetDebug();
-    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
+    if (makerName[0]=='\0') {
+      StFlowMaker* flowMaker = new StFlowMaker();
     } else {
       StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
     }
@@ -204,53 +194,57 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Flow Makers
   //   Use of the TagMaker is optional.
   //   The AnalysisMaker and CumulantMaker may be used with a selection object.
-  //bool tagMaker = kFALSE;
-  bool tagMaker = kTRUE;
+  bool tagMaker = kFALSE;
+  //bool tagMaker = kTRUE;
   bool anaMaker = kTRUE;
   //bool anaMaker = kFALSE;
-  //bool cumMaker = kTRUE;
-  bool cumMaker = kFALSE;
+  bool cumMaker = kTRUE;
+  //bool cumMaker = kFALSE;
 
   if (tagMaker) StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
-  if (makerName[0]=='\0') {
+  if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
     if (cumMaker) StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker();
   } else {
     if (anaMaker) {
       sprintf(makerName, "FlowAnalysis");
-      StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
+      StFlowAnalysisMaker* flowAnalysisMaker = new 
+	StFlowAnalysisMaker(makerName, flowSelect);
     }
     if (cumMaker) {
       sprintf(makerName, "FlowCumulant");
-      StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker(makerName, flowSelect);
+      StFlowCumulantMaker* flowCumulantMaker = new 
+	StFlowCumulantMaker(makerName, flowSelect);
     }
   }
 
   // Make docs
-  //flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
-  //flowTagMaker->MakeDoc("./StRoot/StFlowTagMaker", "./html", kFALSE);
-  //flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
-  //flowCumulantMaker->MakeDoc("./StRoot/StFlowCumulantMaker", "./html", kFALSE);
+//   flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
+//   flowTagMaker->MakeDoc("./StRoot/StFlowTagMaker", "./html", kFALSE);
+//   flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
+//   flowCumulantMaker->MakeDoc("./StRoot/StFlowCumulantMaker", "./html", kFALSE);
   
   // Set write flages and file names
-  //  flowMaker->PicoEventWrite(kTRUE);
-  //  flowMaker->SetPicoEventDir("./");
+//  flowMaker->PicoEventWrite(kTRUE);
+//  flowMaker->SetPicoEventDir("./");
   
   // Set Debug status
-  //  flowMaker->SetDebug();
-  //  flowTagMaker->SetDebug();
-  //  flowAnalysisMaker->SetDebug();
-  //  flowCumulantMaker->SetDebug();
+//  flowMaker->SetDebug();
+//  flowTagMaker->SetDebug();
+//  flowAnalysisMaker->SetDebug();
+//  flowCumulantMaker->SetDebug();
 
   //
   // Initialize chain
   //
   Int_t iInit = chain->Init();
-  if (iInit) chain->Fatal(iInit, "on init");
   chain->PrintInfo();
-  if (iInit) goto END;
-  
+  if (iInit) {
+    chain->Fatal(iInit, "on init");
+    goto END;
+  }
+
   //
   // Set the parameters
   //
@@ -281,20 +275,19 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 //   StFlowCutTrack::SetEtaTpc(0., 0.);
 //   StFlowCutTrack::SetEtaFtpc(0., 0., 0., 0.);
 
-  
   // Set the event plane selections
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0);  // harmonic 3, selection 1
-  //StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
-  //StFlowEvent::SetEtaFtpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
-  //StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
-  //StFlowEvent::SetPtFtpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
+//   StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
+//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
+//   StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0);  // harmonic 3, selection 1
+//   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 1);  // harmonic 2, selection 2
+//   StFlowEvent::SetEtaFtpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
+//   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
+//   StFlowEvent::SetPtFtpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
 
-  //StFlowEvent::SetDcaGlobalCut(0., 1.);       // for event plane
+//   StFlowEvent::SetDcaGlobalCut(0., 1.);       // for event plane
 
-  // particles:  pi+, pi-, pi, k+, k-, e-, e+, pbar, proton, d and dbar
-  //StFlowEvent::SetPid("pi");                 // for event plane
+  // particles:  pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
+//   StFlowEvent::SetPid("pi");                 // for event plane
 
   // Make Eta subevents
 //   StFlowEvent::SetEtaSubs();
@@ -303,7 +296,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   StFlowEvent::SetPtWgt(kTRUE);
 
   // Use Aihong's probability PID method
-  //  StFlowEvent::SetProbPid();
+//  StFlowEvent::SetProbPid();
 
   // Have the CumulantMaker use the old method
 //   StFlowCumulantMaker::SetOldMethod(kTRUE); 
@@ -319,11 +312,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 //   StFlowEvent::SetAntiDeuteronCut(-3., 3.);
 //   StFlowEvent::SetElectronCut(-3., 3.);
 //   StFlowEvent::SetPositronCut(-3., 3.);
-
-  TTable   *tabl=0;
-  TDataSet *obj=0;
-  TDataSet *ddb=0;
-  TDataSet *ddstBranch=0;
   
   //
   // Event loop
@@ -363,33 +351,16 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     }
   }
 
+  // Move the flow.cumulant.root file into the flow.hist.root file.
   if (anaMaker && cumMaker) {
-    // Combine the flow.hist.root and flow.cumulant.root files
-    // Is there an easier way?
-    TFile* anaFile = new TFile("flow.hist.root", "UPDATE");
-    if (!anaFile->IsOpen()) cout << "### Can't find file flow.hist.root" << endl;
-    TFile* cumFile = new TFile("flow.cumulant.root", "READ");
+    TFile cumFile("flow.cumulant.root", "READ");
     if (!cumFile->IsOpen()) cout << "### Can't find file flow.cumulant.root" << endl; 
-    
-    TKey*    key;
-    TObject* obj;
-    TIter nextkey(cumFile->GetListOfKeys());  
-    while (key = (TKey*)nextkey()) {
-      cumFile->cd();
-      obj = key->ReadObj();
-      if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
-	char* objName = key->GetName();
-	//cout << "hist name= " << objName << endl;
-	anaFile->cd();
-	obj->Write(objName);
-      }
-      delete obj;
-      obj = NULL;
-    }
-    cumFile->Close();
+    cumFile.ReadAll();
+    TFile anaFile("flow.hist.root", "UPDATE");
+    if (!anaFile->IsOpen()) cout << "### Can't find file flow.hist.root" << endl;
+    cumFile.GetList()->Write();
     //anaFile->ls();
-    anaFile->Close();
-
+    anaFile.Close();    
   } else if (cumMaker) {
     gSystem->Rename("flow.cumulant.root", "flow.hist.root");      
   }
@@ -398,7 +369,8 @@ END:
 }
 
 // ----------- This concatenates the path and the file name ---------------------
-void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, const char *qaflag, const Int_t wrStEOut)
+void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, 
+		  const char *qaflag)
 {
   const char *fileListQQ[] = {0,0};
   if (strncmp(path, "GC", 2) == 0) {
@@ -409,26 +381,26 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, c
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
 
-  doFlowEvents(nevents, fileListQQ, qaflag, wrStEOut);
+  doFlowEvents(nevents, fileListQQ, qaflag);
 }
 
 // ----------- This sets default path and file names ---------------------------
 void doFlowEvents(const Int_t nevents)
 {
   // Commit to cvs with these defaults:
-  const Char_t *filePath="-";
-  const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
+   const Char_t *filePath="-";
+   const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
   
   // BNL
-  //Char_t* filePath="/star/rcf/scratch/posk/P00hg3";
-  //Char_t* fileExt="*.flowpicoevent.root";
-  //Char_t* fileExt="st_physics_1229055_raw_0013.dst.root.flowpicoevent.root";
+//  Char_t* filePath="/star/rcf/scratch/posk/P00hg3";
+//  Char_t* fileExt="*.flowpicoevent.root";
+//  Char_t* fileExt="st_physics_1229055_raw_0013.dst.root.flowpicoevent.root";
   
-  //Char_t* filePath="../Data/FtpcSim/Markus/";
-  //Char_t* fileExt="*flowpicoevent.root";
+//  Char_t* filePath="../Data/FtpcSim/Markus/";
+//  Char_t* fileExt="*flowpicoevent.root";
 
-  //Char_t* filePath="./";
-  //Char_t* fileExt="*.event.root";
+//  Char_t* filePath="./";
+//  Char_t* fileExt="*.event.root";
   
   // LBNL
   // 200 GeV
@@ -442,9 +414,6 @@ void doFlowEvents(const Int_t nevents)
 //   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVerTex/ReverseFullField/P01gk/2001/";
 //   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVerTex/ReverseHalfField/P01gk/2001/";
 
-  // 20 GeV
-// Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/dev/2001/";
-
   // 130 GeV
 //   Char_t* filePath="/auto/pdsfdv14/starprod/DST/kirll_flow_pDST_minbias/";
 //   if (nevents < 250) {
@@ -453,12 +422,18 @@ void doFlowEvents(const Int_t nevents)
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
+  // 20 GeV
+//  Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/dev/2001/";
+
   doFlowEvents(nevents, filePath, fileExt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.35  2001/12/18 19:32:02  posk
+// "proton" and "antiproton" replaced with "pr+" and "pr-".
+//
 // Revision 1.34  2001/12/11 22:14:33  posk
 // Combined histogram output files from the CumulantMaker and the AnalysisMaker.
 //
