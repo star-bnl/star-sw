@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.22 2003/02/05 22:00:59 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.23 2003/02/05 22:10:00 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -870,8 +870,8 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.22  2003/02/05 22:00:59  laue
- * bug fix
+ * Revision 1.23  2003/02/05 22:10:00  laue
+ * delete emc collection after being copied (when creating mudst)
  *
  * Revision 1.21  2003/01/29 03:04:57  laue
  * !!DIRTY FIX FOR StMuEmcCollection
