@@ -402,7 +402,7 @@ void StFtpcV0::ComputeDecayVertex()
   // program, and fills the correct members.
   /////////////////////////////////////////////////////////////////////
   const double first_ftpc_row =162.65;// this is temporary
-  double PI = 2*asin(1);
+  double PI = 2*asin(1.);
   double xcH1 = mTrack1.xcenter()/centimeter;
   double ycH1 = mTrack1.ycenter()/centimeter;
   double radiusH1;
@@ -509,7 +509,7 @@ int StFtpcV0::HelixInter(double xcH1,double ycH1,double pitchH1,double radiusH1,
 
   double Zmin = 0;  // This is the minimum z that the V0 vertex can have
 
-  double PI = 2*asin(1);
+  double PI = 2*asin(1.);
 
   int status = 0;
   double w = sqrt( (xcH1-xcH2)*(xcH1-xcH2) + (ycH1-ycH2)*(ycH1-ycH2) ); //dist between centers
