@@ -116,6 +116,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
    DS_DATASET_T *pTable = NULL;		/* table ptr */
    char *name;				/* table name */
    char *pData;				/* ptr to table data */
+   int  *pDataI;
    size_t nrows,ncols,maxrows;		/* table dimensions */
    char *cname;				/* column name */
    DS_TYPE_CODE_T ctype;		/* column type code */
@@ -171,13 +172,12 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 		  strcpy(&bspec[strlen(bspec)-1],"");
 		  switch (btype[nb-1]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-			HBNAMC(hid,block_name(name,nb-1)
-				   ,(char *)pData,bspec);
-			break;
+		       HBNAMC(hid,block_name(name,nb-1),pData,bspec);
+		       break;
 		     case NUMB_BLOCK:
-			HBNAMC(hid,block_name(name,nb-1)
-				   ,(int *)pData,bspec);
-			break;
+		       pDataI = (int *)pData;
+		       HBNAME(hid,block_name(name,nb-1),pDataI,bspec);
+		       break;
 		     default:
 			break;
 		  }
@@ -201,12 +201,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
       strcpy(&bspec[strlen(bspec)-1],"");
       switch (btype[nb-1]) {
 	 case CHAR_BLOCK: /* should use HBNAMC */
-	    HBNAMC(hid,block_name(name,nb-1)
-		       ,(char *)pData,bspec);
-	    break;
+	   HBNAMC(hid,block_name(name,nb-1),pData,bspec);
+	   break;
 	 case NUMB_BLOCK:
-	    HBNAMC(hid,block_name(name,nb-1)
-		       ,(int *)pData,bspec);
+	   pDataI = (int *)pData;
+	   HBNAME(hid,block_name(name,nb-1),pDataI,bspec);
 	    break;
 	 default:
 	    break;
@@ -222,12 +221,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	       } else {
 		  switch(btype[ib]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-			HBNAMC(hid,block_name(name,ib)
-				   ,(char *)pData,"$SET");
-			break;
+		       HBNAMC(hid,block_name(name,ib),pData,"$SET");
+		       break;
 		     case NUMB_BLOCK:
-			HBNAMC(hid,block_name(name,ib)
-				   ,(int *)pData,"$SET");
+		       pDataI = (int *)pData;
+		       HBNAME(hid,block_name(name,ib),pDataI,"$SET");
 			break;
 		     default:
 			break;
@@ -363,6 +361,7 @@ char* block_name(char *name,long n)
    return bname;
 }
 
+#ifndef linux
 /*
 *:>---------------------------------------------------------------------
 *:ROUTINE:	char* basename
@@ -377,4 +376,4 @@ char* basename(char* filename)
    return strtok((((ss = strrchr(ss,'/')) != NULL) ? ss : filename)
 	   , "/.");
 }
-
+#endif
