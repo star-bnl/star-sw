@@ -12,7 +12,7 @@ public:
     virtual ~StiTrackFitter()
       {}
     virtual void fit(StiTrack * track, int direction)=0;
-    virtual EditableParameters * getParameters()=0;
+    virtual EditableParameters & getParameters()=0;
 };
 
 #endif
