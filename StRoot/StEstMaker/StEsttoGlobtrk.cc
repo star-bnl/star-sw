@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEsttoGlobtrk.cc,v 1.8 2001/03/02 15:32:56 lmartin Exp $
+ * $Id: StEsttoGlobtrk.cc,v 1.9 2001/06/13 18:27:19 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEsttoGlobtrk.cc,v $
+ * Revision 1.9  2001/06/13 18:27:19  caines
+ * Filled flag variable so its non zero
+ *
  * Revision 1.8  2001/03/02 15:32:56  lmartin
  * Assumes that only one branch survives per track. Swaps the saving order of the
  * hits in the group table and removes the useless hit sorting.
@@ -107,6 +110,7 @@ void StEstTracker::EsttoGlobtrk(St_stk_track* svttrk,
       svtTrkPtr->phi0 =  atan2(mTrack[i]->GetBranch(0)->GetHelix()->y(0),
 			       mTrack[i]->GetBranch(0)->GetHelix()->x(0))
 	*C_DEG_PER_RAD;
+      svtTrkPtr->flag=1;
       svtTrkPtr++;
       svtMatchPtr++;
       
