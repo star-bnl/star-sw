@@ -1,6 +1,9 @@
-* $Id: gstar_part.g,v 1.11 2004/12/20 17:55:31 potekhin Exp $
+* $Id: gstar_part.g,v 1.12 2004/12/20 18:04:22 potekhin Exp $
 *
 * $Log: gstar_part.g,v $
+* Revision 1.12  2004/12/20 18:04:22  potekhin
+* Corrected a typo (missing comma)
+*
 * Revision 1.11  2004/12/20 17:55:31  potekhin
 * Requested by Sevil and heavily used in embedding,
 * sigma(1385) family has been added to the particle list
@@ -82,16 +85,16 @@
 
 
 
-  Particle S1385plus     code=701 TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23
-                         pdg=3224  bratio= { 1, }       mode= { 1808, }
+  Particle S1385plus     code=701   TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23,
+                         pdg=3224   bratio= { 1, }       mode= { 1808, }
 
-  Particle S1385minus    code=702 TrkTyp=4 mass=1.3872  charge=-1  tlife=1.67e-23
-                         pdg=3114  bratio= { 1, }       mode= { 1809, }
+  Particle S1385minus    code=702   TrkTyp=4 mass=1.3872  charge=-1  tlife=1.67e-23,
+                         pdg=3114   bratio= { 1, }       mode= { 1809, }
 
-  Particle S1385barplus  code=703 TrkTyp=4 mass=1.3872  charge=-1  tlife=1.67e-23
+  Particle S1385barplus  code=703   TrkTyp=4 mass=1.3872  charge=-1  tlife=1.67e-23,
                          pdg=-3114  bratio= { 1, }       mode= { 2608, }
 
-  Particle S1385barminus code=704 TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23
+  Particle S1385barminus code=704   TrkTyp=4 mass=1.3828  charge=1   tlife=1.84e-23,
                          pdg=-3224  bratio= { 1, }       mode= { 2609, }
 
 * the Stranglet World, authored by Ron Longacre and remastered by M.Potekhin
