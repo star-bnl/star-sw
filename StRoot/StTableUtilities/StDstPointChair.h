@@ -49,13 +49,13 @@ class StDstPointChair : public StHitChair {
     dst_point_st   &operator[](Int_t i);
 
     UShort_t        SectorRow(Int_t i,UShort_t sector,UShort_t row){/* to be implemented */return 0;}
-    Long_t          IdPosition(Int_t i, Long_t track_Id, Long_t position){/* to be implemented */return 0;}
+    Long_t          IdPosition(Int_t i, Int_t track_Id, Int_t position){/* to be implemented */return 0;}
 
 //  Utilities
     static Int_t    DetectId(const Char_t *name="tpc");
     static Float_t  Factor(Float_t &range,Float_t &errF,Int_t detId);
     static Float_t  Factor(Float_t &range,Float_t &errF,const Char_t *name="tpc");
-    static UShort_t UpckDetectorId(Long_t hwPosition);
+    static UShort_t UpckDetectorId(Int_t hwPosition);
 
     static Long_t   GetDetecorIdMask();
     static Long_t   GetRowMask();
@@ -63,20 +63,20 @@ class StDstPointChair : public StHitChair {
     static Long_t   GetSectorMask();
     static Long_t   GetSectorShift();
 
-    static UShort_t UpckSec(Long_t hwPosition);
-    static UShort_t UpckRow(Long_t hwPosition);
-    static ULong_t  UpckX(const Long_t *position);
-    static ULong_t  UpckY(const Long_t *position);
-    static ULong_t  UpckZ(const Long_t *position);
+    static UShort_t UpckSec(Int_t hwPosition);
+    static UShort_t UpckRow(Int_t hwPosition);
+    static ULong_t  UpckX(const Int_t *position);
+    static ULong_t  UpckY(const Int_t *position);
+    static ULong_t  UpckZ(const Int_t *position);
 
     void            SetMaxFactor(Float_t maxFactor);
     void            SetMaxRange(Float_t maxRange);
-    void            SetDetectorRange(Long_t hwPosition);
+    void            SetDetectorRange(Int_t hwPosition);
 
     dst_point_st   *GetTable(Int_t i=0) const;
 
-    Float_t         GetRealPoint(Long_t unPackgedPoint) const;
-    Float_t         GetRealError(Long_t unPackgedPoint) const;
+    Float_t         GetRealPoint(Int_t unPackgedPoint) const;
+    Float_t         GetRealError(Int_t unPackgedPoint) const;
     Int_t           GetLastDetectorId() const ;
 
     ClassDef(StDstPointChair,0)
@@ -96,11 +96,11 @@ inline Long_t   StDstPointChair::GetDetecorIdMask(){return 0xF;       }
 inline Int_t    StDstPointChair::GetLastDetectorId() const { return m_DetectorId; }
 
 //______________________________________________________________
-inline Float_t  StDstPointChair::GetRealError(Long_t unPackgedPoint) const
+inline Float_t  StDstPointChair::GetRealError(Int_t unPackgedPoint) const
                 { return Float_t(unPackgedPoint)*m_MaxErrFactor; }
 
 //______________________________________________________________
-inline Float_t  StDstPointChair::GetRealPoint(Long_t unPackgedPoint) const
+inline Float_t  StDstPointChair::GetRealPoint(Int_t unPackgedPoint) const
                 { return Float_t(unPackgedPoint)/m_MaxFactor - m_MaxRange; }
 
 //______________________________________________________________
@@ -113,16 +113,16 @@ inline Long_t   StDstPointChair::GetSectorMask()  { return 0x000001F0;}
 //______________________________________________________________
 inline Long_t   StDstPointChair::GetSectorShift() { return 4;         }
 //______________________________________________________________
-inline UShort_t StDstPointChair::UpckDetectorId(Long_t hwPosition)
+inline UShort_t StDstPointChair::UpckDetectorId(Int_t hwPosition)
                 {return UShort_t(hwPosition & GetDetecorIdMask());    }
 //______________________________________________________________
-inline UShort_t StDstPointChair::UpckRow(Long_t hwPosition)    
+inline UShort_t StDstPointChair::UpckRow(Int_t hwPosition)    
                 { assert(UpckDetectorId(hwPosition) == kTpcIdentifier);
                   // bits 9-14  pad row number (1-45)
                   return UShort_t((hwPosition & GetRowMask()) >> GetRowShift()) ;
                 }
 //______________________________________________________________
-inline UShort_t StDstPointChair::UpckSec(Long_t hwPosition)    
+inline UShort_t StDstPointChair::UpckSec(Int_t hwPosition)    
                 {  assert(UpckDetectorId(hwPosition) == kTpcIdentifier);
                    // bits 4-8   sector number (1-24)
                    return UShort_t((hwPosition & GetSectorMask()) >> GetSectorShift()) ;
@@ -156,7 +156,7 @@ inline Int_t StDstPointChair::Sector(Int_t i)   const
 inline Int_t StDstPointChair::PadRow(Int_t i)   const 
                 { return UpckRow(fTab_dst[i].hw_position);}
 //______________________________________________________________
-inline void     StDstPointChair::SetDetectorRange(Long_t hwPosition) {
+inline void     StDstPointChair::SetDetectorRange(Int_t hwPosition) {
                   Int_t detId = UpckDetectorId(hwPosition);
                   if (GetLastDetectorId() != detId ) {
                      SetDetectorId(detId);
@@ -164,13 +164,13 @@ inline void     StDstPointChair::SetDetectorRange(Long_t hwPosition) {
                   } 
                 }
 //______________________________________________________________
-inline ULong_t  StDstPointChair::UpckX(const Long_t *position)
+inline ULong_t  StDstPointChair::UpckX(const Int_t *position)
                 { return   (*position) & 0x000FFFFF;}
 //______________________________________________________________
-inline ULong_t  StDstPointChair::UpckY(const Long_t *position)
+inline ULong_t  StDstPointChair::UpckY(const Int_t *position)
                 { return   ((position[1] & 0x3FF) << 10)  | (position[0]  >> 20); }
 //______________________________________________________________
-inline ULong_t  StDstPointChair::UpckZ(const Long_t *position)
+inline ULong_t  StDstPointChair::UpckZ(const Int_t *position)
                 {  return   position[1] >> 10; }
 //______________________________________________________________
 inline Float_t  StDstPointChair::GetX(Int_t i)           const
