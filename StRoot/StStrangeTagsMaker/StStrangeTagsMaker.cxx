@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.3 1999/02/24 02:03:38 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.4 1999/02/24 15:34:00 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.4  1999/02/24 15:34:00  genevb
+ * Fixed a typo
+ *
  * Revision 1.3  1999/02/24 02:03:38  genevb
  * Add Xi vertices
  *
@@ -24,7 +27,7 @@
 #include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StEvent/StEvent.hh"
 #include "StEvent/StV0Vertex.hh"
-#include "StEventReaderMaker/StXiVertex.hh"
+#include "StEvent/StXiVertex.hh"
 #include "StChain/StChain.h"
 #include "TMath.h"
 #include "PhysicalConstants.h"
@@ -69,7 +72,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.3 1999/02/24 02:03:38 genevb Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.4 1999/02/24 15:34:00 genevb Exp $" << endl;
     if (gStChain->Debug()) StMaker::PrintInfo();
 }
 
