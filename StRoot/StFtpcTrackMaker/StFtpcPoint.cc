@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.14 2003/01/16 18:04:33 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.15 2003/09/16 15:27:02 jcs Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.15  2003/09/16 15:27:02  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.14  2003/01/16 18:04:33  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -386,4 +389,96 @@ Int_t StFtpcPoint::WriteCluster()
   // Does nothing up to now.
 
   return 0;
+}
+
+void StFtpcPoint::SetResidualsToZero()
+{
+  // Sets all residuals to 0.
+
+  SetXPrimResidual(0.);
+  SetYPrimResidual(0.);
+  SetRPrimResidual(0.);
+  SetPhiPrimResidual(0.);
+  SetXGlobResidual(0.);
+  SetYGlobResidual(0.);
+  SetRGlobResidual(0.);
+  SetPhiGlobResidual(0.);
+
+  return;
+}
+
+
+StFtpcTrack *StFtpcPoint::GetTrack(TObjArray *tracks) const
+{
+  // Returns the pointer to the track to which this hit belongs.
+
+  return (StFtpcTrack*)tracks->At(this->GetTrackNumber());
+}
+
+
+void StFtpcPoint::SetTrackedFlag(Bool_t tracked) 
+{
+  // Sets flag, if the cluster was used for tracking.
+  // This has to be done due to consistency with the point bank.
+
+  Long_t old_flag = GetFlags();
+  SetFlags((old_flag & 0xFFFFFFDF) | ((Long_t)tracked*32));
+}
+
+
+Bool_t StFtpcPoint::GetTrackedFlag()
+{
+  // Returns true, if 'tracked flag' is set, otherwise returns false.
+
+  return (Bool_t)(GetFlags() & (Long_t)32);
+}
+
+
+void StFtpcPoint::SetGlobalFlag(Bool_t global) 
+{
+  // Sets flag, if the cluster is measured in global coordinates.
+
+  Long_t old_flag = GetFlags();
+  SetFlags((old_flag & 0xFFFFFFAF) | ((Long_t)global*64));
+}
+
+
+Bool_t StFtpcPoint::GetGlobalFlag()
+{
+  // Returns true, if 'global flag' is set, otherwise returns false.
+
+  return (Bool_t)(GetFlags() & (Long_t)64);
+}
+
+
+void StFtpcPoint::SetUnusableForTrackingFlag(Bool_t global) 
+{
+  // Sets flag, if the cluster DOES NOT pass all quality criteria to be used for tracking.
+
+  Long_t old_flag = GetFlags();
+  SetFlags((old_flag & 0xFFFFFFAF) | ((Long_t)global*128));
+}
+
+
+Bool_t StFtpcPoint::GetUnusableForTrackingFlag()
+{
+  // Returns true, if 'UnusableForTracking flag' is set, otherwise returns false.
+
+  return (Bool_t)(GetFlags() & (Long_t)128);
+}
+
+
+Bool_t StFtpcPoint::IsUsable()
+{
+  // Returns true, if 'UsableForTracking flag' and 'tracked flag' is set, otherwise returns false.
+    
+  return (Bool_t)((!GetTrackedFlag()) && !(GetUnusableForTrackingFlag()));
+}
+
+
+Bool_t StFtpcPoint::IsUnusable()
+{
+  // Returns true, if 'UsableForTracking flag' and 'tracked flag' is set, otherwise returns false.
+    
+  return (Bool_t)(GetTrackedFlag() || GetUnusableForTrackingFlag());
 }

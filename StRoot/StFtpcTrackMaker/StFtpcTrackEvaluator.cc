@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.18 2003/01/16 18:04:33 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.19 2003/09/16 15:27:02 jcs Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.19  2003/09/16 15:27:02  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.18  2003/01/16 18:04:33  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -2339,6 +2342,90 @@ void StFtpcTrackEvaluator::InfoAll()
   ClusterInfo();
   gMessMgr->Message("", "I", "OST") << endm;
   ProblemsInfo();
+
+  return;
+}
+
+void StFtpcTrackEvaluator::FillCutHistos()
+{
+  // Fills histograms for cuts. This is done for Geant tracks and found tracks.
+
+  FillGCutHistos();
+  FillFCutHistos();
+
+  return;
+}
+
+
+void StFtpcTrackEvaluator::FillHitsOnTrack()
+{
+  // Fill hits on all tracks in histograms.
+
+  FillHitsOnTrack(mGeantTracks, 'g');
+  FillHitsOnTrack(mFoundTracks, 'f');
+
+  return;
+}
+
+
+void StFtpcTrackEvaluator::FillFoundHitsOnTrack()
+{
+  // Fill hits on found tracks in histograms.
+
+  FillHitsOnTrack(mFoundTracks, 'f');
+
+  return;
+}
+
+
+Bool_t StFtpcTrackEvaluator::IsGoodTrack(StFtpcTrack* track) 
+{
+  // Returns true if the given track fulfills all requirements to be a "good" track.
+
+  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+    return (Bool_t)kTRUE;
+  }
+
+  else {
+    return (Bool_t)kFALSE;
+  }
+} 
+
+
+Bool_t StFtpcTrackEvaluator::IsGoodMainVertexTrack(StFtpcTrack* track) 
+{
+  // Returns true if the given track fulfills all requirements to be a "good" track.
+
+  if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+    return (Bool_t)kTRUE;
+  }
+
+  else {
+    return (Bool_t)kFALSE;
+  }
+} 
+
+
+Bool_t StFtpcTrackEvaluator::IsGoodNonVertexTrack(StFtpcTrack* track) 
+{
+  // Returns true if the given track fulfills all requirements to be a "good" track.
+
+  if (track->GetPid() > 3 && !(track->ComesFromMainVertex()) && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+    return (Bool_t)kTRUE;
+  }
+
+  else {
+    return (Bool_t)kFALSE;
+  }
+} 
+
+
+void StFtpcTrackEvaluator::ShowTracks()
+{
+  // Displays the geant and/or found tracks.
+
+  StFtpcDisplay display(GetFoundHits(), GetFoundTracks(), GetGeantHits(), GetGeantTracks());
+  display.ShowEvalTracks(mSplitTracksArr, mUncleanTracksArr, mClusterArr);
 
   return;
 }

@@ -1,5 +1,8 @@
-// $Id: StFormulary.hh,v 1.4 2002/10/03 10:33:57 oldi Exp $
+// $Id: StFormulary.hh,v 1.5 2003/09/16 15:27:01 jcs Exp $
 // $Log: StFormulary.hh,v $
+// Revision 1.5  2003/09/16 15:27:01  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.4  2002/10/03 10:33:57  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -51,94 +54,5 @@ class StFormulary
     ClassDef(StFormulary,0)  // Mathematical formulary
 };    
 
-
-inline Double_t StFormulary::CheckASinArg(Double_t asin_arg)
-{
-  // Returns +1. if asin_arg>1. or -1. if asin_arg<-1.
-
-  if (TMath::Abs(asin_arg) > 1.) {
-    asin_arg = (asin_arg >= 0) ? +1. : -1.;
-  }
-  
-  return asin_arg;
-}
-
-
-inline Double_t StFormulary::RelDiff(const Double_t p1, const Double_t p2)
-{
-  // Returns the relative diffenrence of two points.
-
-  return (p1 - p2) / (p1 + p2);
-}
-
-
-inline Double_t StFormulary::Dist(const Double_t *p1,  const Double_t *p2, Int_t dim)
-{
-  // Calculates the distance of two points in euclidian geometry.
-  
-  return TMath::Sqrt(Dist_squared(p1, p2, dim));
-}
-
-
-inline void StFormulary::VectorProd(const Double_t *a, const Double_t *b, Double_t *c)
-{
-  // Calculates the (euclidian) vector product of two vectors in three dimensions.
-
-  c[1] = a[2]*b[3] - a[3]*b[2];
-  c[2] = a[3]*b[1] - a[1]*b[3];
-  c[3] = a[1]*b[2] - a[2]*b[1];
-  
-  return;
-}
-
-
-inline Double_t StFormulary::ScalarProd(const Double_t *a, const Double_t *b, Int_t dim)
-{
-  // Calculates the (euclidian) scalar product of two vectors
-
-  Double_t result = 0.;
-
-  for (Int_t i=0; i<dim; result += a[i] * b[i], i++);
-
-  return result;
-}
-
-
-inline Double_t StFormulary::Square(const Double_t *p, Int_t dim)
-{
-  // Calculates the scalar product of the given vector with itself.
-
-  return ScalarProd(p, p, dim);
-}
-
-
-inline void StFormulary::Sum(const Double_t *p1, const Double_t *p2, Double_t *P, Int_t n)
-{
-  // Calculates the sum of the two n-dimensional vectors and stores the 
-  // result in the vector P.
-
-  for (Int_t i=0; i<n; P[i] = p1[i] + p2[i], i++);  
-  
-  return;
-}
-
-
-inline void StFormulary::Diff(const Double_t *p1, const Double_t *p2, Double_t *P, Int_t n)
-{
-  // Calculates the difference of the two n-dimensional vectors and stores the 
-  // result in the vector P.
-
-  for (Int_t i=0; i<n; P[i] = p1[i] - p2[i], i++);
-
-  return;
-}
-
-
-inline Double_t StFormulary::Abs(const Double_t *p, Int_t dim)
-{
-  // Calculates the length of a vector in ordinary euclidian geometry.
-    
-  return TMath::Sqrt(Square(p, dim));
-}
 
 #endif

@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.hh,v 1.17 2003/05/20 18:35:02 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.18 2003/09/16 15:27:02 jcs Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.18  2003/09/16 15:27:02  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.17  2003/05/20 18:35:02  oldi
 // Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
 //
@@ -188,19 +191,6 @@ public:
 };
 
 
-inline Int_t StFtpcTracker::WriteTracksAndClusters()
-{
-  // Writes tracks and clusters in ROOT file.
-  // In the moment this makes no sense because the important information
-  // about momentum of tracks and coordinates of clusters or stored in
-  // StThreeVerctor<double> which does not inherit from TObject. So it
-  // is not written out!
-
-  mHit->Write();
-  mTrack->Write();
-  
-  return 0;
-}
 
 
 #endif
