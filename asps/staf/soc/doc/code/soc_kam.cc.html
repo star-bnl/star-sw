@@ -1,0 +1,347 @@
+<HTML>
+<PRE>
+<H2>file: soc/src/soc_kam.cc</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley Laboratory
+*:&gt;---------------------------------------------------------------------
+*:FILE:         soc_kam.c
+*:DESCRIPTION:  C KUIP Action Modules for Error & Message Logger
+*:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
+*:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      26jul95-v000a-cet- creation
+*:&lt;---------------------------------------------------------------------
+*/
+#undef CORBA
+
+/*-------------------------------------------- INCLUDES             --*/
+
+#include &lt;stdlib.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;dlfcn.h&gt;
+
+#include "asuAlloc.h"
+#include "asuLib.h"
+#include "emlLib.h"
+#include "<A HREF="socLib.h.html">socLib.h</A>"
+
+#include "kuip.h"
+
+/*-------------------------------------------- TYPEDEFS             --*/
+/*-------------------------------------------- GLOBALS              --*/
+/*-------------------------------------------- PROTOTYPES           --*/
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_bind_
+*:DESCRIPTION:  KUIP Action Module to bind to <A HREF="soc_macros.h.html#SOC">SOC</A> server
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/BIND ASP SOLIB
+*:&lt;---------------------------------------------------------------------
+*/
+
+<B>void <A NAME="kam_soc_bind_">kam_soc_bind_(</A>){<A HREF="#kam_soc_bind">kam_soc_bind(</A>);}</B>
+<B>int <A NAME="kam_soc_bind">kam_soc_bind(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* aspName = ku_gets();	/* ASP <A HREF="socClasses.cc.html#name">name</A> */
+   char* solibName = ku_gets();	/* shared library */
+
+   void *solibHandle;
+   char funcName[9];
+// void **funcHandle;
+   int (*asp_init)();
+   int (*asp_start)();
+
+   if( 0 == strcmp(solibName,"-") ){
+      solibName = (char*)ASUALLOC(9);
+      sprintf(solibName,"lib%3s.so",aspName);
+   }
+
+   solibHandle = dlopen(solibName,RTLD_LAZY);
+   sprintf(funcName,"%3s_init",aspName);
+   asp_init = (int(*)())dlsym(solibHandle,funcName);
+   sprintf(funcName,"%3s_start",aspName);
+   asp_start = (int(*)())dlsym(solibHandle,funcName);
+
+   asp_init();
+   asp_start();
+
+   ASUFREE(solibName);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_release_
+*:DESCRIPTION:  KUIP Action Module to <A HREF="socClasses.cc.html#release">release</A> bound <A HREF="soc_macros.h.html#SOC">SOC</A> server
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/RELEASE ASP SOLIB
+*:&lt;---------------------------------------------------------------------
+*/
+
+<B>void <A NAME="kam_soc_release_">kam_soc_release_(</A>){<A HREF="#kam_soc_release">kam_soc_release(</A>);}</B>
+<B>int <A NAME="kam_soc_release">kam_soc_release(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* aspName = ku_gets();	/* ASP <A HREF="socClasses.cc.html#name">name</A> */
+   char* solibName = ku_gets();	/* shared library */
+
+   if( 0 == strcmp(solibName,"-") ){
+      solibName = (char*)ASUALLOC(9);
+      sprintf(solibName,"lib%3s.so",aspName);
+   }
+
+   void *solibHandle;
+   char funcName[9];
+// void **funcHandle;
+   int (*asp_stop)();
+
+   solibHandle = dlopen(solibName,RTLD_LAZY);
+   sprintf(funcName,"%3s_stop",aspName);
+   asp_stop = (int(*)())dlsym(solibHandle,funcName);
+
+   asp_stop();
+
+   ASUFREE(solibName);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_name_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/OBJECT/NAME IDREF
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_socobject_name_">kam_socobject_name_(</A>){<A HREF="#kam_socobject_name">kam_socobject_name(</A>);}</B>
+<B>int <A NAME="kam_socobject_name">kam_socobject_name(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   long idref = ku_geti();	/* <A HREF="socClasses.cc.html#idRef">idRef</A> of object */
+
+   if( !<U>VALID_IDREF(</U>idref) ){        //OVERLOAD CALL: VALID_IDREF: <A HREF="soc_macros.h.html#VALID_IDREF">soc_macros.h(?)</A>, <A HREF="socClasses.cc.html#VALID_IDREF">socClasses.cc(?)</A>
+      EML_ERROR(KAM_INVALID_IDREF);
+   }
+
+   socObject* p;
+   if( !soc-&gt;<A HREF="socClasses.cc.html#getObject">getObject</A>(idref,p) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+   char *n;
+   printf("<A HREF="soc_macros.h.html#SOC">SOC</A>:\tObject <A HREF="socClasses.cc.html#name">name</A> = %s \n",n=p-&gt;<A HREF="socClasses.cc.html#name">name</A>());
+   delete[] n;
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_socobject_type_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/OBJECT/TYPE IDREF
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_socobject_type_">kam_socobject_type_(</A>){<A HREF="#kam_socobject_type">kam_socobject_type(</A>);}</B>
+<B>int <A NAME="kam_socobject_type">kam_socobject_type(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   long idref = ku_geti();	/* <A HREF="socClasses.cc.html#idRef">idRef</A> of object */
+
+   if( !<U>VALID_IDREF(</U>idref) ){        //OVERLOAD CALL: VALID_IDREF: <A HREF="soc_macros.h.html#VALID_IDREF">soc_macros.h(?)</A>, <A HREF="socClasses.cc.html#VALID_IDREF">socClasses.cc(?)</A>
+      EML_ERROR(KAM_INVALID_IDREF);
+   }
+
+   socObject* p;
+   if( !soc-&gt;<A HREF="socClasses.cc.html#getObject">getObject</A>(idref,p) ){
+      EML_ERROR(KAM_OBJECT_NOT_FOUND);
+   }
+
+   char *t;
+   printf("<A HREF="soc_macros.h.html#SOC">SOC</A>:\tObject <A HREF="socClasses.cc.html#type">type</A> = %s \n",t=p-&gt;<A HREF="socClasses.cc.html#type">type</A>());
+   delete[] t;
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_count_
+*:DESCRIPTION:  KUIP Action Module to show number of registered objects
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/CATALOG/COUNT
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_soc_count_">kam_soc_count_(</A>){<A HREF="#kam_soc_count">kam_soc_count(</A>);}</B>
+<B>int <A NAME="kam_soc_count">kam_soc_count(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+
+   long i = soc-&gt;<U>count</U>();        //OVERLOAD CALL: count: <A HREF="socClasses.cc.html#count">socClasses.cc(?)</A>, <A HREF="socClasses.cc.html#count">socClasses.cc(?)</A>
+   printf("<A HREF="soc_macros.h.html#SOC">SOC</A>:\tObject <U>count</U> = %d \n",i);        //OVERLOAD CALL: count: <A HREF="socClasses.cc.html#count">socClasses.cc(?)</A>, <A HREF="socClasses.cc.html#count">socClasses.cc(?)</A>
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_deleteid_
+*:DESCRIPTION:  KUIP Action Module to delete object #id
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/CATALOG/DELETEOBJECT NAME [ TYPE ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_soc_deleteid_">kam_soc_deleteid_(</A>){<A HREF="#kam_soc_deleteid">kam_soc_deleteid(</A>);}</B>
+<B>int <A NAME="kam_soc_deleteid">kam_soc_deleteid(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   long id = ku_geti();		/* object id */
+
+   soc-&gt;<A HREF="socClasses.cc.html#deleteID">deleteID</A>(id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_deleteobject_
+*:DESCRIPTION:  KUIP Action Module to delete registered object
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/CATALOG/DELETEOBJECT NAME [ TYPE ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_soc_deleteobject_">kam_soc_deleteobject_(</A>){<A HREF="#kam_soc_deleteobject">kam_soc_deleteobject(</A>);}</B>
+<B>int <A NAME="kam_soc_deleteobject">kam_soc_deleteobject(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* <A HREF="socClasses.cc.html#name">name</A> = ku_gets();	/* object <A HREF="socClasses.cc.html#name">name</A> */
+   char* <A HREF="socClasses.cc.html#type">type</A> = ku_gets();	/* object <A HREF="socClasses.cc.html#type">type</A> */
+
+   soc-&gt;<A HREF="socClasses.cc.html#deleteObject">deleteObject</A>(<A HREF="socClasses.cc.html#name">name</A>,<A HREF="socClasses.cc.html#type">type</A>);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_idobject_
+*:DESCRIPTION:  KUIP Action Module to identify object
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/CATALOG/FINDOBJECT NAME [ TYPE ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_soc_idobject_">kam_soc_idobject_(</A>){<A HREF="#kam_soc_idobject">kam_soc_idobject(</A>);}</B>
+<B>int <A NAME="kam_soc_idobject">kam_soc_idobject(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* <A HREF="socClasses.cc.html#name">name</A> = ku_gets();	/* object <A HREF="socClasses.cc.html#name">name</A> */
+   char* <A HREF="socClasses.cc.html#type">type</A> = ku_gets();	/* object <A HREF="socClasses.cc.html#type">type</A> */
+
+   <A HREF="soc_types.h.html#IDREF_T">IDREF_T</A> id;
+   if( !soc-&gt;<A HREF="socClasses.cc.html#idObject">idObject</A>(<A HREF="socClasses.cc.html#name">name</A>,<A HREF="socClasses.cc.html#type">type</A>,id) ){
+      EML_ERROR(KAM_INVALID_IDREF);
+   }
+   printf("<A HREF="soc_macros.h.html#SOC">SOC</A>:\tObject <A HREF="socClasses.cc.html#idRef">idRef</A> =  %d \n",id);
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_list_
+*:DESCRIPTION:  KUIP Action Module to <A HREF="socClasses.cc.html#list">list</A> all registered objects
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/CATALOG/LIST
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_soc_list_">kam_soc_list_(</A>){<A HREF="#kam_soc_list">kam_soc_list(</A>);}</B>
+<B>int <A NAME="kam_soc_list">kam_soc_list(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+
+   soc-&gt;<A HREF="socClasses.cc.html#list">list</A>();
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+/*
+*:&gt;---------------------------------------------------------------------
+*:ROUTINE:      void kam_soc_newobject_
+*:DESCRIPTION:  KUIP Action Module to 
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* <A HREF="soc_macros.h.html#SOC">SOC</A>/CATALOG/NEWOBJECT NAME [ TYPE ]
+*:&lt;---------------------------------------------------------------------
+*/
+<B>void <A NAME="kam_soc_newobject_">kam_soc_newobject_(</A>){<A HREF="#kam_soc_newobject">kam_soc_newobject(</A>);}</B>
+<B>int <A NAME="kam_soc_newobject">kam_soc_newobject(</A>)</B>
+{
+   long npars = ku_npar();	/* number of KUIP parameters */
+   char* <A HREF="socClasses.cc.html#name">name</A> = ku_gets();	/* object <A HREF="socClasses.cc.html#name">name</A> */
+
+   soc-&gt;<A HREF="socClasses.cc.html#newObject">newObject</A>(<A HREF="socClasses.cc.html#name">name</A>);
+
+   EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
+}
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
