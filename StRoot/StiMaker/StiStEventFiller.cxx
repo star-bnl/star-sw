@@ -1,11 +1,19 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.30 2004/03/29 00:52:20 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.31 2004/03/31 00:27:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.31  2004/03/31 00:27:29  calderon
+ * Modifications for setting the fit points based on the chi2<chi2Max algorithm.
+ * -Distinguish between points and fit points, so I added a function for each.
+ * -Points is done as it was before, just counting the stHits for a given
+ *  detector id.
+ * -Fit points is done the same with the additional condition that each
+ *  StiKalmanTrackNode has to satisfy the chi2 criterion.
+ *
  * Revision 2.30  2004/03/29 00:52:20  andrewar
  * Added key value to StTrack fill. Key is simply the size of the
  * StTrackNode container at the time the track is filled.
@@ -262,6 +270,7 @@ using namespace std;
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
+#include "Sti/StiKalmanTrackFitterParameters.h"
 /////#include "Sti/StiGeometryTransform.h"
 #include "Sti/StiDedxCalculator.h"
 
@@ -557,11 +566,13 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
   vector<StMeasuredPoint*> hitVec = track->stHits();
   detInfo->setFirstPoint(hitVec.front()->position());
   detInfo->setLastPoint(hitVec.back()->position());
-  detInfo->setNumberOfPoints(encodedStEventFitPoints(track));
+  detInfo->setNumberOfPoints(encodedStEventPoints(track));
   for (vector<StMeasuredPoint*>::iterator point = hitVec.begin(); point!=hitVec.end(); ++point) 
     {
       StHit * hh = dynamic_cast<StHit*>(*point);
-      if (hh) detInfo->addHit(hh);
+      if (hh) {
+	  detInfo->addHit(hh);
+      }
     }
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Done"<<endl;
 }
@@ -771,7 +782,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
 bool StiStEventFiller::accept(StiKalmanTrack* track) {
     return (track->getTrackLength()>0); // insert other filters for riff-raff we don't want in StEvent here.
 }
-unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track) 
+unsigned short StiStEventFiller::encodedStEventPoints(StiKalmanTrack* track) 
 {
   // need to write the fit points in StEvent following the convention
   // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
@@ -799,7 +810,7 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track)
 	++nFitSsd;
 	break;
       default:
-	cout << "StiStEventFiller::encodedStEventFitPoints()\t"
+	cout << "StiStEventFiller::encodedStEventPoints()\t"
 	     << "hit->detector() " << (unsigned long)hit->detector() << " not forseen in the logic" << endl;
       }
     }
@@ -808,6 +819,51 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track)
   return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
     
 }
+unsigned short StiStEventFiller::encodedStEventFitPoints(StiKalmanTrack* track) 
+{
+    // need to write the fit points in StEvent following the convention
+    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+    //vector<StMeasuredPoint*> hitVec = track->stHits();
+    unsigned short nFitTpc, nFitSvt, nFitSsd; // maybe need ftpc (east, west), emc, rich, tof, later
+    nFitTpc = nFitSvt = nFitSsd = 0;
+    unsigned char ImUsed = 1;
+    StiKTNBidirectionalIterator it;
+    double maxChi2 = track->fitPars()->getMaxChi2();
+    // loop here to get the hits using iterator.
+    for (it=track->begin();it!=track->end();it++) {
+	StiKalmanTrackNode& ktn = (*it);
+	if (ktn.getChi2() < maxChi2) {
+	    // use StDetectorId's and switch
+	    const StHit* chit = dynamic_cast<const StHit*>(ktn.getHit()->stHit());
+	    if (chit) {
+		// the stHit function returns a const StHit, so we can't modify it
+		// unless we do the dirty trick of const_cast...
+		StHit* hit = const_cast<StHit*>(chit);
+		hit->setFitFlag(ImUsed);
+		StDetectorId detId = hit->detector();
+		switch (detId) {
+		case kTpcId:
+		    ++nFitTpc;
+		    break;
+		case kSvtId:
+		    ++nFitSvt;
+		    break;
+		case kSsdId:
+		    ++nFitSsd;
+		    break;
+		default:
+		    cout << "StiStEventFiller::encodedStEventFitPoints()\t"
+			 << "hit->detector() " << (unsigned long)hit->detector() << " not forseen in the logic" << endl;
+		    
+		} // switch
+	    } // if (hit)
+	} // if (chi2<maxChi2)
+    } // KTNode loop    
+  //        1*tpc + 1000*svt     + 10000*ssd       (Helen/Spiros Oct 29, 1999)
+  return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
+    
+}
+
 float StiStEventFiller::impactParameter(StiKalmanTrack* track) 
 {
   if (!mEvent->primaryVertex()) 
