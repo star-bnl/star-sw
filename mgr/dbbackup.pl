@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbbackup.pl,v 1.5 1999/07/21 09:15:10 wenaus Exp $
+# $Id: dbbackup.pl,v 1.6 1999/08/08 18:53:42 wenaus Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbbackup.pl 
 #
 # $Log: dbbackup.pl,v $
+# Revision 1.6  1999/08/08 18:53:42  wenaus
+# Keep backups longer
+#
 # Revision 1.5  1999/07/21 09:15:10  wenaus
 # Add params db to backup
 #
@@ -35,8 +38,8 @@ $debugOn = 0;
 ## Databases to be backed up, and the number of backup files to keep
 %dbToBackup = (
                'system_data' => 10,
-               'params' => 10,
-               'mysql' => 10
+               'params' => 20,
+               'mysql' => 20
                );
 
 $backupDir = '/star/sol4/duvall/archive/mysql';
