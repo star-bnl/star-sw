@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.14 2000/06/30 14:43:38 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.15 2001/05/22 19:52:03 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -12,16 +12,87 @@
 //  Maker to fill Tag database for flow analysis
 //
 //
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef StFlowTagMaker_H
+#define StFlowTagMaker_H
+#include <iostream.h>
+#include "StMaker.h"
+#include "tables/St_FlowTag_Table.h"
+#include "StFlowMaker/StFlowConstants.h"
+class StFlowEvent;
+class StFlowSelection;
+class TH1F;
+class TH1D;
+class TProfile;
+
+class StFlowTagMaker : public StMaker 
+{
+
+public:
+
+               StFlowTagMaker(const Char_t* name="FlowTag");
+  virtual      ~StFlowTagMaker();
+
+  Int_t        Init();
+  Int_t        Make();
+  Int_t        Finish();
+  FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
+  virtual const char *GetCVS() const {static const char cvs[]=
+  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.15 2001/05/22 19:52:03 posk Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;}
+
+private:
+
+  void             FillFlowTag();
+  Int_t            FillHistograms();
+  void             PrintTag(ostream& = cout); // output Tag info to screen
+
+  St_FlowTag*      pSt_FlowTag; //! the StFlowTag table header
+  FlowTag_st*      pFlowTag;    //! the StFlowTag table structure to fill
+  StFlowEvent*     pFlowEvent;  //! the event to fill from
+  StFlowSelection* pFlowSelect; //! the selection object
+
+  enum {
+    nHars = 6,
+    nSels = 2,
+    nSubs = 2
+  };
+
+  struct histHarmonic {
+    TH1F *mHistPsi;
+    TH1F *mHistMeanPt;
+    TH1D *mHistMult;
+    TH1F *mHist_q;
+  };
+
+  struct histSubEvent;
+  friend struct histSubEvent;
+  struct histSubEvent {
+    struct histHarmonic histHarmonics[nHars];
+  };
+
+  struct histSubEvent histSubEvents[nSels*nSubs]; //!
+
+  ClassDef(StFlowTagMaker, 1)                     // macro for rootcint
+};
+
+inline FlowTag_st* StFlowTagMaker::TagPointer() const { return pFlowTag; }
+
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.15  2001/05/22 19:52:03  posk
+// Put log comments at end of file.
+//
 // Revision 1.14  2000/06/30 14:43:38  posk
 // Using MessageMgr.
 //
 // Revision 1.13  2000/05/26 21:26:53  posk
 // Number of subevents fixed at 2.
-//
 //
 // Revision 1.10  2000/03/28 23:23:26  posk
 // Allow multiple instances of the AnalysisMaker.
@@ -62,70 +133,5 @@
 // Revision 1.3  1999/08/09 21:43:06  snelling
 // removed parameters from cxx file
 //
-//
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowTagMaker_H
-#define StFlowTagMaker_H
-#include <iostream.h>
-#include "StMaker.h"
-#include "tables/St_FlowTag_Table.h"
-#include "StFlowMaker/StFlowConstants.h"
-class StFlowEvent;
-class StFlowSelection;
-class TH1F;
-class TH1D;
-class TProfile;
-
-class StFlowTagMaker : public StMaker 
-{
-
-public:
-
-               StFlowTagMaker(const Char_t* name="FlowTag");
-  virtual      ~StFlowTagMaker();
-
-  Int_t        Init();
-  Int_t        Make();
-  Int_t        Finish();
-  FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
-  virtual const char *GetCVS() const {static const char cvs[]=
-  "Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.14 2000/06/30 14:43:38 posk Exp $ built "__DATE__" "__TIME__ ;
-    return cvs;}
-
-private:
-
-  void             FillFlowTag();
-  Int_t            FillHistograms();
-  void             PrintTag(ostream& = cout); // output Tag info to screen
-
-  St_FlowTag*      pSt_FlowTag; //! the StFlowTag table header
-  FlowTag_st*      pFlowTag;    //! the StFlowTag table structure to fill
-  StFlowEvent*     pFlowEvent;  //! the event to fill from
-  StFlowSelection* pFlowSelect; //! the selection object
-
-  enum { nHars = 6,
-	 nSels = 2,
-	 nSubs = 2 };
-
-  struct histHarmonic {
-    TH1F *mHistPsi;
-    TH1F *mHistMeanPt;
-    TH1D *mHistMult;
-    TH1F *mHist_q;
-  };
-
-  struct histSubEvent;
-  friend struct histSubEvent;
-  struct histSubEvent {
-    struct histHarmonic histHarmonics[nHars];
-  };
-
-  struct histSubEvent histSubEvents[nSels*nSubs]; //!
-
-  ClassDef(StFlowTagMaker, 1)                     // macro for rootcint
-};
-
-inline FlowTag_st* StFlowTagMaker::TagPointer() const { return pFlowTag; }
-
-#endif
