@@ -40,7 +40,6 @@ long type_of_call tpt_residuals_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 float xlocal[]={0,0,0}; /* scratch position */
-float bfield[3]; /* magnetic field */
 #define LEN 600000
 long  loc_hit[LEN]; /* array to index the hit table sorted by track */
 long  mylen=LEN; /* variable holding length of loc_hit array */
@@ -62,9 +61,6 @@ if(hit_h->nok == 0) return STAFCV_OK;
 
 /* If no tracks return */
 if(track_h->nok ==0) return STAFCV_OK;
-
-/* Get the magnetic field */
-gufld_(xlocal,bfield);
 
 /* Sort hits according to hit[i].track */
 tls_index_sort_i_(&hit_h[0].nok, &hit[0].track,
@@ -107,7 +103,8 @@ while (l<hit_h->nok && hit[loc_hit[l]].track>0)
     z1 = track[j].z0;
     
     /* calculate radius */
-    radius = 1.0/(track[j].invp*bfield[2]*C_D_CURVATURE);
+    /*    radius = 1.0/(track[j].invp*bfield[2]*C_D_CURVATURE);*/
+    radius = 1.0/track[j].curvature;
     psic   = track[j].psi*C_RAD_PER_DEG + track[j].q/fabs(track[j].q)*C_PI*0.5;
     tanl   = track[j].tanl;
 
