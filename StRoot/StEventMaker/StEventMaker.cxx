@@ -43,7 +43,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.56 2003/04/15 22:37:54 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.57 2003/04/16 17:52:28 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -295,22 +295,19 @@ StEventMaker::makeEvent()
     // Get trgStructure from StTriggerDataMaker and put it into StEvent
     //
     StTriggerDataMaker* trgDataMaker = (StTriggerDataMaker*) GetMaker("trgd");
-    cout << "StEventMaker: getting StTriggerDataMaker" << endl;
-    if(trgDataMaker==0) {
-      cout << "StEventMaker: No StTriggerDataMaker found" << endl;     
-    }else{ 
-      cout << "StEventMaker: found StTriggerDataMaker" << endl;     
-      StTriggerData* pTrg = trgDataMaker->getTriggerData();
-      if(pTrg==0){
-	cout << "StEventMaker: StTriggerDataMaker was empty" << endl;
-      }else{
-	mCurrentEvent->setTriggerData(pTrg);
-	cout << "StEventMaker: got StTriggerData" << endl;     
-      }
-      mCurrentEvent->statistics();
+    if (trgDataMaker==0) {
+	gMessMgr->Warning("StEventMaker: No StTriggerDataMaker found");
     }
-
-
+    else{ 
+	StTriggerData* pTrg = trgDataMaker->getTriggerData();
+	if (pTrg==0){
+	    gMessMgr->Warning("StEventMaker: StTriggerDataMaker was empty");
+	}
+	else {
+	    mCurrentEvent->setTriggerData(pTrg);
+	}
+    }
+    
     //
     //  Trigger ID summary
     //
@@ -1507,8 +1504,12 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.56 2003/04/15 22:37:54 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.57 2003/04/16 17:52:28 ullrich Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.57  2003/04/16 17:52:28  ullrich
+ * Cleaned up section where trigger structures are added,
+ * that us removed debud print-outs.
+ *
  * Revision 2.56  2003/04/15 22:37:54  jeromel
  * StTriggerDataMaker added
  *
