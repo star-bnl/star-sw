@@ -5,6 +5,9 @@
 * editted May 27, 1998 - Kathy Turner
 *                      - has macros to do tracking only
 *                      - use run_tpc_tracker to run!
+* editted June 2, 1998 - Kathy Turner
+*                      - removed tcl_init#init 
+*                        and put it in run_tpc_tracker.kumac
 ************************************************************************
 ************************************************************************
 ************************************************************************
@@ -24,7 +27,6 @@ macro initialize
     exec create_tables_tpc_tracker#tte
 
 * initialization for tpc tracker
-    exec tcl_init#init
     exec tpt_init#init
     exec tid_init#init
     exec tte_init#init

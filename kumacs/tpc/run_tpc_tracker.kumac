@@ -1,13 +1,15 @@
 * created May 27, 1998 - Kathy Turner
 *                      - this is now kumac that drives tpc tracker
 *                      - input files must be in this order:
-*                            /dui/constants,/dui/data, /dui/geant !!
+*                            /dui/data, /dui/geant !!
+* editted June 2, 1998 - Kathy Turner
+*                   - put in tcl_init#init and took it out of tpc_tracker.kumac
 * ***********************************************************************
 ************************************************************************
 
  macro run__
-          input_filed=data.xdf _
-          input_fileg=geant.xdf _
+          input_filed=/scr22/kathy/test98d/data.xdf _
+          input_fileg=/scr22/kathy/test98d/geant.xdf _
           num_events=1 _
           tracker=tpt _
           funit=21 _
@@ -77,14 +79,19 @@ $STAR/pams/trg/kumac
  exec read_table_from_file#init indatg [input_fileg]
  if STAF_STATUS(1).eq.0 goto ENDOFDATA  
  
-* ********************** TPC GEOMETRY ***************************
-* tpc geometry init
-  exec tpg_init#init
+*********************** TPC GEOMETRY INIT ***************************
+   exec tpg_init#init
+   
+
+********************** TPC CLUSTER INIT ***************************
+*  have to have this or it won't work!
+   exec tcl_init#init
     
-* ****************** TPC TRACKING INIT **************************
-* tpc tracker init
+  
+******************* TPC TRACKING INIT **************************
   exec tpc_tracker#initialize
    
+  
 ******************* TPC TRACKER PROCESSING *********************
 
 * read event and then process thru tpc fast sim
