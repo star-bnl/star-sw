@@ -23,6 +23,9 @@ char *id2name(char *base, long id)
 #ifdef HERB980611
       size_t herb980611;
       herb980611=strlen(base) + 1 + 1 + log10((double)id);
+      if(herb980611<strlen(base)+2) {
+        printf("herb980611 is too small, crash imminent.\n"); exit(2);
+      }
                                          /* DEAR COLLABORATOR:  PLEASE DO    */
       name = (char*)malloc(herb980611);  /* NOT CHANGE malloc to MALLOC  UN- */
                                          /* LESS YOU HAVE TO.  HERBERT WARD. */
