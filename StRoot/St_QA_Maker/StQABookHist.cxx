@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.18 2001/08/03 20:33:55 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.19 2001/08/03 23:31:59 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.19  2001/08/03 23:31:59  lansdell
+// added missing axis labels to 2d histos
+//
 // Revision 2.18  2001/08/03 20:33:55  lansdell
 // added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
 //
@@ -628,13 +631,23 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
   m_det_id           = QAH::H1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
   m_dcaToBeamXY      = QAH::H2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
+  m_dcaToBeamXY->SetXTitle("x");
+  m_dcaToBeamXY->SetYTitle("y");
   m_dcaToBeamZ1      = QAH::H1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,200);
   m_dcaToBeamZ2      = QAH::H1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis",100,-50,50);
   m_dcaToBeamZ3      = QAH::H1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
   m_zDcaTanl         = QAH::H2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl, tpc,tpc+svt",100,-25,25,32,-4,4);
+  m_zDcaTanl->SetXTitle("z-DCA");
+  m_zDcaTanl->SetYTitle("tanl");
   m_zDcaZf           = QAH::H2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",100,-25,25,50,-300,300);
+  m_zDcaZf->SetXTitle("z-DCA");
+  m_zDcaZf->SetYTitle("z of first point");
   m_zDcaPsi          = QAH::H2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",100,-25,25,64,0,360);
+  m_zDcaPsi->SetXTitle("z-DCA");
+  m_zDcaPsi->SetYTitle("psi");
   m_zDcaPhi0         = QAH::H2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
+  m_zDcaPhi0->SetXTitle("z-DCA");
+  m_zDcaPhi0->SetYTitle("phi0");
   m_glb_ratioTTS     = QAH::MH1F("QaGtrkRnfTTS","globtrk: ratio Nfit/tot pnt, tpc,svt", 55,0.,1.1,2);
   m_glb_ratioTTS->SetMinimum(10);
   m_glb_ratioTTS->Rebin(0,"TPC+SVT");
@@ -811,8 +824,8 @@ void StQABookHist::BookHistGlob(){
     m_chisq1_zfT->SetYTitle("chisq1");
 
   m_chisq0_phiT = QAH::H2F("QaGtrkChi0PhiT","globtrk: Chisq0 vs phi, tpc",20,0.,360,20,0.,5.);
-    m_chisq0_etaT->SetXTitle("phi");
-    m_chisq0_etaT->SetYTitle("chisq0");
+    m_chisq0_phiT->SetXTitle("phi");
+    m_chisq0_phiT->SetYTitle("chisq0");
 
   m_nfptonpt_momT = QAH::H2F("QaGtrkRPntMomT","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc",40,1.,4.,50,0.,1.2005); 
      m_nfptonpt_momT->SetXTitle("log P (MeV)");
@@ -943,8 +956,8 @@ void StQABookHist::BookHistGlob(){
     m_chisq1_zfTS->SetYTitle("chisq1");
 
   m_chisq0_phiTS = QAH::H2F("QaGtrkChi0PhiTS","globtrk: Chisq0 vs phi, tpc+svt",20,0.,360,20,0.,5.);
-    m_chisq0_etaTS->SetXTitle("phi");
-    m_chisq0_etaTS->SetYTitle("chisq0");
+    m_chisq0_phiTS->SetXTitle("phi");
+    m_chisq0_phiTS->SetYTitle("chisq0");
 
   m_nfptonpt_momTS = QAH::H2F("QaGtrkRPntMomTS","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc+svt",40,1.,4.,50,0.,1.2005); 
      m_nfptonpt_momTS->SetXTitle("log P (MeV)");
@@ -1063,7 +1076,11 @@ void StQABookHist::BookHistGlob(){
 // 2D - ftpc
 
    m_pT_eta_recFE = QAH::H2F("QaGtrkPtVsEtaFE","globtrk: log pT vs eta, ftpcE",20,-4.5,-2.,40,1.,4.);
+    m_pT_eta_recFE->SetXTitle("eta");
+    m_pT_eta_recFE->SetYTitle("log pT");
    m_pT_eta_recFW = QAH::H2F("QaGtrkPtVsEtaFW","globtrk: log pT vs eta, ftpcW",20,2.,4.5,40,1.,4.);
+    m_pT_eta_recFW->SetXTitle("eta");
+    m_pT_eta_recFW->SetYTitle("log pT");
   m_globtrk_xf_yfFE = QAH::H2F("QaGtrkXfYfFE","globtrk: Y vs X of first hit on trk, ftpcE", 70,-35.,35.,70,-35.,35.);
     m_globtrk_xf_yfFE->SetXTitle("x first");
     m_globtrk_xf_yfFE->SetYTitle("y first");
