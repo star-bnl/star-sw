@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.h,v 1.11 2000/11/14 22:00:06 genevb Exp $
+ * $Id: StRTpcPadPlane.h,v 1.12 2002/02/21 18:35:58 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.12  2002/02/21 18:35:58  hardtke
+ * Speed up by hardwiring number of inner rows and making array for numberOfRowsAt function
+ *
  * Revision 1.11  2000/11/14 22:00:06  genevb
  * Switched several functions from float to double
  *
@@ -32,6 +35,7 @@ class StRTpcPadPlane : public StTpcPadPlaneI {
 private:
 
   St_tpcPadPlanes* mPadPlane;
+  int numberOfPads[45];
 
 public:
 
@@ -39,7 +43,13 @@ public:
   ~StRTpcPadPlane(){}
   void AddData(St_tpcPadPlanes* PadIn) {
    mPadPlane = PadIn;
- } 
+    for (int irow=1;irow<=numberOfRows();irow++){
+     if ( irow<=numberOfInnerRows() ) 
+      numberOfPads[irow-1] = (*mPadPlane)[0].innerPadsPerRow[irow-1];
+     else 
+      numberOfPads[irow-1] = (*mPadPlane)[0].outerPadsPerRow[irow-1-numberOfInnerRows()];
+    }
+  } 
 
   //Implements Abstract Interface 
  
@@ -84,7 +94,13 @@ public:
 inline int   StRTpcPadPlane::numberOfRows() const { return (*mPadPlane)[0].padRows;}
 
 inline int   StRTpcPadPlane::numberOfInnerRows() const {
-return (*mPadPlane)[0].innerPadRows;
+  // Here I violate my principles in search of speed
+  return 13;
+  //return (*mPadPlane)[0].innerPadRows;
+}
+
+inline int StRTpcPadPlane::numberOfPadsAtRow(int row) const {
+  return numberOfPads[row-1];
 }
 
 inline int   StRTpcPadPlane::numberOfInnerRows48() const {
