@@ -32,7 +32,7 @@ StCustomFilter::~StCustomFilter()
 //______________________________________________________________________________
 const char  **StCustomFilter::GetNams() const
 {
-  //  Create a Lable" list to be used with the dialog box
+  //  Create a "Label" list to be used with the dialog box
   static const char *nams[] = {
     " pCutHigh            ",  
     " nHitsCutHighP       ",
@@ -50,8 +50,8 @@ const char  **StCustomFilter::GetNams() const
 //______________________________________________________________________________
 const float  *StCustomFilter::GetDefs() const
 {
-  //  Create a list of the "defaulkt values"
-   // The order of the default values must match the "lable" list
+  //  Create a list of the "default values"
+  // The order of the default values must match the "label" list (see: StCustomFilter::GetNams)
   static const float defs[] = {
     /* pCutHigh            */ 2.0,    // high momentum cut for RICH/Upsilon candidates 
     /* nHitsCutHighP       */ 10,     // nHits cut for all tracks
@@ -62,7 +62,9 @@ const float  *StCustomFilter::GetDefs() const
     /* dEdxFractionCutHigh */ 0.6,    // cut fraction of dEdx-band, i.e. dEdxFractionCut * BetheBloch(p/dEdxMassCut)
     /* dEdxMassCutLow      */ 0.494,  // cut above BetheBloch(p/dEdxMassCutLow), e.g. kaon-band
     /* dEdxFractionCutLow  */ 1.1,
+   //-------------------------------------------------------------------------------------------
     0                                 // the last valuse MUST be zero and it MUST be present
+   //-------------------------------------------------------------------------------------------
   };
   return defs;
 }
@@ -70,8 +72,8 @@ const float  *StCustomFilter::GetDefs() const
 Int_t StCustomFilter::Accept(StPoints3DABC *pnt) 
 {
    // ---
-   // Accept method is called by the  StEventDisplayMaker event loop 
-   // once for each compoment of the StEvent.
+   // "Accept" method is called by the  StEventDisplayMaker event loop 
+   // once for each component of the StEvent.
    //
    // To see all possible combinations  check:
    //   StRoot/StEventUtilities/StEventHelper.cxx:StFilterDef::Accept()
@@ -86,6 +88,7 @@ Int_t StCustomFilter::Accept(StPoints3DABC *pnt)
    StTrack *trk;
    to = pnt->GetObject();
    if (!to) 						return 1;
+   // We want to provide our own custom cut for the StTrack object only.
    if (!to->InheritsFrom(StTrack::Class()))		return 1;
 
    // The track component of StEvent was found let's apply our custom cut.
@@ -97,7 +100,7 @@ Int_t StCustomFilter::Accept(const StTrack* track)
 {
    //
    // User provided the selection.
-   // It is assumed this function needs the value assigned throuf interactive dialog
+   // It is assumed this function needs the value assigned through interactive dialog
    //
    // This conrete cut implementation was borrowed from StRoot/StMuDSTMaker/COMMON/StMStMuL3Filter
    //-----
@@ -111,7 +114,7 @@ Int_t StCustomFilter::Accept(const StTrack* track)
    //    We do that to highlight the difference between the original "StMStMuL3Filter"
    //-----
 
-     float pCutHigh        = fpCutHigh;    // high momentum cut for RICH/Upsilon candidates 
+     float pCutHigh        = fpCutHigh;               // high momentum cut for RICH/Upsilon candidates 
      int   nHitsCutHighP   = int(fnHitsCutHighP);     // nHits cut for all tracks
 
      // following cuts apply only for tracks with pCutLow < p <pHigh
