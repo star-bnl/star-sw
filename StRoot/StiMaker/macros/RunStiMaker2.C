@@ -125,6 +125,11 @@ void RunStiMaker2(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, 
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
 
+    //
+    // test, MCBS
+    cout <<"Loading StItTestMaker"<<endl;
+    gSystem->Load("StItTestMaker");
+
     if(doProfile){
       cout <<"Loading Jprof"<<endl;
       gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001");
@@ -347,6 +352,12 @@ void RunStiMaker2(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, 
         outMk->SetBranch("eventBranch","test.event.root","w");
         outMk->IntoBranch("eventBranch","StEvent");
     }
+
+    //
+    // test the Ittf tracks in StEvent
+    //
+    StItTestMaker* itTest = new StItTestMaker("StItTestMaker");
+
 
     /*
       dbaseMk->Init();
