@@ -1,11 +1,5 @@
-// $Id: StKinkMaker.cxx,v 1.16 1999/08/24 22:37:23 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.14 1999/08/20 16:02:45 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
-// Revision 1.16  1999/08/24 22:37:23  wdeng
-// Add check of used rows against table size. Reallocate if necessary.
-//
-// Revision 1.15  1999/08/23 22:35:38  wdeng
-// Fill vtx_id always with kKinkVtxId, n_daughters with 1. Reorganize the code a little bit.
-//
 // Revision 1.14  1999/08/20 16:02:45  wdeng
 // Add a word Exit into the warning messages
 //
@@ -169,7 +163,7 @@ Int_t StKinkMaker::Make(){
   St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
   
   Int_t numOfGlbtrk = globtrk->GetNRows();
-  Int_t tkf_limit = numOfGlbtrk/10 + 100;
+  Int_t tkf_limit = numOfGlbtrk/10;
   
   if(!kinkVertex) {
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
@@ -342,18 +336,30 @@ Int_t StKinkMaker::Make(){
 	  StThreeVectorD p1Project = myTrack1->helix().at(p1PathLength);
 	  StThreeVectorD p2Project = myTrack2->helix().at(p2PathLength);
 	  
-	  if( fabs(p2Project.z()-p1Project.z()) > tkfpar->projectPointZDiff ) continue;
-
 	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B);
 	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B);
 	  
 	  decayAngle = radToDeg*parentMom.angle(daughterMom);
 	  if(decayAngle<tkfpar->thetaMin) continue;
 	  
+	  Float_t xn1[3], xn2[3], sxz1, syz1, sxz2, syz2, point1AtDca[3], point2AtDca[3];
+	  
+	  xn1[0] = p1Project.x();
+	  xn1[1] = p1Project.y();
+	  xn1[2] = p1Project.z();
+	  xn2[0] = p2Project.x();
+	  xn2[1] = p2Project.y();
+	  xn2[2] = p2Project.z();
+	  
+	  if( fabs(xn2[2]-xn1[2]) > tkfpar->projectPointZDiff ) continue;
+	  
 	  if( (parentMom.z()==0.) || (daughterMom.z()==0.) ) continue;
-
-	  Float_t point1AtDca[3], point2AtDca[3];
-	  dca =  dcaTwoLines(p1Project, p2Project, parentMom, daughterMom, point1AtDca, point2AtDca);
+	  sxz1 = parentMom.x()/parentMom.z();
+	  syz1 = parentMom.y()/parentMom.z();
+	  sxz2 = daughterMom.x()/daughterMom.z();
+	  syz2 = daughterMom.y()/daughterMom.z();
+	  
+	  dca =  dcaTwoLines(xn1, xn2, sxz1, syz1, sxz2, syz2, point1AtDca, point2AtDca);
 	  if ( dca>tkfpar->dcaParentDaughterMax ) continue;
 	  
 	  mKinkVertex.setX((point1AtDca[0]+point2AtDca[0])/2.);
@@ -523,7 +529,6 @@ Int_t StKinkMaker::Make(){
 		Int_t stopIdParent;
 		Int_t startIdDaughter;	
 		Int_t vertexGeProc; 
-		Int_t numDaughter;
 		
 		St_DataSet *geant = GetDataSet("geant"); 
 		St_DataSetIter geantI(geant);         
@@ -562,14 +567,16 @@ Int_t StKinkMaker::Make(){
 		g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
 		
 		vertexGeProc = g2tVertexPtr->ge_proc;
-		numDaughter = g2tVertexPtr->n_daughter;
 		
-		if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 )
-		    && vertexGeProc==5  && numDaughter==2 )
+		if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 ) && vertexGeProc==5 )
 		  {
 		    dstVtxRow.iflag       = 1;
+		    dstVtxRow.vtx_id      = kKinkVtxId;
+		    dstVtxRow.n_daughters = 1; 
 		  } else {
 		    dstVtxRow.iflag       = 0;
+		    dstVtxRow.vtx_id      = kOtherVtxId;
+		    dstVtxRow.n_daughters = 9999;                  //????????????
 		  }
 		goto PROPERFILL;
 	      }
@@ -578,18 +585,9 @@ Int_t StKinkMaker::Make(){
 	  //================================================================================ 
 	WRONGFILL:
 	  dstVtxRow.iflag       = 2;
+	  dstVtxRow.vtx_id      = 0;
+	  dstVtxRow.n_daughters = 0; 
 	PROPERFILL:	  
-	  dstVtxRow.vtx_id      = kKinkVtxId;
-	  dstVtxRow.n_daughters = 1;
- 
-	  Int_t kvTableSize = kinkVertex->GetTableSize();
-	  Int_t dstvTableSize = vertex->GetTableSize();
-
-	  if( kinkVertex->GetNRows() == kvTableSize )
-	    kinkVertex->ReAllocate( kvTableSize + 100 );
-	  if( vertex->GetNRows() == dstvTableSize )
-	    vertex->ReAllocate( dstvTableSize + 100 );
-
 	  kinkVertex->AddAt(&kinkVtxRow, kinkVtxIndex);
 	  vertex->AddAt(&dstVtxRow, dstVtxIndex);
 	  
@@ -598,7 +596,7 @@ Int_t StKinkMaker::Make(){
 	}
     }
   trackArray->Delete();
-  gMessMgr->Info() << " Found " << kinkCandidate << " kink candidates " << endm;
+  gMessMgr->Info() << " kinkCandidate is " << kinkCandidate << endm;
   
   return kStOK; 
 }
@@ -706,27 +704,20 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
 }
 
 //_____________________________________________________________________________
-Float_t  StKinkMaker::dcaTwoLines(const StThreeVectorD& p1Project, const StThreeVectorD& p2Project, 
-				  const StThreeVectorD& parentMoment, const StThreeVectorD& daughterMoment, 
-				  Float_t point1AtDca[3], Float_t point2AtDca[3])
+Float_t StKinkMaker::dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, Float_t syz1, 
+				 Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3])
 {
   Float_t        x1, x2, y1, y2, z1, z2;
-  Float_t        sxz1, syz1, sxz2, syz2; 
   Float_t        dx, dy, dz;
   Float_t        a1, a2, a3, c, k, l, m, b, v, A, Bb, Cc, D, E, F;
   Float_t        mdca;
-	  
-  x1 = p1Project.x();
-  y1 = p1Project.y();
-  z1 = p1Project.z();
-  x2 = p2Project.x();
-  y2 = p2Project.y();
-  z2 = p2Project.z();
-  sxz1 = parentMoment.x()/parentMoment.z();
-  syz1 = parentMoment.y()/parentMoment.z();
-  sxz2 = daughterMoment.x()/daughterMoment.z();
-  syz2 = daughterMoment.y()/daughterMoment.z();
-
+  
+  x1 = xn1[0];
+  y1 = xn1[1];
+  z1 = xn1[2];
+  x2 = xn2[0];
+  y2 = xn2[1];
+  z2 = xn2[2];
   dx = x1-x2;
   dy = y1-y2;
   dz = z1-z2;
