@@ -11,6 +11,7 @@ HtmlElement::~HtmlElement()
   {
     delete (*iter);
   }
+  _components.clear();
 }
 
 HtmlElement * HtmlElement::add(HtmlElement * htmlElement)

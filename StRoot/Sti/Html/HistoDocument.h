@@ -12,9 +12,16 @@ public:
 		TCanvas * canvas);
   virtual ~HistoDocument();
   virtual void generateWebPage(HistogramGroup * histogramGroup);
-  virtual void generateWebPage(HistogramGroup * histogramGroup1, HistogramGroup * histogramGroup2, int mode);
+  virtual void generateWebPage(HistogramGroup * histogramGroup1, 
+			       HistogramGroup * histogramGroup2, 
+			       int mode=0);
+  virtual void generateWebPage(HistogramGroup * histogramGroup1, 
+			       HistogramGroup * histogramGroup2,
+			       HistogramGroup * histogramGroup3,
+			       int mode=0);
   virtual void generateHistoEntry(const string & dir, TH1*histo);
   virtual void generateHistoEntry(const string & dir, TH1*histo1, TH1*histo2, int mode);
+  virtual void generateHistoEntry(const string & dir, TH1*histo1, TH1*histo2, TH1*histo3, int mode);
   virtual const string saveHistoAsEpsFile(const string & dir, const string &histoName);
   virtual const string saveHistoAsGifFile(const string & dir, const string &histoName);
   virtual const string saveHistoAsTableFile(const string & dir, TH1*histo);

@@ -84,6 +84,8 @@ void StiEvaluatorHistograms::slice(TH2D*h,double meanMin,double meanMax,double s
   string title;
   name = h->GetName();
   name += "_1";
+
+  //cout << "StiEvaluatorHistograms::slice() -I- histoName:"<< name<<endl;
   TH1D * hh;
   hh = (TH1D*)gDirectory->Get(name.c_str());
   if (hh)
@@ -97,6 +99,10 @@ void StiEvaluatorHistograms::slice(TH2D*h,double meanMin,double meanMax,double s
       hh->SetName(name.c_str());
       hh->SetTitle(title.c_str());
       add(hh);
+    }
+  else
+    {
+      cout << "StiEvaluatorHistograms::slice() -E- no object of that name found!"<<endl;
     }
   name = h->GetName();
   name += "_2";

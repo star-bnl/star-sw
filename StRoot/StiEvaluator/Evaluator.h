@@ -20,8 +20,30 @@ class Evaluator : public Named, public Described, public TObject
   void save(const string & targetDirectory);
   void saveHtml(const char * inputFile);
   void saveHtml(const string &targetDirectory);
+  void saveHtml(const char * targetDirectory,
+		const char * fileName,
+		const char * description,
+		StiEvaluatorHistograms* hg1,
+		StiEvaluatorHistograms* hg3);
+  void saveHtml(const string &targetDirectory,
+		const string &fileName,
+		const string &description,
+		StiEvaluatorHistograms* hg1,
+		StiEvaluatorHistograms* hg2);
+  void saveHtml(const char * targetDirectory,
+		const char * fileName,
+		const char * description,
+		StiEvaluatorHistograms* hg1,
+		StiEvaluatorHistograms* hg2,
+		StiEvaluatorHistograms* hg3);
+  void saveHtml(const string &targetDirectory,
+		const string &fileName,
+		const string &description,
+		StiEvaluatorHistograms* hg1,
+		StiEvaluatorHistograms* hg2,
+		StiEvaluatorHistograms* hg3);
   StiEvaluatorHistograms * add(StiEvaluatorHistograms *);
-
+  
  protected:
 
   vector<StiEvaluatorHistograms*> _histograms;
