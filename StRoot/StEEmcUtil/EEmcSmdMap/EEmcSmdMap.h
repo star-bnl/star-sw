@@ -40,14 +40,30 @@
  */
 
 #include <TObject.h>
+#include <TString.h>
 
+#include <vector>
+
+#include "EEmcGeom/EEmcGeomDefs.h"
+
+//-- Structure to map strip ranges to towers --
 struct EEmcStripMapItem {
-  char *tower;
-  Int_t uMin;   // minimum u strip, all indexed from 0
-  Int_t uMax;   // maximum u strip
-  Int_t vMin;   // minimum v strip
-  Int_t vMax;   // maximum v strip
+  Char_t *tower;
+  Int_t   uMin;   // minimum u strip, all indexed from 0
+  Int_t   uMax;   // maximum u strip
+  Int_t   vMin;   // minimum v strip
+  Int_t   vMax;   // maximum v strip
 };
+
+//-- Maps towers to individual strips --
+struct EEmcTowerMapItem {
+  Int_t                nTower;    // Number of towers which match strip
+  std::vector<TString> towers;    // [nTower] array of tower names, eg 01TA01
+  std::vector<Int_t>   sector;    // [nTower] array of sectors
+  std::vector<Int_t>   subsector; // [nTower] array of subsectors
+  std::vector<Int_t>   etabin;    // [nTower] array of etabins
+};
+
 
 
 class EEmcSmdMap 
@@ -93,18 +109,48 @@ class EEmcSmdMap
   //
   //////////////////////////////////////////////////
 
+  //////////////////////////////////////////////////
+  //
+  // Get the number of towers which "belong" to this
+  // strip.  "sec", "plane" and "strip" are counted
+  // from 0.
+  //
+  Int_t getNTowers( Int_t sec, 
+		    Int_t plane, 
+		    Int_t strip ) { 
+    return mTowerMap[sec][plane][strip].nTower; 
+  }
+
+  // For the specified sector, plane and strip (numbered
+  // from 0), return the "nth" tower's subsector and
+  // eta bin.
+  void getTower( Int_t sec, Int_t plane, Int_t strip, 
+		  Int_t ntow, Int_t &sub, Int_t &eta ) {
+    sub = mTowerMap[sec][plane][strip].subsector[ntow];
+    eta = mTowerMap[sec][plane][strip].etabin[ntow];
+    return;
+  }
+  void getTower( Int_t sec, Int_t plane, Int_t strip, 
+		  Int_t ntow, Int_t &sub, Int_t &eta, TString &name ) {
+    sub  = mTowerMap[sec][plane][strip].subsector[ntow];
+    eta  = mTowerMap[sec][plane][strip].etabin[ntow];
+    name = mTowerMap[sec][plane][strip].towers[ntow];
+    return;
+  }
+
  private:
 
   static EEmcSmdMap *sInstance;
  
-  EEmcStripMapItem mSmdMap[12][5][12];
+  EEmcStripMapItem mSmdMap[ kEEmcNumSectors ][ kEEmcNumSubSectors ][ kEEmcNumEtas ];
+  EEmcTowerMapItem mTowerMap[ kEEmcNumSectors ][ kEEmcNumSmdUVs ][ kEEmcNumStrips ];
 
   void Init();
 
  protected:
 
   ClassDef(EEmcSmdMap,1);
-
+ 
 };
 
 #endif
