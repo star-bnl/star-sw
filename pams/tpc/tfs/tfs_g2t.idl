@@ -9,7 +9,6 @@
 #include "g2t_track.idl"
 #include "g2t_vertex.idl"
 #include "tfs_fspar.idl"
-#include "tfs_bmpar.idl"
 #include "tfs_fsctrl.idl"
 #include "tcl_tpc_index.idl"
 #include "tcl_tpc_index_type.idl"
@@ -21,11 +20,10 @@ interface tfs_g2t : amiModule {
                 , in    g2t_track g2t_track
                 , in    g2t_vertex g2t_vertex
                 , in    tfs_fspar par
-                , in    tfs_bmpar bmpar
                 , in    tfs_fsctrl ctrl
                 , out   tcl_tpc_index tpc_index
                 , in    tcl_tpc_index_type tpc_index_type
                 , out   tcl_tphit tphit
                 );
 };
-/* Last mod. for tfs_g2t: $Date: 1998/12/03 23:04:07 $ */
+/* Last mod. for tfs_g2t: $Date: 1998/12/13 21:36:14 $ */

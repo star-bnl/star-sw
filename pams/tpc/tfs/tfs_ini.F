@@ -1,5 +1,8 @@
-* $Id: tfs_ini.F,v 1.3 1998/07/02 19:13:16 sakrejda Exp $
+* $Id: tfs_ini.F,v 1.4 1998/12/13 21:36:18 sakrejda Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.4  1998/12/13 21:36:18  sakrejda
+* parameters and constants cleaned up, bmpar removed
+*
 * Revision 1.3  1998/07/02 19:13:16  sakrejda
 * B field obtained via gufld call
 *
@@ -9,8 +12,7 @@
 * Revision 1.1  1998/01/27 01:47:23  fisyak
 * Split sources
 *
-      SUBROUTINE TFS_INI(par_h, par, ctrl_h, ctrl, bmpar_h, bmpar,
-     >                    errflg)
+      SUBROUTINE TFS_INI(par_h, par, ctrl_h, ctrl, errflg)
       IMPLICIT NONE
 C-----------------------------------------------------------------------
 C     
@@ -19,8 +21,6 @@ C     par_h   = header for tfs fspar table
 C     par     = rows of tfs fspar table
 C     ctrl_h  = header for tfs ctrl table
 C     ctrl    = rows of tfs ctrl table
-C     bmpar_h = header for tfs bmpar table
-C     bmpar   = rows of tfs bmpar table
 C     errflg  = error flag -- .false. - INIT successful; .true. - INIT failed
 C
 C     Output arguments:
@@ -46,25 +46,22 @@ C-----------------------------------------------------------------------
 #include "PAM.inc"
 #include "tfs_fspar.inc"
 #include "tfs_fsctrl.inc"
-#include "tfs_bmpar.inc"
 #include "math_constants.inc"
 C-----------------------------------------------------------------------
       RECORD / table_head_st / par_h
       RECORD / tfs_fspar_st  / par(*)
       RECORD / table_head_st / ctrl_h
       RECORD / tfs_fsctrl_st / ctrl(*)
-      RECORD / table_head_st / bmpar_h
-      RECORD / tfs_bmpar_st  / bmpar(*)
 C-----------------------------------------------------------------------
       INTEGER MXROW
       PARAMETER (MXROW=99)
       INTEGER MXSECTOR
       PARAMETER (MXSECTOR=24)
 
-      REAL SIGMA02(4), SIGMAD2(4), SIGMAT2(4), SIGMA_L
+      REAL SIGMA02(4), SIGMAD2(4)
       REAL PADL(2), PADL2(2), ANG_WIREF(4), ANG_PADF(4), ION_POT,
      >     WIRE_SPACE, WIRE_SPACE2, CLUS_DIS_P10
-      COMMON /PADRES/ SIGMA02, SIGMAD2, SIGMAT2, SIGMA_L,
+      COMMON /PADRES/ SIGMA02, SIGMAD2,
      >     PADL,PADL2,ANG_WIREF,ANG_PADF,ION_POT,WIRE_SPACE,
      >     WIRE_SPACE2,CLUS_DIS_P10
 
@@ -82,23 +79,18 @@ C     ASCALE - is the linear scale factor in-between
       REAL RSEP(2), ZSEP, RPLIM(2), ZLIM
       COMMON /TPMERG/ RSEP, ZSEP, RPLIM, ZLIM
       
-      REAL DZXING, EVPXNG
-      INTEGER NXINGS, NXTRIG
-      COMMON /EVMERG/ DZXING, NXINGS, NXTRIG, EVPXNG
-C     DZXING - z separation between beam bunches
-C     NXINGS - number of beam crossings per TPC live time
-C     NXTRIG - the number of the triggered crossing
-C     EVPXNG - average number of events per beam crossing
-      
-C     Local variables
-      
-      REAL DRIVEL, TXING, NEVENT, DELTIM, EVRATE
+      REAL DRIVEL, NEVENT, DELTIM, EVRATE
       LOGICAL ERRFLG
       
       REAL  CONST, OMEGA_TAU
       REAL  CLUS_PER_CM_AR, CLUS_PER_CM_CH4, F_AR, F_CH4, PRESSURE
 
       INTEGER  n0
+      INTEGER tgc_drift_velocity
+      INTEGER iret
+      REAL    dummy
+      INTEGER tgc_drift_volume_length
+      REAL    xlength
 
 CDH test variables:
       real origin(3), bfield(3)      
@@ -126,6 +118,11 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
          ERRFLG = .TRUE.
          RETURN
       endif
+c     get drift velocity
+      iret = tgc_drift_velocity(drivel, dummy, dummy)
+
+c     get the TPC length
+      iret = tgc_drift_volume_length(xlength,dummy,dummy)
       
 C     pad response function (prf)
       
@@ -161,7 +158,7 @@ C     longitudinal coefficient of diffusion (units :- sqrt(cm))
 C     sigma of longitudinal pulse due to electronics shaping time -
 C     TSHAPE is a FWHM in nanoseconds, DRIVEL is cm/microseconds
 
-      sig_shape2 = ( par(1).drivel * par(1).tshape / 2.36 / 1000. )**2
+      sig_shape2 = ( drivel * par(1).tshape / 2.36 *1.0e-9)**2
       
 C     spatial resolution
 
@@ -169,9 +166,6 @@ C     Modefy the calculation of  sigmad2 to accommodate the changes to
 C     the calculation of sprf_dr2, above (see STAR CDR p. 4C-28).
 C     ***  DSW  03/29/1997  ***
 
-C     n0 -- Number of electrons liberated per cm.  04/17/1997  DSW
-      n0 = par(1).n0_pcm
-      
       wire_space   = 0.4
       wire_space2  = wire_space**2
 
@@ -192,12 +186,8 @@ C     P10 ionization potential  in GeV
       if (par(1).sys_test.eq.0) then
          sigma02(1)   = par(1).sigma0(1)**2
          sigma02(2)   = par(1).sigma0(2)**2
-C     sigmad2(1)   = sprf_dr2(1)/(n0*par(1).padlen(1))
-C     sigmad2(2)   = sprf_dr2(2)/(n0*par(1).padlen(2))
          sigmad2(1)   = sprf_dr2(1)
          sigmad2(2)   = sprf_dr2(2)
-         sigmat2(1)   = par(1).sigmat(1)**2
-         sigmat2(2)   = par(1).sigmat(2)**2
          ang_wireF(1) = par(1).ang_wireF(1)
          ang_wireF(2) = par(1).ang_wireF(2)
          ang_padF(1)  = par(1).ang_padF(1)
@@ -207,15 +197,11 @@ C     sigmad2(2)   = sprf_dr2(2)/(n0*par(1).padlen(2))
          sigma02(4)   = par(1).sigma0(4)**2
          sigmad2(3)   = par(1).sprf_dr0(3)**2
          sigmad2(4)   = par(1).sprf_dr0(4)**2
-         sigmat2(3)   = par(1).sigmat(1)**2
-         sigmat2(4)   = par(1).sigmat(2)**2
          ang_wireF(3) = par(1).ang_wireF(3)
          ang_wireF(4) = par(1).ang_wireF(4)
          ang_padF(3)  = par(1).ang_padF(3)
          ang_padF(4)  = par(1).ang_padF(4)
       endif
-
-      sigma_l      = par(1).sigmal
       
 C     calculate limits for the transition from prf to projected width
       alow  = par(1).alpha_lo * C_RAD_PER_DEG
@@ -225,30 +211,12 @@ C     calculate limits for the transition from prf to projected width
 C     calculate merging criterion
       rsep(1) = par(1).drmin * par(1).padwid(1)
       rsep(2) = par(1).drmin * par(1).padwid(2)
-      zsep    = par(1).dzmin * par(1).tpclen / par(1).zbmax
+      zsep    = par(1).dzmin * xlength / par(1).zbmax
       
 C     calculate merging limits
       rplim(1) = par(1).merge_r * par(1).padwid(1)
       rplim(2) = par(1).merge_r * par(1).padwid(2)
-      zlim     = par(1).merge_z * par(1).tpclen / par(1).zbmax
-      
-C     calculate number of events per gate opening
-      if (ctrl(1).ppflag .ne. 0) then
-         drivel = par(1).drivel * 1.e+06
-         deltim = 2.0*par(1).tpclen / drivel
-         evrate = bmpar(1).xsec * 1.e-27 * bmpar(1).lumin
-         nevent = evrate * deltim
-         txing  = bmpar(1).txing * 1.e-09
-         nxings = deltim / txing
-         nxtrig = nint( nxings / 2. )
-         evpxng = nevent / nxings
-         dzxing = drivel * txing
-
-         WRITE(6,'(A,F5.2)') ' average pp events per crossing: ',evpxng
-      else
-         nxings = 1
-         nxtrig = 1
-      endif
+      zlim     = par(1).merge_z * xlength / par(1).zbmax
       
  999  return
       end

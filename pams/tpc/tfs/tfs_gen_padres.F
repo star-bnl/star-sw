@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.8 1998/08/25 21:15:01 sakrejda Exp $
+* $Id: tfs_gen_padres.F,v 1.9 1998/12/13 21:36:16 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.9  1998/12/13 21:36:16  sakrejda
+* parameters and constants cleaned up, bmpar removed
+*
 * Revision 1.8  1998/08/25 21:15:01  sakrejda
 * correction to always output cossing and dip angle in degrees, STAR convention
 *
@@ -79,10 +82,10 @@ C-----------------------------------------------------------------------
 C     IROW  - 1 pointer to a row in a sector
 C     IROW  - 2 number of hits
       
-      REAL SIGMA02(4), SIGMAD2(4), SIGMAT2(4), SIGMA_L
+      REAL SIGMA02(4), SIGMAD2(4), SIGMA_L
       REAL PADL(2), PADL2(2), ANG_WIREF(4), ANG_PADF(4), ION_POT,
      >     WIRE_SPACE, WIRE_SPACE2, CLUS_DIS_P10
-      COMMON /PADRES/ SIGMA02, SIGMAD2, SIGMAT2, SIGMA_L,
+      COMMON /PADRES/ SIGMA02, SIGMAD2,
      >     PADL,PADL2,ANG_WIREF,ANG_PADF,ION_POT,WIRE_SPACE,
      >     WIRE_SPACE2,CLUS_DIS_P10
 
@@ -121,10 +124,13 @@ C
       real clus_per_cm_P10,rel_dedx,ds_ave
       real AA, BB, CC
       real xlocal(3),Bfield(3)
+      real xlength, dummy
+      integer iret, tgc_drift_volume_length
       DATA xlocal /3*0/
 
 C=========================== Begin Executable Code =======================
-
+c     get the TPC length
+      iret = tgc_drift_volume_length(xlength, dummy, dummy)
 C     loop over sector-rows
 
       do i = 1, par(1).nsect
@@ -278,7 +284,7 @@ C     *** DSW  03/29/1997 ***
 C     calculate half-width to determine merging criterion
                wmin = wmin/2.
 C     add something for diffusion
-               dlen = abs( par(1).tpclen - abs(zi) ) ! in cm
+               dlen = abs( xlength - abs(zi) ) ! in cm
                wmin = wmin + sqrt( sprf_dr2(ipad) * dlen )
                
 C     for crossing angles close to 90 degrees wmin is a better
@@ -347,10 +353,6 @@ C     Until then use Neff_b = 24.84 which is a good approximation.
                   sigma_tr = sigma_response / sqrt(12.0)
                else
                   if(par(1).sys_test.eq.0)then
-C     sigma_tr = sqrt( sigma02(ipad) +
-C     >                    sigmad2(ipad) * dlen/calpha +
-C     >                    sigmat2(ipad) * talpha2 * calpha )
-                     
                      siga2(ipad)  = sigma02(ipad)/Nh**2
                      sigb2(ipad)  = sigmad2(ipad)/Nh
                      sigc2(ipad)  = ang_wireF(ipad)*wire_space2/

@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.5 1998/09/25 23:24:05 sakrejda Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.6 1998/12/13 21:36:14 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.6  1998/12/13 21:36:14  sakrejda
+* parameters and constants cleaned up, bmpar removed
+*
 * Revision 1.5  1998/09/25 23:24:05  sakrejda
 * check added to make sure that id of geant hits is sequential
 *
@@ -35,7 +38,6 @@
      >                           ctrl_h,           ctrl,
      >                           par_h,            par,
      >                           tphit_h,          tphit,
-     >                           ix,              nxtrig,
      >                           tpc_index_h,      tpc_index,
      >                           tpc_index_type_h, tpc_index_type,
      >                           ierr)
@@ -45,7 +47,6 @@
 C-----------------------------------------------------------------------
 C
 C     Input arguments:
-C       ix = current crossing number
 C
 C     Output arguments: ierr = 0 all ok, ierr = 1 tphit too small
 C
@@ -110,7 +111,7 @@ C     IROW  - 2 number of hits
 
 
 C Local variables
-      integer ih, jrow, jsect, nok, ix, nxtrig, ierr
+      integer ih, jrow, jsect, nok,ierr
 
       real x, dx, y, dy
 
@@ -169,17 +170,6 @@ C     DSW 03/13/97
 C     IMS 04/01/98
 C     Add initialisation of dq to that
             tphit(nok).dq         = 0 
-
-
-C     code the crossing number into the quality flag
-            if( ctrl(1).ppflag .ne. 0 ) then
-               tphit(nok).flag = 100 * ix
-               if(ix.eq.nxtrig) then
-                  tphit(nok).cluster=nxtrig
-               else
-                  tphit(nok).cluster=0
-               endif
-            endif
 
             if( abs( g2t_hit(ih).x(3) ) .le. central_membrane ) then
 C     this hit is in the central membrane

@@ -1,5 +1,8 @@
-* $Id: tfs_displ_event2.F,v 1.1 1998/12/03 23:04:33 sakrejda Exp $
+* $Id: tfs_displ_event2.F,v 1.2 1998/12/13 21:36:10 sakrejda Exp $
 * $Log: tfs_displ_event2.F,v $
+* Revision 1.2  1998/12/13 21:36:10  sakrejda
+* parameters and constants cleaned up, bmpar removed
+*
 * Revision 1.1  1998/12/03 23:04:33  sakrejda
 * Akio's changes to create pileup events added
 *
@@ -75,7 +78,15 @@ C Local variables
       integer i, j, istart, iend, k, id0, id1, id2, id3
       real dz
 
+      real drivel, dummy, xlength 
+      integer iret, tgc_drift_velocity, tgc_drift_volume_length
+
 C=========================== Begin Executable Code =======================
+c
+c     get the drift velocity
+      iret = tgc_drift_velocity(drivel,dummy,dummy)
+c     get the drift length
+      iret = tgc_drift_volume_length(xlength,dummy,dummy)
 
 C     now do the displacement
       do i = 1, par(1).nsect
@@ -95,7 +106,7 @@ C     and add time offset of the vertex.
                id1=tpc_index(id0).key1
                id2=g2t_hit(id1).track_p
                id3=g2t_track(id2).start_vertex_p
-               dz=g2t_vertex(id3).ge_tof*par(1).drivel*1.0e6
+               dz=g2t_vertex(id3).ge_tof*drivel
                
                if( tphit(k).z .ge. 0. ) then
                   tphit(k).z = tphit(k).z + dz
@@ -113,7 +124,7 @@ C     flag hit for discarding
                   endif
                endif
 C     discard if hit moved outside tpc
-               if( abs( tphit(k).z ) .ge. par(1).tpclen ) then
+               if( abs( tphit(k).z ) .ge. xlength ) then
 C     flag hit for discarding
                   tphit(k).flag = 9
                endif
