@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.5 2000/09/11 17:48:50 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.6 2001/03/09 22:44:43 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.6  2001/03/09 22:44:43  hardtke
+// Add vertex diagnostic histograms, create root file with these histograms by default
+//
 // Revision 1.5  2000/09/11 17:48:50  hardtke
 // save values of trig offset, dvel, and tpc length for use in Finish()
 //
@@ -45,7 +48,8 @@ StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
   minEntries = 5;   //require 5 valid t0s for a velocity determination
   desiredEntries = 99999; // must set limit by hand. 
   maxRMS     = 0.05; //t0 should be good to 50 ns
-  mHistOut   = kFALSE;
+  //  mHistOut   = kFALSE;
+  mHistOut=kTRUE;
   StMaker *saveMk = cd();
   New("St_tcl_Maker","tpc_hits");
   New("St_tpt_Maker","tpc_tracks");
@@ -67,8 +71,14 @@ Int_t StTpcT0Maker::Init(){
   T0HIST_MAX = 38.0;
   t0result = new TH1F("t0result","t0result",1000,T0HIST_MIN,T0HIST_MAX);
   t0guessError = new TH1F("t0guessError","t0 measured - t0 guess",1000,-1,1);
+  xVertexDiff = new TH1F("xVertexDiff","x Vertex: East - West",600,-0.3,0.3);
+  yVertexDiff = new TH1F("yVertexDiff","y Vertex: East - West",600,-0.3,0.3);
+  zVertexDiff = new TH1F("zVertexDiff","z Vertex: East - West",600,-0.3,0.3);
   AddHist(t0result);
   AddHist(t0guessError);
+  AddHist(xVertexDiff);
+  AddHist(yVertexDiff);
+  AddHist(zVertexDiff);
   date = 0;
   time = 0;
   dvel_assumed=0.0;
@@ -80,7 +90,11 @@ Int_t StTpcT0Maker::Init(){
 void StTpcT0Maker::Clear(Option_t *option){
   t0guess = 0;
   zVertexWest = -999.0;
-  zVertexEast = -999.0; 
+  zVertexEast = -1999.0; 
+  yVertexWest = -999.0;
+  yVertexEast = 999.0; 
+  xVertexWest = -999.0;
+  xVertexEast = 999.0; 
 }
 
 //_____________________________________________________________________________
@@ -125,6 +139,8 @@ Int_t StTpcT0Maker::Make(){
     for (int ij=0;ij<vert->GetNRows();ij++,sth++){
      if(sth->iflag==1&&sth->vtx_id==kEventVtxId){
        zVertexWest = sth->z;
+       yVertexWest = sth->y;
+       xVertexWest = sth->x;
        break;    // found primary vertex
      }    
     }
@@ -152,6 +168,8 @@ Int_t StTpcT0Maker::Make(){
     for (int ij=0;ij<vert1->GetNRows();ij++,sth1++){
      if(sth1->iflag==1&&sth1->vtx_id==kEventVtxId){
        zVertexEast = sth1->z;
+       yVertexEast = sth1->y;
+       xVertexEast = sth1->x;
        break;    // found primary vertex
      }    
     }
@@ -162,6 +180,9 @@ Int_t StTpcT0Maker::Make(){
       gMessMgr->Info() << "StTpcT0Maker::t0 = " << t0current << endm;
       t0result->Fill(t0current);
       t0guessError->Fill(t0current-t0guess);
+      xVertexDiff->Fill(xVertexEast-xVertexWest);
+      yVertexDiff->Fill(yVertexEast-yVertexWest);
+      zVertexDiff->Fill(zVertexEast-zVertexWest);
       if (t0current<T0HIST_MIN||t0current>T0HIST_MAX){
          gMessMgr->Info() << "StTpcT0Maker::t0 out of defined range for histogram"<< endm;
       }
@@ -213,7 +234,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.5 2000/09/11 17:48:50 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.6 2001/03/09 22:44:43 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -249,7 +270,9 @@ void StTpcT0Maker::WriteTableToFile(){
  }
 
 void StTpcT0Maker::WriteHistFile(){
-  TFile out("t0hist.root","RECREATE");
+  char filename[80]; 
+  sprintf(filename,"t0hist.%08d.%06d.root",date,time);
+  TFile out(filename,"RECREATE");
   GetHistList()->Write();
   out.Close();
 }
