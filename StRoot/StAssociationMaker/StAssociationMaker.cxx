@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.33 2002/04/11 22:11:10 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.34 2002/09/21 19:48:44 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.34  2002/09/21 19:48:44  calderon
+ * change encoded method for IT tracks to 263 (was 32770 before)
+ *
  * Revision 1.33  2002/04/11 22:11:10  calderon
  * Changes to incorporate association of tracks from Sti
  * Basically all that was needed was to add a flag to switch between
@@ -1074,8 +1077,8 @@ Int_t StAssociationMaker::Make()
 	
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 	    continue; // If there are no Tpc Hits, skip track.
-	if (mInTrackerOn  && rcTrack->encodedMethod()!=32770) continue; //for IT Tracks, skip the old globals
-	if (!mInTrackerOn && rcTrack->encodedMethod()==32770) continue; //for old globals, skip the IT tracks
+	if (mInTrackerOn  && rcTrack->encodedMethod()!=263) continue; //for IT Tracks, skip the old globals
+	if (!mInTrackerOn && rcTrack->encodedMethod()==263) continue; //for old globals, skip the IT tracks
 	unsigned int nCandidates = 0;
 
 
