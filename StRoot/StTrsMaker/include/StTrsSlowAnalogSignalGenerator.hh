@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.2 1998/11/16 14:49:43 lasiuk Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.hh,v 1.3 1999/01/18 10:20:57 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.hh,v $
- * Revision 1.2  1998/11/16 14:49:43  lasiuk
- * add deltaResponse()
+ * Revision 1.3  1999/01/18 10:20:57  lasiuk
+ * use integral to deposit total charge in time bin
  *
  * Revision 1.4  1999/01/18 21:01:42  lasiuk
  * use fractionSampled(); enumerated types for function selection
@@ -60,9 +60,11 @@ public:
 
 private:
     // charge generation
-    double symmetricGaussianResponse(double, StTrsAnalogSignal&);
-    double asymmetricGaussianResponse(double, StTrsAnalogSignal&);
-    double asymmetricGaussianResponseWithUnrestoredBaseline(double, StTrsAnalogSignal&);
+    double imageChargeIntegral(double, double, double, double, double, double);
+    double endoChargeIntegral(double, double, double, double, double, double);
+    //double gattiChargeIntegral(double, double, double, double, double, double);
+
+    // sampling
     double deltaResponse(double, StTrsAnalogSignal&);
     double symmetricGaussianApproximateResponse(double, StTrsAnalogSignal&);
     double shaperResponse(double, StTrsAnalogSignal&);
