@@ -53,6 +53,28 @@ public:
     virtual unsigned int etsfLowerBound() const;
     virtual void setETSFMaxHits(unsigned int);
     virtual unsigned int etsfMaxHits() const;
+    
+    //Local Track Seed Finder (LTSF) IO
+    
+    virtual void addLTSFPadrow(unsigned int);
+    virtual void addLTSFSector(unsigned int);
+    virtual const vector<unsigned int>& ltsfPadrows() const;
+    virtual const vector<unsigned int>& ltsfSectors() const;
+
+    virtual void setLTSFZWindow(double);
+    virtual double ltsfZWindow() const;
+
+    virtual void setLTSFYWindow(double);
+    virtual double ltsfYWindow() const;
+
+    virtual void setLTSFSeedLength(unsigned int);
+    virtual unsigned int ltsfSeedLength() const;
+    
+    virtual void setLTSFUseVertex(bool);
+    virtual bool ltsfUseVertex() const;
+
+    virtual void setLTSFDoHelixFit(bool);
+    virtual bool ltsfDoHelixFit() const;
 
 protected:
     friend class StiIOBroker;
@@ -71,6 +93,15 @@ protected:
     unsigned int mETSFLowerBound;
     unsigned int mETSFMaxHits;
 
+    //Local Track Seed Finder
+    vector<unsigned int> mLTSFPadrows;
+    vector<unsigned int> mLTSFSectors;
+    double mLTSFZWindow;
+    double mLTSFYWindow;
+    unsigned int mLTSFSeedLength;
+    bool mLTSFUseVertex;
+    bool mLTSFDoHelixFit;
+    
 private:
     ClassDef(StiRootIOBroker, 1)
 };
@@ -164,10 +195,86 @@ inline void StiRootIOBroker::setSeedFinderType(SeedFinderType val)
 	mSeedFinderType=val;
     }
 }
+
 inline StiIOBroker::SeedFinderType StiRootIOBroker::seedFinderType() const
 {
     return mSeedFinderType;
 }
 
+///Local Track Seed Finder
+
+inline void StiRootIOBroker::addLTSFPadrow(unsigned int val)
+{
+    mLTSFPadrows.push_back(val);
+}
+
+inline void StiRootIOBroker::addLTSFSector(unsigned int val)
+{
+    mLTSFSectors.push_back(val);
+}
+
+inline const vector<unsigned int>& StiRootIOBroker::ltsfPadrows() const
+{
+    return mLTSFPadrows;
+}
+
+inline const vector<unsigned int>& StiRootIOBroker::ltsfSectors() const
+{
+    return mLTSFSectors;
+}
+
+inline void StiRootIOBroker::setLTSFZWindow(double val)
+{
+    mLTSFZWindow = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ltsfZWindow() const
+{
+    return mLTSFZWindow;
+}
+
+inline void StiRootIOBroker::setLTSFYWindow(double val)
+{
+    mLTSFYWindow = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ltsfYWindow() const
+{
+    return mLTSFYWindow;
+}
+
+inline void StiRootIOBroker::setLTSFSeedLength(unsigned int val)
+{
+    mLTSFSeedLength = val;
+    notify();
+}
+
+inline unsigned int StiRootIOBroker::ltsfSeedLength() const
+{
+    return mLTSFSeedLength;
+}
+
+inline void StiRootIOBroker::setLTSFUseVertex(bool val)
+{
+    mLTSFUseVertex = val;
+    notify();
+}
+inline bool StiRootIOBroker::ltsfUseVertex() const
+{
+    return mLTSFUseVertex;
+}
+
+inline void StiRootIOBroker::setLTSFDoHelixFit(bool val)
+{
+    mLTSFDoHelixFit = val;
+    notify();
+}
+
+inline bool StiRootIOBroker::ltsfDoHelixFit() const
+{
+    return mLTSFDoHelixFit;
+}
 
 #endif
