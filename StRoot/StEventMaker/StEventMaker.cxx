@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.33 2001/07/17 22:21:50 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.34 2001/07/19 00:05:28 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.34  2001/07/19 00:05:28  ullrich
+ * New StL0Trigger needs additional table in constructor.
+ *
  * Revision 2.33  2001/07/17 22:21:50  ullrich
  * Use B from event summary to set helicity of tracks.
  *
@@ -152,7 +155,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.33 2001/07/17 22:21:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.34 2001/07/19 00:05:28 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -423,7 +426,9 @@ StEventMaker::makeEvent()
     dst_L0_Trigger_st* dstL0Trigger    = mEventManager->returnTable_dst_L0_Trigger(nrows);
     if (dstTriggerDetectors)
         mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
-    if (dstL0Trigger)
+    if (dstL0Trigger && dstTriggerDetectors)
+        mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger, *dstTriggerDetectors));
+    else if (dstL0Trigger)
         mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger));
 
     //
