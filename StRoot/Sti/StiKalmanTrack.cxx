@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.45 2004/11/12 22:48:28 fisyak Exp $
- * $Id: StiKalmanTrack.cxx,v 2.45 2004/11/12 22:48:28 fisyak Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.46 2004/12/01 03:57:08 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.46 2004/12/01 03:57:08 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.46  2004/12/01 03:57:08  pruneau
+ * d<4
+ *
  * Revision 2.45  2004/11/12 22:48:28  fisyak
  * Back to use chi2 instead DCA for Vertex fit
  *
@@ -690,18 +693,46 @@ int    StiKalmanTrack::getGapCount()    const
 int StiKalmanTrack::getFitPointCount()    const  
 {
     int fitPointCount  = 0;
-    double maxChi2 = fitpars->getMaxChi2();
-    if (firstNode) {
+    if (firstNode) 
+      {
+	double chi2Max = fitpars->getMaxChi2();
 	StiKTNBidirectionalIterator it;
-	for (it=begin();it!=end();it++) {
+	for (it=begin();it!=end();it++) 
+	  {
 	    StiKalmanTrackNode& ktn = (*it);
-	    if (ktn.getChi2() < maxChi2) {
-		fitPointCount++;
-	    }
-	}
-    }    
+	    if (ktn.getChi2()<chi2Max) ++fitPointCount;
+	  }
+      }    
   return fitPointCount;
 }
+
+///Get number of fit points in given detector
+int StiKalmanTrack::getFitPointCount(int detectorId)    const  
+{
+    int fitPointCount  = 0;
+    if (firstNode) 
+      {
+	double chi2Max = fitpars->getMaxChi2();
+	StiKTNBidirectionalIterator it;
+	for (it=begin();it!=end();it++) 
+	  {
+	    StiKalmanTrackNode& node = (*it); 
+	    StiHit* hit = node.getHit();
+	    if (hit && 
+		hit->detector() && 
+		node.getDedx()>0. &&  
+		detectorId==hit->detector()->getGroupId() &&
+		node.getChi2()<chi2Max) 
+	      {
+		fitPointCount++;
+	      }
+	  }
+      }    
+  return fitPointCount;
+}
+
+
+
 
 /*! Calculate and return the track length.
   <h3>Notes</h3> 
@@ -931,8 +962,6 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
       const StiKalmanTrackNode& node = *it;
       StiHit* hit = node.getHit();
       if (hit && 
-	  hit->detector())
-      if (hit && 
 	  hit->detector() && 
 	  node.getDedx()>0. &&  
 	  detectorId==hit->detector()->getGroupId() ) 
@@ -1049,6 +1078,11 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 		
   StiHit localVertex = *vertex;
   sNode = lastNode;
+
+  double xxxx = lastNode->_x;
+  bool   check = false;
+  //if (xxxx>4.1) check = true;
+
   localVertex.rotate(sNode->getRefAngle());
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
@@ -1075,10 +1109,10 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 		<< " d: "<< d<<endl;*/
       _vDca = d;
       _vChi2= chi2;
-      if (chi2<pars->maxChi2Vertex)
-	//      if (d<3.)
+      //if (chi2<pars->maxChi2Vertex)
+      if (d<4.)
 	{
-	  _dca = ::sqrt(dy*dy+dz*dz);
+	  //_dca = ::sqrt(dy*dy+dz*dz);
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
 	  tNode->setHit(myHit);
