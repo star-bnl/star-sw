@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.7 2003/06/26 22:37:32 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.8 2003/07/24 22:11:17 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.8  2003/07/24 22:11:17  thenry
+ * Now can use any of Points, Hits, Clusters.  Now uses probability weighted
+ * mass calculation.  Now Subtracts track emc deposited energy from nearest
+ * first EMC energies until track emc deposited energy is used up or too
+ * away.
+ *
  * Revision 1.7  2003/06/26 22:37:32  thenry
  * Fixed a bug in the indexing of the points
  *
@@ -70,7 +76,7 @@ class BadPathLengthException : public string
 
 class StCorrectedEmcPoint
 {
-public:
+ public:
     static const double SMDR = 2.2625;
     static const double HSMDR = 1.13125;
     static const double twoPi = M_PI*2.0;
@@ -132,15 +138,16 @@ public:
     inline bool PhotonRemaining(void) { return correctedE > 0.0; };
     inline StLorentzVectorD P(void)
     {
-      return StLorentzVectorD(correctedE, correctedE*cos(Phi())*cos(Theta()), 
+      return StLorentzVectorD(correctedE*cos(Phi())*cos(Theta()), 
 			      correctedE*sin(Phi())*cos(Theta()), 
-			      correctedE*sin(Theta()));
+			      correctedE*sin(Theta()), 
+			      correctedE);
     };
     inline StMuEmcPoint* getPoint(void) const{ return mPoint; };
     inline double getEtaShift(void) const{ return etaShift; };
     inline int getIndex(void) const{ return index; };
 
-protected:
+ protected:
     double correctedE;
     StMuEmcPoint* mPoint;
     double etaShift;
@@ -150,13 +157,9 @@ protected:
 class StProjectedTrack
 {
  public:
-    static const double SMDR = 226.25;
-    static const double HSMDR = 113.125;
+    static const double SMDR = 231.23;
+    static const double HSMDR = 115.615;
     static const double twoPi = M_PI*2.0;
-    static const double PionAveDepRatio = 0.2;
-    static const double KaonAveDepRatio = 0.2;
-    static const double ProtonAveDepRatio = 0.2;
-    static const double ElectronAveDepRatio = 1.0;;
     static const double me = .000511;	
     static const double mpr = .9383;
     static const double mpi = .1396;
@@ -165,24 +168,24 @@ class StProjectedTrack
     StProjectedTrack() : mTrack(0), index(0) { };
     StProjectedTrack(StMuTrack* t, int _index) : mTrack(t), index(_index) 
     {
-      fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
+      initProbabilities(t);
+      fourP = StLorentzVectorD(eBar(), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
       pairD s = helix.pathLength(SMDR);
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
       double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
       projection = helix.at(path);
-      initProbabilities(t);
     };
     StProjectedTrack(StMuTrack* t, int _index, StThreeVectorD vertex) : 
       mTrack(t), index(_index) 
     {
-      fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
+      initProbabilities(t);
+      fourP = StLorentzVectorD(eBar(), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
       pairD s = helix.pathLength(SMDR);
       if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
       double path = ((s.first < 0) || (s.second < 0)) ? max(s.first, s.second) : min(s.first, s.second);
       projection = helix.at(path) - vertex;
-      initProbabilities(t);
     };
     StProjectedTrack(const StProjectedTrack &t) { 
       mTrack = t.getTrack();
@@ -206,11 +209,27 @@ class StProjectedTrack
 	probKaon = t->pidProbKaon();
 	probProton = t->pidProbProton();
 	probElectron = t->pidProbElectron();
+	if((probPion == 0) && (probKaon == 0) && 
+	   (probProton == 0) && (probElectron == 0))
+	  {
+	    probPion = 1.0;
+	    return;
+	  }
+	double sum = probPion + probKaon + probProton + probElectron;
+	if(fabs(sum-1.0) < .01)
+	  {
+	    probPion /= sum;
+	    probKaon /= sum;
+	    probProton /= sum;
+	    probElectron /= sum;
+	  }
       };
-    bool init(StMuTrack *t, StThreeVectorD vertex)
+    bool init(StMuTrack *t, int _index, StThreeVectorD vertex)
       {
 	mTrack = t;
-	fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
+	index = _index;
+	initProbabilities(t);
+	fourP = StLorentzVectorD(eBar(), mom());
 	StPhysicalHelixD helix = mTrack->outerHelix();
 	pairD s = helix.pathLength(SMDR);
         if(isnan(s.first) || isnan(s.second)) throw BadPathLengthException();
@@ -220,9 +239,7 @@ class StProjectedTrack
       };
     inline double Eta(void) { return fourP.pseudoRapidity(); };
     inline double Phi(void) { return fourP.phi(); };
-    inline double depE(void) { return (probElectron*ElectronAveDepRatio +
-      probPion*PionAveDepRatio + probProton*ProtonAveDepRatio +
-      probKaon*ElectronAveDepRatio)*E(); };
+    double depE(void);
     inline double E(void) { return fourP.e(); };
     inline double pEta(void) { return projection.pseudoRapidity(); };
     inline double pPhi(void) { return projection.phi(); };
@@ -233,8 +250,15 @@ class StProjectedTrack
     inline double getProbProton(void) const { return probProton; };
     inline double getProbElectron(void) const { return probElectron; };
     inline double masssqr(void) { double ms = mass(); return ms*ms; };
-    inline double mass(void) { return probElectron*me +
-      probPion*mpi + probProton*mpr + probKaon*mk; };
+    inline double mass(void) { return fourP.m(); };
+    inline double eBar(void) { return probElectron*eElectron() + 
+      probPion*ePion() + probProton*eProton() + probKaon*eKaon(); };
+    inline double eElectron(void) { return ePart(me); };
+    inline double eKaon(void) { return ePart(mk); };
+    inline double eProton(void) { return ePart(mpr); };
+    inline double ePion(void) { return ePart(mpi); };
+    inline double ePart(double parMass) 
+      { return sqrt(parMass*parMass + mom().mag2()); };
     inline StThreeVectorD mom(void) { return mTrack->momentum(); };
     inline const StLorentzVectorD &P(void) const 
       { const StLorentzVectorD &ret = fourP; return ret; };
@@ -394,7 +418,7 @@ public:
   inline long bin(StMuEmcPoint* point) { return bin(moddPoints[point]); };
   inline long bin(StMuTrack* track) { return bin(moddTracks[track]); };
   inline long bin(StProjectedTrack &p) { return bin(p.pPhi(), p.pTheta()); };
-  inline long bin(StCorrectedEmcPoint &p) { return bin(p.pPhi(), p.pTheta()); };
+  inline long bin(StCorrectedEmcPoint &p) { return bin(p.pPhi(), p.pTheta());};
   inline long bin(double pPhi, double pTheta) 
     { return bin(thetaBin(pTheta), phiBin(pPhi)); };
   inline long thetaBin(double pTheta) 
@@ -430,6 +454,13 @@ public:
   inline bool exists(StMuTrack *track, binCircleList::value_type &relative)
   {  return empty(track, relative) == false; };
 
+  double trackPointRadiusSqr(StProjectedTrack& track, StCorrectedEmcPoint& point)
+    {
+      double dphi = track.pPhi() - point.pPhi();
+      double deta = track.pEta() - point.pEta();
+      return dphi*dphi + deta*deta;
+    }
+
   // Loop through the tracks, and if the track bins into a bin with points
   // in it, then loop over the points and check to see if the point-track
   // distance is small enough to call this a pair.  If so, add the pair
@@ -439,7 +470,7 @@ public:
     for(trackMap::iterator track = moddTracks.begin(); 
 	track != moddTracks.end(); ++track)
       {
-	bool found = false;
+	//bool found = false;
 	for(binCircleList::iterator relative = binchecklist.begin();
 	    relative != binchecklist.end(); ++relative)
 	  {
@@ -451,43 +482,65 @@ public:
 		    point != points.end(); ++point)
 		  {
 		    StCorrectedEmcPoint &cPoint = moddPoints[*point];
-		    double dphi = (*track).second.pPhi() - cPoint.pPhi();
-		    double deta = (*track).second.pEta() - cPoint.pEta();
-		    if(dphi*dphi + deta*deta > realradiussqr) continue;
+		    StProjectedTrack &cTrack = (*track).second;
+		    if(trackPointRadiusSqr(cTrack, cPoint) > realradiussqr) 
+		       continue;
 		    p2t.insert(pointToTracks::value_type
 			       (*point, (*track).first));
 		    t2p.insert(trackToPoints::value_type
 			       ((*track).first, *point));
-		    found = true;
-		    break;
+		    //found = true;
+		    //break;
 		  }
 	      }
-	    if(found) break;
+	    //if(found) break;
 	  }
       }
   };
 };
 
+typedef vector<StMuEmcPoint> createdPointVector;
+
 class StEmcTpcFourPMaker : public StFourPMaker {
-public: 
-    const double radiussqr;
-    double seconds;
-    timesMap timeLengths;
-    
-public:
-    StEmcTpcFourPMaker(const char* name, StMuDstMaker *pevent, 
-      long pBins, long thBins, double pRad, double thRad, double rsqr, 
-      StEmcADCtoEMaker* adcToEMaker = NULL);
-    virtual Int_t Make();
-    
-    StMuEmcCollection* getMuEmcCollection(void) { return muEmc; };
+ public: 
+  enum EMCHitType {Hits=0, Clusters=1, Points=2};
+  
+  const double radiussqr;
+  double seconds;
+  timesMap timeLengths;
 
-    StEmcTpcBinMap binmap;   
-protected:
-    StEmcADCtoEMaker* adc2E;
-    StMuEmcCollection* muEmc;
+ public:
+  void SetDepRatios(double PIDR, double KDR, 
+		    double PRDR, double EDR, double CAD);
+  void SetDepRatios(void);
+  
+  StEmcTpcFourPMaker(const char* name, StMuDstMaker *pevent, 
+		     long pBins, long thBins, double pRad, 
+		     double thRad, double rsqr, 
+		     StEmcADCtoEMaker* adcToEMaker = NULL);
 
-    ClassDef(StEmcTpcFourPMaker,1)
+  virtual Int_t Make();
+    
+  StMuEmcCollection* getMuEmcCollection(void) { return muEmc; };
+  void setUseType(EMCHitType uType) { useType = uType; };
+  EMCHitType getUseType(void) { return useType; };
+
+  StEmcTpcBinMap binmap;   
+ protected:
+  StEmcADCtoEMaker* adc2E;
+  StMuEmcCollection* muEmc;
+  StEmcCollection* emc;
+  int maxHits;
+ public:
+  createdPointVector fakePoints;
+  double mPIDR, mKDR, mPRDR, mEDR, mCAD;
+  EMCHitType useType;
+
+  ClassDef(StEmcTpcFourPMaker,1)
 };
+
+typedef multimap<double, StMuEmcPoint*, less<double> > DistanceToPointMap;
+
 #endif
+
 
