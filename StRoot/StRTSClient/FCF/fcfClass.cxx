@@ -777,10 +777,9 @@ fcfClass::fcfClass(int det, u_short *table)
 		maxCPP = 31 ;
 		maxTimebin = 511 ;
 		timebinLo = 0 ;
-		timebinHi = 511 ;	// should be 400 normally
-		chargeMin = 10 ;	// reasonable estimate was 50
+		timebinHi = 400 ;	// should be 400 normally
+		chargeMin = 50 ;	// reasonable estimate was 50
 		break ;
-
 	case FTP_ID :
 		maxCPP = 31 ;
 		maxTimebin = 511 ;
@@ -895,6 +894,8 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 			}
 			else if(fla & (FCF_ROW_EDGE | FCF_DEAD_EDGE | FCF_ONEPAD)) continue ;	// kill!
 			else if(cha <= ch_min) continue ;	// kill!
+			else if(rr->t1 == 0) continue ;		// kill if they touch timebin 0
+			else if((rr->t2-rr->t1) <= 3) continue ;
 		}
 
 //#ifdef __unix
