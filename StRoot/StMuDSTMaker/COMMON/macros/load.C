@@ -16,7 +16,7 @@ void load() {
   gSystem->Load("StAssociationMaker");
   gSystem->Load("StMcAnalysisMaker");
   gSystem->Load("StStrangeMuDstMaker");
-  gSystem->Load("StMuDstMaker");
+  gSystem->Load("StMuDSTMaker");
 }
 
 /*

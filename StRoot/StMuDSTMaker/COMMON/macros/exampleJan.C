@@ -31,7 +31,7 @@ void exampleJan() {
   StMuDebug::setLevel(0);  // switch of some debug output
 
   int iret=0;
-  maker = new StMuDstMaker(0,0,"MuDst/central/ReversedFullField/runs/","","MuDst");   // set up maker in read mode
+  maker = new StMuDstMaker(0,0,"MuDstCommon/central/ReversedFullField/runs/","","MuDst");   // set up maker in read mode
   for (int i=0; i<100; i++) {
     cout << i << " ";
     iret = maker->Make();  // read an event 
