@@ -1,9 +1,13 @@
-// $Id: ana.C,v 1.5 1998/11/22 00:53:47 fisyak Exp $
+// $Id: ana.C,v 1.6 1998/11/22 00:59:18 fisyak Exp $
 // $Log: ana.C,v $
+// Revision 1.6  1998/11/22 00:59:18  fisyak
+// Add name
+//
 // Revision 1.5  1998/11/22 00:53:47  fisyak
 // Add name
 //
-// $Name:  $
+// $Name:  $  
+// $Tag:  $  
 void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/",const Char_t *root_file="all2.root")
 {
   gROOT->Reset();
