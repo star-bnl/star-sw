@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.25 2001/08/28 19:02:55 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.26 2001/09/16 22:24:22 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.26  2001/09/16 22:24:22  caines
+ * Fix for when SVT isnt in every event
+ *
  * Revision 1.25  2001/08/28 19:02:55  caines
  * Remove hardwired line that makes it always do common mode average (dumb!)
  *
@@ -135,7 +138,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   m_thresh_hi = 10+mPedOffSet; 
   m_n_seq_lo  = 2;
   m_n_seq_hi  = 0;
-  m_inv_prod_lo = 8;
+  m_inv_prod_lo = 0;
   //m_inv_prod_lo = 0;
 
 }
@@ -199,10 +202,16 @@ Int_t StSvtSeqAdjMaker::GetSvtRawData()
   St_DataSet *dataSet;
   
   dataSet = GetDataSet("StSvtRawData");
-  assert(dataSet); 
-  mSvtRawData = (StSvtData*)(dataSet->GetObject());
-  assert(mSvtRawData);
+  if( !dataSet) {
+    gMessMgr->Warning() << " No Svt Raw data set" << endm;
+    return kStWarn;
+  }
 
+  mSvtRawData = (StSvtData*)(dataSet->GetObject());
+  if( !mSvtRawData) {
+    gMessMgr->Warning() << " No Svt Raw data " << endm;
+    return kStWarn;
+  }
   return kStOK;
 }
 
@@ -424,6 +433,8 @@ Int_t StSvtSeqAdjMaker::Make()
 
   StSvtBadAnode* BadAnode=NULL;
 
+
+  if ( GetSvtRawData() ) return kStWarn; // Return if SVT not there
   // copy event information to adjusted data collection
   (*mSvtAdjData) = (*mSvtRawData);
 
