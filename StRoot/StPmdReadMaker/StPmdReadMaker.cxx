@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.6 2004/03/23 08:52:22 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.7 2004/04/14 15:40:41 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.7  2004/04/14 15:40:41  subhasis
+ *chainno 45,46 interchanged (in hardware) issue fixed
+ *
  *Revision 1.6  2004/03/23 08:52:22  subhasis
  *several changes (Board Detail by hand etc) for first production
  *
@@ -228,6 +231,11 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    }
 	    break;
 	  }
+// On 18th access it was found that I/P to chain 45 and 46 are interchanged,
+//	  (see log book for details).
+          Int_t Chain_original=Chain_No;
+	  if(Chain_original==45)Chain_No=46;
+	  if(Chain_original==46)Chain_No=45;
 	  //Chain_No goes from 1 to 48
 	  //   VME Condition Ends ///////////////////////////////////
 	  
@@ -236,6 +244,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	  if (Chain_No >= 1 && Chain_No < 25) SubDet = 2; //! Chains from CPV 	  
 	  if (Chain_No >= 25 && Chain_No <= 48) SubDet = 1; //! Chains from PMD 
 
+	  
           // Apply Mapping to get the sm, row and col here
 	  // 	  
           Int_t mapp= mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp);
