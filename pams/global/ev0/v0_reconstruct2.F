@@ -37,7 +37,7 @@ C---------------
       RECORD/ ev0_track2_st/ trak(*)
     
       INTEGER 	ok
-      INTEGER  	jk,det_id
+      INTEGER  	jk,det_id_i,det_id
       INTEGER   jkk
       INTEGER   ll,iflag,iflag1
       INTEGER   i,j,index
@@ -52,6 +52,7 @@ C---------------
       REAL	xp(2),xn1(2),xn2(2),rd,xpp(3),massl(2),pp(3)
       REAL      env0,bv0,gv0,ep,ppar_cm,mainv(3),rap
       real      rdcheck(2),open,dot, bfield(3)! wkw
+      real      temp ! gvb
       LOGICAL	first, updated
       DATA MASS1/0.139567,.93828,.139567/
       DATA MASS2/0.139567,.139567,.93828/
@@ -68,7 +69,6 @@ CC:  Load Primary vertex position coordinates:
       mainv(1) = 0.0
       mainv(2) = 0.0
       mainv(3) = 0.0
-      if(vertex_h.nok .gt. 0) then
          do i = 1,vertex_h.nok
             if(vertex(i).vtx_id .eq. 1) then
                mainv(1) = vertex(i).x
@@ -78,7 +78,6 @@ CC:  Load Primary vertex position coordinates:
             end if
          end do
 100      continue
-      end if
 
 *-----steering routine------------------------------------------------
 *     
@@ -99,16 +98,16 @@ C--   calculate impact parameter at main vertex--- wkw
 
 C--   skip all tracks with impact parameter .lt. dcapnmin
            if( trak(i).det_id .eq. 1 )then
-                 det_id = 1
+                 det_id_i = 1
            elseif( trak(i).det_id .eq. 2 ) then
-                 det_id = 2
+                 det_id_i = 2
            else
-                 det_id = 3
+                 det_id_i = 3
            endif
-           IF( (trak(i).dca.le.ev0par(det_id).dcapnmin)) GO TO 10 
+           IF( (trak(i).dca.le.ev0par(det_id_i).dcapnmin)) GO TO 10 
 C******************
 C-- skip all SVT only tracks
-c           if(det_id.eq.2)go to 10
+c           if(det_id_i.eq.2)go to 10
 C******************
            call ev0_track_mom(trak(i).r0,trak(i).rc,0,pst1,bfield(3))
            trak(i).p=sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)
@@ -159,16 +158,15 @@ C--   skip all tracks with impact parameter .lt. dcapnmin
                 IF((trak(j).dca.le.ev0par(det_id).dcapnmin)) GO TO 20 
 
 
-              if( trak(i).det_id .eq. 1 .or. trak(j).det_id .eq. 1)then
+              if( det_id_i .eq. 1 .or. det_id .eq. 1)then
                  det_id = 1
-              elseif( trak(i).det_id .eq. 2 .or. 
-     +                trak(j).det_id .eq. 2)then
+              elseif( det_id_i .eq. 2 .or. det_id .eq. 2)then
                  det_id = 2
-              else
-                 det_id = 3
               endif
-              CALL VZERO(xcom,2)
-              CALL VZERO(ycom,2)
+              xcom(1)=0
+              xcom(2)=0
+              ycom(1)=0
+              ycom(2)=0
               iflag1=0
               call ev0_vzero_geom(ev0par(det_id).dca**2,
      +             trak(i).xc,trak(j).xc,
@@ -203,14 +201,22 @@ c
 
               if(jk.eq.1)then
 C               save current point so that no swimming back is necessary
-                DO jkk=1,6
-                 trk1sav(jkk)=trk1(jkk)
-                 trk2sav(jkk)=trk2(jkk)
-                enddo
-                DO jkk=1,2
-                 xn1sav(jkk)=xn1(jkk)
-                 xn2sav(jkk)=xn2(jkk)
-                enddo
+                trk1sav(1)=trk1(1)
+                trk2sav(1)=trk2(1)
+                trk1sav(2)=trk1(2)
+                trk2sav(2)=trk2(2)
+                trk1sav(3)=trk1(3)
+                trk2sav(3)=trk2(3)
+                trk1sav(4)=trk1(4)
+                trk2sav(4)=trk2(4)
+                trk1sav(5)=trk1(5)
+                trk2sav(5)=trk2(5)
+                trk1sav(6)=trk1(6)
+                trk2sav(6)=trk2(6)
+                xn1sav(1)=xn1(2)
+                xn2sav(1)=xn2(2)
+                xn1sav(2)=xn1(2)
+                xn2sav(2)=xn2(2)
               endif 
                  if( iflag1 .eq. 3) goto 12
               enddo
@@ -219,14 +225,22 @@ C               save current point so that no swimming back is necessary
                  xp(1)=xcom(1)
                  xp(2)=ycom(1)
 C restore first point so that no swimming back is necessary
-              DO jk=1,6
-                 trk1(jk)=trk1sav(jk)
-                 trk2(jk)=trk2sav(jk)
-              enddo
-              DO jk=1,2
-                 xn1(jk)=xn1sav(jk)
-                 xn2(jk)=xn2sav(jk)
-              enddo
+              trk1(1)=trk1sav(1)
+              trk2(1)=trk2sav(1)
+              trk1(2)=trk1sav(2)
+              trk2(2)=trk2sav(2)
+              trk1(3)=trk1sav(3)
+              trk2(3)=trk2sav(3)
+              trk1(4)=trk1sav(4)
+              trk2(4)=trk2sav(4)
+              trk1(5)=trk1sav(5)
+              trk2(5)=trk2sav(5)
+              trk1(6)=trk1sav(6)
+              trk2(6)=trk2sav(6)
+              xn1(1)=xn1sav(1)
+              xn2(1)=xn2sav(1)
+              xn1(2)=xn1sav(2)
+              xn2(2)=xn2sav(2)
  
 C                 call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
 C                 call ev0_update_track_param(trak(i).xc,trak(i).rc,
@@ -244,12 +258,14 @@ CC-------  the 3D calculation of the v0_dca
      +                pst1,bfield(3))
                  call ev0_track_mom(trk2,trak(j).rc,0,
      +                pst2,bfield(3))
-                 pst1(1)=pst1(1)/trak(i).p
-                 pst1(2)=pst1(2)/trak(i).p
-                 pst1(3)=pst1(3)/trak(i).p
-                 pst2(1)=pst2(1)/trak(j).p
-                 pst2(2)=pst2(2)/trak(j).p
-                 pst2(3)=pst2(3)/trak(j).p
+                 temp = 1/trak(i).p
+                 pst1(1)=pst1(1)*temp
+                 pst1(2)=pst1(2)*temp
+                 pst1(3)=pst1(3)*temp
+                 temp = 1/trak(j).p
+                 pst2(1)=pst2(1)*temp
+                 pst2(2)=pst2(2)*temp
+                 pst2(3)=pst2(3)*temp
                  rd=(trk1(3)-trk2(3))**2
                  call ev0_3D_dca(rd,pst1,pst2,trk1,trk2,xn1,
      +                xn2,trak(i).rc,trak(j).rc)
@@ -342,10 +358,12 @@ C--   calculate Armenteros variables---
                        pv0  = sqrt(pv0sq) 
                        ppar= pdotp/pv0
                        npar= ndotp/pv0
-                       pper= sqrt(trak(i).p*trak(i).p-ppar*ppar)
-                       if( trak(i).p*trak(i).p-ppar*ppar .lt.0 ) then
+                       temp = trak(i).p*trak(i).p-ppar*ppar
+                       if( temp .lt.0 ) then
 C                          write(6,*) 'Found one'
                           pper = 0.
+                       else
+                          pper = sqrt(temp)
                        endif
 C                       ev0out(ok).pt = pper
 C                       ev0out(ok).alpha = (ppar-npar)/(ppar+npar)

@@ -13,7 +13,7 @@ C   Status		: Tested
 C----------------------------------------------------------------------
       INTEGER iflag
       REAL    trk(6),xc(2),r,beta
-      REAL    x,y,p(3),a,yt1,yt2,xt1,xt2,rxp,test
+      REAL    x,y,p(3),a,b,xt1,rxp,test
 C--------find the radius and the (hit)x-y coordinates------------------
       IF(trk(1).eq.0.) trk(1)=0.01
       x=trk(1)*cos( trk(2) )
@@ -24,19 +24,23 @@ C--------get the momentum components-----------------------------------
 C--------find the two possible solutions------------------------------
       IF(p(1).eq.0.) p(1)=0.01
       a=p(2)/p(1)
-      yt1= sqrt( r*r/(a*a+1) ) + y
-      yt2=-sqrt( r*r/(a*a+1) ) + y
-      xt1=-a*(yt1-y) + x
-      xt2=-a*(yt2-y) + x
+      b = sqrt( r*r/(a*a+1) )
+C     yt1= b + y
+C     yt2=-b + y
+      xt1=-a*b + x
+C     xt2= a*b + x
 C-------decide which one is the right one------------------------------
-      rxp=(xt1-x)*p(2) - (yt1-y)*p(1)
+      rxp=(xt1-x)*p(2) - b*p(1)
       test=rxp*trk(6)/r
       IF(test.gt.0.0) THEN
 	xc(1)=xt1
-	xc(2)=yt1
+C	xc(2)=yt1
+	xc(2)= b + y
       ELSE
-	xc(1)=xt2
-	xc(2)=yt2
+C	xc(1)=xt2
+C	xc(2)=yt2
+	xc(1)=a*b + x
+	xc(2)=-b + y
       ENDIF 	!test.lt.0.0
 C----------------------------------------------------------------------
   999 CONTINUE
@@ -77,7 +81,7 @@ C   Created  JUN-1992  S.Margetis
 C   Error conditions 		: None
 C   Status	     		: Tested
 C----------------------------------------------------------------------
-      REAL 	xv(3),x(3),p(3),x0(3),nom
+      REAL 	xv(3),x(3),p(3),x0(3),nom,a
 *----------------------------------------------------------------------
 
 	nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
@@ -85,14 +89,20 @@ C----------------------------------------------------------------------
 	x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
 
 	IF(p(1).ne.0.) THEN
-	 x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
-	 x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+C	 x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
+C	 x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+         a = (x0(1)-x(1))/p(1)
+	 x0(2)=x(2)+p(2)*a
+	 x0(3)=x(3)+p(3)*a
 	ELSE
-	 x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
+C	 x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
+         a = p(3)/p(2)
+	 x0(3)=(x(3)-x(2)*a)/(1+a*a)
 		IF(p(2).eq.0.) THEN
 		 x0(2)=x(2)
 		ELSE
-		 x0(2)=-x0(3)*p(3)/p(2)
+C		 x0(2)=-x0(3)*p(3)/p(2)
+		 x0(2)=-x0(3)*a
 		ENDIF
 	ENDIF
 
@@ -128,7 +138,7 @@ C----------------------------------------------------------------------
 
          
 	e1    = sqrt(p1*p1 + m(1)*m(1))
-	e2    = sqrt(p2*p2 +m(2)*m(2))
+	e2    = sqrt(p2*p2 + m(2)*m(2))
 C----calculate the invariant mass -----------------------------
 	inv_mass=( (e1+e2)**2. - psq )
         env0 = sqrt(psq+inv_mass)
@@ -159,36 +169,31 @@ C   Error conditions : None
 C   Status	     : Test
 C---------------------------------------------------------------------
       REAL r,xp(2),xc(2),x(2)
-      REAL x1(2),x2(2),yy1,yy2,zz1,zz2
+      REAL x1,x2,yy,zz
       REAL a,b,c
 C-----first find the two possible solutions for closest approach-----
       a=xc(1)-xp(1)
       b=xc(2)-xp(2)
       IF(b.eq.0.0) THEN
-	x1(2)=xc(2)
-	x2(2)=xc(2)
-	x1(1)=xc(1)+r	
-	x2(1)=xc(1)-r	
+	x(2)=xc(2)
+	x2=xc(2)
+	x(1)=xc(1)+r	
+	x1=xc(1)-r	
       ELSE
       	c=a/b
-	yy1= r/sqrt(c*c+1.)
-	yy2=-r/sqrt(c*c+1.)
-	zz1=c*yy1
-	zz2=c*yy2
-	x1(1)=zz1+xc(1)
-	x2(1)=zz2+xc(1)
-	x1(2)=yy1+xc(2)
-	x2(2)=yy2+xc(2)
+	yy= r/sqrt(c*c+1.)
+	zz=c*yy
+	x(1)=zz+xc(1)
+	x1=-zz+xc(1)
+	x(2)=yy+xc(2)
+	x2=-yy+xc(2)
       ENDIF	!b.eq.0
 C-------choose the right one----------------------------------------
-      a=(xp(1)-xc(1))*(x1(1)-xc(1)) + (xp(2)-xc(2))*(x1(2)-xc(2))
-      IF(a.gt.0.) THEN
-	x(1)=x1(1)
-	x(2)=x1(2)
-      ELSE
-	x(1)=x2(1)
-	x(2)=x2(2)
-      ENDIF	!a.gt.0.
+      a=(xp(1)-xc(1))*(x(1)-xc(1)) + (xp(2)-xc(2))*(x(2)-xc(2))
+      IF(a.le.0.) THEN
+	x(1)=x1
+	x(2)=x2
+      ENDIF	!a.le.0.
 
   999 CONTINUE
       RETURN
@@ -213,7 +218,7 @@ C----------------------------------------------------------------------
 
       INTEGER iflag
       REAL    trk(6),p(3),phi,rc
-      REAL    const,beta,lamda
+      REAL    const,beta
       REAL    sph,cph,pt,ptot
       PARAMETER (const=0.299792458)
 
@@ -226,9 +231,8 @@ C-----Extract momentum components from helix --------------------------
 C-------check if it is a neutral particle------------------------------
 
        IF(iflag.eq.5) THEN
-	lamda=atan(trk(5))
 	ptot =1./trk(6)
-	pt   =ptot*cos(lamda)
+	pt   =ptot*cos( atan(trk(5)))
        ELSE
 	pt   =(beta*const*rc)/100.
 	ptot =sqrt(pt*pt+p(3)*p(3))
@@ -262,34 +266,33 @@ C---------------------------------------------------------------------
 #include "math_constants.inc"
 
       REAL r,xc(2),x(2),trk1(6),trk2(6)
-      REAL xi,yi,dphi,ds,sinl,cosl,bphi,h,dsy,dsx
-      REAL axb,arg,adb
+      REAL xi,yi,dphi,ds,cosl,inv_coslh,bphi,h,dsy,dsx
+      REAL arg,adb
+      REAL AA,BB,CC,DD,RR
 
 C*      pi = acos(-1.0)
 C-----calculate the distance ds and the angle between old/new position
       xi = trk1(1)*cos(trk1(2))
       yi = trk1(1)*sin(trk1(2))
-      axb = ( xi-xc(1))*(x(2)-xc(2)) - (yi-xc(2))*(x(1)-xc(1))
-      arg =axb/(r*r)
-      adb = ( xi-xc(1))*(x(1)-xc(1)) + (yi-xc(2))*(x(2)-xc(2))
-      adb = adb/(r*r)
-      IF( arg.ge.1.0 )  arg = 1.
-      IF( arg.le.-1.0 ) arg =-1.
+      AA = xi-xc(1)
+      BB = yi-xc(2)
+      CC = x(1)-xc(1)
+      DD = x(2)-xc(2)
+      RR = 1/(r*r)     ! don't divide by r*r until you need to
+      arg = (AA*DD - BB*CC)
+      adb = (AA*CC + BB*DD)
       if(  arg .gt. 0 ) then
-         dphi=acos(adb)
+         dphi=acos(adb*RR)
       elseif( arg .lt. 0 .and. adb .gt. 0) then
+         arg = arg*RR
+         if( arg.le.-1.0 ) arg =-1.
          dphi = asin(arg)
       else
-*         dphi = 2*pi - acos(adb)
-         dphi = C_2PI - acos(adb)
+*         dphi = 2*pi - acos(adb*RR)
+         dphi = C_2PI - acos(adb*RR)
       endif
 
       
-C      sinl = trk1(5)/(sqrt(1+trk1(5)**2))
-C      cosl = 1/sqrt(1+trk1(5)**2)
-       cosl = cos( atan(trk1(5)))
-       sinl = sin( atan(trk1(5)))
-
 C-----calculate the new track parameters
       trk2(1)=sqrt( x(1)*x(1)+x(2)*x(2) )
       IF(x(1).eq.0.) x(1)=0.01
@@ -310,32 +313,40 @@ C-----calculate the new track parameters
       dsx = (((x(1)-xi)/r)+cos(bphi))
       dsy =(((x(2)-yi)/r)+sin(bphi))
 
+C      sinl = trk1(5)/(sqrt(1+trk1(5)**2))
+C      cosl = 1/sqrt(1+trk1(5)**2)
+C      sinl = sin( atan(trk1(5)))
+       cosl = cos( atan(trk1(5)))
+       inv_coslh = 1/h*cosl
+
 *    Make sure you get the correct angle in 2*pi when taking acos etc
 
       if( dsy .gt. 0) then
-         ds = ( acos(dsx) - bphi)/cosl*h
+         ds = ( acos(dsx) - bphi)*inv_coslh
       elseif( dsx .gt. 0 .and. dsy .lt. 0) then
-*         ds = ( 2.*pi + asin(dsy) - bphi)/cosl*h
-         ds = ( C_2PI + asin(dsy) - bphi)/cosl*h
+*         ds = ( 2.*pi + asin(dsy) - bphi)*inv_coslh
+         ds = ( C_2PI + asin(dsy) - bphi)*inv_coslh
       elseif( dsx .lt. 0 .and. dsy .lt. 0) then
-*         ds = ( (2.*pi-acos(dsx)) - bphi)/cosl*h
-         ds = ( (C_2PI-acos(dsx)) - bphi)/cosl*h
+*         ds = ( (2.*pi-acos(dsx)) - bphi)*inv_coslh
+         ds = ( (C_2PI-acos(dsx)) - bphi)*inv_coslh
       endif
 
       if( ds .gt. 0) then
          if( dsy .gt. 0) then
-*         ds = ( 2.*pi + acos(dsx) - bphi)/cosl*h
-         ds = ( C_2PI + acos(dsx) - bphi)/cosl*h
+*         ds = ( 2.*pi + acos(dsx) - bphi)*inv_coslh
+         ds = ( C_2PI + acos(dsx) - bphi)*inv_coslh
       elseif( dsx .gt. 0 .and. dsy .lt. 0) then
-         ds = (  asin(dsy) - bphi)/cosl*h
+         ds = (  asin(dsy) - bphi)*inv_coslh
       elseif( dsx .lt. 0 .and. dsy .lt. 0) then
-         ds = ( -acos(dsx) - bphi)/cosl*h
+         ds = ( -acos(dsx) - bphi)*inv_coslh
       endif
                   
       endif
 
       IF(trk1(6).eq.0.) trk1(6)=0.001
-      trk2(3)=trk1(3)+ ds*sinl*r
+C     trk2(3)=trk1(3)+ ds*sinl*r
+C cos*tan = sin, faster than doing trig sin(atan(tan))
+      trk2(3)=trk1(3)+ ds*r*cosl*trk1(5)
       trk2(5)=trk1(5)
       trk2(6)=trk1(6)
 
@@ -423,6 +434,9 @@ C----------------------------------------------------------------------
       REAL	xc1(2),xc2(2),r1,r2,r1sq,r2sq
       REAL	x(2),y(2),om1,om2,ph1,ph2
       REAL	a,b,c,d,dia,dtouch,cut
+      REAL	asq_plus_bsq,r1sq_minus_om1sq,r1_dia
+      REAL	ph1_plus_a_sq,ph2_plus_a_sq
+      REAL	om1_plus_b_sq_minus_r2sq,om2_plus_b_sq_minus_r2sq
 C---clear variables cleared before entering routine--------------------
 c      CALL VZERO(x,2)
 c      CALL VZERO(y,2)
@@ -431,33 +445,36 @@ C---find the two intersections----------------------------------------
       r2sq = r2*r2
       a=xc1(1)-xc2(1)
       b=xc1(2)-xc2(2)
-      c=(r1sq-r2sq+a*a+b*b)/2.
-      d=(a*a+b*b)*r1sq-c*c
+      asq_plus_bsq = a*a + b*b
+      c=(r1sq-r2sq + asq_plus_bsq)/2.
+      d=asq_plus_bsq*r1sq - c*c
 C---check if there is any solution, one or two -----------------------
       IF(d.lt.0.0) GOTO 137
       IF(d.eq.0.0) iflag=3
       d = sqrt(d)
-      om1=( -b*c+abs(a)*d ) / (a*a+b*b)
-      om2=( -b*c-abs(a)*d ) / (a*a+b*b)
+      om1=( -b*c+abs(a)*d ) / asq_plus_bsq
+C     om2=( -b*c-abs(a)*d ) / asq_plus_bsq
+      om2=-om1
+      r1sq_minus_om1sq = r1sq-om1*om1
+      IF( r1sq_minus_om1sq.ge.0.) THEN
 C----find the right pair---------------------------------------------
-      IF( (r1sq-om1*om1).ge.0.) THEN
-	ph1=sqrt(r1sq-om1*om1)
+	ph1=sqrt(r1sq_minus_om1sq)
 	ph2=-ph1
-	IF( abs((ph1+a)**2+(om1+b)**2-r2sq).le.
-     +      abs((ph2+a)**2+(om1+b)**2-r2sq) ) THEN
+        ph1_plus_a_sq = (ph1+a)**2
+        ph2_plus_a_sq = (ph2+a)**2
+        om1_plus_b_sq_minus_r2sq = (om1+b)**2 - r2sq
+	IF( abs(ph1_plus_a_sq + om1_plus_b_sq_minus_r2sq).le.
+     +      abs(ph2_plus_a_sq + om1_plus_b_sq_minus_r2sq) ) THEN
 		y(1)=om1+xc1(2)
 		x(1)=ph1+xc1(1)
 	ELSE
 		y(1)=om1+xc1(2)
 		x(1)=ph2+xc1(1)
 	ENDIF	
-      ENDIF
 C------second pair------------------------------------------------
-      IF( (r1sq-om2*om2).ge.0.) THEN
-	ph1=sqrt(r1sq-om2*om2)
-	ph2=-ph1
-	IF( abs((ph1+a)**2+(om2+b)**2-r2sq).le.
-     +      abs((ph2+a)**2+(om2+b)**2-r2sq) ) THEN
+        om2_plus_b_sq_minus_r2sq = (om2+b)**2 - r2sq
+	IF( abs(ph1_plus_a_sq + om2_plus_b_sq_minus_r2sq).le.
+     +      abs(ph2_plus_a_sq + om2_plus_b_sq_minus_r2sq) ) THEN
 		y(2)=om2+xc1(2)
 		x(2)=ph1+xc1(1)
 	ELSE
@@ -470,12 +487,13 @@ C----------------------------------------------------------------------
       RETURN
 
   137 continue
-      dia=sqrt(a*a+b*b)
+      dia=sqrt(asq_plus_bsq)
       dtouch=dia-r1-r2
+      r1_dia = r1/dia
       IF(dtouch .le. sqrt(cut))  THEN
         iflag=3
-        x(1)=xc1(1) + r1*(xc2(1)-xc1(1))/dia
-        y(1)=xc1(2) + r1*(xc2(2)-xc1(2))/dia
+        x(1)=xc1(1) + r1_dia*(xc2(1)-xc1(1))
+        y(1)=xc1(2) + r1_dia*(xc2(2)-xc1(2))
         x(2)=x(1)
         y(2)=y(1)
       ELSE
@@ -488,8 +506,7 @@ C----------------------------------------------------------------------
 
 C******************************************************************************
 
-      SUBROUTINE ev0_v0_dca(xn1, xn2, sxz1, syz1, sxz2, syz2, xv0,
-     >     v0dca)
+      SUBROUTINE ev0_v0_dca(xn1, xn2, sxz1, syz1, sxz2, syz2, xv0, v0dca)
       IMPLICIT NONE
 C   Input arguments  :  xn1(3)  !coord. of first track
 C                       xn2(3)  !  "      second track
@@ -508,8 +525,8 @@ C   Status              : Tested
 C----------------------------------------------------------------------
         real xn1(3),xn2(3),xv0(3),sxz1, syz1, sxz2, syz2
         real x1,x2,y1,y2,z1,z2
-        real dx, dy, dz, v0dca
-        real a1,a2,a3,c,k,l,m,b,v,AA,BB,CC,DD,EE,FF
+        real v0dca
+        real a1,a2,a3,c,k,l,m,b,v,AA,BB,CC,DD,EE,FF,GG
         real x,y,z,xp,yp,zp
 
 
@@ -519,32 +536,30 @@ C----------------------------------------------------------------------
         x2=xn2(1)
         y2=xn2(2)
         z2=xn2(3)
-        dx = x1-x2
-        dy = y1-y2
-        dz = z1-z2
         a1=syz1-syz2
         a2=sxz2-sxz1
         a3=sxz1*syz2-syz1*sxz2
 
-        v0dca = dx*a1 + dy*a2 + dz*a3
-        v0dca = v0dca / sqrt(a1*a1 + a2*a2 + a3*a3)
+        v0dca = ((x1-x2)*a1 + (y1-y2)*a2 + (z1-z2)*a3) /
+     /                                sqrt(a1*a1 + a2*a2 + a3*a3)
 
        IF ( (syz1.ne.0.).AND.(syz2.ne.0.) ) THEN
         c =sxz1/syz1
-        k =(sxz1*y1)/syz1 - x1
+        k =(c*y1) - x1
         l =y1/syz1 - z1
         b =sxz2/syz2
-        m =(sxz2*y2)/syz2 - x2
+        m =(b*y2) - x2
         v =y2/syz2 - z2
         AA =c*a2-a1
         BB =b*a2-a1
-        CC =a2*(k-m)
+        CC =(k-m)
         DD =a2/syz1 - a3
         EE =a2/syz2 - a3
-        FF =a2*(l-v)
+        FF =(l-v)
+        GG = a2/(DD*BB - AA*EE)
       
-        yp=(AA*FF - CC*DD)/(DD*BB - AA*EE)
-        y =(BB*FF - CC*EE)/(DD*BB - AA*EE)
+        yp=(AA*FF - CC*DD)*GG
+        y =(BB*FF - CC*EE)*GG
         xv0(2)=(y+yp)/2.
 
         zp=yp/syz2 - v
