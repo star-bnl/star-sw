@@ -7,7 +7,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// $Id: St_DataSetIter.h,v 1.19 1999/12/28 23:32:01 fine Exp $                             
+// $Id: St_DataSetIter.h,v 1.20 1999/12/29 02:37:00 fine Exp $                             
 //
 // St_DataSetIter                                                       //
 //                                                                      //
@@ -52,7 +52,7 @@ public:
   virtual St_DataSet    *Add(St_DataSet *set, St_DataSet *dataset);
  
   virtual St_DataSet    *Cd(const Char_t *dirname);
-  virtual St_DataSet    *Cd(const St_DataSet *ds);
+  virtual St_DataSet    *Cd(St_DataSet *ds);
   virtual St_DataSet    *operator()( EDataSetPass mode=kContinue ) {return  Next(mode);}
   virtual St_DataSet    *operator()(const Char_t *path) { return Find(path); }
   virtual St_DataSet    *operator[](const Char_t *path);
@@ -93,15 +93,18 @@ public:
   virtual void           Notify(St_DataSet *dataset);
   const Option_t *GetOption() const                                      { return fNext ? fNext->GetOption():0; }
   virtual void           Reset(St_DataSet *l=0,Int_t depth=0);
-  virtual St_DataSet *operator *() const ;
+  virtual const St_DataSet *operator *() const ;
   ClassDef(St_DataSetIter,0) // class-iterator to navigate St_DataSet structure
 };
 
-inline St_DataSet *St_DataSetIter::operator *() const { return fDataSet == fNullDataSet ? fWorkingDataSet : fDataSet; }
+inline const St_DataSet *St_DataSetIter::operator *() const { return fDataSet == fNullDataSet ? fWorkingDataSet : fDataSet; }
 inline const St_DataSet *St_DataSetIter::GetNullSet() { return fNullDataSet; } // return a fake pointer == -1 casted to (St_DataSet *)
 
 //__________________________________________________
 // $Log: St_DataSetIter.h,v $
+// Revision 1.20  1999/12/29 02:37:00  fine
+// remove warning to make Linux happy
+//
 // Revision 1.19  1999/12/28 23:32:01  fine
 // St_DataSetIter  operator++ removed to avoid a future problem
 //

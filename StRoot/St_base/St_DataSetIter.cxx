@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.32 1999/12/28 23:32:01 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.33 1999/12/29 02:36:59 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.33  1999/12/29 02:36:59  fine
+// remove warning to make Linux happy
+//
 // Revision 1.32  1999/12/28 23:32:01  fine
 // St_DataSetIter  operator++ removed to avoid a future problem
 //
@@ -202,7 +205,7 @@ St_DataSet *St_DataSetIter::Cd(const Char_t *dirname){
   return set;
 } 
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Cd(const St_DataSet *ds)
+St_DataSet *St_DataSetIter::Cd(St_DataSet *ds)
 {
 /////////////////////////////////////////////////////////////////////
 //                                                                 //
