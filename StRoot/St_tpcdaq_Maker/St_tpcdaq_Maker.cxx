@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.63  2001/02/13 18:36:24  fisyak
+// Clean GAIN_LINE_SIZE
+//
 // Revision 1.62  2001/02/13 18:28:39  fisyak
 // Step back with switching calibration
 //
@@ -453,7 +456,6 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
   return rv; // < 0 means serious error.
 }
 #ifdef GAIN_CORRECTION
-#define GAIN_LINE_SIZE 1700
 void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) { // www
   register int row,pad;
 
