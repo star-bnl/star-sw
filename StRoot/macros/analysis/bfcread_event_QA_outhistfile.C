@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.9 2001/07/17 03:24:45 genevb Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.10 2001/07/17 03:26:51 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.10  2001/07/17 03:26:51  genevb
+// Modify input file for year 2001
+//
 // Revision 1.9  2001/07/17 03:24:45  genevb
 // Modify TPC DB info for year 2001
 //
@@ -68,7 +71,7 @@ void bfcread_event_QA_outhistfile(
      Int_t nevents=2, 
      const Char_t *MainFile=
      //"/afs/rhic/star/data/samples/gstar.dst.root",
-"/star/rcf/test/dev/trs_redhat61/Tue/year_1h/hc_standard/hc_standard.40_evts.event.root",
+"/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_standard/hc_standard.40_evts.event.root",
      const Char_t *outHistFile="StEQAMaker",
      const Char_t *TopDirTree="StEQAtree",
      const Char_t *MakerHistDir="StEQA")
