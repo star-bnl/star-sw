@@ -9,5 +9,5 @@ ${run} ${*}
 EOF
 more ${batch}
 set PWD = `pwd`
-echo /usr/local/bin/qsub -M ${USER} ${PWD}/${batch}
-/usr/local/bin/qsub -M ${USER} ${PWD}/${batch}   
+echo /opt/star/bin/qsub -M ${USER} ${PWD}/${batch}
+/opt/star/bin/qsub -M ${USER} ${PWD}/${batch}   

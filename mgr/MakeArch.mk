@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.4  1998/06/22 19:03:50  didenko
+#  Remove libraries
+#
 #  Revision 1.3  1998/06/22 00:36:27  fisyak
 #  cleanup for SL98c_1
 #
@@ -23,7 +26,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/22 00:36:27 $ 
+#             Last modification $Date: 1998/06/22 19:03:50 $ 
 #. default setings
 
 RM := rm -f
@@ -264,6 +267,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
   CXXFLAGS  :=  -n32 -fullwarn
   LD        :=   $(CXX)
   LDFLAGS   :=  -n32 -multigot
+  EXEFLAGS  :=  $(LDFLAGS) -Wl,-nltgot,123 -Wl,-m  
   SO        :=   $(CXX)
   SOFLAGS   :=  -n32 -shared -multigot
   CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
