@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.18 2003/05/14 00:04:35 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.19 2003/05/15 03:50:26 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.19  2003/05/15 03:50:26  andrewar
+ * Disabled call to filldEdxInfo for the SVT. Checks need to be
+ * applied to make sure the detector is active before calculator
+ * is called, but for the review filling this info is unnecessary.
+ *
  * Revision 2.18  2003/05/14 00:04:35  calderon
  * The array of 15 floats containing the covariance matrix has a different order
  * in Sti than in StEvent.  In Sti the array is counted
@@ -598,7 +603,7 @@ void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* 
   if (track) {
     dEdxCalculator.getDedx(track, dEdx, errordEdx, nPoints);
   }
-    
+
   StTrackPidTraits* pidTrait = new StDedxPidTraits(dEdxCalculator.whichDetId(),
 						   static_cast<short>(kTruncatedMeanId),
 						   static_cast<unsigned short>(nPoints),
@@ -613,7 +618,7 @@ void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiKalmanTrack* track){
   filldEdxInfo(dEdxTpcCalculator,gTrack,track);
 
   // SVT
-  filldEdxInfo(dEdxSvtCalculator,gTrack,track);
+  //filldEdxInfo(dEdxSvtCalculator,gTrack,track);
 
   return;
 }
