@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.2 2000/03/23 22:24:06 akio Exp $
+ * $Id: StEmcCluster.h,v 2.3 2000/07/31 22:12:23 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.3  2000/07/31 22:12:23  akio
+ * eliminate print() for L3(?)
+ *
  * Revision 2.2  2000/03/23 22:24:06  akio
  * Initial version of Emc Point, and Inclusion of track pointers
  *
@@ -56,8 +59,6 @@ public:
     void addHit(StEmcRawHit*);
     void addNeighbor(StEmcCluster*);
     void addTrack(StTrack*);
-    
-    void print(ostream& os = cout) const;
     
 private:
     Float_t mEta;

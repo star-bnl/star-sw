@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.2 2000/03/23 22:24:06 akio Exp $
+ * $Id: StEmcCluster.cxx,v 2.3 2000/07/31 22:12:22 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.3  2000/07/31 22:12:22  akio
+ * eliminate print() for L3(?)
+ *
  * Revision 2.2  2000/03/23 22:24:06  akio
  * Initial version of Emc Point, and Inclusion of track pointers
  *
@@ -21,7 +24,7 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.2 2000/03/23 22:24:06 akio Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.3 2000/07/31 22:12:22 akio Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
@@ -96,18 +99,12 @@ StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
 StObject*
 StEmcCluster::clone() {return new StEmcCluster(*this);}
 
-void
-StEmcCluster::print(ostream& os) const
-{
-    os << " Energy " << mEnergy << endl;
-    os << " Eta "    << mEta << "+/-" << mSigmaEta << endl;
-    os << " Phi "    << mPhi << "+/-" << mSigmaPhi << endl;
-    os << " # of hits " << nHits() << ",# of neighbor " << nNeighbors() << endl;
-}
-
 ostream&
 operator<<(ostream &os, const StEmcCluster& cl)
 { 
-    cl.print(os);
-    return os;
+  return (os << " Energy " << cl.energy() << endl
+	  << " Eta "    << cl.eta() << "+/-" << cl.sigmaEta() << endl 
+	  << " Phi "    << cl.phi() << "+/-" << cl.sigmaPhi() << endl
+	  << " # of hits " << cl.nHits() << ",# of neighbor " << cl.nNeighbors() << endl);
 }
+
