@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.16 1999/12/16 03:56:20 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.17 1999/12/16 23:12:03 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.17  1999/12/16 23:12:03  kathy
+// fixed list of default histograms, had wrong title and added a few for tables and stevent; rescaled some histograms and fixed titles in booking
+//
 // Revision 1.16  1999/12/16 03:56:20  lansdell
 // mirrored Kathy's changes in St_QA_Maker.cxx: separated tpc and tpc+svt histograms for global tracks using StEvent; added r0,phi0,z0,curvature histograms for global tracks in the tpc
 //
@@ -582,7 +585,10 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaEvgenPt",
  "TabQaEvgenVtxX",
  "TabQaEvgenVtxY",
- "TabQaEvgenVtxZ"
+ "TabQaEvgenVtxZ",
+ "TabQaVtxX",
+ "TabQaVtxY",
+ "TabQaVtxZ"
    };
   sdefList = sdefList1;
   lengofList = sizeof(sdefList1)/4;  
@@ -697,7 +703,10 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaEvgenPt",
  "StEQaEvgenVtxX",
  "StEQaEvgenVtxY",
- "StEQaEvgenVtxZ"
+ "StEQaEvgenVtxZ",
+ "StEQaVtxX",
+ "StEQaVtxY",
+ "StEQaVtxZ"
    };
   sdefList = sdefList2;
   lengofList = sizeof(sdefList2)/4;  
