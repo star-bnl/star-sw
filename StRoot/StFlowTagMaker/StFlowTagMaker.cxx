@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.14 2000/01/20 02:00:05 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.15 2000/02/18 22:47:34 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.15  2000/02/18 22:47:34  posk
+// Minor updates.
+//
 // Revision 1.14  2000/01/20 02:00:05  snelling
 // Fixed StFlowTag table size SetNRows=1 (Thanks Iwona)
 //
@@ -123,7 +126,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.14 2000/01/20 02:00:05 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.15 2000/02/18 22:47:34 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -292,25 +295,25 @@ Int_t StFlowTagMaker::fillHistograms() {
     histSubEvents[0].histHarmonics[j].mHistMult->Fill(pFlowTag->na[j]);
     histSubEvents[0].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxa[j]*pFlowTag->qxa[j] +
-	pFlowTag->qya[j]*pFlowTag->qya[j]) / sqrt((float)(pFlowTag->na[j])));
+	pFlowTag->qya[j]*pFlowTag->qya[j]) / sqrt((double)(pFlowTag->na[j])));
     histSubEvents[1].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->mptb[j]);
     histSubEvents[1].histHarmonics[j].mHistMult->Fill(pFlowTag->nb[j]);
     histSubEvents[1].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxb[j]*pFlowTag->qxb[j] +
-	pFlowTag->qyb[j]*pFlowTag->qyb[j]) / sqrt((float)(pFlowTag->nb[j])));
+	pFlowTag->qyb[j]*pFlowTag->qyb[j]) / sqrt((double)(pFlowTag->nb[j])));
     histSubEvents[2].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->mptc[j]);
     histSubEvents[2].histHarmonics[j].mHistMult->Fill(pFlowTag->nc[j]);
     histSubEvents[2].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxc[j]*pFlowTag->qxc[j] +
-        pFlowTag->qyc[j]*pFlowTag->qyc[j]) / sqrt((float)(pFlowTag->nc[j])));
+        pFlowTag->qyc[j]*pFlowTag->qyc[j]) / sqrt((double)(pFlowTag->nc[j])));
     histSubEvents[3].histHarmonics[j].mHistMeanPt->
       Fill(pFlowTag->mptd[j]);
     histSubEvents[3].histHarmonics[j].mHistMult->Fill(pFlowTag->nd[j]);
     histSubEvents[3].histHarmonics[j].mHist_q->
       Fill(sqrt(pFlowTag->qxd[j]*pFlowTag->qxd[j] +
-        pFlowTag->qyd[j]*pFlowTag->qyd[j]) / sqrt((float)(pFlowTag->nd[j])));
+        pFlowTag->qyd[j]*pFlowTag->qyd[j]) / sqrt((double)(pFlowTag->nd[j])));
 
     float EventPlaneAngle1 = atan2(pFlowTag->qya[j], pFlowTag->qxa[j]) / order;
     if (EventPlaneAngle1 < 0.) {EventPlaneAngle1 += twopi / order;}

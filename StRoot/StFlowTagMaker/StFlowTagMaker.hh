@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.7 2000/01/14 05:44:35 snelling Exp $
+// $Id: StFlowTagMaker.hh,v 1.8 2000/02/18 22:47:36 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.8  2000/02/18 22:47:36  posk
+// Minor updates.
+//
 // Revision 1.7  2000/01/14 05:44:35  snelling
 // Added St_FlowTag Table to .data
 //
@@ -106,12 +109,3 @@ private:
 inline FlowTag_st* StFlowTagMaker::TagPointer() const { return pFlowTag; }
 
 #endif
-
-
-
-
-
-
-
-
-
