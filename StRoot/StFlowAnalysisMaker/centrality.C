@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: centrality.C,v 1.2 2001/11/09 21:14:59 posk Exp $
+// $Id: centrality.C,v 1.3 2003/02/25 19:25:31 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot flow, etc. as a function of centrality.
@@ -15,12 +15,13 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include <iomanip.h>
-Int_t runNumber      = 0;
-const Int_t nCens    = 8;
+Int_t runNumber      =  0;
+const Int_t nCens    = 10;
 TFile* histFile[nCens];
+TCanvas* can;
 char tmp[10];
 
-TCanvas* centrality(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
+TCanvas* centrality(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 
   char  runName[6];
   const int bins = nCens + 2;
@@ -31,12 +32,18 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
     
   gROOT->SetStyle("Bold");                              // set style
   gROOT->ForceStyle();
+  gStyle->SetOptStat(kFALSE);
 
   // names of histograms made by StFlowAnalysisMaker
-  const char* baseName[] = { "Flow_Cos",
-			     "Flow_Res",
-			     "Flow_vObs",
-			     "Flow_v" };
+  const char* baseName[] = { 
+    "Flow_Cos",
+    "Flow_Res",
+    "Flow_vObs",
+    "Flow_v",
+    "Flow_v_ScalarProd",
+    "Flow_Cumul_v_Order2",
+    "Flow_Cumul_v_Order4"
+  };
   const int nNames = sizeof(baseName) / sizeof(char*);
 
   // input the first run number
@@ -60,7 +67,7 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
   while (pageNumber <= 0 || pageNumber > nNames) {
     if (pageNumber < 0) {                                // plot all
       centralityAll(nNames, selN, harN, -pageNumber);
-      return c;
+      return can;
     }
     cout << "-1: \t All" << endl;                        // print menu
     for (int i = 0; i < nNames; i++) {
@@ -85,19 +92,21 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
   histCenName->Append("_Har");
   histCenName->Append(*har);
   cout << " graph name= " << histCenName->Data() << endl;
-  float nMax= 880.;
-  float xMin[] = {0.,20.,100.,180.,270.,360.,460.,560.,660.,870.,950.};
-  float x[bins+1];
-  for (int i=0; i<=bins; i++){ x[i]= xMin[i]/nMax; }   // normalize
-  TH1F* histCen = new TH1F(histCenName->Data(), histCenName->Data(), bins, x);
-  TH1* hist = (TH1*)histFile[0].Get(histName->Data());
+//   float nMax= 880.;
+//   float xMin[] = {0.,20.,100.,180.,270.,360.,460.,560.,660.,870.,950.};
+//   float x[bins+1];
+//   for (int i=0; i<=bins; i++){ x[i]= xMin[i]/nMax; }   // normalize
+//   TH1F* histCen = new TH1F(histCenName->Data(), histCenName->Data(), bins, x);
+  TH1F* histCen = new TH1F(histCenName->Data(), histCenName->Data(),
+			   nCens, -0.5, nCens-0.5);
+  TH1* hist = (TH1*)histFile[0]->Get(histName->Data());
   char* yTitle = hist->GetYaxis()->GetTitle();
 
 
   // make the graph page
-  TCanvas* c = new TCanvas(baseName[pageNumber], baseName[pageNumber],
+  can = new TCanvas(baseName[pageNumber], baseName[pageNumber],
 			   canvasWidth, canvasHeight);
-  c->ToggleEventStatus();
+  can->ToggleEventStatus();
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
@@ -110,67 +119,65 @@ TCanvas* centrality(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
   // make the plots
   double content;
   double error;
-  for (int i = 0; i < nCens; i++) {
-    int cen = i + 2;
-    TH1* hist = (TH1*)histFile[i].Get(histName->Data());
+  for (int cen = 0; cen < nCens; cen++) {
+    TH1* hist = (TH1*)histFile[cen]->Get(histName->Data());
     if (!hist) {
       cout << "### Can't find histogram " << histName->Data() << endl;
-      return c;
+      return can;
     }
 
     // get and put contents
     content = hist->GetBinContent(harN);
     error   = hist->GetBinError(harN);
-    cout << "centrality= " << cen-1 << " content= " << setprecision(3) <<
+    cout << "centrality= " << cen << " content= " << setprecision(3) <<
       content << " error= "  << setprecision(2)  << error << endl;
-    histCen->SetBinContent(cen, content);
-    histCen->SetBinError(cen, error);
+    histCen->SetBinContent(cen+1, content);
+    histCen->SetBinError(cen+1, error);
   }
-  gStyle->SetOptStat(0);
-  histCen->Draw();
+  histCen->SetMarkerStyle(kFullCircle);
+  histCen->SetMarkerColor(kRed);
+  histCen->Draw("E1");
 
   //label the axes
   TLatex l;
   l.SetNDC();
-  l.SetTextAlign(12);
   l.SetTextSize(0.07);
-  l.SetTextColor(4);
-  l.SetIndiceSize(0.5); 
-  l.DrawLatex(0.75,0.07,"n_{ch}/n_{max}" );
+  l.SetTextColor(kBlue);
+  //l.DrawLatex(0.75,0.07,"n_{ch}/n_{max}");
+  l.DrawLatex(0.65,0.03,"Centrality" );
+  l.SetTextAngle(90);
   if (pageNumber==0) {
-    l.SetTextAngle(90);
     if (harN == 2) {
-      l.DrawLatex(0.07,0.4,"<cos[2(#Psi_{2}^{a}-#Psi_{2}^{b})]>" );
+      l.DrawLatex(0.08,0.4,"<cos[2(#Psi_{2}^{a}-#Psi_{2}^{b})]>");
     } else {
-      l.DrawLatex(0.07,0.4,"<cos(#Psi^{a}-#Psi^{b})>" );
+      l.DrawLatex(0.08,0.4,"<cos(#Psi^{a}-#Psi^{b})>");
     }
-  } else if (pageNumber==3 && harN == 2){
-    l.SetTextAngle(90);
-    l.DrawLatex(0.1,0.7,"v_{2} (%)" );
+  } else if (pageNumber>=3 && harN == 2) {
+    l.DrawLatex(0.08,0.7,"v_{2} (%)" );
   } else {
     histCen->SetYTitle(yTitle);
   }
 
-  TLine* lineZeroCen = new TLine(0., 0., x[bins], 0.);
+//   TLine* lineZeroCen = new TLine(0., 0., x[bins], 0.);
+  TLine* lineZeroCen = new TLine(-0.5, 0., nCens-0.5, 0.);
   lineZeroCen->Draw();
   gPad->Update();
 
   delete histName;
   delete histCenName;
   
-  return c;
+  return can;
 }
 
 
 void centralityAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = centrality(i, selN, harN);
-    c->Update();
+    can = centrality(i, selN, harN);
+    can->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
-    if (strstr(tmp,"y")!=0) c->Print(".ps");
+    if (strstr(tmp,"y")!=0) can->Print(".ps");
     else if (strstr(tmp,"q")!=0) return;
-    c->Delete();
   }
   cout << "  Done" << endl;
 }
@@ -178,6 +185,9 @@ void centralityAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: centrality.C,v $
+// Revision 1.3  2003/02/25 19:25:31  posk
+// Improved plotting.
+//
 // Revision 1.2  2001/11/09 21:14:59  posk
 // Switched from CERNLIB to TMath. Using global dca instead of dca.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.4 2002/01/14 23:43:06 posk Exp $
+// $Id: plotCumulant.C,v 1.5 2003/02/25 19:25:34 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -27,6 +27,7 @@ char   fileNum[4]  = "x";
 char   fileName[30];
 TFile* histFile;
 char   tmp[10];
+TCanvas* c;
 
 TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t harN=0){
 
@@ -121,7 +122,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   } else {
     int canvasWidth = 780, canvasHeight = 600;             // landscape
   }
-  TCanvas* c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
+  c = new TCanvas(shortName[pageNumber], shortName[pageNumber],
 			   canvasWidth, canvasHeight);
   c->ToggleEventStatus();
   if (multiGraph) {
@@ -244,13 +245,12 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
 
 void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = plotCumulant(i, selN, orderN, harN);
+    c = plotCumulant(i, selN, orderN, harN);
     c->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
     if (strstr(tmp,"y")!=0) c->Print(".ps");
     else if (strstr(tmp,"q")!=0) return;
-    c->Delete();
   }
   cout << "  plotCumulantAll Done" << endl;
 }
@@ -258,6 +258,9 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.5  2003/02/25 19:25:34  posk
+// Improved plotting.
+//
 // Revision 1.4  2002/01/14 23:43:06  posk
 // Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
 //
