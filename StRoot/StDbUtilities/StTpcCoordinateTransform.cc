@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.5 2000/02/23 14:52:59 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.6 2000/02/24 18:20:58 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.6  2000/02/24 18:20:58  hardtke
+ * use drift distance and offsets from the database
+ *
  * Revision 1.5  2000/02/23 14:52:59  hardtke
  * fix StTpcLocalSectorCoordinate to StTpcLocalCoordinate conversion
  *
@@ -138,9 +141,15 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 	// For this version I'll put the inner/outer sector z offsets by
 	// hand, since StTpcDb doesn't have them.  I'll take them out when
 	// it does.
-	mInnerSectorzOffset = .35;
-	mOuterSectorzOffset = 0.;
-	mDriftDistance = 210.1;
+	//	mInnerSectorzOffset = .35;
+	//	mOuterSectorzOffset = 0.;
+	//	mDriftDistance = 210.1;
+	//DH 24-Feb-2000 -- these parameters are now available
+        //define the outer drift distance as z = 0 in the tpc local
+        //coordinate system.
+        mDriftDistance = gTpcDbPtr->Dimensions()->gatingGridZ();
+        mInnerSectorzOffset = gTpcDbPtr->Dimensions()->zInnerOffset();
+        mOuterSectorzOffset = gTpcDbPtr->Dimensions()->zOuterOffset();
     }
     else {
 	cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
