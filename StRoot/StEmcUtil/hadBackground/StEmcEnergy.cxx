@@ -27,6 +27,7 @@
 #include "StEmcUtil/projection/StEmcPosition.h"
 #include <math.h>
 #include <TFile.h>
+#include <iostream.h>
 
 ClassImp(StEmcEnergy)
 
@@ -120,10 +121,44 @@ void StEmcEnergy::chHadEnergyInBtow()
 
   StEmcPosition* emcPosition = new StEmcPosition();
   StEmcHadDE* emcHadDE = new StEmcHadDE();
+  
+  Float_t total = 0;
+  Float_t totalCorr = 0;
+  
   for (UInt_t i = 0; i < trackNodes.size(); i++)
   {    
     StTrack* track = trackNodes[i]->track(0);
-
+    
+    //////////////////////////////////////////////////////////////////////////
+    // this if to check for PRIMARY electrons and 
+    // exclude them from the had background subtraction
+    Float_t correction = 1;
+    Float_t dca = track->impactParameter();
+    Float_t mass=0;
+    Int_t trId=0;
+    mEmcFilter->getTrackId(track,mass,trId);
+    Int_t np = track->fitTraits().numberOfFitPoints();
+	  StThreeVectorD p = track->geometry()->momentum();
+    Float_t pt = p.perp();
+    Float_t pm = p.mag();
+    if((pm>0.1 && pm<0.23) || (pm>0.42 && pm<0.67) || (pm>0.9 && pm<1.2)) // mixed windows
+    {
+      if(np>15 && fabs(dca)<3 && trId!=2 && trId!=3)
+      {
+	      Float_t electron = 1;
+	      Float_t EDATA[]={1.55,1.30,1.13,1.08,1.05,1.02,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	      Float_t ESIM[] ={1.80,1.10,1.08,1.04,1.02,1.00,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	      Int_t ptbin=(Int_t)((pt-0.05)/0.1);
+	      if(ptbin>19) ptbin=19;
+	
+	      electron = ESIM[ptbin];
+	      if(mRealData) electron=EDATA[ptbin];
+        correction = 1.0/electron;
+      }
+    }
+    else if(np>15 && fabs(dca)<3 && (trId==2 || trId==3)) correction = 0;
+    //////////////////////////////////////////////////////////////////////////
+    
     if (mEmcFilter->accept(track))
     {
       emcPosition->trackOnEmc(&finalPosition, &finalMomentum, track, mBfield);
@@ -168,8 +203,18 @@ void StEmcEnergy::chHadEnergyInBtow()
                   if (tempDepEnergy >= 0)
                   {  
                     Float_t eff = trackEff(track, Nhad);
-                    if(eff>0.1) mChHadEnergyInBtow[towerNdx] += tempDepEnergy/eff; 
-                    else mChHadEnergyInBtow[towerNdx] += tempDepEnergy;
+                    if(eff>0.1) 
+                    {
+                      mChHadEnergyInBtow[towerNdx] += tempDepEnergy*correction/eff;
+                      totalCorr+= tempDepEnergy*correction/eff;
+                      total+=tempDepEnergy/eff;
+                    }
+                    else 
+                    {
+                      mChHadEnergyInBtow[towerNdx] += tempDepEnergy*correction;
+                      totalCorr+= tempDepEnergy*correction;
+                      total+=tempDepEnergy;
+                    }
                   }                    
                 }
               }
@@ -179,6 +224,7 @@ void StEmcEnergy::chHadEnergyInBtow()
       }
     }
   }
+  cout <<"Total Had E = "<<totalCorr<<"  With NO electron correction = "<<total<<endl;
   delete emcPosition;
   delete emcHadDE;
 }
