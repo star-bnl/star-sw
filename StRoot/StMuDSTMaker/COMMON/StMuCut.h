@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuCut.h,v 1.3 2002/09/11 21:02:41 laue Exp $
+ * $Id: StMuCut.h,v 1.4 2003/09/10 22:33:41 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -49,7 +49,7 @@ class StMuCut : public TObject {
   virtual bool accept( const StXiMuDst*    ) = 0;///< abstract cut function, has to be overwritten by derived class
   virtual bool accept( const StKinkMuDst*  ) = 0;///< abstract cut function, has to be overwritten by derived class
 
-  bool StMuCut::leave(bool b, unsigned int counter[2]); ///< increment pass/fail counter (2nd argument) depending on 1st argument and return 1st argument
+  bool leave(bool b, unsigned int counter[2]); ///< increment pass/fail counter (2nd argument) depending on 1st argument and return 1st argument
 
   // counters for passed and failed calls to cut
   unsigned int mNStEvent[2];    
@@ -81,6 +81,9 @@ inline bool StMuCut::pass( const StKinkMuDst* k) {    return leave( accept(k), m
 /***************************************************************************
  *
  * $Log: StMuCut.h,v $
+ * Revision 1.4  2003/09/10 22:33:41  perev
+ * Grid for MuDst corrections
+ *
  * Revision 1.3  2002/09/11 21:02:41  laue
  * added cut on track encoded method for ITTF
  *

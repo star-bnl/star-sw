@@ -12,10 +12,10 @@
 //#include "St_io_Maker/St_io_Maker.h"
 #include "St_xdfin_Maker/St_xdfin_Maker.h"
 
-enum { kStTREE=1,kStXDF=2,kStMDC2=3,kStDAQ=4 };
-const char  IOFMTS[] = "root xdf  mdc2 daq ";
-const char *IOCLAS[] = {0,"StTreeMaker","St_xdfin_Maker","St_io_Maker","StDAQMaker"};
-const char *IONAME[] = {0,"Root","XDF","MDC2","DAQ"};
+enum { kStTREE=1,kStXDF=2,kStMDC2=3,kStDAQ=4, kStMuDst=5 };
+const char  IOFMTS[] = "root  xdf   mdc2  daq   mudst ";
+const char *IOCLAS[] = {0,"StTreeMaker","St_xdfin_Maker","St_io_Maker","StDAQMaker","StMuIOMaker"};
+const char *IONAME[] = {0,"Root","XDF","MDC2","DAQ","MuDst"};
 
 ClassImp(StIOMaker)
 
@@ -123,7 +123,7 @@ Int_t StIOMaker::OpenRead()
 
   const char *cc = strstr(IOFMTS,(const char*)fmt);
   if (!cc) return kStErr;
-  fCase = (cc-IOFMTS)/5+1; 
+  fCase = (cc-IOFMTS)/6+1; 
 
   if (!fFmtMk[fCase-1]) fFmtMk[fCase-1] = Load();
   fCurrMk = fFmtMk[fCase-1];
