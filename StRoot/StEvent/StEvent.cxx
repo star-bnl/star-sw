@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.12 1999/07/19 20:07:32 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.13 1999/07/20 15:48:51 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.12  1999/07/19 20:07:32  fisyak
- * add delete of mPrimaryVertex
+ * Revision 1.13  1999/07/20 15:48:51  fisyak
+ * Don't delete mPrimaryVertex
+ *
+ * Revision 1.13  1999/07/20 15:48:51  fisyak
+ * Don't delete mPrimaryVertex
  *
  * Revision 1.12  1999/07/19 20:07:32  fisyak
  * add delete of mPrimaryVertex
@@ -89,16 +92,16 @@
 #include "TBrowser.h"
 #if !defined(ST_NO_NAMESPACES) 
 using namespace std;
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.12 1999/07/19 20:07:32 fisyak Exp $";
+#endif
  extern "C" {int isprint(int);}
  *
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.12 1999/07/19 20:07:32 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.13 1999/07/20 15:48:51 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
     init();
 #include "StTpcHitCollection.h"
-static const char rcsid[] = "$Id: StEvent.cxx,v 1.12 1999/07/19 20:07:32 fisyak Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 1.13 1999/07/20 15:48:51 fisyak Exp $";
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
 St_DataSet("StEvent")
 #include "StEmcCollection.h"
@@ -126,7 +129,7 @@ StEvent::operator=(const StEvent&) { return *this;} // private
 
     mTime  = evtHdr.time;
     mTriggerMask = evtHdr.trig_mask;
-    SafeDelete(mPrimaryVertex);
+    // SafeDelete(mRun);             Open question?
     // SafeDelete(mPrimaryVertex);   No, is deleted below in vertex collection
     SafeDelete(mSummary);
     //    SafeDelete(mPrimaryVertex);
