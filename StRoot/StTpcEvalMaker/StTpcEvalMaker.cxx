@@ -1,16 +1,18 @@
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 // For StTpcEvalMaker
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 // author: milton toy
 // additions: manuel cbs
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 // class definition of StTpcEvalMaker
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 //-----------------------------------------------------------------------
-// loosely based on
-// * $Id: StTpcEvalMaker.cxx,v 1.1.1.1 2000/05/23 00:25:03 snelling Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.2 2000/05/24 19:20:52 snelling Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.2  2000/05/24 19:20:52  snelling
+// * Fixed distance std function for Solaris
+// *
 // * Revision 1.1.1.1  2000/05/23 00:25:03  snelling
 // * Milton's and Manuel's version
 // *
@@ -21,6 +23,10 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <iterator>
+#if !defined(ST_NO_NAMESPACES)
+using std::distance;
+#endif
 #include <math.h>
 
 #include "StGlobals.hh"
@@ -57,34 +63,39 @@
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.1.1.1 2000/05/23 00:25:03 snelling Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.2 2000/05/24 19:20:52 snelling Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
   // TO DO:
-  // database interface
   // inclusion of vertex information
   // id number for StGlobalTrack (may not be necessary)
   // and....
 //-------------------------------------------------
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 StTpcEvalMaker::StTpcEvalMaker(const char *name, const char *title):StMaker(name,title)
 {
   //
 }
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 StTpcEvalMaker::~StTpcEvalMaker()
 {
   //
 }
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 void StTpcEvalMaker::Clear(const char*)
 {
   StMaker::Clear();
 }
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 Int_t StTpcEvalMaker::Finish()
 {
     cout << " StTpcEvalMaker:  Writing out histograms..." <<endl;
@@ -95,7 +106,9 @@ Int_t StTpcEvalMaker::Finish()
 
     return StMaker::Finish();
 }
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 Int_t StTpcEvalMaker::Init()
 {
     // Create the event structure.
@@ -121,7 +134,7 @@ Int_t StTpcEvalMaker::Init()
     histograms.Book();
     return StMaker::Init();
 }
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 Int_t StTpcEvalMaker::Make()
 {
@@ -135,12 +148,7 @@ Int_t StTpcEvalMaker::Make()
 	cout<<" StTpcDb NOT FOUND!!!"<<endl;
 	return kStErr;
     }
-    
-    // event data -- why are the methods to get StEvent and StMcEvent
-    // so different? Because StEvent is persistent, and StMcEvent is not
-    // One inherits from St_DataSet, the other one does not
-    
-    
+        
     mStEvent = (StEvent*) GetInputDS("StEvent");
     mStMcEvent =  ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
     if (!(mStEvent && mStMcEvent)) {
@@ -149,9 +157,6 @@ Int_t StTpcEvalMaker::Make()
     }
     
     // StAssociationMaker multimaps
-    // ditto the complaints given above...
-    // mcbs: modified to no longer use a global pointer, and gave more consistent
-    // titles
     StAssociationMaker* assoc = 
 	(StAssociationMaker*) GetMaker("StAssociationMaker");
     if (!assoc) {
@@ -167,9 +172,8 @@ Int_t StTpcEvalMaker::Make()
 	gMessMgr->Warning() << "Missing multimaps!!! " << endm;
 	return kStWarn;
     }
-    //
+
     // analyze data using StTpcEvalMaker methods
-    //
 
     fillHeader();
     mcHitIteration();
@@ -183,17 +187,20 @@ Int_t StTpcEvalMaker::Make()
     return kStOK;
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::fillHeader() {
 
-    UInt_t geantTrks, globTrks, geantPrimaries, recoPrimaries, geantTpcHits, recoTpcHits;
-    geantTrks = globTrks = geantPrimaries = recoPrimaries = geantTpcHits = recoTpcHits = 0;
+    UInt_t globTrks, geantPrimaries, recoPrimaries, geantTpcHits, recoTpcHits;
+    globTrks = geantPrimaries = recoPrimaries = geantTpcHits = recoTpcHits = 0;
 
     // Only count g2t tracks.
     StMcTrackIterator mcTrkIter2 = mStMcEvent->tracks().begin();
     while (mcTrkIter2 != mStMcEvent->tracks().end() && !((*mcTrkIter2)->key())) ++mcTrkIter2;
-    geantTrks = distance (mcTrkIter2, mStMcEvent->tracks().end());
+    //changed to old style distance function because of sun compiler
+    unsigned int geantTrks = 0;
+    distance(mcTrkIter2, mStMcEvent->tracks().end(), geantTrks);
+    //    geantTrks = distance(mcTrkIter2, mStMcEvent->tracks().end());
 					 
     globTrks = mStEvent->trackNodes().size();
     geantPrimaries = mStMcEvent->primaryVertex()->daughters().size();
@@ -204,7 +211,7 @@ void StTpcEvalMaker::fillHeader() {
     mTpcEvalEvent->SetHeader(geantTrks, globTrks, geantPrimaries, recoPrimaries, geantTpcHits, recoTpcHits);
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::mcHitIteration() {
     
@@ -260,7 +267,7 @@ void StTpcEvalMaker::mcHitIteration() {
     
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::rcHitIteration() {
     
@@ -312,7 +319,7 @@ void StTpcEvalMaker::rcHitIteration() {
     }
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::mcTrackIteration() {
 
@@ -383,7 +390,7 @@ void StTpcEvalMaker::mcTrackIteration() {
 
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::rcTrackIteration() {
 
@@ -427,6 +434,8 @@ void StTpcEvalMaker::rcTrackIteration() {
 // association maps...
 //-------------------------------------------------
 
+//-----------------------------------------------------------------------
+
 void StTpcEvalMaker::addMcTrack(StMcTrack* mcTrack, mcTrackInfo* mcInfo) {
   //
   // Fill mcTrackInfo
@@ -449,7 +458,7 @@ void StTpcEvalMaker::addMcTrack(StMcTrack* mcTrack, mcTrackInfo* mcInfo) {
   mcInfo->setMatchedHits(matchedHits);
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::addRcTrack(StGlobalTrack* rcTrack, rcTrackInfo* rcInfo) {
   //
@@ -494,7 +503,7 @@ void StTpcEvalMaker::addRcTrack(StGlobalTrack* rcTrack, rcTrackInfo* rcInfo) {
   rcInfo->setMatchedHits(matchedHits);
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalMaker::scanTrackPair(MatchedTrackPair* trackPair, StMcTrack* mcTrack, StGlobalTrack* rcTrack) {
     //
@@ -554,5 +563,4 @@ void StTpcEvalMaker::scanTrackPair(MatchedTrackPair* trackPair, StMcTrack* mcTra
     
 }
 
-//-------------------------------------------------
-
+//-----------------------------------------------------------------------
