@@ -3,6 +3,7 @@
 #include <math.h>
 
 //Sti
+#include "StiKTNIterator.h"
 #include "StiHit.h"
 #include "StiDefaultMutableTreeNode.h"
 #include "StiKalmanTrackNode.h"
@@ -366,6 +367,7 @@ void StiKalmanTrack::initialize(double curvature,
 	pNode = node;
 	i++;
       }
+    setSeedHitCount(v.size());
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
@@ -541,14 +543,23 @@ double  StiKalmanTrack::getChi2() const
 
 int    StiKalmanTrack::getFitPointCount()    const  
 {
-  // return number of points used in fit
+    // return number of points used in fit 
     return nFitPts;
 }
 
 int    StiKalmanTrack::getPointCount()       const  
 {
     // return number of points associated with track
-    return nPts;
+    StiKTNForwardIterator it(getLastNode());
+    StiKTNForwardIterator end = it.end();
+    int npoints = 0;
+    
+    while( it!=end ) {
+	if ( (*it++).getHit()!=0 ) { //there's a hit
+	    ++npoints;
+	}
+    }
+    return npoints;
 }
 
 
