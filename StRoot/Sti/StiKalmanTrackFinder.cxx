@@ -15,12 +15,12 @@
 */
 
 /*
-  StiKalmanTrackFinder  
+  \class StiKalmanTrackFinder  
   
-  Author:  Claude Pruneau, Wayne State University                        
-  Created: March 2001                                                    
+  \author  Claude Pruneau, Wayne State University                        
+  \date March 2001                                                    
   
-  Important Note: The Kalman Filter Code imbedded in this class was given
+  \note The Kalman Filter Code imbedded in this class was given
   to us gracioulsy by Jouri Belikov from the ALICE       
   collaboration. i.e. code reproduced with autorization. 
 */
