@@ -10,7 +10,7 @@ St_ftpcClusterPars *tableSet = new St_ftpcClusterPars("ftpcClusterPars",1);
 //
 memset(&row,0,tableSet->GetRowSize());
     row.gaussFittingFlags         =          0; // 2=time gaussfit, 3=all gaussfit ;
-    row.minimumClusterMaxADC      =         15; // cluster minimum peakheight ;
+    row.minimumClusterMaxADC      =          0; // cluster minimum peakheight ;
     row.numberOfDriftSteps        =      25600; // # of steps in padtrans integration ;
     row.orderOfDiffusionErrors    =          3; // order of diffusion errors; 
     row.padDiffusionErrors[0]     =      0.015; // function of driftlength up to 2nd order;
@@ -49,7 +49,7 @@ memset(&row,0,tableSet->GetRowSize());
     // old settings
     row.maxNumSequences           =       160;  // max number of used sequences
     row.maxNumSeqPeaks            =       160;  // max number of peaks per sequence
-    row.maxNumPeaks               =        10;  // max number of unfolded peaks per cluster
+    row.maxNumPeaks               =       160;  // max number of unfolded peaks per cluster
     row.maxNumCUC                 =       128;  // max number of cluster under construction
     row.maxLoops                  =       100;  // max loopnumber in unfolding
     row.maxFastLoops              =        30;  // max loopnumber in fast unfolding
@@ -57,7 +57,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.unfoldFailedLimit         =      0.50;  // limit for failed unfolding
     row.maxTimelength             =       100;  // max timelength of cluster
     row.maxPadlength              =       100;  // max padlength of cluster
-    row.minTimebin                =         3;  // min timebin for cluster search
+    row.minTimebin                =         5;  // min timebin for cluster search
     
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
