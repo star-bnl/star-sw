@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.100 2004/07/27 00:34:43 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.101 2004/07/29 20:35:37 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -732,7 +732,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   TString sel("^StSPtrVec");
 
   Style_t defSty=0; Size_t defSiz = 0; Color_t defCol= 0;
-  TObjArray *shaps =0;
+  TObjArray *shaps =0,*shapz=0;
 
 
   switch (kase) {
@@ -743,16 +743,26 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
       else     {sel.Append(pos[1],keyLen);} 
       sel += ".*Hit$";
       shaps = mEventHelper->SelHits  (sel.Data(),(kase>>2)&3);
+      sel.ReplaceAll(".*Hit",".*Point");
+      shapz = mEventHelper->SelHits  (sel.Data(),(kase>>2)&3);
+      if (!shaps){ shaps = shapz; break;}
+      if ( shapz){ shaps->AddAll(shapz); delete shapz;}
       break;
 
     case kTRK:;
-    case kTRK|kHIT:;
-      if (kase&kHIT) kase -= kHIT;
       if (all) { 
-        shaps = mEventHelper->SelTracks(kase&3);
+        shaps = mEventHelper->SelTracks(kTRK);
       } else {
         sel.Append(pos[1],keyLen); sel +="Vertex$";
-        shaps = mEventHelper->SelVertex(sel.Data(),kase&3);
+        shaps = mEventHelper->SelVertex(sel.Data(),kTRK);
+      } 
+      break;
+    case kTRK|kHIT:;
+      if (all) { 
+        shaps = mEventHelper->SelTracks(kHIT);
+      } else {
+        sel.Append(pos[1],keyLen); sel +="Vertex$";
+        shaps = mEventHelper->SelVertex(sel.Data(),kHIT);
       } 
       break;
 
@@ -1133,6 +1143,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.101  2004/07/29 20:35:37  fine
+// Fix priblem with Emv his and default hit color
+//
 // Revision 1.100  2004/07/27 00:34:43  perev
 // StrangeBugFix
 //

@@ -319,11 +319,10 @@ TObjArray *StEventHelper::SelHits(const char *RegEx, Int_t un)
     if (!arr)		continue;
     int sz = arr->size();
     if (!sz)		continue;
-    if (strcmp("StSPtrVecEmcRawHit",arr->ClassName())==0) continue; //VP Hack
+    if (!arr->at(0)->InheritsFrom(StHit::Class())) continue;
     for(int ih=0;ih<sz; ih++) {
       StHit *hit = (StHit*)arr->at(ih);
       if (!hit) 	continue;
-      Assert(hit->InheritsFrom(StHit::Class()));
       int used = (hit->trackReferenceCount()!=0);
       if (used==1 && (un&1)==0) continue;
       if (used==0 && (un&2)==0) continue;
@@ -679,7 +678,9 @@ Int_t StFilterDef::Accept(StPoints3DABC *pnt,Color_t &color, Size_t&, Style_t&)
    float x,y,z,r2xy,phid,len,pt,ps,q;
    TObject *to;
    StTrack *trk;
-   
+    // set default color for tracks
+   color = (((color-kRed)+1)%6)+kRed;
+
    int cut = 1;
    if (fRandomSelect < 1. && fRandomSelect < rrr.Rndm())return 0;
  
@@ -700,7 +701,7 @@ Int_t StFilterDef::Accept(StPoints3DABC *pnt,Color_t &color, Size_t&, Style_t&)
    if (!to->InheritsFrom(StTrack::Class()))		return 1;
 
    // set default color for tracks
-   color = (((color-kRed)+1)%6)+kRed;
+   // color = (((color-kRed)+1)%6)+kRed;
 
    trk = (StTrack*)to;
    len = trk->length();
