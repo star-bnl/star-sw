@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.18 2002/09/19 16:17:49 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.19 2002/09/20 19:35:25 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.19  2002/09/20 19:35:25  caines
+// Change building of file name
+//
 // Revision 1.18  2002/09/19 16:17:49  caines
 // Add code to do Juns gain calibration
 //
@@ -68,6 +71,7 @@
 
 #include <iostream.h>
 #include <fstream.h>
+#include <string>
 
 class TH1D;
 class TH2F;
@@ -158,7 +162,8 @@ class StSvtSeqAdjMaker : public StMaker
   float adcCommon[128];
 
  private:
-
+  string buildFileName(string dir, string fileName, string extention);
+  string baseName(string s);
   ClassDef(StSvtSeqAdjMaker,1)   //virtual base class for Makers
 
 };
