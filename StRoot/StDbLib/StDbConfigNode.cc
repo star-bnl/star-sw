@@ -131,6 +131,18 @@ StDbConfigNode::printTree(){
 ////////////////////////////////////////////////////////////////////////
 
 StDbTable*
+StDbConfigNode::addDbTable(const char* tableName, char* version, int elementID){
+  // just like addTable but also loads the descriptor from the database
+
+  StDbTable* table = addTable(tableName,version,elementID);
+  StDbServer* server = StDbManager::Instance()->findServer(mdbType, mdbDomain);
+  if(server)server->QueryDescriptor(table);
+  return table;
+}
+
+////////////////////////////////////////////////////////////////////////
+
+StDbTable*
 StDbConfigNode::addTable(const char* tableName, char* version, int elementID){
 
   if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mdbType);
