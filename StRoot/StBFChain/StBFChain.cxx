@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.325 2003/03/05 19:35:09 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.326 2003/04/07 22:01:14 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -148,6 +148,8 @@ Bfc_st BFC1[] = {
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                   ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+                  ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
 
 
 
@@ -619,7 +621,8 @@ Bfc_st BFC2[] = {
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                   ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
-
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+                  ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc",kFALSE},
 
 
   // Other chains/Calibration
