@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.2 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.3 2002/04/15 22:18:15 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -80,12 +80,14 @@ string StMuChainMaker::dirname(string s){
 TChain*  StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
   TChain* chain;
+  mSubFilters = subFilter(filter);
+
   if (file!="") {
-    if (file.find(".lis")!=string::npos) chain =  fromList(dir, file, maxFiles);
-    if (file.find(".MuDst.root")!=string::npos) chain = fromFile(dir,file, maxFiles);
+    if (file.find(".lis")!=string::npos) chain =  fromList(file, maxFiles);
+    if (file.find(".MuDst.root")!=string::npos) chain = fromFile(file, maxFiles);
   }
   else {
-    chain = fromDir(dir,filter, maxFiles);
+    chain = fromDir(dir, maxFiles);
   }
   DEBUGMESSAGE2("return");
   return chain;
@@ -112,10 +114,9 @@ string**  StMuChainMaker::subFilter(string filter) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromDir(string dir, string filter, int maxFiles) {
+TChain* StMuChainMaker::fromDir(string dir, int maxFiles) {
   DEBUGMESSAGE2("");
   TChain* chain = new TChain(mTreeName.c_str());
-  mSubFilters = subFilter(filter);
   DEBUGVALUE(gSystem);
 
   void *pDir = gSystem->OpenDirectory(dir.c_str());
@@ -144,7 +145,7 @@ TChain* StMuChainMaker::fromDir(string dir, string filter, int maxFiles) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromList(string dir, string list, int maxFiles) {
+TChain* StMuChainMaker::fromList(string list, int maxFiles) {
   DEBUGMESSAGE2("");
   TChain* chain = new TChain(mTreeName.c_str());
   ifstream* inputStream = new ifstream;
@@ -159,10 +160,12 @@ TChain* StMuChainMaker::fromList(string dir, string list, int maxFiles) {
   for (;inputStream->good();) {
     temp = new char[200];
     inputStream->getline(temp,200);
-    cout <<temp << endl;
-    chain->Add( temp, mDbReader->entries(temp) );
+    if ( pass(temp,mSubFilters) ) {
+      cout << temp << endl;
+      chain->Add( temp, mDbReader->entries(temp) );
+      ++fileCount;
+    }
     delete temp;
-    ++fileCount;
     if (fileCount>maxFiles) break;
   }   
   delete inputStream;
@@ -172,12 +175,12 @@ TChain* StMuChainMaker::fromList(string dir, string list, int maxFiles) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-TChain* StMuChainMaker::fromFile(string dir, string file, int maxFiles) {
+TChain* StMuChainMaker::fromFile(string file, int maxFiles) {
   DEBUGMESSAGE2("");
   TChain* chain = new TChain(mTreeName.c_str());
   cout << mTreeName.c_str() << endl;
   chain->Add( file.c_str(), mDbReader->entries(file.c_str()) );
-  return 0;
+  return chain;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -194,6 +197,9 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.3  2002/04/15 22:18:15  laue
+ * bug fix in reading of single file
+ *
  * Revision 1.2  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes
