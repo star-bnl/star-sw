@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.29 2004/06/05 23:40:49 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.30 2004/06/10 19:09:30 fisyak Exp $
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 // ROOT
@@ -119,9 +119,12 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
 }
 //_____________________________________________________________________________
 Int_t StdEdxY2Maker::Init(){
+  Int_t mode = m_Mode;
   if (m_Mode == -10 || m_Mode == 0) { // default
     //    SETBIT(m_Mode,kOldClusterFinder); 
+    m_Mode = 0;
     SETBIT(m_Mode,kPadSelection); 
+    if (mode == -10) SETBIT(m_Mode,kDoNotCorrectdEdx); 
   }
   if (Debug()) {
     if (! TESTBIT(m_Mode, kOldClusterFinder)) 
@@ -507,8 +510,6 @@ Int_t StdEdxY2Maker::Make(){
       D70 += dEdxS[k].dEdx*dEdxS[k].dEdx;
       TrackLength70 += dEdxS[k].dx;
     }
-    Double_t chisq, fitZ, fitdZ;
-    DoFitZ(chisq, fitZ, fitdZ);
     St_tpcCorrectionC    *m_TpcLengthCorrection = 0;
     St_tpcCorrectionC    *m_TpcdEdxCor          = 0;
     if (  m_TpcdEdxCorrection ) {  
@@ -548,19 +549,22 @@ Int_t StdEdxY2Maker::Make(){
     gTrack->addPidTraits(new StDedxPidTraits(dedx));
     if (pTrack) pTrack->addPidTraits(new StDedxPidTraits(dedx));
     if (tTrack) tTrack->addPidTraits(new StDedxPidTraits(dedx));
-    if (m_TpcLengthCorrection) {
-      fitZ -= m_TpcLengthCorrection->CalcCorrection(4,LogTrackLength);
-      if (NRrowsTL > 12 && (TESTBIT(m_Mode, kOldClusterFinder))) 
-	fitZ -= m_TpcLengthCorrection->CalcCorrection(12,LogTrackLength);
-      //	fitdZ = m_TpcLengthCorrection->CalcCorrection(5,LogTrackLength);
-      St_tpcCorrectionC    *m_TpcdEdxCor = m_TpcdEdxCorrection->TpcdEdxCor();
-      if (m_TpcdEdxCor) {
-	Double_t I70L = TMath::Log(1.e6) + fitZ;
-	if (I70L > 0) 
-	  fitZ -= m_TpcdEdxCor->SumSeries(0,I70L);
-      }
-    }
+    // likelihood fit
+    Double_t chisq, fitZ, fitdZ;
+    DoFitZ(chisq, fitZ, fitdZ);
     if (chisq >0 && chisq < 10000.0) {
+      if (m_TpcLengthCorrection) {
+	fitZ -= m_TpcLengthCorrection->CalcCorrection(4,LogTrackLength);
+	if (NRrowsTL > 12 && (TESTBIT(m_Mode, kOldClusterFinder))) 
+	  fitZ -= m_TpcLengthCorrection->CalcCorrection(12,LogTrackLength);
+	//	fitdZ = m_TpcLengthCorrection->CalcCorrection(5,LogTrackLength);
+	St_tpcCorrectionC    *m_TpcdEdxCor = m_TpcdEdxCorrection->TpcdEdxCor();
+	if (m_TpcdEdxCor) {
+	  Double_t I70L = TMath::Log(1.e6) + fitZ;
+	  if (I70L > 0) 
+	    fitZ -= m_TpcdEdxCor->SumSeries(0,I70L);
+	}
+      }
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
       dedx.method    =  kLikelihoodFitIdentifier;
@@ -1281,16 +1285,14 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	if (Time)    Time->Fill(date,FdEdx[k].dEUdxN);
 	if (TimeP)  TimeP->Fill(date,FdEdx[k].dEPdxN);
 	if (TimeC)  TimeC->Fill(date,FdEdx[k].dEdxN);
-	Int_t SectN = FdEdx[k].sector; // drift distance
-	if (FdEdx[k].row < 14) SectN += 24;
-	if (Z3O)  Z3O->Fill(SectN,FdEdx[k].ZdriftDistanceO2,FdEdx[k].dEPdxN);
-	if (Z3OA)Z3OA->Fill(SectN,FdEdx[k].ZdriftDistanceO2,FdEdx[k].dEOdxN);
-	if (Z3OC)Z3OC->Fill(SectN,FdEdx[k].ZdriftDistanceO2,FdEdx[k].dEdxN);
-	if (Z3)    Z3->Fill(SectN,FdEdx[k].ZdriftDistance,  FdEdx[k].dEOdxN);
-	if (Z3A)  Z3A->Fill(SectN,FdEdx[k].ZdriftDistance,  FdEdx[k].dEZdxN);
-	if (Z3C)  Z3C->Fill(SectN,FdEdx[k].ZdriftDistance,  FdEdx[k].dEdxN);
-	if (ETA)  ETA->Fill(SectN,eta,FdEdx[k].dEdxN);
-	if (ETA3)ETA3->Fill(SectN,eta,FdEdx[k].dEdxN);
+	if (Z3O)  Z3O->Fill(FdEdx[k].row+0.5,FdEdx[k].ZdriftDistanceO2,FdEdx[k].dEPdxN);
+	if (Z3OA)Z3OA->Fill(FdEdx[k].row+0.5,FdEdx[k].ZdriftDistanceO2,FdEdx[k].dEOdxN);
+	if (Z3OC)Z3OC->Fill(FdEdx[k].row+0.5,FdEdx[k].ZdriftDistanceO2,FdEdx[k].dEdxN);
+	if (Z3)    Z3->Fill(FdEdx[k].row+0.5,FdEdx[k].ZdriftDistance,  FdEdx[k].dEOdxN);
+	if (Z3A)  Z3A->Fill(FdEdx[k].row+0.5,FdEdx[k].ZdriftDistance,  FdEdx[k].dEZdxN);
+	if (Z3C)  Z3C->Fill(FdEdx[k].row+0.5,FdEdx[k].ZdriftDistance,  FdEdx[k].dEdxN);
+	if (ETA)  ETA->Fill(FdEdx[k].row+0.5,eta,FdEdx[k].dEdxN);
+	if (ETA3)ETA3->Fill(FdEdx[k].row+0.5,eta,FdEdx[k].dEdxN);
 	if (m_trig && m_trig->mult > 0) {
 	  if (MulRow)   MulRow->Fill(TMath::Log10(m_trig->mult),FdEdx[k].row+0.5,FdEdx[k].dEZdxN);
 	  if (MulRowC) MulRowC->Fill(TMath::Log10(m_trig->mult),FdEdx[k].row+0.5,FdEdx[k].dEdxN);
