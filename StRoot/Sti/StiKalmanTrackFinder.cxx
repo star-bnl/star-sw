@@ -301,13 +301,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   leadDet = sDet;
 
 	////
-  vector<StiHit*> & hits = _hitContainer->getHits();
-	for (vector<StiHit*>::const_iterator iii=hits.begin();
-			 iii!=hits.end();
-			 ++iii)
-		{
-		  //cout << **iii<<endl;
-		}
+
   StiKalmanTrackNode testNode;
   StiDetector * currentDet;
   while (!trackDone) 
