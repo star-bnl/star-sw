@@ -1,5 +1,8 @@
-* $Id: tgc_global_to_local.F,v 1.7 1998/11/19 21:06:34 sakrejda Exp $
+* $Id: tgc_global_to_local.F,v 1.8 1998/12/08 05:47:26 sakrejda Exp $
 * $Log: tgc_global_to_local.F,v $
+* Revision 1.8  1998/12/08 05:47:26  sakrejda
+* transformation global->local fixed, it was messed up to compensate for a tss problem
+*
 * Revision 1.7  1998/11/19 21:06:34  sakrejda
 * transformations updated one more time, this time checked by Lidia for simulations and Eric for test data
 *
@@ -51,13 +54,13 @@ C
          isect=15-isect
          if(isect.gt.12) isect=isect-12
          b_rot=real(isect)*(C_PI_2/3.)
-         ff=1.0
+         ff=-1.0
       else
          isect=isect+9
          if(isect.le.12) isect=isect+12
          xlocal(3)=xglobal(3)+drift_vol_length
          b_rot=real(24-isect)*(C_PI_2/3.)
-         ff=-1.0
+         ff=1.0
       endif
       xlocal(1)=ff*(xglobal(1)*cos(b_rot)-xglobal(2)*sin(b_rot))
       xlocal(2)=xglobal(1)*sin(b_rot)+xglobal(2)*cos(b_rot)

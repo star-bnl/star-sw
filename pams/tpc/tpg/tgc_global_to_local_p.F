@@ -1,5 +1,8 @@
-* $Id: tgc_global_to_local_p.F,v 1.7 1998/11/19 21:06:35 sakrejda Exp $
+* $Id: tgc_global_to_local_p.F,v 1.8 1998/12/08 05:47:27 sakrejda Exp $
 * $Log: tgc_global_to_local_p.F,v $
+* Revision 1.8  1998/12/08 05:47:27  sakrejda
+* transformation global->local fixed, it was messed up to compensate for a tss problem
+*
 * Revision 1.7  1998/11/19 21:06:35  sakrejda
 * transformations updated one more time, this time checked by Lidia for simulations and Eric for test data
 *
@@ -33,10 +36,10 @@ C     plocal - momentum in local coordinate system
       plocal(3)=-pglobal(3)
       if(isect.le.12) then    
         b_rot=real(isect)*(C_PI_2/3.)
-        ff=1.0
+        ff=-1.0
       else
         b_rot=real(24-isect)*(C_PI_2/3.)
-        ff=-1.0
+        ff=1.0
       endif
       plocal(1)=ff*(pglobal(1)*cos(b_rot)-pglobal(2)*sin(b_rot))
       plocal(2)=pglobal(1)*sin(b_rot)+pglobal(2)*cos(b_rot)
