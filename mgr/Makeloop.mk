@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.16  1998/09/16 21:52:14  fisyak
+#  Add dependencies for StRoot
+#
 #  Revision 1.15  1998/09/15 22:15:29  fisyak
 #  Fix root/noroot options
 #
@@ -127,7 +130,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/09/15 22:15:29 $ 
+#           Last modification $Date: 1998/09/16 21:52:14 $ 
 #  default setings
 # Current Working Directory
 #
@@ -252,7 +255,7 @@ endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
 TARGETS += St_Tables
 endif
-ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StCahin))
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StChain))
 TARGETS += StChain
 endif
 ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/St_*_Maker))
@@ -268,28 +271,20 @@ Makers  :=  $(filter-out St_ebye_Maker, $(Makers))
 all:  $(BASE) $(XDF2ROOT)  $(TARGETS)
 ifndef NOROOT
 ROOT:      St_base xdf2root St_Makers StChain St_Tables
-St_base:   $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
-xdf2root:  $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
-St_Makers: $(addprefix $(ROOT_DIR)/.$(STAR_SYS)/lib/, $(addsuffix .so, $(Makers)))
-St_Tables: St_base $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so St_base
-StChain:   $(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
-$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so:    $(wildcard $(ROOT_DIR)/StRoot/base/*.*) 
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base    SO_LIB=$(ALL_TAGS)
-$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so:   $(wildcard $(ROOT_DIR)/StRoot/xdf2root/*.*) \
-                                            $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ALL_TAGS)
-$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so:  $(wildcard $(ROOT_DIR)/.share/tables/St*.*) \
-                                                  $(ROOT_DIR)/StRoot/base/St_DataSet.h
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS) NODEBUG=YES
+St_base:
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/base  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
+xdf2root:
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
+St_Makers: $(Makers)
+StChain:   
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain    SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so
+St_Tables:
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so NODEBUG=YES
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
 	root.exe -b -q MakeHtmlTables.cxx
 endif
-$(ROOT_DIR)/.$(STAR_SYS)/lib/St_%_Maker.so: $(wildcard $(ROOT_DIR)/StRoot/St_%_Maker/St*.*) \
-                                            $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ALL_TAGS)
-$(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so:    $(wildcard $(ROOT_DIR)/StRoot/StChain/St*.*) \
-                                            $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ALL_TAGS)
+St_%_Maker: 
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_$(STEM)_Maker.so
 endif
 %_all:  $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
 	$(MAKE) -f $(MakePam) -C $(STEM) $(MAKFLAGS) 
