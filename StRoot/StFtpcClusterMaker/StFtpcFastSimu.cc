@@ -1,6 +1,11 @@
-// $Id: StFtpcFastSimu.cc,v 1.26 2003/09/02 17:58:14 perev Exp $
+// $Id: StFtpcFastSimu.cc,v 1.27 2003/10/10 12:36:16 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.27  2003/10/10 12:36:16  jcs
+// implement new FTPC geant volume id method
+// initialize counters and arrays to zero
+// replace many int,float's wiht Int_t,Float_t
+//
 // Revision 1.26  2003/09/02 17:58:14  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -105,6 +110,9 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
 {
   //-----------------------------------------------------------------------
   
+  // zero everything that is possible
+  memset(&mStart,0,&mEnd-&mStart+1);
+	
   // store Readers in data members
   mParam=paramReader;
   mDb   =dbReader;
@@ -117,8 +125,10 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   mGeantPoint=new StFtpcGeantPoint[nPoints];
 
   nPadrows = mDb->numberOfPadrows();
-  nrowmax = new int[nPadrows];
-  nrow = new int[nPadrows*nPoints];
+  nrowmax = new Int_t[nPadrows];
+  memset(nrowmax,0,nPadrows*sizeof(Int_t));
+  nrow = new Int_t[nPadrows*nPoints];
+  memset(nrow,0,(nPadrows*nPoints)*sizeof(Int_t));
 
   //    check that fppoint and gepoint are large enough to hold g2t_ftp_hit
 
@@ -363,12 +373,7 @@ int StFtpcFastSimu::ffs_hit_rd()
 	  {
 	    mGeantPoint[ih].SetPrimaryTag(-1*mGeantPoint[ih].GetPrimaryTag());
 	  }
-	int temp=mGeant->geantVolume(ih) - mParam->ftpcWestGeantVolumeId();
-	if (temp > mDb->numberOfPadrowsPerSide())
-	  {
-	    temp = mGeant->geantVolume(ih) - mParam->ftpcEastGeantVolumeId() + mDb->numberOfPadrowsPerSide();
-	  }
-	mPoint[ih].SetPadRow(temp);
+	mPoint[ih].SetPadRow(mGeant->geantPlane(mGeant->geantVolume(ih)));
 
 	// Vertex-Momenta
 	mGeantPoint[ih].SetVertexMomentum(mGeant->pVertexX(ih),mGeant->pVertexY(ih),mGeant->pVertexZ(ih));
@@ -542,21 +547,21 @@ int StFtpcFastSimu::ffs_ini()
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_merge_tagger()
+Int_t StFtpcFastSimu::ffs_merge_tagger()
   {
     // Local Variables:
-    int id_1, id_2, rem_count1, rem_count2, n_gepoints;
-    float sig_azi_1, v1, sig_rad_1;
-    float dist_rad_in, dist_rad_out;
-    float delta_azi, delta_r;
+    Int_t id_1, id_2, rem_count1, rem_count2, n_gepoints;
+    Float_t sig_azi_1, v1, sig_rad_1;
+    Float_t dist_rad_in, dist_rad_out;
+    Float_t delta_azi, delta_r;
 
     // Loop Variables
-    int h,i,j,k;
+    Int_t h,i,j,k;
    
-    float * sigazi = new float[nPoints];
-    float * sigrad = new float[nPoints];
-    float * r1 = new float[nPoints];
-    float * phi1 = new float[nPoints];
+    Float_t * sigazi = new float[nPoints];
+    Float_t * sigrad = new float[nPoints];
+    Float_t * r1 = new float[nPoints];
+    Float_t * phi1 = new float[nPoints];
 
     //-----------------------------------------------------------------------
 
