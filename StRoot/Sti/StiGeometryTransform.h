@@ -70,8 +70,9 @@ public:
 
 public:
     //Hit Transform Functors (Transfrom from first argument to second argument)
-    void operator() (const StTpcHit*, StiHit*); //From Tpc -> Sti
-    void operator() (const StiHit*, StTpcHit*); //From Sti -> Tpc
+    //From Tpc -> Sti
+    void operator() (const StTpcHit*, StiHit*); 
+    void operator() (const StiHit*, StTpcHit*);    //From Sti -> Tpc
     
     void operator() (const StSvtHit*, StiHit*); //From Svt -> Sti
     void operator() (const StiHit*, StSvtHit*);  //From Sti -> Svt
