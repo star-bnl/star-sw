@@ -218,7 +218,7 @@ twFit( TH2* h2) {
   //f1->SetParameters(-80,30,1,0.1);// West
   f1->SetLineColor(kRed);
   f1->SetLineWidth(2.);
-  
+    
   h2->FitSlicesY();
   TH1D*hd= (TH1D*)gROOT->FindObject(tt+"_1");
   hd->SetMaximum(100);
