@@ -64,7 +64,7 @@ Widget gVer2;
 #define MCOL 12  /* max columns allowed to be selected in table win */
 #define EXT 13 /* length of constant beginning part of header info */
                /* (WFW+1)*NWF+EXT < COL */
-size_t LastRow(myBool,int);
+size_t LastRow(int,int);
 size_t FirstRow(int);
  /* comment 6tx tlm="ThisLineMeans".
     For TableBrowser windows
@@ -76,7 +76,7 @@ size_t FirstRow(int);
  /* 8tx Subscripting ruins 1-1 corres between columns and text lines
     that the user sees in the clickable window. */
 char gCuts[COL+4];
-myBool gBreakRowsLoop;
+int gBreakRowsLoop;
 #define RW 12  /* num Rows in Write part init (table window type only) */
 typedef struct {
   int    win_type;	/* one of WIN_TYPE_XXX */
@@ -92,7 +92,7 @@ typedef struct {
   int    width,ncol,nRowsWritePart;
   Widget shell,txtWidClickH,txtWidWriteH,rowWidget,rad[NUM_RADIO];
   Widget txtWidTop,txtWidClick,txtWidWrite;
-  myBool isHilited[MAX_LINES_CLICK_PART],useCuts;
+  int isHilited[MAX_LINES_CLICK_PART],useCuts;
   int hlLst[MAX_LINES_CLICK_PART]; /* in order that user clicked on them */
   int nhlLst;
   int    subscript[MAX_LINES_CLICK_PART]; /* see comment 8tx */

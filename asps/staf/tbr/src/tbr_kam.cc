@@ -70,22 +70,13 @@ int kam_tbr_list()
 *:* TBR/LAUNCH
 *:<---------------------------------------------------------------------
 */
-int kam_tbr_visualization_write()
-{
-   long npars = ku_npar();      /* number of KUIP parameters */
-
-   if( !tbr_MotifViewer->writeVisualization(dui->rootDO()) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-void kam_tbr_visualization_write_(){kam_tbr_visualization_write();}
 void kam_tbr_motif_viewdataset_(){kam_tbr_motif_viewdataset();}
 int kam_tbr_motif_viewdataset()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-   if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){
+   if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){ /* Craig. Used to be dui
+                                                       ** intead of tdm */
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);

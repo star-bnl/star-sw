@@ -15,6 +15,8 @@
 #include "asuAlloc.h"
 #include "asuLib.h"
 #include "socLib.h"
+/* #include "dioLib.h" Craig */
+/* #include "dioClasses.hh" Craig */
 #include "tdmLib.h"
 #include "top_macros.h"
 #include "top_types.h"

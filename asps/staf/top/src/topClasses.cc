@@ -187,18 +187,7 @@ char* topCut:: cutFunction() {
 // OVERRIDE socObject::listing()
 char * topCut::  listing () {
    char* c = socObject::listing();
-   char* cc = NULL;
-   char* m = dio_mode2text(mode());
-   char* s = dio_state2text(state());
-   char* l = location();
-   char* ll="                           ";
-   strncpy(ll,l,strlen(ll)-1);
-   cc = (char*)MALLOC(79);
-   memset(cc,0,79);
-   sprintf(cc,"%s (%c,%c) %s",c,m[0],s[0],ll);
-   FREE(c);
-   FREE(l);
-   return cc;
+   return c;				// HACK - WORK!!!
 }
 
 //:----------------------------------------------- INTERFACE METHODS  --
@@ -308,7 +297,7 @@ STAFCV_T topCut:: filter(tdmTable * tab1, tdmTable * tab2) {
    if( !DoFilterTable(tab1,tab2,myCutFunction,&orig,&percent) ){
       EML_ERROR(FILTER_FAILURE);
    }
-   printf("The original table had %d rows.  %d percent of these passed.\n",
+   printf("Your original table had %d rows.  %d percent of them passed.\n",
    orig,percent);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -323,7 +312,7 @@ STAFCV_T topCut:: cut(tdmTable * table1) {
    if( !DoCutTable(table1,myCutFunction,&orig,&percent) ){
       EML_ERROR(CUT_FAILURE);
    }
-   printf("The original table had %d rows.  %d percent of these passed.\n",
+   printf("Your original table had %d rows.  %d percent of them passed.\n",
    orig,percent);
    EML_SUCCESS(STAFCV_OK);
 }

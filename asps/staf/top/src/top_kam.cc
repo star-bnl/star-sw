@@ -402,8 +402,8 @@ STAFCV_T topcut_filter(char* agent, char* table1, char* table2
 	   EML_ERROR(KAM_OBJECT_NOT_FOUND);
          }
       }
-   }
-   else {
+   } else {
+      tbl2 = tdm->findTable(table2);
       if( !tbl2->isType(spec1) ){
 	 EML_ERROR(KAM_BAD_TABLE_TYPE);
       }
