@@ -1,108 +1,99 @@
-<job nProcesses="3" simulateSubmission ="false">
+<job nProcesses="10" simulateSubmission ="false">
    <command>       
    <![CDATA[
     time
-    # --------------------------
-    #  Some user constants
-    # --------------------------
 
-    set nSimulatedEvents=5
-    set ZEBRAOUTPUT=testpyth.fz
-    set HIJINGOUTPUT=evgen.1.nt
-    set finalDirectory=/star/data05/scratch/didenko/gridwork/hj/register
+# Useful tags
+    set JOBSEED = $PROCESSID$REQUESTID
+    set fileID  = ${REQUESTID}_${PROCESSID}
+
+# Preset error messages
+    set hijFailMsg = 'Hijing  error: file not created. Abort.'
+    set strFailMsg = 'Starsim error: file not created. Abort.'
+
+################################################
+    set nev=10
+################################################
 
 
-    # --------------------------
+    set evgenOutput=evgen.1.nt
+    set localHijing=1 # produce own Hijing data locally, be default
+    set fz = gstar.$PROCESSID.fz
 
-    # check which site we are working on
-    set BNL=0
-    set remoteNode=stargrid02.rcf.bnl.gov 
+    set baseDir=/star/simu/simu/gstardata
+    set finalDir=${baseDir}/gridtest
+    set jobTitle="STAR Hijing and GEANT Simulation"   
 
-    # ---  URL: http://www-pdsf.nersc.gov/~username/   ----
-    set localWebPage=~/public_html
 
-    if ( `hostname -d` == "rcf.bnl.gov" ) then;
+# Default to PDSF
+    set BNL=0                              # a flag to check which site we are working on
+    set remoteNode=stargrid03.rcf.bnl.gov  # only this node seems to respond correctly
+    set localWebPage=~/public_html         # ---  URL: http://www-pdsf.nersc.gov/~username/   ----
+
+    if ( `hostname -d` == "rcf.bnl.gov" ) then
         set BNL=1
-        set remoteNode=pdsfgrid2.nersc.gov 
-        # ---  URL: http://www.rhic.bnl.gov/~username/  ----
+        set remoteNode=pdsfgrid2.nersc.gov # ---  URL: http://www.rhic.bnl.gov/~username/  ----
         set localWebPage=~/WWW
     endif
-    # ----  at  BNL (local node) -----
-    #
+
+    # Define the "web" directory, a container really
+    set webDir=${localWebPage}/gridwork/hj 
+
+    set webDirBin=${webDir}/bin
+    set regDir=${webDir}/register/$REQUESTID
+    set localLogFile=${regDir}/$PROCESSID.html
+
+    # Final destination: final node at this point is either BNL or PDSF plus the prefix:
     set finalNode=gsiftp://${remoteNode}
+    set finalPath=${finalNode}/${finalDir}
 
-    set packageDirectory=${localWebPage}/gridwork/hj 
-    set finalPackageDirectory=${finalNode}/${finalDirectory}
-    set packageDirectoryBin=${packageDirectory}/bin
-    set registerDirectory=${packageDirectory}/register/$REQUESTID
-    set localLogFile=${registerDirectory}/$PROCESSID.html
-    #
-    # ----- end of the node parameteres -----
- 
-    # ----- The list of the application parameters  -----
-    #
+# Final file name definitions
+    set finalHijing = ${finalPath}/evgen.$fileID.nt
+    set finalGstar  = ${finalPath}/gstar.$fileID.fz
 
-    set JOBSEED = $PROCESSID$REQUESTID
-
-    #
-    # -----    End of the application parameters   -----
-
-    module load globus
-    mkdir -p ${registerDirectory}
-    mkdir -p ${packageDirectoryBin}
-
-    #--  Prepare the Web catalog
-    # 
-    if ( ! -f ${registerDirectory}/../index.html ) then;
-       echo "<HTML><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
+    # load Globus on PDSF only, won't work at BNL:
+    if ( ${BNL} == 0 ) then
+        module load globus
     endif
-    echo "<li><a href="$REQUESTID">Job: $REQUESTID `date`</a>" >> ${registerDirectory}/../index.html
-    #
-    if ( ! -f ${registerDirectory}/index.html ) then;
-       echo "<HTML><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
-    endif
-    echo "<li><a href="$PROCESSID.html">Process: $PROCESSID `date` </a>" >> ${registerDirectory}/index.html
 
-# ---
+    mkdir -p ${regDir}
+    mkdir -p ${webDirBin}
+
+    #--  Prepare the Web catalog:
+    if ( ! -f ${regDir}/../index.html ) then
+       echo "<HTML><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${regDir}/../index.html
+    endif
+    echo "<li><a href="$REQUESTID">Job: $REQUESTID `date`</a>" >> ${regDir}/../index.html
+    if ( ! -f ${regDir}/index.html ) then
+       echo "<HTML><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${regDir}/index.html
+    endif
+    echo "<li><a href="$PROCESSID.html">Process: $PROCESSID `date` </a>" >> ${regDir}/index.html
+
 #   Start the local Web page
-# ---
     echo "<HTML><TITLE>The job   $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
-    cd ${packageDirectoryBin}
+    cd ${webDirBin}
 
-#    -------------------------------
-#    Set the porper version of STAR software release
-#    -------------------------------
-
-    stardev
-
+    stardev #    Set the proper version of STAR software release
     echo "${STAR_LIB} ${STAR_PATH}"
-    unsetenv  STAR_LIB
-    STAR_LIB=/afs/rhic.bnl.gov/star/packages/DEV/.i386_linux24/lib
-#    -------------------------------
-#    Prepare hijing executable to start
-#    -------------------------------
+    set STAR_LIB=/afs/rhic.bnl.gov/star/packages/DEV/.rh80_gcc32/lib
 
-    lndir $STAR/pams/gen/hijing_382 .
-    make -f  hijing.mk
+    cd $SCRATCH # Go to the working area
 
-#    -------------------------------
-#    Go to the working are 
-#    -------------------------------
+# Build Hijing (optionally)
+    if ( $localHijing == 1 ) then
+      lndir $STAR/pams/gen/hijing_382 .
+      make -f hijing.mk
 
-    cd $SCRATCH
-
-#    -------------------------------
-#    generate custom input file
-#    -------------------------------
-    cat >hijev.inp <<HIJPARAMETERS
+# Create Hijing input file
+     cat >hijev.inp <<HIJ
 '  ====================================================== '   
 '  =====         Hijing Control file                ===== '   
 '  ====================================================== ' 
-' Events                          '  ${nSimulatedEvents}
-' Frame/Energy                    '  'CMS'  62.              
+' Events                          '  ${nev}
+' Frame/Energy                    '  'CMS'  200. 
 ' Projectile  type/A/Z            '  'A'  197 79             
 ' Target      type/Z/Z            '  'A'  197 79         
-' Impact parameter min/max (fm)   '  0.   20.                  
+' Impact parameter min/max (fm)   '  0.   3.               
 ' Jet quenching (1=yes/0=no)      '  0                        
 ' Hard scattering/pt jet          '  0   2.0                   
 ' Max # jets per nucleon (D=10)   '  10                        
@@ -110,106 +101,91 @@
 ' Set ihpr2(21) and ihpr2(18)     '  1   0
 ' set B production                '  1.5  
 ' istat=1 old istat>1 new         '  2                                    
-HIJPARAMETERS
+HIJ
 
-#    -------------------------------
-#   start hijjet from the bin directory
-#    -------------------------------
-    ${packageDirectoryBin}/hijjet.x
-   if (! -f ${HIJINGOUTPUT}) then
-      echo "hijjet.x ERROR. The output file was not created. Abort !!! "
-      echo "hijjet.x ERROR. The output file was not created. Abort !!! " >>${localLogFile}
-      echo "</PRE></BODY><HTML>"  >>${localLogFile}
-      exit $status
+
+     time | tee -a ${localLogFile}
+     echo "Launching the Hijing\n" | tee -a ${localLogFile}
+     time | tee -a ${localLogFile}
+     ${webDirBin}/hijjet.x #   start hijjet from the bin directory
+     if (! -f ${evgenOutput}) then
+        echo hijFailMsg | tee -a ${localLogFile}
+        echo "</PRE></BODY><HTML>"  >>${localLogFile}
+        exit -1
+     endif
+
    endif
 
-#    -------------------------------
-#    register the result file (for the sake of the debugging)
-#    -------------------------------
-
-    ls -l ${HIJINGOUTPUT} >>${localLogFile}
+   echo "Created the Hijing file\n" | tee -a ${localLogFile}
+   ls -l ${evgenOutput} | tee -a ${localLogFile} #    register the result file for debugging
     
-#    -------------------------------
-#    -------------------------------
-#    starting GEANT3 simulation
-#    -------------------------------
-
-#    -------------------------------
-#    define the source of the GEANT geometry
-#    -------------------------------
-#=============  set GEOMETRYLIB=${STAR_LIB}/geometry.so
-    
-#    -------------------------------
-#    Create GEANT3 kumac
-#    -------------------------------
-   set StafKumacMacroName=hijjet
-    cat >${StafKumacMacroName}.kumac <<STAFKUMAC
-macro ${StafKumacMacroName}
-***************BEGIN OF STAF KUMAC***********************
+#  Create the Starsim kumac
+     set macroName=sim
+     cat >${macroName}.kumac <<HIJINGKUMAC
+macro ${macroName}
+*******************************************
  detp geom y2004
  gexec $STAR_LIB/geometry.so
  gexec $STAR_LIB/gstar.so
  gclose all
  vsig  0.01  60.0
  gkine -1 0 0 31 -6.3 6.3 0 6.28 -35.0 35.0
- user/input user ${HIJINGOUTPUT} 
- gfile o $ZEBRAOUTPUT
- trig ${nSimulatedEvents}
-****************END OF STAF KUMAC ***********************
-STAFKUMAC
+ user/input user ${evgenOutput} 
+ gfile o $fz
+ trig ${nev}
+*******************************************
+HIJINGKUMAC
  
-     more ${StafKumacMacroName}.kumac>>${localLogFile}
+      time | tee -a ${localLogFile}
+      echo "Launching Starsim\n" | tee -a ${localLogFile}
+      starsim -w 0 -b ${macroName}.kumac       
+      time | tee -a ${localLogFile}
 
-#    -------------------------------
-#    Launching GEANT3 simulation
-#    -------------------------------
-    starsim -w 0 -b ${StafKumacMacroName}.kumac       
-    time
-    
-      ls -l $ZEBRAOUTPUT              >>${localLogFile}
+      if (! -f ${fz}) then
+        echo strFailMsg | tee -a ${localLogFile}
+        echo "</PRE></BODY><HTML>"  >>${localLogFile}
+        exit -2
+      endif
       
-#    -------------------------------
-#    Copy output files to the permanent place
-#    -------------------------------
-      
-#      cp  ${HIJINGOUTPUT} $packageDirectory/evgen.$PROCESSID.nt
-#      cp  $ZEBRAOUTPUT $packageDirectory/gstar.$PROCESSID.fz
-               echo " Starting ${HIJINGOUTPUT} transfering to BNL" >>${localLogFile}
-               echo " Starting ${HIJINGOUTPUT} transfering to BNL"
-     time
-               echo "Invoking: globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDirectory} "
+     echo "Created the Starsim file\n" | tee -a ${localLogFile}
+     ls -l ${fz} | tee -a ${localLogFile} #    register the result file for debugging
 
-     globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDirectory}
+# Copy output files
+    if ( $BNL == 0 ) then
+       time | tee -a ${localLogFile}
+       echo "Starting ${evgenOutput} ==> ${finalHijing}"                 | tee -a ${localLogFile}
+       globus-url-copy -p 20 -vb  file:$SCRATCH/${evgenOutput} ${finalHijing}
+       echo "Finished ${evgenOutput} ==> ${finalHijing}, status=$status" | tee -a ${localLogFile}
 
-               echo "globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDirectory} with $status"
+       time | tee -a ${localLogFile}
+       echo "Starting ${fz} ==> $finalGstar}" | tee -a ${localLogFile}
+       globus-url-copy -p 20 -vb file:$SCRATCH/$fz ${finalGstar}
 
-     globus-url-copy -p 20 -vb  file:$SCRATCH/${HIJINGOUTPUT}    ${finalPackageDirectory}/evgen.$PROCESSID.nt
+       time | tee -a ${localLogFile}
+       echo "Finished ${fz} ==> ${finalGstar}, status=$status" | tee -a ${localLogFile}
+     else
+       cp  $SCRATCH/${evgenOutput}                              ${finalHijing}
+       cp  $fz                                                  ${finalGstar}
+     endif
 
-               echo " ${HIJINGOUTPUT} has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status" >>${localLogFile}
-               echo " ${HIJINGOUTPUT} has been transfered  to ${finalPackageDirectory}/evgen.$PROCESSID.nt with status=$status"
 
-     globus-job-run  ${remoteNode} /bin/ls /star/data05/scratch/didenko/gridwork/hj  >>${localLogFile}
-     time
-               echo "Starting $ZEBRAOUTPUT  transfering to BNL" >>${localLogFile}
-               echo "Starting $ZEBRAOUTPUT  transfering to BNL"
-
-     globus-url-copy  -p 20 -vb file:$SCRATCH/$ZEBRAOUTPUT  ${finalPackageDirectory}/gstar.$PROCESSID.fz 
-     globus-job-run   ${remoteNode}  /bin/ls /star/data05/scratch/didenko/gridwork/hj  >>${localLogFile}
-
-     time
-               echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz with status=$status" >>${localLogFile}
-               echo "  $ZEBRAOUTPUT has been transfered  to  ${finalPackageDirectory}/gstar.$PROCESSID.fz  with status=$status"
-
-      time >>${localLogFile}
- # ----
- #   close local Web page
- # ----
+# close local Web page
     echo "</PRE></BODY><HTML>"  >>${localLogFile}
+
+###################################################################
+# --max-- This unfortunately does not work:
+#     echo "Invoking: globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDir} "
+#     globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDir}
+#     echo "globus-job-run  ${remoteNode} /bin/mkdir -p ${finalDir} with $status"
+###################################################################
+
+
    ]]>
    </command>  
     <stdout URL="file:./$JOBID.out" />
-    <output fromScratch="$ZEBRAOUTPUT" >
-       <copy ref="pyResult" URI="file:$packageDirectory/testpyth.$PROCESSID.fz" />
+    <stderr URL="file:./$JOBID.err" />
+    <!-- output fromScratch="$fz">
+       <copy ref="pyResult" URI="file:$webDir/testpyth.$PROCESSID.fz" />
        <register ref="pyResult" URI="catalog:star.bnl.gov?att1=nt1,att2=nt2" />
-    </output>
+    </output -->
 </job>
