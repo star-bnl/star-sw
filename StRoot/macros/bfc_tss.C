@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.10 1999/03/03 02:30:25 fisyak Exp $
+// $Id: bfc_tss.C,v 1.11 1999/03/03 04:12:12 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -137,7 +137,7 @@ bfc_tss (const Int_t Nevents=1000,
   gBenchmark->Start("bfc");
   Int_t i=0;
   for (Int_t i =1; i <= NoEvents; i++){
-    if (chain->Make(i)) break;
+    if (chain->Make(i)==2) break;
     if (xdf_out) {
       St_DataSet *dstSet = chain.DataSet("dst");
       if (dstSet) {xdf_out->NextEventPut(dstSet);}

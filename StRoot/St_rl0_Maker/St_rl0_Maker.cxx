@@ -103,15 +103,15 @@ Int_t St_rl0_Maker::Make(){
 
 // Checking if the tables exist
 
-     if (!m_ctb)        {printf("m_ctb does not exist\n")     ;return kStErr;}
-     if (!m_geom)       {printf("m_geom does not exist\n")    ;return kStErr;}
-     if (!rawctb)       {printf("rawctb does not exist\n")    ;return kStErr;} 
-     if (!sector)       {printf("sector does not exist\n")    ;return kStErr;} 
-     if (!rawmwc)       {printf("rawmwc does not exist\n")    ;return kStErr;} 
-     if (!m_rl0_ctrl)   {printf("rl0_ctrl does not exist\n")  ;return kStErr;} 
-     if (!rl0_data)     {printf("rl0_data does not exist\n")  ;return kStErr;} 
-     if (!m_rl0_ctbcal) {printf("rl0_ctcal does not exist\n") ;return kStErr;} 
-     if (!m_rl0_mwccal) {printf("rl0_mwcal does not exist\n") ;return kStErr;} 
+     if (!m_ctb)        {printf("m_ctb does not exist\n")     ;return kStWarn;}
+     if (!m_geom)       {printf("m_geom does not exist\n")    ;return kStWarn;}
+     if (!rawctb)       {printf("rawctb does not exist\n")    ;return kStWarn;} 
+     if (!sector)       {printf("sector does not exist\n")    ;return kStWarn;} 
+     if (!rawmwc)       {printf("rawmwc does not exist\n")    ;return kStWarn;} 
+     if (!m_rl0_ctrl)   {printf("rl0_ctrl does not exist\n")  ;return kStWarn;} 
+     if (!rl0_data)     {printf("rl0_data does not exist\n")  ;return kStWarn;} 
+     if (!m_rl0_ctbcal) {printf("rl0_ctcal does not exist\n") ;return kStWarn;} 
+     if (!m_rl0_mwccal) {printf("rl0_mwcal does not exist\n") ;return kStWarn;} 
 
      Int_t rl0_result = rl0(
                             m_ctb,
@@ -126,7 +126,7 @@ Int_t St_rl0_Maker::Make(){
      if (rl0_result != kSTAFCV_OK)
      {
         printf("**** Problems with rl0 ****\n");
-        return kStErr;
+        return kStWarn;
      }
 
 }
@@ -135,7 +135,7 @@ Int_t St_rl0_Maker::Make(){
 //_____________________________________________________________________________
 void St_rl0_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_rl0_Maker.cxx,v 1.1 1999/02/11 20:10:48 druss Exp $\n");
+  printf("* $Id: St_rl0_Maker.cxx,v 1.2 1999/03/03 04:12:13 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

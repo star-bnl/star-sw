@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.8 1999/03/02 18:33:33 druss Exp $
+// $Id: St_mwc_Maker.cxx,v 1.9 1999/03/03 04:12:13 fisyak Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.9  1999/03/03 04:12:13  fisyak
+// replace kStErr to kStWarn
+//
 // Revision 1.8  1999/03/02 18:33:33  druss
 // Freed up wasted space by lowering number of Rows in the tables from
 // 384 to 96.  Also removed the cor table that is not used in this module.
@@ -112,12 +115,12 @@ Int_t St_mwc_Maker::Make(){
      St_g2t_mwc_hit *g2t_mwc_hit = (St_g2t_mwc_hit *) geant("g2t_mwc_hit");
 
 
-     if (!g2t_mwc_hit) {printf("g2t_mwc_hit does not exist\n");return kStErr;}
-     if (!m_geom)      {printf("m_geom does not exist\n")     ;return kStErr;}
-     if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStErr;} 
-     if (!mevent)      {printf("mevent does not exist\n")     ;return kStErr;}
-     if (!sector)      {printf("sector does not exist\n")     ;return kStErr;} 
-     if (!raw)         {printf("raw does not exist\n")        ;return kStErr;} 
+     if (!g2t_mwc_hit) {printf("g2t_mwc_hit does not exist\n");return kStWarn;}
+     if (!m_geom)      {printf("m_geom does not exist\n")     ;return kStWarn;}
+     if (!m_mpar)      {printf("m_mpar does not exist\n")     ;return kStWarn;} 
+     if (!mevent)      {printf("mevent does not exist\n")     ;return kStWarn;}
+     if (!sector)      {printf("sector does not exist\n")     ;return kStWarn;} 
+     if (!raw)         {printf("raw does not exist\n")        ;return kStWarn;} 
 
      Int_t mwc_result = mws(
                             g2t_mwc_hit,
@@ -129,7 +132,7 @@ Int_t St_mwc_Maker::Make(){
      if (mwc_result != kSTAFCV_OK)
      {
         printf("**** Problems with mwc ****\n");
-        return kStErr;
+        return kStWarn;
      }
      g2t_mwc_hit_st *hitTable = g2t_mwc_hit->GetTable();
      table_head_st *hitHead  = g2t_mwc_hit->GetHeader();
@@ -151,7 +154,7 @@ Int_t St_mwc_Maker::Make(){
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.8 1999/03/02 18:33:33 druss Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.9 1999/03/03 04:12:13 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
