@@ -44,15 +44,16 @@
   // Create the list of the classes defined with the loaded DLL's to be documented
 
   Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
-                       ,"St_DataSet", "St_DataSetIter"
+                       ,"St_DataSet", "St_DataSetIter","St_FileSet"
                        ,"St_particle", "particle_st"
                        ,"StParticleView",
                        ,"StMaker",     "StChain"
                        ,"table_head_st"
                        ,"St_srs_Maker","St_tpt_Maker","St_xdfin_Maker"
                        ,"St_evg_Maker","St_tcl_Maker","St_tss_Maker"
-                       };
-  Int_t nclass = 17;
+                       ,"St_ebye_Maker.cxx"
+                        };
+  Int_t nclass = 19;
   // Creat the definitions of the classes not derived from TObjects
   TClass header1("table_head_st",1,"table_header.h","table_header.h");
   // Make class descriptions
@@ -69,6 +70,7 @@
   html.Convert("./test9.c","How to read the event from XDF file and build some histograms with ROOT");
   html.Convert("./makedoc.C","How to create the HTML documentation");
   html.Convert("./tss.C","An example of the production chain");
+  html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
   if (NT) {
     html.Convert("//hepburn/common/p32/root/star/macros/CallMevSaveXDF.cxx","How to call STAF module");
     html.Convert("//hepburn/common/p32/root/star/macros/par_anal.cxx","How to pick the XDF file up with ROOT");
