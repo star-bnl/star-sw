@@ -73,9 +73,9 @@ STAFCV_T levLogStopTime(DS_DATASET_T *pEnv,const char *comment) {
   for(ii=len-1;ii>=0;ii--) if(stopTime[ii]=='\n') stopTime[ii]='\0';
   levConvertToDigits(stopTime);
   if(!levRegisterEnvInfo(&gNumRowEnv,"stopTime",stopTime,pEnv)) 
-      EML_ERROR("levErr 0a");
+      EML_ERROR(TABLE_INSERTION_FAILED);
   if(!levRegisterEnvInfo(&gNumRowEnv,"stopComment",comment,pEnv)) 
-      EML_ERROR("levErr 1a");
+      EML_ERROR(TABLE_INSERTION_FAILED);
   EML_SUCCESS(STAFCV_OK);
 }
 ----------------------------------------------*/
@@ -85,28 +85,28 @@ STAFCV_T levRegisterEnvInfo(char *name,char *value) {
   int column; char *colName,*val,*v;
   tdmTable* tab; long ncol,nrow;
   if(!tdm->findTable(LEV_ENV_TABLE,tab)) {
-     PP"findTable failed\n"); EML_ERROR("levErr 2a");
+     PP"findTable failed\n"); EML_ERROR(ENV_TBL_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
-  if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR("levErr 3a");
+  if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR(TOO_MANY_ROWS);
   tab->rowCount((long)(1+nrow));
   for(column=0;column<2;column++) {
     if(column==0) {
       val=name; colName="name";
-      if(strlen(val)>31) EML_ERROR("levErr 4a");
+      if(strlen(val)>31) EML_ERROR(INFO_NAME_TOO_BIG);
     } else if(column==1) {
       val=value; colName="value";
-      if(strlen(val)>255) EML_ERROR("levErr 5a");
+      if(strlen(val)>255) EML_ERROR(INFO_VALUE_TOO_BIG);
     }
     if(!tab->findColumn(col,colName)) {
-      PP"findColumn failed\n"); EML_ERROR("levErr 6a");
+      PP"findColumn failed\n"); EML_ERROR(FIND_COL_FAILED);
     }
     ncol = (int)(col.nCol); tcode = col.code; cellData._d = tcode;
     cellData.data.v = (void*)ASUALLOC(sizeof(double)); // BUG? FIXED?
     v=(char*)ASUALLOC(strlen(val) +1);
     strcpy(v,val); cellData.data.c = (char*)v;
     if(!tab->putCell(cellData,nrow,ncol)) {
-      PP"putCell fail\n"); EML_ERROR("levErr 7a");
+      PP"putCell fail\n"); EML_ERROR(PUT_CELL_FAILED);
     }
   }
   ASUFREE(cellData.data.v);
@@ -166,15 +166,23 @@ STAFCV_T levFactory::levRegisterEnvironment() {
   /******************  name of executable ****************************/
   levExeName(nameOfExe);
   /******************  output to tables ****************************/
-  if(!levRegisterEnvInfo("user",user)) EML_ERROR("levErr 8a");
-  if(!levRegisterEnvInfo("hostname",hostname)) EML_ERROR("levErr 9a");
-  if(!levRegisterEnvInfo("sysname",osys.sysname)) EML_ERROR("levErr aa");
-  if(!levRegisterEnvInfo("node",osys.nodename)) EML_ERROR("levErr ba");
-  if(!levRegisterEnvInfo("release",osys.release)) EML_ERROR("levErr ca");
-  if(!levRegisterEnvInfo("version",osys.version)) EML_ERROR("levErr da");
-  if(!levRegisterEnvInfo("machine",osys.machine)) EML_ERROR("levErr ea");
-  if(!levRegisterEnvInfo("nameOfExe",nameOfExe)) EML_ERROR("levErr fa");
-  if(!levRegisterEnvInfo("startTime",startTime)) EML_ERROR("levErr ga");
+  if(!levRegisterEnvInfo("user",user)) EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("hostname",hostname)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("sysname",osys.sysname)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("node",osys.nodename)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("release",osys.release)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("version",osys.version)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("machine",osys.machine)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("nameOfExe",nameOfExe)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
+  if(!levRegisterEnvInfo("startTime",startTime)) 
+        EML_ERROR(TABLE_INSERTION_FAILED);
   EML_SUCCESS(STAFCV_OK);
 }
 //:=============================================== CLASS              ==
@@ -201,7 +209,7 @@ int levCellAlreadyIn(const char *table,const char *value,long col) {
   tdmTable* tab;
   TDM_CELLDATA_T cellData;
   if(!tdm->findTable(table,tab)) {
-     PP"findTable failed\n"); EML_ERROR("levErr 2a");
+     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=tab->rowCount();
   for(i=nrow-1;i>=0;i--) {
@@ -218,10 +226,10 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   tdmTable* tab; long ncol,nrow;
   /*------------------------------------------- */
   if(!tdm->findTable(LEV_VER_TABLE,tab)) {
-     PP"findTable failed\n"); EML_ERROR("levErr ha");
+     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
-  if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR("levErr ia");
+  if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR(TOO_MANY_ROWS);
   colAlreadyIn0=levCellAlreadyIn(LEV_VER_TABLE,name,(long)0);
   colAlreadyIn1=levCellAlreadyIn(LEV_VER_TABLE,type,(long)1);
   if(colAlreadyIn0&&colAlreadyIn1) {
@@ -232,22 +240,22 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   tab->rowCount((long)(1+nrow));
   for(column=0;column<3;column++) {
     if(column==0) {
-      val=name; colName="name"; if(strlen(val)>31) EML_ERROR("levErr ja");
+      val=name; colName="name"; if(strlen(val)>31) EML_ERROR(NAME_TOO_LONG);
     } else if(column==1) {
-      val=type; colName="type"; if(strlen(val)>31) EML_ERROR("levErr ka");
+      val=type; colName="type"; if(strlen(val)>31) EML_ERROR(TYPE_TOO_LONG);
     } else if(column==2) {
       val=version; colName="version";
-      if(strlen(val)>255) EML_ERROR("levErr la");
+      if(strlen(val)>255) EML_ERROR(VALUE_TO_LONG);
     }
     if(!tab->findColumn(col,colName)) {
-      PP"findColumn failed\n"); EML_ERROR("levErr ma");
+      PP"findColumn failed\n"); EML_ERROR(FIND_COL_FAILED);
     }
     ncol = (int)(col.nCol); tcode = col.code; cellData._d = tcode;
     cellData.data.v = (void*)ASUALLOC(1000);  // BUG? does this mem get used?
     v=(char*)ASUALLOC(strlen(val) +1);
     strcpy(v,val); cellData.data.c = (char*)v;
     if(!tab->putCell(cellData,nrow,ncol)) {
-      PP"putCell fail\n"); EML_ERROR("levErr na");
+      PP"putCell fail\n"); EML_ERROR(PUT_CELL_FAILED);
     }
     ASUFREE(cellData.data.v);
   }
@@ -256,7 +264,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.1 1996/07/19 21:16:37 ward Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.2 1997/03/25 18:04:13 ward Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;
