@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.1 2003/08/07 23:55:47 geurts Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.2 2003/12/04 06:54:08 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTofpNtupleMaker.cxx,v $
+ * Revision 1.2  2003/12/04 06:54:08  geurts
+ * introduced variables relevant to TOFp flow analysis
+ *  * trackId, px and py
+ *  * xvtx and yvtx
+ *
  * Revision 1.1  2003/08/07 23:55:47  geurts
  * first release
  *
@@ -115,6 +120,8 @@ Int_t StTofpNtupleMaker::Make(){
   // Collect global data for both ntuples
 
   //-- Primary vertex & trigger information
+  float xvtx = event->primaryVertex()->position().x();
+  float yvtx = event->primaryVertex()->position().y();
   float zvtx = event->primaryVertex()->position().z();
   StL0Trigger* pTrigger = event->l0Trigger();
   unsigned int triggerWord = 0;
@@ -250,6 +257,8 @@ Int_t StTofpNtupleMaker::Make(){
       mSlatData.magfield = event->summary()->magneticField();
       mSlatData.ctbsum   = ctbSum;
       mSlatData.zdcsum   = zdcSumEast + zdcSumWest;
+      mSlatData.xvtx     = xvtx;
+      mSlatData.yvtx     = yvtx;
       mSlatData.zvtx     = zvtx;
       mSlatData.zvtxchi2 = event->primaryVertex()->chiSquared();
       mSlatData.refmult  = refmult;
@@ -273,6 +282,7 @@ Int_t StTofpNtupleMaker::Make(){
       mSlatData.hitprof   = thisSlat->hitProf(); //newerSlatHitVec[ii].hitProfile;
       mSlatData.matchflag = thisSlat->matchFlag(); //newerSlatHitVec[ii].matchFlag;
       mSlatData.zhit      = thisSlat->zHit(); //localHitPos;
+      mSlatData.trackId     = (Int_t)thisTrack->key();
       mSlatData.ntrackpoints= thisTrack->detectorInfo()->numberOfPoints(kTpcId);
       mSlatData.nfitpoints  = thisTrack->fitTraits().numberOfFitPoints(kTpcId);
       mSlatData.r_last      = thisTrack->detectorInfo()->lastPoint().perp();
@@ -280,7 +290,10 @@ Int_t StTofpNtupleMaker::Make(){
   
       mSlatData.s           = fabs(pathLength);
       mSlatData.p           = momentum.mag()* theTrackGeometry->charge();
-      mSlatData.pt	      = momentum.perp();
+      mSlatData.pt	    = momentum.perp();
+      mSlatData.px          = momentum.x();
+      mSlatData.py          = momentum.y();
+      mSlatData.pz          = momentum.z();
       mSlatData.eta         = momentum.pseudoRapidity();
       mSlatData.dedx        = dedx;
       mSlatData.dedx_np     = dedx_np;
@@ -375,6 +388,8 @@ void StTofpNtupleMaker::bookNtuples(){
   mSlatTuple->Branch("magfield",&mSlatData.magfield,"magfield/F");
   mSlatTuple->Branch("ctbsum",&mSlatData.ctbsum,"ctbsum/F");
   mSlatTuple->Branch("zdcsum",&mSlatData.zdcsum,"zdcsum/F");
+  mSlatTuple->Branch("xvtx",&mSlatData.xvtx,"xvtx/F");
+  mSlatTuple->Branch("yvtx",&mSlatData.yvtx,"yvtx/F");
   mSlatTuple->Branch("zvtx",&mSlatData.zvtx,"zvtx/F");
   mSlatTuple->Branch("zvtxchi2",&mSlatData.zvtxchi2,"zvtx/F");
   mSlatTuple->Branch("refmult",&mSlatData.refmult,"refmult/I");
@@ -383,8 +398,8 @@ void StTofpNtupleMaker::bookNtuples(){
   mSlatTuple->Branch("tdcstart",&mSlatData.tdcstart,"tdcstart/F");
   mSlatTuple->Branch("pvpd",&mSlatData.te1,"te1/I:te2:te3:tw1:tw2:tw3:ae1:ae2:ae3:aw1:aw2:aw3");
   mSlatTuple->Branch("slat",&mSlatData.slat,"slat/I:tdc:adc:hitprof:matchflag:zhit/F:zhitinner/F:zhitouter/F:ss:theta_xy:theta_zr");
-
-  mSlatTuple->Branch("track",&mSlatData.ntrackpoints,"ntrackpoints/I:nfitpoints:r_last/F:chi2:s:p:pt:eta:dedx/F:dedx_np/I:cherangle/F:cherangle_nph/I");
+  //mSlatTuple->Branch("track",&mSlatData.ntrackpoints,"ntrackpoints/I:nfitpoints:r_last/F:chi2:s:p:pt:px:py:pz:eta:dedx/F:dedx_np/I:cherangle/F:cherangle_nph/I");
+  mSlatTuple->Branch("track",&mSlatData.trackId,"trackId/I:ntrackpoints/I:nfitpoints:r_last/F:chi2:s:p:pt:px:py:pz:eta:dedx/F:dedx_np/I:cherangle/F:cherangle_nph/I");
 
 
   // TOFp matching ntuple
