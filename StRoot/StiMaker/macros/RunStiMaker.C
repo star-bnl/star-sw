@@ -88,7 +88,6 @@ void RunStiMaker(Int_t nevents=1,
 //    anaMk->setPolygonBuildPath("/scr20/TempIttf/StiGeometryParameters/Polygons");
     anaMk->setMaterialBuildPath("/scr20/ittf/StiGeometryParameters/Materials");
     anaMk->setDetectorBuildPath("/scr20/ittf/StiGeometryParameters/Detectors");
-    anaMk->setPolygonBuildPath("/scr20/ittf/StiGeometryParameters/Polygons");
     
     // now execute the chain member functions    
     chain->PrintInfo();
