@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.11 2004/06/24 13:52:52 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.12 2004/09/22 19:24:56 perev Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -11,6 +11,9 @@
  * filling StPmdCollection    : Dipak
  *
  * $Log: StPmdSimulatorMaker.cxx,v $
+ * Revision 1.12  2004/09/22 19:24:56  perev
+ * Leak fixed + mess with i,j indexes
+ *
  * Revision 1.11  2004/06/24 13:52:52  subhasis
  * numbering of det0 and det1 interchanged
  *
@@ -207,7 +210,7 @@ Int_t StPmdSimulatorMaker::makePmdHits()
 	phit->setColumn(Int_t(col));          //! filling col 1-96
 	phit->setEdep((hit->de)*1000000.);    //! filling energy in keV
 	
-	Int_t ChainNo;
+//VP	Int_t ChainNo;
 	Float_t xPMD,yPMD;
 	if(subdet==1){   //! Filling Hit Collection for PMD
 	  

@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.9 2004/09/21 14:57:20 subhasis Exp $
+ * $Id: StPmdClusterMaker.h,v 1.10 2004/09/22 19:24:55 perev Exp $
  *
  * Author:
  *
@@ -14,8 +14,8 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
- * Revision 1.9  2004/09/21 14:57:20  subhasis
- * delete for StPmdHit*
+ * Revision 1.10  2004/09/22 19:24:55  perev
+ * Leak fixed + mess with i,j indexes
  *
  * Revision 1.8  2004/09/03 14:31:44  subhasis
  * OptHist introduced
@@ -54,7 +54,6 @@ class StPmdClusterMaker: public StMaker{
 
    private:
  Bool_t mOptHist; 
- Bool_t mOptClearHits; 
    protected:
   
   // booking Pmd cluster histograms
@@ -107,13 +106,11 @@ class StPmdClusterMaker: public StMaker{
 
   void  bookHistograms(); //! booking histograms
   void  FillHistograms(StPmdDetector*, StPmdDetector*); //! filling histograms
-  void  ClearHits(StPmdDetector*); //! filling histograms
   void  setPrint(Bool_t a) { mOptHist = a;}
-  void  setClearHits(Bool_t a) { mOptClearHits = a;}
   void  Browse(TBrowser* b); 
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.9 2004/09/21 14:57:20 subhasis Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.10 2004/09/22 19:24:55 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  

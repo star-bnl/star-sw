@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.19 2004/09/03 14:31:22 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.20 2004/09/22 19:24:55 perev Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.20  2004/09/22 19:24:55  perev
+ * Leak fixed + mess with i,j indexes
+ *
  * Revision 1.19  2004/09/03 14:31:22  subhasis
  * memset, memcpy used (Gene's suggesstion and order() changed
  *
@@ -319,7 +322,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 {
   Int_t clno, i, j, k, i1, i2, id, icl, ncl[2000], iordR[2000], itest, ihld;
   Int_t ig, nsupcl;
-  Double_t x1, y1, z1, x2, y2, z2, rr,dist;
+  Double_t x1, y1, z1, x2, y2, z2, rr;
   Double_t x[2000], y[2000], z[2000];
   Double_t x_org[2000], y_org[2000];
   Double_t xc[2000], yc[2000], zc[2000], d[96][72],rcl[2000],rcs[2000],cells[2000];
@@ -500,7 +503,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 		}
 	    }
 	  // End of finding l,ocal maxima	
-	memset(cell_frac[0],0,200*2000*sizeof(Float_t));
+	memset(cell_frac[0],0,sizeof(cell_frac));
 	   //
 	  
 	  Int_t censtat=CentroidCal(ncl[i],ig,x[0],y[0],z[0],xc[0],yc[0],zc[0],rcl[0],rcs[0],cells[0]);
@@ -518,7 +521,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
               take_cell[jk]=-999;
                  }
 
-	memset(temp,0,2000*sizeof(Float_t));
+//VP	memset(temp,0,2000*sizeof(Float_t)); //it is already zeroed above
 
 	for(Int_t pb=0;pb<=ig;pb++)
                {
@@ -595,7 +598,7 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
 				  Double_t &yc,Double_t &zc,
 				  Double_t &rcl,Double_t &rcs,Double_t &cells)
 {
-  Int_t i,j,k,i1,i2;
+  Int_t i1,i2;
   Int_t cluster[2000][10];
   Double_t sum,sumx,sum1,sumy,sumxy,sumxx,sumyy;
   Double_t  rr,x1,y1,x2,y2,b,c,r1,r2;
@@ -610,14 +613,14 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
 	  return kStWarn;
   }
 
-  for(i=0;i<=nclust;i++)
+  for(int i=0;i<=nclust;i++)
     {
       xxc[i] = *(&xc+i);
       yyc[i] = *(&yc+i);
       cellsc[i] = 0.;
       zzct[i] = 0.;
     }
-  for(i=0;i<=ncell;i++)
+  for(int i=0;i<=ncell;i++)
     {
       xx[i] = *(&x+i); 
       yy[i] = *(&y+i);
@@ -632,13 +635,13 @@ memset(cluster[0],0,2000*10*sizeof(Int_t));
   //If there is more than one local maxima
   if(nclust>0)
     {
-      for(i=0;i<=ncell;i++)
+      for(int i=0;i<=ncell;i++)
 	{
 	  x1 = xx[i];
 	  y1 = yy[i];
 	  cluster[i][0] = 0;
 	  //Checking cells shared betn several clusters.
-	  for(j=0;j<=nclust;j++) // For checking the first layer neighbours
+	  for(int j=0;j<=nclust;j++) // For checking the first layer neighbours
 	    {
 	      x2 = xxc[j];
 	      y2 = yyc[j];
@@ -652,7 +655,7 @@ memset(cluster[0],0,2000*10*sizeof(Int_t));
 	    }
 	  
 	  if(cluster[i][0] ==0){  //For checking the second layer neighbours
-	    for(j=0;j<=nclust;j++){
+	    for(int j=0;j<=nclust;j++){
 	      x2=xxc[j];
 	      y2=yyc[j];
 	      rr=Dist(x1,y1,x2,y2);
@@ -666,7 +669,7 @@ memset(cluster[0],0,2000*10*sizeof(Int_t));
 	    } //for loop 'nclust'
 	  } //if loop 'cluster[i][0]
 	  if(cluster[i][0] ==0){  //For checking the third layer neighbours
-	    for(j=0;j<=nclust;j++){
+	    for(int j=0;j<=nclust;j++){
 	      x2=xxc[j];
 	      y2=yyc[j];
 	      rr=Dist(x1,y1,x2,y2);
@@ -680,7 +683,7 @@ memset(cluster[0],0,2000*10*sizeof(Int_t));
 	  }
 	  
 	  if(cluster[i][0] ==0){  //For checking the fourth layer neighbours
-	    for(j=0;j<=nclust;j++){
+	    for(int j=0;j<=nclust;j++){
 	      x2=xxc[j];
 	      y2=yyc[j];
 	      rr=Dist(x1,y1,x2,y2);
@@ -700,41 +703,41 @@ memset(cluster[0],0,2000*10*sizeof(Int_t));
 memset(str,0,2000*sizeof(Double_t));
 memset(str1,0,2000*sizeof(Double_t));
       
-      for(Int_t i=0;i<=ncell;i++){
+      for(int i=0;i<=ncell;i++){
 	if(cluster[i][0]!=0){
 	  i1 = cluster[i][0];
-	  for(j=1;j<=i1;j++){
+	  for(int j=1;j<=i1;j++){
 	    i2 = cluster[i][j];
 	    str[i2] = str[i2] + zz[i]/i1;
 	  }
 	}
       }
       
-      for(k=0; k<5; k++){
-	for(i=0; i<=ncell; i++){
+      for(int k=0; k<5; k++){
+	for(int i=0; i<=ncell; i++){
 	  if(cluster[i][0] != 0){
 	    i1=cluster[i][0];
 	    sum = 0;
-	    for(j=1;j<=i1;j++){
+	    for(int j=1;j<=i1;j++){
 	      sum = sum + str[cluster[i][j]];
 	    }
-	    for(j=1;j<=i1;j++){
+	    for(int j=1;j<=i1;j++){
 	      i2 = cluster[i][j];
 	      str1[i2] = str1[i2] + zz[i]*str[i2]/sum;
 	      clust_cell[i2][i] = zz[i]*str[i2]/sum;
 	    }
 	  }
 	}
-	for(j=0; j<=nclust; j++){
+	for(int j=0; j<=nclust; j++){
 	  str[j]=str1[j]; 
 	  str1[j]=0.;
 	}
       }
 
 
-      for(i=0;i<=nclust;i++){
+      for(int i=0;i<=nclust;i++){
 	sumx=0.;sumy=0.;sum=0.;sum1=0.;
-	for(j=0;j<=ncell;j++){
+	for(int j=0;j<=ncell;j++){
 	  if(clust_cell[i][j] !=0){
 	    
 	    sumx=sumx+clust_cell[i][j]*xx[j];
@@ -753,7 +756,7 @@ memset(str1,0,2000*sizeof(Double_t));
 	xcl[i]=sumx/sum; ycl[i]=sumy/sum; cln[i]=sum1;
 	//      if(sum1>10)cout<<"many gaus, i,sum1, cln "<<i<<" "<<sum1<<" "<<cln[i]<<endl;
 	sumxx=0.; sumyy=0.; sumxy=0.;
-	for(j=0; j<=ncell; j++){
+	for(int j=0; j<=ncell; j++){
 	  sumxx=sumxx+clust_cell[i][j]*(xx[j]-xcl[i])*(xx[j]-xcl[i])/sum;
 	  sumyy=sumyy+clust_cell[i][j]*(yy[j]-ycl[i])*(yy[j]-ycl[i])/sum;
 	  sumxy=sumxy+clust_cell[i][j]*(xx[j]-xcl[i])*(yy[j]-ycl[i])/sum;
@@ -783,7 +786,8 @@ memset(str1,0,2000*sizeof(Double_t));
     {
       //      cout << " only one cluster " << endl;
       sumx=0.; sumy=0.; sum=0.; sum1=0.;
-      for(j=0; j<=ncell; j++)
+      int i=0;
+      for(int j=0; j<=ncell; j++)
 	{
 	  sumx=sumx+zz[j]*xx[j];
 	  sumy=sumy+zz[j]*yy[j];
@@ -793,11 +797,10 @@ memset(str1,0,2000*sizeof(Double_t));
 	  cell_frac[i][j]=1;
 	  //	cout << xx[j] << " " << yy[j] << " " << zz[j] << endl; 
 	}
-      i=0;
       xcl[i]=sumx/sum; ycl[i]=sumy/sum; cln[i]=sum1; str[i]=sum;
       //     if(sum1>10)cout<<"one gaus, i,sum1, cln "<<i<<" "<<sum1<<" "<<cln[i]<<endl;
       sumxx=0.; sumyy=0.; sumxy=0.;
-      for(j=0; j<=ncell; j++)
+      for(int j=0; j<=ncell; j++)
 	{
 	  sumxx=sumxx+zz[j]*(xx[j]-xcl[i])*(xx[j]-xcl[i])/sum;
 	  sumyy=sumyy+zz[j]*(yy[j]-ycl[i])*(yy[j]-ycl[i])/sum;
