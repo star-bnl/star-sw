@@ -1,6 +1,6 @@
 MSG = ../msg
 
-ARCH_TAG     = _sgi
+ARCH_TAG     = _sun
 ARFLAGS      = vqs
 FFLAGS       = -c -O -w
 FFLAGS_DBG   = -c -g -w
@@ -109,7 +109,5 @@ str_ret_inc : str_ret.inc
 
 
 strterm_sun.f : strterm_sgi.f
+	rm -f strterm_sun.f
 	ln -s strterm_sgi.f strterm_sun.f
-
-strtermc_sun.c : strtermc_sgi.c
-	ln -s strtermc_sgi.c strtermc_sun.c
