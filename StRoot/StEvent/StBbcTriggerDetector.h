@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.3 2002/02/22 22:56:46 jeromel Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.4 2002/10/17 02:07:49 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,14 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.4  2002/10/17 02:07:49  akio
+ * Increase # of PMT from 32 to 48 for 2003 run.
+ * Schema evolution should take care for reading old files.
+ * Some of access functions (for east west separately, or sums)
+ * will give wrong answer if you are using new 2003 mapping.
+ * One should access data through raw adc values until improvements.
+ * These functions do correct job for 2002 data.
+ *
  * Revision 2.3  2002/02/22 22:56:46  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -70,7 +78,7 @@ public:
     
 protected:
     enum {
-      mMaxPMTs = 32,
+      mMaxPMTs = 48,
       mMaxRegisters = 2,
       mMaxPedData = 128,
       mMaxScalars = 32
@@ -81,7 +89,7 @@ protected:
     UShort_t mPed[mMaxPedData];
     UShort_t mScl[mMaxScalars];
     
-    ClassDef(StBbcTriggerDetector,1)
+    ClassDef(StBbcTriggerDetector,2)
 };
 
 inline unsigned int
