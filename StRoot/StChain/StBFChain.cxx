@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.4 1999/08/05 17:10:27 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.5 1999/08/06 14:26:37 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.5  1999/08/06 14:26:37  fisyak
+// put back xdf out option
+//
 // Revision 1.4  1999/08/05 17:10:27  fisyak
 // Change strstr to ==
 //
@@ -142,7 +145,6 @@ TString *XdfFile = 0;
 class StEvent;
 StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
-class St_XDFFile;     St_XDFFile     *xdf_out = 0; 
 class St_geant_Maker; St_geant_Maker *geant   = 0;   
 class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0;
 class StMagFC;         StMagFC        *field   = 0;           
@@ -183,14 +185,17 @@ void StBFChain::SetFlags(const Char_t *Chain )
     if (index >= 0) Tag = tChain(index,end);
     begin += end+1;
     if (index >=0) {
+      Int_t kgo = 0;
       for (k = kFIRST+1; k<NoChainOptions; k++) {
 	opt = TString(ChainOptions[k]);
 	opt.ToLower();
 	nopt = TString("-");
 	nopt += opt;
-	if       (Tag ==  opt) SetOption(k);
-	else {if (Tag == nopt) SetOption(-k);}
+	if       (Tag ==  opt) kgo =  k;
+	else {if (Tag == nopt) kgo = -k;}
+	if (kgo) {SetOption(kgo); break;}
       }
+      if (!kgo) printf ("Option %s has been not recognized\n", Tag.Data());
     }
   }
   // Check flags consistency   
@@ -559,6 +564,7 @@ Int_t StBFChain::Load()
       treeMk->SetBranch("histBranch");
     }
   }
+  if (XdfFile) xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
   PrintInfo();
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's inv#ifdef ChainFlags[kTRG]
@@ -621,6 +627,11 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	   ,InFile->Data());
     printf ("QAInfo:Output root file name %s\n", FileOut->Data());
     printf ("==============================================\n");
+    if (ChainFlags[kXOUT]) {
+      XdfFile = new TString(FileOut->Data());
+      XdfFile->ReplaceAll(".root",".dst.xdf");
+      printf ("QAInfo:Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
+    }
   }
   //    gSystem->Exit(1);
 }
