@@ -1,0 +1,34 @@
+/* xyz_newtab.idl
+ * Translate tppad/tppixel tables into adc/x,y,z info (for diagnostic)
+*/
+#include "PAM.idl"
+#include "tpg_pad_plane.idl"
+#include "tpg_detector.idl"
+#include "tcl_sector_index.idl"
+#include "raw_sec_m.idl"
+#include "raw_row.idl"
+#include "raw_pad.idl"
+#include "raw_seq.idl"
+#include "type_shortdata.idl"
+#include "tfc_adcxyz.idl"
+
+interface xyz_newtab: amiModule{
+	STAFCV_T call
+		( in tpg_pad_plane	pad_plane
+		, in tpg_detector	detector
+                , in tcl_sector_index tcl_sector_index
+                , in raw_sec_m      raw_sec_m
+                , in raw_row        raw_row_in
+                , in raw_pad        raw_pad_in
+                , in raw_seq        raw_seq_in
+                , in type_shortdata pixel_data_in
+                , in raw_row        raw_row_out
+                , in raw_pad        raw_pad_out
+                , in raw_seq        raw_seq_out
+                , in type_shortdata pixel_data_out
+   		, out tfc_adcxyz	adcxyz
+		);
+	};
+
+/* Created 25Nov96 Last modification: $Date: 1998/07/10 00:46:18 $ */
+
