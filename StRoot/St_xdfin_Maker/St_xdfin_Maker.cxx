@@ -1,5 +1,8 @@
-// $Id: St_xdfin_Maker.cxx,v 1.34 2000/03/22 22:46:56 perev Exp $
+// $Id: St_xdfin_Maker.cxx,v 1.35 2001/01/03 23:09:27 perev Exp $
 // $Log: St_xdfin_Maker.cxx,v $
+// Revision 1.35  2001/01/03 23:09:27  perev
+// Skip over EOF added
+//
 // Revision 1.34  2000/03/22 22:46:56  perev
 // Printout of I/O actions
 //
@@ -124,11 +127,11 @@ Int_t St_xdfin_Maker::Make(){
 //_____________________________________________________________________________
 Int_t St_xdfin_Maker::Skip(Int_t Nskip){
   St_DataSet *set;
-  for (Int_t i =1; i<= Nskip; i++){
-    if (GetDebug()) printf("St_xdfin_Maker skip record %i\n",i); 
+  for (int i=0;Nskip; Nskip--,i++){
+    if (GetDebug()) printf("St_xdfin_Maker skip record %i\n",i+1); 
     set = fXdfin.ReadEvent();
-    if (!set) return kStEOF;
+    if (!set) break;
     SafeDelete (set);
   }
-  return 0;
+  return Nskip;
 }

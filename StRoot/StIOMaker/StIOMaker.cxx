@@ -77,11 +77,14 @@ Int_t StIOMaker::Init()
 //_____________________________________________________________________________
 Int_t StIOMaker::Skip(int nskip)
 {
-  if (!fCurrMk) {
-    Error("Skip","Ignored. File is NOT opened");
-    return kStErr;
-  }
-  return fCurrMk->Skip(nskip);
+  
+  if (!fCurrMk) Open();
+  if (!fCurrMk) return 0;
+  
+  int rest = fCurrMk->Skip(nskip);
+  if (!rest) return 0;
+  Close();
+  return Skip(rest);
 }
 
 //_____________________________________________________________________________

@@ -29,12 +29,13 @@ void StIOInterFace::IntoBranch(const Char_t *brName,const Char_t *logNames)
 //_____________________________________________________________________________
 Int_t StIOInterFace::Skip(int nskip)
 {  
-  for (int skp=0; skp<nskip; skp++) 
+  for (; nskip; nskip--) 
   {
     Clear(); int ret = MakeRead(); 
-    if (ret) return ret;
+    if (ret) break;
   }
-  return kStOK;
+
+  return nskip;
 }
 //_____________________________________________________________________________
 Int_t StIOInterFace::Finish()
