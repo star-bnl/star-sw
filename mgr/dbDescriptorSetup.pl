@@ -12,10 +12,10 @@
 
 use DBI;
 
-$dbhosto="onlsun1.star.bnl.gov:3306";
-$dbusero="dbmole";
-$dbpasso="quegp23";
-$dbnameo="RunLog";
+$dbhostc="onlsun1.star.bnl.gov:3306";
+$dbuserc="dbmole";
+$dbpassc="quegp23";
+$dbnamec="RunLog";
 #$dbport="3316";
 
 
@@ -25,7 +25,7 @@ $daqDescriptorT = "daqDescriptor";
 
 ######################
 sub StDbDescriptorConnect {
-    $dbh = DBI->connect("dbi:mysql:$dbnameo:$dbhosto", $dbusero, $dbpasso)
+    $dbh = DBI->connect("dbi:mysql:$dbnamec:$dbhostc", $dbuserc, $dbpassc)
         || die "Cannot connect to db server $DBI::errstr\n";
 }
 
