@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.13 2000/11/14 13:08:16 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.14 2000/11/20 11:39:12 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.14  2000/11/20 11:39:12  jcs
+// remove remaining traces of fspar table
+//
 // Revision 1.13  2000/11/14 13:08:16  hummler
 // add charge step calculation, minor cleanup
 //
@@ -88,7 +91,6 @@ StMaker(name),
     m_padtrans(0),
     m_det(0),
     m_zrow(0),
-    m_fspar(0),
     m_gaspar(0)
 {
   drawinit=kFALSE;
