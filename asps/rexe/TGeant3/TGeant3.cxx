@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.8  2000/06/21 18:17:24  fisyak
+Add gfrung, gfhead
+
 Revision 1.7  2000/04/24 15:37:35  fisyak
 Merge with last Alice update
 
@@ -191,6 +194,8 @@ Introduction of the Copyright and cvs Log
 #define    setclip	 F77_NAME(setclip,SETCLIP)
 #define    gcomad	 F77_NAME(gcomad,GCOMAD)
 #define    gfnhit	 F77_NAME(gfnhit,GFNHIT)
+#define    gfrung	 F77_NAME(gfrung,GFRUNG)
+#define    gfhead	 F77_NAME(gfhead,GFHEAD)
 #if 0
 #define    csaddr	 F77_NAME(csaddr,CSADDR)
 #define    csjcal	 F77_NAME(csjcal,CSJCAL)
@@ -437,6 +442,8 @@ extern "C"
 			      Float_t&,Float_t&,Float_t&,Float_t&);
   Int_t type_of_call agsens   (DEFCHARD DEFCHARL);
   void type_of_call gfnhit (DEFCHARD,DEFCHARD,int& DEFCHARL DEFCHARL);
+  void type_of_call gfrung (Int_t &, Int_t *, Int_t &, Float_t *);
+  void type_of_call gfhead (Int_t &, Int_t *, Int_t &, Float_t *);
 #if 0
   ULong_t*  type_of_call csaddr(DEFCHARD DEFCHARL);
   long int type_of_call csjcal(
@@ -3563,6 +3570,14 @@ void TGeant3::Gfrotm(Int_t & Nmat,
 		     Float_t &Theta2, Float_t & Phi2,
 		     Float_t &Theta3, Float_t & Phi3){
   gfrotm(Nmat, Theta1, Phi1, Theta2, Phi2, Theta3, Phi3);
+}
+//_____________________________________________________________________________
+void TGeant3::Gfrung(Int_t & Nwrung, Int_t *Irung, Int_t & Nwbuf, Float_t * Ubuf) { 
+  gfrung(Nwrung,Irung,Nwbuf,Ubuf);
+}
+//_____________________________________________________________________________
+void TGeant3::Gfhead(Int_t & Nwhead, Int_t *Ihead, Int_t & Nwbuf, Float_t * Ubuf) {
+  gfhead(Nwhead,Ihead,Nwbuf,Ubuf); 
 }
 #if 0
 //_____________________________________________________________________________
