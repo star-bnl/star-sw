@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.19 1998/09/28 01:47:48 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.20 1998/10/04 02:20:12 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.20  1998/10/04 02:20:12  fine
+// St_Table.h Some clashes with TNamed and TObject have been fixed (affected Delete() method)
+//
 // Revision 1.19  1998/09/28 01:47:48  fisyak
 // Use system includes for ROOT
 //
@@ -18,7 +21,7 @@
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
 // Revision 1.11  1998/09/07 19:23:39  fine
-// St_Table::Print() - malloc/fre have been replaced with new [] / delete []  due a problem under Linux
+// St_Table::Print() - malloc/free have been replaced with new [] / delete []  due a problem under Linux
 // St_DataSet::~St_DataSet has been changed to take in account the "structural" links. Some opt have been done too
 //
 // Revision 1.10  1998/08/18 14:05:07  fisyak
@@ -192,15 +195,15 @@ void St_Table::AddAt(ULong_t *row, Int_t i)
 }
  
 //______________________________________________________________________________
-void St_Table::Copy(Char_t *dest, Char_t *src)
+void St_Table::CopyStruct(Char_t *dest, const Char_t *src)
 {
     ::memcpy(dest,src,*s_Size*fN);
 }
 //______________________________________________________________________________
-void St_Table::Copy(St_Table &array)
+void St_Table::CopySet(St_Table &array)
 {
   array.Set(fN); 
-  Copy(array.s_Table,s_Table); 
+  CopyStruct(array.s_Table,s_Table); 
  *(array.s_TableHeader) = *s_TableHeader; 
 }
 
@@ -217,7 +220,7 @@ void St_Table::Browse(TBrowser *b){
   Inspect();
 }
 //______________________________________________________________________________
-void St_Table::Delete()
+void St_Table::Delete(Option_t *opt)
 {
   if (s_Table)
   {
@@ -225,7 +228,8 @@ void St_Table::Delete()
     s_Table = 0;
    *s_MaxIndex = 0;
     fN = 0;
-  }       
+  } 
+  St_DataSet::Delete(opt);
 }
 
 #if 0
@@ -451,7 +455,7 @@ void St_Table::SetHeadFields(Text_t *name)
 }
 
 //______________________________________________________________________________
-void St_Table::SetName(const Text_t *const name)
+void St_Table::SetName(const Char_t *name)
 {
    strcpy(s_TableHeader->name,name);
    St_DataSet::SetName(s_TableHeader->name);
@@ -851,7 +855,7 @@ void St_Table::Set(Int_t n, Char_t *array)
 
    if (fN == 0) return;
    if (!s_Table) s_Table = Create();
-   Copy(s_Table,array);
+   CopyStruct(s_Table,array);
    *s_MaxIndex = n;
 }
  
