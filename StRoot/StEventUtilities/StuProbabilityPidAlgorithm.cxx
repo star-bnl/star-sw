@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.11 2000/08/17 13:32:13 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.12 2000/08/22 23:50:04 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.12  2000/08/22 23:50:04  aihong
+ * fix lowRigPID
+ *
  * Revision 1.11  2000/08/17 13:32:13  aihong
  * remove edge effect
  *
@@ -219,9 +222,16 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 	 // const StPhysicalHelixD& helix=theTrack.geometry()->helix();
     const StThreeVectorF& p=theTrack.geometry()->momentum();
     rig=double(p.mag()/charge);
-    rig=fabs(rig);
     pt=double(p.perp());
- 
+
+
+
+
+    //----------------get all info. I want for a track. now do PID
+
+   if (dedx<mDedxEnd){
+
+    rig=fabs(rig); 
     dedx = (dedx>mDedxStart) ? dedx : mDedxStart;
     rig  = (rig >mRigStart)  ? rig  : mRigStart;
     rig  = (rig <mRigEnd  )  ? rig  : mRigEnd*0.9999; //*0.9999 to remove edge effect.   
@@ -230,11 +240,6 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 
     pt   = (pt  >mPtStart)   ? pt   : mPtStart;
     pt   = (pt  <mPtEnd  )   ? pt   : mPtEnd*0.9999;
-
-
-    //----------------get all info. I want for a track. now do PID
-
-   if (dedx<mDedxEnd){
 
    if (mDynamicallyCalculatePID)
       fillPIDByCalculation(charge, dca, nhits, pt, dedx, rig);
@@ -362,7 +367,7 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx){
        double a;
        double upper;
        double lower;
-       double rigidity=fabs(rig);      
+       double rigidity=rig;      
        double mdedx=dedx; 
 
        m = -1.74072;
