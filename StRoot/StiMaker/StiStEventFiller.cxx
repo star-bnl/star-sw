@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.55 2005/03/17 06:33:20 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.56 2005/03/24 17:51:16 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.56  2005/03/24 17:51:16  perev
+ * print error code added
+ *
  * Revision 2.55  2005/03/17 06:33:20  perev
  * TPT like errors implemented
  *
@@ -485,6 +488,7 @@ struct StreamStHit
   fillTopologyMap(), fillGeometry(), fillFitTraits(), which are called within fillGlobalTrack().
   
 */
+//_____________________________________________________________________________
 StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 {
   //cout << "StiStEventFiller::fillEvent() -I- Started"<<endl;
@@ -757,6 +761,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 /// change: currently point and fit points are the same for StiKalmanTracks,
 /// if this gets modified later in ITTF, this must be changed here
 /// but maybe use track->getPointCount() later?
+//_____________________________________________________________________________
 void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* track, bool refCountIncr) 
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
@@ -815,8 +820,10 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
   
-  if (origin.bad()) {
+  int ibad = origin.bad();
+  if (ibad) {
       cout << "StiStEventFiller::fillGeometry() Encountered non-finite numbers!!!! Bail out completely!!! " << endl;
+      cout << "StThreeVectorF::bad() = " << ibad << endl;
       cout << "Last node had:" << endl;
       cout << "Ref Position  " << node->getRefPosition() << endl;
       cout << "node->getY()  " << node->getY() << endl;
@@ -855,6 +862,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
 //     return;
 // }
 
+//_____________________________________________________________________________
 void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   // mass
   // this makes no sense right now... double massHyp = track->getMass();  // change: perhaps this mass is not set right?
@@ -1043,8 +1051,11 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   return;
 }
 //_____________________________________________________________________________
-bool StiStEventFiller::accept(StiKalmanTrack* track) {
-    return (track->getTrackLength()>0); // insert other filters for riff-raff we don't want in StEvent here.
+bool StiStEventFiller::accept(StiKalmanTrack* track)
+{
+    if(track->getTrackLength()<0) return 0; // insert other filters for riff-raff we don't want in StEvent here.
+//    if(track->getFitPointCount(kSvtId)<2) return 0;
+    return 1;
 }
 //_____________________________________________________________________________
 void StiStEventFiller::stEventFitPoints(StiKalmanTrack* track, int *nFitPoints) 
