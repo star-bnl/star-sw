@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.50 2003/09/11 20:39:57 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.51 2003/09/12 22:03:54 jeromel Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.51  2003/09/12 22:03:54  jeromel
+// Bug fix : data member not zeroed (later delete)
+//
 // Revision 1.50  2003/09/11 20:39:57  suaide
 // Removed SMD capacitors 124 and 125 from data for dAu and pp Y2003 runs only.
 // It is timestamp flagged so it will work only for this data.
@@ -126,10 +129,11 @@ ClassImp(StEmcADCtoEMaker)
 
 //_____________________________________________________________________________
 /* 
-Default constructor. Set Initial values for some variables
+   Default constructor. Set Initial values for some variables
 */
 StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 {
+  mDecoder       = 0;
   mControlADCtoE = new controlADCtoE_st();
 
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
@@ -149,7 +153,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 }
 //_____________________________________________________________________________
 /* 
-Default destructor
+   Default destructor
 */
 StEmcADCtoEMaker::~StEmcADCtoEMaker()
 {
@@ -283,7 +287,7 @@ void StEmcADCtoEMaker::zeroAll()
   if(mDecoder) delete mDecoder;
   mDecoder=new StEmcDecoder(GetDate(),GetTime());
   mDb=NULL;
- 	clearStEventStaf();
+  clearStEventStaf();
 } 
 //_____________________________________________________________________________
 /*!
