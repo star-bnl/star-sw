@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   22/06/99  (E-mail: fine@bnl.gov)
-// $Id: PadBrowser.C,v 1.2 1999/06/23 19:25:18 fine Exp $
+// $Id: PadBrowser.C,v 1.3 1999/06/24 02:13:59 fine Exp $
 // $Log: PadBrowser.C,v $
+// Revision 1.3  1999/06/24 02:13:59  fine
+// New buttons and bug fixes
+//
 // Revision 1.2  1999/06/23 19:25:18  fine
 // Wrong index fixed
 //
@@ -38,7 +41,8 @@ class StPadBrowserPanel {
   //  bar->AddButton("Init", "StPadBrowserPanel::Init();", "Load share library and initialize the maker");
      bar->AddButton("Add Axice","St_PolyLine3D::Axis();","Add 3D axice to the cuurent TPad view");
      bar->AddButton("Next Event", "StPadBrowserPanel::Make();", "Make one step");
-     bar->AddButton("Draw Next Histogram", "StPadBrowserPanel::MakeHists();", "Make one step");
+     bar->AddButton("Draw Next Histogram", "StPadBrowserPanel::MakeHists(+1);", "Make one step");
+     bar->AddButton("Draw Prev Histogram", "StPadBrowserPanel::MakeHists(-1);", "Make one step");
      bar->AddButton("Finish","StPadBrowserPanel::Finish();","Finish job");
 
      bar->Show(); 
@@ -52,14 +56,20 @@ class StPadBrowserPanel {
      gPad->Update();
   }
   //_______________________________________________________________________________________
-  static void MakeHists(){
+  static void MakeHists(Int_t direction=1,Int_t hId=0){
     static TCanvas *histCanvas = 0;
     static Int_t histCounter = 0;
     if (!histCanvas) histCanvas = new TCanvas("Pads");
     histCanvas->cd();
-    if (histCounter >= 12) histCounter = 0;
-    histCounter++;
-    chain->GetHists(histCounter++)->Draw("cont");
+    histCounter += direction;
+    if (histCounter > 12) histCounter = 1;
+    if (histCounter < 1)  histCounter = 12;
+    chain->GetHists(hId+histCounter)->Draw("cont");
+  }
+  //_______________________________________________________________________________________
+  static void Finish(){
+    chain->Clear();
+    chain->Finish();
   }
 
 };
