@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.28 1999/06/26 01:40:56 fisyak Exp $
+// $Id: St_Table.h,v 1.29 1999/07/01 01:45:32 fisyak Exp $
 // $Log: St_Table.h,v $
+// Revision 1.29  1999/07/01 01:45:32  fisyak
+// GetRowDescritors => GetRowDescriptors
+//
 // Revision 1.28  1999/06/26 01:40:56  fisyak
 // Add Valery's abstract buffer
 //
@@ -139,7 +142,7 @@ public:
    virtual     TClass    *GetRowClass() const ;
    virtual     Long_t     GetNRows() const;
    virtual     Long_t     GetRowSize() const;
-   virtual     TList     *GetRowDescritors();
+   virtual     TList     *GetRowDescriptors();
    virtual     Long_t     GetTableSize() const;
    virtual     const Char_t *GetType() const;
    virtual     Long_t     HasData() const { return 1; }
