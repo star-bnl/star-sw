@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.10 2001/07/27 01:26:35 snelling Exp $
+// $Id: StFlowPicoEvent.h,v 1.11 2001/08/01 19:39:50 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -29,6 +29,7 @@ class StFlowPicoEvent : public TObject {
   Int_t         GetNtrack()  const { return mNtrack; }
 
   Int_t         Version()    const { return mVersion; }
+  UInt_t        L0TriggerWord() const { return mL0TriggerWord; }
   UInt_t        OrigMult()   const { return mOrigMult; }
   UInt_t        UncorrNegMult() const { return mUncorrNegMult; }
   UInt_t        UncorrPosMult() const { return mUncorrPosMult; }
@@ -56,6 +57,7 @@ class StFlowPicoEvent : public TObject {
   void SetBeamMassNumberWest(const Short_t bmw) { mBeamMassNumberWest = bmw; }
   void SetNtrack(const Int_t ntrk)      { mNtrack = ntrk; }
   void SetOrigMult(const UInt_t mult)   { mOrigMult = mult; }
+  void SetL0TriggerWord(const UInt_t trigger) { mL0TriggerWord = trigger; }
   void SetUncorrNegMult(const UInt_t mult)   { mUncorrNegMult = mult; }
   void SetUncorrPosMult(const UInt_t mult)   { mUncorrPosMult = mult; }
   void SetMultEta(const UInt_t goodtracks) { mMultEta = goodtracks; }
@@ -76,6 +78,7 @@ class StFlowPicoEvent : public TObject {
   Short_t        mBeamMassNumberEast;   // Mass Number of East Beam
   Short_t        mBeamMassNumberWest;   // Mass Number of West Beam
   UInt_t         mOrigMult;             // number of tracks
+  UInt_t         mL0TriggerWord;        // L0 Trigger Word
   UInt_t         mUncorrNegMult;        // number of h-
   UInt_t         mUncorrPosMult;        // number of h+
   UInt_t         mMultEta;              // number of tracks with 
@@ -99,6 +102,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.11  2001/08/01 19:39:50  snelling
+// Added the trigger word
+//
 // Revision 1.10  2001/07/27 01:26:35  snelling
 // Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //

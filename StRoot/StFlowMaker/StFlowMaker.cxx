@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.60 2001/07/27 20:33:40 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.61 2001/08/01 19:39:40 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -188,7 +188,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.60 2001/07/27 20:33:40 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.61 2001/08/01 19:39:40 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -305,6 +305,13 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetPhiWeight(mPhiWgt);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
+
+  // Get Trigger information
+
+  StL0Trigger* pTrigger = pEvent->l0Trigger();
+  if(pTrigger) {
+    pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord());
+  }
 
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
@@ -642,6 +649,7 @@ void StFlowMaker::FillPicoEvent() {
   pPicoEvent->SetVersion(4);         // version 4 
   pPicoEvent->SetEventID(pFlowEvent->EventID());
   pPicoEvent->SetRunID(pFlowEvent->RunID());
+  pPicoEvent->SetL0TriggerWord(pFlowEvent->L0TriggerWord());
 
   pPicoEvent->SetCenterOfMassEnergy(pFlowEvent->CenterOfMassEnergy());
   pPicoEvent->SetBeamMassNumberEast(pFlowEvent->BeamMassNumberEast());
@@ -1050,6 +1058,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetMultEta(pPicoEvent->MultEta());
   pFlowEvent->SetCentrality(pPicoEvent->MultEta());
   pFlowEvent->SetRunID(pPicoEvent->RunID());
+  pFlowEvent->SetL0TriggerWord(pPicoEvent->L0TriggerWord());
 
   pFlowEvent->SetCenterOfMassEnergy(pPicoEvent->CenterOfMassEnergy());
   pFlowEvent->SetBeamMassNumberEast(pPicoEvent->BeamMassNumberEast());
@@ -1245,6 +1254,9 @@ Float_t StFlowMaker::calcDcaSigned(const StThreeVectorF pos,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.61  2001/08/01 19:39:40  snelling
+// Added the trigger word
+//
 // Revision 1.60  2001/07/27 20:33:40  snelling
 // switched from StRun to StEvtHddr.
 //
