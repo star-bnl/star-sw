@@ -1,4 +1,4 @@
-// $Id: starTest.C,v 1.1 2004/07/12 20:16:31 potekhin Exp $
+// $Id: starTest.C,v 1.2 2004/07/13 19:00:49 potekhin Exp $
 //
 
 
@@ -29,6 +29,7 @@
   // Load the application-specific infrastructure lib
   gSystem->Load("../lib/.rh80_gcc32/libvmcApp.so");
   gSystem->Load("../lib/.rh80_gcc32/libtpc.so");
+  gSystem->Load("../lib/.rh80_gcc32/libinterfaces.so");
 
   // MC application
   cout<<"Constructing the VMC application"<<endl;
@@ -49,8 +50,10 @@
   if(StarConfiguration::isExternal())  geant3->SetRootGeometry();
 
   geant3->SetHADR(0);
-  appl->InitMC();
 
+  appl->InitMC();
+  appl->InitDisplay();
+  appl->SetFinishEventCB(StMcEventInterface::FinishEventCB);
 
 
   system("date");
