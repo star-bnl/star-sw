@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.31 2000/07/21 22:26:12 flierl Exp $
+// $Id: St_l3t_Maker.cxx,v 1.32 2000/07/22 21:22:36 flierl Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -169,7 +169,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
    printf("run my l3t_maker-->>\n");
 
    St_l3_Coordinate_Transformer transformer ;
-
+   transformer.Use_transformation_provided_by_db() ;
+   
 // get l3 dataset
    St_DataSet* sec_bank_set = 0 ;
    sec_bank_set = GetInputDS("l3Clufi");
@@ -251,8 +252,10 @@ Int_t St_l3t_Maker::MakeOnLine(){
       printf ( "FtfSl3: minClusterCharge %d  \n", tracker.minClusterCharge);
       printf ( "FtfSl3: maxClusterCharge %d  \n", tracker.maxClusterCharge);
       tracker.para.write ( stdout ) ;
+      transformer.Print_parameters() ;
       printf ( "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n" ) ;
       printf ( "333333333333333333333333333333333333333333333333333333 \n" ) ;
+      firstEvent = 0 ;
    } 
 //
 //    Create hit table to store L3 clusters in offline format
@@ -610,9 +613,14 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 	StThreeVectorF origin( dstTracks[trackindex].r0 * cos(convert*dstTracks[trackindex].phi0),
 			       dstTracks[trackindex].r0 * sin(convert*dstTracks[trackindex].phi0),
 			       dstTracks[trackindex].z0 ) ;
-	StThreeVectorF momentum( 1/dstTracks[trackindex].invpt * cos(convert*dstTracks[trackindex].psi),
-				 1/dstTracks[trackindex].invpt * sin(convert*dstTracks[trackindex].psi),
-				 1/dstTracks[trackindex].invpt * dstTracks[trackindex].tanl ) ;
+	Double_t Pt;
+	if (dstTracks[trackindex].invpt == 0 ) 
+	  { Pt=0.000000001; }
+	else 
+	  { Pt= 1/dstTracks[trackindex].invpt; }
+	StThreeVectorF momentum( Pt * cos(convert*dstTracks[trackindex].psi),
+				 Pt * sin(convert*dstTracks[trackindex].psi),
+				 Pt * dstTracks[trackindex].tanl ) ;
 	StHelixModel* helixModel = new StHelixModel( 
 						    dstTracks[trackindex].icharge,
 						    dstTracks[trackindex].psi,
