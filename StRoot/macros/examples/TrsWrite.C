@@ -1,11 +1,15 @@
 //
-// $Id: TrsWrite.C,v 1.1 1999/11/09 19:12:04 calderon Exp $
+// $Id: TrsWrite.C,v 1.2 1999/11/16 22:31:02 calderon Exp $
 //
 // Description:
 // Write a .trs file from a muon track.
 //
 ///////////////////////////////////////////////////////
 // $Log: TrsWrite.C,v $
+// Revision 1.2  1999/11/16 22:31:02  calderon
+// Version using ROOT Database (Hopefully soon we'll switch to
+// the TPC Db).
+//
 // Revision 1.1  1999/11/09 19:12:04  calderon
 // Initial Commit.
 // Example to write a .trs file from a muon processed through TRS.
@@ -24,6 +28,9 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
+  gSystem->Load("StDbLib");
+  gSystem->Load("StDbBroker");
+  gSystem->Load("St_db_Maker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("geometry");
   gSystem->Load("St_g2r");
@@ -38,6 +45,17 @@ void TrsWrite(const Int_t Nevents=1)
   chain->SetInput("EvtHddr",".make/geant/.const/EvtHddr");    
 
   //  Create the makers to be called by the current chain
+
+  // Db
+  const char* mainDB = "$STAR/StDb";
+  St_db_Maker *dbMk = new St_db_Maker("db",mainDB);
+  dbMk->SetDebug();
+  chain->SetInput("params","db:StDb/params");
+
+  const char* calibDB = "$STAR_ROOT/calib";
+  St_db_Maker *calibMk = new St_db_Maker("calib",calibDB);
+  chain->SetInput("calib","calib:calib");
+  calibMk->SetDebug();
 
   // Geant
   geant = new St_geant_Maker("geant");
