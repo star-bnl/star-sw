@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.h,v 1.3 1999/07/02 03:01:56 pavlinov Exp $
+// $Id: StEmcHitCollection.h,v 1.4 1999/07/16 18:04:08 pavlinov Exp $
 // $Log: StEmcHitCollection.h,v $
+// Revision 1.4  1999/07/16 18:04:08  pavlinov
+// Little correction for StEclMake
+//
 // Revision 1.3  1999/07/02 03:01:56  pavlinov
 // Little corrections for Linux
 //
@@ -42,7 +45,6 @@ class StEmcHitCollection : public St_DataSet , public StEmcGeom {
 private:
 
   St_DataSet     *mEmcCalib;   //!  For StEmcCollection::ADCtoEnergy
-  //  TString mName;  Delete => GetName()
 
   Int_t   mNHit;
   TArrayS mId;      // Id and Energy are the
@@ -50,7 +52,11 @@ private:
 
   Float_t mEnergySum;
   Float_t mEtSum;
-  TArrayS mModulePosition;
+
+  // Service information
+  Int_t   mModule;          // Number  of modules with information
+  TArrayS mNumsModule;         // Numbers of modules
+  TArrayS mIndexFirstLast;     // First and last index of hits for modules
 
   Int_t ADCtoEnergy(St_emc_hits*);   // Get ADC from emc_hits and fill energy
 protected:   
@@ -59,16 +65,20 @@ public:
   StEmcHitCollection(const Char_t* );
   virtual ~StEmcHitCollection();
 
-  inline  void    setEmcCalib(St_DataSet *var) {mEmcCalib = var;}
+  Int_t    NHit() const; 
+  Float_t  EnergySum() const;
+  Float_t  EtSum()    const;
+  Float_t  HitEnergy(Int_t );
+  Int_t    HitId(Int_t );
+  TArrayF* Energy();
+  TArrayS* Id();
 
-  inline Int_t   NHit()     {return mNHit;}      // Get Number of Hits;
-  inline Float_t EnergySum(){return mEnergySum;} // Get total energy;
-  inline Float_t EtSum()    {return mEtSum;}     // Get total transverse energy;
+  Int_t    Module();
+  TArrayS* NumsModule();
+  TArrayS* IndexFirstLast();
 
-  inline Float_t getHitEnergy(Int_t i) { return mEnergy[i];}  // Get hit energy in raw i;
-  inline Int_t   getHitId(Int_t i) { return mId[i];}          // Get hit id     in raw i;
+  void     setEmcCalib(St_DataSet *var);
   St_emc_hits *copyToTable(const Char_t*);                 // Create emc_hit table and copy hits; ??
-  const TArrayF *getmEnergy() {return &mEnergy;}           // Get array of energy
   void    printHits(Int_t n=10, Int_t start=0);            // *MENU*
   void    printHitsAll();                                  // *MENU*
   void    Browse(TBrowser *b);                             // browser
@@ -80,4 +90,18 @@ public:
   ClassDef(StEmcHitCollection,1)                           // Standard Root macro;
 };
 
+  inline  void   StEmcHitCollection::setEmcCalib(St_DataSet *var) {mEmcCalib = var;}
+
+  inline Int_t   StEmcHitCollection::NHit()  const  {return mNHit;}
+  inline Float_t StEmcHitCollection::EnergySum() const {return mEnergySum;}
+  inline Float_t StEmcHitCollection::EtSum()     const {return mEtSum;}
+
+  inline Float_t StEmcHitCollection::HitEnergy(Int_t i) {return mEnergy[i];}
+  inline Int_t   StEmcHitCollection::HitId(Int_t i)     { return mId[i];}
+  inline TArrayF* StEmcHitCollection::Energy() {return &mEnergy;}
+  inline TArrayS* StEmcHitCollection::Id()     {return &mId;}
+
+  inline Int_t    StEmcHitCollection::Module() {return mModule;}
+  inline TArrayS* StEmcHitCollection::NumsModule() {return &mNumsModule;}
+  inline TArrayS* StEmcHitCollection::IndexFirstLast() {return &mIndexFirstLast;}
 #endif

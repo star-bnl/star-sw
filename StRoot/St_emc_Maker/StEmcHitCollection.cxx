@@ -1,5 +1,8 @@
-// $Id: StEmcHitCollection.cxx,v 1.5 1999/07/02 03:01:56 pavlinov Exp $
+// $Id: StEmcHitCollection.cxx,v 1.6 1999/07/16 18:04:00 pavlinov Exp $
 // $Log: StEmcHitCollection.cxx,v $
+// Revision 1.6  1999/07/16 18:04:00  pavlinov
+// Little correction for StEclMake
+//
 // Revision 1.5  1999/07/02 03:01:56  pavlinov
 // Little corrections for Linux
 //
@@ -32,12 +35,16 @@ ClassImp(StEmcHitCollection)
 StEmcHitCollection::StEmcHitCollection() : St_DataSet("bemc") , StEmcGeom("bemc") {
   SetTitle("emc_hit");
   mNHit = 0; mEnergySum = 0.0, mEtSum = 0.0;
+  mModule = 0;
+  mNumsModule.Set(120); mIndexFirstLast.Set(121);
 }
 //_____________________________________________________________________________
 StEmcHitCollection::StEmcHitCollection(const Char_t *Name) : St_DataSet(Name) , StEmcGeom(Name) {
   //construct with name and detector #
   SetTitle("emc_hit");
-  mNHit = 0; mEnergySum = 0.0, mEtSum = 0.0;
+  mNHit = 0; mEnergySum = 0.0, mEtSum = 0.0; 
+  mModule = 0;
+  mNumsModule.Set(120); mIndexFirstLast.Set(121);
 }
 //_____________________________________________________________________________
 StEmcHitCollection::~StEmcHitCollection(){ /* noopt */ }
@@ -64,22 +71,22 @@ Int_t StEmcHitCollection::ADCtoEnergy(St_emc_hits *emc_hit){
     emc_pedestal_st     *ped   = m_ped->GetTable();
     emc_calib_header_st *slp_h = m_slp_h->GetTable();
     emc_adcslope_st     *slp   = m_slp->GetTable();
-    if(ped_h->det != mDetector){
+    if(ped_h->det != Detector()){
       cout << "***StEmcHitCollection::ADCtoEnergy: Pedestal data is not for this datector: "
 	   << name << endl;
       return  kStWarn;
     }
-    if(slp_h->det != mDetector){
+    if(slp_h->det != Detector()){
       cout << "***StEmcHitCollection::ADCtoEnergy: Gain data is not for this datector: "
 	   << name << endl;
       return  kStWarn;
     }
-    if(ped_h->nmodule != mNModule  ||
-       ped_h->neta    != mNEta     ||
-       ped_h->nsub    != mNSub     ||
-       slp_h->nmodule != mNModule  ||
-       slp_h->neta    != mNEta     ||
-       slp_h->nsub    != mNSub     ){      
+    if(ped_h->nmodule != NModule()  ||
+       ped_h->neta    != NEta()     ||
+       ped_h->nsub    != NSub()     ||
+       slp_h->nmodule != NModule()  ||
+       slp_h->neta    != NEta()     ||
+       slp_h->nsub    != NSub()     ){      
       cout << "***StEmcHitCollection::ADCtoEnergy: Inconsistent Ped or Gain data: "
 	   << name << endl;
       return  kStWarn;
@@ -183,6 +190,30 @@ Int_t StEmcHitCollection::fill(St_emc_hits *emc_hits)
     mEnergy[i] = ecopy[j];
   }
 
+  // To calculate modules boundary => Service information
+  Int_t id, m, e, s, mold;
+  id   = HitId(0);  // First hit
+  getBin(id, mold, e, s);
+  mNumsModule[0]     = (Short_t)mold;
+  mIndexFirstLast[0] = 0;
+  mIndexFirstLast[1] = mNHit;
+  mModule = 1;
+
+  if(mNHit > 1){
+    for(i=1; i<mNHit; i++){
+      id   = HitId(i);
+      getBin(id, m, e, s);
+      if(m != mold){
+        mold = m;
+        mNumsModule[mModule]       = (Short_t)mold;
+        mIndexFirstLast[mModule]   = i;
+        mIndexFirstLast[mModule+1] = mNHit;
+        ++mModule; 
+      }
+    }
+  }
+  //  mNumsModule.Set(mModule);
+  //mIndexFirstLast.Set(mModule+1);
   
   return kStOK;
 }
@@ -196,7 +227,7 @@ St_emc_hits* StEmcHitCollection::copyToTable(const Char_t *Name){
     if(mEnergy[i]>0.0){
       id = (Int_t) mId[i];
       getBin(id, m, e, s);
-      raw.det    = mDetector;
+      raw.det    = Detector();
       raw.module = m;
       raw.eta    = e;
       raw.sub    = s;
@@ -214,7 +245,7 @@ void StEmcHitCollection::printHits(Int_t n, Int_t start){
   Int_t i, m, e, s,id;
   cout << endl << GetName() << " : ";
   if(mNHit<=0){cout << "No hits" << endl; return;}
-  else{cout << mNHit << " hits" << endl;} 
+  else{cout << mNHit << " hits" << " Modules "<<mModule<< endl;} 
   cout << "Raw  ID  Module  Eta  Sub  Energy"<<endl;
   if(start<0) start=0;
   if(n<=0) n=1;
@@ -224,13 +255,18 @@ void StEmcHitCollection::printHits(Int_t n, Int_t start){
   int mold;
   for(i=start; i<start+n; i++){
     id = (Int_t) mId[i]; getBin(id, m, e, s);
-    if(i == 1) mold=m;
+    if(i == start) mold=m;
     if(mold != m) {
       cout << "-------------------------------"<<endl;
       mold = m;
     }
-
     cout <<i<<"  "<<id<<"  "<<m<<"  "<<e<<"  "<<s<<"  "<<mEnergy[i]<<endl;
+  }
+
+  for(i=0; i<mModule; i++){
+    Int_t jm=mIndexFirstLast[i+1] - mIndexFirstLast[i];
+    cout<<i<<" #Modules "<<mNumsModule[i]<<" jm "<<jm<<
+	" First "<<mIndexFirstLast[i]<<" Last "<<mIndexFirstLast[i+1]-1<<endl;
   }
 }
 //_____________________________________________________________________________
