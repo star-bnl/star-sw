@@ -67,7 +67,7 @@ public:
   int swapHerb2bytes(short unsigned int *data,int number);
   int swapHerb4bytes(unsigned int  *data,int number);
   int swapHerb4bytes(unsigned long *data,int number);
-  int HerbSwap(void*);
+  int HerbSwap();
   void PrintAllTheData(FILE *ff);
   void PrintDataCompact(FILE *ff);
   char *PrintHelp(char*,int);
