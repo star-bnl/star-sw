@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.11 2000/03/17 23:10:06 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.12 2000/03/20 15:45:06 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.12  2000/03/20 15:45:06  kathy
+// add libraries to load in bfcread_dst_QA*.C so it will work on linux; worked on solaris without adding them - I have no idea why
+//
 // Revision 1.11  2000/03/17 23:10:06  kathy
 // make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
 //
@@ -105,6 +108,8 @@ void bfcread_dst_QA_outhistfile(
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("StDbUtilities");
+  gSystem->Load("StTpcDb");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("tls");
   gSystem->Load("St_tpc");
