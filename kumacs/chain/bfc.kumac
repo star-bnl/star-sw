@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.51 1998/09/15 21:08:55 kathy Exp $
+* $Id: bfc.kumac,v 1.52 1998/09/16 15:27:14 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.52  1998/09/16 15:27:14  kathy
+* fix for skip events so it picks up correct bfc_util
+*
 * Revision 1.51  1998/09/15 21:08:55  kathy
 * make bfc skip events for fzin & dstin also
 *
@@ -456,7 +459,7 @@ MACRO bfc _
            message ' SKIP EVENTS FOR ' [mod]
 	   do ievent = 1,[skip]
 	       message 'skip event # ',[ievent]
-               exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=[mod]
+               exec bfc_util#bfc_process chain=[mod]
                if (STAF_STATUS(1).ne. 1) goto ABEND
            enddo
        endif
