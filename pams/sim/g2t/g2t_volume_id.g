@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.32 2001/02/13 02:29:47 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.33 2001/04/06 18:13:11 akio Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.33  2001/04/06 18:13:11  akio
+* Modifications for FPD
+*
 * Revision 1.32  2001/02/13 02:29:47  nevski
 * USE BTOG bug fix
 *
@@ -36,11 +39,12 @@
       integer  g2t_volume_id
 * 
       Character*3      Csys
-      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/,ivpd/0/
+      Integer          NUMBV(15),itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is
+      Integer          nEndcap,nFpd,depth
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
@@ -54,6 +58,7 @@
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
      + 	                         int Netfirst, int Netsecon}
+      Structure  EMCG  {Version,OnOff(3)}
       logical          first/.true./
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
@@ -66,6 +71,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           USE  /DETM/BTOF/BTOG  stat=ibtf
           USE  /DETM/CALB/CALG  stat=ical
           USE  /DETM/VPDD/VPDG  stat=ivpd
+          USE  /DETM/ECAL/EMCG  stat=ieem
 
           call RBPOPD
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
@@ -73,6 +79,26 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
      >                         ' choice  =',btog_choice,btog_posit1
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
+          if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
+          if (ieem>=0) then
+	    print *,'              : ECAL/FPD version =',emcg_version 
+	    print *,'              : ECAL/FPD : ',
+     >            emcg_onoff(1),emcg_onoff(2),emcg_onoff(3)
+	    if(emcg_onoff(1)==0) then 
+	      nEndcap=0
+	    elseif(emcg_onoff(1)<3) then
+	      nEndcap=1
+	    else 
+	      nEndcap=2
+	    endif
+	    if(emcg_onoff(2)==0) then
+	      nFpd=0
+	    else if(emcg_onoff(2)<3) then
+	      nFpd=1
+	    else 
+	      nFpd=2
+	    endif
+	  endif
       endif
 
       volume_id = 0
@@ -398,23 +424,121 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
      +              100*forw_back+strip
 	endif
 
-      else If (Csys=='esm') then
-*8*                                 end-cap calorimeter - Rashid
-        rileft    = numbv(1)
-        phi       = numbv(2)
-        phi_sub   = numbv(4)
-        eta       = numbv(2) 
-        volume_id = 10000000*rileft+100000*phi+100*phi_sub+eta
-
       else If (Csys=='eem') then
+*8*                                 end-cap calorimeter - Rashid
+
+*	write(*,*) 'g2t_volume_id eem:',
+*     +     numbv(1),numbv(2),numbv(3),numbv(4),numbv(5),numbv(6)
+ 
+	if(cd=='ESCI') then
+	  if(emcg_version < 4) then
+       	    rileft    = numbv(1)
+            phi_30d   = numbv(2)-1
+            section   = numbv(3)
+            eta       = numbv(6)
+            phi       = numbv(4)
+	  else
+	    if(nEndcap==1 & nFpd == 0) then
+       	      rileft    = emcg_onoff(1)
+              phi_30d   = numbv(1)-1
+              section   = numbv(2)
+              eta       = numbv(5)
+              phi       = numbv(3)
+	    else if(nEndcap==0 & nFpd==1) then
+       	      rileft    = emcg_onoff(2)+2
+              phi_30d   = 0
+              section   = numbv(1)
+              eta       = numbv(4)
+              phi       = numbv(2)
+	    else
+	      if(numbv(1)<=nEndcap)then	      
+		if(nEndcap==1) then
+		  rileft=emcg_onoff(1)
+                else 
+		  rileft=numbv(1)
+		endif
+            	phi_30d   = numbv(2)-1
+            	section   = numbv(3)
+            	eta       = numbv(6)
+            	phi       = numbv(4)
+	      else
+		if(nFpd==1) then
+		  rileft=emcg_onoff(2)+ 2
+                else 
+		  rileft=numbv(1)+ 2
+		endif
+		phi_30d   = 0
+                section   = numbv(1)
+	        eta       = numbv(5)
+                phi       = numbv(3)
+              endif
+	    endif
+	  endif
+	else
+	  rileft=5
+	  phi_30d   = 0
+	  eta       = numbv(2)
+          phi       = numbv(1)
+	  if(emcg_onoff(2)==2) phi=phi+4 
+	  if(cd=='EPCT') then
+	    section=2
+	  elseif(cd=='ELGR') then 
+	    section=1
+	  endif
+	endif
+	volume_id = 100000*rileft+5000*phi_30d+1000*phi
+     +             +10*eta+section
+		  
+      else If (Csys=='esm') then
 *9*
-        rileft    = numbv(1)
-        phi_30d   = numbv(2)-1
-        section   = numbv(3)
-        eta       = numbv(6)
-        phi       = numbv(4)
-        volume_id = 100000*rileft+5000*phi_30d+1000*phi+10*eta+
-     +              section
+*        write(*,*) 'g2t_volume_id esm:',
+*     +     numbv(1),numbv(2),numbv(3),numbv(4),numbv(5),numbv(6)
+
+	if(emcg_version < 4) then
+          rileft    = numbv(1)
+          phi       = numbv(2)
+          depth     = numbv(3)
+          strip     = numbv(4) 
+	else
+	  if(nEndcap==1 & nFpd == 0) then
+       	    rileft    = emcg_onoff(1)
+            phi       = numbv(1)
+            depth     = numbv(2)
+            strip     = numbv(3) 
+	  else if(nEndcap==0 & nFpd==1) then
+            rileft    = emcg_onoff(2)+2
+            phi       = 1
+            depth     = numbv(1)
+            strip     = numbv(2) 
+          else
+	    if(numbv(1)<=nEndcap)then	      
+	      if(nEndcap==1) then
+		rileft=emcg_onoff(1)
+              else 
+		rileft=numbv(1)
+	      endif
+	      phi       = numbv(2)
+              depth     = numbv(3)
+              strip     = numbv(4) 
+	    else
+	      if(nFpd==1) then
+		rileft=emcg_onoff(2)+ 2
+              else 
+		rileft=numbv(1)+ 2
+	      endif
+	      if(nEndcap==0) then
+	      	phi       = 1
+       	      	depth     = numbv(1)
+	      	strip     = numbv(2) 
+              else 
+	      	phi       = numbv(1)
+       	      	depth     = numbv(2)
+	      	strip     = numbv(3) 
+	      endif
+            endif
+	  endif
+	endif       
+	volume_id = 1000000*rileft+10000*phi+1000*depth+strip
  
 *   ------------------ forward region ---------------------
 
