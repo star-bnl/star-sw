@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.149 2000/11/02 15:59:26 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.150 2000/11/03 21:21:42 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -431,7 +431,7 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
-	  if (maker == "St_tpt_Maker" && !GetOption("ExB")) mk->SetMode(1); // Al Saulys request
+	  if (maker == "St_tpt_Maker" && GetOption("ExB")) mk->SetMode(1); // Al Saulys request
 	  if (maker == "St_tpcdaq_Maker") {
 	    if (GetOption("Trs")) mk->SetMode(1); // trs
 	    else                  mk->SetMode(0); // daq
