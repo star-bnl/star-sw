@@ -8,7 +8,7 @@
 
 struct eemcDbPMTname { 
 
-   char  towerName[960];   /*    tower name  */
+   char  name[960];   /*    tower name  */
    char  tubeName[960];   /*    PMT  name  */
    char  comment[160];   /*   */
 
