@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.6 2000/01/20 14:36:23 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.7 2000/01/26 22:31:25 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.7  2000/01/26 22:31:25  flierl
+// make cc5 happy. change char to cons char
+//
 // Revision 1.6  2000/01/20 14:36:23  flierl
 // change return value from kStErr to kStWarn to avoid stalling of the whole chain
 //
@@ -150,7 +153,7 @@ Int_t St_l3Clufi_Maker::Make(){
 	    while ( (sector = next()) && sectorindex <= 24 )
 		{
 		    // look if St_DataSet N is really a sector, (trial an error to get the sector id ...)
-		    Char_t *name = 0;
+		    const Char_t *name;
 		    if ((name = strstr(sector->GetName(),"Sector"))) 
 			{
 			    // lets look which sector we got (sectorindex = xxx)
