@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.20 1999/09/22 15:26:52 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.21 1999/09/24 22:18:27 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.21  1999/09/24 22:18:27  fisyak
+# Add new Table method (VF), fix bug in VPATH
+#
 # Revision 1.20  1999/09/22 15:26:52  fisyak
 # Add definition of STAR_MAKE_HOME
 #
@@ -296,6 +299,7 @@ ifeq ($(LEVEL),$(FOUR)) #subpackage level
     DOM_DIR := $(subst / ,,$(INP_DIR)/../../) )
     PKG     := $(NAME)
 endif
+PKGNAME :=$(strip $(PKG))
 ifeq (tables,$(PKG))
 PKG :=Tables
 endif
