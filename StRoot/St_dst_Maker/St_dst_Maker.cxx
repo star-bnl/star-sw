@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.30 1999/10/25 21:53:04 wdeng Exp $
+// $Id: St_dst_Maker.cxx,v 1.31 1999/11/15 17:44:03 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.31  1999/11/15 17:44:03  lbarnby
+// Add ctb,emc,l3,rich monitor soft tables (empty for now)
+//
 // Revision 1.30  1999/10/25 21:53:04  wdeng
 // Use shorter names for monitoring tables
 //
@@ -92,7 +95,8 @@
 #include "tables/St_dst_summary_param_Table.h"
 #include "tables/St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.30 1999/10/25 21:53:04 wdeng Exp $";
+
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.31 1999/11/15 17:44:03 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -208,7 +212,6 @@ Int_t St_dst_Maker::Make(){
   St_DataSetIter dstI(dst);
   St_DataSet *ds=0,*mk=0;
   const char *name,*mkname;
-  
   
   for (int idst=0; (name=fSelect[idst]); idst++) {
     
@@ -365,17 +368,39 @@ Int_t  St_dst_Maker::Filler(){
   St_dst_mon_soft_glob *mon_soft_glob = new St_dst_mon_soft_glob("mon_soft_glob",1);
   St_dst_mon_soft_svt  *mon_soft_svt  = new St_dst_mon_soft_svt("mon_soft_svt",1);
   St_dst_mon_soft_tpc  *mon_soft_tpc  = new St_dst_mon_soft_tpc("mon_soft_tpc",1);
+  St_dst_mon_soft_ctb  *mon_soft_ctb  = new St_dst_mon_soft_ctb("mon_soft_ctb",1);
+  St_dst_mon_soft_emc  *mon_soft_emc  = new St_dst_mon_soft_emc("mon_soft_emc",1);
+  St_dst_mon_soft_l3  *mon_soft_l3  = new St_dst_mon_soft_l3("mon_soft_l3",1);
+  St_dst_mon_soft_rich  *mon_soft_rich  = new St_dst_mon_soft_rich("mon_soft_rich",1);
   dstI.Add(mon_soft_ftpc);
   dstI.Add(mon_soft_glob);
   dstI.Add(mon_soft_svt);
   dstI.Add(mon_soft_tpc);
+  dstI.Add(mon_soft_ctb);
+  dstI.Add(mon_soft_emc);
+  dstI.Add(mon_soft_l3);
+  dstI.Add(mon_soft_rich);
+  //Make (empty) ctb,emc,l3,rich monitor soft tables
+
+  mon_soft_ctb->SetNRows(1);
+  dst_mon_soft_ctb_st *mon_ctb = mon_soft_ctb->GetTable();
+
+  mon_soft_emc->SetNRows(1);  
+  dst_mon_soft_emc_st *mon_emc = mon_soft_emc->GetTable();
+  
+  mon_soft_l3->SetNRows(1);
+  dst_mon_soft_l3_st *mon_l3 = mon_soft_l3->GetTable();
+
+  mon_soft_rich->SetNRows(1);
+  dst_mon_soft_rich_st *mon_rich = mon_soft_rich->GetTable();
+
   iRes = dst_monitor_soft_filler(tpcluster, scs_cluster,
 				 tphit, scs_spt, fcl_fppoint,
 				 tptrack,stk_track,fpt_fptrack,
 				 evt_match, ctb_cor, vertex, event_summary, 
                                  mon_soft_ftpc, mon_soft_glob,
-                                 mon_soft_svt, mon_soft_tpc );
-    //     ===========================================================================
+                                 mon_soft_svt, mon_soft_tpc);
+  //===========================================================================
   if (iRes !=kSTAFCV_OK) {
     iMake = kStWarn;
     gMessMgr->Warning() << "Problem on return from DST_MONITOR_SOFT_FILLER" << endm;
@@ -416,3 +441,4 @@ Int_t  St_dst_Maker::Filler(){
   }
   return kStOK;
 }
+
