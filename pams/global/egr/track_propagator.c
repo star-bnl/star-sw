@@ -28,40 +28,96 @@ long track_propagator_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
   
-  long i;
+  
+  long  i, iflag;
   float bfld=5., GRADDEG=57.2958;
   float psi, pt, tanl, x0, y0, z0, xp[2], xout[4];
-  long q;
+  float trk[6], r1, r2, xc1[2], xc2[2], x[2], y[2], cut;
+  long  q;
 
+  for(i=0; i<gtrack_h->nok; i++) 
+    {
+      psi  = gtrack[i].psi;
+      q    = (long) gtrack[i].icharge;
+      tanl = gtrack[i].tanl;
+      if(gtrack[i].invpt != 0 )
+	{
+	  pt    = 1/gtrack[i].invpt ;
+	}
+      else
+	{
+	  /*	    message('Error, invpt); */
+	  pt = 0.01;
+	}
+      x0   = gtrack[i].x0 ;
+      y0  = gtrack[i].y0 ;
+      z0   = gtrack[i].z0;
+      trk[0] = gtrack[i].x0;
+      trk[1] = gtrack[i].y0;
+      trk[2] = gtrack[i].z0;
+      trk[3] = gtrack[i].psi;
+      trk[4] = gtrack[i].tanl;
+      trk[5] = gtrack[i].icharge;
+      r1     = ((float) gtrack[i].icharge)*(1/gtrack[i].invpt)/(0.0003*bfld);
 
-    for(i=0; i<gtrack_h->nok; i++) 
-      {
-	psi  = gtrack[i].psi;
-	q    = (long) gtrack[i].icharge;
-	tanl = gtrack[i].tanl;
-	if(gtrack[i].invpt != 0 )
-	  {
-	    pt    = 1/gtrack[i].invpt ;
-	  }
-	else
-	  {
-	    /*	    message('Error, invpt); */
-	    pt = 0.01;
-	  }
-	x0   = gtrack[i].x0 ;
-	y0  = gtrack[i].y0 ;
-	z0   = gtrack[i].z0;
-	xp[0]= target->x[0]; 
-	xp[1]= target->x[1];
-	
-	project_track_(&psi, &q, &pt, &tanl, &x0, &y0, &bfld, &z0, xp, xout); 
-	
-	gtrack[i].x0 = xout[0];
-	gtrack[i].y0 = xout[1];
-	gtrack[i].z0 = xout[2];
-	gtrack[i].psi= xout[3];
-      }
+      if(target->iflag == 1)
+	{
+	  xp[0]= target->x[0]; 
+	  xp[1]= target->x[1];
+	  
+	  prop_project_track_(&psi, &q, &pt, &tanl, &x0, &y0, &bfld, &z0, xp, xout); 
+	  
+	  gtrack[i].x0 = xout[0];
+	  gtrack[i].y0 = xout[1];
+	  gtrack[i].z0 = xout[2];
+	  gtrack[i].psi= xout[3];
 
-
-   return STAFCV_OK;
+	  if (target->iflag == 2)
+	    {
+	      /* do nothing now */
+	    }
+	  return STAFCV_OK;
+	}
+      
+      if (target->iflag == 3)
+	{
+	  prop_circle_param_(trk, xc1, &r1, &bfld);
+	  xc2[0] = xc2[1] = 0.;
+	  r2 = target->r;
+	  cut = 0.4;
+	  prop_vzero_geom_(&cut, xc1, xc2, &r1, &r2, x, y, &iflag); 
+	  if(iflag == 5)
+	    {
+	      /* message("Can't project to the circle target->r! "); */
+	      continue;
+	    }
+	  else if (iflag == 3)
+	    {
+      	      xp[0] = x[0];
+	      xp[1] = y[0];
+	    }
+	  else
+	    {
+	      if(  ((x0-x[0])*(x0-x[0]) + (y0-y[0])*(y0-y[0])) <
+		   ((x0-x[1])*(x0-x[1]) + (y0-y[1])*(y0-y[1]))   )
+		{ 
+		  xp[0] = x[0];
+		  xp[1] = y[0];
+		}
+	      else
+		{
+		  xp[0] = x[1];
+		  xp[1] = y[1];
+		} 
+	    }
+	  
+	  prop_project_track_(&psi, &q, &pt, &tanl, &x0, &y0, &bfld, &z0, xp, xout); 
+	  
+	  gtrack[i].x0 = xout[0];
+	  gtrack[i].y0 = xout[1];
+	  gtrack[i].z0 = xout[2];
+	  gtrack[i].psi= xout[3];
+	}
+    }
 }
+  
