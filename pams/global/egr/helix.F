@@ -295,7 +295,7 @@ CCC          print *,' destep,dein,deou,rin,rou,mom = ',destep,dein,deou,re1,re2
       ENDIF
 
         TMOMENTUM = MOMENTUM/SQRT(1.+PIN(3)**2)
-        POU(5) = SIGN(1./TMOMENTUM,PIN(5))
+        POU(5) = SIGN(1.0D0/TMOMENTUM,PIN(5))
 
 CCC        POU(5) = PIN(5)
 *--
