@@ -81,10 +81,13 @@ Int_t StDAQMaker::Make(){
   fEvtHddr->SetTriggerMask	( fDAQReader->getTrigWord() 	);
   fEvtHddr->SetGMTime		( fDAQReader->getUnixTime()	);
   fEvtHddr->SetEventSize	( fDAQReader->getEventSize()	);
-  if (Debug()) fEvtHddr->Print();
-  
+  if (Debug()) {
+    fDAQReader->printEventInfo();
+    fEvtHddr->Print();
+  }  
 
   if (GetDebug()<=1) return 0;
+
   StTPCReader *myTPCReader = fDAQReader->getTPCReader();
   for (int sector =1; sector <=12; sector++)
   {
