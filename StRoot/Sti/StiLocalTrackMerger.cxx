@@ -107,7 +107,7 @@ bool StiLocalTrackMerger::configureMaxTrack(StiKalmanTrack* lowerTrack)
     cout <<"radius: "<<radius<<" dR: "<<dR<<" maxRadius: "<<maxRadius<<endl;
     
     mMaxTrackNode.fP3 = 1./maxRadius;
-    mMaxTrack.setLastNode(&mMaxTrackNode);
+    ///////mMaxTrack.setLastNode(&mMaxTrackNode); <<< error
     //StiKalmanTrackNode* temp = mMaxTrack.getLastNode();
     //cout <<"maxRadius: "<<1./temp->fP3<<endl;
     
