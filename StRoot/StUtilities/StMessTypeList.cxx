@@ -1,7 +1,7 @@
-// $Id: StMessTypeList.cxx,v 1.5 1999/06/30 17:24:49 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.6 1999/07/01 01:24:45 genevb Exp $
 // $Log: StMessTypeList.cxx,v $
-// Revision 1.5  1999/06/30 17:24:49  genevb
-// Better limit management, remove Bool_t
+// Revision 1.6  1999/07/01 01:24:45  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
 //
 // Revision 1.4  1999/06/29 17:37:30  genevb
 // Lots of fixes...
@@ -96,12 +96,9 @@ int StMessTypeList::ListTypes() {
   StMessTypeVecIter iter;
   cout << "List of StMessage types:" << endl;
   cout << "--------------------------------------------------------" << endl;
-  char* temp = "    :                                               ";
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
     StMessTypePair* current = (*iter);
-    strncpy(&temp[2],current->Type(),1);
-    strcpy(&temp[6],current->Text());
-    cout << temp << endl;
+    cout << "  " << current->Type() << " : " << current->Text() << endl;
   }
   return messList.size();
 }

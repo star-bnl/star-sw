@@ -1,7 +1,7 @@
-// $Id: StMessageCounter.cxx,v 1.8 1999/06/30 17:24:50 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.9 1999/07/01 01:24:46 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
-// Revision 1.8  1999/06/30 17:24:50  genevb
-// Better limit management, remove Bool_t
+// Revision 1.9  1999/07/01 01:24:46  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
 //
 // Revision 1.7  1999/06/30 04:18:45  genevb
 // Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
@@ -59,7 +59,7 @@ StMessageCounter* StMessageCounter::Instance() {
 }
 //_____________________________________________________________________________
 void StMessageCounter::SetLimit(char* str, int n) {
-  yesLimits = 1;
+  if (!yesLimits && (n >= 0)) yesLimits = 1;
   const size_t len = strlen(str);
   if (len==1) {
     int typeN = messTypeList->FindTypeNum(str);
@@ -71,7 +71,7 @@ void StMessageCounter::SetLimit(char* str, int n) {
     int index=0;
     for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
       if (!strcmp(str,(*curString))) {
-        if (n<0) {
+        if (n < 0) {
           limitList.erase(curString);
           limitNList.erase(&(limitNList[index]));
           limitNCountList.erase(&(limitNCountList[index]));
@@ -82,6 +82,7 @@ void StMessageCounter::SetLimit(char* str, int n) {
       }
       index++;
     }
+    if (n < 0) return;
     char* temp = new char[len];
     strcpy(temp,str);
     limitList.push_back(temp);
@@ -102,7 +103,7 @@ int StMessageCounter::GetLimit(char* str) {
       index++;
     }
   }
-  return 0;
+  return -1;
 }
 //_____________________________________________________________________________
 void StMessageCounter::ListLimits() {

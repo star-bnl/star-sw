@@ -1,7 +1,7 @@
-// $Id: StMessage.cxx,v 1.8 1999/06/30 17:24:49 genevb Exp $
+// $Id: StMessage.cxx,v 1.9 1999/07/01 01:24:46 genevb Exp $
 // $Log: StMessage.cxx,v $
-// Revision 1.8  1999/06/30 17:24:49  genevb
-// Better limit management, remove Bool_t
+// Revision 1.9  1999/07/01 01:24:46  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
 //
 // Revision 1.7  1999/06/30 04:18:45  genevb
 // Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
@@ -61,11 +61,11 @@ messTime() {
   size_t len = strlen(opt);
   option = new char[len];
   while (len--)
-    option[len] = toupper(opt[len]);
+    option[len] = toupper(opt[len]);  // capitalize while copying
 //  location = "Unknown";
 //  runNumber = 0;
   len = strlen(mess);
-  while (mess[--len] == space) {}    // remove trailing spaces
+  while (mess[--len] == space) {}     // remove trailing spaces
   message = new char[(++len + 1)];
   strncpy(message,mess,len);
   strcpy(&(message[len]),"");
@@ -127,7 +127,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.8 1999/06/30 17:24:49 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.9 1999/07/01 01:24:46 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

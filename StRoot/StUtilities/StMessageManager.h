@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.7 1999/06/29 23:32:42 genevb Exp $
+// $Id: StMessageManager.h,v 1.8 1999/07/01 01:24:46 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.8  1999/07/01 01:24:46  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+//
 // Revision 1.7  1999/06/29 23:32:42  genevb
 // Handle multi-line calls to fortran routines better
 //
@@ -50,22 +53,25 @@
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
 R__EXTERN  void type_of_call Message_(char* mess="", int *lines=0, int *id=0,
-                                                                 int meslen=0);
-R__EXTERN  void type_of_call Msg_Enable_(char* mess="", int len=0);
-R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int *id=0, int len=0);
-R__EXTERN  void type_of_call Msg_Disable_(char* mess="", int len=0);
+                                  size_t len=0);
+R__EXTERN  void type_of_call Msg_Enable_(char* mess="",
+                                  size_t len=0);
+R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int *id=0,
+                                  size_t len=0);
+R__EXTERN  void type_of_call Msg_Disable_(char* mess="",
+                                  size_t len=0);
 R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="I", char* opt="O",
-                                    int len1=0, int len2=1, int len3=1);
+                                  size_t len1=0, size_t len2=1, size_t len3=1);
 R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O",
-                                    int len1=0, int len2=1);
+                                  size_t len1=0, size_t len2=1);
 R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="O",
-                                    int len1=0, int len2=1);
+                                  size_t len1=0, size_t len2=1);
 R__EXTERN  void type_of_call StError_(char* mess="", char* opt="O",
-                                    int len1=0, int len2=1);
+                                  size_t len1=0, size_t len2=1);
 R__EXTERN  void type_of_call StDebug_(char* mess="", char* opt="O",
-                                    int len1=0, int len2=1);
+                                  size_t len1=0, size_t len2=1);
 R__EXTERN  void type_of_call StMessAddType_(const char* type, const char* text,
-                                    int len1=0, int len2=0);
+                                  size_t len1=0, size_t len2=0);
 }
 #endif
 
@@ -124,7 +130,7 @@ class StMessageManager : public ostrstream {
    virtual       void RemoveLimit(char* str) {SetLimit(str,-1);}
    virtual       void SwitchOff(char* str) {SetLimit(str,0);}
    virtual       void SwitchOn(char* str) {RemoveLimit(str);}
-   virtual       void Summary(int nTerms=1);
+   virtual       void Summary(size_t nTerms=1);
    virtual        int AddType(const char* type, const char* text);
    virtual        int ListTypes() {return messTypeList->ListTypes();}
 
