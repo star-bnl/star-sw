@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.14 2000/02/15 02:50:45 sakrejda Exp $
+* $Id: tpt_project.F,v 1.15 2000/02/23 05:05:01 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.15  2000/02/23 05:05:01  sakrejda
+* Skip extension part if track spans across all the padrows
+*
 * Revision 1.14  2000/02/15 02:50:45  sakrejda
 * Clean up, skip calculating prediction if a row is repeated
 *
@@ -149,6 +152,7 @@ C
       ip(2) = ip_out
 
 C     extend toward inner-row and then toward outer-row
+      if(abs(row_out-row_in).lt.44) then
       do mdir = 1,2
          irow_last=0
 C        loop over rows
@@ -249,6 +253,7 @@ C              a hit found
            if(irow.lt.1.or.irow.gt.45) more=.false.
          end do
       end do
+      endif
       tte_skip=0
       save_flag=trk(itrk).flag
       iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
