@@ -7,6 +7,7 @@
 #include <map>
 #include "StThreeVector.hh"
 #include "StThreeVectorD.hh"
+
 #include "tables/St_svg_config_Table.h"
 
 class StiTrack;

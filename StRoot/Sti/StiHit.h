@@ -4,6 +4,49 @@
 
 //Hit class to be used for the ITTF tracker
 
+/*! \class StiHit
+  StiHit is a simple class that encapsulates a three dimensional position
+  measurement in the STAR detector.  The measurement is represented in a frame
+  that is 'local' to the detector plane from which it arose.
+  <p>
+  It is assumed
+  that all hits come from a detector that can be composed of discrete planes.
+  Each plane is characterized by two values: position and refAngle.  In the
+  mid-rapidity region of STAR (SVT, TPC, EMC, etc) the position corresponds to
+  the magnitude of a vector pointing from the origin to the center of the plane.
+  The refAngle is the azimuthal defined by the aforemention vector and the
+  STAR global x-axis.  All hits store the position and refAngle of the detector
+  plane from which they came.
+  <p>
+  Within each detector plane, the hit is characterized by two more numbers:
+  y and z.  The y value corresponds to the distance along the plane (e.g.,
+  padrow) w.r.t. the center of the plane.  The z value corresponds to the STAR
+  global coordinate.
+  <p>
+  While it only takes two values (y and z) two specify the hit location within
+  a plane (once the location of the plane is known) StiHit stores one more
+  value: x.  This value of x corresponds to the magnitude of a vector pointing
+  from the origin to the detector plane <b>perpendicular to the plane</b>.  So,
+  for planes with no tilt w.r.t. the origin (e.g., TPC pad-planes), x will be
+  identical to position.  Actually, this is not even quite true for tpc hits, as
+  distortion corrections can make x slightly different than position.  However,
+  by storing both x and position, we allow for the separation of information
+  that depends only on material location (track fitting) from that which
+  depends only on hit location (track finding).
+  <p>
+  StiHit stores information that represents a full error matrix.  For efficiency
+  purposes this is stored as a collection of discreet doubles instead of a
+  matrix.  Because the error matrix is always symmetric, we must store only six
+  values.  These are denoted by s_ij, where s_ij corresponds to the (i,j)
+  component of the matrix.
+  <p>
+  StiHit also stores a pointer to an StHit that it corresponds to.
+  Additionally, StiHit stores a pointer to the StDetector object from which its
+  measurement arose.
+
+  \author M.L. Miller (Yale Software)
+ */
+
 #ifndef StiHit_HH
 #define StiHit_HH
 
@@ -16,56 +59,89 @@ class StiDetector;
 class StiHit 
 {
 public:
+    ///Default constructor.
     StiHit();
-    StiHit(const StiHit&);   
+    
+    ///Default destructor.
     ~StiHit();
 
     //Gets
+    ///Return the local x value.
     double x() const;
+    ///Return the local y value.
     double y() const;
+    ///Return the global z value.
     double z() const;
+    ///Return the (x,x) component of the error matrix.
     double sxx() const;
+    ///Return the (y,y) component of the error matrix.
     double syy() const;
+    ///Return the (z,z) component of the error matrix.
     double szz() const;
+    ///Return the (x,y) component of the error matrix.
     double sxy() const;
+    ///Return the (x,z) component of the error matrix.
     double sxz() const;
+    ///Return the (y,z) component of the error matrix.
     double syz() const;
+
+    ///Return the refAngle of the detector plane from which the hit arose.
     double refangle() const;
+    ///Return the position of the detector plane from whcih the hit arose.
     double position() const;
-    
+
+    ///Return a const pointer to the StiDetector object from which the hit
+    ///arose.
     const StiDetector* detector() const;
+    ///Return a pointer to the StiDetector object from which the hit arose.
     StiDetector* detector();
-    
+
+    ///Return a const pointer to the StHit object corresponding to this StiHit
+    ///instance
     const StHit* stHit() const;
-    
+
+    ///Return a boolean that marks whether or not this hit is assigne to a
+    ///track.
     bool   isUsed() const;
+
+    ///Return a const reference to a StThreeVectorF that denots the position
+    ///of the hit in global STAR coordinates.
     const StThreeVectorF& globalPosition() const;
 
     //Sets
+
+    ///Set the position and error in one function call
     void set(double refAngle, double position,double x, double y, double z, 
-	     double sxx, double sxy, double sxz, double syy, double syz, double szz);
-    
+	     double sxx, double sxy, double sxz, double syy, double syz,
+	     double szz);
+
+    ///Set the local x value.
     void setX(double);
+    ///Set the local y value.
     void setY(double);
+    ///Set the global z value.
     void setZ(double);
+    ///Set the refAngle of the detector plane from the hit arose.
     void setRefangle(double);
+    ///Set the position of the detector plane from the hit arose.
     void setPosition(double);
+    ///Set the position error matrix for the measurement from an StMatrixF
+    ///object.
     void setError(const StMatrixF&);
+    ///Set the pointer to the StiDetector from which the hit arose.
     void setDetector(StiDetector*);
+    ///Set the pointer to the corresponding StHit object.
     void setStHit(StHit*);
+    ///Set a boolean that marks whether or not this hit is assigned to a track.
     void setUsed(bool);
 
     //Operators
-    bool operator==(const StiHit&);
-    StiHit& operator=(const StiHit&);
 
     //Action
     void reset();
     
 private:
   
-    void copyToThis(const StiHit&);
-    
     double mrefangle;
     double mposition;
     double mx;
@@ -154,34 +230,5 @@ inline void StiHit::setDetector(StiDetector* det) {mdetector=det;}
 inline void StiHit::setStHit(StHit* val) {msthit=val;}
 
 inline void StiHit::setUsed(bool val) { mused = val;}
-
-inline bool StiHit::operator==(const StiHit& rhs)
-{
-    return ( mrefangle==rhs.mrefangle && mposition==rhs.mposition &&
-	     mx==rhs.mx && my==rhs.my && mz==rhs.mz );
-}
-
-inline StiHit& StiHit::operator=(const StiHit& rhs)
-{
-    if (*this==rhs) return *this;
-    copyToThis(rhs);
-    return *this;
-}
-
-inline void StiHit::copyToThis(const StiHit& rhs)
-{
-    mrefangle = rhs.mrefangle;
-    mposition = rhs.mposition;
-    mx = rhs.mx;
-    my = rhs.my;
-    mz = rhs.mz;
-    msxx = rhs.msxx;
-    msyy = rhs.msyy;
-    mszz = rhs.mszz;
-    msxy = rhs.msxy;
-    msxz = rhs.msxz;
-    msyz = rhs.msyz;
-    mused = rhs.mused;
-}
 
 #endif

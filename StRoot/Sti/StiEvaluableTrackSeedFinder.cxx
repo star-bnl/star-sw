@@ -16,6 +16,7 @@ using std::for_each;
 
 //StMcEvent
 #include "StMcEventTypes.hh"
+/// \dontinclude StMcEventTypes.hh
 
 //Association
 #include "StAssociationMaker/StTrackPairInfo.hh"

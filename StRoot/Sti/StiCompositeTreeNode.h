@@ -2,6 +2,60 @@
 //M.L. Miller (Yale Software)
 //07/01
 
+/*! \class StiCompositeTreeNode
+  StiCompositeTreeNode is a templated class that can be used to represent
+  objects
+  in a tree structure.  The objects to be organized are stored as T* pointers by
+  StiCompositeTreeNode and are accessed via getData() and setData(T*) methods.
+  Additionaly, a StiCompositeTreeNode can have 0 or 1 parent and 0-n daughters.
+  A
+  node with no parent is called a <b>root</b>.  A node with no daughters is
+  called a
+  <b>leaf</b>.  Internally, the daughters treated as daughters stored in a
+  vector.
+  As such, StiCompositeTreeNode provides access (via STL iterators) to the
+  bounds
+  of the vector. This has the consequence that traversal of the tree can
+  be performed via recursive calls to the STL algorithms.  For such cases
+  one merely needs to define funtors that either perform some action given
+  a node (e.g., stream the node to screen), or evaluate whether a given node
+  (or a comparison between two nodes) satisfies some logical condition.
+  For more, see example in StlUtilities.h.
+  <p>
+  StiCompositeTreeNode is a special tree-node class in that it was designed
+  with the
+  ability to store daughters in a sorted order, which is especially useful for
+  efficient traversal through the tree.  One could manually sort the tree by
+  the data
+  stored, or one can use the StiOrderKey_t typedef.  Currently this typedef is
+  set to
+  a double, and one can eager cache the sort-key to avoid calls into the data
+  structure.  Because StiCompositeTreeNode provides random-access iterators
+  into the
+  daughters, STL algorithms can easily be used (recursively) to perform tasks
+  on an
+  entire tree (e.g., sort, find, for_each).  Many of these are already
+  implemented
+  in StlUtilities.h.
+  <p>
+  see also: StiCompositeLeafIterator
+  
+  \author M.L. Miller (Yale Software)
+  
+  \note A node with no childeren is called a 'leaf', or sometimes
+  a 'data node'.  In reality, all StiCompositeTreeNodes <b>can</b>
+  hold data.  In practice, however, most uses of StiCompositeTreeNode
+  will store valid data only on leaves.
+  
+  \warning StiCompositeTreeNode stores data by pointer, so only objects created
+  by new should be passed as data to the node.
+  
+  \warning It is assumed that StiCompositeTreeNode owns no objects!
+  That means all nodes must be deleted manually deleted by user.
+  This is not a thread safe class.
+  
+*/
+
 #ifndef StiCompositeTreeNode_H
 #define StiCompositeTreeNode_H
 
@@ -17,6 +71,10 @@ using std::cout;
 using std::ostream;
 using std::endl;
 
+/*! This is used to eager-cache information for sorting and/or traversal of
+  the tree.  However, it <b>is not</b> a priori necessary for efficient
+  traversal of the tree.
+*/
 typedef double StiOrderKey_t;
 
 template <class T>
@@ -24,62 +82,108 @@ class StiCompositeTreeNode
 {
 public:
 
+    ///We provide only a default constructor.
     StiCompositeTreeNode();
+
+    ///Default Destructor
     virtual ~StiCompositeTreeNode();
     
     //Sets
+
+    ///Set the name of the node
     void setName(const string&);
-    
+
+    ///Set the order-key for the node
     void setOrderKey(const StiOrderKey_t&);
-    
+
+    ///Set the data to be hung on the node.
     void setData(T*);
     
     //Gets
+
+    ///Return the name of the node.
     const string& getName() const;
-    
+
+    ///Return the number of children that belong to this node
     unsigned int getChildCount() const;
-    
+
+    ///Return a (non-const!) pointer to the parent of this node.
     StiCompositeTreeNode* getParent() const;
-    
+
+    ///Return a reference to the the orderkey of this node.
     const StiOrderKey_t& getOrderKey() const;
-    
+
+    ///Return a (non-const!) pointer to the data hung on this node.
     T* getData() const;
     
     //Action
+
+    ///Add a child to this node.
     virtual void add(StiCompositeTreeNode*);
     
 public:
     //provide random access iterators to daughters
+
+    ///For internal convenience
     typedef vector<StiCompositeTreeNode *> vec_type;
+    
+    ///For internal convenience
     typedef vector<StiCompositeTreeNode *> StiCompositeTreeNodeVector;
-    
+
+    ///Provide random access iterator to the beginning of the vector of children
     vec_type::iterator begin();
+    
+    ///Provide random access iterator to the end of the vector of children.
     vec_type::iterator end();
-    
+
+    ///Provide const_iterator to the beginning of the vector of children
     vec_type::const_iterator begin() const;
+    
+    ///Provied const_iterator to the end of the vector of children.
     vec_type::const_iterator end() const;
-    
+
+    ///Provide reverse iterator to the beginning of the vector of children.
     vec_type::reverse_iterator rbegin();
-    vec_type::reverse_iterator rend();
     
+    ///Provide reverse iterator to the end of the vector of children.
+    vec_type::reverse_iterator rend();
+
+    ///Provide const_reverse_iterator tot he beginning of the vector of children.
     vec_type::const_reverse_iterator rbegin() const;
+    
+    ///Provide const_reverse_iterator to the end of the vector of children.
     vec_type::const_reverse_iterator rend() const;
     
 private:
-    
+
+    ///Set the parent for this node.  It can only be called internally
+    /// to maintain consistency in all parent-child relationships.
     void setParent(StiCompositeTreeNode* val);
-    
+
+    ///The vector of children
     vec_type mVec;
+
+    ///A pointer to the parent of this node
     StiCompositeTreeNode* mparent;
-    T* mdata;  
+
+    ///A pointer to the data to hung on this node
+    T* mdata;
+
+    ///The order key association with this node
     StiOrderKey_t mkey;
+
+    ///The name of the node.
     string mname;
 };
 
 //Implementation
 
+/*! When the node is created all members are initialized to deafult
+  values (namely 0 or null) and one must then set all information by hand.
+*/
 template <class T>
-StiCompositeTreeNode<T>::StiCompositeTreeNode() : mparent(0), mdata(0), mkey(0) 
+StiCompositeTreeNode<T>::StiCompositeTreeNode()
+    : mparent(0), mdata(0), mkey(0) 
 {
 }
 
@@ -100,6 +204,9 @@ inline void StiCompositeTreeNode<T>::setOrderKey(const StiOrderKey_t& val)
     mkey=val;
 }
 
+/*! The pointer to data (T* mData) defaults to 'null' on creation.
+  If no call to setData() is made, then mData remains set to 'null'.
+ */
 template <class T>
 inline void StiCompositeTreeNode<T>::setData(T* val) 
 {
@@ -137,14 +244,26 @@ inline T* StiCompositeTreeNode<T>::getData() const
     return mdata;
 }
 
+/*! For the sake of consistency in the parent-child relationship of one
+  node to another, you will find no public method setParent().  Instead,
+  this task is performed internally by a call to add().  Thus, once a
+  node2 is added to node1 via node1->add(node2), node1 is automatically set
+  as the parent of node2, and no intervention by the user is necessary. <p>
+  Additionally, node2 cannot be added as a daughter to node1 if node2 is
+  already a daughter of node1.  In such a case, an internal check in the
+  add() method will recognize the situation and return with no action
+  taken.
+ */
 template <class T>
 void StiCompositeTreeNode<T>::add(StiCompositeTreeNode* newChild) 
 {
     if (!newChild) return;
-    StiCompositeTreeNodeVector::iterator where = find(mVec.begin(), mVec.end(), newChild);
+    StiCompositeTreeNodeVector::iterator where = find(mVec.begin(), mVec.end(),
+						      newChild);
     //Remove if we see an efficiency penalty
     if (where!=end()) {
-	cout <<"StiCompositeTreeNode::add()\t Child Already exists.  Abort"<<endl;
+	cout <<"StiCompositeTreeNode::add().  ERROR:\t";
+	cout <<"Child Already exists.  Abort"<<endl;
 	return;
     }
     //else add to list, set parent
@@ -152,13 +271,17 @@ void StiCompositeTreeNode<T>::add(StiCompositeTreeNode* newChild)
     mVec.push_back(newChild);
 }
 
+/*! This is an internal method.  For more see documentation for the public
+  method add().
+ */
 template <class T>
 inline void StiCompositeTreeNode<T>::setParent(StiCompositeTreeNode* val) 
 {
     if (mparent) {
-	cout <<"StiCompositeTreeNode::setParent()\tError:\tparent already exists"<<endl;
+	cout <<"StiCompositeTreeNode::setParent()\tError:\t";
+	cout <<"parent already exists"<<endl;
 	return;
-	}
+    }
     mparent=val;
     return;
 }

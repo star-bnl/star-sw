@@ -13,6 +13,7 @@
 #include "StEventTypes.h"
 
 //StDb
+
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
@@ -21,6 +22,7 @@
 #include "StTpcDb/StTpcDb.h"
 
 //Svt Tables
+
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_svg_config_Table.h"
 #include "tables/St_svg_shape_Table.h"
