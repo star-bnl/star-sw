@@ -1,5 +1,8 @@
-// $Id: readStrangeMuDst.C,v 1.1 2000/03/29 00:24:54 genevb Exp $
+// $Id: readStrangeMuDst.C,v 1.2 2000/03/29 20:58:58 genevb Exp $
 // $Log: readStrangeMuDst.C,v $
+// Revision 1.2  2000/03/29 20:58:58  genevb
+// Modified StV0MuDst member functions
+//
 // Revision 1.1  2000/03/29 00:24:54  genevb
 // Introduction of macro to use StStrangeMuDstMaker
 //
@@ -68,10 +71,9 @@ void run() {
 
     for( Int_t j=0; j<strangeDst.GetNV0(); j++ ) {
       StV0MuDst *v0m = strangeDst.GetV0(j);
-      float* dVertexV0 = v0m->decayVertexV0();
-      hX->Fill(dVertexV0[0]);
-      hY->Fill(dVertexV0[1]);
-      hZ->Fill(dVertexV0[2]);
+      hX->Fill(v0m->decayVertexV0(0));
+      hY->Fill(v0m->decayVertexV0(1));
+      hZ->Fill(v0m->decayVertexV0(2));
       hMassLambda->Fill(v0m->massLambda());
     }
 
