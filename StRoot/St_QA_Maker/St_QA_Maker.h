@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.10 1999/03/07 19:26:16 fine Exp $
+//! $Id: St_QA_Maker.h,v 1.11 1999/03/09 16:30:24 fine Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.11  1999/03/09 16:30:24  fine
+//! Workqround of the St_io_Maker bug
+//!
 //! Revision 1.10  1999/03/07 19:26:16  fine
 //! QA->SetPostScriptFile(psFile) has been introduced
 //!
@@ -80,7 +83,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.10 1999/03/07 19:26:16 fine Exp $";
+//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.11 1999/03/09 16:30:24 fine Exp $";
    //! Histograms booking constants
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -292,14 +295,14 @@ class St_QA_Maker : public StMaker {
    virtual Int_t  Init();
    virtual Int_t  Finish();
    virtual Int_t  Make();
-   virtual void   MakeHistEvSum();
-   virtual void   MakeHistGlob();
-   virtual void   MakeHistDE();
-   virtual void   MakeHistPrim();
-   virtual void   MakeHistGen();
-   virtual void   MakeHistV0();
-   virtual void   MakeHistPID();
-   virtual void   MakeHistVertex();
+   virtual void   MakeHistEvSum(St_DataSet *dst);
+   virtual void   MakeHistGlob(St_DataSet *dst);
+   virtual void   MakeHistDE(St_DataSet *dst);
+   virtual void   MakeHistPrim(St_DataSet *dst);
+   virtual void   MakeHistGen(St_DataSet *dst);
+   virtual void   MakeHistV0(St_DataSet *dst);
+   virtual void   MakeHistPID(St_DataSet *dst);
+   virtual void   MakeHistVertex(St_DataSet *dst);
    virtual void   BookHistEvSum();
    virtual void   BookHistGlob();
    virtual void   BookHistDE();
@@ -313,11 +316,11 @@ class St_QA_Maker : public StMaker {
    virtual void   BookHistEmsHitsBemc();
    virtual void   BookHistEmsHitsBsmd();
    virtual void   BookHistXi();
-   virtual void   MakeHistTofEvt();
-   virtual void   MakeHistTofTrk();
-   virtual void   MakeHistEmsHitsBemc();
-   virtual void   MakeHistEmsHitsBsmd();
-   virtual void   MakeHistXi();
+   virtual void   MakeHistTofEvt(St_DataSet *dst);
+   virtual void   MakeHistTofTrk(St_DataSet *dst);
+   virtual void   MakeHistEmsHitsBemc(St_DataSet *dst);
+   virtual void   MakeHistEmsHitsBsmd(St_DataSet *dst);
+   virtual void   MakeHistXi(St_DataSet *dst);
    virtual void   PrintInfo();
    virtual void   SetDraw(Bool_t drawFlag=kTRUE);
    virtual void   SetHistsNames(const Char_t *firstName="*", const Char_t *lastName="*");

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.13 1999/03/07 19:26:15 fine Exp $
+// $Id: St_QA_Maker.cxx,v 1.14 1999/03/09 16:30:23 fine Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.14  1999/03/09 16:30:23  fine
+// Workqround of the St_io_Maker bug
+//
 // Revision 1.13  1999/03/07 19:26:15  fine
 // QA->SetPostScriptFile(psFile) has been introduced
 //
@@ -255,27 +258,29 @@ Int_t St_QA_Maker::Make(){
 
 // Call methods to fill histograms
 
+  St_DataSet *dst = g_Chain->DataSet("dst");
+
 // histograms from table event_summary
-  MakeHistEvSum();
+  MakeHistEvSum(dst);
 // histograms from table globtrk
-  MakeHistGlob();
+  MakeHistGlob(dst);
 // histograms from table dst_dedx
-  MakeHistDE();
+  MakeHistDE(dst);
 // histograms from table primtrk
-  MakeHistPrim();
+  MakeHistPrim(dst);
 // histograms from table particle
- MakeHistGen();
+ MakeHistGen(dst);
 // histograms from table dst_v0_vertex
-  MakeHistV0();
+  MakeHistV0(dst);
 // histograms from table primtrk & dst_dedx
-  MakeHistPID();
+  MakeHistPID(dst);
 // histograms from table dst_vertex
-  MakeHistVertex();
-  MakeHistTofEvt();
-  MakeHistTofTrk();
-  MakeHistEmsHitsBemc();
-  MakeHistEmsHitsBsmd();
-  MakeHistXi();
+  MakeHistVertex(dst);
+  MakeHistTofEvt(dst);
+  MakeHistTofTrk(dst);
+  MakeHistEmsHitsBemc(dst);
+  MakeHistEmsHitsBsmd(dst);
+  MakeHistXi(dst);
 
   return kStOK;
 }
@@ -476,10 +481,10 @@ void St_QA_Maker::BookHistEmsHitsBsmd(){
 }
 
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistEvSum(){
+void St_QA_Maker::MakeHistEvSum(St_DataSet *dst){
  //  PrintInfo();
  // Fill histograms for event summary
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);         
    
   St_dst_event_summary *event_summary = (St_dst_event_summary *) dstI["event_summary"];
@@ -514,10 +519,10 @@ void St_QA_Maker::MakeHistEvSum(){
 
 //-----------------------------------------------------------------
 
-void St_QA_Maker::MakeHistGlob(){
+void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 
    // Fill histograms for globtrk
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_dst_track *globtrk = (St_dst_track *) dstI["globtrk"];
@@ -558,10 +563,10 @@ void St_QA_Maker::MakeHistGlob(){
 
 //_____________________________________________________________________________
 
- void St_QA_Maker::MakeHistDE() {
+ void St_QA_Maker::MakeHistDE(St_DataSet *dst) {
    // Fill histograms for dE/dx
 
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
 
   
@@ -580,9 +585,9 @@ void St_QA_Maker::MakeHistGlob(){
 //_____________________________________________________________________________
 
 
-void St_QA_Maker::MakeHistPrim(){
+void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling primtrk histograms " << endl;
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
   St_dst_track      *primtrk     = (St_dst_track *) dstI["primtrk"];
 
@@ -622,9 +627,9 @@ void St_QA_Maker::MakeHistPrim(){
 //_____________________________________________________________________________
 
 
-void St_QA_Maker::MakeHistGen(){
+void St_QA_Maker::MakeHistGen(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling particle histograms " << endl;
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
 
   St_particle   *part     = (St_particle  *) dstI["particle"];
@@ -673,9 +678,9 @@ void St_QA_Maker::MakeHistGen(){
 //_____________________________________________________________________________
 
 
-void St_QA_Maker::MakeHistV0(){
+void St_QA_Maker::MakeHistV0(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling dst_v0_vertex histograms " << endl;
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dstI["dst_v0_vertex"];
@@ -708,10 +713,10 @@ void St_QA_Maker::MakeHistV0(){
 //_____________________________________________________________________________
 
 
-void St_QA_Maker::MakeHistPID(){
+void St_QA_Maker::MakeHistPID(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling PID histograms " << endl;
 
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//   St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);        
 
   // spectra-PID diagnostic histograms
@@ -750,9 +755,9 @@ void St_QA_Maker::MakeHistPID(){
 //_____________________________________________________________________________
 
 
-void St_QA_Maker::MakeHistVertex(){
+void St_QA_Maker::MakeHistVertex(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling vertex histograms " << endl;
-  St_DataSet *dst = g_Chain->DataSet("dst");
+//  St_DataSet *dst = g_Chain->DataSet("dst");
   St_DataSetIter dstI(dst);
   St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
 
@@ -772,13 +777,13 @@ void St_QA_Maker::MakeHistVertex(){
   }
 }
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistXi(){
+void St_QA_Maker::MakeHistXi(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling dst_xi_vertex histograms " << endl;
 }
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistTofEvt(){
+void St_QA_Maker::MakeHistTofEvt(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling dst_tof_evt histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+//  St_DataSet *dst = gStChain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_dst_tof_evt *tofevt = (St_dst_tof_evt *) dstI["dst_tof_evt"];
@@ -800,9 +805,9 @@ void St_QA_Maker::MakeHistTofEvt(){
   }
 }
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistTofTrk(){
+void St_QA_Maker::MakeHistTofTrk(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling dst_tof_trk histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+//  St_DataSet *dst = gStChain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_dst_tof_trk *toftrk = (St_dst_tof_trk *) dstI["dst_tof_trk"];
@@ -820,9 +825,9 @@ void St_QA_Maker::MakeHistTofTrk(){
 }
 
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistEmsHitsBemc(){
+void St_QA_Maker::MakeHistEmsHitsBemc(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling dst_ems_bemc histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+//  St_DataSet *dst = gStChain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_ems_hits *ems = (St_ems_hits *) dstI["ems_hits_bemc"];
@@ -852,9 +857,9 @@ void St_QA_Maker::MakeHistEmsHitsBemc(){
 
 }
 //_____________________________________________________________________________
-void St_QA_Maker::MakeHistEmsHitsBsmd(){
+void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
    cout << " *** in St_QA_Maker - filling dst_ems_bsmd histograms " << endl;
-  St_DataSet *dst = gStChain->DataSet("dst");
+//  St_DataSet *dst = gStChain->DataSet("dst");
   St_DataSetIter dstI(dst);         
 
   St_ems_hits *ems = (St_ems_hits *) dstI["ems_hits_bsmd"];
@@ -888,8 +893,8 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.13 1999/03/07 19:26:15 fine Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.14 1999/03/09 16:30:23 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (g_Chain->Debug()) StMaker::PrintInfo();
-}
+} 
