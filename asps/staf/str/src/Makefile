@@ -1,7 +1,7 @@
 ARCH_TAG     = _sgi
 ARFLAGS      = vqs
-FFLAGS       = -c -O -w
-FFLAGS_DBG   = -c -g -w
+FFLAGS       = -c -O -w -extend_source
+FFLAGS_DBG   = -c -g -w -extend_source
 CCFLAGS      = -c -O -ansi -fullwarn -v -prototypes
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -v -prototypes
 
@@ -13,19 +13,19 @@ dbg : libstr_dbg.a
 
 
 libstr.a : strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o strterm$(ARCH_TAG).o str_nextarg.o
-libstr.a : strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o
+libstr.a : strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
 	rm -f libstr.a
 	ar $(ARFLAGS) libstr.a strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o \
 	strterm$(ARCH_TAG).o str_nextarg.o \
-	strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o
+	strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
 	ranlib libstr.a
 
 libstr_dbg.a : strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o strterm$(ARCH_TAG)_dbg.o str_nextarg_dbg.o
-libstr_dbg.a : strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o
+libstr_dbg.a : strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
 	rm -f libstr_dbg.a
 	ar $(ARFLAGS) libstr_dbg.a strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o \
 	strterm$(ARCH_TAG)_dbg.o str_nextarg_dbg.o \
-	strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o
+	strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
 	ranlib libstr_dbg.a
 
 
@@ -83,6 +83,13 @@ strtermc$(ARCH_TAG).o : strtermc$(ARCH_TAG).c
 
 strtermc$(ARCH_TAG)_dbg.o : strtermc$(ARCH_TAG).c
 	cc $(CCFLAGS_DBG) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG)_dbg.o
+
+
+strlibc$(ARCH_TAG).o : strlibc$(ARCH_TAG).c
+	cc $(CCFLAGS) strlibc$(ARCH_TAG).c
+
+strlibc$(ARCH_TAG)_dbg.o : strlibc$(ARCH_TAG).c
+	cc $(CCFLAGS_DBG) strlibc$(ARCH_TAG).c -o strlibc$(ARCH_TAG)_dbg.o
 
 
 
