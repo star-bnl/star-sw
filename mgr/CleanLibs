@@ -5,7 +5,7 @@ require "find.pl";
 
 my @dirs = ();
 if ($#ARGV > -1) {
-    push @dir, $ARGV[0]; 
+    push(@dirs, $ARGV[0]);
 } else {
     push(@dirs,"obj"); 
     push(@dirs,"OBJ");
