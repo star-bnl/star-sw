@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.12 1999/03/07 16:53:32 fine Exp $
+// $Id: St_QA_Maker.cxx,v 1.13 1999/03/07 19:26:15 fine Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.13  1999/03/07 19:26:15  fine
+// QA->SetPostScriptFile(psFile) has been introduced
+//
 // Revision 1.12  1999/03/07 16:53:32  fine
 // New method DrawHists
 //
@@ -145,10 +148,13 @@ ClassImp(St_QA_Maker)
 //_____________________________________________________________________________
 St_QA_Maker::St_QA_Maker(const char *name, const char *title):StMaker(name,title)
 {
+
+
    drawinit=kFALSE;
    SetZones();
    SetPaperSize();
    SetHistsNames();
+   SetPostScriptFile(); // no PostScripy file "by default"
 }
 //_____________________________________________________________________________
 St_QA_Maker::~St_QA_Maker(){
@@ -157,12 +163,16 @@ St_QA_Maker::~St_QA_Maker(){
 //_____________________________________________________________________________
 Int_t St_QA_Maker::DrawHists() 
 {
+  // Plots the seleted  histograms abd generate the postscript file as well if any
+
   const Int_t numPads = m_PadColumns*m_PadRows;
 
   gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight);
 //  gStyle->SetOptStat(0);
 //   TCanvas *QACanvas = new TCanvas("Banner","Canvas Title",30*height,30*width);
-  TPostScript ps("exPsFile.ps");
+  TPostScript *ps = 0;
+  const Char_t *psfileName = m_PsFileName.Data();
+  if (!m_PsFileName.IsNull()) ps = new TPostScript((char *)psfileName);  
 
   gStyle->SetOptStat(111111);
   SafeDelete(m_QACanvas);
@@ -172,7 +182,7 @@ Int_t St_QA_Maker::DrawHists()
 
   QACanvas->Divide(m_PadColumns,m_PadRows);
 
-  ps.NewPage();
+  if (ps) ps->NewPage();
   const Char_t *firstHistName = m_FirstHistName.Data();
   const Char_t *lastHistName  = m_LastHistName.Data();
   TObject *obj = 0;
@@ -194,7 +204,7 @@ Int_t St_QA_Maker::DrawHists()
             histCounter++;
             printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
             if (padCount == numPads) {
-                ps.NewPage();
+                if (ps) ps->NewPage();
                 padCount=0;
             }
             QACanvas->cd(++padCount);
@@ -204,7 +214,10 @@ Int_t St_QA_Maker::DrawHists()
          }
       }
     }
-  ps.Close();
+  if (ps) {
+     ps->Close();
+     delete ps;
+  }
   return histCounter;
 }
 
@@ -875,7 +888,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.12 1999/03/07 16:53:32 fine Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.13 1999/03/07 19:26:15 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (g_Chain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.9 1999/03/07 16:53:33 fine Exp $
+//! $Id: St_QA_Maker.h,v 1.10 1999/03/07 19:26:16 fine Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.10  1999/03/07 19:26:16  fine
+//! QA->SetPostScriptFile(psFile) has been introduced
+//!
 //! Revision 1.9  1999/03/07 16:53:33  fine
 //! New method DrawHists
 //!
@@ -77,7 +80,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.9 1999/03/07 16:53:33 fine Exp $";
+//! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.10 1999/03/07 19:26:16 fine Exp $";
    //! Histograms booking constants
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -148,6 +151,8 @@ class St_QA_Maker : public StMaker {
 
     TString        m_FirstHistName;
     TString        m_LastHistName;
+
+    TString        m_PsFileName;     // Name of the PostScipt file to plot hist's out
 
 
  protected:
@@ -318,6 +323,7 @@ class St_QA_Maker : public StMaker {
    virtual void   SetHistsNames(const Char_t *firstName="*", const Char_t *lastName="*");
    virtual void   SetZones(Int_t columns=2, Int_t rows=3);
    virtual void   SetPaperSize(Int_t width=20, Int_t height=27);
+   virtual void   SetPostScriptFile(const Char_t *psFileName="");
 
    ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
 };
@@ -329,4 +335,6 @@ inline void St_QA_Maker::SetHistsNames(const Char_t *firstName, const Char_t *la
                          { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
 inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows){ m_PadColumns =columns; m_PadRows = rows;}
 inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height){ m_PaperWidth = width; m_PaperHeight = height;}
+inline void St_QA_Maker::SetPostScriptFile(const Char_t *psFileName){ m_PsFileName = psFileName;}
+
 
