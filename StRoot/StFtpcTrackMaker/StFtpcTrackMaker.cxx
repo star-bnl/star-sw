@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.23 2002/02/05 13:53:09 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.24 2002/02/10 21:04:49 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.24  2002/02/10 21:04:49  jcs
+// Use primary vertex for tracking if it is available. Otherwise use preVertex.
+//
 // Revision 1.23  2002/02/05 13:53:09  jcs
 // remove code for ZDC and Holm's primary vertex calculation methods
 // if no preVertex available, stop FTPC tracking
@@ -205,42 +208,69 @@ Int_t StFtpcTrackMaker::Make()
   Int_t   primary_vertex_id = 0;
   Int_t iflag = 0;
   
+  // Use Primary vertex if it exists
 
-// Use TPC preVertex if it exists
-
-  //pointer to preVertex dataset
-  St_DataSet *preVertex = GetDataSet("preVertex");
-  if (preVertex) {
-
-    //iterator
-    St_DataSetIter preVertexI(preVertex);
-
-    //pointer to preVertex
-    St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-
-    dst_vertex_st *preVtxPtr = preVtx->GetTable();
-    for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
-
-      if (preVtxPtr->iflag == 101) {
-        iflag = 101;
-        primary_vertex_x =  preVtxPtr->x;
-        primary_vertex_y =  preVtxPtr->y;
-        primary_vertex_z =  preVtxPtr->z;
-        primary_vertex_id = preVtxPtr->id;
-        break;
+  St_DataSet * primary = GetDataSet("primary");
+  if (primary) {
+   St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
+   if (vertex) {
+     dst_vertex_st *primvtx = vertex->GetTable();
+     if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
+       for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,primvtx++){
+          if( primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1 ) {
+             primary_vertex_x = primvtx->x;
+             primary_vertex_y = primvtx->y;
+             primary_vertex_z = primvtx->z;
+             iflag = primvtx->iflag;
+             break;
+          }       
+        }
       }
-    }
-   }
- 
+     }  // end of if (vertex)
+   }  // end of if (primary) 
+   
+   if (iflag == 0 ) {
 
-  if (iflag == 101) {
-    // TPC vertex used
-    gMessMgr->Message("", "I", "OST") << "Tpc vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") used for Ftpc tracking." << endm;
+    // Otherwise use TPC preVertex if it exists
+
+   //pointer to preVertex dataset
+   St_DataSet *preVertex = GetDataSet("preVertex");
+   if (preVertex) {
+
+      //iterator
+      St_DataSetIter preVertexI(preVertex);
+
+     //pointer to preVertex
+     St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
+
+     dst_vertex_st *preVtxPtr = preVtx->GetTable();
+     for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
+
+       if (preVtxPtr->iflag == 101) {
+         primary_vertex_x =  preVtxPtr->x;
+         primary_vertex_y =  preVtxPtr->y;
+         primary_vertex_z =  preVtxPtr->z;
+         primary_vertex_id = preVtxPtr->id;
+         iflag = preVtxPtr->iflag;
+         break;
+       }
+     }
+    }  // end of if (preVertex)
+  } // end of else (preVertex)
+ 
+  if (iflag == 1) {
+    // TPC  Vertex used
+    gMessMgr->Message("", "I", "OST") << "Using Tpc Vertex (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") for Ftpc tracking." << endm;
   }
-  else {
-    gMessMgr->Warning() << "StFtpcTrackMaker::Make() - no vertex found" << endm;
+  if (iflag == 101) {
+    // TPC  preVertex used
+    gMessMgr->Message("", "I", "OST") << "Using Tpc preVertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") for Ftpc tracking." << endm;
+  }
+  if (iflag == 0) {
+    //  No vertex found, no FTPC tracking is possible
+    gMessMgr->Warning() << "StFtpcTrackMaker::Make() - no vertex found - no tracking" << endm;
     return kStWarn;
-  }   // end of no TPC preVertex found loop
+  }
 
   // check for the position of the main vertex
   Double_t z = TMath::Abs(primary_vertex_z);
@@ -369,7 +399,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.23 2002/02/05 13:53:09 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.24 2002/02/10 21:04:49 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
