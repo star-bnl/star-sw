@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.26 2000/04/26 21:08:44 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.27 2000/06/26 22:14:27 fisyak Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -105,7 +105,7 @@ St_l3t_Maker::~St_l3t_Maker(){
 //_____________________________________________________________________________
 Int_t St_l3t_Maker::Init(){
   // Create tables
-  St_DataSetIter       local(GetInputDB("params/l3"));
+  St_DataSetIter       local(GetInputDB("l3"));
 //
   m_l3_hits_on_track = new TH1F("L3tL3trackNumHits","Number of hits on reconstructed tracks",50,.5,50.5);
   m_l3_azimuth       = new TH1F("L3tL3trackPhi","Azimuthal distribution of tracks",60,0.,360.0);

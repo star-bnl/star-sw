@@ -23,8 +23,8 @@ Int_t St_rl0_Maker::Init(){
 
    // read in CTB parameters from parameter table.
 
-   St_DataSetIter       params(GetDataBase("params"));
-   m_ctb        = (St_ctg_geo      *) params("ctf/ctg/ctb");
+   St_DataSetIter       params(GetDataBase("ctf/ctg"));
+   m_ctb        = (St_ctg_geo      *) params("ctb");
 
    // set pointers to table wrappers
 

@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.17 2000/04/21 23:11:19 v3240 Exp $
+// $Id: St_mwc_Maker.cxx,v 1.18 2000/06/26 22:15:38 fisyak Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.18  2000/06/26 22:15:38  fisyak
+// remove params
+//
 // Revision 1.17  2000/04/21 23:11:19  v3240
 // new database included, must load tpc
 //
@@ -105,7 +108,7 @@ Int_t St_mwc_Maker::Init(){
 
 // Read Parameter tables
 
-   St_DataSetIter params(GetDataBase("params/mwc/mwcpars"));
+   St_DataSetIter params(GetDataBase("mwc/mwcpars"));
    m_geom = (St_mwc_geo  *) params("geom");
    m_cal  = (St_mwc_cal  *) params("cal");
    m_mpar = (St_mwc_mpar *) params("mpar");

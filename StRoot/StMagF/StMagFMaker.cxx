@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.4 2000/06/19 12:49:36 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.5 2000/06/26 22:11:52 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.5  2000/06/26 22:11:52  fisyak
+// remove params
+//
 // Revision 1.4  2000/06/19 12:49:36  fisyak
 // Resolve ambiguity between geometry/agufld and StMagF agufld by renaming agufld => lovefield
 //
@@ -51,7 +54,7 @@ Int_t StMagFMaker::Init(){
     return kStOK;
   }
   if (!m_Mode) fMagF = new StMagFCM("Star Full Field",
-				    "$STAR/StDb/params/StMagF/bfp112.map",
+				    "$STAR/StarDb/StMagF/bfp112.map",
 				    kConMesh,fScale);
   else         fMagF = new StMagFC("Star Constant Field","Constant Field",fScale);
   cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;

@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.8 2000/04/13 18:08:21 fine Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.9 2000/06/26 22:10:32 fisyak Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.9  2000/06/26 22:10:32  fisyak
+// remove params
+//
 // Revision 1.8  2000/04/13 18:08:21  fine
 // Adjusted for ROOT 2.24
 //
@@ -84,7 +87,7 @@ StFtpcClusterMaker::~StFtpcClusterMaker(){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
-  St_DataSet *ftpc = GetDataBase("params/ftpc");
+  St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
   St_DataSetIter       local(ftpc);
 

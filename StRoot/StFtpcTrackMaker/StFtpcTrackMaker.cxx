@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.7 2000/06/15 09:13:34 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.8 2000/06/26 22:10:44 fisyak Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.8  2000/06/26 22:10:44  fisyak
+// remove params
+//
 // Revision 1.7  2000/06/15 09:13:34  oldi
 // No tracking is performed (return kStWarn instead) if the z-position of the
 // main vertex is off by more than 100 cm from z = 0. Different error messages
@@ -93,7 +96,7 @@ Int_t StFtpcTrackMaker::Init()
 {
   // Initialisation
 
-  St_DataSet *ftpcpars = GetInputDB("params/ftpc");
+  St_DataSet *ftpcpars = GetInputDB("ftpc");
   assert(ftpcpars);
   St_DataSetIter  gime(ftpcpars);
   m_fptpar = (St_fpt_fptpar *) gime("fptpars/fptpar");
@@ -382,7 +385,7 @@ void StFtpcTrackMaker::PrintInfo()
   // prints some information
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.7 2000/06/15 09:13:34 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.8 2000/06/26 22:10:44 fisyak Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
