@@ -1,8 +1,11 @@
-$Id: dzddiv.F,v 1.1 2000/01/06 01:01:08 nevski Exp $
-$Log: dzddiv.F,v $
-Revision 1.1  2000/01/06 01:01:08  nevski
-dzdoc for agi
-
+* $Id: dzddiv.F,v 1.2 2000/01/06 23:50:56 nevski Exp $
+* $Log: dzddiv.F,v $
+* Revision 1.2  2000/01/06 23:50:56  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:08  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZDDIV (IXDIVP,LDUMMY,RZPATH,CHOPT0,
      +                   IWDISP, IWMETA, ILOCNR, IWKTYP)
 *.
