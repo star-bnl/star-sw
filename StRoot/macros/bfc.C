@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.56 1999/05/20 01:33:18 fisyak Exp $
+// $Id: bfc.C,v 1.57 1999/05/21 14:46:39 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.57  1999/05/21 14:46:39  fisyak
+// More Iwona's correction
+//
 // Revision 1.56  1999/05/20 01:33:18  fisyak
 // Iwona's changes of access to TPC parameters
 //
@@ -274,6 +277,7 @@ void SetFlags(const Char_t *Chain="gstar tfs"){// parse Chain request
     ChainFlags[kGEANT] = kTRUE;
   }
   if (!ChainFlags[kGEANT] && !ChainFlags[kNo_Field]) ChainFlags[kField_On] = kTRUE;
+  if (ChainFlags[kAllEvent]) {ChainFlags[kEval] = kTRUE; printf(" Switch on  %s\n",ChainOptions[kEval]);}
   for (k = kEval; k<kLAST;k++) 
     if (ChainFlags[k]     ) 
       printf ("================== %2d \t%s \tis ON: \t%s \n",k,ChainOptions[k],ChainComments[k]);
@@ -533,9 +537,9 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
     if (ChainFlags[kMINIDAQ]) {
       tptMk->Set_final(kTRUE);// Turn on the final ntuple.
     }
-    else tptMk->tteEvalOn(); //Turn on the tpc evaluation
     if (ChainFlags[kEval]) {//Additional switches
-      tptMk->tptResOn();      // Turn on the residual table
+      tptMk->tteEvalOn();   //Turn on the tpc evaluation
+      tptMk->tptResOn();    // Turn on the residual table
     }
     tptMk->SetDebug();
   }
