@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbbackup.pl,v 1.1 1999/07/09 12:41:59 wenaus Exp $
+# $Id: dbbackup.pl,v 1.2 1999/07/09 12:47:19 wenaus Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbbackup.pl 
 #
 # $Log: dbbackup.pl,v $
+# Revision 1.2  1999/07/09 12:47:19  wenaus
+# Keep 10 days of backups
+#
 # Revision 1.1  1999/07/09 12:41:59  wenaus
 # cron script to back up databases
 #
@@ -22,8 +25,8 @@ $debugOn = 0;
 
 ## Databases to be backed up, and the number of backup files to keep
 %dbToBackup = (
-               'system_data' => 2,
-               'mysql' => 2
+               'system_data' => 10,
+               'mysql' => 10
                );
 
 $backupDir = '/star/sol4/duvall/archive/mysql';
