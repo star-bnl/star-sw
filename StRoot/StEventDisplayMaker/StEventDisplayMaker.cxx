@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.80 2001/11/01 00:45:31 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.81 2002/01/16 04:01:52 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -684,7 +684,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
   memset(fColCash,0,kCOLORS*sizeof(void*));
 
   if (!mEventHelper) mEventHelper = new StEventHelper;
-  mEventHelper->Reset(event);
+  mEventHelper->Reset(event,"StL3.*");
   mEventHelper->ls();
 
   int keyLen = strchr(pos[1],' ') - pos[1];
@@ -1072,6 +1072,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.81  2002/01/16 04:01:52  perev
+// L3 tracks removed
+//
 // Revision 1.80  2001/11/01 00:45:31  fine
 // const ** cast to avoid cv-qual warning introduced
 //
