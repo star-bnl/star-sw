@@ -488,7 +488,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	  $sub_dir =~ /^StarClassLibrary$/ ||
 	  $sub_dir =~ /^StEvent$/ ||
 	  $sub_dir =~ /^StEventUtilities$/ ||
-	  $sub_dir =~ /^StMcEvent$/ ||
+	  $sub_dir =~ /^StMcEvent$/ 
 	 ) {
 	opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
 	my @incs = readdir DIR; 
