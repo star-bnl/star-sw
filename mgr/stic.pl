@@ -2,7 +2,6 @@
 use File::Basename;
 use Cwd;
 use File::Copy;
-#print "stic @ARGV\n";
 my $target = shift;
 my @pars = ();
 while (my $par = shift) {

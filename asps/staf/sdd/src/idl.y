@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.25 2000/04/14 23:34:58 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.26 2001/04/09 19:26:08 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -168,7 +168,9 @@ void Fose(void) {
   fprintf(stderr,"ooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n");
 }
 void Idl2Fortran(char *out,const char *in) {
-       if(!strcmp(in,"long"))   strcpy(out,"INTEGER*4");
+       if(!strcmp(in,"int"))   strcpy(out,"INTEGER*4");
+  else if(!strcmp(in,"unsigned int"))   strcpy(out,"INTEGER*4");
+  else if(!strcmp(in,"long"))   strcpy(out,"INTEGER*4");
   else if(!strcmp(in,"unsigned long"))   strcpy(out,"INTEGER*4");
   else if(!strcmp(in,"short"))  strcpy(out,"INTEGER*2");
   else if(!strcmp(in,"unsigned short"))  strcpy(out,"INTEGER*2");
@@ -273,7 +275,9 @@ void IdlToCOrCpp(char *out,char *in) {
   else if(!strcmp(in,"octet"))           strcpy(out,"IDL_OCTET");
   else if(!strcmp(in,"char"))            strcpy(out,"IDL_CHAR");
 #else
-  if(!strcmp(in,"octet")) strcpy(out,"unsigned char");
+       if(!strcmp(in,"octet"))         strcpy(out,"unsigned char");
+  else if(!strcmp(in,"long"))          strcpy(out,"int"); 
+  else if(!strcmp(in,"unsigned long")) strcpy(out,"unsigned int"); 
   else strcpy(out,in);
 #endif
 }
@@ -328,7 +332,8 @@ void DotHFileTbl(void) {
   FH"#define %s_SPEC \\\n",Up(gTable));
   FH"\"struct %s { \\\n",gTable);
   for(ii=0;ii<gNColNames;ii++) {
-    FH"\t%s %s; \\\n",gColType[ii],gColName[ii]);
+    IdlToCOrCpp(colType,gColType[ii]);
+    FH"\t%s %s; \\\n",colType,gColName[ii]);
   }
   FH"};\"\n");
   FH"typedef struct %s_st {\n",gTable);

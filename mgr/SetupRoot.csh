@@ -41,7 +41,7 @@ switch ( $STAR_HOST_SYS)
     --with-ttf-incdir=/usr/local/include \
     --with-ttf-libdir=/usr/local/lib \
     --with-cern-libdir=/cern/pro/lib \
-    --with-rfio=/usr/local/lib/libshift.a \
+    --with-shift-libdir=/usr/local/lib \
     --with-afs=/usr/awsfs/lib
     breaksw
     default:
@@ -53,10 +53,9 @@ switch ( $STAR_HOST_SYS)
     --with-ttf-incdir=/usr/local/include \
     --with-ttf-libdir=/usr/local/lib \
     --with-cern-libdir=/cern/pro/lib \
-    --with-rfio=/usr/local/lib/libshift.a \
-    --with-thread=/usr/lib/libpthread.so \
-    --with-afs=/usr/awsfs/lib \
-    --with-pythia6=/cern/pro/lib/libpythia.a
+    --with-shift-libdir=/usr/local/lib \
+    --with-thread-libdir=/usr/lib \
+    --with-afs=/usr/awsfs/lib 
 endsw
 
 
