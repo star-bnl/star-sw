@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.20 2003/01/09 18:59:45 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.21 2003/01/29 03:04:57 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -140,7 +140,7 @@ StMuDstMaker::~StMuDstMaker() {
   delete mStMuDst;
   for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
-  for ( int i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i];emcArrays[i]=0;}
+  for ( int i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i]; emcArrays[i]=0;}
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -204,7 +204,7 @@ void StMuDstMaker::clear(){
     clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
   }
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
+    del(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
   }
   DEBUGMESSAGE2("out");
 }
@@ -213,7 +213,23 @@ void StMuDstMaker::clear(){
 //-----------------------------------------------------------------------
 void StMuDstMaker::clear(TClonesArray* t, int& counter){
   DEBUGMESSAGE3("");
-  if (t) t->Clear(""); counter=0;
+  if (t) { 
+    t->Clear(""); 
+    counter=0;
+  }
+ DEBUGMESSAGE3("out");
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::del(TClonesArray* t, int& counter){
+  DEBUGMESSAGE3("");
+  if (t) { 
+    if (t->UncheckedAt(0)) {
+      ((StMuEmcCollection*)t->UncheckedAt(0))->DeleteThis();
+    }
+    counter=0;
+  }
   DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
@@ -850,6 +866,11 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.21  2003/01/29 03:04:57  laue
+ * !!DIRTY FIX FOR StMuEmcCollection
+ * !! Was memor leaking. Leak fixed, but slow and dirty.
+ * !! Propose to change the structure as soon as possible.
+ *
  * Revision 1.20  2003/01/09 18:59:45  laue
  * initial check in of new EMC classes and the changes required
  *

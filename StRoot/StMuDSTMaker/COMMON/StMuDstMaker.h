@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.17 2003/01/23 21:59:50 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.18 2003/01/29 03:04:57 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -114,7 +114,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.17 2003/01/23 21:59:50 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.18 2003/01/29 03:04:57 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -186,6 +186,7 @@ private:
   void setBranchAddresses(TChain*);
 
   void clear(TClonesArray* t, int& counter);
+  void del(TClonesArray* t, int& counter);
   void clear();
 
   void createArrays();
@@ -275,6 +276,11 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.18  2003/01/29 03:04:57  laue
+ * !!DIRTY FIX FOR StMuEmcCollection
+ * !! Was memor leaking. Leak fixed, but slow and dirty.
+ * !! Propose to change the structure as soon as possible.
+ *
  * Revision 1.17  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

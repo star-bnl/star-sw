@@ -20,6 +20,8 @@ Tower id starts from 1 and goes to 4800 to match EMC Id
 #include "StMuEmcCluster.h"
 #include "StMuEmcPoint.h"
 
+#include <iostream>
+
 enum {bemc=0, bprs=1, bsmde=2, bsmdp=3};
 
 class StMuEmcCollection: public TObject
@@ -43,7 +45,12 @@ class StMuEmcCollection: public TObject
     void              addPoint(StMuEmcPoint*);
     
     void              clear(Option_t *option="");
-        
+     
+    void              DeleteThis() { 
+	for ( int i=0; i<2; i++) mSmdHits[i]->Delete(); 
+	for ( int i=0; i<4; i++) mEmcClusters[i]->Delete(); 
+	mEmcPoints->Delete(); 
+    }
   private:
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
