@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRichIonization.cxx,v 1.1 2000/01/18 21:32:02 lasiuk Exp $
+ * $Id: StRichIonization.cxx,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,8 +22,11 @@
  *
  ************************************************************
  * $Log: StRichIonization.cxx,v $
- * Revision 1.1  2000/01/18 21:32:02  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:21  lasiuk
+ * Second Revision
+ *
+ * Revision 1.4  2000/02/08 23:51:13  lasiuk
+ * removal of rrs macro---CC4.2 cannot handle it!
  *
  * Revision 1.3  2000/02/08 16:27:34  lasiuk
  * change to class.  Put dbs and random generators into
@@ -31,13 +34,13 @@
  ************************************************************/
 
  *
-#ifdef RICH_WITH_VIEWER
-#include "StRichViewer.h"
-#endif
  * Revision 1.2  2000/01/25 22:02:21  lasiuk
  * Second Revision
  *
 #include "StRichOtherAlgorithms.h"
+#include "PhysicalConstants.h"
+
+#include "StRichIonization.h"
 #ifndef ST_NO_NAMESPACES
 #endif
 #include "StRichInduceSignal.h"
@@ -76,8 +79,10 @@
 		
 	
 		if (StRichViewer::histograms )
-		for (unsigned int j=0; j<n; j++ ) 
-		    induceSignal(StRichGHit(x,y,z,hit.quad,hit.id));
+		    StRichViewer::getView()->mClusterElectrons->Fill(n);
+	n = 1;
+		
+		for (unsigned int j=0; j<n; j++ ) {
 		    StRichGHit aGHit(x,y,z,hit.quad,hit.id);
 		    induceSignal(aGHit);
 		}

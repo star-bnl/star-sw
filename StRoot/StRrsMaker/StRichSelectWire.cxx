@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRichSelectWire.cxx,v 1.1 2000/01/18 21:32:04 lasiuk Exp $
+ * $Id: StRichSelectWire.cxx,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
  *
  * Description:
  *
@@ -15,22 +15,25 @@
  *
  ************************************************************
  * $Log: StRichSelectWire.cxx,v $
- * Revision 1.1  2000/01/18 21:32:04  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:22  lasiuk
+ * Second Revision
  *
+ *
+ * Revision 1.3  2000/02/08 16:31:54  lasiuk
+ * use dbs
  *
  * Revision 1.2  2000/01/25 22:02:22  lasiuk
  *
  *************************************************************/
  *
  * Revision 1.1  2000/01/18 21:32:04  lasiuk
-#ifdef RICH_WITH_VIEWER
-#include "StRichViewer.h"
-#endif
  * Initial Revision
  *********************************************************************/
 
 //namespace StRichRawData {
+#endif
+
+#include "StRichSelectWire.h"
 #include "StRichSelectWire.h"
 #include "StRichGHit.h"
 #include "StRichOtherAlgorithms.h"

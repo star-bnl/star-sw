@@ -1,5 +1,5 @@
 /******************************************************
- * $Id: StRichGasGain.cxx,v 1.1 2000/01/18 21:32:01 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -37,9 +37,12 @@
  *
  **********************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.1  2000/01/18 21:32:01  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:20  lasiuk
+ * Second Revision
  *
+ *
+ * Revision 1.4  2000/02/08 23:51:13  lasiuk
+ * removal of rrs macro---CC4.2 cannot handle it!
  *
  * Revision 1.3  2000/02/08 16:24:08  lasiuk
  * use of dbs
@@ -67,7 +70,7 @@
 	static StRichPhysicsDb* physDB = StRichPhysicsDb::getDb();          // idem
 	static Randoms random;
 
-	double p = random.Polia(physDB->polia);
+	double q;
 	hit.x = wirePos;
 	hit.y = 0;
 	double p = random.Polia(physDB->polia());
@@ -98,19 +101,19 @@
 	
     //StRichInduceSignal induceSignal;
 	if ( StRichViewer::histograms )
+	    StRichViewer::getView()->mFeedback->Fill(P);
+    double phot2elec = elec2feed*(mPhotoConversion)/2;
+	double dist, x, y, z, cost, phi;
+    if(RRS_DEBUG)
+	for (int i=1; i<=P; i++) {
+	    cost = random.Flat();
+	    phi  = 2*pi *  random.Flat();
+	    
+	    dist = height * sqrt( 1 - cost*cost ) / cost;
+	    x    = hit.x + dist * sin(phi);
+	    z    = hit.z + dist * cos(phi);
+	    y    = height;
 
-	for (int i=1; i<=P; i++) 
-	    {
-		cost = random.Flat();
-		phi  = 2*pi *  random.Flat();
-		
-		dist = height * sqrt( 1 - cost*cost ) / cost;
-		x    = hit.x + dist * sin(phi);
-		z    = hit.z + dist * cos(phi);
-		y    = height;
-		
-		induceSignal(StRichGHit(x,y,z, hit.quad, hit.id) );
-	    }
 	    StRichGHit aGHit(x,y,z, hit.quad, hit.id);
 	    induceSignal(aGHit);
 	}

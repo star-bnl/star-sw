@@ -1,5 +1,5 @@
 /*********************************************************Writer.h**\
- * $Id: StRichWriter.h,v 1.1 2000/01/18 21:32:05 lasiuk Exp $
+ * $Id: StRichWriter.h,v 1.2 2000/01/25 22:02:23 lasiuk Exp $
  *
  * Description:
  *   Writer is the output module for  
@@ -10,9 +10,12 @@
  *
  ********************************************************************
  * $Log: StRichWriter.h,v $
- * Revision 1.1  2000/01/18 21:32:05  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:23  lasiuk
+ * Second Revision
  *
+ *
+ * Revision 1.3  2000/01/27 17:10:01  lasiuk
+ * modify to work stand-alone from ROOT
  *
  * Revision 1.2  2000/01/25 22:02:23  lasiuk
  * Second Revision
@@ -26,7 +29,7 @@
 
 
 
-
+#define ST_RICH_WRITER_H
 #ifdef __ROOT__
 #include "St_DataSet.h"
 #endif

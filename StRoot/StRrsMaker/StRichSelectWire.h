@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSelectWire.h,v 1.1 2000/01/18 21:32:04 lasiuk Exp $
+ * $Id: StRichSelectWire.h,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
  *
  * Description:
  *   StRichSelectWire is a function object containing the algorithm that
@@ -18,10 +18,12 @@
  *
  ********************************************************************
  * $Log: StRichSelectWire.h,v $
- * Revision 1.1  2000/01/18 21:32:04  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:22  lasiuk
+ * Second Revision
  *
-********************************************************************/
+ * Revision 1.3  2000/02/08 16:31:56  lasiuk
+ * use dbs
+ *
  * Revision 1.2  2000/01/25 22:02:22  lasiuk
  * Second Revision
  *
@@ -34,7 +36,7 @@
 #include <functional>
 
 #ifndef ST_NO_NAMESPACES
-
+using std::unary_function;
 #endif
 
 #ifndef ST_NO_NAMESPACES

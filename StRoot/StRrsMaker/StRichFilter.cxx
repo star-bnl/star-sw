@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: StRichFilter.cxx,v 1.1 2000/01/18 21:32:00 lasiuk Exp $
+ * $Id: StRichFilter.cxx,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
  *
  * Description:
  *  StRichFilter decides which algorithms to apply depending on the kind
@@ -25,20 +25,23 @@
  *
  *****************************************************************************
  * $Log: StRichFilter.cxx,v $
- * Revision 1.1  2000/01/18 21:32:00  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:19  lasiuk
+ * Second Revision
+ *
+ * Revision 1.3  2000/02/08 16:22:56  lasiuk
+ * move selection into maker.  Remove from package next revision
  *
  * Revision 1.2  2000/01/25 22:02:19  lasiuk
  * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:00  lasiuk
 
+ *
+ *****************************************************************************/
+#ifdef NEVER
 //namespace StRichRawData {
 #endif
 #include "StRichFilter.h"
-#include "StRichFilter.h"
-#include "StRichIonization.h"
-#include "StRichInduceSignal.h"
 #include "StRichFilter.h"
 #include "StRichIonization.h"
 #include "StRichInduceSignal.h"

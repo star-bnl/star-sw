@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.1 2000/01/18 21:31:59 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,8 +32,11 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
- * Revision 1.1  2000/01/18 21:31:59  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:19  lasiuk
+ * Second Revision
+ *
+ * Revision 1.4  2000/02/08 23:51:13  lasiuk
+ * removal of rrs macro---CC4.2 cannot handle it!
  *
  * Revision 1.3  2000/02/08 16:21:41  lasiuk
  * use coordinate transformation routines for pad limits
@@ -129,7 +132,7 @@ using std::min;
 		    sum += s;
 
 		    // save signal on pad
-			StRichViewer::getView()->mStRichAnalogSignals->Fill(z,x,s);        // histograms
+		    output->putSignal(i,j,s,hit.id);
 	    s =  q * (q00-q10-q01+q11);
 		    if (StRichViewer::histograms ) 
 			StRichViewer::getView()->mAnalogSignals->Fill(z,x,s);        // histograms

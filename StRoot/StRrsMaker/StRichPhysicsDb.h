@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPhysicsDb.h,v 1.1 2000/01/18 21:32:04 lasiuk Exp $
+ * $Id: StRichPhysicsDb.h,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
  *
  * Description:
  *  The two classes defined below, geometryDB and physicsDB,
@@ -21,15 +21,17 @@
  *
  **************************************************************
  * $Log: StRichPhysicsDb.h,v $
- * Revision 1.1  2000/01/18 21:32:04  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/01/25 22:02:22  lasiuk
+ * Second Revision
  *
+ *
+ * Revision 1.3  2000/02/08 16:29:35  lasiuk
+ * include gasGainAmplification factor here instead of geometry
  *
  * Revision 1.2  2000/01/25 22:02:22  lasiuk
  * Second Revision
  *
  * Revision 1.1  2000/01/18 21:32:04  lasiuk
- * 
  * Initial Revision
  *
  *  Revision history:
@@ -45,15 +47,39 @@
 #include <vector>
 //#include <memory>
 
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
+
+#ifndef ST_NO_NAMESPACES
+//namespace StRichRaw {
+#endif
+#include "StRichRrsMacros.h"
+#include "StRichPhysicsDbInterface.h"
+
 class StRichPhysicsDb : public StRichPhysicsDbInterface {
-    class StRichPhysicsDb {
-    public:    
+    double polia() const;
+    double averageNumberOfInteractions() const;
+    
+
+    double version() const;
+    // Efficiency
+    double feedBackPhotonProbability() const;
+    double electronicNoiseLevel() const;    
+    double electronCharge() const;    
+    double photonToPadEfficiency() const;
+    double electronDistribution(int) const;    
+    int    adcThreshold()                const;
     double maximumElectronEnergy() const;
-	static StRichPhysicsDb* getDb();
+    int averagePedestal() const;
+    double adcConversion() const;
 	
-	double version;
+    int adcThreshold() const;
+    int adcChannelWidth() const;
+
+    void   print(ostream& os = cout) const;
     double electronicNoiseLevel()        const;    
-	double polia;                  // parameter of Polia distribution
+    double electronCharge()              const;    
 	double mVersion;
 	
 	double mPolia;                  // parameter of Polia distribution
@@ -89,8 +115,23 @@ class StRichPhysicsDb : public StRichPhysicsDbInterface {
     private: 
 	void common_fill();            // common fill between my_fill and star_fill
 	void star_fill();              // fill DB from star central DB 
-    }; 
-    
+	void my_fill();                // fill DB with my own stuff 
+private: 
+	static StRichPhysicsDb* p2Db;       // handle to only instance 
+    void star_fill();              // fill DB from star central DB 
+    void my_fill();                // fill DB with my own stuff 
+	
+    static StRichPhysicsDb* p2Db;       // handle to only instance 
+}; 
+inline double StRichPhysicsDb::version() const {return mVersion;}
+inline double StRichPhysicsDb::polia() const { return mPolia;}
+inline double StRichPhysicsDb::averageNumberOfInteractions() const { return avg_n_inter;}
+inline double StRichPhysicsDb::electronCharge() const { return e_charge;}    
+inline double StRichPhysicsDb::photoConversionEfficiency() const { return phot2elec;}
+inline double StRichPhysicsDb::electronicNoiseLevel() const { return electric_noise;}    
+inline double StRichPhysicsDb::maximumElectronEnergy() const { return e_max;}
+inline double StRichPhysicsDb::electronDistribution(int i) const { return e_distribut[i];}    
+inline double StRichPhysicsDb::gasGainAmplification() const { return mGasGainAmplification;}
 
 inline double StRichPhysicsDb::maximumElectronEnergyProbability() const { return e_max;}
 inline int StRichPhysicsDb::averagePedestal() const { return pedestal;}
