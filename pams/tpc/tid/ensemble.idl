@@ -1,0 +1,18 @@
+/* ensemble.idl*/
+#include "PAM.idl"
+#include "tdeparm.idl"
+#include "tcl_tphit.idl"
+#include "tpt_track.idl"
+#include "dst_dedx.idl"
+#include "type_floatdata.idl"
+
+interface ensemble : amiModule {
+             STAFCV_T call
+                     ( in tdeparm           tdpar,
+                       inout tcl_tphit      hit,
+		       inout tpt_track      track,
+                       inout dst_dedx       tpcdedx
+                       in    type_floatdata truncpoint 
+             );
+     };
+     /*  Last mod. for ensemble.idl $Date: 2000/06/14 15:17:22 $ */
