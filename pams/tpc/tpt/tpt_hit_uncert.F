@@ -1,5 +1,6 @@
- subroutine tpt_hit_uncert(z,alpha,lambda,ipadrow,sigX,sigZ)
+      subroutine tpt_hit_uncert(z,alpha,lambda,ipadrow,sigX,sigZ)
       implicit none
+      real tpt_resolution_parameterization
 *
 * Based on a global fit of residual widths as function of
 * alpha, lambda, and z (200-drift), but NOT on Q, this returns
