@@ -71,7 +71,12 @@ double  StiKalmanTrack::getRapidity()       const
     // mass is known, return actual rapidity
     {
       double e = sqrt(mass*mass+p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
-      return 0.5*log(e+p[2])/(e-p[2]);
+			double nn = e+p[2];
+			double dd = e-p[2];
+			if (dd>0 && nn>0)
+				return 0.5*log(nn/dd);
+			else
+				return -999.;
     }
   else
     return getPseudoRapidity();
@@ -82,7 +87,7 @@ double  StiKalmanTrack::getPseudoRapidity() const
   // Return pseudo rapidity of the particle at the inner most node held by this track
   // which may (or not) be the primary vertex. 
   // this will need to be refined...
-  return -log(tan(3.1415927/4.-lastNode->getTanL()));
+  return -log(tan(3.1415927/4.-(lastNode->getTanL()/2.)));
 }
   
 double  StiKalmanTrack::getPhi()            const 

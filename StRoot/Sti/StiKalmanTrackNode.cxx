@@ -222,26 +222,20 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   // p[1] = py  - 
   // p[2] = pz  - along beam axis
   
-  double c, pt, sinPhi, cosPhi;
-  c = fP3;
-  if (c<1e-9 && c>0)
-    c = 1e-9;
-  else if (c>-1e-9 && c<0)
-    c = -1e-9;
-  // with "c" in 1/meter, kField in tesla, pt is in GeV/c
-  pt = 0.003*kField/c;
-  sinPhi = c*fX-fP2;
+  double pt, sinPhi;
+	pt = getPt();
+  sinPhi = fP3*fX-fP2;
   double ss = sinPhi*sinPhi;
   if (ss>1.)
     {
-      cout << "StiKalmanTrackNode::getMomentum - sin(phi)^2 > 1" << endl;
-      cout << " c/fx/fP2/sin(phi):" << c << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
+      cout << "StiKalmanTrackNode::getMomentum - ERROR - sin(phi)^2 > 1" << endl;
+      cout << " fP3/fx/fP2/sin(phi):" << fP3 << "\t" << fX << "\t" << fP2 << "\t" << sinPhi << endl;
       ss = 1.;
     }
-  cosPhi = sqrt(1-ss);
-  p[0] = pt*cosPhi;
+  p[0] = pt*sqrt(1-ss);
   p[1] = pt*sinPhi;
   p[2] = pt*fP4;
+
   if (e==0)
     return;
   double sa = 1-ss;
@@ -250,13 +244,16 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
       cout << "StiKalmanTrackNode::getMomentum() - Error - sa<0 - Value was:" << sa << " - reset to sa=0." << endl;
       sa = 0.;
     }
+	double c = fP3;
+	if (c==0) c=1e-12;
+	double cc = c*c;
   sa = sqrt(sa);
 	// should I include a factor of 0.3 here???????????????
   double a00=kField*(fX-fP2/c)/sa;
-  double a01=-kField*(fP2*fP2-fX*fP2*c-1)/(c*c*sa);
+  double a01=-kField*(fP2*fP2-fX*fP2*c-1)/(cc*sa);
   double a02=0;
   double a10=-kField/c; 
-  double a11=kField*fP2/(c*c);
+  double a11=kField*fP2/(cc);
   double a12=0;
   double a20=0;
   double a21=-kField*fP4/c;
@@ -388,14 +385,12 @@ double StiKalmanTrackNode::getTanL() const
 
 double StiKalmanTrackNode::getPt() const
 {
-  double c,pt;
-  c = fP3;
-  if (c<1e-9 && c>0)
-    c = 1e-9;
-  else if (c>-1e-9 && c<0)
-    c = -1e-9;
-  pt = 0.003*kField/c;
-  return pt;
+  double c;
+  c = fabs(fP3);
+  if (c<1e-12) 
+		return 0.003e12*kField;
+	else
+		return 0.003*kField/c;
 }
 
 int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode, 
@@ -491,15 +486,8 @@ void  StiKalmanTrackNode::propagate(double xk,
       double d=sqrt((x1-fX)*(x1-fX)
 		    +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
       double tanl  = fP4;
-      if (fP3==0.) 
-				{
-					cout <<"StiKalmanTrackNode::propogate(). ERROR:\t";
-					cout <<"fp3==0, line 484. return"<<endl;
-					//throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
-					return;
-      }
-			
-      double pt = 0.003*kField/fP3;
+
+      double pt = getPt();
       double p2=(1.+tanl*tanl)*pt*pt;
       double beta2=p2/(p2 + massHypothesis*massHypothesis);
       double theta2=14.1*14.1/(beta2*p2*1e6)*d/x0*rho;

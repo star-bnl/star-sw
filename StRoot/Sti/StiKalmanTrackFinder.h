@@ -34,7 +34,10 @@ class StiKalmanTrackFinder : public StiTrackFinder
 	virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
+    void reserveHits(StiKalmanTrackNode * node);
     bool extendToMainVertex(StiKalmanTrackNode * node);
+
+
 
     //double getYWindow(StiKalmanTrackNode * n, StiHit * h) const;
     //double getZWindow(StiKalmanTrackNode * n, StiHit * h) const;

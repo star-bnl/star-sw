@@ -68,10 +68,10 @@ void StiKalmanTrackFinder::reset()
     singleNodeFrom       = 20;
     mcsCalculated        = false;
     elossCalculated      = false;
-    maxChi2ForSelection  = 5.;
+    maxChi2ForSelection  = 15.;
     minContiguousHitCountForNullReset = 2;
     maxNullCount = 40;  
-    maxContiguousNullCount = 10;
+    maxContiguousNullCount = 15;
 }
 
 bool StiKalmanTrackFinder::isValid(bool debug) const
@@ -203,23 +203,23 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t) //throw ( Exception)
 	}
     StiKalmanTrackNode * lastNode = tt->getLastNode();
     if (!lastNode) 
-	{
-	    cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - ERROR - lastNode==0. Abort"
-		 <<endl;
-	    return;  
-	}
+			{
+				cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - ERROR - lastNode==0. Abort"
+						 <<endl;
+				return;  
+			}
     lastNode = followTrackAt(lastNode);
     pruneNodes(lastNode);
+		reserveHits(tt->getFirstNode());
     tt->setLastNode(lastNode);
     tt->setChi2(lastNode->fChi2);
-    if (lastNode->fP3>0)
-	tt->setCharge(-StiKalmanTrackNode::unitCharge);
-    else
-	tt->setCharge(StiKalmanTrackNode::unitCharge);
-    
+    if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
+			tt->setCharge(-1);
+		else
+			tt->setCharge(1);
     //extendToMainVertex(lastNode);
     if (StiDebug::isReq(StiDebug::Flow))
-	cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - Done" << endl;
+			cout <<"StiKalmanTrackFinder::findTrack(StiTrack * t)\t - Done" << endl;
 }
 
 StiKalmanTrackNode *
@@ -427,6 +427,28 @@ void StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node)
 		cout << "StiKalmanTrackFinder::pruneNodes(StiKalmanTrackNode * node) -"
 		     << "node has childCount:" << parent->getChildCount() << endl;
 	    parent->removeAllChildrenBut(node);
+	    node = parent;
+	    parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
+	}
+}
+
+void StiKalmanTrackFinder::reserveHits(StiKalmanTrackNode * node)
+{
+	// Declare hits on the track ending at "node"
+	// as used. This method starts with the last node and seeks the
+	// parent of each node recursively. The hit associated with each
+	// (when there is a hit) is set to "used".
+
+	if (StiDebug::isReq(StiDebug::Flow)) 
+		cout <<"StiKalmanTrackFinder::reserveHits(StiKalmanTrackNode * node) - Beginning"<<endl;
+	
+	StiHit * hit;
+	StiKalmanTrackNode * parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
+	while (parent)
+		{
+			hit = parent->getHit();
+			if (hit!=0)
+				hit->setUsed(true);
 	    node = parent;
 	    parent = dynamic_cast<StiKalmanTrackNode *>(node->getParent());
 	}
