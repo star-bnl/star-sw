@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.8 1999/12/01 21:08:19 ullrich Exp $
+% $Id: StEvent.tex,v 2.9 1999/12/03 18:42:17 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,17 +177,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -202,14 +202,14 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.8 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/01 21:08:19 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.9 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/12/03 18:42:17 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
 \end{titlepage}
 \pagenumbering{roman}
-\texttt{StEnumerations.h}.  For users convenience some non-\StEvent\ 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Table of content
@@ -265,14 +265,14 @@ is given in Appendix~\ref{sec:introUML}.\index{UML}
 \clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-enum StDedxMethod           {kUndefinedMethodId,       
-                             kTruncatedMeanId,         
-                             kEnsembleTruncatedMeanId, 
-                             kLikelihoodFitId,         
-                             kWeightedTruncatedMeanId, 
+%
+%    User Guide
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\part{User Guide}
 \clearpage
 
-enum StTrackFittingMethod   {kUndefinedFitterId,         
+\section{Basics} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \label{sec:Basics}
 
 \subsection{Header Files}
@@ -281,7 +281,7 @@ enum StTrackFittingMethod   {kUndefinedFitterId,
 
 The amount of header files included in the \StEvent\ classes was
 minimized to decrease dependencies between the various classes and
-                             svtOther, 
+where ever possible forward declarations were used.  This is
 especially true for the \texttt{StEvent} class itself and it is
 therefore \emph{not} sufficient to include \texttt{StEvent.h} only.
 Many more header files would have to be included. This is very good
@@ -309,7 +309,7 @@ is much more type-safe then using simple integer numbers and makes the
 code more readable. All enumerations used in \StEvent\ are defined in
 \texttt{StEnumerations.h}.  For users convenience some non-\StEvent\
 header files as \texttt{StDetectorId.h}, \texttt{StVertexId.h} and
-\subsubsection{Numbering Scheme} 
+\texttt{StTrackMethod.h} are also included therein.
 enum StTrackType            {global, primary, secondary};
     \begin{center}
 All numbering follows \emph{strictly} the C/C++ convention. This
@@ -404,7 +404,7 @@ stored you must write:
 evt->tpcHitCollection()->sector(h.sector()-1)->padrow(h.padrow()-1).hits();
 \end{verbatim}
 
-\ 
+Many of STARs numbering schemes were defined when FORTRAN was the main
 programming language and C/C++ played only a minor role. Again, the only
 place where you have to deal with these conventions is when you use one of the
 following methods:
@@ -457,7 +457,7 @@ multiplication follows always the STAR system of units.
 The following example illustrates their use:
 \begin{verbatim}
 double a = 10*centimeter;
-typedef unsigned char  Bool_t;      //Boolean 
+double b = 4*millimeter;
 double c = 1*inch;
 double E1 = 130*MeV;
 double E2 = .1234*GeV;
@@ -469,7 +469,7 @@ cout << "STAR units:" << endl;
 cout << "a = " << a << " cm" << endl;
 cout << "b = " << b << " cm" << endl;
 cout << "c = " << c << " cm" << endl;
-a new naming scheme for containers.  All containers used in \StEvent\ 
+cout << "E1 = " << E1 << " GeV" << endl;
 cout << "E2 = " << E2 << " GeV" << endl;
 
 //
@@ -496,7 +496,7 @@ a = 100 mm
 b = 4000 um
 c = 0.0254 m
 E1 = 0.00013 TeV
-containers. Those you can create and delete without doing \StEvent\ 
+E2 = 123400 keV
 \end{verbatim}
 Further documentation can be found in the \name{StarClassLibrary}
 manual (see Sec.~\ref{sec:furtherDoc}).\vfill
@@ -533,7 +533,6 @@ above can be used.  And indeed in the implementation of various
         \caption{Persistence saves the state and class of an object
             across time or space.}
     \end{center}
-    
 \end{figure}
 
 ROOT uses typedefs for the built-in standard C++ types. This is pretty
@@ -548,26 +547,18 @@ The types used in \StEvent\ are defined as follows:
 \begin{verbatim}
 typedef char           Char_t;      //Signed Character 1 byte
 typedef unsigned char  UChar_t;     //Unsigned Character 1 byte
-    
-    
 typedef short          Short_t;     //Signed Short integer 2 bytes
 typedef unsigned short UShort_t;    //Unsigned Short integer 2 bytes
 typedef int            Int_t;       //Signed integer 4 bytes
 typedef unsigned int   UInt_t;      //Unsigned integer 4 bytes
 typedef long           Long_t;      //Signed long integer 4 bytes
-    
-
 typedef unsigned long  ULong_t;     //Unsigned long integer 4 bytes
 typedef float          Float_t;     //Float 4 bytes
-    
-    
 typedef double         Double_t;    //Float 8 bytes
 typedef unsigned char  Bool_t;      //Boolean
 \end{verbatim}
 
 This is fine and good but there is absolutely no reason to use them in
-    
-
 code other than in the definition of class data member. Even worse
 this can have disadvantages when it comes to calls to system functions
 and speed. It also makes code less portable and readable.  Don't use
@@ -654,9 +645,6 @@ with any \StEvent\ class one might find in a container.
     \verb+void push_back(const StClassName *pobj);+\\
     Adds object pointed to by \texttt{pobj}. If the container is not
     large enough it will automatically resize.
-    
-    
-
 
     \verb+UInt_t size() const;+\\
     Returns the current size of the container, i.e. the number of
@@ -671,7 +659,7 @@ with any \StEvent\ class one might find in a container.
     
     \verb+Bool_t empty() const;+\\
     Checks for zero size.
-    Switch on/off checks on memory usage of \StEvent\ 
+    
     \verb+const StPtrVecClassNameIterator begin() const;+\\
     \verb+const StSPtrVecClassNameIterator begin() const;+\\
     Returns iterator to the the first element in the collection.
@@ -737,13 +725,9 @@ this is your concern.
 
 \subsection{Getting StEvent: The StEventMaker}
 \label{sec:StEventMaker}
-
-
 \index{StEventMaker}
 
 \StEvent\ is set up and filled in a ``maker'' with the name
-
-
 \texttt{StEventMaker}.  This maker reads DST tables stored in memory
 and does all the things to make \StEvent\ nice and useful. How the DST
 gets into memory is another story and is explained in the next section
@@ -1019,7 +1003,7 @@ small fraction of the class design around \texttt{StEvent}.
         \includegraphics{event.eps}
         \caption{Class diagrams for \texttt{StEvent} and
             \texttt{StEventSummary}.}
-    if (!tpcMon) return;       // no monitor 
+        \label{fig:umlEvent}
     \end{center}
 \end{figure}
 The class \texttt{StEventSummary} contains lots of information
@@ -1105,7 +1089,7 @@ even the table names.  With other words the software monitor classes
 match their table counterparts 1:1.  The names are not always
 descriptive but the author got tired of inventing new names.  You'll
 find more details on what is what in the reference section of this
-             << ctb.time(i) << endl; 
+manual.
 
 Here a simple example on how to use the software monitors:
 \begin{verbatim}
@@ -1115,7 +1099,7 @@ void printTpcClusterInfo(ostream& os = cout, StEvent* event)
 
     if (event && event->softwareMonitor())
         tpcMon = event->softwareMonitor()->tpc();
-    else 
+
 
     if (!tpcMon) return;       // no monitor
 
@@ -1463,12 +1447,12 @@ the number of points used, and the method which was applied to
     reference since \texttt{StTrack} contains the instance by value.
     It is always present. No need to check for \texttt{NULL} pointer
     and such crap. There's no need for an abstract
-// we first get the list. 
+    layer hence we don't need a pointer.\\
     There might be different ways to fit and different ways to
     calculate the errors but they better be available, always. After
     all, this is what determines the quality of the track and thus
     decides if tracks get included in the analysis or get rejected.
-// What we want here is the dE/dx from the TPC from 
+    
 \item[StTrackNode] \index{StTrackNode} See section \ref{sec:node}.
     \texttt{StTrack::node()} will return a pointer to the node the
     track belongs to.
@@ -1606,7 +1590,7 @@ Instead of a \texttt{dynamic\_cast} one also could use
 \begin{verbatim}
         if (typeid(*pid) == typeid(StDedxPidTraits))
            pid = static_cast<StDedxPidTraits*>(traits[i]);
-struct MyPID : public StPidAlgorithm 
+\end{verbatim}
 which is probably even faster.
 
 In the example we used \texttt{StTrack::pidTraits()} to get the whole
@@ -1640,10 +1624,10 @@ a bit more explanation. With what was shown here you already get very
 far. Remember that every cast but a \texttt{dynamic\_cast} will cause
 you nothing but trouble. Have a look at your favourite introductory
 C++ textbook on \texttt{dynamic\_cast} and RTTI.  (If your favourite
-           return StPionMinus.instance();           
+introductory C++ textbook doesn't discuss \texttt{dynamic\_cast},
 carefully tear out all pages and recycle them.  Dispose of the book's
 cover in an environmentally sound manner, then borrow or buy a better
-      return 0;  
+textbook.)
 
 \subsubsection{PID Algorithm, Filters and Functors}
 \label{sec:pidAlgorithm}
@@ -1667,7 +1651,7 @@ more than this.
 The essential method all tracks provide is:
 \begin{verbatim}
 const StParticleDefinition*
-class MyTpcAlgo : public StPidAlgorithm 
+StTrack::pidTraits(StPidAlgorithm& algo) const;
 \end{verbatim}
 
 As usual \texttt{StPidAlgorithm} is an abstract class (functor) which
@@ -1735,7 +1719,208 @@ cout << tpcDedx.traits()->sigma() << endl;
        // ....
 
        // Assume it's a pion
+       if (track.geometry()->charge() > 0)
+           return StPionPlus.instance();
+       else
+           return StPionMinus.instance();
+   }
+   else
+      return 0;
+}
+\end{verbatim}
+The piece of code where you make use of the class might look as this:
+\begin{verbatim}
+#include "MyPID.h"
+// ....
+
+MyPID mypid;
+const StParticleDefinition *part = track->pidTraits(mypid);
+cout << "The name of the particle is " << part->name() << endl;
+cout << "its mass is m = " << part->mass() << " GeV/c2" << endl;
+\end{verbatim}
+
+So far so good, but what if I don't want to return something, what if
+I simply want to have a look without making a decision? Easy, return a
+\texttt{NULL} pointer -- who cares.  As long as you know what the
+algorithm is doing this should work fine.
+
+Here's a simple version of this approach. Let's say we are interested
+in TPC dE/dx (truncated mean) and nothing else:
+\begin{verbatim}
+// MyTpcAlgo.h
+#include "StEventTypes.h"
+class MyTpcAlgo : public StPidAlgorithm
+{
+public:
+    MyTpcAlgo() {mTraits = 0;}
+
+    StParticleDefinition*
+    operator() (const StTrack&, const StSPtrVecTrackPidTraits&);
+
+    StDedxPidTraits* traits() { return mTraits; }
+
+private:
+    StDedxPidTraits *mTraits;
+};
+
+// MyTpcAlgo.cxx
+#include "MyTpcAlgo.h"
+StParticleDefinition*
+MyTpcAlgo::operator() (const StTrack& t, const StSPtrVecTrackPidTraits& traits)
+{
+   mTraits = 0;
+   for (int i=0; i<traits.size(); i++) {
+        if (traits[i]->detector() != kTpcId) continue;
+        StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+        if (pid && pid->method() == kTruncatedMeanId) {
+           mTraits = pid;
+           break;
+        }
+to give the index.
+
+This now works really as a filter. We added three things which
+\texttt{StPidAlgorithm} does not require: A private data member
+\texttt{mTraits} which is meant to hold the "right" type of PID traits
+we want to filter out, a method to return it \texttt{traits()}, and a
+constructor to initialize the private data member to \texttt{NULL}.
+Note, that the base class \texttt{StPidAlgorithm} only wants us to
+define the \texttt{operator()}, the rest is up to us. We are free to
+add whatever we want.
+
+This is how it can be used:
+\begin{verbatim}
+#include "MyTpcAlgo.h"
+// ....
+
+MyTpcAlgo tpcDedx;
+track->pidTraits(tpcDedx);
+
 cout << tpcDedx.traits()->mean() << endl;
+cout << tpcDedx.traits()->errorOnMean() << endl;
+\end{verbatim}
+\texttt{StMeasuredPoint}.  So all the position related stuff comes
+This code uses very few lines. The code in \texttt{MyTpcAlgo} is
+highly re-usable and whoever uses the PID algorithm saves a lot of
+typing.
+of tracks which use the hits, and a method which returns a list of
+\index{StTpcDedxPidAlgorithm} In \StEvent\ there is actually one
+concrete PID algorithm implemented: \texttt{StTpcDedxPidAlgorithm}.
+references to its hits.
+dE/dx object (StDedxPidTraits) and returns the most probable particle,
+but also keeps all the information selected. The additional methods
+now make use of the stored information and let you work with the
+        \caption{}
+complicated then the examples shown here but the basic idea is the
+same. See \ref{sec:StTpcDedxPidAlgorithm} for details.
+
+\subsection{Vertices}
+\label{sec:vertices}
+tracks which uses a given hit:
+\index{StPrimaryVertex} \index{StV0Vertex} \index{StXiVertex}
+\index{StKinkVertex}
+
+A vertex is, after all, a measured point in space and that's why the
+basic vertex class \texttt{StVertex} inherits from an abstract base
+class called \texttt{StMeasuredPoint}. The same is actually true for
+all hits.  A measured point has a position, position errors, and even
+a covariant error matrix but it doesn't implement them. All it does is
+to guarantee that everything which inherits from it provides these
+methods. The advantage is that all measured points (i.e. hits and
+vertices) have the same basic methods which is a great advantage when
+it comes to fitting or drawing.
+
+The base class for all vertices is \texttt{StVertex}. In addition to
+the methods inherited from \texttt{StMeasuredPoint} each vertex
+provides a \texttt{type()} method which returns an enumeration type
+StVertexId (see section \ref{sec:Enumerations}), a $\chi^2$ value from
+the fit, a pointer to the parent track and a list of daughter tracks.
+However, \texttt{StVertex} is still abstract. The four concrete vertex
+classes are:
+\begin{description}
+\item[\texttt{StPrimaryVertex}] to hold the events vertex (or
+    vertices)
+\item[\texttt{StV0Vertex}] which is primarily used for K$_0$ and
+    $\Lambda$ decay vertices
+\item[\texttt{StXiVertex}] for $\Xi$ decay vertices
+\item[\texttt{StKinkVertex}] for kink vertices
+\end{description}
+The UML diagram for the vertices classes is shown in
+Fig.~\ref{fig:vertex}.
+
+\index{TPC hits} \index{TPC sectors and rows} \index{StTpcHit}
+\index{sectors} \index{rows} Each hit returns its position in global
+coordinates. Besides that many hit classes also provide information on
+their \emph{local} coordinates. For the TPC hits that means that there
+are methods to return the sector number (0-23) and row number (0-44).
+Please read section \ref{sec:conventionsNumbering} if you are puzzled
+about the numbering scheme.  There are two additional member functions
+\texttt{numberOfPrimaryVertices()} method and the access member
+function has an optional argument \texttt{primaryVertex(unsigned int
+    i=0)}.  Hence \texttt{event->primaryVertex()} implies
+\texttt{event->primaryVertex(0)}. If there is more than one you have
+to give the index.\\
+The primary vertices are ordered according to the number of daughters
+        \caption{Class diagrams of the TPC hit storage scheme.}
+the vertex with the most daughter tracks. \index{primary vertices, order of}
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{vertex.eps}
+The organization of the hit storage is such that the hits are ordered
+        \label{fig:vertex}
+That means the collection you get (by pointer) from
+StEvent::tpcHitCollection() holds a collection of sectors
+(StTpcSectorHitCollection) which itself holds a collection of padrows
+(StTpcPadrowHitCollection). Each padrow finally contains the list of
+\texttt{StKinkVertex}, store only references to their daughter tracks
+but they do not own them. In the reconstruction phase the daughter
+tracks are actually refitted with the vertex constraint but do not
+become StTrack objects. Only the momentum is extracted and stored as
+data member in the referring vertex class. This might change later but
+this is how it is done now. The referenced daughter tracks are always
+global tracks (\texttt{StGlobalTrack)}.
+
+By the way, although all vertex classes hold a parent pointer it is
+(currently) always zero. This might change in future. \\
+All secondary vertices are stored in flat containers and accessible
+from \texttt{StEvent}. The methods to obtain a reference (!) to the
+collections are \texttt{StEvent::v0Vertices()},
+\texttt{StEvent::kinkVertices()}, and \texttt{StEvent::xiVertices()}.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[height=0.7\textheight]{cartoon3.eps}
+        \caption{Abstraction from a hierarchy}
+    \end{center}
+    cout << theHits[i]->charge() << endl << endl;
+\texttt{StMeasuredPoint}. So all the 'position' related stuff comes
+with the measured point: position, position errors, and a covariant
+The whole collection (\texttt{StTpcHitCollection}) and each sector
+as a charge, a detector ID, a track reference count, i.e. the number
+of tracks which use the hit, and a method to return the list of
+tracks which reference the hit.  The list of tracks is created on the
+fly since a hit doesn't know anything about tracks. Only tracks hold
+references to their hits.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{hits.eps}
+        \caption{The \texttt{StHit} class and its subclasses and superclasses.}
+        \label{fig:hits}
+    \end{center}
+        << pvec.size() << "primary tracks."
+
+   cout << "The momenta of the tracks are:" << endl;
+        \caption{}
+   for (i=0; i<gvec.size(); i++)
+       cout << gvec[i]->geometry()->momentum() << endl;
+   for (i=0; i<pvec.size(); i++)
+    \begin{center}
+const int isec = 3;
+\index{wafer}
+The SVT consist of 6 layers (or 3 barrels) with up to 8 ladders each. Each ladder
+has up to 7 wafers. Consequently the \texttt{StSvtHit} class provides methods to
+        \caption{}
+returns 1--3, \texttt{layer()} returns 1--6, \texttt{ladder()} returns 1--8,
+and \texttt{wafer()} returns 1--7. If you are puzzled why these numbers start at
+1 have a look at section \ref{sec:conventionsNumbering}.
      << theHits.size() << " hits" << endl;
 
 for (int i=0; i<theHits.size(); i++) {
@@ -2303,7 +2488,7 @@ definition in the header file.
     \verb+StFtpcPlaneHitCollection* plane(UInt_t i);+\\
     \verb+const StFtpcPlaneHitCollection* plane(UInt_t i) const;+\\
     Index \texttt{i} runs from 0--(n-1) where n =
-\end{Entry}                            
+    \texttt{numberOfPlanes()}.
 \end{Entry}
 \clearpage
 
@@ -3079,6 +3264,7 @@ definition in the header file.
 
 \subsection{StSvtLadderHitCollection}
 \index{StSvtLadderHitCollection|textbf}
+\label{sec:StSvtLadderHitCollection}
 \begin{Entry}
 \item[Summary]
 \item[Synopsis]
