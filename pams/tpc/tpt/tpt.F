@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.17 1999/09/14 00:55:44 liq Exp $
+* $Id: tpt.F,v 1.18 2000/03/04 00:33:07 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.18  2000/03/04 00:33:07  sakrejda
+* Segment merging added for straigth tracks
+*
 * Revision 1.17  1999/09/14 00:55:44  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -97,6 +100,8 @@ C             tpcount -# of hits in a given row/sector
       INTEGER tpt_form_segments
       INTEGER tpt_extend_segments
       INTEGER tpt_merge_segments
+      INTEGER tpt_merge_line
+
 
       INTEGER iret  !scratch integer
       INTEGER i,ipass
@@ -119,12 +124,14 @@ c     *****************************************************************
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic),last_track
       REAL    time_now,time_all
       REAL    time_sort,time_seguv,time_seg,time_ext,time_merge
+      REAL    xlocal(3), bfield(3)
 c
 c     message-related variables
       character*132 m132(5)  ! And some message-generating space.
       integer idI1, idI2, idI3
       data    idI1, idI2, idI3 /3*0/
-      save    idI1, idI2, idI3
+      data    xlocal /3*0.0/
+      save    idI1, idI2, idI3, xlocal
 C______________________________________________________________________
 C     initialize timing counters
       time_all=0
@@ -253,6 +260,9 @@ C               failed while extending segments
                 go to 999
               endif
       endif
+      call gufld(xlocal,bfield)
+      if(abs(bfield(3)).lt.0.1)
+     >iret=tpt_merge_line(track_h,track,trk,hit_h,hit,tpar,tpar_h,ipass)
       if(tpar(ipass).merge.eq.1) then
 C             merge pieces of tracks together
               call timed(time_now)
