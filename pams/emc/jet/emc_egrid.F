@@ -335,37 +335,37 @@ c*-Check negative cell and subtract from suround 8 cells.
       enddo     
 
 *- Test
-      do ebin=1,20
-         call find_pos_emc(ems_control,1,1,ebin,phi,eta)
-         write(*,*) 'find_pos/b/eta; ', ebin, eta 
-      enddo
-      do ebin=1,12
-         call find_pos_emc(ems_control,2,1,ebin,phi,eta)
-         write(*,*) 'find_pos/e/eta; ', ebin, eta 
-      enddo
-      do pbin=1,60
-         call find_pos_emc(ems_control,1,pbin,1,phi,eta)
-         write(*,*) 'find_pos/b/phi; ', pbin, phi
-      enddo
-      do pbin=1,60
-         call find_pos_emc(ems_control,2,pbin,1,phi,eta)
-         write(*,*) 'find_pos/e/phi; ', pbin, phi 
-      enddo
-      do i=1,220
-        eta=float(i)/float(det)*4.4-2.2
-         call find_bin_emc(ems_control,0.0,eta,det,pbin,ebin)
-         write(*,*) 'find_bin/eta; ', det,eta, ebin
-      enddo
-      do i=1,240
-         phi=float(i)/float(det)*PI2
-         call find_bin_emc(ems_control,phi,0.0,det,pbin,ebin)
-         write(*,*) 'find_bin/b/phi; ', phi, pbin
-      enddo
-      do i=1,240
-         phi=float(i)/float(det)*PI2
-         call find_bin_emc(ems_control,phi,1.1,det,pbin,ebin)
-         write(*,*) 'find_bin/e/phi; ', phi, pbin
-      enddo
+c      do ebin=1,20
+c         call find_pos_emc(ems_control,1,1,ebin,phi,eta)
+c         write(*,*) 'find_pos/b/eta; ', ebin, eta 
+c      enddo
+c      do ebin=1,12
+c         call find_pos_emc(ems_control,2,1,ebin,phi,eta)
+c         write(*,*) 'find_pos/e/eta; ', ebin, eta 
+c      enddo
+c      do pbin=1,60
+c         call find_pos_emc(ems_control,1,pbin,1,phi,eta)
+c         write(*,*) 'find_pos/b/phi; ', pbin, phi
+c      enddo
+c      do pbin=1,60
+c         call find_pos_emc(ems_control,2,pbin,1,phi,eta)
+c         write(*,*) 'find_pos/e/phi; ', pbin, phi 
+c      enddo
+c      do i=1,220
+c        eta=float(i)/float(det)*4.4-2.2
+c         call find_bin_emc(ems_control,0.0,eta,det,pbin,ebin)
+c         write(*,*) 'find_bin/eta; ', det,eta, ebin
+c      enddo
+c      do i=1,240
+c         phi=float(i)/float(det)*PI2
+c         call find_bin_emc(ems_control,phi,0.0,det,pbin,ebin)
+c         write(*,*) 'find_bin/b/phi; ', phi, pbin
+c      enddo
+c      do i=1,240
+c         phi=float(i)/float(det)*PI2
+c         call find_bin_emc(ems_control,phi,1.1,det,pbin,ebin)
+c         write(*,*) 'find_bin/e/phi; ', phi, pbin
+c      enddo
 
       write(*,*) 'EMC_GRID done : ',nout,' wrote out' 
       write(*,*) 'EMC_GRID done : Total energy : ', etot
@@ -373,3 +373,6 @@ c*-Check negative cell and subtract from suround 8 cells.
       EMC_EGRID=STAFCV_OK
 999   RETURN
       END
+
+
+
