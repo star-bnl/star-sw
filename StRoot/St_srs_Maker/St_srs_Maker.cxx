@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.31 2003/04/05 22:36:26 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.32 2003/04/16 19:02:54 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.32  2003/04/16 19:02:54  caines
+//Make srs pick up Vd and T0 from database not table
+//
 //Revision 1.31  2003/04/05 22:36:26  caines
 //Fix filling on local coords so its time and anode not cm
 //
@@ -45,10 +48,6 @@
 //Added cvs ID strings
 //
 
-#include "StDbUtilities/StSvtCoordinateTransform.hh"
-#include "StDbUtilities/StSvtWaferCoordinate.hh"
-#include "StDbUtilities/StGlobalCoordinate.hh"
-#include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StMessMgr.h"
 #include "St_srs_Maker.h"
 #include "StChain.h"
@@ -56,10 +55,16 @@
 #include "St_ObjectSet.h"
 #include "TString.h"
 
+#include "StDbUtilities/StSvtCoordinateTransform.hh"
+#include "StDbUtilities/StSvtWaferCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
+#include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtT0.hh"
+#include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
 #include "svt/St_svg_am_Module.h"
 #include "svt/St_srs_am_Module.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -236,17 +241,23 @@ Int_t St_srs_Maker::Make()
   }
   
   StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
-  if(GeomDataBase)   mCoordTransform->setParamPointers(GeomDataBase, mConfig);
+  dataSet = GetDataSet("StSvtT0");
+  StSvtT0 *T0 = (StSvtT0*)dataSet->GetObject();
+  dataSet = GetDataSet("StSvtDriftVelocity");
+  StSvtHybridCollection *DriftVel = (StSvtHybridCollection*)
+    dataSet->GetObject();
+  if(GeomDataBase)   mCoordTransform->setParamPointers(GeomDataBase, mConfig,
+						       DriftVel, T0);
   
   // cope with pile up events and fill hit collection
    srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
 
-  int MaxTimeBucket = (int)(3.*mSvtSrsPar[0].fsca/mSvtSrsPar[0].vd);
-  StSvtWaferCoordinate WaferCoord;
-  StGlobalCoordinate GlobalCoord;
-  StSvtAnalysedHybridClusters* mSvtAnalClusters;
-  int VertexId, index, NumOfHits;
-  double TimeBucketShift;
+   int MaxTimeBucket;
+   StSvtWaferCoordinate WaferCoord;
+   StGlobalCoordinate GlobalCoord;
+   StSvtAnalysedHybridClusters* mSvtAnalClusters;
+   int VertexId, index, NumOfHits;
+   double TimeBucketShift;
 
 
    SetSvtAnalysis();
@@ -259,7 +270,7 @@ Int_t St_srs_Maker::Make()
       if( spc->id_wafer < 7000){
 	
 	VertexId=GeantTrack[spc->id_mctrack-1].start_vertex_p-1;
-	TimeBucketShift =  GeantVertex[VertexId].ge_tof*mSvtSrsPar[0].fsca;
+	TimeBucketShift =  GeantVertex[VertexId].ge_tof*T0->getFsca();
 	// Shuffle space points if a pile up event
 	GlobalCoord.setPosition(StThreeVector<double>(spc->x[0],spc->x[1],
 						      spc->x[2]));	 
@@ -267,6 +278,18 @@ Int_t St_srs_Maker::Make()
 	//cout << GlobalCoord ;
 	mCoordTransform->operator()(GlobalCoord,WaferCoord);
 
+	//Fill hit collection
+	index = mSvtAnalColl->getHybridIndex(WaferCoord.barrel(),
+					     WaferCoord.ladder(),
+					     WaferCoord.wafer(),
+					     WaferCoord.hybrid());
+	
+	if( index <0) continue;
+	MaxTimeBucket = (int)(3.*T0->getFsca()/
+			      ((StSvtHybridDriftVelocity*)
+			       DriftVel->at(index))->getV3(1));
+	
+	
 	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
 	
 	if( WaferCoord.timebucket() < 0. || WaferCoord.timebucket() > MaxTimeBucket){
@@ -282,32 +305,22 @@ Int_t St_srs_Maker::Make()
 	    cout << " Moved hit off of wafer" << endl;
 	  }
 	}
-
-	//Fill hit collection
-	index = mSvtAnalColl->getHybridIndex(WaferCoord.barrel(),
-					    WaferCoord.ladder(),
-					    WaferCoord.wafer(),
-					    WaferCoord.hybrid());
-
-
-
-	if( index <0) continue;
-
+	
 	// retrieve bad anodes
 	if (mSvtBadAnodes)
 	  BadAnode = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(index);
 	if(BadAnode)
 	  {
-	    if( BadAnode->isBadAnode(WaferCoord.anode())){
+	    if( BadAnode->isBadAnode((int)WaferCoord.anode())){
 	      //cout << "Found a bad anode" << endl;
 	      spc->flag = 9;
 	    }
 	  }
 	
-
+	
 	mSvtAnalClusters = (StSvtAnalysedHybridClusters*)
 	  mSvtAnalColl->at(index);
-
+	
 	NumOfHits=0;
 	if( mSvtAnalClusters){
 	  NumOfHits = mSvtAnalClusters->numOfHits();
