@@ -64,7 +64,7 @@ ClassImp(StHbtFsiLednicky)
 StHbtFsiLednicky::StHbtFsiLednicky() : StHbtFsiWeight(),
   mItest(0),mIch(1),mIqs(1),mIsi(1),mI3c(0),
   mNuclMass(1.),mNuclCharge(0.),
-  mSphereApp(false),mT0App(false),mNuclChargeSign(1), mLLMax(29),mNumbNonId(0) {
+  mSphereApp(false),mT0App(false),mNuclChargeSign(1), mLLMax(30),mNumbNonId(0) {
 
   mLLName=new char*[mLLMax+1];
   mNumProcessPair=new int[mLLMax+1];
@@ -99,6 +99,7 @@ StHbtFsiLednicky::StHbtFsiLednicky() : StHbtFsiWeight(),
   strcpy( mLLName[27],"proton lambda");
   strcpy( mLLName[28],"neutron lambda");
   strcpy( mLLName[29],"Lambda lambda");// gael 21May02
+  strcpy( mLLName[30],"Proton Anti-proton");// gael 21May02
   FsiInit();
   FsiNucl();
 };
@@ -125,6 +126,9 @@ double StHbtFsiLednicky::GetWeight(const StHbtThPair* aThPair){
       fsimomentum(*p1,*p2);
     }
     p=(aThPair->GetEmPoint1());
+//     cout << "Pid1:dans GetWeight = " << aThPair->GetPid1() << endl;
+//     cout << "Pid2:dans GetWeight = " << aThPair->GetPid2() << endl;
+//     cout << "LL:in GetWeight = " << mLL << endl;
     double x1[]={p->x(),p->y(),p->z(),p->t()};
     p=(aThPair->GetEmPoint2());
     double x2[]={p->x(),p->y(),p->z(),p->t()};
@@ -192,6 +196,9 @@ void StHbtFsiLednicky::FsiSetLL(){
     if (mT0App) { tNS=4;} 
     else {tNS=2;};
   } else { tNS=1;};
+//   cout <<"mLL dans FsiSetLL() = "<< mLL << endl;
+//   cout <<"tNS dans FsiSetLL() = "<< tNS << endl;
+//   cout <<"mItest dans FsiSetLL() = "<< mItest << endl;
   llini(mLL,tNS,mItest);
 }
          
@@ -206,6 +213,7 @@ bool StHbtFsiLednicky::SetPid(const int aPid1,const int aPid2) {
   static const int sLamPid=3122;
   //  static const int sLamLamPid=3122;
 
+  //  cout << "Setting PID to " << aPid1 << " " << aPid2 << endl;
 
   int tPidl,tPidh;
   int tChargeFactor=1;
@@ -237,6 +245,7 @@ bool StHbtFsiLednicky::SetPid(const int aPid1,const int aPid2) {
     switch (tPidh) {
     case sProtPid:    mLL=2; tChargeFactor*=1 ;break;
     case sLamPid:     mLL=27;tChargeFactor*=1 ;break;
+    case -sProtPid:   mLL=30;tChargeFactor*=1 ;break;
     default: mLL=0;
     };
     break;
