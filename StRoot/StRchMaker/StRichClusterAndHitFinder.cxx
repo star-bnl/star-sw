@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 1.3 2000/05/18 11:42:25 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 1.4 2000/05/23 16:55:40 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,8 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 1.3  2000/05/18 11:42:25  lasiuk
- * mods for pre StEvent writing
+ * Revision 1.4  2000/05/23 16:55:40  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * MC info restored in classifyHit() member
  * cut parameters (for decon) added in initializeCutParameters()
@@ -42,10 +44,12 @@
  * Initial Revision
  **************************************************************************/
 #define RICH_CF_DEBUG 0
+#define ivb if(RICH_CF_DEBUG)cout
 #include <iostream.h>
 #include <vector>
 #include <algorithm>
 #include <map>
+#ifndef ST_NO_NAMESPACES
 using std::vector;
 using std::map;
 using std::multimap;
@@ -140,8 +144,9 @@ void StRichClusterAndHitFinder::loadPixels(StRichReaderInterface* interface)
  	    theADC = interface->GetADCFromCoord(iPad,iRow);//GetADCFromCoord
  	    if(theADC) {
 		cout << "p/r/adc " << iPad << '/' << iRow << '/' << theADC << endl;
-	mThePixels.push_back(pixs[ii]);
+ 		mThePixels.push_back(new StRichSinglePixel(iPad,iRow,theADC));
 	    }
+ 	}
     } // loop over rows
 }
 #endif
@@ -202,7 +207,7 @@ bool StRichClusterAndHitFinder::makeTheClustersAndFilter()
 //    if (!makeClusters(5)) return false;
     const double startAmplitude = 10;
 //    if (!makeClusters(1)) return false;
-    
+//    removeNoiseClusters();
 //    if (!splitClusters()) return false;
 //    if (!removeSmallClusters()) return false;
     return true;
@@ -384,7 +389,7 @@ bool StRichClusterAndHitFinder::makeClusters(double minimumAmplitude)
 
 // 	PixelVector::iterator iter;
 // 	ctr=0;
-    
+// 	high=0;
 // 	for(iter=newPads.begin();
 // 	    iter!=newPads.end();
 // 	    iter++) {
@@ -453,9 +458,6 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
     bool makeHitFromCluster = false;
 //     PR(mTheClusters.size());
     for(size_t ii=0; ii<mTheClusters.size(); ii++) {
-	if(ii==118)
-	    cout << "*** Cluster " << ii
-		 << " #pixels: "   << mTheClusters[ii]->numberOfPads() << endl;
 	       << mTheHits[ii]->numberOfPads()      << endl;
 	makeHitFromCluster = false;
        
@@ -492,8 +494,20 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 	double maxAmp = 0;
 	int jj;
 	if(makeHitFromCluster) {
-	    
+	    mAnMCHit = 0;
 	    for(jj=firstPadOfCluster; jj<lastPadOfCluster; jj++) {
+		if(dynamic_cast<StRichSingleMCPixel*>(mThePixels[jj])) {
+		    mAnMCHit = 1;
+		    //
+		    // Here's where it gets interesting
+		    // We can store ALL the mcInfo's from the
+		    // pixels and evaluate them to assign the
+		    // MC information to the hit, or wait until
+		    // later and loop over all the pixels in
+		    // the clusters...This will have to be studied.
+		    //
+		}
+	    //
 		ivb << '\t' << *mThePixels[jj] << endl;
 		amp = mThePixels[jj]->charge();
 		maxAmp = max(maxAmp,amp);
@@ -507,7 +521,27 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 		PR(y);
 		PR(sum);
 	    }
-	    mTheHits.push_back(new StRichSimpleHit);
+		else {
+		    cout << "Matrix failed " << kk << '/' << theLocalMaxima.size() << endl;
+	//	if(makeHitFromCluster) {
+	if(true) {
+	    if(mAnMCHit) {
+		mTheHits.push_back(new StRichSimpleMCHit);
+		//
+		// Here is where we could do the second loop
+		// for evaluation and assignment of the
+		// MC information to the hit?
+		// Find the biggest contribution to the pixel and add it
+		//mMCInfo.push_back(dynamic_cast<StRichSingleMCPixel*>(mThePixels[jj].);
+		//
+		// Just temporary
+		//
+		dynamic_cast<StRichSimpleMCHit*>(mTheHits.back())->
+		    setMCInfo(StRichID(-1,-1,-1,-1,eUnknown));
+	    }
+	    else {
+		mTheHits.push_back(new StRichSimpleHit);
+	    }
 	    mTheHits.back()->internal() = StThreeVector<double>(x/sum,y/sum,0);
 	    mTheHits.back()->setCharge(sum);
 	    mTheHits.back()->setClusterNumber(mThePixels[jj-1]->clusterNumber());
@@ -518,7 +552,7 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 
 // 		// unroll the map.  ordered by GREATEST charge.
 
-    cout << "StRichClusterAndHitFinder::simpleHitsFromCluster() #=" << mTheHits.size() << endl;
+    cout << "StRichClusterAndHitFinder::simpleHitsFromCluster() # =" << mTheHits.size() << endl;
 // 	    else {
 // 	    }
 	    //

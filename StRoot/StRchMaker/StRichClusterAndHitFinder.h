@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 1.2 2000/05/18 11:42:28 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 1.3 2000/05/23 16:55:44 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,8 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 1.2  2000/05/18 11:42:28  lasiuk
- * mods for pre StEvent writing
+ * Revision 1.3  2000/05/23 16:55:44  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * - remove matrix interface
  * - add necessary members
@@ -35,9 +37,12 @@
  *
  * Revision 1.1  2000/04/05 16:39:30  lasiuk
  * Initial Revision
+ *
+ **************************************************************************/
 
 #ifndef ST_RICH_CLUSTER_AND_HOT_FINDER
 #define ST_RICH_CLUSTER_AND_HOT_FINDER
+
 #include <iostream.h>
 #include <stack>
 
@@ -78,7 +83,7 @@ class StRichClusterAndHitFinder {
     //StRichClusterAndHitFinder operator=(const StRichClusterAndHitFinder&){/* use default*/}
 
     void printList(ostream& os=cout);
-    const StRichSinglePixelCollection& getPixels()   const;
+    void printPadPlane(ostream& os=cout);
 
     //
     // Load the pixels by either passing:
@@ -127,9 +132,10 @@ class StRichClusterAndHitFinder {
     void clearAndDestroyThePixels();
     
     
+private:
     int mMaxClusterWidth;
     float mMaxAspectRatio; // length/width
-inline const StRichSinglePixelCollection& StRichClusterAndHitFinder::getPixels()   const
+    float mMinChargeFraction;  // fraction of charge central pad possess
     
     // tmp storage for comparison to cuts
     int mNumberOfSaturatedPads;

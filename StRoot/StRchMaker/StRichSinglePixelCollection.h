@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.h,v 1.2 2000/05/09 21:55:39 lasiuk Exp $
+ * $Id: StRichSinglePixelCollection.h,v 1.3 2000/05/23 16:56:05 lasiuk Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -19,8 +19,10 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.h,v $
- * Revision 1.2  2000/05/09 21:55:39  lasiuk
- * deep copy for copy c'tor and assignment (jd)
+ * Revision 1.3  2000/05/23 16:56:05  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * Revision 1.2  2000/05/09 21:55:39  lasiuk
  * deep copy for copy c'tor and assignment (jd)
@@ -43,6 +45,7 @@ using std::uninitialized_fill_n;
 
 #include "StRrsMaker/StRichRrsMacros.h"
 #include "StRrsMaker/StRichSinglePixel.h"
+#include "StRrsMaker/StRichSingleMCPixel.h"
 
 #ifndef ST_NO_DEF_TEMPLATE_ARGS
 typedef vector<StRichSinglePixel*> PixelVector;

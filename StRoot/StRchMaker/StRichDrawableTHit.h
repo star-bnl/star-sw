@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTHit.h,v 1.2 2000/05/18 11:42:35 lasiuk Exp $
+ * $Id: StRichDrawableTHit.h,v 1.3 2000/05/23 16:55:51 lasiuk Exp $
  *
  * Description:
  *   Cluster which is drawn in the pad monitor
@@ -7,8 +7,10 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTHit.h,v $
- * Revision 1.2  2000/05/18 11:42:35  lasiuk
- * mods for pre StEvent writing
+ * Revision 1.3  2000/05/23 16:55:51  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * Revision 1.2  2000/05/18 11:42:35  lasiuk
  * mods for pre StEvent writing
@@ -26,7 +28,7 @@
 
 #include "TMarker.h"
 
-#include "StRichSimpleHit.h"
+class StRichSimpleHit;
 
 class StRichDrawableTHit : public TMarker {
 public:

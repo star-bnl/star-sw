@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSimpleHit.h,v 1.1 2000/05/18 11:34:18 lasiuk Exp $
+ * $Id: StRichSimpleHit.h,v 1.2 2000/05/23 16:55:58 lasiuk Exp $
  *
  * Description:
  *   Definition of the Hit object as reconstructed by
@@ -7,8 +7,10 @@
  *
  ***************************************************************
  * $Log: StRichSimpleHit.h,v $
- * Revision 1.1  2000/05/18 11:34:18  lasiuk
- * iRename revision
+ * Revision 1.2  2000/05/23 16:55:58  lasiuk
+ * Incorporate new MC info
+ * add clone() where necessary
+ * accomodate name changes
  *
  * Revision 1.3  2000/05/31 19:26:15  dunlop
  * Filling non-ctor entries in persistent hits + support for this
@@ -29,18 +31,21 @@
 #define ST_RICH_SIMPLE_HIT
 
 #include <iostream.h>
-// #ifdef __ROOT__
-// #include "StRichHit.h"
-// #endif
+#include <vector>
+
+#include "StRichHit.h"
+using std::vector;
 #endif
 
 #include "StThreeVector.hh"
 
 #include "StEvent/StRichHit.h"
-// #ifdef __ROOT__
-//      StRichSimpleHit(const StRichHit*);
-// #endif
-    ~StRichSimpleHit();
+#endif
+
+enum StRichSimpleHitFlag {eDeconvoluted=1, eMip=2, eSaturatedPad=4};
+
+class StRichSimpleHit  {
+public:
     StRichSimpleHit();
     StRichSimpleHit(const StThreeVector<double>& xl, const StThreeVector<double>& dx);
 #ifdef __ROOT__
@@ -59,7 +64,7 @@
     int    clusterNumber() const;
     StThreeVector<double>&  global();
     StThreeVector<double>&  local();
-private:
+    StThreeVector<double>&  internal();
     StThreeVector<double>&  localError();
     bool isSet(StRichSimpleHitFlag f)      const;
     void setBit(StRichSimpleHitFlag f);
@@ -82,6 +87,8 @@ inline const StThreeVector<double>& StRichSimpleHit::local() const {return mLoca
 inline StThreeVector<double>& StRichSimpleHit::internal() {return mInternal;}
 inline const StThreeVector<double>& StRichSimpleHit::localError() const {return mLError;}
 inline StThreeVector<double>& StRichSimpleHit::localError() {return mLError;}
+inline const StThreeVector<double>& StRichSimpleHit::sigma() const {return mSigma;}
+inline StThreeVector<double>& StRichSimpleHit::sigma() {return mSigma;}
 inline void StRichSimpleHit::setCharge(double q) {mCharge = q;}
 inline void StRichSimpleHit::setClusterNumber(int no) {mClusterNumber = no;}
 // Flags
