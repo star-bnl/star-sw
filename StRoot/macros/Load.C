@@ -1,5 +1,8 @@
-// $Id: Load.C,v 1.7 1999/09/09 13:52:38 fisyak Exp $
+// $Id: Load.C,v 1.8 1999/11/05 16:19:50 fisyak Exp $
 // $Log: Load.C,v $
+// Revision 1.8  1999/11/05 16:19:50  fisyak
+// Add StUtilities
+//
 // Revision 1.7  1999/09/09 13:52:38  fisyak
 // Add StBFChain
 //
@@ -14,6 +17,7 @@
 void Load(){
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+    gSystem->Load("StUtilities");
     gSystem->Load("StBFChain");
     gSystem->Load("xdf2root");
     gSystem->Load("St_Tables");
