@@ -55,7 +55,8 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   my $includes = "";
   my $com = 0;
   while ($line = <In>) {
-    if ($line =~ /\/\//) {$line =~ s/\/\/*$//;}
+    next if $line =~ /^\s*\/\//;
+    if ($line =~ /\/\//) {$line =~ s/\/\/.*$//;}
     if ($line =~ /\*\//) {$com = 0; $line =~ s/^*\*\///;}
     next if ($com); 
     if ($line =~ /\/\*/) {
@@ -64,7 +65,7 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
 	$line =~ s/\/\**\*\///; 
 	$com = 0;
       }
-      else {$line =~ s/\/\**$//;}
+      else {$line =~ s/\/\*.*$//;}
     }
     if ($line =~ /\#include/ && $line !~ /(<>)/) {
       (my $inc_h = $line) =~ s/\#include\s//g; chop ($inc_h);
