@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.55  2000/06/24 19:26:31  ward
+// changed the name of the function to ExcludeTheseTimeBins
+//
 // Revision 1.54  2000/06/24 19:18:41  ward
 // changed meaning of SetMinMaxTimeBucket args
 //
@@ -488,7 +491,7 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
 
   }
 }
-void St_tpcdaq_Maker::SetMinMaxTimeBucket(int lo,int hi) {
+void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo,int hi) {
   int sector;
   assert(lo<=hi);
   alreadySet=7; // TRUE
