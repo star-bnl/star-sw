@@ -12,7 +12,9 @@ class EditableParameter : ConstrainedParameter
  public:
 
   EditableParameter();
-  EditableParameter(double value, 
+  EditableParameter(const string & name, 
+		    const string & description,
+		    double value, 
 		    double defaultValue, 
 		    double min, 
 		    double max,

@@ -5,13 +5,15 @@ EditableParameter::EditableParameter()
    _increment(1.)
 { }
 
-EditableParameter::EditableParameter(double value, 
+EditableParameter::EditableParameter(const string & name, 
+				     const string & description,
+				     double value, 
 				     double defaultValue, 
 				     double min, 
 				     double max,
 				     double increment,
 				     int    type)
-  : ConstrainedParameter(value,defaultValue,min,max,type),
+  : ConstrainedParameter(name,description,value,defaultValue,min,max,type),
     _increment(increment)
 {}
 
