@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.35 2003/07/29 16:39:11 fine Exp $
+// $Id: rootlogon.C,v 1.36 2003/11/04 17:23:30 jeromel Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -64,6 +64,9 @@
     int dumy = printf("QAInfo:You are using STAR_LEVEL : %s, ROOT_LEVEL : %s and node : %s \n",  
 		      STAR_LEVEL.Data(),ROOT_LEVEL.Data(),gSystem->HostName());
   }
-  gSystem->SetIncludePath("-I. -I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/include");
+  // note that the above bacward support the old mode for include whenever
+  // it was not in .$STAR_HOST_SYS but one level up. The bacward compatibility
+  // can be removed only at the net root release ...
+  gSystem->SetIncludePath("-I. -I./.$STAR_HOST_SYS/include -I./include -I./StRoot -I$STAR/.$STAR_HOST_SYS/include -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/include");
   
 }
