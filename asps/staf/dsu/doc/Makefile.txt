@@ -1,0 +1,7 @@
+exm:	exm.c
+	cc \
+	-I/star/starlib/star/dev/sys/inc \
+	-o exm exm.c \
+	-L/u2/ward/dsu/lib/irix \
+	-L/star/starlib/star/dev/sys/lib/irix \
+	-ldsu -ldsl -lXm -lXt -lX11 -lm
