@@ -7,19 +7,44 @@
       </h2>
       <UL>
          <LI>
-            <a href="MainWidgetDst.gif">Main window</a>
+            <A href="MainWidgetDst.gif">Main window</A>
          – Event and Detector picture
          <LI>
-            <a href="EventControlPanel.gif">"Event Control Panel"</a> to control the event 
-            and optional filter selections
-         </LI>
+            <A href="EventControlPanel.gif">"Event Control Panel"</A>
+         to control the event and optional filter selections
          <LI>
-            The&nbsp;informational widget &nbsp; <a href="InfoWidget.gif">"Info"</a>&nbsp;to 
-            represent&nbsp; the"maker" status information</LI>
+            The informational widget <A href="InfoWidget.gif">"Info"</A>
+         to represent the "maker" status information
          <LI>
             Through <A href="MainWidget.gif">MainWindow</A> View-&gt;OpenGL view one can 
-            get the <A href="OpenGLView.gif">OpenGL </A>view of the MainWindow also</LI></UL>
-      New StEventDisplayMaker has been included into <a href="readme1.html">doEvents.C 
-         and bfc.C </a>STAR macros
+            get the <A href="OpenGLView.gif">OpenGL </A>view of the MainWindow also
+         </LI>
+      </UL>
+      <P>New StEventDisplayMaker has been included into <A href="readme1.html">doEvents.C 
+            and bfc.C </A>
+      STAR macros
+      <P>Since the new version of the maker calls a <a href="http://root.bnl.gov">Qt-based version of ROOT</a>
+         to try it one has to do (temporary):
+         <OL>
+            <LI>
+               Set that ROOT version with the shell command <small><code>
+<pre>
+stardev
+setup ROOT 3.03.09.qt 
+</pre></small></CODE>
+               
+         <LI>
+            Check out the StEventDisplayMaker code and compile it with "cons" <small><code>
+                  <pre>     
+ cvs co StRoot/StEventDisplayMaker
+ cons +StEventDisplay
+</pre></small>
+         </CODE>
+         <LI>
+            run <A href="readme1.html">doEvents.C</A>
+            <OL>
+            </OL>
+      <P>&nbsp;</P>
+      </LI>
    </body>
 </html>
