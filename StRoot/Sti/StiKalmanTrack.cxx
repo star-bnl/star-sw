@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.40 2004/10/28 04:59:18 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.40 2004/10/28 04:59:18 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.41 2004/10/28 19:30:42 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.41 2004/10/28 19:30:42 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.41  2004/10/28 19:30:42  perev
+ * Hack. Infinite Chi2 skipped in Chi2 calculation. Claude??? (VP)
+ *
  * Revision 2.40  2004/10/28 04:59:18  perev
  * Fixed iterator for nodes. v3V2
  *
@@ -496,17 +499,18 @@ int StiKalmanTrack::getCharge() const
 */
 double  StiKalmanTrack::getChi2() const
 {
-  double theChi2 = 0;
+  double theChi2 = 1.e+60;
   if (firstNode)
     {
+      theChi2 = 0;
       StiKTNBidirectionalIterator it;
       for (it=begin();it!=end();it++)
 	{
-	  if ((*it).getHit())
-	    {
-	      //cout << " Chi2:"<< (*it)._chi2<<endl;
-	      theChi2 += (*it)._chi2;
-	    }
+	  if (!(*it).getHit()) 	continue;  	//non used node
+          double Chi2 = (*it)._chi2;
+          if (Chi2>10000) 	continue;	//non used node????(VP)
+	    //cout << " Chi2:"<< Chi2<<endl;
+	  theChi2 += Chi2;
 	}
     }
   return theChi2;
