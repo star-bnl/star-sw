@@ -22,6 +22,7 @@
 //#include "StMaker.h"
 //#endif
 
+#include <strstream>
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 
 class franksTrackCut : public StHbtTrackCut
@@ -53,6 +54,7 @@ class franksTrackCut : public StHbtTrackCut
 
 
   void SetNHits(const int& lo, const int& hi);
+  void SetNdEdxHits(const int& lo, const int& hi);
   void SetP(const float& lo, const float& hi);
   void SetPt(const float& lo, const float& hi);
   void SetPx(const float& lo, const float& hi);
@@ -66,8 +68,10 @@ class franksTrackCut : public StHbtTrackCut
 
   franksTrackCut* Clone();
 
-private:   // here are the quantities I want to cut on...
+  ostrstream* finalReport() const;
 
+  //private:   // here are the quantities I want to cut on...
+ protected:
   int               mCharge;
   float             mPidProbElectron[2];
   float             mPidProbPion[2];
@@ -82,6 +86,7 @@ private:   // here are the quantities I want to cut on...
   float             mNSigmaAntiKaon[2];
   float             mNSigmaAntiProton[2];
   int               mNHits[2];
+  int               mNdEdxHits[2];
   float             mP[2];
   float             mPt[2];
   float             mPx[2];
@@ -92,6 +97,7 @@ private:   // here are the quantities I want to cut on...
   float             mDCA[2];
   float             mDCAGlobal[2];
 
+ protected:
   long              mNTracksPassed;
   long              mNTracksFailed;
 
@@ -119,6 +125,7 @@ inline void franksTrackCut::SetNSigmaAntiProton(const float& lo, const float& hi
     mNSigmaAntiProton[0]=lo; mNSigmaAntiProton[1]=hi;}
 
 inline void franksTrackCut::SetNHits(const int& lo, const int& hi){mNHits[0]=lo;mNHits[1]=hi;}
+inline void franksTrackCut::SetNdEdxHits(const int& lo, const int& hi){mNdEdxHits[0]=lo;mNdEdxHits[1]=hi;}
 inline void franksTrackCut::SetP(const float& lo, const float& hi){mP[0]=lo; mP[1]=hi;}
 inline void franksTrackCut::SetPt(const float& lo, const float& hi){mPt[0]=lo; mPt[1]=hi;}
 inline void franksTrackCut::SetPx(const float& lo, const float& hi){mPx[0]=lo; mPx[1]=hi;}
