@@ -6,7 +6,12 @@
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
-
+#ifdef Sti_DEBUG
+#include "TRMatrix.h"
+#include "TRVector.h"
+#define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
+#define PrPP(A,B) cout << "=== StiHit::" << (#A); PrP((B)); cout << endl;
+#endif
 StiHit::StiHit()
 :  mrefangle(0),
    mposition(0),
@@ -87,20 +92,41 @@ void StiHit::rotate(double alpha)
   double sa = sin(alpha);
   double rxx = ca; double rxy = sa;
   double ryx =-sa; double ryy = ca;
+#ifdef Sti_DEBUG
+  TRMatrix R(2,2,
+	     ca, sa,
+	     -sa, ca); PrPP(rotate,R);
+  TRVector X(2, mx, my); PrPP(rotate,X);
+  X = TRVector(R,TRArray::kAxB,X); PrPP(rotate,X);
+#endif   
   double x = rxx*mx + rxy*my;
   double y = ryx*mx + ryy*my;
+#ifdef Sti_DEBUG
+  TRVector X1(2, x, y); PrPP(rotate,X1);
+  X1.Verify(X);
+  TRSymMatrix S(2,
+		msxx,
+		msxy, msyy);  PrPP(rotate,S);
+  S = TRSymMatrix(R,TRArray::kAxSxAT,S); PrPP(rotate,S);
+#endif
   mx = x;
   my = y;
   // A=R*S
   double axx = rxx*msxx + rxy*msxy;
   double axy = rxx*msxy + rxy*msyy;
   double ayx = ryx*msxx + ryy*msxy;
-  //double ayy = ryx*msxy + ryy*msyy;
+  double ayy = ryx*msxy + ryy*msyy;
   // S=A*Rt
-  msxx = axx*rxx + axy*ryx;
+  msxx = axx*rxx + axy*rxy;
   msxy = axx*ryx + axy*ryy;
   //msyx = ayx*rxx + ayy*rxy;
-  msyy = ayx*ryx + axy*ryy;
+  msyy = ayx*ryx + ayy*ryy;
+#ifdef Sti_DEBUG
+  TRSymMatrix S1(2,
+		msxx,
+		msxy, msyy);  PrPP(rotate,S1);
+  S1.Verify(S);
+#endif
 }
 
 void StiHit::setError(const StMatrixF& matrix)
