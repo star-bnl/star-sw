@@ -30,7 +30,7 @@
 // need to define "ROOT" for use in offline
 #ifdef __ROOT__
 
-
+#include "StDaqLib/TPC/trans_table.hh"
 #define FCF_10BIT_ADC	// ADC data is already in 10 bits!
 #define FCF_DONT_USE_LOG
 
@@ -461,7 +461,10 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 #ifdef FCF_10BIT_ADC 
 					// no lookup - already in 10 bits!
-					a = adc ;
+
+					//a = adc ;           // jml 1/27/02 even when FCF_10BIT_ADC really means the size is short
+					a = log8to10_table[adc];    // we still need to apply the 8to10 bit conversion.
+
 					//if(row==14) printf("Row %d, pad %d, timebin %d, data %d\n",row,pad,start,a) ;
 
 					//if(a > 255) printf("Datum is %d\n",a) ;
