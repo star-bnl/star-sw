@@ -156,8 +156,13 @@ BfcItem BFC[] = {
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svtChain","","svt_T,srs,stk"                             ,"StMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","tls,Simu"  ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
+  {"sls"      ,"","svtChain","tls,Simu"     ,"St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
+  {"spa"      ,"","svtChain","tls,Simu"     ,"St_spa_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
   {"svt_daq"     ,"svt_raw","svtChain",""                       ,"StSvtDaqMaker","StSvtDaqMaker","",kFALSE},
-  {"stk"         ,"svt_tracks","svtChain","tls"     ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
+  {"stk"         ,"svt_tracks","svtChain","tls"     ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},  
+  {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
+  {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
+  {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
   {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                          ,"StMaker","StChain","",kFALSE},
   {"fss"         ,"ftpc_raw","ftpcChain","SCL,Simu"       ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpcChain","SCL"
@@ -799,5 +804,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.120 2000/07/21 00:37:32 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.121 2000/07/21 17:00:23 fisyak Exp $
 //_____________________________________________________________________
