@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.8 2003/01/28 23:10:47 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.9 2003/02/04 19:32:21 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ void StEventControlPanel::Build()
       const char *detectorNames[] =
       {
          "TPC"	 ,"TPSS"	, 
-         "FTPC" ,"FTPC"	, 
+         "FTPC" ,"SCON"	, 
          "SVT"	 ,"STSI"	, 
          "SSD"	 ,"SSD"	, 
          "RICH" ,"RICH"	, 
