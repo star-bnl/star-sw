@@ -15,6 +15,6 @@
 #define MaxSectors 12 /* in the endcap */
 #define MaxSubSec 5 /* in the sector */
 #define MaxEtaBins 12 /* in the sector */
-
+#define MaxPhiBins 60  /* in the Endcap */
 
 #endif
