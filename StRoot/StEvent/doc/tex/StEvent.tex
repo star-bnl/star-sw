@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.9 1999/03/24 19:03:43 ullrich Exp $
+% $Id: StEvent.tex,v 1.10 1999/03/25 14:05:41 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.9  1999/03/24 19:03:43  ullrich
-% Fixed bug in UML figure numbers.
+% Revision 1.10  1999/03/25 14:05:41  ullrich
+% Improved some explanation. More index entries.
 %
 % Revision 1.16  1999/03/31 19:03:50  ullrich
 % Corrected typos in UML appendix
@@ -140,8 +140,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
 % Revision 2.21  2000/02/28 19:37:26  ullrich
 % Added the hypperref package to add bookmarks and hyperlinks
 % tp pdf documents.
@@ -149,14 +149,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.9 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.10 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -298,7 +298,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/24 19:03:43 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -317,8 +317,8 @@ To obtain the SCL documentation perform the following steps:
     \name{make}
 \end{enumerate}
 \index{SCL} \index{StarClassLibrary}
-\section{Coding Standards}  \index{Coding Standards}
-
+  {\end{list}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   {\Large\bf STAR Offline Library Long Writeup}
 \section{Getting \StEvent\ Sources}  \index{Getting StEvent sources}
   \hfill\mbox{}\\[3cm]
@@ -477,7 +477,8 @@ the DST changes considerably in time. We expect a more stable
 situation as soon as experimental data comes in and the DST format
 gets better defined.  \index{DST files}
 
-\subsection{Enumeration Types} \index{enumerations}
+\clearpage
+\name{PhysicalConstants.h} which are part of the StarClassLibrary.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference Manual
@@ -520,7 +521,10 @@ typedef short          Short_t;     //Signed Short integer 2 bytes
     checking rules ensures the proper use of the enumeration constants already
     during compilation.
 
-\section{Collections and Iterators} \index{collection|textbf} \index{iterator}
+    \verb+enum StBeamDirection {east, west};+\\
+typedef double         Double_t;    //Float 8 bytes
+    \verb+enum StBeamPolarizationAxis {sideways, vertical, longitudinal};+\\
+
     \verb+enum StVertexType {undefined, primary, kink,+\\
     \verb+                   twoBody, threeBody, nBody,+\\
     \verb+                   pileUpPrimary, V0, Xi};+\\
@@ -539,7 +543,6 @@ typedef short          Short_t;     //Signed Short integer 2 bytes
 for (int i=0; i<theHits.size(); i++) {
 
 \section{Collections and Iterators}
-\label{sec:collections}
 \label{sec:collections}
 \index{collection|textbf}
 \index{iterator}
@@ -691,9 +694,10 @@ For example the same code above but written as:
 \begin{verbatim}
      StVertexIterator iter;
      StVertexCollection* vertices = event->vertexCollection();
-Note that often some member functions or constructors are omitted
-since they are for internal use only (even if public).
-Destructors are not described.\\
+     StVertex vertex;
+     for (iter = vertices->begin(); iter != vertices->end(); iter++)
+         vertex = **iter;                         // dereference twice
+\end{verbatim}
 invokes the \name{StVertex} assignment operator and creates a local copy.
 This method is only useful if you intend to modify am object locally
 but want to leave the original untouched.
@@ -704,7 +708,9 @@ Destructors, assignment operators and copy constructors are not listed.
 \index{StMeasuredPoint}
 STAR CVS repository are described in alphabetic order.
 \texttt{StMeasuredPoint} can be used wherever positions and errors
-\index{StCtbCounter|textbf} \index{CTB}
+are what count. Take for an example a track fit. What you have to pass
+reference section of a derived class. Always check the section(s)
+of the base class(es) to get a complete overview on the available
 are the coordinates and their weight which depends on the errors.
 \end{verbatim}
 Note that some constructors are omitted, especially the ones which
@@ -720,13 +726,14 @@ documentation.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference: StCtbCounter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StCtbCounter}
+    stored in the \\ \name{dst\_TriggerDetectors.idl} table. Each counter
     is identified by an ID. The class holds the number of mips and the counter
     corrected time.\index{dst\_TriggerDetectors.idl}
     The list of \name{StCtbCounter} objects (collection class \name{StVecCtbCounter}) can be obtained
     through the \name{StTriggerDetectorCollection::ctbCounters()} method.
-    \index{StVecCtbCounter}
-    The list of \name{StCtbCounter} objects (collection class \name{StVecCtbCounter}) can be obtained
-    through the \name{StTriggerDetectorCollection}.
     \index{StVecCtbCounter}
     \index{StTriggerDetectorCollection}
     content of a single Central Trigger Barrel (CTB) counter.
@@ -785,7 +792,8 @@ documentation.
 //  Function to calculate and return the sum of the
 //  number of mips from all CTB counter.
 //
-\index{dE/dx} \index{StDedx|textbf}
+double addCtbMips(StEvent *event)
+{
     double sum = 0;
     StTriggerDetectorCollection* tds =
                 event->triggerDetectorCollection();
@@ -879,7 +887,8 @@ void printDedx(StGlobalTrack &track)
 
     if (ftpc) printOneDedx(ftpc, "FTPC");
     if (tpc) printOneDedx(tpc, "TPC");
-\index{event summary} \index{StDstEventSummary|textbf}
+    if (svt) printOneDedx(svt, "SVT");
+}
 
 void printOneDedx(StDedx *dedx, const char* name)
 {
@@ -925,7 +934,9 @@ void printOneDedx(StDedx *dedx, const char* name)
 
 \item[Related Classes]
     The pointer to the event summary information can be obtained directly
-\index{StEmcHit|textbf} \index{EMC hit} \index{SMD hit}
+    from \name{StEvent} via the \name{StEvent::summary()} method.
+    \index{StEvent}
+
 \item[Public\\ Constructors]
     \verb+StDstEventSummary();+ \\
     Default constructor.
@@ -1146,6 +1157,7 @@ struct addEnergy {
     double operator()(double s, StEmcTowerHit &h) {return s += h.e();}
 };
 
+//
 //  Calculate the total tower energy using the generic STL
 //  function 'accumulate'
 //  (Note the binary operator addEnergy() defined above)
@@ -1372,15 +1384,21 @@ double sumEmcTowerHits(StEvent *event)
 \item[Public Member\\ Operators]
     \verb+int operator==(const StEvent &e) const;+ \\
     Returns true (1) if two instances of \name{StEvent} are equal or false (0)
-     cout << "Event ID = " <<  event->id().first << '/'
-                           <<  event->id().second << endl;
-     cout << "Run ID = " <<  event->run()->id() << endl;
     if otherwise.
-     cout << "# of tracks = " << event->trackCollection()->size() << endl;
-     cout << "# of vertices = " << event->vertexCollection()->size() << endl;
-     cout << "# of tpc hits = " << event->tpcHitCollection()->size() << endl;
+    Note that only the 64 bit event identifier is used for the comparison.
+
+    \verb+int operator!=(const StEvent &e) const;+ \\
+    Returns true (1) if two instances of \name{StEvent} are not equal or false (0)
+    if otherwise.
+    This operator is implemented by simply inverting \name{operator==}.
+
+\item[Examples]
+{\bf Example 1:}
+{\footnotesize
+\begin{verbatim}
 //
-          <<  event->primaryVertex()->position()/millimeter << " mm" << endl;
+//   Prints some basic event quantities to stdout (cout).
+//   Function ctime() is in <ctime>. Note that
 //   the function adds a new line by default.
 //
 void printEvent(StEvent *event)
@@ -2251,7 +2269,7 @@ void beamInfo(StEvent *event)
 }
 \end{verbatim}
 }%footnotesize
-    \name{StRunSummary} is a class which summarizes a DST production run.
+{\bf Programs Output:}
 {\footnotesize
 \begin{verbatim}
 A=197 Z=79                            A=197 Z=79
@@ -2983,7 +3001,7 @@ For more examples see \name{StGlobalTrack} (sec.~\ref{sec:StGlobalTrack}).
 //  Print the covariant matrix of all tracks with
 //  exactly 45 fit points.
 //
-\label{trigger base class}
+void printMatrices(StEvent *event)
 {
     StTrackCollection *tracks = event->trackCollection();
     StTrackIterator i;
@@ -3126,6 +3144,7 @@ bool triggerDetectorsComplete(StEvent *event)
 {
     StTriggerDetectorCollection* tds =
                 event->triggerDetectorCollection();
+
     if (tds->ctbCounters().size() != 240) return false;
     if (tds->mwcSectors().size()  != 96)  return false;
     if (tds->vpdCounters().size() != 48)  return false;
@@ -3265,6 +3284,7 @@ unsigned long countGoodV0s(StEvent *event, double limit)
     for (iter = vertices->begin();
          iter != vertices->end(); iter++) {
          vertex = *iter;
+         if (vertex->type() == V0) {
              v0p = dynamic_cast<StV0Vertex*>(vertex);
              if (v0p->dcaDaughters() < limit) counter++;
          }
@@ -3515,7 +3535,7 @@ unsigned long countCloseOnes(StEvent *event,
 \begin{verbatim}
 //
 //  Print all VPD counter ADC values
-\index{VPD}
+//
 void printVpdAdcs(StEvent *event)
 {
     StTriggerDetectorCollection* tds =
@@ -3570,7 +3590,7 @@ void printVpdAdcs(StEvent *event)
     \verb+StVpdSummary(float te, float tw, float z);+\\
     Constructs a \name{StVpdSummary} with minimum east time \name{te},
     minimum west time \name{tw} and estimated z position of the vertex
-%    Reference: className
+    \name{z}. 
     
 \item[Public Member\\ Functions]
     \verb+float vertexZ() const;+\\
@@ -3632,7 +3652,7 @@ Gene ...
          vertex = *iter;
          if (vertex->type() == Xi) {
              xip = dynamic_cast<StXiVertex*>(vertex);
-\index{zero degree calorimeter}
+             StThreeVector<float> xiMom = xip->momentumOfBachelor() +
                                           xip->momentumOfV0();
              if (xiMom.perp() > limit) counter++;
          }
@@ -3716,7 +3736,7 @@ Gene ...
 //
 //  Print ADC and TDC values of all segments
 //
-\index{ZDC}
+void printZdcAdcTdc(StEvent *event)
 {
     StTriggerDetectorCollection* tds =
                            event->triggerDetectorCollection();
