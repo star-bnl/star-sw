@@ -1,4 +1,22 @@
 #!/opt/star/bin/perl
+#
+# $Id: dbheader.pl,v 1.3 1999/07/07 13:22:11 wenaus Exp $
+#
+# $Log: dbheader.pl,v $
+# Revision 1.3  1999/07/07 13:22:11  wenaus
+# incorporate run log
+#
+#
+######################################################################
+#
+# dbheader.pl
+#
+# T. Wenaus 5/99
+#
+# Setup material for production database scripts
+#
+# Usage: required by other scripts
+#
 
 use CGI qw(:standard);
 use Time::Local;

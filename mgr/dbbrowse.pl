@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbbrowse.pl,v 1.1 1999/06/25 15:16:59 wenaus Exp $
+# $Id: dbbrowse.pl,v 1.2 1999/07/07 13:22:10 wenaus Exp $
 #
 # $Log: dbbrowse.pl,v $
+# Revision 1.2  1999/07/07 13:22:10  wenaus
+# incorporate run log
+#
 # Revision 1.1  1999/06/25 15:16:59  wenaus
 # Add scripts for managing prod DB and SW guide
 #
@@ -19,6 +22,7 @@
 require "dbheader.pl";
 require "dbsetup.pl";
 
+&cgiSetup();
 &printMainHeader("STAR Production Database Query");
 $debugOn = 0;
 
