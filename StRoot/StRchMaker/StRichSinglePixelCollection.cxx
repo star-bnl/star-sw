@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.cxx,v 1.1 2000/04/05 16:39:54 lasiuk Exp $
+ * $Id: StRichSinglePixelCollection.cxx,v 1.2 2000/05/09 21:55:38 lasiuk Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -11,9 +11,11 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.cxx,v $
- * Revision 1.1  2000/04/05 16:39:54  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/05/09 21:55:38  lasiuk
+ * deep copy for copy c'tor and assignment (jd)
  *
+ * Revision 1.2  2000/05/09 21:55:38  lasiuk
+ * deep copy for copy c'tor and assignment (jd)
  *
  * Revision 1.1  2000/04/05 16:39:54  lasiuk
  * Initial Revision
@@ -35,15 +37,15 @@ StRichSinglePixelCollection::StRichSinglePixelCollection()
     mPixelVector.resize(0);
     mZero = 0;
 }
-    for(size_t ii=0; ii<mPixelVector.size(); ii++) {
-	delete (mPixelVector[ii]);
-    }
+
 StRichSinglePixelCollection::~StRichSinglePixelCollection()
 {
     this->clearAndDestroy();
     delete [] mPixelArray;
 }
-    mPixelVector = old.mPixelVector;
+
+StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixelCollection& old)
+{
     // Correction from jcd.  Make a deep copy if
     // the pixel collection is to be passed by value.
     //mPixelVector = old.mPixelVector;
@@ -51,7 +53,8 @@ StRichSinglePixelCollection::~StRichSinglePixelCollection()
     mMaxX        = old.mMaxX;
     mMinY        = old.mMinY;
     mMaxY        = old.mMaxY;
-    mPixelArray  = new StRichSinglePixel* [newx*newy];
+
+    int newx     = int(mMaxX-mMinX+1);
     int newy     = int(mMaxY-mMinY+1);
 
     mPixelArray  = new StRichSinglePixel*[newx*newy];
@@ -59,27 +62,40 @@ StRichSinglePixelCollection::~StRichSinglePixelCollection()
 	cerr << "StRichSinglePixelCollection::StRichSinglePixelCollection(const StRichSinglePixelCollection&)\n";
 	cerr << "\tFATAL:\n";
 	cerr << "\tCannot allocate memory for array.";
+	cerr << "\tAborting..." << endl;
+	abort();
+    }
+    
+    StRichSinglePixel* fillValue = 0;
+    uninitialized_fill_n(mPixelArray,newx*newy,fillValue);
+    
+    for (size_t ii=0; ii<old.mPixelVector.size(); ii++) {
+	// Error handling?
         this->push_back(new StRichSinglePixel(*(old.mPixelVector[ii])));
     }
     
-    copy(old.mPixelArray,old.mPixelArray+(newx*newy),mPixelArray);
+//      memcpy( (void *)mPixelArray,
 //  	    (const void *) old.mPixelArray,
 //  	    (unsigned long)(newx*newy)*sizeof(StRichSinglePixel*) );
 //     copy(old.mPixelArray,old.mPixelArray+(newx*newy),mPixelArray);
 }
 
+StRichSinglePixelCollection&
 StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)
 {
     // change from jcd.  Make a deep copy.
     if(this != &old) {
+	//
 	// clear old stuff...do not destroy
-	mPixelVector = old.mPixelVector;
+	mPixelVector.clear();
+	this->clearThePixelArray();
 	delete [] mPixelArray;
 	//mPixelVector = old.mPixelVector;
 	
 	mMinX        = old.mMinX;
 	mMaxX        = old.mMaxX;
 	mMinY        = old.mMinY;
+	mMaxY        = old.mMaxY;
 	int newx     = int(mMaxX-mMinX+1);
 	int newy     = int(mMaxY-mMinY+1);
 	
@@ -88,13 +104,21 @@ StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection& old)
 	    cerr << "StRichSinglePixelCollection::operator=(const StRichSinglePixelCollection&)\n";
 	    cerr << "\tFATAL:\n";
 	    cerr << "\tCannot allocate memory for array.";
+	    cerr << "\tAborting..." << endl;
+	    abort();
+	}
+	StRichSinglePixel* fillValue = 0;
+	uninitialized_fill_n(mPixelArray,newx*newy,fillValue);
+
+	for (size_t ii=0; ii<old.mPixelVector.size(); ii++) {
+	    // Error handling?
 	    this->push_back(new StRichSinglePixel(*(old.mPixelVector[ii])));
 	}
     }
-    copy(old.mPixelArray,old.mPixelArray+(newx*newy),mPixelArray);
-    }
+// 	memcpy( (void *)mPixelArray,
 // 		(const void*) old.mPixelArray,
 // 		(unsigned long)(newx*newy)*sizeof(StRichSinglePixel*) );
+//     copy(old.mPixelArray,old.mPixelArray+(newx*newy),mPixelArray);
     return *this;
 }
 
@@ -118,6 +142,8 @@ StRichSinglePixelCollection::resize(size_t x, size_t y)
 
     mMaxX = x+mMinX-1;
     mMaxY = y+mMinY-1;
+
+    long newsize = x*y;
 
     // clear before deleting?
     this->clearThePixelArray();
@@ -151,8 +177,11 @@ StRichSinglePixelCollection::resize(size_t x, size_t y)
 void
 StRichSinglePixelCollection::resize(size_t i)
 {
+    mPixelVector.resize(i);
+}
+
 // ::clearThePixelArray() is a protected member
-StRichSinglePixelCollection::clear()
+// function and is specified to reduce the amount
 // of code that appears in other functions.
 void
 StRichSinglePixelCollection::clearThePixelArray()
@@ -163,27 +192,24 @@ StRichSinglePixelCollection::clearThePixelArray()
 	int x = item->pad();
 	int y = item->row();
 	if( boundCheck(x,y) ) {
+	    mPixelArray[where(x,y)] = 0;
+	}
+    }
+}
+
+void
 StRichSinglePixelCollection::clear()
 {
     this->clearThePixelArray();
     mPixelVector.clear();
 }
 
-    size_t ii;
-    for(ii=0; ii<mPixelVector.size(); ii++) {
-	StRichSinglePixel* item =
-	    dynamic_cast<StRichSinglePixel*>(mPixelVector[ii]);
-	int x = item->pad();
-	int y = item->row();
-	if( boundCheck(x,y) ) {
-	    mPixelArray[where(x,y)] = 0;
-	}
-    }
-
+void
 StRichSinglePixelCollection::clearAndDestroy()
-    for(ii=0; ii<mPixelVector.size(); ii++) {
+{
     this->clearThePixelArray();
     
+    for(size_t ii=0; ii<mPixelVector.size(); ii++) {
 	delete mPixelVector[ii];
     }
     

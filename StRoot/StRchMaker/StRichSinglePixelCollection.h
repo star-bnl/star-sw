@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.h,v 1.1 2000/04/05 16:39:58 lasiuk Exp $
+ * $Id: StRichSinglePixelCollection.h,v 1.2 2000/05/09 21:55:39 lasiuk Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -19,8 +19,11 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.h,v $
- * Revision 1.1  2000/04/05 16:39:58  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/05/09 21:55:39  lasiuk
+ * deep copy for copy c'tor and assignment (jd)
+ *
+ * Revision 1.2  2000/05/09 21:55:39  lasiuk
+ * deep copy for copy c'tor and assignment (jd)
  *
  * Revision 1.1  2000/04/05 16:39:58  lasiuk
  * Initial Revision
@@ -69,12 +72,14 @@ public:
     StRichSinglePixel*& operator()(size_t i);
     StRichSinglePixel* operator()(size_t i) const; // NOT an l-value
 
+    StRichSinglePixel*  operator()(size_t i, size_t j) const;
     void resize(size_t x, size_t y);
     void resize(size_t i);
     
     void clear();
     void clearAndDestroy();
     
+protected:
     bool boundCheck(size_t x, size_t y) const;
     size_t where(size_t x, size_t y) const;
     void clearThePixelArray();
