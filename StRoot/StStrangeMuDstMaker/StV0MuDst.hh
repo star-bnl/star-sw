@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 1.1 2000/03/29 03:10:08 genevb Exp $
+ * $Id: StV0MuDst.hh,v 1.2 2000/03/29 14:42:40 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 1.2  2000/03/29 14:42:40  genevb
+ * Removed StV0MiniMiniDst
+ *
  * Revision 1.1  2000/03/29 03:10:08  genevb
  * Introduction of Strangeness Micro DST package
  *
@@ -94,12 +97,6 @@ protected:
   Float_t MomNegAlongV0();
 
   ClassDef(StV0MuDst, 1)
-};
-
-class StV0MiniMiniDst: public TObject {
-public:
-protected:
-  ClassDef(StV0MiniMiniDst, 1)
 };
 
 inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1)
