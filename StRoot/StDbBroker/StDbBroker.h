@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.23 2001/10/26 16:36:17 porter Exp $
+ * $Id: StDbBroker.h,v 1.24 2001/10/30 20:43:29 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.24  2001/10/30 20:43:29  porter
+ * timestamp set for failure on query by runNumber
+ *
  * Revision 1.23  2001/10/26 16:36:17  porter
  * more runNumber implementation
  *
@@ -174,6 +177,7 @@ struct oldDescriptor {
     void * Use();
     void   SetTableFlavor(const char* flavor, int tabID, int parID);
     void * Use(int tabID, int parID);
+    bool   UseRunLog(StDbTable* table);
 
     char  **GetComments(St_Table *parentTable);
     void   Fill(void * pArray, const char **ElementComment);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.31 2001/10/26 21:40:03 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.32 2001/10/30 20:43:29 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.32  2001/10/30 20:43:29  porter
+ * timestamp set for failure on query by runNumber
+ *
  * Revision 1.31  2001/10/26 21:40:03  porter
  * added protection for query by runNumber until Victor can implement his side
  *
@@ -417,14 +420,15 @@ void * StDbBroker::Use(int tabID, int parID)
   if(!node) return pData;
   if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
 
+  // I would do this in a separate function but this would require
+  // redoing it all with
+
   bool fetchStatus;
+  bool fetchRun=true;
   if(node->getDbType()==dbRunLog && 
      node->getDbDomain() != dbStar && 
      m_runNumber !=0 ){
-    ostrstream rq;
-    rq<<" where runNumber="<<m_runNumber<<ends;
-    fetchStatus=mgr->fetchDbTable(node,rq.str());
-    rq.freeze(0);
+     fetchRun=UseRunLog(node);   
   } else {
     fetchStatus=mgr->fetchDbTable(node);
   }
@@ -433,6 +437,8 @@ void * StDbBroker::Use(int tabID, int parID)
 
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
+
+    if(fetchRun){ // failure on fetch run may not give good timestamps
 
     // reformat timestamp for StRoot
     char* thisTime;
@@ -457,9 +463,21 @@ void * StDbBroker::Use(int tabID, int parID)
     m_EndDate = (UInt_t)atoi(tmp1);
     m_EndTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
+  }
 
 
 return pData;
+}
+
+//_____________________________________________________________________________
+bool StDbBroker::UseRunLog(StDbTable* table){
+
+    ostrstream rq;
+    rq<<" where runNumber="<<m_runNumber<<ends;
+    bool fetchStatus=mgr->fetchDbTable(table,rq.str());
+    rq.freeze(0);
+
+return fetchStatus;
 }
 
 //_____________________________________________________________________________
