@@ -44,7 +44,7 @@ extern "C" {
 /* extern volatile int tonkoLogLevel ;	 */
 
 /* if it's not unix it must be vxWorks */
-#ifndef unix
+#ifndef __unix__
 	#include <vxWorks.h>
 	#include <logLib.h>
 
@@ -141,7 +141,7 @@ INLINE_HACK void LOG_LOCAL(char *str, unsigned int l, unsigned int a1, unsigned 
 	}
 
 
-#ifndef unix
+#ifndef __unix__
 	logMsg(str,l,a1,a2,a3,a4,a5) ;
 	/* use the rest only if on MVME kernels! */
 	#ifdef _ARCH_PPC

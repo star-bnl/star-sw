@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.h,v 1.3 1999/09/24 01:23:23 fisyak Exp $
+// $Id: StSmdstMaker.h,v 1.4 2003/09/10 19:47:31 perev Exp $
 // $Log: StSmdstMaker.h,v $
+// Revision 1.4  2003/09/10 19:47:31  perev
+// ansi corrs
+//
 // Revision 1.3  1999/09/24 01:23:23  fisyak
 // Reduced Include Path
 //
@@ -83,9 +86,9 @@ class StSmdstMaker : public StMaker {
    virtual Int_t  Init();              // Initialize analysis
    virtual Int_t  Make();              // Run analysis
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSmdstMaker.h,v 1.3 1999/09/24 01:23:23 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSmdstMaker.h,v 1.4 2003/09/10 19:47:31 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StSmdstMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StSmdstMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

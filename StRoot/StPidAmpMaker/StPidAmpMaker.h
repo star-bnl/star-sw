@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StPidAmpMaker.h,v 1.9 2003/09/02 17:58:47 perev Exp $
+// $Id: StPidAmpMaker.h,v 1.10 2003/09/10 19:47:26 perev Exp $
 //
 // Authors: Aihong Tang
 //
@@ -39,7 +39,7 @@ public:
   Int_t    Finish();
   void     SetMultBinNumber(int val);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.9 2003/09/02 17:58:47 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.10 2003/09/10 19:47:26 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -55,7 +55,7 @@ private:
   
   TString      MakerName;
 
-  ClassDef(StPidAmpMaker, 1)              // macro for rootcint
+  ClassDef(StPidAmpMaker,0)              // macro for rootcint
 };
 
 
@@ -68,6 +68,9 @@ inline void StPidAmpMaker::SetMultBinNumber(int val) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StPidAmpMaker.h,v $
+// Revision 1.10  2003/09/10 19:47:26  perev
+// ansi corrs
+//
 // Revision 1.9  2003/09/02 17:58:47  perev
 // gcc 3.2 updates + WarnOff
 //

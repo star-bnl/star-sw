@@ -1,5 +1,8 @@
-//  $Id: StTpcEvalMaker.h,v 1.5 2001/07/10 09:22:07 flierl Exp $
+//  $Id: StTpcEvalMaker.h,v 1.6 2003/09/10 19:47:40 perev Exp $
 //  $Log: StTpcEvalMaker.h,v $
+//  Revision 1.6  2003/09/10 19:47:40  perev
+//  ansi corrs
+//
 //  Revision 1.5  2001/07/10 09:22:07  flierl
 //  add posibility to cut on vertex z-positions
 //
@@ -97,7 +100,7 @@ public:
    
     // return cvs version
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.5 2001/07/10 09:22:07 flierl Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StTpcEvalMaker.h,v 1.6 2003/09/10 19:47:40 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
         
  private:
 
@@ -119,7 +122,7 @@ public:
     TFile*           mOutputFile;      //! Pointer to output file
 
 
-  ClassDef(StTpcEvalMaker,1)
+  ClassDef(StTpcEvalMaker,0)
 };
 
 // inline function definitions

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 2.3 2002/02/22 21:46:16 dunlop Exp $
+ * $Id: StRchMaker.h,v 2.4 2003/09/10 19:47:29 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
+ * Revision 2.4  2003/09/10 19:47:29  perev
+ * ansi corrs
+ *
  * Revision 2.3  2002/02/22 21:46:16  dunlop
  * Remove picket fence pixels once and for all
  *
@@ -185,7 +188,7 @@ private:
 #endif
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRchMaker.h,v 2.3 2002/02/22 21:46:16 dunlop Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRchMaker.h,v 2.4 2003/09/10 19:47:29 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -196,7 +199,7 @@ public:
     }
 private:
     // the following is a ROOT macro  that is needed in all ROOT code
-    ClassDef(StRchMaker, 1)   //StAF chain virtual base class for Makers
+    ClassDef(StRchMaker,0)   //StAF chain virtual base class for Makers
 	};
 
 inline void StRchMaker::setUseMatrix(int v) {mUseMatrix = v;}

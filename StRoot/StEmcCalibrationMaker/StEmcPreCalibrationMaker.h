@@ -1,5 +1,8 @@
-// $Id: StEmcPreCalibrationMaker.h,v 1.7 2002/12/02 21:30:57 suaide Exp $
+// $Id: StEmcPreCalibrationMaker.h,v 1.8 2003/09/10 19:47:11 perev Exp $
 // $Log: StEmcPreCalibrationMaker.h,v $
+// Revision 1.8  2003/09/10 19:47:11  perev
+// ansi corrs
+//
 // Revision 1.7  2002/12/02 21:30:57  suaide
 // New EMC calibration maker
 //
@@ -69,7 +72,7 @@ class StEmcPreCalibrationMaker : public StMaker
     St_DataSet*         mTheEmcData;//!
     int                 mDaq;  // looking for DAQ data or not?
  
-   ClassDef(StEmcPreCalibrationMaker, 1)  
+   ClassDef(StEmcPreCalibrationMaker,0)  
 };
 
 #endif

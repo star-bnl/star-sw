@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.3 2003/05/14 10:49:12 subhasis Exp $
+ * $Id: StPmdClusterMaker.h,v 1.4 2003/09/10 19:47:26 perev Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.4  2003/09/10 19:47:26  perev
+ * ansi corrs
+ *
  * Revision 1.3  2003/05/14 10:49:12  subhasis
  * CPV clustering added
  *
@@ -79,7 +82,7 @@ class StPmdClusterMaker: public StMaker{
   void  Browse(TBrowser* b); 
 
   
-  ClassDef(StPmdClusterMaker, 1) 
+  ClassDef(StPmdClusterMaker,0) 
 };
 
 #endif

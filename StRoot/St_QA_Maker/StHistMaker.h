@@ -1,5 +1,8 @@
-//! $Id: StHistMaker.h,v 2.1 2002/09/06 02:51:34 genevb Exp $
+//! $Id: StHistMaker.h,v 2.2 2003/09/10 19:47:43 perev Exp $
 //! $Log: StHistMaker.h,v $
+//! Revision 2.2  2003/09/10 19:47:43  perev
+//! ansi corrs
+//!
 //! Revision 2.1  2002/09/06 02:51:34  genevb
 //! Remove limit on maximum number of histograms that can be copied
 //!
@@ -34,7 +37,7 @@ class StHistMaker : public StMaker {
 
  public: 
 
-//! static Char_t m_VersionCVS = "$Id: StHistMaker.h,v 2.1 2002/09/06 02:51:34 genevb Exp $";
+//! static Char_t m_VersionCVS = "$Id: StHistMaker.h,v 2.2 2003/09/10 19:47:43 perev Exp $";
 
   StHistMaker(const char *name="QA", const char *title="SummedQAHist");
   virtual       ~StHistMaker();
@@ -47,9 +50,9 @@ class StHistMaker : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistMaker.h,v 2.1 2002/09/06 02:51:34 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistMaker.h,v 2.2 2003/09/10 19:47:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StHistMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StHistMaker,0)   //StAF chain virtual base class for Makers
     };
     
 inline void StHistMaker::SetHArray(TH1** val)

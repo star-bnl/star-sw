@@ -68,7 +68,7 @@ class StSmdPedMaker : public StMaker
            void    SetFakeRun(Bool_t a)      { mFakeRun =a;}
            
 
-   ClassDef(StSmdPedMaker, 1)  
+   ClassDef(StSmdPedMaker,0)  
 };
 
 #endif

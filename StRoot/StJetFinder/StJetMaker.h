@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.7 2003/09/07 03:49:03 perev Exp $
+ * $Id: StJetMaker.h,v 1.8 2003/09/10 19:47:20 perev Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.8  2003/09/10 19:47:20  perev
+ * ansi corrs
+ *
  * Revision 1.7  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
@@ -137,7 +140,7 @@ private:
 #endif
     Int_t            infoLevel;
   
-    ClassDef(StJetMaker,1)
+    ClassDef(StJetMaker,0)
 	};
 #endif
 

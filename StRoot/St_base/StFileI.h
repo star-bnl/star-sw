@@ -25,6 +25,8 @@ public:
   virtual  void    SetName(const char *name){fName=name;} 
   virtual  const char *GetName() const {return fName;} 
   virtual  TString GetKey() const; 
+  virtual  Int_t   GetNInt() const{ return fNUrr;} 
+  virtual  const UInt_t *GetUInt() const{ return fUrr;} 
   virtual  void    SetKey(const char *key);
   virtual  void    SetUrr(const UInt_t *key,int nk);
   virtual  UInt_t  GetSum() const;

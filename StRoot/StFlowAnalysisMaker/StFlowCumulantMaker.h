@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.h,v 1.4 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowCumulantMaker.h,v 1.5 2003/09/10 19:47:14 perev Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -55,7 +55,7 @@ public:
   void     SetHistoRanges(Bool_t ftpc_included = kFALSE);
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.4 2003/09/02 17:58:11 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowCumulantMaker.h,v 1.5 2003/09/10 19:47:14 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -137,7 +137,7 @@ private:
   Float_t mEtaMax;
     Int_t mNEtaBins;
 
-  ClassDef(StFlowCumulantMaker, 1)              // macro for rootcint
+  ClassDef(StFlowCumulantMaker,0)              // macro for rootcint
     
 };
     
@@ -149,6 +149,9 @@ inline void StFlowCumulantMaker::SetOldMethod(Bool_t flag)
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.h,v $
+// Revision 1.5  2003/09/10 19:47:14  perev
+// ansi corrs
+//
 // Revision 1.4  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //

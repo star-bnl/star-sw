@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.h,v 1.1 2003/07/31 19:18:09 caines Exp $
+ * $Id: StSvtEmbeddingMaker.h,v 1.2 2003/09/10 19:47:37 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:37  perev
+ * ansi corrs
+ *
  * Revision 1.1  2003/07/31 19:18:09  caines
  * Petrs improved simulation code
  *
@@ -58,7 +61,7 @@ class StSvtEmbeddingMaker : public StMaker
     TH2F** mDataHist;      //!
     TFile* mFile;          //!
 
-  ClassDef(StSvtEmbeddingMaker, 1)
+  ClassDef(StSvtEmbeddingMaker,0)
 
 };
 

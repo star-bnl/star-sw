@@ -1,8 +1,11 @@
 #ifndef STAR_StFtpcGlobalMaker
 #define STAR_StFtpcGlobalMaker
 
-// $Id: StFtpcGlobalMaker.h,v 1.2 2001/03/30 13:30:12 jcs Exp $
+// $Id: StFtpcGlobalMaker.h,v 1.3 2003/09/10 19:47:44 perev Exp $
 // $Log: StFtpcGlobalMaker.h,v $
+// Revision 1.3  2003/09/10 19:47:44  perev
+// ansi corrs
+//
 // Revision 1.2  2001/03/30 13:30:12  jcs
 // correct Id and Log
 //
@@ -48,9 +51,9 @@ class StFtpcGlobalMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcGlobalMaker.h,v 1.2 2001/03/30 13:30:12 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcGlobalMaker.h,v 1.3 2003/09/10 19:47:44 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StFtpcGlobalMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StFtpcGlobalMaker,0)   //StAF chain virtual base class for Makers
     };
     
 #endif

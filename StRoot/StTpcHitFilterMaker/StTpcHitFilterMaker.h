@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.h,v 1.3 2001/04/13 21:34:46 hardtke Exp $
+// $Id: StTpcHitFilterMaker.h,v 1.4 2003/09/10 19:47:40 perev Exp $
 // $Log: StTpcHitFilterMaker.h,v $
+// Revision 1.4  2003/09/10 19:47:40  perev
+// ansi corrs
+//
 // Revision 1.3  2001/04/13 21:34:46  hardtke
 // Add option to disable hit deletion
 //
@@ -25,7 +28,7 @@
 
 class StTpcHitFilterMaker : public StMaker {
 private:
-//static Char_t m_VersionCVS = "$Id: StTpcHitFilterMaker.h,v 1.3 2001/04/13 21:34:46 hardtke Exp $";
+//static Char_t m_VersionCVS = "$Id: StTpcHitFilterMaker.h,v 1.4 2003/09/10 19:47:40 perev Exp $";
   Bool_t SectorOn[24];
   Bool_t RowOn[45];
   Bool_t BigErrorsInner;
@@ -72,9 +75,9 @@ public:
   virtual void   DoNotDeleteHits();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcHitFilterMaker.h,v 1.3 2001/04/13 21:34:46 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcHitFilterMaker.h,v 1.4 2003/09/10 19:47:40 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
- ClassDef(StTpcHitFilterMaker, 1)   //StAF chain virtual base class for Makers
+ ClassDef(StTpcHitFilterMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.12 2003/09/02 17:58:39 perev Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.13 2003/09/10 19:47:20 perev Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.13  2003/09/10 19:47:20  perev
+ * ansi corrs
+ *
  * Revision 1.12  2003/09/02 17:58:39  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -609,7 +612,7 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   // the runNumber.  The default one does no descision making.
   void setTowerProxy(SafetyArray* sa) { towerProxy = sa; };
  
-  ClassDef(StEmcTpcFourPMaker,1)
+  ClassDef(StEmcTpcFourPMaker,0)
 };
 
 typedef multimap<double, StMuEmcPoint*, less<double> > DistanceToPointMap;

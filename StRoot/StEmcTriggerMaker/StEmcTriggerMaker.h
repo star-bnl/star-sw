@@ -54,6 +54,6 @@ class StEmcTriggerMaker : public StMaker
             void  FillHistograms(StTriggerDetectorCollection* theTriggers);
 	    void  SetHistFileName(char* name) { HistFileName = name; }
 
-  ClassDef(StEmcTriggerMaker, 1) 
+  ClassDef(StEmcTriggerMaker,0) 
 };
 #endif

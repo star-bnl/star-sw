@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.13 2002/12/19 18:09:53 yepes Exp $
+// $Id: StPeCMaker.h,v 1.14 2003/09/10 19:47:25 perev Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.14  2003/09/10 19:47:25  perev
+// ansi corrs
+//
 // Revision 1.13  2002/12/19 18:09:53  yepes
 // MuDST input added
 //
@@ -108,9 +111,9 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.13 2002/12/19 18:09:53 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.14 2003/09/10 19:47:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-	ClassDef(StPeCMaker, 1)
+	ClassDef(StPeCMaker,0)
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TowerSanityMaker.h,v 1.2 2003/09/04 18:54:24 thenry Exp $
+ * $Id: TowerSanityMaker.h,v 1.3 2003/09/10 19:47:20 perev Exp $
  * 
  * Author: Thomas Henry August 2003
  ***************************************************************************
@@ -259,7 +259,7 @@ class TowerSanityMaker : public SafetyArray {
   void setAvgTowerThreshold(double avgTowerThresh) {
     avgTowerThreshold = avgTowerThresh; };
     
-  ClassDef(TowerSanityMaker,1)
+  ClassDef(TowerSanityMaker,0)
 };
 
 #endif

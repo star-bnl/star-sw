@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.h,v 1.6 2002/04/30 22:49:19 caines Exp $
+ * $Id: StEstMaker.h,v 1.7 2003/09/10 19:47:13 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:13  perev
+ * ansi corrs
+ *
  * Revision 1.6  2002/04/30 22:49:19  caines
  * Make est work with shifted SVT geom, change search radii to 1cm
  *
@@ -69,11 +72,11 @@ class StEstMaker : public StMaker {
   virtual Int_t Init();
   virtual Int_t Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StEstMaker.h,v 1.6 2002/04/30 22:49:19 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StEstMaker.h,v 1.7 2003/09/10 19:47:13 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   Int_t Finish();
 
-  ClassDef(StEstMaker, 1)
+  ClassDef(StEstMaker,0)
 };
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdMaker.h,v 1.1 2002/01/16 20:21:07 akio Exp $ 
+ * $Id: StFpdMaker.h,v 1.2 2003/09/10 19:47:16 perev Exp $ 
  *
  * Author: AKIO OGAWA
  *
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:16  perev
+ * ansi corrs
+ *
  * Revision 1.1  2002/01/16 20:21:07  akio
  * first version
  *
@@ -43,6 +46,6 @@ protected:
 private:
   StEvent* mEvent;
 
-  ClassDef(StFpdMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StFpdMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif

@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.17 2002/04/11 22:11:11 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.18 2003/09/10 19:47:03 perev Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.18  2003/09/10 19:47:03  perev
+ * ansi corrs
+ *
  * Revision 1.17  2002/04/11 22:11:11  calderon
  * Changes to incorporate association of tracks from Sti
  * Basically all that was needed was to add a flag to switch between
@@ -460,9 +463,9 @@ private:
     bool              mL3TriggerOn; //!
     bool              mInTrackerOn; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.17 2002/04/11 22:11:11 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.18 2003/09/10 19:47:03 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
-    ClassDef(StAssociationMaker, 1)
+    ClassDef(StAssociationMaker,0)
 
 };
 #ifndef __CINT__

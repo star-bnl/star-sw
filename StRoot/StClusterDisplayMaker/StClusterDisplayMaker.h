@@ -1,4 +1,4 @@
-// $Id: StClusterDisplayMaker.h,v 1.6 2003/09/07 03:48:58 perev Exp $
+// $Id: StClusterDisplayMaker.h,v 1.7 2003/09/10 19:47:04 perev Exp $
 #ifndef STAR_StClusterDisplayMaker
 #define STAR_StClusterDisplayMaker
 
@@ -19,7 +19,7 @@
 class StClusterDisplayMaker : public StMaker {
 
  private:
-    // static Char_t  m_VersionCVS = "$Id: StClusterDisplayMaker.h,v 1.6 2003/09/07 03:48:58 perev Exp $";
+    // static Char_t  m_VersionCVS = "$Id: StClusterDisplayMaker.h,v 1.7 2003/09/10 19:47:04 perev Exp $";
     TTree* mytree ;
     TH2S*  myhist ;
         
@@ -89,9 +89,9 @@ class StClusterDisplayMaker : public StMaker {
    //TGraphErrors* Get_graph_matched_points() { return matched_points;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StClusterDisplayMaker.h,v 1.6 2003/09/07 03:48:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StClusterDisplayMaker.h,v 1.7 2003/09/10 19:47:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StClusterDisplayMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StClusterDisplayMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -53,7 +53,7 @@ class StiMaker : public StMaker
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.10 2003/07/30 20:13:38 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.11 2003/09/10 19:47:54 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
@@ -87,7 +87,7 @@ private:
     EditableFilter<StiTrack> * _loaderTrackFilter;
     EditableFilter<StiHit>   * _loaderHitFilter;
     
-    ClassDef(StiMaker, 1)
+    ClassDef(StiMaker,0)
 };
 
 //inlines

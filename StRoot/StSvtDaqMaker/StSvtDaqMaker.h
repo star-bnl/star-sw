@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.h,v 1.8 2003/02/19 11:03:32 munhoz Exp $
+ * $Id: StSvtDaqMaker.h,v 1.9 2003/09/10 19:47:35 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.h,v $
+ * Revision 1.9  2003/09/10 19:47:35  perev
+ * ansi corrs
+ *
  * Revision 1.8  2003/02/19 11:03:32  munhoz
  * adding getCVS line
  *
@@ -97,9 +100,9 @@ class StSvtDaqMaker : public StMaker {
   virtual Int_t  Finish();
 
  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDaqMaker.h,v 1.8 2003/02/19 11:03:32 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDaqMaker.h,v 1.9 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StSvtDaqMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StSvtDaqMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

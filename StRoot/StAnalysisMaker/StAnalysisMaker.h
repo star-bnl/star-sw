@@ -17,11 +17,14 @@
  * This is an example of a maker to perform analysis using StEvent.
  * Use this as a template and customize it for your studies.
  *
- * $Id: StAnalysisMaker.h,v 2.3 2002/04/28 00:10:28 jeromel Exp $
+ * $Id: StAnalysisMaker.h,v 2.4 2003/09/10 19:47:02 perev Exp $
  *
  */
 /* -------------------------------------------------------------------------
  * $Log: StAnalysisMaker.h,v $
+ * Revision 2.4  2003/09/10 19:47:02  perev
+ * ansi corrs
+ *
  * Revision 2.3  2002/04/28 00:10:28  jeromel
  * doxygen basic dox added. GetCVS() had wrong signature : corrected to avoid
  * propagation of this typo in new makers.
@@ -100,7 +103,7 @@ public:
     Int_t  Make();                      // invoked for every event
     Int_t  Finish();                    // called once at the end
     virtual const char *GetCVS() const {
-      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.3 2002/04/28 00:10:28 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.4 2003/09/10 19:47:02 perev Exp $ built "__DATE__" "__TIME__ ; 
       return cvs;
     }
 
@@ -136,6 +139,6 @@ private:
     //  It must be always the last statement in the class.
     //  Note that this is a macro, that's why the ';' is missing.
     //
-    ClassDef(StAnalysisMaker,1)
+    ClassDef(StAnalysisMaker,0)
 };
 #endif

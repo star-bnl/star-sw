@@ -98,16 +98,19 @@ public:
   void   setBEMC(UInt_t  key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setHistControl(UInt_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.9 2003/01/23 03:09:02 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEmcSimulatorMaker.h,v 1.10 2003/09/10 19:47:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEmcSimulatorMaker, 1)  // Simulation maker for BEMC and EEMC
+  ClassDef(StEmcSimulatorMaker,0)  // Simulation maker for BEMC and EEMC
 };
 
 #endif
 //////////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEmcSimulatorMaker.h,v 1.9 2003/01/23 03:09:02 jeromel Exp $
+// $Id: StEmcSimulatorMaker.h,v 1.10 2003/09/10 19:47:12 perev Exp $
 // $Log: StEmcSimulatorMaker.h,v $
+// Revision 1.10  2003/09/10 19:47:12  perev
+// ansi corrs
+//
 // Revision 1.9  2003/01/23 03:09:02  jeromel
 // Include modif
 //

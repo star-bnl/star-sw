@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.6 2003/04/14 15:51:45 munhoz Exp $
+ * $Id: StSvtDbMaker.h,v 1.7 2003/09/10 19:47:36 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:36  perev
+ * ansi corrs
+ *
  * Revision 1.6  2003/04/14 15:51:45  munhoz
  * reading t0 from DB
  *
@@ -106,8 +109,8 @@ class StSvtDbMaker : public StMaker {
   StSvtDbWriter* getSvtDbWriter(){return mWriter;}  
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.6 2003/04/14 15:51:45 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-  ClassDef(StSvtDbMaker, 1)   //StAF chain virtual base class for Makers
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.7 2003/09/10 19:47:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 // Global pointers:

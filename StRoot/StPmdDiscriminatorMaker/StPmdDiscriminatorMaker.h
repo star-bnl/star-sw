@@ -4,7 +4,7 @@
  */
 /******************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.h,v 1.2 2003/05/29 13:12:51 subhasis Exp $
+ * $Id: StPmdDiscriminatorMaker.h,v 1.3 2003/09/10 19:47:27 perev Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -15,6 +15,9 @@
  ******************************************************************
  *
  * $Log: StPmdDiscriminatorMaker.h,v $
+ * Revision 1.3  2003/09/10 19:47:27  perev
+ * ansi corrs
+ *
  * Revision 1.2  2003/05/29 13:12:51  subhasis
  * several changes to include NN
  *
@@ -96,7 +99,7 @@ class StPmdDiscriminatorMaker: public StMaker{
 //NN hist outs (made public to be accessed from StPmdNeunet
   TH1F *mNNoutput; //! No of cpv clusters  Matched Clusters
 
-  ClassDef(StPmdDiscriminatorMaker, 1) 
+  ClassDef(StPmdDiscriminatorMaker,0) 
 };
 
 inline void StPmdDiscriminatorMaker::getEdepThreshold(Float_t de){mEdepThreshold=de;}

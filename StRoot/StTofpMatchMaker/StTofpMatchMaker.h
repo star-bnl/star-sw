@@ -9,10 +9,13 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.1 2003/08/08 18:31:26 geurts Exp $
+ * $Id: StTofpMatchMaker.h,v 1.2 2003/09/10 19:47:38 perev Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:38  perev
+ * ansi corrs
+ *
  * Revision 1.1  2003/08/08 18:31:26  geurts
  * first release
  *
@@ -159,9 +162,9 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.1 2003/08/08 18:31:26 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.2 2003/09/10 19:47:38 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StTofpMatchMaker,1)
+  ClassDef(StTofpMatchMaker,0)
 };
 
 inline void StTofpMatchMaker::initLocalDb(Bool_t localDb){mInitLocalDb = localDb;}

@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.27 2003/09/08 20:56:52 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.28 2003/09/10 19:47:10 perev Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.28  2003/09/10 19:47:10  perev
+// ansi corrs
+//
 // Revision 1.27  2003/09/08 20:56:52  suaide
 // Patch to fix problem with SMD-phi pedestals saved on database
 //
@@ -159,11 +162,11 @@ class StEmcADCtoEMaker : public StMaker
            void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
            void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.27 2003/09/08 20:56:52 suaide Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.28 2003/09/10 19:47:10 perev Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
-   ClassDef(StEmcADCtoEMaker, 1)  
+   ClassDef(StEmcADCtoEMaker,0)  
 };
 
 #endif

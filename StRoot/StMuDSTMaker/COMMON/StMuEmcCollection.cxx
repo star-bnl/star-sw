@@ -351,7 +351,7 @@ StMuEmcHit * StMuEmcCollection
 int StMuEmcCollection::getNEndcapSmdHits(char uv)
 {
   assert(uv=='U' || uv=='V');
-  return getNSmdHits(esmdu+uv-'U');
+  return getNSmdHits((int)esmdu+uv-'U');
 }
 
 
@@ -359,7 +359,7 @@ StMuEmcHit * StMuEmcCollection
 ::getEndcapSmdHit(char uv, int ihit,int &isec, int &istrip)
 {
   assert(uv=='U' || uv=='V');
-  int det=esmdu+uv-'U';
+  int det=(int)esmdu+uv-'U';
   StMuEmcHit * h =getSmdHit(ihit,det);  
   int idum;
   util.getEndcapBin(det,h->getId(),isec,istrip,idum);

@@ -4,7 +4,7 @@
  */
 /******************************************************************
  *
- * $Id: StPmdSimulatorMaker.h,v 1.3 2003/05/12 11:37:35 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.h,v 1.4 2003/09/10 19:47:27 perev Exp $
  *
  * Author: Subhasis Chattopadhyay 
  *         Premomoy Ghosh
@@ -14,6 +14,9 @@
  ******************************************************************
  *
  * $Log: StPmdSimulatorMaker.h,v $
+ * Revision 1.4  2003/09/10 19:47:27  perev
+ * ansi corrs
+ *
  * Revision 1.3  2003/05/12 11:37:35  subhasis
  * Stevent added
  *
@@ -98,7 +101,7 @@ public:
 
   void  Browse(TBrowser* b); //! StEvent staf will be visible in browser
 
-  ClassDef(StPmdSimulatorMaker, 1)  //! Simulation maker for PMD
+  ClassDef(StPmdSimulatorMaker,0)  //! Simulation maker for PMD
 };
 
 inline void StPmdSimulatorMaker::adcconstants()

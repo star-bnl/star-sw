@@ -1,4 +1,4 @@
-// $Id: St_TLA_Maker.h,v 1.14 2002/11/26 23:49:40 jeromel Exp $
+// $Id: St_TLA_Maker.h,v 1.15 2003/09/10 19:47:43 perev Exp $
 
 #ifndef STAR_St_TLA_Maker
 #define STAR_St_TLA_Maker
@@ -50,17 +50,20 @@ class St_TLA_Maker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.14 2002/11/26 23:49:40 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.15 2003/09/10 19:47:43 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
-  ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(St_TLA_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.15  2003/09/10 19:47:43  perev
+// ansi corrs
+//
 // Revision 1.14  2002/11/26 23:49:40  jeromel
 // Small modif after Art's note ... doxygen issue + cleanup
 //

@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.h,v 1.5 2002/09/05 15:48:07 jml Exp $
+ * $Id: StDaqClfMaker.h,v 1.6 2003/09/10 19:47:05 perev Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: StDaqClfMaker.h,v $
+ * Revision 1.6  2003/09/10 19:47:05  perev
+ * ansi corrs
+ *
  * Revision 1.5  2002/09/05 15:48:07  jml
  * Now fill the deconvolution flag to help dedx
  *
@@ -170,7 +173,7 @@ class StDaqClfMaker:public StMaker
       static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
     }
   
-  ClassDef(StDaqClfMaker, 1)    //StAF chain virtual base class for Makers
+  ClassDef(StDaqClfMaker,0)    //StAF chain virtual base class for Makers
 };
 
 #endif

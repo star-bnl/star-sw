@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.h,v 1.6 2003/07/09 01:07:23 calderon Exp $
+ * $Id: StMiniMcMaker.h,v 1.7 2003/09/10 19:47:23 perev Exp $
  * \file  StMiniMcMaker.h
  * \brief Filling of StMiniMcEvent classes from StMcEvent, StEvent, StAssociationMaker
  * 
@@ -12,6 +12,9 @@
  * manuel calderon de la barca's code.
  *
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:23  perev
+ * ansi corrs
+ *
  * Revision 1.6  2003/07/09 01:07:23  calderon
  * Addition of FTPC reference multiplicity
  * Addition of other multiplicity values for StMiniMcEvent
@@ -44,6 +47,9 @@
  * Revision 1.4  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:23  perev
+ * ansi corrs
+ *
  * Revision 1.6  2003/07/09 01:07:23  calderon
  * Addition of FTPC reference multiplicity
  * Addition of other multiplicity values for StMiniMcEvent
@@ -72,7 +78,7 @@
  * but in order not to break Jenn's scripts if she was already using this macro,
  * this parameter was added at the end and defaults to "rcf", which is appropriate
  * for hijing files reconstructed in rcf.
- * and $Id: StMiniMcMaker.h,v 1.6 2003/07/09 01:07:23 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.h,v 1.7 2003/09/10 19:47:23 perev Exp $ plus header comments for the macros
  *
  */
 
@@ -253,7 +259,7 @@ class StMiniMcMaker : public StMaker{
   Int_t            mNContam; //!
   Int_t            mNMatched; //!
 
-  ClassDef(StMiniMcMaker,1)
+  ClassDef(StMiniMcMaker,0)
 };
   
   

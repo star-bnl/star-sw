@@ -1,4 +1,4 @@
-// $Id: StHitFilterMaker.h,v 1.2 2003/07/30 15:27:00 caines Exp $
+// $Id: StHitFilterMaker.h,v 1.3 2003/09/10 19:47:19 perev Exp $
 
 #ifndef STAR_StHitFilterMaker
 #define STAR_StHitFilterMaker
@@ -69,18 +69,21 @@ class StHitFilterMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.2 2003/07/30 15:27:00 caines Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StHitFilterMaker.h,v 1.3 2003/09/10 19:47:19 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
   //StAF chain virtual base class for Makers
-  ClassDef(StHitFilterMaker, 1)   
+  ClassDef(StHitFilterMaker,0)   
 };
 
 #endif
 
 
 // $Log: StHitFilterMaker.h,v $
+// Revision 1.3  2003/09/10 19:47:19  perev
+// ansi corrs
+//
 // Revision 1.2  2003/07/30 15:27:00  caines
 // Set options so you delete TPC and SVT hit if Zert >30. If ZVert<30cm save all good svt hits and TPC hits on tracks
 //

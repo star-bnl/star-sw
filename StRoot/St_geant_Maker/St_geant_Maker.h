@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.30 2002/11/01 03:17:42 fine Exp $
+// $Id: St_geant_Maker.h,v 1.31 2003/09/10 19:47:47 perev Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.31  2003/09/10 19:47:47  perev
+// ansi corrs
+//
 // Revision 1.30  2002/11/01 03:17:42  fine
 // the previous version has been restored. No need of the special flag
 //
@@ -121,8 +124,8 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.30 2002/11/01 03:17:42 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.31 2003/09/10 19:47:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ClassDef(St_geant_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.18 2003/05/02 23:54:19 hardtke Exp $
+// $Id: StTrsMaker.h,v 1.19 2003/09/10 19:47:41 perev Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.19  2003/09/10 19:47:41  perev
+// ansi corrs
+//
 // Revision 1.18  2003/05/02 23:54:19  hardtke
 // Allow user to adjust normalFactor (i.e. Fudge Factor)
 //
@@ -131,7 +134,7 @@ class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.18 2003/05/02 23:54:19 hardtke Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.19 2003/09/10 19:47:41 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -206,9 +209,9 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.18 2003/05/02 23:54:19 hardtke Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.19 2003/09/10 19:47:41 perev Exp $ built __DATE__ __TIME__" ; return cvs;}
 
-    ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
+    ClassDef(StTrsMaker,0)   //StAF chain virtual base class for Makers
 
 private:
     void whichSector(int, int*, int*, int*);

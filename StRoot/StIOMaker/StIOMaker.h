@@ -57,9 +57,9 @@ StIOInterFace *Load();
    Int_t  fSkip    ;		//! 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.13 2003/09/09 01:01:21 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StIOMaker.h,v 1.14 2003/09/10 19:47:20 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StIOMaker, 1)   //StAR chain virtual base class for Makers
+   ClassDef(StIOMaker,0)   //StAR chain virtual base class for Makers
 };
 
 #endif

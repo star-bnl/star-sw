@@ -1,5 +1,8 @@
-// $Id: StEEmcTrigSimuMaker.h,v 1.1 2003/01/28 23:13:00 balewski Exp $
+// $Id: StEEmcTrigSimuMaker.h,v 1.2 2003/09/10 19:47:08 perev Exp $
 // $Log: StEEmcTrigSimuMaker.h,v $
+// Revision 1.2  2003/09/10 19:47:08  perev
+// ansi corrs
+//
 // Revision 1.1  2003/01/28 23:13:00  balewski
 // star
 //
@@ -27,7 +30,7 @@ www.star.bnl.gov/STAR/eemc -->How To
 
 class StEEmcTrigSimuMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcTrigSimuMaker.h,v 1.1 2003/01/28 23:13:00 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcTrigSimuMaker.h,v 1.2 2003/09/10 19:47:08 perev Exp $";
   
  protected:
  public: 
@@ -39,11 +42,11 @@ class StEEmcTrigSimuMaker : public StMaker {
   virtual Int_t  Make();
    
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcTrigSimuMaker.h,v 1.1 2003/01/28 23:13:00 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcTrigSimuMaker.h,v 1.2 2003/09/10 19:47:08 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(StEEmcTrigSimuMaker, 1)
+  ClassDef(StEEmcTrigSimuMaker,0)
 };
 
 #endif

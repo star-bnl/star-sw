@@ -1,5 +1,8 @@
-// $Id: StEventDstMaker.h,v 1.1 2001/05/30 17:48:30 perev Exp $
+// $Id: StEventDstMaker.h,v 1.2 2003/09/10 19:47:14 perev Exp $
 // $Log: StEventDstMaker.h,v $
+// Revision 1.2  2003/09/10 19:47:14  perev
+// ansi corrs
+//
 // Revision 1.1  2001/05/30 17:48:30  perev
 // StEvent branching
 //
@@ -21,9 +24,9 @@ class StEventDstMaker : public StMaker {
    virtual Int_t  Make();
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDstMaker.h,v 1.1 2001/05/30 17:48:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDstMaker.h,v 1.2 2003/09/10 19:47:14 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StEventDstMaker, 1)   //
+   ClassDef(StEventDstMaker,0)   //
 };
 
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.h,v 1.2 2001/08/31 19:07:36 macross Exp $
+ * $Id: StZdcVertexMaker.h,v 1.3 2003/09/10 19:47:42 perev Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.h,v $
+ * Revision 1.3  2003/09/10 19:47:42  perev
+ * ansi corrs
+ *
  * Revision 1.2  2001/08/31 19:07:36  macross
  * Modified code to retrieve ADC and TDC pulses from TrgDet table
  *
@@ -45,7 +48,7 @@ private:
     float mOFF;
     
     // the following is a ROOT macro  that is needed in all ROOT accessible code
-    ClassDef(StZdcVertexMaker, 1)
+    ClassDef(StZdcVertexMaker,0)
 };
 #endif
 

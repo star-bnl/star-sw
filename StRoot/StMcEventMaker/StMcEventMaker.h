@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.10 2003/08/20 18:51:01 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.11 2003/09/10 19:47:22 perev Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.11  2003/09/10 19:47:22  perev
+ * ansi corrs
+ *
  * Revision 1.10  2003/08/20 18:51:01  calderon
  * Filling of Tof and Pixel classes.
  *
@@ -69,7 +72,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.10 2003/08/20 18:51:01 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.11 2003/09/10 19:47:22 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -107,7 +110,7 @@ private:
     Bool_t drawinit;
     StMcEvent* mCurrentMcEvent; //!  This tells CINT not to parse it.
     
-    ClassDef(StMcEventMaker, 1)
+    ClassDef(StMcEventMaker,0)
 
 };
 

@@ -59,9 +59,9 @@ private:
 
   StMuDst* muDst;
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCLumiMaker.h,v 1.3 2003/02/01 18:50:18 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCLumiMaker.h,v 1.4 2003/09/10 19:47:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StPeCLumiMaker, 1)
+  ClassDef(StPeCLumiMaker,0)
 };
 
 #endif

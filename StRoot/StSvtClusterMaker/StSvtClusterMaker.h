@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.6 2003/01/28 20:28:44 munhoz Exp $
+// $Id: StSvtClusterMaker.h,v 1.7 2003/09/10 19:47:35 perev Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.7  2003/09/10 19:47:35  perev
+// ansi corrs
+//
 // Revision 1.6  2003/01/28 20:28:44  munhoz
 // new filters for clusters
 //
@@ -58,7 +61,7 @@ class StSvtClusterMaker : public StMaker
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.6 2003/01/28 20:28:44 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterMaker.h,v 1.7 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -77,7 +80,7 @@ class StSvtClusterMaker : public StMaker
  
  private:
 
-  ClassDef(StSvtClusterMaker,1)   //virtual base class for Makers
+  ClassDef(StSvtClusterMaker,0)   //virtual base class for Makers
 
 };
 

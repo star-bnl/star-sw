@@ -21,7 +21,7 @@ class StEEmcDbMaker;
 
 class StEEmcDataMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDataMaker.h,v 1.1 2003/04/25 14:15:59 jeromel Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDataMaker.h,v 1.2 2003/09/10 19:47:07 perev Exp $";
   
   StEEmcDbMaker * mDb; ///< to assess DB
   
@@ -35,17 +35,20 @@ class StEEmcDataMaker : public StMaker {
   virtual Int_t InitRun  (int runumber);///< to change time stamp in TTree
   virtual Int_t  Make();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDataMaker.h,v 1.1 2003/04/25 14:15:59 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDataMaker.h,v 1.2 2003/09/10 19:47:07 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(StEEmcDataMaker, 1) 
+  ClassDef(StEEmcDataMaker,0) 
 };
 
 #endif
 
-// $Id: StEEmcDataMaker.h,v 1.1 2003/04/25 14:15:59 jeromel Exp $
+// $Id: StEEmcDataMaker.h,v 1.2 2003/09/10 19:47:07 perev Exp $
 // $Log: StEEmcDataMaker.h,v $
+// Revision 1.2  2003/09/10 19:47:07  perev
+// ansi corrs
+//
 // Revision 1.1  2003/04/25 14:15:59  jeromel
 // Reshaped Jan's code
 //

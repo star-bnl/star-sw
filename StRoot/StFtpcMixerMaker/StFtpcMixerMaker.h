@@ -96,18 +96,21 @@ class StFtpcMixerMaker : public StMaker {
     inline const Char_t   *getConfig2() {return mConfig2;}
 
     virtual const char *GetCVS() const
-      {static const char cvs[]="Tag $Name:  $ $Id: StFtpcMixerMaker.h,v 1.1 2003/02/14 18:11:25 fsimon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StFtpcMixerMaker.h,v 1.2 2003/09/10 19:47:17 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  
-    ClassDef(StFtpcMixerMaker, 1) 
+    ClassDef(StFtpcMixerMaker,0) 
 };
 
 #endif
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.h,v 1.1 2003/02/14 18:11:25 fsimon Exp $
+ * $Id: StFtpcMixerMaker.h,v 1.2 2003/09/10 19:47:17 perev Exp $
  *
  * $Log: StFtpcMixerMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:17  perev
+ * ansi corrs
+ *
  * Revision 1.1  2003/02/14 18:11:25  fsimon
  * Initial commit of FTPC embedding code
  *

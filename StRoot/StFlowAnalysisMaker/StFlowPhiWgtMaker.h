@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowPhiWgtMaker.h,v 1.2 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowPhiWgtMaker.h,v 1.3 2003/09/10 19:47:15 perev Exp $
 //
 // Authors: Art Poskanzer and Jamie Dunlop, May 2003
 //
@@ -37,7 +37,7 @@ public:
   Int_t    Finish();
 
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.2 2003/09/02 17:58:11 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowPhiWgtMaker.h,v 1.3 2003/09/10 19:47:15 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -86,7 +86,7 @@ private:
 
   TString      MakerName;
 
-  ClassDef(StFlowPhiWgtMaker, 1)              // macro for rootcint
+  ClassDef(StFlowPhiWgtMaker,0)              // macro for rootcint
 };
 
 #endif
@@ -94,6 +94,9 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPhiWgtMaker.h,v $
+// Revision 1.3  2003/09/10 19:47:15  perev
+// ansi corrs
+//
 // Revision 1.2  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //

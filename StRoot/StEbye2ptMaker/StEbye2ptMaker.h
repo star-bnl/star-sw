@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StEbye2ptMaker.h,v 1.6 2001/09/14 18:00:19 perev Exp $
+ * $Id: StEbye2ptMaker.h,v 1.7 2003/09/10 19:47:09 perev Exp $
  *
  * Author: Jeff Reid, UW
  *         with design advice from Thomas Ullrich, Yale
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:09  perev
+ * ansi corrs
+ *
  * Revision 1.6  2001/09/14 18:00:19  perev
  * Removed references to StRun.
  *
@@ -61,7 +64,7 @@ public:
     void SetEbye2ptFileName(const Char_t* name="Ebye2pt.root");    
     void          EbyeDSTRead(Bool_t flag=kFALSE);
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEbye2ptMaker.h,v 1.6 2001/09/14 18:00:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEbye2ptMaker.h,v 1.7 2003/09/10 19:47:09 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
@@ -99,7 +102,7 @@ private:
   TFile* 	   pEbyeDST;
   void             SortEvents();
   
-    ClassDef(StEbye2ptMaker,1)
+    ClassDef(StEbye2ptMaker,0)
 };
 
 inline void StEbye2ptMaker::SetEbyeDSTFileName(const Char_t* name) {

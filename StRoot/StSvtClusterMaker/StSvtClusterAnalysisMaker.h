@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.10 2003/01/28 20:28:09 munhoz Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.11 2003/09/10 19:47:35 perev Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.11  2003/09/10 19:47:35  perev
+// ansi corrs
+//
 // Revision 1.10  2003/01/28 20:28:09  munhoz
 // new filters for clusters
 //
@@ -87,7 +90,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.10 2003/01/28 20:28:09 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.11 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:
@@ -137,7 +140,7 @@ class StSvtClusterAnalysisMaker : public StMaker
 
  private:
 
-  ClassDef(StSvtClusterAnalysisMaker,1)       //virtual base class for Makers
+  ClassDef(StSvtClusterAnalysisMaker,0)       //virtual base class for Makers
 
 };
 

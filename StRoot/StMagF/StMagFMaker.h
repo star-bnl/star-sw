@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.h,v 1.4 2001/05/21 21:40:36 fisyak Exp $
+// $Id: StMagFMaker.h,v 1.5 2003/09/10 19:47:21 perev Exp $
 // $Log: StMagFMaker.h,v $
+// Revision 1.5  2003/09/10 19:47:21  perev
+// ansi corrs
+//
 // Revision 1.4  2001/05/21 21:40:36  fisyak
 // Merge geant and production mag. fields
 //
@@ -39,9 +42,9 @@ class StMagFMaker : public StMaker {
    virtual Int_t  InitRun(Int_t run);
    Int_t          Make() {return kStOK;}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.4 2001/05/21 21:40:36 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.5 2003/09/10 19:47:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StMagFMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StMagFMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

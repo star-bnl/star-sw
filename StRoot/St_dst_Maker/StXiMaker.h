@@ -5,8 +5,11 @@
 //                                                                      //
 // StXiMaker virtual base class for Maker                               //
 //                                                                      //
-// $Id: StXiMaker.h,v 1.5 1999/07/15 13:57:55 perev Exp $
+// $Id: StXiMaker.h,v 1.6 2003/09/10 19:47:45 perev Exp $
 // $Log: StXiMaker.h,v $
+// Revision 1.6  2003/09/10 19:47:45  perev
+// ansi corrs
+//
 // Revision 1.5  1999/07/15 13:57:55  perev
 // cleanup
 //
@@ -28,7 +31,7 @@ class StXiMaker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: StXiMaker.h,v 1.5 1999/07/15 13:57:55 perev Exp $";
+  // static Char_t m_VersionCVS = "$Id: StXiMaker.h,v 1.6 2003/09/10 19:47:45 perev Exp $";
   St_exi_exipar  *m_exipar;      //!
   St_exi_aux     *m_exiaux;      //!
 
@@ -41,9 +44,9 @@ class StXiMaker : public StMaker {
   virtual Int_t Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StXiMaker.h,v 1.5 1999/07/15 13:57:55 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StXiMaker.h,v 1.6 2003/09/10 19:47:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StXiMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StXiMaker,0)   //StAF chain virtual base class for Makers
     };
 
 #endif

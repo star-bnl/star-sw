@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.h,v 1.3 2000/03/28 19:09:37 fine Exp $
+// $Id: StTagsMaker.h,v 1.4 2003/09/10 19:47:37 perev Exp $
 // $Log: StTagsMaker.h,v $
+// Revision 1.4  2003/09/10 19:47:37  perev
+// ansi corrs
+//
 // Revision 1.3  2000/03/28 19:09:37  fine
 // Adjuested to ROOT 2.24
 //
@@ -26,7 +29,7 @@ class StrangeTag_st;
 class TClass;
 class StTagsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTagsMaker.h,v 1.3 2000/03/28 19:09:37 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTagsMaker.h,v 1.4 2003/09/10 19:47:37 perev Exp $";
  protected:
  public: 
                   StTagsMaker(const char *name="tags");
@@ -36,9 +39,9 @@ class StTagsMaker : public StMaker {
    virtual Int_t  Make();
    static EDataSetPass  GetTags (St_DataSet* ds);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTagsMaker.h,v 1.3 2000/03/28 19:09:37 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTagsMaker.h,v 1.4 2003/09/10 19:47:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StTagsMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StTagsMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

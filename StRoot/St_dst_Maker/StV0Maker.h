@@ -5,8 +5,11 @@
 //                                                                      //
 // StV0Maker virtual base class for Maker                               //
 //                                                                      //
-// $Id: StV0Maker.h,v 1.7 2000/10/12 14:52:30 genevb Exp $
+// $Id: StV0Maker.h,v 1.8 2003/09/10 19:47:45 perev Exp $
 // $Log: StV0Maker.h,v $
+// Revision 1.8  2003/09/10 19:47:45  perev
+// ansi corrs
+//
 // Revision 1.7  2000/10/12 14:52:30  genevb
 // Remove vertex table entries when trimming V0s
 //
@@ -36,7 +39,7 @@ class StV0Maker : public StMaker {
 
  private:
   Bool_t m_ev0EvalOn;   //switch for the evaluation
-  // static Char_t m_VersionCVS = "$Id: StV0Maker.h,v 1.7 2000/10/12 14:52:30 genevb Exp $";
+  // static Char_t m_VersionCVS = "$Id: StV0Maker.h,v 1.8 2003/09/10 19:47:45 perev Exp $";
   St_ev0_ev0par  *m_ev0par;        //!
   St_ev0_ev0par2 *m_ev0par2;       //!
   St_ev0_ev0par2 *m_ev0parT;       //!
@@ -56,9 +59,9 @@ class StV0Maker : public StMaker {
   virtual void   ev0EvalOff(){ev0Eval();}
   virtual void   Trim();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StV0Maker.h,v 1.7 2000/10/12 14:52:30 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StV0Maker.h,v 1.8 2003/09/10 19:47:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StV0Maker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StV0Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

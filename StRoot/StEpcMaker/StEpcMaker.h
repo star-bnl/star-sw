@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.7 2003/05/26 13:44:34 suaide Exp $
+// $Id: StEpcMaker.h,v 1.8 2003/09/10 19:47:13 perev Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.8  2003/09/10 19:47:13  perev
+// ansi corrs
+//
 // Revision 1.7  2003/05/26 13:44:34  suaide
 // added setPrint() method
 //
@@ -99,9 +102,9 @@ class StEpcMaker : public StMaker
     virtual void  Browse(TBrowser* b); // StEvent staf will be visible in browser
   
     virtual const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.7 2003/05/26 13:44:34 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+    "Tag $Name:  $ $Id: StEpcMaker.h,v 1.8 2003/09/10 19:47:13 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
-  ClassDef(StEpcMaker, 1)// EMC-Track match maker
+  ClassDef(StEpcMaker,0)// EMC-Track match maker
 };
 #include "StPointCollection.h"
 

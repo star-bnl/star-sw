@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.h,v 1.4 2000/09/30 16:13:11 fisyak Exp $
+// $Id: StChargeStepMaker.h,v 1.5 2003/09/10 19:47:04 perev Exp $
 // $Log: StChargeStepMaker.h,v $
+// Revision 1.5  2003/09/10 19:47:04  perev
+// ansi corrs
+//
 // Revision 1.4  2000/09/30 16:13:11  fisyak
 // take out derivative and result from Streamer
 //
@@ -51,7 +54,7 @@ class StChargeStepMaker : public StMaker {
   virtual void   Clear(const char *opt);
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StChargeStepMaker.h,v 1.4 2000/09/30 16:13:11 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StChargeStepMaker.h,v 1.5 2003/09/10 19:47:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   TH1S* step[4];  //!1=west,inner:2=west,outer:3=east,inner:4=east,outer
   TH1S* derivative[4];//!
   TH1F* result[4];    //!
@@ -89,7 +92,7 @@ class StChargeStepMaker : public StMaker {
  protected:
 
   
-  ClassDef(StChargeStepMaker, 1)       //Cint definition
+  ClassDef(StChargeStepMaker,0)       //Cint definition
 };
 
 inline int StChargeStepMaker::GetValidityDate(){return date;}

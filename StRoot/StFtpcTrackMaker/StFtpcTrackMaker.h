@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.9 2002/11/06 13:46:54 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.10 2003/09/10 19:47:18 perev Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.10  2003/09/10 19:47:18  perev
+// ansi corrs
+//
 // Revision 1.9  2002/11/06 13:46:54  oldi
 // Vertex handling simplifed.
 // Global/primary fit handling simplified.
@@ -103,12 +106,12 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Make();                                           // actual program
            Int_t  Finish();                                         // final cleanup
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.9 2002/11/06 13:46:54 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.10 2003/09/10 19:47:18 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 
 
-   ClassDef(StFtpcTrackMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StFtpcTrackMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

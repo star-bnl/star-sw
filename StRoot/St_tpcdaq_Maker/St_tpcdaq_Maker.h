@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.35 2003/02/13 17:05:05 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.36 2003/09/10 19:47:51 perev Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.36  2003/09/10 19:47:51  perev
+// ansi corrs
+//
 // Revision 1.35  2003/02/13 17:05:05  ward
 // Restored noise elim on request from David Hardtke.
 //
@@ -231,9 +234,9 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.35 2003/02/13 17:05:05 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.36 2003/09/10 19:47:51 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_tpcdaq_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.h,v 1.1 2003/04/04 21:36:06 thenry Exp $
+ * $Id: StTpcFourPMaker.h,v 1.2 2003/09/10 19:47:20 perev Exp $
  * $Log: StTpcFourPMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:20  perev
+ * ansi corrs
+ *
  * Revision 1.1  2003/04/04 21:36:06  thenry
  * Creates Four Vector list from the TPC tracks for use with the StJetMaker
  *
@@ -25,6 +28,6 @@ public:
     virtual Int_t Make();
 
 protected:
-    ClassDef(StTpcFourPMaker,1)
+    ClassDef(StTpcFourPMaker,0)
 };
 #endif

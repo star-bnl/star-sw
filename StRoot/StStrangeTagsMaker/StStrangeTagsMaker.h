@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.h,v 1.6 2003/09/02 17:59:05 perev Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.7 2003/09/10 19:47:34 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:34  perev
+ * ansi corrs
+ *
  * Revision 1.6  2003/09/02 17:59:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -63,9 +66,9 @@ private:
     Float_t         mMassla2;
     
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.6 2003/09/02 17:59:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.7 2003/09/10 19:47:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-    ClassDef(StStrangeTagsMaker, 1)   // macro for rootcint
+    ClassDef(StStrangeTagsMaker,0)   // macro for rootcint
 };
 
 #endif
