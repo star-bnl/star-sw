@@ -95,6 +95,11 @@ bool StizHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
     return (lhs->z() < rhs->z()) ? true : false;
 }
 
+bool SameStHit::operator()(const StiHit* rhs) const
+{
+    return (stHit == rhs->stHit() );
+};
+
 //----------------------- Detector Map Utilities ------------------------------------
 
 //Equality defined by position and refangle, not z!!!!

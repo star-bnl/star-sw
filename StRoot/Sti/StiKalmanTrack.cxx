@@ -14,7 +14,7 @@
 
 ostream& operator<<(ostream&, const StiHit&);
 
-StiTrackNodeFactory* StiTrack::trackNodeFactory = 0;
+StiKalmanTrackNodeFactory* StiKalmanTrack::trackNodeFactory = 0;
 
 void StiKalmanTrack::reset()
 {
@@ -23,7 +23,12 @@ void StiKalmanTrack::reset()
   firstNode = 0;
   lastNode  = 0;
 }
-    
+
+void StiKalmanTrack::setKalmanTrackNodeFactory(StiKalmanTrackNodeFactory* val)
+{
+    trackNodeFactory = val;
+}
+
 void StiKalmanTrack::getMomentum(double p[3], double e[6]) const
 {
   // return the momentum of the track at the inner most node held by this track
@@ -322,15 +327,21 @@ void StiKalmanTrack::initialize(double curvature,
     }
   StiGeometryTransform * t = StiGeometryTransform::instance();
   StiKalmanTrackNodeFactory * fac = dynamic_cast<StiKalmanTrackNodeFactory *>(trackNodeFactory);
+  if (!fac) {
+      cout <<"StiKalmanTrack::initialize(). ERROR:\tfactory cast failed.  Seg-fault"<<endl;
+  }
+  
   StThreeVectorD stiOrigin;
   double alpha,alphaP,eta;  
   hitvector::const_iterator it;
   double state[5];  
   double error[15];
 
+  //cout <<"\tSet state[3], state[4]"<<endl;
   // These are constant for all hits
   state[3]=curvature;
   state[4]=tanl;
+  //cout <<"\tSet Errors"<<endl;
   // For the time being set a diagonal error matrx
   error[0] = 1.;  
   error[1] = 0.; error[2] = 1.;  
@@ -339,19 +350,24 @@ void StiKalmanTrack::initialize(double curvature,
   error[10]= 0.; error[11] = 0.;error[12] = 0.; error[13] = 0.;  error[14] = 1.;
 
   // do the transfer here
-  StiHit * hit;
   StiKalmanTrackNode * node  = 0;
   StiKalmanTrackNode * pNode = 0;
   int i =0;
+  //cout <<"\tAdd Hits"<<endl;
   for (it=v.begin(); it!=v.end(); ++it)
     {
-      hit = *it;      //cout <<"Adding Hit: "<<(*(*it))<<endl;
-      alpha = hit->detector()->getPlacement()->getNormalRefAngle();
+      //cout <<"Adding Hit: "<<(*(*it))<<endl;
+      StiDetector* layer = (*it)->detector();
+      if (!layer) {
+	  cout <<"StiKalmanTrack::initialize() ERROR:\tHit has null detector.  Seg-fault"<<endl;
+      }
+      alpha = layer->getPlacement()->getNormalRefAngle();
       node = fac->getObject();
+      node->reset();
       if (node==0)
 	{
-	  cout << "StiKalmanTrackNode::initilize() - Severe Error - "
-	       << "trackNodeFactor returned null object" << endl;
+	    cout << "StiKalmanTrack::initilize() - Severe Error - "
+		 << "trackNodeFactor returned null object" << endl;
 	  return;
 	}
       if (pNode==0)
@@ -363,10 +379,10 @@ void StiKalmanTrack::initialize(double curvature,
 	  stiOrigin = t->operator()(origin, alpha);
 	  eta = curvature*stiOrigin.x();
 	}
-      state[0] = hit->y(); 
-      state[1] = hit->z(); 
+      state[0] = (*it)->y(); 
+      state[1] = (*it)->z(); 
       state[2] = eta;
-      node->set(i, hit, alpha, hit->x(), state,error, 0., 0.);
+      node->set(i, (*it), alpha, (*it)->x(), state,error, 0., 0.);
       if (pNode==0) 
 	  firstNode = node;
       else

@@ -35,7 +35,7 @@ public:
     
     //Sets
     void setEvent(StEvent*, StMcEvent* mcevt=0);
-    void setFactory(StiEvaluableTrackFactory* val, StiHitFactory* hits);
+    void setFactory(StiEvaluableTrackFactory* val);
     
     void addStTrackFilter(StiStTrackFilter*);
     void setStTrackType(StTrackType);
@@ -49,13 +49,12 @@ public:
 
 protected:
     StiEvaluableTrack* makeTrack(StTrack*);
-    void operator() (const StTrack* st, StiKalmanTrack* sti, const StiDetector*);
+    void operator() (const StTrack* st, StiKalmanTrack* sti);
     
 private:
     StEvent* mevent; //cache pointer
     StMcEvent* mmcevent;
     StiEvaluableTrackFactory* mfactory;
-    StiHitFactory* mhitfactory;
     
     StTrackType mtype; //enumeration to the type of track we get from StEvent
     st_trackfilter_vector mfiltervector;
@@ -65,10 +64,9 @@ private:
     StSPtrVecTrackNodeIterator mend;
 };
 
-inline void StiEvaluableTrackSeedFinder::setFactory(StiEvaluableTrackFactory* val, StiHitFactory* hits)
+inline void StiEvaluableTrackSeedFinder::setFactory(StiEvaluableTrackFactory* val)
 {
     mfactory=val;
-    mhitfactory=hits;
 }
 
 #endif

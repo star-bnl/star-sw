@@ -58,5 +58,6 @@ ostream& operator<<(ostream& os, const StiHit& hit)
     return os <<hit.refangle()<<" "<<hit.position()<<"\t\t" //Key
 	      <<hit.x()<<" "<<hit.y()<<" "<<hit.z()<<"\t\t" //Position
 	      <<hit.sxx()<<" "<<hit.syy()<<" "<<hit.szz()<<"\t" //Diagonal Error
-	      <<hit.sxy()<<" "<<hit.sxz()<<" "<<hit.syz(); //Off-diagonal error
+	      <<hit.sxy()<<" "<<hit.sxz()<<" "<<hit.syz()<<"\t" //Off-diagonal error
+	      <<hit.detector(); //pointer to detector
 }

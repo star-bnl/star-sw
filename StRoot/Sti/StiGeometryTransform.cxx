@@ -347,27 +347,27 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     }
 
     
-    if (0) {
-	//The errors take for god-damn ever to transform!
-	//Now Transform Errors
-	StMatrixF covMatrix = tpchit->covariantMatrix();
-	stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
-	
-	//This is currently performed in the HitFiller to speed things up (MLM, 8/27/01)
-	// find detector for this hit, remembering that we (ITTF) only use
-	// 12 tpc sectors (1-12) instead of separate sectors for the east end
-	StiDetectorFinder *pFinder = StiDetectorFinder::instance();
-	char szBuf[100];
-	int iIttfSector = 12 - (tpchit->sector() - 12)%12;
-	sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(), iIttfSector);
-	StiDetector* layer = pFinder->findDetector(szBuf);
-	if (!layer) {
-	    cout <<" Error, no layer for sector: "<<tpchit->sector()<<"\tpadrow: "<<tpchit->padrow()<<endl;
-	}
-	else {
-	    stihit->setDetector( layer );
-	}
-    }
+    //The errors take for god-damn ever to transform!
+    //Now Transform Errors
+    StMatrixF covMatrix = tpchit->covariantMatrix();
+    stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
+    
+    /*
+      //This is currently performed in the HitFiller to speed things up (MLM, 8/27/01)
+      // find detector for this hit, remembering that we (ITTF) only use
+      // 12 tpc sectors (1-12) instead of separate sectors for the east end
+      StiDetectorFinder *pFinder = StiDetectorFinder::instance();
+      char szBuf[100];
+      int iIttfSector = 12 - (tpchit->sector() - 12)%12;
+      sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(), iIttfSector);
+      StiDetector* layer = pFinder->findDetector(szBuf);
+      if (!layer) {
+      cout <<" Error, no layer for sector: "<<tpchit->sector()<<"\tpadrow: "<<tpchit->padrow()<<endl;
+      }
+      else {
+      stihit->setDetector( layer );
+      }
+    */
     
     return;
 }

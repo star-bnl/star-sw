@@ -82,12 +82,11 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", static_cast<int>(prow), static_cast<int>(iIttfSector));
 	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
-		cout <<"StiHitFiller::fillTpcHits(). ERROR:\t Detector for (sector,padrow): ("<<sector<<","<<prow<<") not found.  Abort"<<endl;
+		cout <<"StiHitFiller::fillTpcHits(). ERROR:\t Detector for (sector,padrow): (";
+		cout <<sector<<","<<prow<<") not found.  Abort"<<endl;
 		mtimer.stop();
 		return;
 	    }
-	    //else
-		//cout <<"Sector: "<<sector<<" padrow: "<<prow<<" layer: "<<*layer<<endl;
 	    
 	    //Loop over hits	    
 	    for (StSPtrVecTpcHitIterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
@@ -100,7 +99,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 		    
 		    mtranslator->operator()(hit, stihit);
 		    stihit->setDetector( layer );
-
+		    
 		    //Now Fill the Hit Container!
 		    store->push_back( stihit );
 		    ++nhit;
