@@ -1,5 +1,8 @@
-* $Id: bfc_mdc.kumac,v 1.8 1998/07/22 15:05:43 kathy Exp $
+* $Id: bfc_mdc.kumac,v 1.9 1998/07/22 21:31:23 kathy Exp $
 * $Log: bfc_mdc.kumac,v $
+* Revision 1.9  1998/07/22 21:31:23  kathy
+* changed all names in chains to be 5 characters or less: evg2tin -> g2tin and ev0_eval2 -> ev0_e
+*
 * Revision 1.8  1998/07/22 15:05:43  kathy
 * fixed for correct gstar kumacs
 *
@@ -78,7 +81,7 @@
 * 
 * -- CHAINS --
 * evgin      - read in event generator file or text file for gstar
-* evg2tin    - read G2T xdf file
+* g2tin      - read G2T xdf file
 * evin       - read in simulated-data file 
 * fzin       - read in fz file
 * rgst       - run gstar from evgin file
@@ -114,24 +117,24 @@
 *                            sgr tracker, tpt tracker, tte track evaluator,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*      chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+*      chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
 *
 * 2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
 *                            sgr tracker, tpt tracker, tte track evaluator
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*    chain=' evg2in svg tpg srs tss tcl tcl_e sgr tpt tte_e svm egr ev0 evout'_
+*    chain=' g2tin svg tpg srs tss tcl tcl_e sgr tpt tte_e svm egr ev0 evout'_
 *
 * 3. read from geant file, svt fast sim, sgr tracker & write event out
-*      chain=' evg2tin svg srs sgr evout'_
+*      chain=' g2tin svg srs sgr evout'_
 * 
 * 4. read from geant file, tpc fast sim, tpt tracker, tte track eval, 
 *                             & write event out
-*      chain=' evg2tin tpg tfs tpt tte_e evout'
+*      chain=' g2tin tpg tfs tpt tte_e evout'
 * 
 * 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
 *                             tte track evaluator, write event out
-*    chain=' evg2tin tpg tss tcl tcl_e tpt tte_e evout'
+*    chain=' g2tin tpg tss tcl tcl_e tpt tte_e evout'
 * 
 * 6. to read in event generator file, run gstar & g2t & write out to xdf file
 *     domain=' geometry sim/gstar sim/g2t ' _

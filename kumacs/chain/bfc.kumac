@@ -1,7 +1,10 @@
-* $Id: bfc.kumac,v 1.20 1998/07/22 15:32:51 kathy Exp $
+* $Id: bfc.kumac,v 1.21 1998/07/22 21:31:22 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.21  1998/07/22 21:31:22  kathy
+* changed all names in chains to be 5 characters or less: evg2tin -> g2tin and ev0_eval2 -> ev0_e
+*
 * Revision 1.20  1998/07/22 15:32:51  kathy
-* fixed space in input parameters that caused it not to run
+*  fixed space in input parameters that caused it not to run
 *
 * Revision 1.19  1998/07/21 23:35:13  kathy
 * changed names of some items in chain, separated gstar and g2t parts, made bfc and bfc_mdc consistent
@@ -84,7 +87,7 @@
 * 
 * -- CHAINS --
 * evgin      - read in event generator file or text file for gstar
-* evg2tin    - read G2T xdf file
+* g2tin      - read G2T xdf file
 * evin       - read in simulated-data file 
 * fzin       - read in fz file
 * rgst       - run gstar from evgin file
@@ -120,24 +123,24 @@
 *                            sgr tracker, tpt tracker, tte track evaluator,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*      chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+*      chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
 *
 * 2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
 *                            sgr tracker, tpt tracker, tte track evaluator
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*    chain=' evg2in svg tpg srs tss tcl tcl_e sgr tpt tte_e svm egr ev0 evout'_
+*    chain=' g2tin svg tpg srs tss tcl tcl_e sgr tpt tte_e svm egr ev0 evout'_
 *
 * 3. read from geant file, svt fast sim, sgr tracker & write event out
-*      chain=' evg2tin svg srs sgr evout'_
+*      chain=' g2tin svg srs sgr evout'_
 *
 * 4. read from geant file, tpc fast sim, tpt tracker, tte track eval, 
 *                             & write event out
-*      chain=' evg2tin tpg tfs tpt tte_e evout'
+*      chain=' g2tin tpg tfs tpt tte_e evout'
 * 
 * 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
 *                             tte track evaluator, write event out
-*    chain=' evg2tin tpg tss tcl tcl_e tpt tte_e evout'
+*    chain=' g2tin tpg tss tcl tcl_e tpt tte_e evout'
 * 
 * 6. to read in event generator file, run gstar & g2t & write out to xdf file
 *     domain=' geometry sim/gstar sim/g2t ' _
@@ -167,7 +170,7 @@ MACRO bfc _
    geomtype=all _
    phystype=on _
    domain=' geometry tpc svt global' _
-   chain=' evg2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+   chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
