@@ -24,5 +24,7 @@
   unsigned short BCdata[16];/* Jul 18 2001                           */
   octet          emcTrigPatch[300]; /* Oct 16 2001 */
   octet          emcHiTower[300];   /* Oct 16 2001 */
+  unsigned long bunchXing_lo; /* Jan 10 2002 Jan,Akio,Ullrich */
+  unsigned long bunchXing_hi; /* Jan 10 2002 Jan,Akio,Ullrich */
 } ;
-/*  Last mod. for dst_TrgDet:   $Date: 2001/10/16 20:26:07 $ */
+/*  Last mod. for dst_TrgDet:   $Date: 2002/01/10 21:46:57 $ */

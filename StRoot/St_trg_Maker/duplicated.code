@@ -18,6 +18,8 @@ void St_trg_Maker::SWITCH(CtbMwcDaq)(St_dst_TrgDet *dst1) { // For sim data, use
   int npre,npost,pp,i,tray,slat,subsector,sector;
   dst_TrgDet_st *tt = dst1->GetTable();
 
+  tt->bunchXing_lo=SWITCH(gs)->EvtDesc.bunchXing_lo;           /* Jan 10 2002, Jan,Akio,Ullrich */
+  tt->bunchXing_hi=(SWITCH(gs)->EvtDesc.bunchXing_hi)&(0xFFFF); /* Jan 10 2002, Jan,Akio,Ullrich */
   npre=SWITCH(gs)->EvtDesc.npre;
   npost=SWITCH(gs)->EvtDesc.npost;
   tt->npre=npre;
