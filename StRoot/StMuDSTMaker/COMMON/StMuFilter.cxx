@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuFilter.cxx,v 1.2 2002/05/04 23:56:30 laue Exp $
+ * $Id: StMuFilter.cxx,v 1.3 2002/06/12 16:02:43 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -12,7 +12,8 @@
 #include "StEvent/StContainers.h"
 #include "StEvent/StDedxPidTraits.h"
 
-#define __MIN_HITS__ 11
+#define __MIN_HITS_TPC__ 11
+#define __MIN_HITS_FTPC__ 5
 
 
 ClassImp(StMuFilter)
@@ -29,7 +30,10 @@ bool StMuFilter::accept( const StKinkMuDst* k) { cout << "StMuFilter::accept(con
 
 bool StMuFilter::accept(const StTrack* track) {
   if ( !track->detectorInfo() ) return false;
-  if ( track->detectorInfo()->numberOfPoints(kTpcId)<__MIN_HITS__ ) return false;
+  if ( track->detectorInfo()->numberOfPoints(kTpcId)<__MIN_HITS_TPC__ &&
+       track->detectorInfo()->numberOfPoints(kFtpcWestId)<__MIN_HITS_FTPC__ && 
+       track->detectorInfo()->numberOfPoints(kFtpcEastId)<__MIN_HITS_FTPC__ 
+       ) return false;
 
   return true;
 }
@@ -38,6 +42,9 @@ bool StMuFilter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuFilter.cxx,v $
+ * Revision 1.3  2002/06/12 16:02:43  laue
+ * Change of the number of hits cut, so that also FTPC tracks are written out.
+ *
  * Revision 1.2  2002/05/04 23:56:30  laue
  * some documentation added
  *
