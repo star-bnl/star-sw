@@ -16,7 +16,8 @@
 *                               and make kumac more standard
 * editted 7/10/98 Kathy Turner - change directories where tables get written
 * editted 7/21/98 Kathy Turner - changed names of kumacs to make them
-*                                more standard 
+*                                   more standard 
+* editted 7/29/98 K. Turner - use more of standard utility kumacs
 * 
 * *******************************************************************
 * ---------available values of input parameters ---------------
@@ -39,10 +40,13 @@
 *                   then use this extension.
 * 
 * ******************************************************************
-* input_data_dir=/star/u2d/kathy/jun98_daq/datafiles/ _
+* input_data_dir=$AFS_RHIC/star/data/samples/ _
 * input_file=muons_central_2.txt _
+* output_file=muons_central.xdf
+* 
 * input_data_dir=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
 * input_file=auau_ce_b0-2_1_200.xdf _
+* output_file=auau_central_hijing.xdf
 * 
  macro run__
    TOP=$STAR _
@@ -51,19 +55,18 @@
    phystype=on _
    geomtype=all _   
    num_events=1 _
-   debugger=off _
+   debugger=on _
    intype=file _
-   input_data_dir=/star/mds/data/SD98/auau200/evg/central/ven-4.12/set0001/ _
-   input_file=venauau200_301_400.xdf _
-   output_file=auau_central_venus.xdf
- 
+   input_data_dir=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
+   input_file=auau_ce_b0-2_1_200.xdf _
+   output_file=auau_central_hijing.xdf
 * 
 *  this is an example!! you must change to fill your needs
 *  
 * --> to run
 *    - change the inputs above as desired
 *    - run staf
-*    -   exec run_gstar
+*    -   exec run_gstar_g2t
 * 
    
   message ' *** TOP directory to search for kumacs --> ' [TOP]
@@ -82,21 +85,20 @@
   macro/global/create TOP           [TOP]
   macro/global/create phystype [phystype]
   macro/global/create geomtype [geomtype]
-* 
+    
 * setup default directories to search for kumacs in
+    exec $STAR/kumacs/util/setup_defaults 
+          
 * setup default table directory structure in STAF
-
-    exec $STAR/kumacs/chain/bfc_util#bfc_defaults 
-* 
-   exec setup#setup
-* 
-   macro/global/import *
+     exec setup#setup
      
- 
+*  must have this after setup!
+   macro/global/import *
+       
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
    exec bfc_util#bfc_gstar_setup    [chain]
    exec bfc_util#bfc_g2t_b4_load    [chain]
-   exec bfc_util#bfc_load          [domain]
+   exec load_libraries#run          [domain]
    exec bfc_util#bfc_g2t_after_load [chain]
  
 ******** turn debugger on just for GSTAR! ******************************
@@ -150,8 +152,10 @@
 * g2t - go to geantE directory, then transform geant structures
 *       to staf tables which will be put in event/geant/Event
      trig 1
+     ls [geantE]
      cd [geantE]
      for/call g2t
+     cd /dui
 * write out to output_file
  exec write_table_to_file#write outunit [geant_Event]
  enddo
