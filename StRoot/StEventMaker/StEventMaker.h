@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.10 2002/02/25 19:34:14 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.11 2002/04/18 23:29:35 jeromel Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.11  2002/04/18 23:29:35  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.10  2002/02/25 19:34:14  ullrich
  * Fill parts of StRunInfo from StDetectorDbBeamInfo.
  *
@@ -70,7 +73,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.10 2002/02/25 19:34:14 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.11 2002/04/18 23:29:35 jeromel Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -80,6 +83,7 @@ public:
     Bool_t  doLoadSvtHits;         //!
     Bool_t  doLoadSsdHits;         //!
     Bool_t  doLoadTptTracks;       //!
+    Bool_t  doLoadEstTracks;       //!
     
     Bool_t  doPrintEventInfo;      //! lots of screen output
     Bool_t  doPrintMemoryInfo;     //! 

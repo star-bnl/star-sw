@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventManager.hh,v 2.4 2001/11/07 21:20:46 ullrich Exp $
+ * $Id: StEventManager.hh,v 2.5 2002/04/18 23:29:35 jeromel Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEventManager.hh,v $
+ * Revision 2.5  2002/04/18 23:29:35  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.4  2001/11/07 21:20:46  ullrich
  * Added L1 trigger.
  *
@@ -96,6 +99,8 @@ public:
     virtual dst_vertex_st*         returnTable_dst_vertex(long&)        const =0;                  
     virtual dst_xi_vertex_st*      returnTable_dst_xi_vertex(long&)     const =0;               
     virtual dst_track_st*          returnTable_CpyTrk(long&)            const =0;               
+    virtual dst_track_st*          returnTable_EstGlobal(long&)         const =0;               
+    virtual dst_track_st*          returnTable_EstPrimary(long&)         const =0;               
     
     virtual void setMaker(StMaker* mk) {mCurrentChain=mk;};
     

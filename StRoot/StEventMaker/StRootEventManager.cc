@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.9 2001/11/07 21:20:46 ullrich Exp $
+ * $Id: StRootEventManager.cc,v 2.10 2002/04/18 23:29:35 jeromel Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.10  2002/04/18 23:29:35  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.9  2001/11/07 21:20:46  ullrich
  * Added L1 trigger.
  *
@@ -175,6 +178,50 @@ StRootEventManager::returnTable_CpyTrk(long& nentries) const
     dst_track_st* table = NULL;
     St_dst_track  *tableWrap;
     const char *nm =  "CpyTrk";
+    const char *nt =  "St_dst_track";
+    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    tableWrap = (St_dst_track*) (*Dst)[nt];
+    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
+    if (tableWrap) {
+	table = tableWrap->GetTable();
+	nentries = tableWrap->GetNRows();
+    }
+    else {
+	cerr << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	nentries = 0;
+    }
+    return table;
+}
+
+dst_track_st*
+StRootEventManager::returnTable_EstGlobal(long& nentries) const
+{
+    dst_track_st* table = NULL;
+    St_dst_track  *tableWrap;
+    const char *nm =  "EstGlobal";
+    const char *nt =  "St_dst_track";
+    St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    tableWrap = (St_dst_track*) (*Dst)[nt];
+    if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
+    if (tableWrap) {
+	table = tableWrap->GetTable();
+	nentries = tableWrap->GetNRows();
+    }
+    else {
+	cerr << "StRootEventManager: Table type  " << nt << 
+	    " - name " << nm << " not found in DataSet " << Dst->Pwd()->GetName() << endl;
+	nentries = 0;
+    }
+    return table;
+}
+
+dst_track_st*
+StRootEventManager::returnTable_EstPrimary(long& nentries) const
+{
+    dst_track_st* table = NULL;
+    St_dst_track  *tableWrap;
+    const char *nm =  "EstPrimary";
     const char *nt =  "St_dst_track";
     St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
     tableWrap = (St_dst_track*) (*Dst)[nt];

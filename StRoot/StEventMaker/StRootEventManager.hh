@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.hh,v 2.4 2001/11/07 21:20:46 ullrich Exp $
+ * $Id: StRootEventManager.hh,v 2.5 2002/04/18 23:29:35 jeromel Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.hh,v $
+ * Revision 2.5  2002/04/18 23:29:35  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
  * Revision 2.4  2001/11/07 21:20:46  ullrich
  * Added L1 trigger.
  *
@@ -37,38 +40,40 @@ class StMaker;
 class StRootEventManager : public StEventManager {
 public:
     StRootEventManager();
-    virtual ~StRootEventManager();
+    ~StRootEventManager();
     
-    virtual ooStatus openEvent(const char* colName);
-    virtual ooStatus readEvent();
-    virtual void closeEvent();
-    virtual void setup();
-    virtual void shutdown();
+    ooStatus openEvent(const char* colName);
+    ooStatus readEvent();
+    void closeEvent();
+    void setup();
+    void shutdown();
     
-    virtual particle_st*  	   returnTable_particle(long&)          const;
-    virtual event_header_st*       returnTable_event_header(long&)      const;             
-    virtual dst_event_summary_st*  returnTable_dst_event_summary(long&) const;             
-    virtual dst_L0_Trigger_st*     returnTable_dst_L0_Trigger(long&)    const;             
-    virtual dst_L1_Trigger_st*     returnTable_dst_L1_Trigger(long&)    const;             
-    virtual dst_TrgDet_st*         returnTable_dst_TrgDet(long&)        const;             
-    virtual dst_dedx_st*           returnTable_dst_dedx(long&)          const;                    
-    virtual dst_mon_soft_ctb_st*   returnTable_dst_mon_soft_ctb(long&)  const;            
-    virtual dst_mon_soft_emc_st*   returnTable_dst_mon_soft_emc(long&)  const;            
-    virtual dst_mon_soft_ftpc_st*  returnTable_dst_mon_soft_ftpc(long&) const;           
-    virtual dst_mon_soft_glob_st*  returnTable_dst_mon_soft_glob(long&) const;           
-    virtual dst_mon_soft_l3_st*    returnTable_dst_mon_soft_l3(long&)   const;             
-    virtual dst_mon_soft_rich_st*  returnTable_dst_mon_soft_rich(long&) const;           
-    virtual dst_mon_soft_svt_st*   returnTable_dst_mon_soft_svt(long&)  const;            
-    virtual dst_mon_soft_tpc_st*   returnTable_dst_mon_soft_tpc(long&)  const;            
-    virtual dst_point_st*          returnTable_dst_point(long&)         const;                   
-    virtual dst_summary_param_st*  returnTable_dst_summary_param(long&) const;           
-    virtual dst_tkf_vertex_st*     returnTable_dst_tkf_vertex(long&)    const;              
-    virtual dst_track_st*          returnTable_dst_globtrk(long&)       const;                   
-    virtual dst_track_st*          returnTable_dst_primtrk(long&)       const;                   
-    virtual dst_v0_vertex_st*      returnTable_dst_v0_vertex(long&)     const;               
-    virtual dst_vertex_st*         returnTable_dst_vertex(long&)        const;                  
-    virtual dst_xi_vertex_st*      returnTable_dst_xi_vertex(long&)     const;               
-    virtual dst_track_st*          returnTable_CpyTrk(long&)            const;               
+    particle_st*  	   returnTable_particle(long&)          const;
+    event_header_st*       returnTable_event_header(long&)      const;
+    dst_event_summary_st*  returnTable_dst_event_summary(long&) const;
+    dst_L0_Trigger_st*     returnTable_dst_L0_Trigger(long&)    const;
+    dst_L1_Trigger_st*     returnTable_dst_L1_Trigger(long&)    const;
+    dst_TrgDet_st*         returnTable_dst_TrgDet(long&)        const;
+    dst_dedx_st*           returnTable_dst_dedx(long&)          const;     
+    dst_mon_soft_ctb_st*   returnTable_dst_mon_soft_ctb(long&)  const;
+    dst_mon_soft_emc_st*   returnTable_dst_mon_soft_emc(long&)  const;
+    dst_mon_soft_ftpc_st*  returnTable_dst_mon_soft_ftpc(long&) const;
+    dst_mon_soft_glob_st*  returnTable_dst_mon_soft_glob(long&) const;
+    dst_mon_soft_l3_st*    returnTable_dst_mon_soft_l3(long&)   const;
+    dst_mon_soft_rich_st*  returnTable_dst_mon_soft_rich(long&) const;
+    dst_mon_soft_svt_st*   returnTable_dst_mon_soft_svt(long&)  const;
+    dst_mon_soft_tpc_st*   returnTable_dst_mon_soft_tpc(long&)  const;
+    dst_point_st*          returnTable_dst_point(long&)         const;    
+    dst_summary_param_st*  returnTable_dst_summary_param(long&) const;
+    dst_tkf_vertex_st*     returnTable_dst_tkf_vertex(long&)    const;
+    dst_track_st*          returnTable_dst_globtrk(long&)       const;    
+    dst_track_st*          returnTable_dst_primtrk(long&)       const;    
+    dst_v0_vertex_st*      returnTable_dst_v0_vertex(long&)     const;
+    dst_vertex_st*         returnTable_dst_vertex(long&)        const;   
+    dst_xi_vertex_st*      returnTable_dst_xi_vertex(long&)     const;
+    dst_track_st*          returnTable_CpyTrk(long&)            const;
+    dst_track_st*          returnTable_EstGlobal(long&)         const;
+    dst_track_st*          returnTable_EstPrimary(long&)        const;
 
 protected:
     St_DataSetIter mDst;
