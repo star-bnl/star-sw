@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.18  2003/10/08 15:42:15  suaide
+// Changes to allow for clustering using hits with calibrationType<128
+//
 // Revision 1.17  2003/09/02 17:58:49  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -216,21 +219,31 @@ Int_t StEmcPreClusterCollection::findClusters()
       ew.Reset(); 
       sw.Reset();
   
-      Int_t  ih, jh;
+      Int_t  ih;
+      Int_t  jh = first;
 
       for(ih=first; ih<last; ih++) // fill arrays
       {
         jh=ih-first;
-        energyw[jh] = hits[ih]->energy();
-        ew[jh]=hits[ih]->eta();
-        sw[jh]=abs(hits[ih]->sub());
+        int cal = hits[ih]->calibrationType();
+        //cout <<ih<<"  "<<cal<<endl;
+        if(cal<128) // ONLY hits with calibrationType <128 should be used for cluster finding...
+        {
+          energyw[jh] = hits[ih]->energy();
+          ew[jh]=hits[ih]->eta();
+          sw[jh]=abs(hits[ih]->sub());
+        } 
+        else
+        {
+          energyw[jh] = 0;
+          ew[jh]=hits[ih]->eta();
+          sw[jh]=abs(hits[ih]->sub());
+        }
       }
-
       idBeforeClustering=mNclusters;
       findClustersInModule(mod);
       idAfterClustering=mNclusters;
       if(kCheckClustersOk) checkClustersInModule(mod);
-    
     }
   }
   if(kCheckClustersOk)
