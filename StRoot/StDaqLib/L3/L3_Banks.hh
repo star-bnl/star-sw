@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Banks.hh,v 1.1 2001/06/21 19:19:15 struck Exp $
+ * $Id: L3_Banks.hh,v 1.2 2001/07/17 19:16:11 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Banks.hh,v $
+ * Revision 1.2  2001/07/17 19:16:11  struck
+ * update to 2001 data format (backwards compatible)Z
+ *
  * Revision 1.1  2001/06/21 19:19:15  struck
  * Should have been ...
  *
@@ -49,25 +52,65 @@
 #define CHAR_L3_LTD     "L3_LTD  "
 #define CHAR_L3_GTD     "L3_GTD  "
 #define CHAR_L3_SECCD   "L3_SECCD"
+#define CHAR_L3_SUMD	"L3_SUMD "
 // i960 cluster banks
 #define CHAR_TPCSECLP   "TPCSECLP"
 #define CHAR_TPCRBCLP   "TPCRBCLP"
 #define CHAR_TPCMZCLD   "TPCMZCLD"
 
 
+
 // Top-level pointer bank
 struct Bank_L3_P: public Bank
 {
-  INT32   len;
-  INT32   time;
-  INT32   seq;
-  INT32   trg_word;
-  INT32   trg_in_word;
+  unsigned int len;          // lenght of the entire L3 contribution
+  unsigned int time;         // time when bank is produced
+  unsigned int gl3Id;        // node Id of the gl3 who produced that event (was 'seq' before)
+  unsigned int trg_word;
+  unsigned int trg_in_word;
   Pointer sector[24];
-  Pointer tracks;
-  Pointer summary_data;
-  INT32   L3_summary[4];
+  Pointer tracks;            // offset/length to/of L3_GTD
+  Pointer summary_data;      // offset/length to/of L3_SUMD
+  unsigned int L3_summary[4];   // struct L3_summary
+  // following in format verion 4 _only_!!!
+  Pointer svt[5];      // 4 svt 'sectors' + 1 ssd
+  Pointer ftpc[2];
+  Pointer emc;
 };
+
+
+struct L3_summary
+{
+    unsigned int accept;
+    unsigned int build;
+    unsigned int on;
+    unsigned int nTracks; 
+};
+
+
+struct algorithm_data
+{
+    int algId;                 // unique algorithm identifier (for non-humans)
+    char on;                   // 1 if this alg. was running on this event, 0 if not.
+    char accept;
+    char build;
+    char blub;                 // padding
+    unsigned int nProcessed;   // number of events processed by that algorithm so far
+    unsigned int nAccept;      // number of events that fullfilled alg. so far
+    unsigned int nBuild;       // number of events that were flagged to be built 
+    float data[10];
+};
+
+
+struct Bank_L3_SUMD: public Bank {
+  unsigned int nProcessed;      // all events looked at
+  unsigned int nReconstructed;  // nProcessed that didn't crash
+  int nAlg;                     // nr of registered algorithms
+  struct algorithm_data alg[1]; // array of size nAlg
+
+  int swap();
+};
+
 
 
 struct Bank_L3_SECP: public Bank
@@ -198,6 +241,8 @@ struct Bank_L3_SECCD: public Bank
 
     int swap();
 };
+
+
 
 
 
