@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.7 1998/09/10 12:56:08 sakrejda Exp $
+* $Id: tph.F,v 1.8 1998/09/12 00:17:35 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.8  1998/09/12 00:17:35  sakrejda
+* errors in hit finder changed to produce a more reasonable chisq
+*
 * Revision 1.7  1998/09/10 12:56:08  sakrejda
 * mod function used to get the row number
 *
@@ -520,12 +523,15 @@ c     be on phi and not lambda.  Confirmed by M. Lisa.
               
 c     also, need a fudge factor for the uncertainties dx dy dz.
 c     this should be understood and fixed, but for now....
-              tphit(tphit_h.nok).dx = tphit(tphit_h.nok).dx 
-     +             * tclpar(1).dxy_fact
-              tphit(tphit_h.nok).dy = tphit(tphit_h.nok).dy 
-     +             * tclpar(1).dxy_fact
-              tphit(tphit_h.nok).dz = tphit(tphit_h.nok).dz 
-     +             * tclpar(1).dz_fact+0.07
+              tphit(tphit_h.nok).dx = 0.2
+c             tphit(tphit_h.nok).dx+ tclpar(1).dxy_fact
+c
+              tphit(tphit_h.nok).dy = 0.2
+c             tphit(tphit_h.nok).dy+ tclpar(1).dxy_fact
+c
+              tphit(tphit_h.nok).dz = 0.55
+c             tphit(tphit_h.nok).dz+0.07
+
               
               
 c     also put q (magnitude of hit) into units of energy loss
