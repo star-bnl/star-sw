@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.54 2000/05/18 17:44:54 kathy Exp $
+// $Id: doEvents.C,v 1.55 2000/06/19 23:33:29 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -123,11 +123,12 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
       gSystem->Load("StChallenger");
       setFiles = StChallenger::Challenge();
       setFiles->SetDebug();
-      Int_t Argc=4;
-      const char *Argv[4]= {
-        "-s","dst;hist;runco",
-        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+      const char *Argv[]= {
+	    "-s","dst runco",                           // list of components needed
+	    "-q","n_trk_tpc[0]>1000 && n_trk_tpc[1]>1000",   // example of user query
+	    "-c","/afs/rhic/star/incoming/GCA/daq/stacs.rc"  // pointer to GC servers for daq
         };
+      Int_t Argc=sizeof(Argv)/4;
       setFiles->Init(Argc,Argv);
     }
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
@@ -214,8 +215,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.54  2000/05/18 17:44:54  kathy
-// turn off by default the writing of output *.event.root file - had it ON by default by accident
+// Revision 1.55  2000/06/19 23:33:29  perev
+// GC for real data
+//
+// Revision 1.55  2000/06/19 23:33:29  perev
+// GC for real data
 //
 // Revision 1.54  2000/05/18 17:44:54  kathy
 // turn off by default the writing of output *.event.root file - had it ON by default by accident
