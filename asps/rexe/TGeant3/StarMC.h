@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: StarMC.h,v 1.2 2000/04/23 19:18:09 fisyak Exp $ */
+/* $Id: StarMC.h,v 1.3 2000/04/24 15:37:35 fisyak Exp $ */
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -35,7 +35,7 @@ public:
   virtual const char* CurrentVolName() const =0;
   virtual const char* CurrentVolOffName(Int_t) const =0;
   virtual Int_t   NofVolumes() const =0;
-  virtual Int_t   VolId(Text_t*) const =0;
+  virtual Int_t   VolId(const Text_t*) const =0;
   virtual Int_t   IdFromPDG(Int_t) const =0;
   virtual Int_t   PDGFromId(Int_t) const =0;
   virtual void    DefineParticles() = 0;

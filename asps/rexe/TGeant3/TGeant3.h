@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.6 2000/04/23 19:18:09 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.7 2000/04/24 15:37:36 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -515,40 +515,40 @@ class TVolume;
 class TGeant3 : public StarMC { 
 
 protected:
-  Int_t fNextVol;    // Iterator for GeomIter
+  Int_t fNextVol;      //! Iterator for GeomIter
 
 //--------------Declarations for ZEBRA--------------------- 
-  Int_t *fZiq, *fZlq; 
-  Float_t *fZq; 
-
-  Quest_t  *fQuest; 
-  Gcbank_t *fGcbank;
-  Gclink_t *fGclink; 
-  Gccuts_t *fGccuts; 
-  Gcmulo_t *fGcmulo; 
-  Gcmate_t *fGcmate; 
-  Gctpol_t *fGctpol; 
-  Gcnum_t  *fGcnum; 
-  Gcsets_t *fGcsets; 
-  Gcopti_t *fGcopti; 
-  Gctlit_t *fGctlit; 
-  Gcvdma_t *fGcvdma; 
-  Gcvolu_t *fGcvolu; 
-  Gckine_t *fGckine; 
-  Gcflag_t *fGcflag; 
-  Gctmed_t *fGctmed; 
-  Gcphys_t *fGcphys; 
-  Gcking_t *fGcking; 
-  Gckin2_t *fGckin2; 
-  Gckin3_t *fGckin3; 
-  Gctrak_t *fGctrak; 
-
-
-  // commons for GEANE
-  Ertrio_t *fErtrio;
-  Eropts_t *fEropts;
-  Eroptc_t *fEroptc;
-  Erwork_t *fErwork;
+  Int_t *fZiq, *fZlq;  //!
+  Float_t *fZq;        //!
+		          
+  Quest_t  *fQuest;    //!
+  Gcbank_t *fGcbank;   //!
+  Gclink_t *fGclink;   //!
+  Gccuts_t *fGccuts;   //!
+  Gcmulo_t *fGcmulo;   //!
+  Gcmate_t *fGcmate;   //!
+  Gctpol_t *fGctpol;   //!
+  Gcnum_t  *fGcnum;    //!
+  Gcsets_t *fGcsets;   //!
+  Gcopti_t *fGcopti;   //!
+  Gctlit_t *fGctlit;   //!
+  Gcvdma_t *fGcvdma;   //!
+  Gcvolu_t *fGcvolu;   //!
+  Gckine_t *fGckine;   //!
+  Gcflag_t *fGcflag;   //!
+  Gctmed_t *fGctmed;   //!
+  Gcphys_t *fGcphys;   //!
+  Gcking_t *fGcking;   //!
+  Gckin2_t *fGckin2;   //!
+  Gckin3_t *fGckin3;   //!
+  Gctrak_t *fGctrak;   //!   
+		          
+		          
+  // commons for GEANE 
+  Ertrio_t *fErtrio;   //!
+  Eropts_t *fEropts;   //!
+  Eroptc_t *fEroptc;   //!
+  Erwork_t *fErwork;   //!
 
   //Put here all volume names
 
@@ -556,9 +556,9 @@ protected:
 
   enum {kMaxParticles = 100};
 
-  Int_t fNPDGCodes;
+  Int_t fNPDGCodes;    //!
 
-  Int_t fPDGCode[kMaxParticles];
+  Int_t fPDGCode[kMaxParticles]; //!
 
 public: 
   TGeant3(); 
@@ -641,14 +641,14 @@ public:
 
   // access functions to commons
  
-  virtual Quest_t* Quest() const {return fQuest;}
+  virtual Quest_t*  Quest()  const {return fQuest;}
   virtual Gcbank_t* Gcbank() const {return fGcbank;}
   virtual Gclink_t* Gclink() const {return fGclink;}
   virtual Gccuts_t* Gccuts() const {return fGccuts;}
   virtual Gcmulo_t* Gcmulo() const {return fGcmulo;}
   virtual Gcmate_t* Gcmate() const {return fGcmate;}
   virtual Gctpol_t* Gctpol() const {return fGctpol;}
-  virtual Gcnum_t* Gcnum() const {return fGcnum;}
+  virtual Gcnum_t*  Gcnum()  const {return fGcnum;}
   virtual Gcsets_t* Gcsets() const {return fGcsets;}
   virtual Gcopti_t* Gcopti() const {return fGcopti;}
   virtual Gctlit_t* Gctlit() const {return fGctlit;}
@@ -662,9 +662,9 @@ public:
   virtual Gckin2_t* Gckin2() const {return fGckin2;}
   virtual Gckin3_t* Gckin3() const {return fGckin3;}
   virtual Gctrak_t* Gctrak() const {return fGctrak;}
-  virtual Int_t* Iq() const {return fZiq;}
-  virtual Int_t* Lq() const {return fZlq;}
-  virtual Float_t* Q() const {return fZq;}
+  virtual Int_t*    Iq()     const {return fZiq;}
+  virtual Int_t*    Lq()     const {return fZlq;}
+  virtual Float_t*  Q()      const {return fZq;}
 
 
   // Access to GEANE commons
@@ -679,6 +679,7 @@ public:
       // functions from GBASE 
    virtual  void  Gpcxyz(); 
    virtual  void  Ggclos(); 
+   virtual  void  SetColors() {}
    virtual  void  Gfile(const char *filename, const char *option="I"); 
    virtual  void  Glast(); 
    virtual  void  Gprint(const char *name); 
@@ -749,7 +750,7 @@ public:
    virtual  void  Gdcxyz(); 
 
       // functions from GGEOM 
-   virtual  void  Gdtom(Float_t *xd, Float_t *xm, Int_t iflag); 
+   virtual  void  Gdtom(Float_t *xd, Float_t *xm, Int_t &iflag); 
    virtual  void  Glmoth(const char* iudet, Int_t iunum, Int_t &nlev, 
                          Int_t *lvols, Int_t *lindx); 
    virtual  void  Gmedia(Float_t *x, Int_t &numed); 
@@ -772,6 +773,8 @@ public:
    virtual  void  Gprotm(Int_t nmat=0); 
    virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
                          Float_t *upar, Int_t np); 
+   virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
+
    virtual  void  Gsatt(const char *name, const char *att, Int_t val);
    virtual  void  Gfpara(const char *name, Int_t number, Int_t intext, Int_t& npar,
 			 Int_t& natt, Float_t* par, Float_t* att);
