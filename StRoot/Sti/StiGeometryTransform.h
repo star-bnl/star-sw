@@ -84,7 +84,8 @@ public:
     StThreeVector<double> operator() (const StThreeVector<double>& position, double refAngle);
     StThreeVectorD operator() (const StThreeVectorD& position, double refAngle);
 
-    
+    pair<double, double> angleAndPosition(const StTpcHit*) const;
+
 protected: 
 
     StiGeometryTransform();    
