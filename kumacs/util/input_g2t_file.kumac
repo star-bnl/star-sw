@@ -18,8 +18,8 @@ macro/global/import *
     endif
  
 *** read first "non-information" event (from G2T)
-*  this record has /dui/Run  on it
- stream/getevent G2Tfile [geant]
+
+ stream/getevent G2Tfile [geantR]
   
    if (STAF_STATUS(1).ne. 1) then
     message ' INPUT_G2T_FILE#INIT ERROR reading Run info!!'
@@ -36,8 +36,8 @@ macro/global/import *
 
  cd /dui
  
-* ** records with /dui/Event
- stream/getevent G2Tfile [geant]
+
+ stream/getevent G2Tfile [geantE]
  
  if (STAF_STATUS(1).ne. 1) then
    message ' INPUT_G2T_FILE#READ ERROR reading Event info!!'
@@ -57,3 +57,5 @@ macro/global/import *
 return
 
 *******************************************************************
+
+
