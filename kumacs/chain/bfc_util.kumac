@@ -45,7 +45,18 @@
 *                                     fpt - ftpc tracking
 *                                     fte - ftpc track evaluator
 *                                    
-* editted 8/24/98 K. Turner - 
+* editted 8/24/98 K. Turner - new/changed modules in chain
+*                               ==> chain name/module
+*                                     fpt_s - ftpc tracking - slow sim
+*                                     fte_s - ftpc track evaluator - slow sim
+*                                     fpt_f - ftpc tracking - fast sim
+*                                     fte_f - ftpc track evaluator - fast sim
+*                           - evr MUST be called before ev0
+*
+* editted 8/25/98 K. Turner - in (evin), right after reading in tables,
+*                             rmdir event/dst - mismatch between old & new 
+*                             directory structure
+*
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -268,6 +279,8 @@ ABEND:
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
             if (staf_status(1).ne.STAFCV_OK) goto EOF
+* 8/25/98 K.Turner - because of mismatch between old and new structure:
+            rmdir event/dst
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
