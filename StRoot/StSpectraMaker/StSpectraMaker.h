@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.5 2000/01/11 19:09:12 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.6 2000/02/03 20:47:41 fisyak Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.6  2000/02/03 20:47:41  fisyak
+// CC5 fixes
+//
 // Revision 1.5  2000/01/11 19:09:12  ogilvie
 // compiles on sun CC5, linux, but not sun cc4
 //
@@ -41,8 +44,9 @@
 #include "StMaker.h"
 #include <TFile.h>
 #include <vector>
+#if !defined(ST_NO_NAMESPACES)
 using std::vector;
-
+#endif
 class StSpectraAnalysis;
 
 class StSpectraMaker : public StMaker {
@@ -69,7 +73,7 @@ public:
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.5 2000/01/11 19:09:12 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.6 2000/02/03 20:47:41 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;};
 
   ClassDef(StSpectraMaker,1)
 

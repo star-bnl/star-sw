@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.16 1999/07/15 13:57:14 perev Exp $
+// $Id: StMinidaqMaker.cxx,v 1.17 2000/02/03 20:47:40 fisyak Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.17  2000/02/03 20:47:40  fisyak
+// CC5 fixes
+//
 // Revision 1.16  1999/07/15 13:57:14  perev
 // cleanup
 //
@@ -300,9 +303,10 @@ void StMinidaqMaker::TransferData(){
    //begin to run module init_raw_table
     cout<<"begin to run module init_raw_table in StMinidaqMaker"<<endl;
    St_DataSetIter next(m_DataSet);
+
    while ((sector=next())){
        Char_t *name= 0;
-       if ((name = strstr(sector->GetName(),"Sector"))) {
+       if ((name = strstr((char *)sector->GetName(),"Sector"))) {
        // look for the sector number
            name  = strchr(name,'_')+1;
            Int_t indx = atoi(name);
@@ -351,7 +355,7 @@ void StMinidaqMaker::TransferData(){
  
       while ((sector=next())){
          Char_t *name= 0;
-          if ((name = strstr(sector->GetName(),"Sector"))) {
+          if ((name = strstr((char *)sector->GetName(),"Sector"))) {
           // look for the sector number
               name  = strchr(name,'_')+1;
               Int_t indx = atoi(name);
