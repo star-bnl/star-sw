@@ -1,6 +1,11 @@
-* $Id: svttgeo3.g,v 1.2 2004/01/22 00:22:59 potekhin Exp $
+* $Id: svttgeo3.g,v 1.3 2004/02/05 20:51:41 potekhin Exp $
 *
 * $Log: svttgeo3.g,v $
+* Revision 1.3  2004/02/05 20:51:41  potekhin
+* Assign the 150 um value to the radial position offset
+* of the wafer, as was decided earlier (and done in version 1
+* as well)
+*
 * Revision 1.2  2004/01/22 00:22:59  potekhin
 * Optionally, position the SVT with MANY option,
 * in case there is an overlap of the PIXL and the beampipe
@@ -168,6 +173,10 @@ Module  SVTTGEO3  is the SVT geometry for STAR: corrected and without SSD
       radii(4)=11.27
       radii(5)=14.19
       radii(6)=15.13
+** Important: the radial offset -- we position by the center of the volume,
+** hence half the wafer thicknes should be added. Remember to change it if
+** it will ever be anyhting other than 300 um.
+      rad_offset=0.015
 ***************************
       shield_phi(1)=9.0
       shield_phi(2)=27.0
