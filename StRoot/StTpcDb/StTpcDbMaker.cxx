@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.6 2000/01/11 15:49:53 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.7 2000/02/10 00:29:09 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.7  2000/02/10 00:29:09  hardtke
+ * Add tpg functions to StTpcDbMaker, fix a few bugs
+ *
  * Revision 1.6  2000/01/11 15:49:53  hardtke
  * get Electronics table from Calibrations database, Fix error messages
  *
@@ -23,8 +26,70 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StTpcDb.h"
-#include "tpc/St_tpg_main_Module.h"
+#include "StDbUtilities/StCoordinates.hh"
+#include "tables/St_tpg_pad_plane_Table.h"
+#include "tables/St_tpg_detector_Table.h"
 ClassImp(StTpcDbMaker)
+
+//
+//C and Fortran routines:
+//________________________________________
+int type_of_call numberOfPadsAtRow_(float *row) {
+    return gStTpcDb->PadPlaneGeometry()->numberOfPadsAtRow((int)*row);
+}
+int type_of_call tpc_row_to_y_(float *row,float *y) {
+  StTpcPadCoordinate raw(12,(int)*row,1,1); //sector 12, row row, pad 1, bucket 1
+  StTpcLocalSectorCoordinate localSector;
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(raw,localSector);
+  *y = localSector.position().y();
+  return 0;
+}
+int type_of_call tpc_pad_to_x_(float *pad,float *row, float* x) {
+  StTpcPadCoordinate raw(12,(int)*row,(int)*pad,1); //sector 12, row row, pad pad, bucket 1
+  StTpcLocalSectorCoordinate localSector;
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(raw,localSector);
+  float offset = *pad - (float)(int)*pad;
+  *x = localSector.position().x() + offset*gStTpcDb->PadPlaneGeometry()->PadPitchAtRow((int)*row);
+  return 0;
+}
+int type_of_call tpc_global_to_local_(int *isect,float *xglobal, float* xlocal){
+  StGlobalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
+  StTpcLocalSectorCoordinate localSector;
+  StTpcPadCoordinate pad;
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(global,localSector); 
+  transform(global,pad);
+  *isect = pad.sector();
+  xlocal[0] = localSector.position().x(); 
+  xlocal[1] = localSector.position().y(); 
+  xlocal[2] = localSector.position().z();
+  return 0; 
+}
+int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
+  StGlobalCoordinate global;
+  StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect);
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(localSector,global); 
+  xglobal[0] = global.position().x(); 
+  xglobal[1] = global.position().y(); 
+  xglobal[2] = global.position().z(); 
+  return 0; 
+}
+int type_of_call tpc_time_to_z_(int *time,int *padin, int* row, int* sector,float *z){
+StTpcPadCoordinate pad(*sector,*row,*padin,*time);
+StTpcLocalSectorCoordinate localSector;
+StTpcCoordinateTransform transform(gStTpcDb);
+transform(pad,localSector);
+*z = localSector.position().z();
+//tph_fit_isolated_cluster wants return=1:
+return 1;
+}
+int type_of_call tpc_drift_velocity_(float *dvel){
+*dvel = gStTpcDb->DriftVelocity();
+return 0;
+}
 
 //_____________________________________________________________________________
 StTpcDbMaker::StTpcDbMaker(const char *name):StMaker(name){
@@ -45,6 +110,7 @@ Int_t StTpcDbMaker::Init(){
    m_tpg_detector = new St_tpg_detector("tpg_detector",1);
    m_tpg_detector->SetNRows(1);
    AddConst(m_tpg_detector);
+   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
 //
    return StMaker::Init();
 }
@@ -55,7 +121,8 @@ Int_t StTpcDbMaker::Make(){
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
    Update_tpg_pad_plane();
-  if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions())
+  if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions()&&
+      tpcDbInterface()->DriftVelocity()) 
    Update_tpg_detector();
   return kStOK;
 }
@@ -84,9 +151,12 @@ void StTpcDbMaker::Update_tpg_pad_plane(){
 void StTpcDbMaker::Update_tpg_detector(){
  if (m_tpg_detector) {
      St_tpg_detector &pp = *m_tpg_detector;
-     pp[0].nsectors = tpcDbInterface()->Dimensions()->numberOfSectors();
- //    m_tpg_detector->drift_length = 0.
-     pp[0].clock_frequency = tpcDbInterface()->Electronics()->samplingFrequency();
+     pp[0].nsectors = 2*tpcDbInterface()->Dimensions()->numberOfSectors();
+           // note tpg table define number of sectors as 48
+     pp[0].drift_length = tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPlaneZ();
+     pp[0].clock_frequency = 1e6*tpcDbInterface()->Electronics()->samplingFrequency();
+     pp[0].z_inner_offset = tpcDbInterface()->PadPlaneGeometry()->innerSectorPadPlaneZ()-tpcDbInterface()->PadPlaneGeometry()->outerSectorPadPlaneZ();
+     pp[0].vdrift = tpcDbInterface()->DriftVelocity();
  }
 }
 
