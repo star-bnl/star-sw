@@ -422,7 +422,7 @@ foreach my $jobnm (@jobSum_set){
       $mjobSt = "n\/a"; 
 
           &sumInfo("$jb_sumFile",1);
-     print "File name: ",$filename, "JobFile=", $mjobFname, "Job Status: ", $mjobSt, "\n";
+     print "File name: ",$filename, "Sum dir: ", $msumDir, "JobFile=", $mjobFname, "Job Status: ", $mjobSt, "\n";
 
 ### update JobStatus table with info for jobs completed
 
@@ -434,7 +434,8 @@ foreach my $jobnm (@jobSum_set){
        
        ($$fObjAdr)->prSer($mproSr);    
        ($$fObjAdr)->job_id($msJobId);  
-       ($$fObjAdr)->smFile($msumFile);   
+       ($$fObjAdr)->smFile($msumFile);
+       ($$fObjAdr)->jbFile($mjobFname);   
        ($$fObjAdr)->NoEvt($mNev);
        ($$fObjAdr)->FstEvt($first_evts);
        ($$fObjAdr)->LstEvt($last_evts);               
@@ -513,6 +514,7 @@ my $mstatus = 0;
 
 my $mName;
 my $jfile;
+my $newset;
 
    $mdataSet  = ($$eachRecoFile)->dset;
    $mfName = ($$eachRecoFile)->filename;
@@ -526,7 +528,7 @@ my $jfile;
    $mfileSeq = $2 ; 
    $mrun = $1;
    $mrunId = substr($1,3) + 0;    
-#   print "file name = ", $mName, " fileSeq = ", $mfileSeq, "  RunID = ",$mrunId, "\n"; 
+#   print "file name = ", $mName, " Run = ", $mrun, " fileSeq = ", $mfileSeq, "  RunID = ",$mrunId, "\n"; 
 #    print "Path = ", $mpath, "File name: ", $mfName, "\n"; 
    if($mfName =~ /dst.xdf/ ) {
      $mformat = "xdf";
@@ -551,13 +553,16 @@ foreach my $jobnm (@jobFSum_set){
       $mproSr   = ($$jobnm)->prSer;
       $msumFile = ($$jobnm)->smFile;
       $mJobId   = ($$jobnm)->job_id;
+      $mjobFname = ($$jobnm)->jbFile;
       $mNevts = ($$jobnm)->NoEvt; 
       $mNevtLo = 1;
       $mNevtHi = $mNevts;
       $jfile = $msumFile;
       $jfile =~ s/.sum//g;
-
-     if ( $mfName =~ /$jfile/) {
+      $newset = $mdataSet;
+      $newset =~ s/\//_/g;
+    
+     if ( $mfName =~ /$jfile/ and $mjobFname =~ /$newset/) {
 
 #    print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n";
       print "updating cpFileCatalogT table\n";
