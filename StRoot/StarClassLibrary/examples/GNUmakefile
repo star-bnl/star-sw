@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.2 1999/06/04 18:04:12 ullrich Exp $
+# $Id: GNUmakefile,v 1.3 1999/12/07 23:40:28 ullrich Exp $
 #
 # Author: Thomas Ullrich, May 1999
 # --------------------------------------------------------------------------
@@ -10,8 +10,11 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
-# Revision 1.2  1999/06/04 18:04:12  ullrich
-# Added dependencies for memInfoTest
+# Revision 1.3  1999/12/07 23:40:28  ullrich
+# Modified options for Linux
+#
+# Revision 1.6  2000/03/16 16:30:58  ullrich
+# Added new example randomTest4.
 #
 # Revision 1.5  1999/12/21 16:30:17  ullrich
 # Added test program for StFastCircleFitter.
@@ -42,7 +45,7 @@ LDFLAGS       :=
 
 # -------- hp_ux102 ---------
 
-	CXXFLAGS     += -fno-for-scope
+ifeq ($(STAR_SYS),hp_ux102)
 	CXX          := aCC 
 	CXXFLAGS     += +d 
         LD           := aCC
