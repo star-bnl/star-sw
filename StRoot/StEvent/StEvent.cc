@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $
+ * $Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.5  1999/02/10 18:58:23  wenaus
- * Print 'bad compiler' line only for bad compiler
+ * Revision 1.6  1999/02/10 21:50:27  wenaus
+ * Plug memory leaks
+ *
+ * Revision 1.7  1999/02/10 23:26:53  wenaus
+ * fix setPrimaryVertex in StEvent to set the vertex type to primary
  *
  * Revision 1.6  1999/02/10 21:50:27  wenaus
  * Plug memory leaks
@@ -30,13 +33,13 @@
  * Fix for Sun compiler peculiarity
  *
  * Revision 1.2  1999/01/15 22:53:39  wenaus
-static const char rcsid[] = "$Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $";
  *
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.6 1999/02/10 21:50:27 wenaus Exp $";
 
 StEvent::StEvent()
 {
@@ -66,12 +69,19 @@ const StEvent&
     delete mTracks;            
     for(StVertexIterator iv=mVertices->begin(); iv != mVertices->end(); iv++) delete *iv;
     delete mVertices;
+    long nht=0;
+    for(StTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) { delete *iht; nht++;}
+    cout << "Deleted TPC hits: " << nht << endl;
     delete mTpcHits;           
+    for(StSvtHitIterator ihs=mSvtHits->begin(); ihs != mSvtHits->end(); ihs++) delete *ihs;
     delete mSvtHits;           
+    for(StFtpcHitIterator ihf=mFtpcHits->begin(); ihf != mFtpcHits->end(); ihf++) delete *ihf;
     delete mFtpcHits;          
     delete mTriggerDetectors;  
     delete mL0Trigger;         
+    for(StEmcHitIterator ihe=mEmcHits->begin(); ihe != mEmcHits->end(); ihe++) delete *ihe;
     delete mEmcHits;         
+    for(StSmdHitIterator ihd=mSmdHits->begin(); ihd != mSmdHits->end(); ihd++) delete *ihd;
     delete mSmdHits;         
     delete mTriggerDetectors; mTriggerDetectors=0;
     delete mL0Trigger; mL0Trigger=0;
