@@ -25,6 +25,8 @@
 * editted 6/15/98 Kathy Turner - small changes to make work for tpc slow sim
 *                              - added documentation to the kumac
 *                              - changed to work for running gstar in kumac
+* editted 6/25/98 Kathy Turner - put in svt initializations - so it will
+*                                work in new system
 * 
 * *****************************************************************
 * TO RUN (updated 6/15/98)
@@ -103,7 +105,7 @@ MACRO run_all _
  ev0_finder=ev0 _
  emc_sim_jet=none _
  reco_outfile=bfc_data_global.xdf _
-   reco_outtable=/dui/data/global 
+   reco_outtable=/dui/event/data/global 
 
 
 ***********************************************************
@@ -207,7 +209,6 @@ $STAR/pams/trg/kumac
  endif
  
  
-
 ****************************************
 *  LOAD LIBRARIES
 **************************************** 
@@ -313,6 +314,8 @@ $STAR/pams/trg/kumac
 
  if [svt_simul] = sss then
    exec svt_slow_sim#initialization
+ elseif [svt_simul] = srs then
+   exec init_srs
  endif
 
  *****************************************
@@ -323,7 +326,7 @@ $STAR/pams/trg/kumac
     exec tpc_clustering#initialize_fast
     exec tpc_fast_sim#initialize
   elseif [tpc_simul]=tss then
-    exec tpc_slow_sim#initialize _ 
+    exec tpc_slow_sim#initialize  _ 
       [adcxyzon] [tpc_sector_first] [tpc_sector_last]
     exec tpc_clustering#initialize
   else
@@ -350,6 +353,42 @@ $STAR/pams/trg/kumac
      message ' track evaluation NOT AVAILABLE for tpc slow sim'
    endif
   endif
+  
+ *****************************************
+ * SVT initialization - tracker
+ *****************************************
+
+ if [svt_tracker].eq.stk then
+   exec svt_tracker#initialize_stk
+ elseif [svt_tracker].eq.sgr then
+    exec svt_tracker#initialize_sgr
+ endif
+ 
+  *****************************************
+ * SVT-TPC track matcher  initialization
+ *****************************************
+
+ if [tpc_svt_match].eq.svm then
+   exec init_svm
+ endif
+ 
+  *****************************************
+ * GLOBAL tracker initialization
+ *****************************************
+
+ if [event_refit].eq.egr then
+   exec init_egr
+ endif
+
+ 
+  *****************************************
+ * V0 finder initialization
+ *****************************************
+
+ if [ev0_finder].eq. ev0 then
+   exec init_ev0#init_ev0
+ endif
+
   
  ****************************************
  * EMC  geometry &  pam initialization 
