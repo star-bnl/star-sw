@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.4 2001/12/11 21:33:40 posk Exp $
+// $Id: StFlowConstants.cxx,v 1.5 2001/12/18 19:21:53 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -19,14 +19,18 @@ ClassImp(Flow)
   Float_t Flow::etaMin = -1.5;
   Float_t Flow::etaMax =  1.5;
 
-  Float_t Flow::ptMin  =   0.;
-  //Float_t Flow::ptMax  =   8.;
-  Float_t Flow::ptMax  =   2.;
+  Float_t Flow::ptMin     = 0.;
+  Float_t Flow::ptMax     = 2.;
+  Float_t Flow::ptMaxPart = 6.;
 
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
+// Revision 1.5  2001/12/18 19:21:53  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.4  2001/12/11 21:33:40  posk
 // Went from one to four sets of histograms for making the event plane isotropic.
 // StFlowEvent::PhiWeight() has changed arguments and return value.

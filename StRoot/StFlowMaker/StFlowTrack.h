@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.22 2001/11/09 21:11:04 posk Exp $
+// $Id: StFlowTrack.h,v 1.23 2001/12/18 19:22:42 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //         FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -209,14 +209,14 @@ inline Float_t StFlowTrack::Y()             const {
   if (strcmp(mPid, "none") == 0)          { M = 0.139; }
   else if (strcmp(mPid, "pi+") == 0)      { M = 0.139; }
   else if (strcmp(mPid, "pi-") == 0)      { M = 0.139; }
-  else if (strcmp(mPid, "proton") == 0)   { M = 0.938; }
-  else if (strcmp(mPid, "pbar") == 0)     { M = 0.938; }
-  else if (strcmp(mPid, "k+") == 0)       { M = 0.494; }
-  else if (strcmp(mPid, "k-") == 0)       { M = 0.494; }
-  else if (strcmp(mPid, "d") == 0)        { M = 1.876; }
-  else if (strcmp(mPid, "dbar") == 0)     { M = 1.876; }
-  else if (strcmp(mPid, "e-") == 0)       { M = 0.0005; }
-  else if (strcmp(mPid, "e+") == 0)       { M = 0.0005; }
+  else if (strcmp(mPid, "pr+") == 0)      { M = 0.938; }
+  else if (strcmp(mPid, "pr-") == 0)      { M = 0.938; }
+  else if (strcmp(mPid, "k+")  == 0)      { M = 0.494; }
+  else if (strcmp(mPid, "k-")  == 0)      { M = 0.494; }
+  else if (strcmp(mPid, "d+")  == 0)      { M = 1.876; }
+  else if (strcmp(mPid, "d-")  == 0)      { M = 1.876; }
+  else if (strcmp(mPid, "e-")  == 0)      { M = 0.0005; }
+  else if (strcmp(mPid, "e+")  == 0)      { M = 0.0005; }
   double Pz = sqrt(this->P()*this->P() - mPt*mPt); 
   if (mEta < 0) { Pz = -Pz; }
   double E = sqrt(this->P()*this->P() + M*M);
@@ -336,6 +336,10 @@ inline void StFlowTrack::SetTopologyMap(StTrackTopologyMap map) { mTopology = ma
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.23  2001/12/18 19:22:42  posk
+// "proton" and "antiproton" changed to "pr+" and "pr-".
+// Compiles on Solaris.
+//
 // Revision 1.22  2001/11/09 21:11:04  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
