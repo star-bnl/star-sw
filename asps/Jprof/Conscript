@@ -34,8 +34,8 @@ $CPPPATH = "#" . $Dir .
     $main::PATH_SEPARATOR . $ObjDir."/exe";
 
 
-# Change some values
-$CPPFLAGS = "";
+# Change some values to accomodate
+#$CPPFLAGS = "";
 $Libraries = " -lJprof -lbfd -liberty -ldl ";
 
 # Correct a 'cons' annoying side-effect
