@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.49 2003/06/10 13:10:05 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.50 2003/06/11 12:06:03 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.50  2003/06/11 12:06:03  jcs
+// get inner cathode and cluster geometry parameters from database
+//
 // Revision 1.49  2003/06/10 13:10:05  jcs
 // get min,max gas temperature and pressure limits from database instead of from
 // parameters
@@ -218,7 +221,9 @@ StMaker(name),
     m_timeoffset(0),
     m_driftfield(0),
     m_gas(0),
-    m_electronics(0)
+    m_electronics(0),
+    m_cathode(0),
+    m_clustergeo(0)
 {
   drawinit=kFALSE;
 }
@@ -333,6 +338,8 @@ Int_t StFtpcClusterMaker::Make()
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
   m_padrow_z   = (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ");
   m_asicmap    = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
+  m_clustergeo = (St_ftpcClusterGeometry *)dblocal_geometry("ftpcClusterGeometry");
+  m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
@@ -375,7 +382,9 @@ Int_t StFtpcClusterMaker::Make()
                                                 m_timeoffset,
                                                 m_driftfield,
                                                 m_gas,
-                                                m_electronics);
+                                                m_electronics,
+						m_cathode,
+					        m_clustergeo);	
 
   if ( paramReader->gasTemperatureWest() == 0 && paramReader->gasTemperatureEast() == 0) {
      cout<<"Using the following values from database:"<<endl;
@@ -387,11 +396,11 @@ Int_t StFtpcClusterMaker::Make()
      cout<<"          defaultTemperatureEast    = "<<dbReader->defaultTemperatureEast()<<endl;
      cout<<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endl;
      cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
-     cout<<"          offsetCathodeWest         = "<<paramReader->offsetCathodeWest()<<endl;
-     cout<<"          offsetCathodeEast         = "<<paramReader->offsetCathodeEast()<<endl;
-     cout<<"          angleOffsetWest           = "<<paramReader->angleOffsetWest()<<endl;
-     cout<<"          angleOffsetEast           = "<<paramReader->angleOffsetEast()<<endl;
-     cout<<"          minChargeWindow           = "<<paramReader->minChargeWindow()<<endl;
+     cout<<"          offsetCathodeWest         = "<<dbReader->offsetCathodeWest()<<endl;
+     cout<<"          offsetCathodeEast         = "<<dbReader->offsetCathodeEast()<<endl;
+     cout<<"          angleOffsetWest           = "<<dbReader->angleOffsetWest()<<endl;
+     cout<<"          angleOffsetEast           = "<<dbReader->angleOffsetEast()<<endl;
+     cout<<"          minChargeWindow           = "<<dbReader->minChargeWindow()<<endl;
   }
 
   St_DataSet *daqDataset;

@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.23 2003/06/10 13:13:51 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.24 2003/06/11 12:06:03 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.24  2003/06/11 12:06:03  jcs
+// get inner cathode and cluster geometry parameters from database
+//
 // Revision 1.23  2003/06/10 13:13:51  jcs
 // get mix,max gas temperature and pressure limits from database
 //
@@ -92,7 +95,9 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcTimeOffset    *timeoffset,
                                St_ftpcDriftField    *driftfield,
                                St_ftpcGas           *gas,
-                               St_ftpcElectronics   *electronics)
+                               St_ftpcElectronics   *electronics,
+			       St_ftpcInnerCathode  *cathode,
+			       St_ftpcClusterGeometry *clustergeo)
 {
 
   //  just copy dimensions table start to pointer
@@ -238,6 +243,37 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   } else {
     gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
   }
+
+  //  just copy inner cathode table start to pointer
+  ftpcInnerCathode_st* cathodeTable = (ftpcInnerCathode_st*)cathode->GetTable();
+  if(cathodeTable){
+    mOffsetCathodeWest = cathodeTable->offsetCathodeWest;
+    mOffsetCathodeEast = cathodeTable->offsetCathodeEast;
+    mAngleOffsetWest   = cathodeTable->angleOffsetWest;
+    mAngleOffsetEast   = cathodeTable->angleOffsetEast;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcInnerCathode","E");
+  }    
+
+  //  just copy cluster geometry table start to pointer
+  ftpcClusterGeometry_st* clustergeoTable = (ftpcClusterGeometry_st*)clustergeo->GetTable();
+  if(clustergeoTable){
+    mMinTimeBin = clustergeoTable->minTimebin;
+    mMinTimeBinMed = clustergeoTable->minTimebinMed;
+    mMinTimeBinOut = clustergeoTable->minTimebinOut;
+    mMaxTimeLength = clustergeoTable->maxTimelength;
+    mMaxTimeLengthMed = clustergeoTable->maxTimelengthMed;
+    mMaxTimeLengthOut =  clustergeoTable->maxTimelengthOut;
+    mMaxPadLength  = clustergeoTable->maxPadlength;  
+    mMaxPadLengthMed  = clustergeoTable->maxPadlengthMed;
+    mMaxPadLengthOut  = clustergeoTable->maxPadlengthOut;
+    mDeltaTime = clustergeoTable->deltaTime;
+    mDeltaPad  = clustergeoTable->deltaPad;
+    mMinChargeWindow = clustergeoTable->minChargeWindow;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcClusterGeometry","E");
+  }
+
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }

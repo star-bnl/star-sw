@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.48 2003/05/15 20:29:50 putschke Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.49 2003/06/11 12:06:03 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.49  2003/06/11 12:06:03  jcs
+// get inner cathode and cluster geometry parameters from database
+//
 // Revision 1.48  2003/05/15 20:29:50  putschke
 // bug fixed
 //
@@ -192,26 +195,26 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   UNFOLDLIMIT = mParam->unfoldLimit();
   UNFOLDFAILEDLIMIT = mParam->unfoldFailedLimit();
 
-  mMinTimeBin = mParam->minTimeBin();
-  mMinTimeBinMed = mParam->minTimeBinMed();
-  mMinTimeBinOut = mParam->minTimeBinOut();
+  mMinTimeBin = mDb->minTimeBin();
+  mMinTimeBinMed = mDb->minTimeBinMed();
+  mMinTimeBinOut = mDb->minTimeBinOut();
 
-  mMaxPadlength = mParam->maxPadLength();
-  mMaxTimelength = mParam->maxTimeLength();
-  mMaxPadlengthMed = mParam->maxPadLengthMed();
-  mMaxTimelengthMed = mParam->maxTimeLengthMed();
-  mMaxPadlengthOut = mParam->maxPadLengthOut();
-  mMaxTimelengthOut = mParam->maxTimeLengthOut();
+  mMaxPadlength = mDb->maxPadLength();
+  mMaxTimelength = mDb->maxTimeLength();
+  mMaxPadlengthMed = mDb->maxPadLengthMed();
+  mMaxTimelengthMed = mDb->maxTimeLengthMed();
+  mMaxPadlengthOut = mDb->maxPadLengthOut();
+  mMaxTimelengthOut = mDb->maxTimeLengthOut();
 
-  DeltaTime = mParam->deltaTime();
-  DeltaPad = mParam->deltaPad();
+  DeltaTime = mDb->deltaTime();
+  DeltaPad = mDb->deltaPad();
 
-  mOffsetCathodeWest = mParam->offsetCathodeWest();
-  mOffsetCathodeEast = mParam->offsetCathodeEast();
-  mAngleOffsetWest = mParam->angleOffsetWest();
-  mAngleOffsetEast = mParam->angleOffsetEast();
+  mMinChargeWindow = mDb->minChargeWindow();
 
-  mMinChargeWindow = mParam->minChargeWindow();
+  mOffsetCathodeWest = mDb->offsetCathodeWest();
+  mOffsetCathodeEast = mDb->offsetCathodeEast();
+  mAngleOffsetWest = mDb->angleOffsetWest();
+  mAngleOffsetEast = mDb->angleOffsetEast();
 
   mhpad = hpad;
   mhtime = htime;
