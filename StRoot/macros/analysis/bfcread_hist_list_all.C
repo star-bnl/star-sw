@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.9 2000/01/05 22:12:03 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.10 2000/01/19 16:29:51 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.10  2000/01/19 16:29:51  kathy
+// update macros to use default input files in /afs/rhic/star/data/samples
+//
 // Revision 1.9  2000/01/05 22:12:03  kathy
 // changed input file to current one
 //
@@ -50,7 +53,7 @@ St_DataSet *Event;
 
 void bfcread_hist_list_all(
   const Char_t *MainFile=
-     "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.hist.root",
+     "/afs/rhic/star/data/samples/gstar.hist.root",
   const Char_t *TopDirTree="bfcTree")
 {
   cout << "bfcread_hist_list_all.C, input hist file = " 

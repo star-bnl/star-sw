@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.7 2000/01/18 16:38:05 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.8 2000/01/19 16:29:50 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.8  2000/01/19 16:29:50  kathy
+// update macros to use default input files in /afs/rhic/star/data/samples
+//
 // Revision 1.7  2000/01/18 16:38:05  kathy
 // add loading of StUtilities and StAnalysisUtilities so that StHistUtil class can now be picked up from StAnalysisUtilities library
 //
@@ -62,7 +65,7 @@ StChain *chain;
 void bfcread_dst_QA_outhistfile(
      Int_t nevents=10, 
      const Char_t *MainFile=
-     "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
+     "/afs/rhic/star/data/samples/gstar.dst.root",
      const Char_t *outHistFile="QAMaker",
      const Char_t *TopDirTree="QAtree",
      const Char_t *MakerHistDir="QA")
