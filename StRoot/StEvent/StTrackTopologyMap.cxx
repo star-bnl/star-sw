@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.14 2002/03/18 17:11:31 jeromel Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.15 2004/08/11 05:21:22 genevb Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.15  2004/08/11 05:21:22  genevb
+ * tpcOnly excludes SSD
+ *
  * Revision 2.14  2002/03/18 17:11:31  jeromel
  * Typo found by Jamie while testing P02gd. Corrected.
  *
@@ -63,7 +66,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.14 2002/03/18 17:11:31 jeromel Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.15 2004/08/11 05:21:22 genevb Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -200,7 +203,8 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
 bool
 StTrackTopologyMap::trackTpcOnly() const
 {
-    return ((hasHitInDetector(kTpcId)) & ~(hasHitInDetector(kSvtId)));
+    return ((hasHitInDetector(kTpcId)) &
+           ~((hasHitInDetector(kSvtId)) | (hasHitInDetector(kSsdId))));
 }
 
 bool
