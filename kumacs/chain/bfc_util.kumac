@@ -64,7 +64,8 @@
 *                             tables so had to change init kumacs for svt,tpc
 *                           - remove rm and rmdir (see few days ago);  just 
 *                             leave old unused tables in
-*
+*                           - write out information to log file from (rg2t)
+*                             
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
