@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.1 1999/09/20 20:09:02 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.2 1999/09/20 20:28:12 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.2  1999/09/20 20:28:12  kathy
+// fix to give macro correct name
+//
 // Revision 1.1  1999/09/20 20:09:02  kathy
 // bfcread_hist_list_all now lists all histograms in hist.root file; bfcread_hist_list now only lists those that are in the Maker that is input; bfcread_hist_to_ps prints and draws the hist that are in the input Maker, bfcread_dst_QAhist.C reads .dst.root file - runs QA_Maker and prints and draws the QA histograms
 //
@@ -28,7 +31,7 @@ StTreeMaker *treeMk=0;
 
 //------------------------------------------------------------------------
 
-void bfcread_hist_to_ps_new(
+void bfcread_hist_to_ps(
   const Char_t *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/set0352_01_35evts.hist.root",
   const Char_t *MakerHist="QA",
   const Char_t *psFile="QA_hist.ps")
