@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-// $Id: St_NodeViewIter.cxx,v 1.8 1999/04/23 00:09:20 fine Exp $
+// $Id: St_NodeViewIter.cxx,v 1.9 1999/10/17 20:45:34 fine Exp $
 // $Log: St_NodeViewIter.cxx,v $
+// Revision 1.9  1999/10/17 20:45:34  fine
+// some clean up
+//
 // Revision 1.8  1999/04/23 00:09:20  fine
 // Working verion of PolyLineShape. Some correction for St_Node family as well
 //
@@ -83,7 +86,7 @@ void St_NodeViewIter::Notify(St_DataSet *set)
   St_NodeView     *view         = (St_NodeView *) set;
   St_NodePosition *position     = 0;
   position = view->GetPosition();
-  St_NodePosition *newPosition=UpdateTempMatrix(position);
+  UpdateTempMatrix(position);
 }
 
 //______________________________________________________________________________
