@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.10 2004/04/08 16:21:57 subhasis Exp $
+ * $Id: StMuTrack.cxx,v 1.11 2004/04/14 03:27:30 jeromel Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -24,7 +24,7 @@ double StMuTrack::mProbabilityPidCentrality=0;
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Global, int index2RichSpectra, bool l3) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), mNSigmaElectron(-999), mNSigmaPion(-999), mNSigmaKaon(-999), mNSigmaProton(-999) ,mdEdx(0.) {
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Global, int index2RichSpectra, bool l3) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), /* mNSigmaElectron(__NOVALUE__), mNSigmaPion(__NOVALUE__), mNSigmaKaon(__NOVALUE__), mNSigmaProton(__NOVALUE__) ,*/ mdEdx(0.) {
 
   const StTrack* globalTrack = track->node()->track(global);
 
@@ -48,6 +48,14 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
     mNSigmaPion =     pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Pion),__SIGMA_SCALE__),     __SIGMA_SCALE__ );
     mNSigmaKaon =     pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Kaon),__SIGMA_SCALE__),     __SIGMA_SCALE__ );
     mNSigmaProton =   pack2Int( fabsMin(PidAlgorithm.numberOfSigma(Proton),__SIGMA_SCALE__),   __SIGMA_SCALE__ );
+  } else {
+    // BEWARE : Data members initialized to __NOVALUE__ was an hazardous
+    // bunsiness as both NOVALUE and SIGMA_SCALE would have to be changed 
+    // simultaneously (error prone). The above is equivalent while safer ...
+    mNSigmaElectron = int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaPion =     int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaKaon =     int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaProton =   int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
   }
 
   // if we have pid traits
@@ -173,6 +181,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.11  2004/04/14 03:27:30  jeromel
+ * Change init of mNSigma
+ *
  * Revision 1.10  2004/04/08 16:21:57  subhasis
  * Initialization ,as suggested by Yuri
  *

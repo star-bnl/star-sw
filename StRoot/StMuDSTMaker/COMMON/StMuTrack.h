@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.7 2003/10/28 18:57:56 perev Exp $
+ * $Id: StMuTrack.h,v 1.8 2004/04/14 03:27:30 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -32,9 +32,9 @@
 
 #include "TObject.h"
 
-#define __NOVALUE__ -999
-#define __PROB_SCALE__ 1000.
+#define __PROB_SCALE__  1000.
 #define __SIGMA_SCALE__ 1000.
+#define __NOVALUE__     -999
 
 class StRichSpectra;
 class StEvent;
@@ -186,6 +186,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.8  2004/04/14 03:27:30  jeromel
+ * Change init of mNSigma
+ *
  * Revision 1.7  2003/10/28 18:57:56  perev
  * BadData protection added
  *
