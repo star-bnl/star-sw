@@ -332,6 +332,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
       (tfc) 
         exec create_tables_tpc#tfc
       (tfc_r)
+         exec create_tables_tpc#tfc_r
          exec tfc_init#init
       (tcl)
          exec create_tables_tpc#tcl_slow
@@ -546,8 +547,7 @@ return
             endif
      (mdin) ls [params]/tpc/TPC_DATA
             if (staf_status(2).eq.STAFCV_OK) then
-               mkdir [raw_data]/tpc/TPC_DATA
-               mv [params]/tpc/TPC_DATA  [raw_data]/tpc/TPC_DATA
+               mv [params]/tpc/TPC_DATA  [raw_data]/tpc
             else
                exec read_table_from_file#read inev /dui/event/raw_data/tpc
                if ($vexist(readprob).ne.0) then 
