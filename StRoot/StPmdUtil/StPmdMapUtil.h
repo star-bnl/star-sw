@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdMapUtil.h,v 1.1 2004/06/24 13:54:35 subhasis Exp $
+ * $Id: StPmdMapUtil.h,v 1.2 2005/01/27 13:10:13 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -15,8 +15,11 @@
  *************************************************************
  *
  * $Log: StPmdMapUtil.h,v $
+ * Revision 1.2  2005/01/27 13:10:13  subhasis
+ * New map for 2005 data
+ *
  * Revision 1.1  2004/06/24 13:54:35  subhasis
- * Maputils added
+ *  Maputils added
  *
  *************************************************************/
 #ifndef STAR_StPmdMapUtil
@@ -42,6 +45,7 @@ class StPmdMapUtil {
   virtual  ~StPmdMapUtil();       //! A destructor
   
   void StoreMapInfo();
+  void StoreMapInfo(Int_t );
   void ReverseChannelOriginal( Int_t,  Int_t, Int_t, Int_t& ); 
   void ReverseChannelConverted( Int_t,  Int_t, Int_t, Int_t& ); 
   void ChainNumber( Int_t,  Int_t, Int_t, Int_t& ); 
@@ -51,16 +55,19 @@ class StPmdMapUtil {
 inline void StPmdMapUtil::ReverseChannelConverted(Int_t sm, Int_t row, Int_t col, Int_t& channel)
 {
 channel=m_TempChannelInBoard[sm-1][row-1][col-1];
+//cout<<"channelC, sm,row,col "<<channel<<" "<<sm<<" "<<row<<" "<<col<<endl;
 }
 
 inline void StPmdMapUtil::ReverseChannelOriginal(Int_t sm, Int_t row, Int_t col, Int_t& channel)
 {
 channel=m_ChannelInBoard[sm-1][row-1][col-1];
+//cout<<"channelR, sm,row,col "<<channel<<" "<<sm<<" "<<row<<" "<<col<<endl;
 }
 
 inline void StPmdMapUtil::ChainNumber(Int_t sm, Int_t row, Int_t col, Int_t& chain)
 {
 chain=m_Chain[sm-1][row-1][col-1];
+//cout<<"chain, sm,row,col "<<chain<<" "<<sm<<" "<<row<<" "<<col<<endl;
 }
 
 #endif

@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.12 2005/01/08 16:47:02 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.13 2005/01/27 13:09:50 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.13  2005/01/27 13:09:50  subhasis
+ * New map for 2005 data
+ *
  * Revision 1.12  2005/01/08 16:47:02  subhasis
  * status problem fixed for chain#7 (Rashmi)
  *
@@ -191,6 +194,7 @@ void StPmdGeom::DetCell_xy(Int_t nmod,Float_t row, Float_t col,Float_t& xreal, F
 //! function for converting supermodule,row,col to x,y,eta,phi after conversionfrom 17 to 12 supermodule 
 void StPmdGeom::IntDetCell_xy(Int_t nmod,Int_t row, Int_t col,Float_t& xreal, Float_t& yreal,Float_t& eta,Float_t& phi)
 {
+  if(nmod>12) nmod=nmod-12;
   if(nmod<=4)
     {
       xreal = mdetxcon[nmod-1] - (col - 1) * mconst2;
@@ -1275,7 +1279,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
   Int_t year =0;
   rn=atoi(iRun);
   year=atoi(iyear);
-  cout<<"runno, rn1 "<<runno1<<" "<<rn<<" "<<year<<endl;
+  cout<<"runid="<<runno1<<" run#="<<rn<<" year="<<year<<endl;
   
  if(year==5){  // 2004 run
   // Once the day is know choose the mapping file
@@ -1630,7 +1634,7 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
       //chain 45
       status[44][3]=0;status[44][6]=0;
       for(Int_t i=12;i<18;i++)status[44][i]=0;
-      for(Int_t i=19;i<27;i++)status[44][i]=0;
+      for(Int_t i=18;i<27;i++)status[44][i]=0;
       //chain 46
       for(Int_t i=9;i<27;i++)status[45][i]=0;
       //chain 47
@@ -1650,12 +1654,17 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
 // (Y2005, rashmi's code)Function used for mapping from Chain#, Channel# to Detector SM, Col, Row
 Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t&chmod,Int_t year)
 {
+  //initialized to zero rr 27.1.2005
+  supmod =0;
+  col =0; 
+  row = 0;
+
   Int_t chain = chainno;
   Int_t chtemp=ch;
   Int_t brd=Int_t((ch)/64)+1;
   Int_t missing=0;
   Int_t brdCount=0;
-  for(Int_t ibrd=0;ibrd<36;ibrd++)
+  for(Int_t ibrd=0;ibrd<27;ibrd++)
     {
     if(brdCount<brd)
       {
@@ -1663,6 +1672,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
 	brdCount+=status[chainno-1][ibrd];
       }
     }
+
   chtemp=ch+missing*64;
   chmod=chtemp;
   
@@ -1715,7 +1725,7 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain13(chtemp,supmod,col,row,year);
     break;
   case 14:
-    chain15(chtemp,supmod,col,row,year);
+    chain14(chtemp,supmod,col,row,year);
     break;
   case 15:
     chain15(chtemp,supmod,col,row,year);
@@ -1826,211 +1836,251 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
 // The following chains [1-48] have been mapped for run05
 void StPmdGeom::chain1(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 1;
   Int_t zone = ch/192;
   switch(zone){
   case 0:
     col = inorm[ch]; row = 8 + jnorm[ch];
+    supmod = 1;
     break;
   case 1:
     col = 25 - inorm[ch-192]; row = 25 - jnorm[ch-192];
+    supmod = 1;
     break;
   case 2:
     col = 49 - inorm[ch-2*192]; row = 25 - jnorm[ch-2*192];
+    supmod = 1;
     break;
   case 3:
     col = 24 + inorm[ch-3*192]; row = 24 + jnorm[ch-3*192];
+    supmod = 1;
     break;
   case 4:
     col = inorm[ch-4*192]; row = 24 + jnorm[ch-4*192];
+    supmod = 1;
     break;
   case 5:
     col = 25 - inorm[ch-5*192]; row = 41 - jnorm[ch-5*192];
+    supmod = 1;
     break;
   case 6:
     col = 49 - inorm[ch-6*192]; row = 41 - jnorm[ch-6*192];
+    supmod = 1;
     break;
   case 7:
     col = 24 + inorm[ch-7*192]; row = 40 + jnorm[ch-7*192];
+    supmod = 1;
     break;
   case 8:
     col = inorm[ch-8*192]; row = 40 + jnorm[ch-8*192];
+    supmod = 1;
     break;
   }
 }
 void StPmdGeom::chain2(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 2;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  48 + inorm[ch];
       row =  jnorm[ch];
+      supmod = 2;
       break;
     case 1:
       col =  24 + inorm[ch-192];
       row =  jnorm[ch-192];
+      supmod = 2;
       break;
     case 2:
       col = inorm[ch-2*192];
       row = jnorm[ch-2*192];
+      supmod = 2;
       break;
     case 3:
       col = 25 - inorm[ch-3*192];
       row = 17 - jnorm[ch-3*192];
+      supmod = 2;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  17 - jnorm[ch-4*192];
+      supmod = 2;
       break;
     case 5:
       col =  73 - inorm[ch-5*192];
       row =  17 - jnorm[ch-5*192];
+      supmod = 2;
       break;
     case 6:
       col = 48 + inorm[ch-6*192];
       row = 16 + jnorm[ch-6*192];
+      supmod = 2;
       break;
     case 7:
       col = 24 + inorm[ch-7*192];
       row = 16 + jnorm[ch-7*192];
+      supmod = 2;
       break;
     case 8:
       col = inorm[ch-8*192];
       row = 16 + jnorm[ch-8*192];
+      supmod = 2;
       break;
     }
 }
 void StPmdGeom::chain3(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 3;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 16 + imirr[ch];
       row = jmirr[ch];
+      supmod = 3;
       break;
     case 1:
       col = 16 + imirr[ch-192];
       row = 24 + jmirr[ch-192];
+      supmod = 3;
       break;
     case 2:
       col = 16 + imirr[ch-2*192];
       row = 48 + jmirr[ch-2*192];
+      supmod = 3;
       break;
     case 3:
       col = 17 - imirr[ch-3*192];
       row = 73 - jmirr[ch-3*192];
+      supmod = 3;
       break;
     case 4:
       col = 17 - imirr[ch-4*192];
       row = 49 - jmirr[ch-4*192];
+      supmod = 3;
       break;
     case 5:
       col = 17 - imirr[ch-5*192];
       row = 25 - jmirr[ch-5*192];
+      supmod = 3;
       break;
     case 6:
       col = imirr[ch-6*192];
       row = jmirr[ch-6*192];
+      supmod = 3;
       break;
     case 7:
       col =  imirr[ch-7*192];
       row =  24 + jmirr[ch-7*192];
+      supmod = 3;
       break;
     case 8:
       col = imirr[ch-8*192];
       row = 48 + jmirr[ch-8*192];
+      supmod = 3;
       break;
     }
 }
 void StPmdGeom::chain4(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 2;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  48 + inorm[ch];
       row =  24 + jnorm[ch];
+      supmod = 2;
       break;
     case 1:
       col =  24 + inorm[ch-192];
       row =  24 + jnorm[ch-192];
+      supmod = 2;
       break;
     case 2:
       col = inorm[ch-2*192];
       row = 24 + jnorm[ch-2*192];
+      supmod = 2;
       break;
     case 3:
       col = 25 - inorm[ch-3*192];
       row = 41 - jnorm[ch-3*192];
+      supmod = 2;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  41 -  jnorm[ch-4*192];
+      supmod = 2;
       break;
     case 5:
       col =  73 - inorm[ch-5*192];
       row =  41 - jnorm[ch-5*192];
+      supmod = 2;
       break;
     case 6:
       col = 48 + inorm[ch-6*192];
       row = 40 + jnorm[ch-6*192];
+      supmod = 2;
       break;
     case 7:
       col = 24 + inorm[ch-7*192];
       row = 40 + jnorm[ch-7*192];
+      supmod = 2;
       break;
     case 8:
       col = inorm[ch-8*192];
       row = 40 + jnorm[ch-8*192];
+      supmod = 2;
       break;
     }
 }
 void StPmdGeom::chain5(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 3;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 40 + imirr[ch];
       row = jmirr[ch];
+      supmod = 3;
       break;
     case 1:
       col = 40 + imirr[ch-192];
       row = 24 + jmirr[ch-192];
+      supmod = 3;
       break;
     case 2:
       col = 40 + imirr[ch-2*192];
       row = 48 + jmirr[ch-2*192];
+      supmod = 3;
       break;
     case 3:
       col = 41 - imirr[ch-3*192];
       row = 73 - jmirr[ch-3*192];
+      supmod = 3;
       break;
     case 4:
       col = 41 - imirr[ch-4*192];
       row = 49 - jmirr[ch-4*192];
+      supmod = 3;
       break;
     case 5:
       col = 41 - imirr[ch-5*192];
       row = 25 - jmirr[ch-5*192];
+      supmod = 3;
       break;
     case 6:
       col = 24 + imirr[ch-6*192];
       row = jmirr[ch-6*192];
+      supmod = 3;
       break;
     case 7:
       col =  24 + imirr[ch-7*192];
       row =  24 + jmirr[ch-7*192];
+      supmod = 3;
       break;
     case 8:
       col = 24 + imirr[ch-8*192];
       row = 48 + jmirr[ch-8*192];
+      supmod = 3;
       break;
     }
 }
@@ -2042,109 +2092,127 @@ void StPmdGeom::chain6(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 }
 void StPmdGeom::chain7(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 4;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  48 + inorm[ch];
       row =  jnorm[ch];
+      supmod = 4;
       break;
     case 1:
       col =  24 + inorm[ch-192];
       row =  jnorm[ch-192];
+      supmod = 4;
       break;
     case 2:
       col = inorm[ch-2*192];
       row = jnorm[ch-2*192];
+      supmod = 4;
       break;
     case 3:
       col = 25 - inorm[ch-3*192];
       row = 17 - jnorm[ch-3*192];
+      supmod = 4;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  17 -  jnorm[ch-4*192];
+      supmod = 4;
       break;
     case 5:
       col =  73 - inorm[ch-5*192];
       row =  17 - jnorm[ch-5*192];
+      supmod = 4;
       break;
     case 6:
       col = 40 + inorm[ch-6*192];
       row = 16 + jnorm[ch-6*192];
+      supmod = 4;
       break;
     case 7:
       col = 24 + inorm[ch-7*192];
       row = 24 + jnorm[ch-7*192];
+      supmod = 4;
       break;
     case 8:
       col = inorm[ch-8*192];
       row = 24 + jnorm[ch-8*192];
+      supmod = 4;
       break;
     }
 }
 void StPmdGeom::chain8(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 5;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 48 + inorm[ch];
       row = jnorm[ch];
+      supmod = 5;
       break;
     case 1:
       col = 24 + inorm[ch-192];
       row = jnorm[ch-192];
+      supmod = 5;
       break;
     case 2:
       col =  inorm[ch-2*192];
       row =  jnorm[ch-2*192];
+      supmod = 5;
       break;
     case 3:
       col =  25 - inorm[ch-3*192];
       row =  17 - jnorm[ch-3*192];
+      supmod = 5;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  17 - jnorm[ch-4*192];
+      supmod = 5;
       break;
     case 5:
       col = 73 - inorm[ch-5*192];
       row = 17 - jnorm[ch-5*192];
+      supmod = 5;
       break;
     case 6:
       col = 48 + inorm[ch-6*192];
       row = 16 + jnorm[ch-6*192];
+      supmod = 5;
       break;
     case 7:
       col =  24 + inorm[ch-7*192];
       row =  16 + jnorm[ch-7*192];
+      supmod = 5;
       break;
     case 8:
       col =  inorm[ch-8*192];
       row = 16 + jnorm[ch-8*192];
+      supmod = 5;
       break;
     }
 }
 void StPmdGeom::chain9(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 4;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  48 + inorm[ch];
       row =  48 + jnorm[ch];
+      supmod = 4;
       break;
     case 1:
       col =  73 - inorm[ch-192];
       row =  65 - jnorm[ch-192];
+      supmod = 4;
       break;
     case 2:
       col = 48 + inorm[ch-2*192];
       row = 64 + jnorm[ch-2*192];
+      supmod = 4;
       break;
     case 3:
       col = 25 - inorm[ch-3*192];
@@ -2180,65 +2248,75 @@ void StPmdGeom::chain9(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 }
 void StPmdGeom::chain10(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 5;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 48 + inorm[ch];
       row = 24 + jnorm[ch];
+      supmod = 5;
       break;
     case 1:
       col = 24 + inorm[ch-192];
       row = 24 + jnorm[ch-192];
+      supmod = 5;
       break;
     case 2:
       col =  inorm[ch-2*192];
       row =  24 + jnorm[ch-2*192];
+      supmod = 5;
       break;
     case 3:
       col =  25 - inorm[ch-3*192];
       row =  41 - jnorm[ch-3*192];
+      supmod = 5;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  41 - jnorm[ch-4*192];
+      supmod = 5;
       break;
     case 5:
       col = 73 - inorm[ch-5*192];
       row = 41 - jnorm[ch-5*192];
+      supmod = 5;
       break;
     case 6:
       col = 48 + inorm[ch-6*192];
       row = 40 + jnorm[ch-6*192];
+      supmod = 5;
       break;
     case 7:
       col =  24 + inorm[ch-7*192];
       row =  40 + jnorm[ch-7*192];
+      supmod = 5;
       break;
     case 8:
       col =  inorm[ch-8*192];
       row = 40 + jnorm[ch-8*192];
+      supmod = 5;
       break;
     }
 }
 void StPmdGeom::chain11(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 4;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  24 + inorm[ch];
       row =  48 + jnorm[ch];
+      supmod = 4;
       break;
     case 1:
       col =  49 - inorm[ch-192];
       row =  65 - jnorm[ch-192];
+      supmod = 4;
       break;
     case 2:
       col = 24 + inorm[ch-2*192];
       row = 64 + jnorm[ch-2*192];
+      supmod = 4;
       break;
     case 3:
       col = 25 - inorm[ch-3*192];
@@ -2276,53 +2354,60 @@ void StPmdGeom::chain11(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 
 void StPmdGeom::chain12(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 7;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  25 - inorm[ch];
       row =  25 - jnorm[ch];
+      supmod = 7;
       break;
     case 1:
       col =  49 - inorm[ch-192];
       row =  25 - jnorm[ch-192];
+      supmod = 7;
       break;
     case 2:
       col = 24 + inorm[ch-2*192];
       row = 8  + jnorm[ch-2*192];
+      supmod = 7;
       break;
     case 3:
       col = inorm[ch-3*192];
       row = 8 + jnorm[ch-3*192];
+      supmod = 7;
       break;
     case 4:
       col =  25 - inorm[ch-4*192];
       row =  9  - jnorm[ch-4*192];
+      supmod = 7;
       break;
     case 5:
       col =  49 - inorm[ch-5*192];
       row =  9  - jnorm[ch-5*192];
+      supmod = 7;
       break;
     }
 }
 void StPmdGeom::chain13(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 6;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  73 - inorm[ch];
       row =  9 - jnorm[ch];
+      supmod = 6;
       break;
     case 1:
       col =  48 + inorm[ch-192];
       row =  8  + jnorm[ch-192];
+      supmod = 6;
       break;
     case 2:
       col = 73 - inorm[ch-2*192];
       row = 25 - jnorm[ch-2*192];
+      supmod = 6;
       break;
     case 3:
       col =  25 - inorm[ch-3*192];
@@ -2365,110 +2450,128 @@ void StPmdGeom::chain14(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 
 void StPmdGeom::chain15(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 9;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 40 + imirr[ch];
       row = jmirr[ch];
+      supmod = 9;
       break;
     case 1:
       col = 40 + imirr[ch-192];
       row = 24 + jmirr[ch-192];
+      supmod = 9;
       break;
     case 2:
       col = 41 - imirr[ch-2*192];
       row = 49 - jmirr[ch-2*192];
+      supmod = 9;
       break;
     case 3:
       col = 41 - imirr[ch-3*192];
       row = 25 - jmirr[ch-3*192];
+      supmod = 9;
       break;
     case 4:
       col = 24 + imirr[ch-4*192];
       row = jmirr[ch-4*192];
+      supmod = 9;
       break;
     case 5:
       col = 24 + imirr[ch-5*192];
       row = 24 + jmirr[ch-5*192];
+      supmod = 9;
       break;
     }
 }
 void StPmdGeom::chain16(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 9;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 16 + imirr[ch];
       row = jmirr[ch];
+      supmod = 9;
       break;
     case 1:
       col = 16 + imirr[ch-192];
       row = 24 + jmirr[ch-192];
+      supmod = 9;
       break;
     case 2:
       col = 17 - imirr[ch-2*192];
       row = 49 - jmirr[ch-2*192];
+      supmod = 9;
       break;
     case 3:
       col = 17 - imirr[ch-3*192];
       row = 25 - jmirr[ch-3*192];
+      supmod = 9;
       break;
     case 4:
       col = imirr[ch-4*192];
       row = jmirr[ch-4*192];
+      supmod = 9;
       break;
     case 5:
       col = imirr[ch-5*192];
       row = 24 + jmirr[ch-5*192];
+      supmod = 9;
       break;
     }
 }
 
 void StPmdGeom::chain17(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 11;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  48 + inorm[ch];
       row =  24 + jnorm[ch];
+      supmod = 11;
       break;
     case 1:
       col =  24 + inorm[ch-192];
       row =  24 + jnorm[ch-192];
+      supmod = 11;
       break;
     case 2:
       col = inorm[ch-2*192];
       row = 24 + jnorm[ch-2*192];
+      supmod = 11;
       break;
     case 3:
       col =  25 - inorm[ch-3*192];
       row =  41 - jnorm[ch-3*192];
+      supmod = 11;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  41 - jnorm[ch-4*192];
+      supmod = 11;
       break;
     case 5:
       col =  73 - inorm[ch-5*192];
       row =  41 - jnorm[ch-5*192];
+      supmod = 11;
       break;
     case 6:
       col = 48 + inorm[ch-6*192];
       row = 40 + jnorm[ch-6*192];
+      supmod = 11;
       break;
     case 7:
       col = 24 + inorm[ch-7*192];
       row = 40 + jnorm[ch-7*192];
+      supmod = 11;
       break;
     case 8:
       col = inorm[ch-8*192];
       row = 40 + jnorm[ch-8*192];
+      supmod = 11;
       break;
     }
 }
@@ -2481,45 +2584,53 @@ void StPmdGeom::chain18(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 
 void StPmdGeom::chain19(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 11;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  48 + inorm[ch];
       row =  jnorm[ch];
+      supmod = 11;
       break;
     case 1:
       col =  24 + inorm[ch-192];
       row =  jnorm[ch-192];
+      supmod = 11;
       break;
     case 2:
       col = inorm[ch-2*192];
       row = jnorm[ch-2*192];
+      supmod = 11;
       break;
     case 3:
       col =  25 - inorm[ch-3*192];
       row =  17 - jnorm[ch-3*192];
+      supmod = 11;
       break;
     case 4:
       col =  49 - inorm[ch-4*192];
       row =  17 - jnorm[ch-4*192];
+      supmod = 11;
       break;
     case 5:
       col =  73 - inorm[ch-5*192];
       row =  17 - jnorm[ch-5*192];
+      supmod = 11;
       break;
     case 6:
       col = 48 + inorm[ch-6*192];
       row = 16 + jnorm[ch-6*192];
+      supmod = 11;
       break;
     case 7:
       col = 24 + inorm[ch-7*192];
       row = 16 + jnorm[ch-7*192];
+      supmod = 11;
       break;
     case 8:
       col = inorm[ch-8*192];
       row = 16 + jnorm[ch-8*192];
+      supmod = 11;
       break;
     }
 }
@@ -2532,45 +2643,53 @@ void StPmdGeom::chain20(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 
 void StPmdGeom::chain21(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 12;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 9 - imirr[ch];
       row = 73 - jmirr[ch];
+      supmod = 12;
       break;
     case 1:
       col = 8 + imirr[ch-192];
       row = 48 + jmirr[ch-192];
+      supmod = 12;
       break;
     case 2:
       col = 25 - imirr[ch-2*192];
       row = 73 - jmirr[ch-2*192];
+      supmod = 12;
       break;
     case 3:
       col = 33 - imirr[ch-3*192];
       row = 73 - jmirr[ch-3*192];
+      supmod = 12;
       break;
     case 4:
       col = 33 - imirr[ch-4*192];
       row = 49 - jmirr[ch-4*192];
+      supmod = 12;
       break;
     case 5:
       col = 32 + imirr[ch-5*192];
       row = 24 + jmirr[ch-5*192];
+      supmod = 12;
       break;
     case 6:
       col = 32 + imirr[ch-6*192];
       row = 48 + jmirr[ch-6*192];
+      supmod = 12;
       break;
     case 7:
       col =  49 - imirr[ch-7*192];
       row =  73 - jmirr[ch-7*192];
+      supmod = 12;
       break;
     case 8:
       col = 49 - imirr[ch-8*192];
       row = 49 - jmirr[ch-8*192];
+      supmod = 12;
       break;
     }
 }
@@ -2583,908 +2702,1047 @@ void StPmdGeom::chain22(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
 
 void StPmdGeom::chain23(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 12;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col =  57 - imirr[ch];
       row =  73 - jmirr[ch];
+      supmod = 12;
       break;
     case 1:
       col =  57 - imirr[ch-192];
       row =  49 - jmirr[ch-192];
+      supmod = 12;
       break;
     case 2:
       col =  57 - imirr[ch-2*192];
       row =  25 - jmirr[ch-2*192];
+      supmod = 12;
       break;
     case 3:
       col = 56 + imirr[ch-3*192];
       row = jmirr[ch-3*192];
+      supmod = 12;
       break;
     case 4:
       col = 56 + imirr[ch-4*192];
       row = 24 + jmirr[ch-4*192];
+      supmod = 12;
       break;
     case 5:
       col = 56 + imirr[ch-5*192];
       row = 48 + jmirr[ch-5*192];
+      supmod = 12;
       break;
     case 6:
       col = 73 - imirr[ch-6*192];
       row = 73 - jmirr[ch-6*192];
+      supmod = 12;
       break;
     case 7:
       col =  73 - imirr[ch-7*192];
       row =  49 - jmirr[ch-7*192];
+      supmod = 12;
       break;
     case 8:
       col = 73 - imirr[ch-8*192];
       row = 25 - jmirr[ch-8*192];
+      supmod = 12;
       break;
     }
 }
 void StPmdGeom::chain24(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 12;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 97 - imirr[ch];
       row = 73 - jmirr[ch];
+      supmod = 12;
       break;
     case 1:
       col = 97 - imirr[ch-192];
       row = 49 - jmirr[ch-192];
+      supmod = 12;
       break;
     case 2:
       col = 97 - imirr[ch-2*192];
       row = 25 - jmirr[ch-2*192];
+      supmod = 12;
       break;
     case 3:
       col = 80 + imirr[ch-3*192];
       row = jmirr[ch-3*192];
+      supmod = 12;
       break;
     case 4:
       col = 80 + imirr[ch-4*192];
       row = 24 + jmirr[ch-4*192];
+      supmod = 12;
       break;
     case 5:
       col = 80 + imirr[ch-5*192];
       row = 48 + jmirr[ch-5*192];
+      supmod = 12;
       break;
     case 6:
       col = 81 - imirr[ch-6*192];
       row = 73 - jmirr[ch-6*192];
+      supmod = 12;
       break;
     case 7:
       col =  81 - imirr[ch-7*192];
       row =  49 - jmirr[ch-7*192];
+      supmod = 12;
       break;
     case 8:
       col = 81 - imirr[ch-8*192];
       row = 25 - jmirr[ch-8*192];
+      supmod = 12;
       break;
     }
 }
 
 void StPmdGeom::chain25(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 1;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 49 - jmirr[ch];
       row = 9 - imirr[ch];
+      supmod = 1+12;
       break;
     case 1:
       col = 25 - jmirr[ch-192];
       row = 9 - imirr[ch-192];
+      supmod = 1+12;
       break;
     case 2:
       col = jmirr[ch-2*192];
       row = 8 + imirr[ch-2*192];
+      supmod = 1+12;
       break;
     case 3:
       col = 24 + jmirr[ch-3*192];
       row = 8 + imirr[ch-3*192];
+      supmod = 1+12;
       break;
     case 4:
       col = 49 - jmirr[ch-4*192];
       row = 25 - imirr[ch-4*192];
+      supmod = 1+12;
       break;
     case 5:
       col = 25 - jmirr[ch-5*192];
       row = 25 - imirr[ch-5*192];
+      supmod = 1+12;
       break;
     case 6:
       col = 25 - jmirr[ch-6*192];
       row = 33 - imirr[ch-6*192];
+      supmod = 1+12;
       break;
     case 7:
       col = jmirr[ch-7*192];
       row = 32 + imirr[ch-7*192];
+      supmod = 1+12;
       break;
     case 8:
       col = 25 - jmirr[ch-8*192];
       row = 49 - imirr[ch-8*192];
+      supmod = 1+12;
       break;
     }
 }
 void StPmdGeom::chain26(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 2;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 73 - jmirr[ch];
       row = 9 - imirr[ch];
+      supmod = 2+12;
       break;
     case 1:
       col = 49 - jmirr[ch-192];
       row = 9 - imirr[ch-192];
+      supmod = 2+12;
       break;
     case 2:
       col = 25 - jmirr[ch-2*192];
       row = 9 - imirr[ch-2*192];
+      supmod = 2+12;
       break;
     case 3:
       col = jmirr[ch-3*192];
       row = 8 + imirr[ch-3*192];
+      supmod = 2+12;
       break;
     case 4:
       col = 24 + jmirr[ch-4*192];
       row = 8 + imirr[ch-4*192];
+      supmod = 2+12;
       break;
     case 5:
       col = 48 + jmirr[ch-5*192];
       row = 8 + imirr[ch-5*192];
+      supmod = 2+12;
       break;
     case 6:
       col = 73 - jmirr[ch-6*192];
       row = 25 - imirr[ch-6*192];
+      supmod = 2+12;
       break;
     case 7:
       col = 49 - jmirr[ch-7*192];
       row = 25 - imirr[ch-7*192];
+      supmod = 2+12;
       break;
     case 8:
       col = 25 - jmirr[ch-8*192];
       row = 25 - imirr[ch-8*192];
+      supmod = 2+12;
       break;
     }
 }
 void StPmdGeom::chain27(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 1;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 49 - jmirr[ch];
       row = 49 - 16 - imirr[ch];
+      supmod = 1+12;
       break;
     case 1:
       col = 24 + jmirr[ch-192];
       row = 32 + imirr[ch-192];
+      supmod = 1+12;
       break;
     case 2:
       col = 49 - jmirr[ch-2*192];
       row = 49- imirr[ch-2*192];
+      supmod = 1+12;
       break;
     case 3:
       col = 25-jnorm[ch-3*192];
       row = 25-inorm[ch-3*192];
-      supmod = 3;
+      supmod = 3+12;
       break;
     case 4:
       col = 25-jnorm[ch-4*192];
       row = 49-inorm[ch-4*192];
-      supmod = 3;
+      supmod = 3+12;
       break;
     case 5:
       col = 8+jnorm[ch-5*192];
       row = 24+inorm[ch-5*192];
-      supmod = 3;
+      supmod = 3+12;
       break;
     case 6:
       col = 8+jnorm[ch-6*192];
       row = inorm[ch-6*192];
-      supmod = 3;
+      supmod = 3+12;
       break;
     case 7:
       col = 9-jnorm[ch-7*192];
       row = 25-inorm[ch-7*192];
-      supmod = 3;
+      supmod = 3+12;
       break;
     case 8:
       col = 9-jnorm[ch-8*192];
       row = 49-inorm[ch-8*192];
-      supmod = 3;
+      supmod = 3+12;
       break;
     } 
 }
 
 void StPmdGeom::chain28(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 2;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 73 - jmirr[ch];
       row = 33 - imirr[ch];
+      supmod = 2+12;
       break;
     case 1:
       col = 49 - jmirr[ch-192];
       row = 33 - imirr[ch-192];
+      supmod = 2+12;
       break;
     case 2:
       col = 25 - jmirr[ch-2*192];
       row = 33 - imirr[ch-2*192];
+      supmod = 2+12;
       break;
     case 3:
       col = jmirr[ch-3*192];
       row = 32 + imirr[ch-3*192];
+      supmod = 2+12;
       break;
     case 4:
       col = 24 + jmirr[ch-4*192];
       row = 32 + imirr[ch-4*192];
+      supmod = 2+12;
       break;
     case 5:
       col = 48 + jmirr[ch-5*192];
       row = 32 + imirr[ch-5*192];
+      supmod = 2+12;
       break;
     case 6:
       col = 73 - jmirr[ch-6*192];
       row = 49 - imirr[ch-6*192];
+      supmod = 2+12;
       break;
     case 7:
       col = 49 - jmirr[ch-7*192];
       row = 49 - imirr[ch-7*192];
+      supmod = 2+12;
       break;
     case 8:
       col = 25 - jmirr[ch-8*192];
       row = 49 - imirr[ch-8*192];
+      supmod = 2+12;
       break;
     }
 }
 
 void StPmdGeom::chain29(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {   
-  supmod = 3;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 49 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 3+12;
       break;
     case 1:
       col = 49 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 3+12;
       break;
     case 2:
       col = 49 - jnorm[ch-2*192];
       row = 73 - inorm[ch-2*192];
+      supmod = 3+12;
       break;
     case 3:
       col = 32 + jnorm[ch-3*192];
       row = 48 + inorm[ch-3*192];
+      supmod = 3+12;
       break;
     case 4:
       col = 32 + jnorm[ch-4*192];
       row = 24 + inorm[ch-4*192];
+      supmod = 3+12;
       break;
     case 5:
       col = 32 + jnorm[ch-5*192];
       row = inorm[ch-5*192];
+      supmod = 3+12;
       break;
     case 6:
       col = 33 - jnorm[ch-6*192];
       row = 25 - inorm[ch-6*192];
+      supmod = 3+12;
       break;
     case 7:
       col = 33 - jnorm[ch-7*192];
       row = 49 - inorm[ch-7*192];
+      supmod = 3+12;
       break;
     case 8:
       col = 33 - jnorm[ch-8*192];
       row = 73 - inorm[ch-8*192];
+      supmod = 3+12;
       break;
     }
 }
 void StPmdGeom::chain30(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 4;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 73 - jmirr[ch];
       row = 9 - imirr[ch];
+      supmod = 4+12;
       break;
     case 1:
       col = 49 - jmirr[ch-192];
       row = 9 - imirr[ch-192];
+      supmod = 4+12;
       break;
     case 2:
       col = 25 - jmirr[ch-2*192];
       row = 9 - imirr[ch-2*192];
+      supmod = 4+12;
       break;
     case 3:
       col = jmirr[ch-3*192];
       row = 8 + imirr[ch-3*192];
+      supmod = 4+12;
       break;
     case 4:
       col = 24 + jmirr[ch-4*192];
       row = 8 + imirr[ch-4*192];
+      supmod = 4+12;
       break;
     case 5:
       col = 48 + jmirr[ch-5*192];
       row = 8 + imirr[ch-5*192];
+      supmod = 4+12;
       break;
     case 6:
       col = 73 - jmirr[ch-6*192];
       row = 25 - imirr[ch-6*192];
+      supmod = 4+12;
       break;
     case 7:
       col = 49 - jmirr[ch-7*192];
       row = 25 - imirr[ch-7*192];
+      supmod = 4+12;
       break;
     case 8:
       col = 25 - jmirr[ch-8*192];
       row = 25 - imirr[ch-8*192];
+      supmod = 4+12;
       break;
     }
 }
 void StPmdGeom::chain31(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 4;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 73 - jmirr[ch];
       row = 33 - imirr[ch];
+      supmod = 4+12;
       break;
     case 1:
       col = 49 - jmirr[ch-192];
       row = 33 - imirr[ch-192];
+      supmod = 4+12;
       break;
     case 2:
       col = 25 - jmirr[ch-2*192];
       row = 33 - imirr[ch-2*192];
+      supmod = 4+12;
       break;
     case 3:
       col = jmirr[ch-3*192];
       row = 32 + imirr[ch-3*192];
+      supmod = 4+12;
       break;
     case 4:
       col = 24 + jmirr[ch-4*192];
       row = 32 + imirr[ch-4*192];
+      supmod = 4+12;
       break;
     case 5:
       col = 48 + jmirr[ch-5*192];
       row = 32 + imirr[ch-5*192];
+      supmod = 4+12;
       break;
     case 6:
       col = 73 - jmirr[ch-6*192];
       row = 49 - imirr[ch-6*192];
+      supmod = 4+12;
       break;
     case 7:
       col = 49 - jmirr[ch-7*192];
       row = 49 - imirr[ch-7*192];
+      supmod = 4+12;
       break;
     case 8:
       col = 25 - jmirr[ch-8*192];
       row = 49 - imirr[ch-8*192];
+      supmod = 4+12;
       break;
     }
 }
 void StPmdGeom::chain32(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 5;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = jmirr[ch];
       row = 16 + imirr[ch];
+      supmod = 5+12;
       break;
     case 1:
       col = 24 + jmirr[ch-192];
       row = 16 + imirr[ch-192];
+      supmod = 5+12;
       break;
     case 2:
       col = 48 + jmirr[ch-2*192];
       row = 16 + imirr[ch-2*192];
+      supmod = 5+12;
       break;
     case 3:
       col = 73 - jmirr[ch-3*192];
       row = 17 - imirr[ch-3*192];
+      supmod = 5+12;
       break;
     case 4:
       col = 49 - jmirr[ch-4*192];
       row = 17 - imirr[ch-4*192];
+      supmod = 5+12;
       break;
     case 5:
       col = 25 - jmirr[ch-5*192];
       row = 17 - imirr[ch-5*192];
+      supmod = 5+12;
       break;
     case 6:
       col = jmirr[ch-6*192];
       row = imirr[ch-6*192];
+      supmod = 5+12;
       break;
     case 7:
       col = 24 + jmirr[ch-7*192];
       row = imirr[ch-7*192];
+      supmod = 5+12;
       break;
     case 8:
       col = 48 + jmirr[ch-8*192];
       row = imirr[ch-8*192];
+      supmod = 5+12;
       break;
     }
 }
 void StPmdGeom::chain33(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 3;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 25 - jnorm[ch];
       row = 73 - inorm[ch];
+      supmod = 3+12;
       break;
     case 1:
       col = 8 + jnorm[ch-192];
       row = 48 + inorm[ch-192];
+      supmod = 3+12;
       break;
     case 2:
       col = 9 - jnorm[ch-2*192];
       row = 73 - inorm[ch-2*192];
+      supmod = 3+12;
       break;
     case 3:
       col = 73 - jmirr[ch-3*192];
       row = 57 - imirr[ch-3*192];
-      supmod = 4;
+      supmod = 4+12;
       break;
     case 4:
       col = 49 - jmirr[ch-4*192];
       row = 57 - imirr[ch-4*192];
-      supmod = 4;
+      supmod = 4+12;
       break;
     case 5:
       col = 24 + jmirr[ch-5*192];
       row = 56 + imirr[ch-5*192];
-      supmod = 4;
+      supmod = 4+12;
       break;
     case 6:
       col = 48 + jmirr[ch-6*192];
       row = 56 + imirr[ch-6*192];
-      supmod = 4;
+      supmod = 4+12;
       break;
     case 7:
       col = 73 - jmirr[ch-7*192];
       row = 73 - imirr[ch-7*192];
-      supmod = 4;
+      supmod = 4+12;
       break;
     case 8:
       col = 49 - jmirr[ch-8*192];
       row = 73 - imirr[ch-8*192];
-      supmod = 4;
+      supmod = 4+12;
       break;
     }
 }
 
 void StPmdGeom::chain34(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 5;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = jmirr[ch];
       row = 40 + imirr[ch];
+      supmod = 5+12;
       break;
     case 1:
       col = 24 + jmirr[ch-192];
       row = 40 + imirr[ch-192];
+      supmod = 5+12;
       break;
     case 2:
       col = 48 + jmirr[ch - 2*192];
       row = 40 + imirr[ch - 2*192];
+      supmod = 5+12;
       break;
     case 3:
       col = 73 - jmirr[ch - 3*192];
       row = 41 - imirr[ch - 3*192];
+      supmod = 5+12;
       break;
     case 4:
       col = 49 - jmirr[ch-4*192];
       row = 41 - imirr[ch-4*192];
+      supmod = 5+12;
       break;
     case 5:
       col = 25 - jmirr[ch-5*192];
       row = 41 - imirr[ch-5*192];
+      supmod = 5+12;
       break;
     case 6:
       col = jmirr[ch-6*192];
       row = 24 + imirr[ch-6*192];
+      supmod = 5+12;
       break;
     case 7:
       col = 24 + jmirr[ch-7*192];
       row = 24 + imirr[ch-7*192];
+      supmod = 5+12;
       break;
     case 8:
       col = 48 + jmirr[ch-8*192];
       row = 24 + imirr[ch-8*192];
+      supmod = 5+12;
       break;
     }
 }
 void StPmdGeom::chain35(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 6;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = jmirr[ch];
       row = 40 + imirr[ch];
+      supmod = 6+12;
       break;
     case 1:
       col = 25 - jmirr[ch-192];
       row = 41 - imirr[ch-192];
+      supmod = 6+12;
       break;
     case 2:
       col = jmirr[ch-2*192];
       row = 24 + imirr[ch-2*192];
+      supmod = 6+12;
       break;
     case 3:
       col = jmirr[ch-3*192];
       row = 16 + imirr[ch-3*192];
+      supmod = 6+12;
       break;
     case 4:
       col = 24 + jmirr[ch-4*192];
       row = 16 + imirr[ch-4*192];
+      supmod = 6+12;
       break;
     case 5:
       col = 49 - jmirr[ch-5*192];
       row = 17 - imirr[ch-5*192];
+      supmod = 6+12;
       break;
     case 6:
       col = 25 - jmirr[ch-6*192];
       row = 17 - imirr[ch-6*192];
+      supmod = 6+12;
       break;
     case 7:
       col =  jmirr[ch-7*192];
       row =  imirr[ch-7*192];
+      supmod = 6+12;
       break;
     case 8:
       col = 24 + jmirr[ch-8*192];
       row = imirr[ch-8*192];
+      supmod = 6+12;
       break;
     }
 }
 
 void StPmdGeom::chain36(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 6;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 24 + jmirr[ch];
       row = 40 + imirr[ch];
+      supmod = 6+12;
       break;
     case 1:
       col = 49 - jmirr[ch-192];
       row = 41 - imirr[ch-192];
+      supmod = 6+12;
       break;
     case 2:
       col = 24 + jmirr[ch-2*192];
       row = 24 + imirr[ch-2*192];
+      supmod = 6+12;
       break;
     case 3:
       col = 48 + jmirr[ch-3*192];
       row = 16 + imirr[ch-3*192];
+      supmod = 6+12;
       break;
     case 4:
       col = 73 - jmirr[ch-4*192];
       row = 17 - imirr[ch-4*192];
+      supmod = 6+12;
       break;
     case 5:
       col = 48 + jmirr[ch-5*192];
       row = imirr[ch-5*192];
+      supmod = 6+12;
       break;
     case 6:
       col = jmirr[ch-6*192];
       row = 40 + imirr[ch-6*192];
-      supmod = 7;
+      supmod = 7+12;
       break;
     case 7:
       col = 25 - jmirr[ch-7*192];
       row = 41 - imirr[ch-7*192];
-      supmod = 7;
+      supmod = 7+12;
       break;
     case 8:
       col = jmirr[ch-8*192];
       row = 24 + imirr[ch-8*192];
-      supmod = 7;
+      supmod = 7+12;
       break;
     }
 }
 void StPmdGeom::chain37(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 7;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 24 + jmirr[ch];
       row = 40 + imirr[ch];
+      supmod = 7+12;
       break;
     case 1:
       col = 49 - jmirr[ch-192];
       row = 41 - imirr[ch-192];
+      supmod = 7+12;
       break;
     case 2:
       col = 24 + jmirr[ch-2*192];
       row = 24 + imirr[ch-2*192];
+      supmod = 7+12;
       break;
     case 3:
       col = jmirr[ch-3*192];
       row = 16 + imirr[ch-3*192];
+      supmod = 7+12;
       break;
     case 4:
       col = 24 + jmirr[ch-4*192];
       row = 16 + imirr[ch-4*192];
+      supmod = 7+12;
       break;
     case 5:
       col = 49 - jmirr[ch-5*192];
       row = 17 - imirr[ch-5*192];
+      supmod = 7+12;
       break;
     case 6:
       col = 25 - jmirr[ch-6*192];
       row = 17 - imirr[ch-6*192];
+      supmod = 7+12;
       break;
     case 7:
       col = jmirr[ch-7*192];
       row = imirr[ch-7*192];
+      supmod = 7+12;
       break;
     case 8:
       col = 24 + jmirr[ch-8*192];
       row = imirr[ch-8*192];
+      supmod = 7+12;
       break;
     }
 }
 void StPmdGeom::chain38(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 8;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 49 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 8+12;
       break;
     case 1:
       col = 49 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 8+12;
       break;
     case 2:
       col = 49 - jnorm[ch-2*192];
       row = 73 - inorm[ch-2*192];
+      supmod = 8+12;
       break;
     case 3:
       col = 32 + jnorm[ch-3*192];
       row = 48 + inorm[ch-3*192];
+      supmod = 8+12;
       break;
     case 4:
       col = 32 + jnorm[ch-4*192];
       row = 24 + inorm[ch-4*192];
+      supmod = 8+12;
       break;
     case 5:
       col = 32 + jnorm[ch-5*192];
       row = inorm[ch-5*192];
+      supmod = 8+12;
       break;
     case 6:
       col = 33 - jnorm[ch-6*192];
       row = 25 - inorm[ch-6*192];
+      supmod = 8+12;
       break;
     case 7:
       col = 33 - jnorm[ch-7*192];
       row = 49 - inorm[ch-7*192];
+      supmod = 8+12;
       break;
     case 8:
       col = 33 - jnorm[ch-8*192];
       row = 73 - inorm[ch-8*192];
+      supmod = 8+12;
       break;
     }
 }
 
 void StPmdGeom::chain39(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 9;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 49 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 9+12;
       break;
     case 1:
       col = 49 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 9+12;
       break;
     case 2:
       col = 32 + jnorm[ch-2*192];
       row = 24 + inorm[ch-2*192];
+      supmod = 9+12;
       break;
     case 3:
       col = 32 + jnorm[ch-3*192];
       row =  inorm[ch-3*192];
+      supmod = 9+12;
       break;
     case 4:
       col = 33 - jnorm[ch-4*192];
       row = 25 - inorm[ch-4*192];
+      supmod = 9+12;
       break;
     case 5:
       col = 33 - jnorm[ch-5*192];
       row = 49 - inorm[ch-5*192];
+      supmod = 9+12;
       break;
     case 6:
       col = 25 - jnorm[ch-6*192];
       row = 49 - inorm[ch-6*192];
+      supmod = 9+12;
       break;
     case 7:
       col = 8 + jnorm[ch-7*192];
       row = 24 + inorm[ch-7*192];
+      supmod = 9+12;
       break;
     case 8:
       col = 9 - jnorm[ch-8*192];
       row = 49 - inorm[ch-8*192];
+      supmod = 9+12;
       break;
     }
 }
 void StPmdGeom::chain40(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 8;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 25 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 8+12;
       break;
     case 1:
       col = 25 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 8+12;
       break;
     case 2:
       col = 25 - jnorm[ch-2*192];
       row = 73 - inorm[ch-2*192];
+      supmod = 8+12;
       break;
     case 3:
       col = 8 + jnorm[ch-3*192];
       row = 48 + inorm[ch-3*192];
+      supmod = 8+12;
       break;
     case 4:
       col = 8 + jnorm[ch-4*192];
       row = 24 + inorm[ch-4*192];
+      supmod = 8+12;
       break;
     case 5:
       col = 8 + jnorm[ch-5*192];
       row = inorm[ch-5*192];
+      supmod = 8+12;
       break;
     case 6:
       col = 9 - jnorm[ch-6*192];
       row = 25 - inorm[ch-6*192];
+      supmod = 8+12;
       break;
     case 7:
       col = 9 - jnorm[ch-7*192];
       row = 49 - inorm[ch-7*192];
+      supmod = 8+12;
       break;
     case 8:
       col = 9 - jnorm[ch-8*192];
       row = 73 - inorm[ch-8*192];
+      supmod = 8+12;
       break;
     }
 }
 void StPmdGeom::chain41(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 9;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 25 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 9+12;
       break;
     case 1:
       col = 8 + jnorm[ch-192];
       row = inorm[ch-192];
+      supmod = 9+12;
       break;
     case 2:
       col = 9 - jnorm[ch-2*192];
       row = 25 - inorm[ch-2*192];
+      supmod = 9+12;
       break;
     case 3:
       col = 73 - jmirr[ch-3*192];
       row = 33 - imirr[ch-3*192];
-      supmod = 11;
+      supmod = 11+12;
       break;
     case 4:
       col = 49 - jmirr[ch-4*192];
       row = 33 - imirr[ch-4*192];
-      supmod = 11;
+      supmod = 11+12;
       break;
     case 5:
       col = 24 + jmirr[ch-5*192];
       row = 32 + imirr[ch-5*192];
-      supmod = 11;
+      supmod = 11+12;
       break;
     case 6:
       col = 48 + jmirr[ch-6*192];
       row = 32 + imirr[ch-6*192];
-      supmod = 11;
+      supmod = 11+12;
       break;
     case 7:
       col = 73 - jmirr[ch-7*192];
       row = 49 - imirr[ch-7*192];
-      supmod = 11;
+      supmod = 11+12;
       break;
     case 8:
       col = 49 - jmirr[ch-8*192];
       row = 49 - imirr[ch-8*192];
-      supmod = 11;
+      supmod = 11+12;
       break;
     }
 }
 void StPmdGeom::chain42(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 10;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 73 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 10+12;
       break;
     case 1:
       col = 73 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 10+12;
       break;
     case 2:
       col = 73 - jnorm[ch-2*192];
       row = 73 - inorm[ch-2*192];
+      supmod = 10+12;
       break;
     case 3:
       col = 56 + jnorm[ch-3*192];
       row = 48 + inorm[ch-3*192];
+      supmod = 10+12;
       break;
     case 4:
       col = 56 + jnorm[ch-4*192];
       row = 24 + inorm[ch-4*192];
+      supmod = 10+12;
       break;
     case 5:
       col = 56 + jnorm[ch-5*192];
       row = inorm[ch-5*192];
+      supmod = 10+12;
       break;
     case 6:
       col = 57 - jnorm[ch-6*192];
       row = 25 - inorm[ch-6*192];
+      supmod = 10+12;
       break;
     case 7:
       col = 57 - jnorm[ch-7*192];
       row = 49 - inorm[ch-7*192];
+      supmod = 10+12;
       break;
     case 8:
       col = 57 - jnorm[ch-8*192];
       row = 73 - inorm[ch-8*192];
+      supmod = 10+12;
       break;
     }
 }
@@ -3496,232 +3754,263 @@ void StPmdGeom::chain43(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year
    case 0:
      col = 73 - jmirr[ch];
      row = 9 - imirr[ch];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 1:
      col = 49 - jmirr[ch-192];
      row = 9 - imirr[ch-192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 2:
      col = 25 - jmirr[ch-2*192];
      row = 9 - imirr[ch-2*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 3:
      col = jmirr[ch-3*192];
      row = 8 + imirr[ch-3*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 4:
      col = 24 + jmirr[ch-4*192];
      row = 8 + imirr[ch-4*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 5:
      col = 48 + jmirr[ch-5*192];
      row = 8 + imirr[ch-5*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 6:
      col = 73 - jmirr[ch-6*192];
      row = 25 - imirr[ch-6*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 7:
      col = 49 - jmirr[ch-7*192];
      row = 25 - imirr[ch-7*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    case 8:
      col = 25 - jmirr[ch-8*192];
      row = 25 - imirr[ch-8*192];
-     supmod = 11;
+     supmod = 11+12;
      break;
    }
 }
 void StPmdGeom::chain44(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 10;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 49 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 10+12;
       break;
     case 1:
       col = 49 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 10+12;
       break;
     case 2:
       col = 49 - jnorm[ch-2*192];
       row = 73 - inorm[ch-2*192];
+      supmod = 10+12;
       break;
     case 3:
       col = 32 + jnorm[ch-3*192];
       row = 48 + inorm[ch-3*192];
+      supmod = 10+12;
       break;
     case 4:
       col = 32 + jnorm[ch-4*192];
       row = 24 + inorm[ch-4*192];
+      supmod = 10+12;
       break;
     case 5:
       col = 32 + jnorm[ch-5*192];
       row = inorm[ch-5*192];
+      supmod = 10+12;
       break;
     case 6:
       col =33 - jnorm[ch-6*192];
       row =25 - inorm[ch-6*192];
+      supmod = 10+12;
       break;
     case 7:
       col =33 - jnorm[ch-7*192];
       row =49 - inorm[ch-7*192];
+      supmod = 10+12;
       break;
     case 8:
       col =33 - jnorm[ch-8*192];
       row =73 - inorm[ch-8*192];
+      supmod = 10+12;
       break;
     }
 }
 void StPmdGeom::chain45(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 10;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 25 - jnorm[ch];
       row = 25 - inorm[ch];
+      supmod = 10+12;
       break;
     case 1:
       col = 25 - jnorm[ch-192];
       row = 49 - inorm[ch-192];
+      supmod = 10+12;
       break;
     case 2:
       col = 8 + jnorm[ch-2*192];
       row = 24 + inorm[ch-2*192];
+      supmod = 10+12;
       break;
     case 3:
       col = 8 + jnorm[ch-3*192];
       row = inorm[ch-3*192];
+      supmod = 10+12;
       break;
     case 4:
       col = 9 - jnorm[ch-4*192];
       row = 25 - inorm[ch-4*192];
+      supmod = 10+12;
       break;
     case 5:
       col = 9 - jnorm[ch-5*192];
       row = 49 - inorm[ch-5*192];
+      supmod = 10+12;
       break;
     }
 }
 
 void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 11;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 25 - jmirr[ch];
       row = 33 - imirr[ch];
+      supmod = 11+12;
       break;
     case 1:
       col =  jmirr[ch-192];
       row =  32 + imirr[ch-192];
+      supmod = 11+12;
       break;
     case 2:
       col = 25 - jmirr[ch-2*192];
       row = 49- imirr[ch-2*192];
+      supmod = 11+12;
       break;
     }
 }
 void StPmdGeom::chain47(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 12;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
      col = 24 + jnorm[ch];
      row = 48 + inorm[ch];
+     supmod = 12+12;
      break;
    case 1:
      col = 24 + jnorm[ch-192];
      row = 24 + inorm[ch-192];
+     supmod = 12+12;
      break;
    case 2:
      col = 41 - jnorm[ch-2*192];
      row = 49 - inorm[ch-2*192];
+     supmod = 12+12;
      break;
    case 3:
      col = 41 - jnorm[ch-3*192];
      row = 73 - inorm[ch-3*192];
+     supmod = 12+12;
      break;
    case 4:
      col = 40 + jnorm[ch-4*192];
      row = 48 + inorm[ch-4*192];
+     supmod = 12+12;
      break;
    case 5:
      col = 40 + jnorm[ch-5*192];
      row = 24 + inorm[ch-5*192];
+     supmod = 12+12;
      break;
    case 6:
      col = 48 + jnorm[ch-6*192];
      row = inorm[ch-6*192];
+     supmod = 12+12;
      break;
    case 7:
      col = 65 - jnorm[ch-7*192];
      row = 25 - inorm[ch-7*192];
+     supmod = 12+12;
      break;
    case 8:
      col = 64 + jnorm[ch-8*192];
      row = inorm[ch-8*192];
+     supmod = 12+12;
      break;
    }
 }
 void StPmdGeom::chain48(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row,Int_t year)
 {
-  supmod = 12;
   Int_t zone = ch/192;
   switch(zone)
     {
     case 0:
       col = 48 + jnorm[ch];
       row = 48 + inorm[ch];
+      supmod = 12+12;
       break;
     case 1:
       col = 65 - jnorm[ch-192];
       row = 73 - inorm[ch-192];
+      supmod = 12+12;
       break;
     case 2:
       col = 64 + jnorm[ch-2*192];
       row = 48 + inorm[ch-2*192];
+      supmod = 12+12;
       break;
     case 3:
       col = 72 + jnorm[ch-3*192];
       row = 48 + inorm[ch-3*192];
+      supmod = 12+12;
       break;
     case 4:
       col = 72 + jnorm[ch-4*192];
       row = 24 + inorm[ch-4*192];
+      supmod = 12+12;
       break;
     case 5:
       col = 89 - jnorm[ch-5*192];
       row = 49 - inorm[ch-5*192];
+      supmod = 12+12;
       break;
     case 6:
       col = 89 - jnorm[ch-6*192];
       row = 73 - inorm[ch-6*192];
+      supmod = 12+12;
       break;
     case 7:
       col = 88 + jnorm[ch-7*192];
       row = 48 + inorm[ch-7*192];
+      supmod = 12+12;
       break;
     case 8:
       col = 88 + jnorm[ch-8*192];
       row = 24 + inorm[ch-8*192];
+      supmod = 12+12;
       break;
     }
 }
