@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.23 1999/03/20 20:57:35 perev Exp $
+// $Id: StMaker.cxx,v 1.24 1999/03/28 02:57:51 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.24  1999/03/28 02:57:51  perev
+// Add .const in searching path in GetDataSet
+//
 // Revision 1.23  1999/03/20 20:57:35  perev
 // add StEvtHddr.h and fix Get/SetNumber in maker
 //
@@ -58,7 +61,7 @@ StMaker *StMaker::fgStChain = 0;
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.23 1999/03/20 20:57:35 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.24 1999/03/28 02:57:51 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -183,6 +186,8 @@ TString StMaker::GetInput(const char* logInput) const
 //______________________________________________________________________________
 St_DataSet *StMaker::GetDataSet(const char* logInput) const
 {
+const char *subdirs[] = {".data",".const",0};
+
 TString actInput,makerName,findString;
 St_DataSet *dataset;
 StMaker    *parent;
@@ -196,29 +201,36 @@ int icol,idat,nspn;
 
 //		Not so evident, do some editing
   icol = actInput.Index(":");
-  idat = actInput.Index("/.data");
-  if (icol<0 && idat < 0) {
+  idat = actInput.Index("/.");
 
-//		MAKER/Dataset -> .make/MAKER/.data/Dataset
-    findString = ".make/";
-    nspn = strcspn((const char*)actInput,"/ ");
-    findString.Append(actInput,nspn);
-    findString.Append("/.data");
-    findString.Append((const char*)actInput+nspn);
+  const char *dir;
+  for ( int idir=0;(dir=subdirs[idir]);idir++)
+  { 
+
+    if (icol<0 && idat < 0) {
+
+  //		MAKER/Dataset -> .make/MAKER/.data/Dataset
+      findString = ".make/";
+      nspn = strcspn((const char*)actInput,"/ ");
+      findString.Append(actInput,nspn);
+      findString +="/"; findString +=dir;
+      findString.Append((const char*)actInput+nspn);
+      dataset = Find(findString);  
+      if (dataset) return dataset;
+    }
+
+
+  //		AAA/BBB/CCC -> .make/*/.data/AAA/BBB/CCC
+  //		AAA:BBB/CCC -> .make/AAA/.data/BBB/CCC
+    makerName="*";
+    if (icol>=0) makerName.Replace(0,9999,actInput,icol);
+    findString = ".make/"; findString += makerName; 
+    findString+="/";findString+=dir; findString+="/";
+    findString += (const char*)actInput+icol+1;
+
     dataset = Find(findString);  
     if (dataset) return dataset;
-  }
-
-
-//		AAA/BBB/CCC -> .make/*/.data/AAA/BBB/CCC
-//		AAA:BBB/CCC -> .make/AAA/.data/BBB/CCC
-  makerName="*";
-  if (icol>=0) makerName.Replace(0,9999,actInput,icol);
-  findString = ".make/"; findString += makerName; findString+="/.data/";
-  findString += (const char*)actInput+icol+1;
-
-  dataset = Find(findString);  
-  if (dataset) return dataset;
+  }//end for over dirs
 
   parent = GetMaker(this);         if (!parent) return 0;
   dataset = parent->GetInputDS(actInput);
