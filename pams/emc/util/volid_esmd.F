@@ -19,5 +19,9 @@
       if(rl.eq.2)then
          module=25-module
       endif
+      if(module.le.0) module=1
+      if(eta.le.0)    eta=1
+      if(sub.le.0)    sub=1
+      if(type.le.0)   type=1
       return
       end
