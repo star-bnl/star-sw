@@ -454,8 +454,9 @@
 	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
 
 	  DO ID=1,MSG_Nprefixes
-	    MSG_Active(ID)  =.TRUE.
-	    MSG_Counting(ID)=.TRUE. !Active, No-Counting is an illegal state.
+	    MSG_Active(      ID ) = .TRUE.
+	    MSG_Counting(    ID ) = .TRUE. !Active, No-Counting is an illegal state.
+	    MSG_Count_limit( ID ) = 0 !Always reset counting limit here, too.
 	  END DO
 	  MSG_ALL_DISABLE=.FALSE.
 
@@ -465,8 +466,9 @@
 	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
 	  DO ID=1,MSG_Nprefixes
 	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
-	      MSG_Active(ID)  =.TRUE.
-	      MSG_Counting(ID)=.TRUE. !Active, No-Counting is an illegal state.
+	      MSG_Active(      ID ) =.TRUE.
+	      MSG_Counting(    ID ) =.TRUE. !Active, No-Counting is an illegal state.
+	      MSG_Count_limit( ID ) = 0 !Always reset counting limit here, too.
 	    END IF
 	  END DO !ID=1,MSG_Nprefixes
 
@@ -477,8 +479,9 @@
 *	  in the index if necessary, and return its ID:
 	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
 	  IF (ID.GT.0) THEN
-	    MSG_Active(ID)=.TRUE.
-	    MSG_Counting(ID)=.TRUE. !Active, No-Counting is an illegal state.
+	    MSG_Active(      ID ) = .TRUE.
+	    MSG_Counting(    ID ) = .TRUE. !Active, No-Counting is an illegal state.
+	    MSG_Count_limit( ID ) = 0 !Always reset counting limit here, too.
 	  END IF
 
 	END IF !WPT.EQ.1
@@ -1292,20 +1295,26 @@
 *	First check to see if there is a wildcard in the specified prefix:
 	WPT=INDEX(PREFIX,'*')
 
-	IF (WPT.EQ.1) THEN !Wildcard in first position -- do them all:
+	IF (WPT.EQ.1) THEN !Wildcard in first position -- do all enabled ones:
 
 	  DO ID=1,MSG_Nprefixes
-	    MSG_Count_limit(ID)=LIMIT
+	    IF ( MSG_Active( ID ) ) THEN
+	      MSG_Count_limit( ID ) = LIMIT
+	      MSG_Counting(    ID ) = .TRUE. !... can't be active with no-count!
+	    END IF
 	  END DO
 	  MSG_ALL_COUNT_LIMIT=LIMIT !And set the default, for new messages...
 
-	ELSE IF (WPT.GT.1) THEN !There's a wildcard.
+	ELSE IF (WPT.GT.1) THEN !There's a wildcard -- do selected, enabled ones.
 
 *	  Point to last character before the wildcard; protect against too-long:
 	  SPT=MIN(WPT-1,MSG_Prefix_length_P)
 	  DO ID=1,MSG_Nprefixes
 	    IF ( PREFIX(:SPT).EQ.MSG_Prefix(ID)(:SPT) ) THEN	    
-	      MSG_Count_limit(ID)=LIMIT
+	      IF ( MSG_Active( ID ) ) THEN
+	        MSG_Count_limit( ID ) = LIMIT
+	        MSG_Counting(    ID ) = .TRUE. !... can't be active with no-count!
+	      END IF
 	    END IF
 	  END DO !ID=1,MSG_Nprefixes
 
@@ -1315,7 +1324,11 @@
 *	  Check that the message-prefix is in the index, enter it
 *	  in the index if necessary, and return its ID:
 	  CALL MSG_CHECK(PREFIX,ID,ACTIVE,COUNTING)
-	  IF (ID.GT.0) MSG_Count_limit(ID)=LIMIT
+	  IF (ID.GT.0) THEN
+	    MSG_Count_limit( ID ) = LIMIT
+	    MSG_Active(      ID ) = .TRUE. !Always enable on set-limit.
+	    MSG_Counting(    ID ) = .TRUE. !... can't be active with no-count!
+	  END IF
 
 	END IF !WPT.EQ.1
 
