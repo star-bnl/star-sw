@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.36 2001/09/18 00:16:06 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.37 2001/09/19 04:49:05 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.37  2001/09/19 04:49:05  ullrich
+ * Set event size in StEventInfo.
+ *
  * Revision 2.36  2001/09/18 00:16:06  ullrich
  * Fill and add StRunInfo.
  *
@@ -163,7 +166,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.36 2001/09/18 00:16:06 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.37 2001/09/19 04:49:05 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -856,6 +859,8 @@ StEventMaker::makeEvent()
     StEvtHddr* header = dynamic_cast<StEvtHddr*>(GetInputDS("EvtHddr"));
     if (header) {
 	mCurrentEvent->setTriggerMask(header->GetTriggerMask());
+	if (mCurrentEvent->info())
+	    mCurrentEvent->info()->setEventSize(header->GetEventSize());
     }
 
     //
@@ -883,7 +888,7 @@ StEventMaker::makeEvent()
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
 
-    
+   
     return kStOK;
 }
 
