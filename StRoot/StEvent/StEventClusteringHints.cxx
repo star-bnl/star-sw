@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.2 2001/04/20 00:50:48 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.3 2001/04/23 19:28:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.3  2001/04/23 19:28:53  ullrich
+ * Inherit from StObject. Not a singleton anymore.
+ *
  * Revision 2.2  2001/04/20 00:50:48  ullrich
  * Added new query methods.
  *
@@ -20,19 +23,9 @@
 #include "StEventClusteringHints.h"
 #include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.2 2001/04/20 00:50:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.3 2001/04/23 19:28:53 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
-
-StEventClusteringHints* StEventClusteringHints::mSelf = 0;
-
-StEventClusteringHints*
-StEventClusteringHints::instance()
-{
-    if (!mSelf)
-	mSelf = new StEventClusteringHints;
-    return mSelf;
-}
 
 StEventClusteringHints::~StEventClusteringHints() {/*noop*/}
 
