@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.399 2004/03/24 23:16:54 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.400 2004/03/24 23:59:49 calderon Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1413,7 +1413,7 @@ Int_t StBFChain::Instantiate()
 
 	    //if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
 	  }
-	  if (maker=="GenericVertex") {
+	  if (maker=="StGenericVertexMaker") {
 	      if (GetOption("beamLine")) {
 		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
 		  gvtxMk->UseBeamLine();
