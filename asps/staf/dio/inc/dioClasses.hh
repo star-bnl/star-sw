@@ -63,9 +63,7 @@ public:
 //:----------------------------------------------- PUB FUNCTIONS      --
 //:- override virtuals
    virtual STAFCV_T close ();
-   virtual STAFCV_T getEvent (tdmDataset* destination);
    virtual STAFCV_T open (DIO_MODE_T mode);
-   virtual STAFCV_T putEvent (tdmDataset* source);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -106,23 +104,31 @@ class dioSockStream: public virtual dioStream {
 
 public:
 //:----------------------------------------------- CTORS & DTOR       --
-   dioSockStream(const char * name, long socket);
+   dioSockStream(const char * name, const char * hostName, long port);
    virtual ~dioSockStream();
 
 //:----------------------------------------------- ATTRIBUTES         --
-   virtual long socket ();
-   virtual void bufferSize (long bufferSize);
+   virtual long port ();
+   virtual char * host ();
+   virtual long socketNumber ();
    virtual long bufferSize ();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-//:**NONE**
+//:- override virtuals
+   virtual STAFCV_T close ();
+   virtual STAFCV_T open (DIO_MODE_T mode);
+   virtual STAFCV_T getEvent (tdmDataset* destination);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --
-   long mySocket;
+   long myPort;
+   char * myHost;
+   int mySocket;		// << INTEGER, not LONG
    long myBufferSize;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
+   virtual int openServer();
+   virtual int openClient();
 };
 
 //:=============================================== CLASS              ==
@@ -139,6 +145,12 @@ public:
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual char * list ();
 
+//:- Stream ------------------------------------
+   virtual STAFCV_T deleteStream (const char * name);
+   virtual STAFCV_T findStream (const char * name, dioStream*& stream);
+   virtual STAFCV_T getStream (IDREF_T id, dioStream*& stream);
+
+//:- FileStream --------------------
    virtual STAFCV_T deleteFileStream (const char * name);
    virtual STAFCV_T findFileStream (const char * name
                 , dioFileStream*& fileStream);
@@ -146,6 +158,15 @@ public:
                 , dioFileStream*& fileStream);
    virtual STAFCV_T newFileStream (const char * name
                 , const char * fileName);
+
+//:- SockStream --------------------
+   virtual STAFCV_T deleteSockStream (const char * name);
+   virtual STAFCV_T findSockStream (const char * name
+                , dioSockStream*& sockStream);
+   virtual STAFCV_T getSockStream (IDREF_T id
+                , dioSockStream*& sockStream);
+   virtual STAFCV_T newSockStream (const char * name
+		, const char * hostName, long port);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --

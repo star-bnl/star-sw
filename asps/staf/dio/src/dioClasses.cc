@@ -8,12 +8,29 @@
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
+//- NEEDED FOR openServer() -??
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/wait.h>
+#include <netinet/in.h>
+#include <errno.h>
+#include <signal.h>
+
 #include <string.h>
 #include "asuAlloc.h"
 #include "dioClasses.hh"
+#include "tcplib.h"	//- WHG's functions
 
 //:----------------------------------------------- MACROS             --
 #include "dio_macros.h"
+
+//:----------------------------------------------- PROTOTYPES         --
+extern "C" int klose(int);	//-HACK- C++ fails on close(int)
+//extern "C" static void reaper();
+extern "C" void signal_reaper();
 
 //:=============================================== CLASS              ==
 // dioStream
@@ -40,20 +57,94 @@ DIO_STATE_T dioStream::  state () {
 
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T dioStream:: close () {
-   EML_ERROR(PURE_VIRTUAL);
+
+   if( !(DIO_CLOSE_STATE != myState) ){
+      EML_ERROR(BAD_MODE_OR_STATE);
+   }
+
+   DIO_STATE_T saveState=myState;
+   myState = DIO_UNKNOWN_STATE;
+
+/*- Destroy xdr. -*/
+   if( &myXDR != NULL ) XDR_DESTROY(&myXDR);
+
+   if( DIO_OPEN_STATE == saveState ){
+      saveState = DIO_CLOSE_STATE;
+   }
+   EML_SUCCESS(STAFCV_OK);
 }
 
+//----------------------------------
 STAFCV_T dioStream:: getEvent (tdmDataset* destination) {
-   EML_ERROR(PURE_VIRTUAL);
+
+   DIO_STATE_T saveState=myState;
+
+   if( !(DIO_OPEN_STATE == myState)
+   ||  !(DIO_READ_MODE == myMode || DIO_UPDATE_MODE == myMode)
+   ){
+      EML_ERROR(BAD_MODE_OR_STATE);
+   }
+   myState = DIO_READ_STATE;
+
+//-(" Get pointer to destination dataset. \n");
+   DSL_PTR_T ddd=0;
+   if( !destination->cvtDslPointer(ddd) ){
+      EML_ERROR(BAD_DATASET);
+   }
+//-(" Convert pointer to DS_DATASET_T. \n");
+   DS_DATASET_T *pDest=(DS_DATASET_T*)ddd;
+
+//-(" Read data here. \n");
+DS_DATASET_T *pDS=NULL;
+bool_t result;
+   if( !xdr_dataset_type(&myXDR, &pDS,0)	/* get descriptor */
+   ||  !dsIsDataset(&result,pDS) ||  !result	/* sanity check */
+   ||  !dio_mapHierarchy(pDest,pDS)		/* map onto memory */
+   ||  !dsAllocTables(pDS)			/* no-opt */
+   ||  !xdr_dataset_data(&myXDR,pDS)		/* get data */
+   ||  !dsFreeDataset(pDS)			/* discard input DS */
+   ){
+      myState = saveState;
+      EML_ERROR(CANT_READ_FROM_STREAM);
+   }
+
+   myState = saveState;
+   EML_SUCCESS(STAFCV_OK);
 }
 
+//----------------------------------
 STAFCV_T dioStream:: open (DIO_MODE_T mode) {
+//- This function MUST be overridden by specific subclass.
    EML_ERROR(PURE_VIRTUAL);
 }
 
+//----------------------------------
 STAFCV_T dioStream:: putEvent (tdmDataset* source) {
-   EML_ERROR(PURE_VIRTUAL);
+   if( !(DIO_OPEN_STATE == myState)
+   ||  !(DIO_WRITE_MODE == myMode || DIO_UPDATE_MODE == myMode)
+   ){
+      EML_ERROR(BAD_MODE_OR_STATE);
+   }
+   myState = DIO_WRITE_STATE;
+
+//- Get pointer to source dataset -**
+   DSL_PTR_T ddd;
+   if( !source->cvtDslPointer(ddd) ){
+      myState = DIO_OPEN_STATE;
+      EML_ERROR(BAD_DATASET);
+   }
+   DS_DATASET_T *pSour=(DS_DATASET_T*)ddd;
+
+//- Write data here -**
+   if( !xdr_dataset(&myXDR, &pSour) ){
+      myState = DIO_OPEN_STATE;
+      EML_ERROR(ERROR_WRITING_DATASET);
+   }
+
+   myState = DIO_OPEN_STATE;
+   EML_SUCCESS(STAFCV_OK);
 }
+
 
 //:----------------------------------------------- PROT FUNCTIONS     --
 //:----------------------------------------------- PRIV FUNCTIONS     --
@@ -72,6 +163,7 @@ dioFileStream:: dioFileStream(const char * name, const char * fileName)
 
 //----------------------------------
 dioFileStream:: ~dioFileStream() {
+   close();
    ASUFREE(myFileName);
 }
 
@@ -86,51 +178,15 @@ char * dioFileStream::  fileName () {
 STAFCV_T dioFileStream:: close () {
 
    DIO_STATE_T saveState=myState;
+   myState = DIO_UNKNOWN_STATE;
 
 /*- Close file and destroy xdr. -*/
-   if( &myXDR != NULL ) XDR_DESTROY(&myXDR);
+   dioStream::close();
    fclose(myFile);
 
-   myState = DIO_CLOSE_STATE;
-   EML_SUCCESS(STAFCV_OK);
-}
-
-//----------------------------------
-STAFCV_T dioFileStream:: getEvent (tdmDataset* destination) {
-
-   DIO_STATE_T saveState=myState;
-
-   if( !(DIO_OPEN_STATE == myState)
-   ||  !(DIO_READ_MODE == myMode || DIO_UPDATE_MODE == myMode)
-   ){
-      EML_ERROR(BAD_MODE_OR_STATE);
+   if( DIO_OPEN_STATE == saveState ){
+      myState = DIO_CLOSE_STATE;
    }
-   myState = DIO_READ_STATE;
-
-//-DEBUG-EML_PRINTF(" Get pointer to destination dataset. \n");
-   DSL_PTR_T ddd=0;
-//-DEBUG-EML_PRINTF(" Get pointer to destination dataset. \n");
-   if( !destination->cvtDslPointer(ddd) ){
-      EML_ERROR(BAD_DATASET);
-   }
-//-DEBUG-EML_PRINTF(" Convert pointer to DS_DATASET_T. \n");
-   DS_DATASET_T *pDest=(DS_DATASET_T*)ddd;
-
-//-DEBUG-EML_PRINTF(" Read data here. \n");
-DS_DATASET_T *pDS=NULL;
-bool_t result;
-   if( !xdr_dataset_type(&myXDR, &pDS,0)	/* get descriptor */
-   ||  !dsIsDataset(&result,pDS) ||  !result	/* sanity check */
-   ||  !dio_mapHierarchy(pDest,pDS)		/* map onto memory */
-   ||  !dsAllocTables(pDS)			/* no-opt */
-   ||  !xdr_dataset_data(&myXDR,pDS)		/* get data */
-   ||  !dsFreeDataset(pDS)			/* discard input DS */
-   ){
-      myState = saveState;
-      EML_ERROR(CANT_READ_FROM_STREAM);
-   }
-
-   myState = saveState;
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -159,6 +215,7 @@ STAFCV_T dioFileStream:: open (DIO_MODE_T mode) {
 
 //- Open file. -**
    if( (myFile = fopen(myFileName, fo_mode)) == NULL ){
+      printf("(%s)(%s)\n",myFileName,fo_mode);
       EML_ERROR(CANT_OPEN_FILE);
    }
 
@@ -167,33 +224,6 @@ STAFCV_T dioFileStream:: open (DIO_MODE_T mode) {
 //-? if( myXDR == NULL ) EML_ERROR(BAD_XDR); -??
 
    myMode = mode;
-   myState = DIO_OPEN_STATE;
-   EML_SUCCESS(STAFCV_OK);
-}
-
-//----------------------------------
-STAFCV_T dioFileStream:: putEvent (tdmDataset* source) {
-   if( !(DIO_OPEN_STATE == myState)
-   ||  !(DIO_WRITE_MODE == myMode || DIO_UPDATE_MODE == myMode)
-   ){
-      EML_ERROR(BAD_MODE_OR_STATE);
-   }
-   myState = DIO_WRITE_STATE;
-
-//- Get pointer to source dataset -**
-   DSL_PTR_T ddd;
-   if( !source->cvtDslPointer(ddd) ){
-      myState = DIO_OPEN_STATE;
-      EML_ERROR(BAD_DATASET);
-   }
-   DS_DATASET_T *pSour=(DS_DATASET_T*)ddd;
-
-//- Write data here -**
-   if( !xdr_dataset(&myXDR, &pSour) ){
-      myState = DIO_OPEN_STATE;
-      EML_ERROR(ERROR_WRITING_DATASET);
-   }
-
    myState = DIO_OPEN_STATE;
    EML_SUCCESS(STAFCV_OK);
 }
@@ -241,23 +271,40 @@ long dioTapeStream::  bufferSize () {
 //:=============================================== CLASS              ==
 // dioSockStream
 //:----------------------------------------------- CTORS & DTOR       --
-dioSockStream:: dioSockStream(const char * name, long sock)
+dioSockStream:: dioSockStream(const char * name, const char * hostName
+			, long port)
 		: dioStream()
 		, socObject(name,"dioSockStream") {
    myPtr = (SOC_PTR_T)this;
-   mySocket = sock;
-}
-dioSockStream:: ~dioSockStream() {
-}
 
-//:----------------------------------------------- ATTRIBUTES         --
-long dioSockStream::  socket () {
-   return mySocket;
+//- Socket stuff;
+   myState = DIO_UNKNOWN_STATE;
+   myBufferSize = -1; /*-DIO_E_UNIMPLEMENTED-*/
+   myHost = (char*)ASUALLOC(strlen(hostName) +1);
+   strcpy(myHost,hostName);
+   myPort = port;
 }
 
 //----------------------------------
-void dioSockStream:: bufferSize (long bufferSize) {
-   myBufferSize = bufferSize;
+dioSockStream:: ~dioSockStream() {
+   close();
+}
+
+//:----------------------------------------------- ATTRIBUTES         --
+long dioSockStream::  port () {
+   return myPort;
+}
+
+//----------------------------------
+char * dioSockStream::  host () {
+   char *c=(char*)ASUALLOC(strlen(myHost) +1);
+   strcpy(c,myHost);
+   return c;
+}
+
+//----------------------------------
+long dioSockStream::  socketNumber () {
+   return mySocket;
 }
 
 //----------------------------------
@@ -266,7 +313,110 @@ long dioSockStream::  bufferSize () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+STAFCV_T dioSockStream:: close () {
+
+   DIO_STATE_T saveState=myState;
+   myState = DIO_UNKNOWN_STATE;
+
+/*- Close socket and destroy xdr. -*/
+   dioStream::close();
+/*-klose(mySocket);	HACK-This needs to be a message to server-*/
+
+   if( DIO_OPEN_STATE == saveState ){
+      myState = DIO_CLOSE_STATE;
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
+
+   int status;
+
+//- Open network socket. -**
+   if( !(DIO_OPEN_STATE == myState)
+   &&  !(DIO_CONNECT_STATE == myState)
+   ){
+      if( (status = tcpConnect(myHost, myPort, &mySocket)) ){
+	 perror("tcpConnect failed");
+	 myState = DIO_UNKNOWN_STATE;
+	 EML_ERROR(CONNECTION_FAILURE);
+      }
+      myState = DIO_CONNECT_STATE;
+   }
+
+//- Create XDR pointer. -**
+   memset((char*)&myXDR, 0, sizeof(myXDR));
+   xdrrec_create(&myXDR, 0, 0, &mySocket, tcpRead, tcpWrite);
+//-? if( myXDR == NULL ) EML_ERROR(BAD_XDR); -??
+
+//- Set XDR mode -**
+   switch (mode){
+   case DIO_READ_MODE:
+      myXDR.x_op = XDR_DECODE;
+      break;
+   case DIO_WRITE_MODE:
+      myXDR.x_op = XDR_ENCODE;
+      break;
+   case DIO_UPDATE_MODE:	//- Not implemented
+   case DIO_UNKNOWN_MODE:
+   default:
+      EML_ERROR(INVALID_MODE);
+      break;
+   }
+
+   myMode = mode;
+   myState = DIO_OPEN_STATE;
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T dioSockStream:: getEvent (tdmDataset* destination) {
+   printf("xdrrec_skiprecord: %d\n", xdrrec_skiprecord(&myXDR));
+   return dioStream::getEvent(destination);
+}
+
+//----------------------------------
+//?STAFCV_T dioSockStream:: putEvent (tdmDataset* destination) {
+//?   STAFCV_T status = dioStream::putEvent(destination);
+//?   if( !xdrrec_endofrecord(&myXDR, 1) ){
+//?      EML_ERROR(ENDOFRECORD_FAILURE);
+//?   }
+//?   return status;
+//?}
+
 //:----------------------------------------------- PROT FUNCTIONS     --
+int dioSockStream:: openServer() {
+   extern int errno;
+   int length, listenSocket, acceptSocket;
+   struct sockaddr_in localAddr, remoteAddr;
+
+   if ((listenSocket = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+   		return socketCallFailed;
+
+   memset((char *) &localAddr, 0, sizeof(localAddr));
+   localAddr.sin_family = htons(AF_INET);;
+   localAddr.sin_port = htons(port());
+
+   if (bind(listenSocket, (struct sockaddr *) & localAddr,
+   		sizeof(localAddr)) < 0) {
+      klose(listenSocket);
+      return bindFailure;
+   }
+   if (listen(listenSocket, 5) < 0) {
+      perror("listen failed\n");
+      return listenFailure;
+   }
+
+/* signal(SIGCHLD, reaper);// eliminate zombies */
+   signal_reaper();
+}
+
+//----------------------------------
+int dioSockStream:: openClient() {
+   return tcpConnect(myHost, myPort, &mySocket);
+}
+
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
 //:=============================================== CLASS              ==
@@ -288,6 +438,97 @@ dioFactory:: ~dioFactory() {
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+char * dioFactory:: list (){
+   socObject* obj;
+
+   printf("\n"
+"+---------------------------------------------------------------------"
+   "\n"
+"|**************** DIO - Dataset Input/Output listing *****************"
+   "\n"
+"+-------+-----------------+-----------------+-------------------------"
+   "\n"
+"| IDREF | NAME            | TYPE            | MODE & STATE            "
+   "\n"
+"+-------+-----------------+-----------------+-------------------------"
+    "\n");
+   for( int i=0;i<count();i++ ){
+      if( soc->getObject(entry(i),obj) ){
+         if( 0 == strcmp("dioFileStream",obj->type()) ){
+            printf("| %5d | %-15s | %-15s | %s %s \n"
+                        ,obj->idRef(),obj->name(),obj->type()
+			, dio_mode2text(DIOFILESTREAM(obj)->mode())
+			, dio_state2text(DIOFILESTREAM(obj)->state())
+                        );
+         } else if( 0 == strcmp("dioSockStream",obj->type()) ){
+            printf("| %5d | %-15s | %-15s | %s %s \n"
+                        ,obj->idRef(),obj->name(),obj->type()
+			, dio_mode2text(DIOSOCKSTREAM(obj)->mode())
+			, dio_state2text(DIOSOCKSTREAM(obj)->state())
+                        );
+         } else if( 0 == strcmp("dioTestStream",obj->type()) ){
+            printf("| %5d | %-15s | %-15s | \n"
+                        ,obj->idRef(),obj->name(),obj->type()
+                        );
+         }
+      } else {
+         printf("| %5d | %-15s | %-15s | \n"
+                        ,entry(i),"**DELETED**","**DELETED**");
+      }
+   }
+   printf(
+"+-------+-----------------+-----------------+-------------------------"
+   "\n\n");
+
+   return ""; // TEMPORARY HACK
+}
+
+//- Generic Streams ---------------------------------------------------
+STAFCV_T dioFactory:: deleteStream (const char * name) {
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+STAFCV_T dioFactory:: findStream (const char * name
+		, dioStream*& stream) {
+   socObject* obj;
+   if( soc->findObject(name,"dioFileStream",obj) ){
+      stream = DIOFILESTREAM(obj);
+      EML_SUCCESS(STAFCV_OK);
+   }
+   if( soc->findObject(name,"dioSockStream",obj) ){
+      stream = DIOSOCKSTREAM(obj);
+      EML_SUCCESS(STAFCV_OK);
+   }
+   stream = NULL;
+   EML_ERROR(OBJECT_NOT_FOUND);
+}
+
+//----------------------------------
+STAFCV_T dioFactory:: getStream (IDREF_T id, dioStream*& stream) {
+   EML_ERROR(NOT_YET_IMPLEMENTED);
+   socObject* obj;
+   if( !soc->getObject(id,obj) ){
+      stream = NULL;
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   char *t=obj->type();
+   if( (0 == strcmp(t,"dioFileStream")) ){
+      ASUFREE(t);
+      stream = DIOFILESTREAM(obj);
+      EML_SUCCESS(STAFCV_OK);
+   }
+   if( (0 == strcmp(t,"dioSockStream")) ){
+      ASUFREE(t);
+      stream = DIOSOCKSTREAM(obj);
+      EML_SUCCESS(STAFCV_OK);
+   }
+   ASUFREE(t);
+   stream = NULL;
+   EML_ERROR(WRONG_OBJECT_TYPE);
+}
+
+//- File Streams ------------------------------------------------------
 STAFCV_T dioFactory:: deleteFileStream (const char * name ){
    if( !soc->deleteObject(name,"dioFileStream") ){
       EML_ERROR(CANT_DELETE_OBJECT);
@@ -324,46 +565,6 @@ STAFCV_T dioFactory:: getFileStream (IDREF_T id
 }
 
 //----------------------------------
-char * dioFactory:: list (){
-   socObject* obj;
-
-   printf("\n"
-"+---------------------------------------------------------------------"
-   "\n"
-"|**************** DIO - Dataset Input/Output listing *****************"
-   "\n"
-"+-------+-----------------+-----------------+-------------------------"
-   "\n"
-"| IDREF | NAME            | TYPE            | MODE & STATE            "
-   "\n"
-"+-------+-----------------+-----------------+-------------------------"
-    "\n");
-   for( int i=0;i<count();i++ ){
-      if( soc->getObject(entry(i),obj) ){
-         if( 0 == strcmp("dioFileStream",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | %s %s \n"
-                        ,obj->idRef(),obj->name(),obj->type()
-			, dio_mode2text(DIOFILESTREAM(obj)->mode())
-			, dio_state2text(DIOFILESTREAM(obj)->state())
-                        );
-         } else if( 0 == strcmp("dioTestStream",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | \n"
-                        ,obj->idRef(),obj->name(),obj->type()
-                        );
-         }
-      } else {
-         printf("| %5d | %-15s | %-15s | \n"
-                        ,entry(i),"**DELETED**","**DELETED**");
-      }
-   }
-   printf(
-"+-------+-----------------+-----------------+-------------------------"
-   "\n\n");
-
-   return ""; // TEMPORARY HACK
-}
-
-//----------------------------------
 STAFCV_T dioFactory:: newFileStream (const char * name
 		, const char * fileName) {
    IDREF_T id;
@@ -387,6 +588,66 @@ STAFCV_T dioFactory:: newFileStream (const char * name
 
 }
 
+//- Socket Streams ----------------------------------------------------
+//----------------------------------
+STAFCV_T dioFactory:: deleteSockStream (const char * name ){
+   if( !soc->deleteObject(name,"dioSockStream") ){
+      EML_ERROR(CANT_DELETE_OBJECT);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T dioFactory:: findSockStream (const char * name
+		, dioSockStream*& sockStream ){
+   socObject* obj;
+   if( !soc->findObject(name,"dioSockStream",obj) ){
+      sockStream = NULL;
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   sockStream = DIOSOCKSTREAM(obj);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T dioFactory:: getSockStream (IDREF_T id
+		, dioSockStream*& sockStream ){
+   socObject* obj;
+   if( !soc->getObject(id,obj) ){
+      sockStream = NULL;
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   if( 0 != strcmp(obj->type(),"dioSockStream") ){
+      sockStream = NULL;
+      EML_ERROR(WRONG_OBJECT_TYPE);
+   }
+   sockStream = DIOSOCKSTREAM(obj);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+//----------------------------------
+STAFCV_T dioFactory:: newSockStream (const char * name
+		, const char * hostName, long port) {
+   IDREF_T id;
+   if( soc->idObject(name,"dioSockStream",id) ){
+      EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   static dioSockStream* p;
+   p = new dioSockStream(name,hostName,port);
+   if( !soc->idObject(name,"dioSockStream",id) ){
+      EML_ERROR(OBJECT_NOT_FOUND);
+   }
+   addEntry(id);
+/***
+   if( !p->open(mode) ){
+      p->close();
+      soc->deleteObject(name,"dioSockStream");
+      EML_ERROR(CANT_OPEN_SOCKET);
+   }
+***/
+   EML_SUCCESS(STAFCV_OK);
+
+}
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
 // ---------------------------------------------------------------------

@@ -19,7 +19,9 @@
 /*- Don't use CORBA (by default).
 #define CORBA -*/
 
+#define DIOSTREAM(OBJ) ((dioStream*)(OBJ->ptr()))
 #define DIOFILESTREAM(OBJ) ((dioFileStream*)(OBJ->ptr()))
+#define DIOSOCKSTREAM(OBJ) ((dioSockStream*)(OBJ->ptr()))
 
 #endif /* DIO_MACROS_H */
 
