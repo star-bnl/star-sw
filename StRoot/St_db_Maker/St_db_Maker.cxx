@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.30 2000/05/11 01:27:54 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.31 2000/05/12 15:10:19 fine Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.31  2000/05/12 15:10:19  fine
+// new Table macro introduced
+//
 // Revision 1.30  2000/05/11 01:27:54  fisyak
 // Change y1h from 03/01/2000 to 05/01/2000
 //
@@ -69,11 +72,7 @@ static const int   times[]=  {
 //                                          
 /////////////////////////////////////////////////////////////////////////  
                                             
-TTableDescriptor *St_dbConfig::fgColDescriptors = 0; 
-
-TableImp(dbConfig)                     
-TableStreamerImp(dbConfig)             
-
+TableClassImpl(St_dbConfig,dbConfig_st)
 
 //_________________________ class St_Validity ____________________________________
 class St_ValiSet : public TDataSet{
