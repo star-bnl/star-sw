@@ -185,6 +185,7 @@ Int_t StVertexSeedMaker::Make(){
     if (summary & (1 << (dbTriggerId->getDaqTrgId(iTrg)))) {
       switch (dbTriggerId->getOfflineTrgId(iTrg)) {
         case (1000) :     // ppMinBias
+        case (1003) :     // ppFPDe-slow
         case (2001) :     // dAuMinBias
         case (2003) :     // dAuMinBias
         case (2300) :     // dAuTOF
@@ -297,7 +298,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.16 2003/04/22 19:20:52 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.17 2003/05/19 14:34:54 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -582,8 +583,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.16 2003/04/22 19:20:52 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.17 2003/05/19 14:34:54 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.17  2003/05/19 14:34:54  genevb
+// Add ppFPD slow triggers
+//
 // Revision 1.16  2003/04/22 19:20:52  genevb
 // Add ppMinBias triggers
 //
