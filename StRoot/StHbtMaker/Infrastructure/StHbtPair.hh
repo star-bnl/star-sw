@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.6 2000/02/13 21:13:34 lisa Exp $
+ * $Id: StHbtPair.hh,v 1.7 2000/04/03 22:09:12 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.7  2000/04/03 22:09:12  rcwells
+ * Add member function ... quality().
+ *
  * Revision 1.6  2000/02/13 21:13:34  lisa
  * changed ambiguous StHbtPair::fourMomentum() to fourMomentumSum() and fourMomentumDiff() and fixed related bug in QvecCorrFctn
  *
@@ -92,6 +95,7 @@ public:
   double qOutBf(double beta=0.0) const;
   double qLongBf(double beta=0.0) const;
 
+  int quality() const;
 
 private:
   StHbtParticle* mTrack1;
