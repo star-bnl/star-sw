@@ -182,6 +182,7 @@ Int_t StTreeMaker::MakeRead(const StUKey &RunEvent){
   else                  	iret = fTree->NextEvent(        );
 
   StEvtHddr *hddr = (StEvtHddr*)GetDataSet("EvtHddr");
+  if (hddr && Debug()) hddr->Print("");
   if (iret) return iret;
   St_DataSetIter nextBr(fTree);
   StBranch *br ;
