@@ -1,5 +1,58 @@
-// $Id: St_TLA_Maker.h,v 1.12 1999/09/24 22:03:09 perev Exp $
+// $Id: St_TLA_Maker.h,v 1.13 2002/04/28 01:28:36 jeromel Exp $
+
+#ifndef STAR_St_TLA_Maker
+#define STAR_St_TLA_Maker
+
+/*!
+ *                                                                     
+ * \class  St_TLA_Maker
+ * \author fisyak
+ * \date   1998/07/20
+ * \brief  virtual base class for Maker
+ *
+ * This commented block at the top of the header file is considered as
+ * the class description to be present on the this class Web page. 
+ *
+ * 
+ * St_TLA_Maker virtual base class for Maker                        
+ * Template Maker doing nothing. See README file in StRoot/St_TLA_Maker
+ *
+ *
+ */                                                                      
+
+#ifndef StMaker_H
+#include "StMaker.h"
+#endif
+//class St_stk_stkpar;
+class St_TLA_Maker : public StMaker {
+ private:
+  // static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.13 2002/04/28 01:28:36 jeromel Exp $";
+ 
+ protected:
+ public: 
+                  St_TLA_Maker(const char *name="TLA");
+   virtual       ~St_TLA_Maker();
+   virtual Int_t Init();
+   virtual Int_t  Make();
+// virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
+// virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
+
+   virtual const char *GetCVS() const {
+     static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.13 2002/04/28 01:28:36 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     return cvs;
+   }
+
+   ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
+};
+
+#endif
+
+
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.13  2002/04/28 01:28:36  jeromel
+// Reshaped comments for doxygen. Hopefully, users will propagate this good
+// habit.
+//
 // Revision 1.12  1999/09/24 22:03:09  perev
 // Add InitRun & FinishRun to template maker
 //
@@ -33,37 +86,3 @@
 // Revision 1.2  1998/07/20 15:08:15  fisyak
 // Add tcl and tpt
 //
-#ifndef STAR_St_TLA_Maker
-#define STAR_St_TLA_Maker
-
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_TLA_Maker virtual base class for Maker                            //
-//                                                                      //
-//  Submit any problem with this code via begin_html <A HREF="http://www.rhic.bnl.gov/STAR/html/comp_l/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
-//
-//////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
-#include "StMaker.h"
-#endif
-//class St_stk_stkpar;
-class St_TLA_Maker : public StMaker {
- private:
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.12 1999/09/24 22:03:09 perev Exp $";
- 
- protected:
- public: 
-                  St_TLA_Maker(const char *name="TLA");
-   virtual       ~St_TLA_Maker();
-   virtual Int_t Init();
-   virtual Int_t  Make();
-// virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
-// virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
-
-   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_TLA_Maker.h,v 1.12 1999/09/24 22:03:09 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-   ClassDef(St_TLA_Maker, 1)   //StAF chain virtual base class for Makers
-};
-
-#endif

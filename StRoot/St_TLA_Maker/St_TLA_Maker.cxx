@@ -1,7 +1,11 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_TLA_Maker.cxx,v 1.14 2000/06/23 16:50:07 fisyak Exp $
+// $Id: St_TLA_Maker.cxx,v 1.15 2002/04/28 01:28:36 jeromel Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.15  2002/04/28 01:28:36  jeromel
+// Reshaped comments for doxygen. Hopefully, users will propagate this good
+// habit.
+//
 // Revision 1.14  2000/06/23 16:50:07  fisyak
 // remove params
 //
@@ -14,17 +18,7 @@
 // Revision 1.11  1999/07/10 22:59:16  fine
 // Some comments have been introduced to show html docs
 //
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_TLA_Maker class for Makers                                        //
-//                                                                      //
-// This commented block at the top of the source file is considered as  //
-// this class description to be present on the this class Web page.     //
-//  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html                    //
-//                                                                      //
-//  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html   //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+
 
 #include "St_TLA_Maker.h"
 #include "StChain.h"
@@ -35,48 +29,51 @@
 ClassImp(St_TLA_Maker)
 
 //_____________________________________________________________________________
-St_TLA_Maker::St_TLA_Maker(const char *name):StMaker(name){
- //  TLA constructor
- //
- //  const char *name -  the name of this constructor
- //
- //  The first comment lines after the opening bracket
- //  ({) of a member function are considered as a member function description 
- //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
-}
-//_____________________________________________________________________________
-St_TLA_Maker::~St_TLA_Maker(){
- // This TLA destructor
- //
- //  The first comment lines after the opening bracket
- //  ({) of a member function are considered as a member function description 
- //
- //  The first comment lines after the opening bracket
- //  ({) of a member function are considered as a member function description 
- //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
-}
-//_____________________________________________________________________________
-Int_t St_TLA_Maker::Init(){
- //  Init - is a first method the top level StChain calls to initialize all its makers
- //
- //  The first comment lines after the opening bracket
- //  ({) of a member function are considered as a member function description 
- //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
+/// TLA constructor
+/*!
+  const char *name -  the name of this constructor
+  The first comment lines after the opening bracket
+  ({) of a member function are considered as a member function description 
+  See <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A>
 
-// Create tables
-// Create Histograms    
+ */
+St_TLA_Maker::St_TLA_Maker(const char *name):StMaker(name){
+  //
+}
+
+
+//_____________________________________________________________________________
+/// This is TLA destructor
+/*!
+  The first comment lines after the opening bracket
+  ({) of a member function are considered as a member function description 
+  
+  The first comment lines after the opening bracket
+  ({) of a member function are considered as a member function description 
+  see: <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> 
+
+ */
+St_TLA_Maker::~St_TLA_Maker(){
+  //
+}
+
+
+//_____________________________________________________________________________
+/// Init - is a first method the top level StChain calls to initialize all its makers 
+Int_t St_TLA_Maker::Init(){
+  // Create tables
+  // Create Histograms    
    return StMaker::Init();
 }
+
+
 //_____________________________________________________________________________
+/// Make - this method is called in loop for each event
 Int_t St_TLA_Maker::Make(){
- //
- //  Make - this methoid is called in loop for each event
- //
- //  The first comment lines after the opening bracket
- //  ({) of a member function are considered as a member function description 
- //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
- //  PrintInfo();
- int nArray; unsigned char *Array;
+  //
+  //  PrintInfo();
+  //
+  int nArray; unsigned char *Array;
 
  St_ObjectSet *os = (St_ObjectSet*)GetDataSet("StDAQReader");
  assert(os);
