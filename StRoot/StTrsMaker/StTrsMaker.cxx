@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.55 2000/03/15 23:33:30 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.56 2000/03/24 02:43:46 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.56  2000/03/24 02:43:46  long
+// comment out  "hitMomentum.setZ(-(tpc_hit->p[2]*GeV)); when bsectorOfHit>12"
+//
 // Revision 1.55  2000/03/15 23:33:30  calderon
 // Modified Finish() to properly take care of pointers when
 // using the mixer chain.
@@ -320,7 +323,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.55 2000/03/15 23:33:30 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.56 2000/03/24 02:43:46 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -826,7 +829,7 @@ Int_t StTrsMaker::Make(){
              if(bsectorOfHit>12) 
                    {
                     sector12Coordinate.setZ((tpc_hit->x[2])+mGeometryDb->driftDistance());
-	            hitMomentum.setZ(-(tpc_hit->p[2]*GeV));// HL,02/23/00
+	       
 		 
                    } 
              else
