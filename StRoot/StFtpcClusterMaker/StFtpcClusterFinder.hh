@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.14 2002/07/15 13:31:01 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.15 2002/08/02 11:26:41 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.15  2002/08/02 11:26:41  oldi
+// Chargestep corrected (it was looping over the sequences twice).
+//
 // Revision 1.14  2002/07/15 13:31:01  jcs
 // incorporate charge step histos into cluster finder and remove StFtpcChargeStep
 //
@@ -42,7 +45,7 @@
 
 #ifndef STAR_StFtpcClusterFinder
 #define STAR_StFtpcClusterFinder
-//#define DEBUG 1
+// #define DEBUG 1
 /*#define DEBUGFILE 1*/
 
 
@@ -58,6 +61,7 @@
 #include "StFtpcDbReader.hh"
 #include "TH1.h"
 #include "TH2.h"
+
 
 #define TRUE 1
 #define FALSE 0
