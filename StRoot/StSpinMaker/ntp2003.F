@@ -10,7 +10,7 @@
       if (ISTAT.eq.0) then
          call hbnt(111,'BLOCK1',' ')
          call hbname(111,'BLOCK1',event,ntpdef)
-         write(*,*) '>>> N-tuple is BOOKED <<<'
+         write(*,*) '>>> N-tuple is BOOKED! <<<'
       else
          write(*,*) 'File open error'
          write(*,*) '>>> N-tuple is NOT BOOKED <<<'
