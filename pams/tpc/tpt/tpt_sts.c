@@ -258,7 +258,7 @@ long type_of_call tpt_sts_(
 
 /* Sort all the hits according to sector/row*/
     tls_index_sort_i_(&tphit_h[0].nok, &tphit[0].row,
-		      &tphit[1].row,&loc_hit,&len);
+		      &tphit[1].row,loc_hit,&len);
 /*
  * loc_hit was sorted for fortran, so the index starts at 1; fix it,
  * then load the row pointers
@@ -1165,7 +1165,7 @@ long type_of_call tpt_sts_(
 		if (sector!=sector_prev) {
 		    sector_prev = sector;
 		    /*calculate the crossing angle and the dip angle */   
-                    tgc_cross_and_dip_(&sector,&vtracky,&cross,&dip);
+                    tgc_cross_and_dip_(&sector,vtracky,&cross,&dip);
                     cos_alpha = cos(cross);
 		    alpha = RADTODEG*cross;
                     lambda = RADTODEG*dip;
