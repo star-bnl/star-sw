@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include <cstdio>
-//#include <Stiostream.h>
 
 #include "TROOT.h"
 #include "TFile.h"
@@ -11,7 +10,6 @@
 
 #include "EEfeeDataBlock.h"
 #include "EEfeeRawEvent.h"
-//#include "EEfeeRunDescr.h"
 #include "EEmcEventHeader.h"
 
 
@@ -29,17 +27,18 @@ static TTree   *tree  = NULL ;
 
 static TBranch *beve  = NULL ;
 static TBranch *bhead  = NULL ;
-
+ 
 static EEfeeDataBlock *b   = NULL ;
 static EEfeeRawEvent  *eve = NULL ;
 static EEmcEventHeader *ehead = NULL ;
 
 static int   evnum                   = 0;
+static int   nAutoSave =10000;
 static char *filename = NULL;
 
 
 extern "C" void
-eemcfeerootopen_(long& run, long& runtime, char *chfile, int len)
+eemcfeerootopen_(long& run, long& runtime, char *chfile, int &nAuto, int len)
 { 
   char *comment  = new char[MaxCommentLen];
   char *basefile = new char[MaxCommentLen];
@@ -75,8 +74,11 @@ eemcfeerootopen_(long& run, long& runtime, char *chfile, int len)
   ehead->setTimeStamp(runtime);
   ehead->setComment(comment);
 
+  nAutoSave=nAuto;
+
   fprintf(stderr,"rootopen: file=%s\n",filename);
   fprintf(stderr,"rootopen: comment=%s\n",comment);
+  fprintf(stderr,"rootopen: nAutoSave=%d\n",nAutoSave);
   fflush(stderr);
   if(basefile) delete [] basefile;
   if(comment ) delete [] comment;
@@ -149,6 +151,14 @@ eemcfeerootfill_(unsigned short& evtype, unsigned short& evtoken, unsigned short
   ehead->setToken(evtoken);
   ehead->setEventNumber(eveID);
   tree->Fill();  
+
+  if(evnum%nAutoSave==0) {
+    tree->AutoSave();
+    file->SaveSelf();
+    printf("====>  ezTree AutoSave done, nEve=%d\n",evnum);
+  }
+
+
   *ierr=0;
   return;
 }
