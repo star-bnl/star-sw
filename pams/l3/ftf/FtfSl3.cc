@@ -7,12 +7,31 @@
 **:           oct 11, 1999  ppy phiMin, phiMax changed to 0 and 2 pi
 **:           oct 21, 1999  ppy call to rawToGlobal with variables rather than pointers
 **:           oct 22, 1999  ppy back to pointers to make Christof happy
-**:   
+**:
+**:           nov 24, 1999  cle extra method for filling US tracks deleted
+**:                         (FtfSl3::fillUSTracks) 
+**:                         added 'token' as argument for fill method
+**:                         changed formats to official L3 formats
+**:           dec  2, 1999  ppy setup and readSector modified
+**:                         sectorGeo class added to keep sector phase space
+**:                         readSector uses it to define tracker phase space
+**:           dec  6, 1999  ppy add xLastHit and yLastHit to type1_track
+**:           dec  6, 1999  ppy provisional patch to avoid generaring type1 tracks
+**:           dec  6, 1999  ppy pt in type 1 & 2 tracks is pt * charge  
+**:           dec  6, 1999  ppy method CanItBeMerged added
+**:           dec 16, 1999  ppy readSector and readMezzaninne look at
+**:                             byte order now
+**:           dec 20, 1999  ppy sectorGeo[23].phiMax set to correct value in setup 
+**:           dec 21, 1999  ppy fillTracks=0 deleted, leave default value (1)
+**:           dec 21, 1999  ppy bug corrected phiShift = 0 zero for non-border sectors
+**:           dec 21, 1999  ppy ptHelixFit set to zero in setParameters
+**:           dec 21, 1999  ppy maxChi2Primary =10 in setParameters
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 #include <iostream.h>
 
-UINT32 swap32(unsigned int in);
+UINT32 swap32(unsigned int   in);
+UINT32 swap16(unsigned short in);
 
 #ifdef SL3ROOT
 ClassImp(FtfSl3)
@@ -21,104 +40,222 @@ ClassImp(FtfSl3)
 //******************************************************************
 //   fill tracks
 //******************************************************************
-int FtfSl3::fillTracks ( int maxBytes, int* buff ) {
-//
-//   Loop over tracks
-//
-
-    for ( int i = 0 ; i < nTracks ; i++ ) {
-       sl3Track[i].id    = track[i].id ;
-       sl3Track[i].nHits = track[i].nHits ;
-       sl3Track[i].s11Xy = track[i].s11Xy ;
-       sl3Track[i].s12Xy = track[i].s12Xy ;
-       sl3Track[i].s22Xy = track[i].s22Xy ;
-       sl3Track[i].g1Xy  = track[i].g1Xy  ;
-       sl3Track[i].g2Xy  = track[i].g2Xy  ;
-       sl3Track[i].s11Sz = track[i].s11Sz ;
-       sl3Track[i].s12Sz = track[i].s12Sz ;
-       sl3Track[i].s22Sz = track[i].s22Sz ;
-       sl3Track[i].g1Sz  = track[i].g1Sz  ;
-       sl3Track[i].g2Sz  = track[i].g2Sz  ;
-       sl3Track[i].trackLength  = track[i].trackLength  ;
-    }//
- //
-//  Fill header
-//
-    TrackHeader head ;
-    head.cpuTime  = cpuTime ;
-    head.realTime = realTime ;
-    head.nHits    = nHits ;
-    head.nTracks  = nTracks ;
-//
-//   copy track info
-//
-    int *iP = buff+1;
-    int *iPLast = buff + maxBytes ;
-    int *iPNext =  iP + sizeof(TrackHeader) ;
-    if ( iPNext > iPLast ) {
-       printf ( "FtfSl3:fillTracks: buffer too short, maxBytes %d \n", maxBytes ) ; 
-       return -1 ;
-    }
-    memcpy ( iP, (int *)&(head), sizeof(TrackHeader) ) ;
-//
-    iP     = iPNext ;
-    iPNext = iP + nTracks*sizeof(sl3MPTrack) ;
-    if ( iPNext > iPLast ) {
-       printf ( "FtfSl3:fillTracks: buffer too short, maxBytes %d \n", maxBytes ) ;
-       return -1 ;
-    }
-    memcpy ( iP, (int *)sl3Track, nTracks*sizeof(sl3MPTrack) ) ;
-//
-    int nBytes = (int)(iPNext-buff) ; 
-    buff[0] = nBytes ;
-//
-    return nBytes ;
-//
+int FtfSl3::canItBeMerged ( FtfTrack* thisTrack ) {
+// if ( thisTrack->nHits < 45 - para.minHitsPerTrack ) return 1 ; // no type 1 for now
+// float pt = thisTrack->pt ;
+   return 0 ;
 }
 //******************************************************************
 //   fill tracks
 //******************************************************************
-int FtfSl3::fillUSTracks ( int maxBytes, int* buff ) {
+int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 //
-    long nBytes = sizeof(TrackHeader) - sizeof(int) + nTracks*sizeof(sl3USTrack) ;
+//   Loop over tracks
+//
+    int counter1 = 0 ;
+    int counter2 = 0 ;
+    int counter3 = 0 ;
+
+    short* mergeFlag = new short[nTracks] ;
+//
+//   Count tracks of each type
+//
+    int i ;
+    for ( i = 0 ; i < nTracks ; i++ ) {
+       if ( track[i].flag == 1 ) {
+	  if ( canItBeMerged ( &(track[i]) ) ) {
+	     counter1++ ;
+	     mergeFlag[i] = 1 ;
+	  }
+	  else { 
+	     counter2++ ;
+	     mergeFlag[i] = 0 ;
+	  }
+       } //  Secondaries now 
+       else counter3++ ;
+    }    
+//
+    // this is done to ease calcultion of offsets further down.
+    unsigned int headSize1, headSize2, headSize3;
+    if(counter1) {
+	headSize1 = sizeof(struct bankHeader); }
+    else { headSize1 = 0; }
+    
+    if(counter2) {
+	headSize2 = sizeof(struct bankHeader); }
+    else { headSize2 = 0; }
+
+    if(counter3) {
+	headSize3 = sizeof(struct bankHeader); }
+    else { headSize3 = 0; }
+
+
+    char *pointer1 = buff + sizeof(struct L3_SECTP) ;  // type I start
+
+    char *pointer2 = pointer1 + headSize1 
+	               + counter1 * sizeof(struct type1_track) ; //type II
+    char *pointer3 = pointer2 + headSize2
+	               + counter2 * sizeof(struct type2_track) ; //typeIII
+    char *pointer4 = pointer3 + headSize3
+	               + counter3 * sizeof(struct type3_track) ; // end
+
+    int nBytes = (pointer4-buff) ; 
     if ( nBytes > maxBytes ) {
-       printf ( "FtfSl3::fillUSTracks: %d too short a buffer \n", maxBytes ) ;
-       return 1 ;
+       fprintf ( stderr, "FtfSl3::fillTracks: %d bytes needed, %d max, too short a buffer \n ",  nBytes, maxBytes ) ;
     }
 //
 //  Fill header
 //
-    TrackHeader *head = (TrackHeader *)buff ;
-    head->cpuTime  = cpuTime ;
-    head->realTime = realTime ;
-    head->nHits    = nHits ;
-    head->nTracks  = nTracks ;
+
+    struct L3_SECTP *head = (struct L3_SECTP *)buff ;
+    int sizeWord = 4; // 4 bytes per dword in raw formats
+// bankHeader
+    //  head->bh.bank_type = CHAR_L3_SECTP;
+    memcpy(head->bh.bank_type,CHAR_L3_SECTP,8);
+    head->bh.length     = sizeof(struct L3_SECTP) / 4 ;
+    head->bh.bank_id    = sectorNr;
+    head->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+    head->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+    head->bh.format_number = 0;
+    head->bh.token      = token;
+    head->bh.w9         = DAQ_RAW_FORMAT_WORD9;
+    head->bh.crc        = 0; //don't know yet....
+
+    head->nHits    = (unsigned int)nHits ;
+    head->nTracks  = (unsigned int)nTracks ;
+    head->cpuTime  = (unsigned int)rint(cpuTime * 1000000);   // to get microsec
+    head->realTime = (unsigned int)rint(realTime * 1000000) ; // same here
+    head->xVert  = (int)rint(para.xVertex * 1000000);   // to get cm*10**-6
+    head->yVert  = (int)rint(para.yVertex * 1000000); 
+    head->zVert  = (int)rint(para.zVertex * 1000000); 
+    head->para = 1 ;
+    head->banks[0].off = (pointer1-buff)/sizeWord; ;
+    head->banks[0].len = (pointer2-pointer1)/sizeWord; ;
+    head->banks[1].off = (pointer2-buff)/sizeWord; ;
+    head->banks[1].len = (pointer3-pointer2)/sizeWord; ;
+    head->banks[2].off = (pointer3-buff)/sizeWord; ;
+    head->banks[2].len = (pointer4-pointer3)/sizeWord; ;
+// done with L3_SECTP
+
+
+//  L3_STKXD banks:
+
+    struct L3_STK1D* STK1D = (struct L3_STK1D*)pointer1;
+    struct L3_STK2D* STK2D = (struct L3_STK2D*)pointer2;
+    struct L3_STK3D* STK3D = (struct L3_STK3D*)pointer3;
+
+    struct type1_track* mPTrack = 
+	(struct type1_track *)(pointer1 + headSize1) ;
+    struct type2_track* uPTrack = 
+	(struct type2_track *)(pointer2 + headSize2) ;
+    struct type3_track* uSTrack = 
+	(struct type3_track *)(pointer3 + headSize3) ;
+
+    if(headSize1) {
+	memcpy(STK1D->bh.bank_type, CHAR_L3_STK1D, 8);
+	STK1D->bh.length     = (sizeof(struct bankHeader) + 
+	                              counter1 * sizeof(type1_track))/4 ;
+	STK1D->bh.bank_id    = sectorNr ;
+	STK1D->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+	STK1D->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+	STK1D->bh.format_number = 0 ;
+	STK1D->bh.token      = token ;
+	STK1D->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
+	STK1D->bh.crc = 0; // for now!!!
+    }
+    
+    if(headSize2) {
+	memcpy(STK2D->bh.bank_type, CHAR_L3_STK2D, 8);
+	STK2D->bh.length     = (sizeof(struct bankHeader) + 
+	                              counter2 * sizeof(type2_track))/4 ;
+	STK2D->bh.bank_id    = sectorNr ;
+	STK2D->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+	STK2D->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+	STK2D->bh.format_number = 0 ;
+	STK2D->bh.token      = token ;
+	STK2D->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
+	STK2D->bh.crc = 0; // for now!!!
+    }
+
+    if(headSize3) {
+	memcpy(STK3D->bh.bank_type, CHAR_L3_STK3D, 8);
+	STK3D->bh.length     = (sizeof(struct bankHeader) + 
+	                              counter3 * sizeof(type3_track))/4 ;
+	STK3D->bh.bank_id    = sectorNr ;
+	STK3D->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+	STK3D->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+	STK3D->bh.format_number = 0 ;
+	STK3D->bh.token      = token ;
+	STK3D->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
+	STK3D->bh.crc = 0; // for now!!!
+    }   
 //
-//   copy track info
+    for ( i = 0 ; i < nTracks ; i++ ) {
+       if ( track[i].flag == 1 ) {
+	  if ( mergeFlag[i] ) { 
+	     mPTrack->id    = track[i].id ;
+	     mPTrack->nHits = track[i].nHits ;
+	     mPTrack->s11Xy = track[i].s11Xy ;
+	     mPTrack->s12Xy = track[i].s12Xy ;
+	     mPTrack->s22Xy = track[i].s22Xy ;
+	     mPTrack->g1Xy  = track[i].g1Xy  ;
+	     mPTrack->g2Xy  = track[i].g2Xy  ;
+	     mPTrack->s11Sz = track[i].s11Sz ;
+	     mPTrack->s12Sz = track[i].s12Sz ;
+	     mPTrack->s22Sz = track[i].s22Sz ;
+	     mPTrack->g1Sz  = track[i].g1Sz  ;
+	     mPTrack->g2Sz  = track[i].g2Sz  ;
+	     mPTrack->trackLength  = track[i].trackLength  ;
+	     mPTrack->xLastHit = track[i].lastHit->x  ;
+	     mPTrack->yLastHit = track[i].lastHit->y  ;
+	     mPTrack++ ;
+	  }
+	  else {
+	     uPTrack->id    = track[i].id ;
+	     uPTrack->nrec = track[i].nHits ;
+	     // chi2 * 10!!!! 
+	     uPTrack->xy_chisq = (unsigned short)rint(10 * track[i].chi2[0]
+						      /float(track[i].nHits));
+	     uPTrack->sz_chisq = (unsigned short)rint(10 * track[i].chi2[1]
+						      /float(track[i].nHits));
+	     uPTrack->dedx  = track[i].dedx ; 
+	     uPTrack->pt    = track[i].pt * float(track[i].q);   ; 
+	     uPTrack->psi   = track[i].psi  ; 
+	     uPTrack->tanl  = track[i].tanl  ; 
+	     uPTrack->z0    = track[i].z0    ; 
+	     uPTrack->Errors= 0 ; // to be filled
+	     uPTrack++ ;
+	  }
+       }
+       //
+       //  Secondaries now 
+       //
+       else {
+	  uSTrack->id    = track[i].id ;
+	  uSTrack->nrec = track[i].nHits ;
+	  uSTrack->xy_chisq = (unsigned short)rint(10 * track[i].chi2[0]
+						   /float(track[i].nHits));
+	  uSTrack->sz_chisq = (unsigned short)rint(10 * track[i].chi2[1]
+						      /float(track[i].nHits));
+	  uSTrack->dedx  = track[i].dedx  ; 
+	  uSTrack->pt    = track[i].pt * float(track[i].q) ; 
+	  uSTrack->psi   = track[i].psi   ; 
+	  uSTrack->tanl  = track[i].tanl  ; 
+	  uSTrack->r0    = track[i].r0    ; 
+	  uSTrack->phi0  = track[i].phi0  ; 
+	  uSTrack->z0    = track[i].z0    ; 
+	  uSTrack->Errors= 0 ; // to be filled
+	  uSTrack++ ;
+       }
+    }
+//  delete array
+
+    delete []mergeFlag ;
 //
-    sl3USTrack *bTrack = (sl3USTrack *)&(head->bTrack) ;
-//
-//   Loop over tracks
-//
-   for ( int i = 0 ; i < nTracks ; i++ ) {
-       bTrack[i].id    = track[i].id ;
-       bTrack[i].pt    = track[i].pt    ;
-       bTrack[i].psi   = track[i].psi   ;
-       bTrack[i].tanl  = track[i].tanl  ;
-       bTrack[i].r0    = track[i].r0    ;
-       bTrack[i].phi0  = track[i].phi0  ;
-       bTrack[i].z0    = track[i].z0    ;
-       bTrack[i].nHits = track[i].nHits ;
-       bTrack[i].q     = track[i].q     ;
-   }
-#ifdef DEBUG
-   if ( debugLevel > 1 ) {
-      printf ( "FtfSl3::fillUSTracks: %d bytes of track data\n",nBytes ) ;
-   }
-#endif
-   return nBytes ;
+    return nBytes ;
 //
 }
+
 //******************************************************************
 //   Initialize sl3 tracker
 //******************************************************************
@@ -132,6 +269,76 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
 //
   setParameters ( ) ;
 //
+//    Set sector geometry parameters
+//
+  double toRad = acos(-1.)/180. ;
+  sectorGeo[ 0].phiMin =  45. * toRad ;
+  sectorGeo[ 1].phiMin =  15. * toRad ;
+  sectorGeo[ 2].phiMin = 345. * toRad ;
+  sectorGeo[ 3].phiMin = 315. * toRad ;
+  sectorGeo[ 4].phiMin = 285. * toRad ;
+  sectorGeo[ 5].phiMin = 255. * toRad ;
+  sectorGeo[ 6].phiMin = 225. * toRad ;
+  sectorGeo[ 7].phiMin = 195. * toRad ;
+  sectorGeo[ 8].phiMin = 165. * toRad ;
+  sectorGeo[ 9].phiMin = 135. * toRad ;
+  sectorGeo[10].phiMin = 105. * toRad ;
+  sectorGeo[11].phiMin =  75. * toRad ;
+  sectorGeo[12].phiMin = 105. * toRad ;
+  sectorGeo[13].phiMin = 135. * toRad ;
+  sectorGeo[14].phiMin = 165. * toRad ;
+  sectorGeo[15].phiMin = 195. * toRad ;
+  sectorGeo[16].phiMin = 225. * toRad ;
+  sectorGeo[17].phiMin = 255. * toRad ;
+  sectorGeo[18].phiMin = 285. * toRad ;
+  sectorGeo[19].phiMin = 315. * toRad ;
+  sectorGeo[20].phiMin = 345. * toRad ;
+  sectorGeo[21].phiMin =  15. * toRad ;
+  sectorGeo[22].phiMin =  45. * toRad ;
+  sectorGeo[23].phiMin =  75. * toRad ;
+//
+  sectorGeo[ 0].phiMax =  75. * toRad ;
+  sectorGeo[ 1].phiMax =  45. * toRad ;
+  sectorGeo[ 2].phiMax =  15. * toRad ;
+  sectorGeo[ 3].phiMax = 345. * toRad ;
+  sectorGeo[ 4].phiMax = 315. * toRad ;
+  sectorGeo[ 5].phiMax = 285. * toRad ;
+  sectorGeo[ 6].phiMax = 255. * toRad ;
+  sectorGeo[ 7].phiMax = 225. * toRad ;
+  sectorGeo[ 8].phiMax = 195. * toRad ;
+  sectorGeo[ 9].phiMax = 165. * toRad ;
+  sectorGeo[10].phiMax = 135. * toRad ;
+  sectorGeo[11].phiMax = 105. * toRad ;
+  sectorGeo[12].phiMax = 135. * toRad ;
+  sectorGeo[13].phiMax = 165. * toRad ;
+  sectorGeo[14].phiMax = 195. * toRad ;
+  sectorGeo[15].phiMax = 225. * toRad ;
+  sectorGeo[16].phiMax = 255. * toRad ;
+  sectorGeo[17].phiMax = 285. * toRad ;
+  sectorGeo[18].phiMax = 315. * toRad ;
+  sectorGeo[19].phiMax = 345. * toRad ;
+  sectorGeo[20].phiMax =  15. * toRad ;
+  sectorGeo[21].phiMax =  45. * toRad ;
+  sectorGeo[22].phiMax =  75. * toRad ;
+  sectorGeo[23].phiMax = 105. * toRad ;
+//
+  double etaMin = 0.4 ;
+  double etaMax = 2.3 ;
+//
+  for ( int sector = 0 ; sector < NSECTORS ; sector++ ) {
+     sectorGeo[sector].phiShift = 0 ;
+     if ( sector < 12 ) {
+        sectorGeo[sector].etaMin = -1. * etaMin ;
+        sectorGeo[sector].etaMax = etaMax ;
+     }
+     else {
+        sectorGeo[sector].etaMin = -1. * etaMax ;
+        sectorGeo[sector].etaMax = etaMin ;
+     }
+  }
+  sectorGeo[ 2].phiShift = 16. * toRad ;
+  sectorGeo[20].phiShift = 16. * toRad ; 
+//
 //    Reset tracker
 //
   reset ( ) ;
@@ -140,18 +347,13 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
 //
   maxHits    = maxHitsIn ;
   maxTracks  = maxTracksIn ;
-  hit        =  (FtfHit*) new FtfHit[maxHits] ;
-  FtfHit* head = (FtfHit*) new FtfHit[maxHits] ;
+  hit        = new FtfHit[maxHits] ;
   track      = new FtfTrack[maxTracks] ;
-  sl3Track   = new sl3MPTrack[maxTracks] ;
-//
 //
   para.phiMin =  0.F * pi / 180.F ;
   para.phiMax =360.F * pi / 180.F  ;
-  para.etaMin = 0.F ;
-  para.etaMax = 2.F ;
-  para.mergePrimaries = 0 ;
-  para.fillTracks     = 0 ;
+  para.etaMin =-0.4F ;
+  para.etaMax = 2.2F ;
 #ifdef TRDEBUG
   para.trackDebug = 24 ;
   para.debugLevel =  1 ;
@@ -163,11 +365,11 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
 //
 //    returns number of hits from this mezzanine
 //
-//     !! ONLY FOR ALPHA/PC !!
-//     !! no byte swapping hardcoded !!
 //
 //     author: christof, derived from tonko's 'sl3'
+//     ppy:    modified to look at byte order      
 //******************************************************************
+//#define TRDEBUG
 int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 
    unsigned int *tmp32;
@@ -180,62 +382,76 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 
    counter = 0;
 
+   short swapByte = 0 ;
+   if     ( !checkByteOrder(mzcld->bh.byte_order) ) swapByte = 1 ;
+
    tmp32 = mzcld->padrowFiller ;
 
-   rows = *tmp32++ ;
+   rows = mzcld->rows;
+   if ( swapByte ) rows = swap32(rows);
 
-   //fprintf(stderr,"       Found %d rows.\n",rows) ;
+   // fprintf(stderr,"       Found %d rows.\n",rows) ;
 
    for (i=0; i<rows; i++) {
-           row = *tmp32++ ;
-	   len = *tmp32++ ;
-	   //fprintf(stderr,"        Row# %d: clusters %d\n",row,len) ;
+      row = *tmp32++ ;
+      len = *tmp32++ ;
+      if ( swapByte ) {
+	 row = swap32(row);
+	 len = swap32(len);
+      }
+      //  fprintf(stderr,"        Row# %d: clusters %d\n",row,len) ;
 
-	   for ( j=0; j<len; j++) {
-	           double fp, ft ;
-		   double x;
-		   double y;
-		   double z;
+      for ( j=0; j<len; j++) {
+	 double fp, ft ;
+	 double x;
+	 double y;
+	 double z;
 
-		   struct xt {
-		         unsigned short x ;
-		         unsigned short t ;
-		   } *xt ;
-		   struct c {
-		         unsigned short f ;
-		         unsigned short c ;
-		   } *c ;
+	 struct xt {
+	    unsigned short x ;
+	    unsigned short t ;
+	 } *xt ;
+	 struct c {
+	    unsigned short f ;
+	    unsigned short c ;
+	 } *c ;
 
-		   xt = (struct xt *) tmp32++ ;
-		   c = (struct c *) tmp32++ ;
+	 xt = (struct xt *) tmp32++ ;
+	 c = (struct c *) tmp32++ ;
 
-		   fp = (double) xt->x / 64.0 ;
-		   ft = (double) xt->t / 64.0 ;
-		   //printf("%02d %02d %9.5f %9.5f %6d %3d\n", SB, row,
-		   //       fp, ft, c->c , c->f) ;
-		   rawToGlobal(sector, row, fp, ft, &x, &y, &z);
+	 if ( !swapByte ) {
+	    fp = (double) xt->x / 64.0 ;
+	    ft = (double) xt->t / 64.0 ;
+	 }
+	 else {
+	    fp = (double) swap16(xt->x) / 64.0 ;
+	    ft = (double) swap16(xt->t) / 64.0 ;
+	 }
+	 //  printf("%02d %9.5f %9.5f %6d %3d\n", row,
+	 //         fp, ft, c->c , c->f) ;
+	 rawToGlobal(sector, row, fp, ft, &x, &y, &z);
 
-		   //printf(" %d  %d  %f  %f  %f  %d  %d\n",
-		   //	  sector, row, x, y, z, c->c, c->f);
+//	  printf(" %d  %d  %f  %f  %f  %f  %f\n",
+//	   	  sector, row, x, y, z, fp, ft);
 
-		   hitP->id  = counter ;
-		   hitP->row = row ;
-		   hitP->x   = (float) x;
-		   hitP->y   = (float) y;
-		   hitP->z   = (float) z;
-		   hitP->dx  = 0.2F ;
-		   hitP->dy  = 0.2F ;
-		   hitP->dz  = 0.2F ;
+	 hitP->id  = counter ;
+	 hitP->row = row ;
+	 hitP->x   = (float) x;
+	 hitP->y   = (float) y;
+	 hitP->z   = (float) z;
+	 hitP->dx  = 0.2F ;
+	 hitP->dy  = 0.2F ;
+	 hitP->dz  = 0.2F ;
 
-		   hitP++;
+	 hitP++;
 
-		   counter++;
-		   if ( (nHits+counter)>maxHits ) {
-		           fprintf (stderr, "Error - FtfSl3:read: Hit array too small: counter %d maxHits %d \n",
-				    counter, maxHits ) ;
-			   return -1;
-		   }
-	   }
+	 counter++;
+	 if ( (nHits+counter)>maxHits ) {
+	    fprintf (stderr, "Error - FtfSl3:read: Hit array too small: counter %d maxHits %d \n",
+		  counter, maxHits ) ;
+	    return -1;
+	 }
+      }
    }
    return counter;
 }
@@ -243,115 +459,130 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 //******************************************************************
 //     Read Sector from buffer (using daqFormats.h)
 //
-//     !! ONLY FOR ALPHA/PC !!
-//     !! byte swapping hardcoded !!
 //
 //     author: christof, derived from tonko's 'sl3'
+//     ppy:    modified to look at byte order      
 //******************************************************************
 int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 
-    struct TPCRBCLP *rbclp ;
-    struct TPCMZCLD_local *mzcld ;
-    int iRb, kMz;
-    int sector;
-    int nHitsOfMz;
+   struct TPCRBCLP *rbclp ;
+   struct TPCMZCLD_local *mzcld ;
+   int iRb, kMz;
+   int sector; 
+   int nHitsOfMz;
 
-    // reset sector-hit counter
-    nHits = 0;
+   // reset sector-hit counter
+   nHits = 0;
+   //
 
-    // check byte order of SECLP bank
-    // byte swapping is needed
-    short swapByte = 0 ;
-    if (seclp->bh.byte_order == 0x04030201) 
-	{
-	    swapByte = 1     ;
-	}
-    else if( seclp->bh.byte_order == 0x01020304 )
-	{
-        swapByte = 0 ;
-	//fprintf(stderr, "Error - FtfSl3::readSector: Wrong byte order in SECLP bank!\n");
-	//   return -1;
-	}
-    else 
-	{
-	    printf("unknow bit order \n");
-	}
-    
-    nHitsOfMz = 0;
+   // check byte order of SECLP bank
+   // byte swapping is needed
+   short swapByte = 0 ;
+   if     ( !checkByteOrder(seclp->bh.byte_order) ) swapByte = 1 ;
+
+   nHitsOfMz = 0;
+
+   sector = (unsigned int)seclp->bh.bank_id ;
+   if ( swapByte ) sector = swap32(sector) ;
+
+   sectorNr = sector;
+   para.phiMin = sectorGeo[sector-1].phiMin ;
+   para.phiMax = sectorGeo[sector-1].phiMax ;
+   para.etaMin = sectorGeo[sector-1].etaMin ;
+   para.etaMax = sectorGeo[sector-1].etaMax ;
+   //
+   //   Check Sector 
+   //
+   if ( sectorNr < 0 && sectorNr > 24 ) {
+      fprintf(stderr, "Error - FtfSl3::readSector: Wrong sector %d!\n",sectorNr);
+      return -1 ;
+   }
+
+   // run over receiver boards
+   for (iRb=0; iRb<SB_RB_NUM; iRb++) {
+
+      if (iRb==6) { 
+	 sector++ ;	// the other Sector
+	 if ( sector == 4 ) { 
+	    para.phiMin = 0. ;
+	    para.phiMax = 1.1 ; // 60 degress a bit more than a rad
+	    para.phiShift = 0.8 ; // ~45 degrees
+	 }
+	 else if ( sector == 22 ) {
+	    para.phiMin = 0. ;
+	    para.phiMax = 1.1 ; // 60 degress a bit more than a rad
+	    para.phiShift = 0.27 ; // ~15 degrees
+	 }
+	 else { 
+	    if ( sectorGeo[sector-1].phiMin < para.phiMin ) para.phiMin = sectorGeo[sector-1].phiMin ;
+	    if ( sectorGeo[sector-1].phiMax > para.phiMax ) para.phiMax = sectorGeo[sector-1].phiMax ;
+	 }
+	 if ( sectorGeo[sector-1].etaMin < para.etaMin ) para.etaMin = sectorGeo[sector-1].etaMin ;
+	 if ( sectorGeo[sector-1].etaMax > para.etaMax ) para.etaMax = sectorGeo[sector-1].etaMax ;
+         para.phiShift = 0 ;
+      }
 
 
-    sector = (unsigned int)seclp->bh.bank_id ;
-    if ( swapByte ) sector = swap32(sector) ;
-    
-    cout << sector << "sector " <<endl;
-    cout << swapByte << "swap " << endl;
+      if ( !(unsigned int)seclp->rb[iRb].off) continue ;
 
-    // run over receiver boards
-    for (iRb=0; iRb<SB_RB_NUM; iRb++) {
+      int off = (unsigned int)seclp->rb[iRb].off;
+      if ( swapByte ) off = swap32(off);
+      rbclp = (struct TPCRBCLP *)((char *)seclp + off * 4) ;
+      int swapByteMezzaninne = 0 ;
+      if     ( !checkByteOrder(rbclp->bh.byte_order) ) swapByteMezzaninne = 1 ;
 
-            if (iRb==6) sector++ ;	// the other Sector
+      // run over the 3 mezzanines
+      for (kMz=0; kMz<RB_MZ_NUM; kMz++) {
 
-	        
-	    if ((unsigned int)seclp->rb[iRb].off) {
+	 if(rbclp->mz[kMz].off) {
 #ifdef TRDEBUG
-	            if ( debugLevel > 1 ) {
-		            fprintf (stderr, "FtfSl3::readSector:     RBCLP %d exists!\n", iRb+1) ;
-		    }
-#endif
+	    if ( debugLevel > 1 ) {
+	       fprintf (stderr, "FtfSl3::readSector:       MZCLD %d exists!\n", kMz+1) ;
 	    }
-	    else continue ;
-	    
-	    int off;
-	    off = (unsigned int)seclp->rb[iRb].off;
-	    if ( swapByte ) swap32(off);
-
-	    rbclp = (struct TPCRBCLP *)((char *)seclp + off * 4) ;
-
-	    // run over the 3 mezzanines
-	    for (kMz=0; kMz<RB_MZ_NUM; kMz++) {
-
-	            if(rbclp->mz[kMz].off) {
-#ifdef TRDEBUG
-		            if ( debugLevel > 1 ) {
-			            fprintf (stderr, "FtfSl3::readSector:       MZCLD %d exists!\n", kMz+1) ;
-			    }
 #endif
-		    }
-		    else continue ;
+	 }
+	 else continue ;
 
-		    mzcld = (struct TPCMZCLD_local *) ((char *)rbclp + rbclp->mz[kMz].off*4) ;
+	 off = rbclp->mz[kMz].off ;
+	 if ( swapByteMezzaninne ) off = swap32(off);
+	 mzcld = (struct TPCMZCLD_local *) ((char *)rbclp + off*4) ;
 
-		    if (mzcld) {
-		            nHitsOfMz = readMezzanine (sector, mzcld);
-			    if (nHitsOfMz<0) {
-			            return -1;
-			    }
-			    nHits += nHitsOfMz;
-		    }
-		    
+	 if (mzcld) {
+	    nHitsOfMz = readMezzanine (sector, mzcld);
+	    if (nHitsOfMz<0) {
+	       return -1;
 	    }
-    }
-    return 0;
+	    nHits += nHitsOfMz;
+	 }
+
+      }
+   }
+   //
+   //   Since phiMin/Max etaMin/etaMax may have changed reset tracker
+   //
+   reset();
+   //
+   return 0;
 } 
 //*******************************************************************
 //    Process
 //*******************************************************************
 int FtfSl3::processSector ( ){ 
-//
-//   Reset hit track assignment
-//
+   //
+   //   Reset hit track assignment
+   //
    for ( int h = 0 ; h < nHits ; h++ ) {
-       hit[h].track = 0 ;
+      hit[h].track = 0 ;
    }
    para.eventReset = 1 ;
    nTracks         = 0 ;
    process ( ) ;
-//
+   //
    if ( debugLevel > 0 ) 
-   printf ( " FtfSl3::process: tracks %i Time: real %f cpu %f\n", 
-                    nTracks, realTime, cpuTime ) ;
-//
-//
+      printf ( " FtfSl3::process: tracks %i Time: real %f cpu %f\n", 
+	    nTracks, realTime, cpuTime ) ;
+   //
+   //
    return 1;
 }
 //***************************************************************
@@ -359,11 +590,12 @@ int FtfSl3::processSector ( ){
 //***************************************************************
 int FtfSl3::setParameters ( ) {
 
-// FtfPara* para = &(para) ;
+   // FtfPara* para = &(para) ;
 
-   para.hitChi2Cut        = 200.F  ;
-   para.goodHitChi2       =  20.F  ;
-   para.trackChi2Cut      = 100.F  ;
+   para.hitChi2Cut        = 400.F  ;
+   para.goodHitChi2       =  50.F  ;
+   para.trackChi2Cut      = 200.F  ;
+   para.maxChi2Primary    = 50.F   ;
    para.segmentRowSearchRange = 2      ;
    para.trackRowSearchRange = 3    ;
    para.dphi              = 0.08F  ;
@@ -372,11 +604,11 @@ int FtfSl3::setParameters ( ) {
    para.detaMerge        = 0.02F  ;
    para.etaMinTrack      = -2.2F  ;
    para.etaMaxTrack      =  2.2F  ;
- 
+
    para.getErrors        =  0     ;
    para.goBackwards      =  1     ;
-   para.goodDistance     = 50.F   ;
-   para.mergePrimaries   =  1    ;
+   para.goodDistance     =  5.F   ;
+   para.mergePrimaries   =  1     ;
    para.maxDistanceSegment = 50.F ;
    para.minHitsPerTrack  = 5      ;
    para.nHitsForSegment  = 2      ;
@@ -389,8 +621,8 @@ int FtfSl3::setParameters ( ) {
    para.xyErrorScale     = 1.0F   ;
    para.szErrorScale     = 1.0F   ;
    para.phiClosed        = 0      ;
-  
-   para.ptMinHelixFit     = 100.F  ;
+
+   para.ptMinHelixFit     = 0.F  ;
    para.rVertex          = 0.F    ;
    para.xVertex          = 0.F    ;
    para.yVertex          = 0.F    ;
@@ -400,3 +632,8 @@ int FtfSl3::setParameters ( ) {
    para.phiVertex        = 0.F    ;
    return 0;
 }
+
+
+
+
+

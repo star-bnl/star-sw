@@ -8,6 +8,7 @@
 //:             10aug1999 ppy nHitsForSegment set to at least 3 for
 //:                           secondary search.
 //:             23aug1999 ppy ClassImp added with ROOT flag
+//:             21dec1999 ppy printf replaced by fprintf(stderr,...
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -34,6 +35,7 @@ FtfFinder::FtfFinder ( )
     volume     = 0 ;
     rowk       = 0 ;
     trackArea  = 0 ;
+    nHitsOutOfRange = 0 ;
 }
 //*********************************************************************
 //      Steers the tracking 
@@ -43,12 +45,13 @@ double FtfFinder::process (  ) {
 //        Make sure there is something to work with
 //------------------------------------------------------------------ 
     if ( nHits <= 0 ) {
-         printf ( "fft: Hit structure is empty \n " ) ;
-         return 1 ;
+        if ( para.infoLevel > 2 )         
+           fprintf ( stderr, "fft: Hit structure is empty \n " ) ;
+        return 1 ;
     }
 //
-    double initCpuTime  = CpuTime ( );
-    double initRealTime = RealTime ( );
+    CpuTime ( );
+    RealTime ( );
 //
 //        General initialization 
 //
@@ -79,7 +82,8 @@ double FtfFinder::process (  ) {
    realTime = RealTime ( ) ;
 #ifdef DEBUG
    if ( para.infoLevel > 0 )
-      printf ( "FtfFinder::process: cpu %7.3f real %f7.2 \n", cpuTime, realTime ) ;
+      fprintf ( stderr, "FtfFinder::process: cpu %7.3f real %f7.2 \n", 
+                cpuTime, realTime ) ;
 #endif
    return cpuTime ;
 } 
@@ -130,7 +134,7 @@ int FtfFinder::getTracks ( ) {
 //
 //
          if ( nTracks > maxTracks ){
-            printf("\n FtfFinder::getTracks: Max nr tracks reached !") ;
+            fprintf(stderr,"\n FtfFinder::getTracks: Max nr tracks reached !") ;
             nTracks = maxTracks  ;
             return 1 ;
          }
@@ -222,8 +226,9 @@ int FtfFinder::reset (void)
 //---------------------------------------------------------------------------*/
    para.nRowsPlusOne = ( para.rowOuterMost - para.rowInnerMost ) / para.modRow + 2 ;
    if ( para.nRowsPlusOne < 1 ) {
-       printf ( " \n =====> Error <===== " ) ;
-       printf ( " \n Rows: Outer Most Inner Most %d % d ", para.rowOuterMost,  para.rowInnerMost ) ;
+       fprintf ( stderr, " =====> Error <===== \n" ) ;
+       fprintf ( stderr, " Rows: Outer Most Inner Most %d % d \n", 
+                          para.rowOuterMost,  para.rowInnerMost ) ;
        return 1 ;
    }
    para.nPhiPlusOne    = para.nPhi + 1 ;
@@ -238,7 +243,7 @@ int FtfFinder::reset (void)
 //
    if (volume != NULL) free ( (void *) volume ) ; 
 #ifdef TRDEBUG
-   printf("Allocating %d bytes of memory for volume\n",
+   fprintf(stderr,"Allocating %d bytes of memory for volume\n",
                para.nRowsPlusOne*
                para.nPhiPlusOne*
                para.nEtaPlusOne*sizeof(VOLUME));
@@ -247,7 +252,7 @@ int FtfFinder::reset (void)
                              para.nPhiPlusOne *
                              para.nEtaPlusOne*sizeof(VOLUME));
    if(volume == (VOLUME *)NULL) {
-     printf ( "Problem with malloc... exiting\n" ) ;
+     fprintf ( stderr, "Problem with malloc... exiting\n" ) ;
      return 1 ;
    }
 /*
@@ -255,12 +260,12 @@ int FtfFinder::reset (void)
  */
    if (rowk != NULL) free ( (void *) rowk ) ;
 #ifdef TRDEBUG
-   printf("Allocating %d bytes of memory for rowk\n",
+   fprintf( stderr, "Allocating %d bytes of memory for rowk\n",
                               para.nRowsPlusOne*sizeof(ROW));
 #endif
    rowk = (ROW *)malloc(para.nRowsPlusOne*sizeof(ROW));
    if ( rowk == ( ROW *)NULL) {
-     printf ( "Problem with malloc... exiting\n" ) ;
+     fprintf ( stderr, "Problem with malloc... exiting\n" ) ;
      exit(0);
    }
 /*
@@ -269,14 +274,14 @@ int FtfFinder::reset (void)
    if ( para.mergePrimaries ) {
       if (trackArea != NULL) free ( (void *) trackArea ) ;
 #ifdef TRDEBUG
-         printf("Allocating %d bytes of memory for track_area\n",
+         fprintf(stderr, "Allocating %d bytes of memory for track_area\n",
                        para.nPhiTrackPlusOne*
                        para.nEtaTrackPlusOne*sizeof(AREA));
 #endif
          trackArea = (AREA *)malloc(para.nPhiTrackPlusOne*
                                     para.nEtaTrackPlusOne*sizeof(AREA));
          if(trackArea == (AREA *)NULL) {
-         printf ( "Problem with malloc... exiting\n" ) ;
+         fprintf ( stderr, "Problem with malloc... exiting\n" ) ;
          return 1 ;
       }
       else{
@@ -284,8 +289,8 @@ int FtfFinder::reset (void)
 //   Check there is some memory allocated
 //
          if ( trackArea == 0 ){
-            printf ( " You cannot repass with the merging option when \n " ) ; 
-            printf ( " when you did not use it the first time         \n " ) ; 
+            fprintf ( stderr, "FtfFinder::reset: Merging option not available \n " ) ; 
+            printf ( " when option was not used the first time         \n " ) ; 
             return 1 ;
          }
      }
@@ -295,7 +300,7 @@ int FtfFinder::reset (void)
 -------------------------------------------------------------------------- */
    phiDiff = para.phiMax - para.phiMin ;
    if ( phiDiff > 2. * pi + 0.1 ) {
-      printf ( " Wrong phi range %f, %f ", 
+      fprintf ( stderr, "FtfFinder::reset: Wrong phi range %f, %f ", 
                  para.phiMin*toDeg, para.phiMax*toDeg ) ;
       return 1 ;
    }
@@ -381,6 +386,8 @@ int FtfFinder::setPointers ( )
     double r, r2, phi, eta ;
     FtfHit *thisHit ;
 //
+    nHitsOutOfRange = 0 ;
+//
 //   Set volumes to zero
 //
    memset ( rowk,   0, para.nRowsPlusOne*sizeof(ROW) ) ;
@@ -434,13 +441,14 @@ int FtfFinder::setPointers ( )
         Get phi index for hit
 -------------------------------------------------------------------------*/
 
-      thisHit->phiIndex = (int)( (thisHit->phi-para.phiMin)/para.phiSlice + 1);
+      thisHit->phiIndex = (int)( (thisHit->phi-para.phiMin)/para.phiSlice + 1.);
       if ( thisHit->phiIndex < 1 || thisHit->phiIndex > para.nPhi ) {
          if ( para.infoLevel > 2 ) {
-	      printf ( " \n === > Hit %d has Phi = %f  ", thisHit->id, 
-                                                          thisHit->phi ) ;
-              printf ( " \n Phi index %d out of range  ", thisHit->phiIndex ) ;
+	      fprintf ( stderr, " === > Hit %d has Phi = %f \n", (int)thisHit->id,    
+                                                      thisHit->phi*toDeg ) ;
+              fprintf ( stderr, " Phi index %d out of range \n", thisHit->phiIndex ) ;
          }
+	 nHitsOutOfRange++ ;
 	 continue ;
       } 
 
@@ -448,16 +456,16 @@ int FtfFinder::setPointers ( )
         Get eta index for hit
 -------------------------------------------------------------------------*/
 
-    thisHit->etaIndex = (int)((thisHit->eta - para.etaMin)/para.etaSlice + 1);
+    thisHit->etaIndex = (int)((thisHit->eta - para.etaMin)/para.etaSlice + 1.);
     if ( thisHit->etaIndex < 1 || thisHit->etaIndex > para.nEta ) {
        if ( para.infoLevel > 2 ) {
-          printf ( " \n === > Hit %d has Eta = %f  ", thisHit->id, 
-                                                     thisHit->eta ) ;
-          printf ( " \n Eta min/max %f %f ", para.etaMin, para.etaMax ) ;
-          printf ( " \n Eta slice   %f    ", para.etaSlice ) ;
-          printf ( " \n Eta index %d out of range ", thisHit->etaIndex ) ;	  
+          fprintf ( stderr, " \n === > Hit %d has Eta = %f  z %f ", (int)thisHit->id, 
+                                                           thisHit->eta, thisHit->z ) ;
+          fprintf ( stderr, " \n Eta min/max %f %f ", para.etaMin, para.etaMax ) ;
+          fprintf ( stderr, " \n Eta slice   %f    ", para.etaSlice ) ;
+          fprintf ( stderr, " \n Eta index %d out of range ", thisHit->etaIndex ) ;	  
        }
-
+       nHitsOutOfRange++ ;
        continue ;
     }
 //

@@ -3,9 +3,11 @@
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:             11aug1999 ppy primary flag fill in filling routines
-//:             22aug1999 fixing Debug routines (TRDEBUG flag on)  
-//:             23aug1999 change loop order in seekNextHit
-//:             29aug1999 move fill tracks from follow to build
+//:             22aug1999 ppy fixing Debug routines (TRDEBUG flag on)  
+//:             23aug1999 ppy change loop order in seekNextHit
+//:             29aug1999 ppy move fill tracks from follow to build
+//:             19nov1999 ppy add maxChi2Primary to decide whether track is primary
+//:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfTrack
@@ -290,7 +292,12 @@ void FtfTrack::fill (  ) {
    double rc   = sqrt ( a2Xy * a2Xy + 1 ) / ( 2 * fabs(a1Xy) ) ;
    pt          = (double)(2.9979e-3 * para->bField * rc );
 
-   if ( pt > para->ptMinHelixFit ) fitHelix ( ) ;
+   if ( pt > para->ptMinHelixFit ) {
+      double combinedChi2 = 0.5*(chi2[0]+chi2[1])/nHits ;
+      if ( para->primaries && combinedChi2 < para->maxChi2Primary ) para->vertexConstrainedFit = 1 ;
+      else para->vertexConstrainedFit = 0 ;
+      fitHelix ( ) ;
+   }
    else{
       if ( para->primaries ) fillPrimary ( xc, yc, rc ) ;
       else

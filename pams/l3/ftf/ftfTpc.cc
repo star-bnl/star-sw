@@ -188,8 +188,9 @@ extern "C" long type_of_call ftfTpc_(
   int monCounter    =  monitor_h->nok ;
   tracker.nTracks   = 0 ;
   int nTracksLast = 0 ;
+  int sectorIndex = 0 ;
 
-  for ( int sectorIndex = 0 ; sectorIndex < nSectors ; sectorIndex++ ) {
+  for ( sectorIndex = 0 ; sectorIndex < nSectors ; sectorIndex++ ) {
 //
 //   Check if any hits
 //
