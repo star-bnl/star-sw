@@ -1,6 +1,11 @@
-// $Id: StFtpcFastSimu.cc,v 1.12 2000/09/18 14:26:48 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.13 2000/11/24 14:57:02 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.13  2000/11/24 14:57:02  hummler
+// - remove tables from StFtpcFastSimu
+// - remove memory leak
+// - general cleanup
+//
 // Revision 1.12  2000/09/18 14:26:48  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
 // introduce StFtpcGeantReader to separate g2t tables from simulator code
@@ -50,14 +55,10 @@
 
 static RanluxEngine engine;
 
-StFtpcFastSimu::StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
-			       int *ffs_gepoint_nok,
-			       int ffs_gepoint_maxlen,
-			       FCL_FPPOINT_ST* fcl_fppoint,
-			       int *fcl_fppoint_nok,
-			       int fcl_fppoint_maxlen,
-			       StFtpcGeantReader *geantReader,
-			       StFtpcParamReader *paramReader)
+StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
+			       StFtpcParamReader *paramReader,
+			       TClonesArray *pointarray,
+			       TClonesArray *geantarray)
 {
   //-----------------------------------------------------------------------
   
@@ -65,38 +66,60 @@ StFtpcFastSimu::StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
   mParam=paramReader;
   mGeant=geantReader;
 
+  // allocate memory for local storage
+  // we need local arrays here that we can mess around in
+  nPoints=mGeant->numberOfHits();
+  mPoint=new StFtpcPoint[nPoints];
+  mGeantPoint=new StFtpcGeantPoint[nPoints];
+
   //    check that fppoint and gepoint are large enough to hold g2t_ftp_hit
 
-  if(mGeant->numberOfHits() > fcl_fppoint_maxlen ||
-     mGeant->numberOfHits() > ffs_gepoint_maxlen)
-    {
-      cerr << "point tables are too small to take all geant hits!!!" << endl;
-    }
-  else
-    {
-      //  Read paramenter tables and inititialize  
-      ffs_ini();
-      
-      // hh Transfer the usable g2t_ftp_hit-data into fppoint and gepoint
-      ffs_hit_rd(ffs_gepoint_nok, ffs_gepoint_maxlen,
-		 ffs_gepoint, fcl_fppoint_nok, fcl_fppoint_maxlen,
-		 fcl_fppoint);
-      
-      // jr   mark each hit with a row-number and a individual id
-      ffs_tag(ffs_gepoint_nok, ffs_gepoint_maxlen, ffs_gepoint,
-	      fcl_fppoint_nok, fcl_fppoint_maxlen, fcl_fppoint);   
-      
-      //       generate pad response and spatial resolutions
-      // mk  in the routine FFS_GEN_PADRES the routine FFS_HIT_SMEAR is called
-      ffs_gen_padres(ffs_gepoint_nok,
-		     ffs_gepoint_maxlen, ffs_gepoint, fcl_fppoint_nok, 
-		     fcl_fppoint_maxlen, fcl_fppoint);
+  //  Read paramenter tables and inititialize  
+  ffs_ini();
+  
+  // hh Transfer the usable g2t_ftp_hit-data into fppoint and gepoint
+  ffs_hit_rd();
+  
+  // jr   mark each hit with a row-number and a individual id
+  ffs_tag();   
+  
+  //       generate pad response and spatial resolutions
+  // mk  in the routine FFS_GEN_PADRES the routine FFS_HIT_SMEAR is called
+  ffs_gen_padres();
+  
+  // Check for hit-merging
+  
+  ffs_merge_tagger();
+  
+  TClonesArray &point = *pointarray;
+  TClonesArray &gpoint = *geantarray;
+  
+  for (Int_t i = 0; i < nPoints; i++) {
+    // use (default) copy constructor for StFtpcGeantPoint
+    new(gpoint[i]) StFtpcGeantPoint(mGeantPoint[i]);
+    // as StFtpcPoint is in different package, copy constructor is not visible here
+    // hgrrrumpf!!!
+//    new(point[i]) StFtpcPoint();
+//    ((StFtpcPoint *)pointarray->At(i))->SetX(mPoint[i].GetX());
+//    ((StFtpcPoint *)pointarray->At(i))->SetY(mPoint[i].GetY());
+//    ((StFtpcPoint *)pointarray->At(i))->SetZ(mPoint[i].GetZ());
+//    ((StFtpcPoint *)pointarray->At(i))->SetXerr(mPoint[i].GetXerr());
+//    ((StFtpcPoint *)pointarray->At(i))->SetYerr(mPoint[i].GetYerr());
+//    ((StFtpcPoint *)pointarray->At(i))->SetZerr(mPoint[i].GetZerr());
+//    ((StFtpcPoint *)pointarray->At(i))->SetPadRow(mPoint[i].GetPadRow());
+//    ((StFtpcPoint *)pointarray->At(i))->SetSector(mPoint[i].GetSector());
+//    ((StFtpcPoint *)pointarray->At(i))->SetNumberPads(mPoint[i].GetNumberPads());
+//    ((StFtpcPoint *)pointarray->At(i))->SetNumberBins(mPoint[i].GetNumberBins());
+//    ((StFtpcPoint *)pointarray->At(i))->SetMaxADC(mPoint[i].GetMaxADC());
+//    ((StFtpcPoint *)pointarray->At(i))->SetCharge(mPoint[i].GetCharge());
+//    ((StFtpcPoint *)pointarray->At(i))->SetFlags(mPoint[i].GetFlags());
+//    ((StFtpcPoint *)pointarray->At(i))->SetSigmaPhi(mPoint[i].GetSigmaPhi());
+//    ((StFtpcPoint *)pointarray->At(i))->SetSigmaR(mPoint[i].GetSigmaR());
+  }
 
-      // Check for hit-merging
-
-      ffs_merge_tagger(ffs_gepoint_nok, ffs_gepoint_maxlen, ffs_gepoint,
-		       fcl_fppoint_nok, fcl_fppoint_maxlen, fcl_fppoint);
-    }
+  
+  delete[] mGeantPoint;
+  delete[] mPoint;
 }
 
 StFtpcFastSimu::~StFtpcFastSimu()
@@ -104,12 +127,7 @@ StFtpcFastSimu::~StFtpcFastSimu()
   cout << "StFtpcFastSimu destructed" << endl;
 }
 
-int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
-				   int ffs_gepoint_maxlen,
-				   FFS_GEPOINT_ST *ffs_gepoint,
-				   int *fcl_fppoint_nok,
-				   int fcl_fppoint_maxlen,
-				   FCL_FPPOINT_ST *fcl_fppoint)
+int StFtpcFastSimu::ffs_gen_padres()
   {
     // Local Variables:
     float check1, check2;
@@ -154,13 +172,13 @@ int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
 
     //mk end of check
 
-    for(k = 0; k<*fcl_fppoint_nok; k++)
+    for(k = 0; k<nPoints; k++)
       {
 	//            get space point
 
-	xi = fcl_fppoint[k].x;
-	yi = fcl_fppoint[k].y;
-	zi = fcl_fppoint[k].z;
+	xi = mPoint[k].GetX();
+	yi = mPoint[k].GetY();
+	zi = mPoint[k].GetZ();
 
 	//             calculate spatial resolution along the padrow
 
@@ -184,9 +202,9 @@ int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
 	// then at least one of the momentum-components is 0; therefore set the
 	// angles to 0
 
-	if((ffs_gepoint[k].p_g[0]==0.)||
-	   (ffs_gepoint[k].p_g[1]==0.)||
-	   (ffs_gepoint[k].p_g[2]==0.))
+	if((mGeantPoint[k].GetLocalMomentum(0)==0.)||
+	   (mGeantPoint[k].GetLocalMomentum(0)==0.)||
+	   (mGeantPoint[k].GetLocalMomentum(0)==0.))
 	  {
 	    alpha  = 0.;
 	    lambda = 0.;
@@ -264,22 +282,17 @@ int StFtpcFastSimu::ffs_gen_padres(int *ffs_gepoint_nok,
 		       sigma_l, sigma_tr,&sigma_z,&sigma_x,&sigma_y,
 		       &quasiRandom);
 
-	fcl_fppoint[k].x = xo;
-	fcl_fppoint[k].y = yo;
-	fcl_fppoint[k].z = zo;
-	fcl_fppoint[k].x_err = sigma_x;
-	fcl_fppoint[k].y_err = sigma_y;
-	fcl_fppoint[k].z_err = sigma_z;
+	mPoint[k].SetX(xo);
+	mPoint[k].SetY(yo);
+	mPoint[k].SetZ(zo);
+	mPoint[k].SetXerr(sigma_x);
+	mPoint[k].SetYerr(sigma_y);
+	mPoint[k].SetZerr(sigma_z);
       }
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_hit_rd(int *ffs_gepoint_nok,
-			       int ffs_gepoint_maxlen,
-			       FFS_GEPOINT_ST *ffs_gepoint,
-                               int *fcl_fppoint_nok,
-			       int fcl_fppoint_maxlen,
-			       FCL_FPPOINT_ST *fcl_fppoint)
+int StFtpcFastSimu::ffs_hit_rd()
   {
     int ih, ih_max;
     float phi , dphi; 
@@ -296,61 +309,55 @@ int StFtpcFastSimu::ffs_hit_rd(int *ffs_gepoint_nok,
       {
 	// specification variables:
 	// changed to new structures (gepoint) 01/29/98 hh
-	ffs_gepoint[ih].ge_pid = mGeant->trackPid(ih);
-	ffs_gepoint[ih].ge_track_p = mGeant->track(ih)+1;
-	ffs_gepoint[ih].prim_tag = mGeant->trackType(ih);
+	mGeantPoint[ih].SetGeantPID(mGeant->trackPid(ih));
+	mGeantPoint[ih].SetTrackPointer(mGeant->track(ih)+1);
+	mGeantPoint[ih].SetPrimaryTag(mGeant->trackType(ih));
 	if(mGeant->trackCharge(ih) < 0.0)
 	  {
-	    ffs_gepoint[ih].prim_tag *= -1;
+	    mGeantPoint[ih].SetPrimaryTag(-1*mGeantPoint[ih].GetPrimaryTag());
 	  }
-	fcl_fppoint[ih].row = mGeant->geantVolume(ih) - 100;
-	if (fcl_fppoint[ih].row > 10)
+	int temp=mGeant->geantVolume(ih) - 100;
+	if (temp > 10)
 	  {
-	    fcl_fppoint[ih].row -= 90;
+	    temp -= 90;
 	  }
+	mPoint[ih].SetPadRow(temp);
 
 	// Vertex-Momenta
-	ffs_gepoint[ih].p_v[0] = mGeant->pVertexX(ih);
-	ffs_gepoint[ih].p_v[1] = mGeant->pVertexY(ih);
-	ffs_gepoint[ih].p_v[2] = mGeant->pVertexZ(ih);
+	mGeantPoint[ih].SetVertexMomentum(mGeant->pVertexX(ih),mGeant->pVertexY(ih),mGeant->pVertexZ(ih));
 	
 	// Vertex position
-	ffs_gepoint[ih].vertex[0] = mGeant->vertexX(ih);
-	ffs_gepoint[ih].vertex[1] = mGeant->vertexY(ih);
-	ffs_gepoint[ih].vertex[2] = mGeant->vertexZ(ih);
+        mGeantPoint[ih].SetVertexPosition(mGeant->vertexX(ih),mGeant->vertexY(ih),mGeant->vertexZ(ih));
 
 	// Secondary production process
-
-	ffs_gepoint[ih].ge_proc = mGeant->productionProcess(ih);
+        mGeantPoint[ih].SetGeantProcess(mGeant->productionProcess(ih));
 
 	//local momentum
-	ffs_gepoint[ih].p_g[0] = mGeant->pLocalX(ih);
-	ffs_gepoint[ih].p_g[1] = mGeant->pLocalY(ih);
-	ffs_gepoint[ih].p_g[2] = mGeant->pLocalZ(ih);
+        mGeantPoint[ih].SetLocalMomentum(mGeant->pLocalX(ih),mGeant->pLocalY(ih),mGeant->pLocalZ(ih));
 
-	fcl_fppoint[ih].x = mGeant->x(ih);
-	fcl_fppoint[ih].y = mGeant->y(ih);
-	fcl_fppoint[ih].z = mGeant->z(ih);
+        mPoint[ih].SetX(mGeant->x(ih));
+        mPoint[ih].SetY(mGeant->y(ih));
+        mPoint[ih].SetZ(mGeant->z(ih));
+
 	//sector number 
-	phi = atan2((double) fcl_fppoint[ih].y,
-                    (double) fcl_fppoint[ih].x);
+	phi = atan2((double) mGeant->y(ih),
+                    (double) mGeant->x(ih));
 	if ( phi < 0.0 ) 
 	  phi += C_2PI;
 	dphi = myModulo((phi-phimin+C_2PI), C_2PI);
-	fcl_fppoint[ih].sector = int ( dphi/phisec ) + 1;  
+        mPoint[ih].SetSector( int ( dphi/phisec ) + 1);  
 	
 	//de/dx
-	fcl_fppoint[ih].max_adc = int( 8000000.0 * mGeant->energyLoss(ih) );
-	fcl_fppoint[ih].charge = fcl_fppoint[ih].max_adc * 6;
+	mPoint[ih].SetMaxADC(int( 8000000.0 * mGeant->energyLoss(ih) ));
+	mPoint[ih].SetCharge(6*mPoint[ih].GetMaxADC());
 	// for de/dx simulations, introduce de/dx smearing + adjust factors! hh
-	fcl_fppoint[ih].n_pads = 4;
-	fcl_fppoint[ih].n_bins = 3;
+	mPoint[ih].SetNumberPads(4);
+	mPoint[ih].SetNumberBins(3);
 	// possibly make n_pads, n_bins dependent on exact position, charge
       }
 
     //     set the row counter
-    *ffs_gepoint_nok = ih_max;
-    *fcl_fppoint_nok = ih_max;
+    nPoints=ih_max;
 
     return TRUE;
   }
@@ -495,12 +502,7 @@ int StFtpcFastSimu::ffs_ini()
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
-				     int ffs_gepoint_maxlen,
-				     FFS_GEPOINT_ST *ffs_gepoint,
-				     int *fcl_fppoint_nok,
-				     int fcl_fppoint_maxlen,
-				     FCL_FPPOINT_ST *fcl_fppoint)
+int StFtpcFastSimu::ffs_merge_tagger()
   {
     // Local Variables:
     int id_1, id_2, rem_count1, rem_count2, n_gepoints;
@@ -517,20 +519,20 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
     //-----------------------------------------------------------------------
 
     k=0;
-    for(i=0; i<*fcl_fppoint_nok; i++)
+    for(i=0; i<nPoints; i++)
       {
-	fcl_fppoint[i].flags = 0;
+	mPoint[i].SetFlags(0);
 	
 	// azimuthal direction
-	r1[i] = sqrt(sqr(fcl_fppoint[i].x) + sqr(fcl_fppoint[i].y));
-	phi1[i] = atan2((double) fcl_fppoint[i].y,
-                        (double) fcl_fppoint[i].x);
+	r1[i] = sqrt(sqr(mPoint[i].GetX()) + sqr(mPoint[i].GetY()));
+	phi1[i] = atan2((double) mPoint[i].GetY(),
+                        (double) mPoint[i].GetX());
 	if ( phi1[i] < 0.0 ) 
 	  phi1[i] += C_2PI;
 	
 	sig_azi_1 = s_azi[0] + s_azi[1]*r1[i] + 
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
-	fcl_fppoint[i].s_phi = sig_azi_1/10000*(r1[i]/ra);
+	mPoint[i].SetSigmaPhi(sig_azi_1/10000*(r1[i]/ra));
 
 	sig_azi_1 = (2.5*sig_azi_1)/10000; // micron -> cm
 	sigazi[i] = sig_azi_1*(r1[i]/ra);
@@ -541,7 +543,7 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	sig_rad_1 = s_rad[0] + s_rad[1]*r1[i] +  
 	  s_rad[2]*sqr(r1[i]) + s_rad[3]*sqr(r1[i])*r1[i];
 
-	fcl_fppoint[i].s_r = sig_rad_1/10000*(v1/Va);
+	mPoint[i].SetSigmaR(sig_rad_1/10000*(v1/Va));
 
 	sig_rad_1 = (2.5*sig_rad_1)/10000; // micron -> cm
 	sigrad[i] = sig_rad_1*(v1/Va);
@@ -560,8 +562,8 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	    for(j=i+1; j<nrowmax[h]; j++)
 	      {
 		id_2 = nrow[h][j]-1;
- 		if((fcl_fppoint[id_2].flags==1000) || 
- 		   (fcl_fppoint[id_2].sector!=fcl_fppoint[id_1].sector))
+ 		if((mPoint[id_2].GetFlags()==1000) || 
+ 		   (mPoint[id_2].GetSector()!=mPoint[id_1].GetSector()))
  		  continue;
 		
 		delta_azi = fabs(phi1[id_1]-phi1[id_2])
@@ -572,11 +574,11 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 		   (delta_azi < (2 * sigazi[id_1])))
 		  {
 		    // mark clusters as unfolded 
-		    if(fcl_fppoint[id_1].flags != 1000)
+		    if(mPoint[id_1].GetFlags() != 1000)
 		      {
-			fcl_fppoint[id_1].flags = 1;
+			mPoint[id_1].SetFlags(1);
 		      }
-		    fcl_fppoint[id_2].flags = 1;
+		    mPoint[id_2].SetFlags(1);
 		  }
 		
 		if((delta_r<sigrad[id_1]) &&
@@ -585,28 +587,28 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 		    k++;
 		    
 		    // merge clusters, mark second for removal
-		    if(fcl_fppoint[id_1].flags != 1000)
+		    if(mPoint[id_1].GetFlags() != 1000)
 		      {
-			fcl_fppoint[id_1].flags = 8;
+			mPoint[id_1].SetFlags(8);
 		      }
-		    fcl_fppoint[id_2].flags = 1000;
-		    fcl_fppoint[id_1].max_adc=fcl_fppoint[id_1].max_adc+
-		      fcl_fppoint[id_2].max_adc / 2;
+		    mPoint[id_2].SetFlags(1000);
+		    mPoint[id_1].SetMaxADC(mPoint[id_1].GetMaxADC()+
+					   mPoint[id_2].GetMaxADC() / 2);
 		      // maxadc adds up somehow, maybe more, maybe less
-		    fcl_fppoint[id_1].charge=fcl_fppoint[id_1].charge+
-		      fcl_fppoint[id_2].charge;
+		    mPoint[id_1].SetCharge(mPoint[id_1].GetCharge() +
+					   mPoint[id_2].GetCharge());
 		    // charge adds up exactly
-		    fcl_fppoint[id_1].x=(fcl_fppoint[id_1].x+
-					 fcl_fppoint[id_2].x) / 2;
-		    fcl_fppoint[id_1].y=(fcl_fppoint[id_1].y+
-					 fcl_fppoint[id_2].y) / 2;
-		    fcl_fppoint[id_1].z=(fcl_fppoint[id_1].z+
-					 fcl_fppoint[id_2].z) / 2;
+		    mPoint[id_1].SetX((mPoint[id_1].GetX() +
+				       mPoint[id_2].GetX()) / 2);
+		    mPoint[id_1].SetY((mPoint[id_1].GetY() +
+				       mPoint[id_2].GetY()) / 2);
+		    mPoint[id_1].SetZ((mPoint[id_1].GetZ() +
+				       mPoint[id_2].GetZ()) / 2);
 		    // positions average more or less
-		    fcl_fppoint[id_1].s_phi=fcl_fppoint[id_1].s_phi+
-		      fcl_fppoint[id_2].s_phi / 2;
-		    fcl_fppoint[id_1].s_r=fcl_fppoint[id_1].s_r+
-		      fcl_fppoint[id_2].s_r / 2;
+		    mPoint[id_1].SetSigmaPhi(mPoint[id_1].GetSigmaPhi()+
+					     mPoint[id_2].GetSigmaPhi() / 2);
+		    mPoint[id_1].SetSigmaR(mPoint[id_1].GetSigmaR()+
+					   mPoint[id_2].GetSigmaR() / 2);
 		    //widths add up somehow...
 		  }
 	      }
@@ -630,10 +632,10 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
     dist_rad_in /= 5000;
     dist_rad_out /= 5000;
       
-    while(id_2 < *fcl_fppoint_nok)
+    while(id_2 < nPoints)
       {
 	delta_azi = phi1[id_2] 
-	  -myModulo(((fcl_fppoint[id_2].sector-1)*phisec+phimin),(C_2PI));
+	  -myModulo(((mPoint[id_2].GetSector()-1)*phisec+phimin),(C_2PI));
 	if (delta_azi<0.0) 
 	  delta_azi += C_2PI;
 
@@ -641,9 +643,9 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
            (delta_azi > sector_phi_max) ||
 	   (r1[id_2] < ri+dist_rad_in) ||
 	   (r1[id_2] > ra-dist_rad_out) ||
-           (fcl_fppoint[id_2].flags > 256))
+           (mPoint[id_2].GetFlags() > 256))
 	  {
-            if(fcl_fppoint[id_2].flags > 256)
+            if(mPoint[id_2].GetFlags() > 256)
 	      {
 		rem_count1++;
 	      }
@@ -661,31 +663,31 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	      }
 	    else
 	      {
-		fcl_fppoint[id_1].row=fcl_fppoint[id_2].row;
-		fcl_fppoint[id_1].sector=fcl_fppoint[id_2].sector;
-		fcl_fppoint[id_1].n_pads=fcl_fppoint[id_2].n_pads;
-		fcl_fppoint[id_1].n_bins=fcl_fppoint[id_2].n_bins;
-		fcl_fppoint[id_1].max_adc=fcl_fppoint[id_2].max_adc;
-		fcl_fppoint[id_1].charge=fcl_fppoint[id_2].charge;
-		fcl_fppoint[id_1].flags=fcl_fppoint[id_2].flags;
-		ffs_gepoint[id_1].ge_track_p=ffs_gepoint[id_2].ge_track_p;
-		ffs_gepoint[id_1].ge_pid=ffs_gepoint[id_2].ge_pid;
-		ffs_gepoint[id_1].prim_tag=ffs_gepoint[id_2].prim_tag;
-		fcl_fppoint[id_1].x=fcl_fppoint[id_2].x;
-		fcl_fppoint[id_1].y=fcl_fppoint[id_2].y;
-		fcl_fppoint[id_1].z=fcl_fppoint[id_2].z;
-		fcl_fppoint[id_1].s_phi=fcl_fppoint[id_2].s_phi;
-		fcl_fppoint[id_1].s_r=fcl_fppoint[id_2].s_r;
-		ffs_gepoint[id_1].p_v[0]=ffs_gepoint[id_2].p_v[0];
-		ffs_gepoint[id_1].p_v[1]=ffs_gepoint[id_2].p_v[1];
-		ffs_gepoint[id_1].p_v[2]=ffs_gepoint[id_2].p_v[2];
-		ffs_gepoint[id_1].p_g[0]=ffs_gepoint[id_2].p_g[0];
-		ffs_gepoint[id_1].p_g[1]=ffs_gepoint[id_2].p_g[1];
-		ffs_gepoint[id_1].p_g[2]=ffs_gepoint[id_2].p_g[2];
-		ffs_gepoint[id_1].vertex[0]=ffs_gepoint[id_2].vertex[0];
-		ffs_gepoint[id_1].vertex[1]=ffs_gepoint[id_2].vertex[1];
-		ffs_gepoint[id_1].vertex[2]=ffs_gepoint[id_2].vertex[2];
-		ffs_gepoint[id_1].ge_proc=ffs_gepoint[id_2].ge_proc;
+		mPoint[id_1].SetPadRow(mPoint[id_2].GetPadRow());
+		mPoint[id_1].SetSector(mPoint[id_2].GetSector());
+		mPoint[id_1].SetNumberPads(mPoint[id_2].GetNumberPads());
+		mPoint[id_1].SetNumberBins(mPoint[id_2].GetNumberBins());
+		mPoint[id_1].SetMaxADC(mPoint[id_2].GetMaxADC());
+		mPoint[id_1].SetCharge(mPoint[id_2].GetCharge());
+		mPoint[id_1].SetFlags(mPoint[id_2].GetFlags());
+		mGeantPoint[id_1].SetTrackPointer(mGeantPoint[id_2].GetTrackPointer());
+		mGeantPoint[id_1].SetGeantPID(mGeantPoint[id_2].GetGeantPID());
+		mGeantPoint[id_1].SetPrimaryTag(mGeantPoint[id_2].GetPrimaryTag());
+		mPoint[id_1].SetX(mPoint[id_2].GetX());
+		mPoint[id_1].SetY(mPoint[id_2].GetY());
+		mPoint[id_1].SetZ(mPoint[id_2].GetZ());
+		mPoint[id_1].SetSigmaPhi(mPoint[id_2].GetSigmaPhi());
+		mPoint[id_1].SetSigmaR(mPoint[id_2].GetSigmaR());
+		mGeantPoint[id_1].SetVertexMomentum(mGeantPoint[id_2].GetVertexMomentum(0),
+						    mGeantPoint[id_2].GetVertexMomentum(1),
+						    mGeantPoint[id_2].GetVertexMomentum(2));
+		mGeantPoint[id_1].SetLocalMomentum(mGeantPoint[id_2].GetLocalMomentum(0),
+						   mGeantPoint[id_2].GetLocalMomentum(1),
+						   mGeantPoint[id_2].GetLocalMomentum(2));
+		mGeantPoint[id_1].SetVertexPosition(mGeantPoint[id_2].GetVertexPosition(0),
+						    mGeantPoint[id_2].GetVertexPosition(1),
+						    mGeantPoint[id_2].GetVertexPosition(2));
+		mGeantPoint[id_1].SetGeantProcess(mGeantPoint[id_2].GetGeantProcess());
 		id_1++;
 		n_gepoints++;
 	      }
@@ -693,8 +695,7 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
 	id_2++;
       }
 	
-    *ffs_gepoint_nok = n_gepoints;
-    *fcl_fppoint_nok = n_gepoints;
+    nPoints = n_gepoints;
       
     cout << "Deleted " << rem_count1 << " merged clusters." << endl;
     cout << "Deleted " << rem_count2 << " clusters on sector limit." << endl;
@@ -702,12 +703,7 @@ int StFtpcFastSimu::ffs_merge_tagger(int *ffs_gepoint_nok,
     return TRUE;
   }
 
-int StFtpcFastSimu::ffs_tag(int *ffs_gepoint_nok,
-			    int ffs_gepoint_maxlen, 
-			    FFS_GEPOINT_ST *ffs_gepoint,
-			    int *fcl_fppoint_nok,
-			    int fcl_fppoint_maxlen,
-			    FCL_FPPOINT_ST *fcl_fppoint)
+int StFtpcFastSimu::ffs_tag()
   {
       int i, k, num_nok;
       //-----------------------------------------------------------------------
@@ -721,10 +717,11 @@ int StFtpcFastSimu::ffs_tag(int *ffs_gepoint_nok,
 	  nrowmax[k] = 0;
 	}
 
-      num_nok=*fcl_fppoint_nok;
+      num_nok=nPoints;
+
       if (num_nok > MXMROW )
 	{
-	  cout << "FFS WARNING:  fppoint_h.nok (" << *fcl_fppoint_nok
+	  cout << "FFS WARNING: number of Points (" << nPoints
 	       << ") greater than mxmrow ("<< MXMROW<<")"<< endl;
 	  cout << "              Setting num_nok =  mxmrow ("
 	       << MXMROW <<")" << endl;
@@ -733,7 +730,7 @@ int StFtpcFastSimu::ffs_tag(int *ffs_gepoint_nok,
  
       for(i = 0; i< num_nok; i++)
 	{
-	  k =  fcl_fppoint[i].row;
+	  k = mPoint[i].GetPadRow();
 	  nrowmax[k-1]++;
 	  nrow[k-1][nrowmax[k-1]-1] = i+1;
 	}
