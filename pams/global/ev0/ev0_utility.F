@@ -272,117 +272,74 @@ C-------check if it is a neutral particle------------------------------
 
 
 C******************************************************************************
-
-      SUBROUTINE ev0_update_track_param(xc,r,x,trk1,trk2)
+      SUBROUTINE ev0_update_track_param(xc,r,x,trk1,trk2,beta)
       IMPLICIT NONE
-C   Input arguments  :	xc(2)	!position-coord. in x-y plane of the 
-C				!centre of the circle (charged part.)
-C			r	!radius of the above circle
-C			x(2)	!x-y coord. of new point
-C			trk1(6)	!old track parameters
-C   Output arguments : 	trk2(6)	!updated track parameters
-C   Functional Description :	Extrapolates a helix and calculates the 
-C				new helix parameters at another point.
-C   Created  JAN-1992 S.Margetis   
+C   Input arguments  :  xc(2)   !position-coord. in x-y plane of the 
+C                               !centre of the circle (charged part.)
+C                       r       !radius of the above circle
+C                       x(2)    !x-y coord. of new point
+C                       trk1(6) !old track parameters
+C                       beta    !z component of magnetic field
+C   Output arguments :  trk2(6) !updated track parameters
+C   Functional Description :    Extrapolates a helix and calculates the 
+C                               new helix parameters at another point.
+C   Created  March, 1999 A. Saulys   
 C   Error conditions : None
-C   Status	     : Tested
+C     trk(1) -> r0  (radius from 0,0)
+C     trk(2) -> phi (angle about 0,0)
+C     trk(3) -> z
+C     trk(4) -> psi (the circle angle)
+C     trk(5) -> tanl
+C     trk(6) -> charge of track ( = =- 1.0)
+
+
 C---------------------------------------------------------------------
 #include "math_constants.inc"
 
-      REAL r,xc(2),x(2),trk1(6),trk2(6)
-      REAL xi,yi,dphi,ds,cosl,inv_coslh,bphi,h,dsy,dsx
-      REAL arg,adb
-      REAL AA,BB,CC,DD,RR
+      REAL r,xc(2),x(2),trk1(6),trk2(6),beta
+      REAL psi,psir,dpsi
 
-C*      pi = acos(-1.0)
-C-----calculate the distance ds and the angle between old/new position
-      xi = trk1(1)*cos(trk1(2))
-      yi = trk1(1)*sin(trk1(2))
-      AA = xi-xc(1)
-      BB = yi-xc(2)
-      CC = x(1)-xc(1)
-      DD = x(2)-xc(2)
-      RR = 1/(r*r)     ! don't divide by r*r until you need to
-      arg = (AA*DD - BB*CC)
-      adb = (AA*CC + BB*DD)
-      if(  arg .gt. 0 ) then
-         dphi=acos(adb*RR)
-      elseif( arg .lt. 0 .and. adb .gt. 0) then
-         arg = arg*RR
-         if( arg.le.-1.0 ) arg =-1.
-         dphi = asin(arg)
-      else
-*         dphi = 2*pi - acos(adb*RR)
-         dphi = C_2PI - acos(adb*RR)
-      endif
-
-      
 C-----calculate the new track parameters
-      trk2(1)=sqrt( x(1)*x(1)+x(2)*x(2) )
-      IF(x(1).eq.0.) x(1)=0.01
+      trk2(1)=sqrt( x(1)**2+x(2)**2 )
       trk2(2)=atan2( x(2),x(1) )
-      trk2(4)=trk1(4)+dphi
-      h = -1.0*trk1(6)
-*      bphi = trk1(4) -(h*pi/2.)
-      bphi = trk1(4) -(h*C_PI_2)
-*      if( bphi .gt. 2.*pi) then
-      if( bphi .gt. C_2PI) then
-*         bphi = bphi - 2.*pi
-         bphi = bphi - C_2PI
-      elseif( bphi .lt. 0) then
-*         bphi = bphi + 2.*pi
-         bphi = bphi + C_2PI
-      endif
-     
-      dsx = (((x(1)-xi)/r)+cos(bphi))
-      dsy =(((x(2)-yi)/r)+sin(bphi))
+      psi = atan2(x(2)-xc(2),x(1)-xc(1))
 
-      if( abs(dsx) .gt. 1.0 ) then
-         dsx = sign(1.,dsx)
-      elseif( abs( dsy) .gt. 1.0) then
-         dsy = sign(1.,dsy)
-      endif
-C      sinl = trk1(5)/(sqrt(1+trk1(5)**2))
-C      cosl = 1/sqrt(1+trk1(5)**2)
-C      sinl = sin( atan(trk1(5)))
-       cosl = cos( atan(trk1(5)))
-       inv_coslh = 1/(h*cosl)
+C -- put psi in 0-2pi range
+      psi = amod(psi,real(C_2PI))
+      if(psi.lt.0)psi=psi+C_2PI
 
-*    Make sure you get the correct angle in 2*pi when taking acos etc
+      psir = psi - trk1(6)*C_PI_2
+C -- put psir in 0-2pi range
+      psir = amod(psir,real(C_2PI))
+      if(psir.lt.0)psir=psir+C_2PI
 
-      if( dsy .gt. 0) then
-         ds = ( acos(dsx) - bphi)*inv_coslh
-      elseif( dsx .gt. 0 .and. dsy .lt. 0) then
-*         ds = ( 2.*pi + asin(dsy) - bphi)*inv_coslh
-         ds = ( C_2PI + asin(dsy) - bphi)*inv_coslh
-      elseif( dsx .lt. 0 .and. dsy .lt. 0) then
-*         ds = ( (2.*pi-acos(dsx)) - bphi)*inv_coslh
-         ds = ( (C_2PI-acos(dsx)) - bphi)*inv_coslh
-      endif
+      dpsi = psir - trk1(4)
 
-      if( ds .gt. 0) then
-         if( dsy .gt. 0) then
-*         ds = ( 2.*pi + acos(dsx) - bphi)*inv_coslh
-         ds = ( C_2PI + acos(dsx) - bphi)*inv_coslh
-      elseif( dsx .gt. 0 .and. dsy .lt. 0) then
-         ds = (  asin(dsy) - bphi)*inv_coslh
-      elseif( dsx .lt. 0 .and. dsy .lt. 0) then
-         ds = ( -acos(dsx) - bphi)*inv_coslh
-      endif
-                  
-      endif
+C -- put dpsi in 0-2pi range
+      dpsi = amod(dpsi,real(C_2PI))
+      trk2(4)=trk1(4)+dpsi
 
-      IF(trk1(6).eq.0.) trk1(6)=0.001
-C     trk2(3)=trk1(3)+ ds*sinl*r
-C cos*tan = sin, faster than doing trig sin(atan(tan))
-      trk2(3)=trk1(3)+ ds*r*cosl*trk1(5)
+C -- check for rotation direction
+      if(trk1(6).gt.0)then
+        if(dpsi.lt.0)then
+          dpsi = (C_2PI+dpsi)
+        endif
+      else
+        if(dpsi.gt.0)then
+           dpsi = -(C_2PI-dpsi)
+        endif
+      endif
+   
+C --  z = zi + dz = zi - dpsi*signedradius*tanl
+      trk2(3)=trk1(3)-dpsi*trk1(6)*sign(r,beta)*trk1(5)
+
+
       trk2(5)=trk1(5)
       trk2(6)=trk1(6)
 
-
-  999 CONTINUE
       RETURN
       END
+
 
 C******************************************************************************
 
