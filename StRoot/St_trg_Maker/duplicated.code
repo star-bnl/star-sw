@@ -1,0 +1,168 @@
+void St_trg_Maker::SWITCH(SecondDstDaq)(St_dst_L0_Trigger *dst2) {
+  int i;
+  dst_L0_Trigger_st *tt = dst2->GetTable();
+  tt->TrgToken         = SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgToken; // Jul 18 2001 A St_dst_L0_Trigger
+  tt->TriggerActionWd  = SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd;
+  tt->DSMInput         = SWITCH(gs)->EvtDesc.TCU2.FIFO2.DSMInput;        // Oct 2 2000
+  tt->DSMAddress       = SWITCH(gs)->EvtDesc.TCU2.FIFO2.DSMAddress;      // Jul 18 2001 B St_dst_L0_Trigger
+  tt->TriggerWd        = SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd;
+  tt->DetectorBusy     = SWITCH(gs)->EvtDesc.TCU3.FIFO3.DetectorBusy;    // Oct 2 2000
+  tt->addBits          = SWITCH(gs)->EvtDesc.TCU3.FIFO3.addBits;    // Jul 18 2001 C St_dst_L0_Trigger
+  for(i=0;i<32;i++) tt->CPA[i]=SWITCH(gs)->TrgSum.DSM.CPA[i];
+  tt->MWC_CTB_mul      = SWITCH(gs)->TrgSum.DSM.lastDSM[2]; // Per Hank Crawford, Jan 6 2000.
+  tt->MWC_CTB_dipole   = 0;
+  tt->MWC_CTB_topology = 0;
+  tt->MWC_CTB_moment   = 0;
+}
+void St_trg_Maker::SWITCH(CtbMwcDaq)(St_dst_TrgDet *dst1) { // For sim data, use output of trg_fillDst module.
+  int npre,npost,pp,i,tray,slat,subsector,sector;
+  dst_TrgDet_st *tt = dst1->GetTable();
+
+  npre=SWITCH(gs)->EvtDesc.npre;
+  npost=SWITCH(gs)->EvtDesc.npost;
+  tt->npre=npre;
+  tt->npost=npost;
+  for(pp=0;pp<1+npre+npost;pp++) {
+    assert(pp<PREPOST);
+    for(slat=0;slat<2;slat++) {
+      for(tray=0;tray<120;tray++) {
+        tt->nCtb[tray][slat][pp]=SWITCH(gs)->RAW[pp].CTB[ctbmap[tray][slat]];
+        tt->timeCtb[tray][slat][pp]=0;  // May be settable in some events from the LS bit, consult Hank.
+      }
+    }
+    for(sector=0;sector<24;sector++) {
+      for(subsector=0;subsector<4;subsector++) {
+        tt->nMwc[sector][subsector][pp]=SWITCH(gs)->RAW[pp].MWC[mwcmap[sector][subsector]];
+      }
+    }
+    for(i=0;i<16;i++) tt->ctbaux[i][pp]=SWITCH(gs)->RAW[pp].CTB[auxctbmap[i]];
+    for(i=0;i<32;i++) tt->mwcaux[i][pp]=SWITCH(gs)->RAW[pp].MWC[auxmwcmap[i]];
+  }
+}
+Int_t St_trg_Maker::SWITCH(SanityCheck)() {
+  int pp,lim;
+  lim=1+SWITCH(gs)->EvtDesc.npre+SWITCH(gs)->EvtDesc.npost;
+  for(pp=0;pp<lim;pp++) {
+    SANITYCheck(SWITCH(gs)->RAW[pp].RawDetHeader[0] ,'R')
+    SANITYCheck(SWITCH(gs)->RAW[pp].RawDetHeader[1] ,'D')
+    SANITYCheck(SWITCH(gs)->RAW[pp].CTBdataHeader[0],'C')
+    SANITYCheck(SWITCH(gs)->RAW[pp].CTBdataHeader[1],'T')
+    SANITYCheck(SWITCH(gs)->RAW[pp].MWCdataHeader[0],'M')
+    SANITYCheck(SWITCH(gs)->RAW[pp].MWCdataHeader[1],'W')
+    SANITYCheck(SWITCH(gs)->RAW[pp].EMCdataHeader[0],'E')
+    SANITYCheck(SWITCH(gs)->RAW[pp].EMCdataHeader[1],'M')  
+  }
+  return kStOK;
+}
+int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
+      St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
+
+  char *oo,*ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
+  fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
+  fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
+  assert(fVictor->thereIsTriggerData()); // No TRG bank in .daq file.  Perhaps a pedestal or laser run?
+              // StTRGReader *St_trg_Maker::fVictor;
+              // TRG_Reader  *StTRGReader::fTRGImpReader;
+              // Bank_TRGD   *TRG_Reader::pBankTRGD;
+  ptr=(char*)(fVictor->fTRGImpReader->pBankTRGD);
+  assert(ptr);
+  ptr+=40; /* skip header */
+  SWITCH(gs)=(SWITCH(MarilynMonroe)*)ptr;
+  Int_t Iret = SWITCH(SanityCheck)();
+  if (Iret !=  kStOK) return Iret;
+  if(SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9009) isLaser=7;
+  if(SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==4) isPhysics=7;
+  if(SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd==0xf101) isPulser=7;
+  if((m_Mode&1)&&isPhysics) thisEventOk=7;
+  if((m_Mode&2)&&isLaser)   thisEventOk=7;
+  if((m_Mode&4)&&isPulser)  thisEventOk=7;
+  if (!thisEventOk) {
+    oo="";
+    if(isPhysics) oo="Physics"; if(isLaser) oo="Laser"; if(isPulser) oo="Pulser";
+    printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning kStErr.\n",
+        oo,SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd,
+        SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd);
+    return kStErr; // Skip this event.
+  }
+  // dumpDataToScreenAndExit();
+  SWITCH(VpdDaq)(dst1);       // The function
+  SWITCH(ZdcDaq)(dst1);       // St_trg_Maker::Sim
+  SWITCH(CtbMwcDaq)(dst1);    // has four lines
+  SWITCH(SecondDstDaq)(dst2); // which are analogous to these four.
+  SWITCH(TakeCareOfL1andL2Daq)(dst3,dst4);
+
+  // SWITCH(dumpDataToScreenAndExit)();
+
+  return kStOK;
+}
+void St_trg_Maker::SWITCH(TakeCareOfL1andL2Daq)(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
+  int i;
+  dst_L1_Trigger_st *tt1 = dst3->GetTable();
+  dst_L2_Trigger_st *tt2 = dst4->GetTable();
+  for(i=0;i<32;i++) {
+    tt1->L1_result[i] = SWITCH(gs)->TrgSum.L1Result[i];
+    tt2->L2_result[i] = SWITCH(gs)->TrgSum.L2Result[i];
+  }
+}
+void St_trg_Maker::SWITCH(VpdDaq)(St_dst_TrgDet *dst1) {
+  int i;
+  dst_TrgDet_st *tt = dst1->GetTable();
+  for(i=0;i<48;i++) { 
+    tt->adcVPD[i]=0;
+    tt->timeVPD[i]=0;
+  }
+  tt->TimeEastVpd=0;
+  tt->TimeWestVpd=0;
+  tt->vertexZ=0;
+}
+void St_trg_Maker::SWITCH(ZdcDaq)(St_dst_TrgDet *dst1) {
+  int i;
+  dst_TrgDet_st *tt = dst1->GetTable();
+  for(i=0;i<8;i++) tt->lastDSM[i]=SWITCH(gs)->TrgSum.DSM.lastDSM[i]; // Jul 18 2001 D   St_dst_TrgDet   This is 
+                                                                     // partially redundant with St_dst_L0_Trigger.
+  for(i=0;i<16;i++) { 
+    tt->adcZDC[i]=SWITCH(gs)->TrgSum.DSM.ZDC[i];
+    tt->tdcZDC[i]=0;
+    tt->BCdata[i]=SWITCH(gs)->TrgSum.DSM.BCdata[i]; // Jul 18 2001 E     St_dst_TrgDet
+  }
+  tt->adcZDCEast=SWITCH(gs)->TrgSum.DSM.ZDC[13];
+  tt->adcZDCWest=SWITCH(gs)->TrgSum.DSM.ZDC[10];
+  tt->adcZDCsum=SWITCH(gs)->TrgSum.DSM.ZDC[13]+SWITCH(gs)->TrgSum.DSM.ZDC[10];
+}
+void St_trg_Maker::SWITCH(dumpDataToScreenAndExit)() {
+  int i;
+  char *TrgSumHeader=(char*)&(SWITCH(gs)->TrgSum.TrgSumHeader);
+  char *L0SumHeader=(char*)&(SWITCH(gs)->TrgSum.L0SumHeader);
+  char *L1SumHeader=(char*)&(SWITCH(gs)->TrgSum.L1SumHeader);
+  char *L2SumHeader=(char*)&(SWITCH(gs)->TrgSum.L2SumHeader);
+                   printf("%15s      = %d\n","TCUdataBytes",SWITCH(gs)->EvtDesc.TCUdataBytes);
+                   printf("%15s      = %d\n","TCUEvtDesc",SWITCH(gs)->EvtDesc.TCUEvtDesc);
+                   printf("%15s      = %d\n","TrgDataFmtVer",SWITCH(gs)->EvtDesc.TrgDataFmtVer);
+                   printf("%15s      = %d\n","bunchXing_hi",SWITCH(gs)->EvtDesc.bunchXing_hi);
+                   printf("%15s      = %d\n","bunchXing_lo",SWITCH(gs)->EvtDesc.bunchXing_lo);
+                   printf("%15s      = %d\n","npre",SWITCH(gs)->EvtDesc.npre);
+                   printf("%15s      = %d\n","npost",SWITCH(gs)->EvtDesc.npost);
+                   printf("%15s      = %d\n","TrgSumBytes",SWITCH(gs)->TrgSum.TrgSumBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","TrgSumHeader",i,TrgSumHeader[i]);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1Sum",i,SWITCH(gs)->TrgSum.L1Sum[i]);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2Sum",i,SWITCH(gs)->TrgSum.L2Sum[i]);
+                     printf("%15s    = %d\n","L0SumBytes",SWITCH(gs)->TrgSum.L0SumBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L0SumHeader",i,L0SumHeader[i]);
+                     printf("%15s      = %d\n","L1SumBytes",SWITCH(gs)->TrgSum.L1SumBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1SumHeader",i,L1SumHeader[i]);
+  for(i=0;i< 32;i++) printf("%15s[%3d] = %d\n","L1Result",i,SWITCH(gs)->TrgSum.L1Result[i]);
+                     printf("%15s      = %d\n","L2SumBytes",SWITCH(gs)->TrgSum.L2SumBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2SumHeader",i,L2SumHeader[i]);
+  for(i=0;i< 32;i++) printf("%15s[%3d] = %d\n","L2Result",i,SWITCH(gs)->TrgSum.L2Result[i]);
+                     printf("%15s      = %d\n","RawDetBytes",SWITCH(gs)->RAW[0].RawDetBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","RawDetHeader",i,SWITCH(gs)->RAW[0].RawDetHeader[i]);
+                     printf("%15s      = %d\n","CTBdataBytes",SWITCH(gs)->RAW[0].CTBdataBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","CTBdataHeader",i,SWITCH(gs)->RAW[0].CTBdataHeader[i]);
+  for(i=0;i<256;i++) printf("%15s[%3d] = %d\n","CTB",i,SWITCH(gs)->RAW[0].CTB[i]);
+                     printf("%15s      = %d\n","MWCdataBytes",SWITCH(gs)->RAW[0].MWCdataBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","MWCdataHeader",i,SWITCH(gs)->RAW[0].MWCdataHeader[i]);
+  for(i=0;i<128;i++) printf("%15s[%3d] = %d\n","MWC",i,SWITCH(gs)->RAW[0].MWC[i]);
+                     printf("%15s      = %d\n","EMCdataBytes",SWITCH(gs)->RAW[0].EMCdataBytes);
+  for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","EMCdataHeader",i,SWITCH(gs)->RAW[0].EMCdataHeader[i]);
+  exit(2);
+}
