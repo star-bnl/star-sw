@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doSimpleUst.C,v 1.1 2002/11/19 18:30:32 dunlop Exp $
+// $Id: doSimpleUst.C,v 1.2 2002/11/19 22:38:29 dunlop Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -124,7 +124,7 @@ void doSimpleUst(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, con
     gSystem->Load("StRchMaker");
     
 //    gSystem->Load("StRichSimpleUst");
-    gSystem->Load("StRichPool");
+    gSystem->Load("StRichSimpleUst");
     
 //		DB ON
     if (tflag.Contains("dbon")) {
@@ -334,6 +334,9 @@ void doSimpleUst(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doSimpleUst.C,v $
+// Revision 1.2  2002/11/19 22:38:29  dunlop
+// Reverting loading to the subdirectory-named .so
+//
 // Revision 1.1  2002/11/19 18:30:32  dunlop
 // Version used (with tweak to loading syntax) for November 2002 tree creation for Nico et al
 //
