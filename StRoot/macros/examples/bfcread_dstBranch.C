@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.15 2000/06/13 15:41:44 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.16 2000/06/19 16:19:56 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.16  2000/06/19 16:19:56  kathy
+// fixed counthold defnition
+//
 // Revision 1.15  2000/06/13 15:41:44  kathy
 // add a few more counters so we know how many events have dst tables and how many have RunEvent object
 //
@@ -102,7 +105,7 @@ EventLoop: if (iev < nevents && !istat) {
   Int_t Countevobjb=0;
   Int_t Countevtabb=0;
 
-  Int_t countholdT=0;
+  Int_t counthold=0;
   Int_t countre=0;
 
     chain->Clear();
