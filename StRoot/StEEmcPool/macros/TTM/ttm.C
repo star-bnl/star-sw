@@ -9,8 +9,9 @@ void
 ttm
 (
  char* inpDir  = "/star/fy2003/mudst/",                        // MuDST directory
- char* inpFile = "st_physics_4145010_raw_0010001.MuDst.root",  // MuDST file(s)
- Int_t nFiles  = 1,                                            // # of MuDST file(s)
+ char* inpFile = "",// "st_physics_4145010_raw_0010001.MuDst.root",  // MuDST file(s)
+ char* outFile = "R4145010.root",
+ Int_t nFiles  = 50,                                            // # of MuDST file(s)
  Int_t nEvents = -1
  )
 { 
@@ -48,6 +49,7 @@ ttm
 
   // finally after so many lines we arrive at the good stuff
   EETowTrackMatchMaker *mm = new  EETowTrackMatchMaker ("TTM",muDstMaker,eemcDbMaker);
+  mm->SetFileName(outFile);
   mm->Summary(cout);    // 
 
   StMuDebug::setLevel(0);
@@ -59,7 +61,7 @@ ttm
   //---------------------------------------------------
   for(int counter=0; nEvents<0 || counter<nEvents ; ++counter) {
     if( (stat = chain->Make()) != 0 ) break;
-    if(counter%100==0) cerr << "analyzed " << counter << " events" << endl;
+    if(counter%1000==0) cerr << "analyzed " << counter << " events" << endl;
   }
 
   mm->Summary(cout);    // 
