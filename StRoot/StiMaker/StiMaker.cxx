@@ -21,7 +21,6 @@
 
 // Sti
 #include "Sti/StiHitContainer.h"
-#include "Sti/StiHitFactory.h"
 #include "Sti/StiHitFiller.h"
 #include "Sti/StiDetectorLayerContainer.h"
 #include "Sti/StiDrawableDetector.h"
@@ -90,7 +89,7 @@ Int_t StiMaker::Init()
 
     mtrackstore = StiTrackContainer::instance();
     mhitstore = StiHitContainer::instance();
-    mhitfactory = new StiHitFactory();
+    mhitfactory = new StiHitFactory("HitFactory");
     mhitfiller = new StiHitFiller();
 
     mhitfiller->addDetector(kTpcId);

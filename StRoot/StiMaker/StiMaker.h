@@ -6,10 +6,10 @@
 #define StiMaker_HH
 
 #include "StMaker.h"
+#include "Sti/StiFactoryTypedefs.h"
 
 class StEvent;
 class StiHitContainer;
-class StiHitFactory;
 class StiHitFiller;
 class StiDisplayManager;
 class StiDetectorLayerContainer;
@@ -26,7 +26,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.3 2001/05/17 14:22:05 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.4 2001/05/17 20:07:33 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
