@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.21 2000/02/03 00:05:13 snelling Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.22 2000/02/18 20:07:57 snelling Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.22  2000/02/18 20:07:57  snelling
+* Changed tph function into tpc functions y(using database)
+*
 * Revision 1.21  2000/02/03 00:05:13  snelling
 * Changed warning reporting, improved switching between 3point Gaussian fit
 * and weighted mean.
@@ -161,7 +164,8 @@ c     functions:
 c
       integer iucomp
       integer lvsimx
-      integer tgc_time_to_z
+c      integer tgc_time_to_z
+      integer tpc_time_to_z
       integer loop_over_z
       integer tph_3point_gauss  ! not in use?
 c-----------------------------------------------------------------------
@@ -189,13 +193,13 @@ c     set up the identity vector for x (pad) calculation
          enddo
          lookat_mc = (tclpar(1).mc.eq.1)
 c     get difference in z-positions for two randomly selected pixels:
-         iret=tgc_time_to_z(50,50,5,5,zdummy) 
+         iret=tpc_time_to_z(50,50,5,5,zdummy) 
          if(iret.eq.1)bucket_length_in = zdummy
-         iret=tgc_time_to_z(51,50,5,5,zdummy) 
+         iret=tpc_time_to_z(51,50,5,5,zdummy) 
          if(iret.eq.1)bucket_length_in = zdummy - bucket_length_in
-         iret=tgc_time_to_z(50,50,35,5,zdummy) 
+         iret=tpc_time_to_z(50,50,35,5,zdummy) 
          if(iret.eq.1)bucket_length_out = zdummy
-         iret=tgc_time_to_z(51,50,35,5,zdummy) 
+         iret=tpc_time_to_z(51,50,35,5,zdummy) 
          if(iret.eq.1)bucket_length_out = zdummy - bucket_length_out
       endif
         
@@ -228,7 +232,7 @@ c     pad direction projection
      +        + FLOAT(itdc_ipix)*adc_ipix
          numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)+1.
          if(ipix .le. nbuck) then
-            iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
+            iret=tpc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
             z_vector(ipix) = 0.0
             if(iret .eq. 1) z_vector(ipix) = zdummy
          endif
