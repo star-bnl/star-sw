@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.38 2002/02/25 17:52:10 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.39 2002/02/25 19:21:51 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.39  2002/02/25 19:21:51  porter
+ * removed <<ends from  prodTime protection on run queries
+ *
  * Revision 1.38  2002/02/25 17:52:10  porter
  * prodTime check for run level queries
  *
@@ -494,12 +497,12 @@ bool StDbBroker::UseRunLog(StDbTable* table){
 
   unsigned int prodTime=table->getProdTime();    
     ostrstream rq;
-    rq<<" where runNumber="<<m_runNumber<<ends;
+    rq<<" where runNumber="<<m_runNumber;
 
     if(prodTime==0){
-      rq<<"AND deactive=0 "<<ends;
+      rq<<" AND deactive=0 "<<ends;
     } else {
-      rq<<"AND (deactive=0 OR deactive>="<<prodTime<<")";
+      rq<<" AND (deactive=0 OR deactive>="<<prodTime<<")";
       rq<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
     } 
 
