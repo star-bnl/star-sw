@@ -82,9 +82,32 @@ macro svm
       
    macro/global/import *
      
-     newtable [data]/global/tracks/ev0track2 ev0_track2 10000
+       
+  
+  ls [dst]/ev0out
+    if (staf_status(2).ne.STAFCV_OK) then
+      cd [dst]
+      tdm/newtable ev0out ev0_aux 100000
+  endif
+    
+  ls [dst]/vertex
+  if ( staf_status(2) .ne. STAFCV_OK ) then
+    cd [dst]
+    tdm/newtable vertex dst_vertex 100000
+  endif
+  
+  ls [dst]/globtrk
+  if (staf_status(2) .ne. STAFCV_OK ) then
+    cd [dst]
+    tdm/newtable globtrk dst_track 100000
+  endif
+  
+  cd [data]/global/tracks
+  maxrowcount [dst]/globtrk
+  tdm/newtable ev0track2 ev0_track2  staf_result(1)
 
-	
+  cd /dui
+   
  return
  
  
@@ -140,11 +163,27 @@ macro svm
 
  macro/global/import *
 
- cd [dst]
+  cd [dst]
+    tdm/newtable monitor_soft  dst_monitor_soft  1  
+  cd /dui
+  
+* now check to make sure tables exist that might be missing:
+  
+  ls [data]/tpc/hits/tpcluster
+  if ( staf_status(2) .ne. STAFCV_OK ) then
+    cd [data]/tpc/hits
+    tdm/newtable tpcluster tcl_tpcluster 10
+    cd /dui  
+  endif
+  
+  ls [data]/svt/hits/scs_cluster
+  if ( staf_status(2) .ne. STAFCV_OK ) then
+    cd [data]/svt/hits
+    tdm/newtable scs_cluster scs_cluster 10
+    cd /dui  
+  endif
+  
 
-  tdm/newtable monitor_soft  dst_monitor_soft  1
-
- cd /dui
 
  return
  
