@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 3.2 2001/08/23 13:20:54 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.3 2001/09/14 21:22:26 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.3  2001/09/14 21:22:26  genevb
+ * Avoid hiding TObject::Clear()
+ *
  * Revision 3.2  2001/08/23 13:20:54  genevb
  * Many bug workarounds...
  *
@@ -54,6 +57,7 @@ public:
   void Fill(StEvent&);
   void Fill(StMcEvent&);
   void Clear() {}
+  void Clear(Option_t* option) {TObject::Clear(option);}
   static void SetCorrectionFile(char*);
   static void SetFractionFile(char*);
 
