@@ -18,9 +18,9 @@
 #define FCF_IGNORE		128
 
 // FCF paramters defaults - DON'T MUCK AROUND!
-#define FCF_PARAM1		2
-#define FCF_MIN_ADC_T		3
-#define FCF_MIN_ADC_PAD		12
+#define FCF_PARAM1		2	// was 2
+#define FCF_MIN_ADC_T		3	// was 3
+#define FCF_MIN_ADC_PAD		12	// was 12
 
 
 #define FCF_GAIN_SHIFT		6			// shift left/righ
