@@ -259,12 +259,14 @@ Int_t StiMaker::Init()
 	//Make an evaluable track factory
 	if (StiIOBroker::instance()->useGui()==true) {
 	    mtrackfactory = new StiRDEvaluableTrackFactory("StiRDEvaluableTrackFactory",50);
+	    mtrackfactory->setIncrementalSize(1000);
+	    mtrackfactory->setMaxIncrementCount(200);
 	}
 	else {
 	    mtrackfactory = new StiEvaluableTrackFactory("StiEvaluableTrackFactory");
+	    mtrackfactory->setIncrementalSize(1000);
+	    mtrackfactory->setMaxIncrementCount(200);
 	}
-	mtrackfactory->setIncrementalSize(50);
-	mtrackfactory->setMaxIncrementCount(100);	    
 	    
 	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kEvaluable"<<endl;
 	StiEvaluableTrackSeedFinder* temp =
@@ -281,8 +283,8 @@ Int_t StiMaker::Init()
 	else {
 	    mtrackfactory = new StiKalmanTrackFactory("StiKalmanTrackFactory");
 	}
-	mtrackfactory->setIncrementalSize(50);
-	mtrackfactory->setMaxIncrementCount(100);
+	mtrackfactory->setIncrementalSize(1000);
+	mtrackfactory->setMaxIncrementCount(200);
 	
 	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kComposite"<<endl;
 	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory);
