@@ -108,7 +108,7 @@ int
 EMC_Reader::getTowerADC(int modInd,int eInd, int sInd,unsigned short& ADC )
 {
   //
-  // modInd, eInd and sInd are indexes - 1-oct-2001
+  // modInd, eInd and sInd are indexes  starting with 1 - 1-oct-2001
   // see StEmcTowerInput.cxx 
   //
   if(mTowerPresent) {
@@ -116,8 +116,7 @@ EMC_Reader::getTowerADC(int modInd,int eInd, int sInd,unsigned short& ADC )
       cout<<" error in header name**"<<endl; 
       return 0;
     } else {
-    //   ADC=mTheTowerAdcR.TowerMatrix[mod-1][e-1][s-1];
-      ADC=mTheTowerAdcR.TowerMatrix[modInd][eInd][sInd];
+      ADC=mTheTowerAdcR.TowerMatrix[modInd-1][eInd-1][sInd-1];
       return 1;    // 1 is good
     }
   } else return 0; // 0 is bad 
@@ -127,15 +126,14 @@ int
 EMC_Reader::getTowerADC(int index, unsigned short& ADC )
 {
   //
-  // index is index (0 to max-1)
+  // index is index (1 to max)
   //
   if(mTowerPresent){
     if(strncmp(mTheTowerAdcR.BankType,"TOWRADCR",8)) {
       cout<<" error in header name**" << endl;
       return 0;
     } 
-    //    ADC = mTheTowerAdcR.TowerADCArray[index-1];
-    ADC = mTheTowerAdcR.TowerADCArray[index];
+    ADC = mTheTowerAdcR.TowerADCArray[index-1];
     return 1; // 1 is good
   }
   else return 0;
@@ -164,7 +162,6 @@ EMC_Reader::getSMDE_ADC(int modInd,int stripInd,unsigned short& ADC )
       cout<<" getSMDE_ADC::error in header name**"<<endl;
       return 0;
     } else {
-      //      ADC = mTheSmdAdcR.SmdE_ADCMatrix[mod-1][strip-1];
       ADC = mTheSmdAdcR.SmdE_ADCMatrix[modInd][stripInd];
       return 1;  // 1 is good
     }
@@ -175,7 +172,7 @@ int
 EMC_Reader::getSMDP_ADC(int modInd,int binInd,int stripInd,unsigned short& ADC )
 {
   //
-  // modInd, binInd and stripInd are indexes - 1-oct-2001
+  // modInd, binInd and stripInd are indexes starting with 1- 1-oct-2001
   // see StEmcSmdInput.cxx 
   //
   if(mSmdPresent){
@@ -183,8 +180,7 @@ EMC_Reader::getSMDP_ADC(int modInd,int binInd,int stripInd,unsigned short& ADC )
       cout<<" getSMDE_ADC::error in header name**"<<endl;
       return 0;
     } else {
-      //      ADC=mTheSmdAdcR.SmdP_ADCMatrix[mod-1][bin-1][strip-1];
-      ADC=mTheSmdAdcR.SmdP_ADCMatrix[modInd][binInd][stripInd];
+      ADC=mTheSmdAdcR.SmdP_ADCMatrix[modInd-1][binInd-1][stripInd-1];
       return 1;  // 1 is good
     }
   }
@@ -194,14 +190,14 @@ EMC_Reader::getSMDP_ADC(int modInd,int binInd,int stripInd,unsigned short& ADC )
 int 
 EMC_Reader::getSMD_ADC(int index, int fiber,unsigned short& ADC )
 {
-  // index and fiber is index 
+  // index and fiber is index starting with 1
   if(mSmdPresent) {
     if(strncmp(mTheSmdAdcR.BankType,"BSMDADCR",8)) {
       cout<<" getSMD_ADC::error in header name**"<<endl; 
       return 0;
     } else {
       //      ADC=mTheSmdAdcR.SMDADCArray[fiber-1][index-1];
-      ADC=mTheSmdAdcR.SMDADCArray[fiber][index];
+      ADC=mTheSmdAdcR.SMDADCArray[fiber-1][index-1];
       return 1;   // 1 is good
     }
   } else return 0;
