@@ -136,18 +136,24 @@ C****************************************************************************
 
       implicit none
 
-C   Argument Declarations, TAS include and record statements:
+C   Argument Declarations, include and record statements:
 C
 #include "svm_eval2.inc"
 
 C     Local Variable Type Declarations:
 C
 
+
       integer     i, index, j, tpcmat, mctpc, svtmat, mcsvt, nmax, row
       integer     nmax2, k
-      integer     tpt_rows(10000), tpe_rows(10000), svtspt_rows(15000)
-      integer     svt_trk(10000,4), tpc_trk(10000,4)
-      integer     evt_svt(10000), evt_tpc(10000)
+
+      parameter (pi=3.141592654)
+      parameter (nmax = 10000)
+      parameter (nmax2 = 15000)
+      
+      integer     tpt_rows(nmax), tpe_rows(nmax), svtspt_rows(nmax2)
+      integer     svt_trk(nmax,4), tpc_trk(nmax,4)
+      integer     evt_svt(nmax), evt_tpc(nmax)
       integer     nstrk_bad     ,   nttrk_bad
       integer     nstrk_badm    ,   nttrk_badm
       integer     nstrk_sgl    ,   nttrk_sgl
@@ -160,10 +166,7 @@ C
       integer     nttrk_goodp       ,   nttrk_goodp_cor
       real tan_ang, ang, theta, pi
       real tanl, sinl, costh, th, mass, pz, e
-      parameter (pi=3.141592654)
-      parameter (nmax = 10000)
-      parameter (nmax2 = 15000)
-
+ 
 CC   Message Formats:
 CC
 
@@ -250,12 +253,12 @@ CC
 
 CC  Build local arrays for TAS tables svt_spt, tpeval, evt_match, and tptrack
 CC
-CC  svt_trk(10000,4): cols1-4= no. pts on track,mc check, mc trk id, if true
+CC  svt_trk(nmax,4): cols1-4= no. pts on track,mc check, mc trk id, if true
 CC                    mc match then this is the row index of tpc_trk
-CC  tpc_trk(10000,4): cols1-4= no. pts on track,mc check, mc trk id, if true
+CC  tpc_trk(nmax,4): cols1-4= no. pts on track,mc check, mc trk id, if true
 CC                    mc match then this is the row index of svt_trk
-CC  evt_svt(10000),  col1 = matched tpc track id #
-CC  evt_tpc(10000),  col1 = matched svt track id #
+CC  evt_svt(nmax),  col1 = matched tpc track id #
+CC  evt_tpc(nmax),  col1 = matched svt track id #
 CC
 CC  Use nmax = 10000 for do-loops and dimension checks on arrays.
 CC  Count number of svt space points on each reconstructed track, verify
@@ -402,8 +405,8 @@ CC
 
 CC  Build tptrack array:
 CC
-CC  tpt_rows(10000)
-CC  tpe_rows(10000)
+CC  tpt_rows(nmax)
+CC  tpe_rows(nmax)
 CC
       do 32 i = 1,tptrack_h.nok
       if(tptrack(i).id .le. 0) go to 32
