@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.92 1999/07/15 22:44:41 fisyak Exp $
+// $Id: bfc.C,v 1.93 1999/07/16 02:15:34 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -98,7 +98,7 @@ enum EChainOptions {
   kDST     ,kEVENT   ,kANALYSIS,kQA      ,                    // Dst
   kTREE    ,kAllEvent,kDISPLAY ,kLAST    ,                    // StEvent
   kDEFAULT ,
-  kMakeDoc
+  kMakeDoc ,kDEBUG   ,kHIGZ
 };
 Char_t  *ChainOptions[] = {
   "FIRST"
@@ -117,7 +117,7 @@ Char_t  *ChainOptions[] = {
  ,"DST"    ,"EVENT"  ,"ANALYSIS","QA"
  ,"TREE"   ,"AllEvent","DISPLAY","LAST"
  ,"DEFAULT"
- ,"MakeDoc"
+ ,"MakeDoc","DEBUG"  ,"HIGZ"
 };
 Int_t NoChainOptions = sizeof (ChainOptions)/sizeof (Char_t *);
 Bool_t *ChainFlags   = new Bool_t [NoChainOptions]; 
@@ -180,7 +180,9 @@ Char_t *ChainComments[] = {
   "StEventDisplayMaker \tin Chain",
   "Nothing to comment",
   "Default has been set",
-  "Make HTML documentation for the given Chain"
+  "Make HTML documentation for the given Chain",
+  "Set debug flag",
+  "Pop HIGZ window"
 };
 //_____________________________________________________________________
 void SetOption(int k){// set all OFF
@@ -379,11 +381,11 @@ Examples:
     printf ("
 \t root4star 'bfc.C(1,\"off tdaq tpc FieldOn\",\"/disk1/star/daq/990624.306.daq\")' 
 \t \t//Cosmics (56) events with full magnetic field, TPC only 
-\t root4star 'bfc.C(1,\"tdaq -ftpc -trg FieldOn\",\"/disk1/star/daq/990624.306.daq\")' 
+\t root4star 'bfc.C(1,\"tdaq FieldOn\",\"/disk1/star/daq/990624.306.daq\")' 
 \t \t//Cosmics (56) events with full magnetic field 
-\t root4star 'bfc.C(1,\"tdaq -ftpc -trg  HalfField\",\"/disk1/star/daq/990630.602.daq\")' 
+\t root4star 'bfc.C(1,\"tdaq HalfField\",\"/disk1/star/daq/990630.602.daq\")' 
 \t \t//Laser (10) events with half magnetic field 
-\t root4star 'bfc.C(1,\"tdaq -ftpc -trg FieldOff\",\"/disk1/star/daq/990701.614.daq\")' 
+\t root4star 'bfc.C(1,\"tdaq FieldOff\",\"/disk1/star/daq/990701.614.daq\")' 
 \t \t//Laser (12) events with no magnetic field 
 \n");
     printf ("============= \tPossible Chain Options are: \n"); 
@@ -619,11 +621,11 @@ void bfc(const Int_t First,
 	  chain->GetCVS(),
 	  gSystem->HostName(),
 	  gSystem->WorkingDirectory());
-  if (chain) chain->SetDebug();
+  if (chain && ChainFlags[kDEBUG]) chain->SetDebug();
   //  Create the makers to be called by the current chain
   const char *mainDB = "$STAR/StDb/params";
   dbMk = new St_db_Maker("db",mainDB);
-  if (dbMk) dbMk->SetDebug();
+  if (dbMk && ChainFlags[kDEBUG]) dbMk->SetDebug();
   if (ChainFlags[kSD97]) { dbMk->SetDateTime("sd97");}
   if (ChainFlags[kSD98]) { dbMk->SetDateTime("sd98");}
   if (ChainFlags[kY1a])  { dbMk->SetDateTime("year_1a");}
@@ -638,13 +640,13 @@ void bfc(const Int_t First,
 	  dbMk->GetDateTime().GetTime());
   const char *calibDB = "$STAR_ROOT/calib";
   calibMk = new St_db_Maker("calib",calibDB);
-  if (calibMk) calibMk->SetDebug();  
+  if (calibMk && ChainFlags[kDEBUG]) calibMk->SetDebug();  
   if (ChainFlags[kFieldOff]) field   = new StMagFC("field","STAR no field",0.00002);
   if (ChainFlags[kFieldOn])  field   = new StMagFC("field","STAR Normal field",1.);
   if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Half field",0.5);
   if (ChainFlags[kXIN]) {
     xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
-    if (xdfMK) xdfMk->SetDebug();
+    if (xdfMK && ChainFlags[kDEBUG]) xdfMk->SetDebug();
     chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
   }
   if (ChainFlags[kGEANT])  {
@@ -652,8 +654,8 @@ void bfc(const Int_t First,
     if (geant) {
       geant->SetNwGEANT(10000000);
       chain->SetInput("geant",".make/geant/.data");
-    //  geant->SetIwtype(1);
-    //  geant->SetDebug();
+      if (ChainFlags[kHIGZ])  geant->SetIwtype(1);
+      if (ChainFlags[kDEBUG]) geant->SetDebug();
       if (ChainFlags[kGSTAR]) {
 	if (ChainFlags[kSD97] || ChainFlags[kSD98] || ChainFlags[kY1a] || 
 	    ChainFlags[kES99] || ChainFlags[kER99]) geant->LoadGeometry("detp geometry YEAR_1A");
@@ -679,7 +681,7 @@ void bfc(const Int_t First,
 	geant->Do("mode g2tm prin 1;");
 	//  geant->Do("next;");
 	//  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-	//  geant->Do("debug on;");
+	if (ChainFlags[kDEBUG]) geant->Do("debug on;");
 	geant->Do("swit 2 3;");
 	// geant->LoadGeometry("detp geometry ChainFlags[kFieldOn] field_off");
       }
@@ -711,23 +713,23 @@ void bfc(const Int_t First,
       else { 
 	if (ChainFlags[kTSS]) {//		tss
 	  tssMk 	= new St_tss_Maker("tpc_raw");
-	  if (tssMk) tssMk->SetDebug();
+	  if (tssMk && ChainFlags[kDEBUG]) tssMk->SetDebug();
 	}
       }
     }
   }
   if (ChainFlags[kFSS]) {//		fss
     fssMk 	= new St_fss_Maker("ftpc_raw");
-    if (fssMk) fssMk->SetDebug();
+    if (fssMk && ChainFlags[kDEBUG]) fssMk->SetDebug();
   }
   
   if (ChainFlags[kEMS]) {//		emc
     emsMk = new St_ems_Maker("emc_raw" );
-    if (emsMk) emsMk->SetDebug();
+    if (emsMk && ChainFlags[kDEBUG]) emsMk->SetDebug();
   }
   if (ChainFlags[kEMC]) {
     emcMk = new St_emc_Maker("emc_hits");
-    if (emcMk) emcMk->SetDebug();
+    if (emcMk && ChainFlags[kDEBUG]) emcMk->SetDebug();
   }
   // L O C A L    R E C O N S T R U C T I O
   if (ChainFlags[kTCL]) {//		tcl
@@ -737,16 +739,16 @@ void bfc(const Int_t First,
 	tclMk->tclPixTransOn(); //Turn on flat adcxyz table
 	tclMk->tclEvalOn(); //Turn on the hit finder evaluation
       }
-      tclMk->SetDebug();
+      if (ChainFlags[kDEBUG]) tclMk->SetDebug();
     }
   }
   if (ChainFlags[kSRS]) {//		svt
     srsMk 	= new St_srs_Maker("svt_hits");
-    if (srsMk) srsMk->SetDebug();  
+    if (srsMk && ChainFlags[kDEBUG]) srsMk->SetDebug();  
   }
   if(ChainFlags[kFCL]){//		fcl
     fclMk 	= new St_fcl_Maker("ftpc_hits");  
-    if (fclMk) fclMk->SetDebug();
+    if (fclMk && ChainFlags[kDEBUG]) fclMk->SetDebug();
   }
   // T R A C K I N G
   if (ChainFlags[kTPT]) {
@@ -759,16 +761,16 @@ void bfc(const Int_t First,
 	tptMk->tteEvalOn();   //Turn on the tpc evaluation
 	tptMk->tptResOn();    // Turn on the residual table
       }
-      tptMk->SetDebug();
+      if (ChainFlags[kDEBUG]) tptMk->SetDebug();
     }
   }
   if (ChainFlags[kSTK]) {//		stk
     stkMk 	= new St_stk_Maker("svt_tracks");
-    if (stkMk) stkMk->SetDebug();
+    if (stkMk && ChainFlags[kDEBUG]) stkMk->SetDebug();
   }
   if (ChainFlags[kFPT]){//		fpt
     fptMk 	= new St_fpt_Maker("ftpc_tracks");
-    if (fptMk) fptMk->SetDebug();
+    if (fptMk && ChainFlags[kDEBUG]) fptMk->SetDebug();
   }
   // T R I G G E R
   if (ChainFlags[kTRG]) {
@@ -781,7 +783,7 @@ void bfc(const Int_t First,
     glbMk = new StMaker("global");
     //    chain->SetInput("dst",".make/global/.data/dst");
     if (glbMk) {
-      glbMk->SetDebug();
+      if (ChainFlags[kDEBUG]) glbMk->SetDebug();
       StMaker *saveMK = glbMk->cd();
       if (ChainFlags[kMATCH])   matchMk   = new StMatchMaker();
       if (ChainFlags[kPRIMARY]) primaryMk = new StPrimaryMaker();
@@ -796,22 +798,22 @@ void bfc(const Int_t First,
   }
   if (ChainFlags[kL3T]) {//		l3t
     l3tMk  = new St_l3t_Maker("l3Tracks");
-    if (l3tMk) l3tMk->SetDebug();
+    if (l3tMk && ChainFlags[kDEBUG]) l3tMk->SetDebug();
   }
   if (ChainFlags[kGLOBAL]) {
   //		dst
     if (ChainFlags[kDST]){
       dstMk = new St_dst_Maker("dst");
       if (dstMk) {
-      chain->SetInput("dst",".make/dst/.data/dst");
-      dstMk->SetDebug();
+	chain->SetInput("dst",".make/dst/.data/dst");
+	if (ChainFlags[kDEBUG]) dstMk->SetDebug();
       }
     }
     if (ChainFlags[kEVENT]){
       evMk  = new StEventMaker;
       if (ChainFlags[kANALYSIS]) {
 	anaMk = new StAnalysisMaker;
-	if (anaMk) anaMk->SetDebug(0);
+	if (anaMk && ChainFlags[kDEBUG]) anaMk->SetDebug(0);
       }
     }
     if (ChainFlags[kQA]) qa = new St_QA_Maker;  
@@ -825,7 +827,7 @@ void bfc(const Int_t First,
     treeMk = new StTreeMaker("tree",FileOut->Data());
     if (treeMk) {
       treeMk->SetIOMode("w");
-      treeMk->SetDebug();
+      if (ChainFlags[kDEBUG]) treeMk->SetDebug();
       if (dstMk) {
 	//  treeMk->SetBranch("dstBranch",FileOut->Data());
 	treeMk->IntoBranch("dstBranch","dst");
@@ -880,7 +882,6 @@ void bfc(const Int_t First,
   if (ChainFlags[kMakeDoc]) chain->MakeDoc();
   
   // Init the chain and all its makers
-  //  chain->SetDebug(1);
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
   if (ChainFlags[kXOUT] && FileOut) {
