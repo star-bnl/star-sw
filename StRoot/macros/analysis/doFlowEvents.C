@@ -1,10 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.19 2000/08/28 16:48:01 snelling Exp $
+// $Id: doFlowEvents.C,v 1.20 2000/09/01 12:16:19 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
-// what it does: reads .dst.root, .xdf, flowevent.root, files 
+// what it does: reads .dst.root, .xdf, flowevent.root, pico files 
 //          to fill StFlowEvent
 //
 // Environment:
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.20  2000/09/01 12:16:19  posk
+// Consistency with Maker changes.
+//
 // Revision 1.19  2000/08/28 16:48:01  snelling
 // Right defaults for QA
 //
@@ -182,14 +185,17 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Make Selection objects and instantiate FlowMaker
   //
   char makerName[30];
-  StFlowSelection flowSelect;
+  //StFlowSelection flowSelect;
   //StFlowSelection flowSelect1;
-  //  flowSelect->SetNumber(1);
-  //  flowSelect->SetCentrality(4);
-  //  flowSelect->SetPid("pi"); // pi+, pi-, pi, or proton
-  //  flowSelect->SetPidPart("pi"); // pi+, pi-, pi, k+, k-, pbar or proton
+  //flowSelect->SetNumber(1);
+  //flowSelect->SetCentrality(1);
+  //flowSelect->SetPid("pi"); // pi+, pi-, pi, or proton
+  //flowSelect->SetPidPart("pi"); // pi+, pi-, pi, or proton
+  //flowSelect->SetPtPart(1., 3.); // pt selection for parts. wrt plane
+  //flowSelect->SetEtaPart(0., 0.); // eta selection for parts. wrt plane
 
-  sprintf(makerName, "Flow%s", flowSelect->Number());
+  // uncomment next line if you make a selection object
+  //sprintf(makerName, "Flow%s", flowSelect->Number());
 
   if (strstr(fileList[0], "event.root")==0) {
     // Read raw events and make StEvent
@@ -248,9 +254,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //   If you want to read more than one PhiWeight file, instantiate multiple
   //      FlowMakers with the corresponding selection objects.
   //
-  //   StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
-  
-  if (makerName[0]=='\0') {
+  //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
+
+    if (makerName[0]=='\0') {
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   } else {
     sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
@@ -263,7 +269,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Set write flages and file names
   //
   //  flowMaker->PicoEventWrite(kTRUE);
-  //  flowMaker->SetPicoEventFileName("flowpicoevent.root"); 
+  //  flowMaker->SetPicoEventDir("./");
   //  flowMaker->FlowEventWrite(kTRUE);
   //  flowMaker->FlowEventRead(kTRUE);
   
@@ -283,33 +289,35 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //
   // Set the parameters
   //
+
   // Set the event cuts
-  StFlowCutEvent::SetMult(0, 0);
-  StFlowCutEvent::SetVertexX(0., 0.);
-  StFlowCutEvent::SetVertexY(0., 0.);
-  //  StFlowCutEvent::SetVertexZ(-50., 50.);
-  StFlowCutEvent::SetVertexZ(0., 0.);
-  StFlowCutEvent::SetEtaSym(0., 0.);
+  //StFlowCutEvent::SetCent(1, 1);
+  //StFlowCutEvent::SetMult(0, 0);
+  //StFlowCutEvent::SetVertexX(0., 0.);
+  //StFlowCutEvent::SetVertexY(0., 0.);
+  //StFlowCutEvent::SetVertexZ(0., 0.);
+  //StFlowCutEvent::SetEtaSym(0., 0.);
   
   // Set the track cuts
-  StFlowCutTrack::SetFitPts(0, 0);
-  //StFlowCutTrack::SetFitOverMaxPts(0.55, 2.0);
-  StFlowCutTrack::SetFitOverMaxPts(0., 0.);
-  StFlowCutTrack::SetChiSq(0., 0.);
-  StFlowCutTrack::SetDca(0., 0.);
-  StFlowCutTrack::SetPt(0., 0.);
-  StFlowCutTrack::SetEta(0., 0.);
-
-  // Set the event plane selections
-  //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // harmonic 1, selection 1
+  //StFlowCutTrack::SetFitPts(0, 0);
+  //StFlowCutTrack::SetFitOverMaxPts(0., 0.);
+  //StFlowCutTrack::SetChiSq(0., 3.);
+  //StFlowCutTrack::SetDca(0., 0.);
+  //StFlowCutTrack::SetPt(0., 0.);
+  //StFlowCutTrack::SetEta(0., 0.);
   
+  // Set the event plane selections
+  //StFlowEvent::SetEtaCut(0.05, 1., 0, 0); // harmonic 1, selection 1
+  //StFlowEvent::SetEtaCut(0.05, 1., 1, 0); // harmonic 2, selection 1
+  //StFlowEvent::SetEtaCut(0.05, 1., 2, 0); // harmonic 3, selection 1
+
   // Set the PID windows
-  StFlowEvent::SetPiPlusCut(-3., 3.);
-  StFlowEvent::SetPiMinusCut(-3., 3.);
-  StFlowEvent::SetProtonCut(-3., 3.);
-  StFlowEvent::SetAntiProtonCut(-3., 3.);
-  StFlowEvent::SetKPlusCut(-3., 3.);
-  StFlowEvent::SetKMinusCut(-3., 3.);
+//   StFlowEvent::SetPiPlusCut(-3., 3.);
+//   StFlowEvent::SetPiMinusCut(-3., 3.);
+//   StFlowEvent::SetProtonCut(-3., 3.);
+//   StFlowEvent::SetAntiProtonCut(-3., 3.);
+//   StFlowEvent::SetKPlusCut(-3., 3.);
+//   StFlowEvent::SetKMinusCut(-3., 3.);
 
   TTable   *tabl=0;
   TDataSet *obj=0;
@@ -410,14 +418,13 @@ void doFlowEvents(const Int_t nevents)
   // BNL
   //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
   //Char_t* fileExt="*.dst.root";
-
-  //Char_t* filePath="/star/rcf/data03/reco/auau200/hbt/default/midcentral/year_1h/hadronic_on/tfs_6/";
-  //Char_t* fileExt="*.dst.root";
   
   //Char_t* filePath="/star/rcf/reco/P00he/2000/07/"; // data
-  //Char_t* filePath="~voloshin/root/dat/";
   //Char_t* fileExt="*.dst.root";
-  
+
+  //Char_t* filePath="/star/rcf/reco/auau130/mevsim/vanilla_flow/central/year_1h/hadronic_on/tfs_7/";
+  //Char_t* fileExt="*.dst.root";
+
   // Both  
   //Char_t* filePath="/afs/rhic/star/ebye/flow/fixed10/";
   //Char_t* filePath="/afs/rhic/star/ebye/flow/random10/";
@@ -428,13 +435,21 @@ void doFlowEvents(const Int_t nevents)
   
   // LBNL
   //Char_t* filePath="/data06/posk/";
-  //Char_t* fileExt="flow9picoevent.root";
-  
-  //Char_t* filePath="/data06/posk/f07/";
-  // Char_t* fileExt="f0730picoevent.root";
+  //Char_t* filePath="./pico/";
+  //Char_t* fileExt="*flowpicoevent.root";
 
-  //  Char_t* filePath="/auto/pdsfdv09/star/dst/P00he/2000/07/"; //data
-  //  Char_t* fileExt="*.dst.root";
+  //Char_t* filePath="/auto/pdsfdv09/star/dst/P00he/2000/07/"; // July data
+  //Char_t* fileExt="*.dst.root";
+
+  //Char_t* filePath="/auto/pdsfdv09/star/flow";   // new July data
+  //Char_t* fileExt="juli.flowpicoevent.root";
+
+  //Char_t* filePath="/auto/pdsfdv08/star/reco/P00hg/2000/08/"; // Aug data
+  //Char_t* fileExt="st_physics*dst.root";
+
+  //Char_t* filePath="/auto/pdsfdv08/star/flow/P00hg/flowPicoDST/"; // Aug data
+  //Char_t* fileExt="*.flowpicoevent.root";
+  //Char_t* fileExt="st_physics_1223002_raw_0005.dst.root.flowpicoevent.root"; // one file
 
   doFlowEvents(nevents, filePath, fileExt);
 }
