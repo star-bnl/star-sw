@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.41 1999/12/28 21:07:35 didenko Exp $
+// $Id: StBFChain.cxx,v 1.42 1999/12/28 22:07:00 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.42  1999/12/28 22:07:00  fisyak
+// Fix typo
+//
 // Revision 1.41  1999/12/28 21:07:35  didenko
 // Add dc99 tag for December 99 test run, remove StEvent from default output
 //
@@ -674,7 +677,7 @@ void StBFChain::SetGeantOptions(){
       else {if (GetOption("Y1b"))    geantMk->LoadGeometry("detp geometry YEAR_1B");
       else {if (GetOption("Y1c"))    geantMk->LoadGeometry("detp geometry YEAR_1C");
       else {if (GetOption("Y2a"))    geantMk->LoadGeometry("detp geometry YEAR_2A");
-      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}
+      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}
       if (GetOption("gstar")) {
 	geantMk->Do("subevent 0;");
 	// gkine #particles partid ptrange yrange phirange vertexrange 
@@ -707,7 +710,7 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1d"))  dbMk->SetDateTime("year_1d");
   else {if (GetOption("Y1e"))  dbMk->SetDateTime("year_1e");
   else {if (GetOption("Y2a"))  dbMk->SetDateTime("year_2a");
-  else                         dbMk->SetDateTime("year_2a");}}}}}}}}}
+  else                         dbMk->SetDateTime("year_2a");}}}}}}}}}}
   gMessMgr->QAInfo() << "db Maker set time = " << dbMk->GetDateTime().GetDate() 
 		   << dbMk->GetDateTime().GetTime() << endm;
   gMessMgr->QAInfo() << "Geometry Maker set time = ";
@@ -729,7 +732,7 @@ void StBFChain::SetTreeOptions()
   treeMk->SetBranch("histBranch");
   treeMk->SetBranch("runcoBranch");
   if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
-  if (GetOption("Event") && (GetOption("EvOut"))  
+  if (GetOption("Event") && GetOption("EvOut"))  
                              treeMk->IntoBranch("eventBranch","StEvent");
   if (GetOption("AllEvent")) {
     if (geantMk) {
