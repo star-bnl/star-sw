@@ -1,4 +1,4 @@
-
+*
 	SUBROUTINE STR_Axis_Tick( Xmin, Xmax, Max_Nticks, Nticks, Xtick, Nlabels, Xlabel, Clabel, Iscale, Cexponent )
 
 	IMPLICIT NONE
@@ -278,7 +278,7 @@ C	  Number X axis every other tick -- but is even or odd better?
 
 
 
-
+*
 	SUBROUTINE STR_Scale_Tick(Amin, Amax, Nticks, Iscale)
 
 	IMPLICIT NONE
