@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.cxx,v 1.1 1999/01/30 03:58:06 fisyak Exp $
+ * $Id: StMwcSector.cxx,v 1.2 1999/02/09 21:07:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.cxx,v $
- * Revision 1.1  1999/01/30 03:58:06  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 21:07:38  fisyak
+ * Import new Torre staffs
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -23,7 +23,7 @@
 #include "StMwcSector.h"
 #ifdef __ROOT__
 
-static const Char_t rcsid[] = "$Id: StMwcSector.cxx,v 1.1 1999/01/30 03:58:06 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StMwcSector.cxx,v 1.2 1999/02/09 21:07:38 fisyak Exp $";
 #endif
 ClassImp(StMwcSector)
 

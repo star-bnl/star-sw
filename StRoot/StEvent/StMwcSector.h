@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.h,v 1.1 1999/01/30 03:58:07 fisyak Exp $
+ * $Id: StMwcSector.h,v 1.2 1999/02/09 21:07:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.h,v $
- * Revision 1.1  1999/01/30 03:58:07  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 21:07:38  fisyak
+ * Import new Torre staffs
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies

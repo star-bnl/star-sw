@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.h,v 1.1 1999/01/30 03:58:07 fisyak Exp $
+ * $Id: StRun.h,v 1.2 1999/02/09 21:06:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.h,v $
- * Revision 1.1  1999/01/30 03:58:07  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/09 21:06:30  fisyak
+ * Import new Torre staffs
+ *
+ * Revision 1.4  1999/02/10 21:50:32  wenaus
+ * Plug memory leaks
  *
  * Revision 1.3  1999/01/30 23:03:14  wenaus
  * table load intfc change; include ref change
@@ -28,15 +31,15 @@
 #endif
 #define StRun_hh
 
-#include "dst_run_header.h"
-#include "dst_run_summary.h"
+#include "tables/dst_run_header.h"
+#include "tables/dst_run_summary.h"
 #include <TString.h>
 #if !defined(ST_NO_NAMESPACES)
 class StRun : public TObject {
 #endif
 
 class StRun : public St_DataSet {
-    StRun(dst_run_header_st*, dst_run_summary_st*);
+public:
     virtual ~StRun();
     StRun(dst_run_header_st&, dst_run_summary_st&);
     StRun(dst_run_header_st&);
