@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.323 2003/02/16 20:17:23 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.324 2003/02/16 22:48:42 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -223,7 +223,7 @@ Bfc_st BFC1[] = {
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
   {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                   "Use pp-like specific treatement (ppLMV, enable beamline etc..)",kFALSE},
+                                   "Use pp-like specific treatement (ppLMV, CTB match etc..)",kFALSE},
   {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
                                                                     "pp option without spin makers",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
@@ -693,7 +693,7 @@ Bfc_st BFC2[] = {
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
   {"pp"      ,""  ,"","SpinTag,ppLPfind1,SpinSortA,ppLPprojectA","","",
-                                   "Use pp-like specific treatement (ppLMV, enable beamline etc..)",kFALSE},
+                                   "Use pp-like specific treatement (ppLMV, CTB match etc..)",kFALSE},
   {"ppOpt"       ,""  ,"","pp,-SpinTag,-ppLPfind1,-SpinSortA,-ppLPprojectA","","",
                                                                     "pp option without spin makers",kFALSE},
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
