@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: db.cxx,v 1.1 2000/02/08 16:35:28 lasiuk Exp $
+ * $Id: db.cxx,v 1.2 2000/03/12 23:58:08 lasiuk Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: db.cxx,v $
+ * Revision 1.2  2000/03/12 23:58:08  lasiuk
+ * db update
+ *
  * Revision 1.1  2000/02/08 16:35:28  lasiuk
  * Hp compatible
  *
@@ -17,7 +20,7 @@
 #endif
 #include <iostream.h>
 #include <string>
-
+#include <vector>
 #if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
 using std::string;
 #endif
@@ -26,6 +29,8 @@ using std::string;
 #include "StRichPhysicsDb.h"
 #include "StRichGeometryDb.h"
 #include "StRichCoordinateTransform.h"
+#include "StRichOtherAlgorithms.h"
+
 int main()
 {
 
@@ -47,60 +52,64 @@ int main()
     //myPhysicsDb->print();
 
 
-    StRichCoordinateTransform transform(myGeometryDb);
-    StRichRawCoordinate      raw;
+    StRichCoordinateTransform* transform =
+	StRichCoordinateTransform::getTransform(myGeometryDb);
+    StRichRawCoordinate      rawA;
     StRichQuadrantCoordinate quad;
-    StRichLocalCoordinate    local;
+    StRichLocalCoordinate    localA;
     StGlobalCoordinate       global;
     
     cout << "Raw --> Quadrant" << endl;
-    StRichRawCoordinate rawa(95,0);
-    StRichRawCoordinate rawb(0,0);
-    StRichRawCoordinate rawc(0,48);
-    StRichRawCoordinate raw1(159,95);
-    StRichRawCoordinate rawd(95,159);
-    
-    transform(raw1,quad);
-    cout << "raw --> quad:  " << raw1   << " " << quad << endl;
+    vector<StRichRawCoordinate> raw;
+    raw.push_back(StRichRawCoordinate(0,0));
+    raw.push_back(StRichRawCoordinate(79,0));
+    raw.push_back(StRichRawCoordinate(159,0));
+    raw.push_back(StRichRawCoordinate(0,47));
+    raw.push_back(StRichRawCoordinate(79,47));
 
-    transform(raw1,local);
-    cout << "raw --> local: " << raw1   << " " << local << endl;
+    raw.push_back(StRichRawCoordinate(80,0));
+    raw.push_back(StRichRawCoordinate(80,47));
 
-    transform(raw1, global);
-    cout << "raw-->global:  " << raw1   << " " << global << endl;
+    vector<StRichLocalCoordinate> local;
+    local.push_back(StRichLocalCoordinate(0,0,0));
+    local.push_back(StRichLocalCoordinate(65,0,0));
+    local.push_back(StRichLocalCoordinate(65.5,0.2,0));
 
-    transform(quad,local);
-    cout << "quad-->local:  " << quad   << " " << local << endl;
-    
-    transform(quad,global);
-    cout << "quad-->global: " << quad   << " " << global << endl;
+    int ii;
+    for(ii=0; ii<raw.size(); ii++) {
+	cout << "ii= " << ii << endl;
+	(*transform)(raw[ii],quad);
+	cout << "raw --> quad:  " << raw[ii]   << " " << quad << endl;
 
-    transform(local,global);
-    cout << "local-->global:  " << local  << " " << global << endl;
+	(*transform)(raw[ii],localA);
+	cout << "raw --> local: " << raw[ii]   << " " << localA << endl;
 
-    //
-    // And backwards
-    //
-    
-    transform(global,local);
-    cout << "global-->local:  " << global   << " " << local << endl;
+	(*transform)(raw[ii], global);
+	cout << "raw-->global:  " << raw[ii]   << " " << global << endl;
 
-    transform(global,quad);
-    cout << "global-->quad:  " << global  << " " << quad << endl;
+	(*transform)(global,rawA);
+	cout << "global->rawA:  " << global  << " " << rawA
+	     << "(" << nearestInteger(rawA.pad()) << ", " << nearestInteger(rawA.row()) << ")" << endl;
+    }
 
-    transform(global,raw);
-    cout << "global-->raw:  " << global  << " " << raw << endl;
-    
-    transform(local,quad);
-    cout << "local-->quad:  " << local  << " " << quad << endl;
+    cout << "*****************************************\n" << endl;
+    for(ii=0; ii<local.size(); ii++) {
+	cout << "ii= " << ii << endl;
+	cout << local[ii] << endl;
+	(*transform)(local[ii],rawA);
+	cout << "local --> local: " << local[ii]   << " " << rawA << endl;
 
-    transform(local,raw);
-    cout << "local-->raw:  " << local  << " " << raw << endl;
+	(*transform)(local[ii],quad);
+	cout << "local --> quad:  " << local[ii]   << " " << quad << endl;
 
-    transform(quad,raw);
-    cout << "quad-->raw:  " << quad  << " " << raw << endl;
+	(*transform)(local[ii], global);
+	cout << "local-->global:  " << local[ii]   << " " << global << endl;
 
-    
+	(*transform)(global,localA);
+	cout << "global->localA:  " << global  << " " << localA << endl;
+    }
+
+
     delete myGeometryDb;
     delete myPhysicsDb;
     

@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: tform.cxx,v 1.1 2000/02/08 16:35:27 lasiuk Exp $
+ * $Id: tform.cxx,v 1.2 2000/03/12 23:58:08 lasiuk Exp $
  * Description:
  *  Stand-alone test module
  *
  * $Log: tform.cxx,v $
+ * Revision 1.2  2000/03/12 23:58:08  lasiuk
+ * db update
+ *
  * Revision 1.1  2000/02/08 16:35:27  lasiuk
  * Hp compatible
  *
@@ -71,12 +74,13 @@ int main()
       return 1;
     }
 
-    myGeometryDb->print();
+    //myGeometryDb->print();
     //myPhysicsDb->print();
 
     
 
-    StRichCoordinateTransform transform(myGeometryDb);
+    StRichCoordinateTransform* transform =
+	StRichCoordinateTransform::getTransform(myGeometryDb);
     StRichRawCoordinate      raw;
     StRichRawCoordinate      rawb;
     StRichQuadrantCoordinate quad;
@@ -86,10 +90,23 @@ int main()
     PR(myGeometryDb->numberOfPadsInARow());
     PR(myGeometryDb->numberOfRowsInAColumn());
 
+//     StRichLocalCoordinate    locC(-7.59,0,.445);
+//     StRichRawCoordinate      rawC;
+
+    
+//     transform(locC,rawC);
+//     PR(rawC);
+//     PR(locC);
+    
+
+//     exit(0);
+    
     int startRow = 0;
     int endRow   = myGeometryDb->numberOfRowsInAColumn();
     int startPad = 0;
     int endPad = myGeometryDb->numberOfPadsInARow();
+    cout << "ROWS: " << startRow << " - " << endRow << endl;
+    cout << "PADS: " << startPad << " - " << endPad << endl;
     for(int iRow=startRow; iRow<endRow; iRow++) {
 	raw.setRow(iRow);
 	for(int iPad=startPad; iPad<endPad; iPad++) {
@@ -100,39 +117,39 @@ int main()
 	    tuple[1] = static_cast<float>(iRow);
 	    idb << "R p/r " << iPad << '\t' << iRow << endl;
 	    
-	    transform(raw,quad);
+	    (*transform)(raw,quad);
 	    tuple[2] = static_cast<float>(quad.quadrant());
 	    tuple[3] = static_cast<float>(quad.position().x());
 	    tuple[4] = static_cast<float>(quad.position().y());
 	    tuple[5] = static_cast<float>(quad.position().z());
 	    idb << "Q: x/y/z " << quad.position() << endl;
 	    
-	    transform(quad,local);
+	    (*transform)(quad,local);
 	    tuple[6] = static_cast<float>(local.position().x());
 	    tuple[7] = static_cast<float>(local.position().y());
 	    tuple[8] = static_cast<float>(local.position().z());
 	    idb << "L: x/y/z " << local.position() << endl;
 	    
-	    transform(local,global);
+	    (*transform)(local,global);
 	    tuple[9]  = static_cast<float>(global.position().x());
 	    tuple[10] = static_cast<float>(global.position().y());
 	    tuple[11] = static_cast<float>(global.position().z());
 	    idb << "G: x/y/z " << global.position() << endl;
 	    
-	    transform(global,local);
+	    (*transform)(global,local);
 	    tuple[12] = static_cast<float>(local.position().x());
 	    tuple[13] = static_cast<float>(local.position().y());
 	    tuple[14] = static_cast<float>(local.position().z());
 	    idb << "Lb: x/y/z " << local.position() << endl;
 	    
-	    transform(local,quad);
+	    (*transform)(local,quad);
 	    tuple[15] = static_cast<float>(quad.position().x());
 	    tuple[16] = static_cast<float>(quad.position().y());
 	    tuple[17] = static_cast<float>(quad.position().z());
 	    tuple[18] = static_cast<float>(quad.quadrant());
 	    idb << "Qb: x/y/z " << quad.position() << endl;
 	    
-	    transform(quad,rawb);
+	    (*transform)(quad,rawb);
 	    tuple[19] = static_cast<float>(rawb.pad());
 	    tuple[20] = static_cast<float>(rawb.row());
 	    idb << "Rb p/r " << rawb.pad() << '\t' << rawb.row() << '\n' << endl;
