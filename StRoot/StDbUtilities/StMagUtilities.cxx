@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.27 2002/02/03 20:59:47 dunlop Exp $
+ * $Id: StMagUtilities.cxx,v 1.28 2002/02/03 21:17:11 dunlop Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.28  2002/02/03 21:17:11  dunlop
+ * Fix the spacecharge instance, so that it gets called to
+ * reset ONLY if the instance is non-zero, e.g. wanted.
+ * (Previous log: call SpaceCharge::instance() every hit
+ * to reset the DetectorDbMaker array.  Only works on 2nd+ event if you do this.)
+ *
  * Revision 1.27  2002/02/03 20:59:47  dunlop
  * *** empty log message ***
  *
@@ -961,10 +967,14 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   InterpolateEdistortion( r, phi, z, spaceEr, spaceEphi, Er_integral, Ephi_integral ) ;
   // Get Space Charge **** Every Event (JCD This is actually per hit)***
   // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
-  fSpaceCharge = StDetectorDbSpaceCharge::instance();
   
-  if ( fSpaceCharge !=0 ) SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
+  if ( fSpaceCharge !=0 ) {
+      // need to reset it. 
+      fSpaceCharge = StDetectorDbSpaceCharge::instance();
 
+      SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
+  }
+  
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
     {
