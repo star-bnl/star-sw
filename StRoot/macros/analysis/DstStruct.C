@@ -1,4 +1,4 @@
-// $Id: DstStruct.C,v 3.5 2000/08/16 23:19:16 fine Exp $
+// $Id: DstStruct.C,v 3.6 2000/08/17 00:54:16 fine Exp $
 
 #include <iomanip.h>
 class StChain;
@@ -44,6 +44,7 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch  
+//  IOMk->SetBranch("eventBranch",0,"r"); //activate dst Branch  
 // --- now execute chain member functions
   chain->Init();
 
@@ -59,9 +60,9 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   Float_t totalPoints = 0;
   TStopwatch readTimer;
   for (iev = 0; iev < counter; iev++) {         // goto loop code
-     chain->Clear();
-     iret = chain->Make();
-     if (iret) break;
+     readTimer.Start(kFALSE);
+     if (iret = chain->MakeEvent()) break;
+     readTimer.Stop();
      ds=chain->GetDataSet("dst");
      if (ds) {
          TDataSetIter next(ds);
@@ -121,8 +122,9 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   }
   if (iev) { 
      Float_t kBytes = total/1024;
-     Float_t thisTime = readTimer->RealTime();
-    cout << endl 
+     readTimer.Stop();
+     Double_t thisTime = readTimer.RealTime();
+     cout << endl 
          << " *** DstStruct.C "
 	 << endl 
 	 << " \t-- Total: " 
@@ -147,9 +149,11 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
        << endl 
        << "      Web site for further information" 
        << endl << endl;
-  cout << "Total:" << total/1024. << " KBytes,  total hits: " 
-       << totalPoints/1024. << "  Kbytes, hits/total: "<< 100*totalPoints/total << " %"
-       << endl; 
+  if (total>0) {
+    cout << "Total:" << total/1024. << " KBytes,  total hits: " 
+         << totalPoints/1024. << "  Kbytes, hits/total: "<< 100*totalPoints/total << " %"
+         << endl;
+  }
   chain->Finish();   
 }
 
@@ -178,8 +182,8 @@ void DstStruct(const char *MainFile="/afs/rhic/star/data/samples/gstar.dst.root"
 //__________________________________________________________________________
 //__________________________________________________________________________
 // $Log: DstStruct.C,v $
-// Revision 3.5  2000/08/16 23:19:16  fine
-// Clean up
+// Revision 3.6  2000/08/17 00:54:16  fine
+// more accurate timing
 //
 // Revision 3.4  2000/08/15 15:24:48  fine
 // new output format
