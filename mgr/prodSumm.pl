@@ -208,7 +208,7 @@ my $hpss_hist_date = "00000000";
 my $hpss_hist_size = 0;
 
 my $sum_File = "no";
-
+my $jfile_status = "no"; 
 my $lb_tag = "no";     
 my $lb_ver;
 
@@ -217,6 +217,8 @@ my $mem_size = 0;
 my $cpu_event = 0;
 my $no_track = 0;
 my $no_vertx = 0;
+my $jobfile_nm;    
+
 
 ## for web-table filling
 my $geantInputSize = 0;
@@ -297,7 +299,7 @@ foreach $eachSet (@Sets) {
     $hpss_dst_size = 0;
     $hpss_hist_date = "00000000";
     $hpss_hist_size = 0;
-    
+    $jfile_status = "no";     
     $sum_File = "no";
     
     $lb_tag = "no";     
@@ -322,9 +324,24 @@ foreach $eachSet (@Sets) {
     $basename =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
     $geantInputEvts += $3;
 
+## check if jobfile is created
+ my $run_chain = "tfs";
+ my $jSet;
+ my @hSet =  split ("/",$eachSet);
+    if($hSet[0] eq "auau200") {
+    $jSet = $hSet[1]."_".$hSet[2]."_".$hSet[3]."_".$hSet[4] ."_". $hSet[5];
+}
+  else {
+    $jSet = $hSet[0]."_".$hSet[1]."_".$hSet[2]."_".$hSet[3] ."_". $hSet[4] ."_". $hSet[5];
+}    
+   $jobfile_nm = $jSet . "_" . $basename;
+    print $jobfile_nm, "\n";
+    job_file($run_chain,$jobfile_nm); 
+    print $jfile_status, "\n";
+
 ## summary info check
 
-    $sumDirTfs = $sumDir."/tfs";
+    $sumDirTfs = $sumDir . "/tfs";
     opendir(DIR, $sumDirTfs) or die "can't open $sumDirTfs\n";
     while( defined($filename = readdir(DIR)) ) {
       next if $filename =~ /^\.\.?$/;
@@ -603,6 +620,31 @@ my @output = `more $jb_sum`;
            if(!defined $lb_tag)  {
           $lb_tag = $lb_ver;
         }
+ 
+}
+
+######################
+sub job_file($$) {
+
+my $run_ch = $_[0];
+my $jfile_nm = $_[1];
+
+my $prod_dir   = "/star/u2e/starreco/prod4/requests/";
+my $jobf_dir   = $prod_dir . $run_ch . "/" . "jobfiles";
+my $jarch_dir  = $prod_dir . $run_ch . "/" . "archive";
+my $jnew_dir   = $prod_dir . $run_ch . "/" . "new_jobs"; 
+my $jhold_dir  = $prod_dir . $run_ch . "/" . "jobs_hold";  
+ 
+  
+chdir $jobf_dir;
+if (-f $jfile_nm) {$jfile_status = "jobfiles"};
+chdir $jarch_dir;
+if (-f $jfile_nm) {$jfile_status = "archive"};
+chdir $jnew_dir;
+if (-f $jfile_nm) {$jfile_status = "new_jobs"};
+chdir $jhold_dir;
+if (-f $jfile_nm) {$jfile_status = "jobs_hold"};    
+
  
 }
 	   
