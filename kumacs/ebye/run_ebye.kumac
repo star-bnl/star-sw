@@ -20,7 +20,8 @@
 * 09/01/1998 - DSW        -- Brought into STAR kumac framework.
 * 09/11/1998 - DSW        -- Updated to normalize prior and  ensemble average.
 * 09/14/1998 - LDC  Added output xdf file in event loop and as argument
-*
+* 10/14/98 K. Turner - put in read_default_params
+* 
 ************************************************************************
 ************************************************************************
 
@@ -87,7 +88,9 @@
    macro/global/import *
      
    exec load_libraries#run [domain]
-
+   
+   exec read_default_params#init
+      
 **************************************************************
 * OPEN FILES
 ****************************************************************
