@@ -1,0 +1,47 @@
+# $Id: Makefile.SunOS,v 1.1 2004/09/02 23:50:49 potekhin Exp $
+
+# Sun platform dependent definitions
+
+# The compilers
+CXX       = /opt/SUNWspro/bin/CC
+CC	      = /opt/SUNWspro/bin/cc
+F77	      = f77
+
+# Global optimisation
+OPT       = -O
+
+# Shared library suffix
+SL	      = so
+
+# AWK
+AWK	      = /usr/xpg4/bin/awk
+
+# The options
+CXXOPTS       = $(OPT) +w -KPIC -features=rtti
+COPT	      = $(OPT) -KPIC -erroff=%none
+FOPT	      = $(OPT) -KPIC
+
+# CERNLIB stuff
+
+CLIBDEFS      = -DCERNLIB_SUN -DCERNLIB_BLDLIB -DCERNLIB_CZ
+CLIBCXXOPTS   = 
+CLIBCOPT      = 
+CLIBFOPT      = -xpp=cpp
+
+LD            = /opt/SUNWspro/bin/CC
+LDFLAGS       = $(OPT) -Qoption ld -t
+
+SHLD	      = $(LD)
+SOFLAGS       = -G
+SHLIB         = -L/opt/SUNWspro/lib -lF77 -lM77 /opt/SUNWspro/lib/libsunmath.so.1
+
+# Graphics
+#  
+X11FLAGS  := -I/usr/openwin/include/X11/extensions -I/usr/openwin/include/X11
+X11FLAGS  += -I/usr/openwin/include
+ifndef OGLFLAGS
+  ifneq ($(OGLHOME),/usr) 
+    OGLFLAGS  := -I$(OGLHOME)/include
+  endif 
+endif
+
