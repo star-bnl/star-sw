@@ -136,21 +136,21 @@ private:
 
 inline void StiEvaluableTrackSeedFinder::update(Subject* changedSubject)
 {
-    cout <<"StiEvaluableTrackSeedFinder::update(Subject*)"<<endl;
+    //cout <<"StiEvaluableTrackSeedFinder::update(Subject*)"<<endl;
     if (changedSubject!=mSubject) {
 	cout <<"StiEvaluableTrackSeedFinder::update(Subject*). ERROR:\t"
 	     <<"changedSubject!=mSubject"<<endl;
     }
     else {
-	cout <<"getting new values"<<endl;
+	//cout <<"getting new values"<<endl;
 	getNewState();
-	cout <<"\tdone getting new values"<<endl;
+	//cout <<"\tdone getting new values"<<endl;
     }   
 }
 
 inline void StiEvaluableTrackSeedFinder::forgetSubject(Subject* obsolete)
 {
-    cout <<"StiEvaluableTrackSeedFinder::forgetSubject(Subject*)"<<endl;
+    //cout <<"StiEvaluableTrackSeedFinder::forgetSubject(Subject*)"<<endl;
     if (obsolete==mSubject) {
 	mSubject=0;
     }
