@@ -462,6 +462,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #ifdef FCF_10BIT_ADC 
 					// no lookup - already in 10 bits!
 					a = adc ;
+					//if(row==14) printf("Row %d, pad %d, timebin %d, data %d\n",row,pad,start,a) ;
+
+					//if(a > 255) printf("Datum is %d\n",a) ;
 #else
 					a = adc8to10[adc] ;  // transfer to 10 bits
 #endif
@@ -719,7 +722,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 	if(new_res_cou) {
 		int wrote ;
 		// check for space!
+
 		if((*cl_found_pointer + new_res_cou) >= maxClusters) {
+			printf("FCF:Too many clusters!\n") ;
 			LOG(TERR,"Too many clusters in pad %d - breaking!",pad,0,0,0,0) ;
 			return outres - row_pointer ;
 		}
@@ -731,6 +736,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		*cl_found_pointer += wrote ;
 	}
 
+	//if(row == 14) printf("Row %d: length %d\n",row,outres-row_pointer) ;
 
 	//LOG(WARN,"One_pad %d, pad decon %d, seq_total %d, low_adc %d, delta %d",one_pad,pad_decon,seq_total,adc_low,delta[2]) ;
 

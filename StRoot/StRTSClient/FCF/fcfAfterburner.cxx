@@ -173,17 +173,21 @@ int fcfAfterburner::burn(u_int *ptr_res[3])
 	
 	ptr = ptr_res ;	// store arg in member...
 
-	if(ptr_res[0]) {
-		row = *ptr_res[0] ;	// this should point to "row"
+	for(i=0;i<3;i++) {
+		if(ptr_res[i]) {
+			row = *ptr_res[i] ;	// this should point to "row"
 
-		if(row < 123) do_swap = 0 ;	// same endianes == LOCAL
-		else do_swap = 1 ;		// different endianess == SWAP
+			if(row < 123) do_swap = 0 ;	// same endianes == LOCAL
+			else do_swap = 1 ;		// different endianess == SWAP
+			
+			break ;	// at least one row
+		}
 	}
-	else {
-		row = 0 ;	// mark unknown...
-		return -1 ;	// data doesn't exist for this row...
+	
+	if(i==3) { // no content
+		row = 0 ;
+		return -1 ;
 	}
-
 
 	// get the row + sanity checks
 	row = 123 ;
