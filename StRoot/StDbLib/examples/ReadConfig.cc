@@ -10,19 +10,19 @@ int main(){
 
 
   StDbManager* mgr = StDbManager::Instance();
-  StDbConfigNode* node = mgr->initConfig(dbCalibrations,dbTpc,"reconV0");
+  StDbConfigNode* node = mgr->initConfig(dbStDb,dbStar,"reconV0");
 
+
+  // set timestamp
   unsigned int rTime = (unsigned int)time(NULL);
   mgr->setRequestTime(rTime);
+
+  // request tables
   mgr->fetchAllTables(node); 
-  StDbTable* table = node->findTable("tpcElectronics");
 
-
-  if(table){
-    ofstream of("tpcElectronics.Now.xml");
-    StDbXmlWriter writer(of);  
-    writer.ioTable(table);
-  }
+  // print out the list of tables
+  mgr->setVerbose(true);
+  node->printTree(0);
 
   delete node;
   delete mgr;
