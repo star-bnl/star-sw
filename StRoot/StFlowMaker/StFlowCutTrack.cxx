@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.14 2000/07/20 17:25:50 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.15 2000/08/10 23:00:20 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.15  2000/08/10 23:00:20  posk
+// New centralities. pt and eta cuts.
+//
 // Revision 1.14  2000/07/20 17:25:50  posk
 // Fixed bug in readPico checkEvent.
 //
@@ -70,9 +73,11 @@ ClassImp(StFlowCutTrack)
 //-----------------------------------------------------------------------
 
 Int_t   StFlowCutTrack::mFitPtsCuts[2]     = {15, 200};
-Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.55, 2.};
-Float_t StFlowCutTrack::mChiSqCuts[2]      = {0., 3.};
-Float_t StFlowCutTrack::mDcaCuts[2]        = {0., 0.8};
+Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.52, 1.};
+Float_t StFlowCutTrack::mChiSqCuts[2]      = {0., 0.};
+Float_t StFlowCutTrack::mDcaCuts[2]        = {0., 1.};
+Float_t StFlowCutTrack::mPtCuts[2]         = {0.1, 2.};
+Float_t StFlowCutTrack::mEtaCuts[2]        = {-1.5, 1.5};
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     
 UInt_t  StFlowCutTrack::mGoodTrackN        = 0;
@@ -81,6 +86,8 @@ UInt_t  StFlowCutTrack::mEtaSymNegN        = 0;
 UInt_t  StFlowCutTrack::mFitPtsCutN        = 0;
 UInt_t  StFlowCutTrack::mFitOverMaxCutN    = 0;
 UInt_t  StFlowCutTrack::mChiSqCutN         = 0;
+UInt_t  StFlowCutTrack::mPtCutN            = 0;
+UInt_t  StFlowCutTrack::mEtaCutN           = 0;
 UInt_t  StFlowCutTrack::mDcaCutN           = 0;
 
 //-----------------------------------------------------------------------
@@ -134,9 +141,26 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
     return kFALSE;
   }
 
+  StThreeVectorD p = pTrack->geometry()->momentum();
+
+  // pt
+  float pt = p.perp();
+  if (mPtCuts[1] > mPtCuts[0] && 
+      (pt < mPtCuts[0] || pt >= mPtCuts[1])) {
+    mPtCutN++;
+    return kFALSE;
+  }
+
+  // eta
+  float eta = p.pseudoRapidity();
+  if (mEtaCuts[1] > mEtaCuts[0] && 
+      (eta < mEtaCuts[0] || eta >= mEtaCuts[1])) {
+    mEtaCutN++;
+    return kFALSE;
+  }
+
   // Increment counters for Eta symmetry cut
-  StThreeVectorD p = pTrack->geometry()->momentum(); 
-  if (p.pseudoRapidity() > 0.) { mEtaSymPosN++;
+  if (eta > 0.) { mEtaSymPosN++;
   } else { mEtaSymNegN++; }
   mGoodTrackN++;
   return kTRUE;
@@ -182,8 +206,23 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
     return kFALSE;
   }
 
-  // Increment counters for Eta symmetry cut
+  // pt
+  float pt = pPicoTrack->Pt();
+  if (mPtCuts[1] > mPtCuts[0] && 
+      (pt < mPtCuts[0] || pt >= mPtCuts[1])) {
+    mPtCutN++;
+    return kFALSE;
+  }
+
+  // eta
   float eta = pPicoTrack->Eta();
+  if (mEtaCuts[1] > mEtaCuts[0] && 
+      (eta < mEtaCuts[0] || eta >= mEtaCuts[1])) {
+    mEtaCutN++;
+    return kFALSE;
+  }
+
+  // Increment counters for Eta symmetry cut
   if (eta > 0.) { mEtaSymPosN++;
   } else { mEtaSymNegN++; }
   mGoodTrackN++;
@@ -210,6 +249,12 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#   Dca cuts= " << mDcaCuts[0] << ", " 
        << mDcaCuts[1] << " :\t\t " << setprecision(3)
        << (float)mDcaCutN/(float)mTrackN/perCent << "% cut" << endl;
+  cout << "#   Pt cuts= " << mPtCuts[0] << ", " 
+       << mPtCuts[1] << " :\t\t " << setprecision(3)
+       << (float)mPtCutN/(float)mTrackN/perCent << "% cut" << endl;
+  cout << "#   Eta cuts= " << mEtaCuts[0] << ", " 
+       << mEtaCuts[1] << " :\t " << setprecision(3)
+       << (float)mEtaCutN/(float)mTrackN/perCent << "% cut" << endl;
   cout << "# Good Tracks = " << (float)mGoodTrackN/(float)mTrackN/perCent
        << "%" << endl;
   cout << "#######################################################" << endl;

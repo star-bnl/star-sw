@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.16 2000/07/20 17:25:49 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.17 2000/08/10 23:00:19 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.17  2000/08/10 23:00:19  posk
+// New centralities. pt and eta cuts.
+//
 // Revision 1.16  2000/07/20 17:25:49  posk
 // Fixed bug in readPico checkEvent.
 //
@@ -75,14 +78,14 @@ ClassImp(StFlowCutEvent)
 Int_t    StFlowCutEvent::mMultCuts[2]    = {10, 10000};
 Float_t  StFlowCutEvent::mVertexXCuts[2] = {-1., 1.};
 Float_t  StFlowCutEvent::mVertexYCuts[2] = {-1., 1.};
-Float_t  StFlowCutEvent::mVertexZCuts[2] = {-100., 100.};
+Float_t  StFlowCutEvent::mVertexZCuts[2] = {-75., 75.};
 UInt_t   StFlowCutEvent::mEventN         = 0;     
 UInt_t   StFlowCutEvent::mGoodEventN     = 0;
 UInt_t   StFlowCutEvent::mMultCut        = 0;
 UInt_t   StFlowCutEvent::mVertexXCut     = 0;
 UInt_t   StFlowCutEvent::mVertexYCut     = 0;
 UInt_t   StFlowCutEvent::mVertexZCut     = 0;
-Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {-2.5, 2.5};
+Float_t  StFlowCutEvent::mEtaSymCuts[2]  = {0., 0.};
 UInt_t   StFlowCutEvent::mEtaSymCutN     = 0;     
 
 //-----------------------------------------------------------------------
