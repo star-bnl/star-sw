@@ -10,6 +10,7 @@ class StrangeMuDstPlayer {
   void Make(Int_t NEvents, StFile* input, Char_t *output="evMuDst.root");
   void Filter(Int_t NEvents, StFile* input, Char_t *output="evMuDst.root");
   void Play(Int_t NEvents, StFile* input, Char_t *output="evMuDst.root");
+  void Copy(Int_t NEvents, StFile* input, Char_t *output="evMuDst.root");
   void DoFileSplit(Bool_t val = kTRUE);
   void DoMC(Bool_t val = kTRUE);
   void DoT0Abort(Bool_t val = kTRUE);

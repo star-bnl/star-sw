@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.13 2003/04/11 08:06:03 jones Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.14 2003/05/15 21:14:06 jones Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.14  2003/05/15 21:14:06  jones
+// Added Copy() function to player, fixed ControllerBase to handle common MuDst names, didn't do it right first time.
+//
 // Revision 3.13  2003/04/11 08:06:03  jones
 // Fix to read in Mc branch(es) of common MuDst
 //
@@ -175,7 +178,7 @@ void StStrangeControllerBase::InitCreateSubDst() {
     if (!dstMaker->GetTree()->GetBranch(mcName.Data()))
       // Common MuDst stores the MC under a different name
       (mcName = "Mc") += GetName();
-    if (!tree->GetBranch(mcName.Data())) {
+    if (!dstMaker->GetTree()->GetBranch(mcName.Data())) {
       gMessMgr->Warning() << IsA()->GetName() <<
         ": No MC data available, continuing without." << endm;
       doMc = kFALSE;
