@@ -1,7 +1,7 @@
-// $Id: StMaker.cxx,v 1.27 1999/04/30 21:08:16 perev Exp $
+// $Id: StMaker.cxx,v 1.28 1999/05/01 00:53:38 perev Exp $
 // $Log: StMaker.cxx,v $
-// Revision 1.27  1999/04/30 21:08:16  perev
-// GetDataSet fix maker:
+// Revision 1.28  1999/05/01 00:53:38  perev
+// GetDataSet bug fix NAME == NAME/.data
 //
 // Revision 1.26  1999/04/30 14:58:41  perev
 //  cd() added to StMaker class
@@ -71,7 +71,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.27 1999/04/30 21:08:16 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.28 1999/05/01 00:53:38 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -250,7 +250,11 @@ int icol;
   if (!uppMk && !dowMk) 	goto DOWN;
 
 //		Direct try
-  dataset = Find(actInput);
+  dataset = 0;
+  if (actInput.Contains("."))  dataset = Find(actInput);
+  if (dataset) return dataset;
+  
+  if (actInput==GetName()) dataset = m_DataSet;
   if (dataset) return dataset;
 
 //		Not so evident, do some editing
@@ -260,12 +264,12 @@ int icol;
   if (icol>=0) {//there is maker name is hidden
     tmp = actInput; 
     tmp.Replace(0,0,".make/"); icol +=6;
-    tmp.Replace(icol,1,"/.data");
+    tmp.Replace(icol,1,"/.data/");
     dataset = Find((const char*)tmp);  		// .make/MAKER/.data/...
     if (dataset) return dataset;
     dataset = Find((const char*)tmp+6);		//       MAKER/.data/...
     if (dataset) return dataset;
-    tmp.Replace(icol,6,"/.const");
+    tmp.Replace(icol,7,"/.const/");
     dataset = Find((const char*)tmp);		// .make/MAKER/.const/...
     if (dataset) return dataset;
     dataset = Find((const char*)tmp+6);		//       MAKER/.const/...
@@ -274,6 +278,7 @@ int icol;
 
   if (actInput.Contains("/.")) 	goto DOWN;
 
+  assert(m_DataSet);
   dataset = m_DataSet->Find(actInput);
   if (dataset) return dataset;
   dataset = m_ConstSet->Find(actInput);
