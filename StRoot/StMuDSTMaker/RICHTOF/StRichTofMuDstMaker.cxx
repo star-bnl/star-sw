@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichTofMuDstMaker.cxx,v 1.1 2002/02/20 01:57:26 dunlop Exp $
+ * $Id: StRichTofMuDstMaker.cxx,v 1.2 2002/02/23 01:54:56 dunlop Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StRichTofMuDstMaker.cxx,v $
+ * Revision 1.2  2002/02/23 01:54:56  dunlop
+ * Tightened cut on tof phi
+ *
  * Revision 1.1  2002/02/20 01:57:26  dunlop
  * New Rich and Tof combined maker
  *
@@ -62,8 +65,8 @@ Int_t StRichTofMuDstMaker::Init()
     mOuterTrackGeometry = true;
     mTrackAcceptZ_min =   -250*centimeter; // default Z-range: East Barrel
     mTrackAcceptZ_max =      0*centimeter;
-    mTrackAcceptPhi_min = -1.3*radian;     // default phi-range: 3 trays
-    mTrackAcceptPhi_max = -1.0*radian;
+    mTrackAcceptPhi_min = -1.25*radian;     // default phi-range: 3 trays
+    mTrackAcceptPhi_max = -1.05*radian;
  // L3 projection
     mRichGlobalEdgeMin.setX(83.031);
     mRichGlobalEdgeMax.setX(157.511);
