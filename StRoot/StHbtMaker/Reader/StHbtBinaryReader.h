@@ -31,21 +31,21 @@ private:
   StHbtIOBinary* binaryIO;
 
   ifstream* mInputStream;              //!
-  ofstream* mOutputStream;             //!
+  ofstream* mOutputStream;             //! 
   const char* mFileName;               //!
   const char* mInFileName;             //!
 
 public:
   StHbtBinaryReader();
   StHbtBinaryReader(char* FileName);
-  virtual ~StHbtBinaryReader();
+  ~StHbtBinaryReader();
 
   // generic StHbtEventReader methods
-  virtual StHbtEvent* ReturnHbtEvent();
-  virtual StHbtString Report();
-  virtual int WriteHbtEvent(StHbtEvent*);
-  virtual int Init(const char* ReadWrite, StHbtString Message=" ");
-  virtual void Finish();
+  StHbtEvent* ReturnHbtEvent();
+  //StHbtString Report();
+  int WriteHbtEvent(StHbtEvent*);
+  int Init(const char* ReadWrite, StHbtString& Message);
+  void Finish();
 
   // methods special to this Reader
   void SetFileName(char* file);

@@ -376,7 +376,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chi2(0) );
     hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chi2(1) ); 
     
-    StPhysicalHelixD&  helix = rTrack->geometry()->helix();
+    StPhysicalHelixD  helix = rTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
     
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);

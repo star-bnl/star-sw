@@ -72,13 +72,6 @@ StHbtEvent* StHbtAsciiReader::ReturnHbtEvent(){
   }
   return event;
 }
-
-//_______________________________
-StHbtString StHbtAsciiReader::Report(){
-  StHbtString temp = "\n This is the StHbtAsciiReader - no Early Cuts applied\n";
-  return temp;
-}
-
 //_______________________________
 int StHbtAsciiReader::WriteHbtEvent(StHbtEvent* event){
 
@@ -92,12 +85,23 @@ int StHbtAsciiReader::WriteHbtEvent(StHbtEvent* event){
     return (2);
   }
 
-  (*mOutputStream) << (*event);
+  
+  if ( !mEventCut || mEventCut->Pass(event) ) {  
+    cout << "StHbtAsciiReader: eventCut passed" << endl;
+    StHbtEvent newEvent(*event, mTrackCut, mV0Cut);
+    (*mOutputStream) << (newEvent);
+  }
   return (0);
 }
 
 //_______________________________
-int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString Message){
+//StHbtString StHbtAsciiReader::Report(){
+//  StHbtString temp = "\n This is StHbtAsciiReader calling the base class Report()";
+///  temp += this->Report();
+//  return temp;
+//}
+//_______________________________
+int StHbtAsciiReader::Init(const char* ReadWrite, StHbtString& Message){
   cout << " *\n *\n *\n StHbtAsciiReader::Init() being called*\n *\n";
   mReaderStatus = 0;           // means "good"
   //  if ((ReadWrite=="r")|| (ReadWrite=="R")){  // this object will be a reader

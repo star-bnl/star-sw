@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.h,v 1.1 2000/02/13 17:19:27 laue Exp $
+ * $Id: StHbtXDFReader.h,v 1.2 2000/02/18 22:01:55 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -104,17 +104,14 @@ public:
   StHbtXDFReader(const char* dataSetName="dst", const char* particleTableDirectory="dst/particle");
   ~StHbtXDFReader();
 
-  virtual StHbtEvent* ReturnHbtEvent();
-  virtual StHbtString Report();
+  StHbtEvent* ReturnHbtEvent();
+  StHbtString Report();
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
   void SetTheV0Maker(StV0MiniDstMaker*);
   StV0MiniDstMaker* TheV0Maker();
 
-  void SetEventCut(StHbtEventCut*);          // use these methods to do
-  void SetTrackCut(StHbtTrackCut*);          // "front-loaded" cuts
-  void SetV0Cut(StHbtV0Cut*);
   void AddAcceptedParticle( int pdgCode );
   void AddAcceptedMother( int pdgCode );
   void AddAcceptedDaughter( int pdgCode );
@@ -128,9 +125,6 @@ inline void StHbtXDFReader::SetTheEventMaker(StMaker* maker){mTheEventMaker=make
 inline StMaker* StHbtXDFReader::TheEventMaker(){return mTheEventMaker;}
 inline void StHbtXDFReader::SetTheV0Maker(StV0MiniDstMaker* maker){mTheV0Maker=maker;}
 inline StV0MiniDstMaker* StHbtXDFReader::TheV0Maker(){return mTheV0Maker;}
-inline void StHbtXDFReader::SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
-inline void StHbtXDFReader::SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
-inline void StHbtXDFReader::SetV0Cut(StHbtV0Cut* pcut){mV0Cut=pcut;}
 
 #endif
 

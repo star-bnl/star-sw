@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.12 2000/01/25 17:35:27 laue Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.13 2000/02/18 22:01:56 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,13 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.13  2000/02/18 22:01:56  laue
+ * Implementation of a collections of StHbtEventWriters.
+ * We now can write multiple microDsts at a time.
+ *
+ * All readers can have front-loaded cuts now. For that reason some
+ * functionality was moved from the specific readers to the base class
+ *
  * Revision 1.12  2000/01/25 17:35:27  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -93,9 +100,6 @@
 //#include "StChain.h"
 #include "StMaker.h"
 #include "StV0MiniDstMaker/StV0MiniDstMaker.h"
-#include "StHbtMaker/Base/StHbtEventCut.h"
-#include "StHbtMaker/Base/StHbtTrackCut.h"
-#include "StHbtMaker/Base/StHbtV0Cut.h"
 
 class StPionPlus;
 class StKaonPlus;
@@ -110,9 +114,6 @@ private:
 
   StMaker* mTheEventMaker;      //! this is the chain where the StEventReaderMaker is
   StV0MiniDstMaker* mTheV0Maker; //! this is the chain where the StV0MiniDstMaker is
-  StHbtEventCut* mEventCut;     //!
-  StHbtTrackCut* mTrackCut; //!
-  StHbtV0Cut* mV0Cut; //!
   long              mV0;        //! Number of v0s looked at to date
 
  protected:
@@ -122,17 +123,14 @@ public:
   StStandardHbtEventReader();
   ~StStandardHbtEventReader();
 
-  virtual StHbtEvent* ReturnHbtEvent();
-  virtual StHbtString Report();
+  StHbtEvent* ReturnHbtEvent();
+  StHbtString Report();
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
   void SetTheV0Maker(StV0MiniDstMaker*);
   StV0MiniDstMaker* TheV0Maker();
 
-  void SetEventCut(StHbtEventCut*);          // use these methods to do
-  void SetTrackCut(StHbtTrackCut*);          // "front-loaded" cuts
-  void SetV0Cut(StHbtV0Cut*);
 #ifdef __ROOT__
   ClassDef(StStandardHbtEventReader, 1)
 #endif
@@ -142,9 +140,6 @@ inline void StStandardHbtEventReader::SetTheEventMaker(StMaker* maker){mTheEvent
 inline StMaker* StStandardHbtEventReader::TheEventMaker(){return mTheEventMaker;}
 inline void StStandardHbtEventReader::SetTheV0Maker(StV0MiniDstMaker* maker){mTheV0Maker=maker;}
 inline StV0MiniDstMaker* StStandardHbtEventReader::TheV0Maker(){return mTheV0Maker;}
-inline void StStandardHbtEventReader::SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
-inline void StStandardHbtEventReader::SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
-inline void StStandardHbtEventReader::SetV0Cut(StHbtV0Cut* pcut){mV0Cut=pcut;}
 
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.16 2000/02/01 00:35:29 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.17 2000/02/18 22:01:56 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,13 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.17  2000/02/18 22:01:56  laue
+ * Implementation of a collections of StHbtEventWriters.
+ * We now can write multiple microDsts at a time.
+ *
+ * All readers can have front-loaded cuts now. For that reason some
+ * functionality was moved from the specific readers to the base class
+ *
  * Revision 1.16  2000/02/01 00:35:29  laue
  * namespaces and other little things (see Thomas CC5 migration page) changed
  * to run on the new Solaris Compiler CC5
@@ -138,9 +145,6 @@ ClassImp(StStandardHbtEventReader)
 StStandardHbtEventReader::StStandardHbtEventReader(){
   mTheEventMaker=0;
   mTheV0Maker=0;
-  mEventCut=0;
-  mTrackCut=0;
-  mV0Cut=0;
   mReaderStatus = 0;  // "good"
   mV0=0;
 
@@ -164,15 +168,14 @@ StHbtString StStandardHbtEventReader::Report(){
   else {
     temp += "NONE";
   }
-  temp += "\n---> TrackCuts in Reader:\n ";
+  temp += "\n---> TrackCuts in Reader: ";
   if (mTrackCut) {
     temp += mTrackCut->Report();
   }
   else {
     temp += "NONE";
   }
-  temp += "\n";
-  temp += "\n---> V0Cuts in Reader:\n ";
+  temp += "\n---> V0Cuts in Reader: ";
   if (mV0Cut) {
     temp += mV0Cut->Report();
   }
@@ -240,7 +243,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   int iFailedCut =0;
   int iNoBestGuess =0;
   // loop over all the tracks, accept only global
-  for (unsigned long int icount=0; icount<mult; icount++){
+  for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
 
 
     //cout << " track# " << icount << endl;
@@ -265,7 +268,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     //cout << " number of pidTraits " << rTrack->pidTraits().size();
     //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
     StTrackPidTraits* trackPidTraits=0; 
-    int iPidTraitsCounter=0;
+    size_t iPidTraitsCounter=0;
     do {
       trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
       iPidTraitsCounter++;
@@ -352,7 +355,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chi2(0) );
     hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chi2(1) ); 
 
-    StPhysicalHelixD&  helix = rTrack->geometry()->helix();
+    StPhysicalHelixD  helix = rTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
 
     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);

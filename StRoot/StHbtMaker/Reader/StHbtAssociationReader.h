@@ -17,10 +17,6 @@ class StHbtAssociationReader : public StHbtEventReader{
   StMaker* mTheAssociationMaker;  //! this is the chain where the StAssociationEventReaderMaker is
   StV0MiniDstMaker* mTheV0Maker;  //! this is the chain where the StV0MiniDstMaker is
 
-  // pointers to front-loaded cuts
-  StHbtEventCut* mEventCut;       //!
-  StHbtTrackCut* mTrackCut; //!
-
   // some monitor histograms
   StHbt1DHisto* mDiffCurrent;   //! momenta diff distribution
   StHbt1DHisto* mDiff;          //! momenta diff distribution
@@ -40,8 +36,8 @@ class StHbtAssociationReader : public StHbtEventReader{
   StHbtAssociationReader();
   ~StHbtAssociationReader();
   
-  virtual StHbtEvent* ReturnHbtEvent();
-  virtual StHbtString Report();
+  StHbtEvent* ReturnHbtEvent();
+  StHbtString Report();
 
   // sets and gets for the other makers
   void SetTheEventMaker(StMaker*);
@@ -52,10 +48,6 @@ class StHbtAssociationReader : public StHbtEventReader{
   StMaker* TheMcEventMaker();
   StMaker* TheAssociationMaker();
   StV0MiniDstMaker* TheV0Maker();
-
-  // sets and gets for the front-loaded cuts
-  void SetEventCut(StHbtEventCut*);          // use these methods to do
-  void SetTrackCut(StHbtTrackCut*);    // "front-loaded" cuts
 
   ClassDef(StHbtAssociationReader, 0)
 };
@@ -68,9 +60,6 @@ inline StMaker* StHbtAssociationReader::TheMcEventMaker(){return mTheMcEventMake
 inline StMaker* StHbtAssociationReader::TheAssociationMaker(){return mTheAssociationMaker;}
 inline StV0MiniDstMaker* StHbtAssociationReader::TheV0Maker(){return mTheV0Maker;}
 
-inline void StHbtAssociationReader::SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
-inline void StHbtAssociationReader::SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
- 
 #endif
 
 
