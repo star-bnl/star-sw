@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.53 2001/08/02 17:41:49 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.54 2001/08/02 20:42:01 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -204,7 +204,7 @@ Int_t StFlowAnalysisMaker::Init() {
   };
   
   // Trigger
-  mHistTrigger = new TH1F("Flow_Charge", "Flow_Charge",
+  mHistTrigger = new TH1F("Flow_Trigger", "Flow_Trigger",
       nTriggerBins, triggerMin, triggerMax);
   mHistTrigger->SetXTitle("Trigger: 1 minbias, 2 central, 3 laser, 10 other");
   mHistTrigger->SetYTitle("Counts");
@@ -947,7 +947,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.53 2001/08/02 17:41:49 snelling Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.54 2001/08/02 20:42:01 snelling Exp $");
 
   return StMaker::Init();
 }
@@ -1653,6 +1653,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.54  2001/08/02 20:42:01  snelling
+// removed hist title conflict
+//
 // Revision 1.53  2001/08/02 17:41:49  snelling
 // Added trigger histogram
 //
