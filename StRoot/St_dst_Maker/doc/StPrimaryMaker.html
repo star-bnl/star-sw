@@ -45,6 +45,28 @@ The "fixed" vertex can also be switched off with
 
 in case one wants to switch on/off the fixing of the vertex
 for different events.
+
+One can also read in a file of vertex positions to use for
+fixing the vertex. There are three options presently. In
+the above example, one would replace the call to FixVertex()
+with a call to FixVertexFile*(char* filename) as shown here:
+
+  primMk->FixVertexFile3Vector("file.txt");
+    This would read in a sequential file of just 3 columns
+    representing the X Y Z coordinates.
+
+  primMk->FixVertexFileMatch("file.txt");
+    This reads in a file with 5 columns: eventID runID X Y Z
+    When running, the maker "looks up" the appropriate vertex
+    for the current run and event ID.
+
+  primMk->FixVertexFileEmbed("file.txt");
+    This behaves just as FixVertexMatch(), except that the data
+    in the second column is ignored (runID is not checked). This
+    is done to attain compatibility with the text files of vertex
+    positions used for embedding where the second column is event
+    multiplicity.
+
 </pre>
 
 </html>
