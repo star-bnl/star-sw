@@ -44,6 +44,7 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
   // This ctor creates a St_NodeView structure from the "marked" nodes
   // of the "viewNode" input structure
   // It re-calculates all positions according of the new topology
+  // All new St_Node became UNMARKED though
   //
   if (viewNode) 
   {
