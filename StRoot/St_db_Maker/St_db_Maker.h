@@ -36,7 +36,7 @@ private:
   Int_t       fIsDBTime;	//! flag to use owb time stamp
   TDatime     fDBTime;		//! Own DB time stamp
 
-//  static Char_t m_VersionCVS = "$Id: St_db_Maker.h,v 1.3 1999/05/13 21:24:10 perev Exp $";
+//  static Char_t m_VersionCVS = "$Id: St_db_Maker.h,v 1.4 1999/07/08 19:12:22 fisyak Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
@@ -48,7 +48,7 @@ private:
    virtual void    SetDateTime(int idat,int itim);
    virtual void    SetDateTime(const char *datalias);
    virtual Int_t   Init();
-   virtual Int_t   Make(){return kStOK;};                                                               // *MENU*
+   virtual Int_t   Make(){return kStOK;};      // *MENU*
    virtual void    PrintInfo();
    virtual void    SetMainDir(const Char_t *db);
    virtual void    SetUserDir(const Char_t *db);

@@ -23,6 +23,17 @@
 #include "St_XDFFile.h"
 
 static Int_t AliasDate(const char *alias);
+static Int_t AliasTime(const char *alias);
+static const char *aliases[]={"sd97",   "sd98",   "year_1a","year_1b","year_1c"
+			     ,"es99",   "er99"
+                             ,"year_1d","year_1e","year_2a","nofield",      0};   
+
+static const int   dates[]=  {19970101, 19980101, 19990101, 19990500, 19991001
+			     ,19990615, 19990616
+                             ,19991101, 19991201, 20000101, 1996010,        0};
+static const int   times[]=  {       0,        0,        0,        0,        0
+			     ,       0,   120000
+                             ,       0,        0,        0,        0,        0};
 
 //_________________________ class St_Validity ____________________________________
 class St_ValiSet : public St_DataSet{
@@ -82,6 +93,7 @@ Int_t St_db_Maker::Init()
    m_CurrentDir = m_MainDir;
    St_FileSet *fileset = new St_FileSet(m_CurrentDir);
    fileset->Purge(); 
+   fileset->Sort(); 
    fileset->Pass(PrepareDB,&m_CurrentDir);
    fileset->Purge(); 
    St_FileSet *Fileset = fileset;
@@ -90,6 +102,7 @@ Int_t St_db_Maker::Init()
    if (!m_CurrentDir.IsNull()) {
      fileset = new St_FileSet(m_CurrentDir);
      fileset->Purge();
+     fileset->Sort(); 
      fileset->Pass(PrepareDB,&m_CurrentDir);
      fileset->Purge();}
 
@@ -106,8 +119,6 @@ Int_t St_db_Maker::Init()
    OnOff();
    return 0;
 }
-
-
 //_____________________________________________________________________________
 TDatime St_db_Maker::Time(const char *filename)
 {
@@ -119,8 +130,9 @@ TDatime St_db_Maker::Time(const char *filename)
   lname = strcspn(filename,".");
   if (lname+2>lfilename) return time;
   idate = ::AliasDate(filename+lname+1);
+  itime = ::AliasTime(filename+lname+1);
 
-  if (idate) { time.Set(idate,0);return time;}
+  if (idate) { time.Set(idate,itime);return time;}
 
   if (lname+20 <= lfilename    &&
       filename[lname+1 ]=='.'  && 
@@ -252,7 +264,7 @@ EDataSetPass St_db_Maker::PrepareDB(St_DataSet* ds, void *user)
     if (!Kind(filename)){ delete set;		continue;}
     set->SetTitle(newTitle);
     lpsname = dot - filename;
-    if (strncmp(filename,psname+1,lpsname+1)) {// make new pseudo directory
+    if (strncmp(filename,psname+1,lpsname)) {// make new pseudo directory
       psname[1]=0; strncat(psname,filename,lpsname);
       pseudo = new St_ValiSet(psname,ds); strcat(psname,".");}
 
@@ -268,7 +280,7 @@ void    St_db_Maker::SetUserDir(const Char_t *db)
 //_____________________________________________________________________________
 void St_db_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_db_Maker.cxx,v 1.7 1999/05/13 21:24:09 perev Exp $\n");
+  printf("* $Id: St_db_Maker.cxx,v 1.8 1999/07/08 19:12:22 fisyak Exp $\n");
   printf("***************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -288,9 +300,10 @@ void St_db_Maker::SetDateTime(Int_t idat,Int_t itim)
 void   St_db_Maker::SetDateTime(const char *alias)
 { 
   fIsDBTime=1;
-  int idat = AliasDate(alias);
+  int idat = AliasDate(alias);// <name>.YYYYMMDD.hhmmss.<ext>
+  int itim = AliasTime(alias);
   assert(idat);
-  fDBTime.Set(idat,0);
+  fDBTime.Set(idat,itim);
 }
 //_____________________________________________________________________________
 void   St_db_Maker::SetOn(const char *path)
@@ -339,13 +352,19 @@ void St_db_Maker::OnOff()
 static Int_t AliasDate(const char *alias)
 
 {
-static const char *aliases[]={"sd97",   "sd98",   "year_1a","year_1b","year_1c"
-                             ,"year_1d","year_1e","year_2a","nofield",      0};   
-
-static const int   dates[]=  {19970101, 19980101, 19990101, 19990500, 19991001
-                             ,19991101, 19991201, 20000101, 1996010,        0};
 
   int n = strcspn(alias," ."); if (n<4) return 0;
-  for (int i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
+  int i;
+  for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
   return dates[i];
+}
+//_____________________________________________________________________________
+static Int_t AliasTime(const char *alias)
+
+{
+
+  int n = strcspn(alias," ."); if (n<4) return 0;
+  int i;
+  for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
+  return times[i];
 }
