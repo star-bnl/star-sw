@@ -19,8 +19,11 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 
-// $Id: St_DataSet.h,v 1.38 1999/11/04 18:01:19 fine Exp $
+// $Id: St_DataSet.h,v 1.39 1999/11/06 19:09:45 fisyak Exp $
 // $Log: St_DataSet.h,v $
+// Revision 1.39  1999/11/06 19:09:45  fisyak
+// Clean up for Valery
+//
 // Revision 1.38  1999/11/04 18:01:19  fine
 // Copyright text introduced
 //
@@ -156,7 +159,7 @@ class St_DataSet : public TNamed
     virtual void         Shunt(St_DataSet *newParent=0);
     virtual void         Sort();			//Sort objects in lexical order
     virtual Bool_t       IsEmpty() const;
-    virtual Bool_t       IsFolder() const {return kTRUE;}
+    virtual Bool_t       IsFolder() {return kTRUE;}
     virtual Bool_t       IsLocked() const ;
     virtual Bool_t       IsMarked() const ;
     virtual Bool_t       IsThisDir(const Char_t *dirname,int len=-1,int ignorecase=0) const ;
