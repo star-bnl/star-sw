@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.39 2001/12/11 03:11:26 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.40 2002/01/03 22:50:09 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -213,11 +213,12 @@
             $LDFLAGS = $CXXOPT;
             $SO      = $CXX;
             $SOFLAGS = $CXXOPT;
-        }
-        else {
-            if ($PGI) { $CLIBS = "-L" . $PGI . "/linux86/lib"; }
-            $CLIBS .=
-              " -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
+        } else {
+            if ($PGI) { 
+		$CLIBS  = "-L$PGI/linux86/lib -lpgc ";
+	    }
+	    $CLIBS .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 ".
+		" -lm -ldl  -rdynamic ";
         }
         if (/^i386_linux2/) { $FLIBS .= " -lI77 -lF77"; }
 
