@@ -3,7 +3,7 @@
 <!-- 
 <input URL="file:/star/simu/simu/gstardata/rcf1206/done/rcf1206_99_700evts.fzd"></input>
 -->
- <input URL="file:/star/simu/simu/gstardata/rcf1206/done/*.fzd"></input>
+   <input URL="file:/star/simu/simu/gstardata/rcf1206/done/*.fzd"></input>
    <command>       
    <![CDATA[
     # --------------------------
@@ -48,15 +48,15 @@
     mkdir -p ${registerDirectory}
     mkdir -p ${packageDirectoryBin}
 
-    #--  Prepare the catalog
+    #--  Prepare the Web catalog
     # 
     if ( ! -f ${registerDirectory}/../index.html ) then;
-       echo "<HTML><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
+       echo "<HTML><META HTTP-EQUIV="Refresh" CONTENT=1200><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
     endif
     echo "<li><a href="$REQUESTID">Job: $REQUESTID `date`</a>" >> ${registerDirectory}/../index.html
     #
     if ( ! -f ${registerDirectory}/index.html ) then;
-       echo "<HTML><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
+       echo "<HTML><META HTTP-EQUIV="Refresh" CONTENT=12><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
     endif
     echo "<li><a href="$PROCESSID.html">Process: $PROCESSID `date` </a>" >> ${registerDirectory}/index.html
 
