@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.17 2001/10/31 15:01:07 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.18 2001/10/31 22:08:56 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.18  2001/10/31 22:08:56  suaide
+// fixed Finish() method
+//
 // Revision 1.17  2001/10/31 15:01:07  suaide
 // modified to discard bad EMC events
 //
@@ -93,7 +96,6 @@ Int_t StEmcADCtoEMaker::Init()
 //_____________________________________________________________________________
 Int_t StEmcADCtoEMaker::Finish()
 {
-  return StMaker::Finish();
 }
 //_____________________________________________________________________________
 Int_t StEmcADCtoEMaker::Make()
