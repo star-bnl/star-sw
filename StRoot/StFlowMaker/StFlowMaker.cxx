@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.95 2004/12/07 23:08:12 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.96 2004/12/09 00:45:17 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -222,7 +222,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.95 2004/12/07 23:08:12 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.96 2004/12/09 00:45:17 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1699,9 +1699,13 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       StFlowTrack* pFlowTrack = new StFlowTrack;
       if (!pFlowTrack) return kFALSE;
       pFlowTrack->SetPt(pMuTrack->pt());
-      StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->UncheckedAt(pMuTrack->index2Global());
+      if (pMuTrack->index2Global()<0) {
+        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track (index2Global < 0)" << endl;
+        continue;
+      }
+      StMuTrack* pMuGlobalTrack = (StMuTrack*)pMuGlobalTracks->At(pMuTrack->index2Global());
       if(!pMuGlobalTrack) {
-        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track" << endl;
+        gMessMgr->Info() << "FlowMaker: FillFromMuVersion0DST(): WARNING! primary track has no reference to global track (pMuGlobalTrack = 0)" << endl;
         continue;
       }
       pFlowTrack->SetPtGlobal(pMuGlobalTrack->pt());
@@ -2068,6 +2072,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.96  2004/12/09 00:45:17  oldi
+// Little fix to get rid if problems when primaries don't have globals assigned to them.
+//
 // Revision 1.95  2004/12/07 23:08:12  posk
 // Only odd and even phiWgt hists. If the old phiWgt file contains more than
 // two harmonics, only the first two are read. Now writes only the first two.
