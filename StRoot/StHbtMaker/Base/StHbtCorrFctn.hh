@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.6 2000/03/23 22:43:27 laue Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.7 2000/05/11 21:16:40 willson Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.7  2000/05/11 21:16:40  willson
+ * myAnalysis pointer changed to type StHbtBaseAnalysis - moved
+ * some methods into StHbtBaseAnalysis class
+ *
  * Revision 1.6  2000/03/23 22:43:27  laue
  * Clone() function implemented in cuts.
  *
@@ -39,6 +43,7 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
+#include "StHbtMaker/Infrastructure/StHbtTriplet.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 
 class StHbtCorrFctn{
@@ -50,8 +55,11 @@ public:
 
   virtual StHbtString Report() = 0;
 
-  virtual void AddRealPair(const StHbtPair*) = 0;
-  virtual void AddMixedPair(const StHbtPair*) = 0;
+  virtual void AddRealPair(const StHbtPair*);
+  virtual void AddMixedPair(const StHbtPair*);
+
+  virtual void AddRealTriplet(const StHbtTriplet*);
+  virtual void AddMixedTriplet(const StHbtTriplet*);
 
   virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
@@ -60,15 +68,20 @@ public:
   virtual StHbtCorrFctn* Clone() { return 0;}
 
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
-  friend class StHbtAnalysis;
-  StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
+  friend class StHbtBaseAnalysis;
+  StHbtBaseAnalysis* HbtAnalysis(){return myAnalysis;};
 
 protected:
-  StHbtAnalysis* myAnalysis;
+  StHbtBaseAnalysis* myAnalysis;
 
 private:
 
 };
+
+inline void StHbtCorrFctn::AddRealPair(const StHbtPair*) { cout << "Not implemented" << endl; }
+inline void StHbtCorrFctn::AddMixedPair(const StHbtPair*) { cout << "Not implemented" << endl; }
+inline void StHbtCorrFctn::AddRealTriplet(const StHbtTriplet*) { cout << "Not implemented" << endl; }
+inline void StHbtCorrFctn::AddMixedTriplet(const StHbtTriplet*) { cout << "Not implemented" << endl; }
 
 inline StHbtCorrFctn::StHbtCorrFctn(const StHbtCorrFctn& c) { myAnalysis =0; }
 
