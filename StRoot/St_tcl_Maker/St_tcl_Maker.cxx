@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.38 1999/04/14 13:54:56 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.39 1999/07/02 15:25:11 ward Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.39  1999/07/02 15:25:11  ward
+// Add -1 so 1-512 -> 0-511.
+//
 // Revision 1.38  1999/04/14 13:54:56  sakrejda
 // Iterator Reset() taken out of the if for pixel table creation
 //
@@ -438,7 +441,7 @@ Int_t St_tcl_Maker::cluster_morphology(
       if(seqTbl[iSeqTbl].tpc_row!=clusterTbl[iClusterTbl].tpc_row) 	return 3;
 
       for(iPixTbl=pixBeg;iPixTbl<=pixEnd;iPixTbl++) {
-        whichTimeBin=seqTbl[iSeqTbl].tdc_low+iPixTbl-pixBeg;
+        whichTimeBin=seqTbl[iSeqTbl].tdc_low+iPixTbl-pixBeg-1;
         if(whichTimeBin<0||whichTimeBin>=TCC_BIN) 			return 81;
         charge[whichPad][whichTimeBin]=pixTbl[iPixTbl].data;
         if(maxCharge<pixTbl[iPixTbl].data) maxCharge=pixTbl[iPixTbl].data;
@@ -693,7 +696,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.38 1999/04/14 13:54:56 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.39 1999/07/02 15:25:11 ward Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
