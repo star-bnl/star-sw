@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3Points.cxx,v 1.3 1999/06/01 01:27:53 fine Exp $
+// $Id: St_Table3Points.cxx,v 1.4 1999/11/04 18:03:03 fine Exp $
 // $Log: St_Table3Points.cxx,v $
+// Revision 1.4  1999/11/04 18:03:03  fine
+// new ctor for tablepoints introduced to make EventDiplay happy
+//
 // Revision 1.3  1999/06/01 01:27:53  fine
 // Comments clean ups
 //
@@ -99,6 +102,16 @@ St_Table3Points::St_Table3Points(St_TableSorter *sorter,const void *key,
                        const Char_t *xName, const Char_t *yName, const Char_t *zName
                       ,Option_t *opt)
                 : St_TablePoints(sorter,key,opt)
+
+{ 
+  m_ArrayOfColumnDesciptors =  new TObjArray(kTotalSize);
+  SetXColumn(xName);  SetYColumn(yName);  SetZColumn(zName); 
+}
+//________________________________________________________________________________
+St_Table3Points::St_Table3Points(St_TableSorter *sorter,Int_t keyIndex,
+                       const Char_t *xName, const Char_t *yName, const Char_t *zName
+                      ,Option_t *opt)
+                : St_TablePoints(sorter,keyIndex,opt)
 
 { 
   m_ArrayOfColumnDesciptors =  new TObjArray(kTotalSize);
