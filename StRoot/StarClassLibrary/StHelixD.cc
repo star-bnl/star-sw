@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.7 2000/05/22 21:14:40 ullrich Exp $
+ * $Id: StHelixD.cc,v 1.8 2000/05/22 21:38:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,10 +15,8 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.7  2000/05/22 21:14:40  ullrich
- * In pathLength(StThreeVector&): Increased number of max iteration
- * in Newton method from 10 to 100. Improved initial guess in case
- * it is off by n period.
+ * Revision 1.8  2000/05/22 21:38:32  ullrich
+ * Add parenthesis to make Linux compiler happy.
  *
  * Revision 1.8  2000/05/22 21:38:32  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -219,7 +217,7 @@ double StHelixD::pathLength(const StThreeVectorD& p) const
 	    s = fudgePathLength(p);
 
 	    double ds = period();
-		if (d = abs(at(s+j*ds) - p) < dmin) {
+	    int    j, jmin = 0;
 	    double d, dmin = abs(at(s) - p);
 	    for(j=1; j<MaxIterations; j++) {
 		if ((d = abs(at(s+j*ds) - p)) < dmin) {
@@ -227,7 +225,7 @@ double StHelixD::pathLength(const StThreeVectorD& p) const
 		    jmin = j;
 		}
 		else
-		if (d = abs(at(s+j*ds) - p) < dmin) {
+		    break;
 	    }
 	    for(j=-1; -j<MaxIterations; j--) {
 		if ((d = abs(at(s+j*ds) - p)) < dmin) {
