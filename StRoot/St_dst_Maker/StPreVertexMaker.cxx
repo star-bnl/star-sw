@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.1 2000/02/01 17:12:18 wdeng Exp $
+// $Id: StPreVertexMaker.cxx,v 1.2 2000/02/02 19:53:55 wdeng Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.2  2000/02/02 19:53:55  wdeng
+// Assigned -1 to covariance entry of evrpar.
+//
 // Revision 1.1  2000/02/01 17:12:18  wdeng
 // Initial version. This maker reads in tptrack and produces a preliminary primary vertex.
 //
@@ -35,7 +38,7 @@ Int_t StPreVertexMaker::Init(){
 
     memset(&row,0,sizeof(row));
     row.fitoption  = 0;
-    row.covariance = 0;   //
+    row.covariance = -1;   //
     row.vcut	   = 3.;  // distance below where track is marked as default primary
     row.cut2	   = 2.;  // select tracks for 2nd vertex fit
     row.cut3	   = 0.5; // select tracks for 3rd vertex fit
