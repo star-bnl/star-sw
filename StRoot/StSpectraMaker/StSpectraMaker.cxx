@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.6 2000/01/11 19:09:12 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.7 2000/03/03 03:30:32 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.7  2000/03/03 03:30:32  ogilvie
+// major infra. change to read in/use efficiency histos
+//
 // Revision 1.6  2000/01/11 19:09:12  ogilvie
 // compiles on sun CC5, linux, but not sun cc4
 //
@@ -47,7 +50,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.6 2000/01/11 19:09:12 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.7 2000/03/03 03:30:32 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -63,52 +66,41 @@ Int_t StSpectraMaker::Init() {
   // 
 
   ifstream from("StRoot/StSpectraMaker/analysis.dat");
-  while (!from.fail()) {
+  while (!from.eof()) {
+
+    cout << "particle name " ;
     string particleName = readString(from);
-    string analysisTitle = readString(from);
-    efficiencyType efficType = FUNCTION; 
+    string analysisTitle = readString(from); 
     char* efficiencyFile = new char[100];
     from >> efficiencyFile; 
     cout << efficiencyFile << endl;
-    StEfficiency effic(efficType,efficiencyFile);
+    StEfficiency effic(efficiencyFile);
     delete efficiencyFile; 
-   //
-    // to do, add in particle Definition to efficiency constructor
-    //
-    StParticleDefinition* particle = 
-   	StParticleTable::instance()->findParticle(particleName);
+
     effic.setParticle(particleName);
-   
-    float lYbin;
-    float uYbin;
-    from >> lYbin >> uYbin ;
-    int nYbin ;
-    from >> nYbin ;
-    float lMt = particle->mass();
-    float mtRange;
-    from >> mtRange ; 
-    cout << mtRange << endl;
-    float uMt = lMt + mtRange;
-    int nMtbin;
-    from >> nMtbin ;
+    
+    float lYbin = effic.getLowEdge('x');
+    float uYbin = effic.getUpEdge('x');
+    int nYbin = effic.getNbin('x');
+    float lPtbin = effic.getLowEdge('y');
+    float uPtbin = effic.getUpEdge('y');
+    int nPtbin = effic.getNbin('y');
 
     StTpcDeviantSpectraAnalysis* anal = new StTpcDeviantSpectraAnalysis;
     anal->setParticle(particleName);
     anal->setTitle(analysisTitle);
-    anal->setEfficiency(effic);
-   
+    anal->setEfficiency(effic);   
     anal->setYAxis(lYbin,uYbin,nYbin); 
-    anal->setMtAxis(lMt,uMt,nMtbin); 
+    anal->setPtAxis(lPtbin,uPtbin,nPtbin);
+ 
     mSpectraAnalysisContainer.push_back(anal);
-    char* comment = new char[100];
-    from >> comment;
+
+    string comment = readString(from); 
   }
   from.close();
  
   //
-  // set common characteristics of spectra, e.g. size of bins, do this via a file?
-  // loop through the analyses and load into the private data members the
-  // spectra characteristics
+  // loop through the analyses and book histograms
   // 
 
   vector<StSpectraAnalysis*>::const_iterator analysisIter;
@@ -118,10 +110,12 @@ Int_t StSpectraMaker::Init() {
 	 analysisIter++) {
     (*analysisIter)->bookHistograms();
   }
+
  return StMaker::Init();
 }
 
 Int_t StSpectraMaker::Make() {
+
   StEvent* mEvent;
   mEvent = (StEvent *) GetInputDS("StEvent");
   if (! mEvent) return kStOK; // If no event, we're done

@@ -18,17 +18,17 @@ class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
 
  private:
 
-  TH3D* mYMtDeviant;
-  TH2D* mYMt;
+  TH3D* mYPtDeviant;
+  TH2D* mYPt;
   TH1D* mPIDDeviant;  
   TH2D* mDedxvsP;
 
   float mlYbin;
   float muYbin;
   int   mnYbin;
-  float mlMtbin;
-  float muMtbin;
-  int   mnMtbin;
+  float mlPtbin;
+  float muPtbin;
+  int   mnPtbin;
 
  protected:
 
@@ -41,7 +41,7 @@ class StTpcDeviantSpectraAnalysis : public  StSpectraAnalysis {
   void projectHistograms();
 
   void setYAxis(float lYbin, float uYbin, int nYbin);
-  void setMtAxis(float lMtbin, float uMtbin, int nMtbin);
+  void setPtAxis(float lPtbin, float uPtbin, int nPtbin);
 
 
 };

@@ -9,24 +9,21 @@
 #include "TH2.h"
 class TH2D;
 
-enum efficiencyType {FUNCTION, HISTOGRAM};
-
 class StEfficiency {
 
  private:
 
-  efficiencyType mEfficType;
   StParticleDefinition* mParticle;
 
   double mScale;
   double mMomentumTerm;
-  TH2D* mHistoEffic;
+  TH2D mEfficHistogram;
 
  protected:
 
  public:
   StEfficiency();
-  StEfficiency(efficiencyType efficType, char* efficFile);
+  StEfficiency(char* efficFile);
   ~StEfficiency();
   //
   // could not get this as private
@@ -39,6 +36,11 @@ class StEfficiency {
   //
   void setParticle(string particle);
   double efficiency(StTrack* track);
+  TH2D getEfficHistogram();
+
+  double getLowEdge(char axis);
+  double getUpEdge(char axis);
+  int getNbin(char axis);
 
 };
 
