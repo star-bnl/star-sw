@@ -1,7 +1,0 @@
-/*   sl3Buffer
- * Table containing buffer with hit/track information
-*/
-struct sl3Buffer{
-    char       data ;      /* 1 byte variable */
-};
-/*  Last mod. for sl3Buffer: $Date: 1999/07/07 19:02:59 $ */
