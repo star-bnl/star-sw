@@ -1,5 +1,8 @@
-// $Id: StHistMaker.cxx,v 1.2 2000/07/26 19:57:50 lansdell Exp $
+// $Id: StHistMaker.cxx,v 2.0 2000/08/25 16:02:40 genevb Exp $
 // $Log: StHistMaker.cxx,v $
+// Revision 2.0  2000/08/25 16:02:40  genevb
+// New revision: new structure, multiplicity classes
+//
 // Revision 1.2  2000/07/26 19:57:50  lansdell
 // new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
 //

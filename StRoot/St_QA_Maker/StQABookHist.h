@@ -1,185 +1,98 @@
-//! $Id: StQABookHist.h,v 1.27 2000/08/18 20:30:17 lansdell Exp $ 
-//! $Log: StQABookHist.h,v $
-//! Revision 1.27  2000/08/18 20:30:17  lansdell
-//! added global track probability of fit histogram; extra, empty page is currently printed for some reason, still checking
-//!
-//! Revision 1.26  2000/08/17 18:52:30  lansdell
-//! added z distribution of hits histogram to StEventQA set
-//!
-//! Revision 1.25  2000/07/28 19:25:21  lansdell
-//! added histogram of number of events without a primary vertex
-//!
-//! Revision 1.24  2000/07/26 19:57:50  lansdell
-//! new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
-//!
-//! Revision 1.23  2000/06/13 00:32:38  lansdell
-//! added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
-//!
-//! Revision 1.22  2000/06/02 01:11:52  lansdell
-//! added several x,y,z-dca to beam axis histograms
-//!
-//! Revision 1.21  2000/05/25 03:52:11  lansdell
-//! mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
-//!
-//! Revision 1.20  2000/02/10 23:02:45  kathy
-//! changed limits on linear impact param hist; added new hist of detector id values for dst_point table
-//!
-//! Revision 1.19  2000/02/10 21:31:29  kathy
-//! add another set of impact param hist so we can see them in linear scale too
-//!
-//! Revision 1.18  2000/02/07 19:49:06  kathy
-//! removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
-//!
-//! Revision 1.17  2000/02/04 19:53:57  kathy
-//! added 2 more histograms - for med and small range of # hits in detector
-//!
-//! Revision 1.16  2000/02/03 22:02:31  kathy
-//! adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
-//!
-//! Revision 1.15  2000/01/31 22:15:25  kathy
-//! added Gene's code to make mass plot for Xi's in table and StEvent versions
-//!
-//! Revision 1.14  2000/01/07 20:35:00  kathy
-//! make some corrections to filling hist; add point hist for each det separately
-//!
-//! Revision 1.13  1999/12/17 22:11:33  kathy
-//! add psi vs phi hist, change limits
-//!
-//! Revision 1.12  1999/12/15 20:32:17  kathy
-//! separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
-//!
-//! Revision 1.11  1999/12/15 18:31:05  kathy
-//! added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
-//!
-//! Revision 1.10  1999/12/15 17:17:33  kathy
-//! changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
-//!
-//! Revision 1.9  1999/12/14 18:33:24  kathy
-//! removed 4 ftpc histograms as per Janet's request
-//!
-//! Revision 1.8  1999/12/12 23:09:47  kathy
-//! add pt vs eta in ftpc histogram as per Janet
-//!
-//! Revision 1.7  1999/12/08 22:58:17  kathy
-//! changed histogram limits and made names smaller
-//!
-//! Revision 1.6  1999/12/07 23:14:18  kathy
-//! fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
-//!
-//! Revision 1.5  1999/12/06 22:25:05  kathy
-//! split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
-//!
-//! Revision 1.4  1999/11/29 21:50:38  kathy
-//! remove St_QATestTables_Maker class - not used anywhere; remove SetDraw method from StQABookHist method - not needed
-//!
-//! Revision 1.3  1999/11/23 19:00:51  lansdell
-//! Reorganized Make() and include files (Gene)
-//!
-//! Revision 1.2  1999/11/22 22:46:41  lansdell
-//! update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
-//!
-//! Revision 1.1  1999/11/19 22:44:43  kathy
-//! took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
-//!
+// $Id: StQABookHist.h,v 2.0 2000/08/25 16:02:41 genevb Exp $ 
+// $Log: StQABookHist.h,v $
+// Revision 2.0  2000/08/25 16:02:41  genevb
+// New revision: new structure, multiplicity classes
+//
+//
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
-//  StQABookHist abstract base class for QA Histogram Makers             //
+//  StQABookHist class for multiplicity-based QA histograms              //
 //                                                                       //
 ///////////////////////////////////////////////////////////////////////////
 
 #ifndef STAR_StQABookHist
 #define STAR_StQABookHist
 
-#include "StMaker.h"
 #include "TString.h"
+#include "TObject.h"
 class TH1F;
 class TH2F;
+class StMaker;
 
-class StQABookHist : public StMaker {
+class StQABookHist : public TObject {
+
+// ************************ Public Functions *****************************
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.27 2000/08/18 20:30:17 lansdell Exp $";
+  StQABookHist() {}
+  StQABookHist(const char *type);
+  virtual       ~StQABookHist() {}
+  virtual void   BookHist();
 
-//! Histograms booking constants
-  static const Int_t nxpT;
-  static const Int_t nyeta;
-  static const Float_t xminpT;
-  static const Float_t xmaxpT;
-  //  static const Float_t ymineta;
-  //  static const Float_t ymaxeta;
-  
-  static const Int_t nchisq;
-  //  static const Int_t nmass;
-  //  static const Int_t ntau; 
-  static const Int_t ndedx;  
-  static const Int_t npnt;   
-  static const Int_t nleng;  
-  static const Int_t npsi;   
-  static const Int_t knpsi;  
-  static const Int_t ntrk;   
-  static const Int_t nvrt;   
-  static const Int_t nmnpt;  
-  static const Int_t nmneta; 
-  static const Int_t nxyz;   
-  static const Int_t knyeta; 
-  static const Int_t knid;   
-  static const Int_t cnp; 
-  static const Int_t cndedx; 
-  
-  static const Float_t kminnid;  
-  static const Float_t kmaxnid; 
-  static const Float_t minpsi;   
-  static const Float_t kminpsi;  
-  static const Float_t maxpsi;   
-  static const Float_t minchisq; 
-  static const Float_t maxchisq; 
-  static const Float_t minmass;  
-  static const Float_t maxmass;  
-  static const Float_t minpnt;   
-  static const Float_t maxpnt;   
-  static const Float_t minleng;  
-  static const Float_t maxleng;  
-  static const Float_t mintau;   
-  static const Float_t maxtau;   
-  static const Float_t mintrk;   
-  static const Float_t maxtrk;   
-  static const Float_t minvrt;   
-  static const Float_t maxvrt;   
-  static const Float_t minmpt;   
-  static const Float_t maxmpt;   
-  static const Float_t minmeta;  
-  static const Float_t maxmeta;  
-  static const Float_t kmineta;  
-  static const Float_t kmaxeta;  
-  static const Float_t minxyz;   
-  static const Float_t maxxyz;   
-  static const Float_t cminp; 
-  static const Float_t cmaxp; 
-  static const Float_t cmindedx; 
-  static const Float_t cmaxdedx; 
-  
-  // histogram for number of events without primary vertex
-  TH1F     *mNullPrimVtx;         //!
+// the following is a ROOT macro  that is needed in all ROOT code
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.0 2000/08/25 16:02:41 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  // for method MakeEvSum - from table event_summary
-  TH1F     *m_trk_tot_gd;         //! num of good trks over total - global
-  TH1F     *m_glb_trk_tot;        //! # tracks total from globtrk
-  TH1F     *m_glb_trk_tot_sm;     //! # tracks total from globtrk, small range
-  TH1F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
-  TH1F     *m_glb_trk_plusminus_sm; //! # trks pos/neg., small range 
-  TH1F     *m_glb_trk_chg;        //! all charge east/west (TPC) 
-  TH1F     *m_glb_trk_prim;       //! # trks from primaries
-  TH1F     *m_glb_trk_prim_sm;    //! # trks from primaries, small range
-  TH1F     *m_vert_total;         //! total number of vertices
-  TH1F     *m_vert_total_sm;      //! total number of vertices, small range
-  TH1F     *m_mean_pt;            //! mean pt value
-  TH1F     *m_mean_pt_sm;         //! mean pt value, small range
-  TH1F     *m_mean_eta;           //! mean eta value 
-  TH1F     *m_rms_eta;            //! rms eta value 
-  TH1F     *m_prim_vrtr;          //! primary vrtx r position
-  TH1F     *m_prim_vrtx0;         //! primary vrtx x position
-  TH1F     *m_prim_vrtx1;         //! primary vrtx y position
-  TH1F     *m_prim_vrtx2;         //! primary vrtx z position
+
+// ******************** Histogram Booking Constants ************************
+ protected:
+
+  Int_t nxpT;
+  Int_t nyeta;
+  Float_t xminpT;
+  Float_t xmaxpT;
+  //  Float_t ymineta;
+  //  Float_t ymaxeta;
+  
+  Int_t nchisq;
+  //  Int_t nmass;
+  //  Int_t ntau; 
+  Int_t ndedx;  
+  Int_t npnt;   
+  Int_t nleng;  
+  Int_t npsi;   
+  Int_t knpsi;  
+  Int_t nvrt;   
+  Int_t knyeta; 
+  Int_t knid;   
+  Int_t cnp; 
+  Int_t cndedx; 
+  
+  Float_t kminnid;  
+  Float_t kmaxnid; 
+  Float_t minpsi;   
+  Float_t kminpsi;  
+  Float_t maxpsi;   
+  Float_t minchisq; 
+  Float_t maxchisq; 
+  Float_t minmass;  
+  Float_t maxmass;  
+  Float_t minpnt;   
+  Float_t maxpnt;   
+  Float_t minleng;  
+  Float_t maxleng;  
+  Float_t mintau;   
+  Float_t maxtau;   
+  Float_t mintrk;   
+  Float_t maxtrk;   
+  Float_t minvrt;   
+  Float_t maxvrt;   
+  Float_t minmpt;   
+  Float_t maxmpt;   
+  Float_t minmeta;  
+  Float_t maxmeta;  
+  Float_t kmineta;  
+  Float_t kmaxeta;  
+  Float_t minxyz;   
+  Float_t maxxyz;   
+  Float_t cminp; 
+  Float_t cmaxp; 
+  Float_t cmindedx; 
+  Float_t cmaxdedx; 
+
+
+// ************************ Histogram Pointers *****************************
+ public:
 
   
   // for method MakeGlob - from table globtrk
@@ -578,50 +491,12 @@ class StQABookHist : public StMaker {
   TH1F *m_geant_reco_pvtx_z;  //! prim vtx z, diff geant - reco
   TH2F *m_geant_reco_vtx_z_z; //! prim vtx z, diff geant - reco vs reco z
 
-//------------------------------------------------------------------------
 
+// ********************** Members For Internal Use *************************
  protected:
 
-//   Bool_t drawinit;
+  TString QAHistType; // character string to prepend to each hist name/title
 
-   TString QAHistType;   // character string to prepend to each hist name/title
-   TString QAHistName;   // character string for each hist name
-   TString QAHistTitle;  // character string for each hist title
-   const char* NameIt(const char* name); // method for naming histograms
-   const char* TitleIt(const char* name); // method for titling histograms
-   TH1F* QAH1F(const Text_t* name, const Text_t* title,
-               Int_t nbinsx, Axis_t xlow, Axis_t xup);
-   TH2F* QAH2F(const Text_t* name, const Text_t* title,
-               Int_t nbinsx, Axis_t xlow, Axis_t xup,
-               Int_t nbinsy, Axis_t ylow, Axis_t yup); // method for 2d-hists
-   TH2F* QAMH1F(const Text_t* name, const Text_t* title,
-               Int_t nbinsx, Axis_t xlow, Axis_t xup,
-               Int_t nbinsy, Axis_t ylow, Axis_t yup); // multi 1d-hists
-
-//------------------------------------------------------------------------
-  
- public:
-
-  StQABookHist() {}
-  StQABookHist(const char *name, const char *title, const char *type);
-  virtual       ~StQABookHist();
-  virtual Int_t  Init();
-  virtual Int_t  Make();
-
- protected:
-
-  virtual void   MakeHistEvSum() = 0;
-  virtual void   MakeHistGlob() = 0;
-  virtual void   MakeHistDE() = 0;
-  virtual void   MakeHistPrim() = 0;
-  virtual void   MakeHistGen() = 0;
-  virtual void   MakeHistPID() = 0;
-  virtual void   MakeHistVertex() = 0;
-  virtual void   MakeHistPoint() = 0;
-  virtual void   MakeHistRich() = 0;
-  virtual void   MakeHistEval() = 0;
-
-  virtual void   BookHistEvSum();
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
   virtual void   BookHistPrim();
@@ -632,19 +507,9 @@ class StQABookHist : public StMaker {
   virtual void   BookHistRich();
   virtual void   BookHistEval();
 
-  
- public:
+  ClassDef(StQABookHist,0)
+};
 
-
-//  virtual void   SetDraw(Bool_t drawFlag=kTRUE) {drawinit = drawFlag;}
-
-// the following is a ROOT macro  that is needed in all ROOT code
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.27 2000/08/18 20:30:17 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
-  ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
-    };
-    
 #endif
     
 

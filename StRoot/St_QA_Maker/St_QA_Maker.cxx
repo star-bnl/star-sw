@@ -1,328 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.107 2000/08/22 15:37:05 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.0 2000/08/25 16:02:41 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
-// Revision 1.107  2000/08/22 15:37:05  lansdell
-// changed ftpc iflag check from >700 to >=700
+// Revision 2.0  2000/08/25 16:02:41  genevb
+// New revision: new structure, multiplicity classes
 //
-// Revision 1.106  2000/08/04 21:04:00  perev
-// Leaks + Clear() cleanup
-//
-// Revision 1.105  2000/07/31 19:29:49  lansdell
-// primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
-//
-// Revision 1.104  2000/07/28 19:25:21  lansdell
-// added histogram of number of events without a primary vertex
-//
-// Revision 1.103  2000/07/26 19:57:51  lansdell
-// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
-//
-// Revision 1.102  2000/07/07 05:29:23  lansdell
-// move filling code into proper area (within vertex check) for MakeHistEval
-//
-// Revision 1.101  2000/06/16 15:53:41  kathy
-// Gene's fix --- fixes a bug that the 2ndary histograms get filled presently with primary vertices where the iflag != 1
-//
-// Revision 1.100  2000/06/13 00:32:38  lansdell
-// added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
-//
-// Revision 1.99  2000/06/02 20:07:11  lansdell
-// removed RICH code (now written directly to StEvent)
-//
-// Revision 1.98  2000/05/25 15:27:05  lansdell
-// changed primtrk iflag check: 300<=iflag<400 (TPC), 600<=iflag<700 (TPC+SVT)
-//
-// Revision 1.97  2000/05/25 04:02:51  lansdell
-// fill primtrk TPC histograms for iflag>0
-//
-// Revision 1.95  2000/04/20 17:26:30  kathy
-// fix to remove compilation warnings due to unused variables - see Victor's email to starsofi recently
-//
-// Revision 1.94  2000/03/15 20:20:38  lansdell
-// added Craig's changes to pid histogram
-//
-// Revision 1.93  2000/03/13 22:01:47  lansdell
-// changed good global tracks to include iflag=100,500
-//
-// Revision 1.92  2000/02/11 15:56:05  kathy
-// change limits on number of hits in detector histograms; fill number of hits in detector histograms
-//
-// Revision 1.91  2000/02/10 23:02:45  kathy
-// changed limits on linear impact param hist; added new hist of detector id values for dst_point table
-//
-// Revision 1.90  2000/02/10 21:31:30  kathy
-// add another set of impact param hist so we can see them in linear scale too
-//
-// Revision 1.89  2000/02/10 19:50:55  kathy
-// use kEventVtxId to select primary verteices instead of value 1
-//
-// Revision 1.88  2000/02/10 19:49:41  kathy
-// use kEventVtxId to select primary verteices instead of value 1
-//
-// Revision 1.87  2000/02/09 19:22:23  kathy
-// protect MakeHistEval method so that if there is no geant dataset, it skips out
-//
-// Revision 1.86  2000/02/09 16:10:26  kathy
-// fill all new small range histograms - forgot to fill some of them a few days ago...
-//
-// Revision 1.85  2000/02/07 19:49:07  kathy
-// removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
-//
-// Revision 1.84  2000/02/04 19:53:58  kathy
-// added 2 more histograms - for med and small range of # hits in detector
-//
-// Revision 1.83  2000/02/03 22:02:32  kathy
-// adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
-//
-// Revision 1.82  2000/02/02 16:35:23  kathy
-// fixing some histograms - booking params
-//
-// Revision 1.81  2000/02/01 21:35:10  kathy
-// fix code for xi mass in StEvent histograms; change curvature and impact param histograms so it's log of the value, plotted in linear scale
-//
-// Revision 1.80  2000/01/31 22:15:26  kathy
-// added Gene's code to make mass plot for Xi's in table and StEvent versions
-//
-// Revision 1.79  2000/01/11 15:28:32  kathy
-// limits on residual histograms changed; St_QA_Maker changed to give proper inputs to routine prop_one_track which is from pams/global/egr - NOTE! Now St_QA_Maker class requires that you load the St_global librarycvs -n update!
-//
-// Revision 1.78  2000/01/10 21:22:29  kathy
-// now use Spiros' new code in pams/global/egr/prop_one_track to get primary track residuals - note must now load St_global library! - don't have magnetic field working from the dst yet...
-//
-// Revision 1.77  2000/01/08 03:27:34  lansdell
-// fixed nfit/nmax ratio in Tab version; separated hits by detector; changed vertex histograms to allow for events with 0 vertices
-//
-// Revision 1.76  2000/01/07 20:35:01  kathy
-// make some corrections to filling hist; add point hist for each det separately
-//
-// Revision 1.75  2000/01/04 15:18:45  kathy
-// comment out unused variables so we don't get compilation warnings - needed for getting working with the new compiler
-//
-// Revision 1.74  1999/12/21 23:11:00  kathy
-// unpack number of points correctly in primtrk table; change some limits
-//
-// Revision 1.73  1999/12/17 22:11:33  kathy
-// add psi vs phi hist, change limits
-//
-// Revision 1.72  1999/12/16 19:52:37  kathy
-// fix hist titles in QABookHist; unpack n_point,n_fit_point,n_max_point correctly for globtrk table - must still fix for primtrk table - in St_QA_Maker
-//
-// Revision 1.71  1999/12/15 20:32:18  kathy
-// separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
-//
-// Revision 1.70  1999/12/15 18:31:05  kathy
-// added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
-//
-// Revision 1.69  1999/12/15 17:17:33  kathy
-// changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
-//
-// Revision 1.68  1999/12/14 18:33:24  kathy
-// removed 4 ftpc histograms as per Janet's request
-//
-// Revision 1.67  1999/12/12 23:09:47  kathy
-// add pt vs eta in ftpc histogram as per Janet
-//
-// Revision 1.66  1999/12/08 22:58:18  kathy
-// changed histogram limits and made names smaller
-//
-// Revision 1.65  1999/12/07 23:14:18  kathy
-// fix primary vtx histograms for dst tables; split apart the ftpc and tpc in the dedx histograms
-//
-// Revision 1.64  1999/12/06 22:25:05  kathy
-// split apart the tpc and ftpc (east & west) histograms for the globtrk table; had to add characters to end of each histogram pointer to differentiate the different ones; updated the default list of hist to be plotted with logy scale
-//
-// Revision 1.63  1999/11/23 19:00:51  lansdell
-// Reorganized Make() and include files (Gene)
-//
-// Revision 1.62  1999/11/22 22:46:41  lansdell
-// update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
-//
-// Revision 1.61  1999/11/19 22:44:43  kathy
-// took histogram booking out of St_QA_Maker as per Thomas' request and put it into separate class StQABookHist which can now be used also by Curtis' class to book histograms - thanks for your help Gene!
-//
-// Revision 1.60  1999/11/18 22:48:42  kathy
-// remove commented out lines
-//
-// Revision 1.59  1999/11/18 22:34:11  kathy
-// removed some histograms of variables that no longer exist and change some limits
-//
-// Revision 1.58  1999/11/09 20:37:33  fisyak
-// Correct tables
-//
-// Revision 1.57  1999/11/05 15:25:38  kathy
-// fix hist limits for detector id hist; small updates to documentation
-//
-// Revision 1.56  1999/09/30 21:48:39  kathy
-// fix for phi0 being in degrees in globtrk
-//
-// Revision 1.55  1999/09/29 16:46:29  kathy
-// changed code so it would compile in .dev due to changes in DST tables - I even used cons instead of makel - wow! - I just changed variables or commented out some histograms that use now-non-existant variables so it would compile - later I will go through and redefine histograms as needed
-//
-// Revision 1.54  1999/09/23 20:08:37  kathy
-// fix some histogram limits
-//
-// Revision 1.53  1999/09/23 18:54:09  kathy
-// fix some histogram limits, add about 10 histograms - just so we know number rows in each table - had to include some more tables to do this
-//
-// Revision 1.52  1999/09/23 16:04:33  kathy
-// change paths for include files to standard way according to Yuri's request
-//
-// Revision 1.51  1999/09/21 15:05:36  kathy
-// comment out unneccessary method: SetPntrToHistUtil because now I'm making it totally independent of the histograms printing at the end - also put in doc directory and html file - basically empty now
-//
-// Revision 1.50  1999/09/20 20:22:19  kathy
-// oops - one more fix to make sure that QA_Maker doesn't depend on StHistUtil
-//
-// Revision 1.49  1999/09/20 20:12:17  kathy
-// moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
-//
-// Revision 1.48  1999/09/02 21:47:23  kathy
-// changed code so that it uses TMath functions so will compile on HP
-//
-// Revision 1.47  1999/07/23 17:26:36  kathy
-// changes to histogram limits
-//
-// Revision 1.46  1999/07/17 01:51:19  kathy
-// changed limits and titles of some histograms
-//
-// Revision 1.45  1999/07/15 13:57:37  perev
-// cleanup
-//
-// Revision 1.44  1999/07/14 23:22:58  kathy
-// a lot of changes to hist limits and fixes to titles and added a few new hist
-//
-// Revision 1.43  1999/07/12 16:39:33  kathy
-// hopefully last change for globtrk,event_summary and primtrk histograms
-//
-// Revision 1.42  1999/07/11 23:32:00  fisyak
-// St_dst_TriggerDetectors => St_dst_TrgDet
-//
-// Revision 1.41  1999/07/09 23:04:03  kathy
-// hopefully getting to final round of fixes to globtrk and primtrk histograms
-//
-// Revision 1.40  1999/07/09 13:14:17  kathy
-// now have put in new primtrk histograms to match the globtrk ones
-//
-// Revision 1.38  1999/07/08 22:20:57  kathy
-// updated limits on hist
-//
-// Revision 1.37  1999/07/07 21:23:16  kathy
-// fixed log scales
-//
-// Revision 1.36  1999/07/07 16:58:32  kathy
-// put log scales on some histograms
-//
-// Revision 1.35  1999/07/02 21:56:56  kathy
-// update for tables which exist in 99f AND put in changes to event summary and globtrk histogram sets requested by offline analysis meeting
-//
-// Revision 1.34  1999/06/30 20:35:35  kathy
-// now have 2D histograms being plotted with box plots instead of scatter plots
-//
-// Revision 1.33  1999/06/17 18:25:32  kathy
-// fix so writes out blank canvas
-//
-// Revision 1.32  1999/06/15 14:44:52  kathy
-// fix St_QA_Maker
-//
-// Revision 1.30  1999/06/11 20:05:51  kathy
-// put in method FindHists to find the histogram directory, since it can be in different places depending on how/where you make the histograms
-//
-// Revision 1.29  1999/05/10 20:03:54  kathy
-// add new member function ExamineLogYList and RemoveFromLogYList
-//
-// Revision 1.28  1999/05/10 17:16:16  kathy
-// added new member function SetDefaultLogYList and implemented and tested
-//
-// Revision 1.27  1999/05/07 20:20:53  kathy
-// now set logy on when hist name is in loglist
-//
-// Revision 1.26  1999/05/07 17:18:29  kathy
-// new method AddToLogYList implemented and tested on solaris
-//
-// Revision 1.25  1999/05/06 12:48:44  fisyak
-// Add search geant in search path for particle tables
-//
-// Revision 1.24  1999/05/05 19:35:52  kathy
-// add new method ListHists and clean up
-//
-// Revision 1.23  1999/04/28 18:39:29  kathy
-// removed check of two different directory for GetDataSet because the infrastructure code should take care of this and not the Makers
-//
-// Revision 1.22  1999/04/27 21:05:29  kathy
-// clean up comments
-//
-// Revision 1.21  1999/04/23 14:04:07  kathy
-// just cleaning up comments
-//
-// Revision 1.20  1999/04/21 20:19:18  kathy
-// put in comments and cleaned up - works for mdc2 dst in dev now
-//
-// Revision 1.19  1999/04/20 01:16:59  fisyak
-// Add check on. no of tracks in dE/dX
-//
-// Revision 1.18  1999/04/19 20:33:42  didenko
-// uncommented MakeHistGen fuction
-//
-// Revision 1.17  1999/04/19 18:07:57  didenko
-// QA_Maker for new scheme DST
-//
-// Revision 1.16  1999/03/11 23:14:49  fisyak
-// Victor scheme
-// 
-// Revision 1.15  1999/03/11 21:13:13  kathy
-// update to hist limits
-//
-// Revision 1.14  1999/03/09 16:30:23  fine
-// Workqround of the St_io_Maker bug
-//
-// Revision 1.13  1999/03/07 19:26:15  fine
-// QA->SetPostScriptFile(psFile) has been introduced
-//
-// Revision 1.12  1999/03/07 16:53:32  fine
-// New method DrawHists
-//
-// Revision 1.11  1999/03/05 21:19:37  kathy
-// added new histograms
-//
-// Revision 1.10  1999/03/03 23:34:29  kathy
-// fixes to histograms
-//
-// Revision 1.9  1999/02/26 18:42:33  kathy
-// added vertex histograms
-//
-// Revision 1.8  1999/02/26 17:24:42  kathy
-// fix histograms
-//
-// Revision 1.7  1999/02/25 21:11:56  kathy
-// fix histograms
-//
-// Revision 1.6  1999/02/25 19:25:39  kathy
-// fix up histograms
-//
-// Revision 1.5  1999/02/24 21:15:02  kathy
-// fixed histograms and added a few new ones
-//
-// Revision 1.4  1999/02/23 22:22:22  kathy
-// changes to histograms: titles changed so they'll be in order and redundant ones removed
-//
-// Revision 1.3  1999/02/22 21:27:17  kathy
-// moved hist from St_glb_Maker to St_QA_Maker and had to rename some etc
-//
-// Revision 1.2  1999/02/20 00:24:48  kathy
-// fixed some of the histograms
-//
-// Revision 1.1  1999/02/08 19:28:23  didenko
-// fixed directory level
-//
-// Revision 1.4  1999/01/22 22:53:14  didenko
-// maker to fill QA histograms
-//
-// Revision 1.3  1999/01/22 22:19:57  didenko
-// maker to fill QA histograms
-//
-// Revision 1.2  1998/12/21 19:43:17  fisyak
-// Move ROOT includes to non system
-//
-// Revision 1.1  1998/11/01 16:42:25  fisyak
-// dst analysis
 //
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
@@ -339,6 +19,7 @@
 #include "TH2.h"
 #include "St_DataSetIter.h"
 #include "St_QA_Maker.h"
+#include "StQABookHist.h"
 
 #include "StVertexId.h"
 #include "StDetectorDefinitions.h"
@@ -372,15 +53,10 @@ extern "C" {float prop_one_track( float * ,  float * , float * );}
 ClassImp(St_QA_Maker)
   
 //_____________________________________________________________________________
-  St_QA_Maker::St_QA_Maker(const char *name, const char *title) : StQABookHist(name,title,"Tab"){
+St_QA_Maker::St_QA_Maker(const char *name, const char *title) :
+ StQAMakerBase(name,title,"Tab"){
 
 }
-//_____________________________________________________________________________
-
-St_QA_Maker::~St_QA_Maker(){
-
-}
-
 //_____________________________________________________________________________
 
 Int_t St_QA_Maker::Finish() {
@@ -392,7 +68,7 @@ Int_t St_QA_Maker::Finish() {
 Int_t St_QA_Maker::Init(){
 // St_QA_Maker - Init; book histograms and set defaults for member functions
 
-  return StQABookHist::Init();
+  return StQAMakerBase::Init();
 }
 //_____________________________________________________________________________
 
@@ -404,6 +80,21 @@ Int_t St_QA_Maker::Make(){
 
   if (dst) {
     St_DataSetIter dstI(dst);           
+    if (firstEvent) {
+      St_event_header* evHeader = (St_event_header*) dstI["event_header"];
+      if (evHeader) {
+        event_header_st* evh = evHeader->GetTable();
+        if (evh) {
+          if (!strcmp(evh->event_type,"NONE")) {
+            histsSet = 1;
+          } else {
+            // process Monte Carlo events
+            histsSet = 0;
+          }
+        }
+      }
+      BookHist();
+    }
     // check that primary vertex exists !!!
     St_dst_vertex *vertex = (St_dst_vertex *) dstI["vertex"];
     if (vertex) {
@@ -412,7 +103,9 @@ Int_t St_QA_Maker::Make(){
 	if (tt->iflag==1 && tt->vtx_id==kEventVtxId) {
 	  foundPrimVtx = kTRUE;
 	  mNullPrimVtx->Fill(1);
-	  return StQABookHist::Make();
+	  St_dst_track* gtracks = (St_dst_track*) dstI["globtrk"];
+	  multiplicity = gtracks->GetNRows();
+	  return StQAMakerBase::Make();
 	}
       }
     }
@@ -444,29 +137,29 @@ void St_QA_Maker::MakeHistEvSum(){
       Float_t trk_plus =  tt->glb_trk_plus;
       Float_t trk_minus = tt->glb_trk_minus;
 
-      m_trk_tot_gd->Fill(trk_good/trk_tot); 
-      m_glb_trk_tot->Fill(tt->glb_trk_tot);
-      m_glb_trk_tot_sm->Fill(tt->glb_trk_tot);
-      m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
-      m_glb_trk_plusminus_sm->Fill(trk_plus/trk_minus);
-      m_glb_trk_prim->Fill(tt->glb_trk_prim);
-      m_glb_trk_prim_sm->Fill(tt->glb_trk_prim);
-      m_vert_total->Fill(tt->n_vert_total);
-      m_vert_total_sm->Fill(tt->n_vert_total);
-      m_mean_pt->Fill(tt->mean_pt);
-      m_mean_pt_sm->Fill(tt->mean_pt);
-      m_mean_eta->Fill(tt->mean_eta);
-      m_rms_eta->Fill(tt->rms_eta);
+      m_trk_tot_gd->Fill(trk_good/trk_tot,multClass); 
+      m_glb_trk_tot->Fill(tt->glb_trk_tot,multClass);
+      m_glb_trk_tot_sm->Fill(tt->glb_trk_tot,multClass);
+      m_glb_trk_plusminus->Fill(trk_plus/trk_minus,multClass);
+      m_glb_trk_plusminus_sm->Fill(trk_plus/trk_minus,multClass);
+      m_glb_trk_prim->Fill(tt->glb_trk_prim,multClass);
+      m_glb_trk_prim_sm->Fill(tt->glb_trk_prim,multClass);
+      m_vert_total->Fill(tt->n_vert_total,multClass);
+      m_vert_total_sm->Fill(tt->n_vert_total,multClass);
+      m_mean_pt->Fill(tt->mean_pt,multClass);
+      m_mean_pt_sm->Fill(tt->mean_pt,multClass);
+      m_mean_eta->Fill(tt->mean_eta,multClass);
+      m_rms_eta->Fill(tt->rms_eta,multClass);
 
       if(!isnan((double)(tt->prim_vrtx[0])) &&
 	 !isnan((double)(tt->prim_vrtx[1])) &&
 	 !isnan((double)(tt->prim_vrtx[2]))) {
 	Float_t radius = sqrt(tt->prim_vrtx[0]*tt->prim_vrtx[0]+
 			      tt->prim_vrtx[1]*tt->prim_vrtx[1]);
-	m_prim_vrtr->Fill(radius);
-	m_prim_vrtx0->Fill(tt->prim_vrtx[0]);
-        m_prim_vrtx1->Fill(tt->prim_vrtx[1]);
-        m_prim_vrtx2->Fill(tt->prim_vrtx[2]);
+        m_prim_vrtr->Fill(radius,multClass);
+        m_prim_vrtx0->Fill(tt->prim_vrtx[0],multClass);
+        m_prim_vrtx1->Fill(tt->prim_vrtx[1],multClass);
+        m_prim_vrtx2->Fill(tt->prim_vrtx[2],multClass);
       }
     }
   }
@@ -482,7 +175,7 @@ void St_QA_Maker::MakeHistEvSum(){
       else
 	tpcChgEast += t->chrg_tpc_in[i]+t->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest);
+    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,multClass);
   }
 } 
 
@@ -509,12 +202,12 @@ void St_QA_Maker::MakeHistGlob(){
     Int_t cnttrk=0;
     Int_t cnttrkg=0;
     cnttrk = globtrk->GetNRows();
-    m_globtrk_tot->Fill(cnttrk);
-    m_globtrk_tot_sm->Fill(cnttrk);
+    hists->m_globtrk_tot->Fill(cnttrk);
+    hists->m_globtrk_tot_sm->Fill(cnttrk);
 
     for (Int_t i = 0; i < globtrk->GetNRows(); i++,t++){
 
-      m_globtrk_iflag->Fill(t->iflag);
+      hists->m_globtrk_iflag->Fill(t->iflag);
 
       if (t->iflag>0) {
         cnttrkg++;
@@ -707,73 +400,73 @@ void St_QA_Maker::MakeHistGlob(){
 // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
 // so it doesn't need to be calculated here 
 		
- 	m_det_id->Fill(t->det_id);
+         hists->m_det_id->Fill(t->det_id);
 
 //  now fill all TPC histograms ------------------------------------------------
         if (t->iflag>=100 && t->iflag<200 ) {
 
 // these are tpc only
-        m_glb_f0->Fill(xdif,0.);
-        m_glb_f0->Fill(ydif,1.);
-        m_glb_f0->Fill(zdif,2.);
+        hists->m_glb_f0->Fill(xdif,0.);
+        hists->m_glb_f0->Fill(ydif,1.);
+        hists->m_glb_f0->Fill(zdif,2.);
 
-        m_glb_xf0->Fill(xdif);
-        m_glb_yf0->Fill(ydif);
-        m_glb_zf0->Fill(zdif);
-        m_glb_impactT->Fill(logImpact);
-        m_glb_impactrT->Fill(t->impact);
+        hists->m_glb_xf0->Fill(xdif);
+        hists->m_glb_yf0->Fill(ydif);
+        hists->m_glb_zf0->Fill(zdif);
+        hists->m_glb_impactT->Fill(logImpact);
+        hists->m_glb_impactrT->Fill(t->impact);
 
 	// need padrow histogram -CPL
 	
 // these are tpc & ftpc
-	m_pointT->Fill(trkpnt);
-	m_max_pointT->Fill(trkmpnt);
-	m_fit_pointT->Fill(trkfpnt);
-        m_glb_chargeT->Fill(t->icharge);
-        m_glb_r0T->Fill(t->r0);
-        m_glb_phi0T->Fill(t->phi0);
-        m_glb_z0T->Fill(t->z0);
-        m_glb_curvT->Fill(logCurvature);
-        m_glb_rfT->Fill(sqrt((t->x_first[0]*t->x_first[0])+
+        hists->m_pointT->Fill(trkpnt);
+        hists->m_max_pointT->Fill(trkmpnt);
+        hists->m_fit_pointT->Fill(trkfpnt);
+        hists->m_glb_chargeT->Fill(t->icharge);
+        hists->m_glb_r0T->Fill(t->r0);
+        hists->m_glb_phi0T->Fill(t->phi0);
+        hists->m_glb_z0T->Fill(t->z0);
+        hists->m_glb_curvT->Fill(logCurvature);
+        hists->m_glb_rfT->Fill(sqrt((t->x_first[0]*t->x_first[0])+
 			     (t->x_first[1]*t->x_first[1])));
-        m_glb_xfT->Fill(t->x_first[0]);
-        m_glb_yfT->Fill(t->x_first[1]);
-        m_glb_zfT->Fill(t->x_first[2]);
-        m_glb_radfT->Fill(radf);
-        m_glb_ratioT->Fill(nfitntot);
-        m_glb_ratiomT->Fill(nfitnmax);
-	m_psiT->Fill(t->psi);
-        m_tanlT->Fill(t->tanl);
-        m_glb_thetaT->Fill(thetad);
-	m_etaT->Fill(eta);
-	m_pTT->Fill(pT);
-        m_momT->Fill(gmom);
-	m_lengthT->Fill(t->length);
-	m_chisq0T->Fill(chisq0);
-	m_chisq1T->Fill(chisq1);
+        hists->m_glb_xfT->Fill(t->x_first[0]);
+        hists->m_glb_yfT->Fill(t->x_first[1]);
+        hists->m_glb_zfT->Fill(t->x_first[2]);
+        hists->m_glb_radfT->Fill(radf);
+        hists->m_glb_ratioT->Fill(nfitntot);
+        hists->m_glb_ratiomT->Fill(nfitnmax);
+        hists->m_psiT->Fill(t->psi);
+        hists->m_tanlT->Fill(t->tanl);
+        hists->m_glb_thetaT->Fill(thetad);
+        hists->m_etaT->Fill(eta);
+        hists->m_pTT->Fill(pT);
+        hists->m_momT->Fill(gmom);
+        hists->m_lengthT->Fill(t->length);
+        hists->m_chisq0T->Fill(chisq0);
+        hists->m_chisq1T->Fill(chisq1);
 	
 // these are for tpc & ftpc
-        m_globtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
-        m_eta_trklengthT->Fill(eta,t->length);
-	m_npoint_lengthT->Fill(t->length,Float_t(trkpnt));
-	m_fpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
+        hists->m_globtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_eta_trklengthT->Fill(eta,t->length);
+        hists->m_npoint_lengthT->Fill(t->length,Float_t(trkpnt));
+        hists->m_fpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
 	
 // these are tpc only
-	m_pT_eta_recT->Fill(eta,lmevpt);
-        m_tanl_zfT->Fill(t->x_first[2]-primVtxZ,t->tanl);
-	m_mom_trklengthT->Fill(t->length,lmevmom);
-	m_chisq0_momT->Fill(lmevmom,chisq0);
-	m_chisq1_momT->Fill(lmevmom,chisq1);
-	m_chisq0_etaT->Fill(eta,chisq0);
-	m_chisq1_etaT->Fill(eta,chisq1);
-	m_chisq0_dipT->Fill(t->tanl,chisq0);
-	m_chisq1_dipT->Fill(t->tanl,chisq1);
-	m_chisq0_zfT->Fill(t->x_first[2],chisq0);
-	m_chisq1_zfT->Fill(t->x_first[2],chisq1);
-	m_chisq0_phiT->Fill(t->phi0,chisq0);
-        m_nfptonpt_momT->Fill(lmevmom,nfitntot);
-        m_nfptonpt_etaT->Fill(eta,nfitntot);
-        m_psi_phiT->Fill(t->phi0,t->psi);
+        hists->m_pT_eta_recT->Fill(eta,lmevpt);
+        hists->m_tanl_zfT->Fill(t->x_first[2]-primVtxZ,t->tanl);
+        hists->m_mom_trklengthT->Fill(t->length,lmevmom);
+        hists->m_chisq0_momT->Fill(lmevmom,chisq0);
+        hists->m_chisq1_momT->Fill(lmevmom,chisq1);
+        hists->m_chisq0_etaT->Fill(eta,chisq0);
+        hists->m_chisq1_etaT->Fill(eta,chisq1);
+        hists->m_chisq0_dipT->Fill(t->tanl,chisq0);
+        hists->m_chisq1_dipT->Fill(t->tanl,chisq1);
+        hists->m_chisq0_zfT->Fill(t->x_first[2],chisq0);
+        hists->m_chisq1_zfT->Fill(t->x_first[2],chisq1);
+        hists->m_chisq0_phiT->Fill(t->phi0,chisq0);
+        hists->m_nfptonpt_momT->Fill(lmevmom,nfitntot);
+        hists->m_nfptonpt_etaT->Fill(eta,nfitntot);
+        hists->m_psi_phiT->Fill(t->phi0,t->psi);
         }
 
 
@@ -781,94 +474,94 @@ void St_QA_Maker::MakeHistGlob(){
         if (t->iflag>=500 && t->iflag<600 ) {
 
 	// use multihist class StMultiH1F
-        m_glb_f0TS->Fill(xdif,0.);
-        m_glb_f0TS->Fill(ydif,1.);
-        m_glb_f0TS->Fill(zdif,2.);
+        hists->m_glb_f0TS->Fill(xdif,0);
+        hists->m_glb_f0TS->Fill(ydif,1);
+        hists->m_glb_f0TS->Fill(zdif,2);
 
-        m_glb_xf0TS->Fill(xdif);
-        m_glb_yf0TS->Fill(ydif);
-        m_glb_zf0TS->Fill(zdif);
-        m_glb_impactTS->Fill(logImpact);
-        m_glb_impactrTS->Fill(t->impact);
+        hists->m_glb_xf0TS->Fill(xdif);
+        hists->m_glb_yf0TS->Fill(ydif);
+        hists->m_glb_zf0TS->Fill(zdif);
+        hists->m_glb_impactTS->Fill(logImpact);
+        hists->m_glb_impactrTS->Fill(t->impact);
 	
-	m_pointTS->Fill(trkpnt);
-	m_max_pointTS->Fill(trkmpnt);
-	m_fit_pointTS->Fill(trkfpnt);
-        m_glb_chargeTS->Fill(t->icharge);
-        m_glb_r0TS->Fill(t->r0);
-        m_glb_phi0TS->Fill(t->phi0);
-        m_glb_z0TS->Fill(t->z0);
-        m_glb_curvTS->Fill(logCurvature);
-        m_glb_rfTS->Fill(sqrt((t->x_first[0]*t->x_first[0])+
+        hists->m_pointTS->Fill(trkpnt);
+        hists->m_max_pointTS->Fill(trkmpnt);
+        hists->m_fit_pointTS->Fill(trkfpnt);
+        hists->m_glb_chargeTS->Fill(t->icharge);
+        hists->m_glb_r0TS->Fill(t->r0);
+        hists->m_glb_phi0TS->Fill(t->phi0);
+        hists->m_glb_z0TS->Fill(t->z0);
+        hists->m_glb_curvTS->Fill(logCurvature);
+        hists->m_glb_rfTS->Fill(sqrt((t->x_first[0]*t->x_first[0])+
 			      (t->x_first[1]*t->x_first[1])));
-        m_glb_xfTS->Fill(t->x_first[0]);
-        m_glb_yfTS->Fill(t->x_first[1]);
-        m_glb_zfTS->Fill(t->x_first[2]);
-        m_glb_radfTS->Fill(radf);
-        m_glb_ratioTS->Fill(nfitntot);
-        m_glb_ratiomTS->Fill(nfitnmax);
-	m_psiTS->Fill(t->psi);
-        m_tanlTS->Fill(t->tanl);
-        m_glb_thetaTS->Fill(thetad);
-	m_etaTS->Fill(eta);
-	m_pTTS->Fill(pT);
-        m_momTS->Fill(gmom);
-	m_lengthTS->Fill(t->length);
-	m_chisq0TS->Fill(chisq0);
-	m_chisq1TS->Fill(chisq1);
+        hists->m_glb_xfTS->Fill(t->x_first[0]);
+        hists->m_glb_yfTS->Fill(t->x_first[1]);
+        hists->m_glb_zfTS->Fill(t->x_first[2]);
+        hists->m_glb_radfTS->Fill(radf);
+        hists->m_glb_ratioTS->Fill(nfitntot);
+        hists->m_glb_ratiomTS->Fill(nfitnmax);
+        hists->m_psiTS->Fill(t->psi);
+        hists->m_tanlTS->Fill(t->tanl);
+        hists->m_glb_thetaTS->Fill(thetad);
+        hists->m_etaTS->Fill(eta);
+        hists->m_pTTS->Fill(pT);
+        hists->m_momTS->Fill(gmom);
+        hists->m_lengthTS->Fill(t->length);
+        hists->m_chisq0TS->Fill(chisq0);
+        hists->m_chisq1TS->Fill(chisq1);
 	
-        m_globtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
-        m_eta_trklengthTS->Fill(eta,t->length);
-	m_npoint_lengthTS->Fill(t->length,Float_t(trkpnt));
-	m_fpoint_lengthTS->Fill(t->length,Float_t(trkfpnt));
+        hists->m_globtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_eta_trklengthTS->Fill(eta,t->length);
+        hists->m_npoint_lengthTS->Fill(t->length,Float_t(trkpnt));
+        hists->m_fpoint_lengthTS->Fill(t->length,Float_t(trkfpnt));
 	
-	m_pT_eta_recTS->Fill(eta,lmevpt);
-        m_tanl_zfTS->Fill(t->x_first[2],t->tanl);
-	m_mom_trklengthTS->Fill(t->length,lmevmom);
-	m_chisq0_momTS->Fill(lmevmom,chisq0);
-	m_chisq1_momTS->Fill(lmevmom,chisq1);
-	m_chisq0_etaTS->Fill(eta,chisq0);
-	m_chisq1_etaTS->Fill(eta,chisq1);
-	m_chisq0_dipTS->Fill(t->tanl,chisq0);
-	m_chisq1_dipTS->Fill(t->tanl,chisq1);
-	m_chisq0_zfTS->Fill(t->x_first[2],chisq0);
-	m_chisq1_zfTS->Fill(t->x_first[2],chisq1);
-	m_chisq0_phiTS->Fill(t->phi0,chisq0);
-        m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
-        m_nfptonpt_etaTS->Fill(eta,nfitntot);
-        m_psi_phiTS->Fill(t->phi0,t->psi);
+        hists->m_pT_eta_recTS->Fill(eta,lmevpt);
+        hists->m_tanl_zfTS->Fill(t->x_first[2],t->tanl);
+        hists->m_mom_trklengthTS->Fill(t->length,lmevmom);
+        hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
+        hists->m_chisq1_momTS->Fill(lmevmom,chisq1);
+        hists->m_chisq0_etaTS->Fill(eta,chisq0);
+        hists->m_chisq1_etaTS->Fill(eta,chisq1);
+        hists->m_chisq0_dipTS->Fill(t->tanl,chisq0);
+        hists->m_chisq1_dipTS->Fill(t->tanl,chisq1);
+        hists->m_chisq0_zfTS->Fill(t->x_first[2],chisq0);
+        hists->m_chisq1_zfTS->Fill(t->x_first[2],chisq1);
+        hists->m_chisq0_phiTS->Fill(t->phi0,chisq0);
+        hists->m_nfptonpt_momTS->Fill(lmevmom,nfitntot);
+        hists->m_nfptonpt_etaTS->Fill(eta,nfitntot);
+        hists->m_psi_phiTS->Fill(t->phi0,t->psi);
         }
 
 //  now fill all FTPC East histograms ------------------------------------------------
         if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
 	
 // these are tpc & ftpc
-	m_pointFE->Fill(trkpnt);
-	m_max_pointFE->Fill(trkmpnt);
-	m_fit_pointFE->Fill(trkfpnt);
-        m_glb_chargeFE->Fill(t->icharge);
-        m_glb_rfFE->Fill(sqrt((t->x_first[0]*t->x_first[0])+
+        hists->m_pointFE->Fill(trkpnt);
+        hists->m_max_pointFE->Fill(trkmpnt);
+        hists->m_fit_pointFE->Fill(trkfpnt);
+        hists->m_glb_chargeFE->Fill(t->icharge);
+        hists->m_glb_rfFE->Fill(sqrt((t->x_first[0]*t->x_first[0])+
 			      (t->x_first[1]*t->x_first[1])));
-        m_glb_xfFE->Fill(t->x_first[0]);
-        m_glb_yfFE->Fill(t->x_first[1]);
-        m_glb_zfFE->Fill(t->x_first[2]);
-        m_glb_radfFE->Fill(radf);
-        m_glb_ratioFE->Fill(nfitntot);
-        m_glb_ratiomFE->Fill(nfitnmax);
-	m_psiFE->Fill(t->psi);
-	m_etaFE->Fill(eta);
-	m_pTFE->Fill(pT);
-        m_momFE->Fill(gmom);
-	m_lengthFE->Fill(t->length);
-	m_chisq0FE->Fill(chisq0);
-	m_chisq1FE->Fill(chisq1);
+        hists->m_glb_xfFE->Fill(t->x_first[0]);
+        hists->m_glb_yfFE->Fill(t->x_first[1]);
+        hists->m_glb_zfFE->Fill(t->x_first[2]);
+        hists->m_glb_radfFE->Fill(radf);
+        hists->m_glb_ratioFE->Fill(nfitntot);
+        hists->m_glb_ratiomFE->Fill(nfitnmax);
+        hists->m_psiFE->Fill(t->psi);
+        hists->m_etaFE->Fill(eta);
+        hists->m_pTFE->Fill(pT);
+        hists->m_momFE->Fill(gmom);
+        hists->m_lengthFE->Fill(t->length);
+        hists->m_chisq0FE->Fill(chisq0);
+        hists->m_chisq1FE->Fill(chisq1);
 	
 // these are for tpc & ftpc
-	m_pT_eta_recFE->Fill(eta,lmevpt);
-        m_globtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
-        m_eta_trklengthFE->Fill(eta,t->length);
-	m_npoint_lengthFE->Fill(t->length,Float_t(trkpnt));
-	m_fpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
+        hists->m_pT_eta_recFE->Fill(eta,lmevpt);
+        hists->m_globtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_eta_trklengthFE->Fill(eta,t->length);
+        hists->m_npoint_lengthFE->Fill(t->length,Float_t(trkpnt));
+        hists->m_fpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
 
         }
 
@@ -876,38 +569,38 @@ void St_QA_Maker::MakeHistGlob(){
         if (t->iflag>=700 && t->iflag<800 && t->det_id==4) {
 
 // these are tpc & ftpc
-        m_glb_rfFW->Fill(sqrt((t->x_first[0]*t->x_first[0])+
+        hists->m_glb_rfFW->Fill(sqrt((t->x_first[0]*t->x_first[0])+
 			      (t->x_first[1]*t->x_first[1])));
-	m_pointFW->Fill(trkpnt);
-	m_max_pointFW->Fill(trkmpnt);
-	m_fit_pointFW->Fill(trkfpnt);
-        m_glb_chargeFW->Fill(t->icharge);
-        m_glb_xfFW->Fill(t->x_first[0]);
-        m_glb_yfFW->Fill(t->x_first[1]);
-        m_glb_zfFW->Fill(t->x_first[2]);
-        m_glb_radfFW->Fill(radf);
-        m_glb_ratioFW->Fill(nfitntot);
-        m_glb_ratiomFW->Fill(nfitnmax);
-	m_psiFW->Fill(t->psi);
-	m_etaFW->Fill(eta);
-	m_pTFW->Fill(pT);
-        m_momFW->Fill(gmom);
-	m_lengthFW->Fill(t->length);
-	m_chisq0FW->Fill(chisq0);
-	m_chisq1FW->Fill(chisq1);
+        hists->m_pointFW->Fill(trkpnt);
+        hists->m_max_pointFW->Fill(trkmpnt);
+        hists->m_fit_pointFW->Fill(trkfpnt);
+        hists->m_glb_chargeFW->Fill(t->icharge);
+        hists->m_glb_xfFW->Fill(t->x_first[0]);
+        hists->m_glb_yfFW->Fill(t->x_first[1]);
+        hists->m_glb_zfFW->Fill(t->x_first[2]);
+        hists->m_glb_radfFW->Fill(radf);
+        hists->m_glb_ratioFW->Fill(nfitntot);
+        hists->m_glb_ratiomFW->Fill(nfitnmax);
+        hists->m_psiFW->Fill(t->psi);
+        hists->m_etaFW->Fill(eta);
+        hists->m_pTFW->Fill(pT);
+        hists->m_momFW->Fill(gmom);
+        hists->m_lengthFW->Fill(t->length);
+        hists->m_chisq0FW->Fill(chisq0);
+        hists->m_chisq1FW->Fill(chisq1);
 	
 // these are for tpc & ftpc
-	m_pT_eta_recFW->Fill(eta,lmevpt);
-        m_globtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
-        m_eta_trklengthFW->Fill(eta,t->length);
-	m_npoint_lengthFW->Fill(t->length,Float_t(trkpnt));
-	m_fpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
+        hists->m_pT_eta_recFW->Fill(eta,lmevpt);
+        hists->m_globtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_eta_trklengthFW->Fill(eta,t->length);
+        hists->m_npoint_lengthFW->Fill(t->length,Float_t(trkpnt));
+        hists->m_fpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
         }
 
       }
     }
-    m_globtrk_good->Fill(cnttrkg);
-    m_globtrk_good_sm->Fill(cnttrkg);
+    hists->m_globtrk_good->Fill(cnttrkg);
+    hists->m_globtrk_good_sm->Fill(cnttrkg);
   }       
 }
 
@@ -924,24 +617,24 @@ void St_QA_Maker::MakeHistDE() {
 
     Int_t cntrows=0;
     cntrows = dst_dedx->GetNRows();
-    m_ndedxr->Fill(cntrows);
+    hists->m_ndedxr->Fill(cntrows);
 
     dst_dedx_st *d = dst_dedx->GetTable();
     for (Int_t i = 0; i < dst_dedx->GetNRows(); i++,d++) {
         if (d->det_id==1) {      
-         m_ndedxT->Fill(d->ndedx);
-         m_dedx0T->Fill(d->dedx[0]);
-         m_dedx1T->Fill(d->dedx[1]);
+         hists->m_ndedxT->Fill(d->ndedx);
+         hists->m_dedx0T->Fill(d->dedx[0]);
+         hists->m_dedx1T->Fill(d->dedx[1]);
         }
         if (d->det_id==4) {      
-         m_ndedxFW->Fill(d->ndedx);
-         m_dedx0FW->Fill(d->dedx[0]);
-         m_dedx1FW->Fill(d->dedx[1]);
+         hists->m_ndedxFW->Fill(d->ndedx);
+         hists->m_dedx0FW->Fill(d->dedx[0]);
+         hists->m_dedx1FW->Fill(d->dedx[1]);
         }
         if (d->det_id==5) {      
-         m_ndedxFE->Fill(d->ndedx);
-         m_dedx0FE->Fill(d->dedx[0]);
-         m_dedx1FE->Fill(d->dedx[1]);
+         hists->m_ndedxFE->Fill(d->ndedx);
+         hists->m_dedx0FE->Fill(d->dedx[0]);
+         hists->m_dedx1FE->Fill(d->dedx[1]);
         }
     }
   }
@@ -972,12 +665,12 @@ void St_QA_Maker::MakeHistPrim(){
     Int_t cnttrk=0;
     Int_t cnttrkg=0;
     cnttrk = primtrk->GetNRows();
-    m_primtrk_tot->Fill(cnttrk);
-    m_primtrk_tot_sm->Fill(cnttrk);
+    hists->m_primtrk_tot->Fill(cnttrk);
+    hists->m_primtrk_tot_sm->Fill(cnttrk);
 
     for (Int_t i = 0; i < primtrk->GetNRows(); i++,t++){
 
-      m_primtrk_iflag->Fill(t->iflag);
+      hists->m_primtrk_iflag->Fill(t->iflag);
 
       if (t->iflag>0) {
         cnttrkg++;
@@ -1074,158 +767,158 @@ void St_QA_Maker::MakeHistPrim(){
 // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
 // so it doesn't need to be calculated here 
 		
- 	m_pdet_id->Fill(t->det_id);
+         hists->m_pdet_id->Fill(t->det_id);
 
 //  now fill all TPC histograms ------------------------------------------------
         if (t->iflag>=300 && t->iflag<400) {
 
 // these are tpc only
-        m_prim_f0->Fill(xdif,0.);
-        m_prim_f0->Fill(ydif,1.);
-        m_prim_f0->Fill(zdif,2.);
+        hists->m_prim_f0->Fill(xdif,0);
+        hists->m_prim_f0->Fill(ydif,1);
+        hists->m_prim_f0->Fill(zdif,2);
 
-        m_prim_xf0->Fill(xdif);
-        m_prim_yf0->Fill(ydif);
-        m_prim_zf0->Fill(zdif);
-        m_prim_impactT->Fill(logImpact);
-        m_prim_impactrT->Fill(t->impact);
+        hists->m_prim_xf0->Fill(xdif);
+        hists->m_prim_yf0->Fill(ydif);
+        hists->m_prim_zf0->Fill(zdif);
+        hists->m_prim_impactT->Fill(logImpact);
+        hists->m_prim_impactrT->Fill(t->impact);
 	
 // these are tpc & ftpc
-	m_ppointT->Fill(trkpnt);
-	m_pmax_pointT->Fill(trkmpnt);
-	m_pfit_pointT->Fill(trkfpnt);
-        m_prim_chargeT->Fill(t->icharge);
-        m_prim_r0T->Fill(t->r0);
-        m_prim_phi0T->Fill(t->phi0);
-        m_prim_z0T->Fill(t->z0);
-        m_prim_curvT->Fill(logCurvature);
-        m_prim_xfT->Fill(t->x_first[0]);
-        m_prim_yfT->Fill(t->x_first[1]);
-        m_prim_zfT->Fill(t->x_first[2]);
-        m_prim_radfT->Fill(radf);
-        m_prim_ratioT->Fill(nfitntot);
-        m_prim_ratiomT->Fill(nfitnmax);
-	m_ppsiT->Fill(t->psi);
-        m_ptanlT->Fill(t->tanl);
-        m_prim_thetaT->Fill(thetad);
-	m_petaT->Fill(eta);
-	m_ppTT->Fill(pT);
-        m_pmomT->Fill(gmom);
-	m_plengthT->Fill(t->length);
-	m_pchisq0T->Fill(chisq0);
-	m_pchisq1T->Fill(chisq1);
+        hists->m_ppointT->Fill(trkpnt);
+        hists->m_pmax_pointT->Fill(trkmpnt);
+        hists->m_pfit_pointT->Fill(trkfpnt);
+        hists->m_prim_chargeT->Fill(t->icharge);
+        hists->m_prim_r0T->Fill(t->r0);
+        hists->m_prim_phi0T->Fill(t->phi0);
+        hists->m_prim_z0T->Fill(t->z0);
+        hists->m_prim_curvT->Fill(logCurvature);
+        hists->m_prim_xfT->Fill(t->x_first[0]);
+        hists->m_prim_yfT->Fill(t->x_first[1]);
+        hists->m_prim_zfT->Fill(t->x_first[2]);
+        hists->m_prim_radfT->Fill(radf);
+        hists->m_prim_ratioT->Fill(nfitntot);
+        hists->m_prim_ratiomT->Fill(nfitnmax);
+        hists->m_ppsiT->Fill(t->psi);
+        hists->m_ptanlT->Fill(t->tanl);
+        hists->m_prim_thetaT->Fill(thetad);
+        hists->m_petaT->Fill(eta);
+        hists->m_ppTT->Fill(pT);
+        hists->m_pmomT->Fill(gmom);
+        hists->m_plengthT->Fill(t->length);
+        hists->m_pchisq0T->Fill(chisq0);
+        hists->m_pchisq1T->Fill(chisq1);
 	
 // these are for tpc & ftpc
-        m_primtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
-        m_peta_trklengthT->Fill(eta,t->length);
-	m_pnpoint_lengthT->Fill(t->length,Float_t(trkpnt));
-	m_pfpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
+        hists->m_primtrk_xf_yfT->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_peta_trklengthT->Fill(eta,t->length);
+        hists->m_pnpoint_lengthT->Fill(t->length,Float_t(trkpnt));
+        hists->m_pfpoint_lengthT->Fill(t->length,Float_t(trkfpnt));
 	
 // these are tpc only
-	m_ppT_eta_recT->Fill(eta,lmevpt);
-        m_ptanl_zfT->Fill(t->x_first[2]-primVtxZ,t->tanl);
-	m_pmom_trklengthT->Fill(t->length,lmevmom);
-	m_pchisq0_momT->Fill(lmevmom,chisq0);
-	m_pchisq1_momT->Fill(lmevmom,chisq1);
-	m_pchisq0_etaT->Fill(eta,chisq0);
-	m_pchisq1_etaT->Fill(eta,chisq1);
-	m_pchisq0_dipT->Fill(t->tanl,chisq0);
-	m_pchisq1_dipT->Fill(t->tanl,chisq1);
-	m_pchisq0_zfT->Fill(t->x_first[2],chisq0);
-	m_pchisq1_zfT->Fill(t->x_first[2],chisq1);
-        m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
-        m_pnfptonpt_etaT->Fill(eta,nfitntot);
-        m_ppsi_phiT->Fill(t->phi0,t->psi);
+        hists->m_ppT_eta_recT->Fill(eta,lmevpt);
+        hists->m_ptanl_zfT->Fill(t->x_first[2]-primVtxZ,t->tanl);
+        hists->m_pmom_trklengthT->Fill(t->length,lmevmom);
+        hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
+        hists->m_pchisq1_momT->Fill(lmevmom,chisq1);
+        hists->m_pchisq0_etaT->Fill(eta,chisq0);
+        hists->m_pchisq1_etaT->Fill(eta,chisq1);
+        hists->m_pchisq0_dipT->Fill(t->tanl,chisq0);
+        hists->m_pchisq1_dipT->Fill(t->tanl,chisq1);
+        hists->m_pchisq0_zfT->Fill(t->x_first[2],chisq0);
+        hists->m_pchisq1_zfT->Fill(t->x_first[2],chisq1);
+        hists->m_pnfptonpt_momT->Fill(lmevmom,nfitntot);
+        hists->m_pnfptonpt_etaT->Fill(eta,nfitntot);
+        hists->m_ppsi_phiT->Fill(t->phi0,t->psi);
         }
 
 
 //  now fill all TPC+SVT histograms ------------------------------------------------
         if (t->iflag>=600 && t->iflag<700) {
 
-        m_prim_f0TS->Fill(xdif,0.);
-        m_prim_f0TS->Fill(ydif,1.);
-        m_prim_f0TS->Fill(zdif,2.);
+        hists->m_prim_f0TS->Fill(xdif,0);
+        hists->m_prim_f0TS->Fill(ydif,1);
+        hists->m_prim_f0TS->Fill(zdif,2);
 
-        m_prim_xf0TS->Fill(xdif);
-        m_prim_yf0TS->Fill(ydif);
-        m_prim_zf0TS->Fill(zdif);
-        m_prim_impactTS->Fill(logImpact);
-        m_prim_impactrTS->Fill(t->impact);
+        hists->m_prim_xf0TS->Fill(xdif);
+        hists->m_prim_yf0TS->Fill(ydif);
+        hists->m_prim_zf0TS->Fill(zdif);
+        hists->m_prim_impactTS->Fill(logImpact);
+        hists->m_prim_impactrTS->Fill(t->impact);
 	
-	m_ppointTS->Fill(trkpnt);
-	m_pmax_pointTS->Fill(trkmpnt);
-	m_pfit_pointTS->Fill(trkfpnt);
-        m_prim_chargeTS->Fill(t->icharge);
-        m_prim_r0TS->Fill(t->r0);
-        m_prim_phi0TS->Fill(t->phi0);
-        m_prim_z0TS->Fill(t->z0);
-        m_prim_curvTS->Fill(logCurvature);
-        m_prim_xfTS->Fill(t->x_first[0]);
-        m_prim_yfTS->Fill(t->x_first[1]);
-        m_prim_zfTS->Fill(t->x_first[2]);
-        m_prim_radfTS->Fill(radf);
-        m_prim_ratioTS->Fill(nfitntot);
-        m_prim_ratiomTS->Fill(nfitnmax);
-	m_ppsiTS->Fill(t->psi);
-        m_ptanlTS->Fill(t->tanl);
-        m_prim_thetaTS->Fill(thetad);
-	m_petaTS->Fill(eta);
-	m_ppTTS->Fill(pT);
-        m_pmomTS->Fill(gmom);
-	m_plengthTS->Fill(t->length);
-	m_pchisq0TS->Fill(chisq0);
-	m_pchisq1TS->Fill(chisq1);
+        hists->m_ppointTS->Fill(trkpnt);
+        hists->m_pmax_pointTS->Fill(trkmpnt);
+        hists->m_pfit_pointTS->Fill(trkfpnt);
+        hists->m_prim_chargeTS->Fill(t->icharge);
+        hists->m_prim_r0TS->Fill(t->r0);
+        hists->m_prim_phi0TS->Fill(t->phi0);
+        hists->m_prim_z0TS->Fill(t->z0);
+        hists->m_prim_curvTS->Fill(logCurvature);
+        hists->m_prim_xfTS->Fill(t->x_first[0]);
+        hists->m_prim_yfTS->Fill(t->x_first[1]);
+        hists->m_prim_zfTS->Fill(t->x_first[2]);
+        hists->m_prim_radfTS->Fill(radf);
+        hists->m_prim_ratioTS->Fill(nfitntot);
+        hists->m_prim_ratiomTS->Fill(nfitnmax);
+        hists->m_ppsiTS->Fill(t->psi);
+        hists->m_ptanlTS->Fill(t->tanl);
+        hists->m_prim_thetaTS->Fill(thetad);
+        hists->m_petaTS->Fill(eta);
+        hists->m_ppTTS->Fill(pT);
+        hists->m_pmomTS->Fill(gmom);
+        hists->m_plengthTS->Fill(t->length);
+        hists->m_pchisq0TS->Fill(chisq0);
+        hists->m_pchisq1TS->Fill(chisq1);
 	
-        m_primtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
-        m_peta_trklengthTS->Fill(eta,t->length);
-	m_pnpoint_lengthTS->Fill(t->length,Float_t(trkpnt));
-	m_pfpoint_lengthTS->Fill(t->length,Float_t(trkfpnt));
+        hists->m_primtrk_xf_yfTS->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_peta_trklengthTS->Fill(eta,t->length);
+        hists->m_pnpoint_lengthTS->Fill(t->length,Float_t(trkpnt));
+        hists->m_pfpoint_lengthTS->Fill(t->length,Float_t(trkfpnt));
 	
-	m_ppT_eta_recTS->Fill(eta,lmevpt);
-        m_ptanl_zfTS->Fill(t->x_first[2]-primVtxZ,t->tanl);
-	m_pmom_trklengthTS->Fill(t->length,lmevmom);
-	m_pchisq0_momTS->Fill(lmevmom,chisq0);
-	m_pchisq1_momTS->Fill(lmevmom,chisq1);
-	m_pchisq0_etaTS->Fill(eta,chisq0);
-	m_pchisq1_etaTS->Fill(eta,chisq1);
-	m_pchisq0_dipTS->Fill(t->tanl,chisq0);
-	m_pchisq1_dipTS->Fill(t->tanl,chisq1);
-	m_pchisq0_zfTS->Fill(t->x_first[2],chisq0);
-	m_pchisq1_zfTS->Fill(t->x_first[2],chisq1);
-        m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
-        m_pnfptonpt_etaTS->Fill(eta,nfitntot);
-        m_ppsi_phiTS->Fill(t->phi0,t->psi);
+        hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
+        hists->m_ptanl_zfTS->Fill(t->x_first[2]-primVtxZ,t->tanl);
+        hists->m_pmom_trklengthTS->Fill(t->length,lmevmom);
+        hists->m_pchisq0_momTS->Fill(lmevmom,chisq0);
+        hists->m_pchisq1_momTS->Fill(lmevmom,chisq1);
+        hists->m_pchisq0_etaTS->Fill(eta,chisq0);
+        hists->m_pchisq1_etaTS->Fill(eta,chisq1);
+        hists->m_pchisq0_dipTS->Fill(t->tanl,chisq0);
+        hists->m_pchisq1_dipTS->Fill(t->tanl,chisq1);
+        hists->m_pchisq0_zfTS->Fill(t->x_first[2],chisq0);
+        hists->m_pchisq1_zfTS->Fill(t->x_first[2],chisq1);
+        hists->m_pnfptonpt_momTS->Fill(lmevmom,nfitntot);
+        hists->m_pnfptonpt_etaTS->Fill(eta,nfitntot);
+        hists->m_ppsi_phiTS->Fill(t->phi0,t->psi);
         }
 
 /* The following is for the FTPC, which doesn't do primary tracking yet.
 //  now fill all FTPC East histograms ------------------------------------------------
-        if (t->=iflag>700 && t->iflag<800 && t->det_id==5) {
+        if (t->iflag>=700 && t->iflag<800 && t->det_id==5) {
 	
 // these are tpc & ftpc
-	m_ppointFE->Fill(trkpnt);
-	m_pmax_pointFE->Fill(trkmpnt);
-	m_pfit_pointFE->Fill(trkfpnt);
-        m_prim_chargeFE->Fill(t->icharge);
-        m_prim_xfFE->Fill(t->x_first[0]);
-        m_prim_yfFE->Fill(t->x_first[1]);
-        m_prim_zfFE->Fill(t->x_first[2]);
-        m_prim_radfFE->Fill(radf);
-        m_prim_ratioFE->Fill(nfitntot);
-        m_prim_ratiomFE->Fill(nfitnmax);
-	m_ppsiFE->Fill(t->psi);
-	m_petaFE->Fill(eta);
-	m_ppTFE->Fill(pT);
-        m_pmomFE->Fill(gmom);
-	m_plengthFE->Fill(t->length);
-	m_pchisq0FE->Fill(chisq0);
-	m_pchisq1FE->Fill(chisq1);
+        hists->m_ppointFE->Fill(trkpnt);
+        hists->m_pmax_pointFE->Fill(trkmpnt);
+        hists->m_pfit_pointFE->Fill(trkfpnt);
+        hists->m_prim_chargeFE->Fill(t->icharge);
+        hists->m_prim_xfFE->Fill(t->x_first[0]);
+        hists->m_prim_yfFE->Fill(t->x_first[1]);
+        hists->m_prim_zfFE->Fill(t->x_first[2]);
+        hists->m_prim_radfFE->Fill(radf);
+        hists->m_prim_ratioFE->Fill(nfitntot);
+        hists->m_prim_ratiomFE->Fill(nfitnmax);
+        hists->m_ppsiFE->Fill(t->psi);
+        hists->m_petaFE->Fill(eta);
+        hists->m_ppTFE->Fill(pT);
+        hists->m_pmomFE->Fill(gmom);
+        hists->m_plengthFE->Fill(t->length);
+        hists->m_pchisq0FE->Fill(chisq0);
+        hists->m_pchisq1FE->Fill(chisq1);
 	
 // these are for tpc & ftpc
-	m_ppT_eta_recFE->Fill(eta,lmevpt);
-        m_primtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
-        m_peta_trklengthFE->Fill(eta,t->length);
-	m_pnpoint_lengthFE->Fill(t->length,Float_t(trkpnt));
-	m_pfpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
+        hists->m_ppT_eta_recFE->Fill(eta,lmevpt);
+        hists->m_primtrk_xf_yfFE->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_peta_trklengthFE->Fill(eta,t->length);
+        hists->m_pnpoint_lengthFE->Fill(t->length,Float_t(trkpnt));
+        hists->m_pfpoint_lengthFE->Fill(t->length,Float_t(trkfpnt));	
 
         }
 
@@ -1233,36 +926,36 @@ void St_QA_Maker::MakeHistPrim(){
         if (t->iflag>=700 && t->iflag<800 && t->det_id==4) {
 
 // these are tpc & ftpc
-	m_ppointFW->Fill(trkpnt);
-	m_pmax_pointFW->Fill(trkmpnt);
-	m_pfit_pointFW->Fill(trkfpnt);
-        m_prim_chargeFW->Fill(t->icharge);
-        m_prim_xfFW->Fill(t->x_first[0]);
-        m_prim_yfFW->Fill(t->x_first[1]);
-        m_prim_zfFW->Fill(t->x_first[2]);
-        m_prim_radfFW->Fill(radf);
-        m_prim_ratioFW->Fill(nfitntot);
-        m_prim_ratiomFW->Fill(nfitnmax);
-	m_ppsiFW->Fill(t->psi);
-	m_petaFW->Fill(eta);
-	m_ppTFW->Fill(pT);
-        m_pmomFW->Fill(gmom);
-	m_plengthFW->Fill(t->length);
-	m_pchisq0FW->Fill(chisq0);
-	m_pchisq1FW->Fill(chisq1);
+        hists->m_ppointFW->Fill(trkpnt);
+        hists->m_pmax_pointFW->Fill(trkmpnt);
+        hists->m_pfit_pointFW->Fill(trkfpnt);
+        hists->m_prim_chargeFW->Fill(t->icharge);
+        hists->m_prim_xfFW->Fill(t->x_first[0]);
+        hists->m_prim_yfFW->Fill(t->x_first[1]);
+        hists->m_prim_zfFW->Fill(t->x_first[2]);
+        hists->m_prim_radfFW->Fill(radf);
+        hists->m_prim_ratioFW->Fill(nfitntot);
+        hists->m_prim_ratiomFW->Fill(nfitnmax);
+        hists->m_ppsiFW->Fill(t->psi);
+        hists->m_petaFW->Fill(eta);
+        hists->m_ppTFW->Fill(pT);
+        hists->m_pmomFW->Fill(gmom);
+        hists->m_plengthFW->Fill(t->length);
+        hists->m_pchisq0FW->Fill(chisq0);
+        hists->m_pchisq1FW->Fill(chisq1);
 	
 // these are for tpc & ftpc
-	m_ppT_eta_recFW->Fill(eta,lmevpt);
-        m_primtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
-        m_peta_trklengthFW->Fill(eta,t->length);
-	m_pnpoint_lengthFW->Fill(t->length,Float_t(trkpnt));
-	m_pfpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
+        hists->m_ppT_eta_recFW->Fill(eta,lmevpt);
+        hists->m_primtrk_xf_yfFW->Fill(t->x_first[0],t->x_first[1]);
+        hists->m_peta_trklengthFW->Fill(eta,t->length);
+        hists->m_pnpoint_lengthFW->Fill(t->length,Float_t(trkpnt));
+        hists->m_pfpoint_lengthFW->Fill(t->length,Float_t(trkfpnt));	        
         }
 */
       }
     }
-    m_primtrk_good->Fill(cnttrkg);
-    m_primtrk_good_sm->Fill(cnttrkg);
+    hists->m_primtrk_good->Fill(cnttrkg);
+    hists->m_primtrk_good_sm->Fill(cnttrkg);
   }
 }
 
@@ -1303,22 +996,22 @@ void St_QA_Maker::MakeHistGen(){
 
             Float_t Glmevpt = TMath::Log10(pT*1000.0);
 
-	    m_H_pT_eta_gen->Fill(eta, Glmevpt);
-	    m_H_pT_gen->Fill((Float_t) pT);
+	    hists->m_H_pT_eta_gen->Fill(eta, Glmevpt);
+	    hists->m_H_pT_gen->Fill((Float_t) pT);
 	    if (fabs(eta) < 1)
-	      m_H_pT_genT->Fill((Float_t) pT);
-	    m_H_eta_gen->Fill(eta);
-	    m_H_vtxx->Fill(p->vhep[0]);
-	    m_H_vtxy->Fill(p->vhep[1]);
-	    m_H_vtxz->Fill(p->vhep[2]);
+	      hists->m_H_pT_genT->Fill((Float_t) pT);
+	    hists->m_H_eta_gen->Fill(eta);
+	    hists->m_H_vtxx->Fill(p->vhep[0]);
+	    hists->m_H_vtxy->Fill(p->vhep[1]);
+	    hists->m_H_vtxz->Fill(p->vhep[2]);
 	  }
 	}
       }
     }
-    m_H_npart->Fill(totpart);
-    m_H_npart_sm->Fill(totpart);
-    m_H_ncpart->Fill(nchgpart);
-    m_H_ncpart_sm->Fill(nchgpart);
+    hists->m_H_npart->Fill(totpart);
+    hists->m_H_npart_sm->Fill(totpart);
+    hists->m_H_ncpart->Fill(nchgpart);
+    hists->m_H_ncpart_sm->Fill(nchgpart);
   }
 }
 
@@ -1365,7 +1058,7 @@ void St_QA_Maker::MakeHistPID(){
 	    // Float_t  p = TMath::Sqrt(pT*pT+pz*pz);
 
 	    if (dedx->ndedx >15 ) { 
-	      m_p_dedx_rec->Fill(gmom,dedx_m*1.e6); 
+	      hists->m_p_dedx_rec->Fill(gmom,dedx_m*1.e6); 
 	    // change from GeV/cm to keV/cm
 	    }
 	  }
@@ -1389,8 +1082,8 @@ void St_QA_Maker::MakeHistVertex(){
     float z_svt = 999.;
     float z_tpc = -999.;
 
-    m_v_num->Fill(vertex->GetNRows());
-    m_v_num_sm->Fill(vertex->GetNRows());
+    hists->m_v_num->Fill(vertex->GetNRows());
+    hists->m_v_num_sm->Fill(vertex->GetNRows());
     dst_vertex_st  *t   = vertex->GetTable();
 
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
@@ -1398,24 +1091,24 @@ void St_QA_Maker::MakeHistVertex(){
       else if (t->iflag == 101) z_tpc = t->z;
       else if (t->iflag == 1 && t->vtx_id == kEventVtxId) { 
 	// plot of primary vertex only
-	m_pv_vtxid->Fill(t->vtx_id);
-	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
-	if (!isnan(double(t->y))) m_pv_y->Fill(t->y);     
-	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
-	m_pv_pchi2->Fill(t->chisq[0]);
-	m_pv_r->Fill(t->x*t->x + t->y*t->y);
+        hists->m_pv_vtxid->Fill(t->vtx_id);
+	if (!isnan(double(t->x))) hists->m_pv_x->Fill(t->x);     
+	if (!isnan(double(t->y))) hists->m_pv_y->Fill(t->y);     
+	if (!isnan(double(t->z))) hists->m_pv_z->Fill(t->z);     
+        hists->m_pv_pchi2->Fill(t->chisq[0]);
+        hists->m_pv_r->Fill(t->x*t->x + t->y*t->y);
       }
       if (!(t->iflag == 1 && t->vtx_id == kEventVtxId)) { 
 	// plot of 2ndary verticex only
-	m_v_vtxid->Fill(t->vtx_id);
-	if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
-	if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
-	if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
-	m_v_pchi2->Fill(t->chisq[0]); 
-	m_v_r->Fill(t->x*t->x + t->y*t->y);
+        hists->m_v_vtxid->Fill(t->vtx_id);
+	if (!isnan(double(t->x))) hists->m_v_x->Fill(t->x);     
+	if (!isnan(double(t->y))) hists->m_v_y->Fill(t->y);     
+	if (!isnan(double(t->z))) hists->m_v_z->Fill(t->z);     
+        hists->m_v_pchi2->Fill(t->chisq[0]); 
+        hists->m_v_r->Fill(t->x*t->x + t->y*t->y);
       }
     }
-    m_vtx_z->Fill(z_tpc-z_svt);
+    hists->m_vtx_z->Fill(z_tpc-z_svt);
   }
 
   // V0 vertices
@@ -1424,7 +1117,7 @@ void St_QA_Maker::MakeHistVertex(){
 
   if (dst_v0_vertex) {
     dst_v0_vertex_st *v0 = dst_v0_vertex->GetTable();
-    m_v0->Fill(dst_v0_vertex->GetNRows());
+    hists->m_v0->Fill(dst_v0_vertex->GetNRows());
 
     for (Int_t k=0; k<dst_v0_vertex->GetNRows(); k++, v0++){
       Float_t e1a = v0->pos_px*v0->pos_px +  v0->pos_py*v0->pos_py
@@ -1443,8 +1136,8 @@ void St_QA_Maker::MakeHistVertex(){
       e1 = TMath::Sqrt(e1);
       Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
 
-      m_ev0_lama_hist->Fill(inv_mass_la);
-      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
+      hists->m_ev0_lama_hist->Fill(inv_mass_la);
+      hists->m_ev0_k0ma_hist->Fill(inv_mass_k0);   
     }
   }
 
@@ -1453,7 +1146,7 @@ void St_QA_Maker::MakeHistVertex(){
   St_dst_xi_vertex *dst_xi = (St_dst_xi_vertex*) dstI["dst_xi_vertex"];
 
   if (dst_xi) {
-    m_xi_tot->Fill(dst_xi->GetNRows());
+    hists->m_xi_tot->Fill(dst_xi->GetNRows());
     St_dst_v0_vertex *dst_v0 = (St_dst_v0_vertex*) dstI["dst_v0_vertex"];
     if (!dst_v0) {
       cout << "Error! No V0 table found for Xi's.";
@@ -1492,7 +1185,7 @@ void St_QA_Maker::MakeHistVertex(){
 	Float_t psq =  px*px + py*py + pz*pz;
 	Float_t inv_mass_xi = sqrt(e3*e3 - psq);
 
-	m_xi_ma_hist->Fill(inv_mass_xi);
+        hists->m_xi_ma_hist->Fill(inv_mass_xi);
       }
     }
   }
@@ -1502,7 +1195,7 @@ void St_QA_Maker::MakeHistVertex(){
   St_dst_tkf_vertex *pt = (St_dst_tkf_vertex*) dstI["kinkVertex"];
 
   if (pt) {
-    m_kink_tot->Fill(pt->GetNRows());
+    hists->m_kink_tot->Fill(pt->GetNRows());
   }
 
 }
@@ -1519,9 +1212,9 @@ void St_QA_Maker::MakeHistPoint(){
 
     Int_t cntrows=0;
     cntrows = pt->GetNRows();
-      m_pnt_tot->Fill(cntrows);
-      m_pnt_tot_med->Fill(cntrows);
-      m_pnt_tot_sm->Fill(cntrows);
+      hists->m_pnt_tot->Fill(cntrows);
+      hists->m_pnt_tot_med->Fill(cntrows);
+      hists->m_pnt_tot_sm->Fill(cntrows);
 
     dst_point_st  *t   = pt->GetTable();
 
@@ -1537,7 +1230,7 @@ void St_QA_Maker::MakeHistPoint(){
 // unpack detector ID value:
       id = (t->hw_position) & 15;
 
-      m_pnt_id->Fill(id);
+      hists->m_pnt_id->Fill(id);
 
       if (id==kTpcIdentifier)           {hitsTpc++;}
       else if (id==kSvtIdentifier)      {hitsSvt++;}
@@ -1547,11 +1240,11 @@ void St_QA_Maker::MakeHistPoint(){
 
     }
 
-      m_pnt_tpc->Fill(hitsTpc);
-      m_pnt_svt->Fill(hitsSvt);
-      m_pnt_ftpcW->Fill(hitsFtpcW);
-      m_pnt_ftpcE->Fill(hitsFtpcE);
-      m_pnt_ssd->Fill(hitsSsd);
+      hists->m_pnt_tpc->Fill(hitsTpc);
+      hists->m_pnt_svt->Fill(hitsSvt);
+      hists->m_pnt_ftpcW->Fill(hitsFtpcW);
+      hists->m_pnt_ftpcE->Fill(hitsFtpcE);
+      hists->m_pnt_ssd->Fill(hitsSsd);
 
   }
 
@@ -1620,10 +1313,10 @@ void St_QA_Maker::MakeHistEval(){
       }
     }
 // fill geant,reco comparison histograms -----------------------------------
-    m_geant_reco_pvtx_x->Fill(geantX-recoX);
-    m_geant_reco_pvtx_y->Fill(geantY-recoY);
-    m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
-    m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);
+    hists->m_geant_reco_pvtx_x->Fill(geantX-recoX);
+    hists->m_geant_reco_pvtx_y->Fill(geantY-recoY);
+    hists->m_geant_reco_pvtx_z->Fill(geantZ-recoZ);
+    hists->m_geant_reco_vtx_z_z->Fill(geantZ-recoZ,recoZ);
   }
 }
 
