@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.20 2000/10/02 19:41:54 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.21 2001/01/02 18:10:44 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.21  2001/01/02 18:10:44  ward
+// Pablo Yepes' modifications in support of CTU simulations.
+//
 // Revision 1.20  2000/10/02 19:41:54  ward
 // Added DSMInput and DetectorBusy to trigger DST output (dst_L0_Trigger).
 //
@@ -97,7 +100,7 @@
 #include "tables/St_dst_L1_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_L2_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_TrgDet_Table.h" // 24dec99
-#include "tables/St_ctu_cor_Table.h"
+#include "tables/St_ctu_raw_Table.h"
 #include "tables/St_mwc_raw_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
 #include "trgStructures.h" // From the STAR trigger group, and may need occasional updating.
@@ -260,10 +263,84 @@ void St_trg_Maker::TakeCareOfL1andL2Daq(St_dst_L1_Trigger *dst3,St_dst_L2_Trigge
 }
 void St_trg_Maker::TakeCareOfL1andL2Sim(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
   // Like the rest of the sim stuff, this needs to be filled in.
+    printf ( "we are in TakeCareOfL1andL2Sim\n" ) ;
 }
-int St_trg_Maker::HandleCtu(St_ctu_cor *ctu_cor,St_dst_TrgDet *dst1) {
+int St_trg_Maker::HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1) {
+//
+  if ( !dst1 ) {
+     printf ( "St_trg_Maker::HandleCtu: dst1 not found \n" ) ;
+     return 0 ;
+  }  
+  dst_TrgDet_st *tt = 0 ;
+  tt = dst1->GetTable();
+  if ( !tt ) {
+     printf ( "St_trg_Maker::HandleCtu: dst1 table not found \n" ) ;
+     return 0 ;
+  }
+  //
+  // No pre and post crossing data in simulations
+  // at least for the moment (PY 12/1/00).
+  tt->npre = 0 ;
+  tt->npost= 0;
+
+  if ( !ctu_raw ) {
+     printf ( "St_trg_Maker::HandleCtu: ctu_raw table not found \n" ) ;
+     return 0 ;
+  }
+  ctu_raw_st* ctbRaw = 0 ;
+  ctbRaw = ctu_raw->GetTable();
+  if ( !ctbRaw ) {
+     printf ( "St_trg_Maker::HandleCtu: ctbRaw table not found \n" ) ;
+     return 0 ;
+  }
+  
+  int tray = 0 ;
+  int slat = 0 ;
+  for ( int i = 0 ; i < ctu_raw->GetNRows() ; i++ ) {
+//   printf ( "ieta iphi adc %d %d %d \n", ctbRaw[i].i_eta, ctbRaw[i].i_phi,
+//                                         ctbRaw[i].adc ) ;
+
+     if ( ctbRaw[i].i_eta < 3 ) {
+        tray = getTrayCtb ( float(6. * (ctbRaw[i].i_phi-1)), -100. )  ;
+	slat = 2 - ctbRaw[i].i_eta ;
+     }
+     else {
+        tray = getTrayCtb ( float(6. * (ctbRaw[i].i_phi-1)),  100. )  ;
+        slat = ctbRaw[i].i_eta - 2 ;
+     }
+     tt->nCtb[tray][slat][0]     = ctbRaw[i].adc ;
+     tt->timeCtb[tray][slat][0] = 0;  
+  }
   return 7;
 }
+//
+//
+int St_trg_Maker::getTrayCtb ( float phi, float z ) {
+   float phiShift, phiShifted ;
+   int iphi, iPhi ;
+
+   if ( z > 0 ) {
+      phiShift = 84  ;
+      phiShifted = (phi - phiShift) ;
+      if ( phiShifted < 0 ) phiShifted += 360 ;
+      iphi = phiShifted / 6 ;
+      iPhi = 59 - iphi ;
+      if ( iPhi == 0 ) iPhi = 60 ;
+      return iPhi ;
+   }
+   else {
+      phiShift = 112  ;
+      phiShifted = (phi - phiShift) ;
+      if ( phiShifted < 0 ) phiShifted += 360 ;
+      iphi = phiShifted / 6 ;
+      iPhi = 62 + iphi ;
+      if ( iPhi == 121 ) iPhi = 61 ;
+      return iPhi ;
+   }
+
+}
+
+
 void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
   int offset;
   assert(input>=1&&input<=96);
@@ -290,18 +367,18 @@ int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
 int St_trg_Maker::Sim(St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
   int rv=kStOK;
 
-  St_DataSet *ctf = GetInputDS("ctf");
+  St_DataSet *ctf = GetInputDS(".make/ctf/.data");
   St_DataSet *mwc = GetInputDS(".make/mwc/.data");
   if (!ctf || !mwc) return kStWarn;
-  St_ctu_cor   *ctu_cor  = (St_ctu_cor   *) ctf->Find("ctb_cor");
+  St_ctu_raw   *ctu_raw  = (St_ctu_raw   *) ctf->Find("ctb_raw");
   St_mwc_raw   *mwc_raw  = (St_mwc_raw   *) mwc->Find("raw");
-  // May 3 2000.   if (!ctu_cor || !mwc_raw) return kStWarn;
-
+//
   VpdSim(dst1); 
   ZdcSim(dst1);
-  /* May 3 2000.   Int_t Res = trg_fillDst(ctu_cor,mwc_raw,dst1); if (Res != kSTAFCV_OK) return kStWarn; */
+
+
   if(!HandleMwc(mwc_raw,dst1)) rv=kStWarn;
-  if(!HandleCtu(ctu_cor,dst1)) rv=kStWarn;
+  if(!HandleCtu(ctu_raw,dst1)) rv=kStWarn;
   SecondDstSim(dst2);
   TakeCareOfL1andL2Sim(dst3,dst4);
 
