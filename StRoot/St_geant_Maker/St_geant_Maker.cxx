@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.14 1999/02/16 18:15:45 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.15 1999/02/17 15:55:38 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.15  1999/02/17 15:55:38  fisyak
+// Add GSTAR to ROOT geometry tables transformation
+//
 // Revision 1.14  1999/02/16 18:15:45  fisyak
 // Check in the latest updates to fix them
 //
@@ -63,12 +66,16 @@
 #include "St_geant_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+#include <iostream.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "TGeometry.h"
 #include "TMaterial.h"
 #include "TMixture.h"
+#include "TString.h"
+#include "TInterpreter.h"
+    
 #include "St_Node.h"
 #include "TMath.h"
 #include "TBRIK.h"
@@ -94,6 +101,7 @@
 #include "St_g2t_vertex_Table.h"
 #include "St_g2t_track_Table.h"
 
+#include "St_DataSetIter.h"
 #include "g2r/St_g2t_get_kine_Module.h"
 #include "g2r/St_g2t_svt_Module.h"
 #include "g2r/St_g2t_tpc_Module.h"
@@ -198,10 +206,13 @@ Int_t St_geant_Maker::Init(){
 Int_t St_geant_Maker::Make()
 { if (!m_DataSet->GetList()) 
  {
+     
+
   Int_t    nhits,nhit1,nhit2,link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   Char_t   cgnam[20];
-
+  St_DataSet *geom = gStChain->DataSet("geom");
+  if (geom && !geom->GetList()) {agstroot_("*","*");}
   gtrig();
   // empty g2t_event
   St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
@@ -322,7 +333,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.14 1999/02/16 18:15:45 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.15 1999/02/17 15:55:38 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -723,10 +734,19 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
    TRotMatrix *matrix=0; TIter nextmatrix(list);
    while (matrix=(TRotMatrix *) nextmatrix())  
    { if (matrix!=pattern) 
-     { if (CompareMatrix(*matrix,*pattern))
+     { if (CompareMatrix(*matrix,*pattern)) 
        { list->Remove(pattern); delete pattern; return matrix; }
    } }
    return pattern;
 }
-
-
+//------------------------------------------------------------------------
+void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq){
+  TString TableName(Table); 
+  TString t = TableName.Strip();
+  t.ToLower();
+  St_DataSet *geom = gStChain->DataSet("geom");
+  Char_t cmd[80];
+  Int_t Nchar = sprintf(cmd,"new St_%s(\"%s\",%i)",t.Data(),t.Data(),*k);
+  St_Table *table = (St_Table *) gInterpreter->Calc(cmd);
+  if (table) {geom->Add(table); table->Adopt(*k,iq);}
+}

@@ -481,6 +481,7 @@ EXTERN Float_t *z_q;
 # define agxinit agxinit_
 # define geometry geometry_
 # define agvolume agvolume_
+# define agstroot agstroot_
 # define kuexel  kuexel_
 # define set_kupatl set_kupatl_
 # define dzddiv  dzddiv_
@@ -557,6 +558,7 @@ EXTERN Float_t *z_q;
 # define agxinit AGXINIT
 # define geometry GEOMETRY
 # define agvolume AGVOLUME
+# define agstroot AGSTROOT
 # define kuexel  KUEXEL
 # define set_kupatl SET_KUPATL
 # define dzddiv  DZDDIV
@@ -636,6 +638,7 @@ extern "C" void type_of_call agxuser();
 extern "C" void type_of_call agxinit();
 extern "C" void type_of_call geometry();
 extern "C" Int_t  type_of_call agvolume(St_Node**,Float_t**,Float_t**,Float_t**);
+extern "C" Int_t  type_of_call agstroot(Char_t*,Char_t*);
 extern "C" void type_of_call kuexel   (const Char_t*,Int_t);
 extern "C" void type_of_call set_kupatl(const Char_t*,Int_t*,Int_t);
 extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
