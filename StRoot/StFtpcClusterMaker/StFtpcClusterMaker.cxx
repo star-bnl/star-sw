@@ -1,5 +1,10 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.14 2000/11/20 11:39:12 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.15 2000/11/24 14:57:02 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.15  2000/11/24 14:57:02  hummler
+// - remove tables from StFtpcFastSimu
+// - remove memory leak
+// - general cleanup
+//
 // Revision 1.14  2000/11/20 11:39:12  jcs
 // remove remaining traces of fspar table
 //
@@ -57,6 +62,7 @@
 #include "StFtpcChargeStep.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
+#include "StFtpcGeantPoint.hh"
 #include "StFtpcFastSimu.hh"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -132,7 +138,7 @@ Int_t StFtpcClusterMaker::Make()
 
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
-  StFTPCReader *ftpcReader;
+  StFTPCReader *ftpcReader=NULL;
   daqDataset=GetDataSet("StDaqReader");
   if(daqDataset)
     {
@@ -152,6 +158,11 @@ Int_t StFtpcClusterMaker::Make()
 							 m_zrow,
 							 m_gaspar);
   
+  TClonesArray *hitarray = new TClonesArray("StFtpcPoint", 0);  
+
+  // ghitarray will only be used if fast simulator is active
+  TClonesArray *ghitarray = new TClonesArray("StFtpcGeantPoint", 0);  
+
   St_DataSet *raw = GetDataSet("ftpc_raw");
   if (raw) {
     //			FCL
@@ -168,51 +179,6 @@ Int_t StFtpcClusterMaker::Make()
 				  fcl_ftpcadc->GetNRows());
 
       cout << "created StFTPCReader from tables" << endl;
-
-      TClonesArray *hitarray = new TClonesArray("StFtpcPoint", 0);
-
-      StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
-						    ftpcReader, 
-						    paramReader);
-      // uncomment to recalculate normalized pressure from charge step:
-      step->histogram(1);
-      // uncomment to fill charge step histogram only:
-      //      step->histogram(0);
-
-      if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
-            
-      StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
-							 paramReader, 
-							 hitarray);
-
-      int searchresult=fcl->search();
-      
-      if (searchresult == 0)
-	{
-	  iMake=kStWarn;
-	}
-      else
-	{
-	  Int_t num_points = hitarray->GetEntriesFast();
-	  St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",num_points);
-	  m_DataSet->Add(fcl_fppoint);
-
-	  fcl_fppoint_st *pointTable= fcl_fppoint->GetTable();
-
-	  StFtpcPoint *point;
-    
-	  for (Int_t i=0; i<num_points; i++) 
-	    {
-	      point = (StFtpcPoint *)hitarray->At(i);
-	      point->ToTable(&(pointTable[i]));    
-	    }
-   
-	  fcl_fppoint->SetNRows(num_points);
-	  
-	}
-      delete fcl;
-      delete step;
-      delete ftpcReader;
     }
     else {
       
@@ -221,8 +187,34 @@ Int_t StFtpcClusterMaker::Make()
 	   << " fcl_ftpcadc   = " << fcl_ftpcadc << endl;
     }
   }
-  else { 
+
+  if(ftpcReader) {
+    StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
+						  ftpcReader, 
+						  paramReader);
+    // uncomment to recalculate normalized pressure from charge step:
+    step->histogram(1);
+    // uncomment to fill charge step histogram only:
+    //      step->histogram(0);
     
+    if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
+    
+    StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
+						       paramReader, 
+						       hitarray);
+    
+    int searchresult=fcl->search();
+    
+    if (searchresult == 0)
+      {
+	iMake=kStWarn;
+      }
+	
+    delete fcl;
+    delete step;
+    delete ftpcReader;
+  }
+  else {     
     //                      FFS
     St_DataSet *gea = GetDataSet("geant");
     St_DataSetIter geant(gea);
@@ -234,31 +226,60 @@ Int_t StFtpcClusterMaker::Make()
 							     g2t_track,
 							     g2t_ftp_hit);
 
-      St_ffs_gepoint *ffs_gepoint = new St_ffs_gepoint("ffs_gepoint",150000);
-      m_DataSet->Add(ffs_gepoint);
-      St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",150000);
-      m_DataSet->Add(fcl_fppoint);
-      
       if(Debug()) cout<<"NO RAW DATA AVAILABLE - start running StFtpcFastSimu"<<endl;
       
-      Int_t numGepoint=ffs_gepoint->GetNRows();
-      Int_t maxGepoint=ffs_gepoint->GetTableSize();
-      Int_t numFppoint=fcl_fppoint->GetNRows();
-      Int_t maxFppoint=fcl_fppoint->GetTableSize();
-      StFtpcFastSimu *ffs = new StFtpcFastSimu(ffs_gepoint->GetTable(),
-					       &numGepoint, maxGepoint,
-					       fcl_fppoint->GetTable(),
-					       &numFppoint, maxFppoint,
-					       geantReader,
-					       paramReader);
-      ffs_gepoint->SetNRows(numGepoint);				      
-      fcl_fppoint->SetNRows(numFppoint);				      
+      StFtpcFastSimu *ffs = new StFtpcFastSimu(geantReader,
+					       paramReader,
+					       hitarray,
+					       ghitarray);
       if(Debug())cout<<"finished running StFtpcFastSimu"<<endl;
       delete ffs;
       delete geantReader;
     }
   }
+
+  Int_t num_points = hitarray->GetEntriesFast();
+  if(num_points>0)
+    {
+      St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",num_points);
+      m_DataSet->Add(fcl_fppoint);
+      
+      fcl_fppoint_st *pointTable= fcl_fppoint->GetTable();
+      
+      StFtpcPoint *point;
+      
+      for (Int_t i=0; i<num_points; i++) 
+	{
+	  point = (StFtpcPoint *)hitarray->At(i);
+	  point->ToTable(&(pointTable[i]));    
+	}
+      
+      fcl_fppoint->SetNRows(num_points);
+    }
   
+  Int_t num_gpoints = ghitarray->GetEntriesFast();
+  if(num_gpoints>0)
+    {
+      St_ffs_gepoint *ffs_gepoint = new St_ffs_gepoint("ffs_fgepoint",num_gpoints);
+      m_DataSet->Add(ffs_gepoint);
+      
+      ffs_gepoint_st *gpointTable= ffs_gepoint->GetTable();
+      
+      StFtpcGeantPoint *gpoint;
+      
+      for (Int_t i=0; i<num_gpoints; i++) 
+	{
+	  gpoint = (StFtpcGeantPoint *)ghitarray->At(i);
+	  gpoint->ToTable(&(gpointTable[i]));    
+	}
+      
+      ffs_gepoint->SetNRows(num_gpoints);
+    }
+  
+  ghitarray->Delete();
+  delete ghitarray;
+  hitarray->Delete();
+  delete hitarray;
   delete paramReader;
 // Deactivate histograms for MDC3
 //MakeHistograms(); // FTPC cluster finder histograms

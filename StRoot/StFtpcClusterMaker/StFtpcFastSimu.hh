@@ -1,6 +1,11 @@
-// $Id: StFtpcFastSimu.hh,v 1.8 2000/09/18 14:26:49 hummler Exp $
+// $Id: StFtpcFastSimu.hh,v 1.9 2000/11/24 14:57:02 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.9  2000/11/24 14:57:02  hummler
+// - remove tables from StFtpcFastSimu
+// - remove memory leak
+// - general cleanup
+//
 // Revision 1.8  2000/09/18 14:26:49  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
 // introduce StFtpcGeantReader to separate g2t tables from simulator code
@@ -31,6 +36,9 @@
 #define STAR_StFtpcFastSimu
 #include "ffs_gepoint.h"
 #include "fcl_fppoint.h"
+#include "TClonesArray.h"
+#include "StFtpcGeantPoint.hh"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -46,6 +54,10 @@ class StFtpcFastSimu
  private:
   StFtpcParamReader *mParam;
   StFtpcGeantReader *mGeant;
+  StFtpcPoint *mPoint;
+  StFtpcGeantPoint *mGeantPoint;
+  int nPoints;
+
   float Va;
   float Vhm[4];
   float Tbm[4];
@@ -70,27 +82,13 @@ class StFtpcFastSimu
       return x1-(double)(int)(x1/x2)*x2;
     }
  public:
-  StFtpcFastSimu(FFS_GEPOINT_ST* ffs_gepoint,
-		 int *ffs_gepoint_nok,
-		 int ffs_gepoint_maxlen,
-		 FCL_FPPOINT_ST* fcl_fppoint,
-		 int *fcl_fppoint_nok,
-		 int fcl_fppoint_maxlen,
-		 StFtpcGeantReader *geantReader,
-		 StFtpcParamReader *paramReader);
+  StFtpcFastSimu(StFtpcGeantReader *geantReader,
+		 StFtpcParamReader *paramReader,
+		 TClonesArray *pointarray,
+		 TClonesArray *geantarray);
   ~StFtpcFastSimu();
-  int ffs_gen_padres(int *ffs_gepoint_nok,
-		     int ffs_gepoint_maxlen,
-		     FFS_GEPOINT_ST *ffs_gepoint,
-		     int *fcl_fppoint_nok,
-		     int fcl_fppoint_maxlen,
-		     FCL_FPPOINT_ST *fcl_fppoint);
-  int ffs_hit_rd(int *ffs_gepoint_nok,
-		 int ffs_gepoint_maxlen,
-		 FFS_GEPOINT_ST *ffs_gepoint,
-		 int *fcl_fppoint_nok,
-		 int fcl_fppoint_maxlen,
-		 FCL_FPPOINT_ST *fcl_fppoint);
+  int ffs_gen_padres();
+  int ffs_hit_rd();
   int ffs_hit_smear(float phi, 
 		    float xi, 
 		    float yi, 
@@ -105,18 +103,8 @@ class StFtpcFastSimu
 		    float *st_dev_y,  
 		    RandGauss *quasiRandom);
   int ffs_ini();
-  int ffs_merge_tagger(int *ffs_gepoint_nok,
-		       int ffs_gepoint_maxlen,
-		       FFS_GEPOINT_ST *ffs_gepoint,
-		       int *fcl_fppoint_nok,
-		       int fcl_fppoint_maxlen,
-		       FCL_FPPOINT_ST *fcl_fppoint);
-  int ffs_tag(int *ffs_gepoint_nok,
-	      int ffs_gepoint_maxlen, 
-	      FFS_GEPOINT_ST *ffs_gepoint,
-	      int *fcl_fppoint_nok,
-	      int fcl_fppoint_maxlen,
-	      FCL_FPPOINT_ST *fcl_fppoint);
+  int ffs_merge_tagger();
+  int ffs_tag();
 };
 
 #endif
