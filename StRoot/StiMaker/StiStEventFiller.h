@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.3 2003/03/14 19:02:56 pruneau Exp $
+ * $Id: StiStEventFiller.h,v 2.4 2003/04/25 21:41:18 andrewar Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.4  2003/04/25 21:41:18  andrewar
+ * Added data memebers.
+ *
  * Revision 2.3  2003/03/14 19:02:56  pruneau
  * various updates - DCA is a bitch
  *
@@ -76,6 +79,8 @@ class StiTrackContainer;
 class StiTrack;
 class StiKalmanTrack;
 class StHelix;
+class StHelixModel;
+class StPhysicalHelixD;
 
 /*! \class StiStEventFiller
     StiStEventFiller is a utilitity class meant to properly convert StiKalmanTrack
@@ -108,8 +113,14 @@ private:
     StiDedxCalculator dEdxTpcCalculator;
     StiDedxCalculator dEdxSvtCalculator;
 
-    StHelix * helix;
     unsigned short mStiEncoded;
+    //helix parameters
+    StThreeVectorF *origin;
+    StThreeVectorF *mom;
+    StThreeVectorD *originD;
+    StHelixModel * helix;
+    StPhysicalHelixD * physicalHelix;
+
 
 };
 
