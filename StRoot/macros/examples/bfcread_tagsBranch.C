@@ -1,4 +1,4 @@
-// $Id: bfcread_tagsBranch.C,v 1.8 2000/05/03 20:06:51 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.9 2000/05/05 16:17:11 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -145,60 +145,65 @@ void bfcread_tagsBranch(
 // now sum up values in groups of tags so we can do a 
 // rough check - this can be removed later when/if we
 // have histograms
-	     if ( (strcmp(branch->GetName(),"ScaTag")==0) &&
-                  (strncmp(leaf->GetName(),"chargedParticles_Means",20)==0) )
-	      {
-		AcntScaCPM++;
-	        AsumScaCPM += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"ScaTag")==0) &&
-                  (strncmp(leaf->GetName(),"chargedParticles_Sigmas",20)==0) )
-     	      {
-		AcntScaCPS++;
-	        AsumScaCPS += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"ScaTag")==0) &&
-                  (strncmp(leaf->GetName(),"scaAnalysisMatrix",15)==0) )
-	      {
-		AcntScaAM++;
-	        AsumScaAM += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"StrangeTag")==0) )
-	      {
-		AcntStrange++;
-	        AsumStrange += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
-                  (strncmp(leaf->GetName(),"qx",2)==0) )
-	      {
-		AcntFlowqx++;
-	        AsumFlowqx += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
-                  (strncmp(leaf->GetName(),"qy",2)==0) )
-	      {
-		AcntFlowqy++;
-	        AsumFlowqy += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
-                  (strncmp(leaf->GetName(),"n",1)==0) )
-	      {
-		AcntFlown++;
-	        AsumFlown += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"FlowTag")==0) &&
-                  (strncmp(leaf->GetName(),"m",1)==0) )
-	      {
-		AcntFlowm++;
-	        AsumFlowm += leaf->GetValue();
-              }
-	     if ( (strcmp(branch->GetName(),"EvtHddr")==0) )
-	      {
-		AcntEvtHddr++;
-	        AsumEvtHddr += leaf->GetValue();
-              }
-
-
+	  char *bName = branch->GetName();
+	  char b = bName[1];
+   
+	  switch (b)
+	    {
+	    case 'c': //"ScaTag"
+	      if (strncmp(leaf->GetName(),"chargedParticles_Means",20)==0)
+		{
+		  AcntScaCPM++;
+		  AsumScaCPM += leaf->GetValue();
+		}
+	      elseif(strncmp(leaf->GetName(),"chargedParticles_Sigmas",20)==0)
+		{
+		  AcntScaCPS++;
+		  AsumScaCPS += leaf->GetValue();
+		}
+	      elseif (strncmp(leaf->GetName(),"scaAnalysisMatrix",15)==0)
+		{
+		  AcntScaAM++;
+		  AsumScaAM += leaf->GetValue();
+		}
+	      break;
+	      
+	    case 't': //"StrangeTag"
+	      AcntStrange++;
+	      AsumStrange += leaf->GetValue();
+	      break;
+	      
+	    case 'l': //"FlowTag"
+	      if (strncmp(leaf->GetName(),"qx",2)==0)
+		{
+		  AcntFlowqx++;
+		  AsumFlowqx += leaf->GetValue();
+		}
+	      elseif (strncmp(leaf->GetName(),"qy",2)==0) 
+		{
+		  AcntFlowqy++;
+		  AsumFlowqy += leaf->GetValue();
+		}
+	      elseif (strncmp(leaf->GetName(),"n",1)==0) 
+		{
+		  AcntFlown++;
+		  AsumFlown += leaf->GetValue();
+		}
+	      elseif (strncmp(leaf->GetName(),"m",1)==0) 
+		{
+		  AcntFlowm++;
+		  AsumFlowm += leaf->GetValue();
+		}
+	      break;
+	      
+	    case 'v': //"EvtHddr"
+	      AcntEvtHddr++;
+	      AsumEvtHddr += leaf->GetValue();
+	      break;
+	    default:
+	      cerr<<"ERROR: Unknown branch!"<<endl;
+	      break;
+	    }
 	}
 
 
