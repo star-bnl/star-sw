@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.46 2000/11/30 16:40:21 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.47 2000/12/06 15:38:46 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,13 +11,15 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.47  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
 // Revision 1.46  2000/11/30 16:40:21  snelling
-// Protection agains loading probability pid caused it not to work anymore
+// Protection against loading probability pid caused it not to work anymore
 // therefore protection removed again
 //
 // Revision 1.45  2000/11/07 02:36:41  snelling
 // Do not init prob pid when not used
-//
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -197,7 +199,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.46 2000/11/30 16:40:21 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.47 2000/12/06 15:38:46 oldi Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -368,6 +370,7 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPhiGlobal(g.phi());
 	pFlowTrack->SetEta(p.pseudoRapidity());
 	pFlowTrack->SetEtaGlobal(g.pseudoRapidity());
+	pFlowTrack->SetDetId((Float_t)p.pseudoRapidity());
 	pFlowTrack->SetPt(p.perp());
 	pFlowTrack->SetPtGlobal(g.perp());
 	pFlowTrack->SetCharge(pTrack->geometry()->charge());
@@ -605,6 +608,7 @@ Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPt(pPicoTrack->Pt());
       pFlowTrack->SetPhi(pPicoTrack->Phi());
       pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca()/10000.);
@@ -658,6 +662,7 @@ Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPt(pPicoTrack->Pt());
       pFlowTrack->SetPhi(pPicoTrack->Phi());
       pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());
@@ -725,6 +730,7 @@ Bool_t StFlowMaker::FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());
@@ -792,6 +798,7 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPhiGlobal(pPicoTrack->PhiGlobal());
       pFlowTrack->SetEta(pPicoTrack->Eta());
       pFlowTrack->SetEtaGlobal(pPicoTrack->EtaGlobal());
+      pFlowTrack->SetDetId(pPicoTrack->Eta());
       pFlowTrack->SetDedx(pPicoTrack->Dedx());
       pFlowTrack->SetCharge(pPicoTrack->Charge());
       pFlowTrack->SetDca(pPicoTrack->Dca());

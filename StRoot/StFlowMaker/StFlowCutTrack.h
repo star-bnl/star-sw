@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.5 2000/10/12 22:46:35 snelling Exp $
+// $Id: StFlowCutTrack.h,v 1.6 2000/12/06 15:38:46 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.6  2000/12/06 15:38:46  oldi
+// Including FTPC.
+//
 // Revision 1.5  2000/10/12 22:46:35  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -74,23 +77,46 @@ class StFlowCutTrack {
   static void    PrintCutList();
   static UInt_t  EtaSymPos();
   static UInt_t  EtaSymNeg();
+  static UInt_t  EtaSymTpcPos();
+  static UInt_t  EtaSymTpcNeg();
+  static UInt_t  EtaSymFtpcPos();
+  static UInt_t  EtaSymFtpcNeg();
   static void    EtaSymClear();
-  static void    SetFitPts(Int_t lo, Int_t hi);
+  static void    SetFitPtsTpc(Int_t lo, Int_t hi);
+  static void    SetFitPtsFtpc(Int_t lo, Int_t hi);
   static void    SetFitOverMaxPts(Float_t lo, Float_t hi);
   static void    SetChiSq(Float_t lo, Float_t hi);
   static void    SetDca(Float_t lo, Float_t hi);
   static void    SetPt(Float_t lo, Float_t hi);
-  static void    SetEta(Float_t lo, Float_t hi);
+  static void    SetEtaTpc(Float_t lo, Float_t hi);
+  static void    SetEtaFtpc(Float_t lo, Float_t hi);
+
+  static Int_t   DetId(Float_t eta);
   
  private:
 
   static UInt_t  mTrackN;                    // number of tracks
+  static UInt_t  mTpcTrackN;                 // number of Tpc tracks
+  static UInt_t  mFtpcTrackN;                // number of Ftpc tracks
+  static UInt_t  mFtpcEastTrackN;            // number of Ftpc east tracks
+  static UInt_t  mFtpcWestTrackN;            // number of Ftpc west tracks
+
   static UInt_t  mGoodTrackN;                // number of accepted tracks   
+  static UInt_t  mGoodTpcTrackN;             // number of accepted Tpc tracks   
+  static UInt_t  mGoodFtpcTrackN;            // number of accepted Ftpc tracks
+   
   static UInt_t  mEtaSymPosN;                // number of positive Eta tracks
   static UInt_t  mEtaSymNegN;                // number of negative Eta tracks
+  static UInt_t  mEtaSymPosTpcN;             // number of positive Eta Tpc tracks
+  static UInt_t  mEtaSymNegTpcN;             // number of negative Eta Tpc tracks
+  static UInt_t  mEtaSymPosFtpcN;            // number of positive Eta Ftpc tracks
+  static UInt_t  mEtaSymNegFtpcN;            // number of negative Eta Ftpc tracks
 						
-  static UInt_t  mFitPtsCutN;                // number not accepted
-  static Int_t   mFitPtsCuts[2];             // range
+  static UInt_t  mFitPtsTpcCutN;             // number not accepted
+  static Int_t   mFitPtsTpcCuts[2];          // range
+
+  static UInt_t  mFitPtsFtpcCutN;            // number not accepted
+  static Int_t   mFitPtsFtpcCuts[2];         // range
 
   static UInt_t  mFitOverMaxCutN;            // number not accepted
   static Float_t mFitOverMaxCuts[2];         // range
@@ -101,11 +127,14 @@ class StFlowCutTrack {
   static UInt_t  mDcaCutN;                   // number not accepted
   static Float_t mDcaCuts[2];                // range
 
-  static UInt_t  mPtCutN;                   // number not accepted
-  static Float_t mPtCuts[2];                // range
+  static UInt_t  mPtCutN;                    // number not accepted
+  static Float_t mPtCuts[2];                 // range
 
-  static UInt_t  mEtaCutN;                   // number not accepted
-  static Float_t mEtaCuts[2];                // range
+  static UInt_t  mEtaTpcCutN;                // number not accepted
+  static Float_t mEtaTpcCuts[2];             // range
+
+  static UInt_t  mEtaFtpcCutN;               // number not accepted
+  static Float_t mEtaFtpcCuts[2];            // range
 
   ClassDef(StFlowCutTrack,1)                 // macro for rootcint
 }; 
@@ -116,8 +145,11 @@ inline UInt_t StFlowCutTrack::EtaSymNeg() { return mEtaSymNegN; }
 
 inline void StFlowCutTrack::EtaSymClear() { mEtaSymPosN = 0; mEtaSymNegN = 0; }
 
-inline void StFlowCutTrack::SetFitPts(Int_t lo, Int_t hi) {
-  mFitPtsCuts[0] = lo; mFitPtsCuts[1] = hi; }
+inline void StFlowCutTrack::SetFitPtsTpc(Int_t lo, Int_t hi) {
+  mFitPtsTpcCuts[0] = lo; mFitPtsTpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetFitPtsFtpc(Int_t lo, Int_t hi) {
+  mFitPtsFtpcCuts[0] = lo; mFitPtsFtpcCuts[1] = hi; }
 
 inline void StFlowCutTrack::SetFitOverMaxPts(Float_t lo, Float_t hi) {
   mFitOverMaxCuts[0] = lo; mFitOverMaxCuts[1] = hi; }
@@ -131,7 +163,10 @@ inline void StFlowCutTrack::SetDca(Float_t lo, Float_t hi) {
 inline void StFlowCutTrack::SetPt(Float_t lo, Float_t hi) {
   mPtCuts[0] = lo; mPtCuts[1] = hi; }
 
-inline void StFlowCutTrack::SetEta(Float_t lo, Float_t hi) {
-  mEtaCuts[0] = lo; mEtaCuts[1] = hi; }
+inline void StFlowCutTrack::SetEtaTpc(Float_t lo, Float_t hi) {
+  mEtaTpcCuts[0] = lo; mEtaTpcCuts[1] = hi; }
+
+inline void StFlowCutTrack::SetEtaFtpc(Float_t lo, Float_t hi) {
+  mEtaFtpcCuts[0] = lo; mEtaFtpcCuts[1] = hi; }
 
 #endif
