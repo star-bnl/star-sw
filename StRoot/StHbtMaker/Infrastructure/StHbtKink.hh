@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtKink.hh,v 1.2 2001/06/21 19:15:46 laue Exp $
+ * $Id: StHbtKink.hh,v 1.3 2001/11/14 21:07:21 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, 23May2001
  *
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StHbtKink.hh,v $
+ * Revision 1.3  2001/11/14 21:07:21  lisa
+ * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
+ *
  * Revision 1.2  2001/06/21 19:15:46  laue
  * Modified fiels:
  *   CTH.hh : new constructor added
@@ -55,17 +58,17 @@ public:
   ~StHbtKink(){/* no-op */}
 
   // Get's
-  float        DcaParentDaughter();
-  float        DcaDaughterPrimaryVertex();
-  float        DcaParentPrimaryVertex();
-  float        HitDistanceParentDaughter();
-  float        HitDistanceParentVertex();
-  float        DeltaEnergy(int i=0);
-  float        DecayAngle();
-  float        DecayAngleCM();
-  StHbtTrack   Daughter();
-  StHbtTrack   Parent();
-  StHbtThreeVector Position();
+  float        DcaParentDaughter() const;
+  float        DcaDaughterPrimaryVertex() const;
+  float        DcaParentPrimaryVertex() const;
+  float        HitDistanceParentDaughter() const;
+  float        HitDistanceParentVertex() const;
+  float        DeltaEnergy(int i=0) const;
+  float        DecayAngle() const;
+  float        DecayAngleCM() const;
+  StHbtTrack   Daughter() const;
+  StHbtTrack   Parent() const;
+  StHbtThreeVector Position() const; 
 
   
   friend ostream& operator<<(ostream& out, StHbtKink& kink);
@@ -91,17 +94,17 @@ protected:
 };
 
 // Get's
-inline float        StHbtKink::DcaParentDaughter(){return mDcaParentDaughter;}
-inline float        StHbtKink::DcaDaughterPrimaryVertex(){return mDcaDaughterPrimaryVertex;}
-inline float        StHbtKink::DcaParentPrimaryVertex(){return mDcaParentPrimaryVertex;}
-inline float        StHbtKink::HitDistanceParentDaughter(){return mHitDistanceParentDaughter;}
-inline float        StHbtKink::HitDistanceParentVertex(){return mHitDistanceParentVertex;}
-inline float        StHbtKink::DeltaEnergy(int i){return mDeltaEnergy[i];}
-inline float        StHbtKink::DecayAngle(){return mDecayAngle;}
-inline float        StHbtKink::DecayAngleCM(){return mDecayAngleCM;}
-inline StHbtTrack   StHbtKink::Daughter(){return mDaughter;}
-inline StHbtTrack   StHbtKink::Parent(){return mParent;}
-inline StHbtThreeVector StHbtKink::Position(){return mPosition;}
+inline float        StHbtKink::DcaParentDaughter() const {return mDcaParentDaughter;}
+inline float        StHbtKink::DcaDaughterPrimaryVertex() const {return mDcaDaughterPrimaryVertex;}
+inline float        StHbtKink::DcaParentPrimaryVertex() const {return mDcaParentPrimaryVertex;}
+inline float        StHbtKink::HitDistanceParentDaughter() const {return mHitDistanceParentDaughter;}
+inline float        StHbtKink::HitDistanceParentVertex() const {return mHitDistanceParentVertex;}
+inline float        StHbtKink::DeltaEnergy(int i) const {return mDeltaEnergy[i];}
+inline float        StHbtKink::DecayAngle() const {return mDecayAngle;}
+inline float        StHbtKink::DecayAngleCM() const {return mDecayAngleCM;}
+inline StHbtTrack   StHbtKink::Daughter() const {return mDaughter;}
+inline StHbtTrack   StHbtKink::Parent() const {return mParent;}
+inline StHbtThreeVector StHbtKink::Position() const {return mPosition;}
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.cxx,v 1.3 2001/07/22 19:57:05 rcwells Exp $
+ * $Id: calculateEventPlaneEventCut.cxx,v 1.4 2001/11/14 21:07:19 lisa Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.cxx,v $
+ * Revision 1.4  2001/11/14 21:07:19  lisa
+ * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
+ *
  * Revision 1.3  2001/07/22 19:57:05  rcwells
  * Fixed switch in calculateEventPlaneEventCut
  *
@@ -45,8 +48,14 @@ calculateEventPlaneEventCut::calculateEventPlaneEventCut(){
 //  /* noop */
 //}
 //------------------------------
-bool calculateEventPlaneEventCut::Pass(const StHbtEvent* event){
+bool calculateEventPlaneEventCut::Pass(const StHbtEvent* ConstantEventIn){
   cout << "calculateEventPlaneEventCut::Pass()" << endl;
+
+  /* this next line makes it explicit that we are PURPOSELY ignoring the
+     "const" nature of the StHbtEvent for this special case - mike lisa 14nov01
+  */
+  StHbtEvent* event = (StHbtEvent*)ConstantEventIn;
+
   bool goodEvent = true;
   if (event) {
     if (mFromHBT) mFlowMaker->FillFlowEvent(event);

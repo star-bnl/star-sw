@@ -317,8 +317,9 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
 	continue;
       }
       pdgCode = mTrack->particleDefinition()->pdgEncoding();
-      motherPdgCode = mTrack->parent(); // 0 if no start vertex 
-      if (motherPdgCode) {
+      // this was just stupid... mal 14nov01      motherPdgCode = mTrack->parent(); // 0 if no start vertex 
+      //      if (motherPdgCode) {
+      if (mTrack->parent()) {
 	motherPdgCode = mTrack->parent()->pdgId();
 	motherTrackId = mTrack->parent()->key();
       }
