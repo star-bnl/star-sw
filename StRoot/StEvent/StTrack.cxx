@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.24 2004/08/10 14:20:21 calderon Exp $
+ * $Id: StTrack.cxx,v 2.25 2004/08/13 18:15:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.25  2004/08/13 18:15:08  ullrich
+ * Added +1 to the number of possible points when primary track.
+ *
  * Revision 2.24  2004/08/10 14:20:21  calderon
  * Putting the streamers back in.  They should not be needed, but
  * apparently removing them causes more problems.  Yuri tested that
@@ -101,7 +104,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.24 2004/08/10 14:20:21 calderon Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.25 2004/08/13 18:15:08 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -267,18 +270,21 @@ StTrack::length() const { return mLength; }
 unsigned short
 StTrack::numberOfPossiblePoints() const
 {
+    unsigned short result;
     if (mNumberOfPossiblePoints) {
-	return (numberOfPossiblePoints(kTpcId) +
-		numberOfPossiblePoints(kSvtId) +
-		numberOfPossiblePoints(kSsdId));
+	result = numberOfPossiblePoints(kTpcId) +
+	    numberOfPossiblePoints(kSvtId) +
+	    numberOfPossiblePoints(kSsdId);
     }
     else {
-	return (numberOfPossiblePoints(kTpcId) +
-		numberOfPossiblePoints(kFtpcWestId) +
-		numberOfPossiblePoints(kFtpcEastId) +
-		numberOfPossiblePoints(kSvtId) +
-		numberOfPossiblePoints(kSsdId));	
+	result = numberOfPossiblePoints(kTpcId) +
+	    numberOfPossiblePoints(kFtpcWestId) +
+	    numberOfPossiblePoints(kFtpcEastId) +
+	    numberOfPossiblePoints(kSvtId) +
+	    numberOfPossiblePoints(kSsdId);	
     }
+    if (type() == primary || type() == estPrimary) result++;
+    return result;
 }
 
 unsigned short
