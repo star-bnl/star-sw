@@ -7,9 +7,42 @@ MODULES := $(CVSROOT)/CVSROOT/modules
 #BRANCH_DIR := $(shell awk '$$1=="$(BASE_NAME)" {print $$2}' $(MODULES))
 #BRANCH_DIR := $(addprefix $(STAR_LIB)/,$(BRANCH_DIR))
 #BRANCH_DIR := $(dir $(BRANCH_DIR))
-BRANCH_DIR := $(STAR_LIB)/dev/$(BRANCH_NAME)/
+SYS := sys
+ifeq( $(BRANCH_NAME),$(SYS) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_SYS_LEVEL)/$(BRANCH_NAME)/
+endif
+SIM := sim
+ifeq( $(BRANCH_NAME),$(SIM) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_SIM_LEVEL)/$(BRANCH_NAME)/
+endif
+ANA := ana
+ifeq( $(BRANCH_NAME),$(ANA) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_ANA_LEVEL)/$(BRANCH_NAME)/
+endif
+PHY := phy
+ifeq( $(BRANCH_NAME),$(PHY) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_PHY_LEVEL)/$(BRANCH_NAME)/
+endif
+OFL := ofl
+ifeq( $(BRANCH_NAME),$(OFL) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_OFL_LEVEL)/$(BRANCH_NAME)/
+endif
+ONL := onl
+ifeq( $(BRANCH_NAME),$(ONL) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_ONL_LEVEL)/$(BRANCH_NAME)/
+endif
+TRG := trg
+ifeq( $(BRANCH_NAME),$(TRG) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_TRG_LEVEL)/$(BRANCH_NAME)/
+endif
+DAQ := daq
+ifeq( $(BRANCH_NAME),$(DAQ) )
+	BRANCH_DIR := $(STAR_LIB)/$(STAR_DAQ_LEVEL)/$(BRANCH_NAME)/
+endif
 #
+# Real install command should be "cp".
 INSTALL := cp
+INSTALL := -ln -s
 #
 INSTALL_IDL_FILES := $(wildcard $(IDLDIR)/*.idl)
 install_idl:
