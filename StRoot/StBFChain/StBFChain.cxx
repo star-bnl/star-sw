@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.135 2000/08/29 21:12:59 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.136 2000/08/31 13:14:03 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -252,7 +252,6 @@ StBFChain::StBFChain(const char *name):StChain(name),fXdfOut(0),fSetFiles(0),fIn
 }
 //_____________________________________________________________________________
 StBFChain::~StBFChain(){
-  if (fBFC) delete [] fBFC;
   Finish();
 }
 //_____________________________________________________________________________
@@ -454,9 +453,13 @@ Int_t StBFChain::Instantiate()
 }
 Int_t StBFChain::Finish()
 {
-  SafeDelete (fXdfOut);
-  if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
-  return StMaker::Finish();
+  if (fBFC) {
+    delete [] fBFC; fBFC = 0;
+    SafeDelete (fXdfOut);
+    if (fTFile) {fTFile->Write(); fTFile->Flush(); fTFile->Close(); SafeDelete (fTFile);}
+    return StMaker::Finish();
+  }
+  else return kStOK;
 }
 //_____________________________________________________________________
 Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Opt) {
