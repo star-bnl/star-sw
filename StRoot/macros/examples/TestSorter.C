@@ -38,5 +38,12 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
        particle_st *particle = table->GetTable();
        for (i=0; i < sorter->GetNRows(); i++) cout << particle[sorter->GetIndex(i)]->phep[3] << "  ";
        cout << endl;
+
+       cout << " Binary Search test:"<< endl;
+       for (i=sorter->GetNRows()-1; i >= 0 ; i--) {
+          Float_t ph = particle[sorter->GetIndex(i)]->phep[3]; 
+          Int_t lastFound = sorter->BinarySearch(ph);
+          cout << i << ". " << ph << " == " << lastFound << " : " << sorter->GetLastFound() << endl;
+       }
     }
 }
