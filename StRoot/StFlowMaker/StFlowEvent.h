@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.31 2001/11/02 04:49:52 aihong Exp $
+// $Id: StFlowEvent.h,v 1.32 2001/11/09 21:10:42 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          Cumulants added by Aihong Tang, KSU, Nov 2001
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -303,6 +304,9 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.32  2001/11/09 21:10:42  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.31  2001/11/02 04:49:52  aihong
 // add func. for cumulant maker
 //

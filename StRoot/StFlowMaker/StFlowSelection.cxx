@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.14 2001/05/22 20:17:58 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.15 2001/11/09 21:10:57 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -36,8 +36,6 @@ StFlowSelection::StFlowSelection() : mSubevent(-1) {
   mFitOverMaxPtsPart[1] = 0.;
   mChiSqPart[0]         = 0.;
   mChiSqPart[1]         = 0.;
-  mDcaPart[0]           = 0.;
-  mDcaPart[1]           = 0.;
   mDcaGlobalPart[0]     = 0.;
   mDcaGlobalPart[1]     = 0.;
   mYPart[0]             = 0.;
@@ -113,11 +111,6 @@ Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
       (chiSq < mChiSqPart[0] || 
        chiSq >= mChiSqPart[1])) return kFALSE;
 
-  // DCA
-  float dca = pFlowTrack->Dca();
-  if (mDcaPart[1] > mDcaPart[0] && 
-      (dca < mDcaPart[0] || dca >= mDcaPart[1])) return kFALSE;
-
   // DCA Global
   float globdca = pFlowTrack->DcaGlobal();
   if (mDcaGlobalPart[1] > mDcaGlobalPart[0] && 
@@ -154,8 +147,6 @@ void StFlowSelection::PrintList() const {
        << mFitOverMaxPtsPart[0] << " to " << mFitOverMaxPtsPart[1] <<endl;
   cout << "# Chi2 for particles correlated with the event plane: " << 
     mChiSqPart[0] << " to " << mChiSqPart[1] <<endl;
-  cout << "# Dca for particles correlated with the event plane: " << 
-    mDcaPart[0] << " to " << mDcaPart[1] <<endl;
   cout << "# Global Dca for particles correlated with the event plane: " << 
     mDcaGlobalPart[0] << " to " << mDcaGlobalPart[1] <<endl;
   cout << "#################################################################"
@@ -166,6 +157,9 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.15  2001/11/09 21:10:57  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.14  2001/05/22 20:17:58  posk
 // Now can do pseudorapidity subevents.
 //

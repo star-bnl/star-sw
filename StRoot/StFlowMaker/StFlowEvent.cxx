@@ -1,9 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.25 2001/11/02 04:49:52 aihong Exp $
+// $Id: StFlowEvent.cxx,v 1.26 2001/11/09 21:10:37 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          Cumulants added by Aihong Tang, KSU, Nov 2001
 //
 //////////////////////////////////////////////////////////////////////
 //
@@ -433,15 +434,10 @@ Double_t StFlowEvent::WgtMult_q6(StFlowSelection* pFlowSelect) {
 //-------------------------------------------------------------
 
 Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
-  TVector2 mQ  = Q(pFlowSelect);
-  UInt_t mult  = Mult(pFlowSelect);
+  TVector2 mQ  = NormQ(pFlowSelect);
   
-  if (mPtWgt) return 0.;
-
-  return (mult) ? mQ.Mod() / sqrt((double)mult) : 0.;
+  return mQ.Mod();
 }
-
-
 
 //-----------------------------------------------------------------------
 
@@ -838,6 +834,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.26  2001/11/09 21:10:37  posk
+// Switched from CERNLIB to TMath. Little q is now normalized.
+//
 // Revision 1.25  2001/11/02 04:49:52  aihong
 // add func. for cumulant maker
 //
