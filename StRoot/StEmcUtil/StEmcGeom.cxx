@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.9 2001/05/02 16:35:51 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.10 2001/05/02 20:34:02 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.10  2001/05/02 20:34:02  pavlinov
+ * mCalg must zero on constractor
+ *
  * Revision 1.9  2001/05/02 16:35:51  pavlinov
  * Change default value of calb for year2001 geometry
  *
@@ -107,6 +110,11 @@ void StEmcGeom::initGeom(const Int_t det)
 {
   mMode="default";
   mDetector = det;
+  mGeantGeom = 0;
+  mCalg    = 0;
+  mCalg_st = 0;
+  mCalr    = 0;
+  mCalr_st = 0;
 
   mPhiOffset.Set(2); mPhiStep.Set(2); mPhiBound.Set(2);
 
@@ -826,17 +834,18 @@ StEmcGeom::getGeantGeometryTable()
   StMaker maker;
   mChain = maker.GetChain();
 
-  if(mChain) mGeantGeom = mChain->GetDataSet("geom");
+  if(mChain) mGeantGeom = mChain->GetDataSet(".const/geom");
 
   if(mGeantGeom != 0) {
     mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
     if(mCalg) {
       mCalg_st = mCalg->GetTable();
-      for(Int_t i=0;i<2;i++) 
- 	printf(" Barrel %i Angle shift %6.0f \n", i+1, mCalg_st->shift[i]); 
+      printf("calb_calr get from Geant::"); 
+      for(Int_t i=0;i<2;i++) printf(" Barrel %i Angle shift %6.0f ", i+1, mCalg_st->shift[i]);
+      printf("\n");
+      mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
+      if(mCalr) mCalr_st = mCalr->GetTable(); // BARREL EMC RADIUSES
     }
-    mCalr = (St_calb_calr   *) mGeantGeom->Find("calb_calr");
-    if(mCalr) mCalr_st = mCalr->GetTable(); // BARREL EMC RADIUSES
   }
   if(!mCalg_st || !mCalr_st) {
     mMode.Append(" : No table");
