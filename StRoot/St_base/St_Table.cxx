@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.29 1998/12/07 20:23:11 fine Exp $ 
+// $Id: St_Table.cxx,v 1.30 1998/12/09 20:55:28 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.30  1998/12/09 20:55:28  fine
+// St_Table::Print() method bug has been fixed, some cosmetic improvements
+//
 // Revision 1.29  1998/12/07 20:23:11  fine
 // St_Table:: working versions of the Print() and SavePrimitive methods
 //
@@ -361,9 +364,10 @@ TClass  *St_Table::GetRowClass() const
   // Return TClass object defining the origial STAF table
 
   //   TString buffer = Class()->GetName();
-   TString buffer = GetTitle();
-   //   buffer.ReplaceAll("St_","");
-   buffer += "_st";
+  //  TString buffer = GetTitle();
+     TString buffer = IsA()->GetName();
+     buffer.ReplaceAll("St_","");
+     buffer += "_st";
    return gROOT->GetClass(buffer.Data());
 }
 //______________________________________________________________________________
@@ -691,7 +695,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
              Int_t ltit = 0;
              if (isdate == kFALSE && strcmp(member->GetFullTypeName(), "char*") &&
                  strcmp(member->GetFullTypeName(), "const char*")) {
-                    cout << " // " << member->GetTitle() << ";";
+                    cout << " " << member->GetTitle();
              }   
            }
            cout << endl;

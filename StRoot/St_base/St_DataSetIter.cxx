@@ -2,6 +2,9 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
 //*KEEP,TDataset,T=C++.
+#include <iostream.h>
+#include <iomanip.h>
+
 #include "St_DataSetIter.h"
 #include "St_DataSet.h"
 //*KEEP,TBrowser.
@@ -172,13 +175,31 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
 }
 
 //______________________________________________________________________________
+Int_t St_DataSetIter::Du() const {
+ // summarize dataset usage by Herb Ward proposal 
+  if (!fWorkingDataSet) return 0;
+  St_DataSetIter next(fWorkingDataSet,0); 
+  St_DataSet *nextset = 0;
+  Int_t count = 0;
+  while(nextset = count ? next():fWorkingDataSet) {
+      count++;
+      if (nextset->IsFolder()) cout << endl;
+      TString path = nextset->Path();
+      cout << path << setw(TMath::Max(Int_t(40-strlen(path.Data())),Int_t(0))) << "...";
+      const Char_t *type = nextset->IsFolder() ? "directory" : "table" ;
+      cout << setw(10) << type;
+      cout << endl;   
+  }
+  return count;
+} 
+//______________________________________________________________________________
 St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Option_t *opt)
 {
   //
   // FindObject looks for the object with the name supplied across dataset.
   //
   // name        - the "base" name (with no path) of the St_DataSet
-  // path        - path to start the seacrh from (the current dataset "by default")
+  // path        - path to start the search from (the current dataset "by default")
   // opt = "-i"  - case insensitive search
   //
   // Note: If the name provided is not unique 
@@ -327,7 +348,12 @@ St_DataSet *St_DataSetIter::Next()
     if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) ) 
     {
       // create the next level iterator, go deeper
-      TList *list = fDataSet->GetListOfDataset();
+#ifndef DATASETMAP
+      TList 
+#else
+      TMap
+#endif
+            *list  = fDataSet->GetListOfDataset();
       // Look for the next level
       if (list && list->GetSize() ) {
          fDepth++;
@@ -441,7 +467,12 @@ St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
         found = kTRUE;
       }
       else {
-        TList *list = dataset->GetListOfDataset();
+#ifndef DATASETMAP
+        TList 
+#else
+        TMap
+#endif
+              *list = dataset->GetListOfDataset();
         if (list) {
           TIter next(list);
           St_DataSet *obj = 0;
