@@ -402,14 +402,14 @@ my $newset;
    $mowner = ($$eachRecoFile)->fowner;
    $msize = ($$eachRecoFile)->dsize;
    $mName = $mfName;
-  if($mfName =~ /rcf150_p/ and $mfName =~ /_2000evts/) {
+  if($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
+   $mrunId = 150;
+   $mfileSeq = 0; 
+ }
+  elsif($mfName =~ /rcf150_p/) {
    $mrunId = 150;
    @prtFS = split("_",$mfName);
    $mfileSeq = $prtFS[2];
- }
-  elsif($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
-   $mrunId = 150;
-   $mfileSeq = 0;  
  }else { 
    $mName =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;  
    $mfileSeq = $2 ; 

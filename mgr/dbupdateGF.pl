@@ -240,7 +240,7 @@ my $mNts;
    $mNts = $prtFS[3]; 
    $mNts =~ s/evts//g; 
    $mNevts = $mNts;
-   print "No Events : ", $mNevts, "\n";
+#   print "No Events : ", $mNevts, "\n";
  }else{
    
    $basename =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
