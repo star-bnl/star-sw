@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.41 2002/09/19 16:17:48 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.42 2002/09/20 19:35:19 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.42  2002/09/20 19:35:19  caines
+ * Change building of file name
+ *
  * Revision 1.41  2002/09/19 16:17:48  caines
  * Add code to do Juns gain calibration
  *
@@ -145,12 +148,11 @@
 #include "StSvtSeqAdjMaker.h"
 #include "StSvtCalibMaker/StSvtPedMaker.h"
 #include "StMessMgr.h"
+#include "StIOMaker/StIOMaker.h"
 
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 
-#include <iostream.h>
-#include <fstream.h>
 
 int* anolist; 
 TFile *hfile;
@@ -201,19 +203,20 @@ Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
 
   mTotalNumberOfHybrids = mSvtRawData->getTotalNumberOfHybrids();
 
-  char FileName[100], RunNo[10], EventNo[10];
+  string ioMakerFileName;
+  string FileName;
+  string DirName;
+  DirName=".";
 
-  sprintf(FileName,"SvtGainCalRun");
-  sprintf(RunNo,"%d", runnumber);
-  sprintf(EventNo,"%d", mSvtRawData->getEventNumber());
-  strcat(FileName, RunNo);
-  strcat(FileName,"_");
-  strcat(FileName, EventNo);
-  strcat(FileName,".root");
+  StIOMaker* mIOMaker = (StIOMaker*)GetMaker("inputStream");
+  cout << "************************" << mIOMaker << endl;
+  ioMakerFileName = string(mIOMaker->GetFile()); 
+  FileName = buildFileName( DirName+"/", baseName(ioMakerFileName),".SvtGainCal.root"); 
   
-  cout << "Heres my name: " << FileName << endl;
+  // cout << "Heres my name: " << FileName << endl;
 
-  hfile  = new TFile(FileName,"RECREATE","Demo ROOT file");
+   hfile  = new TFile(FileName.c_str(),"RECREATE","Demo ROOT file");
+   //hfile  = new TFile("test.root","RECREATE","Demo ROOT file");
   CreateHist(mTotalNumberOfHybrids);	    
   
   GetSvtPedestals();
@@ -1072,7 +1075,27 @@ Int_t StSvtSeqAdjMaker::Reset(){
   
   return kStOK;
 }
+//_____________________________________________________________________________
+string StSvtSeqAdjMaker::baseName(string s){
 
+  string name(s);
+  size_t pos;
+  pos = name.find_last_of("/");
+  if (pos!=string::npos ) name.erase(0, pos );
+  pos = name.find_first_of(".");
+  if (pos!=string::npos ) name.erase(pos,name.length()-pos );
+  return name;
+} 
+//_____________________________________________________________________________
+string StSvtSeqAdjMaker::buildFileName(string dir, string fileName, string extention){
+
+  fileName = dir + fileName + extention;
+  while (fileName.find("//")!=string::npos) {
+    int pos = fileName.find("//");
+    fileName.erase(pos,1);
+  }
+  return fileName;
+}
 //_____________________________________________________________________________
 Int_t StSvtSeqAdjMaker::Finish(){
   
