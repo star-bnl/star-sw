@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.25 2000/11/09 17:39:14 snelling Exp $
+// $Id: doFlowEvents.C,v 1.26 2000/11/13 01:32:35 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.26  2000/11/13 01:32:35  snelling
+// load StEventUtilities
+//
 // Revision 1.25  2000/11/09 17:39:14  snelling
 // Added switch for probability pid
 //
@@ -170,6 +173,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   gSystem->Load("StTreeMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
+  gSystem->Load("StEventUtilities");
   gSystem->Load("StMagF");
 
   gSystem->Load("StFlowMaker");
