@@ -163,7 +163,7 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 		StiTrackPairInfo& info = (*it).second.second;
 		if (&info!=bestStiPair) { //don't repeat for bestMatch
 		    //Fill McTrack info:
-		    mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, true);
+		    mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, false);
 		    if (globalPair!=0) {
 			mEntry->setGlobalTrack(globalPair->partnerTrack());
 			mEntry->setGlobalAssoc(globalPair);
