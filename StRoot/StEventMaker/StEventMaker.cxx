@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.25 2000/05/25 14:44:43 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.26 2000/05/26 11:34:08 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.25  2000/05/25 14:44:43  ullrich
- * Removed remaining pieces of the RICH pixel table.
+ * Revision 2.26  2000/05/26 11:34:08  ullrich
+ * Skip the attempt of creating an instance of StRun in case
+ * no dst dataset is available.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -132,10 +133,10 @@ using std::pair;
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.25 2000/05/25 14:44:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.26 2000/05/26 11:34:08 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.25 2000/05/25 14:44:43 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.26 2000/05/26 11:34:08 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -207,6 +208,8 @@ StEventMaker::Make()
     StTimer timer;
     if (doPrintCpuInfo) timer.start();
     if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
+    
+    //
     //  The current event is deleted automatically before every
     //  new event. It is added by using AddData().
     //  The current run is kept until a new one is created. It
@@ -220,7 +223,7 @@ StEventMaker::Make()
     //
     int status = mEventManager->openEvent("dst");
     if (status == oocError) {
-    if (isNewRun()) {
+        gMessMgr->Warning() << "StEventMaker::Make(): cannot open dataset 'dst'." << endm;
 	mCreateEmptyInstance = kTRUE;
     }
     else
