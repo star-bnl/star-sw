@@ -29,7 +29,8 @@ tdm/table/cell/putvalue 'ev0par[2].dlen'  0.6
 tdm/table/cell/putvalue 'ev0par[2].dmass' 10
 
 cd /dui/data/global/vertices
-tdm/newtable ev0out ev0_ev0out 50000
+tdm/newtable ev0out ev0_aux 50000
+tdm/newtable vertex dst_vertex 50000
 
 rowcount /dui/data/global/tracks/globtrk 
 if ( staf_result(1) .eq. 0 ) then
@@ -42,7 +43,7 @@ maxrowcount globtrk
 tdm/newtable ev0track ev0_track  staf_result(1)
 
 cd /dui/constants/global/magnetic_field
-tdm/typespecifier/load $STAR/pams/magnet/idl/mft_control.idl
+
 tdm/newtable magf mft_control 1
 rowcount magf 1
 tdm/table/cell/putvalue 'magf[0].field_type' 1
