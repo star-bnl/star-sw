@@ -23,6 +23,7 @@ Module  BTOFGEO is the Geometry of Barrel Trigger / Time Of Flight system
 *                          WJL-    uncommented/changed BCEL (Boards in CW Base)
 *                          WJL-    added interior cooling rails and pipes
 * modified   09 Dec  1998, GE - add btog.choice: 4: 1 TOF at 5 o'clock west
+* modified   08 Apr  1999, PN - water (BWAT) is inside the tube (BCOV), Rmin=0
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
 *
@@ -511,24 +512,24 @@ Block BARM  is  a TPC cooling structure arm             ( Material  Aluminium )
 EndBlock
 *
 Block BANG  is  an angled part of TPC cooling structure ( Aile )
-      Attribute BANG      seen=1   colo=2
+      Attribute BANG   seen=1   colo=2
       Shape     PARA   dx=tray_SupArmT/2   Dy=support_aile_width/2,
-                      Alph=-60   thet=0   phi=0
+                       Alph=-60   thet=0   phi=0
 EndBlock
 *
 Block BASE  is  a bottom of TPC coolant structure       
-      Attribute BASE      seen=1   colo=2
+      Attribute BASE   seen=1   colo=2
       Shape     BOX    Dx=tray_SupBaseT/2  Dy=tray_SupBaseW/2
 EndBlock
 *
 Block BCOV  is  a whole TPC cooling channel
-      Attribute BCOV      seen=1   colo=2
-      Shape     TUBE   Rmin=tray_CoolInnR   Rmax=tray_CoolOutR
+      Attribute BCOV   seen=1   colo=2
+      Shape     TUBE   Rmin=0   Rmax=tray_CoolOutR
       Create and Position BWAT 
 EndBlock
 *
 Block BWAT  is  TPC cooling water
-      Attribute BWAT      seen=1   colo=2
+      Attribute BWAT   seen=1   colo=3
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
       Mixture   Water  Dens=1.0
