@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.38 2003/10/25 00:36:49 perev Exp $
+ * $Id: StMagUtilities.cxx,v 1.39 2003/10/25 00:57:02 perev Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.39  2003/10/25 00:57:02  perev
+ * Redundand debug print removed
+ *
  * Revision 1.38  2003/10/25 00:36:49  perev
  * Defence against divergency added (????)
  *
@@ -991,7 +994,6 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 		  Double_t zterm = 1 + TMath::Cos( k*z ) ;
 		  IntegralOverZ += (Cn * zterm *qwe) ;
                   if (n>10 && fabs(IntegralOverZ)*1.e-10>fabs(qwe)) break;
-                  printf("i,j,n=%d,%d,%d Sum,qwe = %f %f %f\n",i,j,n,IntegralOverZ,qwe,k*r);
 		}
 	      if  ( eZList[i] < 0 )  IntegralOverZ = -1 * IntegralOverZ ;  // Force AntiSymmetry of solutions in Z
 	      shiftEr[i][j] = IntegralOverZ ; 	    }
