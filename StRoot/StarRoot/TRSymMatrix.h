@@ -6,8 +6,8 @@ class TRVector;
 class TRSymMatrix : public TRArray {
  public:
   TRSymMatrix(Int_t nrows=0);
-  TRSymMatrix(Int_t nrows,Double_t *Array);
-  TRSymMatrix(Int_t nrows,Float_t *Array);
+  TRSymMatrix(Int_t nrows,const Double_t *Array);
+  TRSymMatrix(Int_t nrows,const Float_t *Array);
   TRSymMatrix(Int_t nrows,const Char_t *s);
   TRSymMatrix(const TRSymMatrix& W,ETRMatrixCreatorsOp kop);
   TRSymMatrix(ETRMatrixCreatorsOp kop,Int_t nrows);

@@ -7,10 +7,10 @@ ClassImp(TRSymMatrix);
 TRSymMatrix::TRSymMatrix(Int_t nrows) :  
   TRArray(nrows*(nrows+1)/2), fNrows(nrows) {;}
 //________________________________________________________________________________
-TRSymMatrix::TRSymMatrix(Int_t nrows,Double_t *Array) :  
+TRSymMatrix::TRSymMatrix(Int_t nrows,const Double_t *Array) :  
   TRArray(nrows*(nrows+1)/2,Array), fNrows(nrows) {;}
 //________________________________________________________________________________
-TRSymMatrix::TRSymMatrix(Int_t nrows,Float_t *Array) :  
+TRSymMatrix::TRSymMatrix(Int_t nrows,const Float_t *Array) :  
   TRArray(nrows*(nrows+1)/2,Array), fNrows(nrows) {;}
 //________________________________________________________________________________
 TRSymMatrix::TRSymMatrix(Int_t nrows,const Char_t *s) : 
