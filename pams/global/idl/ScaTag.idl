@@ -1,0 +1,27 @@
+//
+// $Id: ScaTag.idl,v 1.1 1999/02/08 14:48:58 wenaus Exp $
+//
+// Scale correlation analysis tag
+//
+// $Log: ScaTag.idl,v $
+// Revision 1.1  1999/02/08 14:48:58  wenaus
+// New tag tables
+//
+
+struct ScaTag {
+    float             scaAnalysisMatrix[3][4][12];          
+    float             meanChargedParticlePt;
+    float             sigmaChargedParticlePt;
+    float             meanChargedParticleMt;
+    float             sigmaChargedParticleMt;
+    float             meanChargedParticlePtSquared;
+    float             sigmaChargedParticlePtSquared;
+    float             meanChargedParticleRapidity;
+    float             sigmaChargedParticleRapidity;
+    float             meanChargedParticleRapiditySquared;
+    float             sigmaChargedParticleRapiditySquared;
+    float             meanChargedParticleRapidityTimesPhi;
+    float             sigmaChargedParticleRapidityTimesPhi;
+    float             meanChargedParticleMtTimesPhi;
+    float             sigmaChargedParticleMtTimesPhi;
+};

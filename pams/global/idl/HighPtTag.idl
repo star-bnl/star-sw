@@ -1,0 +1,19 @@
+//
+// $Id: HighPtTag.idl,v 1.1 1999/02/08 14:48:57 wenaus Exp $
+//
+// High Pt group tag
+//
+// $Log: HighPtTag.idl,v $
+// Revision 1.1  1999/02/08 14:48:57  wenaus
+// New tag tables
+//
+
+struct HighPtTag {
+    long tracksOverThreshold[3];     /* num tracks > pt threshold*/
+    long v0sOverThreshold[3];        /* num v0 candidates > pt thresh*/
+    long jetsOverThreshold[3];       /* number of jets > pt threshold */
+    long gammasOverThreshold[3];     /* number of gammas > pt threshold */
+    long electronsOverThreshold[3];  /* number of electrons > pt threshold */
+    long richTracksOverThreshold[3]; /* num tracks > pt thresh, point to RICH*/
+    long tofTracksOverThreshold[3];  /* num tracks > pt thresh, point to TOF*/
+};
