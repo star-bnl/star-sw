@@ -261,7 +261,7 @@ $(OBJ_DIR)/idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
         $(RM) idl-lex.c;\
         cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' > idl-lex.c;\
         $(RM) lex.yy.c;\
-        $(CC) $(CFLAGS) -I. -c idl-yacc.c -o $(ALL_TAGS)
+        $(CC) $(CFLAGS) -I. -I$(SRC_DIR) -c idl-yacc.c -o $(ALL_TAGS)
 #
 ###############################################################################
 $(filter-out $(BIN_DIR)/stic,$(FILES_EXE)) : $(FILES_A)
