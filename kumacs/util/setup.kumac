@@ -1,6 +1,7 @@
 * editted 7/9/98 Kathy Turner - don't create subdirectores for GSTAR
 * editted 7/10/98 K. Turner - change geant macro definitions to geant_Run 
 *                             and geant_Event
+* editted 8/31/98 K. Turner - put stafcv_ok,bad aliases in
 * 
 **************************************************
  
@@ -10,6 +11,7 @@ macro setup
     
  if $vexist(setup_done)=0 then
    exec setup#dir
+   exec setup#set_aliases
    vec/cre setup_done
  endif
  
@@ -17,6 +19,15 @@ return
  
 **************************************************
  
+macro set_aliases
+
+ macro/global/import *
+
+ alias/create stafcv_ok 1
+ alias/create stafcv_bad 0
+
+return
+**************************************************
 macro dir
   
   macro/global/import *
