@@ -12,7 +12,7 @@ class StEvent;
 class StiHitContainer;
 class StiHitFiller;
 class StiDisplayManager;
-class StiDetectorLayerContainer;
+class StiDetectorContainer;
 class StiTrackContainer;
 
 class StiMaker : public StMaker {
@@ -26,13 +26,18 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.4 2001/05/17 20:07:33 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.5 2001/06/06 13:53:40 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
     //Singleton access
     static StiMaker* instance();
     static void kill();
+
+    //Gets/sets
+    void setMaterialBuildPath(char* val);
+    void setDetectorBuildPath(char* val);
+    void setPolygonBuildPath(char* val);
     
     //Used for stepping to next action (via StiControlPad)
     static void reset();
@@ -52,8 +57,12 @@ private:
     StiHitFactory* mhitfactory; //!
     StiHitFiller* mhitfiller; //!
     StiDisplayManager* mdisplay; //!
-    StiDetectorLayerContainer* mdetector; //!
+    StiDetectorContainer* mdetector; //!
     StiTrackContainer* mtrackstore; //!
+
+    char* mmaterialbuildpath; //!
+    char* mdetectorbuildpath; //!
+    char* mpolygonbuildpath; //!
     
 private:
     StEvent* mevent; //!

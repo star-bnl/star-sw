@@ -22,7 +22,7 @@
 // Sti
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHitFiller.h"
-#include "Sti/StiDetectorLayerContainer.h"
+#include "Sti/StiDetectorContainer.h"
 #include "Sti/StiDrawableDetector.h"
 #include "Sti/StiTrackContainer.h"
 
@@ -66,7 +66,7 @@ StiMaker::~StiMaker()
     mhitfiller = 0;
     delete mdisplay;
     mdisplay = 0;
-    StiDetectorLayerContainer::kill();
+    StiDetectorContainer::kill();
     mdetector = 0;
     StiTrackContainer::kill();
     mtrackstore = 0;
@@ -96,25 +96,18 @@ Int_t StiMaker::Init()
     //mhitfiller->addDetector(kSvtId);
     //cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
 
-    cout <<"cd()"<<endl;
     mdisplay->cd();
-    cout <<"Draw Display"<<endl;
     mdisplay->draw();
-    cout <<"Update Display"<<endl;
     mdisplay->update();
 
-    const char* buildfile = "/scr20/ittf/StiGeometryParameters/Detectors";
-    mdetector = StiDetectorLayerContainer::instance();
-    
-    //mdetector->setSectors(0, 0);
-    //mdetector->setPadrows(0, 0);
-    //mdetector->buildReset();
-    //while (mdetector->hasMoreToBuild()) {
-    //mdetector->buildNext(buildfile);
-    //}
+    mdetector = StiDetectorContainer::instance();
+
+    //Must build Polygons and Materials before detectors
+    mdetector->buildPolygons(mpolygonbuildpath);
+    mdetector->buildMaterials(mmaterialbuildpath);
+    mdetector->buildDetectors(mdetectorbuildpath);
     mdetector->reset();
-    mdetector->buildMaterials("/scr20/ittf/StiGeometryParameters/Materials");
-    mdetector->build(buildfile);
+    mdetector->print();
     
     mdisplay->draw();
     mdisplay->update();
@@ -141,36 +134,49 @@ Int_t StiMaker::Make()
     return kStOK;
 }
 
+void StiMaker::setMaterialBuildPath(char* val)
+{
+    mmaterialbuildpath = val;
+}
+
+void StiMaker::setDetectorBuildPath(char* val)
+{
+    mdetectorbuildpath = val;
+}
+
+void StiMaker::setPolygonBuildPath(char* val)
+{
+    mpolygonbuildpath = val;
+}
+
+
 void StiMaker::reset()
 {
     mdone=false;
     mcounter=0;
-    StiDetectorLayerContainer::instance()->reset();
+    StiDetectorContainer::instance()->reset();
 }
 
 void StiMaker::doNextAction()
 {
-    if (mdone) {
-	cout <<"StiMaker::doNext()\t Nothing Left to do"<<endl;
-	return;
-    }
+    /*
+      if (mdone) {
+      cout <<"StiMaker::doNext()\t Nothing Left to do"<<endl;
+      return;
+      }
+      
+      StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+      const StiDrawableDetector* layer = dynamic_cast<const StiDrawableDetector*>(*rdet);
+      if (!layer) return;
+      StiDisplayManager::instance()->setVisible(layer);
+      StiDisplayManager::instance()->draw();
+      StiDisplayManager::instance()->update();
+      bool cangofurther = rdet.padrowStepMinus();
+      if (!cangofurther) {
+      rdet.setRefDetector( layer->getSector()+1 );
+      }
 
-    StiDetectorLayerContainer& rdet = *(StiDetectorLayerContainer::instance());
-    const StiDrawableDetector* layer = dynamic_cast<const StiDrawableDetector*>(*rdet);
-    if (!layer) return;
-    StiDisplayManager::instance()->setVisible(layer);
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
-    bool cangofurther = rdet.padrowStepMinus();
-    if (!cangofurther) {
-	rdet.setRefDetector( layer->getSector()+1 );
-    }
-    //if (!cangofurther) mdone = true;
-    
-    //cout <<"StiMaker::doNext()\t mcounter:\t"<<mcounter<<endl;
-    //++mcounter;
-    //if (mcounter>10) mdone=true;
-
+    */
     return;
 }
 

@@ -40,6 +40,11 @@ public:
     void setVisible(); //All
     void setVisible(const StiDrawable*);
 
+    void setTpcVisible();
+    void setTpcInvisible();
+    void setSvtVisible();
+    void setSvtInvisible();
+
     //Utility
     void print() const;
     

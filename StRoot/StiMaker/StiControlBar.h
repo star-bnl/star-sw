@@ -25,8 +25,15 @@ public:
     static void finish(); //call StChain::Finish() and close control
     static void printDisplayManager(); //call StiDisplayManager::print()
     static void printDetector(); //call StiDetecotrLayerContainer::print()
+    
     static void setVisible(); //call StiDisplayManager::setVisible()
     static void setInvisible(); //call StiDisplayManager::setInvisible()
+    
+    static void setSvtVisible(); //call StiDisplayManager::setSvtVisible()
+    static void setSvtInvisible(); //call StiDisplayManager::setSvtInvisible()
+
+    static void setTpcVisible(); //call StiDisplayManager::setTpcVisible()
+    static void setTpcInvisible(); //call StiDisplayManager::setTpcInvisible()
 
     //Navigate through detector (should be sub-menued/cascaded)
     static void setCurrentDetectorToDefault();
