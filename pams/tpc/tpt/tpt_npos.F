@@ -155,7 +155,7 @@ C   Created  DEC-1991 S.Margetis
 C   Error conditions	: None
 C   Status		: Tested
 C----------------------------------------------------------------------
-      INTEGER iflag
+C-SM      INTEGER iflag
       REAL    trk(6),xc(2),r,beta
       REAL    x,y,p(3),a,b,ab,rxp,test
 C--------find the radius and the (hit)x-y coordinates------------------
@@ -163,10 +163,11 @@ C--------find the radius and the (hit)x-y coordinates------------------
       x=trk(1)*cos( trk(2) )
       y=trk(1)*sin( trk(2))
 C--------get the momentum components-----------------------------------
-      iflag=0
-      CALL nmax_track_mom(trk,r,iflag,p,beta)
+C-SM      iflag=0
+C-SM      CALL nmax_track_mom(trk,r,iflag,p,beta)
+      CALL nmax_track_mom(trk,r,p,beta)
 C--------find the two possible solutions------------------------------
-      IF(p(1).eq.0.) p(1)=0.01
+      IF(p(1).lt.0.001) p(1)=0.001
       a=p(2)/p(1)
       b = sqrt( r*r/(a*a+1) )
 C     yt1= b + y
@@ -197,7 +198,8 @@ C----------------------------------------------------------------------
 C******************************************************************************
 
 
-      SUBROUTINE nmax_track_mom(trk,rc,iflag,p,beta)
+C-SM      SUBROUTINE nmax_track_mom(trk,rc,iflag,p,beta)
+      SUBROUTINE nmax_track_mom(trk,rc,p,beta)
       IMPLICIT NONE
 C   Input arguments  :	trk(6)	!helix parameters of the track
 C			iflag	!if =5 it is a neutral particle and
@@ -211,7 +213,7 @@ C   Error conditions	:	None
 C   Status 		:	Tested
 C----------------------------------------------------------------------
 
-      INTEGER iflag
+C-SM      INTEGER iflag
       REAL    trk(6),p(3),rc
       REAL    const,beta
       REAL    sph,cph,pt
@@ -224,8 +226,9 @@ C-----Extract momentum components from helix --------------------------
 
 C-------check if it is a neutral particle------------------------------
 
-       IF(iflag.eq.5) THEN
-	pt   = cos( atan(trk(5)))/trk(6)
+C-SM       IF(iflag.eq.5) THEN
+       IF(abs(beta).le.0.001) THEN
+	pt   = 100.        !just any big number is good (GeV)
        ELSE
 	pt   = (beta*const*rc)/100.
        ENDIF	!iflag.eq.5
