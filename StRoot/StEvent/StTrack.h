@@ -4,16 +4,36 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.18 2004/07/15 16:36:26 ullrich Exp $
+ * $Id: StTrack.h,v 2.19 2004/08/05 22:24:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
  *
+ * Note the following: with the arrival of ITTF it is now possible to
+ * store the numberOfPossiblePoints for every detector individually. Before
+ * that and because of the way the tables were defined TPC and FTPC were
+ * one and the same. This caused confusion. However, since we have to
+ * stay backwards compatible the "old way" is still working.
+ * If
+ * a) mNumberOfPossiblePoints == 0 the new encoding is the one to use, i.e.,
+ *    mNumberOfPossiblePointsTpc
+ *    mNumberOfPossiblePointsFtpcWest 
+ *    mNumberOfPossiblePointsFtpcEast 
+ *    mNumberOfPossiblePointsSvt 
+ *    mNumberOfPossiblePointsSsd 
+ *    are the ones that count
+ * b) mNumberOfPossiblePoints != 0 then we still loaded the info from
+ *    the tables and all is as it was before, i.e., we do not distinguish
+ *    between FTPC and TPC.
+ *
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.19  2004/08/05 22:24:51  ullrich
+ * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
+ *
  * Revision 2.18  2004/07/15 16:36:26  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -136,15 +156,23 @@ public:
     void         setFitTraits(const StTrackFitTraits&);
     void         addPidTraits(StTrackPidTraits*);
     void         setDetectorInfo(StTrackDetectorInfo*);
-    void         setNumberOfPossiblePoints(unsigned short);
     void         setNode(StTrackNode*);
     int          bad() const;
+    void         setNumberOfPossiblePoints(unsigned char, StDetectorId);
+    
+protected:
+    void         setNumberOfPossiblePoints(unsigned short); // obsolete
     
 protected:
     UShort_t                mKey;
     Short_t                 mFlag;
     UShort_t                mEncodedMethod;
-    UShort_t                mNumberOfPossiblePoints;
+    UShort_t                mNumberOfPossiblePoints;   // obsolete if ITTF is running
+    UChar_t                 mNumberOfPossiblePointsTpc;
+    UChar_t                 mNumberOfPossiblePointsFtpcWest;
+    UChar_t                 mNumberOfPossiblePointsFtpcEast;
+    UChar_t                 mNumberOfPossiblePointsSvt;
+    UChar_t                 mNumberOfPossiblePointsSsd;
     Float_t                 mImpactParameter;
     Float_t                 mLength;
     StTrackTopologyMap      mTopologyMap;
@@ -163,6 +191,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    ClassDef(StTrack,3)
+    ClassDef(StTrack,4)
 };
 #endif

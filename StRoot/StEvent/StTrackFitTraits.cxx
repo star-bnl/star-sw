@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.10 2001/05/04 19:49:51 perev Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.11 2004/08/05 22:24:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.11  2004/08/05 22:24:32  ullrich
+ * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
+ *
  * Revision 2.10  2001/05/04 19:49:51  perev
  * Streamer to account old ROOT2
  *
@@ -57,12 +60,17 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.10 2001/05/04 19:49:51 perev Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.11 2004/08/05 22:24:32 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
     mPidHypothesis = 0;
     mNumberOfFitPoints = 0;
+    mNumberOfFitPointsTpc = 0;
+    mNumberOfFitPointsFtpcWest = 0;
+    mNumberOfFitPointsFtpcEast = 0;
+    mNumberOfFitPointsSvt = 0;
+    mNumberOfFitPointsSsd = 0;
     fill_n(mChi2, 2, 0);
 }
 
@@ -72,6 +80,11 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
     mNumberOfFitPoints = t.n_fit_point;
     copy(t.chisq+0, t.chisq+2, mChi2);
     mCovariantMatrix.Set(15, (float*)t.covar);        //tempHackVP
+    mNumberOfFitPointsTpc = 0;
+    mNumberOfFitPointsFtpcWest = 0;
+    mNumberOfFitPointsFtpcEast = 0;
+    mNumberOfFitPointsSvt = 0;
+    mNumberOfFitPointsSsd = 0;
 }
 
 StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
@@ -81,6 +94,11 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
     mNumberOfFitPoints = nfp;
     copy(chi, chi+2, mChi2);
     mCovariantMatrix.Set(15, cov);
+    mNumberOfFitPointsTpc = 0;
+    mNumberOfFitPointsFtpcWest = 0;
+    mNumberOfFitPointsFtpcEast = 0;
+    mNumberOfFitPointsSvt = 0;
+    mNumberOfFitPointsSsd = 0;
 }
 
 StTrackFitTraits::~StTrackFitTraits() {/* noop */}
@@ -88,29 +106,61 @@ StTrackFitTraits::~StTrackFitTraits() {/* noop */}
 unsigned short
 StTrackFitTraits::numberOfFitPoints() const
 {
-    return (numberOfFitPoints(kTpcId) +
-            numberOfFitPoints(kSvtId) +
-            numberOfFitPoints(kSsdId));
+    if (mNumberOfFitPoints) {
+	return (numberOfFitPoints(kTpcId) +
+		numberOfFitPoints(kSvtId) +
+		numberOfFitPoints(kSsdId));
+    }
+    else {
+	return (numberOfFitPoints(kTpcId) +
+		numberOfFitPoints(kFtpcWestId) +
+		numberOfFitPoints(kFtpcEastId) +
+		numberOfFitPoints(kSvtId) +
+		numberOfFitPoints(kSsdId));	
+    }
 }
 
 unsigned short
 StTrackFitTraits::numberOfFitPoints(StDetectorId det) const
 {
-    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-    switch (det) {
-    case kFtpcWestId:
-    case kFtpcEastId:
-    case kTpcId:
-        return mNumberOfFitPoints%1000;
-        break;
-    case kSvtId:
-        return (mNumberOfFitPoints%10000)/1000;
-        break;
-    case kSsdId:
-        return mNumberOfFitPoints/10000;
-        break;
-    default:
-        return 0;
+    if (mNumberOfFitPoints) {    
+	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+	switch (det) {
+	case kFtpcWestId:
+	case kFtpcEastId:
+	case kTpcId:
+	    return mNumberOfFitPoints%1000;
+	    break;
+	case kSvtId:
+	    return (mNumberOfFitPoints%10000)/1000;
+	    break;
+	case kSsdId:
+	    return mNumberOfFitPoints/10000;
+	    break;
+	default:
+	    return 0;
+	}
+    }
+    else {
+	switch (det) {
+	case kFtpcWestId:
+	    return mNumberOfFitPointsFtpcWest;
+	    break;
+	case kFtpcEastId:
+	    return mNumberOfFitPointsFtpcEast;
+	    break;
+	case kTpcId:
+	    return mNumberOfFitPointsTpc;
+	    break;
+	case kSvtId:
+	    return mNumberOfFitPointsSvt;
+	    break;
+	case kSsdId:
+	    return mNumberOfFitPointsSsd;
+	    break;
+	default:
+	    return 0;
+	}
     }
 }
 
@@ -158,33 +208,27 @@ StTrackFitTraits::covariantMatrix() const
 void
 StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 
-//______________________________________________________________________________
-void StTrackFitTraits::Streamer(TBuffer &R__b)
+void
+StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 {
-//        Stream an object of class StTrackFitTraits.
-
-  Version_t R__v = 0;
-  if (R__b.IsReading()) {
-    R__v = R__b.ReadVersion();
-    StObject::Streamer(R__b);
-
-    R__b >> (unsigned short&)mPidHypothesis;
-    R__b >> (unsigned short&)mNumberOfFitPoints;
-
-    if (R__v==2 && gFile && gFile->GetVersion()%100000<30000)
-       { Int_t dumy; R__b >> dumy;}
-
-    R__b.ReadFastArray(mChi2,2);
-    mCovariantMatrix.Streamer(R__b);
-
-  } else {
-    R__b.WriteVersion(Class());
-    StObject::Streamer(R__b);
-    R__b << (unsigned short )mPidHypothesis;
-    R__b << (unsigned short )mNumberOfFitPoints;
-    R__b.WriteFastArray(mChi2, 2);
-    mCovariantMatrix.Streamer(R__b);
-  }
+    mNumberOfFitPoints = 0;  // make sure old method is NOT active
+    switch (det) {
+    case kFtpcWestId:
+	mNumberOfFitPointsFtpcWest = val;
+	break;
+    case kFtpcEastId:
+	mNumberOfFitPointsFtpcEast = val;
+	break;
+    case kTpcId:
+	mNumberOfFitPointsTpc = val;
+	break;
+    case kSvtId:
+	mNumberOfFitPointsSvt = val;
+	break;
+    case kSsdId:
+	mNumberOfFitPointsSsd = val;
+	break;
+    default:
+	break;
+    }
 }
-
-

@@ -4,16 +4,36 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.8 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTrackFitTraits.h,v 2.9 2004/08/05 22:24:32 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
  *
+ * Note the following: with the arrival of ITTF it is now possible to
+ * store the numberOfFitPoints for every detector individually. Before
+ * that and because of the way the tables were defined TPC and FTPC were
+ * one and the same. This caused confusion. However, since we have to
+ * stay backwards compatible the "old way" is still working.
+ * If
+ * a) mNumberOfFitPoints == 0 the new encoding is the one to use, i.e.,
+ *    mNumberOfFitPointsTpc
+ *    mNumberOfFitPointsFtpcWest 
+ *    mNumberOfFitPointsFtpcEast 
+ *    mNumberOfFitPointsSvt 
+ *    mNumberOfFitPointsSsd 
+ *    are the ones that count
+ * b) mNumberOfFitPoints != 0 then we still loaded the info from
+ *    the tables and all is as it was before, i.e., we do not distinguish
+ *    between FTPC and TPC.
+ *
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.9  2004/08/05 22:24:32  ullrich
+ * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
+ *
  * Revision 2.8  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -69,13 +89,19 @@ public:
     double                 chi2(unsigned int = 0) const;
 
     void                   clearCovariantMatrix();
+    void                   setNumberOfFitPoints(unsigned char, StDetectorId);
     
 protected:
     UShort_t mPidHypothesis;       // GeantId
-    UShort_t mNumberOfFitPoints;
+    UShort_t mNumberOfFitPoints;   // obsolete since ITTF
+    UChar_t  mNumberOfFitPointsTpc;
+    UChar_t  mNumberOfFitPointsFtpcWest;
+    UChar_t  mNumberOfFitPointsFtpcEast;
+    UChar_t  mNumberOfFitPointsSvt;
+    UChar_t  mNumberOfFitPointsSsd;
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,3) //!OWNSTREAMER
+    ClassDef(StTrackFitTraits,4) 
 };
 #endif
