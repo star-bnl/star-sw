@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.20 1998/07/14 01:24:53 perev Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.21 1998/07/29 22:59:03 dave Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -121,10 +121,14 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
    for( i=0;i<(int)tbl._length;i++ ){
       (tbl._buffer[i])->rowCount(h[i]->nok);
    }
-//- Deleteing TAS-structures.
+//- Deleting TAS-structures.
    if( tbl._length > 0 ){
-      delete[] h;
-      delete[] d;
+     // JL fix memory leak
+     for (i = 0; i < (int)tbl._length;i++) {
+       if (h[i]) FREE(h[i]);
+     }
+     delete[] h;
+     delete[] d;
    }
 //- WARNING!!! - Pass pure return value out to status vector.
      set_staf_status(status);
