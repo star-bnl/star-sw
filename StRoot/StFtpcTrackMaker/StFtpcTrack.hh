@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.hh,v 1.4 2000/07/03 12:42:57 jcs Exp $
+// $Id: StFtpcTrack.hh,v 1.5 2000/07/12 11:58:43 jcs Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.5  2000/07/12 11:58:43  jcs
+// calculate and save FTPC track parameters for unconstrained fit
+//
 // Revision 1.4  2000/07/03 12:42:57  jcs
 // save (pre)Vertex id and unconstrained fit results
 //
@@ -46,6 +49,7 @@ private:
 
   Double_t   mChi2Circle;     // Chi squared of circle fit
   Double_t   mChi2Length;     // Chi squared of length fit
+  Double_t   mtrackLength;    // Length of track helix from first to last point
   Double_t   mRadius;         // Radius of the helix (projected to a circle)
   Double_t   mCenterX;        // x coordinate of the center of the helix (projected to a circle)
   Double_t   mCenterY;        // y coordinate of the center of the helix (projected to a circle)
