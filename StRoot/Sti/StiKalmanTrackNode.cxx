@@ -403,7 +403,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   double tAlpha = tPlace->getNormalRefAngle();
   double dAlpha = tAlpha - fAlpha;
 	//cout << " Propagate : tAlpha/fAlpha :" << tAlpha << "\t" << fAlpha << endl;
-  if (dAlpha>1e-4)   // perform rotation if needed
+  if (fabs(dAlpha)>1e-4)   // perform rotation if needed
 		{
 			cout << " doing rotation <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << endl;
 			rotate(-dAlpha);
