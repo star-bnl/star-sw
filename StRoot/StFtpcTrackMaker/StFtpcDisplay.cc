@@ -1,5 +1,9 @@
-// $Id: StFtpcDisplay.cc,v 1.9 2001/07/12 13:02:25 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.10 2001/07/13 18:00:50 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.10  2001/07/13 18:00:50  oldi
+// New function WriteData() added. It writes TPolyMarkers and TPolyLine3Ds to
+// a file which can be used to display results (pictures) offline.
+//
 // Revision 1.9  2001/07/12 13:02:25  oldi
 // Boundaries of FTPC set to correct values (7.73, 30.05).
 //
@@ -64,6 +68,7 @@
 #include "TMarker.h"
 #include "TTUBE.h"
 #include "TBRIK.h"
+#include "TFile.h"
 //#include "TCONE.h"
 
 
@@ -119,6 +124,9 @@ StFtpcDisplay::StFtpcDisplay()
   found_value        = NULL;
   found_value_minus  = NULL;
   found_value_plus   = NULL;
+  unused_value       = NULL;
+  unused_value_minus = NULL;
+  unused_value_plus  = NULL;
   geant_value        = NULL;
   geant_value_minus  = NULL;
   geant_value_plus   = NULL;
@@ -172,6 +180,9 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks)
   found_value        = NULL;
   found_value_minus  = NULL;
   found_value_plus   = NULL;
+  unused_value       = NULL;
+  unused_value_minus = NULL;
+  unused_value_plus  = NULL;
   geant_value        = NULL;
   geant_value_minus  = NULL;
   geant_value_plus   = NULL;
@@ -226,6 +237,9 @@ StFtpcDisplay::StFtpcDisplay(TObjArray *hits, TObjArray *tracks, TObjArray *gean
   found_value        = NULL;
   found_value_minus  = NULL;
   found_value_plus   = NULL;
+  unused_value       = NULL;
+  unused_value_minus = NULL;
+  unused_value_plus  = NULL;
   geant_value        = NULL;
   geant_value_minus  = NULL;
   geant_value_plus   = NULL;
@@ -247,6 +261,9 @@ StFtpcDisplay::~StFtpcDisplay()
   delete found_hit;
   delete found_hit_plus;
   delete found_hit_minus;
+  delete unused_value;
+  delete unused_value_minus;
+  delete unused_value_plus;
   delete geant_hit;
   delete geant_hit_plus;
   delete geant_hit_minus;
@@ -256,6 +273,135 @@ StFtpcDisplay::~StFtpcDisplay()
   delete wrong_hit;
   delete wrong_hit_plus;
   delete wrong_hit_minus;
+}
+
+
+void StFtpcDisplay::WriteData(Char_t *filename)
+{
+  // Writes clusters and tracks to file.
+ 
+  TFile file(filename, "RECREATE");
+  file.cd();
+  
+  Float_t x[100];
+  Float_t y[100];
+  Float_t z[100];
+
+  Int_t track_entries = mTrack->GetEntriesFast(); 
+      
+  StFtpcConfMapPoint *cluster;
+  StFtpcTrack *track;
+  found_line = new TPolyLine3D[track_entries];
+  
+  // loop over all tracks
+  for (Int_t tracks = 0; tracks < track_entries; tracks++) {
+    track = (StFtpcTrack *)mTrack->At(tracks);
+	
+    Int_t cluster_entries = track->GetNumberOfPoints();
+	
+    // loop over all clusters
+    for (Int_t clusters = 0; clusters < cluster_entries && clusters < 100; clusters++) {
+      
+      cluster = (StFtpcConfMapPoint *)track->GetHits()->At(clusters);
+      
+      // fill point array
+      x[clusters] = (Float_t)(cluster->GetX());
+      y[clusters] = (Float_t)(cluster->GetY());
+      z[clusters] = (Float_t)(cluster->GetZ());
+    }
+	
+    // fill PolyLine for this track
+    current_line = &(found_line[tracks]);
+    current_line = new TPolyLine3D(cluster_entries, x, y, z, "");
+    current_line->SetLineColor(3);
+
+    current_line->Write();
+    delete current_line;
+  }
+	
+  Int_t cluster_anz = mHit->GetEntriesFast();
+
+  // coordinates of clusters (+, -, both)
+  found_value_plus =   new Float_t[3*cluster_anz];
+  found_value_minus =  new Float_t[3*cluster_anz];
+  found_value =        new Float_t[3*cluster_anz];
+  unused_value_plus =  new Float_t[3*cluster_anz];
+  unused_value_minus = new Float_t[3*cluster_anz];
+  unused_value =       new Float_t[3*cluster_anz];
+    
+  StFtpcConfMapPoint *h;
+  Int_t cl_plus = 0;
+  Int_t cl_minus = 0;  
+  Int_t cl = 0;
+  Int_t ucl_plus = 0;
+  Int_t ucl_minus = 0;  
+  Int_t ucl = 0;
+  
+  // loop over all clusters
+  for (Int_t i = 0; i < cluster_anz; i++) {
+    h = (StFtpcConfMapPoint *)mHit->At(i);
+    
+    if (h->GetUsage()) { 
+      // fill (+, -, both) cluster arrays
+      found_value[cl++] = h->GetX();
+      found_value[cl++] = h->GetY();
+      
+      if ((found_value[cl++] = h->GetZ())>0) {
+	found_value_plus[cl_plus++] = h->GetX();
+	found_value_plus[cl_plus++] = h->GetY();
+	found_value_plus[cl_plus++] = h->GetZ();
+      }
+      
+      else {
+	found_value_minus[cl_minus++] = h->GetX();
+	found_value_minus[cl_minus++] = h->GetY();
+	found_value_minus[cl_minus++] = h->GetZ();
+      }
+    }
+
+    else { // unused clusters
+      // fill (+, -, both) cluster arrays
+      unused_value[ucl++] = h->GetX();
+      unused_value[ucl++] = h->GetY();
+      
+      if ((unused_value[ucl++] = h->GetZ())>0) {
+	unused_value_plus[ucl_plus++] = h->GetX();
+	unused_value_plus[ucl_plus++] = h->GetY();
+	unused_value_plus[ucl_plus++] = h->GetZ();
+      }
+      
+      else {
+	unused_value_minus[ucl_minus++] = h->GetX();
+	unused_value_minus[ucl_minus++] = h->GetY();
+	unused_value_minus[ucl_minus++] = h->GetZ();
+      }
+    }
+  }
+  
+  // create PolyMarkers
+  found_hit->SetPolyMarker(cl/3, found_value, 1);      
+  found_hit_plus->SetPolyMarker(cl_plus/3, found_value_plus, 1);      
+  found_hit_minus->SetPolyMarker(cl_minus/3, found_value_minus, 1);      
+  unused_hit->SetPolyMarker(ucl/3, unused_value, 1);      
+  unused_hit_plus->SetPolyMarker(ucl_plus/3, unused_value_plus, 1);      
+  unused_hit_minus->SetPolyMarker(ucl_minus/3, unused_value_minus, 1);      
+  
+  // set colors
+  found_hit->SetMarkerColor(2);
+  found_hit_plus->SetMarkerColor(2);
+  found_hit_minus->SetMarkerColor(2);
+  unused_hit->SetMarkerColor(5);
+  unused_hit_plus->SetMarkerColor(5);
+  unused_hit_minus->SetMarkerColor(5);
+     
+  found_hit->Write();
+  found_hit_plus->Write();
+  found_hit_minus->Write();
+  unused_hit->Write();
+  unused_hit_plus->Write();
+  unused_hit_minus->Write();
+
+  file.Close();
 }
 
 
@@ -1073,7 +1219,7 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
 
   // ask user, which Ftpc(s) ('+', '-', 'b'oth) to display in 3D view
   Char_t a;
-
+  
   while (1) {
     cout << "Please enter '+', '-' or 'b' to see one or both Ftpc's, 'q' to quit: "; 
     cin >> a;
