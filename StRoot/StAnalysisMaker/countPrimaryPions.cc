@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: countPrimaryPions.cc,v 2.4 2000/03/02 13:13:19 ullrich Exp $
+ * $Id: countPrimaryPions.cc,v 2.5 2000/07/12 05:24:39 ullrich Exp $
  *
  * Author: Craig Ogilvie, MIT, Dec 199
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: countPrimaryPions.cc,v $
+ * Revision 2.5  2000/07/12 05:24:39  ullrich
+ * Minor updates to cope with revised StAnalysisMaker.
+ *
  * Revision 2.4  2000/03/02 13:13:19  ullrich
  * Modified such that code compiles on Linux without warnings.
  *
@@ -18,7 +21,7 @@
 #include "StPionPlus.hh"
 #include "StTpcDedxPidAlgorithm.h"
 
-static const char rcsid[] = "$Id: countPrimaryPions.cc,v 2.4 2000/03/02 13:13:19 ullrich Exp $";
+static const char rcsid[] = "$Id: countPrimaryPions.cc,v 2.5 2000/07/12 05:24:39 ullrich Exp $";
 
 long countPrimaryPions(StEvent& event)
 {
@@ -35,7 +38,7 @@ long countPrimaryPions(StEvent& event)
     // collection of primary tracks
     StPrimaryTrack         *track;
 
-    for (StPrimaryTrackIterator iter = tracks.begin();
+    for (StSPtrVecPrimaryTrackConstIterator iter = tracks.begin();
 	 iter != tracks.end(); iter++) {
 
 	track = *iter;
