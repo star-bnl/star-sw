@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: addHists.C,v 1.5 2001/08/17 22:14:40 posk Exp $
+// $Id: addHists.C,v 1.6 2002/03/23 21:45:51 posk Exp $
 //
 // Author:       Art Poskanzer, Feb 2001
 // Description:  Macro to add histograms together with weighting.
@@ -10,28 +10,6 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: addHists.C,v $
-// Revision 1.5  2001/08/17 22:14:40  posk
-// Updated to also do 40 GeV.
-//
-// Revision 1.4  2001/05/14 23:18:22  posk
-// Uses yield weighting.
-//
-// Revision 1.3  2001/03/16 22:34:59  posk
-// plotGraphs.C makes the final graphs.
-//
-// Revision 1.2  2001/03/06 17:32:51  posk
-// All macros now work.
-//
-// Revision 1.1  2001/02/26 23:07:01  posk
-// Rearranged macros.
-//
-// Revision 1.1  2001/02/23 00:58:19  posk
-// NA49 version of STAR software.
-//
-///////////////////////////////////////////////////////////////////////////////
-
 #include <iostream.h>
 
 // // pions
@@ -64,11 +42,11 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
   //bool   stripes = kFALSE;
   bool   stripes = kTRUE;
   TFile* histFile[3];
-  char   firstRunName[6];
+  //char   firstRunName[6];
   char   firstRunName[30];
-  char   secondRunName[6];
+  //char   secondRunName[6];
   char   secondRunName[30];
-  char   outputRunName[6];
+  //char   outputRunName[6];
   char   outputRunName[30];
   int    nSels = 2;
   int    nHars = 3;
@@ -128,7 +106,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
     }
   }
   
-  // add histograms with error or yield weighting
+  //get the yield hist
   cout<<endl<<"  With weighting"<<endl;
   for (int n = 0; n < 2; n++) {
     yieldPartHist[n] = dynamic_cast<TH2*>(histFile[n]->Get("Flow_YieldPart2D"));
@@ -139,6 +117,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
     }
   }
 
+  // add histograms with error or yield weighting
   for (int pageNumber = 0; pageNumber < nNames; pageNumber++ ) {
     bool twoD = kFALSE;
     if (strstr(baseName[pageNumber],"v2D")) twoD = kTRUE;
@@ -268,3 +247,29 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
   delete histFile[2];
   
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: addHists.C,v $
+// Revision 1.6  2002/03/23 21:45:51  posk
+// More 40 GeV compatability.
+//
+// Revision 1.5  2001/08/17 22:14:40  posk
+// Updated to also do 40 GeV.
+//
+// Revision 1.4  2001/05/14 23:18:22  posk
+// Uses yield weighting.
+//
+// Revision 1.3  2001/03/16 22:34:59  posk
+// plotGraphs.C makes the final graphs.
+//
+// Revision 1.2  2001/03/06 17:32:51  posk
+// All macros now work.
+//
+// Revision 1.1  2001/02/26 23:07:01  posk
+// Rearranged macros.
+//
+// Revision 1.1  2001/02/23 00:58:19  posk
+// NA49 version of STAR software.
+//
+///////////////////////////////////////////////////////////////////////////////
