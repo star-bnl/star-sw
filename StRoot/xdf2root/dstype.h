@@ -17,6 +17,9 @@ definitions for types and datasets
 #include <stdio.h>
 #include <rpc/rpc.h>
 #include "dscodes.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 /******************************************************************************
 *
 * macros for return values and types
@@ -402,4 +405,7 @@ long strtol(char *str, char **ptr, int base);
 #endif
 */
 #endif  /* DS_PRIVATE */
+#ifdef __cplusplus
+}
+#endif
 #endif  /* DSTYPE_H */
