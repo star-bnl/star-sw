@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.4 1998/03/29 05:04:59 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.5 1998/04/09 23:08:23 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.5  1998/04/09 23:08:23  sakrejda
+* write to unit 6 replaced by a message call
+*
 * Revision 1.4  1998/03/29 05:04:59  sakrejda
 * Protection agains overflow in trk checked against mxtrack
 *
@@ -84,6 +87,12 @@ C     Local variables
       REAL    xold, yold, cf,q1,q2,what
       LOGICAL saved,better
       INTEGER klc,ldpnt,ipass
+c
+c     for messages
+      integer idI1, idI2, idI3
+      character*132 m132(2)  ! And some message-generating space.
+      data idI1, idI2, idI3 /3*0/
+      save idI1, idI2, idI3
 C______________________________________________________________________
       itest = 0
       do i=tpar(ipass).irow_root_beg,tpar(ipass).irow_root_end,-1
@@ -153,8 +162,9 @@ C	                better than the saved one
                     endif
                   end do ! end of loop on l (number of roots)
                else
-                  write(6,*) 'too many track candidates-',
-     >                       'track table not big enough',mxtrack
+                  write(m132(1),*)'TPT-MAKES1 too many track candidates'
+                  write(m132(2),*)'track table size', mxtrack
+                  call Message( m132, 2, idI1 )
                endif ! end of check on room in the tracks table
 
 C              if there was a good track load it and mark all the hits
@@ -172,11 +182,13 @@ C              memorize the final best segment
                  do ld=1,trk(ntrk).nhit
                    ient = trk(ntrk).ipnt(ld)
                    if(ient.gt.hit_h.nok.or.ient.lt.1) then
-                     write(6,*) 'WRONG POINTER*********',ient
+                     write(m132(1),*) 'TPT-MAKES2 WRONG POINTER*',ient
+                     call Message( m132, 1, idI2 )
                    endif
                    if(hit(ient).track.ne.0) then
-                     write(6,*) 'hit overwritten',hit(ient).track
-                     read(5,*) itest
+                     write(m132(1),*) 'TPT-MAKES3 hit overwritten'
+     >                                ,ient,hit(ient).track
+                     call Message( m132, 1, idI3 )
                    endif
                    hit(ient).track = ntrk*1000+ld
                  end do
