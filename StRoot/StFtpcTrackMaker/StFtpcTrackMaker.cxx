@@ -1,5 +1,11 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.39 2002/10/11 15:45:31 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.40 2002/10/31 13:40:52 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.40  2002/10/31 13:40:52  oldi
+// dE/dx parameters read from database.
+// Calibration parameters read from database.
+// Vertex estimation for different sectors added.
+// Vertex estimation switched off for events with no tracks.
+//
 // Revision 1.39  2002/10/11 15:45:31  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -212,7 +218,7 @@
 ClassImp(StFtpcTrackMaker)
 
 //_____________________________________________________________________________
-StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name),  m_fdepar(0)
+StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name)
 {
   // Default constructor.
 }
@@ -226,8 +232,20 @@ StFtpcTrackMaker::~StFtpcTrackMaker()
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::InitRun(Int_t run){
 
-  // get tracking parameters from database
-  StFtpcTrackingParams::Instance(kFALSE, GetDataBase("RunLog"));
+  // get ftpc calibration db
+  St_DataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
+
+  if (!ftpcCalibrationsDb){
+    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
+    assert(ftpcCalibrationsDb);
+
+    return kStWarn;
+  }
+
+  St_DataSetIter ftpcCalibrations(ftpcCalibrationsDb);
+
+  // get run dependend tracking parameters from database
+  StFtpcTrackingParams::Instance(kTRUE, (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"), GetDataBase("RunLog"));
 
   return kStOK;
 }
@@ -237,23 +255,41 @@ Int_t StFtpcTrackMaker::Init()
 {
   // Initialisation.
 
-  St_DataSet *ftpcpars = GetInputDB("ftpc");
-  assert(ftpcpars);
-  St_DataSetIter  gime(ftpcpars);
-  m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
+  // get ftpc parameters
+  St_DataSet *ftpcParsDb = GetInputDB("ftpc");
+  assert(ftpcParsDb);
+  St_DataSetIter ftpcPars(ftpcParsDb);
 
-  St_DataSet *geometry_db = GetDataBase("Geometry/ftpc");
-  if ( !geometry_db ){
-     gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry"<<endm;
-     return kStWarn;
+  // get ftpc geometry
+  St_DataSet *ftpcGeometryDb = GetDataBase("Geometry/ftpc");
+
+  if (!ftpcGeometryDb){
+    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
+    assert(ftpcGeometryDb);
+
+    return kStWarn;
   }
-  St_DataSetIter geometry(geometry_db);
+
+  St_DataSetIter ftpcGeometry(ftpcGeometryDb);
+
+  // get tpc geometry
+  St_DataSet *tpcGeometryDb = GetDataBase("Geometry/tpc");
+
+  if (!tpcGeometryDb){
+    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting TPC database: Geometry" << endm;
+    assert(tpcGeometryDb);
+
+    return kStWarn;
+  }
+
+  St_DataSetIter tpcGeometry(tpcGeometryDb);
  
   // get tracking parameters from database
-  StFtpcTrackingParams::Instance(Debug(), 
-				  (St_ftpcDimensions *)geometry("ftpcDimensions"), 
-				 (St_ftpcPadrowZ  *)geometry("ftpcPadrowZ"), 
-				 GetDataBase("RunLog"));
+  StFtpcTrackingParams::Instance(Debug(),
+				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
+				 (St_fde_fdepar *)ftpcPars("fdepars/fdepar"),
+				 (St_ftpcDimensions *)ftpcGeometry("ftpcDimensions"), 
+				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
   // Create Histograms
   m_vtx_pos      = new TH1F("fpt_vtx_pos"   ,"FTPC estimated vertex position"                  , 800, -400.0, 400.0);
   m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                               ,  3,   -2.0,   2.0);
@@ -296,6 +332,13 @@ Int_t StFtpcTrackMaker::Init()
   m_vertex_east_z = new TH1F("fpt_vertex_east_z", "FTPC east vertex z estimation with resp. to TPC vertex", 100, -10., 10.);
   m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", "FTPC west vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
   m_vertex_west_z = new TH1F("fpt_vertex_west_z", "FTPC west vertex z estimation with resp. to TPC vertex", 100, -10., 10.);
+
+  m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 6, 0.5, 6.5, 100., -10., 10.);
+  m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 6, 0.5, 6.5, 100., -10., 10.);
 
   return StMaker::Init();
 }
@@ -440,7 +483,7 @@ Int_t StFtpcTrackMaker::Make()
       else if (z > StFtpcTrackingParams::Instance()->MaxVertexPosZError()) {
 	gMessMgr->Message("", "E", "OST") << "Found vertex is more than " 
 					  << StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
-					  << " cm off from z = 0. Ftpc tracking makes no sense." <<endm;
+					  << " cm off from z = 0. Ftpc tracking makes no sense." << endm;
 	// No tracking!
 	return kStWarn;
       }
@@ -499,21 +542,23 @@ Int_t StFtpcTrackMaker::Make()
       for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
 	point = (StFtpcPoint *)clusters->At(i);
 	point->TransformFtpc2Global();
-	point->ToTable(&(point_st[i]));    
+	point->ToTable(&(point_st[i]));   
       }
     }
-    
+
     // momentum fit, dE/dx calculation, write tracks to tables
     St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
     m_DataSet->Add(fpt_fptrack);
 
-    tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
-    tracker->EstimateVertex(tracker->GetVertex(), 1);
+    tracker->FitAnddEdxAndWrite(fpt_fptrack, -primary_vertex_id);
     
+    if (tracker->GetNumberOfTracks() > 0) { // makes only sense if some tracks found
+      tracker->EstimateVertex(tracker->GetVertex(), 1);
+    }
+
     if (Debug()) {
       gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
-      tracker->SettingInfo();
-      tracker->CutInfo();
+      StFtpcTrackingParams::Instance()->PrintParams();
       tracker->TrackingInfo();
     }
     
@@ -556,15 +601,16 @@ Int_t StFtpcTrackMaker::Make()
     delete eval;
     */
     
-    MakeHistograms(tracker);
+    if (tracker->GetNumberOfTracks() > 0) { // only done when sone tracks found
+      MakeHistograms(tracker);
+    }
+
     delete tracker;
     
-    //MakeHistograms();
     gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
     
     return kStOK;;
 }
-
 
 //_____________________________________________________________________________
 void StFtpcTrackMaker::MakeHistograms()
@@ -578,7 +624,7 @@ void StFtpcTrackMaker::MakeHistograms()
   trk = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
   
   if (trk) {
-    // Fill histograms for FTPC fpt,fte,fde
+    // Fill histograms for FTPC fpt, fte, fde
     
     fpt_fptrack_st *r = trk->GetTable();
     
@@ -597,7 +643,28 @@ void StFtpcTrackMaker::MakeHistograms()
 void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 {
   // Fill histograms.
+  // This is done only if at least one track was found.
+  // With that a crash in EstimateVertex is prohibited. 
+  // (Problem to fit empty histograms.)
+
+  // vertex estimation for different sectors
+  StFtpcVertex vertex;
+
+  for (Int_t i = 1; i <= 6; i++) { // east
+    vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
+    m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+    m_vertex_east_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+    m_vertex_east_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+  }
   
+  for (Int_t i = 1; i <= 6; i++) { // west
+    vertex = tracker->EstimateVertex(tracker->GetVertex(), +1, i, 1);
+    m_vertex_west_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+    m_vertex_west_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+    m_vertex_west_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+  }
+  
+  // vertex estimation for both FTPCs (using all tracks)
   m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
 			 tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
   m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
@@ -628,7 +695,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	m_phires->Fill(mhit->GetPhiResidual());
       }
       
-      if (mhit->GetPadRow()<=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+      if (mhit->GetPadRow() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
 	m_maxadc_West->Fill(mhit->GetMaxADC());
 	m_charge_West->Fill(mhit->GetCharge());
@@ -640,7 +707,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	}
       }
 
-      else if (mhit->GetPadRow()>=11) {
+      else if (mhit->GetPadRow() > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
 	m_maxadc_East->Fill(mhit->GetMaxADC());
 	m_charge_East->Fill(mhit->GetCharge());
@@ -655,7 +722,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
   }
 }
 
-
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Finish()
 {
@@ -666,14 +732,13 @@ Int_t StFtpcTrackMaker::Finish()
   return kStOK;
 }
 
-
 //_____________________________________________________________________________
 void StFtpcTrackMaker::PrintInfo()
 {
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.39 2002/10/11 15:45:31 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.40 2002/10/31 13:40:52 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
