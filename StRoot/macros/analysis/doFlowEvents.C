@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.37 2002/01/30 13:05:13 oldi Exp $
+// $Id: doFlowEvents.C,v 1.38 2002/02/05 17:00:37 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -31,10 +31,11 @@
 // doFlowEvents.C(nevents)	
 // doFlowEvents.C()                // 2 events
 //
-// A parameter, RunType,  may be passed from the calling LSF shell script
+// Parameters, RunType and OutPicoDir, may be passed from the calling LSF shell script
 //   (see pdsf:: ~posk/doFlowEvents.csh):
 //        root4star -b << eof >& $LOG
 //        Int_t RunType = $runNo ;
+//        Char_t* OutPicoDir = $outPicoDir ;
 //        .L $doFile
 //        doFlowEvents.C
 //        .q
@@ -50,6 +51,7 @@ class    StChain;
 StChain  *chain = 0;
 TBrowser *b = 0;
 Int_t    RunType;
+Char_t*  OutPicoDir;
 
 const char *dstFile = 0;
 const char *fileList[] = {dstFile, 0};
@@ -119,9 +121,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   //
   char makerName[30];
 //   StFlowSelection flowSelect;
-  // particles:  pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
-//   flowSelect->SetPidPart("pr");               // for parts. wrt plane
+  // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
+//   flowSelect->SetPidPart("h+");               // for parts. wrt plane
 //   flowSelect->SetPtPart(0., 8.);              // for parts. wrt plane
+//   flowSelect->SetPtBinsPart(256);             // for parts. wrt plane
 //   flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
 //   flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
 //   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
@@ -186,12 +189,12 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   //   a selection object.
   //bool tagMaker = kFALSE;
   bool tagMaker = kTRUE;
-  bool anaMaker = kTRUE;
   //bool anaMaker = kFALSE;
-  //bool cumMaker = kTRUE;
+  bool anaMaker = kTRUE;
   bool cumMaker = kFALSE;
-  //bool spMaker = kTRUE;
+  //bool cumMaker = kTRUE;
   bool spMaker = kFALSE;
+  //bool spMaker = kTRUE;
 
   if (tagMaker) StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
@@ -217,16 +220,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     }
   }
 
-  // Make docs
-//   flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
-//   flowTagMaker->MakeDoc("./StRoot/StFlowTagMaker", "./html", kFALSE);
-//   flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
-//   flowCumulantMaker->MakeDoc("./StRoot/StFlowCumulantMaker", "./html", kFALSE);
-//   flowScalarProdMaker->MakeDoc("./StRoot/StFlowScalarProdMaker", "./html", kFALSE);
-  
   // Set write flages and file names
 //  flowMaker->PicoEventWrite(kTRUE);
 //  flowMaker->SetPicoEventDir("./");
+//  flowMaker->SetPicoEventDir(*OutPicoDir);
   
   // Set Debug status
 //  flowMaker->SetDebug();
@@ -275,6 +272,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   StFlowCutTrack::SetPtFtpc(0., 0.);
 //   StFlowCutTrack::SetEtaTpc(0., 0.);
 //   StFlowCutTrack::SetEtaFtpc(0., 0., 0., 0.);
+//   StFlowCutTrack::SetChgTpc(0, 1); // positive tracks
 
   // Set the event plane selections
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
@@ -287,8 +285,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
 //   StFlowEvent::SetDcaGlobalCut(0., 1.);       // for event plane
 
-  // particles:  pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
-//   StFlowEvent::SetPid("pi");                 // for event plane
+  // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
+//   StFlowEvent::SetPid("h-");                 // for event plane
 
   // Make Eta subevents
 //   StFlowEvent::SetEtaSubs();
@@ -345,7 +343,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   if (nevents > 1) {
     chain->Clear();
     chain->Finish();
-    delete chain;
+    //delete chain;
   }
   else {
     if (!b) {
@@ -424,6 +422,7 @@ void doFlowEvents(const Int_t nevents)
   
   // LBNL
   // 200 GeV
+  // RDO 9-3 and 21-3 bad
 //   Char_t* filePath="/auto/pdsfdv15/rhstar/kaneta/flow_pDST/reco/ProductionMinBias/DEV/2001/2266012/";
 //   if (nevents < 250) {
 //     Char_t* fileExt="st_physics_2266012_raw_0001.event.root.flowpicoevent.root";
@@ -431,7 +430,11 @@ void doFlowEvents(const Int_t nevents)
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
-//   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVertex/ReversedFullField/P01gk/2001/"; 
+//      /auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVertex/ReversedHalfField/P01gk/2001/
+//      /auto/stardata/starspec/kaneta/flow_pDST_production/reco/productionCentral/ReversedFullField/P01gk/2001/
+
+  // only RDO 21-3 bad
+//   Char_t* filePath="/auto/stardata/starspec2/flow_pDST_production/reco/MinBiasVertex/ReversedFullField/P01gk/2001/"; 
 //   if (nevents < 250) {
 //     Char_t* fileExt="2230003/st_physics_2230003_raw_0001.event.root.flowpicoevent.root";
 //    } else {
@@ -443,7 +446,7 @@ void doFlowEvents(const Int_t nevents)
 //   if (nevents < 250) {
 //     Char_t* fileExt="st_physics_1239006_raw_0006.event.root.flowpicoevent.root";
 //   } else {
-//      Char_t* fileExt="*.flowpicoevent.root";
+//     Char_t* fileExt="*.flowpicoevent.root";
 //   }
 
   // miniDST
@@ -451,7 +454,8 @@ void doFlowEvents(const Int_t nevents)
 //   Char_t* fileExt="*.event.root"; // needs stardev as of 1/02
 
   // 20 GeV
-//  Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/dev/2001/";
+  // /auto/stardata/starspec2/flow_pDST_from_fastoffline_DST/020GeV_AuAu/reco/dev/
+
 
   doFlowEvents(nevents, filePath, fileExt);
 }
@@ -459,6 +463,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.38  2002/02/05 17:00:37  posk
+// Added commands for SetPtBinsPart and h+/h-
+//
 // Revision 1.37  2002/01/30 13:05:13  oldi
 // Trigger cut implemented.
 //
