@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.87 2004/02/10 23:16:34 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.88 2004/02/24 17:16:44 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.88  2004/02/24 17:16:44  fisyak
+// remove creation of empty fVolume
+//
 // Revision 1.87  2004/02/10 23:16:34  potekhin
 // First version of Ag2Geom
 //
@@ -440,7 +443,6 @@ St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int
   fVolume(0), fTopGeoVolume(0), 
   fInputFile(""), fEvtHddr(0)
 {
-  fVolume = new TDataSet("geom");
   fgGeom  = new TDataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
