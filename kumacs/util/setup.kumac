@@ -2,6 +2,8 @@
 * editted 7/10/98 K. Turner - change geant macro definitions to geant_Run 
 *                             and geant_Event
 * editted 8/31/98 K. Turner - put stafcv_ok,bad aliases in
+* editted 9/1/98 K. Turner - define counters nevdsttot,nevdstgood
+*                            which are incremented in bfc_util
 * 
 **************************************************
  
@@ -10,8 +12,9 @@ macro setup
   macro/global/import *
     
  if $vexist(setup_done)=0 then
-   exec setup#dir
+   exec setup#set_dir
    exec setup#set_aliases
+   exec setup#set_values
    vec/cre setup_done
  endif
  
@@ -28,7 +31,20 @@ macro set_aliases
 
 return
 **************************************************
-macro dir
+ 
+macro set_values
+
+ macro/global/import *
+
+ macro/global/create log_file ' ' 'default log message file'
+ macro/global/create nevents  0   'no. of events processed so far'
+ macro/global/create nevdsttot 0 
+ macro/global/create nevdstgood 0
+
+return
+
+**************************************************
+macro set_dir
   
   macro/global/import *
    
@@ -38,6 +54,7 @@ macro dir
 
  macro/global/create log_file ' ' 'default log message file'
  macro/global/create nevents  0   'no. of events processed so far'
+
 *************** create global macros *********************************
  macro/global/create run       /dui/run
  macro/global/create event     /dui/event
