@@ -193,6 +193,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     } elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	      $pkg =~ m/EmcUtil$/             ||
 	      $pkg =~ m/^StMuDSTMaker$/       ||
+	      $pkg =~ m/^StJetMaker$/         ||
 	      $pkg =~ m/^StEEmcPool$/         ||
 	      $pkg =~ m/^StTofPool$/          ||
 	      $pkg =~ m/^StRichPool$/         ||
