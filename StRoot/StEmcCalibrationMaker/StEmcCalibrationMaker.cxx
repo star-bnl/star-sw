@@ -713,7 +713,26 @@ void StEmcCalibrationMaker::SaveCalibration(Int_t date, Int_t time)
 		mgr->storeDbTable(tab);
   }
 }
-
+//_____________________________________________________________________________
+void StEmcCalibrationMaker::CorrectGain(char* file,Int_t outGain,Int_t mode)
+{
+  ofstream out(file);
+  
+  for(Int_t id = 1;id<=mNBins;id++)
+  {
+    Int_t ibin = mCalib->FindBin((Float_t)id,1.0);
+    Float_t gain =  mCalib->GetBinContent(ibin);
+    Float_t a = 1;
+    Float_t eta,phi;
+    mCalibGeo->getEtaPhi(id,eta,phi);
+    Float_t theta=2.*atan(exp(-eta));
+    if(mode==1) a = 1./sin(theta); // gain equalized in Et
+    Float_t gainShift = (outGain/gain)*a;
+    out <<id<<"  "<<eta<<"  "<<phi<<"  "<<gain<<"  "<<outGain<<"  "<<gainShift<<endl;
+  }
+  out.close();
+  return;
+}
 
 
 
