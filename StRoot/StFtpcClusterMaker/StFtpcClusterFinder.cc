@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.46 2003/04/23 15:13:13 putschke Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.47 2003/05/07 15:09:22 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.47  2003/05/07 15:09:22  putschke
+// improvements for cathode offset corretions
+//
 // Revision 1.46  2003/04/23 15:13:13  putschke
 // minor change in padtrans
 //
@@ -202,6 +205,10 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
 
   mOffsetCathodeWest = mParam->offsetCathodeWest();
   mOffsetCathodeEast = mParam->offsetCathodeEast();
+  mAngleOffsetWest = mParam->angleOffsetWest();
+  mAngleOffsetEast = mParam->angleOffsetEast();
+
+  mMinChargeWindow = mParam->minChargeWindow();
 
   mhpad = hpad;
   mhtime = htime;
@@ -984,8 +991,8 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 		  // if local maximum Found make Peak
 		  // ================================
 
-		   if (PeakFound && cl_charge>30 && iNumPeaks<160)
-		   //if (PeakFound && cl_charge>30 && iNumPeaks<MAXPEAKS)
+		   if (PeakFound && cl_charge>mMinChargeWindow && iNumPeaks<MAXPEAKS)
+		   //if (PeakFound && cl_charge>30 && iNumPeaks<160)
 		    {
 		      
 		      if (iNumPeaks>0)
@@ -1885,10 +1892,10 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
     {
 
       if (iRow<10) // correct for west chamber
-	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi))*TimeCoordinate;
+	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi-mAngleOffsetWest))*TimeCoordinate;
 	//TimeCoordinate=(1.0-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi))*TimeCoordinate;
       else // correct for east chamber
-	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeEast*sin(Peak->Phi))*TimeCoordinate;
+	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeEast*sin(Peak->Phi+mAngleOffsetEast))*TimeCoordinate;
 	//TimeCoordinate=(1.0-0.09739494018294076*mOffsetCathodeEast*sin(Peak->Phi))*TimeCoordinate;
       
       // calculate new corrected radius and deflection angle :

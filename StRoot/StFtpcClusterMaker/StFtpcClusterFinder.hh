@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.16 2003/04/15 11:35:51 putschke Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.17 2003/05/07 15:09:49 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.17  2003/05/07 15:09:49  putschke
+// improvements for cathode offset corretions
+//
 // Revision 1.16  2003/04/15 11:35:51  putschke
 // Include corrections for inner cathode offset and move some parameter to database
 //
@@ -144,6 +147,11 @@ class StFtpcClusterFinder
 
   float mOffsetCathodeWest;
   float mOffsetCathodeEast;
+  
+  float mAngleOffsetWest;
+  float mAngleOffsetEast;
+  
+  float mMinChargeWindow;
 
  public:
   StFtpcClusterFinder(StFTPCReader *reader, 

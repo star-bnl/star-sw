@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.22 2003/04/15 11:36:22 putschke Exp $
+// $Id: StFtpcParamReader.hh,v 1.23 2003/05/07 15:10:46 putschke Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.23  2003/05/07 15:10:46  putschke
+// improvements for cathode offset corretions
+//
 // Revision 1.22  2003/04/15 11:36:22  putschke
 // Include corrections for inner cathode offset and move some parameter to database
 //
@@ -168,7 +171,7 @@ protected:
   Int_t mMaxFastLoops;    
   Float_t mUnfoldLimit;      
   Float_t mUnfoldFailedLimit;
-
+  Float_t mMinChargeWindow;
   Int_t mMinTimeBin;
   Int_t mMinTimeBinMed;
   Int_t mMinTimeBinOut;
@@ -185,6 +188,8 @@ protected:
 
   Float_t mOffsetCathodeWest;
   Float_t mOffsetCathodeEast;
+  Float_t mAngleOffsetWest;
+  Float_t mAngleOffsetEast;
   
 public:
   // constructor used by StFtpcClusterMaker:
@@ -292,6 +297,9 @@ public:
   Int_t deltaPad() {return mDeltaPad;}
   Float_t offsetCathodeWest() {return mOffsetCathodeWest;}
   Float_t offsetCathodeEast() {return mOffsetCathodeEast;}
+  Float_t angleOffsetWest() {return mAngleOffsetWest;}
+  Float_t angleOffsetEast() {return mAngleOffsetEast;}
+  Float_t minChargeWindow() {return mMinChargeWindow;}
 
 };
 
