@@ -1,9 +1,9 @@
 #ifndef StiKalmanTrackFitter_H
 #define StiKalmanTrackFitter_H
 #include "StiTrackFitter.h"
+#include "StiKalmanTrackFitterParameters.h"
 class StiTrack;
 class EditableParameters;
-class StiKalmanTrackFitterParameters;
 
 ///Class implements a kalman track fitter 
 ///Based on the abstract interface StiTrackFitter
@@ -15,11 +15,11 @@ class StiKalmanTrackFitter : public StiTrackFitter
   StiKalmanTrackFitter();
   virtual ~StiKalmanTrackFitter();
   virtual void fit(StiTrack * track, int direction);
-  void setParameters(StiKalmanTrackFitterParameters *par);
-  virtual EditableParameters * getParameters();
+  void setParameters(const StiKalmanTrackFitterParameters & par);
+  virtual EditableParameters & getParameters();
  
  protected:
-  StiKalmanTrackFitterParameters * _pars;
+  StiKalmanTrackFitterParameters  _pars;
   
 };
 

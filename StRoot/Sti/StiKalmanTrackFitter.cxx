@@ -1,12 +1,10 @@
 #include <stdexcept>
 #include "StiKalmanTrackFitter.h"
-#include "StiKalmanTrackFitterParameters.h"
 #include "StiKalmanTrack.h"
 #include "StiKTNIterator.h"
   
 
 StiKalmanTrackFitter::StiKalmanTrackFitter()
-  : _pars(new StiKalmanTrackFitterParameters() )
 {}
 
 StiKalmanTrackFitter::~StiKalmanTrackFitter()
@@ -62,7 +60,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	    {
 	      chi2 = targetNode->evaluateChi2(targetHit);
 	      targetNode->setChi2(chi2);
-	      if (chi2<3) targetNode->updateNode();
+	      if (chi2<_pars.getMaxChi2() ) targetNode->updateNode();
 	    }
 	  source++;//cout<<"=="<<endl;
 	}
@@ -95,12 +93,12 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 }
 
 
-void StiKalmanTrackFitter::setParameters(StiKalmanTrackFitterParameters *pars)
+void StiKalmanTrackFitter::setParameters(const StiKalmanTrackFitterParameters & pars)
 {
   _pars = pars;
 }
 
-EditableParameters * StiKalmanTrackFitter::getParameters()
+EditableParameters & StiKalmanTrackFitter::getParameters()
 {
   return _pars;
 }
