@@ -62,10 +62,12 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    # backward infrastructure compatible layout (AFS only).
    if( ! -l "$lib")   { symlink("$ANFS/$root/lib","$lib" );}
    if( ! -l "$bin")   { symlink("$ANFS/$root/bin","$bin" );}
-   if( ! -l "etc")    { symlink("$ANFS/$root/etc","etc"  );}
-   if( ! -l "cint")   { symlink("$ANFS/$root/cint","cint");}
-   if( ! -l "icons")  { symlink("$ANFS/$root/icons","icons");}
-   if( ! -l "include"){ symlink("$ANFS/$root/include","include");}
+   if( $iter == 1){
+       if( ! -l "etc")    { symlink("$ANFS/$root/etc","etc"  );}
+       if( ! -l "cint")   { symlink("$ANFS/$root/cint","cint");}
+       if( ! -l "icons")  { symlink("$ANFS/$root/icons","icons");}
+       if( ! -l "include"){ symlink("$ANFS/$root/include","include");}
+   }
 
    if( ! $FLINK ){
        print 
