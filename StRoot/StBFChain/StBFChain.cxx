@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.211 2001/07/13 21:21:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.212 2001/07/14 16:47:41 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -106,10 +106,10 @@ Bfc_st BFC[] = {
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
-  {"FieldOn"     ,""  ,"",""                                 ,"","StMagF" ,"Constant nominal field",kFALSE},
-  {"FieldOff"    ,""  ,"",""                                        ,"","StMagF" ,"No Field option",kFALSE},
-  {"HalfField"   ,""  ,"",""                                       ,"","StMagF","Half Field option",kFALSE},
-  {"ReverseField",""  ,"",""                                    ,"","StMagF","Reverse Field option",kFALSE},
+  {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
+  {"FieldOff"    ,""  ,"","MagF"                                          ,"","" ,"No Field option",kFALSE},
+  {"HalfField"   ,""  ,"","MagF"                                         ,"","","Half Field option",kFALSE},
+  {"ReverseField",""  ,"","MagF"                                      ,"","","Reverse Field option",kFALSE},
   {"NoCintDb"    ,""  ,"",""                                   ,"","","Switch off standard Cint Db",kFALSE},
   {"NoCintCalDb" ,""  ,"",""                                      ,"","","Switch off Cint Calib Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
