@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.17 2000/10/02 11:47:50 fisyak Exp $
+# $Id: cons,v 1.1.1.18 2000/11/06 01:05:26 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.1";
 $ver_rev = ".3";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.17 2000/10/02 11:47:50 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.18 2000/11/06 01:05:26 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -404,24 +404,28 @@ if ($param::depfile) {
 }
 
 # Walk up the directory hierarchy looking for a Conscript file (if -t set).
-my $target_top;
-if ($param::traverse) {
-    my $cwd = cwd();
-    my $ttop = dir::lookupdir(undef, $cwd);
-    my $dir = $ttop;
-    while (! -f $dir->prefix . $param::topfile) {
-	$dir = $dir->up;
-	die("$0: unable to find $param::topfile.\n") if ! $dir;
+my($target_top);
+my(@targetdir) = ();
+if ($param::traverse && ! -f $param::topfile) {
+    my($vol, $dirs, $file) = File::Spec->splitpath(cwd());
+    my(@dirs) = (File::Spec->splitdir($dirs), $file);
+    while (! -f File::Spec->catpath($vol, File::Spec->catdir(@dirs), $param::topfile)) {
+	die("$0: unable to find $param::topfile.\n") if ! @dirs;
+	unshift(@targetdir, pop(@dirs));
     }
-    if ($dir != $ttop) {
-	chdir($dir->path);
-	@targets = map($ttop->lookup($_)->path, @targets);
-	$target_top = $ttop;
-    }
+    my($cwd) = File::Spec->catpath($vol, File::Spec->catdir(@dirs), '');
+    print "$0: Entering directory `$cwd'\n";
+    chdir($cwd);
+    @targets = map {File::Spec->catdir(@targetdir, $_)} @targets;
 }
 
 # Set up $dir::top and $dir::cwd, now that we are in the right directory.
 dir::init();
+
+#
+if (@targetdir) {
+    $target_top = $dir::top->lookupdir(File::Spec->catdir(@targetdir));
+}
 
 # Now handle override file.
 package override;
@@ -586,49 +590,13 @@ sub buildtarget {
 # main package by cons), these are all invoked by user scripts.
 package script;
 
-use vars qw( @ISA @EXPORT $ARG $caller_dir_path );
-
-require Exporter;
+use vars qw( $ARG $caller_dir_path %special_var );
 
 BEGIN {
-    @ISA = qw(Exporter);
-
-    @EXPORT = qw(Link Repository Repository_List Repository_Sig_Times_OK
-		 Conscript_chdir Local Export Import Build Ignore
-		 Default Help FilePath
-		 DirPath SplitPath ConsPath SourcePath UseCache Salt
-		 Precious
-		 %ARG );
-}
-
-# We will use a new unique module name for each Construct/Conscript file
-# read. The methods in the "script" module that should be available
-# are imported to each new module created.
-
-use vars qw( $conscript_module );
-
-BEGIN { $conscript_module = "ConscriptModule0"; }
-
-sub do_in_new_package
-{
-    my ($path) = @_;
-
-    $conscript_module++;
-    my $saved_at = '';
-    my $prog = qq{
-	package $conscript_module;
-	'script'->import;
-	do '$path';
-	if (\$@) {
-	    \$saved_at = \$@;
-	}
-    };
-    eval $prog;
-    if ($@) {
-	warn "cons internal error in eval, $@";
-	die "cons internal error in eval";
-    }
-    $@ = $saved_at;
+    # We can't Export or Import the following variables because Perl always
+    # treats them as part of the "main::" package (see perlvar(1)).
+    %special_var = map {$_ => 1} qw(ENV INC ARGV ARGVOUT SIG
+				    STDIN STDOUT STDERR);
 }
 
 # This is called from main to interpret/run the top-level Construct
@@ -639,6 +607,11 @@ sub main::doscripts {
     # Now set up the includes/excludes (after the Construct file is read).
     $param::include = join('|', @param::include);
 
+    # Save the original variable names from the script package.
+    # These will stay intact, but any other "script::" variables
+    # defined in a Conscript file will get saved, deleted,
+    # and (when necessary) restored.
+    my(%orig_script_var) = map {$_ => 1} keys %script::;
     $caller_dir_path = undef;
     my $cwd = Cwd::cwd();
     my(@scripts) = pop(@priv::scripts);
@@ -646,6 +619,7 @@ sub main::doscripts {
 	my($path) = $priv::self->{script}->rsrcpath;
 	if (-f $path) {
 	    $dir::cwd = $priv::self->{script}->{dir};
+	    # Handle chdir to the Conscript file directory, if necessary.
 	    my ($vol, $dir, $file);
 	    if ($param::conscript_chdir) {
 		($vol, $dir, $file) = File::Spec->splitpath(File::Spec->canonpath($path));
@@ -657,7 +631,28 @@ sub main::doscripts {
 	    } else {
 		$file = $path;
 	    }
-	    do_in_new_package($file);
+	    # Actually process the Conscript file.
+	    do $file;
+	    # Save any variables defined by the Conscript file
+	    # so we can restore them later, if needed;
+	    # then delete them from the script:: namespace.
+	    my(%env_imports, $var, $type);
+	    foreach $var (grep(! $orig_script_var{$_}, keys %script::)) {
+		$env_imports{$var} = [];
+		# If the scalar for this variable name doesn't already
+		# exist, *foo{SCALAR} will autovivify the reference
+		# instead of returning undef, so unlike the other types,
+		# we have to dereference to find out if it exists.
+		no strict 'refs';
+		push @{$env_imports{$var}}, *{"script::$var"}{SCALAR}
+			       if defined ${*{"script::$var"}{SCALAR}};
+		foreach $type (qw(ARRAY HASH CODE IO)) {
+			push @{$env_imports{$var}}, *{"script::$var"}{$type}
+					 if defined *{"script::$var"}{$type};
+		}
+		delete $script::{$var};
+	    }
+	    $priv::self->{script}->{env_imports} = \%env_imports;
 	    if ($caller_dir_path) {
 		chdir($cwd);
 		$caller_dir_path = undef;
@@ -757,17 +752,25 @@ sub Local {
 
 # Export variables to any scripts invoked from this one.
 sub Export {
-    @{$priv::self->{exports}} = @_;
+    my(@illegal) = grep($special_var{$_}, @_);
+    if (@illegal) {
+	die qq($0: cannot Export special Perl variables: @illegal\n);
+    }
+    @{$priv::self->{exports}} = grep(! defined $special_var{$_}, @_);
 }
 
 # Import variables from the export list of the caller
 # of the current script.
 sub Import {
+    my(@illegal) = grep($special_var{$_}, @_);
+    if (@illegal) {
+	die qq($0: cannot Import special Perl variables: @illegal\n");
+    }
     my($parent) = $priv::self->{parent};
     my($imports) = $priv::self->{imports};
     @{$priv::self->{exports}} = keys %$imports;
     my($var);
-    while ($var = shift) {
+    foreach $var (grep(! defined $special_var{$_}, @_)) {
 	if (!exists $imports->{$var}) {
 	    my($path) = $parent->{script}->path;
 	    die qq($0: variable "$var" not exported by file "$path"\n);
@@ -778,7 +781,7 @@ sub Import {
 		      "defined by file \"$path\"\n";
 	    die $err;
 	}
-	${$conscript_module."::".$var} = $imports->{$var};
+	${"script::$var"} = $imports->{$var};
     }
 }
 
@@ -787,8 +790,7 @@ sub Import {
 # the current script.
 sub Build {
     my(@files) = map($dir::cwd->lookupfile($_), @_);
-    my(%imports);
-    map($imports{$_} = ${$conscript_module."::".$_}, @{$priv::self->{exports}});
+    my(%imports) = map {$_ => ${"script::$_"}} @{$priv::self->{exports}};
     my $file;
     for $file (@files) {
 	next if $param::include && $file->path !~ /$param::include/o;
@@ -1068,7 +1070,7 @@ sub Objects {
 sub _Objects {
     my($env) = shift;
     my($suffix) = $env->{SUFOBJ};
-    map(_Object($env, $_, $_->{dir}->lookupfile($_->base . $suffix)), @_);
+    map(_Object($env, $_, $_->{dir}->lookupfile($_->base_suf($suffix))), @_);
 }
 
 # Called with an object and source reference.  If no object reference
@@ -1142,7 +1144,7 @@ sub Command {
 	my(@tgts) = map($dir::cwd->lookupfile($_), @$tgt);
 	die("empty target list in multi-target command\n") if !@tgts;
 	$env = $env->_resolve($tgts[0]);
-	my $builder = find build::command::user($env, $com, $script::conscript_module);
+	my $builder = find build::command::user($env, $com, 'script');
 	my($multi) = build::multiple->new($builder, \@tgts);
 	for $tgt (@tgts) {
 	    $tgt->bind($multi, @sources);
@@ -1150,7 +1152,7 @@ sub Command {
     } else {
 	$tgt = $dir::cwd->lookupfile($tgt);
 	$env = $env->_resolve($tgt);
-	my $builder = find build::command::user($env, $com, $script::conscript_module);
+	my $builder = find build::command::user($env, $com, 'script');
 	$tgt->bind($builder, @sources);
     }
 }
@@ -1397,7 +1399,24 @@ sub action {
 	    my $perlcmd = $';
 	    my $status;
 	    {
-	      $status = eval "package ${\$self->{'package'}}; $perlcmd";
+	      # Restore the script package variables that were defined
+	      # in the Conscript file that defined this [perl] build,
+	      # so the code executes with the expected variables.
+	      my($package) = $self->{'package'};
+	      my($env_imports) = $tgt->{conscript}->{env_imports};
+	      my($var, $ref);
+	      foreach $var (keys %$env_imports) {
+		foreach $ref (@{$env_imports->{$var}}) {
+		    *{$package."::".$var} = $ref;
+		}
+	      }
+	      # Actually execute the [perl] command to build the target.
+	      $status = eval "package $package; $perlcmd";
+	      # Clean up the namespace by deleting the package variables
+	      # we just restored.
+	      foreach $var (keys %$env_imports) {
+		delete ${$package."::"}{$var};
+	      }
 	    }
 	    if (!defined($status)) {
 		warn "$0: *** Error during perl command eval: $@.\n";
@@ -2687,11 +2706,16 @@ sub local {
     $self->{'local'};
 }
 
-# Return the entry name of the specified file
-# without the suffix
-sub base {
+# Return the entry name of the specified file with the specified
+# suffix appended.  Leave it untouched if the suffix is already there.
+# Differs from the addsuffix function, below, in that this strips
+# the existing suffix (if any) before appending the desired one.
+sub base_suf {
     my($entry) = $_[0]->{entry};
-    $entry =~ s/\.[^\.]*$//;
+    if ($entry !~ m/$_[1]$/) {
+	$entry =~ s/\.[^\.]*$//;
+	$entry .= $_[1];
+    }
     $entry;
 }
 
@@ -2890,6 +2914,7 @@ sub bind {
     $self->{builder} = $builder;
     push(@{$self->{sources}}, @sources);
     @{$self->{dep}} = () if ! defined $self->{dep};
+    $self->{conscript} = $priv::self->{script};
 }
 
 sub is_under {
@@ -2985,8 +3010,6 @@ sub mkdir {
 
 # Signature package.
 package sig::hash;
-
-use vars qw( $called );
 
 use vars qw( $called );
 
@@ -3574,17 +3597,6 @@ component that needs to be incorporated into a build tree, for example,
 might hook into the build tree in one place, but define its own construction
 hierarchy.
 
-Internally, each subsidiary F<Conscript> file is executed in its own Perl
-C<package>.  This means that you may pull modules into each F<Conscript>
-file using the normal Perl C<use> or C<require> statements:
-
-  use English;
-  require My::Module;
-
-Each C<use> or C<require> only affects the one F<Conscript> file in which
-it appears.  To use a module in multiple F<Conscript> files, you must
-put a C<use> or C<require> statement in each one that needs the module.
-
 By default, Cons does not change its working directory to the directory
 containing a subsidiary F<Conscript> file it is including.  This behavior
 can be enabled for a build by specifying, in the top-level F<Construct>
@@ -3617,29 +3629,41 @@ systems which use a back slash rather than a forward slash to name absolute
 paths.
 
 
+=head2 Using modules in build scripts
+
+You may pull modules into each F<Conscript> file using the normal Perl
+C<use> or C<require> statements:
+
+  use English;
+  require My::Module;
+
+Each C<use> or C<require> only affects the one F<Conscript> file in which
+it appears.  To use a module in multiple F<Conscript> files, you must
+put a C<use> or C<require> statement in each one that needs the module.
+
+
 =head2 Scope of variables
 
-Each F<Conscript> file, and also the top-level F<Construct> file, begins
-life in a separate Perl package. Except for the F<Construct> file, which
-gets some of the command line arguments, the symbol table for each script is
-empty. All of the variables that are set, therefore, are set by the script
-itself--not by some external script. Variables can be explicitly B<imported>
-by a script from its parent script. To import a variable, it must have been
-B<exported> by the parent and initialized (otherwise an error will
-occur). It is therefore possible to determine, from looking at a single
-script, exactly where each variable in that script is set.
+The top-level F<Construct> file and all F<Conscript> files begin life in
+a common, separate Perl package.  B<Cons> controls the symbol table for
+the package so that, the symbol table for each script is empty, except
+for the F<Construct> file, which gets some of the command line arguments.
+All of the variables that are set or used, therefore, are set by the
+script itself--not by some external script.
+
+Variables can be explicitly B<imported> by a script from its parent
+script. To import a variable, it must have been B<exported> by the parent
+and initialized (otherwise an error will occur).
 
 
 =head2 The Export command
 
 The C<Export> command is used as in the following example:
 
-
-
-  $ENV = new cons();
+  $env = new cons();
   $INCLUDE = "#export/include";
   $LIB = "#export/lib";
-  Export qw( ENV INCLUDE LIB );
+  Export qw( env INCLUDE LIB );
   Build qw( util/Conscript );
 
 The values of the simple variables mentioned in the C<Export> list will be
@@ -3652,12 +3676,10 @@ original exporting script. It's acceptable, however, to assign a new value
 to the exported scalar variable--that won't change the underlying variable
 referenced. This sequence, for example, is OK:
 
-
-
-  $ENV = new cons();
-  Export qw( ENV INCLUDE LIB );
+  $env = new cons();
+  Export qw( env INCLUDE LIB );
   Build qw( util/Conscript );
-  $ENV = new cons(CFLAGS => '-O');
+  $env = new cons(CFLAGS => '-O');
   Build qw( other/Conscript );
 
 It doesn't matter whether the variable is set before or after the C<Export>
@@ -3673,10 +3695,9 @@ Variables exported by the C<Export> command can be imported into subsidiary
 scripts by the C<Import> command. The subsidiary script always imports
 variables directly from the superior script. Consider this example:
 
+  Import qw( env INCLUDE );
 
-  Import qw( ENV INCLUDE );
-
-This is only legal if the parent script exported both C<$ENV> and
+This is only legal if the parent script exported both C<$env> and
 C<$INCLUDE>. It also must have given each of these variables values. It is
 OK for the subsidiary script to only import a subset of the exported
 variables (in this example, C<$LIB>, which was exported by the previous
@@ -3684,18 +3705,14 @@ example, is not imported).
 
 All the imported variables are automatically re-exported, so the sequence:
 
-
-
-  Import qw ( ENV INCLUDE );
+  Import qw ( env INCLUDE );
   Build qw ( beneath-me/Conscript );
 
-will supply both C<$ENV> and C<$INCLUDE> to the subsidiary file. If only
-C<$ENV> is to be exported, then the following will suffice:
+will supply both C<$env> and C<$INCLUDE> to the subsidiary file. If only
+C<$env> is to be exported, then the following will suffice:
 
-
-
-  Import qw ( ENV INCLUDE );
-  Export qw ( ENV );
+  Import qw ( env INCLUDE );
+  Export qw ( env );
   Build qw ( beneath-me/Conscript );
 
 Needless to say, the variables may be modified locally before invoking
@@ -4907,14 +4924,20 @@ It is possible to programmatically rewrite part of the command by
 enclosing part of it between C<%[> and C<%]>.  This will call the
 construction variable named as the first word enclosed in the brackets
 as a Perl code reference; the results of this call will be used to
-replace the contents of the brackets in the command line.  For example:
+replace the contents of the brackets in the command line.  For example,
+given an existing input file named F<tgt.in>:
 
+  @keywords = qw(foo bar baz);
   $env = new cons(X_COMMA => sub { join(",", @_) });
-  Command $env 'tgt', qw(foo bar baz), "echo %[X_COMMA %<%] > %>"
+  Command $env 'tgt', 'tgt.in', qq(
+	echo '# Keywords: %[X_COMMA @keywords %]' > %>
+	cat %< >> %>
+  );
 
 This will execute:
 
-  echo foo,bar,baz > tgt
+  echo '# Keywords: foo,bar,baz' > tgt
+  cat tgt.in >> tgt
 
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
@@ -4962,7 +4985,7 @@ file in which the C<Command> appears:
 
   $env = new cons();
   sub create_file {
-    	my $file = shift;
+	my $file = shift;
 	open(FILE, ">$file");
 	print FILE "hi\n";
 	close(FILE);

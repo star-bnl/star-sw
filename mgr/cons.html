@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
+<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
 </HEAD>
 
 <BODY>
@@ -12,7 +12,6 @@
 
 	<LI><A HREF="#NAME">NAME</A>
 	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
-	<LI><A HREF="#Cons_A_Software_Construction_Sy">Cons: A Software Construction System</A>
 	<LI><A HREF="#Introduction">Introduction</A>
 	<LI><A HREF="#Why_Cons_Why_not_Make_">Why Cons? Why not Make?</A>
 	<UL>
@@ -39,6 +38,7 @@
 		<LI><A HREF="#A_hierarchy_of_build_scripts">A hierarchy of build scripts</A>
 		<LI><A HREF="#The_Build_command">The Build command</A>
 		<LI><A HREF="#Relative_top_relative_and_abso">Relative, top-relative, and absolute file names</A>
+		<LI><A HREF="#Using_modules_in_build_scripts">Using modules in build scripts</A>
 		<LI><A HREF="#Scope_of_variables">Scope of variables</A>
 		<LI><A HREF="#The_Export_command">The Export command</A>
 		<LI><A HREF="#The_Import_command">The Import command</A>
@@ -104,6 +104,7 @@
 	<UL>
 
 		<LI><A HREF="#Default_construction_variables">Default construction variables</A>
+		<LI><A HREF="#Interpolating_construction_varia">Interpolating construction variables</A>
 	</UL>
 
 	<LI><A HREF="#Default_construction_methods">Default construction methods</A>
@@ -142,7 +143,10 @@
 
 	<LI><A HREF="#Invoking_Cons">Invoking Cons</A>
 	<LI><A HREF="#Using_and_writing_dependency_sca">Using and writing dependency scanners</A>
-	<LI><A HREF="#Support_and_Suggestions">Support and Suggestions</A>
+	<LI><A HREF="#SUPPORT_AND_SUGGESTIONS">SUPPORT AND SUGGESTIONS</A>
+	<LI><A HREF="#BUGS">BUGS</A>
+	<LI><A HREF="#INFORMATION_ABOUT_CONS">INFORMATION ABOUT CONS</A>
+	<LI><A HREF="#AUTHORS">AUTHORS</A>
 </UL>
 <!-- INDEX END -->
 
@@ -150,25 +154,13 @@
 <P>
 <H1><A NAME="NAME">NAME</A></H1>
 <P>
-Cons - Cons: A Software Construction System
+Cons - A Software Construction System
 
 <P>
 <HR>
 <H1><A NAME="DESCRIPTION">DESCRIPTION</A></H1>
 <P>
-The original document was automatically derived from the <EM>cons/cons.html</EM>
-by <STRONG>html2pod</STRONG>, thanks to Ulrich Pfiefer. Later revisions were created from the original.
-
-<P>
-<HR>
-<H1><A NAME="Cons_A_Software_Construction_Sy">Cons: A Software Construction System</A></H1>
-<P>
-by Bob Sidebotham, et al. <EM>cons-discuss@gnu.org</EM>
-
-
-
-<P>
-A guide and reference for version 2.0.1
+A guide and reference for version 2.1.3
 
 <P>
 Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -243,10 +235,10 @@ recursively for each sub-directory of a build. This leads to complicated
 code, in which it is often unclear how a variable is set, or what effect
 the setting of a variable will have on the build as a whole. The make
 scripting language has gradually been extended to provide more
-possibilities, but these have largely served to clutter an already over
-extended language. Often, builds are done in multiple passes in order to
-provide appropriate products from one directory to another directory. This
-represents a further increase in build complexity.
+possibilities, but these have largely served to clutter an already
+overextended language. Often, builds are done in multiple passes in order
+to provide appropriate products from one directory to another directory.
+This represents a further increase in build complexity.
 
 <P>
 <HR>
@@ -312,7 +304,7 @@ for writing scripts is a familiar one. Even if you don't happen to be a
 Perl programmer, it helps to know that Perl is basically just a simple
 declarative language, with a well-defined flow of control, and familiar
 semantics. It has variables that behave basically the way you would expect
-them to, subroutines, flow-of-control, and so on. There is no special
+them to, subroutines, flow of control, and so on. There is no special
 syntax introduced for Cons. The use of Perl as a scripting language
 simplifies the task of expressing the appropriate solution to the often
 complex requirements of a build.
@@ -497,6 +489,28 @@ might hook into the build tree in one place, but define its own
 construction hierarchy.
 
 <P>
+By default, Cons does not change its working directory to the directory
+containing a subsidiary <EM>Conscript</EM> file it is including. This behavior can be enabled for a build by
+specifying, in the top-level <EM>Construct</EM>
+file:
+
+<P>
+<PRE>  Conscript_chdir 1;
+</PRE>
+<P>
+When enabled, Cons will change to the subsidiary <EM>Conscript</EM> file's containing directory while reading in that file, and then change
+back to the top-level directory once the file has been processed.
+
+<P>
+It is expected that this behavior will become the default in some future
+version of Cons. To prepare for this transition, builds that expect Cons to
+remain at the top of the build while it reads in a subsidiary
+<EM>Conscript</EM> file should explicitly disable this feature as follows:
+
+<P>
+<PRE>  Conscript_chdir 0;
+</PRE>
+<P>
 <HR>
 <H2><A NAME="Relative_top_relative_and_abso">Relative, top-relative, and absolute file names</A></H2>
 <P>
@@ -512,16 +526,29 @@ which use a back slash rather than a forward slash to name absolute paths.
 
 <P>
 <HR>
+<H2><A NAME="Using_modules_in_build_scripts">Using modules in build scripts</A></H2>
+<P>
+You may pull modules into each <EM>Conscript</EM> file using the normal Perl
+<CODE>use</CODE> or <CODE>require</CODE> statements:
+
+<P>
+<PRE>  use English;
+  require My::Module;
+</PRE>
+<P>
+Each <CODE>use</CODE> or <CODE>require</CODE> only affects the one <EM>Conscript</EM> file in which it appears. To use a module in multiple <EM>Conscript</EM> files, you must put a <CODE>use</CODE> or <CODE>require</CODE> statement in each one that needs the module.
+
+<P>
+<HR>
 <H2><A NAME="Scope_of_variables">Scope of variables</A></H2>
 <P>
-Each <EM>Conscript</EM> file, and also the top-level <EM>Construct</EM> file, begins life in a separate Perl package. Except for the <EM>Construct</EM> file, which gets some of the command line arguments, the symbol table for
-each script is empty. All of the variables that are set, therefore, are set
-by the script itself--not by some external script. Variables can be
-explicitly <STRONG>imported</STRONG>
-by a script from its parent script. To import a variable, it must have been
-<STRONG>exported</STRONG> by the parent and initialized (otherwise an error will occur). It is
-therefore possible to determine, from looking at a single script, exactly
-where each variable in that script is set.
+The top-level <EM>Construct</EM> file and all <EM>Conscript</EM> files begin life in a common, separate Perl package.  <STRONG>Cons</STRONG> controls the symbol table for the package so that, the symbol table for
+each script is empty, except for the <EM>Construct</EM> file, which gets some of the command line arguments. All of the variables
+that are set or used, therefore, are set by the script itself--not by some
+external script.
+
+<P>
+Variables can be explicitly <STRONG>imported</STRONG> by a script from its parent script. To import a variable, it must have been <STRONG>exported</STRONG> by the parent and initialized (otherwise an error will occur).
 
 <P>
 <HR>
@@ -530,10 +557,10 @@ where each variable in that script is set.
 The <CODE>Export</CODE> command is used as in the following example:
 
 <P>
-<PRE>  $ENV = new cons();
+<PRE>  $env = new cons();
   $INCLUDE = &quot;#export/include&quot;;
   $LIB = &quot;#export/lib&quot;;
-  Export qw( ENV INCLUDE LIB );
+  Export qw( env INCLUDE LIB );
   Build qw( util/Conscript );
 </PRE>
 <P>
@@ -545,10 +572,10 @@ scalar variable--that won't change the underlying variable referenced. This
 sequence, for example, is OK:
 
 <P>
-<PRE>  $ENV = new cons();
-  Export qw( ENV INCLUDE LIB );
+<PRE>  $env = new cons();
+  Export qw( env INCLUDE LIB );
   Build qw( util/Conscript );
-  $ENV = new cons(CFLAGS =&gt; '-O');
+  $env = new cons(CFLAGS =&gt; '-O');
   Build qw( other/Conscript );
 </PRE>
 <P>
@@ -565,10 +592,10 @@ Variables exported by the <CODE>Export</CODE> command can be imported into subsi
 superior script. Consider this example:
 
 <P>
-<PRE>  Import qw( ENV INCLUDE );
+<PRE>  Import qw( env INCLUDE );
 </PRE>
 <P>
-This is only legal if the parent script exported both <CODE>$ENV</CODE> and
+This is only legal if the parent script exported both <CODE>$env</CODE> and
 <CODE>$INCLUDE</CODE>. It also must have given each of these variables values. It is OK for the
 subsidiary script to only import a subset of the exported variables (in
 this example, <CODE>$LIB</CODE>, which was exported by the previous example, is not imported).
@@ -577,16 +604,16 @@ this example, <CODE>$LIB</CODE>, which was exported by the previous example, is 
 All the imported variables are automatically re-exported, so the sequence:
 
 <P>
-<PRE>  Import qw ( ENV INCLUDE );
+<PRE>  Import qw ( env INCLUDE );
   Build qw ( beneath-me/Conscript );
 </PRE>
 <P>
-will supply both <CODE>$ENV</CODE> and <CODE>$INCLUDE</CODE> to the subsidiary file. If only
-<CODE>$ENV</CODE> is to be exported, then the following will suffice:
+will supply both <CODE>$env</CODE> and <CODE>$INCLUDE</CODE> to the subsidiary file. If only
+<CODE>$env</CODE> is to be exported, then the following will suffice:
 
 <P>
-<PRE>  Import qw ( ENV INCLUDE );
-  Export qw ( ENV );
+<PRE>  Import qw ( env INCLUDE );
+  Export qw ( env );
   Build qw ( beneath-me/Conscript );
 </PRE>
 <P>
@@ -1077,7 +1104,7 @@ building the derived files from the repository source:
 <P>
 <PRE>  % rm world.c
   % cons -R /usr/src_only/repository hello
-  gcc -c /usr/src_only/world.c/repository -o world.o
+  gcc -c /usr/src_only/repository/world.c -o world.o
   ar r libworld.a world.o
   ar: creating libworld.a
   ranlib libworld.a
@@ -1656,6 +1683,7 @@ overridden in the default:
 <PRE>  CC            =&gt; 'cl',
   CFLAGS        =&gt; '/nologo',
   CCCOM         =&gt; '%CC %CFLAGS %_IFLAGS /c %&lt; /Fo%&gt;',
+  CXXCOM        =&gt; '%CXX %CXXFLAGS %_IFLAGS /c %&lt; /Fo%&gt;',
   INCDIRPREFIX  =&gt; '/I',
   LINK          =&gt; 'link',
   LINKCOM       =&gt; '%LINK %LDFLAGS /out:%&gt; %&lt; %_LDIRS %LIBS',
@@ -1684,7 +1712,7 @@ the corresponding object files. For example:
 <PRE>  Objects $env 'foo.c', 'bar.c';
 </PRE>
 <P>
-This will arrange to produce, if necessary, <EM>foo.o</EM> and <EM>bar.o</EM>. The command invoked is simply <CODE>%CCOM</CODE>, which expands through substitution, to the appropriate external command
+This will arrange to produce, if necessary, <EM>foo.o</EM> and <EM>bar.o</EM>. The command invoked is simply <CODE>%CCCOM</CODE>, which expands through substitution, to the appropriate external command
 required to build each object. We will explore the substitution rules
 further under the <CODE>Command</CODE> method, below.
 
@@ -1720,6 +1748,26 @@ reproducibility, you should really arrange to set your own execution path,
 in your top-level <EM>Construct</EM> file (or perhaps by importing an appropriate construction package with the
 Perl <CODE>use</CODE>
 command). The default variables are intended to get you off the ground.
+
+<P>
+<HR>
+<H2><A NAME="Interpolating_construction_varia">Interpolating construction variables</A></H2>
+<P>
+Construction environment variables may be interpolated in the source and
+target file names by prefixing the construction variable name with <CODE>%</CODE>.
+
+<P>
+<PRE>  $env = new cons(
+        DESTDIR =&gt;      'programs',
+        SRCDIR  =&gt;      'src',
+  );
+  Program $env '%DESTDIR/hello', '%SRCDIR/hello.c';
+</PRE>
+<P>
+Expansion of construction variables is recursive--that is, the file
+<CODE>name(s)</CODE> will be re-expanded until no more substitutions can be
+made. If a construction variable is not defined in the environment, then
+the null string will be substituted.
 
 <P>
 <HR>
@@ -1880,7 +1928,8 @@ Within the construction command, any variable from the construction
 environment may be introduced by prefixing the name of the construction
 variable with <CODE>%</CODE>. This is recursive: the command is expanded until no more substitutions
 can be made. If a construction variable is not defined in the environment,
-then the null string will be substituted.
+then the null string will be substituted. A doubled <CODE>%%</CODE>
+will be replaced by a single <CODE>%</CODE> in the construction command.
 
 <P>
 There are several pseudo variables which will also be expanded:
@@ -1927,12 +1976,12 @@ Any of the above pseudo variables may be followed immediately by one of the
 following suffixes to select a portion of the expanded path name:
 
 <P>
-<PRE>  C&lt;:a&gt;    the absolute path to the file name
-  C&lt;:b&gt;    the directory plus the file name stripped of any suffix
-  C&lt;:d&gt;    the directory
-  C&lt;:f&gt;    the file name
-  C&lt;:s&gt;    the file name suffix
-  C&lt;:F&gt;    the file name stripped of any suffix
+<PRE>  :a    the absolute path to the file name
+  :b    the directory plus the file name stripped of any suffix
+  :d    the directory
+  :f    the file name
+  :s    the file name suffix
+  :F    the file name stripped of any suffix
 </PRE>
 <P>
 Continuing with the above example, <CODE>%&lt;:f</CODE> would expand to <CODE>foo bar baz</CODE>, and <CODE>%</CODE>:d&gt; would expand to <CODE>test</CODE>.
@@ -1942,17 +1991,22 @@ It is possible to programmatically rewrite part of the command by enclosing
 part of it between <CODE>%[</CODE> and <CODE>%]</CODE>. This will call the construction variable named as the first word enclosed
 in the brackets as a Perl code reference; the results of this call will be
 used to replace the contents of the brackets in the command line. For
-example:
+example, given an existing input file named <EM>tgt.in</EM>:
 
 <P>
-<PRE>  $env = new cons(X_COMMA =&gt; sub { join(&quot;,&quot;, @_) });
-  Command $env 'tgt', qw(foo bar baz), &quot;echo %[X_COMMA %&lt;%] &gt; %&gt;&quot;
+<PRE>  @keywords = qw(foo bar baz);
+  $env = new cons(X_COMMA =&gt; sub { join(&quot;,&quot;, @_) });
+  Command $env 'tgt', 'tgt.in', qq(
+        echo '# Keywords: %[X_COMMA @keywords %]' &gt; %&gt;
+        cat %&lt; &gt;&gt; %&gt;
+  );
 </PRE>
 <P>
 This will execute:
 
 <P>
-<PRE>  echo foo,bar,baz &gt; tgt
+<PRE>  echo '# Keywords: foo,bar,baz' &gt; tgt
+  cat tgt.in &gt;&gt; tgt
 </PRE>
 <P>
 After substitution occurs, strings of white space are converted into single
@@ -1984,6 +2038,41 @@ must either explicitly set up a dependency (with the
 <CODE>Depends</CODE> method), or be sure that the command you are using is a system command
 which is expected to be available. If it isn't available, you will, of
 course, get an error.
+
+<P>
+If any command (even one within a multi-line command) begins with
+<CODE>[perl]</CODE>, the remainder of that command line will be evaluated by the running Perl
+instead of being forked by the shell. If an error occurs in parsing the
+Perl or if the Perl expression returns 0 or undef, the command will be
+considered to have failed. For example, here is a simple command which
+creates a file <CODE>foo</CODE> directly from Perl:
+
+<P>
+<PRE>  $env = new cons();
+  Command $env 'foo',
+    qq([perl] open(FOO,'&gt;foo');print FOO &quot;hi\\n&quot;; close(FOO); 1);
+</PRE>
+<P>
+Note that when the command is executed, you are in the same package as when
+the <EM>Construct</EM> or <EM>Conscript</EM> file was read, so you can call Perl functions you've defined in the same <EM>Construct</EM> or <EM>Conscript</EM>
+file in which the <CODE>Command</CODE> appears:
+
+<P>
+<PRE>  $env = new cons();
+  sub create_file {
+        my $file = shift;
+        open(FILE, &quot;&gt;$file&quot;);
+        print FILE &quot;hi\n&quot;;
+        close(FILE);
+        return 1;
+  }
+  Command $env 'foo', &quot;[perl] &amp;create_file('%&gt;')&quot;;
+</PRE>
+<P>
+The Perl string will be used to generate the signature for the derived
+file, so if you change the string, the file will be rebuilt. The contents
+of any subroutines you call, however, are not part of the signature, so if
+you modify a called subroutine such as <CODE>create_file</CODE> above, the target will <EM>not</EM> be rebuilt. Caveat user.
 
 <P>
 Cons normally prints a command before executing it. This behavior is
@@ -2045,14 +2134,14 @@ source files. It is invoked as shown below:
 <P>
 Under Unix, source files ending in <EM>.s</EM> and <EM>.c</EM> are currently supported, and will be compiled into a name of the same file
 ending in <EM>.o</EM>. By default, all files are created by invoking the external command which
-results from expanding the <CODE>CCOM</CODE> construction variable, with <CODE>%&amp;lt;</CODE> and <CODE>%&amp;gt;</CODE> set to the source and object files, respectively (see the <CODE>Command</CODE> method for expansion details) . The variable <CODE>CPPPATH</CODE> is also used when scanning source files for dependencies. This is a colon
+results from expanding the <CODE>CCCOM</CODE> construction variable, with <CODE>%&amp;lt;</CODE> and <CODE>%&amp;gt;</CODE> set to the source and object files, respectively (see the <CODE>Command</CODE> method for expansion details). The variable <CODE>CPPPATH</CODE> is also used when scanning source files for dependencies. This is a colon
 separated list of pathnames, and is also used to create the construction
 variable <CODE>_IFLAGS,</CODE> which will contain the appropriate list of -<CODE>I</CODE> options for the compilation. Any relative pathnames in <CODE>CPPPATH</CODE> is interpreted relative to the directory in which the associated
 construction environment was created (absolute and top-relative names may
 also be used). This variable is used by
-<CODE>CCOM</CODE>. The behavior of this command can be modified by changing any of the
-variables which are interpolated into <CODE>CCOM</CODE>, such as <CODE>CC</CODE>,
-<CODE>CFLAGS</CODE>, and, indirectly, <CODE>CPPPATH</CODE>. It's also possible to replace the value of <CODE>CCOM</CODE>, itself. As a convenience, this file returns the list of object filenames.
+<CODE>CCCOM</CODE>. The behavior of this command can be modified by changing any of the
+variables which are interpolated into <CODE>CCCOM</CODE>, such as <CODE>CC</CODE>,
+<CODE>CFLAGS</CODE>, and, indirectly, <CODE>CPPPATH</CODE>. It's also possible to replace the value of <CODE>CCCOM</CODE>, itself. As a convenience, this file returns the list of object filenames.
 
 <P>
 <HR>
@@ -2065,15 +2154,24 @@ files. It is invoked in the following manner:
 <PRE>  Program $env &lt;program name&gt;, &lt;source or object files&gt;;
 </PRE>
 <P>
+The program name will have the value of the <CODE>SUFEXE</CODE> construction variable appended (by default, <CODE>.exe</CODE> on Win32 systems, nothing on Unix systems) if the suffix is not already
+present.
+
+<P>
 Source files may be specified in place of objects files--the <CODE>Objects</CODE>
 method will be invoked to arrange the conversion of all the files into
-object files, and hence all the observations about the <CODE>Objects</CODE> method, above, apply to this method also. The actual linking of the program
-will be handled by an external command which results from expanding the <CODE>LINKCOM</CODE>
-construction variable, with <CODE>%&amp;lt;</CODE> set to the object files to be linked (in the order presented), and <CODE>%&amp;gt;</CODE> set to the target (see the <CODE>Command</CODE> method for expansion details). The user may set additional variables in the
+object files, and hence all the observations about the <CODE>Objects</CODE> method, above, apply to this method also.
+
+<P>
+The actual linking of the program will be handled by an external command
+which results from expanding the <CODE>LINKCOM</CODE> construction variable, with
+<CODE>%&amp;lt;</CODE> set to the object files to be linked (in the order presented), and <CODE>%&amp;gt;</CODE> set to the target (see the <CODE>Command</CODE> method for expansion details). The user may set additional variables in the
 construction environment, including <CODE>LINK</CODE>, to define which program to use for linking, <CODE>LIBPATH</CODE>, a colon-separated list of library search paths, for use with library
-specifications of the form <EM>-llib</EM>, and <CODE>LIBS</CODE>, specifying the list of libraries to link against (in either <EM>-llib</EM> form or just as pathnames. Relative pathnames in both <CODE>LIBPATH</CODE> and <CODE>LIBS</CODE> are interpreted relative to the directory in which the associated
-construction environment created (absolute and top-relative names may also
-be used). Cons automatically sets up dependencies on any libraries
+specifications of the form <EM>-llib</EM>, and <CODE>LIBS</CODE>, specifying the list of libraries to link against (in either <EM>-llib</EM>
+form or just as pathnames. Relative pathnames in both <CODE>LIBPATH</CODE> and
+<CODE>LIBS</CODE> are interpreted relative to the directory in which the associated
+construction environment is created (absolute and top-relative names may
+also be used). Cons automatically sets up dependencies on any libraries
 mentioned in <CODE>LIBS</CODE>: those libraries will be built before the command is linked.
 
 <P>
@@ -2087,18 +2185,20 @@ files. It is invoked as follows:
 <PRE>  Library $env &lt;library name&gt;, &lt;source or object files&gt;;
 </PRE>
 <P>
+The library name will have the value of the <CODE>SUFLIB</CODE> construction variable appended (by default, <CODE>.lib</CODE> on Win32 systems, <CODE>.a</CODE> on Unix systems) if the suffix is not already present.
+
+<P>
 Source files may be specified in place of objects files--the <CODE>Objects</CODE>
 method will be invoked to arrange the conversion of all the files into
-object files, and hence all the observations about the <CODE>Objects</CODE> method, above, apply to this method also. The actual creation of the
-library will be handled by an external command which results from expanding
-the <CODE>ARCOM</CODE>
-construction variable, with <CODE>%&amp;lt;</CODE> set to the library members (in the order presented), and <CODE>%&amp;gt;</CODE> to the library to be created (see the <CODE>Command</CODE>
-method for expansion details). The user may set variables in the
+object files, and hence all the observations about the <CODE>Objects</CODE> method, above, apply to this method also.
+
+<P>
+The actual creation of the library will be handled by an external command
+which results from expanding the <CODE>ARCOM</CODE> construction variable, with <CODE>%&amp;lt;</CODE> set to the library members (in the order presented), and <CODE>%&amp;gt;</CODE> to the library to be created (see the <CODE>Command</CODE> method for expansion details). The user may set variables in the
 construction environment which will affect the operation of the command.
 These include <CODE>AR</CODE>, the archive program to use, <CODE>ARFLAGS</CODE>, which can be used to modify the flags given to the program specified by <CODE>AR</CODE>, and
 <CODE>RANLIB</CODE>, the name of a archive index generation program, if needed (if the
-particular need does not require the latter functionality, then <CODE>ARCOM</CODE>
-must be redefined to not reference <CODE>RANLIB</CODE>).
+particular need does not require the latter functionality, then <CODE>ARCOM</CODE> must be redefined to not reference <CODE>RANLIB</CODE>).
 
 <P>
 The <CODE>Library</CODE> method allows the same library to be specified in multiple method
@@ -2645,18 +2745,44 @@ attached to a source file by:
 </PRE>
 <P>
 <HR>
-<H1><A NAME="Support_and_Suggestions">Support and Suggestions</A></H1>
+<H1><A NAME="SUPPORT_AND_SUGGESTIONS">SUPPORT AND SUGGESTIONS</A></H1>
 <P>
 Cons is maintained by the user community. To subscribe, send mail to
 <STRONG>cons-discuss-request@gnu.org</STRONG> with body <STRONG>subscribe</STRONG>.
 
 <P>
-Please report any bugs/fixes/suggestions through the <A
-HREF="mailto:cons-discuss@gnu.org">cons-discuss@gnu.org</A> mailing list.
+Please report any suggestions through the <STRONG>cons-discuss@gnu.org</STRONG> mailing list.
 
 <P>
-The Official cons site is: <A
-HREF="http://www.dsmit.com/cons/">http://www.dsmit.com/cons/</A>
+<HR>
+<H1><A NAME="BUGS">BUGS</A></H1>
+<P>
+Sure to be some. Please report any bugs through the <STRONG>bug-cons@gnu.org</STRONG>
+mailing list.
+
+<P>
+<HR>
+<H1><A NAME="INFORMATION_ABOUT_CONS">INFORMATION ABOUT CONS</A></H1>
+<P>
+Information about CONS can be obtained from the official cons web site
+<STRONG>http://www.dsmit.com/cons/</STRONG> or its mirrors listed there.
+
+<P>
+The cons maintainers can be contacted by email at
+<STRONG>cons-maintainers@gnu.org</STRONG>
+
+
+
+<P>
+<HR>
+<H1><A NAME="AUTHORS">AUTHORS</A></H1>
+<P>
+Originally by Bob Sidebotham. Then significantly enriched by the members of
+the Cons community <STRONG>cons-discuss@gnu.org</STRONG>.
+
+<P>
+The Cons community would like to thank Ulrich Pfeifer for the original pod
+documentation derived from the <EM>cons.html</EM> file. Cons documentation is now a part of the program itself.
 
 </BODY>
 
