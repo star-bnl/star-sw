@@ -1,5 +1,8 @@
-* $Id: pixlgeo.g,v 1.7 2003/10/27 23:59:58 potekhin Exp $
+* $Id: pixlgeo.g,v 1.8 2004/01/19 22:52:09 potekhin Exp $
 * $Log: pixlgeo.g,v $
+* Revision 1.8  2004/01/19 22:52:09  potekhin
+* Some new dimensions
+*
 * Revision 1.7  2003/10/27 23:59:58  potekhin
 * Added the sensitivity and hits definition to the
 * wafers' active layers -- just a step to establish the
@@ -62,7 +65,7 @@ Module PIXLGEO is the geometry of the STAR pixel detector
 *
    Fill PIXG                   ! Pixel detector data
       Ladder     =  1          ! ladder index
-      Rin        =  1.4        ! Inner radius
+      Rin        =  1.45       ! Inner radius
       Rout       =  5.65       ! Outer radius
       TotalLength=  16.0       ! Overal length of the detector
 *
