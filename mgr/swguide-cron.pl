@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: swguide-cron.pl,v 1.1 1999/07/07 13:21:07 wenaus Exp $
+# $Id: swguide-cron.pl,v 1.2 1999/07/22 22:05:05 wenaus Exp $
 #
 # $Log: swguide-cron.pl,v $
+# Revision 1.2  1999/07/22 22:05:05  wenaus
+# kill printout
+#
 # Revision 1.1  1999/07/07 13:21:07  wenaus
 # faster and more info presented
 #
@@ -26,11 +29,14 @@ if ( @ARGV ) {
     @ver = ( "dev", ".dev", "new", "pro", "old" );
 }
 
-print "Build SW guide for versions";
-foreach $v ( @ver ) {
-    print " '$v'";
+$debugOn = 0;
+if ( $debugOn ) {
+    print "Build SW guide for versions";
+    foreach $v ( @ver ) {
+        print " '$v'";
+    }
+    print "\n";
 }
-print "\n";
 
 @detail = ( 0, 1, 2 );
 
