@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.4 1999/11/29 21:40:17 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.5 1999/11/29 21:49:22 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.5  1999/11/29 21:49:22  kathy
+// more print statements
+//
 // Revision 1.4  1999/11/29 21:40:17  kathy
 // clean up macros; change name of output files; remove unneccessary lines
 //
@@ -93,20 +96,20 @@ void bfcread_dst_EventQAhist(Int_t nevents=10,
 //can do this anytime after they're booked
   Int_t NoHist=0;
   NoHist = HU->ListHists(MakerHist);
-  cout << " bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
+  cout << " !!! bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
  
 // loop over events:
   int iev=0,iret=0;
  EventLoop: if (iev<nevents && !iret) {  // goto loop code
-   cout <<  " bfcread_dst_EventQAhist.C, processing event !!! " << iev << endl ;
+   cout <<  " !!! bfcread_dst_EventQAhist.C, processing event !!! " << iev << endl ;
    chain->Clear();
    iret = chain->Make();
    iev++;                                // goto loop code
    goto EventLoop;                       // goto loop code
  }
 
-  cout <<  " bfcread_dst_EventQAhist.C, passed chain->Make !!!" << endl ;
+  cout <<  " !!! bfcread_dst_EventQAhist.C, passed chain->Make !!!" << endl ;
 
 //  brow = new TBrowser("BName","BTitle");   
 
