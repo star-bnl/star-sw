@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.8 2000/01/06 17:36:38 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.9 2000/01/07 22:16:14 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.9  2000/01/07 22:16:14  laue
+ * missing 'const' in Helix() added
+ *
  * Revision 1.8  2000/01/06 17:36:38  laue
  * mNHits changed from 'int' to 'unsigned short'
  * 'int' is inconsistend with the corresponding getters and setters
@@ -65,7 +68,7 @@ public:
   float ChiSquaredZ() const;
   StHbtThreeVector P() const;
   float Pt() const;
-  StPhysicalHelixD& Helix();
+  StPhysicalHelixD& Helix() const;
 
   void SetCharge(const char&);
   void SetNHits(const unsigned short&);
@@ -134,6 +137,6 @@ inline float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;}
 inline float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 inline StHbtThreeVector StHbtTrack::P() const {return mP;}
 inline float StHbtTrack::Pt() const {return mPt;}                
-inline StPhysicalHelixD& StHbtTrack::Helix() {return mHelix;}
+inline StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
 
 #endif
