@@ -2,6 +2,10 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.3  2003/05/31 00:27:19  calderon
+// Bug fix.  Was not using the values set in the macro for the fit points and
+// dca cuts.
+//
 // Revision 1.2  2003/03/05 22:02:29  calderon
 // protect against tracks which have zero possible points...
 // caused a floating point exception
@@ -134,8 +138,8 @@ bool EfficiencyAnalysis::acceptPair(StMiniMcPair* pair) {
     // pi+, k+, prot = 8, 11, 14
     if ((mGeantId==8 || mGeantId==11 || mGeantId==14) && pair->charge()<0) return false;
     if ((mGeantId==9 || mGeantId==12 || mGeantId==15) && pair->charge()>0) return false;
-    if (!(pair->nHitMc()>=10)) return false;
-    if (!(pair->fitPts()>=24)) return false; // thesis >= 24, BigBad >=25
+    if (!(pair->nHitMc()>=mDcaLimit)) return false;
+    if (!(pair->fitPts()>=mFitPtsLimit)) return false; // thesis >= 24, BigBad >=25
     if (!(pair->dcaGl()<1.)) return false; // thesis primary dca (only for P00hm), Big Bad global dca
     return true;
 }
