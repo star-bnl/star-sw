@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.102 2005/02/19 05:26:29 potekhin Exp $
+* $Id: geometry.g,v 1.103 2005/03/08 01:05:35 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.103  2005/03/08 01:05:35  potekhin
+* Created a new tag, y2005b, which is necessary to optionally
+* activate the updated version of the TPC geometry. Introduced
+* simple logic to handle same, similar to the versioning of
+* other detectors (TpceConfig)
+*
 * Revision 1.102  2005/02/19 05:26:29  potekhin
 * a) Corrected the comment for tag IST1
 * b) Added the FGTD activation in same
@@ -441,7 +447,8 @@
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
               PixlConfig, IstbConfig, FstdConfig,
-              FtroConfig, ConeConfig, FgtdConfig
+              FtroConfig, ConeConfig, FgtdConfig,
+              TpceConfig
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -459,6 +466,10 @@
 *            IstbConfig  -- outer pixel
 *            FstdConfig  -- forward pixel
 *            FtroConfig  -- FTPC readout barrel
+*            ConeConfig  -- SVT support cone
+*            FgtdConfig  -- forward GEM detector config
+*            TpceConfig  -- TPC version (new material added to the backplane in Feb 2005)
+
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -507,6 +518,7 @@ replace[;ON#{#;] with [
    FgtdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
    ConeConfig  = 1 ! 1 (def) old version, 2=more copper
+   TpceConfig  = 1 ! 1 (def) old version, 2=more structures in the backplane
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -1235,6 +1247,71 @@ If LL>1
 
                 }
 
+****************************************************************************************
+  on Y2005B    { TPC correction of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                  "geometry correction "
+                     CorrNum = 3;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 23; "second version, full barrel"
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                  "New version of the TPC backplane "
+                     TpceConfig = 2;
+
+                }
 
 ****************************************************************************************
   on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
@@ -1489,7 +1566,8 @@ If LL>1
      call AgDETP add ('tpcg.gasCorr=',2 ,1)
    endif
 
-   if (tpce) Call tpcegeo
+   if (tpce.and.TpceConfig==1) Call tpcegeo
+   if (tpce.and.TpceConfig==2) Call tpcegeo1
 
    if (ftpc) then
 	Call ftpcgeo     ! and look at the support pieces:
