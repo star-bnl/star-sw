@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 2.0 2000/08/09 16:22:12 gans Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 2.1 2000/09/13 21:00:42 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,9 +11,16 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 2.0  2000/08/09 16:22:12  gans
- * Cosmetic Changes. Naming convention for TDrawable objects
+ * Revision 2.1  2000/09/13 21:00:42  lasiuk
+ * Begin modification for cluster/hit deconvolution
+ * - remove matrix interface
+ * - add necessary members
+ * - unify cog calculation
+ * - mapping code is not in place
  *
+ * Revision 2.2  2000/09/29 19:04:43  lasiuk
+ * hit calculation factorized to allow
+ * deconvolution.  A flag was added to denote
  * this process (eDeconvolution).
  * MC info restored in classifyHit() member
  * cut parameters (for decon) added in initializeCutParameters()
@@ -50,10 +57,12 @@
 #define ST_RICH_CLUSTER_AND_HOT_FINDER
 
 #include <iostream.h>
+#include <vector>
 #include <stack>
 
 #ifndef ST_NO_NAMESPACES
 using std::vector;
+using std::stack;
 #endif
 
 #include "StRrsMaker/StRichSinglePixel.h"
@@ -69,6 +78,7 @@ using std::vector;
 class StRrsReader;
 class StRichGeometryDb;
 class StRichCoordinateTransform;
+#ifdef NEVER
 class StRichReaderInterface;
 #endif
 // #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -82,7 +92,9 @@ class StRichReaderInterface;
 enum StRichBoxType {eOdd, eEven};
 
 class StRichClusterAndHitFinder {
+public:
     StRichClusterAndHitFinder();
+    StRichClusterAndHitFinder(unsigned int x, unsigned int y);
     ~StRichClusterAndHitFinder();
 
     //StRichClusterAndHitFinder(const StRichClusterAndHitFinder&){/* use default*/}
@@ -98,7 +110,6 @@ class StRichClusterAndHitFinder {
     // OR
 #ifdef NEVER
     void loadPixels(StRichReaderInterface*);
-    bool makeHitsFromPixelMatrix();
 #endif
     void loadPixels(vector<StRichSinglePixel>&);
     void loadPixels(vector<StRichSinglePixel*>&);
@@ -109,11 +120,26 @@ class StRichClusterAndHitFinder {
     const StRichSinglePixelCollection& getPixels();
     const ClusterVector&               getClusters() const;
     const HitVector&                   getHits()     const;
+    
+    bool isSet(StRichSinglePixelFlag f)      const;
+
+    //Main control!  calls functions below!
+    bool makeTheClustersAndFilter(); 
+    bool simpleHitsFromClusters();
+
+    
+    void dumpClusterInformation(ostream& os=cout) const;
+    bool constructTheMatrix(StRichSinglePixel*, vector<StRichSinglePixel*>*);
+    bool constructTheMatrix(StRichSimpleCluster*, vector<StRichSinglePixel*>*);
+    bool constructTheAdjacentNeighbors(StRichSinglePixel*, vector<StRichSinglePixel*>*);
+    bool constructTheNearestNeighbors(StRichSinglePixel*, vector<StRichSinglePixel*>*);
+    // pixel selection
+    void calculateNeighborVector(int, vector<int>&, StRichBoxType=eOdd);
+    bool constructNeighborMatrixFromVector(StRichSinglePixel*, vector<int>&,
+					   vector<StRichSinglePixel*>*);
+    
     bool constructSquareMatrix(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
-    bool useTheMovingMatrix(StRichSinglePixel* pix);
-    bool constructTheMatrix(int ipad, int iRow,
-			    double& fx, double& fy, double& fx2, double& fy2,
-			    double& ampsum, StRichSinglePixel*& maxadc);
+    bool constructSquareMatrix(StRichSimpleCluster*, int, vector<StRichSinglePixel*>*);
     bool constructTheAdjacentNeighbors(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
     bool constructTheNearestNeighbors(StRichSinglePixel*, int, vector<StRichSinglePixel*>*);
 
