@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiSpectra.h,v 1.1 2002/04/02 20:05:18 jklay Exp $                                    
+ * $Id: StHiSpectra.h,v 1.2 2002/05/31 21:58:29 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  * 
  * $Log: StHiSpectra.h,v $
+ * Revision 1.2  2002/05/31 21:58:29  jklay
+ * Updated analysis code to use new cut class
+ *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -61,9 +64,9 @@ class StHiSpectra : public StHiBaseAnalysis{
   TH1D*              h1Centrality; //! just look at centrality stuff
   TH1D*              h1CentralityCut; //!
   TH1D*              h1VertexZ; //!
-  TH1D*              h1VertexZCut; //!
+//  TH1D*              h1VertexZCut; //!
   TH1D*              h1VertexZThin; //!
-  TH1D*              h1VertexRCut; //!
+//  TH1D*              h1VertexRCut; //!
 
   TH2D*              h2Yield; //!
 

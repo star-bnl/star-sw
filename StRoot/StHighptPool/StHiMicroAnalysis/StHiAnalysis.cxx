@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
+ * $Id: StHiAnalysis.cxx,v 1.3 2002/05/31 21:58:29 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,12 +12,17 @@
  ***************************************************************************
  *
  * $Log: StHiAnalysis.cxx,v $
+ * Revision 1.3  2002/05/31 21:58:29  jklay
+ * Updated analysis code to use new cut class
+ *
  * Revision 1.2  2002/04/03 00:23:27  jklay
  * Fixed private member access bugs in analysis code
  *
  * Revision 1.1  2002/04/02 20:05:18  jklay
  * Bums analysis tools for highpt uDSTs
  *
+ *
+ * NOTE: Sector is now computed from Phi
  * 
  **************************************************************************/
 #include "StHiAnalysis.h"
@@ -28,7 +33,6 @@
 StHiAnalysis::StHiAnalysis(const char* inputDir,
 			   const char* outRootName)
   :  StHiBaseAnalysis(inputDir,outRootName)
-
      
 {
 
@@ -49,276 +53,334 @@ StHiAnalysis::initHistograms()
   cout << "StHiAnalysis::initHistograms()" << endl;
   
   //***********************
-  
+
   using namespace Bin;
-
+                             
   //***********************
-
-
+  
   //  gStyle->SetPalette(1,0);
-
   char title[500],name[500];
 
-
-  h1CentralityCut = new TH1D("h1CentralityCut","centrality cut",
-			     nFlowCentBin,flowCentMin,flowCentMax);
-
-  h1Centrality = new TH1D("h1Centrality","centrality",
-			     nFlowCentBin,flowCentMin,flowCentMax);
-  sprintf(name,"h3VtxXYZ");
-  h3VtxXYZ = 
-    new TH3D(name,name,
-	     nVertexXBin, vertexXMin,vertexXMax,
-	     nVertexXBin, vertexXMin,vertexXMax,
-	     nVertexZEvtBin,vertexZEvtMin,vertexZEvtMax);
-  h3VtxXYZ->SetXTitle("vtx x");
-  h3VtxXYZ->SetYTitle("vtx y");
-  h3VtxXYZ->SetZTitle("vtx z");
-
-  strcpy(name,"h1VtxZCentCut");
-  h1VtxZCentCut =
-    new TH1D(name,name,
-	     nVertexZEvtThinBin,vertexZEvtMin,vertexZEvtMax);
-  h1VtxZCentCut->SetXTitle("vtx z");
-
-  strcpy(name,"h3ZdcHMinusVtxZ");
-  h3ZdcHMinusVtxZ =
-    new TH3D(name,name,
-	     nZdcBin,zdcMin,zdcMax,
-	     nHMinusBin,hMinusMin,hMinusMax,
-	     nVertexZEvtBin,vertexZEvtMin,vertexZMax);
-  h3ZdcHMinusVtxZ->SetXTitle("zdcSum");
-  h3ZdcHMinusVtxZ->SetYTitle("hMinus");
-  h3ZdcHMinusVtxZ->SetZTitle("vtxZ");
-	     
-
-  strcpy(name,"h3ZdcHMinusCtbVtxZCut");
-  h3ZdcHMinusCtbVtxZCut =
-    new TH3D(name,name,
-	     nZdcBin,zdcMin,zdcMax,
-	     nHMinusBin,hMinusMin,hMinusMax,
-	     30001,-0.5,30000);
-  h3ZdcHMinusCtbVtxZCut->SetXTitle("zdcSum");
-  h3ZdcHMinusCtbVtxZCut->SetYTitle("hMinus");
-  h3ZdcHMinusCtbVtxZCut->SetZTitle("ctb");
+  //********************************************************
+  // number of events used to scale the spectra
+      
+  h1NEvent = new TH1D("h1NEvent","h1NEvent",1,1,2);
+    
+  // eta cut
   
+  h1EtaCut = new TH1D("h1EtaCut","h1EtaCut",2,0,2);
 
-  //------------------------------------------------------------
-  
-  
+  //**********Event Histograms
+  h3VertexXYZ = new TH3D("h3VertexXYZ","h3VertexXYZ",nVertexXBin,vertexXMin,vertexXMax,
+					nVertexXBin,vertexXMin,vertexXMax,
+					nVertexZEvtThinBin,vertexZEvtMin,vertexZEvtMax);
+  h3VertexXYZ->SetXTitle("Xvtx (cm)");  h3VertexXYZ->SetYTitle("Yvtx (cm)");  
+  h3VertexXYZ->SetZTitle("Zvtx (cm)");  
 
-  TString sPM[2] = { "Plus","Minus"};
-  TString sEW[2] = { "East","West" };
+  h2ZDCSumVsCTB = new TH2D("h2ZDCSumVsCTB","h2ZDCSumVsCTB",nCtbBin,ctbMin,ctbMax,nZdcBin,zdcMin,zdcMax);  
+  h2ZDCSumVsCTB->SetYTitle("ZDCSum"); h2ZDCSumVsCTB->SetXTitle("CTB");
+
+  //Event histos after event cuts...
+  h2NGoodGlobalsVsNch = new TH2D("h2NGoodGlobalsVsNch","h2NGoodGlobalsVsNch",nNchBin,nChMin,nChMax,nNGGBin,nGGMin,nGGMax);
+  h2NGoodGlobalsVsNch->SetXTitle("N_{ch}"); h2NGoodGlobalsVsNch->SetYTitle("N_{GoodGlobals}");
+
+  h1FlowCent = new TH1D("h1FlowCent","h1FlowCent",nFlowCentBin,flowCentMin,flowCentMax);
+  h1FlowCent->SetXTitle("Flow Centrality");
+
+  //--------------------------------------------------
+  //Track histograms
+  //--------------------------------------------------
 
   //********************************************************
   // both charges
 
   strcpy(name,"h3ResPtPrGlPtPrDcaXYGl");
-  h3ResPtPrGlPtPrDcaXYGl = 
+  h3ResPtPrGlPtPrDcaXYGl =
     new TH3D(name,name,
-	     nResPtBin,resPtMin,resPtMax,
-	     nPtBin,ptMin,ptMax,
-	     nDcaXYGlWideBin,dcaXYGlWideMin,dcaXYGlWideMax);
-  h3ResPtPrGlPtPrDcaXYGl->SetXTitle("(ptPr-ptGl)/ptPr");
-  h3ResPtPrGlPtPrDcaXYGl->SetYTitle("ptPr");
-  h3ResPtPrGlPtPrDcaXYGl->SetZTitle("glDcaXY");
-
+             nResPtBin,resPtMin,resPtMax,
+             nPtBin,ptMin,ptMax,
+             nDcaXYGlWideBin,dcaXYGlWideMin,dcaXYGlWideMax);
+  h3ResPtPrGlPtPrDcaXYGl->SetXTitle("(Pr p_{T} - Gl p_{T})/Pr p_{T}");
+  h3ResPtPrGlPtPrDcaXYGl->SetYTitle("Primary p_{T} (GeV/c)");
+  h3ResPtPrGlPtPrDcaXYGl->SetZTitle("sDca_{XY}");
+           
   strcpy(name,"h3ResPtPrGlPtGlDcaXYGl");
-  h3ResPtPrGlPtGlDcaXYGl = 
+  h3ResPtPrGlPtGlDcaXYGl =
     new TH3D(name,name,
-	     nResPtBin,resPtMin,resPtMax,
-	     nPtBin,ptMin,ptMax,
-	     nDcaXYGlWideBin,dcaXYGlWideMin,dcaXYGlWideMax);
-  h3ResPtPrGlPtGlDcaXYGl->SetXTitle("(ptPr-ptGl)/ptGl");
-  h3ResPtPrGlPtGlDcaXYGl->SetYTitle("ptGl");
-  h3ResPtPrGlPtGlDcaXYGl->SetZTitle("glDcaXY");
+             nResPtBin,resPtMin,resPtMax,
+             nPtBin,ptMin,ptMax,
+             nDcaXYGlWideBin,dcaXYGlWideMin,dcaXYGlWideMax);
+  h3ResPtPrGlPtGlDcaXYGl->SetXTitle("(Pr p_{T} - Gl p_{T})/Gl p_{T}");
+  h3ResPtPrGlPtGlDcaXYGl->SetYTitle("Global p_{T} (GeV/c)");
+  h3ResPtPrGlPtGlDcaXYGl->SetZTitle("sDca_{XY}");
+
+  h1FitPts = new TH1D("h1FitPts","Fit Points",51,-0.5,50.5);
+  h1FitPts->SetXTitle("Fit Points");  
+
+  h2DcaGlVsSector = new TH2D("h2DcaGlVsSector","h2DcaGlVsSector",24,0.5,24.5,60,0,3);
+  h2DcaGlVsSector->SetXTitle("Sector");  h2DcaGlVsSector->SetYTitle("Dca_{3d}");
+
+  h2DcaXYGlVsSector = new TH2D("h2DcaXYGlVsSector","h2DcaXYGlVsSector",24,0.5,24.5,60,-3,3);
+  h2DcaXYGlVsSector->SetXTitle("Sector");  h2DcaXYGlVsSector->SetYTitle("sDca_{XY}");
+
+  h2FitPtsVsSector = new TH2D("h2FitPtsVsSector","h2FitPtsVsSector",24,0.5,24.5,51,-0.5,50.5);
+  h2FitPtsVsSector->SetXTitle("Sector");  h2FitPtsVsSector->SetYTitle("Fit Points");
+
+  h2MaxPtsVsSector = new TH2D("h2MaxPtsVsSector","h2MaxPtsVsSector",24,0.5,24.5,51,-0.5,50.5);
+  h2MaxPtsVsSector->SetXTitle("Sector");  h2MaxPtsVsSector->SetYTitle("Max Points");
+
+  h2AllPtsVsSector = new TH2D("h2AllPtsVsSector","h2AllPtsVsSector",24,0.5,24.5,51,-0.5,50.5);
+  h2AllPtsVsSector->SetXTitle("Sector");  h2AllPtsVsSector->SetYTitle("All Points");
+
+  h1YieldVsSector = new TH1D("h1YieldVsSector","h1YieldVsSector",24,0.5,24.5);
+  h1YieldVsSector->SetXTitle("Sector"); h1YieldVsSector->SetYTitle("Raw Yield (h^{+}+h^{-})");
+
+  h2PrPtVsSector = new TH2D("h2PrPtVsSector","h2PrPtVsSector",24,0.5,24.5,20,1.5,21.5);
+  h2PrPtVsSector->SetXTitle("Sector");  h2PrPtVsSector->SetYTitle("Primary p_{T} (GeV/c)");
+
+  h2GlPtVsSector = new TH2D("h2GlPtVsSector","h2GlPtVsSector",24,0.5,24.5,20,1.5,21.5);
+  h2GlPtVsSector->SetXTitle("Sector");  h2GlPtVsSector->SetYTitle("Global p_{T} (GeV/c)");
+
+  h2ResPrPtVsSector = new TH2D("h2ResPrPtVsSector","h2ResPrPtVsSector",24,0.5,24.5,60,-3,3);
+  h2ResPrPtVsSector->SetXTitle("Sector");  h2ResPrPtVsSector->SetYTitle("(Pr p_{T} - Gl p_{T})/Pr p_{T}");
+
+  h2ResGlPtVsSector = new TH2D("h2ResGlPtVsSector","h2ResGlPtVsSector",24,0.5,24.5,60,-3,3);
+  h2ResGlPtVsSector->SetXTitle("Sector");  h2ResGlPtVsSector->SetYTitle("(Gl p_{T} - Pr p_{T})/Gl p_{T}");
+
+  TString sPM[3] = { "Plus","Minus","Charged"};
+  TString sEW[3] = { "East","West","FullTPC"};
 
   //*** init var bin 0
-  TArrayD* bins = new TArrayD;
-  initPtAry(bins,0);
-  
+  TArrayD* bins0 = new TArrayD;
+  initPtAry(bins0,0);
+  //*** init var bin 0
+  TArrayD* bins1 = new TArrayD;
+  initPtAry(bins1,1);
 
+  // east/west
   // plus/minus
-  
-  for(Int_t i=0; i<2; i++){
+
+  for (Int_t i=0; i < 3; i++) {
+    for(Int_t j=0; j<3; j++){
 
     //******** centrality dependence of pt yields
-    setName(title,"h2ZDCCentralityPtPr",sPM[i].Data());
-    pm[i].h2ZDCCentralityPtPr
+//    setName(title,"h2ZDCCentralityPtPr",sEW[i].Data(),sPM[j].Data());
+//    ew[i].pm[j].h2ZDCCentralityPtPr 
+//      = new TH2D(title,title,
+//                 nZdcCentBin,zdcCentMin,zdcCentMax,
+//                 nPtBin,ptMin,ptMax);
+//    ew[i].pm[j].h2ZDCCentralityPtPr->SetXTitle("ZDC Centrality");
+//    ew[i].pm[j].h2ZDCCentralityPtPr->SetXTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h2ZDCCentralityPtPr->Sumw2();
+
+    setName(title,"h2CentralityPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h2CentralityPtPr
       = new TH2D(title,title,
-		 nZdcCentBin,zdcCentMin,zdcCentMax,
-		 nPtBin,ptMin,ptMax);
-    pm[i].h2ZDCCentralityPtPr->SetXTitle("zdc centrality");
-    pm[i].h2ZDCCentralityPtPr->SetXTitle("primary pt");
+                 nFlowCentBin,flowCentMin,flowCentMax,
+                 nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h2CentralityPtPr->SetXTitle("Flow Centrality");
+    ew[i].pm[j].h2CentralityPtPr->SetXTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h2CentralityPtPr->Sumw2();
 
-    setName(title,"h2CentralityPtPr",sPM[i].Data());
-    pm[i].h2CentralityPtPr
-      = new TH2D(title,title,
-		 nZdcCentBin,zdcCentMin,zdcCentMax,
-		 nPtBin,ptMin,ptMax);
-    pm[i].h2CentralityPtPr->SetXTitle("zdc centrality");
-    pm[i].h2CentralityPtPr->SetXTitle("primary pt");
-
-    //******** phi and global dca xy
-    setName(name,"h3PhiPrDcaXYGlPtPr",sPM[i].Data());
-    pm[i].h3PhiPrDcaXYGlPtPr
+    //******** sector and global dca xy
+    setName(name,"h3PhiPrDcaXYGlPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3PhiPrDcaXYGlPtPr
       = new TH3D(name,name,
-		 nPhiBin,phiDegMin,phiDegMax,
-		 nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
-		 nPtBin,ptMin,ptMax);
-    pm[i].h3PhiPrDcaXYGlPtPr->SetXTitle("phiPr");
-    pm[i].h3PhiPrDcaXYGlPtPr->SetYTitle("dcaXYGl");
-    pm[i].h3PhiPrDcaXYGlPtPr->SetZTitle("ptPr");
+                 nPhiBin,phiMin,phiMax,
+                 nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
+                 nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3PhiPrDcaXYGlPtPr->SetXTitle("#phi_{primary}");
+    ew[i].pm[j].h3PhiPrDcaXYGlPtPr->SetYTitle("sDca_{XY}"); 
+    ew[i].pm[j].h3PhiPrDcaXYGlPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3PhiPrDcaXYGlPtPr->Sumw2();
 
-    setName(name,"h3PhiGlDcaXYGlPtGl",sPM[i].Data());
-    pm[i].h3PhiGlDcaXYGlPtGl
+    setName(name,"h3PhiGlDcaXYGlPtGl",sEW[i],sPM[j].Data());
+    ew[i].pm[j].h3PhiGlDcaXYGlPtGl
       = new TH3D(name,name,
-		 nPhiBin,phiDegMin,phiDegMax,
-		 nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
-		 nPtBin,ptMin,ptMax);
-    pm[i].h3PhiGlDcaXYGlPtGl->SetXTitle("phiGl");
-    pm[i].h3PhiGlDcaXYGlPtGl->SetYTitle("dcaXYGl");
-    pm[i].h3PhiGlDcaXYGlPtGl->SetZTitle("ptGl");
-    
+                 nPhiBin,phiMin,phiMax,
+                 nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
+                 nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3PhiGlDcaXYGlPtGl->SetXTitle("#phi_{Global}");
+    ew[i].pm[j].h3PhiGlDcaXYGlPtGl->SetYTitle("sDca_{XY}"); 
+    ew[i].pm[j].h3PhiGlDcaXYGlPtGl->SetZTitle("Global p_{T} (GeV/c)");
+//    ew[i].pm[j].h3PhiGlDcaXYGlPtGl->Sumw2();
+
     //********** 3d dca, dca xy ,pt
-    setName(name,"h3DcaGlDcaXYGlPtPr",sPM[i].Data());
-    pm[i].h3DcaGlDcaXYGlPtPr =
+    setName(name,"h3DcaGlDcaXYGlPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3DcaGlDcaXYGlPtPr =
       new TH3D(name,name,
-	       nDcaBin,dcaMin,dcaMax,
-	       nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
-	       nPtBin,ptMin,ptMax);
-    pm[i].h3DcaGlDcaXYGlPtPr->SetXTitle("dca 3d");
-    pm[i].h3DcaGlDcaXYGlPtPr->SetYTitle("dca xy");
-    pm[i].h3DcaGlDcaXYGlPtPr->SetZTitle("ptPr");
+               nDcaBin,dcaMin,dcaMax,
+               nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3DcaGlDcaXYGlPtPr->SetXTitle("dca_{3d}");  
+    ew[i].pm[j].h3DcaGlDcaXYGlPtPr->SetYTitle("sDca_{XY}");
+    ew[i].pm[j].h3DcaGlDcaXYGlPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3DcaGlDcaXYGlPtPr->Sumw2();
 
-    setName(name,"h3DcaGlDcaXYGlPtGl",sPM[i].Data());
-    pm[i].h3DcaGlDcaXYGlPtGl =
+    setName(name,"h3DcaGlDcaXYGlPtGl",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3DcaGlDcaXYGlPtGl =
       new TH3D(name,name,
-	       nDcaBin,dcaMin,dcaMax,
-	       nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
-	       nPtBin,ptMin,ptMax);
-    pm[i].h3DcaGlDcaXYGlPtGl->SetXTitle("dca 3d");
-    pm[i].h3DcaGlDcaXYGlPtGl->SetYTitle("dca xy");
-    pm[i].h3DcaGlDcaXYGlPtGl->SetZTitle("ptGl");
+               nDcaBin,dcaMin,dcaMax,
+               nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3DcaGlDcaXYGlPtGl->SetXTitle("sDca_{3d}");  
+    ew[i].pm[j].h3DcaGlDcaXYGlPtGl->SetYTitle("Dca_{XY}");
+    ew[i].pm[j].h3DcaGlDcaXYGlPtGl->SetZTitle("Global p_{T} (GeV/c)");
+//    ew[i].pm[j].h3DcaGlDcaXYGlPtGl->Sumw2();
 
     // for backgrounds
-    setName(name,"h2SDcaGlPtPrRebin",sPM[i].Data());
-    pm[i].h2SDcaGlPtPrRebin =
+    setName(name,"h2SDcaGlPtPrRebin",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h2SDcaGlPtPrRebin =
       new TH2D(name,name,
-	       nSDcaBin,sDcaMin,sDcaMax,
-	       nPtRebinBin,ptRebinMin,ptRebinMax);
-    pm[i].h2SDcaGlPtPrRebin->SetXTitle("dca 3d");
-    pm[i].h2SDcaGlPtPrRebin->SetYTitle("ptPr");
-    
-    setName(name,"h2DcaXYGlPtPrRebin",sPM[i].Data());
-    pm[i].h2DcaXYGlPtPrRebin =
-      new TH2D(name,name,
-	       nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
-	       nPtRebinBin,ptRebinMin,ptRebinMax);
-    pm[i].h2DcaXYGlPtPrRebin->SetXTitle("dca 3d");
-    pm[i].h2DcaXYGlPtPrRebin->SetYTitle("ptPr");
+               nSDcaBin,sDcaMin,sDcaMax,
+               nPtRebinBin,ptRebinMin,ptRebinMax);
+    ew[i].pm[j].h2SDcaGlPtPrRebin->SetXTitle("Dca_{3d}");   
+    ew[i].pm[j].h2SDcaGlPtPrRebin->SetYTitle("Primary p_{T} (GeV/c)");   
+//    ew[i].pm[j].h2SDcaGlPtPrRebin->Sumw2();
 
-    setName(name,"h2DcaGlPtPrRebin",sPM[i].Data());
-    pm[i].h2DcaGlPtPrRebin
+    setName(name,"h2DcaXYGlPtPrRebin",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h2DcaXYGlPtPrRebin =
+      new TH2D(name,name,
+               nDcaXYGlBin,dcaXYGlMin,dcaXYGlMax,
+               nPtRebinBin,ptRebinMin,ptRebinMax);
+    ew[i].pm[j].h2DcaXYGlPtPrRebin->SetXTitle("Dca_{3d}");
+    ew[i].pm[j].h2DcaXYGlPtPrRebin->SetYTitle("Primary p_{T} (GeV/c)");  
+//    ew[i].pm[j].h2DcaXYGlPtPrRebin->Sumw2();
+
+    setName(name,"h2DcaGlPtPrRebin",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h2DcaGlPtPrRebin
       = new TH2D(name,name,
-		 nDcaBin,dcaMin,dcaMax,
-		 nPtRebinBin,ptRebinMin,ptRebinMax);
-    pm[i].h2DcaGlPtPrRebin->SetXTitle("dca");
-    pm[i].h2DcaGlPtPrRebin->SetYTitle("ptPr");
-    
+                 nDcaBin,dcaMin,dcaMax,
+                 nPtRebinBin,ptRebinMin,ptRebinMax);
+    ew[i].pm[j].h2DcaGlPtPrRebin->SetXTitle("Dca_{3d}");
+    ew[i].pm[j].h2DcaGlPtPrRebin->SetYTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h2DcaGlPtPrRebin->Sumw2();    
 
-    //********** phi , fit pts, pt 
-    setName(name,"h3PhiPrFitPtsPtPr",sPM[i].Data());
-    pm[i].h3PhiPrFitPtsPtPr =
+    //********** PhiPr , fit pts, pt
+    setName(name,"h3PhiPrFitPtsPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3PhiPrFitPtsPtPr =
+      new TH3D(name,name,  
+               nPhiBin,phiMin,phiMax,
+               nFitPtsBin,fitPtsMin,fitPtsMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3PhiPrFitPtsPtPr->SetXTitle("#phi_{Primary}");
+    ew[i].pm[j].h3PhiPrFitPtsPtPr->SetYTitle("Fit Points");
+    ew[i].pm[j].h3PhiPrFitPtsPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3PhiPrFitPtsPtPr->Sumw2();
+
+    //********** sector , all pts, pt
+    setName(name,"h3PhiPrAllPtsPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3PhiPrAllPtsPtPr =
       new TH3D(name,name,
-	       nPhiBin,phiDegMin,phiDegMax,
-	       nFitPtsBin,fitPtsMin,fitPtsMax,
-	       nPtBin,ptMin,ptMax);
-    pm[i].h3PhiPrFitPtsPtPr->SetXTitle("phi");
-    pm[i].h3PhiPrFitPtsPtPr->SetYTitle("fit pts");
-    pm[i].h3PhiPrFitPtsPtPr->SetZTitle("ptPr");
+               nPhiBin,phiMin,phiMax,
+               nFitPtsBin,fitPtsMin,fitPtsMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3PhiPrAllPtsPtPr->SetXTitle("#phi_{Primary}"); 
+    ew[i].pm[j].h3PhiPrAllPtsPtPr->SetYTitle("All Points");
+    ew[i].pm[j].h3PhiPrAllPtsPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3PhiPrAllPtsPtPr->Sumw2();
 
-
-    //********** phi , fit pts, pt 
-    setName(name,"h3PhiPrAllPtsPtPr",sPM[i].Data());
-    pm[i].h3PhiPrAllPtsPtPr =
+    //********** sector , max pts, pt
+    setName(name,"h3PhiPrMaxPtsPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3PhiPrMaxPtsPtPr =
       new TH3D(name,name,
-	       nPhiBin,phiDegMin,phiDegMax,
-	       nFitPtsBin,fitPtsMin,fitPtsMax,
-	       nPtBin,ptMin,ptMax);
-    pm[i].h3PhiPrAllPtsPtPr->SetXTitle("phi");
-    pm[i].h3PhiPrAllPtsPtPr->SetYTitle("all pts");
-    pm[i].h3PhiPrAllPtsPtPr->SetZTitle("ptPr");
-
-
+               nPhiBin,phiMin,phiMax,
+               nFitPtsBin,fitPtsMin,fitPtsMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3PhiPrMaxPtsPtPr->SetXTitle("#phi_{Primary}"); 
+    ew[i].pm[j].h3PhiPrMaxPtsPtPr->SetYTitle("Max Points");
+    ew[i].pm[j].h3PhiPrMaxPtsPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3PhiPrMaxPtsPtPr->Sumw2();
 
     //********** vtx z, fit pts, pt
-    setName(name,"h3VtxZFitPtsPtPr",sPM[i].Data());
-    pm[i].h3VtxZFitPtsPtPr =
+    setName(name,"h3VtxZFitPtsPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3VtxZFitPtsPtPr =
       new TH3D(name,name,
-	       nVertexZWideBin,vertexZWideMin,vertexZWideMax,
-	       nFitPtsBin,fitPtsMin,fitPtsMax,
-	       nPtBin,ptMin,ptMax);
-    pm[i].h3VtxZFitPtsPtPr->SetXTitle("vtxZ");
-    pm[i].h3VtxZFitPtsPtPr->SetYTitle("fitPts");
-    pm[i].h3VtxZFitPtsPtPr->SetZTitle("ptPr");
+               nVertexZWideBin,vertexZWideMin,vertexZWideMax,
+               nFitPtsBin,fitPtsMin,fitPtsMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3VtxZFitPtsPtPr->SetXTitle("Z_{vtx} (cm)");
+    ew[i].pm[j].h3VtxZFitPtsPtPr->SetYTitle("Fit Points");
+    ew[i].pm[j].h3VtxZFitPtsPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3VtxZFitPtsPtPr->Sumw2();
 
     //********* vtx z, fit pts, eta
-    setName(name,"h3VtxZFitPtsEtaPr",sPM[i].Data());
-    pm[i].h3VtxZFitPtsEtaPr = 
+    setName(name,"h3VtxZFitPtsEtaPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3VtxZFitPtsEtaPr =
       new TH3D(name,name,
-	       nVertexZWideBin,vertexZWideMin,vertexZWideMax,
-	       nFitPtsBin,fitPtsMin,fitPtsMax,
-	       nEtaBin,etaMin,etaMax);
-    pm[i].h3VtxZFitPtsEtaPr->SetXTitle("vtxZ");
-    pm[i].h3VtxZFitPtsEtaPr->SetYTitle("fitPts");
-    pm[i].h3VtxZFitPtsEtaPr->SetZTitle("etaPr");
-
-    //********** flow cent, fit pts, pt pr
-    setName(name,"h3FlowCentFitPtsPtPr",sPM[i].Data());
-     pm[i].h3FlowCentFitPtsPtPr =
-      new TH3D(name,name,
-	       nFlowCentBin,flowCentMin,flowCentMax,
-	       nFitPtsCentBin,fitPtsCentMin,fitPtsCentMax,
-	       nPtBin,ptMin,ptMax);
-    pm[i].h3FlowCentFitPtsPtPr->SetXTitle("flowCent");
-    pm[i].h3FlowCentFitPtsPtPr->SetYTitle("fitPts");
-    pm[i].h3FlowCentFitPtsPtPr->SetZTitle("ptPr");
-
-
-    //********** vtx, eta, pt
-    setName(name,"h3VtxZEtaPrPtPr",sPM[i].Data());
-    pm[i].h3VtxZEtaPrPtPr
-      = new TH3D(name,name,
-		 nVertexZBin,vertexZMin,vertexZMax,
-		 nEtaSmallBin,etaSmallMin,etaSmallMax,
-		 nPtBin,ptMin,ptMax);
-    pm[i].h3VtxZEtaPrPtPr->SetXTitle("vertexZ");
-    pm[i].h3VtxZEtaPrPtPr->SetYTitle("etaPr");
-    pm[i].h3VtxZEtaPrPtPr->SetZTitle("ptPr");
-
-    setName(name,"h3VtxZEtaGlPtGl",sPM[i].Data());
-    pm[i].h3VtxZEtaGlPtGl
-      = new TH3D(name,name,
-		 nVertexZBin,vertexZMin,vertexZMax,
-		 nEtaSmallBin,etaSmallMin,etaSmallMax,
-		 nPtBin,ptMin,ptMax);
-    pm[i].h3VtxZEtaGlPtGl->SetXTitle("vertexZ");
-    pm[i].h3VtxZEtaGlPtGl->SetYTitle("etaPr");
-    pm[i].h3VtxZEtaGlPtGl->SetZTitle("ptPr");
-
-    // varying bins spectra 
-    setName(name,"RawVarBin",sPM[i].Data());
-    pm[i].h1RawVarBin 
-      = new TH1D(name,name,bins->GetSize()-1,bins->GetArray());
-    pm[i].h1RawVarBin->SetXTitle("pT");
+               nVertexZWideBin,vertexZWideMin,vertexZWideMax,
+               nFitPtsBin,fitPtsMin,fitPtsMax,
+               nEtaBin,etaMin,etaMax);
+    ew[i].pm[j].h3VtxZFitPtsEtaPr->SetXTitle("Zvtx (cm)"); 
+    ew[i].pm[j].h3VtxZFitPtsEtaPr->SetYTitle("Fit Points");
+    ew[i].pm[j].h3VtxZFitPtsEtaPr->SetZTitle("#eta_{Primary}");
+//    ew[i].pm[j].h3VtxZFitPtsEtaPr->Sumw2();
     
+    //********** flow cent, fit pts, pt pr
+    setName(name,"h3FlowCentFitPtsPtPr",sEW[i].Data(),sPM[j].Data());
+     ew[i].pm[j].h3FlowCentFitPtsPtPr =
+      new TH3D(name,name,
+               nFlowCentBin,flowCentMin,flowCentMax,
+               nFitPtsCentBin,fitPtsCentMin,fitPtsCentMax,
+               nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3FlowCentFitPtsPtPr->SetXTitle("Flow Centrality");
+    ew[i].pm[j].h3FlowCentFitPtsPtPr->SetYTitle("Fit Points");
+    ew[i].pm[j].h3FlowCentFitPtsPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3FlowCentFitPtsPtPr->Sumw2();    
+    
+    //********** vtx, eta, pt
+    setName(name,"h3VtxZEtaPrPtPr",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3VtxZEtaPrPtPr
+      = new TH3D(name,name,
+                 nVertexZBin,vertexZMin,vertexZMax,
+                 nEtaSmallBin,etaSmallMin,etaSmallMax,
+                 nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3VtxZEtaPrPtPr->SetXTitle("Zvtx (cm)");  
+    ew[i].pm[j].h3VtxZEtaPrPtPr->SetYTitle("#eta_{Primary}");
+    ew[i].pm[j].h3VtxZEtaPrPtPr->SetZTitle("Primary p_{T} (GeV/c)");
+//    ew[i].pm[j].h3VtxZEtaPrPtPr->Sumw2();
 
-  }
+    setName(name,"h3VtxZEtaGlPtGl",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h3VtxZEtaGlPtGl
+      = new TH3D(name,name,
+                 nVertexZBin,vertexZMin,vertexZMax,
+                 nEtaSmallBin,etaSmallMin,etaSmallMax,
+                 nPtBin,ptMin,ptMax);
+    ew[i].pm[j].h3VtxZEtaGlPtGl->SetXTitle("Zvtx (cm)");  
+    ew[i].pm[j].h3VtxZEtaGlPtGl->SetYTitle("#eta_{Global}");
+    ew[i].pm[j].h3VtxZEtaGlPtGl->SetZTitle("Global p_{T} (GeV/c)");
+//    ew[i].pm[j].h3VtxZEtaGlPtGl->Sumw2();
+
+    // varying bins spectra
+    setName(name,"RawPtGlVarBin0",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1RawPtGlVarBin0
+      = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
+    ew[i].pm[j].h1RawPtGlVarBin0->SetXTitle("Global p_{T} (GeV/c)");
+    ew[i].pm[j].h1RawPtGlVarBin0->Sumw2();
+
+    setName(name,"RawPtGlVarBin1",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1RawPtGlVarBin1
+      = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
+    ew[i].pm[j].h1RawPtGlVarBin1->SetXTitle("Global p_{T} (GeV/c)");
+    ew[i].pm[j].h1RawPtGlVarBin1->Sumw2();
+
+    setName(name,"RawPtPrVarBin0",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1RawPtPrVarBin0
+      = new TH1D(name,name,bins0->GetSize()-1,bins0->GetArray());
+    ew[i].pm[j].h1RawPtPrVarBin0->SetXTitle("Primary p_{T} (GeV/c)");
+    ew[i].pm[j].h1RawPtPrVarBin0->Sumw2();
+
+    setName(name,"RawPtPrVarBin1",sEW[i].Data(),sPM[j].Data());
+    ew[i].pm[j].h1RawPtPrVarBin1
+      = new TH1D(name,name,bins1->GetSize()-1,bins1->GetArray());
+    ew[i].pm[j].h1RawPtPrVarBin1->SetXTitle("Primary p_{T} (GeV/c)");
+    ew[i].pm[j].h1RawPtPrVarBin1->Sumw2();
+                 
+    } //PM    
+  } //EW
 
 
 
-  
 }
 //______________________
 
@@ -326,137 +388,214 @@ StHiAnalysis::initHistograms()
 void 
 StHiAnalysis::trackLoop()
 {
+  //Standard event cut on vertexZ, centrality and triggerword are already done
+
   if(mDebug)
     cout << "StHiAnalysis::trackLoop()" << endl;
 
-  //
-  // event stuff
-  // 
-  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
-  Float_t ctb    = mHiMicroEvent->CTB();
-  Float_t flowCent   = mHiMicroEvent->Centrality();
-  NchCentrality zdcCent = centrality(zdcSum,ctb);
+  //Need this for EAST/WEST analysis
+  Float_t vertexZ = mHiMicroEvent->VertexZ();
 
+  Float_t flowCent   = mHiMicroEvent->Centrality();
 
   Int_t nTrack = mHiMicroEvent->NTrack();
   StHiMicroTrack* track;
-  
+
   for(Int_t i=0; i<nTrack; i++){
     track =(StHiMicroTrack*) mHiMicroEvent->tracks()->At(i);
 
     Int_t iCharge = (track->Charge()>0) ? 0 : 1; //plus is 0
+    //This definition of iSide only requires the track be on
+    //one half or the other and doesn't specify vertex position
+    //Need to make that cut explicitly using the cutList
+    Int_t iSide = (CutRc::AcceptEastSideTrack(track)) ? 0 : 1; //east is 0 
     
     Float_t ptPr  = track->PtPr();
     Float_t ptGl  = track->PtGl();
     Float_t resPtPrGlPr = (ptPr-ptGl)/ptPr;
     Float_t resPtPrGlGl = (ptPr-ptGl)/ptGl;
-    
 
-    Float_t sDcaGl = (track->DcaXYGl()>0) ? track->DcaGl() : -track->DcaGl();
-    Float_t dcaXYGl = track->DcaXYGl();
-    Float_t dcaGl = track->DcaGl();
     Float_t etaGl = track->EtaGl();
     Float_t etaPr  = track->EtaPr();
 
     Float_t phiPr = track->PhiPr();
     Float_t phiGl = track->PhiGl();
-    Float_t phiGlDeg = phiGl*180./TMath::Pi();
-    Float_t phiPrDeg = phiPr*180./TMath::Pi();
+ //   Float_t phiGlDeg = phiGl*180./TMath::Pi();
+ //   Float_t phiPrDeg = phiPr*180./TMath::Pi();
 
-    Int_t fitPts = track->FitPts();
-    Int_t allPts = track->AllPts();
+    Float_t sector = track->FirstSector();    
 
-    phiGlDeg = (phiGlDeg<-165) ? (phiGlDeg += 360) : phiGlDeg;
-    phiPrDeg = (phiPrDeg<-165) ? (phiPrDeg += 360) : phiPrDeg;
+    Float_t sDcaGl = (track->DcaXYGl()>0) ? track->DcaGl() : -track->DcaGl();
+    Float_t dcaXYGl = track->DcaXYGl();
+    Float_t dcaGl = track->DcaGl();
 
-    Float_t vertexZ = mHiMicroEvent->VertexZ();
+    Float_t fitPts = track->FitPts();
+    Float_t allPts = track->AllPts();
+    Float_t maxPts = track->MaxPossPts();
 
-    //**********************************************************
-    
-    if(!CutRc::AcceptTrackHalf(track,vertexZ)) continue;
+    h1FitPts->Fill(fitPts);
 
-    //************** both signs ********************************
-    
-    // dca and fit points
-    if(CutRc::AcceptNoEta(track)){
+    if(CutRc::AcceptEta(track) && CutRc::AcceptFirstPadrow(track)) {
+// && CutRc::AcceptSameSector(track)) {
       
+      if(CutRc::AcceptSDcaGl(track)) {
+        h2FitPtsVsSector->Fill(sector,fitPts);
+        h2MaxPtsVsSector->Fill(sector,maxPts);
+        h2AllPtsVsSector->Fill(sector,allPts);
+      }
+      if(CutRc::AcceptFitPts(track)) {
+        h2DcaGlVsSector->Fill(sector,dcaGl);
+        h2DcaXYGlVsSector->Fill(sector,dcaXYGl);
+      }
     }
+
+    //Standard track cuts are |eta|<0.5,fitpts>20,SDca<1cm
+    if(CutRc::Accept(track)) {
+      h1YieldVsSector->Fill(sector);  
+      h2PrPtVsSector->Fill(sector,ptPr);
+      h2GlPtVsSector->Fill(sector,ptGl);
+      h2ResPrPtVsSector->Fill(sector,resPtPrGlPr);
+      h2ResGlPtVsSector->Fill(sector,resPtPrGlGl);
+    }
+
+//Bum's stuff
+
+    //*********** AcceptNoeta = dca, fitpts and samesector
     
-
-    //************** plus/minus ********************************
-
-    if(CutRc::AcceptFitPts(track) && CutRc::AcceptSDcaGl(track)){
-      pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
-      pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+    if(CutRc::AcceptNoEta(track)){
+	ew[iSide].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[iSide].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+	ew[2].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[2].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+	ew[iSide].pm[2].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[iSide].pm[2].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
+	ew[2].pm[iCharge].h3VtxZEtaPrPtPr->Fill(vertexZ,etaPr,ptPr);
+        ew[2].pm[iCharge].h3VtxZEtaGlPtGl->Fill(vertexZ,etaGl,ptGl);
     }
 
-    // eta cut!
-    //
+    //****** Eta cut
+
     if(CutRc::AcceptEta(track)){
       if(CutRc::AcceptFitPts(track)){
-	// phi,dcaxy,pt
-	pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPrDeg,dcaXYGl,ptPr);
-	pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGlDeg,dcaXYGl,ptGl);
 
-	// dca3d, dcaxy,pt
-	pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
-	pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         // sector,dcaxy,pt
+         ew[iSide].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[iSide].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         ew[2].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[2].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         ew[iSide].pm[2].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[iSide].pm[2].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
+         ew[2].pm[iCharge].h3PhiPrDcaXYGlPtPr->Fill(phiPr,dcaXYGl,ptPr);
+         ew[2].pm[iCharge].h3PhiGlDcaXYGlPtGl->Fill(phiGl,dcaXYGl,ptGl);
 
+         // dca3d, dcaxy,pt
+         ew[iSide].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[iSide].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         ew[2].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[2].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         ew[iSide].pm[2].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[iSide].pm[2].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
+         ew[2].pm[iCharge].h3DcaGlDcaXYGlPtPr->Fill(dcaGl,dcaXYGl,ptPr);
+         ew[2].pm[iCharge].h3DcaGlDcaXYGlPtGl->Fill(dcaGl,dcaXYGl,ptGl);
 
-	// respt, pt,dcaxy
-	// no charge difference
-	h3ResPtPrGlPtPrDcaXYGl->Fill(resPtPrGlPr,ptPr,dcaXYGl);
-	h3ResPtPrGlPtGlDcaXYGl->Fill(resPtPrGlGl,ptGl,dcaXYGl);
-
-	// rebin?
-	pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
-	
-	// dcaxy,pt
-	pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
-	
-	// dca,pt
-	pm[iCharge].h2DcaGlPtPrRebin->Fill(dcaGl,ptPr);
-      }
+        // respt, pt,dcaxy
+        // no charge difference
+        h3ResPtPrGlPtPrDcaXYGl->Fill(resPtPrGlPr,ptPr,dcaXYGl);
+        h3ResPtPrGlPtGlDcaXYGl->Fill(resPtPrGlGl,ptGl,dcaXYGl);
       
-      //
-      // 
-      //
-      if(CutRc::AcceptSDcaGl(track)){ // eta and dca cut
-	// phi,fit pts, pt
-	pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPrDeg,fitPts,ptPr);
+        // rebin?
+        ew[iSide].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+        ew[2].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+        ew[iSide].pm[2].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+        ew[2].pm[iCharge].h2SDcaGlPtPrRebin->Fill(sDcaGl,ptPr);
+        
+        // dcaxy,pt
+        ew[iSide].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+        ew[2].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+        ew[iSide].pm[2].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
+        ew[2].pm[iCharge].h2DcaXYGlPtPrRebin->Fill(dcaXYGl,ptPr);
 
-	// phi, all pts, pt
-	pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPrDeg,allPts,ptPr);
-	
-	// flow, fit pts, pt
-  	pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
-      }    
-    }
-    // dca and tight eta cut
-    if(CutRc::AcceptSDcaGl(track) &&
-       fabs(etaPr)<.1){
+      }//AcceptFitPts(track)
+
+      //*********eta and dca cut
+      if(CutRc::AcceptSDcaGl(track)){
+        // sector,fit pts, pt
+        ew[iSide].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+        ew[2].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+        ew[iSide].pm[2].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+        ew[2].pm[iCharge].h3PhiPrFitPtsPtPr->Fill(phiPr,fitPts,ptPr);
+    
+        // sector, all pts, pt
+        ew[iSide].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+        ew[2].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+        ew[iSide].pm[2].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+        ew[2].pm[iCharge].h3PhiPrAllPtsPtPr->Fill(phiPr,allPts,ptPr);
+
+        // sector, max pts, pt
+        ew[iSide].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+        ew[2].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+        ew[iSide].pm[2].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+        ew[2].pm[iCharge].h3PhiPrMaxPtsPtPr->Fill(phiPr,maxPts,ptPr);
+      
+        // flow, fit pts, pt
+        ew[iSide].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+        ew[2].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+        ew[iSide].pm[2].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+        ew[2].pm[iCharge].h3FlowCentFitPtsPtPr->Fill(flowCent,fitPts,ptPr);
+      } //dca
+    }//eta
+
+    //******** dca and tight eta cut
+    if(CutRc::AcceptSDcaGl(track) && fabs(etaPr)<.1){
       // vtx z, fit pts, pt
-      pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
-    }
+      ew[iSide].pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+      ew[2].pm[2].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+      ew[iSide].pm[2].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+      ew[2].pm[iCharge].h3VtxZFitPtsPtPr->Fill(vertexZ,fitPts,ptPr);
+    } 
 
     // dca and pt
-    if(CutRc::AcceptSDcaGl(track) &&
-       ptPr>2 && ptPr<4){
+    if(CutRc::AcceptSDcaGl(track) && ptPr>4 && ptPr<6){
       // vtx z, fit pts, eta
-      pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      ew[iSide].pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      ew[2].pm[2].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      ew[iSide].pm[2].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
+      ew[2].pm[iCharge].h3VtxZFitPtsEtaPr->Fill(vertexZ,fitPts,etaPr);
     }
 
     // all cuts
     if(CutRc::Accept(track)){
       // count and centrality
-      pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
-      pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+//      ew[iSide].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//      ew[2].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//      ew[iSide].pm[2].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+//      ew[2].pm[iCharge].h2ZDCCentralityPtPr->Fill(zdcCent,ptPr);
+      ew[iSide].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+      ew[2].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
+      ew[iSide].pm[2].h2CentralityPtPr->Fill(flowCent,ptPr);
+      ew[2].pm[iCharge].h2CentralityPtPr->Fill(flowCent,ptPr);
+       
+      ew[iSide].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
+      ew[iSide].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
+      ew[2].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
+      ew[2].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
+      ew[iSide].pm[2].h1RawPtGlVarBin0->Fill(ptGl);
+      ew[iSide].pm[2].h1RawPtGlVarBin1->Fill(ptGl);
+      ew[2].pm[iCharge].h1RawPtGlVarBin0->Fill(ptGl);
+      ew[2].pm[iCharge].h1RawPtGlVarBin1->Fill(ptGl);
 
-      pm[iCharge].h1RawVarBin->Fill(ptPr);
+      ew[iSide].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
+      ew[iSide].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
+      ew[2].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
+      ew[2].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
+      ew[iSide].pm[2].h1RawPtPrVarBin0->Fill(ptPr);
+      ew[iSide].pm[2].h1RawPtPrVarBin1->Fill(ptPr);
+      ew[2].pm[iCharge].h1RawPtPrVarBin0->Fill(ptPr);
+      ew[2].pm[iCharge].h1RawPtPrVarBin1->Fill(ptPr);
     }
 
   } // tracks
-
+         
   if(mDebug)
     cout << "\ttracks : " << nTrack << endl;
 
@@ -466,30 +605,26 @@ StHiAnalysis::trackLoop()
 void
 StHiAnalysis::fillEventHistograms()
 {
-  h1Centrality->Fill(mHiMicroEvent->Centrality());
+   //This comes before we make event cuts
+   //Except we need to make sure and do trigger word cut!!!!
+   if (CutRc::AcceptTrgWord(mHiMicroEvent)) {
+     Float_t flowCent   = mHiMicroEvent->Centrality();
+     Float_t Nch = mHiMicroEvent->CentMult();
+     Float_t NGoodGlobals = mHiMicroEvent->NGoodGlobals();
+     Float_t ZDCSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
+     Float_t CTB = mHiMicroEvent->CTB();
+     Float_t zvtx = mHiMicroEvent->VertexZ(); 
+     Float_t yvtx = mHiMicroEvent->VertexY(); 
+     Float_t xvtx = mHiMicroEvent->VertexX(); 
 
-  if(CutRc::AcceptVertexZ(mHiMicroEvent))
-    h1CentralityCut->Fill(mHiMicroEvent->Centrality());
+     h3VertexXYZ->Fill(xvtx,yvtx,zvtx);
+     h1FlowCent->Fill(flowCent);
+     h2ZDCSumVsCTB->Fill(CTB,ZDCSum);
 
-  h3VtxXYZ->Fill(mHiMicroEvent->VertexX(),
-		 mHiMicroEvent->VertexY(),
-		 mHiMicroEvent->VertexZ());
-
-  if(CutRc::AcceptCent(mHiMicroEvent) && 
-     CutRc::AcceptVertexZ(mHiMicroEvent)){
-    h1VtxZCentCut->Fill(mHiMicroEvent->VertexZ());
-  }
-
-  Float_t zdcSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
- 
-  h3ZdcHMinusVtxZ->Fill(zdcSum,mHiMicroEvent->NUncorrectedNegativePrimaries(),
-			mHiMicroEvent->VertexZ());
-
-  float vertexCut=fabs(Cut::mVertexZ[0]);
-  if(fabs(mHiMicroEvent->VertexZ())<vertexCut){
-    //h3ZdcHMinusCtbVtxZCut->Fill(zdcSum,mHiMicroEvent->NUncorrectedNegativePrimaries(),mHiMicroEvent->CTB());
-    //h3ZdcHMinusCtbVtxZCut->Fill(0,0,0);
-  }
+     if (acceptEvent(mHiMicroEvent)) {
+       h2NGoodGlobalsVsNch->Fill(Nch,NGoodGlobals);
+     }
+   } //Check Trigger Word
 }
 
 //______________________
@@ -497,16 +632,15 @@ StHiAnalysis::fillEventHistograms()
 void
 StHiAnalysis::finishHistograms()
 {
+  h1NEvent->SetBinContent(1,mNEventAccepted);
+  h1EtaCut->SetBinContent(1,CutRc::mEta[0]);
+  h1EtaCut->SetBinContent(2,CutRc::mEta[1]);
+
+//Can specifiy ranges or do normalizations, etc.
 
 }
 //______________
 
-Bool_t
-StHiAnalysis::acceptEvent(StHiMicroEvent* event)
-{
-  return CutRc::Accept(event);
-}
-//_____________________________________
 
 ClassImp(StHiAnalysis)
 

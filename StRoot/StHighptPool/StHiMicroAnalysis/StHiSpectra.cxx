@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiSpectra.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
+ * $Id: StHiSpectra.cxx,v 1.3 2002/05/31 21:58:29 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  * 
  * $Log: StHiSpectra.cxx,v $
+ * Revision 1.3  2002/05/31 21:58:29  jklay
+ * Updated analysis code to use new cut class
+ *
  * Revision 1.2  2002/04/03 00:23:27  jklay
  * Fixed private member access bugs in analysis code
  *
@@ -124,34 +127,19 @@ StHiSpectra::initHistograms()
   h1VertexZ = new TH1D("h1VertexZ","vertex z",
 		       nVertexZEvtBin,vertexZEvtMin,vertexZEvtMax);
 
-  sprintf(title,"vertex z (%d<=zdc cent<=%d)",
-	  CutRc::mZdcCtbCent[1],CutRc::mZdcCtbCent[0]);
-  h1VertexZCut = new TH1D("h1VertexZCut",title,
-			  nVertexZEvtBin,vertexZEvtMin,vertexZEvtMax);
+//  sprintf(title,"vertex z (%d<=zdc cent<=%d)",
+//	  CutRc::mZdcCtbCent[1],CutRc::mZdcCtbCent[0]);
+//  h1VertexZCut = new TH1D("h1VertexZCut",title,
+//			  nVertexZEvtBin,vertexZEvtMin,vertexZEvtMax);
 
   h1VertexZThin = new TH1D("h1VertexZThin","vertex z",
 			   nVertexZEvtThinBin,vertexZEvtMin,vertexZEvtMax);
 
-  sprintf(title,"vertex r %d<=zdc cent<=%d)",
-	  CutRc::mZdcCtbCent[1],CutRc::mZdcCtbCent[0]);
-  h1VertexRCut = new TH1D("h1VertexRCut",title,
-			  nVertexREvtBin,vertexREvtMin,vertexREvtMax);
-  /*
-  Double_t ary0[] 
-    = {
-    1.6,1.7,1.8,1.9,2.0,2.25,2.55,3.0,3.5,4.1,4.9,6.0,7.0,8.0
-      };
-  Double_t ary1[]
-    = {
-    1.6,1.7,1.8,1.9,2.0,2.2,2.45,2.7,3.0,3.35,3.8,4.4,5.1,6.0,7.0,8.0
-      };
-   
-  varBin[0].nPtBinAry = sizeof(ary0)/sizeof(Double_t) - 1;
-  varBin[1].nPtBinAry = sizeof(ary1)/sizeof(Double_t) - 1;
-  
-  varBin[0].ptBinsAry = new TArrayD(varBin[0].nPtBinAry+1,ary0);
-  varBin[1].ptBinsAry = new TArrayD(varBin[1].nPtBinAry+1,ary1);
-   */
+//  sprintf(title,"vertex r %d<=zdc cent<=%d)",
+//	  CutRc::mZdcCtbCent[1],CutRc::mZdcCtbCent[0]);
+//  h1VertexRCut = new TH1D("h1VertexRCut",title,
+//			  nVertexREvtBin,vertexREvtMin,vertexREvtMax);
+
   cout << "using bins" << endl;
   for(int iBin=0; iBin<2; iBin++){
     varBin[iBin].ptBinsAry = new TArrayD;
@@ -323,9 +311,10 @@ StHiSpectra::trackLoop()
 
     //***************** spectra  ***********************************
     
-    if(!CutRc::AcceptTrackHalf(track,vertexZ)) continue;
-    if(!CutRc::Accept(track)) continue; // cuts
-    
+    if(!CutRc::AcceptTrackHalf(track)) {
+        continue; }
+    if(!CutRc::Accept(track)) continue; 
+
     //**************************************************************
     Float_t ptPr = track->PtPr();
     Float_t eta = track->EtaPr();
@@ -405,10 +394,10 @@ StHiSpectra::fillEventHistograms()
   if(CutRc::AcceptVertexZ(mHiMicroEvent))
     h1CentralityCut->Fill(mHiMicroEvent->Centrality());
 
-  if(CutRc::AcceptZdcCtbCent(mHiMicroEvent)){
-    h1VertexZCut->Fill(mHiMicroEvent->VertexZ());
-    //h1VertexRCut->Fill(mHiMicroEvent->VertexR());
-  }
+//  if(CutRc::AcceptZdcCtbCent(mHiMicroEvent)){
+//    h1VertexZCut->Fill(mHiMicroEvent->VertexZ());
+//    //h1VertexRCut->Fill(mHiMicroEvent->VertexR());
+//  }
 }
 
 
