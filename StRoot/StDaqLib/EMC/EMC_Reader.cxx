@@ -34,7 +34,7 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR)
   delete barreltowerreader;barreltowerreader=0;
 
   //SMDs
-  EMC_SmdReader* barrelsmdreader = new EMC_SmdReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
+/*  EMC_SmdReader* barrelsmdreader = new EMC_SmdReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
   int smdresult = barrelsmdreader->ProcessBarrelSmd(EmcPTR);
   mTheSmdAdcR=barrelsmdreader->getBSMDADCR();
 
@@ -47,7 +47,7 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR)
   {
     mSmdPresent=true;
   }
-  delete barrelsmdreader;barrelsmdreader=0;
+  delete barrelsmdreader;barrelsmdreader=0;*/
 }
 
 //EMC_Reader::~EMC_Reader(){}
