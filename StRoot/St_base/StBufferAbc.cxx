@@ -1,2 +1,2 @@
 #include "StBufferAbc.h"
-ClassImp(StBufferAbc);
+ClassImp(StBufferAbc)

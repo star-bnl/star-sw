@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.5 1999/12/13 21:40:41 perev Exp $
+// $Id: StObject.cxx,v 1.6 1999/12/21 15:42:58 fine Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.6  1999/12/21 15:42:58  fine
+// remove compilation warning
+//
 // Revision 1.5  1999/12/13 21:40:41  perev
 // Remove warnings
 //
@@ -23,6 +26,7 @@
 #include "TRealData.h"
 #include "StArray.h"
 
+ClassImp(StObject)
 //_____________________________________________________________________________
 StObject::~StObject()
 {
@@ -72,7 +76,3 @@ int StObject::Browse(const TObject *This,TBrowser *tb)
   }
   return num;
 }
-
-
-
-ClassImp(StObject);
