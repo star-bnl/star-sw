@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.21 2000/03/30 22:32:06 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.22 2000/05/30 20:31:39 genevb Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.22  2000/05/30 20:31:39  genevb
+// Adding ev0_am3 option
+//
 // Revision 1.21  2000/03/30 22:32:06  genevb
 // Fixed a typo
 //
@@ -75,6 +78,7 @@
 #include "StMessMgr.h"
 
 #include "global/St_ev0_am2_Module.h"
+#include "global/St_ev0_am3_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 
 ClassImp(StV0Maker)
@@ -102,6 +106,9 @@ Int_t StV0Maker::Init(){
     row.alpha_max=        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
     row.ptarm_max=        0.3; // Max. value of arm. pt allowed, only first entry used;
     row.dcapnmin=         0.7; // Min. value of tracks at interaction ;
+    if (m_Mode == 1) {
+      row.dcapnmin=       0.0; // Min. value of tracks at interaction for ev03;
+    }
     row.n_point  =         11; // Min. number of TPC hits on a track ;
     m_ev0par2->AddAt(&row,0);
     memset(&row,0,m_ev0par2->GetRowSize());
@@ -204,14 +211,30 @@ Int_t StV0Maker::Make(){
     }
     vertex->ReAllocate(v0_limit);
     Long_t NGlbTrk = globtrk->GetNRows();
-    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",NGlbTrk);
+    Long_t space2,space3 = 0;
+    if (m_Mode == 1) {
+      space3 = NGlbTrk;
+    } else {
+      space2 = NGlbTrk;
+    }
+    St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",space2);
+    St_ev0_track3 *ev0track3 = new St_ev0_track3("ev0_track3",space3);
     AddGarb(ev0track2);
-        
+    AddGarb(ev0track3);
     if (NGlbTrk < 1) {
       gMessMgr->Warning("StV0Maker::Make(): Cannot call ev0 with <1 tracks");
       iRes = kSTAFCV_ERR;
     } else {
-      iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+      if (m_Mode == 0) {
+        iRes = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+      } else if (m_Mode == 1) {
+        gMessMgr->Info("StV0Maker::Make(): Calling ev0_am3");
+        iRes = ev0_am3(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track3);
+      } else {
+        gMessMgr->Error() << "StV0Maker::Make(): Unknown mode = "
+                          << m_Mode << endm;
+        iRes = kSTAFCV_ERR;
+      }
     }
     //       =========================================================
     
