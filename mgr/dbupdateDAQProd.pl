@@ -312,9 +312,9 @@ my $nDiskFiles = 0;
           $mEvType = ($$eachOnFile)->evType; 
   	 if (($mFile eq $dbFile) and ($mNevts > 0)) {
 
-#    print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
+    print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
 
-#   &updateDAQTable();
+   &updateDAQTable();
 
       last;
      }else{
