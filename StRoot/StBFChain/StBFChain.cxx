@@ -5,7 +5,6 @@
 #include "TSystem.h"
 #include "StBFChain.h"
 #include "StEvtHddr.h"
-#include "St_DataSet.h"
 #include "StChain.h"
 #include "St_XDFFile.h"
 #include "StMagF/StMagF.h"
@@ -682,8 +681,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.82 2000/03/16 00:28:26 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.83 2000/03/23 03:45:51 fine Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.83  2000/03/23 03:45:51  fine
+// Clean up
+//
 // Revision 1.82  2000/03/16 00:28:26  fisyak
 // To be sure that we get magnetic field once
 //
