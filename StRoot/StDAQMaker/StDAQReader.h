@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.27 2004/03/04 21:51:27 ward Exp $
+ * $Id: StDAQReader.h,v 1.28 2004/03/05 15:38:08 fisyak Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.28  2004/03/05 15:38:08  fisyak
+ * Add default for getTPCReader (to keep interface unchanged)
+ *
  * Revision 1.27  2004/03/04 21:51:27  ward
  * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
  *
@@ -171,7 +174,7 @@ public:
   virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 
   virtual const char *getTPCVersion()  const {return fTPCVersion ;} 
   virtual const char *getFTPCVersion() const {return fFTPCVersion;} 
-  StTPCReader  *getTPCReader (char mergeSequences); 
+  StTPCReader  *getTPCReader (char mergeSequences=1); 
   StSSDReader  *getSSDReader ();
   StEMCReader  *getEMCReader (); 
   StEEMCReader  *getEEMCReader (); 
