@@ -13,15 +13,16 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.24 2001/01/02 15:54:50 fisyak Exp $
+use vars qw( $CVS_id $CVS_ver $ver_num $ver_rev $version );
 
-use vars qw( $ver_num $ver_rev $version );
+$CVS_id = '$Id: cons,v 1.1.1.25 2001/01/17 17:39:27 fisyak Exp $ ';   
+
+($CVS_ver = $CVS_id);# =~ s/^\$Id: cons,v 1.1.1.25 2001/01/17 17:39:27 fisyak Exp $1/;
 
 $ver_num = "2.3";
 $ver_rev = ".0";
-$version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.24 2001/01/02 15:54:50 fisyak Exp $)'. "\n",
-	    $ver_num, $ver_rev;
+
+$version = "This is Cons $ver_num$ver_rev ($CVS_id)\n";
 
 # Cons: A Software Construction Tool.
 # Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -1132,7 +1133,7 @@ sub _Objects {
     my($env) = shift;
     my($suffix) = $env->{SUFOBJ};
     map($env->_Object($_, $_->{dir}->lookupfile($_->base_suf($suffix))),
-        map($dir::cwd->lookupfile($env->_subst($_)), grep(defined $_, @_)));
+	map($dir::cwd->lookupfile($env->_subst($_)), grep(defined $_, @_)));
 }
 
 # Called with an object and source reference.  If no object reference
@@ -1197,14 +1198,13 @@ sub Library {
 sub Command {
     my($env) = shift;
     my($tgt) = $env->_subst(shift);
-    my($com) = pop(@_);
+    my($builder) = find build::command::user($env, pop(@_), 'script');
     my(@sources) = map($dir::cwd->lookupfile($env->_subst($_)), @_);
     if (ref($tgt)) {
 	# A multi-target command.
 	my(@tgts) = map($dir::cwd->lookupfile($_), @$tgt);
 	die("empty target list in multi-target command\n") if !@tgts;
 	$env = $env->_resolve($tgts[0]);
-	my $builder = find build::command::user($env, $com, 'script');
 	my($multi) = build::multiple->new($builder, \@tgts);
 	for $tgt (@tgts) {
 	    $tgt->bind($multi, @sources);
@@ -1212,7 +1212,6 @@ sub Command {
     } else {
 	$tgt = $dir::cwd->lookupfile($tgt);
 	$env = $env->_resolve($tgt);
-	my $builder = find build::command::user($env, $com, 'script');
 	$tgt->bind($builder, @sources);
     }
 }
@@ -1250,7 +1249,7 @@ package build;
 sub includes { () }
 
 # Null signature for build script.
-sub script { () }
+sub signature { () }
 
 # Not compatible with any other builder, by default.
 sub compatible { 0 }
@@ -1295,17 +1294,12 @@ use vars qw( @ISA %com );
 BEGIN { @ISA = qw(build) }
 
 sub find {
-    my ($class, $env, $com, $package) = @_;
-    $com = $env->_subst($com);
+    my($class, $env, $cmd, $package) = @_;
+    my($act) = action::new($env, $cmd);
     $package ||= '';
-    $com{$env,$com,$package} || do {
-	# Remove unwanted bits from signature -- those bracketed by %( ... %)
-	my $comsig = $com;
-	$comsig =~ s/^\@\s*//mg;
-	while ($comsig =~ s/%\(([^%]|%[^\(])*?%\)//g) { }
-	my $self = { env => $env, com => $com, 'package' => $package,
-		     comsig => $comsig };
-	$com{$env,$com,$package} = bless $self, $class;
+    $com{$env,$act,$package} || do {
+	my $self = { env => $env, act => $act, 'package' => $package };
+	$com{$env,$act,$package} = bless $self, $class;
     }
 }
 
@@ -1314,7 +1308,7 @@ sub cachin {
     my($self, $tgt, $sig) = @_;
     if (cache::in($tgt, $sig)) {
 	if ($param::cachecom) {
-	    map { if (! s/^\@\s*//) { main::showcom($_) } } $self->getcoms($tgt);
+	    $self->{act}->show($self->{env}, $tgt);
 	} else {
 	    printf("Retrieved %s from cache\n", $tgt->path)
 		if ($param::quiet < 1);
@@ -1330,221 +1324,15 @@ sub cachout {
     cache::out($tgt, $sig);
 }
 
-# internal routine to process variable options.
-# f: return file part
-# F: return file part, but strip any suffix
-# d: return directory part
-# b: return full path, but strip any suffix (a.k.a. return basename)
-# s: return only the suffix (or an empty string, if no suffix is there)
-# a: return the absolute path to the file
-# no option: return full path to file
-sub _variant {
-    my($opt, $file) = @_;
-    $opt = '' if ! defined $opt;
-    if ($opt eq 'f') { return $file->{entry}; }
-    elsif ($opt eq 'd') { return $file->{dir}->path; }
-    elsif ($opt eq 'F') {
-	my $subst = $file->{entry};
-	$subst =~ s/\.[^\.]+$//;
-	return $subst;
-    }
-    elsif ($opt eq 'b') {
-	my $subst = $file->path;
-	$subst =~ s/\.[^\.]+$//;
-	return $subst;
-    }
-    elsif ($opt eq 's') {
-	my $subst = $file->{entry};
-	$subst =~ m/(\.[^\.]+)$/;
-	return $1;
-    }
-    elsif ($opt eq 'a') {
-	my $path = $file->path;
-	if (! File::Spec->file_name_is_absolute($path)) {
-	    $path = File::Spec->catfile(Cwd::cwd(), $path);
-	}
-	return $path;
-    }
-    else { return $file->path; }
-}
-
-# For the signature of a basic command, we don't bother
-# including the command itself. This is not strictly correct,
-# and if we wanted to be rigorous, we might want to insist
-# that the command was checked for all the basic commands
-# like gcc, etc. For this reason we don't have an includes
-# method.
-
-# Call this to get the command line script: an array of
-# fully substituted commands.
-sub getcoms {
-    my($self, $tgt) = @_;
-    my(@coms);
-    my $com;
-    for $com (split(/\n/, $self->{com})) {
-	my(@src) = (undef, @{$tgt->{sources}});
-	my(@src1) = @src;
-
-	next if $com =~ /^\s*$/;
-
-	# NOTE: we used to have a more elegant s//.../e solution
-	# for the items below, but this caused a bus error...
-
-	# Remove %( and %) -- those are only used to bracket parts
-	# of the command that we don't depend on.
-	$com =~ s/%[()]//g;
-
-	# Deal with %n, n=1,9 and variants.
-	while ($com =~ /%([1-9])(:([fdbsFa]?))?/) {
-	    my($match) = $&;
-	    my($src) = $src1[$1];
-	    my($subst) = _variant($3, $src1[$1]->rfile);
-	    undef $src[$1];
-	    $com =~ s/$match/$subst/;
-	}
-
-	# Deal with %0 aka %> and variants.
-	while ($com =~ /%[0>](:([fdbsFa]?))?/) {
-	    my($match) = $&;
-	    my($subst) = _variant($2, $tgt);
-	    $com =~ s/$match/$subst/;
-	}
-
-	# Deal with %< (all sources except %n's already used)
-	while ($com =~ /%<(:([fdbsFa]?))?/) {
-	    my($match) = $&;
-	    my @list = ();
-	    foreach (@src) {
-		push(@list, _variant($2, $_->rfile)) if $_;
-	    }
-	    my($subst) = join(' ', @list);
-	    $com =~ s/$match/$subst/;
-	}
-
-	# Deal with %[ %].
-	$com =~ s{%\[(.*?)%\]}{
-	    my($func, @args) = grep { $_ ne '' } split(/\s+/, $1);
-	    die("$0: \"$func\" is not defined.\n")
-		unless ($self->{env}->{$func});
-	    &{$self->{env}->{$func}}(@args);
-	}gex;
-
-	# Convert left-over %% into %.
-	$com =~ s/%%/%/g;
-
-	# White space cleanup. XXX NO WAY FOR USER TO HAVE QUOTED SPACES
-	$com = join(' ', split(' ', $com));
-	next if $com =~ /^:/ && $com !~ /^:\S/;
-	push(@coms, $com);
-    }
-    @coms
-}
-
 # Build the target using the previously specified commands.
 sub action {
     my($self, $tgt) = @_;
-    my($env) = $self->{env};
-
-    if ($param::build) {
-	futil::mkdir($tgt->{dir});
-	unlink($tgt->path) if ! $tgt->precious;
-    }
-
-    # Set environment.
-    map(delete $ENV{$_}, keys %ENV);
-    %ENV = %{$env->{ENV}};
-
-    # Handle multi-line commands.
-    my $com;
-    for $com ($self->getcoms($tgt)) {
-	if ($com !~ s/^\@\s*//) {
-	    main::showcom($com);
-	}
-	if ($param::build) {
-
-	  if ($com =~ /^\[perl\]\s*/) {
-	    my $perlcmd = $';
-	    my $status;
-	    {
-	      # Restore the script package variables that were defined
-	      # in the Conscript file that defined this [perl] build,
-	      # so the code executes with the expected variables.
-	      my($package) = $self->{'package'};
-	      my($pkgvars) = $tgt->{conscript}->{pkgvars};
-	      NameSpace::restore($package, $pkgvars) if $pkgvars;
-	      # Actually execute the [perl] command to build the target.
-	      $status = eval "package $package; $perlcmd";
-	      # Clean up the namespace by deleting the package variables
-	      # we just restored.
-	      NameSpace::remove($package, keys %$pkgvars) if $pkgvars;
-	    }
-	    if (!defined($status)) {
-		warn "$0: *** Error during perl command eval: $@.\n";
-		return undef;
-	    } elsif ($status == 0) {
-		warn "$0: *** Perl command returned $status (this indicates an error).\n";
-		return undef;
-	    }
-	    next;
-	  }
-	  #---------------------
-	  # Can't fork on Win32
-	  #---------------------
-	  if ($main::_WIN32) {
-	    system($com);
-	    if ($?) {
-	      my ($b0, $b1) = ($? & 0xFF, $? >> 8);
-	      my $err = $b1 || $?;
-	      my $path = $tgt->path;
-	      my $warn = qq($0: *** [$path] Error $err);
-	      $warn .= " (executable not found in path?)" if $b1 == 0xFF;
-	      warn "$warn\n";
-	      return undef;
-	    }
-	  } else {
-	    my($pid) = fork();
-	    die("$0: unable to fork child process ($!)\n") if !defined $pid;
-	    if (!$pid) {
-	      # This is the child.  We eval the command to suppress -w
-	      # warnings about not reaching the statements afterwards.
-	      eval 'exec($com)';
-	      $com =~ s/\s.*//;
-	      die qq($0: failed to execute "$com" ($!). )
-		. qq(Is this an executable on path "$ENV{PATH}"?\n);
-	    }
-	    for (;;) {
-	      do {} until wait() == $pid;
-	      my ($b0, $b1) = ($? & 0xFF, $? >> 8);
-	      # Don't actually see 0177 on stopped process; is this necessary?
-	      next if $b0 == 0177; # process stopped; we can wait.
-	      if ($b0) {
-		my($core, $sig) = ($b0 & 0200, $b0 & 0177);
-		my($coremsg) = $core ? "; core dumped" : "";
-		$com =~ s/\s.*//;
-		my $path = $tgt->path;
-		my $err = "$0: *** \[$path\] $com terminated by signal " .
-			  "$sig$coremsg\n";
-		warn $err;
-		return undef;
-	      }
-	      if ($b1) {
-		my($path) = $tgt->path;
-		warn qq($0: *** [$path] Error $b1\n); # trying to be like make.
-		return undef;
-	      }
-	      last;
-	    }
-	  }
-	}
-    }
-
-    # success.
-    return 1;
+    $self->{act}->execute($self->{env}, $tgt, $self->{'package'});
 }
 
 # Return script signature.
-sub script {
-    $_[0]->{comsig}
+sub signature {
+    $_[0]->{act}->signature
 }
 
 
@@ -1759,43 +1547,6 @@ use vars qw( @ISA );
 
 BEGIN { @ISA = qw(build::command) }
 
-# XXX Optimize this to not use ignored paths.
-sub comsig {
-    return $_[0]->{_comsig} if exists $_[0]->{_comsig};
-    my($self, $tgt) = @_;
-    my($env) = $self->{env};
-    $self->{_comsig} = '';
-    my $com;
-  com:
-    for $com (split(/[\n;]/, $self->script)) {
-	# Isolate command word.
-	$com =~ s/^\s*//;
-	$com =~ s/\s.*//;
-	next if !$com; # blank line
-	my($pdirs) = $env->{ENV}->{PATH};
-	if (! defined $pdirs) {
-	    $pdirs = [ ];
-	} elsif (ref($pdirs) ne 'ARRAY') {
-	    $pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
-	}
-	my $dir;
-	for $dir (map($dir::top->lookupdir($_), @$pdirs)) {
-	    my($prog) = $dir->lookup_accessible($com);
-	    if ($prog) { # XXX Not checking execute permission.
-		if ((build $prog) eq 'errors') {
-		    $tgt->{status} = 'errors';
-		    return undef;
-		}
-		next com if $prog->ignore;
-		$self->{_comsig} .= 'sig'->signature($prog);
-		next com;
-	    }
-	}
-	# Not found: let shell give an error.
-    }
-    $self->{_comsig}
-}
-
 sub includes {
     my($self, $tgt) = @_;
     my($sig) = '';
@@ -1809,8 +1560,35 @@ sub includes {
 	}
     }
 
-    # Add the command signature.
-    return &comsig . $sig;
+    # XXX Optimize this to not use ignored paths.
+    if (! exists $self->{_comsig}) {
+	my($env) = $self->{env};
+	$self->{_comsig} = '';
+	my($com, $dir);
+      com:
+	for $com ($self->{act}->commands) {
+	    my($pdirs) = $env->{ENV}->{PATH};
+	    if (! defined $pdirs) {
+		$pdirs = [ ];
+	    } elsif (ref($pdirs) ne 'ARRAY') {
+		$pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
+	    }
+	    for $dir (map($dir::top->lookupdir($_), @$pdirs)) {
+		my($prog) = $dir->lookup_accessible($com);
+		if ($prog) { # XXX Not checking execute permission.
+		    if ((build $prog) eq 'errors') {
+			$tgt->{status} = 'errors';
+			return $sig;
+		    }
+		    next com if $prog->ignore;
+		    $self->{_comsig} .= 'sig'->signature($prog);
+		    next com;
+		}
+	    }
+	}
+    }
+
+    return $self->{_comsig} . $sig
 }
 
 
@@ -1845,9 +1623,9 @@ sub new {
     bless { 'builder' => $builder, 'tgts' => $tgts };
 }
 
-sub script {
+sub signature {
     my($self, $tgt) = @_;
-    $self->{builder}->script($tgt);
+    $self->{builder}->signature($tgt);
 }
 
 sub includes {
@@ -1904,6 +1682,316 @@ sub action {
 
     # Status of action.
     $self->{built};
+}
+
+package action;
+
+sub new {
+    my($env, $act) = @_;
+    if (ref($act) eq 'CODE') {
+	return action::perl->new($act);
+    } else {
+	return action::command->new($env, $act);
+    }
+}
+
+package action::command;
+
+use vars qw( @ISA %cmd );
+
+BEGIN {
+    if ($main::_WIN32) {
+	@ISA = qw( action::command::win32 );
+    } else {
+	@ISA = qw( action::command::unix );
+    }
+}
+
+sub new {
+    my($class, $env, $cmd) = @_;
+    $cmd = $env->_subst($cmd);
+    $cmd{$env,$cmd} || do {
+	# Remove unwanted bits from signature -- those bracketed by %( ... %)
+	my $sig = $cmd;
+	$sig =~ s/^\@\s*//mg;
+	while ($sig =~ s/%\(([^%]|%[^\(])*?%\)//g) { }
+	my $self = { cmd => $cmd, cmdsig => $sig };
+	$cmd{$env,$cmd} = bless $self, $class;
+    }
+}
+
+sub signature {
+    $_[0]->{cmdsig};
+}
+
+# Return an array of all the commands (first word on each line).
+sub commands {
+    my($self) = @_;
+    my(@cmds) = ();
+    my $com;
+    for $com (split(/\n/, $self->{cmd})) {
+	$com =~ s/^\s*//;
+	$com =~ s/\s.*//;
+	next if ! $com; # blank line
+	push @cmds, $com;
+    }
+    @cmds;
+}
+
+# internal routine to process variable options.
+# f: return file part
+# F: return file part, but strip any suffix
+# d: return directory part
+# b: return full path, but strip any suffix (a.k.a. return basename)
+# s: return only the suffix (or an empty string, if no suffix is there)
+# a: return the absolute path to the file
+# no option: return full path to file
+sub _variant {
+    my($opt, $file) = @_;
+    $opt = '' if ! defined $opt;
+    my %variant = (
+	    'f' => sub { return $_[0]->{entry}; },
+	    'd' => sub { return $_[0]->{dir}->path; },
+	    'F' => sub { my $subst = $_[0]->{entry};
+			 $subst =~ s/\.[^\.]+$//;
+			 return $subst; },
+	    'b' => sub { my $subst =  $_[0]->path;
+			 $subst =~ s/\.[^\.]+$//;
+			 return $subst; },
+	    's' => sub { my $subst = $_[0]->{entry};
+			 $subst =~ m/(\.[^\.]+)$/;
+			 return $1; },
+	    'a' => sub { my $path = $_[0]->path;
+			 if (! File::Spec->file_name_is_absolute($path)) {
+			     $path = File::Spec->catfile(Cwd::cwd(), $path);
+			 }
+			 return $path; },
+    );
+    if (defined $variant{$opt}) {
+	return &{$variant{$opt}}($file);
+    }
+    return $file->path;
+}
+
+# For the signature of a basic command, we don't bother
+# including the command itself. This is not strictly correct,
+# and if we wanted to be rigorous, we might want to insist
+# that the command was checked for all the basic commands
+# like gcc, etc. For this reason we don't have an includes
+# method.
+
+# Call this to get the command line script: an array of
+# fully substituted commands.
+sub getcoms {
+    my($self, $env, $tgt) = @_;
+    my(@coms);
+    my $com;
+    for $com (split(/\n/, $self->{cmd})) {
+	my(@src) = (undef, @{$tgt->{sources}});
+	my(@src1) = @src;
+
+	next if $com =~ /^\s*$/;
+
+	# NOTE: we used to have a more elegant s//.../e solution
+	# for the items below, but this caused a bus error...
+
+	# Remove %( and %) -- those are only used to bracket parts
+	# of the command that we don't depend on.
+	$com =~ s/%[()]//g;
+
+	# Deal with %n, n=1,9 and variants.
+	while ($com =~ /%([1-9])(:([fdbsFa]?))?/) {
+	    my($match) = $&;
+	    my($src) = $src1[$1];
+	    my($subst) = _variant($3, $src1[$1]->rfile);
+	    undef $src[$1];
+	    $com =~ s/$match/$subst/;
+	}
+
+	# Deal with %0 aka %> and variants.
+	while ($com =~ /%[0>](:([fdbsFa]?))?/) {
+	    my($match) = $&;
+	    my($subst) = _variant($2, $tgt);
+	    $com =~ s/$match/$subst/;
+	}
+
+	# Deal with %< (all sources except %n's already used)
+	while ($com =~ /%<(:([fdbsFa]?))?/) {
+	    my($match) = $&;
+	    my @list = ();
+	    foreach (@src) {
+		push(@list, _variant($2, $_->rfile)) if $_;
+	    }
+	    my($subst) = join(' ', @list);
+	    $com =~ s/$match/$subst/;
+	}
+
+	# Deal with %[ %].
+	$com =~ s{%\[(.*?)%\]}{
+	    my($func, @args) = grep { $_ ne '' } split(/\s+/, $1);
+	    die("$0: \"$func\" is not defined.\n")
+		unless ($env->{$func});
+	    &{$env->{$func}}(@args);
+	}gex;
+
+	# Convert left-over %% into %.
+	$com =~ s/%%/%/g;
+
+	# White space cleanup. XXX NO WAY FOR USER TO HAVE QUOTED SPACES
+	$com = join(' ', split(' ', $com));
+	next if $com =~ /^:/ && $com !~ /^:\S/;
+	push(@coms, $com);
+    }
+    @coms
+}
+
+# Build the target using the previously specified commands.
+sub execute {
+    my($self, $env, $tgt, $package) = @_;
+
+    if ($param::build) {
+	futil::mkdir($tgt->{dir});
+	unlink($tgt->path) if ! $tgt->precious;
+    }
+
+    # Set environment.
+    map(delete $ENV{$_}, keys %ENV);
+    %ENV = %{$env->{ENV}};
+
+    # Handle multi-line commands.
+    my $com;
+    for $com ($self->getcoms($env, $tgt)) {
+	if ($com !~ s/^\@\s*//) {
+	    main::showcom($com);
+	}
+	next if ! $param::build;
+
+	if ($com =~ /^\[perl\]\s*/) {
+	    my $perlcmd = $';
+	    my $status;
+	    {
+		# Restore the script package variables that were defined
+		# in the Conscript file that defined this [perl] build,
+		# so the code executes with the expected variables.
+		# Then actually execute (eval) the [perl] command to build
+		# the target, followed by cleaning up the name space
+		# by deleting the package variables we just restored.
+		my($pkgvars) = $tgt->{conscript}->{pkgvars};
+		NameSpace::restore($package, $pkgvars) if $pkgvars;
+		$status = eval "package $package; $perlcmd";
+		NameSpace::remove($package, keys %$pkgvars) if $pkgvars;
+	    }
+	    if (!defined($status)) {
+		warn "$0: *** Error during perl command eval: $@.\n";
+		return undef;
+	    } elsif ($status == 0) {
+		warn "$0: *** Perl command returned $status "
+		   . "(this indicates an error).\n";
+		return undef;
+	    }
+	    next;
+	}
+	if (! $self->do_command($com, $tgt->path)) {
+		return undef;
+	}
+    }
+
+    # success.
+    return 1;
+}
+
+sub show {
+    my($self, $env, $tgt) = @_;
+    my $com;
+    for $com ($self->getcoms($env, $tgt)) {
+	if ($com !~ /^\@\s*/) {
+	    main::showcom($com);
+	}
+    }
+}
+
+package action::command::unix;
+
+sub do_command {
+    my($class, $com, $path) = @_;
+    my($pid) = fork();
+    die("$0: unable to fork child process ($!)\n") if !defined $pid;
+    if (!$pid) {
+	# This is the child.  We eval the command to suppress -w
+	# warnings about not reaching the statements afterwards.
+	eval 'exec($com)';
+	$com =~ s/\s.*//;
+	die qq($0: failed to execute "$com" ($!). )
+	  . qq(Is this an executable on path "$ENV{PATH}"?\n);
+    }
+    for (;;) {
+	do {} until wait() == $pid;
+	my ($b0, $b1) = ($? & 0xFF, $? >> 8);
+	# Don't actually see 0177 on stopped process; is this necessary?
+	next if $b0 == 0177; # process stopped; we can wait.
+	if ($b0) {
+	    my($core, $sig) = ($b0 & 0200, $b0 & 0177);
+	    my($coremsg) = $core ? "; core dumped" : "";
+	    $com =~ s/\s.*//;
+	    my $err = "$0: *** \[$path\] $com terminated by signal " .
+		  "$sig$coremsg\n";
+	    warn $err;
+	    return undef;
+	}
+	if ($b1) {
+	    warn qq($0: *** [$path] Error $b1\n); # trying to be like make.
+	    return undef;
+	}
+	last;
+    }
+    return 1;
+}
+
+package action::command::win32;
+
+sub do_command {
+    my($class, $com, $path) = @_;
+    system($com);
+    if ($?) {
+	my ($b0, $b1) = ($? & 0xFF, $? >> 8);
+	my $err = $b1 || $?;
+	my $warn = qq($0: *** [$path] Error $err);
+	$warn .= " (executable not found in path?)" if $b1 == 0xFF;
+	warn "$warn\n";
+	return undef;
+    }
+    return 1;
+}
+
+package action::perl;
+
+use vars qw( %code );
+
+sub new {
+    my($class, $cref) = @_;
+    $code{$cref} || do {
+	my($sig) = 7777;	# XXX
+	my($self) = { cref => $cref, crefsig => $sig };
+	$code{$cref} = bless $self, $class;
+    }
+}
+
+sub signature {
+    $_[0]->{crefsig}
+}
+
+sub execute {
+    my($self, $env, $tgt) = @_;
+    if ($param::build) {
+	futil::mkdir($tgt->{dir});
+	unlink($tgt->path) if ! $tgt->precious;
+	my($cref) = $self->{cref};
+	&$cref($env, $tgt->path, map($_->rpath, @{$tgt->{sources}}));
+    }
+}
+
+sub commands {
+    return ();
 }
 
 
@@ -2906,7 +2994,7 @@ sub _build {
     # output path name, and (non-substituted) build script.
     my($sig) = 'sig'->collect(map('sig'->signature($_->rfile), @deps),
 			    $builder->includes($self),
-			    $builder->script);
+			    $builder->signature);
 
     # May have gotten errors during computation of dynamic
     # dependency signature, above.
