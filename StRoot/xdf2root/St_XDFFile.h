@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.25 2001/04/06 16:32:32 fine Exp $
+// $Id: St_XDFFile.h,v 1.26 2001/04/06 16:37:38 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.26  2001/04/06 16:37:38  fine
+// TObject::Delete compliant method introduced
+//
 // Revision 1.25  2001/04/06 16:32:32  fine
 // the order of inclide has been changed to make new ROOT happy
 //
@@ -95,6 +98,7 @@ class St_XDFFile : public TObject
     virtual ~St_XDFFile();
     virtual void        Browse(TBrowser *b);
     virtual Int_t       CloseXDF();                                             // close the XDF file (it is called from dtor)
+    virtual void        Delete(Option_t* option){ TObject::Delete(option);}
     static  Int_t       dir(const Char_t *filename, UInt_t firstRecord=1, UInt_t numberOfRecords=1);
             Int_t       GetErrorCode() const { return fErrorCode;}
     virtual const Char_t *GetName() const { return fName;}
