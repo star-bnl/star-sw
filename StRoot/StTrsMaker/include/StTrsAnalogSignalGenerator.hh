@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.2 1999/01/18 10:20:23 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.3 1999/01/18 21:00:52 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
- * Revision 1.2  1999/01/18 10:20:23  lasiuk
- * add tau
+ * Revision 1.3  1999/01/18 21:00:52  lasiuk
+ * add fractionSampled(); reorder initialization
  *
  * Revision 1.3  1999/01/18 21:00:52  lasiuk
  * add fractionSampled(); reorder initialization
@@ -70,6 +70,9 @@ public:
     void           setDeltaPad(int);
     void           setDeltaRow(int);
     void           setSignalThreshold(double);
+    void           setSuppressEmptyTimeBins(bool);
+
+protected:
     void           fractionSampled();
     
 protected:
@@ -98,6 +101,7 @@ protected:
     // db parameters
     double mSigma1;
     double mSigma2;
+    double mTau;
     double mSamplingFrequency;
     double mGain;
     double mFractionSampled;
