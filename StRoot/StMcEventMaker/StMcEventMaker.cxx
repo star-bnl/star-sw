@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.27 2000/05/11 14:40:29 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.28 2000/05/11 20:16:01 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.28  2000/05/11 20:16:01  calderon
+ * Fix typo in checking for volume id of rich hits, Thanks Jamie.
+ *
  * Revision 1.27  2000/05/11 14:40:29  calderon
  * Added switches to do/do not load hit information from different detectors.
  * By default, all the detectors' hit information is loaded.
@@ -144,7 +147,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.27 2000/05/11 14:40:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.28 2000/05/11 20:16:01 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -776,7 +779,7 @@ Int_t StMcEventMaker::Make()
 	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
 		if (rchHitTable[ihit].volume_id < 257 // 2^8 + 1 
-		    || ftpHitTable[ihit].volume_id > 2560) { // 10*2^8
+		    || rchHitTable[ihit].volume_id > 2560) { // 10*2^8
 		    nBadVolId++;
 		    continue;
 		}
