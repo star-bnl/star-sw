@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.20 1999/04/30 14:48:02 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.21 1999/05/08 23:19:36 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.21  1999/05/08 23:19:36  fisyak
+# Add rootPstar
+#
 # Revision 1.20  1999/04/30 14:48:02  fisyak
 # replace Root.exe by rootPstar for persistent StEvent
 #
@@ -140,9 +143,9 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 ifndef STEVENT_OBJS
 all: root4star 
 else
-all: root4star rootPstar
+all: rootPstar root4star 
 endif
-rootPstar: $(FILES_O) $(STCLASS_OBJS)
+rootPstar: $(FILES_O) 
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 root4star: $(FILES_O) $(STCLASS_OBJS) $(STEVENT_OBJS)
 	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
