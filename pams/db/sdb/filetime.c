@@ -1,6 +1,10 @@
 #include <string.h>
 #include <stdlib.h>
-#include <dirent.h>
+
+#ifndef WIN32
+# include <dirent.h>
+#endif /* WIN32 */
+
 #include        <stdio.h>
 #ifdef irix
 #include        <sys/time.h>
