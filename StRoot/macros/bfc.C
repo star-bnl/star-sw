@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.42 1999/05/06 03:14:02 fisyak Exp $
+// $Id: bfc.C,v 1.43 1999/05/06 03:21:24 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.43  1999/05/06 03:21:24  fisyak
+// synchronize FTPC and TPC slow/fast
+//
 // Revision 1.42  1999/05/06 03:14:02  fisyak
 // Merged version of bfc's
 //
@@ -165,13 +168,13 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gtrack",Char_t *infile=0, 
       TPC     = kTRUE;
       TSS     = kFALSE;
       TRS     = kTRUE;
+      FSS     = kFALSE;
       if (strstr(Chain,"-tss") || strstr(Chain,"-TSS")) TSS = kFALSE;
-      else {if (strstr(Chain,"tss") || strstr(Chain,"TSS")) TSS = kTRUE;}
+      else {if (strstr(Chain,"tss") || strstr(Chain,"TSS")) {TSS = kTRUE; FSS = kTRUE;}}
       if (strstr(Chain,"-trs") || strstr(Chain,"-TRS")) TRS = kFALSE;
-      else {if (strstr(Chain,"trs") || strstr(Chain,"TRS")) TRS = kTRUE;}
+      else {if (strstr(Chain,"trs") || strstr(Chain,"TRS")) TRS = kTRUE; FSS = kTRUE;}}
       if (strstr(Chain,"tfs") || strstr(Chain,"TFS")) {TRS = kFALSE; TSS = kFALSE;}
       FTPC    = kTRUE;
-      FSS     = kTRUE;
       EMC     = kTRUE;
       CTF     = kTRUE;
       //      L3      = kTRUE;
