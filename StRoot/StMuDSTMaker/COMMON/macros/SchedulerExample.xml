@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?> 
-<job maxFilesPerProcess="50"> 
+<job maxFilesPerProcess="5"> 
 
    <command>
-            root4star -q -b StRoot/StMuDSTMaker/COMMON/macros/SchedulerExample.C\(\"$FILELIST\",\"$SCRATCH/dAu200_MC_$JOBID.root\"\)
+            root4star -q -b /star/u/laue/afsWork/StRoot/StMuDSTMaker/COMMON/macros/SchedulerExample.C\(\"$FILELIST\",\"$SCRATCH/dAu200_MC_$JOBID.root\"\)
   </command>
 
    <!-- please change the output paths to valid folders where you have write permission -->
    <output fromScratch="*" toURL="file:/star/u/laue/afsWork/Test/" />
    <stdout URL="file:/star/u/laue/afsWork/sched$JOBID.out"/>
    <stderr URL="file:/star/u/laue/afsWork/sched$JOBID.out"/>
-
-<input URL="catalog:star.bnl.gov?collision=dAu200,trgsetupname=minbias,filetype=MC_reco_MuDst" nFiles="1000" />
+ 
+<input URL="catalog:star.bnl.gov?collision=dAu200,trgsetupname=minbias,filetype=MC_reco_MuDst" nFiles="10" />
 
 </job>
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.19 2003/02/19 15:38:10 jeromel Exp $
+ * $Id: StMuDstMaker.h,v 1.20 2003/04/15 18:48:36 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -126,7 +126,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.19 2003/02/19 15:38:10 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.20 2003/04/15 18:48:36 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -246,7 +246,8 @@ private:
   string buildFileName(string dir, string fileName, string extention);
  
   friend class StMuDst;
-
+  friend class StMuDstFilterMaker;
+    
   TClonesArray* arrays[__NARRAYS__];//->
   TClonesArray* mArrays[__NARRAYS__];//->
 
@@ -291,6 +292,11 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.20  2003/04/15 18:48:36  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.19  2003/02/19 15:38:10  jeromel
  * Modifications made to account for the new location of the PIDTable file.
  * The setProbabilityPidFile() method has been modified to take care of a default

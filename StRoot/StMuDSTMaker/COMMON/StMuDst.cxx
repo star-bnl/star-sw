@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.13 2003/03/19 18:58:04 laue Exp $
+ * $Id: StMuDst.cxx,v 1.14 2003/04/15 18:48:34 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -93,9 +93,18 @@ void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays, TCl
 void StMuDst::fixTrackIndices() {
   /// global and primary tracks share the same id, so we can fix the 
   /// index2Global up in case they got out of order (e.g. by removing 
-  /// a track from the TClonesArrayx
+  /// a track from the TClonesArrays
+    fixTrackIndices( arrays[muPrimary], arrays[muGlobal] );  
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDst::fixTrackIndices(TClonesArray* primary, TClonesArray* global) {
+  /// global and primary tracks share the same id, so we can fix the 
+  /// index2Global up in case they got out of order (e.g. by removing 
+  /// a track from the TClonesArrays
 
-  if ( !(arrays[muGlobal]&&arrays[muPrimary]) ) return;
+  if ( !(global&&primary) ) return;
   DEBUGMESSAGE1("");
   StTimer timer;
   timer.start();
@@ -103,14 +112,14 @@ void StMuDst::fixTrackIndices() {
   // fill an array with the indices to the global tracks as function of trackId
   static int *globalIndex = new int[StMuArrays::arraySizes[muGlobal]];
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) globalIndex[i]=-1;   // there must be an better way
-  int nGlobals = arrays[muGlobal]->GetEntries();
+  int nGlobals = global->GetEntries();
   for (int i=0; i<nGlobals; i++) {
     globalIndex[ globalTracks(i)->id() ] = i;
     globalTracks(i)->setIndex2Global(i);
   }
   // set the indices for the primary tracks
-  DEBUGVALUE2(arrays[muPrimary]->GetEntries());
-  int nPrimaries = arrays[muPrimary]->GetEntries();
+  DEBUGVALUE2(primary->GetEntries());
+  int nPrimaries = primary->GetEntries();
   for (int i=0; i<nPrimaries; i++) {
      primaryTracks(i)->setIndex2Global( globalIndex[ primaryTracks(i)->id() ] );
   }
@@ -268,6 +277,11 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.14  2003/04/15 18:48:34  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
+ *
  * Revision 1.13  2003/03/19 18:58:04  laue
  * StMuChainMaker: updates for moved file catalog
  * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx

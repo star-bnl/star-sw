@@ -11,7 +11,7 @@ void exampleInChain() {
   chain->SetDebug(1);
   
   StMuDebug::setLevel(0);  // switch of some debug output
-  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"","dAu200.lis","MuDst.root",2,"MuDst");   // set up maker in read mode
+  StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"","JPsi.lis","MuDst.root",20,"MuDst");   // set up maker in read mode
   StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
 
   chain->Init(); // This should call the Init() method in ALL makers
