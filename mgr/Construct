@@ -76,7 +76,7 @@ elsif (/^hp_ux102/) {
 #    case "hp":
 #  ====================
   $OSFID = "HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS";
-  if (defined(NODEBUG)) {$DEBUG = "-O";}
+#  if (defined(NODEBUG)) {$DEBUG = "-O";}
   $OSFID   .= " NEW_ARRAY_ON";
   $CXX      = "aCC";
   $CC       = "cc";
@@ -94,7 +94,9 @@ elsif (/^hp_ux102/) {
   $CLIBS     = "-lXm -lXt -lX11 -lm -lPW -ldld";
   $FC        = "fort77";
   $FLIBS     = "/opt/fortran/lib/libU77.a";
-  $FFLAGS    = "+DA1.0 +ppu +Z  +U77 -K";
+#  $FFLAGS    = "+DA1.0 +ppu +Z  +U77 -K";
+#  $FFLAGS    = "+DA1.0 +ppu +B +Z -K";
+  $FFLAGS    = "-WF,-P +ppu +Z -K";
   $FEXTEND   = "+es";
 }
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
