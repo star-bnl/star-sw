@@ -183,8 +183,8 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap=1)
     ret = read(fd, DATAP, datap.EventLength*4);
     if(ret < 0) ERROR(ERR_FILE);
   // check CRC, swap
-    if (!datap.test_CRC()) ERROR(ERR_CRC);
-    if (datap.swap() < 0) ERROR(ERR_SWAP);
+    if (!((Bank_DATAP *)DATAP)->test_CRC()) ERROR(ERR_CRC);
+    if (((Bank_DATAP *)DATAP)->swap() < 0) ERROR(ERR_SWAP);
 
   }
   else if(MMap == 1)
