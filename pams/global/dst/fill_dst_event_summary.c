@@ -86,7 +86,7 @@ long  type_of_call fill_dst_event_summary_ (
   int     glb_trk_good, glb_trk_prim, glb_trk_plus, glb_trk_minus;
   int     itrk, ibin, iptbin,  ietabin, iphibin;
   int     minbin, maxbin, binrange,nphirange;
-  int     ivtx, vtx_id;
+  int     ivtx, vtx_id, iflag;
   double  pi, piov2;
   float   minval, maxval;
   float   pt_binsize,  eta_binsize, phi_binsize; 
@@ -211,8 +211,9 @@ long  type_of_call fill_dst_event_summary_ (
   /* Count v0 candidates */
   for (ivtx=0;  ivtx<dst_vertex_h->nok; ivtx++)  { /* begin vertex loop */
     vtx_id = dst_vertex[ivtx].vtx_id;  /*  get vertex type */
+    iflag  = dst_vertex[ivtx].iflag
 
-    if(vtx_id == 1 && iflag ==1) {
+    if(vtx_id == 1 && iflag ==1 ) {
       /* Fill Primary vertex information */
       dst_eventsummary->prim_vrtx[0]    = dst_vertex[ivtx].x;
       dst_eventsummary->prim_vrtx[1]    = dst_vertex[ivtx].y;
