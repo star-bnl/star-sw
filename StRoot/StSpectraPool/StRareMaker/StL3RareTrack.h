@@ -28,7 +28,7 @@ class StL3RareTrack : public TObject
       int   chargesign() const;
       float rapidity(float mass) const;
       float pt() const;
-      float dca() const;
+      float dca2d() const;
       float dedx() const;
       int   ndedx() const;
       float chisqxy() const;
@@ -52,7 +52,7 @@ class StL3RareTrack : public TObject
       float mPy;
       float mPz;
       int   mChargesign;
-      float mDca;
+      float mDca2d;
       float mDedx;
       int   mNDedx;
       float mChisqXY;
@@ -78,7 +78,7 @@ inline float StL3RareTrack::pz() const {return mPz;}
 inline float StL3RareTrack::p() const {return sqrt(mPx*mPx+mPy*mPy+mPz*mPz);}
 inline float StL3RareTrack::pt() const {return sqrt(mPx*mPx+mPy*mPy);}
 inline int   StL3RareTrack::chargesign() const {return mChargesign;}
-inline float StL3RareTrack::dca() const {return mDca;} 
+inline float StL3RareTrack::dca2d() const {return mDca2d;} 
 inline float StL3RareTrack::dedx() const {return mDedx;}
 inline int   StL3RareTrack::ndedx() const {return mNDedx;}
 inline float StL3RareTrack::chisqxy() const {return mChisqXY;} 

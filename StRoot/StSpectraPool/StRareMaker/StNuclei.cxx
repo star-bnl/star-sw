@@ -18,8 +18,8 @@ int StNuclei::Accept(StPrimaryTrack* trk){
   int pOK=0;
   StRareTrack track(trk);
   if (chargeToAccept==0) {chargeOK = 1;}
-  else if (chargeToAccept<0&&track.chargesign()<0) {chargeOK=1;}
-  else if (chargeToAccept>0&&track.chargesign()>0) {chargeOK=1;}
+  else if (chargeToAccept<0 && track.chargesign()<0) {chargeOK=1;}
+  else if (chargeToAccept>0 && track.chargesign()>0) {chargeOK=1;}
   float dedxmin;
   int theCharge = 1;
   if (abs(chargeToAccept)>1) theCharge=2;

@@ -15,7 +15,7 @@ ClassImp(StL3RareTrack)
 
 StL3RareTrack::StL3RareTrack()
 {
-  mDca = 0;
+  mDca2d = 0;
   mNPntpossible = 0;
   mTracknumber = 0;
   mFlag = 0;
@@ -36,9 +36,10 @@ StL3RareTrack::StL3RareTrack()
   mDedx = 0.0;
 }
 
+
 StL3RareTrack::StL3RareTrack(StGlobalTrack* track)
 {
-  mDca = track->impactParameter();
+  mDca2d = track->impactParameter();
   mNPntpossible = track->numberOfPossiblePoints();
   mTracknumber = track->key();
   mFlag = track->flag();
@@ -66,7 +67,8 @@ StL3RareTrack::StL3RareTrack(StGlobalTrack* track)
 	      StTrackPidTraits* thisTrait = traits[itrait];
 	      dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
 	      if (dedxPidTr && dedxPidTr->method() == kTruncatedMeanId) {
-		    mDedx = dedxPidTr->mean();
+		    // adjust dE/dx by a factor of 2 to match offline
+		    mDedx = 2 * dedxPidTr->mean();
 		    mNDedx = dedxPidTr->numberOfPoints();
 	      }
 	}
@@ -81,4 +83,4 @@ float StL3RareTrack::dedxExpected(float mass, float charge = 1) const {
   return dedx;
 } 
 
-void  StL3RareTrack::SetTrigType(int type) {mTrigType = type;}
+void StL3RareTrack::SetTrigType(int type) {mTrigType = type;}

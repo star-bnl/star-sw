@@ -2,6 +2,7 @@
 #include "StRareTrack.h"
 #include "StL3RareTrack.h"
 #include "StEventTypes.h"
+#include "StThreeVectorF.hh"
 #include "StEventUtilities/StuRefMult.hh"
 
 ClassImp(StRareEvent)
@@ -26,7 +27,7 @@ StRareEvent::~StRareEvent() {
 
 
 void StRareEvent::fillRareEvent(StEvent* event){
-  //fRunNumber = event->runInfo()->runId();
+  fRunNumber = event->runId();
   fEventNumber = event->id();
   fmagneticField = event->summary()->magneticField();
   //  fmagneticField = 0.25;
@@ -90,6 +91,15 @@ void StRareEvent::addTrack(StPrimaryTrack* track) {
 
 void StRareEvent::addL3Track(StGlobalTrack* l3track) {
   TClonesArray &l3trks = *fgL3RareTracks;
+//   // temporary fix for dip angle:
+//   StPhysicalHelixD oldhelix = l3track->geometry()->helix();
+//   StHelixD l3helix(0.001*oldhelix.curvature(), atan(oldhelix.dipAngle()),
+// 		   // oldhelix.phase()+TMath::Pi(), oldhelix.origin(), -1*oldhelix.h());
+// 		   oldhelix.phase(), oldhelix.origin(), oldhelix.h());
+//   StThreeVectorD vertex(0, 0, zVertex);
+//   double dca2d = l3helix.distance(vertex);
+//   // fix end
+//   //cout << zVertex << " ==> dca 2d : " << dca2d << endl;
   new (l3trks[fNL3RareTrack++]) StL3RareTrack(l3track);
 }
 
