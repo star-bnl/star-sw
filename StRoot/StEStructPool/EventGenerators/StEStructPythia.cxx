@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructPythia.cxx,v 1.1 2003/11/21 06:24:56 porter Exp $
+ * $Id: StEStructPythia.cxx,v 1.2 2004/03/24 21:26:52 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -90,19 +90,28 @@ void StEStructPythia::fillTracks(StEStructEvent* estructEvent){
     float pt=sqrt(p[0]*p[0]+p[1]*p[1]);
     if(pt<0.15)continue;
 
-    float* gdca = globalDCA(p,v);
-    
-    bool useTrack=true;
-    useTrack = (mTCuts->goodGlobalDCA(gdca[3]) && useTrack);
 
     float energy=pstr->P[3][i];
     float num=energy+p[2];
     float den=energy-p[2];
     float eta=-999.;
+
+    float ptotal=sqrt(p[0]*p[0]+p[1]*p[1]+p[2]*p[2]);
+    if(ptotal<0.1) continue;
+
+    float theta=acos(p[2]/ptotal);
+    eta=-1.0*log(tan(theta/2.0));
+
+    float* gdca = globalDCA(p,v);    
+    bool useTrack=true;
+    useTrack = (mTCuts->goodGlobalDCA(gdca[3]) && useTrack);
+
+    /*
     if(den!=0.) { 
        float arg=num/den;
        if(arg>0.) eta=0.5*log(arg);
     }
+    */
     useTrack = (mTCuts->goodEta(eta) && useTrack);
     float phi=atan2((double)p[1], (double)p[0]);
     useTrack=(mTCuts->goodPhi(phi) && useTrack);
@@ -167,6 +176,9 @@ void StEStructPythia::setTrackCuts(StEStructTrackCuts* cuts){
 /**********************************************************************
  *
  * $Log: StEStructPythia.cxx,v $
+ * Revision 1.2  2004/03/24 21:26:52  porter
+ * fixed error calculating eta as rapidity
+ *
  * Revision 1.1  2003/11/21 06:24:56  porter
  * Pythia event generater as an StEStructEventReader
  *
