@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.1 2001/02/12 21:16:20 yepes Exp $
+// $Id: StPeCTrigger.h,v 1.2 2001/02/21 20:54:25 yepes Exp $
 // $Log: StPeCTrigger.h,v $
-// Revision 1.1  2001/02/12 21:16:20  yepes
-// New version of StPeCMaker, lots of changes
+// Revision 1.2  2001/02/21 20:54:25  yepes
+// *** empty log message ***
 //
 //
 // Revision 1.0  2000/12/11 Pablo Yepes
@@ -20,6 +20,7 @@
 #define StPeCTrigger_h
 #include "Rtypes.h"
 #include "TObject.h"
+#include "TClonesArray.h"
 #include "StPeCL0.h"
 class StEvent ;
 
@@ -29,14 +30,9 @@ public:
 
   StPeCTrigger();
   ~StPeCTrigger();
+  void  clear ( ) ;
   Int_t StPeCTrigger::process(StEvent *event);
 
-  Bool_t FalkAkio ;
-  Bool_t FalkAkioEW ;
-  Bool_t EastAndWest ;
-  Bool_t EastOrWest ;
-  Bool_t p4_0 ;
-  Bool_t p4_1 ;
   Int_t  p4 ; // p4 with swapt weigthts
   Int_t  p4c ;
   Int_t  p5 ;
@@ -71,7 +67,6 @@ public:
   Float_t   zdcEast ;
   Float_t   zdcWest ;
   Float_t   zdcSum  ;
-
 #ifndef __CINT__
   void  setInfoLevel ( Int_t in ) { infoLevel = in ; } ; 
   Int_t        infoLevel ;
@@ -79,6 +74,8 @@ public:
   StPeCL0      *l0_2000Corrected ;
   StPeCL0      *l0Offline2001 ;
 #endif /*__CINT__*/
+private:
+  TClonesArray  *ctbSlats ;
 
 
   ClassDef(StPeCTrigger,1)
