@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Q3invCorrFctn.cxx,v 1.3 2000/08/08 23:39:21 laue Exp $
+ * $Id: Q3invCorrFctn.cxx,v 1.4 2001/06/03 21:05:42 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: Q3invCorrFctn.cxx,v $
- * Revision 1.3  2000/08/08 23:39:21  laue
- * Updated for standalone version
+ * Revision 1.4  2001/06/03 21:05:42  willson
+ * Bins in entrance separation
  *
  * Revision 1.2  2000/04/12 01:53:28  willson
  * Initial Installation - Comments Added
@@ -24,31 +24,32 @@
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
 
-#ifdef __ROOT__
 ClassImp(Q3invCorrFctn)
-#endif
 
 //____________________________
-Q3invCorrFctn::Q3invCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi){
+Q3invCorrFctn::Q3invCorrFctn(char* title, const int& nbinsQ, const float& QinvLo, const float& QinvHi, const int& nbinsMerge, const float& MergeLo, const float& MergeHi, const float& Split){
+  // This one does not do a quality calulation
+  mSplit = Split;
+  mPHist = 0;
   // set up numerator
   //  title = "Num Q3inv (MeV/c)";
   char TitNum[100] = "Num";
   strcat(TitNum,title);
-  mNumerator = new StHbt1DHisto(TitNum,title,nbins,QinvLo,QinvHi);
+  mNumerator = new StHbt2DHisto(TitNum,title,nbinsQ,QinvLo,QinvHi,nbinsMerge,MergeLo,MergeHi);
   // set up denominator
   //title = "Den Q3inv (MeV/c)";
   char TitDen[100] = "Den";
   strcat(TitDen,title);
-  mDenominator = new StHbt1DHisto(TitDen,title,nbins,QinvLo,QinvHi);
+  mDenominator = new StHbt2DHisto(TitDen,title,nbinsQ,QinvLo,QinvHi,nbinsMerge,MergeLo,MergeHi);
   // set up ratio
   //title = "Ratio Q3inv (MeV/c)";
   char TitRat[100] = "Rat";
   strcat(TitRat,title);
-  mRatio = new StHbt1DHisto(TitRat,title,nbins,QinvLo,QinvHi);
+  mRatio = new StHbt2DHisto(TitRat,title,nbinsQ,QinvLo,QinvHi,nbinsMerge,MergeLo,MergeHi);
   // this next bit is unfortunately needed so that we can have many histos of same "title"
   // it is neccessary if we typedef StHbt1DHisto to TH1d (which we do)
-  //mNumerator->SetDirectory(0);
-  //mDenominator->SetDirectory(0);
+  //mNumer->SetDirectory(0);
+  //mDenom->SetDirectory(0);
   //mRatio->SetDirectory(0);
 
   // to enable error bar calculation...
@@ -64,17 +65,10 @@ Q3invCorrFctn::~Q3invCorrFctn(){
   delete mDenominator;
   delete mRatio;
 }
+
 //_________________________
 void Q3invCorrFctn::Finish(){
-  // here is where we should normalize, fit, etc...
-  // we should NOT Draw() the histos (as I had done it below),
-  // since we want to insulate ourselves from root at this level
-  // of the code.  Do it instead at root command line with browser.
-  //  mNumerator->Draw();
-  //mDenominator->Draw();
-  //mRatio->Draw();
-  mRatio->Divide(mNumerator,mDenominator,1.0,1.0);
-
+  mRatio->Divide(mNumerator,mDenominator,1.0,1.0);    
 }
 
 //____________________________
@@ -93,16 +87,40 @@ StHbtString Q3invCorrFctn::Report(){
 }
 //____________________________
 void Q3invCorrFctn::AddRealTriplet(const StHbtTriplet* triplet){
-  double Q3inv = fabs(triplet->qInv());   // note - qInv() will be negative for identical triplets...
-  mNumerator->Fill(Q3inv);
-  //  cout << "Q3invCorrFctn::AddRealTriplet : " << triplet->qInv() << " " << Q3inv <<
-  //" " << triplet->track1().FourMomentum() << " " << triplet->track2().FourMomentum() << endl;
+  if (mPHist) {
+    mPHist->Fill(triplet->track1()->Track()->P().mag());
+    mPHist->Fill(triplet->track2()->Track()->P().mag());
+    mPHist->Fill(triplet->track3()->Track()->P().mag());
+  }
+  double Qual = triplet->quality();
+  double entSep = triplet->NominalTpcEntranceSeparation();
+  double Q3inv = fabs(triplet->qInv());   // note - qInv() will be negative for identical triplets...  
+  if (Qual<mSplit) mNumerator->Fill(Q3inv, entSep, 1.0);
 }
+
 //____________________________
 void Q3invCorrFctn::AddMixedTriplet(const StHbtTriplet* triplet){
   double weight = 1.0;
-  double Q3inv = fabs(triplet->qInv());   // note - qInv() will be negative for identical triplets...
-  mDenominator->Fill(Q3inv,weight);
+  if (mCorrection.GetRadius()!=-1) {
+    StHbtPair pair1(triplet->track1(), triplet->track2());
+    StHbtPair pair2(triplet->track2(), triplet->track3());
+    StHbtPair pair3(triplet->track3(), triplet->track1());
+    
+    double weight1 = mCorrection.CoulombCorrect(&pair1);
+    double weight2 = mCorrection.CoulombCorrect(&pair2);
+    double weight3 = mCorrection.CoulombCorrect(&pair3);
+    
+    weight = weight1*weight2*weight3;
+  }
+  else 
+    weight = 1.0;
+  
+  double Qual = triplet->quality();
+  double entSep = triplet->NominalTpcEntranceSeparation();
+  double Q3inv = fabs(triplet->qInv());   // note - qInv() will be negative for identical triplets...  
+  if (Qual<mSplit) mDenominator->Fill(Q3inv, entSep, weight);
 }
-
-
+//____________________________
+void Q3invCorrFctn::AddCorrection(StHbtCoulomb* correction) {
+  mCorrection = *correction;
+}
