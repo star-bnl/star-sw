@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.38 2002/01/13 21:30:32 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.39 2002/04/21 20:28:01 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,8 +13,8 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
- * Revision 1.38  2002/01/13 21:30:32  caines
- * only do sequence merging if there are sequences to merge, save time and fix bug
+ * Revision 1.39  2002/04/21 20:28:01  caines
+ * Put some of the print out only if in debug mode
  *
  * Revision 1.37  2002/01/11 22:49:15  caines
  * Fix sequence merging bugs-hopefully
@@ -532,6 +532,14 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
    mRawAdc = new TH1F*[tNuOfHyb];
    mAdcAfter = new TH1F*[tNuOfHyb];
    mTimeAn = new TH2F*[tNuOfHyb];
+
+   mRawPixel = new TH1F*[6];
+   mRawPixel[0] = new TH1F("rawpixel0","freq Of pixel firing T0 3",128,0.,128.);
+   mRawPixel[1] = new TH1F("rawpixel1","freq Of pixel firing T0 4",128,0.,128.);
+   mRawPixel[2] = new TH1F("rawpixel2","freq Of pixel firing T0 5",128,0.,128.);
+   mRawPixel[3] = new TH1F("rawpixel3","freq Of pixel firing T0 3",128,0.,128.);
+   mRawPixel[4] = new TH1F("rawpixel4","freq Of pixel firing T0 4",128,0.,128.);
+   mRawPixel[5] = new TH1F("rawpixel5","freq Of pixel firing T0 5",128,0.,128.);
  
    char invProdTitle_cut[25], RawTitle[25], AdcAfterTitle[25], TimeAnTitle[25];
    char  Index[4];
@@ -623,7 +631,7 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	  mNAnodes = FindBlackAnodes();
 	  if( doCommon || !mNAnodes ){
-	    cout << "Doing Common mode average for index " << index << endl;
+	    if (Debug())   gMessMgr->Debug() << "Doing Common mode average for index " << index << endl;
 
 	    // Zero Common Mode Noise arrays
 	    for(int Timebin=0; Timebin<128; Timebin++){
@@ -640,7 +648,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	      //	cout << "raw data, iAnode = " << iAnode << ", Anode = " << Anode << endl;
 
 	      // here anode is real anode number (1-240)
-	      if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
+	      //if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
 	      if( doCommon)  CommonModeNoiseCalc(iAnode);
 	    }
 	 
@@ -691,7 +699,7 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	      if( doCommon) CommonModeNoiseSub(iAnode);
 	      else SubtractFirstAnode(iAnode);
-
+	      if (Debug() && !doCommon)MakeHistogramsAdc(mHybridRawData,index,Anode,1);
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(iAnode, Anode);
 	      
@@ -1218,9 +1226,19 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
 	  if( Count ==1) {
 	    mRawAdc[index]->Fill((int)adc[j]-mPedOffSet);
 	    mTimeAn[index]->Fill(Anode,j+svtSequence[mSeq].startTimeBin);
+	    if( (int)adc[j]-mPedOffSet > 5 && hybridData->getTimeZero() >2
+		&& hybridData->getTimeZero() < 6)
+	      
+	    mRawPixel[hybridData->getTimeZero()-3]->Fill(j+svtSequence[mSeq].startTimeBin);
 	  }
-	  else 
+
+	  else {
 	    mAdcAfter[index]->Fill((int)adc[j]-mPedOffSet);
+	    if((int)adc[j]-mPedOffSet > 5 && hybridData->getTimeZero() >2
+		&& hybridData->getTimeZero() < 6){
+	      mRawPixel[hybridData->getTimeZero()]->Fill(j+svtSequence[mSeq].startTimeBin);
+	    }
+	  }
 	}
     }
   
