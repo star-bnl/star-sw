@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.15 2003/04/29 18:48:52 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.16 2003/05/08 22:23:33 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.16  2003/05/08 22:23:33  calderon
+ * Adding a check for finiteness of node origin and node curvature.  If any
+ * of the numbers is not finite, the code will abort().
+ *
  * Revision 2.15  2003/04/29 18:48:52  pruneau
  * *** empty log message ***
  *
@@ -480,6 +484,23 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     node = track->getInnerMostHitNode();
   StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
+  // making some checks.  Seems the curvature is infinity sometimes and
+  // the origin is sometimes filled with nan's...
+  
+  if (!finite(origin.x()) ||
+      !finite(origin.y()) ||
+      !finite(origin.z()) ||
+      !finite(node->getCurvature())) {
+      cout << "StiStEventFiller::fillGeometry() Encountered non-finite numbers!!!! Bail out completely!!! " << endl;
+      cout << "Last node had:" << endl;
+      cout << "Ref Position  " << node->getRefPosition() << endl;
+      cout << "node->getY()  " << node->getY() << endl;
+      cout << "node->getZ()  " << node->getZ() << endl;
+      cout << "Ref Angle     " << node->getRefAngle() << endl;
+      cout << "origin        " << origin << endl;
+      cout << "curvature     " << node->getCurvature() << endl;
+      abort();
+  }
   StTrackGeometry* geometry =new StHelixModel(short(track->getCharge()),
 					      node->getPhase(),
 					      fabs(node->getCurvature()),
