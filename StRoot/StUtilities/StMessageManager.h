@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.17 2000/03/30 16:12:55 genevb Exp $
+// $Id: StMessageManager.h,v 1.18 2000/05/23 19:03:38 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.18  2000/05/23 19:03:38  genevb
+// Correct interface for MessageOut(), update docs
+//
 // Revision 1.17  2000/03/30 16:12:55  genevb
 // Add NoLimits() capability to turn off message limiting.
 //
@@ -90,7 +93,7 @@ void type_of_call Message_(const char* mess, int *lines, int *id, size_t len);
 void type_of_call Msg_Enable_(const char* mess, size_t len);
  int type_of_call Msg_Enabled_(const char* mess, int *id, size_t len);
 void type_of_call Msg_Disable_(const char* mess, size_t len);
-void type_of_call MessageOut(const char* msg, int *lines, size_t len);
+void type_of_call MessageOut(const char* msg);
 void type_of_call StMessage_(const char* mess, const char* type,
                                   const char* opt, size_t len1,
 				  size_t len2, size_t len3);

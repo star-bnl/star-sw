@@ -12,26 +12,26 @@
 Table of Contents:
 
 Section I. Basic usage: creating a message
-I-1.   C++ and CINT usage
-I-2.   Fortran usage
-I-3.   C usage
+<a href="#i1">I-1.   C++ and CINT usage</a>
+<a href="#i2">I-2.   Fortran usage</a>
+<a href="#i3">I-3.   C usage</a>
 
 Section II. Advanced features
-II-1.  Message summary
-II-2.  Specifying output streams
-II-3.  Non-accounted messages
-II-4.  Turning off printing of the time-date stamp
-II-5.  Turning off printing of the leading "St"
-II-6.  Access to the current message
-II-7.  Finding a message
-II-8.  Finding a list of messages
-II-9.  Finding messages within a list
-II-10. Printing a list of messages
-II-11. Formatting output
-II-12. Limiting message counts
+<a href="#ii1">II-1.  Message summary</a>
+<a href="#ii2">II-2.  Specifying output streams</a>
+<a href="#ii3">II-3.  Non-accounted messages</a>
+<a href="#ii4">II-4.  Turning off printing of the time-date stamp</a>
+<a href="#ii5">II-5.  Turning off printing of the leading "St"</a>
+<a href="#ii6">II-6.  Access to the current message</a>
+<a href="#ii7">II-7.  Finding a message</a>
+<a href="#ii8">II-8.  Finding a list of messages</a>
+<a href="#ii9">II-9.  Finding messages within a list</a>
+<a href="#ii10">II-10. Printing a list of messages</a>
+<a href="#ii11">II-11. Formatting output</a>
+<a href="#ii12">II-12. Limiting message counts</a>
 
 </pre>
-<hr>
+<hr size=5>
 <pre>
 
 
@@ -41,10 +41,9 @@ Section I.
 ***************************************************
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="i1">*** I-1.   C++ and CINT usage</a>
 <pre>
-
-*** I-1.   C++ and CINT usage
 
 In C++ programs, one must include StMessMgr.h.
 A global pointer (gMessMgr) points to the single message managing class.
@@ -110,10 +109,9 @@ to the output: gMessMgr->Print(). This is the option which must be used
 in CINT as "endm" is not recognized properly there.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="i2">*** I-2.   Fortran usage</a>
 <pre>
-
-*** I-2.   Fortran usage
 
 No special statements are needed in fortran to include message
 functionality. Messages are declared with a call as follows:
@@ -166,24 +164,23 @@ have been supplied:
   msg_disable(message)
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="i3">*** I-3.   C usage</a>
 <pre>
 
-*** I-3.   C usage
-
 For C, one must have "extern" statements stating that the routines to
-use have been defined externally. This can be done simply by including
-the StMessMgr.h file. All the C routines are identical to the FORTRAN
-routines except that they have an underscore ("_") at the end of the
-subroutine name. Otherwise they are identical.
+use have been defined externally. This can be done by hand or by simply
+including the StMessageManager.h file. All the C routines are identical
+to the FORTRAN routines except that they have an underscore ("_") at the
+end of the subroutine name. Otherwise they are identical.
 
 Also, for C, one more routine has been provided: MessageOut(message)
 just to maintain some compatibility with the MSG package. This routine
-does not have an extern statement in StMessMgr.h at the moment.
+does not have an extern statement in StMessageManager.h at the moment.
 
 
 </pre>
-<hr>
+<hr size=5>
 <pre>
 
 Section II.
@@ -192,10 +189,9 @@ Section II.
 *************************************
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii1">*** II-1.  Message summary</a>
 <pre>
-
-*** II-1.  Message summary
 
 A message summary can be displayed with:
 
@@ -206,10 +202,9 @@ This function compares messages by type and by the first n "tokens"
 Using n=0 would summarize messages by type.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii2">*** II-2.  Specifying output streams</a>
 <pre>
-
-*** II-2.  Specifying output streams
 
 Message declarations have a third field (second field for the predefined
 declarations) for an options string. By default, this string contains only
@@ -218,10 +213,9 @@ to stdout (like cout). One can also specify the letter "E" so that the
 message goes to stderr (like cerr). One can even use both: "OE".
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii3">*** II-3.  Non-accounted messages</a>
 <pre>
-
-*** II-3.  Non-accounted messages
 
 Using the additional option "-" means that a message will not be saved
 by the message manager. This means it will not show up in subsequent
@@ -230,28 +224,25 @@ stdout or stderr if (and only if) "O" and/or "E" is included in the option
 string.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii4">*** II-4.  Turning off printing of the time-date stamp</a>
 <pre>
-
-*** II-4.  Turning off printing of the time-date stamp
 
 Use the option "T". Remember, "O" or "E" must also be in the option
 string for the printout. QAInfo messages by default have this option.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii5">*** II-5.  Turning off printing of the leading "St"</a>
 <pre>
-
-*** II-5.  Turning off printing of the leading "St"
 
 Use the option "S". Remember, "O" or "E" must also be in the option
 string for the printout. QAInfo messages by default have this option.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii6">*** II-6.  Access to the current message</a>
 <pre>
-
-*** II-6.  Access to the current message
 
 A global pointer, gMessage, exists as a pointer to the last StMessage.
 StMessage allows access to the attributes of a message:
@@ -263,10 +254,9 @@ StMessage allows access to the attributes of a message:
   gMessage->Print();          // outputs a message
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii7">*** II-7.  Finding a message</a>
 <pre>
-
-*** II-7.  Finding a message
 
 The message manager can find the first message whose text string contains
 matches for up to four search strings:
@@ -274,10 +264,9 @@ matches for up to four search strings:
   StMessage* myMess = gMessMgr->FindMessage("dst","full");
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii8">*** II-8.  Finding a list of messages</a>
 <pre>
-
-*** II-8.  Finding a list of messages
 
 Message lists in the form of a vector of StMessage pointers are called
 a messVec. A list of messages can be found which match up to four strings:
@@ -285,29 +274,27 @@ a messVec. A list of messages can be found which match up to four strings:
   messVec* myList = gMessMgr->FindMessageList("sun","moon","planet")
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii9">*** II-9.  Finding messages within a list</a>
 <pre>
-
-*** II-9.  Finding messages within a list
 
 Both FindMessage() and FindMessageList() take a fifth argument which is
 messVec pointer.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii10">*** II-10. Printing a list of messages</a>
 <pre>
 
-*** II-10. Printing a list of messages
 
 Call PrintList() with a pointer to the messVec list of messages:
 
   gMessMgr->PrintList(myList);
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii11">*** II-11. Formatting output</a>
 <pre>
-
-*** II-11. Formatting output
 
 StMessMgr is an ostream, like cout. It can therefore be used
 to format, like cout:
@@ -323,10 +310,9 @@ One should not forget that character strings can also be formatted by
 sprintf() before adding them to the message.
 
 </pre>
-<hr>
+<hr align=left width="50%">
+<a name="ii12">*** II-12. Limiting message counts</a>
 <pre>
-
-*** II-12. Limiting message counts
 
 The message manager provide message limiting in two ways:
 
@@ -350,6 +336,9 @@ to limiting message counts:
 - SwitchOff(string/type) sets the limit to zero. This is the default case
   for type "D", debug messages - on can use SwitchOn("D") to enable them.
 - SwitchOn(string/type) sets the limit to -1, removing any limit.
+- NoLimits() turns off ALL message limiting. This is useful for debugging,
+  but can result in a large amount of messages that had been previously
+  hidden.
 
 </pre>
 </html>
