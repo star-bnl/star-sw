@@ -157,7 +157,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Functional description:
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SUN (here), the swapping is done.
@@ -193,7 +193,7 @@
 *  Input/Output:
 	INTEGER Block(*) !Block of 32-bit words in to be reordered.
 
-*  Functional description:
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SUN (here), the swapping is done.
@@ -233,7 +233,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Functional description:
+*  Description:
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On SUN (here), the swapping is done.
@@ -268,21 +268,17 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER LUN !FORTRAN Logical Unit of device (file) to be "flushed".
 
-*  Functional Description:
+*  Description:
 *	Do whatever platform-dependent operations are necessary to cause all
 *	pending output for the specified LUN to be sent to the actual device
 *	or file represented by the LUN, "flushing" out that device's buffer.
 *	Intended for use on ASCII-type text files, as written by FORTRAN
 *	formatted-writes.
 
-	CHARACTER*132 Blank_line
-	DATA Blank_line/' '/	
-
-	WRITE(LUN,'(A)') Blank_line
-	BACKSPACE(UNIT=LUN)
+	CALL FLUSH( LUN )
 
 	RETURN
 
@@ -380,7 +376,7 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LUN !Logical unit on which to open file.
 	CHARACTER*(*) FILENAME !Name of file.
 	CHARACTER*(*) STATUS_CARG !"STATUS=" character argument
@@ -400,7 +396,7 @@
 	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
 	LOGICAL READONLY_FLAG !No-op on SUN.
 
-*  Functional Description:
+*  Description:
 *	Provides a machine-dependent (native) OPEN routine, intended
 *	to be called only from STROPEN (qv).
 
@@ -717,7 +713,7 @@
 
 	INTEGER Ireal !Integer-cast of a Host-style floating number.
 
-*  Functional description:
+*  Description:
 
 *	This is the IEEE version, which works for any host using the
 *	IEEE floating-representation.
@@ -792,7 +788,7 @@
 
 	INTEGER Ireal !Integer-cast of a DEC-style floating number.
 
-*  Functional description:
+*  Description:
 
 *	This is the generic version, which works anywhere on 32-bit
 *	floating numbers.
