@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.4 1999/07/15 13:58:39 perev Exp $
+// $Id: drawEvent.C,v 1.5 1999/08/02 00:07:10 fine Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.5  1999/08/02 00:07:10  fine
+// use the new edition of StVirtualFiltr class
+//
 // Revision 1.4  1999/07/15 13:58:39  perev
 // cleanup
 //
@@ -48,6 +51,9 @@ TString  theFileName;
 TString  originalPath;
 class StChain;
 StChain *chain=0;
+
+class StEventDisplayMaker;
+StEventDisplayMaker *disp=0;
 
 TBrowser *b=0;
 const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
@@ -117,14 +123,18 @@ void doEventsQQ(const Int_t nevents=999,
   StEventMaker *readerMaker =  new StEventMaker ("events","title");
 // 		Sample analysis maker
 //  StAnalysisMaker *analysisMaker = new  StAnalysisMaker("analysis");
-  StEventDisplayMaker *disp      = new StEventDisplayMaker;
+  disp      = new StEventDisplayMaker;
+  disp->SetDebug();
+  // Create an user's custom filter for "Tracks" 
+  St_TLA_EventFilter *trackFilter = new St_TLA_EventFilter();
+  disp->SetFilter(trackFilter,StEventDisplayMaker::kTrack);
+  
 
   // Initialize chain
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
   chain->PrintInfo();
-  disp->SetTrackFilterFlag(1);
-  disp->SetHitFilterFlag(1);
+//  chain->MakeDoc();
 
   // Event loop
   int istat;
