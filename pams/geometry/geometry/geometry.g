@@ -71,7 +71,7 @@ If LL>1
                   <W>;('Magnetic Field : Field_on/off, field=value    ');
                   <W>;('Auxillary keys : Debug_on/off, Split_on/off   ');
                   <W>;('--------------------------------------------- ');
-                  <W>;('Default: complete STAR with hadr_on  ');
+                  <W>;('Default: complete STAR with hadr_on,auto-split');
                   <W>;('--------------------------------------------- ');
                 }  
   on COMPLETE   { Complete STAR geometry;                             tof=on; }
@@ -175,12 +175,9 @@ If LL>1
    { Call ggclos
      If IDEBUG>0 { CALL ICLRWK(0,1); Call GDRAWC('CAVE',1,.2,10.,10.,.03,.03)}
    }
-   if (IDEBUG+IPRIN==0) Open (99,File='/dev/null')
    IDEBUG = IPRIN
    ITEST  = min(IPRIN,1)
-   Call AGPHYSCOR
    Call agphysi
-   close (99)
 *                      automatic subevent size selection
    If NtrSubev > 0
    { Call MZNEED(IXDIV,1000,'G')
