@@ -28,7 +28,6 @@ char* outFile="test.root") {
 //    StMuDbReader* db = StMuDbReader::instance();
 //    db->addDb("/star/u/laue/afsWork/P02gc.db");
 //    db->addDb("/star/u/laue/afsWork/P02gd.db");
-   StMuChainMaker::setNumberOfEventsModeUseFileCatalog();
 
    int counter=0;
   int iret=0;
