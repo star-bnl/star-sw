@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.2 2000/11/21 16:24:22 horsley Exp $
+ * $Id: StRichArea.cxx,v 2.3 2000/11/22 21:49:48 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
+ *  Revision 2.3  2000/11/22 21:49:48  horsley
+ *  StRichArea.cxx changed to remove the abort commands and replace with return false tp avoid aborting whole chain.
+ *
  *  Revision 2.2  2000/11/21 16:24:22  horsley
  *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
  *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
@@ -274,7 +277,8 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
   if (!getRingPoints(angle1,angle2,mInXYA,mOutXYA,mPositiveDirection)) {
     cout 
       << "StRichNewArea::calculateArea  a --> starting point returns false. abort!" << endl;
-    abort();
+    //abort();
+    return -999;
   }
   
 
@@ -385,7 +389,8 @@ double StRichArea::calculateArea(double areaCut, double psiCut) {
 
   if (!getRingPoints(angle1,angle2,mInXYA,mOutXYA,mNegativeDirection)) {
     cout << "StRichNewArea::calculateArea  b --> starting point returns false. abort!" << endl;
-    abort();
+    //abort();
+    return -999;
   }
 
   tempArea=0;
@@ -599,7 +604,8 @@ StRichArea::getRingPoints(double& angle1, double& angle2,
     cout << "track theta = " << mInnerRing->getTrack()->getTheta()/degree << endl;
     cout << "angle = " << angle1/degree << endl;
     cout << "problem track. abort() " << endl;
-    abort();
+    //abort();
+    return false;
   }
 
   //
@@ -915,7 +921,9 @@ StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,  StThreeVectorF& oxy,
     if (safetyCheck>mTooManyCounts) {
       cout << "StRichArea::adjacentGapCorrectionNecessary  ---> abort!" << endl;
       cout << "Problem in outer ring gap correction. " << endl;      
-      abort();}
+      //  abort();
+      return false;
+    }
     
     temp = tempi-tempo;
     double v = 0.5*temp.mag();
@@ -934,7 +942,8 @@ StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,  StThreeVectorF& oxy,
   if (!sanityCheck(ixy,oxya,oxy) ) {
     cout << "StRichArea::adjacentGapCorrectionNecessary() ---> abort()!" << endl;
     cout << "Problem in outer ring gap correction, sanity check." << endl;
-    abort();
+    // abort();
+    return false;
   }
 
 
@@ -980,7 +989,9 @@ StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,  StThreeVectorF& oxy,
     if (safetyCheck>mTooManyCounts) {
       cout << "StRichArea::adjacentGapCorrectionNecessary  ---> abort!" << endl;
       cout << "Problem in inner ring gap correction. " << endl;      
-      abort();}
+      //abort();
+      return false;
+    }
     
     temp = tempi - tempo;
     double v = 0.5*temp.mag();
@@ -994,7 +1005,9 @@ StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,  StThreeVectorF& oxy,
   if (!sanityCheck(ixy,ixya,oxy) ) {
     cout << "StRichArea::adjacentGapCorrectionNecessary() ---> abort()!" << endl;
     cout << "Problem in inner ring gap correction, sanity check." << endl;
-    abort();}
+    //abort();
+    return false;
+  }
   
   //
   // now get the next point across from the gap
@@ -1073,7 +1086,9 @@ StRichArea::fullGapCorrectionNecessary(StThreeVectorF& ixy,  StThreeVectorF& oxy
     if (safetyCheck>mTooManyCounts) {
       cout << "StRichArea::fullGapCorrectionNecessary  ---> abort!" << endl;
       cout << "Problem in outer ring gap correction. " << endl;      
-      abort();}
+      //  abort();
+      return false;
+    }
     
     temp = tempi-tempo;
     double v = 0.5*temp.mag();
@@ -1087,7 +1102,9 @@ StRichArea::fullGapCorrectionNecessary(StThreeVectorF& ixy,  StThreeVectorF& oxy
   if (!sanityCheck(ixy,otemp,oxy) ) {
     cout << "StRichArea::fullGapCorrectionNecessary() ---> abort()!" << endl;
     cout << "Problem in outer ring gap correction, sanity check." << endl;
-    abort();}
+    //  abort();
+    return false;
+  }
  
 
   //
@@ -1122,7 +1139,9 @@ StRichArea::fullGapCorrectionNecessary(StThreeVectorF& ixy,  StThreeVectorF& oxy
     if (safetyCheck>mTooManyCounts) {
       cout << "StRichArea::fullGapCorrectionNecessary  ---> abort!" << endl;
       cout << "Problem in inner ring gap correction. " << endl;      
-      abort();}
+      //abort();
+      return false;
+    }
     
     temp = tempi - tempo;
     double v = 0.5*temp.mag();
@@ -1137,7 +1156,9 @@ StRichArea::fullGapCorrectionNecessary(StThreeVectorF& ixy,  StThreeVectorF& oxy
   if (!sanityCheck(ixy,itemp,oxy) ) {
     cout << "StRichArea::fullGapCorrectionNecessary() ---> abort()!" << endl;
     cout << "Problem in inner ring gap correction, sanity check." << endl;
-    abort();}
+    // abort();
+    return false;
+  }
   
   return true;
 }
@@ -1565,7 +1586,8 @@ void StRichArea::getMonteCarloArea(double angleCut, TArrayD& array, int points) 
 	cout << "problem addressing vector index! abort(). " << endl;
 	cout << "angle = " << ang/degree << endl;
 	cout << "areaIndex > array size " << areaIndex << "    " << array.GetSize() - 1 << endl;
-	abort();
+	//abort();
+	return -999;
       }
     }
 
