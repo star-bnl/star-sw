@@ -1,11 +1,15 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.7 2002/04/16 19:46:44 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 1.8 2002/05/29 19:14:45 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.8  2002/05/29 19:14:45  calderon
+ * Filling of primaries, in
+ * StiStEventFiller::fillEventPrimaries()
+ *
  * Revision 1.7  2002/04/16 19:46:44  pruneau
  * must catch exception
  *
@@ -64,7 +68,7 @@ using namespace std;
 //StiMaker
 #include "StiStEventFiller.h"
 
-StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0)
+StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 {
 	//temp, make sure we're not constructing extra copies...
 	//cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
@@ -175,40 +179,115 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 		// detector info
 		StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 		fillDetectorInfo(detInfo,kTrack);
-		detInfoVec.push_back(detInfo);
 		
 		// track node where the new StTrack will reside
 		StTrackNode* trackNode = new StTrackNode;
-		trNodeVec.push_back(trackNode);
 		
 		// actual filling of StTrack from StiTrack
 		StGlobalTrack* gTrack = new StGlobalTrack;
 		
-		try
-			{
-				fillTrack(gTrack,kTrack);
-			}
-		catch (runtime_error & rte )
-			{
-				cout << "StiStEventFiller::fillEvent() - WARNING - runtime exception while filling StEvent track. Error:"
-						 << rte.what() << endl;
-			}
-		catch (...)
-			{
-				cout << "StiStEventFiller::fillEvent() - WARNING - Unknown exception while filling StEvent track."<<endl;
-			}
+		try {
+		    fillTrack(gTrack,kTrack);
+
+		    // filling successful,
+		    // set up relationships between objects
+		    detInfoVec.push_back(detInfo);
+		    trNodeVec.push_back(trackNode);
+		    gTrack->setDetectorInfo(detInfo);
+		    gTrack->setNode(trackNode);
+		    trackNode->addTrack(gTrack);
+		    
+		    // reuse the utility to fill the topology map
+		    // this has to be done at the end as it relies on
+		    // having the proper track->detectorInfo() relationship
+		    // and a valid StDetectorInfo object.
+		    StuFixTopoMap(gTrack);
+		    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trackNode) );
+		}
+		catch (runtime_error & rte ) {
+		    cout << "StiStEventFiller::fillEvent() - WARNING - runtime exception filling track: "
+			 << rte.what() << endl;
+		    delete trackNode;
+		    delete detInfo;
+		    delete gTrack;
+		}
+		catch (...) {
+		    cout << "StiStEventFiller::fillEvent() - WARNING - Unknown exception filling track."<<endl;
+		    delete trackNode;
+		    delete detInfo;
+		    delete gTrack;
+		}
 		
-		// set up relationships between objects
-		gTrack->setDetectorInfo(detInfo);
-		gTrack->setNode(trackNode);
-		trackNode->addTrack(gTrack);
-		
-		// reuse the utility to fill the topology map
-	// this has to be done at the end as it relies on
-	// having the proper track->detectorInfo() relationship
-	// and a valid StDetectorInfo object.
-	StuFixTopoMap(gTrack);
     }
+    
+	return mEvent;
+}
+StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
+{
+    cout <<"StiStEventFiller::fillEventPrimaries()"<<endl;
+    if (!mTrkNodeMap.size()) {
+	cout <<"StiStEventFiller::fillEventPrimaries(). ERROR:\t"
+	     << "Mapping between the StTrackNodes and the StiTracks is empty.  Exit." << endl;
+	return 0;
+    }
+    if (e==0 || t==0) {
+	cout <<"StiStEventFiller::fillEventPrimaries(). ERROR:\t"
+	     <<"Null StEvent ("<<e<<") || StiTrackContainer ("<<t<<").  Exit"<<endl;
+	return 0;
+    }
+    
+    mEvent = e;
+    mTrackStore = t;
+    
+    StPrimaryVertex*       vertex = mEvent->primaryVertex(0);
+    StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
+
+
+    // loop over StiKalmanTracks
+    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt){
+	// get track and corresponding StTrackNode
+	const StiKalmanTrack* kTrack = (*trackIt).second;	
+	map<const StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
+	if (itKtrack == mTrkNodeMap.end()) {
+	    cout << "skipping track which was not entered in an StTrackNode" << endl;
+	    continue;
+	}
+	if (kTrack->isPrimary()) {
+	    StTrackNode* currentTrackNode = (*itKtrack).second;
+	    
+	    // detector info
+	    StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
+	    fillDetectorInfo(detInfo,kTrack);
+
+	    // actual filling of StTrack from StiTrack
+	    StPrimaryTrack* pTrack = new StPrimaryTrack;
+	    
+	    try	{
+		fillTrack(pTrack,kTrack);
+
+		// set up relationships between objects
+		detInfoVec.push_back(detInfo);
+		pTrack->setDetectorInfo(detInfo);
+		pTrack->setNode(currentTrackNode);
+		currentTrackNode->addTrack(pTrack);
+		vertex->addDaughter(pTrack);
+	    
+		StuFixTopoMap(pTrack);
+	    }
+	    catch (runtime_error & rte ) {
+		cout << "StiStEventFiller::fillEventPrimaries() - runtime exception, filling track: "
+		     << rte.what() << endl;
+		delete detInfo;
+		delete pTrack;
+	    }
+	    catch (...) {
+		cout << "StiStEventFiller::fillEventPrimaries() - Unknown exception, filling track."<<endl;
+		delete detInfo;
+		delete pTrack;
+	    }
+	}
+    } // kalman track loop
+    mTrkNodeMap.clear();  // need to reset for the next event
     
     return mEvent;
 }
@@ -284,11 +363,11 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
 	if (mEvent->runInfo()!=0) bField = mEvent->runInfo()->magneticField();
 	else bField =  0.5; 
 	StTrackGeometry* geometry = new StHelixModel(helix->charge(bField),
-																							 helix->phase(),
-																							 helix->curvature(),
-																							 helix->dipAngle(),
-																							 origin, momF,
-																							 helix->h());
+						     helix->phase(),
+						     helix->curvature(),
+						     helix->dipAngle(),
+						     origin, momF,
+						     helix->h());
 	
 	delete helix;
 	if (outer)
@@ -353,8 +432,15 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
 void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
 	//cout << "StiStEventFiller::fillTrack()" << endl;
     // data members from StTrack
-    gTrack->setFlag(101); //change: make sure flag is ok
-
+    if (gTrack->type()==global) {
+	gTrack->setFlag(101); //change: make sure flag is ok
+    }
+    else if (gTrack->type()==primary) {
+	gTrack->setFlag(301);
+    }
+    else {
+	
+    }
     
     // encoded method = 16 bits = 12 fitting and 4 finding, for the moment use:
     // kKalmanFitId

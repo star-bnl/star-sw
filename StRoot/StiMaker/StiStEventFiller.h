@@ -1,12 +1,16 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 1.2 2002/03/28 04:29:49 calderon Exp $
+ * $Id: StiStEventFiller.h,v 1.3 2002/05/29 19:14:45 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 1.3  2002/05/29 19:14:45  calderon
+ * Filling of primaries, in
+ * StiStEventFiller::fillEventPrimaries()
+ *
  * Revision 1.2  2002/03/28 04:29:49  calderon
  * First test version of Filler
  * Currently fills only global tracks with the following characteristics
@@ -30,7 +34,8 @@
  **************************************************************************/
 #ifndef StiStEventFiller_HH
 #define StiStEventFiller_HH
-
+#include <map>
+using std::map;
 //Doxygen class header...
 /*! \class StiStEventFiller
     StiStEventFiller is a utilitity class meant to properly convert StiTrack
@@ -39,11 +44,13 @@
 
     \author Manuel Calderon de la Barca Sanchez (Yale Software)
     \note 
-    \warning This is a development version, proceed at your own risk!
  */
 
 class StEvent;
+class StTrackNode;
 class StiTrackContainer;
+class StiTrack;
+class StiKalmanTrack;
 
 class StiStEventFiller
 {
@@ -53,6 +60,7 @@ public:
 
     ///Fill the event from the track store.
     StEvent* fillEvent(StEvent*, StiTrackContainer*);
+    StEvent* fillEventPrimaries(StEvent*, StiTrackContainer*);
     //void operator()(const KalmanTrackMapValType);
     void fillDetectorInfo(StTrackDetectorInfo* detInfo, const StiTrack* kTrack);
     void fillGeometry(StTrack* track, const StiTrack* kTrack, bool outer);
@@ -64,6 +72,7 @@ public:
 private:
     StEvent* mEvent;
     StiTrackContainer* mTrackStore;
+    map<const StiKalmanTrack*, StTrackNode*> mTrkNodeMap;
 };
 
 #endif
