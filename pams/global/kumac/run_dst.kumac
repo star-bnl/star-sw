@@ -104,6 +104,7 @@ RETURN
        
 ami/mod/call fill_dst_event_summary_
         [run_dst]/run_header _
+        [run_dst]/run_summary _
         [dst]/event_header _
         [dst]/globtrk _
         [dst]/vertex _

@@ -39,6 +39,24 @@ cd /dui
 return
 ***************************************************************
 *
+macro init_rsum
+
+macro/global/import *
+
+message ' Initializing the Run summary  Tables'
+
+cd [run_dst]
+tdm/table/rowcount run_summary 1
+tdm/table/cell/putvalue 'run_summary[0].eta_bins'    -2. -1. -.5 .5  1. 2.
+tdm/table/cell/putvalue 'run_summary[0].pt_bins'      .1  .15 .2 .3 .5 1. 
+tdm/table/cell/putvalue 'run_summary[0].mt_bins'      .03 .12 .2 .3 .5 1. 
+tdm/table/cell/putvalue 'run_summary[0].n_phi_bins'   8
+wait
+cd /dui
+
+return
+***************************************************************
+*
 macro init_ehead
  macro/global/import *
 
