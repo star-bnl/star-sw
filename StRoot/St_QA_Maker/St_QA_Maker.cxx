@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.38 1999/07/08 22:20:57 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.39 1999/07/09 12:12:54 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.39  1999/07/09 12:12:54  kathy
+// fixed all globtrk histograms as per 3pm thursday meeting
+//
 // Revision 1.38  1999/07/08 22:20:57  kathy
 // updated limits on hist
 //
@@ -667,6 +670,7 @@ void St_QA_Maker::SetDefaultLogYList(){
   cout << " **** Now in St_QA_Maker::SetDefaultLogYList  **** " << endl;
 
   const Char_t *sdefList[] = {
+ "QaGlobtrkDetId",
  "QaGlobtrkFlag",
  "QaGlobtrkNPnt",
  "QaGlobtrkNPntMax",
@@ -812,39 +816,39 @@ void St_QA_Maker::BookHistGlob(){
   m_fit_point  = new TH1F("QaGlobtrkNPntFit", "globtrk: N fit points on track", 50, 0.,50.);
   m_glb_charge = new TH1F("QaGlobtrkChrg",    "globtrk: charge ", 20,-2.,2.);
   m_glb_x0     = new TH1F("QaGlobtrkX0",      "globtrk: x coor. on helix at start ", 50,-200.,200.);
-  m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first tpc hit - on helix at start ",50,-5.,5.);
+  m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first tpc hit - on helix at start",50,-20.,20.);
   m_glb_y0     = new TH1F("QaGlobtrkY0",      "globtrk: y coor. on helix at start ", 50,-200.,200.);
-  m_glb_yf     = new TH1F("QaGlobtrkYf",      "globtrk: y of first tpc hit - on helix at start",  50,-5.,5.);
+  m_glb_yf     = new TH1F("QaGlobtrkYf",      "globtrk: y of first tpc hit - on helix at start",50,-20.,20.);
   m_glb_z0     = new TH1F("QaGlobtrkZ0",      "globtrk: z coor. on helix at start ", 50,-250.,250.);
-  m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first tpc hit - on helix at start",  50,-5.,5.);
+  m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first tpc hit - on helix at start",50,-20.,20.);
   m_psi        = new TH1F("QaGlobtrkPsi",     "globtrk: psi distribution", 36, 0.,360.);
   m_tanl       = new TH1F("QaGlobtrkTanl",    "globtrk: tanl distribution",32,-4.,4.);
   m_glb_theta  = new TH1F("QaGlobtrkTheta",   "globtrk: theta distribution",20,0.,4.);
   m_eta        = new TH1F("QaGlobtrkEta",     "globtrk: eta distribution",60,-3.0,3.0);
   m_pT         = new TH1F("QaGlobtrkPt",      "globtrk: pT distribution",50,0.,5.);
   m_mom        = new TH1F("QaGlobtrkP",       "globtrk: momentum distribution",50,0.,5.);
-  m_chisq0     = new TH1F("QaGlobtrkChisq0C", "globtrk: chisq[0]", 100, 0.,15.);
-  m_chisq1     = new TH1F("QaGlobtrkChisq1C", "globtrk: chisq[1]", 100, 0.,15.);
+  m_chisq0     = new TH1F("QaGlobtrkChisq0C", "globtrk: chisq[0] per dof", 50, 0.,15.);
+  m_chisq1     = new TH1F("QaGlobtrkChisq1C", "globtrk: chisq[1] per dof", 50, 0.,15.);
   m_length     = new TH1F("QaGlobtrkLength",  "globtrk: track length", 50,0.,300.);
   m_glb_impact = new TH1F("QaGlobtrkImpact",  "globtrk: impact param from prim vtx ", 50,0.,500.);
   m_glb_ndf    = new TH1F("QaGlobtrkNdof",    "globtrk: num deg of freedom", 100,-10.,90.);
 
 
 // 2D
-  m_pT_eta_rec = new TH2F("QaGlobtrkPtVsEta","globtrk: pT versus eta", 20,-2.,2.,20,0.,2000.);
+  m_pT_eta_rec = new TH2F("QaGlobtrkPtVsEta","globtrk: log pT versus eta", 20,-2.,2.,40,0.,10.);
     m_pT_eta_rec->SetXTitle("eta");
-    m_pT_eta_rec->SetYTitle(" pT (MeV)");
+    m_pT_eta_rec->SetYTitle(" log pT (MeV)");
 
 
-  m_tanl_z0 = new TH2F("QaGlobtrkTanlz0","globtrk: tanl(dip) versus z0", 20,-250.,250.,20,-5.,5.);
+  m_tanl_z0 = new TH2F("QaGlobtrkTanlz0","globtrk: tanl(dip) versus z0",50,-250.,250.,60,-3.,3.);
     m_tanl_z0->SetXTitle("z0");
     m_tanl_z0->SetYTitle("tanl");
 
 
-  m_mom_trklength = new TH2F("QaGlobtrkPVsTrkLength","globtrk: mom vs trk length",
-			     50,0.,250.,20,0.,2000.);
-    m_mom_trklength->SetXTitle("trk length");
-    m_mom_trklength->SetYTitle("momentum (MeV)");
+  m_mom_trklength = new TH2F("QaGlobtrkPVsTrkLength","globtrk: log mom vs trk length",
+			     50,0.,250.,40,0.,10.);
+    m_mom_trklength->SetXTitle("trk length");  
+    m_mom_trklength->SetYTitle("log P (MeV)");
 
   m_eta_trklength = new TH2F("QaGlobtrkLengthVEta","globtrk: trk length vs eta",
 			     20,-2.,2.,50,0.,250.);
@@ -862,12 +866,12 @@ void St_QA_Maker::BookHistGlob(){
     m_fpoint_length->SetXTitle("length");
     m_fpoint_length->SetYTitle("Npoints");
 
-  m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","globtrk: Chisq0 vs mom",20,0.,2000.,50,0.,15.);
-    m_chisq0_mom->SetXTitle("momentum (MeV)");
-    m_chisq0_mom->SetYTitle("chisq0");
+  m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","globtrk: Chisq0 vs log mom",40,0.,10.,50,0.,15.);
+    m_chisq0_mom->SetXTitle("log P (MeV)");
+    m_chisq0_mom->SetYTitle("chisq0") ;
 
-  m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","globtrk: Chisq1 vs mom",20,0.,2000.,50,0.,15.);
-    m_chisq1_mom->SetXTitle("momentum (MeV)");
+  m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","globtrk: Chisq1 vs log mom",40,0.,10.,50,0.,15.);
+    m_chisq1_mom->SetXTitle("log P (MeV)");
     m_chisq1_mom->SetYTitle("chisq1");
 
 
@@ -896,11 +900,11 @@ void St_QA_Maker::BookHistGlob(){
     m_chisq1_z0->SetXTitle("z0");
     m_chisq1_z0->SetYTitle("chisq1");
 
-  m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs Mom",20,0.,10000.,40,0.,2.0); 
-     m_nfptonpt_mom->SetXTitle("momentum (MeV)");
+  m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs log mom.",40,0.,10.,40,0.,2.0); 
+     m_nfptonpt_mom->SetXTitle("log P (MeV)");
      m_nfptonpt_mom->SetYTitle("Ratio Nfitpnt/Npnt");
 
-  m_nfptonpt_eta = new TH2F("QaGlobtrkRPntEta","globtrk: ratio Nfitpnt,Npnt vs Eta",20,-2.,2.,40,0.,2.0); 
+  m_nfptonpt_eta = new TH2F("QaGlobtrkRPntEta","globtrk: ratio Nfitpnt,Npnt vs Eta",40,-2.,2.,40,0.,2.0); 
      m_nfptonpt_eta->SetXTitle("eta");
      m_nfptonpt_eta->SetYTitle("Ratio Nfitpnt/Npnt");
 
@@ -1080,11 +1084,11 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
         cnttrkg++;
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
-        Float_t mevpt = pT*1000.0;
+        Float_t lmevpt = log(pT*1000.0);
 	Float_t theta = asin(1.) - atan(t->tanl);
 	Float_t eta   =-log(tan(theta/2.));
 	Float_t gmom  = pT/sin(theta);
-        Float_t mevmom = gmom*1000.0; 
+        Float_t lmevmom = log(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
 	Float_t degoffree = t->n_fit_point;
@@ -1119,21 +1123,21 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
 	m_chisq0->Fill(chisq0_p);
 	m_chisq1->Fill(chisq1_p);
 
-	m_pT_eta_rec->Fill(eta,mevpt);
+	m_pT_eta_rec->Fill(eta,lmevpt);
         m_tanl_z0->Fill(t->z0,t->tanl);
-	m_mom_trklength->Fill(t->length,mevmom);
+	m_mom_trklength->Fill(t->length,lmevmom);
         m_eta_trklength->Fill(eta,t->length);
 	m_npoint_length->Fill(t->length,float(t->n_point));
 	m_fpoint_length->Fill(t->length,float(t->n_fit_point));
-	m_chisq0_mom->Fill(mevmom,chisq0_p);
-	m_chisq1_mom->Fill(mevmom,chisq1_p);
+	m_chisq0_mom->Fill(lmevmom,chisq0_p);
+	m_chisq1_mom->Fill(lmevmom,chisq1_p);
 	m_chisq0_eta->Fill(eta,chisq0_p);
 	m_chisq1_eta->Fill(eta,chisq1_p);
 	m_chisq0_dip->Fill(t->tanl,chisq0_p);
 	m_chisq1_dip->Fill(t->tanl,chisq1_p);
 	m_chisq0_z0->Fill(t->z0,chisq0_p);
 	m_chisq1_z0->Fill(t->z0,chisq1_p);
-        m_nfptonpt_mom->Fill(mevmom,nfitntot);
+        m_nfptonpt_mom->Fill(lmevmom,nfitntot);
         m_nfptonpt_eta->Fill(eta,nfitntot);
 
       }
@@ -1370,7 +1374,7 @@ void St_QA_Maker::MakeHistXi(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.38 1999/07/08 22:20:57 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.39 1999/07/09 12:12:54 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
