@@ -12,7 +12,7 @@
 *              File types are saved in Ccommand - one letter per file   *
 *************************************************************************
    Implicit   None   
-   Integer    LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot
+   Integer    LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate
    Character  file*(*),C*1,Table*120
    common     /agcuser/ Igate,Table
 *
