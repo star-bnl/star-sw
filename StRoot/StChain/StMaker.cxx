@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.98 2000/07/01 00:17:37 fisyak Exp $
+// $Id: StMaker.cxx,v 1.99 2000/07/04 02:36:01 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -55,11 +55,17 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(
    m_Inputs   = new TObjectSet(".aliases" );Add(m_Inputs);
    m_Runco  = new TObjectSet(".runco" );Add(m_Runco);
    AddHist(0); m_Histograms = GetHistList();
-   gStChain = this; //?????????????????????????????????????????????????????
-::doPs(GetName(),"constructor");
+   ::doPs(GetName(),"constructor");
    m_Timer.Stop();
 }
 
+//_____________________________________________________________________________
+void StMaker::AddMaker(StMaker *mk)
+{
+  TDataSet *dotmk = Find(".make");
+  if (!dotmk) dotmk = new TDataSet(".make",this);
+  mk->Shunt(dotmk);
+}
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
@@ -1052,6 +1058,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.99  2000/07/04 02:36:01  perev
+// AddMaker method added & gStChain removed
+//
 // Revision 1.98  2000/07/01 00:17:37  fisyak
 // Remove memory leak
 //
