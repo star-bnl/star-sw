@@ -81,10 +81,8 @@ else {
       push @Deps,$DIR . "St_" . $stem . "_Module.h";
       push @Deps,$DIR . "St_" . $stem . "_Module.cxx";#    print "@Deps\n";
       my $cmd = "cd $dir &&  stic -r $CPPPATH -q $idl";# print "stic cmd: $cmd\n";
-      Command $env [@Deps], @idlS, 
-      qq(
-	 $cmd
-	);  
+#      Command $env [@Deps], @idlS,  qq( cd %>:d && stic -q -r $CPPPATH %1:f);  
+      Command $env [@Deps], @idlS,  qq( $cmd );  
       my @incs = ($Deps[0],$Deps[1]); 
       Install $env $INCLUDE, @incs;  #print "Install incs = @incs in $INCLUDE\n";
       (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; ; #print "new share $share\n";
@@ -99,6 +97,34 @@ else {
     Command $env [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$CPPPATH" );
     push @src, $CintFiles[0]; #print "+==========add $CintFiles[0]\n"; 
   }
+#  my @obj = find_Template($DIR);
   LinkedModule $env $SO_PKG, @src;
   Install $env $LIB, $SO_PKG;
 }
+#________________________________________
+sub script::find_Template {
+  if (defined($AFS)) {$File::Find::dont_use_nlink;}
+  @search_files   = ();
+  &File::Find::find(\&wanted_Template, @_);
+  for my $dir (@_) {
+    my $i = 0;
+    for ($i=0;$i<=$#search_files;$i++) {
+      #      print "i = ",$i, "src =", $search_files[$i],"\n";
+      my $file = $search_files[$i];
+      $file =~ s/$dir\///g;
+      $search_files[$i] = $file;
+    }
+  }
+  #  print "find_source found $#search_files + 1 files\n";
+  return @search_files;
+}
+#________________________________________
+sub script::wanted_Template {
+  #  print "wanted ",$_,"\n";
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  if ( -d $_ && ! /^Templates\.Db$/) {return;}
+  if (/\.o$/) {print "$name\n";
+    push @search_files, $name; 
+  }
+}
+#________________________________________

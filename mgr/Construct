@@ -14,7 +14,7 @@ my $A        = "a";
 my $Cxx      = "cxx";
 my $so       = "so";
 
-my $SoOUT    = "-o";
+my $SoOUT    = "-o ";
 my $Cout     = "-o ";
 my $Fout     = "-o ";
 my $Lout     = "-o ";
@@ -97,11 +97,11 @@ elsif (/^hp_ux102/) {
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $ROOTCINTD = "-DSOLARIS";
   $CPPFLAGS  =~ s/SunOS//g;
-  $OSFID     =  "sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS";
+  $OSFID     =  "sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS ST_NO_NAMESPACES ST_NO_TEMPLATE_DEF_ARGS";
   $CC        = "/opt/SUNWspro/bin/cc";
-  $CXX       = "/opt/SUNWspro/bin/CC -features=no%castop -features=no%anachronisms";
+  $CXX       = "/opt/SUNWspro/bin/CC";
   $FC        = "/opt/SUNWspro/bin/f77";
-  $CXXFLAGS  =  "-KPIC +w";
+  $CXXFLAGS  =  "-KPIC +w -features=no_castop -features=no_anachronisms";# -ptr%>:d";
   $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
   $FFLAGS    =  "  -KPIC -w";
@@ -111,9 +111,12 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $LDFLAGS   =  " -Bstatic"; 
   $SO        =  $CXX;
   $SOFLAGS   =  " -G";
+  my $STDHOME = "/afs/rhic/star/packages/ObjectSpace/2.0m";
+  $CPPPATH .= $STDHOME . ":" . $STDHOME ."/ospace/std:" . $STDHOME . "/ospace:";
 }
 elsif (/^intel_wnt/) {
-  $DEBUG    = "-Zi";
+#  $DEBUG    = "-Zi";
+  $DEBUG    = "";
   $EXESUF   = ".exe";
   $O        = "obj";
   $A        = "lib";
@@ -154,9 +157,11 @@ $MAIN    = cwd();
 $INCLUDE = "#inc";
 $LIB     = "";
 $EXPORT = "#.share";
+$FFLAGS .= " -DCERNLIB_TYPE";
 my $FLAGS = $CPPFLAGS . " " . $OSFID . " __ROOT__";
 $CPPFLAGS = "-D" . join (" -D", split (" ",$FLAGS));
 print "CPPFLAGS = ", $CPPFLAGS, "\n";
+print "FFLAGS = ", $FFLAGS, "\n";
 print "CPP =\t",$CPP,";\tCPPFLAGS =\t",$CPPFLAGS,"\n"; 
 print "CC  =\t",$CC,";\tCCFLAGS = \t",$CFLAGS,"\tCLIBS =\t",$CLIBS,"\n"; 
 print "CXX =\t",$CXX,";\tCXXFLAGS = \t",$CXXFLAGS,"\n";
@@ -172,7 +177,8 @@ foreach my $inc (@includes) {
 }
 $CPPPATH .= ":" . $ROOTSYS . "/src:" . $STAF . "/inc:/opt/star/include";
 #$CPPPATH =~ s/:/$PATH_SEPARATOR/g;
-$FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
+#$FCPPPATH = "-I.. -I../.. -I" . $CERN_ROOT ."/include -I" . $CERN_ROOT . "/include/geant321";
+$FCPPPATH = "-I.. -I../.. -I" . $STAR ."/cern/geant321 -I" . $STAR . "/cern/geant321/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
 print " STAR = ",$STAR,"\n";
 push @Reps, $STAR;
@@ -218,9 +224,9 @@ $env = new cons(
 		'Cout'         => $Cout,
 		'Lout'         => $Lout,
 		'SoOUT'        => $SoOUT,
-		'FCCOM'        => 'cd %<:d && %FC %FFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
+		'FCCOM'        => 'cd %<:d && %FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %<:f %Fout%>:f',
 		'GEANT3'       => $GEANT3,
-		'GEANT3COM'    => 'cd %<:d && %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
+		'GEANT3COM'    => 'cd %<:d && %GEANT3 %<:f -o %<:f.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<:f.F -o %>:f',
 		'CC'	       => $CC,
 		'CFLAGS'       => $CFLAGS,
 		'CCCOM'        => 'cd %<:d && %CC %CFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %Cinp%<:f %Cout%>:f',
@@ -241,8 +247,8 @@ $env = new cons(
 		'AS'	       => 'as',
 		'ASFLAGS'      => '',
 		'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
-		'LD'	       => 'ld',
-		'LDFLAGS'      => '',
+		'LD'	       => $LD,
+		'LDFLAGS'      => $LDFLAGS,
 		'PREFLIB'      => 'lib',
 		'SUFLIB'       => $A,
 		'SUFLIBS'      => $so . ":" . $A,
@@ -268,7 +274,9 @@ $env = new cons(
 				     'STAR' => $STAR,
 				     'STAF' => $STAF,
 				     'STAR_BIN' => $STAR_BIN,
-				     'INCLUDE' => $INCLUDE_PATH
+				     'INCLUDE' => $INCLUDE_PATH,
+				     'TEMP' => $TEMP,
+				     'TMP'  => $TMP
 				   },
 	       );
 #Command $env 
@@ -282,8 +290,10 @@ my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 #if (! -d "$obj")   {mkdir $obj, 0664;}
 my @Targets = ();
-my @dirs = ("StRoot","pams","pams/tables");
-for my $dir (@dirs) {
+my @dirs = ();
+if ($STAR_SYS =~ /^intel_wnt/) {@dirs = ("pams/vpd");}
+else {@dirs = ("StRoot","pams","pams/tables","cern/minicern","cern/geant321");}
+foreach my $dir (@dirs) {
   if (-d $dir) {
     my $target = $OBJ . "/" . $dir . "/Conscript";
     push @Targets, $target; print "new taret = $target\n";
@@ -577,156 +587,14 @@ sub script::wanted_inc {
   }
 }
 #________________________________________
-sub RootCint {
-#
-#print "RootCint.pl ================\n"; my $rootcint = `which rootcint`; 
-#print "ROOTSYS = $ROOTSYS rootcint = $rootcint\n";
-my $Cint_cxx = shift;
-(my $Cint_h  = $Cint_cxx) =~ s/_Cint\.cxx/_Cint\.h/g;
-my $DirName = dirname($Cint_cxx);# print "DirName = $DirName\n";
-my $LinkDef = $DirName . "/" . "LinkDef.h"; 
-print "Cint Files :", $Cint_cxx, ",", $Cint_h,",",$LinkDef,"\n";
-my $sources  = shift; #print "sources =", $sources,"\n";
-my $CPPFLAGS = shift; #print "CPPFLAGS = ", $CPPFLAGS, "\n";
-my %class_hfile = (); # class h-file map
-my %class_written = (); 
-my @classes = 0; # list of classes
-
-# count no. of classes i LinkDef's
-my $ListOfWrittenClasses = ":"; 
-my $ListOfDefinedClasses = "";
-my $off = 0;
-open (Out, ">$LinkDef") or die "Can't open $LinkDef";
-for my $def  (split / /,$sources) {#  print "SRC:", $def, "\n";
-  if ($def =~ /LinkDef/ && !($def =~/^$LinkDef$/) ) {
-    open (In, $def) or die "Can't open $def";
-    while ($line = <In>) {
-      print Out $line; print $line; 
-      if ($line =~ /link off all/) {$off++;}
-      if ($line =~ / class / && $line  =~ /\#pragma/) {
-	my @words = split /([ \(,\)\;\-\!])/, $line;
-	my $class = $words[8];
-	if ($class) {
-	  push @classes, $class;
-	  $class_written{$class} = "YES"; #print "class: $class, written: $class_written{$class}\n";
-	}
-      }
-    }
+#____________________________________________________________
+sub rmkdir {
+  (my $Dir = $_[0]) =~ s/\\/\//g; 
+  my @terms = split "/", $Dir;
+  my $dir = "";
+  foreach my $term (@terms) {
+    if ($dir) {$dir .= "/";}
+    $dir .= $term;
+    if (!-d $dir && ! mkdir($dir,0755)) {die "$0: can't create directory $path ($!).\n";}
   }
 }
-close (Out);
-for my $h  (split / /,$sources) {#  print "SRC:", $h, "\n";
-  if ($h =~ /LinkDef/) {next;}
-  open (In,$h) or die "Can't open $h";
-  my $coll = 0;
-  my $dummy;
-  my $class;
-  while ($line = <In>) {
-    if ($line =~/ClassDef/) {
-      if ($line =~ /\#\#/) {next;} # ClassDefs in macro definition
-      my @words = split /([\(,\-\!\)])/, $line;
-      my $class = $words[2];#      print "=================class = ",$class,"\n";
-      if ($class) {
-	push @classes, $class;
-	$class_hfile{$class} = $h; #print "class: $class, written: $class_written{$class}, h: $class_hfile{$class}\n"; 
-      }
-    }
-    if ($line =~ /\#define/) {next;}
-    if ($line =~ /StCollectionDef/) {
-      $coll++;  #print "$coll, $line\n";
-    }
-  }
-  close (In);
-  if ($coll) {# Collection Definition 
-    my $macro = `echo \$STAR/StRoot/St_base/StArray.h`;
-    my $tmp = "temp.h";
-    open (INPUT, $h) or die "Can't open $h\n";
-    open (OUTPUT, ">$tmp") or die "Can't open $tmp\n";
-    while ($line = <INPUT>) {
-      if ($line =~ /StCollectionDef/) {
-	my @Class = split /([\(\)])/, $line;
-	my $class = $Class[2];
-	if ($class) {
-	  (my $core = $class) =~ s/^St//g; # print "core $core\n";
-          my $cl = "";
-	  $cl = "St" . $core . "Collection-"; push @classes, $cl; $class_hfile{$cl} = $h;
-	  $cl = "St" . $core . "Iterator-";   push @classes, $cl; $class_hfile{$cl} = $h;
-	  $cl = "StVecPtr" . $core . "-";     push @classes, $cl; $class_hfile{$cl} = $h;
-	  open(DEF, $macro) || die "Can't open Macros $macro \n";
-	  my $def = 0;
-	  while ($line = <DEF>) {
-	    if ($line =~ /\#define/ && $line =~ /StCollectionDef/) {
-	      $def = 1; next;
-	    }
-	    if ($def && $line =~ /\#define/) {last;}
-	    if (! $def) { next; }
-	    $line =~ s/\\//g;
-	    $line =~ s/QWERTY/$class/g;
-	    $line =~ s/ \#\# //g;
-	    $line =~ s/\#\# //g;
-	    $line =~ s/ \#\#//g;
-	    print OUTPUT $line;
-	  }
-	}
-      }
-      else {print OUTPUT $line;}
-    }
-    close (OUTPUT);
-    my $flag = rename $tmp, $h; #`mv $tmp $h;`; print "mv $tmp $h;\n";
-  }
-}
-my $opened = "";
-for my $class (@classes) {
-  if ($class) {
-    if (!$class_written{$class}) {
-      if (!$opened) {
-	open (Out,">>$LinkDef")  or die "Can't open $LinkDef";
-	print Out "#ifdef __CINT__\n";                  print  "#ifdef __CINT__\n";
-	if (! $off) {
-	  print Out "#pragma link off all globals;\n";    print  "#pragma link off all globals;\n";
-	  print Out "#pragma link off all classes;\n";    print  "#pragma link off all classes;\n";
-	  print Out "#pragma link off all functions;\n";  print  "#pragma link off all functions;\n";
-	}
-	$opened = "YES";
-      }
-      if ($class_hfile{$class} =~ /_Module/) {
-	print Out "#pragma link C++ class $class-;\n"; print  "#pragma link C++ class $class-;\n";
-	(my $global = $class) =~ s/St_//g;
-	print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
-      }
-      else {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
-      $class_written{$class} = "YES";
-    }
-  }
-}
-if ($opened) {
-  print Out "#endif\n";                           print  "#endif\n";
-  close (Out);
-  $opened = "";
-}
-my $h_files = "";
-for my $class (@classes) {
-  next if ! $class;
-  my $h = $class_hfile{$class};#  print "Class: $class h: $h written: $class_written{$class} \n";
-  if (!$h) {my $hfile = $DirName . "/" . $class . ".h"; #print "hfile = $hfile\n";
-	    if (-f $hfile ) {$h = $hfile;} 
-	  }
-  if (!$h) {next;}
-  my $hh = basename($h); #print "hh = $hh\n";
-  if (!grep(/$hh/,$h_files)) {$h_files .= " " . $hh;}
-}
-my $hfile = $DirName . "/Stypes.h";
-if (-f $hfile) {$h_files .= " Stypes.h";}
-if ($h_files) {
-  $h_files .= " " . "LinkDef.h";# print "files = ",$files,"\n";
-  my $local_cint = basename($Cint_cxx);#  print "files = $#files\n";
-  my $cmd  = "cd $DirName && rootcint -f $local_cint -c -DROOT_CINT -D__ROOT__ $CPPFLAGS $h_files";
-  print "cmd = ",$cmd,"\n";
-  my $flag = `$cmd`;
-}
-else {
-#    my $flag = `touch $Cint_cxx $Cint_h $LinkDef`;
-}
-#exit(0);
-}
-# last line
