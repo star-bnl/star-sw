@@ -306,6 +306,7 @@ Int_t StEmcCalibrationMaker::Make()
   zVertex=0;
   Bool_t kReadOk=kFALSE; 
 
+  cout <<"***** Reading HITS\n";
   switch (Settings_st[0].DataType)
   {
     case(0): kReadOk=ReadHitsOffline();   break;
@@ -322,6 +323,7 @@ Int_t StEmcCalibrationMaker::Make()
   }
   
   // reading B field from Database
+  cout <<"***** Reading Magnetic Field\n";
   TDataSet *RunLog=GetInputDB("RunLog");
   BField=0.5;
   if(RunLog)
@@ -336,6 +338,7 @@ Int_t StEmcCalibrationMaker::Make()
   }
   //
  
+  cout <<"***** Getting z Vertex\n";
   if(!CalcZVertex()) 
   {
     #ifdef StEmcCalibrationMaker_DEBUG
@@ -353,6 +356,9 @@ Int_t StEmcCalibrationMaker::Make()
     #endif    
     return kStWarn;  
   }
+  
+  
+  cout <<"***** Filling EMC vector\n";
   emcHits.Reset();
   if(!FillEmcVector())
   {
@@ -360,9 +366,11 @@ Int_t StEmcCalibrationMaker::Make()
     return kStWarn; 
   }
   
+  cout <<"***** Checking tracks\n";
   trackTower.Reset();
   CheckTracks();
   
+  cout <<"***** Checking Pedestals\n";
   if(!CheckPedestal())
   {
     gMessMgr->Warning("StEmcCalibrationMaker::Make() - Could not check pedestals");
@@ -551,8 +559,8 @@ Bool_t StEmcCalibrationMaker::CalcZVertex()
     }    
   }
   
-  // no vertex in the StEvent.  try to calculate one...  
-  if(nTracks<3) return kFALSE;
+  cout<<"***** No vertex in the StEvent.  try to calculate one...\n";  
+  /*if(nTracks<3) return kFALSE;
     
   zVertex=0;
   Float_t c=0;
@@ -585,7 +593,8 @@ Bool_t StEmcCalibrationMaker::CalcZVertex()
   }
   if(c<3) return kFALSE;
   zVertex/=c;
-  return kTRUE;
+  return kTRUE;*/
+  return kFALSE;
 }
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::CheckTracks()
@@ -1604,24 +1613,25 @@ Bool_t StEmcCalibrationMaker::FillEmcVector()
   Int_t tmp=0;
   StDetectorId id = static_cast<StDetectorId>(detnum+kBarrelEmcTowerId);
   StEmcDetector* detector=emc->detector(id);
-  for(Int_t m=1;m<=120;m++)
-  {
-     StEmcModule* module = detector->module(m);
-     if(module)
-     {
-       StSPtrVecEmcRawHit& rawHit=module->hits();
-       for(UInt_t k=0;k<rawHit.size();k++)
-       {
-         tmp++;
-         Int_t did;
-         Int_t mod=rawHit[k]->module();
-         Int_t e=rawHit[k]->eta(); 
-         Int_t s=abs(rawHit[k]->sub());
-         calibGeo->getId(mod,e,s,did);
-         emcHits[did-1]=rawHit[k]->adc();
-       }
-     }
-  }
+  if(detector)
+    for(Int_t m=1;m<=120;m++)
+    {
+      StEmcModule* module = detector->module(m);
+      if(module)
+      {
+        StSPtrVecEmcRawHit& rawHit=module->hits();
+        for(UInt_t k=0;k<rawHit.size();k++)
+        {
+          tmp++;
+          Int_t did;
+          Int_t mod=rawHit[k]->module();
+          Int_t e=rawHit[k]->eta(); 
+          Int_t s=abs(rawHit[k]->sub());
+          calibGeo->getId(mod,e,s,did);
+          emcHits[did-1]=rawHit[k]->adc();
+        }
+      }
+    }
   if(tmp>0) return kTRUE;
   return kFALSE;
 }

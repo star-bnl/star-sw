@@ -1,5 +1,8 @@
-// $Id: StEmcFit.h,v 1.3 2001/11/07 17:54:10 suaide Exp $
+// $Id: StEmcFit.h,v 1.4 2001/12/04 18:23:55 suaide Exp $
 // $Log: StEmcFit.h,v $
+// Revision 1.4  2001/12/04 18:23:55  suaide
+// small fix
+//
 // Revision 1.3  2001/11/07 17:54:10  suaide
 // some modifications for real data
 //
@@ -12,6 +15,7 @@
 #ifndef STAR_StEmcFit
 #define STAR_StEmcFit
 #include "TObject.h"
+#include <math.h>
 class StEmcFit : public TObject 
 {
   private: 
