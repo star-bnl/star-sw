@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.91 1999/07/15 18:35:48 fisyak Exp $
+// $Id: bfc.C,v 1.92 1999/07/15 22:44:41 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -191,7 +191,7 @@ void SetOption(int k){// set all OFF
     printf (" Switch On  %s\n", ChainOptions[k]);
   }
   else {
-    if (k < 0 && ChainFlags[k]) {
+    if (k < 0 && ChainFlags[-k]) {
       //      printf ("SetOption: %s %i",ChainOptions[-k],k);
       ChainFlags[-k] = kFALSE;
       printf (" Switch Off %s\n", ChainOptions[-k]);
@@ -292,6 +292,7 @@ void SetOption(int k){// set all OFF
   case  kY2a:
     if (!ChainFlags[kDEFAULT]) {
       SetOption(kDEFAULT);
+      SetOption(kSVT);
       SetOption(kEMS);
       SetOption(kEMC);
       SetOption(kTPC);
