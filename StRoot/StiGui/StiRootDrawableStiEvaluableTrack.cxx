@@ -4,6 +4,7 @@
 
 //STD
 #include <algorithm>
+#include <math.h>
 
 //StEvent
 #include "StEventTypes.h"
@@ -20,6 +21,7 @@
 #include "StThreeVectorF.hh"
 
 //Sti
+#include "Sti/StiKTNVertIterator.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiMapUtilities.h"
 
@@ -104,24 +106,74 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     setLineInfo();
     
     //Let's try to find out where the first node is:
-    StiKalmanTrackNode* inner = getNodeNear(0.);
-    double xStart = inner->fX;
+    /*
+      double xStart = lastNode->fX;
+      double xStop = firstNode->fX;
+      
+      for (double xLocal=6.; xLocal<xStop; xLocal+=1.) {
+      StThreeVector<double> pos = getGlobalPointNear(xLocal);
+      //cout <<"Adding Position:\t"<<pos<<endl;
+      //mLineHitPair.first->push_back( pos );
+      mLineHitPair.first->push_back( pos.x() );
+      mLineHitPair.first->push_back( pos.y() );
+      mLineHitPair.first->push_back( pos.z() );
+      }
+    */
     
-    for (double xLocal=xStart; xLocal<200.; xLocal+=1.) {
-	StThreeVector<double> pos = getGlobalPointNear(xLocal);
-	//cout <<"Adding Position:\t"<<pos<<endl;
-	//mLineHitPair.first->push_back( pos );
-	mLineHitPair.first->push_back( pos.x() );
-	mLineHitPair.first->push_back( pos.y() );
-	mLineHitPair.first->push_back( pos.z() );
+    //Loop over nodes by hand (faster than using StiKalmanTrack interface)
+    double step = 1.; //cm
+    
+    bool go = true;
+    double xLocal = lastNode->fX;
+    StiKTNVertIterator it(lastNode);
+    StiKTNVertIterator end = it.end();
+    
+    while( go && it!=end ) {
+	//cout <<"Entered loop";
+	StiKalmanTrackNode& node = *it;
+	//cout <<"\tDereferenced it";
 	
-    }
+	++it;
+	if (it==end) { //we're done
+	    //cout <<"We're finished, go on"<<endl;
+	    go=false;
+	}
+	else {
+	    StiKalmanTrackNode& next = *it;
+	    //cout <<"\tDereferenced ++it"<<endl;
+	    //cout <<"node->fX: "<<node.fX<<"\tnext->fX: "<<next.fX<<endl;
 
+	    //This is a temp hack to avoid IFC nodes!
+	    if (node.fX!=0. && next.fX!=0.) {
+		
+		//cout <<"node.fX!=0. && next.fX!=0."<<endl;
+		//now step!
+		while (xLocal<next.fX) {
+		    //cout <<" xLocal: "<<xLocal<<"\tnext->fX: "<<next.fX<<endl;
+		    double xx = node.fX;
+		    double yy = node.fP0;
+		    double zz = node.fP1;
+		    double alpha = node.fAlpha;
+		    double ca = cos(alpha);
+		    double sa = sin(alpha);
+		    double gx = ca*xx-sa*yy;
+		    double gy = sa*xx+ca*yy;
+		    mLineHitPair.first->push_back(gx);
+		    mLineHitPair.first->push_back(gy);
+		    mLineHitPair.first->push_back(zz);
+		    
+		    xLocal+=step;
+		}
+		//cout <<"Done stepping"<<endl;
+	    }
+	}
+    }
+    
     //now fill hits for real:
     //remember, we *ARE* an StiKalmanTrack (public inheritance)
     StiKalmanTrackNode* node = lastNode; //start at innermost
     int hits=0;
-    bool go=true;
+    go=true;
     while (go) {
 	if (node->getHit()) {
 	    //Add this point to the drawable hits
