@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.16 1998/12/07 20:23:12 fine Exp $
+// $Id: St_Table.h,v 1.17 1998/12/17 16:57:57 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.17  1998/12/17 16:57:57  fine
+// St_Table: some extra protections have been established (safe "strncat" have replaced the  unsafe  "strncpy")
+//
 // Revision 1.16  1998/12/07 20:23:12  fine
 // St_Table:: working versions of the Print() and SavePrimitive methods
 //
@@ -74,6 +77,9 @@ protected:
    void       SetType(const Text_t *const type);
    void       StreamerHeader(TBuffer &b);
    int        PointerToPointer(G__DataMemberInfo &m);
+   void       SetTableName(const Char_t *name);
+   void       SetTableType(const Char_t *type);
+
    Long_t    *s_MaxIndex;   // The used capacity of this array
  
 public:
@@ -114,8 +120,6 @@ public:
    virtual     void       SavePrimitive(ofstream &out, Option_t *option);
    virtual     void       SetHeader(table_head_st *table);
 //   ULong_t   &operator(){ return GetTable();}
-   virtual     void       SetTableName(Char_t *name);
-   virtual     void       SetTableType(Char_t *type);
 
    virtual     void       StafStreamer(Char_t *structname=0, FILE *fl=0);
    virtual     void       Set(Int_t n);
@@ -134,8 +138,6 @@ inline  void   St_Table::SetUsedRows(Int_t n) {if (s_TableHeader) *s_MaxIndex = 
 inline  void   St_Table::SetTitle(const Char_t *title){SetType(title);}
 inline  void   St_Table::SetHeader(table_head_st *table){s_TableHeader = table;} 
 //   ULong_t   &operator(){ return GetTable();}
-inline  void   St_Table::SetTableName(Char_t *name){ if (s_TableHeader) strncpy(s_TableHeader->name,name,20); }
-inline  void   St_Table::SetTableType(Char_t *type){ if (s_TableHeader) strncpy(s_TableHeader->type,type,20); }
 
 inline void *St_Table::At(Int_t i)
 {
