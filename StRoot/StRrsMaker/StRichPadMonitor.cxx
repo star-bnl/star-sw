@@ -1,44 +1,31 @@
-/******************************************************
- * $Id: StRichPadMonitor.cxx,v 1.1 2000/02/12 21:57:56 lasiuk Exp $
+/****************************************************************
+ * $Id: StRichPadMonitor.cxx,v 1.2 2000/02/29 18:19:38 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
  *
- * Auxiliary classes are kept here for now as well
+ *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 1.1  2000/02/12 21:57:56  lasiuk
- * Initial revision
+ * Revision 1.2  2000/02/29 18:19:38  lasiuk
+ * Split needed classes into individual files
  *
- ******************************************************/
+ * Revision 1.2  2000/02/29 18:19:38  lasiuk
+ * Split needed classes into individual files
+ *
  * Revision 1.1  2000/02/12 21:57:56  lasiuk
  * Initial revision
-#include "StRichPadMonitor.h"
-#include "TLine.h"
  ****************************************************************/
-StRichSinglePixel::StRichSinglePixel() {/*nopt*/}
-StRichSinglePixel::StRichSinglePixel(int p, int r, int adc)
-    : mPad(p), mRow(r), mAdc(adc) {}
 #ifdef __ROOT__
-StRichSinglePixel::~StRichSinglePixel() {/*nopt*/}
 
-StRichDrawableTPad::StRichDrawableTPad() {/*nopt*/}
-StRichDrawableTPad::StRichDrawableTPad(double xl, double yl, double xu, double yu, int adc)
-    : TBox(xl,yl,xu,yu), mAdc(adc) {/* nopt */}
 
-StRichDrawableTPad::~StRichDrawableTPad() {/*nopt*/}
-
-void StRichDrawableTPad::draw()
-{
-    this->Draw();
-}
-
-void StRichDrawableTPad::setPosition(int p, int r)
-{
-    mRow = r;
-    mPad = p;
-}
+#include "TLine.h"
 #include "TPaveText.h"
+
+#include "StRichPadMonitor.h"
+
+#include "StRichGeometryDb.h"
+#include "StRichCoordinateTransform.h"
 #include "StRichSinglePixel.h"
 #include "StRichDrawableTPad.h"
 #include "StRichPadMonitorText.h"
@@ -54,8 +41,13 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
 
     mTransform = new StRichCoordinateTransform(geoDb);
     : mGeometryDb(geoDb)
-    mRichCanvas = new TCanvas("richCanvas", "RICH Event Readouts Main Canvas",0,0,1000,700);
+    mRichCanvas = new TCanvas("richCanvas", "RICH Event Display",0,0,1000,700);
     mRichCanvas->Range(-70,-50,70,50);
+    // xtop, ytop, w h
+    mRichCanvas->Range(-70,-50,85,50);
+
+    // ORiginal 1000,700 -- -70,-50,70,50
+    //
     // make the text window
     mTextWindow = new StRichPadMonitorText();
     StRichDrawableTPad::setPadMonitorText(mTextWindow);
@@ -63,6 +55,14 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
     // make the boundaries of the detector
     mRowPitch  = mGeometryDb->rowPitch();  //.84;
     mPadPitch  = mGeometryDb->padPitch();  //.80;
+    mPadLength = mGeometryDb->padLength(); //.79;
+    mPadWidth  = mGeometryDb->padWidth();  //.75;
+
+//     mHall = (St_Node*)GetDataSet("HALL");
+//     if(!mHall) {
+// 	cout << "HALL NOT GOTTEN" << endl;
+// 	//return -9;  // kStErr
+//     }
 //     mHall->FindByName("RICH")->Draw();
 
 	
@@ -75,13 +75,13 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
     //     |
     double xco = mGeometryDb->quadrantX0(2)+.5*mRowPitch;  //41.82;
     double zco = -mGeometryDb->quadrantZ0(2)+.5*mPadPitch; //65.9;
-    double xci = -mGeometryDb->quadrantX0(4)+.5*mRowPitch; //1.5;
+    double xci = -mGeometryDb->quadrantX0(4)-.5*mRowPitch; //1.5;
     double zci = mGeometryDb->quadrantZ0(4)-.5*mPadPitch;  //1.5;
 
     cout << "xco (41.82) " << xco << endl;
-    cout << "xci (1.5)   " << xco << endl;
-    cout << "zco (65.9)  " << xco << endl;
-    cout << "zci (1.5)   " << xco << endl;
+    cout << "yco (41.82) " << yco << endl;
+    cout << "zco (65.5)  " << zco << endl;
+    cout << "zci (1.5)   " << zci << endl;
     cout << "yci (1.5)   " << yci << endl;
     cout << "xco (65.5)  " << xco << endl;
     cout << "xci (1.5)   " << xci << endl;
@@ -109,8 +109,6 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
     aLine.DrawLine(zci, -xco, zco, -xco);
     aLine.DrawLine(zci, -xci, zci, -xco);
     aLine.DrawLine(zco, -xci, zco, -xco);
-    
-    
 	}
 	lowerY = upperY;
     }
@@ -121,16 +119,23 @@ StRichPadMonitor::~StRichPadMonitor()
     clearPads();
     delete mRichCanvas;
 }
-    // Delete the allocated space
-    for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
-	(mAllFilledPads.At(ii))->Delete();	    
-    }
+void StRichPadMonitor::clearPads()
+{
+    cout << "StRichPadMonitor::clearPads()" << endl;
+  // Delete the allocated space
+  //for(int ii=0; ii<mAllFilledPads.size(); ii++) {
+  PR(mAllFilledPads.GetEntries());
+
+  }
+  mAllFilledPads.Clear();
   PR(mAllFilledPads.GetEntries());
   mAllFilledPads.Expand(0);
   PR(mAllFilledPads.GetEntries());
 }
+
+void StRichPadMonitor::drawPads()
 {
-	(mAllFilledPads.At(ii))->Draw();
+//     cout << "StRichPadMonitor::drawPads()" << endl;
 //     for(int ii=0; ii<mAllFilledPads.size(); ii++) {
     for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
 	(mAllFilledPads[ii])->Draw();
@@ -138,7 +143,7 @@ StRichPadMonitor::~StRichPadMonitor()
 StRichPadMonitor::calculatePadPosition(StRichSinglePixel* pad, double* zl, double* xl, double* zu, double* xu)
 
 void
-    StRichRawCoordinate raw(pad->mPad, pad->mRow);
+StRichPadMonitor::calculatePadPosition(StRichSinglePixel* pad, double* xl, double* yl, double* xu, double* yu)
 {
     // use coordinate tform here
     StRichRawCoordinate raw(pad->pad(), pad->row());
@@ -157,26 +162,35 @@ void
 void StRichPadMonitor::drawPad(StRichSinglePixel pad)
 {
     // Make it a drawable pad
-    StRichDrawableTPad* dtp = new StRichDrawableTPad(xl,yl,xu,yu,pad.mAdc);
-    dtp->SetFillColor(9); // scale by ADC color
+    // Coordinate Transform
+    double xl,xu,yl,yu;
     calculatePadPosition(&pad,&xl,&yl,&xu,&yu);
-    dtp->Draw();    
+    StRichDrawableTPad* dtp = new StRichDrawableTPad(xl,yl,xu,yu,&pad);
+    dtp->SetFillColor(GetColorAttribute(pad.amplitude())); // scale by ADC color
+    dtp->SetLineColor(2);  // black
+    dtp->Draw();
+//     mAllFilledPads.push_back(dtp);
 //     PR(mAllFilledPads.size());
     mAllFilledPads.Add(dtp);
+//     PR(mAllFilledPads.GetEntries());
 }
 
-    // Make it a drawable pad
-    // Coordinate Transform
 
 void StRichPadMonitor::addPad(StRichSinglePixel* pad)
 {
-    StRichDrawableTPad* dtp = new StRichDrawableTPad(xl,yl,xu,yu,pad->mAdc);
+    double xl,xu,yl,yu;
     calculatePadPosition(pad,&xl,&yl,&xu,&yu);
 	
-    dtp->SetLineColor(1);  // black
+    StRichDrawableTPad* dtp = new StRichDrawableTPad(xl,yl,xu,yu, pad);
 
-    dtp->SetFillColor(pad->mAdc); // scale by ADC color
+    dtp->SetLineWidth(1);
+    dtp->SetLineColor(2);  // black
     //dtp->SetFillStyle(0);
+    dtp->SetFillColor(GetColorAttribute(pad->amplitude())); // scale by ADC color
+//     mAllFilledPads.push_back(dtp);    
+    mRichCanvas->Update();
+}
+    return Color_t(50+(log(static_cast<int>(amp))) );
 		bLine->Draw();
 	    }
     }
