@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.19 2004/02/19 20:40:15 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.20 2004/03/22 23:07:12 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,8 +12,11 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.20  2004/03/22 23:07:12  pruneau
+ * Added comments to operator<<
+ *
  * Revision 2.19  2004/02/19 20:40:15  pruneau
- * Added the notion of loadbale to the builders
+ *  Added the notion of loadbale to the builders
  *
  * Revision 2.18  2004/02/02 22:22:54  pruneau
  * Fixed include
@@ -146,6 +149,7 @@ void StiDefaultHitErrorCalculator::loadFS(ifstream& iFile)
 void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
 {
   cout << "StiDefaultHitErrorCalculator::loadDS(TDataSet & ds) -I- Started" <<endl;
+	cout << "    Fetching Hit Error for :" << getName() << endl;
   St_HitError * a = dynamic_cast<St_HitError*>(ds.Find(getName().c_str() ));
   if (!a) throw runtime_error("StiDefaultHitErrorCalculator::loadDS(TDataSet&ds) -E- a==0");
   HitError_st * b = a->GetTable();
@@ -162,12 +166,13 @@ void StiDefaultHitErrorCalculator::loadDS(TDataSet & ds)
 
 ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c)
 {
-  cout <<"Hit Error Parameters: "<<c.coeff[0]
-       <<" "<<c.coeff[1]
-       <<" "<<c.coeff[2]
-       <<" "<<c.coeff[3]
-       <<" "<<c.coeff[4]
-       <<" "<<c.coeff[5]<<endl;
+  cout <<"Hit Error Parameters: "
+			 <<"[0] "<<c.coeff[0] << endl
+       <<"[1] "<<c.coeff[1] << endl
+       <<"[2] "<<c.coeff[2] << endl
+       <<"[3] "<<c.coeff[3] << endl
+       <<"[4] "<<c.coeff[4] << endl
+       <<"[5] "<<c.coeff[5]<<endl;
   return os;	
 }
 
