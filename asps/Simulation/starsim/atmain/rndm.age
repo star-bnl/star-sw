@@ -1,7 +1,13 @@
 *
-* $Id: rndm.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: rndm.age,v 1.2 2004/08/27 21:41:15 potekhin Exp $
 * $Log: rndm.age,v $
+* Revision 1.2  2004/08/27 21:41:15  potekhin
+* Proper interface with the Pythia random number generation.
+* We detect whether the Pythia sequence is initilaized, and if
+* yes, use it. If no, we default to our own starsim generator.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.5  2002/01/26 15:21:42  nevski
 * bugfix for the full event reproducibility
@@ -35,7 +41,7 @@ Replace [ON(#) OUT(#)] with [;IF(#1) {#1=.false.; Print *,'*** ','#2',' ***';}]
       Integer           INDEX,Li,IS1/0/,IS2/0/
       Integer           IgChoice,Lux,ISEED
       common /AgCRNDM/  IgChoice,Lux,ISEED
-*
+
       Entry      RANLUX (RVEC,LEN)
       Entry      RANMAR (RVEC,LEN)
       if IgChoice<=0 { Call aGRNDM(Rvec,Len) } else { Call aRANLUX(RVEC,LEN) }
@@ -109,18 +115,25 @@ c  -  return all four values
 *  -  all functions substitution
       implicit    none
       REAL        RNDM,RANF,RN32,RG32,RLU,A,B
-      REAL*8      PYR,BB
+      REAL*8      PYR,BB,PYRPYTH
       Integer     IRNDM,IB
       EQUIVALENCE (IB,B)
       data        B/0/
       save        B
 *     may be RLU=b*(1+BB*3.d-8)
+C...Random number generator status for pythia
+      Integer         MRPY
+      Real*8                  RRPY
+      common /pydatr/ MRPY(6),RRPY(100)
 *
                            CALL GRNDM(b,1);  RNDM  = b;  return
       ENTRY IRNDM(a);      Call GRNDM(b,1);  IRNDM =Ib;  return
       ENTRY RANF(a);       Call GRNDM(b,1);  RANF  = b;  return
       ENTRY RLU (a); BB=b; Call GRNDM(b,1);  RLU   = b;  return
-      ENTRY PYR (a);       Call GRNDM(b,1);  PYR   = b;  return
+      ENTRY PYR (a); 
+       if (MRPY(1)==0 | MRPY(1)=19780503) { Call GRNDM(b,1); PYR   = b;}
+       else                              {    PYR = PYRPYTH(a)        }
+      return
       ENTRY RN32(a);       Call GRNDM(b,1);  RN32  = b;  return
       ENTRY RG32(a);       Call NORRAN(b);   RG32  = b;  return
       end
