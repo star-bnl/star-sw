@@ -1,6 +1,11 @@
+* $Id: g2t_volume_id.g,v 1.25 2000/05/23 20:02:09 fisyak Exp $
+* $Log: g2t_volume_id.g,v $
+* Revision 1.25  2000/05/23 20:02:09  fisyak
+* Attempt to merge all correction together (PN)
+*
 ********************************************************************
       function g2t_volume_id(Csys,numbv)
-* 
+*
 * Modification history:                                            *
 * PN 28.12.99: use structure control access to avoid warnings      *
 * PN 28.12.99: make decision on CALB 2/3 level numbering based on  *
@@ -23,9 +28,9 @@
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       Structure  TPCG  {version}
-      Structure  BTOG  {version, Rmin, Rmax, dz, choice, posit1}
+      Structure  BTOG  {version, Rmin, Rmax, dz, choice, posit1, posit2 }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, int Nsub,
-     +                  int NetaSMDp, int NPhistr, int Netfirst, int Netsecon}
+     + 	                int NetaSMDp, int NPhistr, int Netfirst, int Netsecon}
 
       logical          first/.true./
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
@@ -33,6 +38,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       if (First) then
           first=.false.
           call RBPUSHD
+          btog_posit1 = 23
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
           USE  /DETM/CALB/CALG  stat=ical
@@ -168,7 +174,6 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         else If (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
-
 
       else If (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
@@ -402,7 +407,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='psc') then
 *13*
       else If (Csys=='rch') then
-        volume_id = numbv(1)
+        is=0
+        if      cd=='RCSI' { is=1 }
+        elseif  cd=='RGAP' { is=2 }
+        elseif  cd=='QUAR' { is=3 }
+        elseif  cd=='FREO' { is=4 }
+        elseif  cd=='OQUA' { is=5 }
+        volume_id = numbv(1)+10*is
 
       else If (Csys=='zdc') then
         volume_id = numbv(1)*1000+numbv(2)
