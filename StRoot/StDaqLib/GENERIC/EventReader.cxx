@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.18 2000/01/11 22:04:40 levine Exp $
+ * $Id: EventReader.cxx,v 1.19 2000/01/31 19:26:11 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -18,9 +18,13 @@
  * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
  * 29-Aug-99 MJL if((MMAPP = (char *) mmap(0, ...  for HP platform
  * 28-Dec-99 MJL add alternate InitEventReaders, mapped and unmapped
+ * 31-Jan-00 MJL set runnum  (mapped version)
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.19  2000/01/31 19:26:11  levine
+ * restore run number to memory-mapped version
+ *
  * Revision 1.18  2000/01/11 22:04:40  levine
  * EventReader.hh  // change the header file to include std::string
  * EventReader.cxx // convert string to char* via c_str() member
@@ -291,6 +295,9 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
     }
     else { // DATA record. Skip LR
       
+      // save run number
+      runnum = lr.header.RunNumber;
+    
       DATAP += sizeof(lr);
       next_event_offset += sizeof(lr);
       break; //no need to loop any further
