@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.40 1999/12/08 21:10:36 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.41 2000/01/06 16:53:05 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.41  2000/01/06 16:53:05  lbarnby
+// fix warnings (Linux)
+//
 // Revision 1.40  1999/12/08 21:10:36  lbarnby
 // bug fix: pointer to summary_param now obtained correctly as it is in different dir.
 //
@@ -123,7 +126,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.40 1999/12/08 21:10:36 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.41 2000/01/06 16:53:05 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -195,7 +198,7 @@ Int_t St_dst_Maker::Init(){
 
   St_dst_run_summary *dst_run_summary = new St_dst_run_summary("dst_run_summary",1);
   AddConst(dst_run_summary);
-  dst_run_summary_st run_summary;
+  //dst_run_summary_st run_summary;
 
 #if 0
   // Spiros says he initialize the table in his filler. I am not sure what should be done here. 
@@ -271,7 +274,7 @@ Int_t  St_dst_Maker::Filler(){
   St_dst_track     *globtrk     = (St_dst_track *)     dstI("globtrk");
   St_dst_vertex    *vertex      = (St_dst_vertex *)    dstI("vertex");    
   St_svm_evt_match *evt_match   = (St_svm_evt_match *) dstI("evt_match");
-  St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
+  //St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
   
   St_event_header  *event_header  = new St_event_header("event_header",1);
   dstI.Add(event_header);
@@ -423,16 +426,16 @@ Int_t  St_dst_Maker::Filler(){
   //Make (empty) ctb,emc,l3,rich monitor soft tables
 
   mon_soft_ctb->SetNRows(1);
-  dst_mon_soft_ctb_st *mon_ctb = mon_soft_ctb->GetTable();
+  //dst_mon_soft_ctb_st *mon_ctb = mon_soft_ctb->GetTable();
 
   mon_soft_emc->SetNRows(1);  
-  dst_mon_soft_emc_st *mon_emc = mon_soft_emc->GetTable();
+  //dst_mon_soft_emc_st *mon_emc = mon_soft_emc->GetTable();
   
   mon_soft_l3->SetNRows(1);
-  dst_mon_soft_l3_st *mon_l3 = mon_soft_l3->GetTable();
+  //dst_mon_soft_l3_st *mon_l3 = mon_soft_l3->GetTable();
 
   mon_soft_rich->SetNRows(1);
-  dst_mon_soft_rich_st *mon_rich = mon_soft_rich->GetTable();
+  //dst_mon_soft_rich_st *mon_rich = mon_soft_rich->GetTable();
 
   iRes = dst_monitor_soft_filler(tpcluster, scs_cluster,
 				 tphit, scs_spt, fcl_fppoint,
