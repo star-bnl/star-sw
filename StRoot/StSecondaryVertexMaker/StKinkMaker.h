@@ -28,11 +28,11 @@ class StKinkVertex;
 class StTrack;
 class pairD;
 
-/* enum TrackerUsage{ See StV0FinderMaker.h */
-/*  kTrackerUseTPT  = 0, */
-/*  kTrackerUseITTF = 1, */
-/*  kTrackerUseBOTH = 2 */
-/* }; */
+// enum TrackerUsage{ //See StV0FinderMaker.h */
+//  kTrackerUseTPT  = 0, 
+//  kTrackerUseITTF = 1, 
+//  kTrackerUseBOTH = 2 
+// }; 
 
 class StKinkMaker : public StMaker {
 public: 
@@ -45,7 +45,7 @@ public:
   virtual Int_t   GetTrackerUsage(){return mUseTracker;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.6 2004/07/15 16:31:57 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.7 2004/07/15 17:48:01 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:
@@ -77,7 +77,7 @@ public:
   StKinkVertex* kinkVertex;
 
   int mUseTracker;
-  ClassDef(StKinkMaker, 2)  
+ClassDef(StKinkMaker,0)  
 };
     
 #endif
