@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.36 2003/07/16 19:58:29 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.37 2003/09/28 01:54:58 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.37  2003/09/28 01:54:58  jeromel
+ * Missing one zero
+ *
  * Revision 1.36  2003/07/16 19:58:29  perev
  * Cleanup of StTriggerData2003 at all
  *
@@ -151,10 +154,11 @@ StDAQReader::StDAQReader(const char *file)
   fEMCReader 	= 0;
   fEEMCReader 	= 0;
   fPMDReader 	= 0;
-  fRICHReader 	= 0;
-  fL3Reader 	= 0;
-  fSVTReader 	= 0;
   fFTPCReader   = 0;
+  fRICHReader 	= 0;
+  fTRGReader    = 0;
+  fSVTReader 	= 0;
+  fL3Reader 	= 0;
   fTOFReader    = 0;
   fFPDReader    = 0;
   fOffset = 0;
