@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StMuLcp2TreeMaker.cxx,v 1.3 2003/11/12 18:43:41 balewski Exp $
+// $Id: StMuLcp2TreeMaker.cxx,v 1.4 2004/01/06 17:25:26 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -34,7 +34,7 @@ StMuLcp2TreeMaker::StMuLcp2TreeMaker(const char* self ,const char* muDstMakerNam
   // rejector=new  ExampleUsage; // Mike's cosmic/laser rejector
   primTrA=0;
 
-  runID=9999;// default not initialized value
+  runID=101;// default not initialized value
   treeName="./";
   eve_cosm=-8;
   SetMinNFitPoint(15); 
@@ -51,7 +51,7 @@ StMuLcp2TreeMaker::StMuLcp2TreeMaker(const char* self ,const char* muDstMakerNam
 //___________________ _____________________________
 //________________________________________________
 StMuLcp2TreeMaker::~StMuLcp2TreeMaker(){
-if(tree) tree->Print();
+  if(tree) tree->Print();
  
  // Save all objects in this file
  hfile->Write();
@@ -64,8 +64,9 @@ if(tree) tree->Print();
 Int_t StMuLcp2TreeMaker::InitRunFromMake  (int runNumber){
   float Pi=3.14159;
   if(runID==runNumber)  return kStOK;
+  if(runID==888999)  return kStOK;// special run number
   
-  if(runID !=9999) {
+  if(runID !=101) {
     printf("\n\n FATAL %s::InitRunFromMake() runID=%d changed to %d, (not implemented),STOP \n",GetName(),runID,runNumber);
     assert(runID==runNumber);
   }
@@ -95,7 +96,7 @@ Int_t StMuLcp2TreeMaker::InitRunFromMake  (int runNumber){
   h[10]   = new TH1F("pTm2","pT/GeV of LCP, CTB match LCP",100,0,10.);
   
 
-  if (runNumber>10000) {   
+  if (runNumber>100) {   
     // Create tree
     tree = new TTree("T-LCP","LCP selected from MinB trigger");
     tree->Branch("bx48", &eve_bx48,"bx48/I");
@@ -162,7 +163,7 @@ Int_t StMuLcp2TreeMaker::Make(){
   static int kEve=0;
   kEve++;
   
-  //  printf("%s::Make() is called ..........\n",GetName());
+    printf("%s::Make() is called ..........\n",GetName());
   
   StMuDst* dst = mMuDstMaker->muDst();
   primTrA=dst->primaryTracks();
@@ -173,18 +174,18 @@ Int_t StMuLcp2TreeMaker::Make(){
   StEventSummary &smry=muEve->eventSummary();
   ctb->loadHits(muEve);
   StThreeVectorF ver=smry.primaryVertexPosition();
-  if(runID>1000) InitRunFromMake(info.runId());
+  if(runID>100) InitRunFromMake(info.runId());
 
-
+  //  printf("trgWrd=%d nPrim=%d, Vz=%f \n", trig.triggerWord(),primTrA->GetEntries(),ver.z());
   // use only minB trigger events 
-  if(trig.triggerWord()!=0x2000)  return kStOK;
+   if(trig.triggerWord()!=0x2000)  return kStOK;
   
   // reject events without primtracks
-  if(primTrA->GetEntries()<=0)  return kStOK;
+     if(primTrA->GetEntries()<=0)  return kStOK;
  
   // fill eve-related tree values
   eve_vz=ver.z(); 
-  if(fabs(eve_vz)>C_maxZvertex) return kStOK;
+     if(fabs(eve_vz)>C_maxZvertex) return kStOK;
 
   int bx7=trig.bunchCrossingId7bit(info.runId());
   eve_id=info.id();
@@ -245,8 +246,8 @@ Int_t StMuLcp2TreeMaker::Make(){
   
   
   if(tree)tree->Fill();
-  if(kEve%500==0)
-    printf("%s::Make(%d) nPrim=%d nGlob=%d lcp: pt=%f nFit=%d \n",GetName(),kEve,eve_nPrim, eve_nGlob, lcp_pt,lcp_nFit);
+  //if(kEve%500==0)
+    printf("#%s::Make(%d) nPrim=%d nGlob=%d lcp: pt=%f nFit=%d eta=%f\n",GetName(),kEve,eve_nPrim, eve_nGlob, lcp_pt,lcp_nFit,lcp_eta);
   
   // extra tests of cuts
   //   examinCut(lcp);
@@ -284,10 +285,11 @@ StMuTrack* StMuLcp2TreeMaker::findLCP( float XminPt,int XminNFitP , float XmaxDC
     float frac=1.*gTr->nHitsFit()/gTr->nHitsPoss();
     if ( frac < XminFitPfrac) continue;
     nTr1++;
-    
+    // printf("itr=%d pT=%f phi/deg=%f eta=%f \n",i, pTr->pt(),pTr->phi()/3.1416*180,pTr->eta());
+
     int match=ctb->match(gTr);
     if(match>0) eve_cosm++;
-    //printf("itr=%d pT=%f nFit=%d match=%d\n",i, pTr->pt(),pTr->nHitsFit(),match);
+    // printf("itr=%d pT=%f nFit=%d match=%d\n",i, pTr->pt(),pTr->nHitsFit(),match);
     // now search for high pT
     if ( gTr->pt() < maxPt ) continue;
     maxPt=gTr->pt();
@@ -362,6 +364,9 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
 
 
 // $Log: StMuLcp2TreeMaker.cxx,v $
+// Revision 1.4  2004/01/06 17:25:26  balewski
+// get LCP from Geant info
+//
 // Revision 1.3  2003/11/12 18:43:41  balewski
 // final for LCP paper
 //
