@@ -13,13 +13,11 @@ typedef unsigned char UINT8 ;
 
 
 #if (TRG_VERSION == 0x20)
-#include <TRG/trgStructures_20.h>
+#include <TRG/trgStructures.h>
 #elif (TRG_VERSION == 0x12)
 #include <TRG/trgStructures-Jan2002.h>
-#elif (TRG_VERSION == 0x21)
-#include <TRG/trgStructures.h>
 #else	// default
-#define TRG_VERSION 0x21
+#define TRG_VERSION 0x20
 #include <TRG/trgStructures.h>
 #endif
 
@@ -83,7 +81,6 @@ typedef unsigned char UINT8 ;
 #define TPC_PEDR	8
 #define TPC_RMSR	9
 #define TPC_GAINR	10
-#define TPC_GAIND	10
 #define TPC_BADR	11
 
 #define TPC_MZP_BANKS_NUM	12
@@ -119,8 +116,7 @@ typedef unsigned char UINT8 ;
 #define CHAR_TPCPEDR	"TPCPEDR "
 #define CHAR_TPCRMSR	"TPCRMSR "
 #define CHAR_TPCGAINR	"TPCGAINR"
-#define CHAR_TPCGAIND	"TPCGAIND"	// new, sane gain bank
-#define CHAR_TPCBADR	"TPCBADR "	// this is obsolete...
+#define CHAR_TPCBADR	"TPCBADR "
 
 // real SVT names
 #define CHAR_SVTP	"SVTP    "
@@ -274,17 +270,15 @@ typedef unsigned char UINT8 ;
 #define CHAR_TRGD       "TRGD    "
 #define CHAR_TRGID      "TRGID   "
 
-// PP2PP
-#define CHAR_PP2PPP	"PP2PPP  "
-#define CHAR_PP2PPR	"PP2PPR  "
+#ifndef UNIX
 
-
-#if __GNUC__ == 2 && __GNUC_MINOR__ < 96 && defined(__I960)
+#ifdef CPU
+#if (CPU == I960HX)
 #pragma align 1
 #pragma pack 1
 #endif
-
-
+#endif
+#endif
 
 // generic section for all of DAQ
 struct bankHeader {
@@ -339,7 +333,7 @@ struct LOGREC {
 // Tonko, 7/13/00 noticed that detectorMask and TRG_DAQ_cmds were
 // swapped in real trigger data. Swapped them!
 
-#if defined(UNIX_LITTLE_ENDIAN) || defined(RTS_LITTLE_ENDIAN)
+#ifdef UNIX_LITTLE_ENDIAN
 struct EventDescriptor2001 {
   UINT8  format_version;
   UINT8  tag;                   // 'E'
@@ -626,16 +620,6 @@ struct DETGAINR {
 	UINT16  exp_table[256] ;
 } ;
 
-struct DETGAIND {
-	struct bankHeader bh ;
-	struct gain {
-		short	t0 ;
-		unsigned short  rel_gain ;
-	} gain[MZ_MAX_PADS] ;
-	UINT8	trans_table[1024] ;
-	UINT16  exp_table[256] ;
-} ;
-
 
 struct SVTGAINR {
 	struct bankHeader bh ;
@@ -910,41 +894,20 @@ struct EMCRBP {
 } ;
 
 
-struct PP2PPP {	// main pointer bank
-	struct bankHeader bh ;
-	struct offlen sec[3] ;
-} ;
-
-#ifndef __ROOT__
-// WARNING: sizeof() will not give the correct length!
-struct PP2PPR {	// void data dump...
-	struct bankHeader bh ;
-	unsigned int type ;
-	unsigned int xing ;
-	unsigned int seq ;
-        unsigned int hash ;   // adjusted seq * 1000 + adjusted xing 
-        unsigned int seqAdj ; // sequence adjuster
-        unsigned int xingAdj ; // xing adjuster
-	unsigned int ms ;	// miliseconds from the beginning of the run
-	unsigned int res[1] ; 
-	char data[0] ;	// unknown at compile time...
-} ;
-#endif
-
-
 
 // Level 3 structures
 // Level 3 banks
 #include "L3/L3Formats.h"
 
 
-#if __GNUC__ == 2 && __GNUC_MINOR__ < 96 && defined(__I960)
+#ifndef UNIX
+#ifdef CPU
+#if (CPU == I960HX)
 #pragma pack 0
 #pragma align 0
 #endif
-
-
-
+#endif
+#endif
 
 
 // Define for linker-level checking only! See comment at the

@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.19 2003/12/24 21:55:57 perev Exp $
+ * $Id: EventReader.hh,v 1.20 2004/02/18 20:17:51 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,8 +21,8 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
- * Revision 1.19  2003/12/24 21:55:57  perev
- * Cleanup
+ * Revision 1.20  2004/02/18 20:17:51  ward
+ * Access SSD data in makers.
  *
  * Revision 1.18  2003/09/02 17:55:32  perev
  * gcc 3.2 updates + WarnOff
@@ -134,34 +134,22 @@ struct EventInfo // return from EventReader::getEventInfo()
 {
   int EventLength;
   int Token;
-  unsigned int  UnixTime;
-  unsigned int  EventSeqNo;
-  unsigned int  TrigWord;
-  unsigned int  TrigInputWord;
-  unsigned char TPCPresent;	 //   0
-  unsigned char SVTPresent;	 //   1
-  unsigned char TOFPresent;	 //   2
-  unsigned char BTOWPresent;	 //   3  EMC Barrel Tower
-  unsigned char FPDPresent;	 //   4
-  unsigned char FTPCPresent;	 //   5
-  unsigned char EXTPresent;	 //   6 //   ignore
-  unsigned char RICHPresent;	 //   7
-  unsigned char TRGPresent;	 //   8
-  unsigned char L3Present;	 //   9
-  unsigned char SCPresent;	 //   10 //   reserved for Slow Controls
-  unsigned char EXT2Present;	 //   11 //   ignore
-  unsigned char PMDPresent;	 //   12
-  unsigned char SSDPresent;	 //   13
-  unsigned char ETOWPresent;	 //   14 EMC EndCup Tower
-  unsigned char DAQPresent;	 //   15 //   ignore
-  unsigned char FP2Present;	 //   16 //   reserved for future FPD
-  unsigned char PPPresent;	 //   17//         ignore
-  unsigned char BSMDPresent;	 //   18 EMC Barrel Shower
-  unsigned char ESMDPresent;	 //   19 EMC Endcup Shower
-
-  unsigned char EMCPresent;      //  BTOW || ETOW || BSMD || ESMD
-
-  void printEventInfo(FILE *fd=stdout);
+  unsigned int UnixTime;
+  unsigned int EventSeqNo;
+  unsigned int TrigWord;
+  unsigned int TrigInputWord;
+  unsigned char TPCPresent;
+  unsigned char SVTPresent;
+  unsigned char TOFPresent;
+  unsigned char SSDPresent;
+  unsigned char EMCPresent;
+  unsigned char PMDPresent;
+  unsigned char FPDPresent;
+  unsigned char FTPCPresent;
+  unsigned char RICHPresent;
+  unsigned char TRGDetectorsPresent;
+  unsigned char L3Present;
+  unsigned char SMDPresent;
 };
 
 // Each sequence contains one hit (zero suppressed data)
@@ -451,7 +439,8 @@ public:
 
   char *getDATAP() { return DATAP; };
   struct EventInfo getEventInfo();
-  void printEventInfo(FILE *fd=stdout);
+  void printEventInfo();
+  void printEventInfo(FILE *);
   void fprintError(int err, char *file, int line, char *userstring);
 
   int runno() { return runnum; }

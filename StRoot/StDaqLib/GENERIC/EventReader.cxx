@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.45 2003/12/24 21:55:57 perev Exp $
+ * $Id: EventReader.cxx,v 1.46 2004/02/18 20:17:51 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,8 +23,8 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
- * Revision 1.45  2003/12/24 21:55:57  perev
- * Cleanup
+ * Revision 1.46  2004/02/18 20:17:51  ward
+ * Access SSD data in makers.
  *
  * Revision 1.44  2003/10/02 19:39:22  ward
  * Swap header only of DATAP, so Insure++ does not complain about uninitialized data.
@@ -189,29 +189,6 @@
 #include "EventReader.hh"
 #include <assert.h>
 
-void EventInfo::printEventInfo(FILE * fd)
-{
-static const char *detnams[] =
-{"TPC ","SVT ","TOF ","BTOW","FPD ","FTPC","EXT ","RICH","TRG ","L3  "
-,"SC  ","EXT2","PMD ","SSD ","ETOW","DAQ ","FP2 ","PP  ","BSMD","ESMD"
-,"EMC"};
-
-  char ts[128] ;
-
-  sprintf(ts,"%s",ctime((const long int*)&UnixTime)) ;
-  ts[24] = 0 ;
-  fprintf(fd,"===============  Event # %d  =============\n",EventSeqNo);
-  fprintf(fd,"Ev len (wds) %d\n",EventLength);
-  fprintf(fd,"Creation Time: %s \n",ts);
-  fprintf(fd,"Trigger word 0x%X\t\tTrigger Input word 0x%X\n",TrigWord,TrigInputWord);
-  fprintf(fd,"Token: %d \n",Token);
-  fprintf(fd,"Detectors present: ");
-  unsigned const char* p=0; int i=0;
-  for (p=&TPCPresent,i=0; p<=&EMCPresent;p++,i++) {
-    if (*p) fprintf(fd,"%s ",detnams[i]);}
-  fprintf(fd,"\n");
-  fprintf(fd,"===========================================\n");
-}
 EventReader *getEventReader(int fd, long offset, int MMap)
 {
   EventReader *er = new EventReader();
@@ -589,6 +566,7 @@ void EventReader::InitEventReader(int fdes, long offset)
   //  assert(!(datap.EventLength > (statbuf.st_size - offset)/4)); // ERROR(ERR_FILE);
   //if(datap.EventLength > (statbuf.st_size - offset)/4)  ERROR(ERR_FILE);
   // mmap or read the file
+  // printf("BBB getting DATAP from file offset %d\n",lseek(fd,0,SEEK_CUR));
 
   DATAP = (char *)malloc(datap.EventLength * 4);
   if(!DATAP) ERROR(ERR_MEM);
@@ -667,51 +645,84 @@ EventReader::~EventReader()
 
 EventInfo EventReader::getEventInfo()
 {
-enum {
- TPC_SYSTEM  =    0
-,SVT_SYSTEM  =    1
-,TOF_SYSTEM  =    2
-,BTOW_SYSTEM =    3  //EMC Barrel Tower
-,FPD_SYSTEM  =    4
-,FTP_SYSTEM  =    5
-,EXT_SYSTEM  =    6 // ignore
-,RIC_SYSTEM  =    7
-,TRG_SYSTEM  =    8
-,L3_SYSTEM   =    9
-,SC_SYSTEM   =   10 // reserved for Slow Controls
-,EXT2_SYSTEM =   11 // ignore
-,PMD_SYSTEM  =   12
-,SSD_SYSTEM  =   13
-,ETOW_SYSTEM =   14 //EMC EndCup Tower
-,DAQ_SYSTEM  =   15 // ignore
-,FP2_SYSTEM  =   16 // reserved for future FPD
-,PP_SYSTEM   =   17 // ignore
-,BSMD_SYSTEM =   18 //EMC Barrel Shower
-,ESMD_SYSTEM =   19 //EMC Endcup Shower
-};
-
   //cout << "Getting event info" << endl;
   EventInfo ei;
-  Bank_DATAP *dp   = (Bank_DATAP *)DATAP; 
-  ei.Token         = dp->header.Token;
-  ei.EventLength   = dp->EventLength;
-  ei.UnixTime      = dp->Time;
-  ei.EventSeqNo    = dp->EventNumber;
-  ei.TrigWord      = dp->TriggerWord;
+  Bank_DATAP *dp = (Bank_DATAP *)DATAP; 
+  ei.Token = dp->header.Token;
+  ei.EventLength = dp->EventLength;
+  ei.UnixTime = dp->Time;
+  ei.EventSeqNo = dp->EventNumber;
+  ei.TrigWord = dp->TriggerWord;
   ei.TrigInputWord = dp->TriggerInWord;
-  int detpre       = dp->DetectorPresence;
-  printf("EventReader::getEventInfo  detector presence = %x\n",detpre);
-
-  for (unsigned char *p = &ei.TPCPresent; p<=&ei.ESMDPresent;p++) {
-    *p = !!(detpre&1); detpre>>=1;                                }
-  ei.EMCPresent = (ei.BTOWPresent|ei.ETOWPresent|ei.BSMDPresent|ei.ESMDPresent);
+  printf("EventReader::getEventInfo  detector presence = %x\n",dp->DetectorPresence);
+  ei.TPCPresent = (dp->DetectorPresence & 0x1)!=0;
+  ei.SVTPresent = (dp->DetectorPresence & 0x2)!=0;
+  ei.TOFPresent = (dp->DetectorPresence & 0x4)!=0;
+  ei.SSDPresent = (dp->DetectorPresence & 0x2000)!=0; // bit number 13 (counting from zero 0)
+  ei.EMCPresent = (dp->DetectorPresence & 0x8)!=0;
+  ei.FPDPresent  = (dp->DetectorPresence & 0x10)!=0;
+  ei.FTPCPresent = (dp->DetectorPresence & 0x20)!=0;
+  ei.PMDPresent  = (dp->DetectorPresence & 0x40)!=0;
+  ei.RICHPresent = (dp->DetectorPresence & 0x80)!=0;
+  ei.TRGDetectorsPresent = (dp->DetectorPresence & 0x100)!=0;
+  ei.L3Present = (dp->DetectorPresence & 0x200)!=0;
   return ei;
+}
+
+void EventReader::printEventInfo()
+{
+  char ts[128] ;
+
+  EventInfo ei = getEventInfo();
+  sprintf(ts,"%s",ctime((const long int*)&ei.UnixTime)) ;
+  ts[24] = 0 ;
+  printf("===============  Event # %d  =============\n",ei.EventSeqNo);
+  printf("Ev len (wds) %d\n",ei.EventLength);
+  printf("Creation Time: %s \n",ts);
+  printf("Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
+  printf("Token: %d \n",ei.Token);
+  printf("Detectors present: ");
+  if (ei.TPCPresent) printf("TPC ");
+  if (ei.SVTPresent) printf("SVT ");
+  if (ei.TOFPresent) printf("TOF ");
+  if (ei.SSDPresent) printf("SSD ");
+  if (ei.EMCPresent) printf("EMC ");
+  if (ei.PMDPresent) printf("PMD ");
+  if (ei.FPDPresent) printf("FPD ");
+  if (ei.FTPCPresent) printf("FTPC ");
+  if (ei.RICHPresent) printf("RICH ");
+  if (ei.TRGDetectorsPresent) printf("TRG ");
+  if (ei.L3Present) printf("L3 ");
+  printf("\n");
+  printf("===========================================\n");
 }
 
 void EventReader::printEventInfo(FILE * fd)
 {
+  char ts[128] ;
+
   EventInfo ei = getEventInfo();
-  ei.printEventInfo(fd);
+  sprintf(ts,"%s",ctime((const long int*)&ei.UnixTime)) ;
+  ts[24] = 0 ;
+  fprintf(fd,"===============  Event # %d  =============\n",ei.EventSeqNo);
+  fprintf(fd,"Ev len (wds) %d\n",ei.EventLength);
+  fprintf(fd,"Creation Time: %s \n",ts);
+  fprintf(fd,"Trigger word 0x%X\t\tTrigger Input word 0x%X\n",ei.TrigWord,ei.TrigInputWord);
+  fprintf(fd,"Token: %d \n",ei.Token);
+  fprintf(fd,"Detectors present: ");
+  if (ei.TPCPresent) fprintf(fd,"TPC ");
+  if (ei.SVTPresent) fprintf(fd,"SVT ");
+  if (ei.TOFPresent) fprintf(fd,"TOF ");
+  if (ei.SSDPresent) fprintf(fd,"SSD ");
+  if (ei.EMCPresent) fprintf(fd,"EMC ");
+  if (ei.PMDPresent) fprintf(fd,"PMD ");
+  if (ei.FPDPresent) fprintf(fd,"FPD ");
+  if (ei.FTPCPresent) fprintf(fd,"FTPC ");
+  if (ei.RICHPresent) fprintf(fd,"RICH ");
+  if (ei.TRGDetectorsPresent) fprintf(fd,"TRG ");
+  if (ei.L3Present) fprintf(fd,"L3 ");
+  fprintf(fd,"\n");
+  fprintf(fd,"===========================================\n");
 }
 
 long EventReader::NextEventOffset()
@@ -769,6 +780,7 @@ char * EventReader::findBank(char *bankid)
         if(!strncmp("DATAPX",pBank->BankType,6)){
 	  pBankDATAPX = (Bank_DATAPX *)(((INT32 *)pBankDATAP)+ (ptr->offset));
 	  pBankDATAPX->swap();
+          // printf("BBB offset to SSD is 0x%08x (EventReader.cxx EventReader::findBank).\n",pBankDATAPX->EXT_DET[3]);
   	  Pointer *ptr1 = &pBankDATAPX->EXT_DET[0];
 	  for(j=0; j < ext_len; j++, ptr1++){
                if (ptr1->length==0) continue;//invalid entry

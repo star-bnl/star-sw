@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RichEventReader.cxx,v 1.3 2003/12/24 21:55:57 perev Exp $
+ * $Id: RichEventReader.cxx,v 1.4 2004/02/18 20:17:52 ward Exp $
  * Author: Zhangbu Xu 
  ***************************************************************************
  * Description: Rich Event reader code for standalone data file
@@ -22,6 +22,9 @@
  *
  ***************************************************************************
  * $Log: RichEventReader.cxx,v $
+ * Revision 1.4  2004/02/18 20:17:52  ward
+ * Access SSD data in makers.
+ *
  * Revision 1.3  2003/12/24 21:55:57  perev
  * Cleanup
  *
@@ -394,7 +397,7 @@ EventInfo RichEventReader::getEventInfo()
 void RichEventReader::printEventInfo(FILE * fd)
 {
   EventInfo ei = getEventInfo();
-  ei.printEventInfo(fd);
+  // ei.printEventInfo(fd);
 }
 
 long RichEventReader::NextEventOffset()
