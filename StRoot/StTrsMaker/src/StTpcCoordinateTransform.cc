@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.7 1999/02/16 23:28:59 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.8 1999/02/18 21:17:27 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,10 +16,8 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.7  1999/02/16 23:28:59  lasiuk
- * matrix(3) is a data member to avoid constructor calls
- * protection against pad<1
- * const removed from several functions (because of matrix)
+ * Revision 1.8  1999/02/18 21:17:27  lasiuk
+ * instantiate with electronics db
  *
  *
  * Revision 1.9  1999/02/24 19:31:25  lasiuk
@@ -65,12 +63,15 @@
  * Revision 1.2  1998/05/25 17:05:25  lasiuk
  * use databases instead of filenames
  *
-StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcGeometry* geomdb, StTpcSlowControl* scdb)
+ * Revision 1.1  1998/05/21 21:27:57  lasiuk
+ * Initial revision
+ *
  *
  ***********************************************************************/
 #include "StTpcCoordinateTransform.hh"
 #include "StMatrix.hh"
-
+#include <unistd.h>
+StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcGeometry* geomdb,
 						   StTpcSlowControl* scdb,
 						   StTpcElectronics* eldb)
     : mRotation(2,2,1), mRotate(2,1,0), mResult(2,1,0) {
@@ -395,7 +396,8 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
     // I do not like this.  This should be passed via the electronics data base!
     // We will have to see what is decided about this code!
     {
-    return(nearestInteger(tb/(100.*nanosecond)));
+	using namespace units;
+#endif
     //PR(tb/(100.*nanosecond));
 	//PR(mTimeBinWidth/nanosecond);
     //PR(mTPCdb->frischGrid());
