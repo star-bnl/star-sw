@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.hh,v 1.1 2001/10/29 18:53:13 munhoz Exp $
+ * $Id: StSvtDbReader.hh,v 1.2 2002/02/15 22:45:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.hh,v $
+ * Revision 1.2  2002/02/15 22:45:43  munhoz
+ * introducing drift velocity reading capability
+ *
  * Revision 1.1  2001/10/29 18:53:13  munhoz
  * starting SVT Data base
  *
@@ -61,6 +64,7 @@ class StSvtDbReader
   StSvtConfig* getConfiguration();
   StSvtHybridCollection* getDriftVelocity();
   StSvtHybridCollection* getPedestals();
+  StSvtHybridCollection* getBadAnodes();
   StSvtGeometry* getGeometry();
 
 #ifdef __ROOT__

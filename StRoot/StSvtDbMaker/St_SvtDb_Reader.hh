@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.hh,v 1.1 2001/10/29 18:53:14 munhoz Exp $
+ * $Id: St_SvtDb_Reader.hh,v 1.2 2002/02/15 22:45:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.hh,v $
+ * Revision 1.2  2002/02/15 22:45:43  munhoz
+ * introducing drift velocity reading capability
+ *
  * Revision 1.1  2001/10/29 18:53:14  munhoz
  * starting SVT Data base
  *
@@ -52,8 +55,10 @@ class St_SvtDb_Reader
 
   StSvtHybridCollection* getDriftVelocity();
   StSvtHybridDriftVelocity* getDriftVelocity(int barrel, int ladder, int wafer, int hybrid);
+  void getDriftVelocityAverage(StSvtHybridCollection* svtColl);
   StSvtHybridCollection* getPedestals();
   StSvtGeometry* getGeometry();
+  StSvtHybridCollection* getBadAnodes();
 
 #ifdef __ROOT__
   ClassDef(St_SvtDb_Reader, 1)   //StAF chain virtual base class for Makers

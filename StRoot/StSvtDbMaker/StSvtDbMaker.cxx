@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.3 2002/02/05 23:30:52 caines Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.4 2002/02/15 22:45:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.4  2002/02/15 22:45:43  munhoz
+ * introducing drift velocity reading capability
+ *
  * Revision 1.3  2002/02/05 23:30:52  caines
  * fixing configuration bug
  *
@@ -35,6 +38,8 @@
 #include "StSvtDbWriter.hh"
 #include "St_db_Maker/St_db_Maker.h"
 
+StSvtDbMaker* gStSvtDbMaker=NULL; 
+
 ClassImp(StSvtDbMaker)
 
 //_____________________________________________________________________________
@@ -45,11 +50,14 @@ StSvtDbMaker::StSvtDbMaker(const char *name):StMaker(name)
   m_Reader = NULL;
   mReader = NULL;
   mWriter = NULL;
+  gStSvtDbMaker = this;
 }
 
 //_____________________________________________________________________________
 StSvtDbMaker::~StSvtDbMaker()
 {
+
+ gStSvtDbMaker = NULL;
   //delete m_Reader;
   //if (mReader) delete mReader;
   //if (mWriter) delete mWriter;
@@ -66,6 +74,7 @@ Int_t StSvtDbMaker::Init()
 
   readSvtConfig();
   readSvtGeometry();
+  readSvtDriftVelocity();
 
   return StMaker::Init();
 }
@@ -175,6 +184,18 @@ void StSvtDbMaker::readSvtGeometry()
     svtSet->SetObject((TObject*)mReader->getGeometry());
   else if (m_Reader)
     svtSet->SetObject((TObject*)m_Reader->getGeometry());
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::readSvtBadAnodes()
+{
+  St_ObjectSet *svtSet = new St_ObjectSet("StSvtBadAnodes");
+  AddConst(svtSet);  
+    
+  if (mReader)
+    svtSet->SetObject((TObject*)mReader->getBadAnodes());
+  else if (m_Reader)
+    svtSet->SetObject((TObject*)m_Reader->getBadAnodes());
 }
 
 //_____________________________________________________________________________
