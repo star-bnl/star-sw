@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.17 2004/03/19 16:22:08 didenko Exp $
+// $Id: bfcMixer.C,v 1.18 2004/04/01 02:42:50 jeromel Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -39,13 +39,14 @@ void Load(){
 }
 //_____________________________________________________________________
 void bfcMixer(const Int_t Nevents=10,
-             const Char_t *file1="/star/rcf/test/embedding/st_physics_2270008_raw_0030.daq",
-	     const Char_t *file2="/star/rcf/test/embedding/gtest.fz",
-             const Char_t *file3="/star/rcf/test/embedding/st_physics_2270008_raw_0030.vertices.dat",
-             const Float_t zvertex_low=-175.0,
-             const Float_t zvertex_high=175.0,
-	     const Char_t *mode="strange",
-	     const Char_t *acc_mode="off" )
+	      const Char_t *file1="/star/rcf/test/embedding/st_physics_2270008_raw_0030.daq",
+	      const Char_t *file2="/star/rcf/test/embedding/gtest.fz",
+	      const Char_t *file3="/star/rcf/test/embedding/st_physics_2270008_raw_0030.vertices.dat",
+	      const Float_t zvertex_low=-175.0,
+	      const Float_t zvertex_high=175.0,
+	      const Char_t *mode="strange",
+	      const Char_t *acc_mode="off",
+	      const Int_t  doFCF=1)
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -117,6 +118,8 @@ void bfcMixer(const Int_t Nevents=10,
   chain1->SetInput("Input1","StDAQReader");
   chain2->SetInput("Input2","Event");
   mixer->writeFile("mixer.trs",Nevents);
+  if (doFCF)
+    mixer->SetSequenceMerging(0);               
 
   gSystem->Load("StFtpcMixerMaker");
   StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
@@ -124,7 +127,10 @@ void bfcMixer(const Int_t Nevents=10,
   // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("Simu ppOpt beamline NoDefault DbV20030408 NoInput db tpc_daq tpc ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf tofDat -Prevtx"); 
+  if (doFCF)
+    chain3->SetFlags("Simu ppOpt beamline NoDefault NoInput db tpc_daq tpc -tcl fcf ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf tofDat -Prevtx"); 
+  else
+    chain3->SetFlags("Simu ppOpt beamline NoDefault NoInput db tpc_daq tpc tcl ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf tofDat -Prevtx"); 
 
   TString OutputFileName(gSystem->BaseName(file1));
   OutputFileName.ReplaceAll("*","");
