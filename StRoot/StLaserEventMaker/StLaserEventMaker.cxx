@@ -1,5 +1,11 @@
-// $Id: StLaserEventMaker.cxx,v 1.27 2003/05/15 15:31:31 perev Exp $
+// $Id: StLaserEventMaker.cxx,v 1.28 2003/07/09 21:51:57 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.28  2003/07/09 21:51:57  pfachini
+// The minimum number of valid tracks (minValidTracks) for a good drift velocity
+// calculation is 500 if both east and west lasers are up and 250 if one of them
+// is down. If one of the lasers is down, the drift velocity for east and west will
+// be the same.
+//
 // Revision 1.27  2003/05/15 15:31:31  perev
 // tpc oriented off
 //
@@ -733,21 +739,64 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Finish() {
   if (numberTracks){
-    if (numberTracks->GetMean() >= minValidTracks) {
-      velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
-      velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
-      //Now correcting for the clock...
-      velocityEast = velocityEast*clock/clockNominal;
-      velocityWest = velocityWest*clock/clockNominal;
-      velocityEast = velocityEast/1000000.0;
-      velocityWest = velocityWest/1000000.0;
-      if ((velocityWest > 5.) && (velocityEast > 5.)) {
-	WriteTableToFile();
+
+    if (fzlIntegralEastHigh() < 100. || fzlIntegralEastLow() < 100.) {//in case east laser was down
+      gMessMgr->Warning() << "StLaserEventMaker::no east laser events. Drift Velocity east and west will be the same!!! " << endm;
+      if (numberTracks->GetMean() >= minValidTracks/2.) {
+	velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
+	velocityEast = velocityWest;
+	//Now correcting for the clock...
+	velocityEast = velocityEast*clock/clockNominal;
+	velocityWest = velocityWest*clock/clockNominal;
+	velocityEast = velocityEast/1000000.0;
+	velocityWest = velocityWest/1000000.0;
+	if ((velocityWest > 5.) && (velocityEast > 5.)) {
+	  WriteTableToFile();
+	} else {
+	  gMessMgr->Error() << "StLaserEventMaker:: no laser events. Drift Velocity East = " << velocityEast << " and Drift Velocity West = " << velocityWest << " which is lower than the minimum of " << " 5.0 cm/us" << endm;
+	}
       } else {
-	gMessMgr->Error() << "StLaserEventMaker::no laser events. Drift Velocity East = " << velocityEast << " and Drift Velocity West = " << velocityWest << " which is lower than the minimum of " << " 5.0 cm/us" << endm;
+	gMessMgr->Error() << "StLaserEventMaker:: no laser events. Number Tracks = " << numberTracks->GetMean() << " which is lower than the minimum of " << minValidTracks/2. << " tracks requested for good laser events when one of the lasers (east or west) is down. No table will be written" << endm;  
       }
     } else {
-      gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetMean() << " which is lower than the minimum of " << minValidTracks << "tracks requested for good laser events. No table will be written" << endm;  
+      
+      if (fzlIntegralWestHigh() < 100. || fzlIntegralWestLow() < 100.) {//in case west laser was down
+	gMessMgr->Warning() << "StLaserEventMaker:: no west laser events. Drift Velocity east and west will be the same!!! " << endm;
+	if (numberTracks->GetMean() >= minValidTracks/2.) {
+	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
+	  velocityWest = velocityEast;
+	  //Now correcting for the clock...
+	  velocityEast = velocityEast*clock/clockNominal;
+	  velocityWest = velocityWest*clock/clockNominal;
+	  velocityEast = velocityEast/1000000.0;
+	  velocityWest = velocityWest/1000000.0;
+	  if ((velocityWest > 5.) && (velocityEast > 5.)) {
+	    WriteTableToFile();
+	  } else {
+	    gMessMgr->Error() << "StLaserEventMaker:: no laser events. Drift Velocity East = " << velocityEast << " and Drift Velocity West = " << velocityWest << " which is lower than the minimum of " << " 5.0 cm/us" << endm;
+	  }
+	} else {
+	  gMessMgr->Error() << "StLaserEventMaker:: no laser events. Number Tracks = " << numberTracks->GetMean() << " which is lower than the minimum of " << minValidTracks/2. << " tracks requested for good laser events when one of the lasers (east or west) is down. No table will be written" << endm;  
+	}
+      } else {
+	
+	if (numberTracks->GetMean() >= minValidTracks) {
+	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
+	  velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
+	  //Now correcting for the clock...
+	  velocityEast = velocityEast*clock/clockNominal;
+	  velocityWest = velocityWest*clock/clockNominal;
+	  velocityEast = velocityEast/1000000.0;
+	  velocityWest = velocityWest/1000000.0;
+	  if ((velocityWest > 5.) && (velocityEast > 5.)) {
+	    WriteTableToFile();
+	  } else {
+	    gMessMgr->Error() << "StLaserEventMaker:: no laser events. Drift Velocity East = " << velocityEast << " and Drift Velocity West = " << velocityWest << " which is lower than the minimum of " << " 5.0 cm/us" << endm;
+	  }
+	} else {
+	  gMessMgr->Error() << "StLaserEventMaker:: no laser events. Number Tracks = " << numberTracks->GetMean() << " which is lower than the minimum of " << minValidTracks << " tracks requested for good laser events. No table will be written" << endm;  
+	}
+      }
     }
   } else {
     gMessMgr->Error() << "StLaserEventMaker:: completly empty. Are sure you called this maker on laser events ?? No table will be written ... " << endm;
@@ -763,7 +812,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.27 2003/05/15 15:31:31 perev Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.28 2003/07/09 21:51:57 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -812,4 +861,8 @@ double StLaserEventMaker::fzlAverageEastHigh(){double mean = fzlEastHigh->GetMea
 double StLaserEventMaker::fzlAverageEastLow(){double mean = fzlEastLow->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageWestHigh(){double mean = fzlWestHigh->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageWestLow(){double mean = fzlWestLow->GetMean();return mean;};
+double StLaserEventMaker::fzlIntegralEastHigh(){double integral = fzlEastHigh->Integral();return integral;};
+double StLaserEventMaker::fzlIntegralEastLow(){double integral = fzlEastLow->Integral();return integral;};
+double StLaserEventMaker::fzlIntegralWestHigh(){double integral = fzlWestHigh->Integral();return integral;};
+double StLaserEventMaker::fzlIntegralWestLow(){double integral = fzlWestLow->Integral();return integral;};
 
