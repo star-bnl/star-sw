@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.107 2001/01/23 22:02:51 fine Exp $
+// $Id: StMaker.cxx,v 1.108 2001/03/01 02:08:02 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -933,41 +933,15 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 static void doPs(const char *who, const char *where)
 {
   static const char *ps =0;
-  TString *ts = 0;
   if (!ps) {
 //		execute shell      
     ps = gSystem->Getenv("StarEndMakerShell"); 
-    if (ps) {
-      char buf[12]; sprintf(buf,"%d",gSystem->GetPid());
-      if (!ps[0]) {
-#if defined(__linux)
-	ps = "ps up $$";
-#elif defined(__sun)
-	ps = "ps -o user -o pid -o pcpu -o pmem -o osz -o rss -o stime -o time -o comm -p $$";
-#elif defined(__hpux)
-	ps = "ps -lP -p $$";
-#endif
-      }
-      ts = new  TString(ps); // keep ts
-      ts->ReplaceAll("$$",buf);
-      ps = ts->Data();
-    } else { ps ="";}
+    if (!ps) ps = "";
   }
-  if (ps[0]) { //Execute shell
-    //    fflush(stdout);
-    //    if (gSystem->Exec(ps)) ps="";
-    char   psBuffer[128];
-    FILE   *pipe;
-    if( (pipe = gSystem->OpenPipe(ps, "r" )) == NULL ) ps = "";
-    else {
-      while( !feof( pipe ) ) {
-	if( fgets( psBuffer, 128, pipe ) != NULL ) {
-	  printf("QAInfo: doPs for %20s:%12s \t%s",who,where,psBuffer);
-	}
-      }
-    }
-    gSystem->ClosePipe( pipe );
-  }
+  if (!ps[0]) return;
+  printf("QAInfo: doPs for %20s:%12s \t",who,where);
+  StMem::Print(0);
+  printf("\n");
 }
 
 //_____________________________________________________________________________
@@ -1075,6 +1049,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.108  2001/03/01 02:08:02  perev
+// StMem into doPs
+//
 // Revision 1.107  2001/01/23 22:02:51  fine
 // warning message has been re-introduced
 //
