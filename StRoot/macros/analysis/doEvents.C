@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.22 1999/07/02 22:45:47 perev Exp $
+// $Id: doEvents.C,v 1.23 1999/07/14 01:41:51 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.22  1999/07/02 22:45:47  perev
-// Remove 2 events limit
+// Revision 1.23  1999/07/14 01:41:51  fisyak
+// Add 0.5 Tesla magnetic field as default
+//
+// Revision 1.23  1999/07/14 01:41:51  fisyak
+// Add 0.5 Tesla magnetic field as default
 //
 // Revision 1.22  1999/07/02 22:45:47  perev
 // Remove 2 events limit
@@ -134,6 +137,7 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
 //  gSystem->Load("StEventReaderMaker");
 //  gSystem->Load("St_geom_Maker");
