@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.6 2001/12/19 20:18:38 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.7 2002/01/12 00:10:23 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,10 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.7  2002/01/12 00:10:23  lasiuk
+ * debin addition; quartz cerenkov angle, tuple modification, shift
+ * to 183 nm for ray tracing, no temperature effect yet
+ *
  * Revision 1.6  2001/12/19 20:18:38  lasiuk
  * Changeover in algorithm of isolating the Cherenkov angle
  *
@@ -166,6 +170,8 @@ protected:
     StThreeVectorF mCalculatedResidual;
     StThreeVectorF mAssociatedMip;
 
+    StThreeVectorF mRadPoint;
+    StThreeVectorF mQuartzRadPoint;
     
     StRichCoordinateTransform* mTransform;//!
     StRichMomentumTransform* mMomTform;//!
@@ -188,6 +194,7 @@ protected:
     // average point where expect the radiation to eminate from
     StThreeVectorF mGlobalRichNormal;
     StThreeVectorF mAverageRadiationPlanePoint;
+    StThreeVectorF mAverageQuartzRadiationPlanePoint;
     StThreeVectorF mTopRadiator;
     StThreeVectorF mBottomRadiator;
 
@@ -207,7 +214,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.6 2001/12/19 20:18:38 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.7 2002/01/12 00:10:23 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:

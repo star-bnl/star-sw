@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichWindowHistogram.h,v 1.1 2001/12/19 20:18:38 lasiuk Exp $
+ * $Id: StRichWindowHistogram.h,v 1.2 2002/01/12 00:10:23 lasiuk Exp $
  *
  * Author:  bl Nov 2, 2001
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichWindowHistogram.h,v $
+ * Revision 1.2  2002/01/12 00:10:23  lasiuk
+ * debin addition; quartz cerenkov angle, tuple modification, shift
+ * to 183 nm for ray tracing, no temperature effect yet
+ *
  * Revision 1.1  2001/12/19 20:18:38  lasiuk
  * Changeover in algorithm of isolating the Cherenkov angle
  *
@@ -32,13 +36,15 @@ using std::pair;
 
 class StRichWindowBin {
 public:
-    StRichWindowBin(double theta=0, double wt=0, double sigma=0)
-	:mAngle(theta),mWeight(wt),mSigma(sigma) {}
+    StRichWindowBin(double theta=0, double wt=0, double sigma=0, double symmetry=0, short number=0)
+	:mAngle(theta),mWeight(wt),mSigma(sigma),mSymmetry(symmetry),mNumber(number) {}
     ~StRichWindowBin() {}
 
     double mAngle;
     double mWeight;
     double mSigma;
+    double mSymmetry;
+    short  mNumber;
 };
 ostream& operator<<(ostream& os, const StRichWindowBin& win);
 
@@ -60,10 +66,13 @@ public:
     //operator =(StRichWindowHistogram(const StRichWindowHistogram&) {/* nopt */}
 
     void init();
-    void clearData();
+    void clear();
 
     bool addEntry(StRichWindowBin);
 
+    void setWindowSize(double);
+    void setPhiCut(double);
+    
     double binSize()  const;
     double phiCut()   const;
 
@@ -73,6 +82,7 @@ public:
 
     void process();
     void status();
+    size_t size() const;
     
 private:
 #ifndef __CINT__
@@ -83,8 +93,11 @@ private:
 
     StRichWindowBin* mMaxBin;
 };
+inline void StRichWindowHistogram::setWindowSize(double s) {mBinSize = s; }
+inline void StRichWindowHistogram::setPhiCut(double c) {mPhiCut = c; }
 inline double StRichWindowHistogram::binSize() const { return mBinSize; }
 inline double StRichWindowHistogram::phiCut()  const { return mPhiCut; }
 inline StRichWindowBin* StRichWindowHistogram::maxBin() const { return mMaxBin;}
 inline StRichWindowBin StRichWindowHistogram::bin(int index) const { return mWindowHistogram[index];}
+inline size_t  StRichWindowHistogram::size() const { return mWindowHistogram.size();}
 #endif

@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.4  2002/01/12 00:10:23  lasiuk
+ * debin addition; quartz cerenkov angle, tuple modification, shift
+ * to 183 nm for ray tracing, no temperature effect yet
+ *
  * Revision 1.3  2001/11/21 20:36:07  lasiuk
  * azimuth angle calculation, trace and retracing algorithms, rotation
  * matrices, clean up intersection calculation.  Addition of quick
@@ -49,12 +53,10 @@ StRichRayTracer::StRichRayTracer(double wavelength)
 StRichRayTracer::StRichRayTracer(double wavelength,
 				 StThreeVectorF& pLocal,
 				 StThreeVectorF& radiationPoint,
-				 StThreeVectorF& normalRadiationPoint)
+				 StThreeVectorF& quartzRadiationPoint)
 {
     this->init(wavelength);
-    this->setTrack(pLocal, radiationPoint, normalRadiationPoint);
-
-//     PR(mRadiationPoint);
+    this->setTrack(pLocal, radiationPoint, quartzRadiationPoint);
 }
 
 // ----------------------------------------------------
@@ -63,11 +65,13 @@ StRichRayTracer::~StRichRayTracer() {/*nopt*/}
 // ----------------------------------------------------
 void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
 			       StThreeVectorF& radiationPoint,
-			       StThreeVectorF& radiationPlanePoint) {
+			       StThreeVectorF& quartzRadiationPoint) {
 
-    mLocalTrackMomentum     = pLocal;
-    mExpectedRadiationPoint = radiationPoint;
-    mRadiationPlanePoint   = radiationPlanePoint;
+    mLocalTrackMomentum           = pLocal;
+    mExpectedRadiationPoint       = radiationPoint;
+    mExpectedQuartzRadiationPoint = quartzRadiationPoint;
+    PR(mRadiationPlanePoint);
+    PR(mQuartzRadiationPlanePoint);
 
     //
     // this defines the axis from which the
@@ -86,7 +90,6 @@ void StRichRayTracer::setTrack(StThreeVectorF& pLocal,
 void StRichRayTracer::init(double wavelength)
 {
 //     cout << "StRichRayTracer::init()" << endl;
-    m2Pi   = 2.*M_PI;
 
     mMeanWavelength = wavelength;
 //     PR(mMeanWavelength);
@@ -118,22 +121,31 @@ void StRichRayTracer::init(double wavelength)
      mnQ2 = materialsDb->indexOfRefractionOfQuartzAt(mUpper);
      mnG2 = materialsDb->indexOfRefractionOfMethaneAt(mUpper);
 
-     PR(mnF1);
-     PR(mnQ1);
-     PR(mnG1);
-     PR(mnF2);
-     PR(mnQ2);
-     PR(mnG2);
+//      PR(mnF1);
+//      PR(mnQ1);
+//      PR(mnG1);
+//      PR(mnF2);
+//      PR(mnQ2);
+//      PR(mnG2);
      
     StRichGeometryDb* geometryDb = StRichGeometryDb::getDb();
+    mYGap  = fabs(geometryDb->quadrantX0(1));
+    mXGap  = fabs(geometryDb->quadrantY0(4));
+    mXEdge = fabs(geometryDb->quadrantX0(2));
+    mYEdge = fabs(geometryDb->quadrantY0(2));
+
+//     PR(mYGap);
+//     PR(mXGap);
+//     PR(mXEdge);
+//     PR(mYEdge);
     
     mRadiatorThickness =  geometryDb->radiatorDimension().z();  //1.0*centimeter;
     mQuartzThickness = geometryDb->quartzDimension().z();       //5.*millimeter;
     mGapThickness    = geometryDb->proximityGap();              //8.0*centimeter;
 
-     PR(mRadiatorThickness/millimeter);
-     PR(mQuartzThickness/millimeter);
-     PR(mGapThickness/millimeter);
+//      PR(mRadiatorThickness/millimeter);
+//      PR(mQuartzThickness/millimeter);
+//      PR(mGapThickness/millimeter);
 
     //mxyPrecision = 1.*millimeter;
     mxyPrecision = 50.*micrometer;
@@ -185,27 +197,18 @@ void StRichRayTracer::calculateTrackAngle()
     //
 
     mAlpha = M_PI - mLocalTrackMomentum.theta();
-
-}
-
-// ----------------------------------------------------
-bool StRichRayTracer::adjustPropagator()
-{
-    cout << "StRichRayTracer::adjustPropagator()" << endl;
-    
-    return true;
 }
 
 // ----------------------------------------------------
 void StRichRayTracer::setPhotonPosition(StThreeVectorF& pos)
 {
 //     cout << "StRichRayTracer::setPhotonPosition()" << endl;
+
     mLocalPhotonPosition = pos;
-     PR(mLocalPhotonPosition);
+
     //
     // reset the step for optimizing theta
     //
-    
     mDeltaTheta = mInitialIncrement;
 }
 
@@ -230,7 +233,7 @@ StThreeVectorF StRichRayTracer::rotateToAxis(double angle, StThreeVectorF& vec)
     //
     // in x-y plane
     // axis defined by the track momentum in the xy plane
-    // (chi)
+    // 
     
     StThreeVectorF newPt(vec.x()*cos(angle)-vec.y()*sin(angle),
 			 vec.x()*sin(angle)+vec.y()*cos(angle),
@@ -428,7 +431,8 @@ bool StRichRayTracer::initialPropagator()
 
     mGapPropagator = (mExpectedRadiationPoint - mLocalPhotonPosition).unit();
     
-    mPhotonRadPointTransverseDistance = mGapPropagator.perp();
+    mPhotonRadPointTransverseDistance =
+	(mExpectedRadiationPoint - mLocalPhotonPosition).perp();
     
 //     PR(mPhotonRadPointTransverseDistance);
 
@@ -480,14 +484,6 @@ bool  StRichRayTracer::processPhoton(double* angle) {
 
 //     cout << "StRichRayTracer::processPhoton()" << endl;
     
-    if(!this->initialPropagator()) {
-	cout << "initialPropagator is BAD***" << endl;
-	return false;
-    }
-    else {
-//  	cout << "initialPropagator is okay" << endl;
-    }
-    
     if(this->findCerenkovAngle()) {
 	//cout << "\n**** Convergence..." << endl;
 	*angle = mCerenkovAngle;
@@ -498,8 +494,8 @@ bool  StRichRayTracer::processPhoton(double* angle) {
 	*angle = FLT_MAX;
     }
 
-    PR(mCerenkovAngle/degree);
-    PR(mPhi/degree);
+     PR(mCerenkovAngle/degree);
+//     PR(mPhi/degree);
     
     //
     // tests for convergence and performance
@@ -509,7 +505,12 @@ bool  StRichRayTracer::processPhoton(double* angle) {
 //     PR(mTheCalculatedRadiationPoint);
 //     this->traceDown();
 //     this->traceUp();
-    
+
+    //
+    // Quartz Cerenkov Angle
+    //
+    this->findQuartzCerenkovAngle();
+
     return true;
 }
 
@@ -574,7 +575,8 @@ bool StRichRayTracer::propagateToRadiator()
 	this->intersectionWithPlane(mDetectorNormal, mRadiationPlanePoint,
 				    mTopOfQuartzPlate, propagator);
 
-    mConvergenceValue = (mTheCalculatedRadiationPoint-mLocalPhotonPosition).perp();
+    mConvergenceValue =
+	(mTheCalculatedRadiationPoint-mLocalPhotonPosition).perp();
 
     double cosCerenkovAngle =
 	-1.*(propagator.unit()).dot(mLocalTrackMomentum.unit());
@@ -588,11 +590,17 @@ bool StRichRayTracer::propagateToRadiator()
 bool StRichRayTracer::findCerenkovAngle()
 {
 //     cout << "StRichRayTracer::findCerenkovAngle()" << endl;
-
+    if(!this->initialPropagator()) {
+	cout << "initialPropagator is BAD***" << endl;
+	return false;
+    }
+    else {
+//  	cout << "initialPropagator is okay" << endl;
+    }
+    
     //
     // the first iteration to get a starting point
     //
-
     if(!this->propagateToRadiator()) {
 	cout << "StRichRayTracer::findCerenkovAngle()\n";
 	cout << "FATAL::1st iteration of propagateToRadiator()" << endl;
@@ -669,11 +677,195 @@ bool StRichRayTracer::findCerenkovAngle()
     return false;
 }
 
+
+// ----------------------------------------------------
+bool StRichRayTracer::checkQuartzConvergence(StThreeVectorF& point) const
+{
+    bool convergence = false;
+
+    if( ( (point-mExpectedQuartzRadiationPoint).perp() < mxyPrecision) ) {
+//   	cout << "StRichRayTracer::checkQuartzConvergence()\n";
+//   	cout << "\tConvergence!!!" << endl;
+//   	cout << "\tQuartzCerenkov Angle= ";
+//   	cout << (mQuartzCerenkovAngle/degree) <<  " degrees" << endl;
+		    
+ 	convergence = true;
+     }
+	    
+    return convergence;
+}
+
+
+// -------------------------------------------------------
+bool StRichRayTracer::propagateToQuartz()
+{
+    //cout << "StRichRayTracer::propagateToQuartz()" << endl;
+
+    //
+    // find the linear distance (mLOne) which is covered
+    // while the light ray propagates through the
+    // proximity focussing gap.
+    // Calculate the intersection at the bottom
+    // of the quartz window
+    //
+
+    StThreeVectorF propagator = mGapPropagatorForQuartz;
+    
+    //
+    // propagate to the bottom quartz
+    //
+
+    StThreeVectorF zAtBottomQuartz =
+	this->intersectionWithPlane(mDetectorNormal, mBottomQuartzPoint,
+				    mLocalPhotonPosition, propagator);    
+    //
+    // angle wrt quartz?
+    //
+    double cosGapAngle = (propagator.unit()).dot(mDetectorNormal.unit());
+    double gapAngle = acos( cosGapAngle );
+
+    double sinAngle = (mIndexCH4/mIndexQuartz*sin(gapAngle));
+    double quartzAngle;
+    if(fabs(sinAngle) <=1) {
+	quartzAngle = asin(mIndexCH4/mIndexQuartz*sin(gapAngle));
+	propagator.setTheta(quartzAngle);
+    }
+    else {
+	cout << "StRichRayTracer::propagateToQuartz()\n";
+	cout << "\tInternally reflected" << endl;
+	return false;
+    }
+
+    //
+    // at what point does it hit the Mid-Point (plane) of the quartz
+    //
+    mTheCalculatedQuartzRadiationPoint =
+	this->intersectionWithPlane(mDetectorNormal, mQuartzRadiationPlanePoint,
+				    zAtBottomQuartz, propagator);
+
+    mQuartzConvergenceValue =
+	(mTheCalculatedQuartzRadiationPoint-mLocalPhotonPosition).perp();
+
+    double cosQuartzCerenkovAngle =
+	-1.*(propagator.unit()).dot(mLocalTrackMomentum.unit());
+    mQuartzCerenkovAngle = acos(cosQuartzCerenkovAngle);
+
+    return true;
+}
+
+// ----------------------------------------------------
+bool StRichRayTracer::findQuartzCerenkovAngle()
+{    
+//     cout << "StRichRayTracer::findQuartzCerenkovAngle()" << endl;
+    
+    mDeltaTheta = mInitialIncrement/2.;
+    
+    mGapPropagatorForQuartz =
+	(mExpectedQuartzRadiationPoint - mLocalPhotonPosition).unit();
+
+    //
+    // the first iteration to get a starting point
+    //
+
+    if(!this->propagateToQuartz()) {
+	cout << "StRichRayTracer::findQuartzCerenkovAngle()\n";
+	cout << "FATAL::1st iteration of propagateToQuartz()" << endl;
+	return false;
+    };
+
+    StThreeVectorF oldRadiationPoint = mTheCalculatedQuartzRadiationPoint;
+    
+    if(this->checkQuartzConvergence(oldRadiationPoint)) {
+ 	cout << "*StRichRayTracer::findQuartzCerenkovAngle()\n";
+ 	cout << "\tConvergence in first iteration" << endl;
+	return true;
+    }
+    
+    //
+    // adjust theta and continue with next iterations
+    // if x^2 + y^2 bounds are NOT exceeded
+    //
+
+    double comparisonValue = (mLocalPhotonPosition-mExpectedQuartzRadiationPoint).perp();
+    if( mQuartzConvergenceValue >  comparisonValue) {
+	//
+	// went to far(overshot)
+ 	// decrease theta (saves an iteration)
+ 	//
+	mDeltaTheta *= -1.;
+    }
+
+    mGapPropagatorForQuartz.setTheta(mGapPropagatorForQuartz.theta() + mDeltaTheta);
+    
+    int iteration=0;
+    do {
+	iteration++;
+
+	if(!this->propagateToQuartz()) {
+	    cout << "StRichRayTracer::findQuartzCerenekovAngle()\n";
+	    cout << "FATAL ERROR 2 on iteration (" << iteration << ")" << endl;
+	    return false;
+	}
+	
+ 	StThreeVectorF newRadiationPoint = mTheCalculatedQuartzRadiationPoint;
+
+	//
+	// Check for convergence and recalculate the
+	// stepsize for the next iteration if necessary
+	//
+
+	if(this->checkQuartzConvergence(newRadiationPoint)) {
+  	    //cout << "*StRichRayTracer::findQuartzCerenkovAngle()\n";
+  	    //cout << " \tConvergence in (" << iteration << ") iteration" << endl;
+ 	    //cout << "final gap propagator " << mGapPropagator << endl;
+	    return true;
+	}
+
+	if( abs(oldRadiationPoint-mExpectedQuartzRadiationPoint) >
+	    abs(newRadiationPoint-mExpectedQuartzRadiationPoint) ) {
+	    //
+	    // good, leave deltaTheta alone
+	    //
+	}
+	else {
+	    //
+	    // Wrong way:  Change of sign of the
+	    // step size and decrease by a factor of 2
+	    //
+	    mDeltaTheta *= -0.5;
+	}
+
+	oldRadiationPoint = newRadiationPoint;
+	
+	mGapPropagatorForQuartz.setTheta(mGapPropagatorForQuartz.theta() + mDeltaTheta);
+    } while (iteration < mMaximumNumberOfIterations);
+
+    return false;
+}
+
 // ----------------------------------------------------
 void StRichRayTracer::status() const
 {
     cout << "StRichRayTracer::status()\n";
-    cout << "===========================" << endl;
+    cout << "-------------------------------------------" << endl;
+    cout << "CerenkovAngle   Azimuth    Quartz Cerenkov" << endl;
+    cout << "-------------------------------------------" << endl;
+    cout << (this->cerenkovAngle()/degree) << '\t'
+	 << (this->azimuth()/degree)     << '\t'
+	 << (this->quartzCerenkovAngle()/degree) << endl;
+    cout << "===========================================" << endl;
+}
+
+// ----------------------------------------------------
+bool StRichRayTracer::checkPlane(StThreeVectorF& pt)
+{
+    if( (fabs(pt.x())>mXEdge)  ||
+	(fabs(pt.x())<mXGap)   ||
+	(fabs(pt.y())>mYEdge)  ||
+	(fabs(pt.y())<mYGap) )
+	return false;
+    else
+	return true;
 }
 
 // ----------------------------------------------------
@@ -701,6 +893,13 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
 	nQ = mnQ1;
 	nG = mnG1;
     }
+    else if(radPt.z() == 9.0) {
+	// intermediate value
+	cout << "intermediate" << endl;
+	nF = mIndexFreon;
+	nQ = mIndexQuartz;
+	nG = mIndexCH4;
+    }
     else {
 	nF = mnF2;
 	nQ = mnQ2;
@@ -717,8 +916,17 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
     StThreeVectorF axis(mLocalTrackMomentum.x(), mLocalTrackMomentum.y(), 0.);
     double alpha = M_PI - mLocalTrackMomentum.theta();
     
-    double chi = axis.phi();
-
+    //
+    // Initialize the length calculations
+    //
+    StThreeVectorF firstPoint;
+    StThreeVectorF lastPoint;
+    StThreeVectorF firstPointOnPlane;
+    StThreeVectorF lastPointOnPlane;
+    double totalLength = 0.;
+    double totalLengthOnPlane = 0.;
+    int status = 1;
+    
     double dphi = 1.*degree;
     for(double phi=0.*degree; phi<360.*degree; phi+=dphi) {
 	
@@ -743,7 +951,8 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
 	//
 	// incident angle wrt normal
 	//
-	double openingAngle = acos( (photonPropagator.unit()).dot(mDetectorNormal.unit()) );
+	double openingAngle =
+	    acos( (photonPropagator.unit()).dot(mDetectorNormal.unit()) );
 	double incidentAngle = M_PI - openingAngle;
 	double sinr = nF*sin(incidentAngle)/nQ;
 	if(sinr>1) continue;
@@ -770,8 +979,40 @@ StRichRayTracer::calculatePoints(StThreeVectorF& radPt, double mass)
 	    intersectionWithPlane(mDetectorNormal, mLocalPhotonPosition,
 				  bottomQuartz, photonPropagator);
 
+	firstPoint = bottomDetector;
+	if( abs(lastPoint)>0 ) {
+	    totalLength += abs(lastPoint - firstPoint);
+	}
+	lastPoint = firstPoint;
+
+	if(this->checkPlane(bottomDetector)) {
+	    if(status==0) {
+		firstPointOnPlane = bottomDetector;
+		lastPointOnPlane  = bottomDetector;
+		status = 1;
+	    }
+	    lastPointOnPlane = firstPointOnPlane;
+	    firstPointOnPlane = bottomDetector;
+	    status = 1;
+	}
+	else {
+	    status = 0;
+	    firstPointOnPlane = bottomDetector;
+	    lastPointOnPlane = firstPointOnPlane;
+	}
+	if( abs(lastPointOnPlane)>0 ) {
+	    totalLengthOnPlane += abs(lastPointOnPlane - firstPointOnPlane);
+	    lastPointOnPlane = firstPointOnPlane;
+	}
+	
 	if( (abs(bottomDetector.x())>70) || (abs(bottomDetector.y())>50)) continue;
 	pts.push_back(bottomDetector);
     }
+
+    PR(totalLength);
+    PR(totalLengthOnPlane);
+    mLineIntegralOnPlane = totalLengthOnPlane;
+    mLineIntegralRatio = totalLengthOnPlane/totalLength;
+    
     return pts;
 }
