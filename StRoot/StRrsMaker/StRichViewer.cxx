@@ -1,13 +1,13 @@
 /*******************************************************
- * $Id: StRichViewer.cxx,v 1.2 2000/01/25 22:02:22 lasiuk Exp $
+ * $Id: StRichViewer.cxx,v 1.3 2000/04/05 16:06:05 lasiuk Exp $
  *
  * Description:
  *  Implementation of the Viewer displaying module
  *
  ********************************************************
  * $Log: StRichViewer.cxx,v $
- * Revision 1.2  2000/01/25 22:02:22  lasiuk
- * Second Revision
+ * Revision 1.3  2000/04/05 16:06:05  lasiuk
+ * add histos
  *
  * Revision 1.2  2000/01/25 22:02:22  lasiuk
  * Second Revision
@@ -27,14 +27,9 @@
 #include "TH1.h"
 #include "TH2.h"
 
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-
 
 StRichViewer* StRichViewer::p2View = 0;
 
-int StRichViewer::foo = 0;
 int StRichViewer::histograms = 0;
 
 
@@ -46,7 +41,7 @@ StRichViewer::StRichViewer()
     //
     
 	
-    mCanvas1    = new TCanvas("mCanvas1","Rich Digitalization",700,500);
+    //mCanvas1    = new TCanvas("mCanvas1","Rich Digitalization",700,500);
     mHFile = (TFile*)gROOT->FindObject("hsimple.root");
     if (mHFile)
 	mHFile->Close();
@@ -65,11 +60,22 @@ StRichViewer::StRichViewer()
     mWhichWire           = new TH1F("mWhichWire","Wire number",
 				    100,0,195);
     mFeedback            = new TH1F("mFeedback","Feedback photons",
-				    40,0,10);
+				    21,-0.5,20.5);
+    mPoissonMean         = new TH1F("mPoissonMean","Mean of Poisson",
+				    100,0,1);
+    mDist                = new TH1F("mDist","Distance Traveled",
+				    1000,0,100);
+    mPhi                 = new TH1F("mPhi","Angle",
+				    1000,0,10);
+    
+
+    mCost                 = new TH1F("mCost","cos(Angle)",
+				    100,0,1);
+    
     mPolia               = new TH1F("mPolia","Polia Distribution",
 				    100,0,2);
     mNoise               = new TH1F("mNoise", "Electric Noise", 
-				    100, -5000.0, 5000.0);
+				    100, -5000.0, 4000.0);
     mTotalCharge         = new TH1F("mTotalCharge","Total charge on pads",
 				    100,0.0,1.0);
     mADCSignal           = new TH2F("mADCSignal","ADC Signal on pads",
@@ -79,7 +85,7 @@ StRichViewer::StRichViewer()
     mPadPlane            = new TH2F("mPadPlane","Particle distibution in RICH",
 				    50,-66.0,66.0,50,-42.0,42.0);
     cout << "Set Options " << endl;
-    mCanvas1->SetFillColor(42);
+    //mCanvas1->SetFillColor(42);
     //mCanvas1->GetFrame()->SetFillColor(21);
     //mCanvas1->GetFrame()->SetBorderSize(6);
     //mCanvas1->GetFrame()->SetBorderMode(-1); 
@@ -102,22 +108,22 @@ StRichViewer::StRichViewer()
 
 StRichViewer::~StRichViewer()
 {
-    delete mCanvas1;
-    delete mHFile;
+//     delete mCanvas1;
+//     delete mHFile;
     
-    delete 	mParticleId ; 
-    delete      mWhichQuadrant; 
-    delete 	mClusterElectrons;
-    delete 	mErrorDetection ; 
-    delete 	mWires ;
-    delete 	mWhichWire;  
-    delete	mFeedback;        
-    delete	mPolia;          
-    delete	mNoise;          
-    delete	mTotalCharge; 
-    delete 	mADCSignal;      
-    delete	mAnalogSignals;  
-    delete	mPadPlane;           
+//     delete 	mParticleId ; 
+//     delete      mWhichQuadrant; 
+//     delete 	mClusterElectrons;
+//     delete 	mErrorDetection ; 
+//     delete 	mWires ;
+//     delete 	mWhichWire;  
+//     delete	mFeedback;        
+//     delete	mPolia;          
+//     delete	mNoise;          
+//     delete	mTotalCharge; 
+//     delete 	mADCSignal;      
+//     delete	mAnalogSignals;  
+//     delete	mPadPlane;           
 }
 
 
@@ -141,10 +147,12 @@ void StRichViewer::update()
     //	mAnalogSignals->Draw();
     //	mPadPlane->Draw();    
     
-    mCanvas1->Modified();
-    mCanvas1->Update();
-    
+    //mCanvas1->Modified();
+    //mCanvas1->Update();
+     
     mHFile->Write();
+    mHFile->Close();
+    
 }
 
 
