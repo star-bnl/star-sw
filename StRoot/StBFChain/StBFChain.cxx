@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.130 2000/08/18 21:17:00 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.131 2000/08/26 23:49:37 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -89,6 +89,7 @@ Bfc_st BFC[] = {
   {"GeantOut"    ,""  ,"","Tree"                                ,"","","Write g2t tables to StTree",kFALSE},
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"Simu"        ,""  ,"",""                                                ,"","","Simulated Data",kFALSE},
+  {"HitsBranch"  ,""  ,"",""  ,"","","take out points from dst branch and put them into HitsBranch",kFALSE},
   {"paw"         ,""  ,"",""                                      ,"","","Allocate memory for pawc",kFALSE},
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
@@ -157,6 +158,8 @@ Bfc_st BFC[] = {
   {"tfs"         ,""  ,"tpcChain","Simu"                           ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
+  {"TpcT0"       ,"","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq.kalman","StTpcT0Maker",
+                   "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StTpcT0Maker","",kFALSE},
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
   {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tdaq,tpc,-tpt,-PreVtx"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
@@ -410,7 +413,8 @@ Int_t StBFChain::Instantiate()
 	// special maker options 
 	if (mk) {
 	  if (maker == "StTpcDbMaker") tpcDBMk = mk;
-	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
+	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
+	  SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	  if (maker == "St_tpcdaq_Maker") {
 	    if (GetOption("Trs")) mk->SetMode(1); // trs
@@ -633,8 +637,8 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	  printf ("Use default input file %s for Laser\n",fInFile->Data());
     }    
     if (!fInFile && GetOption("p00h")) {
-	  fInFile = new TString("/star/data08/daq/2000/07/st_physics_1185015_raw_0001.daq");
-	  printf ("Use default input file %s forfirst real data No Field \n",fInFile->Data());
+	  fInFile = new TString("/star/data08/daq/2000/08/st_physics_1225033_raw_0001.daq");
+	  printf ("Use default input file %s for real data\n",fInFile->Data());
     }    
     if (!fInFile && GetOption("miniDAQ")) {
       fInFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
@@ -793,9 +797,13 @@ void StBFChain::SetDbOptions(){
 void StBFChain::SetTreeOptions()
 {
   treeMk->SetBranch("histBranch");
-  
   if (GetOption("dst"))      {
-    treeMk->IntoBranch("dstBranch","dst");
+    if (GetOption("HitsBranch")) {
+      treeMk->SetBranch("dstHitsBranch");
+      treeMk->IntoBranch("dstHitsBranch","dst/.data/Hits");
+    }
+    else treeMk->IntoBranch("dstBranch","dst/.data/Hits");
+    treeMk->IntoBranch("dstBranch","dst/.data/dst");
     treeMk->SetBranch("runcoBranch");
   }
   if (GetOption("Event") && GetOption("EvOut"))  
