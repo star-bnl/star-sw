@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCSlat.cxx,v 2.2 2001/04/26 15:19:10 ullrich Exp $
+ * $Id: StTofMCSlat.cxx,v 2.3 2001/04/27 21:43:18 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.cxx,v $
+ * Revision 2.3  2001/04/27 21:43:18  ullrich
+ * Moved MC info class into separate file.
+ *
  * Revision 2.2  2001/04/26 15:19:10  ullrich
  * Added ClassDef and ClassImp macros.
  *
@@ -20,21 +23,13 @@
 #include "iostream.h"
 #include "StTofMCSlat.h"
 
-ostream& operator<<(ostream& os, const StructTofMCInfo& MCInfo)
-{
-    return (os << "  trkId= " << MCInfo.mTrkId << ", gId=  " << MCInfo.mGId 
-               << ", nHits= " << MCInfo.mNHits << ", nPhe= " << MCInfo.mNPhe  
-               << ", tof: "   << MCInfo.mTof   << endl); 
-}
+static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.3 2001/04/27 21:43:18 ullrich Exp $";
 
-static const char rcsid[] = "$Id: StTofMCSlat.cxx,v 2.2 2001/04/26 15:19:10 ullrich Exp $";
-
-ClassImp(StructTofMCInfo)
 ClassImp(StTofMCSlat)
 
 StTofMCSlat::StTofMCSlat() { /* nopt */ }
 
-StTofMCSlat::StTofMCSlat(const StructTofMCInfo& MCInfo) :  mTofMCInfo(MCInfo) { /* nopt */ }
+StTofMCSlat::StTofMCSlat(const StTofMCInfo& MCInfo) :  mTofMCInfo(MCInfo) { /* nopt */ }
 
 StTofMCSlat::~StTofMCSlat() { /* noop */ }
     
