@@ -65,7 +65,7 @@ void trigCtb(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Cha
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     gSystem->Load("StMagF");
-    gSystem->Load("StEventMaker");
+    // gSystem->Load("StEventMaker");
     gSystem->Load("StTrgMaker");
 
     //
@@ -108,7 +108,7 @@ void trigCtb(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Cha
     //
     // Maker to read events from file or database into StEvent
     //
-    StEventMaker *readerMaker =  new StEventMaker("events","title");
+    // StEventMaker *readerMaker =  new StEventMaker("events","title");
 
     //
     //  Sample analysis maker
