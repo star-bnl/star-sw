@@ -56,9 +56,9 @@ St_DataSetIter::~St_DataSetIter()
      if (s) delete s;
    }
   }
+  else 
+     SafeDelete(fNext);
   fDepth = 1;
-
-  SafeDelete(fNext);
 }
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
