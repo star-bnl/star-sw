@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.9 2003/03/22 22:44:57 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.10 2003/04/23 18:11:19 balewski Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.10  2003/04/23 18:11:19  balewski
+// 'continous' eta & phi bins added
+//
 // Revision 1.9  2003/03/22 22:44:57  zolnie
 // make it standalone library
 //
@@ -88,6 +91,31 @@ EEmcGeomSimple::getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t 
 {
   Double_t  phi   = getPhiMean(sec,sub);
   Double_t  eta   = getEtaMean(etabin);
+  if(eta<0.0) return TVector3();
+  Double_t  z     = getZMean();
+  Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  
+
+  // create vector pointing toward the center of the tower
+  return TVector3(rho*cos(phi),rho*sin(phi),z);
+}
+
+
+inline TVector3 
+EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
+{
+  int ietaBin=(int)(xetaBin+0.5);
+  int iphiBin=(int)(xphiBin+0.5);
+
+  int isec=iphiBin/5;
+  int isub=iphiBin%5;
+
+  // note the higher etaBin the smaller eta,
+  //      the larger sec/sub the smaller phi-angle
+  Double_t  phi   = getPhiMean(isec,isub) - (xphiBin-iphiBin)*2*getPhiHalfWidth(isec,isub) ;
+
+  Double_t  eta   = getEtaMean(ietaBin) - (xetaBin-ietaBin)*2*getEtaHalfWidth(ietaBin);
+  // printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f\n",xetaBin,xphiBin,eta,phi);
+  
   if(eta<0.0) return TVector3();
   Double_t  z     = getZMean();
   Double_t  rho   = z*tan(2.0*atan(exp(-1.0*eta)));  

@@ -5,12 +5,15 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.10 2003/03/22 23:59:00 zolnie Exp $
+ * $Id: EEmcGeomSimple.h,v 1.11 2003/04/23 18:11:31 balewski Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
  *********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.11  2003/04/23 18:11:31  balewski
+ * 'continous' eta & phi bins added
+ *
  * Revision 1.10  2003/03/22 23:59:00  zolnie
  * standalone modifications
  *
@@ -45,6 +48,8 @@ public:
   virtual ~EEmcGeomSimple();
 
   inline TVector3 getTowerCenter(const UInt_t sec, const UInt_t sub, const UInt_t etabin) const;
+
+  inline TVector3 getDirection(const Float_t xetaBin, const Float_t xphiBin) const;
   
   inline Float_t getZ1()   const { return mZ1;  };
   inline Float_t getZ2()   const { return mZ2;  };
