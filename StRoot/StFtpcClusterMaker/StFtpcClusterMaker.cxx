@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.23 2001/06/13 14:37:54 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.24 2001/06/16 12:59:47 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.24  2001/06/16 12:59:47  jcs
+// delete ftpcReader only if it is the FTPC slow simulator reader
+//
 // Revision 1.23  2001/06/13 14:37:54  jcs
 // change StDaqReader to StDAQReader
 //
@@ -190,6 +193,8 @@ Int_t StFtpcClusterMaker::Make()
 {
   int iMake=kStOK;
 
+  int using_FTPC_slow_simulator = 0;
+
   St_DataSet *daqDataset;
   StDAQReader *daqReader;
   StFTPCReader *ftpcReader=NULL;
@@ -201,6 +206,7 @@ Int_t StFtpcClusterMaker::Make()
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
+      assert(ftpcReader);
     }
 
   // create parameter reader
@@ -243,6 +249,7 @@ Int_t StFtpcClusterMaker::Make()
 				  fcl_ftpcadc->GetNRows());
 
       gMessMgr->Message("", "I", "OST") << "created StFTPCReader from tables" << endm;
+      using_FTPC_slow_simulator = 1;
     }
     else {
       
@@ -278,7 +285,7 @@ Int_t StFtpcClusterMaker::Make()
 	
     delete fcl;
     delete step;
-    delete ftpcReader;
+    if (using_FTPC_slow_simulator) delete ftpcReader;
   }
   else {     
     //                      FFS
