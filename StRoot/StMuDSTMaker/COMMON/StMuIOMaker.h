@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.7 2004/04/09 22:02:50 subhasis Exp $
+ * $Id: StMuIOMaker.h,v 1.8 2004/04/14 17:15:57 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuIOMaker_hh
@@ -94,13 +94,13 @@ class StMuIOMaker : public StIOInterFace {
   StMuDst* muDst();                             ///< return pointer the  current (last read) StMuDst
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
   StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
-  //StMuTofUtil* muTofUtil() { return mTofUtil; } ///< return pointer to StMuPmdUtil;
+  StMuTofUtil* muTofUtil() { return mTofUtil; } ///< return pointer to StMuPmdUtil;
   int currentIndex() { return mCurrentIndex; }
   int eventCounter() { return mEventCounter; }
   int numberOfEvents() { return mNumberOfEvents; }
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.7 2004/04/09 22:02:50 subhasis Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.8 2004/04/14 17:15:57 subhasis Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -109,7 +109,7 @@ private:
   StMuDst* mStMuDst;
   StMuEmcUtil* mEmcUtil;
   StMuPmdUtil* mPmdUtil;
-  //StMuTofUtil* mTofUtil;
+  StMuTofUtil* mTofUtil;
 
   TChain* mChain;
   int mNumberOfEvents; ///< holds the number of events in the current chain (file)
@@ -165,6 +165,9 @@ inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.8  2004/04/14 17:15:57  subhasis
+ * Xin's TOF reinclusion
+ *
  * Revision 1.7  2004/04/09 22:02:50  subhasis
  * after tof createevent fix by Xin
  *

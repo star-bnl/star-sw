@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdUtil.cxx,v 1.1 2004/04/02 03:36:21 jeromel Exp $
+ * $Id: StMuPmdUtil.cxx,v 1.2 2004/04/14 17:15:57 subhasis Exp $
  *
  * Class : StMuPmdUtil
  * Author: Supriya Das
@@ -9,6 +9,9 @@
  *              StEvent to StMuDst and vice versa
  * ****************************************************************
  * $Log: StMuPmdUtil.cxx,v $
+ * Revision 1.2  2004/04/14 17:15:57  subhasis
+ * Xin's TOF reinclusion
+ *
  * Revision 1.1  2004/04/02 03:36:21  jeromel
  * New files for PMD
  *
@@ -67,7 +70,7 @@ void StMuPmdUtil::fillMuPmd(StPhmdCollection *phmdColl, StMuPmdCollection *muPmd
 	if(cluscol)
 	  {
 	    Int_t Ncluster0 = cluscol->numberOfclusters();
-	    cout<<"Ncluster0, "<<Ncluster0<<" "<<PmdDet<<endl;
+	    //cout<<"Ncluster0, "<<Ncluster0<<" "<<PmdDet<<endl;
 	    if(Ncluster0 > 0)
 	      {
 		const StSPtrVecPhmdCluster& pmdclusters = cluscol->clusters();	  
@@ -122,7 +125,7 @@ void StMuPmdUtil::fillPmd(StMuPmdCollection* muPmd, StPhmdCollection* phmdColl)
       
       Int_t PmdDet=d+1;
       Int_t nClusters = muPmd->getNClusters(PmdDet);
-     cout<<"PmdDet, nclusters "<<PmdDet<<" "<<nClusters<<endl; 
+    // cout<<"PmdDet, nclusters "<<PmdDet<<" "<<nClusters<<endl; 
       if(nClusters>0)
 	{
           StPhmdClusterCollection* phmdClusColl = new StPhmdClusterCollection();

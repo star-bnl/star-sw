@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.53 2004/04/09 22:03:50 subhasis Exp $
+ * $Id: StMuDstMaker.cxx,v 1.54 2004/04/14 17:15:56 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -159,8 +159,8 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
   mPmdUtil = new StMuPmdUtil();
-  //mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil ) //|| ! mTofUtil )
+  mTofUtil = new StMuTofUtil();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
   createArrays();
@@ -173,7 +173,7 @@ StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
   clear(999);
   delete mStMuDst;
-  //delete mTofUtil;
+  delete mTofUtil;
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -529,8 +529,8 @@ void StMuDstMaker::openRead() {
     DEBUGVALUE3(mChain);
     setBranchAddresses(mChain);
 
-    //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
-    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
+    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+    //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
   }
 
 }
@@ -653,7 +653,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillDetectorStates(ev);
     fillEmc(ev);
     fillPmd(ev);
-    //fillTof(ev);
+    fillTof(ev);
   }
   catch(StMuException e) {
     e.print();
@@ -1063,6 +1063,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.54  2004/04/14 17:15:56  subhasis
+ * Xin's TOF reinclusion
+ *
  * Revision 1.53  2004/04/09 22:03:50  subhasis
  * after tof createevent fix by Xin
  *
