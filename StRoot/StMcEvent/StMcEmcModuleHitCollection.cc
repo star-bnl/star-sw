@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcEmcModuleHitCollection.cc,v $
+ * Revision 2.3  2001/05/13 21:12:10  calderon
+ * Modifications by Aleksei to the Emc Hit Collections on indexing of
+ * module numbers
+ *
  * Revision 2.2  2000/08/30 14:52:03  calderon
  * New changes made by Aleksei.
  *
@@ -21,7 +25,7 @@
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcCalorimeterHit.hh"
 
-static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.2 2000/08/30 14:52:03 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEmcModuleHitCollection.cc,v 2.3 2001/05/13 21:12:10 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcEmcModuleHitCollection)
@@ -36,10 +40,10 @@ StMcEmcModuleHitCollection::StMcEmcModuleHitCollection()
 void StMcEmcModuleHitCollection::init(const unsigned int m)  
 {
   //
-  // m - index in container
+  // m - module number
   //
   char name[10];
-  sprintf(name,"m%3.3i",m+1);
+  sprintf(name,"m%3.3i",m);
   SetName(name);
 }
 

@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcEmcHitCollection.cc,v $
+ * Revision 2.3  2001/05/13 21:12:10  calderon
+ * Modifications by Aleksei to the Emc Hit Collections on indexing of
+ * module numbers
+ *
  * Revision 2.2  2000/08/30 14:52:02  calderon
  * New changes made by Aleksei.
  *
@@ -40,24 +44,25 @@ StMcEmcHitCollection::~StMcEmcHitCollection()
 StMcEmcHitCollection::EAddHit 
 StMcEmcHitCollection::addHit(StMcCalorimeterHit* hit)
 {
-    unsigned int m, i;
-    if (hit && (m = hit->module()-1) < mNumberOfModules) {
-      if(mModules[m].numberOfHits() == 0) {
+  unsigned int m ,i; // i - array index, m - module nuumber;
+    if (hit && (m = hit->module())<=mNumberOfModules && m>=1) {
+      i = m - 1;
+      if(mModules[i].numberOfHits() == 0) {
 
-        mModules[m](m); // Set name
-        Add((TDataSet*)(&mModules[m]));
+        mModules[i](m); // Set name
+        Add((TDataSet*)(&mModules[i]));
 
-        mModules[m].hits().push_back(hit); // New hit(first)
+        mModules[i].hits().push_back(hit); // New hit(first)
         return kNew;
       }
       else {
-        for(i=0; i<mModules[m].numberOfHits(); i++){
-          if((*mModules[m].hits()[i]) == (*hit)) { // Hits from the same particle
-            (*mModules[m].hits()[i])  += (*hit);
+        for(unsigned int ih=0; ih<mModules[i].numberOfHits(); ih++){
+          if((*mModules[i].hits()[ih]) == (*hit)) { // Hits from the same particle
+            (*mModules[i].hits()[ih])  += (*hit);
             return kAdd;
           }
         }
-        mModules[m].hits().push_back(hit); // New hit
+        mModules[i].hits().push_back(hit); // New hit
         return kNew;
       }
     }
@@ -81,25 +86,30 @@ float
 StMcEmcHitCollection::sum() const
 {
     float s = 0.0;
-    for(unsigned int m=0; m < mNumberOfModules; m++){
-        s += module(m)->sum();
+    unsigned int i, m;
+    for(i=0; i < mNumberOfModules; i++){
+      m  = i + 1;
+      s += module(m)->sum();
     }
     return s;
 }
 
 StMcEmcModuleHitCollection*
-StMcEmcHitCollection::module(unsigned int i)
+StMcEmcHitCollection::module(unsigned int m)
 {
-    if (i < mNumberOfModules)
+// m - module number; i-index number;  i = m - 1; // 10-may-2001 
+    unsigned int i = m - 1;
+    if (i>=0 && i < mNumberOfModules)
         return &(mModules[i]);
     else
         return 0;
 }
 
 const StMcEmcModuleHitCollection*
-StMcEmcHitCollection::module(unsigned int i) const
+StMcEmcHitCollection::module(unsigned int m) const
 {
-    if (i < mNumberOfModules)
+    unsigned int i = m - 1;
+    if (i>=0 && i < mNumberOfModules)
         return &(mModules[i]);
     else
         return 0;
@@ -118,8 +128,10 @@ StMcEmcHitCollection::print()
   //  cout<<"\n  "<<numberOfHits()<<" hits for "<<GetName()<<" sum Energy "<<sum()<<"\n";
   cout<<"-----------\n"<<GetName()<<" has "<<numberOfHits()<<" hits in "
       <<GetListSize()<<" modules. Deposit Energy "<<sum()<<" GeV \n-----------\n";
-  for (int m=0; m<mNumberOfModules; m++) {
-    StSPtrVecMcCalorimeterHit& hits=mModules[m].hits();
+  unsigned int i, m;
+  for (i=0; i<mNumberOfModules; i++) {
+    m = i + 1;
+    StSPtrVecMcCalorimeterHit& hits=mModules[i].hits();
     int nh = hits.size();
     if (nh > 0) {
       cout<<" " <<module(m)->GetName()<<" #hits "<<nh<<" Dep.Energy " << 
