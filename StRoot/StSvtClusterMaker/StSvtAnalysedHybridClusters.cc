@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.6 2002/01/05 21:45:56 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.7 2002/05/08 16:03:52 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.7  2002/05/08 16:03:52  caines
+ * Fix again memory leak - accidentally pput back in data has to be a const() not data()
+ *
  * Revision 1.6  2002/01/05 21:45:56  caines
  * Include t0 correction in hit
  *
@@ -177,7 +180,7 @@ int StSvtAnalysedHybridClusters::setSvtHit(scs_spt_st* mSrsHit)
   mSvtHit[mNumOfHits].setPosition(mGlobalPos);  //invokes StMeasuredPoint::setPosition(StThreeVectorF&)
   
   
-  mSvtHitData[mNumOfHits].peakAdc = mSvtHit[mNumOfHits].charge()/4; //Put in a PEAK ADC value of quarter of charge
+  mSvtHitData[mNumOfHits].peakAdc =(int) (mSvtHit[mNumOfHits].charge()/4.); //Put in a PEAK ADC value of quarter of charge
   mSvtHitData[mNumOfHits].numOfAnodesInClu = 0;
   mSvtHitData[mNumOfHits].numOfPixelsInClu = 0;
   mSvtHitData[mNumOfHits].mom2[0] = mSrsHit->mom2[0];

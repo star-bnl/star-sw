@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.20 2002/04/25 20:34:50 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.21 2002/05/08 16:03:52 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
+ * Revision 1.21  2002/05/08 16:03:52  caines
+ * Fix again memory leak - accidentally pput back in data has to be a const() not data()
+ *
  * Revision 1.20  2002/04/25 20:34:50  caines
  * Pass bad anode information into cluster fitter
  *
@@ -136,9 +139,9 @@ Int_t StSvtClusterAnalysisMaker::Init()
 
   
   GetSvtRawEvent();
-  //GetSvtEvent();
-  //GetSvtCluster();
-  //SetSvtAnalysis();
+  GetSvtEvent();
+  GetSvtCluster();
+  SetSvtAnalysis();
 
    
   mTotalNumberOfHybrids = mSvtRawEventColl->getTotalNumberOfHybrids();
@@ -211,7 +214,8 @@ Int_t StSvtClusterAnalysisMaker::GetSvtPixels()
 Int_t StSvtClusterAnalysisMaker::SetSvtAnalysis()
 {
   mSvtAnalSet = new St_ObjectSet("StSvtAnalResults");
-  AddData(mSvtAnalSet);  
+  // AddData(mSvtAnalSet); 
+  AddConst(mSvtAnalSet); 
   SetOutput(mSvtAnalSet); //Declare for output
 
   mSvtAnalColl = new StSvtHybridCollection(mSvtAdjEvent->getConfiguration());
@@ -298,7 +302,7 @@ Int_t StSvtClusterAnalysisMaker::Make()
     return kStWarn;
   }
 
-  SetSvtAnalysis();
+  //SetSvtAnalysis();
   SetClusterAnalysis();
 
   if( Debug()) MakeHistograms();
