@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.35 2004/08/24 20:24:32 oldi Exp $
+// $Id: StFlowCutEvent.cxx,v 1.36 2005/02/08 20:57:36 psoren Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -43,9 +43,10 @@ Float_t  StFlowCutEvent::mEtaSymTpcCuts[2]  = {-3., 3.};
 UInt_t   StFlowCutEvent::mEtaSymTpcCutN     = 0;     
 Float_t  StFlowCutEvent::mEtaSymFtpcCuts[2] = {-5., 5.};
 UInt_t   StFlowCutEvent::mEtaSymFtpcCutN    = 0;     
-Float_t  StFlowCutEvent::mTriggerCut        = 0;
+UInt_t   StFlowCutEvent::mTriggerCut        = 1;
 UInt_t   StFlowCutEvent::mTriggerCutN       = 0;
-
+UInt_t   StFlowCutEvent::mTriggersFound     = 10;
+UInt_t   StFlowCutEvent::flowTriggerBitMap  = 0;
 //-----------------------------------------------------------------------
 
 StFlowCutEvent::StFlowCutEvent() {
@@ -79,15 +80,6 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
     return kFALSE;
   }
   
-  if (!(pEvent->runInfo()->centerOfMassEnergy() > 60. && pEvent->runInfo()->centerOfMassEnergy() < 65.)) { // not 62 GeV
-    // for 62 GeV this is within the triggerID cut
-    if (pEvent->l3Trigger() && pEvent->l3Trigger()->l3EventSummary() &&
-	!(pEvent->l3Trigger()->l3EventSummary()->unbiasedTrigger())) {
-      // cout << "FlowCutEvent: L3 biased trigger event " << endl;
-      return kFALSE;
-    }
-  }
-
   // update normal event counter
   mEventN++;
 
@@ -117,10 +109,11 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
     return kFALSE;
   }
 
-  // Trigger
-  Float_t trigger = 0.;
+  //////////////////////////////////////////////////////
+  // Check the for acceptable trigger words
 
-  if (pEvent->runInfo()->centerOfMassEnergy() > 60. && pEvent->runInfo()->centerOfMassEnergy() < 65. ) { // 62 GeV
+  if (pEvent->runId() > 4000000 ) { // trigger collections were used
+
     Float_t ctbMult = 0.;
     StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
     if (triggers) {
@@ -132,41 +125,86 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
 	}
       }
     }
-     
-    UInt_t triggerId = 0;
-    if (pEvent->triggerIdCollection()->nominal()->isTrigger(35004)) triggerId = 35004;
-    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35007)) triggerId = 35007;
-    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35001)) triggerId = 35001;
-    else if (pEvent->triggerIdCollection()->nominal()->isTrigger(35009)) triggerId = 35009;
-    
-    if (!( (triggerId == 35004 || triggerId == 35007) ||
-	  ((triggerId == 35001 || triggerId == 35009) && ctbMult > 15) )) {
-      trigger = 10.; // no clue
-    } else {
-      trigger = 1.; // minbias
+
+    /////////////////////////////////////////////////
+    // Add new minbias triggers to look for here
+    /////////////////////////////////////////////////
+    if      ( // year 4 full field minbias triggers
+	     pEvent->triggerIdCollection()->nominal()->isTrigger(15007)
+	     // || pEvent->triggerIdCollection().nominal().isTrigger(15003)
+	     ){
+      flowTriggerBitMap += 1;
+    } 
+    else if ( // year 4 half field minbias triggers
+	     pEvent->triggerIdCollection()->nominal()->isTrigger(25007) 
+	     ){
+      flowTriggerBitMap += 1;
+    } 
+    else if ( // 62 GeV triggers
+	     pEvent->triggerIdCollection()->nominal()->isTrigger(35004) ||
+	     pEvent->triggerIdCollection()->nominal()->isTrigger(35007) ||
+	     ( pEvent->triggerIdCollection()->nominal()->isTrigger(35001) && 
+	       ctbMult > 15 ) ||
+	     ( pEvent->triggerIdCollection()->nominal()->isTrigger(35009) && 
+	       ctbMult > 15 )
+	     ){
+      flowTriggerBitMap += 1;
     }
+
+    /////////////////////////////////////////////////
+    // Add new central triggers to look for here
+    /////////////////////////////////////////////////    
+    if        ( // year 4 full field central triggers
+       pEvent->triggerIdCollection()->nominal()->isTrigger(15105) 
+       ){
+      flowTriggerBitMap += 2;;
+    } else if ( // year 4 half field central
+	       pEvent->triggerIdCollection()->nominal()->isTrigger(25105) 
+	       ){
+      flowTriggerBitMap += 2;
+    }
+    
+    //Make selection from trigger bit map
+    if (mTriggerCut==0 && (flowTriggerBitMap &2 || flowTriggerBitMap &1) ){
+      mTriggersFound = 0;
+    } else if (mTriggerCut==1 && (flowTriggerBitMap &1) ){
+      mTriggersFound = 1;
+    } else if (mTriggerCut==2 && (flowTriggerBitMap &2) ){
+      mTriggersFound = 2;
+    } else {//an unsupported trigger cut selection was made (0, 1, and 2)
+      mTriggerCutN++;
+      return kFALSE;
+    }
+
   } 
-  
+
+  //////////////////////////////////////////
+  // before run 4 triggerWords were used
   else {
+    if (pEvent->l3Trigger() && pEvent->l3Trigger()->l3EventSummary() &&
+	!(pEvent->l3Trigger()->l3EventSummary()->unbiasedTrigger())) {
+      // cout << "FlowCutEvent: L3 biased trigger event " << endl;
+      return kFALSE;
+    }
+    
     StL0Trigger* pTrigger = pEvent->l0Trigger();
     
     if (pTrigger) {
       UInt_t triggerWord = pTrigger->triggerWord();
       
       switch (triggerWord) {
-      case 4096:  trigger = 1.;  break; // minbias
-      case 4352:  trigger = 2.;  break; // central
-      case 61952: trigger = 3.;  break; // laser
-      default:    trigger = 10.; break; // no clue
+      case 4096:  mTriggersFound = 1;  break; // minbias
+      case 4352:  mTriggersFound = 2;  break; // central
+      case 61952: mTriggersFound = 3;  break; // laser
+      default:    mTriggersFound = 10; break; // no clue
       }
+    }    
+    if (mTriggerCut && mTriggersFound != mTriggerCut) {
+      mTriggerCutN++;
+      return kFALSE;
     }
   }
   
-  if (mTriggerCut && trigger != mTriggerCut) {
-    mTriggerCutN++;
-    return kFALSE;
-  }
-
   mGoodEventN++;
   return kTRUE;
 }
@@ -186,6 +224,7 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
     return kFALSE;
   }
    
+  //This is obsolete!!!! There is no trigger word after year 4
   // Trigger
   UInt_t triggerWord = pPicoEvent->L0TriggerWord();
   Float_t trigger;
@@ -282,62 +321,103 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
     return kFALSE;
   }
    
-  // Trigger
-  Float_t trigger;
-  if (pMuEvent->runInfo().centerOfMassEnergy() > 60. && pMuEvent->runInfo().centerOfMassEnergy() < 65. ) { // 62 GeV
+  //////////////////////////////////////////////////////
+  // Check the for acceptable trigger words and set the
+  // correct Flow::centrality array
+  Int_t* cent = 0;
+  Int_t centrality = 0; // Centrality=0 is not retrievable
 
-    UInt_t triggerId = 0;
-    if (pMuEvent->triggerIdCollection().nominal().isTrigger(35004)) triggerId = 35004;
-    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35007)) triggerId = 35007;
-    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35001)) triggerId = 35001;
-    else if (pMuEvent->triggerIdCollection().nominal().isTrigger(35009)) triggerId = 35009;
+  if (pMuEvent->runId() > 4000000 ) { // trigger collections were used
 
-    if (!( (triggerId == 35004 || triggerId == 35007) ||
-	  ((triggerId == 35001 || triggerId == 35009) && pMuEvent->ctbMultiplicity() > 15) )) {
-      trigger = 10.; // no clue
-    } else {
-      trigger = 1.; // minbias
+    /////////////////////////////////////////////////
+    // Add new minbias triggers to look for here
+    /////////////////////////////////////////////////
+    if      ( // year 4 full field minbias triggers
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(15007)
+	     // || pMuEvent->triggerIdCollection().nominal().isTrigger(15003)
+	     ){
+      flowTriggerBitMap += 1;
+      cent = Flow::cent200Year4Full; // full field
+    } 
+    else if ( // year 4 half field minbias triggers
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(25007) 
+	     ){
+      flowTriggerBitMap += 1;
+      cent = Flow::cent200Year4Half; // half field
+    } 
+    else if ( // 62 GeV triggers
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(35004) ||
+	     pMuEvent->triggerIdCollection().nominal().isTrigger(35007) ||
+	     ( pMuEvent->triggerIdCollection().nominal().isTrigger(35001) && 
+	       pMuEvent->ctbMultiplicity() > 15 ) ||
+	     ( pMuEvent->triggerIdCollection().nominal().isTrigger(35009) && 
+	       pMuEvent->ctbMultiplicity() > 15 )
+	     ){
+      flowTriggerBitMap += 1;
+      cent = Flow::cent62; // 62.4 GeV data
     }
-  }
 
+    /////////////////////////////////////////////////
+    // Add new central triggers to look for here
+    /////////////////////////////////////////////////    
+    if        ( // year 4 full field central triggers
+       pMuEvent->triggerIdCollection().nominal().isTrigger(15105) 
+       ){
+      flowTriggerBitMap += 2;
+      cent = Flow::cent200Year4Full; // full field
+    } else if ( // year 4 half field central
+	       pMuEvent->triggerIdCollection().nominal().isTrigger(25105) 
+	       ){
+      flowTriggerBitMap += 2;
+      cent = Flow::cent200Year4Half; // half field
+    }
+    
+    //Make selection from trigger bit map
+    if (mTriggerCut==0 && (flowTriggerBitMap &2 || flowTriggerBitMap &1) ){
+      mTriggersFound = 0;
+    } else if (mTriggerCut==1 && (flowTriggerBitMap &1) ){
+      mTriggersFound = 1;
+    } else if (mTriggerCut==2 && (flowTriggerBitMap &2) ){
+      mTriggersFound = 2;
+    } else {//an unsupported trigger cut selection was made (0, 1, and 2)
+      mTriggerCutN++;
+      return kFALSE;
+    }
+
+  } 
+  //////////////////////////////////////////
+  // before run 4 triggerWords were used
   else {
     if (!pMuEvent->l3EventSummary().unbiasedTrigger()) {
       // cout << "FlowCutEvent: L3 biased trigger event " << endl;
       return kFALSE;
     }
-
+    
     UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
     
     switch (triggerWord) {
-    case 4096:  trigger = 1.;  break; // minbias
-    case 4352:  trigger = 2.;  break; // central
-    case 61952: trigger = 3.;  break; // laser
-    default:    trigger = 10.; break; // no clue
+    case 4096:  mTriggersFound = 1;  break; // minbias
+    case 4352:  mTriggersFound = 2;  break; // central
+    case 61952: mTriggersFound = 3;  break; // laser
+    default:    mTriggersFound = 10; break; // no clue
     }
-  }
-
-  if (mTriggerCut && trigger != mTriggerCut) {
-    mTriggerCutN++;
-    return kFALSE;
-  }
-
-  // Centrality
-  // Centrality=0 is not retrievable
-  Int_t* cent = 0;
-  Int_t centrality = 0;
-
-  if (pMuEvent->runInfo().centerOfMassEnergy() >= 199.) {
-    if (fabs(pMuEvent->magneticField()) >= 4.) { // year=2, Au+Au, Full Field
-      cent = Flow::cent200Full;
-    } else { // year=2, Au+Au, Half Field
-      cent = Flow::cent200Half;
+    
+    if (pMuEvent->runInfo().centerOfMassEnergy() >= 199.) {
+      if (fabs(pMuEvent->magneticField()) >= 4.) { // year=2, Au+Au, Full Field
+	cent = Flow::cent200Full;
+      } else { // year=2, Au+Au, Half Field
+	cent = Flow::cent200Half;
+      }
+    } else if (pMuEvent->runInfo().centerOfMassEnergy() <= 25.){ // year=2, 22 GeV
+      cent = Flow::cent22;
     }
-  } else if (pMuEvent->runInfo().centerOfMassEnergy() <= 25.){ // year=2, 22 GeV
-    cent = Flow::cent22;
-  } else if(pMuEvent->runInfo().centerOfMassEnergy() > 60. && pMuEvent->runInfo().centerOfMassEnergy() < 65) { //62 GeV
-    cent = Flow::cent62;
-  }
+    if (mTriggerCut && mTriggersFound != mTriggerCut) {
+      mTriggerCutN++;
+      return kFALSE;
+    }
 
+  }
+  
   Int_t tracks =  pMuEvent->refMultNeg() + pMuEvent->refMultPos();
 
   if      (tracks < cent[0])  { centrality = 0; }
@@ -552,6 +632,16 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
 
 //-----------------------------------------------------------------------
 
+UInt_t StFlowCutEvent::TriggersFound() {
+  return mTriggersFound;
+}
+//-----------------------------------------------------------------------
+
+UInt_t StFlowCutEvent::GetFlowTriggerBitMap() {
+  return flowTriggerBitMap;
+}
+//-----------------------------------------------------------------------
+
 void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
 
@@ -589,6 +679,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.36  2005/02/08 20:57:36  psoren
+// trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
+//
 // Revision 1.35  2004/08/24 20:24:32  oldi
 // Minor modifications to avoid compiler warnings.
 // Small bug fix (didn't affect anyone yet).
