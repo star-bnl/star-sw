@@ -899,8 +899,8 @@ C-----------------------------------------------------------------
 
 C----------------------------------------------------------------------
 
-      INTEGER FUNCTION reset_svt
-
+      SUBROUTINE reset_svt
+ 
       implicit none
 
       integer icount,noka,igr,iwa,ind,jk,kj,j,q1,l,jj,k,nok,i,ii,
@@ -909,8 +909,6 @@ C----------------------------------------------------------------------
      @               k,nok,i,ii,itra1,npt
 
       integer jcount
-
-      reset_svt = 0
 
       noka=0
       igr=0
