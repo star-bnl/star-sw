@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.46 2000/01/10 18:03:14 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.47 2000/01/11 01:27:03 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.47  2000/01/11 01:27:03  fisyak
+// add tables for tdaq
+//
 // Revision 1.46  2000/01/10 18:03:14  fisyak
 // Add bigbig option for 40 Mw and big for 20 Mw geant common block
 //
@@ -230,7 +233,7 @@ BfcItem BFC[] = {
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
   {"gstar"       ,"" ,"","tables,geant","","","gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
-  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
+  {"tdaq"        ,""  ,"","xin,tables,tpc_daq"                                            ,"","","",kFALSE},  
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant","" ,""                                      ,"read gstar fz-file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
