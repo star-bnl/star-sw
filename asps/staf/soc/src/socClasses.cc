@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.11 1997/01/22 02:34:33 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.12 1997/01/24 00:37:25 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -71,7 +71,7 @@ socObject:: socObject(long n, const char* type) {
    myPtr = NULL; // This must be set in derived CTOR !!!
    	char *name = id2name((char*)type,n);
    myName = new string(name);
-   	free(name);
+   	FREE(name);
    myType = new string(type);
    myLock = FALSE;
    soc->signIn(this,myIdRef);
@@ -88,14 +88,14 @@ IDREF_T socObject::  idRef () {
 
 //----------------------------------
 char * socObject::  name () {
-   char *c = (char*)ASUALLOC(strlen(myName->show())+1);
+   char *c = (char*)MALLOC(strlen(myName->show())+1);
    strcpy(c,myName->show());
    return c;
 }
 
 //----------------------------------
 char * socObject::  type () {
-   char *c = (char*)ASUALLOC(strlen(myType->show())+1);
+   char *c = (char*)MALLOC(strlen(myType->show())+1);
    strcpy(c,myType->show());
    return c;
 }
@@ -103,7 +103,7 @@ char * socObject::  type () {
 //----------------------------------
 char * socObject::  version () {
    char *myVersion="dev";
-   char *c = (char*)ASUALLOC(strlen(myVersion)+1);
+   char *c = (char*)MALLOC(strlen(myVersion)+1);
    strcpy(c,myVersion);
    return c;
 }
@@ -130,10 +130,12 @@ unsigned char socObject::  lock () {
 //----------------------------------
 char * socObject:: listing () {
    char *c = NULL; 
-   c = (char*)ASUALLOC(79);
+   c = (char*)MALLOC(79);
    memset(c,0,79);
+   char *n, *t;
    sprintf(c,"| %5d | %-15s | %-15s |"
-   		, idRef(), name(), type());
+   		, idRef(), n=name(), t=type());
+   FREE(n); FREE(t);
    return c;
 }
 
@@ -178,7 +180,7 @@ long socFactory :: maxCount () {
 //:----------------------------------------------- PUB FUNCTIONS      --
 char * socFactory :: list () {
    char *c=NULL;
-   c = (char*)ASUALLOC(80*(4+maxCount()));
+   c = (char*)MALLOC(80*(4+maxCount()));
    char *l=NULL;	// individual line
    socObject *o;	// object
    char *cc;
@@ -196,7 +198,7 @@ char * socFactory :: list () {
 	 l = o->listing();
 	 cc = c + (80*lc++);
 	 sprintf(cc,"%-79s\n",l);
-	 ASUFREE(l);
+	 FREE(l);
       }
    }
    cc = c + (80*lc++);
@@ -279,7 +281,7 @@ socCatalog:: ~socCatalog() {
 //:----------------------------------------------- ATTRIBUTES         --
 char * socCatalog:: version() {
 	char * myVersion=FILE_VERSION;
-	char *c=(char*)ASUALLOC(strlen(myVersion) +1);
+	char *c=(char*)MALLOC(strlen(myVersion) +1);
 	strcpy(c,myVersion);
 	return c;
 }
@@ -351,12 +353,12 @@ STAFCV_T socCatalog:: idObject (const char * name
 	       if(i != myObjs[i]->idRef()){	//- HACK???
 printf("MAJOR ERROR REPORT!!! (%d,%d)\n",i,id=myObjs[i]->idRef());
 	       }
-	       ASUFREE(n); ASUFREE(t);
+	       FREE(n); FREE(t);
 	       EML_SUCCESS(STAFCV_OK);
 	    }
-	    ASUFREE(t);
+	    FREE(t);
 	 }
-	 ASUFREE(n);
+	 FREE(n);
       }
    }
    id = -1; /*- SOC_E_IDREF_NOTFOUND -*/
@@ -370,7 +372,7 @@ char * socCatalog :: list () {
 
    char *c = socFactory::list();
 
-   char *cc = (char*)ASUALLOC(strlen(c) +1 +162);
+   char *cc = (char*)MALLOC(strlen(c) +1 +162);
 
    sprintf(cc, 
 		"\n"
@@ -380,7 +382,7 @@ char * socCatalog :: list () {
 		"SOC - Service & Object Catalog listing"
 		" *******************\n"
 		"%s\n",c);
-   ASUFREE(c);
+   FREE(c);
    return cc;
 }
 

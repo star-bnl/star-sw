@@ -111,14 +111,17 @@ interface socCatalog_i : socFactory_i {
 // ** NONE **
 
 //:----------------------------------------------- FUNCTIONS          --
-IDREF_T nextIdRef();
-		/* Return the next valid idRef#. */
 STAFCV_T deleteID(in IDREF_T id);
 		/* Delete object with idRef# == id. */
 STAFCV_T deleteObject(in string name, in string type);
 		/* Delete a named and typed object. */
+socObject_i findInterface(in string type);
+		/* Find the "first" object which implements interface
+		"type" */
 socObject_i findObject(in string name, in string type);
 		/* Locate an object by name and type. */
+socObject_i findClass(in string type);
+		/* Find the "first" object of class "type" */
 socObject_i getObject(in IDREF_T id);
 		/* Locate an object by idRef#. */
 IDREF_T idObject(in string name, in string type);
@@ -127,6 +130,8 @@ IDREF_T idObject(in string name, in string type);
 socObject_i newObject(in string name);
 		/* Instantiate a new socObject. Analogous to a C++
 		constructor function. */
+IDREF_T nextIdRef();
+		/* Return the next valid idRef#. */
 IDREF_T signIn(in socObject_i obj);
 		/* Sign an object into the SOCatalog. 
 		N.B. This function may eventually be removed. */
