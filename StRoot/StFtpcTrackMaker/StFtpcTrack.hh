@@ -1,5 +1,20 @@
-// $Id: StFtpcTrack.hh,v 1.13 2002/10/24 16:37:45 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.16 2002/11/28 09:39:30 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.16  2002/11/28 09:39:30  oldi
+// Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
+// It was used do decide for global or primary fit.
+// Code was prepared to fill momentum values at outermost points on tracks.
+// This feature is not used up to now.
+// Code cleanups.
+//
+// Revision 1.15  2002/11/06 13:46:04  oldi
+// Global/primary fit handling simplified.
+// Code clean ups.
+//
+// Revision 1.14  2002/10/31 13:40:27  oldi
+// Method GetSector() added.
+// Method GetMeanR() and GetMeanAlpha() added.
+//
 // Revision 1.13  2002/10/24 16:37:45  oldi
 // dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
 // Therefore it is the smallest three dimensional distance of the helix to the
@@ -112,7 +127,7 @@ private:
   // data from tracker
   TObjArray *mPoints;         // Array of pointers to clusters of track
   MIntArray *mPointNumbers;   // Array of numbers of clusters
-  Int_t  mRowsWithPoints;     // Binary pattern to know in which row a point is found
+      Int_t  mRowsWithPoints; // Binary pattern to know in which row a point is found
 
      Int_t   mTrackNumber;    // number of track
   Double_t   mChi2Circle;     // Chi squared of circle fit
@@ -132,14 +147,16 @@ private:
   
   // data from momentum fit
   TVector3   mP;              // ThreeVector of track momentum
-  TVector3   mV;              // ThreeVector of vertex used in fit
+  TVector3   mV;              // ThreeVector of vertex used in fit (= first point on track)
+  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.  
+  // TVector3   mL;              // ThreeVector of last point on track)  
      Int_t   mQ;              // charge measured in fit 
   Double_t   mChiSq[2];       // Chi2 of momentum fit
   Double_t   mTheta;          // theta value of momentum fit
   Double_t   mDca;            // radial impact parameter to main vertex
 
   // dE/dx information
-  Double_t   mdEdx;           // Mean nergy loss per length
+  Double_t   mdEdx;           // Mean energy loss per length
      Int_t   mNumdEdxHits;    // Number of hits accepted for dE/dx
 
 
@@ -155,13 +172,15 @@ public:
       void   AddPoint(StFtpcPoint *point);                                        // adds a point to the track
       void   AddForwardPoint(StFtpcPoint* point);                                 // adds a point after all shifting all existing points by one slot
       void   Fit();                                                               // momentum fit
-      void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex);  // momentum fit with vertex
+      void   Fit(StFtpcVertex *vertex, Double_t max_Dca, Bool_t primary_fit);     // momentum fit with vertex
       void   CalculateNMax();                                                     // calculates the max. possible number of points
   Double_t   CalcDca(StFtpcVertex *vertex, Bool_t primaryFit);                    // calculation of distance of closest approach (dca) to main vertex
   Double_t   CalcAlpha0();                                                        // calculation of the angle of xt with respect to the x axis
       void   CalcAndSetAlpha0() { this->SetAlpha0(this->CalcAlpha0()); }          // calculates and sets the angle of xt with respect to the x axis
       void   CalcResiduals();                                                     // calulates the residuals for each point on track
-     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex);  // writes track to table
+     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, 
+			StFtpcVertex *vertex,
+			Bool_t primary_fit);                                      // writes track to table
 
   // momentum fit
   void MomentumFit(StFtpcVertex *vertex = 0);
@@ -187,8 +206,10 @@ public:
   Short_t     GetNMax()             const { return mNMax;                            }
   Double_t    GetRFirst()           const { return mRFirst;                          }
   Double_t    GetRLast()            const { return mRLast;                           }
+  Double_t    GetMeanR()            const { return TMath::Abs((mRFirst+mRLast)/2.);  }
   Double_t    GetAlphaFirst()       const { return mAlphaFirst;                      }
   Double_t    GetAlphaLast()        const { return mAlphaLast;                       }
+  Double_t    GetMeanAlpha();
   Int_t       GetNumberOfPoints()   const { return mPoints->GetEntriesFast();        }
   Bool_t      ComesFromMainVertex() const { return mFromMainVertex;                  }
   TVector3    GetMomentum()         const { return mP;                               }
@@ -201,8 +222,12 @@ public:
   Double_t    GetEta() const; 
   Double_t    GetRapidity() const;
   Int_t       GetHemisphere() const;
+  Int_t       GetSector() const;
 
   TVector3    GetVertex()           const { return mV;                               }
+  TVector3    GetFirstPointOnTrack()const { return mV;                               }
+  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.
+  // TVector3    GetLastPointOnTrack() const { return mL;                               }
   Int_t       GetCharge()           const { return mQ;                               }
   Double_t const  *GetChiSq()       const { return mChiSq;                           }
   Double_t    GetTheta()            const { return mTheta;                           }
@@ -258,6 +283,19 @@ protected:
 
   ClassDef(StFtpcTrack, 1)    // Ftpc track class  
 };
+
+
+inline Double_t StFtpcTrack::GetMeanAlpha()
+{
+  // Returns mean phi angle of track.
+
+  Double_t phi = mAlphaFirst+mAlphaLast;
+  
+  if (phi >= 2*TMath::Pi()) phi -= 2*TMath::Pi();
+  else if (phi <= -2*TMath::Pi())  phi += 2*TMath::Pi();
+
+  return phi/2.;
+}
 
 
 inline Double_t StFtpcTrack::GetPt() const

@@ -17,12 +17,17 @@ const int trigBXing=-firstBXing;
 class CtbResponse {
 
  private:
+    unsigned int mMode; // 0 == data, 1 == MC, 2 == Embedding?
+
  public:
-  CtbResponse( StVertexMaker *, int* , float *);
-  struct Jcyl {float eta,phi,gBXing; int ID;}; // ID=tray+120*slat 
-  vector <Jcyl> hits[MxTimeSlot];
-  void * GVER[MxTimeSlot];
-  void  ctb_get_slat_from_data(int slat, int tray, float & phiDeg, float &eta);
+    void SetCTBMode(unsigned int mode){ mMode = mode;};
+    unsigned int GetCTBMode(){ return mMode;};
+    
+    CtbResponse( StVertexMaker *, int* , float *,unsigned int);
+    struct Jcyl {float eta,phi,gBXing; int ID;};  // ID=tray+120*slat 
+    vector <Jcyl> hits[MxTimeSlot];
+    void * GVER[MxTimeSlot];
+    void  ctb_get_slat_from_data(int slat, int tray, float & phiDeg, float &eta);
 };
 
 #endif

@@ -1,5 +1,12 @@
-// $Id: StFtpcVertex.cc,v 1.11 2002/10/11 15:45:50 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.13 2002/11/06 13:47:59 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.13  2002/11/06 13:47:59  oldi
+// IFlag and Id added as data members.
+// New functionality introduced (to clean up StFtpcTrackMaker.cxx).
+//
+// Revision 1.12  2002/10/31 13:42:55  oldi
+// Code cleanup.
+//
 // Revision 1.11  2002/10/11 15:45:50  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -100,6 +107,9 @@ StFtpcVertex::StFtpcVertex()
   SetXerr(0.);
   SetYerr(0.);
   SetZerr(0.);
+
+  SetIFlag(0);
+  SetId(0);
   
   return;
 }
@@ -109,11 +119,11 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 {
   // constructor with ftpc points - fits vertex from points
 
-  Float_t *rmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6*numFppoints];
-  Float_t *zmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()];
+  Double_t *rmap = new Double_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6*numFppoints];
+  Double_t *zmap = new Double_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()];
   Int_t *mapMax = new Int_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6];
   Int_t *myhist = new Int_t[StFtpcTrackingParams::Instance()->HistoBins()];
-  Float_t hratio=StFtpcTrackingParams::Instance()->HistoBins()/(StFtpcTrackingParams::Instance()->HistoMax()-StFtpcTrackingParams::Instance()->HistoMin());
+  Double_t hratio=StFtpcTrackingParams::Instance()->HistoBins()/(StFtpcTrackingParams::Instance()->HistoMax()-StFtpcTrackingParams::Instance()->HistoMin());
   
   for(Int_t iii=0; iii<StFtpcTrackingParams::Instance()->HistoBins(); iii++) {
     myhist[iii]=0;
@@ -136,13 +146,13 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 	if(rowIn<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() || rowOut>=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	  
 	  for(Int_t iOut=0; iOut<mapMax[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iOut++) {
-	    Float_t ri=rmap[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iOut];	    
+	    Double_t ri=rmap[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iOut];	    
 
 	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iIn++) {
-	      Float_t rj=rmap[rowIn+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iIn];
+	      Double_t rj=rmap[rowIn+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iIn];
 			  
 	      if(rj>ri) {
-		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);		
+		Double_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);		
 		
 		if (vtx_pos) {
 		  vtx_pos->Fill(intersect);
@@ -161,8 +171,8 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
 
   Int_t maxBin=StFtpcTrackingParams::Instance()->HistoBins()/2, maxHeight=0;
   
-  Float_t vertex = 0.;
-  Float_t sigma = 0.;
+  Double_t vertex = 0.;
+  Double_t sigma = 0.;
 
   for(Int_t hindex=1; hindex<StFtpcTrackingParams::Instance()->HistoBins()-1; hindex++) {
     
@@ -206,14 +216,18 @@ StFtpcVertex::StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints, TH1F 
   SetY((Double_t) 0);
   SetXerr(0.);
   SetYerr(0.);
-  if(vertex*0 != 0)
-    {
-      cerr << "vertex not found, setting to 0!" << endl;
-      vertex = 0;
-      sigma = 0.;
-    }
+
+  if(vertex*0 != 0) {
+    cerr << "vertex not found, setting to 0!" << endl;
+    vertex = 0;
+    sigma = 0.;
+  }
+
   SetZ((Double_t) vertex);
   SetZerr((Double_t) sigma);
+
+  SetIFlag(0);
+  SetId(0);
 }
 
 
@@ -223,11 +237,11 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 
   Int_t numFppoints = hits->GetEntriesFast();
 
-  Float_t *rmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6*numFppoints];
-  Float_t *zmap = new Float_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()];
+  Double_t *rmap = new Double_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6*numFppoints];
+  Double_t *zmap = new Double_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()];
   Int_t *mapMax = new Int_t[StFtpcTrackingParams::Instance()->NumberOfPadRows()*6];
   Int_t *myhist = new Int_t[StFtpcTrackingParams::Instance()->HistoBins()];
-  Float_t hratio=StFtpcTrackingParams::Instance()->HistoBins()/(StFtpcTrackingParams::Instance()->HistoMax()-StFtpcTrackingParams::Instance()->HistoMin());
+  Double_t hratio=StFtpcTrackingParams::Instance()->HistoBins()/(StFtpcTrackingParams::Instance()->HistoMax()-StFtpcTrackingParams::Instance()->HistoMin());
   
   for(Int_t iii=0; iii<StFtpcTrackingParams::Instance()->HistoBins(); iii++) {
     myhist[iii]=0;
@@ -253,13 +267,13 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 	if(rowIn<StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() || rowOut>=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	  
 	  for(Int_t iOut=0; iOut<mapMax[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iOut++) {
-	    Float_t ri=rmap[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iOut];	    
+	    Double_t ri=rmap[rowOut+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iOut];	    
 
 	    for(Int_t iIn=0; iIn<mapMax[(rowIn)+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI]; iIn++) {
-	      Float_t rj=rmap[rowIn+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iIn];
+	      Double_t rj=rmap[rowIn+StFtpcTrackingParams::Instance()->NumberOfPadRows()*secI+120*iIn];
 			  
 	      if(rj>ri) {
-		Float_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);
+		Double_t intersect=(rj*zmap[rowOut]-ri*zmap[rowIn])/(rj-ri);
 		
 		if (vtx_pos) {
 		  vtx_pos->Fill(intersect);
@@ -278,8 +292,8 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
 
   Int_t maxBin=StFtpcTrackingParams::Instance()->HistoBins()/2, maxHeight=0;
   
-  Float_t vertex = 0.;
-  Float_t sigma = 0.;
+  Double_t vertex = 0.;
+  Double_t sigma = 0.;
 
   for(Int_t hindex=1; hindex<StFtpcTrackingParams::Instance()->HistoBins()-1; hindex++) {
     
@@ -323,14 +337,18 @@ StFtpcVertex::StFtpcVertex(TObjArray *hits, TH1F *vtx_pos)
   SetY(0.);
   SetXerr(0.);
   SetYerr(0.);
-  if(vertex*0 != 0)
-    {
-      cerr << "vertex not found, setting to 0!" << endl;
-      vertex = 0.;
-      sigma = 0.;
-    }
+
+  if(vertex*0 != 0) {
+    cerr << "vertex not found, setting to 0!" << endl;
+    vertex = 0.;
+    sigma = 0.;
+  }
+
   SetZ((Double_t) vertex);
   SetZerr((Double_t) sigma);
+
+  SetIFlag(0);
+  SetId(0);
 }
 
 
@@ -360,7 +378,10 @@ StFtpcVertex::StFtpcVertex(St_DataSet *const geant)
 
     SetXerr(0.);
     SetYerr(0.);
-    SetZerr(0.);  
+    SetZerr(0.); 
+
+    SetIFlag(0);
+    SetId(0);
   }
 }
 
@@ -375,6 +396,9 @@ StFtpcVertex::StFtpcVertex(dst_vertex_st *vertex)
   SetXerr(TMath::Sqrt(vertex->covar[0]));
   SetYerr(TMath::Sqrt(vertex->covar[2]));
   SetZerr(TMath::Sqrt(vertex->covar[5]));  
+
+  SetIFlag(vertex->iflag);
+  SetId(vertex->id);
 }  
 
 
@@ -406,7 +430,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   }
 
   for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
-    
+
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
 
     if (track->GetHemisphere() == hemisphere) {
@@ -417,12 +441,11 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   // fit only 20 cm in both directions of maximum
   z_hist.Fit(&gauss_z, "QN", "", z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())-20,
 	     z_hist.GetXaxis()->GetBinCenter(z_hist.GetMaximumBin())+20);
-
   SetZ(gauss_z.GetParameter(1));
   SetZerr(gauss_z.GetParameter(2));
 
   for (Int_t i = 0; i < tracks->GetEntriesFast(); i++) {
-    
+
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
     
     if (track->GetHemisphere() == hemisphere) {
@@ -445,10 +468,13 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
 	     y_hist.GetXaxis()->GetBinCenter(y_hist.GetMaximumBin())+3);
   SetY(gauss_y.GetParameter(1));
   SetYerr(gauss_y.GetParameter(2));
+
+  SetIFlag(0);
+  SetId(0);
 }
 
 
-StFtpcVertex::StFtpcVertex(Double_t pos[6])
+StFtpcVertex::StFtpcVertex(Double_t pos[6], Int_t iFlag, Int_t id)
 {
   // constructor from Doubles
   
@@ -458,10 +484,13 @@ StFtpcVertex::StFtpcVertex(Double_t pos[6])
   SetXerr((Double_t) pos[3]);
   SetYerr((Double_t) pos[4]);
   SetZerr((Double_t) pos[5]);  
+
+  SetIFlag(iFlag);
+  SetId(id);
 }  
 
 
-StFtpcVertex::StFtpcVertex(Double_t pos[3], Double_t err[3])
+StFtpcVertex::StFtpcVertex(Double_t pos[3], Double_t err[3], Int_t iFlag, Int_t id)
 {
   // constructor from Doubles with errors
   
@@ -471,10 +500,13 @@ StFtpcVertex::StFtpcVertex(Double_t pos[3], Double_t err[3])
   SetXerr((Double_t) err[0]);
   SetYerr((Double_t) err[1]);
   SetZerr((Double_t) err[2]);
+
+  SetIFlag(iFlag);
+  SetId(id);
 }  
 
 
-StFtpcVertex::StFtpcVertex(Double_t x, Double_t y, Double_t z, Double_t x_err, Double_t y_err, Double_t z_err)
+StFtpcVertex::StFtpcVertex(Double_t x, Double_t y, Double_t z, Double_t x_err, Double_t y_err, Double_t z_err, Int_t iFlag, Int_t id)
 {
   // constructor from Doubles with errors
   
@@ -484,6 +516,9 @@ StFtpcVertex::StFtpcVertex(Double_t x, Double_t y, Double_t z, Double_t x_err, D
   SetXerr(x_err);
   SetYerr(y_err);
   SetZerr(z_err);
+
+  SetIFlag(iFlag);
+  SetId(id);
 }  
 
 
@@ -504,6 +539,9 @@ StFtpcVertex::StFtpcVertex(const StFtpcVertex &vertex)
   SetXerr(vertex.GetXerr());
   SetYerr(vertex.GetYerr());
   SetZerr(vertex.GetZerr());
+  
+  SetIFlag(vertex.GetIFlag());
+  SetId(vertex.GetId());
 }
 
 
@@ -518,7 +556,86 @@ StFtpcVertex& StFtpcVertex::operator=(const StFtpcVertex &vertex)
     SetXerr(vertex.GetXerr());
     SetYerr(vertex.GetYerr());
     SetZerr(vertex.GetZerr());
+
+    SetIFlag(vertex.GetIFlag());
+    SetId(vertex.GetId());
   }
 
   return *this;
+}
+
+
+Int_t StFtpcVertex::CheckVertex()
+{
+  // Perform tests to see if this vertex is usable for tracking.
+
+  if (GetIFlag() == 1) {
+    // TPC  Vertex used
+    gMessMgr->Message("", "I", "OST") << "Using Tpc Vertex (" << *this <<  ") for Ftpc tracking." << endm;
+  }
+  
+  else if (GetIFlag() == 101) {
+    // TPC  preVertex used
+    gMessMgr->Message("", "I", "OST") << "Using Tpc preVertex estimation (" << *this << ") for Ftpc tracking."   << endm;
+  }
+  
+  else if (GetIFlag() == 0) {
+    //  No vertex found, therefore set to (0., 0., 0.) to make FTPC tracking possible.
+    gMessMgr->Message("", "W", "OST") << "No vertex found. Use (" << *this << ")." << endm;    
+  }
+  
+  // Check for the position of the main vertex
+  if (CoordIsNan()) {
+    gMessMgr->Message("", "W", "OST") << "Error in vertex calculation - no tracking." << endm;
+
+    // No tracking!
+    return 1;
+  } 
+  
+  // Test if vertex is within the desired range.
+  
+  if (GetAbsZ() > StFtpcTrackingParams::Instance()->MaxVertexPosZWarning()) {
+    
+    if (GetAbsZ() > StFtpcTrackingParams::Instance()->PadRowPosZ(0)) {
+      gMessMgr->Message("Found vertex lies inside of one Ftpc. No Ftpc tracking possible.", "E", "OTS");
+      
+      // No tracking!
+      return 1;   
+    }
+    
+    else if (GetAbsZ() > StFtpcTrackingParams::Instance()->MaxVertexPosZError()) {
+      gMessMgr->Message("", "E", "OST") << "Found vertex is more than " 
+					<< StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
+					<< " cm off from z = 0. Ftpc tracking makes no sense." << endm;
+      // No tracking!
+      return 1;
+    }
+    
+    else {
+      gMessMgr->Message("", "W", "OST") << "Found vertex is more than " 
+					<< StFtpcTrackingParams::Instance()->MaxVertexPosZWarning() 
+					<< " cm off from z = 0 but Ftpc tracking is still possible." << endm;
+      // Do tracking.
+    }
+  }
+  
+  if (GetRadius2() >= StFtpcTrackingParams::Instance()->InnerRadius()) {
+    gMessMgr->Message("", "E", "OST") << "Found vertex x-z-position is greater than " 
+				      << StFtpcTrackingParams::Instance()->InnerRadius()
+				      << " cm (inner Ftpc radius). No Ftpc tracking possible." << endm;
+    // No tracking!
+    return 1;
+  }
+
+  return 0;
+}
+
+
+ostream& operator<< (ostream& s, const StFtpcVertex &vertex)
+{
+  // cout
+  
+  return s << "x = " << vertex.GetX() << "+-" << vertex.GetXerr() << ", " 
+	   << "y = " << vertex.GetY() << "+-" << vertex.GetYerr() << ", " 
+	   << "z = " << vertex.GetZ() << "+-" << vertex.GetZerr();
 }

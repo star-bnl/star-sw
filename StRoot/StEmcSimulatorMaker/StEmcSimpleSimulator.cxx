@@ -27,7 +27,6 @@ void StEmcSimpleSimulator::setControlDefault(UInt_t det=1)
   controlEmcPmtSimulator_st controlW;
 
   controlW.mode = 1;
-  controlW.pedDistribution  = 0;    // no pedestal distribution in default -- 17-0ct-2002
   switch (det){
     case BEMC:
       controlW.maxAdc     = 3500;   // 12 bit (max 4096)
@@ -35,6 +34,7 @@ void StEmcSimpleSimulator::setControlDefault(UInt_t det=1)
       controlW.sfCoeff[0] = 14.69;
       controlW.sfCoeff[1] = -0.1022;
       controlW.sfCoeff[2] = 0.7484;
+      controlW.pedDistribution  = 1;
       controlW.pedMean          = 10.; // for 2001 year
       controlW.pedRMS           = 2.;
       break;
@@ -93,9 +93,9 @@ void StEmcSimpleSimulator::init()
 
      for(Int_t i=0; i<=2; i++) mSF[i] = mControl[0].sfCoeff[i];
 
-     // 16-oct-202 - must be set in any case
-     setPedestal(mControl[0].pedDistribution, mControl[0].pedMean, mControl[0].pedRMS);
-
+     if(mControl[0].pedDistribution) {
+        setPedestal(mControl[0].pedDistribution, mControl[0].pedMean, mControl[0].pedRMS); 
+     }
   } else {
      printf("StEmcSimpleSimulator::init() -> wrong parameter(s) \n");
      assert(0);
@@ -265,11 +265,8 @@ Double_t StEmcSimpleSimulator::getSinTheta(Double_t eta)
 }
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcSimpleSimulator.cxx,v 1.6 2002/10/17 21:17:01 pavlinov Exp $
+//  $Id: StEmcSimpleSimulator.cxx,v 1.5 2002/09/10 16:51:30 pavlinov Exp $
 //  $Log: StEmcSimpleSimulator.cxx,v $
-//  Revision 1.6  2002/10/17 21:17:01  pavlinov
-//  default - no pedestal for all detectors
-//
 //  Revision 1.5  2002/09/10 16:51:30  pavlinov
 //  Discard line with mDbMaker->SetDateTime
 //

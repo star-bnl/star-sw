@@ -1,5 +1,15 @@
-// $Id: StFtpcTracker.hh,v 1.14 2002/06/04 13:41:37 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.16 2002/11/06 13:47:15 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.16  2002/11/06 13:47:15  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+// Code clean ups.
+//
+// Revision 1.15  2002/10/31 13:41:54  oldi
+// dE/dx parameters read from database, now.
+// Vertex estimation for different sectors added.
+// Vertex estimation for different areas (angle, radius) added.
+//
 // Revision 1.14  2002/06/04 13:41:37  oldi
 // Minor change: 'west' -> 'hemisphere' (just a naming convention)
 //
@@ -90,7 +100,6 @@
 #include "TObjArray.h"
 #include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_fcl_fppoint_Table.h"
-#include "tables/St_fde_fdepar_Table.h"
 
 class StFtpcTracker : public TObject {
 
@@ -113,34 +122,48 @@ public:
 
             StFtpcTracker();                                  // default constructor
             StFtpcTracker(St_fcl_fppoint *fcl_fppoint, 
-			  Double_t vertexPos[6] = 0, 
-			  Bool_t bench = (Bool_t)false, 
+			  StFtpcVertex *vertex = 0, 
+			  Bool_t bench = (Bool_t)kFALSE, 
 			  Double_t max_Dca = 100.);           // real constructor
             StFtpcTracker(StFtpcVertex *vertex, 
 			  TObjArray *hit, 
 			  TObjArray *track, 
-			  Bool_t bench = (Bool_t)false, 
+			  Bool_t bench = (Bool_t)kFALSE, 
 			  Double_t max_Dca = 100.);           // constructor if everything is already there
             StFtpcTracker(TObjArray *hits, 
 			  StFtpcVertex *vertex, 
-			  Bool_t bench = (Bool_t)false, 
+			  Bool_t bench = (Bool_t)kFALSE, 
 			  Double_t max_Dca = 100.);           // constructor to handle arbitrary hits 
             StFtpcTracker(StFtpcVertex *vertex, 
 			  St_fcl_fppoint *fcl_fppoint, 
 			  St_fpt_fptrack *fpt_fptrack, 
-			  Bool_t bench = (Bool_t)false, 
+			  Bool_t bench = (Bool_t)kFALSE, 
 			  Double_t max_Dca = 100.);           // constructor do do refitting
 
   virtual  ~StFtpcTracker();  // destructor
 
   void    EstimateVertex(StFtpcVertex *vertex, UChar_t iterations = 1);     // vertex estimation with fit tracks for FTPC east amd west
-  void    EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UChar_t iterations);  // vertex estimation with fit tracks
-  void    CalcEnergyLoss(FDE_FDEPAR_ST *fdepar);                            // calculates dE/dx
+  void    EstimateVertex(StFtpcVertex *vertex, Char_t hemispshere, UChar_t iterations);  // vertex estimation with fit tracks
+  StFtpcVertex EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, 
+			      Char_t sector, UChar_t iterations = 1);  // vertex estimation with fit tracks
+  StFtpcVertex EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere,
+			      Double_t lowAngle, Double_t highAngle,
+			      Double_t lowRadius, Double_t highRadius, 
+			      UChar_t iterations = 1);  // vertex estimation with fit tracks
+  void    CalcEnergyLoss();                                                 // calculates dE/dx
   void    Sorter(Double_t *arr, Int_t *index, Int_t len);                   // sorts by dE/dx
+  Int_t   GlobalFitAnddEdxAndWrite(St_fpt_fptrack *trackTable)
+          { return FitAnddEdxAndWrite(trackTable, kFALSE); }                // global momentum fit, dEdx calculation, and writing of tracks to STAF table
+  Int_t   PrimaryFitAnddEdxAndWrite(St_fpt_fptrack *trackTable) 
+          { return FitAnddEdxAndWrite(trackTable, kTRUE); }                 // primary momentum fit, dEdx calculation, and writing of tracks to STAF table
   Int_t   FitAnddEdxAndWrite(St_fpt_fptrack *trackTable, 
-			     FDE_FDEPAR_ST *fdepar, 
-			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
-  Int_t   FitAndWrite(St_fpt_fptrack *trackTable, Int_t id_start_vertex);   // does momentum fit and writes tracks to STAF table
+			     Bool_t primary_fit);                           // does momentum fit, the dEdx calculation, and writes tracks to STAF table
+  Int_t   GlobalFitAndWrite(St_fpt_fptrack *trackTable)
+          { return FitAndWrite(trackTable, kFALSE); }                       // global momentum fit and writing of tracks to STAF table
+  Int_t   PrimaryFitAndWrite(St_fpt_fptrack *trackTable) 
+          { return FitAndWrite(trackTable, kTRUE); }                        // primary momentum fit and writing of tracks to STAF table
+  Int_t   FitAndWrite(St_fpt_fptrack *trackTable, 
+		      Bool_t primary_fit);                                  // does momentum fit and writes tracks to STAF table
   Int_t   WriteTracksAndClusters();                                         // writes tracks and clusters in ROOT file
 
   // getter

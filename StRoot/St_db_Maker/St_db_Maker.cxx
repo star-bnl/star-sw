@@ -1,129 +1,26 @@
-//*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.60 2002/06/14 14:48:00 jeromel Exp $
+/*!
+ * \class St_db_Maker
+ * \author Valery Fine(fine@bnl.gov)   
+ * \date 10/08/98 
+ *
+ * This class is C++ implementation of the 
+ * <a href="/STAR/comp/pkg/dev/pams/db/sdb/doc/">Simple Database Manager</a>.
+ *
+ */
+
+// Most of the history moved at the bottom
+//
+// $Id: St_db_Maker.cxx,v 1.62 2002/12/16 17:29:56 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
-// Revision 1.60  2002/06/14 14:48:00  jeromel
-// Last change moved after Use()
+// Revision 1.62  2002/12/16 17:29:56  jeromel
+// Fixed timestamp (final)
 //
-// Revision 1.59  2002/06/14 14:03:11  jeromel
-// Added warning if start=end fro date and time (i.e. 0 everywhere) for a table.
+// Revision 1.61  2002/11/27 03:12:26  jeromel
+// Expand array for a new geometry time stamp. Beware, timestamp not fixed yet
+// (had to revert to the preceeding one as the new timeline does not exists but
+// any stamp ended with garbage).Next commit will make it right ...
 //
-// Revision 1.58  2002/05/18 01:04:52  jeromel
-// Small modif adding more debugging of what it's doing ... In perticular,
-// the association string <-> DateTime is shown.
-//
-// Revision 1.57  2002/03/04 16:38:58  jeromel
-// More info printed before assert()
-//
-// Revision 1.56  2002/03/01 14:56:42  jeromel
-// Finalized the timestamp as per June 15th.
-//
-// Revision 1.55  2002/02/28 23:34:04  jeromel
-// Since the svt geant geometry appears to have changed in Spectember 5th 2001,
-// the definition of y2001 geometry must have changed since MDC4 (where y2001
-// was used but the geometry did not have those recent updates). Furthermore,
-// y2001 equates to year_2b for St_db_Maker, that is, timestamp 20010501 that's
-// May 1st 2001. The 'db' entries for svt should also be different. So, we
-// added a hacked entry to correct this very very very confusing issue.
-//
-// 	MDC4New chain added
-// 	Timestamp for this y2001n, will equate to egant geometry y2001
-// 	but a new timestamp in St_db_maker .
-//
-// This allows for re-running through the geant MDC4 produced files using
-// MDC4 chain option in the reco pass and find the same result.
-//
-// Revision 1.54  2002/01/18 16:18:03  perev
-// TimeStamp for absent table fix
-//
-// Revision 1.53  2002/01/17 23:45:32  perev
-// TimeStamp for nonexisting table fixed
-//
-// Revision 1.52  2001/11/07 18:02:28  perev
-// reurn into InitRun added
-//
-// Revision 1.51  2001/10/27 21:48:32  perev
-// SetRunNumber added
-//
-// Revision 1.50  2001/10/13 20:23:16  perev
-// SetFlavor  working before and after Init()
-//
-// Revision 1.49  2001/09/26 23:24:04  perev
-// SetFlavor for table added
-//
-// Revision 1.48  2001/04/14 02:03:46  perev
-// const added
-//
-// Revision 1.47  2001/04/13 21:21:34  perev
-// small fix (fine) + cons's
-//
-// Revision 1.46  2001/04/13 01:28:42  perev
-// Small bug fixed (fine found)
-//
-// Revision 1.45  2001/03/21 23:06:13  didenko
-// Set time for year to 20000614.175430 instead of 20000501.0
-//
-// Revision 1.44  2001/03/07 20:43:46  perev
-// assert for wrong time added
-//
-// Revision 1.43  2001/02/18 20:09:58  perev
-// Distinction between UNIX FS objects and MySql added
-//
-// Revision 1.42  2001/01/31 17:12:05  fisyak
-// Introduce year-2b for STAR 2001
-//
-// Revision 1.41  2000/11/07 15:02:05  fisyak
-// Fix typo
-//
-// Revision 1.40  2000/11/07 01:48:25  fisyak
-// Add one more protection agaist fDataBase==NULL
-//
-// Revision 1.39  2000/11/02 16:02:20  fisyak
-// Jeff request to allow a top level directory (e.g. database) have ID=0 which is ok
-//
-// Revision 1.38  2000/09/16 02:45:09  didenko
-// commit Victor's changes
-//
-// Revision 1.37  2000/07/14 02:39:21  perev
-// SetMaxEntryTime method added
-//
-// Revision 1.36  2000/06/29 15:58:04  perev
-// bug in Init fixed, wrong {}
-//
-// Revision 1.35  2000/06/26 20:58:41  perev
-// multiple DBs
-//
-// Revision 1.33  2000/06/20 20:39:49  fisyak
-// Add debug print out
-//
-// Revision 1.32  2000/05/20 01:00:43  perev
-// SetFlavor() added
-//
-// Revision 1.31  2000/05/12 15:10:19  fine
-// new Table macro introduced
-//
-// Revision 1.30  2000/05/11 01:27:54  fisyak
-// Change y1h from 03/01/2000 to 05/01/2000
-//
-// Revision 1.29  2000/04/14 14:49:59  perev
-// Communication via descriptor struct -> class
-//
-// Revision 1.28  2000/04/13 02:58:47  perev
-// Method Save is added & default CintDB loaded if exists
-//
-// Revision 1.27  2000/04/07 15:44:42  perev
-// Error return when MySQL is not available
-//
-// Revision 1.26  2000/03/23 14:55:55  fine
-// Adjusted to libSTAR and ROOT 2.24
-//
-// 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// St_db_Maker class for Makers                                      //
-//                                                                      //
-// This class is C++ implementation of the Begin_html <a href="http://www.rhic.bnl.gov/afs/rhic/star/doc/www/packages_l/pro/pams/db/sdb/doc/index.html">Simple Database Manager</a> End_html    //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+
 #define MYSQLON 1999
 
 #include <iostream.h>
@@ -155,16 +52,16 @@ static Int_t AliasTime(const char *alias);
 static const char *aliases[]={
 "sd97",   "sd98",   "year_1a","year_1b","year_1c",
 "es99",   "er99",   "dc99"   ,"year_1d","year_1e",
-"year_1h","year_2a", "year_2b", "year2001", 0};   
+"year_1h","year_2a", "year_2b", "year2001", "year2003", 0};   
 
 static const int   dates[]=  {
 19970101, 19980101, 19990101, 19990501, 19991001,
 19990615, 19990616, 19991206, 19991101, 19991201,
-20000614, 20010610, 20010501, 20010615, 0};
+20000614, 20010610, 20010501, 20010615, 20021115, 0};
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
-  175430,        0,        0,        0,        0};
+  175430,        0,        0,        0,        0, 0};
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
 
@@ -914,3 +811,131 @@ static Int_t AliasTime(const char *alias)
   for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
   return times[i];
 }
+
+
+
+//*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
+//
+// Revision 1.60  2002/06/14 14:48:00  jeromel
+// Last change moved after Use()
+//
+// Revision 1.59  2002/06/14 14:03:11  jeromel
+// Added warning if start=end fro date and time (i.e. 0 everywhere) for a table.
+//
+// Revision 1.58  2002/05/18 01:04:52  jeromel
+// Small modif adding more debugging of what it's doing ... In perticular,
+// the association string <-> DateTime is shown.
+//
+// Revision 1.57  2002/03/04 16:38:58  jeromel
+// More info printed before assert()
+//
+// Revision 1.56  2002/03/01 14:56:42  jeromel
+// Finalized the timestamp as per June 15th.
+//
+// Revision 1.55  2002/02/28 23:34:04  jeromel
+// Since the svt geant geometry appears to have changed in Spectember 5th 2001,
+// the definition of y2001 geometry must have changed since MDC4 (where y2001
+// was used but the geometry did not have those recent updates). Furthermore,
+// y2001 equates to year_2b for St_db_Maker, that is, timestamp 20010501 that's
+// May 1st 2001. The 'db' entries for svt should also be different. So, we
+// added a hacked entry to correct this very very very confusing issue.
+//
+// 	MDC4New chain added
+// 	Timestamp for this y2001n, will equate to egant geometry y2001
+// 	but a new timestamp in St_db_maker .
+//
+// This allows for re-running through the geant MDC4 produced files using
+// MDC4 chain option in the reco pass and find the same result.
+//
+// Revision 1.54  2002/01/18 16:18:03  perev
+// TimeStamp for absent table fix
+//
+// Revision 1.53  2002/01/17 23:45:32  perev
+// TimeStamp for nonexisting table fixed
+//
+// Revision 1.52  2001/11/07 18:02:28  perev
+// reurn into InitRun added
+//
+// Revision 1.51  2001/10/27 21:48:32  perev
+// SetRunNumber added
+//
+// Revision 1.50  2001/10/13 20:23:16  perev
+// SetFlavor  working before and after Init()
+//
+// Revision 1.49  2001/09/26 23:24:04  perev
+// SetFlavor for table added
+//
+// Revision 1.48  2001/04/14 02:03:46  perev
+// const added
+//
+// Revision 1.47  2001/04/13 21:21:34  perev
+// small fix (fine) + cons's
+//
+// Revision 1.46  2001/04/13 01:28:42  perev
+// Small bug fixed (fine found)
+//
+// Revision 1.45  2001/03/21 23:06:13  didenko
+// Set time for year to 20000614.175430 instead of 20000501.0
+//
+// Revision 1.44  2001/03/07 20:43:46  perev
+// assert for wrong time added
+//
+// Revision 1.43  2001/02/18 20:09:58  perev
+// Distinction between UNIX FS objects and MySql added
+//
+// Revision 1.42  2001/01/31 17:12:05  fisyak
+// Introduce year-2b for STAR 2001
+//
+// Revision 1.41  2000/11/07 15:02:05  fisyak
+// Fix typo
+//
+// Revision 1.40  2000/11/07 01:48:25  fisyak
+// Add one more protection agaist fDataBase==NULL
+//
+// Revision 1.39  2000/11/02 16:02:20  fisyak
+// Jeff request to allow a top level directory (e.g. database) have ID=0 which is ok
+//
+// Revision 1.38  2000/09/16 02:45:09  didenko
+// commit Victor's changes
+//
+// Revision 1.37  2000/07/14 02:39:21  perev
+// SetMaxEntryTime method added
+//
+// Revision 1.36  2000/06/29 15:58:04  perev
+// bug in Init fixed, wrong {}
+//
+// Revision 1.35  2000/06/26 20:58:41  perev
+// multiple DBs
+//
+// Revision 1.33  2000/06/20 20:39:49  fisyak
+// Add debug print out
+//
+// Revision 1.32  2000/05/20 01:00:43  perev
+// SetFlavor() added
+//
+// Revision 1.31  2000/05/12 15:10:19  fine
+// new Table macro introduced
+//
+// Revision 1.30  2000/05/11 01:27:54  fisyak
+// Change y1h from 03/01/2000 to 05/01/2000
+//
+// Revision 1.29  2000/04/14 14:49:59  perev
+// Communication via descriptor struct -> class
+//
+// Revision 1.28  2000/04/13 02:58:47  perev
+// Method Save is added & default CintDB loaded if exists
+//
+// Revision 1.27  2000/04/07 15:44:42  perev
+// Error return when MySQL is not available
+//
+// Revision 1.26  2000/03/23 14:55:55  fine
+// Adjusted to libSTAR and ROOT 2.24
+//
+// 
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// St_db_Maker class for Makers                                      //
+//                                                                      //
+// This class is C++ implementation of the Begin_html <a href="http://www.rhic.bnl.gov/afs/rhic/star/doc/www/packages_l/pro/pams/db/sdb/doc/index.html">Simple Database Manager</a> End_html    //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////

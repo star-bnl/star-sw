@@ -1,5 +1,22 @@
-// $Id: StFtpcTracker.cc,v 1.22 2002/10/11 15:45:35 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.25 2002/11/28 09:39:33 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.25  2002/11/28 09:39:33  oldi
+// Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
+// It was used do decide for global or primary fit.
+// Code was prepared to fill momentum values at outermost points on tracks.
+// This feature is not used up to now.
+// Code cleanups.
+//
+// Revision 1.24  2002/11/06 13:47:11  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+// Code clean ups.
+//
+// Revision 1.23  2002/10/31 13:41:46  oldi
+// dE/dx parameters read from database, now.
+// Vertex estimation for different sectors added.
+// Vertex estimation for different areas (angle, radius) added.
+//
 // Revision 1.22  2002/10/11 15:45:35  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -144,14 +161,14 @@ StFtpcTracker::StFtpcTracker()
   mHit    = 0;
   mTrack  = 0;
 
-  mHitsCreated = (Bool_t)false;
-  mVertexCreated = (Bool_t)false;
+  mHitsCreated = (Bool_t)kFALSE;
+  mVertexCreated = (Bool_t)kFALSE;
 
   mMaxDca = 100.;
 }
 
 
-StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6], Bool_t bench, Double_t max_Dca)
+StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
   // Usual used constructor.
   // Sets up the pointers and the cut value for the momentum fit.
@@ -162,22 +179,23 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[6],
 
   mTime = 0.;
 
-  mHitsCreated = (Bool_t)false;
+  mHitsCreated = (Bool_t)kFALSE;
   mMaxDca = max_Dca;
   mTrack = new TObjArray(2000);
 
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
-  if(vertexPos == 0) {
+  if(vertex == 0) {
     mVertex = new StFtpcVertex(point_st, n_clusters);
+    mVertexCreated = (Bool_t)kTRUE;
   }
   
   else {
-    mVertex = new StFtpcVertex(vertexPos);
+    mVertex = vertex;
+    mVertexCreated = (Bool_t)kFALSE;
   }
 
-  mVertexCreated = (Bool_t)true;
 
   mVertexEast = new StFtpcVertex();
   mVertexWest = new StFtpcVertex();
@@ -195,13 +213,13 @@ StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench
   mTime = 0.;
 
   mHit = hits;
-  mHitsCreated = (Bool_t)false;
+  mHitsCreated = (Bool_t)kFALSE;
 
   mMaxDca = max_Dca;
   mTrack = new TObjArray(2000);
 
   mVertex = vertex;
-  mVertexCreated = (Bool_t)false;
+  mVertexCreated = (Bool_t)kFALSE;
 }
 
 
@@ -217,8 +235,8 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
 
   mVertex = vertex;
   mHit = hit;
-  mHitsCreated = (Bool_t) false;
-  mVertexCreated = (Bool_t) false;
+  mHitsCreated = (Bool_t) kFALSE;
+  mVertexCreated = (Bool_t) kFALSE;
   mTrack = track;
   mMaxDca = max_Dca;
 
@@ -238,14 +256,14 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   mTime = 0.;
 
   mVertex = vertex;
-  mVertexCreated = (Bool_t)false;
+  mVertexCreated = (Bool_t)kFALSE;
 
   // Copy clusters into ObjArray.
   Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TObjArray(n_clusters);    // create TObjArray
-  mHitsCreated = (Bool_t)true;
+  mHitsCreated = (Bool_t)kTRUE;
 
   {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcPoint(point_st++), i);
@@ -310,7 +328,7 @@ void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, UChar_t iterations)
 
 void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UChar_t iterations)
 {
-  // Vertex estiamtion with fit tracks.
+  // Vertex estimation with fit tracks.
   StFtpcVertex v = *vertex;
 
   for (Int_t i = 0; i < iterations; i++) {
@@ -331,7 +349,70 @@ void StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, UCha
 }
 
 
-void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
+StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, 
+					   Char_t sector, UChar_t iterations)
+{
+  // Vertex estimation with fit tracks for different sectors.
+  StFtpcVertex v = *vertex;
+  TObjArray *tracks = new TObjArray[GetNumberOfTracks()];
+
+  for (Int_t tt = 0; tt < GetNumberOfTracks(); tt++) {
+    // loop over all tracks
+
+    StFtpcTrack *track = (StFtpcTrack*)mTrack->At(tt);
+
+    if (track->GetSector() == sector) {
+      // fill matching tracks to new array
+
+      tracks->AddLast(track);
+    }
+  }
+
+  for (Int_t i = 0; i < iterations; i++) {
+
+    StFtpcVertex v_new = StFtpcVertex(tracks, &v, hemisphere);
+    v = v_new;
+  }
+
+  return v;
+}
+
+
+StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere,
+					   Double_t lowAngle, Double_t highAngle,
+					   Double_t lowRadius, Double_t highRadius, 
+					   UChar_t iterations)
+{
+  // Vertex estimation with fit tracks for different areas.
+  StFtpcVertex v = *vertex;
+
+  TObjArray *tracks = new TObjArray[GetNumberOfTracks()];
+
+  for (Int_t tt = 0; tt < GetNumberOfTracks(); tt++) {
+    // loop over all tracks
+
+    StFtpcTrack *track = (StFtpcTrack*)mTrack->At(tt);
+
+    if (track->GetMeanR() >= lowRadius && track->GetMeanR() < highRadius &&
+	track->GetMeanAlpha() >= lowAngle && track->GetMeanAlpha() < highAngle) {
+      // fill matching tracks to new array
+
+      tracks->AddLast(track);
+    }
+  }
+
+  for (Int_t i = 0; i < iterations; i++) {
+    StFtpcVertex v_new = StFtpcVertex(tracks, &v, hemisphere);
+    v = v_new;
+  }
+  
+  delete tracks;
+  
+  return v;
+}
+
+
+void StFtpcTracker::CalcEnergyLoss()
 {
   // Calculates dE/dx.
   // This function replaces the old pams/ftpc/fde-module, but it is no 
@@ -353,18 +434,10 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
   StFtpcTrack *track;     // track
   StFtpcPoint *hit;       // hit
   
-  Int_t debug_level = 100;
-  Int_t no_angle;
-  Int_t max_hit;
-  Int_t min_hit;
-  
   Double_t xx, yy, rr, px, py, pz, pp, ftmp; // local coor. + mom
   Double_t cos_lambda, cos_alpha;     // cosines of dip and cross angles
-  Double_t a_large_number;
   
-  Double_t ftrunc;
   Double_t dedx_mean;
-  Double_t pad_length;
   
   // variables for full chamber truncation 
   Double_t *weighted;
@@ -372,21 +445,12 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
   Int_t n_tracked;
   Int_t n_untracked;
   
-  // get the preset parameters 
-  debug_level = fdepar[0].debug_level;      // level of debugging
-  no_angle    = fdepar[0].no_angle;         // switch for dip/cross angles
-  max_hit     = fdepar[0].max_hit;          // max. allowable hits per track 
-  min_hit     = fdepar[0].min_hit;          // min. no. hit required 
-  pad_length  = fdepar[0].pad_length/100.;  // from cm to um/keV
-  ftrunc      = fdepar[0].frac_trun;        // fraction for trunc. mean 
-  a_large_number = fdepar[0].a_large_number; // 1e+10
-  
-  if (debug_level < 8 ) {      
-    gMessMgr->Message("", "I", "OST") << " No track = " << (Int_t)GetNumberOfTracks() << endm;
-    gMessMgr->Message("", "I", "OST") << " max_track = " << (Int_t)fdepar[0].max_track << endm;
-    gMessMgr->Message("", "I", "OST") << " max_hit = " << max_hit << endm;
-    gMessMgr->Message("", "I", "OST") << " min_hit = " << min_hit << endm;;
-    gMessMgr->Message("", "I", "OST") << " ftrunc = " << ftrunc << endm;
+  if (StFtpcTrackingParams::Instance()->DebugLevel() < 8) {      
+    gMessMgr->Message("", "I", "OST") << " No track = " << GetNumberOfTracks() << endm;
+    gMessMgr->Message("", "I", "OST") << " max_track = " << StFtpcTrackingParams::Instance()->MaxTrack() << endm;
+    gMessMgr->Message("", "I", "OST") << " max_hit = " << StFtpcTrackingParams::Instance()->MaxHit() << endm;
+    gMessMgr->Message("", "I", "OST") << " min_hit = " << StFtpcTrackingParams::Instance()->MinHit() << endm;;
+    gMessMgr->Message("", "I", "OST") << " ftrunc = " << StFtpcTrackingParams::Instance()->FracTrunc() << endm;
     
     gMessMgr->Message("", "I", "OST") << " name= (no name), nok = (" << GetNumberOfClusters() 
 				      << "), maxlen = (" << GetNumberOfClusters() << ")" << endm;
@@ -401,16 +465,16 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
   n_tracked = 0;
   
   // tmp array to store delta_E of hits on a track 
-  dedx_arr = new Double_t[max_hit];
-  index_arr = new Int_t[max_hit];
+  dedx_arr = new Double_t[StFtpcTrackingParams::Instance()->MaxHit()];
+  index_arr = new Int_t[StFtpcTrackingParams::Instance()->MaxHit()];
   
-  for (int go = 0; go < max_hit; go++) {
+  for (int go = 0; go < StFtpcTrackingParams::Instance()->MaxHit(); go++) {
     dedx_arr[go] = 0.;
   }
 
   // loop over all tracks inside the FTPC for each track 
   // possible to limit number of tracks for processing 
-  for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
+  for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
 
     all_hit = 0;       
     track = (StFtpcTrack*)mTrack->At(itrk);
@@ -425,16 +489,16 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	all_hit++;
 	n_tracked++;
 
-	if (debug_level < 2 ) {          // level=1 debugging
+	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
 	  gMessMgr->Message("", "I", "OST") << "total_charge = " << total_charge << ", hit_p = " << hit_p 
 					    << ", de = " << hit->GetCharge() << endm;
 	}
       }
     }
 
-    if (all_hit < min_hit || all_hit > max_hit) {
+    if (all_hit < StFtpcTrackingParams::Instance()->MinHit() || all_hit > StFtpcTrackingParams::Instance()->MaxHit()) {
       
-      if (debug_level < 5) {  // level = 10 debugging
+      if (StFtpcTrackingParams::Instance()->DebugLevel() < 5) {  // level = 10 debugging
 	gMessMgr->Message("", "I", "OST") << " number of hits = " << all_hit << endm;
       }
       
@@ -456,7 +520,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 
       if(hit_p >= 0) {
 
-	if (no_angle != 0) {
+	if (StFtpcTrackingParams::Instance()->NoAngle() != 0) {
 	  cos_lambda = 1.0;
 	  cos_alpha  = 1.0;
 	} 
@@ -474,7 +538,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	  cos_alpha  = fabs(pz) / TMath::Sqrt(pz*pz + ftmp*ftmp); 
 	} 
 	   
-	if (debug_level < 2 ) {          // level=1 debugging
+	if (StFtpcTrackingParams::Instance()->DebugLevel() < 2 ) {          // level=1 debugging
 	  gMessMgr->Message("", "I", "OST") << " ANGLES: dip= "<< 180./3.14159 * TMath::ACos(cos_lambda) << "(" 
 					    << cos_lambda << ");  cross= " << 180./3.14159 * TMath::ACos(cos_alpha) 
 					    << "(" << cos_alpha << ") [deg]; P=(" << px << ", " << py << ", " 
@@ -482,7 +546,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	}
 	   
 	if ( cos_alpha == 0. || cos_lambda == 0. ) {
-	  dedx_arr[ihit] = a_large_number;
+	  dedx_arr[ihit] = StFtpcTrackingParams::Instance()->ALargeNumber();
 	} 
 
 	else {
@@ -506,7 +570,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     acc_hit   = 0;
     dedx_mean = 0.0;
     
-    for (ihit = 0; ihit < (Int_t)(all_hit*ftrunc); ihit++) {
+    for (ihit = 0; ihit < (Int_t)(all_hit*StFtpcTrackingParams::Instance()->FracTrunc()); ihit++) {
       acc_hit++;
       dedx_mean += dedx_arr[ihit];
     }
@@ -534,7 +598,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     
   } // end loop itrk 
 
-  if(fdepar->id_method == 1) {
+  if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
     gMessMgr->Message("", "I", "OST") << "Using truncated mean over whole chamber method by R. Witt." << endm;
     
     weighted = new Double_t[GetNumberOfClusters()];
@@ -548,7 +612,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     
     average_dedx=0;
     
-    for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
+    for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
       track = (StFtpcTrack*)mTrack->At(itrk);
       px  = track->GetPx();
       py  = track->GetPy();
@@ -563,7 +627,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	
 	if (hit_p >= 0) {
 	  
-	  if (no_angle != 0) {
+	  if (StFtpcTrackingParams::Instance()->NoAngle() != 0) {
 	    cos_lambda = 1.0;
 	    cos_alpha  = 1.0;
 	  }
@@ -582,7 +646,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	  } 
 		
 	  if (cos_alpha == 0. || cos_lambda == 0.) {
-	    weighted[hit_p] = a_large_number;
+	    weighted[hit_p] = StFtpcTrackingParams::Instance()->ALargeNumber();
 	  } 
 	  
 	  else {
@@ -594,7 +658,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
       }
     }
     
-    average_dedx /= TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track);
+    average_dedx /= TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack());
 
     Sorter(weighted, index_arr, GetNumberOfClusters());
     
@@ -605,13 +669,13 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
       
       if(index_arr[ihit]>=0) {
 	
-	if(ihit >= (n_untracked +(Int_t)(ftrunc*(Double_t) n_tracked))) {
+	if(ihit >= (n_untracked +(Int_t)(StFtpcTrackingParams::Instance()->FracTrunc()*(Double_t) n_tracked))) {
 	  index_arr[ihit]=-1;
 	}
       } 
     } 
     
-    for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
+    for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
       acc_hit = 0;
       dedx_mean = 0;
       
@@ -636,7 +700,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	    if(hit_p == index_arr[ihit]) {
 	      acc_hit++;
 	      
-	      if (no_angle != 0) {
+	      if (StFtpcTrackingParams::Instance()->NoAngle() != 0) {
 		cos_lambda = 1.0;
 		cos_alpha  = 1.0;
 	      }
@@ -676,7 +740,7 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
     delete[] weighted;
   } 
 
-  if (debug_level < 11) {
+  if (StFtpcTrackingParams::Instance()->DebugLevel() < 11) {
     gMessMgr->Message("", "I", "OST") << " total charges in 2 FTPCs " << total_charge << endm;
     gMessMgr->Message("", "I", "OST") << " processed tracks = " << itrk_ok << endm;
   }
@@ -715,7 +779,7 @@ void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 
 
 
-Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_start_vertex)
+Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
 {
   // Writes tracks to STAF table.
   // This function is no longer used. Everything is done now in FitAnddEdexAndWrite().
@@ -733,8 +797,8 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
     
     for (Int_t i=0; i<num_tracks; i++) {
       track = (StFtpcTrack *)mTrack->At(i);
-      track->Fit(mVertex, mMaxDca, id_start_vertex);
-      track->WriteTrack(&(trackTable[i]), id_start_vertex);
+      track->Fit(mVertex, mMaxDca, primary_fit);
+      track->WriteTrack(&(trackTable[i]), mVertex, primary_fit);
     }
    
     trackTableWrapper->SetNRows(num_tracks);
@@ -758,7 +822,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
 }
 
 
-Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_FDEPAR_ST *fdepar, Int_t id_start_vertex)
+Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
 {
   // Calculates the momentum fit, the dE/dx, and writes the tracks to their STAF table, finally.
     
@@ -791,19 +855,10 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     StFtpcTrack *track;     // track
     StFtpcPoint *hit;       // hit
   
-    Int_t debug_level = 100;
-    Int_t no_angle;
-    Int_t max_hit;
-    Int_t min_hit;
-  
     Double_t xx, yy, rr, px, py, pz, pp, ftmp; // local coor. + mom
     Double_t cos_lambda, cos_alpha;     // cosines of dip and cross angles
-    Double_t a_large_number;
-  
-    Double_t ftrunc;
-    Double_t aip;
+
     Double_t dedx_mean;
-    Double_t pad_length;
   
     // variables for full chamber truncation 
     Double_t *weighted;
@@ -811,34 +866,24 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     Int_t n_tracked;
     Int_t n_untracked;
   
-    // get the preset parameters 
-    debug_level = fdepar[0].debug_level;      // level of debugging
-    no_angle    = fdepar[0].no_angle;         // switch for dip/cross angles
-    max_hit     = fdepar[0].max_hit;          // max. allowable hits per track 
-    min_hit     = fdepar[0].min_hit;          // min. no. hit required 
-    pad_length  = fdepar[0].pad_length/100.;  // from cm to um/keV
-    ftrunc      = fdepar[0].frac_trun;        // fraction for trunc. mean 
-    aip         = fdepar[0].a_i_p * 1.0e-9;   // in GeV 
-    a_large_number = fdepar[0].a_large_number; // 1e+10
-  
     // initialize the dedx table counter
     itrk_ok   = 0; 
     n_tracked = 0;
   
     // tmp array to store delta_E of hits on a track 
-    dedx_arr = new Double_t[max_hit];
-    index_arr = new Int_t[max_hit];
+    dedx_arr = new Double_t[StFtpcTrackingParams::Instance()->MaxHit()];
+    index_arr = new Int_t[StFtpcTrackingParams::Instance()->MaxHit()];
     
-    for (int go = 0; go < max_hit; go++) {
+    for (int go = 0; go < StFtpcTrackingParams::Instance()->MaxHit(); go++) {
       dedx_arr[go] = 0.;
     }
 
     // loop over all tracks inside the FTPC for each track 
     // possible to limit number of tracks for processing 
-    for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
+    for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
       all_hit = 0;       
       track = (StFtpcTrack*)mTrack->At(itrk);
-      track->Fit(mVertex, mMaxDca, id_start_vertex);
+      track->Fit(mVertex, mMaxDca, primary_fit);
 
       // we accumulate all the charges inside the sensitive volume
       for (icluster = 0; icluster < track->GetNumberOfPoints(); icluster++) {
@@ -852,7 +897,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	}
       }
 
-      if (all_hit < min_hit || all_hit > max_hit) {      
+      if (all_hit < StFtpcTrackingParams::Instance()->MinHit() || all_hit > StFtpcTrackingParams::Instance()->MaxHit()) {      
 	continue;              // skip if unacceptable no. hits
       }
 
@@ -871,7 +916,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 
 	if(hit_p >= 0) {
 
-	  if (no_angle != 0) {
+	  if (StFtpcTrackingParams::Instance()->NoAngle() != 0) {
 	    cos_lambda = 1.0;
 	    cos_alpha  = 1.0;
 	  } 
@@ -890,7 +935,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	  } 
 	   
 	  if ( cos_alpha == 0. || cos_lambda == 0. ) {
-	    dedx_arr[ihit] = a_large_number;
+	    dedx_arr[ihit] = StFtpcTrackingParams::Instance()->ALargeNumber();
 	  } 
 
 	  else {
@@ -909,7 +954,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       acc_hit   = 0;
       dedx_mean = 0.0;
     
-      for (ihit = 0; ihit < (Int_t)(all_hit*ftrunc); ihit++) {
+      for (ihit = 0; ihit < (Int_t)(all_hit*StFtpcTrackingParams::Instance()->FracTrunc()); ihit++) {
 	acc_hit++;
 	dedx_mean += dedx_arr[ihit];
       }
@@ -924,10 +969,10 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	
       //cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl << endl;
 
-      if (fdepar->id_method != 1) { 
+      if (StFtpcTrackingParams::Instance()->IdMethod() != 1) { 
 	// calculations done, write track
-	// if id_method == 1 the calculations go on and the track is writtem later
-	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
+	// if id_method == 1 the calculations go on and the track is written later
+	track->WriteTrack(&(trackTable[itrk]), mVertex, primary_fit);
       }
     
       itrk_ok++;
@@ -938,7 +983,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     
     } // end loop itrk 
 
-    if(fdepar->id_method == 1) {
+    if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
       gMessMgr->Message("", "I", "OST") << "Using truncated mean over whole chamber method by R. Witt." << endm;
     
       weighted = new Double_t[GetNumberOfClusters()];
@@ -952,7 +997,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
     
       average_dedx=0;
     
-      for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
+      for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
 	track = (StFtpcTrack*)mTrack->At(itrk);
 	px  = track->GetPx();
 	py  = track->GetPy();
@@ -967,7 +1012,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	
 	  if (hit_p >= 0) {
 	  
-	    if (no_angle != 0) {
+	    if (StFtpcTrackingParams::Instance()->NoAngle() != 0) {
 	      cos_lambda = 1.0;
 	      cos_alpha  = 1.0;
 	    }
@@ -986,7 +1031,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	    } 
 		
 	    if (cos_alpha == 0. || cos_lambda == 0.) {
-	      weighted[hit_p] = a_large_number;
+	      weighted[hit_p] = StFtpcTrackingParams::Instance()->ALargeNumber();
 	    } 
 	  
 	    else {
@@ -998,7 +1043,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	}
       }
     
-      average_dedx /= TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track);
+      average_dedx /= TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack());
     
       Sorter(weighted, index_arr, GetNumberOfClusters());
     
@@ -1009,13 +1054,13 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       
 	if(index_arr[ihit]>=0) {
 	
-	  if(ihit >= (n_untracked +(Int_t)(ftrunc*(Double_t) n_tracked))) {
+	  if(ihit >= (n_untracked +(Int_t)(StFtpcTrackingParams::Instance()->FracTrunc()*(Double_t) n_tracked))) {
 	    index_arr[ihit]=-1;
 	  }
 	} 
       } 
     
-      for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), (Int_t)fdepar[0].max_track); itrk++) {
+      for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
 	acc_hit = 0;
 	dedx_mean = 0;
       
@@ -1040,7 +1085,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	      if(hit_p == index_arr[ihit]) {
 		acc_hit++;
 	      
-		if (no_angle != 0) {
+		if (StFtpcTrackingParams::Instance()->NoAngle() != 0) {
 		  cos_lambda = 1.0;
 		  cos_alpha  = 1.0;
 		}
@@ -1080,7 +1125,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	//cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl;
 
 	// write track
-	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
+	track->WriteTrack(&(trackTable[itrk]), mVertex, primary_fit);
       }
     
       delete[] weighted;

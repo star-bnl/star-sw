@@ -1,11 +1,12 @@
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StVertexMaker class ( est + evr/lmv/pplmv )                          //
-// Modes: 0 = lmv/evr                                                   //
-//        1 = ppLMV                                                     //
-//        2 = lmv/evr with VtxOffSet                                    //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+/*!
+ *
+ * StVertexMaker class ( est + evr/lmv/pplmv )                          
+ * Modes: 0 = lmv/evr                                                   
+ *        1 = ppLMV                                                     
+ *        2 = lmv/evr with VtxOffSet                                    
+ *                                                                      
+ */
+
 
 #include <iostream.h>
 #include <stdlib.h>
@@ -54,7 +55,9 @@ ClassImp(StVertexMaker)
   UnSetBeam4ppLMV(); // turn off adding beam line to ppLMV  as default (1)
   embedVerts = kFALSE;
   ppLMVparI[1]=0;
+  this->SetCTBMode(0);
 }
+
 //_____________________________________________________________________________
 StVertexMaker::~StVertexMaker(){
   UnFixVertex();
@@ -225,6 +228,8 @@ Int_t StVertexMaker::Make(){
 
     
     break; }
+
+
   case 1: { // ppLMV
 
     gMessMgr->Info() << GetName() <<
@@ -234,7 +239,9 @@ Int_t StVertexMaker::Make(){
       gMessMgr->Error("StVertexMaker: ppLMV not initialized!");
       return kStErr;
     }
-    CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF);
+
+    cout << "CTB Mode = " << this->GetCTBMode() << endl;
+    CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF,this->GetCTBMode());
       
     MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse,globtrk) ;
             
@@ -381,9 +388,14 @@ void StVertexMaker::UnFixVertex(){
     m_fixedVertex = 0;
   }
 }
+
+
 //_____________________________________________________________________________
-// $Id: StVertexMaker.cxx,v 1.3 2002/02/22 23:44:57 jeromel Exp $
+// $Id: StVertexMaker.cxx,v 1.4 2002/12/04 15:43:05 jeromel Exp $
 // $Log: StVertexMaker.cxx,v $
+// Revision 1.4  2002/12/04 15:43:05  jeromel
+// Changes by J.Gans. Approved by Gene
+//
 // Revision 1.3  2002/02/22 23:44:57  jeromel
 // 15 to 30 tracks as a start.
 //

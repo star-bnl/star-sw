@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.28 2002/03/12 21:22:39 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.30 2002/11/01 03:17:42 fine Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.30  2002/11/01 03:17:42  fine
+// the previous version has been restored. No need of the special flag
+//
 // Revision 1.28  2002/03/12 21:22:39  fisyak
 // Set only one StEvtHddr as default option (due to Embedding)
 //
@@ -118,7 +121,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.28 2002/03/12 21:22:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.30 2002/11/01 03:17:42 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.8 2002/10/11 15:45:26 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.9 2002/11/06 13:46:29 oldi Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.9  2002/11/06 13:46:29  oldi
+// Code clean ups.
+//
 // Revision 1.8  2002/10/11 15:45:26  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -407,11 +410,11 @@ inline Bool_t StFtpcTrackEvaluator::IsGoodTrack(StFtpcTrack* track)
   // Returns true if the given track fulfills all requirements to be a "good" track.
 
   if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
-    return (Bool_t)true;
+    return (Bool_t)kTRUE;
   }
 
   else {
-    return (Bool_t)false;
+    return (Bool_t)kFALSE;
   }
 } 
 
@@ -421,11 +424,11 @@ inline Bool_t StFtpcTrackEvaluator::IsGoodMainVertexTrack(StFtpcTrack* track)
   // Returns true if the given track fulfills all requirements to be a "good" track.
 
   if (track->GetPid() > 3 && track->ComesFromMainVertex() && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
-    return (Bool_t)true;
+    return (Bool_t)kTRUE;
   }
 
   else {
-    return (Bool_t)false;
+    return (Bool_t)kFALSE;
   }
 } 
 
@@ -435,11 +438,11 @@ inline Bool_t StFtpcTrackEvaluator::IsGoodNonVertexTrack(StFtpcTrack* track)
   // Returns true if the given track fulfills all requirements to be a "good" track.
 
   if (track->GetPid() > 3 && !(track->ComesFromMainVertex()) && track->GetNumberOfPoints() >= 5 && track->GetNumberOfPoints() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
-    return (Bool_t)true;
+    return (Bool_t)kTRUE;
   }
 
   else {
-    return (Bool_t)false;
+    return (Bool_t)kFALSE;
   }
 } 
 

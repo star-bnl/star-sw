@@ -1,5 +1,13 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.12 2002/10/11 15:47:35 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.14 2002/11/28 09:42:10 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.14  2002/11/28 09:42:10  oldi
+// Code was prepared to fill momentum values at outermost points on tracks.
+// This feature is not used up to now.
+//
+// Revision 1.13  2002/11/06 13:48:29  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+//
 // Revision 1.12  2002/10/11 15:47:35  oldi
 // Code cleanup (several lines of code changed due to *params -> Instance()).
 //
@@ -151,7 +159,7 @@ Int_t StFtpcPrimaryMaker::Make(){
   Bool_t bench = (Bool_t)false;
   StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 
 					      StFtpcTrackingParams::Instance()->MaxDca(0));
-  refitter->FitAndWrite(tracks, primvtx->id);
+  refitter->PrimaryFitAndWrite(tracks);
   delete refitter;
   delete refit_vertex;
 
@@ -200,7 +208,27 @@ Int_t StFtpcPrimaryMaker::Make(){
       ptrk->invpt = 1./sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
       ptrk->tanl  = trk->p[2] * ptrk->invpt;
       ptrk->curvature = trk->curvature;
-      
+
+      // This has to go in as soon as 
+      // r0out, phi0out, z0out, psiout, tanlout, invptout 
+      // in the dst_track table are needed.
+      /*
+      ptrk->r0out    = sqrt(trk->l[0]*trk->l[0] + trk->l[1]*trk->l[1]);
+      ptrk->phi0out  = atan2(trk->l[1],trk->l[0]) * C_DEG_PER_RAD;
+      ptrk->z0out    = trk->l[2];
+
+      // For Kalman fitting 'inner' and 'outer' momenta differ.
+      // For FTPC fitting they are the same,
+      // so fill with the 'inner' values.
+      ptrk->psiout   = atan2(trk->p[1],trk->p[0]);
+      if ( ptrk->psiout < 0.0 ) {
+	ptrk->psiout = ptrk->psiout + C_2PI;
+      }
+      ptrk->psiout = ptrk->psiout * C_DEG_PER_RAD;
+      ptrk->invptout = 1./sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
+      ptrk->tanlout  = trk->p[2] * ptrk->invptout;
+      */
+
       Int_t i = 0;
       for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
       

@@ -1,5 +1,17 @@
-* $Id: geometry.g,v 1.50 2002/10/28 15:49:35 nevski Exp $
+* $Id: geometry.g,v 1.54 2002/12/10 01:48:25 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.54  2002/12/10 01:48:25  potekhin
+* Important: the hadronic interactions are now indeed actuated in GCALOR
+*
+* Revision 1.53  2002/12/05 23:28:41  potekhin
+* Streamlined the btof config logic
+*
+* Revision 1.52  2002/11/27 21:53:14  potekhin
+* code improvement for readability etc -- moved bbcmgeo call
+*
+* Revision 1.51  2002/11/03 02:16:10  nevski
+* geometry up to 2003 introduced
+*
 * Revision 1.50  2002/10/28 15:49:35  nevski
 * fpd as a separate detector added
 *
@@ -63,10 +75,17 @@
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
               zcal,mfld,bbcm,fpdm
 * Qualifiers:  TPC        TOF         etc
-   Logical    mwc,pse, tof,t25,t1, ems,alpipe,svtw,kusok,
+   Logical    mwc,pse,ems,alpipe,svtw,
               on/.true./,off/.false./
+
+* btof tray configuration: btofconfig variable
+*  1 - full ctb, 2 - full TOFp based tof
+*  3 - partial TOFp based tof, 4 - single TOFp tray
+*  5 - one TOFp and one TOFr, 6 - full TOFr based tof.
+   Integer    btofconfig
+
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),kusok,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug
    character  Commands*4000,Geom*8
 * - - - - - - - - - - - - - - - - -
@@ -101,7 +120,8 @@ replace[;ON#{#;] with [
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {bbcm,fpdm} = off;
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
-   {tof,t25,t1,ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
+   {ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
+   btofconfig = 1        " ctb only
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
    mwx=2                 " for Geom=_1 mwx=1 limites x in mwc hits (<Y2K) "
@@ -109,7 +129,7 @@ replace[;ON#{#;] with [
    Rv=2                  " add non-sensetive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
-   kusok=off             " define a patch of Ecal                         "
+   kusok=0               " define a patch of Ecal                         "
    mf=2                  " default field - simetrical, as fitted by Bill  "
    ArgonBug=0            " in the future tsettting bug to 1 should introiduce "
    Fieldbug=0            "  old bugs in these places "
@@ -139,6 +159,9 @@ If LL>1
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
                   <W>;('               : year_1a,s,b,h,c;  year_2a    ');
+                  <W>;('               : year2000, year2001           ');
+                  <W>;('               : year2002, year2003           ');
+                  <W>;('Gcalor     : Gcalor_on, Gcalor_off        ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off            ');
                   <W>;('Geant Physics  : Phys_off, Decay_Only         ');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
@@ -152,27 +175,31 @@ If LL>1
                   {ftpc,vpdd,calb,ecal}=off;                           Nsi=0; }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                   {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0; }
-  on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
-                  {vpdd,ecal}=off;  {rich,ems,t1}=on; 
+  on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt;
+                  btofconfig = 4;
+                  {vpdd,ecal}=off;  {rich,ems}=on; 
                   nmod={12,0}; shift={87,0}; Itof=1; {Rv,Rp}=1;        Nsi=0; }
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  
                   {vpdd,ecal}=off;           Itof=1;                   Nsi=0; }
 
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
-                  {vpdd,ecal}=off;  {rich,ems,t1}=on;  Itof=1; 
+                  btofconfig=4;
+                  {vpdd,ecal}=off;  {rich,ems}=on;  Itof=1; 
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;}
 
   on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder;  
 *    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
-                  {vpdd,ecal,ftpc}=off;  {rich,ems,t1}=on;  Itof=1;
+                  btofconfig=4;
+                  {vpdd,ecal,ftpc}=off;  {rich,ems}=on;  Itof=1;
                   nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;}
 
-  on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
-                  {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
+  on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
+                  btofconfig=4;
+                  {rich,ems}=on;  nmod={24,0}; shift={21,0};  
                   nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
 
-  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  nonf={3,0,0}        }
-  on COMPLETE   { Complete STAR geometry; Itof=2; tof=on; nonf={1,2,2}        }
+  on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
+  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; Kusok=3;   }
 
   on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder; 
 *                 corrected: MWC readout, RICH reconstructed position, no TOF 
@@ -180,10 +207,38 @@ If LL>1
                   nmod={12,0}; shift={87,0}; Rp=2; Rv=2; Wfr=7; Mf=3;  Nsi=-3;}
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
-                  {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
-                  "nonf={0,2,2};" Kusok=on;  Itof=2;  Rv=2;  Mf=3;     Nsi=6; }
-
-  on YEAR2002   { draft 2002 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD?;
+                  btofconfig=4;
+                  {rich,ems}=on;   ecal=off;  
+                  nmod={24,0}; shift={21,0}; Itof=2; Rv=2; Mf=3;       Nsi=6; }  
+                
+  on YEAR2002   { january 2002 geometry - TPC+CTB+FTPC+CaloPatch2+Rich+SVT3+BBC+FPD;
+                  "svt: 3 layers ";
+                     nsi=6        " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0        " numbring is in the code   ";
+                     wdm=0        " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on       " Wultiwire chambers are read-out ";
+                     pse=on       " inner sector has pseudo padrows ";
+                  "rich"
+                     rich=on      " est rich ";
+                     Rv=2;        " save additional (fake) hits "; 
+                  "ctb: central trigger barrer ";
+                     Itof=2       " vyzyvat' btofgeo2                 ";
+                     btofconfig=4;
+                  "calb: barrel calorimeter "
+                     ems=on       " sector version "
+                     nmod={24,0}  " 24 sectora na east side  ";
+                     shift={21,0} " starting from 21         "; 
+                  "ecal"
+                     ecal=off
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector
+                     fpdm=on
+                  " versia polia "
+                     Mf=4;      " tabulirovannoe pole s korrektsiei "
+                }
+  on YEAR2003   { draft 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbring is in the code   ";
@@ -193,22 +248,26 @@ If LL>1
                      pse=on " inner sector has pseudo padrows ";
                   "ctb: central trigger barrer             ";
                      Itof=2 " vyzyvat' btofgeo2            ";
-                     t1=on  " one slab is TOF how many in 2002 ? ;
+                     btofconfig=5;
                   "calb" 
-                     nmod={24,0}; shift={21,0}; " 24 sectora na east side .." 
-                  "ecal 
                      ems=on   " est endcap " 
-                     " obsolete :    nonf={0,2,2}; "
-                     kusok=on   " odin kusok na west "
+                     nmod={60,0}; shift={0,0}; " 24 sectora na east side .." 
+                  "ecal" 
+                     kusok=1   " odin kusok na west "
                   "beam-beam counter "
                      bbcm=on
+                  "forward pion detector
+                     fpdm=on
                   " versia polia "
-                     Mf=3;      " tabulirovannoe pole "
+                     Mf=4;      " tabulirovannoe pole s korrektsiei "
                 }
 
   on HADR_ON    { all Geant Physics On;                                       }
   on HADR_OFF   { all Geant Physics on, except for hadronic interactions; 
                                                                        IHADR=0}
+  on GCALOR_ON { setting hadr 6 to activate hadronic showers;
+                              IHADR=6;}
+
   on PHYS_OFF   { No Physics: only energy loss;
       {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,IDRAY,IMULS}=0; Iloss=2}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
@@ -254,7 +313,6 @@ If LL>1
    if (alpipe)      call AgDETP add ('pipg.S1Leng=',230,1)
    if (pipe)        Call pipegeo
    if (upst)        Call upstgeo
-   if (bbcm)        Call bbcmgeo
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
@@ -285,10 +343,7 @@ If LL>1
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
    If (LL>1 & btof) then
      call AgDETP new ('BTOF')
-     if     (tof) { call AgDETP add ('btog.choice=',2,1) }
-     elseif (t25) { call AgDETP add ('btog.choice=',3,1) }
-     elseif (t1)  { call AgDETP add ('btog.choice=',4,1) }
-     else         { call AgDETP add ('btog.choice=',1,1) }
+     call AgDETP add ('btog.choice=',btofconfig,1)
    endif
    if btof { If Itof==1 { call btofgeo1 } else { call btofgeo2 }}
      
@@ -314,12 +369,13 @@ If LL>1
 *  - endcap calorimeter may be controled here
    If (LL>1 & ecal) then
       call AgDETP new ('ECAL')
-      if (kusok)  
-      {  call AgDETP add ('emcg.OnOff=',1,1)
-         call AgDETP add ('emcg.FillMode=',1,1)
+      if (kusok>0)  
+      {  call AgDETP add ('emcg.OnOff='   ,1,1)
+         call AgDETP add ('emcg.FillMode=',kusok,1)
       }
    endif
    if (ecal) Call ecalgeo
+   if (bbcm) Call bbcmgeo
    if (fpdm) Call fpdmgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
@@ -329,6 +385,9 @@ If LL>1
       call AgDETP new ('MFLD')
       if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
       if (mfld & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
+*     if (mfld & mf>=4)    call AgDETP add ('MFLG(1).nrp=',200,1)
+*     if (mfld & mf>=4)    call AgDETP add ('MFLG(1).nzp=',800,1)
+
    endif
    if (mfld) Call mfldgeo
 *

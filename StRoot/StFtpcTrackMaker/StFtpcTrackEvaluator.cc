@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.16 2002/10/24 16:37:46 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.17 2002/11/06 13:46:24 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.17  2002/11/06 13:46:24  oldi
+// Code clean ups.
+//
 // Revision 1.16  2002/10/24 16:37:46  oldi
 // dca (impact parameter) is calculated using StHelix::distance(vertexPos), now.
 // Therefore it is the smallest three dimensional distance of the helix to the
@@ -181,7 +184,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator()
   mGeantTracks = 0;
   mFoundTracks = 0;
 
-  mObjArraysCreated = (Bool_t)false;
+  mObjArraysCreated = (Bool_t)kFALSE;
 
   mFtpcTrackNum = 0;
 
@@ -324,7 +327,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 
   mFoundHits = tracker->GetClusters();
   mFoundTracks = tracker->GetTracks();
-  mObjArraysCreated = (Bool_t)false;
+  mObjArraysCreated = (Bool_t)kFALSE;
 
   SetupFile(filename, write_permission);
   SetupHistos();
@@ -384,7 +387,7 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
     mFoundTracks->AddAt(new StFtpcTrack(track_st++, mFoundHits, i), i);
   }}
 
-  mObjArraysCreated = (Bool_t)true;
+  mObjArraysCreated = (Bool_t)kTRUE;
 
   SetupFile(filename, write_permission);
   SetupHistos();
@@ -1370,12 +1373,12 @@ void StFtpcTrackEvaluator::GeantTrackInit(St_g2t_track *g2t_track, St_g2t_ftp_hi
 
 	// set main vertex
 	if (track_st->start_vertex_p == 1) {
-	  t->ComesFromMainVertex((Bool_t) true);
+	  t->ComesFromMainVertex((Bool_t) kTRUE);
 	}
 	
 	else {
 	  //	  mNonVertexTracks++;
-	  t->ComesFromMainVertex((Bool_t) false);
+	  t->ComesFromMainVertex((Bool_t) kFALSE);
 	}
 
 	MIntArray *hitnumber = t->GetHitNumbers();
@@ -1473,7 +1476,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
   for (Int_t t_counter = 0; t_counter < mFoundTracks->GetEntriesFast(); t_counter++) {
     StFtpcTrack *track = (StFtpcTrack*)mFoundTracks->At(t_counter);
     TObjArray   *hits  = (TObjArray*) track->GetHits();
-    mUnclean[t_counter] = (Bool_t)false;
+    mUnclean[t_counter] = (Bool_t)kFALSE;
     
     if (track->ComesFromMainVertex()) {
       mFoundVertexTracks++;
@@ -1517,7 +1520,7 @@ void StFtpcTrackEvaluator::ParentTrackInit()
 	      if (actual_track != t_counter) {
 		mUncleanTracksArr->AddLast(t_counter);
 		mUncleanTracks++;
-		mUnclean[t_counter] = (Bool_t)true;
+		mUnclean[t_counter] = (Bool_t)kTRUE;
 		mPtEtaMesUnclean->Fill(TMath::Abs(((StFtpcTrack *)mFoundTracks->At(t_counter))->GetEta()), ((StFtpcTrack *)mFoundTracks->At(t_counter))->GetPt());
 		actual_track = t_counter;
 	      }

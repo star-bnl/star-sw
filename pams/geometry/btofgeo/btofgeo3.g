@@ -1,13 +1,7 @@
-* $Id: btofgeo2.g,v 1.5 2002/12/05 04:46:30 geurts Exp $
-*
-* btofgeo2.g is the geometry to contain TOFp+r and the CTB
-* $Log: btofgeo2.g,v $
-* Revision 1.5  2002/12/05 04:46:30  geurts
-* incl. cvs tags
-*
+* btofgeo3.g is the geometry to contain TOFr
 *
 *******************************************************************************
-Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system 
+Module  BTOFGEO3 is the Geometry of Barrel Trigger / Time Of Flight system 
 *******************************************************************************
 
   Author     W.J. Llope et al.
@@ -35,14 +29,11 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *            28 May  2002  GE- Change the Geometry of TOFr(S.L. Huang)
 *            10 Jun  2002  GE- add BRSG BUPC BRFE on geometry & change the 
 *            sensitive volume to gas layers
-*            Oct/Nov 2002  SY/SH/FG - many, many updates
+*            Oct/Nov 2002  SY/SH/FG - many,many  updates
 *            26 Nov 2002  FG - posit2 reintroduced. TOFr is now at
 *                              pos.23. New TOF_choices are 5 (single
 *                              TOFp+single TOFr tray) and 6 (full TOFr
 *                              system)
-*            04 Dec 2002 FG - modr structure changed. Position arrays
-*                             introduced for the TOFr geometry. Common
-*                             material definitions moved to the top.
 *
 *
 *******************************************************************************
@@ -88,8 +79,19 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
                        RailThck, RailWid,
                        CoolInnR, CoolOutR } 
 *
-      Structure MODR { Height, Width, Length,Center, mrpcX(33), 
-                       mrpcZ(33), mrpcA(33),
+      Structure MODR { Height, Width, Length,Center,
+                       X1, X2, X3, X4, X5, X6, X7, X8, X9, X10,
+                       X11, X12, X13, X14, X15, X16, X17, X18, X19, X20,
+                       X21, X22, X23, X24, X25, X26, X27, X28, X29, X30,
+                       X31, X32, X33,
+                       Z1, Z2, Z3, Z4, Z5, Z6, Z7, Z8, Z9, Z10,
+                       Z11, Z12, Z13, Z14, Z15, Z16, Z17, Z18, Z19, Z20,
+                       Z21, Z22, Z23, Z24, Z25, Z26, Z27, Z28, Z29, Z30,
+                       Z31, Z32, Z33,
+                       A1, A2, A3, A4, A5, A6, A7, A8, A9, A10,
+                       A11, A12, A13, A14, A15, A16, A17, A18, A19, A20,
+                       A21, A22, A23, A24, A25, A26, A27, A28, A29, A30,
+                       A31, A32, A33,
                        HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
                        MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
                        OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
@@ -100,7 +102,7 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
                 support_aile_width, support_aile_Ypos, 
                 xpos, ypos, zpos, totlen, sublen, subcen, x0, z0,
                 Y, Z, DTHgt
-      integer   i,is, choice, tof, iwid, igap
+      integer   is, choice, tof, iwid, igap
 *
 * -------------------------------------------------------------------------
 *
@@ -202,22 +204,105 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          Width     = 21.2     ! Module width (phi)
          Length    = 9.4      ! Module length (z)
          Center    = 0.35     ! Module detector center in (phi)
-	 mrpcX = { 4.76, 1.21, 4.99, 1.46, 5.19, 1.71, 4.98, 1.54, 2.69, 3.39,
-                   3.25, 3.49, 3.33, 3.54, 3.54, 3.57, 3.48, 3.51, 3.19, 3.19,
-		   3.19, 3.19, 3.19, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43,
-		   3.43, 3.43, 3.43 } ! mrpc Xpositions
-         mrpcZ = {  4.50,  10.48,  16.83,  22.64,  29.25,  34.89,
-                   41.68,  47.19,  53.76,  60.18,  66.53,  72.95,
-                   79.42,  85.97,  92.59,  99.28, 106.00, 112.84,
-                  119.60, 126.66, 133.80, 141.06, 148.43, 156.09,
-                  163.71, 171.46, 179.35, 187.38, 195.56, 203.84,
-                  212.33, 220.94, 229.7 } ! mrpc Zpositions
-         mrpcA = {  1.20,  2.84,  4.48,  6.12,  7.74,  9.36,
-                   10.97,  7.60, 14.30, 22.30, 22.30, 22.30,
-                   22.30, 22.30, 22.30, 22.30, 22.30, 22.30,
-                   33.00, 33.00, 33.00, 33.00, 33.00, 37.58,
-                   37.58, 37.58, 37.58, 37.58, 37.58, 37.58,
-                   37.58, 37.58, 37.58 } ! mrpc angles
+         X1        = 4.76   ! my comment
+         X2        = 1.21   ! my comment
+         X3        = 4.99   ! my comment
+         X4        = 1.46   ! my comment
+         X5        = 5.19   ! my comment
+         X6        = 1.71   ! my comment
+         X7        = 4.98   ! my comment
+         X8        = 1.54   ! my comment
+         X9        = 2.69   ! my comment
+         X10       = 3.39   ! my comment
+         X11       = 3.25   ! my comment
+         X12       = 3.49   ! my comment
+         X13       = 3.33   ! my comment
+         X14       = 3.54   ! my comment
+         X15       = 3.54   ! my comment
+         X16       = 3.57   ! my comment
+         X17       = 3.48   ! my comment
+         X18       = 3.51   ! my comment
+         X19       = 3.19   ! my comment
+         X20       = 3.19   ! my comment
+         X21       = 3.19   ! my comment
+         X22       = 3.19   ! my comment
+         X23       = 3.19   ! my comment
+         X24       = 3.43   ! my comment
+         X25       = 3.43   ! my comment
+         X26       = 3.43   ! my comment
+         X27       = 3.43   ! my comment
+         X28       = 3.43   ! my comment
+         X29       = 3.43   ! my comment
+         X30       = 3.43   ! my comment
+         X31       = 3.43   ! my comment
+         X32       = 3.43   ! my comment
+         X33       = 3.43   ! my comment
+         Z1        = 4.50     ! my comment
+         Z2        = 10.48    ! my comment
+         Z3        = 16.83    ! my comment
+         Z4        = 22.64    ! my comment
+         Z5        = 29.25    ! my comment
+         Z6        = 34.89    ! my comment
+         Z7        = 41.68    ! my comment
+         Z8        = 47.19    ! my comment
+         Z9        = 53.76    ! my comment
+         Z10       = 60.18    ! my comment
+         Z11       = 66.53    ! my comment
+         Z12       = 72.95    ! my comment
+         Z13       = 79.42    ! my comment
+         Z14       = 85.97    ! my comment
+         Z15       = 92.59    ! my comment
+         Z16       = 99.28    ! my comment
+         Z17       = 106.00   ! my comment
+         Z18       = 112.84   ! my comment
+         Z19       = 119.60   ! my comment
+         Z20       = 126.66   ! my comment
+         Z21       = 133.80   ! my comment
+         Z22       = 141.06   ! my comment
+         Z23       = 148.43   ! my comment
+         Z24       = 156.09   ! my comment
+         Z25       = 163.71   ! my comment
+         Z26       = 171.46   ! my comment
+         Z27       = 179.35   ! my comment
+         Z28       = 187.38   ! my comment
+         Z29       = 195.56   ! my comment
+         Z30       = 203.84   ! my comment
+         Z31       = 212.33   ! my comment
+         Z32       = 220.94   ! my comment
+         Z33       = 229.7    ! my comment
+         A1        = 1.20     ! my comment
+         A2        = 2.84     ! my comment
+         A3        = 4.48     ! my comment
+         A4        = 6.12     ! my comment
+         A5        = 7.74     ! my comment
+         A6        = 9.36     ! my comment
+         A7        = 10.97    ! my comment
+         A8        = 7.60     ! my comment
+         A9        = 14.30    ! my comment
+         A10       = 22.30    ! my comment
+         A11       = 22.30    ! my comment
+         A12       = 22.30    ! my comment
+         A13       = 22.30    ! my comment
+         A14       = 22.30    ! my comment
+         A15       = 22.30    ! my comment
+         A16       = 22.30    ! my comment
+         A17       = 22.30    ! my comment
+         A18       = 22.30    ! my comment
+         A19       = 33.00    ! my comment
+         A20       = 33.00    ! my comment
+         A21       = 33.00    ! my comment
+         A22       = 33.00    ! my comment
+         A23       = 33.00    ! my comment
+         A24       = 37.58    ! my comment
+         A25       = 37.58    ! my comment
+         A26       = 37.58    ! my comment
+         A27       = 37.58    ! my comment
+         A28       = 37.58    ! my comment
+         A29       = 37.58    ! my comment
+         A30       = 37.58    ! my comment
+         A31       = 37.58    ! my comment
+         A32       = 37.58    ! my comment
+         A33       = 37.58    ! my comment
          HCHgt  =  0.466  ! HC->Height (r)
          HCWid  = 20.8    !  HC->Width (phi)
          HCLen  =  8.4    !   HC->Length (z)
@@ -254,28 +339,6 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
       USE   TOFF
       USE   MODR
 *
-* ---
-* G10 material definition for PCBs
-      Component Si   A=28.08  Z=14   W=0.6*1*28./60.   
-      Component O    A=16     Z=8    W=0.6*2*16./60.   
-      Component C    A=12     Z=6    W=0.4*8*12./174.  
-      Component H    A=1      Z=1    W=0.4*14*1./174.
-      Component O    A=16     Z=8    W=0.4*4*16./174.
-      Mixture   G10  Dens=1.7
-* ---
-* RPCgas material for TOFr gas
-      Component H    A=1      Z=1    W=0.90*2*1./102.  + 0. + 0.05*10*1./58.
-      Component C    A=12     Z=6    W=0.90*2*12./102. + 0. + 0.05*4*12./58.
-      Component F    A=19     Z=9    W=0.90*4*19./102. + 0.05*6*19./146. + 0.
-      Component S    A=32     Z=16   W=0.              + 0.05*1*32./146. + 0.
-      Mixture   RPCgas  Dens=4.55E-3
-* ---
-      Component  Al        A=27  Z=13   W=0.0105
-      Component  N         A=14  Z=7    W=0.7395
-      Component  Adhesive  A=9   Z=4.5  W=0.2500
-      Mixture    HoneyComb Dens=0.282
-* ---
-*
       Create and Position BTOF in Cave
 *
 *******************************************************************************
@@ -284,6 +347,7 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *     increasing z is then toward eta=0 in each half.
 *
 Block BTOF is the whole CTF system envelope 
+*      Attribute BTOF      seen=0  colo=1
       Attribute BTOF      seen=1  colo=1
       Material  Air
       Medium    Standard
@@ -347,7 +411,12 @@ EndBlock
 *
 Block BRFE is the front end electronic of tofr
       Attribute BRFE seen=0   colo=3
-      Material  G10
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.   
+      Component O    A=16     Z=8    W=0.6*2*16./60.   
+      Component C    A=12     Z=6    W=0.4*8*12./174.  
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
       Shape     BOX       dx=modr_feeh/2,
                           dy=tray_Width/2,
                           dz=tray_Length/2
@@ -358,6 +427,13 @@ EndBlock
 Block BXTR  is a Main TRay covering box for CTB or TOF
       Attribute  BXTR     seen=0   colo=2
       Material   Aluminium
+*      Material   Air
+*      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
+*      Component O    A=16     Z=8    W=0.6*2*16./60.
+*      Component C    A=12     Z=6    W=0.4*8*12./174.
+*      Component H    A=1      Z=1    W=0.4*14*1./174.
+*      Component O    A=16     Z=8    W=0.4*4*16./174.
+*      Mixture   G10  Dens=1.7
 
       Shape      BOX      dx=tray_height/2,
                           dz=tray_length/2  
@@ -374,6 +450,7 @@ EndBlock
 *------------------------------------------------------------------------------
 *
 Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
+*      Attribute  BMTC     seen=1   colo=5
       Attribute  BMTC     seen=-1   colo=5
       Material   Air
       Shape      BOX      dx=tray_height/2-tray_WallThk,  
@@ -474,7 +551,13 @@ EndBlock
 *
 Block BUPC is the up pcb cover of tofr
       Attribute BUPC seen=0   colo=3
-      Material  G10
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
+      Component O    A=16     Z=8    W=0.6*2*16./60.
+      Component C    A=12     Z=6    W=0.4*8*12./174.
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
+*      Material  Air
       Shape     BOX       dx=tray_WallThk/2,
                           dy=tray_Width/2-tray_WallThk,
                           dz=tray_Length/2-tray_WallThk     
@@ -484,7 +567,11 @@ EndBlock
 *
 Block BRTC  is  the Main Tray Cavity filled with the details for TOFr 
       Attribute  BRTC     seen=0   colo=5
-      Material   HoneyComb Dens=0.282
+      Component  Al        A=27  Z=13   W=0.0105
+      Component  N         A=14  Z=7    W=0.7395
+      Component  Adhesive  A=9   Z=4.5  W=0.2500
+      Mixture    HoneyComb Dens=0.282
+*      Material   Air
       Shape      BOX      dx=tray_Height/2-tray_WallThk,
                           dy=tray_Width/2-tray_WallThk,
                           dz=tray_Length/2-tray_WallThk
@@ -501,18 +588,143 @@ Block BRTC  is  the Main Tray Cavity filled with the details for TOFr
 *
 *---- create and position TOFr modules
 * 
-* Change the new geometry to honeycomb support of long slim box by
-* add mixture gas box in the tray box iterior
+*Change the new geometry to honeycomb support of long slim box by
+*add mixture gas box in the tray box iterior
 
 *      Create and Position BGMT
 
       Create BRMD
-
-      do i=1,33
-      Position BRMD  X=x0+modr_mrpcX(i) ,
-                     Z=z0-modr_mrpcZ(i) ,
-                     alphay=modr_mrpcA(i)
-      enddo
+      Position BRMD  X=x0+modr_X1 ,
+                     Z=z0-modr_Z1 ,
+                     alphay=modr_A1
+*
+                 Position BRMD  X=x0+modr_X2 ,
+                                Z=z0-modr_Z2 ,
+                                alphay=modr_A2
+*
+                 Position BRMD  X=x0+modr_X3 ,
+                                Z=z0-modr_Z3 ,
+                                alphay=modr_A3
+*
+                 Position BRMD  X=x0+modr_X4 ,
+                                Z=z0-modr_Z4 ,
+                                alphay=modr_A4
+*
+                 Position BRMD  X=x0+modr_X5 ,
+                                Z=z0-modr_Z5 ,
+                                alphay=modr_A5
+*
+                 Position BRMD  X=x0+modr_X6 ,
+                                Z=z0-modr_Z6 ,
+                                alphay=modr_A6
+*
+                 Position BRMD  X=x0+modr_X7 ,
+                                Z=z0-modr_Z7 ,
+                                alphay=modr_A7
+*
+                 Position BRMD  X=x0+modr_X8 ,
+                                Z=z0-modr_Z8 ,
+                                alphay=modr_A8
+*
+                 Position BRMD  X=x0+modr_X9 ,
+                                Z=z0-modr_Z9 ,
+                                alphay=modr_A9
+*
+                 Position BRMD  X=x0+modr_X10 ,
+                                Z=z0-modr_Z10 ,
+                                alphay=modr_A10
+*
+                 Position BRMD  X =x0+modr_X11 ,
+                                Z=z0-modr_Z11 ,
+                                alphay=modr_A11
+*
+                 Position BRMD  X =x0+modr_X12 ,
+                                Z=z0-modr_Z12 ,
+                                alphay=modr_A12
+*
+                 Position BRMD  X=x0+modr_X13 ,
+                                Z=z0-modr_Z13 ,
+                                alphay=modr_A13
+*
+                 Position BRMD  X=x0+modr_X14 ,
+                                Z=z0-modr_Z14 ,
+                                alphay=modr_A14
+*
+                 Position BRMD  X=x0+modr_X15 ,
+                                Z=z0-modr_Z15 ,
+                                alphay=modr_A15
+*
+                 Position BRMD  X=x0+modr_X16 ,
+                                Z=z0-modr_Z16 ,
+                                alphay=modr_A16
+*
+                 Position BRMD  X=x0+modr_X17 ,
+                                Z=z0-modr_Z17 ,
+                                alphay=modr_A17
+*
+                 Position BRMD  X=x0+modr_X18 ,
+                                Z=z0-modr_Z18 ,
+                                alphay=modr_A18
+*
+                 Position BRMD  X=x0+modr_X19 ,
+                                Z=z0-modr_Z19 ,
+                                alphay=modr_A19
+*
+                 Position BRMD  X=x0+modr_X20 ,
+                                Z=z0-modr_Z20 ,
+                                alphay=modr_A20
+*
+                 Position BRMD  X =x0+modr_X21 ,
+                                Z=z0-modr_Z21 ,
+                                alphay=modr_A21
+*
+                 Position BRMD  X =x0+modr_X22 ,
+                                Z=z0-modr_Z22 ,
+                                alphay=modr_A22
+*
+                 Position BRMD  X=x0+modr_X23 ,
+                                Z=z0-modr_Z23 ,
+                                alphay=modr_A23
+*
+                 Position BRMD  X=x0+modr_X24 ,
+                                Z=z0-modr_Z24 ,
+                                alphay=modr_A24
+*
+                 Position BRMD  X=x0+modr_X25 ,
+                                Z=z0-modr_Z25 ,
+                                alphay=modr_A25
+*
+                 Position BRMD  X=x0+modr_X26 ,
+                                Z=z0-modr_Z26 ,
+                                alphay=modr_A26
+*
+                 Position BRMD  X=x0+modr_X27 ,
+                                Z=z0-modr_Z27 ,
+                                alphay=modr_A27
+*
+                 Position BRMD  X=x0+modr_X28 ,
+                                Z=z0-modr_Z28 ,
+                                alphay=modr_A28
+*
+                 Position BRMD  X=x0+modr_X29 ,
+                                Z=z0-modr_Z29 ,
+                                alphay=modr_A29
+*
+                 Position BRMD  X=x0+modr_X30 ,
+                                Z=z0-modr_Z30 ,
+                                alphay=modr_A30
+*
+                 Position BRMD  X =x0+modr_X31 ,
+                                Z=z0-modr_Z31 ,
+                                alphay=modr_A31
+*
+                 Position BRMD  X =x0+modr_X32 ,
+                                Z=z0-modr_Z32 ,
+                                alphay=modr_A32
+*
+                 Position BRMD  X=x0+modr_X33 ,
+                                Z=z0-modr_Z33 ,
+                                alphay=modr_A33
 *
 EndBlock
 *
@@ -520,7 +732,11 @@ EndBlock
 *
 Block BGMT is the mixture gas box in tray that change the hc box into slim
       Attribute BGMT  seen=0   colo=2
-      Material  RPCgas
+      Component H    A=1      Z=1    W=0.90*2*1./102.  + 0. + 0.05*10*1./58.
+      Component C    A=12     Z=6    W=0.90*2*12./102. + 0. + 0.05*4*12./58.
+      Component F    A=19     Z=9    W=0.90*4*19./102. + 0.05*6*19./146. + 0.
+      Component S    A=32     Z=16   W=0.              + 0.05*1*32./146. + 0.
+      Mixture   RPC  Dens=4.55E-3
       Shape     BOX  dx=tray_Height/2-tray_WallThk,
                      dy=tray_Width/2-tray_WallThk-modr_HBWid,
                      dz=tray_Length/2-tray_WallThk
@@ -601,6 +817,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BXSA  is  the active trigger scintillator SLAB for ctb 
+*      Attribute BXSA      seen=1   colo=3
       Attribute BXSA      seen=0   colo=3
       Material polystyren
       Medium   sensitive    IsVol=1
@@ -618,6 +835,7 @@ EndBlock
 *------------------------------------------------------------------------------
 Block BCSB  is  the active trigger scintillator SLAB for tof
       Attribute BCSB      seen=1   colo=7
+*      Attribute BCSB      seen=0   colo=7
       Material polystyren
       Medium   sensitive    IsVol=1
       Shape   BOX    dx=toff_SlatThck/2  dy=toff_SlatWid/2  dz=toff_SlatLen/2 
@@ -633,43 +851,56 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BCCV  is  a  Ctb optical ConVerter
+*      Attribute BCCV      seen=1   colo=3
       Attribute BCCV      seen=0   colo=3
       Material polystyren 
       Shape   TRD2   Dx1=0   Dx2=0   Dy1=0   Dy2=0  dz=0
 EndBlock
 Block BCSK  is a CTB Linear Base tube
+*      Attribute BCSK      seen=1   colo=2
       Attribute BCSK      seen=0   colo=2
       Material  polystyren 
       Shape   TUBE   Rmin=0  Rmax=0   Dz=0
 EndBlock
 Block BZEL  is a Ctb PM electronics
+*      Attribute BZEL      seen=1   colo=6
       Attribute BZEL      seen=0   colo=6
       Material silicon
       Shape   BOX    dx=0  dy=0  dz=0
 EndBlock
 Block BCPM  is a PhotoMultiplier Tube (same for CTB and TOF)
+*      Attribute BCPM      seen=1   colo=1
       Attribute BCPM      seen=0   colo=1
       Material polystyren 
       Shape   TUBE   Rmin=0  Rmax=0  Dz=0
 EndBlock
 *
 Block BTSK  is the outer shell of a TOF CW Base 
+*      Attribute BTSK      seen=1   colo=7
       Attribute BTSK      seen=0   colo=7
       Material  polystyren
       Shape   TUBE   Rmin=0  Rmax=0   Dz=0
 EndBlock
 Block BCEL is a circular G10 board in the CW Base for TOF
+*      Attribute BCEL seen=1   colo=3
       Attribute BCEL seen=0   colo=3
-      Material G10
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
+      Component O    A=16     Z=8    W=0.6*2*16./60.
+      Component C    A=12     Z=6    W=0.4*8*12./174.
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
       Shape     TUBE Rmin=0  Rmax=0   Dz=0
 EndBlock
 Block BCEB is a square G10 board in the CW Base for TOF
+*      Attribute BCEL seen=1   colo=3
       Attribute BCEL seen=0   colo=3
       Material  G10
       Shape     BOX  dx=0  dy=0  dz=0
 EndBlock
 *
 Block BPLA is the plastic angle pieces that hold the upper foam supports...
+*      Attribute BPLA      seen=0   colo=4
       Attribute BPLA      seen=0   colo=4
       Material  polystyren 
       Shape     BOX       dx=0 dy=0 dz=0
@@ -685,14 +916,21 @@ Block BPLA is the plastic angle pieces that hold the upper foam supports...
                                 dz=0.08*2.54/2
 EndBlock
 Block BCON is a generic plastic block for various connectors, foam-support-angles, etc......
+*      Attribute BCON      seen=1   colo=6
       Attribute BCON      seen=0   colo=6
       Material  polystyren 
       Shape     BOX       dx=0 dy=0 dz=0
 EndBlock
 *
 Block BFEE is a G10 FrontEndElectronics board for TOF
+*      Attribute BFEE seen=1   colo=3
       Attribute BFEE seen=0   colo=3
-      Material  G10
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
+      Component O    A=16     Z=8    W=0.6*2*16./60.
+      Component C    A=12     Z=6    W=0.4*8*12./174.
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
       Shape     BOX  dx=0  dy=0  dz=0
       Create    BLEM
       Position  BLEM x=toff_ElecThck+(0.7/2) y=-7.0 z=2 
@@ -712,6 +950,7 @@ Block BFEE is a G10 FrontEndElectronics board for TOF
       Position  BLEM x=toff_ElecThck+(0.7/2) y=8.   z=-2 alphax=180 
 EndBlock
 Block BLEM is a Lemo connector on the FEE boards
+*      Attribute BLEM seen=1   colo=3
       Attribute BLEM seen=0   colo=3
       Shape     BOX   dx=0 dy=0 dz=0
 **      Create    BRAI  dx=0.9/2    dy=0.7/2    dz=0.7/2
@@ -725,6 +964,7 @@ EndBlock
 *******************************************************************************
 *******************************************************************************
 Block BCOO  are the cooling rails/loops
+*      Attribute BCOO  seen=1  colo=2
       Attribute BCOO  seen=0  colo=2
       Shape     BOX   dx=0 dy=0 dz=0
       Create    BRAI  dx=toff_RailThck/2,
@@ -770,16 +1010,19 @@ Block BCOO  are the cooling rails/loops
              alphaX=90
 EndBlock
 Block BRAI  is the Rail for the cooling loop
+*      Attribute BRAI   seen=1  colo=7
       Attribute BRAI   seen=0  colo=7
       Material  Aluminium
       Shape     BOX    dx=0.0  dy=0.0  dz=0.0 
 EndBlock
 Block BPIP  is the Long Pipe for the cooling loop
+*      Attribute BPIP seen=1  colo=7
       Attribute BPIP seen=0  colo=7
       Material  Aluminium
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
 EndBlock
 Block BPIQ  is the Short Pipe for the cooling loop
+*      Attribute BPIQ seen=1  colo=7
       Attribute BPIQ seen=0  colo=7
       Material  Aluminium
       Shape     TUBE Rmin=0  Rmax=0  Dz=0
@@ -789,6 +1032,7 @@ EndBlock
 *******************************************************************************
 *******************************************************************************
 Block BUND   is  Undercarriage support tray - same both for CTB and TOF 
+*      Attribute BUND      seen=0   colo=1   serial=0
       Attribute BUND      seen=0   colo=1   serial=0
       Shape  BOX dx=tray_SupFullH/2  dy=tray_Width/2  dz=tray_SupLen/2
       Material   Aluminium
@@ -824,28 +1068,34 @@ Block BUND   is  Undercarriage support tray - same both for CTB and TOF
       Create and Position  BCOV   X=-tray_SupFullH/2+tray_CoolOutR
 EndBlock
 Block BTFT  is the Foot structure    ( Material  Aluminium )
+*      Attribute BTFT      seen=1   colo=2
       Attribute BTFT      seen=0   colo=2
       Shape     BOX    dx = 0.0  dy = 0.0  dz = 0.0 
 EndBlock
 Block BARM  is  a TPC cooling structure arm             ( Material  Aluminium )
+*      Attribute BARM      seen=1   colo=2
       Attribute BARM      seen=0   colo=2
       Shape     BOX    Dx=tray_SupArmT/2   DY=support_arm_width/2
 EndBlock
 Block BANG  is  an angled part of TPC cooling structure ( Aile )
+*      Attribute BANG   seen=1   colo=2
       Attribute BANG   seen=0   colo=2
       Shape     PARA   dx=tray_SupArmT/2   Dy=support_aile_width/2,
                        Alph=-60   thet=0   phi=0
 EndBlock
 Block BASE  is  a bottom of TPC coolant structure       
+*      Attribute BASE   seen=1   colo=2
       Attribute BASE   seen=0   colo=2
       Shape     BOX    Dx=tray_SupBaseT/2  Dy=tray_SupBaseW/2
 EndBlock
 Block BCOV  is  a whole TPC cooling channel
+*      Attribute BCOV   seen=1   colo=2
       Attribute BCOV   seen=0   colo=2
       Shape     TUBE   Rmin=0   Rmax=tray_CoolOutR
       Create and Position BWAT Rmin=0  Rmax=tray_CoolInnR
 EndBlock
 Block BWAT  is  TPC cooling water
+*      Attribute BWAT   seen=1   colo=3
       Attribute BWAT   seen=0   colo=3
       Component H2     A=1   Z=1   W=2
       Component O      A=16  Z=8   W=1
@@ -884,7 +1134,13 @@ EndBlock
 *------------------------------------------------------------------------------
 Block BRMD  is a six channel module for TOFr
       Attribute  BRMD     seen=1   colo=5
-      Material   RPCgas
+*      Attribute  BRMD     seen=0   colo=5
+*      Material   Air
+      Component H    A=1      Z=1    W=0.90*2*1./102.  + 0. + 0.05*10*1./58.
+      Component C    A=12     Z=6    W=0.90*2*12./102. + 0. + 0.05*4*12./58.
+      Component F    A=19     Z=9    W=0.90*4*19./102. + 0.05*6*19./146. + 0.  
+      Component S    A=32     Z=16   W=0.              + 0.05*1*32./146. + 0.
+      Mixture   RPC  Dens=4.55E-3
       Shape      BOX      dx=modr_Height/2,
                           dy=modr_Width/2,
                           dz=modr_Length/2
@@ -943,7 +1199,10 @@ EndBlock
 *------------------------------------------------------------------------------
 Block BRHC  is the HoneyComb in the TOFr module
       Attribute  BRHC
-      Material   HoneyComb
+      Component  Al        A=27  Z=13   W=0.0105
+      Component  N         A=14  Z=7    W=0.7395
+      Component  Adhesive  A=9   Z=4.5  W=0.2500
+      Mixture    HoneyComb Dens=0.282
       Shape      BOX       dx = modr_HCHgt/2,
                            dy = modr_HCWid/2,
                            dz = modr_HCLen/2
@@ -952,7 +1211,15 @@ EndBlock
 *------------------------------------------------------------------------------
 Block BRCB  is the PCB in the TOFr module
       Attribute  BRCB
-      Material   G10
+      Component Si   A=28.08  Z=14   W=0.6*1*28./60.
+      Component O    A=16     Z=8    W=0.6*2*16./60.
+      Component C    A=12     Z=6    W=0.4*8*12./174.
+      Component H    A=1      Z=1    W=0.4*14*1./174.
+      Component O    A=16     Z=8    W=0.4*4*16./174.
+      Mixture   G10  Dens=1.7
+*
+*      Material   G10
+*
       Shape      BOX    dx = modr_PCBHgt/2,
                         dy = modr_PCBWid/2,
                         dz = modr_PCBLen/2
@@ -1065,7 +1332,11 @@ EndBlock
 *------------------------------------------------------------------------------
 Block BRSG  is the sensitive gas layer in the TOFr module
       Attribute BRSG seen=0   colo=5
-      Material  RPCgas
+      Component H    A=1      Z=1    W=0.90*2*1./102.  + 0. + 0.05*10*1./58.
+      Component C    A=12     Z=6    W=0.90*2*12./102. + 0. + 0.05*4*12./58.
+      Component F    A=19     Z=9    W=0.90*4*19./102. + 0.05*6*19./146. + 0.
+      Component S    A=32     Z=16   W=0.              + 0.05*1*32./146. + 0.
+      Mixture   RPC  Dens=4.55E-3
       Medium    sensitive IsVol=1
       Shape     BOX    dx = modr_IGHgt/2,
                         dy = modr_IGWid/2,

@@ -103,7 +103,11 @@ Int_t StStrangeMuDstMaker::Init() {
   xi = cont[xiT];
   kink = cont[kinkT];
 
-  {EachDoT( if (bsize[i]) cont[i]->SetBufferSize(bsize[i]) );}
+  if (rw == StrangeNoKeep) {
+    {EachDoT( cont[i]->SetBufferSize(32000) );}
+  } else {
+    {EachDoT( if (bsize[i]) cont[i]->SetBufferSize(bsize[i]) );}
+  }
 
   if (rw == StrangeRead) {            // READING  the Micro Dst
     InitReadDst();
@@ -612,8 +616,11 @@ void StStrangeMuDstMaker::SetFractionFile(char* fname) {
 }
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.20 2002/06/21 02:43:59 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.21 2003/01/16 20:38:36 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.21  2003/01/16 20:38:36  genevb
+// Reduce buffer size for NoKeep option
+//
 // Revision 3.20  2002/06/21 02:43:59  genevb
 // handle events without primary vertex better
 //

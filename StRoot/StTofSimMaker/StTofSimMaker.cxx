@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.1 2001/09/28 19:11:11 llope Exp $
+ * $Id: StTofSimMaker.cxx,v 1.2 2002/12/12 01:43:46 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,10 +10,31 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.2  2002/12/12 01:43:46  geurts
+ * Introduced InitRun() and FinishRun() members.
+ * TofData in TofCollection is filled with adc and tdc data.
+ * Extra checks for StEvent object to prevent null pointers.
+ * Primitive ADC response function, disabled slatResponseExp().
+ *
  * Revision 1.1  2001/09/28 19:11:11  llope
  * first version
  *
  **************************************************************************/
+//! Time-of-Flight Fast Simulator Maker
+/*! \class StTofSimMaker
+    \author Frank Geurts
+
+    <p>TOF simulation software. This Maker further processes the simulated
+    detector response from GSTAR's GEANT simulation. It takes the G2T tof
+    hit tables and build an StEvent Tof SlatCollection.</p>
+
+    <p>To Do:
+    <ul>
+    <li> Introduce slat response table, currently an exponential model is used</li>
+    <li> Introduce hit position based corrections from measured delays</li>
+    <li> ... </li>
+    </ul>
+*/
 #include <iostream.h>
 #include <iomanip.h>    //fg only now needed for setw()
 #include "StTofSimMaker.h"
@@ -34,6 +55,9 @@
 #include "tables/St_g2t_vpd_hit_Table.h"
 //#include "tables/St_g2t_track_Table.h"
 //#include "tables/St_g2t_tpc_hit_Table.h"
+//tmp
+#include "StTofMaker/StTofDataCollection.h"
+//tmp
 
 typedef vector<StTofMCSlat> tofMCSlatVector;
 typedef tofMCSlatVector::iterator tofMCSlatVecIter;
@@ -43,13 +67,17 @@ static RanluxEngine engine;
 
 ClassImp(StTofSimMaker)
 
+/// default empty constructor
 StTofSimMaker::StTofSimMaker(const char *name):StMaker(name){/* nope */}
 
+/// default empty destructor
 StTofSimMaker::~StTofSimMaker(){/* nope */}
 
+
+/// Initialize dBase interfaces and book histograms
 Int_t StTofSimMaker::Init(){
   mGeomDb = new StTofGeometry();
-  mGeomDb->init();
+  mGeomDb->init(this);
   mCalibDb = new StTofCalibration();
   mCalibDb->init();
   mSimDb = new StTofSimParam();
@@ -68,6 +96,28 @@ Int_t StTofSimMaker::Init(){
 }
 
 
+
+/// InitRun method, (re)initialize TOFp data from STAR dBase
+Int_t StTofSimMaker::InitRun(int runnumber){
+  // cout << "StTofSimMaker::InitRun  -- initializing TofGeometry --" << endl;
+  // mGeomDb = new StTofGeometry();
+  // mGeomDb->init(this);
+  return kStOK;
+}
+
+
+
+/// FinishRun method, clean up TOFp dBase entries
+Int_t StTofSimMaker::FinishRun(int runnumber){
+  // cout << "StTofSimMaker::FinishRun -- cleaning up TofGeometry --" << endl;
+  // if (mGeomDb) delete mGeomDb;
+  // mGeomDb=0;
+  return 0;
+}
+
+
+
+/// read in GSTAR table and create TOF SlatCollection
 Int_t StTofSimMaker::Make(){
   cout << "StTofSimMaker  Make() starts" << endl;
 
@@ -161,16 +211,42 @@ Int_t StTofSimMaker::Make(){
   }
 
 
-  // send of to StEvent
+  // send off to StEvent
   StTofCollection *mTheTofCollection = new StTofCollection();
   for (size_t j=0;j<mSlatCollection->size();j++){
     mTheTofCollection->addSlat(dynamic_cast<StTofMCSlat*>(mSlatCollection->getSlat(j))); 
     // mTheTofCollection->addSlat(mSlatCollection->getSlat(j)); 
 }
 
+  // create tofData collection
+  StTofDataCollection *mDataCollection = new StTofDataCollection;
+  for (int i=0;i<48;i++){    
+    bool slatFound = false;
+    int j=0;
+    for (j=0;j<(int)mSlatCollection->size();j++){
+      StTofSlat *tempSlat = mSlatCollection->getSlat(j);
+      unsigned short indexSlat = tempSlat->slatIndex();
+      if (indexSlat == mGeomDb->daqToSlatId(i)){
+	slatFound = true;
+	StTofData *rawTofData = new  StTofData(indexSlat,tempSlat->adc(),tempSlat->tdc(),0,0);
+	cout << indexSlat << ":  A" << tempSlat->adc() << "  T" << tempSlat->tdc() << endl;
+	mDataCollection->push_back(rawTofData);
+      }
+    }
+    if (!slatFound){
+      StTofData *rawTofData = new  StTofData(mGeomDb->daqToSlatId(i),0,0,0,0);
+      mDataCollection->push_back(rawTofData);
+    }
+  }
+  for(size_t jj = 0; jj < mDataCollection->size(); jj++)
+    mTheTofCollection->addData(mDataCollection->getData(jj));
+
   mEvent = (StEvent*) GetInputDS("StEvent");
-  mEvent->setTofCollection(mTheTofCollection);
-  
+  if (mEvent) mEvent->setTofCollection(mTheTofCollection);
+  else{
+    cout << "StTofSimMaker: Where is StEvent !?! Unable to store data" << endl;
+    return kStWarn;
+  }
 
 
   // verify existence of tofCollection in StEvent (mEvent) 
@@ -198,19 +274,20 @@ Int_t StTofSimMaker::Make(){
 }
 
 
+/// calculate detector response for a single hit
 StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
 {
 
 
 #ifdef TOFSIM_DEBUG
     // dump the g2t structure ...
-    cout << setw( 3) << tof_hit->id      << setw( 4) << tof_hit->next_tr_hit_p
-	 << setw( 4) << tof_hit->track_p << setw( 8) << tof_hit->volume_id
-	 << setw(13) << tof_hit->de      << setw(11) << tof_hit->ds
-	 << setw(12) << tof_hit->p[0]    << setw(12) << tof_hit->p[1]
-	 << setw(12) << tof_hit->p[2]    << setw( 7) << tof_hit->s_track
-	 << setw(13) << tof_hit->tof     << setw(10) << tof_hit->x[0]
-	 << setw(10) << tof_hit->x[1]    << setw(10) << tof_hit->x[2]
+    cout << " " <<setw( 3) << tof_hit->id      << " " <<setw( 4) << tof_hit->next_tr_hit_p
+	 << " " <<setw( 4) << tof_hit->track_p << " " <<setw( 8) << tof_hit->volume_id
+	 << " " <<setw(13) << tof_hit->de      << " " <<setw(11) << tof_hit->ds
+	 << " " <<setw(12) << tof_hit->p[0]    << " " <<setw(12) << tof_hit->p[1]
+	 << " " <<setw(12) << tof_hit->p[2]    << " " <<setw( 7) << tof_hit->s_track
+	 << " " <<setw(13) << tof_hit->tof     << " " <<setw(10) << tof_hit->x[0]
+	 << " " <<setw(10) << tof_hit->x[1]    << " " <<setw(10) << tof_hit->x[2]
 	 << endl;
 #endif
     // skip the consistency checks for now,
@@ -250,7 +327,9 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
       cout << "StTofSimMaker  Slat Response Table not implemented yet. "
       << " Switching to exponential model instead" <<endl;
     }
-    numberOfPhotoelectrons = long (tof_hit->de * slatResponseExp(length));
+    //numberOfPhotoelectrons = long (tof_hit->de * slatResponseExp(length));
+    numberOfPhotoelectrons = long (tof_hit->de * mSimDb->GeV_2_n_photons()
+                               * mSimDb->cath_eff() * mSimDb->cath_surf() * mSimDb->surf_loss());
 
     // prepare some random generator stuff
     RandGauss random(engine);
@@ -262,7 +341,7 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     float tt =  tof_hit->tof + (float) random.shoot()* resl;
     float tt1 =  time +  (float) random.shoot()* mSimDb->start_res();
 
-#ifdef TOFSIM_HIST
+    //#ifdef TOFSIM_HIST
     // fill the histograms
     mPMlength->Fill(length);
     mdE->Fill(tof_hit->de);
@@ -271,7 +350,7 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     mT->Fill(time);
     mTime->Fill(tt);
     mTime1->Fill(tt1);
-#endif
+    //#endif
 
     // fill or update the mcInfo structure of StTofMCslat
     StTofMCSlat slat;
@@ -308,7 +387,11 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
     slat.setAdc(adc);
     slat.setTdc(tdc);
 
-    cout << "StTofmcInfo updating slatId " << slatId << " " << slatData;
+    cout << "StTofmcInfo slatId " << slatId << "  " << slatData;
+    cout << "    a:" << adc << " t:" << tdc << " dE:"<< slatData.mDe << " dS:"<<  slatData.mDs 
+	 << " mTof:" <<  slatData.mTof << " mTime:"<<  slatData.mTime << " mMTime:"<<slatData.mMTime
+	 << " mMTimeL:"<< slatData.mMTimeL << " mSLength:" << slatData.mSLength
+	 << " mPTot:" << slatData.mPTot  << endl;
 
     // this part considers X-talk between slats (based on parameter below) ...
     //    cout << "PHYSNOISE PARAMETER: " << mSimDb->phys_noise() << endl;
@@ -318,6 +401,7 @@ StTofMCSlat StTofSimMaker::detectorResponse(g2t_ctf_hit_st* tof_hit)
 
 
 
+/// exponential slat response model
 float StTofSimMaker::slatResponseExp(float& dz)
 {
   // Exponential model for slat response
@@ -327,9 +411,10 @@ float StTofSimMaker::slatResponseExp(float& dz)
 }
 
 
+/// write histograms to file
 Int_t StTofSimMaker::Finish(){
 
-#ifdef TOFSIM_HIST
+  //#ifdef TOFSIM_HIST
   cout << "StTofSimMaker::Finish  writing tofsim.root ...";
   TFile theFile("tofsim.root","RECREATE","tofsim");
   theFile.cd();
@@ -341,18 +426,22 @@ Int_t StTofSimMaker::Finish(){
   mTime1->Write();
   mPMlength->Write();
   cout << "done"<<endl;
-#endif
+  //#endif
   return kStOK;
 }
 
 
+/// digitize to ADC and TDC entries (empty)
 void StTofSimMaker::fillRaw(){
   //fill the adc and tdc entries.
 }
 
+
+/// simulate electronic noise (empty)
 void StTofSimMaker::electronicNoise(){
 }
 
 
+/// fill event (empty)
  void StTofSimMaker::fillEvent(){
 }

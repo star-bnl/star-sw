@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.h,v 1.1 2001/09/28 19:11:11 llope Exp $
+ * $Id: StTofSimMaker.h,v 1.2 2002/12/12 01:43:46 geurts Exp $
  *
  * Author:  Frank Geurts
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.h,v $
+ * Revision 1.2  2002/12/12 01:43:46  geurts
+ * Introduced InitRun() and FinishRun() members.
+ * TofData in TofCollection is filled with adc and tdc data.
+ * Extra checks for StEvent object to prevent null pointers.
+ * Primitive ADC response function, disabled slatResponseExp().
+ *
  * Revision 1.1  2001/09/28 19:11:11  llope
  * first version
  *
@@ -56,11 +62,13 @@ class StTofSimMaker : public StMaker{
   StTofSimMaker(const char *name="TofSim");
   virtual ~StTofSimMaker();
   virtual Int_t Init();
+  Int_t  InitRun(int);
+  Int_t  FinishRun(int);
   virtual Int_t  Make();
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofSimMaker.h,v 1.1 2001/09/28 19:11:11 llope Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofSimMaker.h,v 1.2 2002/12/12 01:43:46 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofSimMaker,1)
 };

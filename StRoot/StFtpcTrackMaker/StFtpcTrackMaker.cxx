@@ -1,5 +1,17 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.39 2002/10/11 15:45:31 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.41 2002/11/06 13:46:46 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.41  2002/11/06 13:46:46  oldi
+// Vertex handling simplifed.
+// Global/primary fit handling simplified.
+// Vertex estimations only calculated if a vertex was used for tracking.
+// Code clean ups.
+//
+// Revision 1.40  2002/10/31 13:40:52  oldi
+// dE/dx parameters read from database.
+// Calibration parameters read from database.
+// Vertex estimation for different sectors added.
+// Vertex estimation switched off for events with no tracks.
+//
 // Revision 1.39  2002/10/11 15:45:31  oldi
 // Get FTPC geometry and dimensions from database.
 // No field fit activated: Returns momentum = 0 but fits a helix.
@@ -195,7 +207,6 @@
 #include "tables/St_ffs_gepoint_Table.h"
 #include "tables/St_g2t_track_Table.h"
 
-#include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 
 #include "tables/St_dst_TrgDet_Table.h"
@@ -212,7 +223,7 @@
 ClassImp(StFtpcTrackMaker)
 
 //_____________________________________________________________________________
-StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name),  m_fdepar(0)
+StFtpcTrackMaker::StFtpcTrackMaker(const char *name) : StMaker(name)
 {
   // Default constructor.
 }
@@ -226,8 +237,22 @@ StFtpcTrackMaker::~StFtpcTrackMaker()
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::InitRun(Int_t run){
 
-  // get tracking parameters from database
-  StFtpcTrackingParams::Instance(kFALSE, GetDataBase("RunLog"));
+  // get ftpc calibration db
+  St_DataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
+
+  if (!ftpcCalibrationsDb){
+    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
+    assert(ftpcCalibrationsDb);
+
+    return kStWarn;
+  }
+
+  St_DataSetIter ftpcCalibrations(ftpcCalibrationsDb);
+
+  // get run dependend tracking parameters from database
+  StFtpcTrackingParams::Instance(kTRUE, 
+				 (St_ftpcCoordTrans *)ftpcCalibrations("ftpcCoordTrans"),
+				 GetDataBase("RunLog"));
 
   return kStOK;
 }
@@ -237,35 +262,54 @@ Int_t StFtpcTrackMaker::Init()
 {
   // Initialisation.
 
-  St_DataSet *ftpcpars = GetInputDB("ftpc");
-  assert(ftpcpars);
-  St_DataSetIter  gime(ftpcpars);
-  m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
+  // get ftpc parameters
+  St_DataSet *ftpcParsDb = GetInputDB("ftpc");
+  assert(ftpcParsDb);
+  St_DataSetIter ftpcPars(ftpcParsDb);
 
-  St_DataSet *geometry_db = GetDataBase("Geometry/ftpc");
-  if ( !geometry_db ){
-     gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry"<<endm;
-     return kStWarn;
+  // get ftpc geometry
+  St_DataSet *ftpcGeometryDb = GetDataBase("Geometry/ftpc");
+
+  if (!ftpcGeometryDb){
+    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
+    assert(ftpcGeometryDb);
+
+    return kStWarn;
   }
-  St_DataSetIter geometry(geometry_db);
+
+  St_DataSetIter ftpcGeometry(ftpcGeometryDb);
+
+  // get tpc geometry
+  St_DataSet *tpcGeometryDb = GetDataBase("Geometry/tpc");
+
+  if (!tpcGeometryDb){
+    gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting TPC database: Geometry" << endm;
+    assert(tpcGeometryDb);
+
+    return kStWarn;
+  }
+
+  St_DataSetIter tpcGeometry(tpcGeometryDb);
  
   // get tracking parameters from database
-  StFtpcTrackingParams::Instance(Debug(), 
-				  (St_ftpcDimensions *)geometry("ftpcDimensions"), 
-				 (St_ftpcPadrowZ  *)geometry("ftpcPadrowZ"), 
-				 GetDataBase("RunLog"));
+  StFtpcTrackingParams::Instance(Debug(),
+  				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
+  				 (St_fde_fdepar *)ftpcPars("fdepars/fdepar"),
+  				 (St_ftpcDimensions *)ftpcGeometry("ftpcDimensions"), 
+  				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
+
   // Create Histograms
-  m_vtx_pos      = new TH1F("fpt_vtx_pos"   ,"FTPC estimated vertex position"                  , 800, -400.0, 400.0);
-  m_q            = new TH1F("fpt_q"         ,"FTPC track charge"                               ,  3,   -2.0,   2.0);
-  m_theta        = new TH1F("fpt_theta"     ,"FTPC theta"                                      , 100,   -5.0,   5.0 );
-  m_ndedx        = new TH1F("fde_ndedx"     ,"Number of points used in FTPC dE/dx calculation" , 
+  m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
+  m_q            = new TH1F("fpt_q", "FTPC track charge", 3, -2.0, 2.0);
+  m_theta        = new TH1F("fpt_theta", "FTPC theta", 100, -5.0, 5.0 );
+  m_ndedx        = new TH1F("fde_ndedx", "Number of points used in FTPC dE/dx calculation", 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track"          , 
+  m_found        = new TH1F("fpt_nrec"      ,"FTPC: number of points found per track", 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-  m_track        = new TH1F("fpt_track"     ,"FTPC: number of tracks found"                    , 100, 0., 5000.);    
-  m_nrec_track   = new TH2F("fpt_hits_mom"  ,"FTPC: points found per track vs. momentum"       , 
+  m_track        = new TH1F("fpt_track", "FTPC: number of tracks found", 100, 0., 5000.);    
+  m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
 			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
 
@@ -282,20 +326,51 @@ Int_t StFtpcTrackMaker::Init()
   m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 50, 0.5, 500.5);
   m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 50, 0.5, 500.5);
  
-  m_xres = new TH1F("fpt_x_res", "FTPC x residuals", 100, -0.25, 0.25);
-  m_yres = new TH1F("fpt_y_res", "FTPC y residuals", 100, -0.25, 0.25);
-  m_rres = new TH1F("fpt_r_res", "FTPC r residuals", 100, -0.25, 0.25);
+  m_xres   = new TH1F("fpt_x_res",   "FTPC x residuals",   100, -0.25, 0.25);
+  m_yres   = new TH1F("fpt_y_res",   "FTPC y residuals",   100, -0.25, 0.25);
+  m_rres   = new TH1F("fpt_r_res",   "FTPC r residuals",   100, -0.25, 0.25);
   m_phires = new TH1F("fpt_phi_res", "FTPC phi residuals", 100, -0.01, 0.01);
 
-  m_rres_vs_r_east = new TH2F("fpt_r_res_vs_r_east", "FTPC east r residuals vs. r", 100, -0.25, 0.25, 100, 6.5, 31.);
-  m_phires_vs_r_east = new TH2F("fpt_phi_res_vs_r_east", "FTPC east phi residuals vs. r", 100, -0.01, 0.01, 100, 6.5, 31.);
-  m_rres_vs_r_west = new TH2F("fpt_r_res_vs_r_west", "FTPC west r residuals vs. r", 100, -0.25, 0.25, 100, 6.5, 31.);
-  m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 100, -0.01, 0.01, 100, 6.5, 31.);
+  m_rres_vs_r_east   = new TH2F("fpt_r_res_vs_r_east", "FTPC east r residuals vs. r", 
+				100, -0.25, 0.25, 100, 6.5, 31.);
+  m_phires_vs_r_east = new TH2F("fpt_phi_res_vs_r_east", "FTPC east phi residuals vs. r", 
+				100, -0.01, 0.01, 100, 6.5, 31.);
+  m_rres_vs_r_west   = new TH2F("fpt_r_res_vs_r_west", "FTPC west r residuals vs. r", 
+				100, -0.25, 0.25, 100, 6.5, 31.);
+  m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 
+				100, -0.01, 0.01, 100, 6.5, 31.);
 
-  m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", "FTPC east vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
-  m_vertex_east_z = new TH1F("fpt_vertex_east_z", "FTPC east vertex z estimation with resp. to TPC vertex", 100, -10., 10.);
-  m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", "FTPC west vertex xy estimation with resp. to TPC vertex", 80, -2., 2., 80, -2., 2.);
-  m_vertex_west_z = new TH1F("fpt_vertex_west_z", "FTPC west vertex z estimation with resp. to TPC vertex", 100, -10., 10.);
+  m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", 
+			      "FTPC east vertex xy estimation with resp. to TPC vertex", 
+			      80, -2., 2., 80, -2., 2.);
+  m_vertex_east_z  = new TH1F("fpt_vertex_east_z", 
+			      "FTPC east vertex z estimation with resp. to TPC vertex", 
+			      100, -10., 10.);
+  m_vertex_west_xy = new TH2F("fpt_vertex_west_xy", 
+			      "FTPC west vertex xy estimation with resp. to TPC vertex", 
+			      80, -2., 2., 80, -2., 2.);
+  m_vertex_west_z  = new TH1F("fpt_vertex_west_z", 
+			      "FTPC west vertex z estimation with resp. to TPC vertex",
+			      100, -10., 10.);
+
+  m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
+				       "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
+				       6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", 
+				       "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 
+				       6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", 
+				       "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 
+				       6, 0.5, 6.5, 100., -10., 10.);
+  m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", 
+				       "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 
+				       6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", 
+				       "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 
+				       6, 0.5, 6.5,  80.,  -2.,  2.);
+  m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", 
+				       "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 
+				       6, 0.5, 6.5, 100., -10., 10.);
 
   return StMaker::Init();
 }
@@ -322,299 +397,211 @@ Int_t StFtpcTrackMaker::Make()
     return kStWarn;
   }
   
-  Float_t primary_vertex_x = 0.;
-  Float_t primary_vertex_y = 0.;
-  Float_t primary_vertex_z = 0.;
-  Float_t primary_vertex_x_err = 0.;
-  Float_t primary_vertex_y_err = 0.;
-  Float_t primary_vertex_z_err = 0.;
-    Int_t primary_vertex_id = 0;
-    Int_t iflag = 0;
-  
-    // Use Primary vertex if it exists
-    St_DataSet * primary = GetDataSet("primary");
+  StFtpcVertex *vertex = new StFtpcVertex(); // create vertex (all parameters set to 0)
+
+  // Use Primary vertex if it exists
+  St_DataSet *primary = GetDataSet("primary");
     
-    if (primary) {
-      St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
+  if (primary) {
+    St_dst_vertex *vtx = (St_dst_vertex *)primary->Find("vertex");
+    
+    if (vertex) {
+      dst_vertex_st *primvtx = vtx->GetTable();
       
-      if (vertex) {
-	dst_vertex_st *primvtx = vertex->GetTable();
-	
-	for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,primvtx++){
+      for (Int_t no_rows = 0; no_rows < vtx->GetNRows(); no_rows++, primvtx++) {
         
-	  if( primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1 ) {
-	    primary_vertex_x = primvtx->x;
-	    primary_vertex_y = primvtx->y;
-	    primary_vertex_z = primvtx->z;
-	    
-	    if (isnan(primary_vertex_x_err = TMath::Sqrt(primvtx->covar[0]))) primary_vertex_x_err = 0.;
-	    if (isnan(primary_vertex_y_err = TMath::Sqrt(primvtx->covar[2]))) primary_vertex_y_err = 0.;
-	    if (isnan(primary_vertex_z_err = TMath::Sqrt(primvtx->covar[5]))) primary_vertex_z_err = 0.;
-	    iflag = primvtx->iflag;
-	    primary_vertex_id = primvtx->id;
-	    break;
-          }       
-        }
-      }  // end of if (vertex)
-    }  // end of if (primary) 
+	if (primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1) {
+
+	  *vertex = StFtpcVertex(primvtx);	  
+	  break;
+	}       
+      }
+    }  // end of if (vertex)
+  }  // end of if (primary) 
+  
+  if (vertex->GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
+
+    //pointer to preVertex dataset
+    St_DataSet *preVertex = GetDataSet("preVertex");
     
-    if (iflag == 0 ) {
+    if (preVertex) {
       
-      // Otherwise use TPC preVertex if it exists
+      //iterator
+      St_DataSetIter preVertexI(preVertex);
       
-      //pointer to preVertex dataset
-      St_DataSet *preVertex = GetDataSet("preVertex");
+      //pointer to preVertex
+      St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
       
-      if (preVertex) {
+      dst_vertex_st *preVtxPtr = preVtx->GetTable();
+      
+      for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
 	
-	//iterator
-	St_DataSetIter preVertexI(preVertex);
-	
-	//pointer to preVertex
-	St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-	
-	dst_vertex_st *preVtxPtr = preVtx->GetTable();
-	
-	for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
-	
-	  if (preVtxPtr->iflag == 101) {
-	    primary_vertex_x = preVtxPtr->x;
-	    primary_vertex_y = preVtxPtr->y;
-	    primary_vertex_z = preVtxPtr->z;
-	    
-	    if (isnan(primary_vertex_x_err = TMath::Sqrt(preVtxPtr->covar[0]))) primary_vertex_x_err = 0.;
-	    if (isnan(primary_vertex_y_err = TMath::Sqrt(preVtxPtr->covar[2]))) primary_vertex_y_err = 0.;
-	    if (isnan(primary_vertex_z_err = TMath::Sqrt(preVtxPtr->covar[5]))) primary_vertex_z_err = 0.;
-	    iflag = preVtxPtr->iflag;
-	    primary_vertex_id = preVtxPtr->id;
-	    break;
-	  }
+	if (preVtxPtr->iflag == 101) {
+
+	  *vertex = StFtpcVertex(preVtxPtr);
+	  break;
 	}
-      }  // end of if (preVertex)
-    } // end of else (preVertex)
-    
-    if (iflag == 1) {
-      // TPC  Vertex used
-      gMessMgr->Message("", "I", "OST") 
-	<< "Using Tpc Vertex (" 
-	<< primary_vertex_x << "+-" << primary_vertex_x_err << ", " 
-	<< primary_vertex_y << "+-" << primary_vertex_y_err << ", " 
-	<< primary_vertex_z << "+-" << primary_vertex_z_err 
-	<<  ") for Ftpc tracking." << endm;
-    }
-    
-    if (iflag == 101) {
-      // TPC  preVertex used
-      gMessMgr->Message("", "I", "OST") 
-	<< "Using Tpc preVertex estimation (" 
-	<< primary_vertex_x << "+-" << primary_vertex_x_err << ", " 
-	<< primary_vertex_y << "+-" << primary_vertex_y_err << ", " 
-	<< primary_vertex_z << "+-" << primary_vertex_z_err 
-	<< ") for Ftpc tracking."   << endm;
-    }
-    
-    if (iflag == 0) {
-      //  No vertex found, therefore set to (0., 0., 0.) to make FTPC tracking possible.
-      gMessMgr->Message("", "W", "OST") << "No vertex found. Use (0., 0., 0.)." << endm;    
-    }
-    
-    // check for the position of the main vertex
-    if (isnan(primary_vertex_x) || isnan(primary_vertex_y) || isnan(primary_vertex_z)) {
-      // No tracking!
-      gMessMgr->Message("", "W", "OST") << "StFtpcTrackMaker::Make() - error in vertex calculation - no tracking" << endm;
-      return kStWarn;
-    } 
-
-    Double_t z = TMath::Abs(primary_vertex_z);
-    Double_t radius = TMath::Sqrt(primary_vertex_x*primary_vertex_x + primary_vertex_y*primary_vertex_y);
-    
-    if (z > StFtpcTrackingParams::Instance()->MaxVertexPosZWarning()) {
-      
-      if (z > StFtpcTrackingParams::Instance()->PadRowPosZ(0)) {
-	gMessMgr->Message("Found vertex lies inside of one Ftpc. No Ftpc tracking possible.", "E", "OTS");
-	
-	// No tracking!
-	return kStWarn;   
       }
-      
-      else if (z > StFtpcTrackingParams::Instance()->MaxVertexPosZError()) {
-	gMessMgr->Message("", "E", "OST") << "Found vertex is more than " 
-					  << StFtpcTrackingParams::Instance()->MaxVertexPosZError() 
-					  << " cm off from z = 0. Ftpc tracking makes no sense." <<endm;
-	// No tracking!
-	return kStWarn;
-      }
-      
-      else {
-	gMessMgr->Message("", "W", "OST") << "Found vertex is more than " 
-					  << StFtpcTrackingParams::Instance()->MaxVertexPosZWarning() 
-					  << " cm off from z = 0 but Ftpc tracking is still possible." << endm;
-	// Do tracking.
-      }
-    }
-    
-    if (radius >= StFtpcTrackingParams::Instance()->InnerRadius()) {
-      gMessMgr->Message("", "E", "OST") << "Found vertex x-z-position is greater than " 
-					<< StFtpcTrackingParams::Instance()->InnerRadius()
-					<< " cm (inner Ftpc radius). No Ftpc tracking possible." << endm;
-      // No tracking!
-      return kStWarn; 
-    }
-    
-    Double_t vertexPos[6] = {primary_vertex_x,     primary_vertex_y,     primary_vertex_z, 
-			     primary_vertex_x_err, primary_vertex_y_err, primary_vertex_z_err};
-    StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertexPos, kTRUE);
-    
-    // tracking 
-    if (StFtpcTrackingParams::Instance()->MagFieldFactor() == 0.) {
-      tracker->NoFieldTracking();
-    }
-    
-    else {
-      tracker->TwoCycleTracking();
-    }
-
-    // for the line above you have these possibilities
-    //tracker->MainVertexTracking();
-    //tracker->FreeTracking();
-    //tracker->TwoCycleTracking();
-    //tracker->NoFieldTracking();
-    //tracker->LaserTracking();
-    
-    // coordinate transformation due to rotation and shift of TPC with respect to the magnet (= global coordinate system) 
-    
-    // get geant information to evaluate if this event is simulated
-    St_DataSet *geant = GetInputDS("geant");  
-    St_DataSetIter geantI(geant);
-    
-    if (!geantI("g2t_ftp_hit")) {
-      // not a simulated event
-      
-      fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
-      
-      TObjArray *clusters = tracker->GetClusters();
-      StFtpcPoint *point;
-      
-      // loop over all clusters
-      for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
-	point = (StFtpcPoint *)clusters->At(i);
-	point->TransformFtpc2Global();
-	point->ToTable(&(point_st[i]));    
-      }
-    }
-    
-    // momentum fit, dE/dx calculation, write tracks to tables
-    St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
-    m_DataSet->Add(fpt_fptrack);
-
-    tracker->FitAnddEdxAndWrite(fpt_fptrack, m_fdepar->GetTable(), -primary_vertex_id);
-    tracker->EstimateVertex(tracker->GetVertex(), 1);
-    
-    if (Debug()) {
-      gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
-      tracker->SettingInfo();
-      tracker->CutInfo();
-      tracker->TrackingInfo();
-    }
-    
-    else {
-      tracker->TrackingInfo();
-    }
-    
-    /*
-    // Track Display
-    
-    // Uncomment this block if you want to see (I mean see!) the found tracks.
-    
-    StFtpcDisplay *display = new StFtpcDisplay(tracker->GetClusters(), tracker->GetTracks());
-    //display->TrackInfo();
-    //display->Info();
-    //display->ShowClusters();
-    //display->ShowTracks();
-    display->WriteData("ftpc_display.root");
-    delete display;
-    */
-    
-    /*
-    // Track Evaluator
-    
-    // Uncomment this block to get information about the quality 
-    // of the found tracks in comparison to the simulated input event.
-    
-    StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, 
-							  ftpc_data, 
-							  tracker->GetVertex(), 
-							  tracker->GetClusters(), 
-							  tracker->GetTracks(), 
-							  "ftpc_evaluator.root", 
-							  "RECREATE");
-    
-    // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
-    // evaluated by the TrackEvaluator.  
-    //eval->ShowTracks();
-    
-    delete eval;
-    */
-    
-    MakeHistograms(tracker);
-    delete tracker;
-    
-    //MakeHistograms();
-    gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
-    
-    return kStOK;;
-}
-
-
-//_____________________________________________________________________________
-void StFtpcTrackMaker::MakeHistograms()
-{
-  // Fill histograms.
+    }  // end of if (preVertex)
+  } // end of else (preVertex)
   
-  St_DataSetIter ftpc_tracks(m_DataSet);
-  
-  //Get the table
-  St_fpt_fptrack *trk = 0;
-  trk = (St_fpt_fptrack *) ftpc_tracks.Find("fpt_fptrack");
-  
-  if (trk) {
-    // Fill histograms for FTPC fpt,fte,fde
-    
-    fpt_fptrack_st *r = trk->GetTable();
-    
-    for (Int_t i=0; i<trk->GetNRows(); i++, r++) {
-      m_found->Fill((Float_t)(r->nrec));
-      m_q->Fill((Float_t)(r->q));
-      m_theta->Fill(r->theta);
-      m_ndedx->Fill((Float_t)(r->ndedx));
-      Float_t mom = TMath::Sqrt(r->p[0] * r->p[0] + r->p[1] * r->p[1] + r->p[2] * r->p[2]);
-      m_nrec_track->Fill((Float_t)(r->nrec), mom);
-    }        
+  if (Int_t problem = vertex->CheckVertex()) {
+    return problem;
   }
+  
+  StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertex, kTRUE);
+  
+  // tracking 
+  if (StFtpcTrackingParams::Instance()->MagFieldFactor() == 0.) {
+    tracker->NoFieldTracking();
+  }
+  
+  else {
+    tracker->TwoCycleTracking();
+  }
+  
+  // for the line above you have these possibilities
+  //tracker->MainVertexTracking();
+  //tracker->FreeTracking();
+  //tracker->TwoCycleTracking();
+  //tracker->NoFieldTracking();
+  //tracker->LaserTracking();
+  
+  // coordinate transformation due to rotation and shift of TPC with respect to the magnet (= global coordinate system) 
+  
+  // get geant information to evaluate if this event is simulated
+  St_DataSet *geant = GetInputDS("geant");  
+  St_DataSetIter geantI(geant);
+  
+  if (!geantI("g2t_ftp_hit")) {
+    // not a simulated event
+    
+    fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
+    
+    TObjArray *clusters = tracker->GetClusters();
+    StFtpcPoint *point;
+    
+    // loop over all clusters
+    for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
+      point = (StFtpcPoint *)clusters->At(i);
+      point->TransformFtpc2Global();
+      point->ToTable(&(point_st[i]));   
+    }
+  }
+  
+  // momentum fit, dE/dx calculation, write tracks to tables
+  St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
+  m_DataSet->Add(fpt_fptrack);
+  
+  tracker->GlobalFitAnddEdxAndWrite(fpt_fptrack);
+  
+  if (tracker->GetNumberOfTracks() > 0) { // makes only sense if some tracks found
+    tracker->EstimateVertex(tracker->GetVertex(), 1);
+  }
+  
+  if (Debug()) {
+    gMessMgr->Message("", "I", "OST") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
+    StFtpcTrackingParams::Instance()->PrintParams();
+    tracker->TrackingInfo();
+  }
+  
+  else {
+    tracker->TrackingInfo();
+  }
+  
+  /*
+  // Track Display
+  
+  // Uncomment this block if you want to see (I mean see!) the found tracks.
+  
+  StFtpcDisplay *display = new StFtpcDisplay(tracker->GetClusters(), tracker->GetTracks());
+  //display->TrackInfo();
+  //display->Info();
+  //display->ShowClusters();
+  //display->ShowTracks();
+  display->WriteData("ftpc_display.root");
+  delete display;
+  */
+  
+  /*
+  // Track Evaluator
+  
+  // Uncomment this block to get information about the quality 
+  // of the found tracks in comparison to the simulated input event.
+  
+  StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, 
+							ftpc_data, 
+							tracker->GetVertex(), 
+							tracker->GetClusters(), 
+							tracker->GetTracks(), 
+							"ftpc_evaluator.root", 
+							"RECREATE");
+    
+  // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
+  // evaluated by the TrackEvaluator.  
+  //eval->ShowTracks();
+
+  delete eval;
+  */
+  
+  if (tracker->GetNumberOfTracks() > 0) { // only done when sone tracks found
+    MakeHistograms(tracker);
+  }
+  
+  delete tracker;
+  delete vertex;
+  
+  gMessMgr->Message("", "I", "OST") << "Tracking (FTPC) completed." << endm;
+  
+  return kStOK;;
 }
 
 //_____________________________________________________________________________
 void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 {
   // Fill histograms.
-  
-  m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
-			 tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
-  m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
-  m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
-			 tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
-  m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());
+  // This is done only if at least one track was found.
+  // With that a crash in EstimateVertex is prohibited. 
+  // (Problem to fit empty histograms.)
+
+  if (tracker->GetVertex()->GetIFlag()) { // only do vertex estimation if some found vertex was used for tracking
+
+    // vertex estimation for different sectors
+    StFtpcVertex vertex;
+    
+    for (Int_t i = 1; i <= 6; i++) { // east
+      vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
+      m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+      m_vertex_east_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+      m_vertex_east_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+    }
+    
+    for (Int_t i = 1; i <= 6; i++) { // west
+      vertex = tracker->EstimateVertex(tracker->GetVertex(), +1, i, 1);
+      m_vertex_west_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+      m_vertex_west_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+      m_vertex_west_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+    }
+    
+    // vertex estimation for both FTPCs (using all tracks)
+    m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
+			   tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
+    m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
+    m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
+			   tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
+    m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
+  }
   
   for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) {
     
-    StFtpcTrack *tracks = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
-    TObjArray   *fhits  = (TObjArray*) tracks->GetHits();
+    StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
+    TObjArray   *fhits = (TObjArray*) track->GetHits();
     
-    m_nrec_track->Fill(tracks->GetNumberOfPoints(),tracks->GetP());
-    m_found->Fill(tracks->GetNumberOfPoints());
-    m_q->Fill(tracks->GetCharge());
-    m_theta->Fill(tracks->GetTheta());
-    m_ndedx->Fill(tracks->GetdEdx());
+    m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
+    m_found->Fill(track->GetNumberOfPoints());
+    m_q->Fill(track->GetCharge());
+    m_theta->Fill(track->GetTheta());
+    m_ndedx->Fill(track->GetdEdx());
     
     for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
@@ -628,7 +615,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	m_phires->Fill(mhit->GetPhiResidual());
       }
       
-      if (mhit->GetPadRow()<=StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+      if (mhit->GetPadRow() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
 	m_maxadc_West->Fill(mhit->GetMaxADC());
 	m_charge_West->Fill(mhit->GetCharge());
@@ -640,7 +627,7 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 	}
       }
 
-      else if (mhit->GetPadRow()>=11) {
+      else if (mhit->GetPadRow() > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
 	m_maxadc_East->Fill(mhit->GetMaxADC());
 	m_charge_East->Fill(mhit->GetCharge());
@@ -655,7 +642,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
   }
 }
 
-
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Finish()
 {
@@ -666,14 +652,13 @@ Int_t StFtpcTrackMaker::Finish()
   return kStOK;
 }
 
-
 //_____________________________________________________________________________
 void StFtpcTrackMaker::PrintInfo()
 {
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.39 2002/10/11 15:45:31 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.41 2002/11/06 13:46:46 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
