@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.21 2000/05/25 03:52:11 lansdell Exp $ 
+//! $Id: StQABookHist.h,v 1.22 2000/06/02 01:11:52 lansdell Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.22  2000/06/02 01:11:52  lansdell
+//! added several x,y,z-dca to beam axis histograms
+//!
 //! Revision 1.21  2000/05/25 03:52:11  lansdell
 //! mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
 //!
@@ -80,7 +83,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.21 2000/05/25 03:52:11 lansdell Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.22 2000/06/02 01:11:52 lansdell Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -166,6 +169,14 @@ class StQABookHist : public StMaker {
   TH1F     *m_globtrk_good_sm;//! # tracks in table with iflag>0,small range
   TH1F     *m_globtrk_iflag; //! iflag value
   TH1F     *m_det_id;        //! detector id of track
+  TH2F     *m_dcaToBeamXY;   //! xy-dca to beam axis
+  TH1F     *m_dcaToBeamZ1;   //! z-dca to beam axis -210 to -105
+  TH1F     *m_dcaToBeamZ2;   //! z-dca to beam axis -105 to 0
+  TH1F     *m_dcaToBeamZ3;   //! z-dca to beam axis 0 to 105
+  TH2F     *m_zDcaTanl;      //! z-dca vs tanl
+  TH2F     *m_zDcaZf;        //! z-dca vs z-first
+  TH2F     *m_zDcaPsi;       //! z-dca vs psi
+  TH2F     *m_zDcaPhi0;      //! z-dca vs phi0
 
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointFE;       //! number of points on the track - ftpc east
@@ -605,7 +616,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.21 2000/05/25 03:52:11 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.22 2000/06/02 01:11:52 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.42 2000/05/25 03:52:11 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.43 2000/06/02 01:11:52 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.43  2000/06/02 01:11:52  lansdell
+// added several x,y,z-dca to beam axis histograms
+//
 // Revision 1.42  2000/05/25 03:52:11  lansdell
 // mirrored globtrk histograms for primtrk; removed ev0_eval, vertex: detector id histograms; added generator pT for TPC (|eta|<1), vertex: radial position histograms; merged vertex methods
 //
@@ -232,6 +235,15 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_globtrk_good_sm=0;
   m_globtrk_iflag=0;
   m_det_id=0;
+  m_dcaToBeamXY=0;
+  m_dcaToBeamZ1=0;
+  m_dcaToBeamZ2=0;
+  m_dcaToBeamZ3=0;
+  m_zDcaTanl=0;
+  m_zDcaZf=0;
+  m_zDcaPsi=0;
+  m_zDcaPhi0=0;
+
   m_pointT=0;
   m_pointFE=0;
   m_pointFW=0;
@@ -291,7 +303,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq0FW=0;     
   m_chisq1T=0;
   m_chisq1FE=0;
-  m_chisq1FW=0;     
+  m_chisq1FW=0;
   m_glb_impactT=0; 
   m_glb_impactrT=0; 
 
@@ -731,6 +743,16 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_sm = QAH1F("QaGtrkGoodsm", "globtrk: tot good tracks - all",40,0.,20.);
   
   m_det_id          = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
+
+  m_dcaToBeamXY = QAH2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
+
+  m_dcaToBeamZ1 = QAH1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
+  m_dcaToBeamZ2 = QAH1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
+  m_dcaToBeamZ3 = QAH1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
+  m_zDcaTanl    = QAH2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl",80,-20,20,32,-4,4);
+  m_zDcaZf      = QAH2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
+  m_zDcaPsi     = QAH2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
+  m_zDcaPhi0    = QAH2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
 
 // 1D tpc
 
