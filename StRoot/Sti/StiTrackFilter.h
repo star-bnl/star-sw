@@ -106,10 +106,7 @@ public:
     
 protected:
     ///Return a pointer to a new StiTrackFilter object on the heap.
-    virtual void * makeNewObject() const
-      {
-	return 0;
-      }
+    //virtual void * makeNewObject() const=0;
     
 private:
     StiTrackFilterFactory(); //Not implemented

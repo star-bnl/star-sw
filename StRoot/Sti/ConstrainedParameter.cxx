@@ -37,10 +37,10 @@ ConstrainedParameterFactory::ConstrainedParameterFactory(const string& newName,
 							 int original,
 							 int incremental, 
 							 int maxInc)
-  : ParameterFactory(newName, 
-		     original, 
-		     incremental, 
-		     maxInc)
+  : StiObjectFactoryInterface<Parameter>(newName, 
+					 original, 
+					 incremental, 
+					 maxInc)
 {
   initialize();
 }
@@ -48,4 +48,9 @@ ConstrainedParameterFactory::ConstrainedParameterFactory(const string& newName,
 ConstrainedParameterFactory::~ConstrainedParameterFactory()
 {
   // cout <<"ConstrainedParameterFactory::~ConstrainedParameterFactory()"<<endl;
+}
+
+void* ConstrainedParameterFactory::makeNewObject() const
+{
+  return new ConstrainedParameter();
 }
