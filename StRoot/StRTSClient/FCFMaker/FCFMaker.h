@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.11 2004/08/05 20:08:06 jml Exp $
+ * $Id: FCFMaker.h,v 1.12 2004/09/02 21:37:19 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.12  2004/09/02 21:37:19  jml
+ * Reduced memory footprint
+ *
  * Revision 1.11  2004/08/05 20:08:06  jml
  * added support for StEvent
  *
@@ -76,12 +79,6 @@
 
 #include <fcfClass.hh>
 
-class St_tss_tsspar;
-class StEvent;
-class StTpcCoordinateTransform;
-class StTpcHitCollection;
-typedef u_int* j_uintptr;
-
 #define FCF_MAX_PADS_EVER 256
 #define FCF_MAX_TIMEBINS_EVER 512
 #define FCF_MAX_CLUSTERS 6000
@@ -90,6 +87,35 @@ typedef u_int* j_uintptr;
 #define FCF_MAX_PADS 184
 #define FCF_MAX_SEQ 32
 
+class St_tss_tsspar;
+class StEvent;
+class StTpcCoordinateTransform;
+class StTpcHitCollection;
+typedef u_int* j_uintptr;
+
+struct croat_out_s {
+  u_int v[45][(FCF_MAX_CLUSTERS + 2) * 2];
+};
+struct daq_out_s {
+  u_int v[6][3][(FCF_MAX_CLUSTERS + 2) * 2 * 6];
+};
+struct resptr_s {
+  j_uintptr v[45][3];
+};
+
+typedef croat_out_s croat_out_t;
+typedef daq_out_s daq_out_t;
+typedef resptr_s resptr_t;
+
+struct t0_corr_s {
+  int v[24][45][FCF_MAX_PADS_EVER+1];
+};
+struct gain_corr_s {
+  u_int v[24][45][FCF_MAX_PADS_EVER+1];
+};
+
+typedef t0_corr_s t0_corr_t;
+typedef gain_corr_s gain_corr_t;
 
 // In the tpc_raw dataset, 3 clusters x,y & z the pixels are arranged in memory
 // 
@@ -138,8 +164,8 @@ class StRTSClientFCFMaker:public StMaker
   unsigned int croat_adcOff[FCF_MAX_PADS_EVER+1];
   unsigned short croat_cppOff[FCF_MAX_PADS_EVER+1];   
   
-  int t0Corr[24][45][FCF_MAX_PADS_EVER+1];
-  unsigned int gainCorr[24][45][FCF_MAX_PADS_EVER+1];
+  t0_corr_t *t0Corr;
+  gain_corr_t *gainCorr;
   unsigned short startFlags[FCF_MAX_PADS_EVER+1];
 
   Int_t BuildCPP(int nrows, 
@@ -209,14 +235,18 @@ class StRTSClientFCFMaker:public StMaker
 		       u_int *simu_result_buff,
 		       j_uintptr *simu_mz_ptr);
 
-  int build_croat_clusters();
-  int build_daq_file_clusters();
+  int build_croat_clusters(u_int sector, croat_out_t *croat_out, resptr_t *croat_res, croat_out_t *simu_out, resptr_t *simu_res);
+  int build_daq_file_clusters(u_int sector, daq_out_t *, resptr_t *);
+
+  int anyRawDataInFile();
+  int anyClustersInFile();
+  u_int *getMZCLD(u_int hsector, u_int rb, u_int mz, u_int *len);
 
   bool checkSwap(int x);
   u_int swap32(bool test, u_int x);
 
   // cvs
-  const char *GetCVS() const
+  virtual const char *GetCVS() const
     {
       static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
     }
