@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.4 2002/06/06 23:22:34 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.5 2002/06/07 02:22:00 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,10 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.5  2002/06/07 02:22:00  calderon
+ * Protection against empty vector in findFirstLastHit
+ * $Log$ and $Id$ plus header comments for the macros
+ *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
  * -Add needed libs in StMiniHijing.C
@@ -1152,7 +1156,13 @@ StMiniMcMaker::findFirstLastHit(const StTrack* track)
       vec.push_back(hit);
   }
   sort(vec.begin(),vec.end(),hitCmp);
-  return PAIRHIT(vec[0],vec[vec.size()-1]);   
+  if (vec.size()) {
+      return PAIRHIT(vec[0],vec[vec.size()-1]);   
+  }
+  else {
+      StTpcHit* empty = 0;
+      return PAIRHIT(empty,empty);
+  }
 }
 
 PAIRHIT
