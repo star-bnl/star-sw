@@ -9,8 +9,7 @@
    /*******************  Row struct *******************/
    struct tpt_track_pointers {
 	  long    nhit;               /* number of his per track */
-	  long    ipnt[100];          /* pointers to hits belonging to trk */
-          long    pos[100];           /* position on a track */
+	  long    ipnt[200];          /* pointers to hits belonging to trk */
 	  float   p[9];               /* track parameters */
           float   dpar[9];            /* errors on track parameters */
           long    nfit;               /* # of points used in fit */
