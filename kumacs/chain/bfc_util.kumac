@@ -174,6 +174,7 @@
 *                                MiniDaq data & corrections to "tfc_r"
 * 
 * 11/10/98 K. Turner - fixes to ems,emc, jet chains for Akio
+* 11/12/98 K. Turner - fixes to dstin for rerunning desum & drsum
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -312,7 +313,7 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
 	  if ($vexist(chain_drsum).ne.0) then 
             message ' BFC_UTIL,init:  delete existing run_summary table'
 	    rm [run_dst]/run_summary
-	  endif  
+	  endif
     (obin)	  
     (esin)
           dio/newfilestream inev [input_file] r
@@ -408,13 +409,13 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
       (egr) 
 	    exec create_tables_global#egr
 	    exec init_egr#init
-      (ev0) exec create_tables_global#ev0 
+      (ev0) 
+	    exec create_tables_global#ev0 
             exec init_ev0#init
             exec init_magf#init
      (ev02) 
 	    exec create_tables_global#ev0
             exec create_tables_global#ev02
-* exec init_ev0#fill_ev02
 	    exec init_ev0#init_ev02
    (ev0_e)  exec create_tables_global#ev0_eval2
    (ev0d)   exec init_ev0#ev0_dst
