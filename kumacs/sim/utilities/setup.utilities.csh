@@ -9,11 +9,17 @@
 # alias gstar to execute setup.kumac upon startup
 unalias gstar
 
-if ( $OSTYPE == "unicos" ) then
+if ( $HOST == "mcurie" ) then
 
-# use "-P 0" to set NwPAW to zero
+   alias gstar "~nevski/gstar/bin/gstar -l $GSTAR_UTIL_DIR/setup.kumac"
 
-   alias gstar "~nevski/gstar/bin/gstar -l $GSTAR_UTIL_DIR/setup.kumac -P 0"
+else if ( $HOST == "pierre" ) then
+
+   alias gstar "~nevski/gstar/bin/gstar -l $GSTAR_UTIL_DIR/setup.kumac"
+
+else if ( $HOST == "jaromir" ) then
+
+   alias gstar "/chkpnt/star/pjacobs/bin -l $GSTAR_UTIL_DIR/setup.kumac"
 
 else
 
