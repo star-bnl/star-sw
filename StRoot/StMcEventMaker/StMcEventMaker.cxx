@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.50 2004/12/17 01:19:40 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.51 2005/01/21 02:32:28 jeromel Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.51  2005/01/21 02:32:28  jeromel
+ * No idea of what this change was about ...
+ *
  * Revision 1.50  2004/12/17 01:19:40  calderon
  * Protection against deleting twice (Found by Jeff Porter).
  *
@@ -230,7 +233,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.50 2004/12/17 01:19:40 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.51 2005/01/21 02:32:28 jeromel Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -1450,6 +1453,7 @@ StMcEventMaker::fillEemc(St_g2t_emc_hit* g2t_eem_hitTablePointer)
 	    } 
 	    else if (eemcNew == StMcEmcHitCollection::kAdd) {
 	        // nothing to do...
+	        delete emchEemc;
 	    } 
 	    else if (eemcNew == StMcEmcHitCollection::kErr) {
 	        delete emchEemc;
