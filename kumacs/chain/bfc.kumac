@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.25 1998/07/31 21:22:38 kathy Exp $
+* $Id: bfc.kumac,v 1.26 1998/08/01 20:34:01 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.26  1998/08/01 20:34:01  kathy
+* separated tid from tpt - now it's a separate variable in chain as it should be
+*
 * Revision 1.25  1998/07/31 21:22:38  kathy
 * now can skip events in bfc.kumac
 *
@@ -71,6 +74,7 @@
 *                                      g2t -> rdg2t 
 * editted 7/28/98 K. Turner - now can read in txt file and run gstar (gtxin)
 * editted 7/31/98 K. Turner - now can skip events at beginning (g2tin)
+* editted 8/1/98  K. Turner - separated out tid from tpt as requested
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -121,6 +125,7 @@
 * tpt        - TPC track finding
 * tte_t      - TPC tte tracker
 * tte_e      - TPC track evaluator
+* tid        - TPC dE/dx pid 
 * svm        - tpc and svt track matching
 * egr        - refit global tracks
 * ev0        - Strange particle reconstruction
@@ -128,9 +133,10 @@
 * evout      - write event & run directories into xdf file
 *
 * 
+* 
 * -- EXAMPLE CHAINS --
 * for #1-5, use domain='geometry tpc svt global' 
-* -> take out ones you don't need
+*       -> take out ones you don't need
 * !! In order to get tpc code, you must load BOTH geometry and tpc 
 *     e.g. domain='geometry tpc'
 * example input file is:  $AFS_RHIC/star/data/samples/auau_central_hijing.xdf _
@@ -138,26 +144,30 @@
 * 
 * 1. read from geant file, svt fast sim, tpc fast sim,
 *                            sgr tracker, tpt tracker, tte track evaluator,
+*                            tid particle id,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*      chain=' g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout'_
+*      chain=' g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout'_
 *
 * 2. read from geant file, svt fast sim, tpc slow sim, tpc clustering
 *                            sgr tracker, tpt tracker, tte track evaluator
+*                            tid particle id,
 *                            global tracking, global refitting, v0 finder
 *                            & write event out
-*    chain=' g2tin svg tpg srs tss tcl tcl_e sgr tpt tte_e svm egr ev0 evout'_
+* chain=' g2tin svg tpg srs tss tcl tcl_e sgr tpt tte_e tid svm egr ev0 evout'_
 *
 * 3. read from geant file, svt fast sim, sgr tracker & write event out
 *      chain=' g2tin svg srs sgr evout'_
-*
-* 4. read from geant file, tpc fast sim, tpt tracker, tte track eval, 
+* 
+* 4. read from geant file, tpc fast sim, tpt tracker, tte track eval,
+*                             tid particle id,
 *                             & write event out
-*      chain=' g2tin tpg tfs tpt tte_e evout'
+*      chain=' g2tin tpg tfs tpt tte_e tid evout'
 * 
 * 5. read from geant file, tpc slow sim, tpc clustering, tpt tracker,
+*                             tid particle id, 
 *                             tte track evaluator, write event out
-*    chain=' g2tin tpg tss tcl tcl_e tpt tte_e evout'
+*    chain=' g2tin tpg tss tcl tcl_e tpt tte_e tid evout'
 * 
 * 6. to read in event generator file, run gstar & g2t & write out to xdf file
 *     domain=' geometry sim/gstar sim/g2t ' _
@@ -165,7 +175,7 @@
 *      example input files:  
 *          /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_1_200.xdf 
 * 
-* 7. to read from an xdf file that was produced from bfc.kumac 
+* 7. to read from an xdf file that already has raw data simulated on it
 *    and then doing tpc clustering and tracking and write out results:
 *    domain=' tpc '
 * chain=' evin tpg tcl tpt'
@@ -176,6 +186,7 @@
 *      example input files:  
 *          $AFS_RHIC/star/data/samples/muons_central_2.txt
 *  
+* 
 *****************************************************************
 *****************************************************************
 *****************************************************************
@@ -192,7 +203,7 @@ MACRO bfc _
    geomtype=all _
    phystype=on _
    domain=' geometry tpc svt global ' _
-   chain='  g2tin svg tpg srs tfs sgr tpt tte_e svm egr ev0 evout' _
+   chain='  g2tin svg tpg srs tfs sgr tpt tte_e tid svm egr ev0 evout' _
    first=1 _
    no_events=1 _
    input_data_prefix=$AFS_RHIC/star/data/samples/ _
