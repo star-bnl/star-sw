@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpManager.h,v 1.3 2000/04/11 15:45:25 aihong Exp $
+ * $Id: StPidAmpManager.h,v 1.4 2000/04/12 20:14:29 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpManager.h,v $
+ * Revision 1.4  2000/04/12 20:14:29  aihong
+ * change to adapt to ROOT 2.24 and bug fixed with help from valery
+ *
  * Revision 1.3  2000/04/11 15:45:25  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -45,7 +48,7 @@ class StPidAmpManager{
 
      StPidAmpManager();
      StPidAmpManager(const StPidAmpManager&);
-     ~StPidAmpManager();
+     virtual  ~StPidAmpManager();
 
      void setNHits4BGNet(Int_t theNHits);
      void bookADefaultChannelCollection(TString fitOpt, TString drawOpt);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: readDataFromDisk.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: readDataFromDisk.cc,v 1.2 2000/04/12 20:14:29 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: readDataFromDisk.cc,v $
+ * Revision 1.2  2000/04/12 20:14:29  aihong
+ * change to adapt to ROOT 2.24 and bug fixed with help from valery
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -45,7 +48,11 @@ void readDataFromDisk(StPidAmpTrkVector* trks,TH3D* histo){
 
        f>>rig; f>>dedx; f>>charge; f>>pt; f>>nhits; f>>dca;
 
-      histo->Fill3(nhits,pt,1,1);
+ #if ROOT_VERSION_CODE >= ROOT_VERSION(2,24,0)
+        histo->Fill(nhits,pt,1,1);
+ #else
+        histo->Fill3(nhits,pt,1,1);
+ #endif
 
   StPidAmpTrk* theAmpTrk=new StPidAmpTrk(rig, dedx, charge,pt, nhits, dca);
 

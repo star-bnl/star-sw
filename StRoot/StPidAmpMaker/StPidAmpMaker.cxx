@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.cxx,v 1.4 2000/04/11 15:45:25 aihong Exp $
+ * $Id: StPidAmpMaker.cxx,v 1.5 2000/04/12 20:14:29 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.cxx,v $
+ * Revision 1.5  2000/04/12 20:14:29  aihong
+ * change to adapt to ROOT 2.24 and bug fixed with help from valery
+ *
  * Revision 1.4  2000/04/11 15:45:25  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -28,17 +31,21 @@
 
 #include "StPidAmpMaker/StPidAmpMaker.h"
 #include "StChain.h"
-#include "St_Table.h"
+
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
+
+#include "tables/St_dst_track_Table.h"
+#include "tables/St_dst_dedx_Table.h"
+#include "tables/St_dst_vertex_Table.h"
 
 #include "StPidAmpMaker/Include/StPidAmpConst.hh"
 
 
 
-void fillStPidAmpTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table* theVertexTable, StPidAmpTrkVector* trks,TH3D* histo);
+void fillStPidAmpTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable, StPidAmpTrkVector* trks,TH3D* histo);
 void readDataFromDisk(StPidAmpTrkVector* trks,TH3D* histo);//read trks from disk.
-void writeTrks(St_Table* theTrackTable, St_Table* theDedxTable, St_Table* theVertexTable);//write trks to disk for quik reading.vi readDataFromDisk.
+void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable);//write trks to disk for quik reading.vi readDataFromDisk.
 
 ClassImp(StPidAmpMaker)
 
@@ -109,13 +116,9 @@ StPidAmpMaker::Make()
 
   St_DataSetIter  local(dst_data);
 
-  St_Table* globalTable   =0;
-  St_Table* dst_dedxTable =0;
-  St_Table* vertexTable   =0;
-
-  globalTable   =(St_Table *)local["globtrk"];
-  dst_dedxTable =(St_Table *)local["dst_dedx"];
-  vertexTable   =(St_Table* )local["vertex"];
+  St_dst_track* globalTable   =( St_dst_track *)local["globtrk"];
+  St_dst_dedx*  dst_dedxTable =(St_dst_dedx *)  local["dst_dedx"];
+  St_dst_vertex *vertexTable  =(St_dst_vertex* )local["vertex"];
 
     // OK, we've got the tables. Pass them and process them.
 
