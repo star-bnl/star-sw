@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.10 2000/02/15 23:24:27 fisyak Exp $
+ * $Id: EventReader.hh,v 1.11 2000/06/27 07:27:25 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -17,9 +17,13 @@
  * 20-Jul-99 MJL add overloaded printEventInfo(FILE *)
  * 28-Dec-99 MJL add alternate InitEventReaders, mapped and unmapped
  * 31-Jan-00 MJL change to #if !defined ST_NO_NAMESPACES
+ * 27-Jun-00 MJL add token to EventInfo, change access functions
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.11  2000/06/27 07:27:25  levine
+ * Added Token to EventInfo struct
+ *
  * Revision 1.10  2000/02/15 23:24:27  fisyak
  * Force to compile StPadMonitorMaker
  *
@@ -103,6 +107,7 @@ class EventReader;
 struct EventInfo // return from EventReader::getEventInfo()
 {
   int EventLength;
+  int Token;
   unsigned int UnixTime;
   unsigned int EventSeqNo;
   unsigned int TrigWord;
