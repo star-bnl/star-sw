@@ -1,7 +1,7 @@
-// $Id: StLaserEventMaker.cxx,v 1.11 2001/12/12 19:39:23 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.12 2001/12/12 20:43:53 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.11  2001/12/12 19:39:23  pfachini
-// Changes to automate the drift velocity calculation
+// Revision 1.12  2001/12/12 20:43:53  pfachini
+// Increasing the cut on the number of tracks per event requested for good laser events (from 500 to 600)
 //
 // Revision 1.10  2001/11/28 19:14:47  jeromel
 // Fixed default values for Laser calibration.
@@ -658,11 +658,11 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 }
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Finish() {
-  if (numberTracks->GetMean()>=500){
+  if (numberTracks->GetMean()>=600){
     WriteTableToFile();
   }
   else{
-    gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of 500 tracks requested for good laser events. No table will be written" << endm;
+    gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of 600 tracks requested for good laser events. No table will be written" << endm;
   }
 
   if (mHistOut){
@@ -673,7 +673,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.11 2001/12/12 19:39:23 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.12 2001/12/12 20:43:53 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -681,7 +681,8 @@ void StLaserEventMaker::PrintInfo() {
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteTableToFile(){
   char filename[80]; 
-  sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
+  //sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
+  sprintf(filename,"/star/u/pfachini/workir/Laser/tpcDriftVelocityLaser.%08d.%06d.C",date,time);
   TString dirname = gSystem->DirName(filename);
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
     if (gSystem->mkdir(dirname.Data())) {
