@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.18 2003/09/18 10:00:55 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.19 2003/09/30 08:58:20 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.19  2003/09/30 08:58:20  jcs
+// StMagUtilities constructer was changed; for safety's sake call with mode = 0
+//
 // Revision 1.18  2003/09/18 10:00:55  jcs
 // remove obsolete version of StFtpcMagboltz2 (FORTRAN version in $CVSROOT/online/ftpc/Magboltz)
 //
@@ -160,7 +163,7 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
 
   
 
-  StMagUtilities  *magField = new StMagUtilities(map,factor);
+  StMagUtilities  *magField = new StMagUtilities(map,factor,0);
 
   
   // create magboltz
