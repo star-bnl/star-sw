@@ -1,4 +1,4 @@
-// $Id: bfcread_histBranch.C,v 1.4 2000/04/18 20:37:26 kathy Exp $
+// $Id: bfcread_histBranch.C,v 1.5 2000/05/03 19:38:52 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -12,6 +12,12 @@
 //                    inside it
 //
 //  - the hist branch only has 1 "event" per dst run!
+//
+// Inputs to macro:
+//   nevents  -  # events to process  (should always leave at 1 !!)
+//   MainFile - input *.dst.root file  (you can use any branch here)
+//   fname    - output file name with qa info
+//  
 //=======================================================================
 
 class StChain;
@@ -20,9 +26,22 @@ StChain *chain;
 void bfcread_histBranch(
  Int_t nevents=1, 
  const char *MainFile=
- "/afs/rhic/star/data/samples/gstar.dst.root")
+ "/afs/rhic/star/data/samples/gstar.dst.root",
+  const char *fname="qa_hist.out")
 {
 //
+  cout << " events to process  = " << nevents << endl;
+  cout << " Input File Name = " << MainFile << endl;
+  cout << " Output file containing printouts = " << fname << endl;
+
+  ofstream fout(fname);
+
+  fout << " Running: bfcread_histBranch.C " << endl;
+  fout << " events to process  = " << nevents << endl;
+  fout << " Input File Name = " << MainFile << endl;
+  fout << " Output file containing printouts = " << fname << endl;
+  fout << endl << endl;
+
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("StIOMaker");
@@ -35,7 +54,7 @@ void bfcread_histBranch(
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("histBranch",0,"r"); //activate runco Branch
+  IOMk->SetBranch("histBranch",0,"r"); //activate hist Branch
 
 // --- now execute chain member functions
   chain->Init();
@@ -43,25 +62,35 @@ void bfcread_histBranch(
   TDataSet *ds=0;
   TDataSet *obj=0;
 
-// Event loop
-  int istat=0,i=1;
+  int istat=0;
+  int i=0;
+  int countev=0;
+  int countevhds=0;
 
-EventLoop: if (i <= nevents && !istat) {
-    cout << "============================ Event " << i << " start" << endl;
+// Event loop
+EventLoop: if (i < nevents && !istat) {
+
     chain->Clear();
     istat = chain->Make(i);
-    cout << "     istat value returned from chain Make = " << istat << endl;
 
+//  count # times Make is called
+    i++;
 
 // Now look at the data in the event:
     int countObj=0;
     int countHist=0;
 
     if (!istat) {
+
+    countev++;
+
+    cout << " start event # " << countev << endl;
+
       ds=chain->GetDataSet("hist");
       TDataSetIter tabiter(ds);
       if (ds) {
-//        ds->ls(2); 
+
+        countevhds++;
 
         TDataSetIter nextHistList(ds);
         St_ObjectSet *histContainer = 0;
@@ -70,8 +99,12 @@ EventLoop: if (i <= nevents && !istat) {
 // loop over directories:
         while (histContainer = (St_ObjectSet *)nextHistList()) {
           dirList = (TList *) histContainer->GetObject();
-          cout << "  Found Object (directory) = " 
-               << histContainer->GetName() << endl;
+
+	  cout << " QAInfo: found directory: " << 
+                    histContainer->GetName() << endl;
+	  fout << " QAInfo: found directory: " << 
+                    histContainer->GetName() << endl;
+
           countObj++;
 
 // Notes for future reference (if we want to generalize this...)
@@ -84,26 +117,49 @@ EventLoop: if (i <= nevents && !istat) {
 // loop over histograms in the directory:
           while (o= nextHist()) {
            countHist++;
-           cout << "    Hist name: " << o->GetName() << " ==> Title: " 
-	        << o->GetTitle() << endl; 
-          }
-        }
-      }
-    }
+           cout << " QAInfo:   Hist name: " << o->GetName() << 
+                     " ==> Title: " << o->GetTitle() << endl; 
+           fout << " QAInfo:   Hist name: " << o->GetName() << 
+                     " ==> Title: " << o->GetTitle() << endl; 
 
-    cout << " End of Event " << i << endl;
-    cout << "  # objects found = " << countObj << endl;
-    cout << "  # hist found = " << countHist << endl;
+          } // nextHist
+        } // histContainer
+      } // ds
 
-    if (istat) {
+    cout << " QAInfo: event # " << countev
+            << ", # directories found = " << countObj 
+            << ", # hist found = " << countHist
+            << endl << endl;
+
+
+    fout << " QAInfo: event # " << countev
+            << ", # directories found = " << countObj 
+            << ", # hist found = " << countHist
+            << endl << endl;
+
+
+    } // istat
+
+    else   // if (istat)
+      {
       cout << "Last event processed. Status = " << istat << endl;
     }
 
-    i++;
-    goto EventLoop;
-   }
 
-  cout << " bfcread HIST Branch: passed event loop " << endl;
+    goto EventLoop;
+} //EventLoop
+
+  cout << endl;
+  cout << "QAInfo: End of Job " << endl; 
+  cout << "QAInfo: # times Make called = " << i << endl;
+  cout << "QAInfo:  # events read = " << countev << endl;
+  cout << "QAInfo:   # events with hist dataset = " << countevhds << endl;
+
+  fout << endl;
+  fout << "QAInfo: End of Job " << endl;
+  fout << "QAInfo: # times Make called = " << i << endl;
+  fout << "QAInfo:  # events read = " << countev << endl;
+  fout << "QAInfo:   # events with hist dataset = " << countevhds << endl;
 
  chain->Finish();   
 }
