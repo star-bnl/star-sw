@@ -108,6 +108,7 @@
 *                             file and put tables in correct directories
 * editted 9/15/98 Y. Fisyak - fixed "fzin" so it gets to EOF properly
 * editted 9/16/98 K. Turner - new chain variable "ntup" to write ntuple
+* editted 9/18/98 K. Turner - added create_tables for "spr" init
 *
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -241,7 +242,8 @@ macro bfc_init _
          exec init_vertices#init
          exec init_sgr#init
 	 exec init_stk#init 
-      (spr) 
+      (spr)
+         exec create_tables_svt#spr 
          exec init_spr#init
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
