@@ -1,5 +1,8 @@
-* $Id: tte_track.F,v 1.5 1999/02/27 22:29:18 sakrejda Exp $
+* $Id: tte_track.F,v 1.6 1999/03/06 21:08:15 perev Exp $
 * $Log: tte_track.F,v $
+* Revision 1.6  1999/03/06 21:08:15  perev
+* some small fixes
+*
 * Revision 1.5  1999/02/27 22:29:18  sakrejda
 * changes suggested by Victor implemented
 *
@@ -251,9 +254,9 @@ c          sort the time of flight info
      >            tl(2).tof,tl)
 c
 c          go through all the points on the long_list list
-           if(track_h.maxlen.gt.track_size) then
-               write(6,*) 'track_size not big enough', track_size,
-     >         track_h.maxlen 
+           if(track_h.nok   .gt.track_size) then	!!!VP
+              write(6,*) 'track_size not big enough', track_size,
+     >         track_h.nok 
            endif
 c
            if(long_list_nok.gt.0) then

@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.5 1998/11/30 19:10:34 sakrejda Exp $
+* $Id: tcl_clusters_in_row.F,v 1.6 1999/03/06 21:08:12 perev Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.6  1999/03/06 21:08:12  perev
+* some small fixes
+*
 * Revision 1.5  1998/11/30 19:10:34  sakrejda
 * double declaration for ide2 removed (found by Valeri)
 *
@@ -224,12 +227,12 @@ c
 	Tcl_clusters_in_row = STAFCV_OK     !Success
 
 c see if it is worth it first...
-        if (tpcluster_h.nok.eq.tpcluster_h.maxlen) then
+        if (tpcluster_h.nok.ge.tpcluster_h.maxlen) then		!!!VP /eq/ge/
            write(6,*)'TPCLUSTER table full - not searching sec,row',sector,row
            return
         endif
 
-        if (tpseq_h.nok.eq.tpseq_h.maxlen) then
+        if (tpseq_h.nok.ge.tpseq_h.maxlen) then			!!!VP /eq/ge/
            write(6,*)'TPSEQ table full - not searching sec,row',sector,row
            return
         endif
@@ -442,7 +445,7 @@ c  The cluster is finished... store it...
 	endif
 
 	if (nseq_in_cluster.ge.2) then	! do not store 1-sequence "clusters"
-           if (tpcluster_h.nok.eq.tpcluster_h.maxlen) then
+           if (tpcluster_h.nok.ge.tpcluster_h.maxlen) then	!!!VP /eq/ge/
               write(6,*)'TPCLUSTER table full- abort sec,row',
      +             sector,row
               return
@@ -464,7 +467,7 @@ c
            tpcluster(tpcluster_h.nok).tpc_row = 100*sector + row
            tpcluster(tpcluster_h.nok).flag = 0
            do iseq=1,nseq_in_cluster
-              if (tpseq_h.nok.eq.tpseq_h.maxlen) then
+              if (tpseq_h.nok.ge.tpseq_h.maxlen) then		!!!VP /eq/ge/
                  write(6,*)'TPSEQ table full- abort sec,row',
      +                sector,row
                  tpcluster_h.nok = tpcluster_h.nok -1 ! don't store half-baked cluster
