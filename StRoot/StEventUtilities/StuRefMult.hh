@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuRefMult.hh,v 1.5 2001/11/14 19:47:08 calderon Exp $
+ * $Id: StuRefMult.hh,v 1.6 2005/02/05 01:02:10 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez Aug 2000
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StuRefMult.hh,v $
+ * Revision 1.6  2005/02/05 01:02:10  perev
+ * test for zero momentum added
+ *
  * Revision 1.5  2001/11/14 19:47:08  calderon
  * replace
  * StPrimaryVertex* -> const StPrimaryVertex*
@@ -63,7 +66,8 @@ uncorrectedNumberOfNegativePrimaries(const StEvent& evt)
 	// these first 3 checks are easy, save time
 	if (track->flag()<0 || track->geometry()->charge()>0 || track->fitTraits().numberOfFitPoints()<10 ) continue; 
 	// check eta, a bit more elaborate
-	if (fabs(track->geometry()->momentum().pseudoRapidity())>0.5) continue;
+	if (fabs(track->geometry()->momentum().mag())<1.e-10) 		continue;
+	if (fabs(track->geometry()->momentum().pseudoRapidity())>0.5) 	continue;
 	// finally, check dca, if a track satisfies gets inside the if, count it.
 	if (track->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;
     }
@@ -83,6 +87,7 @@ uncorrectedNumberOfPositivePrimaries(const StEvent& evt)
 	// these first 3 checks are easy, save time
 	if (track->flag()<0 || track->geometry()->charge()<0 || track->fitTraits().numberOfFitPoints()<10 ) continue; 
 	// check eta, a bit more elaborate
+	if (fabs(track->geometry()->momentum().mag())<=1.e-10) continue;
 	if (fabs(track->geometry()->momentum().pseudoRapidity())>0.5) continue;
 	// finally, check dca, if a track satisfies gets inside the if, count it.
 	if (track->geometry()->helix().distance(primVtx->position())<3) ++countedTracks;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.cxx,v 2.5 2004/10/20 18:55:13 ullrich Exp $
+ * $Id: StTrackGeometry.cxx,v 2.6 2005/02/05 01:01:14 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.cxx,v $
+ * Revision 2.6  2005/02/05 01:01:14  perev
+ * test for zero momentum added
+ *
  * Revision 2.5  2004/10/20 18:55:13  ullrich
  * Name of enum changed: StStarMaxR(Z) now StStarMaxTrackRangeR(Z).
  *
@@ -28,12 +31,13 @@
  **************************************************************************/
 #include "StDetectorId.h"
 #include "StTrackGeometry.h"
-#include "tables/St_dst_track_Table.h"
+#include "StThreeVectorF.hh"
 #include "StPhysicalHelixD.hh"
+class dst_track_st;
 
 ClassImp(StTrackGeometry)
 
-static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.5 2004/10/20 18:55:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.6 2005/02/05 01:01:14 perev Exp $";
 
 StTrackGeometry::StTrackGeometry() {/* noop */}
 
@@ -48,5 +52,6 @@ int StTrackGeometry::bad() const
   if (ierr) 				 return  1+100*ierr;
   if (fabs(hh.origin().z())  >kStarMaxTrackRangeZ) return 21;
   if (     hh.origin().perp()>kStarMaxTrackRangeR) return 31;
+  if (momentum().mag() < 1.e-5                   ) return 41;
   return 0;
 }
