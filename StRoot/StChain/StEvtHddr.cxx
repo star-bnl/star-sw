@@ -3,7 +3,7 @@
 #include <time.h>
 ClassImp(StEvtHddr)
 //_____________________________________________________________________________
-StEvtHddr::StEvtHddr(TDataSet *parent):TDataSet("EvtHddr",parent)
+StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
 { 
   SetDateTime(20330101,0);
   SetEventType("NONE");

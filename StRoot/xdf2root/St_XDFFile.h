@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.23 2000/03/22 23:52:06 fine Exp $
+// $Id: St_XDFFile.h,v 1.22 1999/03/15 00:10:15 perev Exp $
 // $Log: St_XDFFile.h,v $
-// Revision 1.23  2000/03/22 23:52:06  fine
-// Adjusted to libSTAR for ROOT 2.24
-//
 // Revision 1.22  1999/03/15 00:10:15  perev
 // For new Maker schema
 //
@@ -60,7 +57,7 @@ typedef void XDR;
 typedef void DS_DATASET_T; 
 #endif
 
-class TDataSet;
+class St_DataSet;
 class TClass;
 
 
@@ -76,11 +73,11 @@ class St_XDFFile : public TObject
     const Char_t        *fMethodName;   // The name of the current method (to debug code)
     TSocket             *fSocket;       // Socket to XDF I/O
     Int_t                fRecordCount;  // No. of records read/written
-    TDataSet          *fBrowsable;    // The pointer to the record selected with ROOT Browser
+    St_DataSet          *fBrowsable;    // The pointer to the record selected with ROOT Browser
     Int_t                fDebug;        // Debug Level
   protected:
-    static TDataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> TDataSet. Create TDataSet object from DS_DATASET_T C-structure
-    static DS_DATASET_T *MakeDataSet(TDataSet *dataset); // TDataSet -> DS_DATASET_T. Create DS_DATASET_T C-structure from TDataSet object
+    static St_DataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> St_DataSet. Create St_DataSet object from DS_DATASET_T C-structure
+    static DS_DATASET_T *MakeDataSet(St_DataSet *dataset); // St_DataSet -> DS_DATASET_T. Create DS_DATASET_T C-structure from St_DataSet object
     static void  Delete(DS_DATASET_T *ds);                 // Delete DS_DATASET_T structure
            Int_t CreateXDFStream();
   public:
@@ -92,24 +89,24 @@ class St_XDFFile : public TObject
     static  Int_t       dir(const Char_t *filename, UInt_t firstRecord=1, UInt_t numberOfRecords=1);
             Int_t       GetErrorCode() const { return fErrorCode;}
     virtual const Char_t *GetName() const { return fName;}
-    virtual TDataSet *GetSelected() { TDataSet *s = fBrowsable; fBrowsable=0; return s;}
-    virtual Int_t       OpenXDF(const Char_t *filename,const Char_t *mode="r"); // Open file and read create the "root" TDataSet (it is called from ctor)
+    virtual St_DataSet *GetSelected() { St_DataSet *s = fBrowsable; fBrowsable=0; return s;}
+    virtual Int_t       OpenXDF(const Char_t *filename,const Char_t *mode="r"); // Open file and read create the "root" St_DataSet (it is called from ctor)
     virtual Int_t       OpenXDF(TInetAddress address, const char *service,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(TInetAddress address, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(const char *host, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
     virtual Bool_t    IsFolder(){ return fFile?kTRUE:kFALSE;}
-    virtual TDataSet *ReadEvent();                                         // create TDataSet and read the next event in it.
-    virtual TDataSet *NextEventGet(){return ReadEvent();};                                         // create TDataSet and read the next event in it.
-    virtual TDataSet *NextEventList();
-    virtual Int_t       WriteEvent(TDataSet *dataset);                      // create DS_DATASET_T from TDataSet and write it out in XDR format
-    virtual Int_t       NextEventPut(TDataSet *dataset){return WriteEvent(dataset);};                      // create DS_DATASET_T from TDataSet and write it out in XDR format
+    virtual St_DataSet *ReadEvent();                                         // create St_DataSet and read the next event in it.
+    virtual St_DataSet *NextEventGet(){return ReadEvent();};                                         // create St_DataSet and read the next event in it.
+    virtual St_DataSet *NextEventList();
+    virtual Int_t       WriteEvent(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
+    virtual Int_t       NextEventPut(St_DataSet *dataset){return WriteEvent(dataset);};                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       GetCount(){return fRecordCount;}
     virtual Int_t       GetDebug(){return fDebug;};
     virtual Int_t       Debug(){return GetDebug();};
     virtual void        SetDebug(Int_t dbl=1){fDebug=dbl;};
-    static  void        GetXdFile(const Char_t *filename, TDataSet *dataset); // open, read and close file file
-    static  TDataSet *GetXdFile(const Char_t *filename);                      // open, read and close file file
+    static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
+    static  St_DataSet *GetXdFile(const Char_t *filename);                      // open, read and close file file
 
     ClassDef(St_XDFFile,0)
 

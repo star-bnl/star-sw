@@ -19,8 +19,6 @@ my $messg_count = 0;
 my $staging_count = 0;
 my $abort_count = 0;
 my $crash_count = 0;
-my $kill_count = 0;
-my $nofiles_count = 0;
 my $status_line;
 my $job_line;
 my $job_file;
@@ -64,21 +62,13 @@ open (MAILFILE, $boxfile ) or die "cannot open $boxfile: $!\n";
      
      elsif ($status_line =~ /killed/) {
       
-       $kill_count++;
+       $abort_count++;
      $job_line = $mailfile[$num_line + 3];
       @parts = split (":", $job_line);
      $job_file = $parts[1];        
       $fileArr[$num_jbfile] = $job_file; 
      $num_jbfile++ ;      
      print "Job file name when killed: ", $job_file, "\n";
-     }
-     elsif ($status_line =~ /file not found/) {
-      
-       $nofiles_count++;
-     $job_line = $mailfile[$num_line + 3];
-      @parts = split (":", $job_line);
-     $job_file = $parts[1];        
-     print "Job file name not found: ", $job_file, "\n";
      }
 
      elsif ($status_line =~ /crashed/) {
@@ -101,8 +91,6 @@ open (MAILFILE, $boxfile ) or die "cannot open $boxfile: $!\n";
   print "Number of jobs with staging failed: ", $staging_count, "\n";
   print "Number of jobs aborted: ", $abort_count, "\n";
   print "Number of jobs crashed: ", $crash_count, "\n";
-  print "Number of jobs killed:  ", $kill_count, "\n";
-  print "Number of files not found: ", $nofiles_count, "\n";
 
  chdir $dir_arch;
  chomp @fileArr; 

@@ -1,10 +1,7 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: StChainMaker.cxx,v 1.2 2000/03/23 03:45:51 fine Exp $
+// $Id: StChainMaker.cxx,v 1.1 1999/11/18 23:34:17 fisyak Exp $
 // $Log: StChainMaker.cxx,v $
-// Revision 1.2  2000/03/23 03:45:51  fine
-// Clean up
-//
 // Revision 1.1  1999/11/18 23:34:17  fisyak
 // Add l3 chain with new clustering, add ChainMaker to remove ugly print out
 //
@@ -28,6 +25,7 @@
 
 #include "StChainMaker.h"
 #include "StChain.h"
+#include "St_DataSetIter.h"
 ClassImp(StChainMaker)
 
 //_____________________________________________________________________________

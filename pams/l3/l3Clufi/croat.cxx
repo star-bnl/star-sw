@@ -519,6 +519,10 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 		    // fill flags and charge 
 		    f->f = resx[j].flags ;
 		    f->c = resx[j].charge ;
+
+		    // print it out
+		    /*printf("rb:%d   mz:%d  row:%d  ncl:%d  x:%d(%f)   t:%d(%f)   c:%d  f:%d\n"
+		      ,rb,mz,rowAbs[i],cl_found,c->x,(float)((float)(c->x)/64),c->t,(float)((float)(c->t)/64),f->c,f->f) ;*/
 		}
 #else
 	    // fill first pad and last pad of this row 
@@ -527,9 +531,10 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	    *outres++ = rowStart[i] ;
 	    *outres++ = rowEnd[i] ;
 #endif
+	   
 
 	}	/* for MAX_LOGICAL_ROWS */
-
+    
     /* now we are done with this card */
     /* fill the first data word of TPCMZCLD DATA */
     *padrows = rows ;	
