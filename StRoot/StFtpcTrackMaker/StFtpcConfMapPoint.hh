@@ -1,5 +1,15 @@
-// $Id: StFtpcConfMapPoint.hh,v 1.1 2000/05/11 15:14:40 oldi Exp $
+// $Id: StFtpcConfMapPoint.hh,v 1.2 2000/07/18 21:22:15 oldi Exp $
 // $Log: StFtpcConfMapPoint.hh,v $
+// Revision 1.2  2000/07/18 21:22:15  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.1  2000/05/11 15:14:40  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -61,6 +71,7 @@ public:
   
             StFtpcConfMapPoint();                                                 // default constructor
             StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *vertex);   // constructor
+            StFtpcConfMapPoint(Double_t *x, Int_t row, StFtpcVertex *vertex);     // constructor for arbitrary coordinates
   virtual  ~StFtpcConfMapPoint();                                                 // destructor
   
   // getter

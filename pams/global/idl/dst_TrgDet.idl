@@ -16,8 +16,8 @@
   float     vertexZ;        /* Z position as determined by the VPD   */  
   float     adcZDC[16];     /* ZDC ADCs                              */
   float     tdcZDC[16];     /* ZDC TDCs                              */
-  float     adcZDCEast;     /* Sum east ZDC ADCs                     */
-  float     adcZDCWest;     /* Sum west ZDC ADCs                     */
-  float     adcZDCsum;      /* Sum ZDC ADCs                          */
+  float     adcZDCEast;     /* Sum of attenuated East ZDC ADCs       */
+  float     adcZDCWest;     /* Sum of attenuated West ZDC ADCs       */
+  float     adcZDCsum;      /* Sum of total (East+West) attenuated ZDC ADCs */
 } ;
-/*  Last mod. for dst_TrgDet:   $Date: 2000/05/04 22:25:24 $ */
+/*  Last mod. for dst_TrgDet:   $Date: 2000/07/19 21:47:29 $ */

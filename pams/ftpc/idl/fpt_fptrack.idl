@@ -14,6 +14,7 @@
        long      id_start_vertex;   /* 0=track not assigned to any vertex */
                                     /* <0=foreign key to preVertex table    */
                                     /* >0=foreign key to vertex table */
+       long      id_globtrk;  /* foreign key to globtrk table */
        long      hitid[10];   /* id's of all points on track */
        short     nmax;        /* maximum number of points possible on track */ 
        short     nrec;        /* number of points on track */
@@ -30,4 +31,4 @@
        float     impact;      /* impact parameter to vertex at z(vertex) */
     };
 
-/*  Last mod. for fpt_fptrack: $Date: 2000/07/12 12:00:41 $ */
+/*  Last mod. for fpt_fptrack: $Date: 2000/07/17 14:49:05 $ */

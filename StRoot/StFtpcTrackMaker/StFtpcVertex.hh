@@ -1,5 +1,15 @@
-// $Id: StFtpcVertex.hh,v 1.3 2000/05/15 14:28:16 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.4 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.4  2000/07/18 21:22:17  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.3  2000/05/15 14:28:16  oldi
 // problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
 // refitting procedure completed and included in StFtpcTrackMaker (commented),
@@ -32,8 +42,8 @@ class StFtpcVertex : public TObject {
 
 private:
 
-  StThreeVector<double> mCoord;
-  StThreeVector<double> mError;
+  StThreeVector<double> mCoord;  //! coordinates of vertex
+  StThreeVector<double> mError;  //! errors on coordinates
 
 public:
 

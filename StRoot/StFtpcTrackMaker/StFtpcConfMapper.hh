@@ -1,5 +1,15 @@
-// $Id: StFtpcConfMapper.hh,v 1.4 2000/06/13 14:33:10 oldi Exp $
+// $Id: StFtpcConfMapper.hh,v 1.5 2000/07/18 21:22:15 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.5  2000/07/18 21:22:15  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.4  2000/06/13 14:33:10  oldi
 // Added three new funtions (SetEtaMin(), SetEtaMax(), CalcEtaMinMax()) and
 // two data members (mEtaMin, mEtaMax) to be able to calculate the
@@ -43,6 +53,7 @@ class StFtpcConfMapper : public StFtpcTracker {
 private:
 
   TBenchmark *mBench;             // benchmark object (just for run-time measurements)
+      Bool_t  mLaser;             // indicator to know if this is a laser event
 
   // Volume segemnts
   TObjArray *mVolume;             // array of volume (pad, phi, eta) elements
@@ -131,9 +142,15 @@ public:
 			     Bool_t bench = (Bool_t)false,
 			     Int_t phi_segments = 100, 
 			     Int_t eta_segments = 200);  // constructor
+            StFtpcConfMapper(TClonesArray *hits, 
+			     Double_t vertexPos[3] = NULL, 
+			     Bool_t bench = (Bool_t)false, 
+			     Int_t phi_segments = 100, 
+			     Int_t eta_segments = 200);  // constructor which takes an CLonesArray of hits
   virtual  ~StFtpcConfMapper();  // destructor
 
   // setter
+  void SetLaser(Bool_t f)    { mLaser = f;  }                                             // set laser flag
   void Settings(Int_t trackletlength1, Int_t trackletlength2, 
 		Int_t tracklength1, Int_t tracklength2, 
 		Int_t rowscopetracklet1, Int_t rowscopetracklet2,
@@ -155,6 +172,8 @@ public:
   void SetVertexConstraint(Bool_t f) { mVertexConstraint = f; }                                                          // sets vertex constraint (on or off)
 
   // getter
+  Bool_t    GetLaser()               { return mLaser;            }  // returns laser flag
+  
   Double_t  GetEtaMin()              { return mEtaMin;           }  // returns min. value of eta
   Double_t  GetEtaMax()              { return mEtaMax;           }  // returns max. value of eta
 
@@ -180,26 +199,30 @@ public:
   Double_t const  GetDistanceFromFit(const StFtpcConfMapPoint *hit);                                   // returns distance of cluster from fit
 
   // Tracking procedures
-              void  ClusterLoop();                                                                           // loops over clusters
-              void  CreateTrack(StFtpcConfMapPoint *hit);                                                    // create track with start at hit
-StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff);                         // returns next cluster to start cluster
-              void  TrackLoop();                                                                             // Loops over found tracks. Trys to extend them.
-            Bool_t  ExtendTrack(StFtpcTrack *track);                                                         // Trys to extend given track.
-    Double_t const  TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit);                   // returns angle
-    Double_t const  TrackletAngle(StFtpcTrack *track, Int_t n = 3);                                          // returns angle
-    Double_t const  CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2);            // returns distance of two hits
-    Double_t const  CalcDistance(const StFtpcConfMapPoint *hit, Double_t *coeff);                            // returns distance between a hit and straight line
-              void  StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n = 0);                           // calculates a straight line fit for given clusters 
-              void  CalcChiSquared(StFtpcTrack *track, StFtpcConfMapPoint *point, Double_t *chi2);           // calculates chi squared for cirlce and length fit
-      Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, const StFtpcConfMapPoint *newhit); // returns true if phi and eta cut holds
-              void  HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max);            // loops over tracks and looks for split tracks
-              void  MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2);                                      // merges two tracks
+              void  ClusterLoop();                                                                               // loops over clusters
+              void  CreateTrack(StFtpcConfMapPoint *hit);                                                        // create track with start at hit
+              void  RemoveTrack(StFtpcTrack *track);                                                             // removes track from track array
+              void  CompleteTrack(StFtpcTrack *track);                                                           // completes track
+StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coeff);                             // returns next cluster to start cluster
+              void  TrackLoop();                                                                                 // Loops over found tracks. Trys to extend them.
+            Bool_t  ExtendTrack(StFtpcTrack *track);                                                             // Trys to extend given track.
+    Double_t const  TrackAngle(const StFtpcPoint *lasthitoftrack, const StFtpcPoint *hit);                       // returns angle
+    Double_t const  TrackletAngle(StFtpcTrack *track, Int_t n = 0);                                              // returns angle
+    Double_t const  CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2, Bool_t laser);  // returns distance of two hits
+    Double_t const  CalcDistance(const StFtpcConfMapPoint *hit, Double_t *coeff);                                // returns distance between a hit and straight line
+              void  StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n = 0);                               // calculates a straight line fit for given clusters 
+              void  CalcChiSquared(StFtpcTrack *track, StFtpcConfMapPoint *point, Double_t *chi2);               // calculates chi squared for cirlce and length fit
+      Bool_t const  VerifyCuts(const StFtpcConfMapPoint *lasttrackhithit, const StFtpcConfMapPoint *newhit);     // returns true if phi and eta cut holds
+              void  HandleSplitTracks(Double_t max_dist, Double_t ratio_min, Double_t ratio_max);                // loops over tracks and looks for split tracks
+              void  MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2);                                          // merges two tracks
+              void  AdjustTrackNumbers();                                                                        // renews tracknumbers
 
   // Start tracking
   void MainVertexTracking(); // tracking of main vertex tracks (vertex constraint on)
   void FreeTracking();       // tracking without vertex constraint 
+  void NonVertexTracking();  // same as FreeTracking()
   void TwoCycleTracking();   // tracking: 1st cylce: with vertex constraint, 2nd cycle: without vertex constraint
-  
+  void LaserTracking();      // tracks straight tracks (settings optimized)
 
   // Information
   void  SettingInfo();  // displays settings
@@ -208,5 +231,176 @@ StFtpcConfMapPoint *GetNextNeighbor(StFtpcConfMapPoint *start_hit, Double_t *coe
 
   ClassDef(StFtpcConfMapper, 1)  // Ftpc conformal mapper class
 };
+
+
+inline void StFtpcConfMapper::TwoCycleTracking()
+{
+  // Tracking in 2 cycles:
+  // 1st cycle: tracking with vertex constraint
+  // 2nd cycle: without vertex constraint (of remaining clusters)Begin_Html<a name="settings"></a>End_Html
+
+  MainVertexTracking();
+  FreeTracking();
+  return;
+}
+
+
+inline void StFtpcConfMapper::NonVertexTracking()
+{
+  // "Shortcut" to FreeTracking().
+
+  FreeTracking();
+}
+
+
+inline void StFtpcConfMapper::RemoveTrack(StFtpcTrack *track)
+{
+  // Removes track from ObjArry and takes care that the points are released again.
+
+  track->SetProperties(false, -1); // release points
+  mTrack->Remove(track);           // actual removement
+  
+  return;
+}
+
+
+inline void StFtpcConfMapper::CalcEtaMinMax()
+{
+  // Calculates the min. and max. value of eta (pseudorapidity) with the given main vertex.
+  // The FTPCs are placed in a distance to the point of origin between 162.75 and 256.45 cm.
+  // Their inner radius is 8, the outer one 30 cm. This means they are seen from (0, 0, 0) 
+  // under an angle between 1.79 and 10.62 degrees which translates directly into max. eta and min. eta. 
+  // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
+  // event. To be save, 0.01 is substracted/added.
+  
+  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(30./ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
+  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin( 8./ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
+
+  return;
+}
+
+
+inline Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
+{
+ // Returns number of pad segment of a specific hit.
+
+  return hit->GetPadRow() - 1;  // fPadRow (1-20) already segmented, only offset substraction
+}
+
+
+inline Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapPoint *hit)
+{
+  // Returns number of phi segment of a specific hit.
+  
+  return (Int_t)(hit->GetPhi()  * mNumPhiSegment / (2.*TMath::Pi())); // fPhi has no offset but needs to be segmented (this is done by type conversion to Int_t)
+}
+
+
+inline Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
+{
+  // Returns number of eta segment of a specific hit.
+
+  Double_t eta;
+  Int_t eta_segm;
+  
+  if ((eta = hit->GetEta()) > 0.) {  // positive values
+    eta_segm = (Int_t)((eta - mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2.); // Only use n_eta_segm/2. bins because of negative eta values.
+  }
+
+  else {                             // negative eta values
+    eta_segm = (Int_t)((-eta - mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2. + mNumEtaSegment/2.);
+  }
+  
+  return eta_segm;
+}
+
+
+inline Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm)
+{
+  // Calculates the volume segment number from the segmented volumes (segm = segm(pad,phi,eta)).
+
+  return row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
+}
+
+
+inline Int_t StFtpcConfMapper::GetRowSegm(Int_t segm)
+{
+  // Returns number of pad segment of a specifiv segment.
+
+  return (segm - GetEtaSegm(segm) - GetPhiSegm(segm)) / (mNumPhiSegment * mNumEtaSegment);
+}
+
+
+inline Int_t StFtpcConfMapper::GetPhiSegm(Int_t segm)
+{
+  // Returns number of phi segment of a specifiv segment.
+
+  return (segm - GetEtaSegm(segm)) % (mNumPhiSegment * mNumEtaSegment) / (mNumEtaSegment);
+}
+
+
+inline Int_t StFtpcConfMapper::GetEtaSegm(Int_t segm)
+{
+  // Returns number of eta segment of a specifiv segment.
+
+  return (segm % (mNumPhiSegment * mNumEtaSegment)) % (mNumEtaSegment);
+}
+
+
+inline Double_t const StFtpcConfMapper::GetPhiDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+{
+  // Returns the difference in angle phi of the two given clusters.
+  // Normalizes the result to the arbitrary angle between two subsequent padrows.
+
+  Double_t angle = TMath::Abs(hit1->GetPhi() - hit2->GetPhi());
+
+  if (angle > TMath::Pi()) {
+    angle = 2*TMath::Pi() - angle;
+  }
+
+  return angle / (TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow()));
+}
+
+
+inline Double_t const StFtpcConfMapper::GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+{
+  // Returns the difference in pseudrapidity eta of the two given clusters.
+  // Normalizes the result to the arbitrary pseudorapidity between two subsequent padrows.
+
+  return (TMath::Abs(hit1->GetEta() - hit2->GetEta())) / (TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow()));
+}
+
+
+inline Double_t const StFtpcConfMapper::GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+{
+  // Returns the distance of two clusters measured in terms of angle phi and pseudorapidity eta weighted by the
+  // maximal allowed values for phi and eta.
+
+  return TMath::Sqrt(TMath::Power(GetPhiDiff(hit1, hit2)/mMaxCircleDist[mVertexConstraint], 2) + TMath::Power(GetEtaDiff(hit1, hit2)/mMaxLengthDist[mVertexConstraint], 2));
+}
+
+
+inline Double_t const StFtpcConfMapper::GetDistanceFromFit(const StFtpcConfMapPoint *hit)
+{
+  // Returns the distance of the given cluster to the track to which it probably belongs.
+  // The distances to the circle and length fit are weighted by the cuts on these values.
+  // Make sure that the variables mCircleDist and mLengthDist for the hit are set already.
+
+  return TMath::Sqrt(TMath::Power((hit->GetCircleDist() / mMaxCircleDist[mVertexConstraint]), 2) + TMath::Power((hit->GetLengthDist() / mMaxLengthDist[mVertexConstraint]), 2));
+}
+
+
+inline void StFtpcConfMapper::AdjustTrackNumbers()
+{
+  // After split tracks are merged the size of the ObjArry holding the tracks needs to be changed.
+  // Afterwards the tracknumbers need to be changed to be the number of the slot of the array again.
+
+  mTrack->Compress();
+  mTrack->Expand(mTrack->GetLast()+1);
+  
+  for (Int_t i = 0; i < mTrack->GetEntriesFast(); ((StFtpcTrack*)mTrack->At(i))->SetTrackNumber(i), i++);
+
+  return;
+}
 
 #endif

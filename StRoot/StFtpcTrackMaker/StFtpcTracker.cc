@@ -1,5 +1,15 @@
-// $Id: StFtpcTracker.cc,v 1.6 2000/07/03 12:48:14 jcs Exp $
+// $Id: StFtpcTracker.cc,v 1.7 2000/07/18 21:22:17 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.7  2000/07/18 21:22:17  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.6  2000/07/03 12:48:14  jcs
 // use (pre)Vertex id to access vertex coordinates for unconstrained fit and
 // for constrained fit
@@ -27,7 +37,7 @@
 //
 
 //----------Author:        Holm G. H&uuml;mmler, Markus D. Oldenburg
-//----------Last Modified: 12.05.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcTracker.hh"
@@ -88,7 +98,22 @@ StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3],
 }
 
 
-StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t dca)
+StFtpcTracker::StFtpcTracker(TClonesArray *hits, Double_t vertexPos[3], Double_t max_Dca)
+{
+  // Constructor to take care of arbitrary hits.
+
+  mHit = hits;
+  mHitsCreated = (Bool_t)false;
+
+  mMaxDca = max_Dca;
+  mTrack = new TClonesArray("StFtpcTrack", 0);
+
+  mVertex = new StFtpcVertex(vertexPos);
+  mVertexCreated = (Bool_t)true;
+}
+
+
+StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t max_Dca)
 {
   // Constructor to handle the case where everything is there already.
 
@@ -97,7 +122,7 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArr
   mHitsCreated = (Bool_t) false;
   mVertexCreated = (Bool_t) false;
   mTrack = track;
-  mMaxDca = dca;
+  mMaxDca = max_Dca;
 }
 
 
@@ -130,7 +155,7 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   TClonesArray &track = *mTrack;
   
   for (Int_t i = 0; i < n_tracks; i++) {
-    new(track[i]) StFtpcTrack(track_st++, mHit);
+    new(track[i]) StFtpcTrack(track_st++, mHit, i);
   }
 
   mMaxDca = dca;
@@ -198,19 +223,4 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
     gMessMgr->Message("", "W", "OST") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
-}
-
-
-Int_t StFtpcTracker::Write()
-{
-  // Writes tracks and clusters in ROOT file.
-  // In the moment this makes no sense because the important information
-  // about momentum of tracks and coordinates of clusters or stored in
-  // StThreeVerctor<double> which does not inherit from TObject. So it
-  // is not written out!
-
-  mHit->Write();
-  mTrack->Write();
-  
-  return 0;
 }

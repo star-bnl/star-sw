@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.8 2000/05/22 21:38:32 ullrich Exp $
+ * $Id: StHelixD.cc,v 1.9 2000/07/17 21:44:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.8  2000/05/22 21:38:32  ullrich
- * Add parenthesis to make Linux compiler happy.
+ * Revision 1.9  2000/07/17 21:44:24  ullrich
+ * Fixed problem in pathLength(cyl_rad).
  *
  * Revision 1.8  2000/05/22 21:38:32  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -125,6 +125,8 @@ void StHelixD::setPhase(double val)
     mPhase       = val;
     mCosPhase    = cos(mPhase);
     mSinPhase    = sin(mPhase);
+    if (fabs(mPhase) > M_PI)
+	mPhase = atan2(mSinPhase, mCosPhase);  // force range [-pi,pi]
 }
 
 void StHelixD::setDipAngle(double val)
@@ -321,6 +323,19 @@ pairD StHelixD::pathLength(double r) const
 	
 	value.first = (-mPhase + 2.0*atan((-2.0*t1 + 2.0*t2 + t40)/t45))/t46;
 	value.second = -(mPhase + 2.0*atan((2.0*t1 - 2.0*t2 + t40)/t45))/t46;
+
+	//
+	//   Solution can be off by +/- one period, select smallest
+	//
+	double p = period();
+	if (!isnan(value.first)) {
+	    if (fabs(value.first-p) < fabs(value.first)) value.first = value.first-p;
+	    if (fabs(value.first+p) < fabs(value.first)) value.first = value.first+p;
+	}
+	if (!isnan(value.second)) {
+	    if (fabs(value.second-p) < fabs(value.second)) value.second = value.second-p;
+	    if (fabs(value.second+p) < fabs(value.second)) value.second = value.second+p;
+	}
     }
     if (value.first > value.second) {
 	double tmp = value.first;

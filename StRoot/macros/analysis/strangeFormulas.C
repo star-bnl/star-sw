@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 2.0 2000/06/09 22:13:45 genevb Exp $
+// $Id: strangeFormulas.C,v 3.0 2000/07/17 22:08:11 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.0  2000/07/17 22:08:11  genevb
+// Updated for rev. 3, fixed bug in number of tpc hits
+//
 // Revision 2.0  2000/06/09 22:13:45  genevb
 // Updated for version 2 of Strangeness mico DST package
 //
@@ -126,6 +129,8 @@ Int_t strangeFormulas(TTree* tree) {
   printf("Loading event formulas...\n");
   formulate("Event.run()", "Event.mRun");
   formulate("Event.event()", "Event.mEvent");
+  formulate("Event.globalTracks()", "Event.mGlobalTracks");
+  formulate("Event.primaryTracks()", "Event.mPrimaryTracks");
   formulate("Event.primaryVertexX()", "Event.mPrimaryVertexX");
   formulate("Event.primaryVertexY()", "Event.mPrimaryVertexY");
   formulate("Event.primaryVertexZ()", "Event.mPrimaryVertexZ");
@@ -278,8 +283,8 @@ Int_t strangeFormulas(TTree* tree) {
       sprintf(temp,"(!%s)*(\0",ftpc);
       tstr = temp;
 
-      // hasHitInTpcRow(i), i=1,45
-      for (int j=1; j<45; j++) {
+      // hasHitInTpcRow(i), i=0,44
+      for (int j=0; j<45; j++) {
         sprintf(name,"V0.topologyMap%s.hasHitInTpcRow(%d)",track,j);
 	int m = j+8;
         sprintf(temp,"V0.topologyMap%s.bit(%d)\0",track,m);
@@ -332,8 +337,10 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.clV0()", "V0.mClV0");
     formulate("V0.chi2Pos()", "V0.mChi2Pos");
     formulate("V0.clPos()", "V0.mClPos");
+    formulate("V0.dedxPos()", "V0.mDedxPos");
     formulate("V0.chi2Neg()", "V0.mChi2Neg");
     formulate("V0.clNeg()", "V0.mClNeg");
+    formulate("V0.dedxNeg()", "V0.mDedxNeg");
 
 
     // V0Mc
@@ -342,10 +349,8 @@ Int_t strangeFormulas(TTree* tree) {
 
       // The following formulas use 1 value:
       formulate("V0Mc.decayMode()", "V0Mc.mDecayMode");
-      formulate("V0Mc.positiveTpcHits()", "V0Mc.mPositiveTpcHits");
       formulate("V0Mc.positiveCommonTpcHits()", "V0Mc.mPositiveCommonTpcHits");
       formulate("V0Mc.positiveSimTpcHits()", "V0Mc.mPositiveSimTpcHits");
-      formulate("V0Mc.negativeTpcHits()", "V0Mc.mNegativeTpcHits");
       formulate("V0Mc.negativeCommonTpcHits()", "V0Mc.mNegativeCommonTpcHits");
       formulate("V0Mc.negativeSimTpcHits()", "V0Mc.mNegativeSimTpcHits");
       formulate("V0Mc.geantIdParent()", "V0Mc.mParentGeantId");
@@ -463,9 +468,11 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.chi2V0()", "Xi.mChi2V0");
     formulate("Xi.clV0()", "Xi.mClV0");
     formulate("Xi.chi2Pos()", "Xi.mChi2Pos");
+    formulate("Xi.dedxPos()", "Xi.mDedxPos");
     formulate("Xi.clPos()", "Xi.mClPos");
     formulate("Xi.chi2Neg()", "Xi.mChi2Neg");
     formulate("Xi.clNeg()", "Xi.mClNeg");
+    formulate("Xi.dedxNeg()", "Xi.mDedxNeg");
 
 
     // Now, finally get to the unique Xi formulas:
@@ -607,8 +614,8 @@ Int_t strangeFormulas(TTree* tree) {
       sprintf(temp,"(!%s)*(\0",ftpc);
       tstr = temp;
 
-      // hasHitInTpcRow(i), i=1,45
-      for (int j=1; j<45; j++) {
+      // hasHitInTpcRow(i), i=0,44
+      for (int j=0; j<45; j++) {
         sprintf(name,"Xi.topologyMap%s.hasHitInTpcRow(%d)",track,j);
 	int m = j+8;
         sprintf(temp,"Xi.topologyMap%s.bit(%d)\0",track,m);
@@ -662,6 +669,7 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.clXi()", "Xi.mClXi");
     formulate("Xi.chi2Bachelor()", "Xi.mChi2Bachelor");
     formulate("Xi.clBachelor()", "Xi.mClBachelor");
+    formulate("Xi.dedxBachelor()", "Xi.mDedxBachelor");
 
 
     // XiMc
@@ -670,7 +678,6 @@ Int_t strangeFormulas(TTree* tree) {
 
       // The following formulas use 1 value:
       formulate("XiMc.decayMode()", "XiMc.mDecayMode");
-      formulate("XiMc.tpcHits()", "XiMc.mTpcHits");
       formulate("XiMc.commonTpcHits()", "XiMc.mCommonTpcHits");
       formulate("XiMc.simTpcHits()", "XiMc.mSimTpcHits");
       formulate("XiMc.geantIdParent()", "XiMc.mParentGeantId");
@@ -699,7 +706,6 @@ Int_t strangeFormulas(TTree* tree) {
 
       // The following formulas use 1 value:
       formulate("KinkMc.decayMode()", "KinkMc.mDecayMode");
-      formulate("KinkMc.tpcHits()", "KinkMc.mTpcHits");
       formulate("KinkMc.commonTpcHits()", "KinkMc.mCommonTpcHits");
       formulate("KinkMc.simTpcHits()", "KinkMc.mSimTpcHits");
       formulate("KinkMc.geantIdParent()", "KinkMc.mParentGeantId");

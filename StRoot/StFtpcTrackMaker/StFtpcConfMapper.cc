@@ -1,5 +1,18 @@
-// $Id: StFtpcConfMapper.cc,v 1.6 2000/07/03 12:39:21 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.8 2000/07/24 02:42:47 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.8  2000/07/24 02:42:47  oldi
+// Problem of memory exhaustion solved. This was introduced during the last changes.
+//
+// Revision 1.7  2000/07/18 21:22:15  oldi
+// Changes due to be able to find laser tracks.
+// Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
+//            to bundle often called functions
+//          - short functions inlined
+//          - formulas of StFormulary made static
+//          - avoid streaming of objects of unknown size
+//            (removes the bunch of CINT warnings during compile time)
+//          - two or three minor bugs cured
+//
 // Revision 1.6  2000/07/03 12:39:21  jcs
 // correct comment
 //
@@ -38,7 +51,7 @@
 //
 
 //----------Author:        Markus D. Oldenburg
-//----------Last Modified: 13.06.2000
+//----------Last Modified: 18.07.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcConfMapper.hh"
@@ -80,6 +93,8 @@ StFtpcConfMapper::StFtpcConfMapper()
   // Default constructor.
 
   mBench = NULL;
+  mLaser = (Bool_t)false;
+
   mHit = NULL;
   mVolume = NULL;
   mSegment = NULL;
@@ -98,6 +113,8 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
     mBench = new TBenchmark();
     mBench->Start("init");
   }
+
+  mLaser = (Bool_t)false;
 
   mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
   mNumPhiSegment = phi_segments; 
@@ -120,6 +137,7 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
   fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
 
   mHit = new TClonesArray("StFtpcConfMapPoint", n_clusters);    // create TClonesArray
+  mHitsCreated = (Bool_t)true;
 
   TClonesArray &hit = *mHit;
   
@@ -127,6 +145,58 @@ StFtpcConfMapper::StFtpcConfMapper(St_fcl_fppoint *const fcl_fppoint, Double_t v
     new(hit[i]) StFtpcConfMapPoint(point_st++, mVertex);
     ((StFtpcConfMapPoint *)mHit->At(i))->SetHitNumber(i);
   }
+
+  mVolume = new TObjArray(mBounds, 0);  // create ObjArray for volume cells (of size bounds)
+
+  for (Int_t i = 0; i < mBounds; i++) {
+    mSegment = new TObjArray(0, 0);     // Fill ObjArray with empty ObjArrays
+    mVolume->AddLast(mSegment);
+  }
+
+  StFtpcConfMapPoint *h;
+
+  for (Int_t i = 0; i < mHit->GetEntriesFast(); i++) {
+    h = (StFtpcConfMapPoint *)mHit->At(i);   
+    ((TObjArray *)mVolume->At(GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h))))->AddLast(h);
+  }
+
+  if (mBench) {
+    mBench->Stop("init");
+    gMessMgr->Message("", "I", "OST") << "Setup finished                (" << mBench->GetCpuTime("init") << " s)." << endm;
+  }
+}
+
+
+StFtpcConfMapper::StFtpcConfMapper(TClonesArray *hits, Double_t vertexPos[3], Bool_t bench, 
+				   Int_t phi_segments, Int_t eta_segments) 
+  : StFtpcTracker(hits, vertexPos)
+{
+  // Constructor which needs a ClonesArray of hits as an input.
+  // So it is possible to fill in arbitrary hits.
+
+  if (bench) { 
+    mBench = new TBenchmark();
+    mBench->Start("init");
+  }
+
+  mLaser = (Bool_t)false;
+
+  mNumRowSegment = 20;   // The number of rows has to be fixed to 20 (because this is the number of rows in both Ftpc's)!
+  mNumPhiSegment = phi_segments; 
+  mNumEtaSegment = eta_segments; 
+  mBounds = mNumRowSegment * mNumPhiSegment * mNumEtaSegment;
+  mMaxFtpcRow = mNumRowSegment/2;
+
+  CalcEtaMinMax();
+
+  mMergedTracks = 0;
+  mMergedTracklets = 0;
+  mMergedSplits = 0;
+  mDiffHits = 0;
+  mDiffHitsStill = 0;
+  mLengthFitNaN  = 0;
+
+  mClustersUnused = mHit->GetEntriesFast();;
 
   mVolume = new TObjArray(mBounds, 0);  // create ObjArray for volume cells (of size bounds)
 
@@ -157,15 +227,26 @@ StFtpcConfMapper::~StFtpcConfMapper()
     mVolume->Delete();
     delete mVolume;
   }
-    
-  if (mHit) {
-    mHit->Delete();
-    delete mHit;
-  }
 
   if (mBench) {
     delete mBench;
   }
+}
+
+
+void StFtpcConfMapper::CompleteTrack(StFtpcTrack *track)
+{
+  // Do everything which is still left to be done for the given track.
+  // Updates the statistics.
+
+  track->SetPointDependencies();
+  track->ComesFromMainVertex(mVertexConstraint);
+  track->CalculateNMax();
+
+  mClustersUnused -= track->GetNumberOfPoints();
+  if (mVertexConstraint) mMainVertexTracks++;
+  
+  return;
 }
 
 
@@ -176,11 +257,19 @@ void StFtpcConfMapper::MainVertexTracking()
   if (mBench) {
     mBench->Start("main_vertex");
   }
-
-  SetVertexConstraint(true);
-  ClusterLoop();
-  //TrackLoop();
   
+  // settings
+  SetMaxDca(1.);
+  MainVertexSettings(3, 5, 1, 2, 1, 1);
+  SetVertexConstraint(true);
+
+  // cuts
+  SetTrackletCuts(0.007, true);
+  SetTrackCuts(0.007, 0.03, 30, true);
+
+  ClusterLoop();
+  HandleSplitTracks(0.11, 0.5, 0.5);
+ 
   if (mBench) {
     mBench->Stop("main_vertex");
     gMessMgr->Message("", "I", "OST") << "Main vertex tracking finished (" << mBench->GetCpuTime("main_vertex") << " s)." << endm;
@@ -198,7 +287,15 @@ void StFtpcConfMapper::FreeTracking()
     mBench->Start("non_vertex");
   }
 
+  // settings
+  SetMaxDca(1.);
+  NonVertexSettings (3, 5, 1, 2, 1, 1);
   SetVertexConstraint(false);
+
+  // cuts
+  SetTrackletCuts(0.007, false);
+  SetTrackCuts(0.007, 0.03, 70., false);
+
   ClusterLoop();
 
   if (mBench) {
@@ -210,19 +307,36 @@ void StFtpcConfMapper::FreeTracking()
 }
 
 
-void StFtpcConfMapper::TwoCycleTracking()
+void StFtpcConfMapper::LaserTracking()
 {
-  // Tracking in 2 cycles:
-  // 1st cycle: tracking with vertex constraint
-  // 2nd cycle: without vertex constraint (of remaining clusters)Begin_Html<a name="settings"></a>End_Html
+  // Tracking of straight (laser) tracks.
+  // Cuts and settings are optimized to find straight tracks.
 
-  MainVertexTracking();
-  FreeTracking();
+  if (mBench) {
+    mBench->Start("laser");
+  }
+
+  // settings
+  SetLaser((Bool_t)true);
+  SetMaxDca(1.);
+  NonVertexSettings (10, 5, 2, 2, 2, 15);
+  SetVertexConstraint(false);
+  
+  // cuts
+  SetTrackletCuts(0.0001, false);
+  
+  ClusterLoop();
+  
+  if (mBench) {
+    mBench->Stop("laser");
+    gMessMgr->Message("", "I", "OST") << "Laser tracking finished  (" << mBench->GetCpuTime("laser") << " s)." << endm;
+  }
+  
   return;
 }
 
 
-void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, Int_t tracklength1, Int_t tracklength2, Int_t rowscopetracklet1, Int_t rowscopetracklet2, Int_t rowscopetrack1, Int_t rowscopetrack2, Int_t phiscope1, Int_t phiscope2, Int_t etascope1, Int_t etascope2)
+inline void StFtpcConfMapper::Settings(Int_t trackletlength1, Int_t trackletlength2, Int_t tracklength1, Int_t tracklength2, Int_t rowscopetracklet1, Int_t rowscopetracklet2, Int_t rowscopetrack1, Int_t rowscopetrack2, Int_t phiscope1, Int_t phiscope2, Int_t etascope1, Int_t etascope2)
 {
   // Sets all settings of the tracker.
   // 
@@ -370,98 +484,23 @@ void StFtpcConfMapper::SetTrackletCuts(Double_t maxangle, Bool_t vertex_constrai
 }
 
 
-void StFtpcConfMapper::CalcEtaMinMax()
-{
-  // Calculates the min. and max. value of eta (pseudorapidity) with the given main vertex.
-  // The FTPCs are placed in a distance to the point of origin between 162.75 and 256.45 cm.
-  // Their inner radius is 8, the outer one 30 cm. This means they are seen from (0, 0, 0) 
-  // under an angle between 1.79 and 10.62 degrees which translates directly into max. eta and min. eta. 
-  // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
-  // event. To be save, 0.01 is substracted/added.
-  
-  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(30./ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
-  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin( 8./ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
-
-  return;
-}
-
-
-Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
-{
- // Returns number of pad segment of a specific hit.
-
-  return hit->GetPadRow() - 1;  // fPadRow (1-20) already segmented, only offset substraction
-}
-
-
-Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapPoint *hit)
-{
-  // Returns number of phi segment of a specific hit.
-  
-  return (Int_t)(hit->GetPhi()  * mNumPhiSegment / (2.*TMath::Pi())); // fPhi has no offset but needs to be segmented (this is done by type conversion to Int_t)
-}
-
-
-Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
-{
-  // Returns number of eta segment of a specific hit.
-
-  Double_t eta;
-  Int_t eta_segm;
-  
-  if ((eta = hit->GetEta()) > 0.) {  // positive values
-    eta_segm = (Int_t)((eta - mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2.); // Only use n_eta_segm/2. bins because of negative eta values.
-  }
-
-  else {                             // negative eta values
-    eta_segm = (Int_t)((-eta -  mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2. + mNumEtaSegment/2.);
-  }
-  
-  return eta_segm;
-}
-
-
-Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm)
-{
-  // Calculates the volume segment number from the segmented volumes (segm = segm(pad,phi,eta)).
-
-  return row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
-}
-
-
-Int_t StFtpcConfMapper::GetRowSegm(Int_t segm)
-{
-  // Returns number of pad segment of a specifiv segment.
-
-  return (segm - GetEtaSegm(segm) - GetPhiSegm(segm)) / (mNumPhiSegment * mNumEtaSegment);
-}
-
-
-Int_t StFtpcConfMapper::GetPhiSegm(Int_t segm)
-{
-  // Returns number of phi segment of a specifiv segment.
-
-  return (segm - GetEtaSegm(segm)) % (mNumPhiSegment * mNumEtaSegment) / (mNumEtaSegment);
-}
-
-
-Int_t StFtpcConfMapper::GetEtaSegm(Int_t segm)
-{
-  // Returns number of eta segment of a specifiv segment.
-
-  return (segm % (mNumPhiSegment * mNumEtaSegment)) % (mNumEtaSegment);
-}
-
-
-Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+Double_t const StFtpcConfMapper::CalcDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2, Bool_t laser)
 {
   // Returns the distance of two given clusters. The distance in this respect (conformal mapping)
   // is defined in the paper "A Fast track pattern recognition" by Pablo Yepes, NIM A 380 (1996) 585-585.
+  // If laser == true I expect straight tracks and the returned value will be the ordinary 3d distance.
   
-  Double_t phi_diff = TMath::Abs( hit1->GetPhi() - hit2->GetPhi() );
-  if (phi_diff > TMath::Pi()) phi_diff = 2*TMath::Pi() - phi_diff;
-  
-  return TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow()) *  (phi_diff + TMath::Abs( hit1->GetEta() - hit2->GetEta() ));
+  if (!laser) {
+ 
+    Double_t phi_diff = TMath::Abs( hit1->GetPhi() - hit2->GetPhi() );
+    if (phi_diff > TMath::Pi()) phi_diff = 2*TMath::Pi() - phi_diff;
+    
+    return TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow()) *  (phi_diff + TMath::Abs( hit1->GetEta() - hit2->GetEta() ));
+  }
+
+  else {
+    return TMath::Sqrt(TMath::Power(hit1->GetX() - hit2->GetX(), 2.) + TMath::Power(hit1->GetY() - hit2->GetY(), 2.) + TMath::Power(hit1->GetZ() - hit2->GetZ(), 2.));
+  }
 }
 
 
@@ -498,10 +537,9 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, c
   // Returns the 'angle' between the last two points on the track (of which the last point is
   // given as input) and the second given point.
   
-  StFormulary f;
-
   Double_t x1[3];
   Double_t x2[3];
+
   StFtpcTrack *track = lasthitoftrack->GetTrack(mTrack);
   TObjArray *hits = track->GetHits();
   Int_t n = track->GetNumberOfPoints();
@@ -509,8 +547,8 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, c
   if (n<2) {
     gMessMgr->Message("StFtpcConfMapper::TrackAngle(StFtpcPoint *lasthitoftrack, StFtpcPoint *hit)", "E", "OST");    
     gMessMgr->Message(" - Call this function only if you are sure to have at least two points on the track already!", "E", "OST");
-
-    return false;
+    
+    return 0.;
   }
 
   x1[0] = ((StFtpcPoint *)hits->At(n-1))->GetX() - ((StFtpcPoint *)hits->At(n-2))->GetX();
@@ -521,7 +559,7 @@ Double_t const StFtpcConfMapper::TrackAngle(const StFtpcPoint *lasthitoftrack, c
   x2[1] = hit->GetY() - ((StFtpcPoint *)hits->At(n-1))->GetY();
   x2[2] = hit->GetZ() - ((StFtpcPoint *)hits->At(n-1))->GetZ();
 
-  return f.Angle(x1, x2, 3);
+  return StFormulary::Angle(x1, x2, 3);
 }
 
 
@@ -529,12 +567,11 @@ Double_t const StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)
 {
   // Returns the angle 'between' the last three points (started at point number n) on this track.
 
-  StFormulary f;
-
   Double_t x1[3];
   Double_t x2[3];  
+
   TObjArray *hits = track->GetHits();  
-  if (n > track->GetNumberOfPoints()) {
+  if (n > track->GetNumberOfPoints() || n == 0) {
     n = track->GetNumberOfPoints();
   }
 
@@ -542,63 +579,18 @@ Double_t const StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)
     gMessMgr->Message("StFtpcConfMapper::TrackletAngle(StFtpcTrack *track, Int_t n)", "E", "OST");
     gMessMgr->Message(" - Call this function only if you are sure to have at least three points on this track already!", "E", "OST");
 
-    return false;
+    return 0.;
   }
-    
+
   x1[0] = ((StFtpcPoint *)hits->At(n-2))->GetX() - ((StFtpcPoint *)hits->At(n-3))->GetX();
   x1[1] = ((StFtpcPoint *)hits->At(n-2))->GetY() - ((StFtpcPoint *)hits->At(n-3))->GetY();
   x1[2] = ((StFtpcPoint *)hits->At(n-2))->GetZ() - ((StFtpcPoint *)hits->At(n-3))->GetZ();
-
+  
   x2[0] = ((StFtpcPoint *)hits->At(n-1))->GetX() - ((StFtpcPoint *)hits->At(n-2))->GetX();
   x2[1] = ((StFtpcPoint *)hits->At(n-1))->GetY() - ((StFtpcPoint *)hits->At(n-2))->GetY();
   x2[2] = ((StFtpcPoint *)hits->At(n-1))->GetZ() - ((StFtpcPoint *)hits->At(n-2))->GetZ();  
-  
-  return f.Angle(x1, x2, 3);
-}
 
-
-Double_t const StFtpcConfMapper::GetPhiDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
-{
-  // Returns the difference in angle phi of the two given clusters.
-  // Normalizes the result to the arbitrary angle between two subsequent padrows.
-
-  Double_t angle = TMath::Abs(hit1->GetPhi() - hit2->GetPhi());
-  if (angle > TMath::Pi()) angle = 2*TMath::Pi() - angle;
-  
-  Double_t row_diff = TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow());
-
-  return angle/row_diff;
-}
-
-
-Double_t const StFtpcConfMapper::GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
-{
-  // Returns the difference in pseudrapidity eta of the two given clusters.
-  // Normalizes the result to the arbitrary pseudorapidity between two subsequent padrows.
-
-  Double_t eta = TMath::Abs(hit1->GetEta() - hit2->GetEta());
-  Double_t row_diff = TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow());
-
-  return eta/row_diff;
-}
-
-
-Double_t const StFtpcConfMapper::GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
-{
-  // Returns the distance of two clusters measured in terms of angle phi and pseudorapidity eta weighted by the
-  // maximal allowed values for phi and eta.
-
-  return TMath::Sqrt(TMath::Power(GetPhiDiff(hit1, hit2)/mMaxCircleDist[mVertexConstraint], 2) + TMath::Power(GetEtaDiff(hit1, hit2)/mMaxLengthDist[mVertexConstraint], 2));
-}
-
-
-Double_t const StFtpcConfMapper::GetDistanceFromFit(const StFtpcConfMapPoint *hit)
-{
-  // Returns the distance of the given cluster to the track to which it probably belongs.
-  // The distances to the circle and length fit are weighted by the cuts on these values.
-  // Make sure that the variables mCircleDist and mLengthDist for the hit are set already.
-
-  return TMath::Sqrt(TMath::Power((hit->GetCircleDist() / mMaxCircleDist[mVertexConstraint]), 2) + TMath::Power((hit->GetLengthDist() / mMaxLengthDist[mVertexConstraint]), 2));
+  return StFormulary::Angle(x1, x2, 3);
 }
 
 
@@ -626,6 +618,78 @@ void StFtpcConfMapper::CalcChiSquared(StFtpcTrack *track, StFtpcConfMapPoint *po
   return;
 }
 
+/*
+Double_t StFtpcConfMapper::CalcLength(StFtpcTrack *track, StFtpcTrackPoint* point)
+{
+
+  Double_t s;
+
+  asin_arg = (point->GetY() - track->GetCenterY()) / track->GetRadius();
+  
+  // The following lines were inserted because ~1% of all tracks produce arguments of arcsin 
+  // which are above the |1| limit. But they were differing only in the 5th digit after the point.
+  if (TMath::Abs(asin_arg) > 1.) {
+    asin_arg = (asin_arg >= 0) ? +1. : -1.;
+    //mLengthFitNaN++;
+  }
+  
+  if (point->GetX() >= track->GetCenterX() && point->GetY() > track->GetCenterY()) {
+    angle = TMath::ASin(asin_arg);
+  }
+  
+  else if (point->GetX() < track->GetCenterX() && point->GetY() >= track->GetCenterY()) {
+    angle = TMath::ASin(-asin_arg) + TMath::Pi();
+  }
+  
+  else if (point->GetX() <= track->GetCenterX() && point->GetY() < track->GetCenterY()) {
+    angle = TMath::ASin(-asin_arg) +  TMath::Pi();
+  }
+  
+  else if (point->GetX() > track->GetCenterX() && point->GetY() <= track->GetCenterY()) {
+    angle = TMath::ASin(asin_arg) + 2 * TMath::Pi();
+  }
+  
+  s = (angle - track->GetAlpha0()) * 
+    TMath::Sqrt(TMath::Power(track->GetRadius(), 2.) + TMath::Power(point->GetZv() , 2.)); 
+  
+  return s;
+}
+
+
+void StFtcpConfMapper::CalcAngle(StFtpcTrack *track, StFtpcTrackPoint* point)
+{
+  // Calculates the the angle of the given point of a track with respect to the vertex of this point.
+
+  Double_t asin_arg;
+
+  asin_arg = (point->GetY() - track->GetCenterY()) / track->GetRadius();
+  
+  // The following lines were inserted because ~1% of all tracks produce arguments of arcsin 
+  // which are above the |1| limit. But they were differing only in the 5th digit after the point.
+  if (TMath::Abs(asin_arg) > 1.) {
+    asin_arg = (asin_arg >= 0) ? +1. : -1.;
+    //mLengthFitNaN++;
+  }
+  
+  if (point->GetX() >= track->GetCenterX() && point->GetY() > track->GetCenterY()) {
+    point->SetPhiv(TMath::ASin(asin_arg));
+  }
+  
+  else if (point->GetX() < track->GetCenterX() && point->GetY() >= track->GetCenterY()) {
+    point->SetPhiv(-TMath::ASin(asin_arg) + TMath::Pi());
+  }
+  
+  else if (point->GetX() <= track->GetCenterX() && point->GetY() < track->GetCenterY()) {
+    point->SetPhiv(TMath::ASin(-asin_arg) +  TMath::Pi());
+  }
+  
+  else if (point->GetX() > track->GetCenterX() && point->GetY() <= track->GetCenterY()) {
+    point->SetPhiv(-TMath::ASin(-asin_arg) + 2 * TMath::Pi());
+  }
+
+  return;
+}
+*/
 
 void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
 {
@@ -657,6 +721,7 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   Double_t  g1 = 0.;
   Double_t  g2 = 0.;
 
+  Double_t asin_arg, asin_arg2;
   Int_t start_counter = 0;
   
   if (!mVertexConstraint) {
@@ -685,11 +750,14 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   track->SetCenterX(- a[0] / (2. * a[1]) + trackpoint->GetXt());
   track->SetCenterY(-  1.  / (2. * a[1]) + trackpoint->GetYt());
   track->SetRadius(TMath::Sqrt(a[0]*a[0] + 1.) / (2. * TMath::Abs(a[1])));
-  track->SetAlpha0(TMath::ASin((trackpoint->GetYt() - track->GetCenterY()) / track->GetRadius()));
-    
+  track->CalcAndSetAlpha0();
+
+  //cout << track->GetRadius() << " " << track->GetAlpha0() << endl;
+
   // Tracklength Fit
   Double_t s;
-  Double_t asin_arg;
+  Double_t angle;
+  Double_t angle_diff;
 
   // Set variables again
   // first track point is main vertex or first track point (both at (0, 0, 0) [shifted coordinates])
@@ -700,18 +768,46 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     
     trackpoint= (StFtpcConfMapPoint *)trackpoints->At(i);
     
-    asin_arg = (trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius();
+    // calculate angle
 
     // The following lines were inserted because ~1% of all tracks produce arguments of arcsin 
     // which are above the |1| limit. But they were differing only in the 5th digit after the point.
-    if (TMath::Abs(asin_arg) > 1.) {
-      asin_arg = (asin_arg >= 0) ? +1. : -1.;
-      mLengthFitNaN++;
+    asin_arg = StFormulary::CheckASinArg(asin_arg2 = (trackpoint->GetY() - track->GetCenterY()) / track->GetRadius());
+    if (asin_arg != asin_arg2) mLengthFitNaN++;
+
+    if (trackpoint->GetX() >= track->GetCenterX() && trackpoint->GetY() > track->GetCenterY()) {
+      angle = TMath::ASin(asin_arg);
+    }
+    
+    else if (trackpoint->GetX() < track->GetCenterX() && trackpoint->GetY() >= track->GetCenterY()) {
+      angle = TMath::ASin(-asin_arg) + TMath::Pi();
+    }
+    
+    else if (trackpoint->GetX() <= track->GetCenterX() && trackpoint->GetY() < track->GetCenterY()) {
+      angle = TMath::ASin(-asin_arg) +  TMath::Pi();
+    }
+    
+    else if (trackpoint->GetX() > track->GetCenterX() && trackpoint->GetY() <= track->GetCenterY()) {
+      angle = TMath::ASin(asin_arg) + 2 * TMath::Pi();
+    }
+    
+    angle_diff = angle - track->GetAlpha0();
+    
+    if (TMath::Abs(angle_diff) > TMath::Pi()) {
+      if (angle_diff > 0.) {
+	angle_diff -= 2*TMath::Pi();
+      }
+
+      else {
+	angle_diff += 2*TMath::Pi();
+      }
     }
 
-    s = TMath::Sqrt(TMath::Power(track->GetRadius() * (TMath::ASin(asin_arg) - track->GetAlpha0()), 2) + 
-		     TMath::Power(trackpoint->GetZv() - trackpoint->GetZt(), 2));
-    
+    s = TMath::Sqrt(TMath::Power(track->GetRadius() * angle_diff, 2.) 
+		    + TMath::Power(trackpoint->GetZv() , 2.));
+
+    //cout << angle << " " << angle - track->GetAlpha0() << " " << s << endl;
+
     L11 += 1;
     L12 += trackpoint->GetZv();
     L22 += (trackpoint->GetZv() * trackpoint->GetZv());
@@ -720,6 +816,8 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   }
     
   D = L11*L22 - L12*L12;
+
+  //cout <<  endl;
 
   a[2] = (g2*L11 - g1*L12)/D;
   a[3] = (g1*L22 - g2*L12)/D;
@@ -730,14 +828,10 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
   
   for (Int_t i = start_counter; i < n; i++) {
     trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
-    asin_arg = (trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius();
-
-    if (TMath::Abs(asin_arg) > 1.) {
-      asin_arg = (asin_arg >= 0) ? +1. : -1.;
-    }
-    
-    s = TMath::Sqrt(TMath::Power(track->GetRadius() * (TMath::ASin(asin_arg) - track->GetAlpha0()), 2) + 
-		    TMath::Power(trackpoint->GetZv() - trackpoint->GetZt(), 2));
+    asin_arg = StFormulary::CheckASinArg((trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius());
+ 
+    s = TMath::Sqrt(TMath::Power(track->GetRadius() * angle_diff, 2.) 
+		    + TMath::Power(trackpoint->GetZv() , 2.));
 
     chi2circle += TMath::Power(trackpoint->GetYprime() - a[0]*trackpoint->GetXprime()+a[1], 2.) / (a[0]*trackpoint->GetXprime()+a[1]);    
     chi2length += TMath::Power(s - a[2]*trackpoint->GetZv()+a[3], 2.) / (a[2]*trackpoint->GetZv()+a[3]);
@@ -790,7 +884,7 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
     for (Int_t j = i+1; j < entries; j++) {
       t2 = (StFtpcTrack *)mTrack->At(j);
      
-      if (!t2) { 
+      if (!t2) {
 	// track was removed before (already merged)
 	continue;
       }
@@ -815,10 +909,9 @@ void StFtpcConfMapper::HandleSplitTracks(Double_t max_dist, Double_t ratio_min, 
       }      
     }
   }
+  
+  AdjustTrackNumbers();
 
-  mTrack->Compress();
-  mTrack->Expand(mTrack->GetLast()+1);
-    
   return;
 }
 
@@ -834,7 +927,7 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
   TObjArray *t2_points = t2->GetHits();
 
   TClonesArray &track_init = *mTrack;
-  new(track_init[new_track_number]) StFtpcTrack();
+  new(track_init[new_track_number]) StFtpcTrack(new_track_number);
   StFtpcTrack *track = (StFtpcTrack *)mTrack->At(new_track_number);
 
   TObjArray *trackpoint = track->GetHits();
@@ -954,14 +1047,12 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   Int_t tracks = GetNumberOfTracks();
 
   TClonesArray &track_init = *mTrack;
-  new(track_init[tracks]) StFtpcTrack();
+  new(track_init[tracks]) StFtpcTrack(tracks);
   track = (StFtpcTrack *)mTrack->At(tracks);
-  
   TObjArray *trackpoint = track->GetHits();
-  MIntArray *trackhitnumber = track->GetHitNumbers();
-  trackpoint->AddLast(hit);                // add address of first cluster to cluster list
-  trackhitnumber->AddLast(hit->GetHitNumber()); // add number of first cluster to number list
-  
+
+  track->AddPoint(hit);
+
   // set conformal mapping coordinates if looking for non vertex tracks
   if (!mVertexConstraint) {
     hit->SetAllCoord(hit);
@@ -969,32 +1060,49 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   
   // create tracklets
   for (point = 1; point < mTrackletLength[mVertexConstraint]; point++) {
-    
+  
     if ((closest_hit = GetNextNeighbor(hit, coeff))) {
-      
       // closest_hit for hit exists
-      trackhitnumber->AddLast(closest_hit->GetHitNumber()); 
-      trackpoint->AddLast(closest_hit);
+      track->AddPoint(closest_hit);
       hit = closest_hit;
+
+      if (GetLaser() && track->GetNumberOfPoints() == mTrackletLength[mVertexConstraint]) {
+	tracks++;
+	CompleteTrack(track);
+
+	return; // no additional track search
+      }
     }
     
-    else {  
+    else { // closest hit does not exist
       
-      // closest hit does not exist
-      mTrack->Remove(track);  // remove track
-      point = mTrackletLength[mVertexConstraint];  // continue with next hit in segment
+      if (!GetLaser()) { // this is not a laser event
+	RemoveTrack(track);
+	point = mTrackletLength[mVertexConstraint];  // continue with next hit in segment
+      }
+
+      else { // this is a laser event
+	
+	if (track->GetNumberOfPoints() < mMinPoints[mVertexConstraint]) { // not enough points
+	  RemoveTrack(track);
+	  point = mTrackletLength[mVertexConstraint];  // continue with next hit in segment
+	}
+	
+	else { // enough points
+	  tracks++;
+	  CompleteTrack(track);
+	  
+	  return; // no additional track search
+	}
+      }
     }
   }
-  
+
   // tracklet is long enough to be extended to a track
   if (trackpoint->GetEntriesFast() == mTrackletLength[mVertexConstraint]) {
     
-    track->SetProperties(true, tracks); // set properties for tracklet 
-    // (otherwise TrackletAngle() does not work properly)
-    
     if (TrackletAngle(track) > mMaxAngleTracklet[mVertexConstraint]) { // proof if the first points seem to be a beginning of a track
-      track->SetProperties(false, tracks); // set usage of the clusters to "unused"
-      mTrack->Remove(track);  // remove track
+      RemoveTrack(track);
     }
     
     else { // good tracklet -> proceed
@@ -1025,22 +1133,18 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
 	  */
 	  
 	  // add closest hit to track
-	  trackhitnumber->AddLast(closest_hit->GetHitNumber());
-	  trackpoint->AddLast(closest_hit);
-	  closest_hit->SetUsage(true);
-	  closest_hit->SetTrackNumber(tracks-1);
+	  track->AddPoint(closest_hit);
+
 	  // }
 	}
 	
 	else { 
-	  
 	  // closest hit does not exist
 	  
 	  /*
 	    probably switch off vertexconstraint!
 	    
 	    if (point.PadRow() > limit) {
-	    
 	    
 	    }
 	    
@@ -1052,16 +1156,13 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       
       // remove tracks with not enough points already now
       if (track->GetNumberOfPoints() < mMinPoints[mVertexConstraint]) {
-	track->SetProperties(false, tracks-1); // set usage of the clusters to "unused"
-	mTrack->Remove(track);    // remove track
+	RemoveTrack(track);
 	tracks--;
       }      
       
       else {
-	mClustersUnused -= track->GetNumberOfPoints();
-	track->ComesFromMainVertex(mVertexConstraint); // mark track as main vertex track or not
-	track->CalculateNMax();
-	if (mVertexConstraint) mMainVertexTracks++;
+	//cout << coeff[2] << endl;
+	CompleteTrack(track);
       }
       
       // cleanup
@@ -1173,9 +1274,25 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
 		  // tracklet search - just look for the nearest neighbor (distance defined by Pablo Jepes)
 		  
 		  // test distance
-		  if ((dist = CalcDistance(start_hit, hit)) < closest_dist) { 
-		    closest_dist = dist;
-		    closest_hit = hit;
+		  if ((dist = CalcDistance(start_hit, hit, GetLaser())) < closest_dist) { // hit found that is closer than the hits before
+
+		    if (GetLaser() && ((StFtpcTrack*)mTrack->Last())->GetNumberOfPoints() > 1) { // laser tracking mode and already 2 hits on this track
+		      
+		      if (TrackAngle(start_hit, hit) <= mMaxAngleTracklet[mVertexConstraint]) {  // angle between last two hits and new within limits
+			
+			closest_dist = dist;
+			closest_hit = hit;
+		      }
+		      
+		      else {  // angle not in limits
+			continue;
+		      }
+		    }
+		    
+		    else { // no laser mode or laser mode but less the two points on the track up to now
+		      closest_dist = dist;
+		      closest_hit = hit;
+		    }
 		  }
 		  
 		  else {  // sub hit was farther away than a hit before
@@ -1273,7 +1390,7 @@ StFtpcConfMapPoint *StFtpcConfMapper::GetNextNeighbor(StFtpcConfMapPoint *start_
   
   else { // closest hit for tracklet found
 
-    if (closest_hit) { // closest hit exists 
+    if (closest_hit) { // closest hit exists
       return closest_hit;
     }
       
@@ -1309,12 +1426,10 @@ Bool_t StFtpcConfMapper::ExtendTrack(StFtpcTrack *track)
 
   Int_t point;
   Int_t number_of_points = track->GetNumberOfPoints();
-  Int_t tracks = mTrack->IndexOf(track);
   Double_t *coeff = NULL;
 
   StFtpcConfMapPoint *closest_hit;
   TObjArray *trackpoint = track->GetHits();
-  MIntArray *trackhitnumber = track->GetHitNumbers();
 
   for (point = number_of_points; point < mMaxFtpcRow; point++) {
     
@@ -1323,12 +1438,8 @@ Bool_t StFtpcConfMapper::ExtendTrack(StFtpcTrack *track)
     closest_hit = GetNextNeighbor((StFtpcConfMapPoint *)trackpoint->Last(), coeff);
     
     if (closest_hit) {
-      
       // add closest hit to track
-      trackhitnumber->AddLast(closest_hit->GetHitNumber());
-      trackpoint->AddLast(closest_hit);
-      closest_hit->SetUsage(true);
-      closest_hit->SetTrackNumber(tracks);
+      track->AddPoint(closest_hit);
     }
     
     else { 

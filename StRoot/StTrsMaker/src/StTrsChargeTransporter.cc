@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.4 1999/03/15 13:44:48 lasiuk Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.5 2000/07/17 19:14:41 long Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,12 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.5  2000/07/17 19:14:41  long
+ * mSigmaTransverse =
+ *      	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));
+ * -----> gasdb->transverseDiffusionCoefficient(),field effects will be calculated
+ * later by reading a table
+ *
  * Revision 1.4  1999/03/15 13:44:48  lasiuk
  * omegaTau is calculated assuming mobility is independent of electric field
  *
@@ -64,7 +70,7 @@ StTrsChargeTransporter::StTrsChargeTransporter(StTpcGeometry* geodb, StTpcSlowCo
 	mDriftVelocity*(mMagDb->at(StThreeVector<double>(0,0,0)).z())/(fabs(scdb->driftVoltage())/(mGeomDb->frischGrid()));
 //     PR(mOmegaTau);
     mSigmaTransverse =
-	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));
+      //	(gasdb->transverseDiffusionCoefficient())/(1+sqr(mOmegaTau));	       gasdb->transverseDiffusionCoefficient();
 //     PR(mSigmaTransverse);
     mSigmaLongitudinal = gasdb->longitudinalDiffusionCoefficient();
     mO2Concentration = 50.; // 50 ppm //mO2Concentration = scdb->oxygenInPPM();

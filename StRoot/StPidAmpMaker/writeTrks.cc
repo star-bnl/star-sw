@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: writeTrks.cc,v 1.4 2000/07/12 15:38:33 aihong Exp $
+ * $Id: writeTrks.cc,v 1.3 2000/04/12 20:14:29 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,9 +12,6 @@
  ***************************************************************************
  *
  * $Log: writeTrks.cc,v $
- * Revision 1.4  2000/07/12 15:38:33  aihong
- * update for real data
- *
  * Revision 1.3  2000/04/12 20:14:29  aihong
  * change to adapt to ROOT 2.24 and bug fixed with help from valery
  *
@@ -28,7 +25,6 @@
 
 
 #include <fstream.h>
-#include "float.h"
 
 #include "StHelixModel.h"
 #include "StPhysicalHelixD.hh" 
@@ -42,7 +38,7 @@
 
 
 
-void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable,Int_t dedxMethod){
+void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_vertex* theVertexTable){
 
   ofstream foutD;
 
@@ -78,7 +74,7 @@ void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_ve
  for (i=0; i<nDedxRows; i++){ //dedx loop
 
    if (dedx_v[i].det_id !=kTpcId ) continue;//not from tpc dector.
-   if (dedx_v[i].method !=dedxMethod ) continue; //not from truncated Mn.
+   if (dedx_v[i].method !=kTruncatedMeanId ) continue; //not from truncated Mn.
    
 
    dedx=dedx_v[i].dedx[0];
@@ -109,9 +105,7 @@ void writeTrks(St_dst_track* theTrackTable, St_dst_dedx* theDedxTable, St_dst_ve
   
    dca=thePhysicalHelix.distance(pvtx->position());
    
-   if ( rig && dedx && charge && 
-	(fabs(pt)<FLT_MAX) && (float(nhits)<FLT_MAX) && (fabs(rig)<FLT_MAX)
-       && (fabs(dca)<FLT_MAX) )
+
    
  foutD<<rig<<" "<<dedx<<" "<<charge<<" "<<pt<<" "<<nhits<<" "<<dca<<endl;
    

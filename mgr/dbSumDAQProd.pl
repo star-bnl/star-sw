@@ -15,7 +15,6 @@
 use CGI;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
-require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
 use File::Find;
 use Class::Struct;
@@ -25,12 +24,12 @@ my $debugOn=0;
 #&cgiSetup();
 
 my @SetD = (
-             "P00hd_1/2000/06",
-             "P00hd_1/2000/07",
+             "P00he/2000/06",
+             "P00he/2000/07",
 );
 my $SetD2 = "P00hd/2000/06";
-my $prod_html_back = "/star/u2e/starreco/P00hd_1/summary/P00hd_1.summary\.html_back";
-my $prod_html = "/star/u2e/starreco/P00hd_1/summary/P00hd_1.summary\.html";
+my $prod_html_back = "/star/u2e/starreco/P00he/summary/P00he.summary\.html_back";
+my $prod_html = "/star/u2e/starreco/P00he/summary/P00he.summary\.html";
 
 struct JFileAttr => {
     daqRun      => '$',
@@ -43,12 +42,13 @@ struct JFileAttr => {
 
 struct FilAttr => {
        flName   => '$',
+       DtSt     => '$', 
        fpath    => '$',
        Nevts    => '$',
        numRun   => '$',
 }; 
  
-my @prodSer = ("P00hd_1","P00hd") ;
+my @prodSer = ("P00he","P00hd") ;
 
 &beginHtml();
 
@@ -60,6 +60,7 @@ my @prodSer = ("P00hd_1","P00hd") ;
  my %daqHpEvts = ();
  my %prodRun = ();
  my %periodRun = ();
+ my %dtSet = ();
  my @DRun;
  my $nRun = 0;
  my $myRun;
@@ -78,69 +79,8 @@ my @prodSer = ("P00hd_1","P00hd") ;
                     "2000/09" => "SEPTEMBER-2000"                    
  ); 
 
-my %daqHash = ();
+#my %daqHash = ();
 
-struct DaqAttr => {
-        drun   => '$',
-        iname  => '$',
-        jname  => '$',
-        iMomnt => '$',
-        jMomnt => '$'
-}; 
-
-
-my @runDescr;
-my $nrunDescr = 0;
-
-##### connect to the DB RunLog
-
-&StDbDescriptorConnect();
-
- $sql="SELECT runNumber, cwName, ccwName, cwMomentum, ccwMomentum FROM $runDescriptorT WHERE category = 'physics'";
- $cursor =$dbh->prepare($sql)
-   || die "Cannot prepare statement: $DBI::errstr\n";
- $cursor->execute;
-
- while(@fields = $cursor->fetchrow) {
-   my $cols=$cursor->{NUM_OF_FIELDS};
-   $fObjAdr = \(DaqAttr->new());
-
-   for($i=0;$i<$cols;$i++) {
-     my $fvalue=$fields[$i];
-     my $fname=$cursor->{NAME}->[$i];
-     print "$fname = $fvalue\n" if $debugOn;
-
-    ($$fObjAdr)->drun($fvalue)      if( $fname eq 'runNumber');
-    ($$fObjAdr)->iname($fvalue)     if( $fname eq 'cwName');   
-    ($$fObjAdr)->jname($fvalue)     if( $fname eq 'ccwName');
-    ($$fObjAdr)->iMomnt($fvalue)    if( $fname eq 'cwMomentum');
-    ($$fObjAdr)->jMomnt($fvalue)    if( $fname eq 'ccwMomentum');
-
-   }
-     $runDescr[$nrunDescr] = $fObjAdr;
-     $nrunDescr++;
-} 
-&StDbDescriptorDisconnect();
-
-my $Numrun;
-my $cWname;
-my $cEname;
-my $cWMnt;
-my $cEMnt; 
-
-foreach my $runDsc (@runDescr) {
-
-       $Numrun = ($$runDsc)->drun;
-       $cWname = ($$runDsc)->iname;
-       $cEname = ($$runDsc)->jname;   
-       $cWMnt  = ($$runDsc)->iMomnt;
-       $cEMnt  = ($$runDsc)->jMomnt;
-
-       $daqHash{$Numrun} = $cWname ."-".$cEname." ". $cWMnt ."GeV"."+". $cEMnt."GeV"; 
-     }
- 
-
-##### connect to the DB operation
 
 &StDbProdConnect();
 ##### select Geant files from FileCatalog
@@ -169,7 +109,6 @@ my  @hpssInFiles;
    $nRun++;
    }
 
-my @DRunc = ("1164052", "1164056", "1172036");
 
  $sql="SELECT prodSeries, sumFileName, NoEvents, jobStatus, NoEventSkip FROM $JobStatusT WHERE prodSeries = '$prodSer[0]' and jobStatus <> 'n/a' ";
 
@@ -204,6 +143,7 @@ my @DRunc = ("1164052", "1164056", "1172036");
  my $hdfile;
  my $dhRun;
  my $dqRun;
+ my $dhSet;
  my @OnlFiles;
  my $nOnlFile = 0;
  my @hpssDstFiles;
@@ -211,7 +151,7 @@ my @DRunc = ("1164052", "1164056", "1172036");
 
   for ($ll=0; $ll<scalar(@DRun); $ll++) {
 
-  $sql="SELECT runID, fName, path, Nevents  FROM $FileCatalogT WHERE runID = '$DRun[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%$prodSer[0]%' AND hpss ='Y'";
+  $sql="SELECT runID, dataset, fName, path, Nevents  FROM $FileCatalogT WHERE runID = '$DRun[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%$prodSer[0]%' AND hpss ='Y'";
   $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
   $cursor->execute;
@@ -224,6 +164,8 @@ my @DRunc = ("1164052", "1164056", "1172036");
        my $fvalue=$fields[$i];
         my $fname=$cursor->{NAME}->[$i];
       print "$fname = $fvalue\n" if $debugOn;
+
+      ($$fObjAdr)->DtSt($fvalue)     if( $fname eq 'dataset'); 
       ($$fObjAdr)->flName($fvalue)   if( $fname eq 'fName');
       ($$fObjAdr)->fpath($fvalue)    if( $fname eq 'path'); 
       ($$fObjAdr)->Nevts($fvalue)    if( $fname eq 'Nevents');
@@ -236,39 +178,15 @@ my @DRunc = ("1164052", "1164056", "1172036");
     }
   }
 
- for ($ll=0; $ll<scalar(@DRunc); $ll++) {
-
- $sql="SELECT runID, fName,path, Nevents  FROM $FileCatalogT WHERE runID = '$DRunc[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%$prodSer[1]%' AND hpss ='Y'";
- $cursor =$dbh->prepare($sql)
-   || die "Cannot prepare statement: $DBI::errstr\n";
- $cursor->execute;
-
- while(@fields = $cursor->fetchrow) {
-    my $cols=$cursor->{NUM_OF_FIELDS};
-    $fObjAdr = \(FilAttr->new());
-
-   for($i=0;$i<$cols;$i++) {
-     my $fvalue=$fields[$i];
-     my $fname=$cursor->{NAME}->[$i];
-     print "$fname = $fvalue\n" if $debugOn;
-     ($$fObjAdr)->flName($fvalue)   if( $fname eq 'fName');
-     ($$fObjAdr)->fpath($fvalue)    if( $fname eq 'path');     
-     ($$fObjAdr)->Nevts($fvalue)    if( $fname eq 'Nevents');
-     ($$fObjAdr)->numRun($fvalue)   if( $fname eq 'runID');
-   }
-  
-   $hpssDstFiles[$nhpssDstFiles] = $fObjAdr;  
-   $nhpssDstFiles++;
-   
-   }
- }
  foreach my $dsfile (@hpssDstFiles) {
 
     $dhfile = ($$dsfile)->flName;
+    $dhSet  = ($$dsfile)->DtSt; 
     $dhpath = ($$dsfile)->fpath;
     $dhRun = ($$dsfile)->numRun;
     @dirP = split ("/", $dhpath);
     $dirR = $dirP[5] . "/" . $dirP[6];
+  $dtSet{$dhRun} = $dhSet;
   $periodRun{$dhRun} = $RunHash{$dirR};
   $dstHpEvts{$dhRun}  += ($$dsfile)->Nevts; 
 
@@ -305,32 +223,6 @@ my @DRunc = ("1164052", "1164056", "1172036");
     }
   }
 
- for ($ll=0; $ll<scalar(@DRunc); $ll++) {
-
- $sql="SELECT runID, fName,path, Nevents  FROM $FileCatalogT WHERE runID = '$DRunc[$ll]' AND fName LIKE '%daq' AND hpss ='Y'";
-  $cursor =$dbh->prepare($sql)
-   || die "Cannot prepare statement: $DBI::errstr\n";
-  $cursor->execute;
-
-  while(@fields = $cursor->fetchrow) {
-   my $cols=$cursor->{NUM_OF_FIELDS};
-    $fObjAdr = \(FilAttr->new());
-
-    for($i=0;$i<$cols;$i++) {
-      my $fvalue=$fields[$i];
-      my $fname=$cursor->{NAME}->[$i];
-      print "$fname = $fvalue\n" if $debugOn;
-        ($$fObjAdr)->flName($fvalue)   if( $fname eq 'fName');
-        ($$fObjAdr)->fpath($fvalue)   if( $fname eq 'path'); 
-        ($$fObjAdr)->Nevts($fvalue)    if( $fname eq 'Nevents');
-        ($$fObjAdr)->numRun($fvalue)   if( $fname eq 'runID');
-   }
-  
-   $OnlFiles[$nOnlFile] = $fObjAdr;  
-   $nOnlFile++;
-   
-   }
- }
 
  foreach my $onfile (@OnlFiles) {
 
@@ -380,34 +272,6 @@ my @DRunc = ("1164052", "1164056", "1172036");
    }
   }
  
- for ($kk=0; $kk<scalar(@DRunc); $kk++) {
-
-  $sql="SELECT runID, fName, path, Nevents FROM $FileCatalogT WHERE runID = '$DRunc[$kk]' AND fName LIKE '%dst.root' AND jobID LIKE '%$prodSer[1]%' AND site = 'disk_rcf'";
-  $cursor =$dbh->prepare($sql)
-    || die "Cannot prepare statement: $DBI::errstr\n";
-  $cursor->execute;
-
-  while(@fields = $cursor->fetchrow) {
-    my $cols=$cursor->{NUM_OF_FIELDS};
-    $fObjAdr = \(FilAttr->new());
-
-    for($i=0;$i<$cols;$i++) {
-      my $fvalue=$fields[$i];
-      my $fname=$cursor->{NAME}->[$i];
-      print "$fname = $fvalue\n" if $debugOn;
-
-      ($$fObjAdr)->flName($fvalue)    if( $fname eq 'fName');
-      ($$fObjAdr)->fpath($fvalue)     if( $fname eq 'path');
-      ($$fObjAdr)->Nevts($fvalue)     if( $fname eq 'Nevents');
-      ($$fObjAdr)->numRun($fvalue)    if( $fname eq 'runID');
-    }
-  
-    $diskDstFiles[$ndiskDstFiles] = $fObjAdr;  
-    $ndiskDstFiles++;
-   
-    }
-  }
-
 foreach my $ddfile (@diskDstFiles) {
 
    $dhfile = ($$ddfile)->flName;
@@ -424,18 +288,14 @@ my $TdstDEvt  = 0;
 my $TdstHEvt  = 0;
 my $TdaqHEvt  = 0;
 
- for ($kk=0; $kk<scalar(@DRunc); $kk++) {
-     $DRun[$nRun] = $DRunc[$kk];
-      $nRun++;
-     $prodRun{$DRunc[$kk]} = $prodSer[1];
-   }
 
     foreach my $runD (@DRun) {
       
+        $daqHpEvts{$runD} -= 1;
         if (! defined $dstHpEvts{$runD}) {$dstHpEvts{$runD} = 0 };
         if (! defined $dstDEvts{$runD}) {$dstDEvts{$runD} = 0 };
         if (! defined $daqHpEvts{$runD}) {$daqHpEvts{$runD} = 0 };
-        if (! defined $daqHash{$runD}) {$daqHash{$runD} = 'n/a'};
+        if (! defined $dtSet{$runD}) {$dtSet{$runD} = 'n/a'};
         $TdstHEvt    +=  $dstHpEvts{$runD}; 
         $TdstDEvt    +=  $dstDEvts{$runD}; 
         $TdaqHEvt    +=  $daqHpEvts{$runD}; 
@@ -443,7 +303,7 @@ my $TdaqHEvt  = 0;
 
    print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
    print HTML "<TD><a href=\"http://duvall.star.bnl.gov/devcgi/dbFileDAQRetrv.pl?run=$runD\">$runD</TD>\n"; 
-   print HTML "<td>$periodRun{$runD}</td><td>$prodRun{$runD}</td><td> $daqHash{$runD} </td><td>$daqHpEvts{$runD}</td><td>$dstHpEvts{$runD}</td><td>$dstDEvts{$runD}</td></tr>\n"; 
+   print HTML "<td>$periodRun{$runD}</td><td>$prodRun{$runD}</td><td> $dtSet{$runD} </td><td>$daqHpEvts{$runD}</td><td>$dstHpEvts{$runD}</td><td>$dstDEvts{$runD}</td></tr>\n"; 
 
 }
 
@@ -478,7 +338,7 @@ my $TdaqHEvt  = 0;
    print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>Run Number</B></TD>\n";
    print HTML "<TD WIDTH=\"20%\" HEIGHT=110><B>Month/Year</B></TD>\n";
    print HTML "<TD WIDTH=\"20%\" HEIGHT=110><B>Production period</B></TD>\n";
-   print HTML "<TD WIDTH=\"20%\" HEIGHT=110><B>Collisions</B></TD>\n";
+   print HTML "<TD WIDTH=\"20%\" HEIGHT=110><B>Dataset</B></TD>\n";
    print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>Number of Events<br> in DAQ files </B></TD>\n"; 
    print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>Number of Events<br>in DST on HPSS </B></TD>\n";
    print HTML "<TD WIDTH=\"10%\" HEIGHT=110><B>Number of Events<br>in DST on disk </B></TD>\n";

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBloch.hh,v 1.3 2000/07/12 15:38:32 aihong Exp $
+ * $Id: BetheBloch.hh,v 1.2 2000/05/01 16:59:48 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,9 +11,6 @@
  ***************************************************************************
  *
  * $Log: BetheBloch.hh,v $
- * Revision 1.3  2000/07/12 15:38:32  aihong
- * update for real data
- *
  * Revision 1.2  2000/05/01 16:59:48  aihong
  * clean up
  *
@@ -54,7 +51,7 @@ double BetheBloch(double *rig,double *par) {
           if (gb2 > 0.0) b2=1.0/(1.0 + 1.0/gb2);
           else return 0.0;
 
-	  myDedx=calib*charge*charge*(1.0/pow(b2,prefactor))*(pow(log(myValue*gb2),0.7) - postfactor*pow(b2,1) )- mFactor;
+	  myDedx=calib*charge*charge*(1.0/pow(b2,prefactor))*(pow(log(myValue*gb2),0.86) - postfactor*pow(b2,1) )- mFactor;
           if (myDedx > satura) myDedx=satura;   
 
           return myDedx;

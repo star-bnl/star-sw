@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.19 2000/06/23 17:54:44 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.20 2000/07/17 19:19:10 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.20  2000/07/17 19:19:10  long
+ * get zoffset by calling zFromTB
+ *
  * Revision 1.19  2000/06/23 17:54:44  long
  * offset-->offset*mTimeBinWidth
  *
@@ -244,7 +247,7 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
-    double offset=transformer.tBFromZ(0.)*mTimeBinWidth;
+    double offset=transformer.zFromTB(0.);
     
     double sigma_xpad2;
     double InOuterFactor=1.0075;
@@ -458,7 +461,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    // The z position already has a z offset, it was put in
 		    // the fast charge transporter.
 		    timeOfSignal =
-			(iter->position().z())/mDriftVelocity+offset;
+			(iter->position().z()-offset)/mDriftVelocity;
 		    	
 		  
 		    // OH-OH OFFSET (replaced!...)
