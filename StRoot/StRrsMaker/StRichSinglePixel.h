@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 1.5 2000/05/19 15:44:31 lasiuk Exp $
+ * $Id: StRichSinglePixel.h,v 1.6 2000/05/25 21:34:53 fisyak Exp $
  *
  * Description:
  *  Definition of a single pixel object
@@ -9,6 +9,9 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
+ * Revision 1.6  2000/05/25 21:34:53  fisyak
+ * Make rootcint happy
+ *
  * Revision 1.5  2000/05/19 15:44:31  lasiuk
  * clone members added
  *
@@ -27,14 +30,14 @@
  ****************************************************************/
 #ifndef ST_RICH_SINGLE_PIXEL_H
 #define ST_RICH_SINGLE_PIXEL_H
-
+#ifndef __CINT__
 #include <iostream.h>
 #include <stack>
 
 #ifndef ST_NO_NAMESPACES
 using namespace std::stack;
 #endif
-
+#endif
 #include "StRichEnumeratedTypes.h"
 
 class StRichSinglePixel  {
@@ -74,6 +77,7 @@ protected:
     unsigned long mFlags;
     int mClusterNumber;
 };
+#ifndef __CINT__
 inline int StRichSinglePixel::pad() const { return mPad; }
 inline int StRichSinglePixel::row() const { return mRow; }
 inline float StRichSinglePixel::charge() const { return mCharge; }
@@ -102,5 +106,5 @@ typedef stack<StRichSinglePixel*> PixelStack;
 #else
 typedef stack<StRichSinglePixel*, allocator<StRichSinglePixel*> > PixelStack;
 #endif
-
+#endif
 #endif

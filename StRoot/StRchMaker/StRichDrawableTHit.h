@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTHit.h,v 1.3 2000/05/23 16:55:51 lasiuk Exp $
+ * $Id: StRichDrawableTHit.h,v 1.4 2000/05/25 21:35:32 fisyak Exp $
  *
  * Description:
  *   Cluster which is drawn in the pad monitor
@@ -7,6 +7,9 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTHit.h,v $
+ * Revision 1.4  2000/05/25 21:35:32  fisyak
+ * Make rootcint happy
+ *
  * Revision 1.3  2000/05/23 16:55:51  lasiuk
  * Incorporate new MC info
  * add clone() where necessary
@@ -23,8 +26,6 @@
 #ifndef ST_RICH_DRAWABLE_THIT_H
 #define ST_RICH_DRAWABLE_THIT_H
 
-#include <iostream.h>
-#include <fstream.h>
 
 #include "TMarker.h"
 
