@@ -17,9 +17,9 @@
 #include "TSystem.h"
 #include "TRegexp.h"
 #include "St_db_Maker.h"
-#include "StChain.h"
 #include "St_DataSetIter.h"
 #include "St_FileSet.h"
+#include "StTree.h"
 #include "St_XDFFile.h"
 
 static Int_t AliasDate(const char *alias);
@@ -171,9 +171,12 @@ EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
 {
   St_DataSet *set,*newdat,*ps;
   St_ValiSet *val;
-  const char *filename;
+  const char *filename,*cqwe;
   TDatime timeMin,timeMax;
-   
+  TObject *to=0;
+  TFile   *tf=0;
+  TString ts;    
+
   TList *list = ds->GetList();
   if (!list) 				return kContinue;
   if (strcmp(".Val",ds->GetTitle()))	return kContinue;
@@ -234,7 +237,9 @@ EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
 
 
   ps = ds->GetParent();
-  dbfile += strchr(strstr(ps->Path(),"/.data/")+7,'/');
+  ts = ps->Path(); cqwe = strstr(ts,"/.data/")+7;
+  cqwe += strcspn(cqwe,"/"); 
+  dbfile += cqwe;
   dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
   newdat = 0;
@@ -253,7 +258,23 @@ EDataSetPass St_db_Maker::UpdateDB(St_DataSet* ds,void *user )
     command.ReplaceAll(".L ",".U "); 
     gInterpreter->ProcessLine(command);
     break;
+
+    case 3: // .root file
     
+    tf = new TFile(dbfile);
+    to = StIO::Read (tf, "*");
+    delete tf;
+    if (!to) break;
+    if (strcmp(to->ClassName(),"StIOEvent")==0) to = ((StIOEvent*)to)->fObj;
+    if (!to) break;
+    if (to->InheritsFrom(St_DataSet::Class())) 	{
+       newdat = (St_DataSet*)to; 
+    } else 					{ 
+      newdat = new St_ObjectSet(to->GetName());
+      newdat->SetObject(to);
+    }
+    break;
+
     default: assert(0);
   }
   val->fDat = newdat;
