@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.65 2001/02/13 21:38:16 genevb Exp $
+// $Id: St_tcl_Maker.cxx,v 1.66 2001/05/22 22:32:49 hardtke Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.66  2001/05/22 22:32:49  hardtke
+// Add option for returning hits in global coordinates
+//
 // Revision 1.65  2001/02/13 21:38:16  genevb
 // Separated TCL and TPH sector loops to reduce memory usage
 //
@@ -61,6 +64,7 @@
 #include "tpc/St_tfs_filt_Module.h"
 #include "tpc/St_tfs_fill_tphit_pad_tmbk_Module.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StDbUtilities/StCoordinates.hh"
 #include "TH1.h"
 
 ClassImp(St_tcl_Maker)
@@ -73,7 +77,8 @@ St_tcl_Maker::St_tcl_Maker(const char *name):
   m_tclMorphOn(kFALSE),
   bWriteTNtupleOn(kFALSE),
   m_EastOff(kFALSE),
-  m_WestOff(kFALSE) {
+  m_WestOff(kFALSE),
+  m_GlobalHits(kFALSE) {
 }
 
 //_____________________________________________________________________________
@@ -418,6 +423,29 @@ Int_t St_tcl_Maker::Make() {
       }
     }
   }
+
+  // Now move hits to global coordinates, if wanted
+  if (m_GlobalHits) {
+    gMessMgr->Info() << "Translating hits to Global Coordinates" << endm;
+    StTpcCoordinateTransform transform(gStTpcDb);
+    StTpcLocalCoordinate local(0,0,0);
+    StGlobalCoordinate   global(0,0,0);
+    StThreeVector<double>       vector(0,0,0);
+    tcl_tphit_st *spc = tphit -> GetTable() ;
+    for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
+	  {
+	    vector.setX(spc -> x);    
+	    vector.setY(spc -> y);    
+	    vector.setZ(spc -> z);
+            local.setPosition(vector);
+	    transform(local,global);
+	    spc -> x = global.position().x();
+	    spc -> y = global.position().y();
+	    spc -> z = global.position().z();
+	    //            cout << "Local Coordinates: " << local << endl;
+	    //            cout << "Global Coordinates: " << global << endl;
+	  }
+  }
   
 //		Histograms     
   MakeHistograms(); // clustering histograms
@@ -431,7 +459,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.65 2001/02/13 21:38:16 genevb Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.66 2001/05/22 22:32:49 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
