@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.12 2002/02/20 17:22:03 caines Exp $ 
+ * $Id: StEstTracker.cxx,v 1.13 2002/04/30 22:49:19 caines Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.13  2002/04/30 22:49:19  caines
+ * Make est work with shifted SVT geom, change search radii to 1cm
+ *
  * Revision 1.12  2002/02/20 17:22:03  caines
  * Comment out some of the print statements
  *
@@ -119,12 +122,12 @@ Int_t StEstTracker::DoTracking() {
     if (mSuperPass>0) {
       for (mPass=0;mPass<mNPass;mPass++) {
 	//	cout<< " Setting params here" << endl;
-	mParams[mPass]->geomcutl[2] = 5.;
-	mParams[mPass]->geomcutl[1] = 5.;
-	mParams[mPass]->geomcutl[0] = 5.;
-	mParams[mPass]->geomcutw[2] = 5.;
-	mParams[mPass]->geomcutw[1] = 5.;
-	mParams[mPass]->geomcutw[0] = 5.;
+	mParams[mPass]->geomcutl[2] = 1.;
+	mParams[mPass]->geomcutl[1] = 1.;
+	mParams[mPass]->geomcutl[0] = 1.;
+	mParams[mPass]->geomcutw[2] = 1.;
+	mParams[mPass]->geomcutw[1] = 1.;
+	mParams[mPass]->geomcutw[0] = 1.;
       }
     }
     FlagTPCTracksSP(mSuperPass);
@@ -412,7 +415,7 @@ void StEstTracker::BuildIdealBranches() {
 
 
       	  if (dca<3.) {
-   	    iret=RefitBranch(branch,1.,&fitstatus);
+   	    iret=RefitBranch(branch,1,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -420,7 +423,7 @@ void StEstTracker::BuildIdealBranches() {
 	    }
 	  }  
     	  else {
-    	    iret=RefitBranch(branch,0.,&fitstatus);
+    	    iret=RefitBranch(branch,0,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -517,7 +520,7 @@ void StEstTracker::BuildFindableBranches() {
 
 
       	  if (dca<3.) {
-   	    iret=RefitBranch(branch,1.,&fitstatus);
+   	    iret=RefitBranch(branch,1,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -525,7 +528,7 @@ void StEstTracker::BuildFindableBranches() {
 	    }
 	  }	  
     	  else {
-    	    iret=RefitBranch(branch,0.,&fitstatus);
+    	    iret=RefitBranch(branch,0,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;

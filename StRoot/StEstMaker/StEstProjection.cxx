@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.7 2001/07/15 20:31:30 caines Exp $
+ * $Id: StEstProjection.cxx,v 1.8 2002/04/30 22:49:19 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.8  2002/04/30 22:49:19  caines
+ * Make est work with shifted SVT geom, change search radii to 1cm
+ *
  * Revision 1.7  2001/07/15 20:31:30  caines
  * Fixes from Insure++ debugging
  *
@@ -42,6 +45,44 @@
 #include "Infrastructure/StEstBranch.hh"
 #include "Infrastructure/StEstWafer.hh"
 #include "Infrastructure/StEstHit.hh"
+#include "StMatrix.hh"
+
+
+// matrix for SVT rotation and translation (alignment)
+StMatrix<double> mSvtToGlobalRotation(3,3,1); // (3X3)
+StMatrix<double> mGlobalToSvtRotation(3,3,1); // (3X3)
+StThreeVector<double> mSvtPositionInGlobal; 
+
+void StEstTracker::AlignmentInfo() {
+
+  // fill in rotation and translation matrix
+  double phi = 0.0;  
+  double theta = -0.000381;
+  double psi = -0.000156;
+
+  mGlobalToSvtRotation(1,1) = cos(theta)*cos(phi);
+  mGlobalToSvtRotation(1,2) = cos(theta)*sin(phi);
+  mGlobalToSvtRotation(1,3) = -sin(theta);
+  mGlobalToSvtRotation(2,1) = sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi);
+  mGlobalToSvtRotation(2,2) = sin(psi)*sin(theta)*sin(phi) + cos(psi)*cos(phi);
+  mGlobalToSvtRotation(2,3) = cos(theta)*sin(psi);
+  mGlobalToSvtRotation(3,1) = cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi);
+  mGlobalToSvtRotation(3,2) = cos(psi)*sin(theta)*sin(phi)-sin(psi)*cos(phi);
+  mGlobalToSvtRotation(3,3) = cos(theta)*cos(psi);
+
+  unsigned int ierr;
+  mSvtToGlobalRotation = mGlobalToSvtRotation.inverse(ierr);
+  if (ierr!=0){ 
+    cerr << "StSvtCoordinateTransform::Cant invert rotation matrix" << endl;
+    cout << "Global to SVT rotation matrix:" << mGlobalToSvtRotation << endl;
+    cout << "SVT to global rotation matrix:" << mSvtToGlobalRotation << endl;
+  }
+
+  mSvtPositionInGlobal.setX(-0.276);
+  mSvtPositionInGlobal.setY(-0.082);
+  mSvtPositionInGlobal.setZ(-0.192);
+
+}
 
 int StEstTracker::Preprojection(StEstBranch *branch, int slayer) {
   
@@ -111,7 +152,8 @@ int StEstTracker::Preprojection(StEstBranch *branch, int slayer) {
       ret = 1;
     }
     else{
-      vect1 = helix->at(sd);
+      //vect1 = helix->at(sd);
+      vect1 = mSvtToGlobalRotation*helix->at(sd)+mSvtPositionInGlobal;
       phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mPhiBin);
       z=floor(vect1.z()/mZBin)+mNZBins/2; 
 
