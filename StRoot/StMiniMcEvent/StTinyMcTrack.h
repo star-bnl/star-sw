@@ -1,5 +1,5 @@
 /**
- * $Id $
+ * $Id: StTinyMcTrack.h,v 1.2 2002/06/11 21:12:00 calderon Exp $
  * \file  StTinyMcTrack.h
  * \brief   Persistent MC track class.
  * 
@@ -9,6 +9,10 @@
  *
  * There will be a container of all MC tracks, and these will also be entered into the Matched and Contamination
  * collections as Pairs, with their corresponding RC track.
+ * $Log: StTinyMcTrack.h,v $
+ * Revision 1.2  2002/06/11 21:12:00  calderon
+ * fix typo, pttMc() -> ptMc()
+ *
 */
 
 #ifndef StTinyMcTrack_H
@@ -32,7 +36,7 @@ class StTinyMcTrack : public TObject {
   void setNAssocPr(Short_t val) { mNAssocPr=val; }
   void setStopR(Float_t val) { mStopR=val; }
 
-  float pttMc() const { return mPtMc; }
+  float ptMc() const { return mPtMc; }
   float pzMc() const { return mPzMc; }
   float etaMc() const { return mEtaMc; }
   float phiMc() const { return mPhiMc; }
@@ -65,6 +69,9 @@ private:
 #endif
 //
 // $Log: StTinyMcTrack.h,v $
+// Revision 1.2  2002/06/11 21:12:00  calderon
+// fix typo, pttMc() -> ptMc()
+//
 // Revision 1.1  2002/05/30 01:20:58  calderon
 // Classes for use in a general framework for extracting efficiencies
 // from both embedding and full simulations
