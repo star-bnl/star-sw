@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.59 2000/02/02 14:50:26 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.60 2000/02/03 19:34:32 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.60  2000/02/03 19:34:32  fisyak
+// Clean up St_geant_Maker::Init, move its parameters to ctor
+//
 // Revision 1.59  2000/02/02 14:50:26  fisyak
 // Put PreVtx into chain if tpc has been selected
 //
@@ -258,12 +261,12 @@ BfcItem BFC[] = {
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
   {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,Cdst,tree"                    ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,emc,rich,Cdst,tree"           ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,emc,Cdst,tree"                ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,Cdst,tree"                    ,"","","Turn on chain y1c",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1h",kFALSE},
-  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,emc,rich,Cdst,tree"           ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,emc,rich,Cdst,tree"       ,"","","Turn on chain y2a",kFALSE},
+  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,emc,Cdst,tree"                ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,emc,Cdst,tree"            ,"","","Turn on chain y2a",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -332,7 +335,7 @@ BfcItem BFC[] = {
   {"l3t"         ,"","l3","tables"                          ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"rich"        ,"","","tables"                                      ,"StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","tables,Match,primary,v0,xi,kink,dst"
-                                                         ,"St_tpc,St_svt,StChainMaker","StChain","",kFALSE},
+                                                         ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tables,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","global","SCL,tables,tls"
@@ -343,9 +346,7 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","tables,SCL"                      ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
-  //  {"HighPtTag"   ,"","","analysis"                                       ,"","","Alias to analysis",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                    ,"StChainMaker","StChain","",kFALSE},
-  //  {"EbyeScaTags" ,"","TagsChain","Event"   ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","EbyeScaTags",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
@@ -492,17 +493,21 @@ Int_t StBFChain::Instantiate()
 	  }
 	}
 	if (Key == "geant") {
-	  geantMk = new St_geant_Maker("geant");
+	  Int_t                    NwGeant = 10000000;
+	  if (!GetOption("fzin") && !GetOption("gstar"))
+	                           NwGeant =  5000000;
+	  if (GetOption("big"))    NwGeant = 20000000;
+	  if (GetOption("bigbig")) NwGeant = 40000000;
+	  Int_t IwType = 0;
+	  if (GetOption("Higz"))  IwType = 1;
+	  Int_t NwPaw = 0;
+	  geantMk = new St_geant_Maker("geant",NwGeant,NwPaw,IwType);
 	  if (geantMk) {
 	    BFC[i].Name = (Char_t *) geantMk->GetName();
 	    if (!GetOption("fzin") && !GetOption("gstar")) {
-	      geantMk->SetNwGEANT(5000000);
 	      geantMk->SetActive(kFALSE);
 	    }
 	    else {
-	      if       (GetOption("bigbig")) geantMk->SetNwGEANT(40000000);
-	      else {if (GetOption("big"))    geantMk->SetNwGEANT(20000000);
-	      else                           geantMk->SetNwGEANT(10000000);}
 	    }
 	    SetGeantOptions();
 	  }
@@ -750,7 +755,6 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 void StBFChain::SetGeantOptions(){
   if (geantMk) {
     SetInput("geant",".make/geant/.data");
-    if (GetOption("Higz"))  geantMk->SetIwtype(1);
     if (!GetOption("fzin")) {
             if (GetOption("SD97") || 
 		GetOption("SD98") || 

@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.56 2000/02/03 16:14:39 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.57 2000/02/03 19:34:40 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.57  2000/02/03 19:34:40  fisyak
+// Clean up St_geant_Maker::Init, move its parameters to ctor
+//
 // Revision 1.56  2000/02/03 16:14:39  fisyak
 // Add Kathy's histograms
 //
@@ -322,12 +325,12 @@ ClassImp(St_geant_Maker)
 St_DataSet *St_geant_Maker::fgGeom = 0;
 TGeant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
-St_geant_Maker::St_geant_Maker(const Char_t *name):
+St_geant_Maker::St_geant_Maker(const Char_t *name,Int_t nwgeant,Int_t nwpaw, Int_t iwtype):
 StMaker(name){
-  fNode   = 0;
-  nwgeant = 2000000;
-  nwpaw   =       0;
-  iwtype  =       0;
+  fNode    = 0;
+  fNwGeant = nwgeant;
+  fNwPaw   = nwpaw;
+  fIwType  = iwtype;
   fgGeom = new St_DataSet("geom");  
   m_ConstSet->Add(fgGeom);
   SetOutput(fgGeom);	//Declare this "geom" for output
@@ -336,10 +339,21 @@ StMaker(name){
     fEvtHddr = new StEvtHddr(m_ConstSet);
     SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
   }
-}
-
-//_____________________________________________________________________________
-St_geant_Maker::~St_geant_Maker(){
+// Initialize GEANT
+  
+  if (! geant3) {
+    PrintInfo();
+    geant3 = new TGeant3("C++ Interface to Geant3",fNwGeant,fNwPaw,fIwType);
+    assert(geant3);
+    cquest = (Quest_t  *) geant3->Quest();
+    clink  = (Gclink_t *) geant3->Gclink();
+    cflag  = (Gcflag_t *) geant3->Gcflag();
+    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+    cnum   = (Gcnum_t  *) geant3->Gcnum();
+    z_iq   = (Int_t    *) geant3->Iq();
+    z_lq   = (Int_t    *) geant3->Lq();
+    z_q    = (Float_t  *) geant3->Q();
+  }
 }
 //_____________________________________________________________________________
 St_DataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *uppMk,
@@ -368,25 +382,8 @@ St_DataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *upp
 }
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
-// Initialize GEANT
-  
-  if (! geant3) {
-    PrintInfo();
-    const char* title = "C++ Interface to Geant3";
-    geant3 = new TGeant3(title,nwgeant,nwpaw,iwtype); 
-    cquest = (Quest_t  *) geant3->Quest();
-    clink  = (Gclink_t *) geant3->Gclink();
-    cflag  = (Gcflag_t *) geant3->Gcflag();
-    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
-    cnum   = (Gcnum_t  *) geant3->Gcnum();
-    z_iq   = (Int_t    *) geant3->Iq();
-    z_lq   = (Int_t    *) geant3->Lq();
-    z_q    = (Float_t  *) geant3->Q();
-// Create Histograms    
-       BookHist();
-  }
-
-
+  // Create Histograms    
+  BookHist();
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -577,7 +574,6 @@ Int_t St_geant_Maker::Make()
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
-  Init(); 
   if (strlen(option)) Do (option); 
   Geometry();
   Do("gclose all");
@@ -596,7 +592,6 @@ void St_geant_Maker::Draw()
 //_____________________________________________________________________________
 void St_geant_Maker::Do(const Char_t *job)
 {  
-  Init();
   int l=strlen(job);
   if (l) geant3->Kuexel(job);
 }
@@ -1104,9 +1099,6 @@ void St_geant_Maker::Dzddiv(Int_t& idiv ,Int_t &Ldummy,const Char_t* path,const 
 
 void St_geant_Maker::BookHist(){
   
-// cout << "********************88********************************" << endl; 
-// cout << "********************88********************************" << endl; 
-// cout << "********************88********************************" << endl;
   cout << "***********  St_geant_Maker - bookhist!!!! *********" << endl;
 
   m_histvx =0;
@@ -1125,16 +1117,10 @@ void St_geant_Maker::BookHist(){
 //_____________________________________________________________________________
 
 void St_geant_Maker::FillHist(){
-  
-  //cout << "********************88********************************" << endl;
-  //cout << "********************88********************************" << endl;
-  //cout << "********************88********************************" << endl;
-
-  //cout << "***********  geant - fillhist!!!! *********" << endl;
   //  cout << " St_geant_Maker::FillHist - Will now fill histograms! " << endl;
 
 
-// get geant event vertex
+  // get geant event vertex
   St_DataSet *geant = GetDataSet("geant"); 
   if( !geant ){
     cout << " No pointer to GEANT DataSet \n" << endl; 
@@ -1157,5 +1143,8 @@ void St_geant_Maker::FillHist(){
   m_histvx->Fill(gvt->ge_x[0]);
   m_histvy->Fill(gvt->ge_x[1]);
   m_histvz->Fill(gvt->ge_x[2]);
-
 }
+//________________________________________________________________________________
+void St_geant_Maker::SetNwGEANT(Int_t n){cout << "St_geant_Maker::SetNwGEANT is obsolete now\n";}
+void St_geant_Maker::SetNwPAW(Int_t n){cout << "St_geant_Maker::SetNwPAW is obsolete now\n";}
+void St_geant_Maker::SetIwtype(Int_t n){cout << "St_geant_Maker::SetIwtype is obsolete now\n";}

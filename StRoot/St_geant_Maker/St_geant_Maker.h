@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.h,v 1.21 2000/02/03 16:15:54 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.22 2000/02/03 19:34:42 fisyak Exp $
 // $Log: St_geant_Maker.h,v $
+// Revision 1.22  2000/02/03 19:34:42  fisyak
+// Clean up St_geant_Maker::Init, move its parameters to ctor
+//
 // Revision 1.21  2000/02/03 16:15:54  fisyak
 // Add Kathy's histograms
 //
@@ -20,9 +23,9 @@ class TH1F;
 
 class St_geant_Maker : public StMaker {
 protected:
-  Int_t  nwgeant;     // No. of words in GCBANK common block
-  Int_t  nwpaw;       // No. of words in PAWC  common block
-  Int_t  iwtype;      // HIGZ interface (=0 no HIGZ)
+  Int_t  fNwGeant;     // No. of words in GCBANK common block
+  Int_t  fNwPaw;       // No. of words in PAWC  common block
+  Int_t  fIwType;      // HIGZ interface (=0 no HIGZ)
   St_Node*   fNode;   //!
   TString fInputFile; // 
   StEvtHddr *fEvtHddr;//! pointer to Event Header
@@ -34,8 +37,9 @@ protected:
   virtual void   FillHist();
 
 public: 
-                  St_geant_Maker(const char *name="geant");
-   virtual       ~St_geant_Maker();
+                  St_geant_Maker(const char *name="geant",
+				 Int_t nwgeant=2000000,Int_t nwpaw=0, Int_t iwtype=0);
+   virtual       ~St_geant_Maker(){};
    virtual Int_t  Finish(){SafeDelete(m_DataSet); return kStOK;}
    virtual Int_t  Init();
    virtual void   Do(const Char_t *option = "dcut cave x 0.1 10 10 0.03 0.03"); // *MENU 
@@ -43,9 +47,9 @@ public:
    virtual void   G2root();
    virtual Int_t  Make();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
-   virtual void   SetNwGEANT (Int_t n=2000000) {nwgeant = n;} // *MENU
-   virtual void   SetNwPAW   (Int_t n=      0) {nwpaw   = n;} // *MENU
-   virtual void   SetIwtype  (Int_t n=      0) {iwtype  = n;} // *MENU
+   virtual void   SetNwGEANT (Int_t n=2000000);
+   virtual void   SetNwPAW   (Int_t n=      0);
+   virtual void   SetIwtype  (Int_t n=      0);
    virtual Int_t  Skip(Int_t Nskip=1);                        // *MENU*
    virtual St_Node *Work();
    virtual void   Call(const Char_t *name); // *MENU 
@@ -95,7 +99,7 @@ public:
 
 
    virtual const char *GetCVS() const
-   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.21 2000/02/03 16:15:54 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.22 2000/02/03 19:34:42 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
