@@ -63,7 +63,8 @@ int main(int argc, char *argv[])
       if(offset != -1)
 	offset = er->NextEventOffset();
       else
-	offset = -1;      DetectorReader *dr = getDetectorReader(er, "TPCV2P0");
+	offset = -1;
+      DetectorReader *dr = getDetectorReader(er, "TPCV2P0");
       if(!dr)
 	{
 	  cout << "Error creating DR: " << er->errstr() << endl;
