@@ -26,6 +26,7 @@ struct sl3TpcPara {
    long       NSecondaryLoops;   // Number of iterations reconstructing secondaries
    long       InnerMostRow ;     // Inner most row to process
    long       OuterMostRow ;     // Outer most row to process
+   long       startRow     ;     // row where to start tracking
    long       SMinimumHitsPerSegment;  // Minimum number of hits required for a track segment
    long       SMinimumHitsPerTrack;    // Minimum number of hits required for a track
    long       SMaxSearchPadrowsTrack;  // Maximum number of padrows without hits for a track

@@ -201,10 +201,10 @@ int FtfFinder::reset (void)
 //----------------------------------------------------------------------------
 //     Allocate volumes 
 //---------------------------------------------------------------------------*/
-   para.n_rp      = ( para.row_start - para.row_end ) / para.mod_row + 2 ;
+   para.n_rp      = ( para.rowOuterMost - para.rowInnerMost ) / para.mod_row + 2 ;
    if ( para.n_rp < 1 ) {
        printf ( " \n =====> Error <===== " ) ;
-       printf ( " \n Rows: start end %d % d ", para.row_start,  para.row_end ) ;
+       printf ( " \n Rows: Outer Most Inner Most %d % d ", para.rowOuterMost,  para.rowInnerMost ) ;
        return 1 ;
    }
    para.n_phip    = para.n_phi + 1 ;
@@ -373,11 +373,11 @@ int FtfFinder::setPointers ( )
         Check whether row is to be considered
 -------------------------------------------------------------------------*/
       this_hit = &(hit[ihit]) ;
-      i_rr = this_hit->i_r - para.row_end ;
+      i_rr = this_hit->i_r - para.rowInnerMost ;
       if ( fmod(i_rr,para.mod_row) != 0 ) continue ;
 
-      if ( this_hit->i_r < para.row_end   ) continue ;
-      if ( this_hit->i_r > para.row_start ) continue ;
+      if ( this_hit->i_r < para.rowInnerMost ) continue ;
+      if ( this_hit->i_r > para.rowOuterMost ) continue ;
 /*
  *->    Get "renormalized" index
  */

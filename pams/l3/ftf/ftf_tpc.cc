@@ -78,12 +78,16 @@ extern "C" long type_of_call ftf_tpc_(
   if ( para->FirstSector > para->LastSector ) {
      pHit        = new PHit[1] ;
      nSectorHits = new long[1] ;
+     maxSectorHits = new long[1] ;
      pHit[0] = new FtfHit[tphit_h->nok] ;
 
      for ( int i = 0 ; i < tphit_h->nok ; i++ ) {
         (pHit[0])[i].id  = i ;
         tphit[i].track   = 0 ;
         (pHit[0])[i].i_r = (short)fmod(tphit[i].row,100)   ;
+        if ( tphit[i].row == 4600 ) (pHit[0])[i].i_r = 46 ;
+        if ( tphit[i].row == 4600 ) tphit[i].row = 46 ;
+//      if ( (pHit[0])[i].i_r > 40   ) ((pHit[0])[i].i_r)++ ;
         (pHit[0])[i].x   = tphit[i].x ;
         (pHit[0])[i].y   = tphit[i].y ;
         (pHit[0])[i].z   = tphit[i].z ;
@@ -93,6 +97,7 @@ extern "C" long type_of_call ftf_tpc_(
      }
      nSectors       = 1 ;
      nSectorHits[0] = tphit_h->nok ;
+     maxSectorHits[0] = tphit_h->nok ;
   }
   else {
 //
@@ -304,8 +309,9 @@ extern "C" long type_of_call ftf_tpc_(
       tracker.para.phi_max_track   = para->MaxSlicePsi / Todeg ;
       tracker.para.eta_min_track   = para->MinSliceTanL ;
       tracker.para.eta_max_track   = para->MaxSliceTanL ;
-      tracker.para.row_end         = (short)para->InnerMostRow ;
-      tracker.para.row_start       = (short)para->OuterMostRow ;
+      tracker.para.rowInnerMost    = (short)para->InnerMostRow ;
+      tracker.para.rowOuterMost    = (short)para->OuterMostRow ;
+      tracker.para.rowStart        = (short)para->startRow     ;
       tracker.para.sz_fit_flag     = para->SFitSz ;
       tracker.para.bfield          = para->BField ;
       tracker.para.chi2_hit_cut    = para->SChi2Cut;
