@@ -96,7 +96,6 @@ long type_of_call reformat_new_
    current_sect=indextbl[0].sector;
  
     if(current_sect==tfc_sector_index[0].CurrentSector && indextbl[3].rgm!=0){
-          raw_sec_m[current_sect-1].TimeRef = 'S' ;
           raw_sec_m[current_sect-1].RowRefIn = 'R' ;
           raw_sec_m[current_sect-1].RowRefOut = 'R' ;
      }

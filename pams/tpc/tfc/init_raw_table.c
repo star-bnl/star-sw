@@ -28,7 +28,7 @@ long  type_of_call init_raw_table_
             raw_sec_m[isect].SectorId = isect+1;
             raw_sec_m[isect].tfirst = min_buck;
             raw_sec_m[isect].tlast  = max_buck;
-            raw_sec_m[isect].TimeRef = 'N' ;    
+            raw_sec_m[isect].TimeRef = 'S' ;    
             raw_sec_m[isect].RowRefIn = 'N' ;   
             raw_sec_m[isect].RowRefOut = 'N' ;  
 	    raw_sec_m_h->nok++; 
