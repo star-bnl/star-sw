@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.20 2002/09/18 22:21:35 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.21 2003/06/27 18:47:12 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.21  2003/06/27 18:47:12  jhthomas
+ * Add new function called FixSpaceChargeDistortion( ,,,,, )
+ *
  * Revision 1.20  2002/09/18 22:21:35  jhthomas
  * Add new option for 1/R**2 space charge density distribution.  Flag = 0x800
  *
@@ -75,7 +78,7 @@
 #define  nePhi            13            // Number of Phi points in table ( add one for 360 == 0 )
 
 enum   EBField  { kUndefined = 0, kConstant = 1, kMapped = 2, kChain = 3 } ;
-
+enum   Prime    { IsPrimary = 0 , IsGlobal = 1 } ;
 // Bit counting starts at 1 for the mode switch (...,3,2,1)
 
 enum   DistortSelect 
@@ -182,6 +185,11 @@ class StMagUtilities {
   virtual void    UndoSpaceChargeDistortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoSpaceChargeR2Distortion ( const Float_t x[], Float_t Xprime[] ) ;
   virtual void    UndoIFCShiftDistortion ( const Float_t x[], Float_t Xprime[] ) ;
+
+  virtual void    FixSpaceChargeDistortion ( const Int_t Charge, const Float_t x[3], const Float_t p[3], 
+					const Prime PrimaryOrGlobal, Float_t x_new[3], Float_t p_new[3],
+		      const unsigned int RowMask1 = 0xFFFFFF00 , const unsigned int RowMask2 = 0x1FFFFF,
+			     		                             const Float_t VertexError = 0.0200 ) ;
 
   ClassDef(StMagUtilities,1)    // Base class for all STAR MagField
 
