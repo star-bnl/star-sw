@@ -42,15 +42,16 @@ CC:>--------------------------------------------------------------------
 
 CC:  Local Variable Type Declarations:
 
-      integer*4 i,detid_tpc,detid_svt,detid_ftpc
-      integer*4 two4,two5,two6,two9,two10,two11,two12
-      integer*4 two16,two17,two18,two20,two21,two24,two25,two26
+      integer*4 i,detid_tpc,detid_svt,detid_ftpc,detid_ssd
+      integer*4 two4,two5,two6,two9,two10,two15,two16,two17
+      integer*4 two20,two21,two22,two24,two25,two26,two28
       integer*4 tpcx,tpcy,tpcz,tpcy10,tpcy11,tpcq,tpcdq
       integer*4 svtx,svty,svtz,svty10,svty11,svtq,svtdq
 
       parameter(detid_tpc  = 1)
       parameter(detid_svt  = 2)
       parameter(detid_ftpc = 3)
+      parameter(detid_ssd  = 8)
 
       real*4    tpc_fac, svt_fac
       parameter(tpc_fac = 2380.0)
@@ -61,16 +62,16 @@ CC:  Local Variable Type Declarations:
       parameter(two6  = 64)
       parameter(two9  = 512)
       parameter(two10 = 1024)
-      parameter(two11 = 2048)
-      parameter(two12 = 4096)
+      parameter(two15 = 32768)
       parameter(two16 = 65536)
       parameter(two17 = 131072)
-      parameter(two18 = 262144)
       parameter(two20 = 1048576)
       parameter(two21 = 2097152)
+      parameter(two22 = 4194304)
       parameter(two24 = 16777216)
       parameter(two25 = 33554432)
       parameter(two26 = 67108864)
+      parameter(two28 = 268435456)
 
 CC:  Set dst_point number of used rows to zero:
 
@@ -85,17 +86,13 @@ CC:  Loop thru TPC space points; store all points
 
 CC:  Fill hardware position for hit>>>
 
-               if(tcl_tphit(i).nseq .le. two11) then
-                  dst_point(dst_point_h.nok).hw_position =
-     1               detid_tpc 
-     2             + two4*int(tcl_tphit(i).row/100)
-     3             + two9*mod(tcl_tphit(i).row,100)
-     4             + two20*tcl_tphit(i).nseq
-               else
-                  dst_point(dst_point_h.nok).hw_position =
-     1               detid_tpc 
-     2             + two4*tcl_tphit(i).row
-               end if
+               dst_point(dst_point_h.nok).hw_position =
+     1            detid_tpc 
+     2            + two4*int(tcl_tphit(i).row/100)
+     3            + two9*mod(tcl_tphit(i).row,100)
+     4            + two15*tcl_tphit(i).npads
+     5            + two22*tcl_tphit(i).ntmbk
+        
 
 CC:  Fill space point position coordinates in {x,y,z}>>>
 
@@ -194,14 +191,18 @@ CC:  Loop thru SVT space points; store all points.
                dst_point_h.nok = dst_point_h.nok + 1
 
 CC:  Fill hardware position for hit>>>
-
-               if(scs_spt(i).id_wafer .le. two16) then
+CC:            Following line checks for SSD hits:
+               if(scs_spt(i).id_wafer .lt. 7000) then
                   dst_point(dst_point_h.nok).hw_position =
      1               detid_svt 
      2             + two4*scs_spt(i).id_wafer
-               else
+               else if(scs_spt(i).id_wafer .ge. two28) then
                   dst_point(dst_point_h.nok).hw_position =
-     1               detid_svt 
+     1               detid_ssd
+               else  
+                  dst_point(dst_point_h.nok).hw_position =
+     1               detid_ssd
+     2             + two4*scs_spt(i).id_wafer
                end if
 
 CC:  Fill space point position coordinates in {x,y,z}>>>
