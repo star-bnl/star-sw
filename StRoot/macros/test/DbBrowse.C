@@ -1,25 +1,12 @@
-void DbBrowse(char* aliasTag){
+void DbBrowse(char* database){
 
-  /*
+  // macro to browse a particular database.
+  // database is in the form => "type/domain"
+  // For examples
+  //  database=>"Calibrations/tpc"
+  //  database=>"Geometry/ftpc"
+  //   ....
 
-Input should be one of these alias tags which the St_db_Maker
-translates into the timestamp  of dates+time
-
-static const char *aliases[]={
-"sd97",   "sd98",   "year_1a","year_1b","year_1c",
-"es99",   "er99",   "dc99"   ,"year_1d","year_1e",
-"year_1h","year_2a", "year_2b", 0};   
-
-static const int   dates[]=  {
-19970101, 19980101, 19990101, 19990501, 19991001,
-19990615, 19990616, 19991206, 19991101, 19991201,
-20000614, 20010610, 20010501, 0};
-static const int   times[]=  {
-       0,        0,        0,        0,        0,
-       0,   120000,    80000,        0,        0,
-  175430,        0,        0,        0};
-
-*/
 
   // Baseline shared libraries
   gSystem->Load("St_base");
@@ -51,12 +38,19 @@ static const int   times[]=  {
   // Make reaquests for data
   // choose timestamp 
 
-  //  dbMk->SetDateTime(20001001,10000);
+  dbMk->SetDateTime(20011201,10000);
 
-  dbMk->SetDateTime(aliasTag);
+
+  /*  to browse many databases, use this approach
 
   const char* dbs[] = {"Geometry","Calibrations","RunLog","Conditions",0};
   for(int i=0;dbs[i]!=0;i++)dbMk->GetDataBase(dbs[i]);
+
+  */
+
+  // to browse 1 database, use this one
+
+  dbMk->GetDataBase(database);
   TBrowser* b2 = new TBrowser("TestDbMaker",dbMk);
 
 }
