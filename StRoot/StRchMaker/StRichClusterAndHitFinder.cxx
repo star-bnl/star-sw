@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 2.3 2000/10/24 00:24:56 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 2.4 2000/11/01 16:51:10 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,11 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 2.3  2000/10/24 00:24:56  lasiuk
- * boolean flag moved to data member
- *
- * Revision 2.3  2000/10/24 00:24:56  lasiuk
- * boolean flag moved to data member
+ * Revision 2.4  2000/11/01 16:51:10  lasiuk
+ * print the number of pads in dumpHitInfo()
  *
  * Revision 2.5  2000/11/07 14:12:44  lasiuk
  * init() information and
@@ -492,15 +489,16 @@ void StRichClusterAndHitFinder::dumpClusterInformation(ostream& os) const
 void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 {
     os << "\nStRichClusterAndHitFinder::dumpHitInformation\n" << endl;
-	os << "hit cluster# charge AmpLocMax rms internal position" << endl;
+    if(!mTheHits.size()) {
 	os << "StRichClusterAndHitFinder::dumpHitInformation()";
 	os << "\tWARNING:";
 	os << "\tHit vector is empty!" << endl;
     }
     else {
-	       << "rms" << '\t'
-	       << mTheHits[ii]->internal()     << '\t'
-	       << mTheHits[ii]->local() << endl;
+	os << mTheHits.size() << " Hits identified." << endl;
+	os << "hit cluster# charge AmpLocMax rms internal position pads" << endl;
+	for(size_t ii=0; ii<mTheHits.size(); ii++) {
+	    os << ii << '\t'
 	       << mTheHits[ii]->clusterNumber()     << '\t'
 	       << mTheHits[ii]->charge()            << '\t'
 	       << mTheHits[ii]->maxAmplitude()      << '\t'
