@@ -47,3 +47,45 @@ static EEmapTP eeMapTP[EEnTPphi][EEnTPeta] ={
 
 
 #endif
+
+/*
+
+The .h file tells you how to find  relation between 
+Steve's TP id and DSM input.
+
+brdIn,chIn - refer to level 0 inputs
+chOut - is level 1 input (i.e. level 0 output)
+
+The tricky part is to find relation between tower ID and
+one of elements in this array.
+An 'lement'is this 5 numbers:   {1, 2, 7, 1, 8}
+
+As you see  eeMapTP[EEnTPphi=i][EEnTPeta=j]  forms a 2D array describing topology of 90 EEMC TP .
+
+EEnTPeta  numbers TP from inside, 
+tower eta bins 1-3 -->j=0, 4-7 -->j=1, 8-12 -->j=2;
+
+EEnTPphi numbers 30 TP in phi . 60/2=30 - makes sense.
+I forgot where is the zero, I think it should be for the first TP in JP1.
+then you go clokwise.
+
+The firts element eeMapTP[0][0]= {1, 1, 7, 0, 8} corresponds to towers:
+11TD01 11TE01
+11TD02 11TE02
+11TD03 11TE03
+
+(Assuming JP=1 covers 11TD -1TC  - I do not remeber)
+
+Next element in eta direction eeMapTP[1][0]= {1, 2, 7, 1, 8} covers
+11TD04 11TE04
+11TD05 11TE05
+11TD06 11TE06
+11TD07 11TE07
+
+Next elemnt in phi direction , clockwise eeMapTP[0][1]= {1, 4, 7, 2, 8}
+12TA01 12TB01
+12TA02 12TB02
+12TA03 12TB03
+
+etc.
+*/
