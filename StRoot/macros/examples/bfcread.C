@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.18 1999/07/27 00:47:04 kathy Exp $
+// $Id: bfcread.C,v 1.19 1999/09/13 14:33:49 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.19  1999/09/13 14:33:49  kathy
+// update bfcread.C so that it now uses IOMaker instead of TreeMaker - tested it for .dst.root,.dst.xdf, .*.root files - works for all
+//
 // Revision 1.18  1999/07/27 00:47:04  kathy
 // remove the for loop from bfcread.C and replace with basically while and go to statements;  this is due to the for loop problem in CINT - see my email on 26Jul99 to starsoft
 //
@@ -26,24 +29,24 @@
 //
 //======================================================================
 // owner:  Victor Perevoztchikov
-// what it does: 
+// what it does:  reads output files from bfc and displays data in browser
+//                - more info below
 //=======================================================================
 // bfcread.C
 //
-// Kathy's notes (5/13/99):
-//     - Victor's example to show how to read in a DST produced from bfc.C and
-//       - run another maker (St_QA_Maker) 
+// Kathy's notes (9/13/99):
+//     - example to show how to read in file (.dst.xdf, .dst.root, .*.root) 
+//       produced from bfc.C and:
+//       - run another maker (St_QA_Maker)  - commented out for now
 //       - look at it using the browser
 //
 // This example is reading in the "dst" branch of the root file.
 // (i.e. the input file is .dst.root)
 // If you want to read in a different branch, you must change:
-//    - the input file name, e.g. *.bname.root
-//    - treeMk->SetBranch("bnameBranch",0,"r");
+//    - the input file name, e.g. *.bname.root (or .dst.xdf)
+//    - IOMk->SetBranch("bnameBranch",0,"r");
 //    - chain->GetDataSet("bname");
 //
-// This example has St_QA_Maker put in properly, but it is commented out.
-// Just un-comment if you want. 
 //
 // This example is for debugging/testing purposes and  therefore does
 //   not have chain->Finish(); at end
@@ -57,30 +60,36 @@ St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
 
+// 9/13/99:
+// locations of some files:
+// "/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
+
 void bfcread(
  Int_t nevents=1, 
  const char *MainFile=
- "/disk00000/star/test/dev/tfs_Linux/Wed/year_2a/psc0208_01_40evts.dst.root")
+ "/disk00000/star/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root")
 {
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
-    gSystem->Load("StTreeMaker");
+    gSystem->Load("StIOMaker");
 
 
 //  Setup top part of chain
     chain = new StChain("bfc");
     chain->SetDebug();
    
-//  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-  treeMk->SetIOMode("r");
-  treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  		//deactivate all branches
-  treeMk->SetBranch("dstBranch",0,"r");	//activate EventBranch
+  StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+  IOMk->SetDebug();
+  IOMk->SetIOMode("r");
+  IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
+//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
+  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
 
-//  add other makers to chain:
+
+// How to add other makers to chain (must also load library!)
 //   St_QA_Maker  *qa  = new St_QA_Maker;
   
 // --- now execute chain member functions
