@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.13 2000/02/10 01:21:50 calderon Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.14 2000/02/24 16:26:58 long Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,11 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.14  2000/02/24 16:26:58  long
+ * changes for field on cases ( calculation of diffusion as a function of field)
+ *
+ * Revision 1.14  2000/02/08  long
+ * add sigmaL and sigmaT for all possible value of the field
  * Revision 1.13  2000/02/10 01:21:50  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -82,12 +87,43 @@ StTrsChargeTransporter* StTrsFastChargeTransporter::instance(StTpcGeometry* geo,
 
 StTrsFastChargeTransporter::StTrsFastChargeTransporter(StTpcGeometry* geodb, StTpcSlowControl* scdb, StTrsDeDx* gasdb, StMagneticField* magdb)
     : StTrsChargeTransporter(geodb, scdb, gasdb, magdb)
-{/* nopt*/ }
+{int i= fieldFactorTable(); /* nopt*/ }
 
 StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 
-void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
+int StTrsFastChargeTransporter::fieldFactorTable()
 {
+  mB2[0]=2.143;//in KG^2
+  mK[0]=0.51848343;
+  mb[0]=1.0;
+  mB2[1]=6.4286;//in KG^2
+  mK[1]=0.34075;
+  mb[1]=1.38088; 
+  mB2[2]=12.14286;//in KG^2
+  mK[2]=0.325;
+  mb[2]=1.4821;
+  mB2[3]=25.0;//in KG^2
+  mK[3]=0.22222;
+  mb[3]=2.7302;
+  return 1;
+
+}
+void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg,double& SigmaL,double& SigmaT)
+{ 
+    double  b             =mMagDb->at(StThreeVector<double>(0,0,0)).z()/kilogauss;
+            b             =b*b;//in KG^2 
+    double  driftLength   =seg.position().z();//in cm
+    double  drift         =driftLength;
+   
+    
+    if( b <mB2[1])
+        
+         SigmaT= b<mB2[0]? mSigmaTransverse *sqrt(drift/(mK[0]*b+mb[0])):
+                         mSigmaTransverse *sqrt(drift/(mK[1]*b+mb[1])) ;
+    else
+         SigmaT= b<mB2[2]? mSigmaTransverse *sqrt(drift/(mK[2]*b+mb[2])):
+                         mSigmaTransverse *sqrt(drift/(mK[3]*b+mb[3])) ;
+     SigmaL=   mSigmaLongitudinal*sqrt(drift);
     // Projection onto pad plane
     //PR(mGeomDb->frischGrid());
     //double frischGrid = (seg.position().z() > 0) ?
@@ -100,14 +136,10 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 // 	seg.position().z() - frischGrid ;
     // With the present coordinate system, local z is now drift length.
     // MCBS Feb 2000
-    double driftLength = seg.position().z(); 
+     // double driftLength = seg.position().z(); 
     
      
 
-    if (seg.position().y() > mGeomDb->firstOuterSectorAnodeWire())
-	driftLength += mGeomDb->outerSectorzOffSet();
-    else
-	driftLength += mGeomDb->innerSectorzOffSet();
     
 //     PR(driftLength);
     if (driftLength<0) {// PROBLEMS
@@ -123,16 +155,16 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     double ne = sqrt(seg.charge());
     if (mTransverseDiffusion) {
       	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
-      					     (mSigmaTransverse*sqrt(driftLength)/ne)));
+      					     SigmaT/ne));
 	seg.position().setY(mGaussDistribution.shoot(seg.position().y(),
-      						     (mSigmaTransverse*sqrt(driftLength)/ne)));
+      					     SigmaT/ne));
+	
     } // else do not alter the position!
    
-    if (mLongitudinalDiffusion) {
-//      double oldZ=seg.position().z();
-// 	seg.position().setZ(oldZ+driftLength-mGaussDistribution.shoot(driftLength,
- 	seg.position().setZ(mGaussDistribution.shoot(driftLength,
-						     (mSigmaLongitudinal*sqrt(driftLength)/ne)));
+   if (mLongitudinalDiffusion) {
+       
+	seg.position().setZ(mGaussDistribution.shoot(seg.position().z(),
+						     SigmaL/ne));
        
     }
     else {
@@ -140,8 +172,11 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 	// needed in order to properly treat the charge distribution onto the wire plane!
 	
     }
-
-    //PR(seg.position());
+    
+    if (seg.position().y() > mGeomDb->firstOuterSectorAnodeWire())
+    	seg.position().setZ(seg.position().z()+ mGeomDb->outerSectorzOffSet());
+    else
+       	seg.position().setZ(seg.position().z()+ mGeomDb->innerSectorzOffSet());
     //
     // Alter charge with:
     //     - absorption (O2)
