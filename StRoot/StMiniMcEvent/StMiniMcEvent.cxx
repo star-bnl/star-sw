@@ -1,3 +1,6 @@
+//
+// $Id: StMiniMcEvent.cxx,v 1.5 2004/01/26 13:58:18 calderon Exp $
+//
 
 #include "StMiniMcEvent.h"
 #include "StMiniMcPair.h"
@@ -48,7 +51,8 @@ StMiniMcEvent::StMiniMcEvent() :
     mNMergedPair(0),
     mNSplitPair(0),
     mNGhostPair(0),
-    mNContamPair(0)
+    mNContamPair(0),
+    mNMatGlobPair(0)
 {
   cout << "###StMiniMcEvent::StMiniMcEvent()" << endl;
   //
@@ -65,7 +69,7 @@ StMiniMcEvent::StMiniMcEvent() :
   const Int_t nSplitPair   = 500;
   const Int_t nGhostPair   = 500;
   const Int_t nContamPair  = 500;
-
+  const Int_t nMatGlobPair = 6000;
   if(mSFirst){ 
     cout << "\tCreating the clones arrays" << endl;
     
@@ -76,6 +80,7 @@ StMiniMcEvent::StMiniMcEvent() :
 
     mGhostPairs  = new TClonesArray("StMiniMcPair",nGhostPair);
     mContamPairs = new TClonesArray("StContamPair",nContamPair); 
+    mMatGlobPairs = new TClonesArray("StMiniMcPair",nMatGlobPair);
 
   }
 
@@ -128,6 +133,9 @@ StMiniMcEvent::addTrackPair(StMiniMcPair* pair,Category category)
     tracks = mContamPairs; nPair = &mNContamPair;
     contamPair = dynamic_cast<StContamPair*>(pair);
     break;
+  case MATGLOB:
+    tracks = mMatGlobPairs; nPair = &mNMatGlobPair;
+    break;
   default:
     cout << "****ERROR!****" << endl 
 	 << "WRONG CATEGORY " 
@@ -160,6 +168,8 @@ StMiniMcEvent::tracks(Category category)
     return mGhostPairs;
   case CONTAM:
     return mContamPairs;
+  case MATGLOB:
+    return mMatGlobPairs;
   default:
     cout << "****WRONG CATEGORY****"<< endl
 	 << "StMiniMcEvent::tracks()" << endl;
@@ -182,13 +192,16 @@ StMiniMcEvent::Clear(Option_t *option)
   mSplitPairs->Clear();
   mGhostPairs->Clear();
   mContamPairs->Clear();
-
+  mMatGlobPairs->Clear();
+  
   mNMcTrack = mNMatchedPair = mNMergedPair 
-    = mNSplitPair = mNGhostPair = mNContamPair = 0;
+    = mNSplitPair = mNGhostPair = mNContamPair = mNMatGlobPair = 0;
   
 }
 
 //__________________
-
+//
+// $Log $
+//
 
   

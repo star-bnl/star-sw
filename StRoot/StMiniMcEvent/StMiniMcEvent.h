@@ -1,5 +1,6 @@
 /**
  * $Id $
+ * $Log $
  * \file  StMiniMcEvent.h
  * \brief Top level class for the MiniMcTree, containing event-wise information and the McTrack, and all TrackPair
  *        collections.
@@ -22,7 +23,7 @@ class StTinyMcTrack;
 class StMiniMcPair;
 class StContamPair;
 
-enum Category { MC,MATCHED,MERGED,SPLIT,CONTAM,GHOST};
+enum Category { MC,MATCHED,MERGED,SPLIT,CONTAM,GHOST,MATGLOB};
 
 class StMiniMcEvent : public TObject {
  public:
@@ -85,8 +86,8 @@ class StMiniMcEvent : public TObject {
   void setNFtpcEUncorrectedPrimaries(Int_t val)		{ mNFtpcEUncorrectedPrimaries=val; }
   void setMcMult(Int_t val)				{ mMcMult=val; }
   void setNMcNch(Int_t val)				{ mNMcNch=val; }
-  void setNMcFtpcWNch(Int_t val)				{ mNMcFtpcWNch=val; }
-  void setNMcFtpcENch(Int_t val)				{ mNMcFtpcENch=val; }
+  void setNMcFtpcWNch(Int_t val)			{ mNMcFtpcWNch=val; }
+  void setNMcFtpcENch(Int_t val)			{ mNMcFtpcENch=val; }
   void setNMcHminus(Int_t val)				{ mNMcHminus=val; }
   void setNMcGlobal(Int_t val)				{ mNMcGlobal=val; }
   void setNMcGoodGlobal20(Int_t val)			{ mNMcGoodGlobal20=val; }
@@ -166,17 +167,18 @@ private:
   Int_t mNSplitPair;
   Int_t mNGhostPair;
   Int_t mNContamPair;
-
+  Int_t mNMatGlobPair;
+    
   TClonesArray* mMcTracks;
   TClonesArray* mMatchedPairs;
   TClonesArray* mMergedPairs;
   TClonesArray* mSplitPairs;
   TClonesArray* mGhostPairs; 
   TClonesArray* mContamPairs;
-
+  TClonesArray* mMatGlobPairs;
   static Int_t mSFirst; //!
 
-  ClassDef(StMiniMcEvent,2)
+  ClassDef(StMiniMcEvent,3)
 };
 
 #endif
@@ -184,6 +186,9 @@ private:
   
 //
 // $Log: StMiniMcEvent.h,v $
+// Revision 1.5  2004/01/26 13:58:18  calderon
+// Introduction of global matched branch.
+//
 // Revision 1.4  2003/07/09 01:05:51  calderon
 // Added the FTPC reference multiplicity, East and West
 // Added various other multiplicity definitions, good globals reco and MC,
