@@ -1,5 +1,8 @@
-* $Id: vpddgeo.g,v 1.9 2002/11/26 17:45:45 geurts Exp $
+* $Id: vpddgeo.g,v 1.10 2004/03/12 20:51:27 llope Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.10  2004/03/12 20:51:27  llope
+* only added a print statement to confirm Z-positioning during run-time
+*
 * Revision 1.9  2002/11/26 17:45:45  geurts
 * Updated the pVPD mothervolume positions for the 2002/2003 run.
 * Removed obsolete vpdg_zpos.
@@ -134,6 +137,7 @@ Created 21 June 2000
 *
      Create VPDD
 * need zpos passed on inside the vpdd definition for the I-beam
+     print *,'pVPD: Zpositions East and West:',vpdg_zposWest,' &',vpdg_zposEast,' cm'	
      zpos = vpdg_zposWest
      Position VPDD in Cave   z=+zpos            Konly='Many'
      zpos = vpdg_zposEast
@@ -223,7 +227,7 @@ Block VPDD  is the whole VPPD assembly
      Create and Position VRNG  Konly='Many'
 *
      if (vpdg_IBchoice != 0) then
-       print *,'vpddgeo: I-Beam support is activated'
+       print *,'pVPD: I-Beam support is activated...'
        Create and Position IBEM z=-zpos+vpdg_IBPosZc y=vpdg_IBposYc
      endif
 *
