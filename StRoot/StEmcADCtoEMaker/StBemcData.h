@@ -13,7 +13,8 @@ class StBemcData: public TDataSet
 					virtual	~StBemcData();
 					Bool_t  getTDCStatus(Int_t);          ///< Returns only if a given TDC channel should be active or not in this run. DOES NOT return if its data is valid or not
 					Bool_t  getSMDStatus(Int_t);          ///< Returns only if a given SMD crate should be active or not in this run. DOES NOT return if its data is valid or not
-					void    validateData();               ///< Validates EMC data. Should be used only if headers are properly filled
+					Bool_t  checkTDC(Int_t,Int_t);        ///< check if data for TDC channel is ok
+          void    validateData();               ///< Validates EMC data. Should be used only if headers are properly filled
 					void    printTower();                 ///< Print tower data
 					void    printSMD();                   ///< Print SMD data
 					
@@ -23,6 +24,7 @@ class StBemcData: public TDataSet
 					Int_t   EventDate;
 					Int_t   EventTime;
 					Int_t   NGlobalTracks;
+          Float_t Vertex[3];
 	
 					// tower data -----------------------------------------------------
 					Bool_t  TowerPresent;                 ///< Check to see if there is tower information in the event
