@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.18 1999/05/24 19:02:03 kathy Exp $
+// $Id: doEvents.C,v 1.19 1999/06/10 15:39:03 fisyak Exp $
 // $Log: doEvents.C,v $
+// Revision 1.19  1999/06/10 15:39:03  fisyak
+// Add mag.field
+//
 // Revision 1.18  1999/05/24 19:02:03  kathy
-// put owner back into do*Events.C so it's standardized with all other macros
+// Merge StRootEvent and StEvent
 //
 // Revision 1.17  1999/05/23 21:54:07  perev
 // restore old default in doEvent
@@ -145,6 +148,7 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
 
 
   // Dynamically link needed shared libs
+  gSystem->Load("StMagF");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
