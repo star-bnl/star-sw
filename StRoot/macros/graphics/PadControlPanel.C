@@ -2,8 +2,11 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.9 1999/06/11 18:17:55 fine Exp $
+// $Id: PadControlPanel.C,v 1.10 1999/06/11 19:14:01 fine Exp $
 // $Log: PadControlPanel.C,v $
+// Revision 1.10  1999/06/11 19:14:01  fine
+// Some extra protections agaist of view == 0
+//
 // Revision 1.9  1999/06/11 18:17:55  fine
 // View have been standardtized
 //
@@ -170,6 +173,7 @@ static void AdjustScales()
   TVirtualPad *thisPad = gPad;
   if (thisPad) {
     TView *view = thisPad->GetView(); 
+    if (!view) return;
     Float_t min[3],max[3];
     view->GetRange(min,max);
     int i;
@@ -190,6 +194,7 @@ static void Centered3DImages()
   TVirtualPad *thisPad = gPad;
   if (thisPad) {
     TView *view = thisPad->GetView(); 
+    if (!view) return;
     Float_t min[3],max[3];
     view->GetRange(min,max);
     int i;
@@ -206,6 +211,7 @@ static void Decrease3DScale()
   TVirtualPad *thisPad = gPad;
   if (thisPad) {
     TView *view = thisPad->GetView(); 
+    if (!view) return;
     Float_t min[3],max[3];
     view->GetRange(min,max);
     int i;
@@ -222,6 +228,7 @@ static void Inscrease3DScale()
   TVirtualPad *thisPad = gPad;
   if (thisPad) {
     TView *view = thisPad->GetView(); 
+    if (!view) return;
     Float_t min[3],max[3];
     view->GetRange(min,max);
     int i;
@@ -275,7 +282,7 @@ void MakeFourView(TVirtualPad *pad=0)
       while (obj = next->Next()) newPrimitives->Add(obj);
       TView *newView = new TView(system);
       newView->SetRange(min,max);
-      next.Reset();
+      next->Reset();
    }
    delete next;
    // set separate view;
