@@ -1,26 +1,30 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.16 2000/03/28 23:25:37 posk Exp $
+// $Id: plot.C,v 1.17 2000/04/10 18:49:10 posk Exp $
 //
-// Author: Art Poskanzer, LBNL, Aug 1999
+// Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
 //               If selN = 0 plot all selections and harmonics.
+//               First time type .x plot.C() to see the menu.
+//               Run Number appended to "ana" is entered in the bottom, left box.
+//               File Number is prepended to flow.hist.root.
+//               Default hist file is just flow.hist.root .
+//               After the first execution, just type plot(N) .
+//               A negative N plots all pages starting with page N.
+//
 //               Place a symbolic link to this file in StRoot/macros/analysis .
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.17  2000/04/10 18:49:10  posk
+// Asks for the histogram file number.
+//
 // Revision 1.16  2000/03/28 23:25:37  posk
 // Allow multiple instances.
 //
 // Revision 1.15  2000/03/21 00:24:45  posk
 // Added GetCVS and changed some plot names.
-//
-// Revision 1.14  2000/03/15 23:32:05  posk
-// Added StFlowSelection.
-//
-// Revision 1.13  2000/02/29 21:55:14  posk
-// Removed static const int& statements.
 //
 // Revision 1.12  2000/02/18 23:44:54  posk
 // Added PID and centrality.
@@ -31,35 +35,17 @@
 // Revision 1.10  2000/01/27 00:04:31  posk
 // Corrected error in pt plots.
 //
-// Revision 1.9  2000/01/24 23:02:13  posk
-// Merged updates
-//
-// Revision 1.8  2000/01/13 21:50:24  posk
-// Updates and corrections.
-//
 // Revision 1.7  1999/12/21 18:14:14  posk
 // More graphs.
 //
 // Revision 1.6  1999/12/21 01:19:29  posk
 // Added more histograms.
 //
-// Revision 1.5  1999/12/04 00:15:41  posk
-// Works with StFlowEvent which works with the new StEvent
-//
-// Revision 1.4  1999/11/24 18:14:07  posk
-// Now reads event quantities with StFlowEvent methods
-//
-// Revision 1.3  1999/11/05 00:02:04  posk
-// Changed the flow vector, Q, to a TVector2.
-//
 // Revision 1.2  1999/10/05 16:54:14  posk
 // Added getPhiWeight method for making the event plane isotropic.
 //
 //
-//
 ///////////////////////////////////////////////////////////////////////////////
-
-TFile histFile("flow.hist.root");
 
 //const Int_t nHars    = 6;
 const Int_t nHars    = 3;
@@ -69,11 +55,12 @@ const Float_t twopi  = 2. * 3.1416;
 const Float_t etaMax = 2.;
 const Float_t ptMax  = 2.;
 Int_t runNumber      = 0;
-//Int_t fileNumber     = 0;
-char  fileNumber[3];
 char  runName[6];
+char  fileNumber[4]  = "x";
 char  fileName[30];
- 
+TFile* histFile;
+
+
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
@@ -142,24 +129,26 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     shortName[n] = new char[30];
     strcpy(shortName[n], baseName[n]);
     char* cp = strstr(shortName[n],"_Sel");
-    if (cp) *cp = '\0';                                   // truncate
+    if (cp) *cp = '\0';                                  // truncate
   }
 
   // input the run number
   if (runNumber == 0) {
     cout << "     run number? ";
     cin >> runNumber;
-    sprintf(runName, "ana%2d", runNumber);                   // add ana prefix
+    sprintf(runName, "ana%2d", runNumber);               // add ana prefix
     cout << " run name = " << runName << endl;
   }
 
-  // input the file number
-//     cout << "     file number? [none]";
-//     cin >> fileNumber;
-//     char* c0 = strstr(fileNumber, '\0');
-//     *(c0 - 1) = '\0';
-//     sprintf(fileName, "%sflow.hist.root", fileNumber); 
-//     cout << " file name = " << fileName << endl;
+  // input the file number (default opens flow.hist.root)
+  if (strstr(fileNumber, "x")!=0) {
+    cout << "     file number? [none] " << flush;
+    fgets(fileNumber, sizeof(fileNumber), stdin);
+    fileNumber[strlen(fileNumber)-1] = '\0';             // remove CR
+    sprintf(fileName, "%sflow.hist.root", fileNumber);   // prepend
+    cout << " file name = " << fileName << endl;
+    histFile = new TFile(fileName);
+  }
 
   // input the page number
   while (pageNumber <= nSingles || pageNumber > nNames) {
