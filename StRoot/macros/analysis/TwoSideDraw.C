@@ -3,9 +3,12 @@
 // Macro for plotting hits and pixels in combination with bfc.C
 //            plotting both sides of tpc seperately
 //
-// $Id: TwoSideDraw.C,v 1.8 1999/12/06 21:49:58 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.9 1999/12/11 20:13:53 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.9  1999/12/11 20:13:53  snelling
+// Fixed logic between DAQ data and similators
+//
 // Revision 1.8  1999/12/06 21:49:58  snelling
 // Fixed bug (exchanged x and z)
 //
@@ -199,7 +202,7 @@ void TwoSideDraw() {
   // -------- Fill pixels ----------
   Bool_t isSimulator = chain->GetOption("tss") || chain->GetOption("trs");
   
-  if (noDAQ && isSimulator && hits = GetPixels() && nHitsRows = hits->GetNRows() ) {
+  if ((!noDAQ || isSimulator) && hits = GetPixels() && nHitsRows = hits->GetNRows() ) {
     
     hyx_pixels = new TH2F("x vs y (pixels pos z)","x vs y (z > 0)",50,-100,100,50,-100,100);
     hzx_pixels = new TH2F("x vs z (pixels pos z)","x vs z (z > 0)",50,-100,100,50,-100,100);
