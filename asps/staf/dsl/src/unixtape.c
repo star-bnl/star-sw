@@ -6,6 +6,7 @@
 modification history
 --------------------
 01a,30jan95,whg  written
+01b,23apr96,bem  fix read,write declarations for AIX
 */
 
 #include <fcntl.h>
@@ -24,8 +25,10 @@ modification history
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#ifndef _AIX           /* if NOT ibm aix */ 
 int read(int fd, char *buf, unsigned count);
 int write(int fd, char *buf, unsigned count);
+#endif /* aix */
 #define RD_FLAG O_RDONLY
 #define WR_DISK_FLAG  O_RDWR  | O_CREAT | O_TRUNC
 #define WR_DISK_MODE S_IRWXU
@@ -149,3 +152,16 @@ static void usage(void)
 	printf("\tw - write known datasets on tape\n");
 	exit(0);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
