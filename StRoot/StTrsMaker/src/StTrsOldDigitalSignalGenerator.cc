@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.2 1999/12/08 02:10:42 calderon Exp $
+ * $Id: StTrsOldDigitalSignalGenerator.cc,v 1.3 2000/06/07 02:03:11 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsOldDigitalSignalGenerator.cc,v $
+ * Revision 1.3  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.2  1999/12/08 02:10:42  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -123,8 +126,8 @@ StTrsOldDigitalSignalGenerator::instance()
 	throw range_error("StTrsOldDigitalSignalGenerator::instance() Must Supply a File name");
 #else
 	cerr << "StTrsOldDigitalSignalGenerator::instance() Must Supply a File name" << endl;
-	cerr << "Exitting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return mInstance;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.11 2000/03/15 23:33:55 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.12 2000/06/07 02:03:11 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.12  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.11  2000/03/15 23:33:55  calderon
  * Remove extra messages
  *
@@ -148,9 +151,10 @@ StTrsIstream::~StTrsIstream() {ifs.close();}
 void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 {
     if (ifs.eof()) {
-	cerr << "End of file Reached" << endl;
-	cerr << "This file has only " << mEvents << " events, make sure you don't request more!" << endl;
-	exit(1);
+	cerr << "End of file Reached\n";
+	cerr << "This file has only " << mEvents;
+	cerr << " events, make sure you don't request more!" << endl;
+	abort();
     }
     cout << "Filling Tpc Info from File ... " << endl; 
     unsigned short lengthData;
@@ -175,7 +179,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 	    
 // 	    int d;
 // 	    cin >> d;
-// 	    if (d==2) exit(1);
+// 	    if (d==2) abort();
 	    aDigitalSector->mData[currentRowNum].resize(padsAtRow[currentRowNum]);
 	    
 	    ifs >> currentPadNum;
@@ -190,7 +194,7 @@ void StTrsIstream::fillTrsEvent(StTrsRawDataEvent* EventData)
 		ifs.get();
 // 		int d;
 // 		cin >> d;
-// 		if (d==2) exit(1);
+// 		if (d==2) abort();
 		
 		digitalPadData.clear();
 		if (lengthData>0) { // We have data, read it in

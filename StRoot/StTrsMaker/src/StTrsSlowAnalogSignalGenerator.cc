@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.23 2000/02/10 01:21:51 calderon Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.24 2000/06/07 02:03:12 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.24  2000/06/07 02:03:12  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.23  2000/02/10 01:21:51  calderon
  * Switch to use StTpcDb.
  * Coordinates checked for consistency.
@@ -184,8 +187,8 @@ StTrsSlowAnalogSignalGenerator::instance()
 #else
 	cerr << "StTrsSlowAnalogSignalGenerator::instance() Invalid Arguments" << endl;
 	cerr << "Cannot create Instance" << endl;
-	cerr << "Exitting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return mInstance;
@@ -305,7 +308,7 @@ void StTrsSlowAnalogSignalGenerator::setChargeDistribution(StDistribution v)
 	mChargeDistribution = v;
     else {
 	cerr << "Cannot Determine Charge Distribution Requested" << endl;
-	exit(0);
+	abort();
     }
 }
 
@@ -702,7 +705,7 @@ void StTrsSlowAnalogSignalGenerator::setElectronicSampler(StSignal t)
     else {
 	cerr << "Cannot determine Electronics Response specified" << endl;
 	// this would be a good place to throw an exception
-	exit(0);
+	abort();
     }
 }
 

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.13 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.14 2000/06/07 02:03:11 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.14  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.13  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -131,8 +134,8 @@ StTrsDeDx::StTrsDeDx(const char* gas, double pad)
 #else
 	cerr << gas << " gas not currently Implemented." << endl;
 	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
-	cerr << "Exitting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     doInitialization();
@@ -149,8 +152,8 @@ StTrsDeDx::StTrsDeDx(const string& gas, double pad)
 #else
 	cerr << gas.c_str() << " gas not currently Implemented." << endl;
 	cerr << "Must use either: \"Ne\", \"Ar\", or \"P10\"." << endl;
-	cerr << "Exitting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     doInitialization();
