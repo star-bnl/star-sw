@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.1 1998/01/27 01:47:22 fisyak Exp $
+* $Id: tfs_gen_padres.F,v 1.2 1998/02/19 01:28:37 hardtke Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.2  1998/02/19 01:28:37  hardtke
+* fixed z resolution
+*
 * Revision 1.1  1998/01/27 01:47:22  fisyak
 * Split sources
 *
@@ -37,6 +40,7 @@ C     --                ----                    ------
 C     Dhammika W.      03/29/1997       Modefied the calculation of
 C                                       wmin & tlen  to accommodate
 C                                       zero B-field case.
+C     David Hardtke    02/14/1998       fix z resolution calculation.
 C-----------------------------------------------------------------------
 #include "PAM.inc"
 #include "tfs_fspar.inc"
@@ -360,23 +364,31 @@ C     limited crossing angle region  [-45, 45] degrees.  --- DSW  6/17/97 ---
                
 C     Calculate  the error in Z coordinate (sigma_l). Use Eq. 6.40 in
 C     Blum & Roland (p. 188).   DSW  May 29, 1997.
+C
+CDH   I suspect that the variables defined here are different than what is
+c     in Blum and Rolandi.  Using the substitution rules (B&R eqn. 6.10),
+c     alpha is the DIP ANGLE (?).  DH January 14, 1998.
                if (par(1).sys_test.eq.0) then
                   sigb2(ipad)  = sigmad2(ipad)/Nh
                elseif(par(1).sys_test.eq.1)then
                   sigb2(ipad)  = sigmad2(ipad+2)/Nh
                endif
                
-               AA  = sigb2(ipad)*dlen/calpha2
-               BB  = wire_space2*tan(alpha)**2/(12.*Neff_b)
+CDH               AA  = sigb2(ipad)*dlen/calpha2
+CDH               BB  = wire_space2*tan(alpha)**2/(12.*Neff_b)
+CDH               CC  = 0.64*wire_space2/(180.*Neff_b) 
+               AA  = sigb2(ipad)*dlen/cos(lambda)**2
+               BB  = wire_space2*tan(lambda)**2/(12.*Neff_b)
                CC  = 0.64*wire_space2/(180.*Neff_b)
                
                if(par(1).sys_test.lt.2)then
-                  if( theta .lt. 0.0175 ) then
-                     sigma_l      = sqrt( CC )
-                  else
-                     sigma_l      = sqrt( AA + BB + CC )
-                  endif
-                  
+CDH                  if( theta .lt. 0.0175 ) then
+CDH                     sigma_l      = sqrt( CC )
+CDH                  else
+CDH                     sigma_l      = sqrt( AA + BB + CC )
+CDH                  endif
+CDH   add temporary fudge factor of 0.07**2. DH January 15, 1998. 
+                  sigma_l = sqrt( 0.0049 + AA + BB + CC )
                elseif(par(1).sys_test.eq.2)then
 C     Use a parametrization solely based on the  cosmic ray test data in the
 C     limited dip angle region  [-45, 45] degrees. --- DSW  6/17/97 ---
