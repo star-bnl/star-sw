@@ -1,7 +1,29 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-// $Id: St_DataSet.h,v 1.37 1999/10/28 16:24:29 fine Exp $
+//***********************************************************************
+//     C++ class library to create and manipulate hierarchy datasets
+// * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
+// * Author                  Valerie Fine  (fine@bnl.gov)
+// * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// *
+// * Permission to use, copy, modify and distribute this software and its
+// * documentation for any purpose is hereby granted without fee,
+// * provided that the above copyright notice appear in all copies and
+// * that both that copyright notice and this permission notice appear
+// * in supporting documentation.  Brookhaven National Laboratory makes no
+// * representations about the suitability of this software for any
+// * purpose.  It is provided "as is" without express or implied warranty.
+// ************************************************************************
+
+// $Id: St_DataSet.h,v 1.38 1999/11/04 18:01:19 fine Exp $
 // $Log: St_DataSet.h,v $
+// Revision 1.38  1999/11/04 18:01:19  fine
+// Copyright text introduced
+//
 // Revision 1.37  1999/10/28 16:24:29  fine
 // St_DataSet major correction: it may be built with TList (default) or with TObjArray
 //
