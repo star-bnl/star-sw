@@ -22,6 +22,7 @@
 #include "../Sti/StiDetectorFinder.h"
 #include "../Sti/StiTrackContainer.h"
 #include "../Sti/StiGeometryTransform.h"
+#include "../Sti/StiCoordinateTransform.h"
 #include "../Sti/StiDetectorFinder.h"
 #include "../Sti/StiTrackSeedFinder.h"
 #include "../Sti/StiTrackFinder.h"
@@ -55,6 +56,7 @@ StiDefaultToolkit::StiDefaultToolkit() :
 	hitContainer(0),
 	trackContainer(0),
 	geometryTransform(0),
+	coordinateTransform(0),
 	detectorFinder(0),
 	trackSeedFinder(0),
 	trackFilter(0),
@@ -79,6 +81,7 @@ StiDefaultToolkit::~StiDefaultToolkit()
 	delete trackNodeFactory;
 	delete trackContainer;
 	StiGeometryTransform::kill();
+	StiCoordinateTransform::kill();
 	delete trackFactory;
 	delete trackSeedFinder;
 	delete trackFinder;
@@ -91,7 +94,19 @@ StiDefaultToolkit::~StiDefaultToolkit()
 	delete ioBroker;
 };
 
+StiGeometryTransform *StiDefaultToolkit::getGeometryTransform(){
+  if(!geometryTransform){
+    geometryTransform = StiGeometryTransform::instance();
+  }
+  return geometryTransform;
+}
 
+StiCoordinateTransform *StiDefaultToolkit::getCoordinateTransform(){
+  if(!coordinateTransform){
+    coordinateTransform = StiCoordinateTransform::instance();
+  }
+  return coordinateTransform;
+}
 
 StiObjectFactoryInterface<StiHit>* StiDefaultToolkit::getHitFactory()
 {

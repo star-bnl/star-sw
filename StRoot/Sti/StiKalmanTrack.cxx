@@ -10,7 +10,6 @@
 #include "StiKalmanTrack.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
-#include "StiGeometryTransform.h"
 #include "StiKTNIterator.h"
 
 ostream& operator<<(ostream&, const StiHit&);

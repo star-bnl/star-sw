@@ -123,8 +123,10 @@ public:
 
     ///Set the position and error in one function call
     void set(double refAngle, double position,double x, double y, double z, 
-	     double sxx, double sxy, double sxz, double syy, double syz,
-	     double szz);
+	     double sxx, double sxy, double sxz, double syy, double syz, 
+             double szz);
+    ///Set the position in one function call
+    void set(double refAngle, double position,double x, double y, double z);
 
     ///Set the local x value.
     void setX(double);
@@ -281,6 +283,15 @@ inline void StiHit::set(double refAngle, double position, double x, double y, do
     msxy = sxy;
     msxz = sxz;
     msyz = syz;  
+    //mused = false;
+}
+inline void StiHit::set(double refAngle, double position, 
+                        double x, double y, double z){
+    mrefangle = refAngle;
+    mposition = position;
+    mx = x;
+    my = y;
+    mz = z;
     //mused = false;
 }
 

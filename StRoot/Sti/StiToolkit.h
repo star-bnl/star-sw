@@ -27,6 +27,7 @@ class 	StiHitFiller;
 class 	StiTrackContainer;
 // service and convenience class objects.
 class 	StiGeometryTransform;
+class 	StiCoordinateTransform;
 class 	StiDetectorFinder;
 class 	StiSeedFinder;
 class 	StiTrackFinder;
@@ -61,7 +62,8 @@ public:
 	virtual StiTrackContainer     * getTrackContainer()=0;
 
 	// service and convenience class objects.
-	//virtual StiGeometryTransform * getGeometryTransform()=0;
+	virtual StiGeometryTransform * getGeometryTransform()=0;
+	virtual StiCoordinateTransform * getCoordinateTransform()=0;
 	virtual StiDetectorFinder    * getDetectorFinder()=0;
 	virtual StiSeedFinder        * getTrackSeedFinder()=0;
 	virtual StiTrackFinder       * getTrackFinder()=0;

@@ -38,7 +38,8 @@ public:
 	virtual StiTrackContainer     * getTrackContainer();
 
 	// service and convenience class objects.
-	//virtual StiGeometryTransform * getGeometryTransform();
+	virtual StiGeometryTransform * getGeometryTransform();
+	virtual StiCoordinateTransform * getCoordinateTransform();
 	virtual StiDetectorFinder    * getDetectorFinder();
 	virtual StiSeedFinder        * getTrackSeedFinder();
 	virtual StiTrackFinder       * getTrackFinder();
@@ -83,6 +84,7 @@ protected:
 
 	// service and convenience class objects.
 	StiGeometryTransform  * geometryTransform;
+	StiCoordinateTransform  * coordinateTransform;
 	StiDetectorFinder     * detectorFinder;
 	StiSeedFinder         * trackSeedFinder;
 	//StiTrackSeedFinder  * trackSeedFinder;
