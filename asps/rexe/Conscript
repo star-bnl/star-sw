@@ -4,7 +4,7 @@ Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
 (my $build = $OBJ) =~ s/\#//g;
 $build =~ s/\\/\//g;# print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
 (my $ObjDir = DirPath '.') =~ s/\\/\//g;# print "ObjDir = $ObjDir\n";
-(my $Dir = $ObjDir) =~ s/$build\///g; print "Dir = $Dir\n";
+(my $Dir = $ObjDir) =~ s/$build\///g;# print "Dir = $Dir\n";
 $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 (my $obj_dir = $ObjDir) =~ s/^\#//g;# print "obj_dir = $obj_dir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
@@ -13,7 +13,9 @@ my @GDIRS = qw(.
 	       ../agi/gst/agsim
 	       ../agi/gst/geant
 	       ../agi/gst/zebra
-	       ../agi/gst/dzdoc);
+	       ../agi/gst/dzdoc
+	      );
+
 my $PKG  = $pkg . $env->{SUFEXE};
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n"; 
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
@@ -25,14 +27,14 @@ $CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH};# . ":" . $env->{ENV}->{
 $CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
-print "CPPPATH = \t$CPPPATH \nCPPFLAGS = \t$CPPFLAGS\n";
+#print "CPPPATH = \t$CPPPATH \nCPPFLAGS = \t$CPPFLAGS\n";
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/asps//g; #print "new share $share\n" if $param::debug;
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $LDIRS = $env->{LDIRS}; #print "LDIRS $LDIRS\n";
 my $LIBPATH = $env->{LIBPATH}; #print "LIBPATH $LIBPATH\n";
 my $LIBS  = $env->{LIBS};  #print "LIBS  $LIBS\n";
 my $Libraries = $env->{Libraries}; #print "Libraries $Libraries\n";
-if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
+if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CPPFLAGS'     => $CPPFLAGS,
 		    'CXXFLAGS'     => $CXXFLAGS

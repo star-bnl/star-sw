@@ -71,6 +71,9 @@ Replace[LIST #;] with [ #1 _
 * now fake calls to library - no need for arguments
   list ref;
   a = a/ix
+  prin3 ctab,dete_Csys,dete_Cdet,nhits
+        (' in G2Tmain: found ',3(1x,a),'   Nhits = ',i6)
+   prin5 i; (' g2tmain ===> tdm table for g2t_hits = ',i6)
 *
   END
  
