@@ -12,7 +12,7 @@
 #include "StEventTypes.h"
 
 StTpcHitMover::StTpcHitMover(const Char_t *name) : StMaker(name), 
-						   mAlignSector(kTRUE),
+						   mAlignSector(kFALSE),
 						   mSectorAligner(NULL),
 						   mExB(NULL) {
   gMessMgr->Info("StTpcHitMover::StTpcHitMover: constructor called");
