@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.8 2001/04/29 16:26:32 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.9 2001/05/02 16:35:51 pavlinov Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.9  2001/05/02 16:35:51  pavlinov
+ * Change default value of calb for year2001 geometry
+ *
  * Revision 1.8  2001/04/29 16:26:32  pavlinov
  * clean up
  *
@@ -502,14 +505,14 @@ Int_t &sub, Int_t &detector)
     strip  = smdChid[4];  // strip number 1-75(type 1,2) 1-15(type 3)
     if     (rl==1) {
       //      phi += Int_t((mCalg_st->shift[0]-75.)/6.);
-      phi += Int_t((75.-mCalg_st->shift[0])/6.);
+      phi += Int_t((75. - mCalg_st->shift[0])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi;
     }
     else if(rl==2) {
       //      phi += Int_t((mCalg_st->shift[1]-105.)/6.);
-      phi += Int_t((105.-mCalg_st->shift[0])/6.);
+      phi += Int_t((105. - mCalg_st->shift[1])/6.);
       while (phi<=0)  phi+=60;
       while (phi>=61) phi-=60;
       module=phi+60;
@@ -843,7 +846,8 @@ StEmcGeom::getGeantGeometryTable()
     mCalr = new St_calb_calr("calr", 1);
     mCalg_st = mCalg->GetTable();
     mCalr_st = mCalr->GetTable();
-    mCalg_st[0].shift[0]=75.0;
-    mCalg_st[0].shift[1]=105.0;
+    // For year2001 configuration only
+    mCalg_st[0].shift[0]=21.0;
+    mCalg_st[0].shift[1]=0.0;
   }
 }
