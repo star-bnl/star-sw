@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.cc,v 1.2 2001/01/25 18:20:38 lmartin Exp $
+ * $Id: StEstTrack.cc,v 1.3 2001/01/26 09:36:56 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.cc,v $
+ * Revision 1.3  2001/01/26 09:36:56  lmartin
+ * Minor changes. Useless statements removed. Add a short description of the data members
+ *
  * Revision 1.2  2001/01/25 18:20:38  lmartin
  * Destructor completed to prevent memory leak.
  * New method RemoveLastBranch added to force the last branch destruction.
@@ -36,10 +39,8 @@ StEstTrack::StEstTrack(long maxbranch, StEstTPCTrack *tr=NULL) {
   mDone      = 0;
   mHelix = NULL;
   
-  
   if(mBranch==NULL)
     cerr << "ERROR StEstTrack::StEstTrack mBranch==NULL" << endl;
-  //  mMaxTPCHits = 40;
 };
 
 StEstTrack::~StEstTrack() {
