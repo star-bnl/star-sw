@@ -20,24 +20,32 @@ my $PKG  = $pkg . $env->{SUFEXE};
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n"; 
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 my @h_files = find_hfiles($Dir);#   $i = 0; for my $s (@h_files) {print "i=",$i++," h_files = ",$s,"\n";}
-#$CPPPATH = $env->{CPPPATH} . ":#asps/agi:#asps/agi/gst:" . $env->{ENV}->{CERN_ROOT} . "/include:"; 
-#$CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH} . ":" . $env->{ENV}->{STAF} . "/inc"; 
 $CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH};# . ":" . $env->{ENV}->{STAF} . "/inc"; 
 #  $env->{ENV}->{CERN_ROOT} .  "/src/graflib/higz";
 $CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
-#print "CPPPATH = \t$CPPPATH \nCPPFLAGS = \t$CPPFLAGS\n";
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/asps//g; #print "new share $share\n" if $param::debug;
 my $CXXFLAGS = $env->{CXXFLAGS};
-my $LDIRS = $env->{LDIRS}; #print "LDIRS $LDIRS\n";
-my $LIBPATH = $env->{LIBPATH}; #print "LIBPATH $LIBPATH\n";
-my $LIBS  = $env->{LIBS};  #print "LIBS  $LIBS\n";
-my $Libraries = $env->{Libraries}; #print "Libraries $Libraries\n";
+my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib:" . $env->{LIBPATH};
+my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS} . " " . $env->{LIBS};
+   $LIBS .= " -lSTAR -lStar2Root";# -lSt_base -lStUtilities";  
+my $Libraries = "";
+if ($STAR_SYS =~ /^sun4x_56_CC5$/) {
+  my $glob = $env->{ENV}->{ROOTSYS} . "/." . $STAR_SYS . "/root/cint/stl/*.dl*";# print "glob = $glob\n";
+  my @dll = glob $glob;# print "dll = @dll\n";
+  my $libs = "";
+  foreach my $l (@dll) {$libs .= " " . $l;}
+  $Libraries = $libs . " " . $env->{Libraries};# print "Libraries $Libraries\n";
+}
+else {$Libraries = $env->{Libraries};}
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CPPFLAGS'     => $CPPFLAGS,
-		    'CXXFLAGS'     => $CXXFLAGS
+		    'CXXFLAGS'     => $CXXFLAGS,
+		    'LIBPATH'      => $LIBPATH,
+		    'LIBS'         => $LIBS,
+		    'Libraries'    => $Libraries
 		   );
 my @src = ();
 foreach my $d (@GDIRS){
