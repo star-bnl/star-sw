@@ -263,7 +263,7 @@ Libraries : $(MY_SO)
 $(MY_SO) : $(FILES_O)
 	cd $(OBJ_DIR); \
         $(SO) $(SOFLAGS) -o $(SL_NEW) $(notdir $(FILES_O)) $(STAR_FILES_O) $(LIBRARY); \
-        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)'
+        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 	@echo "           Shared library " $(MY_SO) " has been created"   
 
 #_________________dependencies_____________________________
