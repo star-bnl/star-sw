@@ -1,7 +1,10 @@
 /*
- * $Id: traceqc.c,v 1.4 1998/08/03 17:23:57 didenko Exp $
+ * $Id: traceqc.c,v 1.5 1998/09/24 05:25:30 nevski Exp $
  *
  * $Log: traceqc.c,v $
+ * Revision 1.5  1998/09/24 05:25:30  nevski
+ * verbose interrupt handler
+ *
  * Revision 1.4  1998/08/03 17:23:57  didenko
  * correction for NT version by Faine
  *
@@ -27,7 +30,7 @@ void type_of_call traceqc_()
 void    U_STACK_TRACE();
    U_STACK_TRACE();
 #else
-printf (" traceqc is not awalable \n"); 
+printf (" interrupt trace routine (traceqc not awailable yet \n"); 
 #endif
 }
  
