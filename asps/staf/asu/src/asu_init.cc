@@ -22,7 +22,7 @@
 //:<--------------------------------------------------------------------
 int asu_init()
 {
-   EML_MESSAGE("Initializing ASU.");
+   EML_MESSAGE(Initializing ASU.);
 
 /*- Setup basic KUIP commands. -*/
    asu_kuip_init_();
@@ -41,7 +41,7 @@ int asu_init()
 //:<--------------------------------------------------------------------
 int asu_start()
 {
-   EML_MESSAGE("Starting ASU.");
+   EML_MESSAGE(Starting ASU.);
 
    return TRUE;
 }
@@ -54,7 +54,7 @@ int asu_start()
 //:<--------------------------------------------------------------------
 int asu_stop()
 {
-   EML_MESSAGE("Stopping ASU.");
+   EML_MESSAGE(Stopping ASU.);
 
    asuAllocStats();			/* show allocation stats */
    return TRUE;
