@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.292 2002/03/28 00:14:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.293 2002/03/29 01:07:16 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -21,6 +21,7 @@
 #include "St_tpt_Maker/St_tpt_Maker.h"
 #include "St_dst_Maker/StPrimaryMaker.h"
 #include "St_dst_Maker/StVertexMaker.h"
+#include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -229,12 +230,12 @@ Bfc_st BFC1[] = {
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
-  {"StEvent"     ,""  ,"","globT,SCL",""                                              ,"StEvent","",kFALSE},
+  {"StEvent"     ,""  ,"","globT,SCL",""                                  ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
-  {"in"          ,""  ,"","xin"                                               ,"","","Alias to xin",kFALSE},
+  {"in"          ,""  ,"","xin"                                           ,"","","... Alias to xin",kFALSE},
   {"xin"         ,""  ,"",""              ,"StIOMaker","StIOMaker","Read [XDF|DAQ|ROOT] input file",kFALSE},
   {"xdf2root"    ,""  ,"",""                                   ,"","xdf2root","Read XDF input file",kFALSE},
   {"geant"       ,"geant","","geomT,gen_T,sim_T"
@@ -398,12 +399,14 @@ Bfc_st BFC1[] = {
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
 
-  {"MuDSTChain","MuDSTChain","MuDSTDeps,EMCmDST",""                         ,"StMaker","StChain","",kFALSE},
-  {"MuDSTDeps","","MuDSTChain","","",      "StEvent,StStrangeMuDstMaker","MuDST misc. dependencies",kFALSE},
+  {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
+  {"MuDSTDeps","","","","",          "StEvent,StStrangeMuDstMaker","MuDST misc. dependencies (all)",kFALSE},
+  {"StrngMuDST","","","",                                       "StStrangeMuDstMaker","StStrangeMuDstMaker",
+                                                                            "Load Stangeness MuDST",kFALSE},
 
   {"EMCmDST"  ,"","MuDSTChain","MuDSTDeps,EmcUtil",                     "StEmcMicroDstMaker","StMuDSTMaker",
                                                                                  "Writes EMC MuDST",kFALSE},
-  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps",                                   "StMuDstMaker","StMuDSTMaker",
+  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,StrngMuDST",                        "StMuDstMaker","StMuDSTMaker",
                                                                               "Writes Common MuDST",kFALSE},
 
 
@@ -431,6 +434,8 @@ Bfc_st BFC1[] = {
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
+
+
 
 
 // ITTF Chain will be put here. Option list starting from minimalistic requirements
@@ -625,7 +630,7 @@ Bfc_st BFC2[] = {
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
-  {"StEvent"     ,""  ,"","globT,SCL",""                                              ,"StEvent","",kFALSE},
+  {"StEvent"     ,""  ,"","globT,SCL",""                                  ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
 
   // REMINDER :: THIS IS THE ITTF CHAIN OPTIONS
@@ -791,13 +796,8 @@ Bfc_st BFC2[] = {
                  "TagsChain,globT,Event,FlowTag,StrangeTags,SpectraTag,EbyeScaTags,TpcTag,PCollTag"
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
 
-
-  {"MuDSTChain","MuDSTChain","MuDSTDeps,EMCmDST",""                         ,"StMaker","StChain","",kFALSE},
-  {"MuDSTDeps","","MuDSTChain","", "",                                        "StEvent,StStrangeMuDstMaker",
-                                                                 "MuDST miscellaneous dependencies",kFALSE},
-  {"EMCmDST","","MuDSTChain","MuDSTDeps,EmcUtil",                       "StEmcMicroDstMaker","StMuDSTMaker",
-                                                                                 "Writes EMC MuDST",kFALSE},
-
+  // THIS IS THE ITTF PART OF THE OPTION
+  // MicroDST options were removed (being shaped)
 
 
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
@@ -1075,6 +1075,15 @@ Int_t StBFChain::Instantiate()
 		StVertexMaker *pMk = (StVertexMaker*) mk;
 		pMk->SetBeam4ppLMV();                       // Add beam-line constrain
 	      }
+	    }
+	  }
+	  if (GetOption("CMuDST") && GetOption("StrngMuDST")) {
+	    if (maker == "StStrangeMuDstMaker"){
+	      StStrangeMuDstMaker *pMk = (StStrangeMuDstMaker*) mk;
+	      pMk->DoV0();                                  // Set StrangeMuDstMaker parameters
+	      pMk->DoXi();
+	      pMk->DoKink();
+	      pMk->SetNoKeep();                             // Set flag for output OFF
 	    }
 	  }
 	  if ((maker == "StVertexMaker"  || maker == "StPreVertexMaker") &&
@@ -1424,8 +1433,10 @@ void StBFChain::SetFlags(const Char_t *Chain)
   AddRunco(Bfc);
   for (k = 1; k<NoChainOptions;k++) {
     if (GetOption(k)) {
-      gMessMgr->QAInfo() << "================== " << k << "\t"
-			 << fBFC[k].Key << "\tis ON \t:" << fBFC[k].Comment << endm;
+      (void) printf("QAInfo: ================== %4d %15s\tis ON \t: %s\n",
+		    k, (char *) fBFC[k].Key, (char *) fBFC[k].Comment);
+      //      gMessMgr->QAInfo() << "================== " << k << "\t"
+      //		 << fBFC[k].Key << "\tis ON \t:" << fBFC[k].Comment << endm;
       Bfc->AddAt(&fBFC[k]);
     }
   }
