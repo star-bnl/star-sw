@@ -1,6 +1,9 @@
 // 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
+//Revision 1.7  2001/07/17 17:12:44  love
+//Added phi variable to laser track object
+//
 //Revision 1.6  2001/03/23 15:27:59  love
 //Updated README text
 //
@@ -103,7 +106,7 @@ void StLaserEvent::AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
          Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
          Float_t phi0, Float_t r0, Float_t z0, Int_t sector, Float_t xl,
-         Float_t yl, Float_t zl )
+         Float_t yl, Float_t zl, Float_t phi )
 {
    // Add a new track to the list of tracks for this event.
    // To avoid calling the very time consuming operator new for each track,
@@ -113,8 +116,8 @@ void StLaserEvent::AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
 
    TClonesArray &tracks = *fTracks;
    new(tracks[fNtrack++]) Track(flag, hitid, tid, id_globtrk,
-         ndedx, nfit, nrec, npos, q, Chixy, Chiyz, dedx,
-         invp, curvature, psi, tanl, phi0, r0, z0, sector, xl, yl, zl);
+         ndedx, nfit, nrec, npos, q, Chixy, Chiyz, dedx, invp,
+       curvature, psi, tanl, phi0, r0, z0, sector, xl, yl, zl, phi);
 }
 
 //______________________________________________________________________________
@@ -231,7 +234,7 @@ Track::Track(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
          Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
 	 Float_t phi0, Float_t r0, Float_t z0, Int_t sector,
-         Float_t xl, Float_t yl,Float_t zl ) : TObject()
+         Float_t xl, Float_t yl,Float_t zl, Float_t phi ) : TObject()
 {
    // Create a track object.
 
@@ -258,6 +261,7 @@ Track::Track(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
    fxl =  xl;
    fyl =  yl;
    fzl =  zl;
+   fphi = phi;
    fsector =  sector;
 }
 
