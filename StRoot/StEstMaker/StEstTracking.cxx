@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.2 2001/01/25 18:24:56 lmartin Exp $
+ * $Id: StEstTracking.cxx,v 1.3 2001/01/31 16:59:30 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.3  2001/01/31 16:59:30  lmartin
+ * mParams[]->debug replaced by mDebug.
+ *
  * Revision 1.2  2001/01/25 18:24:56  lmartin
  * Method declared as a StEstTracker method.
  * mIdealTracking used as a flag for the perfect tracking and the evaluation.
@@ -41,7 +44,7 @@ int StEstTracker::Tracking(int slay) {
   //   by duplication of the mother branch and the Nth hit is attached at the end to the 
   //   mother branch.
   
-  if(mParams[mPass]->debug>2)  {
+  if(mDebugLevel>2)  {
       cout << "StEstMaker::Tracking ****START****"<<endl;
   }
 
@@ -57,12 +60,12 @@ int StEstTracker::Tracking(int slay) {
 
   StEstBranch *branch, *branch_new;
  
-  if(mParams[mPass]->debug>2) cout << "loop over the tracks START"<<endl;
+  if(mDebugLevel>2) cout << "loop over the tracks START"<<endl;
   for (i=0;i<mNTrack;i++) { // loop over the tracks
     
     maxl = 0;
 
-    if(mParams[mPass]->debug>2) {
+    if(mDebugLevel>2) {
       cout << "StEstMaker::Tracking" << endl;
       cout << " Track #"<<i<<"  Number of branches: "<<mTrack[i]->GetNBranches();
       cout << "  mPt="<<mTrack[i]->mTPCTrack->mPt<< endl;
@@ -73,7 +76,7 @@ int StEstTracker::Tracking(int slay) {
     nbranch = mTrack[i]->GetNBranches();
 
     for (j=0;j<nbranch;j++) { // loop over the branches in the track
-      if(mParams[mPass]->debug>2)
+      if(mDebugLevel>2)
 	cout << " Track #"<<i<<"  Branch #"<<j<<endl;
       branch = mTrack[i]->GetBranch(j);
 
@@ -85,7 +88,7 @@ int StEstTracker::Tracking(int slay) {
 
       maxl=mProjOut.nhit;
 
-      if(mParams[mPass]->debug>2){
+      if(mDebugLevel>2){
 	cout << " number of hits from projection: "<<maxl<<endl;
 	cout << " loop over the hits found in Projection"<<endl;
       }
@@ -94,9 +97,9 @@ int StEstTracker::Tracking(int slay) {
       kk=0;
       for (k=0;k<maxl;k++) { // loop over the hits found in Projection
 
-	if(mParams[mPass]->debug>2)
+	if(mDebugLevel>2)
 	  cout << "    k="<<k<<endl;
-	if(mParams[mPass]->debug>3) {
+	if(mDebugLevel>3) {
 	  cout << "    nbr="<<nbr<<endl;
 	  cout << "    branch=" << branch<<endl;
 	  cout << "    branch->GetNHits()="<<branch->GetNHits()<<endl;
@@ -166,18 +169,18 @@ int StEstTracker::Tracking(int slay) {
 	  }
 	}
       }// ENd of ideal Tracking
-      if(mParams[mPass]->debug>2)
+      if(mDebugLevel>2)
 	cout << " hits found: " << kk << endl;
       if (kk>0) {
 	// connecting branch and hits, branch duplication
 	for (k=0;k<kk-1 && k<mParams[mPass]->nbranch[slay]-1;k++) { 
 
-	  if(mParams[mPass]->debug>2)
+	  if(mDebugLevel>2)
 	    cout << " duplicating...  k= "<<k<<endl;
 
 	  branch_new = branch->Duplicate();
 	  if (branch_new!=NULL) {
-	    if(mParams[mPass]->debug>3) 
+	    if(mDebugLevel>3) 
 	      cout <<"  nBranch= "<<branch_new->mTrack->GetNBranches()<<endl;
 	    if (hitbra[distind[k]]->JoinBranch(branch_new,mTrack[i])==1) {
 	      branch_new->AddHit(hitbra[distind[k]],distbra[distind[k]]);
@@ -204,7 +207,7 @@ int StEstTracker::Tracking(int slay) {
 	    }
 	    else {
 	      delete branch_new;
-	      if(mParams[mPass]->debug>0) {
+	      if(mDebugLevel>0) {
 		cout << "  hit was not added to the branch *1*"<<endl;	    
 		cout<<" hit id ="<<hitbra[distind[k]]->GetId()
 		    <<" Nbranch="<<hitbra[distind[k]]->GetNBranch()
@@ -216,13 +219,13 @@ int StEstTracker::Tracking(int slay) {
 	    }
 	  }
 	  else
-	    if(mParams[mPass]->debug>0)
+	    if(mDebugLevel>0)
 	      cout << "  duplication error"<<endl;
-	  if(mParams[mPass]->debug>3)
+	  if(mDebugLevel>3)
 	    cout << " done..."<<endl;
 	} //for (k=0;k<kk...
 	// the last hit to join is connected to the old branch
-	if(mParams[mPass]->debug>3)
+	if(mDebugLevel>3)
 	    cout << " the last...  k= "<<k<<endl;
 
 	if (hitbra[distind[k]]->JoinBranch(branch,mTrack[i])==1) {
@@ -250,7 +253,7 @@ int StEstTracker::Tracking(int slay) {
 	}
 	else {
 	  delete branch;
-	  if(mParams[mPass]->debug>0) {
+	  if(mDebugLevel>0) {
 	    cout << "  hit was not added to the branch *2*"<<endl;	    	
 	    cout<<" hit id ="<<hitbra[distind[k]]->GetId()
 		<<" Nbranch="<<hitbra[distind[k]]->GetNBranch()
@@ -282,14 +285,14 @@ int StEstTracker::Tracking(int slay) {
 	      mTrack[i]->GetBranch(j)->SetIsGoodOld(0);
       }
     }
-    if(mParams[mPass]->debug>2)
+    if(mDebugLevel>2)
       cout << "loop over the branches in the track STOP"<<endl;
   }// end of "for (i=0;i<mNTrack;i++)"
 
-  if(mParams[mPass]->debug>2) cout << "loop over the tracks STOP"<<endl;
+  if(mDebugLevel>2) cout << "loop over the tracks STOP"<<endl;
 
 
-  if(mParams[mPass]->debug>2)
+  if(mDebugLevel>2)
     cout<<"StEstMaker::Tracking ****STOP****"<<endl;
 
   return 0;

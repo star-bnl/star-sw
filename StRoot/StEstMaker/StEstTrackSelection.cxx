@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrackSelection.cxx,v 1.3 2001/01/25 18:06:18 lmartin Exp $
+ * $Id: StEstTrackSelection.cxx,v 1.4 2001/01/31 16:56:03 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrackSelection.cxx,v $
+ * Revision 1.4  2001/01/31 16:56:03  lmartin
+ * mParams[]->debug replaced by mDebug.
+ *
  * Revision 1.3  2001/01/25 18:06:18  lmartin
  * Methods declared as StEstTracker methods.
  * ChooseBestBranch and RemoveHitSharing methods rewritten to prevent memory leak.
@@ -53,18 +56,18 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
   // Method used to prevent a large number of branches to be formed for a given track
   // For a given track in a given layer the mParams[mPass]->ntotBranch[slay]
   // branches with the best chisq are selected.
-  // The branches are sorted according to their chisq (minus the TPC chisq)
+  // The branches are sorted according to their chisq (weighted by the number of hits)
   // The unselected branches are deleted.
   int i, j;
   int indtmp, *indchi;
   double chii, chij;
 
-  if(mParams[mPass]->debug>2)
-    cout << "\n\nStEstMaker::ChooseBestNBranches ****START****" <<endl;
+  if(mDebugLevel>0)
+    cout << "StEstMaker::ChooseBestNBranches ****START****" <<endl;
 
   StEstBranch **br_tmp = new StEstBranch*[tr->GetNBranches()];
 
-  if(mParams[mPass]->debug>2)
+  if(mDebugLevel>1)
     cout << "tr->GetNBranches()= "<<tr->GetNBranches()<<endl;
 
   indchi = new int[mParams[0]->maxbranches];
@@ -73,8 +76,6 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
     indchi[i] = i;
   for (i=0;i<tr->GetNBranches()-1;i++) {
     for (j=i+1;j<tr->GetNBranches();j++) {
-      //      chii = tr->GetBranch(indchi[i])->GetChiSq() - tr->mTPCTrack->mChiSq;
-      //      chij = tr->GetBranch(indchi[j])->GetChiSq() - tr->mTPCTrack->mChiSq;
       chii = tr->GetBranch(indchi[i])->GetChiSq()/tr->GetBranch(indchi[i])->GetNHits();
       chij = tr->GetBranch(indchi[j])->GetChiSq()/tr->GetBranch(indchi[i])->GetNHits();
       if (chii>chij) {
@@ -93,13 +94,13 @@ void StEstTracker::ChooseBestNBranches(StEstTrack *tr, int slay) {
     delete br_tmp[i];
   }
 
-  if(mParams[mPass]->debug>2)
+  if(mDebugLevel>1)
     cout << "tr->GetNBranches()= "<<tr->GetNBranches()<<endl;
 
   delete[] indchi;
   delete[] br_tmp;
 
-  if(mParams[mPass]->debug>2)
+  if(mDebugLevel>0)
     cout << "StEstMaker::ChooseBestNBranches ****STOP****" <<endl;
 }
        
@@ -135,17 +136,17 @@ void StEstTracker::RemoveOneHitTracks() {
 
   long i,j;
 
-  if(mParams[mPass]->debug>2) cout << "*** Removal of one-hit-tracks ***"<<endl;
+  if(mDebugLevel>2) cout << "*** Removal of one-hit-tracks ***"<<endl;
   for (i=0;i<mNTrack;i++) { // loop over the tracks
     // we assume we have already last only one branch
-    if(mParams[mPass]->debug>2)
+    if(mDebugLevel>2)
       cout<<" Track #"<<i<< "  "<<mTrack[i]->GetBranch(0)->GetNHits();
     if (mTrack[i]->GetBranch(0)->GetNHits()<2 && mTrack[i]->GetBranch(0)->GetNHits()>0) {
-      if(mParams[mPass]->debug>2) cout <<" <-- remove"<<endl;
+      if(mDebugLevel>2) cout <<" <-- remove"<<endl;
       for (j=0;j<mTrack[i]->GetBranch(0)->GetNHits();j++) 
 	mTrack[i]->GetBranch(0)->GetHit(j)->LeaveBranch(mTrack[i]->GetBranch(0));
     }
-    else if(mParams[mPass]->debug>2) cout <<endl;
+    else if(mDebugLevel>2) cout <<endl;
   }
 }
 
@@ -153,18 +154,15 @@ void StEstTracker::RemoveOneHitTracks() {
 void StEstTracker::RemoveHitSharing() {
   // Hit sharing removal.
   // For each hit shared by several branches, we determine the branch (brmin)
-  // with the lowest chisq (minbr) then the other branches are either deleted 
-  // (if their mother track has several branches) or reset by removing the hits 
-  // (if the mother track has only one branch).
+  // with the lowest chisq (minbr). The  other branches are deleted. We assume
+  // here that when this method is called only one branch per track survives
+  // the previous selection (such as ChooseBestBranch).
   
   long brmax,i,j,k,brmin;
   long HowMany;
   double minbr;
 
-  //  StEstHit    **hit_tmp = new StEstHit*[20];
-  //  StEstTrack *track;
-
-  if(mParams[0]->debug>2)
+  if(mDebugLevel>2)
     cout << "StEstMaker::RemoveHitSharing ****START****"<<endl;
 
   HowMany=0;
@@ -193,11 +191,9 @@ void StEstTracker::RemoveHitSharing() {
     }
     for (j=0;j<brmax;j++) track[j]=0;
     delete [] track;
-    //    delete[] br_tmp;
   }
-  //  delete[] hit_tmp;
   cout<<HowMany<<" branches cleared"<<endl;
-  if(mParams[0]->debug>2)
+  if(mDebugLevel>2)
         cout << "StEstMaker::RemoveHitSharing ****STOP****"<<endl;
 }
 
@@ -270,7 +266,7 @@ void StEstTracker::ChooseSegment(int overPass,int layer) {
 
 
 void StEstTracker::FinishFlag() {
-  // flag the found tracks
+  // flag the found tracks and their hits
 
   long il,maxl;
   int jl;
@@ -296,7 +292,8 @@ void StEstTracker::ReInitializeHelix() {
   StEstBranch *br;
   
   HowMany=0;
-  cout<<"ReInitializing the unselected tracks : ";
+  if (mDebugLevel>0)
+    cout<<"ReInitializing the unselected tracks : ";
   for (il=0;il<mNTrack;il++) {
     if(mTrack[il]->GetDone()==1 && mTrack[il]->GetFlag()==0){
       br = mTrack[il]->GetBranch(0);
@@ -313,5 +310,6 @@ void StEstTracker::ReInitializeHelix() {
 	       <<" is reinitialized but still have hits attached "<<endl;
     }
   }
-  cout<<HowMany<<" tracks initialized"<<endl;
+  if (mDebugLevel>0)
+    cout<<HowMany<<" tracks initialized"<<endl;
 }
