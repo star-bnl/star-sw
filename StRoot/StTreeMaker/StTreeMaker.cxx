@@ -101,9 +101,9 @@ Int_t StTreeMaker::Open(const char*)
 
 //    		Several default branches
       if ( fTreeName=="bfcTree") { 
-        if (!Find(".branches/dstBranch"  )) SetBranch("dstBranch"  ,0,"w");
-        if (!Find(".branches/histBranch" )) SetBranch("histBranch" ,0,"w","const");
-        if (!Find(".branches/runcoBranch")) SetBranch("runcoBranch",0,"w","const");
+        SetBranch("dstBranch"  ,0,"w");
+        SetBranch("histBranch" ,0,"w","const");
+        SetBranch("runcoBranch",0,"w","const");
       }
 
 //   	Set filename for runcoBranch
@@ -189,9 +189,9 @@ void StTreeMaker::UpdateTree(Int_t flag)
   StBranch *br;
   const char* logs;int nlog,isSetBr,isHist; 
   St_DataSet *upd,*updList,*dat,*ds;
-  const char *cc;
+  const char *updName,*updTitl,*cc;
 
-  TString updName,updTitl,updFile,updMode,updOpt,tlog;
+  TString updFile,updMode,updOpt,tlog;
   
   updList= Find(".branches");
   if (!updList) return;
@@ -201,7 +201,7 @@ void StTreeMaker::UpdateTree(Int_t flag)
     updTitl = upd->GetTitle();
     updName = upd->GetName();
     updFile = ""; updMode = ""; updOpt = "";
-    isSetBr = (updTitl.Index("SetBranch:")==0);
+    isSetBr = (strncmp("SetBranch:",updTitl,10)==0);
     if (isSetBr && flag!=0)	continue;
 
     if (isSetBr) {//SetBranch block
@@ -220,17 +220,15 @@ void StTreeMaker::UpdateTree(Int_t flag)
         continue;}
         
     br = (StBranch*)fTree->Find(updName);
-    if (!br && fIOMode!="r" && fIOMode!="0") {
-      br = new StBranch(updName,fTree); br->SetIOMode("w");}
+    if (!br && fIOMode!="r") { br = new StBranch(updName,fTree); updMode = "w";}
       
     if (!br) 				continue;
     if (!updMode.IsNull() || !updFile.IsNull()) br->SetFile(updFile,updMode);  
     if (!updOpt.IsNull()) br->SetOption((const char*)updOpt);  
     
-    if (flag==0) 		continue;    
-    if (*br->GetIOMode()=='0')	continue;
-
-    isHist = (updName=="hist"); 
+    if (flag==0) 	continue;
+    
+    isHist = (strncmp("hist",updName,4)==0); 
     if ( (flag==1) != (!isHist)) 	continue;
 
 

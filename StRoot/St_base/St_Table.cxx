@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.102 2000/03/10 23:30:31 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.95 2000/02/22 23:05:00 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -9,18 +9,6 @@
 // St_Table                                                             //
 //                                                                      //
 // Wraps the array of the STAF C-structures (one STAF Table per element)//
-//                                                                      //
-// class St_Table provides the automatic schema evolution for           //
-// the derived "table" classes saved with ROOT format.                  //
-//                                                                      //
-// "Automatic Schema evolution" provides:                               //
-//   -  skipping data-member if it is not present for the current       //
-//      implementation of the "table" but was present at the time the   //
-//      table was written;                                              //
-//   -  assign a default value ZERO for the brand-new data-members,     //
-//      those were not in the structure when the object was written but //
-//      present now;                                                    //
-//   -  trace propely any change in the order of the data-members       //
 //                                                                      //
 // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/st2tab.gif"> </P> End_Html //
 //                                                                      //
@@ -111,26 +99,9 @@ static void ArrayLayout(Int_t *layout,Int_t *size, Int_t dim)
   }
 }
 
-
-ClassImp(St_Table)
- 
 //______________________________________________________________________________
-St_tableDescriptor *St_Table::GetTableDescriptors() const {
- // protected: create a new St_tableDescriptor descriptor for this table
-    return new St_tableDescriptor(this);
-}
-
-//______________________________________________________________________________
-void St_Table::AsString(void *buf, const char *name, Int_t width) const
+static void AsString(void *buf, const char *name, Int_t width=0)
 {
-  //
-  // AsString represents the value provided via "void *b" with type defined 
-  //          by "name"
-  //
-  //   void *buf  - the pointer to the value to be printed out.
-  //        name  - the name of the type for the value above
-  //       width  - the number of psotion to be used to print the value out
-  //
    if (!strcmp("unsigned int", name))
       cout << setw(width) << *(unsigned int *)buf;
    else if (!strcmp("int", name))
@@ -144,7 +115,7 @@ void St_Table::AsString(void *buf, const char *name, Int_t width) const
    else if (!strcmp("short", name))
       cout <<  setw(width) << *(short *)buf;
    else if (!strcmp("unsigned char", name))
-      cout <<  setw(width) <<  hex << *(unsigned char *)buf;
+      cout <<  setw(width) <<  *(unsigned char *)buf;
    else if (!strcmp("char", name))
       cout <<   setw(width) << *(char *)buf;
    else if (!strcmp("float", name))
@@ -153,14 +124,20 @@ void St_Table::AsString(void *buf, const char *name, Int_t width) const
       cout <<   setw(width) << setprecision(width-3) << *(double *)buf;
 }
 
+
+ClassImp(St_Table)
+ 
+
+//______________________________________________________________________________
+St_tableDescriptor *St_Table::GetTableDescriptors() const {
+    return new St_tableDescriptor(this);
+}
+
 //______________________________________________________________________________
 const void *St_Table::At(Int_t i) const
 {
- // Returns a pointer to the i-th row of the table
-   if (!BoundsOk("St_Table::At", i)) {
-       Warning("St_Table::At","%s.%s",GetName(),GetType());
+   if (!BoundsOk("St_Table::At", i))
       i = 0;
-   }
    return (const void *)(s_Table+i*(*s_Size));
 }
 
@@ -1070,8 +1047,6 @@ void St_Table::Append(St_Table *donorTable, Int_t nRows, Int_t firstRows)
 //______________________________________________________________________________
 void St_Table::CopyStruct(Char_t *dest, const Char_t *src)
 {
- // Copy the C-structure src into the new location
- // the length of the strucutre is defined by this class descriptor
     ::memcpy(dest,src,*s_Size*fN);
 }
 //______________________________________________________________________________
@@ -1085,12 +1060,6 @@ void St_Table::CopySet(St_Table &array)
 //______________________________________________________________________________
 void *St_Table::ReAllocate()
 {
-  // Reallocate this table leaving only (used rows)+1 allocated
-  // GetTableSize() = GetNRows() + 1
-  // returns a pointer to the first row of the reallocated table
-  // Note:
-  // The table is reallocated if it is an owner of the internal array
-
    ReAlloc(GetNRows()+1);
    return (void *)s_Table;
 }
@@ -1098,20 +1067,13 @@ void *St_Table::ReAllocate()
 //______________________________________________________________________________
 void *St_Table::ReAllocate(Int_t newsize)
 {
-  // Reallocate this table leaving only <newsize> allocated
-  // GetTableSize() = newsize;
-  // returns a pointer to the first row of the reallocated table
-  // Note:
-  // The table is reallocated if it is an owner of the internal array
-
   if (newsize > fN) ReAlloc(newsize);
   return (void *)s_Table;
 }
 
 //______________________________________________________________________________
 void St_Table::ReAlloc(Int_t newsize)
-{  
-  // The table is reallocated if it is an owner of the internal array
+{
   if (!TestBit(kIsNotOwn) && s_Size && newsize > 0) {
     void *arr =  realloc(s_Table,*s_Size*newsize);
     SetfN(newsize);
@@ -1135,9 +1097,6 @@ void St_Table::Browse(TBrowser *b){
 //______________________________________________________________________________
 void St_Table::Clear(Option_t *opt)
 {
-  // Deletes the internal array of this class
-  // if this object does own its internal table
-
   if (!s_Table) return;
   if (!opt || !opt[0]) {
     if (! TestBit(kIsNotOwn)) free(s_Table);
@@ -1281,6 +1240,10 @@ void St_Table::Fit(const Text_t *formula ,const Text_t *varexp, const Text_t *se
    else      printf("ERROR hfit=0\n");
 }
 
+//______________________________________________________________________________
+void  *St_Table::GetArray() const {
+//  return the void pointer to the C-structure
+ return s_Table; }
 //______________________________________________________________________________
 const Char_t *St_Table::GetType() const { 
 //Returns the type of the wrapped C-structure kept as the TNamed title
@@ -1659,7 +1622,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
                         }
                         else 
 //                           cout << membertype->AsString(p3pointer) << " :";
-                           AsString(p3pointer,membertype->GetTypeName(),width);
+                          ::AsString(p3pointer,membertype->GetTypeName(),width);
                            cout << " :";
                    }
                 } else if (!strcmp(member->GetFullTypeName(), "char*") ||
@@ -1684,7 +1647,7 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *, const 
                     breakLoop = kTRUE;
                  }
                  else{
-                    AsString((void *)pointer,membertype->GetTypeName(),width);
+                    ::AsString((void *)pointer,membertype->GetTypeName(),width);
                     cout << " :";
 //                    cout << membertype->AsString((void *)pointer) <<" :";
                  }
@@ -2409,8 +2372,6 @@ void St_Table::StafStreamer(Char_t *structname, FILE *fl)
 //______________________________________________________________________________
 void St_Table::Reset(Int_t c)
 {
-  // Fill the entire table with byte "c" ;
-  ///     c=0 "be default"
   if (s_Table) ::memset(s_Table,c,*s_Size*fN);
 }
 
@@ -2473,10 +2434,8 @@ void St_Table::StreamerHeader(TBuffer &b)
 //   b >> s_TableHeader->rbytes;       /* number of bytes per row */
    b >> s_TableHeader->dsl_pointer;  /* swizzled (DS_DATASET_T*) */
    b >> s_TableHeader->data_pointer; /* swizzled (char*) */
-   if (rbytes - GetRowSize()) {
+   if (rbytes - GetRowSize()) 
       Warning("StreamerHeader","Wrong row size: must be %d, read %d bytes\n",GetRowSize(),rbytes);
-//      Print(0,1);
-   }
   }
   else {
    b.WriteArray(s_TableHeader->name,sizeof(s_TableHeader->name));    /* table name */
@@ -2519,30 +2478,11 @@ Int_t St_Table::SetfN(Long_t len)
 #undef StreamElelement
 #endif
 
-#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):   \
- if (evolutionOn) {                                  \
-     if (nextCol->m_Dimensions)  {                   \
-       if (nextCol->m_Offset != UInt_t(-1))          \
-           R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));     \
-       else {                                        \
-           _NAME2_(type,_t) *readPtrV = 0;           \
-           R__b.ReadArray(readPtrV);                 \
-           delete [] readPtrV;                       \
-           readPtrV = 0;                             \
-       }                                             \
-     }                                               \
-     else  {                                         \
-       _NAME2_(type,_t) skipBuffer;                  \
-       _NAME2_(type,_t) *readPtr =  (_NAME2_(type,_t) *)(row+nextCol->m_Offset);  \
-       if (nextCol->m_Offset == UInt_t(-1)) readPtr = &skipBuffer;                \
-       R__b >> *readPtr;                             \
-     }                                               \
- } else {                                            \
-   if (nextCol->m_Dimensions)                        \
-     R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));           \
-   else                                                         \
-     R__b >> *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);      \
- }                                                              \
+#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):            \
+ if (nextCol->m_Dimensions)                                   \
+   R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));                      \
+ else                                                         \
+   R__b >> *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);      \
  break
 
 #define StreamElementOut(type) case St_TableElementDescriptor::_NAME2_(k,type):            \
@@ -2646,38 +2586,15 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
 void St_Table::Streamer(TBuffer &R__b)
 {
    // Stream an array of the "plain" C-structures
-   St_tableDescriptor *ioDescriptor = GetRowDescriptors();
-   St_tableDescriptor *currentDescriptor = ioDescriptor;
-   if (R__b.IsReading()) { 
-      Version_t R__v = R__b.ReadVersion(); 
-      Bool_t evolutionOn = kFALSE;
-      if (R__v==2) {
-         if (IsA() != St_tableDescriptor::Class()) {
-            ioDescriptor =  new St_tableDescriptor();
-            ioDescriptor->Streamer(R__b);
-            // compare two descriptors
-            if (ioDescriptor->UpdateOffsets(currentDescriptor)) {
-              // Remember the real descriptor
-              TString dType = "Broken:";
-              dType += GetType();
-              ioDescriptor->SetName(dType.Data());
-              Add(ioDescriptor);
-              evolutionOn = kTRUE; 
-            }
-            else {
-              delete ioDescriptor;
-              ioDescriptor = currentDescriptor;
-            }
-         }
-      }
+
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
-      Int_t maxColumns = ioDescriptor->NumberOfColumns();
-      Int_t rowSize = GetRowSize();
-      if (evolutionOn) Reset(0); // Clean table
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += rowSize) {
-        tableDescriptor_st *nextCol = ioDescriptor->GetTable();
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
         for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
           // Stream one table row supplied
@@ -2697,16 +2614,13 @@ void St_Table::Streamer(TBuffer &R__b)
       }
      }
    } else {
- //      R__b.WriteVersion(St_ev0_track2::IsA());
-     //      if (Class_Version()==2)
-      if (IsA() != St_tableDescriptor::Class()) ioDescriptor->Streamer(R__b);
+//      R__b.WriteVersion(St_ev0_track2::IsA());
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
-      Int_t maxColumns = ioDescriptor->NumberOfColumns();        
-      Int_t rowSize = GetRowSize();
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += rowSize) {
-        tableDescriptor_st *nextCol = ioDescriptor->GetTable();
+      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
+        tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
+        Int_t maxColumns = GetNumberOfColumns();
         for (Int_t colCounter=0; colCounter < maxColumns; colCounter++,nextCol++) 
         {
           // Stream one table row supplied
@@ -2760,48 +2674,27 @@ void St_Table::Update(St_DataSet *set, UInt_t opt)
 }
 
  //  ----   Table descriptor service   ------
-const Char_t *St_Table::GetColumnName(Int_t columnIndex) const {return GetRowDescriptors()->ColumnName(columnIndex); }
-UInt_t      *St_Table::GetIndexArray(Int_t columnIndex)  const {return GetRowDescriptors()->IndexArray(columnIndex); }
-UInt_t       St_Table::GetNumberOfColumns()              const {return GetRowDescriptors()->NumberOfColumns();       }
+const Char_t *St_Table::GetColumnName(Int_t columnIndex) const {return GetRowDescriptors()->GetColumnName(columnIndex); }
+UInt_t      *St_Table::GetIndexArray(Int_t columnIndex)  const {return GetRowDescriptors()->GetIndexArray(columnIndex); }
+UInt_t       St_Table::GetNumberOfColumns()              const {return GetRowDescriptors()->GetNumberOfColumns();       }
 
-UInt_t       St_Table::GetOffset(Int_t columnIndex)      const {return GetRowDescriptors()->Offset(columnIndex); }
-Int_t        St_Table::GetOffset(const Char_t *columnName) const {return GetRowDescriptors()->Offset(columnName); }
+UInt_t       St_Table::GetOffset(Int_t columnIndex)      const {return GetRowDescriptors()->GetOffset(columnIndex); }
+Int_t        St_Table::GetOffset(const Char_t *columnName) const {return GetRowDescriptors()->GetOffset(columnName); }
 
-UInt_t       St_Table::GetColumnSize(Int_t columnIndex)  const {return GetRowDescriptors()->ColumnSize(columnIndex); }
-Int_t        St_Table::GetColumnSize(const Char_t *columnName) const {return GetRowDescriptors()->ColumnSize(columnName); }
+UInt_t       St_Table::GetColumnSize(Int_t columnIndex)  const {return GetRowDescriptors()->GetColumnSize(columnIndex); }
+Int_t        St_Table::GetColumnSize(const Char_t *columnName) const {return GetRowDescriptors()->GetColumnSize(columnName); }
 
-UInt_t       St_Table::GetTypeSize(Int_t columnIndex)    const {return GetRowDescriptors()->TypeSize(columnIndex); }
-Int_t        St_Table::GetTypeSize(const Char_t *columnName) const {return GetRowDescriptors()->TypeSize(columnName); }
+UInt_t       St_Table::GetTypeSize(Int_t columnIndex)    const {return GetRowDescriptors()->GetTypeSize(columnIndex); }
+Int_t        St_Table::GetTypeSize(const Char_t *columnName) const {return GetRowDescriptors()->GetTypeSize(columnName); }
 
-UInt_t       St_Table::GetDimensions(Int_t columnIndex)  const {return GetRowDescriptors()->Dimensions(columnIndex); }
-Int_t        St_Table::GetDimensions(const Char_t *columnName) const {return GetRowDescriptors()->Dimensions(columnName); }
+UInt_t       St_Table::GetDimensions(Int_t columnIndex)  const {return GetRowDescriptors()->GetDimensions(columnIndex); }
+Int_t        St_Table::GetDimensions(const Char_t *columnName) const {return GetRowDescriptors()->GetDimensions(columnName); }
 
-St_Table::EColumnType  St_Table::GetColumnType(Int_t columnIndex)  const {return GetRowDescriptors()->ColumnType(columnIndex); }
-St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {return GetRowDescriptors()->ColumnType(columnName); }
+St_Table::EColumnType  St_Table::GetColumnType(Int_t columnIndex)  const {return GetRowDescriptors()->GetColumnType(columnIndex); }
+St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {return GetRowDescriptors()->GetColumnType(columnName); }
 
 
 // $Log: St_Table.cxx,v $
-// Revision 1.102  2000/03/10 23:30:31  fisyak
-// method At() Warning message has been introduced
-//
-// Revision 1.101  2000/03/07 23:52:21  fine
-// some comments improved
-//
-// Revision 1.100  2000/03/06 02:03:16  fine
-// Schema evolution: skiping the lost field introduced
-//
-// Revision 1.99  2000/03/05 04:11:47  fine
-// Automatic schema evolution for St_Table has been activated
-//
-// Revision 1.98  2000/02/29 22:15:45  fine
-// function AsString converted to the virtual method to let user to overload it
-//
-// Revision 1.97  2000/02/29 01:54:47  fine
-// St_Table -> turn automatic schema evolution for table version 2 and above
-//
-// Revision 1.96  2000/02/26 01:38:12  fine
-// public s_Table is replaced with inline GetArray()
-//
 // Revision 1.95  2000/02/22 23:05:00  fine
 // Several loops for Streamer methods had been cleaned to avoid some problem in future
 //

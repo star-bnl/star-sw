@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.12 2000/02/24 16:35:03 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.13 2000/03/15 02:13:20 calderon Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.13  2000/03/15 02:13:20  calderon
+ * Fixed bug from pad response function sigma:
+ * The data member mPadResponseFunctionSigma was assigned the right values
+ * but never used, whereas the temporary mPadRespondFunctionSigma was
+ * not initialized and then used.  Removed the temporary one altogether.
+ * Also removed declaration of two_pi, use twopi from PhysicalConstants.h
+ *
  * Revision 1.12  2000/02/24 16:35:03  long
  * modification for step functions, normalization factors of the padresponse functions of inner ,outer sector
  *
@@ -221,10 +228,10 @@ double  StTrsParameterizedAnalogSignalGenerator::erf_fast(double argument) const
 
 void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistogram* wireHistogram)
 {
-    double two_pi=6.2821852,sigma_xpad2;
+    double sigma_xpad2;
     double InOuterFactor=1.21;
     double charge_fraction[5]; 
-    double mPadRespondFunctionSigma;
+    //double mPadResponseFunctionSigma;
     //
     // This should probably be made a data member at some point!
 //     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
@@ -371,13 +378,13 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 		    delx           = xCentroidOfPad-iter->position().x();
 		    gridMinusZ     = iter->position().z(); // for new coordinates
 		    sigma_x        = iter->sigmaT();
-		    sigma_xpad2=sigma_x *sigma_x+ mPadRespondFunctionSigma*mPadRespondFunctionSigma; 
+		    sigma_xpad2=sigma_x *sigma_x+ mPadResponseFunctionSigma*mPadResponseFunctionSigma; 
 		     
 
                     
 		    localXDirectionCoupling  =
 
-                       mPadRespondFunctionSigma/sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //sqrt(2pi) is absorbed in the local Y coupling
+                       mPadResponseFunctionSigma/sqrt(sigma_xpad2)*exp(-0.5*delx*delx/sigma_xpad2);   //sqrt(2pi) is absorbed in the local Y coupling
                                 
                       
 		  
@@ -391,7 +398,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 
 		    localYDirectionCoupling =
 
-		      0.5/two_pi*((charge_fraction[0]-charge_fraction[1])*(erf_fast((dely+mYb[0])/constant)-
+		      0.5/twopi*((charge_fraction[0]-charge_fraction[1])*(erf_fast((dely+mYb[0])/constant)-
 						     erf_fast((dely-mYb[0])/constant))+
 					    (charge_fraction[1]-charge_fraction[2])*(erf_fast((dely+mYb[1])/constant)-
 						     erf_fast((dely-mYb[1])/constant))+
@@ -627,7 +634,7 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 			mTimeSequenceIterator++) {
 			signalTime = mTimeSequenceIterator->time();
 
-// 			PR(signalTime/nanosecond);
+//  			PR(signalTime/nanosecond);
 			
 			//
 			// The current time bin will be filled with
@@ -659,8 +666,8 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 		// DIAGNOSTIC
 		// Print out the pulse height in each time bin
 		    
+		    //cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << " mV" << endl;
 
-// 		    cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << " mV" << endl;
 		} // if itbin is beyond maxTime
 
 		if (!mAddNoise && timeBinT-maxTime > timeBinUpperLimit*mTimeBinWidth) break;
@@ -683,11 +690,12 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 		mElectronicSignal.setTime(itbin);
 		mElectronicSignal.setAmplitude(pulseHeight);
 		mDiscreteAnalogTimeSequence.push_back(mElectronicSignal);
+		
 
 	    } // loop over time bins
 // 	    timeBinEnd = time(0);
 // 	    timeBinTime += difftime(timeBinEnd, timeBinBegin);
-
+	    
 	    mSector->assignTimeBins(irow,ipad,mDiscreteAnalogTimeSequence);
 	    
 	} // loop over pads

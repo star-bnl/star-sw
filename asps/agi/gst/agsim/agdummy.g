@@ -5,13 +5,14 @@
 Replace[REF#,#;] with [{IF}[EXIST 1]{Call #1;Call CsExt('D',#1);REF #2,;}]
 *************************************************************************
 Replace[LIST #;] with [ #1 _
- "Geant  "   GfKine,GfVert,GfPart,GfPath,GfHead,GDtoM,GMtoD,GlVolu,Grun,
-             GpKine,GLast,GsHEAD,GsCKOV,GpIons,Grndm,Granor,Gfnhit,GpRung,
+ "Geant  "   GfKine,GfVert,GfPart,GfPath,GDtoM,GMtoD,GlVolu,Grun,
+             GpKine,GLast,GsCKOV,GpIons,Grndm,Granor,Gfnhit,
+             GsRung,GfRung,GpRung,GsHead,GfHead,GpHead,
  "vector "   vdist,vscale,vadd,vmod,vfill,Ublank,Ufill,Uzero,IuLast,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,lvmaxa,lzlong,
- "sorting"   sortzv,zsorvh,intsor,
+ "sorting"   sortzv,zsorvh,intsor,assndx,
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
- "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,assndx,
+ "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rndm,rnorml,dircos,rnpssn,
  "random "   binomi,rngama,gauss,proxim,rnhpre,rnhran,
@@ -34,18 +35,19 @@ Replace[LIST #;] with [ #1 _
   Ix = Ix+1;  if (Ix>=0) Return;
   ix = SystemF(' ')+JattF(ix);
   x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
-  d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
+* d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
   x  = mod(Ix,ix+1)+amod(x,x+1)+dmod(d,d+1.)
   x=ifromc(' '); c=cfromi(0)
-
+ 
 * now fake calls to library - no need for arguments
   list ref;
 *
   END
-
+ 
   subroutine message(line,i,j)
   character  Line*(*)
   print *,%L(line)
   entry msg_enable
   entry msg_enabled
   end
+ 

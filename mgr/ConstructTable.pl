@@ -40,8 +40,9 @@ public:
 						      return *((const ' . $stem . '_st *)(GetTable(i))); }
 ';
   print OUT $h;
-  my $vers = 2;
+  my $vers = 0;
  
+  if ($stem eq "g2t_rch_hit") {$vers = 1;} 
   $h = '
     ClassDef(St_' . $stem . ',' . $vers . ') //C++ wrapper for <' . $stem . '> StAF table
 };
@@ -186,14 +187,7 @@ void St_g2t_rch_hit::Streamer(TBuffer &R__b)
      R__b.WriteVersion(St_g2t_rch_hit::IsA());
      St_Table::Streamer(R__b); 
    } else {
-      Int_t save =  R__b.Length();
-      Version_t R__v = R__b.ReadVersion(); 
-      if (R__v) {
-        R__b.SetBufferOffset(save); // reset TBuffer offset;
-        St_Table::Streamer(R__b); 
-        return; 
-      }
-      // Special case to read "old" version of St_g2t_rch table
+      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
       St_Table::StreamerTable(R__b);
       if (*s_MaxIndex <= 0) return; 
       char *row = (char *)GetArray();
@@ -204,7 +198,7 @@ void St_g2t_rch_hit::Streamer(TBuffer &R__b)
         {
          //   Skip 5th elememnt
          //   float ds; /* energy deposition over ds */
-          if (colCounter == 4) {
+          if (R__v == 0 && colCounter == 4) {
               *(Float_t *)(row+nextCol->m_Offset) = -7070707.;
               continue; 
           }

@@ -2,14 +2,8 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.19 2000/03/10 21:54:18 lbarnby Exp $
+// $Id: StMatchMaker.cxx,v 1.17 2000/03/01 14:48:09 caines Exp $
 // $Log: StMatchMaker.cxx,v $
-// Revision 1.19  2000/03/10 21:54:18  lbarnby
-// Turn on Kalman fitter as default for global tracks
-//
-// Revision 1.18  2000/03/09 23:31:17  lbarnby
-// Protection against no TPC hits when creating tpc_groups
-//
 // Revision 1.17  2000/03/01 14:48:09  caines
 // Removed references to scs_cluster
 //
@@ -368,26 +362,20 @@ Int_t StMatchMaker::Init(){
     row.debug[8]	 =          0;
     row.minfit	 =          2; // min no. of points on track ;
     row.mxtry	 =         10; // max no. of attempts to fit ;
-    //Kalman - switch on by default
-    if(m_Mode == 0){
-    row.usetpc = 4; 
-    row.useglobal = 4;
-    gMessMgr->Info() << "Kalman fitting turned ON as default" << endm;
-    }
-    else{
-    row.useglobal = 2; // set if to usematching to be used ;
-    row.usetpc	 =  1; // set if TPC used in refit ;
-    gMessMgr->Info() << "Kalman fitting turned OFF" << endm;
-    }
-    row.useemc	 =          0; // set if EMC used in refit ;
+    row.useglobal	 =          2; // set if to usematching to be used ;
+      row.useemc	 =          0; // set if EMC used in refit ;
     row.usesvt	 =          0; // set if SVT used in refit ;
     row.usetof	 =          0; // set if TOF used in refit ;
   // Helix
-
+    row.usetpc	 =          1; // set if TPC used in refit ;
+  //Kalman
+  // row.usetpc =           4;
     row.usevert	 =          0; // Set if primary vertex used in refit ;
     row.prob[0]	 =         10; // probability cut in fit ;
     row.prob[1]	 =         10;
     row.svtchicut	 =  0; // SVT chi2 cut for adding SVT-only tracks ;
+  //Kalman
+  //row.useglobal =     4;
   //  row.svtchicut = m_svtchicut;
   //  row.useglobal = m_useglobal;
   //  row.usetpc    = m_usetpc;
@@ -537,17 +525,11 @@ Int_t StMatchMaker::Make(){
   }
   
 
+
   // Create groups table for tpc
-  St_sgr_groups *tpc_groups;
-  if (tphit->GetNRows() != 0){
-    tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());   
-    AddData(tpc_groups); 
-  }
-  else {
-    tpc_groups = new St_sgr_groups("tpc_groups",1);
-    AddGarb(tpc_groups);
-  }
-  
+
+
+   St_sgr_groups *tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());    AddData(tpc_groups); 
   // egr
 
 

@@ -9,17 +9,17 @@
 *KEEP,VIDQQ.
       CHARACTER*68 VIDQQ
       DATA VIDQQ/
-     +'@(#)* Advanced Geant Inteface   2.00/00   C: 04/01/2000  19.02.02
+     +'@(#)* Advanced Geant Inteface   2.00/03   C: 25/03/2000  15.39.00
      +'/
 *KEND.
       QFTITLCH=VIDQQ(5:60)
 *KEEP,DATEQQ.
-      IDATQQ = 20000104
+      IDATQQ = 20000325
 *KEEP,TIMEQQ.
-      ITIMQQ =   1902
+      ITIMQQ =   1539
 *KEEP,VERSQQ.
-      VERSQQ = ' 2.00/00'
-      IVERSQ =  20000
+      VERSQQ = ' 2.00/03'
+      IVERSQ =  20003
 *KEND.
       END
  
