@@ -1,12 +1,15 @@
 #!/usr/local/bin/tcsh
-#  $Id: fast,v 1.1 1998/05/15 21:38:49 fisyak Exp $
+#  $Id: fast,v 1.2 1998/05/15 21:41:44 fisyak Exp $
 #  $Log: fast,v $
+#  Revision 1.2  1998/05/15 21:41:44  fisyak
+#  check commitlog
+#
 #  Revision 1.1  1998/05/15 21:38:49  fisyak
 #  add fast
 #
 # This script is to submit an example job to execute  NQS queues.
 # You can submit it with the command: 
-#	qsub -q express star_nqs.batch
+#	qsub -q express star_nqs.batch    
 # You can modify your copy of this script to suit your needs.
 #
 # When this script starts executing, assumes as default directory
