@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.34 2004/03/24 22:01:07 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.35 2004/10/25 14:15:56 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.35  2004/10/25 14:15:56  pruneau
+ * various changes to improve track quality.
+ *
  * Revision 2.34  2004/03/24 22:01:07  pruneau
  * Removed calls to center representation and replaced by normal representation
  *
@@ -434,7 +437,9 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   StiPlacement * place = tDet->getPlacement();
   double tAlpha = nice(place->getNormalRefAngle());
   double dAlpha = tAlpha - _alpha;
-  if (fabs(dAlpha)>1e-3) rotate(dAlpha);
+	// bail out if the rotation fails...
+  if (fabs(dAlpha)>1e-2) 
+    if (rotate(dAlpha)) return -10;
   StiShape * sh = tDet->getShape();
   planarShape = 0;
   cylinderShape = 0;
@@ -446,7 +451,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
   // Multiple scattering
-  if (pars->mcsCalculated)
+  if (pars->mcsCalculated && fabs(pars->field)>0 )
       propagateMCS(pNode,tDet);
   return position;
 }
@@ -502,7 +507,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
       if (a==0.) return -1;
       double b = L*L/(a*a);
       double sq = b*r0sq-1;
-      if (sq<0) return -1;
+      if (sq<0) return -2;
       sq = ::sqrt(sq);				
       double x_p = a*(x0+y0*sq)/r0sq;
       if (x_p>0)
@@ -513,12 +518,12 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
 	  if (x_m>0)
 	    x2 = x_m;
 	  else
-	    return -1;
+	    return -3;
 	}
     }
   dx=x2-x1;  
   sinCA2=_p3*x2 - _p2; 
-  if (fabs(sinCA2)>1.) return -1;
+  if (fabs(sinCA2)>1.) return -4;
   /*if (sinCA2>1.) 
     sinCA2 = 0.999999;
   else if (sinCA2<-1.) 
@@ -529,33 +534,41 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
   if (sinCA1plusCA2==0) 
     {
       //cout << "======================================================= fabs(sinCA1plusCA2)==0" << endl;
-      return -1;
+      return -5;
     }
   sumCos   = cosCA1+cosCA2;
   _p0      += dx*sumSin/sumCos;
+	//	if (fabs(_p1)>200.) cout << "propagate()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
   _p1      += dx*_p4*sumSin/sinCA1plusCA2;
+	//if (fabs(_p1)>200.) cout << "propagate()[2] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
+	// sanity check - to abandon the track
+	if (fabs(_p0)>200. || fabs(_p1)>200. ) return -6;
   _x       = x2;
   _sinCA   = sinCA2;
   _cosCA   = cosCA2;
   return 0;
 }
 
-void StiKalmanTrackNode::nudge()
+int StiKalmanTrackNode::nudge()
 {
   double deltaX = _hit->x()-_x;
   sinCA2=_p3*(_x+deltaX) - _p2; 
   //cout << " StiKalmanTrackNode::nudge() -I- sin(CA2):"<<sinCA2<<endl;
-  if (fabs(sinCA2)>1.) return;
+  if (fabs(sinCA2)>1.) return -7;
   cosCA2   = ::sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
   sinCA1plusCA2    = sinCA1*cosCA2 + sinCA2*cosCA1;
-  if (fabs(sinCA1plusCA2)==0) return;
+  if (fabs(sinCA1plusCA2)==0) return -8;
   sumCos   = cosCA1+cosCA2;
-  _p0      += deltaX*sumSin/sumCos;
-  _p1      += deltaX*_p4*sumSin/sinCA1plusCA2;
+	double dp0 = deltaX*sumSin/sumCos;
+	double dp1 = deltaX*_p4*sumSin/sinCA1plusCA2;
+	if (fabs(_p0+dp0)>200. || fabs(_p1+dp1)>200. ) return -9;
+  _p0      += dp0;
+  _p1      += dp1;
   _x       = _x+deltaX;
   _sinCA   = sinCA2;
   _cosCA   = cosCA2;
+	return 0;
 }
 
 
@@ -881,7 +894,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   <li>Throw runtime_error if determinent of "r" matrix is null.
   </ol>
 */
-void StiKalmanTrackNode::updateNode() 
+int StiKalmanTrackNode::updateNode() 
 {
   double r00,r01,r11;
   const StiDetector * detector = _hit->detector();
@@ -907,37 +920,51 @@ void StiKalmanTrackNode::updateNode()
   double k40=_c40*r00+_c41*r01, k41=_c40*r01+_c41*r11;
   double dy  = _hit->y() - _p0;
   double dz  = _hit->z() - _p1;
-  double cur = _p3 + k30*dy + k31*dz;
-  double eta = _p2 + k20*dy + k21*dz;
+  double dp3  = k30*dy + k31*dz;
+  double dp2  = k20*dy + k21*dz;
+  double dp4  = k40*dy + k41*dz;
 
-	// Check if any of the quantities required to pursue the update
-	// are infinite. If so, it means the tracks cannot be update/propagated
-	// any longer and should therefore be abandoned. Just return. This is 
-	// not a big but rather a feature of the fact a helicoidal tracks!!!
-  if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))  return;
+  if (fabs(dp4)>0.27 || fabs(dp2)>3) return 1;
+  double cur  = _p3 + dp3;
+  double eta  = _p2 + dp2;
+  double tanl = _p4 + dp4;
+  StiKalmanTrackNode * parent = static_cast<StiKalmanTrackNode*>(getParent());
+  if (parent)
+    {
+      if (fabs(eta-parent->_p2)>3 || fabs(tanl-parent->_p4)>0.27) return 2;
+    }
+  
+  // Check if any of the quantities required to pursue the update
+  // are infinite. If so, it means the tracks cannot be update/propagated
+  // any longer and should therefore be abandoned. Just return. This is 
+  // not a big but rather a feature of the fact a helicoidal tracks!!!
+  if (!finite(_c00)||!finite(_c11)||!finite(k30)||!finite(k31))  return -11;
   // update Kalman state
   _p0 += k00*dy + k01*dz;
+	if (fabs(_p0)>200.) 
+		{
+			cout << "updateNode()[1] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
+			return -12;
+		}
   _p1 += k10*dy + k11*dz;
+  if (fabs(_p1)>200.) 
+    {
+      cout << "updateNode()[2] -W- _p0:"<<_p0<<" _p1:"<<_p1<<endl;
+      return -13;
+    }
   _p2  = eta;
   _p3  = cur;
-  _p4 += k40*dy + k41*dz;
+  _p4  = tanl;
+  //_p4 += k40*dy + k41*dz;
   _sinCA  =  _p3*_x-_p2;
   // The following test introduces a track propagation error but happens
   // only when the track should be aborted so we don't care...
-  if (_sinCA>1.) 
+  if (fabs(_sinCA)>0.9999)
     {
       //cout << " SKTN    _sinCA>1";
-      //throw runtime_error("SKTN::updateNode() -W- _sinCA>1");
-      _sinCA = 0.999999;
-    }
-  else if (_sinCA<-1.) 
-    {
-      _sinCA = -0.999999;
+      return -14;
     }
   _cosCA = ::sqrt(1.-_sinCA*_sinCA); 
-  if (_cosCA==0)
-    throw logic_error("StiKalmanTrackNode::updateNode() -E- _cosCA==0");
-
   // update error matrix
   double c01=_c10, c02=_c20, c03=_c30, c04=_c40;
   double c12=_c21, c13=_c31, c14=_c41;
@@ -956,6 +983,7 @@ void StiKalmanTrackNode::updateNode()
   _c33-=k30*c03+k31*c13;
   _c43-=k30*c04+k31*c14; 
   _c44-=k40*c04+k41*c14; 
+	return 0;
 }
 
 /*! Rotate this node track representation azymuthally by given angle.
@@ -969,7 +997,7 @@ void StiKalmanTrackNode::updateNode()
   <li>Avoid undue rotations as they are CPU intensive...</li>
   </ol>
 */
-void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
+int StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
 {
   //cout << "rotate by alpha:"<< 180.*alpha/3.1415927<<endl;
   //cout << "         _alpha:"<< 180.*_alpha/3.1415927<<endl;
@@ -985,17 +1013,8 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   _p2=_p2*ca + (_p3*y1 + _cosCA)*sa;
   _sinCA = _p3*_x - _p2;
   //cout << " _sinCA:"<<_sinCA<<endl;
-  if (_sinCA>1)
-    {
-      _sinCA = 1.; _cosCA = 0.;
-    }
-  else if (_sinCA<-1) 
-    {
-      _sinCA = -1.;
-      _cosCA =  0.;
-    }
-  else
-    _cosCA = ::sqrt(1.- _sinCA*_sinCA);
+  if (fabs(_sinCA)>0.9999) return -15;
+	_cosCA = ::sqrt(1.- _sinCA*_sinCA);
   //double y0=_p0 + _cosCA/_p3;
   ////if ((_p0-y0)*_p3 >= 0.) throw runtime_error("SKTN::rotate() - Error - Rotation failed!\n");
   //f = F - 1
@@ -1023,6 +1042,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   _c42 += b42; 
   _cosAlpha=cos(_alpha); 
   _sinAlpha=sin(_alpha); 
+	return 0;
 }
 
 //_____________________________________________________________________________
@@ -1059,7 +1079,7 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
   os << " a:" << 180*n._alpha/M_PI<<" degs"
-     << " xRef:" << n._x
+     << " xRef:" << n._refX
      << " x:" << n._x
      << " p0:" << n._p0 
      << " p1:" << n._p1 
@@ -1069,9 +1089,12 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
      << " c00:" <<n._c00<< " c11:"<<n._c11
      << " chi2:" << n._chi2 
      << " n:"<<n.hitCount
-     << " null:"<<n.nullCount<<endl;
+     << " null:"<<n.nullCount;
   StiHit * hit = n.getHit();
-  if (hit) os << "   hit:"<<*hit<<endl;
+  if (hit) 
+    os << " hit:"<<*hit<<endl;
+  else
+    os << endl;
   return os;
 }
 
@@ -1143,6 +1166,9 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
   //  cout << "_refX:"<<_refX<<" _p0:"<<_p0<<" p1:"<<_p1<<" NormalYoffset:"
   // << place->getNormalYoffset()<<" zOff:"<< place->getZcenter() ;
 
+	//fast way out for projections going out of fiducial volume
+	if (fabs(_p1)>200. || fabs(_p0)>200. ) position = -1;
+
   yOff = _p0 - place->getNormalYoffset();
   yAbsOff = fabs(yOff);
   zOff = _p1 - place->getZcenter();
@@ -1176,11 +1202,16 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
   outerY = innerY + 2*edge;
   innerZ = detHD - edge;
   outerZ = innerZ + 2*edge;
+
   if (yAbsOff<innerY && zAbsOff<innerZ)
     position = kHit; 
   else if (yAbsOff>outerY && (yAbsOff-outerY)>(zAbsOff-outerZ))
     // outside detector to positive or negative y (phi)
-    position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
+		// if the track is essentially tangent to the plane, terminate it.
+    if (fabs(_sinCA)>0.9999 || _p4>57.2)
+			return -16;
+		else
+			position = yOff>0 ? kMissPhiPlus : kMissPhiMinus;
   else if (zAbsOff>outerZ && (zAbsOff-outerZ)>(yAbsOff-outerY))
     // outside detector to positive or negative z (west or east)
     position = zOff>0 ? kMissZplus : kMissZminus;

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.35 2004/08/17 20:55:42 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.36 2004/10/25 14:15:49 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.36  2004/10/25 14:15:49  pruneau
+ * various changes to improve track quality.
+ *
  * Revision 2.35  2004/08/17 20:55:42  perev
  * memory cleanup heap==>stack
  *
@@ -323,7 +326,7 @@ void StiKalmanTrack::initialize(double curvature,
 				const StThreeVectorD& origin,
 				const vector<StiHit*> & hits)
 {
-  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started"<<endl;
+  //cout << "StiKalmanTrack::initialize() -I- Started"<<endl;
   reset();
   vector<StiHit*>::const_iterator it;
   //StiKalmanTrackNode * node  = 0;
@@ -336,22 +339,22 @@ void StiKalmanTrack::initialize(double curvature,
     {
       detector = (*it)->detector();
       if (!detector) 
-	{
-	  cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
-	  throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
-	}
+				{
+					cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
+					throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
+				}
       // if alpha is same, avoid recalculating eta
       alpha = detector->getPlacement()->getNormalRefAngle();
       if (alphaP!=alpha)
-	{
-	  temp = origin;
-	  temp.rotateZ(-alpha);
-	  eta = curvature*temp.x();
-	  alphaP=alpha;
-	}
-      TRACKMESSENGER << *add((*it),alpha,eta,curvature,tanl);
+				{
+					temp = origin;
+					temp.rotateZ(-alpha);
+					eta = curvature*temp.x();
+					alphaP=alpha;
+				}
+      add((*it),alpha,eta,curvature,tanl);
     }
-  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Done"<<endl;
+  //cout << "StiKalmanTrack::initialize() -I- Done"<<endl;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
@@ -789,26 +792,30 @@ double StiKalmanTrack::getTrackRadLength() const
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 {
   if (firstNode==0 || lastNode==0)
-    throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - firstNode||lastNode==0");
+		{
+		  //cout << "StiKalmanTrack::getOuterMostHitNode() -E- firstNode||lastNode==0" << endl;
+		  throw runtime_error("StiKalmanTrack::getOuterMostHitNode() -E- firstNode||lastNode==0");
+		}
   StiKTNBidirectionalIterator it;
   
   if (trackingDirection==kOutsideIn)
     {
       for (it=begin();it!=end();it++)
-	{
-	  if ((*it).getHit())
-	    return &*it;
-	}
+				{
+					if ((*it).getHit())
+						return &*it;
+				}
     }
   else
     {	
       for (it=end();it!=begin();it--)
-	{
-	  if ((*it).getHit())
-	    return &*it;
-	}
+				{
+					if ((*it).getHit())
+						return &*it;
+				}
     }
-  throw logic_error("StiKalmanTrack::getOuterMostHitNode() - ERROR - Track has no hit");
+  //cout << "StiKalmanTrack::getOuterMostHitNode() -E- Track has no hit" << endl;
+  throw runtime_error("StiKalmanTrack::getOuterMostHitNode() -E- Track has no hit");
 }
 
 
@@ -825,7 +832,10 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
   if (firstNode==0 || lastNode==0)
-    throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - firstNode||lastNode==0");
+    {
+      //cout << "StiKalmanTrack::getInnerMostHitNode() -E- firstNode||lastNode==0" << endl;
+      throw runtime_error("StiKalmanTrack::getInnerMostHitNode() -E- firstNode||lastNode==0");
+    }
   StiKTNBidirectionalIterator it;
   
   if (trackingDirection==kInsideOut)
@@ -842,7 +852,8 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 	  if ((*it).getHit()) return &*it;
 	}
     }
-  throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
+  //cout << "StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit" << endl;
+  throw runtime_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
 }
 
 /*! Return true if inner most hit associated with this track is main vertex.
@@ -1008,16 +1019,22 @@ void StiKalmanTrack::reserveHits()
 bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
   if (trackingDirection==kInsideOut) 
-    throw logic_error("SKT::extendToVertex(const StiHit*) - ERROR - Extension to vtx only allowed for OutsideIn");
+    throw logic_error("SKT::extendToVertex(const StiHit*) -E- Extension to vtx only allowed for OutsideIn");
   double chi2;
   StiKalmanTrackNode * sNode=0;
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
+
+	StiKalmanTrackNode * innerMostHitNode = getInnerMostHitNode();
+	if (!innerMostHitNode) return false;
+	// track with hits in the outer portion of the TPC only are not considered
+	if (innerMostHitNode->getX()>100.) return false;
+		
   StiHit localVertex = *vertex;
   sNode = lastNode;
   localVertex.rotate(sNode->getRefAngle());
   tNode = trackNodeFactory->getInstance();
-  if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
+  if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
   tNode->reset();
   StiHit *myHit;
   //cout << "SKT::extendToVertex() -I- x,y,z:"<< localVertex.x() 
@@ -1063,15 +1080,17 @@ bool StiKalmanTrack::find(int direction)
   bool trackExtendedOut=false;
   setFlag(0);
   // invoke tracker to find or extend this track
-  TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
+  //cout <<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
   try 
     {
       if (trackFinder->find(this,kOutsideIn))
 	{
-	  //cout<<"/fit(InOut)";
-	  fit(kInsideOut);  
-	  fit(kOutsideIn);
+	  //cout<<"/////////////////fit(InOut)";
+	 fit(kInsideOut);  
+	  //------ 
+	 fit(kOutsideIn);
 	  trackExtended = true;
+	  //cout<<"/////////////////fit(InOut) Done";
 	}	
     }
   catch (runtime_error & error)
@@ -1080,10 +1099,15 @@ bool StiKalmanTrack::find(int direction)
     }
   // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
+  if (!outerMostNode)
+    {
+      setFlag(-1);
+      return false;
+    }
   if (outerMostNode->getX()<190. )
     {
       // swap the track inside-out in preparation for the outward search/extension
-      TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
+      //cout<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
       swap();      
       try
 	{
@@ -1101,12 +1125,13 @@ bool StiKalmanTrack::find(int direction)
 	{
 	  cout << "StiKalmanTrack::find(int direction) -W- Exception while in OutsideIn fit"<<endl;
 	} 
-      TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
+      //cout<<"StiKalmanTrack::find(int) -I- Swap back track"<<endl;
       swap();
       setTrackingDirection(kOutsideIn);
+      //cout<<"StiKalmanTrack::find(int) -I- Swap back track Done"<<endl;
     }
-  //reserveHits();
   setFlag(1);
+  //cout << " find track done" << endl;
   return trackExtended||trackExtendedOut;
 }
 
