@@ -44,7 +44,7 @@ my $CLIBS    = "";
 my $FLIBS    = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
-my $LINKMODULECOM  = "";
+my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %<";
 my $INCLUDE_PATH = $INCLUDE;
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
@@ -96,12 +96,13 @@ elsif (/^hp_ux102/) {
 elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $ROOTCINTD = "-DSOLARIS";
   $CPPFLAGS  =~ s/SunOS//g;
-#  $OSFID     =  "sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SOLARIS CERNLIB_SUN ST_NO_MEMBER_TEMPLATES ST_NO_NUMERIC_LIMITS ST_NO_NAMESPACES ST_NO_TEMPLATE_DEF_ARGS Solaris sun sun4os5 sun4x_56";
-  $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
+  $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
+  $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
+  $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
   $CC        = "/opt/SUNWspro/bin/cc";
   $CXX       = "/opt/SUNWspro/bin/CC";
   $FC        = "/opt/SUNWspro/bin/f77";
-  $CXXFLAGS  =  "-KPIC +w -features=no_castop -features=no_anachronisms";# -ptr%>:d";
+  $CXXFLAGS  =  "-KPIC +w -features=no_castop -features=no_anachronisms";
   $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
   $FFLAGS    =  "  -KPIC -w";
@@ -122,7 +123,7 @@ elsif (/^intel_wnt/) {
   $A        = "lib";
   $Cxx      = "cxx";
   $so       = "DLL";
-  $AR       = "lib";
+  $AR       = "set LIB && lib"; print "NT Lib: lib = $lib / LIB = $LIB\n";
   $ARFLAGS  = "-nologo -MACHINE:IX86";
   $Cout     = "-Fo";
   $Fout     = "-Fo";
@@ -137,9 +138,11 @@ elsif (/^intel_wnt/) {
   $ROOTCINT += $EXESUF;
 
   $ROOTCINTD = "-DWIN32";
-  $OSFID     =  "VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32";
+  $OSFID     = "VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32 ";
+  $OSFID    .= "ST_NO_NAMESPACES ";
   $CPP       = "cl";
   $CC        = "cl";
+#  $CXX       = "set inc && path && cl";
   $CXX       = "cl";
   $FC        = "fl32";
   $CLIBS     = "ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
@@ -152,11 +155,14 @@ elsif (/^intel_wnt/) {
 #  $LDFLAGS   =  $DEBUG . $(conlflags); 
   $SO        =  "link";
   $SOFLAGS   =  $DEBUG . " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
+  $LINKMODULECOM = 
+"BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+  $LIB .= ";" . $ROOTSYS . "\\lib";
+  $LIBS = $ROOTSYS . "/lib/*.lib" . " ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
 }
 
 $MAIN    = cwd();
 $INCLUDE = "#include";
-$LIB     = "";
 $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
 my $FLAGS = $CPPFLAGS . " " . $OSFID . " __ROOT__";
@@ -169,10 +175,7 @@ print "CXX =\t",$CXX,";\tCXXFLAGS = \t",$CXXFLAGS,"\n";
 print "FC  =\t",$FC,";\tFFLAGS = \t",$FFLAGS,"\tFLIBS =\t",$FLIBS,"\n"; 
 print "LD  =\t",$LD,";\t$LDFLGAS = \t",$LDFLAGS,"\n";
 print "SO  =\t",$SO,";\t$SOFLGAS = \t",$SOFLAGS,"\n";
-(my $inc = $INCLUDE) =~ s/\#//g;
-
 my $ROOTSRC = "/afs/rhic/star/ROOT/" . $ROOT_LEVEL . "/ROOT/src";
-#$CPPPATH = $INCLUDE . ":#StRoot:" .  $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:";
 $CPPPATH = $INCLUDE . ":#StRoot:#pams:" . $INCLUDE . "/tables:" .  $ROOTSRC . ":" . $STAF . "/inc:/opt/star/include:";
 $FCPPPATH = "-I" . $STAR ."/cern/geant321 -I" . $STAR . "/cern/geant321/geant321";
 print "CPPPATH = ",$CPPPATH,"\n";
@@ -184,25 +187,18 @@ my @Reps = ($DirPath);
 foreach my $rep (@Repo) {
   push @Reps, $rep;
 } print "Repositories: @Reps\n";
-if ($STAR_SYS !~ /^intel_wnt/) {
-  $INCLUDE_PATH = "";
-  $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %<";
-}
-else {
-  $LINKMODULECOM = 
-"BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
-  foreach my $inc (split /:/, $CPPPATH) {
-    
-  }
-  $CPPPATH = "";
+if ($STAR_SYS != /^intel_wnt/) {
+  $CPPPATH  = "";
   $FCPPPATH = "";
+#  dfordll.lib";
   foreach my $dir ($DirPath, @Reps) {
     $INCLUDE_PATH .= ";" . $dir . "/include";
     $INCLUDE_PATH .= ";" . $dir . "/StRoot";
     $INCLUDE_PATH .= ";" . $dir . "/pams";
     $INCLUDE_PATH .= ";" . $dir . "/include/tables";
   }
-  $INCLUDE_PATH .= ";" . $ROOTSRC . "/src";
+  my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
+  $INCLUDE_PATH .= ";" . $ROOTSRC;
   $INCLUDE_PATH .= ";" . $STAF . "/inc";
   $INCLUDE_PATH .= ";" . $CERN_ROOT . "/include";
 }
@@ -229,6 +225,7 @@ $env = new cons(
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
 		'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
+		'LIBS'         => $LIBS,
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
 		'LINKCOM'      => '%LINK %DEBUG %LDFLAGS %Lout%> %< %_LDIRS %LIBS',
@@ -267,14 +264,14 @@ $env = new cons(
 				     'ROOTSYS' => $ROOTSYS,
 				     'ROOTSRC' => $ROOTSRC,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
+				     'LIB'   => $LIB,
 				     'PGI' => $PGI,
 				     'STAR' => $STAR,
 				     'STAF' => $STAF,
 				     'STAR_BIN' => $STAR_BIN,
 				     'TEMP' => $TEMP,
 				     'TMP'  => $TMP,
-				     'STAR_SYS' => $STAR_SYS,
-				     'LIB'   => $LIB
+				     'STAR_SYS' => $STAR_SYS
 				   },
 	       );
 my $build  = "." . $STAR_HOST_SYS; print "build for $build\n";
@@ -285,7 +282,6 @@ $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 my @subdirs = ();
-my @idlT = ();
 my @incT = ();
 # make Targets and install includes
 foreach my $dir ("StRoot","pams") {
@@ -309,10 +305,11 @@ foreach my $dir ("StRoot","pams") {
 	foreach my $subsub_dir (@subsubdirS) {
 	  my $subsub_DIR = $sub_DIR . "/" . $subsub_dir;
 	  if (-d $subsub_DIR) {
-	    if ($subsub_dir =~  /\./     || $subsub_dir =~ /\.\./ || 
-		$subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/ ||
-		$subsub_dir =~ /^local/  || $subsub_dir =~ /^run/ ||
-		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/) {next;}
+	    if ($subsub_dir =~  /\./     || $subsub_dir =~ /\.\./  || 
+		$subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/  ||
+		$subsub_dir =~ /^local/  || $subsub_dir =~ /^run/  ||
+		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/||
+		$subsub_dir =~ /^idl/)        {next;}
 #	    print "subsub :  $subsub_dir /  $subsub_DIR\n";
 	    if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
 	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
@@ -339,17 +336,6 @@ foreach my $dir ("StRoot","pams") {
 	      if ($#incHbt > -1) {
 		my $include_Hbt = $INCLUDE . "/" . $sibsub_dir;# print "Install  $include_Hbt, @incHbt\n";
 		Install $env $include_Hbt, @incHbt; 
-	      }
-	      next;
-	    }
-	    if ($subsub_dir =~ /^idl$/) {
-	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
-	      my @idls = readdir DIR;
-	      closedir DIR; #print "idls = @idls\n";
-	      foreach my $idl (@idls) {
-		if ($idl =~ /\.idl$/ ) {
-		  push @idlT, $subsub_DIR ."/" . $idl; #print "+++ add $idl\n";
-		}
 	      }
 	      next;
 	    }
@@ -431,21 +417,16 @@ if (-d $db_dir) {
   }
 }
 #print "subdirs = @subdirs\n";
-#print "idlT = @idlT\n";
 #print "incT = @incT\n";
 my @Targets = ();
-foreach $dir (@subdirs) {
+foreach $dir (@subdirs,"cern/geant321","cern/minicern") {
+  next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }
 #print "Targets: @Targets\n";
 print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n";# Targets = @Targets\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
-if ($#incT > -1) {Install $env $INCLUDE, @incT;}
-if ($#idlT > -1) {
-  my $tables = $INCLUDE . "/tables";
-  Install $env $tables, @idlT;
-}
 Build  @Targets;
 #________________________________________________________________________________
 # Builder for a C++ module
@@ -751,30 +732,3 @@ sub sortu {
   }
   return @sorted_and_uniq;
 }
-#________________________________________
-sub script::find_Template {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_Template, @_);
-  for my $dir (@_) {
-    my $i = 0;
-    for ($i=0;$i<=$#search_files;$i++) {
-      #      print "i = ",$i, "src =", $search_files[$i],"\n";
-      my $file = $search_files[$i];
-      $file =~ s/$dir\///g;
-      $search_files[$i] = $file;
-    }
-  }
-  #  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub script::wanted_Template {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d $_ && ! /^Templates\.Db$/) {return;}
-  if (/\.o$/) {print "$name\n";
-    push @search_files, $name; 
-  }
-}
-#________________________________________
