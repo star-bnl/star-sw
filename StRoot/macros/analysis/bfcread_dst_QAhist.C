@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.16 1999/12/03 20:20:23 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.17 2000/01/05 22:12:03 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.17  2000/01/05 22:12:03  kathy
+// changed input file to current one
+//
 // Revision 1.16  1999/12/03 20:20:23  kathy
 // correct the event number counter in bfcread_dst*.C macros
 //
@@ -93,7 +96,7 @@ StChain *chain;
 void bfcread_dst_QAhist(
     Int_t nevents=10, 
     const Char_t *MainFile=
-      "/star/rcf/test/dev/tfs_Solaris/Fri/year_1b/set0352_01_35evts.dst.root",
+      "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.root",
     const Char_t *psFile="DSTtable_QA_hist.ps",
     const Char_t *PageTitle="")
 {

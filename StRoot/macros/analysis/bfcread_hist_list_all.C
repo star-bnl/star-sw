@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.8 1999/12/01 21:30:11 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.9 2000/01/05 22:12:03 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.9  2000/01/05 22:12:03  kathy
+// changed input file to current one
+//
 // Revision 1.8  1999/12/01 21:30:11  kathy
 // added input TopDirTree to bfcread_hist* macros in order to tell which top level directory hist file has since sometimes its not bfcTree; cleaned up print statements in bfcread_dst*hist.C macros; two new macros bfcread_dst_*QA_outhistfile.C added which read dst file and book and fill histograms and write out a new *.hist.root file, instead of just sending hist to postscript - this new *.hist.root file can then be read into bfcread_hist*.C to look at it --- note that topdirtree is different!
 //
@@ -47,7 +50,7 @@ St_DataSet *Event;
 
 void bfcread_hist_list_all(
   const Char_t *MainFile=
-     "/star/rcf/test/dev/tfs_Linux/Tue/year_1b/set0352_01_35evts.hist.root",
+     "/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.hist.root",
   const Char_t *TopDirTree="bfcTree")
 {
   cout << "bfcread_hist_list_all.C, input hist file = " 
