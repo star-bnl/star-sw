@@ -13,7 +13,7 @@
 * detp tpce tpcg(1).MWCread=0  tprs(1).super=1
 
 * - magnetic field should be off (default is 5):
-* detp mfld mflg.field=0
+* detp mfld mflg.Bfield=0
  
 * save secondaries which produced tpc hits
 * mode TRAC  SIMU 1  
@@ -79,7 +79,9 @@
       
 * - turn magnetic field off (default is 5):
  detp mfld mflg.field=0    
-      
+ 
+    message ' no B-field'
+ 
  return
  
 *********************************************************************
