@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.134  2004/02/03 18:10:10  pruneau
+// Changed name of StMcEventMaker to McEvent in GetMaker call
+//
 // Revision 1.133  2004/01/30 21:47:23  pruneau
 // Changed organization so detector geometris are loaded and build in InitRun
 // rather than Make.
@@ -324,16 +327,26 @@ Int_t StiMaker::InitRun(int run)
 						{
 							cout << "StiMaker::InitRun() -I- Attempting to load the track finder and fitter parameter from the database"<< endl;
 							// Load Kalman Track Finder Parameters
-							StiKalmanTrackFinderParameters finderPars;
-							finderPars.setName("KalmanTrackFinderParameters");
-							finderPars.load(ds);
-							_tracker->setParameters(finderPars);
-							
+							//StiKalmanTrackFinderParameters & finderPars = static_cast<StiKalmanTrackFinderParameters&>(_tracker->getParameters());
+							//StiKalmanTrackFinderParameters & finderPars = 
+							_tracker->_pars.load(ds);
+							cout << "====got it"<<endl;
+							//finderPars.setName("KalmanTrackFinderParameters");
+							//cout << "name set"<<endl;
+							//finderPars.load(ds);
+							cout << "black";
+							//_tracker->setParameters(finderPars);
+							cout << "more black"<<endl;
 							// Load Kalman Track Fitter Parameters
-							StiKalmanTrackFitterParameters fitterPars;
+							cout << " --1"<<endl;
+							StiKalmanTrackFitterParameters fitterPars = static_cast<StiKalmanTrackFitterParameters&>(_fitter->getParameters());
+							cout << " --2"<< endl;
 							fitterPars.setName("KalmanTrackFitterParameters");
+							cout << " --3"<<endl;
 							fitterPars.load(ds);
-							_fitter->setParameters(fitterPars);
+							cout << " -- 4"<<endl;
+							//_fitter->setParameters(fitterPars);
+							cout << "done "<<endl;
 						}
 					catch (runtime_error & err)
 						{
@@ -411,7 +424,7 @@ Int_t StiMaker::Make()
     }
   if (_toolkit->isMcEnabled() )
     {
-			mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("StMcEventMaker"));
+			mMcEventMaker = dynamic_cast<StMcEventMaker*>(GetMaker("McEvent"));
 			if (mMcEventMaker)
 				{
 					mcEvent= mMcEventMaker->currentMcEvent();
