@@ -162,6 +162,82 @@ Here's how:
 StEvent *event;
 if( jitterBugAbort(event) ) return kStWarn;
 
+
+** StuRefCentrality: Functions to return event multiplicity and centrality percentage defined in flow paper
+-----------------------------------------------------------------------------------
+Files:     StuRefCentrality.hh
+Author:    Yu Chen / UCLA  
+Date:      Feb 2001
+
+Description:
+
+Function to give a standard uncorrected reference multiplicity for 
+an event according to the definition in STAR flow paper. The purpose is
+to give a reference centrality bin.
+    The agreed upon track cuts are: 
+ a) primary tracks only
+ b) flag > 0
+ c) abs(eta) < 0.75
+ d) no cuts on either number of hits or number of fit points
+    The event cut:
+ PrimaryVertex pVertex->numberOfDaughters() > 10
+ should be used for giving percentages below.
+
+    The functions are:
+ 1) uncorrectedMultiplicity
+      return uncorrected multiplicity as a measure of centrality; 
+ 2) meanScaledMultiplicity
+      return mean Nch/Nch(max) for 8 centrality bins;
+ 3) binOfCentrality
+      return the number of centrality bins:
+      1-- most peripheral; ... ; 8-- most central  
+ 4) percentOfCentrality
+      return the higher edge of percentages that centrality bin covers:
+      1-- 85% (to 58%); ... ; 8-- 6% (to 0%)
+
+** StuRefCentrality2: Functions to return flow multiplicity and normalized centrality percentage
+-----------------------------------------------------------------------------------
+Files:     StuRefCentrality2.hh
+Author:    Yu Chen / UCLA  
+Date:      Sep 2001
+
+Description:
+
+Function to give a standard uncorrected reference multiplicity for 
+an event according to the definition in STAR flow paper. The purpose is
+to give a reference centrality bin.
+    The agreed upon track cuts are: 
+ a) primary tracks only
+ b) flag > 0
+ c) abs(eta) < 0.75
+ d) no cuts on either number of hits or number of fit points
+    The event cut:
+ PrimaryVertex pVertex->numberOfDaughters() > 10
+ is suggested to be used.
+
+    The functions are:
+ 1) uncorrectedMultiplicity
+      return uncorrected multiplicity as a measure of centrality; 
+ 2) binOfCentrality
+      return the number of centrality bins:
+      1-- most peripheral; ... ; 10-- most central  
+ 3) percentOfCentrality
+      return the higher edge of percentages that centrality bin covers
+    (based on published STAR h- paper, normalized):
+      1-- 100% (to 80%); ... ; 10-- 5% (to 0%)
+
+   binOfCentrality    percentOfCentrality   uncorrectedMultiplicity  
+         1                 1.00                    0
+         2                 0.80                   14
+         3                 0.70                   30
+         4                 0.60                   60
+         5                 0.50                  107
+         6                 0.40                  176
+         7                 0.30                  271
+         8                 0.20                  400
+         9                 0.10                  569
+        10                 0.05                  675
+ 
 <next entry comes here>
 
 
@@ -175,4 +251,5 @@ Author:      <authorsName>
 Date:        <checkindate>
 Description:
 <your detailed description goes here ...>>>>>>>> 1.2
+
 
