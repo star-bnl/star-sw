@@ -7,7 +7,7 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "StTreeMaker.h"
-#include "TInterpreter.h"
+#include "tables/St_dst_bfc_status_Table.h"
 
 
 ClassImp(StTreeMaker)
@@ -19,7 +19,9 @@ StTreeMaker::StTreeMaker(const char *name, const char *ioFile,const char *treeNa
 :StIOInterFace(name,"0")
 {
   fFile = ioFile; fIOMode="0";fTree=0;fFinished=0;
-
+  fBfcStatus = new St_dst_bfc_status("BfcStatus",100);
+  AddConst(fBfcStatus);
+  
   if ( treeName ) {
     fTreeName=treeName;
   } else {
@@ -192,7 +194,7 @@ Int_t StTreeMaker::MakeWrite()
 {
 
 //		Fill branches
-
+  MakeBfcStatus();
   if (!GetFailedMaker())  UpdateTree(1);
   UpdateHddr();
 
@@ -200,6 +202,34 @@ Int_t StTreeMaker::MakeWrite()
   ULong_t ukey = GetNumber();
   fTree->WriteEvent(ukey);	
   fTree->Clear(); 
+  return 0;
+}
+//_____________________________________________________________________________
+Int_t StTreeMaker::MakeBfcStatus()
+{
+  fBfcStatus->SetNRows(0);
+  int nrows = 0;
+  TDataSetIter nextMk(GetParentChain(),999);
+  TDataSet *ds = 0;
+  EDataSetPass kont=kContinue;
+  const char *name=0;
+  while ((ds = nextMk(kont))) 
+  {
+    name = ds->GetName();
+    kont = kContinue;
+    if (strcmp(".make",name)==0) 		break;
+    kont = kPrune;
+    if (name[0]=='.') 				break;
+    kont = kContinue;
+    if (!ds->InheritsFrom(StMaker::Class()))	break;
+    int ret = ((StMaker*)ds)->GetMakeReturn();
+    if (!ret) 					break;
+    fBfcStatus->SetNRows(++nrows);
+    char * mkName = (*fBfcStatus)[nrows-1].maker_name;   
+    mkName[0]=0; strncat(mkName,name,11);
+    (*fBfcStatus)[nrows-1].status = ret;
+  }
+
   return 0;
 }
 //_____________________________________________________________________________
@@ -235,6 +265,7 @@ void StTreeMaker::UpdateHddr()
     hdd->SetName ("RunEvent");
     hdd->SetTitle(ts);
     ds->AddFirst(hdd);
+    if (fBfcStatus->GetNRows()) ds->AddFirst(fBfcStatus);
   }
 }          
 
