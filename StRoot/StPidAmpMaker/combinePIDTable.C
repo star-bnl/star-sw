@@ -5,7 +5,7 @@ void combinePIDTable(){
   eTableName +="PiPIDTable.root";
 
   TString allTableName;
-  allTableName += "PIDTableP01gl.root";
+  allTableName += "PIDTableP02gd.root";
 
   TStringLong cpCMD;
   cpCMD +="cp ";
@@ -21,10 +21,10 @@ void combinePIDTable(){
 
   //production Tag
 
-  TObjString* productionTag = new TObjString("P01gl");
+  TObjString* productionTag = new TObjString("P02gd");
 
   TFile* table = new TFile (allTableName.Data(),"UPDATE");
-  table->SetFormat(1);
+  //  table->SetFormat(1);
 
   TFile* piFile = new TFile("PiPIDTable.root","R");
   piFile->cd();

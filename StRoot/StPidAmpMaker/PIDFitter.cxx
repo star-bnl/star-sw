@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.4 2002/12/17 17:05:48 aihong Exp $
+// $Id: PIDFitter.cxx,v 1.5 2002/12/20 20:53:40 aihong Exp $
 //
 // Authors: Aihong Tang
 //
@@ -906,6 +906,11 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
      TH1F* KAmpHisto    = new TH1F(KAmpName,  KAmpName,  mNPBins,mPStart,mPEnd);
      TH1F* PAmpHisto    = new TH1F(PAmpName,  PAmpName,  mNPBins,mPStart,mPEnd);
 
+     PiAmpHisto->SetLineColor(4);
+     EAmpHisto->SetLineColor(6);
+     KAmpHisto->SetLineColor(2);
+     PAmpHisto->SetLineColor(3);
+
 
 
      double nhitsPosition=double((k+0.5)*(float(mNNHitsEnd-mNNHitsStart)/float(mNNHitsBins)));
@@ -971,7 +976,7 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
   double  low        = 0.15; 
   double  high       = 0.6;
   double  ampPeakPos = 0.45;
-  double  PiRightFitEnd     = mPEnd;
+
 
                  //find the peak position of Pi amp.
   for (int t=0; t<4; t++){
@@ -983,22 +988,43 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
   delete gs;
   }
 
-  if (nhitsPosition <= 15.) {//ampPeakPos found fails for low ndedx, assign a number.
-  ampPeakPos=0.2; 
-  PiRightFitEnd = 1.2;
-  }
+  //  if (nhitsPosition <= 15.) {//ampPeakPos found fails for low ndedx, assign a number.
+  ampPeakPos=0.6; 
+  //  }
 
-  TF1* PiFcnCenter = new TF1("PiFcnCenter","gaus",low,high);
+
+  TF1* PiFcnCenter = new TF1("PiFcnCenter","pol3",0.4,0.7);
 
   TF1* PiFcnLeft   = new TF1("PiFcnLeft","pol3",0.1,ampPeakPos-0.05);
   PiFcnLeft->SetLineColor(4);
 
-  TF1* PiFcnRight  = new TF1("PiFcnRight","expo",ampPeakPos+0.1,PiRightFitEnd);
+  TF1* PiFcnRight  = new TF1("PiFcnRight","expo",0.7,1.4);
   PiFcnRight->SetLineColor(3);
 
-  PiAmpHisto->Fit("PiFcnCenter","WR+");
-  PiAmpHisto->Fit("PiFcnLeft",  "WR+");
-  PiAmpHisto->Fit("PiFcnRight", "WR+");
+    PiAmpHisto->Fit("PiFcnCenter","WR+");
+  //  PiAmpHisto->Fit("PiFcnLeft",  "WR+");
+
+  // blow error between 0.85-1.2 GeV/c, because K pi crosssing, put less weight on fitting for that range.
+  
+  float crossBandBegin = 0.8;
+  float brossBandEnd   = 1.2;
+
+
+  TGraphErrors* PiAmpGraphRight = new TGraphErrors();
+  
+  for (int ampbin = 0; ampbin<PiAmpHisto->GetNbinsX(); ampbin++){
+    if (PiAmpHisto->GetBinCenter(ampbin) < crossBandBegin || 
+        PiAmpHisto->GetBinCenter(ampbin) > brossBandEnd){ 
+    PiAmpGraphRight->SetPoint(PiAmpGraphRight->GetN(), PiAmpHisto->GetBinCenter(ampbin), PiAmpHisto->GetBinContent(ampbin));
+    PiAmpGraphRight->SetPointError(PiAmpGraphRight->GetN()-1, PiAmpHisto->GetBinCenter(ampbin), PiAmpHisto->GetBinContent(ampbin));
+    }
+  }
+
+
+  PiAmpGraphRight->Fit("PiFcnRight", "WR+");
+
+  PiAmpHisto->GetListOfFunctions()->Add(PiAmpGraphRight->GetFunction("PiFcnRight"));
+
 
   if (PiFcnCenter) delete PiFcnCenter;
   if (PiFcnLeft)   delete PiFcnLeft;
@@ -1012,19 +1038,42 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
   if (nhitsPosition <= 10. && nhitsPosition >5) EAmpFitBegin +=0.09; //peak shift.
 
 
-
   TF1* EFcnLeft = new TF1("EFcnLeft","expo",EAmpFitBegin,EAmpFitBegin+0.22);
-  EAmpHisto->Fit("EFcnLeft","RW+");
-  if (EFcnLeft)  delete EFcnLeft;
+       EFcnLeft->SetLineColor(2);
+  TF1* EFcnRight = new TF1("EFcnRight","expo",0.35,0.8);
+       EFcnRight->SetLineColor(4);
 
-  TF1* EFcnRight = new TF1("EFcnRight","expo",0.3,0.8);
-  EAmpHisto->Fit("EFcnRight","RW+");
+  //  EAmpHisto->Fit("EFcnLeft","RW+");
+
+   crossBandBegin = 0.45;
+   brossBandEnd   = 0.6;
+
+  TGraphErrors* EAmpGraphRight = new TGraphErrors();
+  
+  for (int ampbin = 0; ampbin<EAmpHisto->GetNbinsX(); ampbin++){
+    if (EAmpHisto->GetBinCenter(ampbin) < crossBandBegin || 
+        EAmpHisto->GetBinCenter(ampbin) > brossBandEnd){ 
+    EAmpGraphRight->SetPoint(EAmpGraphRight->GetN(), EAmpHisto->GetBinCenter(ampbin), EAmpHisto->GetBinContent(ampbin));
+    EAmpGraphRight->SetPointError(EAmpGraphRight->GetN()-1, EAmpHisto->GetBinCenter(ampbin), EAmpHisto->GetBinContent(ampbin));
+    }
+  }
+
+
+  EAmpGraphRight->Fit("EFcnRight", "WR+");
+
+  EAmpHisto->GetListOfFunctions()->Add(EAmpGraphRight->GetFunction("EFcnRight"));
+
+
+
+
+
+  if (EFcnLeft)  delete EFcnLeft;
   if (EFcnRight)  delete EFcnRight;
 
 
   //now fit K 
   low        = 0.4; 
-  high       = 1.;
+  high       = 0.9;
   ampPeakPos = 0.68;
 
           //find the peak position of K amp.
@@ -1043,15 +1092,55 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
 
   TF1* KFcnCenter = new TF1("KFcnCenter","gaus",low,high);
 
-  TF1* KFcnLeft   = new TF1("KFcnLeft","pol3",0.28,ampPeakPos-0.02);
+  TF1* KFcnLeft   = new TF1("KFcnLeft","pol3", (nhitsPosition <= 25.) ? 0.28 : 0.35, 0.65);
   KFcnLeft->SetLineColor(4);
 
-  TF1* KFcnRight  = new TF1("KFcnRight","expo",ampPeakPos+0.08,1.2);
+  TF1* KFcnRight  = new TF1("KFcnRight","expo",0.8,2.);
   KFcnRight->SetLineColor(3);
 
+
+   crossBandBegin = 0.48;
+   brossBandEnd   = 0.58;
+
+
+  TGraphErrors* KAmpGraphLeft = new TGraphErrors();
+  
+  for (int ampbin = 0; ampbin<KAmpHisto->GetNbinsX(); ampbin++){
+    if (KAmpHisto->GetBinCenter(ampbin) < crossBandBegin || 
+        KAmpHisto->GetBinCenter(ampbin) > brossBandEnd){ 
+    KAmpGraphLeft->SetPoint(KAmpGraphLeft->GetN(), KAmpHisto->GetBinCenter(ampbin), KAmpHisto->GetBinContent(ampbin));
+    KAmpGraphLeft->SetPointError(KAmpGraphLeft->GetN()-1, KAmpHisto->GetBinCenter(ampbin), KAmpHisto->GetBinContent(ampbin));
+    }
+  }
+
+  KAmpGraphLeft->Fit("KFcnLeft", "WR+");
+  KAmpHisto->GetListOfFunctions()->Add(KAmpGraphLeft->GetFunction("KFcnLeft"));
+   crossBandBegin = 0.9;
+   brossBandEnd   = 1.5;
+
+
+  TGraphErrors* KAmpGraphRight = new TGraphErrors();
+  
+  for (int ampbin = 0; ampbin<KAmpHisto->GetNbinsX(); ampbin++){
+    if (KAmpHisto->GetBinCenter(ampbin) < crossBandBegin || 
+        KAmpHisto->GetBinCenter(ampbin) > brossBandEnd){ 
+    KAmpGraphRight->SetPoint(KAmpGraphRight->GetN(), KAmpHisto->GetBinCenter(ampbin), KAmpHisto->GetBinContent(ampbin));
+    KAmpGraphRight->SetPointError(KAmpGraphRight->GetN()-1, KAmpHisto->GetBinCenter(ampbin), KAmpHisto->GetBinContent(ampbin));
+    }
+  }
+
+
+  KAmpGraphRight->Fit("KFcnRight", "WR+");
+
+  KAmpHisto->GetListOfFunctions()->Add(KAmpGraphRight->GetFunction("KFcnRight"));
+
   KAmpHisto->Fit("KFcnCenter","WR+");
-  KAmpHisto->Fit("KFcnLeft",  "WR+");
-  KAmpHisto->Fit("KFcnRight", "WR+");
+
+  //for the part overlay with FcnLeft, use FcnLeft
+  if ( KFcnCenter->GetXmin()<KFcnLeft->GetXmax() && KFcnLeft->GetXmax() < KFcnCenter->GetXmax() ) 
+  KAmpHisto->GetFunction("KFcnCenter")->SetRange(KFcnLeft->GetXmax()-0.05, KFcnCenter->GetXmax());
+
+  //  KAmpHisto->GetListOfFunctions()->Add(KAmpHisto->GetFunction("KFcnCenter"));
 
   if (KFcnCenter) delete KFcnCenter;
   if (KFcnLeft)   delete KFcnLeft;
@@ -1059,14 +1148,34 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
 
 
   //now fit P
-  double PFitEnd=1.2;
-  if (k==5) PFitEnd=1.7;
-  if (k==4) PFitEnd=1.5;
 
-  TF1* PFcn = new TF1("PFcn","pol3",0.2,PFitEnd);
-  PAmpHisto->Fit("PFcn","RW+");
+  TF1* PFcnLeft = new TF1("PFcnLeft","pol4",0.6,1.4);
+  TF1* PFcnRight = new TF1("PFcnRight","expo",1.4,2.);
 
-  if (PFcn) delete PFcn;
+  crossBandBegin = 1.5;
+  brossBandEnd   = 1.8;
+
+
+  TGraphErrors* PAmpGraphRight = new TGraphErrors();
+
+  for (int ampbin = 0; ampbin<PAmpHisto->GetNbinsX(); ampbin++){
+    if (PAmpHisto->GetBinCenter(ampbin) < crossBandBegin ||
+        PAmpHisto->GetBinCenter(ampbin) > brossBandEnd){
+      PAmpGraphRight->SetPoint(PAmpGraphRight->GetN(), PAmpHisto->GetBinCenter(ampbin), PAmpHisto->GetBinContent(ampbin));
+      PAmpGraphRight->SetPointError(PAmpGraphRight->GetN()-1, PAmpHisto->GetBinCenter(ampbin), PAmpHisto->GetBinContent(ampbin));
+    }
+  }
+
+
+  PAmpGraphRight->Fit("PFcnRight", "WR+");
+
+  PAmpHisto->GetListOfFunctions()->Add(PAmpGraphRight->GetFunction("PFcnRight"));
+
+
+  PAmpHisto->Fit("PFcnLeft","RW+");
+
+  if (PFcnRight) delete PFcnRight;
+  if (PFcnLeft) delete PFcnLeft;
 
   //write hito.
   
@@ -1075,6 +1184,7 @@ void  PIDFitter::ExtrapAmp(Char_t* fileNameOfInput, Char_t* fileNameOfOutput){
    EAmpHisto->Write(EAmpHisto->GetName(),TObject::kOverwrite | TObject::kSingleKey);
    KAmpHisto->Write(KAmpHisto->GetName(),TObject::kOverwrite | TObject::kSingleKey);
    PAmpHisto->Write(PAmpHisto->GetName(),TObject::kOverwrite | TObject::kSingleKey);
+
 
 	   }
 
@@ -1094,6 +1204,9 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
+// Revision 1.5  2002/12/20 20:53:40  aihong
+// changes made for P02gd PIDTable
+//
 // Revision 1.4  2002/12/17 17:05:48  aihong
 // write out sigmaNsample graph
 //
