@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.23 2000/04/29 21:33:28 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.24 2000/05/17 00:11:31 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.24  2000/05/17 00:11:31  caines
+// Make sure ALL hits acknowledged as on track
+//
 // Revision 1.23  2000/04/29 21:33:28  caines
 // More protection for flagged tpc hits on tracks
 //
@@ -575,12 +578,12 @@ Int_t StMatchMaker::Make(){
      
        tgroup->id1 = spc->track;
        tgroup->id2 = i+1;
-       if( spc->flag !=0) {
-	 tgroup->ident = -1;
-       }
-       else if( tgroup->id1 !=0){
+       //if( spc->flag !=0) {
+       // tgroup->ident = -1;
+       // }
+       if( tgroup->id1 !=0){
 	 if( ttrack[((int)tgroup->id1/1000)-1].flag < 0){
-	 tgroup->ident = -1;
+	 tgroup->ident = -10;
 	 }
 	 else{
 	   tgroup->ident = 0;
@@ -620,7 +623,7 @@ Int_t StMatchMaker::Make(){
   
   for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 
-    if( tgroup->id1 != 0 && tgroup->ident==0){
+    if( tgroup->id1 != 0 && tgroup->ident > -5){
       spt_id = tgroup->id2-1;
       row = spc[spt_id].row/100;
       row = spc[spt_id].row - row*100;
