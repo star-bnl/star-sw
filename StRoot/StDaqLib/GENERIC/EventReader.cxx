@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.27 2000/09/15 21:21:00 fisyak Exp $
+ * $Id: EventReader.cxx,v 1.28 2001/05/14 16:25:58 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.28  2001/05/14 16:25:58  ward
+ * Temporary code to skip corruption check for FTPC banks.
+ *
  * Revision 1.27  2000/09/15 21:21:00  fisyak
  * No ulong on HP
  *
@@ -762,6 +765,7 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx,    "SVTP")) { *beg=1; *end= 8; }
   if(!strcmp(xx, "SVTSECP")) { *beg=1; *end=24; }
   if(!strcmp(xx,  "SVTRBP")) { *beg=1; *end= 6; }
+  if(xx[0]=='F'&&xx[1]=='T'&&xx[2]=='P') { *beg=0; *end= 0; return; } // bbb I don't have good doc for FTPC yet
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
     printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
