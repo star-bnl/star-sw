@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.14 2000/02/18 22:49:56 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.15 2000/02/18 23:44:05 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.15  2000/02/18 23:44:05  posk
+// Removed some more lines for CC5 which still do not work.
+//
 // Revision 1.14  2000/02/18 22:49:56  posk
 // Added PID and centrality.
 //
@@ -108,7 +111,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.14 2000/02/18 22:49:56 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.15 2000/02/18 23:44:05 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -235,12 +238,14 @@ void StFlowMaker::fillFlowEvent() {
       pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
       pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
       pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
+#if !defined(__CC5__)
       particle =  StParticleTable::instance()->findParticle("pi+");
       pFlowTrack->SetPidPiPlus(PidSigmas(pTrack, particle));
       particle =  StParticleTable::instance()->findParticle("pi-");
       pFlowTrack->SetPidPiMinus(PidSigmas(pTrack, particle));
       particle =  StParticleTable::instance()->findParticle("proton");
       pFlowTrack->SetPidProton(PidSigmas(pTrack, particle));
+#endif
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
     }
