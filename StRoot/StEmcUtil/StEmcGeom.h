@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.12 2001/09/24 17:34:51 akio Exp $
+ * $Id: StEmcGeom.h,v 1.13 2001/11/21 18:56:19 suaide Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.13  2001/11/21 18:56:19  suaide
+ * added methods to get eta and phi bins boundaries
+ *
  * Revision 1.12  2001/09/24 17:34:51  akio
  * Dirty bug fix.
  *
@@ -179,7 +182,9 @@ public:
   Float_t* Eta();
   Float_t* Ylocal();  
   Float_t* Phi();
-
+  
+  Float_t* EtaB(); // Eta boundaries AASUAIDE
+  Float_t* PhiB(); // Phi boundaries AASUAIDE
 
   void     setDetector(const Int_t);
   void     setRadius(const Float_t);
@@ -250,6 +255,9 @@ inline Float_t* StEmcGeom::Zlocal() {return mZlocal.GetArray();}
 inline Float_t* StEmcGeom::Eta() {return mEta.GetArray();} 
 inline Float_t* StEmcGeom::Ylocal()  {return mYlocal.GetArray();}
 inline Float_t* StEmcGeom::Phi() {return mPhi.GetArray();} 
+
+inline Float_t* StEmcGeom::EtaB() {return mEtaB.GetArray();}
+inline Float_t* StEmcGeom::PhiB() {return mPhiB.GetArray();}
 
 inline void    StEmcGeom::setDetector(const Int_t val) { mDetector = val;} 
 inline void    StEmcGeom::setRadius(const Float_t val) { mRadius = val;}
