@@ -1,4 +1,4 @@
-*CMZ :          05/08/98  23.16.12  by  Pavel Nevski
+*CMZ :          24/08/98  22.02.41  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
 c***********************************************************************
@@ -49,6 +49,8 @@ C
       COMMON /AgCKINO/ Ioutp,IoutpOld
       Character*20     CoptKine,CoptBack,CoptOutp
       COMMON /AgCKINC/ CoptKine,CoptBack,CoptOutp
+      Character*20     StrmKine,StrmBack,StrmOutp
+      COMMON /AgCKINS/ StrmKine,StrmBack,StrmOutp
       Character*20     CrunType
       COMMON /AgCKINR/ CrunType
       Integer          Ncommand
@@ -173,7 +175,7 @@ c***  Get command and number of parameters passed
             If (input .ge. 4) then
                 input = input - 4
                 write(6,*)'*** input: EGZ(FZ) file ',string1(1:length1)
-                Call AgZOPEN ('PZ',string1(1:length1),'E',0,0)
+                Call AgZOPEN ('P',string1(1:length1),'E',0,0)
                 Call AGZREAD ('P',ier)
                 IKINE = -3
                 If (Ier.ne.0) go to 490
@@ -220,7 +222,7 @@ c***  Get command and number of parameters passed
               call KUGETS ( string1, length1 )
               write(6,*) ' GXUSER: opening output file ',
      >                              string1(1:length1)
-              Call AgZOPEN  ('OZ',string1(1:length1),'GEKHD',0,0)
+              Call AgZOPEN  ('O',string1(1:length1),'GEKHD',0,0)
               Call AGZWRITE ('O',ier)
  
           else                                          !  close output
