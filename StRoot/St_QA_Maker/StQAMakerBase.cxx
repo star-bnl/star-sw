@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.23 2003/02/28 16:01:09 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.24 2003/04/19 00:17:50 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.24  2003/04/19 00:17:50  genevb
+// Updated for dAu/pp running
+//
 // Revision 2.23  2003/02/28 16:01:09  genevb
 // Further improvements for previous check-in
 //
@@ -187,9 +190,9 @@ Int_t StQAMakerBase::Make() {
   // histograms from geant and reco tables 
   if (histsSet==StQA_MC) MakeHistEval();
   // histograms from BBC in StEvent
-  MakeHistBBC();
+  if (histsSet!=StQA_dAu) MakeHistBBC();
   // histograms from FPD in StEvent
-  MakeHistFPD();
+  if (histsSet!=StQA_dAu) MakeHistFPD();
 
   return kStOk;
 }

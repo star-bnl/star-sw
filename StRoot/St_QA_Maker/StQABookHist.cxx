@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.39 2003/02/20 20:09:54 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.40 2003/04/19 00:17:49 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.40  2003/04/19 00:17:49  genevb
+// Updated for dAu/pp running
+//
 // Revision 2.39  2003/02/20 20:09:54  genevb
 // Several changes for new trigger scheme, dAu data
 //
@@ -686,8 +689,10 @@ void StQABookHist::BookHist(Int_t histsSet){
   BookHistPoint();
   BookHistRich();
   BookHistEMC();
-  BookHistBBC();
-  BookHistFPD();
+  if (histsSet != StQA_dAu) {
+    BookHistBBC();
+    BookHistFPD();
+  }
   BookHistGlob();
   BookHistPrim();
   BookHistDE();
