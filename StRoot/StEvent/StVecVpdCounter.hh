@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecVpdCounter.hh,v 1.4 1999/03/04 18:17:45 ullrich Exp $
+ * $Id: StVecVpdCounter.hh,v 1.5 1999/03/10 12:12:18 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecVpdCounter.hh,v $
- * Revision 1.4  1999/03/04 18:17:45  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.5  1999/03/10 12:12:18  ullrich
+ * Added iterators
  *
  * Revision 1.4  1999/03/04 18:17:45  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -32,8 +32,10 @@ using namespace std;
 class StVpdCounter;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StVpdCounter, allocator<StVpdCounter> > StVecVpdCounter;
+typedef vector<StVpdCounter, allocator<StVpdCounter> >::iterator StVecVpdCounterIterator;
 #else
 typedef vector<StVpdCounter> StVecVpdCounter;
+typedef vector<StVpdCounter>::iterator StVecVpdCounterIterator;
 #endif
 
 #endif
