@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.2 2000/02/02 21:20:55 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.3 2000/05/20 01:08:27 vanyashi Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.3  2000/05/20 01:08:27  vanyashi
+// Write tags in split mode
+//
 // Revision 1.2  2000/02/02 21:20:55  fisyak
 // Remove user parametes from GetTags
 //
@@ -43,21 +46,31 @@ Int_t StTagsMaker::Make(){
   if (fTree && fTagsList && tabClass) {
     St_DataSetIter next(fTagsList);
     St_DataSet *set = 0;
+    TClass *cl = 0;
+    void *address = 0;
+
     while ((set = next())) {
       St_DataSet *ds = GetDataSet(set->GetTitle());
       if (ds) {
 	if (ds->InheritsFrom(tabClass)) {
 	  St_Table *tabl = (St_Table *) ds;
 	  St_Table &tab  = *tabl;
-	  void *address = tab[0];
-	  fTree->SetBranchAddress(set->GetName(),address);
+	  address = tab[0];
+	  cl = gROOT->GetClass(ds->GetTitle());
 	}
 	else {
 	  if (strstr(ds->GetName(),"EvtHddr")){
 	    EvtHddr_st fEvtHddr;
 	    StEvtHddr *lEvtHddr = (StEvtHddr *) ds;
 	    lEvtHddr->FillTag(&fEvtHddr);
-	    fTree->SetBranchAddress("EvtHddr",&fEvtHddr);                  
+	    address = &fEvtHddr;
+	    cl = gROOT->GetClass("EvtHddr_st");
+	  }
+	}
+	if (cl) {
+	  St_tableDescriptor td(cl);
+	  for (UInt_t i=0;i<td.NumberOfColumns();i++){
+	    fTree->SetBranchAddress(td.ColumnName(i),(char*)address+td.Offset(i));
 	  }
 	}
       }
@@ -69,41 +82,49 @@ Int_t StTagsMaker::Make(){
 //_____________________________________________________________________________
 EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
 {
-  Int_t bufsize= 64000;
   St_DataSet *newds = 0;
-  TString type, name, leaflist;
+  TString name, leaflist;
+  TClass *cl = 0;
+  Int_t bufsize= 64000;
   void *address = 0;
+
   if (!tabClass) tabClass  = gROOT->GetClass("St_Table"); 
   if (ds->InheritsFrom(tabClass) && strstr(ds->GetName(),"Tag")) {
     newds = new St_DataSet(ds->GetName());
-    type = TString(ds->GetTitle());
-    name = type;
-    name.Append("_st");
-    type.Append(".h");
-    TClass CL(name.Data(),1,type.Data(),type.Data());
-    TClass *cl = gROOT->GetClass(name.Data());
-    if (cl) {
-      St_tableDescriptor td(cl);
-      leaflist = td.CreateLeafList();
-      St_Table &tab = *((St_Table *)ds); 
-      address = tab[0];
-    }
+    name = TString(ds->GetTitle());
+    St_Table &tab = *((St_Table *)ds); 
+    address = tab[0];
   }
   else if (strstr(ds->GetName(),"EvtHddr")){   
     newds = new St_DataSet(ds->GetName(),fTagsList);
-    type = TString("StEvtHddr.h");
     name = TString("EvtHddr_st");
-    TClass CL(name.Data(),1,type.Data(),type.Data());
-    TClass *cl = gROOT->GetClass(name.Data());
-    if (cl) {
-      St_tableDescriptor td(cl);
-      leaflist = td.CreateLeafList();
-      address = cl->New();
-    }
+    cl = new TClass(name.Data(),1,"StEvtHddr.h","StEvtHddr.h");
+    if (cl) address = cl->New();
   }
   else return kContinue;
-  if (address) {
-    fTree->Branch(ds->GetName(),address, leaflist.Data(), bufsize);
+
+  // create separate branch for each tag
+  const Char_t TypeMapTBranch[]="\0FIISDiisbBC";
+  cl = gROOT->GetClass(name.Data());
+  if (cl) {
+    St_tableDescriptor td(cl);
+    for (UInt_t i=0;i<td.NumberOfColumns();i++){
+      const Char_t *colName = td.ColumnName(i);
+      leaflist = colName;
+      Int_t nDim = td.Dimensions(i);
+//       UInt_t *indx = 0;
+      if (nDim) {
+	UInt_t *indx = td.IndexArray(i);
+	Char_t buf[64];
+	for (Int_t k=0; k<nDim; k++) {
+	  sprintf(buf,"[%d]",indx[k]);
+	  leaflist += buf;
+	}
+      }
+      leaflist += "/";
+      leaflist += TypeMapTBranch[(Int_t)td.ColumnType(i)];
+      fTree->Branch(colName,(char*)address+td.Offset(i),leaflist.Data(),bufsize);
+    }
     newds->SetTitle(ds->Path());
     fTagsList->Add(newds); 
   }
