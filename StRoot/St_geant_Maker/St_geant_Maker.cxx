@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.16 1999/02/17 22:42:07 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.17 1999/02/18 15:44:47 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.17  1999/02/18 15:44:47  fisyak
+// Cleanup warinings
+//
 // Revision 1.16  1999/02/17 22:42:07  fisyak
 // fix Linux parameters
 //
@@ -198,8 +201,8 @@ St_geant_Maker::~St_geant_Maker(){
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
 // Initialize GEANT
-  PrintInfo();
   if (! geant) {
+    PrintInfo();
     geant  = new TGeant3("Geant","C++ Interface to Geant3",nwgeant,nwpaw,iwtype); 
   }
 // Create Histograms    
@@ -330,13 +333,13 @@ Int_t St_geant_Maker::Make()
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
   Init(); 
-  Do (option); 
+  if (strlen(option)) Do (option); 
   geometry_();
 }
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.16 1999/02/17 22:42:07 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.17 1999/02/18 15:44:47 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -749,8 +752,11 @@ void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t
   t.ToLower();
   St_DataSet *geom = gStChain->DataSet("geom");
   Char_t cmd[80];
-  Int_t Nchar = sprintf(cmd,"St_%",t.Data());
-  if (gClassTable->GetID(cmd)){
+  Int_t Nchar = sprintf(cmd,"St_%s",t.Data());
+  if (gClassTable->GetID(cmd) < 0){
+    cout << "Dictionary for table :" << cmd << " has not yet been defined. Skip it" << endl;
+  }
+  else {
     Nchar = sprintf(cmd,"new St_%s(\"%s\",%i)",t.Data(),t.Data(),*k);
     St_Table *table = (St_Table *) gInterpreter->Calc(cmd);
     if (table) {geom->Add(table); table->Adopt(*k,iq);}
