@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.2 1999/09/08 00:14:06 fisyak Exp $
+// $Id: StBFChain.h,v 1.3 1999/09/12 23:02:43 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.3  1999/09/12 23:02:43  fisyak
+// Add closing xdf and TFile
+//
 // Revision 1.2  1999/09/08 00:14:06  fisyak
 // Add kReverseField option
 //
@@ -72,11 +75,12 @@ class StBFChain : public StChain {
    virtual void        SetXdfOut(St_XDFFile *xdf=0) {xdf_out = xdf;}
    virtual void        SetOption(Int_t k);
    virtual void        SetTFile(TFile *m) {m_TFile = m;}
+   virtual Int_t       Finish();
    virtual TFile      *GetTFile() {return m_TFile;}
    virtual St_XDFFile *GetXdfOut() {return xdf_out;}
    Bool_t              GetOption(Int_t k);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.2 1999/09/08 00:14:06 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.3 1999/09/12 23:02:43 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif

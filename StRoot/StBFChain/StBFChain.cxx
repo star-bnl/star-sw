@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.4 1999/09/12 21:23:04 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.5 1999/09/12 23:02:43 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.5  1999/09/12 23:02:43  fisyak
+// Add closing xdf and TFile
+//
 // Revision 1.4  1999/09/12 21:23:04  fisyak
 // Add multiple input files to chain
 //
@@ -732,3 +735,10 @@ void StBFChain::SetOption(int k){// set all OFF
 }
 //_____________________________________________________________________
 Bool_t StBFChain::GetOption(Int_t k) {return (k>0 && k <=NoChainOptions) ? ChainFlags[k] : kFALSE;}
+//_____________________________________________________________________
+Int_t StBFChain::Finish()
+{
+  SafeDelete (xdf_out);
+  SafeDelete (m_TFile);
+  StMaker::Finish();
+}
