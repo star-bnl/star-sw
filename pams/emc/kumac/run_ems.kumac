@@ -4,6 +4,14 @@
    
    macro/global/import *
      
+   cd [geant_Run]
+   tdm/table/cell/getvalue 'calb_calg[0].shift' OFF
+   if (staf_status(1).ne.STAFCV_OK) then
+	dui/rm [geant_Run]/calb_calg	
+	tables calb/* [geant_Run]
+   endif
+   cd /dui
+
    ami/module/call ems_interface2 _
 			[geant_Event]/g2t_event _
                         [geant_Event]/g2t_vertex _
