@@ -8,6 +8,7 @@
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_hitarray_Table.h"
 #include "St_l3_Coordinate_Transformer.h"
+#include "St_l3_Coordinates.h"
 #include "TStopwatch.h"
 
 ClassImp(St_l3banks_2_tphits);
@@ -29,6 +30,8 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 {
     // Prepare transformation
     St_l3_Coordinate_Transformer transformer;
+    St_l3_xyz_Coordinate XYZ(0,0,0) ;
+    St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
 
     // Prepare tcl_tphit_stucts to be filled
     tcl_tphit_st* mytclhits_st = (tcl_tphit_st*) mytclhits->GetTable();
@@ -144,11 +147,18 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 
 					    // transform
 					    Double_t* xyz = transformer.raw_to_global(ptrs);
+
+					    // new style
+					    //XYZ.Setxyz(1,1,1) ;
+					    PTRS.Setptrs((Double_t) pad, (Double_t) time,(Double_t) row, (Double_t) sector) ;
+					    transformer.raw_to_global(PTRS,XYZ) ;
+					    //Double_t a = xyzn.Getx() ;
+					    
 					    
 					    // fill tphits
-					    mytclhits_st[tphit_index].x = (Float_t) xyz[0];
-					    mytclhits_st[tphit_index].y = (Float_t) xyz[1];
-					    mytclhits_st[tphit_index].z = (Float_t) xyz[2];
+					    mytclhits_st[tphit_index].x = (Float_t) XYZ.Getx() ;
+					    mytclhits_st[tphit_index].y = (Float_t) XYZ.Gety() ;
+					    mytclhits_st[tphit_index].z = (Float_t) XYZ.Getz() ;
 					    mytclhits_st[tphit_index].q = (Float_t) charge;
 					    mytclhits_st[tphit_index].row = (Short_t) 100 * sector + row; // to store the sector 
 					    mytclhits_st[tphit_index].id  = (Long_t)  1 + tphit_index; // to start with 1
