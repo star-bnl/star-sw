@@ -6,6 +6,7 @@
 #include "enumType.hh"
 #endif
 
+#include "StDbBufferI.h"
 
 enum myctype{_char,_uchar,_short,_ushort,_int,_uint,_long,_ulong,_float,_double,_ascii,_string};
 
@@ -27,7 +28,7 @@ struct column {
 
 enum BuffMode{Auto,Client,Storage};
 
-class StDbBuffer   { 
+class StDbBuffer : public StDbBufferI  { 
 
 
 private:

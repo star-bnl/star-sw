@@ -76,8 +76,8 @@ public:
   virtual void StreamAccessor(typeAcceptor* accept);
   virtual void dbStreamer(typeAcceptor* accept);
 
-  virtual void StreamAccessor(StDbBuffer* buff, bool isReading);
-  virtual void dbStreamer(StDbBuffer* buff, bool isReading);
+  virtual void StreamAccessor(StDbBufferI* buff, bool isReading);
+  virtual void dbStreamer(StDbBufferI* buff, bool isReading);
 
   //ClassDef(StDbTable,1)
 

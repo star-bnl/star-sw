@@ -6,7 +6,7 @@
 #include "StDbAccessor.h"
 #include "StTableDescriptorI.h"
 #include "typeAcceptor.hh"
-#include "StDbBuffer.h"
+#include "StDbBufferI.h"
 
 
 class StDbTableI {
@@ -50,11 +50,18 @@ public:
   virtual void StreamAccessor(typeAcceptor* accept) =0;
   virtual void dbStreamer(typeAcceptor* accept) =0;
 
-  virtual void StreamAccessor(StDbBuffer* buff, bool isReading) =0;
-  virtual void dbStreamer(StDbBuffer* buff, bool isReading) =0;
+  virtual void StreamAccessor(StDbBufferI* buff, bool isReading) =0;
+  virtual void dbStreamer(StDbBufferI* buff, bool isReading) =0;
 
   //ClassDef(StDbTableI,1)
 
 };
 
 #endif
+
+
+
+
+
+
+

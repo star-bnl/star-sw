@@ -113,7 +113,7 @@ StDbTable::StreamAccessor(typeAcceptor* accept){
 //////////////////////////////////////////////////////////////////////
 
 void
-StDbTable::StreamAccessor(StDbBuffer* buff, bool isReading){
+StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 
   bool ClientMode;
   if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
@@ -169,7 +169,7 @@ return;
 ///////////////////////////////////////////////////////////////////////
 
 void
-StDbTable::dbStreamer(StDbBuffer* buff, bool isReading){
+StDbTable::dbStreamer(StDbBufferI* buff, bool isReading){
 
 int max = mdescriptor->getNumElements();
 char* name;
@@ -187,9 +187,9 @@ char* ptr;
     if(isReading){
       //       cout << " Reading object " << name << endl;
       //     cout << " buffer offset is " << ptr-mdata << endl;
-     ReadElement(ptr,name,length,type,buff);
+     ReadElement(ptr,name,length,type,(StDbBuffer*)buff);
      } else {
-     WriteElement(ptr,name,length,type,buff);
+     WriteElement(ptr,name,length,type,(StDbBuffer*)buff);
     }       
  }
 

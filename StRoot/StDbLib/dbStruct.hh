@@ -79,10 +79,13 @@ class dbTable : public accessor {
   //  int nelems;
   char* name;
 
-   dbTable() { startKey="<StDbClass>";
-               endKey="</StDbClass>";};
+   dbTable() { startKey="<DbTable>";
+               endKey="</DbTable>";};
 
 };
 
 
 #endif
+
+
+
