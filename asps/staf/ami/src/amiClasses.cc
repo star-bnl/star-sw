@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.25 1998/09/25 02:12:55 fisyak Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.26 1998/09/25 03:24:51 fisyak Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -227,7 +227,8 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    char *table_name=NULL;
    long table_size=1;
    long b;
-   for( int i=0;i<(int)tnames._length;i++ ){
+   int i;
+   for(i=0;i<(int)tnames._length;i++ ){
 //- Break up "name(size)" into "name" and size.
       c = tnames._buffer[i];
       cc = strchr(tnames._buffer[i],'(');
@@ -262,7 +263,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 //- Check Input Tables;
 
    int ierr; 
-   for (int i=0 ;i<(int)tnames._length;i++ ){
+   for (i=0 ;i<(int)tnames._length;i++ ){
      ierr = tables._buffer[i]->NaN(); 
      if (ierr)  printf("MODULE %s ***ERROR*** Bad input Table %s\n",
                name,tables._buffer[i]->Name());}
@@ -271,7 +272,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
    STAFCV_T status = invoker->call(tables);/*fix memory leak -akio*/
 
 //- Check Output Tables;
-   for (int i=0 ;i<(int)tnames._length;i++ ){
+   for (i=0 ;i<(int)tnames._length;i++ ){
      ierr = tables._buffer[i]->NaN(); 
      if (ierr)  printf("MODULE %s ***ERROR*** Bad Output Table %s\n",
                name,tables._buffer[i]->Name());}
