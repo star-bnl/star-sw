@@ -10,16 +10,17 @@ void RunStiMaker(Int_t nevents=1,
 		 //bool doFit=true, // true->fit track only
 		 bool doFit=false, // false->find track only
 		 const char* outfile = "Evaluation.root",
+		 bool doProfile=false, // produce profiling output?
+		 
 		 //This file points to 30 events of 10 neg muons w/ pt=.9 
-		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root",
-		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
-		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
-		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Mon/year_2001/hc_standard/hc_standard.40_evts.event.root")
-    //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Mon/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
+		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
+		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/pp_minbias/pds0200_04_12812evts.event.root")
+		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_highdensity/hc_highdensity.16_evts.event.root")
+		 //const char* MainFile="/star/data22/ITTF/data/StarNightlyTest/Fri/year_2001/hc_standard/hc_standard.40_evts.event.root")
+		 //const char* MainFile="/direct/star+rcf/test/dev/trs_redhat61/Fri/year_2001/hc_lowdensity/hc_lowdensity.400_evts.event.root")
     //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
     //This file points to 5 muons /event
     //const char* MainFile="/star/data22/ITTF/EvalData/MCNtuple/muon_100_neg.event.root")
-    bool doProfile=false) // produce profiling output?
 {
     //bool optimized = true;
     bool optimized = false;
@@ -176,9 +177,9 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setLTSFDoHelixFit(true);
     stiIO->setLTSFExtrapYWindow(1.);
     stiIO->setLTSFExtrapZWindow(2.);
-    stiIO->setLTSFExtrapMaxSkipped(3);
-    stiIO->setLTSFExtrapMinLength(5);
-    stiIO->setLTSFExtrapMaxLength(10);
+    stiIO->setLTSFExtrapMaxSkipped(2);
+    stiIO->setLTSFExtrapMinLength(4);
+    stiIO->setLTSFExtrapMaxLength(5);
     
     stiIO->setLTSFUseVertex(true);
     
@@ -188,14 +189,14 @@ void RunStiMaker(Int_t nevents=1,
     }
     //Add padrows;
     //for (unsigned int padrow=1; padrow<=45; ++padrow) {
-    for (unsigned int padrow=15; padrow<=45; padrow+=1) {
+    for (unsigned int padrow=6; padrow<=45; padrow+=1) {
 	stiIO->addLTSFPadrow(padrow);
     }
     
     //This line has to match the corresponding enumeration in StiIOBroker.h
     enum SeedFinderType {kUndefined=0, kComposite=1, kEvaluable=2};
-    stiIO->setSeedFinderType(kEvaluable);
-    //stiIO->setSeedFinderType(kComposite);
+    //stiIO->setSeedFinderType(kEvaluable);
+    stiIO->setSeedFinderType(kComposite);
 
     stiIO->setSimulated(simulated);
     anaMk->setEvaluationFileName(outfile);
@@ -231,7 +232,7 @@ void RunStiMaker(Int_t nevents=1,
 	guiIO->setUnMarkedHitSize(.3);
 	guiIO->setUnMarkedHitColor(4);
 	guiIO->setUnMarkedHitStyle(8);
-	guiIO->setUpdateEachTrack(true);
+	guiIO->setUpdateEachTrack(false);
 	
 	//Values for hits assigned to tracks
 	guiIO->setMarkedHitSize(.3);
