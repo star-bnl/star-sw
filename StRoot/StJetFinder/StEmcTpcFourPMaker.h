@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.8 2003/07/24 22:11:17 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.9 2003/07/30 20:33:36 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.9  2003/07/30 20:33:36  thenry
+ * Added sanity check for total EMC energy, and some variables are now stored
+ * for possible access later (per event).
+ *
  * Revision 1.8  2003/07/24 22:11:17  thenry
  * Now can use any of Points, Hits, Clusters.  Now uses probability weighted
  * mass calculation.  Now Subtracts track emc deposited energy from nearest
@@ -531,10 +535,23 @@ class StEmcTpcFourPMaker : public StFourPMaker {
   StMuEmcCollection* muEmc;
   StEmcCollection* emc;
   int maxHits;
+  int numCoincidences;
+  double sumPtTracks;
+  double sumEMC;
+  double EMCSanityThreshold;
+  double sumSubtracted;
+  double sumTheorySubtracted;
  public:
   createdPointVector fakePoints;
   double mPIDR, mKDR, mPRDR, mEDR, mCAD;
   EMCHitType useType;
+
+  int getNumberCoincidences(void) { return numCoincidences; };
+  double getSumPtTracks(void) { return sumPtTracks; }; 
+  double getSumEMC(void) { return sumEMC; };
+  double getSumSubtracted(void) { return sumSubtracted; };
+  double getSumTheorySubtracted(void) { return sumTheorySubtracted; };
+  void setEMCSanityThreshold(double EST) { EMCSanityThreshold = EST; };
 
   ClassDef(StEmcTpcFourPMaker,1)
 };
