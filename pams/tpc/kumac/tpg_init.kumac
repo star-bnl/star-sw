@@ -10,9 +10,6 @@ macro/global/import *
   dio/stream/close    geom
   soc/object/oid geom; oid = staf_result(1); soc/deleteoid [oid]
 
-  cd tpgpar
-  tdm/newtable tpg_pad tpg_pad 1
-
   cd /dui
  
 return
@@ -30,13 +27,11 @@ return
   return
  
 * *********************************************************************
-
-*********************************************************************
+* ********************************************************************
+ 
  macro init
+   
    macro/global/import *
-   cd [params]/tpc/tpgpar
-   tdm/newtable tpg_pad tpg_pad 1
-   cd /dui
      
  return
  
