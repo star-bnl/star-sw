@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.230 2001/09/23 14:56:44 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.231 2001/09/24 23:54:40 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -94,11 +94,14 @@ Bfc_st BFC[] = {
   // Physics,Cdst,... Physics was removed since trg reads the wrong format
   {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
                                                ,"Production chain for summer 2001 data (tpc, rich)",kFALSE},
-  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, emc)",kFALSE},
 
-  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""                 ,"Production chain for summer 2001 data (P2001a + nohits)",kFALSE},
+  // all above P2001x are TEMPORARY chains. We will shift the numbering up
+  // as soon as the code will be toroughly tested. NoHits will be turned on
+  // later as a final touch.
+  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc, svt, emc, l3)",kFALSE},
 
-  {"P2001c"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""              ,"Production chain for summer 2001 data (tpc, rich, ftpc)",kFALSE},
+  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,emcY2,ftpc,l3onl,Physics,Cdst,Kalman,tags,Tree,evout,ExB","","" 
+                     ,"Production chain for summer 2001 data (P2001a - Svt)",kFALSE},
 
 
 
