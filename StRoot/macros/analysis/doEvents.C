@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.61 2001/02/14 23:39:17 perev Exp $
+// $Id: doEvents.C,v 1.62 2001/02/21 23:16:19 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -12,7 +12,7 @@
 //
 // Ways to run:
 // If you specify a path, all DST files below that path will be
-// found, and the first 'nevents' events in the file set will be
+// found, and the first 'nEvents' events in the file set will be
 // analyzed.
 // The type of DST files searched for is taken from the 'file' parameter.
 // If 'file ends in '.dst.root', ROOT DSTs are searched for.
@@ -22,13 +22,13 @@
 // to be processed.
 //
 // example invocation:
-// .x doEvents.C(10,"-","some_directory/some_dst_file.xdf")
+// .x doEvents.C(10,"some_directory/some_dst_file.xdf")
 //
 // example ROOT file invocation:
-// .x doEvents.C(10,"-","some_directory/some_dst_file.root")
+// .x doEvents.C(10,"some_directory/some_dst_file.root")
 //
 // example multi-ROOT file invocation:
-// .x doEvents.C(9999,"some_directory","*.dst.root")
+// .x doEvents.C(9999,"some_directory/*.dst.root")
 //
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -36,7 +36,7 @@
 //              Victor Perevoztchikov
 //  
 //  inputs:
-//      nevents = # events to process
+//      nEvents = # events to process
 //      path = a. directory you want files from
 //             b. "-" to get just the one file you want
 //      file = a. file names in directory (takes all files)
@@ -49,50 +49,49 @@
 
 #include "iostream.h"
 
-Int_t    usePath = 0;
-Int_t    nFile = 0;
-TString  thePath;
-TString  theFileName;
-TString  originalPath;
 class    StChain;
 StChain  *chain=0;
-class StEventDisplayMaker;
-StEventDisplayMaker *dsMaker = 0;
-TBrowser *b=0;
 
-const char *dstFile = 0;
-const char *xdfFile = 0;
-const char *mdcFile = 0;
-const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 
 void Help()
 {
-    cout << "Usage: doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.xdf\")" << endl;
-    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
-    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
+    cout << "Usage: doEvents.C(startEvent,nEvents,\"path/some_dst_file.xdf\")" << endl;
+    cout << "       doEvents.C(nEvents,\"path/*.event.root\")" << endl;
+    cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"evout\")" << endl;	
 }
+//		ProtoTypes
 
+void doEvents(Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
+void doEvents(Int_t startEvent, Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 
-void doEvents(Int_t, const Char_t **, const Char_t *qaflag = "");
+void doEvents(Int_t nEvents=2, 
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *qaflag = 0); 
 
-void doEvents(Int_t nevents=2, 
-              const Char_t *path="/afs/rhic/star/data/samples/gstar.dst.root",
-              const Char_t *file="",
-              const Char_t *qaflag = "off", 
-              const Int_t wrStEOut = 0);
+void doEvents(Int_t startEvent=1,Int_t nEvents=2, 
+              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *qaflag = 0);
 
+void doEvents(const Int_t nEvents=2, 
+              const Char_t *path,
+              const Char_t *file,
+              const Char_t *qaflag, int flag);
+              
+              
+              
+              
 // ------------------ Here is the actual method -----------------------------------------
-void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Int_t wrStEOut)
+void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 {
 
-  cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
+  TString tflag = qaflag;
+  cout <<  endl << endl <<" doEvents -  input # events = " << nEvents << endl;
   Int_t ilist=0;
   while(fileList[ilist]){ 
       cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
       ilist++; 
     }
   cout << " doEvents -  input qaflag   = " << qaflag << endl;
-  cout << " doEvents -  input wrStEOut = " << wrStEOut << endl << endl << endl;
  
     //
     // First load some shared libraries we need
@@ -133,11 +132,22 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
       Int_t Argc=sizeof(Argv)/4;
       setFiles->Init(Argc,Argv);
     }
+ 
+    TString mainBranch;
+    if (strstr(fileList[0],".root")) {
+      mainBranch = fileList[0];
+      mainBranch.ReplaceAll(".root","");
+      int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
+      mainBranch.Replace(0,idot+1,"");
+      mainBranch+="Branch";
+    }
+
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
      IOMk->SetIOMode("r");
-     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-     IOMk->SetBranch("dstBranch",0,"r");
-     IOMk->SetBranch("runcoBranch",0,"r");
+     IOMk->SetBranch("*",0,"0");	//deactivate all branches
+     if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
+//     IOMk->SetBranch("dstBranch",0,"r");
+//     IOMk->SetBranch("runcoBranch",0,"r");
      IOMk->SetDebug();
 
     //
@@ -151,6 +161,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
     StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 
     // WriteOut StEvent
+    Int_t wrStEOut = tflag.Contains("evout",TString::kIgnoreCase);
     if (wrStEOut) {
       cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
       StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
@@ -178,7 +189,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
     // Event loop
     //
     int istat=0,i=1;
- EventLoop: if (i <= nevents && istat!=2) {
+ EventLoop: if (i <= nEvents && istat!=2) {
 
      cout << endl << "============================ Event " << i
 	  << " start ============================" << endl;
@@ -212,7 +223,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
            if (ddb->InheritsFrom("TTable")) { 
 
              tabl = (TTable *)ddb;
-             cout << " QAInfo:     it's a table with #rows = " 
+             cout << " QAInfo:     it is a table with #rows = " 
                         << tabl->GetNRows() << endl;
 
              if (dsName == "BfcStatus") {	
@@ -249,26 +260,51 @@ void doEvents(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, cons
 
 //--------------------------------------------------------------------------
 
-void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
-              const Char_t *qaflag, const Int_t wrStEOut)
+void doEvents(const Int_t startEvent, const Int_t nEvents, const Char_t *file, const Char_t *qaflag)
 {
-    if (nevents==-1) { Help(); return;}
+    printf("*file = %s\n",file);
+    if (nEvents==-1) { Help(); return;}
     const char *fileListQQ[]={0,0};
-    if (strncmp(path,"GC",2)==0) {
+    if (strncmp(file,"GC",2)==0) {
       fileListQQ=0;
-    } else if (path[0]=='-') {
-	fileListQQ[0]=file;
-    } else if (!file[0]) {
-	fileListQQ[0]=path;
     } else {
-	fileListQQ[0] = gSystem->ConcatFileName(path,file);
+	fileListQQ[0]=file;
     }
-    doEvents(nevents,fileListQQ,qaflag,wrStEOut);
+    doEvents(startEvent,nEvents,fileListQQ,qaflag);
 }
+//--------------------------------------------------------------------------
+void doEvents(const Int_t nEvents, const Char_t *file, const Char_t *qaflag)
+{
+    doEvents(1,nEvents,file,qaflag);
+}
+
+//--------------------------------------------------------------------------
+void doEvents(const Int_t nEvents, const Char_t *path,const Char_t *file, const Char_t *qaflag, int flag)
+{
+    TString F;
+    if (path && path[0] && path[0]!='-') F = path;
+    if (file && file[0] && file[0]!='-') 
+    {
+       if (!F.IsNull()) F +="/"; 
+       F += file;
+    }
+    TString opt = qaflag;
+    if (flag) opt += " evout";
+
+
+    doEvents(1,nEvents,F.Data(),opt.Data());
+}
+
+//--------------------------------------------------------------------------
+void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
+{ doEvents(1,nEvents,fileList,qaflag); }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.62  2001/02/21 23:16:19  perev
+// clean up
+//
 // Revision 1.61  2001/02/14 23:39:17  perev
 // classs TTable::iterator example introdiced
 //
@@ -307,7 +343,7 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
 // Revision 1.49  2000/04/21 13:40:08  wenaus
-// correct the doc for nevents in multifile mode
+// correct the doc for nEvents in multifile mode
 //
 // Revision 1.48  2000/04/18 21:43:12  fine
 // make TurnDisplay macro available for doEvents
