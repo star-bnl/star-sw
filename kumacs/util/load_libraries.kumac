@@ -2,6 +2,7 @@
 * 25Aug98 K. Turner - load db libraries & all run/params tables
 * 9Sep98  K. Turner - rmdir run/params/geant: put in unnecessarily by par2mem
 * 11Sep98 K. Turner - take out rmdir run/params/geant - not there anymore
+* 14Oct98 K. Turner - separate par2mem stuff into different kumac
 * ************************************************************
 *************************************************************
 ******************************************************************
@@ -9,13 +10,13 @@
 **********************************************************************
 **************************************************************************
 
- macro run domain
+ macro run domain 
    
    macro/global/import *
      
 *  LOAD LIBRARIES
  if $vexist(make_done)=0 then
-   message " load_libraries: Load domains --> " [domain]
+   message ' load_libraries: Load domains --> ' [domain]
    test = [domain]
    nw = $words([test])
    do i = 1, [nw]
@@ -38,23 +39,12 @@
    vec/cre make_done
  endif
  
- make db
- cd run
- fortran/call par2mem
- cd /dui
- 
-
-* message ' load_libraries: remove run/params/geant - not needed!'
-* rmdir run/params/geant
  
  return
  
 *********************************************************************
 **********************************************************************
 **********************************************************************
-**********************************************************************
-**********************************************************************
-
 
 
 
