@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.130  2003/08/05 18:20:33  andrewar
+// Changed default parameters to apply eta filters.
+//
 // Revision 1.129  2003/07/30 20:12:31  pruneau
 // Added new histo group
 //
@@ -232,10 +235,10 @@ Int_t StiMaker::Init()
   _loaderTrackFilter->add(new EditableParameter("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP));
   _loaderTrackFilter->add(new EditableParameter("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP));
   _loaderTrackFilter->add(new EditableParameter("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP));
-  _loaderTrackFilter->add(new EditableParameter("EtaUsed",  "Use Eta",   false, false, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity));
+  _loaderTrackFilter->add(new EditableParameter("EtaUsed",  "Use Eta",   true, true, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity));
   _loaderTrackFilter->add(new EditableParameter("EtaMin",   "Min Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity));
   _loaderTrackFilter->add(new EditableParameter("EtaMax",   "Max Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity));
-  _loaderTrackFilter->add(new EditableParameter("nPtsUsed", "Use nPts",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPointCount));
+  _loaderTrackFilter->add(new EditableParameter("nPtsUsed", "Use nPts",     true , true, 0,1,1,Parameter::Boolean, StiTrack::kPointCount));
   _loaderTrackFilter->add(new EditableParameter("nPtsMin",  "Minimum nPts", 10., 10., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
   _loaderTrackFilter->add(new EditableParameter("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount));
   _loaderTrackFilter->add(new EditableParameter("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge));
@@ -292,7 +295,7 @@ Int_t StiMaker::InitRun(int run)
 
 Int_t StiMaker::Make()
 {
-  //cout <<"StiMaker::Make() -I- Starting"<<endl;
+  cout <<"StiMaker::Make() -I- Starting on new event ======================================"<<endl;
   if (!_initialized)
     {
       cout <<"StiMaker::Make() -I- Initialization Segment Started"<<endl;
