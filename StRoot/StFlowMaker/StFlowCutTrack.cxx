@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.38 2003/02/25 19:28:39 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.39 2003/06/11 00:51:25 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -39,7 +39,7 @@ Float_t StFlowCutTrack::mEtaTpcCuts[2]        = {-1.3, 1.3};
 Int_t   StFlowCutTrack::mChgTpcCuts[2]        = {0, 0};
 
 Bool_t  StFlowCutTrack::mFtpcTrackCut         = kFALSE;
-Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {5, 11};     // greater than ten!
+Int_t   StFlowCutTrack::mFitPtsFtpcCuts[2]    = {6, 12};     // FitPts include the vertex (i.e. the range is from 6 to 11 for 5 to 10 FTPC points). Everything < 6 and >= 12 is cut.
 Float_t StFlowCutTrack::mChiSqFtpcCuts[2]     = {0., 0.};
 Float_t StFlowCutTrack::mDcaFtpcCuts[2]       = {0., 0.};
 Float_t StFlowCutTrack::mDcaGlobalFtpcCuts[2] = {0., 2.};
@@ -703,6 +703,9 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.39  2003/06/11 00:51:25  oldi
+// Default cut for FitPtsFtpc changed to correct values (long tracks were cut before).
+//
 // Revision 1.38  2003/02/25 19:28:39  posk
 // Changed a few unimportant default cuts.
 //
