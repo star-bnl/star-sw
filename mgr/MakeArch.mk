@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.56  1999/01/21 02:15:28  fisyak
+#  New StChain w/o automatical streamer generation
+#
 #  Revision 1.55  1999/01/20 02:16:47  fisyak
 #  Active STAR_HOST_SYS for egcs
 #
@@ -143,7 +146,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/20 02:16:47 $ 
+#             Last modification $Date: 1999/01/21 02:15:28 $ 
 #. default setings
 
 MAKE  := gmake
@@ -384,8 +387,8 @@ else
 #  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
 #   CC  := /usr/local/egcs/bin/gcc 
 #   CXX := /usr/local/egcs/bin/g++ 
-  CC  := /opt/star/egcs/bin/gcc 
-  CXX := /opt/star/egcs/bin/g++ 
+  CC  := /usr/local/i386_redhat51/bin/gcc 
+  CXX := /usr/local/i386_redhat51/bin/g++ 
 
   MOTIF :=
   LINUX :=YESS

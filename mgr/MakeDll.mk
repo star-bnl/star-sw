@@ -1,7 +1,7 @@
-# $Id: MakeDll.mk,v 1.46 1999/01/20 02:16:49 fisyak Exp $
+# $Id: MakeDll.mk,v 1.47 1999/01/21 02:15:30 fisyak Exp $
 # $Log: MakeDll.mk,v $
-# Revision 1.46  1999/01/20 02:16:49  fisyak
-# Active STAR_HOST_SYS for egcs
+# Revision 1.47  1999/01/21 02:15:30  fisyak
+# New StChain w/o automatical streamer generation
 #
 # Revision 1.45  1999/01/14 13:56:40  fisyak
 # Add Victors MakeFun.mk, Add StMagF
@@ -303,7 +303,7 @@ define  ORD_LINKDEF
 	echo "#pragma link off all globals;"    	>> $(LINKDEF);\
 	echo "#pragma link off all classes;"    	>> $(LINKDEF);\
 	echo "#pragma link off all functions;"  	>> $(LINKDEF);\
-	echo "#pragma link C++ class $(STEM);"  	>> $(LINKDEF);\
+	echo "#pragma link C++ class $(STEM)-;"  	>> $(LINKDEF);\
 	echo "#endif"					>> $(LINKDEF);
 endef
 else
@@ -401,6 +401,10 @@ $(FILES_CINT_G3) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h
 	@echo "#pragma  link C++ class  TGeant3;"	 >> $(LINKDEF);
 	@echo "#endif"					 >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
+	cd $(GEN_DIR); $(CP) $(1ST_DEPS) .; \
+	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCINT)  $(notdir $(1ST_DEPS)) \
+        $(notdir $(LINKDEF))
+
 $(FILES_CINT_CHAIN) : $(GEN_DIR)/%Cint.cxx : $(SRC_DIR)/%.h 
 	@test -f $(LINKDEF) &&  $(RM) $(LINKDEF);\
 	echo "#ifdef __CINT__"                  	>  $(LINKDEF);\
