@@ -614,22 +614,21 @@ Block EMGT is a megatile EM section
       Material CAir Isvol=0
       Medium standard
 *
-      Shape     CONS  dz=mgt/2,  
-                rmn1=(current-diff)*Tan_Low-dd,
-								rmn2=(current+mgt-diff)*Tan_Low-dd,
-                rmx1=(current-diff)*Tan_Upp+dup,
-								rmx2=(current+mgt-diff)*Tan_Upp+dup
+      Shape     CONS  dz=mgt/2,
+      rmn1=(current-diff)*Tan_Low-dd,  rmn2=(current+mgt-diff)*Tan_Low-dd,
+      rmx1=(current-diff)*Tan_Upp+dup, rmx2=(current+mgt-diff)*Tan_Upp+dup
+
       if (I_section=1 | I_section=2 | I_section=5) then
-       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-       Call GSTPAR (ag_imed,'CUTELE',0.00001)
+         Call GSTPAR (ag_imed,'CUTGAM',0.00001)
+         Call GSTPAR (ag_imed,'CUTELE',0.00001)
       else
-       Call GSTPAR (ag_imed,'CUTGAM',0.00008)
-       Call GSTPAR (ag_imed,'CUTELE',0.001)
-       Call GSTPAR (ag_imed,'BCUTE',0.0001)
+         Call GSTPAR (ag_imed,'CUTGAM',0.00008)
+         Call GSTPAR (ag_imed,'CUTELE',0.001)
+         Call GSTPAR (ag_imed,'BCUTE',0.0001)
       end if
 *
       Do isec=1,nint(emcs_Nslices)
-        Create and Position EPER AlphaZ=(emcs_Nslices/2-isec+0.5)*dphi
+         Create and Position EPER AlphaZ=(emcs_Nslices/2-isec+0.5)*dphi
       End Do 
 Endblock
 *---------------------------------------------------------------------------
