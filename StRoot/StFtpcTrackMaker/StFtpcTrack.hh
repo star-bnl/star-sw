@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.hh,v 1.19 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcTrack.hh,v 1.20 2004/02/12 19:37:10 oldi Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.20  2004/02/12 19:37:10  oldi
+// *** empty log message ***
+//
 // Revision 1.19  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -124,7 +127,6 @@
 #include "StFtpcVertex.hh"
 #include "StFtpcTrackingParams.hh"
 
-#include "fpt_fptrack.h"
 #include "phys_constants.h"
 
 class StFtpcPoint;
@@ -140,6 +142,7 @@ private:
       Int_t  mRowsWithPoints; // Binary pattern to know in which row a point is found
 
      Int_t   mTrackNumber;    // number of track
+     Int_t   mGlobTrackId;    // global track id
   Double_t   mChi2Circle;     // Chi squared of circle fit
   Double_t   mChi2Length;     // Chi squared of length fit
   Double_t   mTrackLength;    // Length of track helix from first to last point
@@ -158,8 +161,7 @@ private:
   // data from momentum fit
   TVector3   mP;              // ThreeVector of track momentum
   TVector3   mV;              // ThreeVector of vertex used in fit (= first point on track)
-  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.  
-  // TVector3   mL;              // ThreeVector of last point on track)  
+  TVector3   mL;              // ThreeVector of last point on track  
      Int_t   mQ;              // charge measured in fit 
   Double_t   mChiSq[2];       // Chi2 of momentum fit
   Double_t   mTheta;          // theta value of momentum fit
@@ -174,8 +176,6 @@ public:
   
              StFtpcTrack();                                                       // constructor
              StFtpcTrack(Int_t tracknumber);                                      // constructor which fills tracknumber (all other members are set to default values)
-             StFtpcTrack(fpt_fptrack_st *track_st, TObjArray *hits = 0, 
-	                Int_t tracknumber = 0);                                  // constructor if STAF track is given
    virtual  ~StFtpcTrack();                                                       // destructor
 
       void   SetDefaults();                                                       // performs the default setup for the track
@@ -190,9 +190,6 @@ public:
       void   CalcResiduals(Bool_t primaryFit);                                    // calulates the primary or global fit residuals for each point on track
       void   CalcGlobResiduals();                                                 // calulates the global fit residuals for each point on track
       void   CalcPrimResiduals();                                                 // calulates the primary fit residuals for each point on track
-     Int_t   WriteTrack(fpt_fptrack_st *trackTableEntry, 
-			StFtpcVertex *vertex,
-			Bool_t primary_fit);                                      // writes track to table
 
   // momentum fit
   void MomentumFit(StFtpcVertex *vertex = 0);
@@ -208,8 +205,10 @@ public:
   MIntArray  *GetHitNumbers()       const { return mPointNumbers;                    }
   Int_t       GetRowsWithPoints()   const { return mRowsWithPoints;                  }
   Int_t       GetTrackNumber()      const { return mTrackNumber;                     }
+  Int_t       GetGlobalTrackId()    const { return mGlobTrackId;                     }
   Double_t    GetChi2Circle()       const { return mChi2Circle;                      }
   Double_t    GetChi2Length()       const { return mChi2Length;                      }
+  Double_t    GetTrackLength()      const { return mTrackLength;                     }
   Double_t    GetRadius()           const { return mRadius;                          }
   Double_t    GetCenterX()          const { return mCenterX;                         }
   Double_t    GetCenterY()          const { return mCenterY;                         }
@@ -236,10 +235,11 @@ public:
   Int_t       GetHemisphere() const;
   Int_t       GetSector() const;
 
+  // Note that the counting for the final track is reversed:
+  // The first point is the one closest to the interaction point.
   TVector3    GetVertex()           const { return mV;                               }
   TVector3    GetFirstPointOnTrack()const { return mV;                               }
-  // This has to go in as soon as r0out, phi0out, z0out in the dst_track table are needed.
-  // TVector3    GetLastPointOnTrack() const { return mL;                               }
+  TVector3    GetLastPointOnTrack() const { return mL;                               }
   Int_t       GetCharge()           const { return mQ;                               }
   Double_t const  *GetChiSq()       const { return mChiSq;                           }
   Double_t    GetTheta()            const { return mTheta;                           }
@@ -250,6 +250,7 @@ public:
   
   // setter   
   void   SetTrackNumber(Int_t number);
+  void   SetGlobalTrackId(Int_t f)     {    mGlobTrackId = f; }
   void   SetRowsWithPoints(Int_t f)    { mRowsWithPoints = f; }
 	    
   void   SetPx(Double_t f)             {          mP.SetX(f); }

@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.30 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcTracker.cc,v 1.31 2004/02/12 19:37:11 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.31  2004/02/12 19:37:11  oldi
+// *** empty log message ***
+//
 // Revision 1.30  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -162,7 +165,7 @@ ClassImp(StFtpcTracker)
 
 
   
-/// Default constructor. Sets the pointers to 0 an cut for momnetum fit loosely.
+/// Default constructor. Sets the pointers to 0 an cut for momentum fit loosely.
 StFtpcTracker::StFtpcTracker()
 {
   mBench  = 0;
@@ -182,39 +185,6 @@ StFtpcTracker::StFtpcTracker()
 }
 
 
-/// Usual used constructor. Sets up the pointers and the cut value for the momentum fit.
-StFtpcTracker::StFtpcTracker(St_fcl_fppoint *fcl_fppoint, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
-{
-  if (bench) {
-    mBench = new TBenchmark();
-  }
-
-  else mBench = 0;
-
-  mTime = 0.;
-
-  mHitsCreated = (Bool_t)kFALSE;
-  mMaxDca = max_Dca;
-  mTrack = new TObjArray(2000);
-
-  Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
-  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
-
-  if(vertex == 0) {
-    mVertex = new StFtpcVertex(point_st, n_clusters);
-    mVertexCreated = (Bool_t)kTRUE;
-  }
-  
-  else {
-    mVertex = vertex;
-    mVertexCreated = (Bool_t)kFALSE;
-  }
-
-
-  mVertexEast = new StFtpcVertex();
-  mVertexWest = new StFtpcVertex();
-}
-
 /// Constructor to take care of arbitrary hits.
 StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench, Double_t max_Dca)
 {
@@ -230,9 +200,13 @@ StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench
 
   mMaxDca = max_Dca;
   mTrack = new TObjArray(2000);
+  mTrack->SetOwner(kTRUE);
 
   mVertex = vertex;
   mVertexCreated = (Bool_t)kFALSE;
+
+  mVertexEast = new StFtpcVertex();
+  mVertexWest = new StFtpcVertex();
 }
 
 /// Constructor to handle the case where everything is there already.
@@ -257,57 +231,11 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
 }
 
 
-/// Constructor to handle the case where everything is there already but only in StAF tables.
-StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Bool_t bench, Double_t max_Dca)
-{
-
-  mBench  = 0;
-  if (bench) {
-    mBench = new TBenchmark();
-  }
-
-  mTime = 0.;
-
-  mVertex = vertex;
-  mVertexCreated = (Bool_t)kFALSE;
-
-  // Copy clusters into ObjArray.
-  Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
-  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
-
-  mHit = new TObjArray(n_clusters);    // create TObjArray
-  mHitsCreated = (Bool_t)kTRUE;
-
-  {for (Int_t i = 0; i < n_clusters; i++) {
-    mHit->AddAt(new StFtpcPoint(point_st++), i);
-    ((StFtpcPoint *)mHit->At(i))->SetHitNumber(i);
-  }}
-
-  // Copy tracks into ObjArray.
-  Int_t n_tracks = fpt_fptrack->GetNRows();  // number of tracks
-  fpt_fptrack_st *track_st = fpt_fptrack->GetTable();  // pointer to first track structure
-
-  mTrack = new TObjArray(n_tracks);    // create TObjArray
-
-  {for (Int_t i = 0; i < n_tracks; i++) {
-    mTrack->AddAt(new StFtpcTrack(track_st++, mHit, i), i);
-  }}
-
-  mMaxDca = max_Dca;
-
-  mVertexEast = new StFtpcVertex();
-  mVertexWest = new StFtpcVertex();
-}
-
-
 /// Destructor.
 StFtpcTracker::~StFtpcTracker()
 {
-  if (mTrack) {
-    mTrack->Delete();
-    delete mTrack;
-  }
-  
+  // mTrack and all tracks will be deleted by StMaker::Clear() since it is sitting in a TDataSet
+
   if (mHitsCreated) {
     mHit->Delete();
     delete mHit;
@@ -794,67 +722,35 @@ void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 }
 
 
-
 /*!
-  Writes tracks to STAF table.
-  This function is no longer used. Everything is done now in FitAnddEdexAndWrite().
+  Fits tracks.
 */
-Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
+Int_t StFtpcTracker::Fit(Bool_t primary_fit)
 {
-  fpt_fptrack_st *trackTable= trackTableWrapper->GetTable();
-
   if (mTrack) {
-    Int_t num_tracks = mTrack->GetEntriesFast();
-    
-    if(num_tracks > trackTableWrapper->GetTableSize()) {
-      num_tracks = trackTableWrapper->GetTableSize();
-    }
-
     StFtpcTrack *track;
     
-    for (Int_t i=0; i<num_tracks; i++) {
+    for (Int_t i=0; i<mTrack->GetEntriesFast(); i++) {
       track = (StFtpcTrack *)mTrack->At(i);
       track->Fit(mVertex, mMaxDca, primary_fit);
-      track->WriteTrack(&(trackTable[i]), mVertex, primary_fit);
-    }
-   
-    trackTableWrapper->SetNRows(num_tracks);
-    gMessMgr->Message("", "I", "OS") << "Writing " << num_tracks << " found track";
-    
-    if (num_tracks == 1) {
-      *gMessMgr << "." << endm;
-    }
-    
-    else {
-      *gMessMgr << "s." << endm;
     }
 
-    return 0;
-  }
-
-  else {
-    gMessMgr->Message("", "W", "OS") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
-}
+   
+  return 0;
+ }
 
 
-/// Calculates the momentum fit, the dE/dx, and writes the tracks to their STAF table, finally.
-Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_t primary_fit)
+// Calculates the momentum fit and dE/dx (no writing!).
+Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 {
   if (mBench) {
     mBench->Start("fit");
   }
   
-  fpt_fptrack_st *trackTable= trackTableWrapper->GetTable();
-  
   if (mTrack) {
-    Int_t num_tracks = mTrack->GetEntriesFast();
     
-    if(num_tracks > trackTableWrapper->GetTableSize()) {
-      num_tracks = trackTableWrapper->GetTableSize();
-    }
-
     Int_t itrk_ok ;                   // number of acepted tracks  
     Double_t total_charge = 0.0 ;     // total charges
   
@@ -982,15 +878,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
       // fill the output table 
       track->SetdEdx(dedx_mean);
       track->SetNumdEdxHits(acc_hit);
-	
-      //cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl << endl;
-
-      if (StFtpcTrackingParams::Instance()->IdMethod() != 1) { 
-	// calculations done, write track
-	// if id_method == 1 the calculations go on and the track is written later
-	track->WriteTrack(&(trackTable[itrk]), mVertex, primary_fit);
-      }
-    
+	    
       itrk_ok++;
 
       if (itrk > GetNumberOfTracks()) {
@@ -1138,10 +1026,6 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
 	dedx_mean /= (Double_t)acc_hit;
 	track->SetdEdx(dedx_mean);
 	track->SetNumdEdxHits(acc_hit);
-	//cout << track->GetdEdx() << " " << track->GetNumdEdxHits() << endl;
-
-	// write track
-	track->WriteTrack(&(trackTable[itrk]), mVertex, primary_fit);
       }
     
       delete[] weighted;
@@ -1149,12 +1033,10 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
 
     delete[] dedx_arr;    // release the dedx_arr array
     delete[] index_arr;   // release the dedx_arr array
-    
-    trackTableWrapper->SetNRows(num_tracks);
 
     if(mBench) {
       mBench->Stop("fit");
-      gMessMgr->Message("", "I", "OS") << "Fit, dE/dx, writing finished  (" << mBench->GetCpuTime("fit") << " s)." << endm;
+      gMessMgr->Message("", "I", "OS") << "Fit and dE/dx calc.finished   (" << mBench->GetCpuTime("fit") << " s)." << endm;
       mTime += mBench->GetCpuTime("fit");
     }
 
@@ -1172,20 +1054,4 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
     gMessMgr->Message("", "W", "OS") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
-}
-
-
-/*!
-  Writes tracks and clusters in ROOT file.
-  In the moment this makes no sense because the important information
-  about momentum of tracks and coordinates of clusters or stored in
-  StThreeVerctor<double> which does not inherit from TObject. So it
-  is not written out!
-*/
-Int_t StFtpcTracker::WriteTracksAndClusters()
-{
-  mHit->Write();
-  mTrack->Write();
-  
-  return 0;
 }

@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.hh,v 1.18 2003/09/16 15:27:01 jcs Exp $
+// $Id: StFtpcConfMapper.hh,v 1.19 2004/02/12 19:37:10 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.19  2004/02/12 19:37:10  oldi
+// *** empty log message ***
+//
 // Revision 1.18  2003/09/16 15:27:01  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -216,12 +219,7 @@ private:
 
 public:
             StFtpcConfMapper();  // default constructor
-            StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint, 
-			     StFtpcVertex *vertex = 0,
-			     Bool_t bench = (Bool_t)kFALSE,
-			     Int_t phi_segments = 100, 
-			     Int_t eta_segments = 200);  // constructor
-            StFtpcConfMapper(St_fcl_fppoint *fcl_fppoint,
+            StFtpcConfMapper(TObjArray *inputHits,
 			     MIntArray *good_hits,
 			     StFtpcVertex *vertex = 0,
 			     Bool_t bench = (Bool_t)kFALSE,

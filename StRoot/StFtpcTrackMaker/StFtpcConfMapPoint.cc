@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.7 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.8 2004/02/12 19:37:09 oldi Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.8  2004/02/12 19:37:09  oldi
+// *** empty log message ***
+//
 // Revision 1.7  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -75,13 +78,9 @@ StFtpcConfMapPoint::StFtpcConfMapPoint() : StFtpcPoint()
 }
 
 
-StFtpcConfMapPoint::StFtpcConfMapPoint(fcl_fppoint_st *point_st, StFtpcVertex *vertex) : StFtpcPoint(point_st)
+StFtpcConfMapPoint::StFtpcConfMapPoint(StFtpcPoint* point, StFtpcVertex *vertex) : StFtpcPoint(*point)
 {
-  // Standard constructor.
-  // This is the usual way to create a StFtpcConfMapPoint object. By giving the pointer
-  // to the fcl_fppoint_st(ructure) the constructor copies the pointers to the cluster information
-  // into its data members and calculates necessary information for the confromal mapping 
-  // track algorithm. 
+  // "Copy" constructor.
   
   Setup(vertex);
 }

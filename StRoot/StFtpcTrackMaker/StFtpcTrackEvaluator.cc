@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.20 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.21 2004/02/12 19:37:10 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.21  2004/02/12 19:37:10  oldi
+// *** empty log message ***
+//
 // Revision 1.20  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -362,65 +365,6 @@ StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_d
 
   FillEventHistos();
   FillTimeHistos(tracker);
-  FillCutHistos();
-  DivideHistos();
-  WriteHistos();
-}
-
-
-StFtpcTrackEvaluator::StFtpcTrackEvaluator(St_DataSet *geant, St_DataSet *ftpc_data, StFtpcVertex *main_vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Char_t *filename, Char_t *write_permission)
-{
-  // Usual used constructor if the output of the tracker was written in STAF tables only.
-
-  gMessMgr->Message("Track evaluating started...", "I", "OS");
-
-  mVertex = main_vertex;
-
-  // Copy clusters into ObjArray.
-  Int_t n_clusters = fcl_fppoint->GetNRows();          // number of clusters
-  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();  // pointer to first cluster structure
-
-  mFoundHits = new TObjArray(n_clusters);    // create TObjArray
-
-  {for (Int_t i = 0; i < n_clusters; i++) {
-    mFoundHits->AddAt(new StFtpcConfMapPoint(point_st++, mVertex), i);
-    ((StFtpcPoint *)mFoundHits->At(i))->SetHitNumber(i);
-  }}
-
-  // Copy tracks into ObjArray.
-  Int_t n_tracks = fpt_fptrack->GetNRows();          // number of tracks
-  fpt_fptrack_st *track_st = fpt_fptrack->GetTable();  // pointer to first track structure
-
-  mFoundTracks = new TObjArray(n_tracks);    // create TObjArray
-
-  {for (Int_t i = 0; i < n_tracks; i++) {
-    mFoundTracks->AddAt(new StFtpcTrack(track_st++, mFoundHits, i), i);
-  }}
-
-  mObjArraysCreated = (Bool_t)kTRUE;
-
-  SetupFile(filename, write_permission);
-  SetupHistos();
-  Setup(geant, ftpc_data);
-
-  St_ffs_gepoint *ffs_gepoint = (St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint");
- 
-  if (!ffs_gepoint) {
-    // event processed with slow simulator
-    gMessMgr->Message("", "I", "OS") << "This event was processed with the slow simulator!" << endm;
-    gMessMgr->Message("", "I", "OS") << "Most information will be missing due to lack of geant hit information." << endm;
-  }
-  
-  InfoAll();
-  FillHitsOnTrack();
-
-  if (ffs_gepoint) {
-    // fast simulator was present
-    FillParentHistos();
-    FillMomentumHistos();
-  }
-
-  FillEventHistos();
   FillCutHistos();
   DivideHistos();
   WriteHistos();

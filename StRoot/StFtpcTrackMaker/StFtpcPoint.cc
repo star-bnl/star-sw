@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.cc,v 1.17 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcPoint.cc,v 1.18 2004/02/12 19:37:10 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.18  2004/02/12 19:37:10  oldi
+// *** empty log message ***
+//
 // Revision 1.17  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -89,6 +92,9 @@
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcPoint.hh"
+#include "StFtpcHit.h"
+#include "StFtpcHitCollection.h"
+#include "StDetectorId.h"
 #include "StMessMgr.h"
 
 //////////////////////////////////////////////////////////////////////////////
@@ -107,6 +113,8 @@ StFtpcPoint::StFtpcPoint()
 {
   // Default constructor.
   // Sets all pointers to zero.
+
+  SetStFtpcHit((StFtpcHit*)0);
   
   SetHitNumber(-1);
   SetNextHitNumber(-1);
@@ -142,37 +150,15 @@ StFtpcPoint::StFtpcPoint()
 }
 
 
-StFtpcPoint::StFtpcPoint(fcl_fppoint_st *point_st)
+StFtpcPoint::StFtpcPoint(const StFtpcPoint &point)
 {
-  // Standard constructor.
-  // This is the usual way to create a StFtpcPoint object. By giving the pointer
-  // to the fcl_fppoint_st(ructure) (cluster data found by the cluster finder) the 
-  // constructor copies the cluster information into its data members.
+  // Copy constructor for already existing hits.
+
+  *this = point;
 
   SetHitNumber(-1);
   SetNextHitNumber(-1);
   SetTrackNumber(-1);
-
-  SetPadRow((Long_t) point_st->row);
-  SetSector((Long_t) point_st->sector);
-
-  SetNumberPads((Long_t) point_st->n_pads);
-  SetNumberBins((Long_t) point_st->n_bins);
-
-  SetMaxADC((Long_t) point_st->max_adc);
-  SetCharge((Long_t) point_st->charge);
-
-  SetX((Double_t) point_st->x);
-  SetY((Double_t) point_st->y);
-  SetZ((Double_t) point_st->z);
-
-  SetXerr((Double_t) point_st->x_err);
-  SetYerr((Double_t) point_st->y_err);
-  SetZerr((Double_t) point_st->z_err);
-
-  SetSigmaPhi((Double_t) point_st->s_phi);
-  SetSigmaR((Double_t) point_st->s_r);
-  SetFlags((Long_t) point_st->flags);
 
   SetResidualsToZero();
 
@@ -200,6 +186,8 @@ StFtpcPoint::StFtpcPoint(Long_t   row,
 			 Long_t   flags)
 {
   // Constructor which fills all values found by the cluster finder directly.
+
+  SetStFtpcHit((StFtpcHit*)0);
 
   SetHitNumber(-1);
   SetNextHitNumber(-1);
@@ -240,6 +228,8 @@ StFtpcPoint::StFtpcPoint(Double_t *x, Int_t row)
   // Constructor which takes the x, y, and z coodrinate and the pad row.
 
   // Hit position is set in local coordinates per default! Change flag (SetGlobalCoord(kTRUE)) if necessary.
+
+  SetStFtpcHit((StFtpcHit*)0);
 
   SetHitNumber(-1);
   SetNextHitNumber(-1);
@@ -369,40 +359,28 @@ void StFtpcPoint::TransformGlobal2Ftpc()
 }
 
 
-Int_t StFtpcPoint::ToTable(fcl_fppoint_st *point_st)
+Int_t StFtpcPoint::ToStEvent(StFtpcHitCollection* ftpcHitCollection) 
 {
-  point_st->row=GetPadRow();
-  point_st->sector=GetSector();
-  point_st->n_pads=GetNumberPads();
-  point_st->n_bins=GetNumberBins();
-  point_st->max_adc=GetMaxADC();
-  point_st->charge=GetCharge();
-  point_st->flags=GetFlags();
-  point_st->x=GetX();
-  point_st->y=GetY();
-  point_st->z=GetZ();
-  point_st->x_err=GetXerr();
-  point_st->y_err=GetYerr();
-  point_st->z_err=GetZerr();
-  point_st->s_phi=GetSigmaPhi();
-  point_st->s_r=GetSigmaR();
+  // Writes cluster information into StFtpcHit class inside StEvent.
+
+  StFtpcHit *point = new StFtpcHit(StThreeVectorF(GetX(), GetY(), GetZ()), 
+				   StThreeVectorF(GetXerr(), GetYerr(), GetZerr()), 
+				   GetHardwarePosition(), mCharge, 
+				   0); // hit is not used for tracking (yet)
+
+  point->setFlag(GetFlags());
+
+  ftpcHitCollection->addHit(point);
+  SetStFtpcHit(point); // let this StFtpcPoint know its pointer in StEvent
 
   return 1;
 }
 
 
-Int_t StFtpcPoint::WriteCluster()
-{
-  // Writes cluster to disc.
-  // Does nothing up to now.
-
-  return 0;
-}
-
 void StFtpcPoint::SetResidualsToZero()
 {
   // Sets all residuals to 0.
-
+  
   SetXPrimResidual(0.);
   SetYPrimResidual(0.);
   SetRPrimResidual(0.);
@@ -411,7 +389,7 @@ void StFtpcPoint::SetResidualsToZero()
   SetYGlobResidual(0.);
   SetRGlobResidual(0.);
   SetPhiGlobResidual(0.);
-
+  
   return;
 }
 
@@ -419,8 +397,38 @@ void StFtpcPoint::SetResidualsToZero()
 StFtpcTrack *StFtpcPoint::GetTrack(TObjArray *tracks) const
 {
   // Returns the pointer to the track to which this hit belongs.
-
+  
   return (StFtpcTrack*)tracks->At(this->GetTrackNumber());
+}
+
+
+Int_t StFtpcPoint::GetDetectorId() 
+{
+  // Returns the detector id of this hit.
+  
+  if (mPadRow >= 1 && mPadRow <= 10) return kFtpcWestId;
+  else if (mPadRow >= 11 && mPadRow <= 20) return kFtpcEastId;
+  else {
+    gMessMgr->Message("", "I", "OS") << "StFtpcPoint.mPadRow  = " << mPadRow << " is out of range"<< endm;
+    return -1;
+  }
+}
+
+
+Long_t StFtpcPoint::GetHardwarePosition()
+{
+  // Returns the hardware position of this hit.
+  //    hw_position  (32 bits)
+  //            bits  0-3   det_id
+  //            bits 4-10   FTPC pad plane (1-20)
+  //            bits 11-20  Sector number within pad-plane (1-6)
+  //            bits 21-24  number of pads in cluster
+  //            bits 25-31  number of consecutive timebins in cluster
+  return (mNumberBins<<25) 
+    + (mNumberPads<<21)
+    + (mSector<<11)
+    + (mPadRow<<4)
+    + this->GetDetectorId(); 
 }
 
 

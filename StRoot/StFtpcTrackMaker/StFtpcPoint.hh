@@ -1,5 +1,8 @@
-// $Id: StFtpcPoint.hh,v 1.12 2003/09/16 15:27:02 jcs Exp $
+// $Id: StFtpcPoint.hh,v 1.13 2004/02/12 19:37:10 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.13  2004/02/12 19:37:10  oldi
+// *** empty log message ***
+//
 // Revision 1.12  2003/09/16 15:27:02  jcs
 // removed inline as it would leave a few undefined reference
 //
@@ -82,50 +85,52 @@
 #include "TVector3.h"
 #include "TMath.h"
 
-#include "tables/St_fcl_fppoint_Table.h"
-#include "tables/St_ffs_gepoint_Table.h"
-
+#include "StDetectorId.h"
 #include "StFtpcTrack.hh"
 
+class StFtpcHitCollection;
+class StFtpcHit;
 class StFtpcTrack;
 
 class StFtpcPoint : public TObject {
   
 private:
+
+  StFtpcHit *mStEventHit;    // pointer to the corresponding hit in StEvent
   
-  TVector3  mCoord;         // vector of cluster coordinates
-  TVector3  mError;         // vector of errors on cluster coordinates
+  TVector3   mCoord;         // vector of cluster coordinates
+  TVector3   mError;         // vector of errors on cluster coordinates
   
-  Bool_t    mGlobalCoord;   // flag that indicates if the hit is stored in global or local (FTPC) coordinates
-  Bool_t    mUsed;          // flag that indicates if the hit is assigned to a track 
-  Int_t     mHitNumber;     // number of this cluster in this event
-  Int_t     mNextHitNumber; // number of next hit on same track
-  Int_t     mTrackNumber;   // track number to which this cluster belongs to
+  Bool_t     mGlobalCoord;   // flag that indicates if the hit is stored in global or local (FTPC) coordinates
+  Bool_t     mUsed;          // flag that indicates if the hit is assigned to a track 
+  Int_t      mHitNumber;     // number of this cluster in this event
+  Int_t      mNextHitNumber; // number of next hit on same track
+  Int_t      mTrackNumber;   // track number to which this cluster belongs to
 
   // additional input variables from cluster finder
   
-  Long_t    mPadRow;        // FTPC row number
-  Long_t    mSector;        // FTPC readout sector number
-  Long_t    mNumberPads;    // number of pads in cluster
-  Long_t    mNumberBins;    // number of consecutive timebins in cluster
-  Long_t    mMaxADC;        // cluster peak height (adc channels)
-  Long_t    mCharge;        // cluster charge (adc channels)
-  Long_t    mFlags;         // bit0:unfolded, bit1:unfold failed,
-                            // bit2:saturated, bit3:bad shape, 
-                            // bit4:cut off, bit5:tracked, 
-                            // bit6:global coords, bit7:don't use for tracking
-  Double_t  mSigmaPhi;      // cluster sigma in pad direction
-  Double_t  mSigmaR;        // cluster sigma in drift direction
+  Long_t     mPadRow;        // FTPC row number
+  Long_t     mSector;        // FTPC readout sector number
+  Long_t     mNumberPads;    // number of pads in cluster
+  Long_t     mNumberBins;    // number of consecutive timebins in cluster
+  Long_t     mMaxADC;        // cluster peak height (adc channels)
+  Long_t     mCharge;        // cluster charge (adc channels)
+  Long_t     mFlags;         // bit0:unfolded, bit1:unfold failed,
+                             // bit2:saturated, bit3:bad shape, 
+                             // bit4:cut off, bit5:tracked, 
+                             // bit6:global coords, bit7:don't use for tracking
+  Double_t   mSigmaPhi;      // cluster sigma in pad direction
+  Double_t   mSigmaR;        // cluster sigma in drift direction
 
     // Residuals
-  Double_t  mXPrimResidual;     // x distance of measured point to primary momentum fit
-  Double_t  mYPrimResidual;     // y distance of measured point to primary momentum fit
-  Double_t  mRPrimResidual;     // r of measured point to r of primary momentum fit
-  Double_t  mPhiPrimResidual;   // angle of measured point to angle of primary momentum fit
-  Double_t  mXGlobResidual;     // x distance of measured point to global momentum fit
-  Double_t  mYGlobResidual;     // y distance of measured point to global momentum fit
-  Double_t  mRGlobResidual;     // r of measured point to r of global momentum fit
-  Double_t  mPhiGlobResidual;   // angle of measured point to angle of global momentum fit
+  Double_t   mXPrimResidual;     // x distance of measured point to primary momentum fit
+  Double_t   mYPrimResidual;     // y distance of measured point to primary momentum fit
+  Double_t   mRPrimResidual;     // r of measured point to r of primary momentum fit
+  Double_t   mPhiPrimResidual;   // angle of measured point to angle of primary momentum fit
+  Double_t   mXGlobResidual;     // x distance of measured point to global momentum fit
+  Double_t   mYGlobResidual;     // y distance of measured point to global momentum fit
+  Double_t   mRGlobResidual;     // r of measured point to r of global momentum fit
+  Double_t   mPhiGlobResidual;   // angle of measured point to angle of global momentum fit
 
 public:
   
@@ -145,7 +150,7 @@ public:
 			     Double_t s_phi, 
 			     Double_t s_r, 
 			     Long_t   flags);                   // constructor to be filled directly from the cluster finder
-                 StFtpcPoint(fcl_fppoint_st *point_st);         // constructor for data after cluster finding
+                 StFtpcPoint(const StFtpcPoint &point);         // copy constructor
                  StFtpcPoint(Double_t *x, Int_t row);           // constructor which take an arbitrary point as input
   virtual       ~StFtpcPoint();                                 // destructor
 
@@ -153,10 +158,11 @@ public:
   void TransformFtpc2Global();
   void TransformGlobal2Ftpc();
 
-  virtual Int_t  WriteCluster();                                // writes cluster to disc
-  virtual Int_t  ToTable(fcl_fppoint_st *point_st);             // writes cluster to STAF table
+  virtual Int_t  ToStEvent(StFtpcHitCollection *ftpcHitColl);   // writes cluster to StFtpcHit class within StEvent
   
   // getter
+  StFtpcHit* GetStFtpcHit() { return mStEventHit; }
+
   TVector3 GetCoord()  { return mCoord;    }
   TVector3 GetError()  { return mError;    }
   
@@ -192,6 +198,8 @@ public:
   Long_t   GetMaxADC()        const { return mMaxADC;          }
   Long_t   GetCharge()        const { return mCharge;          }
   Long_t   GetFlags()         const { return mFlags;           }
+   Int_t   GetDetectorId();
+  Long_t   GetHardwarePosition();
   
   Double_t GetXPrimResidual()     const { return mXPrimResidual;       }
   Double_t GetYPrimResidual()     const { return mYPrimResidual;       }
@@ -202,7 +210,9 @@ public:
   Double_t GetRGlobResidual()     const { return mRGlobResidual;       }
   Double_t GetPhiGlobResidual()   const { return mPhiGlobResidual;     }
 
-  // setter  
+  // setter
+  void    SetStFtpcHit(StFtpcHit* f) { mStEventHit = f; }
+
   void    SetX(Double_t f)        {     mCoord.SetX(f); }
   void    SetY(Double_t f)        {     mCoord.SetY(f); } 
   void    SetZ(Double_t f)        {     mCoord.SetZ(f); }

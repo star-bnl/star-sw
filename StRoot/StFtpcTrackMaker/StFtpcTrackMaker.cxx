@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.52 2004/02/05 00:24:54 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.53 2004/02/12 19:37:11 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.53  2004/02/12 19:37:11  oldi
+// *** empty log message ***
+//
 // Revision 1.52  2004/02/05 00:24:54  oldi
 // Eliminating a bug concerning a test of the wrong pointer to a vertex.
 //
@@ -229,6 +232,9 @@
 #include "StFormulary.hh"
 #include "StFtpcTrackingParams.hh"
 
+#include "TObjArray.h"
+#include "TObjectSet.h"
+
 #include <Stiostream.h>
 #include <math.h>
 
@@ -238,7 +244,6 @@
 #include "StVertexId.h"
 #include "StMessMgr.h"
 
-#include "tables/St_fpt_fptrack_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
 #include "tables/St_g2t_track_Table.h"
 
@@ -404,23 +409,16 @@ Int_t StFtpcTrackMaker::Make()
   // Setup and tracking.
   
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) started..." << endm;
-  
-  St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
-  
-  if (!ftpc_data) {
-    gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
-    return kStWarn;
-  }
-  
-  //  clusters exist -> do tracking
-  St_fcl_fppoint *fcl_fppoint = (St_fcl_fppoint *)ftpc_data->Find("fcl_fppoint");
-  
-  if (!fcl_fppoint) {
+
+  TObjectSet* objSet = (TObjectSet*)GetDataSet("ftpcClusters");
+  TObjArray *ftpcHits = (TObjArray*)objSet->GetObject();
+  if (!ftpcHits) {
     gMessMgr->Message("", "W", "OS") << "No FTPC clusters available!" << endm;
     return kStWarn;
-  }
-  
+  }  
+
   StFtpcVertex *vertex = new StFtpcVertex(); // create vertex (all parameters set to 0)
+  AddData(new TObjectSet("ftpcVertex", vertex));
 
   // Use Primary vertex if it exists
   St_DataSet *primary = GetDataSet("primary");
@@ -441,6 +439,7 @@ Int_t StFtpcTrackMaker::Make()
       }
     }  // end of if (vertex)
   }  // end of if (primary) 
+ 
   
   if (vertex->GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
 
@@ -471,8 +470,8 @@ Int_t StFtpcTrackMaker::Make()
   if (Int_t problem = vertex->CheckVertex()) {
     return problem;
   }
-  
-  StFtpcConfMapper *tracker = new StFtpcConfMapper(fcl_fppoint, vertex, kTRUE);
+
+  StFtpcConfMapper *tracker = new StFtpcConfMapper(ftpcHits, vertex, kTRUE);
   
   // tracking 
   if (StFtpcTrackingParams::Instance()->MagFieldFactor() == 0.) {
@@ -490,13 +489,13 @@ Int_t StFtpcTrackMaker::Make()
   //tracker->NoFieldTracking();
   //tracker->LaserTracking();
   
+  AddData(new TObjectSet("ftpcTracks", tracker->GetTracks()));
+
   // coordinate transformation due to rotation and shift of TPC with respect to the magnet 
   // (= global coordinate system). 
   // Since the simulator incorporates these transformations, the distinction between simulated
   // and real events isn't necessary any more. 
       
-  fcl_fppoint_st *point_st = fcl_fppoint->GetTable();
-    
   TObjArray *clusters = tracker->GetClusters();
   StFtpcPoint *point;
     
@@ -504,15 +503,11 @@ Int_t StFtpcTrackMaker::Make()
   for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
     point = (StFtpcPoint *)clusters->At(i);
     point->TransformFtpc2Global();
-    point->ToTable(&(point_st[i]));   
   }
   
-  // momentum fit, dE/dx calculation, write tracks to tables
-  St_fpt_fptrack *fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", tracker->GetNumberOfTracks());
-  m_DataSet->Add(fpt_fptrack);
-  
-  tracker->GlobalFitAnddEdxAndWrite(fpt_fptrack);
-  
+  // momentum fit, dE/dx calculation
+  tracker->GlobalFitAnddEdx();
+
   if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
     tracker->EstimateVertex(tracker->GetVertex(), 1);
   }
@@ -546,7 +541,14 @@ Int_t StFtpcTrackMaker::Make()
   
   // Uncomment this block to get information about the quality 
   // of the found tracks in comparison to the simulated input event.
-  
+
+  St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
+
+  if (!ftpc_data) {
+    gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
+    return kStWarn;
+  }
+
   StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, 
 							ftpc_data, 
 							tracker->GetVertex(), 
@@ -567,7 +569,7 @@ Int_t StFtpcTrackMaker::Make()
   }
   
   delete tracker;
-  delete vertex;
+  // don't delete vertex, since it is deleted inside TDataSet
   
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) completed." << endm;
   
@@ -679,7 +681,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.52 2004/02/05 00:24:54 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.53 2004/02/12 19:37:11 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
