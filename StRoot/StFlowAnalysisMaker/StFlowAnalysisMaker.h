@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.11 2000/02/29 21:55:14 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.9 2000/03/02 22:55:34 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -10,7 +10,10 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowAnalysisMaker.hh,v $
+// $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.9  2000/03/02 22:55:34  posk
+// Changed header file extensions from .hh to .h .
+//
 // Revision 1.11  2000/02/29 21:55:14  posk
 // Removed static const int& statements.
 //
@@ -53,14 +56,14 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowAnalysisMaker_HH
-#define StFlowAnalysisMaker_HH
+#ifndef StFlowAnalysisMaker_H
+#define StFlowAnalysisMaker_H
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
-#include "StFlowMaker/StFlowEvent.hh"
-#include "StFlowTagMaker/StFlowTagMaker.hh"
-#include "StFlowMaker/StFlowConstants.hh"
+#include "StFlowMaker/StFlowEvent.h"
+#include "StFlowTagMaker/StFlowTagMaker.h"
+#include "StFlowMaker/StFlowConstants.h"
 #include "TVector2.h"
 class TH1F;
 class TH1D;

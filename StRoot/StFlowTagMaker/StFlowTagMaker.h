@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.9 2000/02/23 22:14:11 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.7 2000/03/02 23:00:09 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -15,7 +15,10 @@
 //////////////////////////////////////////////////////////////////////
 //
 // History:
-// $Log: StFlowTagMaker.hh,v $
+// $Log: StFlowTagMaker.h,v $
+// Revision 1.7  2000/03/02 23:00:09  posk
+// Changed header file extensions from .hh to .h .
+//
 // Revision 1.9  2000/02/23 22:14:11  posk
 // Renamed histograms to contain "Flow".
 //
@@ -55,13 +58,13 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowTagMaker_HH
-#define StFlowTagMaker_HH
+#ifndef StFlowTagMaker_H
+#define StFlowTagMaker_H
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
 #include "tables/St_FlowTag_Table.h"
-#include "StFlowMaker/StFlowConstants.hh"
+#include "StFlowMaker/StFlowConstants.h"
 class StFlowEvent;
 class TH1F;
 class TH1D;

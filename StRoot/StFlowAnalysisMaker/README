@@ -1,7 +1,7 @@
 Time-stamp: <>
 Maker:		StFlowAnalysisMaker
 Files:		StFlowAnalysisMaker.cxx
-		StFlowAnalysisMaker.hh
+		StFlowAnalysisMaker.h
 		plot.C	
 Authors:	Art Poskanzer and Raimond Snellings
 		with lots of help from Glenn Cooper 
