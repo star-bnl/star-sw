@@ -1,3 +1,13 @@
+// $Id: palette.C,v 1.2 1999/11/02 22:54:04 kathy Exp $
+// $Log: palette.C,v $
+// Revision 1.2  1999/11/02 22:54:04  kathy
+// removing unneeded macro & putting owner,Id,Log at beginning of other macro
+//
+//=======================================================================
+// owner: Jon Gans
+// what it does:  set up color palette for STAR
+//=======================================================================
+
 void palette()
 {  
   const float  saturation = 1;
