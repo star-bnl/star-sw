@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracking.cxx,v 1.1 2000/12/07 11:14:22 lmartin Exp $
+ * $Id: StEstTracking.cxx,v 1.2 2001/01/25 18:24:56 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,13 +10,23 @@
  ***************************************************************************
  *
  * $Log: StEstTracking.cxx,v $
+ * Revision 1.2  2001/01/25 18:24:56  lmartin
+ * Method declared as a StEstTracker method.
+ * mIdealTracking used as a flag for the perfect tracking and the evaluation.
+ *
  * Revision 1.1  2000/12/07 11:14:22  lmartin
  * First CVS commit
  *
  **************************************************************************/
-#include "StEstMaker.h"
+#include "StEstTracker.h"
+#include "StEstParams.hh"
+#include "Infrastructure/StEstWafer.hh"
+#include "Infrastructure/StEstBranch.hh"
+#include "Infrastructure/StEstHit.hh"
+#include "Infrastructure/StEstTrack.hh"
+#include "Infrastructure/StEstTPCTrack.hh"
 
-int StEstMaker::Tracking(int slay) {
+int StEstTracker::Tracking(int slay) {
   // Method called at each tracking step (ie in each layer)
   // Two big loops are set on tracks and their branches.
   // For each branch the following action are done :
@@ -43,7 +53,6 @@ int StEstMaker::Tracking(int slay) {
   long i,j,jc,k,kk, maxl, nbr, nbranch;
   double distbra[MAXHITPROJ];
   int distind[MAXHITPROJ], indtmp;
-  StHelix *helixbra[MAXHITPROJ];
   StEstHit* hitbra[MAXHITPROJ];
 
   StEstBranch *branch, *branch_new;
@@ -95,7 +104,6 @@ int StEstMaker::Tracking(int slay) {
 	}
 
 	if (mProjOut.hit[k]->CheckAvailability()) {
-	  helixbra[kk] = new StHelix(*branch->GetHelix());
 	  hitbra[kk] = mProjOut.hit[k];
 	  distbra[kk] = mProjOut.dist[k];
 	  kk++;
@@ -118,52 +126,45 @@ int StEstMaker::Tracking(int slay) {
       if( mIdealTracking == 1){
 	//Ideal Tracking
 
-      // looking where the ideal is in the list
-      if (branch->GetIsGood()==1) {
-	FirstHitIndex=-1;
-	HitPosition=-4;
-	ThereIsOneIdealHitInTheLayer=0;
-	for (lm2=0;lm2<mTrack[i]->GetIdealBranch()->GetNHits();lm2++) {
-	  if (mTrack[i]->GetIdealBranch()->GetHit(lm2)->GetWafer()->GetLayer()==slay) {
-	    ThereIsOneIdealHitInTheLayer=1;
-	    for (lm=0;lm<kk;lm++) {
-	      if (hitbra[lm]==mTrack[i]->GetIdealBranch()->GetHit(lm2)) {
-		if (FirstHitIndex==-1) FirstHitIndex=lm;
-		else if (distbra[lm]<distbra[FirstHitIndex]) FirstHitIndex=lm;
-	      }
-	    }
-	  }
-	}
-	// if the ideal hit is in the selected hit list it should have 
-	// FirstHitIndex>=0.  If there is one ideal hit but not found in the list
-	// it can still be in the original mProjOut list but not available
-	if (FirstHitIndex==-1 && ThereIsOneIdealHitInTheLayer==1) {
-	  HitPosition=-3;
-	  for (lm=0;lm<maxl;lm++) 
-	    for (lm2=0;lm2<mTrack[i]->GetIdealBranch()->GetNHits();lm2++) 
-	      if (mTrack[i]->GetIdealBranch()->GetHit(lm2)==mProjOut.hit[lm]) HitPosition=-1;
-	  if (HitPosition==-3) {
-	    for (lm2=0;lm2<mTrack[i]->GetIdealBranch()->GetNHits();lm2++) {
-	      if (mTrack[i]->GetIdealBranch()->GetHit(lm2)->GetWafer()->GetLayer()==slay) {	    
-		for (lm=0;lm<mPreprojNumber;lm++) {
-		  if (mPreprojTable[lm]->GetId()==mTrack[i]->GetIdealBranch()->GetHit(lm2)->GetWafer()->GetId())
-		      HitPosition=-2;
+	// looking where the ideal is in the list
+	if (branch->GetIsGood()==1) {
+	  FirstHitIndex=-1;
+	  HitPosition=-4;
+	  ThereIsOneIdealHitInTheLayer=0;
+	  for (lm2=0;lm2<mTrack[i]->GetIdealBranch()->GetNHits();lm2++) {
+	    if (mTrack[i]->GetIdealBranch()->GetHit(lm2)->GetWafer()->GetLayer()==slay) {
+	      ThereIsOneIdealHitInTheLayer=1;
+	      for (lm=0;lm<kk;lm++) {
+		if (hitbra[lm]==mTrack[i]->GetIdealBranch()->GetHit(lm2)) {
+		  if (FirstHitIndex==-1) FirstHitIndex=lm;
+		  else if (distbra[lm]<distbra[FirstHitIndex]) FirstHitIndex=lm;
 		}
 	      }
 	    }
 	  }
+	  // if the ideal hit is in the selected hit list it should have 
+	  // FirstHitIndex>=0.  If there is one ideal hit but not found in the list
+	  // it can still be in the original mProjOut list but not available
+	  if (FirstHitIndex==-1 && ThereIsOneIdealHitInTheLayer==1) {
+	    HitPosition=-3;
+	    for (lm=0;lm<maxl;lm++) 
+	      for (lm2=0;lm2<mTrack[i]->GetIdealBranch()->GetNHits();lm2++) 
+		if (mTrack[i]->GetIdealBranch()->GetHit(lm2)==mProjOut.hit[lm]) HitPosition=-1;
+	    if (HitPosition==-3) {
+	      for (lm2=0;lm2<mTrack[i]->GetIdealBranch()->GetNHits();lm2++) {
+		if (mTrack[i]->GetIdealBranch()->GetHit(lm2)->GetWafer()->GetLayer()==slay) {	    
+		  for (lm=0;lm<mPreprojNumber;lm++) {
+		    if (mPreprojTable[lm]->GetId()==mTrack[i]->GetIdealBranch()->GetHit(lm2)->GetWafer()->GetId())
+		      HitPosition=-2;
+		  }
+		}
+	      }
+	    }
+	  }
+	  else {
+	    for (lm=0;lm<kk;lm++) if (distind[lm]==FirstHitIndex) HitPosition=lm;
+	  }
 	}
-	else {
-	  for (lm=0;lm<kk;lm++) if (distind[lm]==FirstHitIndex) HitPosition=lm;
-	}
-
-	if (mTrack[i]->GetIdealPattern()==15) {
-	  if (slay==3) Location3->Fill((float) mPass, (float) HitPosition);
-	  if (slay==2) Location2->Fill((float) mPass, (float) HitPosition);
-	  if (slay==1) Location1->Fill((float) mPass, (float) HitPosition);
-	  if (slay==0) Location0->Fill((float) mPass, (float) HitPosition);
-	}
-      }
       }// ENd of ideal Tracking
       if(mParams[mPass]->debug>2)
 	cout << " hits found: " << kk << endl;
@@ -180,25 +181,26 @@ int StEstMaker::Tracking(int slay) {
 	      cout <<"  nBranch= "<<branch_new->mTrack->GetNBranches()<<endl;
 	    if (hitbra[distind[k]]->JoinBranch(branch_new,mTrack[i])==1) {
 	      branch_new->AddHit(hitbra[distind[k]],distbra[distind[k]]);
-	      //	      RefitBranch(branch_new,NULL,-1,0);
-	      RefitBranch2(branch_new,NULL,-1,0,&fitstatus);
+	      RefitBranch(branch_new,NULL,-1,0,&fitstatus);
 	      branch_new->SetStep(10*mSuperPass+mPass);
-	      branch_new->mHitPosition=HitPosition;
-	      // we check if isgood is still good or not (for debugging) 
-	      if (branch_new->GetNHits()==1 || branch_new->GetIsGood()==1) {
-		TheNewHitIsGood=0;
-		for (lm=0;lm<mTrack[i]->GetIdealBranch()->GetNHits();lm++)
-		  if (mTrack[i]->GetIdealBranch()->GetHit(lm)==hitbra[distind[k]]) 
-		    TheNewHitIsGood=1;
-		if (TheNewHitIsGood==0) {
-		  branch_new->SetIsGoodOld(branch->GetIsGood());
-		  branch_new->SetIsGood(0);
+	      if (mIdealTracking==1) {
+		branch_new->mHitPosition=HitPosition;
+		// we check if isgood is still good or not (for debugging) 
+		if (branch_new->GetNHits()==1 || branch_new->GetIsGood()==1) {
+		  TheNewHitIsGood=0;
+		  for (lm=0;lm<mTrack[i]->GetIdealBranch()->GetNHits();lm++)
+		    if (mTrack[i]->GetIdealBranch()->GetHit(lm)==hitbra[distind[k]]) 
+		      TheNewHitIsGood=1;
+		  if (TheNewHitIsGood==0) {
+		    branch_new->SetIsGoodOld(branch->GetIsGood());
+		    branch_new->SetIsGood(0);
+		  }
 		}
-	      }
-	      else {
+		else {
 		  branch_new->SetIsGoodOld(branch->GetIsGood());
 		  branch_new->SetIsGood(0);
-	      }		
+		}		
+	      }
 	    }
 	    else {
 	      delete branch_new;
@@ -225,26 +227,26 @@ int StEstMaker::Tracking(int slay) {
 
 	if (hitbra[distind[k]]->JoinBranch(branch,mTrack[i])==1) {
 	  branch->AddHit(hitbra[distind[k]],distbra[distind[k]]);
-	  //	  RefitBranch(branch,NULL,-1,0);
-	  RefitBranch2(branch,NULL,-1,0,&fitstatus);
+	  RefitBranch(branch,NULL,-1,0,&fitstatus);
 	  branch->SetStep(10*mSuperPass+mPass);
-	  branch->mHitPosition=HitPosition;
-	  // we check if isgood is still good or not (for debugging) 
-	  if (branch->GetNHits()==1 || branch->GetIsGood()==1) {
-	    TheNewHitIsGood=0;
-	    for (lm=0;lm<mTrack[i]->GetIdealBranch()->GetNHits();lm++)
-	      if (mTrack[i]->GetIdealBranch()->GetHit(lm)==hitbra[distind[k]]) TheNewHitIsGood=1;
-	    //	    if (TheNewHitIsGood==1 && branch->GetNHits()==1) branch->SetIsGood(1);
-	    if (TheNewHitIsGood==0) {
+	  if (mIdealTracking==1) {
+	    branch->mHitPosition=HitPosition;
+	    // we check if isgood is still good or not (for debugging) 
+	    if (branch->GetNHits()==1 || branch->GetIsGood()==1) {
+	      TheNewHitIsGood=0;
+	      for (lm=0;lm<mTrack[i]->GetIdealBranch()->GetNHits();lm++)
+		if (mTrack[i]->GetIdealBranch()->GetHit(lm)==hitbra[distind[k]]) TheNewHitIsGood=1;
+	      //	    if (TheNewHitIsGood==1 && branch->GetNHits()==1) branch->SetIsGood(1);
+	      if (TheNewHitIsGood==0) {
+		branch->SetIsGoodOld(branch->GetIsGood());
+		branch->SetIsGood(0);
+	      }
+	    }
+	    else {
 	      branch->SetIsGoodOld(branch->GetIsGood());
 	      branch->SetIsGood(0);
 	    }
 	  }
-	  else {
-	    branch->SetIsGoodOld(branch->GetIsGood());
-	    branch->SetIsGood(0);
-	  }		
-	
 	}
 	else {
 	  delete branch;
@@ -257,29 +259,28 @@ int StEstMaker::Tracking(int slay) {
 		<<" MaxShare="<<hitbra[distind[k]]->GetMaxShare()<<endl;	
 	  }
 	}
-	for (k=mParams[mPass]->nbranch[slay]; k<kk; k++){ //we remove redundant helices
-	  delete helixbra[distind[k]];
-	}
       } //end of if (kk>0)...          
     } // end of "for (j=0;j<mTrack[i]->GetNBranches();j++) "
-    // we have to loop again on the branches to check if one good survives
-    // if several good branches become bad we set GoodOld to zero for all 
-    // except the first to avoid double counting.
-    OneIsGood=0;
-    SeveralWereGood=0;
-    IndexFirstWasGood=0;
-    for (j=0;j<mTrack[i]->GetNBranches();j++)
-      if (mTrack[i]->GetBranch(j)->GetIsGood()==1) OneIsGood=1;
-    if (OneIsGood==0) {
-      for (j=0;j<mTrack[i]->GetNBranches();j++) {
-	if (mTrack[i]->GetBranch(j)->GetIsGoodOld()==1 && SeveralWereGood==0)
-	  IndexFirstWasGood=j;
-	if (mTrack[i]->GetBranch(j)->GetIsGoodOld()==1) SeveralWereGood++;
+    if (mIdealTracking==1) {
+      // we have to loop again on the branches to check if one good survives
+      // if several good branches become bad we set GoodOld to zero for all 
+      // except the first to avoid double counting.
+      OneIsGood=0;
+      SeveralWereGood=0;
+      IndexFirstWasGood=0;
+      for (j=0;j<mTrack[i]->GetNBranches();j++)
+	if (mTrack[i]->GetBranch(j)->GetIsGood()==1) OneIsGood=1;
+      if (OneIsGood==0) {
+	for (j=0;j<mTrack[i]->GetNBranches();j++) {
+	  if (mTrack[i]->GetBranch(j)->GetIsGoodOld()==1 && SeveralWereGood==0)
+	    IndexFirstWasGood=j;
+	  if (mTrack[i]->GetBranch(j)->GetIsGoodOld()==1) SeveralWereGood++;
+	}
+	if (SeveralWereGood>1) 
+	  for (j=0;j<mTrack[i]->GetNBranches();j++) 
+	    if (mTrack[i]->GetBranch(j)->GetIsGoodOld()==1 && j!=IndexFirstWasGood)
+	      mTrack[i]->GetBranch(j)->SetIsGoodOld(0);
       }
-      if (SeveralWereGood>1) 
-	for (j=0;j<mTrack[i]->GetNBranches();j++) 
-	  if (mTrack[i]->GetBranch(j)->GetIsGoodOld()==1 && j!=IndexFirstWasGood)
-	    mTrack[i]->GetBranch(j)->SetIsGoodOld(0);
     }
     if(mParams[mPass]->debug>2)
       cout << "loop over the branches in the track STOP"<<endl;
@@ -288,7 +289,7 @@ int StEstMaker::Tracking(int slay) {
   if(mParams[mPass]->debug>2) cout << "loop over the tracks STOP"<<endl;
 
 
-  if(mParams[mPass]->debug>1)
+  if(mParams[mPass]->debug>2)
     cout<<"StEstMaker::Tracking ****STOP****"<<endl;
 
   return 0;
