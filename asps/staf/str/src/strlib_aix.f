@@ -329,11 +329,7 @@
 *	Intended for use on ASCII-type text files, as written by FORTRAN
 *	formatted-writes.
 
-	CHARACTER*132 Blank_line
-	DATA Blank_line/' '/	
-
-	WRITE(LUN,'(A)') Blank_line
-	BACKSPACE(UNIT=LUN)
+	CALL FLUSH( LUN ) !It's easy under AIX.
 
 	RETURN
 
