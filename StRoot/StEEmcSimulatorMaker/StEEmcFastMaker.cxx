@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.4 2003/02/20 05:15:51 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.5 2003/02/21 15:31:18 balewski Exp $
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.5  2003/02/21 15:31:18  balewski
+// do not kill the chain (it is against my will, JB)
+//
 // Revision 1.4  2003/02/20 05:15:51  balewski
 // *** empty log message ***
 //
@@ -28,6 +31,7 @@
 #include "StEEmcUtil/EEevent/EEsmdHitDst.h"
 
 #include "StEEmcUtil/EEmcMC/EEmcMCData.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 
 ClassImp(StEEmcFastMaker)
