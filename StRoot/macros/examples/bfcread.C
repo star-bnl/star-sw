@@ -9,18 +9,15 @@
 // This example is reading in the "dst" branch of the root file.
 // (i.e. the input file is .dst.root)
 // If you want to read in a different branch, you must change:
-//    - the input file name 
-//    - treeMk->SetBranch("branch_you_wantBranch",0,"r");
-//    - chain->GetDataSet("branch_you_want");
+//    - the input file name, e.g. *.bname.root
+//    - treeMk->SetBranch("bnameBranch",0,"r");
+//    - chain->GetDataSet("bname");
 //
 // This example has St_QA_Maker put in properly, but it is commented out.
 // Just un-comment if you want. 
 //
 // This example is for debugging/testing purposes and  therefore does
 //   not have chain->Finish(); at end
-//
-// If desired, you can use Example_root_look_at_tables_after_bfcread.C after
-//  this macro to look at the tables by hand (instead of browser)
 //
 //======================================================================
 
@@ -31,7 +28,7 @@ StChain *chain;
 TBrowser *brow=0;
 
 void bfcread(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/SL99d/tfs_Solaris/Tue/year_2a/psc0210_01_40evts.dst.root")
+*MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root")
 
 {
 //
