@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.42 2002/09/20 19:35:19 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.43 2002/09/26 20:46:06 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.43  2002/09/26 20:46:06  caines
+ * Make sure initRun works when no svt data present and correct code to allow for the ordering init and initrun are called in
+ *
  * Revision 1.42  2002/09/20 19:35:19  caines
  * Change building of file name
  *
@@ -191,36 +194,14 @@ StSvtSeqAdjMaker::~StSvtSeqAdjMaker(){
 }
 //____________________________________________________________________________
 Int_t StSvtSeqAdjMaker::Init(){
-  return  StMaker::Init();  
-}
-//____________________________________________________________________________
-Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
-{
 
+
+  hfile = NULL;
   GetSvtRawData();
   
   SetSvtData();
-
-  mTotalNumberOfHybrids = mSvtRawData->getTotalNumberOfHybrids();
-
-  string ioMakerFileName;
-  string FileName;
-  string DirName;
-  DirName=".";
-
-  StIOMaker* mIOMaker = (StIOMaker*)GetMaker("inputStream");
-  cout << "************************" << mIOMaker << endl;
-  ioMakerFileName = string(mIOMaker->GetFile()); 
-  FileName = buildFileName( DirName+"/", baseName(ioMakerFileName),".SvtGainCal.root"); 
-  
-  // cout << "Heres my name: " << FileName << endl;
-
-   hfile  = new TFile(FileName.c_str(),"RECREATE","Demo ROOT file");
-   //hfile  = new TFile("test.root","RECREATE","Demo ROOT file");
-  CreateHist(mTotalNumberOfHybrids);	    
-  
   GetSvtPedestals();
-
+  
   mInvProd = new StSvtInverseProducts();
   mProbValue = new StSvtProbValues();
   
@@ -244,6 +225,47 @@ Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
   }
 
   GetBadAnodes();
+
+  
+  return  StMaker::Init();  
+}
+//____________________________________________________________________________
+Int_t StSvtSeqAdjMaker::InitRun( int runnumber)
+{
+
+  if(GetSvtRawData() ){
+    
+    St_DataSet *dataSet = NULL;
+    dataSet = GetDataSet("StSvtConfig");
+    
+    if (dataSet)
+      mSvtRawData = new StSvtData((StSvtConfig*)(dataSet->GetObject()));
+    else
+      return kStWarn;
+  }
+
+  mTotalNumberOfHybrids = mSvtRawData->getTotalNumberOfHybrids();
+
+  if( hfile){
+    hfile->Write();
+    hfile->Close();
+  }
+  
+  string ioMakerFileName;
+  string FileName;
+  string DirName;
+  DirName=".";
+
+  StIOMaker* mIOMaker = (StIOMaker*)GetMaker("inputStream");
+  cout << "************************" << mIOMaker << endl;
+  ioMakerFileName = string(mIOMaker->GetFile()); 
+  FileName = buildFileName( DirName+"/", baseName(ioMakerFileName),".SvtGainCal.root"); 
+  
+  // cout << "Heres my name: " << FileName << endl;
+
+   hfile  = new TFile(FileName.c_str(),"RECREATE","Demo ROOT file");
+   //hfile  = new TFile("test.root","RECREATE","Demo ROOT file");
+  CreateHist(mTotalNumberOfHybrids);	     
   
   return  kStOK;  
 }
