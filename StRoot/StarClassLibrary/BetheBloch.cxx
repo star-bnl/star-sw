@@ -21,7 +21,7 @@
 // There is an overall normalization factor obtained from a fit
 // and there is a relative normalization factor between the simple
 // 1/beta^2 region and the values from the table.
-
+#include <iostream.h>
 #include <vector>
 #include "BetheBloch.h"
 #include "TMath.h"
@@ -37,7 +37,10 @@ BetheBloch::BetheBloch(){
     // here
     // could also fill them directly in the map, or transform the numbers directly
     // to beta gamma.
-    
+  cout << "BetheBloch::BetheBloch =================================================================" << endl;
+  cout << "Warning: please don't use BetheBloch::BetheBloch for any analysis after P00hm production" << endl;
+  cout << "but use static function 1.e-6*BetheBloch::Sirrf(Poverm) instead                         " << endl;
+  cout << "BetheBloch::BetheBloch =================================================================" << endl;
     vector<double> kinVec;
     vector<double> ionizVec;   // Protons                      
     kinVec.push_back(0.216355);ionizVec.push_back(2.38171e-05);
