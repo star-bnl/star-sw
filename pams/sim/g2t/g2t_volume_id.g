@@ -19,6 +19,7 @@
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
       structure  TPCG  {version}
+      Structure  BTOG  {version, choice }
       logical          first/.true./
 *c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
@@ -26,8 +27,11 @@
           first=.false.
           call RBPUSHD
           USE  /DETM/TPCE/TPCG
+          USE  /DETM/BTOF/BTOG
           call RBPOPD
           print *,' g2t_volume_id: TPC version =',tpcg_version
+          print *,'              : TOF version =',btog_version,
+                                 ' TOF choice  =',btog_choice
       endif
       volume_id = 0
 *
@@ -66,7 +70,7 @@
           If (cd=='TPAO' & tpad==14) tpad=45
         else
           If (tpad<41) then
-             isdet = mod(42-tpad,3)
+             isdet = mod(41-tpad,3)
              tpad  = (tpad+2)/3
           else If (tpad<73) then
              tpad=tpad-41+14
@@ -88,13 +92,23 @@
 
       else If (Csys=='tof') then
 *4*
-        rileft     = numbv(1)
-        sector     = numbv(2)
-        sub_sector = numbv(3) 
-        innout     = numbv(4)
-        volume_id  = 100000*rileft+1000*innout+10*sector+
-     +                                         sub_sector   
-
+        If (btog_version==1) then
+           rileft     = numbv(1)
+           sector     = numbv(2)
+           sub_sector = numbv(3) 
+           innout     = numbv(4)
+           volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
+        else
+           if (btog_choice==4) then
+              rileft     = 1
+              sector     = 23
+              sub_sector = numbv(1) 
+              innout     = numbv(2)
+              volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
+           else
+              print *,' g2t_volume_id : choice not coded yet '
+           endif
+        endif
       else If (Csys=='ctb') then
 *5*
         rileft    = numbv(1)
