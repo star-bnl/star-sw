@@ -1,6 +1,7 @@
+
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.4 1999/07/19 14:24:06 hardtke Exp $
+ * $Id: StHbtTrack.hh,v 1.5 1999/07/27 20:21:10 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.5  1999/07/27 20:21:10  lisa
+ * Franks fixes of StTrack and subsequent changes to particleCut and EventReader
+ *
  * Revision 1.4  1999/07/19 14:24:06  hardtke
  * modifications to implement uDST
  *
@@ -50,6 +54,7 @@ public:
   float ChiSquaredXY() const;
   float ChiSquaredZ() const;
   StHbtThreeVector P() const;
+  float Pt() const;
   StPhysicalHelixD& Helix();
 
   void SetCharge(const char&);
@@ -64,6 +69,7 @@ public:
   void SetChiSquaredXY(const float&);
   void SetChiSquaredZ(const float&);
   void SetP(const StHbtThreeVector&);
+  void SetPt(const float&);
   void SetHelix(const StPhysicalHelixD&);
 
 private:
@@ -74,9 +80,13 @@ private:
   float mNSigmaKaon;
   float mNSigmaProton;
   float mdEdx;
-  float mDCA[2];
-  float mChiSq[2];
+  float mDCAxy;
+  float mDCAz; 
+  float mChiSqXY;
+  float mChiSqZ;
+  
   StHbtThreeVector mP;
+  float mPt;
   StPhysicalHelixD mHelix;
 };
 
@@ -88,11 +98,13 @@ inline void StHbtTrack::SetNSigmaPion(const float& x){mNSigmaPion = x;}
 inline void StHbtTrack::SetNSigmaKaon(const float& x){mNSigmaKaon = x;}
 inline void StHbtTrack::SetNSigmaProton(const float& x){mNSigmaProton = x;}
 inline void StHbtTrack::SetdEdx(const float& x){mdEdx = x;}
-inline void StHbtTrack::SetDCAxy(const float& x){mDCA[0] = x;}
-inline void StHbtTrack::SetDCAz(const float& x){mDCA[1] = x;}
-inline void StHbtTrack::SetChiSquaredXY(const float& x){mChiSq[0] = x;}
-inline void StHbtTrack::SetChiSquaredZ(const float& x){mChiSq[1] = x;}
+
+inline void StHbtTrack::SetDCAxy(const float& x){mDCAxy = x;}
+inline void StHbtTrack::SetDCAz(const float& x){mDCAz = x;}
+inline void StHbtTrack::SetChiSquaredXY(const float& x){mChiSqXY = x;} 
+inline void StHbtTrack::SetChiSquaredZ(const float& x){mChiSqZ = x;}   
 inline void StHbtTrack::SetP(const StHbtThreeVector& p){mP = p;}
+inline void StHbtTrack::SetPt(const float& pt){mPt = pt;}              
 inline void StHbtTrack::SetHelix(const StPhysicalHelixD& h){mHelix = h;}
 
 inline char StHbtTrack::Charge() const {return mCharge;}
@@ -102,11 +114,13 @@ inline float StHbtTrack::NSigmaPion() const {return mNSigmaPion;}
 inline float StHbtTrack::NSigmaKaon() const {return mNSigmaKaon;}
 inline float StHbtTrack::NSigmaProton() const {return mNSigmaProton;}
 inline float StHbtTrack::dEdx() const {return mdEdx;}
-inline float StHbtTrack::DCAxy() const {return mDCA[0];}
-inline float StHbtTrack::DCAz() const {return mDCA[1];}
-inline float StHbtTrack::ChiSquaredXY() const {return mChiSq[0];}
-inline float StHbtTrack::ChiSquaredZ() const {return mChiSq[1];}
+
+inline float StHbtTrack::DCAxy() const {return mDCAxy;}          
+inline float StHbtTrack::DCAz() const {return mDCAz;}            
+inline float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;} 
+inline float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
 inline StHbtThreeVector StHbtTrack::P() const {return mP;}
+inline float StHbtTrack::Pt() const {return mPt;}                
 inline StPhysicalHelixD& StHbtTrack::Helix() {return mHelix;}
 
 #endif
