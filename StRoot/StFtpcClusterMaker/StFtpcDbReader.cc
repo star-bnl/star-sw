@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.11 2001/11/21 12:36:27 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.12 2002/01/21 22:12:53 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.12  2002/01/21 22:12:53  jcs
+// add gas temperature difference between west and east FTPC to database
+//
 // Revision 1.11  2001/11/21 12:36:27  jcs
 // make ftpcGas database table available to FTPC cluster maker
 //
@@ -163,6 +166,10 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
   if(gasTable){
    mBaseTemperature        = gasTable->baseTemperature;
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//   mTemperatureDifference   = gasTable->temperatureDifference;   !!!!->database
+   mTemperatureDifference   = .7;
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
