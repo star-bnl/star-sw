@@ -1,15 +1,6 @@
-/*
-	This contains prototypes for the msg library, standard FORTRAN calls.
-
-	Created  2-Dec-1994   Robert Hackenburg
-*/
-
-#define TRUE -1
-#define FALSE 0
-
 	void message_( const char *msg, int *one, int *ID, int len );
 	void message_out_( const char *msg, int *one, int len );
-	void msg_define_class_( const char *Class, const char *State, int *CountLimit, int *AbortLimit, int Clen, int Slen );
+	void msg_class_define_( const char *Class, const char *State, int *CountLimit, int *AbortLimit, int Clen, int Slen );
 	void msg_count_( const char *Prefix, int len );
 	void msg_disable_( const char *Prefix, int len );
 	void msg_display_( const char *msg, int *one, int *ID, int len );
@@ -26,12 +17,13 @@
 	int  msg_journal_open_( const char *FileName, int len );
 	void msg_journal_page_( void );
 	void msg_lun_page_( int *LUN );
+	void msg_parse_( const char *msg, int *isep, int *nprefix, int *nmessage, int len );
 	void msg_mark_( const char *Prefix, int *ID, int len );
-	void msg_node_name_( const char *NodeName, int len );
+	void msg_name_node_( const char *NodeName, int len );
 	void msg_nocount_( const char *Prefix, int len );
 	void msg_set_abort_limit_( const char *Prefix, int *Limit, int len );
-	void msg_set_by_command_( const char *Command, int len );
-	void msg_set_from_file( int *LUN );
+	int  msg_set_by_command_( const char *Command, int len );
+	int  msg_set_from_file_( int *LUN );
 	void msg_set_limit_( const char *Prefix, int *Limit, int len );
 	void msg_set_lun_( int *TERMINAL_LUN, int *JOURNAL_LUN );
 	void msg_set_summary_mode_aborted_( int *Mode );
@@ -40,7 +32,11 @@
 	void msg_set_summary_mode_inactive_( int *Mode );
 	void msg_set_summary_page_length_( int *Page_Length );
 	void msg_set_timestamp_cpu_( int *Mode );
+	void msg_share_( char*, const len );
 	void msg_sort_( void );
+	void msg_state_load_( int *LUN, const char *FileName, const int len );
+	void msg_state_store_( int *LUN, const char *FileName, const int len );
+	void msg_state_zero_( void );
 	void msg_summary_( int *LUN );
 	void msg_summary_cpu_( int *LUN );
 	void msg_summary_event_( int *LUN, int *EVENTS );
