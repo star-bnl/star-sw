@@ -78,7 +78,6 @@
 
 
 
-
 %\parindent40pt
 %
 %\begin{center}
@@ -143,7 +142,16 @@
 \section*{}
 \addcontentsline{toc}{section}{Table of contents}
 \tableofcontents
-\vspace{2cm}
+
+\thispagestyle{empty}
+
+
+
+
+\newpage
+
+
+
 \section*{}
 \addcontentsline{toc}{section}{List of figures}
 \listoffigures
@@ -154,6 +162,8 @@
 \newpage
 
 
+
+\setlength{\parindent}{50pt}
 
 \section{What are the V0Finder and XiFinder ?}
 
@@ -475,6 +485,18 @@ $
 \section{Structure of the Fortran and C++ codes}
 \label{sec4}
 
+
+
+
+\subsection{KinkFinder}
+
+To be written.
+
+
+
+
+\subsection{Common remarks for the V0/XiFinder}
+
 The first thing to mention is a change in the interaction between the V0Finder and the XiFinder. The XiFinder actually uses the V0's that have first been found by the V0Finder. The table below shows how this is done in the Fortran code :
 
 \begin{center}
@@ -488,13 +510,13 @@ Call {\tt StV0Maker::Trim()} & Loop over the V0's in the table to throw away the
 \end{tabular}
 \end{center}
 
-This waste of memory (storing V0's that will be deleted afterwards) and of time (scanning twice the table of V0's) is solved in the C++ code, by the fact that the class {\tt StXiFinderMaker} actually inherits from {\tt StV0FinderMaker}. The member-functions of each of them and their role are listed in {\sc Fig}. \ref{fonctions-membres}.
+This waste of memory (storing V0's that will be deleted afterwards) and of time (scanning twice the table of V0's) is solved in the C++ code, by the fact that the class {\tt StXiFinderMaker} actually inherits from {\tt StV0FinderMaker}. The member-functions of each of them and their role are listed in {\sc Fig}.~\ref{fonctions-membres}.
 
 Note that {\tt StXiFinderMaker::Init()} is the equivalent of {\tt StV0FinderMaker::GetPars()}. The effect of the function {\tt StV0FinderMaker::DontZapV0s} is that the V0's that are already in StEvent are kept, the V0's found by the V0Finder will be added. The function {\tt StV0FinderMaker::UseExistingV0s} also keeps the V0's that are already in StEvent, but also prevents the V0Finder to be run, and forces the XiFinder to use the V0's previously found. The function {\tt StV0FinderMaker::UseITTFTracks} has been implemented for {\sc ittf} test purposes, since it allows the user to choose between using the {\sc ittf} tracks or using the tracks found by the standard reconstruction.
 
 When the V0Finder is run alone, the method {\tt StV0FinderMaker::UseV0()} is called for each V0 found, and returns {\tt false}, since we don't want to find Xi's.
 
-When both the XiFinder and V0Finder are run, the XiFinder first calls {\tt StV0FinderMaker::Make()}. This function finds V0's and, for each of them, calls the {\tt UseV0()} method. The latter runs the XiFinder algorithm, that will eventually tell {\tt StV0FinderMaker::Make()} if the current V0 has been used in Xi candidates or not. This way to do, compared with the Fortran one, saves time and memory.
+When both the XiFinder and V0Finder are run, the XiFinder first calls {\tt StV0FinderMa\-ker::Make()}. This function finds V0's and, for each of them, calls the {\tt UseV0()} method. The latter runs the XiFinder algorithm, that will eventually tell {\tt StV0FinderMaker::Make()} if the current V0 has been used in Xi candidates or not. This way to do, compared with the Fortran one, saves time and memory.
 
 \begin{center}
 \begin{tabular}{|r|l|l|}
@@ -546,19 +568,14 @@ Call {\tt StXiFinderMaker::Make()} & (Calls everything below) \\
 
 
 
-\subsection{KinkFinder}
-
-To be written.
-
-
 \subsection{V0Finder}
 
 {\sc Fig}. \ref{V0AlgoMieux} shows the detailed structure of the V0Finder, with all the cuts that are applied. Of course, more accurate information can be found... by looking at the code ;-)~.
 
-Before the loops, tables called {\tt ptrks}, {\tt ntrks}, etc..., are filled in the function {\tt StV0FinderMaker::Prepare()}, and the values used afterwards are those that are stored in these tables, in order to improve the speed of the code. The XiFinder doesn't use them yet... but will.
+Before the loops, tables called {\tt ptrks}, {\tt ntrks}, etc..., are filled in the function {\tt StV0FinderMa\-ker::Pre\-pare()}, and the values used afterwards are those that are stored in these tables, in order to improve the speed of the code. The XiFinder doesn't use all of them yet... but will.
 
 The cuts' value are got in the function {\tt StV0FinderMaker::GetPars()}, and stored in the member objects {\tt pars} and {\tt pars2}. Here are the components :
-\begin{itemize}
+\begin{maliste}
 \item {\tt n\_point} : number of hits,
 \item {\tt dcapnmin} : distance of closest approach between the daughter tracks and the primary vertex,
 \item {\tt dca} : distance of closest approach between the V0 daughters,
@@ -566,7 +583,7 @@ The cuts' value are got in the function {\tt StV0FinderMaker::GetPars()}, and st
 \item {\tt dcav0} : distance of closest approach between the V0 trajectory and the primary vertex,
 \item {\tt alpha\_max} : $\alpha$ Armanteros,
 \item {\tt ptarm\_max} : $p_\perp$ Armanteros.
-\end{itemize}
+\end{maliste}
 
 \begin{center}
 $
@@ -607,16 +624,16 @@ Store track and parameters in tables \\
 Determine V0's detector {\sc id} \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on number of hits \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on dcaTrackToPvx \\
-{\footnotesize\bf CUT \hspace{-30pt} CUT} on $p_\perp$ \\
 Find number of intersection points between both helices \\
 Find 2D dca between both helices at both intersection points\\
 Keep the smallest dca \\
-{\footnotesize\bf CUT \hspace{-30pt} CUT} if one track points away from Pvx \\
+{\footnotesize\bf CUT \hspace{-30pt} CUT} if one track doesn't point away from Pvx \\
+{\footnotesize\bf CUT \hspace{-30pt} CUT} if V0 decays after first hit of either track \\
 Calulate approximated 3D dca between both helices \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on dcaV0Daughters \\
-{\footnotesize\bf CUT \hspace{-30pt} CUT} ..............\\
+{\footnotesize\bf CUT \hspace{-30pt} CUT} on dcaTrackToPvx \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on decay length from Pvx \\
-{\footnotesize\bf CUT \hspace{-30pt} CUT} if V0 points away from Pvx \\
+{\footnotesize\bf CUT \hspace{-30pt} CUT} if V0 doesn't point away from Pvx \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on dcaV0ToPvx \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on $\alpha_{Arm}$ \\
 {\footnotesize\bf CUT \hspace{-30pt} CUT} on $p_{\perp_{Arm}}$ \\
@@ -633,10 +650,46 @@ Call {\tt UseV0} to find if V0 is used for Xis \\
 \hline
 \end{array}
 $
-\mycaption{Algorithm of the V0Finder}
+\mycaption{Cuts and algorithm of the V0Finder}
 \label{V0AlgoMieux}
 
 \end{center}
+
+Some information about each cut applied :
+\begin{maliste}
+\item Number of hits : both tracks must have a number of hits $\ge$ {\tt DB\footnote{Database.}->n\_point}
+\item DcaTrackToPvx : dca between each of the tracks and the primary vertex : see explanations in the next paragraph
+\item Track points away from Pvx : both tracks have to point away from the primary vertex, i.e. if we call $X$ the primary vertex and $M$ the point of a track that is the closest to the other helix, $\overrightarrow{p_{_M}} \cdot \overrightarrow{XM}$ must be positive
+\item V0 decays after the first hit of either track : this cut removes obviously bad candidates (or bad decay lengths calculations) which have a decay length that is e.g. longer than the size of the {\sc tpc}. The first hit is assumed to be at {\tt StPhysicalHelix::origin}. Calling it $H$, and $V$ the V0 decay point, the requirement is that $\overrightarrow{p_{_{V0_{at~V}}}} \cdot \overrightarrow{VH}$ must be positive
+\item DcaV0Daughters : the calculated dca between both tracks has to be $<$ {\tt DB->dca}
+\item DcaTrackToPvx : same as above, see also the next paragraph
+\item Decay length : the calculated V0 decay length has to be $>$ {\tt DB->dlen}
+\item V0 points away from Pvx : calling $X$ the primary vertex and $A$ the point where both helices are closest to each other, $\overrightarrow{p_{_A}} \cdot \overrightarrow{XA}$ must be positive
+\item DcaV0ToPvx : the calculated dca between the V0 and the primary vertex must be $<$ {\tt DB->dcav0}
+\item Alpha Armanteros : $\alpha_{Arm}$ must be $\le$ {\tt DB->alpha\_max}
+\item Pt Armanteros : $p_{\perp_{Arm}}$ must be $\le$ {\tt DB->ptarm\_max}
+\end{maliste}
+
+Now, the dcaTrackToPvx cut requires some non-obvious explanations. Its second occurence is simple to understand : it is a cut on the dca of both tracks to the primary vertex -- both have to be $>$ {\tt DB->dcapnmin} -- that is applied only when $p^2_{\perp_{V0}}$ is lower than a variable called {\tt ptV0sq}, and whose value is set to $(3.5~GeV)^2$ in the constructor of {\tt StV0FinderMaker}. This is done to cut less signal at high-$p_\perp$, an area where there is very few background, thus enabeling a loosening of the cuts.
+
+Its first occurence is done to apply this cut as soon as possible, for the code to be faster (less track pairs to process), at a time when $\overrightarrow{p_{_{V0}}}$ is not calculated yet. The reason why this is possible is that, indexing with $n$ (resp. $p$) what is related with the negative (resp. postive) daughter,
+\begin{equation}\label{GenesTrick}p_{\perp n} + p_{\perp p} \ge p_{\perp_{V0}}\end{equation}
+Here is the demonstration : let's call $r$ the axis that is parallel to $\overrightarrow{p_{_{V0}}}$, $\theta$ the perpandicular axis. With these $(\overrightarrow{u_r},\overrightarrow{u_\theta})$ coordinates, we have :
+$$\left\{\begin{array}{rcl}
+p_{_{V0_{r}}} & = & p_{n_{r}} + p_{p_{r}} \\
+p_{_{V0_{\theta}}} & = & p_{n_{\theta}} + p_{p_{\theta}} = 0 \\
+\end{array}\right.$$
+i.e. :
+$$p_{\perp_{V0}} = p_{_{V0_{r}}} = p_{n_{r}} + p_{p_{r}}$$
+Since $p_{\perp n} \ge p_{n_{r}}$ and $p_{\perp p} \ge p_{p_{r}}$\footnote{Because of the opening angle of the V0 decay, the inequality is most often strict.}, we obtain :
+$$p_{\perp n} + p_{\perp p} \ge p_{n_{r}} + p_{p_{r}} = p_{\perp_{V0}} \text{ ~, ~~~~ QED}\footnote{Quod erat demonstrandum, not quantum electrodynamics ;-) ~.}$$
+So the first occurence of the dcaTrackToPvx cut applies this cut when $(p_{\perp n} + p_{\perp p})^2 \le \text{\tt ptV0sq}$, with {\tt ptV0sq} = 3.5~{\em GeV}, because according to \eqref{GenesTrick}, any track pair cut by this condition would anyway have been cut by the second occurence of the dcaTrackToPvx cut (because $p_{\perp_{V0}} \le p_{\perp n} + p_{\perp p} \le 3.5~GeV$).
+
+For security, a factor of 0.98 multiplies the $p_\perp$ limit in the first occurence of the cut. To sum up :
+\begin{maliste}
+\item First occurence : if $p_{\perp n} + p_{\perp p} \le \sqrt{0.98\,}\times3.5~GeV$, apply the dcaTrackToPvx cut on both tracks
+\item Second occurence : if $p_{\perp_{V0}} \le 3.5~GeV$, apply the dcaTrackToPvx cut on both tracks
+\end{maliste}
 
 
 
@@ -770,7 +823,7 @@ Subroutine {\tt ev0\_project\_track} \\
 \end{array}
 $
 
-\mycaption{Algorithm of the XiFinder}
+\mycaption{Differences Fortran vs C++ in the XiFinder algorithm}
 \label{XiFC}
 
 \end{center}
@@ -1026,7 +1079,7 @@ Now, here is how are calculated the coordinates of the intersection points {\em 
 Let's call $\Delta$ the projection of the V0's trajectory, and $\mathcal C$ the circle that is the projection of the bachelor's trajectory. Their equations are :
 $$\Delta : y=ax+b \qquad\qquad\qquad {\mathcal C} : (x-x_c)^2+(y-y_c)^2 = R^2$$
 
-Calling $(x_0,y_0)$ a point on the V0's trajectory, and $\overrightarrow{p} = (p_x,p_y,p_z)$ its momentum, we obtain :
+Calling $(x_0,y_0)$ a point on the V0's trajectory, and $\overrightarrow{p} = (p_x,p_y,p_z)$ its momentum, we obtain~:
 $$a = \frac{p_y}{p_x} \qquad\qquad\qquad b = y_0-\frac{p_y}{p_x}x_0$$
 Thus :
 $$\Delta : y = \frac{p_y}{p_x}(x-x_0)+y_0$$
@@ -1154,8 +1207,11 @@ $$
 $$
 Therefore, since $\text{\tt rsq} = R^2$, we obtain $\text{\tt arg} = \text{\tt axb/rsq} = \sin(\overrightarrow{CA},\overrightarrow{CM})$.\\
 {\tt ds} is then defined as the angle ($\arcsin(\text{\tt arg})$) multiplied by $R$, i.e. it is the curvilinear length on the circle from $A$ to $M$.\\
-And then, from the definition of the dip angle\footnote{For a detailed note about the helices' parameters, see the appendix A of the Star Class Library documentation.}, we obtain that {\tt dz = ds.tan(dipAngle)} is $z_M - z_A$ (considering this time $A$ and $M$ as the points on the helix instead of on the circle).
+And then, from the definition of the dip angle\footnote{For a detailed note about the helices' parameters, see the appendix A of the Star Class Library documentation.\label{SCL}}
+%\footnotemark[1]
+, we obtain that {\tt dz = ds.tan(dipAngle)} is $z_M - z_A$ (considering this time $A$ and $M$ as the points on the helix instead of on the circle).
 %}\par}
+%\footnotetext[1]{For a detailed note about the helices' parameters, see the appendix A of the Star Class Library documentation.}
 
 At the end of the former subroutine {\tt update\_track\_param}, a helix called {\tt bachGeom2} is booked with the same parameters than the original bachelor helix taken from the track container, {\tt bachGeom}, except for the origin that has been moved from $A$ to $M$, and the angle $\Psi$ that obviously changes when the origin moves (see {\sc Fig.} \ref{calcFig1}).
 
@@ -1357,7 +1413,7 @@ $$
 
 \subsubsection{Detailed algorithm and cuts}
 
-The detailed algorithm is actually explained in the paragraph \ref{paragrDca} concerning the calculation of the dca, p. \pageref{paragrDca}. Yet, in the latter paragraph, no overview of the algorithm is given and the cuts are not listed. This is the purpose of this short paragraph, and is summed up in {\sc Fig}. \ref{XiAlgoMieux}.
+The detailed algorithm is actually explained in the section \ref{paragrDca} concerning the calculation of the dca, p. \pageref{paragrDca}. Yet, in the latter paragraph, no overview of the algorithm is given and the cuts are not listed. This is the purpose of this short paragraph, and is summed up in {\sc Fig}. \ref{XiAlgoMieux}.
 
 Blablabla.
 
@@ -1389,16 +1445,206 @@ Apply cuts \\
 \end{array}
 $
 
-\mycaption{Algorithm of the XiFinder}
+\mycaption{Cuts and algorithm of the XiFinder}
 \label{XiAlgoMieux}
 
 \end{center}
 
 
 
-\subsubsection{Detectors}
+
+
+
+
+
+
+\vspace{1cm}
+
+\section{Detectors}
 
 Blablabla
+
+
+
+
+
+
+
+
+\vspace{1cm}
+
+\section{Rotating and like-sign}
+
+These options have been implemented for analysis purpose, and have been thought to be a plug-and-play code, avoiding private dirty versions ;-) ~and waste of time for those who wish to use such methods and would have had to code them themselves.
+
+
+\subsection{Like-sign analysis}
+
+For a decay channel $A \longrightarrow B + C$, the like-sign method consists in reconstructing $A$ by associating $B$ and $\overline{C}$ rather than $B$ and $C$. Its name comes from the usage in decays such as $\Lambda \longrightarrow p^{(+)} + \pi^-$ (using like-sign, $p$ would be combined with $\pi^+$, a particle that has the same sign), but let's extend this usage to the $\Xi$-like decays, e.g. $\Xi^- \longrightarrow \Lambda^0 + \pi^-$. Since the $\Lambda$ is neutral, associating a $\Lambda$ with a $\pi^+$ instead of a $\pi^-$ isn't doing like-sign strictly speaking, but I will call this like that.
+
+Like-sign analysis has been implemented only in the XiFinder, not in the V0Finder. The reason why is that one of the Xi decay is neutral, and combining a stright line with a positive helix rather than a negative one doesn't change anything. But things are different for a V0 decay : in such a case, ``like-singing" means combining 2 helices of same charge, instead of opposite charge, and, although I've never checked that or looked at distributions made by somebody else, I'd bet that things like the combinatoric, the dca distribution, etc... are changed, which means that the background built with this method would be different than the real background, because the same cuts are applied to distributions that don't have the same shape. So in the case of the V0 decays, the rotating method is probably safer than like-sign.
+
+As said previously, the like-sign method in the XiFinder consists in finding candidates build with one of the daughters being the antiparticle of the expected daughter. So we find and store $\Lambda + \pi^-$ (resp. $K^-$ for the $\Omega$) and $\overline{\Lambda} + \pi^+$ (resp. $K^+$).
+
+In the post-reconstruction analysis codes, one should be very careful when using like-signed candidates, because the charge of a particle is determined with the charge of the bachelor\footnote{This can be found in {\tt StRoot/StStrangeMuDstMaker/StXiMuDst.cc}, in function {\tt StXiMuDst::FillXi(StXiVertex* xiVertex)}.}. So what your code will assume is an $\Omega^-$ is a particle made of a $\pi-$ and a $\overline{\Lambda}$ instead of a $\Lambda$. So when applying the cuts, all the functions that make a hypothesis on the particle identification should be changed (e.g. {\tt massLambda()} $\rightarrow$ {\tt massAntiLambda()}).
+
+Deciding whether like-sign should or shouldn't be used is done by using the function {\tt StV0Fin\-derMa\-ker::SetLikesignUsage}. The 2 possible values are :
+\begin{maliste}
+\item {\tt kLikesignUseStandard} = 0 : the standard reconstruction with no like-sign is performed,
+\item {\tt kLikesignUseLikesign} = 2 : the like-sign reconstruction is done.
+\end{maliste}
+Section \ref{HowTo} p.\pageref{HowTo}  explains how to use these functions.
+
+In the code, like-sign analysis is done in a very easy way :
+\begin{maliste}
+\item When checking that-and-whether the V0 is a $\Lambda$ or a $\overline{\Lambda}$, -1 is stored in variable {\tt charge} if it's a $\Lambda$ (i.e. a $\Xi^-$ or $\Omega^-$ candidate will be built), +1 if it's a $\overline{\Lambda}$ (i.e. a $\overline{\Xi}^+$ or $\overline{\Omega}^+$ candidate will be built).
+\item Then, the variable {\tt charge} is transformed according to this formula :\\
+{\tt charge=-(useLikesign-1)*charge;} :\\
+if no like-sign has been asked, the variable is unchanged, whereas if like-sign has been required, the sign of {\tt charge} is changed.
+\item The XiFinder eventually loops over tracks whose charge is such as {\tt charge $\times$ track.charge} $> 0$.
+\end{maliste}
+And that's all !
+
+
+\subsection{Rotating analysis}
+
+For a decay channel $A \longrightarrow B + C$, the rotating method consists in reconstructing $A$ by associating $B$ with $C'$ rather than $C$, where $C'$ is the track of a $C$-like particle whose parameters have been changed. The various possible changes are :
+\begin{maliste}
+\item Rotating : a track is rotated by $180^\circ$ % Ca ressemble pas a un \degres, ca...
+around the axis that is parallel to $(Oz)$ and that goes through the primary vertex,
+\item Symmetry : a track is transformed into its symmetric with respect to the $(xOy)$ plane,
+\item Rotating + symmetry : doing both transofmations together is equivalent to taking the symmetric of the track with respect to the primary vertex.
+\end{maliste}
+
+Rotating -- which will refer from now to all 3 methods described in the previous paragraph -- hasn't been implemented in the V0Finder yet, but will be some day (I haven't received any request yet ;-) ~ ).
+
+Deciding whether one of these methods should be used and which one is done by using the function {\tt StV0FinderMaker::SetRotatingUsage}. The usage is explained in section \ref{HowTo} p. \pageref{HowTo}.There are 4 possible values, which are : 
+\begin{maliste}
+\item {\tt kRotatingUseStandard} = 0 : the standard reconstruction with no rotating is performed,
+\item {\tt kRotatingUseRotating} = 1 : the bachelor tracks are rotated,
+\item {\tt kRotatingUseSymmetry} = 2 : the bachelor tracks are ``symmetrised" with respect to the bending plane,
+\item {\tt kRotatingUseRotatingAndSymmetry} = 3 : the bachelor tracks are ``symmetrised" with respect to the primary vertex.
+\end{maliste}
+Unlike with like-sign, nothing has to be changed in the post-reconstruction analysis codes.
+
+Here is a mathematical description of how the various rotating-like methods are performed %\footnotemark[1].
+% Ca marche impeccable, mais malheureusement ca met "1", qui est bien le numero de la note a laquelle je fais reference, mais evidemment sans mention de la page ni rien. Donc ca sert seulement quand on met pas le compteur de footnotes a 0 a chaque page. Il y a une solution bien meilleure (www.grappa.univ-lille3.fr/FAQ-LaTeX/6.32.html), mais avec le package french... :
+%* Avec french, on peut utiliser la commande \refmark.
+%
+%Exemple :
+%le vrai appel\footnote{C'est une note en bas de
+%page\label{manote}} et le deuxieme appel\refmark{manote}
+% On dirait qu'on peut faire un \pageref{manote} ?
+%
+%OK : en fait c'est un ajout de Bernard Gaulle, cf feuilles imprimees de GUTenberg. C'est tout connement :
+% \def\refmark##1{\hbox{$^{\ref{##1}}$}} !!! Donc je bypasse et j'utilise directement \ref :-)
+(see footnote \ref{SCL} p. \pageref{SCL} about the helices' parameters) : the table below shows how the various helix parameters are modified depending on the method used.
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+Original helix & Rotating & Symmetry & Both \\
+\hline
+\hline
+Charge \hfill $c$ & $c$ & $c$ & $c$ \\
+\hline
+Angle \hfill $\Psi$ & $\Psi + \pi$ & $\Psi$ & $\Psi + \pi$ \\
+\hline
+Curvature \hfill $\kappa$ & $\kappa$ & $\kappa$ & $\kappa$ \\
+\hline
+Dip angle\hfill  $\lambda$ & $\lambda$ & $-\lambda$ & $-\lambda$ \\
+\hline
+X origin \hfill $x_0$ & $2x_{_{Pvx}} - x_0$ & $x_0$ & $2x_{_{Pvx}} - x_0$ \\
+Y origin \hfill $y_0$ & $2y_{_{Pvx}} - y_0$ & $y_0$ & $2y_{_{Pvx}} - y_0$ \\
+Z origin \hfill $z_0$ & $z_0$ & $2z_{_{Pvx}} - z_0$ & $2z_{_{Pvx}} - z_0$ \\
+\hline
+Helicity \hfill $h$ & $h$ & $h$ & $h$ \\
+\hline
+X momentum \hfill ~~$p_x$ & $-p_x$ & $p_x$ & $-p_x$ \\
+Y momentum \hfill ~~$p_y$ & $-p_y$ & $p_y$ & $-p_y$ \\
+Z momentum \hfill ~~$p_z$ & $p_z$ & $-p_z$ & $-p_z$ \\
+\hline
+\end{tabular}
+\label{MathsRotating}
+\end{center}
+
+In the code, all rotating methods calculations are achieved in one shot, thanks to the pre-definition of a couple of interesting variables which I describe below. In the code, once the bachelor helix is moved, nothing else is changed by the use of a rotating-like method. So what is done is simply the booking (and then usage) of a StHelixModel called {\tt bachGeom} from both the initial parameters of the helix and the ``interesting variables", whose value is set at the beginning of the XiFinder, before the loop on the bachelor tracks.
+
+Here is how the helix parameters are modified before their storage in {\tt bachGeom} :\\
+\begin{tabular}{l@{$\quad\longrightarrow\quad$}l}
+charge & charge \\
+helicity & helicity \\
+curvature & curvature \\
+psi & psi + {\tt\bf cstPsi} \\
+dipAngle & {\tt\bf epsDipAngle} $\times$ dipAngle  \\
+origin.X & {\tt\bf cstOrigin.X} + {\tt\bf epsOrigin.X} $\times$ origin.X \\
+origin.Y & {\tt\bf cstOrigin.Y} + {\tt\bf epsOrigin.Y} $\times$ origin.Y \\
+origin.Z & {\tt\bf cstOrigin.Z} + {\tt\bf epsOrigin.Z} $\times$ origin.Z \\
+momentum.X & {\tt\bf epsMomentum.X} $\times$ momentum.X \\
+momentum.Y & {\tt\bf epsMomentum.Y} $\times$ momentum.Y \\
+momentum.Z & {\tt\bf epsMomentum.Z} $\times$ momentum.Z \\
+\end{tabular}\\
+The ``interesting variables" are written in bold, and the values they are given are listed in the table below (an empty space means that the value is the same as for ``no rotating") :
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+Variable & No rotating & Rotating & Symmetry & Both \\
+\hline
+\hline
+{\tt cstPsi} & 0 & $\pi$ &  & $\pi$ \\
+\hline
+{\tt epsDipAngle} & +1 &  & -1 & -1 \\
+\hline
+{\tt cstOrigin.X} & 0 & $2x_{_{Pvx}}$ &  & $2x_{_{Pvx}}$ \\
+{\tt cstOrigin.Y} & 0 & $2y_{_{Pvx}}$ &  & $2y_{_{Pvx}}$ \\
+{\tt cstOrigin.Z} & 0 &  & $2z_{_{Pvx}}$ & $2z_{_{Pvx}}$ \\
+\hline
+{\tt epsOrigin.X} & +1 & -1 &  & -1 \\
+{\tt epsOrigin.Y} & +1 & -1 &  & -1 \\
+{\tt epsOrigin.Z} & +1 &  & -1 & -1 \\
+\hline
+{\tt epsMomentum.X} & +1 & -1 &  & -1 \\
+{\tt epsMomentum.Y} & +1 & -1 &  & -1 \\
+{\tt epsMomentum.Z} & +1 &  & -1 & -1 \\
+\hline
+\end{tabular}
+\end{center}
+
+The combination of the values in this table and the transformations listed just above it give the mathematical transformations listed in the table p. \pageref{MathsRotating}. This avoids a check of the rotating choice by an if-loop inside the for-loop on the tracks, and thus time-consuming jumps in the code.
+
+
+
+
+
+
+
+
+\vspace{1cm}
+
+\section{Cuts values}
+
+Blablabla
+
+
+
+
+
+
+
+
+\vspace{1cm}
+
+\section{How to use the V0/XiFinder}
+\label{HowTo}
+
+Blablabla
+
+
+
+
+
+
 
 
 
