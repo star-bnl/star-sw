@@ -18,13 +18,11 @@ class StiDisplayManager;
 class StiDetectorContainer;
 class StiTrackContainer;
 class StiEvaluableTrack;
-class StiEvaluableTrackSeedFinder;
-class StiTrackSeedFinder;
+class StiSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
-class StiCompositeSeedFinder;
 class StMcEventMaker;
 class StAssociationMaker;
 
@@ -40,7 +38,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.26 2001/10/01 17:06:24 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.27 2001/10/01 19:19:38 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -83,7 +81,6 @@ private:
     StiObjectFactoryInterface<StiKalmanTrackNode>* mktracknodefactory; //!
     StiObjectFactoryInterface<StiDetector>* mdetectorfactory; //!
     StiObjectFactoryInterface<StiDetectorNode>* mdatanodefactory; //!
-    StiObjectFactoryInterface<StiKalmanTrack>* mkalmantrackfactory; //!
 
     //Display
     StiDisplayManager* mdisplay; //!
@@ -91,10 +88,8 @@ private:
     //Utilites
     StiHitFiller* mhitfiller; //!
 
-    //SeedFinders
-    StiEvaluableTrackSeedFinder* mEvaluableSeedFinder; //!
-    StiTrackSeedFinder* mKalmanSeedFinder; //!
-    StiCompositeSeedFinder* mcompseedfinder; //!
+    //SeedFinder(s)
+    StiSeedFinder* mSeedFinder; //!
 
     //Tracker
     StiKalmanTrackFinder* mtracker; //!
