@@ -52,7 +52,7 @@
      gSystem->Load("St_ebye_Maker");
      gSystem->Load("St_laser_Maker");
      gSystem->Load("St_run_Maker");
-     gSystem->Load("St_tpctest_Maker");
+//     gSystem->Load("St_tpctest_Maker");
 
      gSystem->Load("St_calib_Maker");
    }
@@ -100,12 +100,12 @@
   
   if (gSystem->AccessPathName(giffile.Data()) && !NT) {
     // Create "gif" subdirectory for the first time
-    gSystem->MakeDirectory(giffile);
+    gSystem->MakeDirectory(giffile.Data());
     // Create links 
     gSystem->Symlink("../src/gif","/afs/rhic/star/packages/dev/StRoot/html/examples/gif");
     gSystem->Symlink("src/gif","/afs/rhic/star/packages/dev/StRoot/html/gif");
     // Copy the old images into a new directrory
-    gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
+    gSystem->Exec("cp /afs/rhic/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
   }
   
   html->SetSourceDir(lookup.Data());
@@ -175,6 +175,6 @@
   html.Convert("./tst.kumac","An example of  Iwona's old tst.kumac of the analysis of laser events");
   html.Convert("./tpctest.C","ROOT based TPC test analysis");
 
-//  html.MakeClass("EModuleTypes");
-//  html.MakeIndex();
+ html.MakeClass("EModuleTypes");
+ html.MakeIndex();
 }

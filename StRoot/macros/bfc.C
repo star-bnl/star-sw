@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.26 1998/12/10 01:43:46 fisyak Exp $
+// $Id: bfc.C,v 1.27 1998/12/12 02:38:43 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.27  1998/12/12 02:38:43  fisyak
+// Clean up
+//
 // Revision 1.26  1998/12/10 01:43:46  fisyak
 // Remove geant
 //
@@ -73,13 +76,10 @@
 // Add tcl and tpt
 //
 void bfc(
-         const Char_t *fileinp = 
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/g2t/psc340_04_90evts.xdf",
-         const Char_t *fileout=
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.xdf",
-         const Char_t *FileOut=
-"/disk1/star/auau200/hijing135/default/b0_20/year2a/hadronic_on/root/psc340_04_90evts_dst.root",
-         const Int_t  Nevents=1000)
+         const Int_t  Nevents=1000,
+         const Char_t *fileinp = "/afs/rhic/star/data/samples/hijet-g2t.xdf",
+         const Char_t *fileout = "hijet-bfc.xdf",
+         const Char_t *FileOut = "hijet-bfc.root")
 {
   gSystem->Load("St_base");
   gSystem->Load("StChain");
@@ -91,8 +91,9 @@ void bfc(
   gSystem->Load("St_xdfin_Maker");
   gSystem->Load("St_calib_Maker");
   gSystem->Load("St_evg_Maker");
-  //  gSystem->Load("St_geant_Maker");
-  //  gSystem->Load("St_geom_Maker");
+  //  gSystem->Load("geometry");
+  gSystem->Load("St_geometry");
+  gSystem->Load("St_geant_Maker");
   gSystem->Load("St_TLA_Maker");
   gSystem->Load("tpc");
   gSystem->Load("St_tpc");
@@ -125,14 +126,16 @@ void bfc(
 
 //  Create the makers to be called by the current chain
   St_params_Maker params("params","run/params");
-  St_TLA_Maker     geom("geom","run/geant/Run");
+  St_geom_Maker     geom("geom","run/geant/Run");
+  //  St_TLA_Maker     geom("geom","run/geant/Run");
   if (xdf_in) {
     St_xdfin_Maker xdfin("xdfin");
     chain.SetInputXDFile(xdf_in);
   }
   St_calib_Maker    calib("calib","calib"); 
   St_evg_Maker      evgen("evgen","event/evgen");
-  St_TLA_Maker    geant("geant","event/geant/Event");
+  St_geant_Maker    geant("geant","event/geant/Event");
+  //  St_TLA_Maker    geant("geant","event/geant/Event");
 //  St_fss_Maker   ftpc_raw("ftpc_raw","event/raw_data/ftpc");
 //  St_tss_Maker    tpc_raw("tpc_raw","event/raw_data/tpc");
 // Set parameters
