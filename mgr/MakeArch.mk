@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.57  1999/01/21 02:18:51  fisyak
+#  Add Wall
+#
 #  Revision 1.56  1999/01/21 02:15:28  fisyak
 #  New StChain w/o automatical streamer generation
 #
@@ -146,7 +149,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/21 02:15:28 $ 
+#             Last modification $Date: 1999/01/21 02:18:51 $ 
 #. default setings
 
 MAKE  := gmake
@@ -364,8 +367,8 @@ ifndef EGCS_ON
   FC       := /usr/pgi/linux86/bin/pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC
-  CFLAGS   := $(DEBUG) -fPIC
+  CXXFLAGS := $(DEBUG) -fPIC -Wall
+  CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
@@ -399,8 +402,8 @@ else
   FC       := /usr/pgi/linux86/bin/pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := $(DEBUG) -fPIC
-  CFLAGS   := $(DEBUG) -fPIC
+  CXXFLAGS := $(DEBUG) -fPIC -Wall
+  CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
@@ -431,7 +434,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_redhat51 i386_redhat52))
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC -Wall -fno-rtti -fno-exceptions -fno-for-scope
 #                                             -fpipe
-  CFLAGS   := $(DEBUG) -fPIC
+  CFLAGS   := $(DEBUG) -fPIC -Wall
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic   
