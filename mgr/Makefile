@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.14  1998/03/09 14:36:31  fisyak
+#  Switch varibales
+#
 #  Revision 1.13  1998/02/22 02:08:25  fisyak
 #  CPPFLAGS for HPX
 #
@@ -34,10 +37,10 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/22 02:08:25 $ 
-ifdef SILENT
+#             Last modification $Date: 1998/03/09 14:36:31 $ 
+ifdef SILENT #1
 .SILENT:
-endif
+endif        #1
 ALL_DEPS  = $^
 FIRST_DEP = $<
 FIRSTF    = $(<D)/$(<F)
@@ -45,35 +48,35 @@ ALL_TAGS  = $@
 STEM      = $*
 STEMF     = $(*D)/$(*F)
 STIC      = stic
+KUIPC           := kuipc
+KUIPC_FLAGS     :=
 PWD       = /bin/pwd
 CWD      := $(shell $(PWD))
 EMPTY    :=
 FOUR     :=4
 TWO      :=2
-ifndef MAKEFILE
+ifndef MAKEFILE #1
 MAKEFILE = $(STAR)/mgr/Makefile
-endif
-ifndef INP_DIR
+endif           #1
+ifndef INP_DIR  #1
 INP_DIR := $(CWD)
-endif
+endif           #1 
 NAME    := $(notdir $(INP_DIR))
 # define level pams -> domain -> package from *.idl and *.g files
 #======================= level ===========================
 PAMS    :=pams
 DIR_LIST:= $(subst /, ,$(INP_DIR)) 
 pams    := $(findstring $(PAMS),$(DIR_LIST))
-ifeq ($(EMPTY),$(pams)) # ROOT level
+ifeq ($(EMPTY),$(pams))         #1# ROOT level
 	LEVEL   :=0
 	ROOT:=$(INP_DIR)
 	SUBDIRS :=$(PAMS)
-else
+else                    #1 
 	LIST    := $(DIR_LIST)
 	N       := $(words $(LIST))
 	SN      := $(word  $(N), $(DIR_LIST))
 	DIRS    := $(strip $(wildcard *))
 	SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
-	SUBDIRS := $(filter-out staf,$(SUBDIRS))
-	SUBDIRS := $(filter-out sys, $(SUBDIRS))
 	SUBDIRS := $(filter-out inc, $(SUBDIRS))
 	SUBDIRS := $(filter-out idl, $(SUBDIRS))
 	SUBDIRS := $(filter-out doc, $(SUBDIRS))
@@ -83,72 +86,71 @@ else
 	SUBDIRS := $(filter-out exa, $(SUBDIRS))
 	SUBDIRS := $(strip $(sort $(SUBDIRS)))
         SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS))
-ifeq ($(PAMS), $(strip $(SN)))                #pams level
+ifeq ($(PAMS), $(strip $(SN)))  #2  #pams level
 		LEVEL   :=1
 		ROOT    := $(shell cd $(INP_DIR)/../; $(PWD))
-else                             #domain level
+else                            #2  #domain level
 		LIST    := $(filter-out $(SN), $(LIST))
 		N       := $(words  $(LIST))
 		SN_1    := $(word  $(N), $(DIR_LIST))
-ifeq ($(PAMS), $(strip $(SN_1))) 
+ifeq ($(PAMS), $(strip $(SN_1)))#3 #default is domain
 			LEVEL   :=2
-#                       default is domain
 			ROOT    := $(shell cd $(INP_DIR)/../../; $(PWD))
 			DOM_DIR := $(CWD)
 			PKG     := $(notdir $(DOM_DIR))
-ifeq (gen,$(PKG))
-				PKG     :=
-endif
-else                             #package level
+ifeq (gen,$(PKG))               #4
+			PKG     :=
+endif                           #4
+else                            #3 #package level
 			LIST    := $(filter-out $(SN_1), $(LIST))
 			N       := $(words  $(LIST))
 			SN_2    := $(word  $(N), $(DIR_LIST))
 			PKG     := $(NAME)
-ifeq ($(PAMS),$(strip $(SN_2))) #subpackage level
+ifeq ($(PAMS),$(strip $(SN_2))) #4 #subpackage level
 				LEVEL   :=3
 				ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
 				DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
 				SUBDIRS:=
-else
+else                            #4
 				LIST    := $(filter-out $(SN_2), $(LIST))
 				N       := $(words  $(LIST))
 				SN_3    := $(word  $(N), $(DIR_LIST))
-ifeq ($(PAMS),$(strip $(SN_3)))
+ifeq ($(PAMS),$(strip $(SN_3))) #5
 				LEVEL   :=4
 				ROOT    := $(shell cd $(INP_DIR)/../../../../; $(PWD))
 				DOM_DIR := $(shell cd $(INP_DIR)/../../; $(PWD))
 				PKG     := $(notdir $(shell cd $(INP_DIR)/../; $(PWD)))
-else
+else                            #5
 				LEVEL   :=-1
 				ROOT    :=$(INP_DIR)
 				SUBDIRS :=$(PAMS)
-endif
-endif
-endif
-endif
-endif
-ifndef OUT_DIR
+endif                           #5
+endif                           #4
+endif                           #3
+endif                           #2
+endif                           #1
+ifndef OUT_DIR                  #1
 	override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
-endif
-ifeq ($(NAME),$(PKG))
+endif                           #1
+ifeq ($(NAME),$(PKG))           #1
 	SUBDIRS :=
-endif
+endif                           #1
 #.
 SRC_DIR := $(INP_DIR)
 IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
-ifneq ($(EMPTY),$(IDLS))
+ifneq ($(EMPTY),$(IDLS))        #1
 FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
-endif
+endif                           #1
 FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #=========================================================
-ifeq ($(LEVEL),$(FOUR))
+ifeq ($(LEVEL),$(FOUR))         #1
 .PHONY               : default
 all:
 	@echo "Please run make in parent directory"
-else
-ifndef RANLIB
+else                            #1
+ifndef RANLIB                   #2
 override RANLIB := /bin/true
-endif
+endif                           #2
 LIB_DIR := $(OUT_DIR)/$(SYS_HOST_STAR)
 DOMAIN  := $(notdir $(DOM_DIR))
 OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
@@ -173,118 +175,126 @@ VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
 FILES_CC := $(wildcard $(addsuffix /*.cc, $(SRC_DIRS)))
 FILES_C  := $(wildcard $(addsuffix /*.c , $(SRC_DIRS)))
 FILES_F  := $(wildcard $(addsuffix /*.F , $(SRC_DIRS)))
+FILES_CDF:= $(wildcard $(addsuffix /*.cdf , $(SRC_DIRS)))
 
 NAMES_IDM:= $(basename $(notdir $(FILES_IDM)))
 NAMES_G  := $(basename $(notdir $(FILES_G)))
 NAMES_CC := $(basename $(notdir $(FILES_CC)))
 NAMES_C  := $(basename $(notdir $(FILES_C)))
 NAMES_F  := $(basename $(notdir $(FILES_F)))
+NAMES_CDF:= $(basename $(notdir $(FILES_CDF)))
 
 FILES_I  := $(addprefix $(GEN_DIR)/, $(addsuffix .inc, $(NAMES_IDM)))
 FILES_H  := $(addprefix $(GEN_DIR)/, $(addsuffix .h,   $(NAMES_IDM)))
 FILES_CA := $(addprefix $(GEN_DIR)/, $(addsuffix _i.cc,$(NAMES_IDM)))
-FILES_O  := $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_F) $(NAMES_f) \
+FILES_O  := $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_F) \
                                                        $(NAMES_C) $(NAMES_CC)))
-ifeq ($(DOMAIN),gen)
-ifneq ($(PKG),$(EMPTY))
+ifeq ($(DOMAIN),gen)            #2
+ifneq ($(PKG),$(EMPTY))         #3
 		PKG_LIB := lib$(PKG).a
-endif
-else
-ifneq ($(DOMAIN),$(EMPTY))
+endif                           #3
+else                            #2
+ifneq ($(DOMAIN),$(EMPTY))      #3
 		PKG_LIB := lib$(DOMAIN).a
-endif
-endif
-ifneq ($(EMPTY),$(PKG))
+endif                           #3
+endif                           #2
+ifneq ($(FILES_O),$(EMPTY))     #2
+LIB_PKG := $(LIB_DIR)/$(PKG_LIB) 
+endif                           #2
+ifneq ($(EMPTY),$(PKG))         #2
 	PKG_SL  := $(PKG).sl
-endif
+ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) #3
+        SL_PKG  := $(LIB_DIR)/$(PKG_SL)
+endif                           #3
+endif                           #2
 MKDEPFLAGS:= -traditional -MG -MM -w -x c
-ifndef NODEPEND
+ifndef NODEPEND                 #2
 FILES_D  :=                          $(addsuffix .d,   $(basename $(FILES_O)))
 FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
-endif
-FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_G)))
+endif                           #2
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FILES_CA)))))
 NAMES_O   = $(notdir $(FILES_O))
-ifeq ($(LEVEL),$(TWO)) # domain level: add all domain IDM
-ifneq ($(EMPTY),$(FILES_IDM))
+ifeq ($(LEVEL),$(TWO))          #2 # domain level: add all domain IDM
+ifneq ($(EMPTY),$(FILES_IDM))   #3
 IDLSD    := $(wildcard $(STAR)/$(PAMS)/$(DOMAIN)/*/*.idl $(STAR)/$(PAMS)/$(DOMAIN)/*/*/*.idl)
-ifneq ($(EMPTY),$(IDLSD))
+ifneq ($(EMPTY),$(IDLSD))       #4
 FILES_DD := $(shell egrep -l 'interface.*:.*amiModule' $(IDLSD))
 NAMES_IDM+= $(basename $(notdir $(FILES_DD)))
 override  NAMES_IDM := $(sort $(NAMES_IDM))
-endif
-endif
-endif
-ifneq (,$(NAMES_IDM))
-FILES_K  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.o)
-endif
+endif                           #4
+endif                           #3
+endif                           #2
+ifneq (,$(NAMES_IDM))           #2
+FILES_SL  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.o)
+endif                           #2
+ifneq (,$(NAMES_CDF))           #2
+FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_CDF)))
+endif                           #2
+ifneq (,$(NAMES_G))             #2
+FILES_SL  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o, $(NAMES_G)))
+endif                           #2
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/idl $(SRC_DIR) $(IDL_DIRS))
-ifneq ($(SYS_STAR),hp_ux102)
-CPPFLAGS += -D$(SYS_STAR) -D$(shell uname) 
-endif
+ifneq ($(SYS_STAR),hp_ux102)    #2
+CPPFLAGS += -D$(SYS_STAR) $(strip -D$(shell uname)) 
+endif                           #2
 CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc  \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
-ifneq ($(ROOT),$(STAR))
+ifneq ($(ROOT),$(STAR))         #2
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
-endif
+endif                           #2
 FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/geant321
-ifndef NODEBUG
+ifndef NODEBUG                  #2
 FFLAGS   += -g
 CFLAGS   += -g
 CXXFLAGS += -g
 CPPFLAGS += -DDEBUG
-endif
-ifndef CERN_LIBS
+endif                           #2
+ifndef CERN_LIBS                #2
     CERN_LIBS := $(shell cernlib mathlib kernlib)
-endif
-ifndef LIBRARIES
-ifeq ($(LIB_STAR),$(LIB_DIR))
+endif                           #2
+ifndef LIBRARIES                #2
+ifeq ($(LIB_STAR),$(LIB_DIR))   #3
 		LIBRARIES :=  $(LIB_STAR)/$(PKG_LIB) \
                -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -L$(LIB_STAR)
-else
-		LIBRARIES :=  $(LIB_DIR)/$(PKG_LIB)  \
+else                            #3
+		LIBRARIES :=  $(LIB_PKG)  \
                 $(shell test -f $(LIB_STAR)/$(PKG_LIB) && echo $(LIB_STAR)/$(PKG_LIB)) \
                -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -L$(LIB_DIR) -L$(LIB_STAR)
-endif
+endif                           #3
 LIBRARIES +=  -lutil
-#LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libtls.a && echo -ltls)
-#LIBRARIES +=  $(shell test -f $(STAR)/asps/../lib/$(SYS_HOST_STAR)/libmsg.a && echo -lmsg)
-endif
+endif                           #2
 #-------------------------------rules-------------------------------
 # phony - not a file
 .PHONY               : $(PKG) depend clean test
 all                  : $(PKG)  
-ifeq ($(EMPTY),$(SUBDIRS))
+ifeq ($(EMPTY),$(SUBDIRS))      #2
 #          I have no subdrs
 # all files:
-ifeq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))
+ifneq ($(EMPTY),$(strip $(FILES_O) $(FILES_SL))) #3
 #                 I have NO idl- and NO g-files
-$(PKG)               : $(LIB_DIR)/$(PKG_LIB)
-$(LIB_DIR)/$(PKG_LIB): $(FILES_O)
-	$(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB) $(FILES_O)
-	@echo "          Library " $(LIB_DIR)/$(PKG_LIB) " has been updated"
-else
-#                                                       $(IDL_DIRS)
-$(PKG)               : $(LIB_DIR)/$(PKG_SL)
-ifeq ($(FILES_IDM),$(EMPTY))
-$(LIB_DIR)/$(PKG_SL): $(FILES_O)
-	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(PKG_SL) \
-        $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS)
-else
-$(LIB_DIR)/$(PKG_SL): $(FILES_K) $(LIB_DIR)/$(PKG_LIB)
-	$(LD) $(LDFLAGS) $(FILES_K) -o $(LIB_DIR)/$(PKG_SL) \
+$(PKG)               : $(SL_PKG) $(LIB_PKG)
+ifneq ($(FILES_O),$(EMPTY))     #4
+$(LIB_PKG): $(FILES_O)
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(FILES_O)
+	@echo "          Library " $(LIB_PKG) " has been updated"
+endif                           #4
+ifneq ($(FILES_SL),$(EMPTY))    #4
+$(SL_PKG): $(FILES_SL) $(LIB_PKG)
+#ifneq ($(SYS_STAR),hp_ux102)
+	$(LD) $(LDFLAGS) $(FILES_SL) -o $(SL_PKG) \
         $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
-	@echo "          Shared library " $(LIB_DIR)/$(PKG_SL) " has been created"
-$(LIB_DIR)/$(PKG_LIB): $(FILES_O)
-	$(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB) $(FILES_O)
-	@echo "          Library " $(LIB_DIR)/$(PKG_LIB) " has been updated"
+#else
+#	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) $(LDFLAGS) $(GEN_DIR)/$(PKG)_init.cc\
+#      -o $(SL_PKG) $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS)
+#endif
+	@echo "          Shared library " $(SL_PKG) " has been created"
 #--------- module ---------
 $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM) 
 	@if [ -f $(GEN_DIR)/$(PKG)_init.cc ]; then  rm $(GEN_DIR)/$(PKG)_init.cc ; fi
 	@echo '/* '$(PKG)' package interface to STAF */' > $(GEN_DIR)/$(PKG)_init.cc
 	@echo '/* automatically generated file */'      >> $(GEN_DIR)/$(PKG)_init.cc
-ifneq ($(NAMES_IDM),)
+ifneq ($(NAMES_IDM),)           #5
 	@for p in $(NAMES_IDM); do echo $p; echo '#include "'$$p'.h"'   \
                                                         >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo 'extern "C" int  $(PKG)_init (void);'     >> $(GEN_DIR)/$(PKG)_init.cc
@@ -298,10 +308,47 @@ ifneq ($(NAMES_IDM),)
                                                         >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo '                       return 1; }'      >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
-endif    #
+endif                           #5
 	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
-endif
-endif # NO idl- or g-files
+endif                           #4 # NO idl- or g-files
+#-----cleaning------------------------------
+clean: clean_obj clean_lib
+clean_share:
+	rm -rf $(GEN_DIR) 
+clean_obj:
+	rm -rf $(OBJ_DIR) 
+clean_lib:
+	rm -rf $(SL_PKG) $(LIB_DIR)/$(DOMAIN).a
+#-----dependencies--------------------------
+ifneq ($(EMPTY), $(strip $(FILES_D)))  #4
+include $(FILES_D)
+endif                           #4     #
+ifneq ($(EMPTY), $(strip $(FILES_DM))) #4
+include $(FILES_DM)
+endif                           #4     # 
+endif                           #3 # end if of FILES_O FILES_SL
+else                            #2
+#      I_have_subdirs
+all:  $(addsuffix _all, $(SUBDIRS))
+%_all:
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) all 
+test: $(addsuffix _test, $(SUBDIRS))
+%_test: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) test 
+clean: $(addsuffix _clean, $(SUBDIRS))
+%_clean: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
+%_clean_lib: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+clean_share: $(addsuffix _clean_share, $(SUBDIRS))
+%_clean_share: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
+%_clean_obj: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+endif                           #2 # end if of SUBDIR loop
+endif                           #1 # LEVEL 4
 #--------  idm, idl --------
 $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); $(RM) $(STEM).idl
@@ -316,6 +363,10 @@ $(OBJ_DIR)/%.o: %.c
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
+$(OBJ_DIR)/%.o: %.cdf
+	$(KUIPC) $(KUIPC_FLAGS) $(FIRST_DEP) $(GEN_DIR)/$(STEM).c
+	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(GEN_DIR)/$(STEM).c -o $(OBJ_DIR)/$(STEM).o; \
+        $(RM)  $(GEN_DIR)/$(STEM).c
 #-----dependencies-------
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR);\
@@ -342,45 +393,8 @@ $(OBJ_DIR)/%.d: %.F
         > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.cdf
 	cd $(SRC_DIR); \
-        echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;/
+        echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;
         echo "$(STEM).o: $(STEM).c" >> $(ALL_TAGS)
-#-----cleaning------------------------------
-clean: clean_obj clean_lib
-clean_share:
-	rm -rf $(GEN_DIR) 
-clean_obj:
-	rm -rf $(OBJ_DIR) 
-clean_lib:
-	rm -rf $(LIB_DIR)/$(PKG_SL) $(LIB_DIR)/$(DOMAIN).a
-#-----dependencies--------------------------
-ifneq ($(EMPTY), $(strip $(FILES_D)))
-include $(FILES_D)
-endif       #
-ifneq ($(EMPTY), $(strip $(FILES_DM)))
-include $(FILES_DM)
-endif       # 
-else
-#      I_have_subdirs
-all:  $(addsuffix _all, $(SUBDIRS))
-%_all:
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) all 
-test: $(addsuffix _test, $(SUBDIRS))
-%_test: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) test 
-clean: $(addsuffix _clean, $(SUBDIRS))
-%_clean: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
-clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
-%_clean_lib: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
-clean_share: $(addsuffix _clean_share, $(SUBDIRS))
-%_clean_share: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
-clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
-%_clean_obj: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
-endif # end if of SUBDIR loop
-endif # LEVEL 4
 #-----test variables------------------------
 test: test_dir test_files test_mk
 test_files:
@@ -394,12 +408,16 @@ test_files:
 	@echo "FILES_CA  =" $(FILES_CA)
 	@echo "FILES_O   =" $(FILES_O)
 	@echo "FILES_D   =" $(FILES_D)
+	@echo "FILES_CDF =" $(FILES_CDF)
+	@echo "FILES_SL  =" $(FILES_SL)
 	@echo "NAMES_IDM =" $(NAMES_IDM)
 	@echo "NAMES_G   =" $(NAMES_G)
 	@echo "NAMES_CC  =" $(NAMES_CC)
 	@echo "NAMES_C   =" $(NAMES_C)
 	@echo "NAMES_F   =" $(NAMES_F)
+	@echo "NAMES_CDF =" $(NAMES_CDF)
 test_mk:
+	@echo "MAKE      =" $(MAKE)
 	@echo "MAKEFILES =" $(MAKEFILES)
 	@echo "VPATH     =" $(VPATH)
 	@echo "SHELL     =" $(SHELL)
@@ -431,6 +449,8 @@ test_dir:
 	@echo "PGK       =" $(PKG) 
 	@echo "PKG_SL    =" $(PKG_SL)
 	@echo "PKG_LIB   =" $(PKG_LIB)
+	@echo "SL_PGK    =" $(SL_PKG)
+	@echo "LIB_PKG   =" $(LIB_PKG)
 	@echo "INP_DIR   =" $(INP_DIR)
 	@echo "DOM_DIR   =" $(DOM_DIR)
 	@echo "DOM_DIRS  =" $(DOM_DIRS)

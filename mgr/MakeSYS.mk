@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.1 1998/03/09 13:31:50 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.2 1998/03/09 14:36:31 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.2  1998/03/09 14:36:31  fisyak
+#  Switch varibales
+#
 #  Revision 1.1  1998/03/09 13:31:50  fisyak
 #  Remove environment Variables
 #
@@ -26,7 +29,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/03/09 13:31:50 $ 
+#             Last modification $Date: 1998/03/09 14:36:31 $ 
 ALL_DEPS  = $^
 FIRST_DEP = $<
 FIRSTF    = $(<D)/$(<F)
@@ -45,7 +48,7 @@ CFLAGS     := -fpic -w
 CXX        := gcc
 CXXFLAGS   :=-fpic -w
 ARFLAGS    := rvu
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),rs_aix31 rs_aix32 rs_aix41))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),rs_aix31 rs_aix32 rs_aix41))
 CXX        := xlC
 FFLAGS     :=-O -qextname -qcharlen=6000 -WF,-D
 F_EXTENDED :=-e
@@ -53,7 +56,7 @@ LDFLAGS    :=-bnoentry -bE:$*.exp import.map -bh:8 -T512 -H512
 LD_LIBS    :=-lld -lxlf90 -lxlf -lm -lc
 OPSYS      := AIX
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),alpha_osf32c))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),alpha_osf32c))
 CXX        := cxx
 CFLAGS     := -w
 FFLAGS     := -pic  -static -fpe2
@@ -62,7 +65,7 @@ LDFLAGS    := -shared -expect_unresolved \*\
 LD_LIBS    := lUfor -lfor -lFutil -lm -lm_4sqrt -lots -lc
 OPSYS      := OSF1V32
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),hp700_ux90))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp700_ux90))
 CXX        :=      CC
 CXXFLAGS   := -w -O +a1
 CFLAGS     :=  +z  -Aa -D_HPUX_SOURCE
@@ -71,7 +74,7 @@ LDFLAGS    := -b +a1 -z
 LD_LIBS    := /opt/fortran/lib/libU77.a
 CC_LIBS    := -L/opt/CC/lib -lC.ansi -lcxx -lcl -lc
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),hp_ux102))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102))
 CXX        :=      CC
 CXXFLAGS   := -w +a1 -z +Z
 #       CC         :=       cc
@@ -88,7 +91,7 @@ CC_LIBS    := -L/usr/lib -L/lib -L/opt/CC/lib -lC.ansi -lcxx -lcl -lisamstub -lc
 CERN_LIBS  :=
 #LIBRARIES  :=
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),hp_ux102_aCC))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102_aCC))
 CXX        := aCC
 #ifndef NEW
 #CXXFLAGS   := -w -z +Z
@@ -106,7 +109,7 @@ CC         := cc
 #LD_LIBS    := /opt/fortran/lib/libU77.a
 #CC_LIBS    := -lm
 #else /* NEW */
-CFLAGS     := +DA1.0 -g +Z  -Wl,+s,+b${LIB_STAR} -Ae # from DSPACK
+CFLAGS     := +DA1.0 -g +Z  -Wl,+s,+b${STAR_LIB} -Ae # from DSPACK
 FC         := fort77
 FFLAGS     := +DA1.0 +U77 +ppu +Z                    # from DSPACK
 F_EXTENDED := +es
@@ -120,13 +123,13 @@ LD_LIBS    := -L/opt/fortran/lib -lU77 -lV3 -lm -lf -lC
 CERN_LIBS  :=
 #LIBRARIES  :=
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),hp_ux102_gcc))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102_gcc))
 FFLAGS     := +ppu +z +O2
 LDFLAGS    := -b
 LD_LIBS    := /opt/fortran/lib/libU77.a
 CC_LIBS    := -L/opt/CC/lib -lC.ansi -lcxx -lcl -lc
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),sgi_52 sgi_53))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_52 sgi_53))
 FFLAGS     :=-Nn20000 -static -trapuv -KPIC
 #                                                  -u
 F_EXTENDED :=-extend_source
@@ -143,7 +146,7 @@ LDFLAGS    := -32 -shared
         LD_LIBS    := -lsun -lftn -lm -lc -lPW -lmalloc
 OPSYS      := IRIX53
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),sgi_63 sgi_64))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_63 sgi_64))
 FFLAGS     :=-32 -Nn20000 -static -trapuv -KPIC
 #                                                       -u
 F_EXTENDED :=-extend_source
@@ -159,7 +162,7 @@ LD_LIBS    := -lXext -lm
 #LIBRARIES  := 
 OPSYS      := IRIX64_32
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),sgi_64_n32))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_n32))
 CXX        :=  CC
 CXXFLAGS   := -n32
 CFLAGS     := -n32
@@ -169,7 +172,7 @@ LDFLAGS    := -n32 -shared
 LD_LIBS    := -lXext -lm
 OPSYS      := IRIX64_n32
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),sgi_64_64))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_64))
 CXX        :=  CC
 CXXFLAGS   := -64
 CFLAGS     := -64
@@ -179,7 +182,7 @@ LDFLAGS    := -64 -shared
 LD_LIBS    := -lXext -lm
 OPSYS      := IRIX64_64
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),i386_linux2))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),i386_linux2))
 #  ====================
 FFLAGS     :=-w -O2 -export-dynamic -fno-second-underscore
 F_EXTENDED :=-e 
@@ -187,7 +190,7 @@ LDFLAGS    := -shared
 LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXm -lXt
 OPSYS      := Linux
 endif
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),sun4m_54 sun4m_55 sun4x_55 sun4x_56))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sun4m_54 sun4m_55 sun4x_55 sun4x_56))
 CPPFLAGS   -DSUN -DSOLARIS -Dsun
 #ifndef NEW
 FFLAGS     :=-xl -PIC -w
@@ -217,7 +220,7 @@ LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc 
 #                                                                                    -lsunmath 
 CC_LIBS    := -L/usr/ucblib -R/usr/ucblib -lm -ldl -lform -lmalloc
 endif 
-ifneq ($(EMPTY),$(findstring $(SYS_HOST_STAR),sunx86_55))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sunx86_55))
 CXX        :=  CC
 #CXXFLAGS   :=  -w -pic -D_cplusplus
 CXXFLAGS   :=  -KPIC                       # V.P.
