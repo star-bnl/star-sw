@@ -1,7 +1,8 @@
-// $Id: summarizeEvent.cc,v 1.1 1999/04/28 01:08:05 didenko Exp $
+// $Id: summarizeEvent.cc,v 1.2 1999/04/28 15:14:50 ogilvie Exp $
 // $Log: summarizeEvent.cc,v $
-// Revision 1.1  1999/04/28 01:08:05  didenko
-// new package from Craig
+// Revision 1.2  1999/04/28 15:14:50  ogilvie
+// included filling of histogram for pairs of tracks in real events
+// i.e. numerator of correlation function
 //
 // Revision 1.2  1999/02/11 15:39:16  wenaus
 // cleanup
@@ -25,7 +26,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent/StEvent.hh"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.1 1999/04/28 01:08:05 didenko Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.2 1999/04/28 15:14:50 ogilvie Exp $";
 
 void summarizeEvent(StEvent& event)
 {

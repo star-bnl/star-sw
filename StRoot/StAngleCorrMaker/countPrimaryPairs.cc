@@ -1,7 +1,8 @@
-// $Id: countPrimaryPairs.cc,v 1.1 1999/04/28 01:08:04 didenko Exp $
+// $Id: countPrimaryPairs.cc,v 1.2 1999/04/28 15:14:50 ogilvie Exp $
 // $Log: countPrimaryPairs.cc,v $
-// Revision 1.1  1999/04/28 01:08:04  didenko
-// new package from Craig
+// Revision 1.2  1999/04/28 15:14:50  ogilvie
+// included filling of histogram for pairs of tracks in real events
+// i.e. numerator of correlation function
 //
 // Revision 1.5  1999/03/30 20:37:49  wenaus
 // Explicit StGlobalTrack include
@@ -42,7 +43,7 @@
 #include "TRandom.h"
 #include <TOrdCollection.h>
 
-static const char rcsid[] = "$Id: countPrimaryPairs.cc,v 1.1 1999/04/28 01:08:04 didenko Exp $";
+static const char rcsid[] = "$Id: countPrimaryPairs.cc,v 1.2 1999/04/28 15:14:50 ogilvie Exp $";
 
 long countPrimaryPairs(StEvent& event,int eventNumber, TOrdCollection* trackPool)
 {
