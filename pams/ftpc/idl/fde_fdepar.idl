@@ -18,6 +18,7 @@
                              /* default=20 */ 
        long      min_hit;    /* min. no. hits per track for dE/dx ana */
                              /* default=10 */
+       long      n_row;      /* number of padrows */ 
        float     a_large_number;  /* a large number */
        float     pad_length; /* pad length in cm */
        float     frac_trun;  /* fraction of hits for calculating mean dE/dx */
@@ -29,4 +30,4 @@
        float     total_charge;   /* total charge (energy loss/a_i_p) */
       
    };
-/*  Last mod. for fde_fdepar:   $Date: 1998/01/19 02:25:11 $  */
+/*  Last mod. for fde_fdepar:   $Date: 1998/12/21 15:36:47 $  */
