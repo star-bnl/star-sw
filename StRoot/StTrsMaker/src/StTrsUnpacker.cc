@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.12 1999/10/11 23:55:23 calderon Exp $
+ * $Id: StTrsUnpacker.cc,v 1.13 1999/10/22 00:00:15 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.13  1999/10/22 00:00:15  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.12  1999/10/11 23:55:23  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -102,20 +109,15 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	mSequence = 0;
     }
     
-    pair<digitalTimeBins*, digitalTimeBins*>
-	TrsPadData = mSector->timeBinsOfRowAndPad(padRow,npad);
+    digitalTimeBins* TrsPadData = mSector->timeBinsOfRowAndPad(padRow,npad);
 
     //PR(TrsPadData.first->size());
 
     short numberOfZeros = 0;
-    short numberOfEntriesD = TrsPadData.first->size();
-    short numberOfEntriesZ = TrsPadData.second->size();
+    short numberOfEntriesD = TrsPadData->size();
+    
 
     //PR(numberOfEntriesD);
-    //PR(numberOfEntriesZ);
-    assert(numberOfEntriesD == numberOfEntriesZ);
-    // if not, you are in trouble anyway
-
     short startTimeBin = 0;
     unsigned short ii = 0;
 
@@ -130,17 +132,15 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
     //
     // Construct the sequences:
     for(; ii<numberOfEntriesD; ii++) {
-	if ( (*TrsPadData.first)[ii] == static_cast<unsigned char>(0) ) {
-	    numberOfZeros += (*TrsPadData.second)[ii];
+	if ( (*TrsPadData)[ii] == static_cast<unsigned char>(0) ) {
+	    ii++;
+	    numberOfZeros += (*TrsPadData)[ii];
 	    continue;
 	}
-	if ( (*TrsPadData.second)[ii] == static_cast<unsigned char>(255) )
-	    continue;  // If you have a 255 in the Zeros, shouldn't you have a 0 in the Data?
-	               // If so, then this previous if statement never is true, isn't it?
-
+	
 	StSequence aSequence;
 	aSequence.startTimeBin = numberOfZeros;
-	aSequence.firstAdc     = &(*TrsPadData.first)[ii];
+	aSequence.firstAdc     = &(*TrsPadData)[ii];
 
 //  	PR(aSequence.startTimeBin);
 //  	PR(static_cast<int>(*aSequence.firstAdc));
@@ -151,7 +151,7 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	    aSequence.length++;
 	    ii++;
 	    // Don't overstep the bounds
-	    if(ii==TrsPadData.first->size()) {
+	    if(ii==TrsPadData->size()) {
 		//aSequence.length--;
 		//ii--;
 		break;
@@ -159,7 +159,7 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 // 	    PR(aSequence.length);
 // 	    PR(ii);
 // 	    PR(static_cast<int>((*TrsPadData.first)[ii]));
-	} while ( ((*TrsPadData.first)[ii] != static_cast<unsigned char>(0)) &&
+	} while ( ((*TrsPadData)[ii] != static_cast<unsigned char>(0)) &&
 		   (ii<numberOfEntriesD) );
 	ii--; // Adjust it, since you overstep the sequence...
   	//PR(aSequence.length);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsOstream.cc,v 1.2 1999/10/12 01:39:56 calderon Exp $
+ * $Id: StTrsOstream.cc,v 1.3 1999/10/22 00:00:14 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsOstream.cc,v $
+ * Revision 1.3  1999/10/22 00:00:14  calderon
+ * -added macro to use Erf instead of erf if we have HP and Root together.
+ * -constructor with char* for StTrsDedx so solaris doesn't complain
+ * -remove mZeros from StTrsDigitalSector.  This causes several files to
+ *  be modified to conform to the new data format, so only mData remains,
+ *  access functions change and digitization procedure is different.
+ *
  * Revision 1.2  1999/10/12 01:39:56  calderon
  * The <algorithm> header wasn't missing, it
  * was the STL distance() function in ObjectSpace
@@ -82,7 +89,7 @@ StTrsOstream::StTrsOstream(string streamName, int numberOfEvents, StTpcGeometry*
     ofs << "# sectors " << mSectors << endl;
     ofs << "# rows " << mRows << endl;
     ofs << "# pads ";
-    for (int j=0; j<padsAtRow.size(); j++) ofs << padsAtRow[j] << " ";
+    for (unsigned int j=0; j<padsAtRow.size(); j++) ofs << padsAtRow[j] << " ";
     ofs << endl;
     ofs << "##" << endl;
 
@@ -94,71 +101,40 @@ void StTrsOstream::writeTrsEvent(StTrsRawDataEvent* EventData)
 {
     cout << "Writing Output to file " << endl;
     // Write output
-    for (int iSector = 0; iSector < mSectors; iSector++) {
+    for (unsigned int iSector = 0; iSector < mSectors; iSector++) { // sector loop
 	if(EventData->mSectors[iSector]) { // Make sure the sector has data
 	    StTrsDigitalSector* aDigitalSector = EventData->mSectors[iSector];
-	    if (aDigitalSector->cleanup()) 
-		cout << "Sector " << iSector << " has no data. Skip it." << endl;
-	    else {
+	    cout << "Cleanup of Sector " << iSector+1 << endl;	
+	    if (aDigitalSector->cleanup())
+		cout << "Sector " << iSector+1 << " has no data. Skip it." << endl;
+	    else { // sector has data, write it out
 		ofs << static_cast<unsigned short>(iSector) << " ";
-		
-		for (int iRow = 0; iRow < mRows; iRow++) {
+		cout << "Writing Sector " << iSector+1 << endl;
+		for (unsigned int iRow = 0; iRow < mRows; iRow++) { // row loop
 		    if (aDigitalSector->mData[iRow].size()>0) { //Make sure the row has data
 			ofs << static_cast<unsigned short>(iRow) << " ";
-			//PR(iRow);
-			for (int iPad = 0; iPad < padsAtRow[iRow]; iPad++) {
+// 			cout << endl;
+// 			PR(iRow);
+			for (unsigned int iPad = 0; iPad < padsAtRow[iRow]; iPad++) { // pad loop
+// 			    PR(iPad);
 			    int lengthData = aDigitalSector->mData[iRow][iPad].size();
 			    if (lengthData){ // Make sure the pad has data
-				ofs << static_cast<unsigned short>(iPad) << " ";
-				
-// 				ofs << static_cast<unsigned short>(lengthData);
-				
-// 				ofs.write(static_cast<const unsigned char*>(aDigitalSector->mData[iRow][iPad].begin()),lengthData);
-// 				ofs.write(static_cast<const unsigned char*>(aDigitalSector->mZeros[iRow][iPad].begin()),lengthData);
-// 				ofs << " ";
-				//
-				// Transform this into output format
-				//
-				digitalTimeBins::iterator dataBegin  = aDigitalSector->mData[iRow][iPad].begin();
-				digitalTimeBins::iterator dataEnd    = aDigitalSector->mData[iRow][iPad].end();
-				digitalTimeBins::iterator rangeBegin = dataBegin;
-				unsigned int nZeros = count(rangeBegin,dataEnd,static_cast<unsigned char>(0));
-				digitalTimeBins outputData(lengthData+nZeros);
-				digitalTimeBins::iterator currentPos = outputData.begin();
-
-				while (rangeBegin!=dataEnd && currentPos!=outputData.end()) {
-				    digitalTimeBins::iterator rangeEnd = find(rangeBegin,dataEnd,static_cast<unsigned char>(0));
-				    copy(rangeBegin,rangeEnd,currentPos);
-				    unsigned int dummy =0;
-				    distance(rangeBegin,rangeEnd, dummy);
-				    currentPos+= dummy;
-				    if (*rangeEnd == static_cast<unsigned char>(0)) {
-					unsigned int index = 0;
-					distance(dataBegin, rangeEnd, index);
-					*currentPos++ = static_cast<unsigned char>(0);
-					*currentPos++ = aDigitalSector->mZeros[iRow][iPad][index];
-					
-				    }
-				    rangeBegin = (rangeEnd==dataEnd) ?  dataEnd : rangeEnd+1;
-				}
 								
-				//
-				// Write the Output vector
-				//
+				ofs << static_cast<unsigned short>(iPad) << " ";
+								
+				ofs << static_cast<unsigned short>(lengthData);
 				
-				ofs << static_cast<unsigned short>(outputData.size());
-				
-				ofs.write(static_cast<const unsigned char*>(outputData.begin()),outputData.size());
+				ofs.write(static_cast<const unsigned char*>(aDigitalSector->mData[iRow][iPad].begin()),lengthData);
 				ofs << " ";
-				
-// 			    PR(iPad);
-// 			    PR(lengthData);
-// 			    intVec DataOut(lengthData);
-// 			    transform (aDigitalSector->mData[iRow][iPad].begin(), aDigitalSector->mData[iRow][iPad].end(), DataOut.begin(), getInt2);
-// 			    cout << "Read Data" << endl;
-// 			    copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
-// 			    cout << endl;
 
+				if (false) { // to debug, change to true
+				intVec DataOut(lengthData);
+				transform (aDigitalSector->mData[iRow][iPad].begin(), aDigitalSector->mData[iRow][iPad].end(), DataOut.begin(), getInt2);
+				copy (DataOut.begin(), DataOut.end(), ostream_iter_int(cout, " "));
+				cout << endl;
+				cout << "Wrote..." << endl;
+				}
+				
 			    } // if pad has data
 			} // Pads
 			ofs << static_cast<unsigned short>(iPad) << " " ;
