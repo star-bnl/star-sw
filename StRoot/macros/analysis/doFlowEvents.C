@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.15 2000/06/30 14:57:34 posk Exp $
+// $Id: doFlowEvents.C,v 1.16 2000/07/12 18:04:27 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -45,12 +45,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.16  2000/07/12 18:04:27  posk
+// Fixed bug in use of selection objects.
+//
 // Revision 1.15  2000/06/30 14:57:34  posk
 // Updated to latest doEvents.C .
 //
 // Revision 1.14  2000/06/05 15:22:19  posk
 // Fixed typo in EOF recognition.
-//
 //
 // Revision 1.12  2000/05/18 18:12:06  posk
 // Updated to doEvents.C
@@ -168,6 +170,18 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     setFiles->Init(Argc,Argv);
   }
   
+  //
+  // Make Selection objects and instantiate FlowMaker
+  //
+  char makerName[30];
+  //StFlowSelection flowSelect;
+  //StFlowSelection flowSelect1;
+  //flowSelect->SetNumber(1);
+  //flowSelect->SetCentrality(0);
+  //flowSelect->SetPid("pi+"); // pi+, pi-, pi, or proton
+  //flowSelect->SetPidPart("pi-"); // pi+, pi-, pi, or proton
+  //sprintf(makerName, "Flow%s", flowSelect->Number());
+
   if (strstr(fileList[0], "event.root")==0) {
     // Read raw events and make StEvent
     gSystem->Load("StEventMaker");
@@ -178,7 +192,10 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     IOMk->SetBranch("runcoBranch", 0, "r");
     //IOMk->SetDebug();
     StEventMaker *readerMaker =  new StEventMaker("events", "title");
-    StFlowMaker* flowMaker = new StFlowMaker();
+    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
     if (wrStEOut) {
       // Write out StEvent
       cout << "doFlowEvents - will write out .event.root file" << endl << endl;
@@ -194,21 +211,30 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
     IOMk->SetBranch("eventBranch", 0, "r");
-    IOMk->SetBranch("runcoBranch", 0, "r");
+    //IOMk->SetBranch("runcoBranch", 0, "r");
     //IOMk->SetDebug();
-    StFlowMaker* flowMaker = new StFlowMaker();
+    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
     
   } else if (strstr(fileList[0], "nano")!=0) { 
     //Read nano-DST
-    StFlowMaker* flowMaker = new StFlowMaker();
+    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
     flowMaker->NanoEventRead(kTRUE);
     flowMaker->SetNanoEventFileName(fileList[0]); 
 
   } else {
     //Read pico-DST
-    StFlowMaker* flowMaker = new StFlowMaker();
-    flowMaker->PicoEventRead(kTRUE);
-    flowMaker->SetPicoEventFileName(fileList[0]); 
+    if (makerName[0]=='\0') { StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
+     flowMaker->PicoEventRead(kTRUE);
+     flowMaker->SetPicoEventFileName(fileList[0]); 
   }
   
   //////////////
@@ -222,25 +248,16 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //      FlowMakers with the corresponding selection objects.
   //
   StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
-  //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   
-  // Make Selection objects and instantiate Makers
-  //StFlowSelection flowSelect;
-  //StFlowSelection flowSelect1;
-  //flowSelect1->SetNumber(1);
-  //flowSelect->SetCentrality(0);
-  //flowSelect1->SetPid("pi"); // pi+, pi-, pi, or proton
-  //flowSelect1->SetPidPart("pi"); // pi+, pi-, pi, or proton
-  //char makerName[30];
-  //sprintf(makerName, "Flow%s", flowSelect->Number());
-  //StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
-  //sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
-  //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
-  //sprintf(makerName, "Flow%s", flowSelect1->Number());
-  //StFlowMaker* flowMaker1 = new StFlowMaker(makerName, flowSelect1);
+  if (makerName[0]=='\0') {
+    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+  } else {
+    sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
+    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
   //sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
   //StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
-  
+  }
+
   //
   // Set write flages and file names
   //
@@ -270,23 +287,25 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Set the parameters
   //
   // Set the event cuts
-  //StFlowCutEvent::SetMult(100, 10000);
+  //StFlowCutEvent::SetMult(0, 0);
   //StFlowCutEvent::SetVertexX(0., 0.);
   //StFlowCutEvent::SetVertexY(0., 0.);
   //StFlowCutEvent::SetVertexZ(-100., 100.);
-  StFlowCutEvent::SetEtaSym(0.1, 0.05);  // off
+  //StFlowCutEvent::SetEtaSym(0., 0.);
   
   // Set the track cuts
-  //StFlowCutTrack::SetFitPts(15, 200);
+  //StFlowCutTrack::SetFitPts(0, 0);
   //StFlowCutTrack::SetFitOverMaxPts(0.55, 2.0);
+  //StFlowCutTrack::SetChiSq(0., 0.);
+  //StFlowCutTrack::SetDca(0., 0.);
   
   // Set the event plane selections
   //StFlowEvent::SetEtaCut(0.5, 1., 0, 0); // harmonic 1, selection 1
   
   // Set the PID windows
-  //StFlowEvent::SetPiPlusCut(-2., 2.);
-  //StFlowEvent::SetPiMinusCut(-2., 2.);
-  //StFlowEvent::SetProtonCut(-2., 2.);
+  StFlowEvent::SetPiPlusCut(-2., 2.5);
+  StFlowEvent::SetPiMinusCut(-2., 3.);
+  StFlowEvent::SetProtonCut(-1., 2.);
   
   TTable   *tabl=0;
   TDataSet *obj=0;
@@ -391,7 +410,8 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="/star/rcf/data03/reco/auau200/hbt/default/midcentral/year_1h/hadronic_on/tfs_6";
   //Char_t* fileExt="*.dst.root";
   
-  //Char_t* filePath="/star/rcf/reco/P00hd/2000/06/"; // data
+  //Char_t* filePath="/star/rcf/reco/P00hd_1/2000/07/"; // data
+  //Char_t* filePath="~voloshin/root/dat";
   //Char_t* fileExt="*.dst.root";
   
   // Both  
@@ -402,17 +422,14 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="./";
   //Char_t* fileExt="*.event.root";
   
-  //Char_t* filePath="./";
-  //Char_t* fileExt="flownanoevent.root";
-  
   // LBNL
   //Char_t* filePath="/data06/posk/";
-  //Char_t* fileExt="flow7picoevent.root";
+  //Char_t* fileExt="flow5picoevent.root";
   
-  //Char_t* filePath="/data06/snelling/flow/";
-  //Char_t* fileExt="*.dst.root";
+  //Char_t* filePath="/data06/posk/f07/";
+  //Char_t* fileExt="f0730picoevent.root";
 
-  //Char_t* filePath="/auto/pdsfdv09/star/dst/halffield/nokalman";  // data
+  //Char_t* filePath="/auto/pdsfdv09/star/dst/dst07";  // data
   //Char_t* fileExt="*.dst.root";
 
   doFlowEvents(nevents, filePath, fileExt);
