@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.40 1999/05/13 20:56:50 perev Exp $
+// $Id: StMaker.cxx,v 1.41 1999/05/22 17:50:18 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.41  1999/05/22 17:50:18  perev
+// StMaker::EndMaker ps added
+//
 // Revision 1.40  1999/05/13 20:56:50  perev
 // Supress too much warnings
 //
@@ -109,7 +112,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.40 1999/05/13 20:56:50 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.41 1999/05/22 17:50:18 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -449,9 +452,29 @@ void StMaker::StartMaker()
 //_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
 {
+  static const char *ps =0;
+  if (!ps) {
+//		execute shell      
+    ps = gSystem->Getenv("StarEndMakerShell"); 
+    if (ps) {
+      TString *ts = new TString(ps);
+      char buf[12]; sprintf(buf,"%d",gSystem->GetPid());
+      ts->ReplaceAll("$$",buf);
+      ps = ts->Data();
+    } else { ps ="";}
+  }
+  
+  if (ps[0]) { //Execute shell
+    printf("<%s(%s)::EndMakerShell> %s\n",ClassName(),GetName(),ps);
+    fflush(stdout);
+    if (gSystem->Exec(ps)) ps="";
+  }
   if (ierr){};
   St_DataSet *dat = Find(".data");
   if (dat) dat->Pass(ClearDS,0);
+
+  if (ps[0]) gSystem->Exec(ps);
+  
 
   gBenchmark->Stop(GetName());
 }
