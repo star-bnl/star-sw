@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.73 2000/02/25 21:53:39 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.74 2000/02/27 22:29:52 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.74  2000/02/27 22:29:52  fisyak
+// Remove clash with I/O Maker in file names
+//
 // Revision 1.73  2000/02/25 21:53:39  fisyak
 // Add rrs to default
 //
@@ -418,7 +421,7 @@ BfcItem BFC[] = {
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"EbyeScaTags" ,"","TagsChain","Event"              ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
-  {"tags"        ,"","TagsChain","glob_T,Event,FlowTag,StrangeTags,EbyeScaTags"    
+  {"tags"        ,"","TagsChain","globT,Event,FlowTag,StrangeTags,EbyeScaTags"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
@@ -810,13 +813,14 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	FileOut->ReplaceAll(".fz","");
 	FileOut->ReplaceAll(".xdf","");
 	FileOut->Strip();
+	FileOut->Append(".root");
       }
     }
   }
   if (FileOut)  gMessMgr->QAInfo() << "Output root file name " <<  FileOut->Data() << endm;
   if (GetOption("tags") && FileOut && !m_TFile) {
     TString *TagsName = new  TString(FileOut->Data());
-    TagsName->Append(".tags.root");
+    TagsName->ReplaceAll(".root",".tags.root");
     m_TFile = new TFile(TagsName->Data(),"RECREATE");
   }
   if (GetOption("xout") && FileOut) {
