@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.62 2001/11/09 21:10:45 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.63 2001/12/11 21:33:55 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -81,7 +81,7 @@ Int_t StFlowMaker::Make() {
   if (pFlowEvent) delete pFlowEvent;
   pFlowEvent = NULL;
 
-  // Get the input file name from the ioMaker
+  // Get the input file name from the IOMaker
   if (!mPicoEventRead && pIOMaker) {
     mEventFileName = strrchr(pIOMaker->GetFile(),'/')+1;
     if (Debug()) { 
@@ -93,7 +93,6 @@ Int_t StFlowMaker::Make() {
     if (mEventFileName != mEventFileNameOld) { 
       if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
       if (mPicoEventWrite && pPicoDST->IsOpen()) {
-	//	pPicoDST->Write();
 	pPicoDST->Write(0, TObject::kOverwrite);
 	pPicoDST->Close();
       }
@@ -118,7 +117,7 @@ Int_t StFlowMaker::Make() {
       if (Debug()) { 
 	gMessMgr->Info() << "FlowMaker: no Event header " << endm;
       }
-      //      return kStOK; // If no run info, we're done
+      //return kStOK; // If no run info, we're done
     }
 
     pEvent = dynamic_cast<StEvent*>(GetInputDS("StEvent"));
@@ -180,15 +179,14 @@ Int_t StFlowMaker::Init() {
       gMessMgr->Info() << "##### FlowMaker: truncated filename " 
 		       <<  mEventFileName << endm;
     }
-    TString parameterfile = "PIDTable.root";
-    StuProbabilityPidAlgorithm::readParametersFromFile(parameterfile.Data());
+    StuProbabilityPidAlgorithm::readParametersFromFile("PIDTable.root");
   }
 
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.62 2001/11/09 21:10:45 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.63 2001/12/11 21:33:55 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -215,7 +213,6 @@ Int_t StFlowMaker::Finish() {
   pFlowEvent->PrintSelectionList();
 
   if (mPicoEventWrite && pPicoDST->IsOpen()) {
-    //    pPicoDST->Write();
     pPicoDST->Write(0, TObject::kOverwrite);
     pPicoDST->Close();
   }
@@ -237,8 +234,7 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
   }
   gDirectory = dirSave;
 
-  // Fill mPhiWgt
-  // for each selection and each harmonic
+  // Fill mPhiWgt for each selection and each harmonic
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
@@ -250,23 +246,71 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      // Ftpc (east)
+      // Tpc (FarEast)
+      TString* histTitleFarEast = new TString("Flow_Phi_Weight_FarEast_Sel");
+      histTitleFarEast->Append(*countSels);
+      histTitleFarEast->Append("_Har");
+      histTitleFarEast->Append(*countHars);
+      // Tpc (East)
+      TString* histTitleEast = new TString("Flow_Phi_Weight_East_Sel");
+      histTitleEast->Append(*countSels);
+      histTitleEast->Append("_Har");
+      histTitleEast->Append(*countHars);
+      // Tpc (West)
+      TString* histTitleWest = new TString("Flow_Phi_Weight_West_Sel");
+      histTitleWest->Append(*countSels);
+      histTitleWest->Append("_Har");
+      histTitleWest->Append(*countHars);
+      // Tpc (FarWest)
+      TString* histTitleFarWest = new TString("Flow_Phi_Weight_FarWest_Sel");
+      histTitleFarWest->Append(*countSels);
+      histTitleFarWest->Append("_Har");
+      histTitleFarWest->Append(*countHars);
+      // Ftpc (East)
       TString* histTitleFtpcEast = new TString("Flow_Phi_Weight_FtpcEast_Sel");
       histTitleFtpcEast->Append(*countSels);
       histTitleFtpcEast->Append("_Har");
       histTitleFtpcEast->Append(*countHars);
-      // Ftpc (west)
+      // Ftpc (West)
       TString* histTitleFtpcWest = new TString("Flow_Phi_Weight_FtpcWest_Sel");
       histTitleFtpcWest->Append(*countSels);
       histTitleFtpcWest->Append("_Har");
       histTitleFtpcWest->Append(*countHars);
       if (pPhiWgtFile->IsOpen()) {
-	TH1* phiWgtHist = (TH1*)pPhiWgtFile->Get(histTitle->Data());
-	TH1* phiWgtHistFtpcEast = (TH1*)pPhiWgtFile->Get(histTitleFtpcEast->Data());
-	TH1* phiWgtHistFtpcWest = (TH1*)pPhiWgtFile->Get(histTitleFtpcWest->Data());
-	for (int n = 0; n < Flow::nPhiBins; n++) {
-	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
+	TH1* phiWgtHist = dynamic_cast<TH1*>(pPhiWgtFile->Get(histTitle->Data()));
+	if (k==0 && j==0 && phiWgtHist) {
+	  mOnePhiWgt = kTRUE;
+	  gMessMgr->Info("##### FlowMaker: Using old type phi weight file.");
 	}
+	if (mOnePhiWgt) {
+	  for (int n = 0; n < Flow::nPhiBins; n++) {
+	    mPhiWgt[k][j][n] = (phiWgtHist) ? 
+	      phiWgtHist->GetBinContent(n+1) : 1.;
+	  }
+	} else {
+	  TH1* phiWgtHistFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						      Get(histTitleFarEast->Data()));
+	  TH1* phiWgtHistEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						   Get(histTitleEast->Data()));
+	  TH1* phiWgtHistWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						   Get(histTitleWest->Data()));
+	  TH1* phiWgtHistFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						      Get(histTitleFarWest->Data()));
+	  for (int n = 0; n < Flow::nPhiBins; n++) {
+	    mPhiWgtFarEast[k][j][n] = (phiWgtHistFarEast) ? 
+	      phiWgtHistFarEast->GetBinContent(n+1) : 1.;
+	    mPhiWgtEast[k][j][n] = (phiWgtHistEast) ? 
+	      phiWgtHistEast->GetBinContent(n+1) : 1.;
+	    mPhiWgtWest[k][j][n] = (phiWgtHistWest) ? 
+	      phiWgtHistWest->GetBinContent(n+1) : 1.;
+	    mPhiWgtFarWest[k][j][n] = (phiWgtHistFarWest) ? 
+	      phiWgtHistFarWest->GetBinContent(n+1) : 1.;
+	  }
+	}
+	TH1* phiWgtHistFtpcEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						     Get(histTitleFtpcEast->Data()));
+	TH1* phiWgtHistFtpcWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						     Get(histTitleFtpcWest->Data()));
 	{for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	  mPhiWgtFtpcEast[k][j][n] = (phiWgtHistFtpcEast) ? 
 	    phiWgtHistFtpcEast->GetBinContent(n+1) : 1.;
@@ -274,15 +318,23 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	    phiWgtHistFtpcWest->GetBinContent(n+1) : 1.;
 	}}
       } else {
-	{for (int n = 0; n < Flow::nPhiBins; n++) {
-	  mPhiWgt[k][j][n] = 1.;
-	}}
-	{for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	for (int n = 0; n < Flow::nPhiBins; n++) {
+	  mPhiWgt[k][j][n]        = 1.;
+	  mPhiWgtFarEast[k][j][n] = 1.;
+	  mPhiWgtEast[k][j][n]    = 1.;
+	  mPhiWgtWest[k][j][n]    = 1.;
+	  mPhiWgtFarWest[k][j][n] = 1.;
+	}
+	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
 	  mPhiWgtFtpcEast[k][j][n] = 1.;
-	      mPhiWgtFtpcWest[k][j][n] = 1.;
-	}}
+	  mPhiWgtFtpcWest[k][j][n] = 1.;
+	}
       }
       delete histTitle;
+      delete histTitleFarEast;
+      delete histTitleEast;
+      delete histTitleWest;
+      delete histTitleFarWest;
       delete histTitleFtpcEast;
       delete histTitleFtpcWest;
     }
@@ -302,14 +354,21 @@ void StFlowMaker::FillFlowEvent() {
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent()" << endm;
 
   // Fill PhiWgt array
-  pFlowEvent->SetPhiWeight(mPhiWgt);
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
 
   // Get Trigger information
-
   StL0Trigger* pTrigger = pEvent->l0Trigger();
-  if(pTrigger) {
+  if (pTrigger) {
     pFlowEvent->SetL0TriggerWord(pTrigger->triggerWord());
   }
 
@@ -340,8 +399,8 @@ void StFlowMaker::FillFlowEvent() {
     StCtbTriggerDetector &CTB = triggers->ctb();
     StZdcTriggerDetector &ZDC = triggers->zdc();
     // get CTB
-    for (UInt_t slat=0; slat<CTB.numberOfSlats(); slat++) {
-      for (UInt_t tray=0; tray<CTB.numberOfTrays();tray++) {
+    for (UInt_t slat = 0; slat < CTB.numberOfSlats(); slat++) {
+      for (UInt_t tray = 0; tray < CTB.numberOfTrays(); tray++) {
 	ctb += CTB.mips(tray,slat,0);
       }
     }
@@ -383,7 +442,7 @@ void StFlowMaker::FillFlowEvent() {
 
     if (pTrack && pTrack->flag() > 0) {
       StThreeVectorD p = pTrack->geometry()->momentum();
-      StThreeVectorD g = gTrack->geometry()->momentum();
+      StThreeVectorD g = gTrack->geometry()->momentum(); // p of global track
       // calculate the number of tracks with positive flag & |eta| < 0.75
       if (fabs(p.pseudoRapidity()) < 0.75) goodTracksEta++;
       if (StFlowCutTrack::CheckTrack(pTrack)) {
@@ -398,7 +457,7 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPtGlobal(g.perp());
 	pFlowTrack->SetCharge(pTrack->geometry()->charge());
 
-	dcaSigned = calcDcaSigned(vertex,gTrack);
+	dcaSigned = CalcDcaSigned(vertex,gTrack);
 	pFlowTrack->SetDcaSigned(dcaSigned);
 
 	pFlowTrack->SetDcaGlobal(gTrack->impactParameter());
@@ -456,7 +515,7 @@ void StFlowMaker::FillFlowEvent() {
 	const StParticleDefinition* def = pTrack->pidTraits(uPid);
 	pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
 	pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());
-	if (uPid.isExtrap()) pFlowTrack->SetExtrapTag(1); //mergin area. 
+	if (uPid.isExtrap()) pFlowTrack->SetExtrapTag(1); //merging area. 
 	else pFlowTrack->SetExtrapTag(0); 
 	if (pTrack->geometry()->charge() < 0) {
 	  pFlowTrack->SetElectronPositronProb(uPid.beingElectronProb());
@@ -499,6 +558,8 @@ void StFlowMaker::FillFlowEvent() {
 //----------------------------------------------------------------------
 
 void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
+  // For use with HBT Maker. By Randy Wells.
+
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent(HbtEvent)" << endm;
 
   // Delete previous StFlowEvent
@@ -508,10 +569,17 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   pFlowEvent = new StFlowEvent;
 
   cout << "Inside FlowMaker::FillFlowEvent(HbtEvent)..." << endl;
-  // Fill flow event
-  // Weight file
-  //pFlowEvent->SetPtWgt(); // set pT weighting in HbtReader
-  pFlowEvent->SetPhiWeight(mPhiWgt);
+
+  // set phiweights
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
 
@@ -527,18 +595,14 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   UInt_t origMult = hbtEvent->NumberOfTracks();
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
-  // define functor for pid probability algorithm
-  // Randy removed this
-  //StuProbabilityPidAlgorithm uPid(*pEvent);
   // Fill track info
-  //  double nSigma;
   int goodTracks    = 0;
   int goodTracksEta = 0;
   StHbtTrack* pParticle;
   StHbtTrackIterator pIter;
   StHbtTrackIterator startLoop = hbtEvent->TrackCollection()->begin();
   StHbtTrackIterator endLoop   = hbtEvent->TrackCollection()->end();
-  for (pIter=startLoop;pIter!=endLoop;pIter++){
+  for (pIter=startLoop; pIter!=endLoop; pIter++){
     pParticle = *pIter;
     // Instantiate new StFlowTrack
     StFlowTrack* pFlowTrack = new StFlowTrack;
@@ -560,14 +624,11 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     double dcaXY = pParticle->DCAxy();
     double dcaZ = pParticle->DCAz();
     double dca = sqrt( dcaXY*dcaXY + dcaZ*dcaZ );
-    pFlowTrack->SetDca( dca );
+    //pFlowTrack->SetDca( dca );
     pFlowTrack->SetDcaGlobal( dca );
     pFlowTrack->SetChi2( pParticle->ChiSquaredXY() );
     pFlowTrack->SetFitPts( pParticle->NHits() );
     pFlowTrack->SetMaxPts( pParticle->NHitsPossible() );
-    // Here are some couts
-    //cout << "HBT--> " << pParticle->NHits() << "    " << pParticle->NHitsPossible() << endl;
-    //cout << "Flow--> " << pFlowTrack->FitPts() << "    " << pFlowTrack->MaxPts() << endl;
     // PID
     pFlowTrack->SetPidPiPlus( pParticle->NSigmaPion() );
     pFlowTrack->SetPidPiMinus( pParticle->NSigmaPion() );
@@ -580,7 +641,6 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     pFlowTrack->SetPidElectron( pParticle->NSigmaElectron() );
     pFlowTrack->SetPidPositron( pParticle->NSigmaElectron() );
     // dEdx
-    // Randy's temporary change
     if ( pParticle->NSigmaKaon() > 2.0 ) {
       if (pParticle->Charge() > 0 ) {
 	pFlowTrack->SetMostLikelihoodPID(14); // proton
@@ -616,19 +676,8 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     goodTracks++;
   }
 
-  // Check Eta Symmetry
-  // rcwells took this out
-  /*
-  if (!StFlowCutEvent::CheckEtaSymmetry(pEvent)) {
-    delete pFlowEvent;             //  delete this event
-    pFlowEvent = NULL;
-    return;
-  }
-  */
   pFlowEvent->SetMultEta(goodTracksEta);
   pFlowEvent->SetCentrality(goodTracksEta);
-//   (pFlowEvent->ProbPid()) ? pFlowEvent->SetPidsProb() : 
-//     pFlowEvent->SetPidsDeviant();
   pFlowEvent->TrackCollection()->random_shuffle();
   pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
@@ -637,6 +686,8 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
 //----------------------------------------------------------------------
 
 void StFlowMaker::FillPicoEvent() {
+  // Make StFlowPicoEvent from StFlowEvent
+
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillPicoEvent()" << endm;
 
   if (!pPicoEvent) {
@@ -733,8 +784,16 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     return kFALSE; 
   }
   
-  // Fill FlowEvent
-  pFlowEvent->SetPhiWeight(mPhiWgt);
+  // Set phi weights
+  if (mOnePhiWgt) {
+    pFlowEvent->SetOnePhiWgt();
+    pFlowEvent->SetPhiWeight(mPhiWgt);
+  } else {
+    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
+  }
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
 
@@ -1020,11 +1079,6 @@ Bool_t StFlowMaker::FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent) {
 	pFlowTrack->SetPidPositron(pPicoTrack->PidElectron());
       }
 
-      //      if (pPicoTrack->TopologyMap().data(0) || pPicoTrack->TopologyMap().data(1)) {
-      //	// topology map found
-      //	pFlowTrack->SetTopologyMap(pPicoTrack->TopologyMap());
-      //      }
-
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
     }
@@ -1128,6 +1182,8 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintSubeventMults() {
+  // Used for testing
+
   if (Debug()) gMessMgr->Info() << "FlowMaker: PrintSubeventMults()" << endm;
   
   int j, k, n;
@@ -1178,7 +1234,6 @@ Int_t StFlowMaker::InitPicoEventWrite() {
 	 << filestring->Data() << endl;
     return kStFatal;
   }
-  //pPicoDST->SetFormat(1);
   pPicoDST->SetCompressionLevel(comp);
   gMessMgr->Info() << "##### FlowMaker: PicoEvents file = " 
 		   << filestring->Data() << endm;
@@ -1227,26 +1282,30 @@ Int_t StFlowMaker::InitPicoEventRead() {
 
 //-----------------------------------------------------------------------
 
-Float_t StFlowMaker::calcDcaSigned(const StThreeVectorF pos, 
-				   const StTrack* track) {
-
-  // find the distance between the center of the circle and pos (vertex).
+Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex, 
+				   const StTrack* gTrack) {
+  // find the distance between the center of the circle and vertex.
   // if the radius of curvature > distance, then call it positive
   // Bum Choi
 
-  double xCenter = track->geometry()->helix().xcenter();
-  double yCenter = track->geometry()->helix().ycenter();
-  double radius = 1.0/track->geometry()->helix().curvature();
+  double xCenter = gTrack->geometry()->helix().xcenter();
+  double yCenter = gTrack->geometry()->helix().ycenter();
+  double radius = 1.0/gTrack->geometry()->helix().curvature();
 
-  double dPosCenter = sqrt( (pos.x() - xCenter) * (pos.x() - xCenter) +
-			    (pos.y() - yCenter) * (pos.y() - yCenter));
+  double dPosCenter = sqrt( (vertex.x() - xCenter) * (vertex.x() - xCenter) +
+			    (vertex.y() - yCenter) * (vertex.y() - yCenter));
 
-  return (Float_t) (radius - dPosCenter);
+  return (Float_t)(radius - dPosCenter);
 }
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.63  2001/12/11 21:33:55  posk
+// Went from one to four sets of histograms for making the event plane isotropic.
+// StFlowEvent::PhiWeight() has changed arguments and return value.
+// The ptWgt saturates above 2 GeV/c.
+//
 // Revision 1.62  2001/11/09 21:10:45  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.26 2001/11/09 21:10:37 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.27 2001/12/11 21:33:43 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -29,53 +29,53 @@ ClassImp(StFlowEvent)
 
 Float_t  StFlowEvent::mEtaTpcCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
                                                                    {0.,0.},
-								   {0.,0.5},
-								   {0.,0.},
-								   {0.,0.5},
-								   {0.,0.}},
+								   {0.,0.5} },
+// 								   {0.,0.},
+// 								   {0.,0.5},
+// 								   {0.,0.}},
 							          {{1.0,2.},
 								   {1.0,1.},
-							   	   {1.0,2.},
-								   {1.0,1.},
-								   {1.0,2.},
-								   {1.0,1.}}};
+							   	   {1.0,2.} }};
+// 								   {1.0,1.},
+// 								   {1.0,2.},
+// 								   {1.0,1.}}};
 Float_t  StFlowEvent::mEtaFtpcCuts[2][Flow::nHars][Flow::nSels] = {{{2.7,2.7},
 								    {2.7,2.7},
-								    {2.7,2.7},
-								    {2.7,2.7},
-								    {2.7,2.7},
-								    {2.7,2.7}},
+								    {2.7,2.7} },
+// 								    {2.7,2.7},
+// 								    {2.7,2.7},
+// 								    {2.7,2.7}},
 							           {{4.0,4.0},
 								    {4.0,4.0},
-								    {4.0,4.0},
-								    {4.0,4.0},
-								    {4.0,4.0},
-								    {4.0,4.0}}};
+								    {4.0,4.0} }};
+// 								    {4.0,4.0},
+// 								    {4.0,4.0},
+// 								    {4.0,4.0}}};
 
 Float_t  StFlowEvent::mPtTpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								   {0.1,0.1},
-								   {0.1,0.1},
-								   {0.1,0.1},
-								   {0.1,0.1},
-								   {0.1,0.1}},
+								   {0.1,0.1} },
+// 								   {0.1,0.1},
+// 								   {0.1,0.1},
+//   								   {0.1,0.1}},
 							          {{2.,2.},
 								   {2.,2.},
-								   {2.,2.},
-								   {2.,2.},
-								   {2.,2.},
-								   {2.,2.}}};
+								   {2.,2.} }};
+// 								   {2.,2.},
+// 								   {2.,2.},
+// 								   {2.,2.}}};
 Float_t  StFlowEvent::mPtFtpcCuts[2][Flow::nHars][Flow::nSels] =  {{{0.1,0.1},
 								    {0.1,0.1},
-								    {0.1,0.1},
-								    {0.1,0.1},
-								    {0.1,0.1},
-								    {0.1,0.1}},
+								    {0.1,0.1} },
+// 								    {0.1,0.1},
+// 								    {0.1,0.1},
+// 								    {0.1,0.1}},
 							           {{2.,2.},
 								    {2.,2.},
-								    {2.,2.},
-								    {2.,2.},
-								    {2.,2.},
-								    {2.,2.}}};
+								    {2.,2.} }};
+// 								    {2.,2.},
+// 								    {2.,2.},
+// 								    {2.,2.}}};
 
 Float_t StFlowEvent::mPiPlusCuts[2]        = {-3., 3.};
 Float_t StFlowEvent::mPiMinusCuts[2]       = {-3., 3.};
@@ -91,6 +91,7 @@ Float_t StFlowEvent::mDcaGlobalCuts[2]     = { 0., 0.};
 Bool_t  StFlowEvent::mPtWgt                = kFALSE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
 Bool_t  StFlowEvent::mEtaSubs              = kFALSE;
+Bool_t  StFlowEvent::mOnePhiWgt            = kFALSE;
 Char_t  StFlowEvent::mPid[10]              = {'\0'};
 
 //-----------------------------------------------------------
@@ -112,33 +113,62 @@ StFlowEvent::~StFlowEvent() {
 
 //-------------------------------------------------------------
 
-Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN,
-				StTrackTopologyMap topologyMap) const {
+Double_t StFlowEvent::PhiWeight(Int_t selN, Int_t harN,	StFlowTrack*
+				pFlowTrack) const {
+  // Weight for making the event plane isotropic in the lab.
 
-  if (mPhi < 0.) mPhi += twopi;
+  bool oddHar = (harN+1) % 2;
+  StTrackTopologyMap topologyMap = pFlowTrack->TopologyMap();
+  float phi = pFlowTrack->Phi();
+  if (phi < 0.) phi += twopi;
+
+  Double_t phiWgt;
   int n;
 
   if (topologyMap.numberOfHits(kTpcId) || // Tpc track, or no topologyMap
       topologyMap.data(0) == 0 && topologyMap.data(1) == 0) {
-    n = (int)((mPhi/twopi)*Flow::nPhiBins);
-    return mPhiWgt[selN][harN][n];
+    n = (int)((phi/twopi)*Flow::nPhiBins);
+    if (mOnePhiWgt) {
+      phiWgt = mPhiWgt[selN][harN][n];
+    } else {
+      float eta = pFlowTrack->Eta();
+      float vertexZ = mVertexPos.z();
+      if (eta > 0. && vertexZ > 0.) {
+	phiWgt = mPhiWgtFarWest[selN][harN][n];
+      } else if (eta > 0. && vertexZ < 0.) {
+	phiWgt = mPhiWgtWest[selN][harN][n];
+      } else if (eta < 0. && vertexZ > 0.) {
+	phiWgt = mPhiWgtEast[selN][harN][n];
+      } else {
+	phiWgt = mPhiWgtFarEast[selN][harN][n];
+      }      
+    }
   }
 
   else if (topologyMap.numberOfHits(kFtpcEastId)) { // Ftpc east track
-    n = (int)((mPhi/twopi)*Flow::nPhiBinsFtpc);
-    return mPhiWgtFtpcEast[selN][harN][n];
+    n = (int)((phi/twopi)*Flow::nPhiBinsFtpc);
+    phiWgt = mPhiWgtFtpcEast[selN][harN][n];
   }
   
   else if (topologyMap.numberOfHits(kFtpcWestId)) { // Ftpc west track
-    n = (int)((mPhi/twopi)*Flow::nPhiBinsFtpc);
-    return mPhiWgtFtpcWest[selN][harN][n];
+    n = (int)((phi/twopi)*Flow::nPhiBinsFtpc);
+    phiWgt = mPhiWgtFtpcWest[selN][harN][n];
   }
+
+  if (mPtWgt) {  // pt weighting going constant above 2 GeV
+    float pt = pFlowTrack->Pt();
+    phiWgt *= (pt < 2.) ? pt : 2.;
+  }
+  if (oddHar && pFlowTrack->Eta() < 0.) phiWgt *= -1.;
+
+  return phiWgt;
 }
 
 //-------------------------------------------------------------
 
 UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
   UInt_t mult = 0;
+  // Multiplicity of tracks selected for the event plane
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -153,8 +183,10 @@ UInt_t StFlowEvent::Mult(StFlowSelection* pFlowSelect) {
 //-------------------------------------------------------------
 
 Float_t StFlowEvent::MeanPt(StFlowSelection* pFlowSelect) {
-  Float_t sumPt = 0.;
-  UInt_t  mult  = 0;
+  // Mean pt of tracks selected for the event plane
+
+  float sumPt = 0.;
+  UInt_t mult = 0;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
@@ -171,28 +203,24 @@ Float_t StFlowEvent::MeanPt(StFlowSelection* pFlowSelect) {
 
 //-------------------------------------------------------------
 
-TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) { 
+TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
+  // Event plane vector
+ 
   TVector2 mQ;
-  Int_t  selN  = pFlowSelect->Sel();
-  Int_t  harN  = pFlowSelect->Har();
+  Double_t mQx=0., mQy=0.;
+  int    selN  = pFlowSelect->Sel();
+  int    harN  = pFlowSelect->Har();
   double order = (double)(harN + 1);
-  bool  oddHar = (harN+1) % 2;
-  double mQx=0., mQy=0.;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
-      Float_t mPhi = pFlowTrack->Phi();
-      double phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && oddHar) phiWgt *= -1.;
-      if (mPtWgt) {
-	float pt = pFlowTrack->Pt();
-	phiWgt *= pt;
-      }
-      mQx += phiWgt * cos(mPhi * order);
-      mQy += phiWgt * sin(mPhi * order);
+      double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+      float phi = pFlowTrack->Phi();
+      mQx += phiWgt * cos(phi * order);
+      mQy += phiWgt * sin(phi * order);
     }
   }
   mQ.Set(mQx, mQy);
@@ -203,7 +231,9 @@ TVector2 StFlowEvent::Q(StFlowSelection* pFlowSelect) {
 //-------------------------------------------------------------
 
 Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
-  Int_t  harN = pFlowSelect->Har();
+  // Event plane angle
+
+  int    harN = pFlowSelect->Har();
   float order = (float)(harN + 1);
   Float_t psi = 0.;
 
@@ -217,65 +247,57 @@ Float_t StFlowEvent::Psi(StFlowSelection* pFlowSelect) {
   return psi;
 }
 
-
 //-----------------------------------------------------------------------
+
 Double_t StFlowEvent::G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
-//Generatting Fcn for the new cumulant paper.
+  // Generating function for the new cumulant method.
 
-  Int_t  selN  = pFlowSelect->Sel();
-  Int_t  harN  = pFlowSelect->Har();
-  Double_t order = (Double_t)(harN + 1);
+  int selN     = pFlowSelect->Sel();
+  int harN     = pFlowSelect->Har();
+  double order = (double)(harN + 1);
 
-  Double_t  mMult4Q = (Double_t)Mult(pFlowSelect);
-  Double_t  theG=1.;
+  double mMult4Q = (double)Mult(pFlowSelect);
+  Double_t theG  = 1.;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
-      Float_t mPhi = pFlowTrack->Phi();
 
-      Double_t phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
-      if (mPtWgt) {
-			Float_t pt = pFlowTrack->Pt();
-			phiWgt *= pt;
-      }
-    
-      theG *=(1. + (phiWgt/mMult4Q) *(2.*Zx*cos(mPhi * order) + 
-                    2. *Zy*sin(mPhi * order) ) );
-
-
+      double phiWgt = PhiWeight(selN, harN, pFlowTrack);      
+      float phi = pFlowTrack->Phi();
+      theG *= (1. + (phiWgt/mMult4Q) * (2.*Zx*cos(phi * order) + 
+				      2.*Zy*sin(phi * order) ) );            
     }
   }
 
   return theG;
 }
 
-
 //-----------------------------------------------------------------------
+
 Double_t StFlowEvent::G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy) { 
-//Generatting Fcn for the old cumulant paper.
-//if expand this in Taylor series,one recovers G_New() in new new cumu. method.
+  // Generating function for the old cumulant method.
+  // If expanded in Taylor series, one recovers G_New() in new new cumulant method.
 
-  TVector2 normQ=NormQ(pFlowSelect);
+  TVector2 normQ = NormQ(pFlowSelect);
 
-  return exp(2*Zx*normQ.X()+2*Zy*normQ.Y());
+  return exp(2*Zx*normQ.X() + 2*Zy*normQ.Y());
 
 }
 
 //-------------------------------------------------------------
 
 TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) { 
-  //return normalized Q. NormQ = Q / sqrt(sum of weights**2)
+  // Return normalized Q = Q / sqrt(sum of weights**2)
 
   TVector2 mQ;
-  Int_t  selN  = pFlowSelect->Sel();
-  Int_t  harN  = pFlowSelect->Har();
   Double_t mQx=0., mQy=0.;
-  Double_t SumOfWeightSqr=0;
-  Double_t order = (Double_t)(harN + 1);
+  int selN     = pFlowSelect->Sel();
+  int harN     = pFlowSelect->Har();
+  double order = (double)(harN + 1);
+  double SumOfWeightSqr = 0;
 
 
   StFlowTrackIterator itr;
@@ -283,157 +305,131 @@ TVector2 StFlowEvent::NormQ(StFlowSelection* pFlowSelect) {
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
-      Float_t mPhi = pFlowTrack->Phi();
+      
+      double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+      SumOfWeightSqr += phiWgt*phiWgt;
 
-      Double_t phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
-      if (mPtWgt) {
-			Float_t pt = pFlowTrack->Pt();
-			phiWgt *= pt;
-      }
-        SumOfWeightSqr +=phiWgt*phiWgt;
-      mQx += phiWgt * cos(mPhi * order);
-      mQy += phiWgt * sin(mPhi * order);
+      float phi = pFlowTrack->Phi();
+      mQx += phiWgt * cos(phi * order);
+      mQy += phiWgt * sin(phi * order);
     }
   }
-
-  if ( SumOfWeightSqr )
-  mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
+  
+  if (SumOfWeightSqr)
+    mQ.Set(mQx/sqrt(SumOfWeightSqr), mQy/sqrt(SumOfWeightSqr));
   else mQ.Set(0.,0.);
-
+  
   return mQ;
 }
 
 //-------------------------------------------------------------
 
-Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect){
- //return (sum of weights**2)
-  Int_t  selN  = pFlowSelect->Sel();
-  Int_t  harN  = pFlowSelect->Har();
-  Double_t SumOfWeightSqr=0;
+Double_t StFlowEvent::SumWeightSquare(StFlowSelection* pFlowSelect) {
+ // Return sum of weights**2
+
+  int selN = pFlowSelect->Sel();
+  int harN = pFlowSelect->Har();
+  Double_t SumOfWeightSqr = 0;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
-      Float_t mPhi = pFlowTrack->Phi();
-
-      Double_t phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
-      if (mPtWgt) {
-			Float_t pt = pFlowTrack->Pt();
-			phiWgt *= pt;
-      }
-        SumOfWeightSqr +=phiWgt*phiWgt;
+      
+      double phiWgt = PhiWeight(selN, harN, pFlowTrack);
+      SumOfWeightSqr += phiWgt*phiWgt;
     }
   }
 
+  if (SumOfWeightSqr < 0.) return Mult(pFlowSelect);
+
   return SumOfWeightSqr;
 }
-
-
 
 //-------------------------------------------------------------
 
 Double_t StFlowEvent::WgtMult_q4(StFlowSelection* pFlowSelect) { 
 
-  //used only for the old cumulant method. for getting q4 when weight is on.
-  //replace multiplicity in Eq.(74b) by this quantity when weight is on.
-  //this is derived based on (A4) in the old cumulant paper.
+  // Used only for the old cumulant method, for getting q4 when weight is on.
+  // Replace multiplicity in Eq.(74b) by this quantity when weight is on.
+  // This is derived based on (A4) in the old cumulant paper.
 
-  Int_t  selN  = pFlowSelect->Sel();
-  Int_t  harN  = pFlowSelect->Har();
-  double theMult=0.;
-  double theMeanWj4=0.;
-  double theMeanWj2=0.;
-  double theSumOfWgtSqr=0;
-
+  int selN = pFlowSelect->Sel();
+  int harN = pFlowSelect->Har();
+  double theMult        = 0.;
+  double theMeanWj4     = 0.;
+  double theMeanWj2     = 0.;
+  double theSumOfWgtSqr = 0;
+  double phiWgtSq;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
-      Float_t mPhi = pFlowTrack->Phi();
-
-      double phiWgt = PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
-      if (mPtWgt) {
-			float pt = pFlowTrack->Pt();
-			phiWgt *= pt;
-      }
-                        theSumOfWgtSqr +=phiWgt*phiWgt;
-                        theMeanWj4 +=phiWgt*phiWgt*phiWgt*phiWgt;
-                        theMeanWj2 +=phiWgt*phiWgt;
-                        theMult +=1.;
-
+      
+      double phiWgt   = PhiWeight(selN, harN, pFlowTrack);
+      phiWgtSq        = phiWgt*phiWgt;
+      theSumOfWgtSqr += phiWgtSq;
+      theMeanWj4     += phiWgtSq*phiWgtSq;
+      theMult        += 1.;      
     }
   }
+  
+  if (theMult <= 0.) return theMult;
 
   theMeanWj4 /= theMult;
-  theMeanWj2 /= theMult;
-
-  if (theMult>0)
+  theMeanWj2  = theSumOfWgtSqr / theMult;
 
   return (theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(-theMeanWj4+2*theMeanWj2*theMeanWj2));
-  else return theMult;
-
 }
 
 //-------------------------------------------------------------
 
 Double_t StFlowEvent::WgtMult_q6(StFlowSelection* pFlowSelect) { 
-  //used only for the old cumulant method. for getting q6 when weight is on.
-  //replace multiplicity in Eq.(74c) by this quantity when weight is on.
-  //this is derived based on (A4) in the old cumulant paper.
+  // Used only for the old cumulant method. For getting q6 when weight is on.
+  // Replace multiplicity in Eq.(74c) by this quantity when weight is on.
+  // This is derived based on (A4) in the old cumulant paper.
 
-  Int_t  selN  = pFlowSelect->Sel();
-  Int_t  harN  = pFlowSelect->Har();
-  double theMult=0.;
-  double theMeanWj6=0.;
-  double theMeanWj4=0.;
-  double theMeanWj2=0.;
-  double theSumOfWgtSqr=0;
-
+  int selN = pFlowSelect->Sel();
+  int harN = pFlowSelect->Har();
+  double theMult        = 0.;
+  double theMeanWj6     = 0.;
+  double theMeanWj4     = 0.;
+  double theMeanWj2     = 0.;
+  double theSumOfWgtSqr = 0;
+  double phiWgtSq;
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowSelect->Select(pFlowTrack)) {
-      Float_t mPhi = pFlowTrack->Phi();
-
-
-      double phiWgt =  PhiWeight(mPhi, selN, harN, pFlowTrack->TopologyMap());
-      if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
-      if (mPtWgt) {
-			float pt = pFlowTrack->Pt();
-			phiWgt *= pt;
-      }
-                        theSumOfWgtSqr +=phiWgt*phiWgt;
-                        theMeanWj6 +=phiWgt*phiWgt*phiWgt*phiWgt*phiWgt*phiWgt;
-                        theMeanWj4 +=phiWgt*phiWgt*phiWgt*phiWgt;
-                        theMeanWj2 +=phiWgt*phiWgt;
-                        theMult +=1.;
-
+      
+      double phiWgt   = PhiWeight(selN, harN, pFlowTrack);
+      phiWgtSq        = phiWgt*phiWgt;
+      theSumOfWgtSqr += phiWgtSq;
+      theMeanWj4     += phiWgtSq*phiWgtSq;
+      theMeanWj6     += phiWgtSq*phiWgtSq*phiWgtSq;
+      theMult        += 1.;
     }
   }
+    
+  if (theMult <= 0.) return theMult*theMult;
 
   theMeanWj6 /= theMult;
   theMeanWj4 /= theMult;
-  theMeanWj2 /= theMult;
-
-  if (theMult>0)
+  theMeanWj2  = theSumOfWgtSqr / theMult;
 
   return 4.*(theSumOfWgtSqr*theSumOfWgtSqr*theSumOfWgtSqr)/(theMult*(theMeanWj6-9.*theMeanWj2*theMeanWj4+12.*theMeanWj2*theMeanWj2*theMeanWj2));
-  else return theMult*theMult;
-
 }
 
 //-------------------------------------------------------------
 
-Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) { 
+Float_t StFlowEvent::q(StFlowSelection* pFlowSelect) {
+  // Magnitude of normalized Q vector
+ 
   TVector2 mQ  = NormQ(pFlowSelect);
   
   return mQ.Mod();
@@ -448,8 +444,8 @@ void StFlowEvent::SetSelections() {
   for (itr = TrackCollection()->begin(); 
        itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    Double_t eta = (double)(pFlowTrack->Eta());
-    Float_t  Pt  = pFlowTrack->Pt();
+    double eta = (double)(pFlowTrack->Eta());
+    float  Pt  = pFlowTrack->Pt();
 
     // PID
     Char_t pid[10];
@@ -457,7 +453,7 @@ void StFlowEvent::SetSelections() {
     if (mPid[0] != '\0' && strstr(pid, mPid)==0) continue;
 
     // Global DCA
-    Float_t gDca = pFlowTrack->DcaGlobal();
+    float gDca = pFlowTrack->DcaGlobal();
     if (mDcaGlobalCuts[1] > mDcaGlobalCuts[0] &&
 	(gDca < mDcaGlobalCuts[0] || gDca >= mDcaGlobalCuts[1])) continue;
     
@@ -510,6 +506,7 @@ void StFlowEvent::SetSelections() {
 //-------------------------------------------------------------
 
 void StFlowEvent::MakeSubEvents() {
+  // Make random subevents
 
   StFlowTrackIterator itr;
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
@@ -553,7 +550,7 @@ void StFlowEvent::MakeSubEvents() {
 //-------------------------------------------------------------
 
 void StFlowEvent::MakeEtaSubEvents() {
-  // subevents with positive and negative eta
+  // Make subevents with positive and negative eta
 
   StFlowTrackIterator itr;
   int harN, selN = 0;
@@ -581,6 +578,7 @@ void StFlowEvent::MakeEtaSubEvents() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetPidsDeviant() {
+  // Set PID with PID Deviant method
   
   StFlowTrackIterator itr;
 
@@ -589,25 +587,25 @@ void StFlowEvent::SetPidsDeviant() {
 
     StFlowTrack* pFlowTrack = *itr;
     Char_t pid[10] = "none";
-    Short_t charge  = pFlowTrack->Charge();
+    Short_t charge = pFlowTrack->Charge();
 
-    Bool_t bPiPlus       = kFALSE;
-    Bool_t bPiMinus      = kFALSE;
-    Bool_t bProton       = kFALSE;
-    Bool_t bAntiProton   = kFALSE;
-    Bool_t bKplus        = kFALSE;
-    Bool_t bKminus       = kFALSE;
-    Bool_t bDeuteron     = kFALSE;
-    Bool_t bAntiDeuteron = kFALSE;
-    Bool_t bElectron     = kFALSE;
-    Bool_t bPositron     = kFALSE;
+    bool bPiPlus       = kFALSE;
+    bool bPiMinus      = kFALSE;
+    bool bProton       = kFALSE;
+    bool bAntiProton   = kFALSE;
+    bool bKplus        = kFALSE;
+    bool bKminus       = kFALSE;
+    bool bDeuteron     = kFALSE;
+    bool bAntiDeuteron = kFALSE;
+    bool bElectron     = kFALSE;
+    bool bPositron     = kFALSE;
     
     if (charge == 1) {
-      Float_t piPlus    = pFlowTrack->PidPiPlus();
-      Float_t proton    = pFlowTrack->PidProton();
-      Float_t kPlus     = pFlowTrack->PidKaonPlus();
-      Float_t deuteron  = pFlowTrack->PidDeuteron();
-      Float_t positron  = pFlowTrack->PidPositron();
+      float piPlus    = pFlowTrack->PidPiPlus();
+      float proton    = pFlowTrack->PidProton();
+      float kPlus     = pFlowTrack->PidKaonPlus();
+      float deuteron  = pFlowTrack->PidDeuteron();
+      float positron  = pFlowTrack->PidPositron();
       if (piPlus > mPiPlusCuts[0] && 
 	  piPlus < mPiPlusCuts[1]) {
 	bPiPlus = kTRUE;
@@ -629,11 +627,11 @@ void StFlowEvent::SetPidsDeviant() {
 	bPositron = kTRUE;
       }
     } else if (charge == -1) {
-      Float_t piMinus      = pFlowTrack->PidPiMinus();
-      Float_t antiProton   = pFlowTrack->PidAntiProton();
-      Float_t kMinus       = pFlowTrack->PidKaonMinus();
-      Float_t antiDeuteron = pFlowTrack->PidAntiDeuteron();
-      Float_t electron     = pFlowTrack->PidElectron();
+      float piMinus      = pFlowTrack->PidPiMinus();
+      float antiProton   = pFlowTrack->PidAntiProton();
+      float kMinus       = pFlowTrack->PidKaonMinus();
+      float antiDeuteron = pFlowTrack->PidAntiDeuteron();
+      float electron     = pFlowTrack->PidElectron();
       if (piMinus > mPiMinusCuts[0] && 
 	  piMinus < mPiMinusCuts[1]) {
 	bPiMinus = kTRUE;
@@ -695,6 +693,7 @@ void StFlowEvent::SetPidsDeviant() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetPidsProb() {
+  // Set PID with PID Probability method
   
   StFlowTrackIterator itr;
 
@@ -704,46 +703,36 @@ void StFlowEvent::SetPidsProb() {
     StFlowTrack* pFlowTrack = *itr;
     Char_t pid[10] = "none";
 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 8 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "pi+"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 9 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "pi-"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 14 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "proton"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 15 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "pbar"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 11 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "k+"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 12 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "k-"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 45 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "d"); } 
-//      if (
-//  	pFlowTrack->MostLikelihoodPID() == &&  
-//  	pFlowTrack->MostLikelihoodProb() > 0.9
-//  	) { strcpy(pid, "dbar"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 3 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "e-"); } 
-    if (
-	pFlowTrack->MostLikelihoodPID() == 2 &&  
-	pFlowTrack->MostLikelihoodProb() > 0.9
-	) { strcpy(pid, "e+"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 8 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "pi+"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 9 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "pi-"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 14 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "proton"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 15 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "pbar"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 11 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "k+"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 12 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "k-"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 45 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "d"); } 
+//      if (pFlowTrack->MostLikelihoodPID() == &&  
+//  	pFlowTrack->MostLikelihoodProb() > 0.9)
+//      { strcpy(pid, "dbar"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 3 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "e-"); } 
+    if (pFlowTrack->MostLikelihoodPID() == 2 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9)
+      { strcpy(pid, "e+"); } 
 
     pFlowTrack->SetPid(pid);
 
@@ -753,6 +742,7 @@ void StFlowEvent::SetPidsProb() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetCentrality(const UInt_t& tracks) {
+  // Centrality for year=1
 
   UInt_t cent[] = {20,100,180,270,360,460,560,660,870};
   if (tracks < cent[0])       { mCentrality = 0; }
@@ -834,6 +824,11 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.27  2001/12/11 21:33:43  posk
+// Went from one to four sets of histograms for making the event plane isotropic.
+// StFlowEvent::PhiWeight() has changed arguments and return value.
+// The ptWgt saturates above 2 GeV/c.
+//
 // Revision 1.26  2001/11/09 21:10:37  posk
 // Switched from CERNLIB to TMath. Little q is now normalized.
 //
