@@ -19,6 +19,7 @@
 #include "Sti/StiDetectorBuilder.h"
 #include "Sti/StiDetectorFinder.h"
 #include "Sti/StiDetector.h"
+#include "Sti/StiHitTest.h"
 
 StiSvtHitLoader::StiSvtHitLoader()
 : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("SvtHitLoader")
@@ -64,6 +65,7 @@ void StiSvtHitLoader::loadHits(StEvent* source,
         StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
         if (!waferhits) break;
         const StSPtrVecSvtHit& hits = waferhits->hits();
+        StiHitTest hitTest;
         for (const_StSvtHitIterator it=hits.begin(); it!=hits.end(); ++it)
           {
           if (!*it) throw runtime_error("StiSvtHitLoader::loadHits() -W- *it==0!");
@@ -79,10 +81,16 @@ void StiSvtHitLoader::loadHits(StEvent* source,
             {
             stiHit = _hitFactory->getInstance();
             stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(),hit->position().z(),hit->charge() );
+            hitTest.add(hit->position().x(),hit->position().y(),hit->position().z());
             _hitContainer->add( stiHit );
 	    hitCounter++;
             }
           }
+        if (hitTest.width() > 0.1) {
+	  printf("**** SVT hits too wide (%g) barrel=%d ladder%d wafer%d\n"
+	        ,hitTest.width(),barrel,ladder,wafer);
+        }
+	
         }
       }
     }

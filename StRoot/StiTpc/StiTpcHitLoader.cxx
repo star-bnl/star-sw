@@ -21,6 +21,7 @@
 #include "Sti/StiDetector.h"
 #include "Sti/StiDetectorBuilder.h"
 #include "StiTpcHitLoader.h"
+#include "Sti/StiHitTest.h"
 
 StiTpcHitLoader::StiTpcHitLoader()
 : StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder>("TpcHitLoader")
@@ -77,6 +78,7 @@ void StiTpcHitLoader::loadHits(StEvent* source,
 
       if (!detector) throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- Detector element not found");
       const_StTpcHitIterator iter;
+      StiHitTest hitTest;
       for (iter = hitvec.begin();iter != hitvec.end();++iter)
         {
         StTpcHit*hit=*iter;
@@ -85,8 +87,14 @@ void StiTpcHitLoader::loadHits(StEvent* source,
         if(!stiHit)   throw runtime_error("StiTpcHitLoader::loadHits(StEvent*) -E- stiHit==0");
         stiHit->reset();
         stiHit->setGlobal(detector,hit,hit->position().x(),hit->position().y(), hit->position().z(),hit->charge());
+        hitTest.add(hit->position().x(),hit->position().y(), hit->position().z());
         _hitContainer->add( stiHit );
         }
+      if (hitTest.width()>0.1) {
+  	  printf("**** TPC hits too wide (%g) sector=%d row%d\n"
+	        ,hitTest.width(),sector,row);
+      }
+  
       }
     }
   cout << "StiTpcHitLoader::loadHits(StEvent*) -I- Done" << endl;
