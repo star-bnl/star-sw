@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.60 2005/02/17 01:59:41 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.61 2005/02/18 08:39:02 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.61  2005/02/18 08:39:02  jhthomas
+ * Change InnerOuterPadRatio from 0.7 to 0.6 at the request of GVB
+ *
  * Revision 1.60  2005/02/17 01:59:41  jhthomas
  * Make GetSpaceCharge a public member function.
  * Change InnerOuterPadRatio to 0.7 for GridLeak.  Note that it is 1.3 if you do not use
@@ -2983,7 +2986,7 @@ void StMagUtilities::ApplySpaceChargeDistortion (const Double_t sc, const Int_t 
    // Return default values if passed a whacko input value (i.e. infinite or NaN)
    if ( finite((double)Charge)*finite(x[0])*finite(x[1])*finite(x[2])*finite(p[0])*finite(p[1])*finite(p[2]) == 0 ) return ;
 
-   const Float_t InnerOuterRatio = 0.7 ; // Ratio of size of the inner pads to the outer pads (real world == 0.5, GVB likes 0.7)
+6  const Float_t InnerOuterRatio = 0.6 ; // Ratio of size of the inner pads to the outer pads (real world == 0.5, GVB likes 0.6)
    const Int_t   INNER    = 13  ;        // Number of TPC rows in the inner sectors
    const Int_t   ROWS     = 45  ;        // Total number of TPC rows per sector (Inner + Outer)
    const Int_t   RefIndex =  7  ;        // Refindex 7 (TPCRow 8) is about where 1/R**2 has no effect on points (~97 cm radius).
@@ -3237,7 +3240,7 @@ Int_t StMagUtilities::PredictSpaceChargeDistortion (Int_t Charge, Float_t Pt, Fl
        }
        if (mDistortionMode & kGridLeak) { 
 	 UndoGridLeakDistortion ( xx, xxprime ) ;
-	 InnerOuterRatio = 0.7 ; // JT test.  With the GridLeak, GVB prefers 0.7  (note that order is important in this loop).
+	 InnerOuterRatio = 0.6 ; // JT test.  With the GridLeak, GVB prefers 0.6  (note that order is important in this loop).
 	 for ( unsigned int j = 0 ; j < 3 ; ++j ) 
 	   {
 	     xx[j] = xxprime[j];
