@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_xdfin_Maker class for Makers                                        //
+// St_xdfin_Maker class for Makers                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
@@ -18,19 +18,13 @@ St_xdfin_Maker::St_xdfin_Maker(){}
 St_xdfin_Maker::St_xdfin_Maker(const char *name, const char *title):StMaker(name,title){}
 //_____________________________________________________________________________
 St_xdfin_Maker::~St_xdfin_Maker(){
-  m_DataSet = 0; //SafeDelete(m_DataSet); 
 }
 //_____________________________________________________________________________
 void St_xdfin_Maker::Clear(Option_t *option){
-  m_DataSet = 0; //SafeDelete(m_DataSet); 
-}
-
-//_____________________________________________________________________________
-void St_xdfin_Maker::Finish(){ 
- Clear();
+  m_DataSet = 0; // 
 }
 //_____________________________________________________________________________
-void St_xdfin_Maker::Init(){
+Int_t St_xdfin_Maker::Init(){
 // Get run parameters from input file
   St_DataSet *set = gStChain->XDFFile()->NextEventGet(); 
   //  SafeDelete(set);// quick and dirty
@@ -73,7 +67,7 @@ void St_xdfin_Maker::Init(){
 
 // Create Histograms    
 // Registrate the Maker
-   StMaker::Init();
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_xdfin_Maker::Make(){

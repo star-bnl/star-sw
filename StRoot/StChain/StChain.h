@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.11 1998/09/18 14:35:29 fisyak Exp $
+// $Id: StChain.h,v 1.12 1998/10/06 18:00:27 perev Exp $
 // $Log: StChain.h,v $
+// Revision 1.12  1998/10/06 18:00:27  perev
+// cleanup
+//
 // Revision 1.11  1998/09/18 14:35:29  fisyak
 // Fix makers
 //
@@ -46,11 +49,24 @@
 #include "StMaker.h"
 #endif
 
+#ifndef __CINT__
+#include <TROOT.h>
+#include <TChain.h>
+#include <TTree.h>
+#include <TBrowser.h>
+#include <TClonesArray.h>
+#include <TBenchmark.h>
+#include "St_XDFFile.h"
+#include "St_DataSetIter.h"
+#include "St_FileSet.h"
+#include "StChain.h"
+#include "StMaker.h"
+#endif
 
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.11 1998/09/18 14:35:29 fisyak Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.12 1998/10/06 18:00:27 perev Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
 public:
@@ -83,8 +99,8 @@ public:
    virtual void       Clear(Option_t *option="");
    virtual void       FillClone();
    virtual void       FillXDF(St_XDFFile &file);
-   virtual void       Finish();
-   virtual void       GetEvent(Int_t event=1);  // *MENU*
+   virtual Int_t      Finish();
+   virtual Int_t      GetEvent(Int_t event=1);  // *MENU*
    St_DataSet        *GetRun(); 
    St_DataSet        *GetCalib();
    St_DataSet        *GetEventSet(){return m_EventSet;}
@@ -95,17 +111,18 @@ public:
    St_DataSet        *GetRawData();
    St_XDFFile        *GetXDF_in(){return m_File;} 
    St_XDFFile        *GetXDF_out(){ return m_FileOut;} 
-   virtual void       Init();
+   virtual Int_t Init();
    Bool_t             IsFolder() {return kTRUE;}
    virtual Int_t      Make() {return 0;}
+   virtual void       StartMaker(StMaker *mk);
    virtual Int_t      Make(Int_t i);
+   virtual void       EndMaker  (StMaker *mk,Int_t iret);
    virtual void       Paint(Option_t *option="");
    virtual void       PrintInfo();
    void               SetDebug(EDebugLevel debug){m_DebugLevel = debug;}
    virtual void       SetDefaultParameters();
    virtual void       SetInputXDFile(St_XDFFile *file) {m_File = file;}
    virtual void       SetOutputXDFile(St_XDFFile *file) {m_FileOut = file;}
-
    virtual St_XDFFile *XDFFile() {return m_File;}
 
    TList             *Makers()    {return m_Makers;}

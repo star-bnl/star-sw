@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.3 1998/08/26 12:15:10 fisyak Exp $
+// $Id: St_stk_Maker.h,v 1.4 1998/10/06 18:00:46 perev Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.4  1998/10/06 18:00:46  perev
+// cleanup
+//
 // Revision 1.3  1998/08/26 12:15:10  fisyak
 // Remove asu & dsl libraries
 //
@@ -37,7 +40,7 @@ class St_svg_geom;
 class St_stk_Maker : public StMaker {
  private:
                Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.3 1998/08/26 12:15:10 fisyak Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.4 1998/10/06 18:00:46 perev Exp $";
                Int_t  m_mode;      // mode 1 = primaries;
 	                           // mode 2 = secondaries;
 	                           // mode 3 = primaries to secondaries 
@@ -87,9 +90,7 @@ class St_stk_Maker : public StMaker {
                   St_stk_Maker();
                   St_stk_Maker(const char *name, const char *title);
    virtual       ~St_stk_Maker();
-   virtual void   Clear(Option_t *option="");
-   virtual void   Finish();
-   virtual void   Init();
+   virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
    virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*

@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.2 1998/08/26 12:15:10 fisyak Exp $
+// $Id: St_tcl_Maker.h,v 1.3 1998/10/06 18:00:48 perev Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.3  1998/10/06 18:00:48  perev
+// cleanup
+//
 // Revision 1.2  1998/08/26 12:15:10  fisyak
 // Remove asu & dsl libraries
 //
@@ -53,9 +56,7 @@ class St_tcl_Maker : public StMaker {
                   St_tcl_Maker();
                   St_tcl_Maker(const char *name, const char *title);
    virtual       ~St_tcl_Maker();
-   virtual void   Clear(Option_t *option="");
-   virtual void   Finish();
-   virtual void   Init();
+   virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
    ClassDef(St_tcl_Maker, 1)   //StAF chain virtual base class for Makers

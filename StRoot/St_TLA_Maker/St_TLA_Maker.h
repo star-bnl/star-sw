@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.5 1998/08/26 12:15:13 fisyak Exp $
+// $Id: St_TLA_Maker.h,v 1.6 1998/10/06 18:00:31 perev Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.6  1998/10/06 18:00:31  perev
+// cleanup
+//
 // Revision 1.5  1998/08/26 12:15:13  fisyak
 // Remove asu & dsl libraries
 //
@@ -27,7 +30,7 @@
 class St_TLA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.5 1998/08/26 12:15:13 fisyak Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.6 1998/10/06 18:00:31 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
@@ -36,9 +39,7 @@ class St_TLA_Maker : public StMaker {
                   St_TLA_Maker();
                   St_TLA_Maker(const char *name, const char *title);
    virtual       ~St_TLA_Maker();
-   virtual void   Clear(Option_t *option="");
-   virtual void   Finish();
-   virtual void   Init();
+   virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*

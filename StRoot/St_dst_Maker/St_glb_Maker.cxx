@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.5 1998/09/23 20:22:54 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.6 1998/10/06 18:00:34 perev Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.6  1998/10/06 18:00:34  perev
+// cleanup
+//
 // Revision 1.5  1998/09/23 20:22:54  fisyak
 // Prerelease SL98h
 //
@@ -92,20 +95,9 @@ m_particle_dst_param(0)
 }
 //_____________________________________________________________________________
 St_dst_Maker::~St_dst_Maker(){
- if (m_DataSet) delete m_DataSet;
- m_DataSet = 0;
 }
 //_____________________________________________________________________________
-void St_dst_Maker::Clear(Option_t *option){
-  if (m_DataSet) {delete m_DataSet; m_DataSet = 0;}
-}
-
-//_____________________________________________________________________________
-void St_dst_Maker::Finish(){ 
- Clear();
-}
-//_____________________________________________________________________________
-void St_dst_Maker::Init(){
+Int_t St_dst_Maker::Init(){
 // Create tables
    St_DataSetIter params(gStChain->GetParams());
 //svm
@@ -143,7 +135,7 @@ void St_dst_Maker::Init(){
      m_particle_dst_param = new St_particle_dst_param("particle_dst_param",1); global->Add(m_particle_dst_param);
    }
 // Create Histograms    
-   StMaker::Init();
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
@@ -312,12 +304,12 @@ Int_t St_dst_Maker::Make(){
      cout << "Problem on return from FILL_DST_RUN_SUMMARY" << endl;
   }
 
-  return kSTAFCV_OK;
+  return kStOK;
 }
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.5 1998/09/23 20:22:54 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.6 1998/10/06 18:00:34 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.2 1998/08/07 19:26:10 dhammika Exp $
+// $Id: St_ebye_Maker.h,v 1.3 1998/10/06 18:00:36 perev Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.3  1998/10/06 18:00:36  perev
+// cleanup
+//
 // Revision 1.2  1998/08/07 19:26:10  dhammika
 // event by event chain in root
 //
@@ -48,9 +51,7 @@ class St_ebye_Maker : public StMaker {
                   St_ebye_Maker();
                   St_ebye_Maker(const char *name, const char *title);
    virtual       ~St_ebye_Maker();
-   virtual void   Clear(Option_t *option="");
-   virtual void   Finish();
-   virtual void   Init();
+   virtual Int_t Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
    void SetDeltaD(Bool_t flag=kFALSE);     // *MENU*
