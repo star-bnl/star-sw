@@ -62,7 +62,7 @@ MESS ****    then sect1,2,3,4
 MESS ************************************************************
 WAIT 'Hit <CR> to continue:' 0
 
-DUI/MKDIR config
+DUI/MKDIR config 
 DUI/MKDIR config/calib
 DUI/MKDIR raw
 DUI/MKDIR raw/tpc
@@ -249,3 +249,13 @@ MESS *******************************************************
 WAIT 'Hit <CR> to continue:' 0
 
 RETURN
+
+
+
+
+
+
+
+
+
+

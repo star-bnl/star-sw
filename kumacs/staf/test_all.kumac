@@ -35,12 +35,12 @@ exec top_cut 0
 
 MESS *******Testing TOP-JOIN commands
 
-exec top_join
+exec top_join 0
 
 MESS *******Testing TOP-PROJ commands
-
-exec top_proj
-
+ 
+exec top_proj 0 
+ 
 MESS ********Testing ASU commands
 
 exec asu

@@ -103,7 +103,7 @@ MESS ***** First get data and sort tables in track_p ****
 MESS **************************************************
 
 
-dio/newf fjoin test_data.xdf R
+dio/newf fjoin /afs/rhic/star/data/samples/test_data.xdf R
 dio/stream/getevent fjoin
 dio/stream/getevent fjoin
 cd Event

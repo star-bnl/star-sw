@@ -133,10 +133,10 @@ MESS ****  (N.B. This is dangerous if object 6 is not apple) ****
 MESS ************************************************************
 TRACE ON
 SOC/OBJ/LOCK [oidapp] T
-SOC/DELETEID [oidapp]
+SOC/DELETEOID [oidapp]
 SOC/LIST
 SOC/OBJ/LOCK [oidapp] F
-SOC/DELETEID [oidapp]
+SOC/DELETEOID [oidapp]
 SOC/LIST
 TRACE OFF
 WAIT 'Hit <CR> to continue:' 0
@@ -144,7 +144,7 @@ MESS
 MESS ************************************************************
 MESS ****  Delete the fish by name and list again.                   ****
 MESS ************************************************************
-SOC/DELETEOBJECT fish
+SOC/DELETEOBJECT fish 
 SOC/LIST
 WAIT 'Hit <CR> to continue:' 0
 MESS
