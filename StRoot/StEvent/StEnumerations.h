@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.3 2000/08/17 00:12:18 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.4 2000/08/21 19:26:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.3  2000/08/17 00:12:18  ullrich
- * Added tpt to enum StTrackType
+ * Revision 2.4  2000/08/21 19:26:26  ullrich
+ * Removed all CINT pragmas.
  *
  * Revision 2.3  2000/08/17 00:12:18  ullrich
  * Added tpt to enum StTrackType
@@ -29,19 +29,6 @@
  * Added enum tpt and removed CINT pragmas.
  *
  * Revision 2.5  2000/08/28 17:08:58  didenko
-#ifdef __CINT__
-#pragma link C++ enum StBeamDirection;
-#pragma link C++ enum StBeamPolarizationAxis;
-#pragma link C++ enum StChargeSign;
-#pragma link C++ enum StDetectorId;
-#pragma link C++ enum StVertexId;
-#pragma link C++ enum StTrackType;
-#pragma link C++ enum StTrackModel;
-#pragma link C++ enum StDedxMethod;
-#pragma link C++ enum StTrackFinderMethod;
-#pragma link C++ enum StTrackFittingMethod;
-#endif
-
 #pragma link C++ enum StTrackFittingMethod;
 #endif
 
