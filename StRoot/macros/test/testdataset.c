@@ -1,7 +1,10 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   07/04/99
-// $Id: testdataset.c,v 1.10 1999/12/28 22:25:03 fine Exp $
+// $Id: testdataset.c,v 1.11 1999/12/28 23:32:02 fine Exp $
 // $Log: testdataset.c,v $
+// Revision 1.11  1999/12/28 23:32:02  fine
+// St_DataSetIter  operator++ removed to avoid a future problem
+//
 // Revision 1.10  1999/12/28 22:25:03  fine
 // new test for operators ++ and * implemented
 //
@@ -130,13 +133,13 @@
    else
      cout << " Ok! the path to d[\"" <<  d("v1/v1_1/v1_1_1")->Path() << "\"]=" << d["v1/v1_1/v1_1_1"] << ";" << endl; 
   cout  << endl << "------------ 7 ------------ " << endl;
-  cout  << "  Check loop with \"St_DataSet *operator++()\" and \"St_DataSet *operator *() const\"" << endl;
+  cout  << "  Check loop with \"St_DataSet *operator *() const\"" << endl;
   St_DataSet *ds = 0;
   do { 
-    ds = d++;
+    ds = *d; 
     if (ds) {
         cout << "\tCurrent ds <" << ds->GetName() << ">;";
-        if (*d) { 
+        if (d()) { 
           cout << "\tnext ds will be <" << (*d)->GetName();
           cout << ">" << endl; 
         } else 

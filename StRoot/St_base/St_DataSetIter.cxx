@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.31 1999/12/28 21:24:07 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.32 1999/12/28 23:32:01 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.32  1999/12/28 23:32:01  fine
+// St_DataSetIter  operator++ removed to avoid a future problem
+//
 // Revision 1.31  1999/12/28 21:24:07  fine
 // St_DataSetIter opeartor * and operator ++ have been implemented
 //
@@ -197,8 +200,33 @@ St_DataSet *St_DataSetIter::Cd(const Char_t *dirname){
     set = fWorkingDataSet->GetParent();
   if (set) fWorkingDataSet = set;
   return set;
+} 
+//______________________________________________________________________________
+St_DataSet *St_DataSetIter::Cd(const St_DataSet *ds)
+{
+/////////////////////////////////////////////////////////////////////
+//                                                                 //
+// St_DataSet *St_DataSetIter::Cd(const St_DataSet *ds)            //
+//                                                                 //
+// Make:  Cwd() = ds;                                              //
+// Look for the first occurence of the "ds" pointer for the current//
+// St_DataSet in respect of the Cwd() if any                       //
+//                                                                 //
+// Change the current working directory to ds if present           //
+//                                                                 //
+// Returns the pointer to the new "working" St_DataSet (i.e. ds)   //
+// =======   0,  if the new directory doesn't exist.               //
+//                                                                 //
+/////////////////////////////////////////////////////////////////////
+  St_DataSet *nextSet = 0;
+  if (Cwd()) {
+    St_DataSetIter next(Cwd(),0);
+     while ( (nextSet = next()) ) 
+         if (ds == nextSet) {fWorkingDataSet = ds; break;}
+  }
+  return nextSet;
 }
- 
+
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
 {
