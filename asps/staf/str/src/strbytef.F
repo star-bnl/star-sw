@@ -76,14 +76,14 @@
      1	  ,32767, '.', Assigned_Version_Number, Filename_with_Version
      1	   )) THEN
 *	  File did not open:
-#ifndef PGI
+#ifndef Linux
 	  CALL MESSAGE(
      1	    'STRBYTE_OPENW-E1 (FORTRAN) Open failed on:'//Filename,1,-1)
 	  strbyte_file_opened=.FALSE.
 #endif
 	ELSE
 *	  File successfully openned:
-#ifndef PGI
+#ifndef Linux
 	  CALL MESSAGE(
      1	    'STRBYTE_OPENW-I1 (FORTRAN) Openned file:'//Filename,1,-1)
 	  strbyte_file_opened=.TRUE.
@@ -139,14 +139,14 @@
      1	   // ',RECL=4, FORM=UNFORMATTED, ACCESS=DIRECT'
      1	   ) )  THEN
 *	  File did not open:
-#ifndef PGI
+#ifndef Linux
 	  CALL MESSAGE(
      1	    'STRBYTE_OPENR-E1 (FORTRAN) Open failed on:'//Filename,1,-1)
 	  strbyte_file_opened=.FALSE.
 #endif
 	ELSE
 *	  File successfully openned:
-#ifndef PGI
+#ifndef Linux
 	  CALL MESSAGE(
      1	    'STRBYTE_OPENR-I1 (FORTRAN) Opened file:'//Filename,1,-1)
 	  strbyte_file_opened=.TRUE.

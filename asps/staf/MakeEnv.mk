@@ -25,11 +25,17 @@ ifndef STAF_SYS_LEVEL
    STAF_SYS_LEVEL := dev
 endif
 # 	
-
+#
+# Determine STAF_ARCH variable.
+#
+STAF_ARCH := $(shell sys)
+#
 
 UNAMES := $(shell uname -s)
 UNAMER := $(shell uname -r)
+ifneq (HP-UX,$(UNAMES))
 UNAMEP := $(shell uname -p)
+endif
 UNAMESRP := $(UNAMES)_$(UNAMER)_$(UNAMEP)
 #
 # Determine TULL_ARCH variable.
@@ -41,6 +47,7 @@ endif
 
 ifeq (HP-UX,$(UNAMES))
   TULL_ARCH := hpux
+override UNAMES := HPUX
 endif        
 
 ifeq (IRIX_4,$(findstring IRIX_4,$(UNAMESRP)))
@@ -75,10 +82,6 @@ ifeq (SunOS_5,$(findstring SunOS_5,$(UNAMESRP)))
   endif        
 endif        
 
-#
-# Determine STAF_ARCH variable.
-#
-STAF_ARCH := $(shell sys)
 
 
 
