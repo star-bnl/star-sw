@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.9 2003/01/10 16:41:50 oldi Exp $
+// $Id: StFlowConstants.cxx,v 1.10 2003/02/28 16:49:33 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -22,14 +22,17 @@ ClassImp(Flow)
   Float_t Flow::ptMax     = 2.;
   Float_t Flow::ptMaxPart = 6.;
 
-  Int_t Flow::cent200Full[nCents] = {14,30,56,94,146,217,312,431,510}; // new
+  Int_t Flow::cent200Full[nCents] = {14,30,56,94,146,217,312,431,510};
   Int_t Flow::cent200Half[nCents] = {14,32,59,98,149,216,302,409,474};
   Int_t Flow::cent130[nCents]     = {20,100,180,270,360,460,560,660,870};
-  Int_t Flow::cent22[nCents]      = {20,100,180,270,360,460,560,660,870}; // No!
+  Int_t Flow::cent22[nCents]      = {8,16,30,51,80,120,173,240,284}; // Cebra
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.cxx,v $
+// Revision 1.10  2003/02/28 16:49:33  posk
+// Entered 20 GeV centrality cuts from Cebra.
+//
 // Revision 1.9  2003/01/10 16:41:50  oldi
 // Several changes to comply with FTPC tracks:
 // - Switch to include/exclude FTPC tracks introduced.
