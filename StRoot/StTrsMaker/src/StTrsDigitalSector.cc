@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.3 1999/01/22 08:06:21 lasiuk Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.4 1999/02/10 04:25:43 lasiuk Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
+ * Revision 1.4  1999/02/10 04:25:43  lasiuk
+ * remove debug
+ *
  * Revision 1.3  1999/01/22 08:06:21  lasiuk
  * use unsigned char for compatibilty with interface.
  * requires use of two arrays...ugly but fine for now.
@@ -38,12 +41,10 @@ StTrsDigitalSector::StTrsDigitalSector(StTpcGeometry* geoDb)
 	mData.push_back(padRow);
 	mZeros.push_back(padRow);
     }
-
-    
     // tmp
     // check size at creation?
-     cout << "  NumberOfRows in Data Sector: " << mData.size() << endl;
-     cout << "  NumberOfRows in Zero Sector: " << mZeros.size() << endl;
+    //cout << "  NumberOfRows in Data Sector: " << mData.size() << endl;
+    //cout << "  NumberOfRows in Zero Sector: " << mZeros.size() << endl;
 //     for(int ii=0; ii<mSector.size(); ii++) {
 //  	cout << "  Data  PadsInRow(" << ii << "): " << mData[ii].size()  << endl;
 //  	cout << "  Zeros PadsInRow(" << ii << "): " << mZeros[ii].size() << endl;
@@ -54,7 +55,7 @@ StTrsDigitalSector::~StTrsDigitalSector() {/* nopt */}
 
 void StTrsDigitalSector::clear() // clears only the time bins
 {
-    cout << "in StTrsDigitalSector::clear()" << endl;
+    cout << "StTrsDigitalSector::clear()" << endl;
     if(mData.size() != mZeros.size()) {
 	cerr << "Error:StTrsDigitalSector::~StTrsDigitalSector()" << endl;
 	cerr << "Data and Zero array not same size!" << endl;
