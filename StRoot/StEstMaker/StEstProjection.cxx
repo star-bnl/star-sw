@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.1 2000/12/07 11:14:21 lmartin Exp $
+ * $Id: StEstProjection.cxx,v 1.2 2001/01/25 18:00:09 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,13 +10,23 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.2  2001/01/25 18:00:09  lmartin
+ * Methods declared as StEstTracker methods.
+ * RAD_TO_DEG variable replaced by C_DEG_PER_RAD.
+ *
  * Revision 1.1  2000/12/07 11:14:21  lmartin
  * First CVS commit
  *
  **************************************************************************/
-#include "StEstMaker.h"
+#include "StEstTracker.h"
+#include "StEstParams.hh"
+#include "math_constants.h"
+#include "StHelix.hh"
+#include "Infrastructure/StEstBranch.hh"
+#include "Infrastructure/StEstWafer.hh"
+#include "Infrastructure/StEstHit.hh"
 
-int StEstMaker::Preprojection(StEstBranch& branch, int slayer) {
+int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
   
   StHelix*              helix = branch.GetHelix();
   StThreeVector<double> vect1; 
@@ -28,7 +38,7 @@ int StEstMaker::Preprojection(StEstBranch& branch, int slayer) {
   int       phi;     // phi bin
   int       z;       // z bin
   long      il;
-  long      jl;
+  long      jl,lm;
   int       ns;      
   int       ret = 0;
   int       nneighbours = mParams[mPass]->nneighbours[slayer];
@@ -84,19 +94,11 @@ int StEstMaker::Preprojection(StEstBranch& branch, int slayer) {
       sd=s.second;
 
     if(fabs(sd)>=1000){
-//       if(mParams[mPass]->debug>0){
-// 	cout<<"       Path Length > 10m !!! : s.f="<<s.first
-// 	    <<" s.s="<<s.second<<" phase="<<helix->phase()
-// 	    <<" period="<<helix->period()
-// 	    <<" track_id="<<branch.mTrack->mTPCTrack->GetId()
-// 	    <<" layer="<<slayer
-// 	    <<" ns="<<ns<<endl;
-//       }
       ret = 1;
     }
     else{
       vect1 = helix->at(sd);
-      phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*RAD_TO_DEG/mParams[mPass]->phibin);
+      phi=floor((atan2(vect1.y(), vect1.x())+M_PI)*C_DEG_PER_RAD/mParams[mPass]->phibin);
       z=floor(vect1.z()/mParams[mPass]->zbin)+mParams[mPass]->nzbins/2; 
 
       //last chance for track
@@ -128,8 +130,11 @@ int StEstMaker::Preprojection(StEstBranch& branch, int slayer) {
     for(il=0; il<nwaf; il++){
       for(jl=0; jl<8; jl++){
 	if(mPreprojNumber>=MAXFINDWAF){
-	  if(mParams[mPass]->debug>0)
-	    cout<<"      WARNING!!! too many neighbours. "<<endl;
+	  if(mParams[mPass]->debug>0) 
+	    cout<<"      WARNING!!! too many neighbours. mPreprojNumber="<<mPreprojNumber<<endl;
+	  for (lm=0;lm<mPreprojNumber;lm++) 
+	    cout<<" "<<mPreprojTable[lm]->GetId()<<" ";
+	  cout<<endl;
 	  ret=3;
 	  goto PREPROJ_FINISH;
 	}
@@ -164,7 +169,7 @@ int StEstMaker::Preprojection(StEstBranch& branch, int slayer) {
 
 
 
-int StEstMaker::Projection(StEstBranch* branch, long slay) {
+int StEstTracker::Projection(StEstBranch* branch, long slay) {
 
 
   StEstWafer* tmpl1;
