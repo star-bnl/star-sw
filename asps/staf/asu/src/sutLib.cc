@@ -70,6 +70,7 @@ int sutMatchWild(char *pattern,char* string)
 #ifdef IRIX
    return gmatch(string,pattern);
 #endif /*IRIX*/
+   return NULL;
 }
 
 /*
