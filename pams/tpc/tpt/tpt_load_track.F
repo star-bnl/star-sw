@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.16 2000/03/03 23:46:01 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.17 2000/03/10 06:23:02 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.17  2000/03/10 06:23:02  sakrejda
+* Track length calculation fixed.
+*
 * Revision 1.16  2000/03/03 23:46:01  sakrejda
 * Loading track for no field
 *
@@ -183,9 +186,9 @@ c
          ient = trk(ipt).ipnt(ld)
          iret = tpt_cross_fact(hit(ient).row,hit(ient).x,
      >          hit(ient).y,xold,yold,cf,hit(ient).alpha)
-         if(abs(bfield(3)).gt.0.1)
-     >   ds=ds+2.0*abs(trk(ipt).p(2))*asin(0.5*sqrt((xold-hit(ient).x)**2+
-     >   (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
+c         if(abs(bfield(3)).gt.0.1)
+c     >   ds=ds+2.0*abs(trk(ipt).p(2))*asin(0.5*sqrt((xold-hit(ient).x)**2+
+c     >   (yold-hit(ient).y)**2)/abs(trk(ipt).p(2)))
          xold = hit(ient).x
          yold = hit(ient).y
          hit(ient).lambda=atand(trk(ipt).p(7))
@@ -197,7 +200,19 @@ c
      >hit( trk(ipt).ipnt(trk(ipt).nhit-1)).lambda
 C
       if(abs(bfield(3)).gt.0.1) then
-           track(ipt).length =ds*sqrt(1.0+track(ipt).tanl**2)
+           ds=(( hit( trk(ipt).ipnt(trk(ipt).nhit)).x -trk(ipt).p(3))*
+     >        ( hit( trk(ipt).ipnt(1)).x-trk(ipt).p(3))+ 
+     >        ( hit( trk(ipt).ipnt(trk(ipt).nhit)).y -trk(ipt).p(4))*
+     >        ( hit( trk(ipt).ipnt(1)).y-trk(ipt).p(4)))/
+     >     sqrt((( hit( trk(ipt).ipnt(trk(ipt).nhit)).x -trk(ipt).p(3))**2+
+     >           ( hit( trk(ipt).ipnt(trk(ipt).nhit)).y -trk(ipt).p(4))**2)*
+     >          (( hit( trk(ipt).ipnt(1)).x-trk(ipt).p(3))**2+
+     >           ( hit( trk(ipt).ipnt(1)).y-trk(ipt).p(4))**2))
+           ds=acos(ds)
+           if(ds.lt.0)write(16,*) "negative ds"
+
+           track(ipt).length =abs(trk(ipt).p(2))*ds*sqrt(1.0+track(ipt).tanl**2)
+           write(16,*)ipt,track(ipt).length
       else
            track(ipt).length = trk(ipt).p(3)
       endif
