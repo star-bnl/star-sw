@@ -1,7 +1,7 @@
-// $Id: bfcread_dst_QAhist.C,v 1.4 1999/09/20 20:09:01 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.5 1999/09/20 20:22:56 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
-// Revision 1.4  1999/09/20 20:09:01  kathy
-// bfcread_hist_list_all now lists all histograms in hist.root file; bfcread_hist_list now only lists those that are in the Maker that is input; bfcread_hist_to_ps prints and draws the hist that are in the input Maker, bfcread_dst_QAhist.C reads .dst.root file - runs QA_Maker and prints and draws the QA histograms
+// Revision 1.5  1999/09/20 20:22:56  kathy
+// fix to bfcread_dst_QAhist.C to print hist at end
 //
 // Revision 1.3  1999/09/09 21:18:02  kathy
 // changed to use StIOMaker instead of StTreeMaker so that it can read as input both .dst.root and .dst.xdf files
@@ -143,10 +143,12 @@ void bfcread_dst_QAhist(Int_t nevents=1,
   numLog = HU->ExamineLogYList();
   cout << " bfcread_dst_QAhist.C, Number hist to plot with log scale = " << numLog << endl;
 
-// Finish method in St_QA_Maker is where the actual DrawHist is done
-
   chain->Finish();
   cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ; 
+
+//  Now draw the actual histograms to canvas and to ps file
+    HU->DrawHists(MakerHist);
+   
 
 }
  
