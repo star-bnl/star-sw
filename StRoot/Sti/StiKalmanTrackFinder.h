@@ -46,6 +46,8 @@ public:
   /// Optionally load the given (associated) monte carlo event
   virtual void findTracks(StEvent * event,StMcEvent * mcEvent); 
   /// Load given event and MC event
+  virtual void reloadEvent();
+  /// Load given event and MC event
   virtual void loadEvent(StEvent * event,StMcEvent * mcEvent);
   /// Load hits from the given source
   virtual void loadHits(StEvent * event);

@@ -4,15 +4,13 @@
 messengerMap Messenger::s_messengerMap;
 unsigned int Messenger::s_routing = 0;
 
-void Messenger::init(unsigned int routing){
-
+void Messenger::init(unsigned int routing)
+{
   // default is that all routes are valid
-  if(routing==0){
-    s_routing = (1 << MessageType::getNtypes()) - 1;
-  }else{
-    s_routing = routing;
-  }
-
+  //if(routing==-1){
+  //  s_routing = (1 << MessageType::getNtypes()) - 1;
+  //}else{
+	s_routing = routing;
 } // init
 
 void Messenger::kill(){

@@ -21,6 +21,8 @@ public:
   virtual void initialize()=0;
   /// Load given event, and find all tracks of that event
   virtual void findTracks(StEvent * event,StMcEvent * mcEvent)=0; 
+  /// ReLoad current event
+  virtual void reloadEvent()=0;
   /// Load given event and MC event
   virtual void loadEvent(StEvent * event,StMcEvent * mcEvent)=0;
   /// Load tracks from the given source
