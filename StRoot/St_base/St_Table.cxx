@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.57 1999/06/27 00:46:56 fine Exp $ 
+// $Id: St_Table.cxx,v 1.58 1999/07/01 01:45:31 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.58  1999/07/01 01:45:31  fisyak
+// GetRowDescritors => GetRowDescriptors
+//
 // Revision 1.57  1999/06/27 00:46:56  fine
 // Obsolete comment deleted
 //
@@ -1637,7 +1640,7 @@ Int_t St_Table::SetfN(Long_t len)
 Int_t St_Table::StreamerHeader(StBufferAbc &b){ return 0;}
 
 //______________________________________________________________________________
-TList *St_Table::GetRowDescritors() { return 0;}
+TList *St_Table::GetRowDescriptors() { return 0;}
 //______________________________________________________________________________
 Int_t St_Table::Streamer(StBufferAbc &R__b)
 {
@@ -1649,7 +1652,7 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescritors());
+        TIter nextColDescriptor(GetRowDescriptors());
         St_TableElementDescriptor *nextCol = 0;
         while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
         {
@@ -1675,7 +1678,7 @@ Int_t St_Table::Streamer(StBufferAbc &R__b)
       if (*s_MaxIndex <= 0) return -1; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescritors());
+        TIter nextColDescriptor(GetRowDescriptors());
         St_TableElementDescriptor *nextCol = 0;
         while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
         {
@@ -1710,7 +1713,7 @@ void St_Table::Streamer(TBuffer &R__b)
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescritors());
+        TIter nextColDescriptor(GetRowDescriptors());
         St_TableElementDescriptor *nextCol = 0;
         while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
         {
@@ -1737,7 +1740,7 @@ void St_Table::Streamer(TBuffer &R__b)
       if (*s_MaxIndex <= 0) return; 
       char *row= s_Table;
       for (Int_t indx=0;indx<*s_MaxIndex;indx++) {
-        TIter nextColDescriptor(GetRowDescritors());
+        TIter nextColDescriptor(GetRowDescriptors());
         St_TableElementDescriptor *nextCol = 0;
         while ( ( nextCol = (St_TableElementDescriptor *)nextColDescriptor() ) )
         {
