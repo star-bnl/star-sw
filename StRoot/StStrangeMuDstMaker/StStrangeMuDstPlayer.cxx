@@ -8,7 +8,7 @@
 #include "StStrangeMuDstMaker/StStrangeCuts.hh"
 #include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
 #include "StStrangeMuDstPlayer.h"
-#include "StUtilities/StMessMgr.h"
+#include "StMessMgr.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 #include "StAssociationMaker/StAssociationMaker.h"
 #include "StHbtMaker/StRandyTopMapMaker.h"
