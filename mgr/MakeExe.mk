@@ -38,7 +38,7 @@ CC  := $(CC)    $(CFLAGS)   $(CPPFLAGS)
 FSL := $(FOR72) $(FFLAGS)   $(CPPFLAGS)   $(SOFLAGS)
 
 
-MOTIF := YESsss
+####### MOTIF := YESsss
 
 CMDS  := atlsim starsim gstar staf staf+ staf++ Staf
 
