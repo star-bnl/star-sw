@@ -226,6 +226,16 @@ macro bfc_init _
  nw = $words([test])
  message ' !!! bfc_util#init ==> Number of words in chain = ' [nw]
  
+*  check if we're running desum or drsum again
+ do i = 1, [nw]
+   mod = $word([test],[i],1)
+   CASE [mod] in
+     (desum) vec/create chain_desum
+     (drsum) vec/create chain_drsum
+   ENDCASE
+ enddo
+* 
+ 
  do i = 1, [nw]
    mod = $word([test],[i],1)
    message ' !!! bfc_util#init ==>  chain init for ' [mod] 
@@ -298,6 +308,11 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
 	    rm dst/run_summary
 	    rmdir dst
 	  endif
+* now if we're rerunning drsum, need to delete run_summary table
+	  if ($vexist(chain_drsum).ne.0) then 
+            message ' BFC_UTIL,init:  delete existing run_summary table'
+	    rm [run_dst]/run_summary
+	  endif  
     (obin)	  
     (esin)
           dio/newfilestream inev [input_file] r
@@ -564,7 +579,14 @@ return
                  goto EOF
                endif
            endif
-   (dstin) exec read_table_from_file#read ind [event]/data/global
+   (dstin) 
+* now if we're rerunning desum, need to delete event_summary table
+	  if ($vexist(chain_desum).ne.0) then 
+            message ' BFC_UTIL,init:  delete existing event_summary table'
+            rm [dst]/event_summary
+	  endif
+* read in dst
+	  exec read_table_from_file#read ind [event]/data/global
            if ($vexist(readprob).ne.0) then 
 	    message ' BFC_UTIL,process: ERROR - cannot read dstin file - quit '
 	    nev_proc = [nev_proc] - 1
