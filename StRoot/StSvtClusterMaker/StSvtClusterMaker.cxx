@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.3 2000/08/29 22:46:26 caines Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.4 2001/04/29 20:11:58 caines Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.4  2001/04/29 20:11:58  caines
+// Added reset command for Online monitor
+//
 // Revision 1.3  2000/08/29 22:46:26  caines
 // Fixed some memory leaks
 //
@@ -77,6 +80,7 @@ Int_t StSvtClusterMaker::SetSvtCluster()
   AddData(mClusterSet);  
   SetOutput(mClusterSet); //Declare for output
 
+  
   if (!mClusterColl) {
     mClusterColl = new StSvtHybridCollection(mSvtEvent->getConfiguration());
     mClusterSet->SetObject((TObject*)mClusterColl);
@@ -153,6 +157,24 @@ Int_t StSvtClusterMaker::Finish(){
 		 GetName() << endm;
 
   return kStOK;
+}
+
+//_____________________________________________________________________________
+
+Int_t StSvtClusterMaker::Reset(){
+
+  if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::reset() ..."  << 
+		 GetName() << endm;
+
+ delete mHybridCluster;
+ delete mClusterColl;
+ delete mClusterFinder;
+
+ mHybridCluster = NULL;
+ mClusterColl = NULL;
+ mClusterFinder = NULL;
+
+ return kStOK;
 }
 
 //_____________________________________________________________________________
