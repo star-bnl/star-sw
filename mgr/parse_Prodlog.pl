@@ -11,8 +11,8 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $dir_log      = "/star/rcf/disk00001/star/P00hi/log/daq";
-my $dir_sum      = "/star/rcf/disk00001/star/P00hi/sum/daq";   
+my $dir_log      = "/star/rcf/disk00001/star/P00hk/log/daq";
+my $dir_sum      = "/star/rcf/disk00001/star/P00hk/sum/daq";   
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -71,7 +71,7 @@ foreach my $logFile (@list) {
        
         my $ltime = `mod_time $mfile`;
            if( $ltime > 7200){
-		    if ($msize < 37000 )  {
+		    if ($msize < 25000 )  {
 #     print "Crashed job :", $mfile, "\n";
    }else { 
               $f_flag = 0;
