@@ -99,7 +99,7 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
   int i;
   for (i = 0; i < g2t_ctb_hit->GetNRows(); i++,ctb_hit++){
     float de_mev=ctb_hit->de*1000.;
-    // printf("CTB Hit i=%d  de/MeV=%f parent=%d\n",i,de_mev ,ctb_hit->track_p);
+    if(de_mev>0.01)  printf("CTB Hit i=%d  de/MeV=%f parent=%d\n",i,de_mev ,ctb_hit->track_p);
     if(de_mev <mCtbThres_mev)  continue; // ignore low energy CTB slat
     
     long iPhi,iEta;
@@ -110,7 +110,7 @@ void  StCtbUtility::collectCTBhitsMC(St_DataSet *gds){// M-C CTB
     //printf("ctb_indexes , hit=%d, vol_id=%d, iPhi=%d, iEta=%d, de/MeV=%f\n",i,(int)ctb_hit->volume_id,(int)iPhi,(int)iEta );
     
     ctbHit curHit;
-    curHit.adc=(int)de_mev*2.5 ;
+    curHit.adc=de_mev*2.5 ;
     curHit.phi=iPhi*mCtbPhiSeg;
     curHit.eta=iEta*mCtbEtaSeg -0.75;
     mCtbHits.push_back(curHit);
@@ -166,9 +166,21 @@ void  StCtbUtility::collectCTBhitsData(StTriggerData *trgD){
       if(curHit.adc<mCtbThres_ch) continue;
       printf("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc );
     }
-
   
 #endif
   return ;
 }
 
+
+//==========================================================
+//==========================================================
+void  StCtbUtility::printCtb() {
+ printf("StCtbUtility::print(),nSlat=%d\n",mCtbHits.size());
+
+  uint ih;
+  for(ih=0;ih<mCtbHits.size();ih++) {// loop over CTB hits
+    printf("ih=%d eta=%.3f phi/deg=%.1f adc=%.1f\n",ih
+           ,mCtbHits[ih].eta,mCtbHits[ih].phi/3.1416*180,mCtbHits[ih].adc);
+  }
+}
+     

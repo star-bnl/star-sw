@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.16 2004/12/16 17:01:36 balewski Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.17 2005/03/09 19:24:18 balewski Exp $
  *
  * Author: Jan Balewski
  ************************************************************
@@ -50,7 +50,7 @@ void StppLMVVertexFinder::Init() {
     mMaxTrkDcaRxy    = 3.9;
     mMinTrkPt        = 0.2;
     mMinNumberOfFitPointsOnTrack = 15; // a typo (=10) was here before , JB
-    mMaxZrange       = 180;            // for tracksa;  typo (=250) was here before , JB
+    mMaxZrange       = 180;            // for tracks;  typo (=250) was here before , JB
     mDVtxMax         = 4.0;            // max sigma multipl between tracks and current vertex, used for tracks rejection
     mMinMatchTr      = 1;              // minimal # of tracks matched to CTB 
     mBLequivNtr      = 100;            // equivalent # of tracks for BeamLine
@@ -213,7 +213,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   for( uint j=0;j<mPrimCand.size();j++) {
     double spath = mPrimCand[j].helix.pathLength(mFitResult.x(),mFitResult.y());
     StThreeVectorD p=mPrimCand[j].helix.momentumAt(spath,mBfield*tesla);
-    printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
+    // printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
   }
 	 
   gMessMgr->Message("","I") << "Prim ppLMV Vertex at " <<  mFitResult<<endm;
@@ -320,7 +320,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   if(track->geometry()->momentum().perp() <mMinTrkPt ) return false;
   n4++;
 
-  //  cout<<"\n\n DCA to beam at 0x0: "<<posDCA<<endl;
+  //cout<<"\n\n DCA to beam at xy=00: "<<posDCA<<endl;
        
   //Find momentum direction at vertex point
   StThreeVectorD pmom = TrkHlxIn.momentumAt(spath,mBfield*tesla );
@@ -394,7 +394,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
     // printf("  CTB match OK:  del_eta=%.2f, del_phi/deg=%.1f \n", del_eta,del_phi/C_PI*180);
     sigma=strag;
     n6++;    
-    printf("add tr %d w/ sigma=%f p/GeV=%f spath/cm=%f nFitP=%d nPoss=%d nSVT=%d\n",mPrimCand.size(),sigma,pmom.mag(),spath,nFitP, nPoss,nSvtP);
+    //  printf("add tr %d w/ sigma=%f p/GeV=%f spath/cm=%f nFitP=%d nPoss=%d nSVT=%d\n",mPrimCand.size(),sigma,pmom.mag(),spath,nFitP, nPoss,nSvtP);
     
     return true;
   }
@@ -598,6 +598,9 @@ void  StppLMVVertexFinder::changeCuts(){
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.17  2005/03/09 19:24:18  balewski
+ * preparation for PPV vertex finder
+ *
  * Revision 1.16  2004/12/16 17:01:36  balewski
  * 2 cuts in ppLMV4 were slightly off what was in the TPT version
  *
