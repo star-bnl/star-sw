@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.6 2000/05/09 19:38:35 kathy Exp $
+// $Id: runPeCMaker.C,v 1.7 2001/09/21 02:21:57 jeromel Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.7  2001/09/21 02:21:57  jeromel
+// StTpcDb needed by StEventMaker.
+//
 // Revision 1.6  2000/05/09 19:38:35  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
@@ -98,6 +101,7 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StEvent");
     gSystem->Load("StMagF");
+    gSystem->Load("StTpcDb");
     gSystem->Load("StEventMaker");
     gSystem->Load("StPeCMaker");
     cout<<"Shared Libraries Loaded!"<<endl;
