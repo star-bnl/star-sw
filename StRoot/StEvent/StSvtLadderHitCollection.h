@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtLadderHitCollection.h,v 2.1 1999/10/13 19:43:46 ullrich Exp $
+ * $Id: StSvtLadderHitCollection.h,v 2.2 2000/02/17 18:13:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtLadderHitCollection.h,v $
- * Revision 2.1  1999/10/13 19:43:46  ullrich
- * Initial Revision
+ * Revision 2.2  2000/02/17 18:13:19  ullrich
+ * Changed the SVT hit storage model. Hits are now stored according
+ * to barrel/ladder/wafer not by layer/ladder/wafer.
  *
  * Revision 2.1  1999/10/13 19:43:46  ullrich
  * Initial Revision
@@ -37,11 +38,11 @@ public:
     StSvtWaferHitCollection*       wafer(UInt_t);
     const StSvtWaferHitCollection* wafer(UInt_t) const;
 
-    void setLayerNumber(Int_t);
+    void setBarrelNumber(Int_t);
     
 private:
     enum { mMaxNumberOfWafers = 7 };
-    Int_t                    mLayerNumber;
+    Int_t                    mBarrelNumber;
     StSvtWaferHitCollection  mWafers[mMaxNumberOfWafers];
     
     ClassDef(StSvtLadderHitCollection,1)
