@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.8 2000/03/28 17:03:18 porter Exp $
+ * $Id: MysqlDb.cc,v 1.9 2000/06/02 13:37:36 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.9  2000/06/02 13:37:36  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.8  2000/03/28 17:03:18  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -361,8 +369,10 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
   bool tRetVal=false;
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
-  if (tRow) {
-    for (i=0;i<(int)tNbFields;i++){
+  //  if (tRow) {
+  for (i=0;i<(int)tNbFields;i++){
+    if(tRow[i]){
+
       //      cout <<mRes->mRes->fields[i].name<<" = "<< tRow[i] << endl;
       if (IS_BLOB(mRes->mRes->fields[i].flags)) {
 	    if (mRes->mRes->fields[i].flags&BINARY_FLAG) {
@@ -399,7 +409,17 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
 
 char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
   
-  char* tPnt=strinput;
+
+  if(!strinput){ // shouldn't happen - should have checked before here
+    cout<< "null input string from mysql " << endl;
+    char** tmparr = new char*[1];
+    aLen = 1;
+    tmparr[0] = new char[2];
+    strcpy(tmparr[0],"0");
+    return tmparr;
+  }
+
+  char* tPnt=strinput; 
   aLen=0;
   while (tPnt&&aLen<100) {
     tPnt=strpbrk( tPnt,"\\,");

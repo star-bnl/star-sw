@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.24 2000/04/25 18:26:03 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.25 2000/06/02 13:37:37 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.25  2000/06/02 13:37:37  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.24  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -126,12 +134,21 @@ if(mserverName) delete [] mserverName;
 int 
 mysqlAccessor::initDbQuery(const char* dbname, const char* serverName, const char* host, const int portNumber){ 
 
+  char userName[20] = {""};
+  char pWord[20] = {""};
+
 if(mdbName) delete [] mdbName;
 mdbName=new char[strlen(dbname)+1];
 strcpy(mdbName,dbname);
 
-return (int)Db.Connect(host,"","",dbname,portNumber);
+if(StDbManager::Instance()->userName())
+   strncpy(userName,StDbManager::Instance()->userName(),strlen(StDbManager::Instance()->userName()));
 
+if(StDbManager::Instance()->pWord())
+   strncpy(pWord,StDbManager::Instance()->pWord(),strlen(StDbManager::Instance()->pWord()));
+
+
+return (int)Db.Connect(host,userName,pWord,dbname,portNumber);
 };
 
 ////////////////////////////////////////////////////////////////
@@ -609,7 +626,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
   table->setStoreMode(false);
 
   if(countRows != table->GetNRows()){
-     cerr <<"Query::Table: Mismatch between NRows Requested & Delivered"<<endl;
+    cerr <<"Table ["<<table->getMyName()<<"] NRows Requested != Delivered"<<endl;
      cerr <<" NRows Requested = "<<table->GetNRows() << "  ";
      cerr <<" NRows Delivered = "<<countRows<<endl;
   }
@@ -682,7 +699,14 @@ mysqlAccessor::QueryDb(StDbTable* table, const char* whereClause){
      return 0;
    }
 
-   if(rows==0 || (retRows != rows))table->SetNRows(retRows);
+   if(rows==0 || (retRows != rows)){
+     if(StDbManager::Instance()->IsVerbose())
+        cout<<"Reseting NRows="<<retRows<<endl; 
+     table->SetNRows(retRows);
+   } else {
+     if(StDbManager::Instance()->IsVerbose())
+       cout<<" Rows Returned="<<retRows<<endl; 
+   }
 
    int icount=0;
    int* dataIDs = new int[retRows]; memset(dataIDs,0,retRows*sizeof(int));

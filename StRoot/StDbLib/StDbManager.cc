@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.23 2000/05/04 15:13:11 porter Exp $
+ * $Id: StDbManager.cc,v 1.24 2000/06/02 13:37:36 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,14 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.24  2000/06/02 13:37:36  porter
+ * built up list of minor changes:
+ *  - made buffer more robust for certain null inputs
+ *  - fixed small leak in StDbTables & restructure call to createMemory
+ *  - added dbRhic as a database domain in StDbDefs
+ *  - added setUser() in StDbManager
+ *  - added more diagnostic printouts in mysqlAccessor.cc
+ *
  * Revision 1.23  2000/05/04 15:13:11  porter
  * added dbOnl, dbRich, dbMwc domains as standards
  *
@@ -1364,3 +1372,21 @@ delete [] tmpName;
 return retVal;
 }
 
+//////////////////////////////////////////////////////////////////
+
+void
+StDbManager::setUser(const char* userName, const char* pWord){
+
+  if(userName){
+    if(muserName) delete [] muserName;
+    muserName = new char[strlen(userName)+1];
+    strcpy(muserName, userName);
+  }
+
+  if(pWord){
+   if(mpWord) delete [] mpWord;
+   mpWord = new char[strlen(pWord)+1];
+   strcpy(mpWord,pWord);
+  }
+
+}

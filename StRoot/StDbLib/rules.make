@@ -64,7 +64,7 @@ else
  EXTRA_LIBS = -L$(STLHOME)/lib -lstd15d
 
 endif
-  AR  := $(CXX)
+  AR  := $(CXX) 
 else
  OSDEFS   += ST_NO_NAMESPACES
 endif
