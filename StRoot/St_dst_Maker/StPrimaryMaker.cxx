@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.58 2001/05/01 18:02:07 lbarnby Exp $
+// $Id: StPrimaryMaker.cxx,v 1.59 2001/05/31 16:11:01 fisyak Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.59  2001/05/31 16:11:01  fisyak
+// Make m_Mode in StPreVertexMaker bitwise
+//
 // Revision 1.58  2001/05/01 18:02:07  lbarnby
 // Zero primtrk map before filling, fix filling bug for SVT part += becomes |=
 //
@@ -267,7 +270,7 @@ Int_t StPrimaryMaker::Init(){
     evr_evrpar_st row;
     //
     memset(&row,0,sizeof(row));
-    if (m_Mode == 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
+    if (m_Mode & 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
     row.vcut	 =          3; // distance below where track is marked as default primary ;
     row.cut2	 =          2; // select tracks for 2nd vertex fit ;
     row.cut3	 =        0.5; // select tracks for 3rd vertex fit ;

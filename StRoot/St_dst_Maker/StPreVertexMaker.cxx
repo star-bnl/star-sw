@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.10 2001/04/09 19:27:43 fisyak Exp $
+// $Id: StPreVertexMaker.cxx,v 1.11 2001/05/31 16:11:01 fisyak Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.11  2001/05/31 16:11:01  fisyak
+// Make m_Mode in StPreVertexMaker bitwise
+//
 // Revision 1.10  2001/04/09 19:27:43  fisyak
 // modification for new evr
 //
@@ -65,7 +68,7 @@ Int_t StPreVertexMaker::Init(){
 
     memset(&row,0,sizeof(row));
     row.fitoption  = 0;
-    if (m_Mode == 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
+    if (m_Mode & 2) row.fitoption = 2; // For Y2K real data set evrpar.fitoption = 2
     row.covariance = -1;   //
     row.vcut	   = 3.;  // distance below where track is marked as default primary
     row.cut2	   = 2.;  // select tracks for 2nd vertex fit
