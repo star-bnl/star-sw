@@ -1,7 +1,10 @@
-* $Id: tte.F,v 1.2 1998/01/27 02:18:51 fisyak Exp $
+* $Id: tte.F,v 1.3 1998/02/11 19:49:44 sakrejda Exp $
 * $Log: tte.F,v $
-* Revision 1.2  1998/01/27 02:18:51  fisyak
-* Add README
+* Revision 1.3  1998/02/11 19:49:44  sakrejda
+* tte.F charge retrieved from tptrack.q, previously it was attached tp invpt
+*
+* Revision 1.3  1998/02/11 19:49:44  sakrejda
+* tte.F charge retrieved from tptrack.q, previously it was attached tp invpt
 *
 * Revision 1.2  1998/01/27 02:18:51  fisyak
 * Add README
@@ -46,7 +49,14 @@ C  evalh    - header of the tpeval (tpc evaluation) table
 C  eval     - rows of the tpeval (tpc evaluation) table
 C  evmch    - header of the tp_mctrk (mc tracks in TPC) table
 C  evmc     - rows of the tp_mctrk (mc tracks in TPC) table
-
+C  everesh  - header of the everes (fitting evaluation) table
+C  everes   - rows of the everes table
+C
+C
+C      Update history:
+C      02/11/98 Noticed by Joachim nystrand
+C      eval(i).ptvg was calculated twice, one of them removed
+C      sign of particle is no longer attached to invpt
 C      should be retrieved from tptrack.q
 C      it was affecting sence of rotation in the momentum extrapolation 
       integer   tls_Quick_Sort_i              !integer sort (tls pkg)
@@ -446,7 +456,7 @@ c        and get it's momentum information.
          eval(eval_h.nok).pzg=g2t_hit(ip_mc).p(3)
          eval(eval_h.nok).ptg=sqrt(g2t_hit(ip_mc).p(1)**2+
      >                             g2t_hit(ip_mc).p(2)**2)
-         eval(eval_h.nok).qr=sign(1.0,track(list_trk(track_num)).invp)
+         eval(eval_h.nok).qr=track(list_trk(track_num)).q
          eval(eval_h.nok).ptr=1.0/track(list_trk(track_num)).invp
          eval(eval_h.nok).ptvr=1.0/track(list_trk(track_num)).invp
          eval(eval_h.nok).chisq(1)=track(list_trk(track_num)).chisq(1)
@@ -462,7 +472,7 @@ c        and get it's momentum information.
 *        try to get the closest approach:
 *        first get the track radius
 *        hrot is the sence of rotation
-         hrot=-sign(1.0,track(list_trk(track_num)).invp)
+         hrot=-track(list_trk(track_num)).q
          radius=1.0/(track(list_trk(track_num)).invp*0.5
      >               *0.00299792458)
          psic=degtorad*track(list_trk(track_num)).psi-
@@ -546,8 +556,6 @@ c          find a parent track for this point
          eval(eval_h.nok).mtrk=short_track(iloc)
             endif
          ii=list_g2t_track(mc_track)
-         eval(eval_h.nok).ptvg=
-     >   sqrt(g2t_track(ii).p(1)**2+g2t_track(ii).p(2)**2)
          eval(eval_h.nok).mtrk=rec_track_on_mc_track(1,iloc)
          eval(eval_h.nok).ngood=ibig
          ii=list_g2t_tracks(mc_track)
