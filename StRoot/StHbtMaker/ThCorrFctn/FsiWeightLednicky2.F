@@ -556,29 +556,31 @@ C---Spin factors <RHO vs (LL,ISPIN)
      2          .6667D0,.75D0,0.D0,3*.75D0, .75D0, 
      3          17*.0D0,.5556D0,3*0.D0, 8*0.D0,1*0.D0,210*0.D0/
 C---Scattering length FD and effective radius RD in fm vs (LL,ISPIN)
-      DATA FDH/17.0D0,7.8D0,23.7D0,2230.1218D0,.225D0,.081D0,-.063D0,
+      DATA FDH/
+     1 	   17.0D0,7.8D0,23.7D0,2230.1218D0,.225D0,.081D0,-.063D0,
      1     -.65D0,-2.73D0,
      1     .137D0,-.071D0,-.148D0,.112D0,2*1.D-6,-.360D0,
      1     2*1.D-6,1.344D0,6*1.D-6,-5.628D0,2.18D0,2.40D0, 
-     1     2.81D0,              ! ND potential /\/\
-C     1  0.50D0, ! NSC97e potential /\/\
+     1     2.81D0,              ! ND potential 
+C     1     0.50D0,              ! NSC97e potential lam-lam
      1     1*0.001D0,        
-c     c     2 -10.8D0,2*-5.4D0,4*0.D0,-6.35D0,-11.88D0,8*0.D0,9*0.D0,
+C     c     2 -10.8D0,2*-5.4D0,4*0.D0,-6.35D0,-11.88D0,8*0.D0,9*0.D0,
      2     3*-5.4D0,4*0.D0,-6.35D0,-11.88D0,8*0.D0,9*0.D0,
      2     1.93D0,1.84D0,
-     2     0.50D0,              ! triplet f0 /\/\=singlet f0 ND
+     2     0.50D0,              ! triplet f0 lam-lam=singlet f0 ND
                                 ! not contributing in s-wave FSI approx.
      2     1*0.001D0,
      3     240*0.D0/
 c--------|---------|---------|---------|---------|---------|---------|----------     
-      DATA RDH/2.7D0,2.8D0,2.7D0,1.12139906D0,-44.36D0,64.0D0,784.9D0,
+      DATA RDH/
+     1     2.7D0,2.8D0,2.7D0,1.12139906D0,-44.36D0,64.0D0,784.9D0,
      1     477.9D0, 2.27D0, 9*0.D0,-69.973D0, 6*0.D0,3.529D0,
      1     3.19D0,3.15D0,
-     1     2.95D0,              ! ND potential /\/\
-C     1  10.6D0, ! NSC97e potential /\/\
+     1     2.95D0,              ! ND potential lam-lam
+C     1  10.6D0, ! NSC97e potential lam-lam
      1     1*0.D0,  
      2     3*1.7D0,4*0.D0,2.0D0,2.63D0, 17*0.D0,3.35D0,3.37D0, 
-     2     2.95D0,              ! triplet d0 /\/\=singlet d0 ND
+     2     2.95D0,              ! triplet d0 lam-lam=singlet d0 ND
                                 ! not contributing in s-wave approx.  
      2     1*0.D0, 
      3     240*0.D0/
@@ -587,26 +589,26 @@ C--   EB =SQRT(-AM*U) (in GeV/c); U is the well height
       DATA RBH/2.545739D0,   2.779789D0, 2.585795D0, 5.023544D0,
      1     .124673D0, .3925180D0,.09D0, 2.D0, 4.058058D0, 17*0.D0, 
      1     2.252623D0, 2.278575D0, 
-     1     2.234089D0,          ! ND potential /\/\
-C     1  3.065796D0, ! NSC97e potential /\/\
+     1     2.234089D0,          ! ND potential lam-lam
+C     1  3.065796D0, ! NSC97e potential lam-lam
      1     1*0.001D0,  
      2     3*2.003144D0,
      2     4*0.D0, 2.D0, 4.132163D0, 17*0.D0, 
      2     2.272703D0, 2.256355D0, 
-     2     2.234089D0,          ! triplet potential /\/\=singlet ND
+     2     2.234089D0,          ! triplet potential lam-lam=singlet ND
                                 ! not contributing in s-wave FSI approx.  
      2     1*0.001D0, 
      3     240*0.D0/
       DATA EBH/.1149517D0,    .1046257D0,   .1148757D0, .1186010D0,
      1     .7947389D0,2.281208D0,8.7D0,.4D0,.1561219D0,17*0.D0,
      1     .1013293D0, .1020966D0, 
-     1     .1080476D0,          ! ND potential /\/\
-C     1    .04115994D0, ! NSC97e potential /\/\
+     1     .1080476D0,          ! ND potential lam-lam
+C     1    .04115994D0, ! NSC97e potential lam-lam
      1     1*0.001D0,    
      2     3*.1847221D0,
      2     4*0.D0, .4D0, .1150687D0, 17*0.D0, 
      2     .09736083D0, .09708310D0, 
-     2     .1080476D0,          ! triplet potential /\/\= singlet ND 
+     2     .1080476D0,          ! triplet potential lam-lam= singlet ND 
                                 ! not contributing in s-wave FSI approx. 
      2     1*0.001D0, 
      3     240*0.D0/
