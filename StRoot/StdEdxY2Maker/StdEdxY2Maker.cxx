@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.1 2002/10/31 23:01:57 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.2 2002/11/02 01:46:59 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -10,6 +10,7 @@
 //#define  MultiplicityCorrection
 //#define  XYZcheck
 #define  SpaceChargeStudy
+//#define  GetTpcGainMonitor
 #include <iostream.h>
 #include <time.h>
 #include "StdEdxY2Maker.h"
@@ -165,7 +166,6 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
     m_TpcLengthCorrection(0),
     m_tpcGas(0),
     m_tpcPressure(0), 
-    m_tpcTimeP(0), 
     m_trigDetSums(0),
     m_trig(0),
     m_Simulation(kFALSE), 
@@ -323,7 +323,7 @@ Int_t StdEdxY2Maker::Init(){
 	TString nameP("fit");
 	nameP += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
 	nameP.ReplaceAll("-","");
-	TString title = "fitZ - Pred. for";
+	TString title = "fitZ - Pred. for ";
 	title += StProbPidTraits::mPidParticleDefinitions[hyp]->name().data();
 	title.ReplaceAll("-","");
 	title += " versus log10(beta*gamma) for pion";
@@ -524,7 +524,9 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
 							    gBotCoord.position().z());
     }
   }
+#ifdef GetTpcGainMonitor
   m_tpcGainMonitor = (St_tpcGainMonitor *) GetDataBase("Conditions/tpc/tpcGainMonitor");
+#endif
   TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
   if (! m_tpcGas) {
     m_tpcGas = (St_tpcGas *) tpc_calib->Find("tpcGas");
@@ -597,7 +599,6 @@ Int_t StdEdxY2Maker::FinishRun(Int_t OldRunNumber) {
   }
   SafeDelete(m_TpcSecRow);
   SafeDelete(m_tpcGas); 
-  SafeDelete(m_tpcTimeP); 
   SafeDelete(m_drift); 
   SafeDelete(m_Multiplicity); 
   SafeDelete(m_AdcCorrection); 
@@ -650,6 +651,7 @@ Int_t StdEdxY2Maker::Make(){
 		   (*m_tpcPressure)[0].A1*TMath::Log((*m_tpcGas)[0].barometricPressure)));
   }
 #endif
+#ifdef GetTpcGainMonitor
   if (m_Mode != 0 && m_tpcGainMonitor) {
     if (Center) {
       Center->Fill(date,(*m_tpcGainMonitor)[0].center);
@@ -659,6 +661,7 @@ Int_t StdEdxY2Maker::Make(){
     if (Height) Height->Fill(date,(*m_tpcGainMonitor)[0].height);
     if (Width)  Width->Fill(date,(*m_tpcGainMonitor)[0].width);
   }
+#endif
   dst_dedx_st dedx;
   StTpcCoordinateTransform transform(gStTpcDb);
   Float_t bField = 0;
@@ -1020,13 +1023,14 @@ Int_t StdEdxY2Maker::Make(){
       Float_t Chisq[NHYPS];
       for (int hyp = 0; hyp < NHYPS; hyp++) {
 	Double_t bgL10 = TMath::Log10(pMomentum/StProbPidTraits::mPidParticleDefinitions[hyp]->mass());
-	Chisq[hyp] = LikelyHood(bgL10,NdEdx,FdEdx);
+	Chisq[hyp] = LikeliHood(bgL10,NdEdx,FdEdx);
       }
       gTrack->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,NHYPS,Chisq));
       if (pTrack) pTrack->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,NHYPS,Chisq));
       if (tTrack) tTrack->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,NHYPS,Chisq));
       //    if (primtrkC && iprim >= 0&& m_Mode > 0) {
       //      if (m_Mode != 0 && bField && pTrack) Histogramming(gTrack);
+#if 0
       if (Debug()) {
 	StPtrVecTrackPidTraits traits = gTrack->pidTraits(kTpcId);
 	StProbPidTraits *pidprob = 0;
@@ -1035,8 +1039,8 @@ Int_t StdEdxY2Maker::Make(){
 	  pidprob = dynamic_cast<StProbPidTraits*>(traits[i]);
 	  if (pidprob) break;
 	}
-	
       }
+#endif
       if (m_Mode != 0) Histogramming(gTrack);
     }
   }
@@ -1338,9 +1342,11 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 	    if (MultiplicityPO && FdEdx[k].row > 13) MultiplicityPO->Fill(TMath::Log10(m_trig->mult), FdEdx[k].dEdxN);
 	  }
 	}
+#ifdef GetTpcGainMonitor
 	if (m_tpcGainMonitor) {
 	  if (GainMonitor)  GainMonitor->Fill((*m_tpcGainMonitor)[0].center, FdEdx[k].dEdxN);
 	}
+#endif
 	if (Time)   Time->Fill(date,FdEdx[k].dEUdxL - TMath::Log(predB));
 	if (TimeP)  TimeP->Fill(date,FdEdx[k].dEPdxL - TMath::Log(predB));
 	if (TimeC)  TimeC->Fill(date,FdEdx[k].dEdxN);
@@ -1444,7 +1450,7 @@ void StdEdxY2Maker::PrintdEdx(Int_t iop) {
   cout << "mean dEdx \t" << I << "\tExp(avrz)\t" << TMath::Exp(avrz) << endl;
 }
 //________________________________________________________________________________
-Double_t StdEdxY2Maker::LikelyHood(Double_t Xlog10bg, Int_t NdEdx, dEdx_t *dEdx) {
+Double_t StdEdxY2Maker::LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdx_t *dEdx) {
   //SecRowMipFitpHist298P02gh1.root  correction to most probable value vs log2(dx)
   //  static const Double_t probdx2[3] = {-3.58584e-02, 4.16084e-02,-1.45163e-02};// 
   static Double_t ProbCut = 1.e-4;
