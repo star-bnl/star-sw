@@ -1,12 +1,17 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.10 2000/02/15 18:07:20 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.11 2000/02/29 18:05:00 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.10  2000/02/15 18:07:20  lasiuk
- * check if pointer exists.  If not, return a warning status.
+ * Revision 1.11  2000/02/29 18:05:00  lasiuk
+ * include FREO, QUAR volumes
+ * rotate coordinate inputs (x->-x, y->-y) for local
+ * use units consistently
  *
+ * Comment the Ring drawing routines
+ *
+ * Revision 1.12  2000/03/13 21:58:01  lasiuk
  * singleton classes
  *
  * Revision 1.11  2000/02/29 18:05:00  lasiuk
@@ -41,7 +46,7 @@
 #ifdef __ROOT__
 #include "StRrsMaker.h"             
 
-#include <iostream.h>
+// SWITCHES
 #define rICH_DIAGNOSTIC 1
 #define rICH_DECODE_DATA 1
 #define rICH_WITH_PADMONITOR 1
@@ -61,6 +66,7 @@
 #include "StRichPhysicsDb.h"
 #include "StRichMomentumTransform.h"
 #include "StRichGeantReader.h"
+#include "StRichPadPlane.h"
 #include "StRichPadPlane.h"
 #include "StRichWriter.h"
 #endif
@@ -156,6 +162,7 @@ void StRrsMaker::addElectricNoise(int b)
     mPhysicsDb  = StRichPhysicsDb::getDb();
     mGeometryDb = StRichGeometryDb::getDb();
 
+    
     if ( !mGeometryDb ) {
       cerr << "Geometry database could not be initialized. Aborting!!!\n";
       return 1;
@@ -181,8 +188,8 @@ void StRrsMaker::addElectricNoise(int b)
 			   mGeometryDb->numberOfPadsInARow());
     AddConst(new St_ObjectSet("richPixels", mPadPlane));
 
+    // Data Writer is here
     mWriter = StRichWriter::getInstance(mPadPlane);
-    //AddData(mPadPlane);
 
     // Construct constant data set.  This is what is passed downstream
     // The processors
@@ -223,6 +230,12 @@ int StRrsMaker::whichVolume(int val, string* vName)
     // coding from GEANT is:
     //    volume+Isys*1000
     // where:
+    //  Isys = 1 for RGAP
+    //  Isys = 2 for RCSI
+    int volume = val/1000;
+    switch(volume) {
+    case 1:
+	*vName = string("RGAP");
 	break;
     case 2:
 	*vName = string("RCSI");
@@ -237,7 +250,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
 	*vName = string("");
     return volumeNumber;
 //     cout << "-- Press return to continue -- ";
-    ofstream raw("/afs/rhic/star/users/lasiuk/data/rrs.txt");
+    ofstream raw("/afs/rhic/star/users/lasiuk/data/rrs_gerd.txt");
 //       char c = cin.get();
 #ifdef USE_MEMORY_INFO
     StMemoryInfo* info = StMemoryInfo::instance();
@@ -252,7 +265,7 @@ int StRrsMaker::whichVolume(int val, string* vName)
     StThreeVector<double> gTrackMomentum;
 
     
-    else {  // else
+    //
     // Either  Read mPadPlane from file
     //
     if (mReadFromFile) {
@@ -261,59 +274,106 @@ int StRrsMaker::whichVolume(int val, string* vName)
     }
     //
     // or do the normal processing of RRS from GEANT
+    //
     else {  // else process from stream
 	if (!m_DataSet->GetList())  {
 	    //if DataSet is empty fill it
 	    //
 	    // Read the GEANT info
+	    // these structures/classes are defined in:
+	    // $STAR/pams/sim/idl/g2t_tpc_hit.idl 
+	    // $STAR/StRoot/base/St_DataSet.h & St_Table.h 
+	    //
+	    
+	    St_DataSetIter geant(GetDataSet("geant"));
+	
 	    St_g2t_track *g2t_track =
-	    PR(numberOfTracks);
+		static_cast<St_g2t_track *>(geant("g2t_track"));
 
  	    if(!g2t_track){
+ 		cout << "StRrsMaker::Make()";
+ 		cout << "\tNo g2t_track pointer";
+ 		cout << "\treturn from StRrsMaker::Make()" << endl;
+ 		return kStWarn;
+ 	    }
+
+	    int numberOfTracks          =  g2t_track->GetNRows();
+	    //PR(numberOfTracks);
+	    
+	    g2t_track_st *track =  g2t_track->GetTable();
+	    
+	    //
 	    // TPC HITS
+	    St_g2t_tpc_hit *g2t_tpc_hit =
+		static_cast<St_g2t_tpc_hit *>(geant("g2t_tpc_hit"));
+
+	    if(!g2t_tpc_hit){
+		cout << "StRrsMaker::Make()";
 		cout << "\tNo g2t_tpc_hit pointer";
 		cout << "\treturn from StRrsMaker::Make()" << endl;
 		return kStWarn;
-	    if(!g2t_rch_hit) return kStWarn;
+	    }
+
+	    int no_tpc_hits         =  g2t_tpc_hit->GetNRows();
+	    //PR(no_tpc_hits);
 	    
-	    // can we check if the dataset exists?
+	    g2t_tpc_hit_st *tpc_hit =  g2t_tpc_hit->GetTable();
+	    
 	    St_g2t_rch_hit *g2t_rch_hit =
 		static_cast<St_g2t_rch_hit *>(geant("g2t_rch_hit"));
+
 	    if(!g2t_rch_hit){
 		cout << "StRrsMaker::Make()";
 		cout << "\tNo g2t_rch_hit pointer";
 		cout << "\treturn from StRrsMaker::Make()" << endl;
-	    ///////////////////////
-	    //numberOfRichHits = 10;
+		return kStWarn;
+	    }
+	    // Make Transformations available
+	    int numberOfRichHits        =  g2t_rch_hit->GetNRows();
+	    
 	    StRichCoordinateTransform tmpTform(mGeometryDb);
 	    PR(numberOfRichHits);
-	    ///////////////////////
+	    g2t_rch_hit_st *rch_hit     =  g2t_rch_hit->GetTable();
 	    string volumeName;
 	    int    quadrant;
 
 		StThreeVector<double>
-		    momentum(rch_hit->p[0],rch_hit->p[1],rch_hit->p[2]);
+		    momentum(rch_hit->p[0]*GeV,
+			     rch_hit->p[1]*GeV,
+			     rch_hit->p[2]*GeV);
 
+	    //
+	    // Declarations for Transformation routines
+	    //
+	    StRichLocalCoordinate  local;
 		// Input is in local or global coordinates
-		    StGlobalCoordinate global(rch_hit->x[0], rch_hit->x[1], rch_hit->x[2]);
+		StThreeVector<double> tmpMomentum(rch_hit->p[0]*GeV,
+						  rch_hit->p[1]*GeV,
+						  rch_hit->p[2]*GeV);
 		    tmpTform(global,local);
 		//
+		if(!mUseLocalCoordinate) {
 		    //
+		    // Transform coordinates
 		    StGlobalCoordinate global(rch_hit->x[0]*centimeter,
-		    StRichQuadrantCoordinate quad(rch_hit->x[0],rch_hit->x[1],rch_hit->x[2],quadrant);
+					      rch_hit->x[1]*centimeter,
+					      rch_hit->x[2]*centimeter);
+
 		    tmpTform(quad,local);
 		// and x-> -x, y-> -y
-		else {
-		    local.position().setX(rch_hit->x[0]);
-		    local.position().setY(rch_hit->x[1]);
-		    local.position().setZ(rch_hit->x[2]);
+		else if (mUseLocalCoordinate && volumeName == "RCSI") {
+		    StRichQuadrantCoordinate quad(-1.*rch_hit->x[0]*centimeter,
+						  -1.*rch_hit->x[1]*centimeter,
+						  rch_hit->x[2]*centimeter,quadrant);
 		    // z-component okay
 		}
-		hit.fill(local.position().x(), local.position().y(), local.position().z(),
+		else {  // if in the gap, freon, quartz AND in local:
+		    local.position().setX(-1.*rch_hit->x[0]*centimeter);
+		    local.position().setY(-1.*rch_hit->x[1]*centimeter);
 		    local.position().setZ(rch_hit->x[2]*centimeter);
-			 (momentum.x()/abs(momentum))*GeV,
-			 (momentum.y()/abs(momentum))*GeV,
-			 (momentum.z()/abs(momentum))*GeV,
+		hit.fill(local.position().x(),
+			 local.position().y(),
+			 local.position().z(),
 		
 		    (!mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))) ?
 		    0. : mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass();
@@ -321,26 +381,51 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		hit.fill(local.position(),
 		    gTrackMomentum.setZ(track[(rch_hit->track_p)-1].p[2]*GeV);
 		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
-		raw << "volumeName= " << volumeName.c_str() << endl;
-		raw << "volume_id= "  << rch_hit->volume_id << endl;
-		raw << "hit= "        << hit                << endl;
-		raw << "p= "          << abs(momentum)
-		    << " track id= "  << rch_hit->id
-		    << " tpchit= "    << track[(rch_hit->track_p-1)].n_tpc_hit
-		    << " eg_lab= "    << track[(rch_hit->track_p-1)].eg_label
-		    << " egpid= "     << track[(rch_hit->track_p-1)].eg_pid << endl;
+// 		raw << volumeName.c_str() << endl;
+		//raw << "volume_id= "  << rch_hit->volume_id << endl;
+		//raw << " hit= "        << hit;
+// 		raw << abs(momentum)/GeV << endl;
+// 		raw << momentum.perp()/GeV << endl;
+// 		raw << rch_hit->id << endl;
+// 		raw << track[(rch_hit->track_p)-1].eg_label  << endl;
+// 		raw << track[(rch_hit->track_p)-1].eg_pid    << endl;
+// 		raw << track[(rch_hit->track_p)-1].ge_pid    << endl;
+// 		raw << track[(rch_hit->track_p)-1].pt        << endl;
+// 		raw << track[(rch_hit->track_p)-1].ptot      << endl;
+// 		raw << track[(rch_hit->track_p)-1].p[0]      << endl;
+// 		raw << track[(rch_hit->track_p)-1].p[1]      << endl;
+// 		raw << track[(rch_hit->track_p)-1].p[2]      << endl;
+// 		raw << track[(rch_hit->track_p)-1].n_tpc_hit << endl;
+//  		raw << track[(rch_hit->track_p)-1].eg_label  << endl;
+//  		raw << track[(rch_hit->track_p)-1].eg_pid    << endl;
+//  		raw << track[(rch_hit->track_p)-1].ge_pid    << endl;
+//  		raw << track[(rch_hit->track_p)-1].pt        << endl;
+//  		raw << track[(rch_hit->track_p)-1].ptot      << endl;
+// 		// momentum of track
+//  		raw << track[(rch_hit->track_p)-1].p[0]      << endl;
+//  		raw << track[(rch_hit->track_p)-1].p[1]      << endl;
+//  		raw << track[(rch_hit->track_p)-1].p[2]      << endl;
+//  		raw << track[(rch_hit->track_p)-1].n_tpc_hit << endl;
+// 		int ctr =0;
+// 		for(int zz=0; zz<no_tpc_hits; zz++) {
+// 		    raw << tpc_hit[zz].track_p << " ";
+// 		    if (tpc_hit[zz].track_p == (rch_hit->track_p) ) {
+// 			ctr++;
+		//raw << "ctr= " << ctr << endl;
+		//raw << endl;
+
 // 			    << tpc_hit[zz].x[1] << " "
 // 			    << tpc_hit[zz].x[2] << " ";
 // 			double ptot = (sqrt(tpc_hit[zz].p[0]*tpc_hit[zz].p[0]+
-// 		if ( hit.volumeID() != "RCSI" ) { 
-		if ( hit.volumeID() == "RGAP" ) { 
-		    mIonize( hit );		 
+// 					    tpc_hit[zz].p[1]*tpc_hit[zz].p[1]+
+// 					    tpc_hit[zz].p[2]*tpc_hit[zz].p[2]));
 		
-		else {
+// 		    }
+		if(hit.volumeID() == "RGAP") { 
+		    mIonize(hit);		 
 #endif
-		    // check if it is photon
 
-			mInduceSignal ( hit );
+		    //
 		    // Check if it is photon, and induce signal if so
 		    //
 // 		    cout << "RGAP" << "ii/size " << ii << " " << theList.size() << endl;
@@ -349,9 +434,12 @@ int StRrsMaker::whichVolume(int val, string* vName)
 							    hit.momentum(),
 		
 		    }
-		else {
 		}
-    } //else
+		else {
+		    //cout << "don't add" << endl;
+		}
+		//sleep(1);
+	    }  // loop over hits
 		iter != theList.end();
 		wireNumber = mWireSelector.whichWire(*iter);
 		chargeMultiplied = mAmplification.avalanche(*iter, wireNumber, theList);
@@ -372,7 +460,8 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		mWriter->getSignal(i,j).signal +=  mNoiseSimulator();
 	    
 	    mWriter->getSignal(i,j).signal =
-	cout << "StRrsMaker::Maker() Write DATA out" << endl; 
+		mADC( mWriter->getSignal(i,j).signal );
+	    
 #ifdef RICH_WITH_VIEWER
 	    if (StRichViewer::histograms )
 		StRichViewer::getView()->mADCSignal->Fill(i,j,mWriter->getSignal(i,j).signal);
@@ -381,54 +470,52 @@ int StRrsMaker::whichVolume(int val, string* vName)
 
     
 	iter++) {
+	delete *iter;
 	*iter = 0;
-    thePadMonitor->clearPads();
+    }
+    theList.clear();
 
 #ifdef RICH_DECODE_DATA
     int version = 1;
+    unsigned int theADCValue = 0;
 
 #ifdef RICH_WITH_PADMONITOR
     cout << "Get Instance of Pad Monitor" << endl;
 	    theADCValue = theReader.GetADCFromCoord(iRow,iCol);
     cout << "Try Clear" << endl;
-		//cout << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
-
+#endif
     cout << "DECODER " << endl;
     int ctr = 0;
     for(int iRow=0; iRow<(mGeometryDb->numberOfRowsInAColumn()); iRow++) {
 	for(int iCol=0; iCol<(mGeometryDb->numberOfPadsInARow()) ; iCol++) {
+	    
+	    theADCValue = theReader.GetADCFromCoord(iCol,iRow);
+	    if(theADCValue) {
 #ifdef RICH_DIAGNOSTIC
-		raw << "r/c/adc: "
-		    << iRow << ' '
-		    << iCol << ' ' << theADCValue << endl;
-		anIDList MCInfo = theReader.GetMCDetectorInfo(iRow, iCol);
-		anIDList::iterator iter;
-		for(iter = MCInfo.begin();
-		    iter!= MCInfo.end();
-		    iter++) {
-#ifdef __SUNPRO_CC
-		    raw << ">>* MCinfo.G_ID= "
-			<< (*iter).mG_ID << "MCinfo.trackp= "
-			<< (*iter).mTrackp << "MCinfo.amount= "
-			<< (*iter).mAmount << endl;
-#else
-		    raw << ">>* MCinfo.G_ID= "
-			<< iter->mG_ID << "MCinfo.trackp= "
-			<< iter->mTrackp << "MCinfo.amount= "
-			<< iter->mAmount << endl;
+		raw << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
 #endif
-		}
+#ifdef RICH_WITH_PADMONITOR
+		StRichSinglePixel aPixel(iCol,iRow,theADCValue);
+		thePadMonitor->drawPad(aPixel);
 #endif
+// #ifdef RICH_DIAGNOSTIC
+//  		raw << "r/c/adc: " << iRow << ' ' << iCol << ' ' << theADCValue << endl;
+// 		anIDList MCInfo = theReader.GetMCDetectorInfo(iRow, iCol);
+// 		anIDList::iterator iter;
+// 		for(iter = MCInfo.begin();
+// 		    iter!= MCInfo.end();
+// 		    iter++) {
+// #ifdef __SUNPRO_CC
+// 		}
+// 			<< (*iter).mG_ID << "MCinfo.trackp= "
 		
 // 			<< (*iter).mAmount << endl;
 // #else
-	    thePadMonitor->drawPads();
+// 		    raw << ">>* MCinfo.G_ID= "
 // 			<< iter->mG_ID << "MCinfo.trackp= "
 // 			<< iter->mTrackp << "MCinfo.amount= "
 // 			<< iter->mAmount << endl;
 //     StThreeVector<double> bPoint;
-
-
 //     for(int kk=90; kk<270;kk+=5) {
 // 	bool status = myCalculator.getRing(eInnerRing)->getPoint(kk*degree, aPoint);
 // 	thePadMonitor->addInnerRingPoint(aPoint.x(), aPoint.y());
