@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.3 2001/05/25 23:23:59 lisa Exp $
+ * $Id: StHbtTrack.cc,v 1.4 2001/06/21 19:15:48 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,20 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.4  2001/06/21 19:15:48  laue
+ * Modified fiels:
+ *   CTH.hh : new constructor added
+ *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
+ *                                   (TTree) classes added
+ *   StHbtLikeSignAnalysis : minor changes, for debugging
+ *   StHbtTypes: split into different files
+ * Added files: for the new TTree muDst's
+ *   StExceptions.cxx StExceptions.hh StHbtEnumeration.hh
+ *   StHbtHelix.hh StHbtHisto.hh StHbtString.hh StHbtTFile.hh
+ *   StHbtTTreeEvent.cxx StHbtTTreeEvent.h StHbtTTreeKink.cxx
+ *   StHbtTTreeKink.h StHbtTTreeTrack.cxx StHbtTTreeTrack.h
+ *   StHbtTTreeV0.cxx StHbtTTreeV0.h StHbtVector.hh
+ *
  * Revision 1.3  2001/05/25 23:23:59  lisa
  * Added in StHbtKink stuff
  *
@@ -17,15 +31,26 @@
  ****************************************************************************/
 
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh" 
+#ifdef __ROOT__
+#include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h" 
+#include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h" 
+#include "StEvent/StEnumerations.h"
+#endif
 
 StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
+  mTrackType = t.mTrackType;
   mCharge = t.mCharge;
   mNHits = t.mNHits;
-  mNHitsPoss = t.mNHitsPoss; 
+  mNHitsPoss = t.mNHitsPoss;
+  mNHitsDedx = t.mNHitsDedx;
   mNSigmaElectron = t.mNSigmaElectron;
   mNSigmaPion = t.mNSigmaPion;
   mNSigmaKaon = t.mNSigmaKaon;
   mNSigmaProton = t.mNSigmaProton;
+  mPidProbElectron = t.mPidProbElectron/1000.;
+  mPidProbPion = t.mPidProbPion/1000.;
+  mPidProbKaon = t.mPidProbKaon/1000.;
+  mPidProbProton = t.mPidProbProton/1000.;
   mdEdx = t.mdEdx;
   mDCAxy = t.mDCAxy;
   mDCAz = t.mDCAz; 
@@ -34,6 +59,7 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mP = t.mP;
   mPt = t.mPt;
   mHelix = t.mHelix;
+  mHelixGlobal = t.mHelixGlobal;
   mMap[0] = t.mMap[0];
   mMap[1] = t.mMap[1];
   mTrackId = t.mTrackId;
@@ -43,29 +69,14 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
 #include "StEventTypes.h"
 #include "StEvent/StTpcDedxPidAlgorithm.h"
 #include "StEventUtilities/StuRefMult.hh"
+#include "StEvent/StEnumerations.h"
 #include "StarClassLibrary/SystemOfUnits.h"   // has "tesla" in it
-// #include "StEvent.h"
-// #include "StEventTypes.h"
-// #include "StEventUtilities/StuRefMult.hh"
-// #include "StEventSummary.h"
-// #include "StGlobalTrack.h"
-// #include "StTrackNode.h"
-// #include "StContainers.h"
-// #include "StPrimaryVertex.h"
-// #include "StVertex.h"
-// #include "StMeasuredPoint.h"
-// #include "StDedxPidTraits.h"
-// #include "StTrackPidTraits.h"
-// #include "StTrackGeometry.h"
-// #include "StTrackDetectorInfo.h"
-// #include "StParticleTypes.hh"
-// #include "StTpcDedxPidAlgorithm.h"
-// #include "StHit.h"
-// #include "StEventInfo.h"
-// #include "SystemOfUnits.h"   // has "tesla" in it
+#include "StarClassLibrary/StParticleTypes.hh"
+#include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h" 
+#include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h" 
+
 StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
 {
-
   StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
   if (!PidAlgorithm) cout << " StHbtTrack::StHbtTrack(StTrack*) - Whoa!! No PidAlgorithm!! " << endl;
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
@@ -79,10 +90,11 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   StKaonPlus* Kaon = StKaonPlus::instance();
   StProton* Proton = StProton::instance();
 
-
+ 
 
   // OK let's go...
   mHiddenInfo = 0;
+  mTrackType = ST->type();
   mCharge = ST->geometry()->charge();
   mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
   mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
@@ -100,12 +112,111 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mDCAxy = DCAxyz.perp();
   mDCAz = DCAxyz.z();
 
-
   mChiSqXY = ST->fitTraits().chi2(0);
   mChiSqZ = ST->fitTraits().chi2(1);
   mHelix = ST->geometry()->helix();
+  mHelixGlobal = ST->node()->track(global)->geometry()->helix();
   mMap[0] = ST->topologyMap().data(0);
   mMap[1] = ST->topologyMap().data(1);
   mTrackId = ST->key();
 }
+
+StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { // copy constructor
+  mTrackType = t->mTrackType;
+  mTrackId = t->mTrackId;
+  mNHits = t->mNHits;
+  mNHitsPoss = t->mNHitsPoss; 
+  mNHitsDedx = t->mNHitsDedx; 
+  mNSigmaElectron = t->mNSigmaElectron;
+  mNSigmaPion = t->mNSigmaPion;
+  mNSigmaKaon = t->mNSigmaKaon;
+  mNSigmaProton = t->mNSigmaProton;
+  mPidProbElectron = t->mPidProbElectron;
+  mPidProbPion = t->mPidProbPion;
+  mPidProbKaon = t->mPidProbKaon;
+  mPidProbProton = t->mPidProbProton;
+
+  mdEdx = t->mdEdx;
+  mChiSqXY = t->mChiSqXY;
+  mChiSqZ = t->mChiSqZ;
+  mMap[0] = t->mMap[0];
+  mMap[1] = t->mMap[1];
+  
+  mHelix = StPhysicalHelixD(t->mHelixC,t->mHelixDip,t->mHelixPhase,
+			    StThreeVectorD(t->mHelixX,t->mHelixY,t->mHelixZ),
+			    t->mHelixH);
+  mHelixGlobal = StPhysicalHelixD(t->mHelixGlobalC,t->mHelixGlobalDip,t->mHelixGlobalPhase,
+			    StThreeVectorD(t->mHelixGlobalX,t->mHelixGlobalY,t->mHelixGlobalZ),
+			    t->mHelixGlobalH);
+  //ev->mMagneticField
+  //  cout << mHelix << endl;
+  mCharge =mHelix.charge(ev->mMagneticField*kilogauss);
+  StHbtThreeVector vertex(ev->mVertexX,ev->mVertexY,ev->mVertexZ);
+  double pathlength = mHelix.pathLength(vertex);
+  //  cout << pathlength << endl;
+  mP = mHelix.momentumAt(pathlength,ev->mMagneticField*kilogauss);
+  mPt = mP.perp();
+  //  cout << mP << endl;
+  mDCAxy = (mHelix.at(pathlength) - vertex).perp();
+  mDCAz = (mHelix.at(pathlength) - vertex).z();
+  
+};
+
 #endif  // __ROOT__
+
+void StHbtTrack::SetTrackType(const short& t){mTrackType=t;}
+void StHbtTrack::SetCharge(const short& ch){mCharge=ch;}
+void StHbtTrack::SetNHits(const short& nh){mNHits=nh;}
+void StHbtTrack::SetNHitsPossible(const short& nh){mNHitsPoss=nh;}
+void StHbtTrack::SetNHitsDedx(const short& nh){mNHitsDedx=nh;}
+void StHbtTrack::SetNSigmaElectron(const float& x){mNSigmaElectron = x;}
+void StHbtTrack::SetNSigmaPion(const float& x){mNSigmaPion = x;}
+void StHbtTrack::SetNSigmaKaon(const float& x){mNSigmaKaon = x;}
+void StHbtTrack::SetNSigmaProton(const float& x){mNSigmaProton = x;}
+void StHbtTrack::SetPidProbElectron(const float& x){mPidProbElectron = x;}
+void StHbtTrack::SetPidProbPion(const float& x){mPidProbPion = x;}
+void StHbtTrack::SetPidProbKaon(const float& x){mPidProbKaon = x;}
+void StHbtTrack::SetPidProbProton(const float& x){mPidProbProton = x;}
+
+void StHbtTrack::SetdEdx(const float& x){mdEdx = x;}
+
+void StHbtTrack::SetDCAxy(const float& x){mDCAxy = x;}
+void StHbtTrack::SetDCAz(const float& x){mDCAz = x;}
+void StHbtTrack::SetChiSquaredXY(const float& x){mChiSqXY = x;} 
+void StHbtTrack::SetChiSquaredZ(const float& x){mChiSqZ = x;}   
+void StHbtTrack::SetP(const StHbtThreeVector& p){mP = p;}
+void StHbtTrack::SetPt(const float& pt){mPt = pt;}              
+void StHbtTrack::SetHelix(const StPhysicalHelixD& h){mHelix = h;}
+void StHbtTrack::SetHelixGlobal(const StPhysicalHelixD& h){mHelixGlobal = h;}
+void StHbtTrack::SetTopologyMap(const int word, const unsigned int map) { mMap[word]=map;}
+void StHbtTrack::SetTrackId(const short & id) { mTrackId=id;}
+
+short StHbtTrack::TrackType() const {return mTrackType;}
+short StHbtTrack::Charge() const {return mCharge;}
+short StHbtTrack::NHits() const {return mNHits;}
+short StHbtTrack::NHitsPossible() const {return mNHitsPoss;}
+short StHbtTrack::NHitsDedx() const {return mNHitsDedx;}
+float StHbtTrack::NSigmaElectron() const {return mNSigmaElectron;}
+float StHbtTrack::NSigmaPion() const {return mNSigmaPion;}
+float StHbtTrack::NSigmaKaon() const {return mNSigmaKaon;}
+float StHbtTrack::NSigmaProton() const {return mNSigmaProton;}
+float StHbtTrack::PidProbElectron() const {return mPidProbElectron;}
+float StHbtTrack::PidProbPion() const {return mPidProbPion;}
+float StHbtTrack::PidProbKaon() const {return mPidProbKaon;}
+float StHbtTrack::PidProbProton() const {return mPidProbProton;}
+float StHbtTrack::dEdx() const {return mdEdx;}
+
+float StHbtTrack::DCAxy() const {return mDCAxy;}          
+float StHbtTrack::DCAz() const {return mDCAz;}            
+float StHbtTrack::ChiSquaredXY() const {return mChiSqXY;} 
+float StHbtTrack::ChiSquaredZ() const {return mChiSqZ;}   
+StHbtThreeVector StHbtTrack::P() const {return mP;}
+float StHbtTrack::Pt() const {return mPt;}                
+const StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
+const StPhysicalHelixD& StHbtTrack::HelixGlobal() const {return mHelixGlobal;}
+unsigned int StHbtTrack::TopologyMap(const unsigned int word) const { return mMap[word];}
+short StHbtTrack::TrackId() const { return mTrackId; }
+
+void StHbtTrack::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHiddenInfo;}
+bool StHbtTrack::ValidHiddenInfo() const { if (mHiddenInfo) return true; else return false; }
+const StHbtHiddenInfo* StHbtTrack::HiddenInfo() const {return mHiddenInfo;}

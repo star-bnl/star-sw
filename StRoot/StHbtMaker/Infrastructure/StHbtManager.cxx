@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.19 2000/05/08 15:45:50 laue Exp $
+ * $Id: StHbtManager.cxx,v 1.20 2001/06/21 19:15:46 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,20 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.20  2001/06/21 19:15:46  laue
+ * Modified fiels:
+ *   CTH.hh : new constructor added
+ *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
+ *                                   (TTree) classes added
+ *   StHbtLikeSignAnalysis : minor changes, for debugging
+ *   StHbtTypes: split into different files
+ * Added files: for the new TTree muDst's
+ *   StExceptions.cxx StExceptions.hh StHbtEnumeration.hh
+ *   StHbtHelix.hh StHbtHisto.hh StHbtString.hh StHbtTFile.hh
+ *   StHbtTTreeEvent.cxx StHbtTTreeEvent.h StHbtTTreeKink.cxx
+ *   StHbtTTreeKink.h StHbtTTreeTrack.cxx StHbtTTreeTrack.h
+ *   StHbtTTreeV0.cxx StHbtTTreeV0.h StHbtVector.hh
+ *
  * Revision 1.19  2000/05/08 15:45:50  laue
  * Memory leak fixed. Current hbt event was not deleted
  *
@@ -273,6 +287,8 @@ int StHbtManager::ProcessEvent(){
   } 
 
   if (currentHbtEvent) delete currentHbtEvent;
+#ifdef STHBRDEBUG
   cout << "StHbtManager::ProcessEvent() - return to caller ... " << endl;
+#endif
   return 0;    // 0 = "good return"
 }       // ProcessEvent

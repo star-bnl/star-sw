@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.13 2001/06/04 19:09:52 rcwells Exp $
+ * $Id: StHbtEvent.hh,v 1.14 2001/06/21 19:15:45 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,20 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.14  2001/06/21 19:15:45  laue
+ * Modified fiels:
+ *   CTH.hh : new constructor added
+ *   StHbtEvent, StHbtKink, StHbtTrack : constructors from the persistent
+ *                                   (TTree) classes added
+ *   StHbtLikeSignAnalysis : minor changes, for debugging
+ *   StHbtTypes: split into different files
+ * Added files: for the new TTree muDst's
+ *   StExceptions.cxx StExceptions.hh StHbtEnumeration.hh
+ *   StHbtHelix.hh StHbtHisto.hh StHbtString.hh StHbtTFile.hh
+ *   StHbtTTreeEvent.cxx StHbtTTreeEvent.h StHbtTTreeKink.cxx
+ *   StHbtTTreeKink.h StHbtTTreeTrack.cxx StHbtTTreeTrack.h
+ *   StHbtTTreeV0.cxx StHbtTTreeV0.h StHbtVector.hh
+ *
  * Revision 1.13  2001/06/04 19:09:52  rcwells
  * Adding B-field, run number, and improved reaction plane functionality
  *
@@ -71,11 +85,18 @@
 
 class StHbtTrackCut;
 class StHbtV0Cut;
+class StHbtKinkCut;
+#ifdef __ROOT__
+class StHbtTTreeEvent;
+#endif
 
 class StHbtEvent{
 public:
   StHbtEvent();
-  StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0); // copy constructor with track and v0 cuts
+#ifdef __ROOT__
+  StHbtEvent(const StHbtTTreeEvent* ); // copy constructor with track and v0 cuts
+#endif
+  StHbtEvent(const StHbtEvent&, StHbtTrackCut* =0, StHbtV0Cut* =0, StHbtKinkCut* =0); // copy constructor with track and v0 cuts
   ~StHbtEvent();
   void RotateZ(const double);
 
@@ -90,11 +111,12 @@ public:
   unsigned int UncorrectedNumberOfPositivePrimaries() const;
   unsigned int UncorrectedNumberOfNegativePrimaries() const;
   float ReactionPlane() const;
+  float ReactionPlaneError() const;
   float ReactionPlaneSubEventDifference() const;
   StHbtThreeVector PrimVertPos() const;
-  StHbtTrackCollection* TrackCollection() const;
   StHbtV0Collection* V0Collection() const;
   StHbtKinkCollection* KinkCollection() const;
+  StHbtTrackCollection* TrackCollection() const;
   double MagneticField() const;
 
   void SetEventNumber(const unsigned short&);
@@ -106,8 +128,9 @@ public:
   void SetNumberOfTracks(const unsigned short&);
   void SetNumberOfGoodTracks(const unsigned short&);
   void SetUncorrectedNumberOfPositivePrimaries(const unsigned int&);
-  void SetUncorrectedNumberOfNegativePrimaries(const unsigned int&);
+  void SetUncorrectedNumberOfNegativePrimaries(const unsigned int&); 
   void SetReactionPlane(const float&);
+  void SetReactionPlaneError(const float&);
   void SetReactionPlaneSubEventDifference(const float&);
   void SetPrimVertPos(const StHbtThreeVector&);
   void SetMagneticField(const double&);
@@ -118,7 +141,7 @@ public:
 
 private:
   unsigned short mEventNumber;           //
-  int mRunNumber;
+  unsigned short mRunNumber;
   unsigned short mCtbMultiplicity;       // Central Trigger Barrel
   unsigned short mZdcAdc[2];       // Zero-degree calorimeter 
                                          //values east/west
@@ -128,47 +151,19 @@ private:
   unsigned int mUncorrectedNumberOfPositivePrimaries;
   unsigned int mUncorrectedNumberOfNegativePrimaries;
   float mReactionPlane[2]; //reaction plane/error  //   
+  double mMagneticField; // magnetic field in Z direction
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
   StHbtV0Collection* mV0Collection;
   StHbtKinkCollection* mKinkCollection;
-  double mMagneticField; // magnetic field in Z direction
 
   friend class StHbtIOBinary;
+  friend class StHbtTTreeEvent;
+  friend class StHbtTTreeTrack;
+  friend class StHbtTTreeV0;
+  friend class StHbtTTreeKink;
 };
 
-inline void StHbtEvent::SetEventNumber(const unsigned short& event){mEventNumber = event;}
-inline void StHbtEvent::SetRunNumber(const int& runNum){mRunNumber = runNum;}
-inline void StHbtEvent::SetCtbMult(const unsigned short& mult){mCtbMultiplicity = mult;}
-inline void StHbtEvent::SetZdcAdcEast(const unsigned short& adc){mZdcAdc[0]= adc;}
-inline void StHbtEvent::SetZdcAdcWest(const unsigned short& adc){mZdcAdc[1]=adc;}
-inline void StHbtEvent::SetNumberOfTpcHits(const int& nhits){mTpcNhits = nhits;}
-inline void StHbtEvent::SetNumberOfTracks(const unsigned short& tracks){mNumberOfTracks = tracks;}
-inline void StHbtEvent::SetNumberOfGoodTracks(const unsigned short& tracks){mNumberOfGoodTracks = tracks;}
-inline void StHbtEvent::SetUncorrectedNumberOfPositivePrimaries(const unsigned int& tracks){mUncorrectedNumberOfPositivePrimaries = tracks;}
-inline void StHbtEvent::SetUncorrectedNumberOfNegativePrimaries(const unsigned int& tracks){mUncorrectedNumberOfNegativePrimaries = tracks;}
-inline void StHbtEvent::SetReactionPlane(const float& rp){mReactionPlane[0] = rp ;}
-inline void StHbtEvent::SetReactionPlaneSubEventDifference(const float& rp ){mReactionPlane[1]=rp;}
-inline void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
-inline void StHbtEvent::SetMagneticField(const double& magF){mMagneticField = magF;}
-
-inline  unsigned short StHbtEvent::EventNumber() const {return mEventNumber;}
-inline  int            StHbtEvent::RunNumber() const {return mRunNumber;}
-inline  unsigned short StHbtEvent::CtbMult() const {return mCtbMultiplicity;}
-inline  unsigned short StHbtEvent::ZdcAdcEast() const {return mZdcAdc[0];}
-inline  unsigned short StHbtEvent::ZdcAdcWest() const {return mZdcAdc[1];}
-inline  int            StHbtEvent::NumberOfTpcHits() const {return mTpcNhits;}
-inline  unsigned short StHbtEvent::NumberOfTracks() const {return mNumberOfTracks;}
-inline  unsigned short StHbtEvent::NumberOfGoodTracks() const {return mNumberOfGoodTracks;}
-inline unsigned int StHbtEvent::UncorrectedNumberOfPositivePrimaries() const {return mUncorrectedNumberOfPositivePrimaries;}
-inline unsigned int StHbtEvent::UncorrectedNumberOfNegativePrimaries() const {return mUncorrectedNumberOfNegativePrimaries;}
-inline  float          StHbtEvent::ReactionPlane() const {return mReactionPlane[0];}
-inline  float          StHbtEvent::ReactionPlaneSubEventDifference() const {return mReactionPlane[1];}
-inline StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
-inline StHbtV0Collection* StHbtEvent::V0Collection() const {return mV0Collection;}
-inline StHbtKinkCollection* StHbtEvent::KinkCollection() const {return mKinkCollection;}
-inline StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
-inline double StHbtEvent::MagneticField() const {return mMagneticField;}
 
 
-#endif
+#endif 

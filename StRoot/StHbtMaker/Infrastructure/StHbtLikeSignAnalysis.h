@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtLikeSignAnalysis.h,v 1.1 2000/09/01 17:47:36 laue Exp $
+ * $Id: StHbtLikeSignAnalysis.h,v 1.2 2001/06/21 19:15:46 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -23,25 +23,34 @@
 
 #include "StHbtMaker/Base/StHbtBaseAnalysis.h"        // base analysis class
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-//#include <string>
 #include "StHbtMaker/Base/StHbtEventCut.h"             // base class 
 #include "StHbtMaker/Base/StHbtParticleCut.h"          // base class
 #include "StHbtMaker/Base/StHbtPairCut.h"              // base class
 #include "StHbtMaker/Base/StHbtLikeSignCorrFctn.hh"    // base class
 #include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
+class StHbtPicoEventCollectionVectorHideAway;
 
 
 class StHbtLikeSignAnalysis : public StHbtAnalysis {
 
-public:
+public: 
 
-  StHbtLikeSignAnalysis();
+  StHbtLikeSignAnalysis(unsigned int bins=20, double min=-100., double max=100.);
   StHbtLikeSignAnalysis(const StHbtLikeSignAnalysis&);  // copy constructor
   virtual ~StHbtLikeSignAnalysis();
 
   virtual void ProcessEvent(const StHbtEvent*);
   virtual StHbtString Report();
+  virtual unsigned int Overflow() { return mOverFlow;}
+  virtual unsigned int Underflow() { return mUnderFlow;}
+
+protected:
+  double mVertexZ[2];
+  unsigned int mVertexBins;
+  unsigned int mOverFlow;
+  unsigned int mUnderFlow;
+  StHbtPicoEventCollectionVectorHideAway* mPicoEventCollectionVectorHideAway;
 
 #ifdef __ROOT__
   ClassDef(StHbtLikeSignAnalysis, 0)
