@@ -50,7 +50,7 @@
                run <A href="readme1.html">doEvents.C</A>
                <p>
                   <small>
-                     <bold></small><code><pre>
+                     <bold><code><pre>
  .x doEvents.C(1,"026/st_physics_4026006_raw_0040047.event.root","display")
                </pre>
                   </code></BOLD></SMALL>
@@ -64,6 +64,16 @@
          <h2><a href="how2customize.html">How to create your own custom filter:</a></h2>
          If you are not happy with the filter provided by default you always 
          can <a href="how2customize.html">create</a> and add one of your own.
+
+         <h2><a href="how2drawgeometry.html">How to draw the STAR geometry alone:</a></h2>
+         Sometimes the only thing one wants to see is the GEANT3 definition of the STAR geometry alone.
+         To do that the simple ROOT macro GeomDraw.C has been introduced. It is as simple as type:
+         
+    <small>
+                     <bold><code><pre>
+         root4star GeomDraw.C
+               </pre>
+                  </code></BOLD></SMALL>     
 
          <h2><a href="howitworks.html">How it works:</a></h2>
           Essentially StEventDisplayMaker is a class to combine the different 

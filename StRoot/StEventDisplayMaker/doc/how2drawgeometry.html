@@ -1,0 +1,56 @@
+
+ <h2>How to draw the STAR geometry alone :</h2>
+    Sometimes the only thing one wants to see is the GEANT3 definition of the STAR geometry alone.
+    To do that the simple ROOT macro GeomDraw.C has been introduced. It is as simple as type:         
+    <small>
+                     <bold><code><pre>
+         root4star GeomDraw.C
+               </pre>
+                  </code></BOLD></SMALL>   
+                  
+ Some particular version of the geometry can be drawn also.
+
+<p>
+<center>
+    <bold><code>
+       root4star 'GeomDraw.C(const char *geomDescriptor="complete")'
+    </code></bold>,
+ </center>
+ <br>
+  where "geomDescriptor" value is "complete" "by default and it can be either
+  <ol>
+    <li> STAR geometry version like "year2003" <br>
+         (see: <a href ="http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html">http://www.star.bnl.gov/STAR/comp/prod/MCGeometry.html</a>)
+         <br>
+            Example: <code>root4star 'GeomDraw.C("year2003")' </code>
+    <li> The proper ZEBRA fz file. <br>
+            Example: <code> root4star 'GeomDraw.C("/star/u/potekhin/gstardata/y2003x_complete.fz ")'</code>
+  </ol>
+
+<p>
+
+ One can adjust the view via ROOT Browser or ROOT TCanvas
+ <ol>
+   <li> Select the volume you are interesting in with left mouse button
+   <li> Bring the ROOT context menu up with the right mouse button click
+   <li> Select class method to execute and click it with left mouse button
+</ol>
+
+     List of the usefull TVolume methods and its parameters:
+     <ol>
+     <li> <bold><code>TVolume::Draw(const char *levels="3") </code></bold>-
+                       - define the number of the levels of the geometry hierarchy to be drawn
+     <li> <bold><code>TVolume::SetVisibility </code></bold> - <P>
+                         0 - everything visible, <br>
+                         2 - this invisible, but sons are visible<br>
+                         1 - this visible but sons<br>
+                         3 - neither this nor its sons are visible<br>
+</ol>                         
+
+<p>
+
+ To get the OpenGL view one has to
+ <ol>
+    <li> Turn Qt ROOT Layer on (see: <a href="http://www.rhic.bnl.gov/~fine/EventDisplay"> http://www.rhic.bnl.gov/~fine/EventDisplay</a>)
+    <li> Select "OpenGL view" from the "View" menu of ROOT TCanvas
+ </pl>
