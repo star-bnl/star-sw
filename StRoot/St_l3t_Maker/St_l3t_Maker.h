@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.h,v 1.7 2000/03/28 22:29:29 yepes Exp $
+// $Id: St_l3t_Maker.h,v 1.8 2000/07/21 20:12:02 yepes Exp $
 // $Log: St_l3t_Maker.h,v $
+// Revision 1.8  2000/07/21 20:12:02  yepes
+// *** empty log message ***
+//
 // Revision 1.7  2000/03/28 22:29:29  yepes
 // overflow problems solve for now
 //
@@ -52,6 +55,8 @@ class St_l3t_Maker : public StMaker {
     TH1F *m_l3_cpuTimeSector; //!cpu  Time spend per sector
     TH1F *m_l3_realTimeSector;//!real Time spend per sector
 
+    short firstEvent ;
+
   TString m_InputHitDataSetName; //! 
   TString m_InputHitName; //!
 
@@ -64,7 +69,7 @@ class St_l3t_Maker : public StMaker {
    virtual Int_t  MakeOnLine();
    virtual Int_t  MakeOffLine();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.7 2000/03/28 22:29:29 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.8 2000/07/21 20:12:02 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3t_Maker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,21 +1,26 @@
 //:>------------------------------------------------------------------
 //: FILE:       gl3Conductor.cc
 //: HISTORY:
-//:              1feb2000 version 1.00
+//:             1 feb 2000 version 1.00
+//:             6 jul 2000 add St_l3_Coordinate_Transformer
 //:<------------------------------------------------------------------
+#include <time.h>
 #include "gl3Conductor.h"
 
 
 //####################################################################
 //
 //####################################################################
-gl3Conductor::gl3Conductor ( int maxEventsIn, int maxAnalysisIn ) {
+gl3Conductor::gl3Conductor ( 
+             St_l3_Coordinate_Transformer* _trans,
+             int maxEventsIn, int maxAnalysisIn ) {
    communicationsFlag = 1 ;
    event     = 0 ;
    analysis  = 0 ;
+   runNumber = 0 ;
    maxTokens = 4096 ;
    tokenIndex = new int[maxTokens+1];
-   setup ( maxEventsIn, maxAnalysisIn ) ;
+   setup ( _trans, maxEventsIn, maxAnalysisIn ) ;
 }
 //####################################################################
 //
@@ -106,7 +111,10 @@ int gl3Conductor::init  (  ){
 //####################################################################
 //
 //####################################################################
-gl3EventDecision gl3Conductor::processEvent  ( int maxLength, char* buffer ){
+gl3EventDecision  gl3Conductor::processEvent ( int maxLength, char* buffer ){
+//
+   double initialCpuTime  = cpuTime ( );
+   double initialRealTime = realTime( );
 //
 //   Look for free event container
 //
@@ -141,19 +149,38 @@ gl3EventDecision gl3Conductor::processEvent  ( int maxLength, char* buffer ){
    }
    tokenIndex[token] = freeEventIndex ;
 //
-//    Read Event
+//    Read Event and check no errors
 //
-   event[freeEventIndex].readEvent ( maxLength, buffer ) ;
+   if ( event[freeEventIndex].readEvent ( maxLength, buffer ) < 0 ) {
+      printf ( "gl3Conductor::processEvent: error reading event \n" ) ;
+      return decision ;
+   }
+//
+   double cpuTimeAfterRead  = cpuTime ( );
+   double realTimeAfterRead = realTime( );
+   readCpuTime  = cpuTimeAfterRead  - initialCpuTime ;
+   readRealTime = realTimeAfterRead - initialRealTime ;
 //
 //    Run analysis modules
 //
    int result = 0 ;
+   double lastTimeCpu  = cpuTimeAfterRead ;
+   double lastTimeReal = realTimeAfterRead ;
+   double nowCpu ;
+   double nowReal;
    for ( i = 0 ; i < nAnalyses ; i++ ) {
       result = analysis[i]->process( &(event[freeEventIndex]) );
       if ( i > 0 && result ) {
          decision.accept |= mask[i-1] ; 
          decision.build  |= mask[i-1] ; 
       }
+      nowCpu  = cpuTime();
+      nowReal = realTime();
+
+      analysisRealTime[i] = nowReal - lastTimeReal ;
+      analysisCpuTime[i]  = nowCpu  - lastTimeCpu  ;
+      lastTimeReal        = nowReal ;
+      lastTimeCpu         = nowCpu  ;
 //    printf ( " %d result %d decision %x %d\n",i, result, decision.accept, decision.accept ) ;
    }
 //
@@ -162,6 +189,8 @@ gl3EventDecision gl3Conductor::processEvent  ( int maxLength, char* buffer ){
 #ifdef GL3ONLINE
    if ( communicationsFlag ) checkHistoRequest();
 #endif
+
+   totalCpuTime = cpuTime() - initialCpuTime ;
 
    return decision ;
 }
@@ -190,12 +219,40 @@ int gl3Conductor::releaseToken ( int token ) {
 //####################################################################
 //
 //####################################################################
+int gl3Conductor::resetHistos (  ) {
+   gl3Histo* hPointer ;
+//
+//    Reset Histograms
+//
+   for( hPointer = (gl3Histo *)histoList.first(); 
+	 hPointer != 0; 
+	 hPointer = (gl3Histo *)histoList.next() ) {
+//    hPointer->Reset ( ) ;
+   }
+   return 0 ;
+}//####################################################################
+//
+//####################################################################
+int gl3Conductor::runStart ( long _runNumber ) {
+   runNumber = _runNumber ;
+   return resetHistos ( ) ;
+}
+//####################################################################
+//
+//####################################################################
+int gl3Conductor::runEnd (  ) {
+
+   return 0 ;
+}
+//####################################################################
+//
+//####################################################################
 int gl3Conductor::setCommunications (  ){
 //
 #ifdef GL3ONLINE
    struct sockaddr_in gl3Address;    /* my address information */
 
-   gl3Port = 9999 ;
+   gl3Port = 3333 ;
    int backLog = 5 ; // how many pending connections will hold
     
    if ((socketFd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
@@ -235,14 +292,17 @@ void gl3Conductor::setHitProcessing ( int hitPro ){
 //####################################################################
 //
 //####################################################################
-int gl3Conductor::setup ( int maxEventsIn, int maxAnalysesIn ) {
+int gl3Conductor::setup ( St_l3_Coordinate_Transformer* _trans,
+                          int maxEventsIn, int maxAnalysesIn ) {
 //
-   maxEvents   = maxEventsIn ;
-   maxAnalyses = maxAnalysesIn ;
-   event       = new gl3Event[maxEvents] ;
-   analysis    = new pGl3Analysis[maxAnalyses] ; 
-   nEvents     = 0 ;
-   nAnalyses   = 0 ;
+   maxEvents        = maxEventsIn ;
+   maxAnalyses      = maxAnalysesIn ;
+   event            = new gl3Event[maxEvents] ;
+   analysis         = new pGl3Analysis[maxAnalyses] ; 
+   analysisCpuTime  = new double[maxAnalyses];
+   analysisRealTime = new double[maxAnalyses];
+   nEvents          = 0 ;
+   nAnalyses        = 0 ;
 //
    int i ;
    for ( i = 0 ; i < maxTokens ; i++ ) tokenIndex[i] = 0 ; 
@@ -259,7 +319,10 @@ int gl3Conductor::setup ( int maxEventsIn, int maxAnalysesIn ) {
    if ( communicationsFlag ) setCommunications();
 #endif
    hitProcessing = 0 ;
-   for ( i = 0 ; i < maxEvents ; i++ ) event[i].setHitProcessing ( hitProcessing ) ; 
+   for ( i = 0 ; i < maxEvents ; i++ ) {
+      event[i].setHitProcessing ( hitProcessing ) ; 
+      event[i].setCoordinateTransformer ( _trans ) ; 
+   }
 
    return 0 ;
 }
@@ -272,6 +335,7 @@ int gl3Conductor::writeHistos ( int maxBytes, char *buffer ){
    gl3HistoContainer* container = (gl3HistoContainer *)buffer ;
 
    printf ( "nHistos %d \n", histoList.size() ) ;
+   container->runNumber = runNumber ;
    container->nHistos = histoList.size();
    
    char* pointer = (char *)&(container->buffer) ;
@@ -305,3 +369,22 @@ int gl3Conductor::writeHistos ( int maxBytes, char *buffer ){
 
    return nTotalBytes ;
 } 
+
+
+double gl3Conductor::cpuTime (void) {
+  return (double) (clock ()) / CLOCKS_PER_SEC;
+}
+//
+#ifdef I386
+double gl3Conductor::realTime (void) {
+  const long nClicks = 400000000;
+  unsigned long eax, edx;
+  asm volatile ("rdtsc":"=a" (eax), "=d" (edx));
+  double realTime = (double) (eax) / nClicks;
+  return realTime;
+}
+#else
+double gl3Conductor::realTime (void) {
+  return 1.;
+}
+#endif

@@ -109,13 +109,13 @@ struct local_track {
        short  xy_chisq;     /* xy & sz chi2 packed in 16 bits each */
        short  sz_chisq;     /* same as with track type II, divide by 10 for
                                real result*/
-       float     dedx;      /* dE/dx information */
-       float     pt  ;      /* pt time charge */
-       float     psi;       /* azimuthal angle of the momentum at (r,.. */
-       float     tanl;      /* tg of the dip angle at (r,phi,z) */
-       float     z0;        /* z   coordinate of the first point */
-       float     r0;        /* r   coordinate of the first point */
-       float     phi0;      /* phi coordinate of the first point */
+       float     dedx;       /* dE/dx information */
+       float     pt  ;       /* pt time charge */
+       float     psi;        /* azimuthal angle of the momentum at (r,.. */
+       float     tanl;       /* tg of the dip angle at (r,phi,z) */
+       float     z0;         /* z   coordinate of track parameters */
+       float     r0;         /* r   coordinate of track parameters */
+       float     phi0;       /* phi coordinate of track parameters */
        float     trackLength;
        unsigned short dpt ;
        unsigned short dpsi ;

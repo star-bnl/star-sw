@@ -3,6 +3,8 @@
 //: HISTORY:
 //:              3dec1999 version 1.00
 //:              3feb2000 add sector to addTracks of type 3
+//:              6jul2000 add St_l3_Coordinate_Transformer
+//:             17jul2000 move glR3HistoContainer to gl3Conductor
 //:<------------------------------------------------------------------
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,21 +36,14 @@
 #endif
 
 
-class gl3HistoContainer {
-public:
-   int nBytes ;
-   int nHistos ;
-   int buffer ;
-};
-
-
 class gl3Event {
-
 public:
-   gl3Event(int mxHits=500000, int mxTracks=20000 ):hit(0),track(0),busy(0){
+   gl3Event(int mxHits=500000, int mxTracks=20000,
+            St_l3_Coordinate_Transformer* inTrans=0 ):hit(0),track(0),busy(0){
       trackContainer = 0 ;
       trackIndex     = 0 ;
       hitProcessing  = 0 ;
+      coordinateTransformer = inTrans ;
       setup ( mxHits, mxTracks ) ;
    } ;
    ~gl3Event( ){ 
@@ -84,14 +79,22 @@ public:
 
    void addTracks ( short sector, int nTracks, local_track* track ) ;
 
-   int getNTracks ( ) { return nTracks ; } ;
-   int getNHits   ( ) { return nHits   ; } ;
+   int getNTracks       ( ) { return nTracks ; } ;
+   int getNMergedTracks ( ) { return nMergedTracks ; } ;
+   int getNHits         ( ) { return nHits   ; } ;
+
+   St_l3_Coordinate_Transformer* getCoordinateTransformer()
+         { return (St_l3_Coordinate_Transformer*)coordinateTransformer ; } ;
 
    int  readEvent  ( int maxLength, char* buffer ) ;
    int  readSectorHits   ( char* buffer, int nSectorTracks ) ;
    int  readSectorTracks ( char* buffer ) ;
    int  resetEvent ( ) ;
    void setHitProcessing ( int hitPro ) { hitProcessing = hitPro ; } ;
+   void setCoordinateTransformer ( St_l3_Coordinate_Transformer* in )
+            { coordinateTransformer = (void *)in ; } ;
+
+
 
    int fillTracks ( int maxBytes, char* buffer, unsigned int token ) ;
    //
@@ -114,6 +117,7 @@ private:
    int     maxHits ;
    int     nHits ;
    int     nMergedTracks ;
+   void*   coordinateTransformer ;
    //
    FtfPara          para ;
    FtfContainer*    trackContainer ;

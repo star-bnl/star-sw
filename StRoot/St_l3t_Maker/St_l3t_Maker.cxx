@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.29 2000/07/21 17:47:55 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.30 2000/07/21 20:12:02 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -71,6 +71,7 @@
 // St_l3t_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+#include <stdio.h>
 #include <iostream.h>
 #include "St_l3t_Maker.h"
 #include "StChain.h"
@@ -89,6 +90,7 @@
 #include "gl3HighPt.h"
 #include "TH1.h"
 #include "tables/St_hitarray_Table.h"
+#include "St_l3_Coordinate_Transformer.h"
 ClassImp(St_l3t_Maker)
   
   //_____________________________________________________________________________
@@ -97,6 +99,7 @@ St_l3t_Maker::St_l3t_Maker(const char *name):
 {
   m_InputHitDataSetName="tpc_hits";
   m_InputHitName="tphit";
+  firstEvent = 1 ;
 
 }
 //_____________________________________________________________________________
@@ -163,6 +166,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
 
    printf("run my l3t_maker-->>\n");
 
+   St_l3_Coordinate_Transformer transformer ;
+
 // get l3 dataset
    St_DataSet* sec_bank_set = 0 ;
    sec_bank_set = GetInputDS("l3Clufi");
@@ -179,8 +184,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
 //    Create tracker and gl3 objects
 //
-   FtfSl3   tracker ;
-   gl3Conductor gl3 ;
+   FtfSl3   tracker(&transformer) ;
+   gl3Conductor gl3(&transformer) ;
    gl3GeneralHistos  fillHistoModule ;
    gl3JPsi           jPsiM ;
    gl3GammaGamma     gammaGammaM ;
@@ -217,17 +222,36 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
    tracker.setup ( 30000, 3000 ) ;
    tracker.para.infoLevel = 10 ;
+   for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
+   tracker.para.infoLevel = 10 ;
    tracker.para.hitChi2Cut   = 50 ;
    tracker.para.trackChi2Cut = 20 ;
    tracker.para.goodHitChi2  = 5 ;
    tracker.para.dphi=0.1;
    tracker.para.deta=0.1;
    tracker.para.distanceMerge = 5 ;
-   tracker.xyError = 0.1 ;
-   tracker.zError  = 0.2  ;
-//
-   for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
+   tracker.para.parameterLocation = 0 ;
+   tracker.setXyError ( 0.1 ) ;
+   tracker.setZError  ( 0.2 ) ;
+
    tracker.reset();
+//
+//   Print parameters for first event
+//
+   if ( firstEvent ) {
+      printf ( "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n" ) ;
+      printf ( "333333333333333333333333333333333333333333333333333333 \n" ) ;
+      printf ( "St_l3t_Maker: tracking parameters \n" ) ;
+      printf ( "FtfSl3: xyError          %f  \n", tracker.getXyError());
+      printf ( "FtfSl3: zError           %f  \n", tracker.getZError());
+      printf ( "FtfSl3: minTimeBin       %d  \n", tracker.minTimeBin);
+      printf ( "FtfSl3: maxTimeBin       %d  \n", tracker.maxTimeBin);
+      printf ( "FtfSl3: minClusterCharge %d  \n", tracker.minClusterCharge);
+      printf ( "FtfSl3: maxClusterCharge %d  \n", tracker.maxClusterCharge);
+      tracker.para.write ( stdout ) ;
+      printf ( "LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL \n" ) ;
+      printf ( "333333333333333333333333333333333333333333333333333333 \n" ) ;
+   } 
 //
 //    Create hit table to store L3 clusters in offline format
 //
@@ -335,12 +359,15 @@ Int_t St_l3t_Maker::MakeOnLine(){
    //   Generate output table
    //
    int nTracks = 1;
-   if ( eventP ) nTracks = max(1,eventP->getNTracks());   
+   int nMergedTracks = 1;
+   if ( eventP ) nTracks       = max(1,eventP->getNTracks());   
+   if ( eventP ) nMergedTracks = max(1,eventP->getNMergedTracks());   
    St_dst_track *trackS = new St_dst_track("l3Track", nTracks);
    St_dst_dedx  *dedxS  = new St_dst_dedx("l3Dedx", nTracks); 
    m_DataSet->Add(trackS);
    m_DataSet->Add(dedxS);
-   fprintf(stderr," %s on-line found Ntracks=%d\n",GetName(),nTracks);
+   fprintf(stderr," %s on-line:  Tracks %d Merged Tracks %d \n",
+                  GetName(),nTracks, nMergedTracks );
 
    //
    dst_track_st *track     = (dst_track_st *)trackS->GetTable(); 
@@ -364,9 +391,9 @@ Int_t St_l3t_Maker::MakeOnLine(){
          hit[ihit].x = gHit->getX ();
          hit[ihit].y = gHit->getY ();
          hit[ihit].z = gHit->getZ ();
-         hit[ihit].dx = tracker.xyError;
-         hit[ihit].dy = tracker.xyError;
-         hit[ihit].dz = tracker.zError;
+         hit[ihit].dx = tracker.getXyError();
+         hit[ihit].dy = tracker.getXyError();
+         hit[ihit].dz = tracker.getZError();
          hit[ihit].q = gHit->getCharge ();
          hit[ihit].track = gHit->getTrackId ();
       }

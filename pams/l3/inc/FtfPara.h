@@ -34,6 +34,7 @@
        void      setDefaults ( ) ;
        void      read  ( char* inputFile ) ;
        void      write ( char* outputFile ) ;
+       void      write ( FILE* outFile ) ;
 
        int       infoLevel;       // Level of information printed about progress
        int       segmentRowSearchRange;       // Row search range for segments 

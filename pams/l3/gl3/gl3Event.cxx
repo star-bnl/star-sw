@@ -3,6 +3,10 @@
 //: HISTORY:
 //:             3 dec 1999 version 1.00
 //:             8 apr 2000 include modifications form Clemens
+//:             6 jul 2000 add St_l3_Coordinate_Transformer
+//:            12 jul 2000 merge tracks using parameters at closest
+//:                        approach (from sl3) and them extrapolate
+//:                        them to inner most hit for consumers down the line
 //:<------------------------------------------------------------------
 #include "gl3Event.h"
 
@@ -43,11 +47,14 @@ void gl3Event::addTracks ( short sector, int nTrk, local_track* localTrack ) {
       gl3Track* fatterTrack = 0 ;
       if ( idTrack < 0 ) {
          fatterTrack = lTrack->merge ( trackContainer ) ;
+	 fatterTrack = 0 ;
          if ( fatterTrack ) {
+//   printf ( "gl3Event: track merged !!! \n" ) ;
             if ( hitProcessing && indexStore > 0 ) {
                 trackIndex[indexStore] = fatterTrack->id  ;
             }
             trk++ ;
+            nMergedTracks++ ;
             continue ;
          }
       }
@@ -104,6 +111,7 @@ int gl3Event::fillTracks ( int maxBytes, char* buffer, unsigned int token ){
    //   Loop over tracks now
    //
    global_track* oTrack = (global_track *)head->track ;
+   printf ( "gl3Event:fillTracks:\n" ) ;
    for ( int i = 0 ; i < nTracks ; i++ ) {
       oTrack->id   = track[i].id ;
       oTrack->flag = track[i].flag ;
@@ -155,11 +163,39 @@ int gl3Event::readEvent  ( int maxLength, char* buffer ){
 
       trackPointer  = (char *)sectorP + sectorP->trackp.off * 4 ; 
       int nSectorTracks = readSectorTracks ( trackPointer ) ;
+      if ( nSectorTracks < 0 ) {
+         printf ( "gl3Event:readEvent: error reading tracks, sector %d \n", i+1 ) ;
+         return -1 ;
+      }
       if ( hitProcessing && sectorP->sl3clusterp.off ) {
          hitPointer    = (char *)sectorP + sectorP->sl3clusterp.off * 4 ; 
          readSectorHits   ( hitPointer, nSectorTracks ) ;
       }
    }
+//
+//   For best merging (as least as 7/12/00) tracks
+//   are passed from sl3 to gl3 at point of closest approach
+//   the event viewer wants them(at least for now) at
+//   inner most point so we extrapolate to inner most hit radius
+//
+   for ( int i = 0 ; i < nTracks ; i++ ) {
+      St_l3_Coordinate_Transformer* transformer = 
+                      (St_l3_Coordinate_Transformer *)coordinateTransformer ;
+      float radius = transformer->GetRadialDistanceAtRow(track[i].innerMostRow-1) ;
+
+//    printf ( "innerMostRow %d radius %f \n", track[i].innerMostRow, radius ) ;
+      if ( fabs( track[i].r0 - radius ) > 5. ) { 
+//       printf ( "track extrapolated to radius %f \n", radius ) ;
+         track[i].updateToRadius ( radius ) ;
+	 if ( fabs(radius-track[i].r0) > 1 ) {
+	    printf ( "problem extrapolating \n" ) ;
+         }
+      }
+   }
+//
+//   declare event as busy
+//
+   busy = 1 ;
    //
    return 0 ;
 }
@@ -169,9 +205,12 @@ int gl3Event::readEvent  ( int maxLength, char* buffer ){
 int gl3Event::readSectorHits ( char* buffer, int nSectorTracks ){
    L3_SECCD* head = (L3_SECCD *)buffer ;
 //
-//   Construct coordinate transformer class
+//   Check coordinate transformer is there
 //
-   St_l3_Coordinate_Transformer transformer;
+  if ( !coordinateTransformer ) {
+      printf ( "gl3Event::readSectorHits, there is not Coordinate Transformer \n "  ) ;
+      return 0 ;
+  }
 //
 //   Check bank header type
 //
@@ -204,7 +243,8 @@ int gl3Event::readSectorHits ( char* buffer, int nSectorTracks ){
       //
       if ( hitProcessing > 1 ) {
          gHitP = &(hit[nHits+i]);
-         gHitP->set ( &transformer, sector, hitP ) ;
+         gHitP->set ( (St_l3_Coordinate_Transformer *)coordinateTransformer, 
+	               sector, hitP ) ;
       }
       //
       //  Now logic to reset trackId in hits
@@ -255,7 +295,7 @@ int gl3Event::readSectorTracks ( char* buffer ){
 
    if ( strncmp(head->bh.bank_type,CHAR_L3_SECTP,8) ) {
       printf ( "gl3Event::readSectorTracks, wrong bank type %s\n", head->bh.bank_type ) ;
-      return 0 ;
+      return -1 ;
    }
 
    int sector = head->bh.bank_id ;
@@ -304,10 +344,7 @@ int gl3Event::readSectorTracks ( char* buffer ){
      local_track* localTrack = headerLocal->track ;
      addTracks ( sector, nSectorTracks, localTrack ) ;
    }
-//
-//   declare event as busy
-//
-   busy = 1 ;
+
 //
    return sectorP->nTracks ;
 }
@@ -384,6 +421,5 @@ int gl3Event::setup ( int mxHits, int mxTracks ){
 //
    para.bField = 0.5 ;
 //
-
    return 0 ;
 }

@@ -42,6 +42,7 @@ public:
    double GetY   ( int iBin ) ;
    int   Print  ( short Level=1 ) ;
    int   Read   ( char* input  ) ; 
+   int   Reset  (  ) ;
    int   Write  ( int maxBytes, char* output ) ; 
 
    ClassDef(gl3Histo,1)
