@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.10 1999/07/08 22:58:18 genevb Exp $
+// $Id: StMessage.cxx,v 1.11 1999/07/15 05:15:06 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.11  1999/07/15 05:15:06  genevb
+// Fixed an odd bug with seekp(0) on an empty stream buffer
+//
 // Revision 1.10  1999/07/08 22:58:18  genevb
 // Created an abstract interface with StMessMgr.h hiding template implementation from others, a few other small fixes
 //
@@ -48,7 +51,10 @@
 
 static StMessageCounter* messCounter = StMessageCounter::Instance();
 
-ostrstream messBuffer(new char[1024],1024);
+static int messBuffSize = 1024;
+char* tempPtr = new char[messBuffSize];
+static char* messBuff = strcpy(tempPtr,"Empty\n");
+ostrstream messBuffer(messBuff,messBuffSize,ios::out);
 
 #ifdef __ROOT__
 ClassImp(StMessage)
@@ -107,19 +113,19 @@ int StMessage::Print(int nChars) {
     if (nChars>0) {
       if (messBuffer.tellp() > nChars)
         messBuffer.seekp(nChars);   // set end-of-string at nChars
-      int noReturns = strcspn(messBuffer.str(),endofline);
+      int noReturns = strcspn(messBuff,endofline);
       if (noReturns < messBuffer.tellp()) messBuffer.seekp(noReturns);
     } else
       nChars = 0;
   }
   messBuffer << ends;
   if ((strchr(option,'O')) || (nChars)) {
-    cout << messBuffer.str();
+    cout << messBuff;
     if (addedMessage) cout << addedMessage;
     cout.flush();
   }
   if ((strchr(option,'E')) && !(nChars)) {
-    cerr << messBuffer.str();
+    cerr << messBuff;
     if (addedMessage) cout << addedMessage;
     cerr.flush();
   }
@@ -128,7 +134,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.10 1999/07/08 22:58:18 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.11 1999/07/15 05:15:06 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

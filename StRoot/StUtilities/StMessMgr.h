@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.1 1999/07/08 22:59:33 genevb Exp $
+// $Id: StMessMgr.h,v 1.2 1999/07/15 05:15:02 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.2  1999/07/15 05:15:02  genevb
+// Fixed an odd bug with seekp(0) on an empty stream buffer
+//
 // Revision 1.1  1999/07/08 22:59:33  genevb
 // Created an abstract interface with StMessMgr.h hiding template implementation from others
 //
@@ -72,7 +75,7 @@ class StMessMgr : public ostrstream {
  protected:
  
  public:
-   StMessMgr() : ostrstream(new char[1024],1024) {}
+   StMessMgr() : ostrstream(new char[1024],1024,ios::out) {}
    StMessMgr(const StMessMgr&);
    virtual ~StMessMgr() =0;
 
