@@ -55,7 +55,7 @@ CC:<--------------------------------------------------------------------
       IMPLICIT NONE
 #include "math_constants.inc"
 ** some approximation for phi angle
-      real phi, eta, theta, sphi, phi
+      real phi, eta, theta, sphi
       integer phi_bin, eta_bin, iphi
 
       if(eta_bin .lt. 0) then
