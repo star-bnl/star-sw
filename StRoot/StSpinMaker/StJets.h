@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.1 2002/12/04 20:28:08 thenry Exp $
+// $Id: StJets.h,v 1.2 2003/04/01 23:45:04 thenry Exp $
 // $Log: StJets.h,v $
+// Revision 1.2  2003/04/01 23:45:04  thenry
+// Added jet track accessor functions:
+// numTracks, tracksPt, tracksPhi, tracksEta
+//
 // Revision 1.1  2002/12/04 20:28:08  thenry
 // StppuDstMaker was modified to allow multiple jet analysis modules to be
 // run simultaneosly with various parameters while the Maker loads the events
@@ -36,6 +40,7 @@ using std::vector;
 #include <cmath>
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 class StProtoJet;
 class StppEvent;
@@ -73,6 +78,16 @@ public:
     double eta(int) ;
     int nCell(int) ;
     int charge(int) ;
+
+    int numTracks(int i, StppEvent* event) 
+	{ return jetParticles(event, i).size(); };
+    double tracksPt(int i, StppEvent* event, int index) 
+	{ return jetParticles(event, i)[index]->pt(); };
+    double tracksPhi(int i, StppEvent* event, int index) 
+	{ return jetParticles(event, i)[index]->phi(); };
+    double tracksEta(int i, StppEvent* event, int index) 
+	{ return jetParticles(event, i)[index]->eta(); };
+
     
 private:
     bool inBounds(int);
