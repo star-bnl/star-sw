@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.9 2002/02/16 21:50:32 jeromel Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.10 2002/02/20 17:08:08 caines Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -30,15 +30,6 @@ using std::vector;
 
 #include "tables/St_svg_geom_Table.h"
 
-#ifndef __CINT__
-#include "StarCallf77.h"
-#define SvtLtoG_ F77_NAME(svtltog,SVTLTOG)
-#define SvtGtoL_ F77_NAME(svtgtol,SVTGTOL)
-extern "C" {
-int type_of_call SvtLtoG_(float *x, float *xp, int *index);
-int type_of_call SvtGtoL_(float *x, float *xp, int *index);
-}
-#endif
 #include "StThreeVector.hh"
 
 #define DEBUG_SVT 0
@@ -53,7 +44,6 @@ class StSvtHybridCollection;
 class svg_geom_st;
 class svg_shape_st;
 class srs_srspar_st;
-class StTpcCoordinateTransform;
 class StTpcDb;
 class StSvtCoordinateTransform {
 public:
@@ -85,14 +75,10 @@ public:
   double UnCalcTransLength(double x);
   int IsOnWaferZ( const StThreeVector<double>& x, int HardWarePos);
   int IsOnWaferR(const StThreeVector<double>& x, int HardWarePos);
-  StTpcCoordinateTransform* TpcTransform;
   void setDriftVelocity();
 
 private:
   
-  //  svg_geom_st *mgeom;
-  //  svg_shape_st *mshape;
-  //  srs_srspar_st *mparam;
   StSvtConfig *mconfig;
   StSvtGeometry* mgeom;
   StSvtHybridCollection* mDriftVelocity;

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.15 2002/02/16 21:45:34 jeromel Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.16 2002/02/20 17:08:05 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -16,7 +16,6 @@
  *
  ***********************************************************************/
 #include "StTpcDb/StTpcDb.h" //Final transformation to mag. coords
-#include "StSvtDbMaker/StSvtDbMaker.h"
 #include "StSvtCoordinateTransform.hh"
 #include "StCoordinates.hh"        // coordinate definitions
 #include "StGlobals.hh"
@@ -26,9 +25,6 @@
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
-//#include "tables/St_svg_geom_Table.h"
-//#include "tables/St_svg_shape_Table.h"
-//#include "tables/St_srs_srspar_Table.h"
 #include <unistd.h>
 #include "TString.h"
 
@@ -36,59 +32,9 @@
 using namespace units;
 #endif
 
-//C and fortran routines
 
-//_______________________________________________________________________
-int type_of_call SvtGtoL_(float *x,float *xp, int* index){
-
-
- 
-  StThreeVector<double> a(x[0],x[1],x[2]);
-  StSvtCoordinateTransform transform;
-  St_DataSet* dataSet;
-  dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
-  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
-  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL);
-
-  StSvtLocalCoordinate b;
-
-  transform.GlobaltoLocal(a, b,*index, -1);
-
-  xp[0] = b.position().x();
-  xp[1] = b.position().y();
-  xp[2] = b.position().z();
-  
-  return 0;
-  
-}
-//____________________________________________________________________________
-int type_of_call SvtLtoG_(float *xp, float *x, int* index){
-  StSvtLocalCoordinate a;
-
-
-  a.setPosition(StThreeVector<double>(xp[0],xp[1],xp[2]));
-  StSvtCoordinateTransform transform;
-  St_DataSet* dataSet;
-  dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
-  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
-  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL);
-
-  StThreeVector<double> b(0,0,0);
-  StGlobalCoordinate c;
-
-  transform.LocaltoGlobal(a, b, -1);
-
-
-  x[0] = b.x();
-  x[1] = b.y();
-  x[2] = b.z();
-  
-  return 0;
-}
 //_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
-
- TpcTransform = NULL;
 
 }
 
@@ -96,13 +42,10 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
 StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
 
-  TpcTransform = new StTpcCoordinateTransform(gStTpcDb);
-
 }
 //_____________________________________________________________________________
 
 StSvtCoordinateTransform::~StSvtCoordinateTransform() {
-  delete TpcTransform;
  }
 
 //_____________________________________________________________________________
@@ -114,13 +57,9 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mgeom = new StSvtGeometry(param, geom, shape);
   mconfig = config;
   mDriftVelocity = driftVeloc;
-  //  mparam = param;
-  //  mgeom = geom;
-  //  mshape = shape;
-
   
-}
-
+};
+//____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 StSvtConfig* config,
 						 StSvtHybridCollection* driftVeloc){
@@ -139,12 +78,6 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StGloba
 
   this->operator()(a,b);
   this->operator()(b,c);
-  
-  if( TpcTransform){
-    StTpcLocalCoordinate tpc;
-    tpc.setPosition(c.position());
-    TpcTransform->operator()(tpc,c);
-  }
 
   return;
 
@@ -158,14 +91,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWafe
 
   StSvtLocalCoordinate b;
 
-  if( TpcTransform){
-
-    StTpcLocalCoordinate tpc;
-    TpcTransform->operator()(a,tpc); 
-    this->operator()(tpc.position(),b);
-  }
-  else
-    this->operator()(a,b);
+ 
+  this->operator()(a,b);
 
   this->operator()(b,c);
   return;
@@ -276,15 +203,7 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
   
   LocaltoGlobal(a, x, -1);
 
-  if( TpcTransform){
-
-    StTpcLocalCoordinate tpc;
-    tpc.setPosition(x);
-    TpcTransform->operator()(tpc,b);
-  }
-
-  else 
-    b.setPosition(x);
+  b.setPosition(x);
 		 
 
 }
@@ -296,16 +215,6 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
 void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLocalCoordinate& b)
 {
 
-  StGlobalCoordinate aa;
-  if( TpcTransform){
-    
-    StTpcLocalCoordinate tpc;
-    TpcTransform->operator()(a,tpc);
-    aa.setPosition(tpc.position());
-  }
-  else
-    aa.setPosition(a.position());
-
   int barrel, HardWarePos, Found;
   int iladder, ibarrel, NWafer;
   int ladderRangeLo, ladderRangeHi, ladderMax;
@@ -313,8 +222,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
   // Find out what barrel hit is on
 
-  double r = (aa.position().x()*aa.position().x() +
-	      aa.position().y()*aa.position().y());
+  double r = (a.position().x()*a.position().x() +
+	      a.position().y()*a.position().y());
 
   if( r > 169) barrel = 3;
   else if( r > 64) barrel = 2;
@@ -333,8 +242,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
      for( NWafer=1; NWafer<= mconfig->getNumberOfWafers(barrel); NWafer++){
 
-       if ( IsOnWaferZ(aa.position(),HardWarePos+100*NWafer)) break;
-       if ( IsOnWaferZ(aa.position(),HardWarePos+100*NWafer+1)) break;
+       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer)) break;
+       if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer+1)) break;
      }
 
      b.setWafer(NWafer);
@@ -344,22 +253,22 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     
   case 1:
       
-      if( aa.position().x() >= 0 && aa.position().y() >= 0){
+      if( a.position().x() >= 0 && a.position().y() >= 0){
 	ladderRangeLo = 1;
 	ladderRangeHi = 2;
 	ladderMax = 8;
       }
-      else if(aa.position().x() >= 0 && aa.position().y() < 0){
+      else if(a.position().x() >= 0 && a.position().y() < 0){
 	ladderRangeLo = 2;
 	ladderRangeHi = 4;
 	ladderMax = 0;
       }
-      else if(aa.position().x() < 0 && aa.position().y() < 0){
+      else if(a.position().x() < 0 && a.position().y() < 0){
 	ladderRangeLo = 4;
 	ladderRangeHi = 6;
 	ladderMax = 0;
       }
-      else if(aa.position().x() < 0 && aa.position().y() >= 0){
+      else if(a.position().x() < 0 && a.position().y() >= 0){
 	ladderRangeLo = 6;
 	ladderRangeHi = 8;
 	ladderMax = 0;
@@ -370,22 +279,22 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
    
   case 2:
       
-    if( aa.position().x() > 0 && aa.position().y() > 0){
+    if( a.position().x() > 0 && a.position().y() > 0){
       ladderRangeLo = 1;
       ladderRangeHi = 3;
       ladderMax = 12;
     }
-    else if(aa.position().x() > 0 && aa.position().y() < 0){
+    else if(a.position().x() > 0 && a.position().y() < 0){
       ladderRangeLo = 3;
       ladderRangeHi = 6;
       ladderMax = 0;
     }
-    else if(aa.position().x() < 0 && aa.position().y() < 0){
+    else if(a.position().x() < 0 && a.position().y() < 0){
       ladderRangeLo = 6;
       ladderRangeHi = 9;
       ladderMax = 0;
     }
-    else if(aa.position().x() < 0 && aa.position().y() > 0){
+    else if(a.position().x() < 0 && a.position().y() > 0){
       ladderRangeLo = 9;
       ladderRangeHi = 12;
       ladderMax = 0;
@@ -395,22 +304,22 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     break;
     
   case 3:
-   if( aa.position().x() > 0 && aa.position().y() > 0){
+   if( a.position().x() > 0 && a.position().y() > 0){
       ladderRangeLo = 1;
       ladderRangeHi = 4;
       ladderMax = 16;
     }
-    else if(aa.position().x() > 0 && aa.position().y() < 0){
+    else if(a.position().x() > 0 && a.position().y() < 0){
       ladderRangeLo = 4;
       ladderRangeHi = 8;
       ladderMax = 0;
     }
-    else if(aa.position().x() < 0 && aa.position().y() < 0){
+    else if(a.position().x() < 0 && a.position().y() < 0){
       ladderRangeLo = 8;
       ladderRangeHi = 12;
       ladderMax = 0;
     }
-    else if(aa.position().x() < 0 && aa.position().y() > 0){
+    else if(a.position().x() < 0 && a.position().y() > 0){
       ladderRangeLo = 12;
       ladderRangeHi = 16;
       ladderMax = 0;
@@ -430,7 +339,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   do{
     for( iladder=ladderRangeLo; iladder<=ladderRangeHi; iladder++){
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
-      if( IsOnWaferR(aa.position(),HardWarePos)) {
+      if( IsOnWaferR(a.position(),HardWarePos)) {
 	Found = 1;
 	break;
       }
@@ -444,7 +353,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     for(  ibarrel=(barrel*2)-1; ibarrel<=barrel*2; ibarrel++){
       iladder = ladderMax; 
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
-      if( IsOnWaferR(aa.position(),HardWarePos)) {
+      if( IsOnWaferR(a.position(),HardWarePos)) {
 	Found = 1;
 	break;
       }
@@ -465,7 +374,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     b.setLayer(ibarrel);
     b.setLadder(iladder);
     
-    GlobaltoLocal( aa.position(), b, HardWarePos, -1);
+    GlobaltoLocal( a.position(), b, HardWarePos, -1);
 
     b.setHybrid(2);
     if( b.position().x() < 0) b.setHybrid(1);
@@ -531,6 +440,7 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
 
   if( index < 0){
     index = mgeom->getWaferIndex(mgeom->getBarrelID(a.layer(),a.ladder()),(int)a.ladder(),(int)a.wafer());
+
   }
   if (index >= 0 && index < 216)
     waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
@@ -542,7 +452,6 @@ int StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StThr
     return 0;
   }
       
-
   xl[0] = a.position().x();
   xl[1] = a.position().y();
   xl[2] = a.position().z();
@@ -619,10 +528,10 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
   if( index < 0){
     index = mgeom->getWaferIndex(HardWarePos);
   }
-  if (index >= 0 && index < 216)
-      waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
 
-    //cout << "HardWarePos = " << HardWarePos << ", index = " << index << ", waferGeom = " << waferGeom << endl;
+  if (index >= 0 && index<216)
+    waferGeom = (StSvtWaferGeometry*)mgeom->at(index);
+  //cout << "HardWarePos = " << HardWarePos << ", index = " << index << ", waferGeom = " << waferGeom << endl;
 
   if (!waferGeom) {
     b.position().setX(-999);
@@ -630,7 +539,7 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
     b.position().setZ(-999);
     return 0;
   }
-      
+  
   
   //  xl[0] = x.x() - mgeom[index].x[0];
   //  xl[1] = x.y() - mgeom[index].x[1];
@@ -648,6 +557,9 @@ int StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StS
   b.position().setY(xl[0]*waferGeom->t(0) + xl[1]*waferGeom->t(1) + xl[2]*waferGeom->t(2));
   b.position().setZ(xl[0]*waferGeom->n(0) + xl[1]*waferGeom->n(1) + xl[2]*waferGeom->n(2));
  
+
+  // cout << index << " " << b.position() <<  " " << waferGeom->x(0) << " " <<   waferGeom->x(1) << " " << waferGeom->x(2)  << "  " << x.x() << " "
+//        << x.y() << " " << x.z() << endl;
   return index;
   
 }
@@ -716,7 +628,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   if (vd < 0)
     vd = 675000;
 
-  cout << "index = " << index << ", vd = " << vd << endl;
+  //cout << "index = " << index << ", vd = " << vd << endl;
 
   //distance = mparam->vd*x/mparam->fsca;
   distance = vd*x/fsca;
