@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerIdCollection.cxx,v 2.1 2003/01/30 18:14:15 ullrich Exp $
+ * $Id: StTriggerIdCollection.cxx,v 2.2 2003/01/30 18:37:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerIdCollection.cxx,v $
+ * Revision 2.2  2003/01/30 18:37:19  ullrich
+ * Changed name of method, now setNominal().
+ *
  * Revision 2.1  2003/01/30 18:14:15  ullrich
  * Initial Revision.
  *
@@ -56,5 +59,5 @@ void
 StTriggerIdCollection::setL3(StTriggerId* val) {mL3TriggerId = val;}
 
 void
-StTriggerIdCollection::setLast(StTriggerId* val) {mNominalTriggerId = val;}
+StTriggerIdCollection::setNominal(StTriggerId* val) {mNominalTriggerId = val;}
     
