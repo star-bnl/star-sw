@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.16 2004/03/10 21:55:54 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.17 2004/03/15 15:28:35 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.17  2004/03/15 15:28:35  tonko
+ * Added TrackIDs in FCF and cleaned the includes
+ *
  * Revision 1.16  2004/03/10 21:55:54  jml
  * support for simulations in FCFMaker
  *
@@ -126,7 +129,7 @@
 
 #include <rtsSystems.h>
 #include <fcfClass.hh>
-#include <fcfAfterburner.hh>
+//#include <fcfAfterburner.hh>
 #include <TPC/padfinder.h>
 #include <TPC/rowlen.h>
 
@@ -144,6 +147,58 @@ ClassImp(StRTSClientFCFMaker);
 #ifdef FCF_DEBUG_OUTPUT
 static FILE *ff ;
 #endif
+
+
+#if !defined(__CINT__) || defined(__MAKECINT__)
+#include "Riostream.h"
+#include "StMaker.h"
+#include "tables/St_g2t_tpc_hit_Table.h"
+#else
+class StMaker;
+class St_g2t_tpc_hit;
+class g2t_tpc_hit_st;
+#endif
+struct Hit_t {
+  double x, y, z, charge ; 
+};
+static Hit_t Hit;
+//________________________________________________________________________________
+static Hit_t *getHitInfo(int sector=1, int row=1, int track_id=1) {
+  StMaker *mk = StMaker::GetChain();
+  if (mk) {
+    StMaker *geant = mk->Maker("geant");
+    if (geant) {
+      St_g2t_tpc_hit *hit = (St_g2t_tpc_hit *) geant->DataSet("g2t_tpc_hit");
+      if (hit) {
+	Int_t N = hit->GetNRows();
+	g2t_tpc_hit_st *tpc_hit = hit->GetTable();
+	for (int i = 0; i < N; i++, tpc_hit++) {
+	  Int_t volId = tpc_hit->volume_id;
+	  Int_t isDet  = (volId/100000);
+	  if (isDet) continue; // pseudo pad row
+	  volId  -= (isDet)*100000;
+	  Int_t iSector = volId/100;
+	  if (iSector != sector) continue;
+	  volId  -= (iSector)*100;
+	  Int_t iPadrow = volId;
+	  if (iPadrow != row) continue;
+	  if (tpc_hit->track_p != track_id) continue;
+	  Hit.x = tpc_hit->x[0];
+	  Hit.y = tpc_hit->x[1];
+	  Hit.z = tpc_hit->x[2];
+	  Hit.charge = tpc_hit->de;
+	  //cout << "Hit s/r/i " << sector << "/" << row << "/" << track_id
+	  //     << "\t x/y/z/charge " <<  Hit.x << "/" << Hit.y << "/" << Hit.z 
+	  //     << "/" << Hit.charge << endl;
+	  return &Hit;
+	}
+      }
+    }
+  } 
+  return 0;
+}
+
+
 
 static class fcfAfterburner fcf_after;
 
@@ -801,6 +856,10 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
     t0Corr[sector-1][row][pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
     if(t0 < 0.0) t0Corr[sector-1][row][pad+1] *= -1 ;
 
+
+//    t0Corr[sector-1][row][pad+1] = 0 ;
+//    gainCorr[sector-1][row][pad+1] = 64 ;
+
 #ifdef FCF_DEBUG_OUTPUT
 //     fprintf(ff, "%d %d %d %1.3f %1.3f\n",
 // 	    sector, row+1, pad+1, gain, t0);
@@ -901,7 +960,19 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   hit.id_simtrk = id_simtrk;
   hit.id_quality = id_quality;
 
+
 #ifdef FCF_DEBUG_OUTPUT
+  struct Hit_t *ht = getHitInfo(hit.row/100,hit.row%100,hit.id_simtrk) ;
+  
+  fprintf(ff,"%d %d %d %f %f %f %f %d ",hit.row/100, hit.row%100, hit.id_quality,
+	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_f) ;
+
+  if(!ht) {
+	fprintf(ff,"0.0 0.0 0.0 0.0\n") ;
+  }
+  else {
+	fprintf(ff,"%f %f %f %f\n",ht->x,ht->y,ht->z,ht->charge*1000000.0) ;
+  }
  
   // Raw....
   // This line is to compare with the output from special
@@ -1115,8 +1186,8 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 	  }
 
 #ifdef FCF_DEBUG_OUTPUT
-	  if(sector==1 && row==0)
-	    fprintf(ff,"%d %d %d %d %d\n",sector,row+1,pp,time,log10to8_table[adc[pnt]]) ;
+//	  if(sector==1 && row==0)
+//	    fprintf(ff,"%d %d %d %d %d\n",sector,row+1,pp,time,log10to8_table[adc[pnt]]) ;
 #endif
 	}
       }
