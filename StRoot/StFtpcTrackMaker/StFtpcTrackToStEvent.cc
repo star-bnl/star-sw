@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.10 2005/02/05 01:03:00 perev Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.11 2005/03/10 02:21:09 perev Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -321,7 +321,7 @@ void StFtpcTrackToStEvent::FillGeometry(StTrack* gTrack, StFtpcTrack* track, boo
   StTrackGeometry* geometry = new StHelixModel(short(track->GetCharge()),
 					       psi,
 					       track->curvature(),
-					       TMath::ATan2(track->GetPz(),(track->GetPt()+1.e-5)), // dip angle
+					       TMath::ATan2(track->GetPz(),(track->GetPt()+1.e-10)), // dip angle
 					       origin, 
 					       P, 
 					       track->h());
