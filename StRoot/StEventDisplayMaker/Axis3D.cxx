@@ -1,8 +1,9 @@
 //*CMZ :          28/11/99  01.06.19  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
-// $Id: Axis3D.cxx,v 1.3 1999/11/30 01:44:23 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.4 1999/11/30 03:01:02 fine Exp $ 
 #include <iostream.h>
 #include <ctype.h>
+#include <assert.h>
 
 #include "TAxis3D.h"
 #include "Hoption.h"
@@ -20,7 +21,7 @@
 //   rulers.Draw();
 //
 // The attributes of the created axice are affected by the current style
-// (see TStyle class )
+// (see TStyle class ) and Set... methods of this class
 //
  
 ClassImp(TAxis3D)
@@ -32,8 +33,11 @@ TAxis3D::TAxis3D(Option_t *option)
 {
  
   fAxis[0].SetName("xaxis");
+  fAxis[0].SetTitle("x");
   fAxis[1].SetName("yaxis");
+  fAxis[1].SetTitle("y");
   fAxis[2].SetName("zaxis");
+  fAxis[2].SetTitle("z");
   fAxis[0].Set(1,0.,1.);
   fAxis[1].Set(1,0.,1.);
   fAxis[2].Set(1,0.,1.);
@@ -175,13 +179,15 @@ void TAxis3D::PaintLegoAxis(TGaxis *axis, Float_t ang)
 
       // If the axis is too short - skip it
       if ( ( TMath::Abs(ax[0] - ax[1]) + TMath::Abs(ay[0] - ay[1]))  < epsil  ) continue;
+   
+      if (i != 2 ) {
+        if (ax[0] > ax[1]) strcpy(chopax, "SDHV=+");
+        else               strcpy(chopax, "SDHV=-");
+      }
 
-       if (i < 2) {
-         if (ax[0] > ax[1]) strcpy(chopax, "SDHV=+");
-         else               strcpy(chopax, "SDHV=-");
-       }
-       if (i==1 && TMath::Abs(z1[0] - z2[0]) < epsil && TMath::Abs(z1[1] - z2[1]) < epsil) 
-                            strcpy(chopax, "SDH+=N");
+      if (i==1 && (TMath::Abs(z1[0] - z2[0]) + TMath::Abs(z1[1] - z2[1])) < epsil) 
+                            strcpy(chopax, "SDH+=");
+//                            strcpy(chopax, "SDH+=N");
 
        //*-*-  Initialize the axis options
        if (logAx) {
@@ -390,6 +396,9 @@ void TAxis3D::SetTitleOffset(Float_t offset, Option_t *axis)
 }
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.4  1999/11/30 03:01:02  fine
+// clean ups
+//
 // Revision 1.3  1999/11/30 01:44:23  fine
 // Z axis fixed
 //
