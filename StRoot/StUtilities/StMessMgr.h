@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.5 1999/08/10 22:07:35 genevb Exp $
+// $Id: StMessMgr.h,v 1.6 1999/08/18 18:28:32 fine Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.6  1999/08/18 18:28:32  fine
+// Various bugs have been fixed. share lib was not loaded under HP
+//
 // Revision 1.5  1999/08/10 22:07:35  genevb
 // Added QAInfo message types
 //
@@ -31,7 +34,12 @@
 #ifndef ClassStMessMgr
 #define ClassStMessMgr
 
+#ifdef __ROOT__
+#include "Rtypes.h"
+#endif
+
 #ifndef __CINT__
+#ifndef StMessMgrImpl
 #include "fortranc.h"
 #define Message_ F77_NAME(message,MESSAGE)
 #define Msg_Enable_ F77_NAME(msg_enable,MSG_ENABLE)
@@ -70,6 +78,7 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 void type_of_call MessageOut(const char* msg);
 }
 #endif
+#endif
 
 class StMessage;
 
@@ -88,12 +97,12 @@ class StMessMgr : public ostrstream {
  protected:
  
  public:
-   StMessMgr() : ostrstream(new char[1024],1024,ios::out) {}
-   StMessMgr(const StMessMgr&);
-   virtual ~StMessMgr() =0;
+   StMessMgr();
+   StMessMgr(const StMessMgr&){;}
+   virtual ~StMessMgr(){;}
 
 // Generic Messages:
-   virtual StMessMgr& Message(char* mess="", char* type="", char* opt=0) =0;
+   virtual StMessMgr& Message(char* mess="", char* type="", char* opt=0)= 0;
    virtual       void Print() =0;
    virtual        int PrintList(messVec* list) =0;
    virtual        int PrintAll() =0;
@@ -115,7 +124,7 @@ class StMessMgr : public ostrstream {
    virtual        int ListTypes() =0;
 
 // Info Messages:
-   virtual StMessMgr& Info(char* mess="", char* opt="O") =0;
+   virtual StMessMgr& Info(char* mess="", char* opt="O")=0;
    virtual        int PrintInfos() =0;
    virtual const messVec* GetInfos() =0;
    virtual StMessage* FindInfo(const char* s1, char* s2="", char* s3="",
@@ -124,7 +133,7 @@ class StMessMgr : public ostrstream {
          char* s4="") =0;
 
 // Warning Messages:
-   virtual StMessMgr& Warning(char* mess="", char* opt="E") =0;
+   virtual StMessMgr& Warning(char* mess="", char* opt="E")= 0;
    virtual        int PrintWarnings() =0;
    virtual const messVec* GetWarnings() =0;
    virtual StMessage* FindWarning(const char* s1, char* s2="", char* s3="",
@@ -133,7 +142,7 @@ class StMessMgr : public ostrstream {
          char* s4="") =0;
 
 // Error Messages:
-   virtual StMessMgr& Error(char* mess="", char* opt="E") =0;
+   virtual StMessMgr& Error(char* mess="", char* opt="E") = 0;
    virtual        int PrintErrors() =0;
    virtual const messVec* GetErrors() =0;
    virtual StMessage* FindError(const char* s1, char* s2="", char* s3="",
@@ -142,7 +151,7 @@ class StMessMgr : public ostrstream {
          char* s4="") =0;
 
 // Debug Messages:
-   virtual StMessMgr& Debug(char* mess="", char* opt="O") =0;
+   virtual StMessMgr& Debug(char* mess="", char* opt="O")= 0;
    virtual        int PrintDebug() =0;
    virtual const messVec* GetDebugs() =0;
    virtual StMessage* FindDebug(const char* s1, char* s2="", char* s3="",
@@ -151,7 +160,7 @@ class StMessMgr : public ostrstream {
          char* s4="") =0;
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(char* mess="", char* opt="OTS") =0;
+   virtual StMessMgr& QAInfo(char* mess="", char* opt="OTS") = 0;
    virtual        int PrintQAInfo() =0;
    virtual const messVec* GetQAInfos() =0;
    virtual StMessage* FindQAInfo(const char* s1, char* s2="", char* s3="",
