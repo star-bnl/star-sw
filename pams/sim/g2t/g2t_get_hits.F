@@ -5,7 +5,6 @@ C : AUTHOR:      narod
 C : ARGUMENTS:   p_vert,  p_vert_h     - vertex table
 C :              p_track, p_track_h    - track table
 C :              p_hits,  p_hits_h     - hit table
-C : RETURNS:     STAF Condition Value
 C : HISTORY:     31dec97-v000a-PLN
 C :>--------------------------------------------------------------------
       function g2t_get_hits (   p_vert_h,      p_vert ,
@@ -17,22 +16,19 @@ C :>--------------------------------------------------------------------
       RECORD          /TABLE_HEAD_ST/    p_vert_h
       RECORD          /TABLE_HEAD_ST/    p_track_h
       RECORD          /TABLE_HEAD_ST/    p_hits_h
-
-      INTEGER*4       G2T_GET_HITS,p_hits(*),p_track(*),p_vert(*),Iprin
-      Integer         AgFHIT1,ISLFLAG,G2T_VOLUME_ID,NUMBV(15),phits(15)
-      integer         nh/0/,i,j,k,l,e,f,m,n,LenH,LenT,ip,in,jX,jP,iX,iC
-      Real            Hits(15),FHmin(15),FHmax(15),FHbin(15)
-      integer         IQQ(100),iadr(15),jadr(15),xD2M,pD2M,IH,JTRA
-      Character*4     Csys/' '/,chit(15)
-      Character       col*80,typ*80
+      Integer         Lnmax,Lnam0,Lnam,Nbytpw,Nmh
+      Parameter       (Lnmax=50,Lnam0=35,Nbytpw=4,Nmh=15)
+      INTEGER         G2T_GET_HITS,p_hits(*),p_track(*),p_vert(*)
+      integer         nh/0/,i,j,k,l,e,f,m,n,ip,in,jX,jP,iX,iC,
+     >                LenT,LenH,xD2M,pD2M,IH,JTRA,Iprin
+      Real            Hits(Nmh),FHmin(Nmh),FHmax(Nmh),FHbin(Nmh)
+      integer         IQQ(100),iadr(Nmh),jadr(Nmh),NUMBV(Nmh),phits(Nmh)
+      Character*4     Csys*4/' '/,chit*4(Nmh),col*80,typ*80
       real            xxx(3),ccc(3),QQ(100)
       Equivalence     (QQ(1),IQQ(1),id)
 
-      Integer         Lnmax,Lnam0,Lnam
-      Parameter       (Lnmax=50,Lnam0=35)
       character*4     Gname(Lnmax),Tname(Lnmax)
       integer         iflg(Lnmax), jflg(Lnmax)
-      data            Lnam/Lnam0/
       Integer         id,trac,next,volume
       Real            x,   xx,   c,   p   ,r,rr,phi,the,eta,
      >                tdr,tof,Slen,Step,Etot,Lgam,Shtn,Elos,User,Unkn
@@ -47,20 +43,21 @@ C :>--------------------------------------------------------------------
      >  '_', '_', '_', 'x', '_', '_', '_', '_', '_', 'p', '_','_',
      >  '_', '_', '_', '_', '_', '_', '_','tof','s_tr','ds',  
      >  'e', '_', '_','de','de','de','de','comp','res' /
-
+      data            Lnam/Lnam0/
       Integer         TDM_GET_SPEC, TDM_GET_COLUMN, TDM_GET_CCOUNT
       External        TDM_GET_SPEC, TDM_GET_COLUMN, TDM_GET_CCOUNT
-*
+      Integer         AgFHIT1, ISLFLAG, G2T_VOLUME_ID
+      External        AgFHIT1, ISLFLAG, G2T_VOLUME_ID
 *   
       G2T_GET_HITS = STAFCV_BAD
-      Iprin = ISLFLAG('GTOT','PRIN')
-      LenH  = p_hits_h.rbytes/4
-      LenT  = p_track_h.rbytes/4
+      Iprin = ISLFLAG('G2TM','PRIN')
+      LenH  = p_hits_h.rbytes/NBytPW
+      LenT  = p_track_h.rbytes/NBytPW
       call vzero (QQ,   100)
       call vzero (iflg, Lnmax)
-      call vzero (iadr, 15)
-      call vzero (phits,15)
-      if (Iprin.ge.2) then
+      call vzero (iadr, Nmh)
+      call vzero (phits,Nmh)
+      if (Iprin.ge.4) then
          print *,'   name  = ',p_hits_h.name
          print *,'   type  = ',p_hits_h.type
          print *,'   nok   = ',p_hits_h.nok
@@ -70,9 +67,8 @@ C :>--------------------------------------------------------------------
       endif
 *
 *     1. flag information which is hardwired:
-*     First, flag the info which comes directly (not in measurments)
-*     These values should be in both tables - (T and G).
-*     Second, set D2M conversion flags if any of xyz or Cxyz are measured.
+*     - what comes directly (not measurments) should be in both tables - (T&G)
+*     - set D2M conversion flags if any of xyz or Cxyz are measured.
 *      
       iX=0
       iC=0
@@ -87,7 +83,6 @@ C :>--------------------------------------------------------------------
       enddo
       if (iX*iC*jX*jP.le.0) print *,' errenious G table ',iX,iP,jX,jP
 
-*     a table should be introduce here to map Star TLA to GEANT 
 *     STAR system TLA code is extracted from the table header:
       if   (  p_hits_h.name(1:4) .eq.'g2t_' 
      >  .and. p_hits_h.name(8:11).eq.'_hit') then
@@ -96,11 +91,10 @@ C :>--------------------------------------------------------------------
             nh   =  0
         endif
       endif
-
 *
 *     2. locate track descriptors in output hit table:
 *     use star subsystem TLA to map ip - hit pointer and in - hit counter
-*     This pointers are BUILT here.
+*   
       n  = 0
       ip = 0
       in = 0
@@ -112,30 +106,25 @@ C :>--------------------------------------------------------------------
       enddo
       if (ip.eq.0) print *,'hit_'//Csys(1:3)//'_p not found in g2t_track'
       if (in.eq.0) print *,'n_'//Csys(1:3)//'_hit not found in g2t_track'
-
+*
 *     3. prepare map to unfold an input hit into full hit
 *     Each filled variable in the extended hit is flagged by iflg - 
 *     its position in measurements. Iadr is measurement reference.
 *
       Call AgFDPAR (hits,Chit,FHmin,FHmax,FHbin)
       if  (Iprin.ge.4)  print *,' chit=',chit
-      do k=1,15
+      do k=1,Nmh
          if (chit(k).eq.' ') go to 101
          do j=1,Lnam
-            if (chit(k).eq.Gname(j)) then
-               iadr(k)=j
-               iflg(j)=k
-            endif
+            if (chit(k).eq.Gname(j)) go to 100
          enddo
-         if (iadr(k).le.0) then
-            if (Iprin.ge.2) print *,'G2T: introducing new hit element ',chit(k)
-            j=min(Lnam+1,Lnmax)
-            Gname(j)=chit(k)
-            Tname(j)=chit(k)
-            call CUTOL(Tname(j))
-            iadr(k)=j
-            iflg(j)=k
-         endif            
+         if (Iprin.ge.2) print *,'G2T: introducing new hit element ',chit(k)
+         j=min(Lnam+1,Lnmax)
+         Gname(j) = chit(k)
+         Tname(j) = chit(k)
+         call CUTOL(Tname(j))
+ 100     iadr(k)  = j
+         iflg(j)  = k
       enddo         
  101  continue
 *
@@ -172,15 +161,13 @@ C :>--------------------------------------------------------------------
       endif
 *
 * - - -     
-*
       DO WHILE (agfhit1(ih,jtra,numbv,hits).eq.0)
-
+*
          nh     = nh + 1
          id     = nh
          trac   = abs(jtra)
          volume = g2t_volume_id (Csys,NUMBV)
-
-         do k=1,15
+         do k=1,Nmh
             if (iadr(k).gt.0) QQ(iadr(k))=hits(k)
          enddo
 
