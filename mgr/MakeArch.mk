@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.33  1998/10/14 21:40:48  fisyak
+#  Add versioning of shared libraries for ROOT wrappers
+#
 #  Revision 1.32  1998/09/24 18:01:42  didenko
 #  correcotion
 #
@@ -77,7 +80,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/24 18:01:42 $ 
+#             Last modification $Date: 1998/10/14 21:40:48 $ 
 #. default setings
 
 RM := rm -f
@@ -102,7 +105,6 @@ CERN_STAF = $(CERN)/$(CERN_LEVEL)
 CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran 
 CERN_ROOT_LIBS = $(shell cernlib geant321 pawlib graflib mathlib)
 
-MOTIF :=YES
 GCC      :=  gcc
 CC       :=  $(GCC)
 CFLAGS   := $(DEBUG) -fpic -w
@@ -302,9 +304,10 @@ endif
     CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
     CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
     LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
-    EXEFLAGS  := $(LDFLAGS) -Wl,-N
+    EXEFLAGS  := $(LDFLAGS) -Wl,-N 
     SOFLAGS   := $(DEBUG)  -b -z  
-    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld /usr/local/lib/libMagick.a
+#    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld /usr/local/lib/libMagick.a
+    CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld 
 
   else
     CXX     :=  CC

@@ -54,6 +54,7 @@ VPATH := $(SRC_DIRS) $(OUT_DIR) $(OBJ_DIR)  $(EXE_DIR)
 FILES_O := $(addsuffix /*.[fFgc]*,$(SRC_DIRS))
 FILES_O := $(wildcard $(FILES_O))
 FILES_O := $(filter %.f %.F %.c %.cc %.cxx,$(FILES_O))
+FILES_O := $(filter-out %/UTILS_h2root.cxx,$(FILES_O))
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(basename $(notdir $(FILES_O)))))
 
 
