@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.330 2003/04/18 00:21:30 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.331 2003/04/18 15:53:35 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -101,7 +101,7 @@ Bfc_st BFC1[] = {
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
-  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,mwc,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
@@ -309,7 +309,7 @@ Bfc_st BFC1[] = {
   {"magF"        ,"","","geant,StDbT,db","StMagFMaker","geometry,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"trgd"        ,"trgd","","TRGDef"                  ,"StTriggerDataMaker","StTriggerDataMaker","",kFALSE},
+  {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
@@ -581,7 +581,7 @@ Bfc_st BFC2[] = {
   {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
                                                      "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
-  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
+  {"ppMDC4"      ,""  ,"","ppOpt,C2001,-PreVtx,mwc,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
 
   {"dAuMDC"      ,""  ,"","ppOpt,C2003,-PreVtx,trs,srs,fss,big,GeantOut","","","Chain for d+Au",kFALSE},
@@ -789,7 +789,7 @@ Bfc_st BFC2[] = {
   {"magF"        ,"","","geant,StDbT,db","StMagFMaker","geometry,StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"trgd"        ,"trgd","","TRGDef"                  ,"StTriggerDataMaker","StTriggerDataMaker","",kFALSE},
+  {"trgd"        ,"trgd","","TRGDef"  ,"StTriggerDataMaker","StTriggerDataMaker","Get trigger data",kFALSE},
 
   {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                        ,"StMaker","StChain","",kFALSE},
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE},
