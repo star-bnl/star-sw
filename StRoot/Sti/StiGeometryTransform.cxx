@@ -6,8 +6,9 @@
 
 //SCL
 #include "StThreeVector.hh"
-#include "StHelix.hh"
+#include "StPhysicalHelix.hh"
 #include "StMatrixF.hh"
+#include "SystemOfUnits.h"
 
 //StEvent
 #include "StEventTypes.h"
@@ -517,29 +518,28 @@ void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 }
 
 void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
-                                       StHelix *pHelix){
-	/*
-  *(Messenger::instance(MessageType::kGeometryMessage)) << "StiKalmanTrackNode: x=" << pTrackNode->fX 
-       << ", alpha=" << pTrackNode->fAlpha
-       << ", y=" << pTrackNode->fP0
-       << ", z=" << pTrackNode->fP1
-       << ", c*x0=" << pTrackNode->fP2
-       << ", c=" << pTrackNode->fP3
-       << ", tanL=" << pTrackNode->fP4 << endl;
-	*/
+                                       StPhysicalHelix *pHelix){
+  // thanks to StPhysicalHelix constructor, this is easy.
+
   // first, calculate the helix origin in global coords
   StThreeVector<double> origin(pTrackNode->fX, pTrackNode->fP0,
                                pTrackNode->fP1);
-  /**(Messenger::instance(MessageType::kGeometryMessage)) << "Before rotation: x=" << origin.x()
-       << ", y=" << origin.y()
-       << ", z=" << origin.z() << endl;
-	*/
   origin.rotateZ(pTrackNode->fAlpha);
   
-	/**(Messenger::instance(MessageType::kGeometryMessage)) << "After rotation: x=" << origin.x()
-       << ", y=" << origin.y()
-       << ", z=" << origin.z() << endl;
-	*/
+  // now get momentum at that point
+  double adMomentum[3];
+  pTrackNode->getMomentum(adMomentum);
+  StThreeVector<double> momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
+  momentum.rotateZ(pTrackNode->fAlpha);
+  
+  // magnetic field and charge
+  double dField = StiKalmanTrackNode::getFieldConstant();
+  double dCharge = (dField*pTrackNode->fP3 > 0) ? -1. : 1.;
+
+  *pHelix = StPhysicalHelix(momentum*GeV, origin*GeV, 
+                            dField*tesla, dCharge*eplus);
+
+/*
   // dip angle & curvature easy
   *(Messenger::instance(MessageType::kGeometryMessage)) << "tanDip=" << pTrackNode->fP4 << endl;
   double dDip = atan(pTrackNode->fP4);
@@ -551,13 +551,13 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
   double dDeltaY = sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
       (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
-  //*(Messenger::instance(MessageType::kGeometryMessage)) << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
+  // *(Messenger::instance(MessageType::kGeometryMessage)) << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
   double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
   // now change to global coords
   dPhi -= pTrackNode->fAlpha;
   while(dPhi <  -M_PI){ dPhi += 2.*M_PI; };
   while(dPhi >=  M_PI){ dPhi -= 2.*M_PI; };
-  //*(Messenger::instance(MessageType::kGeometryMessage)) << "phi=" << dPhi << endl;
+  // *(Messenger::instance(MessageType::kGeometryMessage)) << "phi=" << dPhi << endl;
 
   // finally, need the sense of rotation.  Here we need the fact that
   // the track model assumes outward tracks (positive local x coord of mtm).
@@ -565,7 +565,6 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
 
   pHelix->setParameters( fabs(dCurvature), dDip, dPhi, origin, iH );
 
-	/*
   *(Messenger::instance(MessageType::kGeometryMessage)) << "StHelix: x0=" << pHelix->x(0)
        << ", y0=" << pHelix->y(0)
        << ", z0=" << pHelix->z(0)
@@ -573,7 +572,7 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
        << ", phi0=" << pHelix->phase()
        << ", dip=" << pHelix->dipAngle()
        << ", h=" << pHelix->h() << endl;
-	*/
+*/
 }
 
 double StiGeometryTransform::positionForTpcPadrow(int padrow) const{

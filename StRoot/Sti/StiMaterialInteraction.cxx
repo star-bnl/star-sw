@@ -10,8 +10,9 @@
 #include "StiGeometryTransform.h" 
 #include "Messenger.h"
 
-#include "StHelix.hh"
-#include "StThreeVector.hh"
+#include "StPhysicalHelix.hh"
+#include "SystemOfUnits.h"
+#include "PhysicalConstants.h" 
 
 #include <float.h>
 #include <string>
@@ -19,6 +20,7 @@
 // can't initialize this to the actual messenger until after
 // Messenger::init() is called in StiMaker, certainly not at dll load time.
 Messenger *StiMaterialInteraction::s_pMessenger = NULL;
+StiExtrapolationType StiMaterialInteraction::s_extrapolationType = kHelixExtrapolation;
 
 void StiMaterialInteraction::nameForIntersection(
     StiIntersection &intersection, string &name){
@@ -71,90 +73,51 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
 
-  StiPlacement *pPlacement = pDetector->getPlacement();
-  StiPlanarShape *pShape = dynamic_cast<StiPlanarShape *>(
-      pDetector->getShape());
-  const StiDetector *pNodeDetector = pNode->getDetector();
+  // first extrapolate to find the intersection point and
+  // thicknesses traversed.
+  double dNodeHalfThickness, dDetectorHalfThickness, dGapThickness;
+  StThreeVector<double> intersection;
+  bool bExtrapolated = false;
+  switch(s_extrapolationType){
+    case kHelixExtrapolation:
+        bExtrapolated = extrapolateHelixToPlane(
+            pNode, pDetector, &intersection,
+            dNodeHalfThickness, dGapThickness, dDetectorHalfThickness);
+        break;
+    case kLinearExtrapolation:
+    default:
+        bExtrapolated = extrapolateLineToPlane(
+            pNode, pDetector, &intersection,
+            dNodeHalfThickness, dGapThickness, dDetectorHalfThickness);
+        break;
+  }
+  if(bExtrapolated==false){ return kFailed; }
+  dDistance = 2.*dDetectorHalfThickness + dGapThickness;
 
-  //---------------------------------------------------
-  // first, do the intersection of the node's momentum 
-  // vector with the detector plane in global coords.
-  /*
-double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
-  double c1=fP3*x1 - fP2, r1=sqrt(1.- c1*c1);
-  double c2=fP3*x2 - fP2, r2=sqrt(1.- c2*c2);
-  fP0 = fP0 + dx*(c1+c2)/(r1+r2);
-  fP1 = fP1 + dx*(c1+c2)/(c1*r2 + c2*r1)*fP4; 
-	*/
-  // get momentum of node in global coords
-  double adMomentum[3];
-  pNode->getMomentum(adMomentum);
-  StThreeVectorD momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
-  momentum.rotateZ(pNode->fAlpha);
-
-  // get normals to plane in global coords
-  StThreeVectorD normal(1., 0., 0.);
-  normal.rotateZ(pPlacement->getNormalRefAngle());
-
-  // get vector to node in global coords
-  StThreeVectorD node(pNode->fX, pNode->fP0, pNode->fP1);
-  node.rotateZ(pNode->fAlpha);
-
-  // find the coefficent for momentum vector which extends it to
-  // the intersection point, then the intersection.
-  double momentumCoefficient = 
-      (pPlacement->getNormalRadius() - node.dot(normal))/
-      momentum.dot(normal);
-  // If we were only interested in whether or not (and where) there was
-  // an intersection with the given detector, we would require that the
-  // momentum coefficient be negative because we're tracking outside-in.
-  // Since we're intersted in the relative position of any misses, we don't
-  // make the cut:
-  //
-  // if(momentumCoefficient>0.){ return kFailed; }
-  StThreeVectorD nodeToIntersection = momentumCoefficient*momentum;
-  StThreeVectorD intersection = node + nodeToIntersection;
-
-  //--------------------------------
-  // determine thickness and density
-  // of the region travsersed
-
-  // just use the cosine between the momentum and the detector normal to
-  // calculate thickness traversed
-  double dPathLengthDetector = findThickness(pDetector, &intersection, 
-                                             &momentum);
-  double dPathLengthNodeDetector = findThickness(pNodeDetector, &node, 
-                                                 &momentum);
-
-  // subtract off the half-thicknesses traversed of in both detectors
-  // to get the gap thickness traversed
-  double dPathLengthGap = nodeToIntersection.mag() - dPathLengthDetector/2. -
-      dPathLengthNodeDetector/2.;
-
-  double dPathLength = dPathLengthDetector + dPathLengthGap;
-  dDistance = dPathLength;
-
-  // get the weighted density average
+  //-------------------------------------------
+  // get the weighted densities & thicknesses
   StiMaterial *pGas = pDetector->getGas();
   StiMaterial *pMaterial = pDetector->getMaterial();
-  dDensity = (pGas->getDensity()*dPathLengthGap +
-              pMaterial->getDensity()*dPathLengthDetector)/dPathLength;
+  dDensity = (pGas->getDensity()*dGapThickness +
+              pMaterial->getDensity()*2.*dDetectorHalfThickness)/dDistance;
 
-  dThickness = (dPathLengthGap/pGas->getRadLength() +
-                dPathLengthDetector/pMaterial->getRadLength());
+  dThickness = (dGapThickness/pGas->getRadLength() +
+                2.*dDetectorHalfThickness/pMaterial->getRadLength());
 
   //--------------------------------
   // rotate to local and determine 
   // if & where it hit the detector
-
+  StiPlacement *pPlacement = pDetector->getPlacement();
   intersection.rotateZ(-pPlacement->getNormalRefAngle());
   dXlocal = intersection.x();
 
-  // get offsets of intersection from center
+  // get offsets of intersection from detector center
   double dYoffset = intersection.y() - pPlacement->getNormalYoffset();
   double dZoffset = intersection.z() - pPlacement->getZcenter();
 
   // find limits of various regions
+  StiPlanarShape *pShape = dynamic_cast<StiPlanarShape *>(
+      pDetector->getShape());
   double dEdgeHalfWidth = (strstr(pDetector->getName().c_str(), "Tpc")==NULL) ?
       SVG_EDGE_HALF_WIDTH : TPC_EDGE_HALF_WIDTH;
   double dInnerY = pShape->getHalfWidth() - dEdgeHalfWidth;
@@ -203,86 +166,40 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
     const StiKalmanTrackNode *pNode, const StiDetector *pDetector,
     double &dXlocal, double &dThickness, double &dDensity, double &dDistance){
 
-  StiPlacement *pPlacement = pDetector->getPlacement();
-  StiCylindricalShape *pShape = dynamic_cast<StiCylindricalShape *>(
-      pDetector->getShape());
-  const StiDetector *pNodeDetector = pNode->getDetector();
-
-  //---------------------------------------------------
-  // first, do the intersection of the node's momentum 
-  // vector with the detector cylinder in global coords.
-
-  // get momentum of node in global coords
-  double adMomentum[3];
-  pNode->getMomentum(adMomentum);
-  StThreeVectorD momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
-  momentum.rotateZ(pNode->fAlpha);
-  
-  // get vector to node in global coords
-  StThreeVectorD node(pNode->fX, pNode->fP0, pNode->fP1);
-  node.rotateZ(pNode->fAlpha);
-
-  // get "transverse" vectors used in calculating intersection
-  StThreeVectorD zHat(0., 0., 1.);
-  StThreeVectorD momentumPerp = momentum.cross(zHat);
-  StThreeVectorD nodePerp = node.cross(zHat);
-
-  // first, test for any intersection at all
-  double radius = pPlacement->getNormalRadius();
-  double determinant = radius*radius*momentumPerp.mag2() -
-      node.dot(momentumPerp)*node.dot(momentumPerp);
-  if(determinant<0.){ return kFailed; }
-
-  // find the coefficent for momentum vector which extends it to
-  // the intersection point, then the intersection.
-  double momentumCoefficient = 
-      (-nodePerp.dot(momentumPerp) + sqrt(determinant))/momentumPerp.mag2();
-  double momentumCoefficientAlternate = 
-      (-nodePerp.dot(momentumPerp) - sqrt(determinant))/momentumPerp.mag2();
-  // for now, take smaller root...this may not always be right
-  if(fabs(momentumCoefficient)>fabs(momentumCoefficientAlternate)){
-    momentumCoefficient = momentumCoefficientAlternate; 
+  // first extrapolate to find the intersection point and
+  // thicknesses traversed.
+  double dNodeHalfThickness, dDetectorHalfThickness, dGapThickness;
+  StThreeVector<double> intersection;
+  bool bExtrapolated = false;
+  switch(s_extrapolationType){
+    case kHelixExtrapolation:
+        bExtrapolated = extrapolateHelixToCylinder(
+            pNode, pDetector, &intersection,
+            dNodeHalfThickness, dGapThickness, dDetectorHalfThickness);
+        break;
+    case kLinearExtrapolation:
+    default:
+        bExtrapolated = extrapolateLineToCylinder(
+            pNode, pDetector, &intersection,
+            dNodeHalfThickness, dGapThickness, dDetectorHalfThickness);
+        break;
   }
-
-  // physically, we only want a negative coefficient.  We are tracking
-  // outside-in, which means we should be tracking in the negative
-  // momentum direction.
-  //if(momentumCoefficient>0.){ return kFailed; }
-  StThreeVectorD nodeToIntersection = momentumCoefficient*momentum;
-  StThreeVectorD intersection = node + nodeToIntersection;
-
-  //--------------------------------
-  // determine thickness and density
-  // of the region travsersed
-
-  // just use the cosine between the momentum and the detector normal to
-  // calculate thickness traversed
-  double dPathLengthDetector = findThickness(pDetector, &intersection, 
-                                             &momentum);
-  double dPathLengthNodeDetector = findThickness(pNodeDetector, &node, 
-                                                 &momentum);
-
-  // subtract off the half-thicknesses traversed of in both detectors
-  // to get the gap thickness traversed
-  double dPathLengthGap = nodeToIntersection.mag() - dPathLengthDetector/2. -
-      dPathLengthNodeDetector/2.;
-
-  double dPathLength = dPathLengthDetector + dPathLengthGap;
-  dDistance = dPathLength;
+  if(bExtrapolated==false){ return kFailed; }
+  dDistance = 2.*dDetectorHalfThickness + dGapThickness;
 
   // get the weighted density average
   StiMaterial *pGas = pDetector->getGas();
   StiMaterial *pMaterial = pDetector->getMaterial();
-  dDensity = (pGas->getDensity()*dPathLengthGap +
-              pMaterial->getDensity()*dPathLengthDetector)/dPathLength;
+  dDensity = (pGas->getDensity()*dGapThickness +
+              pMaterial->getDensity()*2.*dDetectorHalfThickness)/dDistance;
 
-  dThickness = (dPathLengthGap/dPathLength/pGas->getRadLength() +
-                dPathLengthDetector/dPathLength/pMaterial->getRadLength());
+  dThickness = (dGapThickness/pGas->getRadLength() +
+                2.*dDetectorHalfThickness/pMaterial->getRadLength());
 
   //--------------------------------
   // rotate to local and determine 
   // if & where it hit the detector
-
+  StiPlacement *pPlacement = pDetector->getPlacement();
   intersection.rotateZ(-pPlacement->getNormalRefAngle());
   dXlocal = intersection.x();
 
@@ -291,6 +208,9 @@ StiIntersection StiMaterialInteraction::findCylindricalIntersection(
   double dZoffset = intersection.z() - pPlacement->getZcenter();
 
   // find limits of various regions
+  StiCylindricalShape *pShape = dynamic_cast<StiCylindricalShape *>(
+      pDetector->getShape());
+  double radius = pPlacement->getNormalRadius();
   double dEdgeHalfWidth = (strstr(pDetector->getName().c_str(), "Tpc")==NULL) ?
       SVG_EDGE_HALF_WIDTH : TPC_EDGE_HALF_WIDTH;
   double dInnerPhi = pShape->getOpeningAngle()/2. - dEdgeHalfWidth/radius;
@@ -328,21 +248,17 @@ StiIntersection StiMaterialInteraction::findConicalIntersection(
   return kFailed;
 } // findConicalIntersection
 
-// returns thickness*(direction dot normal at point).
-// all coordinates are assumed to be global.  pDirection does not have to
-// be normalized.
-// normalized.
-// returns -1 on failure.
 double StiMaterialInteraction::findThickness(const StiDetector *pDetector,
-                                             const StThreeVectorD *pPoint,
-                                             const StThreeVectorD *pDirection){
+                                             const StThreeVector<double> *pPoint,
+                                             const StThreeVector<double> *pDirection){
 
   double dAlpha = pDetector->getPlacement()->getNormalRefAngle();
   double dThickness = pDetector->getShape()->getThickness();
 
-  StThreeVectorD normal(1., 0., 0.);
-  normal.rotateZ(dAlpha);
-  StThreeVectorD point = *pPoint;
+  // we must find the normal based on the detector type.
+  StThreeVector<double> normal(1., 0., 0.);
+  normal.rotateZ(dAlpha);  // this is fine for a plane
+  StThreeVector<double> point = *pPoint;
 
   switch(pDetector->getShape()->getShapeCode()){
     case kCylindrical:
@@ -362,5 +278,214 @@ double StiMaterialInteraction::findThickness(const StiDetector *pDetector,
   return dThickness;
 }
 
+bool StiMaterialInteraction::extrapolateHelixToPlane(
+    const StiKalmanTrackNode *pNode,
+    const StiDetector *pDetector,
+    StThreeVector<double> *pIntersection,
+    double &dNodeHalfThickness,
+    double &dGapThickness,
+    double &dDetectorHalfThickness){
 
+  // first get the helix for the track node (uses node as origin)
+  StThreeVector<double> dummy(1., 0., 0.);
+  StPhysicalHelix helix(dummy, dummy, 0, 1);
+  StiGeometryTransform *pTransform = StiGeometryTransform::instance();
+  (*pTransform)(pNode, &helix);
 
+  // get normal to plane in global
+  StThreeVector<double> normal(1., 0., 0.);
+  StiPlacement *pPlacement = pDetector->getPlacement();
+  normal.rotateZ(pPlacement->getNormalRefAngle());
+
+  // get point on plane in global
+  StThreeVector<double> point(pPlacement->getNormalRadius(), 0.);
+  point.rotateZ(pPlacement->getNormalRefAngle());
+
+  // get the path length between node center & detector center
+  dGapThickness = abs(helix.pathLength(point, normal)); // tracking outside->in
+  if(dGapThickness == DBL_MAX){ 
+    return false; 
+  }
+  *pIntersection = helix.at(dGapThickness);
+
+  // For the node & detector pathlengths, we still use a line approximation.
+  StThreeVector<double> momentum = helix.momentumAt(
+      dGapThickness, StiKalmanTrackNode::getFieldConstant());
+  StThreeVector<double> node(pNode->fX, pNode->fP0, pNode->fP1);
+  dDetectorHalfThickness = 0.5*findThickness(pDetector, pIntersection, 
+                                             &momentum);
+  dNodeHalfThickness = 0.5*findThickness(pNode->getDetector(), &node,  
+                                         &momentum);
+  dGapThickness -= (dDetectorHalfThickness + dNodeHalfThickness);
+
+  return true;
+
+} // extrapolateHelixToPlane
+
+bool StiMaterialInteraction::extrapolateHelixToCylinder(
+    const StiKalmanTrackNode *pNode,
+    const StiDetector *pDetector,
+    StThreeVector<double> *pIntersection,
+    double &dNodeHalfThickness,
+    double &dGapThickness,
+    double &dDetectorHalfThickness){
+
+  // first get the helix for the track node (uses node as origin)
+  StThreeVector<double> dummy(1., 0., 0.);
+  StPhysicalHelix helix(dummy, dummy, 0, 1);
+  StiGeometryTransform *pTransform = StiGeometryTransform::instance();
+  (*pTransform)(pNode, &helix);
+
+  // get the path length between node center & detector center
+  StiPlacement *pPlacement = pDetector->getPlacement();
+  pair<double, double> pathLengths = helix.pathLength(
+      pPlacement->getNormalRadius());
+  StThreeVector<double> intersection = helix.at(pathLengths.first);
+  
+  // For the node & detector pathlengths, we still use a line approximation.
+  StThreeVector<double> momentum = helix.momentumAt(
+      pathLengths.first, StiKalmanTrackNode::getFieldConstant());
+  StThreeVector<double> node(pNode->fX, pNode->fP0, pNode->fP1);
+  dDetectorHalfThickness = 0.5*findThickness(pDetector, pIntersection, 
+                                             &momentum);
+  dNodeHalfThickness = 0.5*findThickness(pNode->getDetector(), &node,
+                                         &momentum);
+  dGapThickness = pathLengths.first - dDetectorHalfThickness - 
+      dNodeHalfThickness;
+
+  return true;
+
+} // extrapolateHelixToCylinder
+
+bool StiMaterialInteraction::extrapolateLineToPlane(
+    const StiKalmanTrackNode *pNode,
+    const StiDetector *pDetector,
+    StThreeVector<double> *pIntersection,
+    double &dNodeHalfThickness,
+    double &dGapThickness,
+    double &dDetectorHalfThickness){
+
+  StiPlacement *pPlacement = pDetector->getPlacement();
+  const StiDetector *pNodeDetector = pNode->getDetector();
+
+  //---------------------------------------------------
+  // first, do the intersection of the node's momentum 
+  // vector with the detector plane in global coords.
+
+  // get momentum of node in global coords
+  double adMomentum[3];
+  pNode->getMomentum(adMomentum);
+  StThreeVector<double> momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
+  momentum.rotateZ(pNode->fAlpha);
+
+  // get normal to plane in global coords
+  StThreeVector<double> normal(1., 0., 0.);
+  normal.rotateZ(pPlacement->getNormalRefAngle());
+
+  // get vector to node in global coords
+  StThreeVector<double> node(pNode->fX, pNode->fP0, pNode->fP1);
+  node.rotateZ(pNode->fAlpha);
+
+  // find the coefficent for momentum vector which extends it to
+  // the intersection point, then the intersection.
+  double momentumCoefficient = 
+      (pPlacement->getNormalRadius() - node.dot(normal))/
+      momentum.dot(normal);
+  // If we were only interested in whether or not (and where) there was
+  // an intersection with the given detector, we would require that the
+  // momentum coefficient be negative because we're tracking outside-in.
+  // Since we're intersted in the relative position of any misses, we don't
+  // make the cut:
+  //
+  // if(momentumCoefficient>0.){ return kFailed; }
+  StThreeVector<double> nodeToIntersection = momentumCoefficient*momentum;
+  *pIntersection = node + nodeToIntersection;
+
+  //--------------------------------
+  // determine thicknesses traversed
+
+  // just use the cosine between the momentum and the detector normal to
+  // calculate thickness traversed
+  dDetectorHalfThickness = 0.5*findThickness(pDetector, pIntersection,  
+                                             &momentum);
+  dNodeHalfThickness = 0.5*findThickness(pNodeDetector, &node, &momentum);
+
+  // subtract off the half-thicknesses traversed of in both detectors
+  // to get the gap thickness traversed
+  dGapThickness = nodeToIntersection.mag() - dDetectorHalfThickness -
+      dNodeHalfThickness;
+
+  return true;
+} // extrapolateLineToPlane    
+
+bool StiMaterialInteraction::extrapolateLineToCylinder(
+    const StiKalmanTrackNode *pNode,
+    const StiDetector *pDetector,
+    StThreeVector<double> *pIntersection,
+    double &dNodeHalfThickness,
+    double &dGapThickness,
+    double &dDetectorHalfThickness){
+
+  StiPlacement *pPlacement = pDetector->getPlacement();
+  const StiDetector *pNodeDetector = pNode->getDetector();
+
+  //---------------------------------------------------
+  // first, do the intersection of the node's momentum 
+  // vector with the detector cylinder in global coords.
+
+  // get momentum of node in global coords
+  double adMomentum[3];
+  pNode->getMomentum(adMomentum);
+  StThreeVector<double> momentum(adMomentum[0], adMomentum[1], adMomentum[2]);
+  momentum.rotateZ(pNode->fAlpha);
+  
+  // get vector to node in global coords
+  StThreeVector<double> node(pNode->fX, pNode->fP0, pNode->fP1);
+  node.rotateZ(pNode->fAlpha);
+
+  // get "transverse" vectors used in calculating intersection
+  StThreeVector<double> zHat(0., 0., 1.);
+  StThreeVector<double> momentumPerp = momentum.cross(zHat);
+  StThreeVector<double> nodePerp = node.cross(zHat);
+
+  // first, test for any intersection at all
+  double radius = pPlacement->getNormalRadius();
+  double determinant = radius*radius*momentumPerp.mag2() -
+      node.dot(momentumPerp)*node.dot(momentumPerp);
+  if(determinant<0.){ return false; }
+
+  // find the coefficent for momentum vector which extends it to
+  // the intersection point, then the intersection.
+  double momentumCoefficient = 
+      (-nodePerp.dot(momentumPerp) + sqrt(determinant))/momentumPerp.mag2();
+  double momentumCoefficientAlternate = 
+      (-nodePerp.dot(momentumPerp) - sqrt(determinant))/momentumPerp.mag2();
+  // for now, take smaller root...this may not always be right
+  if(fabs(momentumCoefficient)>fabs(momentumCoefficientAlternate)){
+    momentumCoefficient = momentumCoefficientAlternate; 
+  }
+
+  // physically, we only want a negative coefficient.  We are tracking
+  // outside-in, which means we should be tracking in the negative
+  // momentum direction.
+  //if(momentumCoefficient>0.){ return kFailed; }
+  StThreeVector<double> nodeToIntersection = momentumCoefficient*momentum;
+  StThreeVector<double> intersection = node + nodeToIntersection;
+
+  //--------------------------------
+  // determine thicknesses travsersed
+
+  // just use the cosine between the momentum and the detector normal to
+  // calculate thickness traversed
+  dDetectorHalfThickness = 0.5*findThickness(pDetector, pIntersection, 
+                                             &momentum);
+  dNodeHalfThickness = 0.5*findThickness(pNodeDetector, &node, &momentum);
+
+  // subtract off the half-thicknesses traversed of in both detectors
+  // to get the gap thickness traversed
+  dGapThickness = nodeToIntersection.mag() - dDetectorHalfThickness -
+      dNodeHalfThickness;
+
+  return true;
+} // extrapolateLineToCylinder
+    

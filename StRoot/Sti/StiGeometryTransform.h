@@ -25,9 +25,8 @@ class svg_geom_st;
 class svg_shape_st;
 class StPrimaryVertex;
 class StSvtConfig;
-class StHelix;
+class StPhysicalHelix;
 class StTpcHitFilter;
-
 class StiGeometryTransform{
     
 public:
@@ -89,27 +88,28 @@ public:
     /// StTpcHit -> StiHit
     void operator() (const StTpcHit*, StiHit*); 
     /// StiHit -> StTpcHit
-    void operator() (const StiHit*, StTpcHit*);    //From Sti -> Tpc
+    void operator() (const StiHit*, StTpcHit*);
     
     /// StSvtHit -> StiHit
-    void operator() (const StSvtHit*, StiHit*); //From Svt -> Sti
+    void operator() (const StSvtHit*, StiHit*);
     /// StiHit -> StSvtHit
-    void operator() (const StiHit*, StSvtHit*);  //From Sti -> Svt
+    void operator() (const StiHit*, StSvtHit*);
     
     /// StSsdHit -> StiHit
-    void operator() (const StSsdHit*, StiHit*); //From Ssd -> Sti
+    void operator() (const StSsdHit*, StiHit*);
     /// StiHit -> StSsdHit
-    void operator() (const StiHit*, StSsdHit*);  //From Sti -> Ssd
+    void operator() (const StiHit*, StSsdHit*);
     
     /// StPrimaryVertex -> StiHit
-    void operator() (const StPrimaryVertex*, StiHit*); //From StPrimaryVertex -> StiHit
+    void operator() (const StPrimaryVertex*, StiHit*);
 
-    /// StiKalmanTrackNode -> StHelix
-    void operator() (const StiKalmanTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
+    /// StiKalmanTrackNode -> StPhysicalHelix
+    void operator() (const StiKalmanTrackNode*, StPhysicalHelix*);
 
     /// StGlobalTrack -> StiKalmanTrack
     void operator() (const StGlobalTrack*, StiKalmanTrack*,
-		     unsigned int maxHits=1000, const StTpcHitFilter* filter=0) const;
+		     unsigned int maxHits=1000, 
+                     const StTpcHitFilter* filter=0) const;
 
     /// Returns reference angle and position of padrow for hit
     pair<double, double> angleAndPosition(const StTpcHit*) const;
