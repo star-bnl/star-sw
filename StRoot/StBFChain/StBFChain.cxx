@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.425 2004/07/23 02:25:49 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.426 2004/07/23 21:36:58 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -736,15 +736,15 @@ Bfc_st BFC2[] = {
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
   {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
-                 ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgs","",""
+           ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
   {"pp2003"      ,"" ,"",  "B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
   {"Idst"        ,""  ,"",
    "l0,dst,event,dEdxY2,genvtx,Kink2,xi2,svtdEdx,SvtIT,CMuDst,analysis,compend,EventQA"   ,"","","",kFALSE},
-  {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,beamLine,tags,Tree,evout"
+  {"B2003I"      ,"","","ry2003,in,tpc_daq,tpcI,fcf,Physics,Idst,tags,Tree,evout"
                                                                   ,"","","Base chain for 2003 ITTF",kFALSE},
   {"dau2003i"    ,""  ,"",  "B2003I,CtbMatchVtx,Corr2,ppOpt,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd",
                                    "","","Production chain for winter 2003 data dau2003a with ITTF",kFALSE},
