@@ -1,8 +1,11 @@
-$Id: dzdhea.F,v 1.1 2000/01/06 01:01:09 nevski Exp $
-$Log: dzdhea.F,v $
-Revision 1.1  2000/01/06 01:01:09  nevski
-dzdoc for agi
-
+* $Id: dzdhea.F,v 1.2 2000/01/06 23:57:24 nevski Exp $
+* $Log: dzdhea.F,v $
+* Revision 1.2  2000/01/06 23:57:24  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:09  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZDHEA(LB,IB,L)
 *.
 *...DZDHEA   draw the top bank + its up bank and link in between

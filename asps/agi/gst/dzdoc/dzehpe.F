@@ -1,8 +1,11 @@
-$Id: dzehpe.F,v 1.1 2000/01/06 01:01:11 nevski Exp $
-$Log: dzehpe.F,v $
-Revision 1.1  2000/01/06 01:01:11  nevski
-dzdoc for agi
-
+* $Id: dzehpe.F,v 1.2 2000/01/06 23:57:24 nevski Exp $
+* $Log: dzehpe.F,v $
+* Revision 1.2  2000/01/06 23:57:24  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:11  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZEHPE(LUN)
       WRITE(LUN,'(9(A/),A)')
      & '%!PS-Adobe-2.0'

@@ -1,8 +1,11 @@
-$Id: dzddtr.F,v 1.1 2000/01/06 01:01:09 nevski Exp $
-$Log: dzddtr.F,v $
-Revision 1.1  2000/01/06 01:01:09  nevski
-dzdoc for agi
-
+* $Id: dzddtr.F,v 1.2 2000/01/06 23:57:23 nevski Exp $
+* $Log: dzddtr.F,v $
+* Revision 1.2  2000/01/06 23:57:23  nevski
+* cvs header record corrected
+*
+* Revision 1.1  2000/01/06 01:01:09  nevski
+* dzdoc for agi
+*
       SUBROUTINE DZDDTR(LUNSGM,LUNLOG,LUNMET,IWMETA,ITMETA,L,CHOPT)
       CHARACTER*(*) CHOPT
       CHARACTER*7 CTEMP
