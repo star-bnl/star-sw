@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.42 2000/01/07 22:31:43 perev Exp $
+// $Id: StMaker.h,v 1.43 2000/03/23 00:15:22 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.43  2000/03/23 00:15:22  fine
+// Adjusted to libSTAR for ROOT 2.24
+//
 // Revision 1.42  2000/01/07 22:31:43  perev
 // one more argument for SetOutputAll
 //
@@ -109,36 +112,36 @@
 //////////////////////////////////////////////////////////////////////////
 #include <assert.h>
 #include "Stypes.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
-#include "St_ObjectSet.h"
-#include "TString.h"
-#include "TDatime.h"
-#include "TH1.h"
+#include "TDataSet.h"
+#include "TDataSetIter.h"
+#include "TObjectSet.h"
+#include <TString.h>
+#include <TDatime.h>
+#include <TH1.h>
 #include "StEvtHddr.h"
 #ifndef ROOT_TClonesArray
-#include "TClonesArray.h"
+#include <TClonesArray.h>
 #endif
-#include "TStopwatch.h"
+#include <TStopwatch.h>
 
 class TList;
 class TBrowser;
 class TChain;
 class TTree;
 
-class StMaker : public St_DataSet{
+class StMaker : public TDataSet{
 public:
    typedef  enum {kNormal, kDebug} EDebugLevel;
    enum {kSTAFCV_BAD, kSTAFCV_OK, kSTAFCV_ERR=2, kSTAFCV_FATAL=3} EModule_return_Status;
 
 protected:
 
-   St_DataSet     *m_DataSet;		//!  
-   St_DataSet     *m_ConstSet;		//!  
-   St_DataSet     *m_GarbSet;		//!  
-   St_DataSet     *m_Inputs;	 	//!list of logInput:ActualInput
-   St_DataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
-   St_DataSet     *m_Runco;	 	//!Run Control parameters
+   TDataSet     *m_DataSet;		//!  
+   TDataSet     *m_ConstSet;		//!  
+   TDataSet     *m_GarbSet;		//!  
+   TDataSet     *m_Inputs;	 	//!list of logInput:ActualInput
+   TDataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
+   TDataSet     *m_Runco;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
@@ -173,14 +176,14 @@ public:
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
 
 //		User methods
-   virtual St_DataSet   *AddData (St_DataSet *data=0,const char *dir=".data");
-   virtual St_ObjectSet *AddObj  (TObject *obj,const char *dir);
-   virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
+   virtual TDataSet   *AddData (TDataSet *data=0,const char *dir=".data");
+   virtual TObjectSet *AddObj  (TObject *obj,const char *dir);
+   virtual void        	AddConst(TDataSet *data=0){AddData(data,".const");}
    virtual void        	AddHist(TH1 *h,const char *dir=0);
-   virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
-   virtual void        	AddRunco (St_DataSet *data=0){AddData(data,".runco");};
+   virtual void        	AddGarb (TDataSet *data=0){AddData(data,".garb");};
+   virtual void        	AddRunco (TDataSet *data=0){AddData(data,".runco");};
    virtual void        	AddRunco (double par,const char* name,const char* comment);
-           void        	AddRunCont (St_DataSet *data=0){AddRunco(data);};	//alias
+           void        	AddRunCont (TDataSet *data=0){AddRunco(data);};	//alias
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
@@ -189,7 +192,7 @@ public:
 //		STAR methods
    virtual Int_t  	GetNumber() const ;
    virtual void   	SetNumber(Int_t number) ;
-   virtual St_DataSet*  UpdateDB(St_DataSet* ds){if (ds){};return 0;};
+   virtual TDataSet*  UpdateDB(TDataSet* ds){if (ds){};return 0;};
    static  StMaker     *GetChain(){return fgStChain;}
    virtual StMaker     *GetParentChain() const;
    virtual Int_t        GetEventNumber() const ;
@@ -201,17 +204,17 @@ public:
 
 
 //		Get
-   virtual St_DataSet  *GetData(const char *name, const char* dir=".data") const;
-   virtual St_DataSet  *GetDataSet (const char* logInput,
+   virtual TDataSet  *GetData(const char *name, const char* dir=".data") const;
+   virtual TDataSet  *GetDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
-   virtual St_DataSet  *   DataSet (const char* logInput)   const 
+   virtual TDataSet  *   DataSet (const char* logInput)   const 
                            {return GetDataSet(logInput);};
-   virtual St_DataSet  *GetInputDS (const char* logInput)   const 
+   virtual TDataSet  *GetInputDS (const char* logInput)   const 
                            {return GetDataSet(logInput);};
 
-   virtual St_DataSet  *GetDataBase(const char* logInput);
-   virtual St_DataSet  *GetInputDB (const char* logInput)
+   virtual TDataSet  *GetDataBase(const char* logInput);
+   virtual TDataSet  *GetInputDB (const char* logInput)
                           {return GetDataBase(logInput);};
 
 
@@ -237,9 +240,9 @@ public:
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	SetInput(const char* log,const char* act){SetAlias(log,act);};
    virtual void       	SetOutput(const char* log,const char* act){SetAlias(log,act,".aliases");};
-   virtual void       	SetOutput(const char* log,St_DataSet *ds);
-   virtual void       	SetOutput(St_DataSet *ds){SetOutput(0,ds);};
-   virtual void       	SetOutputAll(St_DataSet *ds,Int_t level=1);
+   virtual void       	SetOutput(const char* log,TDataSet *ds);
+   virtual void       	SetOutput(TDataSet *ds){SetOutput(0,ds);};
+   virtual void       	SetOutputAll(TDataSet *ds,Int_t level=1);
    virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}   // *MENU*
 
    virtual Double_t     RealTime(){ return m_Timer.RealTime();}
@@ -250,8 +253,8 @@ public:
    virtual void         PrintTotalTime(){}
 
 //		Static functions
-   static  StMaker     *GetMaker(const St_DataSet *ds)  ;
-   static EDataSetPass  ClearDS (St_DataSet* ds,void *user );
+   static  StMaker     *GetMaker(const TDataSet *ds)  ;
+   static EDataSetPass  ClearDS (TDataSet* ds,void *user );
 
 
 TObject        *GetDirObj(const char *dir) const;
@@ -259,9 +262,9 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.42 2000/01/07 22:31:43 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.43 2000/03/23 00:15:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StMaker, 0)   //StChain virtual base class for Makers
+   ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
 
 #endif

@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.31 1999/12/03 01:24:40 fine Exp $
+// $Id: StChain.h,v 1.32 2000/03/23 00:15:22 fine Exp $
 // $Log: StChain.h,v $
+// Revision 1.32  2000/03/23 00:15:22  fine
+// Adjusted to libSTAR for ROOT 2.24
+//
 // Revision 1.31  1999/12/03 01:24:40  fine
 // Advanced timer has been introduced
 //
@@ -89,7 +92,7 @@ class StChain : public StMaker {
 private:
    Int_t               m_Version;    	//StChain version number
    Int_t               m_VersionDate;   //StChain version date
-   St_DataSet         *m_EvtHddr;     	//Header of event
+   TDataSet         *m_EvtHddr;     	//Header of event
 public:
                       StChain(const char *name="bfcChain");
    virtual           ~StChain();
@@ -102,8 +105,8 @@ public:
    Int_t              GetVersion() {return m_Version;}
    Int_t              GetVersionDate() {return m_VersionDate;}
 
- virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.31 1999/12/03 01:24:40 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+ virtual const char *GetCVS() const 
+ {static const char cvs[]="Tag $Name:  $ $Id: StChain.h,v 1.32 2000/03/23 00:15:22 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StChain, 0)   //StChain control class
 };
 

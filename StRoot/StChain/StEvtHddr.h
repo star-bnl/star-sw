@@ -1,14 +1,14 @@
 #ifndef StEvtHddr_h
 #define StEvtHddr_h
 
-#include "TDatime.h"
-#include "St_DataSet.h"
+#include <TDatime.h>
+#include "TDataSet.h"
 struct EvtHddr_st;
 
-class StEvtHddr : public St_DataSet
+class StEvtHddr : public TDataSet
 {
 public:
-  StEvtHddr(St_DataSet *parent=0);
+  StEvtHddr(TDataSet *parent=0);
  ~StEvtHddr(){};
   StEvtHddr &operator=(const StEvtHddr &hddr);
 //		Get methods
