@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.3 2003/09/11 05:49:20 perev Exp $
+ * $Id: StMuIOMaker.h,v 1.4 2003/09/12 21:31:50 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuIOMaker_hh
@@ -84,14 +84,14 @@ class StMuIOMaker : public StIOInterFace {
   void  SetFileName(const char *fileName);
   void  SetFile(const char *fileName);
 
-  StMuDst* muDst(); ///< return pointer the  current (last read) StMuDst
+  StMuDst* muDst();                             ///< return pointer the  current (last read) StMuDst
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
   int currentIndex() { return mCurrentIndex; }
   int eventCounter() { return mEventCounter; }
   int numberOfEvents() { return mNumberOfEvents; }
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.3 2003/09/11 05:49:20 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.4 2003/09/12 21:31:50 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -101,9 +101,9 @@ private:
   StMuEmcUtil* mEmcUtil;
 
   TChain* mChain;
-int mNumberOfEvents; ///< holds the number of events in the current chain (file)
-int mCurrentIndex;  ///< holds the index of the last event read
-int mEventCounter; ///< a running counter holding the total number of events read
+  int mNumberOfEvents; ///< holds the number of events in the current chain (file)
+  int mCurrentIndex;   ///< holds the index of the last event read
+  int mEventCounter;   ///< a running counter holding the total number of events read
   
   template<class T> 
   void saveDelete(T* t) { if (t!=0) delete t; t=0;}    
@@ -148,6 +148,9 @@ inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.4  2003/09/12 21:31:50  jeromel
+ * No changes (ident)
+ *
  * Revision 1.3  2003/09/11 05:49:20  perev
  * ansi corrs
  *
