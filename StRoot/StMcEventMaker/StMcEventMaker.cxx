@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.21 2000/04/18 00:56:39 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.22 2000/04/18 23:17:23 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.22  2000/04/18 23:17:23  calderon
+ * delete the svt hit if it is not possible to store it
+ *
  * Revision 1.21  2000/04/18 00:56:39  calderon
  * Add pdgId to tracks that appear in both tables
  *
@@ -124,7 +127,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.21 2000/04/18 00:56:39 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.22 2000/04/18 23:17:23 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -635,8 +638,12 @@ Int_t StMcEventMaker::Make()
 		    continue;
 		}
 		sh = new StMcSvtHit(&svtHitTable[ihit]);
-		if (!mCurrentMcEvent->svtHitCollection()->addHit(sh)) // adds hit sh to collection
-		    nBadVolId++; 
+		if (!mCurrentMcEvent->svtHitCollection()->addHit(sh)) {// adds hit sh to collection
+		    nBadVolId++;
+		    delete sh; // If the hit couldn't be assigned, delete it.
+		    sh = 0;
+		    continue;
+		}
 		
 		// point hit to its parent and add it to collection
 		// of the appropriate track
