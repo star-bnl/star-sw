@@ -56,7 +56,7 @@ StiTrack* StiLocalTrackSeedFinder::findTrack()
 	}
       catch(runtime_error & rte )
 	{
-	  cout<< "StiLocalTrackSeedFinder::findTrack() -W- Run Time Error :" << rte.what() << endl;
+	  //	  cout<< "StiLocalTrackSeedFinder::findTrack() -W- Run Time Error :" << rte.what() << endl;
 	}
       ++_hitIter;
     }
