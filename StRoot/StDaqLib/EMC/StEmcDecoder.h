@@ -44,6 +44,9 @@ class StEmcDecoder
     int       connector1[20],connector2[20],connector3[20];
     int       SmdeRDO[120][150],SmdpRDO[120][10][15];
     int       SmdeIndex[120][150],SmdpIndex[120][10][15];
+    int       PsdModules[4][15];
+    int       PsdRDO[4800];
+    int       PsdIndex[4800];
     
     int       Getjose_towerWest(int,int);///<Get Software Id for West size for towers
     int       Getjose_towerEast(int,int);///<Get Software Id for East side for towers
@@ -70,8 +73,11 @@ class StEmcDecoder
 		int       GetPMTBoxFromTowerId(int,int&,int&); ///<Get PMT box and position from tower Id
     int       GetTowerBin(int,int&,int&,int&);///<Transition from environment rid to m,e,s for towers
     
-    int       GetSmdCoord(int,int,int&,int&,int&,int&);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
+    int       GetSmdCoord(int,int,int&,int&,int&,int&,bool=false);///<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
     int       GetSmdRDO(int,int,int,int,int&,int&);///<Get SMD fiber and position from detector number (3==SMDE, 4==SMDP), m, e, s
+
+    int       GetPsdId(int,int,int&,bool=false);///<Get PSD id
+    int       GetPsdRDO(int,int&,int&);///<Get PSD fiber and position from id
     
     void      PrintTowerMap(ofstream *);///<Print Tower MAP
     void      PrintSmdMap(ofstream *);///<Print SMD MAP
