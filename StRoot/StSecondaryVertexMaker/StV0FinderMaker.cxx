@@ -429,7 +429,6 @@ Int_t StV0FinderMaker::Make() {
       if ((temp*temp < 0.98*ptV0sq) &&
           ((trk[i]->impactParameter() <= pars2->dcapnmin) ||
            (trk[j]->impactParameter() <= pars2->dcapnmin))) continue;
-      ///Julien : not if (pt || (dca || dca))
 
       xcj.Set(heli[j].xcenter(),heli[j].ycenter());
       rj.Set(heli[j].origin().x(),heli[j].origin().y());
@@ -443,7 +442,7 @@ Int_t StV0FinderMaker::Make() {
       dca_ij1 = -9999;
 
 
-// ********************* START OF DETERMINATION OF V0 GEOMETRY
+      // ********************* START OF DETERMINATION OF V0 GEOMETRY
       if (separation < 0)
          {// Check for one helix circle completely inside the other
           if (dxc < TMath::Abs(rad_i - rad_j)) continue;
@@ -454,16 +453,16 @@ Int_t StV0FinderMaker::Make() {
           path2 = heli[i].pathLength(rad_j,xcj.X(),xcj.Y());
           // Two possible solutions: process ones that aren't nans
           if (!isnan(path2.first))
-      {solution = path2.first;
+             {solution = path2.first;
               if ((!isnan(path2.second)) && (path2.second != path2.first))
-          {doSecond = kTRUE;
-    }
+                 {doSecond = kTRUE;
+                  }
               goto ProcessSolution;
               }
-       else if (isnan(path2.second))
-      {// no solutions
-       continue;
-       }
+             else if (isnan(path2.second))
+             {// no solutions
+              continue;
+              }
               //else run only with the second solution
           SecondSolution:
           solution = path2.second;
@@ -478,7 +477,7 @@ Int_t StV0FinderMaker::Make() {
           xj = heli[j].at(paths.second);
           }
           else if (separation < pars2->dca)
-  {// Helix circles are close, but not overlapping,
+         {// Helix circles are close, but not overlapping,
           // find dca to point halfway between circle centers
           tmp2V = (xci + xcj) * 0.5;
           paths.first  = heli[i].pathLength(tmp2V.X(),tmp2V.Y());
@@ -487,7 +486,7 @@ Int_t StV0FinderMaker::Make() {
           xj = heli[j].at(paths.second);
           }
           else
-  {// Helix circles are too far apart
+         {// Helix circles are too far apart
           continue;
           }
       
@@ -497,19 +496,19 @@ Int_t StV0FinderMaker::Make() {
         dca_ij1 = dca_ij;
         xi1=xi;
         xj1=xj;
- paths1=paths;
+        paths1=paths;
         goto SecondSolution;
-      }
+        }
       if ((dca_ij1 != -9999) &&
           (TMath::Abs(dca_ij1) < TMath::Abs(dca_ij))) {
         // First solution was better
         dca_ij = dca_ij1;
         xi=xi1;
         xj=xj1;
- paths=paths1;
-      }
+        paths=paths1;
+        }
       // At this point, dca_ij is *signed* for use in 3D calc
-// *********************  END  OF DETERMINATION OF V0 GEOMETRY
+      // *********************  END  OF DETERMINATION OF V0 GEOMETRY
 
       pi = heli[i].momentumAt(paths.first ,Bfield);
       pj = heli[j].momentumAt(paths.second,Bfield);
@@ -517,9 +516,15 @@ Int_t StV0FinderMaker::Make() {
       //Cut: check if tracks points away from prim vtx
       if ((pi.dot(xi-mainv) < 0.0) ||
           (pj.dot(xj-mainv) < 0.0)) continue;
+						
+						///Begin Betty 
+      //Cut: check if the first point of either track is after v0vertex
+      if ((pi.dot(heli[i].origin() - xi) < 0.0) ||  //if pV0 * r <0, cut
+         (pj.dot(heli[j].origin() - xj) < 0.0)) continue;
+      ///End Betty
 
 
-// ********************* START OF DETERMINATION OF 3D DCA
+      // ********************* START OF DETERMINATION OF 3D DCA
       // dca_ij will be an approximation of the 3D dca
       pi1 = pi/ptot[i];
       pj1 = pj/ptot[j];
@@ -560,7 +565,7 @@ Int_t StV0FinderMaker::Make() {
         }
         //This code is the new one.
 
- /*if (dca_ij1 < dca_ij) {
+      /*if (dca_ij1 < dca_ij) {
           paths.first  = heli[i].pathLength(xi1.x(),xi1.y());
           paths.second = heli[j].pathLength(xj1.x(),xj1.y());
           xi = xi1;
@@ -568,12 +573,12 @@ Int_t StV0FinderMaker::Make() {
           pi = heli[i].momentumAt(paths.first ,Bfield);
           pj = heli[j].momentumAt(paths.second,Bfield);
           dca_ij = dca_ij1;
-   }*/
-   //And this one is the old one (comparison with Fortran).
+          }*/
+        //And this one is the old one (comparison with Fortran).
 
  
       }
-// *********************  END  OF DETERMINATION OF 3D DCA
+      // *********************  END  OF DETERMINATION OF 3D DCA
 
 
       // Now we have the positions and momenta of our tracks
@@ -590,7 +595,6 @@ Int_t StV0FinderMaker::Make() {
       if ((pperpsq < ptV0sq) && 
           ((trk[i]->impactParameter() <= pars2->dcapnmin) ||
            (trk[j]->impactParameter() <= pars2->dcapnmin))) continue;
-      ///Julien : diff. w/ previous such one ?
 
       xpp = (xi + xj) * 0.5;
       impact = xpp - mainv;
@@ -605,7 +609,7 @@ Int_t StV0FinderMaker::Make() {
       ppmag = pperpsq + pp.z()*pp.z();
       rmin = impact.cross(pp).mag2()/ppmag;
 
-      /// Cut on dca of V0
+      //Cut: dca of V0 to prim vtx
       if (rmin >= (pars2->dcav0*pars2->dcav0)) continue;
 
       tmp3V = pp/sqrt(ppmag);
@@ -738,8 +742,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.8 2003/07/15 17:40:36 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.9 2003/07/17 17:01:10 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.9  2003/07/17 17:01:10  faivre
+// Add one causality check. Exhaustive listing of cuts. Tab->spaces.
+//
 // Revision 1.8  2003/07/15 17:40:36  faivre
 // Fixed charge of Bfield (used for print, and XiFinder since now).
 //
