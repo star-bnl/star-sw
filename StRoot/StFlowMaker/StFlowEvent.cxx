@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.9 2000/08/10 23:00:21 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.10 2000/08/12 20:22:19 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.10  2000/08/12 20:22:19  posk
+// Recalculate centrality in read from pico.
+//
 // Revision 1.9  2000/08/10 23:00:21  posk
 // New centralities. pt and eta cuts.
 //
@@ -27,9 +30,6 @@
 //
 // Revision 1.4  2000/05/12 22:42:04  snelling
 // Additions for persistency and minor fix
-//
-// Revision 1.3  2000/05/11 20:00:33  posk
-// Preparation for micro and nano DSTs.
 //
 // Revision 1.2  2000/03/15 23:28:50  posk
 // Added StFlowSelection.
@@ -133,11 +133,11 @@ Float_t StFlowEvent::mAntiProtonCuts[2]  = {-1., 1.};
 
 //-----------------------------------------------------------
 
-StFlowEvent::StFlowEvent() {
+StFlowEvent::StFlowEvent()  {
   // Make a new track collection
 
   pTrackCollection = new StFlowTrackCollection;
-
+ 
 }
 
 //-----------------------------------------------------------
@@ -360,13 +360,7 @@ void StFlowEvent::SetPids() {
 void StFlowEvent::SetCentrality(const UInt_t& tracks) {
 
   UInt_t cent[] = {20,100,180,270,360,460,560,660,870};
-//   if (!tracks) {
-//     float origMult = pFlowEvent->OrigMult();
-//     int maxTracks = 1500;
-//     mCentrality = (6*origMult)/maxTracks + 1;
-//   }
   if (tracks < cent[0]) {
-    //else if (tracks < cent[0]) {
     mCentrality = 0;
   }
   else if (tracks >= cent[0] && tracks < cent[1]) {
@@ -394,8 +388,9 @@ void StFlowEvent::SetCentrality(const UInt_t& tracks) {
     mCentrality = 8;
   }
   else if (tracks >= cent[8]) {
-    mCentrality = 0;
+    mCentrality = 9;
   }
+
 }
 
 //-----------------------------------------------------------------------
