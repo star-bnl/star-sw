@@ -1,7 +1,7 @@
-* $Id: tpt_form_segments.F,v 1.3 1998/03/23 18:25:58 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.4 1998/03/29 05:04:59 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
-* Revision 1.3  1998/03/23 18:25:58  sakrejda
-* tpg_pad-plane removed from the tpt module, it was not used there anyway
+* Revision 1.4  1998/03/29 05:04:59  sakrejda
+* Protection agains overflow in trk checked against mxtrack
 *
 * Revision 1.2  1998/01/27 00:35:47  fisyak
 * Split sources
@@ -52,6 +52,7 @@ C
 #include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
+
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_root.inc"
@@ -59,7 +60,7 @@ C
 C______________________________________________________________________
 
       RECORD /table_head_st/    tpar_h
-      RECORD /tpt_pars_st/    tpar(*)
+      RECORD /tpt_pars_st/      tpar(*)
       RECORD /table_head_st/    track_h
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
@@ -71,9 +72,12 @@ C
 C     Local variables
       RECORD /track_pointers/ saved_trk
       RECORD /track_root/     root(mxroot)
-      INTEGER next_hit(tpt_mxhit),slice_loc(mxsector,mxrow,mxslic)
+      INTEGER next_hit(tpt_mxhit)
+      INTEGER slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector,mxrow,mxslic)
-      INTEGER loc_hit(*),tpstart(mxrow,mxsector),tpcount(mxrow,mxsector)
+      INTEGER loc_hit(*)
+      INTEGER tpstart(mxrow,mxsector)
+      INTEGER tpcount(mxrow,mxsector)
       INTEGER i,j,k,iend,nroot,iret,l,ld,ient,ntrk,itest
       INTEGER tpt_find_root,tpt_make_segment,tpt_make_segment_uv
       INTEGER tpt_load_track,tpt_cross_fact
@@ -92,12 +96,14 @@ C              find all the possible 3-hit links starting from this point
                iret=tpt_find_root(k,hit_h,hit,tpar_h,tpar,
      >                            nroot,root,
      >                            next_hit,slice_loc,slice_pnt,ipass)
+c
+C              if no roots were found skip it.....
+               if(nroot.gt.0) then               
 C
 C              no saved tracks yet....
                saved = .false.
-               if(track_h.nok.lt.track_h.maxlen) then
+               if(track_h.nok.lt.mxtrack) then
                   ntrk = track_h.nok + 1
-                  trk(ntrk).flag=0
                   do l=1,nroot
 C                   look for a track starting from this root
                     trk(ntrk).nhit = 3
@@ -145,11 +151,12 @@ C	                better than the saved one
                         end do
                         saved = .true.
                     endif
-                  end do
+                  end do ! end of loop on l (number of roots)
                else
                   write(6,*) 'too many track candidates-',
-     >                       'track table not big enough',track_h.maxlen
-               endif
+     >                       'track table not big enough',mxtrack
+               endif ! end of check on room in the tracks table
+
 C              if there was a good track load it and mark all the hits
 C              memorize the final best segment
                if(saved) trk(ntrk).flag=saved_trk.flag
@@ -193,10 +200,11 @@ C              memorize the final best segment
                    end do
                  endif
                  iret = tpt_load_track(ntrk,track_h,track,trk)
-               endif
-            endif
-            end do
-         end do
-      end do                    ! end of loop over sectors
+               endif ! end of an if on good track (flag>0)
+               endif ! end of an if on nroot>0
+               endif ! end of an if on available hit
+            end do  ! end of a loop over hits
+         end do ! end of a loop over sectors
+      end do    ! end of loop over rows
       tpt_form_segments=STAFCV_OK
       end
