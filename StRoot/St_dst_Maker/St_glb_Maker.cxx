@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.52 1999/04/01 23:31:42 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.53 1999/04/14 23:09:42 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.53  1999/04/14 23:09:42  fisyak
+// Add primtrk to dataset
+//
 // Revision 1.52  1999/04/01 23:31:42  fisyak
 // Add summary information and set return kStWarn after evr fails
 //
@@ -486,7 +489,7 @@ Int_t St_glb_Maker::Make(){
   dst_event_header_st  event =   {"Collision", //event_type
 				  {0,0},       // n_event[2]
 				  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
-  strcpy (&event.event_type[0],GetEventType());
+  if (GetEventType()) strcpy (&event.event_type[0],GetEventType());
   event.n_event[0] = GetEventNumber();
   event.n_event[1] = GetDate();
   event.n_run      = GetRunNumber();
@@ -668,6 +671,7 @@ Int_t St_glb_Maker::Make(){
     if (tphit && stk_track) {
       int nglob = globtrk->GetNRows();
       primtrk = new St_dst_track("primtrk",nglob);
+      dst.Add(primtrk);
       primtrk_aux = new St_dst_track_aux("primtrk_aux",nglob);
       dst.Add(primtrk_aux);
       
@@ -840,7 +844,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.52 1999/04/01 23:31:42 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.53 1999/04/14 23:09:42 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
