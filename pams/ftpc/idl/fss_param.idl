@@ -11,6 +11,7 @@
 
    struct fss_param {    
       short  random_number_gen      ;
+      short adc_threshold           ;/* D=      5   minimum ADC value */
       float chamber_r_min           ;/* D=      8.0  inner radius [cm]    */
       float chamber_r_max           ;/* D=     32.0  outer radius [cm]    */
       float chamber_phi_min         ;/* D=      0.0  min. phi [deg]    */ 
