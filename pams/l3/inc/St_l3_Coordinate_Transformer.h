@@ -93,6 +93,9 @@ public:
     double Get_drift_length_outer() { return drift_length_outer ;} ;
     double Get_lengthPerTb() { return lengthPerTb ; } ;
     int Get_transformation_errors() { return transformation_errors; } ;
+    double Get_max_timebucket_inner() { return  max_tb_inner; } ;
+    double Get_max_timebucket_outter() { return  max_tb_outer; } ;
+
 
     
 #ifdef L3OFFLINE
