@@ -2,41 +2,19 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.9 1999/11/23 21:21:07 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.10 2000/02/03 23:51:39 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.10  2000/02/03 23:51:39  snelling
+ * Removed empty histograms
+ *
  * Revision 1.9  1999/11/23 21:21:07  snelling
  * removed references to tphitclus table
  *
- * Revision 1.8  1999/09/24 01:23:21  fisyak
- * Reduced Include Path
- *
- * Revision 1.7  1999/09/23 18:25:19  snelling
- * Added QA hists for hitclus table and morphology table
- *
- * Revision 1.6  1999/09/03 16:07:37  snelling
- * Added method to write out histogrmas and TNtuple
- *
- * Revision 1.5  1999/08/26 03:36:58  snelling
- * Added Q versus pad
- *
- * Revision 1.4  1999/08/19 00:29:58  snelling
- * Added Q distribution histograms and only used points on track
- *
- * Revision 1.3  1999/08/17 18:55:55  snelling
- * Added two member funtions: setSector and setNrXbins
- *
- * Revision 1.2  1999/08/17 01:44:32  snelling
- * changed ntuple projection to normal histogram filling
- *
- * Revision 1.2  1999/08/03 17:15:53  snelling
- * added id tags
- *
- *  
  **************************************************************************/
 #include "StMaker.h"
 #include "St_TableSorter.h"
@@ -74,7 +52,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.9 1999/11/23 21:21:07 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.10 2000/02/03 23:51:39 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -154,9 +132,6 @@ class StQACosmicMaker : public StMaker {
   TNtuple *mTNtupleTPC; //!
 
   struct ClusterHist {
-    TH1F *mNHits;
-    TH1F *mNPadsPerCluster;
-    TH1F *mNTimeBucketsPerCluster;
     TH1F *mNPadsPerHit;
     TH1F *mNTimeBucketsPerHit;
   };
@@ -190,6 +165,22 @@ class StQACosmicMaker : public StMaker {
     TH1D *mXYResVersusAlpha_sigma;
     TH1D *mXYResVersusAlpha_mag;
     TH1D *mXYResVersusAlpha_chi;
+    TH1D *mXYResVersusAlphaZ1_mean;
+    TH1D *mXYResVersusAlphaZ1_sigma;
+    TH1D *mXYResVersusAlphaZ1_mag;
+    TH1D *mXYResVersusAlphaZ1_chi;
+    TH1D *mXYResVersusAlphaZ2_mean;
+    TH1D *mXYResVersusAlphaZ2_sigma;
+    TH1D *mXYResVersusAlphaZ2_mag;
+    TH1D *mXYResVersusAlphaZ2_chi;
+    TH1D *mXYResVersusAlphaZ3_mean;
+    TH1D *mXYResVersusAlphaZ3_sigma;
+    TH1D *mXYResVersusAlphaZ3_mag;
+    TH1D *mXYResVersusAlphaZ3_chi;
+    TH1D *mXYResVersusAlphaZ4_mean;
+    TH1D *mXYResVersusAlphaZ4_sigma;
+    TH1D *mXYResVersusAlphaZ4_mag;
+    TH1D *mXYResVersusAlphaZ4_chi;
   };
 
   struct ResidualHist;
@@ -197,6 +188,10 @@ class StQACosmicMaker : public StMaker {
 
   struct ResidualHist {
     TH2F *mXYResVersusAlpha;
+    TH2F *mXYResVersusAlphaZ1;
+    TH2F *mXYResVersusAlphaZ2;
+    TH2F *mXYResVersusAlphaZ3;
+    TH2F *mXYResVersusAlphaZ4;
     struct FitHist FitHists; 
   };
 
