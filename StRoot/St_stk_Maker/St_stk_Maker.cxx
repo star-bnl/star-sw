@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.17 1999/07/20 04:59:02 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.18 2000/01/31 23:54:37 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.18  2000/01/31 23:54:37  caines
+// Add code for SVT vtx finding - Not yet switched on
+//
 // Revision 1.17  1999/07/20 04:59:02  caines
 // Temporary fix using geant vtx for tracking
 //
@@ -75,8 +78,12 @@
 #include "svt/St_stk_am_init_Module.h"
 #include "svt/St_sgr_am_Module.h"
 #include "svt/St_spr_svt_Module.h"
+#include "tables/St_dst_vertex_Table.h"
 #include "TH1.h"
 #include "TH2.h"
+
+long sft_main( St_scs_spt *scs_spt, St_dst_vertex *vertex);
+
 ClassImp(St_stk_Maker)
   
   //_____________________________________________________________________________
@@ -92,10 +99,12 @@ ClassImp(St_stk_Maker)
     m_sprpar(0),
     m_q_pt(0),
     m_frac_used(0),
+    m_x0y0(0),
+    m_z0(0),
     m_azimuth(0),
     m_tan_dip(0),
     m_dedx(0),
-    m_gededx(0)
+    m_vtx_z(0)  
 {
   m_mode = 2;
   m_method = 2;
@@ -171,10 +180,13 @@ Int_t St_stk_Maker::Init(){
   // Create Histograms
   m_q_pt      = new TH1F("StkChargeOverPt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
   m_frac_used = new TH1F("StkHitsUsed"    ,"Fraction of hits used on svt tracks"  ,100,0.,1.2);
+   m_x0y0 = new TH2F("StkX0y0"               ,"X0 vs y0 of svt tracks"  ,100,-30.,30.,100,-30.,30.);
+   m_z0 = new TH1F("StkZ0"    ,"Z0 of svt tracks"  ,100,-25.,25.);
   m_azimuth   = new TH1F("StkAzimuth"     ,"Azimuthal distribution of svt tracks" ,60,0.,360.0);
   m_tan_dip   = new TH1F("StkTanDip"      ,"Distribution of the svt dip angle"    ,100,-1.5,1.5);
   m_dedx      = new TH2F("StkDedx"        ,"svt de/dx distribution"               ,100,0.,2.0,100,0.,0.01);
-  
+   m_vtx_z     = new TH1F("SvtVert"        ,"Z of svt found primary vertex"        ,100,-40.,40.);
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -229,9 +241,25 @@ Int_t St_stk_Maker::Make()
   if (Res_stk_init !=  kSTAFCV_OK) {
     cout << "Problem on return from STK_AM_INIT" << endl;
   }
+
+  g2t_vertex_st *g_vertex = g2t_vertex->GetTable();
+
+   //St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
+    //AddData(vertex);  
+
+    //vertex->SetNRows(0);
+    // Int_t Res_sft= sft_main(scs_spt,vertex);
+
+    // dst_vertex_st *svt_vertex = vertex->GetTable();
+    //printf(" vertex->x[2] = %f, geant= %f \n", svt_vertex->z,g_vertex->ge_x[2] );
+    
+    //if (Res_sft !=  kSTAFCV_OK) {
+    //  cout << " Problem on return from SFT" << endl;
+      
+    //  return kStOK;}
+    
   
   stk_vtx_st *stk_vtx = m_stk_vtx->GetTable();
-  g2t_vertex_st *g_vertex = g2t_vertex->GetTable();
   printf("*************************** Warning cheating with vtx using geant\n");
   stk_vtx->x[2] = g_vertex->ge_x[2];
   
@@ -266,17 +294,19 @@ void St_stk_Maker::MakeHistograms() {
   St_DataSetIter svt_tracks(m_DataSet);
   // 		Create iterator for space points
   
-  St_DataSetIter data(GetDataSet("svt_hits"));
+  St_DataSetIter hits(GetDataSet("svt_hits"));
   
   
   //		Get the table:
   St_stk_track *spr = 0;
   St_sgr_groups *gpr = 0;
+  St_dst_vertex *vtx = 0;
   St_scs_spt *spc = 0;
   
   spr  = (St_stk_track  *) svt_tracks.Find("stk_track");  
-  gpr  = (St_sgr_groups *) svt_tracks.Find("groups");  
-  spc  = (St_scs_spt    *) data.Find("scs_spt");
+  gpr  = (St_sgr_groups *) svt_tracks.Find("groups");
+  vtx  = (St_dst_vertex    *) svt_tracks.Find("vertex");
+  spc  = (St_scs_spt    *) hits.Find("scs_spt");
   
   if(Debug()) cout << "Filling SVT track histograms" << endl;
   
@@ -291,6 +321,8 @@ void St_stk_Maker::MakeHistograms() {
       m_q_pt->Fill(r->invpt);
       m_azimuth->Fill(r->psi);
       m_tan_dip->Fill(r->tanl); 
+      m_x0y0->Fill((float)(r->r0*cos(r->phi0*3.141/180.)),(float)(r->r0*sin(r->phi0*3.1416/180.)));
+      m_z0->Fill(r->z0); 
       
       // Fill dedx
       Float_t pt = 1./r->invpt;
@@ -300,4 +332,11 @@ void St_stk_Maker::MakeHistograms() {
       m_dedx->Fill(p,r->dedx[0]);
     }
   }
+
+  // dst_vertex_st *v = vtx->GetTable();
+
+  //if( vtx){    
+  //  m_vtx_z->Fill(v->z);
+  // }
+
 }
