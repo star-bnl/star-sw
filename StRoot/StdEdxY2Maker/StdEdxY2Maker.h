@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.1 2002/10/31 23:01:58 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.2 2002/11/02 01:46:59 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -56,14 +56,14 @@ class StdEdxY2Maker : public StMaker {
   virtual Int_t FinishRun(Int_t OldRunNumber);
   virtual Int_t Make();
   void    SortdEdx(Int_t N, dEdx_t *dE, dEdx_t *dES);
-  Double_t LikelyHood(Double_t Xlog10bg, Int_t NdEdx, dEdx_t *dEdx);
+  Double_t LikeliHood(Double_t Xlog10bg, Int_t NdEdx, dEdx_t *dEdx);
   Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
   void    Histogramming(StGlobalTrack* gTrack);
   void    DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ);
   void    PrintdEdx(Int_t iop = 0);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.1 2002/10/31 23:01:58 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.2 2002/11/02 01:46:59 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
