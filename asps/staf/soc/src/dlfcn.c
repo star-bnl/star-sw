@@ -124,7 +124,7 @@ void *dlopen(const char *path, int mode)
 		errvalid++;
 		strcpy(errbuf, "strdup: ");
 		strcat(errbuf, strerror(errno));
-		free(mp);
+		FREE(mp);
 		return NULL;
 	}
 	/*
@@ -132,8 +132,8 @@ void *dlopen(const char *path, int mode)
 	 * cast the path to a normal char *. Ugly.
 	 */
 	if ((mp->entry = (void *)load((char *)path, L_NOAUTODEFER, NULL)) == NULL) {
-		free(mp->name);
-		free(mp);
+		FREE(mp->name);
+		FREE(mp);
 		errvalid++;
 		strcpy(errbuf, "dlopen: ");
 		strcat(errbuf, path);
@@ -319,8 +319,8 @@ int dlclose(void *handle)
 		register int i;
 		for (ep = mp->exports, i = mp->nExports; i; i--, ep++)
 			if (ep->name)
-				free(ep->name);
-		free(mp->exports);
+				FREE(ep->name);
+		FREE(mp->exports);
 	}
 	if (mp == modList)
 		modList = mp->next;
@@ -331,8 +331,8 @@ int dlclose(void *handle)
 				break;
 			}
 	}
-	free(mp->name);
-	free(mp);
+	FREE(mp->name);
+	FREE(mp);
 	return result;
 }
 
@@ -370,16 +370,16 @@ static int readExports(ModulePtr mp)
 		 * environment variable. Search for the loaded
 		 * module using L_GETINFO.
 		 */
-		if ((buf = malloc(size)) == NULL) {
+		if ((buf = MALLOC(size)) == NULL) {
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
 			strcat(errbuf, strerror(errno));
 			return -1;
 		}
 		while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
-			free(buf);
+			FREE(buf);
 			size += 4*1024;
-			if ((buf = malloc(size)) == NULL) {
+			if ((buf = MALLOC(size)) == NULL) {
 				errvalid++;
 				strcpy(errbuf, "readExports: ");
 				strcat(errbuf, strerror(errno));
@@ -390,7 +390,7 @@ static int readExports(ModulePtr mp)
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
 			strcat(errbuf, strerror(errno));
-			free(buf);
+			FREE(buf);
 			return -1;
 		}
 		/*
@@ -409,7 +409,7 @@ static int readExports(ModulePtr mp)
 			else
 				lp = (struct ld_info *)((char *)lp + lp->ldinfo_next);
 		}
-		free(buf);
+		FREE(buf);
 		if (!ldp) {
 			errvalid++;
 			strcpy(errbuf, "readExports: ");
@@ -447,7 +447,7 @@ static int readExports(ModulePtr mp)
 	 * We read the complete loader section in one chunk, this makes
 	 * finding long symbol names residing in the string table easier.
 	 */
-	if ((ldbuf = (char *)malloc(sh.s_size)) == NULL) {
+	if ((ldbuf = (char *)MALLOC(sh.s_size)) == NULL) {
 		errvalid++;
 		strcpy(errbuf, "readExports: ");
 		strcat(errbuf, strerror(errno));
@@ -458,7 +458,7 @@ static int readExports(ModulePtr mp)
 	if (FSEEK(ldp, sh.s_scnptr, BEGINNING) != OKFSEEK) {
 		errvalid++;
 		strcpy(errbuf, "readExports: cannot seek to loader section");
-		free(ldbuf);
+		FREE(ldbuf);
 		while(ldclose(ldp) == FAILURE)
 			;
 		return -1;
@@ -466,7 +466,7 @@ static int readExports(ModulePtr mp)
 	if (FREAD(ldbuf, sh.s_size, 1, ldp) != 1) {
 		errvalid++;
 		strcpy(errbuf, "readExports: cannot read loader section");
-		free(ldbuf);
+		FREE(ldbuf);
 		while(ldclose(ldp) == FAILURE)
 			;
 		return -1;
@@ -485,7 +485,7 @@ static int readExports(ModulePtr mp)
 		errvalid++;
 		strcpy(errbuf, "readExports: ");
 		strcat(errbuf, strerror(errno));
-		free(ldbuf);
+		FREE(ldbuf);
 		while(ldclose(ldp) == FAILURE)
 			;
 		return -1;
@@ -518,7 +518,7 @@ static int readExports(ModulePtr mp)
 					ls->l_value - shdata.s_vaddr);
 		ep++;
 	}
-	free(ldbuf);
+	FREE(ldbuf);
 	while(ldclose(ldp) == FAILURE)
 		;
 	return 0;
@@ -536,16 +536,16 @@ static void * findMain(void)
 	int i;
 	void *ret;
 
-	if ((buf = malloc(size)) == NULL) {
+	if ((buf = MALLOC(size)) == NULL) {
 		errvalid++;
 		strcpy(errbuf, "findMain: ");
 		strcat(errbuf, strerror(errno));
 		return NULL;
 	}
 	while ((i = loadquery(L_GETINFO, buf, size)) == -1 && errno == ENOMEM) {
-		free(buf);
+		FREE(buf);
 		size += 4*1024;
-		if ((buf = malloc(size)) == NULL) {
+		if ((buf = MALLOC(size)) == NULL) {
 			errvalid++;
 			strcpy(errbuf, "findMain: ");
 			strcat(errbuf, strerror(errno));
@@ -556,7 +556,7 @@ static void * findMain(void)
 		errvalid++;
 		strcpy(errbuf, "findMain: ");
 		strcat(errbuf, strerror(errno));
-		free(buf);
+		FREE(buf);
 		return NULL;
 	}
 	/*
@@ -566,7 +566,7 @@ static void * findMain(void)
 	 */
 	lp = (struct ld_info *)buf;
 	ret = lp->ldinfo_dataorg;
-	free(buf);
+	FREE(buf);
 	return ret;
 }
 #else

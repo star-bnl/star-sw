@@ -69,10 +69,10 @@ tntColumnChform(tdmTable *table, long iColumn) {
     }    
   }
 
-  chform = (char *) malloc(strlen(colName) + strlen(chShape) 
+  chform = (char *) MALLOC(strlen(colName) + strlen(chShape) 
 			   + strlen(chtype) + 1);
   strcpy(chform,colName);
-  free(colName);
+  FREE(colName);
   strcat(chform,chShape);
   strcat(chform,chtype);
   

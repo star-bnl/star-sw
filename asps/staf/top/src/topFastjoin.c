@@ -65,8 +65,8 @@ int topTablesNotSorted(DS_DATASET_T *tbl1,DS_DATASET_T *tbl2,
   if(!dsFindColumn(&col2num,tbl2,col2))			return __LINE__;
   if(!dsColumnTypeCode(&col1type,tbl1,col1num))		return __LINE__;
   if(!dsColumnTypeCode(&col2type,tbl2,col2num))		return __LINE__;
-  *vals1=(float*)malloc(nrow1*sizeof(float)); if(!*vals1) return __LINE__;
-  *vals2=(float*)malloc(nrow2*sizeof(float)); if(!*vals2) { free(*vals1); return __LINE__; }
+  *vals1=(float*)MALLOC(nrow1*sizeof(float)); if(!*vals1) return __LINE__;
+  *vals2=(float*)MALLOC(nrow2*sizeof(float)); if(!*vals2) { FREE(*vals1); return __LINE__; }
   for(whichTable=0;whichTable<2;whichTable++) {
     switch(whichTable) {
       case 0: coltype=col1type; nrow=nrow1; tbl=tbl1; colnum=col1num; fArray=*vals1; break;
@@ -94,7 +94,7 @@ int topTablesNotSorted(DS_DATASET_T *tbl1,DS_DATASET_T *tbl2,
   return 0;
 }
 
-#define DS_FREE_VALS if(sorted) { free(rValues1); free(rValues2); }
+#define DS_FREE_VALS if(sorted) { FREE(rValues1); FREE(rValues2); }
 
 /***********************************************************************
 *

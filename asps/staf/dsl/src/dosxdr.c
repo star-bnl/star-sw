@@ -123,7 +123,7 @@ bool_t xdr_bytes(XDR *xdrs, char **cpp, unsigned *sizep, unsigned maxsize)
 			return TRUE;
 		}
 		if (sp == NULL) {
-			*cpp = sp = (char *)malloc(nodesize);
+			*cpp = sp = (char *)MALLOC(nodesize);
 		}
 		if (sp == NULL) {
 			dsErrorPrint("xdr_bytes: out of memory\n");
@@ -134,7 +134,7 @@ bool_t xdr_bytes(XDR *xdrs, char **cpp, unsigned *sizep, unsigned maxsize)
 		return xdr_opaque(xdrs, sp, nodesize);
 	case XDR_FREE:
 		if (sp != NULL) {
-			free(sp);
+			FREE(sp);
 			*cpp = NULL;
 		}
 		return TRUE;
@@ -362,7 +362,7 @@ bool_t xdr_string(XDR *xdrs, char **cpp, unsigned maxsize)
 	switch (xdrs->x_op) {
 	case XDR_DECODE:
 		if (sp == NULL) {
-			*cpp = sp = malloc((unsigned)size + 1);
+			*cpp = sp = MALLOC((unsigned)size + 1);
 		}
 		if (sp == NULL) {
 			dsErrorPrint("xdr_string out of memory\n");
@@ -373,7 +373,7 @@ bool_t xdr_string(XDR *xdrs, char **cpp, unsigned maxsize)
 	case XDR_ENCODE:
 		return xdr_opaque(xdrs, sp, (unsigned)size);
 	case XDR_FREE:
-		free(sp);
+		FREE(sp);
 		*cpp = NULL;
 		return TRUE;
 	}

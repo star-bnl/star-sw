@@ -83,7 +83,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl-yacc.c,v 1.1 1998/03/16 03:02:17 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl-yacc.c,v 1.2 1998/05/09 02:40:23 perev Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1465,7 +1465,7 @@ char * yyreds[] =
 	goto yynewstate;\
 }
 #define YYRECOVERING()	(!!yyerrflag)
-#define YYNEW(type)	malloc(sizeof(type) * yynewmax)
+#define YYNEW(type)	MALLOC(sizeof(type) * yynewmax)
 #define YYCOPY(to, from, type) \
 	(type *) memcpy(to, (char *) from, yymaxdepth * sizeof (type))
 #define YYENLARGE( from, type) \

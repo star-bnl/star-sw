@@ -10,6 +10,7 @@ if ( $#argv < 2 ) then
 endif
 #
 set pkg = $1
+set argv[1] = " "
 set pams = ` egrep -c amiModule $* | egrep -v :0 | sed -e 's/:.*//' `
 set pams = ` egrep -h 'interface.*:.*amiModule' $* | sed -e 's/:.*//' -e 's/.*interface[ 	]//' `
 #
@@ -24,11 +25,5 @@ foreach p ($pams)
 	echo "	${p}_load_ami(ami);"
 end
 echo 'return 1; }'
-echo "int ${pkg}_stop() {"
-echo '	amiInvoker *i;'
-foreach p ($pams)
-	echo "	if(NULL != (i=ami->findInvoker("\""${p}"\"")))"
-	echo "		ami->deleteInvoker("\""${p}"\"");"
-end
-echo 'return 1; }'
+echo "int ${pkg}_stop() { return 1; }"
 #

@@ -457,8 +457,8 @@ int xdrMemTest(void)
 
 	size = XDR_MEM_SIZE(NLOOP);
 	printf("xdrMemTest: size %d\n", size);
-	if ((addr = malloc(size)) == NULL) {
-		printf("xdrMemTest - malloc(%d) failed \n", size);
+	if ((addr = MALLOC(size)) == NULL) {
+		printf("xdrMemTest - MALLOC(%d) failed \n", size);
 		goto fail;
 	}
 	xdrmem_create(&xdr, addr, size, XDR_ENCODE);
@@ -475,11 +475,11 @@ int xdrMemTest(void)
 		goto fail;
 	}
 	printf("%d bytes\n\n", xdr_getpos(&xdr));
-	free(addr);
+	FREE(addr);
 	return TRUE;
 fail:
 	if (addr != NULL) {
-		free(addr);
+		FREE(addr);
 	}
 	return FALSE;
 }

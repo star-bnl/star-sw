@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "asuAlloc.h"
 
@@ -169,6 +168,11 @@ void asuMallocAdd(void *p, size_t size, char* file, int line)
    int patt=ASU_MALLOC_FILLPATTERN;
    int *c = &patt;
 
+   if (!p) {/* Not enough space*/
+      fprintf(stderr,"ASU_ALLOC: ***Error***: No Space");
+      asuMallocPrintTrace(p,size,file,line);
+      fprintf(stderr,"\n");}
+   
    switch(asu_mallocLevel) {
    case ASU_MALLOC_VERBOSE:	/* ...and print every time */
       fprintf(stderr,"ASU_MALLOC: alloc ");
@@ -206,6 +210,19 @@ void asuMallocRemove(void *p, char* file, int line)
    int patt=ASU_MALLOC_FREEPATTERN;
    int *c = &patt;
    size_t size;
+   int istk;
+   
+   istk = asuStack(p);
+   if (istk) {
+     fprintf(stderr,"ASU_MALLOC: free Error");
+     asuMallocPrintTrace(p,size,file,line);
+     fprintf(stderr,"\n");}
+     
+   switch(istk) {
+     case  1: fprintf(stderr,"          : It is stack area      \n"); 	break;
+     case -1: fprintf(stderr,"          : It is LOST stack area \n");	break;
+     case -2: fprintf(stderr,"          : It is UNDEFINED area  \n");	break;
+   }  
 
    switch(asu_mallocLevel) {
    case ASU_MALLOC_VERBOSE:	/* ...and print every time */
@@ -252,6 +269,7 @@ void *asuCalloc(size_t nobj, size_t size, char* file, int line)
    void *p=NULL;
    p = calloc(nobj,size);
    asuMallocAdd(p,size,file,line);
+   if (!p) p=(void*)(-1);
    return p;
 }
 
@@ -261,6 +279,7 @@ void *asuMalloc(size_t size, char* file, int line)
    void *p=NULL;
    p = malloc(size);
    asuMallocAdd(p,size,file,line);
+   if (!p) p=(void*)(-1);
    return p;
 }
 
@@ -270,6 +289,7 @@ void *asuRealloc(void *p, size_t size, char* file, int line)
    asuMallocRemove(p,file,line);
    p = realloc(p,size);
    asuMallocAdd(p,size,file,line);
+   if (!p) p=(void*)(-1);
    return p;
 }
 
@@ -281,3 +301,25 @@ void asuFree(void *p, char* file, int line)
 }
 
 /*--------------------------------------------------------------------*/
+
+  
+int asuStack(void *p) 
+{
+  static unsigned long MinStack=(unsigned long)(-1),MaxStack=0,MinHeap=0;
+  unsigned long NowStack,pp;
+
+  if (!MinHeap) {MinHeap = (unsigned long)malloc(8); free ((void*)MinHeap);}
+
+  NowStack = (unsigned long)&NowStack ;
+
+  if (NowStack > MaxStack) MaxStack = NowStack;
+  if (NowStack < MinStack) MinStack = NowStack;
+  pp = (unsigned long)p;
+  if (! pp) return 0;
+
+  if (MaxStack >= pp && pp > NowStack) 	return  1;
+  if (NowStack >= pp && pp > MinStack) 	return -1;
+  if (pp < MinHeap)  			return -2;
+  return 0;    
+}
+

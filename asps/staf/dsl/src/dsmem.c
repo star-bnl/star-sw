@@ -20,7 +20,7 @@ general routines for memory allocation
 /*
  * fix for realloc bug on some versions of UNIX
  */
-#define DS_REALLOC(ptr, size) ((ptr) ? realloc(ptr, size) : malloc(size))
+#define DS_REALLOC(ptr, size) ((ptr) ? realloc(ptr, size) : MALLOC(size))
 /*
  * locations for memory allocation stats
  */
@@ -49,7 +49,7 @@ void dsAllocStats(void)
 int dsBufFree(DS_BUF_T *bp)
 {
 	if (bp->out == NULL && bp->first != NULL) {
-		free(bp->first);
+		FREE(bp->first);
 		dsMemCalls++;
 		dsBufSize -= bp->limit - bp->first;
 		bp->first = bp->in = bp->limit = NULL;
@@ -78,7 +78,7 @@ int dsBufRealloc(DS_BUF_T *bp, size_t size)
 	}
 	else {
 		if (bp->first != NULL) {
-			free(bp->first);
+			FREE(bp->first);
 			dsMemCalls++;
 		}
 		ptr = NULL;
@@ -153,7 +153,7 @@ int dsFreeDataset(DS_DATASET_T *dataset)
 			}
 			if (p->flags & DS_F_ALLOC_NODE) {
 				p->flags = DS_F_INVALID;
-				free(p);
+				FREE(p);
 				dsMemCalls++;
 				dsDsetSize -= sizeof(DS_DATASET_T);
 			}
@@ -214,7 +214,7 @@ int dsListInit(DS_LIST_T *list)
 int dsListFree(DS_LIST_T *list)
 {
 	if (list->pItem != NULL) {
-		free(list->pItem);
+		FREE(list->pItem);
 		dsMemCalls++;
 		dsListSize -= sizeof(DS_LIST_T *)*list->maxcount;
 	}
@@ -238,7 +238,7 @@ int dsNewDataset(DS_DATASET_T **ppDataset, char *name)
 	}
 	dsMemCalls++;
 	if (!dsCopyName(pDataset->name, name, NULL)) {
-		free(pDataset);
+		FREE(pDataset);
 		dsMemCalls++;
 		DS_ERROR(DS_E_INVALID_DATASET_NAME);	
 	}
@@ -261,12 +261,12 @@ int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
 	if (ppTable == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
-	if ((pTable = malloc(sizeof(DS_DATASET_T))) == NULL) {
+	if ((pTable = MALLOC(sizeof(DS_DATASET_T))) == NULL) {
 		return FALSE;
 	}
 	dsMemCalls++;
 	if (!dsInitTable(pTable, tableName, typeSpecifier, rowCount, pData)) {
-		free(pTable);
+		FREE(pTable);
 		dsMemCalls++;
 		return FALSE;
 	}
@@ -314,7 +314,7 @@ int dsRealloc(DS_DATASET_T *dataset, size_t maxcount)
 		dataset->flags |= DS_F_ALLOC_P;
 	}
 	else if (dataset->p.data != NULL) {
-		free(dataset->p.data);
+		FREE(dataset->p.data);
 		dsMemCalls++;
 		dataset->p.data = NULL;
 		dataset->flags &= ~DS_F_ALLOC_P;
@@ -368,7 +368,7 @@ void *dsTypeCalloc(size_t size)
 void dsTypeFree(void *ptr, size_t size)
 {
 	if (ptr != NULL) {
-		free((char *)ptr);
+		FREE((char *)ptr);
 		dsMemCalls++;
 		dsTidSize -= size;
 	}

@@ -130,7 +130,7 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
     }
   }
 
-  // Find out longwordified size of a row and malloc a buffer
+  // Find out longwordified size of a row and MALLOC a buffer
   longwordifiedSize = tntLongwordifyRowSize(table);
   rowBuffer = (char *) MALLOC(longwordifiedSize);
 

@@ -141,13 +141,13 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    ||  !dsTableTypeSpecifier(&s2,pTbl2) 
    ){
       EML_ERROR(CANT_CREATE_TABLE);
-      free(pTbl2); /*fix memory leak -akio*/
+      FREE(pTbl2); /*fix memory leak -akio*/
    }
    if( NULL == (table2 = tdm->newTable(n2,s2,0)) ){
       EML_ERROR(CANT_CREATE_TABLE);
-      free(pTbl2); /*fix memory leak -akio*/
+      FREE(pTbl2); /*fix memory leak -akio*/
     }
-   free(pTbl2); /*fix memory leak -akio*/
+   FREE(pTbl2); /*fix memory leak -akio*/
    return table2;
 }
 
@@ -257,7 +257,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   printf("%d rows passed the cuts.\n",rowCnt);
   *percentPass=(100.0*rowCnt)/(*orig)+0.5;
   tbl->rowCount(rowCnt);
-  free(mask); /*fix memory leak -akio*/
+  FREE(mask); /*fix memory leak -akio*/
   return 7;
 }
 STAFCV_T topCut:: DoFilterTable(tdmTable *src,
@@ -320,7 +320,7 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   }
   printf("%d rows passed the cuts.\n",numberPass);
   *percentPass=(100.0*numberPass)/(*orig)+0.5;
-  free(mask); /*fix memory leak -akio*/
+  FREE(mask); /*fix memory leak -akio*/
   return 7;
 }
 STAFCV_T topCut:: filter(tdmTable * tab1, tdmTable * tab2) {
@@ -621,13 +621,13 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
    ||  !dsTableTypeSpecifier(&s3,pTbl3) 
    ){
       EML_ERROR(CANT_CREATE_TABLE);
-      free(pTbl3); /*fix memory leak -akio*/
+      FREE(pTbl3); /*fix memory leak -akio*/
    }
    if( NULL == (table3 = tdm->newTable(n3,s3,0)) ){
       EML_ERROR(CANT_CREATE_TABLE);
-      free(pTbl3); /*fix memory leak -akio*/
+      FREE(pTbl3); /*fix memory leak -akio*/
    }
-   free(pTbl3); /*fix memory leak -akio*/
+   FREE(pTbl3); /*fix memory leak -akio*/
    return table3;
 }
 

@@ -48,7 +48,7 @@ STAFCV_T top_list()
 {
    char *s;
    printf("%s",s=top->list() );
-   free(s);  /*fix memory leak -akio*/
+   FREE(s);  /*fix memory leak -akio*/
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -452,7 +452,7 @@ STAFCV_T topcut_agent_function(char* agent)
   }
   char *s;
   printf("%s\n",s=cut->cutFunction());
-  free(s); /*fix memory leak -akio*/
+  FREE(s); /*fix memory leak -akio*/
   EML_SUCCESS(STAFCV_OK);
 }
 /*-------------------------------------------------------------------*/

@@ -68,7 +68,7 @@ void cdl_init()
 /*  link libs in reverse order */
     fp = NULL;
     while (shl_get(ns, &desc) == 0) {
-      f = (FilesPtr) malloc(sizeof(Files));
+      f = (FilesPtr) MALLOC(sizeof(Files));
       f->filename = strdup( desc->filename);
       f->file_handle = desc->handle;
       if (!fileList) fileList = f;
@@ -92,7 +92,7 @@ void cdl_init()
 
 /*   Add new file to the files list
 */
-   f = (FilesPtr) malloc(sizeof(Files));
+   f = (FilesPtr) MALLOC(sizeof(Files));
    f->filename = strdup(lib_name);
    f->file_handle = file_handle;
    f->next  = fileList;
@@ -426,7 +426,7 @@ FuncPtr cdl_find_proc(char *procname)
 
    addr = (void *)cdl_get_func_lib(procname, &fp);
    if(addr != NULL) {
-       pp = (FuncPtr)malloc(sizeof(FuncDesc));
+       pp = (FuncPtr)MALLOC(sizeof(FuncDesc));
        pp->name    = strdup(procname);
        pp->file    = fp;
        pp->funcptr = (GenFuncPtr)addr;
@@ -482,7 +482,7 @@ int cdl_load(char *lib_name)
 
 /*   Add new file to the files list
 */
-   f = (FilesPtr) malloc(sizeof(Files));
+   f = (FilesPtr) MALLOC(sizeof(Files));
    f->filename = strdup(lib_name);
    f->file_handle = file_handle;
    f->next  = fileList;
@@ -527,8 +527,8 @@ int cdl_unload(char *lib_name)
    }
 
    cdl_delete_all(f);
-   free(f->filename);
-   free(f);
+   FREE(f->filename);
+   FREE(f);
    if (debug_level > 0) printf("Unlink %s file.\n",lib_name);
    return 0;
 }
@@ -772,7 +772,7 @@ int cdl_proto(char *func_proto)
 
     pp = cdl_find_proc(fname);
     if(pp == NULL) {
-       pp = (FuncPtr)malloc(sizeof(FuncDesc));
+       pp = (FuncPtr)MALLOC(sizeof(FuncDesc));
        pp->name    = strdup(fname);
        pp->file    = NULL;
        pp->funcptr = NULL;
@@ -780,12 +780,12 @@ int cdl_proto(char *func_proto)
        pp->next    = procList;
        procList    = pp;
     }
-    if(pp->arglist != NULL) free(pp->arglist);
+    if(pp->arglist != NULL) FREE(pp->arglist);
     pp->type    = proc_type;
     pp->narg    = narg;
 
     if (narg){
-       pp->arglist = atp = (ArgType *)malloc(narg * sizeof(ArgType));
+       pp->arglist = atp = (ArgType *)MALLOC(narg * sizeof(ArgType));
        for (i=0; i<narg; i++,atp++) *atp = argsp[i];
      } else 
        pp->arglist = NULL;

@@ -190,7 +190,7 @@ void kam_dui_ls_()
 }
 STAFCV_T dui_ls(char* path)
 {
-   char *result;   // 24jul97 hjw removed malloc; result was reset a 
+   char *result;   // 24jul97 hjw removed MALLOC; result was reset a 
                    // few lines below.
    // strncpy(result,"",1);     24jul97 hjw, must init in dui->ls() instead 
 

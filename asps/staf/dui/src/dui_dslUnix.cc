@@ -49,7 +49,7 @@ int dui_ls_l_Table(DS_DATASET_T *pDS, char*& listing)
    sprintf(result,DUI_LST_FORMAT
    		,"T",name,tname,rowcount,maxrowcount,rowsize);
    strcat(listing,result);
-   free(result); /*fix memory leak -akio*/
+   FREE(result); /*fix memory leak -akio*/
    return TRUE;
 }
 
@@ -82,7 +82,7 @@ int dui_ls_ld_Dataset(DS_DATASET_T *pDS,char*& listing)
    sprintf(result,DUI_LSD_FORMAT
    		,"D",name," ",elcount,-1,-1);
    strcat(listing,result);
-   free(result); /*fix memory leak -akio*/
+   FREE(result); /*fix memory leak -akio*/
    return TRUE;
 }
 
@@ -144,7 +144,7 @@ int dui_ls_l_Header(char*& listing)
 		,"Size    ");
 //		,"123456789 123456789 "
    strcat(listing,result);
-   free(result); /*fix memory leak -akio*/
+   FREE(result); /*fix memory leak -akio*/
    return TRUE;
 }
 
