@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// $Id: doEvents.C,v 1.95 2004/08/12 16:43:26 perev Exp $
+// $Id: doEvents.C,v 1.96 2004/08/16 02:27:39 perev Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
@@ -247,7 +247,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
     displayMk->AddFilter(new StMuDstFilterHelper("MuL3Filter",kFALSE));
     displayMk->AddFilter(new StColorFilterHelper("Color schema",kFALSE));
   }
-  
+
   // Initialize chain
   cout << "----------------------------------------------------------" << endl;
   cout << " doEvents - Initializing and Printing chain information   " << endl;
@@ -263,7 +263,9 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const ch
   // Event loop
   istat=0,iEvt=1;
   istat = chain->EventLoop(1,nEvents);    
-  //VP    delete setFiles; setFiles=0;
+  //VP  
+  delete setFiles; setFiles=0;
+  //  gSystem->Exit(0);
 }
 //____________________________________________________________________________
 void doEvents(Int_t startEvent, Int_t nEvents, const char *file, const char *qaflag)
@@ -379,7 +381,7 @@ int gcReadCommands(const char *file, TString& cmds)
       if (fst[0]            == 0 ) continue; // blank line
       if (fst[0]            =='#') continue; // # comment
       if (strncmp(fst,"//",2)==0 ) continue; // // comment
-      comm = strstr(line,"#"  ); if (comm) comm[0]=0; // # comment
+      //comm = strstr(line,"#"  ); if (comm) comm[0]=0; // # comment
       comm = strstr(line," //"); if (comm) comm[0]=0; // // comment
       cmds += fst;
     }
@@ -456,6 +458,9 @@ int gcInit(const char *request)
 //____________________________________________________________________________
 //////////////////////////////////////////////////////////////////////////////
 // $Log: doEvents.C,v $
+// Revision 1.96  2004/08/16 02:27:39  perev
+// delete setfiles again
+//
 // Revision 1.95  2004/08/12 16:43:26  perev
 // Cleanup from JohnVu & VP
 //
