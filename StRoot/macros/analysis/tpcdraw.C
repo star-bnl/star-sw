@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.10 1999/11/20 23:45:51 snelling Exp $
+// $Id: tpcdraw.C,v 1.11 1999/11/23 19:50:24 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.11  1999/11/23 19:50:24  snelling
+// changed variable order
+//
 // Revision 1.10  1999/11/20 23:45:51  snelling
 // Used Table member function Draw instead of making TableNtuple
 //
@@ -340,23 +343,23 @@ void tpcdraw() {
   pad1->cd();
   if (chain->GetOption("tss") || chain->GetOption("trs") || 
       chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
-    DrawPixels("y:x","(adc>2)*adc","box");
+    DrawPixels("x:y","(adc>2)*adc","box");
   }
   if (DrawPixels == 0) { DrawHits("y:x","","same,scat"); }
-  else { DrawHits("y:x","","scat"); }
+  else { DrawHits("x:y","","scat"); }
   if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
-    DrawGeantHits("x1:x0","volume_id<2446","same,scat");
+    DrawGeantHits("x[0]:x[1]","volume_id<2446","same,scat");
   }  
 
   pad2->cd();
   if (chain->GetOption("tss") || chain->GetOption("trs") || 
       chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
-    DrawPixels("z:x","(adc>2)*adc","box");
+    DrawPixels("x:z","(adc>2)*adc","box");
   }
   if (DrawPixels == 0) { DrawHits("z:x","","same,scat"); }
-  else { DrawHits("z:x","","scat"); }
+  else { DrawHits("x:z","","scat"); }
   if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
-    DrawGeantHits("x2:x0","volume_id<2446","same,scat");
+    DrawGeantHits("x[0]:x[2]","volume_id<2446","same,scat");
   }
   
   InitDraw();
