@@ -20,10 +20,14 @@
 #define PARAM1		4
 
 /* perform deconv. in the time direction */
-//#define DECONVOLUTE_TIME 
+/*
+#define DECONVOLUTE_TIME 
+*/
 
 /* perform deconv. in the pad direction */
-//#define DECONVOLUTE_PAD 
+/*
+#define DECONVOLUTE_PAD 
+*/
 
 
 /* output flags */
