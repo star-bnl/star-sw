@@ -549,60 +549,60 @@ int StiKalmanTrack::calculatePointCount() const
 	int nPts = 0;
 	if (firstNode)
 		{
-			StiKTNBidirectionalIterator it;
-			for (it=begin();it!=end();it++)
-				{
-					if ((*it).getDetector()->isActive() && (*it).getHit())
-						nPts++;
-				}
+		  StiKTNBidirectionalIterator it;
+		  for (it=begin();it!=end();it++)
+		    {
+		      if ((*it).getDetector()->isActive() && (*it).getHit())
+			nPts++;
+		    }
 		}
 	return nPts;
 }
 
 int StiKalmanTrack::calculateMaxPointCount() const
 {
-	int nPts = 0;
-	if (firstNode)
-		{
-			StiKTNBidirectionalIterator it;
-			for (it=begin();it!=end();it++)
-				{
-					if ((*it).getDetector()->isActive() && 
-							(*it).getDetector()->isOn())   // (y,z) should be used here...
-						nPts++;
-				}
-		}
-	return nPts;
+  int nPts = 0;
+  if (firstNode)
+    {
+      StiKTNBidirectionalIterator it;
+      for (it=begin();it!=end();it++)
+	{
+	  if ((*it).getDetector()->isActive() && 
+	      (*it).getDetector()->isOn())   // (y,z) should be used here...
+	    nPts++;
+	}
+    }
+  return nPts;
 }
 
 int    StiKalmanTrack::getGapCount()    const  
 {
-	int gaps = 0;
+  int gaps = 0;
   if (firstNode)
     {
-			StiKTNBidirectionalIterator it;
+      StiKTNBidirectionalIterator it;
       bool inGap = false;
-			for (it=begin();it!=end();it++)
-				{
-					if ((*it).getDetector()->isActive())
-						{
-							if ((*it).getHit())
-								{
-									if (inGap) 
-										inGap = false;
-								}
-							else
-								{
-									if (!inGap)
-										{
-											inGap = true;
-											gaps++;
-										}										
-								}
-						}
-				}
+      for (it=begin();it!=end();it++)
+	{
+	  if ((*it).getDetector()->isActive())
+	    {
+	      if ((*it).getHit())
+		{
+		  if (inGap) 
+		    inGap = false;
 		}
-	return gaps;
+	      else
+		{
+		  if (!inGap)
+		    {
+		      inGap = true;
+		      gaps++;
+		    }										
+		}
+	    }
+	}
+    }
+  return gaps;
 }
 
 int    StiKalmanTrack::getFitPointCount()    const  
@@ -614,13 +614,13 @@ int    StiKalmanTrack::getFitPointCount()    const
 
 double StiKalmanTrack::getTrackLength() const
 {
-	return calculateTrackLength();
+  return calculateTrackLength();
 }
 
 
 StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
-	return StiKTNBidirectionalIterator(firstNode);
+  return StiKTNBidirectionalIterator(firstNode);
 }
 
 StiKTNBidirectionalIterator StiKalmanTrack::end() const 
@@ -631,57 +631,58 @@ StiKTNBidirectionalIterator StiKalmanTrack::end() const
 
 double StiKalmanTrack::calculateTrackLength() const
 {
-	double length = 0;
-	if (firstNode)
-		{
-			StiKalmanTrackNode * cnode;
-			StiKalmanTrackNode * pnode;
-			pnode = firstNode;
-			cnode = static_cast<StiKalmanTrackNode *>(pnode->getFirstChild());
-			while (cnode)
-				{
-					length += calculateTrackSegmentLength(pnode,cnode);
-					pnode = cnode;
-					cnode = static_cast<StiKalmanTrackNode *>(pnode->getFirstChild() );
-				}
-		}
-	return length;
+  double length = 0;
+  if (firstNode)
+    {
+      StiKTNBidirectionalIterator first(getOuterMostHitNode());
+      StiKTNBidirectionalIterator last(getInnerMostHitNode());
+      StiKTNBidirectionalIterator it1;
+      StiKTNBidirectionalIterator it2;
+      it1 = first;
+      it2 = first; it2++;
+      while (it1!=last)
+	{
+	  length += calculateTrackSegmentLength((*it1),(*it2));
+	}
+    }
+  cout << "Track length:" << length << endl;
+  return length;
 }
 
-double StiKalmanTrack::calculateTrackSegmentLength(StiKalmanTrackNode *p1, StiKalmanTrackNode *p2) const
+double StiKalmanTrack::calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const
 {
-	double dx, dy, dz, s, c, tanl;
-	double cos1, cos2;
-	c = fabs(p1->fP3);// curvature
-	if (c<1e-12)
-		{
-			// straight track case
-			dx = p1->fX  - p2->fX;
-			dy = p1->fP0 - p2->fP0;
-			dz = p1->fP1 - p2->fP1;
-			s = sqrt(dx*dx+dy*dy+dz*dz);
-		}
-	else
-		{
-			// helix case
-			tanl=p1->fP4;
-			cos1 = p1->fP3*p1->fX - p1->fP2;
-			cos2 = p2->fP3*p2->fX - p2->fP2;
-			if (fabs(cos1)>1. || fabs(cos2)>1.)
-				{
-					// straight track case
-					dx = p1->fX  + p2->fX;
-					dy = p1->fP0 + p2->fP0;
-					dz = p1->fP1 + p2->fP1;
-					s = sqrt(dx*dx+dy*dy+dz*dz);
-				}
-			else
-				{
-					// "normal" helix case
-					s = fabs(acos(cos1)-acos(cos2))*sqrt(1+tanl*tanl)/c;
-				}
-		}
-	return s;
+  double dx, dy, dz, s, c, tanl;
+  double cos1, cos2;
+  c = fabs(p1.fP3);// curvature
+  if (c<1e-12)
+    {
+      // straight track case
+      dx = p1.fX  - p2.fX;
+      dy = p1.fP0 - p2.fP0;
+      dz = p1.fP1 - p2.fP1;
+      s = sqrt(dx*dx+dy*dy+dz*dz);
+    }
+  else
+    {
+      // helix case
+      tanl=p1.fP4;
+      cos1 = p1.fP3*p1.fX - p1.fP2;
+      cos2 = p2.fP3*p2.fX - p2.fP2;
+      if (fabs(cos1)>1. || fabs(cos2)>1.)
+	{
+	  // straight track case
+	  dx = p1.fX  + p2.fX;
+	  dy = p1.fP0 + p2.fP0;
+	  dz = p1.fP1 + p2.fP1;
+	  s = sqrt(dx*dx+dy*dy+dz*dz);
+	}
+      else
+	{
+	  // "normal" helix case
+	  s = fabs(acos(cos1)-acos(cos2))*sqrt(1+tanl*tanl)/c;
+	}
+    }
+  return s;
 }
 
 
@@ -738,23 +739,23 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
   if (firstNode==0 || lastNode==0)
     throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - firstNode||lastNode==0");
-	StiKTNBidirectionalIterator it;
-	
+  StiKTNBidirectionalIterator it;
+  
   if (trackingDirection==kInsideOut)
     {
-			for (it=begin();it!=end();it++)
-				{
-					if ((*it).getHit())
-						return &*it;
-				}
-		}
-	else
-		{	
-			for (it=end();it!=begin();it--)
-				{
-					if ((*it).getHit())
-						return &*it;
-				}
+      for (it=begin();it!=end();it++)
+	{
+	  if ((*it).getHit())
+	    return &*it;
+	}
+    }
+  else
+    {	
+      for (it=end();it!=begin();it--)
+	{
+	  if ((*it).getHit())
+	    return &*it;
+	}
     }
   throw logic_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
 }
