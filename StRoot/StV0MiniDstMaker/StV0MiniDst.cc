@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.cc,v 1.2 1999/07/26 19:17:24 jones Exp $
+ * $Id: StV0MiniDst.cc,v 1.3 1999/07/30 15:01:13 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.cc,v $
+ * Revision 1.3  1999/07/30 15:01:13  genevb
+ * Switched from TObject to StHFillObject inheritance
+ *
  * Revision 1.2  1999/07/26 19:17:24  jones
  * Added primary vertex position and v0 daughter DCA to the primary vertex
  *
@@ -175,3 +178,35 @@ float StV0MiniDst::ptot() {
   return sqrt(mPtot2);
 }
 
+void StV0MiniDst::LearnMembers() {
+  LearnMember("primVertex",(TMemOff) &StV0MiniDst::primVertex);
+  LearnMember("decayDistance",(TMemOff) &StV0MiniDst::decayDistance);
+  LearnMember("position",(TMemOff) &StV0MiniDst::position);
+  LearnMember("dcaDaughters",(TMemOff) &StV0MiniDst::dcaDaughters);
+  LearnMember("dcaParentToPrimVertex",(TMemOff) &StV0MiniDst::dcaParentToPrimVertex);
+  LearnMember("dcaPosToPrimVertex",(TMemOff) &StV0MiniDst::dcaPosToPrimVertex);
+  LearnMember("dcaNegToPrimVertex",(TMemOff) &StV0MiniDst::dcaNegToPrimVertex);
+  LearnMember("momPosDaughter",(TMemOff) &StV0MiniDst::momPosDaughter);
+  LearnMember("momNegDaughter",(TMemOff) &StV0MiniDst::momNegDaughter);
+  LearnMember("alpha",(TMemOff) &StV0MiniDst::alpha);
+  LearnMember("ptArm",(TMemOff) &StV0MiniDst::ptArm);
+  LearnMember("eLambda",(TMemOff) &StV0MiniDst::eLambda);
+  LearnMember("eK0Short",(TMemOff) &StV0MiniDst::eK0Short);
+  LearnMember("ePosDaughterProton",(TMemOff) &StV0MiniDst::ePosDaughterProton);
+  LearnMember("ePosDaughterPion",(TMemOff) &StV0MiniDst::ePosDaughterPion);
+  LearnMember("eNegDaughterProton",(TMemOff) &StV0MiniDst::eNegDaughterProton);
+  LearnMember("eNegDaughterPion",(TMemOff) &StV0MiniDst::eNegDaughterPion);
+  LearnMember("massLambda",(TMemOff) &StV0MiniDst::massLambda);
+  LearnMember("massAntiLambda",(TMemOff) &StV0MiniDst::massAntiLambda);
+  LearnMember("massK0Short",(TMemOff) &StV0MiniDst::massK0Short);
+  LearnMember("rapLambda",(TMemOff) &StV0MiniDst::rapLambda);
+  LearnMember("rapK0Short",(TMemOff) &StV0MiniDst::rapK0Short);
+  LearnMember("cTauLambda",(TMemOff) &StV0MiniDst::cTauLambda);
+  LearnMember("cTauK0Short",(TMemOff) &StV0MiniDst::cTauK0Short);
+  LearnMember("pt",(TMemOff) &StV0MiniDst::pt);
+  LearnMember("ptot",(TMemOff) &StV0MiniDst::ptot);
+  LearnMember("ptPosDaughter",(TMemOff) &StV0MiniDst::ptPosDaughter);
+  LearnMember("ptotPosDaughter",(TMemOff) &StV0MiniDst::ptotPosDaughter);
+  LearnMember("ptNegDaughter",(TMemOff) &StV0MiniDst::ptNegDaughter);
+  LearnMember("ptotNegDaughter",(TMemOff) &StV0MiniDst::ptotNegDaughter);
+}
