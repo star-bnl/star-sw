@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.5 1998/07/30 12:34:01 sakrejda Exp $
+* $Id: tfs_tpchit_merge.F,v 1.6 1998/09/18 21:56:51 perev Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.6  1998/09/18 21:56:51  perev
+* WRONG calling sequence for tls_sort
+*
 * Revision 1.5  1998/07/30 12:34:01  sakrejda
 * loop index taken out from calls to the tgc functions
 *
@@ -159,7 +162,7 @@ C     Sort each sector-row in time
             istart = irow(1,j,i)
             iend   = irow(1,j,i) + irow(2,j,i) - 1
             iret   = tls_Quick_Sort_r(irow(2,j,i),tphit(istart).z,
-     >           tphit(istart+1).z,tphit)
+     >           tphit(istart+1).z,tphit(istart))
             
 C     start of the merging itteration
             num_marked = 1
