@@ -3,11 +3,15 @@
 //02/02/01
 
 #include <iostream.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "StiMapUtilities.h"
 #include "StiDetector.h"
+#include "StiMaterial.h"
 #include "StiDrawableDetector.h"
 #include "StiDetectorLayerContainer.h"
+
 
 StiDetectorLayerContainer* StiDetectorLayerContainer::sinstance = 0;
 static double gInfintessimal = 1.e-10;
@@ -212,28 +216,74 @@ void StiDetectorLayerContainer::setRefDetector(double refangle, double position)
   return;  
 }
 
+// Load all material definition files from a given directory
+void StiDetectorLayerContainer::buildMaterials(const char* buildDirectory){
+  char* buildfile = new char[200];
+
+  DIR *pDir = opendir(buildDirectory);
+  struct dirent *pDirEnt;
+  struct stat fileStat;
+
+  while( (pDirEnt = readdir(pDir)) != 0){
+    sprintf(buildfile, "%s/%s", buildDirectory, pDirEnt->d_name);
+
+    // get file attributes
+    stat(buildfile, &fileStat);
+
+    // if regular file, process as material
+    if(S_ISREG(fileStat.st_mode)){
+      StiMaterial *pMaterial = new StiMaterial();
+      pMaterial->build(buildfile);
+
+      // TODO: add pMaterial to some container!
+
+      printf("Built material '%s'\n", pMaterial->getName());
+    } // if is regular file
+  }
+
+  closedir(pDir);
+}// buildMaterials
+
+// Recursively load all detector definition files from the given directory.
 void StiDetectorLayerContainer::build(const char* buildDirectory)
 {
-    char* buildfile = new char[200];
-    for (int sector=12; sector<=12; ++sector) {
-	for (int padrow=1; padrow<=45; ++padrow) {
-	    
-	    sprintf(buildfile, "%sTpc/Sector_%i/Padrow_%i.txt", buildDirectory, static_cast<int>(sector), padrow);
-	    //cout <<"buildfile:\t"<<buildfile<<endl;
-	    StiDetector* layer;
-	    if (mdraw) {
-		layer = new StiDrawableDetector();
-	    }
-	    else {
-		layer = new StiDetector();
-	    }
-	    
-	    layer->build(buildfile);
-	    
-	    if (layer->isOn()) push_back(layer);
-	}
-    }
-    return;
+  char* buildfile = new char[200];
+
+  DIR *pDir = opendir(buildDirectory);
+  struct dirent *pDirEnt;
+  struct stat fileStat;
+
+  while( (pDirEnt = readdir(pDir)) != 0){
+    sprintf(buildfile, "%s/%s", buildDirectory, pDirEnt->d_name);
+    
+    // get file attributes
+    stat(buildfile, &fileStat);
+
+    // is this a directory?  if so, recursively build directory
+    if((S_ISDIR(fileStat.st_mode)) && pDirEnt->d_name[0] != '.'){
+      build(buildfile);
+    } // if is directory
+    
+    // if regular file, process as detector
+    if(S_ISREG(fileStat.st_mode)){
+      StiDetector* layer;
+      if (mdraw) {
+        layer = new StiDrawableDetector();
+      }else {
+        layer = new StiDetector();
+      }
+      
+      layer->build(buildfile);      
+      if (layer->isOn()) push_back(layer);
+      printf("Built detector '%s'\n", layer->getName());
+
+    } // if is regular file
+
+  }
+
+  closedir(pDir);
+ 
+  return;
 }
 
 void StiDetectorLayerContainer::buildNext(const char* buildDirectory)
