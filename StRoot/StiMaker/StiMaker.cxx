@@ -49,7 +49,7 @@
 #include "StiGui/StiDrawableHits.h"
 #include "StiGui/StiRootDrawableHits.h"
 #include "StiGui/StiRootDrawableLine.h"
-//#include "StiGui/StiRootDrawableHitContainer.h"
+#include "StiGui/StiRootDrawableHitContainer.h"
 #include "StiGui/StiDisplayManager.h"
 
 //StiEvaluator
@@ -108,7 +108,8 @@ void StiMaker::kill()
 StiMaker::~StiMaker() 
 {
     cout <<"StiMaker::~StiMaker()"<<endl;
-    StiHitContainer::kill();
+
+    delete mhitstore;
     mhitstore = 0;
     
     delete mhitfactory;
@@ -211,14 +212,19 @@ Int_t StiMaker::Init()
 	StiEventAssociator::instance(mAssociationMaker);
     }
     
+    //The hit container
+    if (StiIOBroker::instance()->useGui()) {
+	mhitstore = new StiRootDrawableHitContainer();
+    }
+    else {
+	mhitstore = new StiHitContainer();
+    }
+
     //The track store
     mtrackstore = StiTrackContainer::instance();
 
     //The track merger
     mTrackMerger = new StiLocalTrackMerger(mtrackstore);
-
-    //The hit container
-    mhitstore = StiHitContainer::instance(StiIOBroker::instance()->useGui());
 
     //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
@@ -279,7 +285,7 @@ Int_t StiMaker::Init()
 	    
 	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kEvaluable"<<endl;
 	StiEvaluableTrackSeedFinder* temp =
-	    new StiEvaluableTrackSeedFinder(mAssociationMaker);
+	    new StiEvaluableTrackSeedFinder(mAssociationMaker, mhitstore);
 	temp->setFactory(mtrackfactory);
 	mSeedFinder=temp;
     }
@@ -296,7 +302,7 @@ Int_t StiMaker::Init()
 	mtrackfactory->setMaxIncrementCount(200);
 	
 	cout <<"StiMaker::init(). Set tracker seed finder to StiIOBroker::kComposite"<<endl;
-	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory);
+	StiCompositeSeedFinder* temp = new StiCompositeSeedFinder(mtrackfactory, mhitstore);
 	mSeedFinder=temp;
     }
     else if (StiIOBroker::instance()->seedFinderType()==StiIOBroker::kUndefined) { //not initialized
@@ -310,6 +316,7 @@ Int_t StiMaker::Init()
     mtracker = new StiKalmanTrackFinder();
     mtracker->setTrackNodeFactory(mktracknodefactory);
     mtracker->setTrackSeedFinder(mSeedFinder);
+    mtracker->setHitContainer(mhitstore);
     mtracker->isValid(true);
 
     if (StiIOBroker::instance()->useGui()) {

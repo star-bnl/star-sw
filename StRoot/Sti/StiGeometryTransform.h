@@ -11,6 +11,7 @@
 //#include "tables/St_svg_config_Table.h"
 
 class StiTrack;
+class StiHitContainer;
 class StiKalmanTrack;
 class StiKalmanTrackNode;
 class StTrack;
@@ -111,7 +112,7 @@ public:
     void operator() (const StiKalmanTrackNode*, StPhysicalHelix*);
 
     /// StGlobalTrack -> StiKalmanTrack
-    void operator() (const StGlobalTrack*, StiKalmanTrack*,
+    void operator() (StiHitContainer*, const StGlobalTrack*, StiKalmanTrack*,
 		     unsigned int maxHits=1000, 
                      const StTpcHitFilter* filter=0) const;
 

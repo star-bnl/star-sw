@@ -31,9 +31,6 @@ StiTrackFinder::StiTrackFinder()
     //Detector Container
     setDetectorContainer( StiDetectorContainer::instance() );
 
-    //Hit Container
-    setHitContainer( StiHitContainer::instance() );
-
     //TrackContainer
     setTrackContainer( StiTrackContainer::instance() );
     

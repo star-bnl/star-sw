@@ -21,8 +21,7 @@ ostream& operator<<(ostream& os, const StiHit& hit);
 
 StiTrackSeedFinder::StiTrackSeedFinder(StiDetectorContainer* det,
 				       StiHitContainer* h)
-    : StiSeedFinder(),
-      mDetStore(det), mHitStore(h)
+    : StiSeedFinder(h), mDetStore(det)
 {
     mMessenger <<"StiTrackSeedFinder::StiTrackSeedFinder()"<<endl;
     

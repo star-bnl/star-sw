@@ -14,14 +14,16 @@
 class StiRootDrawableHitContainer : public StiHitContainer, public StiRootDrawableHits
 {
 public:
-    friend class StiHitContainer;
+    
+    StiRootDrawableHitContainer();
+    virtual ~StiRootDrawableHitContainer();
+
+    //friend class StiHitContainer;
 
     virtual void clear();
     virtual void update();
     
 protected:
-    StiRootDrawableHitContainer();
-    virtual ~StiRootDrawableHitContainer();
 private:
 };
 

@@ -85,7 +85,7 @@ class StiEvaluableTrackSeedFinder : public Observer, public StiSeedFinder
 {
 public:
     ///This is the only constructor available.
-    StiEvaluableTrackSeedFinder(StAssociationMaker*);
+    StiEvaluableTrackSeedFinder(StAssociationMaker*, StiHitContainer*);
 
     ///Default destructor.
     virtual ~StiEvaluableTrackSeedFinder();

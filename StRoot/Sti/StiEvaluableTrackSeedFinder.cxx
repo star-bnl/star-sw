@@ -42,8 +42,8 @@ ostream& operator<<(ostream&, const StiHit&);
   types are excplicity prohibited.  It is assumed, however, that the StAssociationMaker
   object is owned by some other scope.
 */
-StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
-    : StiSeedFinder(),
+StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc, StiHitContainer* hc)
+    : StiSeedFinder(hc),
       mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
       mIOBroker(StiIOBroker::instance()), mSubject(StiIOBroker::instance()),
       mLowerBound(0), mMaxHits(0)
@@ -201,7 +201,7 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     track->setStTrackPairInfo(bestPair);
 
     //fitlered
-    StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(),
+    StiGeometryTransform::instance()->operator()(mHitStore, bestPair->partnerTrack(),
 						 track, mMaxHits, mTpcHitFilter);
 
     //Set StiDetectorContainer to layer corresponding to

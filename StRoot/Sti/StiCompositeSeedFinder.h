@@ -14,11 +14,13 @@ using std::vector;
 class StiKalmanTrack;
 class StTrack;
 class StiTrackSeedFinder;
+class StiHitContainer;
 
 class StiCompositeSeedFinder : public StiSeedFinder
 {
 public:
-    StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>*);
+    StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>*,
+			   StiHitContainer*);
     virtual ~StiCompositeSeedFinder();
 
     //Inherited interface

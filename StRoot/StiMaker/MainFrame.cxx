@@ -939,8 +939,8 @@ void MainFrame::printHitContainerForDetector()
 	cout <<"Error! printHitContainerForDetector(): Failed to get detector"<<endl;
 	return;
     }
-    cout << StiHitContainer::instance()->hits( layer->getPlacement()->getCenterRefAngle(),
-					       layer->getPlacement()->getCenterRadius() )
+    cout << StiMaker::instance()->hitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
+							layer->getPlacement()->getCenterRadius() )
 	 <<endl;
 }
 
@@ -1058,7 +1058,7 @@ void StiManualView::setToDefault()
 
 void MainFrame::printHits()
 {
-    cout <<*StiHitContainer::instance()<<endl;
+    cout <<*(StiMaker::instance()->hitContainer())<<endl;
 }
 
 void MainFrame::toggleFitFind()
@@ -1079,7 +1079,7 @@ void MainFrame::toggleFitFind()
 
 void MainFrame::printVertices()
 {
-    cout <<StiHitContainer::instance()->vertices()<<endl;
+    cout <<StiMaker::instance()->hitContainer()->vertices()<<endl;
 }
 
 // Non members

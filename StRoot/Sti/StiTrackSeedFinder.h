@@ -48,7 +48,7 @@ protected:
     
     //Shallow members
     StiDetectorContainer* mDetStore;
-    StiHitContainer* mHitStore;
+    //StiHitContainer* mHitStore;
 
 private:
     //The following are not implemented

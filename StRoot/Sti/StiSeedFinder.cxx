@@ -8,8 +8,9 @@
 //sti
 #include "StiSeedFinder.h"
 
-StiSeedFinder::StiSeedFinder()
-    : mFactory(0), mMessenger(*(Messenger::instance(MessageType::kSeedFinderMessage)))
+StiSeedFinder::StiSeedFinder(StiHitContainer* hc)
+    : mFactory(0), mMessenger(*(Messenger::instance(MessageType::kSeedFinderMessage))),
+      mHitStore(hc)
 {
     mMessenger <<"StiSeedFinder::StiSeedFinder()"<<endl;
 }

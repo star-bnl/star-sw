@@ -148,17 +148,23 @@ typedef hitmap::value_type hitMapValType;
 class StiHitContainer
 {
 public:
+    
+    ///Implementation of the singleton design pattern.
+    StiHitContainer();
+    ///Implementation of the singleton design pattern.
+    virtual ~StiHitContainer();
+    
     ///We include this to avoid unneccessary compiler warnings triggered by
     ///the design singleton pattern.
-    friend class nobody;
+    //friend class nobody;
     
     //Singleton access
 
     ///Access to the singleton instance.
-    static StiHitContainer* instance(bool drawable=false);
+    //static StiHitContainer* instance(bool drawable=false);
 
     ///Kill the singleton instance.
-    static void kill();
+    //static void kill();
 
     ///Set the half-width of the search window in distance along the pad.
     void setDeltaD(double);
@@ -236,10 +242,6 @@ public:
     const hitvector& vertices() const;
     
 protected:
-    ///Implementation of the singleton design pattern.
-    StiHitContainer();
-    ///Implementation of the singleton design pattern.
-    virtual ~StiHitContainer();
 
     Messenger& mMessenger;
 
@@ -248,7 +250,7 @@ private:
     hitvector mvertexvec; //! Container for primary vertices
 
 private:
-    static StiHitContainer* sinstance;
+    //static StiHitContainer* sinstance;
     friend ostream& operator<<(ostream&, const StiHitContainer&);
     
     HitMapKey mkey; //store a map key member to avoid constructor call per hit

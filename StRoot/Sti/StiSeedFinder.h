@@ -16,11 +16,12 @@ using std::string;
 class StiKalmanTrack;
 class StTrack;
 class Messenger;
+class StiHitContainer;
 
 class StiSeedFinder
 {
 public:
-    StiSeedFinder();
+    StiSeedFinder(StiHitContainer*);
     virtual ~StiSeedFinder();
 
     //Inherited interface
@@ -28,14 +29,19 @@ public:
     virtual StiKalmanTrack* next() = 0;
     virtual void reset() =0;
 
-    //SetFactory
+    ///Set factory
     void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
+
+    ///Set hit container
+    void setHitContainer(StiHitContainer*);
     
 protected:
     StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
     Messenger& mMessenger;
+    StiHitContainer* mHitStore;
     
 private:
+    StiSeedFinder(); //Not implemented
 };
 
 //inlines
@@ -45,7 +51,10 @@ inline void StiSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>*
     mFactory=val;
 }
 
-
+inline void StiSeedFinder::setHitContainer(StiHitContainer* val)
+{
+    mHitStore=val;
+}
 
 #endif
 
