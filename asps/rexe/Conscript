@@ -33,7 +33,7 @@ my $LIBPATH = $env->{ENV}->{ROOTSYS} . "/lib" . $main::PATH_SEPARATOR . $env->{L
 my $LIBS  = $env->{ROOTLIBS} . " " . $env->{ROOTGLIBS} . " " . $env->{RINTLIBS};# . " " . $env->{LIBS};
 #print "LIBS = $LIBS : ROOTLIBS = ",$env->{ROOTLIBS}," ROOTGLIBS = ",$env->{ROOTGLIBS},
 #  " RINTLIBS = ", $env->{RINTLIBS},"\n";
-if ($env->{ENV}->{STAR}) {$LIBS .= " -lStar -lStar2Root";}
+if ($env->{ENV}->{STAR}) {$LIBS .= " -lTable -lStar2Root";}
 my $Libraries =  $env->{Libraries};
 my $FC    = $env->{FC};
 my $FFLAGS = $env->{FFLAGS};
