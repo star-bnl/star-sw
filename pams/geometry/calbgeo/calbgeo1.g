@@ -4,8 +4,13 @@ MODULE  CALBGEO1 is the geometry of the Barrel EM Calorimeter
    Created   January 20, 2004
 * Based on the original CALBGEO
 *
-* $Id: calbgeo1.g,v 1.3 2004/01/22 00:28:04 potekhin Exp $
+* $Id: calbgeo1.g,v 1.4 2004/02/06 01:55:13 potekhin Exp $
 * $Log: calbgeo1.g,v $
+* Revision 1.4  2004/02/06 01:55:13  potekhin
+* Correcting the new barrel: some parts of the modules
+* were 3 deg off, this is now rectified. Also, minor
+* logic improvements.
+*
 * Revision 1.3  2004/01/22 00:28:04  potekhin
 * Correct a typo -- the angle covered by a module is 6 deg,
 * not 3
@@ -49,6 +54,7 @@ external etsphit
                 cut_length, cut_radius, future_depth,c_dep,c_lead_dep, 
                 eta_lenght, current_csda, h_eta1, h_eta2, h_phi1, h_phi2,
                 sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng, Deta,
+                angular_offset,
                 DphiTot, DphiMod, DphiT, R1, R2, R3, R4, RR(2)
       integer   layer,super,sub,i,j,ii,nn,imod
 *
@@ -167,22 +173,25 @@ Block CHLV corresponds to double modules...
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
+
       Create  CPHI
       do imod=1,calg_Nmodule(ii)
 
-          if(ii==1) then
-            Position CPHI AlphaZ=calg_shift(ii)+3.0+6.0*(imod-1) Ncopy=imod
-          endif
+          angular_offset=calg_shift(ii)+3.0+6.0*(imod-1)
 
-          if(ii.eq.2.and.calg_ModMap(imod).gt.0) then
-            Position CPHI AlphaZ=calg_shift(ii)+3.0+6.0*(imod-1) Ncopy=imod
-          endif
+          if(ii==1) {
+            Position CPHI AlphaZ=angular_offset Ncopy=imod;
+          }
+          if(ii.eq.2.and.calg_ModMap(imod).gt.0) {
+            Position CPHI AlphaZ=angular_offset Ncopy=imod;
+          }
+
       enddo
 EndBlock
 * -----------------------------------------------------------------------------
 Block CPHI corresponds to a single module
       attribute CPHI  seen=1   colo=5
-      Shape  PCON Phi1=0.0 DPhi=6.0 Nz=3,
+      Shape  PCON Phi1=-3.0 DPhi=6.0 Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
@@ -229,7 +238,7 @@ Block CSUP  is a super layer with few layers inside
       Component O  A=16.     Z=8.    W=5./21.
       Mixture   Cellulose Dens=0.35 Isvol=1       
       attribute CSUP  seen=0   colo=1
-      shape     PCON  Phi1=-3  Dphi=DphiMod  Nz=3,
+      shape     PCON  Phi1=-3.0  Dphi=DphiMod  Nz=3,
                       zi ={0, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
