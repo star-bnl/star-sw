@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.56 1998/10/06 19:52:30 fisyak Exp $
+# $Id: MakePam.mk,v 1.57 1998/10/11 23:32:50 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.57  1998/10/11 23:32:50  fisyak
+# reastore  -D__ROOT__
+#
 # Revision 1.56  1998/10/06 19:52:30  fisyak
 # Add g2t script
 #
@@ -256,6 +259,7 @@ else
 #-------------------------------rules-------------------------------
 # phony - not a file
 .PHONY               : MakeInc lib sl_lib depend clean test
+#ifdef NEVER
 all                  : MakeInc $(LIB_PKG) $(SL_PKG) 
 ifndef NOROOT
 MakeInc  : $(FILES_ALL_TAB) $(FILES_ALL_MOD) 
@@ -474,6 +478,7 @@ clean_dep:
 	rm -rf $(DEP_DIR) 
 clean_lib:
 	rm -rf $(SL_PKG) $(LIB_PKG)
+#endif #NEVER
 test: test_dir test_files test_mk
 test_files:
 	@echo LEVEL     = $(LEVEL)
