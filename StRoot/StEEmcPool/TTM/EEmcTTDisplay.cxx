@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.3 2004/01/26 21:51:53 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.4 2004/01/26 22:54:14 zolnie Exp $
 // doxygen info here
 
 #include "TList.h"
@@ -190,11 +190,14 @@ EEmcTTDisplay::trackHit(const StMuTrack& track)
   StThreeVectorD o   = h.origin(); 
   StThreeVectorD p   = h.momentum(Bfield);
   double         q   = h.charge(Bfield);
+#define DEBUG_PRINTS 0
+#if     DEBUG_PRINTS
   cerr << "<TrackHit>"<< endl;
   cerr << o << endl;
   cerr << p << endl;
   cerr << q << endl;
   cerr << "</TrackHit>"<< endl;
+#endif
   return trackHit(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),cLight*q*Bfield);
 }
 
@@ -235,6 +238,9 @@ EEmcTTDisplay::volumeName (int sec, int sub, int eta)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.4  2004/01/26 22:54:14  zolnie
+// after name cleanup
+//
 // Revision 1.3  2004/01/26 21:51:53  zolnie
 // shorter names
 //

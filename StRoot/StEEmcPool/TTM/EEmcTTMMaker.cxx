@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.7 2004/01/26 21:51:54 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.8 2004/01/26 22:54:15 zolnie Exp $
 // doxygen info here
 /** 
     \mainpage TTM - an endcap Tower to Track Match maker
@@ -387,8 +387,8 @@ EEmcTTMMaker::Make(){
       }
       if(!matched) continue;
 
-#define DEBUG_PRINTS
-#ifdef  DEBUG_PRINTS
+#define DEBUG_PRINTS 0
+#if     DEBUG_PRINTS
       cerr << "<ExtrapolateToZ>\n";      
       cerr <<  sec+1 << "|" << char(sub+'A') << "|" << eta+1 << endl;
       cerr <<  track->helix() << endl;
@@ -562,11 +562,11 @@ EEmcTTMMaker::Summary(ostream &out ) const
 ostream& 
 EEmcTower::Out(ostream &out ) const
 {
-  out << "<EEmcTower ";
-  out << " SECTOR=\""    << int(sec) << "\"" ;
-  out << " SUBSECTOR=\"" << int(sub) << "\"" ;
-  out << " ETA=\""       << int(eta) << "\"" ;
-  out << " EDEP=\""      << edep     << "\"" ;
+  out << "<EEmcTower";
+  out << " SECTOR=\""    << int(sec+1)    << "\"" ;
+  out << " SUBSECTOR=\"" << char(sub+'A') << "\"" ;
+  out << " ETA=\""       << int(eta+1)    << "\"" ;
+  out << " EDEP=\""      << edep          << "\"" ;
   out << "/>\n";
   return out;
 }
@@ -575,14 +575,9 @@ EEmcTower::Out(ostream &out ) const
 ostream& 
 Out(ostream &out , const StMuTrack &t)
 {
-  StPhysicalHelixD h = t.helix();
-  StThreeVectorF   o = t.firstPoint();
-  StThreeVectorF   p = t.momentum();
-  out << "<StMuTrack\n";
-  out << " O=\"" << o << "\"\n";
-  out << "HO=\"" << h.origin()      << "\"\n";
-  out << " P=\"" << p << "\"\n";
-  out << "HP=\"" << h.momentum(0.5*tesla) << "\"\n";
+  out << "<StMuTrack";
+  out << " ORIGIN=\""   << t.helix().origin() << "\"";
+  out << " MOMENTUM=\"" << t.momentum()   << "\"";
   out << "/>\n";
   return out;
 }
@@ -611,6 +606,9 @@ ostream&  operator<<(ostream &out, const StMuTrack    &t  )  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.8  2004/01/26 22:54:15  zolnie
+// after name cleanup
+//
 // Revision 1.7  2004/01/26 21:51:54  zolnie
 // shorter names
 //
