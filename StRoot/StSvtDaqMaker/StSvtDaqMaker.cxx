@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.11 2002/02/15 02:39:28 munhoz Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.12 2002/02/27 01:37:20 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.12  2002/02/27 01:37:20  munhoz
+ * move GetDataSet(StDAQReader) from Init() to Make()
+ *
  * Revision 1.11  2002/02/15 02:39:28  munhoz
  * switching from .const to .data
  *
@@ -83,11 +86,13 @@ Int_t StSvtDaqMaker::Init()
 
   daqReader = NULL;
 
+  /*
   St_DataSet *dataSet;
   dataSet = GetDataSet("StDAQReader");
   assert(dataSet);
   daqReader = (StDAQReader*)(dataSet->GetObject());
   assert(daqReader);
+  */
 
   SetSvtData();
 
@@ -200,6 +205,12 @@ Int_t StSvtDaqMaker::SetHybridData()
 Int_t StSvtDaqMaker::Make()
 {
    if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Make" << endm;
+
+  St_DataSet *dataSet;
+  dataSet = GetDataSet("StDAQReader");
+  assert(dataSet);
+  daqReader = (StDAQReader*)(dataSet->GetObject());
+  assert(daqReader);
 
   GetSvtData();
 
@@ -355,7 +366,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.11 2002/02/15 02:39:28 munhoz Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.12 2002/02/27 01:37:20 munhoz Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
