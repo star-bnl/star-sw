@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.2 2003/09/17 19:03:59 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.3 2003/09/17 19:57:48 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.3  2003/09/17 19:57:48  tonko
+ * Changed name of the class from DaqClf to RTSClientFCF
+ *
  * Revision 1.2  2003/09/17 19:03:59  tonko
  * Fixed a small warning in BuildCPP
  *
@@ -93,19 +96,19 @@
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
 #include "StDaqLib/TPC/fee_pin.h"
 
-ClassImp(StDaqClfMaker);
+ClassImp(StRTSClientFCFMaker);
 
 
-StDaqClfMaker::StDaqClfMaker(const char *name):StMaker(name)
+StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
 {
-  gMessMgr->Debug() << "Constructor for StDaqClfMaker()" << endm;
+  gMessMgr->Debug() << "Constructor for StRTSClientFCFMaker()" << endm;
   fcf = NULL;
   mCTransform = NULL;
 }
 
-StDaqClfMaker::~StDaqClfMaker() 
+StRTSClientFCFMaker::~StRTSClientFCFMaker() 
 {
-  gMessMgr->Debug() << "Destructor for StDaqClfMaker()" << endm;
+  gMessMgr->Debug() << "Destructor for StRTSClientFCFMaker()" << endm;
   if(fcf != NULL)
   {
     delete fcf;
@@ -122,7 +125,7 @@ StDaqClfMaker::~StDaqClfMaker()
 static FILE *ff, *dataf ;
 static class fcfAfterburner fcf_after ;
 
-Int_t StDaqClfMaker::Init()
+Int_t StRTSClientFCFMaker::Init()
 {
   PrintInfo();
 
@@ -212,14 +215,14 @@ Int_t StDaqClfMaker::Init()
 // Tonko: this should hold aaaall the gain/T0 correction tables
 // so that we don't have to redo them every time...
 
-Int_t StDaqClfMaker::InitRun(int run)
+Int_t StRTSClientFCFMaker::InitRun(int run)
 {
-	fprintf(stderr,"StDaqClfMaker::InitRun called with run %u...\n",run) ;
+	fprintf(stderr,"StRTSClientFCFMaker::InitRun called with run %u...\n",run) ;
 	
 	return kStOK ;
 }
 
-Int_t StDaqClfMaker::Make()
+Int_t StRTSClientFCFMaker::Make()
 {
   PrintInfo();
 
@@ -496,7 +499,7 @@ Int_t StDaqClfMaker::Make()
 // Note: padrows[1-13] point to the inner sectors pixel buffer 
 //       padrows[14-45] point to the outer sectors pixel buffer
 
-Int_t StDaqClfMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_seq_st *seq)
+Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_seq_st *seq)
 {
   int i,j,k;
   int r,p,s;
@@ -545,7 +548,7 @@ Int_t StDaqClfMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_s
   return offset;
 }
 
-StDaqClfCppRow *StDaqClfMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
+StDaqClfCppRow *StRTSClientFCFMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
 {
   if(splitRows) {   // split row up to 3 times as per i960
     int found = 0;
@@ -583,7 +586,7 @@ StDaqClfCppRow *StDaqClfMaker::GetCPPRow(int r, int i, StDaqClfCppRow *storage)
 
 // Copies from StTpcCoordinateTransform,
 //   except pad and tb need not be integers...
-double StDaqClfMaker::lxFromPad(int row, double pad)
+double StRTSClientFCFMaker::lxFromPad(int row, double pad)
 {
   double pitch = (row<14) ?
     gStTpcDb->PadPlaneGeometry()->innerSectorPadPitch() :
@@ -596,13 +599,13 @@ double StDaqClfMaker::lxFromPad(int row, double pad)
   return(dist2move);
 }
 
-double StDaqClfMaker::lyFromRow(int row)
+double StRTSClientFCFMaker::lyFromRow(int row)
 {
   return (gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(row));
 }
 
 // With offsets and t0 corrections
-double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
+double StRTSClientFCFMaker::lzFromTB(double timeBin, int sector, int row, int pad)
 {
   double tbWidth = (1./gStTpcDb->Electronics()->samplingFrequency());
   
@@ -634,7 +637,7 @@ double StDaqClfMaker::lzFromTB(double timeBin, int sector, int row, int pad)
 
 // Tonko: this doesc both Gain _and_ T0 corrections!
 // "sector" starts from 1 whereas "row" starts from 0 (argh!)
-void StDaqClfMaker::getGainCorrections(int sector, int row)
+void StRTSClientFCFMaker::getGainCorrections(int sector, int row)
 {
   // copy this routine from St_tpcdaq_Maker()
   int pad;
@@ -698,7 +701,7 @@ void StDaqClfMaker::getGainCorrections(int sector, int row)
 }
 
 // Save the cluster
-void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector)
+void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int p1, int p2, int t1, int t2, int r, int sector)
 {
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
 
@@ -841,7 +844,7 @@ fprintf(ff,"%d %f %f %f %e %d %d %d %d %d\n",
   }
 }
 
-void StDaqClfMaker::fillStEvent(tcl_tphit_st *hit)
+void StRTSClientFCFMaker::fillStEvent(tcl_tphit_st *hit)
 {
   assert(mStEvent);
   assert(mTpcHitColl);
@@ -863,7 +866,7 @@ void StDaqClfMaker::fillStEvent(tcl_tphit_st *hit)
   //}
 }
 
-void StDaqClfMaker::filltphit(tcl_tphit_st *hit)
+void StRTSClientFCFMaker::filltphit(tcl_tphit_st *hit)
 {
   assert(mT_tphit);
 

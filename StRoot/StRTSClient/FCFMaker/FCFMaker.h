@@ -1,13 +1,16 @@
-#ifndef StDaqClfMaker_H
-#define StDaqClfMaker_H
+#ifndef StRTSClientFCFMaker_H
+#define StRTSClientFCFMaker_H
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.1 2003/09/17 18:22:26 tonko Exp $
+ * $Id: FCFMaker.h,v 1.2 2003/09/17 19:57:48 tonko Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.2  2003/09/17 19:57:48  tonko
+ * Changed name of the class from DaqClf to RTSClientFCF
+ *
  * Revision 1.1  2003/09/17 18:22:26  tonko
  * First seemingly working set
  *
@@ -99,7 +102,7 @@ struct StDaqClfCppRow {
   StDaqClfcpp r[MAX_PADS][MAX_SEQ];
 };
 
-class StDaqClfMaker:public StMaker
+class StRTSClientFCFMaker:public StMaker
 {
  private:
   StDaqClfCppRow cpp[MAX_PADROWS];       // PADROW, PAD, SEQUENCE (0 based)
@@ -167,8 +170,8 @@ class StDaqClfMaker:public StMaker
 
  public:    
 
-  StDaqClfMaker(const char *name="tpc_hits");
-  ~StDaqClfMaker() ;
+  StRTSClientFCFMaker(const char *name="tpc_hits");
+  ~StRTSClientFCFMaker() ;
 
   Int_t Init() ;
   Int_t Make() ;
@@ -180,7 +183,7 @@ class StDaqClfMaker:public StMaker
       static const char cvs[]="Tag $Name:  $Id: built "__DATE__" "__TIME__ ; return cvs;
     }
   
-  ClassDef(StDaqClfMaker, 1)    //StAF chain virtual base class for Makers
+  ClassDef(StRTSClientFCFMaker, 1)    //StAF chain virtual base class for Makers
 };
 
 #endif
