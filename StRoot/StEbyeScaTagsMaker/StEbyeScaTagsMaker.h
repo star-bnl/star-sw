@@ -18,6 +18,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
+#include <fstream.h>
 #include "StMaker.h"
 #include "ScaTag.h"
 
@@ -53,7 +54,7 @@ public:
   void printTag(ostream& = cout);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.4 1999/09/24 01:22:57 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.5 2000/01/04 19:50:20 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeScaTagsMaker, 1)
 };
