@@ -605,10 +605,13 @@ ccc                        invec(2)=tpg_row_to_y(krowtemp,ksectortemp)
                         invec(1)=dble(vec(2))
                         invec(2)=dble(vec(3))
                         invec(3)=dble(vec(4))
-                        kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+                        kstatus=
+     +                       tpg_global_to_local(ksectortemp,
+     +                       invec,outvec)
                         vec2(1)=real(outvec(1))
                         vec2(2)=real(outvec(3))
-                        vec2(3)=mhits_tpc(mcptr(idummy,i_incidence)).itrk
+                        vec2(3)=
+     +                       mhits_tpc(mcptr(idummy,i_incidence)).itrk
                         vec2(4)=real(100*isect+irow)
                         call hfn(650+ihisto,vec2)
 c----------------------------------------------------------------
@@ -619,12 +622,17 @@ c  coordinates-- NOTE THAT I USE THE TPG ROUTINE NOW ON MOMENTA, NOT
 C  COORDINATES... looking at source code, this should work, but this
 c  kind of stuff can be tricky
                         invec(1) =
-     +                       dble(mhits_tpc(mcptr(idummy,i_incidence)).p(1))
+     +                       dble(
+     +                       mhits_tpc(mcptr(idummy,i_incidence)).p(1))
                         invec(2) =
-     +                       dble(mhits_tpc(mcptr(idummy,i_incidence)).p(2))
+     +                       dble(
+     +                       mhits_tpc(mcptr(idummy,i_incidence)).p(2))
                         invec(3) =
-     +                       dble(mhits_tpc(mcptr(idummy,i_incidence)).p(3))
-                        kstatus=tpg_global_to_local(ksectortemp,invec,outvec)
+     +                       dble(
+     +                       mhits_tpc(mcptr(idummy,i_incidence)).p(3))
+                        kstatus=
+     +                       tpg_global_to_local(ksectortemp,
+     +                       invec,outvec)
                         if (real(outvec(2)).ne.0.0) then
                            vec(21)=atand(float(outvec(1)/outvec(2)))
                         else
@@ -635,8 +643,10 @@ c  kind of stuff can be tricky
      +			  mhits_tpc(mcptr(idummy,i_incidence)).id)
                         
                         
-c     now must find the reconstructed hit on this row and sector associated with this track
-c     that is *closest* to the generated mc hit (but it must be *somewhat* close - i.e.
+c     now must find the reconstructed hit on this row and sector
+c     associated with this track
+c     that is *closest* to the generated mc hit 
+c     (but it must be *somewhat* close - i.e.
 c     within 2 cm.)
                         idummy=mxhits*(isect-1)+irow
                         closest=100.0
@@ -655,11 +665,12 @@ c     within 2 cm.)
                               endif
                            endif
                         enddo
-c     if closest>2.0) then there is no nearby reconstructed hit with same MCID
+c     if closest>2.0) then there is no 
+c     nearby reconstructed hit with same MCID
                         
                         if(closest.lt.max_sep_same_mcid)then
 c-------------------------------------------
-c store the correlated pair in the tpc_index table... -- ** new 24jul95 mal
+c store the correlated pair in the tpc_index table..- ** new 24jul95 mal
                            tpc_indexh.nok = tpc_indexh.nok+1
                            tpc_index(tpc_indexh.nok).type = 
      +                          tpc_index_type(1).tphit_mhitstpc
@@ -684,8 +695,10 @@ c-------------------------------------------
                            vec(19) = tphit(dtptr(idummy,jdummy)).phi
                            vec(20) = tphit(dtptr(idummy,jdummy)).lambda
                            vec(22) = tphit(dtptr(idummy,jdummy)).alpha
-                           vec(23) = real(tphit(dtptr(idummy,jdummy)).id)
-                           vec(24) = real(tphit(dtptr(idummy,jdummy)).flag)
+                           vec(23) = real(
+     +                          tphit(dtptr(idummy,jdummy)).id)
+                           vec(24) = real(
+     +                          tphit(dtptr(idummy,jdummy)).flag)
 c ok we have found a reconstructed hit... how many mc tracks contributed
 c  to its cluster???
                            nmc_found=0
@@ -703,7 +716,7 @@ c  to its cluster???
                               nmc_found=nmc_found+1
                               if (nmc_found.gt.nmc_found_max) then
                                  nmc_found=nmc_found_max
-                                 goto 34 ! done searching for this cluster
+                                 goto 34 ! done searching this cluster
                               endif
                               mc_found(nmc_found)=jmc
  33                           continue ! already found that one
@@ -715,11 +728,13 @@ c  to its cluster???
                            call hfn(300+ihisto,vec)
                         else
 c now, instead of declaring such a hit lost, we save it for the
-c  clean-up stage which follows, which tries to link up "lost" and "ghost"
+c  clean-up stage which follows, which tries to link up 
+c     "lost" and "ghost"
 c  hits...
                            n_maybe_lost(idummy) = n_maybe_lost(idummy)+1
                            if (n_maybe_lost(idummy).gt.200) then
-                              write(6,*)'Increase Possible Lost Array!!!'
+                              write(6,*)
+     +                             'Increase Possible Lost Array!!!'
                               goto 99
                            endif
                            maybe_lost(n_maybe_lost(idummy),idummy)=
@@ -740,14 +755,18 @@ c            e               vec(18) = 0.
                         
                      endif      ! if(nmchit .ne. oldmchit)
                   enddo         ! do i_incidence=1,n_incidence
-c ok, that's the end of this track on this sector/row, so any hit who claims
-c  to belong to the current track, but has not been associated with a mc hit,
-c  MAY BE a "ghost" hit... fill the ntuple with these guys AFTER CLEAN-UP
+c ok, that's the end of this track 
+c on this sector/row, so any hit who claims
+c  to belong to the current track, but has 
+c not been associated with a mc hit,
+c MAY BE a "ghost" hit... 
+c fill the ntuple with these guys AFTER CLEAN-UP
                   idummy=mxhits*(isect-1)+irow
                   do i_incidence=1,dtptr(idummy,0)
                      if (.not.used_recon_hit(i_incidence)) then
                         n_maybe_ghost(idummy)=n_maybe_ghost(idummy)+1
-                        if (n_maybe_ghost(idummy).gt.n_maybe_ghost_max) then
+                        if (n_maybe_ghost(idummy).gt.
+     +                       n_maybe_ghost_max) then
                            write(6,*)'Increase Possible Ghost Array!!!'
                            goto 99
                         endif
@@ -843,9 +862,12 @@ c     vec(4) = (vec(2)-vec(3))/vec(2)
          call hrout(400+ihisto,icycle,' ')
          call hrout(650+ihisto,icycle,' ')
 
-c now, run through a clean-up stage, where match-up between maybe "lost" or 
-c  "ghost" hits is attempted; (hits that should be associated with each other
-c  may wind up as "lost"+"ghost" if the  MCID for the reconstructed hit is
+c now, run through a clean-up stage, where match-up between
+c maybe "lost" or 
+c  "ghost" hits is attempted; (hits that should be associated 
+c with each other
+c  may wind up as "lost"+"ghost" if the  MCID for the 
+c reconstructed hit is
 c  incorrectly assigned, which is easy enough)
 
          do isect=1,24
@@ -858,7 +880,8 @@ c  incorrectly assigned, which is easy enough)
                   ghost_is_saved(i_maybe_ghost)=.false.
                enddo
                vec(11) = 100*isect+irow
-c if a ghost and lost hit are within 1 cm of each other, they get associated
+c if a ghost and lost hit are within 1 cm of each other,
+c they get associated
                do i_maybe_lost=1,n_maybe_lost(idummy)
                   ptr_lost=maybe_lost(i_maybe_lost,idummy)
                   vec(1) = mhits_tpc(ptr_lost).itrk
@@ -897,7 +920,8 @@ c  kind of stuff can be tricky
                         endif
                      endif
                   enddo
-                  if (closest.lt.max_sep_diff_mcid) then ! not lost after all..
+                  if (closest.lt.max_sep_diff_mcid) then 
+c not lost after all..
                      ghost_is_saved(jdummy)=.true.
                      lost_is_found(i_maybe_lost)=.true.
                      ptr_ghost=maybe_ghost(jdummy,idummy)
@@ -1066,11 +1090,12 @@ c first do MC hits on this padrow/sector
                do index1=1,mc_ptr_list(idummy,0)-1
                   do index2=index1+1,mc_ptr_list(idummy,0)
                      xydist = sqrt(
-     +                    (mhits_tpc(mc_ptr_list(idummy,index1)).x(1)-
-     +                     mhits_tpc(mc_ptr_list(idummy,index2)).x(1))**2 +
-     +                    (mhits_tpc(mc_ptr_list(idummy,index1)).x(2)-
-     +                     mhits_tpc(mc_ptr_list(idummy,index2)).x(2))**2)
-                     zdist = abs(mhits_tpc(mc_ptr_list(idummy,index1)).x(3)-
+     +                  (mhits_tpc(mc_ptr_list(idummy,index1)).x(1)-
+     +                  mhits_tpc(mc_ptr_list(idummy,index2)).x(1))**2 +
+     +                  (mhits_tpc(mc_ptr_list(idummy,index1)).x(2)-
+     +                  mhits_tpc(mc_ptr_list(idummy,index2)).x(2))**2)
+                     zdist = abs(
+     +                    mhits_tpc(mc_ptr_list(idummy,index1)).x(3)-
      +                    mhits_tpc(mc_ptr_list(idummy,index2)).x(3))
                      if (irow.lt.14) then
                         histid=1100+ihisto
@@ -1147,7 +1172,8 @@ c  mal 12jul95
                do kpix_count=1,numpix_seq
                   kdatum=tppixel(kpix).datum
                   ktdc = (kdatum - numpix_factor*numpix_seq)/tdc_factor
-                  kadc = kdatum - numpix_factor*numpix_seq - tdc_factor*ktdc
+                  kadc = kdatum - numpix_factor*numpix_seq - 
+     +                 tdc_factor*ktdc
                   kmcid = tpmcpix(kpix).mcid
                   vec(3)=kadc
                   invec(3) = dble(ktdc*time_bucket)

@@ -270,29 +270,29 @@ c       set status
 c
         tpham = tucod_ok
 
-         if(first)then
+        if(first)then
 c
 c           make id_pad array...
 c
-            first = .false.
-            id_pad(1) = 0
-            do irow = 2, mxrow
-               id_pad(irow) = id_pad(irow-1)
-     +                        + pad_plane(1).npads(irow-1)
-            enddo
-c
+           first = .false.
+           id_pad(1) = 0
+           do irow = 2, mxrow
+              id_pad(irow) = id_pad(irow-1)
+     +             + pad_plane(1).npads(irow-1)
+           enddo
+c     
 c->         constants...
 c
-            time_bucket = detector(1).drift_length/tsspar(1).ntime
-            time_bin = time_bucket/tsspar(1).v_drift
-	    rms_noise = sqrt((tsspar(1).white_rms)**2 +
-     +		(tsspar(1).sca_rms)**2)/tsspar(1).scale
-
+           time_bucket = detector(1).drift_length/tsspar(1).ntime
+           time_bin = time_bucket/tsspar(1).v_drift
+           rms_noise = sqrt((tsspar(1).white_rms/tsspar(1).scale)**2 +
+     +          (tsspar(1).sca_rms/tsspar(1).scale)**2+1.0) ! add 1 for digit
+           
         endif
 
         do jtpcl = 1, tpclusterh.nok
 
-c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal -** temp
+c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal 
 
            nseq = tpcluster(jtpcl).nseq
            jseq = tpcluster(jtpcl).jseq
@@ -1284,6 +1284,7 @@ C-----------------------------------------------------------------------
         integer npads_max,nbuck_max
         parameter(npads_max=184,nbuck_max=1024)
         integer pad_proj(npads_max),time_proj(nbuck_max)
+        integer numpix_pad_proj(npads_max)
         integer tdc_x_adc(npads_max)
         integer nmc_tracks_max,nmc_tracks
         parameter(nmc_tracks_max=2000)
@@ -1319,6 +1320,7 @@ c 3) project onto time axis (will fit projection to find z,dz,zrf)
 c 4) get time average for each pad (fit each and obtain orientation)
 c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
 
+	call vzero(numpix_pad_proj,npads_max)
         call vzero(pad_proj,npads_max)
         call vzero(time_proj,nbuck_max)
         call vzero(tdc_x_adc,npads_max)
@@ -1326,6 +1328,7 @@ c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
         do ipix=1,nclspix
            adc_sum = adc_sum+iadc(ipix)
            pad_proj(ipad(ipix)) = pad_proj(ipad(ipix))+iadc(ipix)
+           numpix_pad_proj(ipad(ipix))=numpix_pad_proj(ipad(ipix))+1
            time_proj(itdc(ipix)) = time_proj(itdc(ipix))+iadc(ipix)
            tdc_x_adc(ipad(ipix)) = tdc_x_adc(ipad(ipix))+
      +          itdc(ipix)*iadc(ipix)
@@ -1337,7 +1340,8 @@ c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
         call vfloat(pad_proj,rvec,npads_max)
         do indx=1,npads_max
            if (pad_proj(indx).ne.0)
-     +          d_rvec(indx) = sqrt(rvec(indx))*rms_noise
+     +          d_rvec(indx) = 
+     +          sqrt(float(numpix_pad_proj(indx)))*rms_noise
         enddo
         if (tph_3point_gauss(identity_vector,rvec,d_rvec,
      +       npads_max,centroid,sigma,uncertainty).ne.1) 
