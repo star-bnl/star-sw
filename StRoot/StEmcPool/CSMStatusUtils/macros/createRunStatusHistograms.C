@@ -21,5 +21,4 @@ void createRunStatusHistograms(const Char_t* directory =
   
   CSMBuildRunMap builder;
   builder.buildRunMap(directory,filter);
-//  builder.buildRunMap(directory);
 }
