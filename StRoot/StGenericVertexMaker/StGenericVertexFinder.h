@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.6 2004/07/24 19:40:38 balewski Exp $
+ * $Id: StGenericVertexFinder.h,v 1.7 2004/08/04 21:57:56 balewski Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -39,7 +39,8 @@ class StGenericVertexFinder {
   // virtual and '=0' ; those MUST be implemented
   virtual ~StGenericVertexFinder(){};                         // virtual destructor
   virtual bool           fit(StEvent*)=0;                     // fit the vertex
-  virtual int            NCtbMatches()=0;                     // returns the number of CTB match
+  virtual int            NCtbMatches()=0;                     // returns the number of tracks matched to CTB and used by the vertex finder
+  virtual int            NCtbSlats()=0;                     // returns the number of CTB slats above threshold
   virtual void           UseVertexConstraint(double, double, double, double, double)=0;
   virtual void           printInfo(ostream& = cout) const=0;
 
@@ -91,6 +92,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.7  2004/08/04 21:57:56  balewski
+// toward smarter ppLMV5
+//
 // Revision 1.6  2004/07/24 19:40:38  balewski
 // fix swap of vert & errVert
 //

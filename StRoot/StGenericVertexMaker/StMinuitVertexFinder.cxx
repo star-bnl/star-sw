@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.11 2004/07/23 01:28:55 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.12 2004/08/04 21:57:56 balewski Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.12  2004/08/04 21:57:56  balewski
+ * toward smarter ppLMV5
+ *
  * Revision 1.11  2004/07/23 01:28:55  jeromel
  * Typo corrected
  *
@@ -463,6 +466,9 @@ double StMinuitVertexFinder::beamY(double z) {
 
 int  StMinuitVertexFinder::NCtbMatches() { 
   return nCTBHits;
+}
+int  StMinuitVertexFinder::NCtbSlats() { 
+  return -777; // dum result, perhaps not needed at all,JB
 }
 
 
