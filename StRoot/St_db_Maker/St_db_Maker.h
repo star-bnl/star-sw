@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.16 2001/04/13 21:21:34 perev Exp $
+// $Id: St_db_Maker.h,v 1.17 2001/09/26 23:24:05 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.17  2001/09/26 23:24:05  perev
+// SetFlavor for table added
+//
 // Revision 1.16  2001/04/13 21:21:34  perev
 // small fix (fine) + cons's
 //
@@ -57,12 +60,11 @@ private:
   StDbBroker  *fDBBroker;	//!MySql broker 
   St_dbConfig *fHierarchy; 	//!
   TString     fDirs[10];        //! Array of dirs with DBs
-  TString     fFlavor;     	//! Flavor selection
   Int_t       fIsDBTime;	//! flag to use own time stamp
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.16 2001/04/13 21:21:34 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.17 2001/09/26 23:24:05 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -72,7 +74,6 @@ private:
 			      ,const char *dir3 = ""
                    );
    virtual        ~St_db_Maker();
-   virtual const char *GetFlavor(){ return fFlavor;}
    virtual TDatime GetDateTime() const;
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
    virtual void    SetDateTime(int idat,int itim);
@@ -82,7 +83,7 @@ private:
    virtual Int_t   Save(const char *path);
    virtual void    SetOff(const Char_t *path);
    virtual void    SetOn (const Char_t *path);
-   virtual void    SetFlavor(const char *flav){fFlavor=flav;}
+   virtual void    SetFlavor(const char *flav,const char *tabname=".all");
    virtual void    OnOff();
    virtual void    Clear(Option_t *opt=""){if(opt){/*unused*/}};
            void    SetMaxEntryTime(Int_t idate,Int_t itime);
@@ -100,7 +101,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.16 2001/04/13 21:21:34 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.17 2001/09/26 23:24:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };

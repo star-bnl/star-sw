@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.48 2001/04/14 02:03:46 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.49 2001/09/26 23:24:04 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.49  2001/09/26 23:24:04  perev
+// SetFlavor for table added
+//
 // Revision 1.48  2001/04/14 02:03:46  perev
 // const added
 //
@@ -95,13 +98,12 @@
 #include "StTree.h"
 #include "TTableDescriptor.h"
 #include "TTable.h"
+#include "TUnixTime.h"
 
 #include "StDbBroker/StDbBroker.h"
 
 static Int_t AliasDate(const char *alias);
 static Int_t AliasTime(const char *alias);
-static time_t mkgmtime(struct tm *gt);
-static time_t mkgmt(int date,int time);
 
 static const char *aliases[]={
 "sd97",   "sd98",   "year_1a","year_1b","year_1c",
@@ -294,17 +296,6 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    fDBBroker  = new StDbBroker();
    if (fMaxEntryTime) fDBBroker->SetProdTime(fMaxEntryTime);
 
-//   if (fDBBroker->IsZombie()) {
-//     Warning("OpenDB","***Can not open MySQL DB %s ***");
-//     return 0;
-//   }
-
-   if (*GetFlavor()) {
-      if (GetDebug()) 
-         printf("<St_db_Maker::OpenMySQL> Flavor %s is set\n",GetFlavor());
-      fDBBroker->SetFlavor(GetFlavor());
-   }
-
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = new St_dbConfig((char*)ts.Data());    
    assert(fHierarchy);
@@ -359,6 +350,26 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
      delete ds; dss[irow]=0;
      Error("OpenMySQL","WRONG parent %s/%s\n",ihy->parname,ihy->tabname);
    }/*end i for*/
+
+   TDataSet *wild = GetData(".all",".flavor");
+   TDataSet *flav,*flv;
+   for (irow=0,ihy=thy; irow <nrows ; irow++,ihy++)
+   {  
+     if (GetDebug()>1) 
+       printf("%4d - parID/TabId=%d/%d \t%s/%s \n"
+             ,irow,ihy->parID,ihy->tabID,ihy->parname,ihy->tabname);
+     if (strcmp(".node",ihy->tabtype)==0)	continue;
+     if (ihy->parID == 0)			continue;
+     if (ihy->tabID == 0)			continue;
+     flav = wild;
+     flv = GetData(ihy->tabname,".flavor");
+     if (flv) flav = flv;
+     if (!flav)					continue;
+     printf("<St_db_Maker::OpenMySQL> set flavor %s to %s\n"
+           ,flav->GetTitle(),flav->GetName());
+     fDBBroker->SetTableFlavor(flav->GetTitle(),ihy->tabID, ihy->parID);
+   }
+
    delete [] dss;
 //   top->ls(99);
    return top;   
@@ -691,6 +702,13 @@ Int_t  St_db_Maker::Save(const char *path)
   return (!nakt);
 }
 //_____________________________________________________________________________
+void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
+{
+   TDataSet *fl = new TDataSet(tabname);
+   fl->SetTitle(flav);
+   AddData(fl,".flavor");
+}
+//_____________________________________________________________________________
 Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *val) const
 {
    if (!tb) 				return 1;
@@ -748,7 +766,9 @@ void St_db_Maker::OnOff()
 //_____________________________________________________________________________
 void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
 {
-  fMaxEntryTime = mkgmt(idate,itime);
+  TUnixTime ut;
+  ut.SetGTime(idate,itime);
+  fMaxEntryTime = ut.GetUTime();
 }
 //_____________________________________________________________________________
 static Int_t AliasDate(const char *alias)
@@ -769,31 +789,4 @@ static Int_t AliasTime(const char *alias)
   int i;
   for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
   return times[i];
-}
-//_____________________________________________________________________________
-static time_t mkgmtime(struct tm *gt)
-{
-  time_t ut,ug;
-  struct tm *gtt;
-  gt->tm_isdst=-1;
-  ut =mktime(gt);
-  gtt = gmtime(&ut);
-  gtt->tm_isdst=-1;
-  ug = mktime(gtt);
-  ug = ut + (ut-ug);
-  return ug;
-}  
-//_____________________________________________________________________________
-static time_t mkgmt(int date,int time)
-{
-  struct tm gt;
-  if (date < 19000000) date +=19000000;
-  if (date < 19500000) date += 1000000;
-  gt.tm_year= ((date/10000)-1900);        
-  gt.tm_mon = ((date/100)%100) - 1; 
-  gt.tm_mday= ((date    )%100);
-  gt.tm_hour=  time/10000;
-  gt.tm_min = (time/100 )%100;
-  gt.tm_sec = (time     )%100;
-  return mkgmtime(&gt);
 }
