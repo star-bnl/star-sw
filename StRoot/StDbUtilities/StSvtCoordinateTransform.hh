@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.13 2004/07/29 01:38:07 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.14 2004/09/16 02:16:22 perev Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -85,6 +85,7 @@ public:
 
 private:
   
+  UInt_t       mFlag;
   StSvtConfig *mconfig;
   StSvtGeometry* mgeom;
   StSvtHybridCollection* mDriftVelocity;
