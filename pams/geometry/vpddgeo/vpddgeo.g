@@ -1,5 +1,8 @@
-* $Id: vpddgeo.g,v 1.11 2004/03/24 18:24:07 llope Exp $
+* $Id: vpddgeo.g,v 1.12 2004/03/24 19:42:39 llope Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.12  2004/03/24 19:42:39  llope
+* extremely trivial change: stupid typo in a print statement for debugging. fixed.
+*
 * Revision 1.11  2004/03/24 18:24:07  llope
 * Zposns increased by 4" w.r.t. the run-3 posns, radiator changed to quartz to plastic scintillator
 *
@@ -140,7 +143,7 @@ Created 21 June 2000
 *
      Create VPDD
 * need zpos passed on inside the vpdd definition for the I-beam
-     print *,'pVPD: Zpositions East and West:',vpdg_zposWest,' &',vpdg_zposEast,' cm'	
+     print *,'pVPD: Zpositions West and East:',vpdg_zposWest,' &',vpdg_zposEast,' cm'	
      zpos = vpdg_zposWest
      Position VPDD in Cave   z=+zpos            Konly='Many'
      zpos = vpdg_zposEast
