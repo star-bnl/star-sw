@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.h,v 1.2 2000/09/01 22:59:11 jgreid Exp $
+ * $Id: StEbyeDSTMaker.h,v 1.3 2001/09/14 17:47:08 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.h,v $
+ * Revision 1.3  2001/09/14 17:47:08  perev
+ * Removed forward decleration of StRun.
+ *
  * Revision 1.2  2000/09/01 22:59:11  jgreid
  * version 1 revision ; multiple file handling + additional data members added
  *
@@ -41,7 +44,7 @@
 #include "StEbyeEvent.h"
 
 class StEvent;
-class StRun;
+//-tu class StRun;
 class StIOMaker;
 
 class StEbyeDSTMaker : public StMaker {
@@ -67,7 +70,7 @@ public:
   Int_t Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.2 2000/09/01 22:59:11 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.3 2001/09/14 17:47:08 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEbyeDSTMaker, 1)
 };
