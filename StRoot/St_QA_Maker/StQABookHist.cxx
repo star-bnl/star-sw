@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.22 2001/10/25 20:43:43 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.23 2001/10/25 20:45:12 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.23  2001/10/25 20:45:12  lansdell
+// changed ftpc # hits range to 25k
+//
 // Revision 2.22  2001/10/25 20:43:43  lansdell
 // changed 2d ftpc globtrk histo ranges
 //
@@ -1590,13 +1593,13 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,15000.);
   m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
   // east and west on same plot
-  m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,50000.,2);
+  m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,25000.,2);
   m_pnt_ftpc->Rebin(0,"East");
   m_pnt_ftpc->Rebin(1,"West");
   m_pnt_ftpc->SetStats(kFALSE);
   // east and west on separate plots
-  m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,50000.);
-  m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,50000.);
+  m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
+  m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
 
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
   m_pnt_phiT    = QAH::MH1F("QaPointPhiT","point: #phi distribution of hits, tpc",36,0,360,2);
