@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.52  1999/02/10 14:12:43  fisyak
+#  Turn on StEventReaderMaker and StTrsMaker
+#
 #  Revision 1.51  1999/02/10 02:19:58  fisyak
 #  put back l3 and trg
 #
@@ -232,7 +235,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/10 02:19:58 $ 
+#           Last modification $Date: 1999/02/10 14:12:43 $ 
 #  default setings
 # Current Working Directory
 #
@@ -283,8 +286,6 @@ ifndef SUBDIRS
   ifndef OBJY_HOME
     SUBDIRS := $(filter-out objy, $(SUBDIRS))
   endif
-  SUBDIRS := $(filter-out StEventReaderMaker, $(SUBDIRS))
-  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
