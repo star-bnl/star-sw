@@ -87,6 +87,7 @@ install_solib:
 ifneq ($(INSTALL_SOLIB_FILES),$(EMPTY))
 	$(INSTALL) $(INSTALL_SOLIB_FILES) \
 		$(BRANCH_DIR)/solib/
+	cd $(BRANCH_DIR)/solib/; ln -s $(BRANCH_DIR)/lib/lib$(BASE_NAME).a .
 else
 	@echo "No SOLIB files installed."
 endif

@@ -12,7 +12,11 @@ inc_all:
 	-cp ../idl/*.inc .
 #
 inc_clean:
+ifneq ($(EMPTY),$(GENFILES))
 	-rm $(notdir $(shell ls $(GENFILES))) core
+else
+	-rm core
+endif
 #
 inc_test:
 #

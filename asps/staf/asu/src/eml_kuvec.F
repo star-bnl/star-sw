@@ -55,6 +55,7 @@ c:<---------------------------------------------------------------------
 #include "emlLib.inc"
 
       INTEGER*4 STATUS
+/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
       INTEGER*4 I
 
 c     write(*,*)'DEBUG:: SET_STAF_STATUS STATUS = ',STATUS
@@ -72,6 +73,7 @@ C- FIFO buffer approach. --
 	 STAF_STATUS_VECTOR(I+1) = STAF_STATUS_VECTOR(I)
       ENDDO
       STAF_STATUS_VECTOR(1) = STATUS
+-- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
 
       RETURN
       END
@@ -88,9 +90,11 @@ c:<---------------------------------------------------------------------
 #include "emlLib.inc"
 
       INTEGER*4 N
+/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
 
       GET_STAF_STATUS = 
      + STAF_STATUS_VECTOR(MAX(1,MIN(N,STAF_STATUS_COUNT)))
+-- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
 
       RETURN
       END
@@ -107,6 +111,7 @@ c:<---------------------------------------------------------------------
 #include "emlLib.inc"
 
       REAL*4 RESULT
+/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
 
       INTEGER*4 I
 
@@ -117,6 +122,7 @@ C- FIFO buffer approach. --
       ENDDO
 
       STAF_RESULT_VECTOR(1) = RESULT
+-- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
 
       RETURN
       END
@@ -133,9 +139,11 @@ c:<---------------------------------------------------------------------
 #include "emlLib.inc"
 
       INTEGER*4 N
+/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
 
       GET_STAF_RESULT
      += STAF_RESULT_VECTOR(MAX(1,MIN(N,STAF_RESULT_COUNT)))
+-- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
 
       RETURN
       END

@@ -13,7 +13,9 @@ lib_all: $(LIBDIR) $(SOLIBDIR)
 ifneq ($(LIBS),$(EMPTY))
 	-cd $(LIBDIR); \
 	$(MAKE) -f ../Makefile $(LIBS); \
-	mv lib*.so $(SOLIBDIR)
+	mv lib*.so $(SOLIBDIR); \
+	mv so_locations $(SOLIBDIR)
+	cd $(SOLIBDIR); ln -s $(LIBDIR)/lib*.a .
 endif
 #
 lib_clean:

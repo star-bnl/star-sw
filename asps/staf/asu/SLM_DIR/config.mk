@@ -30,6 +30,10 @@ BRANCH_NAME := $(shell awk '$$1=="$(BASE_NAME)" {print $$2}' $(MODULES))
 BRANCH_NAME := $(subst /, ,$(BRANCH_NAME))
 BRANCH_NAME := $(word 2,$(BRANCH_NAME))
 BRANCH_DIRS := \
+	$(STAR_LIB)/$(STAR_PHY_LEVEL)/ofl/ \
+	$(STAR_LIB)/$(STAR_SIM_LEVEL)/daq/ \
+	$(STAR_LIB)/$(STAR_SIM_LEVEL)/trg/ \
+	$(STAR_LIB)/$(STAR_PHY_LEVEL)/onl/ \
 	$(STAR_LIB)/$(STAR_PHY_LEVEL)/phy/ \
 	$(STAR_LIB)/$(STAR_ANA_LEVEL)/ana/ \
 	$(STAR_LIB)/$(STAR_SIM_LEVEL)/sim/ \
