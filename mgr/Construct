@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.102 2000/09/28 00:35:31 fisyak Exp $
+# $Id: Construct,v 1.103 2000/11/25 20:59:38 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -33,7 +33,7 @@ $FCPPPATH ="";
 chdir($STAR); my $repository = cwd(); chdir($DirPath);# print "repository $repository\n";
 Repository ($repository);# unless $param::noRepository;
 my @Repo = Repository_List; 
-if ($#Repo > -1) {
+if ($#Repo > -1 and $USER ne 'fisyak') {
   print "Repositories:  \"@Repo\";" unless ($param::quiet);
   if (defined($ARG{Salt}))       {$Salt = $ARG{Salt};}
   elsif (!defined($ARG{NoSalt}))  {$Salt = "user";}
@@ -135,6 +135,7 @@ foreach my $dir ("pams","StRoot","StPiD"){#,"asps/rexe"){#,"StDb") {
 	  $sub_dir =~ /^Star2Root$/ ||
 	  $sub_dir =~ /^StChain$/ ||
 	  $sub_dir =~ /^StBFChain$/ ||
+	  $sub_dir =~ /^StTableUtilities$/ ||
 	  $sub_dir =~ /^StUtilities$/ ||
 	  $sub_dir =~ /^StAnalysisUtilities$/ ||
 	  $sub_dir =~ /^xdf2root$/ ||
