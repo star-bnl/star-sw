@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.69 1999/09/13 23:22:53 fine Exp $
+// $Id: StMaker.cxx,v 1.70 1999/09/14 17:30:37 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.70  1999/09/14 17:30:37  fine
+// some clean ups
+//
 // Revision 1.69  1999/09/13 23:22:53  fine
 // improved version of MakeDoc with MakeAssociatedClassList function
 //
@@ -740,6 +743,7 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
  // Search C++ class declaraion looping over all *.h 
  // with the classDir directory of provided otherwise
  // within  this class source directory
+ //
 
   if (!obj) return;
   const Char_t *thisDir = classDir;
@@ -800,7 +804,7 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
                 if (*nextSym == ' ' || *nextSym == '\t') break;    
                 const Char_t *classFound = strstr(nextSym,keyWord);
                 if ( classFound && classFound == nextSym){
-                                                       status = 2;
+                                                        status = 2;
                    nextSym += lKeyWord-2;
                 }
                 else                         status = 0;             
@@ -824,9 +828,7 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
             case 4:
               if (*nextSym == ' ' || *nextSym == '\t') break;    
                                           status = 0;
-              if (*nextSym ==  0   ||
-                  *nextSym == ':'  || 
-                  *nextSym == '{'  ||
+              if (*nextSym == 0 || *nextSym == ':' || *nextSym == '{' ||
                   ( *nextSym == '/' && 
                     (*(nextSym+1) == '/' || *(nextSym+1) == '*') 
                   )
@@ -839,7 +841,7 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
                     gHtml->MakeClass((Text_t *)className.Data());
                 }
               }
-            default:                                     status = 1;
+            default:                                    status = 1;
                break;
           };
         }   while (*(++nextSym) && status ); // end of buffer
@@ -847,8 +849,7 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
       headerFile.close();
       delete [] fullFile;
     } 
-  }
-  
+  }  
 }
 //_____________________________________________________________________________
 void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses)
@@ -872,12 +873,14 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  //            $(stardir) + "StRoot/St_base"
  //            $(stardir) + "StRoot/StChain"
  //            $(stardir) + "StRoot/xdf2root"
+ //            $(stardir) + "StRoot/StarClassLibrary"
+ //            $(stardir) + "StRoot/StEvent"
  //            $(stardir) + ".share/tables"
  //            $(stardir) + "include",
  //            $(stardir) + "include/tables",
  //            $(stardir) + "StRoot/<this class name>",
  //
- //   where $(stardir) is the input parameter (by default = "$(afs)/rhic/star/packages/dev/")
+ //   where $(stardir) is the input parameter (by default = "$STAR")
  //
  // baseClasses - flag to mark whether the base classes HTML docs will be created as well
  //               = kTRUE by default
