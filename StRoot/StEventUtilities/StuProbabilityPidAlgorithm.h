@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.12 2001/03/21 17:54:31 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.13 2001/03/21 18:16:13 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.13  2001/03/21 18:16:13  aihong
+ * constructor without StEvent added
+ *
  * Revision 1.12  2001/03/21 17:54:31  aihong
  * add processPIDAsFunction()
  *
@@ -59,6 +62,8 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
  public:
 
       StuProbabilityPidAlgorithm(StEvent& ev);
+      StuProbabilityPidAlgorithm();
+
       virtual  ~StuProbabilityPidAlgorithm();
 
 
