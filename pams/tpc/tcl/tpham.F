@@ -22,9 +22,9 @@ C
      +,                       pad_plane_h, pad_plane
      +,                       tppixel_h, tppixel
      +,                       tpmcpix_h, tpmcpix
-     +,                       tpseqh, tpseq 
-     +,                       tpclusterh, tpcluster 
-     +,                       tphith, tphit )
+     +,                       tpseq_h, tpseq 
+     +,                       tpcluster_h, tpcluster 
+     +,                       tphit_h, tphit )
 
       IMPLICIT NONE
 
@@ -40,14 +40,14 @@ C     tpppixel_h
 C     tppixel:
 C     tpmcpix_h
 C     tpmcpix:
-C     tpseqh
+C     tpseq_h
 C     tpseq:
-C     tpclusterh
+C     tpcluster_h
 C     tpcluster:
 C
 C   Output arguments : 
 C
-C     tphith
+C     tphit_h
 C     tphit:
 C
 C  Returns:
@@ -159,55 +159,7 @@ C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-
-#include "tss_tsspar_pars.inc"
-#include "tss_tsspar_st.inc"
-
-#include "tpg_detector_pars.inc"
-#include "tpg_detector_st.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
-
-#include "tss_tppixel_pars.inc"
-#include "tss_tppixel_st.inc"
-#include "tss_tpmcpix_pars.inc"
-#include "tss_tpmcpix_st.inc"
-
-#include "tcl_tclpar_pars.inc"
-#include "tcl_tclpar_st.inc"
-#include "tcl_tpseq_pars.inc"
-#include "tcl_tpseq_st.inc"
-#include "tcl_tpcluster_pars.inc"
-#include "tcl_tpcluster_st.inc"
-#include "tcl_tphit_pars.inc"
-#include "tcl_tphit_st.inc"
-
-C-----------------------------------------------------------------------
-      RECORD/ table_head_st/ tsspar_h
-      RECORD/ tsspar_row_st/ tsspar(*)
-
-      RECORD/ table_head_st/ detector_h
-      RECORD/ detector_row_st/ detector(*)
-      RECORD/ table_head_st/ pad_plane_h
-      RECORD/ pad_plane_row_st/ pad_plane(*)
-
-      RECORD/ table_head_st/ tppixel_h
-      RECORD/ tppixel_row_st/ tppixel(*)
-      RECORD/ table_head_st/ tpmcpix_h
-      RECORD/ tpmcpix_row_st/ tpmcpix(*)
-
-
-      RECORD/ table_head_st/ tclpar_h
-      RECORD/ tclpar_row_st/ tclpar(*)
-      RECORD/ table_head_st/ tpseqh
-      RECORD/ tpseq_row_st/ tpseq(*)
-      RECORD/ table_head_st/ tpclusterh
-      RECORD/ tpcluster_row_st/ tpcluster(*)
-      RECORD/ table_head_st/ tphith
-      RECORD/ tphit_row_st/ tphit(*)
-
+#include "tpham.inc"
 C-----------------------------------------------------------------------
 c
 c        functions
@@ -248,7 +200,7 @@ C-----------------------------------------------------------------------
 c------------ for deconvolution -----------
         integer max_hits_in_cluster
         parameter(max_hits_in_cluster=100)
-        real q(max_hits_in_cluster)
+        real qq(max_hits_in_cluster)
         real x(max_hits_in_cluster)
         real dx(max_hits_in_cluster)
         real prf(max_hits_in_cluster)
@@ -271,7 +223,7 @@ C-----------------------------------------------------------------------
 c
 c       set status
 c
-        tpham = tucod_ok
+        tpham = STAFCV_OK
 
         if(first)then
            first = .false.
@@ -289,7 +241,7 @@ c sca and digitization noise
 c noise that comes through shaper
         filtered_noise = tsspar(1).white_rms/tsspar(1).scale
 
-        do jtpcl = 1, tpclusterh.nok
+        do jtpcl = 1, tpcluster_h.nok
 
 c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal 
 
@@ -300,7 +252,7 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal
            if(nseq.ge.tclpar(1).min_nseq)then
 
               call tph_get_cls_data(jseq, nseq, irow
-     +,                             tpseqh, tpseq 
+     +,                             tpseq_h, tpseq 
      +,                             tppixel_h, tppixel
      +,                             tpmcpix_h, tpmcpix
      +,                             nclspix, ipad, itdc, iadc, itrk
@@ -313,7 +265,7 @@ c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal
      +             ipad, itdc, iadc, itrk,
      +             white_noise, filtered_noise, nhits,
      +             max_hits_in_cluster,
-     +             q,x,dx,prf,z,dz,zrf,phi,track,irow)
+     +             qq,x,dx,prf,z,dz,zrf,phi,track,irow)
 
            else
 c
@@ -346,33 +298,33 @@ c  to cluster in TPCLUSTER table....
            fflagg=0
            if (nhits.gt.1) fflagg=1
            DO ihit=1,nhits
-              if (tphith.nok.ge.tphit_len) then
+              if (tphit_h.nok.ge.tphit_h.maxlen) then
                  write(6,*)'TPHIT table full - quitting at cluster',
      +                jtpcl
                  return
               endif
-              tphith.nok = tphith.nok+1
-	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
-              tphit(tphith.nok).cluster = jtpcl
-              tphit(tphith.nok).nseq = nseq
-              tphit(tphith.nok).row = 100*isec+irow     	! mal 30mar95
-              tphit(tphith.nok).q     = q(ihit)
-              tphit(tphith.nok).x     = x(ihit)
-              tphit(tphith.nok).dx    = dx(ihit)
-              tphit(tphith.nok).prf   = prf(ihit)
-              tphit(tphith.nok).z     = z(ihit)
-              tphit(tphith.nok).dz    = dz(ihit)
-              tphit(tphith.nok).zrf   = zrf(ihit)
-              tphit(tphith.nok).phi   = phi(ihit)
-              tphit(tphith.nok).track = track(ihit)
-              tphit(tphith.nok).flag  = fflagg
+              tphit_h.nok = tphit_h.nok+1
+	      tphit(tphit_h.nok).id = tphit_h.nok		! mal 17jan95
+              tphit(tphit_h.nok).cluster = jtpcl
+              tphit(tphit_h.nok).nseq = nseq
+              tphit(tphit_h.nok).row = 100*isec+irow     	! mal 30mar95
+              tphit(tphit_h.nok).q     = qq(ihit)
+              tphit(tphit_h.nok).x     = x(ihit)
+              tphit(tphit_h.nok).dx    = dx(ihit)
+              tphit(tphit_h.nok).prf   = prf(ihit)
+              tphit(tphit_h.nok).z     = z(ihit)
+              tphit(tphit_h.nok).dz    = dz(ihit)
+              tphit(tphit_h.nok).zrf   = zrf(ihit)
+              tphit(tphit_h.nok).phi   = phi(ihit)
+              tphit(tphit_h.nok).track = track(ihit)
+              tphit(tphit_h.nok).flag  = fflagg
 
 c     
 c     finally, transform everything to global coordinates !
 c     
 c     account for "lower-edge" binning in z coordinate
 c     
-              invec(3)=tphit(tphith.nok).z*time_bucket
+              invec(3)=tphit(tphit_h.nok).z*time_bucket
               
 c     correct (in average way) for time-offset -- (this is not beautiful)
 c     22jun95 mal
@@ -387,84 +339,84 @@ c      (effective) time constant.  For STAR, n=2, and tau is set by tss.
               istatus = tgc_row_to_y(float(irow),
      +             invec(2),pad_plane_h,pad_plane)
                             
-              istatus = tgc_pad_to_x(tphit(tphith.nok).x,
+              istatus = tgc_pad_to_x(tphit(tphit_h.nok).x,
      +             float(irow),invec(1),pad_plane_h,pad_plane)
 
               istatus = tgc_local_to_global(isec,invec,outvec)
 
                             
-              tphit(tphith.nok).x = outvec(1)
-              tphit(tphith.nok).y = outvec(2)
-              tphit(tphith.nok).z = outvec(3) 
+              tphit(tphit_h.nok).x = outvec(1)
+              tphit(tphit_h.nok).y = outvec(2)
+              tphit(tphit_h.nok).z = outvec(3) 
               
 c     
 c     zrf in units of time bins --> cm
 c     
-              tphit(tphith.nok).zrf 
-     +             = (tphit(tphith.nok).zrf)*time_bucket
+              tphit(tphit_h.nok).zrf 
+     +             = (tphit(tphit_h.nok).zrf)*time_bucket
 c     
 c     prf in units of pads --> cm
 c     
-              tphit(tphith.nok).prf 
-     +             = (tphit(tphith.nok).prf) * pad_width
+              tphit(tphit_h.nok).prf 
+     +             = (tphit(tphit_h.nok).prf) * pad_width
               
 c     also, calculate "orientation" of hit in terms of spatial quantities
               
-              tphit(tphith.nok).phi = atand(
-     +             tphit(tphith.nok).phi *
+              tphit(tphit_h.nok).phi = atand(
+     +             tphit(tphit_h.nok).phi *
      +             time_bucket / pad_width )
               
 c     must also rotate dx,dy into global coordinates...
-              tphit(tphith.nok).dz = time_bucket*tphit(tphith.nok).dz
-              dx_prime = pad_width*tphit(tphith.nok).dx
+              tphit(tphit_h.nok).dz = time_bucket*tphit(tphit_h.nok).dz
+              dx_prime = pad_width*tphit(tphit_h.nok).dx
 c     for explanation of what follows, see bottom of notebook p95
-              rad = sqrt((tphit(tphith.nok).x)**2+
-     +             (tphit(tphith.nok).y)**2)
-              tphit(tphith.nok).dx = dx_prime *
-     +             abs(tphit(tphith.nok).y)/rad
-              tphit(tphith.nok).dy = dx_prime *
-     +             abs(tphit(tphith.nok).x)/rad
+              rad = sqrt((tphit(tphit_h.nok).x)**2+
+     +             (tphit(tphit_h.nok).y)**2)
+              tphit(tphit_h.nok).dx = dx_prime *
+     +             abs(tphit(tphit_h.nok).y)/rad
+              tphit(tphit_h.nok).dy = dx_prime *
+     +             abs(tphit(tphit_h.nok).x)/rad
 
               
 c     while we have these numbers, fill the lambda field of tphit,
 c     with the ansatz that the track comes from (0,0,0)
-              tphit(tphith.nok).lambda = 
-     +             - abs(atand(tphit(tphith.nok).z/rad)) ! lambda < 0 always
+              tphit(tphit_h.nok).lambda = 
+     +             - abs(atand(tphit(tphit_h.nok).z/rad)) ! lambda < 0 always
 
 c     and I can calcualte alpha as well -- see notebook 2, pp 25-32 for
 c     explanation...
-              if (tand(tphit(tphith.nok).lambda).ne.0.0) then
-                 if (tphit(tphith.nok).lambda.ge.10.0) then
-                    tphit(tphith.nok).alpha = atand(
-     +                   0.5*tand(tphit(tphith.nok).phi)/
-     +                   tand(tphit(tphith.nok).lambda))
+              if (tand(tphit(tphit_h.nok).lambda).ne.0.0) then
+                 if (tphit(tphit_h.nok).lambda.ge.10.0) then
+                    tphit(tphit_h.nok).alpha = atand(
+     +                   0.5*tand(tphit(tphit_h.nok).phi)/
+     +                   tand(tphit(tphit_h.nok).lambda))
                  else
-                    if (tphit(tphith.nok).flag.eq.0) then
-                       tphit(tphith.nok).alpha = atand(
-     +                      tand(tphit(tphith.nok).phi)/
-     +                      tand(tphit(tphith.nok).lambda))
+                    if (tphit(tphit_h.nok).flag.eq.0) then
+                       tphit(tphit_h.nok).alpha = atand(
+     +                      tand(tphit(tphit_h.nok).phi)/
+     +                      tand(tphit(tphit_h.nok).lambda))
                     else
-                       tphit(tphith.nok).alpha = atand(
-     +                      4.0*tand(tphit(tphith.nok).phi)/
-     +                      tand(tphit(tphith.nok).lambda))
+                       tphit(tphit_h.nok).alpha = atand(
+     +                      4.0*tand(tphit(tphit_h.nok).phi)/
+     +                      tand(tphit(tphit_h.nok).lambda))
                     endif
                  endif
               else
-                 tphit(tphith.nok).alpha = 0.0
+                 tphit(tphit_h.nok).alpha = 0.0
               endif
 
 c also, need a fudge factor for the uncertainties dx dy dz.
 c  this should be understood and fixed, but for now....
-              tphit(tphith.nok).dx = tphit(tphith.nok).dx 
+              tphit(tphit_h.nok).dx = tphit(tphit_h.nok).dx 
      +             * tclpar(1).dxy_fact
-              tphit(tphith.nok).dy = tphit(tphith.nok).dy 
+              tphit(tphit_h.nok).dy = tphit(tphit_h.nok).dy 
      +             * tclpar(1).dxy_fact
-              tphit(tphith.nok).dz = tphit(tphith.nok).dz 
+              tphit(tphit_h.nok).dz = tphit(tphit_h.nok).dz 
      +             * tclpar(1).dz_fact
               
 
 c also put q (magnitude of hit) into units of energy loss
-              tphit(tphith.nok).q = tphit(tphith.nok).q * de_scale
+              tphit(tphit_h.nok).q = tphit(tphit_h.nok).q * de_scale
               
            ENDDO
 
@@ -479,7 +431,7 @@ c
 
 C-----------------------------------------------------------------------
         Subroutine tph_get_cls_data(jseq, nseq, irow
-     +,                            tpseqh, tpseq 
+     +,                            tpseq_h, tpseq 
      +,                            tppixel_h, tppixel
      +,                            tpmcpix_h, tpmcpix
      +,                            nclspix, ipad, itdc, iadc, itrk
@@ -494,7 +446,7 @@ C
 C     jseq:
 C     nseq:
 C     irow:
-C     tpseqh:
+C     tpseq_h:
 C     tpseq:
 C     tpppixel_h
 C     tppixel:
@@ -537,26 +489,18 @@ c
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
+#include "PAM.inc"
+#include "tcl_tpseq.inc"
+      RECORD      /TABLE_HEAD_ST/                 tpseq_h
+      RECORD       /TCL_TPSEQ_ST/                tpseq(*)
+#include "tss_tppixel.inc"
+      RECORD      /TABLE_HEAD_ST/               tppixel_h
+      RECORD     /TSS_TPPIXEL_ST/              tppixel(*)
+#include "tss_tpmcpix.inc"
+      RECORD      /TABLE_HEAD_ST/               tpmcpix_h
+      RECORD     /TSS_TPMCPIX_ST/              tpmcpix(*)
 
-#include "tss_tppixel_pars.inc"
-#include "tss_tppixel_st.inc"
-#include "tss_tpmcpix_pars.inc"
-#include "tss_tpmcpix_st.inc"
 
-#include "tcl_tpseq_pars.inc"
-#include "tcl_tpseq_st.inc"
-
-C-----------------------------------------------------------------------
-
-      RECORD/ table_head_st/ tppixel_h
-      RECORD/ tppixel_row_st/ tppixel(*)
-      RECORD/ table_head_st/ tpmcpix_h
-      RECORD/ tpmcpix_row_st/ tpmcpix(*)
-
-      RECORD/ table_head_st/ tpseqh
-      RECORD/ tpseq_row_st/ tpseq(*)
 
 C-----------------------------------------------------------------------
         integer lvmax,iucomp
@@ -660,7 +604,7 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
-     +     q,x,dx,prf,z,dz,zrf,phi,track,irow)
+     +     qq,x,dx,prf,z,dz,zrf,phi,track,irow)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -702,11 +646,12 @@ C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
+#include "PAM.inc"
+#include "tcl_tclpar.inc"
+      RECORD      /TABLE_HEAD_ST/                tclpar_h
+      RECORD      /TCL_TCLPAR_ST/               tclpar(*)
 
-#include "tas_structures.inc"
-#include "tcl_tclpar_pars.inc"
-#include "tcl_tclpar_st.inc"
-      RECORD/ tclpar_row_st/ tclpar(*)
+
 
       integer nseq,nclspix
       integer ipad(*),itdc(*),iadc(*),itrk(*)
@@ -721,15 +666,15 @@ C-----------------------------------------------------------------------
 
       integer max_hits_in_cluster
 c        parameter(max_hits_in_cluster=30)
-      real q(max_hits_in_cluster)
-      real x(max_hits_in_cluster)
-      real dx(max_hits_in_cluster)
-      real prf(max_hits_in_cluster)
-      real z(max_hits_in_cluster)
-      real dz(max_hits_in_cluster)
-      real zrf(max_hits_in_cluster)
-      real phi(max_hits_in_cluster)
-      real track(max_hits_in_cluster)
+      real qq(*)
+      real x(*)
+      real dx(*)
+      real prf(*)
+      real z(*)
+      real dz(*)
+      real zrf(*)
+      real phi(*)
+      real track(*)
 
       logical look_for_many,triage_cuts
 c----------------------------------------------------------------
@@ -750,7 +695,7 @@ c*** skip the neural net for now..... mal 21jun95
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
      +           nhits,
-     +           q,x,dx,prf,z,dz,zrf,phi,track)
+     +           qq,x,dx,prf,z,dz,zrf,phi,track)
             if (nhits.gt.max_hits_in_cluster) 
      +           write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
          endif
@@ -758,7 +703,7 @@ c*** skip the neural net for now..... mal 21jun95
             call tph_fit_isolated_cluster(tclpar, nclspix,
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,
-     +           q,x,dx,prf,z,dz,zrf,phi,track)
+     +           qq,x,dx,prf,z,dz,zrf,phi,track)
             nhits=1
          endif
 c
@@ -772,7 +717,7 @@ c*****************
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
-     +        q,x,dx,prf,z,dz,zrf,phi,track)
+     +        qq,x,dx,prf,z,dz,zrf,phi,track)
          nhits=1
       endif
       
@@ -798,10 +743,10 @@ c
 c Returns: true if should proceed with multi-peak search. false otherwise
 c
       implicit none
-#include "tas_structures.inc"
-#include "tcl_tclpar_pars.inc"
-#include "tcl_tclpar_st.inc"
-      RECORD/ tclpar_row_st/ tclpar(*)
+#include "PAM.inc"
+#include "tcl_tclpar.inc"
+      RECORD      /TABLE_HEAD_ST/                tclpar_h
+      RECORD      /TCL_TCLPAR_ST/               tclpar(*)
 
       integer ipad(*),itdc(*),iadc(*),nclspix
       real ppa,tta,pa,ta,a,pta ! these are produce sums (ta = tdc(i)*adc(i))
@@ -877,7 +822,7 @@ C-----------------------------------------------------------------------
      +     ipad, itdc, iadc, itrk,
      +     white_noise, filtered_noise,
      +     nhits,
-     +     q,x,dx,prf,z,dz,zrf,phi,track)
+     +     qq,x,dx,prf,z,dz,zrf,phi,track)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -909,18 +854,19 @@ C
 C   Functional Description : 
 C-----------------------------------------------------------------------
 c passed inputs
+#include "PAM.inc"
+#include "tcl_tclpar.inc"
+      RECORD      /TABLE_HEAD_ST/                tclpar_h
+      RECORD      /TCL_TCLPAR_ST/               tclpar(*)
 
-#include "tas_structures.inc"
-#include "tcl_tclpar_pars.inc"
-#include "tcl_tclpar_st.inc"
-      RECORD/ tclpar_row_st/ tclpar(*)
+
 
       integer nseq,nclspix
       integer ipad(*),itdc(*),iadc(*),itrk(*)
       integer npix_seq(*),nhits
       real white_noise,filtered_noise
 c passed outputs
-      real q(*)
+      real qq(*)
       real x(*)
       real dx(*)
       real prf(*)
@@ -1089,7 +1035,7 @@ c calculate "positions"...
          call tph_fit_isolated_cluster(tclpar, nclspix,
      +        ipad,itdc,iadc,itrk,
      +        white_noise, filtered_noise,
-     +        q,x,dx,prf,z,dz,zrf,phi,track)
+     +        qq,x,dx,prf,z,dz,zrf,phi,track)
       else                      ! just use pixels around local maximum
          do imax=1,nmax
             jpad=max_pos(1,imax)
@@ -1113,7 +1059,7 @@ c calculate "positions"...
      +           white_noise, filtered_noise,
      +           qtemp,xtemp,dxtemp,prftemp,ztemp,dztemp,zrftemp,
      +           phitemp,tracktemp)
-            q(imax)     = qtemp(1)
+            qq(imax)     = qtemp(1)
             x(imax)     = xtemp(1)
             dx(imax)    = dxtemp(1)
             prf(imax)   = prftemp(1)
@@ -1149,7 +1095,7 @@ C-----------------------------------------------------------------------
       Subroutine tph_fit_isolated_cluster(tclpar, nclspix,
      +				ipad, itdc, iadc, itrk,
      +				white_noise, filtered_noise,
-     +                          q,x,dx,prf,z,dz,zrf,phi,track)
+     +                          qq,x,dx,prf,z,dz,zrf,phi,track)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -1166,7 +1112,7 @@ C     rms_noise: rms noise on adc values
 C
 C   Output arguments : 
 C
-C     q         - "integrated charge" (sum of adc counts)
+C     qq         - "integrated charge" (sum of adc counts)
 C     x,dx,prf  - position, uncertainty, and width along row (units=pads)
 C     z,dz,zrf  - position, uncertainty, and width along time (units=buckets)
 C     phi       - "orientation" of cluster
@@ -1195,17 +1141,19 @@ C-----------------------------------------------------------------------
 
 
 c passed inputs
-#include "tas_structures.inc"
-#include "tcl_tclpar_pars.inc"
-#include "tcl_tclpar_st.inc"
-      RECORD/ tclpar_row_st/ tclpar(*)
+#include "PAM.inc"
+#include "tcl_tclpar.inc"
+      RECORD      /TABLE_HEAD_ST/                tclpar_h
+      RECORD      /TCL_TCLPAR_ST/               tclpar(*)
+
+
 
 	integer nclspix
 	integer ipad(*),itdc(*),iadc(*),itrk(*)
 	integer nhits
 
 c passed outputs
-        real q(*)
+        real qq(*)
         real x(*)
         real dx(*)
         real prf(*)
@@ -1279,7 +1227,7 @@ c 5) sum up adc contribs from all MC tracks (will check to see who gave most)
      +          itdc(ipix)*iadc(ipix)
         enddo
 c q:
-        q(1) = adc_sum
+        qq(1) = adc_sum
 
 c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
         call vfloat(pad_proj,rvec,npads_max)
