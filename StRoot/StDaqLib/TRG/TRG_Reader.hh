@@ -31,7 +31,7 @@ class TRG_Reader : public DetectorReader
   friend class EventReader;
 
 public:
-  TRG_Reader *getTRGReader(int sector){cout <<"DUMMY implementation"<<endl;};
+  TRG_Reader *getTRGReader(int sector){cout <<"DUMMY implementation"<<endl; return FALSE;};
   ZeroSuppressedReader *getZeroSuppressedReader(int sector){cout<<sector<<endl; return FALSE;};
   ADCRawReader *getADCRawReader(int sector){cout<<sector<<endl; return FALSE;};
   PedestalReader *getPedestalReader(int sector){cout<<sector<<endl; return FALSE;};

@@ -31,7 +31,7 @@ class SVT_Reader : public DetectorReader
   friend class EventReader;
 
 public:
-  SVT_Reader *getSVTReader(int sector){cout <<"DUMMY implementation"<<endl;};
+  SVT_Reader *getSVTReader(int sector){cout <<"DUMMY implementation"<<endl; return FALSE;};
   ZeroSuppressedReader *getZeroSuppressedReader(int sector){cout<<sector<<endl; return FALSE;};
   ADCRawReader *getADCRawReader(int sector){cout<<sector<<endl; return FALSE;};
   PedestalReader *getPedestalReader(int sector){cout<<sector<<endl; return FALSE;};

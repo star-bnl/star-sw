@@ -31,7 +31,7 @@ class EMC_Reader : public DetectorReader
   friend class EventReader;
 
 public:
-  EMC_Reader *getEMCReader(int sector){cout <<"DUMMY implementation"<<endl;};
+  EMC_Reader *getEMCReader(int sector){cout <<"DUMMY implementation"<<endl; return FALSE;};
   ZeroSuppressedReader *getZeroSuppressedReader(int sector){cout<<sector<<endl; return FALSE;};
   ADCRawReader *getADCRawReader(int sector){cout<<sector<<endl; return FALSE;};
   PedestalReader *getPedestalReader(int sector){cout<<sector<<endl; return FALSE;};

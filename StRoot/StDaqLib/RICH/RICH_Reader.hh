@@ -31,7 +31,7 @@ class RICH_Reader : public DetectorReader
   friend class EventReader;
 
 public:
-  RICH_Reader *getRICHReader(int sector){cout <<"DUMMY implementation"<<endl;};
+  RICH_Reader *getRICHReader(int sector){cout <<"DUMMY implementation"<<endl; return FALSE;};
   ZeroSuppressedReader *getZeroSuppressedReader(int sector){cout<<sector<<endl; return FALSE;};
   ADCRawReader *getADCRawReader(int sector){cout<<sector<<endl; return FALSE;};
   PedestalReader *getPedestalReader(int sector){cout<<sector<<endl; return FALSE;};
