@@ -1,0 +1,122 @@
+* created 6/5/98 Kathy Turner
+* 
+* ************************************************************
+* ***** IMPORTANT NOTE *************
+* - See also notes from Pavel Nevski on his WWW page about this:
+* - The extension of the input file (first letter) tells Geant
+*   what type of file it is and can therefore read it correctly.
+*    .t is text file
+*    .x is xdf file - if you are reading directly from xdf file use this
+*    .s is staf tables  - if you are using commands to write a staf table
+*                   to use for geant OR to read from a staf table file,
+*                   then use this extension.
+* ******************************************************************* 
+* notes:  
+*   => instead of using an input file, can generate a muon directly using:
+*    phase 1 5 10 10 .95 .95 1.56 1.58 OR
+* OR gkin etc.
+******************************************************************
+macro run__
+   nev=1 _
+   input_file=muons_central_2.txt _
+   output_file=muons_central_2.xdf _
+   phystype=muons _
+   geomtype=muons 
+   
+* SETUP DIRECTORIES TO FIND KUMACS:
+    
+DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./kumacs/tpc,_
+./kumacs/sim,_
+./kumacs/gen,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+./pams/gen/kumac,_
+./pams/sim/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/kumacs/sim,_
+$STAR/kumacs/gen,_
+$STAR/kumacs/svt,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac,_
+$STAR/pams/sim/kumac 
+ 
+def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+* turn debugger on just for GSTAR! ******************************
+ debug on
+ 
+* ******* INITIALIZATION BEFORE LOADING ************************
+ exec gstar#init_phys [phystype] 
+ exec gstar#init_geom [geomtype]
+ 
+* LOAD LIBRARIES
+ if $vexist(make_done)=0 then
+   make geometry
+   make sim/g2t
+   make sim/gstar
+   vec/cre make_done
+ endif
+
+******** INITIALIZATION AFTER LOADING ************************
+*  nothing now
+ 
+ 
+* debugger stuff just for GSTAR!
+  swit 2 3
+  next; dcut cave z 225 10 10 .04 .04
+    
+* open input file - this in in GEANT format!
+  user/input tx [input_file]
+  
+* open output file:
+  exec write_table_to_file#init outunit [output_file]
+  
+* write Run information to output file - already in staf format 
+  exec write_table_to_file#write outunit /dui/geant/Run
+  
+  
+*************** LOOP OVER EVENTS *****************************
+  
+   do iev = 1,[nev]
+ 
+*  do for debugging:
+     next; dcut cave z 225 10 10 .04 .04
+* if you want to generate particles by hand, do it here 
+*   using phase or gkin
+* run gstar/g2t - automatically reads from input file
+     exec gstar#process_event
+*  write out Run information on first event only
+     exec write_table_to_file#write outunit /dui/geant/Event
+     
+   enddo
+   
+******************* CLOSE OUTPUT ***************************
+   exec write_table_to_file#close outunit
+* 
+* ***********************************************************
+   
+
+
+
+
+
+
+
+
+
+
