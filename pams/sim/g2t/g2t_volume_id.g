@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.28 2000/08/14 20:43:49 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.29 2000/11/17 02:55:21 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.29  2000/11/17 02:55:21  nevski
+* TOF geometry 3 - tof tray moved to east
+*
 * Revision 1.28  2000/08/14 20:43:49  nevski
 * bug corrected
 *
@@ -48,6 +51,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       if (First) then
           first=.false.
           call RBPUSHD
+*        in simulations done in MDC1 (1998) btog_posit1 was not saved
           btog_posit1 = 23
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
@@ -229,6 +233,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
            innout     = numbv(4)
            volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
         elseif (btog_version==2) then
+*          simulations done in 2000
            if (btog_choice==4) then
               rileft     = 1
               sector     = btog_posit1
@@ -239,6 +244,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
               print *,' g2t_volume_id : choice not coded yet '
            endif        
         elseif (btog_version==3) then
+*          For simulations after 28-sep-00, before it was version 2
            if (btog_choice==2) then      ! Full TOF
              rileft     = numbv(1)       !     west(1)/east(2)
              sector     = numbv(2)       !     tray(1-60)
@@ -246,13 +252,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              sub_sector = numbv(4)       !     theta-tray(4w:1-4, 5w:1-5)
              section    = numbv(5)       !     phi-tray(4w:1-9,5w:1)
            elseif (btog_choice==3) then  ! ~25% TOF (only on west side)
-             rileft     = 1              !     west (pre-set)
+             rileft     = 2              !     east (pre-set)
              sector     = numbv(1)       !     tray
              innout     = numbv(2)       !     4wide/5wide section
              sub_sector = numbv(3)       !     theta-tray
              section    = numbv(4)       !     phi-tray
            elseif (btog_choice==4) then  !  TOFp (single tray)
-             rileft     = 1              !     west (pre-set)
+             rileft     = 2              !     east (pre-set)
              sector     = btog_posit1    !     tray (pre-set)
              innout     = numbv(1)       !     4wide/5wide section
              sub_sector = numbv(2)       !     theta-tray
