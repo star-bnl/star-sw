@@ -8,9 +8,14 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.13 2002/02/27 20:17:58 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.14 2002/05/16 02:39:13 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.14  2002/05/16 02:39:13  struck
+//  switch reco/embedding mode (m_Mode=0/1).
+//  Embedding mode skips L3 biased events (return kStErr).
+//  Reco mode fills StEvent as before.
+//
 //  Revision 1.13  2002/02/27 20:17:58  struck
 //  adding globalTrack->setEncodedMethod() to mark tracks as l3 tracks in StEvent
 //
@@ -76,11 +81,6 @@ Stl3RawReaderMaker::~Stl3RawReaderMaker(){
 Int_t Stl3RawReaderMaker::Init(){
   //  Init - is a first method the top level StChain calls to initialize all its makers
 
-  // Make Connection to raw data
-  //DAQReaderSet = GetDataSet("StDAQReader");
- 
-  // set switches
-  mWriteStEvent   = kTRUE;
   mL3On = kFALSE;
 
   //SetDebug(1);
@@ -127,6 +127,7 @@ Int_t Stl3RawReaderMaker::Make()
           gMessMgr->Error() << "Stl3RawReaderMaker::Make():  no DaqReader found!" << endm;
 	  return kStWarn;
     }
+
     StDAQReader *daqReader = (StDAQReader*)(DAQReaderSet->GetObject()) ;
     if (daqReader) { 
           ml3reader = daqReader->getL3Reader();
@@ -153,12 +154,25 @@ Int_t Stl3RawReaderMaker::Make()
 					     << " i960 clusters found in sec " << sec << endm;
 		}
 
-		// fill StEvent
-		if (mWriteStEvent) {
+		switch (m_Mode) {
+		case 0:
+		      // standard mode: fill StEvent
+		      gMessMgr->Info("Stl3RawReaderMaker: Fill StEvent.");
 		      if (fillStEvent() != 0) {
 			    gMessMgr->Error("Stl3RawReaderMaker: problems filling l3 into StEvent.");
 			    return kStErr;
 		      }
+		      break;
+		case 1:
+		      // embedding mode: skip biased events,
+                      //                 return kStErr (or better: kStSkip)
+		      gMessMgr->Info("Stl3RawReaderMaker: Embedding Mode, check L3 bias.");
+		      return checkL3Bias();
+		      break;
+		default:
+		      // unknown mode: do nothing!
+		      gMessMgr->Error("Stl3RawReaderMaker: Unknown mode, return kStWarn");
+		      return kStWarn;
 		}
 
 	  } // if (ml3reader)
@@ -175,7 +189,10 @@ Int_t Stl3RawReaderMaker::Make()
 		// so don't crash the chain
 		else {
 		      gMessMgr->Warning("Stl3RawReaderMaker: no l3 data found.");
-		      return kStWarn;
+		      // standard mode: return warning
+		      if (m_Mode!=1) return kStWarn;
+		      // embedding mode: return ok, since there is obviously no bias
+		      else return kStOk;
 		}
 	  } 
 
@@ -185,6 +202,61 @@ Int_t Stl3RawReaderMaker::Make()
     return kStOk;
 }
 
+//_____________________________________________________________________________
+
+Int_t Stl3RawReaderMaker::checkL3Bias() 
+{
+
+  // get Gl3AlgorithmReader
+  Gl3AlgorithmReader* gl3Reader = ml3reader->getGl3AlgorithmReader();
+  if (!gl3Reader) {
+        gMessMgr->Error("Stl3RawReaderMaker: L3 is ON, but L3 summary data is missing!");
+	gMessMgr->Error("Stl3RawReaderMaker: ==> This event is bad, skip it!");
+	return kStErr;
+  }
+
+  // check data
+  // L3_summary.on==0 indicates that the event crashed in
+  // L3 online and raw data contains no valid information for us
+  if (ml3reader->getL3_Summary()->on == 0) {
+        gMessMgr->Warning("Stl3RawReaderMaker: L3 crashed online on this event, no usefull information.");
+	gMessMgr->Warning("Stl3RawReaderMaker: ==> This event is WEIRD, but definitely unbiased!");
+	return kStOk;
+  }
+
+  // number of algorithms
+  mNumberOfAlgorithms = gl3Reader->getNumberofAlgorithms();
+
+  Algorithm_Data* algData = gl3Reader->getAlgorithmData();
+
+  // default return value: kStErr == skip event
+  // should be kStSkip
+  int returnValue = kStErr; 
+
+  //
+  // check Pass-Thru Algorithm for hadronic triggers
+  // that is either TWReject && triggerWord=0x1...
+  // or TRUE && triggerWord=0x1...
+  //
+  // __STATUS as of NOV. 2001__
+  //
+  for (int i=0; i<mNumberOfAlgorithms; i++) {
+	if ( (algData[i].algId==10 || algData[i].algId==1)
+	     && ml3reader->getL3_P()->trg_word>0x0fff
+	     && ml3reader->getL3_P()->trg_word<0x2000
+	     && algData[i].build==1 ) {
+
+	      if (m_DebugLevel) {
+		    printf("L0 trigger word: %x\n", ml3reader->getL3_P()->trg_word); 
+		    printf("pass-thru algorithm Id: %i\n", algData[i].algId);
+	      }
+	      // this event is unbiased ==>> take it!
+	      returnValue = kStOk;
+	}
+  }
+
+  return returnValue;
+}
 
 //_____________________________________________________________________________
 
