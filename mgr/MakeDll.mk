@@ -13,7 +13,7 @@ endif
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-.SUFFIXES: .cxx .c .o .d Cint.cxx .h
+.SUFFIXES: .cxx .c .o .d .h
 
 #
 ifndef STAF_MAKE_HOME
@@ -108,7 +108,10 @@ FILES_TAB  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*_Table.cxx )))
 FILES_MOD  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_*_Module.cxx )))
 #FILES_DAT  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_DataSet.cxx )))
 FILES_XDF  := $(strip $(wildcard $(addprefix $(SRC_DIR)/, St_XDFFile.cxx )))
+FILES_CXX  := $(filter-out Cint.cxx, $(nodir $(wildcard $(SRC_DIR)/St*.cxx )))
 FILES_ALL  := $(strip $(wildcard $(SRC_DIR)/St*.cxx ))
+FILES_CINT := $(strip $(wildcard $(SRC_DIR)/St*Cint.cxx))
+FILES_ALL  := $(filter-out $(FILES_CINT), $(FILES_ALL))
 FILES_ST   := $(strip $(FILES_SYM) $(FILES_SYT) $(FILES_TAB) $(FILES_MOD) $(FILES_DAT))
 FILES_ALL  := $(filter-out $(FILES_ST),  $(FILES_ALL))
 FILES_ORD  := $(FILES_ALL)
