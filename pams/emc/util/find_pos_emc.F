@@ -95,6 +95,8 @@ c*-
       elseif(det.eq.BSMDP) then                     ! Barrel SMD phi strip
          eta=rl*(ems_control(1).bemc_eta_bin(ebin*2-1)
      +          +ems_control(1).bemc_eta_bin(ebin*2+1))/2.0
+      elseif(det.eq.ESMDE .or. det.eq.ESMDP) then   ! Endcap SMD phi strip
+         eta= 0.0  ! we don't know
       elseif(det.eq.0) then                         ! Gap
          eta=rl*(
      +        ems_control(1).bemc_eta_bin(ems_control(1).neta(BEMC)+1)
@@ -108,3 +110,4 @@ c*-
       
       return
       end
+
