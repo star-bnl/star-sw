@@ -186,12 +186,10 @@ c
              
                  call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
                  call ev0_update_track_param(trak(i).xc,trak(i).rc,
-     +                xn1,trak(i).r0,trk1)
-                 call ev0_project_track(trak(j).xc,trak(j).rc,xp,xn2)
-                 
+     +                xn1,trak(i).r0,trk1,bfield(3))
+                 call ev0_project_track(trak(j).xc,trak(j).rc,xp,xn2)    
                  call ev0_update_track_param(trak(j).xc,trak(j).rc,
-     +                xn2,trak(j).r0,trk2)
-                 
+     +                xn2,trak(j).r0,trk2,bfield(3))
                  if( trk1(3) .lt. 99990.0 .and. 
      +                trk2(3) .lt. 99990.0) then
                     rdcheck(jk)=(xn1(1)-xn2(1))**2+(xn1(2)-xn2(2))**2
@@ -243,11 +241,11 @@ C restore first point so that no swimming back is necessary
               xn2(2)=xn2sav(2)
  
 C                 call ev0_project_track(trak(i).xc,trak(i).rc,xp,xn1)
-C                 call ev0_update_track_param(trak(i).xc,trak(i).rc,
-C     +                xn1,trak(i).r0,trk1)
+C                 call ev0_update_track_param2(trak(i).xc,trak(i).rc,
+C     +                xn1,trak(i).r0,trk1,bfield(3))
 C                 call ev0_project_track(trak(j).xc,trak(j).rc,xp,xn2)
-C                 call ev0_update_track_param(trak(j).xc,trak(j).rc,
-C     +                xn2,trak(j).r0,trk2)
+C                 call ev0_update_track_param2(trak(j).xc,trak(j).rc,
+C     +                xn2,trak(j).r0,trk2,bfield(3))
               endif
 
               if( updated) then 
@@ -269,11 +267,12 @@ CC-------  the 3D calculation of the v0_dca
                  rd=(trk1(3)-trk2(3))**2
                  call ev0_3D_dca(rd,pst1,pst2,trk1,trk2,xn1,
      +                xn2,trak(i).rc,trak(j).rc)
+                 
                  call ev0_update_track_param(trak(i).xc,trak(i).rc,
-     +                xn1,trak(i).r0,trk1)
+     +                xn1,trak(i).r0,trk1,bfield(3))
                  
                  call ev0_update_track_param(trak(j).xc,trak(j).rc,
-     +                xn2,trak(j).r0,trk2)  
+     +                xn2,trak(j).r0,trk2,bfield(3))  
 
 
 CC  ----------------------------------------------------------------------
