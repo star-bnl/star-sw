@@ -6,9 +6,9 @@
 macro/global/import *
 * Book groups tables
  cd [data]/svt/tracks
- tdm/newtable candidate_groups sgr_groups 30000
- tdm/newtable groups sgr_groups 30000
- tdm/newtable mcgroups sgr_groups 30000
+ tdm/newtable candidate_groups sgr_groups 50000
+ tdm/newtable groups sgr_groups 200000
+ tdm/newtable mcgroups sgr_groups 40000
  cd /dui
  
  return
@@ -19,8 +19,8 @@ macro srs
 macro/global/import *
 
   cd [data]/svt/hits
-    newtable scs_spt scs_spt 20000
-    newtable srs_result srs_result 20000
+    newtable scs_spt scs_spt 30000
+    newtable srs_result srs_result 30000
   cd /dui
   
 return
@@ -39,10 +39,10 @@ macro stk
 macro/global/import *
    
   cd [data]/svt/tracks
-  tdm/newtable stk_track stk_track 6000
-  tdm/newtable stk_kine stk_kine 6000
-  tdm/newtable stk_mctrack stk_track 6000
-  tdm/newtable stk_mckine stk_kine 6000
+  tdm/newtable stk_track stk_track 50000
+  tdm/newtable stk_kine stk_kine 10000
+  tdm/newtable stk_mctrack stk_track 10000
+  tdm/newtable stk_mckine stk_kine 10000
   
   cd /dui
   

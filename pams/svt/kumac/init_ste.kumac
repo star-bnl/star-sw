@@ -14,5 +14,6 @@
      
   message 'init_ste'
   newtable ste_teff ste_teff 1
-  
+  cell/putvalue 'dui/run/params/svt/stkpars/stkpars[0].direct' 2	
+  cell/putvalue 'dui/run/params/svt/stkpars/stkpars[0].fill' 0 
   return
