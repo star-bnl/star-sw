@@ -13,6 +13,9 @@
             <A href="EventControlPanel.gif">"Event Control Panel"</A>
          to control the event and optional filter selections
          <LI>
+         The <a href="filter.gif">"Filter panel"</a> to check and change the parameters of the current StEvent 
+         filtr
+         <LI>
             The informational widget <A href="InfoWidget.gif">"Info"</A>
          to represent the "maker" status information
          <LI>
@@ -23,27 +26,27 @@
       <P>New StEventDisplayMaker has been included into <A href="readme1.html">doEvents.C 
             and bfc.C </A>
       STAR macros
-      <P>Since the new version of the maker calls a <a href="http://root.bnl.gov">Qt-based version of ROOT</a>
-         to try it one has to do (temporary):
+      <P>Since the new version of the maker calls a <a href="http://root.bnl.gov">Qt-based 
+            version of ROOT</a> to try it one has to do (temporary):
          <OL>
             <LI>
                Set that ROOT version with the shell command <small><code>
-<pre>
+                     <pre>
 stardev
 setup ROOT 3.03.09.qt 
-</pre></small></CODE>
-               
-         <LI>
-            Check out the StEventDisplayMaker code and compile it with "cons" <small><code>
-                  <pre>     
+</pre></small>
+            </CODE>
+            <LI>
+               Check out the StEventDisplayMaker code and compile it with "cons" <small><code>
+                     <pre>     
  cvs co StRoot/StEventDisplayMaker
  cons +StEventDisplay
 </pre></small>
-         </CODE>
-         <LI>
-            run <A href="readme1.html">doEvents.C</A>
-            <OL>
-            </OL>
+            </CODE>
+            <LI>
+               run <A href="readme1.html">doEvents.C</A>
+         <OL>
+         </OL>
       <P>&nbsp;</P>
       </LI>
    </body>
