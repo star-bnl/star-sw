@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.16 2000/02/29 20:20:29 levine Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.17 2000/06/22 21:19:16 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.17  2000/06/22 21:19:16  ward
+ * added stop<start to bad cluster criteria
+ *
  * Revision 1.16  2000/02/29 20:20:29  levine
  * corrected loop logic line 220
  *
@@ -184,7 +187,7 @@ int TPCV2P0_ZS_SR::initialize()
 	      stop = clusters[i].stop_time_bin;
 	      //MJL: not used:   len = stop - start + 1;
 	      // catch bad values of start, stop
-	      if (start<0 || start>511 || stop<0 || stop>511) {
+	      if ( stop<start || start<0 || start>511 || stop<0 || stop>511) {
 		struct EventInfo ei;
 		ei = detector->ercpy->getEventInfo();
 		printf("%s:%d: bad TPC cluster data detected\n",
@@ -229,7 +232,7 @@ int TPCV2P0_ZS_SR::initialize()
 		stop = clusters[i].stop_time_bin;
 		len = stop - start + 1;
 		// catch bad values of start, stop
-		if (start<0 || start>511 || stop<0 || stop>511) {
+		if ( stop<start || start<0 || start>511 || stop<0 || stop>511) {
 		  struct EventInfo ei;
 		  ei = detector->ercpy->getEventInfo();
 		  printf("%s:%d: bad TPC cluster data detected\n",
