@@ -57,8 +57,8 @@ SOC_PTR_T myPtr;
 private:
 //:----------------------------------------------- PRIV VARIABLES     --
 IDREF_T myIdRef;
-string *myName;
-string *myType;
+stafString *myName;
+stafString *myType;
 unsigned char myLock;
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
