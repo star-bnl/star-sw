@@ -15,7 +15,7 @@ StFtpcTrack::StFtpcTrack(StThreeVector<double> momentum,
 }
 
 StFtpcTrack::StFtpcTrack()
-  :StPhysicalHelix((StThreeVector<double>)0,(StThreeVector<double>)0,(double)0,(double)0)
+:StPhysicalHelix(StThreeVector<double>(),StThreeVector<double>(),0,0)
 {
   // cout<<"Constructing an empty Track"<<endl;
   mB=0;
