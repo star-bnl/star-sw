@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QA_outhistfile.C,v 1.12 2000/03/20 15:45:06 kathy Exp $
+// $Id: bfcread_dst_QA_outhistfile.C,v 1.13 2000/03/20 17:32:55 kathy Exp $
 // $Log: bfcread_dst_QA_outhistfile.C,v $
+// Revision 1.13  2000/03/20 17:32:55  kathy
+// setbranches in all macros so that they will work with softlinks - for StIOMaker
+//
 // Revision 1.12  2000/03/20 15:45:06  kathy
 // add libraries to load in bfcread_dst_QA*.C so it will work on linux; worked on solaris without adding them - I have no idea why
 //
@@ -45,6 +48,7 @@
 //
 // Kathy's notes (12/1/99):
 //   - reads from .dst.root or .xdf.root file produced from bfc.C 
+//    - sets dst & geant branches (uses both)
 //   - opens output histogram file
 //   - run maker (St_QA_Maker) to book,fill histograms
 //   - writes out histograms to *.hist.root file
@@ -125,6 +129,8 @@ void bfcread_dst_QA_outhistfile(
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
 //  - turn geant Branch on - dstBranch already on from input file
      IOMk->SetDebug();
+     IOMk->SetIOMode("r");
+     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
      IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
      IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
 

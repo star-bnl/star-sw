@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.21 2000/02/29 18:25:14 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.22 2000/03/20 17:32:55 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.22  2000/03/20 17:32:55  kathy
+// setbranches in all macros so that they will work with softlinks - for StIOMaker
+//
 // Revision 1.21  2000/02/29 18:25:14  kathy
 // fix typo
 //
@@ -147,8 +150,6 @@ void bfcread_hist_to_ps(
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
-//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
   IOMk->SetBranch("histBranch",0,"r"); //activate dst Branch
 
 

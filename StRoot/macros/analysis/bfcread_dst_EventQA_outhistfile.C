@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.8 2000/03/17 23:10:05 kathy Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.9 2000/03/20 17:32:54 kathy Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.9  2000/03/20 17:32:54  kathy
+// setbranches in all macros so that they will work with softlinks - for StIOMaker
+//
 // Revision 1.8  2000/03/17 23:10:05  kathy
 // make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
 //
@@ -29,6 +32,7 @@
 // owner:  Curtis Lansdell, Kathy Turner
 // what it does: 
 //    - reads a *.dst.root OR .dst.xdf file from bfc.C 
+//    - sets dst & runco branches (uses both)
 //    - runs StEventMaker (loads StEvent) 
 //    - runs StEventQAMaker (books & fills hist)
 //    - opens & writes histograms to output hist file 
@@ -104,7 +108,8 @@ void bfcread_dst_EventQA_outhistfile(
    
 // Input File Maker
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
-//     also open the runco branch in addition to dst branch (input file)
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("dstBranch",0,"r");
     IOMk->SetBranch("runcoBranch",0,"r");
 

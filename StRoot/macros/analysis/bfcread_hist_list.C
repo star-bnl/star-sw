@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.16 2000/02/14 20:30:40 kathy Exp $ 
+// $Id: bfcread_hist_list.C,v 1.17 2000/03/20 17:32:55 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.17  2000/03/20 17:32:55  kathy
+// setbranches in all macros so that they will work with softlinks - for StIOMaker
+//
 // Revision 1.16  2000/02/14 20:30:40  kathy
 // removing unneeded macros; updating documentation in bfcread macros
 //
@@ -113,8 +116,6 @@ void bfcread_hist_list(
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
-//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
   IOMk->SetBranch("histBranch",0,"r"); //activate dst Branch
 
 
