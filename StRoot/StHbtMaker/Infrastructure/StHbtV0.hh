@@ -11,6 +11,10 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.3  2000/02/01 00:33:32  laue
+ * namespaces changed to run on the new Solaris Compiler CC5
+ * since we can use member templates in franks1Histo.hh we are doing it
+ *
  * Revision 1.2  1999/10/15 02:32:37  lisa
  * Helen has added method StHbtV0::UpdateV0() to fill derived information - this leads to smaller microDSTs
  *
@@ -71,40 +75,40 @@ public:
   int   idPos() const;               // Id of positive track
 
   void UpdateV0(); // Fills derived info
-  void SetdecayLengthV0(const float&);  
-  void SetdecayVertexV0(const StHbtThreeVector&);  
-  void SetdcaV0Daughters(const float&); 
-  void SetdcaV0ToPrimVertex(const float&);  
-  void SetdcaPosToPrimVertex(const float&); 
-  void SetdcaNegToPrimVertex(const float&); 
-  void SetmomPos(const StHbtThreeVector&);  
-  void SetmomNeg(const StHbtThreeVector&);  
+  void SetdecayLengthV0(const float);  
+  void SetdecayVertexV0(const StHbtThreeVector);  
+  void SetdcaV0Daughters(const float); 
+  void SetdcaV0ToPrimVertex(const float);  
+  void SetdcaPosToPrimVertex(const float); 
+  void SetdcaNegToPrimVertex(const float); 
+  void SetmomPos(const StHbtThreeVector);  
+  void SetmomNeg(const StHbtThreeVector);  
 
   void SettpcHitsPos(const int&);      
   void SettpcHitsNeg(const int&);      
 
-  void SetmomV0( StHbtThreeVector&);
-  void SetalphaV0( float&);       
-  void SetptArmV0( float&);       
-  void SeteLambda( float&);     
-  void SeteK0Short( float&);    
-  void SetePosProton( float&);  
-  void SetePosPion( float&);    
-  void SeteNegProton( float&);  
-  void SeteNegPion( float&);    
-  void SetmassLambda( float&);  
-  void SetmassAntiLambda( float&);
-  void SetmassK0Short( float&);  
-  void SetrapLambda( float&);    
-  void SetrapK0Short( float&);   
-  void SetcTauLambda( float&);   
-  void SetcTauK0Short( float&);  
-  void SetptV0( float&);         
-  void SetptotV0( float&);       
-  void SetptPos( float&);        
-  void SetptotPos( float&);      
-  void SetptNeg( float&);        
-  void SetptotNeg( float&);
+  void SetmomV0( StHbtThreeVector);
+  void SetalphaV0( float);       
+  void SetptArmV0( float);       
+  void SeteLambda( float);     
+  void SeteK0Short( float);    
+  void SetePosProton( float);  
+  void SetePosPion( float);    
+  void SeteNegProton( float);  
+  void SeteNegPion( float);    
+  void SetmassLambda( float);  
+  void SetmassAntiLambda( float);
+  void SetmassK0Short( float);  
+  void SetrapLambda( float);    
+  void SetrapK0Short( float);   
+  void SetcTauLambda( float);   
+  void SetcTauK0Short( float);  
+  void SetptV0( float);         
+  void SetptotV0( float);       
+  void SetptPos( float);        
+  void SetptotPos( float);      
+  void SetptNeg( float);        
+  void SetptotNeg( float);
   void SetidNeg(const int&);
   void SetidPos(const int&);
      
@@ -229,38 +233,38 @@ inline int   StHbtV0::idPos() const
 
 
 
-inline void StHbtV0::SetdecayLengthV0(const float& x){ mdecayLengthV0= x;}   
-inline void StHbtV0::SetdecayVertexV0(const StHbtThreeVector& v){mdecayVertexV0 = v;} 
-inline void StHbtV0::SetdcaV0Daughters(const float& x){mdcaV0Daughters= x;} 
-inline void StHbtV0::SetdcaV0ToPrimVertex(const float& x){mdcaV0ToPrimVertex= x;}   
-inline void StHbtV0::SetdcaPosToPrimVertex(const float& x){mdcaPosToPrimVertex = x;} 
-inline void StHbtV0::SetdcaNegToPrimVertex(const float& x){mdcaNegToPrimVertex = x;} 
-inline void StHbtV0::SetmomPos(const StHbtThreeVector& v){mmomPos = v;} 
-inline void StHbtV0::SetmomNeg(const StHbtThreeVector& v){mmomNeg = v;} 
+inline void StHbtV0::SetdecayLengthV0(const float x){ mdecayLengthV0= x;}   
+inline void StHbtV0::SetdecayVertexV0(const StHbtThreeVector v){mdecayVertexV0 = v;} 
+inline void StHbtV0::SetdcaV0Daughters(const float x){mdcaV0Daughters= x;} 
+inline void StHbtV0::SetdcaV0ToPrimVertex(const float x){mdcaV0ToPrimVertex= x;}   
+inline void StHbtV0::SetdcaPosToPrimVertex(const float x){mdcaPosToPrimVertex = x;} 
+inline void StHbtV0::SetdcaNegToPrimVertex(const float x){mdcaNegToPrimVertex = x;} 
+inline void StHbtV0::SetmomPos(const StHbtThreeVector v){mmomPos = v;} 
+inline void StHbtV0::SetmomNeg(const StHbtThreeVector v){mmomNeg = v;} 
 inline void StHbtV0::SettpcHitsPos(const int& i){mtpcHitsPos=i;} 
 inline void StHbtV0::SettpcHitsNeg(const int& i){mtpcHitsNeg=i;}
-inline void StHbtV0::SetmomV0(StHbtThreeVector& v){mmomV0= v;}
-inline void StHbtV0::SetalphaV0( float& x){malphaV0= x;}
-inline void StHbtV0::SetptArmV0( float& x){mptArmV0 = x;}
-inline void StHbtV0::SeteLambda( float& x){meLambda= x;}       
-inline void StHbtV0::SeteK0Short( float& x){meK0Short= x;}
-inline void StHbtV0::SetePosProton( float& x){mePosProton= x;}      
-inline void StHbtV0::SetePosPion( float& x){mePosPion= x;}      
-inline void StHbtV0::SeteNegProton( float& x){meNegProton= x;} 
-inline void StHbtV0::SeteNegPion( float& x){meNegPion= x;}       
-inline void StHbtV0::SetmassLambda( float& x){mmassLambda = x;} 
-inline void StHbtV0::SetmassAntiLambda( float& x){mmassAntiLambda= x;} 
-inline void StHbtV0::SetmassK0Short( float& x){mmassK0Short= x;}  
-inline void StHbtV0::SetrapLambda( float& x){mrapLambda= x;}
-inline void StHbtV0::SetrapK0Short( float& x){mrapK0Short = x;}   
-inline void StHbtV0::SetcTauLambda( float& x){mcTauLambda = x;}   
-inline void StHbtV0::SetcTauK0Short( float& x){mcTauK0Short = x;}   
-inline void StHbtV0::SetptV0( float& x){mptV0 = x;}          
-inline void StHbtV0::SetptotV0( float& x){mptotV0 = x;}
-inline void StHbtV0::SetptPos( float& x){mptPos = x;}
-inline void StHbtV0::SetptotPos( float& x){mptotPos = x;}    
-inline void StHbtV0::SetptNeg( float& x){ mptNeg= x;}    
-inline void StHbtV0::SetptotNeg( float& x){ mptotNeg= x;}
+inline void StHbtV0::SetmomV0(StHbtThreeVector v){mmomV0= v;}
+inline void StHbtV0::SetalphaV0( float x){malphaV0= x;}
+inline void StHbtV0::SetptArmV0( float x){mptArmV0 = x;}
+inline void StHbtV0::SeteLambda( float x){meLambda= x;}       
+inline void StHbtV0::SeteK0Short( float x){meK0Short= x;}
+inline void StHbtV0::SetePosProton( float x){mePosProton= x;}      
+inline void StHbtV0::SetePosPion( float x){mePosPion= x;}      
+inline void StHbtV0::SeteNegProton( float x){meNegProton= x;} 
+inline void StHbtV0::SeteNegPion( float x){meNegPion= x;}       
+inline void StHbtV0::SetmassLambda( float x){mmassLambda = x;} 
+inline void StHbtV0::SetmassAntiLambda( float x){mmassAntiLambda= x;} 
+inline void StHbtV0::SetmassK0Short( float x){mmassK0Short= x;}  
+inline void StHbtV0::SetrapLambda( float x){mrapLambda= x;}
+inline void StHbtV0::SetrapK0Short( float x){mrapK0Short = x;}   
+inline void StHbtV0::SetcTauLambda( float x){mcTauLambda = x;}   
+inline void StHbtV0::SetcTauK0Short( float x){mcTauK0Short = x;}   
+inline void StHbtV0::SetptV0( float x){mptV0 = x;}          
+inline void StHbtV0::SetptotV0( float x){mptotV0 = x;}
+inline void StHbtV0::SetptPos( float x){mptPos = x;}
+inline void StHbtV0::SetptotPos( float x){mptotPos = x;}    
+inline void StHbtV0::SetptNeg( float x){ mptNeg= x;}    
+inline void StHbtV0::SetptotNeg( float x){ mptotNeg= x;}
 inline void StHbtV0::SetidNeg(const int& i){ midNeg= 0;}
 inline void StHbtV0::SetidPos(const int& i){ midPos= 0;}
 

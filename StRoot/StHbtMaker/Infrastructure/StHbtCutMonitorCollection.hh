@@ -5,7 +5,7 @@
 //#include <list>
 #include <vector>
 #if !defined(ST_NO_NAMESPACES)
-using namespace std;
+using std::vector;
 #endif
 class StHbtCutMonitor;
 

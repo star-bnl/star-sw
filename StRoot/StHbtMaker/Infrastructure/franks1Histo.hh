@@ -10,8 +10,9 @@
 #endif
 #endif
 
-#define ST_NO_MEMBER_TEMPLATES
-
+//#ifndef ST_NO_MEMBER_TEMPLATES
+//#define ST_NO_MEMBER_TEMPLATES
+//#endif
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 template<class T>
@@ -37,11 +38,11 @@ public:
 
   // member functions
 #ifndef ST_NO_MEMBER_TEMPLATES
-  template<class X> template<class Y>  void Add( franks1Histo<X>* , franks1Histo<X>* , Y, Y, const char*);
-  template<class X> template<class Y>  void Divide( franks1Histo<X>* , franks1Histo<X>* , Y, Y, const char*);
-  template<class X>                    void Fill( X value);
-  template<class X> template<class Y>  void Fill( X value, Y weight);
-  template<class X>                    void Scale(X scale) { scale = scale*2; }
+  template<class X, class Y>  void Add( franks1Histo<X>* , franks1Histo<X>* ,    Y w1=1., Y w2=1., const char* c="");
+  template<class X, class Y>  void Divide( franks1Histo<X>* , franks1Histo<X>* , Y w1=1., Y w2=1., const char* c="");
+  template<class X>           void Fill( X value);
+  template<class X, class Y>  void Fill( X value, Y weight);
+  template<class X>           void Scale(X scale) { scale = scale*2; }
 #else
   void Add( franks1Histo<double>* , franks1Histo<double>* , double, double, const char*);
   void Divide( franks1Histo<double>* , franks1Histo<double>* , double, double, const char*);
@@ -92,18 +93,16 @@ inline franks1Histo<T>::~franks1Histo() {
 #ifndef ST_NO_MEMBER_TEMPLATES
 // *************************************************************************************************
   template<class T>
-  template<class X>
-  template<class Y>
-  inline void franks1Histo<T>::Add( franks1Histo<X>* h1, franks1Histo<X>* h2, Y w1=1, Y w2=1, const char* c="") {
+  template<class X, class Y>
+  inline void franks1Histo<T>::Add( franks1Histo<X>* h1, franks1Histo<X>* h2, Y w1, Y w2, const char* c) {
     for (int i=0; i < mBins; i++) {
       vec[i] = h1->vec[i]*w1 + h2->vec[i]*w2;
     }
 }
 // *************************************************************************************************
   template<class T>
-  template<class X>
-  template<class Y>
-  inline void franks1Histo<T>::Divide( franks1Histo<X>* h1, franks1Histo<X>* h2, Y w1=1, Y w2=1, const char* c="") {
+  template<class X, class Y>
+  inline void franks1Histo<T>::Divide( franks1Histo<X>* h1, franks1Histo<X>* h2, Y w1, Y w2, const char* c) {
     for (int i=0; i < mBins; i++) {
       if (h2->vec[i]*w2 !=0 ) 
 	vec[i] = h1->vec[i]*w1 / h2->vec[i]*w2;
@@ -122,8 +121,7 @@ inline void franks1Histo<T>::Fill( X value) {
 }
 // *************************************************************************************************
 template<class T>
-template<class X>
-template<class Y>
+template<class X, class Y>
 inline void franks1Histo<T>::Fill( X value, Y weight) {
   mPos = (int) abs( (value-mXmin)/mStep );
   if ( mPos>=0 && mPos < mBins) 
@@ -133,14 +131,14 @@ inline void franks1Histo<T>::Fill( X value, Y weight) {
 #else
 // *************************************************************************************************
   template<class T>
-  inline void franks1Histo<T>::Add( franks1Histo<double>* h1, franks1Histo<double>* h2, double w1=1, double w2=1, const char* c="") {
+  inline void franks1Histo<T>::Add( franks1Histo<double>* h1, franks1Histo<double>* h2, double w1, double w2, const char* c) {
     for (int i=0; i < mBins; i++) {
       vec[i] = h1->vec[i]*w1 + h2->vec[i]*w2;
     }
 }
 // *************************************************************************************************
   template<class T>
-  inline void franks1Histo<T>::Divide( franks1Histo<double>* h1, franks1Histo<double>* h2, double w1=1, double w2=1, const char* c="") {
+  inline void franks1Histo<T>::Divide( franks1Histo<double>* h1, franks1Histo<double>* h2, double w1, double w2, const char* c) {
     for (int i=0; i < mBins; i++) {
       if (h2->vec[i]*w2 !=0 ) 
 	vec[i] = h1->vec[i]*w1 / h2->vec[i]*w2;
