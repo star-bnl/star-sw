@@ -269,43 +269,54 @@ C----------------------------------------------------------------------
       SUBROUTINE PROP_FINE_APPROACH(xv,x,p,x0)
 C----------------------------------------------------------------------
       IMPLICIT NONE
-C   Input arguments   	xv	! 3-dimensional position vector 
-C				! of the main vertex
-C   		   	x	! 3-dimensional position vector 
-C				! of the secondary track
-C			p	! 3-dimensional momentum vector of the 
-C				! reconstructed secondary particle
-C   Output arguments :	x0      ! coordinates of closest approach
+C   Input arguments     xv      ! 3-dimensional position vector 
+C                               ! of the main vertex
+C                       x       ! 3-dimensional position vector 
+C                               ! of the secondary track
+C                       p       ! 3-dimensional momentum vector of the 
+C                               ! reconstructed secondary particle
+C   Output arguments :  x0      ! coordinates of closest approach
 C
-C   Functional Description:	Finds the coordinates of the point of
-C				closest approach from the main vertex
-C				The input vectors must be calculated
-C				at a point close to the vertex.
+C   Functional Description:     Finds the coordinates of the point of
+C                               closest approach from the main vertex
+C                               The input vectors must be calculated
+C                               at a point close to the vertex.
 C   Created  JUN-1992  S.Margetis
-C   Error conditions 		: None
-C   Status	     		: Tested
+C   Modified: 4/2/99 R.L.Ray
+C   Error conditions            : Error for p(1)=0 fixed (4/2/99 RLR)
+C   Status                      : Tested
 C----------------------------------------------------------------------
-      REAL 	xv(3),x(3),p(3),x0(3),nom
+      REAL      xv(3),x(3),p(3),x0(3),nom,cut,det
+      DATA  cut /1.0E-06/
 *----------------------------------------------------------------------
 
-	nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
-	nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
-	x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
+        nom=(p(2)*p(2)+p(3)*p(3))*x(1)-(x(2)*p(2)+x(3)*p(3))*p(1) 
+        nom=nom+(xv(1)*p(1)+xv(2)*p(2)+xv(3)*p(3))*p(1)
+        x0(1)=nom/( p(1)*p(1)+p(2)*p(2)+p(3)*p(3) )
 
-	IF(p(1).ne.0.) THEN
-	 x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
-	 x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
-	ELSE
-	 x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
-		IF(p(2).eq.0.) THEN
-		 x0(2)=x(2)
-		ELSE
-		 x0(2)=-x0(3)*p(3)/p(2)
-		ENDIF
-	ENDIF
+C       IF(p(1).ne.0.) THEN
+        IF(abs(p(1)) .gt. cut) THEN              ! RLR (4/99)
+         x0(2)=x(2)+(p(2)/p(1))*(x0(1)-x(1))
+         x0(3)=x(3)+(p(3)/p(1))*(x0(1)-x(1))
+        ELSE
+         det = p(2)*p(2) + p(3)*p(3)             ! RLR (4/99)
+         x0(2)=(x(2)*p(3)*p(3)+xv(2)*p(2)*p(2)+  ! RLR (4/99)
+     1         (xv(3)-x(3))*p(2)*p(3))/det       ! RLR (4/99)
+         x0(3)=(x(3)*p(2)*p(2)+xv(3)*p(3)*p(3)+  ! RLR (4/99)
+     1         (xv(2)-x(2))*p(2)*p(3))/det       ! RLR (4/99)
 
- 999  RETURN
+C        x0(3)=p(2)*(x(3)*p(2)-x(2)*p(3))/(p(2)*p(2)+p(3)*p(3))
+C               IF(p(2).eq.0.) THEN
+C                x0(2)=x(2)
+C               ELSE
+C                x0(2)=-x0(3)*p(3)/p(2)
+C               ENDIF
+
+        ENDIF
+
+      RETURN
       END
+
 
 C*********************************************************************
 
