@@ -30,10 +30,10 @@ public:
   virtual Factory<StiKalmanTrack>  * getTrackFactory();
   virtual Factory<StiMcTrack>      * getMcTrackFactory();
   virtual Factory<StiDetector>      * getDetectorFactory();
-  virtual Factory< StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory();
+  virtual Factory<StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory();
   virtual Factory<StiKalmanTrackNode>   * getTrackNodeFactory();
-  virtual Factory<Parameter>            * getParameterFactory();
-  virtual Factory< Filter<StiTrack>  >  * getTrackFilterFactory();
+  virtual Factory<EditableParameter>    * getParameterFactory();
+  virtual Factory<Filter<StiTrack>  >  * getTrackFilterFactory();
 
   // common object containers
   virtual StiMasterDetectorBuilder * getDetectorBuilder();
@@ -64,7 +64,7 @@ public:
   
   // small object factories
   Factory< Filter<StiTrack>  > * _trackFilterFactory;
-  Factory<Parameter>           * _parameterFactory;
+  Factory<EditableParameter>   * _parameterFactory;
   Factory<StiHit>              * _hitFactory;
   Factory<StiKalmanTrack>      * _trackFactory;
   Factory<StiMcTrack>          * _mcTrackFactory;

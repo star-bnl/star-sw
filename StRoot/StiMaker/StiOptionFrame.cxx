@@ -19,7 +19,7 @@
 #include <TGShutter.h>
 #include <TGProgressBar.h>
 #include <TGNumberEntry.h>
-#include "Sti/EditableParameters.h"
+#include "Sti/Base/EditableParameters.h"
 #include "StiMaker/RootEditableParameter.h"
 
 StiOptionFrame::StiOptionFrame(const TGWindow * p, 
@@ -184,7 +184,7 @@ void StiOptionFrame::closeWindow()
 
 void StiOptionFrame::apply()
 {
-  cout << "StiOptionFrame::apply() -  Applied Starting" << endl;
+  cout << "StiOptionFrame::apply() -I-  Started" << endl;
   ParameterIterator it;
   for (it=parameters->begin();it!=parameters->end();it++)
     {
@@ -197,6 +197,7 @@ void StiOptionFrame::apply()
   // tell our observers we have changed!
   cout << "StiOptionFrame::apply() -  Notify observers" << endl;
   parameters->notify();
+  cout << "StiOptionFrame::apply() -I- Done" << endl;  
 }
 
 Bool_t StiOptionFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
