@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StRichLocalCoordinate.cxx,v 1.1 2000/02/08 16:34:08 lasiuk Exp $
+ * $Id: StRichLocalCoordinate.cxx,v 1.2 2000/02/08 23:45:47 lasiuk Exp $
  *
  * Author: brian Jan 20, 2000
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StRichLocalCoordinate.cxx,v $
+ * Revision 1.2  2000/02/08 23:45:47  lasiuk
+ * Default constructor initializer changed for CC4.2
+ *
  * Revision 1.1  2000/02/08 16:34:08  lasiuk
  * Initial Revision:  eventually for StUtilities
  *
@@ -18,7 +21,7 @@
 #include "StRichLocalCoordinate.h"
 
 StRichLocalCoordinate::StRichLocalCoordinate()
-    :mPos(0) {/*nopt*/}
+    :mPos(0,0,0) {/*nopt*/}
 StRichLocalCoordinate::StRichLocalCoordinate(const double x, const double y, const double z)
     : mPos(x,y,z) {/* nopt */ }
 
