@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.13 2003/09/02 17:59:20 perev Exp $
+// $Id: StMessMgr.h,v 1.14 2003/09/22 01:30:41 perev Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.14  2003/09/22 01:30:41  perev
+// some cleanup
+//
 // Revision 1.13  2003/09/02 17:59:20  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -70,7 +73,7 @@ class messVec;
 #include <Stiostream.h>
 
 class StMessMgr : public ostrstream {
-   friend ostream& operator<<(ostream& ,StMessage*);
+   friend StMessMgr& operator<<(StMessMgr& ,StMessage*);
 
  private:
 

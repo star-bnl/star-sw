@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.11 2001/05/16 15:50:56 genevb Exp $
+// $Id: StMessage.h,v 1.12 2003/09/22 01:30:41 perev Exp $
 // $Log: StMessage.h,v $
+// Revision 1.12  2003/09/22 01:30:41  perev
+// some cleanup
+//
 // Revision 1.11  2001/05/16 15:50:56  genevb
 // Switch TROOT.h to Rtypes.h
 //
@@ -80,7 +83,7 @@ class StMessage {
           void SetOption(char* opt) {option = opt;}
         size_t GetMemoryUsage();
 #ifdef __ROOT__
-   ClassDef(StMessage,1)
+   ClassDef(StMessage,0)
 #endif
 };
 
