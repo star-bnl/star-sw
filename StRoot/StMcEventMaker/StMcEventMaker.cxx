@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.36 2000/09/07 21:04:51 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.37 2001/03/13 16:14:02 pavlinov Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.37  2001/03/13 16:14:02  pavlinov
+ * StEmcGeom moved to StEmcUtil
+ *
  * Revision 1.36  2000/09/07 21:04:51  calderon
  * Remove requirement on having g2t_tpc_hit table to create StMcEvent.
  * Print diagnostics accordingly.
@@ -170,7 +173,7 @@ using std::find;
 
 #include "StMcEventTypes.hh"
 
-#include "St_emc_Maker/StEmcGeom.h" // For Barrel Emc ??
+#include "StEmcUtil/StEmcGeom.h" // For Barrel Emc
 
 
 static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
@@ -178,7 +181,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.36 2000/09/07 21:04:51 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.37 2001/03/13 16:14:02 pavlinov Exp $";
 ClassImp(StMcEventMaker)
 
 
