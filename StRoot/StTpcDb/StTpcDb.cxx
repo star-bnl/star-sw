@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.23 2000/08/04 21:03:55 perev Exp $
+ * $Id: StTpcDb.cxx,v 1.24 2000/08/08 19:15:22 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.24  2000/08/08 19:15:22  hardtke
+ * use correct trigger time offset in case of laser
+ *
  * Revision 1.23  2000/08/04 21:03:55  perev
  * Leaks + Clear() cleanup
  *
@@ -59,6 +62,7 @@
 #include "StTpcDb.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
 #include "tables/St_trgTimeOffset_Table.h"
+#include "tables/St_dst_L0_Trigger_Table.h"
 
 StTpcDb* gStTpcDb = 0;
 
@@ -105,6 +109,7 @@ StTpcDb::StTpcDb(St_DataSet* input) {
 StTpcDb::StTpcDb(StMaker* maker) {
  assert(gStTpcDb==0);
  memset(this,0,sizeof(StTpcDb));
+ mk = maker;
  if (maker) GetDataBase(maker);
  gMessMgr->SetLimit("StRTpcPadPlane::Invalid Pad number",20);
  gStTpcDb = this;
@@ -326,6 +331,8 @@ float StTpcDb::DriftVelocity(){
 
 //-----------------------------------------------------------------------------
 float StTpcDb::triggerTimeOffset(){
+  if (!trigtype) trigtype = (St_dst_L0_Trigger*)mk->GetChain()->GetDataSet("L0_Trigger");
+  
   if(!toff){              // get triggerTimeOffset
    const int dbIndex = kConditions;
    if (trg[dbIndex]){
@@ -337,7 +344,9 @@ float StTpcDb::triggerTimeOffset(){
     toff = (St_trgTimeOffset*)tpd;
    }
   }
+  //  assert(trig);
   float theoffset = 1e-6*(*toff)[0].offset;
+  if(trigtype&&(*trigtype)[0].TriggerActionWd==36865) theoffset = 1e-6*(*toff)[0].laserOffset;
   return theoffset;
 }
 

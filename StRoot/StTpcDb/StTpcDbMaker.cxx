@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.16 2000/07/06 21:37:34 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.17 2000/08/08 19:15:23 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.17  2000/08/08 19:15:23  hardtke
+ * use correct trigger time offset in case of laser
+ *
  * Revision 1.16  2000/07/06 21:37:34  hardtke
  * speed up tpc_pad_to_x function
  *
@@ -330,5 +333,8 @@ void StTpcDbMaker::Update_tpg_detector(){
      pp[0].vdrift = tpcDbInterface()->DriftVelocity();
  }
 }
+
+
+
 
 

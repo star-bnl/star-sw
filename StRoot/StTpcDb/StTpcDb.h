@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.16 2000/05/11 17:17:27 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.17 2000/08/08 19:15:23 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.17  2000/08/08 19:15:23  hardtke
+ * use correct trigger time offset in case of laser
+ *
  * Revision 1.16  2000/05/11 17:17:27  hardtke
  * make trigger time offset available -- currently NOT different for beam and laser events
  *
@@ -78,6 +81,7 @@
 class StMaker;
 class St_tpcDriftVelocity;
 class St_trgTimeOffset;
+class St_dst_L0_Trigger;
 //class StTpcCoordinateTransform;
 
 class StTpcDb {
@@ -95,6 +99,7 @@ class StTpcDb {
  St_DataSet*           trg[3];        //!
  St_tpcDriftVelocity*  dvel;          //!
  St_trgTimeOffset*     toff;          //!
+ St_dst_L0_Trigger*    trigtype;      //!
  // StTpcCoordinateTransform* transform; //!
 
  protected:
