@@ -1,7 +1,7 @@
-// $Id: StLaserEventMaker.cxx,v 1.15 2001/12/18 15:22:00 jeromel Exp $
+// $Id: StLaserEventMaker.cxx,v 1.16 2001/12/18 20:33:35 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.15  2001/12/18 15:22:00  jeromel
-// Removed laserhist#_#.root file from StarDb/Calibration/tpc
+// Revision 1.16  2001/12/18 20:33:35  pfachini
+// Since the laserhist.*.*.root file cannot be written to the database directory (it makes the whole thing crash), I am adding the date and time stamp to Bill's tree
 //
 // Revision 1.14  2001/12/14 17:30:16  pfachini
 // Adding two histograms to the laserhist.*.*.root file
@@ -230,10 +230,12 @@ void StLaserEventMaker::MakeHistograms() {
       Float_t m_tzero = gStTpcDb->Electronics()->tZero();
       Float_t m_clock = gStTpcDb->Electronics()->samplingFrequency();
       Float_t m_trigger = gStTpcDb->triggerTimeOffset();
+      m_date = date;
+      m_time = time;
        //   m_tzero = 1.0; m_clock = 1.0;
 
      // Fill the event header.
-     event->SetHeader(evno, m_runno, m_date,
+      event->SetHeader(evno, m_runno, m_date, m_time,
                   m_tzero, m_drivel, m_clock, m_trigger);
      cout << "Event "<< evno << " Run " << m_runno << endl;
      cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
@@ -682,7 +684,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.15 2001/12/18 15:22:00 jeromel Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.16 2001/12/18 20:33:35 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -720,7 +722,6 @@ void StLaserEventMaker::WriteTableToFile(){
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteHistFile(){
   char filename[80]; 
-  //sprintf(filename,"./StarDb/Calibrations/tpc/laserhist.%08d.%06d.root",date,time);
   sprintf(filename,"laserhist.%08d.%06d.root",date,time);
   TFile out(filename,"RECREATE");
   GetHistList()->Write();
