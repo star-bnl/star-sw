@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.15 2001/09/28 22:20:49 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.16 2002/02/27 19:09:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.16  2002/02/27 19:09:22  ullrich
+ * Updated fittingMethod(): L3 added.
+ *
  * Revision 2.15  2001/09/28 22:20:49  ullrich
  * Added helix geometry at last point.
  *
@@ -71,7 +74,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.15 2001/09/28 22:20:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.16 2002/02/27 19:09:22 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -194,6 +197,9 @@ StTrack::fittingMethod() const
         break;
     case kLine3DId:
         return kLine3DId;
+        break;
+    case kL3FitId:
+        return kL3FitId;
         break;
     default:
     case kUndefinedFitterId:
