@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.13 2001/05/24 01:48:13 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.14 2001/05/25 16:31:20 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.14  2001/05/25 16:31:20  lansdell
+// more updates to qa shift histograms
+//
 // Revision 2.13  2001/05/24 01:48:13  lansdell
 // qa_shift histograms updated
 //
@@ -73,6 +76,7 @@
 #include "StMessMgr.h"
 #include "StEmcUtil/StEmcGeom.h"
 #include "StEmcUtil/StEmcMath.h"
+#include "StarClassLibrary/BetheBloch.h"
 
 static StEmcGeom* emcGeom[4];
 // These are the mean z positions of the FTPC padrows (1-20).
@@ -282,10 +286,10 @@ void StEventQAMaker::MakeHistGlob() {
 	hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
 	hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
       }
-      if (map.trackTpcSvt() && radf>40) {
+      if (map.trackTpcSvt())
 	hists->m_zDcaTanl->Fill(dcaToBeam.z(),TMath::Tan(geom->dipAngle()));
+      if (map.trackTpcSvt() && radf>40)
 	hists->m_zDcaZf->Fill(dcaToBeam.z(),firstPoint.z());
-      }
       hists->m_zDcaPsi->Fill(dcaToBeam.z(),geom->psi()/degree);
       if (origin.phi() < 0)
         hists->m_zDcaPhi0->Fill(dcaToBeam.z(),360+origin.phi()/degree);
@@ -391,8 +395,12 @@ void StEventQAMaker::MakeHistGlob() {
 
         hists->m_pT_eta_recT->Fill(eta,lmevpt);
 	if (event->primaryVertex()) {
-	  hists->m_tanl_zfT->Fill(firstPoint.z() -
-				  event->primaryVertex()->position().z(),
+	  Float_t denom = 2*rcircle*
+	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+		 (2*rcircle));
+	  hists->m_tanl_zfT->Fill((firstPoint.z() -
+				   event->primaryVertex()->position().z())/denom,
 				  Float_t(TMath::Tan(geom->dipAngle())));
 	}
         hists->m_mom_trklengthT->Fill(globtrk->length(),lmevmom);
@@ -504,15 +512,21 @@ void StEventQAMaker::MakeHistGlob() {
 					Float_t(fTraits.numberOfFitPoints()));
 
         hists->m_pT_eta_recTS->Fill(eta,lmevpt);
-	if (event->primaryVertex() && radf>40) {
-	  hists->m_tanl_zfT->Fill(firstPoint.z() -
-				  event->primaryVertex()->position().z(),
-				  Float_t(TMath::Tan(geom->dipAngle())));
-	}
-	if (event->primaryVertex() && radf<40) {
-	  hists->m_tanl_zfTS->Fill(firstPoint.z() -
-			    event->primaryVertex()->position().z(),
-			    Float_t(TMath::Tan(geom->dipAngle())));
+	if (event->primaryVertex()) {
+	  Float_t denom = 2*rcircle*
+	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+		 (2*rcircle));
+	  if (radf>40) {
+	    hists->m_tanl_zfT->Fill((firstPoint.z() -
+				     event->primaryVertex()->position().z())/denom,
+				    Float_t(TMath::Tan(geom->dipAngle())));
+	  }
+	  if (radf<40) {
+	    hists->m_tanl_zfTS->Fill((firstPoint.z() -
+				     event->primaryVertex()->position().z())/denom,
+				     Float_t(TMath::Tan(geom->dipAngle())));
+	  }
 	}
         hists->m_mom_trklengthTS->Fill(globtrk->length(),lmevmom);
         hists->m_chisq0_momTS->Fill(lmevmom,chisq0);
@@ -897,8 +911,12 @@ void StEventQAMaker::MakeHistPrim() {
 
 // these are TPC only
 	  hists->m_ppT_eta_recT->Fill(eta,lmevpt);
-	  hists->m_ptanl_zfT->Fill(firstPoint.z() -
-				   event->primaryVertex()->position().z(),
+	  Float_t denom = 2*rcircle*
+	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+		 (2*rcircle));
+	  hists->m_ptanl_zfT->Fill((firstPoint.z() -
+				    event->primaryVertex()->position().z())/denom,
 				   Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthT->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momT->Fill(lmevmom,chisq0);
@@ -989,11 +1007,15 @@ void StEventQAMaker::MakeHistPrim() {
 					   Float_t(fTraits.numberOfFitPoints()));
 
 	  hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
+	  Float_t denom = 2*rcircle*
+	    asin(sqrt((pow(firstPoint.x()-event->primaryVertex()->position().x(),2))+
+		      (pow(firstPoint.y()-event->primaryVertex()->position().y(),2)))/
+		 (2*rcircle));
 	  if (radf>40) hists->m_ptanl_zfT->
-			 Fill(firstPoint.z() - event->primaryVertex()->position().z(),
+			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
 			      Float_t(TMath::Tan(geom->dipAngle())));
 	  if (radf<40) hists->m_ptanl_zfTS->
-			 Fill(firstPoint.z() - event->primaryVertex()->position().z(),
+			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
 			      Float_t(TMath::Tan(geom->dipAngle())));
 	  hists->m_pmom_trklengthTS->Fill(primtrk->length(),lmevmom);
 	  hists->m_pchisq0_momTS->Fill(lmevmom,chisq0);
@@ -1166,9 +1188,12 @@ void StEventQAMaker::MakeHistPID() {
 	double dedx = dedxPidTr->mean();
 	double error = dedxPidTr->errorOnMean();
 	double p = abs(theTrack->geometry()->momentum());
+	double trackLength = dedxPidTr->length();
 	if (dedxPidTr->detector() == kTpcId) {
-	  Float_t pionExpectedBB = betheBloch(theTrack->geometry()->momentum().mag()/
-					      pion_minus_mass_c2);
+	  // using BetheBloch::Sirrf method for curve normalized to 2.4 keV/cm
+	  Float_t pionExpectedBB = BetheBloch::Sirrf(theTrack->geometry()->momentum().mag()/
+						     pion_minus_mass_c2,trackLength);
+	  pionExpectedBB *= 1.e-6;
 	  hists->m_dedxTTS->Fill(dedx/pionExpectedBB);
 	  hists->m_ndedxT->Fill(ndedx);
 	  hists->m_dedx0T->Fill(dedx);
@@ -1178,8 +1203,10 @@ void StEventQAMaker::MakeHistPID() {
 	  }
 	}
 	if (dedxPidTr->detector() == kTpcSvtId) {
-	  Float_t pionExpectedBB = betheBloch(theTrack->geometry()->momentum().mag()/
-					      pion_minus_mass_c2);
+	  // using BetheBloch::Sirrf method for curve normalized to 2.4 keV/cm
+	  Float_t pionExpectedBB = BetheBloch::Sirrf(theTrack->geometry()->momentum().mag()/
+						     pion_minus_mass_c2,trackLength);
+	  pionExpectedBB *= 1.e-6;
 	  hists->m_dedxTTS->Fill(dedx/pionExpectedBB);
 	}
 	if (dedxPidTr->detector() == kFtpcWestId) {

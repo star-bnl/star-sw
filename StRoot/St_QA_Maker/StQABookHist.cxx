@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.12 2001/05/24 01:48:13 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.13 2001/05/25 16:31:21 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.13  2001/05/25 16:31:21  lansdell
+// more updates to qa shift histograms
+//
 // Revision 2.12  2001/05/24 01:48:13  lansdell
 // qa_shift histograms updated
 //
@@ -716,8 +719,8 @@ void StQABookHist::BookHistGlob(){
     m_globtrk_xf_yfT->SetYTitle("y first");
 
 
-  m_tanl_zfT = QAH::H2F("QaGtrkTanlzf","globtrk: tanl(dip) versus zfirst-zvtx, tpc,tpc+svt",50,-250.,250.,60,-3.,3.);
-    m_tanl_zfT->SetXTitle("zfirst-zvtx");
+  m_tanl_zfT = QAH::H2F("QaGtrkTanlzf","globtrk: tanl(dip) vs. (zfirst-zvtx)/arc length, tpc,tpc+svt",60,-3.,3.,60,-3.,3.);
+    m_tanl_zfT->SetXTitle("(zfirst-zvtx)/arc length");
     m_tanl_zfT->SetYTitle("tanl");
 
   m_mom_trklengthT = QAH::H2F("QaGtrkPVsTrkLength","globtrk: log mom vs trk length, tpc",
@@ -848,8 +851,8 @@ void StQABookHist::BookHistGlob(){
     m_globtrk_xf_yfTS->SetXTitle("x first");
     m_globtrk_xf_yfTS->SetYTitle("y first");
 
-  m_tanl_zfTS = QAH::H2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus zfirst-zvtx, svt",50,-50.,50.,60,-3.,3.);
-    m_tanl_zfTS->SetXTitle("zfirst-zvtx");
+  m_tanl_zfTS = QAH::H2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus (zfirst-zvtx)/arc length, svt",60,-3.,3.,60,-3.,3.);
+    m_tanl_zfTS->SetXTitle("(zfirst-zvtx)/arc length");
     m_tanl_zfTS->SetYTitle("tanl");
 
   m_mom_trklengthTS = QAH::H2F("QaGtrkPVsTrkLTS","globtrk: log mom vs trk length, tpc+svt",50,0.,250.,40,1.,4.);
@@ -964,7 +967,7 @@ void StQABookHist::BookHistGlob(){
   m_psiF->Rebin(0,"East");
   m_psiF->Rebin(1,"West");
   m_psiF->SetStats(kFALSE);
-  m_etaF        = QAH::MH1F("QaGtrkEtaF",     "globtrk: eta, ftpc",80,2,5,2);
+  m_etaF        = QAH::MH1F("QaGtrkEtaF",     "globtrk: |eta|, ftpc",80,2,5,2);
   m_etaF->Rebin(0,"East");
   m_etaF->Rebin(1,"West");
   m_etaF->SetStats(kFALSE);
@@ -1152,7 +1155,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_xf_yfT = QAH::H2F("QaPtrkXfYfT",  "primtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
     m_primtrk_xf_yfT->SetXTitle("x first");
     m_primtrk_xf_yfT->SetYTitle("y first");
-  m_ptanl_zfT = QAH::H2F("QaPtrkTanlzf","primtrk: tanl(dip) versus zfirst-zvtx, tpc,tpc+svt",50,-250.,250.,60,-3.,3.);
+  m_ptanl_zfT = QAH::H2F("QaPtrkTanlzf","primtrk: tanl(dip) versus zfirst-zvtx, tpc,tpc+svt",60,-3.,3.,60,-3.,3.);
     m_ptanl_zfT->SetXTitle("zfirst-zvtx");
     m_ptanl_zfT->SetYTitle("tanl");
   m_pmom_trklengthT = QAH::H2F("QaPtrkPVsTrkLength","primtrk: log mom vs trk length, tpc",50,70.,350.,40,1.,4.);
@@ -1247,7 +1250,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_xf_yfTS = QAH::H2F("QaPtrkXfYfTS",  "primtrk: Y vs X of first hit on trk, tpc+svt", 40,-200.,200.,40,-200.,200.);
     m_primtrk_xf_yfTS->SetXTitle("x first");
     m_primtrk_xf_yfTS->SetYTitle("y first");
-  m_ptanl_zfTS = QAH::H2F("QaPtrkTanlzfTS","primtrk: tanl(dip) versus zfirst-zvtx, svt",70,-35.,35.,60,-3.,3.);
+  m_ptanl_zfTS = QAH::H2F("QaPtrkTanlzfTS","primtrk: tanl(dip) versus zfirst-zvtx, svt",60,-3.,3.,60,-3.,3.);
     m_ptanl_zfTS->SetXTitle("zfirst-zvtx");
     m_ptanl_zfTS->SetYTitle("tanl");
   m_pmom_trklengthTS = QAH::H2F("QaPtrkPVsTrkLTS","primtrk: log mom vs trk length, tpc+svt",50,70.,350.,40,1.,4.);
@@ -1338,7 +1341,7 @@ void StQABookHist::BookHistPrim(){
   m_ppsiF->Rebin(0,"East");
   m_ppsiF->Rebin(1,"West");
   m_ppsiF->SetStats(kFALSE);
-  m_petaF        = QAH::MH1F("QaPtrkEtaF",     "primtrk: eta, ftpc",80,2,5,2);
+  m_petaF        = QAH::MH1F("QaPtrkEtaF",     "primtrk: |eta|, ftpc",80,2,5,2);
   m_petaF->Rebin(0,"East");
   m_petaF->Rebin(1,"West");
   m_petaF->SetStats(kFALSE);

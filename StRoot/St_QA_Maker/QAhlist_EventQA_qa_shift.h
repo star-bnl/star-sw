@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.5 2001/05/24 01:48:13 lansdell Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.6 2001/05/25 16:31:20 lansdell Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.6  2001/05/25 16:31:20  lansdell
+// more updates to qa shift histograms
+//
 // Revision 2.5  2001/05/24 01:48:13  lansdell
 // qa_shift histograms updated
 //
@@ -67,8 +70,8 @@
   "StEQaGtrkImpactF",
   "StEQaGtrkImpactrF",
   "StEQaGtrkDetId",
-  "StEQaPtrkTanlzf",
-  "StEQaPtrkTanlzfTS",
+  "StEQaGtrkTanlzf",
+  "StEQaGtrkTanlzfTS",
   "StEQaPtrkPsiTTS",
   "StEQaPtrkPtTTS",
   "StEQaPtrkEtaTTS",
@@ -178,8 +181,8 @@
   "StELMQaGtrkImpactF",
   "StELMQaGtrkImpactrF",
   "StELMQaGtrkDetId",
-  "StELMQaPtrkTanlzf",
-  "StELMQaPtrkTanlzfTS",
+  "StELMQaGtrkTanlzf",
+  "StELMQaGtrkTanlzfTS",
   "StELMQaPtrkPsiTTS",
   "StELMQaPtrkPtTTS",
   "StELMQaPtrkEtaTTS",
@@ -288,8 +291,8 @@
   "StEMMQaGtrkImpactF",
   "StEMMQaGtrkImpactrF",
   "StEMMQaGtrkDetId",
-  "StEMMQaPtrkTanlzf",
-  "StEMMQaPtrkTanlzfTS",
+  "StEMMQaGtrkTanlzf",
+  "StEMMQaGtrkTanlzfTS",
   "StEMMQaPtrkPsiTTS",
   "StEMMQaPtrkPtTTS",
   "StEMMQaPtrkEtaTTS",
@@ -398,8 +401,8 @@
   "StEHMQaGtrkImpactF",
   "StEHMQaGtrkImpactrF",
   "StEHMQaGtrkDetId",
-  "StEHMQaPtrkTanlzf",
-  "StEHMQaPtrkTanlzfTS",
+  "StEHMQaGtrkTanlzf",
+  "StEHMQaGtrkTanlzfTS",
   "StEHMQaPtrkPsiTTS",
   "StEHMQaPtrkPtTTS",
   "StEHMQaPtrkEtaTTS",
