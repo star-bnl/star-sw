@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.2 2002/01/22 04:57:03 geurts Exp $
+ * $Id: StTofGeometry.h,v 1.3 2003/04/15 03:24:18 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,14 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.3  2003/04/15 03:24:18  geurts
+ * many, many changes:
+ * . updated and extended StructSlatHit, introduced tofSlatHitVector and Iterator
+ * . generalize (2+1)-D slat model from 3 layers to n layers, default n=5
+ * . introduced new member functions which identify 3x3 and 5x5 neighbours
+ * . introduced SetDebug() option.
+ * . minor updates in mTofParam parameters
+ *
  * Revision 1.2  2002/01/22 04:57:03  geurts
  * STAR dBase access routine, bugfixes and doxygenized
  *
@@ -19,9 +27,8 @@
  *******************************************************************/
 #ifndef STTOFGEOMETRY_H
 #define STTOFGEOMETRY_H
-#include "StThreeVectorD.hh"
-#include "StPhysicalHelixD.hh"
 #include "tofSlatGeom.h"
+#include "Rtypes.h"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -29,6 +36,8 @@ using std::vector;
 #endif
 
 class StMaker;
+class StThreeVectorD;
+class StPhysicalHelixD;
 
 
 struct StructTofSlatEta{
@@ -76,6 +85,12 @@ struct StructSlatHit {
   Int_t             slatIndex;   
   StThreeVectorD    hitPosition;
   idVector          trackIdVec;
+  Int_t             hitProfile;
+  Float_t           s;
+  Float_t           theta_xy;
+  Float_t           theta_zr;
+  vector<StThreeVectorD> layerHitPositions;
+  Int_t             matchFlag;
 };
 
 
@@ -84,22 +99,20 @@ typedef vector<tofSlatGeom_st> slatGeomVector;
 typedef vector<StructTofSlatEta> tofSlatEtaVector;  
 typedef vector<StructTofSlatPhi> tofSlatPhiVector;  
 typedef vector<StructSlatHit> tofSlatHitVector; 
-typedef vector<StructSlatHit> tofSlatHitVector; 
 #else
 typedef vector<tofSlatGeom_st,allocator<tofSlatGeom_st>> slatGeomVector;
 typedef vector<StructTofSlatEta,allocator<StructTofSlatEta>> tofSlatEtaVector; 
 typedef vector<StructTofSlatPhi,allocator<StructTofSlatPhi>> tofSlatPhiVector; 
 typedef vector<SructSlatHit,allocator<StructSlatHit>> tofSlatHitVector;
-typedef vector<SructSlatHit,allocator<StructSlatHit>> tofSlatHitVector;
 #endif   
 typedef slatGeomVector::iterator slatGeomIter;
-typedef vector<StructSlatHit>::iterator tofSlatHitVectorIter; 
 typedef vector<StructSlatHit>::iterator tofSlatHitVectorIter; 
 
 
 
 class StTofGeometry{
  private:
+  bool mDebug;                       //! debug flag
   StructTofParam     mTofParam;      //! global geometry variables
   tofSlatEtaVector   mTofSlatEtaVec; //! vector with eta-dependent variables.
   tofSlatPhiVector   mTofSlatPhiVec; //! vector with phi settings
@@ -117,6 +130,8 @@ class StTofGeometry{
   StTofGeometry();
   ~StTofGeometry();
 
+  void SetDebug();
+  bool Debug();
   void init();         // init the dbase and get the data from it
   void init(StMaker*); // init the dbase and get the data from it
   StructTofParam tofParam() const; // geometry access member
@@ -139,12 +154,18 @@ class StTofGeometry{
   int tofSlatCrossId(const StThreeVectorD& point) const;
   int tofSlatCrossId(const int volumeId) const;
 
+  static const unsigned int mMaxSlatLayers;
   tofSlatHitVector tofHelixToArray(const StPhysicalHelixD& helix,
 				   idVector slatIdVec);
 
+  float slatHitPosition(StThreeVectorD*);  // calculate local hit position on slat
+  float slatPhiPosition(StThreeVectorD*);  // calculate local hit position on slat
   unsigned short daqToSlatId(const int) const;
   int slatIdToDaq(const Int_t) const;
+  idVector slatNeighbours(const int);
+  idVector slatNeighboursWide(const int);
 };
+
 
 inline StructTofParam StTofGeometry::tofParam()
      const {return mTofParam;}
@@ -152,5 +173,9 @@ inline unsigned short StTofGeometry::daqToSlatId(const int daqId)
      const {return mTofDaqMap[daqId];}
 inline int StTofGeometry::slatIdToDaq(const Int_t slatId)
      const {return mTofSlatMap[slatId];}
+inline void StTofGeometry::SetDebug(){mDebug = true;}
+inline bool StTofGeometry::Debug(){return mDebug;}
+
+const unsigned int StTofGeometry::mMaxSlatLayers(5);
 
 #endif

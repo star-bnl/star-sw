@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.3 2002/01/23 17:30:45 geurts Exp $
+ * $Id: StTofGeometry.cxx,v 1.4 2003/04/15 03:24:17 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,14 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.4  2003/04/15 03:24:17  geurts
+ * many, many changes:
+ * . updated and extended StructSlatHit, introduced tofSlatHitVector and Iterator
+ * . generalize (2+1)-D slat model from 3 layers to n layers, default n=5
+ * . introduced new member functions which identify 3x3 and 5x5 neighbours
+ * . introduced SetDebug() option.
+ * . minor updates in mTofParam parameters
+ *
  * Revision 1.3  2002/01/23 17:30:45  geurts
  * removed const
  *
@@ -40,17 +48,27 @@
     </ul>
 
 */
-#include "StTofGeometry.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "PhysicalConstants.h"
 #include "ctf/St_ctg_Module.h"
 #include "tables/St_tofSlatGeom_Table.h"
+#include "StThreeVectorD.hh"
+#include "StPhysicalHelixD.hh"
 #include "StMaker.h"
+#include "StTofGeometry.h"
+
+#include <utility>
+using std::pair;
+
+double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
 
 
-/// defaulty empty constructor
-StTofGeometry::StTofGeometry(){ /* nope */};
+/// defaulty constructor
+StTofGeometry::StTofGeometry(){
+  mDebug = false;
+}
+
 /// default empty destructor
 StTofGeometry::~StTofGeometry(){ /* nope */};
 
@@ -89,10 +107,10 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
   St_ctg_slat_eta* stafSlatEta(0);
   St_ctg_slat*     stafSlatParam(0);
 
-  stafTofParam   = (St_ctg_geo      *) gime("tof");
-  stafSlatPhi    = (St_ctg_slat_phi *) gime("tof_slat_phi");
-  stafSlatEta    = (St_ctg_slat_eta *) gime("tof_slat_eta");
-  stafSlatParam  = (St_ctg_slat     *) gime("tof_slat");
+  stafTofParam   = static_cast<St_ctg_geo*>(gime("tof"));
+  stafSlatPhi    = static_cast<St_ctg_slat_phi*>(gime("tof_slat_phi"));
+  stafSlatEta    = static_cast<St_ctg_slat_eta*>(gime("tof_slat_eta"));
+  stafSlatParam  = static_cast<St_ctg_slat*>(gime("tof_slat"));
 
   ctg_geo_st *geo = stafTofParam->GetTable();
   if (geo){
@@ -123,7 +141,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
   if (eta){
     for(int iRow=0; iRow<stafSlatEta->GetNRows(); iRow++,eta++){
       StructTofSlatEta tofSlatEta;
-      tofSlatEta.ieta = eta->ieta;
+      tofSlatEta.ieta    = eta->ieta;
       tofSlatEta.cosang  = eta->cosang;
       tofSlatEta.eta     = eta->eta;
       tofSlatEta.eta_max = eta->eta_max;
@@ -146,7 +164,7 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
       StructTofSlatPhi tofSlatPhi;
       tofSlatPhi.iphi    = phi->iphi;
       // convert XDF 0..360 degrees to STAR -pi..pi range
-      tofSlatPhi.phi     = ((phi->phi>180)?phi->phi-360:phi>phi)*degree;
+      tofSlatPhi.phi     = ((phi->phi    >180)?phi->phi     -360:phi>phi    )*degree;
       tofSlatPhi.phi_max = ((phi->phi_max>180)?phi->phi_max-360:phi->phi_max)*degree;
       tofSlatPhi.phi_min = ((phi->phi_min>180)?phi->phi_min-360:phi->phi_min)*degree;
       mTofSlatPhiVec.push_back(tofSlatPhi);
@@ -164,8 +182,9 @@ void StTofGeometry::initGeomFromXdf(const Char_t* InputXdfFile){
     if      (iEta==10) {iPhiMin= 1 ; iPhiMax= 5;}  // 1st 5-wide row
     else if (iEta== 9) {iPhiMin= 6 ; iPhiMax= 9;}  // 2nd 4-wide row
     else if (iEta < 9) {iPhiMin=10 ; iPhiMax=13;}  // all other 4-wide rows
-    else {cout << "StTofGeometry: slat eta out of range " << iEta << endl;
-          iPhiMin=0; iPhiMax=-1;}
+    else {
+      cout << "StTofGeometry: slat eta out of range " << iEta << endl;
+      iPhiMin=0; iPhiMax=-1;}
     for (int j=iPhiMin-1;j<iPhiMax;j++){
       tofSlatGeom_st* tofSlat = new tofSlatGeom_st;
       tofSlat->ieta    = mTofSlatEtaVec[i].ieta;
@@ -203,9 +222,9 @@ void StTofGeometry::initGeomFromDbase(StMaker *maker){
   mDbDataSet= maker->GetDataBase("Geometry/tof");
 
   assert(mDbDataSet);
-  St_tofSlatGeom* mSlatGeom = (St_tofSlatGeom*)mDbDataSet->Find("tofSlatGeom");
+  St_tofSlatGeom* mSlatGeom = static_cast<St_tofSlatGeom*>(mDbDataSet->Find("tofSlatGeom"));
   assert(mSlatGeom);
-  tofSlatGeom_st *mslats=(tofSlatGeom_st*)mSlatGeom->GetArray();
+  tofSlatGeom_st *mslats= static_cast<tofSlatGeom_st*>(mSlatGeom->GetArray());
   int numRows=mSlatGeom->GetNRows(); // should be 41 rows...
   cout << "StTofGeometry: numRows = " << numRows << endl;
   for (int i=0;i<numRows;i++) mTofSlatVec.push_back(mslats[i]);
@@ -219,8 +238,8 @@ void StTofGeometry::initGeomFromDbase(StMaker *maker){
   mTofParam.n_counter_phi     =  5;
   mTofParam.n_tray_eta        =  1;
   mTofParam.n_tray_phi        =  1;
-  mTofParam.counter_thickness =  2.159;
-  mTofParam.counter_width     =   1;
+  mTofParam.counter_thickness =  2; 
+  mTofParam.counter_width     =  4;
   mTofParam.r                 = 213.95;
   mTofParam.tray_height       =   4.7;
   mTofParam.tray_width        =  10.795;
@@ -310,13 +329,11 @@ StThreeVectorD StTofGeometry::tofPlaneNormPoint(Int_t slatId) const {
   int iPhi, centerSlatId;
   if (iEta==10){  // for 5w rows take the centre (iphi=3)
     iPhi=3;
-    //centerSlatId = (iPhi - 1) * nEtas + iEta; 
     centerSlatId=calcSlatId(iPhi,iEta);
     planeNormPoint = tofSlatNormPoint(centerSlatId);
   }
   else {        // in case of 4w rows average over slats iphi=2,4
     for (iPhi=2;iPhi<4;iPhi++){
-      //centerSlatId = (iPhi - 1) * nEtas + iEta; 
       centerSlatId=calcSlatId(iPhi,iEta);
       planeNormPoint += tofSlatNormPoint(centerSlatId)/2;
     }
@@ -391,9 +408,8 @@ int StTofGeometry::tofSlatCross(const StThreeVectorD& point, const tofSlatGeom_s
   }
 
   // start to check
-  //  slatCross = 0;
-  if((float) point.pseudoRapidity() >= etaMin &&
-     (float) point.pseudoRapidity() <= etaMax) { 
+  if(point.pseudoRapidity() >= etaMin &&
+     point.pseudoRapidity() <= etaMax) { 
 
     if (phi >= tofSlat.phi_min && phi <= tofSlat.phi_max)   
       slatCross = 1;
@@ -405,13 +421,13 @@ int StTofGeometry::tofSlatCross(const StThreeVectorD& point, const tofSlatGeom_s
 
 ///  decode the volumeId and return a constructed slatId
 int StTofGeometry::tofSlatCrossId(const int volumeId) const {
-  int phiId=-1;
-  int etaId=-1;
+  int phiId = -1;
+  int etaId = -1;
 
-  int trayEta    = int(volumeId/100000) ;
-  int trayPhi    = (short)fmod((double)volumeId,100000.)/1000 ;
-  int counterPhi = (short)fmod((double)volumeId,1000.)/100 ;
-  int counterEta = (short)fmod((double)volumeId,100.) ;
+  int trayEta    = volumeId/100000;
+  int trayPhi    = static_cast<int>(fmod(volumeId,100000.)/1000) ;
+  int counterPhi = static_cast<int>(fmod(volumeId,1000.)/100) ;
+  int counterEta = static_cast<int>(fmod(volumeId,100.)) ;
 
   if (trayEta==1) {
     phiId = 14 - trayPhi ;
@@ -447,10 +463,10 @@ int StTofGeometry::tofSlatCrossId(const StThreeVectorD& point) const {
   int phiId = -1;
 
   for (unsigned int i=0;i<mTofSlatVec.size();i++){
-    if((float) point.z() >= mTofSlatVec[i].z_min &&
-       (float) point.z() <= mTofSlatVec[i].z_max &&
-       (float) point.phi() >= mTofSlatVec[i].phi_min &&
-       (float) point.phi() <= mTofSlatVec[i].phi_max) {
+    if(point.z()   >= mTofSlatVec[i].z_min   &&
+       point.z()   <= mTofSlatVec[i].z_max   &&
+       point.phi() >= mTofSlatVec[i].phi_min &&
+       point.phi() <= mTofSlatVec[i].phi_max) {
       etaId = mTofSlatVec[i].ieta;
       phiId = mTofSlatVec[i].iphi;
       break;
@@ -474,11 +490,8 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
   idVector     idErasedVec = slatIdVec;
   idVectorIter slatIdIter, idErasedIter;
 
-  bool   middle, inner, outer;
   double pathLength;
   
-  float slatThickness = mTofParam.counter_thickness;
-
   StructSlatHit slatHit;
   tofSlatHitVector slatHitVec;
   slatHitVec.clear();
@@ -489,28 +502,30 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
     // the first slat in the cluster
     slatIdIter = slatIdVec.begin();
     
-    int trayId = this->tofSlat(*slatIdIter).trayId;
+    int   trayId = this->tofSlat(*slatIdIter).trayId;
     float cosang = this->tofSlat(*slatIdIter).cosang;
-    int iEta = this->tofSlat(*slatIdIter).ieta;
+    int   iEta   = this->tofSlat(*slatIdIter).ieta;
     
-    // middle of the slat
-    StThreeVectorD slatNormMiddle = this->tofPlaneNormPoint(*slatIdIter);
-    
-    // get normal vector of the plane
-    StThreeVectorD slatNormal = slatNormMiddle/slatNormMiddle.mag();
-
-    // two edges (inner and outer) of the slat
-    StThreeVectorD slatNormInner = slatNormMiddle*((slatNormMiddle.mag() -
-						    slatThickness)/ slatNormMiddle.mag());
-    StThreeVectorD slatNormOuter = slatNormMiddle*((slatNormMiddle.mag() +
-						    slatThickness)/ slatNormMiddle.mag());
-    // points at three planes
-    pathLength = helix.pathLength(slatNormMiddle, slatNormal);
-    StThreeVectorD hitAtMiddle = helix.at(pathLength);
-    pathLength = helix.pathLength(slatNormInner, slatNormal);
-    StThreeVectorD hitAtInner = helix.at(pathLength);
-    pathLength = helix.pathLength(slatNormOuter, slatNormal);
-    StThreeVectorD hitAtOuter = helix.at(pathLength);
+    // layer[mMax-1] closest to STAR center, layer[0] farthest.
+    // typically hitprof  [msb|...|lsb] = [innermost| ... | outermost]
+    unsigned int idMiddleLayer = (mMaxSlatLayers-1)/2;
+    float layerSeperation = mTofParam.counter_thickness/(mMaxSlatLayers-1);
+    StThreeVectorD slatNormLayer[mMaxSlatLayers];
+    slatNormLayer[idMiddleLayer] =  this->tofPlaneNormPoint(*slatIdIter);
+    StThreeVectorD slatNormalVec = slatNormLayer[idMiddleLayer]/slatNormLayer[idMiddleLayer].mag();
+    for (unsigned int ll=1;ll<(idMiddleLayer+1);ll++){
+	slatNormLayer[idMiddleLayer+ll] = slatNormLayer[idMiddleLayer]
+	  *((slatNormLayer[idMiddleLayer].mag() - ll*layerSeperation )
+	    /slatNormLayer[idMiddleLayer].mag());
+	slatNormLayer[idMiddleLayer-ll] = slatNormLayer[idMiddleLayer]
+	  *((slatNormLayer[idMiddleLayer].mag() + ll*layerSeperation )
+	    /slatNormLayer[idMiddleLayer].mag());
+    }
+    StThreeVectorD hitAtLayer[mMaxSlatLayers];
+    for (unsigned int ll=0;ll<mMaxSlatLayers;ll++){
+	pathLength = helix.pathLength(slatNormLayer[ll], slatNormalVec);
+	hitAtLayer[ll] = helix.at(pathLength);
+    }
 
     // loop over all slats in idErasedVec (=slatIdVec at the begining of while)
     idErasedIter = idErasedVec.begin();
@@ -518,41 +533,66 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
       
       // check if any slat in the plane where the first slat lies
       if(this->tofSlat(*idErasedIter).cosang == cosang &&
-	 this->tofSlat(*idErasedIter).ieta == iEta &&
+	 this->tofSlat(*idErasedIter).ieta   == iEta   &&
 	 this->tofSlat(*idErasedIter).trayId == trayId) {
 
-	// check if any slat in the plane is fired
-	middle=tofSlatCross(hitAtMiddle, this->tofSlat(*idErasedIter));
-	inner=tofSlatCross(hitAtInner, this->tofSlat(*idErasedIter));
-	outer=tofSlatCross(hitAtOuter, this->tofSlat(*idErasedIter));
+	  bool layer[mMaxSlatLayers];
+	  int numberOfHitLayers(0);
+	  for (unsigned int ll=0;ll<mMaxSlatLayers;ll++){
+	    layer[ll] = tofSlatCross(hitAtLayer[ll], this->tofSlat(*idErasedIter));
+	    if (layer[ll]) numberOfHitLayers++;
+	  }
 	
-	// fill histogram of hit pattern 
-	// if(middle && inner && outer) hist->Fill(1.0); 
-	// if(!middle && inner && outer) hist->Fill(2.0); 
-	// if(middle && !inner && outer) hist->Fill(3.0); 
-	// if(middle && inner && !outer) hist->Fill(4.0); 
-	// if(!middle && !inner && outer) hist->Fill(5.0); 
-	// if(!middle && inner && !outer) hist->Fill(6.0); 
-	// if(middle && !inner && !outer) hist->Fill(7.0); 
- 
-	// save fired slat in slatHitVec which will be returned at the end  
-	if(middle||inner||outer) {
-	  slatHit.slatIndex = *idErasedIter;
-	  if(middle) slatHit.hitPosition = hitAtMiddle; 
-	  else if(inner) slatHit.hitPosition = hitAtInner; 
-	  else slatHit.hitPosition = hitAtOuter; 
-	  slatHitVec.push_back(slatHit);
+ 	// save fired slat in slatHitVec which will be returned at the end  
+	  if (numberOfHitLayers>0) {
+	    slatHit.hitProfile = 0;
+	    if (Debug()) cout << "L(0-"<<mMaxSlatLayers-1<<"): ";
+	    for  (unsigned int ll=0;ll<mMaxSlatLayers;ll++){
+	      slatHit.hitProfile = 2*slatHit.hitProfile + layer[ll]*1;
+	      if (Debug()) cout <<layer[ll];
+	    }
+	    if (Debug()) cout << endl;
 
-	  //cout << "fired? Ids, and angles = " 
-	  //	 << middle << " " << inner <<" "<< outer <<
-	  //  " " << slatNormal.x() <<
-	  //  " " << slatNormal.y() <<
-	  //  " " << slatNormal.z() <<
-	  //  " " << this->tofSlat(*idErasedIter)->ieta <<
-	  //  " " << this->tofSlat(*idErasedIter)->iphi <<
-	  //  " " << this->tofSlat(*idErasedIter)->eta <<
-	  //  " " << this->tofSlat(*idErasedIter)->phi << endl;
-	}
+	    unsigned int innerLayer(0), outerLayer(mMaxSlatLayers-1);
+	    // boundary control not really necessary since anyLayer guarantees at least one layer
+	    while (!layer[innerLayer] && (innerLayer<=mMaxSlatLayers)) innerLayer++;
+	    while (!layer[outerLayer] && (outerLayer>= 0            )) outerLayer--;
+	    if (Debug()) cout << "Li="<<innerLayer<< " Lo="<<outerLayer<<" nLx="<<numberOfHitLayers<<endl;
+
+
+	    float s(0);
+	    StThreeVectorD distance(0,0,0);
+
+	    if (innerLayer!=outerLayer){
+	      s = tofPathLength(&hitAtLayer[innerLayer],&hitAtLayer[outerLayer],helix.curvature());
+	      distance = hitAtLayer[outerLayer] - hitAtLayer[innerLayer];	    
+	    }
+
+	    float theta_xy = atan(distance.x()/distance.y());
+	    float theta_zr = atan(distance.z()/distance.perp());
+
+	    // make angles local to the slat
+	    theta_zr -= acos(this->tofSlat(*idErasedIter).cosang);
+	    theta_xy += pi/2 + this->tofSlat(*idErasedIter).phi;
+
+	    slatHit.s = s;
+	    slatHit.theta_xy = theta_xy;
+	    slatHit.theta_zr = theta_zr;
+
+	    slatHit.slatIndex = *idErasedIter;
+
+	    // calculate average hit position, based on all hit layers
+	    StThreeVectorD averageHitPos(0,0,0);
+	    for (unsigned int i=0;i<mMaxSlatLayers;i++)
+	      if (layer[i]){
+		averageHitPos += hitAtLayer[i]/numberOfHitLayers;
+		slatHit.layerHitPositions.push_back(hitAtLayer[i]);
+	      }
+	    slatHit.hitPosition = averageHitPos;
+
+	    slatHitVec.push_back(slatHit);
+	    slatHit.layerHitPositions.clear();
+	  }
 	//erase the slat entry which has been checked (preparing for the next round)
 	idErasedVec.erase(idErasedIter);
 	idErasedIter--;
@@ -563,3 +603,140 @@ tofSlatHitVector StTofGeometry::tofHelixToArray(const StPhysicalHelixD& helix,
   }
   return slatHitVec;
 }
+
+
+/// returns 1-D hit position on the TOFp slat (Zhit)
+float StTofGeometry::slatHitPosition(StThreeVectorD* hitPoint){
+  int slatId = this->tofSlatCrossId(*hitPoint);
+  if (slatId>0){
+    float zmin   = this->tofSlat(slatId).z_min;
+    float zmax   = this->tofSlat(slatId).z_max;
+    float cosang = this->tofSlat(slatId).cosang;
+    
+    // pmt is on the zmax side.
+    float length = (zmax-hitPoint->z())/cosang ;
+    float max_distance = (zmax-zmin)/cosang ;
+
+    if (length>max_distance || length<0){
+      cout <<  "HitPositionCorrection:  length="<<length<<" max="<<max_distance
+	   << " zmin="<<zmin<<" zmax="<<zmax<<" cosang="<<cosang<<endl;
+      this->printSlat(slatId);
+    }
+
+    return length;
+  }
+
+  // return very negative value to indicate bad slatId.
+  cout << "slatHitPosition: hit point out of range;"
+       << " phi=" << hitPoint->phi() << "  z=" << hitPoint->z() << endl;
+  return -100.;
+}
+
+
+/// returns idVector of 3x3 (max) neighbouring slatIds
+idVector StTofGeometry::slatNeighbours(int slatId){
+  tofSlatGeom_st middleSlat = this->tofSlat(slatId);
+  int slatPhi = middleSlat.iphi;
+  int slatEta = middleSlat.ieta;
+
+  idVector neighbours;
+  neighbours.clear();
+  int thisSlatId, ieta, iphi;
+
+  // for all the 4w rows life is simple ...
+  if (slatEta<9){
+    for (ieta= slatEta-1;ieta<=slatEta+1;ieta++)
+      for (iphi= slatPhi-1;iphi<=slatPhi+1;iphi++){
+	if ((ieta==slatEta) && (iphi==slatPhi)) continue;
+	if ((ieta <1) || (iphi<1) || (iphi>4)) continue;
+	thisSlatId = calcSlatId(iphi,ieta);
+	neighbours.push_back(thisSlatId);
+      }
+  }
+  // the 4w row next to the 5w row needs a little bit attention ...
+  else if (slatEta==9){
+    for (ieta= slatEta-1;ieta<=slatEta;ieta++)
+      for (iphi= slatPhi-1;iphi<=slatPhi+1;iphi++){
+	if ((ieta==slatEta) && (iphi==slatPhi)) continue;
+	if ((iphi<1) || (iphi>4)) continue;
+	thisSlatId = calcSlatId(iphi,ieta);
+	neighbours.push_back(thisSlatId);
+      }
+    ieta = slatEta+1; iphi = slatPhi;
+    thisSlatId = calcSlatId(iphi,ieta);
+    neighbours.push_back(thisSlatId);
+    iphi = slatPhi+1;
+    thisSlatId = calcSlatId(iphi,ieta);
+    neighbours.push_back(thisSlatId);
+  }
+  // the 5w row needs special treatment ...
+  else if (slatEta==10){
+    for (iphi= slatPhi-1;iphi<=slatPhi+1;iphi++){
+      if (iphi==slatPhi) continue;
+      if ((iphi<1) || (iphi>5)) continue;
+      ieta = slatEta;
+      thisSlatId = calcSlatId(iphi,ieta); 
+      neighbours.push_back(thisSlatId);
+    }
+    ieta=slatEta-1;
+    for (iphi=slatPhi-1;iphi<=slatPhi;iphi++){
+      if ((iphi<1) || (iphi>4)) continue;
+      thisSlatId = calcSlatId(iphi,ieta);
+      neighbours.push_back(thisSlatId);
+    }
+  }
+
+  return neighbours;
+}
+
+
+/// returns idVector of 5x5 (max) neighbouring slatIds
+idVector StTofGeometry::slatNeighboursWide(int slatId){
+  // consider a wider range around this slatId (5x5)
+  tofSlatGeom_st middleSlat = this->tofSlat(slatId);
+  int slatPhi = middleSlat.iphi;
+  int slatEta = middleSlat.ieta;
+
+  idVector neighbours;
+  neighbours.clear();
+  int thisSlatId, ieta, iphi;
+
+  for (ieta=slatEta-2;ieta<=slatEta+2;ieta++){
+    if ((ieta<1) || (ieta>10)) continue;
+    int iphiMax = (ieta==10)?5:4;
+    for (iphi = 1; iphi<=iphiMax; iphi++){
+      if ((ieta==slatEta) && (iphi==slatPhi)) continue;
+      thisSlatId = calcSlatId(iphi,ieta);
+      neighbours.push_back(thisSlatId);
+    }
+  }
+
+  return neighbours;
+}
+
+
+/// returns the local Phi angle of a track inside a slat
+float StTofGeometry::slatPhiPosition(StThreeVectorD* hitPoint){
+  int slatId = this->tofSlatCrossId(*hitPoint);
+  if (slatId>0){
+    float phimin = this->tofSlat(slatId).phi_min;
+    float phimax = this->tofSlat(slatId).phi_max;
+    
+    float philoc = hitPoint->phi() - phimin;
+    float max_deltaphi = (phimax-phimin);
+
+    if (philoc>max_deltaphi || philoc<0){
+      cout <<  "slatHitPhiPosition:  phi="<<philoc<<" max="<<max_deltaphi
+	   << " phimin="<<phimin<<" phimax="<<phimax<<endl;
+      this->printSlat(slatId);
+    }
+
+    return philoc;
+  }
+
+  // return very negative value to indicate bad slatId.
+  cout << "slatHitPhiPosition: hit point out of range;"
+       << " phi=" << hitPoint->phi() << "  z=" << hitPoint->z() << endl;
+  return -100.;
+}
+
