@@ -1,7 +1,7 @@
  macro run _
        chain
    
-   macro/global/import *
+  macro/global/import *
      
   message ' Now running BFC_cleanup'
      
@@ -18,16 +18,29 @@
    
   message ' --> bfc_cleanup - delete vectors'      
 * delete vectors
-   vec/delete havedstrunsum
-   vec/delete totime
-   vec/delete cpupev
-   vec/delete setup_done
-   vec/delete readprob
-   
+  if ($vexist(havedstrunsum).ne.0) then      
+    vec/delete havedstrunsum
+  endif
+  if ($vexist(totime).ne.0) then      
+    vec/delete totime
+  endif
+  if ($vexist(cpupev).ne.0) then      
+    vec/delete cpupev
+  endif
+  if ($vexist(setup_done).ne.0) then      
+    vec/delete setup_done
+  endif
+  if ($vexist(readprob).ne.0) then      
+    vec/delete readprob
+  endif
+  if ($vexist(randst).ne.0) then      
+    vec/delete randst
+  endif
+    
+  
 * do only if you want to re-load stuff
 * vec/delete make_done
-* vec/delete randst
-* vec/delete readprob
+
    
   test = [chain]
   nw = $words([test])
