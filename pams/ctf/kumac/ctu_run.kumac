@@ -4,7 +4,7 @@ macro/global/import *
 *   
 *    Call cts
 *
-ami/mod/call ctu [geometry]/ctf/ctb _ 
-                 [calib]/ctf/ctb_slat _
+ami/mod/call ctu [params]/ctf/ctb _ 
+                 [params]/ctf/ctb_slat _
                  [data]/ctf/ctb_raw _
                  [data]/ctf/ctb_cor
