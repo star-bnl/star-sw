@@ -4,12 +4,15 @@
 #ifndef EEeventDst_h
 #define EEeventDst_h
 /*********************************************************************
- * $Id: EEeventDst.h,v 1.2 2003/02/21 22:21:47 balewski Exp $
+ * $Id: EEeventDst.h,v 1.3 2003/07/01 14:13:13 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw Hits
  *********************************************************************
  * $Log: EEeventDst.h,v $
+ * Revision 1.3  2003/07/01 14:13:13  balewski
+ * no clue
+ *
  * Revision 1.2  2003/02/21 22:21:47  balewski
  * time stamp added
  *
@@ -73,7 +76,7 @@ public:
   
   EEeventDst();
   virtual ~EEeventDst();
-  void print();
+  void print(int k=0);
   EEsectorDst *addSectorDst(int ID);
   EEsectorDst *getSec(int secID, int create=0);
   void clear();
