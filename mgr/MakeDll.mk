@@ -1,7 +1,7 @@
-# $Id: MakeDll.mk,v 1.58 1999/01/31 23:12:08 fisyak Exp $
+# $Id: MakeDll.mk,v 1.59 1999/01/31 23:23:40 fisyak Exp $
 # $Log: MakeDll.mk,v $
-# Revision 1.58  1999/01/31 23:12:08  fisyak
-# Cleanup St Wrapper libraries
+# Revision 1.59  1999/01/31 23:23:40  fisyak
+# Correct Template
 #
 # Revision 1.57  1999/01/31 20:54:56  fisyak
 # Fix bugs
@@ -215,6 +215,7 @@ endif
 CPPFLAGS += -D__ROOT__ 
 ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
 CXXFLAGS +=-ptr$(OBJ_DIR)
+
 endif
 #
 #	If NO source , NOTHING to do
@@ -466,7 +467,7 @@ ifndef NT
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.o)
 ifneq ($(STAR_SYS),hp_ux102)   
 	cd $(OBJ_DIR); \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(notdir $(ALL_DEPS)) $(LIBRARY); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS) $(LIBRARY); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 else  # hp_ux102
 	cd $(OBJ_DIR); \
