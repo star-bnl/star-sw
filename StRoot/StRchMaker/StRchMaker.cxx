@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $
+ * $Id: StRchMaker.cxx,v 2.1 2000/09/13 21:01:12 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 2.0  2000/08/09 16:22:11  gans
- * Cosmetic Changes. Naming convention for TDrawable objects
+ * Revision 2.1  2000/09/13 21:01:12  lasiuk
+ * adjust to interface of new CF
+ *
+ * Revision 2.1  2000/09/13 21:01:12  lasiuk
+ * adjust to interface of new CF
  *
  * Revision 2.0  2000/08/09 16:22:11  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
@@ -261,6 +264,10 @@ Int_t StRchMaker::Make() {
 
     //
     // Load the pixels into a container for
+    cout << "Next Event? <ret>: " << endl;
+    do {
+      if(getchar()) break;
+    } while (true);
 //      do {
 //        if(getchar()) break;
 //      } while (true);
@@ -538,6 +545,7 @@ Int_t StRchMaker::Make() {
     // ...then, write it into StEvent...if possible
     //
     
+    //
     // the cluster finder stuff
     //
     cout << "At the cluster finder" << endl;
@@ -576,17 +584,9 @@ Int_t StRchMaker::Make() {
     mClusterFinder->dumpClusterInformation(raw);
 #endif
 
-    if(mUseMatrix) {
-	cout << "==> USE MATRIX" << endl;
-	if(!mClusterFinder->makeHitsFromPixelMatrix()) {
-	    cout << "==> hits from pixel matrix failed!" << endl;
-	}
-    }
-    else {
-	cout << "==> USE SIMPLE HITS" << endl;
-	if(!mClusterFinder->simpleHitsFromClusters()) {
-	    cout << "==> simple hits from clusters failed!" << endl;
-	}
+    //
+    // select the method of hit finding
+    //
     cout << "==> USE SIMPLE HITS" << endl;
     if(!mClusterFinder->simpleHitsFromClusters()) {
       cout << "==> simple hits from clusters failed!" << endl;
@@ -864,10 +864,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-    printf("* $Id: StRchMaker.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.1 2000/09/13 21:01:12 lasiuk Exp $\n");
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.1 2000/09/13 21:01:12 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
