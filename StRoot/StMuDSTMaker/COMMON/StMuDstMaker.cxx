@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.39 2003/10/20 19:50:13 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.40 2003/10/23 04:08:29 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -419,21 +419,25 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   // muDst stuff
 
   chain->SetBranchStatus("*",0);
+  TString ts;
   for ( int i=0; i<__NARRAYS__; i++) {
     chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
-    chain->SetBranchStatus (StMuArrays::arrayNames[i],1);
+    ts = StMuArrays::arrayNames[i]; ts +="*";
+    chain->SetBranchStatus (ts,1);
   } 
   
   // strange stuff
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
     chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
-    chain->SetBranchStatus (StMuArrays::strangeArrayNames[i],1);
+    ts = StMuArrays::strangeArrayNames[i]; ts +="*";
+    chain->SetBranchStatus (ts,1);
   } 
   
   // emc stuff
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
-    chain->SetBranchStatus (StMuArrays::emcArrayNames[i],1);
+    ts = StMuArrays::emcArrayNames[i]; ts +="*";
+    chain->SetBranchStatus (ts,1);
   } 
   
   mTTree = mChain->GetTree();
@@ -915,6 +919,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.40  2003/10/23 04:08:29  perev
+ * use SetBranchStatus fixed
+ *
  * Revision 1.39  2003/10/20 19:50:13  perev
  * workaround added for TClonesArray::Delete + some cleanup of MuEmc
  *

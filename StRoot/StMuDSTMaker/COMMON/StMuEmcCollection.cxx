@@ -279,7 +279,7 @@ StMuEmcPoint* StMuEmcCollection::getEndcapPoint(int pointId)
 
 void StMuEmcCollection::setTowerADC(int id,int adc, int detector)
 {
-  if (!mPrsHits) return 0;
+  if (!mPrsHits) return;
   if(detector == bemc)
   {
     if(id<1 || id>4800) return;

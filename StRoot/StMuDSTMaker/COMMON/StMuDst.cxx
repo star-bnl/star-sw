@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.17 2003/10/20 22:55:39 laue Exp $
+ * $Id: StMuDst.cxx,v 1.18 2003/10/23 04:08:29 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -248,14 +248,17 @@ StTrackGeometry* StMuDst::trackGeometry(int q, StPhysicalHelixD* h) {
 }
 
 StTrack* StMuDst::createStTrack(StMuTrack* track) {
-  StTrack* t;
+  StTrack* t=0;
   if (track->type() == primary) t = new StPrimaryTrack();
-  if (track->type() == global) t = new StGlobalTrack();
+  if (track->type() == global)  t = new StGlobalTrack();
+  assert(t);
   t->setFlag( track->flag() );
 
   StPhysicalHelixD helix;
-  helix = track->helix(); t->setGeometry( trackGeometry( track->charge(), &helix ) );
-  helix = track->outerHelix(); t->setOuterGeometry( trackGeometry( track->charge(), &helix ) );
+  helix = track->helix(); 
+  t->setGeometry( trackGeometry( track->charge(), &helix ) );
+  helix = track->outerHelix();
+  t->setOuterGeometry( trackGeometry( track->charge(), &helix ) );
 
   t->setLength(track->length());
   t->setImpactParameter((track->dca()).mag());
@@ -279,6 +282,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.18  2003/10/23 04:08:29  perev
+ * use SetBranchStatus fixed
+ *
  * Revision 1.17  2003/10/20 22:55:39  laue
  * added filling of the topology map in the createStTrack function
  *
