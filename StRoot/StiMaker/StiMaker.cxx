@@ -88,7 +88,7 @@ Int_t StiMaker::Init()
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
 
     mtrackstore = StiTrackContainer::instance();
-    mhitstore = new StiHitContainer();
+    mhitstore = StiHitContainer::instance();
     mhitfactory = new StiHitFactory();
     mhitfiller = new StiHitFiller();
 
