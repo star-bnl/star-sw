@@ -1,5 +1,16 @@
-* $Id: geometry.g,v 1.63 2003/10/01 23:44:17 potekhin Exp $
+* $Id: geometry.g,v 1.64 2003/10/10 23:12:56 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.64  2003/10/10 23:12:56  potekhin
+* The fact is, we will need a suitable specialized geometry
+* for the pixel detector development, as it will require
+* a different beampipe and other modifications. I hereby
+* create the tag y2003c which will serve this purpose.
+* Right now it disables the old beampipe w/o offering anything
+* in its place -- this is subject to change as we assimilate
+* the new pipe design.
+*
+* Improved comments and structure in a few places
+*
 * Revision 1.63  2003/10/01 23:44:17  potekhin
 * Code modifications related to persisting the vital
 * geometry/version data, for now the magnetic field
@@ -163,7 +174,7 @@
    Structure  GDAT {real mfscale, char gtag(2)}
 * system list 
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd
+              zcal,mfld,bbcm,fpdm,phmd,pixl
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,alpipe,svtw,
               on/.true./,off/.false./
@@ -213,13 +224,18 @@ replace[;ON#{#;] with [
    CorrNum = 0
 * No PHMD by default, hence init the version:
    PhmdVersion = 0
+
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
-*
+
+
    field=5                                             "defaults constants"
+* "canonical" detector are all ON by default
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
-   {bbcm,fpdm,phmd} = off;
+* whereas some stuff is considered optional:
+   {bbcm,fpdm,phmd,pixl} = off;
+
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows"   
    {ems,rich,alpipe}=off   "TimeOfFlight, EM calorimeter Sector"
    btofconfig = 1        " ctb only
@@ -449,6 +465,40 @@ If LL>1
                      PhmdVersion = 1;
                 }
 
+* same as Y2003B but with pixel detector
+  on Y2003C    { correction 1 in 2003 geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     btofconfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,0}; shift={75,0}; " 60 sectors " 
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 3;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdVersion = 1;
+* careful!
+                   pipe=off;   " provisional"
+                   pixl=on;    " put the pixel detector in"
+                }
+
 
   on Y2003X    { same as year2003 but with full calorimeters
                   "svt: 3 layers ";
@@ -494,16 +544,23 @@ If LL>1
                   {pipe,svtt,ftpc,btof,vpdd,calb,ecal,magp,upst,zcal,phmd,fpdm,bbcm}=off; }
   on SVTT_ON    { Optional SVTT added on top of the minimal geo;
                      svtt=on; }
+*
   on PIPE_ON    { Optional pipe added on top of the minimal geo;
                      pipe=on; }
+  on PIPE_OFF   { Pipe optionally removed;
+                     pipe=off; }
+*
   on FTPC_ON    { Optional FTPC added on top of the minimal geo;
                      ftpc=on; }
   on BTOF_ON    { Optional BTOF added on top of the minimal geo;
                      btof=on; }
-  on ECAL_ON    { Optional ECAL  added on top of the minimal geo;
+  on ECAL_ON    { Optional ECAL added on top of the minimal geo;
                      ecal=on; }
-  on CALB_ON    { Optional CALB  added on top of the minimal geo;
+  on CALB_ON    { Optional CALB added on top of the minimal geo;
                      calb=on; }
+
+  on PIXL_ON    { Optional PIXL added on top of the minimal geo;
+                     pixl=on; }
 
   on FIELD_ONLY { No geometry - only magnetic field;              NtrSubEv=0;
       {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,rich,upst,zcal}=off; }
@@ -569,7 +626,10 @@ If LL>1
      if (.not.svtw) call AgDETP add ('swam.Len=',       0, 1)
    endif
 
-* Take care of the correction level:
+******************************************************************
+* Take care of the correction level
+* and call the appropriate constructor:
+
            if (svtt) then
               if(CorrNum==0) then
                  call svttgeo
@@ -577,9 +637,14 @@ If LL>1
                  call svttgeo1
               elseif(CorrNum==2) then
                  call svttgeo2
+              elseif(CorrNum==3) then
+                 call AgDETP add ('svtg.ShieldVer=',2 ,1)  ! switch to a larger inner shield
+                 call svttgeo2
               endif
            endif
- 
+            
+
+
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
 *   CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
 * - for year_1 X in mwc hits was limited, keep this (mwx=1)
@@ -618,14 +683,16 @@ If LL>1
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
 
-*  - barrel calorimeter may be a patch of 12 modules at the left side
+******************************************************************
+*  - Set up the parameters for the barrel calorimeter
    If (LL>1 & calb) then
      call AgDETP new ('CALB')
      if (ems)  call AgDETP add ('calg.nmodule=',Nmod, 2)
      if (ems)  call AgDETP add ('calg.shift=',  shift,2)
    endif
    if (calb) Call calbgeo
-*
+******************************************************************
+*  - Set up the parameters for the RICH counter
    if (LL>1 & rich) then
       call AgDETP new ('Rich')
       if (Rv>0) call AgDETP add ('Rich.Version=', Rv,1) 
@@ -634,18 +701,25 @@ If LL>1
    endif
    if (rich) Call richgeo
 
-*  - endcap calorimeter
+******************************************************************
+*  - Set up the parameters for the endcap calorimeter
    If (LL>1 & ecal) then
       call AgDETP new ('ECAL')
       call AgDETP add ('emcg.OnOff='   ,ecal_config,1)
       call AgDETP add ('emcg.FillMode=',ecal_fill,1)
    endif
+
 ******************************************************************
+* The rest of steering:
+
    if (ecal) Call ecalgeo
    if (bbcm) Call bbcmgeo
    if (fpdm) Call fpdmgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
+   if (pixl) Call pixlgeo
+
+
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
 * is defined, pass the version number to its constructor
