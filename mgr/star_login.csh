@@ -1,7 +1,10 @@
 #  $Log: star_login.csh,v $
+#  Revision 1.2  1998/01/01 03:28:13  fisyak
+#  New make.kumac
+#
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1997/12/31 14:35:23 $ 
+#             Last modification $Date: 1998/01/01 03:28:13 $ 
 #!/usr/bin/csh
 # star_login.csh
 #------------------------------------------------------------------#
@@ -28,7 +31,7 @@ set hostname_command = "hostname"
 # Setting some STAR variables
 #
 ########################################################################
-setenv STAR_DIR  /afs/rhic/star/pakages;        if ($ECHO) echo   "Setting up STAR_DIR  = $STAR_DIR"
+setenv STAR_DIR  /afs/rhic/star/packages;        if ($ECHO) echo   "Setting up STAR_DIR  = $STAR_DIR"
 setenv STAR_ROOT $STAR_DIR/dev;           if ($ECHO) echo   "Setting up STAR_ROOT = $STAR_ROOT"
 source $STAR_ROOT/mgr/STAR_SYS;    
 setenv STAR_LIB $STAR_ROOT/lib/$STAR_SYS; if ($ECHO) echo   "Setting up STAR_LIB  = $STAR_LIB"
