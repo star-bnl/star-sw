@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCluster.h,v 1.2 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuPmdCluster.h,v 1.3 2004/10/19 01:44:29 mvl Exp $
  *
  * Class : StMuPmdCluster
  * Author: Supriya Das
@@ -8,6 +8,9 @@
  * Description: This is the Cluster class for PMD in MuDst
  * ****************************************************************
  * $Log: StMuPmdCluster.h,v $
+ * Revision 1.3  2004/10/19 01:44:29  mvl
+ * Changed names of getters and setters (Star coding conventions)
+ *
  * Revision 1.2  2004/05/02 04:10:14  perev
  * private => protected
  *
@@ -29,25 +32,25 @@ class StMuPmdCluster : public TObject
 		StMuPmdCluster(StMuPmdCluster*);
   virtual	~StMuPmdCluster();
   
-  Int_t		GetSuperModule()	{return mSuperModule;}
-  Int_t		GetNcell()		{return mNcell;}
-  Float_t	GetEta()		{return mEta;}
-  Float_t 	GetPhi()		{return mPhi;}
-  Float_t	GetSigma()		{return mSigma;}
-  Float_t	GetEnergy()		{return mEnergy;}
-  Int_t		GetEnergyPID()		{return mEnergyPID;}//PID from Energy cut
-  Int_t		GetPID()		{return mPID;}//PID from other method (e.g. NN)
-  Int_t		GetMcPID()		{return mMcPID;}//PID from GEANT, 0 for Data
+  Int_t		superModule()	{return mSuperModule;}
+  Int_t		ncell()		{return mNcell;}
+  Float_t	eta()		{return mEta;}
+  Float_t 	phi()		{return mPhi;}
+  Float_t	sigma()		{return mSigma;}
+  Float_t	energy()	{return mEnergy;}
+  Int_t		energyPID()	{return mEnergyPID;}//PID from Energy cut
+  Int_t		PID()		{return mPID;}//PID from other method (e.g. NN)
+  Int_t		mcPID()		{return mMcPID;}//PID from GEANT, 0 for Data
 
-  void		SetSuperModule(Int_t var)	{mSuperModule = var;}
-  void		SetNcell(Int_t var)		{mNcell = var;}
-  void		SetEta(Float_t var)		{mEta = var;}
-  void		SetPhi(Float_t var)		{mPhi = var;}
-  void		SetSigma(Float_t var)		{mSigma = var;}
-  void		SetEnergy(Float_t var)		{mEnergy = var;}
-  void		SetEnergyPID(Int_t var)		{mEnergyPID = var;}
-  void		SetPID(Int_t var)		{mPID = var;}
-  void		SetMcPID(Int_t var)		{mMcPID = var;}
+  void		setSuperModule(Int_t var)	{mSuperModule = var;}
+  void		setNcell(Int_t var)		{mNcell = var;}
+  void		setEta(Float_t var)		{mEta = var;}
+  void		setPhi(Float_t var)		{mPhi = var;}
+  void		setSigma(Float_t var)		{mSigma = var;}
+  void		setEnergy(Float_t var)		{mEnergy = var;}
+  void		setEnergyPID(Int_t var)		{mEnergyPID = var;}
+  void		setPID(Int_t var)		{mPID = var;}
+  void		setMcPID(Int_t var)		{mMcPID = var;}
 
  protected:
   Int_t		mSuperModule;
