@@ -1,6 +1,9 @@
-//  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.65 2001/06/01 03:03:57 perev Exp $
+/  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
+// $Id: St_geant_Maker.cxx,v 1.66 2001/07/03 15:51:48 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.66  2001/07/03 15:51:48  nevski
+// phmd added
+//
 // Revision 1.65  2001/06/01 03:03:57  perev
 // overloaded GetDataSet -> FindDataSet
 //
@@ -272,6 +275,7 @@
 #include "g2t/St_g2t_esm_Module.h"
 #include "g2t/St_g2t_zdc_Module.h"
 #include "g2t/St_g2t_vpd_Module.h"
+#include "g2t/St_g2t_pmd_Module.h"
 #include "StarCallf77.h" 
 #ifdef F77_NAME
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
@@ -580,6 +584,14 @@ Int_t St_geant_Maker::Make()
       St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
       m_DataSet->Add(g2t_vpd_hit);
       iRes = g2t_vpd(g2t_track,g2t_vpd_hit);
+//           ==============================
+    }
+
+    geant3->Gfnhit("PHMD","PDGS", nhits);
+    if (nhits>0) {
+      St_g2t_pmd_hit *g2t_pmd_hit = new St_g2t_pmd_hit("g2t_pmd_hit",nhits);
+      m_DataSet->Add(g2t_pmd_hit);
+      iRes = g2t_pmd(g2t_track,g2t_pmd_hit);
 //           ==============================
     }
 
