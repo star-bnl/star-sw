@@ -1,7 +1,14 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.26 2000/04/20 16:56:12 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.27 2000/05/11 15:34:29 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.27  2000/05/11 15:34:29  calderon
+ * added option to print memory usage using StMemoryInfo, useful
+ * for checking leaks.  If used, a lot of status information is printed
+ * at several points in Make() and then in Clear().  Whatever is allocated
+ * during Make() should be accounted for in Clear().  By default memory is
+ * not checked, so there are a lot less output messages.
+ *
  * Revision 1.26  2000/04/20 16:56:12  calderon
  * Speed up the tpc matching algorithm by using a seed to tell the iterator
  * where to start looping, instead of looping over every hit all the time.
@@ -152,6 +159,7 @@ using std::find_if;
 #include "StEventMaker/StEventMaker.h"
 #include "StMcEventMaker/StMcEventMaker.h"
 
+#include "StMemoryInfo.hh"
 // // Define the comparison to be used in the multimaps
     
 // bool compTpcHit::operator()(const StTpcHit* h1, const StTpcHit* h2) const {
@@ -334,7 +342,8 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
     mSvtHitResolution      = 0;   
     mFtpcHitResolution     = 0;
 
-
+    doPrintMemoryInfo = kFALSE;
+    
 }
 
 //_________________________________________________
@@ -346,32 +355,26 @@ StAssociationMaker::~StAssociationMaker()
     if (mRcTpcHitMap) {
 	mRcTpcHitMap->clear();
 	SafeDelete(mRcTpcHitMap);
-	cout << "Deleted Rec. Tpc Hit Map" << endl;
     }
     if (mMcTpcHitMap) {
 	mMcTpcHitMap->clear();
 	SafeDelete(mMcTpcHitMap);
-	cout << "Deleted M.C. Tpc Hit Map" << endl;
     }
     if (mRcSvtHitMap) {
 	mRcSvtHitMap->clear();
 	SafeDelete(mRcSvtHitMap);
-	cout << "Deleted Rec. Svt Hit Map" << endl;
     }
     if (mMcSvtHitMap) {
 	mMcSvtHitMap->clear();
 	SafeDelete(mMcSvtHitMap);
-	cout << "Deleted M.C. Svt Hit Map" << endl;
     }
     if (mRcFtpcHitMap) {
 	mRcFtpcHitMap->clear();
 	SafeDelete(mRcFtpcHitMap);
-	cout << "Deleted Rec. Ftpc Hit Map" << endl;
     }
     if (mMcFtpcHitMap) {
 	mMcFtpcHitMap->clear();
 	SafeDelete(mMcFtpcHitMap);
-	cout << "Deleted M.C. Ftpc Hit Map" << endl;
     }
     
     if (mRcTrackMap) {
@@ -383,81 +386,80 @@ StAssociationMaker::~StAssociationMaker()
 	// Delete the REC. TrackMap
 	mRcTrackMap->clear();
 	SafeDelete(mRcTrackMap);
-	cout << "Deleted Rec. Track Map" << endl;
     }
     if (mMcTrackMap) {
 	mMcTrackMap->clear();
 	SafeDelete(mMcTrackMap);
-	cout << "Deleted M.C. Track Map" << endl;
-
     }    
     if (mRcKinkMap) {
 	mRcKinkMap->clear();
 	SafeDelete(mRcKinkMap);
-	cout << "Deleted Rec. Kink Map" << endl;
     }
     if (mMcKinkMap) {
 	mMcKinkMap->clear();
 	SafeDelete(mMcKinkMap);
-	cout << "Deleted M.C. Kink Map" << endl;
     }
     if (mRcV0Map) {
 	mRcV0Map->clear();
 	SafeDelete(mRcV0Map);
-	cout << "Deleted Rec. V0 Map" << endl;
     }
     if (mMcV0Map) {
 	mMcV0Map->clear();
 	SafeDelete(mMcV0Map);
-	cout << "Deleted M.C. V0 Map" << endl;
     }
     if (mRcXiMap) {
 	mRcXiMap->clear();
 	SafeDelete(mRcXiMap);
-	cout << "Deleted Rec. Xi Map" << endl;
     }
     if (mMcXiMap) {
 	mMcXiMap->clear();
 	SafeDelete(mMcXiMap);
-	cout << "Deleted M.C. Xi Map" << endl;
     }
 }
 
 //_____________________________________________________________________________
 
-void StAssociationMaker::Clear(const char*)
+void StAssociationMaker::Clear(const char* c)
 {
     // StAssociationMaker - Clear,
+    if (doPrintMemoryInfo) 
+	StMemoryInfo::instance()->snapshot();
     
     // Delete TpcHitMap 
     if (mRcTpcHitMap) {
 	mRcTpcHitMap->clear();
 	SafeDelete(mRcTpcHitMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. Tpc Hit Map" << endl;
     }
     if (mMcTpcHitMap) {
 	mMcTpcHitMap->clear();
 	SafeDelete(mMcTpcHitMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. Tpc Hit Map" << endl;
     }
     if (mRcSvtHitMap) {
 	mRcSvtHitMap->clear();
 	SafeDelete(mRcSvtHitMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. Svt Hit Map" << endl;
     }
     if (mMcSvtHitMap) {
 	mMcSvtHitMap->clear();
 	SafeDelete(mMcSvtHitMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. Svt Hit Map" << endl;
     }
     if (mRcFtpcHitMap) {
 	mRcFtpcHitMap->clear();
 	SafeDelete(mRcFtpcHitMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. Ftpc Hit Map" << endl;
     }
     if (mMcFtpcHitMap) {
 	mMcFtpcHitMap->clear();
 	SafeDelete(mMcFtpcHitMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. Ftpc Hit Map" << endl;
     }
     
@@ -465,50 +467,63 @@ void StAssociationMaker::Clear(const char*)
 	// Delete the TrackPairInfos
 	// Careful, only delete them once!
 	for (rcTrackMapIter i=mRcTrackMap->begin(); i!=mRcTrackMap->end(); i++){
-	    delete (*i).second;
+	    SafeDelete((*i).second);
 	}
 	// Delete the REC. TrackMap
 	mRcTrackMap->clear();
 	SafeDelete(mRcTrackMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. Track Map" << endl;
     }
     if (mMcTrackMap) {
 	mMcTrackMap->clear();
 	SafeDelete(mMcTrackMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. Track Map" << endl;
 
     }    
     if (mRcKinkMap) {
 	mRcKinkMap->clear();
 	SafeDelete(mRcKinkMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. Kink Map" << endl;
     }
     if (mMcKinkMap) {
 	mMcKinkMap->clear();
 	SafeDelete(mMcKinkMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. Kink Map" << endl;
     }
     if (mRcV0Map) {
 	mRcV0Map->clear();
 	SafeDelete(mRcV0Map);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. V0 Map" << endl;
     }
     if (mMcV0Map) {
 	mMcV0Map->clear();
 	SafeDelete(mMcV0Map);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. V0 Map" << endl;
     }
     if (mRcXiMap) {
 	mRcXiMap->clear();
 	SafeDelete(mRcXiMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted Rec. Xi Map" << endl;
     }
     if (mMcXiMap) {
 	mMcXiMap->clear();
 	SafeDelete(mMcXiMap);
+    if (doPrintMemoryInfo) 
 	cout << "Deleted M.C. Xi Map" << endl;
     }
-    StMaker::Clear();
+
+    if (doPrintMemoryInfo) {
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
+    StMaker::Clear(c);
 }
 
 //_________________________________________________
@@ -526,6 +541,7 @@ Int_t StAssociationMaker::Init()
     //
     // TPC
     //
+    
     mTpcLocalHitResolution = new TH2F("TpcLocalHitResolution",
 				      "Delta Z Vs Delta X for Nearby Hits",
 				      50, -0.52, 0.52,
@@ -552,7 +568,9 @@ Int_t StAssociationMaker::Init()
 				  50, -8, 0.8);
     mFtpcHitResolution->SetXTitle("Rmc - Rrec (cm)");
     mFtpcHitResolution->SetYTitle("PHImc - PHIrec (deg)");
-    
+
+    cout << "Cuts used in association for this run: " << endl;
+    cout << *(StMcParameterDB::instance()) << endl;
     return StMaker::Init();
 }
 
@@ -561,7 +579,8 @@ Int_t StAssociationMaker::Init()
 Int_t StAssociationMaker::Make()
 {
     cout << "AssociationMaker -- Make()" << endl;
-
+    if (doPrintMemoryInfo) 
+	StMemoryInfo::instance()->snapshot();
     //
     // Get StEvent
     //
@@ -605,7 +624,7 @@ Int_t StAssociationMaker::Make()
     // should be done at the macro level.
 
     StMcParameterDB* parDB = StMcParameterDB::instance();
-    cout << *parDB << endl;
+    
 
     //
     // Loop over TPC hits and make Associations
@@ -687,6 +706,7 @@ Int_t StAssociationMaker::Make()
 		    
 		} // End of Hits in Padrow loop for MC Hits
 		if (closestTpcHit)
+		    if(false)
 		    mTpcLocalHitResolution->Fill(closestTpcHit->position().x()-
 						 rcTpcHit->position().x(),
 						 closestTpcHit->position().z()-
@@ -696,12 +716,17 @@ Int_t StAssociationMaker::Make()
     } // End of Sector Loop for Rec. Hits
     
     cout << "\nFinished Making TPC Hit Associations *********" << endl;
+    cout << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endl;
+    if (doPrintMemoryInfo) {
+	cout << "End of TPC Hit Associations\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
     
     //
     // Loop over SVT hits and make Associations
     //
     cout << "Making SVT Hit Associations..." << endl;
-    cout << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endl;
     
     StSvtHit*   rcSvtHit;
     StMcSvtHit* mcSvtHit;
@@ -775,6 +800,11 @@ Int_t StAssociationMaker::Make()
 
     cout << "Finished Making SVT Hit Associations *********" << endl;
     cout << "Number of Entries in SVT Hit Maps: " << mRcSvtHitMap->size() << endl;
+    if (doPrintMemoryInfo) {
+	cout << "End of SVT Hit Associations\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
 
     //
     // Loop over FTPC hits and make Associations
@@ -860,6 +890,11 @@ Int_t StAssociationMaker::Make()
     
     cout << "\nFinished Making FTPC Hit Associations *********" << endl;
     cout << "Number of Entries in Ftpc Hit Maps: " << mRcFtpcHitMap->size() << endl;
+    if (doPrintMemoryInfo) {
+	cout << "End of FTPC Hit Associations\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
     
 
     //
@@ -939,11 +974,6 @@ Int_t StAssociationMaker::Make()
     initializedTrackPing.nPingsSvt = 0;
     initializedTrackPing.nPingsFtpc = 0;
     
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<trackPing> candidates(100, initializedTrackPing);
-#else
-    vector<trackPing, allocator<trackPing> > candidates(100, initializedTrackPing);
-#endif
 
     // Instantiate the Track map
     mRcTrackMap = new rcTrackMapType;
@@ -957,6 +987,11 @@ Int_t StAssociationMaker::Make()
     unsigned int trkNodeI;
     for (trkNodeI = 0; trkNodeI < rcTrackNodes.size(); trkNodeI++){
 	
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+	vector<trackPing> candidates(20, initializedTrackPing);
+#else
+	vector<trackPing, allocator<trackPing> > candidates(20, initializedTrackPing);
+#endif
 	trkNode = rcTrackNodes[trkNodeI]; // For a by-pointer collection we need to dereference once
 	rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
@@ -966,19 +1001,20 @@ Int_t StAssociationMaker::Make()
 
 	//
 	// Get the hits of this track.
-	// 
+	//
+
 	StPtrVecHit recTpcHits   = rcTrack->detectorInfo()->hits(kTpcId);
 	StPtrVecHit recSvtHits   = rcTrack->detectorInfo()->hits(kSvtId);
 	StPtrVecHit recFtpcHitsW = rcTrack->detectorInfo()->hits(kFtpcWestId);
 	StPtrVecHit recFtpcHitsE = rcTrack->detectorInfo()->hits(kFtpcEastId);
 
+		
 	//
 	// Loop over the TPC hits of the track
 	//
 	unsigned int recTpcHitI;
-	for (recTpcHitI = 0; recTpcHitI < recTpcHits.size(); recTpcHitI++) {
-	    
-	    
+ 	for (recTpcHitI = 0; recTpcHitI < recTpcHits.size(); recTpcHitI++) {
+	    	    
 	    rcHit = recTpcHits[recTpcHitI];
 	    rcKeyTpcHit = dynamic_cast<StTpcHit*>(rcHit);
 		
@@ -1026,7 +1062,7 @@ Int_t StAssociationMaker::Make()
 	//
 
 	unsigned int recSvtHitI;
-	for (recSvtHitI = 0; recSvtHitI < recSvtHits.size(); recSvtHitI++) {
+ 	for (recSvtHitI = 0; recSvtHitI < recSvtHits.size(); recSvtHitI++) {
 	    // Loop over the SVT hits of the track
 	    
 	    rcHit = recSvtHits[recSvtHitI];
@@ -1080,7 +1116,7 @@ Int_t StAssociationMaker::Make()
 	unsigned int recFtpcHitI;
 
 	// Loop over the West FTPC hits of the track
-	for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsW.size(); recFtpcHitI++) {
+ 	for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsW.size(); recFtpcHitI++) {
 	    
 	    rcHit = recFtpcHitsW[recFtpcHitI];
 	    rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
@@ -1126,7 +1162,7 @@ Int_t StAssociationMaker::Make()
 	
 	// Loop over the East FTPC hits of the track
 	for (recFtpcHitI = 0; recFtpcHitI < recFtpcHitsE.size(); recFtpcHitI++) {
-	    
+		    
 	    
 	    rcHit = recFtpcHitsE[recFtpcHitI];
 	    rcKeyFtpcHit = dynamic_cast<StFtpcHit*>(rcHit);
@@ -1174,38 +1210,44 @@ Int_t StAssociationMaker::Make()
 	// Now we need to associate the tracks that meet the commonHits criteria.
 	//
 	
-	if (nCandidates>100) cout << "We Have More than 100 candidates!!! " << endl;
-	for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){
+	if (nCandidates>20) cout << "We Have More than 20 candidates!!! " << endl;
+	if (candidates.size()>20) cout << "The candidate track vector has grown more than expected!! " << endl;
+ 	for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){
 	    //mNumberOfPings->Fill((float) candidates[iCandidate].nPings);
-
-	  
-	  if (candidates[iCandidate].nPingsTpc  >= parDB->reqCommonHitsTpc() ||
-	      candidates[iCandidate].nPingsSvt  >= parDB->reqCommonHitsSvt() ||
-	      candidates[iCandidate].nPingsFtpc >= parDB->reqCommonHitsFtpc()){
-	    // We got a track pair !!
-	    // Add it to multimap
 	    
-	    trkPair = new StTrackPairInfo(rcTrack,
-					  candidates[iCandidate].mcTrack,
-					  candidates[iCandidate].nPingsTpc,
-					  candidates[iCandidate].nPingsSvt,
-					  candidates[iCandidate].nPingsFtpc);
-	    mRcTrackMap->insert(rcTrackMapValType (rcTrack, trkPair));
-	    mMcTrackMap->insert(mcTrackMapValType (candidates[iCandidate].mcTrack, trkPair));
 	    
-	    // print out the map
-	    //cout << "The map is now" << endl << *mRcTrackMap << endl;
-	  }
+	    if (candidates[iCandidate].nPingsTpc  >= parDB->reqCommonHitsTpc() ||
+		candidates[iCandidate].nPingsSvt  >= parDB->reqCommonHitsSvt() ||
+		candidates[iCandidate].nPingsFtpc >= parDB->reqCommonHitsFtpc()){
+		// We got a track pair !!
+		// Add it to multimap
+		
+		trkPair = new StTrackPairInfo(rcTrack,
+					      candidates[iCandidate].mcTrack,
+					      candidates[iCandidate].nPingsTpc,
+					      candidates[iCandidate].nPingsSvt,
+					      candidates[iCandidate].nPingsFtpc);
+		mRcTrackMap->insert(rcTrackMapValType (rcTrack, trkPair));
+		mMcTrackMap->insert(mcTrackMapValType (candidates[iCandidate].mcTrack, trkPair));
+		
+		// print out the map
+		//cout << "The map is now" << endl << *mRcTrackMap << endl;
+	    }
 	}
 	
-	
-    }// StEvent track loop
+	// Clear the candidate vector
+	candidates.clear();
 
-    // Clear the candidate vector
-    candidates.clear();
+    }// StEvent track loop
+    
 	 
     cout << "Finished Making Track Associations *********" << endl;
     cout << "Number of Entries in Track Maps: " << mRcTrackMap->size() << endl;
+    if (doPrintMemoryInfo) {
+	cout << "End of Track Associations\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
 
     //
     // Start doing Vertex Associations ----------------------
@@ -1222,8 +1264,6 @@ Int_t StAssociationMaker::Make()
     cout << "Making Vertex Associations" << endl;
 
     StSPtrVecKinkVertex& kinks = rEvent->kinkVertices();
-    StSPtrVecV0Vertex& v0s = rEvent->v0Vertices();
-    StSPtrVecXiVertex& xis = rEvent->xiVertices();
 
     
     cout << "Kinks..." << endl;
@@ -1231,35 +1271,28 @@ Int_t StAssociationMaker::Make()
     // Loop over Kinks
 
     pair<rcTrackMapIter, rcTrackMapIter> kinkBoundsDaughter, kinkBoundsParent;
-    StKinkVertex* rcKink  = 0;
-    StTrack* kinkDaughter  = 0;
-    StTrack* kinkParent  = 0;
-    StGlobalTrack* gKinkDaughter = 0;
-    StGlobalTrack* gKinkParent = 0;
-    StMcTrack* mcDaughter = 0;
-    StMcVertex* mcKink    = 0;
+    
     StMcVertex* primary   = mEvent->primaryVertex();
-    const StMcTrack*  mcParent  = 0;
     for (StKinkVertexIterator kvi = kinks.begin(); kvi!=kinks.end(); kvi++) {
 	
-	rcKink = *kvi; // Got Kink ...
-	kinkDaughter  = rcKink->daughter(0);
-	gKinkDaughter = dynamic_cast<StGlobalTrack*>(kinkDaughter);
+	StKinkVertex* rcKink = *kvi; // Got Kink ...
+	StTrack* kinkDaughter  = rcKink->daughter(0);
+	StGlobalTrack* gKinkDaughter = dynamic_cast<StGlobalTrack*>(kinkDaughter);
 	if (!gKinkDaughter) continue;
 	// Got Daughter
-	kinkParent  = rcKink->parent();
-	gKinkParent = dynamic_cast<StGlobalTrack*>(kinkParent);
+	StTrack* kinkParent  = rcKink->parent();
+	StGlobalTrack* gKinkParent = dynamic_cast<StGlobalTrack*>(kinkParent);
 	if (!gKinkParent) continue;
 	// Got Parent
 	
 	kinkBoundsDaughter = mRcTrackMap->equal_range(gKinkDaughter);
 	// Loop over associated tracks of the daughter
 	for (rcTrackMapIter trkIter = kinkBoundsDaughter.first; trkIter!=kinkBoundsDaughter.second; trkIter++) {
-	    mcDaughter = (*trkIter).second->partnerMcTrack(); // Get associated daughter
+	    StMcTrack* mcDaughter = (*trkIter).second->partnerMcTrack(); // Get associated daughter
 	    
-	    mcKink = mcDaughter->startVertex(); // Get Kink candidate 
+	    StMcVertex* mcKink = mcDaughter->startVertex(); // Get Kink candidate 
 	    if (mcKink == primary || mcKink == 0) continue;  // Check that it's not primary
-	    mcParent = mcKink->parent();
+	    const StMcTrack* mcParent = mcKink->parent();
 	    
 	    // Check that parents match
 	    kinkBoundsParent = mRcTrackMap->equal_range(gKinkParent);
@@ -1277,36 +1310,35 @@ Int_t StAssociationMaker::Make()
 	    
 	}
     } // kink loop
+    cout << "Finished Making kink Associations *********" << endl;
+    cout << "Number of Entries in kink Maps: " << mRcKinkMap->size() << endl;
+    if (doPrintMemoryInfo) {
+	cout << "End of kink Associations\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
 	
     cout << "V0s..." << endl;
-    pair<rcTrackMapIter, rcTrackMapIter> v0Bounds1;
-    pair<rcTrackMapIter, rcTrackMapIter> v0Bounds2;    
-    StV0Vertex* rcV0  = 0;
-    StTrack* v0Daughter1  = 0;
-    StGlobalTrack* gV0Daughter1 = 0;
-    StTrack* v0Daughter2  = 0;
-    StGlobalTrack* gV0Daughter2 = 0;
-    
-    StMcTrack* mcDaughter1 = 0;
-    StMcTrack* mcDaughter2 = 0;
-    
+
+    StSPtrVecV0Vertex& v0s = rEvent->v0Vertices();    
+   
     // Loop over V0s
     for (StV0VertexIterator v0vi = v0s.begin(); v0vi!=v0s.end(); v0vi++) {
-	rcV0 = *v0vi; // Got V0 ...
-	v0Daughter1  = rcV0->daughter(0);
-	gV0Daughter1 = dynamic_cast<StGlobalTrack*>(v0Daughter1);
+	StV0Vertex* rcV0 = *v0vi; // Got V0 ...
+	StTrack* v0Daughter1  = rcV0->daughter(0);
+	StGlobalTrack* gV0Daughter1 = dynamic_cast<StGlobalTrack*>(v0Daughter1);
 	if (!gV0Daughter1) continue;
 	// Got Daughter1
-	v0Daughter2  = rcV0->daughter(1);
-	gV0Daughter2 = dynamic_cast<StGlobalTrack*>(v0Daughter2);
+	StTrack* v0Daughter2  = rcV0->daughter(1);
+	StGlobalTrack* gV0Daughter2 = dynamic_cast<StGlobalTrack*>(v0Daughter2);
 	if (!gV0Daughter2) continue;
 	// Got Daughter2
-	v0Bounds1 = mRcTrackMap->equal_range(gV0Daughter1);
-	v0Bounds2 = mRcTrackMap->equal_range(gV0Daughter2);
+	pair<rcTrackMapIter, rcTrackMapIter> v0Bounds1 = mRcTrackMap->equal_range(gV0Daughter1);
+	pair<rcTrackMapIter, rcTrackMapIter> v0Bounds2 = mRcTrackMap->equal_range(gV0Daughter2);
 	for (rcTrackMapIter trkIter1 = v0Bounds1.first; trkIter1!=v0Bounds1.second; trkIter1++) {
-	    mcDaughter1 = (*trkIter1).second->partnerMcTrack();
+	    StMcTrack* mcDaughter1 = (*trkIter1).second->partnerMcTrack();
 	    for (rcTrackMapIter trkIter2 = v0Bounds2.first; trkIter2!=v0Bounds2.second; trkIter2++) {
-		mcDaughter2 = (*trkIter2).second->partnerMcTrack();
+		StMcTrack* mcDaughter2 = (*trkIter2).second->partnerMcTrack();
 		if (mcDaughter1->startVertex() == mcDaughter2->startVertex() &&
 		    mcDaughter1->startVertex() != primary &&
 		    mcDaughter1->startVertex() != 0) {
@@ -1319,33 +1351,33 @@ Int_t StAssociationMaker::Make()
 	}
 	
     } // V0 loop
+    cout << "Finished Making V0 Associations *********" << endl;
+    cout << "Number of Entries in V0 Maps: " << mRcV0Map->size() << endl;
+    if (doPrintMemoryInfo) {
+	cout << "End of V0 Associations\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
     
     cout << "Xis..." << endl;
-    pair<rcTrackMapIter, rcTrackMapIter> xiBounds;
-    pair<rcV0MapIter, rcV0MapIter> xiBoundsV0;
+
+    StSPtrVecXiVertex& xis = rEvent->xiVertices();    
     
-    StXiVertex*    rcXi;
-    StV0Vertex*    rcV0ofXi;
-    StTrack*       rcBachelor;
-    StGlobalTrack* gRcBachelor;
-    StMcTrack*     mcBachelor;
-    StMcVertex*    mcXi;
-    StMcVertex*    mcV0;
     // Loop over Xis
     for (StXiVertexIterator xvi = xis.begin(); xvi!=xis.end(); xvi++) {
-	rcXi = *xvi;
-	rcV0ofXi = rcXi->v0Vertex();
-	rcBachelor = rcXi->bachelor();
-	gRcBachelor = dynamic_cast<StGlobalTrack*>(rcBachelor);
+	StXiVertex* rcXi = *xvi;
+	StV0Vertex* rcV0ofXi = rcXi->v0Vertex();
+	StTrack* rcBachelor = rcXi->bachelor();
+	StGlobalTrack* gRcBachelor = dynamic_cast<StGlobalTrack*>(rcBachelor);
 	if (!gRcBachelor) continue;
-	xiBounds = mRcTrackMap->equal_range(gRcBachelor);
+	pair<rcTrackMapIter, rcTrackMapIter> xiBounds = mRcTrackMap->equal_range(gRcBachelor);
 	for (rcTrackMapIter trkIter3 = xiBounds.first; trkIter3!= xiBounds.second; trkIter3++){
-	    mcBachelor = (*trkIter3).second->partnerMcTrack();
-	    mcXi = mcBachelor->startVertex();
+	    StMcTrack*  mcBachelor = (*trkIter3).second->partnerMcTrack();
+	    StMcVertex* mcXi = mcBachelor->startVertex();
 	    if (mcXi == primary || mcXi == 0) continue;
-	    xiBoundsV0 = mRcV0Map->equal_range(rcV0ofXi);
+	    pair<rcV0MapIter, rcV0MapIter> xiBoundsV0 = mRcV0Map->equal_range(rcV0ofXi);
 	    for (rcV0MapIter v0Iter = xiBoundsV0.first; v0Iter!= xiBoundsV0.second; v0Iter++){
-		mcV0 = (*v0Iter).second;
+		StMcVertex* mcV0 = (*v0Iter).second;
 		if (mcV0->parent() != 0 && mcXi == mcV0->parent()->startVertex()) {
 		    // Got a Xi candidate
 		    mRcXiMap->insert(rcXiMapValType (rcXi, mcXi));
@@ -1355,6 +1387,13 @@ Int_t StAssociationMaker::Make()
 	    }
 	}
     }
-      
+    cout << "Finished Making Xi Associations *********" << endl;
+    cout << "Number of Entries in Xi Maps: " << mRcXiMap->size() << endl;
+
+    if (doPrintMemoryInfo) {
+	cout << "End of Make()\n";
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
     return kStOK;
 }

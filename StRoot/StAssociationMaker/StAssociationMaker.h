@@ -1,7 +1,14 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.13 2000/04/20 16:56:12 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.14 2000/05/11 15:34:29 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.14  2000/05/11 15:34:29  calderon
+ * added option to print memory usage using StMemoryInfo, useful
+ * for checking leaks.  If used, a lot of status information is printed
+ * at several points in Make() and then in Clear().  Whatever is allocated
+ * during Make() should be accounted for in Clear().  By default memory is
+ * not checked, so there are a lot less output messages.
+ *
  * Revision 1.13  2000/04/20 16:56:12  calderon
  * Speed up the tpc matching algorithm by using a seed to tell the iterator
  * where to start looping, instead of looping over every hit all the time.
@@ -412,6 +419,7 @@ class StAssociationMaker : public StMaker {
     rcXiMapType*      rcXiMap()      { return mRcXiMap; }      //!
     mcXiMapType*      mcXiMap()      { return mMcXiMap; }      //!
 
+    Bool_t doPrintMemoryInfo;
 private:
 
     // Define the maps.  Note they are pointers to the maps.
@@ -434,7 +442,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.13 2000/04/20 16:56:12 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.14 2000/05/11 15:34:29 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
