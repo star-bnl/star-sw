@@ -15,7 +15,7 @@
 #include "spx_macros.h"
 
 #ifdef CORBA
-#include "spx_i.hh"
+#include <spx_i.hh>
 #endif
 
 /*-------------------------------------------- CORBA                --*/

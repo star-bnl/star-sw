@@ -16,7 +16,7 @@
 #include "lev_macros.h"
 
 #ifdef CORBA
-#include "lev_i.hh"
+#include <lev_i.hh>
 #endif
 
 /*-------------------------------------------- CORBA                --*/

@@ -12,7 +12,7 @@
 
 /*-------------------------------------------- INCLUDES             --*/
 #ifdef CORBA
-#include "asu_i.hh"
+#include <asu_i.hh>
 #endif
 
 #include "emlLib.h"
