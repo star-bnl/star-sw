@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.36 2001/09/25 21:17:03 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.37 2001/10/30 03:59:22 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -38,7 +38,13 @@
     $Cinp     = "";
     $CXXinp   = "";
     $CPPFLAGS = "";                                                  #-I-";
-    $EXTRA_CPPFLAGS = "";                                                  #-I-";
+
+    # Dirty patch to circunvent a cons side effect which is to 
+    # eliminate from the -I search list non-existing directories.
+    $EXTRA_CPPFLAGS = "";
+    $EXTRA_CPPFLAGS = "-Iinclude" if( ! -d "include");                     
+          #-I-";
+
     $AFSFLAGS = "";
     $AFSDIR   = "/usr/afsws";
     $AFSLIBS  = "-L" . $AFSDIR . "/lib -L" . $AFSDIR . "/lib/afs";
