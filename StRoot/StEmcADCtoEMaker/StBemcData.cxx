@@ -1,238 +1,185 @@
 #include "StBemcData.h"
-#include "StDaqLib/EMC/StEmcDecoder.h"
-#include "Stiostream.h"
- 
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEventTypes.h"
+#include "StEvent.h"
+#include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+
 ClassImp(StBemcData)
- 
-StBemcData::StBemcData(char* name):TDataSet(name)
-{
-  mDecoder = NULL;
-  TDCErrorFlag = 0;
-  SMDErrorFlag = 0;
-  PSDErrorFlag = 0;
-  zeroAll();
-  for(int i=0;i<TOWERCHANNELS;i++) 
-  {
-    TowerStatus[i] = 0;
-    PsdStatus[i] = 0;
-  }
-  for(int i=0;i<SMDCHANNELS;i++) 
-  {
-    SmdeStatus[i] = 0;
-    SmdpStatus[i] = 0;
-  }
-  for(int i=0;i<TDCCHANNELS;i++) 
-  {
-    TDCGhost[i] = 200;
-    TDCGhostMode[i] = 0;
-  }
-  TowerRemoveGhost = kFALSE;
+
+//_____________________________________________________________________________
+/* 
+   Default constructor. Set Initial values for some variables
+*/
+StBemcData::StBemcData():StBemcRaw()
+{  
+
 }
-void StBemcData::zeroAll()
-{
-  //mDecoder = NULL;
-  ///////////////////////////////////////////////////////////
-  // NOTE from AAPSUAIDE
-  //
-  // the status flags (TowerStatus, SmdeStatus, etc) should
-  // not be zeroed event by event. This should only clear the
-  // detector data, such as ADC, energies and headers
-  //
-  // Status come from the database and are filled only once
-  // per run, so, if it is zeroed it will not be set again
-  // until the next run starts
-  //
-  //////////////////////////////////////////////////////////
-  
-  NumberGhost = 0;
-  NumberBadHeader = 0;
-  for(int i=0;i<TDCCHANNELS;i++)
-    {
-      TDCError[i]    = 0;
-      TDCToken[i]    = 0;
-      TDCTrigger[i]  = 4;
-      TDCCrateId[i]  = 0;
-      TDCCount[i]    = 164;
-    }
-  for(int i=0;i<TOWERCHANNELS;i++)
-    {
-      TowerADC[i]    = 0;
-      TowerEnergy[i] = 0;
-      SmdeADC[i]     = 0;
-      SmdpADC[i]     = 0;
-      SmdeEnergy[i]  = 0;
-      SmdpEnergy[i]  = 0;
-      PsdADC[i]      = 0;
-      PsdEnergy[i]   = 0;
-    }
-  for(int i=TOWERCHANNELS;i<SMDCHANNELS;i++)
-    {
-      SmdeADC[i] = 0;
-      SmdpADC[i] = 0;
-      SmdeEnergy[i] = 0;
-      SmdpEnergy[i] = 0;
-    }
-  for(int i=0;i<EMCTRIGGERPATCH;i++)
-    {
-      HighTower[i] = 0;
-      Patch[i] = 0;
-    }
-  TowerPresent = kFALSE;
-  SMDPresent = kFALSE;
-  PSDPresent = kFALSE;
-  ValidTowerEvent = kFALSE;
-  ValidSMDEvent = kFALSE;
-  ValidPSDEvent = kFALSE;
-  TDCErrorFlag = 0;
-  SMDErrorFlag = 0;
-  PSDErrorFlag = 0;
-}
+//_____________________________________________________________________________
+/*! 
+   Default destructor
+*/
 StBemcData::~StBemcData()
 {
-  if(mDecoder) delete mDecoder;
-} 
-Bool_t StBemcData::getTDCStatus(Int_t c)
+}
+Bool_t StBemcData::make(StEmcRawData* emcraw, StEvent* event)
 {
-  if(c<0 || c>29) return kFALSE;
-  if(c<3  && EventDate<20011105) return kTRUE;
-  if(c<5  && EventDate>=20011105 && EventDate<20020301) return kTRUE;
-  if(c<15 && EventDate>=20020301 && EventDate<20030701) return kTRUE;
-  if(EventDate>=20030701) // returns the status based on the event header
-    {
-      return checkTDC(c);
-    }
-  return kFALSE;
-} 
-Bool_t StBemcData::getSMDStatus(Int_t c)
+  return StBemcRaw::make(emcraw,event);
+}
+Bool_t StBemcData::make(TDataSet* DS, StEvent* event)
 {
-  if(c<0 || c>7) return kFALSE;
-  if(c<1 && EventDate<20011105) return kTRUE;
-  if(c<2 && EventDate>=20011105 && EventDate<20020301) return kTRUE;
-  if(c<4 && EventDate>=20020301 && EventDate<20030701) return kTRUE;
-  if(EventDate>=20030701) // returns the status based on the event header
-    {
-      return kTRUE;
-    }
-  return kFALSE;
-} 
-Bool_t StBemcData::checkTDC(Int_t i)
+  return StBemcRaw::make(DS,event);
+}
+Bool_t StBemcData::make(StEmcCollection* emc, StEvent* event)
 {
-  float sum =0, nt=0;
-  float avg = 0;
-  float sumbd[5], ntbd[5];
-  int id=0;
-  int crate=0;
-  for(int j=0;j<5;j++)
+  if(!emc) return kFALSE;
+  if(!event) return kFALSE;
+  StEmcCollection *emcN = event->emcCollection();
+  if(!emcN) 
   {
-    sumbd[j] = 0;
-    ntbd[j] = 0;
+    emcN = emc;
+    event->setEmcCollection(emcN);
   }
-  Bool_t ok = kTRUE;
-  Bool_t badHeader = kFALSE;
-  Bool_t ghost = kFALSE;
   
-  if(!mDecoder) mDecoder = new StEmcDecoder(EventDate,EventTime);
-  mDecoder->GetTowerCrateFromTDC(i,crate);
-  
-  // checking for header of the event
-  if(TDCError[i]!=0) badHeader = kTRUE;
-  if(TDCCrateId[i]!=crate && TDCCrateId[i]!=0) badHeader = kTRUE;
-  if(TDCCount[i]!=164) badHeader = kTRUE;
-  
-  // checking for ghost pedestals
-  if(TDCTrigger[i]==4)  //physics trigger only
-    for(int j=0;j<160;j++)
+  Int_t ADC[MAXDETBARREL][BSMDCH];
+  Int_t CRATE[MAXDETBARREL][BSMDCH];
+  Int_t CAP[MAXDETBARREL][BSMDCH];
+  Int_t ID[MAXDETBARREL][BSMDCH];
+  Int_t NH[MAXDETBARREL];
+  Int_t Crate,RDO,Index,Daq;
+  Int_t S;
+  Float_t E;
+  for(Int_t det=1;det<=MAXDETBARREL;det++)
+  {
+    StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId-1);
+    NH[det-1] = 0;
+    StEmcDetector* detector=emc->detector(id);
+    mNCRATESOK[det-1]=0;
+    if(detector)
     {
-	    mDecoder->GetTowerIdFromTDC(i,j,id);
-	    if(id>=1 && id<=TOWERCHANNELS) if(TowerStatus[id-1]==1) 
-      { 
-        sum+=TowerADC[id-1]; 
-        nt++;
-        int bd = j/32;
-        sumbd[bd]+=TowerADC[id-1];
-        ntbd[bd]++;
+      for(Int_t crate=1;crate<=MAXCRATES;crate++) 
+      {
+        mCrateStatus[det-1][crate-1] = (Int_t)detector->crateStatus(crate);
+        if(mCrateStatus[det-1][crate-1]==crateOK) mNCRATESOK[det-1]++;
       }
-    }
-  if(TDCGhostMode[i]<=0) // average over the entire TDC channel
+        
+      StEmcGeom* geo = StEmcGeom::instance(det);
+      for(UInt_t j=1;j<=BEMCMODULES;j++)
+      {
+        StEmcModule* module = detector->module(j);
+        if(module)
+        {
+          StSPtrVecEmcRawHit& rawHit=module->hits();
+          for(UInt_t k=0;k<rawHit.size();k++)
+          {
+            Int_t m=rawHit[k]->module();
+            Int_t e=rawHit[k]->eta();
+            Int_t s=abs(rawHit[k]->sub());
+            Int_t adc=rawHit[k]->adc();
+            Int_t cap=rawHit[k]->calibrationType();       
+            Int_t id;
+            geo->getId(m,e,s,id);
+            ID[det-1][NH[det-1]]  = id;
+            ADC[det-1][NH[det-1]] = adc;
+            CAP[det-1][NH[det-1]] = cap;
+            if(det==BTOW)
+            {
+              mDecoder->GetDaqIdFromTowerId(id,Daq);
+              mDecoder->GetTowerCrateFromDaqId(Daq,Crate,Index);
+            }
+            else if(det==BPRS)
+            {
+              mDecoder->GetPsdRDO(id,RDO,Index);
+              Crate = RDO+1;
+            }
+            else if(det==BSMDE || det == BSMDP)
+            {
+              mDecoder->GetSmdRDO(det,m,e,s,RDO,Index);
+              Crate = RDO+1;
+            }
+            CRATE[det-1][NH[det-1]] = Crate;
+            NH[det-1]++;
+          }
+        }
+      }
+    } 
+  }  
+  emptyEmcCollection(emcN);
+  for(Int_t det=1;det<=MAXDETBARREL;det++)
   {
-    if(nt>0) avg = sum/nt;
-    if(avg>TDCGhost[i]) ghost = kTRUE;
-    //cout <<"TDC = "<<i<<"  AVG = "<<avg<<"  Threshold = "<<TDCGhost[i]<<" ghost = "<<(int)ghost<<endl;
-  }
-  else
-  {
-    int nbad = 0;
-    for(int j=0;j<5;j++) 
+    clearStats(det);
+    for(Int_t i = 0;i<NH[det-1];i++) 
     {
-      if(ntbd[j]>0) if(sumbd[j]/ntbd[j]>TDCGhost[i]) nbad++;
-      //cout <<"TDC = "<<i<<"  board = "<<j<<"  AVG = "<<sumbd[j]/ntbd[j]<<"  Threshold = "<<TDCGhost[i]<<endl;
-    }
-    if(nbad>=TDCGhostMode[i]) ghost = kTRUE;
-    //cout <<"TDC = "<<i<<"  NBad = "<<nbad<<" ghost = "<<(int)ghost<<endl;
+      S = makeHit(emcN,det,ID[det-1][i],ADC[det-1][i],CRATE[det-1][i],CAP[det-1][i],E); 
+      updateStats(det,S,ADC[det-1][i],E);
+    }   
+    printStats(det);
   }
+  return kTRUE;
+}
+Bool_t StBemcData::make(StMuEmcCollection* muEmc, StEvent* event)
+{
+  if(!muEmc) return kFALSE;
+  if(!event) return kFALSE;
+  StEmcCollection *emc = event->emcCollection();
+  if(!emc) return kFALSE;
+  emptyEmcCollection(emc);
   
-  if(badHeader) NumberBadHeader++;
-  if(ghost) NumberGhost++;
-  
-  if(badHeader || ghost) ok = kFALSE;
-  
-  if(!ok) for(int j=0;j<160;j++)
+  for(Int_t det=1;det<=MAXDETBARREL;det++)
   {
-	  mDecoder->GetTowerIdFromTDC(i,j,id);
-	  TowerADC[id-1] = 0;
-  }
-  return ok;
-}
-void StBemcData::validateData()
-{
-  //towers first
-  Bool_t ok = kTRUE;
-  if(!TowerPresent) ok = kFALSE;
-  if(TDCErrorFlag==1) ok = kFALSE;
-  Int_t nbad = 0;
-  for(Int_t i=0;i<TDCCHANNELS;i++) if(!checkTDC(i)) nbad++;
-  if(nbad==TDCCHANNELS) ok = kFALSE;
-  if(TowerRemoveGhost && NumberGhost>0) ok = kFALSE;
-  
-  //cout <<"Number Ghost = "<<NumberGhost<<"  ok = "<<(int)ok<<endl;
-
-  ValidTowerEvent = ok;
-	
-  //SMD
-  ok = kTRUE;
-  if(!SMDPresent) ok = kFALSE;
-  if(SMDErrorFlag ==1) ok = kFALSE;
-  ValidSMDEvent = ok;
-	
-  //PSD
-  ok = kTRUE;
-  if(!PSDPresent) ok = kFALSE;
-  if(PSDErrorFlag ==1) ok = kFALSE;
-  ValidPSDEvent = ok;
-}
-void StBemcData::printTower()
-{
-  cout <<"TOWER DATA -----------------------------------------------------------\n";
-  cout <<"RunNumber = "<<RunNumber<<endl;
-  cout <<"TriggerWord = "<<TriggerWord<<endl;
-  cout <<"EventDate = "<<EventDate<<endl;
-  cout <<"EventTime = "<<EventTime<<endl;
-  cout <<"ValidTowerEvent = "<<(Int_t)ValidTowerEvent<<endl;
-  cout <<"EventNumber = "<<EventNumber<<endl;
-  cout <<"TowerByteCount = "<<TowerByteCount<<endl;
-  cout <<"NTowerHits = "<<NTowerHits<<endl;
-  cout <<"TDCErrorFlag = "<<TDCErrorFlag<<endl;
-  cout <<"NTDCChannels = "<<NTDCChannels<<endl;
-  for(Int_t i=0;i<TDCCHANNELS;i++)
-    cout <<"  TDC = "<<i<<"  Error = "<<TDCError[i]<<"  Token = "<<TDCToken[i]<<"  Trigger = "<<TDCTrigger[i]
-	 <<"  Crate = "<<TDCCrateId[i]<<"  Count = "<<TDCCount[i]<<endl;
-  for(Int_t k=0;k<TOWERCHANNELS;k++)
+    clearStats(det);      
+    mNCRATESOK[det-1]=0;
+    StDetectorId did = static_cast<StDetectorId>(det+kBarrelEmcTowerId-1);
+    StEmcDetector* detector=emc->detector(did);
+    for(Int_t crate = 1;crate<=MAXCRATES;crate++) 
     {
-      cout <<" ID = "<<k<<" STAT = "<<(Int_t)TowerStatus[k]<<" ADC = "<<TowerADC[k]<<" E = "<<TowerEnergy[k]<<" |";
-      if((k+1)%3==0) cout <<endl;
+      mCrateStatus[det-1][crate-1] = (Int_t)muEmc->getCrateStatus(crate,det);
+      if(mCrateStatus[det-1][crate-1]==crateOK) mNCRATESOK[det-1]++;
+      if(detector) detector->setCrateStatus(crate,(StEmcCrateStatus)mCrateStatus[det-1][crate-1]);
     }
-}
-
-void StBemcData::printSMD()
-{
+    StEmcGeom* geo = StEmcGeom::instance(det);
+    Int_t nh;
+    Int_t ADC,ID,CRATE,RDO,INDEX,CAP,DAQ;
+    Int_t m,e,s;
+    Float_t E;
+    Int_t S;
+    if (det==BTOW) nh = BTOWCH; 
+    if (det==BPRS) nh=muEmc->getNPrsHits(det);
+    if (det==BSMDE || det==BSMDP) nh=muEmc->getNSmdHits(det);
+    for(Int_t j=0;j<nh;j++)
+    {
+      ADC = 0;
+      if(det==BTOW) // towers have only ADC
+      {
+        ID = j+1;
+        ADC = muEmc->getTowerADC(ID,det);
+        mDecoder->GetDaqIdFromTowerId(ID,DAQ);
+        mDecoder->GetTowerCrateFromDaqId(DAQ,CRATE,INDEX);
+        CAP = 0;
+      }  
+      if(det==BPRS)
+      {
+        StMuEmcHit* hit=muEmc->getPrsHit(j,det);
+        ID = hit->getId();
+        ADC = hit->getAdc();
+        CAP = hit->getCalType();
+        mDecoder->GetPsdRDO(ID,RDO,INDEX);
+        CRATE = RDO+1;
+      }    
+      if(det==BSMDE || det==BSMDP) //smd
+      {
+        StMuEmcHit* hit=muEmc->getSmdHit(j,det);
+        ID = hit->getId();
+        ADC = hit->getAdc();
+        CAP = hit->getCalType();
+        geo->getBin(ID,m,e,s);
+        mDecoder->GetSmdRDO(det,m,e,s,RDO,INDEX);
+        CRATE = RDO+1;
+      }
+      S = makeHit(emc,det,ID,ADC,CRATE,CAP,E);
+      updateStats(det,S,ADC,E);
+    }
+    printStats(det);
+  }
+  return kTRUE;
 }
