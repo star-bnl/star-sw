@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpBGNet.cc,v 1.2 2000/03/22 14:07:59 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.cc,v $
+ * Revision 1.2  2000/03/22 14:07:59  aihong
+ * reduce unnecessary bound checking for faster run
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -273,11 +276,17 @@ int StPidAmpBGNet::getSliceIndex(double x){
        double fx=fabs(x);
 
 
+       int i=0;
 
+     if (idx>0) i=int((fx-mNetWindow.windowBegin(idx))/sliceWidth4Window[idx-1]) + NSliceAccum[idx-1];
 
-     if (idx>0) return int((fx-mNetWindow.windowBegin(idx))/sliceWidth4Window[idx-1]) + NSliceAccum[idx-1];
+     else if (idx<=0) i=0;
 
-     else if (idx<=0) return 0;
+ if (i>=sliceVector()->size()) i=sliceVector()->size()-1;
+ if (i<0) i=0;
+        
+ return i;
+
 }
 
 
