@@ -81,7 +81,7 @@ symlink "/star/data03/reco/StarDb", "StarDb";
 #print "$cmd\n";
 #system $cmd;
 #system 'echo "Finished calibration job execution at" `date` " on " `hostname`'; 
-$cmd = " root4star -b -q 'bfc.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . "\",-200,-100)\'";
+$cmd = " root4star -b -q 'bfcZ.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . "\",-200,-100)\'";
 print $cmd,"\n";
 system $cmd;
 system 'echo "Finished job execution at" `date` " on " `hostname`'; 
