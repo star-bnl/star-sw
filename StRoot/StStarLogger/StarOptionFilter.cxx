@@ -19,6 +19,8 @@
 #include <log4cxx/helpers/stringhelper.h>
 #include <log4cxx/helpers/optionconverter.h>
 
+// #include <iostream>
+
 using namespace log4cxx;
 using namespace log4cxx::varia;
 using namespace log4cxx::spi;
@@ -27,8 +29,7 @@ using namespace log4cxx::helpers;
 IMPLEMENT_LOG4CXX_OBJECT(StarOptionFilter)
 
 String StarOptionFilter::ACCEPT_REPEAT_COUNTER  = _T("RepeatMessage");
-String StarOptionFilter::STRING_TO_COUNT_OPTION =_T("StringToCount");
-// String StarOptionFilter::ACCEPT_ON_MATCH_OPTION = _T("AcceptOnMatch");
+String StarOptionFilter::STRING_TO_COUNT_OPTION = _T("StringToCount");
 
 //______________________________________________________________________________
 StarOptionFilter::StarOptionFilter() : acceptRepeatCounter(-1),currentRepeatCounter(0)
@@ -54,13 +55,17 @@ void StarOptionFilter::setOption(const String& option,
       if (lastLoggerMessageToCompare.empty())  
          matchPredefinedStringOnly  = false;
    }
-
 }
 //______________________________________________________________________________
 void StarOptionFilter::setRepeatCounterOption(int value)      
 { 
-   // value  < 0; do not count the messages
-   // value  >= 0  the total number of the messsages before it is filtered out
+  //  value  = -1  there is no limit
+  //         >  0  the number of times the message can printed out sequiencially
+  // 
+  //        Attn: the value zero and one have one and the same meaning
+  //               0 - there is no repeatition, the message can be printed at once
+  //               1 - the message can be printed one times only, so "0" == "1"
+
    acceptRepeatCounter = value;  
 }
 
@@ -69,31 +74,21 @@ Filter::FilterDecision StarOptionFilter::decide(
 	const log4cxx::spi::LoggingEventPtr& event) const
 {
    Filter::FilterDecision decision = Filter::NEUTRAL;
-      	const String& msg = event->getRenderedMessage();
-// || stringToMatch.empty())
-	if( !( msg.empty() && acceptRepeatCounter < 0 ) ) {
-	   if( msg.find(lastLoggerMessageToCompare) == String::npos )
+  	const String& msg               = event->getRenderedMessage();
+	if( !msg.empty() && acceptRepeatCounter >= 0 )   {   
+	   if( strcmp(msg.c_str(),lastLoggerMessageToCompare.c_str() ) )
    	{
          if (!matchPredefinedStringOnly) {
-           currentRepeatCounter = 0;
+           currentRepeatCounter = 2;
 		     lastLoggerMessageToCompare = msg;
          }
-	   }
+      }
 	   else 
-	   { // we've got a match
-		   if(currentRepeatCounter <= acceptRepeatCounter)
-		   {
-            currentRepeatCounter++;
-			   decision = Filter::ACCEPT;
-		   }
-		   else
-	   	{
-		    	decision = Filter::DENY;
-		   }
+	   { 
+         // we've got a match
+		   if(currentRepeatCounter > acceptRepeatCounter) 	decision = Filter::DENY;
+         currentRepeatCounter++;
 	   }
    }
-//   printf(" ~~~~~~~~~~~~~~~~~~~~~~~~~~  FILETR MAKINGF DECISION %d n = %d  treschold = %d %s %d \n",decision
-//         , currentRepeatCounter, acceptRepeatCounter,(const char *) msg.c_str());
    return decision;
 }
-
