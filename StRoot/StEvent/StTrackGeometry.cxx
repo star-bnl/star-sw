@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.cxx,v 2.3 2003/10/30 20:07:32 perev Exp $
+ * $Id: StTrackGeometry.cxx,v 2.4 2004/10/17 03:35:10 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.cxx,v $
+ * Revision 2.4  2004/10/17 03:35:10  perev
+ * Error check improved
+ *
  * Revision 2.3  2003/10/30 20:07:32  perev
  * Check of quality added
  *
@@ -20,13 +23,14 @@
  * Initial Revision
  *
  **************************************************************************/
+#include "StDetectorId.h"
 #include "StTrackGeometry.h"
 #include "tables/St_dst_track_Table.h"
 #include "StPhysicalHelixD.hh"
 
 ClassImp(StTrackGeometry)
 
-static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.3 2003/10/30 20:07:32 perev Exp $";
+static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.4 2004/10/17 03:35:10 perev Exp $";
 
 StTrackGeometry::StTrackGeometry() {/* noop */}
 
@@ -37,6 +41,9 @@ StTrackGeometry::~StTrackGeometry() { /* noop */ }
 int StTrackGeometry::bad() const
 {
   StPhysicalHelixD hh = helix();
-  if (!hh.valid()) return 1;
-  return 0;	
+  int ierr=hh.bad();
+  if (ierr) 				 return  1+100*ierr;
+  if (fabs(hh.origin().z())  >kStarMaxZ) return 21;
+  if (     hh.origin().perp()>kStarMaxR) return 31;
+  return 0;
 }
