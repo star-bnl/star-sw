@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.66 2001/09/01 19:56:41 perev Exp $
+// $Id: doEvents.C,v 1.67 2001/09/07 18:32:28 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -52,26 +52,28 @@
 class     StChain;
 StChain  *chain=0;
 Int_t iEvt=0,istat=0,nEvents=0;
-void Help()
+void doEvents()
 {
-    cout << "Usage: doEvents.C(startEvent,nEvents,\"path/some_dst_file.xdf\")" << endl;
+    cout << "Usage: doEvents.C(2)  // work with default event.root file" << endl;
+    cout << "       doEvents.C(startEvent,nEvents,\"path/somefile.event.root\")" << endl;
     cout << "       doEvents.C(nEvents,\"path/*.event.root\")" << endl;
-    cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"evout\")" << endl;	
+    cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"evout\") //Write out StEvent" << endl;	
+    cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"display\") //EventDispay" << endl;	
 }
 //		ProtoTypes
 
 void doEvents(Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 void doEvents(Int_t startEvent, Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
 
-void doEvents(Int_t nEvents=2, 
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+void doEvents(Int_t nEvents, 
+              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
               const Char_t *qaflag = 0); 
 
-void doEvents(Int_t startEvent=1,Int_t nEvents=2, 
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+void doEvents(Int_t startEvent,Int_t nEvents, 
+              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
               const Char_t *qaflag = 0);
 
-void doEvents(const Int_t nEvents=2, 
+void doEvents(const Int_t nEvents, 
               const Char_t *path,
               const Char_t *file,
               const Char_t *qaflag, int flag);
@@ -252,7 +254,6 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
 void doEvents(const Int_t startEvent, const Int_t nEvents, const Char_t *file, const Char_t *qaflag)
 {
     printf("*file = %s\n",file);
-    if (nEvents==-1) { Help(); return;}
     const char *fileListQQ[]={0,0};
     if (strncmp(file,"GC",2)==0) {
       fileListQQ=0;
@@ -291,6 +292,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.67  2001/09/07 18:32:28  perev
+// help restored
+//
 // Revision 1.66  2001/09/01 19:56:41  perev
 // EventDisplay option added
 //
