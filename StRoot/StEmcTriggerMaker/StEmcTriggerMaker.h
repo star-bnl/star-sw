@@ -25,6 +25,7 @@ class StEmcTriggerMaker : public StMaker
     TH1F*   PatchHist;     //!
     TH1F*   JetHist;       //!
     TH2F*   HTxPatch;      //!
+    TH2F*   HT2D;      //!
 
   protected:
   public: 

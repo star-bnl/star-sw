@@ -1,5 +1,5 @@
 //
-// $Id: StEmcTrigger.h,v 1.1 2001/05/24 14:42:10 suaide Exp $
+// $Id: StEmcTrigger.h,v 1.2 2002/01/03 21:41:15 suaide Exp $
 //
 //    
 
@@ -13,7 +13,11 @@
 #include "tables/St_emcPatchTrigger_Table.h"
 #include "tables/St_emcJetTrigger_Table.h"
 
+#include "StDaqLib/EMC/StEmcDecoder.h"
+
 class StEmcCollection; 
+class StEmcGeom;
+class StEmcDecoder;
 
 class StEmcTrigger : public TObject
 {
@@ -26,10 +30,12 @@ class StEmcTrigger : public TObject
        
     Float_t DigEnergyHT;
     Float_t DigEnergyPatch;
+    StEmcDecoder *emcdec; //! 
+    StEmcGeom    *geo; //!
     
 
   public: 
-                 StEmcTrigger();
+                 StEmcTrigger(Int_t date=20330101,Int_t time=120000);
     virtual     ~StEmcTrigger();
 
     void         SetThreshold(TArrayF,TArrayF,TArrayF,TArrayF,TArrayF);
