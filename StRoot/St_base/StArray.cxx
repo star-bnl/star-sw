@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.7 1999/05/11 01:10:50 fine Exp $
+// $Id: StArray.cxx,v 1.8 1999/05/22 17:46:45 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.8  1999/05/22 17:46:45  perev
+// StVectorInt class added
+//
 // Revision 1.7  1999/05/11 01:10:50  fine
 // StArray::Browse() method jas been introduced
 //
@@ -21,6 +24,37 @@
 #include "TBrowser.h"
 
 TObjArray *StRegistry::fReg = 0;
+
+ClassImp(StVectorInt)
+//______________________________________________________________________________
+ void StVectorInt::Streamer(TBuffer &b){}
+//______________________________________________________________________________
+ void StVectorInt::ShowMembers(TMemberInspector &, char *){}
+//______________________________________________________________________________
+ void StVectorInt::Set(Int_t n)
+{
+   // Set array size of TArrayI object to n integers.
+   // If n<0 leave array unchanged.
+
+   if (n < 0) return;
+   Int_t *arrSav = fArray;
+   if (n) {
+     fArray = new Int_t[n];
+     memset(fArray,0,sizeof(Int_t)*n);
+     if (arrSav) memcpy(fArray,arrSav,sizeof(Int_t)*fN);
+   }
+   fN = n;
+   if (arrSav) delete [] arrSav;
+   if (fLast >=fN) fLast=fN-1;
+}
+//______________________________________________________________________________
+ void StVectorInt::Add(const Int_t &c )
+{ if (++fLast >=fN) Set(fN*2);
+  fArray[fLast]=c;
+}
+
+
+
 
 //______________________________________________________________________________
 Int_t StRegistry::SetColl (StStrArray *coll) 		
@@ -98,6 +132,8 @@ ClassImp(StObjArray)
 //______________________________________________________________________________
 void StObjArray::Streamer(TBuffer &)
 {;}
+//______________________________________________________________________________
+ void StObjArray::ShowMembers(TMemberInspector &, char *){}
 
 //______________________________________________________________________________
 const TIterator *StObjArray::Begin() const
@@ -160,6 +196,8 @@ TIterator* StObjArray::MakeIterator(Bool_t dir) const
 }
 //______________________________________________________________________________
 ClassImp(StObjArrayIter)
+//______________________________________________________________________________
+ void StObjArrayIter::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 void StObjArrayIter::SetCursor(Int_t kursor)
 {
@@ -230,6 +268,8 @@ void StObjArrayIter::operator=(const StObjArrayIter &iter)
 //______________________________________________________________________________
 ClassImp(StRefArray)
 //______________________________________________________________________________
+void StRefArray::ShowMembers(TMemberInspector &, char *){}
+//______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
 {
    // Stream all objects in the array to or from the I/O buffer.  
@@ -291,6 +331,8 @@ void StRefArray::Streamer(TBuffer &R__b)
 }
 
 ClassImp(StStrArray)
+//______________________________________________________________________________
+void StStrArray::ShowMembers(TMemberInspector &, char *){}
 //______________________________________________________________________________
 StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
 { 

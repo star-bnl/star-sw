@@ -31,7 +31,28 @@
 #include "TList.h"
 #include "TObjArray.h"
 #include "TNamed.h"
- 
+#include "TArrayI.h"
+
+class StVectorInt : public TArrayI
+{
+public:
+   StVectorInt(int n=0):TArrayI(n){fLast = -1;}; 
+virtual ~StVectorInt(){};
+virtual void Set(int n);
+virtual void resize(int n){Set(n);};
+virtual void Add(const int &c);
+virtual void push_back(const int &c){Add(c);};
+virtual void pop_back(){if (fLast>-1) fArray[fLast--]=0;};
+virtual int  At(int idx){return (idx>=0 && idx<fN) ? fArray[idx]:0;};
+virtual int& at(int idx){return fArray[idx];};
+virtual int& front(){return at(0);};
+virtual int& back(){return at(fLast);};
+protected:
+int fLast;
+ClassDef(StVectorInt,0)
+};
+
+
 class StObjArray;
 class StStrArray;
 class StRegistry 
@@ -90,7 +111,7 @@ virtual        ~StObjArray(){delete fObjArr;};
             virtual void Sort(Int_t upto = kMaxInt){fObjArr->Sort(upto);};
                 TObject* UncheckedAt(Int_t i) const {return fObjArr->UncheckedAt(i);};
                 
-virtual void 	push_back(TObject *obj) {AddLast(obj);};
+virtual void 	push_back(const TObject *obj) {AddLast((TObject*)obj);};
 virtual void 	pop_back() {RemoveAt(GetLast());};
 virtual UInt_t  size() const {return GetLast()+1;};
 virtual void    Resize(Int_t num);
@@ -257,6 +278,8 @@ class StVecPtr ## QWERTY : public StRefArray \
 public: \
 StVecPtr ## QWERTY ## (Int_t s = TCollection::kInitCapacity):StRefArray(s){}; \
 virtual        ~StVecPtr ## QWERTY ##(){}; \
+virtual void push_back(const St ## QWERTY &Obj){StObjArray::push_back((TObject*)&Obj);}  \
+virtual void push_back(const St ## QWERTY *Obj){StObjArray::push_back((TObject*)Obj);} \
 virtual St ## QWERTY ## * back() const \
 {return (St ## QWERTY ## *)Back();}; \
 virtual St ## QWERTY ## * front() const \
@@ -274,6 +297,8 @@ public: \
 St ## QWERTY ## Collection(const Char_t *name=0,Int_t s = TCollection::kInitCapacity):StStrArray(name,s){}; \
 virtual        ~St ## QWERTY ## Collection()\
 {}; \
+virtual void push_back(const St ## QWERTY &Obj){StObjArray::push_back((TObject*)&Obj);} \
+virtual void push_back(const St ## QWERTY *Obj){StObjArray::push_back((TObject*)Obj);} \
 virtual St ## QWERTY ## * back() const \
 {return (St ## QWERTY ## *)Back();}; \
 virtual St ## QWERTY ## * front() const \
