@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctn.cxx,v 1.2 1999/07/06 22:33:20 lisa Exp $
+ * $Id: QinvCorrFctn.cxx,v 1.3 1999/07/29 02:47:09 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctn.cxx,v $
+ * Revision 1.3  1999/07/29 02:47:09  lisa
+ * 1) add OpeningAngle correlation function 2) add StHbtMcEventReader 3) make histos in CorrFctns do errors correctly
+ *
  * Revision 1.2  1999/07/06 22:33:20  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -47,6 +50,12 @@ QinvCorrFctn::QinvCorrFctn(char* title, const int& nbins, const float& QinvLo, c
   //mNumerator->SetDirectory(0);
   //mDenominator->SetDirectory(0);
   //mRatio->SetDirectory(0);
+
+  // to enable error bar calculation...
+  mNumerator->Sumw2();
+  mDenominator->Sumw2();
+  mRatio->Sumw2();
+
 }
 
 //____________________________
