@@ -31,6 +31,7 @@ my @Sets = (
               "auau130/mevsim/vanilla_dynamic/central/year_1e/hadronic_on",
               "auau130/mevsim/vanilla_dynamic/central/year_1h/hadronic_on",
               "auau130/mevsim/vanilla_omega/central/year_1e/hadronic_on",
+              "auau130/mevsim/vanilla_omega/central/year_1h/hadronic_on",
               "auau130/mevsim/vanilla_trigger/central/year_1e/hadronic_on",
               "auau130/mevsim/vanilla_trigger/central/year_1h/hadronic_on", 
               "auau130/nexus/default/b0_3/year_1e/hadronic_on",
