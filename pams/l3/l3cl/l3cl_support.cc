@@ -4,10 +4,13 @@
 **:
 **:     clusterfinder support functions
 **:     author: dirk schmischke, ikf, kraut@ikf.uni-frankfurt.de
-**:     last change: 06/02/98 cs
-**:                  06/15/98 py corr. init_cluster and Coord trans
-**:                  06/18/98 cs corr geometry
-**:                  07/15/98 py protect for small output table
+**:     last change: 06/02/98 cs:
+**:                  06/15/98 py: corr. init_cluster and Coord trans
+**:                  06/18/98 cs: corr geometry
+**:                  09/17/98 cs: new l3 data format
+**:                  10/20/98 py: ConvertRawToDetector moved to l3clUtilities.cc 
+**:                  10/22/98 py: add l3cl at beginning function names
+**:                  10/22/98 py: l3clAllocateMemory and l3clFreeMemory added
 **:
 **:>-----------------------------------------------------------------*/
 
@@ -16,7 +19,6 @@
 #include "l3cl_inc.h"
 #include <string.h>
 #include <stdlib.h>
-#include <math.h>
 
 /* some defines */
 #define min(a,b)               (a>b ? b : a)
@@ -42,9 +44,9 @@ extern int NPADS;
 /* array of pointers to pad-sequence data */
 extern CLUSTER **cluster_seq;
 /* simulated asic storage for pad-sequence data */
-extern CLUSTER *phys_cluster;
+   extern CLUSTER *phys_cluster;
 /* copy of simulated asic storage for pad-sequence data (not used in this program) */
-extern CLUSTER *copy_phys_cluster;
+  // extern CLUSTER *copy_phys_cluster;
 /* pointers to simulated asic storage for number of sequences in each pad */
 extern unsigned short *(*n_cluster);
 /* pointer to array of formatted output data */
@@ -59,120 +61,190 @@ extern struct DATA_RAM *phys_data_ram;
 }
 #endif
 
-void init_phys_map()
-{
-	int i,j,k=0;
-
-	/*
-		Do the mapping from pad sequence numbers to physical pads, padrows.
-		Trivial mapping done here. Need table downloaded...
-	*/
-	for (i=0; i<MAX_PADROW-MIN_PADROW+1; i++) 
-	{
-		NPADS += n_pads[i] = row_sizes[MIN_PADROW + i - 1]; 
-		iFirstPad[i] = 0;
-		iLastPad[i] = iFirstPad[i]+n_pads[i]-1;
-		for (j=0; j<n_pads[i]; j++) 
-		{
-			padlist[i][j] = k++;
-		}
-	}
-	/* allocate memory for some dynamic arrays */
-	
-	if ((cluster_seq = (CLUSTER**) malloc(NPADS * sizeof(CLUSTER*))) == NULL)
+int l3clAllocateMemory ( ) {
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clAllocateMemory
+**: DESCRIPTION: Allocates memory for dynamic arrays
+**:
+**: AUTHOR:     ds   -  Pablo Yepes from Dirk Schimschke's code
+**:
+**: RETURNS:    <>0 if there was a problem
+**:>------------------------------------------------------------------*/
+//
+// allocate memory for some dynamic arrays
+//
+  if ((cluster_seq = (CLUSTER**) malloc(NPADS * sizeof(CLUSTER*))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+      printf("Couldn't allocate cluster_seq in init_phys_map!\n");
+      return 1 ;
   }
+//
   if ((phys_cluster = (CLUSTER*) malloc(NPADS * sizeof(CLUSTER))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+     printf("Couldn't allocate phys_cluster in init_phys_map!\n");
+     return 1 ;
   }
+/*
   if ((copy_phys_cluster = (CLUSTER*) malloc(NPADS * sizeof(CLUSTER))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+     printf("Couldn't allocate copy_phys_cluster in init_phys_map!\n");
+     return 1 ;
   }
+*/
   if ((n_cluster = (unsigned short**) malloc(NPADS * sizeof(unsigned short *))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+     printf("Couldn't allocate n_cluster in init_phys_map!\n");
+     return 1 ;
   }
   if ((phys_n_cluster = (unsigned short*) malloc(NPADS * sizeof(unsigned short))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+     printf("Couldn't allocate phys_n_cluster in init_phys_map!\n");
+     return 1 ;
   }
   if ((data_ram = (struct DATA_RAM**) malloc(NPADS * sizeof(struct DATA_RAM*))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+     printf("Couldn't allocate data_ram in init_phys_map!\n");
+     return 1 ;
   }
   if ((phys_data_ram = (struct DATA_RAM*) malloc(NPADS * sizeof(struct DATA_RAM))) == NULL)
   {
-    printf("Couldn't allocate memory in init_phys_map!\n");
-    exit(-1);
+     printf("Couldn't allocate phys_data_ram in init_phys_map!\n");
+     return 1 ;
   }
-  /* clear the memory */
-  memset(phys_data_ram, 0, NPADS * sizeof(struct DATA_RAM));
-  
-  /* hardwired locations */
-	/*
-	phys_cluster = (void*) 0xe0020000; 
-	copy_phys_cluster = (void*) 0xe0028000; 
-	cluster_seq = (void*) 0xe0030000; 
-	n_cluster = (void*) 0xe0030800; 
-	phys_n_cluster = (void*) 0xe0031000; 
-	data_ram = (void*) 0xe0031400; 
-	phys_data_ram = (void*) 0xe0031C00;
-	pGlobalStoreIntern = (void*) 0xe0071C00;
-	*/
-	
-  if ((pGlobalStoreIntern = (TFormattedData*) malloc((MAXCLUSTERS+1) * 2 * sizeof(TFormattedData))) == NULL)
+
+  if ((pGlobalStoreIntern = (TFormattedData*) malloc((NPADS+1) * 2 * sizeof(TFormattedData))) == NULL)
   {
-      printf("Couldn't allocate memory in init_phys_map!\n");
-      exit(-1);
+     printf("Couldn't allocate pGlobalStoreIntern in init_phys_map!\n");
+     return 1 ;
   }
-  
-  /* align pGlobalStore to a 16 byte boundary, for fast storage (i960) */
+//
+// align pGlobalStore to a 16 byte boundary, for fast storage (i960)
+//
   pGlobalStore = (PFormattedData) (((unsigned int)(pGlobalStoreIntern+1)) & 0xfffffff0);
+//
+
+//
+  return 0 ;
 }
+
+int l3clFreeMemory ( ) {
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clFreeMemory  
+**: DESCRIPTION: Frees allocated memory   
+**:
+**: AUTHOR:     py  - Pablo Yepes     
+**:
+**: RETURNS:    <>0 if there was a problem
+**:>------------------------------------------------------------------*/
 //
-//   Initialize pointers
+// allocate memory for some dynamic arrays
 //
-void init_pointers()
+  if ( cluster_seq        != NULL) {
+     free (  (void * )cluster_seq        ) ;
+     cluster_seq = NULL ;
+  }
+  if ( phys_cluster       != NULL) {
+     free (  (void * )phys_cluster       ) ;
+     phys_cluster = NULL ;
+  }
+  if ( n_cluster          != NULL) {
+     free (  (void * )n_cluster          ) ;
+     n_cluster = NULL ;
+  }
+  if ( phys_n_cluster     != NULL) {
+     free (  (void * )phys_n_cluster     ) ;
+     phys_n_cluster = NULL ;
+  }
+  if ( data_ram           != NULL) {
+     free (  (void * )data_ram           ) ;
+     data_ram = NULL ;
+  }
+  if ( phys_data_ram      != NULL) {
+     free (  (void * )phys_data_ram      ) ;
+     phys_data_ram = NULL ;
+  }
+  if ( pGlobalStoreIntern != NULL) {
+     free (  (void * )pGlobalStoreIntern ) ;
+     pGlobalStoreIntern = NULL ;
+  }
+  return 0 ;
+}
+
+int l3clInitPhysMap()
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clInitPhysMap
+**: DESCRIPTION: Initializes physics maps
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:
+**: RETURNS:    <>0 if there was a problem
+**:>------------------------------------------------------------------*/
+{
+  int i,j,k=0;
+//
+//       Do the mapping from pad sequence numbers to physical pads, padrows.
+//       Trivial mapping done here. Need table downloaded...
+//
+  NPADS = 0 ;
+  for (i=0; i<MAX_PADROW-MIN_PADROW+1; i++) 
+  {
+      NPADS += n_pads[i] = row_sizes[MIN_PADROW + i - 1]; 
+      iFirstPad[i] = 0;
+      iLastPad[i] = iFirstPad[i]+n_pads[i]-1;
+      for (j=0; j<n_pads[i]; j++) 
+      {
+	padlist[i][j] = k++;
+      }
+  }
+//
+  return 0 ;
+}
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clInitPointers 
+**: DESCRIPTION: Initializes pointers
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:
+**:>------------------------------------------------------------------*/
+void l3clInitPointers()
 {       
-	int i;
-	/* set pointers to physical addresses in ASIC */
-	for (i=0;i<NPADS; i++) 
-	{
-		cluster_seq[i] = &phys_cluster[i];
-		data_ram[i] = &phys_data_ram[i];
-		n_cluster[i] = &phys_n_cluster[i];
-	}
+   int i;
+/* set pointers to physical addresses in ASIC */
+   for (i=0;i<NPADS; i++) 
+   {
+      cluster_seq[i] = &phys_cluster[i];
+      data_ram[i] = &phys_data_ram[i];
+      n_cluster[i] = &phys_n_cluster[i];
+   }
 }
-
-
-void init_table()
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clInitTable    
+**: DESCRIPTION: Initializes table    
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:
+**:>------------------------------------------------------------------*/
+void l3clInitTable()
 {
    int i;
-   for (i=0;i<256; i++) 
-   {
+   for (i=0;i<256; i++) {
       table[i] = 4*i;       /* just a linear table for now */
    }
 }
-
-
-TSS_TPPAD_ST* init_clusters( int                sector,
-                             TSS_TPPAD_ST       *pad_pointer,
-                             TABLE_HEAD_ST      *tppad_h,      
- 	                     TSS_TPPAD_ST       *tppad,        
-	                     TSS_TPPIXEL_ST     *tppixel   )
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clInitClusters 
+**: DESCRIPTION: Initializes clusters 
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:
+**:>------------------------------------------------------------------*/
+void l3clInitClusters( TABLE_HEAD_ST       *pad_h,
+		       L3CLPAD_ST          *pad,
+		       TYPE_SHORTDATA_ST   *pixel   )
 {
-   int ipadrow, ipad, i, j, k, start,len, sequence[512];
-   int offset;
-
+   int i, k;
+   int ipadrow, ipad;
+   int start, end, sequence[512];
 //
 // Set cluster counter to zero
 //
@@ -180,49 +252,39 @@ TSS_TPPAD_ST* init_clusters( int                sector,
    {
       for (ipad=iFirstPad[ipadrow]; ipad<=iLastPad[ipadrow]; ipad++)
       {
-          i = padlist[ipadrow][ipad];
-          (*n_cluster[i]) = 0;
+         i = padlist[ipadrow][ipad];
+         (*n_cluster[i]) = 0;
       }
    }
 //
-// has to be done sector by sector !!!
+// read input tables
 //
-//	sec = pad_pointer->tpc_row / 100;
-   while( sector == pad_pointer->tpc_row /100 && pad_pointer <= &(tppad[(tppad_h->nok)-1]) )   
+   for ( i = 0; i < pad_h->nok; i++ )
    {
-      offset = 0;
-// printf("nseq: %d\n", pad_pointer->nseq);
-      for( j=0; j<pad_pointer->nseq; j++ )
-      {
-          ipad = pad_pointer->secpad;
-          len = tppixel[pad_pointer->jpix+offset-1].datum >> 20;
-          start = ( tppixel[pad_pointer->jpix+offset-1].datum >> 10 ) & 0x3FF;
-          ipadrow = pad_pointer->tpc_row % 100;
-          for ( k=0; k<len; k++) {
-             sequence[k] = tppixel[pad_pointer->jpix+offset-1].datum & 0x3FF;
-             offset++;
-          }
-
-          make_cluster(ipadrow-MIN_PADROW,ipad-1,start,len,sequence);
+      ipadrow = pad[i].row;
+      ipad    = pad[i].pad;
+      start   = pad[i].first;
+      end     = pad[i].last;
+      for ( k = 0; k < (end-start+1); k++) {
+          sequence[k] = (pixel + pad[i].jpix + k )->data;
       }
-      pad_pointer++;
+      l3clMakeCluster( ipadrow-1, ipad-1, start, end, sequence);
    }
-
-   return pad_pointer ;
-// printf("init_cluster done.\n");
 
 }
-
-void make_cluster(int pr,int off,int mbeg,int mlen, int* seq)
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clMakecluster 
+**: DESCRIPTION: Make clusters
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:             06/10/98 cs: bug in calculating the seq. padnumber
+**:
+**:>------------------------------------------------------------------*/
+void l3clMakeCluster( int pr, int off, int mbeg, int mend, int* seq)
 {
    int i,t;
    CLUSTER * cptr;
 
-// 06/10/98 cs: bug in calculating the seq. padnumber
-   if ( off < iFirstPad[pr] || off > iLastPad[pr] ) {
-     printf ( "  \n Pad %d in row %d out of range, first: %d last: %d ", 
-              off, pr, iFirstPad[pr], iLastPad[pr] ) ;
-   }
    i = padlist[pr][iFirstPad[pr]+off];
    if (*n_cluster[i] >= MAX_CLUSTERSUC )
    {
@@ -230,28 +292,28 @@ void make_cluster(int pr,int off,int mbeg,int mlen, int* seq)
       return; /* max 31 clusters in list */
    }
    cptr = cluster_seq[i];
-   cptr->a_run[*(n_cluster[i])].Part.Begin=mbeg;
-   cptr->a_run[*(n_cluster[i])].Part.End=mbeg+mlen-1;
-// printf("clust_seq[%d]->%x:  ", i, cptr);
-// printf("seq: %d . %d; ", cptr->a_run[*(n_cluster[i])].Part.Begin, cptr->a_run[*(n_cluster[i])].Part.End );
- // printf("pSeq->Part.Beg= %d; ", ((PSequence) cluster_seq[i])->Part.Begin );
- // printf("pSeq-> = %x\n", (PSequence) cluster_seq[i] );
+   cptr->a_run[*(n_cluster[i])].Part.Begin = mbeg;
+   cptr->a_run[*(n_cluster[i])].Part.End   = mend;
    (*n_cluster[i])++;
-/* fill in the data RAM values (not properly mapped to 8 bits )*/
-   for (t=mbeg; t<mbeg+mlen;t++)
+//
+// fill in the data RAM values (not properly mapped to 8 bits )
+//
+   for ( t = mbeg; t < (mend+1); t++ )
    {
-      data_ram[i]->t_sam[t] = min(seq[t-mbeg] >> 2,255);
- // printf("  >%d", data_ram[i]->t_sam[t]);
+      data_ram[i]->t_sam[t] = min(seq[t-mbeg] >> 2, 255);
    }
- // printf("\n");
    return;
 }
-
-
-void init_other()
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    l3clInitOther   
+**: DESCRIPTION: Other initializations
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:
+**:>------------------------------------------------------------------*/
+void l3clInitOther()
 {
    int Index;
-
 /* initialize clusters under construction array and allocate some memory for sequence list */
    for (Index = 0; Index < MAX_CLUSTERSUC; Index++)
    {
@@ -263,185 +325,29 @@ void init_other()
 /* initialize prf table */
    SetupLogTable();
 }
-
-
-void reset_other()
+/*:>--------------------------------------------------------------------
+**: FUNCTION:    WriteDataToTable
+**: DESCRIPTION: writes data to L3 hit table
+**:
+**: AUTHOR:     ds  - Dirk Schminschke
+**:
+**:>------------------------------------------------------------------*/
+void l3clWriteDataToTable( TABLE_HEAD_ST *hit_h,
+                           SL3HIT_ST     *hit )
 {
-   int Index;
+   int i, nok ;
+   float x, y, z ;
+   PFormattedData p = pGlobalStore ; 
 
-/* initialize clusters under construction array and allocate some memory for sequence list */
-   for (Index = 0; Index < MAX_CLUSTERSUC; Index++)
+   nok = hit_h->nok ;
+
+   for ( i = 0 ; i < clusters; i++ )
    {
-      pClustersUnderConstruction[Index].Sequence.Complete = -1;
-      pClustersUnderConstruction[Index].pList->next = NULL;
-      pClustersUnderConstruction[Index].pList->Filling = 0;
-   }
-/* clear the memory */
-  memset(phys_data_ram, 0, NPADS * sizeof(struct DATA_RAM));
-
-}
-
-void WriteDataToTable( int sector, 
-                       TABLE_HEAD_ST *hit_h, 
-                       TCL_TPHIT_ST  *hit )
-{
-    int i, nok ;
-    float x, y, z ;
-    PFormattedData p = pGlobalStore ; 
-//
-    nok = hit_h->nok ;
-    for ( i = 0 ; i < clusters; i++ )
-    {
-/*
-    Returns coordinates in cm
-*/
-      ConvertRawToDetector( sector, (p->PadRow)+1,
-                            ((float)p->CenterPad)/64, 
-                            ((float)p->CenterTime)/64,
-                            &x, &y, &z );
-      hit[nok].id  = nok + 1 ;
-      hit[nok].row = sector * 100 + p->PadRow+1 ;
-      hit[nok].x   = x ;
-      hit[nok].y   = y ;
-      hit[nok].z   = z ;
-      hit[nok].dx  = 0.2F ;
-      hit[nok].dy  = 0.2F ;
-      hit[nok].dz  = 0.2F ;
+      hit[nok].row  = p->PadRow + 1;
+      hit[nok].pad  = p->CenterPad;
+      hit[nok].time = p->CenterTime;
       nok++ ;
-      if ( nok >= hit_h->maxlen ) {
-         printf ( " \n l3cl: Too many hits, quit " ) ;    
-         break ;
-      }
       p++;
    }
    hit_h->nok = nok ;
-}
-
-
-/* 
- new: conversion from raw data (sector, padrow, pad, time) to real coordinates in [cm] 
-*/
-void ConvertRawToDetector(int sector, int padrow, float pad, float timeslice, 
-                          float* x, float* y, float* z)
-{
-   float cart_x, cart_y;
-   int is ;
-
-/* statics
-   padrow-offset (center pad) from detector-center in mm */
-   static float PadrowOffset [] = 
-   {
-      60.0F, 64.8F, 69.6F, 74.4F, 79.2F, 84.0F, 88.8F, 93.60F, /*   7 * 4.80 cm spacing  */
-      98.8F, 104.F, 109.20F, 114.4F, 119.6F,                   /*   5 * 5.20 cm spacing  */
-     127.195F, 129.195F, 131.195F, 133.195F, 135.195F,        /*  32 * 2.00 cm spacing  */
-     137.195F, 139.195F, 141.195F, 143.195F, 145.195F,
-     147.195F, 149.195F, 151.195F, 153.195F, 155.195F,
-     157.195F, 159.195F, 161.195F, 163.195F, 165.195F,
-     167.195F, 169.195F, 171.195F, 173.195F, 175.195F,
-     177.195F, 179.195F, 181.195F, 183.195F, 185.195F,
-     187.195F, 189.195F
-   };
-/* cross-spacings between adjacent pads in cm */
-   static float PadSpacing [] =
-   {
-     .335F, .335F, .335F, .335F, .335F, /*  13 * .335 cm  */
-     .335F, .335F, .335F, .335F, .335F,
-     .335F, .335F, .335F,
-     .670F, .670F, .670F, .670F, .670F, /*  32 * .670 cm  */
-     .670F, .670F, .670F, .670F, .670F,
-     .670F, .670F, .670F, .670F, .670F,
-     .670F, .670F, .670F, .670F, .670F,
-     .670F, .670F, .670F, .670F, .670F,
-     .670F, .670F, .670F, .670F, .670F,
-     .670F, .670F
-    };
-/* number of pads in padrow */
-   static short NumberOfPadsInRow[45] = 
-   {
-      88,96,104,112,118,126,134,142,150,158,166,174,182,
-      98,100,102,104,106,106,108,110,112,112,114,116,
-     118,120,122,122,124,126,128,128,130,132,134,136,
-     138,138,140,142,144,144,144,144 
-   };
-/* sector-rotation factors */
-   static float SectorSinus [] =
-   {
-  /*  30 deg each segment */
-      0.866025404F,  /*  60 deg */
-      0.5F,          /*  30 deg */
-      0.0F,          /*   0 deg */
-     -0.5F,          /* 330 deg */
-     -0.866025404F,  /* 300 deg */
-     -1.0F,          /* 270 deg */
-     -0.866025404F,  /* 240 deg */
-     -0.5F,          /* 210 deg */
-      0.F,           /* 180 deg */
-      0.5,           /* 150 deg */
-      0.866025404F,  /* 120 deg */
-      1.0F           /*  90 deg */
-   };
-   static float SectorCosinus [] =
-   {
-      0.5F,          /*  60 */
-      0.866025404F,  /*  30 */
-      1.0F,          /*   0 */
-      0.866025404F,  /* 330 */
-      0.5F,          /* 300 */
-      0.0F,          /* 270 */
-     -0.5F,          /* 240 */
-     -0.866025404F,  /* 210 */
-     -1.0F,          /* 180 */
-     -0.866025404F,  /* 150 */
-     -0.5F,          /* 120 */
-      0.0F           /*  90 */
-   };
-
-/* scaling in time-direction */
-   static float driftLength = 209.7 ;
-   static float TimeScale   = 209.7 / 512.0;
-   static float offset      = 0.36 ;
- 
-/*
-     Make sure sector makes sense
-*/
-    
-   if ( sector < 1 || sector > 24 )
-   {
-      printf ( " \n sector out of range %d ", sector ) ;
-      *x = *y = *z = 0.F ;
-   }
-//
-//    Get sector index
-//
-   if ( sector == 24 ) 
-      is = 11 ;
-      else if ( sector > 12 )
-         is = 23 - sector ; 
-      else 
-        is = sector -1 ;
-
-/* calculate unrotated cartesian base-coordinates */
-
-   if ( pad < 0 ) {
-      printf ( "\n pad %f in row %d , out of bounds (0, %d) ", 
-                pad, padrow, NumberOfPadsInRow[padrow-1] ) ;
-      pad = 0 ;
-   }
-//   if ( pad >= NumberOfPadsInRow[padrow-1] ) {
-//      printf ( "\n pad %f in row %d , out of bounds (0, %d) ", 
-//            pad, padrow, NumberOfPadsInRow[padrow-1] ) ;
-//      pad = NumberOfPadsInRow[padrow-1] - 1 ;
-//   }
-   cart_y = PadrowOffset[padrow-1];
-//   cart_x = (pad - (NumberOfPadsInRow[padrow-1] >> 1)+0.5) * PadSpacing[padrow-1];
-   cart_x = (pad - (NumberOfPadsInRow[padrow-1] >> 1)) * PadSpacing[padrow-1];
- 
-/* rotate these coordinates */
-   *x = SectorSinus[is] * cart_x + SectorCosinus[is] * cart_y;
-   *y = SectorSinus[is] * cart_y - SectorCosinus[is] * cart_x;
-
-/* calculate time-direction */
-
-   *z =  offset + driftLength - timeslice * TimeScale;
-   if (sector > 12 ) *z *= -1. ;
 }
