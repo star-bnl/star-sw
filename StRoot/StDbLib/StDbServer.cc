@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.7 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbServer.cc,v 1.8 2000/01/19 20:20:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.8  2000/01/19 20:20:06  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.7  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -426,6 +431,25 @@ StDbServer::WriteDb(StDbConfigNode* node,int currentID) {
 return mdatabase->WriteDb(node,currentID);
 
 }
+
+////////////////////////////////////////////////////////////////
+
+bool
+StDbServer::rollBack(StDbNode* node) { 
+
+return mdatabase->rollBack(node);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+bool
+StDbServer::rollBack(StDbTable* table) { 
+
+return mdatabase->rollBack(table);
+
+}
+
 
 ////////////////////////////////////////////////////////////////
 

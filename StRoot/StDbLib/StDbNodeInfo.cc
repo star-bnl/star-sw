@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNodeInfo.cc,v 1.2 2000/01/14 14:50:52 porter Exp $
+ * $Id: StDbNodeInfo.cc,v 1.3 2000/01/19 20:20:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNodeInfo.cc,v $
+ * Revision 1.3  2000/01/19 20:20:06  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.2  2000/01/14 14:50:52  porter
  * expanded use of verbose mode & fixed inconsistency in
  * StDbNodeInfo::getElementID
@@ -134,7 +139,7 @@ StDbNodeInfo::getElementID(const char* elemID, int& numRows) {
 
 numRows=1;
 int * retVal = 0;
-char* id=strstr(elemID,"None");
+char* id=strstr((char*)elemID,"None");
 
 if(id){
   numRows=1;
@@ -222,6 +227,25 @@ while(id){
 
 
 return retVal;
+}
+
+////////////////////////////////////////////////////////////////
+char*
+StDbNodeInfo::elementIDString() {
+
+if(!elementID) return elementID;
+char* id = strstr(elementID,"-");
+if(!id) return elementID;
+
+int nr;
+int* eid = getElementID(elementID,nr);
+char* newString = new char[4*nr+1];
+ostrstream os(newString,4*nr+1);
+
+ for(int i=0;i<nr-1;i++)os<<eid[i]<<",";
+ os<<eid[nr-1]<<ends;
+
+return newString;
 }
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.6 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbServer.hh,v 1.7 2000/01/19 20:20:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.7  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.6  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -30,6 +35,7 @@
 
 #include "StDbDefs.hh"    // enumeration of type & domain
 
+class StDbNode;
 class StDbTable;
 class StDbConfigNode;
 
@@ -119,6 +125,8 @@ public:
   virtual bool QueryDb(StDbConfigNode* node);
   virtual bool WriteDb(StDbTable* table, unsigned int storeTime);
 
+  virtual bool rollBack(StDbNode* node);
+  virtual bool rollBack(StDbTable* table);
   virtual bool QueryDescriptor(StDbTable* table);
 
   // provide direct SQL access

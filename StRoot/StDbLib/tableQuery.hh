@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tableQuery.hh,v 1.5 2000/01/10 20:37:55 porter Exp $
+ * $Id: tableQuery.hh,v 1.6 2000/01/19 20:20:08 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: tableQuery.hh,v $
+ * Revision 1.6  2000/01/19 20:20:08  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.5  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -32,7 +37,7 @@
 #ifndef TABLEQUERY_HH
 #define TABLEQUERY_HH
 
-
+class StDbNode;
 class StDbTable;
 class StDbConfigNode;
 class StDbBuffer;
@@ -52,6 +57,9 @@ public:
 
   virtual int QueryDb(StDbConfigNode* node) = 0;
   virtual int WriteDb(StDbConfigNode* node, int currentID)=0;
+
+  virtual bool rollBack(StDbNode* node) = 0;
+  virtual bool rollBack(StDbTable* table) = 0;
 
   virtual int QueryDescriptor(StDbTable* table) = 0;
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.8 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.9 2000/01/19 20:20:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,11 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.9  2000/01/19 20:20:07  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.8  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -201,7 +206,12 @@ bool ClientMode;
    //  cout << " name = " << mcols[i].name << " type = " << mcols[i].type << "    //   size = " << mcols[i].size << " offset = " << mcols[i].offset << endl;
    mCur++;
    mnumElements++;
-   mtableSize = offsetToNextEmptyByte+(4 - offsetToNextEmptyByte%4);
+
+   // for multiple rows, add padding as needed at end of structure (tableSize)
+   int rowpad;
+   if((rowpad=offsetToNextEmptyByte%4))rowpad=4-rowpad;
+
+   mtableSize = offsetToNextEmptyByte+rowpad;
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }
@@ -335,7 +345,7 @@ StDbTableDescriptor::getType(char* type) {
 StTypeE retVal;
 
 //char* typenames[] = {"Stchar","Stuchar","Stshort","Stushort","Stint","Stuint","Stlong","Stulong","Stfloat","Stdouble","Stascii","Ststring"};
-char* typenames[] = {"char","uchar","short","ushort","int","uint","long","ulong","float","double","ascii","string"};
+const char* typenames[] = {"char","uchar","short","ushort","int","uint","long","ulong","float","double","ascii","string"};
 
  for(int i=0; i<12;i++){
    if(strcmp(type,typenames[i])==0){

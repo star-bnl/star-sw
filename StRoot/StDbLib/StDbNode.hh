@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.hh,v 1.1 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbNode.hh,v 1.2 2000/01/19 20:20:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbNode.hh,v $
+ * Revision 1.2  2000/01/19 20:20:06  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.1  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -35,6 +40,9 @@ protected:
 StDbNodeInfo mnode;
 bool misConfigured;
 bool misNode;
+bool mcanRollBack;
+
+
 
 public:
 
@@ -70,6 +78,9 @@ public:
    virtual bool  IsConfigured() const ;
    virtual void  setAsNode(bool isNode);
    virtual bool  IsNode() const;
+   virtual bool  canRollBack() const;
+   virtual void  addWrittenNode(int dataID);
+   virtual void  commit();
 
    virtual bool  checkName(const char* nodeName) const;
    virtual bool  checkVersion(const char* nodeVersion) const;
@@ -113,6 +124,18 @@ void StDbNode::setAsNode(bool isNode){ misNode=isNode; }
 
 inline
 bool StDbNode::IsNode() const { return misNode; }
+
+inline
+bool StDbNode::canRollBack() const { return mcanRollBack; }
+
+inline
+void StDbNode::addWrittenNode(int dataID){
+ mcanRollBack=true;
+ mnode.nodeID=dataID;
+}
+
+inline
+void StDbNode::commit() { mcanRollBack = false; }
 
 inline
 bool StDbNode::checkName(const char* nodeName) const {

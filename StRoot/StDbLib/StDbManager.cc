@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.13 2000/01/14 14:50:52 porter Exp $
+ * $Id: StDbManager.cc,v 1.14 2000/01/19 20:20:05 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.14  2000/01/19 20:20:05  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.13  2000/01/14 14:50:52  porter
  * expanded use of verbose mode & fixed inconsistency in
  * StDbNodeInfo::getElementID
@@ -48,7 +53,7 @@
 #include "StDbServer.hh"
 #include "StDbTable.h"
 #include "StDbTime.h"
-#include "TableIter.hh"
+#include "StDbTableIter.hh"
 #include <iostream.h>
 #include <strstream.h>
 #include <strings.h>
@@ -734,7 +739,11 @@ StDbManager::setStoreTime(unsigned int time){
 
 mstoreTime.munixTime = time;
 StDbServer* server = findServer(dbStDb,dbStar);
-if(server)mstoreTime.mdateTime = server->getDateTime(time);
+if(server){
+ mstoreTime.mdateTime = server->getDateTime(time);
+ if(misVerbose) cout <<" StoreDateTime = " << mstoreTime.mdateTime << endl;
+}
+
 
 }
 
@@ -745,7 +754,10 @@ StDbManager::setStoreTime(const char* time){
 
 mstoreTime.setDateTime(time);
 StDbServer* server = findServer(dbStDb,dbStar);
-if(server)mstoreTime.munixTime = server->getUnixTime(time);
+if(server){
+  mstoreTime.munixTime = server->getUnixTime(time);
+ if(misVerbose) cout <<" StoreUnixTime = " << mstoreTime.munixTime << endl;
+}
 
 }
 
@@ -848,7 +860,7 @@ bool retVal=false;
   }
 
   if(node->hasData()){
-    TableIter* itr = node->getTableIter();
+    StDbTableIter* itr = node->getStDbTableIter();
     StDbTable* table = 0;
     retVal = true;
     while(!itr->done()){
@@ -909,24 +921,37 @@ bool retVal = false;
   }
 
   if(node->hasData()){
-    TableIter* itr = node->getTableIter();
+    StDbTableIter* itr = node->getStDbTableIter();
     StDbTable* table = 0;
     retVal = true;
     while(!itr->done()){
       table = itr->next();
       retVal = (retVal && storeDbTable(table));
+      if(!retVal){
+        rollBackAllTables(node);
+        break;
+      }
     }
   delete itr;
   }
 
+if(!retVal) return retVal;
 bool children = true;
 bool siblings = true;
 
   if(node->hasChildren())children = storeAllTables(node->getFirstChildNode());
+  if(!children){
+    rollBackAllTables(node);
+    return false;
+  }
   StDbConfigNode* nextNode = 0;
   if((nextNode=node->getNextNode()))siblings = storeAllTables(nextNode);
+  if(!siblings){
+    rollBackAllTables(node);
+    return false;
+  }
 
-return (retVal && children && siblings);
+return true;
 }
 
 ///////////////////////////////////////////////////////////////
@@ -935,13 +960,178 @@ int
 StDbManager::storeConfig(StDbConfigNode* node, int currentID){
 
 StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
-
+bool children = true;
+bool siblings = true;
+bool retVal = false;
 int nodeID=server->WriteDb(node,currentID);
-if(node->hasChildren())storeConfig(node->getFirstChildNode(),nodeID);
-if(node->getNextNode())storeConfig(node->getNextNode(),currentID);
+if(nodeID){
+  retVal = true;
+  node->addWrittenNode(nodeID);
+  if(node->hasChildren())children=storeConfig(node->getFirstChildNode(),nodeID);
+  if(node->getNextNode())siblings=storeConfig(node->getNextNode(),currentID);
+ 
+}
+ if(! (retVal && children && siblings) ){
+      if(retVal){
+        rollBack(node);
+      } else  {
+        if(node->hasChildren() && children)rollBack(node->getFirstChildNode());
+        if((node->getNextNode()) && siblings)rollBack(node->getNextNode());
+      }
+     retVal = false;
+ }
+
+return retVal;
+}
+
+////////////////////////////////////////////////////////////////
+
+bool
+StDbManager::rollBackAllTables(StDbConfigNode* node){
+
+bool retVal=false;
+
+  if(node->hasData()){
+    StDbTableIter* itr = node->getStDbTableIter();
+    StDbTable* table = 0;
+    retVal = true;
+    while(!itr->done()){
+      table = itr->next();
+      rollBack(table);
+    }
+  delete itr;
+  }
+
+bool children = true;
+bool siblings = true;
+
+  if(node->hasChildren())children = rollBackAllTables(node->getFirstChildNode());
+  StDbConfigNode* nextNode = 0;
+  if((nextNode=node->getNextNode()))siblings = rollBackAllTables(nextNode);
+
+return (retVal && children && siblings);
+}
+
+////////////////////////////////////////////////////////////////
+
+bool
+StDbManager::rollBackAllNodes(StDbConfigNode* node){
+
+bool retVal=false;
+
+  if(node->hasData()){
+    StDbTableIter* itr = node->getStDbTableIter();
+    StDbNode* tnode = 0;
+    retVal = true;
+    while(!itr->done()){
+      tnode = (StDbNode*)itr->next();
+      rollBack(tnode);
+    }
+  delete itr;
+  }
+
+bool children = true;
+bool siblings = true;
+
+if(node->hasChildren())children = rollBackAllNodes(node->getFirstChildNode());
+StDbConfigNode* nextNode = 0;
+if((nextNode=node->getNextNode()))siblings = rollBackAllNodes(nextNode);
+
+
+return rollBack(node);
+}
+
+////////////////////////////////////////////////////////////////
+
+bool
+StDbManager::rollBack(StDbNode* node){
+
+  if(!node->canRollBack()){
+    cerr<<" Cannot Roll Back Write of Node="<<node->getName()<<endl;
+    return false;
+  }
+
+StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
+return server->rollBack(node);
+}
+
+////////////////////////////////////////////////////////////////////////
+
+bool
+StDbManager::rollBack(StDbTable* table){
+
+  int* dataRows=0;
+  int numRows;
+  bool retVal = false;
+  if((dataRows=table->getWrittenRows(&numRows))){
+     StDbServer* server=findServer(table->getDbType(),table->getDbDomain());
+     retVal = server->rollBack(table);
+  }
+     
+return retVal;
+}
+
+
+////////////////////////////////////////////////////////////////////////
+
+bool
+StDbManager::commitAllTables(StDbConfigNode* node){
+
+bool retVal=true;
+
+  if(node->hasData()){
+    StDbTableIter* itr = node->getStDbTableIter();
+    StDbTable* table = 0;
+    retVal = true;
+    while(!itr->done()){
+      table = itr->next();
+      if(table) table->commitData();
+    }
+  delete itr;
+  }
+
+bool children = true;
+bool siblings = true;
+
+  if(node->hasChildren())children = commitAllTables(node->getFirstChildNode());
+  StDbConfigNode* nextNode = 0;
+  if((nextNode=node->getNextNode()))siblings = commitAllTables(nextNode);
+
+return (retVal && children && siblings);
+}
+
+////////////////////////////////////////////////////////////////////////
+
+bool
+StDbManager::commitAllNodes(StDbConfigNode* node){
+
+bool retVal=true;
+
+  if(node->hasData()){
+    StDbTableIter* itr = node->getStDbTableIter();
+    StDbNode* tnode = 0;
+    retVal = true;
+    while(!itr->done()){
+      tnode = (StDbNode*)itr->next();
+      if(tnode) tnode->commit();
+    }
+  delete itr;
+  }
+
+bool children = true;
+bool siblings = true;
+
+if(node->hasChildren())children = commitAllNodes(node->getFirstChildNode());
+StDbConfigNode* nextNode = 0;
+if((nextNode=node->getNextNode()))siblings = commitAllNodes(nextNode);
+
+node->commit();
 
 return true;
 }
+
+
+
 
 ////////////////////////////////////////////////////////////////
 
@@ -978,22 +1168,4 @@ delete [] tmpName;
  }
 return retVal;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

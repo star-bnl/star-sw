@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.13 2000/01/14 14:50:52 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.14 2000/01/19 20:20:08 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.14  2000/01/19 20:20:08  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.13  2000/01/14 14:50:52  porter
  * expanded use of verbose mode & fixed inconsistency in
  * StDbNodeInfo::getElementID
@@ -43,7 +48,7 @@
  **************************************************************************/
 #include "mysqlAccessor.hh"
 #include "StDbTableDescriptor.h"
-#include "TableIter.hh"
+#include "StDbTableIter.hh"
 #include "StDbManager.hh"
 #include <strings.h>
 
@@ -54,7 +59,6 @@ mysqlAccessor::~mysqlAccessor(){
 if(mdbName) delete [] mdbName;
 
 }
-
 
 ////////////////////////////////////////////////////////////
 
@@ -69,12 +73,10 @@ return (int)Db.Connect(host,"","",dbname,portNumber);
 
 };
 
-
 ////////////////////////////////////////////////////////////////
 
 char*
 mysqlAccessor::getDbName() const {
-
 
 char* retVal=0;
 
@@ -445,17 +447,38 @@ int
 mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
   
   StDbNodeInfo currentNode;
+  // first check if node exists
 
-  if(!table->IsConfigured()){
-   if(!prepareNode((StDbNode*)table, &currentNode)) return 0;
-  } else {
-    table->getNodeInfo(&currentNode);
+  currentNode.dbName = table->getDbName();
+  if(!currentNode.dbName){
+     table->setDbName(mdbName);
+     currentNode.dbName=table->getDbName();
   }
+
+  currentNode.name = table->getName();
+  currentNode.versionKey = table->getVersion();
+
+  if(!queryNodeInfo(&currentNode)){ 
+     // then we should store the node in DB
+     // I assume the table has the right node information
+     char* cName = table->getCstrName();
+     if(cName)currentNode.structName = currentNode.mstrDup((const char*)cName);
+     currentNode.elementID  = ((StDbNode*)table)->getElementID();
+     currentNode.IsBaseLine = table->IsBaseLine();
+     if(!storeNodeInfo(&currentNode))return 0;
+  }
+
+  // check if it baseline &, if so, if an instance is already stored 
+  if(currentNode.IsBaseLine && hasInstance(&currentNode)){
+    cerr << "WriteDb::Table Error: trying to add to baseline instance"<<endl;
+    return 0;
+  }
+
+  // some node information can change e.g. isIndexed, structName,...
 
   if(!table->hasDescriptor()){
      if(!QueryDescriptor(table))return 0;
   }
-
 
   char* sTime = getDateTime(storeTime);
 
@@ -497,7 +520,8 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
        return 0;
      }
     }
-      
+    table->addWrittenRow(dataID);
+          
   } else {  // not binary
 
    int eID;
@@ -511,7 +535,7 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
      dataID = Db.GetLastInsertID(); // get auto-generated row-id
      storedData[i]=dataID;
      Db.Release(); buff.Raz();
-
+     
      if(currentNode.IsIndexed){
       eID=elements[i];
 
@@ -528,6 +552,7 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
         deleteRows(currentNode.structName,storedData,i+1);
         deleteRows("dataIndex",storedIndex,i);
         table->setRowNumber(); // reset row number to 0 for future dbStreaming
+        table->commit(); //zero written rows
         return 0;
       } else {
         storedIndex[i] = Db.GetLastInsertID();
@@ -537,6 +562,8 @@ mysqlAccessor::WriteDb(StDbTable* table, unsigned int storeTime){
      buff.Raz();
 
      } // isIndexed
+
+    table->addWrittenRow(dataID);
     } // element loop
   }
 
@@ -574,10 +601,6 @@ mysqlAccessor::prepareNode(StDbNode* dbNode, StDbNodeInfo* node){
    if(node->versionKey) delete [] node->versionKey;
    node->name = nodeName;
    node->versionKey = version;
-   //   node->mstrCpy(node->name,nodeName);
-   //   node->mstrCpy(node->versionKey,version);
-   //   delete [] nodeName;
-   //   delete [] version; 
 
    if(queryNodeInfo(node)){
 
@@ -604,16 +627,24 @@ mysqlAccessor::queryNodeInfo(StDbNodeInfo* node){
 node->IsBinary   = false;
 node->IsBaseLine = false;
 node->IsIndexed  = true;
+bool retVal;
 
     Db.Release(); buff.Raz();
 
     Db<< "Select * from Nodes where Nodes.name='";
     Db<< node->name<<"' AND Nodes.versionKey='"<<node->versionKey<<"'"<<endsql;
 
-    if(!Db.Output(&buff)) return false;
+    if(!Db.Output(&buff)) { // no such node... but maybe named reference is ok
+       retVal = false;
+       Db.Release();
+       Db<< "Select * from Nodes where Nodes.name='";
+       Db<< node->name<<"' limit 1"<<endsql;
+       if(!Db.Output(&buff))return retVal;
+    }   
     buff.SetClientMode();
 
-    bool retVal = readNodeInfo(node);
+    bool retCheck = readNodeInfo(node);
+    if(retVal && !retCheck)retVal=false;
 
     Db.Release(); buff.Raz();
 
@@ -672,7 +703,7 @@ mysqlAccessor::storeNodeInfo(StDbNodeInfo* node){
   if(node->IsBaseLine)Db<<", baseLine='Y'";
   if(node->IsBinary)Db<<", isBinary='Y'";
   if(!node->IsIndexed)Db<<", isIndexed='N'";
-  if(node->elementID)Db<<", elementID='"<< node->elementID <<"'"; 
+  if(node->elementID)Db<<", elementID='"<< node->elementID<<"'"; 
 
   Db<<endsql;
 
@@ -687,8 +718,26 @@ mysqlAccessor::storeNodeInfo(StDbNodeInfo* node){
 return true;
 }
 
-
 ////////////////////////////////////////////////////////////////
+bool
+mysqlAccessor::hasInstance(StDbNodeInfo *node){
+
+  Db.Release(); buff.Raz();
+  char thisNode[10];
+  ostrstream os(thisNode,10);
+  os<<node->nodeID<<ends;
+
+  Db<<"select * from dataIndex where nodeID="<<thisNode;
+  Db<<" AND version='"<<node->versionKey<<"'"<<endsql;
+
+  if(Db.NbRows() != 0) return true;
+
+return false;
+}
+
+
+
+
 
 int
 mysqlAccessor::QueryDescriptor(StDbTable* table){
@@ -799,7 +848,7 @@ StDbNodeInfo currentNode;
   StDbNodeInfo childNode;  
 
   if(node->hasData()){
-     TableIter* itr=node->getTableIter();
+     StDbTableIter* itr=node->getStDbTableIter();
      StDbTable* table = 0;
      while(!itr->done()){
 
@@ -808,8 +857,8 @@ StDbNodeInfo currentNode;
          table->getNodeInfo(&childNode);
          if(!queryNodeInfo(&childNode)){ // put it in
              if(!storeNodeInfo(&childNode)) return 0;
+         table->addWrittenNode(childNode.nodeID);
          }
-
        }
 
        char childID[10];
@@ -825,6 +874,59 @@ StDbNodeInfo currentNode;
 return currentNode.nodeID;
 }
             
+/////////////////////////////////////////////////////////////////
+bool
+mysqlAccessor::rollBack(StDbNode* node){
+
+  if(node->canRollBack()){
+    char nodeID[10]; 
+    ostrstream os(nodeID,10); os<<node->getNodeID() << ends;
+    Db<<"delete from Nodes where ID="<<nodeID<<endsql;
+    Db.Release();
+    Db<<"delete from NodeRelations where ParentID="<<nodeID;
+    Db<<" OR NodeID="<<nodeID<<endsql;
+    Db.Release();
+    node->commit();
+  }
+
+return true;
+} 
+
+/////////////////////////////////////////////////////////////////
+bool
+mysqlAccessor::rollBack(StDbTable* table){
+
+int numrows;
+int* dataIDs;
+
+ if((dataIDs=table->getWrittenRows(&numrows))){
+     
+   char* dataString = new char[4*numrows+1];
+   ostrstream os(dataString,4*numrows+1);
+   for(int i=0;i<numrows-1;i++)os<<"dataID="<<dataIDs[i]<<" OR ";
+   os<<"dataID="<<dataIDs[numrows-1]<<ends;
+   if(table->IsBinary()){
+     Db<<"Delete from bytes where "<<dataString<<endsql;
+   } else {
+     Db<<"Delete from "<<table->getCstrName()<<" where "<<dataString<<endsql;
+   }
+
+   Db.Release();
+   if(table->IsIndexed()){
+      char * nodeID = new char[10];
+      ostrstream nos(nodeID,10); os<<table->getNodeID()<<ends;
+      Db<<"delete from dataIndex where nodeID="<<nodeID<<" AND (";
+      Db<<dataString<<")"<<endsql;
+   }
+
+   Db.Release();
+   table->commitData();
+
+ }
+
+return true;
+}
+
 /////////////////////////////////////////////////////////////////
 
 char*

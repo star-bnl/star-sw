@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.11 2000/01/14 14:50:52 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.12 2000/01/19 20:20:05 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.12  2000/01/19 20:20:05  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.11  2000/01/14 14:50:52  porter
  * expanded use of verbose mode & fixed inconsistency in
  * StDbNodeInfo::getElementID
@@ -49,7 +54,7 @@
 
 class StDbTable;
 class StDbFactoryI;
-class TableIter;
+class StDbTableIter;
 
 
 #ifndef __CINT__
@@ -67,11 +72,11 @@ typedef list<StDbTable*> TableList;
 class TableList;
 #endif
 
-class TableIter;
+class StDbTableIter;
 
 class StDbConfigNode : public StDbNode {
 
- friend class TableIter;
+ friend class StDbTableIter;
 
 private:
 
@@ -152,7 +157,7 @@ public:
   virtual StDbTable* findTable(const char* name, const char* subPath="/");
   virtual StDbTable* findLocalTable(const char* name);
   virtual void removeTable(StDbTable* table);
-  virtual TableIter* getTableIter();
+  virtual StDbTableIter* getStDbTableIter();
 
   // node operations
   virtual StDbConfigNode* findConfigNode(StDbType type, 

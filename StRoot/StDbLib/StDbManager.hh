@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.10 2000/01/10 20:37:54 porter Exp $
+ * $Id: StDbManager.hh,v 1.11 2000/01/19 20:20:05 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.11  2000/01/19 20:20:05  porter
+ * - finished transaction model needed by online
+ * - fixed CC5 compile problem in StDbNodeInfo.cc
+ * - replace TableIter class by StDbTableIter to prevent name problems
+ *
  * Revision 1.10  2000/01/10 20:37:54  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -181,6 +186,16 @@ public:
   virtual bool storeDbTable(StDbTable* table);
   virtual bool storeAllTables(StDbConfigNode* node);
   virtual int  storeConfig(StDbConfigNode* node, int currentID=0);
+
+  // transaction methods 
+  //  nodes are node entries in the "Nodes" table
+  //  tables are real data entries in a data+dataIndex table
+  virtual bool rollBackAllTables(StDbConfigNode* node); //! for table data
+  virtual bool rollBackAllNodes(StDbConfigNode* node); //!  for node data
+  virtual bool rollBack(StDbNode* node);   //! for node data
+  virtual bool rollBack(StDbTable* table); //! for table data
+  virtual bool commitAllTables(StDbConfigNode* node); //! table commits
+  virtual bool commitAllNodes(StDbConfigNode* node);  //! node  commits 
 
   // make ROOT-CLI via star-ofl "makefiles"
   // ClassDef(StDbManager,0)
