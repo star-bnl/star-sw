@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.273 2002/02/20 01:14:58 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.274 2002/02/21 02:45:17 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -127,6 +127,7 @@ Bfc_st BFC[] = {
   // Other chains/Calibration
   {"LaserCal",""  ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","", 
                                                                           "Laser Calibration Chain",kFALSE},
+  {"L3Counter","" ,"","db,detDb,tpc_daq,l3count","","",                "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
    "pp2001 -l3onl -rich -rch -RichPiD -tofDat -v0 -xi -kink FindVtxSeed NoEvent -tree -tags -QA -EventQA",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
@@ -237,7 +238,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"db"          ,"db"   ,"","StDbT,xdf2root"    ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"svtDb"       ,"svtDb","","SvtCL,db" ,                          "StSvtDbMaker","StSvtDbMaker","",kFALSE},
-  {"dbutil"      ,""     ,"","SCL,svtDb"                   ,"","StDbUtilities","Load StDbUtilities",kFALSE},
+  {"dbutil"      ,""     ,"","SCL"                         ,"","StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -337,7 +338,7 @@ Bfc_st BFC[] = {
   {"V0"         ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"         ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"fpt"      ,"ftpc_tracks","ftpcChain","SCL"          
+  {"fpt"      ,"ftpc_tracks","globalChain","SCL"          
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
                  ,"StFtpcGlobalMaker","St_global,St_dst_Maker","FTPC track refit, fills dst_tracks",kFALSE},
@@ -357,7 +358,7 @@ Bfc_st BFC[] = {
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
 
-  {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
+  {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"RichPiD"     ,"","RichChain","Event"                      ,"StRichPIDMaker","StRichPIDMaker","",kFALSE},
