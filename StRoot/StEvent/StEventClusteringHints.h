@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.h,v 2.4 2001/04/23 19:28:53 ullrich Exp $
+ * $Id: StEventClusteringHints.h,v 2.5 2001/05/01 03:48:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.h,v $
+ * Revision 2.5  2001/05/01 03:48:36  ullrich
+ * Added branch IDs.
+ *
  * Revision 2.4  2001/04/23 19:28:53  ullrich
  * Inherit from StObject. Not a singleton anymore.
  *
@@ -52,6 +55,7 @@ public:
     void setDstMode();                          // switch to DST mode
     void setMiniDstMode();                      // switch to miniDST mode
     const char* branchName(const char*) const;  // get branch name for given class name
+    int branchId(const char*) const;            // return unique ID for given branch
 
 #if !defined(__CINT__)    
     vector<string> listOfBranches() const;      // list of all branches for given mode (miniDST or DST)         
@@ -59,8 +63,8 @@ public:
     vector<string> listOfClasses(const char*) const;  // list of all top level classes for a given branch
 #endif    
     
-    void setBranch(const char*, const char*);   // assign classname with a branch name
-    void print(ostream& = cout);                // print current configuration
+    void setBranch(const char*, const char*, int);   // assign classname with a branch name (incl. ID)
+    void print(ostream& = cout);                     // print current configuration
     
 private:
     StEventClusteringHints(const StEventClusteringHints&);
@@ -69,6 +73,7 @@ private:
     map<string,string> *mNameMap;           //!
     map<string,string> mDstMap;             //!
     map<string,string> mMiniDstMap;         //!
+    map<string, int>   mBranchIds;          //!
  
     ClassDef(StEventClusteringHints,1)
 };
