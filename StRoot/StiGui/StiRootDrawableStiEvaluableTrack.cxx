@@ -217,6 +217,6 @@ void StiRootDrawableStiEvaluableTrack::setLineInfo()
 
 void StiRootDrawableStiEvaluableTrack::reset()
 {
-  this->StiKalmanTrack::reset();
+  this->StiEvaluableTrack::reset();
   this->StiRootDrawableTrack::reset();
 }
