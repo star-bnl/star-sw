@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: St_table_header_Table.cxx,v 1.2 2000/03/27 00:34:04 fine Exp $
+// $Id: St_table_header_Table.cxx,v 1.3 2000/03/29 20:39:18 fine Exp $
 //
 #include "St_table_header_Table.h"
 /////////////////////////////////////////////////////////////////////////
@@ -16,10 +16,12 @@ TableClassImp(St_table_header,table_head)
 
 //______________________________________________________________________________
 St_table_header::St_table_header(const TTable *table) 
-                : TTable("table_header",sizeof(table_head_st))
+                : TTable("table_header",sizeof(table_head_st),1)
 {
    SetType("table_header");
    table_head_st header;
+   *header.name = 0;
+   *header.type = 0;
    strncat(header.name,table->GetName(),sizeof(header.name));  // table name
    strncat(header.type,table->GetType(),sizeof(header.type));  // table type
    header.maxlen = table->GetTableSize();  // # rows allocated 
@@ -50,6 +52,9 @@ void *ReAllocate(table_head_st *header, Int_t newsize)
 
 //______________________________________________________________________________
 // $Log: St_table_header_Table.cxx,v $
+// Revision 1.3  2000/03/29 20:39:18  fine
+// bug fix
+//
 // Revision 1.2  2000/03/27 00:34:04  fine
 // function ReAllocate and method TTable::Object have been move to St_table_head class
 //
