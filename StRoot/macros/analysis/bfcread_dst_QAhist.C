@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.37 2001/04/25 01:52:51 genevb Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.38 2001/04/28 21:45:19 genevb Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.38  2001/04/28 21:45:19  genevb
+// include libs for EMC
+//
 // Revision 1.37  2001/04/25 01:52:51  genevb
 // Get TPC lib load ordering correct
 //
@@ -193,18 +196,15 @@ void bfcread_dst_QAhist(
 
   gSystem->Load("St_base");
   gSystem->Load("StChain");
-
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libglobal_Tables");
+  gSystem->Load("St_Tables");
 
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
-  gSystem->Load("libtpc_Tables");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("StEmcUtil");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("tls");
   gSystem->Load("St_tpc");

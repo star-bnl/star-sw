@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.27 2000/08/02 00:46:25 lansdell Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.28 2001/04/28 21:45:19 genevb Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.28  2001/04/28 21:45:19  genevb
+// include libs for EMC
+//
 // Revision 1.27  2000/08/02 00:46:25  lansdell
 // call Finish() only if in batch mode, otherwise causes seg violation
 //
@@ -158,6 +161,7 @@ void bfcread_dst_EventQAhist(
   gSystem->Load("St_db_Maker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("StEmcUtil");
   gSystem->Load("StEventMaker");
   gSystem->Load("St_QA_Maker");  
 
