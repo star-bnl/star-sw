@@ -1,3 +1,6 @@
+/*!
+ * \file PAM.h
+ */
 #ifndef PAM_H
 #define PAM_H
 /* -------------- emlLib.h --------------------------*/
@@ -14,19 +17,19 @@ class amiBroker;
 /*- STAFCV - STAF Condition Value -*/
 #ifndef				  STAFCV_T
 typedef long STAFCV_T;
-#define STAFCV_BAD	0
-#define STAFCV_OK	1
-#define STAFCV_ERR	2
-#define STAFCV_FATAL	3
+#define STAFCV_BAD        0                                            /*! \def STAFCV_BAD */
+#define STAFCV_OK        1                                             /*! \def STAFCV_OK */
+#define STAFCV_ERR        2                                            /*! \def STAFCV_ERR */
+#define STAFCV_FATAL        3                                          /*! \def STAFCV_FATAL */
 #endif				/*STAFCV_T*/
 #ifndef TRUE
-#define TRUE 1
+#define TRUE 1                                                         /*! \def TRUE */
 #endif
 #ifndef FALSE
-#define FALSE 0
+#define FALSE 0                                                        /*! \def FALSE */
 #endif
 #ifndef NULL
-#define NULL 0
+#define NULL 0                                                         /*! \def NULL */
 #endif
 /*-------------------------------------------- GLOBALS              --*/
 /*#include "idl_types.h"*/
@@ -36,7 +39,7 @@ typedef long STAFCV_T;
 #include "StarCallf77.h"
 
 #ifndef EXTERN
-#define EXTERN extern
+#define EXTERN extern                                                  /*! \def EXTERN */
 #endif
 
 
