@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.365 2003/11/12 23:33:38 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.366 2003/12/09 17:33:42 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -71,9 +71,9 @@ Bfc_st BFC1[] = {
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
-  {"Y2003a" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
-  {"Y2003b" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
-  {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+  {"Y2003a" ,"","","db,detDb","","",                                   "Who knows what that is ???",kFALSE},
+  {"Y2003b" ,"","","db,detDb","","",                                   "Who knows what that is ???",kFALSE},
+  {"Y2004"  ,"","","db,detDb","","",                                   "Who knows what that is ???",kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
@@ -365,8 +365,13 @@ Bfc_st BFC1[] = {
 
   {"svt"         ,"svtChain","","svt_T,SvtCL,Est,SvtVtx"                    ,"StMaker","StChain","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
-  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
-                                                  ,"StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
+  {"SvtSlowSim"  ,"","","SvtSSim,SvtOnlSeq"         ,"","","Short cut for SvtSlowSim and SvtOnlSeq",kFALSE},
+  {"SvtSSim","SvtSSimu","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+                                  ,"StSvtSimulationMaker","StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
+
+  {"SvtOnlSeq","SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+                                             ,"StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
+
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
                                   ,"St_srs_Maker","St_tpc,St_svt,StSvtClusterMaker,St_srs_Maker","",kFALSE},
@@ -579,9 +584,9 @@ Bfc_st BFC2[] = {
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
   {"Y2003X" ,"","","db,detDb","","",
                   "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
-  {"Y2003a" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
-  {"Y2003b" ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
-  {"Y2004"  ,"","","db,detDb","","",                                 "Who knows what that is (???)",kFALSE},
+  {"Y2003a" ,"","","db,detDb","","",                                   "Who knows what that is ???",kFALSE},
+  {"Y2003b" ,"","","db,detDb","","",                                   "Who knows what that is ???",kFALSE},
+  {"Y2004"  ,"","","db,detDb","","",                                   "Who knows what that is ???",kFALSE},
 
   {"Complete","","","db,detDb"            ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
@@ -874,8 +879,13 @@ Bfc_st BFC2[] = {
 
   {"svt"         ,"svtChain","","svt_T,SvtCL,Est,SvtVtx"                    ,"StMaker","StChain","",kFALSE},
   {"sss"         ,"","","SvtSlowSim"                              ,"","","Short cut for SvtSlowSim",kFALSE},
-  {"SvtSlowSim"  ,"SvtSlowSim","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
-                                                  ,"StSvtSimulationMaker","StSvtSimulationMaker","",kFALSE},
+  {"SvtSlowSim"  ,"","","SvtSSim,SvtOnlSeq"         ,"","","Short cut for SvtSlowSim and SvtOnlSeq",kFALSE},
+  {"SvtSSim","SvtSSimu","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+                                  ,"StSvtSimulationMaker","StSvtSimulationMaker,StSvtCalibMaker","",kFALSE},
+
+  {"SvtOnlSeq","SvtOnlSeq","svtChain","svtDb,SvtCL,Simu,SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit"
+                                             ,"StSvtOnlineSeqAdjSimMaker","StSvtSimulationMaker","",kFALSE},
+
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","svtDb,tls,Simu,SvtCL,-sss,-SvtSlowSim,StEvent"
                                   ,"St_srs_Maker","St_tpc,St_svt,StSvtClusterMaker,St_srs_Maker","",kFALSE},
