@@ -5,7 +5,7 @@ ClassImp(StEvtHddr)
 //_____________________________________________________________________________
 StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
 { 
-  SetDateTime(19950101,0);
+  SetDateTime(20330101,0);
   SetEventType("NONE");
   memset(&mRunNumber,0,(char*)&mEventNumber-(char*)&mRunNumber); 
   mRunNumber=-1;mOldRunNumber=-1;mEventNumber=-1;
