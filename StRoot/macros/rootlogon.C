@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.40 2004/05/12 17:50:26 perev Exp $
+// $Id: rootlogon.C,v 1.41 2004/06/25 19:28:29 jeromel Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -7,7 +7,7 @@
 
 {
 
-#pragma optimize 0
+  // #pragma optimize 0 <-- removed BuTracking 247
   //  set FloatPointException trap
 namespace rootlogon {
   int fpe=0;const char *env=0;
