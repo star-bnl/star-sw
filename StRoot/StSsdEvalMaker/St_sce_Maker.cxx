@@ -11,6 +11,8 @@
 #include "svt/St_sce_am_Module.h"
 #include "TH1.h"
 #include "TFile.h"
+#include "StMessMgr.h"
+
 ClassImp(St_sce_Maker)
 //_____________________________________________________________________________
 St_sce_Maker::St_sce_Maker(const char *name):
@@ -36,14 +38,12 @@ Int_t St_sce_Maker::Init(){
    m_ctrl        = (St_sce_ctrl    *)local("ssd/sce_ctrl");
 
    
-  Int_t res = 1;
-  if ((!m_geom_par)||(!m_geom)||(!m_ctrl))
-    {
-      res = 0;
-      cout<<"*** IN SCE_AM MODULE ***"<<endl;
-      cout<<"*** sce parameter tables are missing ***"<<endl;
-      return kStWarn;
-    }
+  if ((!m_geom_par)||(!m_geom)) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+  }   
+  if (!m_ctrl) {
+    gMessMgr->Error() << "No  access to control parameters" << endm;
+  } 
 // 		Create SCM histograms
   devXl0 = new TH1F("xl [0] (microns)","Xl [0] deviation:",100,-200,200);
   devXl0 -> SetYTitle("Nbre of Points");
@@ -76,6 +76,9 @@ Int_t St_sce_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_sce_Maker::Make()
 {
+  if (Debug())  gMessMgr->Debug() << "In St_sce_Maker::Make() ... "
+                               << GetName() << endm;
+  // 		Create output tables
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
   St_sls_spt *sls_spt = (St_sls_spt *)GetDataSet("sls_strip/.data/sls_spt");
@@ -86,8 +89,11 @@ Int_t St_sce_Maker::Make()
   m_DataSet->Add(sce_dspt);
 
   Int_t res = sce_am(g2t_svt_hit, sls_spt, scf_cluster, scm_spt, m_geom, m_geom_par, sce_dspt, m_ctrl);
-  if(res!=kSTAFCV_OK) return kStWarn;
-  if (Debug()) m_DataSet->ls("*");
+;
+   if(res!=kSTAFCV_OK){
+     gMessMgr->Warning("St_sce_Maker: no output");
+     return kStWarn;
+   }
   
   makeScfStats();
   showScfStats();
@@ -291,7 +297,13 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.2 2000/07/24 19:56:32 hippolyt Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.3 2000/08/15 19:32:59 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
+}
+//_____________________________________________________________________________
+Int_t St_sce_Maker::Finish() {
+  if (Debug()) gMessMgr->Debug() << "In St_sce_Maker::Finish() ... "
+                               << GetName() << endm; 
+  return kStOK;
 }

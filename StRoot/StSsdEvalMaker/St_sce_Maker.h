@@ -45,6 +45,7 @@ class St_sce_Maker : public StMaker {
    virtual       ~St_sce_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
+   virtual Int_t  Finish();
    virtual void   PrintInfo();
    ClassDef(St_sce_Maker, 1)   //StAF chain virtual base class for Makers
 };

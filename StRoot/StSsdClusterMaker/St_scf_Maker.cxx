@@ -11,6 +11,7 @@
 #include "svt/St_scf_am_Module.h"
 #include "TH1.h"
 #include "TFile.h"
+#include "StMessMgr.h"
 ClassImp(St_scf_Maker)
 //_____________________________________________________________________________
 St_scf_Maker::St_scf_Maker(const char *name):
@@ -27,7 +28,8 @@ St_scf_Maker::~St_scf_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_scf_Maker::Init(){
-  
+  if (Debug())  gMessMgr->Debug() << "In St_scf_Maker::Make() ... "
+                               << GetName() << endm;
   // 		Create tables
   St_DataSet *svtparams = GetInputDB("svt");
   St_DataSetIter       local(svtparams);
@@ -36,24 +38,16 @@ Int_t St_scf_Maker::Init(){
   m_noise     = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
   m_scf_ctrl  = (St_scf_ctrl          *)local("ssd/scf_ctrl");
   m_sls_ctrl  = (St_sls_ctrl          *)local("ssd/sls_ctrl");
+  if (!m_geom_par) {
+    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+  }   
+  if (!m_noise) {
+    gMessMgr->Error() << "No  access to noise condition" << endm;
+  }
+  if ((!m_sls_ctrl)||(!m_scf_ctrl)) {
+    gMessMgr->Error() << "No  access to control parameters" << endm;
+  } 
 
-  int res = 1;
-  if ((!m_geom_par)||(!m_scf_ctrl)||(!m_sls_ctrl))
-    {
-      res = 0;
-      cout<<"*** IN SCF_AM MODULE ***"<<endl;
-      cout<<"*** sdm parameter tables are missing ***"<<endl;
-      return kStWarn;
-      
-    }
-  else
-    {
-      if (!m_noise)
-	{
-	  cout<<"*** sdm database tables are missing ***"<<endl;
-	  return kStWarn;
-	}
-    }
   // 		Create SCF histograms
 
   noisDisP = new TH1F("Noise (p)","Noise Distribution",25,0,25);
@@ -71,6 +65,8 @@ Int_t St_scf_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_scf_Maker::Make()
 {
+  if (Debug())  gMessMgr->Debug() << "In St_scf_Maker::Make() ... "
+                               << GetName() << endm;
   // 		Create output tables
   Int_t res = 0; 
   
@@ -82,8 +78,10 @@ Int_t St_scf_Maker::Make()
   res =  scf_am(m_geom_par, spa_strip, m_sls_ctrl,
 		m_noise, m_scf_ctrl, scf_cluster);
   
-  if(res!=kSTAFCV_OK) return kStWarn;
-  if (Debug()) m_DataSet->ls("*");
+   if(res!=kSTAFCV_OK){
+     gMessMgr->Warning("St_scf_Maker: no output");
+     return kStWarn;
+   }
   makeScfCtrlHistograms();
   writeScfCtrlHistograms();
   
@@ -143,8 +141,14 @@ void St_scf_Maker::writeScfCtrlHistograms()
 void St_scf_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_scf_Maker.cxx,v 1.1 2000/07/21 15:08:54 hippolyt Exp $\n");
+  printf("* $Id: St_scf_Maker.cxx,v 1.2 2000/08/15 19:34:52 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
+}
+//_____________________________________________________________________________
+Int_t St_scf_Maker::Finish() {
+  if (Debug()) gMessMgr->Debug() << "In St_spa_Maker::Finish() ... "
+                               << GetName() << endm; 
+  return kStOK;
 }
 
