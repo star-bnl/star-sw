@@ -18,6 +18,9 @@
 #define MAXCRATES 30
 #define MAXSMDCRATES 8
 #define MAXBPRSCRATES 4
+#define NBEMCTRIGGERTOWER 300
+#define NPATCHESPERCRATE 10
+#define NTOWERSPERCRATE 160
 
 // raw data position in StEvent
 #define BTOWBANK 0
