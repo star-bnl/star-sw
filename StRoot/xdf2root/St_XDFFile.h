@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.14 1998/10/06 18:00:56 perev Exp $
+// $Id: St_XDFFile.h,v 1.15 1998/10/31 00:21:57 fisyak Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.15  1998/10/31 00:21:57  fisyak
+// Add record counter
+//
 // Revision 1.14  1998/10/06 18:00:56  perev
 // cleanup
 //
@@ -54,6 +57,7 @@ class St_XDFFile
     Int_t                fErrorCode;    // Error code of the last operation
     const Char_t        *fMethodName;   // The name of the current method (to debug code)
     TSocket             *fSocket;       // Socket to XDF I/O
+    Int_t                fRecordCount;  // No. of records read/written
 
   protected:
     static St_DataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> St_DataSet. Create St_DataSet object from DS_DATASET_T C-structure
@@ -74,7 +78,8 @@ class St_XDFFile
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
     virtual St_DataSet *NextEventGet();                                         // create St_DataSet and read the next event in it.
     virtual Int_t       NextEventPut(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
-   static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
+    virtual Int_t       GetCount(){return fRecordCount;}
+    static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
     static  St_DataSet *GetXdFile(const Char_t *filename);                      // open, read and close file file
     ClassDef(St_XDFFile,0)
 

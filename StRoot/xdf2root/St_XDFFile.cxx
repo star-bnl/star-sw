@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.17 1998/10/05 21:21:22 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.18 1998/10/31 00:21:57 fisyak Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.18  1998/10/31 00:21:57  fisyak
+// Add record counter
+//
 // Revision 1.17  1998/10/05 21:21:22  fine
-// #include <errno.h>
+//  #include <errno.h>
 // fErrorCode data-member has been activated
 //
 // Revision 1.16  1998/09/21 23:50:47  fine
@@ -68,6 +71,7 @@ St_XDFFile::St_XDFFile(){
   fDataSet= 0;
   fSocket = 0;
   fErrorCode=0;
+  fRecordCount =0;
 }
 
 //______________________________________________________________________________
@@ -88,6 +92,7 @@ St_XDFFile::St_XDFFile(const Char_t *filename,const Char_t *mode)
   fDataSet= 0;
   fSocket = 0;
   fErrorCode=0;
+  fRecordCount =0;
   if (filename && strlen(filename)) {
      fStream = (XDR*) malloc(sizeof(XDR));
      OpenXDF(filename,mode);
@@ -137,6 +142,7 @@ Int_t St_XDFFile::OpenXDF(TInetAddress address, const char *service,const Char_t
 {
   fSocket = new TSocket(address,service);
   fFile   = (FILE *)fSocket->GetDescriptor();
+  fRecordCount =0;
   return  CreateXDFStream();
 }
 //______________________________________________________________________________
@@ -144,6 +150,7 @@ Int_t St_XDFFile::OpenXDF(TInetAddress address, Int_t port,const Char_t *mode)
 {
    fSocket = new TSocket(address,port);
    fFile = (FILE *)fSocket->GetDescriptor();
+   fRecordCount =0;
    return  CreateXDFStream();
 }
 
@@ -152,6 +159,7 @@ Int_t St_XDFFile::OpenXDF(const char *host, Int_t port,const Char_t *mode)
 {
   fSocket = new TSocket(host,port);
   fFile = (FILE *)fSocket->GetDescriptor();
+  fRecordCount =0;
   return  CreateXDFStream();
 }
 //______________________________________________________________________________
@@ -159,6 +167,7 @@ Int_t St_XDFFile::OpenXDF(Int_t descriptor,const Char_t *mode)
 {
   fSocket = new TSocket(descriptor);
   fFile = (FILE *)fSocket->GetDescriptor();
+  fRecordCount =0;
   return  CreateXDFStream();
 }
 
@@ -189,6 +198,7 @@ Int_t St_XDFFile::OpenXDF(const Char_t *filename,const Char_t *mode)
   fErrorCode=0;
   fFile = fopen(fName,fType);
   
+  fRecordCount =0;
   if(!fFile) {                    // open error 
     fErrorCode=errno;
     Printf("xdf_open. Error, can not open file %s %s\n",fName,fType);
@@ -238,9 +248,10 @@ Int_t St_XDFFile::NextEventPut(St_DataSet *dataset)
    DS_DATASET_T *ds = MakeDataSet(dataset);
 
    if (ds) { 
+     fRecordCount++;
      if (!::xdr_dataset(fStream,&ds))
      {
-        printf("*** Error: WriteEvent() xdf_next_record: %s\n",fName); 
+        printf("*** Error: WriteEvent() xdf_next_record: %s in Record %d\n",fName,fRecordCount); 
         return 0;
      };
      Delete(ds);
@@ -276,6 +287,8 @@ St_DataSet *St_XDFFile::NextEventGet()
        printf("*** Warning: NextEvent() xdf_next_record: end of file %s\n",fName); 
        return 0;
    };
+   fRecordCount++;
+    printf("%s from %s record %d \n",fMethodName,fName,fRecordCount);
    St_DataSet *set = MakeDataSet(fDataSet);
    Delete(fDataSet);
    return set;
