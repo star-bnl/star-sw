@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.66 2001/10/05 14:34:02 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.67 2001/10/26 16:49:28 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.67  2001/10/26 16:49:28  caines
+// Temporarily feed nanodes and npixels into the SVT hit errors
+//
 // Revision 1.66  2001/10/05 14:34:02  caines
 // Fixed used in fit TPC hit
 //
@@ -205,7 +208,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.66 2001/10/05 14:34:02 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.67 2001/10/26 16:49:28 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -504,6 +507,10 @@ Int_t  St_dst_Maker::Filler(){
 	      for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
 
 	       
+		if( ladder == 15 || ladder ==16 && mSvtBigHit->svtHit()[clu].charge() > 250){
+		  cout << mSvtBigHit->WaferPosition()[clu].x() << " " 
+		       << mSvtBigHit->WaferPosition()[clu].y() << " " << index << " " << index2 << endl;
+		}
 		mypoint[HitIndex].hw_position = 2;
   		mypoint[HitIndex].hw_position += (1L<<4)*(index2);
 		svtx = int(mSvtBigHit-> WaferPosition()[clu].x()*4);
@@ -552,15 +559,23 @@ Int_t  St_dst_Maker::Filler(){
 		mypoint[HitIndex].position[1] = svty10 + (1L<<10)*svtz; 
 		
 		
-		cov =  mSvtBigHit->svtHit()[clu].positionError().x()
-		  *mSvtBigHit->svtHit()[clu].positionError().x();
+		//cov =  mSvtBigHit->svtHit()[clu].positionError().x()
+		//  *mSvtBigHit->svtHit()[clu].positionError().x();
+
+		// Temporarily fill with No. anodes and No. pixels
 		
-		if( cov > 0.0 && cov < 1.0/float((1L<<6)))
+
+		cov = 1./(100*
+		       (float)mSvtBigHit->svtHitData()[clu].numOfAnodesInClu);
+		if( cov > 0.0 && cov < (1.0/float((1L<<6))))
 		    svtx = int((1L<<26)*cov);
 		else  svtx = 0;
 		
-		cov =  mSvtBigHit->svtHit()[clu].positionError().y()
-		  *mSvtBigHit->svtHit()[clu].positionError().y();
+		//	cov =  mSvtBigHit->svtHit()[clu].positionError().y()
+		// *mSvtBigHit->svtHit()[clu].positionError().y();
+
+		cov = 1./(100*
+		     (float)mSvtBigHit->svtHitData()[clu].numOfPixelsInClu);
 		if( cov > 0.0 && cov <  (1.0/float((1L<<6))))
 		  svty = int((1L<<26)*cov);
 		else  svty = 0;
