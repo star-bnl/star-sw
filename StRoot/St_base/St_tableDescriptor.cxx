@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.1 1999/08/11 00:40:11 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.2 1999/08/11 14:44:39 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.2  1999/08/11 14:44:39  fine
+// name clash with ROOT over enum resolved
+//
 // Revision 1.1  1999/08/11 00:40:11  fine
 // new class St_tableDescriptor
 //
@@ -153,7 +156,7 @@ Int_t St_tableDescriptor::GetDimensions(const Char_t *columnName) const
   return indx;
 }
 //____________________________________________________________________________
-EColumnType St_tableDescriptor::GetColumnType(const Char_t *columnName) const 
+St_Table::EColumnType St_tableDescriptor::GetColumnType(const Char_t *columnName) const 
 {
   Int_t indx = GetColumnByName(columnName);
   if (indx >= 0 ) indx = GetColumnType(indx);
