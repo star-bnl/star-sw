@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.10 2000/11/26 15:07:55 lasiuk Exp $
+ * $Id: StEnumerations.h,v 2.11 2001/03/14 02:30:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.11  2001/03/14 02:30:20  ullrich
+ * Added StPeg enum.
+ *
  * Revision 2.10  2000/11/26 15:07:55  lasiuk
  * replace multiplyassigned bit for RICH
  *
@@ -103,4 +106,13 @@ enum StRichHitFlag {eDeconvoluted=1,
                     e2SigmaPi=134217728,
                     e2SigmaK=268435456,
                     e2Sigmap=536870912};
+
+enum StPwg         {generic,
+		    ebye,
+		    hbt,
+		    highpt,
+		    pcoll,
+		    spectra,
+		    spin,
+		    strangeness};
 #endif
