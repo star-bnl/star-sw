@@ -45,15 +45,38 @@ class StAssociationMaker;
 class StTrackPairInfo;
 class StTpcHitFilter;
 
+//Stl utility functor
+class BestCommonHits
+{
+public:
+    typedef pair<StMcTrack*, StTrackPairInfo*> McToStPair_t;
+
+    ///Default Constructor
+    BestCommonHits();
+    
+    ///Reset all internal members to either zero or 'null'.
+    void reset() {
+	mMostCommon=0;
+	mPair=0;
+    }
+
+    ///Set required lower bound for the number of common hits required.
+    void setLowerBound(unsigned int val ) {mMostCommon=val;}
+
+    void operator()(const McToStPair_t& rhs);
+    
+    StTrackPairInfo* pair() const {return mPair;}
+    
+private:
+    unsigned int mMostCommon;
+    StTrackPairInfo* mPair;
+};
+    
 class StiEvaluableTrackSeedFinder : public StiSeedFinder
 {
 public:
     
     ///This is the only constructor available.
-    /*! We require a valid pointer to an StAssociationMaker object.  All other constructor
-      types are excplicity prohibited.  It is assumed, however, that the StAssociationMaker
-      object is owned by some other scope.
-     */
     StiEvaluableTrackSeedFinder(StAssociationMaker*);
 
     ///Default destructor.
@@ -62,10 +85,6 @@ public:
     //Sets
 
     ///Set a pointer to StMcEvent
-    /*! This should be called once per event.  The call to setEVent internally initializes
-      the seed finder for the event.  Without this call, the behavior of hasMore() and next()
-      is undefined.
-    */
     void setEvent(StMcEvent* mcevt=0);
 
     ///Set a pointer to the track factory.
@@ -77,75 +96,43 @@ public:
     //User query interface to StiKalmanTracks
 
     ///Are there more tracks to be had?
-    /*! A call to hasMore() simply checks if there are more seeds to be generated.
-      It does not implement any increment or decrement calls, and thus may be called without
-      ever changing the internal state of the seed finder.
-     */
     virtual bool hasMore();
 
     ///Access to the next track.
-    /*! A call to next() constructs a seed from the current m.c. track and increments
-      a pointer to the next available m.c. track.  The generation of the seed itself is
-      performed by the private makeTrack() method.
-    */
     virtual StiKalmanTrack* next();
 
     ///Dynamically build the internal state of the seed-finder.
-    /*! A call to build builds the internal state from the text file specified by
-      buildPath.  If buildPath is not initialized, warning messages are streamed and
-      behavior of the seed-finder object is undefined.
-     */
-    
     virtual void build();
     
     ///This performs no operation.
-    /*! This call is inherited from StiSeedFinder but does not make much sense in the context
-      of evaluable seeds.  That is, the internal state cannot be reset without a call to
-      setEvent().
-    */
     virtual void reset();
 
 protected:
     ///Construct an evaluable track from a m.c. track
-    /*! This function is the heart of the seed-finder.  It finds the best associated match
-      from the StAssociationMaker instance and initializes the StiKalmanTrack state with
-      the parameters from the m.c. track and the hits from the StGlobalTrack.
-    */
     StiEvaluableTrack* makeTrack(StMcTrack*);
     
 private:
-    StiEvaluableTrackSeedFinder(); //Not implemented, gotta have association maker
+    //Not implemented, gotta have association maker
+    StiEvaluableTrackSeedFinder(); 
     
     StAssociationMaker* mAssociationMaker;
     StMcEvent* mMcEvent;
     StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
-    StTpcHitFilter* mTpcHitFilter; //deep memeber, requires non-defualt assignment and copy
+    //deep memeber, requires non-defualt assignment and copy
+    StTpcHitFilter* mTpcHitFilter;
+    
     string mBuildPath;
     bool mBuilt;
 
+    unsigned int mLowerBound;
+    //Association filter.
+    BestCommonHits mBestCommon;
+    
     vector<StMcTrack*>::iterator mCurrentMc;
     vector<StMcTrack*>::iterator mBeginMc;
     vector<StMcTrack*>::iterator mEndMc;
 };
 
-//Stl utility functors
-
-class BestCommonHits
-{
-public:
-    typedef pair<StMcTrack*, StTrackPairInfo*> McToStPair_t;
-    
-    BestCommonHits();
-
-    void operator()(const McToStPair_t& rhs);
-    
-    StTrackPairInfo* pair() const {return mPair;}
-    
-private:
-    unsigned int mMostCommon;
-    StTrackPairInfo* mPair;
-};
-    
 inline void StiEvaluableTrackSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
 {
     mFactory=val;
