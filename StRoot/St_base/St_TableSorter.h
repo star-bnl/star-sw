@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.h,v 1.17 1999/05/18 17:59:22 fine Exp $
+// $Id: St_TableSorter.h,v 1.18 1999/08/09 01:38:55 fine Exp $
 // $Log: St_TableSorter.h,v $
+// Revision 1.18  1999/08/09 01:38:55  fine
+// New method GetKeyAddress has been introduced
+//
 // Revision 1.17  1999/05/18 17:59:22  fine
 // Clean up and some comments
 //
@@ -59,7 +62,7 @@ class St_TableSorter : public TNamed {
     enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
                            ,kULong, kUShort, kUChar, kChar };
     void    **m_SortIndex;    // Array of pointers to columns of the sorted table
-    Int_t     m_LastFound;    // The index ofmthe last found index within m_SortIndex
+    Int_t     m_LastFound;    // The index of the last found index within m_SortIndex
     Int_t     m_firstRow;     // first row of the table to be sorted
     Int_t     m_numberOfRows; // number of rows of the table to be sorted
     TString   m_colName;      //
@@ -150,6 +153,7 @@ class St_TableSorter : public TNamed {
  
     virtual const Text_t   *GetColumnName() const { return m_colName.Data();}
     virtual       Int_t     GetIndex(UInt_t sortedIndex) const;
+    virtual const void     *GetKeyAddress(Int_t indx) { return (m_SortIndex && indx >= 0) ?m_SortIndex[indx]:(void *)(-1);}
     virtual       Int_t     GetLastFound()  const { return m_LastFound; }
     virtual const Text_t   *GetTableName()  const;
     virtual const Text_t   *GetTableTitle() const;
