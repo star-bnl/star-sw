@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedDigitalSignalGenerator.cc,v $
+ * Revision 1.3  1999/10/06 21:53:19  long
+ * comment out one message output
+ *
  * Revision 1.2  1999/10/04 15:56:55  long
  * add 10 to 8 bit transformation
  *
@@ -63,10 +66,9 @@ StTrsParameterizedDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSe
 
 
 unsigned char StTrsParameterizedDigitalSignalGenerator::do10to8Translation(int index)const
-{    int i;
+{   
    
-     if(index<-1.0e-30)
-       {cerr<<"wrong adc!!! StTrsParameterizeDigitalSignalGenerator::do10to8Translationin()  "<<index<<endl;cin>>i;}
+     if(index<-1.0e-30)index=0;
      if(index>1023)index=1023;
     
    
@@ -116,7 +118,7 @@ void StTrsParameterizedDigitalSignalGenerator::digitizeSignal()
 		//PR(*mTimeSequenceIterator);
 	     
 
-	       
+	        
 		int temporary_digitalAmplitude =
 		   (int) (mTimeSequenceIterator->amplitude()/mSimpleConversion);
             
@@ -134,10 +136,7 @@ void StTrsParameterizedDigitalSignalGenerator::digitizeSignal()
 
 		                unsigned char digitalAmplitude = 
 			 do10to8Translation(temporary_digitalAmplitude);
-			       	int iii;
-				 iii=(int)digitalAmplitude;
-				// if(iii>0){ cout<<iii<<  "    adc   "<<currentTimeBin<<endl;
-				 //	cin>>iii;}
+			       
 		if(digitalAmplitude>255) digitalAmplitude = 255;
 
 		if(digitalAmplitude != 0) {
