@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.12 2001/05/04 14:20:05 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.13 2001/05/09 02:23:06 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.13  2001/05/09 02:23:06  caines
+ * Fix axis limits
+ *
  * Revision 1.12  2001/05/04 14:20:05  caines
  * Improved historgramming
  *
@@ -189,7 +192,7 @@ Int_t StSvtHitMaker::Init()
     mAnodeHitResolution = new TH1F("hitARes","Delta Z for Hits",1000,-2.0,2.0);
     mXHitResolution = new TH1F("hitXRes","Delta X for Hits",1000,-0.1,0.1);
     mYHitResolution = new TH1F("hitYRes","Delta Y for Hits",1000,-0.1,0.1);
-    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-0.1,-0.1);		      
+    mZHitResolution = new TH1F("hitZRes","Delta Z for Hits",1000,-0.1,0.1);		      
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",1000,-2.0,2.0,1000,-2.0,2.0);
     
     mTimeHitResolution->SetXTitle("delta X (timebucket)");
