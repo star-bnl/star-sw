@@ -34,7 +34,7 @@
       External        AgFHIT0,ISLFLAG
 *   
 *
-      if (AgFHIT0('TPCE','TPAD') .ne. 0) return
+      if (AgFHIT0(Cset,Cdet) .ne. 0) return
       Iprin = ISLFLAG('G2TM','PRIN')
 
       call vzero (QQ,   Lnmax)
@@ -143,7 +143,7 @@
 *    - - - - - - - - -
       Integer         G2R_GET_HIT,G2T_VOLUME_ID,AgFHIT1,ih,jtra,i,k
       real            hits(nmh)
-      integer         NUMBV(Nmh)
+      integer         NUMBV(Nmh)/Nmh*0/
       character*3     Csys
 
          i=AgFHIT1(ih,jtra,numbv,hits)

@@ -51,7 +51,6 @@
          g2t_svt_hit(i).next_tr_hit_p = g2t_track(trac).hit_svt_p
          g2t_track(trac).hit_svt_p    = i
          g2t_track(trac).n_svt_hit    = g2t_track(trac).n_svt_hit + 1
-
       enddo    
 
       RETURN

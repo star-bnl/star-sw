@@ -29,22 +29,22 @@
 #include "TGTRA.h"
 #include "TCTUB.h"
 #include "TGeant3.h"
+#include "St_g2t_run_Table.h"
+#include "St_g2t_event_Table.h"
+#include "St_g2t_gepart_Table.h"
+#include "St_g2t_vertex_Table.h"
+#include "St_g2t_track_Table.h"
+#include "St_g2t_svt_hit_Table.h"
+#include "g2r/St_g2t_get_kine_Module.h"
+#include "g2r/St_g2t_tpc_Module.h"
+#include "g2r/St_g2t_ftp_Module.h"
+#include "g2r/St_g2t_svt_Module.h"
 #include "St_g2t_ctf_hit_Table.h"
 #include "St_g2t_eem_hit_Table.h"
 #include "St_g2t_emc_hit_Table.h"
 #include "St_g2t_esm_hit_Table.h"
-#include "St_g2t_event_Table.h"
-#include "St_g2t_ftp_hit_Table.h"
-#include "St_g2t_gepart_Table.h"
-#include "St_g2t_hits_Table.h"
 #include "St_g2t_mwc_hit_Table.h"
-#include "St_g2t_run_Table.h"
 #include "St_g2t_smd_hit_Table.h"
-#include "St_g2t_svt_hit_Table.h"
-#include "g2r/St_g2t_get_kine_Module.h"
-#include "g2r/St_g2t_tpc_Module.h"
-#include "St_g2t_track_Table.h"
-#include "St_g2t_vertex_Table.h"
 #include "St_g2t_vpd_hit_Table.h"
 
 common_gcbank *cbank;
@@ -132,31 +132,44 @@ Int_t St_geant_Maker::Init(){
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Make(){
-  if (!m_DataSet->GetList()) {
-    Int_t nhits;
-    gtrig();
-    St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
-    m_DataSet->Add(g2t_vertex);
-    St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
-    m_DataSet->Add(g2t_track);
-    Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
-    
-    gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
-    St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
-    m_DataSet->Add(g2t_tpc_hit);
-    
-    Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
+Int_t St_geant_Maker::Make()
+{ if (!m_DataSet->GetList()) 
+ {
+  Int_t nhits;
+  gtrig();
+  St_g2t_vertex  *g2t_vertex  = new St_g2t_vertex("g2t_vertex",cnum->nvertx);
+  m_DataSet->Add(g2t_vertex);
+  St_g2t_track   *g2t_track   = new St_g2t_track ("g2t_track",cnum->ntrack);
+  m_DataSet->Add(g2t_track);
+  Int_t Res_kine = g2t_get_kine(g2t_vertex,g2t_track);
 
+  gfnhit_ ("SVTH","SVTD", &nhits, 4,4);
+  if (nhits>0) 
+  { St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
+    m_DataSet->Add(g2t_svt_hit);
+    Int_t Res_svt = g2t_svt(g2t_track,g2t_svt_hit);
+  }
+  gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
+  if (nhits>0)
+  { St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
+    m_DataSet->Add(g2t_tpc_hit);
+    Int_t Res_tpc = g2t_tpc(g2t_track,g2t_tpc_hit);
+  }
+  gfnhit_ ("FTPH","FSEC", &nhits, 4,4);
+  if (nhits>0)
+  { St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
+    m_DataSet->Add(g2t_ftp_hit);
+    Int_t Res_ftp = g2t_ftp(g2t_track,g2t_ftp_hit);
+  }
 
 #if 0
-    Char_t *g2t = "g2t_";
-    Int_t  narg = 0;
-    addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
-    if (address) csjcal(&address,&narg);
+  Char_t *g2t = "g2t_";
+  Int_t  narg = 0;
+  addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
+  if (address) csjcal(&address,&narg);
 #endif
-  }
-  return kStOK;
+ }
+ return kStOK;
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
@@ -167,7 +180,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.9 1999/01/28 17:10:33 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.10 1999/02/02 01:03:39 nevski Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
