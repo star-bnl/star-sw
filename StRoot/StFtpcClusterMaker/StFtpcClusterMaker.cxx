@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.67  2004/05/24 13:35:32  jcs
+// create a new StFtpcSoftwareMonitor if none exists
+//
 // Revision 1.66  2004/05/19 17:44:46  oldi
 // For simulated data the ftpcHitCollection inside StEvent doesn't exist yet.
 // We have to create it on our own. Additional check for ftpcHitCollection
@@ -258,6 +261,9 @@ extern "C" void gufld(float *, float *);
 #include "StEvent.h"
 #include "StFtpcHitCollection.h"
 
+#include "StSoftwareMonitor.h"
+#include "StFtpcSoftwareMonitor.h"
+
 ClassImp(StFtpcClusterMaker)
 
   //_____________________________________________________________________________
@@ -393,6 +399,15 @@ Int_t StFtpcClusterMaker::Make()
       mCurrentEvent->setFtpcHitCollection(mFtpcHitColl);
     }
   } else mFtpcHitColl = 0;
+
+  StFtpcSoftwareMonitor* ftpcMon;
+  if (mCurrentEvent->softwareMonitor()) {
+     ftpcMon = mCurrentEvent->softwareMonitor()->ftpc();
+     if (!ftpcMon){
+	ftpcMon = new StFtpcSoftwareMonitor();
+        mCurrentEvent->softwareMonitor()->setFtpcSoftwareMonitor(ftpcMon);
+     }
+  }      
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -601,6 +616,7 @@ Int_t StFtpcClusterMaker::Make()
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
                                                        dbReader,
+						       ftpcMon,
 						       mHitArray,
 						       m_hitsvspad,
 						       m_hitsvstime,
