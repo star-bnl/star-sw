@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.81 1999/12/22 16:22:45 fine Exp $
+// $Id: StMaker.cxx,v 1.82 1999/12/28 21:23:22 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -734,7 +734,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
  //               = kTRUE by default
 
  // Define the type of the OS
-  TString STAR= stardir;
+  TString STAR = stardir;
   TString delim = ":";
   Bool_t NT=kFALSE;
 
@@ -748,7 +748,9 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   TString classname = IsA()->GetName();
 
-  if (!gHtml) gHtml = new THtml;
+  THtml thisHtml;
+
+//  if (!gHtml) gHtml = new THtml;
 
   // Define the set of the subdirectories with the STAR class sources
   //                       | ----------------------  | ------------  | ------------------ |
@@ -798,16 +800,18 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
            printf(" Failed to load the share library %s for class %s\n",so,cl);
     }
   }
+
+//  cout << lookup.Data() << endl << endl;
   
 //  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
 
   lookup.ReplaceAll("//StRoot/","/StRoot/");
-  gHtml->SetSourceDir(lookup);
+  thisHtml.SetSourceDir(lookup);
 
   TString odir = outdir;
 //  odir.ReplaceAll("$(STAR)",STAR);
   gSystem->ExpandPathName(odir);
-  gHtml->SetOutputDir(odir);
+  thisHtml.SetOutputDir(odir);
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
@@ -830,17 +834,18 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   static Bool_t makeAllAtOnce = kTRUE;
   if (makeAllAtOnce && baseClasses) { 
       makeAllAtOnce = kFALSE;
-      //  gHtml->MakeAll();  // VF 10/09/99
-      for (i=0;i<nclass;i++) gHtml->MakeClass(classes[i]);
+      //  thisHtml.MakeAll();  // VF 10/09/99
+      for (i=0;i<nclass;i++) thisHtml.MakeClass(classes[i]);
+      thisHtml.MakeIndex();
 //      MakeAssociatedClassList(this, classDir.Data());
   }
 
-  if (baseClasses)    MakeAssociatedClassList(this, classDir.Data());
+  if (baseClasses) {gHtml= &thisHtml;  MakeAssociatedClassList(this, classDir.Data()); }
   // Create the doc for this class
   printf(" Making html for <%s>\n",classname.Data());
-  gHtml->MakeClass((Char_t *)classname.Data());
+  thisHtml.MakeClass((Char_t *)classname.Data());
   // Create the associated classes docs
-//   Loop on all makers
+  //   Loop on all makers
    TList *tl = GetMakeList();
    if (tl) {
      TIter nextMaker(tl);
@@ -848,12 +853,6 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
      while ((maker = (StMaker*)nextMaker())) 
          maker->MakeDoc(stardir,outdir,kFALSE);
    }
-  static Bool_t makeIndexAtOnce = kTRUE;
-  if (makeIndexAtOnce) {
-     makeIndexAtOnce = kFALSE;
-     gHtml->MakeIndex();
-  }
-
 }
 
 //_____________________________________________________________________________
@@ -940,6 +939,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.82  1999/12/28 21:23:22  fine
+// StChain::MakeDoc corrections
+//
 // Revision 1.81  1999/12/22 16:22:45  fine
 // MakeIndex for html doc introduced. Thankls Art
 //
