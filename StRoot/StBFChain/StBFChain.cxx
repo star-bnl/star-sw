@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.368 2003/12/12 03:54:39 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.369 2003/12/13 22:49:54 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1450,9 +1450,13 @@ Int_t StBFChain::Instantiate()
 	    // bit 0  =   do GAIN_CORRECTION
 	    // bit 1  =   do NOISE_ELIM
 	    // bit 2  =   do ASIC_THRESHOLDS
-	    if ( GetOption("fcf")   )    tcpdaqMk->SetCorrection(0x0);
-	    else                         tcpdaqMk->SetCorrection(0x7);
-	    if ( GetOption("Trs")   )    tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN 
+	    if ( GetOption("fcf")   ){
+	      if ( GetOption("Trs")   )  tcpdaqMk->SetCorrection(0x5); // ASIC + GAIN 
+	      else                       tcpdaqMk->SetCorrection(0x0); // fcf && ! trs => no corrections
+	    } else {
+	      tcpdaqMk->SetCorrection(0x7);
+	    }
+
 
 	    (void) printf("StBFChain:: maker==St_tpcdaq_Maker SetDAQFlag(%d) SetMode(%d) SetCorrection(%d)\n",
 			  DMode,tcpdaqMk->GetMode(),tcpdaqMk->GetCorrection());
