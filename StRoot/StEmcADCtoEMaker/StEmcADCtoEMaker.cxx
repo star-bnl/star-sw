@@ -1,8 +1,8 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.14 2001/10/26 16:14:41 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.15 2001/10/26 16:15:11 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.14  2001/10/26 16:14:41  suaide
+// Revision 1.15  2001/10/26 16:15:11  suaide
 // small fix
 //
 // Revision 1.11  2001/10/24 23:06:54  suaide
@@ -197,7 +197,7 @@ void StEmcADCtoEMaker::GetStatus(Int_t det)
           status[i-1]=0;
           if (i>=1861 && i<=2340) status[i-1]=1; // initial 2001 configuration
           if (i>=2021 && i<=2100) status[i-1]=0; // initial 2001 configuration
-          if (i>=1861 && i<=2020)  // remove PTM 4
+          if (i>=1861 && i<=2020)  // remove crate 0x12
           {
             if(d>=20011015 && d<=20011020) status[i-1]=0;
           }
