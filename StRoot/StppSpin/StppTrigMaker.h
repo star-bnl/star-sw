@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $
+// $Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $
 // $Log: StppTrigMaker.h,v $
+// Revision 1.3  2001/04/10 16:28:54  perev
+// ClassDef(,1) -> "ClassDef ( ,0 )
+//
 // Revision 1.2  2001/02/28 19:06:13  balewski
 // some reorganizations
 //
@@ -61,9 +64,9 @@ class StppTrigMaker : public StMaker
   int getGeneratedLP(float &, int&, int&);
   void addMiniDst();
 
-  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $";
  
-  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $";
 
  protected:  //....................................................
   
@@ -80,9 +83,9 @@ class StppTrigMaker : public StMaker
    virtual Int_t  Make();
    int  decision ; // see description 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: StppTrigMaker.h,v 1.2 2001/02/28 19:06:13 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StppTrigMaker.h,v 1.3 2001/04/10 16:28:54 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    
-   ClassDef(StppTrigMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StppTrigMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
