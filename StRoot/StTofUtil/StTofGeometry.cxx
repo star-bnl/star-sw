@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.9 2004/06/09 21:26:32 dongx Exp $
+ * $Id: StTofGeometry.cxx,v 1.10 2004/06/10 15:53:50 dongx Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,10 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.10  2004/06/10 15:53:50  dongx
+ * -head file "StHelixD.hh" included
+ * -simplify the macro definition
+ *
  * Revision 1.9  2004/06/09 21:26:32  dongx
  * add function projTrayVector(..) to increase the matching speed
  *
@@ -759,7 +763,7 @@ float StTofGeometry::slatPhiPosition(StThreeVectorD* hitPoint){
 
 //---------------------------------------------------------------------------
 // estimate the possible projection on the TOF tray
-Bool_t StTofGeometry::projTrayVector(const StHelixD &helix, IntVec &trayVec) const {
+Bool_t StTofGeometry::projTrayVector(const StHelixD &helix, idVector &trayVec) const {
 
   trayVec.clear();
   double R_tof = 220.;
