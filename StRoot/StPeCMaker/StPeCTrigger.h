@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.4 2002/03/19 22:23:54 meissner Exp $
+// $Id: StPeCTrigger.h,v 1.5 2002/12/16 23:04:02 yepes Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.5  2002/12/16 23:04:02  yepes
+// Field comes in KGauss and should be passed to routines in Teslas
+// problem pointed out by Vladimir
+//
 // Revision 1.4  2002/03/19 22:23:54  meissner
 // New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
 //
@@ -28,6 +32,7 @@
 #include "TObject.h"
 #include "TClonesArray.h"
 #include "StPeCL0.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 class StEvent ;
 
 class StPeCTrigger: public TObject {
@@ -38,6 +43,7 @@ public:
   ~StPeCTrigger();
   void  clear ( ) ;
   Int_t process(StEvent *event);
+  Int_t process(StMuDst* mudst);
 
   Int_t  p4 ; // p4 with swapt weigthts
   Int_t  p4c ;

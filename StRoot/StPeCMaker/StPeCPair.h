@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.4 2001/02/21 20:42:14 yepes Exp $
+// $Id: StPeCPair.h,v 1.5 2002/12/16 23:04:02 yepes Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.5  2002/12/16 23:04:02  yepes
+// Field comes in KGauss and should be passed to routines in Teslas
+// problem pointed out by Vladimir
+//
 // Revision 1.4  2001/02/21 20:42:14  yepes
 // Add ctb signals to tree
 //
@@ -38,6 +42,8 @@
 #include "SystemOfUnits.h"
 #include "StPeCSpec.h"
 #include "StPeCTrack.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 
 class StPeCPair : public TObject {
 
@@ -48,14 +54,31 @@ public:
 
   void                            calculatePair4Momentum( ) ;
 #ifndef __CINT__
+                                  StPeCPair ( StMuTrack *trk1, StMuTrack *trk2, 
+				              Bool_t primaryFlag, StMuEvent* event );
+
                                   StPeCPair ( StTrack *trk1, StTrack *trk2, 
 				              Bool_t primaryFlag, StEvent* event );
 
   Int_t                           fill ( Bool_t primaryFlag, StEvent* event ) ;
+  Int_t                           fill ( Bool_t primaryFlag, StMuEvent* event ) ;
+  Int_t                           fill ( Bool_t primaryFlag, StEventSummary* summary,
+                                         StThreeVectorF& p1, StPhysicalHelixD& h1, short charge1,
+                                         StThreeVectorF& p2, StPhysicalHelixD& h2, short charge2,    
+                                         StThreeVectorF& primaryVertexPosition ) ;
+
   void                            setTrack1(StTrack* trk);
   void                            setTrack2(StTrack* trk);
+
+  void                            setTrack1(StMuTrack* trk);
+  void                            setTrack2(StMuTrack* trk);
+
   StTrack*                        getTrack1();
   StTrack*                        getTrack2();
+
+  StMuTrack*                      getMuTrack1();
+  StMuTrack*                      getMuTrack2();
+
   StLorentzVectorF                getPair4Momentum(StPeCSpecies pid) const;
 #endif /*__CINT__*/
   Int_t                           getSumCharge() const;
@@ -99,6 +122,8 @@ private:
 #ifndef __CINT__
   StTrack*                        track1; //!
   StTrack*                        track2; //!
+  StMuTrack*                      muTrack1; //!
+  StMuTrack*                      muTrack2; //!
 #endif /*__CINT__*/
 
   ClassDef(StPeCPair,1)

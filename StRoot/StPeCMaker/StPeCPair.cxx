@@ -1,7 +1,12 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.7 2002/03/19 22:23:49 meissner Exp $
+// $Id: StPeCPair.cxx,v 1.8 2002/12/16 23:04:02 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.8  2002/12/16 23:04:02  yepes
+// Field comes in KGauss and should be passed to routines in Teslas
+// problem pointed out by Vladimir
+//
+// 
 // Revision 1.7  2002/03/19 22:23:49  meissner
 // New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
 //
@@ -42,14 +47,33 @@ StPeCPair::StPeCPair ( StTrack* trk1, StTrack* trk2,
    track2 = trk2;
    fill ( primaryFlag, event ) ;
 }
+
+StPeCPair::StPeCPair ( StMuTrack* trk1, StMuTrack* trk2, 
+                       Bool_t primaryFlag, StMuEvent* event ) {
+   muTrack1 = trk1;
+   muTrack2 = trk2;
+   fill ( primaryFlag, event ) ;
+}
+
 void StPeCPair::setTrack1(StTrack* trk) {
   track1 = trk;
 }
 void StPeCPair::setTrack2(StTrack* trk) {
   track2 = trk;
 }
+
+void StPeCPair::setTrack1(StMuTrack* trk) {
+  muTrack1 = trk;
+}
+void StPeCPair::setTrack2(StMuTrack* trk) {
+  muTrack2 = trk;
+}
+
 StTrack* StPeCPair::getTrack1() { return track1; }
 StTrack* StPeCPair::getTrack2() { return track2; }
+
+StMuTrack* StPeCPair::getMuTrack1() { return muTrack1; }
+StMuTrack* StPeCPair::getMuTrack2() { return muTrack2; }
 
 StLorentzVectorF StPeCPair::getPair4Momentum(StPeCSpecies pid) const{
   StLorentzVectorF p4pair(0.0,0.0,0.0,0.0);
@@ -65,35 +89,12 @@ StLorentzVectorF StPeCPair::getPair4Momentum(StPeCSpecies pid) const{
 }
 #endif /*__CINT__*/
 
-Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
-//
-//
-   pCharge           = track1->geometry()->charge()+track2->geometry()->charge();
 
-   StThreeVectorF p1 ; 
-   StThreeVectorF p2 ;
-   StPhysicalHelixD h1 ;
-   StPhysicalHelixD h2 ;
-//
-//  If charges have different sign
-//  1=+ and 2=-
-//
-   if ( track1->geometry()->charge() > 0 && track2->geometry()->charge() < 0 ) {
-      p1 = track1->geometry()->momentum();
-      p2 = track2->geometry()->momentum();
-      //   if ( !primaryFlag ) {
-      h1 = track1->geometry()->helix() ;
-      h2 = track2->geometry()->helix() ;
-      // }
-   }
-   else {
-     p1 = track2->geometry()->momentum();
-     p2 = track1->geometry()->momentum();
-     // if ( !primaryFlag ) {
-     h1 = track2->geometry()->helix() ;
-     h2 = track1->geometry()->helix() ;
-     // }
-   }
+
+Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary, 
+                        StThreeVectorF& p1, StPhysicalHelixD& h1, short charge1,
+                        StThreeVectorF& p2, StPhysicalHelixD& h2, short charge2,  
+                        StThreeVectorF& primaryVertexPosition ) {
 //
 //  Check whether tracks are primary or secondary
 //  if they are secondary find point of closest approach
@@ -108,18 +109,18 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    //  if ( !primaryFlag ) {
    pairD dcaLengths ;
    dcaLengths = h1.pathLengths(h2);
-   StEventSummary* summary = 0 ;
-   summary = event->summary();
+// StEventSummary* summary = 0 ;
+// summary = event->summary();
    Float_t bField ;
    if ( summary != 0 ) bField = summary->magneticField();
-   else bField = 0.25 ;
+   else bField = 2.5 ;
+   printf ( "bField %f tesla %f \n", bField, tesla ) ;
 
    // The momentum we do not need for the primary pair ....
    if ( !primaryFlag ) {
-      p1 = h1.momentumAt(dcaLengths.first, bField*tesla*0.1 ) ;
-      p2 = h2.momentumAt(dcaLengths.second, bField*tesla*0.1 ) ;
+      p1 = h1.momentumAt(dcaLengths.first, bField*0.1 ) ;
+      p2 = h2.momentumAt(dcaLengths.second, bField*0.1 ) ;
    }
-
 
    StThreeVectorD x1 = h1.at(dcaLengths.first);
    StThreeVectorD x2 = h2.at(dcaLengths.second);
@@ -135,13 +136,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    zV0   = xMean.z();
    
    StThreeVectorD pSum  = p1+p2 ;
-   StPhysicalHelixD v0Helix ( pSum, xMean, 10.*bField/tesla, 100000./GeV ) ;
-   
-   StPrimaryVertex* vtx = 0;
-   vtx = event->primaryVertex();
-   if ( vtx ) {
-     pV0Dca = v0Helix.distance ( vtx->position() ) ;
-   }
+   StPhysicalHelixD v0Helix ( pSum, xMean, 0.1*bField, 100000./GeV ) ;
+   pV0Dca = v0Helix.distance ( primaryVertexPosition ) ;
    
 
    StThreeVectorF p = p1 + p2 ;
@@ -184,7 +180,8 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
    Float_t mInv, cosThetaStar ;
    StLorentzVectorF FourMomentum ; 
    StPeCSpec* species ;
-   for ( int i = 0 ; i < nSpecies ; i++ ) {
+   for ( int i = 0 ; i < nSpecies ; i++ )
+	   {
       if ( i == pion )    {
          mptcle = pion_plus_mass_c2;
 	 species = &pionH ;
@@ -210,7 +207,6 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
  	continue ;
       }
       
-
       StLorentzVectorF p4pair(0.0,0.0,0.0,0.0);
       Float_t          e1 = p1.massHypothesis(mptcle);
       Float_t          e2 = p2.massHypothesis(mptcle);
@@ -219,7 +215,6 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
       p4pair = pf1 + pf2;
       FourMomentum = p4pair ;
       mInv = p4pair.m() ;
-
 
   // ThetaStar is the angle between of one of the daughter tracks
   // and the Z-axis in the Helicity frame. The Helicity frame is
@@ -249,15 +244,120 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
       species->yRap         = FourMomentum.rapidity() ;
       species->Mom4         = FourMomentum ;
       species->cosThetaStar = cosThetaStar ;
-
    }
 //
 //  fill our local Track class
 #ifndef __CINT__
    Int_t prim = 1 ;
-   tr1.set(prim,track1);
-   tr2.set(prim,track2);
+	if (track1 && track2)
+	{
+	   tr1.set(prim,track1);
+	   tr2.set(prim,track2);
+	}
+	else if (muTrack1 && muTrack2)
+	{
+	   tr1.set(prim,muTrack1);
+	   tr2.set(prim,muTrack2);
+	}
 #endif
+
+
+   return 0 ;
+}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Int_t StPeCPair::fill ( Bool_t primaryFlag, StMuEvent* event  ) {
+
+   pCharge           = muTrack1->charge()+muTrack2->charge();
+
+   StThreeVectorF p1 ; 
+   StThreeVectorF p2 ;
+   StPhysicalHelixD h1 ;
+   StPhysicalHelixD h2 ;
+   short charge1, charge2 ;
+//
+//  If charges have different sign
+//  1=+ and 2=-
+//
+   if ( muTrack1->charge() > 0 && muTrack2->charge() < 0 ) {
+      p1      = muTrack1->momentum();
+      p2      = muTrack2->momentum();
+      charge1 = muTrack1->charge();
+      charge2 = muTrack2->charge();
+      h1      = muTrack1->helix() ;
+      h2      = muTrack2->helix() ;
+   }
+   else {
+      p1      = muTrack2->momentum();
+      p2      = muTrack1->momentum();
+      charge1 = muTrack2->charge();
+      charge2 = muTrack1->charge();
+      h1      = muTrack2->helix() ;
+      h2      = muTrack1->helix() ;
+   }
+
+   StThreeVectorF vtx = event->primaryVertexPosition() ;
+
+   fill ( primaryFlag, &(event->eventSummary()), 
+	  p1, h1, charge1, p2, h2, charge2, vtx ) ; 
+   
+   return 0 ;
+
+}
+Int_t StPeCPair::fill ( Bool_t primaryFlag, StEvent* event  ) {
+//
+   pCharge           = track1->geometry()->charge()+track2->geometry()->charge();
+
+   StThreeVectorF p1 ; 
+   StThreeVectorF p2 ;
+   StPhysicalHelixD h1 ;
+   StPhysicalHelixD h2 ;
+   short charge1, charge2 ;
+//
+//  If charges have different sign
+//  1=+ and 2=-
+//
+   if ( track1->geometry()->charge() > 0 && track2->geometry()->charge() < 0 ) {
+      p1      = track1->geometry()->momentum();
+      p2      = track2->geometry()->momentum();
+      charge1 = track1->geometry()->charge();
+      charge2 = track2->geometry()->charge();
+      //   if ( !primaryFlag ) {
+      h1 = track1->geometry()->helix() ;
+      h2 = track2->geometry()->helix() ;
+      // }
+   }
+   else {
+      p1 = track2->geometry()->momentum();
+      p2 = track1->geometry()->momentum();
+      charge1 = track2->geometry()->charge();
+      charge2 = track1->geometry()->charge();
+      // if ( !primaryFlag ) {
+      h1 = track2->geometry()->helix() ;
+      h2 = track1->geometry()->helix() ;
+      // }
+   }
+
+   StEventSummary* summary = 0 ;
+   StPrimaryVertex* vtx = 0;
+   vtx = event->primaryVertex();
+   summary = event->summary();
+   StThreeVectorF vtxP  ;
+   //
+   //  If there is no primary vertex assume (0,0,0)
+   //
+   if ( vtx ) vtxP = vtx->position() ;
+   else {
+      vtxP.setX(0.);
+      vtxP.setY(0.);
+      vtxP.setZ(0.);
+   }
+
+   fill ( primaryFlag, summary, p1, h1, charge1, p2, h2, charge2, vtxP ) ;
+
+
    return 0 ;
 }
 
