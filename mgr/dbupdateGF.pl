@@ -101,7 +101,7 @@ print "Total files: ".@hpssGeantFiles."\n";
 ###### Find GEANT files in Files Catalog
  &StDbProdConnect();
 
-# $sql="delete from $cpFileCatalogT WHERE dataset = 'auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on' ";
+# $sql="delete from $cpFileCatalogT WHERE dataset = 'auau200/mevsim/vanilla_central/year_1h/hadronic_on' ";
 # $cursor =$dbh->prepare($sql)
 #    || die "Cannot prepare statement: $DBI::errstr\n";
 # $cursor->execute;
