@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.6 1999/06/24 17:33:01 fisyak Exp $
+ * $Id: StVertex.h,v 1.7 1999/09/10 09:16:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.6  1999/06/24 17:33:01  fisyak
- * Replace Collection by value to Collection by pointer for TBrowser
+ * Revision 1.7  1999/09/10 09:16:12  ullrich
+ * Made position() and positionError() const methods.
  *
  * Revision 1.7  1999/09/10 09:16:12  ullrich
  * Made position() and positionError() const methods.
@@ -79,8 +79,8 @@ protected:
 
     virtual StVertexType                type() {return mType;};
     virtual StVecPtrGlobalTrack&        daughters() {return *mDaughters;};
-    virtual const StThreeVectorF& position(){ return mPosition; } ;
-    virtual const StThreeVectorF& positionError(){ return mPositionError; };
+    virtual UInt_t                numberOfDaughters() {return mDaughters ? mDaughters->size() : 0; };
+    virtual StGlobalTrack*              daughter(UInt_t);
     virtual const StGlobalTrack*        parent(){ return mParent; };
     virtual const StThreeVectorF& position() const{ return mPosition; } ;
     virtual const StThreeVectorF& positionError() const { return mPositionError; };
