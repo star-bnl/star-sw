@@ -45,7 +45,7 @@ void EEstarTrig :: clear() {
 //--------------------------------------------------
 //
 //--------------------------------------------------
-void EEstarTrig :: print(FILE *fd,  int k) const{
+void EEstarTrig :: print(int k, FILE *fd) const{
   // printf("EEstarTrig:: print0() %d %d %d \n",bX48hi,bX48lo, bX7bit);
   unsigned long long int hi=bX48hi;
   unsigned long long int lo=bX48lo;
