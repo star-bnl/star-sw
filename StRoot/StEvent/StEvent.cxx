@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.13 2000/05/24 15:46:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.12  2000/05/22 21:47:12  ullrich
- * Added RICH collection and related methods.
+ * Revision 2.13  2000/05/24 15:46:05  ullrich
+ * Added setSummary() method.
  *
  * Revision 2.15  2000/09/06 22:34:12  ullrich
  * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
@@ -78,8 +78,8 @@
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.13 2000/05/24 15:46:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.13 2000/05/24 15:46:05 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
@@ -108,7 +108,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.12 2000/05/22 21:47:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.13 2000/05/24 15:46:05 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -372,6 +372,13 @@ StEvent::setTriggerMask(ULong_t val) { mTriggerMask = val; }
     static_cast<StEventInfo*>(mContent[mInfo])->setBunchCrossingNumber(val);
 StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }
     info->setBunchCrossingNumber(val, i);
+}
+
+    if (mContent[mInfo]) delete mContent[mInfo];
+    if (mSummary) delete mSummary;
+    mSummary = val;
+{
+    _lookupAndSet(val, mContent);
 }
 
     if (mContent[mSummary]) delete mContent[mSummary];
