@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackGeometry.cxx,v 2.4 2004/10/17 03:35:10 perev Exp $
+ * $Id: StTrackGeometry.cxx,v 2.5 2004/10/20 18:55:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.cxx,v $
+ * Revision 2.5  2004/10/20 18:55:13  ullrich
+ * Name of enum changed: StStarMaxR(Z) now StStarMaxTrackRangeR(Z).
+ *
  * Revision 2.4  2004/10/17 03:35:10  perev
  * Error check improved
  *
@@ -30,7 +33,7 @@
 
 ClassImp(StTrackGeometry)
 
-static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.4 2004/10/17 03:35:10 perev Exp $";
+static const char rcsid[] = "$Id: StTrackGeometry.cxx,v 2.5 2004/10/20 18:55:13 ullrich Exp $";
 
 StTrackGeometry::StTrackGeometry() {/* noop */}
 
@@ -43,7 +46,7 @@ int StTrackGeometry::bad() const
   StPhysicalHelixD hh = helix();
   int ierr=hh.bad();
   if (ierr) 				 return  1+100*ierr;
-  if (fabs(hh.origin().z())  >kStarMaxZ) return 21;
-  if (     hh.origin().perp()>kStarMaxR) return 31;
+  if (fabs(hh.origin().z())  >kStarMaxTrackRangeZ) return 21;
+  if (     hh.origin().perp()>kStarMaxTrackRangeR) return 31;
   return 0;
 }
