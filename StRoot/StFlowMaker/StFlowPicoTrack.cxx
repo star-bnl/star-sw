@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.6 2000/12/12 20:22:06 posk Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.7 2001/07/24 22:29:37 snelling Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -8,8 +8,6 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include <iostream.h>
-#include <math.h>
 #include "StFlowPicoTrack.h"
 
 ClassImp(StFlowPicoTrack)
@@ -30,13 +28,25 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
   mPhiGlobal = track->PhiGlobal();
   mCharge    = track->Charge();
   mDca       = track->Dca();
+  mDcaSigned = track->DcaSigned();
   mDcaGlobal = track->DcaGlobal();
   mChi2      = track->Chi2();
   mFitPts    = track->FitPts();
   mMaxPts    = track->MaxPts();
+  mNhits     = track->Nhits();
+  mFirstPointX  = track->FirstPointX();
+  mFirstPointY  = track->FirstPointY();
+  mFirstPointZ  = track->FirstPointZ();
+  mTrackLength = track->TrackLength();
   mMostLikelihoodPID  = track->MostLikelihoodPID();
   mMostLikelihoodProb = track->MostLikelihoodProb();
   mExtrapTag = track->ExtrapTag();
+  mElectronPositronProb = track->ElectronPositronProb();
+  mPionPlusMinusProb = track->PionPlusMinusProb();
+  mKaonPlusMinusProb = track->KaonPlusMinusProb();
+  mProtonPbarProb = track->ProtonPbarProb();
+  mTopologyMap0 = track->TopologyMap0();
+  mTopologyMap1 = track->TopologyMap1();
 
   pid = track->PidPion();
   if (fabs(pid) > maxInt) pid = maxInt; mPidPion     = (Int_t)(pid*1000.); 
@@ -49,12 +59,14 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
   pid = track->PidElectron();
   if (fabs(pid) > maxInt) pid = maxInt; mPidElectron = (Int_t)(pid*1000.); 
 
-  mTopology = track->mTopology;
 }
 
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.7  2001/07/24 22:29:37  snelling
+// First attempt to get a standard root pico file again, added variables
+//
 // Revision 1.6  2000/12/12 20:22:06  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).

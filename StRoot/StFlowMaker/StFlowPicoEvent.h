@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.h,v 1.8 2001/05/22 20:17:54 posk Exp $
+// $Id: StFlowPicoEvent.h,v 1.9 2001/07/24 22:29:32 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -10,11 +10,11 @@
 
 #ifndef StFlowPicoEvent__h
 #define StFlowPicoEvent__h
-#include <iostream.h>
-#include "StFlowPicoTrack.h"
-#include "TObject.h"
-#include "TClonesArray.h"
 
+#include "TObject.h"
+#include "StFlowPicoTrack.h"
+
+class TClonesArray;
 //-----------------------------------------------------------
 
 class StFlowPicoEvent : public TObject {
@@ -30,6 +30,7 @@ class StFlowPicoEvent : public TObject {
 
   Int_t         Version()    const { return mVersion; }
   UInt_t        OrigMult()   const { return mOrigMult; }
+  UInt_t        UncorrMult() const { return mUncorrMult; }
   UInt_t        MultEta()    const { return mMultEta; }
 
   UInt_t        Centrality() const { return mCentrality; }
@@ -38,6 +39,9 @@ class StFlowPicoEvent : public TObject {
   Float_t       VertexZ()    const { return mVertexZ; }
   Int_t         EventID()    const { return mEventID; }
   Int_t         RunID()      const { return mRunID; }
+  Double_t      CenterOfMassEnergy() const { return mCenterOfMassEnergy; }
+  Short_t       BeamMassNumberEast() const { return mBeamMassNumberEast; }
+  Short_t       BeamMassNumberWest() const { return mBeamMassNumberWest; } 
   Float_t       CTB()        const { return mCTB; }
   Float_t       ZDCe()       const { return mZDCe; }
   Float_t       ZDCw()       const { return mZDCw; }
@@ -46,8 +50,12 @@ class StFlowPicoEvent : public TObject {
   void SetVersion(const Int_t ver)      { mVersion = ver; }
   void SetEventID(const Int_t id)       { mEventID = id; }
   void SetRunID(const Int_t id)         { mRunID = id; }
+  void SetCenterOfMassEnergy(const Double_t cms) { mCenterOfMassEnergy = cms; }
+  void SetBeamMassNumberEast(const Short_t bme) { mBeamMassNumberEast = bme; }
+  void SetBeamMassNumberWest(const Short_t bmw) { mBeamMassNumberWest = bmw; }
   void SetNtrack(const Int_t ntrk)      { mNtrack = ntrk; }
   void SetOrigMult(const UInt_t mult)   { mOrigMult = mult; }
+  void SetUncorrMult(const UInt_t mult)   { mUncorrMult = mult; }
   void SetMultEta(const UInt_t goodtracks) { mMultEta = goodtracks; }
   void SetCentrality(const UInt_t cent) { mCentrality = cent; }
   void SetVertexPos(const Float_t x, const Float_t y, const Float_t z) { 
@@ -62,7 +70,11 @@ class StFlowPicoEvent : public TObject {
   Int_t          mNtrack;               // track number
   Int_t          mEventID;              // event ID
   Int_t          mRunID;                // run ID
+  Double_t       mCenterOfMassEnergy;   // CMS Energy 
+  Short_t        mBeamMassNumberEast;   // Mass Number of East Beam
+  Short_t        mBeamMassNumberWest;   // Mass Number of West Beam
   UInt_t         mOrigMult;             // number of tracks
+  UInt_t         mUncorrMult;           // number of h-
   UInt_t         mMultEta;              // number of tracks with 
                                         // positive flag in 1.5 units of eta
   UInt_t         mCentrality;           // centrality bin
@@ -84,6 +96,9 @@ class StFlowPicoEvent : public TObject {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.h,v $
+// Revision 1.9  2001/07/24 22:29:32  snelling
+// First attempt to get a standard root pico file again, added variables
+//
 // Revision 1.8  2001/05/22 20:17:54  posk
 // Now can do pseudorapidity subevents.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoEvent.cxx,v 1.8 2001/05/22 20:17:51 posk Exp $
+// $Id: StFlowPicoEvent.cxx,v 1.9 2001/07/24 22:29:31 snelling Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -23,6 +23,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "StFlowPicoEvent.h"
+#include "TClonesArray.h"
 
 ClassImp(StFlowPicoEvent)
 
@@ -59,6 +60,9 @@ void StFlowPicoEvent::AddTrack(StFlowPicoTrack* inputTrack) {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoEvent.cxx,v $
+// Revision 1.9  2001/07/24 22:29:31  snelling
+// First attempt to get a standard root pico file again, added variables
+//
 // Revision 1.8  2001/05/22 20:17:51  posk
 // Now can do pseudorapidity subevents.
 //
