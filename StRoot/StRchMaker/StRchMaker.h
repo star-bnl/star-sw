@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.2 1999/02/12 17:29:02 fisyak Exp $
+ * $Id: StRchMaker.h,v 1.3 1999/03/20 22:00:19 perev Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -16,6 +16,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.h,v $
+ * Revision 1.3  1999/03/20 22:00:19  perev
+ * new maker schema
+ *
  * Revision 1.2  1999/02/12 17:29:02  fisyak
  * Make it compiled
  *
@@ -36,8 +39,7 @@ class StRichReaderInterface;
    Bool_t drawinit;
 
     
-    StRchMaker(const char *name="rch",
-		 const char *title="event/raw_data/rch");
+    StRchMaker(const char *name="rch");
     virtual       ~StRchMaker();
     virtual Int_t  Init();
     virtual Int_t  Make();
