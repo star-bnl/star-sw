@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.24 2001/04/23 19:24:32 porter Exp $
+ * $Id: StDbTable.cc,v 1.25 2001/07/13 02:28:15 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.25  2001/07/13 02:28:15  porter
+ * fix problem in schema evolution for array size changes
+ *
  * Revision 1.24  2001/04/23 19:24:32  porter
  * fixed row limit & initial buffer contents for query by where clause
  *
@@ -113,6 +116,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.25  2001/07/13 02:28:15  porter
+ * fix problem in schema evolution for array size changes
+ *
  * Revision 1.24  2001/04/23 19:24:32  porter
  * fixed row limit & initial buffer contents for query by where clause
  *
@@ -532,7 +538,7 @@ StDbTable::addNRows(int numRows){
   char* p1 = newData;
   p1+=mrows*rowsize;
   memset(p1,0,numRows*rowsize);
-  delete [] mdata;
+  if(mdata)delete [] mdata;
   mdata=newData;
   mrows = newRows;
 
@@ -742,6 +748,8 @@ StDbTable::ReadElement(char*& ptr, char* name, int len, StTypeE type, StDbBuffer
 char* mchar; unsigned char* muchar; short* mshort; unsigned short* mushort; 
 int* mint; unsigned int* muint; long* mlong; unsigned long* mulong; 
 float* mfloat; double* mdouble;
+
+ int blen; // length returned from db  ### use lesser of len & blen 
  
   switch (type) {
   case Stchar:
@@ -763,7 +771,8 @@ float* mfloat; double* mdouble;
     }
   case Stuchar:
     {
-      if(buff->ReadArray(muchar,len,name)){
+      if(buff->ReadArray(muchar,blen,name)){
+	if(len>blen)len=blen;
         memcpy(ptr,muchar,len*sizeof(unsigned char));
        delete [] muchar;
       }
@@ -771,7 +780,8 @@ float* mfloat; double* mdouble;
     }
   case Stshort:
     {
-      if(buff->ReadArray(mshort,len,name)){
+      if(buff->ReadArray(mshort,blen,name)){
+	if(len>blen)len=blen;
         memcpy(ptr,mshort,len*sizeof(short));
         delete [] mshort;
       }
@@ -779,7 +789,8 @@ float* mfloat; double* mdouble;
     }
   case Stushort:
     {
-      if(buff->ReadArray(mushort,len,name)){
+      if(buff->ReadArray(mushort,blen,name)){
+	if(len>blen)len=blen;
         memcpy(ptr,mushort,len*sizeof(unsigned short));
         delete [] mushort;
       }
@@ -787,7 +798,8 @@ float* mfloat; double* mdouble;
     }
   case Stint:
     {
-      if(buff->ReadArray(mint,len,name)){
+      if(buff->ReadArray(mint,blen,name)){
+	if(len>blen)len=blen;
          memcpy(ptr,mint,len*sizeof(int));
          delete [] mint;
       }
@@ -795,7 +807,8 @@ float* mfloat; double* mdouble;
     }
   case Stuint:
     {
-      if(buff->ReadArray(muint,len,name)){
+      if(buff->ReadArray(muint,blen,name)){
+	if(len>blen)len=blen;
        memcpy(ptr,muint,len*sizeof(unsigned int));
        delete [] muint;
       }
@@ -803,7 +816,8 @@ float* mfloat; double* mdouble;
     }
   case Stlong:
     {
-      if(buff->ReadArray(mlong,len,name)){
+      if(buff->ReadArray(mlong,blen,name)){
+	if(len>blen)len=blen;
        memcpy(ptr,mlong,len*sizeof(long));
        delete [] mlong;
       }
@@ -811,7 +825,8 @@ float* mfloat; double* mdouble;
     }
   case Stulong:
     {
-      if(buff->ReadArray(mulong,len,name)){
+      if(buff->ReadArray(mulong,blen,name)){
+	if(len>blen)len=blen;
        memcpy(ptr,mulong,len*sizeof(unsigned long));
        delete [] mulong;
       }
@@ -819,7 +834,7 @@ float* mfloat; double* mdouble;
     }
   case Stfloat:
     {
-      if(buff->ReadArray(mfloat,len,name)){
+      if(buff->ReadArray(mfloat,blen,name)){
        memcpy(ptr,mfloat,len*sizeof(float));
        delete [] mfloat;
       }
@@ -827,7 +842,8 @@ float* mfloat; double* mdouble;
     }
   case Stdouble:
     {
-      if(buff->ReadArray(mdouble,len,name)){
+      if(buff->ReadArray(mdouble,blen,name)){
+	if(len>blen)len=blen;
        memcpy(ptr,mdouble,len*sizeof(double));
        delete [] mdouble;
       }
