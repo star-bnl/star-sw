@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.4 2000/06/07 09:43:17 ullrich Exp $
+ * $Id: StHit.cxx,v 2.5 2000/07/28 19:49:28 akio Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.5  2000/07/28 19:49:28  akio
+ * Change in Detector Id for Endcap SMD
+ *
  * Revision 2.4  2000/06/07 09:43:17  ullrich
  * Changed return type of flag() to UInt_t
  *
@@ -31,7 +34,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.4 2000/06/07 09:43:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.5 2000/07/28 19:49:28 akio Exp $";
 
 ClassImp(StHit)
 
@@ -130,10 +133,10 @@ StHit::detector() const
         return kEndcapEmcTowerId;
     case kEndcapEmcPreShowerId:
         return kEndcapEmcPreShowerId;
-    case kEndcapSmdEtaStripId:
-        return kEndcapSmdEtaStripId;
-    case kEndcapSmdPhiStripId:
-        return kEndcapSmdEtaStripId;
+    case kEndcapSmdUStripId:
+        return kEndcapSmdUStripId;
+    case kEndcapSmdVStripId:
+        return kEndcapSmdVStripId;
     case kZdcWestId:
         return kZdcWestId;
     case kZdcEastId:

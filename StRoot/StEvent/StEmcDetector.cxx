@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.3 2000/06/30 17:23:19 akio Exp $
+ * $Id: StEmcDetector.cxx,v 2.4 2000/07/28 19:49:27 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
- * Revision 2.3  2000/06/30 17:23:19  akio
- * minor bug fix for return kFalse
+ * Revision 2.4  2000/07/28 19:49:27  akio
+ * Change in Detector Id for Endcap SMD
+ *
+ * Revision 2.4  2000/07/28 19:49:27  akio
+ * Change in Detector Id for Endcap SMD
  *
  * Revision 2.3  2000/06/30 17:23:19  akio
  * minor bug fix for return kFalse
@@ -25,10 +28,10 @@
  **************************************************************************/
 #include "StEmcDetector.h"
 #include "StEmcRawHit.h"
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.3 2000/06/30 17:23:19 akio Exp $";
+#include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.3 2000/06/30 17:23:19 akio Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.4 2000/07/28 19:49:27 akio Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -41,7 +44,7 @@ StEmcDetector::StEmcDetector(StDetectorId id, UInt_t n)
     mModules = new StEmcModule[n];
 }
 
-    if (mClusters) delete [] mClusters;
+StEmcDetector::~StEmcDetector()
 {
     if (mModules)  delete [] mModules;
     if (mClusters) delete mClusters;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.8 2000/05/17 17:21:34 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.9 2000/07/28 19:49:28 akio Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.9  2000/07/28 19:49:28  akio
+ * Change in Detector Id for Endcap SMD
+ *
  * Revision 2.8  2000/05/17 17:21:34  ullrich
  * New method largestGap() and new output operator.
  *
@@ -45,7 +48,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.8 2000/05/17 17:21:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.9 2000/07/28 19:49:28 akio Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -168,8 +171,8 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
         break;
     case kEndcapEmcTowerId:
     case kEndcapEmcPreShowerId:
-    case kEndcapSmdEtaStripId:
-    case kEndcapSmdPhiStripId:
+    case kEndcapSmdUStripId:
+    case kEndcapSmdVStripId:
         if (bit(58)) n++;
         break;
     default:
