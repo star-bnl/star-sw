@@ -65,4 +65,18 @@ if ( -e .sl302_gcc323) then
 	echo "Forward compatibility assumed between SL301 -> SL302"
 	ln -s .sl302_gcc323 .sl301_gcc323
     endif
+    if ( ! -e .rh3_gcc323 ) then
+	echo "RHE supported through SL3"
+	ln -s .sl302_gcc323 .rh3_gcc323
+    endif
+else
+    # A bit risky. Will get argument as confirmation
+    # Note that those are bacward compatibility links
+    # only.
+    if ( $1 != "") then
+	if ( -e .rh80_gcc322 ) then
+	    ln -s .rh80_gcc322 .sl301_gcc323 && echo "SL301 compatbility link created"
+	    ln -s .rh80_gcc322 .sl302_gcc323 && echo "SL302 compatbility link created"
+	endif
+    endif
 endif
