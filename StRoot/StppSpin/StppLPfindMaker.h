@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.h,v 1.6 2001/06/07 17:02:53 balewski Exp $
+// $Id: StppLPfindMaker.h,v 1.7 2003/01/02 22:19:45 balewski Exp $
 // $Log: StppLPfindMaker.h,v $
+// Revision 1.7  2003/01/02 22:19:45  balewski
+// cleanup #1 of unused code, all makers are now empty
+//
 // Revision 1.6  2001/06/07 17:02:53  balewski
 // *** empty log message ***
 //
@@ -22,7 +25,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-//   Search for the leading charge particle in the event                //
+//   Temporary test Maker for EEMC code
 //   use DST as input
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
@@ -34,31 +37,11 @@
 #include "StMaker.h"
 #endif
 
-//class St_jdata1;
-
-class StEvent;
-class St_dst_track;
-class St_tpt_track;
-class tpt_track_st;
-class StPrimaryVertex;
 
 class StppLPfindMaker : public StMaker 
 {
  private: 
-  // static Char_t  m_VersionCVS = "$Id: StppLPfindMaker.h,v 1.6 2001/06/07 17:02:53 balewski Exp $";
-
-  // setup
-  float EtaCut;
-  TH1F *hv[16];
-  StEvent *stEvent;
-  StPrimaryVertex* primV;
-
-  void init_histo();
-
-  float  PtPz2Eta(float, float);
-
-  void DcaTract2Vert(tpt_track_st *TPT,float &delZ, float &lpRxy, float &delRxy);
-  int nEVtot,nEVfound;
+  // static Char_t  m_VersionCVS = "$Id: StppLPfindMaker.h,v 1.7 2003/01/02 22:19:45 balewski Exp $";
  protected:
 
  public: 
@@ -67,13 +50,12 @@ class StppLPfindMaker : public StMaker
   virtual Int_t Init();
   virtual Int_t Finish();
   virtual Int_t  Make();
-  TH1F *hvS[16];
 
   // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
   // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StppLPfindMaker.h,v 1.6 2001/06/07 17:02:53 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StppLPfindMaker.h,v 1.7 2003/01/02 22:19:45 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StppLPfindMaker, 0)   //StAF chain virtual base class for Makers
 };

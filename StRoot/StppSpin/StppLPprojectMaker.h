@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $
+// $Id: StppLPprojectMaker.h,v 1.5 2003/01/02 22:19:45 balewski Exp $
 // $Log: StppLPprojectMaker.h,v $
+// Revision 1.5  2003/01/02 22:19:45  balewski
+// cleanup #1 of unused code, all makers are now empty
+//
 // Revision 1.4  2001/04/12 15:19:09  balewski
 // *** empty log message ***
 //
@@ -14,32 +17,20 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// Projects events in tho phi/pT bins depending on spin bits            //
+// Obsolete Maker
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
 #ifndef STAR_StppLPprojectMaker
 #define STAR_StppLPprojectMaker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StppLPprojectMaker virtual base class for Maker                       
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
 
-#define MxSpinID 4
-
 class StppLPprojectMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StppLPprojectMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $";
-
-  TH1F *hst[16]; //!
-  TH1F *hpol[3*MxSpinID]; //!
-
-  void init_histo();
+  // static Char_t  m_VersionCVS = "$Id: StppLPprojectMaker.h,v 1.5 2003/01/02 22:19:45 balewski Exp $";
 
  protected:
  public: 
@@ -53,9 +44,11 @@ class StppLPprojectMaker : public StMaker {
 // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: StppLPprojectMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StppLPprojectMaker.h,v 1.5 2003/01/02 22:19:45 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    
    ClassDef(StppLPprojectMaker, 0)   //StAF chain virtual base class for Makers
 };
 
 #endif
+
+
