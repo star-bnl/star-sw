@@ -68,7 +68,19 @@ Int_t StTpcFEEGainCalibMaker::Init(){
   98,100,102,104,106,106,108,110,112,112,114,116,118,120,122,122,
   124,126,128,128,130,132,134,136,138,138,140,142,144,144,144,144};
   ifstream* tBadFile = new ifstream(mSetup->getBadFileName());
+  if(tBadFile->fail()) { 
+    cout << "Couldn't open bad file " 
+	 << mSetup->getBadFileName() << endl
+	 << "Please run this macro with CalibType=1 before" << endl;
+    return kStFatal;
+  }
   ifstream* tDeadFile = new ifstream(mSetup->getDeadFileName());
+  if(tDeadFile->fail()) { 
+    cout << "Couldn't open bad file " 
+	 << mSetup->getDeadFileName()  << endl
+	 << "Please run this macro with CalibType=2 before" << endl;
+    return kStFatal;
+  }
 
   mTpcCalibSector = new StTpcCalibSector*[tNumberOfSector];
   for(int tiSect=0;
@@ -76,14 +88,14 @@ Int_t StTpcFEEGainCalibMaker::Init(){
       tiSect++){
     mTpcCalibSector[tiSect]= new StTpcCalibSector(mSetup,(tiSect+1),
 						  tNPadAtRow);
-    mTpcCalibSector[tiSect]->readBadTable(tBadFile);
-    mTpcCalibSector[tiSect]->readDeadTable(tDeadFile);
+      mTpcCalibSector[tiSect]->readBadTable(tBadFile);
+      mTpcCalibSector[tiSect]->readDeadTable(tDeadFile);
   }
   tBadFile->close();
   tDeadFile->close();
   delete tBadFile;
 
-  return StMaker::Init();
+  return kStOK;
 }
 //
 //_____________________________________________________________________
@@ -114,7 +126,7 @@ Int_t StTpcFEEGainCalibMaker::Make(){
 //_____________________________________________________________________________
 void StTpcFEEGainCalibMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.1 1999/09/14 12:42:14 fretiere Exp $\n");
+  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.2 1999/09/23 16:13:27 fretiere Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
