@@ -1,5 +1,8 @@
-* $Id: tpt_helix_pred.F,v 1.6 1999/09/14 00:55:48 liq Exp $
+* $Id: tpt_helix_pred.F,v 1.7 2000/02/23 21:05:52 hardtke Exp $
 * $Log: tpt_helix_pred.F,v $
+* Revision 1.7  2000/02/23 21:05:52  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.6  1999/09/14 00:55:48  liq
 * use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
 *
@@ -60,15 +63,15 @@ C
       RECORD /tpt_track_pointers_st/   trk(*)
 C______________________________________________________________________
 
-      INTEGER tgc_row_par,tpt_circle_pred
+      INTEGER tpc_row_par,tpt_circle_pred
       INTEGER isect,irow,np,iret,itrk,isec1,ipass
-      integer tgc_global_to_sector
+      integer tpc_global_to_sector
       REAL    xp(2),yp(2),as,bs,xav,yav,dr,xglobal(3)
       REAL    dummy
       CHARACTER*132 m132
 
       np=0
-      iret = tgc_row_par(isect,real(irow),as,bs,dummy,dummy)
+      iret = tpc_row_par(isect,real(irow),as,bs)
       if(tpar(ipass).debug(2).eq.1) then
        write(m132,*) 'TPT_HELIX_PRED - sector',isect,'row',irow,'a',as,'b',bs
        call StInfo(m132)
@@ -88,7 +91,7 @@ C______________________________________________________________________
            xglobal(1)=xp(1)
            xglobal(2)=yp(1)
            xglobal(3)=10.0
-           iret =  tgc_global_to_sector(isec1,xglobal)
+           iret =  tpc_global_to_sector(isec1,xglobal)
            if(isec1.gt.12) isec1=24-isec1
            if(isec1.eq.0) isec1=12
            if(isec1.eq.isect) then
@@ -97,7 +100,7 @@ C______________________________________________________________________
            xglobal(1)=xp(2)
            xglobal(2)=yp(2)
            xglobal(3)=10.0
-           iret =  tgc_global_to_sector(isec1,xglobal)
+           iret =  tpc_global_to_sector(isec1,xglobal)
            if(isec1.gt.12) isec1=24-isec1
            if(isec1.eq.0) isec1=12
            if(isec1.eq.isect) then

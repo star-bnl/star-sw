@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.10 1999/12/17 16:30:53 sakrejda Exp $
+* $Id: tpt_make_segment.F,v 1.11 2000/02/23 21:05:52 hardtke Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.11  2000/02/23 21:05:52  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.10  1999/12/17 16:30:53  sakrejda
 * Introduced additional integer to avit having mod(short,int).
 * It was not harmful, but confusing and debuggers complained about it.
@@ -81,7 +84,7 @@ C     Local variables
       INTEGER ntrk,ir1,ir2,npnt,ip2,ip3,ip4,nfound,iret
       INTEGER isect_first, isect_trunc, isec1
       INTEGER irow_last,irow_start,irow_step,ngap
-      INTEGER tgc_row_par, tpt_ptcrs
+      INTEGER tpc_row_par, tpt_ptcrs
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
       INTEGER nf,drow,i,nh1,ilc
@@ -89,8 +92,8 @@ C     Local variables
       INTEGER is_pnt,islic,ipass,tte_skip
       INTEGER tpt_find_slic
 
-      INTEGER tgc_global_to_sector
-      INTEGER tgc_sec24_to_sec12
+      INTEGER tpc_global_to_sector
+      INTEGER tpc_sec24_to_sec12
       INTEGER longrow
 
       REAL    ax,ay,az,ar,bx,by,bz,br,dydx,oxy,dzdr,as,bs,xp1,yp1
@@ -102,7 +105,7 @@ C     towards the inside of the chamber
       longrow = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row
       irow_start = mod(longrow,100)-1
       isect_first= hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
-      iret       = tgc_sec24_to_sec12(isect_first,isect_trunc)
+      iret       = tpc_sec24_to_sec12(isect_first,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
       irow_step = -1
 C
@@ -140,14 +143,14 @@ C           if there was a gap parametrisation for a row won't change
          endif
 C        find what is the parametrisation for the row ir1 in sector 
 C        isect
-         iret = tgc_row_par(isect_trunc,real(ir1),as,bs,dummy,dummy)
+         iret = tpc_row_par(isect_trunc,real(ir1),as,bs)
 C        find what is the prediction for this row
          iret = tpt_ptcrs(as,bs,dydx,oxy,xp1,yp1)
 C        and check whether it lies in the same sector
          xglobal(1)=xp1
          xglobal(2)=yp1
          xglobal(3)=10.0
-         iret =  tgc_global_to_sector(isec1,xglobal)
+         iret =  tpc_global_to_sector(isec1,xglobal)
          if( isect_trunc.eq.isec1 ) then
            rp1 = sqrt(xp1**2+yp1**2)
            drp = r2 - rp1

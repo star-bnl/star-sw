@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.11 1999/12/17 16:30:53 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.12 2000/02/23 21:05:53 hardtke Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.12  2000/02/23 21:05:53  hardtke
+* replace tpg functions with tpc functions
+*
 * Revision 1.11  1999/12/17 16:30:53  sakrejda
 * Introduced additional integer to avit having mod(short,int).
 * It was not harmful, but confusing and debuggers complained about it.
@@ -97,9 +100,9 @@ C     Local variables
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
 
-      INTEGER tgc_global_to_sector
-      INTEGER tgc_sec24_to_sec12
-      INTEGER tgc_row_par
+      INTEGER tpc_global_to_sector
+      INTEGER tpc_sec24_to_sec12
+      INTEGER tpc_row_par
 
       REAL    as,bs,xp1,yp1,xp(2),yp(2),xlast,ylast,zlast
       REAL    zp1,sr1,dis0,dy,dx,dz,dfir,tolr2,disr2,dist1,dist2,fact
@@ -116,7 +119,7 @@ C     towards the inside of the chamber
       longrow = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row
       irow_start = mod(longrow,100)-1
       isect      = hit(trk(ntrk).ipnt(trk(ntrk).nhit)).row/100
-      iret       = tgc_sec24_to_sec12(isect,isect_trunc)
+      iret       = tpc_sec24_to_sec12(isect,isect_trunc)
       irow_last  = tpar(ipass).irow_seg_end
       irow_step  = -1
 C
@@ -160,7 +163,7 @@ C
          do while (ns.eq.0)
 C           find what is the parametrisation for the row ir1 in 
 C           sector isect
-            iret = tgc_row_par(isect_trunc,float(ir1),as,bs,dummy,dummy)
+            iret = tpc_row_par(isect_trunc,float(ir1),as,bs)
 C           find what is the prediction for this row
             iret = tpt_ptcrs_uv_p(as,bs,-1.0,at,bt,x0,y0,xp,yp)
 C           check whether there is a crossing point
@@ -176,7 +179,7 @@ C              find which solution is closer
                xglobal(2)=yp1
                xglobal(3)=10.0
 C              and check whether it lies in the same sector
-               iret = tgc_global_to_sector(isec1,xglobal)
+               iret = tpc_global_to_sector(isec1,xglobal)
                if(isect_trunc.eq.isec1) then
                   ns=1
                else
