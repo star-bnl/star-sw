@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.6 2001/04/05 04:00:46 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.7 2001/04/24 21:32:07 genevb Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
+ * Revision 2.7  2001/04/24 21:32:07  genevb
+ * Additional helper functions
+ *
  * Revision 2.6  2001/04/05 04:00:46  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -48,8 +51,17 @@ public:
 
     bool           primaryVertexUsed() const;
     unsigned int   numberOfHits(StDetectorId) const;
+    bool           hasHitInDetector(StDetectorId) const;
     bool           hasHitInRow(StDetectorId, unsigned int) const; // first row = 1
     bool           hasHitInSvtLayer(unsigned int) const;          // first layer = 1
+
+    bool           trackTpcOnly() const;
+    bool           trackSvtOnly() const;
+    bool           trackTpcSvt() const;
+    bool           trackFtpcEast() const;
+    bool           trackFtpcWest() const;
+    bool           trackFtpc() const;
+
     bool           turnAroundFlag() const;
     unsigned int   data(unsigned int) const;
 
