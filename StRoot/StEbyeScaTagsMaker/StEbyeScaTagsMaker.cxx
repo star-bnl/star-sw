@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.4 1999/05/01 00:56:59 fisyak Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.5 1999/05/27 17:19:24 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.5  1999/05/27 17:19:24  jgreid
+ * fixed rapidity calculation bug and added additional QC cuts
+ *
  * Revision 1.4  1999/05/01 00:56:59  fisyak
  * Change Clear function to defualt
  *
@@ -34,7 +37,7 @@
 // define values for temperature calculation
 #define PI_MASS 0.139569
 #define NBINS 50
-#define PI 3.1415926
+//#define PI 3.1415926
 
 ClassImp(StEbyeScaTagsMaker)
 
@@ -63,7 +66,7 @@ Int_t StEbyeScaTagsMaker::Make() {
 }
 
 void StEbyeScaTagsMaker::PrintInfo() {
-  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.4 1999/05/01 00:56:59 fisyak Exp $" << endl;
+  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.5 1999/05/27 17:19:24 jgreid Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -83,6 +86,11 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   StTrackIterator lastTrack = tracks->end();
   StGlobalTrack *currentTrack = 0;
   
+  StVertex *primeVertex = event.primaryVertex();
+
+  StThreeVector<double> origin(0,0,0);
+  StThreeVector<double> primaryVertexPosition = primeVertex->position();
+
   double mt_histo[NBINS];
   
   /* Reset pt, mt, eta & phi  histograms  */
@@ -95,6 +103,12 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   float eta_min = -1;
   float eta_max = 1;
 
+  float dcaX_min = -2;
+  float dcaX_max = 2;
+
+  float dcaY_min = dcaX_min;
+  float dcaY_max = dcaX_max;
+
   // define variables
   float deta1 = eta_max - eta_min;
 
@@ -103,8 +117,13 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   float mtweight1   = 1./(deta1*dmt);
 
   float pt, mt;
+  float charge;
+
   float dip;
   float theta, eta;
+
+  float nFound, nMax;
+
   int imtbin;
 
   float trackCount = 0.0;
@@ -113,6 +132,11 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   float meanEta = 0.0;
   float meanEtaSquared = 0.0;
 
+  double s;
+  StThreeVector<double> dca, p;
+
+  double dcaX, dcaY, dcaZ, dcaM;
+
   // ** track loop **
   for (; itr != lastTrack; itr++) {
     currentTrack = *itr;
@@ -120,33 +144,56 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
     // get the momentum of the current track
     pt = currentTrack->helix().momentum(bField).perp();
 
+    // get the charge of the current track
+    charge = currentTrack->helix().charge(bField);
+
+    // get Nfound & Nmax
+    nFound = currentTrack->fitTraits().numberOfFitPoints();
+    nMax = currentTrack->fitTraits().numberOfPossiblePoints();
+
+    // calculate distance of closest approach to the primary vertex position
+    s = currentTrack->helix().pathLength(primaryVertexPosition);
+    p = currentTrack->helix().at(s);
+    dca = p-primaryVertexPosition;
+    dcaX = dca.x()/centimeter;
+    dcaY = dca.y()/centimeter;
+    dcaZ = dca.z()/centimeter;
+    dcaM = (abs(dca))/centimeter;
+
+    // calculate mt (needed for temperature calculation)
     mt = sqrt(pt*pt + PI_MASS*PI_MASS)-PI_MASS;
     imtbin  = (mt - mt_min)/mt_binsize;
 
+    // calculate eta
     dip = currentTrack->helix().dipAngle();
-    theta = (PI/2.0)-atan(dip);
+    theta = (M_PI/2.0)-dip;
     eta = -log(tan(theta/2.0));
 
-    // ** rapidity cut [cut #2] 
-    if ((eta > eta_min) && (eta < eta_max)) {
+    // ** transverse DCA cut [cut #3]
+    if (((dcaX > dcaX_min) && (dcaX < dcaX_max)) && ((dcaY > dcaY_min) && (dcaY < dcaY_max))) {
 
-      // ** cut out extreme pt values [cut #1]
-      if ((pt > 0) && (pt < 20.0)) {
+      // ** rapidity cut [cut #2] 
+      if ((eta > eta_min) && (eta < eta_max)) {
 
-        /* dN/mt*dy*dmt histogram */
-        if (0<=imtbin && imtbin<NBINS) mt_histo[imtbin] += mtweight1/mt; 
+        // ** cut out extreme pt values [cut #1]
+        if ((pt > 0) && (pt < 20.0)) {
 
-        // calculate number of particles that make the cuts, and the first two pt moments
-        trackCount++;
-        meanPtSquared += pt*pt;
-        meanPt += pt;
+          /* dN/mt*dy*dmt histogram */
+          if (0<=imtbin && imtbin<NBINS) mt_histo[imtbin] += mtweight1/mt; 
 
-	meanEtaSquared += eta*eta;
-	meanEta += eta;
+          // calculate number of particles that make the cuts, and the first two pt moments
+          trackCount++;
+          meanPtSquared += pt*pt;
+          meanPt += pt;
 
-      } // [cut #1]
+	  meanEtaSquared += eta*eta;
+	  meanEta += eta;
 
-    } // [cut #2]
+        } // [cut #1]
+
+      } // [cut #2]
+
+    } // [cut #3]
 
   } // ** end of track loop **
   meanPtSquared /= trackCount;
@@ -170,7 +217,7 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event, ScaTag_st& scaTag) {
   //     (based on slope fit to 1/mt dN/dmt)
   scaTag.chargedParticles_Means[5] = mtInverseSlope(mt_histo, 0, NBINS);
 
-  cout << trackCount << " " << meanPt/GeV << " " << meanPtSquared/(GeV*GeV) << endl;
+  //cout << trackCount << " " << meanPt/GeV << " " << meanPtSquared/(GeV*GeV) << endl;
 }
 
 float StEbyeScaTagsMaker::mtInverseSlope(double *mthisto, int ibegin, int istop) {
