@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.15 1999/02/25 02:21:51 wenaus Exp $
+# $Id: MakeRexe.mk,v 1.16 1999/03/02 20:27:38 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.16  1999/03/02 20:27:38  fisyak
+# Filter out #
+#
 # Revision 1.15  1999/02/25 02:21:51  wenaus
 # StSclRoot -> StarClassLibrary
 #
@@ -58,9 +61,12 @@ SRC_DIRS := $(INP_DIR)  $(addprefix $(STAR)/asps/agi/gst/, agsim geant zebra)
 VPATH := $(SRC_DIRS) $(OUT_DIR) 
 #                                  $(OBJ_DIR)  $(EXE_DIR) 
 
+#SUFFIXES := .c .cc .C .cxx .f .F .g
+#NAMES_O := $(strip $(foreach s, $(SUFFIXES), $(wildcard $(addsuffix $(s), $(SRC_DIR)/*$(s))))
 NAMES_O := $(wildcard $(addsuffix /*.[fFgc]*,$(SRC_DIRS)))
 #NAMES_O := $(wildcard $(NAMES_O))
 #NAMES_O := $(filter %.g %.f %.F %.c %.cc %.cxx %.cdf,$(NAMES_O))
+NAMES_O := $(filter-out \#%\#,$(NAMES_O))
 NAMES_O := $(filter-out %.bck,$(NAMES_O))
 NAMES_O := $(basename $(notdir $(NAMES_O)))
 NAMES_O := $(filter-out traceqc,$(NAMES_O))
