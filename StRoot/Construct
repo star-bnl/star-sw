@@ -1,7 +1,10 @@
 #!/usr/local/bin/perl
 use Env;
 #print "PATH=",$PATH,"\n";
+require "find.pl";
+if (defined($AFS)) {$File::Find::dont_use_nlink;}
 use File::Basename;
+
 #use strict;
 use Sys::Hostname;
 use Cwd;
@@ -135,8 +138,7 @@ if ($DirPath eq $STAR) {
 }
 else {
   print "Repositories = ",$DirPath," + ",$STAR,"\n";
-  Repository  ($DirPath);
-  Repository  ($STAR);
+  Repository  ($DirPath, $STAR);
 }
 #print "Repository = ",$Repository,"\n";
 $env = new cons(
@@ -174,10 +176,12 @@ $env = new cons(
 				    '.S'  => 'build::command::cc',
 				    '.cc' => 'build::command::cxx',
 				    '.cxx'=> 'build::command::cxx',
-				    '.cpp'=> 'build::command::cxx',
+				    '.cpp'=> 'build::command::cxx'
 				   },
 		 'SUFOBJ'	=> '.o',
-		 'ENV'	        => { 'PATH' => $PATH },
+		 'ENV'	        => { 'PATH' => $PATH,
+				     'ROOTSYS' => $ROOTSYS,
+				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH},
 		);
 #Command $env 
 $INCLUDE = ""; 
@@ -220,30 +224,73 @@ sub includes {
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
 }
 #________________________________________________________________________________
-
 package script;
+#________________________________________
+sub find_sources($) {
+
+}
 #________________________________________
 sub find_files_by_extention($) {
   
-  my $obj = $OBJ;
-  $obj =~ s/\#//g;
+  (my $obj = $OBJ)  =~ s/\#//g;
   my $FilePath = FilePath();
-#  my $FilePath = DirPath '.';
-  $FilePath =~ s/$obj/StRoot/g;
-  print " FilePath=",$FilePath,"\n"; 
-#  my @c_files = glob $FilePath . "*.c*", $FilePath . "*/*.c*" ; #$tag; 
+  $FilePath =~ s/$obj/StRoot/g; #  print " FilePath=",$FilePath,"\n"; 
   my @c_files = map { glob($_) } $FilePath . $_[0], $FilePath . "*/" . $_[0] ; #$tag; 
-  print "c_files = ",@c_files,"\n";
+#  print "c_files = ",@c_files,"\n";
   my @files;
   my $i=0;
   foreach $file (@c_files) {
-    next if $file =~ /~/;
-    print "File:",$file;
+    next if $file =~ /~/;#   print "File:",$file;
     $files[$i] = $file; 
-    $files[$i] =~ s/$FilePath//g;
-    print "\tfile:", $files[$i],"\n";  
+    $files[$i] =~ s/$FilePath//g;#    print "\tfile:", $files[$i],"\n";  
     $i++; 
   } 
   
   return @files;
 }
+#________________________________________
+sub cppflags {
+my @cpp = split /:/, $env->{CPPPATH};
+my @repositories = Repository_List;
+my $PWD = $cwd;
+my $CPPFLAGS = "-I";
+$CPPFLAGS .= join " -I$PWD", @cpp;
+for my $repository (@repositories) {
+  $CPPFLAGS .= " -I";
+  $CPPFLAGS .= join " -I$repository/", @cpp;
+}
+$CPPFLAGS .= env->{CPPFLAGS};
+$CPPFLAGS .= " -D__ROOT__";#print "CPPFLAGS = ", $CPPFLAGS, "\n";
+return $CPPFLAGS;
+}
+#________________________________________
+sub script::wanted {
+  print "wanted ",$_,"\n";
+    (
+        (($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_)) &&
+        -d _ &&
+        ! /^CVS$/ &&
+        ! /^idl$/ &&
+        ! /^exa$/ &&
+        ! /^inc$/ &&
+        ! /^doc$/ &&
+        ! /^run$/ &&
+        ! /^examples$/ &&
+        ! /^local$/ &&
+        ! /^hold$/ &&
+        ! /^wrk$/ &&
+        (
+            /^.*\.c$/
+            ||
+            /^.*\.cc$/
+            ||
+            /^.*\.cxx$/
+            ||
+            /^.*\.g$/
+            ||
+            /^.*\.F$/
+            ||
+            /^.*\.f$/
+        ) 
+    ) && print "$File::Find::name\n";
+  }
