@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.7 2001/11/05 23:41:06 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.8 2001/11/06 19:45:03 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.8  2001/11/06 19:45:03  genevb
+// Prepare for bug fix in Root 3.02/02
+//
 // Revision 3.7  2001/11/05 23:41:06  genevb
 // Add more dEdx, B field info, careful of changes to TTree unrolling
 //
@@ -41,6 +44,9 @@
 
 StStrangeMuDstMaker* StStrangeControllerBase::currentMaker = 0;
 static int bfirst=1;
+static int rootVersion=gROOT->GetVersionInt();
+static int doAbstractFix =
+  ((rootVersion >= 30000) && (rootVersion < 30202) ? 1 : 0);
 
 ClassImp(StStrangeControllerBase)
 //_____________________________________________________________________________
@@ -158,9 +164,10 @@ TBranch* StStrangeControllerBase::AssignBranch(const char* name,
                                                TClonesArray** address) {
 
   // This is a *temporary* workaround for a bug in TBranchElement.
-  // Through Root 3.01/06, it is unable to handle inherited abstract classes.
+  // In Root 3.00/00-3.02/02, it is unable to handle inherited abstract classes.
   // GVB - Aug. 14, 2001
-  if (bfirst==1) {
+  // GVB - Nov.  6, 2001
+  if (doAbstractFix && bfirst==1) {
     bfirst=0;
     long propl, *prop, pabs = 64;
     TClass* procl;
