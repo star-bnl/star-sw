@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.46 2003/10/09 16:33:02 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.47 2003/11/12 22:42:37 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.47  2003/11/12 22:42:37  potekhin
+* add the pixel detector volume encoding
+*
 * Revision 1.46  2003/10/09 16:33:02  potekhin
 * Introduced a small hash table for the GEANT-> reco mapping
 * of the FTPC sector numbers, in accordance with
@@ -552,8 +555,10 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *       BBC has 4 levels: west/east, annulus, triple module, single module
         volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
 *17*
-
+      else If (Csys=='pix') then
+        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
       else
+
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
 
