@@ -411,7 +411,7 @@ Int_t StV0FinderMaker::Make() {
           }
 
       // Determine detector id of V0 for pars
-      det_id_v0 = TMath::Min(detId[i],detId[j]);
+      det_id_v0 = TMath::Max(detId[i],detId[j]);
 
       // Primary   V0 cut parameters
       pars  = ev0par2->GetTable(det_id_v0+2);
@@ -738,8 +738,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.6 2003/06/24 16:20:01 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.7 2003/07/04 17:52:54 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.7  2003/07/04 17:52:54  faivre
+// Use SVT cuts if any dg has a SVT hit.
+//
 // Revision 1.6  2003/06/24 16:20:01  faivre
 // Uses SVT tracks. Fixed bool calculations. Exits when bad param. Reshaping.
 //

@@ -420,7 +420,7 @@ Bool_t StXiFinderMaker::UseV0() {
           ///"heli" and "trk" : cf StRoot/St_dst_Maker/StV0FinderMaker.cxx (STAT).
           
           //Determine detector id of pair for parsXi
-          det_id_xi=TMath::Min(det_id_v0,detId[k]);
+          det_id_xi=TMath::Max(det_id_v0,detId[k]);
           //Xi cut parameters
           parsXi=exipar->GetTable(det_id_xi-1);
           
@@ -763,8 +763,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.8 2003/06/24 16:20:11 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.9 2003/07/04 17:52:46 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.9  2003/07/04 17:52:46  faivre
+// Use SVT cuts if any dg has a SVT hit.
+//
 // Revision 1.8  2003/06/24 16:20:11  faivre
 // Uses SVT tracks. Fixed bool calculations. Exits when bad param. Reshaping.
 //
