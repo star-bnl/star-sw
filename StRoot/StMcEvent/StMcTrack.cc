@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.1 1999/11/19 19:06:34 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.2  1999/12/03 00:51:53  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:34  calderon
  * Recommit after redoing the files.
  *
@@ -28,7 +32,7 @@
 
 #include "tables/St_g2t_track_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.1 1999/11/19 19:06:34 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -42,7 +46,7 @@ StMcTrack::StMcTrack(g2t_track_st* trk) {
     mFourMomentum.setPx(trk->p[0]);
     mFourMomentum.setPy(trk->p[1]);
     mFourMomentum.setPz(trk->p[2]);
-    mFourMomentum.setE(trk->p[2]);
+    mFourMomentum.setE(trk->e);
     mIsShower = trk->is_shower;
     mGeantId = trk->ge_pid;
     mParticleDefinition = StParticleTable::instance()->findParticleByGeantId(trk->ge_pid);
@@ -84,6 +88,21 @@ int StMcTrack::operator==(const StMcTrack& t) const
 int StMcTrack::operator!=(const StMcTrack& t) const
 {
     return !(t == *this);
+}
+
+ostream&  operator<<(ostream& os, const StMcTrack& t)
+{
+    os << "Particle      : " << t.particleDefinition()->name().c_str() << endl;
+    os << "Four Momentum : " << t.fourMomentum() << endl; 
+    os << "Pt            : " << t.pt() << endl;
+    os << "Rapidity      : " << t.rapidity() << endl;
+    os << "PseudoRapidity: " << t.pseudoRapidity() << endl;
+    os << "No. Tpc  Hits : " << t.tpcHits().size() << endl;
+    os << "No. Svt  Hits : " << t.svtHits().size() << endl;
+    os << "No. Ftpc Hits : " << t.ftpcHits().size() << endl;
+    os << "Is Shower     : " << t.isShower() << endl;
+    os << "Geant Id      : " << t.geantId()  << endl;
+    return os;
 }
 
 void StMcTrack::setFourMomentum(const StLorentzVectorF& val) { mFourMomentum = val; }
@@ -137,4 +156,4 @@ void StMcTrack::removeSvtHit(StMcSvtHit* hit)
   if (iter != mSvtHits.end()) mSvtHits.erase(iter);
 }
 
-void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }
+//void StMcTrack::setTopologyMap(StTrackTopologyMap& val) { mTopologyMap = val; }

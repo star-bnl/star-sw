@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.1 1999/11/19 19:06:32 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.2 1999/12/03 00:51:52 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.2  1999/12/03 00:51:52  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:32  calderon
  * Recommit after redoing the files.
  *
@@ -49,5 +53,8 @@ private:
 
     static StMemoryPool mPool; //!
 };
+
+ostream&  operator<<(ostream& os, const StMcFtpcHit&);
+
 
 #endif

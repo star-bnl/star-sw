@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.1 1999/11/19 19:06:33 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.2 1999/12/03 00:51:52 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.2  1999/12/03 00:51:52  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:33  calderon
  * Recommit after redoing the files.
  *
@@ -52,6 +56,8 @@ protected:
     static StMemoryPool mPool;  //!
     long   mVolumeId;
 };
+
+ostream&  operator<<(ostream& os, const StMcSvtHit&);
 
 inline unsigned long
 StMcSvtHit::layer() const

@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.1 1999/11/19 19:06:31 calderon Exp $
+ * $Id: StMcEvent.hh,v 2.2 1999/12/03 00:51:52 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.2  1999/12/03 00:51:52  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:31  calderon
  * Recommit after redoing the files.
  *
@@ -65,6 +69,7 @@ public:
     unsigned long                nWest() const;
     unsigned long                zEast() const;
     unsigned long                nEast() const;
+    unsigned long                numberOfPrimaryTracks() const;
     float                        impactParameter() const;
     float                        phiReactionPlane() const;
     float                        triggerTimeOffset() const;
@@ -94,6 +99,7 @@ public:
     void setNWest(unsigned long);
     void setZEast(unsigned long);
     void setNEast(unsigned long);
+    void setNumberOfPrimaryTracks(unsigned long);
     void setImpactParameter(float);
     void setPhiReactionPlane(float);
     void setTriggerTimeOffset(float);
@@ -112,6 +118,7 @@ protected:
     unsigned long                  mNWest;
     unsigned long                  mZEast;
     unsigned long                  mNEast;
+    unsigned long                  mPrimaryTracks;
     float                          mImpactParameter;
     float                          mPhiReactionPlane;
     float                          mTriggerTimeOffset;
@@ -147,6 +154,8 @@ inline unsigned long StMcEvent::nWest() const { return mNWest;}
 inline unsigned long StMcEvent::zEast() const { return mZEast;}
 
 inline unsigned long StMcEvent::nEast() const { return mNEast;}
+
+inline unsigned long StMcEvent::numberOfPrimaryTracks() const { return mPrimaryTracks;}
 
 inline float StMcEvent::impactParameter() const { return mImpactParameter; }
 

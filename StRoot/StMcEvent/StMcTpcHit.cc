@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $
+ * $Id: StMcTpcHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $
  * $Log: StMcTpcHit.cc,v $
+ * Revision 2.2  1999/12/03 00:51:52  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:33  calderon
  * Recommit after redoing the files.
  *
@@ -18,7 +22,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_tpc_hit_Table.h"  
 
-static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.1 1999/11/19 19:06:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTpcHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $";
 
 StMemoryPool StMcTpcHit::mPool(sizeof(StMcTpcHit));
 
@@ -37,7 +41,7 @@ StMcTpcHit::StMcTpcHit(g2t_tpc_hit_st* pt)
   mPosition.setX(pt->x[0]); 
   mPosition.setY(pt->x[1]);
   mPosition.setZ(pt->x[2]);
-
+  
   // The Local and Pad coordinates will be filled in the maker,
   // since they use the coordinate transforms.
   
@@ -45,6 +49,16 @@ StMcTpcHit::StMcTpcHit(g2t_tpc_hit_st* pt)
 
 StMcTpcHit::~StMcTpcHit() {/* noop */}
 
+ostream&  operator<<(ostream& os, const StMcTpcHit& h)
+{
+    os << "Position      : " << h.position() << endl; 
+    os << "Local Position: " << h.localPosition() << endl;
+    os << "Sector        : " << h.sector()     << endl;
+    os << "Pad Row       : " << h.padrow()     << endl;
+    os << "Pad           : " << h.pad()        << endl;
+    os << "Time Bucket   : " << h.timeBucket() << endl;
+    return os;
+}
 
 
 

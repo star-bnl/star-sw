@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.1 1999/11/19 19:06:33 calderon Exp $
+ * $Id: StMcTpcHit.hh,v 2.2 1999/12/03 00:51:53 calderon Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.2  1999/12/03 00:51:53  calderon
+ * Tested with new StMcEventMaker.  Added messages for
+ * diagnostics.
+ *
  * Revision 2.1  1999/11/19 19:06:33  calderon
  * Recommit after redoing the files.
  *
@@ -58,6 +62,8 @@ private:
     StTpcPadCoordinate          mPadCoordinate; //!
     StTpcLocalSectorCoordinate  mSectorTwelveCoordinate; //!
 };
+
+ostream&  operator<<(ostream& os, const StMcTpcHit&);
 
 inline unsigned long
 StMcTpcHit::sector() const
