@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.19 2001/10/05 03:19:38 jeromel Exp $
+ * $Id: StMagUtilities.cxx,v 1.20 2001/10/05 03:44:25 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
- * Revision 1.19  2001/10/05 03:19:38  jeromel
- * Modification by Jamie ...
+ * Revision 1.20  2001/10/05 03:44:25  jeromel
+ * Modifications by Jamie so we can turn on/off every corrections.
  *
  * Revision 1.18  2001/09/06 18:27:39  jeromel
  * Modifications for larger number of ExB options, forcing different configuration 9EB1 EB2 ...). Added loading of StTableUtilities when 'display' option is required.
