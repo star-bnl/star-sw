@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.7 2000/02/24 15:18:42 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.8 2000/04/13 18:08:21 fine Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.8  2000/04/13 18:08:21  fine
+// Adjusted for ROOT 2.24
+//
 // Revision 1.7  2000/02/24 15:18:42  jcs
 // inactivate histograms for MDC3
 //
@@ -190,9 +193,9 @@ Int_t StFtpcClusterMaker::Make()
       Int_t numHit=g2t_ftp_hit->GetNRows();
       Int_t numTrack=g2t_track->GetNRows();
       Int_t numGepoint=ffs_gepoint->GetNRows();
-      Int_t maxGepoint=ffs_gepoint->GetHeader()->maxlen;
+      Int_t maxGepoint=ffs_gepoint->GetTableSize();
       Int_t numFppoint=fcl_fppoint->GetNRows();
-      Int_t maxFppoint=fcl_fppoint->GetHeader()->maxlen;
+      Int_t maxFppoint=fcl_fppoint->GetTableSize();
       StFtpcFastSimu *ffs = new StFtpcFastSimu(g2t_ftp_hit->GetTable(), 
 					       &numHit,
 					       g2t_track->GetTable(), 
