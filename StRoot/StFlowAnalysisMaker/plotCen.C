@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.21 2004/11/19 16:54:41 posk Exp $
+// $Id: plotCen.C,v 1.22 2005/02/08 22:37:55 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -31,6 +31,7 @@ char   tmp[10];
 TCanvas* c;
 
 TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
+  gInterpreter->ProcessLine(".O0");
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
@@ -589,6 +590,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.22  2005/02/08 22:37:55  posk
+// Fixed trigger histogram for year=4.
+//
 // Revision 1.21  2004/11/19 16:54:41  posk
 // Replaced gPad with (TVirtualPad::Pad()). Reverted to TMath::Struve functions.
 //
