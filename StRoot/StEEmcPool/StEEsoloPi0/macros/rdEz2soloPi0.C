@@ -1,12 +1,10 @@
-rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
-	    ) {
+rdEz2soloPi0(  char *run="R5112017",  int mxEve=200000 , int typeG=0) {
   //    runL=" R5107005 R5107005_1  R5107008  R5109025  R5109026 R5109027   R5109028a  R5109028b  R5109028c  R5109029a  R5109030   R5109031  R5109034  R5109035";
-  char *outname="bb9a";
+ TString out="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0B/";
+ if(typeG==1)  out="/auto/pdsfdv34/starspin/balewski/calib2004/outPi0C/";
 
-  TString iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";
-  int mxEve=1000000;
-  int firstSec=1;
-  int lastSec=12;
+  int firstSec=5;
+  int lastSec=8;
   char *libL[]={
     "StRoot/StDbLib/StDbLib.so",  
     "StRoot/StEEmcDbMaker/libEEmcDbMaker.so", 
@@ -31,6 +29,12 @@ rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
 
   TChain *chain = new TChain("ezstar");
 
+
+#if 0
+  //............................
+  // use simple list of runs from fixed input directory
+  TString iPath="/auto/pdsfdv34/starspin/relyea/butterfly/"; //LBL
+  //  iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";// BNL
   char *run=strtok(runL," "); // init 'strtok'
   int i=0;
   do {
@@ -38,11 +42,32 @@ rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
     TString fullName=iPath+run+".ez.root";  
     chain->Add(fullName);
   } while(run=strtok(0," "));  // advance by one nam
-  
-  int nEntries = (Int_t)chain->GetEntries();
-  printf("Sort %d  of total Events %d\n",mxEve, nEntries);
-  int nEve=0;
+#endif  
 
+
+ #if 1
+  //............................
+  // read exact full path from the list
+  TString runList="ezListLBL/"; runList+=run; 
+  out+=run;
+  printf("aa=%s=\n",runList.Data());
+
+  FILE *fd=fopen(runList.Data(),"r"); assert(fd);
+  int i=0;
+  while(1) { 
+    char text[500];
+    int ret= fscanf(fd,"%s",text);
+    if(ret<=0) break;
+    i++;
+    chain->Add(text);    
+    printf("%d =%s=\n",i,text);
+  }
+#endif
+
+  int nEntries = (Int_t)chain->GetEntries();
+  int mSect=lastSec-firstSec+1;
+  printf("Sort %d  of total Events %d, mSect=%d\n",mxEve, nEntries,mSect);
+  int nEve=0;
 
   Int_t nEntries = (Int_t)chain->GetEntries();
   if(nEntries<=0) {
@@ -73,6 +98,16 @@ rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
   db->requestDataBase(timeStamp,firstSec,lastSec); // range of sectors
   // db->changeGains("setG1.dat");
   //  db->changeMask("setM1.dat");
+
+  // overwrit tower gains
+  TString calDir3="../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter3/";
+  int secID=0;
+  for(secID=5;secID<=8*typeG;secID++){
+    char tt1[100];
+    sprintf(tt1,"%02d",secID);
+    TString tt;
+    tt=calDir3+"gains"+tt1+"tower.dat";   db->changeGains(tt.Data());
+  }
   
   TObjArray  HList;
   //........... sorter(s) ..........
@@ -99,10 +134,11 @@ rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
    // this is for sure minB events
     nAcc++;
     // verify data block consistency
-    int nCr=eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
+    eFee->maskWrongCrates(timeStamp,eHead->getToken(),EEfeeRawEvent::headVer1);
     eFee-> maskBEMC();
+    int nCr=eFee->getNGoodBlock();
     // printf("%d\n",nCr);
-    if(nCr!=22 && nCr!=36) continue;
+    if(nCr!=22) continue;
     // use only 100% healthy events
     nOK++;
     task->make();
@@ -111,13 +147,12 @@ rdEz2soloPi0(  char *runL=" R5112004 R5107005 "
   if(t2==t1) t2=t1+1;
   float tMnt=(t2-t1)/60.;
   float rate=1.*nEve/(t2-t1);
-  printf("sorting done, nEve=%d, acc=%d CPU event rate=%.1f Hz, total time %.1f minute(s) \n",nEve,nAcc,rate,tMnt);
+  printf("sorting done, nEve=%d, acc=%d CPU event rate=%.1f Hz, total time %.1f minutes \n",nEve,nAcc,rate,tMnt);
 
 
   task->finish();
   
-  TString out="outPi0/";
-  out+=outname;
+   // save output histograms
   out+=".hist.root";
   TFile f( out,"recreate");
   assert(f.IsOpen());
