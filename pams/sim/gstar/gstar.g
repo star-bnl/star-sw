@@ -1,6 +1,3 @@
-   subroutine    GSTAR_INIT
-   call gstar
-   end
 
    subroutine    GSTAR 
    print *,' **********************************************************'
