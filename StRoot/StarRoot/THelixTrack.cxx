@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
+#include "TError.h"
 #include "THelixTrack.h"
 const double Zero = 1.e-5;
 
@@ -435,47 +436,94 @@ double THelixTrack::StepHZ(const double *su, int nsurf,
 //_____________________________________________________________________________
 double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 {
-    double pnt[3],xx,yy,zz,tmp,step,dx,dy;
+    double pnt[3],pnd[3],step[3],tg;
     int i;    
     for (i=0;i<3;i++) pnt[i] = point[i] - fX[i];
 
-    xx = (pnt[0]*fPxy[0]+pnt[1]*fPxy[1]+pnt[2]*fPxy[2]);
-    yy = (pnt[0]*fHXP[0]+pnt[1]*fHXP[1]+pnt[2]*fHXP[2])/fCosL;
-    zz = (pnt[0]*fH  [0]+pnt[1]*fH  [1]+pnt[2]*fH  [2]);
-    double arho = fabs(fRho);
+    pnd[0] = (pnt[0]*fPxy[0]+pnt[1]*fPxy[1]+pnt[2]*fPxy[2]);
+    pnd[1] = (pnt[0]*fHXP[0]+pnt[1]*fHXP[1]+pnt[2]*fHXP[2])/fCosL;
+    pnd[2] = (pnt[0]*fH  [0]+pnt[1]*fH  [1]+pnt[2]*fH  [2]);
 
 //		Z estimated step 
 
-    step = 0.;
-    if (fabs(fHP) > 0.01) {
-      step = zz/fHP;
-    } else {
-//		R estimated step
-      if (fRho < 0) yy = -yy;
-
-      tmp = ::sqrt(::pow(xx*fRho,2)+::pow(yy*fRho-1.,2));
-      step = xx/tmp;
-      if (arho > Zero) {
-        dx = step*arho; if (fabs(dx) <= Zero) dx = 0;
-        dy = yy*arho -1;if (fabs(dy) <= Zero) dy = 0;
-        if (fabs(arho*step)> 0.01 || dy >0 || dx < 0) {
-          step = atan2(dx,-dy); if (step<0) step +=2.*M_PI;
-          step /=arho;}
-      }
-      step /= fCosL;
+    int zStep=0;
+    step[1]= 0.5*GetPeriod(); if (fHP<0) step[1]=- step[1];
+    if (fabs(fHP) > 0.01){ //Z approximation
+      zStep = 1;
+      step[1] = pnd[2]/fHP;
     }
-    double xnear[3],pnear[3];
+//angle approximation
+//		R estimated step
+    {
+      double xRho = pnd[0]*fRho;
+      double yRho = 1. - pnd[1]*fRho;
+      if (fabs(yRho) > 0.1 && fabs((tg = xRho/yRho))<0.2) {
+        tg *=tg; step[2] = pnd[0]/yRho*(1.+tg*(-1./3 + 1./5*tg));
+      } else {
+        step[2] = atan2(xRho,yRho)/fRho;
+      }
+      step[2] /= fCosL;
+    }
+    if (fabs(step[1]-step[2]) > GetPeriod()) {
+      int nperd = (int)((step[1]-step[2])/GetPeriod());
+      step[2] += nperd*GetPeriod();
+    }
+    step[0] = step[2];
+
+    double ds = step[1]-step[2];
+    if (zStep && fabs(ds)>1.e-5) {
+      double dz = ds*fHP;
+      step[0] += dz*dz/ds;
+    }
+
+
+    double xnear[6],ss=0;  double* pnear=xnear+3;
+    memset(xnear,0,sizeof(xnear));
+    pnear[0]= fCosL; pnear[2]=fHP;
 //		iterations
     double dstep = 1.e+10;
-    for (int iter=0; iter <5 && (fabs(arho*dstep)> 0.001 || !iter); iter++)
+    double lMax = (step[1]>step[2])? step[1]:step[2];
+    double lMin = (step[1]>step[2])? step[2]:step[1];
+    int iter=40,icut=1;
+    THelixTrack local(xnear,pnear,fRho);
+    local.Move(step[0]);
+    lMax-=step[0];lMin-=step[0];
+    for (; iter; iter--)
     { 
-      Step(step,xnear,pnear);
-      dstep = 0;
-      for (i=0;i<3;i++) {dstep += pnear[i]*(point[i]-xnear[i]);}
-      step += dstep;
+      double diff = (icut)? lMax-lMin: fabs(dstep);
+      if (diff < 0.1) {
+        if (diff < 1.e-5) 	break;
+        double tmp = 0;
+        for (i=0;i<3;i++) {tmp += fabs(pnd[i]-xnear[i]);}
+        if (diff < tmp*1.e-4) 	break;
+        if (tmp < 1.e-5) 	break;
+      }
+      
+      local.Step(ss,xnear,pnear);
+      dstep = 0; icut = 0;
+      for (i=0;i<3;i++) {dstep += pnear[i]*(pnd[i]-xnear[i]);}
+      if(dstep<0) {
+        lMax = ss; if ((ss+dstep)<lMin) {icut=1;dstep = 0.5*(lMin-lMax);}
+      } else {
+        lMin = ss; if ((ss+dstep)>lMax) {icut=1;dstep = 0.5*(lMax-lMin);}
+      }
+      ss += dstep; 
     }
-  return (xyz) ? Step(step,xyz,dir) : step;
+    Assert(iter);
+    step[0]+=ss;
+    fDist=0; for (i=0;i<3;i++) {fDist += pow(pnd[i]-xnear[i],2);}
+
+  return (xyz) ? Step(step[0],xyz,dir) : step[0];
 }
+//_____________________________________________________________________________
+double THelixTrack::Dist(const double *point,double *xyz, double *dir) const
+{
+  Step(point,xyz,dir);
+  return sqrt(fDist);
+}
+//_____________________________________________________________________________
+double THelixTrack::GetPeriod() const
+{ return (fabs(fRho) > 1.e-10) ? fabs(1./fRho/fCosL): 1.e+10; }
 //_____________________________________________________________________________
 void THelixTrack::Streamer(TBuffer &){}
 //_____________________________________________________________________________
@@ -486,6 +534,13 @@ void THelixTrack::Print(Option_t *) const
   printf(" THelixTrack::fP[3] = { %f , %f ,%f }\n",fP[0],fP[1],fP[2]);
   printf(" THelixTrack::fH[3] = { %f , %f ,%f }\n",fH[0],fH[1],fH[2]);
   printf(" THelixTrack::fRho  =   %f \n\n",fRho);
+
+  printf("double xyz[3] = {%g,%g,%g};\n" ,fX[0],fX[1],fX[2]); 
+  printf("double dir[3] = {%g,%g,%g};\n" ,fP[0],fP[1],fP[2]); 
+  printf("double hhh[3] = {%g,%g,%g};\n" ,fH[0],fH[1],fH[2]); 
+  printf("double Rho = %g;\n" ,fRho); 
+  printf("THelixTrack *ht = new THelixTrack(xyz,dir,Rho,hhh);\n");
+  
 }
 //_____________________________________________________________________________
 int THelixTrack::SqEqu(double *cba, double *sol)

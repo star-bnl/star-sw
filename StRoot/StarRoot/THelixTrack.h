@@ -17,9 +17,13 @@ public:
 	double Step(double step, double *xyz, double *dir=0) const;
         double Step(double stmax, const double *surf, int nsurf, double *x=0, double *dir=0) const;
         double Step(const double *point,double *xyz=0, double *dir=0) const;
-        const double *GetXYZ(){return fX;}
-        const double *GetDir(){return fP;}
-        double GetRho(){return fRho;}
+        double Dist(const double *point,double *xyz=0, double *dir=0) const;
+        const double *GetXYZ() const {return fX;}
+        const double *GetDir() const {return fP;}
+        double GetRho() const {return fRho ;}
+        double GetCos() const {return fCosL;}
+        double GetSin() const {return fHP  ;}
+        double GetPeriod() const ;
 
         void Print(Option_t *) const;
 static  int  SqEqu(double *, double *);
@@ -37,6 +41,7 @@ protected:
 	double fHP;
 	double fCosL;
    	double fMax;
+   	mutable double fDist;
         mutable Int_t  fKind;
 ClassDef(THelixTrack,0)
 };
