@@ -1,5 +1,24 @@
-* $Id: geometry.g,v 1.62 2003/09/29 19:48:41 potekhin Exp $
+* $Id: geometry.g,v 1.63 2003/10/01 23:44:17 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.63  2003/10/01 23:44:17  potekhin
+* Code modifications related to persisting the vital
+* geometry/version data, for now the magnetic field
+* scale and the geometry tag"
+*
+* 1) Change the semantics of the variable Geom, which was hacky
+* anyway, and put the mwx=1 in the individual year_1 branches
+* themselves (a lot cleaner than a prior obscure "if")
+*
+* 2) Store the complete geometry tag in the variable Geom,
+* which is 8 characters long
+*
+* 3) Change the subroutine "geometry" into a "module",
+* which process instruments it (via Mortran) to access
+* and manipulate ZEBRA banks as structures
+*
+* 4) Introduce the bank GDAT, as a sub-bank of GEOM,
+* which for now contains the field scale and the tag.
+*
 * Revision 1.62  2003/09/29 19:48:41  potekhin
 * 1) Fixed typos in comments
 *
@@ -128,19 +147,20 @@
 * tof geometry versions 1/2 preserved in btofgeo1, version 3 goes in btofgeo2
 *
 ***************************************************************************
-   subroutine geometry
-*                                                                         *
-*  author  Pavel Nevski                                                   *
-*  Created August 1998                                                    *
+   module geometry is the main steering module for the STAR geometry
+   author  Pavel Nevski
+   Created August 1998
 *                                                                         *
 *  Update history:                                                        *
 *  08/19/98, PN: tof is not part of year_2a                               *
 *  12/04/98, PN: rich  + upstream part + zero degree calo                 *
 *  09/26/99, E.Cains: 1H geometry added - one svt ladder at layer 3       *
 *  01/27/99, PN: rich in 1H geometry is simulated with hits is quartz & fr*
-*  22.05.01, PN: starting with tag y2000 field is version 3 (direct map)  *
+*  05/22/01, PN: starting with tag y2000 field is version 3 (direct map)  *
+*  09/30/03, MP: see the many new CVS comments about recent check-ins     *
+*  09/30/03, MP: converted the sub into a MODULE to allow for ZEBRA access*
 ***************************************************************************
-   Implicit   none
+   Structure  GDAT {real mfscale, char gtag(2)}
 * system list 
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
               zcal,mfld,bbcm,fpdm,phmd
@@ -149,29 +169,33 @@
               on/.true./,off/.false./
 
 * btof tray configuration: btofconfig variable
-*  1 - full ctb, 2 - full TOFp based tof
-*  3 - partial TOFp based tof, 4 - single TOFp tray
-*  5 - one TOFp and one TOFr, 6 - full TOFr based tof.
    Integer    btofconfig
+*  Codes:
+*  1 - full ctb,         2 - full TOFp based tof,   3 - partial TOFp based tof,
+*  4 - single TOFp tray, 5 - one TOFp and one TOFr, 6 - full TOFr based tof.
 
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,fieldbug,argonbug,
               CorrNum, PhmdVersion
-* Correction number within a year
+* CorrNum allows us to control incremental bug fixes in a more
+* organized manner
 
    character  Commands*4000,Geom*8
+
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
 *  temporarely until GCTLIT is not part of GCTMED:
    Integer        Thrind   ,Jmin,ItCkov,ImCkov,NpCkov
    common/GCTLIT/ Thrind(4),Jmin,ItCkov,ImCkov,NpCkov
 * - - - - - - - - - - - - - - - - -
+
 replace[;ON#{#;] with [
   IF Index(Commands,'#1')>0 
   { j=Index(Commands,'#1');  l=j+Lenocc('#1')-1; 
-    if (Commands(j:j+3)=='YEAR') Geom=Commands(j+4:l); 
+    if (Commands(j:j+3)=='YEAR') Geom=Commands(j:l); 
+    if (Commands(j:j)  =='Y')    Geom=Commands(j:l); 
     Commands(j:l)=' ';  <W>; (' #1: #2');
 ]
 *
@@ -201,7 +225,7 @@ replace[;ON#{#;] with [
    btofconfig = 1        " ctb only
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
-   mwx=2                 " for Geom=_1 mwx=1 limites x in mwc hits (<Y2K) "
+   mwx=2                 " for Year_1? mwx=1 limites x in mwc hits (<Y2K) "
    Itof=2                " use btofgeo2 - default starting from Y2000     "
    Rv=2                  " add non-sensitive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
@@ -211,8 +235,10 @@ replace[;ON#{#;] with [
    mf=2                  " default field - simetrical, as fitted by Bill  "
    ArgonBug=0            " in the future tsettting bug to 1 should introduce "
    Fieldbug=0            " old bugs in these places "
-   Commands=' '; Geom=' '
-
+   Commands=' ';
+   do kgeom=1,8
+      Geom(kgeom:kgeom)='\0';
+   enddo;
 
 * -------------------- select USERS configuration ------------------------
 * On a non-empty DETP GEOM every keyword makes an action and is erased.
@@ -249,27 +275,33 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on,auto-split');
                   <W>;('--------------------------------------------- ');
                 }  
-  on YEAR_1S    { starting in summer: TPC, CONE, AL pipe;          alpipe=on;
-                  {ftpc,vpdd,calb,ecal}=off;                           Nsi=0; }
+  on YEAR_1S    { starting in summer: TPC, CONE, AL pipe; alpipe=on;
+                  {ftpc,vpdd,calb,ecal}=off;                           Nsi=0;
+                  mwx=1;}
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
-                  {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0; }
+                  {vpdd,calb,ecal}=off;      Itof=1;                   Nsi=0;
+                  mwx=1;}
   on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt;
                   btofconfig = 4;
                   {vpdd,ecal}=off;  {rich,ems}=on; 
-                  nmod={12,0}; shift={87,0}; Itof=1; {Rv,Rp}=1;        Nsi=0; }
+                  nmod={12,0}; shift={87,0}; Itof=1; {Rv,Rp}=1;        Nsi=0;
+                  mwx=1;}
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  
-                  {vpdd,ecal}=off;           Itof=1;                   Nsi=0; }
+                  {vpdd,ecal}=off;           Itof=1;                   Nsi=0;
+                  mwx=1;}
 
   on YEAR_1H    { even better y1:  TPC+CTB+FTPC+RICH+caloPatch+svtLadder;  
                   btofconfig=4;
                   {vpdd,ecal}=off;  {rich,ems}=on;  Itof=1; 
-                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;}
+                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wdm=6;        Nsi=-3;
+                  mwx=1;}
 
   on YEAR_1E    { even better y1:  TPC+CTB+RICH+caloPatch+svtLadder;  
 *    HELEN:       one ladder at R=10.16cm with 7 wafers at the 12 O'Clock...
                   btofconfig=4;
                   {vpdd,ecal,ftpc}=off;  {rich,ems}=on;  Itof=1;
-                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;}
+                  nmod={12,0}; shift={87,0}; Rp=1; Rv=2; Wfr=7; Wdm=6; Nsi=-3;
+                  mwx=1;}
 
   on YEAR_2B    { old 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
                   btofconfig=4;
@@ -497,6 +529,13 @@ If LL>1
   }
 }
 
+* -------------------- persist certain global parameters -------------------
+
+   Fill GDAT                     ! GEANT run data
+      mfscale=field/5.0          ! magnetic field scale (nominal)
+      gtag={geom(1:4),geom(4:8)} ! geometry tag 
+   EndFill
+
 * -------------------- setup selected configuration ------------------------
 * Now when all parameters and flags are ready, make gstar work as usually
 * ie put a MODE or/and DETP command and executing them for selected systems.
@@ -547,7 +586,10 @@ If LL>1
 
    If (LL>1 & tpce) then
      call AgDETP new ('TPCE')
-     If (Geom(1:2)='_1') mwx=1
+* Attention -- this line below was effectively moved into individual year 1 declarations:
+*     If (Geom(1:2)='_1') mwx=1
+* Since we don't need the GEOM variable anymore in this context, we use it differently:
+* to simply contains the whole geometry tag such as year_1S or y2003a
      If (  .not. mwc   ) mwx=0
      If ( mwx <2 )  call AgDETP add ('tpcg(1).MWCread=',mwx,1)
      If (.not.pse)  call AgDETP add ('tprs(1).super='  , 1, 1) 
