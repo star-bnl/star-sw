@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcContainers.hh,v 2.1 1999/11/19 19:06:31 calderon Exp $
+ * $Id: StMcContainers.hh,v 2.2 1999/12/14 07:04:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcContainers.hh,v $
+ * Revision 2.2  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.1  1999/11/19 19:06:31  calderon
  * Recommit after redoing the files.
  *
@@ -60,16 +63,16 @@ typedef vector<StMcTrack*, allocator<StMcTrack*> >      StPtrVecMcTrack; //!
 
 #endif // no template default arguments
 //Iterators
-typedef StPtrVecMcVertex::iterator  StPtrVecMcVertexIterator; //!
-typedef StPtrVecMcSvtHit::iterator  StPtrVecMcSvtHitIterator; //!
-typedef StPtrVecMcTpcHit::iterator  StPtrVecMcTpcHitIterator; //!
-typedef StPtrVecMcFtpcHit::iterator StPtrVecMcFtpcHitIterator; //!
-typedef StPtrVecMcTrack::iterator   StPtrVecMcTrackIterator; //!
+typedef StPtrVecMcVertex::iterator  StMcVertexIterator; //!
+typedef StPtrVecMcSvtHit::iterator  StMcSvtHitIterator; //!
+typedef StPtrVecMcTpcHit::iterator  StMcTpcHitIterator; //!
+typedef StPtrVecMcFtpcHit::iterator StMcFtpcHitIterator; //!
+typedef StPtrVecMcTrack::iterator   StMcTrackIterator; //!
 //Const Iterators
-typedef StPtrVecMcVertex::const_iterator  StPtrVecMcVertexConstIterator; //!
-typedef StPtrVecMcSvtHit::const_iterator  StPtrVecMcSvtHitConstIterator; //!
-typedef StPtrVecMcTpcHit::const_iterator  StPtrVecMcTpcHitConstIterator; //!
-typedef StPtrVecMcFtpcHit::const_iterator StPtrVecMcFtpcHitConstIterator; //!
-typedef StPtrVecMcTrack::const_iterator   StPtrVecMcTrackConstIterator; //!
+typedef StPtrVecMcVertex::const_iterator  StMcVertexConstIterator; //!
+typedef StPtrVecMcSvtHit::const_iterator  StMcSvtHitConstIterator; //!
+typedef StPtrVecMcTpcHit::const_iterator  StMcTpcHitConstIterator; //!
+typedef StPtrVecMcFtpcHit::const_iterator StMcFtpcHitConstIterator; //!
+typedef StPtrVecMcTrack::const_iterator   StMcTrackConstIterator; //!
 
 #endif //StMcContainers

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.hh,v 2.2 1999/12/03 00:51:53 calderon Exp $
+ * $Id: StMcVertex.hh,v 2.3 1999/12/14 07:04:50 calderon Exp $
  * $Log: StMcVertex.hh,v $
+ * Revision 2.3  1999/12/14 07:04:50  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:53  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -25,11 +28,11 @@
 #define StMcVertex_hh
 #include "StMcContainers.hh"
 #include <string>
-#include "StDbUtilities/StGlobalCoordinate.hh"
+#include "StThreeVectorF.hh"
 
 class g2t_vertex_st;
 
-class StMcVertex : public StGlobalCoordinate {
+class StMcVertex {
 public:
     StMcVertex();
     StMcVertex(g2t_vertex_st*);
@@ -37,10 +40,10 @@ public:
     
     int operator==(const StMcVertex&) const;
     int operator!=(const StMcVertex&) const;
-
-  // "Get" Methods
-
-  
+    
+    // "Get" Methods
+    
+    const StThreeVectorF&       position() const;
     StPtrVecMcTrack&            daughters();
     unsigned int                numberOfDaughters();
     StMcTrack*                  daughter(unsigned int);
@@ -51,7 +54,7 @@ public:
 
   // "Set" Methods
   
-
+    void setPosition(const StThreeVectorF&);
     void setParent(StMcTrack* );         
     void addDaughter(StMcTrack*);
     void setGeantVolume(string);
@@ -61,7 +64,7 @@ public:
     
 protected:
     
-
+    StThreeVectorF       mPosition;
     StPtrVecMcTrack      mDaughters;
     StMcTrack*           mParent;
     string               mGeantVolume;
@@ -70,6 +73,8 @@ protected:
 };
 
 ostream&  operator<<(ostream& os, const StMcVertex&);
+
+inline const StThreeVectorF& StMcVertex::position() const { return mPosition;}
 
 inline StPtrVecMcTrack& StMcVertex::daughters(){ return mDaughters; }       
 

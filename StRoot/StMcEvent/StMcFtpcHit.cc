@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $
+ * $Id: StMcFtpcHit.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $
  * $Log: StMcFtpcHit.cc,v $
+ * Revision 2.3  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:52  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -24,7 +27,7 @@
 #include "StMcTrack.hh"
 #include "tables/St_g2t_ftp_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.2 1999/12/03 00:51:52 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 2.3 1999/12/14 07:04:49 calderon Exp $";
 
 StMemoryPool StMcFtpcHit::mPool(sizeof(StMcFtpcHit));
 
@@ -56,7 +59,7 @@ ostream&  operator<<(ostream& os, const StMcFtpcHit& h)
 unsigned long
 StMcFtpcHit::plane() const
 {
-    //volume_id = 101 to 110 are the first FTPC (0-9 in StEvent)
-    //volume_id = 201 to 210 are the second FTPC (10-19 in StEvent)
-    return (mVolumeId/100 - 1)*10 + mVolumeId%100 - 1;
+    //volume_id = 101 to 110 are the first FTPC (1-10 in StEvent)
+    //volume_id = 201 to 210 are the second FTPC (11-20 in StEvent)
+    return (mVolumeId/100 - 1)*10 + mVolumeId%100;
 }

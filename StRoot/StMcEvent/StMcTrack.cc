@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.3 1999/12/14 07:04:50 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.3  1999/12/14 07:04:50  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:53  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -32,7 +35,7 @@
 
 #include "tables/St_g2t_track_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.2 1999/12/03 00:51:53 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.3 1999/12/14 07:04:50 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -140,19 +143,19 @@ void StMcTrack::addSvtHit(StMcSvtHit* hit)
 
 void StMcTrack::removeTpcHit(StMcTpcHit* hit)
 {
-  StPtrVecMcTpcHitIterator iter = find(mTpcHits.begin(), mTpcHits.end(), hit);
+  StMcTpcHitIterator iter = find(mTpcHits.begin(), mTpcHits.end(), hit);
   if (iter != mTpcHits.end()) mTpcHits.erase(iter);
 }
 
 void StMcTrack::removeFtpcHit(StMcFtpcHit* hit)
 {
-  StPtrVecMcFtpcHitIterator iter = find(mFtpcHits.begin(), mFtpcHits.end(), hit);
+  StMcFtpcHitIterator iter = find(mFtpcHits.begin(), mFtpcHits.end(), hit);
   if (iter != mFtpcHits.end()) mFtpcHits.erase(iter);
 }
 
 void StMcTrack::removeSvtHit(StMcSvtHit* hit)
 {
-  StPtrVecMcSvtHitIterator iter = find(mSvtHits.begin(), mSvtHits.end(), hit);
+  StMcSvtHitIterator iter = find(mSvtHits.begin(), mSvtHits.end(), hit);
   if (iter != mSvtHits.end()) mSvtHits.erase(iter);
 }
 

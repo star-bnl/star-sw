@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLayerHitCollection.cc,v 2.0 1999/11/17 02:01:00 calderon Exp $
+ * $Id: StMcSvtLayerHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLayerHitCollection.cc,v $
+ * Revision 2.1  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.0  1999/11/17 02:01:00  calderon
  * Completely revised for new StEvent
  *
@@ -17,7 +20,7 @@
  **************************************************************************/
 #include "StMcSvtLayerHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtLayerHitCollection.cc,v 2.0 1999/11/17 02:01:00 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtLayerHitCollection.cc,v 2.1 1999/12/14 07:04:49 calderon Exp $";
 
 #ifdef PERSISTENT
 ClassImp(StMcSvtLayerHitCollection)
@@ -40,16 +43,16 @@ unsigned int
 StMcSvtLayerHitCollection::numberOfLadders() const
 {
     switch (mLayerNumber) {
-    case 0:
     case 1:
+    case 2:
         return 4;
         break;
-    case 2:
     case 3:
+    case 4:
         return 6;
         break;
-    case 4:
     case 5:
+    case 6:
         return 8;
         break;
     default:

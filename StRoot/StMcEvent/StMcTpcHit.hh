@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTpcHit.hh,v 2.2 1999/12/03 00:51:53 calderon Exp $
+ * $Id: StMcTpcHit.hh,v 2.3 1999/12/14 07:04:49 calderon Exp $
  * $Log: StMcTpcHit.hh,v $
+ * Revision 2.3  1999/12/14 07:04:49  calderon
+ * Numbering scheme as per SVT request.
+ *
  * Revision 2.2  1999/12/03 00:51:53  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -48,19 +51,12 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
     
-    void setPadCoordinate(StTpcPadCoordinate);
-    void setLocalCoordinate(StTpcLocalSectorCoordinate);
-
-    unsigned long sector()     const; // 0-23
-    unsigned long padrow()     const; // 0-44
-    unsigned long pad()        const; // start from zero
-    unsigned long timeBucket() const; // start from zero
-    const StThreeVectorF& localPosition() const;
+    unsigned long sector()     const; // 1-24
+    unsigned long padrow()     const; // 1-45
 
 private:
     static StMemoryPool         mPool; //!
-    StTpcPadCoordinate          mPadCoordinate; //!
-    StTpcLocalSectorCoordinate  mSectorTwelveCoordinate; //!
+    long   mVolumeId;
 };
 
 ostream&  operator<<(ostream& os, const StMcTpcHit&);
@@ -68,37 +64,14 @@ ostream&  operator<<(ostream& os, const StMcTpcHit&);
 inline unsigned long
 StMcTpcHit::sector() const
 {
-    return mPadCoordinate.sector()-1;   //  sector=[0,23]
+    // volume Id = 10000 * some junk + 100 * sector + padrow
+    return (mVolumeId%10000)/100;   //  sector=[1,24]
 }
 
 inline unsigned long
 StMcTpcHit::padrow() const
 {
-    return mPadCoordinate.row()-1;   // padrow=[0-44]
+    return (mVolumeId%100);   // padrow=[1-45]
 }
-
-inline unsigned long
-StMcTpcHit::pad() const
-{
-    return mPadCoordinate.pad()-1;   // start from zero
-}
-
-inline unsigned long
-StMcTpcHit::timeBucket() const
-{
-    return mPadCoordinate.timeBucket();   // already starts from zero.
-}
-
-inline const StThreeVectorF&
-StMcTpcHit::localPosition() const
-{
-    return mSectorTwelveCoordinate.position();
-}
-
-inline void
-StMcTpcHit::setPadCoordinate(StTpcPadCoordinate val) { mPadCoordinate=val; }
-
-inline void
-StMcTpcHit::setLocalCoordinate(StTpcLocalSectorCoordinate val) { mSectorTwelveCoordinate=val; }
 
 #endif
