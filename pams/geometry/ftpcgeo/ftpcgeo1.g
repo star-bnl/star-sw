@@ -1,6 +1,11 @@
-* $Id: ftpcgeo1.g,v 1.1 2005/03/25 02:06:11 potekhin Exp $
+* $Id: ftpcgeo1.g,v 1.2 2005/03/31 20:05:49 potekhin Exp $
 *
 * $Log: ftpcgeo1.g,v $
+* Revision 1.2  2005/03/31 20:05:49  potekhin
+* Janet has coomuncated to us that a few parameters
+* need to be updated, which is what is done here.
+* There is a comment added about it, too
+*
 * Revision 1.1  2005/03/25 02:06:11  potekhin
 * Janet has told us that they are using
 * Ar+C02 mix in the chamber, as opposed to
@@ -65,10 +70,10 @@ Module   FTPCGEO1  is the Forward TPC in STAR with corrected GAS
 	Integer  Agexist
 *
 * ----------------------------------------------------------------------------
-
+* changes as of 20050331: rinnerms, drinall1, drinisol, drinall2
    Fill FTPG	    ! basic FTPC data
 	Version		= 1	! geometry Version
-	RinnerMs	= 7.55  ! innermost radius of envelope
+	RinnerMs	= 7.40  ! innermost radius of envelope
 	RouterMs	= 36.4	! outermost radius of envelope
 	RGasOut		= 30.6  ! outer radius of the gas-volume
         RRoM            = 29.42 ! outer radius for one readout module in a ring
@@ -79,9 +84,9 @@ Module   FTPCGEO1  is the Forward TPC in STAR with corrected GAS
 	totLen		= 119	! overall length
         LayLen          = 2.0   ! thickness of the sensitive Layer
         Hitlay          = 10    ! # of padrows in one FTPC : 10
-	DrInAlL1	= 0.05  ! thickness of inner Al-Layer of inner Tube
-	DrInAlL2	= 0.05  ! thickness of outer Al-Layer of inner Tube
-	DrInIsoL	= 0.4	! thickness of plastic insulation of inner tube
+	DrInAlL1	= 0.01  ! thickness of inner Al-Layer of inner Tube
+	DrInAlL2	= 0.01  ! thickness of outer Al-Layer of inner Tube
+	DrInIsoL	= 0.3	! thickness of plastic insulation of inner tube
 	DzKapton	= 0.02	! thickness of a double kapton-windows
 	DrIFR		= 1.15	! thickness (r) of inner flange ring
 	DzIFR		= 0.4	! thickness (z) of inner flange ring
