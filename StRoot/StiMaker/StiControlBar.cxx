@@ -51,6 +51,13 @@ void StiControlBar::doNextStiGuiAction()
     //cout <<"\t Leaving StiControlBar::doNextStGuiAction()"<<endl;
 }
 
+void StiControlBar::finishEvent()
+{
+    StiControlBar::setCurrentDetectorToDefault();
+    StiMaker::instance()->finishEvent();
+    StiControlBar::showCurrentDetector();
+}
+
 void StiControlBar::stepToNextEvent()
 {
     StiControlBar::setCurrentDetectorToDefault();    
@@ -324,34 +331,51 @@ TControlBar* StiControlBar::makeControlBar()
 
     bar->AddButton("Dump Display Manager","StiControlBar::printDisplayManager()",
 		   "Show contents of the Display Manager");
-    bar->AddButton("Dump Detector","StiControlBar::printDetector()","Show contents of Detector Container");
-    bar->AddButton("Dump Hits","StiControlBar::printHits()","Show all contents of Hit Container");
-    bar->AddButton("Dump Vertices", "StiControlBar::printVertices()", "Show Primary vertices for this event");
-    bar->AddButton("Choose fit/find","StiControlBar::toggleFitFind()","Switch between track fitting and track finding");
+    bar->AddButton("Dump Detector","StiControlBar::printDetector()",
+		   "Show contents of Detector Container");
+    bar->AddButton("Dump Hits","StiControlBar::printHits()",
+		   "Show all contents of Hit Container");
+    bar->AddButton("Dump Vertices", "StiControlBar::printVertices()",
+		   "Show Primary vertices for this event");
+    bar->AddButton("Choose fit/find","StiControlBar::toggleFitFind()",
+		   "Switch between track fitting and track finding");
     
     bar->AddSeparator();
     
-    bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");
-    bar->AddButton("All Invisible","StiControlBar::setInvisible()","Set All Drawables to Invisible State");
-    bar->AddButton("SkeletonView","StiControlBar::setSkeletonView()","Set Display to Skeleton View");
+    bar->AddButton("All Visible","StiControlBar::setVisible()",
+		   "Set All Drawables to Visible State");
+    bar->AddButton("All Invisible","StiControlBar::setInvisible()",
+		   "Set All Drawables to Invisible State");
+    bar->AddButton("SkeletonView","StiControlBar::setSkeletonView()",
+		   "Set Display to Skeleton View");
     
-    bar->AddButton("Svt Visible","StiControlBar::setSvtVisible()","Set Svt Drawables to Visible State");    
-    bar->AddButton("Svt Invisible","StiControlBar::setSvtInvisible()","Set Svt Drawables to Invisible State");
+    bar->AddButton("Svt Visible","StiControlBar::setSvtVisible()",
+		   "Set Svt Drawables to Visible State");    
+    bar->AddButton("Svt Invisible","StiControlBar::setSvtInvisible()",
+		   "Set Svt Drawables to Invisible State");
     
-    bar->AddButton("Tpc Visible","StiControlBar::setTpcVisible()","Set Tpc Drawables to Visible State");    
-    bar->AddButton("Tpc Invisible","StiControlBar::setTpcInvisible()","Set Tpc Drawables to Invisible State");
+    bar->AddButton("Tpc Visible","StiControlBar::setTpcVisible()",
+		   "Set Tpc Drawables to Visible State");    
+    bar->AddButton("Tpc Invisible","StiControlBar::setTpcInvisible()",
+		   "Set Tpc Drawables to Invisible State");
     
 
     //Detector navigation
-    bar->AddButton("Show Current Detector","StiControlBar::showCurrentDetector()","Highlight Current Detector");
-    bar->AddButton("Show Hits for Current Detector","StiControlBar::printHitContainerForDetector()",
+    bar->AddButton("Show Current Detector","StiControlBar::showCurrentDetector()",
+		   "Highlight Current Detector");
+    bar->AddButton("Show Hits for Current Detector",
+		   "StiControlBar::printHitContainerForDetector()",
 		   "Show hits for Current Detector");
 
-    bar->AddButton("Move Out","StiControlBar::moveOut()","Step Radially to Next Padrow Out");
-    bar->AddButton("Move In","StiControlBar::moveIn()","Step Radially to Next Padrow In");
+    bar->AddButton("Move Out","StiControlBar::moveOut()",
+		   "Step Radially to Next Padrow Out");
+    bar->AddButton("Move In","StiControlBar::moveIn()",
+		   "Step Radially to Next Padrow In");
     
-    bar->AddButton("Move Around (Plus)","StiControlBar::movePlusPhi()","Step positive in global phi");
-    bar->AddButton("Move Around (Minus)","StiControlBar::moveMinusPhi()","Step negative in global phi");
+    bar->AddButton("Move Around (Plus)","StiControlBar::movePlusPhi()",
+		   "Step positive in global phi");
+    bar->AddButton("Move Around (Minus)","StiControlBar::moveMinusPhi()",
+		   "Step negative in global phi");
 
     bar->AddButton("Set Layer","StiControlBar::setLayer()","Set to given layer");
     bar->AddButton("Set Layer and Angle","StiControlBar::setLayerAndAngle()",
@@ -359,10 +383,16 @@ TControlBar* StiControlBar::makeControlBar()
 
     //Chain management
     bar->AddSeparator();
-    bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()","Step Through Next Action");
-    bar->AddButton("Event Step","StiControlBar::stepToNextEvent()","Step Through to Next Event");
-    bar->AddButton("N-Event Step","StiControlBar::stepThroughNEvents()","Step Through N-Events");
-    bar->AddButton("Finish","StiControlBar::finish()","Call StChain::Finish()");
+    bar->AddButton("Step",  "StiControlBar::doNextStiGuiAction()",
+		   "Step Through Next Action");
+    bar->AddButton("Event Step","StiControlBar::stepToNextEvent()",
+		   "Step Through to Next Event");
+    bar->AddButton("Finish Event","StiControlBar::finishEvent()",
+		   "Track Entire Event");
+    bar->AddButton("N-Event Step","StiControlBar::stepThroughNEvents()",
+		   "Step Through N-Events");
+    bar->AddButton("Finish","StiControlBar::finish()",
+		   "Call StChain::Finish()");
 
     bar->Show();
     return bar;
