@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RichEventReader.cxx,v 1.1 2000/04/25 14:55:28 xzb Exp $
+ * $Id: RichEventReader.cxx,v 1.2 2000/04/25 15:18:08 xzb Exp $
  * Author: Zhangbu Xu 
  ***************************************************************************
  * Description: Rich Event reader code for standalone data file
@@ -22,6 +22,9 @@
  *
  ***************************************************************************
  * $Log: RichEventReader.cxx,v $
+ * Revision 1.2  2000/04/25 15:18:08  xzb
+ * Fix the compiler warnings.
+ *
  * Revision 1.1  2000/04/25 14:55:28  xzb
  * Clean up RICH_Reader array, add RichEventReader for standalone data file
  *
@@ -184,7 +187,7 @@ void RichEventReader::InitEventReader(int fdes, long offset, int MMap)
     ERROR(INFO_END_FILE) ;
     next_event_offset= -1;
   }
-  if (verbose) printf( "pagesize = %d  mapsize %d offset %d\n",(int)pagesize, mapsize, offset);
+  //  if (verbose) printf( "pagesize = %d  mapsize %d offset %d\n",(int)pagesize, mapsize, offset);
   if (mapsize>MX_MAP_SIZE)    mapsize =  MX_MAP_SIZE;
   event_size = mapsize ; //needed for munmap() in destructor
 
@@ -198,7 +201,7 @@ void RichEventReader::InitEventReader(int fdes, long offset, int MMap)
     ERROR(ERR_MEM);
     next_event_offset=-1;
   }
-  if (verbose) printf("mapping file request 0x%x bytes 0x%x with page 0x%x at 0x%x\n",mapsize,mmap_offset,pagesize,MMAPP);
+  //  if (verbose) printf("mapping file request 0x%x bytes 0x%x with page 0x%x at 0x%x\n",mapsize,mmap_offset,pagesize,MMAPP);
 
   // Set DATAP to the real value
   DATAP = MMAPP + (offset-mmap_offset);
@@ -267,7 +270,7 @@ void RichEventReader::InitEventReader(int fdes, long offset)
   long c_offset = offset;
   next_event_offset = -1;
 
-  if (verbose) cout << "Initializing EventReader with a file" << endl;
+  if (verbose) cout << "Initializing RichEventReader with a file" << endl;
 
   //initialize the error strings
   strcpy(err_string[0],"ERROR: FILE");
@@ -363,7 +366,7 @@ RichEventReader::~RichEventReader()
   else if(MMAPP != NULL)    // Memory Mapped file
   {
     // Unmap memory
-    if (verbose) printf("0x%x  of size 0x%x\n",MMAPP,event_size);
+    //    if (verbose) printf("0x%x  of size 0x%x\n",MMAPP,event_size);
     munmap(MMAPP,event_size); //unmap 
   }
   else                      // file buffer
