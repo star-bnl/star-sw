@@ -182,6 +182,11 @@ private:
 
     StChain* mchain;
 
+    TGCompositeFrame* fTrackingFrame;
+    TGTextButton* fFinishTrackButton;
+    TGTextButton* fFinishEventButton;
+    TGTextButton* fNextEventButton;
+    
     ClassDef(MainFrame,1)
 };
 

@@ -98,7 +98,10 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
       fDetectorViewMenu(0), mSvtViewMenu(0), mTpcViewMenu(0),
       mIfcViewMenu(0), mAllViewMenu(0), mNavigateMenu(0),
       mTrackingMenu(0),
-      fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0)
+      fMenuBarLayout(0), fMenuBarItemLayout(0), fMenuBarHelpLayout(0),
+      mchain(0),
+      fTrackingFrame(0), fFinishTrackButton(0), fFinishEventButton(0),
+      fNextEventButton(0)
 {
     cout <<"MainFrame::MainFrame()"<<endl;
     // Create test main frame. A TGMainFrame is a top level window.
@@ -196,8 +199,6 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     
     AddFrame(fMenuBar, fMenuBarLayout);
 
-    // Create TGCanvas and a canvas container which uses a tile layout manager
-    //fCanvasWindow = new TGCanvas(this, 600, 600);
     fCanvasWindow =
 	new TRootEmbeddedCanvas("My Embedded Canvas", this, 600, 600);
 
@@ -214,11 +215,41 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     }
 
     //This has to be the first call to StiDisplayManager::instance()
-    
     StiDisplayManager::instance(temp->GetCanvas());
-    
+
+    //Add the canvas to the frame
     AddFrame(fCanvasWindow, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY,
 					      0, 0, 2, 2));
+
+    fTrackingFrame = new TGCompositeFrame(this, 60, 20, kHorizontalFrame |
+					  kSunkenFrame);
+
+    fFinishTrackButton = new TGTextButton(fTrackingFrame,
+					  "Finish &Track", M_Tracking_FinishTrack);
+    fFinishTrackButton->Associate(this);
+    fFinishTrackButton->SetToolTipText("Finish The Current Track");
+
+    fFinishEventButton = new TGTextButton(fTrackingFrame,
+					  "Finish &Event", M_Tracking_FinishEvent);
+    fFinishEventButton->Associate(this);
+    fFinishEventButton->SetToolTipText("Finish The Current Event");
+
+
+    fNextEventButton = new TGTextButton(fTrackingFrame,
+					"&Next Event", M_Tracking_EventStep);
+    fNextEventButton->Associate(this);
+    fNextEventButton->SetToolTipText("Step To Next Event");
+    
+    fTrackingFrame->AddFrame(fFinishTrackButton,
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 2, 0, 2, 2));
+    fTrackingFrame->AddFrame(fFinishEventButton,
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 10, 2, 2, 2));
+    fTrackingFrame->AddFrame(fNextEventButton,
+			     new TGLayoutHints(kLHintsTop | kLHintsLeft, 18, 2, 2, 2));
+
+    AddFrame(fTrackingFrame, new TGLayoutHints(kLHintsBottom | kLHintsExpandX,
+					       0, 0, 1, 0));
+    
     
     SetWindowName("The STAR Integraged Tracker");
     
@@ -315,11 +346,22 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	    
 	case kCM_BUTTON:
 	    //printf("Button was pressed, id = %ld\n", parm1);
+	    if (parm1 == M_Tracking_FinishTrack) {
+		doNextStiGuiAction();
+	    }
+	    else if (parm1 == M_Tracking_FinishEvent) {
+		finishEvent();
+	    }
+	    else if (parm1 == M_Tracking_EventStep) {
+		stepToNextEvent();
+	    }
+	    break;
+	    
 	    
 	case kCM_MENUSELECT:
 	    //printf("Pointer over menu entry, id=%ld\n", parm1);
 	    break;
-
+	    
 	case kCM_MENU:
 	    switch (parm1) {
 		
