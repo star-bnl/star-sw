@@ -23,11 +23,6 @@
 #include "StHbtMaker/Base/StHbtV0Cut.h"
 #include "StHbtMaker/Base/StHbtKinkCut.h"
 
-#include "StFlowMaker/StFlowMaker.h"
-#include "StFlowMaker/StFlowEvent.h"
-#include "StFlowAnalysisMaker/StFlowAnalysisMaker.h"
-#include "StFlowMaker/StFlowSelection.h"
-
 #include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 #include "StHbtMaker/Reader/StHbtBinaryReader.h"
 
@@ -41,8 +36,6 @@ StHbtBinaryReader::StHbtBinaryReader(const char* dir, const char* file, const ch
 #ifdef __ROOT__
   mIOMaker =0;
 #endif
-  mFlowMaker = 0;
-  mFlowAnalysisMaker = 0;
 }
 //_______________________________
 #ifdef __ROOT__
@@ -51,8 +44,6 @@ StHbtBinaryReader::StHbtBinaryReader(StIOMaker* ioMaker, const char* dir, const 
   mRetrieve = 1;
   mIOMaker = ioMaker;
   if (mDebug) cout << " StHbtBinaryReader::StHbtBinaryReader() -  mIOMaker : " << mIOMaker << endl;
-  mFlowMaker = 0;
-  mFlowAnalysisMaker = 0;
 }
 #endif
 //_______________________________
@@ -71,8 +62,6 @@ void StHbtBinaryReader::init(const char* dir, const char* file, const char* appe
   mStHbtEventVersion = 2;
   mStHbtTrackVersion = 2,
   mStHbtV0Version = 3;
-  mFlowMaker = 0;
-  mFlowAnalysisMaker = 0;
 }
 //_______________________________
 StHbtBinaryReader::~StHbtBinaryReader(){
@@ -164,22 +153,36 @@ StHbtEvent* StHbtBinaryReader::ReturnHbtEvent(){
     NewV0Collection.clear();
   }
 
+  /* Randy removed this since RP is calculated in event cut -> "calculateEventPlaneEventCut"
   // to get RP from FlowMaker
   if ( mFlowMaker && event ) {
     mFlowMaker->FillFlowEvent(event);
+    mFlowMaker->FlowEventPointer()->SetPtWgt(false);
     // First get RP for whole event
     mFlowMaker->FlowSelection()->SetSubevent(-1);
     double reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-    cout << "Reaction Plane " << reactionPlane << endl;
-    event->SetReactionPlane(reactionPlane);
+    event->SetReactionPlane(reactionPlane,0);
     // Sub event RPs
     mFlowMaker->FlowSelection()->SetSubevent(0);
     double RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
     mFlowMaker->FlowSelection()->SetSubevent(1);
     double RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
-    event->SetReactionPlaneSubEventDifference(RP1-RP2);
+    event->SetReactionPlaneSubEventDifference(RP1-RP2,0);
+    // Now with Pt Weighting
+    mFlowMaker->FlowEventPointer()->SetPtWgt(true);
+    // First get RP for whole event
+    mFlowMaker->FlowSelection()->SetSubevent(-1);
+    reactionPlane = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+    event->SetReactionPlane(reactionPlane,1);
+    // Sub event RPs
+    mFlowMaker->FlowSelection()->SetSubevent(0);
+    RP1 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+    mFlowMaker->FlowSelection()->SetSubevent(1);
+    RP2 = mFlowMaker->FlowEventPointer()->Psi(mFlowMaker->FlowSelection());
+    event->SetReactionPlaneSubEventDifference(RP1-RP2,1);
     if (mFlowAnalysisMaker) mFlowAnalysisMaker->Make();
   }
+  */
 
   if (mDebug>1) {
     cout << " StHbtBinaryReader::ReturnHbtEvent() - current filename: " << mFileName << endl;

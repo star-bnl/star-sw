@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.12 2001/06/23 21:55:17 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.13 2001/07/20 20:03:53 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.13  2001/07/20 20:03:53  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.12  2001/06/23 21:55:17  laue
  * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
  * Some output turned off
@@ -107,6 +110,8 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
   mUncorrectedNumberOfNegativePrimaries = ev->mUncorrectedNumberOfNegativePrimaries;
   mReactionPlane[0] = ev->mReactionPlane[0];
   mReactionPlane[1] = ev->mReactionPlane[1];
+  mReactionPlanePtWgt[0] = ev->mReactionPlanePtWgt[0];
+  mReactionPlanePtWgt[1] = ev->mReactionPlanePtWgt[1];
   mPrimVertPos = StHbtThreeVector(ev->mVertexX,ev->mVertexY,ev->mVertexZ);
   mMagneticField = ev->mMagneticField;
   if (mMagneticField==0) {
@@ -166,6 +171,8 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
   mUncorrectedNumberOfNegativePrimaries = ev.mUncorrectedNumberOfNegativePrimaries;
   mReactionPlane[0] = ev.mReactionPlane[0];
   mReactionPlane[1] = ev.mReactionPlane[1];
+  mReactionPlanePtWgt[0] = ev.mReactionPlanePtWgt[0];
+  mReactionPlanePtWgt[1] = ev.mReactionPlanePtWgt[1];
   mPrimVertPos = ev.mPrimVertPos;
   mMagneticField= ev.mMagneticField;
 
@@ -232,6 +239,7 @@ void StHbtEvent::RotateZ(const double angle){
   double c;
 
   mReactionPlane[0] += angle;
+  mReactionPlanePtWgt[0] += angle;
   cout << " StHbtEvent::RotateZ(const double angle) - angle=" << angle << " rad    ";
   cout << angle / degree << " deg " << endl; 
   for (iter=mTrackCollection->begin();iter!=mTrackCollection->end();iter++){
@@ -263,9 +271,15 @@ void StHbtEvent::SetNumberOfTracks(const unsigned short& tracks){mNumberOfTracks
 void StHbtEvent::SetNumberOfGoodTracks(const unsigned short& tracks){mNumberOfGoodTracks = tracks;}
 void StHbtEvent::SetUncorrectedNumberOfPositivePrimaries(const unsigned int& tracks){mUncorrectedNumberOfPositivePrimaries = tracks;}
 void StHbtEvent::SetUncorrectedNumberOfNegativePrimaries(const unsigned int& tracks){mUncorrectedNumberOfNegativePrimaries = tracks;}
-void StHbtEvent::SetReactionPlane(const float& rp){mReactionPlane[0] = rp ;}
-void StHbtEvent::SetReactionPlaneError(const float& rp ){ SetReactionPlaneSubEventDifference(rp); }
-void StHbtEvent::SetReactionPlaneSubEventDifference(const float& rp ){mReactionPlane[1]=rp;}
+void StHbtEvent::SetReactionPlane(const float& rp, const int& wgt=0){
+  if (!wgt) mReactionPlane[0]=rp;
+  else mReactionPlanePtWgt[0]=rp;
+}
+void StHbtEvent::SetReactionPlaneError(const float& rp, const int& wgt=0){ SetReactionPlaneSubEventDifference(rp,wgt); }
+void StHbtEvent::SetReactionPlaneSubEventDifference(const float& rp, const int& wgt=0){
+  if (!wgt) mReactionPlane[1]=rp;
+  else mReactionPlanePtWgt[1]=rp;
+}
 void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
 void StHbtEvent::SetMagneticField(const double& magF){mMagneticField = magF;}
 
@@ -279,9 +293,19 @@ unsigned short StHbtEvent::NumberOfTracks() const {return mNumberOfTracks;}
 unsigned short StHbtEvent::NumberOfGoodTracks() const {return mNumberOfGoodTracks;}
 unsigned int StHbtEvent::UncorrectedNumberOfPositivePrimaries() const {return mUncorrectedNumberOfPositivePrimaries;}
 unsigned int StHbtEvent::UncorrectedNumberOfNegativePrimaries() const {return mUncorrectedNumberOfNegativePrimaries;}
-float          StHbtEvent::ReactionPlane() const {return mReactionPlane[0];}
-float          StHbtEvent::ReactionPlaneError() const {return ReactionPlaneSubEventDifference();}
-float          StHbtEvent::ReactionPlaneSubEventDifference() const {return mReactionPlane[1];}
+float          StHbtEvent::ReactionPlane(const int& wgt=0) const {
+  float temp;
+  if (!wgt) temp=mReactionPlane[0];
+  else temp=mReactionPlanePtWgt[0];
+  return temp;
+}
+float          StHbtEvent::ReactionPlaneError(const int& wgt=0) const {return ReactionPlaneSubEventDifference(wgt);}
+float          StHbtEvent::ReactionPlaneSubEventDifference(const int& wgt=0) const {
+  float temp;
+  if (!wgt) temp=mReactionPlane[1];
+  else temp=mReactionPlanePtWgt[1];
+  return temp;
+}
 StHbtV0Collection* StHbtEvent::V0Collection() const {return mV0Collection;}
 StHbtKinkCollection* StHbtEvent::KinkCollection() const {return mKinkCollection;}
 StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}

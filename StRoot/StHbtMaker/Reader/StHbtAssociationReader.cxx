@@ -246,8 +246,10 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   hbtEvent->SetZdcAdcWest(0.);
   hbtEvent->SetNumberOfTpcHits(0.);
   hbtEvent->SetNumberOfTracks(rMult);
-  hbtEvent->SetReactionPlane(0.);
-  hbtEvent->SetReactionPlaneSubEventDifference(0.);
+  hbtEvent->SetReactionPlane(0.,0);
+  hbtEvent->SetReactionPlane(0.,1);
+  hbtEvent->SetReactionPlaneSubEventDifference(0.,0);
+  hbtEvent->SetReactionPlaneSubEventDifference(0.,1);
   hbtEvent->SetPrimVertPos(rVertexPosition); 
 
   // By now, all event-wise information has been extracted and stored in hbtEvent

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTTreeEvent.h,v 1.2 2001/06/23 21:55:17 laue Exp $
+ * $Id: StHbtTTreeEvent.h,v 1.3 2001/07/20 20:03:53 rcwells Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************
@@ -8,6 +8,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTTreeEvent.h,v $
+ * Revision 1.3  2001/07/20 20:03:53  rcwells
+ * Added pT weighting and moved event angle cal. to event cut
+ *
  * Revision 1.2  2001/06/23 21:55:17  laue
  * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
  * Some output turned off
@@ -77,6 +80,7 @@ private:
   Float_t mZdcAdc[2];             // Zero-degree calorimeter 
                                        //values east/west
   Float_t mReactionPlane[2];              
+  Float_t mReactionPlanePtWgt[2];              
   Float_t mVertexX;
   Float_t mVertexY;
   Float_t mVertexZ;
