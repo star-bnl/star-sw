@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.6 2003/09/02 17:59:39 perev Exp $
+ * $Id: TMemStat.cxx,v 1.7 2003/10/25 02:58:50 jeromel Exp $
  *
  ***************************************************************************
  *
@@ -17,13 +17,17 @@
 #include "TList.h"
 #include "TError.h"
 
-double  TMemStat::fgUsed=0;
-TList  *TMemStat::fgList=0;
+Double_t  TMemStat::fgUsed=0;
+TList    *TMemStat::fgList=0;
 ClassImp(TMemStat)
+
+#define LOWEST_VAL 0.0000001                                           /*! \def LOWEST_VAL */
+
+
 //______________________________________________________________________________
 TMemStat::TMemStat(const char *name):TNamed(name,"")
 {
-  int n = (char*)&fTally-(char*)&fLast+sizeof(fTally);
+  int n = (char*)&fTally - (char*)&fLast + sizeof(fTally);
   memset(&fLast,0,n);
   fMin =  1.e+33; 
   fMax = -1.e+33; 
@@ -47,39 +51,48 @@ void TMemStat::Start()
 void TMemStat::Stop()
 {
   fTally++;
-  double dif = Used() - fLast;
+  Double_t dif = Used() - fLast;
+
+  //printf("DEBUG >> time distance between two stops Used=%f Last=%f\n",Used(),fLast);
+  if ( dif < LOWEST_VAL )  dif  = 0.0;
+  if ( dif < fMin )        fMin = dif;
+  if ( dif > fMax )        fMax = dif;
+
   fAver += dif;
   fRms  += (dif*dif);
-  if (fabs(dif) < 0.0000001) dif = 0;
-  if (dif < fMin) fMin=dif;
-  if (dif > fMax) fMax=dif;
+
 }
 //______________________________________________________________________________
 void TMemStat::Print(const char *) const
 {
   if (!fTally) return;
-  double aver = fAver/fTally;
-  double rms  = ::sqrt(fabs(fRms/fTally - aver*aver));
-  if (fabs(aver) < 0.000001) aver = 0;
-  if (fabs(rms ) < 0.000001) rms  = 0;
-  printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n"
-        ,GetName(),fTally,fMin,aver,fMax,rms);
+  Double_t aver = fAver/fTally;
+  Double_t rms  = ::sqrt(fabs(fRms/fTally - aver*aver));
+
+  //printf("DEBUG :: %.10f %d %.10f %.10f\n",fAver,fTally,fRms,aver);
+  if ( aver < LOWEST_VAL ) aver = 0.0;
+  if ( rms  < LOWEST_VAL ) rms  = 0.0;
+
+  printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
+	 GetName(),fTally,fMin,aver,fMax,rms);
 }
 //______________________________________________________________________________
 void TMemStat::Summary()
 {
 
-   double dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+   Double_t dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
 
    if(!fgList) return;
    fgList->Sort();
-   printf("%40s%12s%12s%12s%12s\n"
-   ,"TMemStat::Summary(calls)","Min ","Aver ","Max ","RMS ");
-   {for(int i=0;i<40+4*12;i++) printf("=");} printf("\n");
+   printf("%40s%12s%12s%12s%12s\n",
+	  "TMemStat::Summary(calls)","Min ","Aver ","Max ","RMS ");
+
+   for(int i=0 ; i < 40+4*12 ; i++) printf("=");
+   printf("\n");
    
-   TListIter next(fgList); TMemStat *m;
-   while((m = (TMemStat*)next())) 
-   {
+   TListIter next(fgList); 
+   TMemStat  *m;
+   while((m = (TMemStat*)next())){
      if(!m->fTally)	continue;
      m->Print();
      dtally++;
@@ -90,17 +103,22 @@ void TMemStat::Summary()
      drms  += dmp*dmp;
    }
    if(!dtally) return;
-   {for(int i=0;i<40+4*12;i++) printf("-");} printf("\n");
-   daver /=dtally;
-   drms = ::sqrt(fabs(drms/dtally-daver*daver));
-   printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n"
-        ,"Total",(int)dtally,dmin,daver,dmax,drms);
-   {for(int i=0;i<40+4*12;i++) printf("=");} printf("\n");
+
+   for(int i=0 ; i < 40+4*12 ; i++) printf("-");
+   printf("\n");
+
+   daver /= dtally;
+   drms   = ::sqrt(fabs(drms/dtally-daver*daver));
+   printf("%40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
+	  "Total",(int)dtally,dmin,daver,dmax,drms);
+
+   for(int i=0 ; i < 40+4*12 ; i++) printf("=");
+   printf("\n");
 
 }
 
 //______________________________________________________________________________
-double TMemStat::Used()
+Double_t TMemStat::Used()
 {
   struct mallinfo info;
   info = mallinfo();
@@ -108,10 +126,10 @@ double TMemStat::Used()
 }
 
 //______________________________________________________________________________
-double TMemStat::ProgSize()
+Double_t TMemStat::ProgSize()
 {
   static char *ps = 0;
-  double res=0;  
+  Double_t res=0;  
   if (!ps) {
     int pid = ::getpid();
     ps = (char*)malloc(20);
@@ -132,7 +150,7 @@ double TMemStat::ProgSize()
       if (c[0]==' ' && c[1]!=' ') ifild++;
       if (ifild == 10) break;
     }
-    res = (double)atoi(c+1);
+    res = (Double_t) atoi(c+1);
     if (res) break;
   }
   ::pclose(pipe);
@@ -144,8 +162,8 @@ double TMemStat::ProgSize()
 //______________________________________________________________________________
 void TMemStat::PrintMem(const char *tit)
 {
-  double used = Used();
-  double exec = ProgSize();
+  Double_t used = Used();
+  Double_t exec = ProgSize();
 
   if (tit) printf("\nTMemStat::%s",tit);
   printf("\t total =%10.6f heap =%10.6f (%+10.6f)\n",exec, used,used-fgUsed);
