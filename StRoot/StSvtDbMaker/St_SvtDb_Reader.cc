@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.2 2002/02/05 23:30:52 caines Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.3 2002/02/15 22:45:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.3  2002/02/15 22:45:43  munhoz
+ * introducing drift velocity reading capability
+ *
  * Revision 1.2  2002/02/05 23:30:52  caines
  * fixing configuration bug
  *
@@ -27,11 +30,13 @@
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
+#include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 
 #include "tables/St_svtConfiguration_Table.h"
-#include "tables/St_svtDriftVelocity_Table.h"
+#include "tables/St_svtDriftVelAvg_Table.h"
+#include "tables/St_svtBadAnodes_Table.h"
 #include "tables/St_svtPedestals_Table.h"
 #include "tables/St_svtWafersPosition_Table.h"
 #include "tables/St_svtDimensions_Table.h"
@@ -116,25 +121,25 @@ StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
 {
   cout << "St_SvtDb_Reader::getDriftVelocity" << endl;
 
-  St_svtDriftVelocity *driftVelocity;
-  const int dbIndex = kCalibration;
-  if (svtDb[dbIndex]){
-    driftVelocity = (St_svtDriftVelocity*)svtDb[dbIndex]->Find("svtDriftVelocity");
-    if (!(driftVelocity && driftVelocity->HasData()) ){
-     gMessMgr->Message("Error Finding SVT Drift Velocity","E");
-     return 0;
-    }
-  }
-  else {
-    gMessMgr->Message("Error Finding SVT Calibration Db","E");
-    return 0;
-  }
-
-  svtDriftVelocity_st *driftVeloc = driftVelocity->GetTable();
-
-  // Create all drift velocity objects
   StSvtHybridCollection* svtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
+
+  getDriftVelocityAverage(svtDriftVeloc);
+
+  return svtDriftVeloc;
+}
+
+//_____________________________________________________________________________
+void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVeloc)
+{
+  cout << "St_SvtDb_Reader::getDriftVelocityAverage" << endl;
+
+  St_svtDriftVelAvg *driftVelocity;
+  const int dbIndex = kCalibration;
+
+  svtDriftVelAvg_st *driftVeloc;
   StSvtHybridDriftVelocity* hybridDriftVeloc;
+
+  char path[100];
   int index;
 
   for (int barrel = 1;barrel <= mSvtConfig->getNumberOfBarrels();barrel++) {
@@ -146,14 +151,51 @@ StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
 
 	  if (index < 0) continue;
 
-	  hybridDriftVeloc = new StSvtHybridDriftVelocity(barrel,ladder,wafer,hybrid);
+	  switch (barrel) {
+	  case 1:
+	    sprintf(path,"InnerBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtDriftVelAvg",ladder,wafer,hybrid);
+	    break;
+	  case 2:
+	    if (ladder < 10)
+	      sprintf(path,"MiddleBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtDriftVelAvg",ladder,wafer,hybrid);
+	    else
+	      sprintf(path,"MiddleBarrel/Ladder_%d/Wafer_0%d/Hybrid_0%d/svtDriftVelAvg",ladder,wafer,hybrid);
+	    break;
+	  case 3:
+	    if (ladder < 10)
+	      sprintf(path,"OuterBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtDriftVelAvg",ladder,wafer,hybrid);
+	    else
+	      sprintf(path,"OuterBarrel/Ladder_%d/Wafer_0%d/Hybrid_0%d/svtDriftVelAvg",ladder,wafer,hybrid);
+	    break;
+	  }
+
+	  //cout << path << endl;
+
+	  // get wafers position table
+	  if (svtDb[dbIndex]){
+	    driftVelocity = (St_svtDriftVelAvg*)svtDb[dbIndex]->Find(path);
+	    if (!(driftVelocity && driftVelocity->HasData()) ){
+	      gMessMgr->Message("Error Finding SVT drift velocity average","E");
+	      return;
+	    }
+	  }
+	  else {
+	    gMessMgr->Message("Error Finding SVT Calibration Db","E");
+	    return;
+	  }
+
+	  driftVeloc = driftVelocity->GetTable();
+
+	  hybridDriftVeloc = (StSvtHybridDriftVelocity*)svtDriftVeloc->at(index);
+	  if (!hybridDriftVeloc)
+	    hybridDriftVeloc = new StSvtHybridDriftVelocity(barrel,ladder,wafer,hybrid);
 	  
 	  // loop over anodes
 	  for (int anode=1;anode<=mSvtConfig->getNumberOfAnodes();anode++) {
-	    hybridDriftVeloc->setV1(anode,driftVeloc[index].injectionDriftVelocityFocus[anode-1]);
-	    hybridDriftVeloc->setV2(anode,driftVeloc[index].injectionDriftVelocity[anode-1]);
-	    hybridDriftVeloc->setV3(anode,driftVeloc[index].averageDriftVelocity[anode-1]);
+	    hybridDriftVeloc->setV3(driftVeloc->averageDriftVelocity,anode);
 	  }
+
+	  cout << "index = " << index << ", averageDriftVelocity = " << driftVeloc->averageDriftVelocity << endl;
 
 	  svtDriftVeloc->put_at(hybridDriftVeloc,index);
 
@@ -162,7 +204,6 @@ StSvtHybridCollection* St_SvtDb_Reader::getDriftVelocity()
     } // end of loop over ladders
   } // end of loop over barrels
 
-  return svtDriftVeloc;
 }
 
 //_____________________________________________________________________________
@@ -317,4 +358,79 @@ StSvtGeometry* St_SvtDb_Reader::getGeometry()
   } // end of loop over barrels
 
   return svtGeom;
+}
+
+//_____________________________________________________________________________
+StSvtHybridCollection* St_SvtDb_Reader::getBadAnodes()
+{
+  // get svt dimensions table
+  St_svtBadAnodes *badAnodes;
+  svtBadAnodes_st *badAnode;
+  const int dbIndex = kCalibration;
+
+  // Create all pedestal objects
+  StSvtHybridCollection* svtBadAnodes = new StSvtHybridCollection(mSvtConfig);
+  StSvtHybridBadAnodes* hybridBadAnodes;
+
+  char path[100];
+  int index;
+
+  for (int barrel = 1;barrel <= mSvtConfig->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mSvtConfig->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mSvtConfig->getNumberOfWafers(barrel);wafer++) {
+	for (int hybrid = 1;hybrid <= mSvtConfig->getNumberOfHybrids();hybrid++) {
+
+	  index = mSvtConfig->getHybridIndex(barrel,ladder,wafer,hybrid);
+
+	  if (index < 0) continue;
+
+	  switch (barrel) {
+	  case 1:
+	    sprintf(path,"InnerBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtBadAnodes",ladder,wafer,hybrid);
+	    break;
+	  case 2:
+	    if (ladder < 10)
+	      sprintf(path,"MiddleBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtBadAnodes",ladder,wafer,hybrid);
+	    else
+	      sprintf(path,"MiddleBarrel/Ladder_%d/Wafer_0%d/Hybrid_0%d/svtBadAnodes",ladder,wafer,hybrid);
+	    break;
+	  case 3:
+	    if (ladder < 10)
+	      sprintf(path,"OuterBarrel/Ladder_0%d/Wafer_0%d/Hybrid_0%d/svtBadAnodes",ladder,wafer,hybrid);
+	    else
+	      sprintf(path,"OuterBarrel/Ladder_%d/Wafer_0%d/Hybrid_0%d/svtBadAnodes",ladder,wafer,hybrid);
+	    break;
+	  }
+
+	  // get wafers position table
+	  if (svtDb[dbIndex]){
+	    badAnodes = (St_svtBadAnodes*)svtDb[dbIndex]->Find(path);
+	    if (!(badAnodes && badAnodes->HasData()) ){
+	      gMessMgr->Message("Error Finding SVT bad anodes","E");
+	      return 0;
+	    }
+	  }
+	  else {
+	    gMessMgr->Message("Error Finding SVT Calibration Db","E");
+	    return 0;
+	  }
+
+	  badAnode = badAnodes->GetTable();
+
+	  hybridBadAnodes = new StSvtHybridBadAnodes(barrel,ladder,wafer,hybrid);
+	  
+	  // loop over anodes
+	  for (int anode=1;anode<=mSvtConfig->getNumberOfAnodes();anode++) {
+	    if (badAnode[index].isBadAnode[anode-1])
+	      hybridBadAnodes->setBadAnode(anode);
+	  }
+
+	  svtBadAnodes->put_at(hybridBadAnodes,index);
+
+	} // end of loop over hybrids
+      } // end of loop over wafers
+    } // end of loop over ladders
+  } // end of loop over barrels
+
+  return svtBadAnodes;
 }

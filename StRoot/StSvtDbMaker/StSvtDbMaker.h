@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.1 2001/10/29 18:53:13 munhoz Exp $
+ * $Id: StSvtDbMaker.h,v 1.2 2002/02/15 22:45:43 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.2  2002/02/15 22:45:43  munhoz
+ * introducing drift velocity reading capability
+ *
  * Revision 1.1  2001/10/29 18:53:13  munhoz
  * starting SVT Data base
  *
@@ -62,6 +65,7 @@ class StSvtDbMaker : public StMaker {
   void readSvtDriftVelocity();
   void readSvtPedestals();
   void readSvtGeometry();
+  void readSvtBadAnodes();
 
   void writeSvtDriftVelocity(StSvtHybridCollection* driftVeloc=0);
   void writeSvtPedestals(StSvtHybridCollection* pedestals=0);
@@ -72,6 +76,9 @@ class StSvtDbMaker : public StMaker {
 
   ClassDef(StSvtDbMaker, 1)   //StAF chain virtual base class for Makers
 };
+
+// Global pointers:
+R__EXTERN StSvtDbMaker* gStSvtDbMaker;
 
 #endif
 
