@@ -2,6 +2,9 @@
 * editted 6/8/98 Kathy Turner - put tables in correct directories
 *                             - and make so can enter values by hand
 * editted 6/9/98 Kathy Turner - don't need to move directories anymore
+* editted 6/26/98 Kathy Turner - now open input file using "dummy" - now
+*                                you must make sure that you have correct
+*                                extension on your file! (see note below)
 * 
 * **** 
 * This kumac reads from a file and runs gstar then g2t.
@@ -110,7 +113,7 @@ def [DEFAULT]
 * open input file - this in in GEANT format!
  
  if [intype].eq.file then
-   user/input tx [input_file]
+   user/input dummy [input_file]
    message ' use input file to run '
  elseif [intype].eq.phase then
    message ' enter particles to generate by hand '
