@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdAbsClustering.cxx,v 1.4 2003/09/02 17:58:48 perev Exp $
+ * $Id: StPmdAbsClustering.cxx,v 1.5 2004/06/24 13:47:09 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -11,6 +11,9 @@
  ******************************************************
  *
  * $Log: StPmdAbsClustering.cxx,v $
+ * Revision 1.5  2004/06/24 13:47:09  subhasis
+ * several changes in clustering code
+ *
  * Revision 1.4  2003/09/02 17:58:48  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -37,10 +40,6 @@
 #include "StPmdUtil/StPmdHit.h"
 #include "StPmdAbsClustering.h"
 #include "StPmdClusterMaker.h"
-//#include "StPmdUtil/StPmdClusterCollection.h"
-//#include "StPmdUtil/StPmdCluster.h"
-//#include "StPmdUtil/StPmdModule.h"
-//#include "StPmdUtil/StPmdDetector.h"
 
 
 

@@ -4,7 +4,7 @@
  */
 /******************************************************
  *
- * $Id: StPmdClustering.h,v 1.4 2004/03/23 05:17:45 subhasis Exp $
+ * $Id: StPmdClustering.h,v 1.5 2004/06/24 13:43:02 subhasis Exp $
  *
  * Author: Dr. S.C. Phatak
  *         Dipak Mishra
@@ -13,17 +13,15 @@
  * Description: Base class for PMD clusters
  *
  * $Log: StPmdClustering.h,v $
- * Revision 1.4  2004/03/23 05:17:45  subhasis
- * refclust changed to have correct sigma/ncell
- *
- * Revision 1.3  2003/05/14 10:49:12  subhasis
- * CPV clustering added
+ * Revision 1.5  2004/06/24 13:43:02  subhasis
+ * several changes in clustering code
  *
  *
  ******************************************************/
 #ifndef STAR_StPmdClustering
 #define STAR_StPmdClustering
 #include <TH2.h>
+#include<math.h>
 #include <TH1.h>
 #include <TCanvas.h>
 #include <TArrayF.h>
@@ -33,14 +31,14 @@ class StPmdHit;
 class StPmdCluster;
 class StPmdDetector;
 class StPmdClusterCollection;
-class StPmdGeom;
 class StPmdClustering:public StPmdAbsClustering
 {
 
   private:
-  StPmdGeom* m_geom;
+ 
+  
+ protected:
 
-  protected:
 
    public:
   // functions for clustering
@@ -50,27 +48,31 @@ class StPmdClustering:public StPmdAbsClustering
   StPmdClustering();                             
   //!destructor
   virtual ~StPmdClustering();
+
   //! for Pmd clusters                     
-  void findPmdClusters();
-  //! for Cpv clusters
-  void findCpvClusters(); 
+  //  void findPmdClusters(); // old method
+  void findPmdClusters(StPmdDetector *);
+
 
  //! crude clustering
   Int_t crclust(Double_t , Double_t, Int_t, Int_t); 
   //! refined clustering
   void refclust(StPmdDetector*,Int_t, Int_t, Int_t,StPmdClusterCollection*);
-  //!random number generator
-  Double_t ranmar(); 
+  
   //! for ordering
   void order(Int_t);  
   //! ordering 
   void arrange(Int_t);
   Double_t Dist(Double_t, Double_t, Double_t, Double_t);  //! distance between two clusters
-  //! for parametrization
-  void gaussfit(Int_t, Int_t, Double_t &, Double_t &, Double_t &, Double_t &, Double_t &,Double_t &,Double_t & ); 
-  //  void printclust(Int_t, Int_t, Int_t,StPmdClusterCollection*,StPmdCluster*); 
+  
+  //! for parametrization : not used any more
+  //  void gaussfit(Int_t, Int_t, Double_t &, Double_t &, Double_t &, Double_t &, Double_t &,Double_t &,Double_t & ); 
   //! printing clusters
   void printclust(Int_t,Int_t, StPmdCluster*); 
+  //! for Calculating cluster properties, those clusters having more then two cells
+  void CentroidCal(Int_t,Int_t,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&,Double_t&);
+  
+
   //! for getting hits of each cluster
   //  StPmdHit* GetHit(StPmdDetector*, Int_t, Int_t, Int_t);
   StPmdHit* GetHit(StPmdDetector*, Int_t, Double_t, Double_t);
@@ -78,7 +80,7 @@ class StPmdClustering:public StPmdAbsClustering
   ClassDef(StPmdClustering, 1) 
     };
 
-
+    
 #endif
 
 

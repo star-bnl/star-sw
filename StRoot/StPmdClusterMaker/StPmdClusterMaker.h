@@ -3,7 +3,7 @@
  * \author
  */
 /***********************************************************
- * $Id: StPmdClusterMaker.h,v 1.6 2004/04/09 23:01:48 jeromel Exp $
+ * $Id: StPmdClusterMaker.h,v 1.7 2004/06/24 13:48:33 subhasis Exp $
  *
  * Author:
  *
@@ -14,6 +14,9 @@
  ************************************************************
  *
  * $Log: StPmdClusterMaker.h,v $
+ * Revision 1.7  2004/06/24 13:48:33  subhasis
+ * several changes in clustering code
+ *
  * Revision 1.6  2004/04/09 23:01:48  jeromel
  * GetCVS() missing
  *
@@ -50,7 +53,8 @@ class StPmdClusterMaker: public StMaker{
   // booking Pmd cluster histograms
   TH1F *mSmPmdCluster;      //!  supermodule no for Pmd
   TH1F *mEdepPmdCluster;    //!  cluster edep in Pmd
-  TH1F *mSigmaPmdCluster;    //!  cluster Sigma in Pmd
+  TH1F *mSigmaLPmdCluster;    //!  cluster SigmaL in Pmd
+  TH1F *mSigmaSPmdCluster;    //!  cluster SigmaS in Pmd
   TH1F *mNcellPmdCluster;    //!  cluster edep in Pmd
   TH1F *mEtaPmdCluster;     //!  cluster eta in Pmd 
   TH1F *mPhiPmdCluster;     //!  cluster phi in Pmd 
@@ -65,7 +69,8 @@ class StPmdClusterMaker: public StMaker{
   
   TH1F *mSmCpvCluster;      //!  supermodule no for Cpv
   TH1F *mEdepCpvCluster;    //!  cluster edep in Cpv
-  TH1F *mSigmaCpvCluster;    //!  cluster Sigma in Cpv
+  TH1F *mSigmaLCpvCluster;    //!  cluster SigmaL in Cpv
+  TH1F *mSigmaSCpvCluster;    //!  cluster SigmaS in Cpv
   TH1F *mNcellCpvCluster;    //!  cluster edep in Cpv
   TH1F *mEtaCpvCluster;     //!  cluster eta in Cpv 
   TH1F *mPhiCpvCluster;     //!  cluster phi in Cpv 
@@ -93,7 +98,7 @@ class StPmdClusterMaker: public StMaker{
   void  Browse(TBrowser* b); 
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
-    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.6 2004/04/09 23:01:48 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPmdClusterMaker.h,v 1.7 2004/06/24 13:48:33 subhasis Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  
