@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   23/04/99  
-// $Id: HitsDraw.C,v 1.2 1999/04/27 15:29:58 fine Exp $
+// $Id: HitsDraw.C,v 1.3 1999/04/27 21:32:03 fine Exp $
 // $Log: HitsDraw.C,v $
+// Revision 1.3  1999/04/27 21:32:03  fine
+// some new comments and clean up
+//
 // Revision 1.2  1999/04/27 15:29:58  fine
 // Make up plus Polyline was replaced by PolyMarker3D
 //
@@ -12,13 +15,13 @@ class St_Node;
 class St_NodeView;
 
 // Global variables to access from an interactive session
-St_Node     *hall        = 0;
-St_NodeView *fullView    = 0;
+St_Node     *hall      = 0;
+St_NodeView *fullView  = 0;
 St_NodeView *shortView = 0;
-St_NodeView *sensible    = 0;
+St_NodeView *sensible  = 0;
 
+// Subroutine to draw a separate "HELP" TCanvas object
 void x3dHelpDraw(){
- // Subroutine to draw a separate "HELP" TCanvas object
  TCanvas *paveCanvas =  new TCanvas("x3d","X3D Help",500,20,540,220);
  TPaveText *label  = new TPaveText(0,0,1,1);
  const Char_t *myMessage[] = {"Plot  3D view"
@@ -39,11 +42,13 @@ void x3dHelpDraw(){
  paveCanvas->Update();
 }
 
+// Loading the share libraries
 void Load() {
   gSystem->Load("St_base");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
 }
+// Drawing subroutine
 void HitsDraw(){
   TCanvas *m_TreeD = new TCanvas("STAF","Events",10,600,200,200);
   Load();
@@ -198,12 +203,15 @@ void HitsDraw(){
    // Select node to be left
    printf(" Marking the current strucutre to create another simplified one\n");
    sensible->Mark();                                                      //  Select HALL
-   St_NodeView *shortView = (St_NodeView *)sensible->FindByName("TPGV");  // Select TPGV
+   shortView = (St_NodeView *)sensible->FindByName("TPGV");  // Select TPGV
    if (shortView) shortView->Mark();     
 
    // Select all hits                                              // Select ALL Hits
    St_DataSetIter nextHits(sensible);
-   while (shortView = (St_NodeView *) nextHits()) { shortView->Mark();}
+   while (shortView = (St_NodeView *) nextHits()) {
+      if (strcmp(shortView->GetName(),"ZCAL")==0) continue;       // skip ZCAL detector element
+      shortView->Mark();
+   }
    
    // Create new short view                                        // New "short" dataset
    printf(" Creating a new structure simplified structure\n");
@@ -221,6 +229,9 @@ void HitsDraw(){
 
  //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawX3D.gif"> </P> End_Html // 
 
-  printf(" The following global variable are available:\n");
-  printf("\tSt_Node     *hall\n\tSt_NodeView *fullView\n\tSt_NodeView *shortView\n\tSt_NodeView *sensible\n");
+  printf(" The following global variables are available:\n");
+  printf("\tSt_Node     *hall      -  \"closed\" full GEANT geometry structure\n");
+  printf("\tSt_NodeView *fullView  -  \"open\"   full GEANT geometry structure\n");
+  printf("\tSt_NodeView *sensible  - all \"sensible\" detector elements of the full GEANT structure\n");
+  printf("\tSt_NodeView *shortView - subset of the structure above\n");
 }
