@@ -4,7 +4,7 @@ macro/global/import *
 *    Define tables
 *
  
- cd [params]/ctf
+ cd [params]/ctf/cts
  
 * 
 newtab cts cts_mpara 1
@@ -72,6 +72,15 @@ tdm/table/cell/putvalue 'cts[0].time_response' _
 
 *
 cd /dui
+
+
+
+
+
+
+
+
+
 
 
 
