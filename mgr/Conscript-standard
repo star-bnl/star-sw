@@ -137,7 +137,7 @@ if ( $pkg =~ /^StHbtMaker$/ ) {
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 
-if ( $pkg =~ /^StDaqLib$/ ) {
+if ( $pkg =~ /^StDaqLib$/ || $pkg =~ /^StMuDSTMaker$/ ) {
     $CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
