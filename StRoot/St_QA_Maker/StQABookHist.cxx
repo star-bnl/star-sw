@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.47 2004/12/13 15:52:36 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.48 2005/01/27 05:28:25 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.48  2005/01/27 05:28:25  genevb
+// PMD changes
+//
 // Revision 2.47  2004/12/13 15:52:36  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //
@@ -1998,14 +2001,14 @@ void StQABookHist::BookHistFPD(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistPMD(){
 
-  QAH::MMH1F(m_pmd_sm_hit,3,"QaPmdSmHit%d",
-	     "PMD SM-wise Hit Multiplicity %02d-%02d",1000,0.,5000.,8);
-  QAH::MMH1F(m_pmd_sm_adc,3,"QaPmdSmAdcHit%d",
-	     "PMD SM-wise ADC/Hit Multiplicity %02d-%02d",100,0.,1000.,8);
-  QAH::MMH1F(m_pmd_chain_hit,6,"QaPmdChHitChain%d",
-	     "PMD Channel-wise Hit, Chain %02d-%02d",1728,-0.5,1727.5,8);
-  QAH::MMH1F(m_pmd_chain_adc,6,"QaPmdChAdcChain%d",
-	     "PMD Channel-wise ADC, Chain %02d-%02d",1728,-0.5,1727.5,8);
+  QAH::MMH1F(m_pmd_sm_hit,12,"QaPmdSmHit%d",
+	     "PMD SM-wise Hit Multiplicity %02d-%02d",1000,0.,5000.,2);
+  QAH::MMH1F(m_pmd_sm_adc,12,"QaPmdSmAdcHit%d",
+	     "PMD SM-wise ADC/Hit Multiplicity %02d-%02d",100,0.,1000.,2);
+  QAH::MMH1F(m_pmd_chain_hit,24,"QaPmdChHitChain%d",
+	     "PMD Channel-wise Hit, Chain %02d-%02d",1728,-0.5,1727.5,2);
+  QAH::MMH1F(m_pmd_chain_adc,24,"QaPmdChAdcChain%d",
+	     "PMD Channel-wise ADC, Chain %02d-%02d",1728,-0.5,1727.5,2);
 
   m_pmd_total_hit = QAH::H2F("QaPmdTotalHit","PMD Total Hits",100,0.,1e5,100,0.,4.);
   m_pmd_total_hit->SetXTitle("event id");

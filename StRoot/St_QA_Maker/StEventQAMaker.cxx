@@ -94,6 +94,7 @@ Int_t StEventQAMaker::Finish() {
 
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Init() {
+
   return StQAMakerBase::Init();
 }
 
@@ -372,6 +373,11 @@ void StEventQAMaker::MakeHistGlob() {
   Int_t cnttrkgFE=0;
   Int_t cnttrkgFW=0;
   
+  // Determine if Sti was run:
+  if ((GetChain()->GetMaker("StiMaker")) ||
+      (GetChain()->FindByName("StiRunco")) )
+    ITTF = kTRUE;
+
   for (UInt_t i=0; i<theNodes.size(); i++) {
     StTrack *globtrk = theNodes[i]->track(global);
     if (!globtrk) continue;
@@ -2129,8 +2135,8 @@ void StEventQAMaker::MakeHistPMD() {
 		maputil->ChainNumber(sm+1,row+1,col+1,chain);
 		if (chain>0 && channel>=0 && chain<=49) {
 		  Int_t ch1 = chain-1;
-		  hists->m_pmd_chain_adc[ch1/8]->Fill(channel,ch1%8,adc);
-		  hists->m_pmd_chain_hit[ch1/8]->Fill(channel,ch1%8);
+		  hists->m_pmd_chain_adc[ch1/2]->Fill(channel,ch1%2,adc);
+		  hists->m_pmd_chain_hit[ch1/2]->Fill(channel,ch1%2);
 		}
                 TOTAL_HIT_DETECTOR++;;
                 TOTAL_ADC_DETECTOR+=adc;
@@ -2138,8 +2144,8 @@ void StEventQAMaker::MakeHistPMD() {
 	    } //rawHit.size()
 	  } //module
 	  Int_t smid=d*12+j;
-	  hists->m_pmd_sm_hit[smid/8]->Fill(TotalHit,smid%8);
-	  hists->m_pmd_sm_adc[smid/8]->Fill(TotalAdc/TotalHit,smid%8);
+	  hists->m_pmd_sm_hit[smid/2]->Fill(TotalHit,smid%2);
+	  hists->m_pmd_sm_adc[smid/2]->Fill(TotalAdc/TotalHit,smid%2);
 	}
       }
       if (d==0) {
@@ -2154,8 +2160,11 @@ void StEventQAMaker::MakeHistPMD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.63 2004/12/13 15:52:36 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.64 2005/01/27 05:28:25 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.64  2005/01/27 05:28:25  genevb
+// PMD changes
+//
 // Revision 2.63  2004/12/13 15:52:36  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //

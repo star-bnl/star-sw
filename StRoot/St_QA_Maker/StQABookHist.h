@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.20 2004/12/13 15:52:37 genevb Exp $ 
+// $Id: StQABookHist.h,v 2.21 2005/01/27 05:28:25 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.21  2005/01/27 05:28:25  genevb
+// PMD changes
+//
 // Revision 2.20  2004/12/13 15:52:37  genevb
 // Numerous updates: PMD, primtrk, FPD, QAShift lists
 //
@@ -93,7 +96,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.20 2004/12/13 15:52:37 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.21 2005/01/27 05:28:25 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -681,10 +684,10 @@ class StQABookHist : public TObject {
   TH1F* m_fpd_sums[8];         //!
 
   // Hists for PMD
-  TH2F* m_pmd_sm_adc[3];       //!
-  TH2F* m_pmd_sm_hit[3];       //!
-  TH2F* m_pmd_chain_hit[6];    //!
-  TH2F* m_pmd_chain_adc[6];    //!
+  TH2F* m_pmd_sm_adc[12];      //!
+  TH2F* m_pmd_sm_hit[12];      //!
+  TH2F* m_pmd_chain_hit[24];   //!
+  TH2F* m_pmd_chain_adc[24];   //!
   TH2F* m_pmd_total_hit;       //!
   TH2F* m_pmd_total_adc;       //!
   TH2F* m_cpv_total_hit;       //!
