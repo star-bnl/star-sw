@@ -12,7 +12,6 @@
 #include "StGetConfigValue.hh"
 
 //Sti
-#include "StiIOBroker.h"
 #include "Sti/Base/Messenger.h"
 #include "StiHit.h"
 #include "StiMapUtilities.h"
@@ -119,18 +118,8 @@ bool NameMapKey::operator<(const NameMapKey& key2) const{
 }
 
 StTpcPadrowHitFilter::StTpcPadrowHitFilter()
-    : mMinPadrow(0), mMaxPadrow(0)
-{
-}
-
-void StTpcPadrowHitFilter::getNewState()
-{
-    StiIOBroker* broker = StiIOBroker::instance();
-    mMinPadrow = broker->tphfMinPadrow();
-    mMaxPadrow = broker->tphfMaxPadrow();
-    //cout <<"StTpcPadrowHitFilter::getNewState()\t"
-    //<<"minPadrow: "<<mMinPadrow<<"\tmaxPadrow: "<<mMaxPadrow<<endl;
-}
+    : mMinPadrow(1), mMaxPadrow(45)
+{}
 
 bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
 {

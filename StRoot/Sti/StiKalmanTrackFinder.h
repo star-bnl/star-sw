@@ -1,17 +1,17 @@
-#ifndef StiKalmanTrackFinder_H
-#define StiKalmanTrackFinder_H 1
-
+///\File StiKalmanTrackFinder.h
+///\Author Claude A Pruneau (Wayne State U) 
+#ifndef StiKalmanTrackFinder_H_INCLUDED
+#define StiKalmanTrackFinder_H_INCLUDED
 #include "Sti/StiTrackFinder.h"
 class Messenger;
 class StiDetector;
 class StiDetectorBuilder;
 class StiDetectorContainer;
 class StiToolkit;
-class StiSeedFinder;
+class StiTrackSeedFinder;
 class StiKalmanTrackFactory;
 class StiHitContainer;
 class StiTrackContainer;
-class StiSeedFinder;
 class StiTrack;
 class StiMcTrack;
 class StiKalmanTrack;
@@ -117,7 +117,7 @@ protected:
     Filter<StiTrack>            * _trackFilter;
     Filter<StiTrack>            * _guiTrackFilter;
     Filter<StiTrack>            * _guiMcTrackFilter;
-    StiSeedFinder               * _trackSeedFinder;
+    StiTrackSeedFinder          * _trackSeedFinder;
     Factory<StiKalmanTrackNode> * _trackNodeFactory;
     Factory<StiKalmanTrack>     * _trackFactory;
     Factory<StiMcTrack>         * _mcTrackFactory;

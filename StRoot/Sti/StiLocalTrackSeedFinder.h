@@ -1,14 +1,7 @@
-/// \class StiLocalTrackSeedFinder
-/// StiLocalTrackSEedFinder is a concrete implementation of StiTrackSeedFinder.
-/// It is built from a collection of StiDetectorObjects, which it
-/// stores in a vector and orders properly, then uses each detector
-/// as a layer from which a one-point seed can be generated.  It then proceeds
-/// to step inwards, iteratively making a local decision at each step.
-///  
+/// \File StiLocalTrackSeedFinder.h
 /// \author M.L. Miller (Yale Software) 10/01
 #ifndef StiLocalTrackSeedFinder_HH
 #define StiLocalTrackSeedFinder_HH
-
 #include <iostream>
 using std::ostream;
 #include <vector>
@@ -22,7 +15,15 @@ class Sti2HitComboFilter;
 class StiDetector;
 #include "Sti/Base/EditableParameters.h"
 
-class StiLocalTrackSeedFinder : public StiTrackSeedFinder, public EditableParameters
+/// \class StiLocalTrackSeedFinder
+/// StiLocalTrackSEedFinder is a concrete implementation of StiTrackSeedFinder.
+/// It is built from a collection of StiDetectorObjects, which it
+/// stores in a vector and orders properly, then uses each detector
+/// as a layer from which a one-point seed can be generated.  It then proceeds
+/// to step inwards, iteratively making a local decision at each step.
+/// \author M.L. Miller (Yale Software) 10/01
+/// \author Claude A Pruneau (Wayne State) Jan 2003
+class StiLocalTrackSeedFinder : public StiTrackSeedFinder
 {
 public:
   StiLocalTrackSeedFinder(const string& name,
@@ -30,11 +31,6 @@ public:
 			  StiHitContainer         * hitContainer,
 			  StiDetectorContainer    * detectorContainer);
   virtual ~StiLocalTrackSeedFinder();
-  
-  //Implementation of Observer pattern
-  virtual void getNewState();
-  
-  //Inherited interface
   virtual bool hasMore();
   virtual StiKalmanTrack* next();
   virtual void reset();
@@ -43,10 +39,8 @@ public:
   virtual void print() const;
   
 protected:
-
   StiSortedHitIterator begin();
   StiSortedHitIterator end();
-
   ///Extend hit looking for closest neighbor in z
   bool extendHit(StiHit * hit);
   ///Extrapolate to next layer using straight line, add hit closest in z

@@ -1,57 +1,81 @@
-//StiTrackSeedFinder.h
-//M.L. Miller (Yale Software)
-//03/01
-
-//Abstract base class for track seed finding for the tracker
-
-#ifndef StiTrackSeedFinder_HH
-#define StiTrackSeedFinder_HH
-
+///\File StiTrackSeedFinder.h
+///\author M.L. Miller (Yale Software) 03/01
+///\author C. Pruneau (Wayne) Jan 2003
+#ifndef StiTrackSeedFinder_H_INCLUDED
+#define StiTrackSeedFinder_H_INCLUDED
+#include <stdexcept>
 #include <string>
 using std::string;
 
-#include "Sti/Base/SubjectObserver.h"
-#include "Sti/StiHit.h"
-#include "Sti/StiSeedFinder.h"
-
+#include "Sti/Base/EditableParameters.h"
+class Messenger;
 class StiKalmanTrack;
-class Sti2HitComboFilter;
 class StiHitContainer;
 class StiDetectorContainer;
 class StiDetector;
 class StiHit;
-class Messenger;
+template<class Factorized>class Factory;
+class Sti2HitComboFilter;
 
-class StiTrackSeedFinder : public Observer, public StiSeedFinder
+/// Abstract base defining a mechanism to find track seeds.
+/// <p>
+/// The seed finders shall be given a unique name to identify them; i.e. it is a Named object.
+/// It is also editable through its inheritance to the EditableParameters class.
+/// <p>
+/// The seed finders require valid pointers to a track factory, a hit container,
+/// and a detector container. Pointers to such three objects must be passed
+/// to the class constructor. An exception is thrown if any of the three 
+/// pointers are null.
+/// <p>
+/// \author M.L.Miller, Yale, 03/01
+/// \author C. Pruneau, Wayne State U. Jan 03
+///
+class StiTrackSeedFinder : public EditableParameters
 {
 public:
-    StiTrackSeedFinder(const string& name,
-		       Factory<StiKalmanTrack> * trackFactory,
-		       StiHitContainer         * hitContainer,
-		       StiDetectorContainer    * detectorContainer);
-    virtual ~StiTrackSeedFinder();
-    
-    //Inherited User interface
-    virtual bool hasMore() = 0;
-    virtual StiKalmanTrack* next() = 0;
-    virtual void reset();
-
-    ///The derived class is responsible for ordering the detectors apporpriately.
-    virtual void addLayer(StiDetector*) = 0;
-    virtual void print() const = 0;
-
-    //Implementation of Observer pattern
-    virtual void getNewState() = 0;
-    
-protected:
+  StiTrackSeedFinder(const string& name,
+								Factory<StiKalmanTrack> * trackFactory,
+								StiHitContainer         * hitContainer,
+								StiDetectorContainer    * detectorContainer);
+  virtual ~StiTrackSeedFinder();
+  
+  //Inherited interface
+  virtual bool hasMore() = 0;
+  virtual StiKalmanTrack* next() = 0;
+  virtual void reset() =0;
+  
+  ///Set factory
+  void setFactory(Factory<StiKalmanTrack>* val);
+  ///Set hit container
+  void setHitContainer(StiHitContainer*);
+  StiHitContainer* getHitContainer();
+  
+ protected:
+  Factory<StiKalmanTrack>* _trackFactory;
+  StiHitContainer* _hitContainer;
+  StiDetectorContainer* _detectorContainer;
+  Messenger &  _messenger;
+  
 private:
-    //The following are not implemented
-    StiTrackSeedFinder();
+  StiTrackSeedFinder(); //Not implemented
 };
 
+//inlines
 
-// Non members ---
+inline void StiTrackSeedFinder::setFactory(Factory<StiKalmanTrack>* val)
+{
+  _trackFactory=val;
+}
 
+inline void StiTrackSeedFinder::setHitContainer(StiHitContainer* val)
+{
+  _hitContainer=val;
+}
+
+inline StiHitContainer* StiTrackSeedFinder::getHitContainer()
+{
+  return _hitContainer;
+}
 
 
 //Helper class to filter combinations of StiHits
@@ -87,4 +111,6 @@ inline bool StiRectangular2HitComboFilter::operator()(const StiHit* lhs, const S
     return ( (fabs(lhs->y()-rhs->y())<=deltaD) && (fabs(lhs->z()-rhs->z())<deltaZ));
 }
 
+
 #endif
+

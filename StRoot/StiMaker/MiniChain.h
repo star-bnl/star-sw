@@ -3,10 +3,8 @@
 #include "TObject.h"
 class StChain;
 class StiMaker;
-class StiRootIOBroker;
-class StiGuiIOBroker;
 class MiniChainParameters;
-
+class StiDefaultToolkit;
 
 class MiniChain : public TObject
 {
@@ -15,8 +13,6 @@ class MiniChain : public TObject
   virtual ~MiniChain();
 	
 	MiniChainParameters * getParameters();
-  StiRootIOBroker * getIOBroker();
-  StiGuiIOBroker  * getGuiIOBroker();
   void run(int first, 
 	   int nEvents, 
 	   const char *  filePrefix,
@@ -35,11 +31,9 @@ class MiniChain : public TObject
   MiniChainParameters * _pars;
   StChain             * _chain;
   StiMaker            * _stiMaker;
-  StiRootIOBroker     * _stiIoBroker;
-  StiGuiIOBroker      * _guiIoBroker;
   StIOMaker           * _ioMaker;
+	StiDefaultToolkit   * _toolkit;
 
   ClassDef(MiniChain, 1)
 };
-
 #endif

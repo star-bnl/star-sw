@@ -99,6 +99,7 @@ void Run(Int_t firstEvent,
   pars->doDst=doDst;
   pars->doStEventOutput=doStEventOutput;
   pars->doStEventInput=doStEventInput;  
+	/*
   StiRootIOBroker * stiIoBroker = miniChain->getIOBroker();
   stiIoBroker->setTPHFMinPadrow(1);
   stiIoBroker->setTPHFMaxPadrow(45);
@@ -140,6 +141,7 @@ void Run(Int_t firstEvent,
   for (unsigned int padrow=6; padrow<=45; padrow+=1)
     stiIoBroker->addLTSFPadrow(padrow);
   stiIoBroker->setSimulated(doSimulation);
+	*/
 
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
   

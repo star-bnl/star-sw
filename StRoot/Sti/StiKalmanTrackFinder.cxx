@@ -1,28 +1,20 @@
-/*
-  Copyright(c) 2001, STAR  Experiment at BNL, All rights reserved.      
-  
-  Author: STAR Integrated Track Task Force                              
-  Contributors are mentioned in the code where appropriate.
-  
-  Permission to use, copy, modify and distribute this software and its
-  documentation strictly for non-commercial purposes is hereby granted 
-  without fee, provided that the above copyright notice appears in all
-  copies and that both the copyright notice and this permission notice
-  appear in the supporting documentation. The authors make no claims 
-  about the suitability of this software for any purpose. It is     
-  provided "as is" without express or implied warranty.             
-  
-*/
-
-//Std
+/// \File StiKalmanTrackFinder.cxx
+/// \Author Claude A Pruneau, 2001-2003
+/// \Copyright(c) 2001, STAR  Experiment at BNL, All rights reserved.      
+/// \Note  
+/// Permission to use, copy, modify and distribute this software and its
+/// documentation strictly for non-commercial purposes is hereby granted 
+/// without fee, provided that the above copyright notice appears in all
+/// copies and that both the copyright notice and this permission notice
+/// appear in the supporting documentation. The authors make no claims 
+/// about the suitability of this software for any purpose. It is     
+/// provided "as is" without express or implied warranty.             
 #include <iostream>
 #include <stdexcept>
 #include <math.h>
 using namespace std;
 using std::_messenger;
 using std::endl;
-
-//Sti
 #include "Sti/Base/Parameter.h"
 #include "Sti/Base/EditableFilter.h"
 #include "StiHitLoader.h"
@@ -62,11 +54,7 @@ using std::endl;
 #include "StThreeVectorD.hh"
 #include "StiVertexFinder.h"
 
-
 ostream& operator<<(ostream&, const StiTrack&);
-
-
-
 void StiKalmanTrackFinder::initialize()
 {
   //set the cached variables

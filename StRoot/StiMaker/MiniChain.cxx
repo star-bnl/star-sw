@@ -8,8 +8,6 @@ using namespace std;
 #include "StiMaker/MiniChain.h"
 #include "StiMaker/MiniChainParameters.h"
 #include "StiMaker/MainFrame.h"
-#include "StiMaker/StiRootIOBroker.h"
-#include "StiGui/StiGuiIOBroker.h"
 #include "St_db_Maker/St_db_Maker.h"
 #include "StDetectorDbMaker/StDetectorDbMaker.h"
 #include "StTpcDb/StTpcDb.h"
@@ -25,20 +23,20 @@ using namespace std;
 ClassImp(MiniChain)
 
 MiniChain::MiniChain()
+	: _pars( new MiniChainParameters() ),
+		_chain(0),
+		_stiMaker(0),
+		_ioMaker(0),
+		_toolkit(new StiDefaultToolkit())
 { 
-  StiToolkit::setToolkit(new StiDefaultToolkit());
-  StiToolkit * toolkit = StiToolkit::instance();
-  _pars = new MiniChainParameters();
-  _stiIoBroker= static_cast<StiRootIOBroker*>(toolkit->getIOBroker());
-  // yuk
-  _guiIoBroker = StiGuiIOBroker::instance();
-  _guiIoBroker->setUnMarkedHitSize(.3);
-  _guiIoBroker->setUnMarkedHitColor(4);
-  _guiIoBroker->setUnMarkedHitStyle(8);
-  _guiIoBroker->setUpdateEachTrack(false);
-  _guiIoBroker->setMarkedHitSize(.3);
-  _guiIoBroker->setMarkedHitColor(2);
-  _guiIoBroker->setMarkedHitStyle(3);
+  StiToolkit::setToolkit(_toolkit);
+  /*  _guiIoroker->setUnMarkedHitSize(.3);
+  _guiIoroker->setUnMarkedHitColor(4);
+  _guiIoroker->setUnMarkedHitStyle(8);
+  _guiIoroker->setUpdateEachTrack(false);
+  _guiIoroker->setMarkedHitSize(.3);
+  _guiIoroker->setMarkedHitColor(2);
+  _guiIoroker->setMarkedHitStyle(3);*/
 }
 
 MiniChain::~MiniChain()
@@ -47,16 +45,6 @@ MiniChain::~MiniChain()
 MiniChainParameters * MiniChain::getParameters()
 {
 	return _pars;
-}
-
-StiRootIOBroker * MiniChain::getIOBroker()
-{
-  return _stiIoBroker;
-}
-
-StiGuiIOBroker * MiniChain::getGuiIOBroker()
-{  
-  return _guiIoBroker;
 }
 
 void MiniChain::run(int first, 
@@ -88,11 +76,15 @@ void MiniChain::run(int first,
       _stiMaker = StiMaker::instance();
       if (_pars->doSimulation) 
 	    {
+				_toolkit->setMcEnabled(true);
 	      _stiMaker->setMcEventMaker(mcEventMaker);
 	      _stiMaker->setAssociationMaker(assocMaker);
 	    }
       if (_pars->useGui)      
-	      setupGui();
+				{
+					_toolkit->setGuiEnabled(true);
+					setupGui();
+				}
       setupOutput(filePrefix,fileList[0]);
       eventLoop(first, first+nEvents);
     }
@@ -190,7 +182,6 @@ void MiniChain::setupGui()
   mainFrame = new MainFrame(gClient->GetRoot(), 400, 220);
   mainFrame->setStChain(_chain);
   mainFrame->setIoMaker(_ioMaker);
-  _stiIoBroker->setUseGui(true);
   cout <<"MiniChain::setupGui - INFO - Done"<<endl;
 }
 

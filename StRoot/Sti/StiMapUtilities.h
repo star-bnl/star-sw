@@ -11,7 +11,6 @@ class StiDetector;
 class StHit;
 class StiHit;
 class StTpcHit;
-class StiIOBroker;
 class StiTrackNode;
 template<class NodeType> class StiCompositeTreeNode;
 
@@ -84,7 +83,6 @@ class StTpcHitFilter
 public:
     virtual ~StTpcHitFilter() {};
     virtual bool operator()(const StTpcHit&) const = 0;
-    virtual void getNewState()=0;
 };
 
 class StTpcPadrowHitFilter : public StTpcHitFilter
@@ -92,10 +90,7 @@ class StTpcPadrowHitFilter : public StTpcHitFilter
 public:
     StTpcPadrowHitFilter();
     virtual ~StTpcPadrowHitFilter() {};
-
     virtual bool operator()(const StTpcHit&) const;
-    virtual void getNewState();
-    
 private:
     unsigned int mMinPadrow;
     unsigned int mMaxPadrow;

@@ -1,14 +1,12 @@
-//StiTrackSeedFinder.cxx
-//M.L. Miller (Yale Software)
-//03/01
-
+///\File StiTrackSeedFinder.cxx
+///\author M.L. Miller (Yale Software) 03/01
+///\author C. Pruneau (Wayne) Jan 2003
 #include <iostream.h>
-
 //StarClassLibrary
 #include "StGetConfigValue.hh"
 #include "StThreeVectorF.hh"
-
-//Sti
+#include "Sti/Base/MessageType.h"
+#include "Sti/Base/Messenger.h"
 #include "StiKalmanTrack.h"
 #include "StiMapUtilities.h"
 #include "StiHit.h"
@@ -16,8 +14,6 @@
 #include "StiTrackSeedFinder.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
-#include "StiIOBroker.h"
-#include "Sti/Base/Messenger.h"
 
 ostream& operator<<(ostream& os, const StiHit& hit);
 
@@ -25,15 +21,25 @@ StiTrackSeedFinder::StiTrackSeedFinder(const string& name,
 				       Factory<StiKalmanTrack> * trackFactory,
 				       StiHitContainer         * hitContainer,
 				       StiDetectorContainer    * detectorContainer)
-  : Observer(StiIOBroker::instance()),
-    StiSeedFinder(name,trackFactory,hitContainer,detectorContainer)
+	:	EditableParameters(),
+    _trackFactory(trackFactory), 
+    _hitContainer(hitContainer),
+    _detectorContainer(detectorContainer),
+    _messenger(*(Messenger::instance(MessageType::kSeedFinderMessage)) )
 {
-  _messenger <<"StiTrackSeedFinder::StiTrackSeedFinder() - INFO - Started/Done"<<endl;
+	_messenger <<"StiTrackSeedFinder::StiTrackSeedFinder() -I- Started Constructing "<<_name<<endl; 
+  if(!_trackFactory)
+    throw runtime_error("StiTrackSeedFinder::StiTrackSeedFinder(...) -F- _trackFactory==0");
+  if(!_hitContainer)
+    throw runtime_error("StiTrackSeedFinder::StiTrackSeedFinder(...) -F- _hitContainer==0");
+  if(!_detectorContainer)
+    throw runtime_error("StiTrackSeedFinder::StiTrackSeedFinder(...) -F- _detectorContainer==0");
+  _messenger <<"StiTrackSeedFinder::StiTrackSeedFinder() -I- Done"<<endl; 
 }
 
 StiTrackSeedFinder::~StiTrackSeedFinder()
 {
-  _messenger <<"StiTrackSeedFinder::~StiTrackSeedFinder() - INFO - Started/Done"<<endl;
+	_messenger <<"StiTrackSeedFinder::StiTrackSeedFinder() -I- Started Destroying "<<_name<<endl; 
 }
 
 void StiTrackSeedFinder::reset()

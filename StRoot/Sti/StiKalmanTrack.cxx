@@ -193,7 +193,7 @@ void StiKalmanTrack::initialize(double curvature,
   TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started -----------------------------"<<endl;
   reset();
   hitvector::const_iterator it;
-  StiKalmanTrackNode * node  = 0;
+  //StiKalmanTrackNode * node  = 0;
   double eta   =-99999.;
   double alphaP=-99999.;
   double alpha;
@@ -806,8 +806,7 @@ bool StiKalmanTrack::find(int direction)
       trackExtended = true;
     }		
   // decide if an outward pass is needed.
-  const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
-	/*
+  /*const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
 		if (outerMostNode->_x<190. )
     {
       // swap the track inside-out in preparation for the outward search/extension

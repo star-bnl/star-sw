@@ -5,7 +5,6 @@
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 #include "StThreeVector.hh"
-#include "StiIOBroker.h"
 #include "StiHit.h"
 #include "StiHitContainer.h"
 #include "StiKalmanTrack.h"
@@ -18,6 +17,7 @@
 #include "Sti/Base/MessageType.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/EditableParameter.h"
+#include "StiMasterDetectorBuilder.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
@@ -25,25 +25,25 @@ StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(const string& name,
 						 Factory<StiKalmanTrack> * trackFactory,
 						 StiHitContainer         * hitContainer,
 						 StiDetectorContainer    * detectorContainer)
-  : StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer),
-    mDoHelixFit(false)
+  : StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer)
+	//mDoHelixFit(false)
+	//mDeltaY;
+	//double mDeltaZ;mSeedLength;mExtrapDeltaY,mExtrapDelta,mSkipped,mMaxSkipped,mExtrapMinLength,mExtrapMaxLength,
+	//mUseOrigin,
 {
   _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() - INFO - Started"<<endl;
-  mSubject->attach(this);
-  getNewState();
+	initialize();
   _messenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder() - INFO - Done"<<endl;
 }
 
 StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
 {
   _messenger <<"StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()"<<endl;
-  if (mSubject) {
-    mSubject->detach(this);
-  }
 }
 
 void StiLocalTrackSeedFinder::initialize()
 {
+	_messenger << "StiLocalTrackSeedFinder::initialize() -I- Started" << endl;
   Factory<EditableParameter> * f = StiToolkit::instance()->getParameterFactory();
   if (!f)
     {
@@ -61,6 +61,24 @@ void StiLocalTrackSeedFinder::initialize()
   add(f->getInstance()->set("ExtrapMaxLength","Max Length of Extrapolation", &mExtrapMaxLength,  5, 1, 10, 1, 0));
   add(f->getInstance()->set("UseOrigin","Use Origin in Fit", &mUseOrigin, true, 0));
   add(f->getInstance()->set("DoHelixFit","Do Helix Fit",  &mDoHelixFit, true, 0));
+
+	StiMasterDetectorBuilder * builder = StiToolkit::instance()->getDetectorBuilder();
+  if (!builder)
+    throw runtime_error("StiCompositeSeedFinder::build() -F- builder==0 ");
+	for (unsigned int row=0;row<builder->getNRows();row++)
+    {
+      for (unsigned int sector=0;sector<builder->getNSectors(row);sector++)
+				{
+					StiDetector * detector = builder->getDetector(row,sector);
+					if (!detector)
+						{
+							cout << "StiCompositeSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
+							throw runtime_error("StiCompositeSeedFinder::build() -F- detector==0 ");
+						}
+					addLayer(detector);
+				}
+    }
+	_messenger << "StiLocalTrackSeedFinder::initialize() -I- Done" << endl;
 }
 
 /// Produce the next track seed 
@@ -158,13 +176,13 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   mSeedHitVec.push_back(hit);
   //Recursively extend track:
   bool go=true;
-  while ( go && mSeedHitVec.size()<mSeedLength) 
+  while ( go && mSeedHitVec.size()<(unsigned int) mSeedLength) 
     {
       go = extendHit( mSeedHitVec.back() );
     }
   //Extension failed if current track length less than mSeedLength
   //Return 0.
-  if ( mSeedHitVec.size()<mSeedLength ) 
+  if ( mSeedHitVec.size()<(unsigned int)mSeedLength ) 
     {
       _messenger <<"StiLocalTrackSeedFidnder::makeTrack() -W- Hit extension failed because size()<mSeedLength"<<endl;
       return track;
@@ -172,13 +190,13 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
   //now use straight line propogation to recursively extend
   mSkipped = 0;
   go=true;
-  while ( go && mSkipped<=mMaxSkipped && mSeedHitVec.size()<=mSeedLength+mExtrapMaxLength) 
+  while ( go && mSkipped<=mMaxSkipped && mSeedHitVec.size()<=(unsigned int)( mSeedLength+mExtrapMaxLength) ) 
     {
       go = extrapolate();
     }
   //Extension failed if current track length less than mSeedLength+mExtrapMinLength
   //Return 0.
-  if ( mSeedHitVec.size()<mSeedLength+mExtrapMinLength) 
+  if ( mSeedHitVec.size()<(unsigned int)( mSeedLength+mExtrapMinLength) )
     {
       _messenger <<"StiLocalTrackSeedFinder::makeTrack() -W- Hit extension failed because size()<mSeedLength+mExtrapMinLength"<<endl;
       return track;
@@ -418,22 +436,6 @@ void StiLocalTrackSeedFinder::calculateWithOrigin(StiKalmanTrack* track)
   track->initialize( mHelixCalculator.curvature(), mHelixCalculator.tanLambda(),
 		     StThreeVectorD(mHelixCalculator.xCenter(), mHelixCalculator.yCenter(), 0.),
 		     mSeedHitVec);    
-}
-
-void StiLocalTrackSeedFinder::getNewState()
-{
-  const StiIOBroker* broker = StiIOBroker::instance();
-  mDeltaY = broker->ltsfYWindow();
-  mDeltaZ = broker->ltsfZWindow();
-  mSeedLength = broker->ltsfSeedLength();
-  mExtrapDeltaY = broker->ltsfExtrapYWindow();
-  mExtrapDeltaZ = broker->ltsfExtrapZWindow();
- 
-  mMaxSkipped = broker->ltsfExtrapMaxSkipped();
-  mExtrapMinLength = broker->ltsfExtrapMinLength();
-  mExtrapMaxLength = broker->ltsfExtrapMaxLength();
-  mUseOrigin = broker->ltsfUseVertex();
-  mDoHelixFit = broker->ltsfDoHelixFit();
 }
 
 void StiLocalTrackSeedFinder::addLayer(StiDetector* det)

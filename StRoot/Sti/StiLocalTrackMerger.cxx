@@ -7,20 +7,15 @@
 #include <cmath>
 #include <algorithm>
 using namespace std;
-
-//Sti
 #include "StiKalmanTrack.h"
 #include "StiTrackContainer.h"
 #include "StiKalmanTrackNode.h"
-#include "StiIOBroker.h"
-
 #include "StiLocalTrackMerger.h"
 
 StiLocalTrackMerger::StiLocalTrackMerger(StiTrackContainer* store)
-    : StiTrackMerger(store), mDeltaR(0.)
+    : StiTrackMerger(store), mDeltaR(1.)
 {
     cout <<"StiLocalTrackMerger::StiLocalTrackMerger()"<<endl;
-    getNewState();
     mMaxTrack.reset();
     mMaxTrackNode.reset();
 }
@@ -30,25 +25,18 @@ StiLocalTrackMerger::~StiLocalTrackMerger()
     cout <<"StiLocalTrackMerger::~StiLocalTrackMerger()"<<endl;
 }
 
-void StiLocalTrackMerger::getNewState()
-{
-    StiIOBroker* broker = StiIOBroker::instance();
-
-    mDeltaR = broker->ltmDeltaR();
-}
-
 void StiLocalTrackMerger::mergeTracks()
 {
     cout <<"StiLocalTrackMerger::mergeTracks()"<<endl;
     
     if (!mTrackStore) {
-	cout <<"StiLocalTrackMerger::mergeTracks(). ERROR:\t"
-	     <<"mTrackStore==0.  Abort"<<endl;
-	return;
+			cout <<"StiLocalTrackMerger::mergeTracks(). ERROR:\t"
+					 <<"mTrackStore==0.  Abort"<<endl;
+			return;
     }
     
     cout <<"\t N-tracks before merge: "<<mTrackStore->size()<<endl;
-
+		
     for (TrackMap::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower) {
 	if (configureMaxTrack( static_cast<StiKalmanTrack*>((*lower).second) )) {
 

@@ -12,22 +12,15 @@ using namespace std;
 #include "StiKalmanTrack.h"
 #include "StiTrackContainer.h"
 #include "StiKalmanTrackNode.h"
-#include "StiIOBroker.h"
-
 #include "StiTrackMerger.h"
 
 StiTrackMerger::StiTrackMerger(StiTrackContainer* store)
-  : Observer(StiIOBroker::instance()),
-    mTrackStore(store)
+  : mTrackStore(store)
 {
     cout <<"StiTrackMerger::StiTrackMerger()"<<endl;
-    mSubject->attach(this);
 }
 
 StiTrackMerger::~StiTrackMerger()
 {
   cout <<"StiTrackMerger::~StiTrackMerger()"<<endl;
-  if (mSubject) {
-    mSubject->detach(this);
-  }
 }

@@ -1,21 +1,17 @@
-//StiCompositeSeedFinder.cxx
-//M.L. Miller (Yale Software)
-//03/01
+///\File StiCompositeSeedFinder.cxx
+///\author M.L. Miller (Yale Software) 03/01
+///\author C. Pruneau (Wayne) Jan 03
 #include <stdexcept>
 #include <stdio.h>
 #include <iostream.h>
 #include <algorithm>
 using std::ostream_iterator;
 using std::copy;
-
-//Scl
-//#include "StGetConfigValue.hh"
 #include "StMeasuredPoint.h"
 #include "Sti/Base/MessageType.h"
 #include "Sti/Base/Messenger.h"
 #include "Sti/Base/Factory.h"
 #include "StiToolkit.h"
-#include "StiIOBroker.h"
 #include "StiHitContainer.h"
 #include "StiDetectorContainer.h"
 #include "StiTrackSeedFinder.h"
@@ -27,13 +23,11 @@ using std::copy;
 #include "StiMasterDetectorBuilder.h"
 
 StiCompositeSeedFinder::StiCompositeSeedFinder(const string&             name,
-					       Factory<StiKalmanTrack> * trackFactory,
-					       StiHitContainer         * hitContainer,
-					       StiDetectorContainer    * detectorContainer)
-  : StiSeedFinder(name,trackFactory,hitContainer,detectorContainer)
-{
-  build();
-}
+																							 Factory<StiKalmanTrack> * trackFactory,
+																							 StiHitContainer         * hitContainer,
+																							 StiDetectorContainer    * detectorContainer)
+  : StiTrackSeedFinder(name,trackFactory,hitContainer,detectorContainer)
+{ }
 
 ///Destructor 
 ///Nothing to do because the base class takes care of deleting 
@@ -45,9 +39,9 @@ StiCompositeSeedFinder::~StiCompositeSeedFinder()
 
 bool StiCompositeSeedFinder::hasMore()
 {
-  _messenger <<"StiCompositeSeedFinder::hasMore() - INFO - Started"<<endl;
+  _messenger <<"StiCompositeSeedFinder::hasMore() -I- Started"<<endl;
   bool has_more;
-  if (_currentTrackSeedFinder != end())
+  if (_currentTrackSeedFinder != Vectorized<StiTrackSeedFinder>::end())
     has_more = (*_currentTrackSeedFinder)->hasMore();
   else
     has_more = false;
@@ -56,61 +50,29 @@ bool StiCompositeSeedFinder::hasMore()
 
 StiKalmanTrack* StiCompositeSeedFinder::next()
 {
-  _messenger <<"StiCompositeSeedFinder::next() - INFO - Starting"<<endl;
+  _messenger <<"StiCompositeSeedFinder::next() -I- Starting"<<endl;
   
   StiKalmanTrack* track=0;
   track = (*_currentTrackSeedFinder)->next();
   //Check to see if we ran out
   if ( (*_currentTrackSeedFinder)->hasMore()==false ) ++_currentTrackSeedFinder;
-  _messenger <<"StiCompositeSeedFinder::next() - INFO - Done"<<endl;
+  _messenger <<"StiCompositeSeedFinder::next() -I- Done"<<endl;
   return track;
 }
 
 void StiCompositeSeedFinder::reset()
 {
-  _messenger <<"StiCompositeSeedFinder::reset() - INFO - Started"<<endl;
+  _messenger <<"StiCompositeSeedFinder::reset() -I- Started"<<endl;
   //reset all!
-  for (vector<StiSeedFinder*>::iterator it=begin(); it!=end(); ++it)
+  for (vector<StiTrackSeedFinder*>::iterator it=Vectorized<StiTrackSeedFinder>::begin(); 
+			 it!=Vectorized<StiTrackSeedFinder>::end(); ++it)
     (*it)->reset();
-  _currentTrackSeedFinder = begin();
-  _messenger <<"StiCompositeSeedFinder::reset() - INFO - Done"<<endl;
+  _currentTrackSeedFinder = Vectorized<StiTrackSeedFinder>::begin();
+  _messenger <<"StiCompositeSeedFinder::reset() -I- Done"<<endl;
 }
 
-void StiCompositeSeedFinder::build()
+void StiCompositeSeedFinder::initialize()
 {
-  _messenger<<"StiCompositeSeedFinder::build() - INFO - Started"<<endl;
-  //Build each SeedFinder
-  StiTrackSeedFinder* trackSeedFinder=0;
-  if (StiToolkit::instance()->getIOBroker()->useGui()==true)
-    trackSeedFinder = new StiRDLocalTrackSeedFinder("RDLocalTrackSeedFinder",
-						    _trackFactory,
-						    _hitContainer,
-						    _detectorContainer);
-  else 
-    trackSeedFinder = new StiLocalTrackSeedFinder("LocalTrackSeedFinder",
-						  _trackFactory,
-						  _hitContainer,
-						  _detectorContainer);
-  //Now add detectors to the container
-  // This will put all known rows in the search loop
-  StiMasterDetectorBuilder * builder = StiToolkit::instance()->getDetectorBuilder();
-  if (!builder)
-    throw runtime_error("StiCompositeSeedFinder::build() - FATAL - builder==0 ");
-  for (unsigned int row=0;row<builder->getNRows();row++)
-    {
-      for (unsigned int sector=0;sector<builder->getNSectors(row);sector++)
-	{
-	  StiDetector * detector = builder->getDetector(row,sector);
-	  if (!detector)
-	    {
-	      cout << "StiCompositeSeedFinder::build() row:"<<row<<" sector:"<<sector<<" ERROR" << endl;
-	      throw runtime_error("StiCompositeSeedFinder::build() - FATAL - detector==0 ");
-	    }
-	  trackSeedFinder->addLayer(detector);
-	}
-    }
-  add(trackSeedFinder);
-  reset();
-  _messenger<<"StiCompositeSeedFinder::build() - INFO - Done"<<endl;
+	// no ops because the Composite finder does not have parameters
+	// other than the actual finder themselves.
 }
-
