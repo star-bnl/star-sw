@@ -1,5 +1,10 @@
-* $Id: sisdgeo2.g,v 1.4 2005/03/25 02:08:59 potekhin Exp $
+* $Id: sisdgeo2.g,v 1.5 2005/03/25 17:29:35 potekhin Exp $
 * $Log: sisdgeo2.g,v $
+* Revision 1.5  2005/03/25 17:29:35  potekhin
+* Created a new version (4) of the structure SFPA,
+* to reflect the correct ladder positions as per Lilian's
+* communication.
+*
 * Revision 1.4  2005/03/25 02:08:59  potekhin
 * Small cosmetic change in the output
 * (easier to catch config in the log)
@@ -326,6 +331,27 @@ Module  SISDGEO2  is the Silicon Strip Detector
                        23.177,22.800,22.800,22.800,23.800,
                        22.500,23.800,22.800,22.800,22.800} ! individual radii
       EndFill
+* In the following, ladders 5,7,15,17 have their radii corrected as per
+* Lilian Martin's instructions  --maxim--
+      Fill SFPA               ! Silicon Strip detector parameters
+        version  = 4          ! geometry version
+        ladderMap   = {     1,     1,     1,     1,     1,
+                            1,     1,     1,     1,     1,
+                            1,     1,     1,     1,     1,
+                            1,     1,     1,     1,     1} ! presence of ladders
+        ladderAngle = {  90.0, 108.3, 126.6, 144.4, 162.2,
+                        180.0, 197.8, 215.6, 233.4, 251.7,
+                        270.0, 288.3, 306.6, 324.4, 342.2,
+                          0.0,  17.8,  35.6,  53.4,  71.7} ! individual angles
+        ladderTilt  = {   0.0,  -6.0,  -7.0,  -7.0,  -7.0,
+                          0.0,   7.0,   7.0,   7.0,   6.0,
+                          0.0,  -6.0,  -7.0,  -7.0,  -7.0,
+                          0.0,   7.0,   7.0,   7.0,   6.0} ! individual tilts
+        ladderRadius= {23.177,22.800,22.800,22.800,22.800,
+                       22.500,22.800,22.800,22.800,22.800,
+                       23.177,22.800,22.800,22.800,22.800,
+                       22.500,22.800,22.800,22.800,22.800} ! individual radii
+      EndFill
 *
 *************************************************************************************************
 *************************************************************************************************
@@ -351,7 +377,8 @@ Module  SISDGEO2  is the Silicon Strip Detector
         Component O   A=16     Z=8    W=0.4*4*16./174.
         Mixture   G5   Dens=0.85
 
-      write(*,*) 'Level 2 of the SSD geometry'
+      write(*,*) 'Level 2 of the SSD geometry, Configuration: ',SSDP_Config
+
       if(ssdp_Placement==1) then
          write(*,*) '*** Positioining the Silicon Strip Detector in SVT'
          Create and Position SFMO in SVTT
