@@ -1,4 +1,5 @@
-#ifndef StHbtTypes_HH
+
+// for each little section here, do your own "ifndef....endif"
 
 /*------------------------------------
  * Histograms
@@ -26,12 +27,21 @@ typedef TH3D StHbt3DHisto;
  * so much like C++, doesn't even recognize "string" as a type!
  */
 
-
 #ifndef __CINT__
+#ifndef StHbtString_noCint
+#define StHbtString_noCint
 #include <string>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
 typedef string StHbtString; //!
+#endif
+
 #else
+#ifndef StHbtString_yesCint
+#define StHbtString_yesCint
 class StHbtString; //!
+#endif
 #endif
 
 /*----------------------------------------------------------------
@@ -42,6 +52,8 @@ class StHbtString; //!
  * from sofi more easily.
  */
 
+#ifndef StHbtVectors_hh
+#define StHbtVectors_hh
 //#include "StThreeVector.hh"
 //typedef StThreeVector<double> StHbtThreeVector;//!
 #include "StThreeVectorD.hh"
@@ -50,5 +62,4 @@ typedef StThreeVectorD StHbtThreeVector;//!
 //typedef StLorentzVector<double> StHbtLorentzVector;//!
 #include "StLorentzVectorD.hh"
 typedef StLorentzVectorD StHbtLorentzVector;//!
-
 #endif
