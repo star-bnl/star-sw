@@ -7,7 +7,8 @@
 * 10Jul98 K. Turner - changed to use new version of global pam kumacs
 * 11Jul98 K. Turner - changed to used tfc for adcxyz table
 * 11Jul98 K. Turner - changed to load gstar more standard way 
-*                    - changed inputs to bfc_start!
+*                   - changed inputs to bfc_start!
+* 13Jul98 K. Turner - change to separate out parts of setup 
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -28,80 +29,16 @@
 * import global macros
  macro/global/import *
    
-* set parameters needed for running gstar & g2t - if loading geometry
- testgeom = [domain]
- nw1=$words([testgeom])
- message ' !!! bfc_util#start ==> Number of words in domain = ',[nw1]
- do i=1,[nw1]
-   mod1 = $word([testgeom],[i],1)
-   if ([mod1].eq.geometry) then
-     message ' setup for domain = ' [mod1]
-* initialize physics types for running gstar
-	  exec set_hadr_phys_[phystype]
-          message ' gstar: set hadronic physics ' [phystype]
-* initialize geometry for running gstar
-         if ([geomtype].eq.all) then 
-           message ' gstar: load star geometry - all '
-           exec load_star_geom#all
-         elseif ([geomtype].eq.tpc_nofield) then
-           message ' gstar: load star geometry - tpc only, no mag.field '
-           exec load_star_geom#tpc_nofield
-	 elseif ([geomtype].eq.tpc_field) then
-	   message ' gstar: load star geometry - tpc only with mag field'
-	   exec load_star_geom#tpc_field
-         else 
-           message ' gstar: geometry type not available!! '
-         endif
-* initialize for g2t: tell g2t where to put tables
-         detp g2tmain gttc.rdir=0     
-   endif
- enddo
-     
+*  THESE NEXT 3 MUST BE DONE IN THIS ORDER!!!!
+   exec bfc_util#bfc_gstar [chain]
+   exec bfc_util#bfc_load [domain]
+   exec bfc_util#bfc_g2t [chain]
  
-*  LOAD LIBRARIES
- if $vexist(make_done)=0 then
-   message "Load domains:" [domain]
-   test = [domain]
-   nw = $words([test])
-   do i = 1, [nw]
-     mod = $word([test],[i],1)
-     n = $words([mod],'/') 
-     module = $word([mod],[n],[n],'/')
-     test_done = [module]_done
-     if ($vexist([test_done])=0) then
-       vec/cre [test_done]
-	message ' doing make for domain:' [mod]
-        make [mod]
-        if $iquest(1)<>0 then
-            message "<bfc> Shared libraries have not been loaded : ABend"
-         endif
-     endif
-     if $iquest(1)<>0 then
-       message "<bfc> Shared libraries have not been loaded : ABend"
-     endif
-   enddo
-   vec/cre make_done
- endif
- 
- 
-*  must fill Run tables if running g2t (rg2t in chain)
- testrg2t = [chain]
- nw2=$words([testrg2t])
- message ' !!! bfc_util#start ==> Number of words in chain = ',[nw2]
- do i=1,[nw2]
-   mod2 = $word([testrg2t],[i],1)
-   CASE [mod2] in
-     (rg2t) 
-        message ' !!! bfc_util#start ==> setup for chain:' [mod2]
-* this command fills geant Run tables
-        tables ' ' [geant_Run]
-   ENDCASE
- enddo
-       
 return
  
-**********************************************************************
-**********************************************************************
+*********************************************************************
+
+*********************************************************************
 **********************************************************************
  
 macro bfc_init _
@@ -352,7 +289,110 @@ return
  
 **********************************************************************
 **********************************************************************
+***********************************************************************
+******************************************************************
+ 
+ macro bfc_g2t chain
+   
+   macro/global/import *
+     
+*  must fill Run tables if running g2t (rg2t in chain)
+*  has to be done after loading
+ test2 = [chain]
+ nw2=$words([test2])
+ message ' !!! bfc_util#bfc_g2t ==> Number of words in chain = ',[nw2]
+ do i=1,[nw2]
+   mod2 = $word([test2],[i],1)
+   CASE [mod2] in
+     (rg2t) 
+        message ' !!! bfc_util#bfc_g2t ==> setup for chain:' [mod2]
+* this command fills geant Run tables
+        tables ' ' [geant_Run]
+   ENDCASE
+ enddo
+  
+return
+ 
+*********************************************************************
 **********************************************************************
+**************************************************************************
+
+ macro bfc_load domain
+   
+   macro/global/import *
+     
+*  LOAD LIBRARIES
+ if $vexist(make_done)=0 then
+   message " bfc_util#bfc_load: Load domains --> " [domain]
+   test = [domain]
+   nw = $words([test])
+   do i = 1, [nw]
+     mod = $word([test],[i],1)
+     n = $words([mod],'/') 
+     module = $word([mod],[n],[n],'/')
+     test_done = [module]_done
+     if ($vexist([test_done])=0) then
+       vec/cre [test_done]
+	message ' bfc_load: doing make for domain:' [mod]
+        make [mod]
+        if $iquest(1)<>0 then
+            message "<bfc> Shared libraries have not been loaded : ABend"
+         endif
+     endif
+     if $iquest(1)<>0 then
+       message "<bfc> Shared libraries have not been loaded : ABend"
+     endif
+   enddo
+   vec/cre make_done
+ endif
+ 
+ return
+ 
+*********************************************************************
+**********************************************************************
+************************************************************
+ 
+macro bfc_gstar chain
+   
+   macro/global/import *
+     
+      
+ test1 = [chain]
+ nw1=$words([test1])
+ message ' !!! bfc_util#bfc_gstar ==> Number of words in chain = ',[nw1]
+ do i=1,[nw1]
+   mod1 = $word([test1],[i],1)
+   CASE [mod1] in
+     (rgst)
+         message ' !!! bfc_util#bfc_gstar ==> set params for chain:' [mod1]
+* initialize physics types for running gstar
+	 exec set_hadr_phys_[phystype]
+         message ' gstar: set hadronic physics ' [phystype]
+* initialize geometry for running gstar
+         if ([geomtype].eq.all) then 
+           message ' gstar: load star geometry - all '
+           exec load_star_geom#all
+         elseif ([geomtype].eq.tpc_nofield) then
+           message ' gstar: load star geometry - tpc only, no mag.field '
+           exec load_star_geom#tpc_nofield
+	 elseif ([geomtype].eq.tpc_field) then
+	   message ' gstar: load star geometry - tpc only with mag field'
+	   exec load_star_geom#tpc_field
+         else 
+           message ' gstar: geometry type not available!! '
+         endif
+     (rg2t)
+         message ' !!! bfc_util#bfc_gstar ==> set params for chain:' [mod1]
+* initialize for g2t: tell g2t where to put tables
+         detp g2tmain gttc.rdir=0		  
+   ENDCASE
+ enddo
+       
+return
+ 
+*********************************************************************
+*********************************************************************
+*********************************************************************
 
 macro bfc_defaults
  macro/global/import *
