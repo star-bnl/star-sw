@@ -3,14 +3,8 @@
 * This kumac initializes the STE (Svt Tracker Evaluator) module
 **************************************************************************
 **************************************************************************
-
-*-------------------------------------------------------------------------
-* This section creates the teval table
-*-------------------------------------------------------------------------
-message 'making the ste teval table...'
-
-cd /dui/data/svt/tracks
-newtable ste_teval ste_teval 10000
+* editted June 4, 1998 by Kathy Turner
+* 
 
 *-------------------------------------------------------------------------
 * This section creates the teff table
