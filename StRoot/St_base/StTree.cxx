@@ -283,7 +283,7 @@ TString outFile = file; gSystem->ExpandPathName(outFile);
         bas[0] = gSystem->BaseName(outFile);
 
 if (strncmp(".none ",GetFile(),6)==0) {//FileName was corrupted by old bug
-  
+
   TString ts(GetFile()); ts.Remove(0,6); SetFile(ts);
 }
 
@@ -292,10 +292,10 @@ if (strncmp(".none ",GetFile(),6)==0) {//FileName was corrupted by old bug
 //VP  SetIOMode("0");
   if (bas[0] == bas[1] || bas[0].Contains(nam)) SetIOMode("r");
   //VP?? else                                  	bas[0]=bas[1];
-  for (int d=0; d<2; d++) {
-    for (int b=0; b<2; b++) {
+  for (int d=1; d>=0; d--) {
+    for (int b=1; b>=0; b--) {
       char *newFile = gSystem->ConcatFileName(dir[d],bas[b]);
-      if (StIO::IfExi(newFile)) {        
+      if (StIO::IfExi(newFile)) {
         fFile = newFile;
         printf("<StBranch::UpdateFile> Branch=%s file %s\n",GetName(),newFile);
         delete [] newFile;
@@ -310,7 +310,7 @@ Int_t StBranch::SetTFile(TFile *tfile)
   if (!tfile)           return 0;
   if (fTFile==tfile)    return 0;
   fHandle=0;
-  if (fTFile) Close();  
+  if (fTFile) Close();
   fTFile=0;
   SetFile(tfile->GetName());
   Open();
@@ -355,7 +355,7 @@ const char *StBranch::GetFile()
     if (tree) { // include base name
       const char* base = tree->GetBaseName();
       if (base) {fFile.Insert(0,"."); fFile.Insert(0,base);}}
-    if (kase==1) fFile.Insert(0,dir); 
+    if (kase==1) fFile.Insert(0,dir);
   }
 
    return (const char*)fFile;
@@ -448,8 +448,8 @@ Int_t StBranch::NextEvent (StUKey &ukey)
   if (!(fIOMode&1))     return 0;
   Clear();
   fUKey.Update(ukey,GetName());
-  int iret = GetEvent(1); 
-  ukey.Update(fUKey); 
+  int iret = GetEvent(1);
+  ukey.Update(fUKey);
   return iret;
 }
 //_______________________________________________________________________________
@@ -462,7 +462,7 @@ void StBranch::SetParAll(TDataSet *parNew,TDataSet *parOld,TList *savList)
     son->SetParent(parNew);
     if (savList) {
        assert(p);
-       savList->AddFirst(son); savList->AddFirst(p); 
+       savList->AddFirst(son); savList->AddFirst(p);
        SetParAll(son,son,savList);
     }
   }// end while
@@ -537,15 +537,15 @@ void StTree::SetIOMode(Option_t *iomode)
 //_______________________________________________________________________________
 Int_t StTree::SetFile(const Char_t *file,const Char_t *mode,int insist)
 {
-  if (mode && *mode) StBranch::SetIOMode(mode); 
+  if (mode && *mode) StBranch::SetIOMode(mode);
   if (!file || !*file) 	return 0;
 
   if (fIOMode&1)  {	//ReadMode
     UpdateFile(file);
-    
+
   }
   if (fIOMode&2)  {	//WriteMode
-  
+
     SetBaseName(file);
   }
   return 0;
@@ -626,10 +626,10 @@ Int_t StTree::NextKey()
 }
 //_____________________________________________________________________________
 Int_t StTree::Skip(int nskip)
-{  
-  for (; nskip; nskip--) 
+{
+  for (; nskip; nskip--)
   {
-    int ret = NextKey(); 
+    int ret = NextKey();
     if (ret) break;
   }
 
@@ -657,7 +657,7 @@ Int_t StTree::NextEvent()
     if (iret)				continue;
     nAkt++;
   }
-  
+
   return (nAkt) ? 0:kStEOF;
 }
 
@@ -685,7 +685,7 @@ void StTree::Close(const char* opt)
 //_______________________________________________________________________________
 StTree *StTree::GetTree(TFile *file, const char *treeName)
 {
-  StUKey treeKey(treeName,2000); 
+  StUKey treeKey(treeName,2000);
   StTree *ret = (StTree*)StIO::Read(file,treeKey);
   if ((Long_t)ret == -1) ret = 0;
   if (ret) ret->SetIOMode("0");
@@ -706,7 +706,7 @@ void StTree::SetBaseName(const char *baseName,const char *dirname)
   if (!dot) return;
   fBaseName.Remove(dot-fBaseName.Data());
   if (dirname && *dirname) {
-    TString ts(dirname); 
+    TString ts(dirname);
     if (ts[ts.Length()-1]!='/') ts += "/";
     ts += fBaseName;
     fBaseName = ts;
@@ -734,8 +734,8 @@ Int_t StFile::GetNextBundle()
 {
   if (!fDS)	return 1;
   if (fIter>-1 && !fDS->At(fIter)) return 1;
-  return (!fDS->At(++fIter));
-  
+  return (!fDS->At(fIter++));
+
 }
 //_____________________________________________________________________________
 Int_t StFile::GetNBundles()
@@ -843,7 +843,7 @@ Int_t StFile::AddWild(const Char_t *file)
   const char* fullname;
   TDirIter dirIter(file);
   while((fullname=dirIter.NextFile())) { AddFile(fullname);}
-  
+
   return 0;
 }
 //_____________________________________________________________________________
@@ -851,20 +851,20 @@ Int_t StFile::AddEvent(UInt_t r,UInt_t e)
 {
   TObjectSet *dsfam = (TObjectSet*)fDS->Last();	if(!dsfam) return 1;
   TDataSet   *dsfil = dsfam->Last();		if(!dsfil) return 1;
-    
-  TDataSet   *dskey = (TDataSet*)dsfam->GetObject(); 
-  if (!dskey) { dskey = new TDataSet("uklist");dsfam->SetObject(dskey,1);} 
+
+  TDataSet   *dskey = (TDataSet*)dsfam->GetObject();
+  if (!dskey) { dskey = new TDataSet("uklist");dsfam->SetObject(dskey,1);}
   char cbuf[40];
   sprintf(cbuf,".%010u.%010u",r,e);
   new TDataSet(cbuf,dskey);
   return 0;
-}  
+}
 //_____________________________________________________________________________
 StUKey StFile::GetNextEvent()
 {
   StUKey uk(kUMAX);
   if (!fDS) 		return uk;
-  TDataSet *dsfam = fDS->At(fIter); 
+  TDataSet *dsfam = fDS->At(fIter);
   if (!dsfam) 		return uk;
   uk = 0;
   TDataSet *dskeys = (TDataSet*)dsfam->GetObject();
@@ -952,7 +952,7 @@ void StFile::ls(Option_t *opt)
   TList blist;
   int ibr=0,i;
   Cat *cat;
-  int savIter = fIter; fIter=-1;
+
   int numFile=0;
   TString oldirname("_");
   while (!GetNextBundle()) {    //Bundle loop
@@ -1038,7 +1038,7 @@ void StFile::ls(Option_t *opt)
              cat->fNFiles);
   }
   blist.Delete();
-  fIter = savIter;
+
 }
 //_____________________________________________________________________________
 const Char_t *StFile::GetAttr(TDataSet *ds,const char *att)
