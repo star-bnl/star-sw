@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.h,v 1.5 2002/03/19 22:23:28 meissner Exp $
+// $Id: StPeCEvent.h,v 1.6 2002/12/19 18:09:53 yepes Exp $
 // $Log: StPeCEvent.h,v $
+// Revision 1.6  2002/12/19 18:09:53  yepes
+// MuDST input added
+//
 // Revision 1.5  2002/03/19 22:23:28  meissner
 // New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
 //
@@ -65,9 +68,11 @@ public:
   Float_t                         getYVertex() const;
   Float_t                         getZVertex() const;
 #ifndef __CINT__
+  StMuDst* muDst;
   StEvent*                        eventP ;
   void                            addPair(StPeCPair* pair) const;
   Int_t                           fill ( StEvent* event ) ;
+  Int_t fill(StMuDst* mudst);
   Int_t                           infoLevel ;
   void                            setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
   StLorentzVectorF                getEvent4Momentum(StPeCSpecies pid) const;
