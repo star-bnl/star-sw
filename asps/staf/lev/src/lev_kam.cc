@@ -4,7 +4,7 @@
 *:DESCRIPTION:  C KUIP Action Modules for LEV
 *:AUTHOR:       hjw - Herb Ward - ward@physics.utexas.edu
 *:BUGS:         -- STILL IN DEVELOPMENT --
-*:HISTORY:      01jul96-v000a-cet- creation
+*:HISTORY:      01jul96-v000a-hjw- creation
 *:<---------------------------------------------------------------------
 */
 #undef CORBA
@@ -40,4 +40,10 @@ void kam_lev_update_()
   lev->update();
   printf("I have updated the versions table (config/levVersions).\n");
   set_staf_status(0);
+}
+void lev_registerversion_(const char *name,const char *version) {
+  lev->registerVersion(name,"pam",version);
+}
+void lev_registerversion(const char *name,const char *version) {
+  lev_registerversion_(name,version);
 }
