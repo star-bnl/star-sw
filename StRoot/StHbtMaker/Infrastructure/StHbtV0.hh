@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.11  2002/11/19 23:37:56  renault
+ * Get V0 daughters helix
+ *
  * Revision 1.10  2002/02/09 19:25:36  laue
  * updates (dedx length)
  *
@@ -62,6 +65,7 @@
 
 #include <fstream.h>
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh" //same as in StHbtTrack.hh
+#include "StarClassLibrary/StPhysicalHelixD.hh" // Gael 12 Sept 02
 #ifdef __ROOT__
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #endif
@@ -82,6 +86,7 @@ public:
 
   float decayLengthV0() const;       // 3-d decay distance
   StHbtThreeVector decayVertexV0() const; // Coordinates of decay vertex
+  StHbtThreeVector primaryVertex() const; // Coordinates of primary vertex
   float decayVertexV0X() const; // Coordinates of decay vertex
   float decayVertexV0Y() const; // Coordinates of decay vertex
   float decayVertexV0Z() const; // Coordinates of decay vertex
@@ -153,6 +158,9 @@ public:
   unsigned short   keyNeg() const;               // Id of negative track
   unsigned short   keyPos() const;               // Id of positive track
 
+  const StPhysicalHelixD& HelixPos() const; // Gael 12 Sept 02
+  const StPhysicalHelixD& HelixNeg() const; // Gael 12 Sept 02
+
   void UpdateV0(); // Fills derived info
   void SetdecayLengthV0(const float);  
   void SetdecayVertexV0(const StHbtThreeVector);  
@@ -216,7 +224,11 @@ public:
   void SetkeyNeg(const unsigned short&);
   void SetkeyPos(const unsigned short&);
      
-  
+  void SetHelixPos(const StPhysicalHelixD&); // Gael 12 Sept 02
+  void SetHelixNeg(const StPhysicalHelixD&); // Gael 12 Sept 02
+
+  void SetprimaryVertex(const StHbtThreeVector v);//Gael 24 Sept 02
+
   friend ostream& operator<<(ostream& out, StHbtV0& v0);
   friend istream& operator>>(istream& in,  StHbtV0& v0);
 
@@ -228,6 +240,7 @@ protected:
  
   float mDecayLengthV0;
   StHbtThreeVector mDecayVertexV0;
+  StHbtThreeVector mPrimaryVertex;
   float mDcaV0Daughters;
   float mDcaV0ToPrimVertex;
   float mDcaPosToPrimVertex;
@@ -259,8 +272,8 @@ protected:
   unsigned short mNumDedxPos;
   unsigned short mNumDedxNeg;
 
-  //Get PidProb and NSigma of Neg and Pos Track -- Gael 01 Feb 02
-  //float mPidProbPion;  
+  StPhysicalHelixD mHelixPos; // Gael 12 Sept 02
+  StPhysicalHelixD mHelixNeg; // Gael 12 Sept 02
 
   // the following variables are not in the persistent version and can be calculated via UpdateV0();
   StHbtThreeVector mMomV0;
@@ -289,12 +302,15 @@ protected:
   unsigned short   mKeyNeg;
   unsigned short   mKeyPos;
 
+
+
 };
 
 
 
 inline float StHbtV0::decayLengthV0() const { return mDecayLengthV0; }
 inline StHbtThreeVector StHbtV0::decayVertexV0() const { return mDecayVertexV0; } 
+inline StHbtThreeVector StHbtV0::primaryVertex() const { return mPrimaryVertex; }
 inline float StHbtV0::decayVertexV0X() const { return mDecayVertexV0.x(); } 
 inline float StHbtV0::decayVertexV0Y() const { return mDecayVertexV0.y(); } 
 inline float StHbtV0::decayVertexV0Z() const { return mDecayVertexV0.z(); } 
@@ -415,7 +431,7 @@ inline void StHbtV0::SetlendedxNeg(float x){mLenDedxNeg=x;}//Gael 04Fev2002
 inline void StHbtV0::SetdedxPos(float x){mDedxPos=x;}
 inline void StHbtV0::SeterrdedxPos(float x){mErrDedxPos=x;}//Gael 04Fev2002
 inline void StHbtV0::SetlendedxPos(float x){mLenDedxPos=x;}//Gael 04Fev2002
-
+inline void StHbtV0::SetprimaryVertex(const StHbtThreeVector v) { mPrimaryVertex = v; }//Gael 24 Sept 02
 #endif
 
 
