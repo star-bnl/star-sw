@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.2 1998/02/19 01:28:37 hardtke Exp $
+* $Id: tfs_gen_padres.F,v 1.3 1998/03/03 23:03:13 hardtke Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.3  1998/03/03 23:03:13  hardtke
+* use constants files
+*
 * Revision 1.2  1998/02/19 01:28:37  hardtke
 * fixed z resolution
 *
@@ -41,10 +44,13 @@ C     Dhammika W.      03/29/1997       Modefied the calculation of
 C                                       wmin & tlen  to accommodate
 C                                       zero B-field case.
 C     David Hardtke    02/14/1998       fix z resolution calculation.
+C     DH               03/02/98         use math and physical constants
 C-----------------------------------------------------------------------
 #include "PAM.inc"
 #include "tfs_fspar.inc"
 #include "tcl_tphit.inc"
+#include "math_constants.inc"
+#include "phys_constants.inc"
 
 C-----------------------------------------------------------------------
       RECORD / table_head_st / par_h
@@ -83,30 +89,9 @@ C     ASCALE - is the linear scale factor in-between
       COMMON /TPMERG/ RSEP, ZSEP, RPLIM, ZLIM
       
 C     Local variables
-      
-      REAL CPI, C2PI, CPI2, CLIGHT, ELMASS, CROOT2, DTORAD
-      REAL BCONV
 C     
-      PARAMETER ( CPI    = 3.141592654, 
-     >     C2PI   = 6.283185307,
-     >     CPI2   = 1.570796327,
-     >     CROOT2 = 1.414213562, 
-     >     DTORAD = 0.017453293,
-     >     BCONV  = 0.002998,
-     >     CLIGHT = 2.99792458E+10, 
-     >     ELMASS = 0.5110034)
-      
-C     
-C     General physical constants
-C     CPI = pi
-C     C2PI = 2*pi
-C     CPI2 = pi/2
-C     CLIGHT = Velocity of light (cm/sec)
-C     ELMASS = electron mass  (MeV)
-C     CROOT2 = sqrt(2)
-C     DTORAD = Conv. factor degrees to radians
-C     BCFGEV = Conv. factor:     pt(GeV) = BCFGEV*radius(cm)
-C     BCFMEV = Conv. factor:     pt(MeV) = BCFMEv*radius(cm)
+C     General physical constants now in math_constants and phys_constants
+C  
       
       integer i,j,k, isect, istart, iend, ipad, iret
       integer tgc_global_to_local_p
@@ -185,7 +170,7 @@ C     pad-crossing angle.  -- Apr 10, 96  --- DSW ---
                p_global(3) = pz
                iret  = tgc_global_to_local_p(i,p_global,p_local)
                alpha = atan(p_local(1)/p_local(2)) ! angle wrt normal
-               theta = cpi2 - abs(alpha) ! angle wrt pad row
+               theta = C_PI_2 - abs(alpha) ! angle wrt pad row
                tphit(k).alpha = alpha
                
 C     calculate the dip angle
@@ -213,8 +198,10 @@ C     wmin - is the track length along the padrow
 C     tlen  - is the approximated track arc-length
                   
 C     1st -  approximate with a circle
+CDH   par(1).bmag is in Tesla, C_D_CURVATURE is (GeV/c)(1/kG)(1/cm)
 
-                  rad = sqrt( px**2 + py**2 ) / (bconv*par(1).bmag)
+                  rad = sqrt( px**2 + py**2 ) / 
+     +                   ((C_D_CURVATURE*10.)*par(1).bmag)
                   if( rad .lt. par(1).padlen(ipad) ) then
 C     this is a spiral - cannot calculate track length
                      wcirc = 2.0 * rad
@@ -356,9 +343,10 @@ C     System test  simulations.
                   elseif(par(1).sys_test.eq.2)then
 C     Use a parametrization solely based on the  cosmic ray test data in the
 C     limited crossing angle region  [-45, 45] degrees.  --- DSW  6/17/97 ---
-                     sigma_tr = 0.04 + 0.09*(abs(alpha)/(DTORAD*45.))
-     >                    + 0.04*(abs(alpha)/(DTORAD*45.))**2
-     >                    + 0.32*(abs(alpha)/(DTORAD*45.))**8
+                     sigma_tr = 0.04  
+     >                    + 0.09*(abs(alpha)/(C_RAD_PER_DEG*45.))
+     >                    + 0.04*(abs(alpha)/(C_RAD_PER_DEG*45.))**2
+     >                    + 0.32*(abs(alpha)/(C_RAD_PER_DEG*45.))**8
                   endif
                endif
                
@@ -392,9 +380,10 @@ CDH   add temporary fudge factor of 0.07**2. DH January 15, 1998.
                elseif(par(1).sys_test.eq.2)then
 C     Use a parametrization solely based on the  cosmic ray test data in the
 C     limited dip angle region  [-45, 45] degrees. --- DSW  6/17/97 ---
-                  sigma_l = 0.04 + 0.09*(abs(lambda)/(DTORAD*45.))
-     >                 + 0.04*(abs(lambda)/(DTORAD*45.))**2
-     >                 + 0.32*(abs(lambda)/(DTORAD*45.))**8
+                  sigma_l = 0.04 
+     >                 + 0.09*(abs(lambda)/(C_RAD_PER_DEG*45.))
+     >                 + 0.04*(abs(lambda)/(C_RAD_PER_DEG*45.))**2
+     >                 + 0.32*(abs(lambda)/(C_RAD_PER_DEG*45.))**8
                   sigma_l = 2.*sigma_l
                   
                endif
@@ -428,3 +417,4 @@ C     End loop over sectors
 C     WRITE(6,*) ' TFS_GEN_PADRES: number hits discarded ', nh_discard
       RETURN
       end
+

@@ -1,5 +1,8 @@
-* $Id: tfs_ini.F,v 1.1 1998/01/27 01:47:23 fisyak Exp $
+* $Id: tfs_ini.F,v 1.2 1998/03/03 23:03:14 hardtke Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.2  1998/03/03 23:03:14  hardtke
+* use constants files
+*
 * Revision 1.1  1998/01/27 01:47:23  fisyak
 * Split sources
 *
@@ -35,11 +38,13 @@ C                                       diffusion coefficients in the
 C                                       pad response function and the pad
 C                                       resolution function  to accommodate
 C                                       zero B-field case.
+C     D. Hardtke       03/02/98         Delete unused constants
 C-----------------------------------------------------------------------
 #include "PAM.inc"
 #include "tfs_fspar.inc"
 #include "tfs_fsctrl.inc"
 #include "tfs_bmpar.inc"
+#include "math_constants.inc"
 C-----------------------------------------------------------------------
       RECORD / table_head_st / par_h
       RECORD / tfs_fspar_st  / par(*)
@@ -83,31 +88,7 @@ C     NXTRIG - the number of the triggered crossing
 C     EVPXNG - average number of events per beam crossing
       
 C     Local variables
-      REAL CPI, C2PI, CPI2, CLIGHT, ELMASS, CROOT2, DTORAD
-      REAL BCONV
-C     
-      PARAMETER ( 
-     >     CPI    = 3.141592654, 
-     >     C2PI   = 6.283185307,
-     >     CPI2   = 1.570796327,
-     >     CROOT2 = 1.414213562, 
-     >     DTORAD = 0.017453293,
-     >     BCONV  = 0.002998,
-     >     CLIGHT = 2.99792458E+10, 
-     >     ELMASS = 0.5110034)
-C     
-C     General physical constants
-C     CPI = pi
-C     C2PI = 2*pi
-C     CPI2 = pi/2
-C     CLIGHT = Velocity of light (cm/sec)
-C     ELMASS = electron mass  (MeV)
-C     CROOT2 = sqrt(2)
-C     DTORAD = Conv. factor degrees to radians
-C     BCFGEV = Conv. factor:     pt(GeV) = BCFGEV*radius(cm)
-C     BCFMEV = Conv. factor:     pt(MeV) = BCFMEv*radius(cm)
       
-      REAL RADEG
       REAL DRIVEL, TXING, NEVENT, DELTIM, EVRATE
       LOGICAL ERRFLG
       
@@ -115,6 +96,10 @@ C     BCFMEV = Conv. factor:     pt(MeV) = BCFMEv*radius(cm)
       REAL  CLUS_PER_CM_AR, CLUS_PER_CM_CH4, F_AR, F_CH4, PRESSURE
 
       INTEGER  n0
+
+CDH test variables:
+CDH      real origin(3), bfield(3)      
+CDH      integer i
 
       PARAMETER(CLUS_PER_CM_AR  = 22.3,
      >          CLUS_PER_CM_CH4 = 24.3,
@@ -139,6 +124,11 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
          RETURN
       endif
       
+CDH   try to extract b-field
+CDH      do i=1,3
+CDH       origin(i) = 0.
+CDH      enddo   
+ 
 C     pad response function (prf)
       
 C     modefy sprf_dr2 & sigmad2 to accomodate zero B_filed case.
@@ -230,9 +220,8 @@ C     sigmad2(2)   = sprf_dr2(2)/(n0*par(1).padlen(2))
       sigma_l      = par(1).sigmal
       
 C     calculate limits for the transition from prf to projected width
-      radeg = cpi / 180.
-      alow  = par(1).alpha_lo * radeg
-      ahigh = par(1).alpha_hi * radeg
+      alow  = par(1).alpha_lo * C_RAD_PER_DEG
+      ahigh = par(1).alpha_hi * C_RAD_PER_DEG
       ascale = ( ahigh - alow )
       
 C     calculate merging criterion
@@ -265,3 +254,9 @@ C     calculate number of events per gate opening
       
  999  return
       end
+
+
+
+
+
+
