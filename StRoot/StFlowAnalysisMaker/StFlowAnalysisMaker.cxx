@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.71 2003/05/06 21:33:04 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.72 2003/05/16 20:44:46 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -69,22 +69,18 @@ Int_t StFlowAnalysisMaker::Make() {
   pFlowMaker = (StFlowMaker*)GetMaker("Flow");
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
   if (pFlowEvent && pFlowSelect->Select(pFlowEvent)) {     // event selected
-
-    // Event quantities
-    if (pFlowEvent) {
-      if (FillFromFlowEvent()) {               // get event quantities
-	FillEventHistograms();                 // fill from FlowEvent
-	FillParticleHistograms();              // fill particle histograms
-      } else {
-	gMessMgr->Info("##### FlowAnalysis: Event psi = 0");
-      }
+    if (FillFromFlowEvent()) {               // get event quantities
+      FillEventHistograms();                 // fill from FlowEvent
+      FillParticleHistograms();              // fill particle histograms
     } else {
-      gMessMgr->Info("##### FlowAnalysis: FlowEvent pointer null");
-      return kStOK;
+      gMessMgr->Info("##### FlowAnalysis: Event psi = 0");
     }
-    
-    if (Debug()) StMaker::PrintInfo();
+  } else {
+    gMessMgr->Info("##### FlowAnalysis: FlowEvent pointer null");
+    return kStOK;
   }
+    
+  if (Debug()) StMaker::PrintInfo();
   
   return kStOK;
 }
@@ -789,7 +785,7 @@ Int_t StFlowAnalysisMaker::Init() {
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histFullHar[j].mHistPhiFtpcWest->SetXTitle
 	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
+      histFull[k].histFullHar[j].mHistPhiFtpcWest->SetYTitle("Counts");
       delete histTitle;
       
       // Ftpc (FarWest)
@@ -801,7 +797,7 @@ Int_t StFlowAnalysisMaker::Init() {
         histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
       histFull[k].histFullHar[j].mHistPhiFtpcFarWest->SetXTitle
 	("Azimuthal Angles (rad)");
-      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
+      histFull[k].histFullHar[j].mHistPhiFtpcFarWest->SetYTitle("Counts");
       delete histTitle;
       
 
@@ -1172,7 +1168,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.71 2003/05/06 21:33:04 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.72 2003/05/16 20:44:46 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1927,8 +1923,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 	/ (double)Flow::nPhiBinsFtpc;
       double meanFtpcFarWest = histFull[k].histFullHar[j].mHistPhiFtpcFarWest->Integral() 
 	/ (double)Flow::nPhiBinsFtpc;
+
+      // Tpc
       for (int i = 0; i < Flow::nPhiBins; i++) {
-	// Tpc
 	histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetBinContent(i+1,meanFarEast);
 	histFull[k].histFullHar[j].mHistPhiWgtFarEast->SetBinError(i+1, 0.);
 	histFull[k].histFullHar[j].mHistPhiWgtEast->SetBinContent(i+1, meanEast);
@@ -1938,8 +1935,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetBinContent(i+1,meanFarWest);
 	histFull[k].histFullHar[j].mHistPhiWgtFarWest->SetBinError(i+1, 0.);
       }
+
+      // Ftpc
       for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
-	// Ftpc
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->SetBinContent(i+1, meanFtpcFarEast);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->SetBinError(i+1, 0.);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
@@ -1949,6 +1947,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->SetBinContent(i+1, meanFtpcFarWest);
 	histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest->SetBinError(i+1, 0.);
       }
+
       // Tpc
       histFull[k].histFullHar[j].mHistPhiWgtFarEast->
 	Divide(histFull[k].histFullHar[j].mHistPhiFarEast);
@@ -1962,6 +1961,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHistPhiWgtFarWest->
 	Divide(histFull[k].histFullHar[j].mHistPhiFarWest);
       phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFarWest);
+
       // Ftpc
       histFull[k].histFullHar[j].mHistPhiWgtFtpcFarEast->
 	Divide(histFull[k].histFullHar[j].mHistPhiFtpcFarEast);
@@ -2025,6 +2025,9 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.72  2003/05/16 20:44:46  posk
+// First commit of StFlowPhiWgtMaker
+//
 // Revision 1.71  2003/05/06 21:33:04  posk
 // Removed some histograms.
 //
