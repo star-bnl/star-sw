@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.4 1998/10/31 00:26:24 fisyak Exp $
+// $Id: St_tpt_Maker.h,v 1.5 1999/01/08 23:19:42 sakrejda Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.5  1999/01/08 23:19:42  sakrejda
+// histogramming added
+//
 // Revision 1.4  1998/10/31 00:26:24  fisyak
 // Makers take care about branches
 //
@@ -30,12 +33,13 @@ class St_tpt_spars;
 class St_tte_control;
 class St_tdeparm;
 class St_tpipar;
+class TH1F;
 
 class St_tpt_Maker : public StMaker {
  private:
                Bool_t drawinit;
 	       Bool_t m_iftte;
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.4 1998/10/31 00:26:24 fisyak Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.5 1999/01/08 23:19:42 sakrejda Exp $";
                St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
@@ -44,7 +48,9 @@ class St_tpt_Maker : public StMaker {
                St_tte_control *m_tte_control;//! Control switches for the evaluation 
                St_tdeparm   *m_tdeparm;   //! Parameters for the tde dedx module
                St_tpipar    *m_tpipar;    //! parameter file for tpi package
+               void              MakeHistograms();// Histograms for tracking
  protected:
+	       TH1F *m_hits_on_track; //!number of hits assigned to a reconstructed track
  public: 
                   St_tpt_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
    virtual       ~St_tpt_Maker();
