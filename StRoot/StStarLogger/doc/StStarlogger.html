@@ -63,7 +63,8 @@ Table of Contents:
   the severity for entire production chain or / and for each STAR maker subclass separately.
   The end user code is not to worry about the proper selection of the appropriated logger.
   The user via set of the CPP <a href="#macros">macro</a> or 
-  via the "#i1">global pointer</a>
+  via the <a href="http://www.star.bnl.gov/STAR/comp/sofi/StMessMgr#i1"><code>gMessMgr</code> 
+  global pointer</a>
   communicate with the so-called "current logger".
    The base StMaker class internally governs the logger selection to make sure he current
   logger  matches the logger of the current active StMaker instance.
