@@ -573,7 +573,7 @@ C---<<<<<<<
                endif
            
                globtrk(igtrk).impact = 0
-               globtrk(igtrk).id_start_vertex = 0
+CSM               globtrk(igtrk).id_start_vertex = 0
                globtrk(igtrk).curvature = tptrack(itpct).curvature
                globtrk(igtrk).method = 0
                globtrk(igtrk).map(1) = 0
@@ -745,7 +745,7 @@ C---<<<<<<<
                      globtrk(iglob).length=99999.9
                   endif
 
-                  globtrk(iglob).id_start_vertex= 0
+CSM                  globtrk(iglob).id_start_vertex= 0
                   globtrk(iglob).curvature = tptrack(itrk).curvature
                   globtrk(iglob).method = 0
                   globtrk(iglob).map(1) = 0
@@ -882,7 +882,7 @@ C---<<<<<<<
                      globtrk(iglob).length=99999.9
                   endif
                     globtrk(iglob).impact = 0
-                    globtrk(iglob).id_start_vertex = 0
+CSM                    globtrk(iglob).id_start_vertex = 0
                     globtrk(iglob).curvature = 0
                     globtrk(iglob).method = 0
                     globtrk(iglob).map(1) = 0
