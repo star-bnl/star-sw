@@ -3,20 +3,21 @@
  under dsl.
  At the risk of looking difficult, these notes are detailed.
  This file (and its companion cuts.h, which you should #include in your
- files where you call either DoCuts() or RowPassedCuts(), contain
+ files where you call anything from this file, contain
  software for doing table cuts under dsl for STAR.  You must link
  to STAR's dsl lib (-ldsl).
- There are two functions that you call.  Here is how to use them.
+ There are two functions (DoCuts() and RowPassedCuts()) that you call.
+ Here is how to use them.
  1.  Declarations:
         char ba[NBYTES];       NOTE:   ba=Boolean Array
         size_t rowIndex,nBytes;
         DS_DATASET_T *pTable;
  2.  Determine the number of rows in your table.  Divide this number by 8,
      round up to the next integer.  Check that your result <= NBYTES.
-     (I use every bit to conserve memory: I don't use all eight bits to
+     (I use every bit (to conserve memory) instead of all eight bits to
      store one true/false.)
  3.  Make a cuts string [eg, "(id.ge.200.and.id.le.299).or.(invpt.le.5.23)"].
-     The identifiers (eg "invpt" are column names);
+     The identifiers (eg "invpt") are column names.
      Use square brackets for columns whose data types are arrays [eg,
      "cov[5].gt.6.12"].
  4.  Use dsl to make a pointer to the table named "pTable".
@@ -66,6 +67,7 @@ extern char gStr[100];
 #define ERR_4 "Subscript for column array type is out of range."
 #define PP printf(
 #define PSIZE 2200
+#define COPY 500
 #define BITSPERCHAR 8
 #define PARSE_ERR         -1
 #define FALSE              0
@@ -79,11 +81,13 @@ extern char gStr[100];
 /***********************************************************  GLOBALS  **/
 myBool gTableError,gAlreadyDidIt;
 char gCopy[PSIZE];
+extern int gDone;
 /***********************************************************  DEFINES  **/
 #define GRAPHICS 0
 #define TEXT 1
 #define PROGRESS 2
 /***********************************************************  FUNCTIONS  **/
+void Say(char *mess);
 void Say1(char *x) {
   if(!gAlreadyDidIt) { gAlreadyDidIt=TRUE; Say(x); }
 }
@@ -124,7 +128,8 @@ float Val(char *cc,DS_DATASET_T *pTable,long row) {
     sizetRow=row;
     sub=StripSubAndRetItsValue(cc);
     if(!dsFindColumn(&colNum,pTable,cc)) {
-      PP"Table browser can't find column \"%s\".\n",cc); exit(2);
+      PP"Fatal error: table browser can't find column \"%s\".\n",cc);
+      gDone=7; return 0.0;
     }
     if(!TableValue(&dataType,gStr,&fv,&iv,sizetRow,colNum,pTable,sub)) {
       gTableError=TRUE; return 0.0;
@@ -132,7 +137,8 @@ float Val(char *cc,DS_DATASET_T *pTable,long row) {
     if(dataType==FLOAT) rv=fv;
     else if(dataType==INTEGER) rv=iv;
     else if(dataType==STRING) {
-      PP"Fatal error in table browser:  char string used in cuts.\n"); exit(2);
+      PP"Fatal error in table browser:  char string used in cuts.\n");
+      gDone=7; return 0.0;
     }
     /* PP"Val rets %f.  dataType=%d\n------------------\n",rv,dataType); */
     return rv;
@@ -161,7 +167,7 @@ int SingleExpressionResult(DS_DATASET_T *pTable,long row,char *cuts) {
     case OPERATOR_TYPE_LE: return(v1<=v2);
     case OPERATOR_TYPE_GE: return(v1>=v2);
     case OPERATOR_TYPE_GT: return(v1> v2);
-    case OPERATOR_TYPE_LT: return(v1<=v2);
+    case OPERATOR_TYPE_LT: return(v1< v2);
     case OPERATOR_TYPE_EQ: return(v1==v2);
     case OPERATOR_TYPE_PE: Say1("Parse error on cuts.");  return PARSE_ERR;
     default: PP"fatal error in module evl_vs\n");
@@ -264,9 +270,38 @@ int PassCuts(DS_DATASET_T *pTable,long row,char *cuts) {
   ser=SingleExpressionResult(pTable,row,cuts);
   return ser;
 } /* wt row cc */
+void InsertChars(char *xx,int pos,char *yy) {
+  char copy[COPY]; int ii,len,len2; len=strlen(xx); len2=strlen(yy);
+  for(ii=len;ii>=pos;ii--) xx[ii+len2]=xx[ii];
+  for(ii=len2-1;ii>=0;ii--) xx[ii+pos]=yy[ii];
+}
+void DeleteChars(char *xx,int pos,int hm) {
+  int ii,len; len=strlen(xx);
+  for(ii=pos;ii<=len;ii++) xx[ii]=xx[ii+hm];
+}
+void Sub(char *xx,char *ee,int hm,int where) {
+  DeleteChars(xx,where,hm);
+  InsertChars(xx,where,ee);
+}
+void ConvertFromCtoFortran(char *xx) {
+  int len,ii,fo=7;
+  while(fo) {
+    fo=0; len=strlen(xx);
+    for(ii=0;ii<len-1;ii++) {
+      if(xx[ii]=='>'&&xx[ii+1]=='=') { fo=7; Sub(xx,".ge.",2,ii); break; }
+      if(xx[ii]=='<'&&xx[ii+1]=='=') { fo=7; Sub(xx,".le.",2,ii); break; }
+      if(xx[ii]=='='&&xx[ii+1]=='=') { fo=7; Sub(xx,".eq.",2,ii); break; }
+      if(xx[ii]=='/'&&xx[ii+1]=='=') { fo=7; Sub(xx,".ne.",2,ii); break; }
+      if(xx[ii]=='!'&&xx[ii+1]=='=') { fo=7; Sub(xx,".ne.",2,ii); break; }
+      if(xx[ii]=='<'               ) { fo=7; Sub(xx,".lt.",1,ii); break; }
+      if(xx[ii]=='>'               ) { fo=7; Sub(xx,".gt.",1,ii); break; }
+    }
+  }
+}
 myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
-  size_t numRows;
-  long ii;
+  size_t numRows; long ii; char copy[COPY];
+  strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy);
+  if(strlen(copy)>COPY-4) { Say1("Cuts string too big."); return FALSE; }
   gAlreadyDidIt=FALSE;
   Progress(0);
   if(sizeof(char)!=1) {
@@ -279,7 +314,7 @@ myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   for(ii=0;ii<numRows;ii++) {
     if(ii%300==0) Progress(ii);
     if(gTableError) { Say1("Error 66d in DoCuts()."); return FALSE; }
-    switch(PassCuts(pTable,ii,cuts)) {
+    switch(PassCuts(pTable,ii,copy)) {
       case TRUE: SetThisRow(ii,ba); break;
       case FALSE: break;
       case PARSE_ERR: Say1("Parse error on your cuts."); return FALSE; break;
