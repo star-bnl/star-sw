@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.25 2003/06/12 10:01:25 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.26 2003/07/03 13:21:50 fsimon Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.26  2003/07/03 13:21:50  fsimon
+// Added cathode offset information to constructor for SlowSimulator
+//
 // Revision 1.25  2003/06/12 10:01:25  jcs
 // renamed ftpcClusterGeometry database table to ftpcClusterGeom
 // (name was too long)
@@ -295,7 +298,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcElectronics   *electronics,
 			       St_ftpcAmpSlope      *ampslope,
 			       St_ftpcAmpOffset     *ampoffset,
-			       St_ftpcTimeOffset    *timeoffset)
+			       St_ftpcTimeOffset    *timeoffset,
+			       St_ftpcInnerCathode  *cathode)
 {
 
   //  just copy dimensions table start to pointer
@@ -435,6 +439,18 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   if(!timeoffsetTable){
     gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
   }
+
+  //  just copy inner cathode table start to pointer
+  ftpcInnerCathode_st* cathodeTable = (ftpcInnerCathode_st*)cathode->GetTable();
+  if(cathodeTable){
+    mOffsetCathodeWest = cathodeTable->offsetCathodeWest;
+    mOffsetCathodeEast = cathodeTable->offsetCathodeEast;
+    mAngleOffsetWest   = cathodeTable->angleOffsetWest;
+    mAngleOffsetEast   = cathodeTable->angleOffsetEast;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcInnerCathode","E");
+  }
+
 
    gMessMgr->Message("StFtpcDbReader constructed for SlowSimulator"  ,"I"); 
 }
