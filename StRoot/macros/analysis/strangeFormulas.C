@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 1.7 2000/04/19 15:11:15 genevb Exp $
+// $Id: strangeFormulas.C,v 2.0 2000/06/09 22:13:45 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 2.0  2000/06/09 22:13:45  genevb
+// Updated for version 2 of Strangeness mico DST package
+//
 // Revision 1.7  2000/04/19 15:11:15  genevb
 // Streamlined adding TTreeFormulas
 //
@@ -48,12 +51,13 @@
 // Should be careful to optimize formulas for number of calls to
 // other formulas. TTreeFormula/TFormula is not smart enough to save
 // values to repeat them, and calculates the full thing twice, but
-// has a limit of 50 values one can calculate.
+// has a limit of 200 values one can calculate (only 50 values for
+// Root 2.24/04 and earlier).
 //
 // For example, "a()+a()+a()" repeats everything necessary to find
 // "a()" three times. If "a()" requires 20 values to calculate, then
-// "a()+a()+a()" will fail, needing 60 values. Much better to write
-// something like "3*a()".
+// "a()+a()+a()" will fail for Root 2.24/04, needing 60 values. Much
+// better to write something like "3*a()".
 //
 
 TTree* strangeFormulas(const char* fname=0);
@@ -120,16 +124,11 @@ Int_t strangeFormulas(TTree* tree) {
 
   // Event
   printf("Loading event formulas...\n");
-  formulate("Event.run()",
-    "Event.mRun");
-  formulate("Event.event()",
-    "Event.mEvent");
-  formulate("Event.primaryVertexX()",
-    "Event.mPrimaryVertexX");
-  formulate("Event.primaryVertexY()",
-    "Event.mPrimaryVertexY");
-  formulate("Event.primaryVertexZ()",
-    "Event.mPrimaryVertexZ");
+  formulate("Event.run()", "Event.mRun");
+  formulate("Event.event()", "Event.mEvent");
+  formulate("Event.primaryVertexX()", "Event.mPrimaryVertexX");
+  formulate("Event.primaryVertexY()", "Event.mPrimaryVertexY");
+  formulate("Event.primaryVertexZ()", "Event.mPrimaryVertexZ");
   
   // V0
   if (tree->GetBranch("V0")) {
@@ -140,47 +139,29 @@ Int_t strangeFormulas(TTree* tree) {
       "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
 
     // The following formulas use 1 value:
-    formulate("V0.decayVertexV0X()",
-      "V0.mDecayVertexV0X");
-    formulate("V0.decayVertexV0Y()",
-      "V0.mDecayVertexV0Y");
-    formulate("V0.decayVertexV0Z()",
-      "V0.mDecayVertexV0Z");
-    formulate("V0.dcaV0Daughters()",
-      "V0.mDcaV0Daughters");
-    formulate("V0.dcaV0ToPrimVertex()",
-      "V0.mDcaV0ToPrimVertex");
-    formulate("V0.dcaPosToPrimVertex()",
-      "V0.mDcaPosToPrimVertex");
-    formulate("V0.dcaNegToPrimVertex()",
-      "V0.mDcaNegToPrimVertex");
-    formulate("V0.momPosX()",
-      "V0.mMomPosX");
-    formulate("V0.momPosY()",
-      "V0.mMomPosY");
-    formulate("V0.momPosZ()",
-      "V0.mMomPosZ");
-    formulate("V0.momNegX()",
-      "V0.mMomNegX");
-    formulate("V0.momNegY()",
-      "V0.mMomNegY");
-    formulate("V0.momNegZ()",
-      "V0.mMomNegZ");
+    formulate("V0.decayVertexV0X()", "V0.mDecayVertexV0X");
+    formulate("V0.decayVertexV0Y()", "V0.mDecayVertexV0Y");
+    formulate("V0.decayVertexV0Z()", "V0.mDecayVertexV0Z");
+    formulate("V0.dcaV0Daughters()", "V0.mDcaV0Daughters");
+    formulate("V0.dcaV0ToPrimVertex()", "V0.mDcaV0ToPrimVertex");
+    formulate("V0.dcaPosToPrimVertex()", "V0.mDcaPosToPrimVertex");
+    formulate("V0.dcaNegToPrimVertex()", "V0.mDcaNegToPrimVertex");
+    formulate("V0.momPosX()", "V0.mMomPosX");
+    formulate("V0.momPosY()", "V0.mMomPosY");
+    formulate("V0.momPosZ()", "V0.mMomPosZ");
+    formulate("V0.momNegX()", "V0.mMomNegX");
+    formulate("V0.momNegY()", "V0.mMomNegY");
+    formulate("V0.momNegZ()", "V0.mMomNegZ");
     
     formulate("V0.Ptot2Pos()",
       "(sq(V0.mMomPosX)+sq(V0.mMomPosY)+sq(V0.mMomPosZ))");
     formulate("V0.Ptot2Neg()",
       "(sq(V0.mMomNegX)+sq(V0.mMomNegY)+sq(V0.mMomNegZ))");
-    formulate("V0.momV0X()",
-      "(V0.mMomPosX+V0.mMomNegX)");
-    formulate("V0.momV0Y()",
-      "(V0.mMomPosY+V0.mMomNegY)");
-    formulate("V0.momV0Z()",
-      "(V0.mMomPosZ+V0.mMomNegZ)");
-    formulate("V0.Pt2V0()",
-      "(sq(V0.momV0X())+sq(V0.momV0Y()))");
-    formulate("V0.Ptot2V0()",
-      "(V0.Pt2V0()+sq(V0.momV0Z()))");
+    formulate("V0.momV0X()", "(V0.mMomPosX+V0.mMomNegX)");
+    formulate("V0.momV0Y()", "(V0.mMomPosY+V0.mMomNegY)");
+    formulate("V0.momV0Z()", "(V0.mMomPosZ+V0.mMomNegZ)");
+    formulate("V0.Pt2V0()", "(sq(V0.momV0X())+sq(V0.momV0Y()))");
+    formulate("V0.Ptot2V0()", "(V0.Pt2V0()+sq(V0.momV0Z()))");
 
     // The following momentum component formulas use 15 values:
     formulate("V0.MomPosAlongV0()",
@@ -193,22 +174,15 @@ Int_t strangeFormulas(TTree* tree) {
     // The above fails for exceeding 50 value limit. The following uses 30:
       "1.-(2./(1.+(V0.MomPosAlongV0()/V0.MomNegAlongV0())))");
     // The following formula uses 18 values:
-    formulate("V0.ptArmV0()",
-      "sqrt(V0.Ptot2Pos()-sq(V0.MomPosAlongV0()))");
+    formulate("V0.ptArmV0()", "sqrt(V0.Ptot2Pos()-sq(V0.MomPosAlongV0()))");
 
     // The following energy formulas use 6 values:
-    formulate("V0.eLambda()",
-      "sqrt(V0.Ptot2V0()+sq(mLambda))");
-    formulate("V0.eK0Short()",
-      "sqrt(V0.Ptot2V0()+sq(mK0Short))");
-    formulate("V0.ePosProton()",
-      "sqrt(V0.Ptot2Pos()+sq(mProton))");
-    formulate("V0.eNegAntiProton()",
-      "sqrt(V0.Ptot2Neg()+sq(mAntiProton))");
-    formulate("V0.ePosPion()",
-      "sqrt(V0.Ptot2Pos()+sq(mPiPlus))");
-    formulate("V0.eNegPion()",
-      "sqrt(V0.Ptot2Neg()+sq(mPiMinus))");
+    formulate("V0.eLambda()", "sqrt(V0.Ptot2V0()+sq(mLambda))");
+    formulate("V0.eK0Short()", "sqrt(V0.Ptot2V0()+sq(mK0Short))");
+    formulate("V0.ePosProton()", "sqrt(V0.Ptot2Pos()+sq(mProton))");
+    formulate("V0.eNegAntiProton()", "sqrt(V0.Ptot2Neg()+sq(mAntiProton))");
+    formulate("V0.ePosPion()", "sqrt(V0.Ptot2Pos()+sq(mPiPlus))");
+    formulate("V0.eNegPion()", "sqrt(V0.Ptot2Neg()+sq(mPiMinus))");
 
     // The following mass formulas use 12 values:
     formulate("V0.massLambda()",
@@ -234,18 +208,12 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.cTauK0Short()",
       "V0.massK0Short()*V0.decayLengthV0()/sqrt(V0.Ptot2V0())");
     
-    formulate("V0.ptPos()",
-      "sqrt(sq(V0.mMomPosX)+sq(V0.mMomPosY))");
-    formulate("V0.ptotPos()",
-      "sqrt(V0.Ptot2Pos())");
-    formulate("V0.ptNeg()",
-      "sqrt(sq(V0.mMomNegX)+sq(V0.mMomNegY))");
-    formulate("V0.ptotNeg()",
-      "sqrt(V0.Ptot2Neg())");
-    formulate("V0.ptV0()",
-      "sqrt(V0.Pt2V0())");
-    formulate("V0.ptotV0()",
-      "sqrt(V0.Ptot2V0())");
+    formulate("V0.ptPos()", "sqrt(sq(V0.mMomPosX)+sq(V0.mMomPosY))");
+    formulate("V0.ptotPos()", "sqrt(V0.Ptot2Pos())");
+    formulate("V0.ptNeg()", "sqrt(sq(V0.mMomNegX)+sq(V0.mMomNegY))");
+    formulate("V0.ptotNeg()", "sqrt(V0.Ptot2Neg())");
+    formulate("V0.ptV0()", "sqrt(V0.Pt2V0())");
+    formulate("V0.ptotV0()", "sqrt(V0.Ptot2V0())");
     
     // Track topology maps, with function names like
     // "V0.topologyMapNeg.*()" and "V0.topologyMapPos.*()"
@@ -359,6 +327,45 @@ Int_t strangeFormulas(TTree* tree) {
       formulate(name,expr);
     } } // End topology maps
 
+    // The following formulas use 1 value:
+    formulate("V0.chi2V0()", "V0.mChi2V0");
+    formulate("V0.clV0()", "V0.mClV0");
+    formulate("V0.chi2Pos()", "V0.mChi2Pos");
+    formulate("V0.clPos()", "V0.mClPos");
+    formulate("V0.chi2Neg()", "V0.mChi2Neg");
+    formulate("V0.clNeg()", "V0.mClNeg");
+
+
+    // V0Mc
+    if (tree->GetBranch("V0Mc")) {
+      printf("Loading V0Mc formulas...\n");
+
+      // The following formulas use 1 value:
+      formulate("V0Mc.decayMode()", "V0Mc.mDecayMode");
+      formulate("V0Mc.positiveTpcHits()", "V0Mc.mPositiveTpcHits");
+      formulate("V0Mc.positiveCommonTpcHits()", "V0Mc.mPositiveCommonTpcHits");
+      formulate("V0Mc.positiveSimTpcHits()", "V0Mc.mPositiveSimTpcHits");
+      formulate("V0Mc.negativeTpcHits()", "V0Mc.mNegativeTpcHits");
+      formulate("V0Mc.negativeCommonTpcHits()", "V0Mc.mNegativeCommonTpcHits");
+      formulate("V0Mc.negativeSimTpcHits()", "V0Mc.mNegativeSimTpcHits");
+      formulate("V0Mc.geantIdParent()", "V0Mc.mParentGeantId");
+      formulate("V0Mc.geantIdPositive()", "V0Mc.mPositiveGeantId");
+      formulate("V0Mc.geantIdNegative()", "V0Mc.mNegativeGeantId");
+      formulate("V0Mc.parentMomentumX()", "V0Mc.mParentMomentumX");
+      formulate("V0Mc.parentMomentumY()", "V0Mc.mParentMomentumY");
+      formulate("V0Mc.parentMomentumZ()", "V0Mc.mParentMomentumZ");
+      formulate("V0Mc.positiveMomentumX()", "V0Mc.mPositiveMomentumX");
+      formulate("V0Mc.positiveMomentumY()", "V0Mc.mPositiveMomentumY");
+      formulate("V0Mc.positiveMomentumZ()", "V0Mc.mPositiveMomentumZ");
+      formulate("V0Mc.negativeMomentumX()", "V0Mc.mNegativeMomentumX");
+      formulate("V0Mc.negativeMomentumY()", "V0Mc.mNegativeMomentumY");
+      formulate("V0Mc.negativeMomentumZ()", "V0Mc.mNegativeMomentumZ");
+      formulate("V0Mc.positionX()", "V0Mc.mPositionX");
+      formulate("V0Mc.positionY()", "V0Mc.mPositionY");
+      formulate("V0Mc.positionZ()", "V0Mc.mPositionZ");
+
+    }  // End of V0Mc
+
   }  // End of V0
   
   // Xi
@@ -371,50 +378,33 @@ Int_t strangeFormulas(TTree* tree) {
     // First, the Xi's get all the same functions that the V0's get...
     // The following formula uses 6 values:
     formulate("Xi.decayLengthV0()",
-      "sqrt(sq(Xi.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
+      "sqrt(sq(Xi.mDecayVertexV0X-Xi.mDecayVertexXiX)+sq(Xi.mDecayVertexV0Y-Xi.mDecayVertexXiY)+sq(Xi.mDecayVertexV0Z-Xi.mDecayVertexXiZ))");
+//      "sqrt(sq(Xi.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
 
     // The following formulas use 1 value:
-    formulate("Xi.decayVertexV0X()",
-      "Xi.mDecayVertexV0X");
-    formulate("Xi.decayVertexV0Y()",
-      "Xi.mDecayVertexV0Y");
-    formulate("Xi.decayVertexV0Z()",
-      "Xi.mDecayVertexV0Z");
-    formulate("Xi.dcaV0Daughters()",
-      "Xi.mDcaV0Daughters");
-    formulate("Xi.dcaV0ToPrimVertex()",
-      "Xi.mDcaV0ToPrimVertex");
-    formulate("Xi.dcaPosToPrimVertex()",
-      "Xi.mDcaPosToPrimVertex");
-    formulate("Xi.dcaNegToPrimVertex()",
-      "Xi.mDcaNegToPrimVertex");
-    formulate("Xi.momPosX()",
-      "Xi.mMomPosX");
-    formulate("Xi.momPosY()",
-      "Xi.mMomPosY");
-    formulate("Xi.momPosZ()",
-      "Xi.mMomPosZ");
-    formulate("Xi.momNegX()",
-      "Xi.mMomNegX");
-    formulate("Xi.momNegY()",
-      "Xi.mMomNegY");
-    formulate("Xi.momNegZ()",
-      "Xi.mMomNegZ");
+    formulate("Xi.decayVertexV0X()", "Xi.mDecayVertexV0X");
+    formulate("Xi.decayVertexV0Y()", "Xi.mDecayVertexV0Y");
+    formulate("Xi.decayVertexV0Z()", "Xi.mDecayVertexV0Z");
+    formulate("Xi.dcaV0Daughters()", "Xi.mDcaV0Daughters");
+    formulate("Xi.dcaV0ToPrimVertex()", "Xi.mDcaV0ToPrimVertex");
+    formulate("Xi.dcaPosToPrimVertex()", "Xi.mDcaPosToPrimVertex");
+    formulate("Xi.dcaNegToPrimVertex()", "Xi.mDcaNegToPrimVertex");
+    formulate("Xi.momPosX()", "Xi.mMomPosX");
+    formulate("Xi.momPosY()", "Xi.mMomPosY");
+    formulate("Xi.momPosZ()", "Xi.mMomPosZ");
+    formulate("Xi.momNegX()", "Xi.mMomNegX");
+    formulate("Xi.momNegY()", "Xi.mMomNegY");
+    formulate("Xi.momNegZ()", "Xi.mMomNegZ");
 
     formulate("Xi.Ptot2Pos()",
       "(sq(Xi.mMomPosX)+sq(Xi.mMomPosY)+sq(Xi.mMomPosZ))");
     formulate("Xi.Ptot2Neg()",
       "(sq(Xi.mMomNegX)+sq(Xi.mMomNegY)+sq(Xi.mMomNegZ))");
-    formulate("Xi.momV0X()",
-      "(Xi.mMomPosX+Xi.mMomNegX)");
-    formulate("Xi.momV0Y()",
-      "(Xi.mMomPosY+Xi.mMomNegY)");
-    formulate("Xi.momV0Z()",
-      "(Xi.mMomPosZ+Xi.mMomNegZ)");
-    formulate("Xi.Pt2V0()",
-      "(sq(Xi.momV0X())+sq(Xi.momV0Y()))");
-    formulate("Xi.Ptot2V0()",
-      "(Xi.Pt2V0()+sq(Xi.momV0Z()))");
+    formulate("Xi.momV0X()", "(Xi.mMomPosX+Xi.mMomNegX)");
+    formulate("Xi.momV0Y()", "(Xi.mMomPosY+Xi.mMomNegY)");
+    formulate("Xi.momV0Z()", "(Xi.mMomPosZ+Xi.mMomNegZ)");
+    formulate("Xi.Pt2V0()", "(sq(Xi.momV0X())+sq(Xi.momV0Y()))");
+    formulate("Xi.Ptot2V0()", "(Xi.Pt2V0()+sq(Xi.momV0Z()))");
 
     // The following momentum component formulas use 15 values:
     formulate("Xi.MomPosAlongV0()",
@@ -431,18 +421,12 @@ Int_t strangeFormulas(TTree* tree) {
       "sqrt(Xi.Ptot2Pos()-sq(Xi.MomPosAlongV0()))");
 
     // The following energy formulas use 6 values:
-    formulate("Xi.eLambda()",
-      "sqrt(Xi.Ptot2V0()+sq(mLambda))");
-    formulate("Xi.eK0Short()",
-      "sqrt(Xi.Ptot2V0()+sq(mK0Short))");
-    formulate("Xi.ePosProton()",
-      "sqrt(Xi.Ptot2Pos()+sq(mProton))");
-    formulate("Xi.eNegAntiProton()",
-      "sqrt(Xi.Ptot2Neg()+sq(mAntiProton))");
-    formulate("Xi.ePosPion()",
-      "sqrt(Xi.Ptot2Pos()+sq(mPiPlus))");
-    formulate("Xi.eNegPion()",
-      "sqrt(Xi.Ptot2Neg()+sq(mPiMinus))");
+    formulate("Xi.eLambda()", "sqrt(Xi.Ptot2V0()+sq(mLambda))");
+    formulate("Xi.eK0Short()", "sqrt(Xi.Ptot2V0()+sq(mK0Short))");
+    formulate("Xi.ePosProton()", "sqrt(Xi.Ptot2Pos()+sq(mProton))");
+    formulate("Xi.eNegAntiProton()", "sqrt(Xi.Ptot2Neg()+sq(mAntiProton))");
+    formulate("Xi.ePosPion()", "sqrt(Xi.Ptot2Pos()+sq(mPiPlus))");
+    formulate("Xi.eNegPion()", "sqrt(Xi.Ptot2Neg()+sq(mPiMinus))");
 
     // The following mass formulas use 12 values:
     formulate("Xi.massLambda()",
@@ -468,18 +452,20 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.cTauK0Short()",
       "Xi.massK0Short()*Xi.decayLengthV0()/sqrt(Xi.Ptot2V0())");
     
-    formulate("Xi.ptPos()",
-      "sqrt(sq(Xi.mMomPosX)+sq(Xi.mMomPosY))");
-    formulate("Xi.ptotPos()",
-      "sqrt(Xi.Ptot2Pos())");
-    formulate("Xi.ptNeg()",
-      "sqrt(sq(Xi.mMomNegX)+sq(Xi.mMomNegY))");
-    formulate("Xi.ptotNeg()",
-      "sqrt(Xi.Ptot2Neg())");
-    formulate("Xi.ptV0()",
-      "sqrt(Xi.Pt2V0())");
-    formulate("Xi.ptotV0()",
-      "sqrt(Xi.Ptot2V0())");
+    formulate("Xi.ptPos()", "sqrt(sq(Xi.mMomPosX)+sq(Xi.mMomPosY))");
+    formulate("Xi.ptotPos()", "sqrt(Xi.Ptot2Pos())");
+    formulate("Xi.ptNeg()", "sqrt(sq(Xi.mMomNegX)+sq(Xi.mMomNegY))");
+    formulate("Xi.ptotNeg()", "sqrt(Xi.Ptot2Neg())");
+    formulate("Xi.ptV0()", "sqrt(Xi.Pt2V0())");
+    formulate("Xi.ptotV0()", "sqrt(Xi.Ptot2V0())");
+
+    // The following formulas use 1 value:
+    formulate("Xi.chi2V0()", "Xi.mChi2V0");
+    formulate("Xi.clV0()", "Xi.mClV0");
+    formulate("Xi.chi2Pos()", "Xi.mChi2Pos");
+    formulate("Xi.clPos()", "Xi.mClPos");
+    formulate("Xi.chi2Neg()", "Xi.mChi2Neg");
+    formulate("Xi.clNeg()", "Xi.mClNeg");
 
 
     // Now, finally get to the unique Xi formulas:
@@ -488,41 +474,25 @@ Int_t strangeFormulas(TTree* tree) {
       "sqrt(sq(Xi.mDecayVertexXiX-Event.mPrimaryVertexX)+sq(Xi.mDecayVertexXiY-Event.mPrimaryVertexY)+sq(Xi.mDecayVertexXiZ-Event.mPrimaryVertexZ))");
 
     // The following formulas use 1 value:
-    formulate("Xi.charge()",
-      "Xi.mCharge");
-    formulate("Xi.decayVertexXiX()",
-      "Xi.mDecayVertexXiX");
-    formulate("Xi.decayVertexXiY()",
-      "Xi.mDecayVertexXiY");
-    formulate("Xi.decayVertexXiZ()",
-      "Xi.mDecayVertexXiZ");
-    formulate("Xi.dcaXiDaughters()",
-      "Xi.mDcaXiDaughters");
-    formulate("Xi.dcaXiToPrimVertex()",
-      "Xi.mDcaXiToPrimVertex");
-    formulate("Xi.dcaBachelorToPrimVertex()",
-      "Xi.mDcaBachelorToPrimVertex");
-    formulate("Xi.momBachelorX()",
-      "Xi.mMomBachelorX");
-    formulate("Xi.momBachelorY()",
-      "Xi.mMomBachelorY");
-    formulate("Xi.momBachelorZ()",
-      "Xi.mMomBachelorZ");
-    formulate("Xi.momXiX()",
-      "Xi.mMomBachelorX+Xi.momV0X()");
-    formulate("Xi.momXiY()",
-      "Xi.mMomBachelorY+Xi.momV0Y()");
-    formulate("Xi.momXiZ()",
-      "Xi.mMomBachelorZ+Xi.momV0Z()");
-    formulate("Xi.keyBachelor()",
-      "Xi.mKeyBachelor");
+    formulate("Xi.charge()", "Xi.mCharge");
+    formulate("Xi.decayVertexXiX()", "Xi.mDecayVertexXiX");
+    formulate("Xi.decayVertexXiY()", "Xi.mDecayVertexXiY");
+    formulate("Xi.decayVertexXiZ()", "Xi.mDecayVertexXiZ");
+    formulate("Xi.dcaXiDaughters()", "Xi.mDcaXiDaughters");
+    formulate("Xi.dcaXiToPrimVertex()", "Xi.mDcaXiToPrimVertex");
+    formulate("Xi.dcaBachelorToPrimVertex()", "Xi.mDcaBachelorToPrimVertex");
+    formulate("Xi.momBachelorX()", "Xi.mMomBachelorX");
+    formulate("Xi.momBachelorY()", "Xi.mMomBachelorY");
+    formulate("Xi.momBachelorZ()", "Xi.mMomBachelorZ");
+    formulate("Xi.momXiX()", "Xi.mMomBachelorX+Xi.momV0X()");
+    formulate("Xi.momXiY()", "Xi.mMomBachelorY+Xi.momV0Y()");
+    formulate("Xi.momXiZ()", "Xi.mMomBachelorZ+Xi.momV0Z()");
+    formulate("Xi.keyBachelor()", "Xi.mKeyBachelor");
 
     formulate("Xi.Ptot2Bachelor()",
       "(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY)+sq(Xi.mMomBachelorZ))");
-    formulate("Xi.Pt2Xi()",
-      "(sq(Xi.momXiX())+sq(Xi.momXiY()))");
-    formulate("Xi.Ptot2Xi()",
-      "(Xi.Pt2Xi()+sq(Xi.momXiZ()))");
+    formulate("Xi.Pt2Xi()", "(sq(Xi.momXiX())+sq(Xi.momXiY()))");
+    formulate("Xi.Ptot2Xi()", "(Xi.Pt2Xi()+sq(Xi.momXiZ()))");
 
     // The following momentum component formulas use 21 and 24 values:
     formulate("Xi.MomBachelorAlongXi()",
@@ -539,14 +509,10 @@ Int_t strangeFormulas(TTree* tree) {
       "sqrt(Xi.Ptot2V0()-sq(Xi.MomV0AlongXi()))");
 
     // The following energy formulas use 9 values:
-    formulate("Xi.eXi()",
-      "sqrt(Xi.Ptot2Xi()+sq(mXiMinus))");
-    formulate("Xi.eOmega()",
-      "sqrt(Xi.Ptot2Xi()+sq(mOmegaMinus))");
-    formulate("Xi.eBachelorPion()",
-      "sqrt(Xi.Ptot2Bachelor()+sq(mPiMinus))");
-    formulate("Xi.eBachelorKaon()",
-      "sqrt(Xi.Ptot2Bachelor()+sq(mKaonMinus))");
+    formulate("Xi.eXi()", "sqrt(Xi.Ptot2Xi()+sq(mXiMinus))");
+    formulate("Xi.eOmega()", "sqrt(Xi.Ptot2Xi()+sq(mOmegaMinus))");
+    formulate("Xi.eBachelorPion()", "sqrt(Xi.Ptot2Bachelor()+sq(mPiMinus))");
+    formulate("Xi.eBachelorKaon()", "sqrt(Xi.Ptot2Bachelor()+sq(mKaonMinus))");
 
     // The following mass formulas use 18 values:
     formulate("Xi.massXi()",
@@ -572,12 +538,9 @@ Int_t strangeFormulas(TTree* tree) {
     
     formulate("Xi.ptBachelor()",
       "sqrt(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY))");
-    formulate("Xi.ptotBachelor()",
-      "sqrt(Xi.Ptot2Bachelor())");
-    formulate("Xi.ptXi()",
-      "sqrt(Xi.Pt2Xi())");
-    formulate("Xi.ptotXi()",
-      "sqrt(Xi.Ptot2Xi())");
+    formulate("Xi.ptotBachelor()", "sqrt(Xi.Ptot2Bachelor())");
+    formulate("Xi.ptXi()", "sqrt(Xi.Pt2Xi())");
+    formulate("Xi.ptotXi()", "sqrt(Xi.Ptot2Xi())");
 
     // Track topology maps, with function names like
     // "Xi.topologyMapNeg.*()", Xi.topologyMapPos.*(),
@@ -694,11 +657,65 @@ Int_t strangeFormulas(TTree* tree) {
 
     } } // End topology maps
 
+    // The following formulas use 1 value:
+    formulate("Xi.chi2Xi()", "Xi.mChi2Xi");
+    formulate("Xi.clXi()", "Xi.mClXi");
+    formulate("Xi.chi2Bachelor()", "Xi.mChi2Bachelor");
+    formulate("Xi.clBachelor()", "Xi.mClBachelor");
+
+
+    // XiMc
+    if (tree->GetBranch("XiMc")) {
+      printf("Loading XiMc formulas...\n");
+
+      // The following formulas use 1 value:
+      formulate("XiMc.decayMode()", "XiMc.mDecayMode");
+      formulate("XiMc.tpcHits()", "XiMc.mTpcHits");
+      formulate("XiMc.commonTpcHits()", "XiMc.mCommonTpcHits");
+      formulate("XiMc.simTpcHits()", "XiMc.mSimTpcHits");
+      formulate("XiMc.geantIdParent()", "XiMc.mParentGeantId");
+      formulate("XiMc.geantIdDaughter()", "XiMc.mDaughterGeantId");
+      formulate("XiMc.parentMomentumX()", "XiMc.mParentMomentumX");
+      formulate("XiMc.parentMomentumY()", "XiMc.mParentMomentumY");
+      formulate("XiMc.parentMomentumZ()", "XiMc.mParentMomentumZ");
+      formulate("XiMc.daughterMomentumX()", "XiMc.mDaughterMomentumX");
+      formulate("XiMc.daughterMomentumY()", "XiMc.mDaughterMomentumY");
+      formulate("XiMc.daughterMomentumZ()", "XiMc.mDaughterMomentumZ");
+      formulate("XiMc.positionX()", "XiMc.mPositionX");
+      formulate("XiMc.positionY()", "XiMc.mPositionY");
+      formulate("XiMc.positionZ()", "XiMc.mPositionZ");
+
+    }  // End of XiMc
+
   }  // End of Xi
 
   // Kink
   if (tree->GetBranch("Kink")) {
     printf("Loading Kink formulas...\n");
+
+    // KinkMc
+    if (tree->GetBranch("KinkMc")) {
+      printf("Loading KinkMc formulas...\n");
+
+      // The following formulas use 1 value:
+      formulate("KinkMc.decayMode()", "KinkMc.mDecayMode");
+      formulate("KinkMc.tpcHits()", "KinkMc.mTpcHits");
+      formulate("KinkMc.commonTpcHits()", "KinkMc.mCommonTpcHits");
+      formulate("KinkMc.simTpcHits()", "KinkMc.mSimTpcHits");
+      formulate("KinkMc.geantIdParent()", "KinkMc.mParentGeantId");
+      formulate("KinkMc.geantIdDaughter()", "KinkMc.mDaughterGeantId");
+      formulate("KinkMc.parentMomentumX()", "KinkMc.mParentMomentumX");
+      formulate("KinkMc.parentMomentumY()", "KinkMc.mParentMomentumY");
+      formulate("KinkMc.parentMomentumZ()", "KinkMc.mParentMomentumZ");
+      formulate("KinkMc.daughterMomentumX()", "KinkMc.mDaughterMomentumX");
+      formulate("KinkMc.daughterMomentumY()", "KinkMc.mDaughterMomentumY");
+      formulate("KinkMc.daughterMomentumZ()", "KinkMc.mDaughterMomentumZ");
+      formulate("KinkMc.positionX()", "KinkMc.mPositionX");
+      formulate("KinkMc.positionY()", "KinkMc.mPositionY");
+      formulate("KinkMc.positionZ()", "KinkMc.mPositionZ");
+
+    }  // End of KinkMc
+
   }  // End of Kink
   
   Int_t finalFormulas = ListofFuncs->GetSize();

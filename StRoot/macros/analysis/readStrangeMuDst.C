@@ -1,5 +1,8 @@
-// $Id: readStrangeMuDst.C,v 1.4 2000/04/12 16:16:55 genevb Exp $
+// $Id: readStrangeMuDst.C,v 2.0 2000/06/09 22:13:18 genevb Exp $
 // $Log: readStrangeMuDst.C,v $
+// Revision 2.0  2000/06/09 22:13:18  genevb
+// Updated for version 2 of Strangeness mico DST package
+//
 // Revision 1.4  2000/04/12 16:16:55  genevb
 // Remove unnecessary library loads
 //
@@ -60,7 +63,8 @@ void run() {
   StChain chain("myChain");
   StStrangeMuDstMaker strangeDst("strangeMuDst");
   strangeDst.DoV0();    // Selects V0 vertices for micro-DST
-//strangeDst.DoXi();    // Selects Xi vertices for micro-DST
+//  strangeDst.DoXi();    // Selects Xi vertices for micro-DST
+//  strangeDst.DoMc();    // Reads in Monte Carlo information if available
   strangeDst.SetRead(); // Sets "read" mode (using default file names)
 
   clock.Start(kTRUE);
@@ -68,6 +72,9 @@ void run() {
   // Do init
   Int_t ierr = chain.Init();
   if( ierr ) { chain.Fatal(ierr,"on init"); return; }
+
+  gMessMgr->Info("Here are the cuts used to create this strangeness DST:");
+  strangeDst.Cuts().List();
 
   // Loop over events
   for( Int_t i=0; i<Nevents; i++ ) {

@@ -1,5 +1,8 @@
-// $Id: filterStrangeMuDst.C,v 1.2 2000/04/12 16:16:55 genevb Exp $
+// $Id: filterStrangeMuDst.C,v 2.0 2000/06/09 22:12:56 genevb Exp $
 // $Log: filterStrangeMuDst.C,v $
+// Revision 2.0  2000/06/09 22:12:56  genevb
+// Updated for version 2 of Strangeness mico DST package
+//
 // Revision 1.2  2000/04/12 16:16:55  genevb
 // Remove unnecessary library loads
 //
@@ -47,14 +50,21 @@ void run() {
   // erasing the event.
   
   StStrangeMuDstMaker strangeNewDst("strangeNewMuDst");
-  strangeNewDst.DoV0();    // Selects V0 vertices for new micro-DST
   strangeNewDst.SetWrite("newEvMuDst.root","newV0MuDst.root"); //
+  strangeNewDst.DoV0();    // Selects V0 vertices for new micro-DST
+  strangeNewDst.DoMc();    // Keep MC info if it is available
 
   StStrangeMuDstMaker strangeOldDst("strangeOldMuDst");
-  strangeOldDst.DoV0();    // Selects V0 vertices from old micro-DST
   strangeOldDst.SetRead(); // Sets "read" mode (using default file names)
+  // DoV0() and DoMc() are autmatically called for the old maker by the new.
 
+  // Now we tell the new maker that it will create a sub-DST of the old one.
   strangeNewDst.SubDst(&strangeOldDst);
+
+  // Next, any additional cuts that are being made should be added to
+  // the cuts information in the new DST.
+  strangeNewDst.Cuts().Add("Lambda mass","1.11 < mass < 1.12");
+  // strangeNewDst.Cuts().Add("Large Pt total","Pt total > 350 GeV/c");
 
   clock.Start(kTRUE);
 
