@@ -1,13 +1,13 @@
 /*******************************************************************
- * $Id: StRichASCIIReader.h,v 1.1 2000/01/27 17:06:01 lasiuk Exp $
+ * $Id: StRichASCIIReader.h,v 1.2 2000/02/11 13:09:58 lasiuk Exp $
  *
  * Description:
  *   Reads ASCII files for processing in examples
  *   Used for stand-alone
  ********************************************************************
  * $Log: StRichASCIIReader.h,v $
- * Revision 1.1  2000/01/27 17:06:01  lasiuk
- * Initial Revision
+ * Revision 1.2  2000/02/11 13:09:58  lasiuk
+ * new version ASCII reader (include track_p)
  *
  * Revision 1.1  2000/01/27 17:06:01  lasiuk
  * Initial Revision
@@ -62,8 +62,10 @@ private:
     float                 mVolume;
     float                 mVID;
     string                mGV;
+    int                   mTrackP;
+    int                   mNumber;
     // write(21,*) x(1),x(2),x(3),p(1),p(2),p(3),tof,Elos,Step,
-    //    (volume+Isys+1000)
+    //    (volume+Isys+1000),trac,number
     int                   mQuadrant;
     
 };
