@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.12 1999/11/15 22:02:49 lbarnby Exp $
+// $Id: StXiMaker.cxx,v 1.13 2000/03/30 16:33:39 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.13  2000/03/30 16:33:39  genevb
+// Change messages to say where they are called from
+//
 // Revision 1.12  1999/11/15 22:02:49  lbarnby
 // Correct check in mistake. Ignore previous comment
 //
@@ -111,7 +114,7 @@ Int_t StXiMaker::Init(){
 }
 //_____________________________________________________________________________
 Int_t StXiMaker::Make(){
-  //  if(Debug()) gMessMgr->Debug() << "Calling exi..."<< endm;
+  //  if(Debug()) gMessMgr->Debug("StXiMaker::Make(): Calling exi...");
   PrintInfo();
   
   int iMake = kStOK;
@@ -151,7 +154,7 @@ Int_t StXiMaker::Make(){
   
     if (iRes != kSTAFCV_OK) iMake = kStWarn;
     if (iRes != kSTAFCV_OK) {
-      gMessMgr->Warning() << " Problem on return from EXI " << endm;}
+      gMessMgr->Warning("StXiMaker::Make(): Problem on return from EXI");
   }
   return iMake;
 }
