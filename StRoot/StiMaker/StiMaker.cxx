@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.132  2003/10/28 16:01:15  andrewar
+// Passing tracking parameter file to detector Builders.
+//
 // Revision 1.131  2003/09/02 17:59:59  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -261,13 +264,13 @@ Int_t StiMaker::InitDetectors()
   if (_pars->useTpc)
     {
       cout<<"StiMaker::InitDetectors() -I- Adding detector group:TPC"<<endl;
-      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc));
+      _toolkit->add(group = new StiTpcDetectorGroup(_pars->activeTpc, _pars->baseName));
       group->setGroupId(kTpcId);
     }
   if (_pars->useSvt)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:SVT"<<endl;
-      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt));
+      _toolkit->add(group = new StiSvtDetectorGroup(_pars->activeSvt, _pars->baseName));
       group->setGroupId(kSvtId);
     }
   if (_pars->usePixel)
