@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.9 1999/03/02 17:51:45 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.10 1999/03/15 13:49:30 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,8 +12,11 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.9  1999/03/02 17:51:45  lasiuk
- * geant PID
+ * Revision 1.10  1999/03/15 13:49:30  lasiuk
+ * field is initialized with Tesla in the data base!
+ *
+ * Revision 1.10  1999/03/15 13:49:30  lasiuk
+ * field is initialized with Tesla in the data base!
  *
  * Revision 1.9  1999/03/02 17:51:45  lasiuk
  * geant PID
@@ -189,7 +192,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	StPhysicalHelix
 	    track(mMomentum,
 		  mSector12Position,
-		  (magDb->at(mSector12Position)).z()*tesla,
+		  (magDb->at(mSector12Position)).z(), //*tesla NOT now!
 		  charge);
 		   mSector12Position,
 	double betaGamma = abs(mMomentum)/particleMass;
