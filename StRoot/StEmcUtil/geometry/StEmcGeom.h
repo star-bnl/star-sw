@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.2 2003/09/02 17:58:01 perev Exp $
+ * $Id: StEmcGeom.h,v 1.3 2004/08/19 17:31:45 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.3  2004/08/19 17:31:45  pavlinov
+ * getBin(const Float_t phi, const Float_t eta, Int_t &m,Int_t &e,Int_t &s) works bsmde too - request of Dmitry Arkhipkin
+ *
  * Revision 1.2  2003/09/02 17:58:01  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -138,6 +141,7 @@ protected:
   Float_t mRadius;   // Distance to beam axis
   Float_t mYWidth;   // Half Width of module for mRadius
   Float_t mEtaMax;
+  Float_t mEtaMin;   // 
   TArrayF mPhiOffset;  // Phi offset from numbering scheme for center of tower
   TArrayF mPhiStep;    // Step for transition to Star Cordinate System(-/+2pi/60)
   TArrayF mPhiBound;   // Phi offset from numbering scheme for edge of tower
@@ -180,6 +184,7 @@ public:
   Float_t  Radius()  const;
   Float_t  YWidth() const;
   Float_t  EtaMax() const;
+  Float_t  EtaMin() const;
   Float_t* PhiModule();
   Float_t* PhiOffset();
   Float_t* PhiStep();
@@ -253,6 +258,7 @@ inline Int_t   StEmcGeom::NRaw()     const {return mNRaw;}
 inline Float_t StEmcGeom::Radius()   const {return mRadius;}
 inline Float_t StEmcGeom::YWidth()   const {return mYWidth;}
 inline Float_t StEmcGeom::EtaMax()   const {return mEtaMax;}
+inline Float_t StEmcGeom::EtaMin()   const {return mEtaMin;}
 inline Float_t* StEmcGeom::PhiModule() {return mPhiModule.GetArray();} 
 inline Float_t* StEmcGeom::PhiOffset() {return mPhiOffset.GetArray();}
 inline Float_t* StEmcGeom::PhiStep()   {return mPhiStep.GetArray();}
@@ -299,11 +305,12 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
 {
 //
 /// Transition from phi and eta to bin # => 3-Aug-1999 for StTbmMaker
-//  (only for Barrel now !!!! )
+//  19-aug-2004 - for all detectors; request of Dmitry Arkhipkin
+//  mEtaMin=0 for BEMC, BPRS, BSMDP; mEtaMin=  for BMSDE
 //
 
   Float_t phiw, sw;
-  if(0.0<=eta && eta<=mEtaMax) {      // First Barrel
+  if(mEtaMin<eta && eta<=mEtaMax) {      // First Barrel
     e    = getIndex(eta, mEtaB); 
     phiw = mPhiBound[0] - phi;
     if(phiw<0.0) phiw = phiw + C_2PI; // 0<phiw<=2.*pi =>must be
@@ -315,8 +322,8 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
     s    = getIndex(sw, mPhiB);
 
     return 0;
-  }
-  else if(-mEtaMax<=eta && eta<0.0) { // Second Barrel
+
+  } else if(-mEtaMax<=eta && eta<-mEtaMin) { // Second Barrel
     e    = getIndex(fabs(eta), mEtaB); 
     phiw = mPhiBound[1] - phi;
     if(phiw<0.0) phiw = phiw + C_2PI; // 0<phiw<=2.pi =>must be
@@ -328,8 +335,8 @@ inline Int_t StEmcGeom::getBin(const Float_t phi, const Float_t eta, Int_t &m, I
     s   = getIndex(sw, mPhiB);
 
     return 0;
-  }
-  else return 1;                      // Out of Bemc
+
+  } else return 1;                      // Out of Bemc
 
 }
 
