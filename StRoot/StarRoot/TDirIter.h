@@ -31,6 +31,7 @@ void 		ResetQQ(const char *path);
    Int_t fState; 
    Int_t fSele; 
    Int_t fSkip; 
+   Int_t fTop; 
    TString fFull;
    TString fFile;
    TRegexp fRegx;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.1 2002/01/10 02:31:42 perev Exp $
+ * $Id: TDirIter.cxx,v 1.2 2002/01/11 22:01:34 perev Exp $
  *
  ***************************************************************************
  *
@@ -47,22 +47,14 @@ void TDirIter::Reset(const char *path,Int_t maxlev)
 //______________________________________________________________________________
 void TDirIter::ResetQQ(const char *path)
 {
-  fLevel = 0; fState = 1; fSele=0;
+  fLevel = 0; fState = 1; fSele=0; fTop = 0;
   fMaxLevQQ = fMaxLev;
   int n = strcspn(path," \t\n");
   TString myPath; myPath.Insert(0,path,n);
   gSystem->ExpandPathName(myPath);
 
-  const char *p = myPath.Data();
-  
-  if (*p!='^' && strstr(p,"#")==0) {//calculate maxlevQQ
-    fMaxLevQQ=1;
-    for(int i=0;p[i];i++) {if (p[i]=='/') fMaxLevQQ++;}}
-
-
   fEntrStk[0]=0;
-  TString QWE = MakeWild(p);
-  fRegx=TRegexp(QWE);
+  const char *p = myPath.Data();
   if (*p == '^') p++;
   fFile = p; 
   const char *c,*f=fFile.Data();
@@ -80,7 +72,15 @@ void TDirIter::ResetQQ(const char *path)
     if (noexi) { fSele = -2;}
     else       { if ((flags&2)==0) fSele = -1;}}
   
+  fTop = fFile.Length();
+  if (myPath[0]=='^') fTop = 0;
+  TString QWE = MakeWild(myPath.Data()+fTop);
+  fRegx=TRegexp(QWE);
 
+  p = myPath.Data();
+  if (*p!='^' && strstr(p,"#")==0) {//calculate maxlevQQ
+    fMaxLevQQ=1;
+    for(int i=fTop+1;p[i];i++) {if (p[i]=='/') fMaxLevQQ++;}}
 
 }
 //______________________________________________________________________________
@@ -103,7 +103,6 @@ const char *TDirIter::NextFileQQ()
 {
   if (fSele == -2) return 0;
   if (fSele == -1) {fSele = -2; return fFile.Data();}
-
   while(2002) {
     if (fState && fLevel < fMaxLevQQ) {	//Last name was directory
       fLevel++; fState=0;
@@ -134,7 +133,7 @@ const char *TDirIter::NextFileQQ()
     if (flags & 2) 	fState=1;
     if (fSele==0) 	break;
     int len;
-    TString qwe(fFile.Data());
+    TString qwe(fFile.Data()+fTop);
     if (fRegx.Index(qwe,&len) >=0) break;
     
  }
