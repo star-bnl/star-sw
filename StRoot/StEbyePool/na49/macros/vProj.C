@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.11 2002/11/15 22:35:17 posk Exp $
+// $Id: vProj.C,v 1.12 2002/12/09 16:06:13 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -32,8 +32,8 @@ const int nCens = 6;
 
 void vProj(char* part = "pion") {
   
-  //int   eBeam = 158; // select full beam energy
-  int   eBeam = 40;  // select 40Gev beam energy
+  int   eBeam = 158; // select full beam energy
+  //int   eBeam = 40;  // select 40Gev beam energy
 
   bool  pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
@@ -63,8 +63,10 @@ void vProj(char* part = "pion") {
     float  vPtMin = -10.;
     float  sumPt2All[nCens] = {773.,623.,455.,305.,203.,122.}; // from Glenn
     float  meanMul[nCens] = {119.,181.,154.,110.,78.,46.}; // for har 1
+    //float  meanMul[nCens] = {68.,95..,78.,56.,39.,24.}; // for har 1 stripes
     float  meanPt[nCens] = {0.166,0.254,0.293,0.288,0.284,0.279}; // for har 1
     Double_t fracEvents[nCens] = {0.231, 0.189, 0.134, 0.134, 0.115, 0.197};
+    Double_t fracGeom[nCens]   = {0.05, 0.075, 0.11, 0.10, 0.10, 0.57};
   } else if (eBeam == 40) {
     double yCM    =  2.24;
     float  yLow   =  yCM;              // for pt proj.
@@ -76,14 +78,14 @@ void vProj(char* part = "pion") {
     float  vPtMax =  5.;
     float  vPtMin = -5.;
     float  sumPt2All[nCens] = {579.,467.,344..,231.,155.,94.}; // from Glenn
-    float  meanMul[nCens] = {89.3,76.4,59.5,42.2,29.7,17.7}; // for har 1
-    float  meanPt[nCens] = {0.284,0.281,0.273,0.270,0.265,0.257}; // for har 1
-    Double_t fracEvents[nCens] = {0.085, 0.129, 0.191, 0.178, 0.170, 0.247};
+    float  meanMul[nCens] = {80.,76.,59.,42.,30.,17.}; // for har 1
+    float  meanPt[nCens] = {0.284,0.281,0.273,0.270,0.265,0.258}; // for har 1
+    Double_t fracEvents[nCens] = {0.186, 0.11, 0.164, 0.153, 0.146, 0.24};
+    Double_t fracGeom[nCens]   = {0.05, 0.075, 0.11, 0.10, 0.10, 0.57};
   } else {
     cout << " Not valid beam energy" << endl;
     return;
   }
-  Double_t fracGeom[nCens]   = {0.05, 0.075, 0.11, 0.10, 0.10, 0.57};
  
   TFile*    anaFile[nCens];
   TH2*      v2D[nCens][nHars];
@@ -439,10 +441,10 @@ void vProj(char* part = "pion") {
 	      yieldReal = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
 	      if (crossSection) {
 		if (pion) {
-		  yield = dNdydPt(0, y - yCM, pt, n) +
-		    dNdydPt(1, y - yCM, pt, n);               // pi+ + pi-
+		  yield = dNdydPt(0, y - yCM, pt, n, eBeam) +
+		    dNdydPt(1, y - yCM, pt, n, eBeam);               // pi+ + pi-
 		} else {
-		  yield = dNdydPt(4, y - yCM, pt, n);         // p
+		  yield = dNdydPt(4, y - yCM, pt, n, eBeam);         // p
 		}
 		yield *= fracEvents[n-1];
 	      } else {
@@ -486,14 +488,14 @@ void vProj(char* part = "pion") {
 	  y = xAxis->GetBinCenter(xBin);
 	  if (y > yLow && y < yUp) {
 	    v = v2D[n-1][j]->GetCellContent(xBin, yBin);
-	    if (j % 2 == 1 && y < yCM) v *= -1; // backward particles for odd har
+	    if (j % 2 != 1 && y < yCM) v *= -1; // backward particles for odd har
 	    yieldReal = yieldPartHist[n-1]->GetCellContent(xBin, yBin);
 	    if (crossSection) {
 	      if (pion) {
-		yield = dNdydPt(0, y - yCM, pt, n) +
-		  dNdydPt(1, y - yCM, pt, n);                 // pi+ + pi-
+		yield = dNdydPt(0, y - yCM, pt, n, eBeam) +
+		  dNdydPt(1, y - yCM, pt, n, eBeam);                 // pi+ + pi-
 	      } else {
-		yield = dNdydPt(4, y - yCM, pt, n);           // p
+		yield = dNdydPt(4, y - yCM, pt, n, eBeam);           // p
 	      }
 	      yield *= fracEvents[n-1];
 	    } else {
@@ -982,8 +984,8 @@ static Double_t F(double chi) {
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
-// Revision 1.11  2002/11/15 22:35:17  posk
-// Require > 1 count/bin. Use number of events or frac. of crosssection when combining centralities.
+// Revision 1.12  2002/12/09 16:06:13  posk
+// Uses 40 GeV cross sections at 40 GeV.
 //
 // Revision 1.10  2002/03/26 17:48:42  posk
 // Corrected sqrt(2) mistake.
