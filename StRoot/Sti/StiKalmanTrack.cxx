@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.47 2004/12/01 18:04:32 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.47 2004/12/01 18:04:32 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.48 2004/12/11 04:31:36 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.48  2004/12/11 04:31:36  perev
+ * set of bus fixed
+ *
  * Revision 2.47  2004/12/01 18:04:32  perev
  * test for -ve and too big track length added
  *
@@ -477,7 +480,7 @@ StThreeVector<double> StiKalmanTrack::getGlobalPointAt(double x) const
   if (n==0) throw logic_error("StiKalmanTrack::getGlobalPointAt(double x) - ERROR - n==0");
   n->reset();
   n->setState(nearNode);
-  int status = n->propagate(x,0);
+  int status = n->propagate(x,0,trackingDirection);
   if (status<0) throw runtime_error(" StiKalmanTrack::getGlobalPointAt() - WARNING - Position not reachable by this track");
   return n->getGlobalPoint();
 }
@@ -499,7 +502,7 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin() const
   px=py=pz=0;
   StiKalmanTrackNode * inner = getInnerMostNode();
   if (inner==0)throw logic_error("StiKalmanTrack::getMomentumAtOrigin() - ERROR - No node");
-  inner->propagate(0.,0);
+  inner->propagate(0.,0,trackingDirection);
   double p[3];
   double e[6];
   inner->getMomentum(p,e);
@@ -1069,7 +1072,7 @@ bool StiKalmanTrack::extendToVertex(StiHit*vertex, const StiDetector * alternate
   StiKalmanTrackNode * tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() -E- tNode==null");
   tNode->reset();
-  int status = tNode->propagate(lastNode,alternate);
+  int status = tNode->propagate(lastNode,alternate,trackingDirection);
   cout << "propagate status:"<<status<<endl;
   return false;
 }
@@ -1105,7 +1108,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   //     << " " <<  localVertex.y() << " " << localVertex.z() << endl;
   //cout << "SKT::extendToVertex() -I- sNode->_x:"<<sNode->_x<<endl;
   //cout << "SKT::extendToVertex() -I-0 tNode->_x:"<< tNode->_x<<endl;
-  if (tNode->propagate(sNode, &localVertex))
+  if (tNode->propagate(sNode, &localVertex,trackingDirection))
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
@@ -1263,7 +1266,7 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToBeam()
   //return null if there is no node to extrapolate from.
   if (!innerMostNode) return 0;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  if (n->propagateToBeam(innerMostNode)) return n;
+  if (n->propagateToBeam(innerMostNode,trackingDirection)) return n;
   return 0;
 }
 
@@ -1273,6 +1276,6 @@ StiKalmanTrackNode * StiKalmanTrack::extrapolateToRadius(double radius)
   //return null if there is no node to extrapolate from.
   if (!outerMostNode) return 0;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
-  if (n->propagateToRadius(outerMostNode,radius)>=0) return n;
+  if (n->propagateToRadius(outerMostNode,radius,trackingDirection)>=0) return n;
   return 0;
 }

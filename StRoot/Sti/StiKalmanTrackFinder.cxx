@@ -382,7 +382,10 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	      //begin tracking here...
 	      testNode.reset();
 	      testNode.setChi2(1e50);
-	      position = testNode.propagate(leadNode,tDet);
+	      position = testNode.propagate(leadNode,tDet,direction);
+
+	      // CP Nov 2 Try doubling the chi2 in the SVT
+	      //if (testNode._x<40.) maxChi2 = 2* maxChi2;
 	      if(debug)  cout << "propagate returned:"<<position<<endl<< "testNode:"<<testNode;
 	      if (position<0 || position>kEdgeZplus)
 		{ 
