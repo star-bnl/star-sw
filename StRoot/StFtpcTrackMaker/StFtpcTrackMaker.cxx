@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.20 2001/07/13 17:58:18 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.21 2001/07/26 13:42:27 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.21  2001/07/26 13:42:27  oldi
+// Two messages added for the case of missing data.
+//
 // Revision 1.20  2001/07/13 17:58:18  oldi
 // Small change related to new StFtpcDisplay (commented).
 //
@@ -175,6 +178,7 @@ Int_t StFtpcTrackMaker::Make()
   St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
   
   if (!ftpc_data) {
+    gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
     return kStWarn;
   }
   
@@ -182,6 +186,7 @@ Int_t StFtpcTrackMaker::Make()
   St_fcl_fppoint *fcl_fppoint = (St_fcl_fppoint *)ftpc_data->Find("fcl_fppoint");
   
   if (!fcl_fppoint) {
+    gMessMgr->Message("", "W", "OST") << "No FTPC clusters available!" << endm;
     return kStWarn;
   }
   
@@ -408,7 +413,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.20 2001/07/13 17:58:18 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.21 2001/07/26 13:42:27 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
