@@ -252,7 +252,7 @@ Int_t StiMaker::Init()
     //Drawable hits
     mdrawablehits = new StiRootDrawableHits();
     mdrawablehits->clear();
-    mdrawablehits->setMarkerSize(.2);
+    mdrawablehits->setMarkerSize(.5);
     mdisplay->addDrawable(mdrawablehits);
 
     //The Detector Tree
