@@ -1,5 +1,8 @@
-// $Id: doEvents.C,v 1.17 1999/05/23 21:54:07 perev Exp $
+// $Id: doEvents.C,v 1.18 1999/05/24 19:02:03 kathy Exp $
 // $Log: doEvents.C,v $
+// Revision 1.18  1999/05/24 19:02:03  kathy
+// put owner back into do*Events.C so it's standardized with all other macros
+//
 // Revision 1.17  1999/05/23 21:54:07  perev
 // restore old default in doEvent
 //
@@ -49,6 +52,10 @@
 // load StEvent for Linux
 //
 // Revision 1.1  1999/02/11 15:44:28  wenaus
+// macro to read DSTs into StEvent and analyze
+// owner: Torre Wenaus
+// what it does: 
+// what it does: reads .dst.root or .xdf files and then runs StEventMaker
 //          to fill StEvent and StAnalysisMaker to show example of analysis
 //          
 //=======================================================================

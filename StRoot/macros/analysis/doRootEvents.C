@@ -1,5 +1,8 @@
-// $Id: doRootEvents.C,v 1.1 1999/05/22 19:38:12 perev Exp $
+// $Id: doRootEvents.C,v 1.2 1999/05/24 19:02:03 kathy Exp $
 // $Log: doRootEvents.C,v $
+// Revision 1.2  1999/05/24 19:02:03  kathy
+// put owner back into do*Events.C so it's standardized with all other macros
+//
 // Revision 1.1  1999/05/22 19:38:12  perev
 // temporary macro for RootEvents
 //
@@ -43,6 +46,10 @@
 // macro to read DSTs into StEvent and analyze
 //
 //
+//=======================================================================
+// owner: Victor Perevoztchikov
+// what it does: 
+//=======================================================================
 ///////////////////////////////////////////////////////////////////////////////
 //
 // doEvents.C
