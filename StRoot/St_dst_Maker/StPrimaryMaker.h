@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.16 2002/01/21 01:35:07 balewski Exp $
+// $Id: StPrimaryMaker.h,v 1.17 2002/01/24 01:59:49 genevb Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.17  2002/01/24 01:59:49  genevb
+// Add use of vertexSeed from database for ppLMV
+//
 // Revision 1.16  2002/01/21 01:35:07  balewski
 // Optional beam line constrain was added to ppLMV
 //
@@ -91,6 +94,7 @@ class StPrimaryMaker : public StMaker {
   TArrayI m_fixedArrayR;
   TArrayI m_fixedArrayE; 
   Bool_t embedVerts;
+  Bool_t seed;
 
   struct {int equivNtr; float x0,y0,nx,ny;} beam4ppLMV;
   float zCutppLMV;
@@ -119,16 +123,20 @@ class StPrimaryMaker : public StMaker {
   Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
   void ppLMVuse(int *parI, float *parF);
   long ppLMV4(MatchedTrk &, St_dst_track *trackAll,St_dst_vertex *vertex, Int_t mdate);
-  void SetBeam4ppLMV(int ntr, double x, double y, double ux, double uy){
+  void SetBeam4ppLMV(int ntr, double x, double y, double ux, double uy)
+                    { SetBeam4ppLMV_db(ntr,x,y,ux,uy); NoDbSeed(); }
+  void SetBeam4ppLMV_db(int ntr, double x, double y, double ux, double uy){
     beam4ppLMV.equivNtr=ntr;
     beam4ppLMV.x0=x;    beam4ppLMV.nx=ux;
     beam4ppLMV.y0=y;    beam4ppLMV.ny=uy;
     printf(" Executed  SetBeam4ppLMV AAAAAAAAAA\n");
   } 
   void UnSetBeam4ppLMV(){beam4ppLMV.equivNtr=0;}
+  void NoDbSeed() { seed = kFALSE; } // Turn off use of db vertex seed
+  void UseDbSeed() { seed = kTRUE; } // Turn on use of db vertex seed (default)
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.16 2002/01/21 01:35:07 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.17 2002/01/24 01:59:49 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
