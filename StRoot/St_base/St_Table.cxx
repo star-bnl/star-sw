@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.75 1999/08/29 02:01:33 fine Exp $ 
+// $Id: St_Table.cxx,v 1.76 1999/08/30 00:54:54 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.76  1999/08/30 00:54:54  fine
+// Working version of St_Table::Draw NO crash on either system
+//
 // Revision 1.75  1999/08/29 02:01:33  fine
 // St_Table::Draw clean up, G__Calc is activated since it works well but too slow
 //
@@ -329,18 +332,17 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //*-*                  ===========================================
 //
 //  varexp is an expression of the general form e1:e2:e3
-//    where e1,etc is a formula referencing a combination of the columns
+//    where e1,etc is a C++ expression referencing a combination of the columns
 //  Example:
 //     varexp = x     simplest case: draw a 1-Dim distribution of column named x
 //            = sqrt(x)            : draw distribution of sqrt(x)
 //            = x*y/z
 //            = y:sqrt(x) 2-Dim dsitribution of y versus sqrt(x)
-//  Note that the variables e1, e2 or e3 may contain a selection.
+//  Note that the variables e1, e2 or e3 may contain a boolean expression as well.
 //  example, if e1= x*(y<0), the value histogrammed will be x if y<0
 //  and will be 0 otherwise.
 //
-//  selection is an expression with a combination of the columns.
-//  In a selection all the C++ operators are authorized.
+//  selection is a C++ expression with a combination of the columns.
 //  The value corresponding to the selection expression is used as a weight
 //  to fill the histogram.
 //  If the expression includes only boolean operations, the result
@@ -419,38 +421,6 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //
 //  Note: Use tree->SetEventList(0) if you do not want use the list as input.
 //
-//      How to obtain more info from TTree::Draw
-//      ========================================
-//
-//  Once TTree::Draw has been called, it is possible to access useful
-//  information still stored in the TTree object via the following functions:
-//    -GetSelectedRows()    // return the number of entries accepted by the
-//                          //selection expression. In case where no selection
-//                          //was specified, returns the number of entries processed.
-//    -GetV1()              //returns a pointer to the float array of V1
-//    -GetV2()              //returns a pointer to the float array of V2
-//    -GetV3()              //returns a pointer to the float array of V3
-//    -GetW()               //returns a pointer to the double array of Weights
-//                          //where weight equal the result of the selection expression.
-//   where V1,V2,V3 correspond to the expressions in
-//   TTree::Draw("V1:V2:V3",selection);
-//
-//   Example:
-//    Root > ntuple->Draw("py:px","pz>4");
-//    Root > TGraph *gr = new TGraph(ntuple->GetSelectedRows(),
-//                                   ntuple->GetV2(), ntuple->GetV1());
-//    Root > gr->Draw("ap"); //draw graph in current pad
-//    creates a TGraph object with a number of points corresponding to the
-//    number of entries selected by the expression "pz>4", the x points of the graph
-//    being the px values of the Tree and the y points the py values.
-//
-//   Important note: By default TTree::Draw creates the arrays obtained
-//    with GetV1, GetV2, GetV3, GetW with a length corresponding to the
-//    parameter fEstimate. By default fEstimate=10000 and can be modified
-//    via TTree::SetEstimate. A possible recipee is to do
-//       tree->SetEstimate(tree->GetEntries());
-//    You must call SetEstimate if the expected number of selected rows
-//    is greater than 10000.
    printf(" %d %s %s \n",(int) GetNRows(),varexp00,selection);
    if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return;
    TString  opt;
@@ -795,7 +765,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
 
   // Float_t  Selection(Float_t *results[], void *address[])
   const Char_t *funcName = "SelectionQWERTY";  
-// #define BYTECODE
+#define BYTECODE
 #ifdef BYTECODE
   const Char_t *argtypes = "Float_t *,void **";
   long offset;
@@ -1277,7 +1247,7 @@ Long_t St_Table::GetRowSize() const {
 }
 //______________________________________________________________________________
 Long_t St_Table::GetTableSize() const { 
-// Returns the number of the aloocated rows 
+// Returns the number of the allocated rows 
 return fN;
 }
 //______________________________________________________________________________
@@ -1286,7 +1256,7 @@ void  *St_Table::GetArray() const {
  return s_Table; }
 //______________________________________________________________________________
 const Char_t *St_Table::GetType() const { 
-//Returns the type of the wrpped C-structure
+//Returns the type of the wrapped C-structure kept as the TNamed title
   return GetTitle();
 }
 
@@ -1939,17 +1909,25 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
 //print   str << "printf(\" First address: Ox%x \\n\",topr);" << endl;
    int i = 0;
    for (i=0; i < dsc->GetNRows(); i++,descTable++ ) {
+    // Take the column name
+    const Char_t *columnName = descTable->m_ColumnName;
+    const Char_t *type = 0;
     // First check whether we do need this column
-     const Char_t *type = typeNames[descTable->m_Type];
-     str << "topr = address[" << i << "];" << endl;
-//print     str << "printf(\" " << descTable->m_ColumnName << " Ox%x \\n\",topr);" << endl;
-     if (descTable->m_Dimensions) {
-        str << type  << " *" << descTable->m_ColumnName << " = (" << type << "*)topr;" << endl;
-//print        str << "printf(\" " << descTable->m_ColumnName << ":: 0x%x  %f \\n\"," << descTable->m_ColumnName << ","
-//print                            << descTable->m_ColumnName << "[0]);" << endl;
-     }
-     else 
-        str << type  << " &" << descTable->m_ColumnName << " = *((" << type << "*)topr);" << endl;     
+    for (Int_t exCount = 0; exCount < nExpressions; exCount++) {
+       if (strstr(expressions[exCount],columnName)) {goto LETSTRY;}
+    }
+    continue;
+LETSTRY:
+    type = typeNames[descTable->m_Type];
+    str << "topr = address[" << i << "];" << endl;
+//print     str << "printf(\" " << columnName << " Ox%x \\n\",topr);" << endl;
+    if (descTable->m_Dimensions) {
+        str << type  << " *" << columnName << " = (" << type << "*)topr;" << endl;
+//print        str << "printf(\" " << columnName << ":: 0x%x  %f \\n\"," << descTable->m_ColumnName << ","
+//print                            << columnName << "[0]);" << endl;
+    }
+    else 
+        str << type  << " " << columnName << " = *((" << type << "*)topr);" << endl;
    }
    // Create expressions
    for (i=nExpressions-1; i >= 0; i-- ) {
