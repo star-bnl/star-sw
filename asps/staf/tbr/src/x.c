@@ -706,6 +706,7 @@ void RunValue(size_t row) {
       } else {
         for(tt=strlen(gStr)-1;tt>=0;tt--) 
               { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
+        strcat(gStr," ");
       }
       sprintf(tt2,format,gStr);
     } else {
