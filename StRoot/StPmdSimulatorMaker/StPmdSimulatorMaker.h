@@ -4,7 +4,7 @@
  */
 /******************************************************************
  *
- * $Id: StPmdSimulatorMaker.h,v 1.2 2002/09/05 06:20:58 subhasis Exp $
+ * $Id: StPmdSimulatorMaker.h,v 1.3 2003/05/12 11:37:35 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay 
  *         Premomoy Ghosh
@@ -14,6 +14,9 @@
  ******************************************************************
  *
  * $Log: StPmdSimulatorMaker.h,v $
+ * Revision 1.3  2003/05/12 11:37:35  subhasis
+ * Stevent added
+ *
  * Revision 1.2  2002/09/05 06:20:58  subhasis
  * Calibration and readout resolution added
  *
@@ -30,6 +33,7 @@
 #include <TCanvas.h>
 #include "StPmdUtil/StPmdGeom.h"    //! included geom class
 
+class StPhmdCollection;
 class StPmdCollection;
 class StPmdHit;
 class StPmdDetector;
@@ -47,6 +51,7 @@ private:
   
  protected:
   StPmdCollection *       mPmdCollection;   //!Pmd and CPV collections
+  StPhmdCollection *        mevtPmdCollection;   //!Pmd and CPV collections for Stevent
 
   //!booking PMD histograms on cell (summing edep of hits on each cell) parameters
 
@@ -64,6 +69,8 @@ private:
   TH2F *m_cpvcol;    //!  Cpv super vs col
   TH2F *m_pmdEdep2D;    //! 2D-Edep Display of Pmd
   TH2F *m_cpvEdep2D;    //! 2D-Edep Display of Cpv
+  TH2F *mEdepAdc_Cpv;    //! 2D-Edep vs Adc
+  TH2F *mEdepAdc_Pmd;    //! 2D-Edep vs Adc
 
 
 
@@ -80,13 +87,10 @@ public:
   Int_t Decode_VolId(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);  //! decoding
   StPmdHit* Exist(StPmdHit*,StPmdDetector*,Int_t);
 
-
-
-
   void calAdc(StPmdDetector*,Int_t);
   Float_t keV_ADC(Float_t,Float_t&);
   Float_t ADC_Readout(Float_t,Int_t&);
-
+  Int_t  fillStEvent(StPmdDetector*, StPmdDetector*);
 
   void  bookHistograms();  //! Booking histograms
 
