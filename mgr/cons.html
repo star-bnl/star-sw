@@ -13,26 +13,27 @@
 
 	<LI><A HREF="#NAME">NAME</A>
 	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
-	<LI><A HREF="#B_Cons_A_Software_Construction_"><STRONG>Cons: A Software Construction System</STRONG></A>
-	<LI><A HREF="#B_Introduction_"><STRONG>Introduction</STRONG></A>
-	<LI><A HREF="#B_Why_Cons_Why_not_Make_"><STRONG>Why Cons? Why not Make?</STRONG></A>
-	<LI><A HREF="#B_Keeping_it_simple_"><STRONG>Keeping it simple</STRONG></A>
-	<LI><A HREF="#B_Building_large_trees_still_ju"><STRONG>Building large trees-still just as simple</STRONG></A>
-	<LI><A HREF="#B_A_Model_for_sharing_files_"><STRONG>A Model for sharing files</STRONG></A>
-	<LI><A HREF="#B_Separating_source_and_build_tr"><STRONG>Separating source and build trees</STRONG></A>
-	<LI><A HREF="#B_Variant_builds_"><STRONG>Variant builds</STRONG></A>
-	<LI><A HREF="#B_Signatures_"><STRONG>Signatures</STRONG></A>
-	<LI><A HREF="#B_Code_Repositories_"><STRONG>Code Repositories</STRONG></A>
-	<LI><A HREF="#B_Selective_builds_"><STRONG>Selective builds</STRONG></A>
-	<LI><A HREF="#B_Build_Pruning_"><STRONG>Build Pruning</STRONG></A>
-	<LI><A HREF="#B_Backing_builds_"><STRONG>Backing builds</STRONG></A>
-	<LI><A HREF="#B_Temporary_overrides_"><STRONG>Temporary overrides</STRONG></A>
-	<LI><A HREF="#B_More_on_construction_environme"><STRONG>More on construction environments:Default construction variables</STRONG></A>
-	<LI><A HREF="#B_Default_construction_methods_"><STRONG>Default construction methods</STRONG></A>
-	<LI><A HREF="#B_Extending_Cons_"><STRONG>Extending Cons</STRONG></A>
-	<LI><A HREF="#B_Invoking_Cons_"><STRONG>Invoking Cons</STRONG></A>
-	<LI><A HREF="#B_Using_and_writing_dependency_s"><STRONG>Using and writing dependency scanners</STRONG></A>
-	<LI><A HREF="#B_Support_and_Suggestions_"><STRONG>Support and Suggestions</STRONG></A>
+	<LI><A HREF="#B_Cons_A_Software_Construction_">&lt;STRONG&gt;Cons: A Software Construction System&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Introduction_">&lt;STRONG&gt;Introduction&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Why_Cons_Why_not_Make_">&lt;STRONG&gt;Why Cons? Why not Make?&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Keeping_it_simple_">&lt;STRONG&gt;Keeping it simple&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Building_large_trees_still_ju">&lt;STRONG&gt;Building large trees-still just as simple&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_A_Model_for_sharing_files_">&lt;STRONG&gt;A Model for sharing files&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Separating_source_and_build_tr">&lt;STRONG&gt;Separating source and build trees&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Variant_builds_">&lt;STRONG&gt;Variant builds&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Signatures_">&lt;STRONG&gt;Signatures&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Code_Repositories_">&lt;STRONG&gt;Code Repositories&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Default_targets_">&lt;STRONG&gt;Default targets&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Selective_builds_">&lt;STRONG&gt;Selective builds&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Build_Pruning_">&lt;STRONG&gt;Build Pruning&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Backing_builds_">&lt;STRONG&gt;Backing builds&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Temporary_overrides_">&lt;STRONG&gt;Temporary overrides&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_More_on_construction_environme">&lt;STRONG&gt;More on construction environments:Default construction variables&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Default_construction_methods_">&lt;STRONG&gt;Default construction methods&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Extending_Cons_">&lt;STRONG&gt;Extending Cons&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Invoking_Cons_">&lt;STRONG&gt;Invoking Cons&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Using_and_writing_dependency_s">&lt;STRONG&gt;Using and writing dependency scanners&lt;/STRONG&gt;</A>
+	<LI><A HREF="#B_Support_and_Suggestions_">&lt;STRONG&gt;Support and Suggestions&lt;/STRONG&gt;</A>
 </UL>
 <!-- INDEX END -->
 
@@ -68,9 +69,7 @@ by Bob Sidebotham <EM>rns@fore.com</EM>
 
 
 <P>
-
-A guide and reference for version 1.6a3
-
+A guide and reference for version 1.8-dev
 
 <P>
 
@@ -1586,12 +1585,49 @@ with the 'Link' command. A repository tree may contain one or more
 subdirectories for version builds established via <CODE>Link</CODE> to a source subdirectory. Cons will search for derived files in the
 appropriate build subdirectories under the repository tree.
 
+<H1><A NAME="B_Default_targets_">&lt;STRONG&gt;Default targets&lt;/STRONG&gt;</A></H1>
+<P>
+Until now, we've demonstrated invoking Cons with an explicit target to
+build:
 
 <P>
+<PRE>  % cons hello
+</PRE>
+<P>
+Normally, Cons does not build anything unless a target is specified, but
+specifying '.' (the current directory) will build everything:
 
-<H1><A NAME="B_Selective_builds_"><STRONG>Selective builds</STRONG>
+<P>
+<PRE>  % cons                # does not build anything
+</PRE>
+<P>
+<PRE>  % cons .              # builds everything under the top-level directory
+</PRE>
+<P>
+Adding the <A HREF="#item_Default">Default</A> method to any Construct or Conscript file will add the specified targets to
+a list of default targets. Cons will build these defaults if there are no
+targets specified on the command line. So adding the following line to the
+top-level Construct file will mimic Make's typical behavior of building
+everything by default:
 
-</A></H1>
+<P>
+<PRE>  Default '.';
+</PRE>
+<P>
+The following would add the <CODE>hello</CODE> and <CODE>goodbye</CODE> commands (in the same directory as the Construct or Conscript file) to the
+default list:
+
+<P>
+<PRE>  Default qw(
+        hello
+        goodbye
+  );
+</PRE>
+<P>
+The <CODE>default</CODE> method may be used more than once to add targets to the default list.
+
+<H1><A NAME="B_Selective_builds_">&lt;STRONG&gt;Selective builds&lt;/STRONG&gt;</A></H1>
+<P>
 Cons provides two methods for reducing the size of given build. The first
 is by specifying targets on the command line, and the second is a method
 for pruning the build tree. We'll consider target specification first.
@@ -1944,27 +1980,52 @@ follows:
 <PRE>  CC            =&gt; 'cc',
   CFLAGS        =&gt; '',
   CCCOM         =&gt; '%CC %CFLAGS %_IFLAGS -c %&lt; -o %&gt;',
-  CPPPATH       =&gt; '',
-  LINK          =&gt; '%CC',
+  CXX           =&gt; '%CC',
+  CXXFLAGS      =&gt; '%CFLAGS',
+  CXXCOM        =&gt; '%CXX %CXXFLAGS %_IFLAGS -c %&lt; -o %&gt;',
+  LINK          =&gt; '%CXX',
   LINKCOM       =&gt; '%LINK %LDFLAGS -o %&gt; %&lt; %_LDIRS %LIBS',
-  LIBPATH       =&gt; '',
-  LIBS          =&gt; '',
+  LINKMODULECOM =&gt; '%LD -r -o %&gt; %&lt;',
   AR            =&gt; 'ar',
-  ARCOM         =&gt; &quot;%AR %ARFLAGS %&gt; %&lt;\n%RANLIB %&gt;&quot;,
   ARFLAGS       =&gt; 'r',
+  ARCOM         =&gt; &quot;%AR %ARFLAGS %&gt; %&lt;\n%RANLIB %&gt;&quot;,
   RANLIB        =&gt; 'ranlib',
   AS            =&gt; 'as',
   ASFLAGS       =&gt; '',
   ASCOM         =&gt; '%AS %ASFLAGS %&lt; -o %&gt;',
   LD            =&gt; 'ld',
   LDFLAGS       =&gt; '',
+  PREFLIB       =&gt; 'lib',
   SUFLIB        =&gt; '.a',
+  SUFLIBS       =&gt; '.so:.a',
   SUFOBJ        =&gt; '.o',
-  ENV           =&gt; { PATH =&gt; '/bin:/usr/bin' },
+  ENV           =&gt; { 'PATH' =&gt; '/bin:/usr/bin' },
 </PRE>
 
 <P>
+On Win32 systems (Windows NT), the following construction variables are
+overridden in the default:
 
+<P>
+<PRE>  CC            =&gt; 'cl',
+  CFLAGS        =&gt; '/nologo',
+  CCCOM         =&gt; '%CC %CFLAGS %_IFLAGS /c %&lt; /Fo%&gt;',
+  LINK          =&gt; 'link',
+  LINKCOM       =&gt; '%LINK %LDFLAGS /out:%&gt; %&lt; %_LDIRS %LIBS',
+  LINKMODULECOM =&gt; '%LD /r /o %&gt; %&lt;',
+  AR            =&gt; 'lib',
+  ARFLAGS       =&gt; '/nologo ',
+  ARCOM         =&gt; &quot;%AR %ARFLAGS /out:%&gt; %&lt;&quot;,
+  RANLIB        =&gt; '',
+  LD            =&gt; 'link',
+  LDFLAGS       =&gt; '/nologo ',
+  PREFLIB       =&gt; '',
+  SUFEXE        =&gt; '.exe',
+  SUFLIB        =&gt; '.lib',
+  SUFLIBS       =&gt; '.dll:.lib',
+  SUFOBJ        =&gt; '.obj',
+</PRE>
+<P>
 These variables are used by the various methods associated with the
 environment, in particular any method that ultimately invokes an external
 command will substitute these variables into the final command, as
@@ -2184,12 +2245,15 @@ Multiple File Install:
 
 Both the target and the sources lists should be of the same length.
 
-
+<DT><STRONG>The Precious method</STRONG><DD>
 <P>
+The <CODE>Precious</CODE> method asks cons not to delete the given file or list of files before
+building them again. This is especially useful for allowing incremental
+updates to libraries or debug information files which are updated rather
+than rebuilt anew each time. Cons will still delete the files when the <CODE>-r</CODE> flag is specified.
 
-<DT><STRONG>The Command method
-
-</A></STRONG><DD>
+<DT><STRONG>The Command method</STRONG><DD>
+<P>
 The <CODE>Command</CODE> method is a catchall method which can be used to arrange for any external
 command to be called to update the target. For this command, a target file
 and list of inputs is provided. In addition a construction command line, or
@@ -2283,18 +2347,39 @@ directory <CODE>test</CODE>:
   echo test/foo test/baz -i test/bar &gt;&gt; test/tgt
   echo test/foo test/bar -i test/baz &gt;&gt; test/tgt
 </PRE>
-
-<P>
-
 </DL>
-Any of the above pseudo variables may be followed immediately by <CODE>:d</CODE> or
-<CODE>:f</CODE>, to indicate the directory or file associated with the name. Continuing
-with the above example, <CODE>%<:f</CODE> would expand to <CODE>foo bar
-baz</CODE>, and <CODE>%</CODE>:d&gt; would expand to <CODE>test</CODE>.
-
+<P>
+Any of the above pseudo variables may be followed immediately by one of the
+following suffixes to select a portion of the expanded path name:
 
 <P>
+<PRE>  C&lt;:b&gt;    the directory plus the file name stripped of any suffix
+  C&lt;:d&gt;    the directory
+  C&lt;:f&gt;    the file name
+  C&lt;:s&gt;    the file name suffix
+  C&lt;:F&gt;    the file name stripped of any suffix
+</PRE>
+<P>
+Continuing with the above example, <CODE>%&lt;:f</CODE> would expand to <CODE>foo bar baz</CODE>, and <CODE>%</CODE>:d&gt; would expand to <CODE>test</CODE>.
 
+<P>
+It is possible to programmatically rewrite part of the command by enclosing
+part of it between <CODE>%[</CODE> and <CODE>%]</CODE>. This will call the construction variable named as the first word enclosed
+in the brackets as a Perl code reference; the results of this call will be
+used to replace the contents of the brackets in the command line. For
+example:
+
+<P>
+<PRE>  $env = new cons(X_COMMA =&gt; sub { join(&quot;,&quot;, @_) });
+  Command $env 'tgt', qw(foo bar baz), &quot;echo %[X_COMMA %&lt;%] &gt; %&gt;&quot;
+</PRE>
+<P>
+This will execute:
+
+<P>
+<PRE>  echo foo,bar,baz &gt; tgt
+</PRE>
+<P>
 After substitution occurs, strings of white space are converted into single
 blanks, and leading and trailing white space is eliminated. It is therefore
 not possible to introduce variable length white space in strings passed
@@ -2333,7 +2418,21 @@ course, get an error.
 
 
 <P>
+Cons normally prints a command before executing it. This behavior is
+suppressed if the first character of the command is <CODE>@</CODE>. Note that you may need to separate the <CODE>@</CODE> from the command name or escape it to prevent <CODE>@cmd</CODE> from looking like an array to Perl quote operators that perform
+interpolation:
 
+<P>
+<PRE>  # The first command line is incorrect,
+  # because &quot;@cp&quot; looks like an array
+  # to the Perl qq// function.
+  # Use the second form instead.
+  Command $env 'foo', 'foo.in', qq(
+        @cp %&lt; tempfile
+        @ cp tempfile %&gt;
+  );
+</PRE>
+<P>
 If there are shell meta characters anywhere in the expanded command line,
 such as <CODE><</CODE>, <CODE></CODE>&gt;, quotes, or semi-colon, then the command will actually be executed by
 invoking a shell. This means that a command such as:
@@ -2645,17 +2744,21 @@ This functionality could be invoked as in the following example:
 </PRE>
 
 <P>
-
-<H1><A NAME="B_Invoking_Cons_"><STRONG>Invoking Cons</STRONG>
-
-</A></H1>
-The <CODE>cons</CODE> command is always invoked from the root of the build tree. A
-<CODE>Construct</CODE> file must exist in that directory. If the <CODE>-f</CODE> argument is used, then an alternate <CODE>Construct</CODE> file may be used (and, possibly, an alternate root, since <CODE>cons</CODE> will cd to <CODE>Construct</CODE> file's containing directory). The command is invoked as follows:
-
+The <CODE>cons</CODE> command is usually invoked from the root of the build tree. A
+<CODE>Construct</CODE> file must exist in that directory. If the <CODE>-f</CODE> argument is used, then an alternate <CODE>Construct</CODE> file may be used (and, possibly, an alternate root, since <CODE>cons</CODE> will cd to <CODE>Construct</CODE> file's containing directory).
 
 <P>
+If <CODE>cons</CODE> is invoked from a child of the root of the build tree with the <CODE>-t</CODE> argument, it will walk up the directory hierarchy looking for a
+<CODE>Construct</CODE> file. (An alternate name may still be specified with <CODE>-f</CODE>.) The targets supplied on the command line will be modified to be relative
+to the discovered <CODE>Construct</CODE> file. For example, invoking <CODE>cons</CODE> in ``root/libfoo/sub'' with <CODE>cons -t target</CODE> is identical to invoking it in ``root'' with <CODE>cons libfoo/sub/target</CODE>. (Assuming there is a <CODE>Construct</CODE>
+file in ``root''. If there are any <A HREF="#item_Default">Default</A> targets specified in the directory hierarchy's <CODE>Construct</CODE> or <CODE>Conscript</CODE> files, only the default targets at or below the directory from which <CODE>cons -t</CODE>
+was invoked will be built.
 
-<PRE>  cons &lt;arguments&gt;
+<P>
+The command is invoked as follows:
+
+<P>
+<PRE>  cons &lt;arguments&gt; -- &lt;construct-args&gt;
 </PRE>
 
 <P>
@@ -2831,12 +2934,14 @@ attempted.
 </A></STRONG><DD>
 Search for files in <EM>repos</EM>. Multiple <STRONG>-R</STRONG>  <EM>repos</EM> directories are searched in the order specified.
 
-
+<DT><STRONG><A NAME="item__t">-t</A></STRONG><DD>
 <P>
+Traverse up the directory hierarchy looking for a Construct file, if none
+exists in the current directory. Targets will be modified to be relative to
+the Construct file.
 
-<DT><STRONG><A NAME="item__v">-v
-
-</A></STRONG><DD>
+<DT><STRONG><A NAME="item__v">-v</A></STRONG><DD>
+<P>
 Show <CODE>cons</CODE> version and continue processing.
 
 
