@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.352 2003/08/06 00:23:14 lbarnby Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.353 2003/08/21 16:11:08 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1978,7 +1978,7 @@ void StBFChain::SetGeantOptions(){
       else if (GetOption("Y2003")  ||
 	       GetOption("RY2003"))   geantMk->LoadGeometry("detp geometry year2003");
       else if (GetOption("Y2003X") ||
-	       GetOption("RY2003X"))  geantMk->LoadGeometry("detp geometry y2003x");
+	       GetOption("RY2003X"))  geantMk->LoadGeometry("detp geometry year2003x");
 
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
       else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
@@ -2083,7 +2083,7 @@ void StBFChain::SetDbOptions(){
 	// svt shift. Small hack to make it work.
 	else if (GetOption("Y2001n"))db->SetDateTime("year2001");
 	else if (GetOption("Y2003")) db->SetDateTime("year2003");
-	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
+	else if (GetOption("Y2003X"))db->SetDateTime("year2003x");
 	else (void) printf("QAInfo: StBFChain::SetDbOptions() Chain has not set a time-stamp\n");
       }
 
