@@ -1,4 +1,5 @@
 macro make 
+if [#]>0 then
 for pam in [*]
   t = $word([pam],1,1,'/')
   if $index([t],'pams')<1 then
@@ -8,9 +9,14 @@ for pam in [*]
   endif 
   exec makes pam=[p]
 endfor
+else
+for pam in emc global mwc sim svt vpd ctf ftpc geometry magnet tpc
+  exec makes pam=pams/[pam]
+endfor
+endif
 return
 **************************************************
-macro makes pam=pams/tpc/tpt makefile=$ROOT_STAR/mgr/Makefile
+macro makes pam=pams/tpc makefile=$STAR/mgr/Makefile
 cut = ' \( -type d -a ! -name CVS -a ! -name idl _
                    -a ! -name exa -a ! -name inc _
                    -a ! -name "src/*" _
@@ -20,7 +26,7 @@ list = ''
 if $fexist([pam])=1 then
 list = $shell('find '//[pam]//[cut]);
 endif
-listr= $shell('find $ROOT_STAR/'//[pam]//[cut]);
+listr= $shell('find $STAR/'//[pam]//[cut]);
 exec load [list] [listr] 
 ami/list
 return
@@ -54,6 +60,8 @@ macro ld_standard
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
+*  plib = $LIB_STAR/[p]
+*  call  csrmsl($quote([plib]))
   slib = $LIB_STAR/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then
@@ -66,7 +74,9 @@ macro ld_private
   pam = [1]
   n = $words([pam],'/') 
   p = $word([pam],[n],[n],'/')
-  shell make -f $ROOT_STAR/mgr/Makefile -C [pam]
+*  plib = $LIB_STAR/[p]
+*  call  csrmsl($quote([plib]))
+  shell make -f $STAR/mgr/Makefile -C [pam]
   slib = lib/$SYS_STAR/[p].sl
   sl = $fexist([slib])
   if [sl]=1 then

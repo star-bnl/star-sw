@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.5  1998/02/10 00:06:07  fisyak
+#  SL98a second version
+#
 #  Revision 1.4  1998/01/31 23:32:51  fisyak
 #  New Environment variables
 #
@@ -10,7 +13,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/31 23:32:51 $ 
+#             Last modification $Date: 1998/02/10 00:06:07 $ 
 #.SILENT:
 ALL_DEPS  = $^
 FIRST_DEP = $<
@@ -21,35 +24,36 @@ PWD      = /bin/pwd
 CWD     := $(shell $(PWD))
 EMPTY   :=
 ifndef MAKEFILE
-  MAKEFILE = $(ROOT_STAR)/mgr/Makefile
+  MAKEFILE = $(STAR)/mgr/Makefile
 endif
 ifndef INP_DIR
   override INP_DIR := $(CWD)
 endif
 NAME    := $(notdir $(INP_DIR))
-# define level pams -> domain -> package from *.idlm and *.g files
+# define level pams -> domain -> package from *.idl and *.g files
 SRC_DIR := $(INP_DIR)
 SUBDIRS :=
 # default is domain
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*.idlm) 
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*.idl) 
 FILES_G  := $(wildcard $(SRC_DIR)/*/*.g)
 ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # domain level ?
 ROOT    := $(shell cd $(INP_DIR)/../../; $(PWD))
 DOM_DIR := $(shell cd $(INP_DIR); $(PWD))
 sources := $(SRC_DIR)/*
 else # module level
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*.idlm)  
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*.idl)  
 FILES_G  := $(wildcard $(SRC_DIR)/*.g)
 ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # module level
 ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
 DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
 sources := $(SRC_DIR)
 else # pams level
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*/*.idlm)  
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*/*.idl)  
 FILES_G  := $(wildcard $(SRC_DIR)/*/*/*.g)
 ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # pam level
 DIRS    := $(strip $(wildcard *))
 SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
+SUBDIRS := $(filter-out staf,$(SUBDIRS))
 SUBDIRS := $(filter-out sys, $(SUBDIRS))
 SUBDIRS := $(filter-out inc, $(SUBDIRS))
 SUBDIRS := $(filter-out idl, $(SUBDIRS))
@@ -66,7 +70,7 @@ ifeq ($(EMPTY),$(SUBDIRS))
 #          I have no subdrs
 # all files:
 ifeq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))
-#                 I have NO idlm- and NO g-files
+#                 I have NO idl- and NO g-files
 .PHONY               : default
 all:
 	@echo "Nothing to do for domain/module" $(NAME)
@@ -74,16 +78,21 @@ else
 ifndef OUT_DIR
   override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
 endif
+ifndef RANLIB
+  override RANLIB := /bin/true
+endif
 DOMAIN  := $(notdir $(DOM_DIR))
 DOM_DIRS:= $(addprefix $(ROOT)/pams/,$(shell cd $(INP_DIR)/../; ls))
-IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(ROOT_STAR)/pams/*/idl)
-INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(ROOT_STAR)/pams/*/inc)
+IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(STAR)/pams/*/idl)
+INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(STAR)/pams/*/inc)
 LIB_DIR := $(OUT_DIR)/$(SYS_HOST_STAR)
 OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
 DIR_GEN := $(OUT_DIR)/share
 GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
-VPATH   := $(wildcard $(sources)) $(GEN_DIR) $(OBJ_DIR) $(IDL_DIRS)
-#                 I have idlm- or g-files
+VPATH   := $(wildcard $(sources)) $(GEN_DIR) $(OBJ_DIR)
+VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
+#                                                       $(IDL_DIRS)
+#                 I have idl- or g-files
 FILES_CC := $(wildcard $(sources)/*.cc)
 FILES_C  := $(wildcard $(sources)/*.c)
 FILES_F  := $(wildcard $(sources)/*.F)
@@ -109,7 +118,7 @@ ifneq (,$(NAMES_IDM))
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(NAME)_init.o)                      
 endif
 ifndef NODEPEND
-FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didlm, $(NAMES_IDM)))                         
+FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif
 #
 #-------------------------------includes----------------------------
@@ -117,7 +126,7 @@ STICFLAGS =  $(addprefix -I, $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(SYS_STAR),hp_ux102)
 CPPFLAGS  = -D$(SYS_STAR) -D$(shell uname) 
 endif
-CPPFLAGS +=              -I. -I/usr/include \
+CPPFLAGS +=              -I. -I../ -I/usr/include \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
 FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/geant321
 ifndef NODEBUG
@@ -126,25 +135,26 @@ CFLAGS   += -g
 CXXFLAGS += -g
 CPPFLAGS += -DDEBUG
 endif
-#ifndef CERN_LIBS
-#   CERN_LIBS := -L$(CERN_ROOT)/lib -lmathlib -lkernlib
+ifndef CERN_LIBS
     CERN_LIBS := $(shell cernlib mathlib kernlib)
-#endif
+endif
 ifndef LIBRARIES
-  LIBRARIES :=  -L$(ROOT_STAR)/staf/$(SYS_HOST_STAR) \
-                -L$(LIB_DIR) -L$(LIB_STAR)  -l$(DOMAIN)   -lmsg  -ltls  
-#                                                                
-#                                            
+ifeq ($(LIB_STAR),$(LIB_DIR))
+  LIBRARIES :=  $(LIB_STAR)/lib$(NAME).a  -L$(STAR)/staf/$(SYS_HOST_STAR)  -lmsg   
+else
+  LIBRARIES :=  $(LIB_DIR)/lib$(NAME).a $(LIB_STAR)/lib$(NAME).a -L$(STAR)/staf/$(SYS_HOST_STAR) -lmsg   
+endif
 endif
 #-------------------------------rules-------------------------------
 # phony - not a file
 .PHONY               : workdirs  $(NAME) depend clean test
 all                  : workdirs $(GEN_DIR)/$(NAME)_init.cc $(NAME)  
-$(NAME)              : $(LIB_DIR)/$(NAME).sl
-$(LIB_DIR)/$(NAME).sl: $(FILES_O) 
+$(NAME)              : $(LIB_DIR)/lib$(NAME).a $(LIB_DIR)/$(NAME).sl
+$(LIB_DIR)/lib$(NAME).a $(LIB_DIR)/$(NAME).sl: $(FILES_O) 
 	$(AR) $(ARFLAGS) $(LIB_DIR)/lib$(DOMAIN).a $(FILES_O)
-	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(NAME).sl $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
-#hpux	$(LD) $(CPPFLAGS) $(CXXFLAGS) $(GEN_DIR)/$(NAME)_init.cc $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(NAME).sl $(LIBRARIES) 
+	$(RANLIB)        $(LIB_DIR)/lib$(DOMAIN).a
+	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(NAME).sl \
+         $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
 #--------- module ---------
 $(GEN_DIR)/$(NAME)_init.cc: $(GEN_DIR) $(FILES_IDM) 
 	@if [ -f $(ALL_TAGS) ]; then  rm $(ALL_TAGS) ; fi
@@ -165,11 +175,11 @@ ifneq ($(NAMES_IDM),)
 endif    #
 
 #--------  idm, idl --------
-$(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
-	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(ALL_DEPS)
+#$(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
+#	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(ALL_DEPS)
 #--- compilation -
 $(OBJ_DIR)/%.o: %.g
-	test -h $(GEN_DIR)/geant3.def || ln -s $(ROOT_STAR)/bin/share/geant3.def  $(GEN_DIR)/geant3.def
+	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/bin/share/geant3.def  $(GEN_DIR)/geant3.def
 	cd $(GEN_DIR); geant3    $(FIRST_DEP)  -o  $(GEN_DIR)/$(STEM).f 
 	$(FC) $(FFLAGS) -c $(GEN_DIR)/$(STEM).f  -o  $(ALL_TAGS)
 
@@ -191,12 +201,12 @@ $(OBJ_DIR): $(LIB_DIR)
 $(OUT_DIR) $(DIR_GEN) $(GEN_DIR) $(LIB_DIR)  $(OBJ_DIR):
 	@test -d $(ALL_TAGS) ||  mkdir -p $(ALL_TAGS)
 #-----dependencies-------
-$(GEN_DIR)/%.didlm $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idlm 
+$(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 	test -d $(GEN_DIR) || mkdir -p $(GEN_DIR)
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); \
         gcc  $(MKDEPFLAGS) $(STICFLAGS) $(FIRST_DEP) | \
-        sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
-	$(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" >> $(GEN_DIR)/$(STEM).didlm
+        sed -e 's/.idl.o/.didl/g' > $(GEN_DIR)/$(STEM).didl
+	$(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" >> $(GEN_DIR)/$(STEM).didl
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
                 $(GEN_DIR)/$(STEM)_i.cc > temp
@@ -218,8 +228,13 @@ $(OBJ_DIR)/%.d: %.cdf
         echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;/
         echo "$(STEM).o: $(STEM).c" >> $(ALL_TAGS)
 #-----cleaning------------------------------
-clean:
-	rm -rf $(OBJ_DIR) $(GEN_DIR) $(LIB_DIR)/$(NAME).sl $(LIB_DIR)/$(DOMAIN).a
+clean: clean_obj clean_lib
+clean_share:
+	rm -rf $(GEN_DIR) 
+clean_obj:
+	rm -rf $(OBJ_DIR) 
+clean_lib:
+	rm -rf $(LIB_DIR)/$(NAME).sl $(LIB_DIR)/$(DOMAIN).a
 #-----test variables------------------------
 #-----dependencies--------------------------
 ifneq ($(EMPTY), $(strip $(FILES_D)))
@@ -228,8 +243,9 @@ endif       #
 ifneq ($(EMPTY), $(strip $(FILES_DM)))
 include $(FILES_DM)
 endif       # 
-endif # NO idlm- or g-files
-test: 
+endif # NO idl- or g-files
+test: test_dir test_files test_mk
+test_dir:
 	@echo "ROOT      =" $(ROOT)
 	@echo "CWD       =" $(CWD)  
 	@echo "NAME      =" $(NAME) 
@@ -245,6 +261,7 @@ test:
 	@echo "LIB_DIR   =" $(LIB_DIR)
 	@echo "OBJ_DIR   =" $(OBJ_DIR)
 	@echo "GEN_DIR   =" $(GEN_DIR)
+test_files:
 	@echo "FILES_IDM =" $(FILES_IDM)
 	@echo "FILES_G   =" $(FILES_G)
 	@echo "FILES_CC  =" $(FILES_CC)
@@ -260,16 +277,18 @@ test:
 	@echo "NAMES_CC  =" $(NAMES_CC)
 	@echo "NAMES_C   =" $(NAMES_C)
 	@echo "NAMES_F   =" $(NAMES_F)
+test_mk:
 	@echo "MAKEFILES =" $(MAKEFILES)
 	@echo "VPATH     =" $(VPATH)
 	@echo "SHELL     =" $(SHELL)
 	@echo "MAKE      =" $(MAKE)
 	@echo "MAKELEVEL =" $(MAKELEVEL)
-	@echo "MAKEFILE  =" $(MAKEFILE) 
+	@echo "MAKEFILES =" $(MAKEFILES)"; MAKEFILE     ="      $(MAKEFILE)
 	@echo "MAKFLAGS  =" $(MAKEFLAGS)
 	@echo "SUFFIXES  =" $(SUFFIXES)
 	@echo "STIC      =" $(STIC)	"; STICFLAGS	="	$(STICFLAGS)
 	@echo "AR        =" $(AR)	"; ARFLAGS 	="	$(ARFLAGS)
+	@echo "RANLIB    =" $(RANLIB)
 	@echo "AS        =" $(AS)	"; ASFLAGS 	="	$(ASFLAGS)
 	@echo "CC        =" $(CC)	"; CFLAGS 	="	$(CFLAGS)
 	@echo "CXX       =" $(CXX)	"; CXXFLAGS 	="	$(CXXFLAGS)
