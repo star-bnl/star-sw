@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.7 2004/05/03 23:08:50 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.8 2004/07/12 17:21:19 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.8  2004/07/12 17:21:19  dongx
+ * fix the crashing when running events before day 030 (TofDaq not updated to 184 yet)
+ *
  * Revision 1.7  2004/05/03 23:08:50  dongx
  * change according to the update of StTofrGeometry, save CPU time by 100 times
  *
@@ -984,8 +987,10 @@ Int_t StTofrMatchMaker::getTofData(StTofCollection* tofCollection){
   // perform consistency check
   bool dataOK(true);
   gMessMgr->Info("","OS") << "TOF raw data consistency test ...";
-  
-  for (Int_t i=0;i<mNTOFR;i++){
+
+  Int_t tofsize = tofData.size();
+  if(tofsize!=mNTOFR) gMessMgr->Warning("The size of tofData is NOT mNTOFR!","OS");
+  for (Int_t i=0;i<tofsize;i++){
     Int_t iAdc = mDaqMap->DaqChan2ADCChan(i);
     mTofrAdc[i] = tofData[iAdc]->adc();
     Int_t iTdc = mDaqMap->DaqChan2TDCChan(i);
