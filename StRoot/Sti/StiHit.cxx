@@ -49,7 +49,13 @@ void StiHit::setError(const StMatrixF& matrix)
 double StiHit::getEloss()
 {
 	if (msthit)
-		return msthit->charge();
+		{
+			StHit * hit = dynamic_cast<StHit *>(msthit);
+			if (hit)
+				return hit->charge();
+			else
+				return -1;// signals error condition or absence of data
+		}
 	else
 		return -2;// signals error condition or absence of data
 }

@@ -505,7 +505,7 @@ void StiKalmanTrack::initialize(double curvature,
     eta = 0.;
     for (it=v.begin(); it!=v.end(); ++it)
       {
-				StiDetector* layer = (*it)->detector();
+				const StiDetector* layer = (*it)->detector();
 				if (!layer) 
 					throw logic_error("StiKalmanTrack::initialize() ERROR:\t Hit has null detector.");
 				alpha = layer->getPlacement()->getNormalRefAngle();
@@ -801,11 +801,16 @@ int StiKalmanTrack::getMaxPointCount() const
     {
       StiKTNBidirectionalIterator it;
       for (it=begin();it!=end();it++)
-	{
-	  //if ((*it).getDetector()->isActive((*it).fP0,(*it).fP1)) // this comes next...!!!!!
-	  if ((*it).getDetector()->isActive())
-	    nPts++;
-	}
+				{
+					const StiDetector * detector = (*it).getDetector();
+					if (detector)
+						{
+							if (detector->isActive((*it).fP0,(*it).fP1))
+								nPts++;
+						}
+					else
+						nPts++; // vertex have no detector...
+				}
     }
   return nPts;
 }
@@ -828,24 +833,25 @@ int    StiKalmanTrack::getGapCount()    const
       StiKTNBidirectionalIterator it;
       bool inGap = false;
       for (it=begin();it!=end();it++)
-	{
-	  if ((*it).getDetector()->isActive())
-	    {
-	      if ((*it).getHit())
-		{
-		  if (inGap) 
-		    inGap = false;
-		}
-	      else
-		{
-		  if (!inGap)
-		    {
-		      inGap = true;
-		      gaps++;
-		    }										
-		}
-	    }
-	}
+				{
+					const StiDetector * detector = (*it).getDetector();
+					if (detector && detector->isActive())
+						{
+							if ((*it).getHit())
+								{
+									if (inGap) 
+										inGap = false;
+								}
+							else
+								{
+									if (!inGap)
+										{
+											inGap = true;
+											gaps++;
+										}										
+								}
+						}
+				}
     }
   return gaps;
 }
@@ -1162,17 +1168,19 @@ void StiKalmanTrack::swap()
 }
 
 ///return hits;
-vector<StHit*> StiKalmanTrack::stHits() const
+//vector<StHit*> StiKalmanTrack::stHits() const
+vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
 {
 	StiKalmanTrackNode* leaf = getLastNode();
 	StiKTNForwardIterator it(leaf);
 	StiKTNForwardIterator end = it.end();
-	vector<StHit*> hits;
+	//vector<StHit*> hits;
+	vector<StMeasuredPoint*> hits;
 	while (it!=end) {
 		const StiKalmanTrackNode& node = *it;
 		StiHit* hit = node.getHit();
 		if (hit) {
-			StHit * stHit = const_cast<StHit*>( hit->stHit() );
+			StMeasuredPoint * stHit = const_cast<StMeasuredPoint*>( hit->stHit() );
 			if (stHit)
 				hits.push_back(stHit);
 		}

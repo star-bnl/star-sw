@@ -297,7 +297,8 @@ public:
    StThreeVector<double> getHitPositionNear(double x) const;
 
     ///return hits;
-    virtual vector<StHit*> stHits() const;
+	 //virtual vector<StHit*> stHits() const;
+	 virtual vector<StMeasuredPoint*> stHits() const;
   
   // Function to reverse the node geometry of a track
   void swap();
