@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.13 2002/11/14 17:43:00 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.14 2002/11/24 01:39:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.14  2002/11/24 01:39:16  porter
+ * added Pmd domain
+ *
  * Revision 1.13  2002/11/14 17:43:00  porter
  * added dbEemc to enumerated domain list
  *
@@ -262,6 +265,7 @@ addDbDomain(dbRts,"rts");
 addDbDomain(dbTof,"tof"); 
 addDbDomain(dbFpd,"fpd"); 
 addDbDomain(dbEemc,"eemc"); 
+addDbDomain(dbPmd,"pmd"); 
 
 }
 
