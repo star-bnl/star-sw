@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.7 2001/06/30 02:39:47 jcs Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.8 2002/03/11 16:40:24 jcs Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.8  2002/03/11 16:40:24  jcs
+ * return false if no FTPADCD bank or no FTPADCX bank found for requested sector
+ *
  * Revision 1.7  2001/06/30 02:39:47  jcs
  * add forgotten include for assert.h
  *
@@ -89,9 +92,17 @@ int FTPV1P0_ZS_SR::initialize()
   if ((void *)adcd_p != NULL) {
     fflush(stdout);
   }
+  else {
+    cout<<"No FTPADCD bank found for sector "<<sector<<endl;
+    return FALSE;
+  }
   adcx_p = detector->getBankFTPADCX(sector);
   if ((void *)adcx_p != NULL) {
     fflush(stdout);
+  }
+  else {
+    cout<<"No FTPADCX bank found for sector "<<sector<<endl;
+    return FALSE;
   }
   seqd_p = detector->getBankFTPSEQD(sector);
   if ((void *)seqd_p != NULL) {
