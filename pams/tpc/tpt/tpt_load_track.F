@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.24 2000/09/27 16:53:29 genevb Exp $
+* $Id: tpt_load_track.F,v 1.25 2000/11/29 16:18:02 genevb Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.25  2000/11/29 16:18:02  genevb
+* Return if too many tracks
+*
 * Revision 1.24  2000/09/27 16:53:29  genevb
 * Handle negative fields
 *
@@ -136,6 +139,8 @@ C___________________________________________________________________
       if(ipt.gt.track_h.maxlen) then
          write(m132,*) "TPTLOAD-E1 too many tracks",track_h.maxlen,ipt
          call Message( m132, 1, id1 )
+         tpt_load_track = STAFCV_BAD
+         return
       endif
 C
       track(ipt).flag= trk(ipt).flag   ! good momentum fit
