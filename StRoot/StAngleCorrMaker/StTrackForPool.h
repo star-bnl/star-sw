@@ -27,7 +27,7 @@ private:
   Int_t mCharge; 
 
   // track characteristics
-  Double_t mRChiXY,mRChiZ;
+  Double_t mChi2;
   Int_t mNTPCPoints;
 
 public:
@@ -41,18 +41,12 @@ public:
   void GetTrackIDNumber(Int_t& gid);
   void SetTrackIDNumber(Int_t sid);
   void GetPseudoRapidity(Double_t& pRap);
-  void SetRChiSquaredXY(Double_t chiXY);
-  void SetRChiSquaredZ(Double_t chiZ);
+  void SetChiSquared(Double_t chiXY);
   void SetNTPCPoints(Int_t npoints);
-  Double_t GetRChiSquaredXY();
-  Double_t GetRChiSquaredZ();
+  Double_t GetChiSquared();
   Int_t GetNTPCPoints();
   void  SetCharge(Int_t charge);
   Int_t GetCharge();
-
-
-
-
 
 };
 

@@ -21,7 +21,7 @@
 #include "StTrackForPool.h"
 #include "StDiagnosticTool.h"
 #include <TH1.h>
-#include "StEvent.h"
+
 
 class StDiagnosticEventCuts: public StDiagnosticTool {
 public:

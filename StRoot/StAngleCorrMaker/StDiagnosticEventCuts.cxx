@@ -1,6 +1,6 @@
 #include "StDiagnosticEventCuts.h"
 #include <TH1.h>
-#include "StEvent.h"
+
 
 StDiagnosticEventCuts::StDiagnosticEventCuts() 
 {
@@ -10,7 +10,6 @@ StDiagnosticEventCuts::StDiagnosticEventCuts()
 StDiagnosticEventCuts::~StDiagnosticEventCuts() 
 {
   evcutMULT ->Write();
-  cout << "wrote event cuts diagnostic hist's ..." << endl;
 }
 
 void 
@@ -22,7 +21,7 @@ StDiagnosticEventCuts::Write()
 void 
 StDiagnosticEventCuts::Fill(StEvent& ev) 
 {
-  evcutMULT->Fill(ev.trackCollection()->size() );
+  //  evcutMULT->Fill(ev.trackCollection()->size() );
 
 }
 

@@ -68,8 +68,8 @@ StDiagnosticBackground::Fill(StTrackForPool* t1, StTrackForPool* t2)
 
   // fill histo's
   backgroundCut1->Fill(t1->GetNTPCPoints(),t2->GetNTPCPoints(),corrValue,weight);
-  backgroundCut2->Fill(t1->GetRChiSquaredXY(),t2->GetRChiSquaredXY(),corrValue,weight);
-  backgroundCut3->Fill(t1->GetRChiSquaredZ(),t2->GetRChiSquaredZ(),corrValue,weight);
+  backgroundCut2->Fill(t1->GetChiSquared(),t2->GetChiSquared(),corrValue,weight);
+  //backgroundCut3->Fill(t1->GetRChiSquaredZ(),t2->GetRChiSquaredZ(),corrValue,weight);
   backgroundCut4->Fill(rap1,rap2,corrValue,weight);
   backgroundCut5->Fill(p1,p2,corrValue,weight);
 }

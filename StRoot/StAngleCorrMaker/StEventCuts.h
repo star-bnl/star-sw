@@ -1,36 +1,18 @@
 #ifndef StEventCuts_HH
 #define StEventCuts_HH
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// StEventCuts
-//
-// Description: 
-//
-// Environment:
-//  Software developed for the STAR Detector at Brookhaven National Laboratory
-//
-// Author List: 
-//  Craig Ogilvie, MIT
-//  Matt Horsley,  YALE
-// History:
-//
-///////////////////////////////////////////////////////////////////////////////
-
-#include "StEvent.h"
+class StEvent;
 
 class StEventCuts {
 
 public:
-           StEventCuts();
-           ~StEventCuts();
-  Int_t EventSatisfiesCuts(StEvent& ev);
+  StEventCuts();
+  ~StEventCuts();
+  int EventSatisfiesCuts(StEvent& ev);
+  void  SetMultiplicityCuts(double lowerCut, double upperCut);
   
-  // set cuts
-  void  SetMultiplicityCuts(Double_t lowerCut, Double_t upperCut);
-    
  private:
-  Double_t upperMult,lowerMult;
+  double upperMult,lowerMult;
 };
 
 #endif

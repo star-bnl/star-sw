@@ -1,6 +1,5 @@
 #include "StAngleCorrFunction.h"
 #include "StTrackForPool.h"
-#include "StEvent.h"
 #include <TH1.h>
 
 StAngleCorrFunction::StAngleCorrFunction() {}

@@ -1,6 +1,6 @@
 #include "StDiagnosticEventStream.h"
 #include <TH1.h>
-#include "StEvent.h"
+
 
 StDiagnosticEventStream::StDiagnosticEventStream() 
 {
@@ -20,7 +20,7 @@ StDiagnosticEventStream::Write()
 void 
 StDiagnosticEventStream::Fill(StEvent& ev) 
 {
-  evstreamMULT->Fill(ev.trackCollection()->size() );
+  // evstreamMULT->Fill(ev.trackCollection()->size() );
 }
 
 TString
