@@ -750,7 +750,7 @@ const float  *StMuDstFilterHelper::GetDefs() const
   return defs;
 }
 //______________________________________________________________________________
-Int_t StMuDstFilterHelper::AcceptCB(const StTrack* track) {
+Int_t StMuDstFilterHelper::Accept(const StTrack* track) {
   
   float pCutHigh        = fpCutHigh;    // high momentum cut for RICH/Upsilon candidates 
   int   nHitsCutHighP   = int(fnHitsCutHighP);     // nHits cut for all tracks
@@ -811,7 +811,7 @@ Int_t StMuDstFilterHelper::AcceptCB(const StTrack* track) {
 }
 
 //______________________________________________________________________________
-Int_t StMuDstFilterHelper::AcceptCB(StPoints3DABC *pnt) 
+Int_t StMuDstFilterHelper::Accept(StPoints3DABC *pnt) 
 {
    TObject *to;
    StTrack *trk;
@@ -819,5 +819,5 @@ Int_t StMuDstFilterHelper::AcceptCB(StPoints3DABC *pnt)
    if (!to) 						return 1;
    if (!to->InheritsFrom(StTrack::Class()))		return 1;
    trk = (StTrack*)to;
-   return AcceptCB(trk);
+   return Accept(trk);
 }

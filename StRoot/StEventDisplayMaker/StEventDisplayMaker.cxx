@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.92 2003/01/26 23:54:36 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.93 2003/02/28 00:33:54 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -795,7 +795,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
     pnt = (StPoints3DABC*)shaps->At(i);
 //		Filtration
     nextFilter.Reset();
-    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->Accept(pnt)) break;}
+    while ((filt=(StFilterABC*)nextFilter())) {if (!filt->AcceptCB(pnt)) break;}
     if (filt) {ncut++; continue;}
 //
     P = pnt->Size()==1;
@@ -1106,6 +1106,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.93  2003/02/28 00:33:54  fine
+// Exchange Accept and AccpetCB methods
+//
 // Revision 1.92  2003/01/26 23:54:36  fine
 // Add Riostream.h header lost due removing the redundant headers files from StEvent package. Redundant iostream was removed
 //
