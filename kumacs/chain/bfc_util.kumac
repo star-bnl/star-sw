@@ -357,12 +357,15 @@ macro bfc_init _
             exec init_ev0#init
             exec init_magf#init
     (ev0_e) exec create_tables_global#ev0_eval2
-      (ctf) exec create_tables_ctf#init
-            exec ctg_init#read
-            exec cts_init#cts_init
-      (mwc) exec mwg_init
-	    exec mws_init
-	    exec create_tables_mwc#init
+    (ctf)   exec create_tables_ctf#init
+            exec ctg_init#init
+            exec ctg_init#ctg
+            exec cts_init#init
+     (mwc)  exec create_tables_mwc#init
+	    exec mwg_init#init
+	    exec mwg_init#mwg
+	    exec mws_init#init
+	    exec mws_init#fill
       (trg) exec l3cl_init
 	    exec l3t_init
 	    exec create_tables_l3
