@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0I.hh,v 3.6 2002/04/30 16:02:48 genevb Exp $
+ * $Id: StV0I.hh,v 3.7 2002/07/30 20:07:52 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 24-Apr-2001
  *
@@ -13,6 +13,9 @@
  ***********************************************************************
  *
  * $Log: StV0I.hh,v $
+ * Revision 3.7  2002/07/30 20:07:52  genevb
+ * Better cTau calcs
+ *
  * Revision 3.6  2002/04/30 16:02:48  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -378,11 +381,11 @@ inline Float_t StV0I::rapK0Short() {
 }
 
 inline Float_t StV0I::cTauLambda() {
-  return massLambda()*decayLengthV0()/sqrt(Ptot2V0());
+  return M_LAMBDA*decayLengthV0()/sqrt(Ptot2V0());
 }
 
 inline Float_t StV0I::cTauK0Short() {
-  return massK0Short()*decayLengthV0()/sqrt(Ptot2V0());
+  return M_KAON_0_SHORT*decayLengthV0()/sqrt(Ptot2V0());
 }
 
 inline Float_t StV0I::ptPos() {
