@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.44 2003/06/18 17:00:59 posk Exp $
+// $Id: StFlowEvent.h,v 1.45 2003/07/30 22:00:40 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -61,6 +61,7 @@ public:
   Float_t        CTB() const;
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
+  Float_t        PtWgtSaturation() const;
   Bool_t         PtWgt() const;
   Bool_t         EtaWgt() const;
   Bool_t         FirstLastPhiWgt() const;
@@ -106,7 +107,9 @@ public:
 #endif
   static void SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
-  static void SetEtaFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  static void SetEtaFtpcCut(Float_t lo_neg, Float_t hi_neg, 
+			    Float_t lo_pos, Float_t hi_pos, 
+			    Int_t harN, Int_t selN);
   static void SetPtFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPiPlusCut(Float_t lo, Float_t hi);
   static void SetPiMinusCut(Float_t lo, Float_t hi);
@@ -122,6 +125,7 @@ public:
   static void SetDcaGlobalFtpcCut(Float_t lo, Float_t hi);
   static void SetProbPid();
   static void SetEtaSubs();
+  static void SetPtWgtSaturation(Float_t);
   static void SetPtWgt(Bool_t);
   static void SetEtaWgt(Bool_t);
   static void SetOnePhiWgt();
@@ -148,7 +152,7 @@ private:
   Float_t             mZDCe;                                     // ZDC east
   Float_t             mZDCw;                                     // ZDC west
   static Float_t      mEtaTpcCuts[2][2][Flow::nSels];            // range absolute values
-  static Float_t      mEtaFtpcCuts[2][2][Flow::nSels];           // range absolute values
+  static Float_t      mEtaFtpcCuts[4][2][Flow::nSels];           // range values
   static Float_t      mPtTpcCuts[2][2][Flow::nSels];             // range
   static Float_t      mPtFtpcCuts[2][2][Flow::nSels];            // range
   Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights
@@ -161,6 +165,7 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc West
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcFarWest;                        //!flattening weights Ftpc FarWest
   static Float_t      mPiPlusCuts[2];                            // PID cuts
+  static Float_t      mPtWgtSaturation;                          // saturation value for pt weighting
   static Bool_t       mPtWgt;                                    // flag for pt weighting
   static Bool_t       mEtaWgt;                                   // flag for y weighting for odd harmonics
   static Char_t       mPid[10];                                  // h+, h-, pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, e+, e-, e
@@ -224,6 +229,8 @@ inline Float_t  StFlowEvent::ZDCe() const { return mZDCe; }
 
 inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
 
+inline Float_t  StFlowEvent::PtWgtSaturation() const { return mPtWgtSaturation; }
+
 inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
 
 inline Bool_t   StFlowEvent::EtaWgt() const { return mEtaWgt; }
@@ -273,8 +280,11 @@ inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t 
 inline void StFlowEvent::SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
 { mPtTpcCuts[0][harN][selN] = lo; mPtTpcCuts[1][harN][selN] = hi; }
 
-inline void StFlowEvent::SetEtaFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
-{ mEtaFtpcCuts[0][harN][selN] = lo; mEtaFtpcCuts[1][harN][selN] = hi; }
+inline void StFlowEvent::SetEtaFtpcCut(Float_t lo_neg, Float_t hi_neg, 
+				       Float_t lo_pos, Float_t hi_pos, 
+				       Int_t harN, Int_t selN)
+{ mEtaFtpcCuts[0][harN][selN] = lo_neg; mEtaFtpcCuts[1][harN][selN] = hi_neg; 
+ mEtaFtpcCuts[2][harN][selN] = lo_pos; mEtaFtpcCuts[3][harN][selN] = hi_pos; }
 
 inline void StFlowEvent::SetPtFtpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
 { mPtFtpcCuts[0][harN][selN] = lo; mPtFtpcCuts[1][harN][selN] = hi; }
@@ -364,6 +374,8 @@ inline void StFlowEvent::SetFirstLastPhiWgt() { mFirstLastPhiWgt = kTRUE; }
 
 inline void StFlowEvent::SetFirstLastPoints() { mFirstLastPoints = kTRUE; }
 
+inline void StFlowEvent::SetPtWgtSaturation(Float_t PtWgtSaturation) { mPtWgtSaturation = PtWgtSaturation; }
+
 inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 
 inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
@@ -373,6 +385,10 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.45  2003/07/30 22:00:40  oldi
+// Eta cuts for event plane selection separated for FTPC east and west.
+// PtWgtSaturation parameter introduced (default set to 2. -> no change of default behavior).
+//
 // Revision 1.44  2003/06/18 17:00:59  posk
 // Event plane cuts now only odd and even, instead of different for each harmonic.
 //

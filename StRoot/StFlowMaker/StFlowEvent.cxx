@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.42 2003/07/15 18:34:26 oldi Exp $
+// $Id: StFlowEvent.cxx,v 1.43 2003/07/30 22:00:39 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -31,7 +31,11 @@ Float_t  StFlowEvent::mEtaTpcCuts[2][2][Flow::nSels] = {{{0.,0.5},
                                                          {0.,0.} },
 							{{1.0,2.},
 							 {1.0,1.} }};
-Float_t  StFlowEvent::mEtaFtpcCuts[2][2][Flow::nSels] = {{{2.7,2.7},
+Float_t  StFlowEvent::mEtaFtpcCuts[4][2][Flow::nSels] = {{{-4.0,-4.0},
+							  {-4.0,-4.0}},
+							 {{-2.7,-2.7},
+							  {-2.7,-2.7} },
+							 {{2.7,2.7},
 							  {2.7,2.7} },
 							 {{4.0,4.0},
 							  {4.0,4.0} }};
@@ -57,6 +61,7 @@ Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mDcaGlobalTpcCuts[2]  = { 0., 0.};
 Float_t StFlowEvent::mDcaGlobalFtpcCuts[2] = { 0., 0.};
+Float_t StFlowEvent::mPtWgtSaturation      = 2.;
 Bool_t  StFlowEvent::mPtWgt                = kTRUE;
 Bool_t  StFlowEvent::mEtaWgt               = kTRUE;
 Bool_t  StFlowEvent::mProbPid              = kFALSE;
@@ -162,7 +167,7 @@ Double_t StFlowEvent::Weight(Int_t selN, Int_t harN, StFlowTrack*
 
   if (mPtWgt) {
     float pt = pFlowTrack->Pt();
-    phiWgt *= (pt < 2.) ? pt : 2.;  // pt weighting going constant above 2 GeV
+    phiWgt *= (pt < mPtWgtSaturation) ? pt : mPtWgtSaturation;  // pt weighting going constant
   }
 
   float eta = pFlowTrack->Eta();
@@ -551,24 +556,28 @@ void StFlowEvent::SetSelections() {
 	    // Ftpc track
 	    
 	    // Eta
-	    if (mEtaFtpcCuts[1][harN%2][selN] > mEtaFtpcCuts[0][harN%2][selN] && 
-		(fabs(eta) < mEtaFtpcCuts[0][harN%2][selN] || 
-		 fabs(eta) >= mEtaFtpcCuts[1][harN%2][selN])) continue;
-	    // 	    (eta < mEtaTpcCuts[0][harN%2][selN]         || both subs at +eta
-	    // 	     eta >= mEtaTpcCuts[1][harN%2][selN])) continue;
+	    if (eta < 0.) {
+	      if (mEtaFtpcCuts[1][harN%2][selN] > mEtaFtpcCuts[0][harN%2][selN] && 
+		  (eta < mEtaFtpcCuts[0][harN%2][selN] || 
+		   eta >= mEtaFtpcCuts[1][harN%2][selN])) continue;
+	    }
 	    
+	    else { // eta > 0.
+	      if (mEtaFtpcCuts[3][harN%2][selN] > mEtaFtpcCuts[2][harN%2][selN] && 
+		  (eta < mEtaFtpcCuts[2][harN%2][selN] || 
+		   eta >= mEtaFtpcCuts[3][harN%2][selN])) continue;
+	    }
+
 	    // Pt
 	    if (mPtFtpcCuts[1][harN%2][selN] > mPtFtpcCuts[0][harN%2][selN] && 
 		(Pt < mPtFtpcCuts[0][harN%2][selN] ||
 		 Pt >= mPtFtpcCuts[1][harN%2][selN])) continue;	
 	  }
 	  
-	  pFlowTrack->SetSelect(harN, selN);
-	  
+	  pFlowTrack->SetSelect(harN, selN);	  
       }
     }
   }
-  
 }
 
 //-------------------------------------------------------------
@@ -849,6 +858,7 @@ void StFlowEvent::PrintSelectionList() {
   cout << "# Weighting and Striping:" << endl;
   if (mPtWgt) {
     cout << "#    PtWgt= TRUE, also for output of PhiWgt file" << endl;
+    cout << "#    PtWgt Saturation= " << mPtWgtSaturation << endl;
   } else {
     cout << "#    PtWgt= FALSE" << endl;
   }
@@ -897,8 +907,9 @@ void StFlowEvent::PrintSelectionList() {
 	   << j+1 << endl;
       cout << "#    abs(Eta) Tpc cuts= " << mEtaTpcCuts[0][j][k] << ", " 
 	   << mEtaTpcCuts[1][j][k] << endl;
-      cout << "#    abs(Eta) Ftpc cuts= " << mEtaFtpcCuts[0][j][k] << ", " 
-	   << mEtaFtpcCuts[1][j][k] << endl;
+      cout << "#    Eta Ftpc cuts= " << mEtaFtpcCuts[0][j][k] << ", " 
+	   << mEtaFtpcCuts[1][j][k] << ", " << mEtaFtpcCuts[2][j][k] << ", " 
+	   << mEtaFtpcCuts[3][j][k] << endl;
       cout << "#    Pt Tpc cuts= " << mPtTpcCuts[0][j][k] << ", "
 	   << mPtTpcCuts[1][j][k] << endl;
       cout << "#    Pt Ftpc cuts= " << mPtFtpcCuts[0][j][k] << ", "
@@ -912,6 +923,10 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.43  2003/07/30 22:00:39  oldi
+// Eta cuts for event plane selection separated for FTPC east and west.
+// PtWgtSaturation parameter introduced (default set to 2. -> no change of default behavior).
+//
 // Revision 1.42  2003/07/15 18:34:26  oldi
 // Printout for upper FTPC pt cut for the event plane determination was showing
 // upper TPC pt cut always. Changed.
