@@ -1,11 +1,15 @@
 /******************************************************************
- *  $Id: StRichPadPlane.cxx,v 1.2 2000/04/05 16:03:00 lasiuk Exp $
+ *  $Id: StRichPadPlane.cxx,v 1.3 2000/04/14 22:38:09 lasiuk Exp $
  *
  * Description:
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  ********************************************************************
  *  $Log: StRichPadPlane.cxx,v $
+ *  Revision 1.3  2000/04/14 22:38:09  lasiuk
+ *  add print diagnostic for crash
+ *  extra careful on clearing the dataset
+ *
  *  Revision 1.2  2000/04/05 16:03:00  lasiuk
  *  remove size_type type definition.  Clash on SUN
  *
@@ -68,6 +72,9 @@ void StRichPadPlane::clear()
 {
     unsigned int rows = row_size();
     unsigned int cols = col_size();
+    for(int ii=0; ii<v.size(); ii++) {
+	v[ii].clear();
+    }
     v.clear();
     resize(rows,cols);
 }
