@@ -55,6 +55,8 @@ public:
     void getMomentum(double p[3], double e[6]=0) const;
     /// Calculates and returns the tangent of the track pitch angle at this node.
     double getTanL() const;
+    /// Calculates and returns the momentum of the track at this node.
+    double getP() const;
     /// Calculates and returns the transverse momentum of the track at this node.
     double getPt() const;
     /// Calculates and returns the momentum and error of the track at this node in global coordinates.

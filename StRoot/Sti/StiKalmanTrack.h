@@ -125,6 +125,9 @@ class StiKalmanTrack : public StiTrack
   /// Calculates and returns the momentum and error of the track 
   void    getMomentum(double p[3], double e[6]) const ;
   
+  /// Calculates and returns the momentum of the track at the inner most node 
+  double  getP() const;
+  
   /// Calculates and returns the transverse momentum of the track at the inner most node 
   double  getPt() const;
   
@@ -378,6 +381,15 @@ inline void StiKalmanTrack::getMomentum(double p[3], double e[6]) const
   // which may (or not) be the primary vertex. 
   // this will need to be refined...
   getInnerMostHitNode()->getMomentum(p,e);
+}
+
+/*!
+   Calculates and returns the momentum of the track at the inner most node 
+   held by this track which may or (or not) be the primary vertex. 
+*/
+inline double  StiKalmanTrack::getP() const
+{
+  return getInnerMostHitNode()->getP();
 }
 
 /*!
