@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.1 1998/05/22 00:18:18 hardtke Exp $
+* $Id: tph.F,v 1.2 1998/07/08 02:47:55 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.2  1998/07/08 02:47:55  sakrejda
+* z errors patched up, it's neither final nor absolutely correct, but better - offset added (based on aleph)
+*
 * Revision 1.1  1998/05/22 00:18:18  hardtke
 * modified hit finder with new data format
 *
@@ -492,7 +495,7 @@ c     this should be understood and fixed, but for now....
               tphit(tphit_h.nok).dy = tphit(tphit_h.nok).dy 
      +             * tclpar(1).dxy_fact
               tphit(tphit_h.nok).dz = tphit(tphit_h.nok).dz 
-     +             * tclpar(1).dz_fact
+     +             * tclpar(1).dz_fact+0.07
               
               
 c     also put q (magnitude of hit) into units of energy loss
