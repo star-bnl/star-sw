@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.14 2001/10/29 12:53:23 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.15 2001/11/21 12:44:44 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.15  2001/11/21 12:44:44  jcs
+// make ftpcGas database table available to FTPC cluster maker
+//
 // Revision 1.14  2001/10/29 12:53:23  jcs
 // select FTPC drift maps according to flavor of magnetic field
 //
@@ -76,12 +79,13 @@ class St_ftpcAmpSlope;
 class St_ftpcAmpOffset;
 class St_ftpcTimeOffset;
 class St_ftpcDriftField;
+class St_ftpcGas;
 class St_ftpcElectronics;
 
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.14 2001/10/29 12:53:23 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.15 2001/11/21 12:44:44 jcs Exp $";
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
    St_ftpcFastSimPars   *m_fastsimpars;           //!
@@ -96,6 +100,7 @@ class StFtpcClusterMaker : public StMaker {
    St_ftpcAmpOffset     *m_ampoffset;             //!
    St_ftpcTimeOffset    *m_timeoffset;            //!
    St_ftpcDriftField    *m_driftfield;            //!
+   St_ftpcGas           *m_gas;                   //!
    St_ftpcElectronics   *m_electronics;           //!
    void             MakeHistograms();// Histograms for FTPC cluster finder
  
@@ -119,7 +124,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.14 2001/10/29 12:53:23 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.15 2001/11/21 12:44:44 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
