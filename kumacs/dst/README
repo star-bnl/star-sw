@@ -11,12 +11,14 @@
 * 
 * 1. call_bfc_read_dst.kumac 
 *    - read in dst 
-*
-* 2. call_bfc_read_dst_user.kumac
+
+* 2. call_bfc_read_dst_check.kumac
 *    - read in dst 
-*    - execute dummy user package
-*    - write out ntuple
-*    - write out full event tables 
+*    - execute dchkt package which writes out log file with summary info
+*    - write out ntuple of event_summary table
+*   then use analyse_event_summary.kumac to 
+*     - read in ntuple
+*     - make plots
 *
 * 3. call_bfc_read_dst_ebye.kumac
 *    - read in dst
@@ -38,4 +40,14 @@
 *    - write out ntuple
 *    - write out full event tables 
 * 
+* 6. call_bfc_read_dst_user.kumac
+*    - read in dst 
+*    - execute dummy user package
+*    - write out ntuple
+*    - write out full event tables 
+*
 ************************************************************************
+
+
+
+
