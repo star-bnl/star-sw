@@ -121,9 +121,9 @@ macro/global/import *
 
   cd [data]/tpc/hits
   
-    tdm/newtable tphit     tcl_tphit     500000
-    tdm/newtable tphitau   tcl_tphit_aux 500000
-    tdm/newtable index     tcl_tpc_index 500000
+    tdm/newtable tphit     tcl_tphit     600000
+    tdm/newtable tphitau   tcl_tphit_aux 600000
+    tdm/newtable index     tcl_tpc_index 600000
     tdm/newtable tpcluster tcl_tpcluster 400000
     tdm/newtable tpseq     tcl_tp_seq    2000000
     
@@ -172,7 +172,7 @@ macro/global/import *
 
   cd [data]/tpc/hits
 
-  tdm/newtable tphit     tcl_tphit     400000
+  tdm/newtable tphit     tcl_tphit     600000
   tdm/newtable index     tcl_tpc_index 700000
 
   cd /dui
@@ -187,7 +187,7 @@ macro/global/import *
   
   cd [data]/tpc/tracks
 
-  tdm/newtable tptrack   tpt_track 20000
+  tdm/newtable tptrack   tpt_track 30000
 
   cd /dui
 
