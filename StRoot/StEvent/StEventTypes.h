@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.18 2001/11/10 23:53:23 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.19 2001/12/01 15:42:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.19  2001/12/01 15:42:26  ullrich
+ * Added StDetectorState.h
+ *
  * Revision 2.18  2001/11/10 23:53:23  ullrich
  * Added calibration vertices.
  *
@@ -73,6 +76,7 @@
 #include "StCtbSoftwareMonitor.h"
 #include "StCtbTriggerDetector.h"
 #include "StDedxPidTraits.h"
+#include "StDetectorState.h"
 #include "StEmcCluster.h"
 #include "StEmcClusterCollection.h"
 #include "StEmcCollection.h"
