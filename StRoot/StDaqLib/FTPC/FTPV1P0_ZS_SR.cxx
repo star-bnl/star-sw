@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.1 2000/01/18 18:01:19 levine Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.2 2000/01/19 20:31:25 levine Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -10,13 +10,17 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.2  2000/01/19 20:31:25  levine
+ * changed exit() to return -1 in
+ * FTPV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,Sequence **SeqData)
+ *
  * Revision 1.1  2000/01/18 18:01:19  levine
  * Hummler's implementaiton of FTPC reader. Note that method
  *
  * FTPV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,
  * 				   Sequence **SeqData)
  *
- * causes exit() since the required #include file has not yet been
+ * causes return -1 since the required #include file has not yet been
  * (correctly) implemented.
  *
  *
@@ -238,7 +242,7 @@ int FTPV1P0_ZS_SR::getFeeSequences(int Fee, int Pin, int *nSeq,
   return 0;
 #else
   printf("There is no table of FEE connections --- I quit\n");
-  exit(0);
+  return -1;
 #endif
 }
  
