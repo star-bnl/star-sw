@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.38 2001/11/02 22:10:53 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.39 2001/12/11 03:11:26 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -307,7 +307,10 @@
 " -DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
         $CLIBS        =
-          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen";# -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
+          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen /opt/$SUNWS/lib/libCrun.so";
+          # Brute force required for CC WS6.0 (?). Links all others but that one
+	  # (libCrun however isa softlink unlike the others).
+          # -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
         $FLIBS = "-L/opt/$SUNWS/lib -lM77 -lF77 -lsunmath";
         $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
 
