@@ -1,7 +1,6 @@
-{
   ///////////////////////////////////////////////////////////////////////////////
   //
-  // $Id: read2pt.C,v 1.1.1.1 2000/02/05 03:15:21 jgreid Exp $
+  // $Id: read2pt.C,v 1.2 2000/08/14 22:05:20 jseger Exp $
   //
   // read2pt.C
   //
@@ -16,14 +15,20 @@
   //  Janet Seger, Creighton
   //
   // $Log: read2pt.C,v $
+  // Revision 1.2  2000/08/14 22:05:20  jseger
+  // Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
+  // multiplicity and z-vertex position.  Name of output file is no longer hard-wired.
+  //
   // Revision 1.1.1.1  2000/02/05 03:15:21  jgreid
   // Two particle correlationspace generation package
   //
   //
   ///////////////////////////////////////////////////////////////////////////////
 
-  // file name temporarily hard wired
-  TFile InFile("ebye2pt.root");
+void read2pt(const Char_t *inputfile, const Char_t *outputfile)
+{
+
+  TFile InFile(inputfile);
 
   TH2F* SPP = (TH2F*) InFile.Get("SPP");
   TH2F* SPM = (TH2F*) InFile.Get("SPM");
@@ -35,6 +40,16 @@
   TH2F* MMP = (TH2F*) InFile.Get("MMP");
   TH2F* MMM = (TH2F*) InFile.Get("MMM");
 
+  TH2F* SibppEta = (TH2F*) InFile.Get("SibppEta");
+  TH2F* SibpmEta = (TH2F*) InFile.Get("SibpmEta");
+  TH2F* SibmpEta = (TH2F*) InFile.Get("SibmpEta");
+  TH2F* SibmmEta = (TH2F*) InFile.Get("SibmmEta");
+
+  TH2F* MixppEta = (TH2F*) InFile.Get("MixppEta");
+  TH2F* MixpmEta = (TH2F*) InFile.Get("MixpmEta");
+  TH2F* MixmpEta = (TH2F*) InFile.Get("MixmpEta");
+  TH2F* MixmmEta = (TH2F*) InFile.Get("MixmmEta");
+
   float SPPnorm = SPP->GetSum();
   float SMMnorm = SMM->GetSum();
   float SPMnorm = SPM->GetSum();
@@ -45,22 +60,49 @@
   float MPMnorm = MPM->GetSum();
   float MMPnorm = MMP->GetSum();
 
+  float sppEtanorm = SibppEta->GetSum();
+  float spmEtanorm = SibpmEta->GetSum();
+  float smpEtanorm = SibmpEta->GetSum();
+  float smmEtanorm = SibmmEta->GetSum();
+
+  float mppEtanorm = MixppEta->GetSum();
+  float mpmEtanorm = MixpmEta->GetSum();
+  float mmpEtanorm = MixmpEta->GetSum();
+  float mmmEtanorm = MixmmEta->GetSum();
+
   TH2F RatioPP = ((*SPP)/(*MPP))*(MPPnorm/SPPnorm);
   TH2F RatioMM = ((*SMM)/(*MMM))*(MMMnorm/SMMnorm);
   TH2F RatioPM = ((*SPM)/(*MPM))*(MPMnorm/SPMnorm);
   TH2F RatioMP = ((*SMP)/(*MMP))*(MMPnorm/SMPnorm);
   TH2F RatioAll = (((*SPP)+(*SMM)+(*SPM)+(*SMP))/((*MPP)+(*MMM)+(*MPM)+(*MMP)))*((MPPnorm+MMMnorm+MPMnorm+MMPnorm)/(SPPnorm+SMMnorm+SPMnorm+SMPnorm));
 
+  TH2F RatioPPeta = ((*SibppEta)/(*MixppEta))*(mppEtanorm/sppEtanorm);
+  TH2F RatioMMeta = ((*SibmmEta)/(*MixmmEta))*(mmmEtanorm/smmEtanorm);
+  TH2F RatioPMeta = ((*SibpmEta)/(*MixpmEta))*(mpmEtanorm/spmEtanorm);
+  TH2F RatioMPeta = ((*SibmpEta)/(*MixmpEta))*(mmpEtanorm/smpEtanorm);
+  TH2F RatioAlleta = (((*SibppEta)+(*SibmmEta)+(*SibpmEta)+(*SibmpEta))/((*MixppEta)+(*MixmmEta)+(*MixpmEta)+(*MixmpEta)))*((mppEtanorm+mmmEtanorm+mpmEtanorm+mmpEtanorm)/(sppEtanorm+smmEtanorm+spmEtanorm+smpEtanorm));
+
   RatioPP->SetName("Ratio PP");
-  RatioPP->SetTitle("+.+");
+  RatioPP->SetTitle("Pt +.+");
   RatioMM->SetName("Ratio MM");
-  RatioMM->SetTitle("-.-");
+  RatioMM->SetTitle("Pt -.-");
   RatioPM->SetName("Ratio PM");
-  RatioPM->SetTitle("+.-");
+  RatioPM->SetTitle("Pt +.-");
   RatioMP->SetName("Ratio MP");
-  RatioMP->SetTitle("-.+");
+  RatioMP->SetTitle("Pt -.+");
   RatioAll->SetName("Ratio All");
-  RatioAll->SetTitle("all");
+  RatioAll->SetTitle("Pt all");
+
+  RatioPPeta->SetName("Eta Ratio PP");
+  RatioPPeta->SetTitle("Eta +.+");
+  RatioMMeta->SetName("Eta Ratio MM");
+  RatioMMeta->SetTitle("Eta -.-");
+  RatioPMeta->SetName("Eta Ratio PM");
+  RatioPMeta->SetTitle("Eta +.-");
+  RatioMPeta->SetName("Eta Ratio MP");
+  RatioMPeta->SetTitle("Eta -.+");
+  RatioAlleta->SetName("Eta Ratio All");
+  RatioAlleta->SetTitle("Eta all");
 
   Float_t histMin = 0.9;
   Float_t histMax = 1.1;
@@ -76,9 +118,23 @@
   RatioAll.SetMinimum(histMin);
   RatioAll.SetMaximum(histMax);
 
+  Float_t histMinEta = 0.9;
+  Float_t histMaxEta = 1.1;
+
+  RatioPPeta.SetMinimum(histMinEta);
+  RatioPPeta.SetMaximum(histMaxEta);
+  RatioMMeta.SetMinimum(histMinEta);
+  RatioMMeta.SetMaximum(histMaxEta);
+  RatioPMeta.SetMinimum(histMinEta);
+  RatioPMeta.SetMaximum(histMaxEta);
+  RatioMPeta.SetMinimum(histMinEta);
+  RatioMPeta.SetMaximum(histMaxEta);
+  RatioAlleta.SetMinimum(histMinEta);
+  RatioAlleta.SetMaximum(histMaxEta);
+
   // Create new canvas
   const Int_t colSection = 10;
-  Int_t colNum = 4*colSection;
+  const Int_t colNum = 4*colSection;
 
   const Int_t colStart = 51;
 
@@ -112,18 +168,35 @@
   gStyle->SetPalette(colNum,palette);
   gStyle->SetOptStat(0); 
 
+  // open a postscript file and draw the histograms
+  TPostScript *psf = new TPostScript(outputfile,112);
+
   TCanvas *TwoPt = new TCanvas("TwoPt","TwoPt",700,500);
   TwoPt->Divide(2,2);
 
+  psf->NewPage();
   TwoPt->cd(1);
   RatioPP->Draw("colz");
   TwoPt->cd(2);
   RatioMM->Draw("colz");
   TwoPt->cd(3);
   RatioPM->Draw("colz");
-  //TwoPt->cd(4);
-  //RatioMP->Draw("colz");
   TwoPt->cd(4);
   RatioAll->Draw("colz");
+  TwoPt->Update();
+
+  psf->NewPage();
+  TwoPt->cd(1);
+  RatioPPeta->Draw("colz");
+  TwoPt->cd(2);
+  RatioMMeta->Draw("colz");
+  TwoPt->cd(3);
+  RatioPMeta->Draw("colz");
+  TwoPt->cd(4);
+  RatioAlleta->Draw("colz");
+  TwoPt->Update();
+
+// Save the postscript file
+  psf->Close();
 
 }
