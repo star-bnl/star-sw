@@ -1,5 +1,8 @@
-* $Id: tde.F,v 1.2 1999/08/18 20:46:39 fisyak Exp $
+* $Id: tde.F,v 1.3 1999/10/01 16:35:54 margetis Exp $
 * $Log: tde.F,v $
+* Revision 1.3  1999/10/01 16:35:54  margetis
+* updated tid, put method instead of iflag
+*
 * Revision 1.2  1999/08/18 20:46:39  fisyak
 * replace ran by rmdn
 *
@@ -571,7 +574,7 @@ c fill tpcdedx table
          tpcdedx(k).dedx(1) = track(j).dedx(1)
          tpcdedx(k).dedx(2) = track(j).dedx(2)
          tpcdedx(k).id_track = track(j).id
-         tpcdedx(k).iflag = tdpar(1).averaging_method 
+         tpcdedx(k).method = tdpar(1).averaging_method 
   
        end do 
 c      if (tdpar(1).averaging_method.eq.2) then
