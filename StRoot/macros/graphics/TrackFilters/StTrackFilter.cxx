@@ -72,8 +72,8 @@ Int_t StTrackFilter::SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Width_t &si
     for (int i =0; i <m_LTrackP; i++) {
       if (hit[rowNumber].track_p !=  m_Track_P[i]) continue;
       printf("hit %d %ld \n", rowNumber, hit[rowNumber].track_p); 
-      style = 6;
-      size = 4;
+      style = 4;
+      size = 1;
       return kBlue; 
     }
   }
@@ -83,8 +83,8 @@ Int_t StTrackFilter::SubChannel(St_g2t_svt_hit &hit, Int_t rowNumber,Width_t &si
 Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Width_t &size,Style_t &style)
 {
  Int_t color = 0;
- style = 6;
- size  = 4;
+ style = 4;
+ size  = 1;
  long track_p = hit[rowNumber].track_p; //  Id of parent track 
  if (m_G2t_track) {
 
@@ -100,34 +100,31 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Width_t &si
 
      while ( (indxRow = nextTrack()) >= 0 ) {
        if (track_p != track[indxRow].id) continue;
-//  			printf(" - %x track[indxRow].stop_vertex_p =%d\n",m_G2t_vertex,track[indxRow].stop_vertex_p);
+
        if (m_G2t_vertex && track[indxRow].stop_vertex_p) {
           St_TableIter nextVertex(m_G2t_vertex,track[indxRow].stop_vertex_p);
-// 			printf(" - total vertex = %d first_vertex = %d\n",total_vertex, first_vertex);
+
           if (nextVertex.GetNRows() > 0) {
              St_g2t_vertex &vertex = *((St_g2t_vertex*)m_G2t_vertex->GetTable());
              while ( (indxRow = nextVertex() ) >=0 ) {
                Float_t *x = &(vertex[indxRow].ge_x[0]);
                Float_t dist = x[0]*x[0]+x[1]*x[1];
                Bool_t condition = dist > 133*133 && dist < 179*179; 
-//  			printf(" ge_proc=%d dist=%f total_vertex=%d\n", vertex[indxRow].ge_proc,dist,total_vertex);
+
                 if ((vertex[indxRow].ge_proc == 5) && condition ) 
                         return color%8+1;                             
              }
  	   }
          }
-         // printf("get_track i=%d track_p=%d  id=%d  ge_pid=%d\n",
-         //     i, hit[rowNumber].track_p, track[indxRow].id, track[indxRow].ge_pid);
-         return 0; // kBlue;     
+
+         return 0;      
        }
     }
-  }
+ }
   if ( m_LTrackP)  { 
     for (int i =0; i <m_LTrackP; i++) {
       if ( track_p !=  m_Track_P[i])  continue;
       printf("hit %d %ld  \n", rowNumber, track_p); 
-      style = 29;
-      size  = 1;
       return kBlue; 
     }
   }
@@ -138,7 +135,7 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Width_t &si
 Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Width_t &size,Style_t &style)
 {
  Int_t rowNumber = tableObject->GetIndex(UInt_t(index));
- // cout << "class name: " << tableObject->GetTable()->GetName() << endl;
+
  Color_t color = -1;
  TString mStr = tableObject->GetTable()->GetName();
 
