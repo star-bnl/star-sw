@@ -1,566 +1,257 @@
-**:Copyright 1995, Lawrence Berkeley National Laboratory
-**:>--------------------------------------------------------------------
-**:FILE:        tdm_def.cdf
-**:DESCRIPTION: Table & Dataset Memory Command Definition File 
-**:HISTORY:	30apr96-v100a-cet- Beta Release Version
-**:HISTORY:     26apr96-v003a-cet- Add many new commands
-**:HISTORY:     29nov95-v001a-cet- Update
-**:HISTORY:     18arp95-v000a-cet- Creation
-**:<--------------------------------------------------------------------
-
 >NAME TDM_DEF
-
-************************************************************************
-************************************************************************
-** TDM
 >MENU TDM
 >GUIDANCE
-Table & Dataset Memory commands.
-$Id: tdm_def.cdf,v 1.4 1997/05/10 21:44:29 tull Exp $
-.
-Commands for the Table & Dataset Memory (TDM) ASP.
-.
-The TDM package is a C++ classs library implementation of the DSL
-Package for memory-resident datasets and tables.
-.
-TDM is responsible for memory allocation and management for DSL
-datasets and tables, and management of the data tictionary of table
-types.
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/ALLOCSTATS
->COMMAND ALLOCSTATS
->PARAMETERS
->GUIDANCE
-Show DSL allocation statistics.
-.
-Show the statistics for membory allocation and deallocation of DSL
-tables and datasets.
-.
->ACTION KAM_TDM_ALLOCSTATS
-
-** ---------------------------------------------------------------------
-** TDM/COUNT
+**************************************************************** /TDM/COUNT
 >COMMAND COUNT
 >PARAMETERS
 >GUIDANCE
-Show count of known TDM objects.
-.
-Show the number of dataset and table objects currently instantiated and
-managed by the TDM object factory.
-.
 >ACTION KAM_TDM_COUNT
-
-** ---------------------------------------------------------------------
-** TDM/LIST
+***************************************************************** /TDM/LIST
 >COMMAND LIST
 >PARAMETERS
 >GUIDANCE
-List all known TDM objects.
-.
-List all dataset and table objects currently instantiated and
-managed by the TDM object factory.
-.
 >ACTION KAM_TDM_LIST
-
-** ---------------------------------------------------------------------
-** TDM/NEWDATASET NAME [ SETDIM ]
->COMMAND NEWDATASET
->PARAMETERS
-NAME 'tdmDataset name.' C
-+
-DIM 'dataset dimension.' I D=100
->GUIDANCE
-Create a new tdmDataset.
-.
-Create a new dataset unencapsulated by any other dataset.
-.
->ACTION KAM_TDM_NEWDATASET
-
-** ---------------------------------------------------------------------
-** TDM/NEWTABLE NAME [ SPEC ROWCOUNT ]
+************************************************************* /TDM/NEWTABLE
 >COMMAND NEWTABLE
 >PARAMETERS
-NAME 'tdmTable name.' C
-SPEC 'Type specifier for a table row.' C
-ROWCOUNT 'Number of rows in the table.' I R='0:'
+ALIAS '' C
+SPEC '' C
+ROWS '' I
 >GUIDANCE
-Create a new tdmTable.
-.
-     NAME -- Case-sensitive alphanumeric name for table to create.
-	     EG.: fred, Table001, tpc_calib
-.
-     SPEC -- IDL specification string or table type name for new table.
-	     EG.: 'struct point {double x,y,z;};', point
-.
- ROWCOUNT -- Initial number of rows to allocate for new table. (0 >=1)
-.
 >ACTION KAM_TDM_NEWTABLE
-
-************************************************************************
-************************************************************************
-** TDM/TYPESPECIFIERS
->MENU TYPESPECIFIERS
->GUIDANCE
-dsl type specifier commands.
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/TYPESPECIFIERS/LIST [ NTYPE ]
->COMMAND LIST
+*********************************************************** /TDM/NEWDATASET
+>COMMAND NEWDATASET
 >PARAMETERS
-+
-NTYPE 'Table type id.' I D='-1'
+ALIAS '' C
+SETDIM '' I
 >GUIDANCE
-List one or all table type names.
-.
->ACTION KAM_TDM_TYPE_LIST
-
-** ---------------------------------------------------------------------
-** TDM/TYPESPECIFIERS/SHOW [ TYPENAME OPTION ]
->COMMAND SHOW
+>ACTION KAM_TDM_NEWDATASET
+***************************************************************************
+>MENU OBJECT
+>GUIDANCE
+******************************************************* /TDM/OBJECT/DSLNAME
+>COMMAND DSLNAME
 >PARAMETERS
-+
-TYPENAME 'Table type name.' C D='*'
-OPTION 'Options' C D=' ' R=' '
 >GUIDANCE
-Show table type names.
-.
-Possible OPTION values are:
-   ' '   Show everything.
-.
->ACTION KAM_TDM_TYPE_SHOW
-
-** ---------------------------------------------------------------------
-** TDM/TYPESPECIFIERS/LOAD [ IDL_FILE ]
->COMMAND LOAD
+>ACTION
+***************************************************** /TDM/OBJECT/ISDATASET
+>COMMAND ISDATASET
 >PARAMETERS
-+
-IDL_FILE 'IDL file containing table specificaiont.' C D='-'
 >GUIDANCE
-Load table definitions from IDL files.
-.
->ACTION KAM_TDM_TYPE_LOAD
-
-************************************************************************
-************************************************************************
-** TDM/TABLE
+>ACTION
+******************************************************* /TDM/OBJECT/ISTABLE
+>COMMAND ISTABLE
+>PARAMETERS
+>GUIDANCE
+>ACTION
+***************************************************************************
 >MENU \TABLE
 >GUIDANCE
-tdmTable commands.
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/NAME TDMTABLE
->COMMAND NAME
+********************************************************* /TDM/TABLE/ISTYPE
+>COMMAND ISTYPE
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
+ATYPE '' C
 >GUIDANCE
-Show the DSL name of a tdmTable Object.
-.
->ACTION KAM_TDMTABLE_NAME
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/ROWCOUNT TDMTABLE [ROWCOUNT]
->COMMAND ROWCOUNT
+>ACTION
+****************************************************** /TDM/TABLE/PRINTROWS
+>COMMAND PRINTROWS
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
-+
-ROWCOUNT 'Number of rows filled' I D=-1
+IFIRST '' I
+NROWS '' I
 >GUIDANCE
-Show or change the number of rows filled.
-.
->ACTION KAM_TDMTABLE_ROWCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/MAXROWCOUNT TDMTABLE [MAXROWCOUNT]
->COMMAND MAXROWCOUNT
+>ACTION
+*********************************************************** /TDM/TABLE/SHOW
+>COMMAND SHOW
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
-+
-MAXROWCOUNT 'Number of rows allocated' I D=-1
 >GUIDANCE
-Show or change the number of rows allocated.
-.
->ACTION KAM_TDMTABLE_MAXROWCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMNCOUNT TDMTABLE
+>ACTION
+***************************************************** /TDM/TABLE/FINDCOLUMN
+>COMMAND FINDCOLUMN
+>PARAMETERS
+NAME '' C
+COLUMN '' X
+>GUIDANCE
+>ACTION
+****************************************************** /TDM/TABLE/GETCOLUMN
+>COMMAND GETCOLUMN
+>PARAMETERS
+NCOL '' I
+COLUMN '' X
+>GUIDANCE
+>ACTION
+*************************************************** /TDM/TABLE/COLUMNNUMBER
+>COMMAND COLUMNNUMBER
+>PARAMETERS
+NAME '' C
+>GUIDANCE
+>ACTION
+***************************************************** /TDM/TABLE/COLUMNNAME
+>COMMAND COLUMNNAME
+>PARAMETERS
+NCOL '' I
+>GUIDANCE
+>ACTION
+************************************************* /TDM/TABLE/COLUMNTYPECODE
+>COMMAND COLUMNTYPECODE
+>PARAMETERS
+NCOL '' I
+>GUIDANCE
+>ACTION
+***************************************************** /TDM/TABLE/COLUMNSIZE
+>COMMAND COLUMNSIZE
+>PARAMETERS
+NCOL '' I
+>GUIDANCE
+>ACTION
+***************************************************** /TDM/TABLE/COLUMNRANK
+>COMMAND COLUMNRANK
+>PARAMETERS
+NCOL '' I
+>GUIDANCE
+>ACTION
+**************************************************** /TDM/TABLE/COLUMNSHAPE
+>COMMAND COLUMNSHAPE
+>PARAMETERS
+NCOL '' I
+NDIM '' I
+>GUIDANCE
+>ACTION
+************************************************** /TDM/TABLE/COLUMNELCOUNT
+>COMMAND COLUMNELCOUNT
+>PARAMETERS
+NCOL '' I
+>GUIDANCE
+>ACTION
+************************************************* /TDM/TABLE/COLUMNTYPENAME
+>COMMAND COLUMNTYPENAME
+>PARAMETERS
+NCOL '' I
+>GUIDANCE
+>ACTION
+******************************************************** /TDM/TABLE/GETDATA
+>COMMAND GETDATA
+>PARAMETERS
+DATA '' X
+>GUIDANCE
+>ACTION
+******************************************************** /TDM/TABLE/PUTDATA
+>COMMAND PUTDATA
+>PARAMETERS
+DATA '' X
+>GUIDANCE
+>ACTION
+******************************************************** /TDM/TABLE/GETCELL
+>COMMAND GETCELL
+>PARAMETERS
+DATA '' X
+NROW '' I
+NCOL '' I
+>GUIDANCE
+>ACTION
+******************************************************** /TDM/TABLE/PUTCELL
+>COMMAND PUTCELL
+>PARAMETERS
+DATA '' X
+NROW '' I
+NCOL '' I
+>GUIDANCE
+>ACTION
+**************************************************** /TDM/TABLE/COLUMNCOUNT
 >COMMAND COLUMNCOUNT
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
 >GUIDANCE
-Show the number of columns.
-.
->ACTION KAM_TDMTABLE_COLCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/TYPENAME TDMTABLE
->COMMAND TYPENAME
+>ACTION
+**************************************************** /TDM/TABLE/MAXROWCOUNT
+>COMMAND MAXROWCOUNT
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
++
+MAXROWCOUNT '???' I
 >GUIDANCE
-Show the tdmTable type.
-.
->ACTION KAM_TDMTABLE_TYPENAME
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/SPECIFIER TDMTABLE
->COMMAND SPECIFIER
+>ACTION
+******************************************************* /TDM/TABLE/ROWCOUNT
+>COMMAND ROWCOUNT
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
++
+ROWCOUNT '???' I
 >GUIDANCE
-Show the tdmTable specification.
-.
->ACTION KAM_TDMTABLE_SPECIFIER
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/ROWSIZE TDMTABLE
+>ACTION
+******************************************************** /TDM/TABLE/ROWSIZE
 >COMMAND ROWSIZE
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
 >GUIDANCE
-Show the tdmTable row size.
-.
->ACTION KAM_TDMTABLE_ROWSIZE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/PRINT TDMTABLE [ NROWS IFIRST FILE ]
->COMMAND PRINT
+>ACTION
+******************************************************* /TDM/TABLE/TYPENAME
+>COMMAND TYPENAME
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
-+
-NROWS 'Number of rows.' I D=10
-IFIRST 'First row.' I D=0
-FILE 'name of ASCII file.' C D='-'
 >GUIDANCE
-Print the contents of a tdmTable to stdout or a file.
-.
-   FILE = "-" :: Print output to standard out.
-.
- ************************
- * Still In Development *
- ************************
-.
->ACTION KAM_TDMTABLE_PRINT
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/SHOW TDMTABLE [ OPTION ]
->COMMAND SHOW
+>ACTION
+************************************************** /TDM/TABLE/TYPESPECIFIER
+>COMMAND TYPESPECIFIER
 >PARAMETERS
-TDMTABLE 'tdmTable name.' C
-+
-OPTION 'Options.' C D=' ' R=' '
 >GUIDANCE
-Show the definition of a tdmTable.
-.
-Possible OPTION values are:
-   ' '    Show everything.
-.
- ************************
- * Still In Development *
- ************************
-.
->ACTION KAM_TDMTABLE_SHOW
-
-************************************************************************
-************************************************************************
-** TDM/TABLE/CELL
->MENU CELL
+>ACTION
+***************************************************************************
+>MENU \DATASET
 >GUIDANCE
-tdmTable cell commands.
-.
- ************************
- * Still In Development *
- ************************
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/CELL/GETVALUE CELLNAME
->COMMAND GETVALUE
->PARAMETERS
-CELLNAME 'tdmTable cell name.' C
->GUIDANCE
-Print the contents of a tdmTable cell.
-.
- ************************
- * Still In Development *
- ************************
-.
->ACTION KAM_TDMTABLE_CELL_GETVALUE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/CELL/PUTVALUE CELLNAME VALUES
->COMMAND PUTVALUE
->PARAMETERS
-CELLNAME 'tdmTable cell name.' C
-VALUES 'list of values.' C
->GUIDANCE
-Change the contents of a tdmTable cell.
-.
- ************************
- * Still In Development *
- ************************
-.
->ACTION KAM_TDMTABLE_CELL_PUTVALUE
-
-************************************************************************
-************************************************************************
-** TDM/TABLE/COLUMN
->MENU \COLUMN
->GUIDANCE
-tdmTable column commands.
-.
- ************************
- * Not yet Implemented  *
- ************************
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/FIND COLUMNAME
->COMMAND FIND
->PARAMETERS
-COLUMNAME 'tdmTable.column name.' C
->GUIDANCE
-Find the column number of a named column.
-.
-See STAF/SYNTAX for syntax of column names.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_FIND
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/NAME [ NCOL ]
->COMMAND NAME
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the name of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_NAME
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/TYPE [ NCOL ]
->COMMAND TYPE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the type name of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_TYPE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/CODE [ NCOL ]
->COMMAND CODE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the type code of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_CODE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/RANK [ NCOL ]
->COMMAND RANK
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the rank of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_RANK
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/SHAPE [ NCOL ]
->COMMAND SHAPE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the shape of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_SHAPE
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/ELCOUNT [ NCOL ]
->COMMAND ELCOUNT
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the element count of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_ELCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/TABLE/COLUMN/SIZE [ NCOL ]
->COMMAND SIZE
->PARAMETERS
-NCOL 'tdmTable.number.' C
->GUIDANCE
-Show the size in bytes of a tdmTable column.
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_TDMTABLE_COLUMN_SIZE
-
-
-************************************************************************
-************************************************************************
-** TDM/DATASET
->MENU \\DATASET
->GUIDANCE
-tdmDataset commands.
-.
-************************************************************************
-************************************************************************
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/NAME TDMDATASET
->COMMAND NAME
->PARAMETERS
-TDMDATASET 'tdmDataset name.' C
->GUIDANCE
-Show the DSL name of a tdmDataset Object.
-.
->ACTION KAM_TDMDATASET_NAME
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ENTRYCOUNT TDMDATASET
->COMMAND ENTRYCOUNT
->PARAMETERS
-TDMDATASET 'tdmDataset name.' C
->GUIDANCE
-Show the number of entries in a tdmDataset Object.
-.
->ACTION KAM_TDMDATASET_ENTRYCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/MAXENTRYCOUNT TDMDATASET
-**OLD_DSL >COMMAND MAXENTRYCOUNT
-**OLD_DSL >PARAMETERS
-**OLD_DSL TDMDATASET 'tdmDataset name.' C
-**OLD_DSL >GUIDANCE
-**OLD_DSL Show the maximum allowable number of entries in a tdmDataset
-**OLD_DSL Object.
-**OLD_DSL .
-**OLD_DSL >ACTION KAM_TDMDATASET_MAXENTRYCOUNT
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ADDDATASET TDMDATASET NAME [ DIM ]
+*************************************************** /TDM/DATASET/ADDDATASET
 >COMMAND ADDDATASET
 >PARAMETERS
-TDMDATASET 'tdmDataset name.' C
-NAME 'tdmTable name.' C
-+
-DIM 'New dataset dimension.' I D=100
+NAME '' C
+SETDIM '' I
 >GUIDANCE
-Add a tdmDataset to a tdmDataset.
-.
- ************************
- * Not yet Implemented  *
- ************************
-.
->ACTION KAM_TDMDATASET_ADDDATASET
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ADDTABLE TDMDATASET NAME SPEC ROWCOUNT
+>ACTION
+***************************************************** /TDM/DATASET/ADDTABLE
 >COMMAND ADDTABLE
 >PARAMETERS
-TDMDATASET 'tdmDataset name.' C
-NAME 'tdmTable name.' C
-SPEC 'Type specifier for a table row.' C
-ROWCOUNT 'Number of rows in the table.' I
+NAME '' C
+SPEC '' C
+ROWS '' I
 >GUIDANCE
-Add a tdmTable to a tdmDataset.
-.
- ************************
- * Not yet Implemented  *
- ************************
-.
->ACTION KAM_TDMDATASET_ADDTABLE
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/SHOW TDMDATASET [ OPTION ]
->COMMAND SHOW
+>ACTION
+************************************************* /TDM/DATASET/GETENTRYTYPE
+>COMMAND GETENTRYTYPE
 >PARAMETERS
-TDMDATASET 'tdmDataset name.' C
-+
-OPTION 'Options' C D=' ' R=' '
+TYPE '' C
+NUM '' I
 >GUIDANCE
-Show the hierarchy of a tdmDataset.
-.
-Possible OPTION values are:
-   ' '   Show everything.
-.
- ************************
- * Not yet Implemented  *
- ************************
-.
->ACTION KAM_TDMDATASET_SHOW
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/ENTRYNAME NENTRY
->COMMAND ENTRYNAME
+>ACTION
+********************************************** /TDM/DATASET/GETDATASETENTRY
+>COMMAND GETDATASETENTRY
 >PARAMETERS
-NENTRY 'tdmDataset.entryNumber.' C
+DATASET '' X
+NUM '' I
 >GUIDANCE
-Show the name of a numbered tdmDataset entry.
-.
- ************************
- * Not yet Implemented  *
- ************************
-.
->ACTION KAM_TDMDATASET_ENTRYNAME
-
-** ---------------------------------------------------------------------
-** TDM/DATASET/FINDENTRY ENTRYNAME
->COMMAND FINDENTRY
+>ACTION
+************************************************ /TDM/DATASET/GETTABLEENTRY
+>COMMAND GETTABLEENTRY
 >PARAMETERS
-ENTRYNAME 'tdmDataset.entryName.' C
+TABLE '' X
+NUM '' I
 >GUIDANCE
-Find and show entry number of named tdmDataset entry.
-.
- ************************
- * Not yet Implemented  *
- ************************
-.
->ACTION KAM_TDMDATASET_FINDENTRY
-
+>ACTION
+********************************************* /TDM/DATASET/FINDDATASETENTRY
+>COMMAND FINDDATASETENTRY
+>PARAMETERS
+DATASET '' X
+NAME '' C
+>GUIDANCE
+>ACTION
+*********************************************** /TDM/DATASET/FINDTABLEENTRY
+>COMMAND FINDTABLEENTRY
+>PARAMETERS
+TABLE '' X
+NAME '' C
+>GUIDANCE
+>ACTION
+************************************************ /TDM/DATASET/GETDESCRIPTOR
+>COMMAND GETDESCRIPTOR
+>PARAMETERS
+DESCRIPTOR '' C
+>GUIDANCE
+>ACTION
+*************************************************** /TDM/DATASET/ENTRYCOUNT
+>COMMAND ENTRYCOUNT
+>PARAMETERS
+>GUIDANCE
+>ACTION
+***************************************************************************

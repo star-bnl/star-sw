@@ -5,3 +5,6 @@
 mytarget:
 	@echo "Put any special make targets in this file."
 #
+##LD := c++
+##LDFLAGS += -bloadmap -bnoquiet
+#

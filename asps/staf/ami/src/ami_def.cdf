@@ -15,12 +15,9 @@
 ** AMI
 >MENU AMI
 >Guidance
-Analysis Module Interface commands.
+User interface commands for the Analysis Module Invoker ASP.
 .
-VERSION v1.00a (30apr96).
-.
-Commands for the Analysis Module Interface ASP.
-.
+ #(@)$Id: ami_def.cdf,v 1.2 1997/08/18 22:33:56 tull Exp $
 ************************************************************************
 ************************************************************************
 
@@ -29,8 +26,28 @@ Commands for the Analysis Module Interface ASP.
 >COMMAND COUNT
 >PARAMETERS
 >GUIDANCE
-Show count of known AMI objects.
+Show the current count of AMI worker objects.
 .
+DESCRIPTION: 
+COUNT is a readonly long attribute which reflects the number of AMI
+worker objects currently instantiated by the AMI object factory.
+Constructing a new ami worker object adds 1 to COUNT, destructing an
+existing ami worker object subtracts 1 from COUNT.
+.
+Ami worker objects include:
+   amiModule - See AMI/MODULE.
+.
+ARGUMENTS: 
+   None.
+.
+EXAMPLE: 
+.
+EXCEPTIONS: 
+.
+BUGS: 
+   None known.
+.
+SEE ALSO: 
 >ACTION KAM_AMI_COUNT
 
 ** ---------------------------------------------------------------------
@@ -38,35 +55,68 @@ Show count of known AMI objects.
 >COMMAND LIST
 >PARAMETERS
 >GUIDANCE
-List all AMI objects.
+List all currently instantiated AMI worker objects.
 .
+DESCRIPTION: 
+Show a one-line description for each AMI worker object currently
+instantiated by the AMI object factory.
+.
+ARGUMENTS: 
+   None.
+.
+EXAMPLE: 
+.
+EXCEPTIONS: 
+.
+BUGS: 
+   None known.
+.
+SEE ALSO: 
 >ACTION KAM_AMI_LIST
 
 ** ---------------------------------------------------------------------
-** AMI/CALL PAM [TABLES]
+** AMI/CALL SOREF [TABLES]
 >COMMAND CALL
 >PARAMETERS
-PAM 'Physics Analysis Module.' C
+SOREF 'Stringified Object REFerence.' C
 +
 TABLES 'Argument table list.' C D='-'
 >GUIDANCE
-Call a Physics Analysis Module.
+Invoke a Physics Analysis Module on data tables.
 .
-Non-existant output tables can be created with a user-specified memory
+DESCRIPTION: 
+Invoke a Physics Analysis Module on pre-existing and/or non-existant 
+data tables. IN and INOUT tables must exist before being passed to the
+Physics Analysis Module. OUT tables can, but need not, exist before
+being passed to the Physics Analysis Module. Non-existant OUT tables
+will be created at invokation of the Physics Analysis Module.
+.
+Non-existant OUT tables can be created with a user-specified memory
 allocation by specifying the number of rows to be allocated in
-parenthisis after the table name.
+parenthisis after the table name (The default is to allocate only one
+row's worth of memory.).
 .
-Example:
-    AMI/CALL pam tab1 tab2(4000) tab3(50)
+ARGUMENTS: 
+   SOREF - Stringified Object REFerence
+      ... of the Physics Analysis Module to invoke.
+      See help for SOC for details.
+   TABLES - Argument table list
+      A list of memory-resident data tables, by name, upon which to
+      invoke the Physics Analysis Module.
 .
-        If tab1 exists, and tab2 and tab3 are output tables, this
-	command will create tab2 with 4000 rows allocated and tab3 with
-	50 rows allocated, and then call pam on the three tables.
+EXAMPLE: 
+   AMI/CALL pam tab1 tab2(4000) tab3
 .
- ************************
- * Still In Development *
- ************************
+   If tab1 exists, and tab2 and tab3 are output tables, this command
+   will create tab2 with 4000 rows allocated and tab3 with 1 row 
+   allocated, and then call pam on the three tables.
 .
+EXCEPTIONS: 
+.
+BUGS: 
+   None known.
+.
+SEE ALSO: 
 >ACTION KAM_AMI_CALL
 
 ************************************************************************
@@ -74,9 +124,7 @@ Example:
 ** AMI/MODULE
 >MENU MODULE
 >Guidance
-AMI commands for PAMs.
-.
-PAM == Physics Analysis Module.
+User interface commands for amiModule objects.
 .
 ************************************************************************
 ************************************************************************
@@ -87,7 +135,7 @@ PAM == Physics Analysis Module.
 >PARAMETERS
 SOREF 'Stringified Obect Reference.' C
 >GUIDANCE
-Show rank of Physics Analysis Module "SOREF".
+Show rank of Physics Analysis Module.
 .
 The rank of a physics analysis module is a readonly attribute of the
 amiModule class and all its derived classes. The rank of an analysis
@@ -98,32 +146,33 @@ The rank of a physics analysis module is the number of tables passed as
 arguments to the physics analysis module at invokation.
 .
 PARAMETERS:
-	SOREF - A stringified object reference (see SOC) specifying a
-	particular object of the amiModule class.
+   SOREF - Stringified Object REFerence
+   See SOC help for details.
 .
 EXAMPLE:
-	The IDL file: 
+   The IDL file: 
 .
-	#include "PAMI.h"
-	#include "point.h"
-	#include "line.h"
-	interface connect_the_dots : amiModule {
-		STAFCV_T call (
-			in point beg_pts,
-			in point end_pts,
-			out line lines
-		);
-	};
+   /* connect_the_dots.idl */
+   #include "PAM.idl"   // generic include
+   #include "point.idl" // point table type definition
+   #include "line.idl"  // line table type definition
+   interface connect_the_dots : amiModule {
+      STAFCV_T call (
+         in point beg_pts, // input table of type point
+         in point end_pts, // input table of type point
+         out line lines    // output table of type line
+      );
+   };
 .
-	... defines an interface which takes two tables of type point
-	as input and outputs one table of type line. This analysis
-	module has a rank of three (3).
+   ... defines an interface which takes two tables of type point as
+   input and outputs one table of type line. This analysis module has a
+   rank of three (i.e. It takes three tables as arguments.).
 .
 EXCEPTIONS:
-	OBJECT_NOT_FOUND - The analysis module named "PAM" is not
-	currently available in the system. Please see SOC/BIND to
-	dynamically bind the proper resources, or rebuild executable
-	with proper resources statically linked.
+   OBJECT_NOT_FOUND - The object specified by SOREF is currently
+   unavailable. Please see SOC/BIND to dynamically bind the proper
+   resources, or rebuild executable with proper resources statically
+   linked.
 .
 >ACTION KAM_AMIINVOKER_RANK
 

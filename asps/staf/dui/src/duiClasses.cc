@@ -134,10 +134,11 @@ STAFCV_T duiFactory:: cp (const char * fromPath
 }
 
 //----------------------------------
-STAFCV_T duiFactory:: ls (const char * path, char *& result) {
+char * duiFactory:: ls (const char * path) {
 
    DS_DATASET_T *pDS;
    bool_t isTable, isDataset;
+   char * result;
    char* errormessage = "*** No such DUI table or directory ***";
 
    if( !findNode_ds(path,pDS) ){
@@ -153,7 +154,8 @@ STAFCV_T duiFactory:: ls (const char * path, char *& result) {
    }
    if( isTable ) dui_ls_l_Table(pDS,result);
    if( isDataset ) dui_ls_l_Dataset(pDS,result);
-   EML_SUCCESS(STAFCV_OK);
+/*-16jul97-   EML_SUCCESS(STAFCV_OK); -*/
+   return result;
 }
 
 //----------------------------------
@@ -192,10 +194,11 @@ STAFCV_T duiFactory:: mv (const char * fromPath
 }
 
 //----------------------------------
-STAFCV_T duiFactory:: pwd (char *& result) {
-   result = (char*)MALLOC(strlen(myCwd) +1);
+char * duiFactory:: pwd () {
+   char * result = (char*)MALLOC(strlen(myCwd) +1);
    strcpy(result,myCwd);
-   EML_SUCCESS(STAFCV_OK);
+/*-16jul97-   EML_SUCCESS(STAFCV_OK); -*/
+   return result;
 }
 
 //----------------------------------

@@ -90,16 +90,18 @@ void kam_dui_ls_()
    long npars = ku_npar();      /* number of KUIP parameters */
    char*  path = ku_gets();	/* path */
 
+//EML_TRACE(DEBUG);
 	STAFCV_T status = dui_ls(path);
 }
 STAFCV_T dui_ls(char* path)
 {
    char * result = (char*)MALLOC(2048);
    strncpy(result,"",1);
-   if( !dui->ls(path, result) ){
+   if( NULL == (result = dui->ls(path)) ){
       EML_FAILURE(KAM_METHOD_FAILURE);
    }
    printf("DUI:\tListing = ...\n%s\n.\n",result);
+   FREE(result);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -165,16 +167,18 @@ void kam_dui_pwd_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
+//EML_TRACE(DEBUG);
 	STAFCV_T status = dui_pwd();
 }
 STAFCV_T dui_pwd()
 {
    char* result=NULL;
 
-   if( !dui->pwd(result) ){
+   if( NULL == (result = dui->pwd()) ){
       EML_FAILURE(KAM_METHOD_FAILURE);
    }
    printf("DUI:\tCurrent Working Directory = (%s) \n",result);
+   FREE(result);
    EML_SUCCESS(STAFCV_OK);
 }
 

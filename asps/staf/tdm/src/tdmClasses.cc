@@ -991,7 +991,8 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
    size_t l;
 
    if( !dsTypeSpecifier(&c,&l,(size_t)tid) ){
-      spec = NULL;
+/*-   spec = NULL;				14jul97 BUGFIX -*/
+      spec = (char*)MALLOC(9); strcpy(spec,"**NONE**");
       EML_ERROR(INVALID_TYPE_ID);
    }
    spec = (char*)MALLOC(l+1);
@@ -1017,6 +1018,7 @@ STAFCV_T tdmFactory:: findTypeSpecification (const char * name
       }
       FREE(nm);
    }
+   EML_ERROR(INVALID_TYPE_NAME);		/*- 14jul97 BUGFIX -*/
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
