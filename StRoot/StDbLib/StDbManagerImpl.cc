@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.6 2001/03/31 15:03:46 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.7 2001/04/18 19:33:37 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.7  2001/04/18 19:33:37  porter
+ * added dbRts enumeration for run-time systems domain
+ *
  * Revision 1.6  2001/03/31 15:03:46  porter
  * fix bug in StDbManagerImpl::getDbName accidently introduced yesterday
  * & added new diagnostic message in MysqlDb
@@ -230,6 +233,7 @@ addDbDomain(dbRich,"rich");
 addDbDomain(dbMwc,"mwc"); 
 addDbDomain(dbRhic,"rhic"); 
 addDbDomain(dbSsd,"ssd"); 
+addDbDomain(dbRts,"rts"); 
 
 }
 
