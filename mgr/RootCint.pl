@@ -43,7 +43,18 @@ for my $def  (split /\s/,$sources) {		#print "SRC:", $def, "\n";
 
   open (In, $def) or die "Can't open $def";
   $LinkDefDirName = dirname($def);
+
   while ($line = <In>) {
+#  if LinkDef.h file contains "//IncFile=aaa/bbb/ccc.h"
+#  this file included to the list of files to process(VP)
+    if (($line  =~ /^\/\/IncFile *=/))	{
+      my @words = split /(=)/, $line;
+      chomp(@words[2]);
+      $h_files .= " " . @words[2];
+      next;
+    }
+
+
     if (!($line  =~ /^\#pragma/))	{next;}
     if ($line =~ /link off all/) 	{next;}
 
@@ -248,7 +259,7 @@ for my $class (@classes) {	#loop over classes
       if ($h) { last;}
   }
   if (!$h) {
-      print STDERR "RootCint.pl :: Warning : $class.h(h) NOT FOUND\n";
+##      print STDERR "RootCint.pl :: Warning : $class.h(h) NOT FOUND\n";
       next;
   }
 
