@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAlignmentMaker.cxx,v 1.4 2003/09/02 17:59:05 perev Exp $
+ * $Id: StSvtAlignmentMaker.cxx,v 1.5 2004/07/29 14:59:36 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAlignmentMaker.cxx,v $
+ * Revision 1.5  2004/07/29 14:59:36  caines
+ * Fix Alignmentmaker with new param settings
+ *
  * Revision 1.4  2003/09/02 17:59:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -96,6 +99,31 @@ Int_t StSvtAlignmentMaker::Init()
   
   mSvtGeomT  = (svg_geom_st*)SvtGeom->GetTable();
   
+  m_driftVeloc = 0;
+  dataSet = GetDataSet("StSvtDriftVelocity");
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT drift velocity  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
+  
+  m_driftVeloc = (StSvtHybridCollection*)dataSet->GetObject();
+
+  m_driftCurve = 0;
+  dataSet = GetDataSet("StSvtDriftCurve");
+  // gMessMgr->Info() << "dataset: " << dataSet << endm;
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT drift curve  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
+
+  m_driftCurve = (StSvtHybridCollection*)dataSet->GetObject();
+  
+  //gMessMgr->Info() << "GETSVTDRIFTCURVE: m_driftCurve is: " << m_driftCurve << endm;
+
+  if(!m_driftCurve) gMessMgr->Error("NULL pointer  - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+
   work = new StSsdAlign();
   work->init(mSvtGeomT,mConfig,NumberEvents);
   
@@ -169,11 +197,12 @@ Int_t StSvtAlignmentMaker::Make()
      SvtGeom = (St_svg_geom    *) local("svgpars/geom");
     
     SvtSrsPar  = (St_srs_srspar  *) local("srspars/srs_srspar");
-    
+
     mSvtSrsParT = (srs_srspar_st*)SvtSrsPar->GetTable();
     mSvtShapeT  = (svg_shape_st*)SvtShape->GetTable();
     mSvtGeomT  = (svg_geom_st*)SvtGeom->GetTable();
-    mCoordTransform->setParamPointers(mSvtSrsParT, mSvtGeomT, mSvtShapeT, mConfig);
+
+    mCoordTransform->setParamPointers(mSvtSrsParT, mSvtGeomT, mSvtShapeT, mConfig,m_driftVeloc, m_driftCurve, m_t0);
 
     work->SetTransform(mCoordTransform);
     
