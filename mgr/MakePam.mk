@@ -146,11 +146,6 @@ ifdef QWE
   QWE  := $(shell expr $(QWE) + 1)
   SL_NEW := $(SL_PKG).$(QWE)
 endif
-
-
-
-        SL_NEW  := $(LIB_DIR)/$(PKG).sl.NEW
-        SL_OLD  := $(wildcard $(SL_PKG))
 endif                          
 ifneq (,$(strip $(FILES_O)))
 ifdef NODEBUG
