@@ -1,8 +1,6 @@
 #include "MessageType.h"
 
 // statics
-//messageTypeMap MessageType::s_typeByIndex;
-//messageTypeMap MessageType::s_typeByCode;
 MessageType* MessageType::s_apTypes[32] = {0};
 unsigned int MessageType::s_nTypes = 0;
 

@@ -31,12 +31,12 @@ void Messenger::kill(){
 } // kill
 
 void Messenger::updateStates(){
-
+  
   for(messengerMapIterator iterator = s_messengerMap.begin();
       iterator!=s_messengerMap.end(); iterator++){
     Messenger *pMessenger = iterator->second;
-    if(pMessenger->canWrite()){ pMessenger->clear(); }
-    else{                       pMessenger->setstate(ios::badbit);}
+     if(pMessenger->canWrite()){ pMessenger->clear(); }
+     else{                       pMessenger->setstate(ios::badbit);}
   }
   
 } // updateStates
@@ -47,9 +47,11 @@ Messenger* Messenger::instance(unsigned int routing){
   messengerMapIterator where = s_messengerMap.find(routing);
   if(where!=s_messengerMap.end()){ return where->second; }
 
-  // create new messenger & add to map before returning
+  // create new messenger & add to map
   Messenger *pMessenger = new Messenger(routing);
   s_messengerMap.insert( messengerMapValueType(routing, pMessenger) );
-  return pMessenger;
+  // set its badbit if it hasn't been instantiated
+  if(!pMessenger->canWrite()){ pMessenger->setstate(ios::badbit); }
 
+  return pMessenger;
 } // instance

@@ -187,8 +187,9 @@ Int_t StiMaker::Finish()
 Int_t StiMaker::Init()
 {
     Messenger::init();
-    Messenger::instance()->setRoutingMask(0); //turn off all streams
-    // Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
+    Messenger::setRoutingMask(0);
+    //Messenger::instance()->setRoutingMask(0); //turn off all streams
+    //Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
 
     //The IOBroker
     StiIOBroker* stiIO = StiIOBroker::instance();
