@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.22 2000/06/02 01:11:52 lansdell Exp $ 
+//! $Id: StQABookHist.h,v 1.23 2000/06/13 00:32:38 lansdell Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.23  2000/06/13 00:32:38  lansdell
+//! added SVT,TPC vertex resolution check; check that pidTraits()[0] exists
+//!
 //! Revision 1.22  2000/06/02 01:11:52  lansdell
 //! added several x,y,z-dca to beam axis histograms
 //!
@@ -83,7 +86,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.22 2000/06/02 01:11:52 lansdell Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.23 2000/06/13 00:32:38 lansdell Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -524,6 +527,8 @@ class StQABookHist : public StMaker {
   TH1F     *m_pv_pchi2; //! row1-chisq per dof of vertex fit
   TH1F     *m_pv_r;     //! radius to primary vertex
 
+  TH1F     *m_vtx_z;    //! resolution of SVT vertex finder relative
+                        //! to main vertex finder
   // from table dst_v0_vertex
   TH1F     *m_v0;            //! # v0 vertices
   TH1F     *m_ev0_lama_hist; //! Lambda mass
@@ -616,7 +621,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.22 2000/06/02 01:11:52 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.23 2000/06/13 00:32:38 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
