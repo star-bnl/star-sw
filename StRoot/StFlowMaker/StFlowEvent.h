@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.25 2001/06/04 18:57:05 rcwells Exp $
+// $Id: StFlowEvent.h,v 1.26 2001/06/06 13:02:58 rcwells Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -89,6 +89,7 @@ public:
   static void SetPtWgt();
   static void SetProbPid();
   static void SetEtaSubs();
+  static void SetPtWgt(Bool_t);
 
 private:
 
@@ -242,11 +243,16 @@ inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 
 inline void  StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 
+inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
+
 #endif
 
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.26  2001/06/06 13:02:58  rcwells
+// Added SetPtWgt(Bool_t) function to StFlowEvent
+//
 // Revision 1.25  2001/06/04 18:57:05  rcwells
 // Adding filling from HbtEvents
 //

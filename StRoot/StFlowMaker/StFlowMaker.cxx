@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.55 2001/06/04 18:57:05 rcwells Exp $
+// $Id: StFlowMaker.cxx,v 1.56 2001/06/06 13:02:58 rcwells Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -176,7 +176,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.55 2001/06/04 18:57:05 rcwells Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.56 2001/06/06 13:02:58 rcwells Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -455,7 +455,7 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   cout << "Inside FlowMaker::FillFlowEvent(HbtEvent)..." << endl;
   // Fill flow event
   // Weight file
-  pFlowEvent->SetPtWgt();
+  //pFlowEvent->SetPtWgt(); // set pT weighting in HbtReader
   pFlowEvent->SetPhiWeight(mPhiWgt);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -1063,6 +1063,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.56  2001/06/06 13:02:58  rcwells
+// Added SetPtWgt(Bool_t) function to StFlowEvent
+//
 // Revision 1.55  2001/06/04 18:57:05  rcwells
 // Adding filling from HbtEvents
 //
