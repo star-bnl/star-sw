@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.2 1998/12/15 11:21:20 lasiuk Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.3 1999/03/15 13:46:54 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
+ * Revision 1.3  1999/03/15 13:46:54  lasiuk
+ * do not use mIoSectorSpacing; use separation instead
+ *
  * Revision 1.2  1998/12/15 11:21:20  lasiuk
  * add i/o sector spacing = 3 mm
  *
@@ -108,7 +111,7 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
     StGetConfigValue(file,"numberOfOuterSectorAnodeWires",mNumberOfOuterSectorAnodeWires);
     StGetConfigValue(file,"innerSectorEdge",mInnerSectorEdge);
     StGetConfigValue(file,"outerSectorEdge",mOuterSectorEdge);
-    StGetConfigValue(file,"ioSectorSpacing",mIoSectorSpacing);
+    //StGetConfigValue(file,"ioSectorSpacing",mIoSectorSpacing);
 
     // should be assign --- not supported by egcs 1.0.2
     //mPadsInRow.assign(mPadRows);
@@ -166,7 +169,7 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
 
     mIoSectorSeparation    *= millimeter;
     mOuterSectorEdge       *= millimeter;
-    mIoSectorSpacing       *= millimeter;
+    //mIoSectorSpacing       *= millimeter;
     
     mFrischGrid            *= millimeter;
     mDriftDistance         *= millimeter;
@@ -364,7 +367,7 @@ void StTpcSimpleGeometry::print(ostream& os) const
     os << "lastOuterSectorAnodeWire      = " << mLastOuterSectorAnodeWire/millimeter      << " mm" << endl;
     os << "innerSectorEdge               = " << mInnerSectorEdge/millimeter << " mm" << endl;
     os << "outerSectorEdge               = " << mOuterSectorEdge/millimeter << " mm" << endl;
-    os << "ioSectorSpacing               = " << mIoSectorSpacing/millimeter << " mm" << endl;
+    //os << "ioSectorSpacing               = " << mIoSectorSpacing/millimeter << " mm" << endl;
     os << endl;
     os << " Row      Pads      Radial Distance to Row" << endl;
     os << "==========================================" << endl;
