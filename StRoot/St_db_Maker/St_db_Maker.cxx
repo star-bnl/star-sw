@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.47 2001/04/13 21:21:34 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.48 2001/04/14 02:03:46 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.48  2001/04/14 02:03:46  perev
+// const added
+//
 // Revision 1.47  2001/04/13 21:21:34  perev
 // small fix (fine) + cons's
 //
@@ -533,7 +536,7 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
   ds = ds->GetParent();
 
   TString path = ds->Path();
-  char *cc = strchr(strstr(path,"/.data/")+7,'/');
+  const char *cc = strchr(strstr(path,"/.data/")+7,'/');
   if (cc) dbfile += cc;
   dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
