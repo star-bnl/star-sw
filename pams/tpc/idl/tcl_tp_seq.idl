@@ -1,0 +1,14 @@
+/*   tcl_tp_seq
+* Table of sequences in time in tpc
+*/
+   struct tcl_tp_seq {
+       long      jpix;       /* offset into tppixel table */
+       long      next;       /* self-link pointer to next sequence */
+       long      secpad;     /* sector-wide pad number */
+       long      tpc_row;    /* encoded sector-row = 100*sector + row */
+       short     tdc_low;    /* low tdc for sequence            */
+       short     tdc_hi;     /* high tdc for sequence           */  
+   };
+/*  Last mod. for tp_seq: $Date: 1998/05/22 00:16:43 $ */
+
+

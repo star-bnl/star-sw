@@ -1,0 +1,34 @@
+/* tph.idl
+* This is the hitfinder module for the tpc
+*/
+#include "PAM.idl"
+#include "tcl_sector_index.idl"
+#include "tcl_tclpar.idl"
+#include "tss_tsspar.idl"
+#include "tpg_detector.idl"
+#include "tpg_pad_plane.idl"
+#include "type_shortdata.idl"
+#include "tcl_tp_seq.idl"
+#include "tcl_tpcluster.idl"
+#include "tcl_tphit.idl"
+#include "tcl_tphit_aux.idl"
+
+interface tph : amiModule{
+	STAFCV_T call (
+                  in tcl_sector_index tcl_sector_index
+		, in tcl_tclpar tclpar
+		, in tss_tsspar tsspar
+		, in tpg_detector detector
+		, in tpg_pad_plane pad_plane
+		, in type_shortdata pixel_data_in
+		, in type_shortdata pixel_data_out
+		, in tcl_tp_seq	tpseq
+		, inout tcl_tpcluster tpcluster
+		, inout tcl_tphit tphit
+		, inout tcl_tphit_aux tphit_aux
+		);
+};
+/* last modified $Date: 1998/05/22 00:18:20 $ */
+
+		
+		

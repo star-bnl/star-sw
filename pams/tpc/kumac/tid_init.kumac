@@ -1,16 +1,10 @@
-
 macro init
-
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC
-
 
 cd /dui/constants/tpc/params
 
-
-dio/newfilestream    tidpar [PARAMS_TPC]tid_pars.xdf r
-dio/stream/getevent  tidpar
-dio/stream/close     tidpar
+  dio/newfilestream    tidpar $STAR/params/tpc/tid_pars.xdf r
+  dio/stream/getevent  tidpar
+  dio/stream/close     tidpar
 
 cd /dui
 

@@ -4,14 +4,12 @@
 #include "tcl_tphit.idl"
 #include "tpt_res.idl"
 #include "tpt_strack.idl"
-#include "tpg_detector.idl"
 
 interface tpt_sts : amiModule {
           STAFCV_T call(   in    tpt_spars par,
 			   inout tcl_tphit tphit,
 			   out   tpt_res res,
 			   out   tpt_res diff_res,
-			   out   tpt_strack strack,
-                           in    tpg_detector detector
+			   out   tpt_strack strack
                            );
 };

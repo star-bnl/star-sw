@@ -3,7 +3,7 @@
 
 macro tpc_fast_sim__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
-          input_g2t_file=auau_hij_tfs.xdf _
+          input_g2t_file=event_0000050.xdf _
           num_events=1 _
           tracker=tpt _
           funit=21 _
@@ -32,32 +32,67 @@ message ' *** output Ntuple filename  -->      ' [nfile]
 message ' *** Ntuple ID # -->                  ' [nid]
 message ' *** Table to write to ntup -->       ' [table]
  
-
-* global macros
-  exec $STAR/kumacs/util/setup_global_macros
-  macro/global/import _
-    DATA_SAMPLES,KUMACS_UTIL,KUMACS_TPC,PARAMS_TPC,PAMS_TPC_KUMAC
+* SETUP DIRECTORIES TO FIND KUMACS:
+ 
+ 
+ DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+ 
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+*  LOAD LIBRARIES
+ if $vexist(make_done)=0 then
+   make tpc 
+   vec/cre make_done
+ endif
+ 
 
 * generic inits
-  exec [KUMACS_UTIL]setup_dir
-  exec [KUMACS_UTIL]input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+  exec setup_dir
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
 
   if STAF_STATUS(1).eq.0 goto ENDOFDATA
 
 * tpc geometry init
-  exec [PAMS_TPC_KUMAC]tpg_init#init
+  exec tpg_init#init
 
 * tpc fast sim init
   exec initialize 
 
 * init to write table from tpc fast sim to ntuple
-   exec [KUMACS_UTIL]write_table_to_ntuple#init_disk _
+   exec write_table_to_ntuple#init_disk _
        [funit] [nfile] [nid] [table]
 
 * read event and then process thru tpc fast sim
   do i=1,[num_events]
     message ' processing event ' [i]
-    exec [KUMACS_UTIL]input_g2t_file#read
+    exec input_g2t_file#read
       if STAF_STATUS(1).eq.0 goto ENDOFDATA
     exec process_event [i]
       if STAF_STATUS(1).eq.0 then
@@ -70,7 +105,7 @@ message ' *** Table to write to ntup -->       ' [table]
     endif
 * write table from tpc fast sim to ntuple
     if [num_events]=1 then
-      exec [KUMACS_UTIL]write_table_to_ntuple#write_event_disk [nid] [table]
+      exec write_table_to_ntuple#write_event_disk [nid] [table]
     endif
   enddo
 
@@ -82,11 +117,11 @@ message ' *** Table to write to ntup -->       ' [table]
 
 * close ntuple
   message ' close ntuple'
-  exec [KUMACS_UTIL]write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit]
 
 * close input file
   message ' close input file'
-  exec [KUMACS_UTIL]input_g2t_file#close
+  exec input_g2t_file#close
 
 return
 
@@ -101,22 +136,19 @@ macro initialize
 
     message ' Initializing for tpc fast simulator '
 
-  macro/global/import _ 
-     KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
-
 *
 *  create tables
-    exec [KUMACS_TPC]create_tables_tpc_fast_sim#tcl
-    exec [KUMACS_TPC]create_tables_tpc_fast_sim#tpt
-    exec [KUMACS_TPC]create_tables_tpc_fast_sim#tte
+    exec create_tables_tpc_fast_sim#tcl
+    exec create_tables_tpc_fast_sim#tpt
+    exec create_tables_tpc_fast_sim#tte
 
 
 *   initialization for tpc fast simulator
-    exec [PAMS_TPC_KUMAC]tcl_init#init 
-    exec [PAMS_TPC_KUMAC]tfs_init#init
-    exec [PAMS_TPC_KUMAC]tpt_init#init
-    exec [PAMS_TPC_KUMAC]tid_init#init
-    exec [PAMS_TPC_KUMAC]tte_init#init
+    exec tcl_init#init 
+    exec tfs_init#init
+    exec tpt_init#init
+    exec tid_init#init
+    exec tte_init#init
 
  return
 
@@ -124,16 +156,12 @@ macro initialize
 
 macro process_event   nev
 
-   macro/global/import _
-      KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
-
    message ' TPC fast sim, Processing Event # ' [nev]
 
 
 * call tfs_g2t and tfs_filt
   message ' calling tfs_run'
-  exec [PAMS_TPC_KUMAC]tfs_run#run
-
+  exec tfs_run#run
 
 return
 
@@ -141,23 +169,21 @@ return
 
 macro run_tracker_tpt   nev
 
-   macro/global/import _
-      KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
 
    message ' TPC tpt tracker: Processing Event # ' [nev]
 
 
 * call tpt
   message ' calling tpt_run'
-  exec [PAMS_TPC_KUMAC]tpt_run#run
+  exec tpt_run#run
 
 * call tde_new
   message ' calling tid_run'
-  exec [PAMS_TPC_KUMAC]tid_run#run_tde_new
+  exec tid_run#run_tde_new
 
 * call tte
   message ' calling tte_run'
-  exec [PAMS_TPC_KUMAC]tte_run#run_tte
+  exec tte_run#run_tte
 
 
 return
@@ -166,22 +192,17 @@ return
 
 macro run_tracker_tte   nev
 
-
-   macro/global/import _
-      KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
-
    message ' TPC tte tracker: Processing Event # ' [nev]
 
 
-
 * call tpt
-  exec [PAMS_TPC_KUMAC]tte_run#run_tte_track
+  exec tte_run#run_tte_track
 
 * call tde_new
-  exec [PAMS_TPC_KUMAC]tid_run#run_tde_new
+  exec tid_run#run_tde_new
 
 * call tte
-  exec [PAMS_TPC_KUMAC]tte_run#run_tte
+  exec tte_run#run_tte
 
 
 return

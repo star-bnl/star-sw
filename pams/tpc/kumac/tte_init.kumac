@@ -1,17 +1,12 @@
 macro init
 
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC
+  cd /dui/constants/tpc/params
 
+  dio/newfilestream    ttepar $STAR/params/tpc/tte_pars.xdf r
+  dio/stream/getevent  ttepar
+  dio/stream/close     ttepar
 
-cd /dui/constants/tpc/params
-
-
-dio/newfilestream    ttepar [PARAMS_TPC]tte_pars.xdf r
-dio/stream/getevent  ttepar
-dio/stream/close     ttepar
-
-cd /dui
+  cd /dui
 
 return
 

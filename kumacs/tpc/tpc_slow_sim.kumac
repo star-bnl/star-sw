@@ -2,16 +2,15 @@
 ************************************************************************
 macro tpc_slow_sim__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
-          input_g2t_file=gstar_ven_phys_on_auau_2central.xdr_
+          input_g2t_file=event_0000050.xdf_
           num_events=1_
           tpc_sector_first=18_
           tpc_sector_last=18_
-          magfield=0.5_
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
-          table=/dui/data/tpc/hits/tphit
-
+          table=/dui/data/tpc/hits/tphit_
+          adcxyzon=0
 
 *  
 * --> to run
@@ -29,42 +28,90 @@ message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
 message ' *** Input G2T file -->         ' [input_g2t_file]
 message ' *** Num Events to process -->  ' [num_events]
 message ' *** TPC Sector first,last -->  ' [tpc_sector_first],[tpc_sector_last]
-message ' *** Magnetic Field -->         ' [magfield]
 message ' *** ntup file unit -->         ' [funit]
 message ' *** output Ntuple filename  -->' [nfile]
 message ' *** Ntuple ID # -->            ' [nid]
 message ' *** Table to write to ntup --> ' [table]
+message ' *** Fill adcxyz table for diag.? 0,1 = no,yes --> ' [adcxyzon]
  
-* global macros
-  exec $STAR/kumacs/util/setup_global_macros
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
+
+* SETUP DIRECTORIES TO FIND KUMACS:
+
+ 
+ DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+ 
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+
+*  LOAD LIBRARIES
+ 
+ if $vexist(make_done)=0 then
+   make tpc 
+   vec/cre make_done
+ endif
 
 * generic inits
-  exec [KUMACS_UTIL]setup_dir
-  exec [KUMACS_UTIL]input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+  exec setup_dir
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
 
   if STAF_STATUS(1).eq.0 goto ENDOFDATA
 
 * tpc geometry init
-  exec [PAMS_TPC_KUMAC]tpg_init#init
+  exec tpg_init#init
 
 * tpc slow sim init
-  exec initialize [tpc_sector_first] [tpc_sector_last]  [magfield] 
+  exec initialize [adcxyzon]
+
+* now overwrite which sector you want to run (in case you don't want default)
+   cd /dui/constants/tpc/params/tsspars
+   tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
+   tdm/table/cell/putvalue 'tsspar[0].max_sect' [tpc_sector_last]
+   message 'Minimum and Maximum Sector numbers for tpc slow simulation: '
+   tdm/table/cell/getvalue 'tsspar[0].min_sect'
+   tdm/table/cell/getvalue 'tsspar[0].max_sect'
+   tdm/table/cell/getvalue 'tsspar[0].bfield'
+   cd /dui
 
 * init to write table from tpc fast sim to ntuple
-   exec [KUMACS_UTIL]write_table_to_ntuple#init_disk _
+   exec write_table_to_ntuple#init_disk _
        [funit] [nfile] [nid] [table]
 
 * read event and then process thru tpc slow sim
   do i=1,[num_events]
     message ' processing event ' [i]
-    exec [KUMACS_UTIL]input_g2t_file#read
+    exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA    
-    exec process_event [i] 
+    exec process_event [i] [adcxyzon]
 * write table from tpc fast sim to ntuple
     if [num_events]=1 then
-      exec [KUMACS_UTIL]write_table_to_ntuple#write_event_disk [nid] [table]
+      exec write_table_to_ntuple#write_event_disk [nid] [table]
     endif
   enddo
 
@@ -75,11 +122,11 @@ message ' *** Table to write to ntup --> ' [table]
 
 * close ntuple
   message 'close ntuple'
-  exec [KUMACS_UTIL]write_table_to_ntuple#close_disk [funit]
+  exec write_table_to_ntuple#close_disk [funit]
 
 * close input file
   message 'close input file'
-  exec [KUMACS_UTIL]input_g2t_file#close
+  exec input_g2t_file#close
 
 return
 
@@ -90,51 +137,47 @@ return
 ************************************************************************
 *--------------------------------------------------------------------
 
-macro initialize_
-               tpc_sector_first_ 
-               tpc_sector_last_ 
-               magfield
+macro initialize adcxyzon
 
   message ' Initializing for tpc slow simulator '
-
-  macro/global/import _ 
-     KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
-
+*  message ' adc xyz on = ', [adcxyzon]
 
 *
 *  create tables
-    exec [KUMACS_TPC]create_tables_tpc_slow_sim#tss
-    exec [KUMACS_TPC]create_tables_tpc_slow_sim#tfc
-    exec [KUMACS_TPC]create_tables_tpc_slow_sim#tcl
+    exec create_tables_tpc_slow_sim#tss
+    if [adcxyzon].eq.1 then
+      exec create_tables_tpc_slow_sim#tfc
+    endif
+    exec create_tables_tpc_slow_sim#tcl
+
 
 *   initialization for tpc slow simulator
-    exec [PAMS_TPC_KUMAC]tss_init#init _
-                      [tpc_sector_first] [tpc_sector_last] [magfield]
-    exec [PAMS_TPC_KUMAC]tcl_init#init
+    exec tss_init#init 
+    exec tcl_init#init
 
  return
 
 *------------------------------------------------------------------------
 
-macro process_event  nev
+macro process_event  nev adcxyzon
 
-   macro/global/import _
-      KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
 
    message ' TPC slow sim: Processing Event # ' [nev]
-
+*   message '  adcxyzon = ',[adcxyzon]
 
 * call tssam - simulated tpc pixels
-  exec [PAMS_TPC_KUMAC]tss_run#run
+  exec tss_run#run
 
 * call xyz - reordered tpc pixels with more info
-  exec [PAMS_TPC_KUMAC]tfc_run#run 
+  if [adcxyzon].eq.1 then
+    exec tfc_run#run 
+  endif
 
 * call tcl_make_clusters - tpc cluster finder
-  exec [PAMS_TPC_KUMAC]tcl_run#run_tcl_make_clusters
+  exec tcl_run#run_tcl_make_clusters
 
 * call tpham - tpc hit finder
-  exec [PAMS_TPC_KUMAC]tcl_run#run_tpham 
+  exec tcl_run#run_tpham 
 
 
 return

@@ -1,29 +1,21 @@
-**************   tpg_init.kumac *****************************************
-**************************************************************************
-**************************************************************************
-
 macro init
 
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
+  cd /dui/constants/tpc/geometry
 
+  dio/newfilestream   geom $STAR/params/tpc/tpg_pars.xdf r
+  dio/stream/getevent geom 
+  dio/stream/close    geom
 
-cd /dui/constants/tpc/geometry
+  cd tpgpar
+  tdm/newtable tpg_pad tpg_pad 1
 
-dio/newfilestream   geom [PARAMS_TPC]tpg_pars.xdf r
-dio/stream/getevent geom 
-dio/stream/close    geom
+  cd /dui
 
-cd tpgpar
-tdm/newtable tpg_pad tpg_pad 1
+  ami/module/call tpg_main /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
+                           /dui/constants/tpc/geometry/tpgpar/tpg_detector _
+                           /dui/constants/tpc/geometry/tpgpar/tpg_pad
 
-cd /dui
-
-ami/module/call tpg_main /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
-                         /dui/constants/tpc/geometry/tpgpar/tpg_detector _
-                         /dui/constants/tpc/geometry/tpgpar/tpg_pad
-
-cd /dui
+  cd /dui
  
 return
 

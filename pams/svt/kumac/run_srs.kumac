@@ -1,17 +1,16 @@
-MACRO run_srs ievent=1 SVT_HOME=$STAR/pams/svt/kumac stnd_al=no nevent=1
+MACRO run_srs ievent=1 stnd_al=no nevent=1
 
 ievent=[1]
-SVT_HOME=[2]
-stnd_al=[3]
-nevent=[4]
+stnd_al=[2]
+nevent=[3]
 
 
 * initializations
 
 if ( [ievent]=1) then
- exec [SVT_HOME]/init_srs
+ exec init_srs
  if ( [stnd_al]=yes ) then
- exec $STAR_REF/ana/svg/init_svg
+ exec init_svg
     message 'Input name of .dsl file'
     read file
     message 'Opening input file...'
@@ -23,12 +22,17 @@ if ( [ievent]=1) then
   endif
 endif
 
+*-------------------------------------------------
+
 * Event Loop
 do i=1,[nevent]
+
    if ( [stnd_al]=yes) then
 	dio/stream/getevent data
    endif
+
    message 'Calling SRS...'
+
    ami/mod/call srs_am _
 	/dui/data/svt/hits/srs_result _
         /dui/geant/Event/g2t_svt_hit _
@@ -41,3 +45,5 @@ do i=1,[nevent]
         /dui/constants/svt/geometry/srs_activea 
    
 enddo
+
+RETURN

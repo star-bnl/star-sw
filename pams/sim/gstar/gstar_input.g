@@ -12,18 +12,19 @@
 *              File types are saved in Ccommand - one letter per file   *
 *************************************************************************
    Implicit   None   
-   Integer    LENOCC,CSADDR,i,J,ier,L,N
-   Character  file*(*),C*1
+   Integer    LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate
+   Character  file*(*),C*1,Table*120
+   common     /agcuser/ Igate,Table
 *
 +CDE,AGCKINE.
 *
     L=LENOCC(file);  Check L>0;
     C=' '
-    Do i=1,L-1  {  if (file(i:i)='.') C=file(i+1:i+1) }
+    Do i=1,L-1  {  check file(i:i)='.'; idot=i; C=file(i+1:i+1);  }
     Call CLTOU(C)
 *
-    N=LENOCC(CCOMMAND)+1
-    print *,' AgUsOpen: openning file ',file,' mode ',C 
+    N=LENOCC(CCOMMAND)+1;  Igate=N
+    print *,' AgUsOpen: input from ',file,' mode ',C 
 *
     if      C=='E'                       " egz format "
     {  Call AgzOPEN('PZ',file,'EK',0,0)
@@ -35,9 +36,15 @@
        If ( J==0 )  goto :e:
        call CsJCAL(J,2,file)
     }
-    else                                 "  any text  "
+    else if C=='T'                       "  any text  "
     {  Call AgFOPEN(21-N,file,ier) 
        if (ier!=0)  goto :e:
+    } 
+    else if C=='S'                       " STAF table "
+    {  Table=File(1:idot-1)
+    } 
+    else if C=='M'                       "mickey-mouse"
+    {  Iadr=CSADDR('gstar_micky');  If (Iadr!=0) Call CSJCAL(Iadr,0,0,0)
     } 
     CCOMMAND(N:N)=C
     return
@@ -51,19 +58,24 @@
 *              and call the corresponding readout routine               *
 *************************************************************************
    Implicit   None
-   Integer    LENOCC,CSADDR,LOCF,Igate,Ier,J,I
-   Character  C*1
++CDE,GCBANK,GCNUM,SCLINK,RBBANK,AgCKINE.
+   Integer    LENOCC,CSADDR,AMI_CALL,Igate,Ier,J,I
+   Character  C*1, o*1, Table*120
+   common     /agcuser/ Igate,Table
 *
-+CDE,GCBANK,SCLINK,RBBANK,AgCKINE,GCNUM.
 *
+   o=CHAR(0)
    Call HEPEVNT
 
    Do i=1,LENOCC(Ccommand)
      C=CCOMMAND(i:i); Igate=i
-     if     C=='E' { Call AGZREAD('P',ier); call gstar_ReadEGZ(Igate)     }
-     elseif C=='X' { IrbDIV=IxDIV;          LKARP2=LkEvnt
-                     J=CsADDR('xdf_read'); If (J!=0) call CsJCAL(J,1,Igate) }
-     else          {                          call gstar_ReadTXT(Igate)     }
+     if     C=='E' { Call AGZREAD('P',ier);  call gstar_ReadEGZ(Igate)     }
+     elseif C=='X' { IrbDIV=IxDIV;           LKARP2=LkEvnt
+                     J=CsADDR('xdf_read'); If (J!=0) call CsJCAL(J,1,Igate)}
+     elseif C=='T' {                         call gstar_ReadTXT(Igate)     }
+     elseif C=='M' { J=CsADDR ('mickine'); IF (J!=0) Call CsJCAL(J,1,Igate)}
+     elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)        }
+
      If Igate<=0   { Ier=1; return }
      print *,' AgUsREAD mode ',C,': # particles in GEANT=',Ntrack,
                                  '  # vertices=',Nvertx
@@ -84,15 +96,20 @@
 Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;] 
 *************************************************************************
    implicit      none
-   character*8   tit    ", eg_name, frame "
++CDE,GCUNIT,GCFLAG.
+*  character*8   tit, eg_name, frame 
    character*120 line
    integer       LENOCC,Index,li,Ieven,Ntrac,Nvert,itr,ivt,nv,nt,Igate,
                  LabelTr,LabelVx,ge_pid,eg_pid,StartVx,StopVx,i,
                  eg_proc,parent
    Real          version,east_z,east_a,west_z,west_a,sqrts,b_max,
                  PP(3),vert(4),UBUF(10),a,b
+   integer       istat,eg_pid,moth,daut,num(5)
+   data          num/1,1,0,0,0/
+   character     Cform*8 /'/6I 9F'/
+   Real          phep,vhep
+   common/GHEPEVT/ istat,eg_pid,moth(2),daut(2),phep(5),vhep(4)
 *
-+CDE,GCUNIT,GCFLAG.
 *
    Li=21-Igate
  { Ntrac,Nvert } = 999;
@@ -126,15 +143,32 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
                          (16x,'VERTEX:',4F10.6,3i6)
      ivt += 1;           call AgSVERT(vert,-LabelVx,-Igate,Ubuf,0,nv) 
    }
-   else If Index(Line,'event')>0 & itr+ivt==0      " old format "
-   { i=Index(Line,'event');  line(i:i+6)='  ';
+   else If Line(1:6)=='HEPEVT' & itr+ivt==0  
+   { *             HEPEVT text format
+     read1 (line(8:),*) Ntrac,Ieven; (' gstar_Read HEPEVT:',i8,' event#',i6)
+
+     do itr=1,Ntrac
+     {  read5(li,*) istat,eg_pid,moth,daut,phep,vhep; (6i5,5F8.2,4F9.3)
+        num(3)=0;   If (itr==1) num(3)=1
+        Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
+        check Istat==1;       Call apdg2gea (eg_pid, ge_pid)
+	if ge_pid<=0 
+        {  if (Idebug>1) <W> eg_pid;(' gstar_read HEPEVT unknown particle',i6);
+           ge_pid = 1000000+eg_pid
+        }
+        Call AgSVERT ( vhep,  0,  -Igate,  0,  0, nv); 
+        Call AgSKINE ( phep, ge_pid,  nv, itr, 0, nt); 
+     }  Break
+   }
+   else If Index(Line,'event')>0 & itr+ivt==0     
+   { *              OLD text format
+     i=Index(Line,'event');  line(i:i+6)='  ';
      read1 (line,*) Ntrac,Ieven; (' gstar_ReadOld: ',i8,' event# ',i6)
      call VZERO(vert,4); call AgSVERT(vert,-1,-Igate,Ubuf,0,nv)
      do itr=1,Ntrac
-        read5 (li,*) ge_pid,PP; (16x,i6,3F8.3)
+     {  read5 (li,*) ge_pid,PP; (16x,i6,3F8.3)
         call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
-     enddo  
-     break
+     }  break
    }
    else If LENOCC(Line)>0
    { <w> line(1:LENOCC(Line)); (' unknown line : ',a); }
@@ -229,7 +263,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
       STRUCTURE EGRN {               " Event generator run structure  "_
         INT   generator              " event generator identification ",
         CHAR  eg_name(8)             " event generator name           ",
-        REAL  eg_version             " version of event generator     ",
+        REAL  eg_versn               " version of event generator     ",
         INT   eg_run                 " generator run number           ",
         INT   eg_rndm(2)             " generator random numbers       ",
         REAL  sqrts                  " center of mass energy          ",
@@ -240,27 +274,27 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
         INT   east_z                 " projectile 1 charge            ",
         INT   west_a                 " projectile 2 mass number       ",
         INT   west_z                 " projectile 2 charge            ",
-        INT   polarizatn(10)         " to be defined                  "_
+        INT   polariza(10)           " to be defined                  "_
       }
 *
       STRUCTURE EGEV {               " Event generator event structure"_
         INT   n_event                " eg event number                ",
         REAL  b_impact               " actual impact parameter        ",
-        REAL  phi_impact             " reaction plane                 ",
-        INT   event_type             " trigger, minbias bkgd, cosmic  ",
-        INT   polarizatn(10)         " to be defined                  ",
-        INT   n_proteast             " number of participant protons  ",
-        INT   n_neuteast             " number of participant neutrons ",
-        INT   n_protwest             " number of participant protons  ",
-        INT   n_neutwest             " number of participant neutrons ",
+        REAL  phi_impa               " reaction plane                 ",
+        INT   ev_type                " trigger, minbias bkgd, cosmic  ",
+        INT   polariza(10)           " to be defined                  ",
+        INT   proteast               " number of participant protons  ",
+        INT   neuteast               " number of participant neutrons ",
+        INT   protwest               " number of participant protons  ",
+        INT   neutwest               " number of participant neutrons ",
         INT   n_track                " # tracks                       ",
         INT   n_vertex               " # vertices                     ",
-        INT   n_fstrack              " # final state tracks           ",
-        INT   n_nfstrack             " # non-final state tracks       ",
-        INT   n_prvertex             " # primary vertices             ",
-        INT   n_fsvertex             " # non-final state vertices     ",
-        INT   pr_vertex              " pointer to ll of primary vertices",
-        INT   fs_vertex              " pointer to ll of final state vert"_
+        INT   fstrack                " # final state tracks           ",
+        INT   nfstrack               " # non-final state tracks       ",
+        INT   prvertex               " # primary vertices             ",
+        INT   fsvertex               " # non-final state vertices     ",
+        INT   p_prvert               " pointer to ll of primary vertices",
+        INT   p_fsvert               " pointer to ll of final state vert"_
       }
 *
    structure uevn {                      _
@@ -272,11 +306,11 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
         int rndmevt(2),
         int n_event,
         int cav(12),
-        int n_shtk_evt,
+        int shtk_evt,
         int mx_shtk,
         int nw_shtk,
-        int firstvert,
-        int firsttrack,  
+        int firstvrt,
+        int firsttrk,  
         int equals  _
     }
 *
@@ -297,7 +331,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
     FILL /EVNT/UEVN/EGRN(1)          !  Event generator run structure 
       generator  = 0                ! event generator identification
       eg_name    = { 'a','b','c' }  ! event generator name
-      eg_version = Q(LKRUNT+3)      ! version of event generator
+      eg_versn   = Q(LKRUNT+3)      ! version of event generator
       eg_run     = 0                ! generator run number
       eg_rndm    = { 0,0 }          ! generator random numbers
       sqrts      = Q(LKRUNT+8)      ! center of mass energy
@@ -308,7 +342,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
       east_z     = Q(LKRUNT+4)      ! projectile 1 charge
       west_a     = Q(LKRUNT+7)      ! projectile 2 mass number
       west_z     = Q(LKRUNT+6)      ! projectile 2 charge
-      polarizatn = { 0,0,0,0,0 }    ! to be defined
+      polariza   = { 0,0,0,0,0 }    ! to be defined
     endfill
    endif
 *
@@ -316,21 +350,21 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
     FILL /EVNT/UEVN/EGEV(1)     !  Event generator event structure 
       n_event    = 0                ! eg event number
       b_impact   = Q (LKEVNT+7)     ! actual impact parameter
-      phi_impact = 0                ! reaction plane
-      event_type = 0                ! trigger, minbias bkgd, cosmic, etc.
-      polarizatn = { 0,0,0,0,0 }    ! to be defined
-      n_proteast = IQ(LKEVNT+4)     ! number of participant protons
-      n_neuteast = IQ(LKEVNT+5)     ! number of participant neutrons
-      n_protwest = IQ(LKEVNT+2)     ! number of participant protons
-      n_neutwest = IQ(LKEVNT+3)     ! number of participant neutrons
+      phi_impa   = 0                ! reaction plane
+      ev_type    = 0                ! trigger, minbias bkgd, cosmic, etc.
+      polariza   = { 0,0,0,0,0 }    ! to be defined
+      proteast   = IQ(LKEVNT+4)     ! number of participant protons
+      neuteast   = IQ(LKEVNT+5)     ! number of participant neutrons
+      protwest   = IQ(LKEVNT+2)     ! number of participant protons
+      neutwest   = IQ(LKEVNT+3)     ! number of participant neutrons
       n_track    = IQ(LKEVNT+1)     ! number of tracks
       n_vertex   = 0                ! number of vertices
-      n_fstrack  = 0                ! number of final state tracks
-      n_nfstrack = 0                ! number of non-final state tracks
-      n_prvertex = 0                ! number of primary vertices
-      n_fsvertex = 0                ! number of non-final state vertices
-      pr_vertex  = 0                ! pointer to ll of primary vertices
-      fs_vertex  = 0                ! pointer to ll of final state vert.
+      fstrack    = 0                ! number of final state tracks
+      nfstrack   = 0                ! number of non-final state tracks
+      prvertex   = 0                ! number of primary vertices
+      fsvertex   = 0                ! number of non-final state vertices
+      p_prvert   = 0                ! pointer to ll of primary vertices
+      p_fsvert   = 0                ! pointer to ll of final state vert.
     endfill
    endif
 *
@@ -348,7 +382,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
  created at night
 *****************************************************************************
 +CDE,AGECOM,GCBANK,SCLINK,RBBANK.
- real x
+
  Old Structure PASS {int SYS1, int SYS2, int SYS3, int PJID,int GJID,int EVID}
 
  Old Structure GENE {int SYS1, int SYS2, int SYS3, int GRUN,int GEVT,
@@ -405,9 +439,6 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
      endfill
 
  end
-
-
-
 
 
 

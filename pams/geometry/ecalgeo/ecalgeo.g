@@ -1,43 +1,44 @@
 ******************************************************************************
 Module ECALGEO is the EM End-Cap Calorimeter GEOmetry
 Created   26 jan 1996
-Author    Rashid Mekhdiyev
+Author    Rashid Mehdiyev
 *
 * Version 1.1, W.J. Llope
 *		- changed sensitive medium names...
-* Version 2.0, R.R. Mekhdiyev                                  16.04.97
+*
+* Version 2.0, R.R. Mehdiyev                                  16.04.97
 *               - Support walls included
 *               - intercell and intermodule gaps width updated
 *               - G10 layers inserted
-* Version 2.1, R.R. Mekhdiyev  
-*               - Shower Max Detector geomerty added           23.04.97
+* Version 2.1, R.R. Mehdiyev                                  23.04.97
+*               - Shower Max Detector geometry added          
 *               - Variable eta grid step size introduced 
+* Version 2.2, R.R. Mehdiyev                                  03.12.97
+*               - Eta grid corrected 
+*               - Several changes in volume's dimensions
+*               - Material changes in SMD
 *       
-* 15 Aug 97, PN - delete unused Ipart,k,phi1,phi2,ysh,yph,secmax
-* 28 Mar 98, PN - materials and medium NUMBERS can not be assigned by user
-*                 direct call to GSTPAR(1..) affects ALL systems !
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
-      Content    ECAL,ECVO,EMDI,EMSS,EAGA,ETOW,ESEC,EPER,EALP,ESHM,ESSP,
-                 ETAR,EGTN,ESCI,ELED,EMOD,EBPL,MGTN,MSEC,MALP,MRIB
+      Content    ECAL,ECVO,EMDI,EMSS,EAGA,ETOW,ESEC,EPER,EFLP,EXFP,ESHM,
+                 ESSP,ETAR,EGTN,ESCI,ELED,EMOD,EXGT,EXSE,EALP,ERIB
 *
       Structure  EMCG { Version,ZOrig,ZEnd,EtaMin,EtaMax,Nsupsec,Nsector,
-                        Nsection,Nslices,Front,Cell,Gten,Scint,Plate,
+                        Nsection,Nslices,Front,Cell,Gten,Scint,Plate,PlateB,
                         Wall,Rmshift,SMShift,GapPlt,GapCel,GapMax}
 *
-      Structure  EETR { Etagr,Phigr,Neta,Nphi,EtaRmn,EtaRmx,Eta(12)}
+      Structure  EETR { Etagr,Phigr,Neta,Nphi,EtaRmn,EtaRmx}
 *
-      Structure  ESEC { Isect, Plateb, Nlayer }
+      Structure  ESEC { Isect, FPlmat, Plateb, Nlayer }
 *
       Structure  EMXG {Version,Zsmax,Gtenm,Salup,Riblg,Ribwd,Rstep}
 *
-      Structure  MSEC { Jsect, Swidth, Glayer, Mat, Med }
+      Structure  EXSE { Jsect, Swidth, Glayer, Mat, Med }
 *
-      Integer    I_section,J_section,Ie,is,isec,ir,nleft,nright,
-                 imat,imed
+      Integer    I_section,J_section,Ie,is,isec,ir,nleft,nright
       Real       Secwid,Section,center,current,Plate,Gap,Cell,G10,
-                 tan_low,tan_upp,Tanf,RBot,Rtop,Deta(0:12),etax,
+                 tan_low,tan_upp,Tanf,RBot,Rtop,Deta,etax,
                  d,dd,d2,d3,rshift,xleft,xright,yleft,yright,
                  maxcnt,msecwd,mxgten,curr,Rleft,Right
       Tanf(etax) = tan(2*atan(exp(-etax)))
@@ -45,9 +46,9 @@ Author    Rashid Mekhdiyev
 * ----------------------------------------------------------------------------
 *
 Fill  EMCG          ! EM EndCAp Calorimeter basic data 
-      Version  = 2.1       ! Geometry version 
-      ZOrig    = 271.4     ! calorimeter origin in z
-      ZEnd     = 310.0     ! Calorimeter end in z
+      Version  = 2         ! Geometry version 
+      ZOrig    = 271.44    ! calorimeter origin in z
+      ZEnd     = 307.0     ! Calorimeter end in z
       EtaMin   = 1.05      ! upper feducial eta cut 
       EtaMax   = 2.0       ! lower feducial eta cut
       Nsupsec  = 12        ! Number of azimuthal supersectors        
@@ -55,16 +56,16 @@ Fill  EMCG          ! EM EndCAp Calorimeter basic data
       Nslices  =  5        ! number of phi slices in supersector
       Nsection =  3        ! Number of readout sections
       Front    = 0.8       ! thickness of the front AL plates (CALO and SMD)
-      Cell     = 1.1       ! Cell full width in z
+      Cell     = 1.08      ! Cell full width in z
       Gten     = 0.16      ! G10 plate width
       Scint    = 0.4       ! Sci layer thickness
-      Plate    = 0.5       ! Lead plate thickness
+      Plate    = 0.48      ! Lead plate thickness
       Wall     = 0.12/2    ! Half thickness of aluminium walls   
       Rmshift  = 0.58      ! radial shift of module
       smshift  = 0.12      ! radial shift of steel support walls
       GapPlt   = 0.3/2     ! HALF of the inter-plate gap in phi
       GapCel   = 0.03/2    ! HALF of the radial inter-cell gap
-      GapMax   = 2.5       ! space reserved for SMD detector
+      GapMax   = 2.8       ! space reserved for SMD detector
 * --------------------------------------------------------------------------
 Fill EETR           ! Eta and Phi grid values
       EtaGr    = 0.0441     ! Min eta granularity
@@ -73,8 +74,6 @@ Fill EETR           ! Eta and Phi grid values
       Nphi     = 60         ! Phi granularity
       EtaRmn   = 1.0663     ! Min readout rapidity
       EtaRmx   = 2.0        ! Max readout rapidity
-      Eta      = {0.0441, 0.0477, 0.0517, 0.0561, 0.0613, 0.0673, 0.074, _
-                  0.0822, 0.0917, 0.1034, 0.1179, 0.1363} ! Eta granularity
 *---------------------------------------------------------------------------
 Fill ESEC           ! First EM section
       ISect    = 1                           ! Section number	
@@ -88,26 +87,26 @@ Fill ESEC           ! Second EM section
 *
 Fill ESEC           ! Third EM section
       ISect    = 3                           ! Section
-      Nlayer   = 10.                         ! Number of Sci layers along z
-      PlateB   = 5.8                         ! Back  Plate, SS
+      Nlayer   = 9.                          ! Number of Sci layers along z
+      PlateB   = 4.0                         ! Back  Plate, SS
 *----------------------------------------------------------------------------
 Fill EMXG           ! EM Endcap SMD basic data
-     Version   = 2.1       ! Geometry version
-     Zsmax     = 279.1     ! Shower Max start
+     Version   = 1         ! Geometry version
+     Zsmax     = 279.04    ! Shower Max start
      Gtenm     = 0.2       ! G10 layer width
      Salup     = 0.2       ! Aluminium plate width
      Ribwd     = 0.1       ! Aluminium rib width
      Riblg     = 0.6       ! Aluminium rib length
      Rstep     = 0.7       ! Rib step
 *----------------------------------------------------------------------------
-Fill MSEC           ! First SMD section
+Fill EXSE           ! First SMD section
       JSect    = 1                           ! Section number	
-      Swidth   = 1.1                         ! Width of SMD section along z
+      Swidth   = 1.3                         ! Width of SMD section along z
       Glayer   = 0.2                         ! Front Plate, G10  
       Mat      = 1                           ! Section Material  
       Med      = 1                           ! Section Medium
 *
-Fill MSEC           ! Second SMD section
+Fill EXSE           ! Second SMD section
       JSect    = 2                           ! Section number
       Swidth   = 0.6                         ! Width of SMD section along z
       Glayer   = 0.2                         ! Front Plate, G10
@@ -135,7 +134,7 @@ Endfill
 *
 * ----------------------------------------------------------------------------
 Block ECAL is one EM END-cap wheel
-      Material  Air
+      Material  Vacuum
       Medium    standard
       Attribute ECAL   seen=0 colo=7
       shape     CONE   dz=(emcg_Zend-emcg_ZOrig)/2,
@@ -196,13 +195,13 @@ Block EMOD is one module  of the EM END-CAP
                 Rmn1=emcg_ZOrig*Tan_Low-dd Rmn2=emcg_ZEnd*Tan_Low-dd,
                 Rmx1=emcg_ZOrig*Tan_Upp-dd*2  Rmx2=emcg_ZEnd*Tan_Upp-dd*2
 *
-*     Running parameter 'section' contains the position of the current section
+*    Running parameter 'section' contains the position of the current section
 *     It should not be modified in daughters, use 'current' variable instead.
 *     SecWid is used in all 'CONS' daughters to define dimensions.
 *
       section = emcg_ZOrig
       secwid  = emcg_Front
-      Create and Position EALP         z=section-center+secwid/2
+      Create and Position EFLP         z=section-center+secwid/2
       section = section + secwid
 *
        Do I_section =1, nint(Emcg_Nsection)
@@ -216,7 +215,7 @@ Block EMOD is one module  of the EM END-CAP
          if (I_section == 1) then      ! Shower Max section
 *
             secwid  = emcg_Front
-            Create and Position EALP   z=section-center+secwid/2
+            Create and Position EXFP   z=section-center+secwid/2
             section = section + secwid
 *
             secwid  = emcg_GapMax
@@ -226,13 +225,8 @@ Block EMOD is one module  of the EM END-CAP
          endif
 *
          secwid  = esec_PlateB
-         if (I_section != 3 ) then
          Create and Position ESSP      z=section-center+secwid/2
-         else
-         Create and Position EBPL      z=section-center+secwid/2
-         endif
          section = section + secwid
-*
       End Do
 endblock
 * ----------------------------------------------------------------------------
@@ -291,19 +285,16 @@ Block EPER  is a EM section period (super layer)
 *
 * --- Divide module (section) into radial blocks 
 * 
-      Deta(0)=0	
-      Do ie = 1,nint(eetr_NEta)
-*
-        Deta(ie)=Deta(ie-1)+eetr_Eta(eetr_Neta-(ie-1)) 
 
-        RBot=max(section*Tanf(eetr_EtaRmx-Deta(ie-1)), _
+      Deta  = ((current+Cell/2)*Tan_Upp-(current+Cell/2)*Tan_Low)/eetr_Neta
+      Do ie = 1,nint(eetr_NEta)
+*                                         
+        RBot=max(current*Tanf(eetr_EtaRmx)+(ie-1)*Deta, _
                 (current+Gap+emcg_scint/2)*Tan_Low)
-        if(is != nint(esec_NLayer)) then          ! Ordinary Sci layer
-        RTop=min(section*Tanf(eetr_EtaRmn-Deta(ie)), _
-                (current-Cell/2)*Tan_Upp)
-        else                                      ! last Sci layer in section
-        RTop=min(section*Tanf(eetr_EtaRmn-Deta(ie)), _
-                (current-Cell) *Tan_Upp)
+        if(is != nint(esec_NLayer)) then         ! Ordinary Sci layer
+        RTop=min(current*Tanf(eetr_EtaRmx)+ ie*Deta,(current-Cell/2)*Tan_Upp)
+        else                                     ! last Sci layer in section
+        RTop=min(current*Tanf(eetr_EtaRmx)+ ie*Deta,(current-Cell) *Tan_Upp)
         end if
         check RBot<RTop
 *
@@ -351,7 +342,6 @@ Block ESCI  is the active scintillator (polystyren) layer
 *
       Material  POLYSTYREN
       Material  Cpolystyren   Isvol=1
-*pn     Medium    sens_sci 
       Attribute ESCI   seen=1   colo=7  fill=1   
 *     local z goes along the radius, y is the thickness
       Shape     TRD1   dy=Emcg_Scint/2  dz=(RTop-RBot)/2-emcg_GapCel
@@ -381,10 +371,34 @@ Block ELED  is lead absorber Plate
 
 endblock
 * ----------------------------------------------------------------------------
+Block EFLP  is First Aluminium plate 
+*
+      Material  Aluminium
+      Attribute EFLP   seen=1  colo=3 fill=1
+      Shape     TUBS   dz=SecWid/2,
+                       rmin=(section+secwid)*Tan_Low,
+                       rmax=(section)*Tan_Upp-dd,
+                       phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec
+*                rmn1=section*Tan_Low-dd rmn2=(section+secwid)*Tan_Low-dd,
+*                rmx1=section*Tan_Upp-dd rmx2=(section+secwid)*Tan_Upp-dd
+endblock
+* ----------------------------------------------------------------------------
+Block EXFP  is First  plate in SMAX
+*
+      Material  Iron
+      Attribute EXFP   seen=1  colo=6 fill=1
+      Shape     TUBS   dz=SecWid/2,
+                       rmin=(section+secwid)*Tan_Low,
+                       rmax=(section)*Tan_Upp-dd,
+                       phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec
+*                rmn1=section*Tan_Low-dd rmn2=(section+secwid)*Tan_Low-dd,
+*                rmx1=section*Tan_Upp-dd rmx2=(section+secwid)*Tan_Upp-dd
+endblock
+* ----------------------------------------------------------------------------
 Block ESHM  is the Shower Max  section
 *
       Material  Air 
-      Material  SmAir Isvol=0 
+      Material  SmAir Isvol=0
       Attribute ESHM   seen=1   colo=4
       Shape     CONS   dz=SecWid/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
@@ -395,32 +409,33 @@ Block ESHM  is the Shower Max  section
       Call GSTPAR (ag_imed,'LOSS',1.)
       Call GSTPAR (ag_imed,'STRA',1.)
 *
-      USE EMXG 
+      USE EMXG Version=1
       curr =  section
       maxcnt = emxg_Zsmax+emcg_Gapmax/2 
       msecwd = emxg_Gtenm ; mxgten = emxg_Gtenm
-      Create and Position MGTN         z=curr-maxcnt+msecwd/2
-      curr = curr + msecwd
+      Create and Position EXGT         z=curr-maxcnt+msecwd/2
+      curr = curr + msecwd+0.1
 *
         Do J_section = 1,2
 *       
-         USE MSEC Jsect=J_section
+         USE EXSE Jsect=J_section
         
-         msecwd  = msec_Swidth
-         Create and position MSEC      z=curr-maxcnt+msecwd/2
-         curr = curr + msecwd ; msecwd=msec_glayer
+         msecwd  = exse_Swidth
+**         if(J_section==2) curr=curr+0.1
+         Create and position EXSE      z=curr-maxcnt+msecwd/2
+         curr = curr + msecwd ; msecwd=exse_glayer
          if (J_section==2) then
          msecwd=emxg_salup
-         Create and Position MALP      z=curr-maxcnt+emxg_salup/2
-         curr = curr + msec_Glayer
+         Create and Position EALP      z=curr-maxcnt+emxg_salup/2
+         curr = curr + exse_Glayer
          end if 
-         Create and Position MGTN      z=curr-maxcnt+msecwd/2
-         curr = curr + msec_Glayer
+         Create and Position EXGT      z=curr-maxcnt+msecwd/2
+         curr = curr + exse_Glayer
         End do
 
 Endblock
 * ----------------------------------------------------------------------------
-Block MGTN  is the G10 layer in the SMax  
+Block EXGT  is the G10 layer in the SMax  
 *
 *     G10 is about 60% SiO2 and 40% epoxy
       Component Si    A=28.08  Z=14   W=0.6*1*28./60.
@@ -429,7 +444,7 @@ Block MGTN  is the G10 layer in the SMax
       Component H     A=1      Z=1    W=0.4*14*1./174.
       Component O     A=16     Z=8    W=0.4*4*16./174.
       Mixture   g10   Dens=1.7
-      Attribute MGTN   seen=1   colo=7
+      Attribute EXGT   seen=1   colo=7
       Shape     CONS   dz=mxgten/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
                 rmn1=curr*Tan_Low-dd rmn2=(curr+mxgten)*Tan_Low-dd,
@@ -438,25 +453,19 @@ Block MGTN  is the G10 layer in the SMax
       Call GSTPAR (ag_imed,'CUTELE',0.00001)
 EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-Block MSEC  is the Shower Max  section
-
+Block EXSE  is the Shower Max  section
 *     SMD default gas P10: Ar/methane 9:1 by weight
       Component Ar    A=40  Z=18 W=.9
       Component C     A=12  Z=6  W=.1*12./16.
       Component H     A=1   Z=1  W=.1* 4./16.
       Mixture   P10   Dens=1.78e-3    
-      Material  msec_mat {Air, P10}
-      Material  msec_med {SmAir isvol=0, sensitive_gas isvol=1 stemax=5}
-      Attribute MSEC   seen=1   colo=7
+      Material  EXSE_mat {Air, P10}
+      Material  EXSE_med {SmAir isvol=0, sensitive_gas isvol=1 stemax=5}
+      Attribute EXSE   seen=1   colo=7
       Shape     CONS   dz=msecwd/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
                 rmn1=curr*Tan_Low-dd  rmn2=(curr+msecwd)*Tan_Low-dd,
                 rmx1=curr*Tan_Upp-dd  rmx2=(curr+msecwd)*Tan_Upp-dd
-
-***\   you can not do this:             imat = msec_mat 
-****>  this affects other systems:      imed = msec_med 
-***/   ag_imed should be used instead:
-
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
       Call GSTPAR (ag_imed,'CUTELE',0.00001)
       Call GSTPAR (ag_imed,'LOSS',1.)
@@ -477,14 +486,14 @@ Block MSEC  is the Shower Max  section
            Rleft=ir*emxg_Rstep/tan(pi/emcg_nsupsec)
          end if
 
-       Create   MRIB
+       Create   ERIB
        if(Ir==1) then
-       Position MRIB  x=+(Right+Rleft)/2  
+       Position ERIB  x=+(Right+Rleft)/2  
        end if 
-       Position MRIB  x=+(Right+Rleft)/2  y=+(emxg_Rstep)*(ir) 
-       Position MRIB  x=+(Right+Rleft)/2  y=-(emxg_Rstep)*(ir) 
+       Position ERIB  x=+(Right+Rleft)/2  y=+(emxg_Rstep)*(ir) 
+       Position ERIB  x=+(Right+Rleft)/2  y=-(emxg_Rstep)*(ir) 
        end do
-       HITS     MSEC xx:16:SH(-250,250)  yy:16:(-250,250)  zz:16:(-350,350),
+       HITS     EXSE xx:16:SH(-250,250)  yy:16:(-250,250)  zz:16:(-350,350),
                      px:16:(-100,100)    py:16:(-100,100)  pz:16:(-100,100),
                      Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)  Step:16:(0,100),
                      none:16:            Eloss:0:(0,10)
@@ -493,11 +502,11 @@ Block MSEC  is the Shower Max  section
       
 endblock
 * ----------------------------------------------------------------------------
-Block MALP  is aluminium  Plate in Shower Max 
+Block EALP  is aluminium  Plate in Shower Max 
 *
       Material  Aluminium
       Material  CAluminium   Isvol=0
-      Attribute MALP   seen=1  colo=1
+      Attribute EALP   seen=1  colo=1
       Shape     CONS   dz=emxg_salup/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
                 rmn1=curr*Tan_Low-dd rmn2=(curr+emxg_salup/2)*Tan_Low-dd,
@@ -508,11 +517,11 @@ Block MALP  is aluminium  Plate in Shower Max
       Call GSTPAR (ag_imed,'STRA',1.)
 endblock
 * ----------------------------------------------------------------------------
-Block MRIB  is aluminium  rib in Shower Max 
+Block ERIB  is aluminium  rib in Shower Max 
 *
       Material  Aluminium
       Material  CAluminium   Isvol=0
-      Attribute MRIB   seen=1  colo=1
+      Attribute ERIB   seen=1  colo=1
       Shape     BOX   dz=emxg_riblg/2   dx=(Right-Rleft)/2,
                       dy=emxg_ribwd/2
       Call GSTPAR (ag_imed,'CUTGAM',0.00001)
@@ -521,37 +530,15 @@ Block MRIB  is aluminium  rib in Shower Max
       Call GSTPAR (ag_imed,'STRA',1.)
 endblock
 * ----------------------------------------------------------------------------
-Block EALP  is aluminium  Plate 
-*
-      Material  Aluminium
-      Attribute EALP   seen=1  colo=3 fill=1
-      Shape     TUBS   dz=SecWid/2,
-                       rmin=(section+secwid)*Tan_Low,
-                       rmax=(section)*Tan_Upp-dd,
-                       phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec
-*                rmn1=section*Tan_Low-dd rmn2=(section+secwid)*Tan_Low-dd,
-*                rmx1=section*Tan_Upp-dd rmx2=(section+secwid)*Tan_Upp-dd
-endblock
-* ----------------------------------------------------------------------------
 Block ESSP  is stainless steel  Plate 
 *
-      Material  Iron
+      Material  Iron      
       Attribute ESSP   seen=1  colo=6 fill=1	
       Shape     CONS   dz=Esec_PlateB/2,
                 phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
                 rmn1=section*Tan_Low-dd rmn2=(section+secwid)*Tan_Low-dd,
                 rmx1=section*Tan_Upp-dd rmx2=(section+secwid)*Tan_Upp-dd
 endblock
-* ----------------------------------------------------------------------------
-Block EBPL  is stainless steel  Back Plate
-*
-      Material  Iron 
-      Attribute EBPL   seen=1  colo=3 fill=1
-      Shape     CONS   dz=Esec_PlateB/2,
-                phi1=-180/emcg_Nsupsec phi2=+180/emcg_Nsupsec,
-                rmn1=section*Tan_Low-dd rmn2=(section+secwid)*Tan_Low-dd,
-                rmx1=section*Tan_Upp-dd rmx2=(section+secwid)*Tan_Upp-dd
-endblock       
 * ----------------------------------------------------------------------------
 * ECAL nice views: dcut ecvo x 1       10 -5  .5 .1
 *                  draw emdi 105 0 160  2 13  .2 .1

@@ -1,17 +1,21 @@
-MACRO run_ev0 i=1 GLOBAL_HOME=$STAR/pams/global/kumac
+MACRO ev0_am i=1 
 i = [1]
-GLOBAL_HOME = [2]
 
 if [i] = 1 then
-exec [GLOBAL_HOME]/init_ev0
+  exec init_ev0
 endif
+
 message 'Calling ev0...'
+message 'Warning Im Zeroing dst_vertex table'
+
+rowcount /dui/data/global/vertices/vertex 0
 
 ami/mod/call ev0_am _
       	/dui/constants/global/params/ev0par _
         /dui/data/global/tracks/globtrk _
         /dui/data/global/vertices/evr_privert _
-        /dui/data/global/vertices/ev0out _
+	/dui/data/global/vertices/vertex _
+        /dui/data/global/vertices/ev0out _	
         /dui/data/global/tracks/ev0track _ 
 	/dui/constants/global/magnetic_field/magf
 
@@ -21,9 +25,19 @@ endif
 
 RETURN
 
-MACRO eval i=1 GLOBAL_HOME=$STAR/pams/global/kumac
+***********************************************************************
+***********************************************************************
+***********************************************************************
+
+
+MACRO ev0_eval2 i=1 
 
 i = [1]
+
+if ( [i] .eq. 1 ) then
+ tdm/newtable /dui/data/global/vertices/ev0_eval ev0_eval 10000
+ maxrow  /dui/data/global/vertices/ev0_eval 10000
+endif
 
 message ' Calling ev0_eval2..'
 
@@ -32,11 +46,15 @@ if ( staf_result(1) .eq. 0) then
   tdm/newtable /dui/data/svt/tracks/stk_track stk_track 1
 endif
 
+rowcount /dui/data/global/vertices/ev0_eval 0
+
 ami/mod/call ev0_eval2 _
       	/dui/data/svt/tracks/stk_track _
 	/dui/data/tpc/tracks/tptrack  _
-	/dui/data/tpc/tracks/tpt_eval  _
+	/dui/data/tpc/tracks/evaltrk  _
+        /dui/data/global/vertices/vertex _
         /dui/data/global/vertices/ev0out _
+	/dui/data/global/vertices/ev0_eval _
         /dui/geant/Event/g2t_track _
         /dui/geant/Event/g2t_vertex
 
@@ -47,9 +65,12 @@ endif
 
 return
 
+***********************************************************************
+***********************************************************************
+***********************************************************************
 
 
-MACRO direct i=1 GLOBAL_HOME=$STAR/pams/global/kumac
+MACRO direct i=1
 
 i = [1]
 

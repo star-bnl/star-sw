@@ -33,8 +33,8 @@ END {#  print "m="m",k="k;b
         f = " "; y = " "; z = " ";
         fref = " "; yref= " "; zref = " ";
         if (i==1) {f=       x "</a>"; fref="<a href=\""ref"\">";}
-        if (i<=m) {y=inn[i-1] "</a>"; yref="<a href=\"#"inn[i-1]"_tab\">";}
-        if (i<=k) {z=out[i-1] "</a>"; zref="<a href=\"#"out[i-1]"_tab\">";}
+        if (i<=m) {y=inn[i-1] "</a>"; yref="<a href=\"table.html#"inn[i-1]"_tab\">";}
+        if (i<=k) {z=out[i-1] "</a>"; zref="<a href=\"table.html#"out[i-1]"_tab\">";}
         print "<TD>" fref f "<TD>" yref y"<TD>" zref z "</TD></TR>" 
 }
 

@@ -1,34 +1,12 @@
-********************* tss.kumac  ************************************
-**************************************************************************
-**************************************************************************
+macro init 
 
-macro init tpc_sector_first tpc_sector_last magfield
+  cd /dui/constants/tpc/params
 
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
+  dio/newfilestream    tss $STAR/params/tpc/tss_pars.xdf r
+  dio/stream/getevent  tss
+  dio/stream/close     tss
 
-
-
-cd /dui/constants/tpc/params
-
-**set tss parameters
-dio/newfilestream tss [PARAMS_TPC]tss_pars.xdf r
-dio/stream/getevent  tss
-dio/stream/close     tss
-
-cd tsspars
- 
-*** Choose active configuration
-tdm/table/cell/putvalue 'tsspar[0].bfield'   [magfield]
-tdm/table/cell/putvalue 'tsspar[0].min_sect' [tpc_sector_first]
-tdm/table/cell/putvalue 'tsspar[0].max_sect' [tpc_sector_last]
-
-message Minimum and Maximum Sector numbers:
-tdm/table/cell/getvalue 'tsspar[0].bfield'
-tdm/table/cell/getvalue 'tsspar[0].min_sect'
-tdm/table/cell/getvalue 'tsspar[0].max_sect'
-
-cd /dui
+  cd /dui
 
 return
 

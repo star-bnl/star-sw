@@ -1,7 +1,9 @@
       INTEGER*4 FUNCTION EV0_EVAL2( svt_track_h,  svt_track,
      +                         tpt_track_h,  tpt_track,
      +                         tte_eval_h,  tte_eval,
+     +                         vertex_h,  vertex,
      +                         ev0out_h,  ev0out,
+     +                         ev0_eval_h, ev0_eval,
      +                         g2t_track_h,  g2t_track,
      +                         g2t_vertex_h,  g2t_vertex)
 C>---------------------------------------------------------------------
@@ -29,6 +31,8 @@ C---------------
      +     tpt_track(2).id_globtrk,tpt_track)
       ok = tls_quick_sort_i(svt_track_h.nok, svt_track(1).id_globtrk,
      +     svt_track(2).id_globtrk, svt_track)
+
+      ev0_eval_h.nok = ev0out_h.nok
 
       do i=1,tpt_track_h.nok
          if( tpt_track(i).id_globtrk .ne. 0) then
@@ -63,8 +67,6 @@ C---------------
          iv2s = 0
          iv1t = 0
          iv2t = 0
-
-
          
          do j=start_tpc,tpt_track_h.nok
             if( tpt_track(j).id_globtrk .eq. iv1) then
@@ -106,59 +108,83 @@ C---------------
         iv2 = 0
         if( done1 .eq. 1) then
            iv1 = g2t_track(iv1t).start_vertex_p
-           ev0out(i).itrue = -1
+           ev0_eval(i).itrue = -1
         elseif( done1 .eq. 10) then
            iv1 = g2t_track(iv1s).start_vertex_p
-           ev0out(i).itrue  = -2
+           ev0_eval(i).itrue  = -2
         else
            if( iv1s .eq. iv1t) then
               iv1 = g2t_track(iv1t).start_vertex_p
-              ev0out(i).itrue = -3
+              ev0_eval(i).itrue = -3
            else
               iv1 = g2t_track(iv1t).start_vertex_p
-              ev0out(i).itrue = -4
+              ev0_eval(i).itrue = -4
            endif
         endif
 
         if( done2 .eq. 1) then
            iv2 = g2t_track(iv2t).start_vertex_p
-           ev0out(i).itrue = ev0out(i).itrue -10
+           ev0_eval(i).itrue = ev0_eval(i).itrue -10
         elseif( done2 .eq. 10) then
            iv2 = g2t_track(iv2s).start_vertex_p
-           ev0out(i).itrue  = ev0out(i).itrue -20
+           ev0_eval(i).itrue  = ev0_eval(i).itrue -20
         else
            if( iv2s .eq. iv2t) then
               iv2 = g2t_track(iv2t).start_vertex_p
-              ev0out(i).itrue = ev0out(i).itrue -30
+              ev0_eval(i).itrue = ev0_eval(i).itrue -30
            else
               iv2 = g2t_track(iv2t).start_vertex_p
-              ev0out(i).itrue = ev0out(i).itrue -40
+              ev0_eval(i).itrue = ev0_eval(i).itrue -40
            endif
         endif
               
         IF( (iv1.eq.iv2).and.(iv1.ne.1).and.(iv2.ne.1) ) THEN
-         ev0out(i).itrue= -1*ev0out(i).itrue
-         ev0out(i).x_true(1)=g2t_vertex(iv1).ge_x(1)
-         ev0out(i).x_true(2)=g2t_vertex(iv1).ge_x(2)
-         ev0out(i).x_true(3)=g2t_vertex(iv1).ge_x(3)
-         ev0out(i).p_true(1)=g2t_track(g2t_vertex(iv1).parent_p).p(1)
-         ev0out(i).p_true(2)=g2t_track(g2t_vertex(iv1).parent_p).p(2)
-         ev0out(i).p_true(3)=g2t_track(g2t_vertex(iv1).parent_p).p(3)
-        ENDIF
+         ev0_eval(i).itrue= -1*ev0_eval(i).itrue
+         ev0_eval(i).x_true=g2t_vertex(iv1).ge_x(1)
+         ev0_eval(i).y_true=g2t_vertex(iv1).ge_x(2)
+         ev0_eval(i).z_true=g2t_vertex(iv1).ge_x(3)
+         ev0_eval(i).px_true=g2t_track(g2t_vertex(iv1).parent_p).p(1)
+         ev0_eval(i).py_true=g2t_track(g2t_vertex(iv1).parent_p).p(2)
+         ev0_eval(i).pz_true=g2t_track(g2t_vertex(iv1).parent_p).p(3)
+         ev0_eval(i).rapidity_true = 
+     +        g2t_track(g2t_vertex(iv1).parent_p).rapidity
+        else
+      
+         ev0_eval(i).x_true= 0
+         ev0_eval(i).y_true= 0
+         ev0_eval(i).z_true= 0
+         ev0_eval(i).px_true= 0
+         ev0_eval(i).py_true= 0
+         ev0_eval(i).pz_true= 0
+         ev0_eval(i).rapidity_true = 0
+         endif
+
+        ev0_eval(i).x = vertex(ev0out(i).id_vertex).x
+        ev0_eval(i).y = vertex(ev0out(i).id_vertex).y
+        ev0_eval(i).z = vertex(ev0out(i).id_vertex).z
+        ev0_eval(i).px = ev0out(i).px
+        ev0_eval(i).py = ev0out(i).py
+        ev0_eval(i).pz = ev0out(i).pz
+        ev0_eval(i).rapidity_la = ev0out(i).rapidity_la
+        ev0_eval(i).rapidity_lb = ev0out(i).rapidity_lb
+        ev0_eval(i).rapidity_k0 = ev0out(i).rapidity_k0
+        ev0_eval(i).pid_pos = ev0out(i).pidpos
+        ev0_eval(i).pid_neg = ev0out(i).pidneg
+        ev0_eval(i).pid_true = g2t_track(g2t_vertex(iv1).parent_p).ge_pid
 
         if (iv1t .gt. 0) then
-           ev0out(i).cov(3) = g2t_track(iv1t).ge_pid
+           ev0_eval(i).pid_neg_true = g2t_track(iv1t).ge_pid
         elseif( iv1s .gt. 0) then
-           ev0out(i).cov(3) = g2t_track(iv1s).ge_pid
+           ev0_eval(i).pid_neg_true = g2t_track(iv1s).ge_pid
         else
-           ev0out(i).cov(3) = 0
+           ev0_eval(i).pid_neg_true  = 0
         endif
         if( iv2t .gt. 0) then
-            ev0out(i).cov(2) = g2t_track(iv2t).ge_pid
+            ev0_eval(i).pid_pos_true  = g2t_track(iv2t).ge_pid
         elseif( iv2s .gt. 0) then
-           ev0out(i).cov(2) = g2t_track(iv2s).ge_pid
+           ev0_eval(i).pid_pos_true  = g2t_track(iv2s).ge_pid
         else
-           ev0out(i).cov(2)= 0
+           ev0_eval(i).pid_pos_true = 0
         endif          
 
  10     CONTINUE

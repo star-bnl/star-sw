@@ -5,9 +5,7 @@
 #include "g2t_vertex.idl"
 #include "g2t_track.idl"
 #include "g2t_emc_hit.idl"
-#include "g2t_smd_hit.idl"
-#include "g2t_eem_hit.idl"
-#include "g2t_esm_hit.idl"
+
 #include "ems_control.idl"
 #include "ems_hits_bemc.idl"
 #include "ems_hits_bsmd.idl"
@@ -20,9 +18,9 @@ interface ems_interface2 : amiModule {
         , in g2t_vertex g2t_vertex
         , in g2t_track g2t_track
         , in g2t_emc_hit g2t_emc_hit
-        , in g2t_smd_hit g2t_smd_hit
-        , in g2t_eem_hit g2t_eem_hit
-        , in g2t_esm_hit g2t_esm_hit
+        , in g2t_emc_hit g2t_smd_hit
+        , in g2t_emc_hit g2t_eem_hit
+        , in g2t_emc_hit g2t_esm_hit
         , in ems_control ems_control
         , out ems_hits_bemc ems_hits_bemc
         , out ems_hits_bsmd ems_hits_bsmd

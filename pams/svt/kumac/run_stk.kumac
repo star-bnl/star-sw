@@ -1,9 +1,9 @@
-MACRO run_stk i=1 SVT_HOME=$STAR/pams/svt/kumac
+MACRO run_stk i=1 
 i = [1]
-SVT_HOME = [2]
+
 if [i] = 1 then
-  exec [SVT_HOME]/init_stk
-  exec [SVT_HOME]/init_sgr
+  exec init_stk
+  exec init_sgr
 
 message ' *** Warning vertex not found just filled fron MC ***'
 
@@ -17,11 +17,10 @@ message ' *** Warning vertex not found just filled fron MC ***'
   tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
   tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0
 
-
 endif
 
-
 message 'Calling STK_AM'
+
 ami/mod/call stk_am _
         /dui/constants/svt/params/stk_stkpar _
         /dui/geant/Event/g2t_track _
@@ -40,16 +39,19 @@ ami/mod/call stk_am _
         /dui/constants/svt/geometry/config _
         /dui/constants/svt/geometry/geom _
         /dui/data/global/tracks/globtrk
+
         if (staf_status(1).ne.stafcv_ok) then
                 message 'Problem on return from STK_AM'
         endif
 
-
 RETURN
+
+***************************************************************
 
 MACRO eval_stk
 	
 	message 'Calling STE_AM...'
+
 	ami/mod/call ste_am _
 		/dui/geant/Run/g2t_gepart _
 		/dui/geant/Event/g2t_svt_hit _
@@ -58,7 +60,7 @@ MACRO eval_stk
 		/dui/geant/Event/g2t_vertex _
 		/dui/data/svt/hits/scs_spt _
 		/dui/data/global/vertices/stk_vtx _
-	        /dui/data/srvt/tracks/groups _
+	        /dui/data/svt/tracks/groups _
 		/dui/data/svt/tracks/stk_track _
 		/dui/data/svt/tracks/stk_kine _
 	 	/dui/data/svt/tracks/mcgroups _
@@ -66,14 +68,16 @@ MACRO eval_stk
 		/dui/data/svt/tracks/stk_mckine _
                 /dui/data/svt/tracks/ste_teval _
                 /dui/data/svt/tracks/ste_teff
+
 	if (staf_status(1).ne.stafcv_ok) then
 		message 'Problem on return from STE_AM'
 	endif
+
 newcwn [i] ste_teval
 	nt/proj 100 [i].(kpt-rpt)/kpt
 
 return
-
+*********************************************************************
 	
 
 

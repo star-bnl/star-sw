@@ -1,6 +1,17 @@
+*** TO DO:
+** put in tss
+** fix directory pointers for tpc parameters - don't use setup global macros
+****************************************************
+* TO RUN:
+*
+*  1. stardev (or whichever version you want)
+*  2. staf++
+*  3. exec $STAR/kumacs/chain/glob_svt_tpc_chain
+* 
+* if you want to change anything, copy kumac to your area and change:
+*  4. input values on macro command line
+*  5. default directory list where you pick up kumacs from 
 **************************************************
-MACRO run_all no_events=1 file=/afs/rhic/star/data/samples/event_0000050.xdf svt_simul=srs svt_tracker=sgr  tpc_simul=tfs tpc_tracker=tpt tpc_svt_match=svm event_refit=egr ev0_finder=ev0
- **************************************************
  * MACRO RUN_ALL
  *
  * SYNOPSIS: STAF analysis driver for the SVT + TPC analysis
@@ -15,42 +26,96 @@ MACRO run_all no_events=1 file=/afs/rhic/star/data/samples/event_0000050.xdf svt
  *    use of LOCAL rather than ANA or SIM depend on the user's
  *    specific needs.
  *
-
+ *  tpc track reconstruction tpt_run runs real track reconstruction
+ *                           tte_run runs ideal track reconstruction
+ *
+ *
  * Authors: H. Caines, C. Pruneau
  *
  * History:
  *          Feb 24, 97 - created
- *************************************************
- no_events=[1]
- file = [2]
- LOCAL = $HOME
- PAMS   = /afs/rhic/star/packages/SL98c/pams
-
- UTIL_HOME = /afs/rhic/star/packages/SL98c/kumacs/util
- KUM_HOME = /afs/rhic/star/packages/SL98c/kumacs/chain
- SVT_HOME = [PAMS]/svt/kumac
- TPC_HOME = [PAMS]/tpc/kumac
- GLOBAL_HOME = [PAMS]/global/kumac
+ *          May 1, 1998 - editted by Kathy Turner
+ *          May 5, 1998 - Kathy
+**************************************************
  
- SVG_HOME = [SVT_HOME]
- SSS_HOME = [SVT_HOME]
- SSF_HOME = [SVT_HOME]
- SRS_HOME = [SVT_HOME]
- SGR_HOME = [SVT_HOME]
- STK_HOME = [SVT_HOME]
- SVM_HOME = [GLOBAL_HOME]
- TPG_HOME = [TPC_HOME]
- TFS_HOME = [TPC_HOME]
- TPT_HOME = [TPC_HOME]
- TTE_HOME = [TPC_HOME]
- EGR_HOME = [GLOBAL_HOME]
- EV0_HOME = [GLOBAL_HOME]
+MACRO run_all _
+   no_events=1 _ 
+   INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+   file=event_0000050.xdf _
+   svt_simul=srs _
+   svt_tracker=sgr _  
+   tpc_simul=tfs _
+   tpc_tracker=tpt _ 
+   tpc_svt_match=svm _ 
+   event_refit=egr _
+   ev0_finder=ev0 
 
 
- make svt tpc global
- *****************************************
- * variables
- *****************************************
+***********************************************************
+* PRINT OUT INPUT VALUES
+***********************************************************
+
+message ' *** Data sample directory -->  ' [INPUT_DATA_DIR]
+message ' *** Input file -->             ' [file]
+message ' *** Num Events to process -->  ' [no_events]
+message ' *** SVT simulator         -->  ' [svt_simul]
+message ' *** SVT tracker           -->  ' [svt_tracker]
+message ' *** TPC simulator         -->  ' [tpc_simul]
+message ' *** TPC tracker           -->  ' [tpc_tracker]
+message ' *** TPC-SVT track matcher -->  ' [tpc_svt_match]
+message ' *** Event Refitter        -->  ' [event_refit]
+message ' *** EV0 Finder            -->  ' [ev0_finder]
+
+
+***********************************
+* SETUP DIRECTORIES TO FIND KUMACS:
+***********************************
+
+ DEFAULT = _
+./kumacs/util,_
+./kumacs/chain,_
+./pams/emc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+
+
+****************************************
+*  LOAD LIBRARIES
+**************************************** 
+
+ if $vexist(make_done)=0 then
+   make svt 
+   make tpc 
+   make global  
+   vec/cre make_done
+ endif
+ 
+************************** 
+* SETUP TABLE DIRECTORIES
+**************************
+
+ exec setup_dir
+
+***************************
+* SETUP LOCAL VARIABLES
+**************************
+
  alias/create STAFCV_OK  1
  alias/create STAFCV_BAD 0
 
@@ -58,165 +123,228 @@ MACRO run_all no_events=1 file=/afs/rhic/star/data/samples/event_0000050.xdf svt
 * Create timing vector
 *****************************************
 
-v/create vsrs
-v/create vsgr
-v/create vstk
-v/create vtfs
-v/create vtpt
-v/create vsvm
-v/create vegr
-v/create vev0
+  v/create vsrs
+  v/create vsgr
+  v/create vstk
+  v/create vtfs
+  v/create vtpt
+  v/create vsvm
+  v/create vegr
+  v/create vev0
 
- *****************************************
- * create table directories
- *****************************************
- *****************************************
-  
- exec [UTIL_HOME]/setup_dir
- exec [UTIL_HOME]/setup_global_macros
 
-Message 'Doing' [no_events] 'events'
+ **=====================================================================
+ **   Here's where main processing begins
+ **=====================================================================
+
+
  ***************************************** 
  * open input file and read header
  *****************************************
- exec [UTIL_HOME]/input_g2t_file#init [file]
+ exec input_g2t_file#init [INPUT_DATA_DIR][file]
 
- *****************************************
- * one time package initialization phase for geometry
- *****************************************
- cd /dui/data/svt
-
- exec  [SVG_HOME]/init_svg
- if [svt_simul] = sss then
-  message 'run_all-I1 : will use svt simulator sss/ssf'
-  exec [SSS_HOME]/init_sss
-  exec [SSF_HOME]/init_ssf
+ if (STAF_STATUS(1).ne. STAFCV_OK) then
+     message 'problem opening input file '
+     goto EOF 
  endif
 
+ **************************************
+ * open new output file
+ **************************************
+ exec write_table_to_file#init evout ev0out_tte.dsl
+
+
  *****************************************
- * TPC geometry
+ * SVT initialization - geometry
  *****************************************
 
- exec [TPG_HOME]/tpg_init
 
- dio/newf output /star/mds/users/ev0out_tte.dsl w
+ exec init_svg
+ message ' called init_svg'
+ if [svt_simul] = sss then
+   message 'run_all-I1 : will use svt simulator sss/ssf'
+   exec init_sss
+   exec init_ssf
+ endif
 
- cd /dui/geant
- stream/getevent G2Tfile
- ls /dui/geant/Event
+ ****************************************
+ * TPC geometry &  pam initialization 
+ ****************************************
+
+  exec tpg_init#init
+  exec tpc_fast_sim#initialize
+
  *****************************************
- * event loop
+ *  MAIN EVENT LOOP 
  *****************************************
 
  do ievent=1,[no_events]
-    
+
+    exec input_g2t_file#read
+
     if (staf_status(1).ne.STAFCV_OK) goto EOF
-    message 'run_all-I3 : doing loop' [ievent]
 
-   
+    message 'run_glob_svt_tpc_chain : doing loop, event #' [ievent]
 
- *  SVT detector response simulation 
-   cd /dui/data/svt
 $cptime
+   
+ *  SVT detector response simulation -----------------------------
+
     if [svt_simul]= sss then
-      exec [SSS_HOME]/run_sss [ievent] [SSS_HOME]
+      exec run_sss [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-      exec [SSF_HOME]/run_ssf [ievent] [SSF_HOME]
+      exec run_ssf [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
- *    exec [SCL_HOME]/run_scl [ievent] [SCL_HOME]
+ *    exec run_scl [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
     elseif [svt_simul]= srs then
-      exec [SRS_HOME]/run_srs  [ievent] [SRS_HOME]
+      exec run_srs  [ievent]
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+    else
+      message ' svt simulator not valid!!'
     endif
-sigma vsrs = vsrs + $cptime
+   sigma vsrs = vsrs + $cptime
 
 
-    cd ../svt
- *  svt track finding and momentum reconstruction
+ *  svt track finding and momentum reconstruction -----------------------
+
     if [svt_tracker]= stk then
-      exec [STK_HOME]/run_stk  [ievent] [STK_HOME]
+      exec run_stk  [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto TPC
     elseif [svt_tracker]=sgr then
-      exec [SGR_HOME]/run_sgr  [ievent] [SGR_HOME]
+      exec run_sgr  [ievent] 
 	 if (staf_status(1) .ne. stafcv_ok) goto TPC
-sigma vsgr = vsgr + $cptime
-     exec [STK_HOME]/run_stk  [ievent]+1 [STK_HOME]
+      sigma vsgr = vsgr + $cptime
+      exec run_stk  [ievent]+1 
 	 if (staf_status(1) .ne. stafcv_ok) goto TPC
+    else
+      message ' svt_tracker not valid! '
     endif
-sigma vstk = vstk + $cptime
+    sigma vstk = vstk + $cptime
 
 
- *  tpc track reconstruction tpt_run runs real track reconstruction
- *                           tte_run runs ideal track reconstruction
- TPC:
+TPC:
 
-    cd /dui/data/tpc
+* TPC simulator ---------------------------------------------------------
 
-    if [tpc_simul]=tfs then
-      exec [TFS_HOME]/tfs_run [ievent] [TFS_HOME] 
-      if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-    endif  
-sigma vtfs = vtfs + $cptime
-
-    if [tpc_tracker]=tpt then
-       exec [TPT_HOME]/tpt_run [ievent] [TPT_HOME]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
-    elseif [tpc_tracker]=tte then
-       exec [TTE_HOME]/tte_run [ievent] [TTE_HOME]
-	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+  if [tpc_simul]=tfs then
+    exec tpc_fast_sim#process_event [ievent]
+    if (staf_status(1) .ne. stafcv_ok) then
+     message ' problem with tpc_fast_sim_process_event'
+     goto NEXT_EVENT
     endif
+    sigma vtfs = vtfs + $cptime
+  else
+    message ' not a valid tpc simulator '
+    go to NEXT_EVENT
+  endif
 
-sigma vtpt = vtpt + $cptime
- *  tpc to svt matching
 
-    cd /dui/data/global
+* TPC tracking ----------------------------------------------------------
+
+   if [tpc_tracker]=tpt then
+     exec tpc_fast_sim#run_tracker_tpt [ievent]
+     if (staf_status(1) .ne. stafcv_ok) then
+      message ' problem with tpc_fast_sim_run_tracker_tpt'
+      goto NEXT_EVENT
+     endif
+   elseif [tpc_tracker]=tte then
+     exec tpc_fast_sim#run_tracker_tte [ievent]
+     if (staf_status(1) .ne. stafcv_ok) then
+      message ' problem with tpc_fast_sim_run_tracker_tte'
+      goto NEXT_EVENT
+     endif
+   else
+     message ' tpc tracker not valid!'
+   endif
+   sigma vtpt = vtpt + $cptime
+
+
+* TPC to SVT Matching ----------------------------------------------------
 
    if [tpc_svt_match]=svm then
-      exec [SVM_HOME]/run_svm [ievent] [SVM_HOME]
+      exec run_svm#run_svm [ievent] 
 	if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+   else
+     message ' not doing tpc and svt matching'
    endif
-sigma vsvm = vsvm + $cptime
-*  event global refit
+   sigma vsvm = vsvm + $cptime
 
-   cd /dui/data/global
+
+* Event Global Refit -----------------------------------------------
+
    if [event_refit]=egr then
-      exec [EGR_HOME]/run_egr [ievent] [EGR_HOME]
+      exec run_egr#egr [ievent] 
 	if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+   else
+     message ' not doing global event refitting'
    endif
-sigma vegr = vegr + $cptime
-*  V0 find
-   cd /dui/data/global
+   sigma vegr = vegr + $cptime
+
+
+*  V0 Finder -----------------------------------------------------------
+
    if [ev0_finder]=ev0 then
-      exec [EV0_HOME]/run_ev0  [ievent] [EV0_HOME]
+      exec run_ev0#ev0_am  [ievent] 
 	if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+   else
+     message ' not doing v0 finding'
    endif
-sigma vev0 = vev0 + $cptime
-* Plots and evaluation
+   sigma vev0 = vev0 + $cptime
 
-exec [EV0_HOME]/run_ev0#eval  [ievent] [EV0_HOME]
 
-v/print vsrs
-v/print vsgr
-v/print vstk
-v/print vtfs
-v/print vtpt
-v/print vsvm
-v/print vegr
-v/print vev0
- ls /dui/data/global
+* Plots and evaluation ----------------------------------------------
+* take out for now - doesn't work 5/1/98 
+*  exec run_ev0#ev0_eval2  [ievent] 
 
- dio/stream/putevent output /dui
 
-NEXT_EVENT:
- 
- dio/stream/getevent G2Tfile
- 
+* Timing values -------------------------------------------------------
+
+  v/print vsrs
+  v/print vsgr
+  v/print vstk
+  v/print vtfs
+  v/print vtpt
+  v/print vsvm
+  v/print vegr
+  v/print vev0
+
+* Write output file --------------------------------------------------
+
+  exec write_table_to_file#write evout /dui/data/global
+
+
+ NEXT_EVENT:
+  
 enddo
 
-*  task is completed
+
+ **=====================================================================
+ **   Here's where main processing ends 
+ **=====================================================================
+
+
 EOF:
 
-dio/stream/close data
+* ran out of data before processed all events asked for:
+  if [ievent].lt.[no_events] then
+   message ' End of input file'
+  endif
+
+* close input file 
+  message ' close input file'
+  exec input_g2t_file#close
+ 
+* close output file
+  message ' close output file'
+  exec write_table_to_file#close evout 
 
 RETURN
+
+
+*************************************************************************
+*************************************************************************
+*************************************************************************
+*************************************************************************
+*************************************************************************
+

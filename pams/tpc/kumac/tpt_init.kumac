@@ -1,20 +1,10 @@
 macro init
 
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC
-
-
 cd /dui/constants/tpc/params
 
-
-dio/newfilestream    tptpar [PARAMS_TPC]tpt_pars.xdf r
-dio/stream/getevent  tptpar
-dio/stream/close     tptpar
-
-cd tptpars
-tdm/table/cell/putvalue 'tpt_pars[1].pass_on'  0
-tdm/table/cell/putvalue 'tpt_pars[0].prob'     200.0 100.0
-tdm/table/cell/putvalue 'tpt_pars[1].prob'     200.0 500.0
+  dio/newfilestream    tptpar $STAR/params/tpc/tpt_pars.xdf r
+  dio/stream/getevent  tptpar
+  dio/stream/close     tptpar
 
 cd /dui
 

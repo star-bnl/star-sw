@@ -3,53 +3,52 @@
 macro setup_global_macros
 
  /MACRO/GLOBAL/CREATE DATA_SAMPLES  $AFS_RHIC/star/data/samples/ 
- /MACRO/GLOBAL/CREATE KUMACS_UTIL   $AFS_RHIC/star/packages/SL98b/kumacs/util/
+ /MACRO/GLOBAL/CREATE KUMACS_UTIL   $STAR/kumacs/util/
 
 
- /MACRO/GLOBAL/CREATE KUMACS_TPC    $AFS_RHIC/star/packages/SL98b/kumacs/tpc/
- /MACRO/GLOBAL/CREATE PARAMS_TPC    $AFS_RHIC/star/packages/SL98b/params/tpc/
- /MACRO/GLOBAL/CREATE PAMS_TPC_KUMAC  _
-                               $AFS_RHIC/star/packages/SL98b/pams/tpc/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_TPC    $STAR/kumacs/tpc/
+ /MACRO/GLOBAL/CREATE PARAMS_TPC    $STAR/params/tpc/
+ /MACRO/GLOBAL/CREATE PAMS_TPC_KUMAC_
+                               $STAR/pams/tpc/kumac/
 
 
- /MACRO/GLOBAL/CREATE KUMACS_SVT    $AFS_RHIC/star/packages/SL98b/kumacs/svt/
- /MACRO/GLOBAL/CREATE PARAMS_SVT    $AFS_RHIC/star/packages/SL98b/params/svt/
- /MACRO/GLOBAL/CREATE PAMS_SVT_KUMAC  _
-                               $AFS_RHIC/star/packages/SL98b/pams/svt/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_SVT    $STAR/kumacs/svt
+ /MACRO/GLOBAL/CREATE PARAMS_SVT    $STAR/params/svt
+ /MACRO/GLOBAL/CREATE PAMS_SVT_KUMAC_
+                               $STAR/pams/svt/kumac
 
- /MACRO/GLOBAL/CREATE KUMACS_EMC    $AFS_RHIC/star/packages/SL98b/kumacs/emc/
- /MACRO/GLOBAL/CREATE PARAMS_EMC    $AFS_RHIC/star/packages/SL98b/params/emc/
- /MACRO/GLOBAL/CREATE PAMS_EMC_KUMAC  _
-                               $AFS_RHIC/star/packages/SL98b/pams/emc/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_EMC    $STAR/kumacs/emc/
+ /MACRO/GLOBAL/CREATE PARAMS_EMC    $STAR/params/emc/
+ /MACRO/GLOBAL/CREATE PAMS_EMC_KUMAC_
+                               $STAR/pams/emc/kumac/
 
- /MACRO/GLOBAL/CREATE KUMACS_CTF    $AFS_RHIC/star/packages/SL98b/kumacs/ctf/
- /MACRO/GLOBAL/CREATE PARAMS_CTF    $AFS_RHIC/star/packages/SL98b/params/ctf/
- /MACRO/GLOBAL/CREATE PAMS_CTF_KUMAC  _
-                               $AFS_RHIC/star/packages/SL98b/pams/ctf/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_CTF    $STAR/kumacs/ctf/
+ /MACRO/GLOBAL/CREATE PARAMS_CTF    $STAR/params/ctf/
+ /MACRO/GLOBAL/CREATE PAMS_CTF_KUMAC_
+                               $STAR/pams/ctf/kumac/
 
- /MACRO/GLOBAL/CREATE KUMACS_MWC    $AFS_RHIC/star/packages/SL98b/kumacs/mwc/
- /MACRO/GLOBAL/CREATE PARAMS_MWC    $AFS_RHIC/star/packages/SL98b/params/mwc/
- /MACRO/GLOBAL/CREATE PAMS_MWC_KUMAC  _
-                               $AFS_RHIC/star/packages/SL98b/pams/mwc/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_MWC    $STAR/kumacs/mwc/
+ /MACRO/GLOBAL/CREATE PARAMS_MWC    $STAR/params/mwc/
+ /MACRO/GLOBAL/CREATE PAMS_MWC_KUMAC_
+                               $STAR/pams/mwc/kumac/
 
- /MACRO/GLOBAL/CREATE KUMACS_TRG    $AFS_RHIC/star/packages/SL98b/kumacs/trg/
- /MACRO/GLOBAL/CREATE PARAMS_TRG    $AFS_RHIC/star/packages/SL98b/params/trg/
- /MACRO/GLOBAL/CREATE PAMS_TRG_KUMAC  _
-                               $AFS_RHIC/star/packages/SL98b/pams/trg/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_TRG    $STAR/kumacs/trg/
+ /MACRO/GLOBAL/CREATE PARAMS_TRG    $STAR/params/trg/
+ /MACRO/GLOBAL/CREATE PAMS_TRG_KUMAC_
+                               $STAR/pams/trg/kumac/
 
- /MACRO/GLOBAL/CREATE KUMACS_FTPC $AFS_RHIC/star/packages/SL98b/kumacs/ftpc/
- /MACRO/GLOBAL/CREATE PARAMS_FTPC $AFS_RHIC/star/packages/SL98b/params/ftpc/
- /MACRO/GLOBAL/CREATE PAMS_FTPC_KUMAC  _
-                    $AFS_RHIC/star/packages/SL98b/pams/ftpc/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_FTPC $STAR/kumacs/ftpc/
+ /MACRO/GLOBAL/CREATE PARAMS_FTPC $STAR/params/ftpc/
+ /MACRO/GLOBAL/CREATE PAMS_FTPC_KUMAC_
+                    $STAR/pams/ftpc/kumac/
 
- /MACRO/GLOBAL/CREATE KUMACS_GLOBAL _
-                      $AFS_RHIC/star/packages/SL98b/kumacs/global/
- /MACRO/GLOBAL/CREATE PARAMS_GLOBAL _ 
-                      $AFS_RHIC/star/packages/SL98b/params/global/
- /MACRO/GLOBAL/CREATE PAMS_GLOBAL_KUMAC  _
-                      $AFS_RHIC/star/packages/SL98b/pams/global/kumac/
+ /MACRO/GLOBAL/CREATE KUMACS_GLOBAL_
+                      $STAR/kumacs/global
+ /MACRO/GLOBAL/CREATE PARAMS_GLOBAL_ 
+                      $STAR/params/global
+ /MACRO/GLOBAL/CREATE PAMS_GLOBAL_KUMAC $STAR/pams/global/kumac
 
-
+ message ' set upt pams global kumac'
  message ' *** Have set up global macros *** '
 
 return

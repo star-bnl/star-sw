@@ -149,14 +149,14 @@ c---- copy the tower/depth energies into a local array...
       do ihit  = 1,ems_hits_bemc_h.nok
         i_dep  = ems_hits_bemc(ihit).tower_dep
         if(i_dep.eq.0)then          ! location of sum over depths from ems_interface...
-         i_eta  = ems_hits_bemc(ihit).tower_eta_bin
-         i_phi  = ems_hits_bemc(ihit).tower_phi_bin
+         i_eta  = ems_hits_bemc(ihit).eta_bin
+         i_phi  = ems_hits_bemc(ihit).phi_bin
          if(.not.sum_down)then  	! check if summing to 0.1x0.1 is needed...
           i_eta = (i_eta-1)/2 + 1
           i_phi = (i_phi-1)/2 + 1
          end if
-         eb_sum(i_phi,i_eta) = ems_hits_bemc(ihit).eb_sum
-         emc_tot             = emc_tot + ems_hits_bemc(ihit).eb_sum   
+         eb_sum(i_phi,i_eta) = ems_hits_bemc(ihit).e_sum
+         emc_tot             = emc_tot + ems_hits_bemc(ihit).e_sum   
         end if
       enddo                       ! End loop over input EMC towers
 

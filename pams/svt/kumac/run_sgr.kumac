@@ -1,10 +1,11 @@
-MACRO run_sgr i=1 SVT_HOME=$STAR/pams/svt/kumac
+
+MACRO run_sgr i=1 
+
 i = [1]
-SVT_HOME = [2]
 
 if [i] = 1 then
-  exec [SVT_HOME]/init_sgr
-  exec [SVT_HOME]/init_stk
+  exec init_sgr
+  exec init_stk
 *
 message ' *** Warning vertex not found just filled fron MC ***'
   cd /dui/data/global/vertices
@@ -53,16 +54,19 @@ RTRN:
 
 return
 
+****************************************************************
+
 MACRO eval i=1
 i = [1]
 
 
 if ( [i] .eq. 1) then
-tdm/newtable /dui/data/svt/tracks/ste_teval ste_teval 10000 
-tdm/newtable  /dui/data/svt/tracks/ste_teff ste_teff 1
-
+  tdm/newtable /dui/data/svt/tracks/ste_teval ste_teval 10000 
+  tdm/newtable  /dui/data/svt/tracks/ste_teff ste_teff 1
 endif
+
         message 'Calling STE_AM...'
+
         ami/mod/call ste_am _
                 /dui/geant/Run/g2t_gepart _
                 /dui/geant/Event/g2t_svt_hit _
@@ -79,12 +83,13 @@ endif
                 /dui/data/svt/tracks/stk_mckine _
                 /dui/data/svt/tracks/ste_teval _
                 /dui/data/svt/tracks/ste_teff
+
         if (staf_status(1).ne.stafcv_ok) then
                 message 'Problem on return from STE_AM'
         endif
 
 
 return
-
+*****************************************************************
 
 

@@ -1,30 +1,26 @@
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
 CC: FILE:        g2t_get_kine.F
-CC: ROUTINE:     G2T_GET_KINE
 CC: AUTHOR:      narod
 CC: DESCRIPTION: get KINE and VERT structure from GEANT
 CC:
-CC: ARGUMENTS:
-CC:  OUT:     p_vert/p_vert_h      - pointer/header to vertex table
-CC:           p_track/p_track_h    - pointer/header to track table
-CC:  RETURNS: STAF Condition Value
-CC:
+CC: ARGUMENTS:   p_vert/p_vert_h      - pointer/header to vertex table
+CC:              p_track/p_track_h    - pointer/header to track table
 CC: HISTORY:    
 CC:  YF, 12/08/97 - first version
 CC:  PN, 12/31/97 - second version
+CC:  PN, 05/05/98 - first release version
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
-
-      FUNCTION  G2T_GET_KINE (
-     >                          p_vert_h,             p_vert ,
+      FUNCTION  G2T_GET_KINE (  p_vert_h,             p_vert ,
      >                          p_track_h,            p_track )
       IMPLICIT  NONE
       INTEGER*4 G2T_GET_KINE
 
-      INTEGER   It, Iv, Ivert, Ityp, idevt, Npar, Istop, LenT, LenV,
-     >          Nd, Id, i, LabelV, LabelT, IHEAD(1000)
+      INTEGER   It, Iv, Ityp, Npar, Istop, LenT, LenV, LBUF,
+     >          Nd, Id, NBytPW, LabelV, LabelT, IHEAD(1000)
+      Parameter (Lbuf=200,NBytPW=4)
       INTEGER   NBUF, NtBeam, NtTarg, Ipart, eg_label, Parent, NwHead,
-     >          Iv0, Ip0, Nt, Mecat, Meca, Ivol, N_parent, numed
-      REAL      VMOD, Pvert(4), Vert(3), Ubuf(100), Par(50),
+     >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed
+      REAL      VMOD, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap
       CHARACTER NAPART*24,Cvol*4,Cshap*4
 
@@ -32,18 +28,21 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
 #include       "geant321/gcnum.inc"
 
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
+      G2T_GET_KINE = STAFCV_BAD
 
 C: Sanity check of header for table 'p_vert' & 'p_track'
-
-      G2T_GET_KINE = STAFCV_BAD
       IF ( p_vert_h.maxlen  .LT. NVERTX .OR.
-     >     p_track_h.maxlen .LT. NTRACK )   go to 900
+     >     p_track_h.maxlen .LT. NTRACK ) then
+         print *,' FATAL error in G2T_GET_KINE '
+         print *,' vert,track len = ',p_vert_h.maxlen,p_track_h.maxlen
+         return
+      endif
 *
       Call GFHEAD (NwHead, IHead, Nbuf, UBUF)
-      If (NwHead.gt.1000 .or. NBUF.gt.100) go to 901
+      If (NwHead.gt.1000 .or. NBUF.gt.Lbuf) go to 901
 
-      LenT          = p_track_h.rbytes/4
-      LenV          = p_vert_h.rbytes /4
+      LenT          = p_track_h.rbytes/NBytPW
+      LenV          = p_vert_h.rbytes /NBytPW
       p_track_h.nok = 0
       p_vert_h.nok  = 0
       LabelV        = 0
@@ -51,7 +50,7 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
 
         Call VZERO  (p_vert(iv),LenV)
         Call GFVERT (Iv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
-        If (Nbuf.gt.100) go to 901
+        If (Nbuf.gt.Lbuf) go to 901
 *       
         If (Ntbeam.le.0) then ! this is an event generator vertex
           LabelV   = LabelV+1
@@ -73,7 +72,7 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
           Istop    = 1-mod(Mecat,100)/50
           if (Istop.eq.0) meca=-meca
           Ivol     = Mecat/100
-          Call aGFVOLU (Cvol,Cshap,numed,par,npar,Ivol)
+          Call aGFVOLU (Ivol,Cvol,Cshap,numed,par,npar)
         endif
 *
         p_vert(iv).Id           = Iv             ! primary key 
@@ -107,17 +106,17 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
 
         Call VZERO  (p_track(it),LenT)
         Call GFKINE (It, Vert, Pvert, Ipart,Iv, UBUF, NBUF)
-        If (Nbuf.gt.100) go to 901
+        If (Nbuf.gt.Lbuf) go to 901
 *
         IF (Iv.ne.Iv0) THEN
           Call GFVERT (Iv, Vert, NtBeam, NtTarg, TOFG, UBUF, NBUF)
-          If (Nbuf.gt.100) go to 901
+          If (Nbuf.gt.Lbuf) go to 901
           Iv0 = Iv
         END IF
 *        
         If (Ipart.ne.Ip0) then
           Call GFPART (Ipart,NaPart,Ityp,Amass,Charge,Tlife,UBUF,NBUF)
-          If (Nbuf.gt.100) go to 901
+          If (Nbuf.gt.Lbuf) go to 901
           Ip0 = Ipart
         endif
 *
@@ -136,17 +135,19 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
 *                                 stable arithmetics requires Pt>0 only
           LabelT  = LabelT + 1 
           Pt      = VMOD (Pvert,2)
-          If (Pt.gt.0) then 
+          Eta     = Pvert(3)
+          Rap     = Pvert(3)
+          If (Pt.gt.Pvert(4)*1.e-3)  then 
             tet   = ATAN2(PT,Pvert(3))      
             Eta   = -LOG (TAN(TET/2))
-            Rap   =  LOG ((Pvert(4) + Pvert(3))/(Pvert(4) - Pvert(3)))/2
+            Rap   =  LOG ( (Pvert(4)+Pvert(3))/(Pvert(4)-Pvert(3)) )/2
+          endif
 *
-            p_track(it).eg_label   = LabelT      ! event generator label
-            p_track(it).eg_pid     = Ipart       ! event generator particle ID
-            p_track(it).pt         = Pt
-            p_track(it).eta        = eta
-            p_track(it).rapidity   = rap
-          end if
+          p_track(it).eg_label   = LabelT      ! event generator label
+          p_track(it).eg_pid     = Ipart       ! event generator particle ID
+          p_track(it).pt         = Pt
+          p_track(it).eta        = eta
+          p_track(it).rapidity   = rap
 *
         else                ! Ntbeam positive - this is a secondary particle
 *                           ! NtTarg coding explained above
@@ -174,37 +175,8 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
       G2T_GET_KINE  = STAFCV_OK
       return
 
- 900  print *,' FATAL error in G2T_GET_KINE '
-      print *,' vert,track maxlen = ',p_vert_h.maxlen,p_track_h.maxlen
-      return
-
  901  print *,' FATAL error in G2T_GET_KINE '
       print *,' UBUF too short, ',NBUF,' needed'
       return
       END
-
-* =========================================================================
-
-      SUBROUTINE  aGFVOLU (Cvol,Cshap,numed,par,npar,Ivol)
-      implicit  none
-#include       "geant321/gcbank.inc"
-      integer   Ivol,numed,npar,Ishap
-      character Cvol*4,Cshap*4
-      real      par(*)
-      CHARACTER*4 CSHAPES(30)
-      SAVE CSHAPES
-      DATA CSHAPES/'BOX ','TRD1','TRD2','TRAP','TUBE','TUBS','CONE',
-     +             'CONS','SPHE','PARA','PGON','PCON','ELTU','HYPE',
-     +               13 * '    ', 'GTRA','CTUB','    '/
-
-*         make GFVOLU call... ? => CVOL,CSHAP
-*         Call GFVOLU (Ivol,CVOL,CSHAP)
-          Call UHTOC   (IQ(JVOLUM+IVOL),4,Cvol,4)
-          Ishap     = Q(LQ(JVOLUM-IVOL)+2)
-          Cshap     = Cshapes(Ishap)
-          Numed     = Q(LQ(JVOLUM-IVOL)+4)
-          Npar      = Q(LQ(JVOLUM-IVOL)+5)
-c         Numat     = Q(LQ(JTMED-Numed)+6)
-          Call Ucopy (Q(LQ(JVOLUM-IVOL)+7),par,min(50,Npar) )
-       end
 
