@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.51 2000/08/17 17:47:53 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.52 2000/08/17 18:52:29 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.52  2000/08/17 18:52:29  lansdell
+// added z distribution of hits histogram to StEventQA set
+//
 // Revision 1.51  2000/08/17 17:47:53  lansdell
 // for real data, only process events with # global tracks between 50 and 500 -> will later add code for various multiplicities
 //
@@ -212,20 +215,19 @@ Int_t StEventQAMaker::Make() {
 	  // fill low multiplicity histogram set
 	  return StQABookHist::Make();
 	}
-	if (multiplicity > 500 && multiplicity <= 1000) {
+	//if (multiplicity > 500 && multiplicity <= 1000) {
 	  // fill medium multiplicity histogram set
-	}
-	if (multiplicity > 1000) {
+	//}
+	//if (multiplicity > 1000) {
 	  // fill high multiplicity histogram set
+	//}
+	// skip event if not in multiplicity range
+	else {
+	  return kStOk;
 	}
       }
       // process Monte Carlo events
-      else if (event->info()->type() == "VENU") {
-	return StQABookHist::Make();
-      }
       else {
-	// if unknown type, go ahead and fill histograms
-	cout << "Warning in StEventQAMaker::Make(): unknown event type!" << endl;
 	return StQABookHist::Make();
       }
     }
@@ -377,6 +379,11 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->topologyMap().numberOfHits(kTpcSvtId)>0) m_det_id->Fill(kTpcSvtId);
       if (globtrk->topologyMap().numberOfHits(kTpcSsdSvtId)>0) m_det_id->Fill(kTpcSsdSvtId);
       if (globtrk->topologyMap().numberOfHits(kSsdSvtId)>0) m_det_id->Fill(kSsdSvtId);
+
+      // z-dist of hits
+      for (UInt_t i=0; i<globtrk->detectorInfo()->hits().size(); i++) {
+	m_z_hits->Fill(globtrk->detectorInfo()->hits()[i]->position().z());
+      }
 
 // now fill all TPC histograms ------------------------------------------------
       if (globtrk->flag()>=100 && globtrk->flag()<200) {
