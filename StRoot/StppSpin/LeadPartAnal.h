@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: LeadPartAnal.h,v 1.2 2001/02/28 19:06:12 balewski Exp $
+// $Id: LeadPartAnal.h,v 1.3 2001/04/12 15:19:08 balewski Exp $
 // $Log: LeadPartAnal.h,v $
+// Revision 1.3  2001/04/12 15:19:08  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2001/02/28 19:06:12  balewski
 // some reorganizations
 //
@@ -18,7 +21,6 @@
 
 
 
-#define MX_LPA 2 // I consider the leading & next to leading charged particle
 #define MX_GLPT 15 //  LP pT range bins
 
 struct RecStep
@@ -29,9 +31,10 @@ struct RecStep
 
 struct LeadPartAnal
 {
-  struct  RecStep Inp, Trig, Acc, dPT, dPsi; // keep them alike
+  struct  RecStep Rec,  dPT, dPsi; // keep them alike
 };
-//, Vert, Det, Rec,Prim, Lead, DrPt
 
-static  char *tt1[]={"Inp","Trig","Acc", "dPT", "dPsi"};
+static  char *tt1[]={"Rec", "dPT", "dPsi"};
+
+
 

@@ -1,9 +1,9 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.h,v 1.3 2001/04/10 16:28:53 perev Exp $
+// $Id: StppLPprojectMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $
 // $Log: StppLPprojectMaker.h,v $
-// Revision 1.3  2001/04/10 16:28:53  perev
-// ClassDef(,1) -> "ClassDef ( ,0 )
+// Revision 1.4  2001/04/12 15:19:09  balewski
+// *** empty log message ***
 //
 // Revision 1.2  2001/02/28 19:06:13  balewski
 // some reorganizations
@@ -30,13 +30,15 @@
 #include "StMaker.h"
 #endif
 
+#define MxSpinID 4
+
 class StppLPprojectMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StppLPprojectMaker.h,v 1.3 2001/04/10 16:28:53 perev Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StppLPprojectMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $";
 
-  TH1F *hm[32]; //!
   TH1F *hst[16]; //!
-  TH1F *hpol[4*3]; //!
+  TH1F *hpol[3*MxSpinID]; //!
+
   void init_histo();
 
  protected:
@@ -46,13 +48,14 @@ class StppLPprojectMaker : public StMaker {
    virtual Int_t Init();
    virtual Int_t  Make();
    virtual Int_t Finish(); 
+   int *JspinID;
 // virtual Int_t InitRun  (int runumber){return 0;}; // Overload empty StMaker::InitRun 
 // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: StppLPprojectMaker.h,v 1.3 2001/04/10 16:28:53 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StppLPprojectMaker.h,v 1.4 2001/04/12 15:19:09 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    
-   ClassDef(StppLPprojectMaker,0)   //StAF chain virtual base class for Makers
+   ClassDef(StppLPprojectMaker, 0)   //StAF chain virtual base class for Makers
 };
 
 #endif

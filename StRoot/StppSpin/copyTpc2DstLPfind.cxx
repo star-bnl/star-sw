@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: copyTpc2DstLPfind.cxx,v 1.2 2001/02/28 19:06:11 balewski Exp $
+// $Id: copyTpc2DstLPfind.cxx,v 1.3 2001/04/12 15:19:09 balewski Exp $
 // $Log: copyTpc2DstLPfind.cxx,v $
+// Revision 1.3  2001/04/12 15:19:09  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2001/02/28 19:06:11  balewski
 // some reorganizations
 //
@@ -19,7 +22,7 @@
 #include <math.h>
 #include <strings.h>
 
-#include "StppLPfindMaker.h"
+#include "StppLPevalMaker.h"
 #include "tables/St_dst_track_Table.h"
 #include "tables/St_tpt_track_Table.h" 
 
@@ -27,7 +30,7 @@
 //_____________________________________________________________
 //_____________________________________________________________
 //_____________________________________________________________
-void StppLPfindMaker::copyTpcTr2Dst(St_tpt_track * TpcTr,St_dst_track * DstTr)
+void StppLPevalMaker::copyTpcTr2Dst(St_tpt_track * TpcTr,St_dst_track * DstTr)
 {// copy TPC track to dst-format
 
   assert(TpcTr);
