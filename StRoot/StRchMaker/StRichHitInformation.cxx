@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichHitInformation.cxx,v 2.2 2000/09/29 19:05:23 lasiuk Exp $
+ * $Id: StRichHitInformation.cxx,v 2.3 2001/02/07 16:07:51 lasiuk Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichHitInformation.cxx,v $
+ * Revision 2.3  2001/02/07 16:07:51  lasiuk
+ * modify ostream operator to include pads in hit
+ *
  * Revision 2.2  2000/09/29 19:05:23  lasiuk
  * number of pads added as well as ostream operator
  *
@@ -54,5 +57,6 @@ ostream& operator<<(ostream& os, StRichHitInformation& hit)
 {
     return (os
 	    << " x=" << hit.position() << " q=" << hit.charge()
-	    << " q_max=" << hit.maxAdc() << " #=" << hit.clusterNumber());
+	    << " q_max=" << hit.maxAdc() << " #Pads=" << hit.numberOfPads()
+	    << " C#=" << hit.clusterNumber());
 }
