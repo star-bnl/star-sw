@@ -23,7 +23,7 @@ StSsdWafer::StSsdWafer()
 StSsdWafer::~StSsdWafer()
 {
   for(int i=0; i < mCurrentHit; i++) delete mHits[i];
-  delete[] mHits;
+  delete[] mHits; mHits=0;
 };
 
 
@@ -130,29 +130,20 @@ int StSsdWafer::addNewHit( localPoint *local )
   if  ((mCurrentHit == maxNumHits)&&(mIsOn))
     {      
       //localPoint *newPt[maxNumHits];
+      maxNumHits = int(maxNumHits*1.2+10);
       localPoint **newPt = new localPoint *[maxNumHits];
       
-      for (int i=0; i<maxNumHits; i++)
+      for (int i=0; i<mCurrentHit; i++)
 	newPt[i] = mHits[i];
 
-      for (int i=0; i<=maxNumHits; i++)  
-	for (int j=0; j<maxNumberOfEvents+1; j++)
-	  if (mEventFirstHit[j] == &mHits[i]) mEventFirstHit[j] = &newPt[i];
+      for (int j=0; j<=maxNumberOfEvents; j++)
+        mEventFirstHit[j] = newPt + (mEventFirstHit[j]-mHits);
       
       delete[] mHits;
-      mHits = new localPoint*[maxNumHits+10];
+      mHits = newPt;
       
-      if (mCurrentHit==0)  mEventFirstHit[0] = mHits;
+      if (mCurrentHit==0)  mEventFirstHit[0] = newPt;
       
-      for (int i=0; i<maxNumHits; i++)
-	mHits[i] = newPt[i];
-      
-      for (int i=0; i<=maxNumHits; i++)
-	for (int j=0; j<maxNumberOfEvents+1; j++)
-	  if (mEventFirstHit[j] == &newPt[i]) mEventFirstHit[j] = &mHits[i];
-      
-      maxNumHits+=10;
-      delete[] newPt;
     };
 
   if ( mIsOn )

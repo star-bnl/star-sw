@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdAlign.cc,v 1.4 2003/09/02 17:59:05 perev Exp $
+ * $Id: StSsdAlign.cc,v 1.5 2004/01/26 23:05:44 perev Exp $
  *
  * Author: Ludovic Gaudichet
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSsdAlign.cc,v $
+ * Revision 1.5  2004/01/26 23:05:44  perev
+ * Cleanup
+ *
  * Revision 1.4  2003/09/02 17:59:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -384,7 +387,7 @@ globalPoint StSsdAlign::findVertex(int ev)
   globalPoint a,b;
   int num_track;
 
-  StSsdEvent *pEvent = new StSsdEvent;
+  StSsdEvent pEvent;
   
   for ( barrel0 = 0; barrel0 < 32; barrel0++ )    
     for ( barrel1 = 32; barrel1 < 104; barrel1++)
@@ -429,7 +432,7 @@ globalPoint StSsdAlign::findVertex(int ev)
 			      eventTracks[num_track].a = a;
 			      eventTracks[num_track].b = b;
 			      eventTracks[num_track].chi2_1 = 
-				( pEvent->chi2ab_Np( eventTracks[num_track].a, eventTracks[num_track].b,
+				( pEvent.chi2ab_Np( eventTracks[num_track].a, eventTracks[num_track].b,
 						     &(eventTracks[num_track].p[0]), 3,
 						     eventTracks[num_track].p[0], 0) )/3.;
 			      num_track++;
@@ -451,15 +454,15 @@ globalPoint StSsdAlign::findVertex(int ev)
 		    };
 	  for (int i = 0; i<num_track; i++)
 	    if (eventTracks[i].chi2_1<chi2_max)
-	      pEvent->addTrack( eventTracks[i] );
+	      pEvent.addTrack( eventTracks[i] );
 	};
   
   globalPoint p;
-  p = pEvent->getVertex();
+  p = pEvent.getVertex();
   gMessMgr->Info()<<"SVT & SSD Au-Au alignment, primary vertex"<< endm;
   cout <<"    event "<<ev<<", vertex at ("<<p.x<<","<<p.y<<","<<p.z<<")"<< endl;
   //printf("    preliminary vertex search %d= %f, %f, %f\n", ev, p.x, p.y, p.z);
-  delete pEvent;
+
   return p;
 };
 
