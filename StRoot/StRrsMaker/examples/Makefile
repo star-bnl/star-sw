@@ -1,14 +1,14 @@
 #################################################
-# $Id: Makefile,v 1.2 2000/02/08 16:35:31 lasiuk Exp $
+# $Id: Makefile,v 1.3 2000/04/05 16:11:56 lasiuk Exp $
 #################################################
 SCL_SYSTEM  = $(STAR_SYS)
 
-SCL_HOME    = /home/star/lasiuk/SCL/StarClassLibrary/
+SCL_HOME    = /home/star/lasiuk/scl/StRoot/StarClassLibrary
 
 RRS_HOME    = ..
 
 CXXFLAGS    = -I$(RRS_HOME)/include\
-              -I$(SCL_HOME)/include\
+              -I$(SCL_HOME)\
               -I/opt/aCC/include/SC\
               -I..\
               -g -DRWSTD_BOUNDS_CHECKING -DST_NO_EXCEPTIONS\
@@ -20,14 +20,14 @@ CXX         =  aCC
 
 LD          = aCC -Wl,+vnocompatwarnings +p
 
-LIBS        = -L$(SCL_HOME)/lib/$(STAR_SYS)/ \
+LIBS        = -L$(SCL_HOME)/$(STAR_SYS)/ \
               -L$(RRS_HOME)/$(STAR_SYS)/ \
               -L/cern/pro/lib \
-              -lStRrs -lscl -lStRrs -lpacklib -lmathlib -l++
+              -lStRrs -lStscl -lStRrs -lpacklib -lmathlib -l++
 
 DEST        = .
 
-PROGRAM     = maker
+PROGRAM     = cf
 
 OBJS        = $(PROGRAM).o
 

@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.7 2000/03/17 14:54:12 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.8 2000/04/05 16:09:14 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,8 +32,8 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
- * Revision 1.7  2000/03/17 14:54:12  lasiuk
- * Large scale revisions after ROOT dependent memory leak
+ * Revision 1.8  2000/04/05 16:09:14  lasiuk
+ * misc
  *
  * Revision 1.7  2000/03/17 14:54:12  lasiuk
  * Large scale revisions after ROOT dependent memory leak
@@ -164,12 +164,12 @@ void StRichAnalogSignalGenerator::induceSignal(const StRichMiniHit* hit, double 
 		cout << "s/sum " << s << '/' << sum << endl;
 	    
 	    // save signal on pad
-	    mOutput->putSignal(i,j,s,hit->id(),hit->trackp());
+	    //mOutput->putSignal(i,j,s,hit->id(),hit->trackp());
+	    mOutput->putSignal(i,j,s,hit->id(),hit->gid(),hit->trackp(),hit->process());
+	    
 #ifdef RICH_WITH_VIEWER
 	    if (StRichViewer::histograms ) 
 		StRichViewer::getView()->mAnalogSignals->Fill(x,y,s);
-	    cout << "fill ASG" << endl;
-	    // histograms
 #endif
 	} 
     }

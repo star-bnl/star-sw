@@ -1,10 +1,10 @@
 ###########################################################
-# $Id: GNUmakefile,v 1.1 2000/02/08 16:36:44 lasiuk Exp $
+# $Id: GNUmakefile,v 1.2 2000/04/05 16:09:10 lasiuk Exp $
 ###########################################################
 name := StRrs
 
 include local/GNUmakefile.architecture
-CPPFLAGS += -I$(SCL_HOME)/include \
+CPPFLAGS += -I$(SCL_HOME) \
 	    -I./include
 
 include local/GNUmakefile.common
