@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixF.hh,v 1.6 2000/09/25 20:23:04 ullrich Exp $
+ * $Id: StMatrixF.hh,v 1.7 2001/12/05 23:34:44 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixF.hh,v $
+ * Revision 1.7  2001/12/05 23:34:44  ullrich
+ * Added Victor modifications to cope with error recovery.
+ *
  * Revision 1.6  2000/09/25 20:23:04  ullrich
  * Removed inheritance from TObject.
  *
@@ -83,6 +86,8 @@ public:
     // For [][] --> [0][0]
     const float& operator()(size_t row, size_t col) const;
     float& operator()(size_t row, size_t col);
+
+    StMatrixF transform(const StMatrixF &, int = 0) const;
 
     // classes for implementing m[i][j]
     class StMatrixRowF {
@@ -195,5 +200,6 @@ ostream&         operator<<(ostream& s, const StMatrixF& q);
 float            norm_infinity(const StMatrixF& m1);
 float            normInfinity(const StMatrixF& m1);
 float            norm1(const StMatrixF& m1);					
+StMatrixF        recoverError(const StMatrixF &toLocal);
 
 #endif
