@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.16  1998/04/28 16:36:48  fisyak
+#  remove or merger from stic -M
+#
 #  Revision 1.15  1998/04/26 02:49:35  fisyak
 #  Fix fortran dependencies
 #
@@ -73,7 +76,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/26 02:49:35 $ 
+#           Last modification $Date: 1998/04/28 16:36:48 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -389,7 +392,7 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
         gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(FIRST_DEP) | \
         sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
         > $(GEN_DIR)/$(STEM).didl; \
-        $(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" \
+        $(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" | sed -e 's/or merger//g'  \
         >> $(GEN_DIR)/$(STEM).didl; $(RM) $(STEM).idl
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
