@@ -37,14 +37,13 @@ void St_xdfin_Maker::Init(){
   if (set) {
     if (strcmp(set->GetName(),"run")==0){ 
       St_DataSet *RunSet = gStChain->GetRun();
-      SafeDelete(RunSet);
-      gStChain->DataSet()->Update(set); SafeDelete(set);
+      RunSet->Update(set); SafeDelete(set);
     }
     else {// GEANT type of events
       if (strcmp(set->GetName(),"Run")==0){
         St_DataSetIter local( gStChain->DataSet());
-        St_DataSet *RunSet = local.Mkdir("run");
-        St_DataSet *geant = local.Mkdir("run/geant");
+        St_DataSet *RunSet = local.Mkdir("run/geant");
+        St_DataSet *geant = local("run/geant");
         geant->Update(set); SafeDelete(set);
       } 
       else {//Raw data format
@@ -93,25 +92,33 @@ Int_t St_xdfin_Maker::Make(){
           set = gStChain->XDFFile()->NextEventGet();
 	  continue;
      }
+     if (strcmp(set->GetName(),"event") == 0){// full event
+       St_DataSetIter top(gStChain->DataSet());
+       top.Cd(gStChain->GetName());
+       St_DataSet *m_EventSet = top("event");
+       SafeDelete(m_EventSet);
+       top.Add(set);
+       break;
+     }
+     if (strcmp(set->GetName(),"Event") == 0){// GEANT event
+       St_DataSetIter top(gStChain->DataSet());
+       top.Cd(gStChain->GetName());
+       St_DataSet *m_EventSet = top("event");
+       SafeDelete(m_EventSet);
+       top.Mkdir("event/geant");
+       top.Cd("event/geant");
+       top.Add(set);
+       break;
+     }
      const Char_t *makertype = GetTitle();
      const Char_t *type = 0;
      St_DataSetIter    top(gStChain->DataSet());
      top.Cd(gStChain->GetName());
-     if (makertype && strlen(makertype)&& strcmp(set->GetName(),"Event")==0) {
-
-     }
      if (makertype && strlen(makertype)) {
        St_DataSet       *topset = top(makertype);
-       if (!topset) {
-         top.Mkdir(makertype); 
-       }
+       if (!topset) top.Mkdir(makertype); 
        St_DataSetIter    parent(top(makertype));
        parent.Add(set);
-     }
-     else {
-       if (strcmp(set->GetName(),"Event")==0){ 
-         St_DataSetIter    top(gStChain->DataSet());
-       }
      }
    }
    break;
