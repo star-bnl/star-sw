@@ -11,8 +11,7 @@
    bar->AddButton("Read StEvent",".x EventRead.C","Read StEvent objects from root file");
    bar->AddButton("Draw ALL TPC hits",".x DrawTpcHits.C","Draw the global tracks by its helix object");
    bar->AddButton("Draw tracks",".x DrawTrackTpcHits.C","Draw the global tracks by its helix object");
-   bar->AddButton("1. Draw g2t_tpc_hits",".x H.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
-   bar->AddButton("2. Draw g2t_tpc_hits",".x HitsDraw.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
+   bar->AddButton("Draw g2t_tpc_hits",".x HitsDraw.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
    bar->Show();
    gROOT->LoadMacro("PadControlPanel.C");
    gROOT->SaveContext();
