@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.6 1999/02/16 18:15:41 fisyak Exp $
+ * $Id: StTrsUnpacker.cc,v 1.7 1999/02/23 14:05:16 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
- * Revision 1.6  1999/02/16 18:15:41  fisyak
- * Check in the latest updates to fix them
+ * Revision 1.7  1999/02/23 14:05:16  lasiuk
+ * exit if last time bin has non-zero count in ADCs
  *
  * Revision 1.7  1999/02/23 14:05:16  lasiuk
  * exit if last time bin has non-zero count in ADCs
@@ -73,7 +73,7 @@ int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
 int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Seq)
 {
     
-    //PR(TrsPadData.first->size());
+    pair<digitalTimeBins*, digitalTimeBins*>
 	TrsPadData = mSector->timeBinsOfRowAndPad(padRow,npad);
 
 //     PR(TrsPadData.first->size());
@@ -92,6 +92,10 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StSequence> tmp;
 #else
+    vector<StSequence, allocator<StSequence> > tmp;
+#endif
+    tmp.clear();
+    //
 //     for(int bbb=0; bbb<numberOfEntriesD; bbb++) {
 // 	cout << bbb << '\t' << (int)(*TrsPadData.first)[bbb] << '\t' << (int)(*TrsPadData.second)[bbb] << endl;
 //     }
@@ -105,17 +109,27 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	    continue;
 
 	StSequence aSequence;
-// 	PR(aSequence.startTimeBin);
-// 	PR(static_cast<int>(*aSequence.firstAdc));
-//  	PR(aSequence.startTimeBin);
+	aSequence.startTimeBin = numberOfZeros;
+	aSequence.firstAdc     = &(*TrsPadData.first)[ii];
 
+//  	PR(aSequence.startTimeBin);
+//  	PR(static_cast<int>(*aSequence.firstAdc));
 // 	PR(numberOfEntriesD);
 	aSequence.length = static_cast<unsigned short>(0);
 	
+	do {
+	    aSequence.length++;
+	    ii++;
+	    // Don't overstep the bounds
+	    if(ii==TrsPadData.first->size()) {
+		aSequence.length--;
+		//ii--;
+		break;
+	    }
 // 	    PR(aSequence.length);
-		  (ii<numberOfEntriesD) );
+// 	    PR(ii);
 // 	    PR(static_cast<int>((*TrsPadData.first)[ii]));
-// 	PR(aSequence.length);
+	} while ( ((*TrsPadData.first)[ii] != static_cast<unsigned char>(0)) &&
 		   (ii<numberOfEntriesD) );
 	ii--; // Adjust it, since you overstep the sequence...
 //  	PR(aSequence.length);
@@ -126,18 +140,17 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
     // Return as an array!
     // CAREFUL::Must call clear() to deallocate this memory when you are done!
     //
-    //PR(tmp.size());
+    *nSeq = tmp.size();
     mSequence = new StSequence[*nSeq];
 
 //     PR(tmp.size());
     
     for(ii=0; ii< tmp.size(); ii++) {
-	//cout << " " << ii << endl;
-	//PR(mSequence[ii].startTimeBin);
-	//PR(mSequence[ii].length);
-	//PR(static_cast<int>(*mSequence[ii].firstAdc));
-    }
-	    
+	mSequence[ii].startTimeBin = tmp[ii].startTimeBin;
+	mSequence[ii].length       = tmp[ii].length;
+	mSequence[ii].firstAdc     = tmp[ii].firstAdc;
+// 	cout << " " << ii << endl;
+// 	PR(mSequence[ii].startTimeBin);
 // 	PR(mSequence[ii].length);
 // 	PR(static_cast<int>(*mSequence[ii].firstAdc));
     }    
@@ -156,8 +169,8 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
     if(padRow<1 || padRow>45) {
 	cerr << "Pad Row " << padRow << " out of range" << endl;
 	cerr << "Normally one would throw an exception here" << endl;
-    //PR(padRow);
-    //PR(mSector->numberOfPadsInRow(padRow));
+	exit(1);
+    }
     
 //     PR(padRow);
 //     PR(mSector->numberOfPadsInRow(padRow));
@@ -169,13 +182,13 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
     vector<unsigned char, allocator<unsigned char> > tmp;
 #endif
     tmp.clear();
-// 	    cout << " pad " << ii << " " << (mSector->numberOfTimeBins(padRow,ii)) << endl;
+    // Loop over all the pads:
     for(int ii=1; ii<=mSector->numberOfPadsInRow(padRow); ii++) {
 	if (mSector->numberOfTimeBins(padRow,ii) > 0) {
 //  	    cout << " pad " << ii << " " << (mSector->numberOfTimeBins(padRow,ii)) << endl;
 	    numberOfPadsWithSignals++;
 	    tmp.push_back(ii);
-    //PR(tmp.size());
+	}
     }
 
 //     PR(tmp.size());
@@ -185,12 +198,12 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
     }
     else {  // Otherwise fill the pad list
 	mPadList = new unsigned char[(tmp.size())];
-	    //PR(static_cast<int>(mPadList[ii]));
+
 	for(ii=0; ii< tmp.size(); ii++) {
 	    mPadList[ii] = tmp[ii];
 // 	    PR(static_cast<int>(mPadList[ii]));
 	}
-    
+
 	*padList = mPadList;
     }
 
