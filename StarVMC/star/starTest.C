@@ -1,4 +1,7 @@
-// $Id: starTest.C,v 1.3 2004/07/16 22:49:52 potekhin Exp $
+// $Id: starTest.C,v 1.4 2004/07/16 22:50:34 potekhin Exp $
+// $Log: starTest.C,v $
+// Revision 1.4  2004/07/16 22:50:34  potekhin
+// Added a log tag
 //
 
 
