@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.24 2000/04/12 21:33:14 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.25 2000/04/19 16:30:18 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.25  2000/04/19 16:30:18  calderon
+ * return kStWarn when no StEvent or StMcEvent is found, instead of
+ * exit.
+ *
  * Revision 1.24  2000/04/12 21:33:14  calderon
  * return warnings instead of fatal when no maps are made
  *
@@ -551,7 +555,7 @@ Int_t StAssociationMaker::Make()
     if (!rEvent) {
 	cerr << "No StEvent!!! " << endl;
 	cerr << "Bailing out ..." << endl;
-	exit(1);
+	return kStWarn;
     }
     
     //
@@ -562,7 +566,7 @@ Int_t StAssociationMaker::Make()
     if (!mEvent) {
 	cerr << "No StMcEvent!!! " << endl;
 	cerr << "Bailing out ..." << endl;
-	exit(1);
+	return kStWarn;
     }
     
     //
