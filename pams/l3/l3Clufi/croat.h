@@ -11,6 +11,7 @@
 #define _CROAT_H_
 
 #include <unistd.h>	/* for the types... */
+#include <Rtypes.h>     /* use ROOT variables: ..._t */
 
 /* TUNABLES */
 
@@ -39,21 +40,12 @@
 #define MAX_C                  64
 #define MAX_C2          (MAX_C/2)
 #define MAX_HITS                6       /* max. hits per pad, needed for alloc. of outgoing */
-/* buffer */
 
 #define ABS_ROWS               45
 #define N_MEZ                  18       /* number of mezzanines for one sector */
 
 
 /* routines */
-/*int croatFinder(uchar_t *adcin, ushort_t *cppin, uint_t *outres); */
-int croatInit(int rb, int mz);
-/*void write_eve(uint_t *out, unsigned short sector); */
-/*int read_eve(const char *filename, unsigned short sector);*/
-/*void asic_eve();*/ 
-/*int rawToGlobal (int sector, int row, double pad, double tb, */
-/*		 double *x, double *y, double *z); */
-/*void dump_banks(uint_t *out, uint_t length); */
-/*int load_banks (uint_t* buffer);*/
+Int_t croatInit(Int_t rb, Int_t mz);
 
 #endif
