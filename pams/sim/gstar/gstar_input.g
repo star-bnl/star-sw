@@ -76,7 +76,7 @@
                      J=CsADDR('XDF_READ'); If (J!=0) call CsJCAL(J,1,Igate)}
      elseif C=='T' { J=1;                    call gstar_ReadTXT(Igate)     }
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
-     elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)        }
+     elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      If Igate<=0   { Ier=1; return }
      print *,' AgUsREAD mode ',C,': # particles in GEANT=',Ntrack,
                                  '  # vertices=',Nvertx
