@@ -1,5 +1,8 @@
-* $Id: tgc_row_to_y.F,v 1.2 1998/01/27 01:56:43 fisyak Exp $
+* $Id: tgc_row_to_y.F,v 1.3 1998/09/11 16:15:48 sakrejda Exp $
 * $Log: tgc_row_to_y.F,v $
+* Revision 1.3  1998/09/11 16:15:48  sakrejda
+* cleaned up so that linux compiler does not complain - no change in performance
+*
 * Revision 1.2  1998/01/27 01:56:43  fisyak
 * Split sources
 *
@@ -25,7 +28,7 @@ C     Returns:
 C     y - y coordinate in the local coordinate system
 
       real row_cent(45)
-      real row_wid_in, row_wid_out,wid,int_row,dif_row
+      real row_wid_in, row_wid_out,wid,trunc_row,dif_row
       integer flag, i
       save
       data flag /1/
@@ -38,10 +41,14 @@ C     y - y coordinate in the local coordinate system
         row_wid_out=pad_plane(1).pad_len_out
         flag=0
       endif
-      int_row=int(row+0.5)
-      wid=row_wid_out
-      if(int_row.ge.14) wid=row_wid_in
-      dif_row=row-real(int_row)
-      y=row_cent(int_row)+dif_row*wid
+      trunc_row=int(row+0.5)
+
+      if(trunc_row.lt.14.0) then
+         wid=row_wid_in
+      else
+         wid=row_wid_out
+      endif
+      dif_row=row-trunc_row
+      y=row_cent(int(trunc_row))+dif_row*wid
       tgc_row_to_y=STAFCV_OK
       end
