@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.19 2000/11/14 22:00:06 genevb Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.20 2001/04/19 19:52:48 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.20  2001/04/19 19:52:48  hardtke
+ * add tpc_pad_time_offset function and add ifdef for static arrays
+ *
  * Revision 1.19  2000/11/14 22:00:06  genevb
  * Switched several functions from float to double
  *
@@ -58,6 +61,7 @@
  *
  **************************************************************************/
 
+#define StTpc_STATIC_ARRAYS
 #include "StTpcDbMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -230,6 +234,15 @@ int type_of_call tpc_global_to_sector_(int *isector, float *xglobal){
 int type_of_call tpc_sec24_to_sec12_(int *isecin, int *isecout){
   int isec24[24] = {1,2,3,4,5,6,7,8,9,10,11,12,11,10,9,8,7,6,5,4,3,2,1,12};
   if (*isecin>0&&*isecin<25) *isecout = isec24[*isecin-1];
+  return 1;
+}
+int type_of_call tpc_pad_time_offset_(int *isec, int *irow, int *ipad, float *t0value){
+  if (gStTpcDb->T0(*isec)) {
+   *t0value = gStTpcDb->T0(*isec)->getT0(*irow, *ipad);
+  }
+  else {
+   *t0value = 0;
+  }
   return 1;
 }
   
