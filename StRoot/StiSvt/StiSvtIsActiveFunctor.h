@@ -12,10 +12,11 @@
 
 #include "Sti/StiIsActiveFunctor.h"
 
-struct StiSvtIsActiveFunctor : public StiIsActiveFunctor{
+struct StiSvtIsActiveFunctor : public StiIsActiveFunctor
+{
     StiSvtIsActiveFunctor();
     virtual ~StiSvtIsActiveFunctor();
-    virtual bool operator()(double dYlocal, double dZlocal);
+    virtual bool operator()(double dYlocal, double dZlocal) const;
 };
 
 #endif // defined STI_SVT_IS_ACTIVE_FUNCTOR
