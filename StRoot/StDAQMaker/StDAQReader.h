@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.5 1999/08/06 16:20:59 perev Exp $
+ * $Id: StDAQReader.h,v 1.6 1999/12/15 18:40:59 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.6  1999/12/15 18:40:59  perev
+ * Keep undeleted all DAQ wrapper classes
+ *
  * Revision 1.5  1999/08/06 16:20:59  perev
  * RICHReader added
  *
@@ -81,6 +84,7 @@ public:
 
   virtual int open(const char *file);
   virtual int close();
+  virtual int isOpened(){ return (fFd != (-1));};
   virtual int readEvent();
   virtual int skipEvent(int nskip);
   virtual int getRunNumber() const;
@@ -123,6 +127,7 @@ class  StTPCReader
 
   StTPCReader(StDAQReader *rd);
   virtual ~StTPCReader();
+  virtual  int close();
 
   int getMaxPad(int PadRow) const;	//Number of pads in padrow
 
