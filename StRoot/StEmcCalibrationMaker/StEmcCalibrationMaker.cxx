@@ -642,7 +642,6 @@ Bool_t StEmcCalibrationMaker::SubtractPedestal()
 Bool_t StEmcCalibrationMaker::FillEqual()
 {      
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
-  emcCalibration_st* Calib_st=CalibTable->GetTable();
   
   if(nTracks<Settings_st[0].EqMinNumberOfTracks) return kFALSE;
   
@@ -760,7 +759,6 @@ Bool_t StEmcCalibrationMaker::Equalize()
 Bool_t StEmcCalibrationMaker::FillMipCalib()
 {  
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();  
-  emcCalibration_st* Calib_st=CalibTable->GetTable();
 
   if(nTracks>Settings_st[0].MipMaxNumberOfTracks) return kFALSE;
 

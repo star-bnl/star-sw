@@ -67,7 +67,6 @@ Bool_t StEmcEqualSpectra::Equalize(Int_t position1,Int_t position2,Int_t mode)
   if(GetStatus(position1)==0) return kFALSE;
   if(GetStatus(position2)==0) return kFALSE;
   emcEqualization_st* rows=EqualTable->GetTable();
-  emcCalibration_st* calib=CalibTable->GetTable();
   
   const int nadcMax = GetNAdcMax();
    
