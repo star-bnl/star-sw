@@ -1,4 +1,4 @@
-*CMZ :          24/08/98  22.02.41  by  Pavel Nevski
+*CMZ :  1.40/05 24/08/98  22.02.41  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
 c***********************************************************************
@@ -378,3 +378,47 @@ c----------------------------------------------------------------------
        end
  
  
+*CMZ :          26/08/98  19.49.23  by  Pavel Nevski
+*CMZ :  1.40/05 26/08/98  19.34.12  by  Pavel Nevski
+*CMZ :  2.06/13 01/02/95  09.38.53  by  O.Couet
+*-- Author :    Fons Rademakers   20/11/93
+      SUBROUTINE PALOGO
+*
+*     Print STAF version identification
+*
+      CHARACTER  CHPAW*8, VERSQQ*8, MONTH*12(12)
+      DATA MONTH/'January','February','March','April','May','June',
+     > 'July','August','September','October','November','December'/
+ 
+*KEEP,VIDQQ.
+      CHARACTER*68 VIDQQ
+      DATA VIDQQ/
+     +'@(#)* STARSIM  1.40/05  26/08/98  19.37.  C: 26/08/98  19.49.51
+     +'/
+*KEEP,DATEQQ.
+      IDATQQ =   980826
+*KEEP,TIMEQQ.
+      ITIMQQ =   1949
+*KEEP,VERSQQ.
+      VERSQQ = ' 1.40/05'
+      IVERSQ =  14005
+*KEND.
+ 
+      CHPAW  = 'S T A F'
+      IDAY   = mod(IDATQQ,100)
+      IMONTH = mod(IDATQQ/100,100)
+      IYEAR  = IDATQQ/10000
+      NCM    = LENOCC(MONTH(IMONTH))
+      IF(IYEAR.LT.90) MILLE=2000+IYEAR
+      IF(IYEAR.GE.90) MILLE=1900+IYEAR
+ 
+      PRINT 3000,CHPAW,VERSQQ,IDAY,MONTH(IMONTH)(1:NCM),
+     >           MILLE,MONTH(IMONTH)(NCM+1:)
+ 3000 FORMAT(' ******************************************************'/,
+     >       ' *                                                    *'/,
+     >       ' *            W E L C O M E    to   ', A7,'           *'/,
+     >       ' *                                                    *'/,
+     >       ' *          Version ',A8,4X,I2,1X,A,1X,I4,A,2X,      '*'/,
+     >       ' *                                                    *'/,
+     >       ' ******************************************************')
+      END
