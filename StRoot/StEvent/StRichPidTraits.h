@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.9 2002/02/19 16:54:33 ullrich Exp $
+ * $Id: StRichPidTraits.h,v 2.10 2002/02/19 17:40:49 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.10  2002/02/19 17:40:49  ullrich
+ * Changed version number from 2 to 3.
+ *
  * Revision 2.9  2002/02/19 16:54:33  ullrich
  * Minor changes - code not altered.
  *
@@ -115,7 +118,7 @@ private:
     StRichSpectra*   mRichSpectra;
     StObject* clone() const;
 
-    ClassDef(StRichPidTraits,2)
+    ClassDef(StRichPidTraits,3)
 };
 
 // sets
