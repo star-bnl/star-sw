@@ -134,7 +134,7 @@ if ($SFLAG == 2 && $SSUBM){
 	if( $file =~ /$prodl/){
 	    $lock = "$SOURCE/jobfiles/$file.lock";
 	    if( ! -e "$lock" ){
-		if ( open(FO,">lock") ){
+		if ( open(FO,">$lock") ){
 		    system("$SUBMIT $SOURCE/jobfiles/$file");
 		    rename("$SOURCE/jobfiles/$file","$SOURCE/archive/$file");
 		    unlink($lock);
@@ -159,7 +159,7 @@ sub ASLog
     my($line)=@_;
 
     if ( open(FL,">>autosubmit.log") ){
-	print localtime()." $line\n";
+	print FL localtime()." $line\n";
 	close(FL);
     }
 }
