@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.3 2001/08/21 17:58:34 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.4 2001/08/22 19:33:35 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,10 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.4  2001/08/22 19:33:35  lasiuk
+ * remove trace of StPairD, and move some include files that
+ * should ease parsing of CINT
+ *
  * Revision 1.3  2001/08/21 17:58:34  lasiuk
  * for 2000 analysis
  *
@@ -19,9 +23,8 @@
  * Initial Revision
  *
  **************************************************************************/
-#ifdef __ROOT__
-#ifndef STAR_StRichSpectraMaker
-#define STAR_StRichSpectraMaker
+#ifndef STAR_StRichSpectraMaker_hh
+#define STAR_StRichSpectraMaker_hh
 
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -36,12 +39,6 @@
 #include "TNtuple.h"
 #endif
 
-#ifndef __CINT__
-#include <vector>
-#ifndef ST_NO_NAMESPACES
-using std::vector;
-#endif
-#endif
 
 // forward StEvent declaration
 class StEvent;
@@ -67,7 +64,6 @@ class StRichRayTracer;
 class StRichCerenkovHistogram;
 
 #include "StThreeVectorF.hh"
-#include "StThreeVector.hh"
 #include "StParticleDefinition.hh"
 
 class StRichSpectraMaker : public StMaker {
@@ -182,7 +178,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.3 2001/08/21 17:58:34 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.4 2001/08/22 19:33:35 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -197,4 +193,3 @@ private:
 inline StThreeVectorF StRichSpectraMaker::normalRadiationPoint() const { return mNormalRadiationPoint;}
 
 #endif
-#endif /* __ROOT__ */

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.3 2001/08/21 17:58:34 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.4 2001/08/22 19:33:35 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.4  2001/08/22 19:33:35  lasiuk
+ * remove trace of StPairD, and move some include files that
+ * should ease parsing of CINT
+ *
  * Revision 1.3  2001/08/21 17:58:34  lasiuk
  * for 2000 analysis
  *
@@ -42,8 +46,6 @@ using std::vector;
 using std::unique;
 #endif
 
-#define VERBOSE 0
-#define ivb if(VERBOSE)cout
 // StEvent
 #include "StEventTypes.h"
 #include "StRichPidTraits.h"
@@ -65,7 +67,6 @@ using std::unique;
 #include "StRichPIDMaker/StRichTrack.h"
 
 // SpectraMaker
-#include "StPairD.h"
 #include "StRichRayTracer.h"
 #include "StRichCerenkovHistogram.h"
 
@@ -811,7 +812,7 @@ bool StRichSpectraMaker::evaluateEvent(StRichTrack* richTrack, StRichPidTraits* 
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.3 2001/08/21 17:58:34 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.4 2001/08/22 19:33:35 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
