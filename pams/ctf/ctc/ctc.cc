@@ -10,7 +10,7 @@
 //
 extern "C" void    MessageOut( const char *msg );
 //
-long type_of_call ctc_(
+extern "C" long ctc_(
   TABLE_HEAD_ST   *ctrl_h,       CTC_CTRL_ST   *ctrl  ,
   TABLE_HEAD_ST   *extra_h,      CTE_EXTRA_ST  *extra ,
   TABLE_HEAD_ST   *raw_h,        CTU_RAW_ST    *raw ,

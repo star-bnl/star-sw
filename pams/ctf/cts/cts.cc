@@ -2,6 +2,8 @@
 **: FILE:       cts.cc        
 **: HISTORY:
 **:             03feb97-      ppy- STAF version
+**:             19mar98-      ppy- zero suppression introduced
+**:                           this may mess up physical and electronic noise
 **:
 **:<------------------------------------------------------------------*/
 #include <math.h>
@@ -68,7 +70,7 @@ float const Pi    = acos(-1.) ;
 float const Todeg = 180. / Pi ;
 #define min(a,b)    ( ( (a) < (b) ) ? (a) : (b) )
 //
-long type_of_call cts_(
+extern "C" long cts_(
   TABLE_HEAD_ST           *mhit_h,    G2T_CTF_HIT_ST             *mhit ,
   TABLE_HEAD_ST          *track_h,      G2T_TRACK_ST            *track ,
   TABLE_HEAD_ST            *geo_h,        CTG_GEO_ST              *geo ,
@@ -435,9 +437,9 @@ void cts_fill_event (
 **: AUTHOR:     ppy - P.P. Yepes, yepes@physics.rice.edu
 **: ARGUMENTS:
 **:       IN:
-**:           track_h     - track       header table
+**:           track_h     - MC track    header table
 **:           track       - MC track    table
-**:           mslat_h     - MC slat     hader table
+**:           mslat_h     - MC slat     header table
 **:           mslat       - MC slat     table
 **:      OUT:
 **:           event_h     - event       header table
@@ -505,11 +507,19 @@ void cts_fill_raw (
 //
 //   Loop over slats
 // 
-   long index ;
-   long i_phi, i_eta, n_eta ;
+   long index, i_raw ;
+   long i_phi, i_eta, n_eta, n_phi ;
    float offset ;
 //
+   n_phi = geo->n_counter_phi * geo->n_tray_phi ;
    n_eta = geo->n_counter_eta * geo->n_tray_eta ;
+//
+//   Set Adc Tdc to zero
+//
+   for ( index = 0 ; index < n_eta*n_phi ; index++ ) {
+       raw[index].adc = 0. ;
+       raw[index].tdc = 0. ;
+   }
 //
    for ( int i_slat = 0 ; i_slat < mslat_h->nok ; i_slat++ ) {
 //
@@ -517,30 +527,50 @@ void cts_fill_raw (
 //
       i_phi = mslat[i_slat].i_phi ;
       i_eta = mslat[i_slat].i_eta ;
-      index = ctg_index ( i_phi, i_eta, n_eta  ) ;
+      i_raw = index = ctg_index ( i_phi, i_eta, n_eta  ) ;
+      if ( mpara->zero_suppression ) i_raw = i_slat ;
 //
 //     Adc 
 //
       offset = slat[index].offset_adc + rg32_()* slat[index].ods_adc ;
-      raw[i_slat].adc = (int)((float)mslat[i_slat].n_phe * mpara->nphe_to_adc) 
+      raw[i_raw].adc = (int)((float)mslat[i_slat].n_phe * mpara->nphe_to_adc) 
                        + offset ;
-      if ( raw[i_slat].adc > mpara->adc_overflow ) 
-                   raw[i_slat].adc = mpara->adc_overflow ;
-      mslat[i_slat].adc = raw[i_slat].adc ;
+      if ( raw[i_raw].adc > mpara->adc_overflow ) 
+                   raw[i_raw].adc = mpara->adc_overflow ;
+      mslat[index].adc = raw[i_raw].adc ;
 //
 //     Tdc
 //
       offset = slat[index].offset_tdc + rg32_()* (float)slat[index].ods_tdc ;
-      raw[i_slat].tdc = mslat[i_slat].time / slat[index].cc_tdc + offset ;
-      mslat[i_slat].tdc = raw[i_slat].tdc ;
+      raw[i_raw].tdc = mslat[i_slat].time / slat[index].cc_tdc + offset ;
+      mslat[i_slat].tdc = raw[i_raw].tdc ;
 //
-      raw[i_slat].i_phi = mslat[i_slat].i_phi ; 
-      raw[i_slat].i_eta = mslat[i_slat].i_eta ;
+      raw[i_raw].i_phi = mslat[i_slat].i_phi ; 
+      raw[i_raw].i_eta = mslat[i_slat].i_eta ;
+   }
+//
+//   If zero suppression stop here
+//
+   if ( mpara->zero_suppression ) {
+      raw_h->nok = mslat_h->nok ;
+      return ;
+   }
+//
+//   Fill the rest of the slats with pedestals and offsets
+//
+   for ( index = 0 ; index < n_eta*n_phi ; index++ ) {
+
+      if ( raw[index].adc != 0. ) continue ;
+
+      raw[index].i_phi = slat[index].i_phi ;
+      raw[index].i_eta = slat[index].i_eta ;
+      raw[index].adc   = slat[index].offset_adc + rg32_()* slat[index].ods_adc ;
+      raw[index].tdc   = slat[index].offset_tdc + rg32_()* slat[index].ods_tdc ;
    }
 //
 //   Set number of slats with raw data
 //
-   raw_h->nok = mslat_h->nok ;
+   raw_h->nok = n_phi * n_eta ;
 //
 //  That's it
 //
