@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.19 2004/01/27 02:45:42 perev Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.20 2004/02/24 15:53:22 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.20  2004/02/24 15:53:22  caines
+ * Read all params from database
+ *
  * Revision 1.19  2004/01/27 02:45:42  perev
  * LeakOff
  *
@@ -92,6 +95,7 @@
 #include "StSvtClassLibrary/StSvtT0.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
+#include "StSvtClassLibrary/StSvtDaq.hh"
 #include "StSvtDaqMaker/StSvtHybridDaqPed.hh"
 #include "StSvtCalibMaker/StSvtPedMaker.h"
 #include "StSvtAngles.hh"
@@ -109,7 +113,6 @@
 
 ClassImp(StSvtSimulationMaker)
 
-int* counter = 0;
 
 
 
@@ -117,9 +120,7 @@ int* counter = 0;
 StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
 { 
    if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor"<<endm;
- 
-  mPedOffset = 20;     //value taken from StSeqAdjMakeru- hardwired value, but could possibly change run to run
- 
+  
   //electron cloud settings - these can be tuned;
   mDiffusionConst=0.0035;   // [mm**2/micro seconds]
   mLifeTime=1000000.0;     // [us]
@@ -128,7 +129,7 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   //options - can be set by setOptions
   mExpOption = "both";     // both, coulomb, diffusion
   mWrite = 0;              // Debug option
-  mFineDiv = 0;            // Debug option
+  mFineDiv = 0;            // Debug option = 0 to use finer scales for signal width outputs 
   mSigOption = 0;          // Debug option 
   
   
@@ -141,10 +142,6 @@ StSvtSimulationMaker::StSvtSimulationMaker(const char *name):StMaker(name)
   mDriftSpeedColl=NULL;
   
   mCoordTransform = NULL;
-
-  //this should be part of the chain
-  //if (!GetMaker("StSvtPedMaker")) new StSvtPedMaker("StSvtPedMaker");   //this should be later removed when Pedmaker is standard part of BFC
-  //else gMessMgr->Info() << "StSvtPedMaker already exists in the chain"<<endm;
 
   if (Debug()) gMessMgr->Info() << "StSvtSimulationMaker::constructor...END"<<endm;
  
@@ -165,11 +162,10 @@ StSvtSimulationMaker::~StSvtSimulationMaker()
 
 //____________________________________________________________________________
 
-Int_t StSvtSimulationMaker::setConst(double timBinSize, double anodeSize, int offset)
+Int_t StSvtSimulationMaker::setConst(double timBinSize, double anodeSize)
 {
   mTimeBinSize = timBinSize ;
   mAnodeSize = anodeSize;    
-  mPedOffset = offset;
   return kStOK;
 }
 
@@ -236,15 +232,13 @@ Int_t StSvtSimulationMaker::Init()
 Int_t StSvtSimulationMaker::InitRun(int runumber)
 { //when the run changes
   if(Debug()) gMessMgr->Info() <<"StSvtSimulationMaker::InitRun()"<<endm;
- 
-  //((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadFromFile("data/ped/pedestal_4065001.root");
-  //((StSvtPedMaker*) GetMaker("StSvtPedMaker"))->ReadRMSFromFile("data/ped/rms2_pedestal_4065001.root");
   
   //read from database
   getConfig();
   getSvtGeometry();
   getSvtDriftSpeeds();
   getSvtT0();
+  getPedestalOffset();
 
   setSvtPixelData();
   //Set up coordinate transformation 
@@ -265,12 +259,11 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   //set size of hits-otherwise default is false,8
   //mSvtSimulation->setPasaSigAttributes(kFALSE,8)
 
-  
-  //if(Debug()) CreateHistograms();
+
   cout<<"StSvtSimulationMaker::InitRun info:"<<endl;
   cout<<"  Anode size="<<mAnodeSize<<" ,time bin size="<<mTimeBinSize<<endl;
-  cout<<"  pedestal offset="<<mPedOffset<<endl;
   cout<<"  default drift velocity="<<mDefaultDriftVelocity<<endl;
+  cout<<"  pedestal offset(from database)="<<mPedOffset<<endl;
   cout<<"  T0(from database)= "<<mT0->getT0(1)<<endl;
   
 
@@ -279,7 +272,18 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   return StMaker::InitRun(runumber);
 }
 
+//____________________________________________________________________________
 
+Int_t  StSvtSimulationMaker:: FinishRun(int oldrunumber){
+  gMessMgr->Info()<<"StSvtSimulationMaker::FinishRun()"<<endm;
+ 
+  TDataSet *set;
+  if ((set=GetDataSet("StSvtPixelData"))) delete set;
+  if ((set=GetDataSet("StSvt8bitPixelData"))) delete set;   
+ 
+  gMessMgr->Info()<<"StSvtSimulationMaker::FinishRun() - END"<<endm;
+  return StMaker::FinishRun(oldrunumber);
+}
 
 
 //____________________________________________________________________________
@@ -365,16 +369,6 @@ void  StSvtSimulationMaker::setGeantData()
 
 }
 
-//____________________________________________________________________________
-void StSvtSimulationMaker::CreateHistograms()
-{ 
-  //mNtFile = new TFile("spacepoints.root","RECREATE","SpacePoints");
-  
-  //mNTuple = new TNtuple("SpacePoints","SpacePoints","xl:yl:x:y:z:peak:unShoot:sumAdc:widthInTime:widthInAnode:shiftInTime");
-
- 
-}
-
 //__________________________________________________________________________________________________
 Int_t  StSvtSimulationMaker::getSvtGeometry()
 {
@@ -386,13 +380,22 @@ Int_t  StSvtSimulationMaker::getSvtGeometry()
   mSvtGeom = (StSvtGeometry*)dataSet->GetObject();
   assert(mSvtGeom);
   
- 
+  return kStOk;
+}
 
-  //+++++++++++++ 
-  //why it's not local? and why here - gets open for each run again
-  //outGeantSvtGeom.open("geantSvtGeom.dat",ios::out);
-  //outDbSvtGeom.open("dbSvtGeom.dat",ios::out);
-  //outSvtTrans.open("transSvtGeom.dat",ios::out);
+//__________________________________________________________________________________________________
+Int_t  StSvtSimulationMaker::getPedestalOffset()
+{
+    
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtDaq");
+  assert(dataSet);
+
+  StSvtDaq *daq = (StSvtDaq*)dataSet->GetObject();
+  assert(daq);
+
+  mPedOffset=daq->getPedOffset();
+
   return kStOk;
 }
 
@@ -405,7 +408,7 @@ Int_t StSvtSimulationMaker::getSvtDriftSpeeds()
   if (!dataSet){
     cout<<"Warning: no SVT drift velocity data available - using default drift speed:"<<mDefaultDriftVelocity<<endl;
     return kStWarn;
-  }
+  } //this might be obsolete, maybe it's better to give an error instead of running on
 
   mDriftSpeedColl = (StSvtHybridCollection*)dataSet->GetObject();
   if (! mDriftSpeedColl) cout<<"Warning: SVT drift velocity data empty - using default drift speed:"<<mDefaultDriftVelocity<<endl;
@@ -423,7 +426,7 @@ Int_t StSvtSimulationMaker::getSvtT0()
   if (!dataSet){
     cout<<"Warning: no SVT T0 data available -using defalt T0 = 0"<<endl;
     return kStWarn;
-  }
+  } //this might be obsolete, maybe it's better to give an error instead of running on
   
   mT0 = (StSvtT0*)dataSet->GetObject();
   if (! mT0) cout<<"Warning: SVT T0 data empty - using default T0 = 0"<<endl;
@@ -509,7 +512,7 @@ Int_t StSvtSimulationMaker::Make()
     {
       double anode,time;
       volId = trk_st[j].volume_id;
-      //cout <<"genat hit #"<<j<<" volumeID="<< volId << " x=" << trk_st[j].x[0] << " y=" << trk_st[j].x[1] << " z=" <<  trk_st[j].x[2]<<endl;
+      //cout <<"geant hit #"<<j<<" volumeID="<< volId << " x=" << trk_st[j].x[0] << " y=" << trk_st[j].x[1] << " z=" <<  trk_st[j].x[2]<<endl;
       //outGeantSvtGeom<< volId <<endl;
       if( volId > 7000) continue; // SSD hit
       /*
@@ -532,10 +535,11 @@ Int_t StSvtSimulationMaker::Make()
       layer = waferCoord.layer(); ladder = waferCoord.ladder();
       wafer = waferCoord.wafer(); hybrid = waferCoord.hybrid();     
       time = waferCoord.timebucket();
+      double driftTime=time - mT0->getT0();
       anode = waferCoord.anode();
       //cout<<"time pos of hit(according to CoordTransform):"<<time<<" ,anodepos:"<<anode<<endl;
     
-      if(time < 0.0 || time > 128.0 || anode < 0.0 || anode > 240.0)
+      if(driftTime < 0.0 || time > 128.0 || anode < 0.0 || anode > 240.0)
 	{ tmpBadCount++; continue;}
       
       mCoordTransform->operator()(globalCor,localCoord);
@@ -577,30 +581,20 @@ Int_t StSvtSimulationMaker::Make()
       //seting drift speed for simulation
       double vd=0;
       if (mDriftSpeedColl){
-	vd = ((StSvtHybridDriftVelocity*)mDriftSpeedColl->at(index))->getV3(1);
-	if (vd<=0) vd=mDefaultDriftVelocity;
-	else vd=vd*1e-5;
+        vd = ((StSvtHybridDriftVelocity*)mDriftSpeedColl->at(index))->getV3(1);
+        if (vd<=0) vd=mDefaultDriftVelocity;
+        else vd=vd*1e-5;
       }
       //cout<<"drift velocity used: = "<<vd<<" (default would be "<<mDefaultDriftVelocity<<")"<<endl;
      
       mSvtSimulation->setDriftVelocity(vd);
-      mSvtSimulation->doCloud(time,energy,theta,phi);
+      mSvtSimulation->doCloud(driftTime,energy,theta,phi);
       mSvtSimulation->fillBuffer(anode,time,svtSimDataPixels);
            
-      //FillGeantHit(barrel,ladder,wafer,hybrid,waferCoord,VecG,VecL,mSvtSimulation->getPeak());
+      if (Debug()) FillGeantHit(barrel,ladder,wafer,hybrid,&waferCoord,&VecG,&VecL,mSvtSimulation->getPeak());
       
     }
-  
-  
-  /*
-   if (mDoBigOutput){
-    cout<<"!!!!!!!!!!!!!Watch out:making big output of histograms"<<endl;
-    MakeRawDataHistos();
-    MakeGeantHitsHistos();
-    oldDir->cd();
-  }
-  */
-
+     
   if (Debug()) gMessMgr->Info() << "In StSvtSimulationMaker::Make()...END" << endm;
   return kStOK;
 }
@@ -608,8 +602,8 @@ Int_t StSvtSimulationMaker::Make()
 
 //____________________________________________________________________________
 void StSvtSimulationMaker::FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
-                    StSvtWaferCoordinate& waferCoord,StThreeVector<double>& VecG,
-                    StThreeVector<double>& VecL, double peak)
+                    StSvtWaferCoordinate* waferCoord,StThreeVector<double>* VecG,
+		    StThreeVector<double>* VecL, double peak)
 { 
   StSvtGeantHits* geantHit;
   
@@ -630,87 +624,6 @@ void StSvtSimulationMaker::FillGeantHit(int barrel, int ladder, int wafer, int h
   geantHit->setNumOfHits(counter[index]);
 }
 
-//____________________________________________________________________________
-void StSvtSimulationMaker::MakePixelHistos()
-{
-  if (Debug()) gMessMgr->Message() << "Making histograms from PixelData" << endm;
-  TH1D *mult=new TH1D("ADC distribution","ADC distribution",500,-10.0,10.0);  
-
-  for(int Barrel = 1;Barrel <= mSvtSimPixelColl->getNumberOfBarrels();Barrel++) {    
-        for (int Ladder = 1;Ladder <= mSvtSimPixelColl->getNumberOfLadders(Barrel);Ladder++) {      
-          for (int Wafer = 1;Wafer <= mSvtSimPixelColl->getNumberOfWafers(Barrel);Wafer++) {	
-            for( int Hybrid = 1;Hybrid <= mSvtSimPixelColl->getNumberOfHybrids();Hybrid++){
-              
-              int index = mSvtSimPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
-              if( index < 0) continue;
-
-              StSvtHybridPixelsD* tmpPixels = (StSvtHybridPixelsD *)mSvtSimPixelColl->at(index);
-              if(!tmpPixels) continue;
-
-              char name[50];
-              char title[50];
-              sprintf(name,"hyb: %.3i Backgr",index);
-              sprintf(title,"Background for hybrid %i",index);
-
-              TH2D *hist = new TH2D(name,title,240,0.0,240.0,128,0.0,128.0);
-              double adc;
-              for(int tim = 0; tim < 128; tim++)
-                for(int an = 0; an < 240; an++)
-                  {
-                    adc = tmpPixels->getPixelContent(an + 1,tim);
-                    //adc-= mPedOffset;
-                    //if(adc != 0.) cout <<adc<<endl;
-                    //cout<<"adc"<<adc<<endl;
-                    hist->Fill(an,tim,adc);
-                    mult->Fill(adc);
-                  }
-              hist->SetDrawOption("ncolz");
-              hist->Write();
-              delete hist;              
-            }
-          }
-        }
-  }
-  mult->Write();
-  delete mult;
-}
-
-//_____________________________________________________________________________
-void StSvtSimulationMaker::MakeGeantHitsHistos()
-{
-  if (Debug()) gMessMgr->Message() << "Making histograms from GeantData" << endm;
-  //TH1D *mult=new TH1D("ADC distribution","ADC distribution",500,-10.0,10.0);  
-
-  for(int Barrel = 1;Barrel <= mSvtGeantHitColl->getNumberOfBarrels();Barrel++) {    
-        for (int Ladder = 1;Ladder <=mSvtGeantHitColl->getNumberOfLadders(Barrel);Ladder++) {      
-          for (int Wafer = 1;Wafer <= mSvtGeantHitColl->getNumberOfWafers(Barrel);Wafer++) {	
-            for( int Hybrid = 1;Hybrid <= mSvtGeantHitColl->getNumberOfHybrids();Hybrid++){
-
-              int index=mSvtGeantHitColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
-              StSvtGeantHits* geantHit = (StSvtGeantHits*)mSvtGeantHitColl->at(index);
-              if( !geantHit) continue;
-              if (geantHit->numberOfHits()==0) continue;
-
-              char name[50];
-              char title[50];
-              sprintf(name,"hyb: %.3i Geant",index);
-              sprintf(title,"Geant hits for hybrid %i",index);
-
-              TH2D *hist = new TH2D(name,title,240,0.0,240.0,128,0.0,128.0);
-
-              for( int gHit = 0; gHit < geantHit->numberOfHits(); gHit++){ 
-                float  time =  geantHit->waferCoordinate()[gHit].timebucket();
-                float  anode = geantHit->waferCoordinate()[gHit].anode();
-                hist->Fill(anode,time);
-              }
-              hist->SetDrawOption("ncolz");
-              hist->Write();
-              delete hist;              
-            }
-          }
-        }
-  }           
-}
 
 //_____________________________________________________________________________
 void StSvtSimulationMaker::Clear(const char*)

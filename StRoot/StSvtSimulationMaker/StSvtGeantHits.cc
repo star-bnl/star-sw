@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.cc,v 1.4 2003/07/31 19:18:09 caines Exp $
+ * $Id: StSvtGeantHits.cc,v 1.5 2004/02/24 15:53:22 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.cc,v $
+ * Revision 1.5  2004/02/24 15:53:22  caines
+ * Read all params from database
+ *
  * Revision 1.4  2003/07/31 19:18:09  caines
  * Petrs improved simulation code
  *
@@ -70,26 +73,26 @@ void  StSvtGeantHits::setGeantHit(int index ,int* svtAtt, float* AnTime)
   mWaferCoord[index].setTimeBucket(AnTime[1]);
 } 
 
-void  StSvtGeantHits::setGeantHit(int index ,StSvtWaferCoordinate& waferCoord)
+void  StSvtGeantHits::setGeantHit(int index ,StSvtWaferCoordinate* waferCoord)
 {
   if (index > MAX_HITS)
     return;
 
-  mWaferCoord[index].setLayer(waferCoord.layer());
-  mWaferCoord[index].setLadder(waferCoord.ladder());
-  mWaferCoord[index].setWafer(waferCoord.wafer());
-  mWaferCoord[index].setHybrid(waferCoord.hybrid());
-  mWaferCoord[index].setAnode(waferCoord.anode());
-  mWaferCoord[index].setTimeBucket(waferCoord.timebucket());
+  mWaferCoord[index].setLayer(waferCoord->layer());
+  mWaferCoord[index].setLadder(waferCoord->ladder());
+  mWaferCoord[index].setWafer(waferCoord->wafer());
+  mWaferCoord[index].setHybrid(waferCoord->hybrid());
+  mWaferCoord[index].setAnode(waferCoord->anode());
+  mWaferCoord[index].setTimeBucket(waferCoord->timebucket());
 } 
 
 
-void StSvtGeantHits::setGlobalCoord( int index, StThreeVector<double>& x ){
+void StSvtGeantHits::setGlobalCoord( int index, StThreeVector<double>* x ){
 
-  mGlobalCoord[index].setPosition(x);
+  mGlobalCoord[index].setPosition(*x);
 }
 
-void StSvtGeantHits::setLocalCoord( int index, StThreeVector<double>& x ){
+void StSvtGeantHits::setLocalCoord( int index, StThreeVector<double>* x ){
 
-  mLocalCoord[index].setPosition(x);
+  mLocalCoord[index].setPosition(*x);
 }

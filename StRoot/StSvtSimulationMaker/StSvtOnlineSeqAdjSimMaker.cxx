@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.3 2004/01/27 02:45:10 perev Exp $
+ * $Id: StSvtOnlineSeqAdjSimMaker.cxx,v 1.4 2004/02/24 15:53:22 caines Exp $
  *
  * Author: Petr Chaloupka
  ***************************************************************************
@@ -18,6 +18,7 @@
 #include "StSvtClassLibrary/StSvtHybridBadAnodes.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtConfig.hh"
+#include "StSvtClassLibrary/StSvtDaq.hh"
 #include "StSequence.hh"
 #include "StMessMgr.h"
 #include "StSvtConversionTable.h"
@@ -30,27 +31,7 @@ StSvtOnlineSeqAdjSimMaker::StSvtOnlineSeqAdjSimMaker(const char* name):StMaker(n
   m8bitPixelColl=NULL;
   mPixelColl=NULL;
   mSvtBadAnodes=NULL;
-
-  //here are the default settings, you can override them in Init()
-  SetKillBadAnodes(kTRUE);
-  SetNumberTBinsToClear(2); 
-
-  //defaults is no raw anodes
-  SetSaveAnode2Raw(kFALSE);
-  SetSaveAnode239Raw(kFALSE);
   
-  //default is no extra anodes
-  SetExtraPixelsBefore(1);
-  SetExtraPixelsAfter(4);
-
-  SetPedOffset(20);
-  //these settings are lower then those usualy used
-  Set_thresh_hi(7);
-  Set_n_seq_hi(0);
-
-  Set_thresh_lo(2);  
-  Set_n_seq_lo(2);
-
   //This is because of some Makers downd the chain
   GetConfig();
   SetRawData(); 
@@ -85,6 +66,29 @@ Int_t StSvtOnlineSeqAdjSimMaker::GetConfig()
     dataSet->SetObject(mConfig);
   }
   
+  return kStOk;
+}
+
+//__________________________________________________________________________________________________
+Int_t  StSvtOnlineSeqAdjSimMaker::GetDaqParams()
+{
+    
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtDaq");
+  assert(dataSet);
+
+  mDaq = (StSvtDaq*)dataSet->GetObject();
+  assert(mDaq);
+
+  SetNumberTBinsToClear(mDaq->getClearedTimeBins());
+  SetExtraPixelsBefore(mDaq->getPixelsBefore());
+  SetExtraPixelsAfter(mDaq->getPixelsAfter());
+  SetPedOffset(mDaq->getPedOffset());
+  Set_n_seq_lo(mDaq->getSeqLo());
+  Set_n_seq_hi(mDaq->getSeqHi());
+  Set_thresh_lo(mDaq->getThreshLo());
+  Set_thresh_hi(mDaq->getThreshHi());
+
   return kStOk;
 }
 
@@ -155,14 +159,7 @@ void StSvtOnlineSeqAdjSimMaker::SetRawData()
 //____________________________________________________________________________
 Int_t StSvtOnlineSeqAdjSimMaker::Init()
 {
-  // these are user settings - they should be read from database - so far here
- /* 
-  SetNumberTBinsToClear(4);
-  SetExtraPixelsBefore(1);
-  SetExtraPixelsAfter(4);
-  SetAdjParams(3,2,7,0);
- */
- return  StMaker::Init();
+  return  StMaker::Init();
 }
 
 //____________________________________________________________________________
@@ -171,6 +168,16 @@ Int_t StSvtOnlineSeqAdjSimMaker::InitRun(int runumber)
   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::InitRun"<<endm;	
   GetConfig();
   GetBadAnodes();
+  GetDaqParams();
+  
+  gMessMgr->Info()<< " DAQ parameters used for simulation:"<<endm;
+  gMessMgr->Info() << "     PedOffSet = "<<mPedOffset<<endm;
+  gMessMgr->Info() << "    thresh_lo = "<<m_thresh_lo <<endm;
+  gMessMgr->Info() << "     thresh_hi = "<<m_thresh_hi <<endm;
+  gMessMgr->Info() << "     n_seq_lo  = "<<m_n_seq_lo <<endm;
+  gMessMgr->Info() << "     n_seq_hi  = "<< m_n_seq_hi <<endm;
+
+  
   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::InitRun...END"<<endm;	
   return  StMaker::InitRun(runumber);
 }
@@ -204,46 +211,46 @@ Int_t  StSvtOnlineSeqAdjSimMaker::Make()
   SetRawData();
   GetPixelData();
   
-   for(int Barrel = 1;Barrel <= mPixelColl->getNumberOfBarrels();Barrel++) {
-     for (int Ladder = 1;Ladder <= mPixelColl->getNumberOfLadders(Barrel);Ladder++) {
+  for(int Barrel = 1;Barrel <= mPixelColl->getNumberOfBarrels();Barrel++) {
+    for (int Ladder = 1;Ladder <= mPixelColl->getNumberOfLadders(Barrel);Ladder++) {
        for (int Wafer = 1;Wafer <= mPixelColl->getNumberOfWafers(Barrel);Wafer++) {
          for( int Hybrid = 1;Hybrid <= mPixelColl->getNumberOfHybrids();Hybrid++){
            
            mCurrentIndex = mPixelColl->getHybridIndex(Barrel,Ladder,Wafer,Hybrid);
            if( mCurrentIndex < 0) continue; 
-            //cout<<"index:"	<<mCurrentIndex<<endl;
-	   
+           //cout<<"index:"	<<mCurrentIndex<<endl;
+           
            mCurrentPixelData  = (StSvtHybridPixelsD*)mPixelColl->at(mCurrentIndex);
            mCurrent8bitPixelData = (StSvtHybridPixelsC*)m8bitPixelColl->at(mCurrentIndex);
-
-	   if(!mCurrent8bitPixelData) {
+           
+           if(!mCurrent8bitPixelData) {
              mCurrent8bitPixelData = new StSvtHybridPixelsC(Barrel, Ladder, Wafer, Hybrid);
              m8bitPixelColl->put_at(mCurrent8bitPixelData,mCurrentIndex);
-	   }
-
-           if(!mCurrentPixelData) { //no data from simulation Maker
-              mCurrent8bitPixelData->Reset();
            }
-	   
-	   //No we have the pixel data sructures,turn it now into the real data
+           
+           if(!mCurrentPixelData) { //no data from simulation Maker
+             mCurrent8bitPixelData->Reset();
+           }
+           
+           //No we have the pixel data sructures,turn it now into the real data
            //ie. simulate the DAQ
-	   
-	   Conversion10to8bit();
-	   ClearMask();
-	   if (mKillBadAnodes) KillBadAnodes();	 
-	   if (mNumberTBinsToClear>0) ClearFirstTbins();
-	   RawAnodes();
+           
+           Conversion10to8bit();
+           ClearMask();
+           if (mKillBadAnodes) KillBadAnodes();	 
+           if (mNumberTBinsToClear>0) ClearFirstTbins();
+           RawAnodes();
            SequenceSearch();
-	   WriteMask();
-	   FillRawData();
-	       
+           WriteMask();
+           FillRawData();
+           
          }
        }
-     }
-   }
+    }
+  }
    
-   if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::Make...END"<<endm;	
-   return kStOK;
+  if (Debug()) gMessMgr->Info()<<"StSvtOnlineSeqAdjSimMaker::Make...END"<<endm;	
+  return kStOK;
 }
 
 //____________________________________________________________________________
@@ -276,72 +283,62 @@ void StSvtOnlineSeqAdjSimMaker::FillRawData()
   if (mKillBadAnodes && mSvtBadAnodes)  badAnode = (StSvtHybridBadAnodes*)mSvtBadAnodes->at(mCurrentIndex);
   
   Char_t *mAdcArray=mCurrent8bitPixelData->GetArray(); // array of [128*240]  
- 
+  
   StSequence tmpSeq[128];  //buffer for sequences on one anode
   for (int ianode=0;ianode<240;ianode++)
     {  
-       int seqCount=0; //number of sequences on current anode
+      int seqCount=0; //number of sequences on current anode
 
       //first check for raw anodes
-      if ((ianode==1)&&mSaveAnode2Raw){
-        if (badAnode->isBadAnode(2)) continue; //don't write out zeros if bad
-	tmpSeq[0].startTimeBin =0;
-	tmpSeq[0].firstAdc=(unsigned char*)(mAdcArray+ianode*128);
-	tmpSeq[0].length = 128;
-	seqCount=1;
-	hybridData->setListSequences(anodes,ianode+1, seqCount, tmpSeq);
-	anodes++;
-	continue;
-      }
-
-      if ((ianode==238)&&mSaveAnode239Raw){
-        if (badAnode->isBadAnode(239)) continue; //don't write out zeros if bad
-	tmpSeq[0].startTimeBin =0;
-	tmpSeq[0].firstAdc=(unsigned char*)(mAdcArray+ianode*128);
-	tmpSeq[0].length = 128;
-	seqCount=1;
-	hybridData->setListSequences(anodes,ianode+1, seqCount, tmpSeq);
-	anodes++;
-	continue;
-      }
-  
-     
+      int an=ianode+1;
+      if ((an==mDaq->getSavedBlackAnodes(0))||(an==mDaq->getSavedBlackAnodes(1))||(an==mDaq->getSavedBlackAnodes(2))||(an==mDaq->getSavedBlackAnodes(3)))
+        {
+          if (badAnode->isBadAnode(an)) continue; //don't write out zeros if bad
+          tmpSeq[0].startTimeBin =0;
+          tmpSeq[0].firstAdc=(unsigned char*)(mAdcArray+ianode*128);
+          tmpSeq[0].length = 128;
+          seqCount=1;
+          hybridData->setListSequences(anodes, an, seqCount, tmpSeq);
+          anodes++;
+          continue; 
+        }
+               
       int pixCount=0; ///number of pixels in current sequence
-      for(int tim = 0; tim <= 128; tim++)
-	{//loop over time bins in one anode
-	  unsigned char adc; 
-	  if (tim==128)  adc=0; // make an artificial end of time sequence
-	  else adc= (unsigned char)mAdcArray[ianode*128 + tim];
-	  
-	  if (adc>0)
-	    {
-	      if (pixCount==0){ //starting new sequence
-		tmpSeq[seqCount].startTimeBin = tim;
-		tmpSeq[seqCount].firstAdc=(unsigned char*)(mAdcArray+ianode*128 + tim);
-	      }
-	      pixCount++;
-	    }
-	  else
-	    {
-	      if(pixCount>0){//end of sequence
-		tmpSeq[seqCount].length = pixCount;
-		seqCount++;
-		pixCount=0;
-	      }
-	    }
-	  
-	  
-	}
+        for(int tim = 0; tim <= 128; tim++)
+          {//loop over time bins in one anode
+            unsigned char adc; 
+            if (tim==128)  adc=0; // make an artificial end of time sequence
+            else adc= (unsigned char)mAdcArray[ianode*128 + tim];
+            
+            if (adc>0)
+              {
+                if (pixCount==0){ //starting new sequence
+                  tmpSeq[seqCount].startTimeBin = tim;
+                  tmpSeq[seqCount].firstAdc=(unsigned char*)(mAdcArray+ianode*128 + tim);
+                }
+                pixCount++;
+              }
+            else
+              {
+                if(pixCount>0){//end of sequence
+                  tmpSeq[seqCount].length = pixCount;
+                  seqCount++;
+                  pixCount=0;
+                }
+              }
+            
+            
+          }
    
-      if(seqCount>0){ //save found sequences
-	//cout<<"found sequences:"<<seqCount<<endl;
-	hybridData->setListSequences(anodes,ianode+1, seqCount, tmpSeq);
-	anodes++;
-      }
-      
-      
+        if(seqCount>0){ //save found sequences
+          //cout<<"found sequences:"<<seqCount<<endl;
+          hybridData->setListSequences(anodes,ianode+1, seqCount, tmpSeq);
+          anodes++;
+        }
+        
+        
     }   
-
+  
   hybridData->setAnodeList();
 }
 
@@ -380,33 +377,33 @@ void StSvtOnlineSeqAdjSimMaker::SequenceSearch()
   for(int an = 0; an < 240; an++){
     //get ready for new anode
     loCount=0;hiCount=0; //just for safety
-
+    
     for(int tim = 0; tim <= 128; tim++)
       {//loop over time bins in one anode
-	
-	if (tim==128)  adc=0; // make an artificial end of time sequence
-	else adc=(unsigned char)mAdcArray[an*128 + tim];
-	
-	if (adc>HiTresh) hiCount++;
-
-	if (adc>LoTresh)
-	  { //inside of sequence or at the beginning
-	    if (loCount==0) SeqBegins=tim; //it is the beginning of the sequence
-	    loCount++;  
-	  }
-	else
-	  { //ouside or at the end of the sequence
-	    if(loCount!=0) //end of sequence
-	      {	
-	        WriteSequence(an,SeqBegins,tim-1,hiCount);
-		loCount=0;hiCount=0;	
-	      }
-	  }
-	
-	
+        
+        if (tim==128)  adc=0; // make an artificial end of time sequence
+        else adc=(unsigned char)mAdcArray[an*128 + tim];
+        
+        if (adc>HiTresh) hiCount++;
+        
+        if (adc>LoTresh)
+          { //inside of sequence or at the beginning
+            if (loCount==0) SeqBegins=tim; //it is the beginning of the sequence
+            loCount++;  
+          }
+        else
+          { //ouside or at the end of the sequence
+            if(loCount!=0) //end of sequence
+              {	
+                WriteSequence(an,SeqBegins,tim-1,hiCount);
+                loCount=0;hiCount=0;	
+              }
+          }
+        
+        
       }
   }
-
+  
 }
 
 
@@ -436,19 +433,12 @@ void  StSvtOnlineSeqAdjSimMaker::KillBadAnodes()
 //____________________________________________________________________________
 void StSvtOnlineSeqAdjSimMaker::RawAnodes()
 {
-  int anode;
-  int tb;
-
-  if(mSaveAnode2Raw)
+ 
+  for (int i=0 ; i<4 ; i++)
     {
-      anode=1;
-      for(tb = 0; tb < 128; tb++) mMask[anode*128 + tb]=kTRUE;
-    }
-
- if(mSaveAnode239Raw)
-    {
-      anode=238;
-      for(tb = 0; tb < 128; tb++) mMask[anode*128 + tb]=kTRUE;
+      int an=mDaq->getSavedBlackAnodes(i);
+      if ((an<=0)||(an>240)) continue;
+      for(int tb = 0; tb < 128; tb++) mMask[an*128 + tb]=kTRUE;
     } 
 
 }

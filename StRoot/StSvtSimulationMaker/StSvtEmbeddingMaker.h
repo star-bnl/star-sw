@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.h,v 1.4 2004/01/22 16:30:47 caines Exp $
+ * $Id: StSvtEmbeddingMaker.h,v 1.5 2004/02/24 15:53:21 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.h,v $
+ * Revision 1.5  2004/02/24 15:53:21  caines
+ * Read all params from database
+ *
  * Revision 1.4  2004/01/22 16:30:47  caines
  * Getting closer to a final simulation
  *
@@ -35,8 +38,6 @@ class StSvtHybridData;
 class StSvtData;
 class StSvtHybridCollection;
 class StSvtHybridPixelsD;
-class TH2F;
-class TFile;
 
 class StSvtEmbeddingMaker : public StMaker
 {
@@ -53,18 +54,16 @@ public:
     
   void setBackGround(Bool_t backgr=kTRUE,double backgSigma=1.8);      //default is TRUE and 1.8
   void setDoEmbedding(Bool_t doIt=kTRUE);                       //this allows(when set to FALSE) to force the embedding maker to ignore raw data 
+  void SetPedRmsPreferences(Bool_t usePixelRMS=kTRUE, Bool_t useHybridRMS=kTRUE);                    // allows to disable reading RMS from database
 							  //and create simple background -just a plain simulation; default is TRUE
   
 private:
+  void ReadPedRMSfromDb();
   void GetSvtData();
   void GetPedRMS();
   void ClearMask();
   void AddRawData();
   void CreateBackground();
- 
-  //for debugging
-  void bookHistograms();
-  //void fillHistograms();
   double  MakeGaussDev(double sigma);
 
   StSvtData*               mSimPixelColl;   //!
@@ -72,19 +71,19 @@ private:
   StSvtHybridCollection*   mPedColl;            //!
   StSvtHybridCollection*   mPedRMSColl;         //!
 
+  //parameters possible set from outside
   double mBackGSigma;  //default value if individiual RMS are not available 
   Bool_t mBackGrOption;
   Bool_t mDoEmbedding;   
+  Bool_t mUsePixelRMS;  //try to read individual pixel RMS from database, default TRUE
+  Bool_t mUseHybridRMS; //try to read individual hybrid RMS from database, default TRUE
+  
+  Bool_t mRunningEmbedding;   // can I realy run embedding - ie. missing DAQ maker?
   Bool_t mMask[128*240];
 
-//global variables for temporary store in the loop
+  //global variables for temporary store in the loop
   StSvtHybridPixelsD  *mCurrentPixelData;
   int mCurrentIndex;
-
-
-  //+++++++++++
-  TH2F** mDataHist;      //!
-  TFile* mFile;          //!
   
   ClassDef(StSvtEmbeddingMaker,1)
 
