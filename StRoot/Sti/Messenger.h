@@ -88,11 +88,11 @@ public:
     /// and the static routing mask allow this Messenger to write
     /// anything.  Always returns false when DEBUG is defined.
     inline bool canWrite(){
-#ifndef DEBUG
-      return false;
-#else
+// #ifndef DEBUG
+//      return false;
+// #else
       return ((getRoutingCode() & s_routing) > 0);
-#endif
+// #endif
     } // canWrite
 
 protected:
