@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.11 2002/02/22 21:55:22 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 2.12 2002/02/23 02:25:08 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -380,8 +380,10 @@ Int_t StRchMaker::Make() {
 		unsigned long theADCValue =
 		    mTheRichReader->GetADCFromCoord(iPad,iRow);
 
-		if(theADCValue>=1023)
+		if(theADCValue>1023) {
 		    saturatedPad = true;
+		    theADCValue = 1024; // anything higher is junk
+		}
 		
 		if (mPedestalSubtract && (iPad == 0) &&  (iRow%6==5)) {
 		    unsigned long theCut = static_cast<unsigned long>(mPedestal[iPad][iRow] + mSigma[iPad][iRow]);
@@ -478,7 +480,11 @@ Int_t StRchMaker::Make() {
 	    UShort_t iPad = (*iter)->pad();
 	    UShort_t iRow = (*iter)->row();
 	    UShort_t theADCValue = (*iter)->adc();
-	    if(theADCValue>=1023) saturatedPad = true;
+	    if(theADCValue>1023) {
+		saturatedPad = true;
+		theADCValue = 1024; // anything higher is junk
+	    }
+	    
 	    if (mPedestalSubtract && (iPad==0) && (iRow%6==5)) {
 		unsigned long theCut =
 		    static_cast<unsigned long>(mPedestal[iPad][iRow] + mPedestalSubtract* mSigma[iPad][iRow]);
@@ -535,6 +541,7 @@ Int_t StRchMaker::Make() {
 		if(saturatedPad) {
 		    thePixelPointer->back()->setBit(eSaturatedPixel);
 		    //cout << "p/r/q " << iPad << "/" << iRow << "/" << theADCValue << endl;
+		    
 		}
 	    }
 	}
@@ -954,7 +961,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.11 2002/02/22 21:55:22 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.12 2002/02/23 02:25:08 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -999,6 +1006,11 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.12  2002/02/23 02:25:08  dunlop
+ * Removed the junk data at the end of a saturated pixel before
+ * filling into the clusterfinder.  If pixel has value > 1023, make
+ * it equal to 1024.
+ *
  * Revision 2.11  2002/02/22 21:55:22  dunlop
  * Fixed bug in saturated pad.  Wasn't being filled for one type of data
  *
