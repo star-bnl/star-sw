@@ -211,16 +211,16 @@ c*** pgj: apply M_LAMBDA mass check
 
 c*** pgj: also apply cuts on v0 pion daughter impact param. and decay dist.
 
-        if( abs(mala-M_LAMBDA).le.dmass(idet_v0) ) then
+ 77     if( abs(mala-M_LAMBDA).le.dmass(idet_v0) ) then
           v0_mass = mala
           charge = -1.
           if( abs(v0_vertex(j).dcan).lt.bpn_v0(idet_v0) .or.
-     >        rv.lt.rv_v0(idet_v0) ) GO TO 10
+     >        rv.lt.rv_v0(idet_v0) ) GO TO 11
         elseif( abs(malb-M_LAMBDA).le.dmass(idet_v0) ) then
           v0_mass = malb
           charge = +1.
           if( abs(v0_vertex(j).dcap).lt.bpn_v0(idet_v0) .or.
-     >        rv.lt.rv_v0(idet_v0) ) GO TO 10
+     >        rv.lt.rv_v0(idet_v0) ) GO TO 11
         else
           GO TO 10
         endif
@@ -503,6 +503,11 @@ c                  exiaux(n_xi).costh   =
 
  20     CONTINUE
 
+ 11   if (charge.eq.-1.) then
+        mala = 0.
+        goto 77
+      endif
+	
  10   CONTINUE	
 
       write(m132,*) 'EXI - found ',n_xi,' candidates'
