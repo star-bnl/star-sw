@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.50 2000/05/09 19:38:17 kathy Exp $
+// $Id: doEvents.C,v 1.51 2000/05/17 15:58:08 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.51  2000/05/17 15:58:08  kathy
+// added some print statements to beginning
+//
 // Revision 1.50  2000/05/09 19:38:17  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
 //
@@ -107,15 +110,27 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 //    cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
 //    cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 //}
+
+
 void doEvents(Int_t, const Char_t **, const char *qaflag = "");
 void doEvents(Int_t nevents=2, 
               const Char_t *path="-",
               const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
               const char *qaflag = "off");
 
-
+// ------------------ Here is the actual method -----------------------------------------
 void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
+
+  cout <<  endl << endl <<" doEvents -  input # events = " << nevents << endl;
+  Int_t ilist=0;
+  while(fileList[ilist]){ 
+      cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
+      ilist++; 
+    }
+  cout << " doEvents -  input qaflag   = " << qaflag << endl << endl << endl;
+ 
+
     //
     // First load some shared libraries we need
     //
