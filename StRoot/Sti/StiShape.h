@@ -19,7 +19,7 @@ public:
     float getHalfDepth() const { return halfDepth; }
     float getThickness() const { return thickness; }
     virtual StiShapeCode getShapeCode() const = 0;
-
+    
     // mutators
     void setHalfDepth(float val);
     void setThickness(float val);

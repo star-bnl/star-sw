@@ -23,7 +23,7 @@
 // The "center" coordinates are a little more natural and are best used for
 // rendering and radial ordering.  Here, the magnitude and azimuthal angle
 // of a vector from the global origin to the center of the detector are
-// given, as well as an orientation angle.  The orientation angle is the
+ // given, as well as an orientation angle.  The orientation angle is the
 // angle from the vector above to the detector plane's outward normal.
 // It is 0 for detectors which have xOffset==0.
 

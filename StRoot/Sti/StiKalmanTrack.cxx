@@ -366,8 +366,8 @@ void StiKalmanTrack::initialize(double curvature,
       node->reset();
       if (node==0)
 	{
-	    cout << "StiKalmanTrack::initilize() - Severe Error - "
-		 << "trackNodeFactor returned null object" << endl;
+	  cout << "StiKalmanTrack::initilize() - Severe Error - "
+	       << "trackNodeFactor returned null object" << endl;
 	  return;
 	}
       if (pNode==0)
