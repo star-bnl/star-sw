@@ -1,6 +1,0 @@
-<StDbServer>
-<server> duvall </server>
-<host> duvall.star.bnl.gov </host>
-<port> 3306 </port>
-<socket> /tmp/mysql.sock </socket>
-</StDbServer>
