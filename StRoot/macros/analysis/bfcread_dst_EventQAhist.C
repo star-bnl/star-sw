@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.28 2001/04/28 21:45:19 genevb Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.29 2001/05/16 20:53:36 lansdell Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.29  2001/05/16 20:53:36  lansdell
+// added StMcEvent to chain
+//
 // Revision 1.28  2001/04/28 21:45:19  genevb
 // include libs for EMC
 //
@@ -163,6 +166,8 @@ void bfcread_dst_EventQAhist(
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StEventMaker");
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
   gSystem->Load("St_QA_Maker");  
 
 //  Setup top part of chain
@@ -174,6 +179,7 @@ void bfcread_dst_EventQAhist(
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
   IOMk->SetBranch("dstBranch",0,"r");
+  IOMk->SetBranch("geantBranch",0,"r");
   IOMk->SetBranch("runcoBranch",0,"r");
 
 // database stuff
@@ -193,6 +199,7 @@ void bfcread_dst_EventQAhist(
 
 //  add other makers to chain:
   StEventMaker *eventMaker = new StEventMaker("events","title");
+  StMcEventMaker *mcEvent = new StMcEventMaker;
   StEventQAMaker *EventQA = new StEventQAMaker("EventQA","StEvent/QA");
 
 // --- now execute chain member functions --> Init

@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QAhist.C,v 1.6 2001/04/28 21:45:19 genevb Exp $
+// $Id: bfcread_event_QAhist.C,v 1.7 2001/05/16 20:53:37 lansdell Exp $
 // $Log: bfcread_event_QAhist.C,v $
+// Revision 1.7  2001/05/16 20:53:37  lansdell
+// added StMcEvent to chain
+//
 // Revision 1.6  2001/04/28 21:45:19  genevb
 // include libs for EMC
 //
@@ -97,6 +100,8 @@ void bfcread_event_QAhist(
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("StEmcUtil");
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
   gSystem->Load("St_QA_Maker");  
 
 //  Setup top part of chain
@@ -106,6 +111,7 @@ void bfcread_event_QAhist(
 // Input File Maker
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetBranch("event",0,"r");
+  IOMk->SetBranch("geantBranch",0,"r");
   IOMk->SetDebug();
 
 // database stuff
@@ -124,6 +130,7 @@ void bfcread_event_QAhist(
   HU->SetPntrToMaker((StMaker *)IOMk);
 
 //  add other makers to chain:
+  StMcEventMaker *mcEvent = new StMcEventMaker;
   StEventQAMaker *EventQA = new StEventQAMaker("EventQA","StEvent/QA");
 
 // --- now execute chain member functions --> Init

@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.15 2001/04/28 21:45:19 genevb Exp $
+// $Id: bfcread_dst_EventQA_outhistfile.C,v 1.16 2001/05/16 20:53:36 lansdell Exp $
 // $Log: bfcread_dst_EventQA_outhistfile.C,v $
+// Revision 1.16  2001/05/16 20:53:36  lansdell
+// added StMcEvent to chain
+//
 // Revision 1.15  2001/04/28 21:45:19  genevb
 // include libs for EMC
 //
@@ -123,6 +126,8 @@ void bfcread_dst_EventQA_outhistfile(
   gSystem->Load("StEmcUtil");
   gSystem->Load("StEventMaker");
   gSystem->Load("StTreeMaker");
+  gSystem->Load("StMcEvent");
+  gSystem->Load("StMcEventMaker");
   gSystem->Load("St_QA_Maker"); 
 
 //  Setup top part of chain
@@ -134,6 +139,7 @@ void bfcread_dst_EventQA_outhistfile(
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("dstBranch",0,"r");
+    IOMk->SetBranch("geantBranch",0,"r");
     IOMk->SetBranch("runcoBranch",0,"r");
 
 // database stuff
@@ -153,6 +159,7 @@ void bfcread_dst_EventQA_outhistfile(
 
 //  add other makers to chain:
   StEventMaker *eventMaker = new StEventMaker("events","title-notused");
+  StMcEventMaker *mcEvent = new StMcEventMaker;
   StEventQAMaker *EventQA = new StEventQAMaker(MakerHistDir,"StEvent/QA-notused");
 
 // output hist.root file:
