@@ -1,5 +1,8 @@
-* $Id: tls_index_sort_i.F,v 1.4 1998/08/17 14:48:55 fisyak Exp $
+* $Id: tls_index_sort_i.F,v 1.5 1998/12/06 01:51:39 perev Exp $
 * $Log: tls_index_sort_i.F,v $
+* Revision 1.5  1998/12/06 01:51:39  perev
+* Add fixes for NT
+*
 * Revision 1.4  1998/08/17 14:48:55  fisyak
 * add type for Index_Sort
 *
@@ -17,7 +20,7 @@
       
       implicit none
       integer nrows(1),el1(1),el2(1),index(*),ind_size(1)
-      integer tls_Index_Sort_i, Index_Sort
+      integer Index_Sort
       tls_Index_Sort_i  = Index_Sort( nrows, el1, el2, index, ind_size ) 
       end
          

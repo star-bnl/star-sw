@@ -1,5 +1,8 @@
-* $Id: quick_sort.F,v 1.4 1998/09/21 19:30:47 perev Exp $
+* $Id: quick_sort.F,v 1.5 1998/12/06 01:51:38 perev Exp $
 * $Log: quick_sort.F,v $
+* Revision 1.5  1998/12/06 01:51:38  perev
+* Add fixes for NT
+*
 * Revision 1.4  1998/09/21 19:30:47  perev
 * Simple tests added
 *
@@ -64,7 +67,7 @@ C-    PROGRAM  M103  TAKEN FROM CERN PROGRAM LIBRARY,  29-APR-78
 C
       INTEGER        A(NROW,NCOL),WORD(NROW,NCOL),X,W
       INTEGER        LT(40),RT(40)
-      INTEGER        R,RT
+      INTEGER        R
 C
       if(NCOL.le.1) return
       do I=1,NCOL-1
