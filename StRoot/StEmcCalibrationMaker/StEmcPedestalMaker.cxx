@@ -33,6 +33,9 @@ Int_t StEmcPedestalMaker::Init()
   mRms = new TH1F("mRms","",getNChannel(),0.5,getNChannel()+0.5);
   mChi = new TH1F("mChi","",getNChannel(),0.5,getNChannel()+0.5);
   mStatus = new TH1F("mStatus","",getNChannel(),0.5,getNChannel()+0.5);
+
+  mSpecName = "mSpecPed";
+  mAcceptName = "mAcceptPed";
   return StEmcCalibMaker::Init();
 }
 //_____________________________________________________________________________
@@ -51,6 +54,7 @@ Int_t StEmcPedestalMaker::Make()
 			mLastPedDate = getDate();
 			mLastPedTime = getTime();
 			mStarted = true;
+		  reset();
 		}
 		else
 		{
@@ -76,7 +80,6 @@ Int_t StEmcPedestalMaker::Make()
 		savePedestals(mLastPedDate,mLastPedTime,isAutoSaveDB());
 		if(isAutoSaveDB()) saveToDb(mLastPedDate,mLastPedTime);
 		mStarted = false;
-		reset();
   }
   
   return kStOK;
@@ -84,13 +87,13 @@ Int_t StEmcPedestalMaker::Make()
 //_____________________________________________________________________________
 Int_t StEmcPedestalMaker::Finish()
 {
-  saveHist((char*)mFileName.Data());
+  //saveHist((char*)mFileName.Data());
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
 void StEmcPedestalMaker::calcPedestals()
 {	
-  cout <<"***** Calculating pedestals for detetctor "<<getDetector()<<" ...\n"; 
+  cout <<"***** Calculating pedestals for detector "<<getDetector()<<" ...\n"; 
   mPedestal->Reset();
   mRms->Reset();
   mChi->Reset();
@@ -135,7 +138,7 @@ void StEmcPedestalMaker::calcPedestals()
     	float res = avg-seed;
 			    
     	if(avg<0)                        {status+= 2; nped++; avg = 0;}// negative pedestal
-    	if(rms<0 || rms >3*rmsInit)      {status+= 4; nrms++;}// bad rms
+    	if(rms<0 || rms >7*rmsInit)      {status+= 4; nrms++;}// bad rms
     	if(fabs(res)>1.5*rms)            {status+= 8; nchi++;}// large distance to seed
     	if(status==1) ngood++; else nbad++;
     	mPedestal->Fill((float)id,avg);
@@ -222,8 +225,8 @@ void StEmcPedestalMaker::savePedestals(int date,int time, bool DB)
 {   
 	char ts[100];
   TString n[] = {"bemcPed","bprsPed","bsmdePed","bsmdpPed"};
-	if (DB) sprintf(ts,"/home/emc/online/emc/Calibration/%s.%08d.%06d.root",n[getDetector()-1].Data(),date,time);
-	else sprintf(ts,"/home/emc/online/emc/Calibration/%s.%08d.%06d.NO_DB.root",n[getDetector()-1].Data(),date,time);
+	if (DB) sprintf(ts,"$EMCONLINE/pedestal/backup/%s.%08d.%06d.root",n[getDetector()-1].Data(),date,time);
+	else sprintf(ts,"$EMCONLINE/pedestal/backup/%s.%08d.%06d.NO_DB.root",n[getDetector()-1].Data(),date,time);
 	TFile *f = new TFile(ts,"RECREATE");
 	if(getSpec()) getSpec()->Write();
 	if(mPedestal) mPedestal->Write();
