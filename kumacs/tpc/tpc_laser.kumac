@@ -524,8 +524,7 @@ else
 	ProducedData/Hits/tphit_
 	ProducedData/Tracks/res_
 	ProducedData/Tracks/diff_res_
-	ProducedData/Tracks/strack_
-	Geometry/tpgpar/tpg_detector
+	ProducedData/Tracks/strack
 
   timing on
 
