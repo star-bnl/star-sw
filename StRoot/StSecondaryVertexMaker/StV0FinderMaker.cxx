@@ -3,10 +3,10 @@
 /// StV0FinderMaker class (finds V0 secondary vertices)                ///
 ///                                                                    ///
 //////////////////////////////////////////////////////////////////////////
-///
-///  Cuts can be found in the code by comments beginning with "Cut:"
-///
-///
+//
+//  Cuts can be found in the code by comments beginning with "Cut:"
+//
+//
 
 
 #include "StV0FinderMaker.h"
@@ -26,6 +26,17 @@
 
 #define MAXTRACKS 10000
 #define MAXSTRACK  6500
+
+
+
+enum ITTFusage{
+  kUseTPT = 0 ,
+  kUseITTF = 1,
+		kUseBOTH = 2
+};
+
+
+
 
 static StTrack* STATtrk[MAXTRACKS];
 static unsigned short STATptrk[MAXSTRACK];
@@ -53,12 +64,12 @@ ClassImp(StV0FinderMaker)
 
 
 	
-///_____________________________________________________________________________
+//_____________________________________________________________________________
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
 						   ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
-						     prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),useITTFTracks(kFALSE)
+						     prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),useITTFTracks(kUseTPT)
 {
-  /// Assign pointers for static arrays
+  // Assign pointers for static arrays
   maxtracks = MAXTRACKS;
   trk = STATtrk;
   ptrk = STATptrk;
@@ -70,7 +81,7 @@ ClassImp(StV0FinderMaker)
   heli = STATheli;
   trkID = STATtrkID;
 
-  /// Check for multiple instances
+  // Check for multiple instances
   if (hits[maxtracks-1] == -2)
     gMessMgr->Warning() << "StV0FinderMaker(" << name <<
       ") : MORE THAN ONE INSTANCE!" << endm;
@@ -89,7 +100,7 @@ ClassImp(StV0FinderMaker)
 
 
 
-///_____________________________________________________________________________
+//_____________________________________________________________________________
 StV0FinderMaker::~StV0FinderMaker() {
 }
 
@@ -104,7 +115,7 @@ StV0FinderMaker::~StV0FinderMaker() {
 
 
 
-///_____________________________________________________________________________
+//_____________________________________________________________________________
 void StV0FinderMaker::GetPars()
 {
   TDataSet* dbDataSet = GetDataBase("global/vertices");
@@ -119,7 +130,7 @@ void StV0FinderMaker::GetPars()
       "StV0FinderMaker::Init(): could not find ev0par2 in database");
     return;
   }
-  //AddRunCont(ev0par2);
+  ///AddRunCont(ev0par2);
 }
 
 
@@ -134,26 +145,30 @@ void StV0FinderMaker::GetPars()
 
 
 
-///_____________________________________________________________________________
+//_____________________________________________________________________________
 Int_t StV0FinderMaker::Prepare() {
 
   if (prepared) return kStOk;
-  if(UsingITTFTracks()) cout << "using ittf tracks" << endl;
+  //if(UsingITTFTracks()) cout << "using ittf tracks" << endl;
+		if (UsingITTFTracks() == kUseTPT) cout << "Using TPT tracks" << endl;
+		if (UsingITTFTracks() == kUseITTF) cout << "Using ITTF tracks" << endl;
+		if (UsingITTFTracks() == kUseBOTH) cout << "Using TPT *and* ITTF tracks" << endl;
 
   unsigned short i,j,nNodes;
   StThreeVectorD p;
 
-  /// Get pars
+  // Get pars
   GetPars();
+		ITTFflag=32770;
 
-  /// Get event 
+  // Get event 
   event = (StEvent*) GetInputDS("StEvent");
   if (!event) {
     gMessMgr->Warning("StV0FinderMaker: no StEvent; skipping event.");
     return kStWarn;
   }
 
-  /// Get Primary Vertex Position
+  // Get Primary Vertex Position
   StPrimaryVertex* pvert = event->primaryVertex();
   if (!pvert) {
     gMessMgr->Warning("StV0FinderMaker: no primary vertex; skipping event.");
@@ -164,7 +179,7 @@ Int_t StV0FinderMaker::Prepare() {
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   nNodes = theNodes.size();
   
-  /// Find which global tracks to use
+  // Find which global tracks to use
   trks=0;
   ntrks=0;
   ptrks=0;
@@ -172,27 +187,27 @@ Int_t StV0FinderMaker::Prepare() {
     for (j=0; j<theNodes[i]->entries(global); j++) {
 
       StTrack* tri = theNodes[i]->track(global,j);
-      ///Cut: track type
-      if ((tri->encodedMethod() != 32770 && UsingITTFTracks()) ||
-          (tri->encodedMethod() == 32770 && !UsingITTFTracks())) continue;
+      //Cut: track type
+      if ((tri->encodedMethod() != ITTFflag && (UsingITTFTracks() == kUseITTF)) ||
+          (tri->encodedMethod() == ITTFflag && (UsingITTFTracks() == kUseTPT))) continue;
 
-      ///Cut: track flag
+      //Cut: track flag
       if (tri->flag() <= 0) continue;
 
-        /// Determine detector id of track i
+        // Determine detector id of track i
         const StTrackTopologyMap& map = tri->topologyMap();
         Bool_t tpcHit = map.hasHitInDetector(kTpcId);
         Bool_t silHit = map.hasHitInDetector(kSvtId) ||
                         map.hasHitInDetector(kSsdId);
         if (tpcHit) {
           if (silHit)
-            detId[trks] = 3; ///SVT+TPC
+            detId[trks] = 3; //SVT+TPC
           else
-            detId[trks] = 1; ///TPC-only
+            detId[trks] = 1; //TPC-only
         } else if (silHit)
-          detId[trks] = 2; ///SVT-only
+          detId[trks] = 2; //SVT-only
         else
-          ///ignore this track
+          //ignore this track
           continue;
 
         trk[trks] = tri;
@@ -207,7 +222,7 @@ Int_t StV0FinderMaker::Prepare() {
         ptot[trks] = p.mag();
 	trkID[trks]=tri->key();
 
-        /// Determine number of hits (in SVT+TPC)
+        // Determine number of hits (in SVT+TPC)
         hits[trks] = map.numberOfHits(kTpcId) +
                      map.numberOfHits(kSvtId) +
                      map.numberOfHits(kSsdId);
@@ -244,31 +259,31 @@ Int_t StV0FinderMaker::Prepare() {
 
 
 
-///_____________________________________________________________________________
+//_____________________________________________________________________________
 Int_t StV0FinderMaker::Make() {
 
-  /// Variables:
-  StThreeVectorD xi,xj,pi,pj,xpp,pp,impact;      /// 3D vectors of the V0
-  StThreeVectorD xi1,xj1,pi1,pj1,tmp3V;          /// temporary 3D vectors
-  TVector2 ri,rj,xci,xcj,tmp2V;                  /// 2D vectors of the tracks
-  double rad_i,rad_j,separation,solution,dxc;    /// helix circle params
-  double dca_ij,dca_ij1,rmin,dlen,pperpsq,ppmag; /// V0 params
-  double alpha,ptArm_sq,pPosAlongV0,pNegAlongV0; /// Armenteros params
-  double cosij,sin2ij,t1,t2;                     /// 3D dca calculation vars
-  unsigned short i,j,ii,jj;                      /// track iteration vars
-  pairD paths,path2;                             /// helix pathLength vars
+  // Variables:
+  StThreeVectorD xi,xj,pi,pj,xpp,pp,impact;      // 3D vectors of the V0
+  StThreeVectorD xi1,xj1,pi1,pj1,tmp3V;          // temporary 3D vectors
+  TVector2 ri,rj,xci,xcj,tmp2V;                  // 2D vectors of the tracks
+  double rad_i,rad_j,separation,solution,dxc;    // helix circle params
+  double dca_ij,dca_ij1,rmin,dlen,pperpsq,ppmag; // V0 params
+  double alpha,ptArm_sq,pPosAlongV0,pNegAlongV0; // Armenteros params
+  double cosij,sin2ij,t1,t2;                     // 3D dca calculation vars
+  unsigned short i,j,ii,jj;                      // track iteration vars
+  pairD paths,path2;                             // helix pathLength vars
   double temp;
   Bool_t doSecond, isPrimaryV0, usedV0;
   Int_t iRes;
 
-  //Julien
+  ///Julien
   pairD paths1;
 
   if (useExistingV0s) return kStOk;
 
   gMessMgr->Info("StV0FinderMaker::Make(): Starting...");
   
-  /// Prepare event and track variables
+  // Prepare event and track variables
   iRes = Prepare();
   if (iRes != kStOk) return iRes;
 
@@ -276,8 +291,8 @@ Int_t StV0FinderMaker::Make() {
   StSPtrVecV0Vertex& v0Vertices = event->v0Vertices();
 
   if (!dontZapV0s) {
-    ///Erase existing V0s and Xis
-    /// (must do Xis too as they point to the V0s!)
+    //Erase existing V0s and Xis
+    // (must do Xis too as they point to the V0s!)
     StSPtrVecV0Vertex v0Vertices2;
     v0Vertices = v0Vertices2;
     StSPtrVecXiVertex& xiVertices   = event->xiVertices();
@@ -286,9 +301,9 @@ Int_t StV0FinderMaker::Make() {
   }
 
 
-  /// Loop over track pairs to find V0s
+  // Loop over track pairs to find V0s
 
-  ///i track is positive
+  //i track is positive
   for (ii=0; ii<ptrks; ii++) {
     i = ptrk[ii];
 
@@ -297,30 +312,35 @@ Int_t StV0FinderMaker::Make() {
     ri -= xci;
     rad_i = ri.Mod();
 
-    ///j track is negative
+    //j track is negative
     for (jj=0; jj<ntrks; jj++) {
       j = ntrk[jj];
 
-      /// Determine detector id of V0 for pars
+      if (UsingITTFTracks() == kUseBOTH)
+						   {if ((trk[i]->encodedMethod() == ITTFflag) && (trk[j]->encodedMethod() != ITTFflag)) continue;
+									 if ((trk[i]->encodedMethod() != ITTFflag) && (trk[j]->encodedMethod() == ITTFflag)) continue;
+									 }
+
+      // Determine detector id of V0 for pars
       det_id_v0 = TMath::Min(detId[i],detId[j]);
 
-      /// Primary   V0 cut parameters
+      // Primary   V0 cut parameters
       pars  = ev0par2->GetTable(det_id_v0+2);
-      /// Secondary V0 cut parameters
+      // Secondary V0 cut parameters
       pars2 = ev0par2->GetTable(det_id_v0-1);
 
-      ///Cut: number of hits
+      //Cut: number of hits
       if ((hits[i] < pars2->n_point) ||
           (hits[j] < pars2->n_point)) continue;
 
-      ///Cut: Initial cut on dca of tracks to primary vertex
-      /// (perform as early as possible)
-      /// V0 can't have pt larger than sum of pts of daughters
+      //Cut: Initial cut on dca of tracks to primary vertex
+      // (perform as early as possible)
+      // V0 can't have pt larger than sum of pts of daughters
       temp = pt[i] + pt[j];
       if ((temp*temp < 0.98*ptV0sq) &&
           ((trk[i]->impactParameter() <= pars2->dcapnmin) ||
            (trk[j]->impactParameter() <= pars2->dcapnmin))) continue;
-      //Julien : not if (pt || (dca || dca))
+      ///Julien : not if (pt || (dca || dca))
 
       xcj.Set(heli[j].xcenter(),heli[j].ycenter());
       rj.Set(heli[j].origin().x(),heli[j].origin().y());
@@ -334,16 +354,16 @@ Int_t StV0FinderMaker::Make() {
       dca_ij1 = -9999;
 
 
-/// ********************* START OF DETERMINATION OF V0 GEOMETRY
+// ********************* START OF DETERMINATION OF V0 GEOMETRY
       if (separation < 0)
-         {/// Check for one helix circle completely inside the other
+         {// Check for one helix circle completely inside the other
           if (dxc < TMath::Abs(rad_i - rad_j)) continue;
-          /// Helix circles are overlapping
-          ///FULL 3D ITERATIVE METHOD (VERY SLOW, ONE SOLUTION)
-          ///      paths = heli[i].pathLengths(heli[j]);
-          ///2D+ METHOD (GETS 3D APPROXIMATION AFTER TWO 2D SOLUTIONS)
+          // Helix circles are overlapping
+          //FULL 3D ITERATIVE METHOD (VERY SLOW, ONE SOLUTION)
+          //      paths = heli[i].pathLengths(heli[j]);
+          //2D+ METHOD (GETS 3D APPROXIMATION AFTER TWO 2D SOLUTIONS)
           path2 = heli[i].pathLength(rad_j,xcj.X(),xcj.Y());
-          /// Two possible solutions: process ones that aren't nans
+          // Two possible solutions: process ones that aren't nans
           if (!isnan(path2.first))
 	     {solution = path2.first;
               if ((!isnan(path2.second)) && (path2.second != path2.first))
@@ -352,25 +372,25 @@ Int_t StV0FinderMaker::Make() {
               goto ProcessSolution;
               }
 	      else if (isnan(path2.second))
-	     {/// no solutions
+	     {// no solutions
 	      continue;
 	      }
-              ///else run only with the second solution
+              //else run only with the second solution
           SecondSolution:
           solution = path2.second;
           doSecond = kFALSE;
           ProcessSolution:
-          /// paths contains the pathlengths for this solution with
-          /// that for track i stored in first, and track j stored
-          /// in second.
+          // paths contains the pathlengths for this solution with
+          // that for track i stored in first, and track j stored
+          // in second.
           paths.first = solution;
           xi = heli[i].at(paths.first );
           paths.second = heli[j].pathLength(xi.x(),xi.y());
           xj = heli[j].at(paths.second);
           }
           else if (separation < pars2->dca)
-	 {/// Helix circles are close, but not overlapping,
-          /// find dca to point halfway between circle centers
+	 {// Helix circles are close, but not overlapping,
+          // find dca to point halfway between circle centers
           tmp2V = (xci + xcj) * 0.5;
           paths.first  = heli[i].pathLength(tmp2V.X(),tmp2V.Y());
           paths.second = heli[j].pathLength(tmp2V.X(),tmp2V.Y());
@@ -378,13 +398,13 @@ Int_t StV0FinderMaker::Make() {
           xj = heli[j].at(paths.second);
           }
           else
-	 {/// Helix circles are too far apart
+	 {// Helix circles are too far apart
           continue;
           }
       
       dca_ij = xi.z() - xj.z();
       if (doSecond) {
-        /// If we have two solutions, save this one and compare
+        // If we have two solutions, save this one and compare
         dca_ij1 = dca_ij;
         xi1=xi;
         xj1=xj;
@@ -393,25 +413,25 @@ Int_t StV0FinderMaker::Make() {
       }
       if ((dca_ij1 != -9999) &&
           (TMath::Abs(dca_ij1) < TMath::Abs(dca_ij))) {
-        /// First solution was better
+        // First solution was better
         dca_ij = dca_ij1;
         xi=xi1;
         xj=xj1;
 	paths=paths1;
       }
-      /// At this point, dca_ij is *signed* for use in 3D calc
-/// *********************  END  OF DETERMINATION OF V0 GEOMETRY
+      // At this point, dca_ij is *signed* for use in 3D calc
+// *********************  END  OF DETERMINATION OF V0 GEOMETRY
 
       pi = heli[i].momentumAt(paths.first ,Bfield);
       pj = heli[j].momentumAt(paths.second,Bfield);
       
-      ///Cut: check if tracks points away from prim vtx
+      //Cut: check if tracks points away from prim vtx
       if ((pi.dot(xi-mainv) < 0.0) ||
           (pj.dot(xj-mainv) < 0.0)) continue;
 
 
-/// ********************* START OF DETERMINATION OF 3D DCA
-      /// dca_ij will be an approximation of the 3D dca
+// ********************* START OF DETERMINATION OF 3D DCA
+      // dca_ij will be an approximation of the 3D dca
       pi1 = pi/ptot[i];
       pj1 = pj/ptot[j];
 
@@ -431,13 +451,13 @@ Int_t StV0FinderMaker::Make() {
         xj1 = xj + pj1.pseudoProduct(temp,temp,t2);
 
         dca_ij1 = (xi1 - xj1).mag2();
-        dca_ij *= dca_ij; // dca_ij no longer signed (squared)
+        dca_ij *= dca_ij; /// dca_ij no longer signed (squared)
 
         if (dca_ij1 < dca_ij) {
           paths.first  = heli[i].pathLength(xi1.x(),xi1.y());
           paths.second = heli[j].pathLength(xj1.x(),xj1.y());
-          //paths.first  = heli[i].pathLength(xnix,xniy);
-          //paths.second = heli[j].pathLength(xnjx,xnjy);
+          ///paths.first  = heli[i].pathLength(xnix,xniy);
+          ///paths.second = heli[j].pathLength(xnjx,xnjy);
           xi1 = heli[i].at(paths.first);
           xj1 = heli[j].at(paths.second);
           dca_ij1 = (xi1 - xj1).mag2();
@@ -449,9 +469,9 @@ Int_t StV0FinderMaker::Make() {
             dca_ij = dca_ij1;
           }
         }
-								///This code is the new one.
+								//This code is the new one.
 
-	/**if (dca_ij1 < dca_ij) {
+	/*if (dca_ij1 < dca_ij) {
           paths.first  = heli[i].pathLength(xi1.x(),xi1.y());
           paths.second = heli[j].pathLength(xj1.x(),xj1.y());
           xi = xi1;
@@ -460,43 +480,43 @@ Int_t StV0FinderMaker::Make() {
           pj = heli[j].momentumAt(paths.second,Bfield);
           dca_ij = dca_ij1;
 	  }*/
-			///And this one is the old one (comparison with Fortran).
+			//And this one is the old one (comparison with Fortran).
 
 	
       }
-/// *********************  END  OF DETERMINATION OF 3D DCA
+// *********************  END  OF DETERMINATION OF 3D DCA
 
 
-      /// Now we have the positions and momenta of our tracks
-      /// at the V0 vertex determined. Ready to make cuts on
-      /// the V0 itself. 
+      // Now we have the positions and momenta of our tracks
+      // at the V0 vertex determined. Ready to make cuts on
+      // the V0 itself. 
 
-      ///Cut: dca between tracks      
+      //Cut: dca between tracks      
       if (dca_ij >= (pars2->dca*pars2->dca)) continue;
 
       pp = pi + pj;
       pperpsq = pp.perp2();
                   
-      ///Cut: dca of tracks to primary vertex (early as possible)
+      //Cut: dca of tracks to primary vertex (early as possible)
       if ((pperpsq < ptV0sq) && 
           ((trk[i]->impactParameter() <= pars2->dcapnmin) ||
            (trk[j]->impactParameter() <= pars2->dcapnmin))) continue;
-      //Julien : diff. w/ previous such one ?
+      ///Julien : diff. w/ previous such one ?
 
       xpp = (xi + xj) * 0.5;
       impact = xpp - mainv;
       dlen = impact.mag2();
 
-      ///Cut: decay length from prim vtx
+      //Cut: decay length from prim vtx
       if (dlen <= (pars2->dlen*pars2->dlen)) continue;
 
-      ///Cut: V0 momentum should be away from prim vtx 
+      //Cut: V0 momentum should be away from prim vtx 
       if (pp.dot(impact) < 0.0) continue;
 
       ppmag = pperpsq + pp.z()*pp.z();
       rmin = impact.cross(pp).mag2()/ppmag;
 
-      // Cut on dca of V0
+      /// Cut on dca of V0
       if (rmin >= (pars2->dcav0*pars2->dcav0)) continue;
 
       tmp3V = pp/sqrt(ppmag);
@@ -505,19 +525,19 @@ Int_t StV0FinderMaker::Make() {
       alpha = (pPosAlongV0-pNegAlongV0) /
               (pPosAlongV0+pNegAlongV0);
 
-      ///Cut: Armenteros alpha
+      //Cut: Armenteros alpha
       if (TMath::Abs(alpha) > pars2->alpha_max) continue;
 
       ptArm_sq = ptot[i]*ptot[i] - pPosAlongV0*pPosAlongV0;
 
-      ///Cut: Armenteros pt
+      //Cut: Armenteros pt
       if (ptArm_sq > (pars2->ptarm_max*pars2->ptarm_max)) continue;
 
       rmin   = sqrt(rmin);
       dca_ij = sqrt(dca_ij);
-
+      if (trk[i]->encodedMethod() == ITTFflag) dca_ij=-dca_ij;
       
-      /// Fill an StV0Vertex
+      // Fill an StV0Vertex
       v0Vertex = new StV0Vertex();
       v0Vertex->setPosition(xpp);
       v0Vertex->addDaughter(trk[i]);
@@ -526,27 +546,27 @@ Int_t StV0FinderMaker::Make() {
         trk[i]->impactParameter());
       v0Vertex->setDcaDaughterToPrimaryVertex(negative,
         trk[j]->impactParameter());
-      //3VectorF vs 3VectorD???
+      ///3VectorF vs 3VectorD???
       v0Vertex->setMomentumOfDaughter(positive,pi);
       v0Vertex->setMomentumOfDaughter(negative,pj);
       v0Vertex->setDcaDaughters(dca_ij);
       v0Vertex->setDcaParentToPrimaryVertex(rmin);
 
-      /// Use primary V0 cut parameters
+      // Use primary V0 cut parameters
       isPrimaryV0 =
         (rmin < pars->dcav0) &&
         ((pperpsq >= ptV0sq) ||
          ((trk[i]->impactParameter() > pars->dcapnmin) &&
           (trk[j]->impactParameter() > pars->dcapnmin)));
 
-      /// Call secondary usage of V0 (such as for Xis)
+      // Call secondary usage of V0 (such as for Xis)
       usedV0 = UseV0();
 
-      /// Tag used V0s to indicate if they aren't primary
+      // Tag used V0s to indicate if they aren't primary
       if (usedV0 && !isPrimaryV0)
         v0Vertex->setDcaParentToPrimaryVertex(-rmin);
 
-      /// If used or primary, keep it
+      // If used or primary, keep it
       if (usedV0 || isPrimaryV0) {
         v0Vertices.push_back(v0Vertex);
       } else {
@@ -554,14 +574,14 @@ Int_t StV0FinderMaker::Make() {
         v0Vertex = 0;
       }
 
-    } /// j-Loop
-  } /// i-Loop
+    } // j-Loop
+  } // i-Loop
 
   gMessMgr->Info() << "StV0FinderMaker: Found " << v0Vertices.size() <<
                       " V0 candidates" << endm;
   gMessMgr->Info() << "StV0Finder: using magnetic field: " << Bfield << endm;
 
-  /// Any cleanup involved for using KeepV0()
+  // Any cleanup involved for using KeepV0()
   
   return kStOk;
 }
@@ -579,9 +599,9 @@ Int_t StV0FinderMaker::Make() {
 
 
 
-///_____________________________________________________________________________
+//_____________________________________________________________________________
 void StV0FinderMaker::Trim() {
-  /// Loop over V0s and remove those that don't satisfy the tight V0 cuts
+  // Loop over V0s and remove those that don't satisfy the tight V0 cuts
 
   gMessMgr->Info() << "StV0FinderMaker::Trim(): Starting..." << endm;
 
@@ -593,9 +613,9 @@ void StV0FinderMaker::Trim() {
 
     v0Vertex = v0Vertices[i];
     if ((v0Vertex) &&
-        /// Is it not a seconday V0?
+        // Is it not a seconday V0?
         (v0Vertex->dcaParentToPrimaryVertex() >= 0) &&
-        /// Is it not a primary V0?
+        // Is it not a primary V0?
         ! ((v0Vertex->dcaParentToPrimaryVertex() < pars->dcav0) &&
            ((v0Vertex->momentum().perp2() >= ptV0sq) ||
             ((v0Vertex->dcaDaughterToPrimaryVertex(positive) > pars->dcapnmin) &&
@@ -603,15 +623,15 @@ void StV0FinderMaker::Trim() {
       v0Vertex->makeZombie();
       iV0s--;
     }
-  } /// V0 loop
+  } // V0 loop
 
   gMessMgr->Info() << "StV0FinderMaker::Trim(): saving " << iV0s <<
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.1 2003/04/09 16:43:31 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.2 2003/04/30 19:14:27 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
-// Revision 1.1  2003/04/09 16:43:31  faivre
-// First version of xxx
+// Revision 1.2  2003/04/30 19:14:27  faivre
+// ITTF vs TPT V0s
 //
 //
