@@ -26,6 +26,8 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
      >          d,P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
       Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
+      INTEGER             NUMPRIM,NUMFINS
+      common /g2tevtcnt/  NUMPRIM,NUMFINS
 
 #include       "g2t_get_kine.inc"
 #include       "geant321/gcnum.inc"
@@ -62,7 +64,7 @@ C: Sanity check of header for table 'p_vert' & 'p_track'
           Do Jv = 1,Iv
             IF ( p_vert(jv).eg_label.ne.0       .and. 
      >           VDIST(p_vert(jv).ge_x,Vert,3).le.Vcut) then
-               num(kv) = Jv
+               num(min(kv,100000)) = Jv
                goto 77
             endif
           enddo  
@@ -122,6 +124,8 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
       Iv0           = 0
       Ip0           = 0
       LabelT        = 0
+      NUMPRIM       = 0
+      NUMFINS       = 0
       DO IT = 1,NTRACK
 
         Call VZERO  (p_track(it),LenT)
@@ -154,6 +158,9 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
 *
         if (NtBeam .le. 0) then ! this is an event generator particle 
 *                                 stable arithmetics requires Pt>0 only
+          if (Iv.eq.1) NUMPRIM = NUMPRIM+1
+          NUMFINS = NUMFINS + 1
+*
  61       LabelT  = LabelT + 1 
           call AgNZGETP(1,1,LabelT,ISTAT,IDPDG,P,AM,MOTH,TIME,IDAU,V)
           if (ISTAT.gt.1) go to 61
