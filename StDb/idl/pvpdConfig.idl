@@ -1,0 +1,15 @@
+/* pvpdConfig.idl
+ *
+ * Table: pvpdConfig
+ *
+ * description: // coincidence configuration for pVPDs
+ */
+
+struct pvpdConfig{
+  unsigned short nEastTubes; /* total number of east tubes */
+  unsigned short nWestTubes; /* total number of west tubes */
+  char eastwestCoincidence;  /* east-west coincidence: AND(1) or OR(0) */
+  unsigned short minEastTubes; /* minimum tubes east coincidence */
+  unsigned short minWestTubes; /* minimum tubes west coincidence */
+};
+

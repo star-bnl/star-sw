@@ -1,0 +1,12 @@
+/*  pvpdStrobeDef.idl
+ *
+ *  Table: pvpdStrobeDef
+ *
+ *  description: // strobe event ranges for pVPD TDCs
+ */
+
+struct pvpdStrobeDef{
+  unsigned short id;           /* pvpd tube Id */
+  unsigned short strobeTdcMin; /* lower range for pVPD strobe event */
+  unsigned short strobeTdcMax; /* upper range for pVPD strobe event */
+};
