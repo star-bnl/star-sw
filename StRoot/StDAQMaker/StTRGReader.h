@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.h,v 1.4 2003/12/23 23:17:10 akio Exp $
+ * $Id: StTRGReader.h,v 1.5 2004/11/03 17:55:28 akio Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.h,v $
+ * Revision 1.5  2004/11/03 17:55:28  akio
+ * update for fy05 run
+ *
  * Revision 1.4  2003/12/23 23:17:10  akio
  * Update for Fy04 run
  *
@@ -32,6 +35,7 @@
 #include "StDaqLib/TRG/trgStructures2000.h"
 #include "StDaqLib/TRG/trgStructures2003.h"
 #include "StDaqLib/TRG/trgStructures2004.h"
+#include "StDaqLib/TRG/trgStructures2005.h"
 #endif /*__CINT__*/
 
 #include "StDaqLib/TRG/TRG_Reader.hh"
@@ -52,6 +56,7 @@ class  StTRGReader {
   const TrgDataType2000 *getDataType2000() const;
   const TrgDataType2003 *getDataType2003() const;
   const TrgDataType2004 *getDataType2004() const;
+  const TrgDataType2005 *getDataType2005() const;
 
   virtual void Update();
 protected:
