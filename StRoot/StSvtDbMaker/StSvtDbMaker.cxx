@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.4 2002/02/15 22:45:43 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.5 2002/02/20 17:10:06 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.5  2002/02/20 17:10:06  caines
+ * Added fortran2c code from StDbUtilities so library depedancies removed
+ *
  * Revision 1.4  2002/02/15 22:45:43  munhoz
  * introducing drift velocity reading capability
  *
@@ -38,10 +41,68 @@
 #include "StSvtDbWriter.hh"
 #include "St_db_Maker/St_db_Maker.h"
 
+#include "StDbUtilities/StCoordinates.hh"  
+#include "StDbUtilities/StSvtCoordinateTransform.hh"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
+
 StSvtDbMaker* gStSvtDbMaker=NULL; 
 
-ClassImp(StSvtDbMaker)
+//C and fortran routines
 
+//_______________________________________________________________________
+int type_of_call SvtGtoL_(float *x,float *xp, int* index){
+
+  StThreeVector<double> a(x[0],x[1],x[2]);
+  StSvtCoordinateTransform transform;
+  St_DataSet* dataSet;
+  dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
+  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
+  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL);
+
+  StSvtLocalCoordinate b;
+
+  transform.GlobaltoLocal(a, b,*index, -1);
+
+  xp[0] = b.position().x();
+  xp[1] = b.position().y();
+  xp[2] = b.position().z();
+  
+  return 0;
+  
+}
+//____________________________________________________________________________
+int type_of_call SvtLtoG_(float *xp, float *x, int* index){
+  StSvtLocalCoordinate a;
+  int layer,ladder,wafer;
+
+  a.setPosition(StThreeVector<double>(xp[0],xp[1],xp[2]));
+  StSvtCoordinateTransform transform;
+  St_DataSet* dataSet;
+  dataSet = gStSvtDbMaker->GetDataSet("StSvtGeometry");
+  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
+  if(GeomDataBase)   transform.setParamPointers(GeomDataBase, NULL, NULL);
+
+  StThreeVector<double> b(0,0,0);
+  StGlobalCoordinate c;
+
+  layer = *index/1000;
+  wafer = (*index -1000*layer)/100;
+  ladder = *index -1000*layer -100*wafer;
+  a.setLayer(layer);
+  a.setLadder(ladder);
+  a.setWafer(wafer);
+  a.setHybrid(1);
+
+  transform.LocaltoGlobal(a, b, -1);
+
+  x[0] = b.x();
+  x[1] = b.y();
+  x[2] = b.z();
+  
+  return 0;
+}
+
+ClassImp(StSvtDbMaker)
 //_____________________________________________________________________________
 StSvtDbMaker::StSvtDbMaker(const char *name):StMaker(name)
 {

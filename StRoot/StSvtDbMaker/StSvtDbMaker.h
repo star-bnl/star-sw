@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.2 2002/02/15 22:45:43 munhoz Exp $
+ * $Id: StSvtDbMaker.h,v 1.3 2002/02/20 17:10:10 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.3  2002/02/20 17:10:10  caines
+ * Added fortran2c code from StDbUtilities so library depedancies removed
+ *
  * Revision 1.2  2002/02/15 22:45:43  munhoz
  * introducing drift velocity reading capability
  *
@@ -34,6 +37,17 @@ class StSvtDbWriter;
 class StSvtHybridCollection;
 class StSvtGeometry;
 
+
+#ifndef __CINT__
+#include "StarCallf77.h"
+#define SvtLtoG_ F77_NAME(svtltog,SVTLTOG)
+#define SvtGtoL_ F77_NAME(svtgtol,SVTGTOL)
+extern "C" {
+int type_of_call SvtLtoG_(float *x, float *xp, int *index);
+int type_of_call SvtGtoL_(float *x, float *xp,  int *index);
+
+}
+#endif
 class StSvtDbMaker : public StMaker {
  private:
   Text_t *mTimeStamp;        //!
