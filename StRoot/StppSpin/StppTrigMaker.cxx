@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.7 2001/04/23 19:44:26 balewski Exp $
+// $Id: StppTrigMaker.cxx,v 1.8 2001/06/22 19:41:46 balewski Exp $
 // $Log: StppTrigMaker.cxx,v $
+// Revision 1.8  2001/06/22 19:41:46  balewski
+// *** empty log message ***
+//
 // Revision 1.7  2001/04/23 19:44:26  balewski
 // *** empty log message ***
 //
@@ -41,9 +44,6 @@
 
 #include "TH1.h"
 #include "TH2.h"
-
-//for ppTag
-#include "tables/St_ppSpinTag_Table.h"
 
 // for gen LP
 #include "tables/St_g2t_track_Table.h"
