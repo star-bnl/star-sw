@@ -1,3 +1,4 @@
+TEXINPUTS	=
 TEXSRC		= StEvent
 MAKEFILE	= Makefile
 GV              = gv
