@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.7 1999/01/23 02:32:22 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.8 1999/01/28 02:52:22 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.7  1999/01/23 02:32:22  lasiuk
- * sun friendly
+ * Revision 1.8  1999/01/28 02:52:22  lasiuk
+ * printout for SUN
+ *
+ * digital sector removed from constructor;
+ * fillSector() added in base class
  *
  * Revision 1.8  1999/01/28 02:52:22  lasiuk
  * printout for SUN
@@ -148,9 +151,8 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		}
 	    PR(digitalPadData.size());
 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
-#ifndef __sun
-		cout << (ii) << '\t' << (static_cast<int>(digitalPadData[ii])) << '\t' << (static_cast<int>(digitalPadZeros[ii])) << endl;
-#endif
+		//cout << (ii) << '\t' << (reinterpret_cast<int>(digitalPadData[ii])) << '\t' << (reinterpret_cast<int>(digitalPadZeros[ii])) << endl;
+		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
 	    }
 	    cout << endl;
 
