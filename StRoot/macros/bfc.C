@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.101 1999/08/04 16:28:18 fisyak Exp $
+// $Id: bfc.C,v 1.102 1999/08/04 16:42:03 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -12,7 +12,7 @@ class StEvent;
 StEvent *Event;
 Int_t NoEvents = 0;
 class St_geant_Maker;
-class St_xdfin_Maker;
+class StIOMaker;
 class St_XDFFile;
 class StEventMaker; StEventMaker *evMk = 0;
 //_____________________________________________________________________
@@ -69,9 +69,12 @@ void bfc(const Int_t First,
 " root4star 'bfc.C(2,40,\"y1b fzin -l3t\")'//the as above but remove L3T from chain\n"
 " root4star 'bfc.C(40,\"y2a fzin\",\"/disk0/star/test/venus412/b0_3/year_2a/psc0208_01_40evts.fz\")'\n"
 " root4star 'bfc.C(40,\"y2a fzin\")'\t// the same as  above\n"
-" root4star 'bfc.C(5,10,\"y1b xin xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n"
-"                                    \t// skipping the 4 events for the rest 6 events\n"
-" root4star 'bfc.C(1,\"off xin tpc FieldOff sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n");
+" root4star 'bfc.C(5,10,\"y1b in xout\",\"/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf\")'\n"
+"                                    \t// skipping the 4 events for the rest 6 events\n");
+    printf (
+" root4star 'bfc.C(1,\"off in tpc FieldOff sd96 eval\",\"Mini_Daq.xdf\")'\t// the same as Chain=\"minidaq\"\n"
+" root4star 'bfc.C(1,\"gstar y1a tfs allevent\")' \t// run gstar and write all event into file branches\n"
+" root4star 'bfc.C(1,\"off in y1a l3t\",\"gtrack.tpc_hits.root\")'\t// run l3t only with prepaired file\n");
     printf (
 " root4star 'bfc.C(1,\"tdaq display\",\"/disk1/star/daq/990727.3002.01.daq\")' \n"
 " \t//Cosmics (56) events with full magnetic field, TPC only \n"
@@ -99,12 +102,12 @@ void bfc(const Int_t First,
   // Init the chain and all its makers
   Int_t iInit = chain->Init();
   // skip if any
-  St_geant_Maker *geant = (St_geant_Maker *) chain->Find("geant");
-  St_xdfin_Maker *xdfMk = (St_xdfin_Maker *) chain->Find("xdfin");
+  St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
+  StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
   St_XDFFile *xdf_out = chain->GetXdfOut();
   evMk  = (StEventMaker   *) chain->Find("StEventMaker");  
-  if (geant && First > 0) geant->Skip(First-1);
-  if (xdfMk && First > 1) xdfMk->Skip(First-1);
+  if (geant && First > 1) geant->Skip(First-1);
+  if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
   Int_t iMake = 0;
   TBenchmark evnt;
   for (Int_t i = First; i <= NoEvents; i++){
