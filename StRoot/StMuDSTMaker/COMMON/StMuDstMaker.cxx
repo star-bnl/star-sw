@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.45 2003/11/09 01:02:59 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.46 2003/11/10 04:07:47 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -158,9 +158,8 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
 //-----------------------------------------------------------------------
 StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
-  clear();
-  delete mStMuDst;
   clear(999);
+  delete mStMuDst;
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -233,29 +232,55 @@ void StMuDstMaker::clear(int del){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del){
+void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
+{
 //	del == 0 : objects are flat, standard Clear()
 //	del == 1 : objects are complex, destructor must be called
 //      del >  1 : all objects(hidden too)  must be destroed
+//  complexity of this clear related to complexity of using TClonesArray
+//  in TTree. Othervice leak as a punishment.
 
+  enum { kRea=0, kWrt=1,kDel=2,kDtr=4};
   DEBUGMESSAGE3("");
   counter=0;
-  if (!t)  				return;
-  if (mIoMode==ioWrite) {t->Delete(); 	return;}// in write all objects must be DEAD
-  if (del) {
-    int num = t->GetLast()+1;
-    if (del>1) num = t->Capacity();		// ALL objects edited
-    if(!num) 				return;
-    t->Delete(); 
-    for (int i=0;i<num; i++) {
-      TObject *to = (*t)[i];
-      if (del>1) 			continue;//No need to reanimate
-      if (to->TestBit(kNotDeleted)) 	continue;
-      t->New(i);
-    }
+  if (!t)  	      return;
+  int kase = 0;
+  if (mIoMode==ioWrite) kase |= kWrt;
+  if (del    ==1      ) kase |= kDel;
+  if (del     >1      ) kase |= kDtr;
+  int num,i;
+  TObject *to;
+
+  switch (kase) {
+
+  case 0: 
+       t->Clear();    break;
+
+  case kWrt: 
+  case kWrt|kDel:
+       t->Delete();   break;
+
+  case kWrt|kDtr:
+       delete t; t=0; break;
+
+  case kRea|kDel:
+       num = t->GetLast()+1;
+       t->Delete();   // call dtr for objects (leak out)
+       for (i=0;i<num; i++) {
+         to = (*t)[i];
+         if (to->TestBit(kNotDeleted)) 	continue;//alive
+         t->New(i);   // call ctr for objects (alive for reading)
+       }
+       t->Clear();
+       break;
+  
+  case kRea|kDtr:
+       num = t->Capacity();
+       for (i=0;i<num; i++) {to = (*t)[i];}  //expose all objects to world
+       delete t; t = 0;
+       break;
+  default: assert(0);
   }
-  if (del> 1) {delete t; t=0;}
-  else        {t->Clear()   ;}
 
   DEBUGMESSAGE3("out");
 }
@@ -931,6 +956,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.46  2003/11/10 04:07:47  perev
+ * again clear improved to avoid leaks
+ *
  * Revision 1.45  2003/11/09 01:02:59  perev
  * more sofisticated clear() to fix leaks
  *
