@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.9 1999/02/17 21:12:47 dhammika Exp $
+// $Id: St_ebye_Maker.cxx,v 1.10 1999/03/12 14:39:40 perev Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.10  1999/03/12 14:39:40  perev
+// New maker schema
+//
 // Revision 1.9  1999/02/17 21:12:47  dhammika
 // prevent deleting dst/run_header for multiple event processing
 //
@@ -65,28 +68,9 @@
 #include "ebye/St_sca_makeref_Module.h"
 
 ClassImp(St_ebye_Maker)
-#ifdef   DEBUG
-#undef   DEBUG 
-#endif
-#define  DEBUG  0
 
-//_____________________________________________________________________________
-//St_ebye_Maker::St_ebye_Maker():
-//m_sca_switch(0),
-//m_sca_const(0),
-//m_sca_filter_const(0),
-//m_dst_track(0),
-//m_particle(0),
-//m_sca_in(0),
-//m_sca_out(0),
-//m_sca_prior(0),
-//m_sca_ensemble_ave(0)
-//{
-//   drawinit=kFALSE;
-//}
-//_____________________________________________________________________________
-St_ebye_Maker::St_ebye_Maker(const char *name, const char *title):
-StMaker(name,title),
+St_ebye_Maker::St_ebye_Maker(const char *name):
+StMaker(name),
 m_sca_switch(0),
 m_sca_const(0),
 m_sca_filter_const(0),
@@ -98,7 +82,6 @@ this_dst_track(0),
 this_sca_in(0),
 this_sca_out(0)
 {
-   drawinit=kFALSE;
 }
 //_____________________________________________________________________________
 St_ebye_Maker::~St_ebye_Maker()
@@ -108,9 +91,9 @@ St_ebye_Maker::~St_ebye_Maker()
 Int_t St_ebye_Maker::Init(){
   // Get the run header
   dst_run_header_st *run_header = 0;
-  St_DataSet *runhead = gStChain->DataSet("run_summary");
+  St_DataSet *runhead = GetDataSet("run_summary");
   St_DataSetIter dstrun(runhead);
-  if (DEBUG) runhead->ls("*");
+  if (GetDebug()) runhead->ls("*");
   this_dst_run_header = (St_dst_run_header *) dstrun("run_header");
   if (this_dst_run_header) {
     run_header = this_dst_run_header->GetTable();
@@ -126,25 +109,17 @@ Int_t St_ebye_Maker::Init(){
     run_header = this_dst_run_header->GetTable();
     run_header->run_id =       1;
     this_dst_run_header->AddAt(&run_header,0);
-    if(DEBUG)this_dst_run_header->ls("*");
+    if(GetDebug())this_dst_run_header->ls("*");
     cout << " ===> <St_ebye_Maker::Init()>: Created run header table" << endl;
   }
   // Create tables
-  St_DataSet *params = gStChain->DataSet("params");
-  if (!params) {
-    cout << " ===> <St_ebye_Maker::Init()>: No params Dataset; create params " << endl;
-    params  = new St_DataSet("params");
-  }
-  if (DEBUG>2) {
-    printf(" ===> <St_ebye_Maker::Init()>: *params = %d\n",params);
+  St_DataSet *params = GetDataBase("params/ebye");
+  assert(params);
+
+  if (GetDebug()>2) {
+    printf(" ===> <St_ebye_Maker::Init()>: *params = %p\n",params);
   } 
   St_DataSetIter     local(params);
-  St_DataSet *ebye = local("ebye");
-  //SafeDelete(ebye);  
-  if (! ebye) {
-    printf(" ===> <St_ebye_Maker::Init()>: params/ebye doesn't exsist. Create");
-    ebye = local.Mkdir("ebye");
-  }
 
   // I don't know how to prevent chain->Clear deleting dst/run_header
   // at the end of the first event. So temporarily store run_header table 
@@ -155,7 +130,7 @@ Int_t St_ebye_Maker::Init(){
   //run_header = this_dst_run_header->GetTable();
   //run_header->run_id =       1;
   //this_dst_run_header->AddAt(&run_header,0);
-  //if(DEBUG){
+  //if(GetDebug()){
   //  this_dst_run_header->ls("*");
   //  local.Du();
   //}
@@ -165,27 +140,19 @@ Int_t St_ebye_Maker::Init(){
   // in ebye.C macro.
   // Feb 4, 1999  Dhammika W.
 
-  St_DataSet *sca = local("ebye/sca");
-  if (!sca){
-    //Char_t *ebye_pars = "${STAR}/params/ebye/sca_params.xdf";
-    Char_t *ebye_pars = "/star/u2/dhammika/newupdate/params/ebye/sca_params.xdf";
-    St_XDFFile::GetXdFile(ebye_pars,ebye);
-    sca = local("ebye/sca");
-    if (!sca) { 
-      printf(" ===> <St_ebye_Maker::Init()>: <<< ERROR >>> the file \"%s\" has no \"sca\" dataset\n",ebye_pars);
-      return kStErr;
-    }
-  }
-  if (DEBUG>2)printf(" ===> <St_ebye_Maker::Init()>: Begin Iterating sca \n");
+  St_DataSet *sca = local("sca");
+  assert(sca);
+
+  if (GetDebug()>2)printf(" ===> <St_ebye_Maker::Init()>: Begin Iterating sca \n");
   St_DataSetIter scatable(sca);
-  if (DEBUG>2)printf(" ===> <St_ebye_Maker::Init()>: Done Iterating sca \n");
+  if (GetDebug()>2)printf(" ===> <St_ebye_Maker::Init()>: Done Iterating sca \n");
 
   m_sca_switch           = (St_sca_switch *)       scatable("sca_switch");
   m_sca_const            = (St_sca_const *)        scatable("sca_const");
   m_sca_filter_const     = (St_sca_filter_const *) scatable("sca_filter_const");
-  if(DEBUG>1)m_sca_const->ls("*");
+  if(GetDebug()>1)m_sca_const->ls("*");
   
-  if (DEBUG>2) printf (" ===> <St_ebye_Maker::Init()>: \n \t m_sca_switch       = %d, \n \t m_sca_const        = %d, \n \t m_sca_filter_const = %d \n", 
+  if (GetDebug()>2) printf (" ===> <St_ebye_Maker::Init()>: \n \t m_sca_switch       = %p, \n \t m_sca_const        = %p, \n \t m_sca_filter_const = %p \n", 
 		     m_sca_switch,m_sca_const,m_sca_filter_const);
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
@@ -196,7 +163,7 @@ Int_t St_ebye_Maker::Init(){
   // Create Histograms    
 
   Int_t iret = StMaker::Init();
-  if (DEBUG>2) printf (" ===> <St_ebye_Maker::Init()>: StMaker::Init() returned iret = %d \n",iret);
+  if (GetDebug()>2) printf (" ===> <St_ebye_Maker::Init()>: StMaker::Init() returned iret = %d \n",iret);
   return iret;
 }
 //_____________________________________________________________________________
@@ -204,7 +171,7 @@ Int_t St_ebye_Maker::Make(){
   Int_t iret = kStWarn;
   //  PrintInfo();
 
-  if (DEBUG>2)cout << " ===> <St_ebye_Maker::Make()>: Begin ebye Make" << endl;
+  if (GetDebug()>2)cout << " ===> <St_ebye_Maker::Make()>: Begin ebye Make" << endl;
   // Create the new tables
   
   this_sca_in            = new St_sca_in("sca_in",10000);
@@ -212,13 +179,13 @@ Int_t St_ebye_Maker::Make(){
   m_DataSet->Add(this_sca_in);
   m_DataSet->Add(this_sca_out);
   
-  St_DataSet *dst_set = gStChain->DataSet("dst");     
+  St_DataSet *dst_set = GetDataSet("dst");     
   if (!dst_set) {
     cout << " ===> <St_ebye_Maker::Make()>: <<< ERROR >>> No DST dataset " << endl;
     return kStWarn;
   }
   else
-    if(DEBUG>1)dst_set->ls("*");
+    if(GetDebug()>1)dst_set->ls("*");
   St_DataSetIter       dsttables(dst_set);
   this_dst_event_header  = (St_dst_event_header *)  dsttables("event_header");
   //this_dst_track         = (St_dst_track *)         dsttables("globtrk");
@@ -229,15 +196,15 @@ Int_t St_ebye_Maker::Make(){
     return kStWarn;
   }
   else
-    if (DEBUG)dsttables.Du();  // This line is a new one
+    if (GetDebug())dsttables.Du();  // This line is a new one
 
-  if(DEBUG>1)this_dst_track->ls("*");
+  if(GetDebug()>1)this_dst_track->ls("*");
   iret = this_dst_track->HasData();
   if (!iret) {
     cout << " ===> <St_ebye_Maker::Make()>: <<< ERROR >>> No DST tracks" << endl;
     return kStWarn;
   }
-  if (DEBUG>2) printf(" ===> <St_ebye_Maker::Make()>: Begin sca_filter \n");
+  if (GetDebug()>2) printf(" ===> <St_ebye_Maker::Make()>: Begin sca_filter \n");
   iret = sca_filter(this_dst_run_header
 		    ,this_dst_event_header
 		    ,this_dst_track
@@ -252,7 +219,7 @@ Int_t St_ebye_Maker::Make(){
     return kStWarn;
   }
   
-  if (DEBUG>2) printf(" ===> <St_ebye_Maker::Make()>: Begin sca_runsca \n");
+  if (GetDebug()>2) printf(" ===> <St_ebye_Maker::Make()>: Begin sca_runsca \n");
   iret = sca_runsca(m_sca_switch
 		    ,m_sca_const
 		    ,this_sca_in
@@ -265,13 +232,13 @@ Int_t St_ebye_Maker::Make(){
     cout << " ===> <St_ebye_Maker::Make()>: <<< ERROR >>> sca_runsca  failed " << endl;
     return kStWarn;
   }
-  if (DEBUG>2)cout << " ===> <St_ebye_Maker::Make()>: End ebye Make" << endl;
+  if (GetDebug()>2)cout << " ===> <St_ebye_Maker::Make()>: End ebye Make" << endl;
   //Histograms     
   return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::SetmakePrior(Bool_t flag){
-  if (!m_sca_switch) return kStErr;
+  if (!m_sca_switch) return kStWarn;
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
   sca_switch->makePrior       = flag;
@@ -283,14 +250,14 @@ Int_t St_ebye_Maker::SetmakePrior(Bool_t flag){
 }
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::SetmakeEnsembleAve(Bool_t flag){
-  if (!m_sca_switch) return kStErr;
-  St_DataSet  *calib = gStChain->DataSet("calib");
+  if (!m_sca_switch) return kStWarn;
+  St_DataSet  *calib = GetDataSet("calib");
   if (!calib) {
     cout << " ===> <St_ebye_Maker::Init()>: No calib  Dataset; create calib  " << endl;
     calib  = new St_DataSet("calib");
   }
-  if (DEBUG>2) {
-    printf(" ===> <St_ebye_Maker::Init()>: *calib  = %d\n",calib);
+  if (GetDebug()>2) {
+    printf(" ===> <St_ebye_Maker::Init()>: *calib  = %p\n",calib);
   }
   St_DataSetIter      local(calib);
   St_DataSet *ebye  = local("ebye");
@@ -302,7 +269,7 @@ Int_t St_ebye_Maker::SetmakeEnsembleAve(Bool_t flag){
   St_DataSet *scaprior = local("ebye/sca_prior_dir");
   if (!scaprior) { 
     printf(" ===> <St_ebye_Maker::SetmakeEnsembleAve()>: <<< ERROR >>>  the file \"%s\" has no \"sca_prior_dir\" dataset\n",sca_prior);
-    return kStErr;
+    return kStWarn;
   }
   
   St_DataSetIter scatable(scaprior);
@@ -310,7 +277,7 @@ Int_t St_ebye_Maker::SetmakeEnsembleAve(Bool_t flag){
   if (!m_sca_prior)
     cout << " ===> <St_ebye_Maker::SetdoAnalysis()>: <<< ERROR >>> No sca_prior table " << endl;
   else
-    if(DEBUG>1)m_sca_prior->ls("*"); 
+    if(GetDebug()>1)m_sca_prior->ls("*"); 
   
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
@@ -325,21 +292,21 @@ Int_t St_ebye_Maker::SetmakeEnsembleAve(Bool_t flag){
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::SetdoAnalysis(Bool_t flag){
 
-  if (DEBUG>2) printf (" ===> <St_ebye_Maker::SetdoAnalysis()>: Begin\n");
-  if (!m_sca_switch) return  kStErr;
-  St_DataSet *calib = gStChain->DataSet("calib");
+  if (GetDebug()>2) printf (" ===> <St_ebye_Maker::SetdoAnalysis()>: Begin\n");
+  if (!m_sca_switch) return  kStWarn;
+  St_DataSet *calib = GetDataSet("calib");
   if (!calib) {
     cout << " ===> <St_ebye_Maker::SetdoAnalysis()>: No calib  Dataset; create calib  " << endl;
     calib  = new St_DataSet("calib");
   }
-  if (DEBUG>2) {
-    printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: *calib  = %d\n",calib);
+  if (GetDebug()>2) {
+    printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: *calib  = %p\n",calib);
   }
   St_DataSetIter      local(calib);
   St_DataSet *ebye  = local("ebye");
   //SafeDelete(ebye);  
   if (! ebye) {
-    if (DEBUG>2) printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: calib/ebye doesn't exist. Create it\n");
+    if (GetDebug()>2) printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: calib/ebye doesn't exist. Create it\n");
     ebye = local.Mkdir("ebye");
   }
   //Char_t *sca_prior = "${STAR_CALIB}/ebye/sca_prior_dir.xdf";
@@ -351,35 +318,35 @@ Int_t St_ebye_Maker::SetdoAnalysis(Bool_t flag){
   St_DataSet *scaprior = local("ebye/sca_prior_dir");
   if (!scaprior) { 
     printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: <<< ERROR >>> the file \"%s\" has no \"sca_prior_dir\" dataset\n",sca_prior);
-    return kStErr;
+    return kStWarn;
   }
   St_DataSetIter priortable(scaprior);
   m_sca_prior           = (St_sca_prior *)    priortable("sca_prior");
   if (!m_sca_prior)
     cout << " ===> <St_ebye_Maker::SetdoAnalysis()>: <<< ERROR >>> No sca_prior table " << endl;
   else
-    if(DEBUG>1)m_sca_prior->ls("*"); 
+    if(GetDebug()>1)m_sca_prior->ls("*"); 
   St_DataSet *scaref = local("ebye/sca_ensemble_dir");
   if (!scaref) { 
     printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: <<< ERROR >>> the file \"%s\" has no \"sca_ensemble_dir\" dataset\n",sca_ensmave);
-    return kStErr;
+    return kStWarn;
   }
   St_DataSetIter ensavetable(scaref);
   m_sca_ensemble_ave    = (St_sca_out *)     ensavetable("sca_ensemble_ave");
   if (!m_sca_ensemble_ave)
     cout << " ===> <St_ebye_Maker::SetdoAnalysis()>: <<< ERROR >>> No sca_ensemble_ave table " << endl;
   else
-    if(DEBUG>1)m_sca_ensemble_ave->ls("*"); 
+    if(GetDebug()>1)m_sca_ensemble_ave->ls("*"); 
 
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
   sca_switch->doAnalysis      = flag;
-  if (DEBUG>2) printf (" ===> <St_ebye_Maker::SetdoAnalysis()>: End\n");
+  if (GetDebug()>2) printf (" ===> <St_ebye_Maker::SetdoAnalysis()>: End\n");
   return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::SetnEvents(Int_t nEvents){
-  if (!m_sca_switch) return kStErr;
+  if (!m_sca_switch) return kStWarn;
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
   sca_switch->nEvents         = nEvents;
@@ -387,32 +354,32 @@ Int_t St_ebye_Maker::SetnEvents(Int_t nEvents){
 }
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::PutPrior(){
-  Int_t iret = kStErr;
+  Int_t iret = kStWarn;
 
   iret = sca_makeprior(m_sca_prior);
   if (iret !=  kSTAFCV_OK){
     cout << " ===> <St_ebye_Maker::PutPrior()>: <<< ERROR >>> sca_makeprior  failed" << endl;
-    return kStErr;
+    return kStWarn;
   }
   return kStOK;
 }
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::PutEnsembleAve(){
-  Int_t iret = kStErr;
+  Int_t iret = kStWarn;
 
   iret = sca_makeref(m_sca_switch
 		     ,m_sca_ensemble_ave);
   if (iret !=  kSTAFCV_OK){
     cout << " ===> <St_ebye_Maker::PutEnsembleAve()>: <<< ERROR >>> sca_makeref failed" << endl;
-    return kStErr;
+    return kStWarn;
   }
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.9 1999/02/17 21:12:47 dhammika Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.10 1999/03/12 14:39:40 perev Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
