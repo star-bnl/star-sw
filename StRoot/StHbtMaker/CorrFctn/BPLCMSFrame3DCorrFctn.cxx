@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.6 2002/06/07 22:51:38 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn.cxx,v 1.7 2003/01/31 19:20:54 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn.cxx,v $
+ * Revision 1.7  2003/01/31 19:20:54  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.6  2002/06/07 22:51:38  lisa
  * Widely used BPLCMSFrame3DCorrFctn class now accumulates UNcorrected denominator and has a WriteOutHistos method
  *
@@ -218,7 +221,7 @@ StHbtString BPLCMSFrame3DCorrFctn::Report(){
   stemp += ctemp;
   sprintf(ctemp,"Number of pairs in Normalization region was:\n");
   stemp += ctemp;
-  sprintf(ctemp,"In numerator:\t%u\t In denominator:\t%u\n",mNumRealsNorm,mNumMixedNorm);
+  sprintf(ctemp,"In numerator:\t%lu\t In denominator:\t%lu\n",mNumRealsNorm,mNumMixedNorm);
   stemp += ctemp;
   if (mCorrection)
     {

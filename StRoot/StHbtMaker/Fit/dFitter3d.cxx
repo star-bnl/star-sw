@@ -351,7 +351,6 @@ void dFitter3d::doFit()
 	    // set step size
 	    double stepSize[5]    = {0.1 ,0.1, 0.1 ,0.1 ,0.1 };
 	    // set fit parameter names startvalue and stepsize
-	    double arglist[4];
 	    mMinuit->mnparm(0, "lambda",  startValues[0], stepSize[0], 0,0,ierflg);
 	    mMinuit->mnparm(1, "Rlong",   startValues[1], stepSize[1], 0,0,ierflg);
 	    mMinuit->mnparm(2, "Rperp",   startValues[2], stepSize[2], 0,0,ierflg);
@@ -365,7 +364,6 @@ void dFitter3d::doFit()
 	    // set step size
 	    double stepSize[5]    = {0.1 ,0.1, 0.1 ,0.1 ,0.1 };
 	    // set fit parameter names startvalue and stepsize
-	    double arglist[4];
 	    mMinuit->mnparm(0, "lambda",   startValues[0], stepSize[0], 0,0,ierflg);
 	    mMinuit->mnparm(1, "Rside",    startValues[1], stepSize[1], 0,0,ierflg);
 	    mMinuit->mnparm(2, "Rout",     startValues[2], stepSize[2], 0,0,ierflg);

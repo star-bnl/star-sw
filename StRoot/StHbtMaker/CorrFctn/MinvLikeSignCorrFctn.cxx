@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvLikeSignCorrFctn.cxx,v 1.3 2001/01/23 16:40:52 laue Exp $
+ * $Id: MinvLikeSignCorrFctn.cxx,v 1.4 2003/01/31 19:21:09 magestro Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -99,8 +99,6 @@ void MinvLikeSignCorrFctn::Finish(){
 
   double NumeratorInt = mNumerator->Integral();
   double MixedEventDenominatorInt = mMixedEventDenominator->Integral();
-  double PositiveDenominatorInt = mPositiveDenominator->Integral();
-  double NegativeDenominatorInt = mNegativeDenominator->Integral();
   mMixedEventDifference->Add(mNumerator,mMixedEventDenominator,1.0,-1*NumeratorInt/MixedEventDenominatorInt);
   mLikeSignDifference->Add(mNumerator,mPositiveDenominator,1.,-1.);
   mLikeSignDifference->Add(mLikeSignDifference,mNegativeDenominator,1.,-1.);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QinvCorrFctnKt.cxx,v 1.1 2002/05/17 14:26:21 mercedes Exp $
+ * $Id: QinvCorrFctnKt.cxx,v 1.2 2003/01/31 19:21:09 magestro Exp $
  *
  * Author: Mercedes Lopez Noriega, OSU, mercedes@pacific.mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: QinvCorrFctnKt.cxx,v $
+ * Revision 1.2  2003/01/31 19:21:09  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.1  2002/05/17 14:26:21  mercedes
  * N Qinv CFs (kt bins) between ktmin and ktmax
  *
@@ -99,11 +102,11 @@ StHbtString QinvCorrFctnKt::Report(){
   }
   string stemp = "Qinv Correlation Function Report:\n";
   char ctemp[100];
-  sprintf(ctemp,"Number of entries in all numerators:\t%E\n",mNumeratorEntries);
+  sprintf(ctemp,"Number of entries in all numerators:\t%i\n",mNumeratorEntries);
   stemp += ctemp;
-  sprintf(ctemp,"Number of entries in all denominators:\t%E\n",mDenominatorEntries);
+  sprintf(ctemp,"Number of entries in all denominators:\t%i\n",mDenominatorEntries);
   stemp += ctemp;
-  sprintf(ctemp,"Number of entries in all ratios:\t%E\n",mRatioEntries);
+  sprintf(ctemp,"Number of entries in all ratios:\t%i\n",mRatioEntries);
   stemp += ctemp;
   StHbtString returnThis = stemp;
   return returnThis;

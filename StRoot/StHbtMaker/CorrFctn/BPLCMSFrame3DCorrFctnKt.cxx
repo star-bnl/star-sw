@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctnKt.cxx,v 1.1 2002/05/17 14:25:31 mercedes Exp $
+ * $Id: BPLCMSFrame3DCorrFctnKt.cxx,v 1.2 2003/01/31 19:21:09 magestro Exp $
  *
  * Author: Mercedes Lopez Noriega, OSU, mercedes@pacific.mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctnKt.cxx,v $
+ * Revision 1.2  2003/01/31 19:21:09  magestro
+ * Cleared up simple compiler warnings on i386_linux24
+ *
  * Revision 1.1  2002/05/17 14:25:31  mercedes
  * N 3D Bertsch-Pratt decomposition (kt bins) between ktmin and ktmax (LCMSFrame)
  *
@@ -144,11 +147,11 @@ StHbtString BPLCMSFrame3DCorrFctnKt::Report(){
 
   string stemp = "LCMS Frame Bertsch-Pratt 3D Correlation Function Report:\n";
   char ctemp[100];
-  sprintf(ctemp,"Number of entries in numerator:\t%E\n",mNumeratorEntries);
+  sprintf(ctemp,"Number of entries in numerator:\t%i\n",mNumeratorEntries);
   stemp += ctemp;
-  sprintf(ctemp,"Number of entries in denominator:\t%E\n",mDenominatorEntries);
+  sprintf(ctemp,"Number of entries in denominator:\t%i\n",mDenominatorEntries);
   stemp += ctemp;
-  sprintf(ctemp,"Number of entries in ratio:\t%E\n",mRatioEntries);
+  sprintf(ctemp,"Number of entries in ratio:\t%i\n",mRatioEntries);
   stemp += ctemp;
   if (mCorrection)
     {
