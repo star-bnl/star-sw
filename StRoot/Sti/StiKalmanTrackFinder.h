@@ -12,57 +12,42 @@ class StiKalmanTrack;
 class StiKalmanTrackFinder : public StiTrackFinder
 {
  public:
-
   StiKalmanTrackFinder();
   ~StiKalmanTrackFinder();
-
-
     //action methods_______________________________________________
-
     //inherited
     virtual void reset();
     virtual void findTracks();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher    
     virtual void doNextAction();
 
-private:
+    virtual void setElossCalculated(bool option);
+    virtual void setMCSCalculated(bool option);
+    void   setMassHypothesis(double m);
+    double getMassHypothesis();
+
     //Local
-    int  findTrack(StiTrack * t) throw ( Exception);
-    
-    void fitInward(StiKalmanTrackNode * node) throw (Exception) ;
-    void fitOutward(StiKalmanTrackNode * node) throw (Exception) ;
-
-    void followTrackAtNode(StiKalmanTrackNode * node) throw (Exception) ;
-    int  propagate(StiKalmanTrackNode * node, 
-				     StiDetector  * sDet,
-				     StiDetector  * tDet) throw ( Exception) ; 
-    void exploreNode(StiKalmanTrackNode * sNode,
-				       StiKalmanTrackNode * tNode) throw (Exception) ; 
-
-    void updateNode(StiKalmanTrackNode * node, double chisq) throw ( Exception) ; 
-    void followBestNode(StiKalmanTrackNode * sNode, 
-			StiKalmanTrackNode * tNode) throw ( Exception);
-    
-    double evaluateChi2(const StiKalmanTrackNode * node, 
-			const StiHit *hit) const  throw ( Exception);
-    
-    void rotate(StiKalmanTrackNode * node, double alpha)  throw ( Exception);
+    virtual void findTrack(StiTrack * t) throw ( Exception);
+    virtual void fitInward(StiKalmanTrackNode * node) throw (Exception) ;
+    virtual void fitOutward(StiKalmanTrackNode * node) throw (Exception) ;
+    virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node) throw (Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
-    StiKalmanTrackNode * findBestBranch(StiKalmanTrackNode * node) throw ( Exception);
     bool extendToMainVertex(StiKalmanTrackNode * node);
-    void   setMassHypothesis(double m) { massHypothesis=m;};
-    double getMassHypothesis()         { return massHypothesis;};
+
+    //double getYWindow(StiKalmanTrackNode * n, StiHit * h) const;
+    //double getZWindow(StiKalmanTrackNode * n, StiHit * h) const;
     
-    double getYWindow(StiKalmanTrackNode * n, StiHit * h) const;
-    double getZWindow(StiKalmanTrackNode * n, StiHit * h) const;
-    
-private:
+protected:
     
     int    singleNodeFrom;
     bool   singleNodeDescent;
-    double maxChi2ForSelection;
     double massHypothesis;
+    double maxChi2ForSelection;
+    int minContiguousHitCountForNullReset;
+    int maxNullCount;  
+    int maxContiguousNullCount;
+
 };
 
 

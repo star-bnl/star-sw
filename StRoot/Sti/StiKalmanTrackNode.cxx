@@ -1,7 +1,10 @@
 #include <iostream>
+#include <math.h>
 #include "StiHit.h"
+#include "StiDetector.h"
+#include "StiPlacement.h"
+#include "StiShape.h"
 #include "StiKalmanTrackNode.h"
-
 
 //_____________________________________________________________________________
 // Local Track Model
@@ -12,6 +15,9 @@
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
+// initialize static vairables
+bool StiKalmanTrackNode::elossCalculated = false;
+bool StiKalmanTrackNode::mcsCalculated   = false;
 double StiKalmanTrackNode::kField = 0.5;
 
 //_____________________________________________________________________________
@@ -370,6 +376,303 @@ double StiKalmanTrackNode::getPt() const
   return pt;
 }
 
+int StiKalmanTrackNode::propagate(StiDetector * tDet)	throw (Exception)
+{
+  int position = 0;
+  StiPlacement * tPlace = tDet->getPlacement();
+  double tAlpha = tPlace->getNormalRefAngle();
+  double dAlpha = tAlpha - fAlpha;
+  if (dAlpha>1e-2)   // perform rotation if needed
+    rotate(dAlpha);
+  
+  propagate(tPlace->getNormalRadius(), 0., 0.);
+  return position;
+}
+
+void  StiKalmanTrackNode::propagate(double xk, 
+				  double x0,   // thickness of material
+				  double rho)  // density of material
+  throw (Exception)
+{
+  double x1=fX, x2=x1+(xk-x1), dx=x2-x1, y1=fP0, z1=fP1;
+  double c1=fP3*x1 - fP2, r1=sqrt(1.- c1*c1);
+  double c2=fP3*x2 - fP2, r2=sqrt(1.- c2*c2);
+  fP0 = fP0 + dx*(c1+c2)/(r1+r2);
+  fP1 = fP1 + dx*(c1+c2)/(c1*r2 + c2*r1)*fP4; 
+
+  //f = F - 1
+  double rr=r1+r2, cc=c1+c2, xx=x1+x2;
+  double f02=-dx*(2*rr + cc*(c1/r1 + c2/r2))/(rr*rr);
+  double f03= dx*(rr*xx + cc*(c1*x1/r1+c2*x2/r2))/(rr*rr);
+  double cr=c1*r2+c2*r1;
+  double f12=-dx*fP4*(2*cr + cc*(c2*c1/r1-r1 + c1*c2/r2-r2))/(cr*cr);
+  double f13=dx*fP4*(cr*xx-cc*(r1*x2-c2*c1*x1/r1+r2*x1-c1*c2*x2/r2))/(cr*cr);
+  double f14= dx*cc/cr; 
+
+  //b = C*ft
+  double b00=f02*fC20 + f03*fC30;
+  double b01=f12*fC20 + f13*fC30 + f14*fC40;
+  double b10=f02*fC21 + f03*fC31;
+  double b11=f12*fC21 + f13*fC31 + f14*fC41;
+  double b20=f02*fC22 + f03*fC32;
+  double b21=f12*fC22 + f13*fC32 + f14*fC42;
+  double b30=f02*fC32 + f03*fC33;
+  double b31=f12*fC32 + f13*fC33 + f14*fC43;
+  double b40=f02*fC42 + f03*fC43;
+  double b41=f12*fC42 + f13*fC43 + f14*fC44;
+  
+  //a = f*b = f*C*ft
+  double a00=f02*b20+f03*b30;
+  double a01=f02*b21+f03*b31;
+  double a11=f12*b21+f13*b31+f14*b41;
+
+  //F*C*Ft = C + (a + b + bt)
+  fC00 += a00 + 2*b00;
+  fC10 += a01 + b01 + b10; 
+  fC20 += b20;
+  fC30 += b30;
+  fC40 += b40;
+  fC11 += a11 + 2*b11;
+  fC21 += b21; 
+  fC31 += b31; 
+  fC41 += b41; 
+  fX=x2;
+
+  // Multiple scattering
+  if (mcsCalculated && x0>0 && rho>0) // only do this when the thickness & density are supplied
+    {
+      double d=sqrt((x1-fX)*(x1-fX)
+		    +(y1-fP0)*(y1-fP0)  +(z1-fP1)*(z1-fP1));
+      double tanl  = fP4;
+			if (fP3==0.)
+				throw new Exception("StiKalmanTrackNode::propagate - Error - fP3 wass null");
+			
+      double pt = kField/fP3;
+      double p2=(1.+tanl*tanl)*pt*pt;
+      double beta2=p2/(p2 + massHypothesis*massHypothesis);
+      double theta2=14.1*14.1/(beta2*p2*1e6)*d/x0*rho;
+      //double theta2=1.0259e-6*10*10/20/(beta2*p2)*d*rho;
+      
+      double ey=fP3*fX - fP2, ez=fP4;
+      double xz=fP3*ez, zz1=ez*ez+1, xy=fP2+ey;
+      
+      fC33 = fC33 + xz*xz*theta2;
+      fC32 = fC32 + xz*ez*xy*theta2;
+      fC43 = fC43 + xz*zz1*theta2;
+      fC22 = fC22 + (2*ey*ez*ez*fP2+1-ey*ey+ez*ez+
+										 fP2*fP2*ez*ez)*theta2;
+      fC42 = fC42 + ez*zz1*xy*theta2;
+      fC44 = fC44 + zz1*zz1*theta2;
+			
+      // Energy losses
+      if (elossCalculated)
+	{
+	  double dE=0.153e-3/beta2*(log(5940*beta2/(1-beta2)) - beta2)*d*rho;
+	  if (x1 < x2) dE=-dE;
+	  cc=fP3;
+	  fP3 = fP3 *(1.- sqrt(p2+massHypothesis*massHypothesis)/p2*dE);
+	  fP2 = fP2 + fX*(fP3-cc);
+	}
+    }
+}
+
+double 
+StiKalmanTrackNode::evaluateChi2() 	throw ( Exception)
+{
+  //-----------------------------------------------------------------
+  // This function calculates a chi2 increment given the track state
+	// and the hit currently stored. The chi2 is stored in this node.
+	// The methods return the increment for convenience.
+	//
+  // return : increment in chi2 implied by the node/hit assocition.
+  //-----------------------------------------------------------------
+	// Update Measurement Error Matrix, calculate its determinant
+	double r00=hit->syy()+fC00;
+  double r01=hit->syz()+fC10;
+  double r11=hit->szz()+fC11;
+  double det=r00*r11 - r01*r01;
+  if (det< 1.e-10 && det>-1.e-10) 
+      throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+  // inverse matrix
+  double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
+  double dy=hit->y() - fP0;
+  double dz=hit->z() - fP1;
+	fChi2 = (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
+	return fChi2;
+}
+
+void StiKalmanTrackNode::updateNode() throw (Exception)
+{
+  // Updates this node with the information 
+  // from its associated hit. The given chisq is set as the chi2 
+  // of this node.
+  //__________________________________________________________________
+	// Update Measurement Error Matrix, calculate its determinant
+	double r00=hit->syy()+fC00;
+  double r01=hit->syz()+fC10;
+  double r11=hit->szz()+fC11;
+  double det=r00*r11 - r01*r01;
+  if (det< 1.e-10 && det>-1.e-10) 
+      throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+  // inverse matrix
+  double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
+  // update error matrix
+  double k00=fC00*r00+fC10*r01, k01=fC00*r01+fC10*r11;
+  double k10=fC10*r00+fC11*r01, k11=fC10*r01+fC11*r11;
+  double k20=fC20*r00+fC21*r01, k21=fC20*r01+fC21*r11;
+  double k30=fC30*r00+fC31*r01, k31=fC30*r01+fC31*r11;
+  double k40=fC40*r00+fC41*r01, k41=fC40*r01+fC41*r11;
+
+  double dy  = hit->y() - fP0;
+  double dz  = hit->z() - fP1;
+  double cur = fP3 + k30*dy + k31*dz;
+  double eta = fP2 + k20*dy + k21*dz;
+  double ddd = cur*fX-eta;
+  if (ddd >= 0.99999 || ddd<0.99999) 
+      throw new Exception("StiKalmanTrackNode - Warning - Filtering failed !\n");
+	// update state
+  fP0 += k00*dy + k01*dz;
+  fP1 += k10*dy + k11*dz;
+  fP2  = eta;
+  fP3  = cur;
+  fP4 += k40*dy + k41*dz;
+
+	// update error matrix
+  double c01=fC10, c02=fC20, c03=fC30, c04=fC40;
+  double c12=fC21, c13=fC31, c14=fC41;
+
+  fC00-=k00*fC00+k01*fC10; 
+  fC10-=k00*c01+k01*fC11;
+  fC20-=k00*c02+k01*c12;   
+  fC30-=k00*c03+k01*c13;
+  fC40-=k00*c04+k01*c14; 
+  fC11-=k10*c01+k11*fC11;
+  fC21-=k10*c02+k11*c12;   
+  fC31-=k10*c03+k11*c13;
+  fC41-=k10*c04+k11*c14; 
+  fC22-=k20*c02+k21*c12;   
+  fC32-=k20*c03+k21*c13;
+  fC42-=k20*c04+k21*c14; 
+  fC33-=k30*c03+k31*c13;
+  fC43-=k30*c04+k31*c14; 
+  fC44-=k40*c04+k41*c14; 
+}
+
+//_____________________________________________________________________________
+void StiKalmanTrackNode::rotate(double alpha) throw ( Exception)
+{
+  //-----------------------------------------------------------------
+  // This function rotates by an angle alpha the track representation 
+  // held by this node.
+  //-----------------------------------------------------------------
+  fAlpha += alpha;
+  if (fAlpha < -3.1415927) fAlpha += 2*3.1415927;
+  if (fAlpha >= 3.1415927) fAlpha -= 2*3.1415927;
+  
+  double x1=fX;
+  double y1=fP0;
+  double ca=cos(alpha);
+  double sa=sin(alpha);
+  double r1=fP3*fX - fP2;
+  
+  fX = x1*ca + y1*sa;
+  fP0=-x1*sa + y1*ca;
+  fP2=fP2*ca + (fP3*y1 + sqrt(1.- r1*r1))*sa;
+  
+  double r2=fP3*fX - fP2;
+  if (r2>= 0.9999999 || r2<0.9999999)
+    {
+      throw new Exception(" StiKalmanTrackNode - Warning: Rotation failed - case 1!\n");
+    }
+  
+  double y0=fP0 + sqrt(1.- r2*r2)/fP3;
+  if ((fP0-y0)*fP3 >= 0.) 
+    {
+      throw new Exception(" StiKalmanTrackNode - Warning: Rotation failed - case 2 !\n");
+    }
+
+  //f = F - 1
+  double f00=ca-1;
+  double f23=(y1 - r1*x1/sqrt(1.- r1*r1))*sa;
+  double f20=fP3*sa;
+  double f22=(ca + sa*r1/sqrt(1.- r1*r1))-1;
+  
+  //b = C*ft
+  double b00=fC00*f00, b02=fC00*f20+fC30*f23+fC20*f22;
+  double b10=fC10*f00, b12=fC10*f20+fC31*f23+fC21*f22;
+  double b20=fC20*f00, b22=fC20*f20+fC32*f23+fC22*f22;
+  double b30=fC30*f00, b32=fC30*f20+fC33*f23+fC32*f22;
+  double b40=fC40*f00, b42=fC40*f20+fC43*f23+fC42*f22;
+
+  //a = f*b = f*C*ft
+  double a00=f00*b00, a02=f00*b02, a22=f20*b02+f23*b32+f22*b22;
+
+  // *** double dy2=fCyy;
+
+  //F*C*Ft = C + (a + b + bt)
+  fC00 += a00 + 2*b00;
+  fC10 += b10;
+  fC20 += a02+b20+b02;
+  fC30 += b30;
+  fC40 += b40;
+  fC21 += b12;
+  fC32 += b32;
+  fC22 += a22 + 2*b22;
+  fC42 += b42; 
+
+  // *** fCyy+=dy2*sa*sa*r1*r1/(1.- r1*r1);
+  // *** fCzz+=d2y*sa*sa*fT*fT/(1.- r1*r1);
+}
+
+
+//_____________________________________________________________________________
+void StiKalmanTrackNode::extendToVertex() throw (Exception)
+{
+  //-----------------------------------------------------------------
+  // This function propagates tracks to the "vertex".
+  //-----------------------------------------------------------------
+  double c=fP3*fX - fP2;
+  double tgf=-fP2/(fP3*fP0 + sqrt(1-c*c));
+  double snf=tgf/sqrt(1.+ tgf*tgf);
+  double xv=(fP2+snf)/fP3;
+  propagate(xv,0.,0.);
+}
+
+void StiKalmanTrackNode::setElossCalculated(bool option)
+{
+	elossCalculated = option;
+}
+
+void StiKalmanTrackNode::setMCSCalculated(bool option)
+{
+    mcsCalculated = option;
+}
+
+bool StiKalmanTrackNode::getElossCalculated()
+{
+	return elossCalculated;
+}
+
+bool StiKalmanTrackNode::getMCSCalculated()
+{
+    return mcsCalculated;
+}
+
+void   StiKalmanTrackNode::setMassHypothesis(double m) 
+{
+ 	massHypothesis=m;
+}
+
+double StiKalmanTrackNode::getMassHypothesis() 
+{ 
+	return massHypothesis;
+}
+
+void StiKalmanTrackNode::setDetector(const StiDetector * det)
+{
+  detector = det;
+}
+
 
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
@@ -409,6 +712,9 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 		}
 	return os;
 }
+
+
+
 
 
 

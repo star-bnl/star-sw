@@ -2,7 +2,7 @@
 // Ben Norman, Kent State
 // 25 July 01
 
-#ifndef STI_PLANAR_SHAPE_H
+#ifndef STI_PLANAR_SHPE_H
 #define STI_PLANAR_SHAPE_H
 
 #include "StiShape.h"

@@ -2,6 +2,7 @@
 #define StiKalmanTrackNode_H 1
 #include <iostream.h>
 #include <stdlib.h>
+#include "Exception.h"
 #include "StiObjectFactory.h"
 #include "StiTrackNode.h"
 
@@ -16,7 +17,7 @@ class StiKalmanTrackNode : public StiTrackNode
    */
 
  public:
-
+	
   void reset();
   void set(int   depth,
 	   StiHit * hit,
@@ -38,6 +39,16 @@ class StiKalmanTrackNode : public StiTrackNode
   double getPt() const;
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   void setAsCopyOf(const StiKalmanTrackNode * node);
+  int  propagate(StiDetector * tDet)	throw (Exception);
+  void propagate(double x, 
+		 double x0,   
+		 double rho) throw (Exception); // mass hypothesis
+  double evaluateChi2() throw ( Exception);
+  void updateNode() throw (Exception);
+  void extendToVertex() throw (Exception);
+  void rotate(double alpha) throw ( Exception);
+  void setDetector(const StiDetector * det);
+  const StiDetector* getDetector() const;
   
   double fAlpha;          // rotation angle
   double fX;              // X-coordinate of this track (reference plane)
@@ -53,15 +64,24 @@ class StiKalmanTrackNode : public StiTrackNode
   double fC40, fC41, fC42, fC43, fC44; // parameters
   double fdEdx;           // dE/dx 
   double fChi2;
-
+	
   // static methods
   static void    setFieldConstant(double f) { kField = f;};
   static double  getFieldConstant()         { return kField;}; 
-  
-friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
+  static void    setMassHypothesis(double m);
+  static double  getMassHypothesis(); 
+  static void    setElossCalculated(bool option);
+  static void    setMCSCalculated(bool option);
+  static bool StiKalmanTrackNode::getElossCalculated();
+  static bool StiKalmanTrackNode::getMCSCalculated();  
+  friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
+
  protected:   
   
   static double kField;
+  static bool   elossCalculated;
+  static bool   mcsCalculated;
+  static double massHypothesis;
 };
 
 typedef StiObjectFactory<StiKalmanTrackNode>   StiKalmanTrackNodeFactory;

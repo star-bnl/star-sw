@@ -31,19 +31,19 @@ public:
     //_accessor methods_____________________________________________
     void setTrackSeedFinder(StiSeedFinder * finder);
     void setTrackFilter(StiTrackFilter * filter);
-    void setGeometryContainer(StiDetectorContainer* geometry);
+    void setDetectorContainer(StiDetectorContainer* detcontainer);
     void setHitContainer(StiHitContainer * hitContainer);
     void setTrackContainer(StiTrackContainer * newTrackContainer);
     void setTrackNodeFactory(StiKalmanTrackNodeFactory * factory);
     void setMagneticField(StMagUtilities * magField);
     
-    void setTrackFiltering(bool option);
-    void setElossCalculated(bool option);
-    void setMCSCalculated(bool option);
+    virtual void setTrackFiltering(bool option);
+    virtual void setElossCalculated(bool option);
+    virtual void setMCSCalculated(bool option);
     
     StiSeedFinder             * getTrackSeedFinder()    const;
     StiTrackFilter            * getTrackFilter()        const;
-    StiDetectorContainer      * getGeometryContainer()  const;
+    StiDetectorContainer      * getDetectorContainer()  const;
     StiHitContainer           * getHitContainer()       const;
     StiTrackContainer         * getTrackContainer()     const;
     StiKalmanTrackNodeFactory * getTrackNodeFactory()   const;
@@ -53,10 +53,6 @@ public:
     bool isTrackFiltering()   const;
     bool isElossCalculated()  const;
     bool isMCSCalculated()    const;
-    int  getAnalyzedTrackSeedCount()  const;
-    int  getFoundTrackCount()         const;
-    int  getAcceptedTrackCount()      const;
-    int  getStatus()                  const;
     
 protected:
 
@@ -67,18 +63,13 @@ protected:
     StiSeedFinder             * trackSeedFinder;
     StiKalmanTrackNodeFactory * trackNodeFactory;
     StMagUtilities            * magField;
-    StiDetectorContainer      * geometryContainer;
+    StiDetectorContainer      * detectorContainer;
     StiHitContainer           * hitContainer;
     StiTrackContainer         * trackContainer;
-    
-    int analyzedTrackSeeds;
-    int acceptedTracks;
-    int foundTracks;
     
     bool trackFiltering;
     bool elossCalculated;
     bool mcsCalculated;
-    int  status;
 };
 
 
@@ -133,12 +124,12 @@ inline StiTrackContainer * StiTrackFinder::getTrackContainer() const
   return trackContainer;
 }
 
-inline StiDetectorContainer * StiTrackFinder::getGeometryContainer() const
+inline StiDetectorContainer * StiTrackFinder::getDetectorContainer() const
 {
   //----------------------------------------------------------------- 
   // Returns the detector geometry used by this finder
   //-----------------------------------------------------------------   
-  return geometryContainer;
+  return detectorContainer;
 }
 
 
@@ -152,42 +143,6 @@ inline StiTrackFilter     * StiTrackFinder::getTrackFilter() const
   return trackFilter;
 }
 
-inline int StiTrackFinder::getAnalyzedTrackSeedCount() const
-{
-  //----------------------------------------------------------------- 
-  // Returns the number of track seeds analyzed by this finder since
-  // last reset.
-  //----------------------------------------------------------------- 
-  return analyzedTrackSeeds;
-}
-
-inline int StiTrackFinder::getFoundTrackCount() const
-{
-  //----------------------------------------------------------------- 
-  // Returns the number of found tracks by this finder since
-  // last reset.
-  //----------------------------------------------------------------- 
-  return foundTracks;
-}
-
-inline int StiTrackFinder::getAcceptedTrackCount() const
-{
-  //----------------------------------------------------------------- 
-  // Returns the number of found and accepted tracks by this finder 
-  // since last reset.
-  //----------------------------------------------------------------- 
-  return acceptedTracks;
-}
-
-inline int StiTrackFinder::getStatus() const
-{
-  //----------------------------------------------------------------- 
-  // Returns status of this finder
-  // See top of this file for the meaning associated with each
-  // status state.
-  //----------------------------------------------------------------- 
-  return status;
-}
 
 inline StMagUtilities * StiTrackFinder::getMagneticField() const
 {
