@@ -123,11 +123,12 @@ void StiHit::setError(const StMatrixF& matrix)
 ostream& operator<<(ostream& os, const StiHit& hit)
 {
   return os <<hit.refangle()<<" "<<hit.position()<<"\t\t" //Key
-	    <<hit.x()<<" "<<hit.y()<<" "<<hit.z()<<"\t\t" //Position
-	    <<hit.sxx()<<" "<<hit.syy()<<" "<<hit.szz()<<"\t" //Diagonal Error
-	    <<hit.sxy()<<" "<<hit.sxz()<<" "<<hit.syz()<<"\t" //Off-diagonal error
-	    <<hit.detector() //pointer to detector
-	    <<"times Used: "<<hit.timesUsed();
+						<<"LOCAL :"<<hit.x()<<" "<<hit.y()<<" "<<hit.z()<< endl
+						<<"GLOBAL:"<<hit.x_g()<<" "<<hit.y_g()<<" "<<hit.z_g()<< endl
+						<<hit.sxx()<<" "<<hit.syy()<<" "<<hit.szz()<<"\t" //Diagonal Error
+						<<hit.sxy()<<" "<<hit.sxz()<<" "<<hit.syz()<<"\t" //Off-diagonal error
+						<<hit.detector() //pointer to detector
+						<<"times Used: "<<hit.timesUsed();
 }
 
 
@@ -153,4 +154,108 @@ double StiHit::getPseudoRapidity() const
     return -::log(tanTheta);
   else
     return 1.e10;
+}
+
+
+void StiHit::setGlobal(const StiDetector * detector,
+			      const StMeasuredPoint * stHit,
+			      float gx, float gy, float gz,
+			      float energy)
+{
+  if (detector)
+    {
+      StiPlacement * placement = detector->getPlacement();
+      mrefangle = placement->getNormalRefAngle();
+      mposition = placement->getLayerRadius();
+      mx =  detector->_cos*gx + detector->_sin*gy;
+      my = -detector->_sin*gx + detector->_cos*gy - placement->getNormalYoffset();
+      //my = -detector->_sin*gx + detector->_cos*gy + placement->getNormalYoffset();
+    }
+  else
+    {
+      mrefangle = 0.;
+      mposition = 0.; 
+      mx =  gx;
+      my =  gy;
+    }
+  mz = gz;
+  msxx = 1.;//sxx;
+  msyy = 1.;//syy;
+  mszz = 1.;//szz;
+  msxy = 0.;//sxy;
+  msxz = 0.;//sxz;
+  msyz = 0.;//syz;  
+  _xg = gx;
+  _yg = gy;
+  _zg = gz;
+  mTimesUsed = 0;
+  mdetector = detector;  msthit = stHit;
+  _energy = energy;
+}
+
+
+ void StiHit::set(const StiDetector * detector,
+			const StMeasuredPoint * stHit,
+			float energy,
+			float x, float y, float z, 
+			float sxx, float sxy, float sxz, float syy, float syz, float szz)
+{
+  if (detector)
+    {
+      StiPlacement * placement = detector->getPlacement();
+      mrefangle = placement->getNormalRefAngle();
+      mposition = placement->getLayerRadius();
+      _xg = detector->_cos*x - detector->_sin*y;
+      _yg = detector->_sin*x + detector->_cos*y;
+    }
+  else
+    {
+      mrefangle = 0.;
+      mposition = 0.;
+      _xg = x;
+      _yg = y;
+    }
+  mx = x;
+  my = y;
+  mz = z;
+  msxx = sxx;
+  msyy = syy;
+  mszz = szz;
+  msxy = sxy;
+  msxz = sxz;
+  msyz = syz;  
+  mTimesUsed = 0;
+  mdetector = detector;
+  msthit = stHit;
+  _energy = energy;  
+  _zg = z;
+}
+
+ void StiHit::setTimesUsed(unsigned int val)
+{
+    mTimesUsed=val;
+}
+
+ float StiHit::getEloss()
+{
+  return _energy;
+}
+
+ const StThreeVectorF StiHit::globalPosition() const
+{
+  return StThreeVectorF(_xg,_yg,_zg); ////msthit->position();
+}
+
+void StiHit::set(float position,  float angle, float y, float z)
+{
+  mrefangle = angle;
+  mposition = position;
+  mx = position;
+  my = y;
+  mz = z;
+  msxx = msyy = mszz = msxy = msxz = msyz = 0.;
+  mTimesUsed=0;
+  mdetector = 0;
+  msthit = 0;
+  _energy = 0;
 }
