@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixel.h,v 1.4 2000/05/17 22:29:15 lasiuk Exp $
+ * $Id: StRichSinglePixel.h,v 1.5 2000/05/19 15:44:31 lasiuk Exp $
  *
  * Description:
  *  Definition of a single pixel object
@@ -9,8 +9,8 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixel.h,v $
- * Revision 1.4  2000/05/17 22:29:15  lasiuk
- * keep charge info as a float only.  Access with charge() uniformly
+ * Revision 1.5  2000/05/19 15:44:31  lasiuk
+ * clone members added
  *
  * Revision 1.4  2000/05/17 22:29:15  lasiuk
  * keep charge info as a float only.  Access with charge() uniformly
@@ -43,6 +43,7 @@ public:
     StRichSinglePixel(int p, int r, float q);
 
     virtual ~StRichSinglePixel();
+    virtual StRichSinglePixel* clone();
     
     //StRichSinglePixel(const StRichSinglePixel&) {/*use default*/}
     //StRichSinglePixel& operator=(const StRichSinglePixel&) {/*use default*/|
@@ -90,6 +91,7 @@ inline bool StRichSinglePixel::operator==(const StRichSinglePixel& pix) const
 inline void StRichSinglePixel::setBit(StRichSinglePixelFlag b) { mFlags |= b; }
 inline void StRichSinglePixel::unSetBit(StRichSinglePixelFlag b) { mFlags &= ~(b);}
 inline bool StRichSinglePixel::isSet(StRichSinglePixelFlag b) const { return (mFlags & b); }
+inline StRichSinglePixel* StRichSinglePixel::clone() {return new StRichSinglePixel(*this);}
 
 // Non-member
 ostream& operator<<(ostream& os, const StRichSinglePixel& pix);
