@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.15 1999/11/29 21:41:16 fisyak Exp $
+// $Id: StSmdstMaker.cxx,v 1.16 1999/12/07 23:23:55 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.16  1999/12/07 23:23:55  genevb
+// Fixed linux warnings
+//
 // Revision 1.15  1999/11/29 21:41:16  fisyak
 // Remove StMagF header file from include area
 //
@@ -233,7 +236,7 @@ Int_t StSmdstMaker::FillV0Table() {
    if (!ev) return kStOK; // If no event, we're done
    
    StSPtrVecV0Vertex& v0Vertices = ev->v0Vertices();
-   Int_t v0tot = v0Vertices.size();
+   size_t v0tot = v0Vertices.size();
    if (!v0tot) {
      gMessMgr->Warning("StSmdstMaker - no vertices in event.");
      return kStOK;
@@ -262,7 +265,7 @@ Int_t StSmdstMaker::FillV0Table() {
 
    StTrack* nTrack;
    StTrack* pTrack;
-   for (unsigned int i=0; i<v0tot; i++) {
+   for (size_t i=0; i<v0tot; i++) {
      StV0Vertex *vertex = v0Vertices[i];
 
      nTrack = vertex->daughter(negative);
@@ -449,14 +452,14 @@ void StSmdstMaker::FillXiHistograms() {
   if (!ev) return; // If no event, we're done
 
   StSPtrVecXiVertex& xiVertices = ev->xiVertices();
-  Int_t castot = xiVertices.size();
+  size_t castot = xiVertices.size();
   if (!castot) {
     gMessMgr->Warning("StSmdstMaker - no vertices in event.");
     return;
   }
 
   if (m_DataSet && update) {
-    for (unsigned int i=0; i<castot; i++) {
+    for (size_t i=0; i<castot; i++) {
       StXiVertex *vertex = xiVertices[i];
 
       const StThreeVectorF& bMom = vertex->momentumOfBachelor();

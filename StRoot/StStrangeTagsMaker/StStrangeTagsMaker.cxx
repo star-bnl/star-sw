@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.12 1999/11/16 19:20:44 genevb Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.13 1999/12/07 23:23:56 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.13  1999/12/07 23:23:56  genevb
+ * Fixed linux warnings
+ *
  * Revision 1.12  1999/11/16 19:20:44  genevb
  * Modified for StEvent 2.0
  *
@@ -101,9 +104,9 @@ StrangeTag_st* StStrangeTagsMaker::tag()
 void StStrangeTagsMaker::fillTag()
 {
     StSPtrVecV0Vertex& v0Vertices = mEvent->v0Vertices();
-    Int_t v0tot = v0Vertices.size();
+    size_t v0tot = v0Vertices.size();
     StSPtrVecXiVertex& xiVertices = mEvent->xiVertices();
-    Int_t castot = xiVertices.size();
+    size_t castot = xiVertices.size();
     Int_t nbelowK0 = 0;
     Int_t nK0 = 0;
     Int_t naboveK0 = 0;
@@ -117,7 +120,7 @@ void StStrangeTagsMaker::fillTag()
     Int_t nXi = 0;
     Int_t naboveXi = 0;
 
-    unsigned int i;
+    size_t i;
 
     for (i=0; i<v0tot; i++) {
         StV0Vertex *vertex = v0Vertices[i];
