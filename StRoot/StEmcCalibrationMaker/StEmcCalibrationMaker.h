@@ -124,6 +124,7 @@ class StEmcCalibrationMaker : public StMaker
            Float_t GetDeltaTime(Int_t,Int_t,Int_t,Int_t);
            void    SavePedestals(Int_t,Int_t);
            void    SaveCalibration(Int_t,Int_t);
+           void    CorrectGain(char*,Int_t,Int_t);
 
    
            StEmcEqualSpectra* GetEqualSpec()      { return mEqualSpec;} ///< Equalization spectra
