@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.3 1999/02/17 11:38:36 ullrich Exp $
+ * $Id: StLorentzVector.hh,v 1.4 1999/04/14 23:12:07 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,9 +20,12 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
- * Revision 1.3  1999/02/17 11:38:36  ullrich
- * Removed specialization for 'long double'.
+ * Revision 1.4  1999/04/14 23:12:07  fisyak
+ * Add __CINT__ to handle references
  *
+ * Revision 1.5  1999/06/04 18:01:36  ullrich
+ * New operators operator() and operator[] which can be used
+ * as lvalues.
  *
  * Revision 1.4  1999/04/14 23:12:07  fisyak
  * Add __CINT__ to handle references
@@ -147,7 +150,7 @@ public:
     StLorentzVector<T>& operator+= (const StLorentzVector<float>&);
     StLorentzVector<T>& operator-= (const StLorentzVector<float>&);
     StLorentzVector<T>& operator+= (const StLorentzVector<double>&);
-
+    StLorentzVector<T>& operator-= (const StLorentzVector<double>&);
 #endif
 
 protected:
@@ -623,6 +626,7 @@ ostream& operator<< (ostream& os, const StLorentzVector<T>& v)
 {
   return os << '(' << v.vect() << ',' << v.t() << ')';
 }
+
 //
 //        Non-member functions
 //
