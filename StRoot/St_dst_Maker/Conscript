@@ -1,0 +1,43 @@
+#!/usr/local/bin/perl
+#use Env;
+#use File::Basename;
+print "St_dst_Maker::cons\n";
+Import qw ( CONS INCLUDE LIB BIN OBJ );
+my $FilePath = FilePath();
+my $DirPath  = DirPath();
+print "Execute ", $0;
+print " in DirPath=",$DirPath," FilePath=",$FilePath,"\n"; 
+my @list = split '/', $FilePath; 
+my $pwd = $list[$#list-1];
+print "pwd = ",$pwd, $#list,"\n";
+my $obj = $OBJ . "/" . $pwd;
+print "obj=",$obj,",OBJ=",$OBJ,"\n";
+#Link $obj  => 'src';
+my $PWD = `pwd`;
+print "Build in $PWD,$dir::cwd->path,\n";
+my $tag =  $FilePath . "*.cxx";  
+print "Tag:", $tag, "\n"; 
+my @files = glob $tag; 
+print @files,"\n";
+@_[0] = $CONS;
+@_[1] = 'St_dst_Maker.so';
+my $i=1;
+foreach $file (@files) {
+  print "File:",$file,"\n"; $i++; 
+  @_[$i] = basename($file); 
+} 
+#Install $CONS $LIB, 'St_dst_Maker.so'; 
+my $m = 0;
+for ($m =0; $m<=$i;$m++) { print $m," ",@_[$m],"\n";}
+while ($m =shift) { print $m," ",@_[$m],"\n";}
+
+&cons::Program;
+#Install $CONS, 'St_dst_Maker.so';
+#Program $CONS  'St_dst_Maker.so', qw (
+#				       StKinkMaker.cxx
+#				       StMatchMaker.cxx
+#				       StPrimaryMaker.cxx
+#				       StV0Maker.cxx
+#				       StXiMaker.cxx
+#				       St_dst_Maker.cxx
+#				      );
