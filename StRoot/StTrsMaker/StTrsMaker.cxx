@@ -1,6 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.54 2000/02/24 16:30:41 long Exp $
+// $Id: StTrsMaker.cxx,v 1.55 2000/03/15 23:33:30 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.55  2000/03/15 23:33:30  calderon
+// Modified Finish() to properly take care of pointers when
+// using the mixer chain.
+//
 // Revision 1.54  2000/02/24 16:30:41  long
 // 1) modified  for field on case
 // //2) modified for pileup pp events  ---Balewski
@@ -316,7 +320,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.54 2000/02/24 16:30:41 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.55 2000/03/15 23:33:30 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -660,7 +664,7 @@ Int_t StTrsMaker::Make(){
     
     if (mReadFromFile) { // Read mAllTheData from file
 	mInputStream->fillTrsEvent(mAllTheData);
-	cout << "Done Filling mAllTheData" << endl;
+	cout << "Done Filling Trs Raw Data Event." << endl;
     }
     else { // Normal processing of TRS through GEANT   
     //cout << "Make ofstream" << endl;
@@ -1156,22 +1160,29 @@ Int_t StTrsMaker::Clear()
 Int_t StTrsMaker::Finish()
 {
     //Clean up all the pointers that were initialized in StTrsMaker::Init()
-    delete mGeometryDb;
-    delete mSlowControlDb;
-    delete mMagneticFieldDb;
-    delete mElectronicsDb;
-    delete mGasDb;
-    
-    delete mWireHistogram;
-    delete mSector;
-    delete mAllTheData;
-    
-    delete mChargeTransporter;
-    delete mAnalogSignalGenerator;
-    delete mDigitalSignalGenerator;
+    // Don't delete pointers to databases, they're singletons.
+//     if (mGeometryDb) delete mGeometryDb;
+//     if (mSlowControlDb) delete mSlowControlDb;
+//     if (mMagneticFieldDb) delete mMagneticFieldDb;
+//     if (mElectronicsDb) delete mElectronicsDb;
+//     if (mGasDb) delete mGasDb;
 
-    if(mInputStream) delete mInputStream;
-    if(mOutputStream) delete mOutputStream;
+    if (mWireHistogram) delete mWireHistogram;
+    mWireHistogram = 0;
+    if (mSector) delete mSector;
+    mSector = 0;
+    if (mAllTheData) delete mAllTheData;
+    mAllTheData = 0;
+    if (mChargeTransporter) delete mChargeTransporter;
+    mChargeTransporter = 0;
+    if (mAnalogSignalGenerator) delete mAnalogSignalGenerator;
+    mAnalogSignalGenerator = 0;
+    if (mDigitalSignalGenerator) delete mDigitalSignalGenerator;
+    mDigitalSignalGenerator = 0;    
+    if(mInputStream) delete(mInputStream);
+    mInputStream = 0;
+    if(mOutputStream) delete(mOutputStream);
+    mOutputStream = 0;
     return kStOK;
 }
 
