@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.8 2000/04/12 17:39:02 kathy Exp $
+// $Id: StHbtExample.C,v 1.9 2000/04/13 21:46:22 kathy Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.9  2000/04/13 21:46:22  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.8  2000/04/12 17:39:02  kathy
 // change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
 //
@@ -53,7 +56,6 @@ void StHbtExample(Int_t nevents=1,
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
-    gSystem->Load("libtpc_Tables");
     gSystem->Load("StUtilities");  // new addition 22jul99
     gSystem->Load("StAnalysisUtilities");  // needed by V0dstMaker
     gSystem->Load("StMagF");

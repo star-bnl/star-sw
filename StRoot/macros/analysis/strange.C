@@ -1,5 +1,8 @@
-// $Id: strange.C,v 1.11 2000/04/12 15:06:53 kathy Exp $
+// $Id: strange.C,v 1.12 2000/04/13 21:46:35 kathy Exp $
 // $Log: strange.C,v $
+// Revision 1.12  2000/04/13 21:46:35  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.11  2000/04/12 15:06:53  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -105,7 +108,7 @@ void strange(Int_t nevents,const Char_t **fileList,const char *qaflag)
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-  gSystem->Load("libtpc_Tables");
+
 
   gSystem->Load("StUtilities");
   gSystem->Load("StIOMaker");

@@ -1,5 +1,8 @@
-// $Id: StAssociator.C,v 1.15 2000/04/12 17:39:02 kathy Exp $
+// $Id: StAssociator.C,v 1.16 2000/04/13 21:46:21 kathy Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.16  2000/04/13 21:46:21  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.15  2000/04/12 17:39:02  kathy
 // change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
 //
@@ -84,7 +87,6 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
-    gSystem->Load("libtpc_Tables");
     gSystem->Load("StUtilities");
 
     gSystem->Load("StIOMaker");
