@@ -56,15 +56,14 @@ my $GEANT3   = $STAF_BIN . "/" . "geant3";
 my $KUIP     = $CERN_ROOT . "/bin/kuipc";
 my $ROOTCINT = $ROOTSYS . "/bin/rootcint";
 my $LIBS     = "";
+my $Libraries= "";
 my $CLIBS    = "";
 my $FLIBS    = "";
 my $CERNLIBS = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
-my $SoLibs   = "";
-my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
+my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
 my $INCLUDE_PATH  = $INCLUDE;
-my $LIBPATH  = ""; #$STAR/.$STAR_SYS/lib:$STAF/.$STAF_SYS/lib";#:;#:$CERN_ROOT/lib"; 
 $_ = $STAR_SYS;
 print "System: ", $_,"\n";
 #if (/^i386_linux2/ || /^i386_redhat50/ || /^i386_redhat51/ ||  /^i386_redhat52/ || /^i386_redhat60/) {
@@ -139,8 +138,8 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
   $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
   $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
-  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %SoLibs ||";
-  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
+  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
+  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
 }
 elsif (/^intel_wnt/) {
 #  $DEBUG    = "-Zi";
@@ -183,9 +182,9 @@ elsif (/^intel_wnt/) {
   $SO        =  "link";
   $SOFLAGS   =  $DEBUG . " -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL ";
   $LINKMODULECOM = 
-"BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+"BINDEXPLIB.exe %> %< > %>.def && %AR %ARFLAGS %Lout%>.lib  %< -def:%>.def && %SO %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS %Libraries";
   $LIB .= ";" . $ROOTSYS . "\\lib";
-  $LIBS = $ROOTSYS . "/lib/*.lib" . " ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
+  $Libraries = $ROOTSYS . "/lib/*.lib" . " ws2_32.lib mswsock.lib user32.lib kernel32.lib msvcrt.lib oldnames.lib MSVCIRT.LIB";
 }
 
 $MAIN    = cwd();
@@ -202,7 +201,7 @@ print "CC       = \t$CC     \tCCFLAGS  = \t$CFLAGS     \tCLIBS    =\t$CLIBS\n";
 print "CXX      = \t$CXX    \tCXXFLAGS = \t$CXXFLAGS\n";
 print "FC       = \t$FC     \nFFLAGS   = \t$FFLAGS     \tFLIBS    =\t$FLIBS\n"; 
 print "LD       = \t$LD     \tLDFLGAS  = \t$LDFLAGS    \nEXEFLAGS =\t$EXEFLAGS\n";
-print "LIBPATH  = \t$LIBPATH\n";
+print "LIBPATH  = \t$LIBPATH\tLIBS     = \t$LIBS       \nLibraries=\t$Libraries\n";
 print "SO       = \t$SO     \tSOFLGAS  = \t$SOFLAGS\n";
 #my $ROOTLIBS    = " -lRint -lNew  -lBase -lCint -lClib -lCont -lFunc";
 my $ROOTLIBS    = " -L$ROOTSYS/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFunc";
@@ -215,6 +214,14 @@ $FCPPPATH ="";
 print "CPPPATH  = \t$CPPPATH\n";
 Repository ($STAR);
 (my $DirPath  = cwd()) =~ s/\/$//g;#print " in DirPath=$DirPath\n";
+my $build  = "." . $STAR_HOST_SYS; print "build for $build\n";
+$BUILD  = "#" . $build;
+$LIB    = $BUILD . "/lib";
+$BIN    = $BUILD . "/bin"; 
+$OBJ    = $BUILD . "/obj";
+my $obj = $build . "/obj";
+$LIBPATH = $LIB;
+Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 my @Repo = Repository_List;# print "Repositories = |@Repo|\n";
 my @Reps = ($DirPath);
 foreach my $rep (@Repo) {
@@ -223,10 +230,10 @@ foreach my $rep (@Repo) {
 if ($STAR_SYS !~ /^intel_wnt/) {
   $CERNLIBS .= " " . `cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`;
   chop ($CERNLIBS);
-  $LIBS =  $CERNLIBS . " " . $ROOTLIBS . " " . $ROOTGLIBS . " -lXpm  ";
-  if ($STAR_SYS !~ /^hp_ux/) {$LIBS .=  " ". $FLIBS . " " . $CLIBS . " ";}
-  chop ($LIBS);
-  print "LIBS     = \t$LIBS\n";
+  $Libraries =  $CERNLIBS . " " . $ROOTLIBS . " " . $ROOTGLIBS . " -lXpm  ";
+  if ($STAR_SYS !~ /^hp_ux/) {$Libraries .=  " ". $FLIBS . " " . $CLIBS . " ";}
+  chop ($Libraries);
+  print "Libraries     = \t$Libraries\n";
 }
 else {
   $CPPPATH  = "";
@@ -273,13 +280,13 @@ $env = new cons(
 		'CERNLIBS'     => $CERNLIBS,
 		'ROOTLIBS'     => $ROOTLIBS,
 		'ROOTGLIBS'    => $ROOTGLIBS,
+		'Libraries'    => $Libraries,
 		'LIBS'         => $LIBS,
-		'SoLibs'       => $SoLibs,
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
 		'EXEFLAGS'     => $EXEFLAGS,
 		'LIBPATH'      => $LIBPATH,
-		'LINKCOM'      => '%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Lout%>',
+		'LINKCOM'      => '%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>',
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
@@ -328,13 +335,6 @@ $env = new cons(
 				     'STAR_SYS' => $STAR_SYS
 				   },
 	       );
-my $build  = "." . $STAR_HOST_SYS; print "build for $build\n";
-$BUILD  = "#" . $build;
-$LIB    = $BUILD . "/lib";
-$BIN    = $BUILD . "/bin"; 
-$OBJ    = $BUILD . "/obj";
-my $obj = $build . "/obj";
-Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 my @subdirs = ();
 my @incT = ();
 # make Targets and install includes

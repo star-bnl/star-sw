@@ -8,7 +8,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.11 1999/09/24 01:11:03 fisyak Exp $
+# $Id: cons,v 1.12 1999/09/26 00:23:53 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -43,7 +43,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.11 1999/09/24 01:11:03 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.12 1999/09/26 00:23:53 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -1365,6 +1365,122 @@ sub compatible {
 package build::command::linkedmodule;
 
 BEGIN { @ISA = qw(build::command) }
+
+# Find an appropriate linker.
+sub find {
+# print "==========\tDebug:","In build::command::link-find- parameters = ", @_, "\n";
+    my($class, $env, $command) = @_;
+    if (!exists $env->{_LDIRS}) {
+	my($ldirs);
+	my($wd) = $env->{_cwd};
+	my($pdirs) = $env->{LIBPATH};
+	if (ref($pdirs) ne 'ARRAY') {
+	    $pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
+	}
+	# On Win32, build library search path as /LIBPATH:A
+	# <schwarze@isa.de> 1998-05-13
+	# Move its invariant calculation outside the loop
+	# <knight@baldmt.com> 1998-09-22
+	my($flagprefix) = " ${main::LIB_FLAG_PREFIX}";
+	for $dir (map($wd->lookupdir($_), @$pdirs)) {
+	    my($dpath) = $dir->path;
+	    $ldirs .= $flagprefix . $dpath;
+	    next if $dpath =~ m#^$dir::MATCH_SEPARATOR#o;
+	    if (@param::rpath) {
+		my($suffix);
+		if ($dpath ne '.' && $dpath !~ '^#') {
+		    $suffix = $dir::SEPARATOR . $dpath;
+		}
+		my($d);
+		foreach $d (@param::rpath) {
+		    $ldirs .= $flagprefix . $d->path . $suffix;
+		}
+	    }
+	}
+	$env->{_LDIRS} = "%($ldirs%)";
+    }
+
+    # Introduce a new magic _LIBS symbol which allows to use the
+    # Unix-style -lNAME syntax for Win32 only. -lNAME will be replaced
+    # with %{PREFLIB}NAME%{UFLIB}. <schwarze@isa.de> 1998-06-18
+
+    if ($main::_WIN32 && !exists $env->{_LIBS}) {
+	my($libs);
+	for $name (split(' ', $env->_subst($env->{LIBS}))) {
+	    if ($name =~ /^-l(.*)/) {
+		$name = "$env->{PREFLIB}$1$env->{SUFLIB}";
+	    }
+	    $libs .= ' ' . $name;
+	}
+	$env->{_LIBS} = "%($libs%)";
+    }
+    bless find build::command($env, $command);
+}
+
+# Called from file::build. Make sure any libraries needed by the
+# environment are built, and return the collected signatures
+# of the libraries in the path.
+sub includes {
+# print "==========\tDebug:","In build::command::link-includes- parameters = ", @_, "\n";
+    return $_[0]->{sig} if exists $_[0]->{sig};
+    my($self, $tgt) = @_;
+    my($env) = $self->{env};
+    my($ewd) = $env->{_cwd};
+    my($ldirs) = $env->{LIBPATH};
+    if (ref($ldirs) ne 'ARRAY') {
+	$ldirs = [ split(/$main::PATH_SEPARATOR/o, $ldirs) ];
+    }
+    my(@lpath) = map($ewd->lookupdir($_), @$ldirs);
+    my(@sigs);
+    my(@names);
+
+    if ($main::_WIN32) {
+      # Pass %LIBS symbol through %-substituition
+      # <schwarze@isa.de> 1998-06-18
+      @names = split(' ', $env->_subst($env->{LIBS}));
+    } else {
+      @names = split(' ', $env->{LIBS});
+    }
+    for $name (@names) {
+      my($lpath,@allnames);
+	if ($name =~ /^-l(.*)/) {
+	    # -l style names are looked up on LIBPATH, using all
+	    # possible lib suffixes in the same search order the
+	    # linker uses (according to SUFLIBS).
+	    # Recognize new PREFLIB symbol, which should be 'lib' on
+	    # Unix, and empty on Win32. TODO: What about shared
+	    # library suffixes?  <schwarze@isa.de> 1998-05-13
+	   @allnames = map("$env->{PREFLIB}$1$_",
+			   split(/:/, $env->{SUFLIBS}));
+	    $lpath = \@lpath;
+	} else {
+	    @allnames = ($name);
+	    # On Win32, all library names are looked up in LIBPATH
+	    # <schwarze@isa.de> 1998-05-13
+	    if ($main::_WIN32) {
+		$lpath = [$dir::top, @lpath];
+	    }
+	    else {
+		$lpath = [$dir::top];
+	    }
+	}
+	DIR: for $dir (@$lpath) {
+	    for $n (@allnames) {
+		my($lib) = $dir->lookup($n);
+		if ($lib->accessible) {
+		    last DIR if $lib->ignore;
+		    if ((build $lib) eq 'errors') {
+			$tgt->{status} = 'errors';
+			return undef;
+		    }
+		    push(@sigs, sig->signature($lib));
+		    last DIR;
+		}
+	    }
+	}
+    }
+    $self->{sig} = sig->collect(@sigs);
+}
 
 # Always compatible with other such builders, so the user
 # can define a single linked module from multiple places.
