@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.3 2000/05/20 01:08:27 vanyashi Exp $
+// $Id: StTagsMaker.cxx,v 1.4 2000/05/25 15:00:05 vanyashi Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.4  2000/05/25 15:00:05  vanyashi
+// save structure names
+//
 // Revision 1.3  2000/05/20 01:08:27  vanyashi
 // Write tags in split mode
 //
@@ -48,6 +51,7 @@ Int_t StTagsMaker::Make(){
     St_DataSet *set = 0;
     TClass *cl = 0;
     void *address = 0;
+    TString branchName;
 
     while ((set = next())) {
       St_DataSet *ds = GetDataSet(set->GetTitle());
@@ -70,7 +74,10 @@ Int_t StTagsMaker::Make(){
 	if (cl) {
 	  St_tableDescriptor td(cl);
 	  for (UInt_t i=0;i<td.NumberOfColumns();i++){
-	    fTree->SetBranchAddress(td.ColumnName(i),(char*)address+td.Offset(i));
+	    branchName=ds->GetName();
+	    branchName += ".";
+	    branchName += td.ColumnName(i);
+	    fTree->SetBranchAddress(branchName.Data(),(char*)address+td.Offset(i));
 	  }
 	}
       }
@@ -83,36 +90,39 @@ Int_t StTagsMaker::Make(){
 EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
 {
   St_DataSet *newds = 0;
-  TString name, leaflist;
+  TString name, leaflist, branchName;
   TClass *cl = 0;
   Int_t bufsize= 64000;
   void *address = 0;
 
+  const char *Name=ds->GetName();
+
   if (!tabClass) tabClass  = gROOT->GetClass("St_Table"); 
-  if (ds->InheritsFrom(tabClass) && strstr(ds->GetName(),"Tag")) {
-    newds = new St_DataSet(ds->GetName());
+  if (ds->InheritsFrom(tabClass) && strstr(Name,"Tag")) {
+    newds = new St_DataSet(Name);
     name = TString(ds->GetTitle());
     St_Table &tab = *((St_Table *)ds); 
     address = tab[0];
   }
-  else if (strstr(ds->GetName(),"EvtHddr")){   
-    newds = new St_DataSet(ds->GetName(),fTagsList);
+  else if (strstr(Name,"EvtHddr")){   
+    newds = new St_DataSet(Name,fTagsList);
     name = TString("EvtHddr_st");
     cl = new TClass(name.Data(),1,"StEvtHddr.h","StEvtHddr.h");
     if (cl) address = cl->New();
   }
   else return kContinue;
 
-  // create separate branch for each tag
+  // create separate branch for each tag (or array of tags)
   const Char_t TypeMapTBranch[]="\0FIISDiisbBC";
   cl = gROOT->GetClass(name.Data());
   if (cl) {
     St_tableDescriptor td(cl);
     for (UInt_t i=0;i<td.NumberOfColumns();i++){
       const Char_t *colName = td.ColumnName(i);
+
+      //prepare name/type description for individual tags or tag arrays
       leaflist = colName;
       Int_t nDim = td.Dimensions(i);
-//       UInt_t *indx = 0;
       if (nDim) {
 	UInt_t *indx = td.IndexArray(i);
 	Char_t buf[64];
@@ -123,7 +133,14 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
       }
       leaflist += "/";
       leaflist += TypeMapTBranch[(Int_t)td.ColumnType(i)];
-      fTree->Branch(colName,(char*)address+td.Offset(i),leaflist.Data(),bufsize);
+
+      //save name of the structure (e.g. "FlowTag") in the TTree branchName
+      branchName = Name;
+      branchName += ".";
+      branchName += colName;
+
+      fTree->Branch(branchName.Data(),(char*)address+td.Offset(i),
+		    leaflist.Data(),bufsize);
     }
     newds->SetTitle(ds->Path());
     fTagsList->Add(newds); 
