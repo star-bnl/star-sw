@@ -1,7 +1,10 @@
 //*CMZ :          13/08/98  18.27.27  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   13/08/98 
-// $Id: St_DataSet.h,v 1.33 1999/06/26 01:40:55 fisyak Exp $
+// $Id: St_DataSet.h,v 1.34 1999/07/23 13:26:06 fine Exp $
 // $Log: St_DataSet.h,v $
+// Revision 1.34  1999/07/23 13:26:06  fine
+// Several new methods to mark the datasets have been introduced
+//
 // Revision 1.33  1999/06/26 01:40:55  fisyak
 // Add Valery's abstract buffer
 //
@@ -104,16 +107,20 @@ class St_DataSet : public TNamed
     virtual void         SetObject(TObject *obj){printf("***DUMMY PutObject***%p\n",obj);}
     virtual void         SetParent(St_DataSet *parent=0);
     virtual void         SetWrite();
-    virtual void         Shunt(St_DataSet *dataset=0);
+    virtual void         Shunt(St_DataSet *newParent=0);
     virtual void         Sort();			//Sort objects in lexical order
     virtual Bool_t       IsFolder() {return kTRUE;}
     virtual Bool_t       IsLocked() const ;
+    virtual Bool_t       IsMarked();
     virtual Bool_t       IsThisDir(const Char_t *dirname,int len=-1,int ignorecase=0) const ;
     virtual St_DataSet  *Last() const;
     virtual void         ls(Option_t *option="")  const;      // Option "*" means print all levels
     virtual void         ls(Int_t depth)  const;              // Print the "depth" levels of this datatset
-    virtual void         Mark();                              // *MENU*
-    virtual void         Mark(UInt_t flag,EBitOpt reset=kSet);
+            void         Mark();                              // *MENU*
+            void         MarkAll();                           // *MENU*
+            void         UnMarkAll();                         // *MENU*
+            void         InvertAllMarks();                    // *MENU*
+            void         Mark(UInt_t flag,EBitOpt reset=kSet);
     virtual Int_t        Streamer(StBufferAbc &R__b);
     virtual void         Update();                            // Update dataset
     virtual void         Update(St_DataSet *set,UInt_t opt=0);// Update this dataset with the new one
@@ -122,5 +129,10 @@ class St_DataSet : public TNamed
  
 inline void      St_DataSet::Add(St_DataSet *dataset){ AddLast(dataset); }
 inline Int_t     St_DataSet::GetListSize() const {TList *tl=GetList(); return (tl) ? tl->GetSize():0;}
+inline Bool_t    St_DataSet::IsMarked() { return TestBit(kMark); }
+inline void      St_DataSet::Mark()     { Mark(kMark,kSet); }
+inline void      St_DataSet::Mark(UInt_t flag,EBitOpt reset){ SetBit(flag,reset); }
+
+
 
 #endif
