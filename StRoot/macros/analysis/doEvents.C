@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.32 1999/08/06 15:00:41 fisyak Exp $
+// $Id: doEvents.C,v 1.33 1999/08/06 15:58:11 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.32  1999/08/06 15:00:41  fisyak
-// Keep formwer bfc.C as BFC.C
+// Revision 1.33  1999/08/06 15:58:11  fisyak
+// Fix of merge with Kathy
+//
+// Revision 1.33  1999/08/06 15:58:11  fisyak
+// Fix of merge with Kathy
 //
 // Revision 1.32  1999/08/06 15:00:41  fisyak
 // Keep formwer bfc.C as BFC.C
@@ -146,14 +149,14 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 //
 // example ROOT file invocation:
 // .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
-void doEvents(Int_t,const Char_t **,const char *flag = "");
+TBrowser *b=0;
 //===================================================================================================
 //
 
-              const char *flag = "");
+void doEvents(Int_t nevents=999,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
               const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
-void doEvents(Int_t nevents,const Char_t **fileList,const char *flag)
+const char *xdfFile = 0;
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
@@ -235,7 +238,7 @@ EventLoop: if (i <= nevents && !istat) {
     if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
     b = new TBrowser;
-void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *flag)
+	chain->Finish();
   }
     }
 	if (!b) {
