@@ -27,7 +27,7 @@ using std::copy;
 #include "StiCompositeSeedFinder.h"
 #include "MessageType.h"
 
-StiCompositeSeedFinder::StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>* fact,
+StiCompositeSeedFinder::StiCompositeSeedFinder(Factory<StiKalmanTrack>* fact,
 					       StiHitContainer* hc)
     : StiSeedFinder(hc)
 {

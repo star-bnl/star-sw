@@ -12,12 +12,12 @@ using namespace std;
 
 #include "SubjectObserver.h"
 #include "StiAbstractFilter.h"
-#include "StiTrackFilter.h"
+#include "Filter.h"
 
 class ostream;
 class StiTrack;
 
-class StiDynamicTrackFilter : public Observer, public StiTrackFilter
+class StiDynamicTrackFilter : public Observer, public Filter<StiTrack>
 {
 public:
 

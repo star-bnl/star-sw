@@ -143,7 +143,7 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 */
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 {
-    StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(mFactory->getObject());
+    StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(mFactory->getInstance());
     if (!track) return 0;
     
     track->reset();

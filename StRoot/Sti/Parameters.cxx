@@ -1,7 +1,10 @@
 #include "Parameters.h"
 #include "Parameter.h"
 #include "StiToolkit.h"
+#include "Factory.h"
 #include <stdexcept>
+
+//Factory<Parameter> * Parameters::_factory = 0;
 
 Parameters::Parameters()
   : Named("noName"),
@@ -46,7 +49,7 @@ void Parameters::add(const string & name,
 		     int type,
 		     int key)
 {
-  Parameter * par = StiToolkit::instance()->getParameterFactory()->getObject();
+  Parameter * par = StiToolkit::instance()->getParameterFactory()->getInstance();
   par->set(name,description,value,type,key);
   add(par);
 }
@@ -89,3 +92,14 @@ Parameter * Parameters::getParameter(const string name)
   throw runtime_error("Parameters::getParameter(name) - ERROR - Requested name not found");
 }
 
+/*
+void Parameters::setFactory(Factory<Parameter> * factory)
+{
+  _factory = factory;
+}
+
+Factory<Parameter> * Parameters::getFactory()
+{
+  return _factory;
+}
+*/

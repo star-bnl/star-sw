@@ -1,7 +1,8 @@
-#include "EditableParameters.h"
-#include "EditableParameter.h"
-#include "StiToolkit.h"
 #include <stdexcept>
+#include "Factory.h"
+#include "StiToolkit.h"
+#include "EditableParameter.h"
+#include "EditableParameters.h"
 
 EditableParameters::EditableParameters()
   : Parameters(),
@@ -38,8 +39,7 @@ void EditableParameters::add(const string & name,
 			     int    key)
 {
   cout << "EditableParameters::add(name,...)" << endl;
-  Parameter * parameter = StiToolkit::instance()->getParameterFactory()->getObject();
-
+  Parameter * parameter = StiToolkit::instance()->getParameterFactory()->getInstance();
   if (parameter)
     cout << "EditableParameters::add(name,...) - INFO - parameter OK" << endl;
   else
@@ -61,3 +61,15 @@ void EditableParameters::add(const string & name,
       // throw runtime_error("EditableParameters::add() - ERROR - static_cast return null pointer");
     }
 }
+
+void EditableParameters::setDefaults()
+{
+  ParameterIterator iter;
+  for (iter=begin();iter!=end();iter++)
+    {
+      EditableParameter * ep = static_cast<EditableParameter *>(*iter);
+      if (ep)
+	ep->reset();
+    }
+}
+

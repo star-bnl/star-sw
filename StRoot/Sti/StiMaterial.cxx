@@ -14,8 +14,12 @@ StiMaterial::~StiMaterial(){
 
 ostream& operator<<(ostream& os, const StiMaterial& m)
 {
-    os << m.getDensity() << " " 
-       << m.getRadLength() << " "
-       << m.getName();
+  os << "Name:"<< m.getName()
+     << " Density:"<< m.getDensity()
+     << " RadLength:"<<m.getRadLength()
+     << " EffZ: "<<m.getZ()
+     << " EffA: "<<m.getA()
+     << " EffIoniz: "<<m.getIonization()<<endl;
+    
     return os;
 }

@@ -1,18 +1,22 @@
 #include "StiToolkit.h"
-#include "StiMaker/StiDefaultToolkit.h"
 
-StiToolkit * StiToolkit::sInstance = 0;
+StiToolkit * StiToolkit::_instance = 0;
+
+void StiToolkit::setToolkit(StiToolkit * toolkit)
+{
+  _instance = toolkit;
+}
 
 StiToolkit * StiToolkit::instance()
 {
-	return (sInstance) ? sInstance :  new StiDefaultToolkit();
+  return _instance;
 }
 
 void StiToolkit::kill()
 {
-  if (sInstance)
+  if (_instance)
     {
-      delete sInstance;
-      sInstance = 0;
+      delete _instance;
+      _instance = 0;
     }
 }

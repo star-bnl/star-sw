@@ -704,6 +704,7 @@ void StiKalmanTrackNode::propagateError()
   fC41 += b41; 
 }
 
+
 void StiKalmanTrackNode::propagateMCS(double density, double radThickness, double massHypo)
 {  
   double d=sqrt((x1-fX)*(x1-fX)
@@ -714,8 +715,7 @@ void StiKalmanTrackNode::propagateMCS(double density, double radThickness, doubl
   double m2=massHypo*massHypo;
   double e2=p2+m2;
   double beta2=p2/e2;
-  double theta2=14.1*14.1/(beta2*p2*1e6)*d/radThickness*density;
-  //double theta2=1.0259e-6*10*10/20/(beta2*p2)*d*density;
+  double theta2=mcs2(d,density,radThickness,beta2,p2);
   double ey=fP3*fX - fP2, ez=fP4;
   double xz=fP3*ez, zz1=ez*ez+1, xy=fP2+ey;
   fC33 = fC33 + xz*xz*theta2;

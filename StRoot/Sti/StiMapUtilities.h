@@ -7,13 +7,13 @@
 #include <string>
 using std::string;
 
-#include "StiFactoryTypes.h" //for typedef.  Can't forward declare!
-
+class StiDetector;
 class StHit;
 class StiHit;
 class StTpcHit;
 class StiIOBroker;
 class StiTrackNode;
+template<class NodeType> class StiCompositeTreeNode;
 
 //Structure for hit map key
 struct HitMapKey {
@@ -68,7 +68,7 @@ struct StiHitIsUsed
 //Detector sorter
 struct StiDetectorNodePositionLessThan
 {
-    bool operator() (const StiDetectorNode*, const StiDetectorNode*) const;
+    bool operator() (const StiCompositeTreeNode<StiDetector> *, const StiCompositeTreeNode<StiDetector> *) const;
 };
 
 //StHit utility

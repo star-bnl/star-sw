@@ -240,7 +240,7 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
     }
 
     //This should be moved into the fit method.  If it fails, we've wasted a served track!
-    track = mFactory->getObject();
+    track = mFactory->getInstance();
     track->reset();
 
     //Test: Scale the errors (MLM 12/10/01)

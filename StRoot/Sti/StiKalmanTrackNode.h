@@ -31,7 +31,9 @@ class StiKalmanTrackNode : public StiTrackNode
 {
     
 public:
-    
+
+  double mcs2(double d, double density, double radThickness, double beta2, double p2);
+
     /// Resets the node to a "null" un-used state
     void reset();
     /// Sets the various attributes of this node based on the argument list.
@@ -301,6 +303,12 @@ inline double StiKalmanTrackNode::getP() const
     return 0.003e12*pars->field;
   else
     return 0.003*pars->field*sqrt(1.+fP4*fP4)/c;
+}
+
+
+inline double mcs2(double d, double density, double radThickness, double beta2, double p2)
+{
+  return 14.1*14.1/(beta2*p2*1e6)*d/radThickness;
 }
 
 

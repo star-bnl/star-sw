@@ -32,12 +32,14 @@ using namespace std;
 //Sti
 #include "StiTrackFinder.h"
 #include "StiTrackFitter.h"
+#include "Filter.h"
 
 class StiHit;
 class StHit;
 class StMeasuredPoint;
 class StiTrackFinder;
 class StiTrackFitter;
+class StiTrack;
 
 /** 
     \enum Direction
@@ -46,6 +48,8 @@ class StiTrackFitter;
     used in track finding and fitting.
 */
 enum StiDirection {kOutsideIn=0, kInsideOut};
+
+typedef Filter<StiTrack> StiTrackFilter;
 
 
 /*! 
@@ -126,7 +130,7 @@ public:
   virtual long    getFlag() const=0;
 
   // Convenience Accessor using a switch
-  virtual double  getValue(int key);
+  virtual double  getValue(int key) const;
 
  protected:
   static StiTrackFinder * trackFinder;
@@ -134,5 +138,6 @@ public:
   
   friend ostream& operator<<(ostream& os, const StiTrack& track);
 };
+
 
 #endif

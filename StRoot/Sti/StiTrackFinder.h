@@ -1,9 +1,10 @@
 #ifndef StiTrackFinder_H
 #define StiTrackFinder_H 1
 
+#include "Filter.h"
+
 class StiHit;
 class StiTrack;
-class StiTrackFilter;
 
 /*!
 A purely abstract class defining  the interface to a track finder.
@@ -26,12 +27,12 @@ public:
   virtual bool isValid(bool debug=false) const = 0;
   virtual int getTrackSeedFoundCount() const=0;
   virtual int getTrackFoundCount() const=0;
-  virtual int getTrackFoundCount(StiTrackFilter * filter) const=0;
+  virtual int getTrackFoundCount(Filter<StiTrack> * filter) const=0;
   virtual bool find(StiTrack *track, int direction) = 0;
   
-  virtual StiTrackFilter * getTrackFilter() const = 0;
-  virtual StiTrackFilter * getGuiTrackFilter() const = 0;
-  virtual StiTrackFilter * getGuiMcTrackFilter() const = 0;
+  virtual Filter<StiTrack> * getTrackFilter() const = 0;
+  virtual Filter<StiTrack> * getGuiTrackFilter() const = 0;
+  virtual Filter<StiTrack> * getGuiMcTrackFilter() const = 0;
 
 protected:
 

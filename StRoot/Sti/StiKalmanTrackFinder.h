@@ -22,7 +22,6 @@ class StiTrack;
 class StiToolkit;
 class StiSeedFinder;
 class StiKalmanTrackFactory;
-class StiTrackFilter;
 class StiDetectorContainer;
 class StiHitContainer;
 class StiTrackContainer;
@@ -73,14 +72,14 @@ public:
       }
     
   int getTrackSeedFoundCount() const;
-  int getTrackFoundCount(StiTrackFilter * filter) const;
+  int getTrackFoundCount(Filter<StiTrack> * filter) const;
   int getTrackFoundCount() const;
     
   void setEvent(StEvent * event, StMcEvent * mcEvent);
  
-  virtual StiTrackFilter * getTrackFilter() const;
-  virtual StiTrackFilter * getGuiTrackFilter() const;
-  virtual StiTrackFilter * getGuiMcTrackFilter() const;
+  virtual Filter<StiTrack> * getTrackFilter() const;
+  virtual Filter<StiTrack> * getGuiTrackFilter() const;
+  virtual Filter<StiTrack> * getGuiMcTrackFilter() const;
 
 protected:
 
@@ -90,13 +89,13 @@ protected:
     // Local cache of pointers
     // none of the following are owned by this class.
     StiToolkit                * toolkit;
-    StiTrackFilter            * trackFilter;
-    StiTrackFilter            * guiTrackFilter;
-    StiTrackFilter            * guiMcTrackFilter;
+    Filter<StiTrack>            * trackFilter;
+    Filter<StiTrack>            * guiTrackFilter;
+    Filter<StiTrack>            * guiMcTrackFilter;
     StiSeedFinder             * trackSeedFinder;
-    StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
-    StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
-    StiObjectFactoryInterface<StiKalmanTrack> * mcTrackFactory;
+    Factory<StiKalmanTrackNode> * trackNodeFactory;
+    Factory<StiKalmanTrack> * trackFactory;
+    Factory<StiTrack> *         mcTrackFactory;
     StiDetectorContainer      * detectorContainer;
     StiHitContainer           * hitContainer;
     StiTrackContainer         * trackContainer;
@@ -142,17 +141,17 @@ inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *
 	StiKalmanTrackNode::setParameters(par);
 }
 
-inline StiTrackFilter * StiKalmanTrackFinder::getTrackFilter() const
+inline Filter<StiTrack> * StiKalmanTrackFinder::getTrackFilter() const
 {
   return trackFilter;
 }
 
-inline StiTrackFilter * StiKalmanTrackFinder::getGuiTrackFilter() const
+inline Filter<StiTrack> * StiKalmanTrackFinder::getGuiTrackFilter() const
 {
   return guiTrackFilter;
 }
 
-inline StiTrackFilter * StiKalmanTrackFinder::getGuiMcTrackFilter() const
+inline Filter<StiTrack> * StiKalmanTrackFinder::getGuiMcTrackFilter() const
 {
   return guiMcTrackFilter;
 }

@@ -56,7 +56,7 @@ void Subject::detach(Observer* obs)
 
 void Subject::notify()
 {
-  cout <<"Subject::notify()"<<endl;
+  //cout <<"Subject::notify()"<<endl;
   for (ObserverVec::iterator it=mObservers.begin(); it!=mObservers.end(); ++it) 
     (*it)->changed(this);
 }

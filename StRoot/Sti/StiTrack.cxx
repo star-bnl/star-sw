@@ -70,7 +70,7 @@ bool StiTrack::find(int direction)
 }
 
 
-double StiTrack::getValue(int key)
+double StiTrack::getValue(int key) const
 {
   double value;
   switch (key)

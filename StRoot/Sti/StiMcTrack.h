@@ -1,7 +1,6 @@
 #ifndef StiMcTrack_H
 #define StiMcTrack_H 1
 #include "StiTrack.h"
-#include "StiObjectFactoryInterface.h"
 
 class StMcTrack;
 
@@ -61,26 +60,5 @@ inline const StMcTrack * StiMcTrack::getStMcTrack(const StMcTrack * track) const
 {
   return mcTrack;
 }
-
-/*! StiMcTrack factory
- */
-class StiMcTrackFactory : public StiObjectFactoryInterface<StiMcTrack>
-{
-public:
-    ///This is the only constructor available.
-    StiMcTrackFactory(const string& newName, 
-		      int original=-1, int 
-		      incremental=-1, 
-		      int maxInc=-1);
-    ///Default destructor.
-    virtual ~StiMcTrackFactory();
-    
-protected:
-    ///Return a pointer to a new StiMcTrack object on the heap.
-    virtual void * makeNewObject() const;
-    
-private:
-    StiMcTrackFactory(); //Not implemented
-};
 
 #endif

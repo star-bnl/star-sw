@@ -153,7 +153,7 @@ bool StiDetectorContainer::moveIn()
     }
     
     //remember where we started:
-    const data_node* oldPhiNode = *mphi_it;
+    const StiDetectorNode* oldPhiNode = *mphi_it;
     
     --mradial_it;
     mphi_it = (*mradial_it)->begin();
@@ -199,7 +199,7 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
 bool StiDetectorContainer::moveOut()
 {
     //remember where we started:
-    const data_node* oldPhiNode = *mphi_it;
+    const StiDetectorNode* oldPhiNode = *mphi_it;
     
     //if there's nowher to go, get out before doing work!
     // mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
@@ -251,10 +251,8 @@ void StiDetectorContainer::moveMinusPhi()
   more than once.
  */
 void
-StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
-				     nodefactory,
-				     StiObjectFactoryInterface<StiDetector>*
-				     detfactory)
+StiDetectorContainer::buildDetectors(Factory<StiDetectorNode>* nodefactory,
+				     Factory<StiDetector>* detfactory)
 {
     cout <<"StiDetectorContainer::buildDetectors"<<endl;
     cout <<"Make builder"<<endl;
@@ -263,17 +261,17 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
     mroot = mybuilder.build(nodefactory, detfactory);
 
     //Set region to midrapidity, hard-coded for now, update later to allow for other regions
-    SameName<data_t> mySameName;
+    SameName<StiDetector> mySameName;
     mySameName.mname = "midrapidity";
-    data_node_vec::iterator where = find_if(mroot->begin(), mroot->end(), mySameName);
+    StiDetectorNodeVector::iterator where = find_if(mroot->begin(), mroot->end(), mySameName);
     if (where==mroot->end()) {
 	cout <<"Error:\tmidrapidity region not found"<<endl;
     }
     //Find leaves
-    mLeafIt = new StiCompositeLeafIterator<data_t>(mroot);
+    mLeafIt = new StiCompositeLeafIterator<StiDetector>(mroot);
     
     //Sort by name for O(log(n)) calls to setDetector()
-    //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<data_t>() );
+    //sort(mLeafIt->begin(), mLeafIt->end(), DataNameLessThan<StiDetector>() );
     
     mregion = (*where);
     reset();
@@ -287,27 +285,27 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
 void StiDetectorContainer::print() const
 {
     //ok, let's look at what we have:
-    RecursiveStreamNode<data_t> myStreamer;
+    RecursiveStreamNode<StiDetector> myStreamer;
     myStreamer( mroot );
 
 }
 
 //We assume that the node is a leaf in phi
-void StiDetectorContainer::setToLeaf(data_node* leaf)
+void StiDetectorContainer::setToLeaf(StiDetectorNode* leaf)
 {
     //Now we try the new index-iterator scheme:
     mphi_it = leaf->whereInParent();
     if (mphi_it == leaf->end()) {
-	cout <<"StiDetectorContainer::setToLeaf(data_node*). ERROR:\t"
+	cout <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
 	     <<"Node not found in parent.  Abort"<<endl;
 	reset();
 	return;
     }
 
-    data_node* parentInRadius = (*mphi_it)->getParent();
+    StiDetectorNode* parentInRadius = (*mphi_it)->getParent();
     mradial_it = parentInRadius->whereInParent();
     if (mradial_it == parentInRadius->end()) {
-	cout <<"StiDetectorContainer::setToLeaf(data_node*). ERROR:\t"
+	cout <<"StiDetectorContainer::setToLeaf(StiDetectorNode*). ERROR:\t"
 	     <<"Node not found in parent.  Abort"<<endl;
 	reset();
 	return;

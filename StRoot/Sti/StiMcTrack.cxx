@@ -1,5 +1,8 @@
 #include "StiMcTrack.h"
 #include "StMcTrack.hh"
+#include "StThreeVectorF.hh"
+#include "StParticleTable.hh"
+#include "StParticleDefinition.hh"
 
 StiMcTrack::StiMcTrack()
   : mcTrack(0)
@@ -22,11 +25,22 @@ void StiMcTrack::reset()
 }
 
 void StiMcTrack::getMomentum(double p[3], double e[6]) const 
-{}
+{  StThreeVectorF mom = mcTrack->momentum();
+  p[0]=mom.x();
+  p[1]=mom.y();
+  p[2]=mom.z();
+  e[0]=0.;
+  e[1]=0.;
+  e[2]=0.;
+  e[3]=0.;
+  e[4]=0.;
+  e[5]=0.;
+}
 
 StThreeVector<double> StiMcTrack::getMomentumAtOrigin() const
 {
-  return StThreeVector<double>(0.,0.,0.);
+  StThreeVectorF mom = mcTrack->momentum();
+  return StThreeVector<double>(mom.x(),mom.y(),mom.z());
 }
 
 StThreeVector<double> StiMcTrack::getMomentumNear(double x)
@@ -75,7 +89,12 @@ double  StiMcTrack::getPhi()            const
 
 double  StiMcTrack::getTanL()           const
 {
-  return 0;
+  StThreeVectorF mom = mcTrack->momentum();
+  double pt = mcTrack->pt();
+  if (fabs(pt)<1e-8)
+    return mom.z()/1e-8; // sign may be wrong half the time.
+  else
+    return mom.z()/pt;
 }
 
 double  StiMcTrack::getDca(StiHit *h)  const
@@ -134,13 +153,21 @@ vector<StMeasuredPoint*> StiMcTrack::stHits() const
 
 double  StiMcTrack::getMass() const
 {
-  return 0;
+  const StParticleDefinition * pd = mcTrack->particleDefinition();
+  if (pd)
+    return pd->mass();
+  else
+    return -99;
 }
 
 
 int     StiMcTrack::getCharge() const
 {
-  return 0;
+  const StParticleDefinition * pd = mcTrack->particleDefinition();
+  if (pd)
+    return pd->charge();
+  else
+    return -99;
 }
 
 
@@ -158,24 +185,3 @@ long    StiMcTrack::getFlag() const
   return (long)0;
 }
 
-void* StiMcTrackFactory::makeNewObject() const
-{
-  return new StiMcTrack();
-}
-
-StiMcTrackFactory::StiMcTrackFactory(const string& newName,
-				     int original,
-				     int incremental, 
-				     int maxInc)
-  : StiObjectFactoryInterface<StiMcTrack>(newName, 
-					  original, 
-					  incremental, 
-					  maxInc)
-{
-  initialize();
-}
-
-StiMcTrackFactory::~StiMcTrackFactory()
-{
-  // cout <<"StiMcTrackFactory::~StiMcTrackFactory()"<<endl;
-}

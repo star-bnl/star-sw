@@ -19,7 +19,7 @@ class StiHitContainer;
 class StiCompositeSeedFinder : public StiSeedFinder
 {
 public:
-    StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>*,
+    StiCompositeSeedFinder(Factory<StiKalmanTrack>*,
 			   StiHitContainer*);
     virtual ~StiCompositeSeedFinder();
 
