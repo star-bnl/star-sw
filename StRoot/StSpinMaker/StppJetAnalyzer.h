@@ -11,7 +11,7 @@
 #include "TObject.h"
 #include "StJetFinder/StJetFinder.h"
 #include "StJetFinder/FourVec.h"
-#include "../StJetFinder/StProtoJet.h"
+#include "StJetFinder/StProtoJet.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StJets.h"
 
