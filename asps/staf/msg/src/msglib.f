@@ -30,7 +30,7 @@
 *                       **   *******    **
 *                      **  ***     ***  **
 *                     **                 **
-
+
 	SUBROUTINE MESSAGE(MSG,LINES,ID)
 
 	IMPLICIT NONE
@@ -84,7 +84,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MESSAGE_OUT(MSG,LINES)
 
 	IMPLICIT NONE
@@ -117,7 +117,7 @@
 	END IF
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_Abort_Check( ID )
 
 	IMPLICIT NONE
@@ -156,6 +156,7 @@
 	RETURN
 	END
 
+
 	SUBROUTINE MSG_COUNT(PREFIX)
 
 	IMPLICIT NONE
@@ -210,7 +211,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_DISABLE(PREFIX)
 
 	IMPLICIT NONE
@@ -263,7 +264,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_DISPLAY(MSG,LINES,ID)
 
 	IMPLICIT NONE
@@ -315,7 +316,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_DISPLAY_AND_ECHO(MSG,LINES,LUN,ID)
 
 	IMPLICIT NONE
@@ -369,7 +370,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_DISPLAY_AND_ECHO_OUT(MSG,LINES,LUN)
 
 	IMPLICIT NONE
@@ -399,7 +400,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_DISPLAY_OUT(MSG,LINES)
 
 	IMPLICIT NONE
@@ -424,7 +425,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_ENABLE(PREFIX)
 
 	IMPLICIT NONE
@@ -487,7 +488,7 @@
 
 	RETURN
 	END
-
+
 	LOGICAL FUNCTION MSG_ENABLED(PREFIX,ID)
 
 	IMPLICIT NONE
@@ -543,7 +544,7 @@
 
 	RETURN
 	END
-
+
 	LOGICAL FUNCTION MSG_ENABLED_TRACE(PREFIX,ID)
 
 	IMPLICIT NONE
@@ -633,7 +634,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_Get_LUN( Terminal_LUN, Journal_LUN )
 
 	IMPLICIT NONE
@@ -656,7 +657,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_INI(JOURNAL_LUN)
 
 	IMPLICIT NONE
@@ -690,7 +691,7 @@
 	RETURN
 
 	END
-
+
 	LOGICAL FUNCTION MSG_JOURNAL_CLOSE()
 
 	IMPLICIT NONE
@@ -731,7 +732,7 @@
 	RETURN
 
 	END
-
+
 	SUBROUTINE MSG_JOURNAL_OFF
 
 	IMPLICIT NONE
@@ -750,7 +751,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_JOURNAL_ON
 
 	IMPLICIT NONE
@@ -769,7 +770,7 @@
 
 	RETURN
 	END
-
+
 	LOGICAL FUNCTION MSG_JOURNAL_OPEN(FILE_NAME)
 
 	IMPLICIT NONE
@@ -813,11 +814,8 @@
 
 *	Open a journal file in a machine-independent fashion:
 	IF (STROPENVER( MSG_JL, FILE_NAME
-     1	              , 'STATUS=NEW'
+     1	              , 'STATUS=NEW, CARRIAGECONTROL=LIST'
      2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
-c->rm AIX FORTRAN forbids cariagecontrol=list
-c->rm1	              , 'STATUS=NEW, CARRIAGECONTROL=LIST'
-c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	  MSG_JOURNAL_OPEN=.TRUE.
 
@@ -848,7 +846,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 	RETURN
 
 	END
-
+
 	SUBROUTINE MSG_JOURNAL_PAGE
 
 	IMPLICIT NONE
@@ -869,7 +867,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_LUN_PAGE(LUN)
 
 	IMPLICIT NONE
@@ -890,7 +888,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_Name_Node(Node_name)
 
 	IMPLICIT NONE
@@ -909,7 +907,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_NOCOUNT(PREFIX)
 
 	IMPLICIT NONE
@@ -963,7 +961,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	INTEGER FUNCTION MSG_RC_JOURNAL_CLOSE()
 
 	IMPLICIT NONE
@@ -993,7 +991,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 	RETURN
 
 	END
-
+
 	INTEGER FUNCTION MSG_RC_JOURNAL_OPEN(FILE_NAME)
 
 	IMPLICIT NONE
@@ -1026,7 +1024,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 	RETURN
 
 	END
-
+
 	SUBROUTINE MSG_Set_Abort_Limit( Prefix, Limit )
 
 	IMPLICIT NONE
@@ -1097,7 +1095,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_Set_By_Command( COM )
 
 	IMPLICIT NONE
@@ -1240,7 +1238,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 
 	END
-
+
 	SUBROUTINE MSG_Set_From_File(LUN)
 
 	IMPLICIT NONE
@@ -1270,7 +1268,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 1	CONTINUE
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_Set_Limit( PREFIX, LIMIT )
 
 	IMPLICIT NONE
@@ -1336,7 +1334,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_SET_LUN(TERMINAL_LUN,JOURNAL_LUN)
 
 	IMPLICIT NONE
@@ -1363,7 +1361,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_Set_Summary_Page_Length( Page_Length )
 
 	IMPLICIT NONE
@@ -1384,7 +1382,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_SUMMARY(LUN)
 
 	IMPLICIT NONE
@@ -1403,7 +1401,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_SUMMARY_EVENT(LUN,EVENTS)
 
 	IMPLICIT NONE
@@ -1588,7 +1586,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_TIME_STAMP(LUN)
 
 	IMPLICIT NONE
@@ -1660,7 +1658,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_TIME_STAMP_OUT(LUN)
 
 	IMPLICIT NONE
@@ -1712,7 +1710,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_TO_JOURNAL(MSG,LINES,ID)
 
 	IMPLICIT NONE
@@ -1764,7 +1762,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_TO_JOURNAL_OUT(MSG,LINES)
 
 	IMPLICIT NONE
@@ -1792,7 +1790,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_TO_LUN(MSG,LINES,LUN,ID)
 
 	IMPLICIT NONE
@@ -1845,7 +1843,7 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_TO_LUN_OUT(MSG,LINES,LUN)
 
 	IMPLICIT NONE
@@ -1910,3 +1908,4 @@ c->rm2	              , 32767, '.', File_ver, Filename_ver ) ) THEN
 
 
 	END
+

@@ -30,7 +30,7 @@
 *                       **   *******    **
 *                      **  ***     ***  **
 *                     **                 **
-
+
 	SUBROUTINE MSG_CHECK(MSG,ID,ACTIVE,COUNTING)
 
 	IMPLICIT NONE
@@ -206,7 +206,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_ENTER(PREFIX,ID)
 
 	IMPLICIT NONE
@@ -263,7 +263,7 @@
 
 	RETURN
 	END
-
+
 	LOGICAL FUNCTION MSG_FIND(PREFIX,ID,ACTIVE,COUNTING)
 
 	IMPLICIT NONE
@@ -342,7 +342,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_GET_PREFIX(MSG,PREFIX)
 
 	IMPLICIT NONE
@@ -418,7 +418,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_INCR(ID)
 
 	IMPLICIT NONE
@@ -436,7 +436,7 @@
 
 	RETURN
 	END
-
+
 	SUBROUTINE MSG_PARSE_PREFIX
      1	          (Prefix,Prefix_stripped,Prefix_number)
 
@@ -503,4 +503,4 @@
 
 	RETURN
 	END
-
+
