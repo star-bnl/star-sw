@@ -46,6 +46,7 @@ void StiControlBar::resetStiGuiForEvent()
     StiMaker::instance()->reset();
     StiDisplayManager::instance()->draw();
     StiDisplayManager::instance()->update();
+    StiControlBar::showCurrentDetector();
     //cout <<"\t Leaving StiControlBar::resetStiGuiForEvent()"<<endl;
 }
 
@@ -58,6 +59,7 @@ void StiControlBar::doNextStiGuiAction()
 
 void StiControlBar::stepToNextEvent()
 {
+    StiControlBar::setCurrentDetectorToDefault();    
     mchain->Clear();
     mchain->Make();
     ++mnevent;
@@ -65,6 +67,7 @@ void StiControlBar::stepToNextEvent()
 
 void StiControlBar::stepThroughNEvents()
 {
+    StiControlBar::setCurrentDetectorToDefault();    
     cout <<"\nEnter number of events to process (int) "<<endl;
     int nevents;
     cin >> nevents;
@@ -281,6 +284,11 @@ void StiControlBar::printHits()
     StiHitContainer::instance()->print();
 }
 
+void StiControlBar::printVertices()
+{
+    StiHitContainer::instance()->printVertices();
+}
+
 TControlBar* StiControlBar::makeControlBar()
 {
     TControlBar* bar = new TControlBar("vertical","Sti Control Panel");
@@ -289,13 +297,15 @@ TControlBar* StiControlBar::makeControlBar()
     bar->AddButton("Memory Snapshot","StiControlBar::memoryInfo()",
 		   "Print a Current Membory Snapshot");
 
-    bar->AddButton("Show Factory Size","StiControlBar::printFactorySize()",
-		   "Print current factory size");
+    bar->AddButton("Show Maker Summary","StiControlBar::printFactorySize()",
+		   "Show summary of StiMaker objects");
 
     bar->AddButton("Dump Display Manager","StiControlBar::printDisplayManager()",
 		   "Show contents of the Display Manager");
     bar->AddButton("Dump Detector","StiControlBar::printDetector()","Show contents of Detector Container");
     bar->AddButton("Dump Hits","StiControlBar::printHits()","Show all contents of Hit Container");
+    bar->AddButton("Dump Vertices", "StiControlBar::printVertices()", "Show Primary vertices for this event");
+
     bar->AddSeparator();
     
     bar->AddButton("All Visible","StiControlBar::setVisible()","Set All Drawables to Visible State");

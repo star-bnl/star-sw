@@ -146,8 +146,12 @@ Int_t StiMaker::Make()
 	
 	cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
 	cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
+
+	//Fill hits, organize the container
 	mhitfiller->setEvent(mevent);
 	mhitfiller->fillHits(mhitstore, mhitfactory);
+	mhitstore->sortHits();
+	
     }
     return kStOK;
 }
@@ -156,6 +160,7 @@ void StiMaker::printStatistics() const
 {
     cout <<"HitFactory Size:\t"<<mhitfactory->getCurrentSize()<<endl;
     cout <<"HitContainer size:\t"<<mhitstore->size()<<endl;
+    cout <<"Number of Primary Vertices:\t"<<mhitstore->numberOfVertices()<<endl;
 }
 
 void StiMaker::setMaterialBuildPath(char* val)

@@ -260,3 +260,11 @@ StiHit* StiHitContainer::previousVertex()
     return (--mvertexiterator>=mvertexvec.begin()) && (mvertexiterator<mvertexvec.end())
 	? (*mvertexiterator) : 0;
 }
+
+void StiHitContainer::printVertices() const
+{
+    for (hitvector::const_iterator it=mvertexvec.begin(); it!=mvertexvec.end(); ++it) {
+	cout <<(*(*it))<<endl;
+    }
+    return;
+}

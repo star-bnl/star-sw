@@ -28,6 +28,7 @@ public:
     static void printDetector(); //call StiDetecotrLayerContainer::print()
     static void printHits(); //print all hits in event
     static void printHitContainerForDetector(); //print hits for the current detector layer
+    static void printVertices();
     
     static void setVisible(); //call StiDisplayManager::setVisible()
     static void setInvisible(); //call StiDisplayManager::setInvisible()
