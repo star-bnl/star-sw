@@ -1,3 +1,21 @@
+/***************************************************************************
+ *
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.2 2000/03/09 20:45:04 aihong Exp $
+ *
+ * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
+ *        Send questions to aihong@cnr.physics.kent.edu 
+ ***************************************************************************
+ *
+ * Description: A functor that do PID base on Probability (Amplitude) info.
+ *
+ ***************************************************************************
+ *
+ * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.2  2000/03/09 20:45:04  aihong
+ * add head for Log
+ *
+ * Revision 1.2  2000/03/09 20:45:04  aihong
+
  *
  **************************************************************************/
 #include <float.h>
