@@ -1,6 +1,4 @@
 //StiMaker.h
-//M.L. Miller (Yale Software)
-//04/01
 
 #ifndef StiMaker_HH
 #define StiMaker_HH
@@ -15,10 +13,7 @@ using std::string;
 #include "Sti/StiKalmanTrackFinder.h"
 
 class StEvent;
-class StiHitContainer;
-class StiHitFiller;
-class StiDisplayManager;
-class StiDetectorContainer;
+
 class StiTrackContainer;
 class StiEvaluableTrack;
 class StiSeedFinder;
@@ -31,13 +26,15 @@ class StAssociationMaker;
 class StMcEvent;
 class StiTrackMerger;
 class StiDynamicTrackFilter;
+class StiIOBroker;
+class StiToolkit;
 class StiStEventFiller;
+
 
 class StiMaker : public StMaker {
  public:
     
     virtual ~StiMaker();
-
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
     virtual Int_t InitRun(int);
@@ -45,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.41 2002/03/08 17:42:44 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.42 2002/03/15 16:57:26 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -69,36 +66,23 @@ public:
 
     //Temporary definition to defaut cvs/DEV mismatch
     void doNextAction() {}; //
-    
+
+    StiIOBroker* getIOBroker();
+
 protected:
     StiMaker(const char* name = "StiMaker");
 
+
 private:
 
-    //Names
+    static StiMaker* sinstance; //!
+
+		bool initialized;
     string mEvalFileName; //!
-    
-    //Containers
-    StiHitContainer* mhitstore; //!
-    StiDetectorContainer* mdetector; //!
-    StiTrackContainer* mtrackstore; //!
 
-    //Factories
-    StiObjectFactoryInterface<StiHit>* mhitfactory; //!
-    StiObjectFactoryInterface<StiKalmanTrack>* mtrackfactory; //!
-    StiObjectFactoryInterface<StiKalmanTrackNode>* mktracknodefactory; //!
-    StiObjectFactoryInterface<StiDetector>* mdetectorfactory; //!
-    StiObjectFactoryInterface<StiDetectorNode>* mdatanodefactory; //!
-
-    //Display
-    StiDisplayManager* mdisplay; //!
-    
-    //Utilites
-    StiHitFiller* mhitfiller; //!
-    StiTrackMerger* mTrackMerger; //!
-
-    //SeedFinder(s)
-    StiSeedFinder* mSeedFinder; //!
+		StiIOBroker * ioBroker;
+		StiToolkit  * toolkit;
+		StiKalmanTrackFinder * tracker;
 
     //Tracker
     StiKalmanTrackFinder* mtracker; //!
@@ -114,7 +98,6 @@ private:
     
     static StiMaker* sinstance; //!
 
-private:
     StEvent* mevent; //!
     StMcEvent* mMcEvent; //!
     StMcEventMaker* mMcEventMaker; //!
@@ -129,6 +112,7 @@ inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
 {
     mMcEventMaker = val;
 }
+
 inline void StiMaker::setEvaluationFileName(const char* val)
 {
     mEvalFileName=val;
@@ -136,11 +120,9 @@ inline void StiMaker::setEvaluationFileName(const char* val)
 
 inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
 {
+	
     mAssociationMaker = val;
 }
 
-inline StiHitContainer* StiMaker::hitContainer() const
-{
-    return mhitstore;
-}
+
 #endif

@@ -15,9 +15,11 @@ ClassImp(StiRootIOBroker)
 StiRootIOBroker::StiRootIOBroker()
 {
     cout <<"StiRootIOBroker::StiRootIOBroker()"<<endl;
+		sInstance = this;
 }
 
 StiRootIOBroker::~StiRootIOBroker()
 {
     cout <<"StiRootIOBroker::~StiRootIOBroker()"<<endl;
 }
+ 

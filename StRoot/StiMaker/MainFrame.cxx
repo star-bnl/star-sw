@@ -35,7 +35,7 @@ using std::find_if;
 //StiGui
 #include "StiGui/StiRootDrawableDetector.h"
 #include "StiGui/StiDrawable.h"
-#include "StiGui/StiDisplayManager.h"
+#include "StiGui/StiRootDisplayManager.h"
 #include "StiGui/StiGuiIOBroker.h"
 
 //StiMaker
@@ -257,7 +257,7 @@ ClassImp(MainFrame)
     }
 
     //This has to be the first call to StiDisplayManager::instance()
-    StiDisplayManager::instance(temp->GetCanvas());
+    StiRootDisplayManager::instance(temp->GetCanvas());
 
     //Add the canvas to the frame
     AddFrame(fCanvasWindow, new TGLayoutHints(kLHintsExpandX | kLHintsExpandY,
@@ -714,89 +714,89 @@ void MainFrame::printFactorySize()
 
 void MainFrame::setAllVisible()
 {
-    StiDisplayManager::instance()->setVisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setVisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setAllInvisible()
 {
-    StiDisplayManager::instance()->setInvisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setInvisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSkeletonView()
 {
-    StiDisplayManager::instance()->setSkeletonView();
+    StiRootDisplayManager::instance()->setSkeletonView();
     setView(new StiSkeletonView());
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setManualView()
 {
-    StiDisplayManager::instance()->setVisible();
+    StiRootDisplayManager::instance()->setVisible();
     setView(new StiManualView());
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setZoomSkeletonView()
 {
-    StiDisplayManager::instance()->setZoomSkeletonView();
+    StiRootDisplayManager::instance()->setZoomSkeletonView();
     setView(new StiZoomSkeletonView());
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSvtVisible()
 {
-    StiDisplayManager::instance()->setSvtVisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setSvtVisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSvtInvisible()
 {
-    StiDisplayManager::instance()->setSvtInvisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setSvtInvisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setTpcVisible()
 {
-    StiDisplayManager::instance()->setTpcVisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setTpcVisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setTpcInvisible()
 {
-    StiDisplayManager::instance()->setTpcInvisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setTpcInvisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setIfcVisible()
 {
     cout <<"MainFrame::setIfcVisible(). Not yet implemented"<<endl;
-    StiDisplayManager::instance()->setIfcVisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setIfcVisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setIfcInvisible()
 {
     cout <<"MainFrame::setIfcInvisible(). Not yet implemented"<<endl;
-    StiDisplayManager::instance()->setIfcInvisible();
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->setIfcInvisible();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::printDisplayManager()
 {
-    StiDisplayManager::instance()->print();
+    StiRootDisplayManager::instance()->print();
 }
 
 //This is a memory leak, so don't push it too far!
@@ -840,7 +840,7 @@ void MainFrame::ShowRootColors()
     other->SetTextColor(5);
     other->Draw();
 
-    StiDisplayManager::instance()->cd();
+    StiRootDisplayManager::instance()->cd();
 }
 
 void MainFrame::setLayer()
@@ -959,8 +959,8 @@ void MainFrame::showCurrentDetector()
     layer->setColor(2);
     
     cout<<*layer<<endl;
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
     
     return;
 }
@@ -1598,8 +1598,8 @@ void DetectorActivator::updateDetectors()
 	    activateLayer(fC[j].first, false);
 	}
     }
-    StiDisplayManager::instance()->draw();
-    StiDisplayManager::instance()->update();
+    StiRootDisplayManager::instance()->draw();
+    StiRootDisplayManager::instance()->update();
 
 }
 
