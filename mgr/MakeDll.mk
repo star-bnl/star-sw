@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.119 1999/10/01 01:08:47 fisyak Exp $
+# $Id: MakeDll.mk,v 1.120 1999/10/04 14:35:34 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.120  1999/10/04 14:35:34  fisyak
+# Add StRoot in include path
+#
 # Revision 1.119  1999/10/01 01:08:47  fisyak
 # bug fix in package name
 #
@@ -301,7 +304,7 @@ SRC_DIRS  += $(ALL_DIRS)
 endif
 
 # 	Define internal and external includes dirs
-INC_NAMES := include include/$(PKGNAME)
+INC_NAMES := include include/$(PKGNAME) StRoot
 INC_DIRS  := $(addprefix $(ROOT_DIR)/,$(INC_NAMES)) $(SRC_DIR)
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(subst $(ROOT_DIR),$(STAR),$(SRC_DIR))
