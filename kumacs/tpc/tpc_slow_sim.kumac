@@ -1,4 +1,4 @@
-************************************************************************
+M************************************************************************
 ************************************************************************
 macro tpc_slow_sim__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
@@ -10,8 +10,8 @@ macro tpc_slow_sim__
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
-          table=/dui/data/tpc/hits/tphit
-
+          table=/dui/data/tpc/hits/tphit_
+          adcxyzon=1
 
 *  
 * --> to run
@@ -34,6 +34,7 @@ message ' *** ntup file unit -->         ' [funit]
 message ' *** output Ntuple filename  -->' [nfile]
 message ' *** Ntuple ID # -->            ' [nid]
 message ' *** Table to write to ntup --> ' [table]
+message ' *** Fill adcxyz table for diag.? 0,1 = no,yes --> ' [adcxyzon]
  
 
 * SETUP DIRECTORIES TO FIND KUMACS:
@@ -137,7 +138,8 @@ return
 macro initialize_
                tpc_sector_first_ 
                tpc_sector_last_ 
-               magfield
+               magfield_
+               adcxyzon
 
   message ' Initializing for tpc slow simulator '
 
@@ -148,7 +150,9 @@ macro initialize_
 *
 *  create tables
     exec create_tables_tpc_slow_sim#tss
-    exec create_tables_tpc_slow_sim#tfc
+    if [adcxyzon].eq.1 then
+      exec create_tables_tpc_slow_sim#tfc
+    endif
     exec create_tables_tpc_slow_sim#tcl
 
 *   initialization for tpc slow simulator
@@ -160,7 +164,7 @@ macro initialize_
 
 *------------------------------------------------------------------------
 
-macro process_event  nev
+macro process_event  nev adcxyzon
 
    macro/global/import _
       PARAMS_TPC 
@@ -172,7 +176,9 @@ macro process_event  nev
   exec tss_run#run
 
 * call xyz - reordered tpc pixels with more info
-  exec tfc_run#run 
+  if [adcxyzon].eq.1 then
+    exec tfc_run#run 
+  endif
 
 * call tcl_make_clusters - tpc cluster finder
   exec tcl_run#run_tcl_make_clusters
