@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.65 2001/09/25 21:05:03 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.66 2001/10/05 14:34:02 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.66  2001/10/05 14:34:02  caines
+// Fixed used in fit TPC hit
+//
 // Revision 1.65  2001/09/25 21:05:03  caines
 // Improve dealing of SVT hits and still not overwrite FTPC
 //
@@ -202,7 +205,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.65 2001/09/25 21:05:03 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.66 2001/10/05 14:34:02 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -444,7 +447,7 @@ Int_t  St_dst_Maker::Filler(){
   Int_t no_ftpc_points  = 0;
   // If FTPC in chain, a point table already exists
   St_dst_point   *point = 0;
-  if (no_of_points > 0) { 
+  if (no_of_points > 0 || dataSetSvt ) { 
     point     = (St_dst_point *)     dstI("point");
     if (!point) {
        point = new St_dst_point("point",no_of_points);  dstI.Add(point);
@@ -600,7 +603,7 @@ Int_t  St_dst_Maker::Filler(){
 	  }
           else{
 	 
-	      mypoint[spt_id].charge |= 1UL<<24;
+	      mypoint[no_ftpc_points+spt_id].charge |= 1UL<<24;
 	      //	    row = spc[spt_id].row/100;
 	      // row = spc[spt_id].row - row*100;
 	      // if( spc[spt_id].id_globtrk-1 < 0){
