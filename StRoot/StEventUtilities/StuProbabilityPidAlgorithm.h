@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.10 2000/12/18 23:22:58 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.11 2000/12/20 16:55:16 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.11  2000/12/20 16:55:16  aihong
+ * let it survive when no support PIDTable is present
+ *
  * Revision 1.10  2000/12/18 23:22:58  aihong
  * big revision. eta bin and centrality bin added
  *
@@ -152,6 +155,7 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
    static double  thisNHitsStart;
    static double  thisNHitsEnd;
 
+  static  bool    mPIDTableRead;
 
   static  StDedxMethod mDedxMethod;
 
