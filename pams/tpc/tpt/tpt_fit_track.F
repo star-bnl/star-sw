@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.11 2000/03/29 03:40:22 sakrejda Exp $
+* $Id: tpt_fit_track.F,v 1.12 2000/07/24 18:32:31 sakrejda Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.12  2000/07/24 18:32:31  sakrejda
+* *** empty log message ***
+*
 * Revision 1.11  2000/03/29 03:40:22  sakrejda
 * Make sure that ncir is not too large
 *
@@ -75,7 +78,7 @@ C#include "tpt_pointers.inc"
 
       INTEGER ipt, ncir,i,ntry,j,iret,ibad,ient ,ient1
       INTEGER tpt_helix_fit, tpt_find_outlier
-      INTEGER tpt_cross_fact, tte_skip,ipass
+      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow
       INTEGER n_good, ipnt_temp(mxpnt)
       LOGICAL enough, good_hit(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
@@ -116,20 +119,25 @@ C           write(6,*)"mxpnt",mxpnt,ncir,ient,ipt,i
 	   xcir(ncir) = hit(ient).x
 	   ycir(ncir) = hit(ient).y
 	   zcir(ncir) = hit(ient).z
-           wcir(ncir) = 1.0/(hit(ient).dx**2+hit(ient).dy**2)
 C          calculate correction to the error, coming from the 
 C          crossing angle
            iret = tpt_cross_fact(hit(ient).row,xcir(ncir),ycir(ncir),
      >                           xold,yold,cf,theta)
-           if(ncir.eq.1) then
+           ipadrow=mod(hit(ient).row,100)
+           if(ncir.gt.1) then
+                lambda = atan(abs(zcir(ncir)-zcir(ncir-1))/
+     >                   sqrt((x(ncir)-x(ncir-1))**2+(y(ncir)-y(ncir-1))**2))
+                call hit_uncert(zcir(ncir),theta,lambda,ipadrow,sigX,sigZ)
+                wcir(i)=1.0/sigx**2/cf
+                wlin(i)=1.0/sigz**2
+           else if(ncir.eq.1) then
                 ient1 = ient
            else if(ncir.eq.2) then
-                wcir(1) = wcir(1)/cf
+                wcir(1) = wcir(2)
+                wlin(1) = wlin(2)
            endif
            xold = xcir(ncir)
            yold = ycir(ncir)
-           wcir(ncir) = wcir(ncir)/cf
-           wlin(ncir) = 1.0/hit(ient).dz**2
            if(hit(ient).flag.ne.0) then 
               wcir(ncir)=0.01*wcir(ncir)
               wlin(ncir)=0.01*wlin(ncir)
