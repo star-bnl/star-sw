@@ -83,8 +83,7 @@ StiDefaultToolkit::StiDefaultToolkit()
   _displayManager(0),
   _ioBroker(0),
   _hitLoader(0),
-  _associationMaker(0),
-  _hitErrorCalculator(0)
+  _associationMaker(0)
 {
   cout<<"StiDefaultToolkit::StiDefaultToolkit() - INFO - Started"<<endl;
   Messenger::init(0);
@@ -392,13 +391,5 @@ void StiDefaultToolkit::setAssociationMaker(StAssociationMaker * a)
   _associationMaker = a;
   if (!_associationMaker)
     throw runtime_error(" StiDefaultToolkit::getAssociationMaker() - FATAL - _associationMaker==0");
-}
-
-
-StiHitErrorCalculator * StiDefaultToolkit::getHitErrorCalculator()
-{
-  if (!_hitErrorCalculator)
-    _hitErrorCalculator = new StiHitErrorDefault();
-  return _hitErrorCalculator;
 }
 

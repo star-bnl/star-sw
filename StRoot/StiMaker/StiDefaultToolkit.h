@@ -56,7 +56,6 @@ public:
   virtual StiHitLoader<StEvent,StiDetectorBuilder> * getHitLoader();
   virtual StAssociationMaker     * getAssociationMaker();
   virtual void setAssociationMaker(StAssociationMaker * a);
-  virtual StiHitErrorCalculator  * getHitErrorCalculator();
   virtual void add(StiDetectorGroup<StEvent>* detectorGroup);
   
  protected:
@@ -92,7 +91,6 @@ public:
   StiIOBroker             * _ioBroker;
   StiHitLoader<StEvent,StiDetectorBuilder> * _hitLoader;
   StAssociationMaker                       * _associationMaker; 
-  StiHitErrorCalculator                    * _hitErrorCalculator;
 };
 
 #endif
