@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.15 2000/09/13 18:09:09 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.16 2001/04/03 21:04:35 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.16  2001/04/03 21:04:35  kisiel
+ * Changes needed to make the Theoretical code
+ *   work. The main code is the ThCorrFctn directory.
+ *   The most visible change is the addition of the
+ *   HiddenInfo to StHbtPair.
+ *
  * Revision 1.15  2000/09/13 18:09:09  laue
  * Bux fix: Delete track cut only once for identical particle hbt
  *
@@ -405,9 +411,9 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
  	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
 	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	    ThePair->SetTrack1(*PartIter1);
+	    ThePair->SetTrack2(*PartIter1);
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      ThePair->SetTrack2(*PartIter2);
+	      ThePair->SetTrack1(*PartIter2);
 	      // testing...	      cout << "ThePair defined... going to pair cut... ";
 	      if (mPairCut->Pass(ThePair)){
 		// testing...		cout << " ThePair passed PairCut... ";

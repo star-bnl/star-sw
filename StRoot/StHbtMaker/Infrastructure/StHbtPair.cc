@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.17 2001/03/28 22:35:20 flierl Exp $
+ * $Id: StHbtPair.cc,v 1.18 2001/04/03 21:04:36 kisiel Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.18  2001/04/03 21:04:36  kisiel
+ * Changes needed to make the Theoretical code
+ *   work. The main code is the ThCorrFctn directory.
+ *   The most visible change is the addition of the
+ *   HiddenInfo to StHbtPair.
+ *
  * Revision 1.17  2001/03/28 22:35:20  flierl
  * changes and bugfixes in qYKP*
  * add pairrapidity
@@ -86,12 +92,6 @@ StHbtPair::~StHbtPair() {/* no-op */}
 
 //StHbtPair& StHbtPair::operator=(const StHbtPair &a)
 
-//_________________
-double StHbtPair::qInv() const
-{
-    double dq = abs(mTrack1->FourMomentum() - mTrack2->FourMomentum());
-    return (dq);
-}
 //_________________
 double StHbtPair::mInv() const
 {
@@ -396,5 +396,148 @@ double StHbtPair::OpeningAngle() const {
   StHbtThreeVector p2 = mTrack2->FourMomentum().vect();
   double dAngInv = 57.296*acos((p1.dot(p2))/(p1.mag()*p2.mag()));
   return (dAngInv);
+}
+//_________________
+double StHbtPair::qInv() const {
+  StHbtLorentzVector tDiff = (mTrack1->FourMomentum()-mTrack2->FourMomentum());
+  return ( -1.* tDiff.m());
+}
+
+double StHbtPair::KStar() const{
+  // Return value calculated in Lednicky's way
+  if(mNonIdParNotCalculated) calcNonIdPar();
+  return kStarCalc;
+  /*
+  const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
+  StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
+  double tMass = abs(tSum);
+  StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
+  double tGamma = tSum.e()/tMass;
+  StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
+			      (tGammaBeta*tGammaBeta))*tGammaBeta;
+  StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
+		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
+  return tK.vect().mag();
+  */
+}
+
+double StHbtPair::KStarFlipped() const{
+  StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
+  tP1.vect() *= -1.; // flip it
+  StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
+  double tMass = abs(tSum);
+  StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
+  double tGamma = tSum.e()/tMass;
+  StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
+			      (tGammaBeta*tGammaBeta))*tGammaBeta;
+  StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
+		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
+  tP1.vect() *= -1.; // unflip it
+  return tK.vect().mag();
+}
+
+double StHbtPair::CVK() const{
+  const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
+  StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
+  double tMass = abs(tSum);
+  StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
+  double tGamma = tSum.e()/tMass;
+  StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
+			      (tGammaBeta*tGammaBeta))*tGammaBeta;
+  StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
+		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
+  return (tK.vect())*tGammaBeta/tK.vect().magnitude()/tGammaBeta.magnitude();
+}
+
+double StHbtPair::CVKFlipped() const{
+  const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
+  tP1.vect() *= -1.; // flip it
+  StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
+  double tMass = abs(tSum);
+  StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
+  double tGamma = tSum.e()/tMass;
+  StThreeVectorD tLongMom  = ((tP1.vect()*tGammaBeta)/
+			      (tGammaBeta*tGammaBeta))*tGammaBeta;
+  StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
+		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
+  tP1.vect() *= -1.; // unflip it
+  return (tK.vect())*tGammaBeta/tGamma;
+}
+
+double StHbtPair::pInv() const{
+  StHbtLorentzVector tP1 = mTrack1->FourMomentum();
+  StHbtLorentzVector tP2 = mTrack2->FourMomentum();
+  double tP = (tP1.px()+tP2.px())*(tP1.px()+tP2.px())+
+              (tP1.py()+tP2.py())*(tP1.py()+tP2.py())+
+              (tP1.pz()+tP2.pz())*(tP1.pz()+tP2.pz())-
+              (tP1.e() -tP2.e() )*(tP1.e() -tP2.e() );
+  return sqrt(fabs(tP));
+}
+
+double StHbtPair::qInvFlippedXY() const{
+  StHbtLorentzVector tP1 = mTrack1->FourMomentum();
+  tP1.setX(-1.*tP1.x());
+  tP1.setY(-1.*tP1.y());
+  StHbtLorentzVector tDiff = (tP1-mTrack2->FourMomentum());
+  return ( -1.* tDiff.m());
+}
+
+void StHbtPair::calcNonIdPar() const{ // fortran like function! faster?
+  mNonIdParNotCalculated=0;
+  double px1 = mTrack1->FourMomentum().vect().x();
+  double py1 = mTrack1->FourMomentum().vect().y();
+  double pz1 = mTrack1->FourMomentum().vect().z();
+  double pE1  = mTrack1->FourMomentum().e();
+  double Particle1Mass = sqrt(pE1*pE1 - px1*px1 - py1*py1 - pz1*pz1);
+  double px2 = mTrack2->FourMomentum().vect().x();
+  double py2 = mTrack2->FourMomentum().vect().y();
+  double pz2 = mTrack2->FourMomentum().vect().z();
+  double pE2  = mTrack2->FourMomentum().e();
+  double Particle2Mass = sqrt(pE2*pE2 - px2*px2 - py2*py2 - pz2*pz2);
+
+  double Px = px1+px2;
+  double Py = py1+py2;
+  double Pz = pz1+pz2;
+  double PE = pE1+pE2;
+      
+  double Ptrans = Px*Px + Py*Py;
+  double Mtrans = PE*PE - Pz*Pz;
+  double Pinv =   sqrt(Mtrans - Ptrans);
+  Mtrans = sqrt(Mtrans);
+  Ptrans = sqrt(Ptrans);
+	
+  double QinvL = (pE1-pE2)*(pE1-pE2) - (px1-px2)*(px1-px2) -
+    (py1-py2)*(py1-py2) - (pz1-pz2)*(pz1-pz2);
+
+  double Q = (Particle1Mass*Particle1Mass - Particle2Mass*Particle2Mass)/Pinv;
+  Q = sqrt ( Q*Q - QinvL);
+	  
+  kStarCalc = Q/2;
+
+  // ad 1) go to LCMS
+  double beta = Pz/PE;
+  double gamma = PE/Mtrans;
+	    
+  double pz1L = gamma * (pz1 - beta * pE1);
+  double pE1L = gamma * (pE1 - beta * pz1);
+  
+  // fill histogram for beam projection ( z - axis )
+  mDKLong = pz1L;
+
+  // ad 2) rotation px -> Pt
+  double px1R = (px1*Px + py1*Py)/Ptrans;
+  double py1R = (-px1*Py + py1*Px)/Ptrans;
+  
+  //fill histograms for side projection ( y - axis )
+  mDKSide = py1R;
+
+  // ad 3) go from LCMS to CMS
+  beta = Ptrans/Mtrans;
+  gamma = Mtrans/Pinv;
+  
+  double px1C = gamma * (px1R - beta * pE1L);
+  
+  // fill histogram for out projection ( x - axis )
+  mDKOut  = px1C;
 }
 

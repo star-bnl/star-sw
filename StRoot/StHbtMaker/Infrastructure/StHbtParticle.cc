@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.14 2000/10/05 23:09:05 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.15 2001/04/03 21:04:36 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,12 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.15  2001/04/03 21:04:36  kisiel
+ * Changes needed to make the Theoretical code
+ *   work. The main code is the ThCorrFctn directory.
+ *   The most visible change is the addition of the
+ *   HiddenInfo to StHbtPair.
+ *
  * Revision 1.14  2000/10/05 23:09:05  lisa
  * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
  *
@@ -99,6 +105,12 @@ StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass
   mNhits = hbtTrack->NHits();
   mHelix = hbtTrack->Helix();
   CalculateNominalTpcExitAndEntrancePoints();
+
+  // ***
+  if(hbtTrack->ValidHiddenInfo()){
+    mHiddenInfo= hbtTrack->HiddenInfo()->getParticleHiddenInfo();
+  }
+  // ***
 }
 //_____________________
 StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass) : mTrack(0), mV0(0) {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.13 2000/05/03 17:44:43 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.14 2001/04/03 21:04:36 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,12 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.14  2001/04/03 21:04:36  kisiel
+ * Changes needed to make the Theoretical code
+ *   work. The main code is the ThCorrFctn directory.
+ *   The most visible change is the addition of the
+ *   HiddenInfo to StHbtPair.
+ *
  * Revision 1.13  2000/05/03 17:44:43  laue
  * StHbtEvent, StHbtTrack & StHbtV0 declared friend to StHbtIOBinary
  * StHbtParticle updated for V0 pos,neg track Id
@@ -79,6 +85,9 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StPhysicalHelixD.hh"
+/* Th stuff */
+#include "StHbtMaker/Base/StHbtHiddenInfo.hh"
+/***/
 
 class StHbtTrack{
 public:
@@ -122,6 +131,12 @@ public:
   void SetTopologyMap(const int word, const unsigned long map);
   void SetTrackId(const unsigned long&);
 
+  /* Th stuff */
+  void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
+  bool ValidHiddenInfo() const;
+  const StHbtHiddenInfo* HiddenInfo() const;
+  /***/
+
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StHbtTrack& trk);
   friend istream& operator>>(istream& in,  StHbtTrack& trk);
@@ -146,6 +161,10 @@ private:
   StHbtThreeVector mP;
   float mPt;
   StPhysicalHelixD mHelix;
+
+  /* Th stuff */
+  StHbtHiddenInfo* mHiddenInfo; //!
+  /***/
 
   friend class StHbtIOBinary;
 };
@@ -187,4 +206,9 @@ inline float StHbtTrack::Pt() const {return mPt;}
 inline const StPhysicalHelixD& StHbtTrack::Helix() const {return mHelix;}
 inline unsigned long StHbtTrack::TopologyMap(const int word) const { return mMap[word];}
 inline unsigned long StHbtTrack::TrackId() const { return mTrackId; }
+
+inline  void StHbtTrack::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHiddenInfo;}
+inline  bool StHbtTrack::ValidHiddenInfo() const {return (bool)mHiddenInfo;}
+inline  const StHbtHiddenInfo* StHbtTrack::HiddenInfo() const {return mHiddenInfo;}
+
 #endif
