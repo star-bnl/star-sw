@@ -28,7 +28,7 @@ void FtfHit::printLinks ( int point_level )
    if ( point_level > 9 ) 
       printf ( "hit ir iphi ieta   phi   eta      x      y     z\n" ) ;
 
-   if ( fmod(point_level,10) > 0 )
+   if ( fmod((double)point_level,10) > 0 )
         printf ( "%3d %2d %3d  %3d  %6.2f %5.2f  %6.2f %6.2f %6.2f \n", 
                   id, row, phiIndex, etaIndex, phi*toDeg, eta, x, y, z ) ;
    int vhit ;
@@ -44,17 +44,17 @@ void FtfHit::printLinks ( int point_level )
    if ( nextMcTrackHit != 0 ) mhit = nextMcTrackHit->id ;
    else mhit = -1 ;
 
-   if ( fmod(point_level,10) > 1 ) 
+   if ( fmod((double)point_level,10) > 1 ) 
       printf ( "pointers:vol,row,tr,mtr,mirror (%4d,%4d,%4d,%4d)\n ",
 		    vhit, rhit, thit, mhit ) ; 
    int tid ;
 //   if ( track != 0 ) tid = track->id ;
 //   else tid = -1 ;
-   if ( fmod(point_level,10) > 2 )
+   if ( fmod((double)point_level,10) > 2 )
       printf ( "\n Tracks  :reco, mc            (%4d,%4d) ",
                                tid, mcTrackId ) ;
 
-/*   if ( fmod(point_level,10)  printf ( "\n  " ) ; */
+/*   if ( fmod((double)point_level,10)  printf ( "\n  " ) ; */
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //    This function assigns this hit and all its 

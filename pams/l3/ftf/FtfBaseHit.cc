@@ -27,7 +27,7 @@ void FtfBaseHit::print ( int point_level )
    if ( point_level > 9 ) 
       printf ( "hit Row    x      y     z\n" ) ;
 
-   if ( fmod(point_level,10) > 0 )
+   if ( fmod((float)point_level,10.) > 0 )
         printf ( "%3d %2d %6.2f %6.2f %6.2f \n", 
                   id, row, x, y, z ) ;
 }
