@@ -17,7 +17,8 @@ class MiniChain : public TObject
   void run(int first, 
 	   int nEvents, 
 	   const char *  filePrefix,
-	   const char ** fileList );
+	   const char ** fileList,
+	   const char * outfile);
   
  protected:
   
