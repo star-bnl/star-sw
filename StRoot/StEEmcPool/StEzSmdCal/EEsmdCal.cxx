@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.7 2004/07/10 18:40:48 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.8 2004/07/27 21:59:46 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -70,7 +70,7 @@ void EEsmdCal::initRun(int runID){
   dbMapped=runID;
 
   // now init all what relays on DB inofrmation
-  addTwMipEbarsToHisto(kGreen,'e');
+  addTwMipEbarsToHisto(kGreen,'g');
   addPresMipEbarsToHisto(kGreen,'P');
   addPresMipEbarsToHisto(kGreen,'Q');
   addPresMipEbarsToHisto(kGreen,'R');
@@ -222,10 +222,10 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   float adcR=tileAdc[kR][iEtaX][iPhiX];
 
   // calibrated energy
-  float eneT=tileEne[kT][iEtaX][iPhiX];
-  float eneP=tileEne[kP][iEtaX][iPhiX];
-  float eneQ=tileEne[kQ][iEtaX][iPhiX];
-  float eneR=tileEne[kR][iEtaX][iPhiX];
+  float eneT=tileEne[kT][iEtaX][iPhiX];  // GeV
+  float eneP=tileEne[kP][iEtaX][iPhiX]*1000; // MeV
+  float eneQ=tileEne[kQ][iEtaX][iPhiX]*1000; // MeV
+  float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
 
   if(thrR){
     hA[9]->Fill(7);
@@ -260,19 +260,8 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   if( mipT && thrP         && thrR ) hT[iCut][kQ][iEtaX][iPhiX]->Fill(eneQ);
   if( mipT && thrP && thrQ         ) hT[iCut][kR][iEtaX][iPhiX]->Fill(eneR);
   
-
-  // SMD energy for pairs
-  iCut='b'-'a';
-  float eU=smdEne[kU][iStrU]+smdEne[kU][iStrU+1];
-  float eV=smdEne[kV][iStrV]+smdEne[kV][iStrV+1];
-  hSp[iCut][kU][iStrU]->Fill(eU);
-  hSp[iCut][kV][iStrV]->Fill(eV);
   
   ((TH2F*) hA[22])->Fill( r.x(),r.y());
-  ((TH2F*) hA[20])->Fill(iStrU+1,eU);
-  ((TH2F*) hA[20])->Fill(iStrV+1,eV);
-  ((TH2F*) hA[23])->Fill(iEtaX+1,eU+eV); 
-
 
   // calibration of SMD strips
   if( mipT && thrP && thrQ && thrR ) {
@@ -281,16 +270,20 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
     int iStr[MaxSmdPlains];
     iStr[0]=iStrU;
     iStr[1]=iStrV;
-    for(iuv=0;iuv<MaxSmdPlains;iuv++)
+    iCut='b'-'a';
+    float eUV=0;// sum from both plains
+    for(iuv=0;iuv<MaxSmdPlains;iuv++) {
+      float e12=0;
       for(i2=0;i2<mx;i2++) {
 	int istrip=iStr[iuv]+i2;
-
-	if(smdAdc[iuv][istrip]<3) continue;// drop pedestal, tmp
-	// re-calibration of strips
-	int iCut='b'-'a';
-	hSs[iCut][iuv][istrip]->Fill(smdAdc[iuv][istrip]);
-	if(smdAdc[iuv][istrip]>3) hA[14+iuv]->Fill(istrip+1); // only above ped
-
+	float adc=smdAdc[iuv][istrip];
+	float ene=smdEne[iuv][istrip]; // GeV
+	if(adc<3) continue;// drop pedestal, tmp
+	e12+=ene*1000; // MeV
+	// re-calibratiop  of strips
+	hSs[iCut][iuv][istrip]->Fill(adc);
+	hA[14+iuv]->Fill(istrip+1); // only above ped
+	
 	// SMD light attenuation for pair of strips
 	StructEEmcStrip* bar=geoSmd->getStripPtr(istrip,iuv,iSect);
 	TVector3 r1=bar->end1;
@@ -306,10 +299,17 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
 	float dist=sqrt(dx*dx+dy*dy);
 	int iG=istrip/stripGang;
 	assert(iG>=0 && iG <MaxAt);
-	hSc[iuv][iSubX][iG]->Fill(smdEne[iuv][istrip]); 
+	hSc[iuv][iSubX][iG]->Fill(ene); 
 	hSeta[iuv][iSubX][iG]->Fill(r.Eta());
 	hSdist[iuv][iSubX][iG]->Fill(dist);
-      } 
+      }// end of loop over one plain
+      eUV+=e12;
+      // SMD energy for pairs
+      int istrip1=iStr[iuv];
+      ((TH2F*) hA[20])->Fill(istrip1+1,e12);
+      hSp[iCut][iuv][istrip1]->Fill(e12);      
+    }// end of loop over UV plains
+    ((TH2F*) hA[23])->Fill(iEtaX+1,eUV); 
   }
   
 }
@@ -332,7 +332,7 @@ int EEsmdCal::getUxVmip(){
   
   int ret=smdHitPl[0].nMatch*smdHitPl[1].nMatch;
 
-  //printf("ret=%d\n",ret);
+  //  printf("UxV ret=%d\n",ret);
   return ret;
 }
 
@@ -346,14 +346,14 @@ int EEsmdCal::getUxVmip(){
 void EEsmdCal::finish(int k){
   printf("\n  EEsmdCal::finish(sec=%d) nInpEve=%d \n",sectID,nInpEve);
 
-  if(k<0) return;
+  if(k<=0) return;
   // some test drawing:
   printf("drawing ...\n");
   //  TFile* f=new TFile("outSec5b/mip05b-8zAB.hist.root");
 
   int iuv=1;
   TString tt="sec"; tt+=sectID;
-  TCanvas *c=new TCanvas(tt,tt,600,600);
+  TCanvas *c=new TCanvas(tt,tt,400,400);
   c->Divide(1,2);
   //  TH2F * h=(TH2F *)f->Get("xy05ct");
   TH2F * h=(TH2F *)hA[22];

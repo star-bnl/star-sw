@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsmdCalMaker.cxx,v 1.3 2004/06/29 16:37:41 balewski Exp $
+// $Id: StEEsmdCalMaker.cxx,v 1.4 2004/07/27 21:59:47 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -21,31 +21,75 @@ ClassImp(StEEsmdCalMaker)
 
 //________________________________________________
 //________________________________________________
-StEEsmdCalMaker::StEEsmdCalMaker(const char* self ,const char* muDstMakerName) : StMaker(self){
+StEEsmdCalMaker::StEEsmdCalMaker( const char* self ,const char* muDstMakerName) : StMaker(self){
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
   MCflag=0;// default off
- }
+  //  printf("constr of calib =%s=\n",GetName());
+ 
+  //tmp, JB
+  // ideal calibration used by Fast simulator has eta dependent gains for towers and plain energy deposit for SMD,pre,post
+  
+  // towers are gain matched to fixed E_T
+  float maxAdc=4095;
+  float maxEtot=60;  // in GeV
+  const float feta[MaxEtaBins]= {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115};
+  
+  int i;
+  
+  mfixEmTgain=new float [MaxEtaBins];
+  for (i=0;i<MaxEtaBins;i++) {
+    mfixEmTgain[i]=maxAdc/maxEtot/cosh(feta[i]); 
+  }
+  mfixSMDgain=23000;
+  mfixPgain=23000;
+  
+}
 
 
 //___________________ _____________________________
 //________________________________________________
 StEEsmdCalMaker::~StEEsmdCalMaker(){
 }
+
+//________________________________________________
+//________________________________________________
+void StEEsmdCalMaker::SetSector(int sec){
+  setSector(sec);
+  TString name=GetName();
+  name+="-";
+  name+=sec;
+  //  printf("change name to %s sec=%d\n", name.Data(),sec);
+  SetName(name);
+}
+
  
 //________________________________________________
 //________________________________________________
 Int_t StEEsmdCalMaker::Init(){
   eeDb=(EEDB*)GetMaker("eemcDb");
-  init();
+  //printf("%s got eeDb=%p\n",GetName(),eeDb);
+  EEsmdCal::init();
   printf("%s has MCflag=%d\n",GetName(),MCflag);
   return StMaker::Init();
 }
+//________________________________________________
+//________________________________________________
+Int_t StEEsmdCalMaker::InitRun(int runNo){
+  if(runNo==0) {
+    gMessMgr->Message("","W")<<GetName()<<"::InitRun("<<runNo<<") ??? changed to 555, it s OK for M-C - perhaps, JB"<<endm;
+    runNo=555;
+  }
+  initRun(runNo);
+  return kStOK;
+}
+
+
 
 //________________________________________________
 //________________________________________________
 Int_t StEEsmdCalMaker::Finish(){
-  finish();
+  finish(0); // do not draw
   return kStOK;
 }
 
@@ -67,11 +111,10 @@ Int_t StEEsmdCalMaker::Make(){
 //________________________________________________
 //________________________________________________
 Int_t StEEsmdCalMaker::unpackMuDst(){
-  assert(strstr("Fix input arrays","only ezTree code is up to date,JB"));
-
+  
   nInpEve++;
   gMessMgr->Message("","D") <<GetName()<<"::::getAdc() is called "<<endm;
-
+  
   // Access to muDst .......................
   StMuEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
   if (!emc) {
@@ -83,9 +126,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
   //.........................  T O W E R S .....................
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
-    int sec,eta,sub,adc;
+    int sec,eta,sub,val;
     //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
-    emc->getEndcapTowerADC(i,adc,sec,sub,eta);
+    emc->getEndcapTowerADC(i,val,sec,sub,eta);
     assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
 
     //tmp, for fasted analysis use only hits from sectors init in DB
@@ -93,27 +136,35 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
  
     const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
     assert(x); // it should never happened for muDst
- 
-    float value=adc;
-    
-    // M-C & real data needs different handling
-    if(MCflag) {
-      ; // no action
-    } else {
-      if(x->fail ) continue; // drop broken channels
-      value-=x->ped;
-    }
-    
+    if(x->fail ) continue; // drop broken channels
+
     int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
     int ieta=x->eta-1;
     assert(iphi>=0 && iphi<MaxPhiBins);
     assert(ieta>=0 && ieta<MaxEtaBins);
+ 
+    float adc=-100, rawAdc=-101, ene=-102;
+    
+    if(MCflag) {  // M-C & real data needs different handling
+      adc=val; //  this is stored in muDst
+      rawAdc=adc+x->ped; // ped noise could be added
+      ene=adc/ mfixEmTgain[ieta];
+    } else {
+      rawAdc=val;
+      adc=rawAdc-x->ped;
+      if(x->gain) ene=adc/x->gain;
+    }
+    
     int iT=0;// for towers
-
-    tileAdc[iT][ieta][iphi]=value;// store towers
-    n1++;
-
-    //if(value>0)  printf(" %d %d %f\n",ieta,iphi,value);    
+    
+    // if(adc>0) printf("adc=%f ene/GeV=%f rawAdc=%f idG=%f,hSec=%d %s\n",adc,ene,rawAdc,mfixEmTgain[ieta],sectID,x->name); 
+   
+    tileAdc[iT][ieta][iphi]=adc;// store towers
+    tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+    if(rawAdc>x->thr)  n1++;
+    if(x->gain<=0) continue;// drop channels w/o gains
+    tileEne[iT][ieta][iphi]=ene;
+    
   }
 
 
@@ -132,29 +183,40 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
     //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
     const EEmcDbItem *x=eeDb-> getTile(sec,sub-1+'A', eta, pre-1+'P'); 
     if(x==0) continue;
+    if(x->fail ) continue; // drop broken channels
     
     // accept this hit
     int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
     int ieta=x->eta-1;
     assert(iphi>=0 && iphi<MaxPhiBins);
     assert(ieta>=0 && ieta<MaxEtaBins);
-    
-    float value=hit->getAdc();
-    
-    if(MCflag) {
-      value/=1.;// to ~match M-C with with slopeGains1 for data 
-    }else {
-      if(x->fail ) continue; // drop broken channels
-      value-=x->ped;
-    }
-    
     int iT=pre; // P,Q,R fall in to iT=1,2,3 <== there is no '+1' error, JB
     assert(iT>0 && iT<mxTile);
-    tileAdc[iT][ieta][iphi]=value; // store P,Q,R depending on 'iT'
-    n2++;
+    
+    float val=hit->getAdc();
+    float adc=-100, rawAdc=-101, ene=-102;
+  
+    if(MCflag) {// val is Geant energy * const
+      adc=val;
+      rawAdc=adc+x->ped; // ped noise could be added
+      ene=val/mfixPgain; // (GeV) Geant energy deposit 
+    } else {
+      rawAdc=val;
+      adc=rawAdc-x->ped;
+      if(x->gain) ene=adc/x->gain;
+    }
+    if(rawAdc>x->thr)  n2++;
+    //if(adc>0) printf("adc=%f ene/GeV=%f  hSec=%d %s g=%f\n",adc,ene,sectID,x->name, x->gain); 
+      
+    tileAdc[iT][ieta][iphi]=adc;// // store P,Q,R depending on 'iT'
+    tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+    
+    if(x->gain<=0) continue;// drop channels w/o gains
+    tileEne[iT][ieta][iphi]=ene;
+
   }
   
-  
+
   //.......................  S M D ................................
   
   char uv='U';
@@ -171,25 +233,29 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
       
       const EEmcDbItem *x=eeDb->getByStrip(sec,uv,strip);
       assert(x); // it should never happened for muDst
-      // x->print();
-      float value=hit->getAdc();
-      assert(x->sec==15) ;// fix it
+      if(x->fail ) continue; // drop broken channels
+
+      float val=hit->getAdc();
+      float adc=-100, rawAdc=-101, ene=-102;
 
       // M-C & real data needs different handling
       if(MCflag) {
-	value/=70;// to ~match M-C with with slopeGains1 for data 
+	adc=val;
+	rawAdc=adc+x->ped; // ped noise could be added
+	ene=val/mfixSMDgain; // (GeV) Geant energy deposit 	
       }else {
-	if(x->fail ) continue; // drop broken channels
-	if(x->gain<=0) continue;
-	value-=x->ped;
-	value/=x->gain;
+	rawAdc=val;
+	adc=rawAdc-x->ped;
+	if(x->gain) ene=adc/x->gain;
       }
-      //  printf("SMD hit sec=%d plane=%c strip=%d value=%f\n",x->sec,x->plane,x->strip,value);
-      smdEne[x->plane-'U'][x->strip-1]=value;
-      n3++;
+      if(rawAdc>x->thr)  n3++;
+      //   if(adc>0)	printf("adc=%f ene/GeV=%f  hSec=%d %s\n",adc,ene,sectID,x->name); 
+
+      smdAdc[x->plane-'U'][x->strip-1]=adc;
+      if(x->gain<=0)continue; // drop channels w/o gains
+      smdEne[x->plane-'U'][x->strip-1]=ene;
     }
   }
-  
   //  printf("nTw=%d nPQR=%d,nSmd=%d\n",n1,n2,n3);
   
   return n1;
@@ -197,6 +263,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
 
 // $Log: StEEsmdCalMaker.cxx,v $
+// Revision 1.4  2004/07/27 21:59:47  balewski
+// now runs on muDst as well
+//
 // Revision 1.3  2004/06/29 16:37:41  balewski
 // towards SMD calib
 //
