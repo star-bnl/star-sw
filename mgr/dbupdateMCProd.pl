@@ -33,6 +33,7 @@ my @SetG = (
              "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
              "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
              "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau128/hijing/b0_3/halffield/year_1e/hadronic_on",
 );
 
 my @recoDir = ("tfs_7", "trs_7");
@@ -298,7 +299,7 @@ foreach my $jobnm (@jobSum_set){
       $mjobSt = "n\/a"; 
 
           &sumInfo("$jb_sumFile",1);
-#     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt, " % ",$mNev," % ",$mEvtSk, " % ", $mnodeId, "\n";
+     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt, " % ",$mNev," % ",$mEvtSk, " % ", $mnodeId, "\n";
 
 ### update JobStatus table with info for jobs completed
 
