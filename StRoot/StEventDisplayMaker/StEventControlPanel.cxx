@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.5 2003/01/18 01:35:05 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.6 2003/01/21 23:49:50 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -302,9 +302,6 @@ void StEventControlPanel::Build()
 #endif 
          l->addItem(new QSpacerItem(10,1));
       }
-
-      Refresh();
-      Show();
 }
 //_______________________________________________________________________________________
 /* public slot: */ 
@@ -436,33 +433,30 @@ void StEventControlPanel::Refresh()
    QObjectList *l = fBar->queryList( "QCheckBox" );
    QObjectListIt nextButton( *l ); // iterate over the buttons
    while ( (but = (QCheckBox *)nextButton.current())) {
-//      printf(" StEventControlPanel::Refresh() %s %s\n",(const char *)but->name());
+      //      printf(" StEventControlPanel::Refresh() %s %s\n",(const char *)but->name());
+      but->blockSignals(kTRUE);
       ++nextButton;
-      {  // refresh the event controls
-         TListIter nextParameter(tl);
-         while ((n=nextParameter())) {
-  //          printf(" StEventControlPanel::Refresh() %s %s\n",(const char *)but->name(),n->GetName());
-            if (strchr(n->GetName(),'(')==0)      continue;
-            if (strstr(but->name(),n->GetName())) break; 
-         }
-         if (n ) {
-            if (!but->isChecked()) but->setChecked(true);
-         } else {
-            if (but->isChecked()) but->setChecked(false);
-         }
+      TListIter nextParameter(tl);
+      while ((n=nextParameter())) {
+         if (strchr(n->GetName(),'(')==0)      continue;
+         if (strstr(but->name(),n->GetName())) break; 
       }
-      {  // refersh the geometry controls
+      if (n ) {
+         if (!but->isChecked())  but->setChecked(true);
+      } else {
+         // Check may be it is the "volume" button
          TListIter nextParameter(lGeom);
-         while ((n=nextParameter())) {
-            if (strstr(but->name(),n->GetName())) break; 
+         TObject *v  = 0;
+         while ((v=nextParameter())) {
+            if (strstr(but->name(),v->GetName())) break; 
          }
-         if (n ) {
+         if (v ) {
             if (!but->isChecked()) but->setChecked(true);
          } else {
             if (but->isChecked()) but->setChecked(false);
          }
       }
-
+      but->blockSignals(kFALSE);
    }
    delete l;
    gSystem->DispatchOneEvent(1);
@@ -475,7 +469,8 @@ void StEventControlPanel::AddFilter(TObject *filter)
 //_______________________________________________________________________________________
 void StEventControlPanel::Show()
 {
-   // Show group of buttons.
+   // Show group of buttons.  
+   Refresh();
    fBar->show();
 }
 //_______________________________________________________________________________________
