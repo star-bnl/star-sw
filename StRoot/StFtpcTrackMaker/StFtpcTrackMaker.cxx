@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.56 2004/04/26 09:53:45 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.57 2004/05/07 15:02:18 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.57  2004/05/07 15:02:18  oldi
+// Tracks are written to StEvent directly, now.
+// Primary Vertex is read from StEvent.
+// MonSoftDst table is filled here now (was filled in the now obsolete StFtpcGlobalMaker before).
+//
 // Revision 1.56  2004/04/26 09:53:45  jcs
 // comment out delete StFtpcTrackingParams::Instance() in FinishRun as a temorary
 // fix for Bug #372
@@ -241,6 +246,7 @@
 #include "StFtpcTrackEvaluator.hh"
 #include "StFormulary.hh"
 #include "StFtpcTrackingParams.hh"
+#include "StFtpcTrackToStEvent.hh"
 
 #include "TObjArray.h"
 #include "TObjectSet.h"
@@ -250,16 +256,18 @@
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
+#include "StEvent.h"
 
 #include "StVertexId.h"
+#include "StFtpcHit.h"
+#include "StPrimaryVertex.h"
 #include "StMessMgr.h"
 
 #include "tables/St_ffs_gepoint_Table.h"
 #include "tables/St_g2t_track_Table.h"
 
 #include "tables/St_dst_vertex_Table.h"
-
-#include "tables/St_dst_TrgDet_Table.h"
+#include "tables/St_dst_mon_soft_ftpc_Table.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -431,30 +439,19 @@ Int_t StFtpcTrackMaker::Make()
     return kStWarn;
   }  
 
+  StEvent *event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );    
+
   StFtpcVertex *vertex = new StFtpcVertex(); // create vertex (all parameters set to 0)
-  AddData(new TObjectSet("ftpcVertex", vertex));
 
   // Use Primary vertex if it exists
-  St_DataSet *primary = GetDataSet("primary");
-    
-  if (primary) {
-    St_dst_vertex *vtx = (St_dst_vertex *)primary->Find("vertex");
-    
-    if (vtx) {
-      dst_vertex_st *primvtx = vtx->GetTable();
-      
-      for (Int_t no_rows = 0; no_rows < vtx->GetNRows(); no_rows++, primvtx++) {
-        
-	if (primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1) {
+  StPrimaryVertex *vtx = 0;
 
-	  *vertex = StFtpcVertex(primvtx);	  
-	  break;
-	}       
-      }
-    }  // end of if (vertex)
-  }  // end of if (primary) 
- 
-  
+  if ((vtx = event->primaryVertex(0))) {        
+    if (vtx->type() == kEventVtxId && vtx->flag() == 1) {
+      *vertex = StFtpcVertex(vtx);	  
+    }       
+  } 
+
   if (vertex->GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
 
     //pointer to preVertex dataset
@@ -503,8 +500,6 @@ Int_t StFtpcTrackMaker::Make()
   //tracker->NoFieldTracking();
   //tracker->LaserTracking();
   
-  AddData(new TObjectSet("ftpcTracks", tracker->GetTracks()));
-
   // coordinate transformation due to rotation and shift of TPC with respect to the magnet 
   // (= global coordinate system). 
   // Since the simulator incorporates these transformations, the distinction between simulated
@@ -513,19 +508,29 @@ Int_t StFtpcTrackMaker::Make()
   TObjArray *clusters = tracker->GetClusters();
   StFtpcPoint *point;
     
-   // loop over all clusters
+  // loop over all clusters
   for (Int_t i = 0; i < clusters->GetEntriesFast(); i++) {
     point = (StFtpcPoint *)clusters->At(i);
-    point->TransformFtpc2Global();
+    point->TransformFtpc2Global(); // errors are not transformed up to now (effect should be small) !!!
+    point->GetStFtpcHit()->update(*point);
   }
-  
+
   // momentum fit, dE/dx calculation
   tracker->GlobalFitAnddEdx();
 
   if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
     tracker->EstimateVertex(tracker->GetVertex(), 1);
   }
-  
+
+  FillDstMonSoftFtpcTable(tracker);
+
+  // write global tracks, do primary fit, write primary tracks
+  StFtpcTrackToStEvent *trackToStEvent = new StFtpcTrackToStEvent();
+  trackToStEvent->FillEvent(event, tracker->GetTracks());  
+  tracker->PrimaryFit();
+  trackToStEvent->FillEventPrimaries(event, tracker->GetTracks());
+  delete trackToStEvent;
+
   if (Debug()) {
     gMessMgr->Message("", "I", "OS") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
     StFtpcTrackingParams::Instance()->PrintParams();
@@ -578,12 +583,12 @@ Int_t StFtpcTrackMaker::Make()
   delete eval;
   */
   
-  if (tracker->GetNumberOfTracks() > 0) { // only done when sone tracks found
+  if (tracker->GetNumberOfTracks() > 0) { // only done when some tracks found
     MakeHistograms(tracker);
   }
   
   delete tracker;
-  // don't delete vertex, since it is deleted inside TDataSet
+  delete vertex;
   
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) completed." << endm;
   
@@ -681,6 +686,79 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 
 
 //_____________________________________________________________________________
+void StFtpcTrackMaker::FillDstMonSoftFtpcTable(StFtpcTracker *tracker) {
+
+  // This is a copy of the stuff formerly done in St_dst_Maker/StFtpcGobalMaker.
+  // Make sure that this function is only called for global tracks.
+
+  Int_t iftpc;
+
+  St_dst_mon_soft_ftpc *dst_mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
+  AddData(dst_mon_soft_ftpc);
+  dst_mon_soft_ftpc->SetNRows(1);
+  // Initialize dst_mon_soft_ftpc table
+  // mon_soft_ftpc[1].n_clus_ftpc[iftpc] is not used
+  dst_mon_soft_ftpc_st *mon_soft_ftpc = dst_mon_soft_ftpc->GetTable();
+
+  for (iftpc=0; iftpc<2; iftpc++) {
+    mon_soft_ftpc[0].n_clus_ftpc[iftpc] = 0;	  
+    mon_soft_ftpc[0].n_pts_ftpc[iftpc] = 0;   
+    mon_soft_ftpc[0].n_trk_ftpc[iftpc] = 0;
+    mon_soft_ftpc[0].chrg_ftpc_tot[iftpc] = 0.;   
+    mon_soft_ftpc[0].hit_frac_ftpc[iftpc] = 0.; 
+    mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] = 0.;
+    mon_soft_ftpc[0].res_pad_ftpc[iftpc] = 0.;   
+    mon_soft_ftpc[0].res_drf_ftpc[iftpc] = 0.;
+  }  
+
+  // Loop over all tracks
+  for (Int_t itrk=0; itrk<tracker->GetTracks()->GetEntriesFast(); itrk++) {
+
+    StFtpcTrack* track = (StFtpcTrack*)tracker->GetTracks()->At(itrk);
+    StFtpcPoint* firstPoint =  (StFtpcPoint*)track->GetHits()->First();
+    
+    iftpc = (firstPoint->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
+
+    mon_soft_ftpc[0].n_trk_ftpc[iftpc]++;
+
+    Int_t nFitPoints = track->GetHits()->GetEntriesFast();
+    mon_soft_ftpc[0].res_pad_ftpc[iftpc] += track->GetChiSq()[0] / (nFitPoints - 3);
+    mon_soft_ftpc[0].res_drf_ftpc[iftpc] += track->GetChiSq()[1] / (nFitPoints - 2);
+
+    mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] += track->GetTrackLength();
+  }
+
+  // Loop over all hits
+  for (Int_t iPoint=0; iPoint<tracker->GetClusters()->GetEntriesFast(); iPoint++) {
+    
+    StFtpcPoint *hit = (StFtpcPoint*)tracker->GetClusters()->At(iPoint);
+ 
+    iftpc = (hit->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
+    
+    if (hit->GetUsage() == kTRUE) mon_soft_ftpc[0].hit_frac_ftpc[iftpc]++;
+    mon_soft_ftpc[0].n_pts_ftpc[iftpc]++;
+    mon_soft_ftpc[0].chrg_ftpc_tot[iftpc] += hit->GetCharge();
+  }
+
+  // Compute dst_mon_soft_ftpc table averages if tracks are found
+  for (iftpc=0; iftpc<2; iftpc++) {
+    
+    if (mon_soft_ftpc[0].n_pts_ftpc[iftpc] != 0) {
+      mon_soft_ftpc[0].hit_frac_ftpc[iftpc] = mon_soft_ftpc[0].hit_frac_ftpc[iftpc]/mon_soft_ftpc[0].n_pts_ftpc[iftpc];
+    }	       
+    
+    if (mon_soft_ftpc[0].n_trk_ftpc[iftpc] != 0) {
+      mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] = mon_soft_ftpc[0].avg_trkL_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+      mon_soft_ftpc[0].res_pad_ftpc[iftpc] = mon_soft_ftpc[0].res_pad_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+      mon_soft_ftpc[0].res_drf_ftpc[iftpc] = mon_soft_ftpc[0].res_drf_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+    }
+  }       
+
+  return;
+}
+
+
+//_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Finish()
 {
   // final cleanup
@@ -707,7 +785,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.56 2004/04/26 09:53:45 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.57 2004/05/07 15:02:18 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
