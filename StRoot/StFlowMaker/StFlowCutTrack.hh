@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.hh,v 1.3 1999/11/30 18:52:50 snelling Exp $
+// $Id: StFlowCutTrack.hh,v 1.4 1999/12/15 22:01:24 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.hh,v $
+// Revision 1.4  1999/12/15 22:01:24  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.3  1999/11/30 18:52:50  snelling
 // First modification for the new StEvent
 //
@@ -35,26 +38,23 @@
 #include "Rtypes.h"
 class StPrimaryTrack;
 class StFlowTrack;
+
 class StFlowCutTrack {
 
  public:
 
-               StFlowCutTrack();
-  virtual      ~StFlowCutTrack();
-  static void  SetFitPts(Int_t lo, Int_t hi);
-  static void  SetFitOverMaxPts(Float_t lo, Float_t hi);
-  static void  SetEta(Float_t lo, Float_t hi, Int_t selN, Int_t harN);
-  static void  SetPt(Float_t lo, Float_t hi, Int_t selN, Int_t harN);
-  static Int_t CheckTrack(StPrimaryTrack* pTrack);
-  static Int_t SelectTrack(StFlowTrack* pFlowTrack, Int_t selN, Int_t harN);
-  static void  PrintCutList();
-  static Int_t EtaSymPos();
-  static Int_t EtaSymNeg();
-  static void  EtaSymClear();
+                StFlowCutTrack();
+  virtual       ~StFlowCutTrack();
+
+  static Int_t  CheckTrack(StPrimaryTrack* pTrack);
+  static void   PrintCutList();
+  static UInt_t EtaSymPos();
+  static UInt_t EtaSymNeg();
+  static void   EtaSymClear();
+  static void   SetFitPts(Int_t lo, Int_t hi);
+  static void   SetFitOverMaxPts(Float_t lo, Float_t hi);
   
  private:
-
-  enum {nSels = 2, nHars = 4};
 
   static UInt_t  mTrackN;                    // number of tracks
   static UInt_t  mGoodTrackN;                // number of accepted tracks   
@@ -67,31 +67,19 @@ class StFlowCutTrack {
   static UInt_t  mFitOverMaxCutN;            // number not accepted
   static Float_t mFitOverMaxCuts[2];         // range
 
-  static UInt_t  mEtaCutN;                   // number not accepted
-  static Float_t mEtaCuts[2][nSels][nHars];  // absolute values of range
-
-  static UInt_t  mPtCutN;                    // number not accepted
-  static Float_t mPtCuts[2][nSels][nHars];   // range
-
   //ClassDef(StFlowCutTrack,1)               // macro for rootcint
 }; 
 
-inline void StFlowCutTrack::SetFitPts(Int_t lo, Int_t hi) 
-  {mFitPtsCuts[0] = lo; mFitPtsCuts[1] = hi;}
+inline UInt_t StFlowCutTrack::EtaSymPos() { return mEtaSymPosN; }
 
-inline void StFlowCutTrack::SetFitOverMaxPts(Float_t lo, Float_t hi) 
-  {mFitOverMaxCuts[0] = lo; mFitOverMaxCuts[1] = hi;}
+inline UInt_t StFlowCutTrack::EtaSymNeg() { return mEtaSymNegN; }
 
-inline void StFlowCutTrack::SetEta(Float_t lo, Float_t hi, Int_t selN,
-  Int_t harN) {mEtaCuts[0][selN][harN] = lo; mEtaCuts[1][selN][harN] = hi;}
+inline void StFlowCutTrack::EtaSymClear() { mEtaSymPosN = 0; mEtaSymNegN = 0; }
 
-inline void StFlowCutTrack::SetPt(Float_t lo, Float_t hi, Int_t selN,
-  Int_t harN) {mPtCuts[0][selN][harN] = lo; mPtCuts[1][selN][harN] = hi;}
+inline void StFlowCutTrack::SetFitPts(Int_t lo, Int_t hi) {
+  mFitPtsCuts[0] = lo; mFitPtsCuts[1] = hi; }
 
-inline Int_t StFlowCutTrack::EtaSymPos() {return mEtaSymPosN;}
-
-inline Int_t StFlowCutTrack::EtaSymNeg() {return mEtaSymNegN;}
-
-inline void StFlowCutTrack::EtaSymClear() {mEtaSymPosN = 0; mEtaSymNegN = 0;}
+inline void StFlowCutTrack::SetFitOverMaxPts(Float_t lo, Float_t hi) {
+  mFitOverMaxCuts[0] = lo; mFitOverMaxCuts[1] = hi; }
 
 #endif

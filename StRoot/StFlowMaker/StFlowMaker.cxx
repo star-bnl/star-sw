@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StFlowMaker.cxx,v 1.6 1999/12/07 23:30:53 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.7 1999/12/15 22:01:27 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 // Description:  Maker to fill StFlowEvent from StEvent and
@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.7  1999/12/15 22:01:27  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.6  1999/12/07 23:30:53  snelling
 // Fixed Linux warnings
 //
@@ -32,6 +35,8 @@
 #include "StFlowMaker.hh"
 #include "StFlowEvent.hh"
 #include "StEvent.h"
+//#include "StEventSummary.h"
+#include "StRun.h"
 #include "StEventTypes.h"
 #include "StFlowCutEvent.hh"
 #include "StFlowCutTrack.hh"
@@ -39,16 +44,19 @@
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
 #include "TFile.h"
+#include "StFlowConstants.hh"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
+
+  Double_t StFlowMaker::mBField = 0.;
 
 //-----------------------------------------------------------------------
 
 StFlowMaker::StFlowMaker(const Char_t *name): 
   StMaker(name),
-  pEvent(0),
-  MakerName(name) {
+  pEvent(0) {
+    //  MakerName(name) {
 }
 
 //-----------------------------------------------------------------------
@@ -56,37 +64,43 @@ StFlowMaker::StFlowMaker(const Char_t *name):
 StFlowMaker::~StFlowMaker() {
 }
 
+//-----------------------------------------------------------------------
+
 Int_t StFlowMaker::Make() {
 
-  // Get a pointer to the DST
-  pEvent = (StEvent*) GetInputDS("StEvent");
+  // Get a pointer to StEvent
+  pEvent = (StEvent*)GetInputDS("StEvent");
   if (!pEvent) return kStOK; // If no event, we're done
+
+  // Set BField
+  //StEventSummary* pSummary = pEvent->summary();
+  //PR(pSummary);
+  //mBField = pEvent->summary()->magneticField();
+  mBField = 0.5*tesla;
     
-  // Check the event cuts
+  // Check the event cuts and fill StFlowEvent
   pFlowEvent = 0;
-  if (StFlowCutEvent::CheckEvent(pEvent)) {
-    // fill and return StFlowEvent
-    pFlowEvent = fillFlowEvent();
-  }
+  if (StFlowCutEvent::CheckEvent(pEvent)) fillFlowEvent();
+
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.6 1999/12/07 23:30:53 snelling Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.7 1999/12/15 22:01:27 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
-}
 
-//-----------------------------------------------------------------------
-
-Int_t StFlowMaker::Finish() {
-  return StMaker::Finish();
 }
 
 //-----------------------------------------------------------------------
 
 Int_t StFlowMaker::Init() {
+
+//   // Get a pointer to StRun
+//   StRun* pRun = (StRun*)GetInputDS("StRun");
+//   if (!pRun) double BField = pRun->magneticField();
+//   PR(BField);
 
   // Open PhiWgt file
   readPhiWgtFile();
@@ -102,18 +116,34 @@ Int_t StFlowMaker::Init() {
 
 //-----------------------------------------------------------------------
 
+Int_t StFlowMaker::Finish() {
+
+  // Print the cut lists
+  StFlowCutEvent::PrintCutList();
+  StFlowCutTrack::PrintCutList();
+  pFlowEvent->PrintSelectionList();
+  
+  return StMaker::Finish();
+}
+
+//-----------------------------------------------------------------------
+
 Int_t StFlowMaker::readPhiWgtFile() {
   // Read the PhiWgt root file
+
+  static const int& nHars    = Flow::nHars;
+  static const int& nSels    = Flow::nSels;
+  static const int& nPhiBins = Flow::nPhiBins;
 
   TDirectory* dirSave = gDirectory;
   TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
   if (!pPhiWgtFile->IsOpen()) {
-    cout << "### Can't open PhiWgt file" << endl;
+    cout << "##### Can't open PhiWgt file" << endl;
   }
   gDirectory = dirSave;
 
   // Fill mPhiWgt
-  // for full events for each harmonic
+  // for each selection and each harmonic
   for (int k = 0; k < nSels; k++) {
     char countSels[2];
     sprintf(countSels,"%d",k+1);
@@ -130,9 +160,7 @@ Int_t StFlowMaker::readPhiWgtFile() {
 	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
 	}
       } else {
-	for (int n = 0; n < nPhiBins; n++) {
-	  mPhiWgt[k][j][n] = 1.;
-	}
+	for (int n = 0; n < nPhiBins; n++) mPhiWgt[k][j][n] = 1.;
       }
       delete histTitle;
     }
@@ -140,31 +168,34 @@ Int_t StFlowMaker::readPhiWgtFile() {
 
   // Close PhiWgt file
   if (pPhiWgtFile->IsOpen()) pPhiWgtFile->Close();
-  PR(mPhiWgt[0][0][0]);
-  PR(mPhiWgt[1][0][30]);
-  PR(mPhiWgt[1][3][59]);
 
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
-StFlowEvent* StFlowMaker::fillFlowEvent() {// Make StFlowEvent from StEvent
-  const Double_t bField = 0.5*tesla;  
+void StFlowMaker::fillFlowEvent() {
+  // Make StFlowEvent from StEvent
 
   // Instantiate a new StFlowEvent
   pFlowEvent = new StFlowEvent;
 
   // Fill PhiWgt array
-  Double_t* pPhiWgt = &mPhiWgt[0][0][0];
-  pFlowEvent->SetPhiWeight(pPhiWgt);
+  //Double_t* pPhiWgt = &mPhiWgt[0][0][0]; 
+  pFlowEvent->SetPhiWeight(mPhiWgt);
 
-  // Get Initial multiplicity before TrackCuts 
+  // Get event id 
+  Long_t eventID = pEvent->id(); 
+  pFlowEvent->SetEventNumber(eventID);
+  PR(eventID);
+
+  // GetiInitial multiplicity before TrackCuts 
   UInt_t origTracks = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigTrackN(origTracks);
+  PR(origTracks);
 
   // loop over tracks in StEvent
-  Int_t goodTracks = 0;
+  int goodTracks = 0;
   const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
   StSPtrVecPrimaryTrackIterator itr = 0;
 
@@ -173,40 +204,51 @@ StFlowEvent* StFlowMaker::fillFlowEvent() {// Make StFlowEvent from StEvent
     if (StFlowCutTrack::CheckTrack(pTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
-      StThreeVectorD p = pTrack->geometry()->helix().momentum(bField);
+      StThreeVectorD p = pTrack->geometry()->helix().momentum(mBField);
       pFlowTrack->SetPhi(p.phi());
       pFlowTrack->SetEta(p.pseudoRapidity());
       pFlowTrack->SetPt(p.perp());
-      for (int k = 0; k < nSels; k++) {
-	for (int j = 0; j < nHars; j++) {
-	  //cout << j << " " << k << " " << p.pseudoRapidity() << endl;
-	  if (StFlowCutTrack::SelectTrack(pFlowTrack, k, j)) {
-	    pFlowTrack->SetSelect(j, k); 
-	  } 
-	}
-      }
+      pFlowTrack->SetCharge(pTrack->geometry()->charge());
+//       float b = pTrack->impactParameter();
+//       PR(b);
+      pFlowTrack->SetImpactPar(pTrack->impactParameter());
+      pFlowTrack->SetChi2(pTrack->fitTraits().chi2());
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
     }
   }
   PR(goodTracks);
   
+  // Check Eta Symmetry
+  if (!StFlowCutEvent::CheckEtaSymmetry()) {  // if kFALSE delete this event
+    delete pFlowEvent;
+    pFlowEvent = 0;
+
+    return;
+  }
+
+  pFlowEvent->SetSelections();
   pFlowEvent->MakeSubEvents();
 
-//   for (int j = 0; j < nHars; j++) {
-//     for (int k = 0; k < nSels; k++) {
-//       for (int n = 0; n < nSubs; n++) {
+  // Print multiplicities
+//   static const int& nHars    = Flow::nHars;
+//   static const int& nSels    = Flow::nSels;
+//   static const int& nSubs    = Flow::nSubs;
+//   int j, k, n;
+
+//   for (j = 0; j < nHars; j++) {
+//     for (k = 0; k < nSels; k++) {
+//       cout << "j,k= " << j << k << " : " << pFlowEvent->Mult(j, k) << endl;
+//     }
+//   }
+
+//   for (j = 0; j < nHars; j++) {
+//     for (k = 0; k < nSels; k++) {
+//       for (n = 0; n < nSubs+1; n++) {
 // 	cout << "j,k,n= " << j << k << n << " : " << 
-// 	  pFlowEvent->Mult(j, k, n+1) << endl;
+// 	  pFlowEvent->Mult(j, k, n) << endl;
 //       }
 //     }
 //   }
 
-  // Check Eta Symmetry
-  if (!StFlowCutEvent::CheckEtaSymmetry()) {    // if kFALSE delete this event
-    delete pFlowEvent;
-    return 0;
-  }
-
-  return pFlowEvent;
 }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.5 1999/12/07 23:30:52 snelling Exp $
+// $Id: StFlowEvent.cc,v 1.6 1999/12/15 22:01:25 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.6  1999/12/15 22:01:25  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.5  1999/12/07 23:30:52  snelling
 // Fixed Linux warnings
 //
@@ -36,16 +39,43 @@
 #include <math.h>
 #include <algorithm>
 #include "StFlowEvent.hh"
+#include "StFlowTrackCollection.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
-#include "StFlowTrackCollection.hh"
 #define PR(x) cout << "##### FlowEvent: " << (#x) << " = " << (x) << endl;
+
+Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
+								{0.,0.},
+								{0.,0.5},
+								{0.,0.},
+								{0.,0.5},
+								{0.,0.}},
+							       {{2.,2.},
+								{2.,1.},
+								{2.,2.},
+								{2.,1.},
+								{2.,2.},
+								{2.,1.}}};
+Float_t  StFlowEvent::mPtCuts[2][Flow::nHars][Flow::nSels] =  {{{0.05,0.05},
+								{0.05,0.05},
+								{0.05,0.05},
+								{0.05,0.05},
+								{0.05,0.05},
+								{0.05,0.05}},
+							       {{2.,2.},
+								{2.,2.},
+								{2.,2.},
+								{2.,2.},
+								{2.,2.},
+								{2.,2.}}};
 
 //-----------------------------------------------------------
 
 StFlowEvent::StFlowEvent() {
+  // Make a new track collection
   pTrackCollection = new StFlowTrackCollection;
+
 }
 
 //-----------------------------------------------------------
@@ -56,21 +86,23 @@ StFlowEvent::~StFlowEvent() {
     delete *iter;
   }
   delete pTrackCollection;
+
 }
 
 //-------------------------------------------------------------
 
 Int_t StFlowEvent::checkInput(Int_t harN, Int_t selN, Int_t subN) const {
+  // checks arguments for valid range
   
-  if (harN < 0 || harN >= nHars) {
+  if (harN < 0 || harN >= Flow::nHars) {
     cout << "### Harmonic " << harN << " not valid" << endl;
     return kFALSE;
   }
-  if (selN < 0 || selN >= nSels) {
+  if (selN < 0 || selN >= Flow::nSels) {
     cout << "### Selection " << selN << " not valid" << endl;
     return kFALSE;
   }
-  if (subN < 0 || subN > nSubs) {
+  if (subN < -1 || subN > Flow::nSubs) {
     cout << "### Subevent " << subN << " not valid" << endl;
     return kFALSE;
   }
@@ -80,18 +112,21 @@ Int_t StFlowEvent::checkInput(Int_t harN, Int_t selN, Int_t subN) const {
 
 //-------------------------------------------------------------
 
-///void StFlowEvent::SetPhiWeight(const PhiWgt_t* &pPhiWgt) {
-void StFlowEvent::SetPhiWeight(const Double_t* pPhiWgt) {
+void StFlowEvent::SetPhiWeight(const PhiWgt_t &pPhiWgt) {
+  // Transfers PhiWgt array from StFlowMaker
+
+  static const int& nHars    = Flow::nHars;
+  static const int& nSels    = Flow::nSels;
+  static const int& nPhiBins = Flow::nPhiBins;
+
   for (int k = 0; k < nSels; k++) {
     for (int j = 0; j < nHars; j++) {
       for (int n = 0; n < nPhiBins; n++) {
-	mPhiWgt[k][j][n] = *(pPhiWgt + n + nPhiBins*(j + nHars*k));
+	mPhiWgt[k][j][n] = pPhiWgt[k][j][n];
       }
     }
   }
-//   PR(mPhiWgt[0][0][0]);
-//   PR(mPhiWgt[1][0][30]);
-//   PR(mPhiWgt[1][3][59]);
+
 }
 
 //-------------------------------------------------------------
@@ -100,8 +135,7 @@ Double_t StFlowEvent::PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const {
   if (!checkInput(harN, selN, 0)) return 0.;
 
   if (mPhi < 0.) mPhi += twopi;
-  Int_t n = (Int_t) (mPhi/twopi)*nPhiBins;
-  //float phiWgt = mPhiWgt[selN][harN][n];  
+  int n = (int)(mPhi/twopi)*Flow::nPhiBins;
 
   return mPhiWgt[selN][harN][n];
 }
@@ -136,6 +170,7 @@ Float_t StFlowEvent::MeanPt(Int_t harN, Int_t selN, Int_t subN) {
       mMult++;
     }
   }
+
   return (mMult) ? mSumPt/(float)mMult : 0.;
 }
 
@@ -145,15 +180,15 @@ TVector2 StFlowEvent::Q(Int_t harN, Int_t selN, Int_t subN) {
   TVector2 mQ;
   mQ.Set(0., 0.);
   if (!checkInput(harN, selN, subN)) return mQ;
-  Double_t mQx=0., mQy=0.;
+  double mQx=0., mQy=0.;
   float order = (float)(harN + 1);
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowTrack->Select(harN, selN, subN)) {
-      Float_t mPhi = pFlowTrack->Phi();
-      Double_t phiWgt = PhiWeight(mPhi, selN, harN);
+      float mPhi = pFlowTrack->Phi();
+      double phiWgt = PhiWeight(mPhi, selN, harN);
       if (pFlowTrack->Eta() < 0 && (harN+1) % 2 == 1) phiWgt *= -1.;
       mQx += phiWgt * cos(mPhi * order);
       mQy += phiWgt * sin(mPhi * order);
@@ -190,49 +225,111 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
   return (mMult) ? mQ.Mod() / sqrt(mMult) : 0.;
 }
 
+//-----------------------------------------------------------------------
+
+void StFlowEvent::SetSelections() {
+
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+  
+  StFlowTrackIterator itr;
+  for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    Float_t mEta = pFlowTrack->Eta();
+    Float_t mPt  = pFlowTrack->Pt();
+    for (int selN = 0; selN < nSels; selN++) {
+      for (int harN = 0; harN < nHars; harN++) {
+	
+	// Eta
+	if (mEtaCuts[1][harN][selN] > mEtaCuts[0][harN][selN] && 
+	    (fabs(mEta) < mEtaCuts[0][harN][selN] || 
+	     fabs(mEta) >= mEtaCuts[1][harN][selN])) goto Skip;
+	
+	// Pt
+	if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
+	    (mPt < mPtCuts[0][harN][selN] ||
+	     mPt >= mPtCuts[1][harN][selN])) goto Skip;
+
+      	pFlowTrack->SetSelect(harN, selN);
+
+      Skip:  ;  // must have a statement after a label
+
+      }
+    }
+  }
+
+}
+
 //-------------------------------------------------------------
 
 void StFlowEvent::MakeSubEvents() {
 
+  static const int& nHars = Flow::nHars;
+  static const int& nSels = Flow::nSels;
+  static const int& nSubs = Flow::nSubs;
+
   StFlowTrackIterator itr;
-  int* fullEventMult = new int[nHars * nSels];
-  int* count = new int[nHars * nSels];
-  //initialize all elements in array with 0 
-  memset(fullEventMult, 0 , (nHars * nSels) * sizeof(int));
-  memset(count, 0 , (nHars * nSels) * sizeof(int));
-  Int_t iSelect, iHar, iSub = 0;
+  int eventMult[Flow::nHars][Flow::nSels] = {{0}};
+  int harN, selN, subN = 0;
 
   //random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
-
 
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    for (iSelect = 0; iSelect < nSels; iSelect++) {
-      for (iHar = 0; iHar < nHars; iHar++) {
-	if (pFlowTrack->Select(iHar, iSelect)) {
-	    fullEventMult[iHar + nHars * iSelect]++;
+    for (selN = 0; selN < nSels; selN++) {
+      for (harN = 0; harN < nHars; harN++) {
+	if (pFlowTrack->Select(harN, selN)) {
+	    eventMult[harN][selN]++;
 	}
       }
     }
   }
 
   // loop to set the SubEvent member variable
-  for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
-    StFlowTrack* pFlowTrack = *itr;
-    for (iSelect = 0; iSelect < nSels; iSelect++) {
-      for (iHar = 0; iHar < nHars; iHar++) {
-	if (pFlowTrack->Select(iHar, iSelect)) {
-	  count[iHar + nHars * iSelect]++;
-	  iSub = (Int_t) ceil(count[iHar + nHars * iSelect] / 
-			 floor(fullEventMult[iHar + nHars * iSelect] / nSubs));
-	  if (iSub > nSubs) {
-	    iSub = 0;
+  for (selN = 0; selN < nSels; selN++) {
+    for (harN = 0; harN < nHars; harN++) {
+      int subEventMult = eventMult[harN][selN] / nSubs;
+      if (subEventMult) {
+	subN = 0;
+	int countN = 0;
+	for (itr = TrackCollection()->begin(); itr != TrackCollection()->end();
+	     itr++) {
+	  StFlowTrack* pFlowTrack = *itr;
+	  if (pFlowTrack->Select(harN, selN)) {
+	    pFlowTrack->SetSubevent(harN, selN, subN);
+	    countN++;
+	    if (countN % subEventMult == 0.) subN++;
 	  }
-	  pFlowTrack->SetSubevent(iHar, iSelect, iSub);
 	}
       }
     }
   }
   
 }
+
+//-----------------------------------------------------------------------
+
+void StFlowEvent::PrintSelectionList() {
+  // Prints the list of selection cuts
+  // Call in Finish
+
+  static const int& nHars    = Flow::nHars;
+  static const int& nSels    = Flow::nSels;
+
+  cout << "#######################################################" << endl;
+  cout << "# Track Selections List:" << endl; 
+  for (int k = 0; k < nSels; k++) {
+    for (int j = 0; j < nHars; j++) {
+      cout << "#  selection= " << k+1 << " harmonic= " 
+	   << j+1 << endl;
+      cout << "#    abs(Eta) cuts= " << mEtaCuts[0][j][k] << ", " 
+	   << mEtaCuts[1][j][k] << endl;
+      cout << "#    Pt cuts= " << mPtCuts[0][j][k] << ", "
+	   << mPtCuts[1][j][k] << endl;
+    }
+  }
+  cout << "#######################################################" << endl;
+
+}
+

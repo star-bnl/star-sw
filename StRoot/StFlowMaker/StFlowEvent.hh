@@ -1,15 +1,18 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.4 1999/12/04 00:10:33 posk Exp $
+// $Id: StFlowEvent.hh,v 1.5 1999/12/15 22:01:26 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
 //
-// Description: A subset of StEvent 
+// Description: A subset of StEvent with flow functions
 //
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.5  1999/12/15 22:01:26  posk
+// Added StFlowConstants.hh
+//
 // Revision 1.4  1999/12/04 00:10:33  posk
 // Works with the new StEvent
 //
@@ -34,13 +37,10 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StFlowTrackCollection.hh"
+#include "StFlowConstants.hh"
 #include "Rtypes.h"
 #include "SystemOfUnits.h"
 class TVector2;
-
-enum {nHars = 4, nSels=2, nSubs = 2};
-enum {nPhiBins = 60};
-//const Double_t bField = 0.5*tesla;
 
 class StFlowEvent{
 
@@ -49,23 +49,23 @@ public:
            StFlowEvent();
   virtual  ~StFlowEvent();
 
+  Double_t PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
+  UInt_t   EventNumber() const;
+  UInt_t   Mult(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  TVector2 Q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Float_t  q(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Float_t  MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
+  Float_t  Psi(Int_t harN=1, Int_t selN=0, Int_t subN=-1);
   StFlowTrackCollection* TrackCollection() const;
 
+  void     SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  void     SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
+  void     SetSelections();
+  void     PrintSelectionList();
   void     MakeSubEvents();
   void     SetEventNumber(const UInt_t&);
   void     SetOrigTrackN(const UInt_t&);
-  void     SetPhiWeight(const Double_t* pPhiWgt);
-  /// void SetPhiWeight(const PhiWgt_t &pPhiWgt);
-  Double_t PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
-  UInt_t   EventNumber() const;
-  UInt_t   Mult(Int_t harN=1, Int_t selN=0, Int_t subN=0);
-  TVector2 Q(Int_t harN=1, Int_t selN=0, Int_t subN=0);
-  Float_t  q(Int_t harN=1, Int_t selN=0, Int_t subN=0);
-  Float_t  MeanPt(Int_t harN=1, Int_t selN=0, Int_t subN=0);
-  Float_t  Psi(Int_t harN=1, Int_t selN=0, Int_t subN=0);
-
-//   enum {nHars = 4, nSels=2, nSubs = 2};
-//   enum {nPhiBins = 60};
+  void     SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StFlowEvent& ev);
@@ -74,24 +74,33 @@ public:
 private:
 
   Int_t   checkInput(Int_t harN, Int_t selN, Int_t subN) const;
-  UInt_t  mEventNumber;                    // number of the event
-  UInt_t  nOrigTrack;                      // number of tracks
-  StFlowEvent* pFlowEvent;                 //!
-  StFlowTrackCollection* pTrackCollection; //!
 
-  /// typedef Double_t PhiWgt_t[nSel][nHars][nPhiBins];
-  Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event plane isotropic
+  UInt_t  mEventNumber;                      // number of the event
+  UInt_t  mOrigTrackN;                       // number of tracks
+  static  Float_t mEtaCuts[2][Flow::nHars][Flow::nSels];  // range absolute values
+  static  Float_t mPtCuts[2][Flow::nHars][Flow::nSels];   // range
+  StFlowEvent*           pFlowEvent;         //!
+  StFlowTrackCollection* pTrackCollection;   //!
+  Flow::PhiWgt_t         mPhiWgt;
 
 };
 
-inline void StFlowEvent::SetEventNumber(const UInt_t& event)
-  {mEventNumber = event;}
-inline void StFlowEvent::SetOrigTrackN(const UInt_t& tracks)
-  {nOrigTrack = tracks;}
-
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
-  return pTrackCollection;}
-inline  UInt_t StFlowEvent::EventNumber() const {return mEventNumber;}
+  return pTrackCollection; }
+
+inline  UInt_t StFlowEvent::EventNumber() const { return mEventNumber; }
+
+inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
+{ mEtaCuts[0][harN][selN] = lo; mEtaCuts[1][harN][selN] = hi; }
+
+inline void StFlowEvent::SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
+{ mPtCuts[0][harN][selN] = lo; mPtCuts[1][harN][selN] = hi; }
+
+inline void StFlowEvent::SetEventNumber(const UInt_t& event) {
+  mEventNumber = event; }
+
+inline void StFlowEvent::SetOrigTrackN(const UInt_t& tracks) {
+  mOrigTrackN = tracks; }
 
 #endif
 
