@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.4 1999/12/07 21:54:15 kathy Exp $
+//! $Id: StHistUtil.h,v 1.5 2000/01/12 16:49:04 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.5  2000/01/12 16:49:04  kathy
+//! add new methods so that one can set a list which will be used to print,draw a subset of the histograms corresponding to a given maker; new methods are SetDefaultPrintList,AddToPrintList,RemoveFromPrintList,ExaminePrintList; can't test it yet because seems can't find directory of histograms in DEV anymore and there are conflicts in NEW; updates to DrawHist method to use this new list are not done yet
+//!
 //! Revision 1.4  1999/12/07 21:54:15  kathy
 //! added date and time to DrawHist method in StHistUtil class so that this is printed at bottom right of histogram output
 //!
@@ -40,6 +43,7 @@ class TPaveLabel;
 class TDatime;
 
 class StHistUtil {
+
  private:
   // Data-members to make up the output Canvases and Postscript files
   TCanvas       *m_HistCanvas;       //!
@@ -57,9 +61,14 @@ class StHistUtil {
   TString        m_GlobalTitle;     // Title at top of each page of output
   
   TList         *m_ListOfLog;      //! list of histogram names that will be drawn with logy scale
+
+  TList         *m_ListOfPrint;    //! list of histogram names that will be drawn,printed
+
   StMaker       *m_PntrToMaker;    //! pointer to an St_Maker, so can find histograms
 
+
  protected:
+
 
  public: 
   StHistUtil();
@@ -67,10 +76,16 @@ class StHistUtil {
   virtual Int_t   DrawHists(Char_t *dirName="QA");
   virtual Int_t   ListHists(Char_t *dirName="QA");
   virtual TList*  FindHists(Char_t *dirName="QA");
+
   virtual void    SetDefaultLogYList(Char_t *dirName="QA");
   virtual Int_t   AddToLogYList(const Char_t *HistName="");
   virtual Int_t   RemoveFromLogYList(const Char_t *HistName="");
   virtual Int_t   ExamineLogYList();
+
+  virtual void    SetDefaultPrintList(Char_t *dirName="QA",Char_t *analType="FullTable");
+  virtual Int_t   AddToPrintList(const Char_t *HistName="");
+  virtual Int_t   RemoveFromPrintList(const Char_t *HistName="");
+  virtual Int_t   ExaminePrintList();
 
 
 // Inline methods
@@ -85,7 +100,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.4 1999/12/07 21:54:15 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.5 2000/01/12 16:49:04 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
@@ -94,14 +109,19 @@ class StHistUtil {
     
 inline void StHistUtil::SetHistsNamesDraw(const Char_t *firstName, const Char_t *lastName)
                          { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
+
 inline void StHistUtil::SetZones(Int_t columns, Int_t rows)
                          { m_PadColumns =columns; m_PadRows = rows;}
+
 inline void StHistUtil::SetPaperSize(Int_t width, Int_t height)
                          { m_PaperWidth = width; m_PaperHeight = height;}
+
 inline void StHistUtil::SetPostScriptFile(const Char_t *psFileName)
                          { m_PsFileName = psFileName;}
+
 inline void StHistUtil::SetPntrToMaker(StMaker *m1) 
                           {m_PntrToMaker = m1;}
+
 inline void StHistUtil::SetGlobalTitle(const Char_t *globalTitle)
                          { m_GlobalTitle = globalTitle;}
 
