@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.15 2000/01/27 05:54:34 porter Exp $
+ * $Id: StDbManager.cc,v 1.16 2000/01/27 20:27:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.16  2000/01/27 20:27:17  porter
+ * fixed error logic for table, config, or table-list not-found
+ *
  * Revision 1.15  2000/01/27 05:54:34  porter
  * Updated for compiling on CC5 + HPUX-aCC + KCC (when flags are reset)
  * Fixed reConnect()+transaction model mismatch
@@ -72,6 +75,7 @@ StDbManager::~StDbManager(){
   deleteServers();
   deleteDomains();
   deleteTypes();
+  mInstance=0;
 
 }
 
@@ -828,6 +832,8 @@ bool retVal = false;
      if(!server->isConnected()){
        if(!server->reConnect())return retVal;
        if(!server->QueryDb(table,mcheckTime.munixTime))return retVal;
+     } else {
+       return retVal;
      }
     }
      
@@ -853,6 +859,8 @@ bool retVal = false;
      if(!server->isConnected()){
       if(!server->reConnect())return retVal;
       if(!server->QueryDb(table,whereClause))return retVal;
+     } else {
+       return retVal;
      }
     }
      
@@ -924,6 +932,8 @@ bool retVal = false;
      if(!server->isConnected()){
        if(!server->reConnect())return retVal;  // table is filled 
        if(!server->WriteDb(table,mstoreTime.munixTime))return retVal; 
+     } else {
+       return retVal;
      }
    }    
 
