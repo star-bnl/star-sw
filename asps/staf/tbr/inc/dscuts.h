@@ -5,6 +5,7 @@ myBool Array(
 #define FLOAT   0
 #define INTEGER 1
 #define STRING  2
+#define HEX	3
 
 #define SUB_SOURCE_GENERIC 0
 #define SUB_SOURCE_WINDOW 1
