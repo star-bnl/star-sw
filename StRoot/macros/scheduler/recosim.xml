@@ -1,9 +1,9 @@
-<job  maxFilesPerProcess="1" simulateSubmission ="true">
+<job  maxFilesPerProcess="1" simulateSubmission ="false">
 <stdout URL="file:./$JOBID.out" />
-<input URL="file:/star/simu/simu/gstardata/rcf1206/done/rcf1206_99_700evts.fzd"></input>
 <!-- 
-    <input URL="file:/star/simu/simu/gstardata/rcf1206/done/*.fzd"></input>
+<input URL="file:/star/simu/simu/gstardata/rcf1206/done/rcf1206_99_700evts.fzd"></input>
 -->
+ <input URL="file:/star/simu/simu/gstardata/rcf1206/done/*.fzd"></input>
    <command>       
    <![CDATA[
     # --------------------------
