@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.5 2001/04/19 21:30:36 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.6 2001/04/27 20:50:45 balewski Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.6  2001/04/27 20:50:45  balewski
+// *** empty log message ***
+//
 // Revision 1.5  2001/04/19 21:30:36  balewski
 // add I/O to ppDst
 //
@@ -30,7 +33,6 @@
 #include "StEventTypes.h"
 #include "StppDst.h" 
 
-#include "tables/St_tcl_tphit_Table.h" //tmp for CL vs. nPrim
 #include "TH2.h"
 
 #include "StTreeMaker/StTreeMaker.h"
@@ -44,6 +46,37 @@ StppLPprojectMaker::StppLPprojectMaker(const char *name):StMaker(name){
  }
 //_____________________________________________________________________________
 StppLPprojectMaker::~StppLPprojectMaker(){
+  printf("%s-Destructor ddddddddddddddddd\n",GetName());
+  float *p[MxSpinID];
+  float tot[MxSpinID];
+
+  int is,ib;
+  for(is=0;is<MxSpinID;is++) {
+    printf("is=%d, add=%d\n",is, hpol[is]);
+    p[is]=((TH1F*) hpol[is])->GetArray();
+    assert(p[is]);
+    tot[is]=0;
+  }
+  int nb=((TH1F*) hpol[0])->GetNbinsX();
+  
+  printf("content of spin sorted %d-bin phi distributions\n",nb);
+  printf("bin spinID");
+  for(is=0;is<MxSpinID;is++) printf("=[%2d]     ",is);
+  printf("\n");
+  
+  for(ib=1;ib<=nb;ib++) {
+    printf("%3d ",ib);
+    for(is=0;is<MxSpinID;is++) {
+      tot[is]+=p[is][ib];
+      printf("  %8.0f",p[is][ib]);
+    }
+    printf("\n");
+  }
+  
+  printf("total=");
+  for(is=0;is<MxSpinID;is++) printf("%8.0f  ",tot[is]);
+  printf("\n %s-maker finisfed\n",GetName());
+
 
 }
 //_____________________________________________________________________________
@@ -86,13 +119,7 @@ Int_t StppLPprojectMaker::Make(){
 
   printf("ppDst found: rec pT=%f \n",my->pt);
   if(my->pt<0) return kStOK; //not valid event
-  
- //   G E T   D A T A
- St_DataSet *ds=GetDataSet("tpc_hits"); assert(ds);
- St_tcl_tphit  *tpcl=(St_tcl_tphit  *) ds->Find( "tphit");
- if(tpcl==0) printf("NULL pointer to St_tcl_tphit table\n");
- int nCL=tpcl->GetNRows();
- 
+
 
  //................................................
  hst[0]->Fill(my->pt); // all input events 
@@ -107,7 +134,6 @@ Int_t StppLPprojectMaker::Make(){
  
  hst[1]->Fill(my->pt); // all input events 
  hst[2]->Fill(spinID);
- ((TH2F *)hst[3])->Fill(my->nPrim,nCL/1000.);
  hst[4]->Fill(my->psi);
 
  
@@ -117,15 +143,16 @@ Int_t StppLPprojectMaker::Make(){
  
  // spin-sorted  PHI-distributios
  hpol[spinID]->Fill(my->psi);
- 
- 
+
  return kStOK;
 }
 
 //_____________________________________________________________________________
 Int_t StppLPprojectMaker::Finish()
 {
-  cout <<" Finish fffffffffffffffff ::"<<GetName() <<endl;
+
+  //printf("%s-Finish ffffffffffffffffff\n",GetName());
+
   return  kStOK;
 }
 
