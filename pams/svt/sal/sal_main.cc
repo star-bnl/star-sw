@@ -24,11 +24,11 @@ long type_of_call sal_main_(TABLE_HEAD_ST *config_h, SVG_CONFIG_ST *config,
 
 
 
-Point P, P1, P2, P3, P4;
+Point P, P1, P2;
 int iev;
 long waf_id;
 float r1, r2, r3, r4, r5, r6;
-int p, i, j, k, l, n, pf[NEV+1];
+int p, i, j, k, l, pf[NEV+1];
 
 r1 = config[0].layer_radius[0]*10;
 r2 = config[0].layer_radius[1]*10;
@@ -40,10 +40,10 @@ r6 = config[0].layer_radius[5]*10;
 work work(r1, r2, r3, r4, r5, r6); 
 event Event(r1, r2, r3, r4, r5, r6);
 //work.ClearParam();
-/*
-//*********************************************************************
+//
+/*********************************************************************/
 //  Parameters installation for misalignment simulation 
-//*********************************************************************
+/*********************************************************************/
   p = 0;
   for(i = 0; i < 3; i++)
    for(l = 0; l < 2; l++)  

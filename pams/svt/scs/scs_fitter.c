@@ -82,7 +82,7 @@ long type_of_call scs_fitter_(
 		 TABLE_HEAD_ST          *merge_h,      SCS_MERGE_ST            *merge ,
 		 TABLE_HEAD_ST            *spt_h,        SCS_SPT_ST              *spt ) 
 {
-   int         iCluster, iStatus;
+   int         iCluster;
    SCS_CLUSTER_ST *theClus;
 
    /* Loop on all clusters in the table */
@@ -265,8 +265,8 @@ int Calculate_Cluster_Moments (TABLE_HEAD_ST  *seq_h,       SSF_SEQ_ST  *seq,
   fSigmaD2 = fDriftMom2;
   
   /* Now we can calculate a better amplitude */
-  fExp  = exp(-0.5 * SQR(fDiffA) / fSigmaA2);
-  fExp *= exp(-0.5 * SQR(fDiffD) / fSigmaD2);
+  fExp  = (float)exp(-0.5 * SQR(fDiffA) / fSigmaA2);
+  fExp *= (float)exp(-0.5 * SQR(fDiffD) / fSigmaD2);
   fAmp  = (float) iADC / fExp;
   
   /* Use better amplitude to get better sigma  */
@@ -275,8 +275,8 @@ int Calculate_Cluster_Moments (TABLE_HEAD_ST  *seq_h,       SSF_SEQ_ST  *seq,
   fSigmaD2 = fDriftMom2;
   
   /* Finally calculate total charge under the gaussian */
-  fFittedCharge = 2 * PI * fAmp * sqrt((double)fSigmaA2) * 
-                        sqrt ((double)fSigmaD2);
+  fFittedCharge = 2 * PI * fAmp * (float)sqrt((double)fSigmaA2) * 
+                        (float)sqrt ((double)fSigmaD2);
   
   clus->x[0]    = fDriftMom1;
   clus->x[1]    = fAnodeMom1;
@@ -311,7 +311,7 @@ int Is_Merged_Cluster (SCS_CLUSTER_ST *Clus, SCS_PAR_ST *par)
 {
   float fCut;
   
-  fCut = fabs(par->cuts[1] * Clus->mom2[1] - Clus->mom2[0] - par->cuts[0]);
+  fCut = (float)fabs(par->cuts[1] * Clus->mom2[1] - Clus->mom2[0] - par->cuts[0]);
   
   /*  Does it make the cut for being a single hit? */
   
@@ -352,8 +352,8 @@ int Fill_Spt (SCS_PAR_ST     *par,
 	      SCS_CLUSTER_ST *clus,
 	      TABLE_HEAD_ST  *spt_h, SCS_SPT_ST    *spt)
 {
-  int    iSpt, iCluster;
-  float  zero[3], x[3], distance;
+  int    iSpt;
+  float  distance;
   float  fCorrection;
   
   /*  Make sure there's room in the spt table! */
@@ -683,13 +683,13 @@ int IsValidPeak (int    **Pixels,
   return 1;
 }
 /*------------------------------------------------------------------
-  ROUTINE:      long Fit_Peaks
+  ROUTINE:      void Fit_Peaks
   DESCRIPTION:  Fit the peaks in a merge configuration
   ARGUMENTS:
   RETURN VALUE: 
   ------------------------------------------------------------------*/
 
-int Fit_Peaks (int             *Pixels[],
+void Fit_Peaks (int             *Pixels[],
 	       int             iRows,
 	       int             iCols,
 	       int             iFirstAnode,
@@ -783,11 +783,11 @@ int Fit_Peaks (int             *Pixels[],
 }
 
 /*------------------------------------------------------------------
-ROUTINE:      int BlockOut
+ROUTINE:      void BlockOut
 DESCRIPTION:  mark pixel position as blocked
 RETURN VALUE: 0
 ------------------------------------------------------------------*/
-int BlockOut (int   *Shadow[], int x, int y)
+void BlockOut (int   *Shadow[], int x, int y)
 {
   Shadow[x-1][y-1] = 1;
   Shadow[x-1][ y ] = 1;
@@ -801,7 +801,6 @@ int BlockOut (int   *Shadow[], int x, int y)
   Shadow[x+1][ y ] = 1;
   Shadow[x+1][y+1] = 1;
   
-  return 0;
 }
 
 /*------------------------------------------------------------------
@@ -824,11 +823,11 @@ int Print_Pixels (int   *Pixels[], int iRows, int iCols)
   return 0;
 }
 /*------------------------------------------------------------------
-ROUTINE:      int Fill_Pixel_Array
+ROUTINE:      void Fill_Pixel_Array
 DESCRIPTION:  fill the pixel array with ADC values
 RETURN VALUE: 0
 ------------------------------------------------------------------*/
-int Fill_Pixel_Array (int   *Pixels[], 
+void Fill_Pixel_Array (int   *Pixels[], 
 		      int   iFirstTime,
 		      int   iFirstAnode,
 		      SCS_CLUSTER_ST   *clus,
@@ -853,7 +852,6 @@ int Fill_Pixel_Array (int   *Pixels[],
       iSeq = theSeq->key_next;
     }
   
-  return 0;
 }
 
 /*------------------------------------------------------------------
