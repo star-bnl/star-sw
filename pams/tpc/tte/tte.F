@@ -1,7 +1,10 @@
-* $Id: tte.F,v 1.8 1998/04/14 23:24:48 sakrejda Exp $
+* $Id: tte.F,v 1.9 1998/04/16 21:16:11 sakrejda Exp $
 * $Log: tte.F,v $
-* Revision 1.8  1998/04/14 23:24:48  sakrejda
-* filling tte_mctrack structure thoroughly debugged
+* Revision 1.9  1998/04/16 21:16:11  sakrejda
+* primary vertex field of tte_mctrack updated following changes in gstar
+*
+* Revision 1.9  1998/04/16 21:16:11  sakrejda
+* primary vertex field of tte_mctrack updated following changes in gstar
 *
 * Revision 1.8  1998/04/14 23:24:48  sakrejda
 * filling tte_mctrack structure thoroughly debugged
@@ -83,6 +86,7 @@ C_____________________________________________________________________________
 
       integer   list_size                     !size of the list arrays used 
 c                                              to address hits by id
+c                                              in the index table, mc g2t_hit
       parameter (list_size=1000000)
       integer   list_index_mc(list_size)      !address mc hit in tindex
       integer   list_index_rec(list_size)     !address rec hits in tindex
@@ -146,11 +150,11 @@ c                                              <-> real hit assignement
       data      event_number /0/
       save      event number
 
-      integer idI10, idI11
+c     message related variables
       character*132 m132(10)                ! for messages
-      data idI10, idI11 /2*0/
+      integer idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9
       integer idI10, idI11, idI12, idI13, idI14
-      save idI10, idI11
+      data idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9 /9*0/
       data idI10, idI11, idI12, idI13, idI14 /5*0/
       save idI1, idI2, idI3, idI4, idI5, idI6, idI7, idI8, idI9
       save idI10, idI11, idI12, idI13, idI14
@@ -171,6 +175,9 @@ C_____________________________________________________________________________
       call Msg_Enable( 'TTE-I6' )
       call Msg_Enable( 'TTE-I7' )
       call Msg_Enable( 'TTE-I8' )
+      call Msg_Enable( 'TTE-I9' )
+c      call Msg_Enable( 'TTE-I10' )
+c      call Msg_Enable( 'TTE-I11' )
 c      call Msg_Enable( 'TTE-I12' )
       call Msg_Enable( 'TTE-I13' )
       call Msg_Enable( 'TTE-I14' )
@@ -484,7 +491,12 @@ c          with tracks
 
 c
 c     go through the evaluation table and fill it with the mc information
-         evmc(i).vid=g2t_track(it).start_vertex_p
+      do i=1,evmc_h.nok
+         it=list_g2t_tracks(evmc(i).mcid)
+         evmc(i).pid=g2t_track(it).ge_pid
+         if(g2t_track(it).eg_label.gt.0) then
+            evmc(i).vid=1.0
+         else
             evmc(i).vid=g2t_track(it).start_vertex_p
          endif
 c
@@ -536,9 +548,18 @@ c     sort on the index table on reconstructed hit id (key2)
       iret = tls_qsort_herb_i(ng2t,tindex(istart).key2,
      >       tindex(istart+1).key2,tindex)
 c
-      call vzero(list_index_mc,list_size)
+c
 c     set up a list so the monte carlo hit can be found in the
-        list_index_mc(tindex(i).key2)=i
+c     translation table, clean up and zero the list_index_mc first
+      call vzero(list_index_rec,list_size)
+      do i=istart,istart+ng2t-1
+        if(tindex(i).key2.gt.0.and.tindex(i).key2.lt.list_size) then
+          list_index_rec(tindex(i).key2)=i
+        else if(tindex(i).key2.eq.0) then
+          write(m132,*)'TTE-I12 no reconstructed partner'
+          call Message(m132, 1, idI12)
+        else
+          write(m132,*)'TTE-I12 list size not big enough', list_size,
      >    tindex(i).key2                     
           call Message(m132, 1, idI12)
         endif
@@ -550,89 +571,95 @@ C     Sort the hit array according to the track number
      >       hit(2).track,loc_hit,
      >       hit_h.maxlen)
         
+c     go through all the hits sorted by the track number and relate them
 c     to the mc tracks
-c     skip hits that do not belong to any track
-      if(hit(loc_hit(i)).track.gt.0) then
-c        get the track number
-         track_num=int(hit(loc_hit(i)).track/1000)
-         track_num_local=track_num
-c        loop through all the points until this track is done
-         eval_h.nok=eval_h.nok+1
-         eval(eval_h.nok).rtrk=track_num
-c        fill the evaluation table with the info about this track:
-         eval(eval_h.nok).nfit=track(list_tracks(track_num)).nfit
-         eval(eval_h.nok).nrec=track(list_tracks(track_num)).nrec
-         eval(eval_h.nok).inhit=track(list_tracks(track_num)).hitid
-c        find a mc hit associated with this reconstructed hit
-c        and get it's momentum information.
-         id_mc=tindex(list_index_mc(eval(eval_h.nok).inhit)).key1
-         ip_mc=list_g2t_hits(id_mc)
-         eval(eval_h.nok).pxg=g2t_hit(ip_mc).p(1)
-         eval(eval_h.nok).pyg=g2t_hit(ip_mc).p(2)
-         eval(eval_h.nok).pzg=g2t_hit(ip_mc).p(3)
-         eval(eval_h.nok).ptg=sqrt(g2t_hit(ip_mc).p(1)**2+
-     >                             g2t_hit(ip_mc).p(2)**2)
-         eval(eval_h.nok).qr=track(list_tracks(track_num)).q
-         eval(eval_h.nok).ptr=1.0/track(list_tracks(track_num)).invp
-         eval(eval_h.nok).ptvr=1.0/track(list_tracks(track_num)).invp
-         eval(eval_h.nok).chisq(1)=
-     >   track(list_tracks(track_num)).chisq(1)
-         eval(eval_h.nok).chisq(2)=
-     >   track(list_tracks(track_num)).chisq(2)
-         eval(eval_h.nok).pxr=eval(eval_h.nok).ptr*
-     >   cos(track(list_tracks(track_num)).psi*C_RAD_PER_DEG)
-         eval(eval_h.nok).pyr=eval(eval_h.nok).ptr*
-     >   sin(track(list_tracks(track_num)).psi*C_RAD_PER_DEG)
-         eval(eval_h.nok).pzr=eval(eval_h.nok).ptr*
-     >                       track(list_tracks(track_num)). tanl
-         eval(eval_h.nok).pzvr=eval(eval_h.nok).ptr*
-     >                       track(list_tracks(track_num)).tanl
-*        try to get the closest approach:
-*        first get the track radius
-*        hrot is the sence of rotation
-         hrot=-track(list_tracks(track_num)).q
-         radius=1.0/(track(list_tracks(track_num)).invp*0.5
-     >               *0.00299792458)
-         psic=C_RAD_PER_DEG*track(list_tracks(track_num)).psi-
-     >   hrot*0.25*C_2PI
-         if(psic.gt.C_2PI) psic=psic-C_2PI
-         if(psic.lt.0)     psic=psic+C_2PI
-         x0=track(list_tracks(track_num)).r0*
-     >   cos(C_RAD_PER_DEG*track(list_tracks(track_num)).phi0) 
-         y0=track(list_tracks(track_num)).r0*
-     >   sin(C_RAD_PER_DEG*track(list_tracks(track_num)).phi0)       
-         xc=x0 - radius*cos(psic)
-         yc=y0 - radius*sin(psic)
-         eval(eval_h.nok).rdca=radius-sqrt(xc**2+yc**2)
-         phis=atan2(yc,xc)
-         if(phis.lt.0) phis=phis+C_2PI
+      i=1
+      bad_track=0
+      do while (i.le.hit_h.nok)
+c        skip hits that do not belong to any track or to a bad track
+         track_num=0
+         if(hit(loc_hit(i)).track.gt.0)
+     >   track_num=int(hit(loc_hit(i)).track/1000)
+c        double-check, whether this is a good track, loop only through good tracks
+         if(track_num.gt.0.and.list_tracks(track_num).eq.0) then
+           track_num=0
+           bad_track=bad_track+1
 
-         xs=eval(eval_h.nok).rdca*cos(phis)
-         ys=eval(eval_h.nok).rdca*sin(phis)
-         psisc=atan2(ys-yc,xs-xc)
-         if(psisc.lt.0)
-     >   psisc=psisc+C_2PI
-
-         eval(eval_h.nok).zdca=track(list_tracks(track_num)).z0+
-     >   hrot*radius*(psisc-psic)*
-     >   track(list_tracks(track_num)).tanl 
-         psis=atan2(ys-yc,xs-xc)+hrot*0.25*C_2PI
-         if(psis.gt.C_2PI) psis=psis-C_2PI
-         eval(eval_h.nok).pxvr=eval(eval_h.nok).ptr*cos(psis)
-         eval(eval_h.nok).pyvr=eval(eval_h.nok).ptr*sin(psis)
-*        set to 0 all the info that is not filled so far
-         eval(eval_h.nok).abpullav(1)=0.0
-         eval(eval_h.nok).abpullav(2)=0.0
-         eval(eval_h.nok).dpt=0.0
-         eval(eval_h.nok).dpx=0.0
-         eval(eval_h.nok).dpy=0.0
-         eval(eval_h.nok).dpz=0.0
-         eval(eval_h.nok).pullav(1)=0.0
-         eval(eval_h.nok).pullav(2)=0.0
-         eval(eval_h.nok).pullmx(1)=0.0
-         eval(eval_h.nok).pullmx(2)=0.0
-         j=i
-         rec_track_on_mc_track_nok=0
+         endif
+         if(track_num.gt.0) then 
+           track_num_local=track_num
+c          loop through all the points until this track is done
+           eval_h.nok=eval_h.nok+1
+           if(eval_h.nok.le.eval_h.maxlen) then
+             eval(eval_h.nok).rtrk=track_num
+c            fill the evaluation table with the info about this track:
+             eval(eval_h.nok).nfit=track(list_tracks(track_num)).nfit
+             eval(eval_h.nok).nrec=track(list_tracks(track_num)).nrec
+             eval(eval_h.nok).inhit=track(list_tracks(track_num)).hitid
+c            find a mc hit associated with this reconstructed hit
+c            and get it's momentum information.
+             id_mc=tindex(list_index_rec(eval(eval_h.nok).inhit)).key1
+             ip_mc=list_g2t_hits(id_mc)
+             eval(eval_h.nok).pxg=g2t_hit(ip_mc).p(1)
+             eval(eval_h.nok).pyg=g2t_hit(ip_mc).p(2)
+             eval(eval_h.nok).pzg=g2t_hit(ip_mc).p(3)
+             eval(eval_h.nok).ptg=sqrt(g2t_hit(ip_mc).p(1)**2+
+     >       g2t_hit(ip_mc).p(2)**2)
+             eval(eval_h.nok).qr=track(list_tracks(track_num)).q
+             eval(eval_h.nok).ptr=1.0/track(list_tracks(track_num)).invp
+             eval(eval_h.nok).ptvr=1./track(list_tracks(track_num)).invp
+             eval(eval_h.nok).chisq(1)=
+     >       track(list_tracks(track_num)).chisq(1)
+             eval(eval_h.nok).chisq(2)=
+     >       track(list_tracks(track_num)).chisq(2)
+             eval(eval_h.nok).pxr=eval(eval_h.nok).ptr*
+     >       cos(track(list_tracks(track_num)).psi*C_RAD_PER_DEG)
+             eval(eval_h.nok).pyr=eval(eval_h.nok).ptr*
+     >       sin(track(list_tracks(track_num)).psi*C_RAD_PER_DEG)
+             eval(eval_h.nok).pzr=eval(eval_h.nok).ptr*
+     >       track(list_tracks(track_num)). tanl
+             eval(eval_h.nok).pzvr=eval(eval_h.nok).ptr*
+     >       track(list_tracks(track_num)).tanl
+*            try to get the closest approach:
+*            first get the track radius
+*            hrot is the sence of rotation
+             hrot=-track(list_tracks(track_num)).q
+             radius=1.0/(track(list_tracks(track_num)).invp*0.5
+     >       *0.00299792458)
+             psic=C_RAD_PER_DEG*track(list_tracks(track_num)).psi-
+     >       hrot*0.25*C_2PI
+             if(psic.gt.C_2PI) psic=psic-C_2PI
+             if(psic.lt.0)     psic=psic+C_2PI
+             x0=track(list_tracks(track_num)).r0*
+     >       cos(C_RAD_PER_DEG*track(list_tracks(track_num)).phi0) 
+             y0=track(list_tracks(track_num)).r0*
+     >       sin(C_RAD_PER_DEG*track(list_tracks(track_num)).phi0)       
+             xc=x0 - radius*cos(psic)
+             yc=y0 - radius*sin(psic)
+             eval(eval_h.nok).rdca=radius-sqrt(xc**2+yc**2)
+             phis=atan2(yc,xc)
+             if(phis.lt.0) phis=phis+C_2PI
+             xs=eval(eval_h.nok).rdca*cos(phis)
+             ys=eval(eval_h.nok).rdca*sin(phis)
+             psisc=atan2(ys-yc,xs-xc)
+             if(psisc.lt.0) psisc=psisc+C_2PI
+             eval(eval_h.nok).zdca=track(list_tracks(track_num)).z0+
+     >       hrot*radius*(psisc-psic)*
+     >       track(list_tracks(track_num)).tanl 
+             psis=atan2(ys-yc,xs-xc)+hrot*0.25*C_2PI
+             if(psis.gt.C_2PI) psis=psis-C_2PI
+             eval(eval_h.nok).pxvr=eval(eval_h.nok).ptr*cos(psis)
+             eval(eval_h.nok).pyvr=eval(eval_h.nok).ptr*sin(psis)
+*            set to 0 all the info that is not filled so far
+             eval(eval_h.nok).abpullav(1)=0.0
+             eval(eval_h.nok).abpullav(2)=0.0
+             eval(eval_h.nok).dpt=0.0
+             eval(eval_h.nok).dpx=0.0
+             eval(eval_h.nok).dpy=0.0
+             eval(eval_h.nok).dpz=0.0
+             eval(eval_h.nok).pullav(1)=0.0
+             eval(eval_h.nok).pullav(2)=0.0
+             eval(eval_h.nok).pullmx(1)=0.0
              eval(eval_h.nok).pullmx(2)=0.0
              j=i
              rec_track_on_mc_track_nok=0
@@ -640,7 +667,7 @@ c        and get it's momentum information.
          do while(track_num_local.eq.track_num)
 c          find a mc track associated with this hit
 c          to do it take a real hit id
-           id_mc=tindex(list_index_mc(ip)).key1
+           ip=hit(loc_hit(i)).id
 c          look up its position in the index table and take
 c          the mc hit id from this location
            id_mc=tindex(list_index_rec(ip)).key1
@@ -691,10 +718,21 @@ c        let's find the biggest contribution
               eval(eval_h.nok).qg=my_charge(g2t_track(ii).ge_pid)
          else
               write(m132(1),*) 'TTE-I9 pid too big'
-      else
+              call Message (m132, 1, idI9 )
+         endif
+         i=j
+         else
+              write(m132(1),*) 'TTE-I13 eval not big enough'
+              call Message (m132, 1, idI13 )
+              tte=STAFCV_BAD
               return
          endif
          else
+         i=i+1
+      endif
+      end do
+      if(bad_track.gt.0) then
+         write(m132(1),*) 
      >   'TTE-I14 hit assigned to a bad reconstructed track', bad_track
          call message (m132, 1 ,idI14)
       endif
