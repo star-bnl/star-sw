@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.21 1999/06/15 14:44:57 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.22 1999/07/02 21:56:57 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.22  1999/07/02 21:56:57  kathy
+//! update for tables which exist in 99f AND put in changes to event summary and globtrk histogram sets requested by offline analysis meeting
+//!
 //! Revision 1.21  1999/06/15 14:44:57  kathy
 //! fix St_QA_Maker
 //!
@@ -118,7 +121,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.21 1999/06/15 14:44:57 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.22 1999/07/02 21:56:57 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -200,40 +203,64 @@ class St_QA_Maker : public StMaker {
   // for method MakeEvSum - from table event_summary
   TH1F     *m_trk_tot_gd;         //! number of good global tracks divided by total
   TH1F     *m_glb_trk_tot;        //! # tracks total from globtrk
-  TH1F     *m_glb_trk_gd;         //! # tracks good from globtrk
   TH1F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
+  TH1F     *m_glb_trk_prim;       //! # trks from primaries
   TH1F     *m_vert_total;         //! total number of vertices
   TH1F     *m_vert_V0;            //! number of V0 vertices
-  /*    TH1F     *m_vert_La;      //! number of La vertices  */
-  /*    TH1F     *m_vert_Ala;     //! number of Ala vertices */
-  /*    TH1F     *m_vert_K0;      //! number of K0 vertices */
   TH1F     *m_mean_pt;       //! mean pt value
   TH1F     *m_mean_eta;      //! mean eta value 
+  TH1F     *m_rms_eta;       //! rms eta value 
+  TH1F     *m_T_average;     //! mean Temp
   TH1F     *m_prim_vrtx0;    //! primary vrtx x position
   TH1F     *m_prim_vrtx1;    //! primary vrtx y position
   TH1F     *m_prim_vrtx2;    //! primary vrtx z position
   TH1F     *m_vrtx_chisq;    //! primary vrtx chisq
   
   // for method MakeGlob - from table globtrk
-  TH1F     *m_pT;            //! pT  reconstructed
-  TH1F     *m_pT_fr;         //! pT  reconstructed - full range
-  TH1F     *m_eta;           //! eta reconstructed
-  TH2F     *m_pT_eta_rec;    //! pT versus eta Spectra for reconstructed
-  TH2F     *m_mom_trklength; //! mom vs. trk length
+  TH1F     *m_globtrk_tot;   //! # tracks in table
+  TH1F     *m_globtrk_good;  //! # tracks in table with iflag>0 
+  TH1F     *m_globtrk_iflag; //! iflag value
+  TH1F     *m_det_id;        //! detector id of track
   TH1F     *m_point;         //! number of points on the track
   TH1F     *m_fit_point;     //! number of track points used for fitting
-  TH1F     *m_length;        //! length of track
+  TH1F     *m_glb_charge;    //! particle charge in units of |e|
+  TH1F     *m_glb_x0;        //! x-coord. at start of helix
+  TH1F     *m_glb_y0;        //! y-coord. at start of helix
+  TH1F     *m_glb_z0;        //! z-coord. at start of helix
+  TH1F     *m_glb_xf;        //! x-coord. of first tpc hit
+  TH1F     *m_glb_yf;        //! y-coord. of first tpc hit
+  TH1F     *m_glb_zf;        //! z-coord. of first tpc hit
+  TH1F     *m_psi;           //! psi reconstructed
+  TH1F     *m_tanl;          //! tan(dip) =pz/pt at start
+  TH1F     *m_glb_theta;     //! theta - calculated
+  TH1F     *m_eta;           //! eta reconstructed
+  TH1F     *m_mom;           //! momentum reconstructed
+  TH1F     *m_pT;            //! pT  reconstructed
   TH1F     *m_chisq0;        //! chi square [0]
   TH1F     *m_chisq1;        //! chi square [1]
-  TH1F     *m_psi;           //! psi reconstructed
-  TH1F     *m_det_id;        //! detector id of track
+  TH1F     *m_length;        //! length of track
+  TH1F     *m_glb_impact;    //! impact parameter from primary vertex
+  TH1F     *m_glb_ndf;       //! no. deg. of freedom for track fit.
+
+  TH2F     *m_pT_eta_rec;    //! pT versus eta Spectra for reconstructed
+  TH2F     *m_tanl_z0;       //! tanl(dip angle) vs z coord at start of helix
+  TH2F     *m_mom_trklength; //! mom vs. trk length
+  TH2F     *m_eta_trklength; //! trk length vs. eta
   TH2F     *m_npoint_length; //! num points vs length
   TH2F     *m_fpoint_length; //! num fit points vs length
   TH2F     *m_chisq0_mom;    //! chisq0 vs momentum
   TH2F     *m_chisq1_mom;    //! chisq1 vs momentum
+  TH2F     *m_chisq0_eta;    //! chisq0 vs eta
+  TH2F     *m_chisq1_eta;    //! chisq1 vs eta
+  TH2F     *m_chisq0_dip;    //! chisq0 vs dip angle
+  TH2F     *m_chisq1_dip;    //! chisq1 vs dip angle
+  TH2F     *m_chisq0_z0;    //! chisq0 vs z0 - helix start point
+  TH2F     *m_chisq1_z0;    //! chisq1 vs z0 - helix start point
+  TH2F     *m_nfptonpt_mom;  //! mom vs ratio of n fit pnts over n pnts
+  TH2F     *m_nfptonpt_eta;  //! eta vs ratio of n fit pnts over n pnts
+
   
-  
-  // for method MakeDE - from table dst_dedx
+// for method MakeDE - from table dst_dedx
   TH1F     *m_ndedx;         //! number of point to find dE/dx
   TH1F     *m_dedx0;         //! dE/dx [0]
   TH1F     *m_dedx1;         //! dE/dx [1] 
@@ -289,40 +316,6 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_pv_z;     //!   system
   TH1F     *m_pv_pchi2; //! row1-P(chi^2,ndf) of vertex fit
   
-  // for method MakeHistTofEvt
-  TH1F *m_te_ntpttrk;   //!no. of tpc tracks in event  
-  TH1F *m_te_nttetrk;   //!no. of tte tracks associated with tpt tracks
-  TH1F *m_te_ng2ttrk;   //!no. of g2t tracks associated with tpt/tte tracks
-  TH1F *m_te_nctfhit;   //!no. hits in g2t_tof_hit
-  TH1F *m_te_nexttrk;   //!no. decent tracks extrapolated
-  TH1F *m_te_ntoftrk;   //!no. of these that are kept
-  TH1F *m_te_ntrks;     //!no. decent tracks in the event
-  TH1F *m_te_ntrks_hit; //!no. of these with ctf hit via pointers
-  TH1F *m_te_ntrks_kee; //!no. of decent tracks extrapolated
-  TH1F *m_te_ntrks_tra; //!no. of these extrapolated to TOFp tray
-  TH1F *m_te_ntrks_mat; //!no. of these extrapolated to struck TOFp slat
-  
-  // for method MakeHistTofTrk
-  TH1F *m_tt_strk;   //! measured total length from target to hit
-  TH1F *m_tt_phitrk; //! phi of extrapolation of track to tof
-  TH1F *m_tt_stof;   //! geant's total length from target to hit 
-  TH1F *m_tt_phitof; //! phi of hit in tof from geant 
-  TH1F *m_tt_tof;    //! actual time of flight
-  TH1F *m_tt_adc;    //! ADC value for this slat
-  
-  // for method MakeHistEmsHitsBemc
-  TH1F *m_ehbe_hits1; //! bemc # hits detector 1
-  TH1F *m_ehbe_tnrg1; //! bemc tot energy detector 1
-  TH1F *m_ehbe_hits2; //! bemc # hits detector 2
-  TH1F *m_ehbe_tnrg2; //! bemc tot energy detector 2
-  
-  
-  // for method MakeHistEmsHitsBsmd
-  TH1F *m_ehbs_hits3; //! bemc # hits detector 3
-  TH1F *m_ehbs_tnrg3; //! bemc tot energy detector 3
-  TH1F *m_ehbs_hits4; //! bemc # hits detector 4
-  TH1F *m_ehbs_tnrg4; //! bemc tot energy detector 4 
-  
   
   // for method MakeHistXi
  
@@ -354,15 +347,7 @@ class St_QA_Maker : public StMaker {
   virtual void   BookHistV0();
   virtual void   BookHistPID();
   virtual void   BookHistVertex();
-  virtual void   BookHistTofEvt();
-  virtual void   BookHistTofTrk();
-  virtual void   BookHistEmsHitsBemc();
-  virtual void   BookHistEmsHitsBsmd();
   virtual void   BookHistXi();
-  virtual void   MakeHistTofEvt(St_DataSet *dst);
-  virtual void   MakeHistTofTrk(St_DataSet *dst);
-  virtual void   MakeHistEmsHitsBemc(St_DataSet *dst);
-  virtual void   MakeHistEmsHitsBsmd(St_DataSet *dst);
   virtual void   MakeHistXi(St_DataSet *dst);
   virtual void   PrintInfo();
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
