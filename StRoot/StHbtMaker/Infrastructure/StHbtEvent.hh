@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.19 2002/11/19 23:27:25 renault Exp $
+ * $Id: StHbtEvent.hh,v 1.20 2003/01/17 16:46:22 mercedes Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.20  2003/01/17 16:46:22  mercedes
+ * StMuEvent::refMult() added
+ *
  * Revision 1.19  2002/11/19 23:27:25  renault
  * New event constructor to find V0 daughters informations(helix for average
  * separation calculation)
@@ -125,6 +128,7 @@ public:
   unsigned short NumberOfGoodTracks() const;
   unsigned int UncorrectedNumberOfPositivePrimaries() const;
   unsigned int UncorrectedNumberOfNegativePrimaries() const;
+  unsigned int UncorrectedNumberOfPrimaries() const;
   float ReactionPlane(const int& wgt=0) const;
   float ReactionPlaneError(const int& wgt=0) const;
   float ReactionPlaneSubEventDifference(const int& wgt=0) const;
@@ -148,6 +152,7 @@ public:
   void SetNumberOfGoodTracks(const unsigned short&);
   void SetUncorrectedNumberOfPositivePrimaries(const unsigned int&);
   void SetUncorrectedNumberOfNegativePrimaries(const unsigned int&); 
+  void SetUncorrectedNumberOfPrimaries(const unsigned int&);
   void SetReactionPlane(const float&,const int& wgt=0);
   void SetReactionPlaneError(const float&, const int& wgt=0);
   void SetReactionPlaneSubEventDifference(const float&, const int& wgt=0);
@@ -172,6 +177,7 @@ private:
   unsigned short mNumberOfGoodTracks; // number of "good" tracks
   unsigned int mUncorrectedNumberOfPositivePrimaries;
   unsigned int mUncorrectedNumberOfNegativePrimaries;
+  unsigned int mUncorrectedNumberOfPrimaries;
   float mReactionPlane[2]; //reaction plane/error  //   
   float mReactionPlanePtWgt[2]; //reaction plane/error with pT weight //     
   double mMagneticField; // magnetic field in Z direction

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.18 2002/11/19 23:27:37 renault Exp $
+ * $Id: StHbtEvent.cc,v 1.19 2003/01/17 16:46:58 mercedes Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.19  2003/01/17 16:46:58  mercedes
+ * StMuEvent::refMult() added
+ *
  * Revision 1.18  2002/11/19 23:27:37  renault
  * New event constructor to find V0 daughters informations(helix for average
  * separation calculation)
@@ -203,6 +206,7 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
   mZdcAdc[1] = ev->zdcAdcAttentuatedSumEast();
   mUncorrectedNumberOfPositivePrimaries = ev->refMultPos();
   mUncorrectedNumberOfNegativePrimaries = ev->refMultNeg();
+  mUncorrectedNumberOfPrimaries = ev->refMult();
   mReactionPlane[0] = 0;
   mReactionPlane[1] = 0;
   mReactionPlanePtWgt[0] = 0;
@@ -284,6 +288,7 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType, bool readV0Daughters) 
   mZdcAdc[1] = ev->zdcAdcAttentuatedSumEast();
   mUncorrectedNumberOfPositivePrimaries = ev->refMultPos();
   mUncorrectedNumberOfNegativePrimaries = ev->refMultNeg();
+  mUncorrectedNumberOfPrimaries = ev->refMult();
   mReactionPlane[0] = 0;
   mReactionPlane[1] = 0;
   mReactionPlanePtWgt[0] = 0;
@@ -423,6 +428,7 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
   mNumberOfGoodTracks = ev.mNumberOfGoodTracks;
   mUncorrectedNumberOfPositivePrimaries = ev.mUncorrectedNumberOfPositivePrimaries;
   mUncorrectedNumberOfNegativePrimaries = ev.mUncorrectedNumberOfNegativePrimaries;
+  mUncorrectedNumberOfPrimaries = ev.mUncorrectedNumberOfPrimaries;
   mReactionPlane[0] = ev.mReactionPlane[0];
   mReactionPlane[1] = ev.mReactionPlane[1];
   mReactionPlanePtWgt[0] = ev.mReactionPlanePtWgt[0];
@@ -539,6 +545,7 @@ void StHbtEvent::SetNumberOfTracks(const unsigned short& tracks){mNumberOfTracks
 void StHbtEvent::SetNumberOfGoodTracks(const unsigned short& tracks){mNumberOfGoodTracks = tracks;}
 void StHbtEvent::SetUncorrectedNumberOfPositivePrimaries(const unsigned int& tracks){mUncorrectedNumberOfPositivePrimaries = tracks;}
 void StHbtEvent::SetUncorrectedNumberOfNegativePrimaries(const unsigned int& tracks){mUncorrectedNumberOfNegativePrimaries = tracks;}
+void StHbtEvent::SetUncorrectedNumberOfPrimaries(const unsigned int& tracks){mUncorrectedNumberOfPrimaries = tracks;}
 void StHbtEvent::SetReactionPlane(const float& rp, const int& wgt=0){
   (wgt) ? mReactionPlanePtWgt[0]=rp : mReactionPlane[0]=rp;
 }
@@ -562,6 +569,7 @@ unsigned short StHbtEvent::NumberOfTracks() const {return mNumberOfTracks;}
 unsigned short StHbtEvent::NumberOfGoodTracks() const {return mNumberOfGoodTracks;}
 unsigned int StHbtEvent::UncorrectedNumberOfPositivePrimaries() const {return mUncorrectedNumberOfPositivePrimaries;}
 unsigned int StHbtEvent::UncorrectedNumberOfNegativePrimaries() const {return mUncorrectedNumberOfNegativePrimaries;}
+unsigned int StHbtEvent::UncorrectedNumberOfPrimaries() const {return mUncorrectedNumberOfPrimaries;}
 float StHbtEvent::ReactionPlane(const int& wgt=0) const { 
   return (wgt) ? mReactionPlanePtWgt[0] : mReactionPlane[0];
 }
