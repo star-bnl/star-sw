@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.5 1999/11/15 18:48:22 ullrich Exp $
+ * $Id: StTrack.h,v 2.6 1999/11/29 17:32:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.5  1999/11/15 18:48:22  ullrich
- * Adapted new enums for dedx and track reco methods.
+ * Revision 2.6  1999/11/29 17:32:45  ullrich
+ * Added non-const method pidTraits().
  *
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
@@ -76,7 +76,8 @@ public:
     StTrackGeometry*               geometry();
     const StTrackGeometry*         geometry() const;
     StTrackDetectorInfo*           detectorInfo();
-    const StPtrVecTrackPidTraits   pidTraits(StDetectorId) const;
+    const StTrackDetectorInfo*     detectorInfo() const;
+    const StTrackFitTraits&        fitTraits() const;
     const StSPtrVecTrackPidTraits& pidTraits() const;
     StSPtrVecTrackPidTraits&       pidTraits();
     StPtrVecTrackPidTraits         pidTraits(StDetectorId) const;

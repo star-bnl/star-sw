@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.6  1999/11/15 18:48:20  ullrich
- * Adapted new enums for dedx and track reco methods.
+ * Revision 2.7  1999/11/29 17:32:42  ullrich
+ * Added non-const method pidTraits().
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
@@ -46,7 +46,7 @@
  **************************************************************************/
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich Exp $";
 #include "StVertex.h"
 #include "StTrackGeometry.h"
 #include "StTrackDetectorInfo.h"
@@ -55,7 +55,7 @@ static const char rcsid[] = "$Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich 
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.7 1999/11/29 17:32:42 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -268,7 +268,10 @@ StTrack::geometry() { return mGeometry; }
 const StTrackFitTraits&
 StTrack::fitTraits() const { return mFitTraits; }
 
-const StPtrVecTrackPidTraits
+StTrackDetectorInfo*
+StTrack::detectorInfo() { return mDetectorInfo; }
+
+const StTrackDetectorInfo*
 StTrack::detectorInfo() const { return mDetectorInfo; }
 
 const StSPtrVecTrackPidTraits&
