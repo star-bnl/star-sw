@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.56 1999/09/30 21:48:39 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.57 1999/11/05 15:25:38 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.57  1999/11/05 15:25:38  kathy
+// fix hist limits for detector id hist; small updates to documentation
+//
 // Revision 1.56  1999/09/30 21:48:39  kathy
 // fix for phi0 being in degrees in globtrk
 //
@@ -594,7 +597,7 @@ void St_QA_Maker::BookHistGlob(){
   m_globtrk_iflag = new TH1F("QaGlobtrkFlag", "globtrk: iflag ",200,-999.,1001.);
 
   m_globtrk_good  = new TH1F("QaGlobtrkGood", "globtrk: tot # good tracks",40,0.,10000.);  
-  m_det_id     = new TH1F("QaGlobtrkDetId",   "globtrk: Detector ID for tracks",11,-0.5,10.5);
+  m_det_id     = new TH1F("QaGlobtrkDetId",   "globtrk: Detector ID for tracks",25,0.,25.);
   m_point      = new TH1F("QaGlobtrkNPnt",    "globtrk: N points on track", 50, 0.,50.);
   m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,100.);
   m_fit_point  = new TH1F("QaGlobtrkNPntFit", "globtrk: N fit points on track", 50, 0.,50.);
@@ -711,7 +714,7 @@ void St_QA_Maker::BookHistPrim(){
   m_primtrk_iflag = new TH1F("QaPrimtrkFlag", "primtrk: iflag ",200,-999.,1001.);
 
   m_primtrk_good  = new TH1F("QaPrimtrkGood",  "primtrk: tot # good tracks",40,0.,10000.);  
-  m_pdet_id     = new TH1F("QaPrimtrkDetId",   "primtrk: Detector ID for tracks",11,-0.5,10.5);
+  m_pdet_id     = new TH1F("QaPrimtrkDetId",   "primtrk: Detector ID for tracks",25,0.,25);
   m_ppoint      = new TH1F("QaPrimtrkNPnt",    "primtrk: N points on track", 50, 0.,50.);
   m_pmax_point  = new TH1F("QaPrimtrkNPntMax", "primtrk: N max points on track", 50, 0.,50.);
   m_pfit_point  = new TH1F("QaPrimtrkNPntFit", "primtrk: N fit points on track", 50, 0.,50.);
