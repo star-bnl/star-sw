@@ -47,6 +47,7 @@ void* StiObjectFactory::returnObject()
 	}
 	else {
 	    // s.o.l.
+	    cout <<getName()<<endl;
 	    cout << "StiObjectFactory::getObject() - FATAL" <<endl;
 	    cout << "     Too many expension request " <<endl;
 	    cout << "     incrementCount : " << incrementCount << endl;
