@@ -29,9 +29,14 @@ using units::tesla;
 ClassImp(StEmcFilter)
 
 //------------------------------------------------------------------------------
-StEmcFilter::StEmcFilter():TObject()
-{
-  
+/*!
+\param mode defines the initial TOWER configuration
+0 = 2001 run (default)
+1 = west side only
+2 = full EMC
+*/
+StEmcFilter::StEmcFilter(Int_t mode):TObject()
+{  
   mGeo[0] = StEmcGeom::getEmcGeom("bemc");
   mGeo[1] = StEmcGeom::getEmcGeom("bprs");
   mGeo[2] = StEmcGeom::getEmcGeom("bsmde");
@@ -94,9 +99,23 @@ StEmcFilter::StEmcFilter():TObject()
   mMcEtaMax=10000.;
   
   mBemcRunning = NULL;
+  mBemcRunningOrig=NULL;
   mBprsRunning = NULL;
   mBsmdeRunning = NULL;
   mBsmdpRunning = NULL;
+  
+  if(mode!=0)
+  {
+    mBemcRunning = new St_emcRunning("bemcRunning",1);
+    emcRunning_st *table=mBemcRunning->GetTable();
+    for(Int_t i=0;i<4800;i++)
+    {
+      table[0].IsRunning[i]=0;
+      if(mode==1 && i<2400) table[0].IsRunning[i]=1;
+      if(mode==2) table[0].IsRunning[i]=1;
+    }
+    mBemcRunningOrig=mBemcRunning;
+  }
   
   mEmcPosition = new StEmcPosition();
   
@@ -104,6 +123,7 @@ StEmcFilter::StEmcFilter():TObject()
 //------------------------------------------------------------------------------
 StEmcFilter::~StEmcFilter()
 {
+  if(mBemcRunningOrig) delete mBemcRunningOrig;
   delete mEmcPosition;
 }
 //------------------------------------------------------------------------------
@@ -572,10 +592,12 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
   id=8;
   mass=mPion->mass();  
   if(!track) return kFALSE;
+  if(!track->geometry()) return kFALSE;
   Int_t charge=track->geometry()->charge();
 	if(charge<0) id=9;
   
   Double_t momentum  = fabs(track->geometry()->momentum().mag());
+  if(momentum==0) return kFALSE;
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
   UInt_t size = traits.size();
   if(size==0) return kFALSE;  
@@ -601,6 +623,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float
     if(dEdX==0) return kFALSE;
     Double_t npt = (Double_t)pid->numberOfPoints();
 		nPoints=(Int_t) npt;
+    if(nPoints==0) return kFALSE;
     Double_t dedx_expected;
     Double_t dedx_resolution = (Double_t)pid->errorOnMean();
     if(dedx_resolution<=0) dedx_resolution=npt > 0 ? 0.45/sqrt(npt) : 1000.;
@@ -691,7 +714,7 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
       }
       else
       {
-        if (/*(id >= 1 && id <= 340) ||*/ (id >= 1861 && id <= 2340) ) return kGOOD;
+        if ((id >= 1 && id <= 340) || (id >= 1861 && id <= 2340) ) return kGOOD;
         else return kBAD;
       }
       break;

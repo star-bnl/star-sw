@@ -73,6 +73,7 @@ class StEmcFilter: public TObject
 
     // status tables
     St_emcRunning*  mBemcRunning;
+    St_emcRunning*  mBemcRunningOrig;
     St_emcRunning*  mBprsRunning;
     St_smdRunning*  mBsmdeRunning;
     St_smdRunning*  mBsmdpRunning;
@@ -133,7 +134,7 @@ class StEmcFilter: public TObject
     void            calcCentrality(StEvent*); 
     
   public:
-                		StEmcFilter();                        ///< StEmcFilter constructor
+                		StEmcFilter(Int_t = 0);               ///< StEmcFilter constructor
                 		~StEmcFilter();                       ///< StEmcFilter destructor
 
     void        		initEmcTowers(StEvent*,Int_t=0);      ///< Use this function before using accept(), getNTracksTower() and getPtTower() methods for towers. This initializes all vectors necessary to these methods.
