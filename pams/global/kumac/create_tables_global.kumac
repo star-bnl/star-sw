@@ -118,7 +118,6 @@ macro svm
      
       cd [dst]
       tdm/newtable dst_v0_vertex dst_v0_vertex 100000
-       maxrowcount dst_v0_vertex 100000      
       cd /dui
       
       
@@ -231,7 +230,7 @@ macro svm
 
     cd [dst]
     tdm/newtable event_header    dst_event_header    1
-
+    rowcount event_header 1
  
  cd /dui
 
@@ -264,7 +263,7 @@ macro svm
   
     cd [run_dst]
     tdm/newtable run_header   dst_run_header   1
-
+    rowcount run_header 1
  cd /dui
 
  return
@@ -293,8 +292,8 @@ macro svm
 
 cd [params]/global
 
-tdm/newtable particle_dst_param  particle_dst_param 1
-tdm/table/rowcount  particle_dst_param 1
+   tdm/newtable particle_dst_param  particle_dst_param 1
+   rowcount  particle_dst_param 1
 
  cd /dui
 

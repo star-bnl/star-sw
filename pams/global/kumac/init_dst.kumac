@@ -7,6 +7,7 @@
 *                            renamed init_esum to init_ehead
 *                            set row count=1 for run_header & event_header
 *                            tables.
+* 12/11/98 K. Turner - moved rowcount to create_tables_global
 *
 ************************************************************************
 
@@ -17,9 +18,8 @@ macro/global/import *
 message ' Initializing the Run header  Tables'
 
 cd [run_dst]
-
-tdm/table/rowcount run_header 1
-
+ 
+ 
 tdm/table/cell/putvalue 'run_header[0].run_id'       0
 tdm/table/cell/putvalue 'run_header[0].event_type'  'Collision'
 tdm/table/cell/putvalue 'run_header[0].trig_mask'    0
@@ -43,9 +43,8 @@ macro init_ehead
  macro/global/import *
 
 cd [dst]
-
-tdm/table/rowcount event_header   1
-
+ 
+ 
 tdm/table/cell/putvalue 'event_header[0].n_event'      0
 tdm/table/cell/putvalue 'event_header[0].n_run'        0
 tdm/table/cell/putvalue 'event_header[0].event_type'  'Collision'
