@@ -59,8 +59,10 @@ int TPCV2P0_ZS_SR::initialize()
    
 
   // search through the  SEQD banks to build our tables of what's where
-
-  for(int rcb = 0; rcb < 6; rcb++) {
+  // This stupid compiler thinks rcb's scope extends here, so I removed int
+  // The original line should go in when we upgrade to a better compiler 
+  //  for(int rcb = 0; rcb < 6; rcb++) {
+  for(rcb = 0; rcb < 6; rcb++) {
     for(int mz = 0; mz < 3; mz++) {
       if (seqd_p[rcb][mz] == (classname(Bank_TPCSEQD) *)NULL) {
 	//TPCSEQD bank doesn't exist
@@ -220,7 +222,10 @@ int TPCV2P0_ZS_SR::initialize()
   }
 
       //second pass ***** this can be incorporated into the first loop !!
-  for(int rcb = 0; rcb < 6; rcb++) {
+  // This stupid compiler thinks rcb's scope extends here, so I removed int
+  // The original line should go in when we upgrade to a better compiler 
+  // for(int rcb = 0; rcb < 6; rcb++) {
+  for(rcb = 0; rcb < 6; rcb++) {
     for(int mz = 0; mz < 3; mz++) {
       if (seqd_p[rcb][mz] == (classname(Bank_TPCSEQD) *)NULL) continue;
       u_char *adc_locn = (u_char *)adcd_p[rcb][mz]->ADC;
