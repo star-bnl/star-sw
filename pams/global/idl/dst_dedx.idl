@@ -10,9 +10,9 @@
 
  struct dst_dedx   {
   long   id_track;      /* F.key to dst_track                             */
-  short  det_id;        /* Detector ID - SVT, TPC, FTPC                   */
+  long   det_id;        /* Detector ID - SVT, TPC, FTPC                   */
   long   iflag;         /* Quality/status of extacted dE/dx               */
   long   ndedx;         /* number of points used in dE/dx calcu.          */
   float  dedx[2];       /* Mean, most prob., or other dE/dx; and variance */
  } ;
-/*  Last mod. for dst_dedx:   $Date: 1998/06/03 13:52:00 $ */
+/*  Last mod. for dst_dedx:   $Date: 1998/06/03 22:26:50 $ */

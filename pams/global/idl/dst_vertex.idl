@@ -3,7 +3,7 @@
 
  struct dst_vertex  {
   long      id;            /* Primary key                             */
-  short     iflag;         /* bitmask of e.g. quality information     */
+  long      iflag;         /* bitmask of e.g. quality information     */
   long      det_id;        /* detector id where vertex was found      */
   long      vtx_id;        /* vertex type                             */
   long      n_daughters;   /* number of charged daughter tracks       */
@@ -14,4 +14,4 @@
   float     pchi2;         /* P(chi^2,ndf) of vertex fit              */
   long      id_aux_ent;    /* F.key into auxiliary vertex table       */
  } ;
-/*  Last mod. for dst_vertex:   $Date: 1998/06/03 13:52:02 $ */
+/*  Last mod. for dst_vertex:   $Date: 1998/06/03 22:26:50 $ */
