@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.20 1999/05/06 21:27:11 perev Exp $
+// $Id: StMaker.h,v 1.21 1999/05/10 15:37:52 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.21  1999/05/10 15:37:52  perev
+// Save of hisogramm in StMaker::Init
+//
 // Revision 1.20  1999/05/06 21:27:11  perev
 // StMaker remove his from hdirectory
 //
@@ -108,7 +111,7 @@ public:
    virtual St_DataSet   *AddData (St_DataSet *data=0,const char *dir=".data");
    virtual St_ObjectSet *AddObj  (TObject *obj,const char *dir);
    virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
-   virtual void        	AddHist(TH1 *h){AddObj(h,".hist");};
+   virtual void        	AddHist(TH1 *h,const char *dir=0);
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
@@ -180,7 +183,7 @@ public:
 
 //		must be in here in .h
    static const char   *GetCVSIdH() 
-    {static const char cvs[]="$Id: StMaker.h,v 1.20 1999/05/06 21:27:11 perev Exp $";
+    {static const char cvs[]="$Id: StMaker.h,v 1.21 1999/05/10 15:37:52 perev Exp $";
      return cvs;};
    static const char   *GetCVSTag()
      {static const char cvs[]="$Name:  $"; return cvs;};
