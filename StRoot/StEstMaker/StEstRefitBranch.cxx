@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstRefitBranch.cxx,v 1.5 2002/11/21 23:02:48 caines Exp $
+ * $Id: StEstRefitBranch.cxx,v 1.6 2003/04/14 18:31:35 munhoz Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstRefitBranch.cxx,v $
+ * Revision 1.6  2003/04/14 18:31:35  munhoz
+ * allow 1 hit tracks
+ *
  * Revision 1.5  2002/11/21 23:02:48  caines
  * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
  *
@@ -195,6 +198,7 @@ int StEstTracker::RefitBranch(StEstBranch *br, int usevertex, int *fitstatus) {
 	  dx = br->GetHit(isvt)->GetGlobE()->x();
 	  dy = br->GetHit(isvt)->GetGlobE()->y();
 	  dz = br->GetHit(isvt)->GetGlobE()->z();
+	  cout << "EST-INFO : dx ="<<dx<<"  dy="<<dy<<"  dz="<<dz<<endl;
 // 	  dx = 0.001;
 // 	  dy = 0.001;
 // 	  dz = 0.001;
