@@ -746,7 +746,7 @@ return
     (ev0_e)    exec run_ev0#ev0_eval2
     (ev0d)     exec run_ev0#ev0d  
 * exec run_ev0#ev0_dst
-* rm [dst]/ev0out
+               rm [dst]/ev0out
       (ctf)    exec cts_run
                exec ctu_run 
       (mwc)    exec mws_run
