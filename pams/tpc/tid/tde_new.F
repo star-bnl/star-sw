@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.7 1998/12/09 00:53:19 sakrejda Exp $
+* $Id: tde_new.F,v 1.8 1998/12/13 21:34:26 sakrejda Exp $
 * $Log: tde_new.F,v $
+* Revision 1.8  1998/12/13 21:34:26  sakrejda
+* tpt_const.inc replaced by math_constants.inc
+*
 * Revision 1.7  1998/12/09 00:53:19  sakrejda
 * increased local array size to accomodate Venus events
 *
@@ -52,7 +55,6 @@ C-----------------------------------------------------------------------
       END STRUCTURE
 
 C-----------------------------------------------------------------------
-#include "tpt_const.inc"
 #include "phys_constants.inc"
 #include "math_constants.inc"
 
@@ -190,7 +192,7 @@ c old hardwired B=0.5
 c         radius = 1. / (track(j).invp * 0.5 * bconv)
 c
          radius=1.0 / (track(j).invp*bfield(3)*C_D_CURVATURE)
-         psic = track(j).psi*dtorad + sign(1,track(j).q)*C_PI*0.5
+         psic = track(j).psi*C_RAD_PER_DEG + sign(1,track(j).q)*C_PI*0.5
 
          xc = x1 - radius*cos(psic)
          yc = y1 - radius*sin(psic)
