@@ -10,6 +10,7 @@
 #include "raw_seq.idl"
 #include "type_shortdata.idl"
 #include "tfc_adcxyz.idl"
+#include "tss_tsspar.idl"
 
 interface xyz_newtab: amiModule{
 	STAFCV_T call
@@ -25,8 +26,9 @@ interface xyz_newtab: amiModule{
                 , in raw_seq        raw_seq_out
                 , in type_shortdata pixel_data_out
    		, out tfc_adcxyz	adcxyz
+		, in tss_tsspar tsspar
 		);
 	};
 
-/* Created 25Nov96 Last modification: $Date: 1998/12/17 19:33:56 $ */
+/* Created 25Nov96 Last modification: $Date: 1999/03/24 01:21:01 $ */
 
