@@ -1,4 +1,4 @@
-/*CMZ :          01/06/98  17.31.42  by  Pavel Nevski*/
+/*CMZ :          06/06/98  19.02.33  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   28/11/97*/
 /*****************************************************/
 /*               S T A F   i n t e r f a c e         */
@@ -8,7 +8,8 @@
 extern "C" void staf_start_    () {}
 extern "C" void staf_stop_     () {}
 extern "C" int  tdm_map_table_ () {return 0;}
-extern "C" void ami_module_register_ (char* name, int n) {}
+extern "C" void ami_module_register_ ()    {}
+extern "C" int  tdm_clear_all_ () {return 0;}
  
 #else
 #include <stdio.h>
@@ -154,11 +155,11 @@ extern "C" int tdm_get_spec_(TABLE_HEAD_ST* pTab, char* c, int lc)
 /*
   printf(" dataset name = %20s \n",pTab->name);
   printf("         type = %20s \n",pTab->type);
-  printf("         maxl = %d \n",pTab->maxlen);
-  printf("         nok  = %d \n",pTab->nok);
-  printf("         rbyte= %d \n",pTab->rbytes);
-  printf("         ds_p = %d \n",pTab->dsl_pointer);
-  printf("         dd_p = %d \n",pTab->data_pointer);
+  printf("         maxl = %d \n",  pTab->maxlen);
+  printf("         nok  = %d \n",  pTab->nok);
+  printf("         rbyte= %d \n",  pTab->rbytes);
+  printf("         ds_p = %d \n",  pTab->dsl_pointer);
+  printf("         dd_p = %d \n",  pTab->data_pointer);
 */
   if (!dsTableTypeSpecifier(&pSpec,(ds_dataset_t*)pTab->dsl_pointer)) return 0;
      if (strlen(pSpec)<lc) strcpy(c,pSpec); else strncpy(c,pSpec,lc);
@@ -187,8 +188,38 @@ extern "C" int tdm_get_column_(TABLE_HEAD_ST* pTab,int* k,char* c,char* d,
   strcpy(c,cc);
   return strlen(cc)+1;
 }
- 
 /*---------------------------------------------------------------------------*/
+ 
+extern "C" int  tdm_clear_all_  (char* path, int lp)
+{  tdmDataset*   tDs  = NULL;
+   DS_DATASET_T  *ds, *dt, *du, *dd[20];
+   int           i,j,l,mm[20];
+ 
+   /* get starting address of a dataset */
+ 
+   ds=0;
+   if (tDs=tdm->findDataset(path))  tDs->cvtDslPointer ((DSL_PTR_T &) ds);
+   if (!ds) { printf (" tdm_zero_all: bad path = %s \n",path); return 0; }
+ 
+   l=0; dd[0]=ds; mm[0]=-1;
+   for (;ds;)
+   {
+     if (ds->tid)
+     { ds->elcount=0; printf(" clearing table %20s \n",ds->name); break; }
+     du=0;
+     for (j=mm[l]+1; j< ds->elcount; j++)
+     {
+       if (!(dt=ds->p.link[j])) continue;
+       if (dt->tid==NULL)       { mm[l]=j; du=dt; break; }
+       dt->elcount=0; printf(" clearing table %20s \n",dt->name);
+     }
+     /* new dataset found  - and selected */
+     if (du)  { /* going  up  the tree */  l+=1; ds=du; mm[l]=-1; dd[l]=ds; }
+     else     { /* going down the tree */  l-=1; if (l<0) break;  ds=dd[l]; }
+   }
+   return 1;
+}
+/***************************************************************************-*/
  
 extern "C" int ami_call_(char* name,int* n, char* tables, int ln, int lt)
  

@@ -360,7 +360,7 @@ Sets: list of data sets to be read or written:
  D - DIGI banks,
  R - reconstruction banks,
  S - data structure description (both include files and rz-database) is
-     updated automatically as it is done with the STRUCTURES commands,
+     updated automatically as it is done with the default STRUCTURES commands,
  * - all above (default).
  
 Note that GEANT simulations are allowed ONLY if the input does not contain
@@ -414,16 +414,30 @@ are updated upon read.
 >Command REBANK
 >Guidance
  
-Bank access mechanism is implemeted as it is described in Atlas note
-SOFT-NO-002. The only correction to the note is the call to the REBANK
-itself, which now has an additional parameter Ia:
+Bank access mechanism is implemeted as it is described in the
+Atlas note SOFT-NO-002. The only correction to the note is the call
+to the REBANK itself, which now has an additional parameter Ia:
  
           call REBANK (Path,IDN,Npar,Link*,Ia*)
  
 The returned value of Ia contains the displacement in the bank,
 for a single raw request. Remember that this routine is not intended
-for general usage and should be avoided - use FILL/USE operators
+for general usage and should be avoided - use FILL/USE operators or
 RBSTORE/RBCOPY, RBGET/RBPUT routines instead.
+*-----------------------------------------------------------------------------
+>Command FILL
+>Guidance
+ 
+FILL operatore is fully described in the AGI manual (Atlas note SOFT-NO-14).
+Here we provide some additional details and helpful hints.
+ 
+ Although names of the variables in AGI structures are limited to 12
+characters, DZDOC suports only 8 characters in the documentation.
+That means that in the structure defintion, produced by AGI (see also
+STRUCTURES and TABLES commands), all names will be TRUNCATED to 8 symbols.
+To avoid this complification, user is advised to use in structures
+variable names not longer than 8 charactes.
+ 
 >Action AGXUSER
 *-----------------------------------------------------------------------------
 >Command USE
@@ -513,8 +527,8 @@ key   'name of the selected histogram'  C   D='ALL'
 >Command STRUCTURES
 >Parameters
 +
-system  'name of the system whose structures should be dumped'  C  D=' '
-type    'type of the output'                                    C  D=' '
+system  'name of the system whose structures should be dumped' C  D=' '
+type    'type of the output'                                   C  D='def'
  
 >Guidance
  
@@ -522,13 +536,19 @@ Produce a definition file with data structure description and
 update the documentation database (detm.rz) in accordance with the
 structures currenly loaded in the program.
  
+System name argument is interpreted in the same way as the argument in
+the UNIX 'ls' command, for example:
+ - no name at all produces a single output file (detmsys) with all structure descriptions in it;
+ - '*' produces a set of system-based output files (*sys) with its related structure description;
+ - sys/name produces a single structure definition.
+ 
 Type of the output may be
  
-  def   - AGI preprocessor input file,
+  def   - AGI preprocessor input file (default),
   idl   - CORBA interface definitions language,
   other - internal table format
  
-This output may automatically be read by the AGI parser so that user
+The detmsys.def output may be automatically read by the AGI parser so that user
 can get access to structure description with +cde or +include statements.
 CORBA idl file should be processed by STIC compiler to produce .inc and .h
 files. Internal definition file is directly fed to table access module.
@@ -545,7 +565,7 @@ dataset  'output directory'                               C  D=' '
 Makes AGI structures, which belong to a particular AGI system, visible as
 StaF tables in the requested dataset. Apropriate STAF table descriptions
 is derived from AGI description and actual table adresses are mapped to AGI
-structures. Default value is "*" which means "all system".
+structures. Default value means "all system".
 A subset of structures can also be convertes into tables
 by defining the path to them.
  
@@ -553,6 +573,16 @@ By default, all tables are created in /dui/Run, but
 destination can be redirectded to another dataset.
 If the dataset does not exist yet, it will be created
 (but not the whole path!)
+ 
+>Action AGXUSER
+*-----------------------------------------------------------------------------
+>Command TABCLEAR
+>Parameters
++
+dataset  'directory to clear'                       C  D='.'
+ 
+>Guidance
+Clear (reset row conters) all tables in the selected directory and below it.
  
 >Action AGXUSER
 *-----------------------------------------------------------------------------

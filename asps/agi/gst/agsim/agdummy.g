@@ -6,10 +6,11 @@ Replace[REF#,#;] with [{IF}[EXIST 1]{Call #1;Call CsExt('D',#1);REF #2,;}]
 *************************************************************************
 Replace[LIST #;] with [ #1 _
  "Geant  "   GfKine,GfVert,GfPart,GfPath,GfHead,GDtoM,GMtoD,GlVolu,
-             GpKine,GLast,GsHEAD,GsCKOV,GpIons,Grndm,Granor,Gfnhit,
+             GpKine,GLast,GsHEAD,GsCKOV,GpIons,Grndm,Granor,Gfnhit,GpRung,
  "vector "   vdist,vscale,vadd,vmod,sortzv,vfill,Ublank,Ufill,Uzero,IuLast,
+ "tr-prop"   trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
- "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
+ "matrix "   Rsinv,Dsinv,Rinv,Dinv,Ssmt5t,Xmm55,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rndm,rnorml,dircos,
  "random "   binomi,rngama,gauss,proxim,
