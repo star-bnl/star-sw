@@ -29,7 +29,8 @@ StEmcSpectra::StEmcSpectra(const char* cdet):St_DataSet(cdet)
   #include "StEmcUtil/emcDetectorName.h"
   Int_t nadc[4]={4096,1024,1024,1024};
   SetTitle(cdet);
-  geo=new StEmcGeom(cdet);
+  //geo=new StEmcGeom(cdet);
+  geo=StEmcGeom::getEmcGeom(cdet);
   for(Int_t i=0;i<4;i++) if(!strcmp(cdet,detname[i].Data())) detNum=i;
   nAdcMax=nadc[detNum];
   nModules=geo->NModule();
@@ -303,7 +304,28 @@ TArrayF StEmcSpectra::GetSpectra(Int_t position)
 //_____________________________________________________________________________
 TArrayF StEmcSpectra::GetSpectra(Int_t position,Float_t a,Float_t b)
 {
-  return ReBin(position,a,b);
+  TArrayF tmp=ReBin(position,a,b);
+  
+  //subtract effective pedestals. If not calculated, effective pedestal=0
+  emcCalSettings_st* Settings_st=SettingsTable->GetTable();
+  if(Settings_st[0].DoEffPedCalculation==1 && 
+     Settings_st[0].DoEffPedSubtraction==1)
+  {
+    emcCalibration_st* Calib_st=CalibTable->GetTable();
+    Float_t avg = Calib_st[position-1].AdcPedestal;
+    Int_t shift=(Int_t) avg;
+    if(shift!=0)
+    {
+      for(Int_t i=0;i<nAdcMax;i++)
+      {
+        Int_t j=i+shift;
+        Float_t x;
+        if(j>=nAdcMax) x=0; else x=tmp[j];
+        tmp[i]=x;
+      }
+    }
+  }  
+  return tmp;
 }
 //_____________________________________________________________________________
 TArrayF StEmcSpectra::ReBin(Int_t position,Float_t a,Float_t b)
@@ -398,7 +420,7 @@ TArrayF StEmcSpectra::GetEtaBinSpectra(Int_t etabin)
           Float_t b=rows[id-1].EqShift;
           if(a!=0) 
           {
-            TArrayF temp1=ReBin(id,a,b); 
+            TArrayF temp1=GetSpectra(id,a,b); 
             for(Int_t j=0;j<GetNAdcMax();j++) temp[j]+=temp1[j];
           } 
         }

@@ -13,6 +13,7 @@
 
 #include "StEmcMipSpectra.h"
 #include "StEmcEqualSpectra.h"
+#include "StEmcEffPedSpectra.h"
 
 #include "TArrayI.h"
 
@@ -23,7 +24,7 @@
 #include "tables/St_emcMipCalib_Table.h"
 #include "TRandom.h"
 
-#define StEmcCalibrationMaker_DEBUG 
+#define StEmcCalibrationMaker_DEBUG 1
 
 #define maxdet 8
 
@@ -36,6 +37,7 @@ class StEmcCalibrationMaker : public StMaker
            //QA histograms ******************
            TH1F* m_EqualOccupancy;        //!
            TH1F* m_MipOccupancy;          //!
+           TH1F* m_EffPedOccupancy;       //!
            //********************************
            
            Int_t   detnum;
@@ -74,8 +76,8 @@ class StEmcCalibrationMaker : public StMaker
            Bool_t  CalcZVertex();
            Bool_t  FillEqual();
            Bool_t  FillMipCalib();
+           Bool_t  FillEffPed();
            Bool_t  CheckTracks();
-           Bool_t  IsThisTrackGood(Int_t,Float_t*,Float_t*);
            Bool_t  ProjectTrack(StTrack*,double,Float_t*,Float_t*);
            Bool_t  GetPedestal();
            Bool_t  SubtractPedestal();
@@ -92,10 +94,11 @@ class StEmcCalibrationMaker : public StMaker
    virtual Int_t   Init();
    virtual Int_t   Make();
    virtual Int_t   Finish();
-   virtual Int_t   Clear();
+           void    Clear(const Option_t *option="");
            Bool_t  Equalize();
            Bool_t  MipCalib();
            Bool_t  MakeCalibration();
+           Bool_t  MakeEffPed();
            Bool_t  SaveTables();
            void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*);
 
@@ -107,7 +110,7 @@ class StEmcCalibrationMaker : public StMaker
    
            StEmcEqualSpectra*     EqualSpec;
            StEmcMipSpectra*       MipSpec;
-
+           StEmcEffPedSpectra*    EffPedSpec;
 
 
    ClassDef(StEmcCalibrationMaker, 1)  

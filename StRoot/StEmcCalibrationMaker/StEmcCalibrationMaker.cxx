@@ -66,15 +66,7 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   
   Settings_st[0].NEtaBins=10;             // number of eta bins
   Settings_st[0].EtaBinWidth=4;           // etabin width in detetor division
-  
-  /*Settings_st[0].DoPedSubtraction=0;      // electronic pedestal subtraction 0=none
-  
-  Settings_st[0].DoEffPedCalculation=0;
-  Settings_st[0].DoEffPedSubtraction=0;
-  Settings_st[0].EffPedEventsPerBin=1000;
-  Settings_st[0].EffPedMinOccupancy=1.0;
-  Settings_st[0].EffPedMaxNumberOfTracks=500;*/
-  
+    
   Settings_st[0].DoEqualization=1;        // 0 - do not equalize, 1 - equalize
   Settings_st[0].EqualizationMethod=1;    // 0 - mean and rms, 1 - fit
   Settings_st[0].EqEventsPerBin=750;      //670
@@ -93,6 +85,16 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   Settings_st[0].UsePi0Calib=0;
   
   Settings_st[0].UseElectronCalib=0;
+  
+  Settings_st[0].DoPedSubtraction=0;      // electronic pedestal subtraction 0=none
+  
+  Settings_st[0].DoEffPedCalculation=0;
+  Settings_st[0].DoEffPedSubtraction=0;
+  Settings_st[0].EffPedMethod=0;  // mean and rms
+  Settings_st[0].EffPedEventsPerBin=1000;
+  Settings_st[0].EffPedMinOccupancy=1.0;
+  Settings_st[0].EffPedMaxNumberOfTracks=500;
+
 // finished settings table
 
 }
@@ -126,7 +128,8 @@ Int_t StEmcCalibrationMaker::Init()
 
   evnumber=0;
   if(Geo) delete Geo;
-  Geo=new StEmcGeom(detname[detnum].Data());
+  //Geo=new StEmcGeom(detname[detnum].Data());
+  Geo=StEmcGeom::getEmcGeom(detname[detnum].Data());
   nbins=Geo->NModule()*Geo->NEta()*Geo->NSub();
   
   emcHits.Set(nbins);
@@ -236,14 +239,42 @@ Int_t StEmcCalibrationMaker::Init()
   {
   }
   
+  if(Settings_st[0].DoEffPedCalculation==1) // do eff pedestal calculation
+  {    
+    Int_t nb=nbins;
+
+    if(EffPedSpec) delete EffPedSpec;
+    EffPedSpec=new StEmcEffPedSpectra(detname[detnum].Data());
+    EffPedSpec->CalibTable=CalibTable;
+    EffPedSpec->SettingsTable=SettingsTable;
+    EffPedSpec->nEtaBins=Settings_st[0].NEtaBins;
+    EffPedSpec->etaBinWidth=Settings_st[0].EtaBinWidth;
+    EffPedSpec->Init();
+    
+    PedStatus=0;
+    m_pedCounter=0;
+    
+    //QA histogram for equalization
+    if (!m_EffPedOccupancy) 
+    {
+      TString name1="EffPed_"+detname[detnum];
+      TString title1="EffPed Occupancy for detetctor "+detname[detnum];
+      m_EffPedOccupancy=new TH1F(name1.Data(),title1.Data(),nb,1,(Float_t)nb);
+    }
+    //
+    gMessMgr->Info("StEmcCalibrationMaker::Init() - EffPed initialized");
+
+  }
+  
   CalibStatus=0;
   
   // setting Calibration Mode
   Summary_st[0].CalibMode=0;  
-  if(Settings_st[0].DoEqualization==1)   Summary_st[0].CalibMode+=1;
-  if(Settings_st[0].UseMipCalib==1)      Summary_st[0].CalibMode+=10;
-  if(Settings_st[0].UsePi0Calib==1)      Summary_st[0].CalibMode+=100;
-  if(Settings_st[0].UseElectronCalib==1) Summary_st[0].CalibMode+=1000;
+  if(Settings_st[0].DoEqualization==1)      Summary_st[0].CalibMode+=1;
+  if(Settings_st[0].UseMipCalib==1)         Summary_st[0].CalibMode+=10;
+  if(Settings_st[0].UsePi0Calib==1)         Summary_st[0].CalibMode+=100;
+  if(Settings_st[0].UseElectronCalib==1)    Summary_st[0].CalibMode+=1000;
+  if(Settings_st[0].DoEffPedCalculation==1) Summary_st[0].CalibMode+=10000;
     
   #ifdef StEmcCalibrationMaker_DEBUG  
   emclog <<"finished StEmcCalibrationMaker::Init()\n";
@@ -314,7 +345,7 @@ Int_t StEmcCalibrationMaker::Make()
   trackTower.Reset();
   CheckTracks();
   
-  /*if (Settings_st[0].DoPedSubtraction == 1) 
+  if (Settings_st[0].DoPedSubtraction == 1) 
   {
     if(GetPedestal()) SubtractPedestal();
     else 
@@ -322,7 +353,7 @@ Int_t StEmcCalibrationMaker::Make()
       gMessMgr->Warning("StEmcCalibrationMaker::Make() - Could not get pedestals");
       return kStWarn;
     }
-  }*/
+  }
 
   evnumber++;
   if(evnumber==1) 
@@ -343,18 +374,28 @@ Int_t StEmcCalibrationMaker::Make()
   }
 
   if(Settings_st[0].UseMipCalib==1) FillMipCalib();
+  
   if(Settings_st[0].UseMipCalib==1 && MipStatus==1) 
   {
     gMessMgr->Info("StEmcCalibrationMaker::Make() - doing MIP calibration");
     MipCalib();
-   }
+  }
+   
+  if(Settings_st[0].DoEffPedCalculation==1) FillEffPed();
+  if(Settings_st[0].DoEffPedCalculation==1 && PedStatus==1)
+  {
+    gMessMgr->Info("StEmcCalibrationMaker::Make() - doing EffPed calculation");
+    MakeEffPed();
+  } 
+  
     
   Int_t done=0;
   if(Settings_st[0].DoEqualization==1 && EqStatus==2)   done+=1;
   if(Settings_st[0].UseMipCalib==1    && MipStatus==2)  done+=10;
 //  if(Settings_st[0].UsePi0Calib==1)      done+=100;
 //  if(Settings_st[0].UseElectronCalib==1) done+=1000;
-
+  if(Settings_st[0].DoEffPedCalculation==1 && PedStatus==2) done+=10000;
+  
   if(done==Summary_st[0].CalibMode) //ready to find calibration contants
   {
     lastEventTime=GetTime();
@@ -395,11 +436,11 @@ Int_t StEmcCalibrationMaker::Finish()
 }
 
 //_____________________________________________________________________________
-Int_t StEmcCalibrationMaker::Clear()
+void StEmcCalibrationMaker::Clear(const Option_t *option)
 {
   if(emc) delete emc;
   if(event) delete event;
-  return kStOk;
+  return;
 }
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::ReadHitsOffline()
@@ -646,96 +687,11 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
       else trackTower[tmp2[i]-1]=0;
     }
   }
+  
+  // check for valid pedestals bins
+  for(Int_t i=0;i<nbins;i++) if(trackTower[i]==1 && tmp1[i]!=0) trackTower[i]=0;
 
   return kTRUE;  
-}
-//_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::IsThisTrackGood(Int_t tr,Float_t *ETA,Float_t *PHI)
-{  
-  if(tr>nTracks) return kFALSE;
-  
-  StTrack* track;
-  
-  emcCalSettings_st* Settings_st=SettingsTable->GetTable();
-
-  if(Settings_st[0].UseL3Tracks==1) 
-  {
-    StSPtrVecTrackNode& tracks =event->l3Trigger()->trackNodes();
-    track=tracks[tr]->track(0);
-  }
-  else 
-  {
-    StSPtrVecTrackNode& tracks=event->trackNodes();
-    track=tracks[tr]->track(0);
-  }    
-
-  Float_t eta,phi,eta1,phi1;
-
-// project track in the begining of the detector
-  if(!ProjectTrack(track,(double)Geo->Radius(),&eta,&phi)) return kFALSE;
-  Int_t mtr,etr,str;
-  if(Geo->getBin(phi,eta,mtr,etr,str)==1) return kFALSE; //out of detector
-  if(str==-1) return kFALSE;
-
-  *ETA=eta;
-  *PHI=phi;
-
-// find eta and phi of the center of the tower  
-  Int_t id;
-  Geo->getId(mtr,etr,str,id);
-  Geo->getEtaPhi(id,eta,phi);
-    
-// project track in the exit of the detector (tower radius + tower width)
-  if(!ProjectTrack(track,(double)(Geo->Radius()+Geo->YWidth()),&eta1,&phi1)) return kFALSE;
-  Int_t mtr1,etr1,str1;
-  if(Geo->getBin(phi1,eta1,mtr1,etr1,str1)==1) return kFALSE; //out of detector
-  if(str1==-1) return kFALSE;
-
-// check if the track does not change the tower
-  if(mtr1!=mtr || etr1!=etr || str1!=str) return kFALSE; 
-
-// check if there are tracks in the neighbor towers
-
-  for(Int_t i=0;i<nTracks;i++)
-  {
-    if(i!=tr)
-    {
-      StTrack* track1;
-      if(Settings_st[0].UseL3Tracks==1) 
-      {
-        StSPtrVecTrackNode& tracks =event->l3Trigger()->trackNodes();
-        track1=tracks[i]->track(0);
-      }
-      else 
-      {
-        StSPtrVecTrackNode& tracks=event->trackNodes();
-        track1=tracks[i]->track(0);
-      }    
-
-      if(ProjectTrack(track1,(double)Geo->Radius(),&eta1,&phi1) && fabs(eta1)<1) // enter of detector (pre shower)
-      {
-        Int_t m,e,s,id1;
-
-        if(Geo->getBin(phi1,eta1,m,e,s)==0) // track hit detector
-        {
-          if(s==-1) s=1; // just for test if the track is close to the other one.
-          Geo->getId(m,e,s,id1);
-          Geo->getEtaPhi(id1,eta1,phi1); // get eta phi of the center of tower
-
-          Float_t x=fabs(eta1-eta);
-          Float_t y=fabs(phi1-phi);
-        
-          if(y>=2*3.14159) y-=2*3.14159;
-        
-          if(y<=0.056 && x<=0.056) return kFALSE;
-          
-          if(tr==3077 && x<0.1 && y<0.1) cout <<" i = "<<i<<"  x = "<<x <<"  y = "<<y<<endl;
-        }
-      }
-    }
-  }
-  
-  return kTRUE;
 }
 //_____________________________________________________________________________
 Bool_t StEmcCalibrationMaker::ProjectTrack(StTrack* track,double radius, Float_t *ETA, Float_t *PHI)
@@ -784,7 +740,7 @@ Bool_t StEmcCalibrationMaker::FillEqual()
   
   if(fabs(zVertex)>fabs(Settings_st[0].ZVertexCut)) return kFALSE;  
 
-  for(UInt_t j=0;j<nbins;j++)
+  for(Int_t j=0;j<nbins;j++)
   {
     Int_t did=j+1;
     if(EqualSpec->GetStatus(did)==1 && emcHits[j]>0) 
@@ -907,73 +863,7 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
       emclog <<"CALIBRATION: MIP Hit. id = "<<did<<"  adc = "<<emcHits[did-1]<<endl;
       #endif
     }
-  
-  
-/*  StDetectorId id = static_cast<StDetectorId>(detnum+kBarrelEmcTowerId);
-  StEmcDetector* detector=emc->detector(id);
     
-  for(Int_t tr=0;tr<nTracks;tr++)
-  {
-    Float_t eta,phi;
-    StTrack* track;
-    if(Settings_st[0].UseL3Tracks==1) 
-    {
-      StSPtrVecTrackNode& tracks =event->l3Trigger()->trackNodes();
-      track=tracks[tr]->track(0);
-    }
-    else 
-    {
-      StSPtrVecTrackNode& tracks=event->trackNodes();
-      track=tracks[tr]->track(0);
-    }    
-
-    StTrackGeometry* trgeo = track->geometry();
-    const StThreeVectorF momentum=trgeo->momentum();
-        
-    if(momentum.mag()>=Settings_st[0].MipMinimumMomentum) 
-    {
-      Bool_t good=IsThisTrackGood(tr,&eta,&phi);
-            
-      if(good)
-      {
-        Int_t mtr,etr,str;
-        Geo->getBin(phi,eta,mtr,etr,str);
-        StEmcModule* module = detector->module(mtr);
-        StSPtrVecEmcRawHit& rawHit=module->hits();
-        for(UInt_t k=0;k<rawHit.size();k++)
-        {
-          if(rawHit[k]->module()==(UInt_t)mtr 
-             && rawHit[k]->eta()==(UInt_t)etr 
-             && abs(rawHit[k]->sub())==abs(str))
-          {
-            Int_t did=MipSpec->GetID(mtr,etr,str);
-            if(MipSpec->GetStatus(did)==1) 
-            {
-              MipSpec->FillSpectra(did,rawHit[k]->adc());
-              //FILL QA HISTOGRAM*********************
-              m_MipOccupancy->Fill(did);
-              //**************************************
-              ok=kTRUE;
-              #ifdef StEmcCalibrationMaker_DEBUG
-              emclog <<"CALIBRATION: MIP track = "<<tr<<"  momentum = "
-                     <<momentum.mag()<<"  eta = "<<eta
-                     <<"  phi = "<<phi<<"  id = "<<did
-                     <<"  adc = "<<rawHit[k]->adc()<<"\n";
-              cout   <<"CALIBRATION: MIP track = "<<tr<<"  momentum = "
-                     <<momentum.mag()<<"  eta = "<<eta
-                     <<"  phi = "<<phi<<"  id = "<<did
-                     <<"  adc = "<<rawHit[k]->adc()
-                     <<"  ntracks in id = "<<tmp1[did-1]
-                     <<"  id track proj = "<<tmp2[tr]
-                     <<"  trackTower = "<<trackTower[did-1]<<"\n";
-              #endif
-            }
-          }
-        }
-      }
-    }
-  }*/
-
   if(ok) m_mipCounter++;
 
   #ifdef StEmcCalibrationMaker_DEBUG
@@ -999,8 +889,16 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
   #endif
   
   if(occ<Settings_st[0].MipMinOccupancy) return kTRUE;
+  
+  // if equalization is needed, check if it is done
   if(Settings_st[0].UseMipEtaBin==1 && EqStatus!=2) return kTRUE;
   
+  // if effective pedestal is needed, check if it is done
+  if(Settings_st[0].DoEffPedCalculation==1 && 
+     Settings_st[0].DoEffPedSubtraction==1 &&
+     PedStatus!=2) return kTRUE;
+
+  // all checked at this point
   MipStatus=1;  // ready to calibrate MIP
   return kTRUE;  
 }
@@ -1037,6 +935,82 @@ Bool_t StEmcCalibrationMaker::MipCalib()
   }
 
   MipStatus=2;  // Mip fit done
+  return kTRUE;
+}
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::FillEffPed()
+{  
+  emcCalSettings_st* Settings_st=SettingsTable->GetTable();  
+
+  if(nTracks>Settings_st[0].MipMaxNumberOfTracks) return kFALSE;
+
+  if(fabs(zVertex)>fabs(Settings_st[0].ZVertexCut)) return kFALSE;  
+  
+  Bool_t ok=kFALSE;
+  Int_t nn=0;
+  
+  for(Int_t did=1;did<=nbins;did++)
+    if(trackTower[did-1]==1 && EffPedSpec->GetStatus(did)==1) 
+    {
+      EffPedSpec->FillSpectra(did,emcHits[did-1]);
+      m_EffPedOccupancy->Fill(did);
+      ok=kTRUE;
+      nn++;
+    }
+  
+  #ifdef StEmcCalibrationMaker_DEBUG
+  if(ok)
+  {
+    cout   <<"EFFPED: Number of hits for pedestal in this event =  "<<nn<<endl;
+    emclog <<"EFFPED: Number of hits for pedestal in this event =  "<<nn<<endl;
+  }
+  #endif
+
+  if(ok) m_pedCounter++;
+
+  #ifdef StEmcCalibrationMaker_DEBUG
+  emclog <<"EFFPED: Ped Nevents = "<<m_pedCounter<<"\n";
+  #endif
+  
+  if(PedStatus!=0) return kTRUE;
+  
+  if(m_pedCounter<1.2*Settings_st[0].EffPedEventsPerBin) return ok; // gives 20% more 
+
+  Float_t occ=0,x=0,y=0;
+  
+  EffPedSpec->GetOccupancy(Settings_st[0].EffPedEventsPerBin,&x,&y,&occ);
+
+  #ifdef StEmcCalibrationMaker_DEBUG
+  emclog <<"EFFPED: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
+  emclog <<"EFFPED: fraction of bins nevents > minimum = "<<occ<<"\n";
+  cout   <<"EFFPED: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
+  cout   <<"EFFPED: fraction of bins nevents > minimum = "<<occ<<"\n";
+  #endif
+  
+  if(occ<Settings_st[0].EffPedMinOccupancy) return kTRUE;
+  
+  PedStatus=1;  // ready to calculate effective pedestals
+  return kTRUE;  
+}
+//_____________________________________________________________________________
+Bool_t StEmcCalibrationMaker::MakeEffPed()
+{
+  #ifdef StEmcCalibrationMaker_DEBUG  
+  emclog <<"****************** Equalizing spectra for detector "<< detname[detnum].Data()<<"\n";
+  #endif
+  
+  emcCalSettings_st* Settings_st=SettingsTable->GetTable();
+  
+  for(Int_t did=1;did<=nbins;did++)
+  {
+    if(EffPedSpec->GetStatus(did)>0 && 
+       EffPedSpec->GetSum(did)>=Settings_st[0].EffPedEventsPerBin) 
+    {
+      EffPedSpec->CalcPedestal(did);
+    }
+  }
+  
+  PedStatus=2;
   return kTRUE;
 }
 //_____________________________________________________________________________
