@@ -5,9 +5,9 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(
+void RunJetFinder2(int nevents=200,
 		   const char* dir = "",
-		   //const char *file = "/star/data29/reco/pp200/pythia6_203/default/pt15/year2003/gheisha_on/trs_if/rcf1205_2012_1000evts.MuDst.root",
+		   //const char* file = "/star/data35/reco/productionPP/ReversedFullField/DEV/2004/132/st_physics_5132053_raw_2020005.MuDst.root",
 		   const char* file = "/star/data16/reco/dAuCombined/FullField/P03ih/2003/065/st_physics_4065003_raw_0040054.MuDst.root",
 		   const char *filter = "",
 		   const char *outfile="Jets_out_")
@@ -15,7 +15,7 @@ void RunJetFinder2(
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
 	gSystem->Load("libPhysics");
-    } 
+    }
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
     gSystem->Load("StMagF");
@@ -118,8 +118,6 @@ void RunJetFinder2(
     chain->Init();
     chain->PrintInfo();
 
-    //int nevents =1000000;
-    int nevents = 20;
     for (Int_t iev=0;iev<nevents; iev++) {
 	cout << "****************************************** " << endl;
 	cout << "Working on eventNumber " << iev << endl;
