@@ -285,6 +285,39 @@ sector 16, time bins 1-10,400-512
 sector 17, time bins 1-10,400-512
 sector 18, time bins 1-10,400-512
 sector 19, time bins 1-10,400-512
+Row 45
+Pads 129 126 127 128 129 130 131 132 133 134 135 136 137
+138 139 140
+row 44   
+pads  85 77
+row 43
+pads 9 33 34 35 36 38 40 129 130 131 132 133 134 135 136 
+row 42 
+pads 33 35 36 65 69 72 129 130 131 132 133 134 135 136 
+row 38 
+pads 63
+Row 35
+Pads 85 86 87 88 89
+Row 34
+Pads 84 85 86 87 88 89 92 93
+row 25
+pads 1 2 
+row 24
+pads 1 15
+row 20 
+pads 81 82 83
+row 17
+pads 13
+row 12
+pads 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 28 31 37 38 
+row 9
+pads 108 112 122
+row 3
+pads 104 
+row 2 
+pads 84 82 81 79 78 77 74 73 72 71 
+row 1
+pads 15 27 48 51
 sector 20, time bins 1-10,400-512
 row 43
 pads 33 46
