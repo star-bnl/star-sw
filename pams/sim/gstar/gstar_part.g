@@ -38,6 +38,12 @@
   Particle rho_minus code=154 TrkTyp=4 mass=.767   charge=-1 tlife=4.35E-24,
                      pdg=-213 bratio= { 1, }       mode= { 907, }
  
+  Particle K0        code=155 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
+                     pdg=311  bratio= { .5, .5}    mode= { 16, 10 }
+
+  Particle anti_K0   code=156 TrkTyp=4 mass=.4977  charge=0  tlife= 1.e-24,
+                     pdg=-311  bratio= { .5, .5}    mode= { 16, 10 }
+ 
 *    For D+, include only K0_S + pi+ decay mode  pmj 16/2/95
 * Particle D_plus    code=35  TrkTyp=4 mass=1.869  charge=1 tlife=1.057e-12,
 *                    pdg=411  bratio= { 1, }       mode= { 1608, }
