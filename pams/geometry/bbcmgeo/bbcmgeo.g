@@ -184,7 +184,7 @@ EndBlock
 *
 * ----------------------------------------------------------------------------
 Block BPOL is one Bbc POLystyren active scintillator layer 
-	Material  POLYSTYREN
+*	Material  POLYSTYREN
 	Material  Cpolystyren   Isvol=1
 	Attribute BPOL  seen=1 colo=4				!  blue
 	shape	  PGON	Phi1=0   Dphi=360  Nz=2,
@@ -204,7 +204,7 @@ Block BPOL is one Bbc POLystyren active scintillator layer
 	Call GSTPAR (ag_imed,'BIRK2',0.013)
 	Call GSTPAR (ag_imed,'BIRK3',9.6E-6)
 *     
-	HITS BPOL  Birk:0:(0,10)
+	HITS BPOL  Birk:0:C(0,10)
 *                  xx:16:H(-250,250)   yy:16:(-250,250)   zz:16:(-350,350),
 *                  px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
 *                  Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
