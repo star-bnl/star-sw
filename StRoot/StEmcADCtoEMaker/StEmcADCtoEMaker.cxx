@@ -1,11 +1,8 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.47 2003/09/07 03:49:01 perev Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.48 2003/09/08 20:56:41 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.47  2003/09/07 03:49:01  perev
-// gcc 3.2 + WarnOff
-//
-// Revision 1.46  2003/09/02 17:57:58  perev
-// gcc 3.2 updates + WarnOff
+// Revision 1.48  2003/09/08 20:56:41  suaide
+// Patch to fix problem with SMD-phi pedestals saved on database
 //
 // Revision 1.45  2003/08/29 19:34:22  suaide
 // small modification in the histogram binning
@@ -115,7 +112,7 @@
 #include "StBemcData.h"
 
 #define STATUS_OK 1
-//VP #define MAXDET 4
+#define MAXDET 4
 #define CAP1 124
 #define CAP2 125
 
@@ -160,7 +157,8 @@ Int_t StEmcADCtoEMaker::Init()
 {     
   //Making QA histgrams
 	
-	mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
+	int nbins[] = {4800,4800,18000,18000};
+  mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
  
   mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit with energy > 0 .vs. Detector #",1000,0.0,18000,8,0.5,8.5);
   mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log10) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
@@ -205,8 +203,8 @@ Int_t StEmcADCtoEMaker::Init()
         Float_t center;
         mGeo[i]->getPhiModule(m,center);
         PhiBins1[j]=center-PhiB[s-1];
-        //Float_t ee,pp;
-        //Int_t id;
+        Float_t ee,pp;
+        Int_t id;
         //if(i==3 && s<=nSub) mGeo[i]->getId(m,1,s,id);
         //if(i==3 && s<=nSub) mGeo[i]->getEtaPhi(id,ee,pp);
         //if(i==3 && s<=nSub) cout <<"j = "<<j<<"  center = "<<center<<"  DPhi = "<<PhiB[s-1]<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<"  phi = "<<pp<<endl;
@@ -240,16 +238,19 @@ Int_t StEmcADCtoEMaker::Init()
       
     TString name_h = detname[i] + "_Hits";
     TString name_e = detname[i] + "_Energy";
+    TString name_s = detname[i] + "_Spec";
     TString name_a = detname[i] + "_ADC";
     TString name_a1= detname[i] + "_ADC1D";
     TString name_e1= detname[i] + "_Energy1D";
     TString title_h= detname[i] + " Hits distribution with energy > 0";
     TString title_e= detname[i] + " Energy distribution";
+    TString title_s= detname[i] + " Spectra";
     TString title_a= detname[i] + " ADC distribution";
     TString title_a1= detname[i] +" ADC distribution (log10)";
     TString title_e1= detname[i] +" Energy distribution";
     mHits[i]   = new TH2F(name_h,title_h,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mEnergyHist[i] = new TH2F(name_e,title_e,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
+    mEnergySpec[i] = new TH2F(name_s,title_s,nbins[i],0.5,(float)nbins[i]+0.5,200,0,5);
     mAdc[i]    = new TH2F(name_a,title_a,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mAdc1d[i]  = new TH1F(name_a1,title_a1,1000,0,8);   
     mEn1d[i]   = new TH1F(name_e1,title_e1,1000,-200,2000);   
@@ -640,7 +641,25 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 				cap = 0;
 				if(capacitor == CAP1) cap = 1;
 				if(capacitor == CAP2) cap = 2;
-				PED = ((Float_t)smdpedst[0].AdcPedestal[id-1][cap])/100.;
+        /////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////
+        // need to include a correction because the SMD-phi
+        // pedestals for Y2003 run were not saved in the right position
+        // in the database. Instead of doing id-1 for SMD-phi, we need
+        // do only id. This is valid only for Y2003 data
+        //
+        // by AAPSUAIDE 20030908
+        //
+        int shift = 1;
+        if(det==3)
+        {
+          if(GetDate()>20021101 && GetDate()<20030501) shift = 0;
+        }
+				if((id-shift)>=0 && (id-shift)<18000) 
+          PED = ((Float_t)smdpedst[0].AdcPedestal[id-shift][cap])/100.;
+        else PED = 0;
+        /////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////
 		  }
 		}
     if(status==STATUS_OK)
@@ -731,6 +750,7 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 				nHits++;
 				Float_t eta,phi;
 				mGeo[det]->getEtaPhi(i+1,eta,phi);
+        mEnergySpec[det]->Fill(i+1,E);
 				if(ADC!=0) mHits[det]->Fill(eta,phi);
         if(ADC!=0) mAdc[det]->Fill(eta,phi,ADC);
 				if(E!=0) mEnergyHist[det]->Fill(eta,phi,E);
