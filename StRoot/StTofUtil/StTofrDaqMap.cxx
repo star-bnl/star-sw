@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrDaqMap.cxx,v 1.2 2004/03/09 17:43:04 dongx Exp $
+ * $Id: StTofrDaqMap.cxx,v 1.3 2004/04/08 21:11:11 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrDaqMap.cxx,v $
+ * Revision 1.3  2004/04/08 21:11:11  dongx
+ * remove assert() functions
+ *
  * Revision 1.2  2004/03/09 17:43:04  dongx
  * first release
  *
@@ -53,13 +56,15 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
   TDataSet *mDbTOFDataSet = maker->GetDataBase("Calibrations/tof");
   if(!mDbTOFDataSet) {
     gMessMgr->Error("unable to access Calibrations TOF parameters","OS");
-    assert(mDbTOFDataSet);
+    //    assert(mDbTOFDataSet);
+    return kStErr;
   }
 
   St_tofModuleConfig* tofModuleConf = static_cast<St_tofModuleConfig*>(mDbTOFDataSet->Find("tofModuleConfig"));
   if(!tofModuleConf) {
     gMessMgr->Error("unable to get tof Module Configuration parameters","OS");
-    assert(tofModuleConf);
+    //    assert(tofModuleConf);
+    return kStErr;
   }
   tofModuleConfig_st* moduleConf = static_cast<tofModuleConfig_st*>(tofModuleConf->GetArray());
   //  Int_t numRows = tofModuleConf->GetNRows();
@@ -81,7 +86,8 @@ void StTofrDaqMap::initFromDbase(StMaker *maker) {
   St_tofCamacDaqMap* tofDaqMap = static_cast<St_tofCamacDaqMap*>(mDbTOFDataSet->Find("tofCamacDaqMap"));
   if(!tofDaqMap) {
     gMessMgr->Error("unable to get tof daq map","OS");
-    assert(tofDaqMap);
+    //    assert(tofDaqMap);
+    return kStErr;
   }
   tofCamacDaqMap_st* tofmap = static_cast<tofCamacDaqMap_st*>(tofDaqMap->GetArray());
   //  Int_t ndaqRows = tofDaqMap->GetNRows();
