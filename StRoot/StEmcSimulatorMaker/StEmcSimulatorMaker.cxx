@@ -99,6 +99,7 @@ void StEmcSimulatorMaker::Clear(const char *)
 StEmcSimulatorMaker::~StEmcSimulatorMaker() 
 {
   if(mEmcCollection) delete mEmcCollection; // 25-jan-2001
+  for (int det=0;det<MAXDET;det++) delete mSimulator[det];  //!
 }
 Int_t StEmcSimulatorMaker::Init()
 {
@@ -979,8 +980,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.25 2004/04/08 21:35:12 perev Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.26 2004/04/09 21:33:53 perev Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.26  2004/04/09 21:33:53  perev
+// Cleanup. destructor of maker more deleting
+//
 // Revision 1.25  2004/04/08 21:35:12  perev
 // Leak off
 //
