@@ -1,13 +1,7 @@
-// $Id: bfc.C,v 1.17 1998/09/27 01:24:22 fisyak Exp $
+// $Id: bfc.C,v 1.14 1998/09/25 02:31:23 fisyak Exp $
 // $Log: bfc.C,v $
-// Revision 1.17  1998/09/27 01:24:22  fisyak
-// bfc.C for whole file
-//
-// Revision 1.16  1998/09/26 00:35:31  fisyak
-// Add real files
-//
-// Revision 1.15  1998/09/26 00:17:27  fisyak
-// Add SetWrite
+// Revision 1.14  1998/09/25 02:31:23  fisyak
+// Add Benchmarks for i/o
 //
 // Revision 1.13  1998/09/23 20:23:23  fisyak
 // Prerelease SL98h
@@ -83,15 +77,15 @@
   St_XDFFile *xdf_in   = 0;
   xdf_in   = new St_XDFFile(filename,"r");
   St_XDFFile *xdf_out  = 0;
-  xdf_out  = new St_XDFFile("/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc079_01_46evts.xdf","w");
+  xdf_out  = new St_XDFFile("auau_central_hijing.xdf","w");
   TFile      *root_out= 0; 
-  root_out=  new TFile("/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc079_01_46evts.root","RECREATE");
+  root_out=  new TFile("auau_central_hijing.root","RECREATE");
 //TFile      *root_tree= new TFile("auau_central_hijing.tree.root","RECREATE");
 // Create the main chain object
   StChain chain("StChain");
 //  Create the makers to be called by the current chain
   St_run_Maker run_Maker("run_Maker","run/params");
-  if (xdf_in) {
+  if (xdfin) {
     St_xdfin_Maker xdfin("xdfin_Maker","event/geant");
     chain.SetInputXDFile(xdf_in);
   }
@@ -100,12 +94,12 @@
   St_srs_Maker srs_Maker("srs_Maker","event/data/svt/hits");
   //  St_fss_Maker fss_Maker("fss_Maker","event/raw_data/ftpc/pixels");
   //  St_tss_Maker tss_Maker("tss_Maker","event/raw_data/tpc");
-// Set parameters
-//  tss_Maker.adcxyzon();
   St_tcl_Maker tcl_Maker("tcl_Maker","event/data/tpc/hits");
   St_stk_Maker stk_Maker("stk_Maker","event/data/svt/tracks");
   St_tpt_Maker tpt_Maker("tpt_Maker","event/data/tpc/tracks");
   St_dst_Maker dst_Maker("dst_Maker","event/data/global");
+// Set parameters
+//  tss_Maker.adcxyzon();
   chain.PrintInfo();
 // Init the mai chain and all its makers
   chain.Init();
@@ -119,13 +113,12 @@
   if (root_out) {
     gBenchmark->Start("root i/o");
     root_out->cd();
-    St_DataSet *run = chain.GetRun();// root output
-    run->SetWrite();
+    chain.GetRun()->Write();// root output
     gBenchmark->Stop("root i/o");
   }
   gBenchmark->Start("bfc");
   Int_t i=0;
-  const Int_t Nevents=100;
+  const Int_t Nevents=1;
   for (Int_t i =1; i <= Nevents; i++){
     if (chain.Make(i)) break;
     St_DataSetIter local(chain.DataSet());
@@ -139,7 +132,7 @@
     if (root_out){
       gBenchmark->Start("root i/o");
       root_out->cd();
-      evnt->SetWrite();// root output
+      evnt->Write();// root output
       gBenchmark->Stop("root i/o");
     }
     //    root_tree->cd();
@@ -147,21 +140,19 @@
     //    chain.FillTree();
     //  histCanvas->Modified();
     //  histCanvas->Update();
-    if (i != Nevents) chain.Clear();
+    chain.Clear();
   }
-  if (Nevents > 1) {
-    chain.Finish();
-    delete xdf_in;
-    if (xdf_out){
-      delete xdf_out;;
-      gBenchmark->Print("xdf out");
-    }
-    if (root_out){
-      root_out->Close();   
-      delete root_out;
-      gBenchmark->Print("root i/o");
-    }
-    gBenchmark->Print("bfc");
+  chain.Finish();
+  delete xdf_in;
+  if (xdf_out){
+    delete xdf_out;;
+    gBenchmark->Print("xdf out");
   }
-  else TBrowser b;
+  if (root_out){
+    root_out->Close();   
+    delete root_out;
+    gBenchmark->Print("root i/o");
+  }
+  gBenchmark->Print("bfc");
+  //  TBrowser b;
 }

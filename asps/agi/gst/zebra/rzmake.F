@@ -1,7 +1,13 @@
 *
-* $Id: rzmake.F,v 1.4 1998/06/05 20:55:43 perev Exp $
+* $Id: rzmake.F,v 1.6 1998/10/08 02:13:37 perev Exp $
 *
 * $Log: rzmake.F,v $
+* Revision 1.6  1998/10/08 02:13:37  perev
+* RZMAKE nrec=1m only for new format
+*
+* Revision 1.5  1998/10/06 18:31:25  perev
+*  add NREC=1M for rzmake
+*
 * Revision 1.4  1998/06/05 20:55:43  perev
 * AGI commit
 *
@@ -12,7 +18,7 @@
 #include "zebra/pilot.h"
 *CMZ :          25/03/98  19.29.54  by  Pavel Nevski
 *-- Author :
-      SUBROUTINE RZMAKE(LUNIN,CHDIR,NWKEY,CHFORM,CHTAG,NRECP,CHOPT)
+      SUBROUTINE RZMAKE(LUNIN,CHDIR,NWKEY,CHFORM,CHTAG,NRECPQQ,CHOPT)
 *
 ************************************************************************
 *
@@ -102,6 +108,10 @@
       IMODEX=IOPTX
       IMODEC=IOPTC
       IF(IOPTC.NE.0) LUNP = IQUEST(11)
+*
+**	VP correction on NRECP
+      nrecp = nrecpqq
+      if (ioptn.ne.0) NRECP = max(NRECPQQ,1000000)
 #if defined(CERNLIB_FQXISN)
       IMODEX=1
 #endif
