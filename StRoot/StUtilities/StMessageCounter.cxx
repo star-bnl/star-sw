@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.4 1999/06/26 00:24:52 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.5 1999/06/28 02:40:55 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.5  1999/06/28 02:40:55  genevb
+// Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
+//
 // Revision 1.4  1999/06/26 00:24:52  genevb
 // Fixed const type mismatches
 //
@@ -85,6 +88,21 @@ void StMessageCounter::SetLimit(Char_t* str, Int_t n) {
     limitNCountList.push_back(new Int_t(0));
   }
   return;
+}
+//_____________________________________________________________________________
+int StMessageCounter::GetLimit(Char_t* str) {
+  if (yesLimits) {
+    messCharVecIter curString;
+    int index=0;
+    for (curString=limitList.begin(); curString!=limitList.end(); curString++) {
+      if (!strcmp(str,(*curString))) {
+        int limit = *(limitNList[index]);
+        return limit;
+      }
+      index++;
+    }
+  }
+  return 0;
 }
 //_____________________________________________________________________________
 void StMessageCounter::ListLimits() {
