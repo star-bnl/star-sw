@@ -5,6 +5,9 @@
 **:  Id: idl.y,v 1.14 1998/08/28 21:22:28 fisyak Exp  
 **:<------------------------------------------------------------------*/
 #include "track_propagator.h"
+#include "stdio.h"
+#include "math.h"
+
 
 long track_propagator_(
   TABLE_HEAD_ST         *gtrack_h,      DST_TRACK_ST           *gtrack ,
@@ -35,7 +38,8 @@ long track_propagator_(
   float bfld=5., GRADDEG=57.2958;
   float psi, pt, tanl, x0, y0, z0, xp[2], xout[4], p[3], xv[3], xx0[3];
   float trk[7], r1, r2, xc1[2], xc2[2], x[2], y[2], cut, x1[3];
-  long  q;
+  float phi0, phi, dphi, temppsi, test=1. ;
+  long  q, psiftr;
 
   for(i=0; i<gtrack_h->nok; i++) 
     {
@@ -62,7 +66,7 @@ long track_propagator_(
       trk[5] = (float) gtrack[i].icharge;
       trk[6] = pt;
       r1     = ((float) gtrack[i].icharge)*(1/gtrack[i].invpt)/(0.0003*bfld);
-
+      /* we should take the absolute value of r1 */
      
       
       if(target->iflag == 1 || target->iflag == 2)
@@ -137,19 +141,30 @@ long track_propagator_(
 	  ptrack[i].z0 = xout[2];
 	  ptrack[i].psi= xout[3];
 	}
+      
+      if(target->iflag == 4)
+	{
+	  phi0 = atan2(y0,x0);
+	  dphi = - trk[5]*(target->z-z0)/(trk[4]*r1); 
+	  /*   trk[4] != 0.  */
+	  phi  = phi0 + dphi;
+	  ptrack[i].x0 = x0 + r1*(cos(phi)-cos(phi0));
+	  ptrack[i].y0 = y0 + r1*(sin(phi)-sin(phi0));
+	  ptrack[i].z0 = target->z;
+	  temppsi = trk[3]+dphi*GRADDEG;
+	  if(temppsi<0.)
+	    {
+	      psiftr = (long)(temppsi/360.-1.);
+	    }
+	  else
+	    {
+	      psiftr = (long)(temppsi/360.);
+	    }
+	  ptrack[i].psi= temppsi - 360.* (float)psiftr; 
+	  /*  Do we have to consider if psi is within (0, 360) degree? */ 
+	  
+	}
     }
 }
   
-
-
-
-
-
-
-
-
-
-
-
-
 
