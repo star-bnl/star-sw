@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.17 2000/08/31 18:58:24 posk Exp $
+//  $Id: StFlowMaker.h,v 1.18 2000/09/11 17:24:09 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.18  2000/09/11 17:24:09  snelling
+//  Put picoreader for different versions in seperate methods
+//
 //  Revision 1.17  2000/08/31 18:58:24  posk
 //  For picoDST, added version number, runID, and multEta for centrality.
 //  Added centrality cut when reading picoDST.
@@ -136,7 +139,7 @@ public:
   void          SetPicoEventFileName(StFileI* fileList);
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.17 2000/08/31 18:58:24 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.18 2000/09/11 17:24:09 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -163,6 +166,8 @@ private:
   void             FillFlowEvent();           // fill the flow event
   void             FillPicoEvent();           // fill pico-DST
   Bool_t           FillFromPicoDST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent);
   void             WriteFlowEvent();          // write StFlowEvent
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing

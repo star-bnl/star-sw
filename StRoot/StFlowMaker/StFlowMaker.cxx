@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.40 2000/09/05 16:11:33 snelling Exp $
+// $Id: StFlowMaker.cxx,v 1.41 2000/09/11 17:24:07 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.41  2000/09/11 17:24:07  snelling
+// Put picoreader for different versions in seperate methods
+//
 // Revision 1.40  2000/09/05 16:11:33  snelling
 // Added global DCA, electron and positron
 //
@@ -287,7 +290,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.40 2000/09/05 16:11:33 snelling Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.41 2000/09/11 17:24:07 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -604,6 +607,44 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   
   // Fill FlowEvent
   pFlowEvent->SetPhiWeight(mPhiWgt);
+
+  if (!pPicoEvent->Version()) {
+    FillFromPicoVersion0DST(pPicoEvent);
+  }
+  if (pPicoEvent->Version() == 1) {
+    FillFromPicoVersion1DST(pPicoEvent);
+  }
+  
+  // Check event cuts and Eta Symmetry
+  if (!StFlowCutEvent::CheckEvent(pPicoEvent) ||
+      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
+    Int_t eventID = pPicoEvent->EventID();
+    gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
+    delete pFlowEvent;             // delete this event
+    pFlowEvent = NULL;
+    return kTRUE;
+  }
+  
+  // For use with STL vector
+  //   random_shuffle(pFlowEvent->TrackCollection()->begin(),
+  // 		 pFlowEvent->TrackCollection()->end());
+  
+  pFlowEvent->TrackCollection()->random_shuffle();
+
+  pFlowEvent->SetSelections();
+  pFlowEvent->MakeSubEvents();
+  pFlowEvent->SetPids();
+  
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowMaker::FillFromPicoVersion0DST(StFlowPicoEvent* pPicoEvent) {
+  // Make StFlowEvent from StFlowPicoEvent
+  
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion0DST()" << endm;
+  
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
@@ -611,11 +652,6 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
-  if (pPicoEvent->Version()) {
-    pFlowEvent->SetMultEta(pPicoEvent->MultEta());
-    pFlowEvent->SetCentrality(pPicoEvent->MultEta());
-    pFlowEvent->SetRunID(pPicoEvent->RunID());
-  }
   pFlowEvent->SetCTB(pPicoEvent->CTB());
   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
@@ -629,6 +665,58 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     if (fabs(pPicoTrack->Eta()) < 0.75) {
       goodTracksEta++;
     }
+    if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
+      // Instantiate new StFlowTrack
+      StFlowTrack* pFlowTrack = new StFlowTrack;
+      if (!pFlowTrack) return kFALSE;
+      pFlowTrack->SetPt(pPicoTrack->Pt());
+      pFlowTrack->SetPhi(pPicoTrack->Phi());
+      pFlowTrack->SetEta(pPicoTrack->Eta());
+      pFlowTrack->SetDedx(pPicoTrack->Dedx());
+      pFlowTrack->SetCharge(pPicoTrack->Charge());
+      pFlowTrack->SetDca(pPicoTrack->Dca()/10000.);
+      pFlowTrack->SetChi2(pPicoTrack->Chi2()/10000.);
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
+      
+      pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+      goodTracks++;
+    }
+  }
+  
+  // Recreate centrality
+  pFlowEvent->SetMultEta(goodTracksEta);
+  pFlowEvent->SetCentrality(goodTracksEta);
+  
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Bool_t StFlowMaker::FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent) {
+  // Make StFlowEvent from StFlowPicoEvent
+  
+  if (Debug()) gMessMgr->Info() << "FlowMaker: FillFromPicoVersion1DST()" << endm;
+
+  pFlowEvent->SetEventID(pPicoEvent->EventID());
+  UInt_t origMult = pPicoEvent->OrigMult();
+  pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
+  pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
+					  pPicoEvent->VertexY(),
+					  pPicoEvent->VertexZ()) );
+  pFlowEvent->SetMultEta(pPicoEvent->MultEta());
+  pFlowEvent->SetCentrality(pPicoEvent->MultEta());
+  pFlowEvent->SetRunID(pPicoEvent->RunID());
+  pFlowEvent->SetCTB(pPicoEvent->CTB());
+  pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
+  pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
+  
+  int    goodTracks    = 0;
+  // Fill FlowTracks
+  for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
+    StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
+      ->UncheckedAt(nt);
     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
@@ -662,32 +750,6 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
       goodTracks++;
     }
   }
-  
-  // Recreate centrality
-  if (!pPicoEvent->Version()) {
-    pFlowEvent->SetMultEta(goodTracksEta);
-    pFlowEvent->SetCentrality(goodTracksEta);
-  }
-  
-  // Check event cuts and Eta Symmetry
-  if (!StFlowCutEvent::CheckEvent(pPicoEvent) ||
-      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
-    Int_t eventID = pPicoEvent->EventID();
-    gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
-    delete pFlowEvent;             // delete this event
-    pFlowEvent = NULL;
-    return kTRUE;
-  }
-  
-  // For use with STL vector
-  //   random_shuffle(pFlowEvent->TrackCollection()->begin(),
-  // 		 pFlowEvent->TrackCollection()->end());
-  
-  pFlowEvent->TrackCollection()->random_shuffle();
-
-  pFlowEvent->SetSelections();
-  pFlowEvent->MakeSubEvents();
-  pFlowEvent->SetPids();
   
   return kTRUE;
 }
