@@ -24,8 +24,8 @@ void StiPlacement::setCenterRep(float refAngle_, float radius_,
 
   if(radius_ >= 0.){ centerRadius = radius_; }
   
-  while(orientation_ < -M_PI/2.){ orientation_ += M_PI; }
-  while(orientation_ >= M_PI/2.){ orientation_ -= M_PI; }
+  while(orientation_ < -M_PI){ orientation_ += 2*M_PI; }
+  while(orientation_ >= M_PI){ orientation_ -= 2*M_PI; }
   centerOrientation = orientation_;
 
   normalRefAngle = centerRefAngle + centerOrientation;
