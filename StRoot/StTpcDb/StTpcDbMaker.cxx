@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.29 2002/04/02 00:16:31 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.30 2003/01/12 20:38:23 jeromel Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.30  2003/01/12 20:38:23  jeromel
+ * fabs() not abs() for doube
+ *
  * Revision 1.29  2002/04/02 00:16:31  hardtke
  * New class that gets hit errors from database
  *
@@ -493,7 +496,7 @@ Int_t StTpcDbMaker::InitRun(int runnumber){
      y1 = gc1.position().y();
      x2 = gc2.position().x();
      y2 = gc2.position().y();
-     if (abs(x2-x1)<0.000001) {
+     if (fabs(x2-x1)<0.000001) {
         aline[i][j] = 1/x1;
         bline[i][j] = 0.;
         continue;
