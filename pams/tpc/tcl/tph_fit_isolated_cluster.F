@@ -1,5 +1,18 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.14 1999/09/05 04:58:30 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.15 1999/09/05 05:09:35 sakrejda Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.15  1999/09/05 05:09:35  sakrejda
+* Changed StError call:
+*          call StError('TPHAM - Hey -- ADCSUM=0!!!!')
+*          write(m132,*) 'number of pixels in cluster = ',nclspix
+*          call StError(m132)
+*
+* to Message call :
+*          write(m132(1),*)'TPHAM - Hey -- ADCSUM=0!!!!'
+*          write(m132(2),*) 'number of pixels in cluster = ',nclspix
+*          call Message(m132,2,-1)
+*
+* to limit both lines with one call to StLimit
+*
 * Revision 1.14  1999/09/05 04:58:30  sakrejda
 * tph_fit_isolated_cluster.F
 *
@@ -294,6 +307,7 @@ C time direction no longer a projection - WAL 13 Feb 98
            endif
         enddo
 	if (adc_sum.eq.0.) then
+c        changed StError Message to limit both lines with one call
          write(m132(1),*)'TPHAM - Hey -- ADCSUM=0!!!!'
          write(m132(2),*) 'number of pixels in cluster = ',nclspix
          call Message(m132,2,-1)
