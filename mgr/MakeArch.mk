@@ -1,5 +1,8 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.41  1998/11/13 00:19:30  fisyak
+#  Revision 1.42  1998/11/13 15:48:43  fisyak
+#  Merged version with NT
+#
+##  Revision 1.41  1998/11/13 00:19:30  fisyak
 #  Add flags for SCL St_trs_Maker
 #
 #  Revision 1.40  1998/11/07 16:52:27  fisyak
@@ -104,7 +107,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/11/13 00:19:30 $ 
+#             Last modification $Date: 1998/11/13 15:48:43 $ 
 #. default setings
 
 MOTIF := Yess
@@ -116,9 +119,12 @@ CD := cd
 LN := ln -sf
 SLASH :=/
 MKDIR := mkdir -p
+CAT    := cat
 
 COUT := -o 
 LOUT := -o 
+FOUT := -o 
+SoOUT := -o 
 DEBUG := -g 
 ifdef NODEBUG
   DEBUG := -O2
@@ -135,7 +141,8 @@ endif
 CERN_LEVEL =pro
 CERN_STAF = $(CERN)/$(CERN_LEVEL)
 CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran 
-CERN_ROOT_LIBS = $(shell cernlib geant321 pawlib graflib mathlib)
+
+MAKECERNLIB := cernlib
 
 GCC      :=  gcc
 CC       :=  $(GCC)
@@ -156,13 +163,22 @@ A        :=a
 Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
+STIC       := $(STAR_BIN)/stic
+GEANT3     := $(STAR_BIN)/geant3
 
-CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP 
+CPPFLAGS := $(STAR_SYS) $(TULL_ARCH) QUIET_ASP 
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
 endif
+ifneq ($(STAR_SYS),hp_ux102)   
+CPPFLAGS += $(UNAMES)
+endif
+
 
 MKDEPFLAGS:= -MG -MM -w -nostdinc
+
+MAKEDEPEND = $(GCC) $(MKDEPFLAGS)
+ROOTCINT   =rootcint
 
 OSFID    :=
 STRID    :=
@@ -172,45 +188,66 @@ LEX      := lex
 LEXLIB   := -ll
 
 
-ifneq (,$(findstring $(STAF_ARCH),intel_wnt))
+ifneq (,$(findstring $(STAR_SYS),intel_wnt))
 #  case WIN32
 #  ====================
 
   MOTIF :=
   DEBUG :=  
-
-  COUT := -Fo 
-  LOUT := -out: 
-
+#  SHELL := cmd /C
+#  export SHELL
+  NT     := intel_wnt
+  CAT    := type
+  COUT   := -Fo
+  FOUT   := -Fo
+  CINP   := -Tc
+  CXXINP := -Tp
+  FINP   := -Fo
+  LOUT   := -out:
+  SoOUT  := -out:
+  COPT   := -O2
+  CXXOPT := -O2
   O     :=obj
   A     :=lib
-  Cxx   :=cxx
+  Cxx   :=cc
   So    :=dll
-  
+
+  MAKECERNLIB = $(subst \,\\,$(subst /,\,$(STAF_MAKE_HOME)/cernlib.bat)) 
+# MAKECERNLIB = call Y:\wrk\mgr\cernlib.bat
+
+  MAKEDEPEND =echo Please RUN this makefile from UNIX, first
+  ROOTCINT   =rootcint
+
   RM := del /Q
+  RMDIR := del /S /Q
   CP := copy
   LN := xcopy
   SLASH := \\
   MKDIR :=mkdir
-  OSFID   := VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL
+  OSFID   := VISUAL_CPLUSPLUS CERNLIB_WINNT CERNLIB_MSSTDCALL WIN32
   STRID   := wnt
+  AR      := lib
+  ARFLAGS := -nologo -MACHINE:IX86 
   CXX     := cl
   CC      := cl
   LD      := $(CXX)
   SO      := link
-  SOFLAGS := /DEBUG /NODEFAULTLIB /INCREMENTAL:NO /NOLOGO /DLL /PDB:$(PDB)_all
-  CXXFLAGS:= $(cvarsdll) /MD /G5 /Zi /Fd$(PDB) /O2
+#  SOFLAGS := -DEBUG -NODEFAULTLIB -INCREMENTAL:NO -NOLOGO -DLL -PDB:$(PDB)_all
+  SOFLAGS := -DEBUG  -INCREMENTAL:NO -NOLOGO -DLL 
+  CXXFLAGS:= $(cvarsdll) -MD -G5 -Zi 
+#  CXXFLAGS:= $(cvarsdll) -MD -G5 -Zi -Fd$(PDB)
   CFLAGS  := $(CXXFLAGS)
   LDFLAGS := $(conlflags)
   CLIBS   := $(guilibsdll)
 
   FC         = fl32
   FLIBS   := dfordll.lib
-  FFLAGS  := /MD /G5 /Zi /Fd$(PDB) /fpp /Oxp
-  FEXTEND := /extend_source
+#  FFLAGS  := -MD -G5 -Zi -Fd$(PDB) -fpp -Oxp
+  FFLAGS  := -MD -G5 -Zi -fpp -Oxp -nokeep
+  FEXTEND := -extend_source
 endif 
 
-ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
+ifneq (,$(findstring $(STAR_SYS),rs_aix31 rs_aix32 rs_aix41))
 #  case IBMRT
 #  ====================
 
@@ -240,7 +277,7 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
   FEXTEND := -e
 endif 
 
-ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
+ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50))
 #    case linux
 #  ====================
   MOTIF :=
@@ -269,7 +306,7 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   LEX      := flex
   LEXLIB   := -lfl
 endif
-ifneq (,$(findstring $(STAF_ARCH),i386_redhat51))
+ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
 #    case linux but gcc is EGCS
 #  ====================
   LINUX :=YESS
@@ -299,7 +336,7 @@ ifneq (,$(findstring $(STAF_ARCH),i386_redhat51))
   LEXLIB   := -lfl
 endif
 
-ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
+ifneq (,$(findstring $(STAR_SYS),alpha_osf1 alpha_osf32c alpha_dux40))
 #    case "alpha":
 #  ====================
   OSFID := osf ALPHA alpha CERNLIB_QMVAOS CERNLIB_DECS CERNLIB_UNIX
@@ -329,7 +366,7 @@ ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
   FEXTEND  :=  -extend_source 
 endif
 
-ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
+ifneq (,$(findstring $(STAR_SYS),hp_ux102 hp700_ux90))
 
 #    case "hp":
 #  ====================
@@ -388,7 +425,7 @@ endif
 
 
 
-ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
+ifneq (,$(findstring $(STAR_SYS),sgi_52 sgi_53))
 #  ====================
   OSFID := SGI IRIX CERNLIB_SGI CERNLIB_UNIX NEW_ARRAY_ON
   STRID := sgi
@@ -407,7 +444,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
   FLIBS     :=   -lftn 
 
 endif
-ifneq (,$(findstring $(STAF_ARCH),sgi_62 ))
+ifneq (,$(findstring $(STAR_SYS),sgi_62 ))
 #  sgi_62 in sgi_52 compatible mode (VP)
   SGI62 := Yess
   OSFID :=  irix62 sgi62 SGI62 IRIX62 CERNLIB_QMIRIX53 CERNLIB_SGI CERNLIB_UNIX 
@@ -427,7 +464,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_62 ))
 
 endif
 
-ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
+ifneq (,$(findstring $(STAR_SYS),sgi_64 ))
 
   SGI64 := Yess
   OSFID :=  irix64 sgi64 SGI64 IRIX64 CERNLIB_QMIRIX64 CERNLIB_SGI CERNLIB_UNIX NEW_ARRAY_ON
@@ -448,7 +485,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
 endif
 
 
-ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
+ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   STDHOME := /afs/rhic/star/packages/ObjectSpace/2.0m
   STAF_UTILS_INCS += $(STDHOME) $(STDHOME)/ospace/std  $(STDHOME)/ospace
@@ -473,7 +510,7 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
 endif
 
 
-ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
+ifneq (,$(findstring $(STAR_SYS),sunx86_55))
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   OSFID :=  sun SUN SOLARIS SOLARISPC CERNLIB_UNIX CERNLIB_SOLARISPC
   STRID :=  sun
@@ -512,3 +549,6 @@ ifdef STDHOME
   CLIBS += -L$(STDHOME)/lib -lospace
 endif  
   
+
+CERN_ROOT_LIBS := $(shell $(MAKECERNLIB) geant321 pawlib graflib mathlib)
+
