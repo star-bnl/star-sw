@@ -19,12 +19,9 @@ packages.
 
 To be done
 ==========
-Tests for memory leaks.
-Note: StAssociationMaker does not work on SUN
-yet.  This package compiles on SUN, but it
-cannot be used yet since it relies on
-StAssociationMaker.
+Tested and ran through 56 events of a test file.
+
 
 Tests done
 ----------
-Compiles on sun4x_56 and i386_redhat51.
+Compiles on sun4x_56, hp_ux102 i386_redhat51.
