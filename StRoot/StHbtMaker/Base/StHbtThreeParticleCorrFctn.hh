@@ -1,9 +1,21 @@
 /***************************************************************************
  *
+ * $Id: StHbtThreeParticleCorrFctn.hh,v 1.2 2000/04/12 01:53:00 willson Exp $
+ *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ * 
  * Description: part of STAR HBT Framework: StHbtMaker package
- *    base class for a STAR three particle correlation function.  
- *    Users should inherit from this and must implement constructor, 
- *    destructor, Report(), AddMixedTriplet(), AddRealTriplet(), Finish()
+ *   base class for a STAR three particle correlation function.  
+ *   Users should inherit from this and must implement constructor, 
+ *   destructor, Report(), AddMixedTriplet(), AddRealTriplet(), Finish()
+ *
+ ***************************************************************************
+ *
+ * $Log: StHbtThreeParticleCorrFctn.hh,v $
+ * Revision 1.2  2000/04/12 01:53:00  willson
+ * Initial Installation - Comments Added
+ *
  *
  ***************************************************************************/
 

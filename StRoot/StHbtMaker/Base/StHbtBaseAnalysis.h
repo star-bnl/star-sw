@@ -1,11 +1,22 @@
 /***************************************************************************
  *
+ * $Id: StHbtBaseAnalysis.h,v 1.3 2000/04/12 01:53:00 willson Exp $
+ *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ * 
  * Description: part of STAR HBT Framework: StHbtMaker package
  *   base class for an HBT analysis.  Users should use one of the
- *   inherited analysis classes to set up an analysis based on the 
- *   number of particles to be correlated.
+ *   inherited analysis classes with this class.
  *
- ***************************************************************************/ 
+ ***************************************************************************
+ *
+ * $Log: StHbtBaseAnalysis.h,v $
+ * Revision 1.3  2000/04/12 01:53:00  willson
+ * Initial Installation - Comments Added
+ *
+ *
+ ***************************************************************************/
 
 #ifndef StHbtBaseAnalysis_hh
 #define StHbtBaseAnalysis_hh

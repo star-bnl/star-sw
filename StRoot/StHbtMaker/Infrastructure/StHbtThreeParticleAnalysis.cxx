@@ -1,11 +1,23 @@
 /***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *      This is the derived Class for three particle Analysis objects.  
- *      Each of the simultaneous Analyses should have one of derived 
- *      Analysis classes runningthese instantiated.  They link
- *      into the Manager in an Analysis Collection.
+ * $Id: StHbtThreeParticleAnalysis.cxx,v 1.2 2000/04/12 01:54:20 willson Exp $
  *
+ * Author: Robert Willson, Ohio State, willson@bnl.gov
+ ***************************************************************************
+ *  
+ * Description: part of STAR HBT Framework: StHbtMaker package.
+ *      This is the derived class for three-particle analysis objects.  
+ *      Each of the simultaneous analyses should have one of derived 
+ *      analysis classes running these instantiated.  They link
+ *      into the aanager in an analysis collection.
+ *
+ ***************************************************************************
+ *
+ * $Log: StHbtThreeParticleAnalysis.cxx,v $
+ * Revision 1.2  2000/04/12 01:54:20  willson
+ * Initial Installation - Comments Added
+ *
+ * 
  ***************************************************************************/
 
 #include "StHbtMaker/Infrastructure/StHbtThreeParticleAnalysis.h"
