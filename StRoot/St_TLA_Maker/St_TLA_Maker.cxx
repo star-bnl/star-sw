@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.2 1998/07/20 15:08:15 fisyak Exp $
+// $Id: St_TLA_Maker.cxx,v 1.3 1998/08/10 02:32:07 fisyak Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.3  1998/08/10 02:32:07  fisyak
+// Clean up
+//
 // Revision 1.2  1998/07/20 15:08:15  fisyak
 // Add tcl and tpt
 //
@@ -50,7 +53,7 @@ Int_t St_TLA_Maker::Make(){
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.2 1998/07/20 15:08:15 fisyak Exp $    *\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.3 1998/08/10 02:32:07 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
