@@ -3,6 +3,7 @@
 
 // change log
 // 03-Jun-99 MJL add Pointer RICH to DATAP
+// 23-Jun-99 MJL reinstate Pointer TRG to DATAP (deleted accidentally)
 
 #ifndef RECHEADERFORMATS_HH
 #define RECHEADERFORMATS_HH
@@ -112,8 +113,9 @@ struct Bank_DATAP : public Bank
   Pointer FTPC;
   Pointer reserved_det;
   Pointer RICH;
+  Pointer TRG;
   Pointer L3;
-  INT32 reserved[102];
+  INT32 reserved[101];
 };
 
 #endif
