@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.7 2001/03/13 19:14:36 didenko Exp $
+ * $Id: StEstTracker.h,v 1.8 2001/03/19 16:06:18 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.8  2001/03/19 16:06:18  lmartin
+ * References to McTrack objects removed.
+ *
  * Revision 1.7  2001/03/13 19:14:36  didenko
  * check commit
  *
@@ -38,7 +41,6 @@ class StEstIndexGeom;
 class StEstHit;
 class StEstTrack;
 class StEstTPCTrack;
-class StEstMcTrack;
 class StEstParams;
 class StEstSegments;
 class St_dst_vertex;
@@ -106,7 +108,6 @@ class StEstTracker {
   StEstHit*        mVertex;//!
   StEstTPCTrack**  mTPCTrack;//!
   StEstTrack**     mTrack;//!
-  StEstMcTrack**   mMcTrack;//!
 
   StEstProjOut     mProjOut;//!
   StEstGtrk*       gtrk; //!
@@ -118,7 +119,6 @@ class StEstTracker {
   long*    mTptIndex; //!
   
   
-  long     mNMcTrack;//! number of MC tracks
   long     mNTPCTrack;      //! number of TPC tracks
   long     mNTrack;         //! total number of tracks
   long     mNSvtHit;        //! number of SVT hits
@@ -145,7 +145,6 @@ class StEstTracker {
   void BuildFindableBranches();
   void PrintTrackDetails(int trackid);
   void Eval(int onoffmatrix, int nminhit);
-  void Eval2(int onoffmatrix, int nminhit);
   void FlagTPCTracksSP(int OverPass);
   void FinishFlag();
   void ReInitializeHelix();
