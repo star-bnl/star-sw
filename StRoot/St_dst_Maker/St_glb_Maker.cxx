@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.8 1998/11/01 16:42:27 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.9 1998/11/12 23:38:36 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.9  1998/11/12 23:38:36  fisyak
+// Account new g2t
+//
 // Revision 1.8  1998/11/01 16:42:27  fisyak
 // dst analysis
 //
@@ -129,7 +132,9 @@ Int_t St_dst_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_dst_Maker::Make(){
   //  PrintInfo();
-  if (!m_DataSet->GetList()){ //create dst
+  St_DataSetIter dst(m_DataSet);         // data/global/dst
+  St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
+  if (!globtrk){ //create dst
     St_DataSetIter dst(m_DataSet);         // data/global/dst
     St_DataSetIter global(gStChain->DataSet("global")); // data/global
     St_DataSetIter tpc_tracks(gStChain->DataSet("tpc_tracks")); 
@@ -289,9 +294,7 @@ Int_t St_dst_Maker::Make(){
     cout << " run_dst: finished calling fill_dst_event_summary" << endl;
   }
   // Fill histograms
-  St_DataSetIter dst(m_DataSet);         // data/global/dst
-  St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
-  if (!globtrk) {
+  if (globtrk) {
     table_head_st *trk_h = globtrk->GetHeader();
     dst_track_st  *trk   = globtrk->GetTable();
     for (Int_t i = 0; i < globtrk->GetNRows(); i++){
@@ -313,14 +316,14 @@ Int_t St_dst_Maker::Make(){
       for (Int_t l=0; l < hepev->GetNRows(); l++){
         hepe_gent_st *p = particle+l;
         if (p->isthep == 1) {
-          Float_t px = p->phep[0];
-          Float_t py = p->phep[1];
-          Float_t pz = p->phep[2];
-          Float_t pT    =  TMath::Sqrt(px*px+py*py);
-          Double_t theta =  TMath::Atan2 ( pT, pz );
+          Double_t px = p->phep[0];
+          Double_t py = p->phep[1];
+          Double_t pz = p->phep[2];
+          Double_t pT    =  TMath::Sqrt(px*px+py*py);
+          Double_t theta =  TMath::ATan2 ( pT, pz );
 //        Double_t theta =  atan2 ( pT, pz );
           Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-          m_pT_eta_gen->Fill(eta,pT);
+          m_pT_eta_gen->Fill(eta, (Float_t) pT);
 	}
       }
   }
@@ -335,14 +338,14 @@ Int_t St_dst_Maker::Make(){
         for (Int_t l=0; l < pa->GetNRows(); l++){
           particle_st *p = particle+l;
           if (p->isthep == 1) {
-            Float_t px = p->phep[0];
-            Float_t py = p->phep[1];
-            Float_t pz = p->phep[2];
-            Float_t pT    =  TMath::Sqrt(px*px+py*py);
-            Double_t theta =  TMath::Atan2 ( pT, pz );
+            Double_t px = p->phep[0];
+            Double_t py = p->phep[1];
+            Double_t pz = p->phep[2];
+            Double_t pT    =  TMath::Sqrt(px*px+py*py);
+            Double_t theta =  TMath::ATan2 ( pT, pz );
 //        Double_t theta =  atan2 ( pT, pz );
             Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-            m_pT_eta_gen->Fill(eta,pT);
+            m_pT_eta_gen->Fill(eta, (Float_t) pT);
 	  }
 	}
       }
@@ -353,7 +356,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.8 1998/11/01 16:42:27 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.9 1998/11/12 23:38:36 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
