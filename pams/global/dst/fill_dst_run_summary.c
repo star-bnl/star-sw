@@ -89,8 +89,8 @@ long  type_of_call fill_dst_run_summary_ (
   float   n_events_good, mean, stddev;
   static  int    first_event=1;
   static  int    nevents=0;
-  static  float  pt_sum=0, pt2_sum=0, eta_sum=0, eta2_sum=0;
-  static  float  nchgtrk_sum=0, nchgtrk2_sum=0, nvertx_sum=0, nvertx2_sum=0;
+  static  double  pt_sum=0, pt2_sum=0, eta_sum=0, eta2_sum=0;
+  static  double  nchgtrk_sum=0, nchgtrk2_sum=0, nvertx_sum=0, nvertx2_sum=0;
  
   /* ===========================  Begin Executable Code  =============== */
   
