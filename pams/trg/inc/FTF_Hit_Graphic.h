@@ -8,3 +8,4 @@ public:
 	   void         Plot ( int color ) ;
    } ;
 #endif
+
