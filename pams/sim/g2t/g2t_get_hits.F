@@ -1,5 +1,8 @@
-* $Id: g2t_get_hits.F,v 1.24 2000/01/23 19:04:42 nevski Exp $
+* $Id: g2t_get_hits.F,v 1.25 2000/03/03 20:51:24 nevski Exp $
 * $Log: g2t_get_hits.F,v $
+* Revision 1.25  2000/03/03 20:51:24  nevski
+* add protection against corrupted Itrac
+*
 * Revision 1.24  2000/01/23 19:04:42  nevski
 * unused variables deleted
 *
@@ -23,7 +26,8 @@ C :>--------------------------------------------------------------------
       IMPLICIT   NONE
 #include "PAM.inc"
 #include "geant321/gcnum.inc"
-#include "geant321/gckine.inc"
+#include "geant321/gckine.inc" 
+#include "geant321/gcflag.inc"
       RECORD          /TABLE_HEAD_ST/    p_vert_h
       RECORD          /TABLE_HEAD_ST/    p_track_h
       RECORD          /TABLE_HEAD_ST/    p_hits_h
@@ -68,7 +72,7 @@ C :>--------------------------------------------------------------------
       Integer         G2T_GET_HITS, AgHITGET, G2T_VOLUME_ID, 
      >                TDM_GET_COLUMN, TDM_GET_CCOUNT, ISLFLAG
 * Local variables
-      Integer         jflg(Lnmax),jadr(Nmh),phits(Nmh),Nbytpw,Iprin,Jtra,
+      Integer         jflg(Lnmax),jadr(Nmh),phits(Nmh),Nbytpw,Iprin,Jtra,Nb,
      >                LenT,LenH,Npar,Ish,nh,i,j,k,l,e,f,m,n,ip,in,Ip0,Nu,n0
       Real            G2T_FIELD,Par(50),xxx(10),U(50),Pt,Vr,dphi,dtr,FieldZ
       Character*4     Csys*4/' '/,col*80,typ*80,cp*20
@@ -144,8 +148,12 @@ C :>--------------------------------------------------------------------
       Jtra = 0
       ip0  = 0
       n0   = 0
+      nb   = 0
 
       DO WHILE (AgHITGET(0,xxx).eq.0)
+         if (abs(trac)>Ntrack) then
+            nb+=1; next
+         endif
 *
          volume  =   g2t_volume_id (Csys,NUMBV)
 
@@ -200,5 +208,17 @@ C TPC correction: - - - - - - - - - - - - - - - - - - - - - - - - - -
 
  190  enddo
  200  G2T_GET_HITS = STAFCV_OK
+      if (nb.eq.0) return
+
+      print *,' G2R_get_hits ERROR in ',Cset,' ',Cdet,': ',nb,' bad hits'
+      IEOTRI = 1
+
+      G2T_GET_HITS = STAFCV_BAD    
+
       end
+
+
+
+
+
 

@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.58 2000/02/29 22:25:52 lasiuk Exp $
+// $Id: St_geant_Maker.cxx,v 1.59 2000/03/03 20:53:48 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.59  2000/03/03 20:53:48  nevski
+// add protection against corrupted Itrac
+//
 // Revision 1.58  2000/02/29 22:25:52  lasiuk
 // added FREO and QUAR to Rich hits
 //
@@ -507,7 +510,7 @@ Int_t St_geant_Maker::Make()
     geant3->Gfnhit("RICH","RCSI", nhit2);
     geant3->Gfnhit("RICH","FREO", nhit3);
     geant3->Gfnhit("RICH","QUAR", nhit4);
-    cout << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endl;
+//  cout << nhit1 << " " << nhit2 << " " << nhit3 << " " << nhit4 << endl;
     nhits=nhit1+nhit2+nhit3+nhit4;
     if (nhits>0) {
       St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
@@ -575,8 +578,9 @@ Int_t St_geant_Maker::Make()
 // Fill Histograms    
    FillHist();
 
-  if (cflag->ieorun) {return kStEOF;} 
-  else               {return kStOK;}
+  if     (cflag->ieorun) {return kStEOF;} 
+  elseif (cflag->ieotri) {return kStErr;} 
+  else                   {return kStOK;}
 }
 //_____________________________________________________________________________
 void St_geant_Maker::LoadGeometry(Char_t *option){
