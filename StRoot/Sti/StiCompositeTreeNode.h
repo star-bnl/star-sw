@@ -10,6 +10,8 @@
 #include <string>
 #include <algorithm>
 
+#include "StiObjectFactory.h"
+
 using std::find;
 using std::vector;
 using std::string;
@@ -86,5 +88,17 @@ private:
     string mname;
 };
 
+//For now, include some typdefs that will make for easy user includes
+#include "StiDetector.h"
+typedef StiDetector data_t;
+
+#ifndef __CINT__
+typedef StiCompositeTreeNode<data_t> data_node;
+#else
+class data_node;
+#endif
+
+typedef vector<data_node*> data_node_vec; 
+typedef StiObjectFactory<data_node> data_node_factory;
 
 #endif

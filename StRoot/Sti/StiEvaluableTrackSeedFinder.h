@@ -12,9 +12,7 @@
 #include "StiSeedFinder.h"
 #include "StEvent/StEnumerations.h"
 
-#include "StiFactoryTypedefs.h"
-//#include "StiEvaluableTrack.h"
-//#include "StiObjectFactory.h"
+#include "StiGui/StiRootDrawableStiEvaluableTrack.h" //For factory
 
 class StEvent;
 class StiDetector;
