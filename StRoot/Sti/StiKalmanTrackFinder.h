@@ -14,6 +14,7 @@ using std::endl;
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
+#include "Sti/StiHitFiller.h"
 
 class StiDetector;
 class StiDectorContainer;
@@ -27,6 +28,8 @@ class StiHitContainer;
 class StiTrackContainer;
 class StiDynamicTrackFilter;
 class StiTrack;
+class StEvent;
+class StMcEvent;
 
 enum StiFindStep {StepByLayer=1,StepByDetector=2 };
 
@@ -34,14 +37,10 @@ class StiKalmanTrackFinder : public StiTrackFinder, public Observer
 {
 public:
     StiKalmanTrackFinder(StiToolkit * userToolkit);
-    ~StiKalmanTrackFinder();
+    virtual ~StiKalmanTrackFinder();
     //action methods_______________________________________________
 
-    //Inherited from Observer
-    virtual void update(Subject* changedSubject);
-    virtual void forgetSubject(Subject* theObsoleteSubject);
-    
-    //inherited
+    virtual void update();
     virtual void findTracks();
     virtual void fitTracks(); 
     virtual void extendTracksToVertex(StiHit* vertex);
@@ -64,18 +63,20 @@ public:
     void doFinishTrackSearch();
     void doNextTrackStep();
     void setStepMode(StiFindStep m)
-			{
-				mode = m;
-			}
+      {
+	mode = m;
+      }
     StiFindStep getStepMode()
-			{
-				return mode;
-			}
-
+      {
+	return mode;
+      }
+    
   int getTrackSeedFoundCount() const;
   int getTrackFoundCount(StiTrackFilter * filter) const;
   int getTrackFoundCount() const;
     
+  void setEvent(StEvent * event, StMcEvent * mcEvent);
+
 protected:
 
     void getNewState();
@@ -120,38 +121,10 @@ private:
     bool hasDet;
     
     Messenger & trackMes;
-    Subject * mSubject;
     
 };
 
 //inlines
-
-
-inline void StiKalmanTrackFinder::update(Subject* changedSubject)
-{
-    // cout <<"StiKalmanTrackFinder::update(Subject*)"<<endl;
-    if (changedSubject!=mSubject) {
-	cout <<"StiKalmanTrackFinder::update(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-    else {
-	// cout <<"getting new values"<<endl;
-	getNewState();
-	// cout <<"\tdone getting new values"<<endl;
-    }
-}
-
-inline void StiKalmanTrackFinder::forgetSubject(Subject* obsolete)
-{
-    // cout <<"StiKalmanTrackFinder::forgetSubject(Subject*)"<<endl;
-    if (obsolete==mSubject) {
-	mSubject=0;
-    }
-    else {
-	cout <<"StiKalmanTrackFinder::forgetSubject(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-}
 
 inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *par)
 {
@@ -159,7 +132,6 @@ inline void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *
 	StiKalmanTrack::setParameters(par);
 	StiKalmanTrackNode::setParameters(par);
 }
-
 
 #endif
 

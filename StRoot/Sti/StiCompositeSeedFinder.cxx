@@ -116,9 +116,6 @@ void StiCompositeSeedFinder::build()
     
     sf->setFactory(mFactory);
 
-    //We should replace this hard loop below with something more elegant and flexible
-    //sf->getNewValues();
-
     //Now add detectors to the container
     const StiIOBroker* broker = StiToolkit::instance()->getIOBroker();
     

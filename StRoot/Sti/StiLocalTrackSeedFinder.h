@@ -38,8 +38,6 @@ public:
 
     //Implementation of Observer pattern
     virtual void getNewState();
-    virtual void update(Subject* changedSubject);
-    virtual void forgetSubject(Subject* theObsoleteSubject);
     
     //Inherited interface
     virtual bool hasMore();
@@ -87,9 +85,6 @@ protected:
     HitVec::iterator mHitsEnd;
     HitVec::iterator mCurrentHit;
 
-    //Subject
-    Subject* mSubject;
-    
     //define search window in the next layer when connecting two points
     double mDeltaY;
     double mDeltaZ;
@@ -124,34 +119,6 @@ private:
 
     
 };
-
-//inlines
-inline void StiLocalTrackSeedFinder::update(Subject* changedSubject)
-{
-    //cout <<"StiLocalTrackSeedFinder::update(Subject*)"<<endl;
-    if (changedSubject!=mSubject) {
-	cout <<"StiLocalTrackSeedFinder::update(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-    else {
-	//cout <<"getting new values"<<endl;
-	getNewState();
-	//cout <<"\tdone getting new values"<<endl;
-    }   
-}
-
-inline void StiLocalTrackSeedFinder::forgetSubject(Subject* obsolete)
-{
-    //cout <<"StiLocalTrackSeedFinder::forgetSubject(Subject*)"<<endl;
-    if (obsolete==mSubject) {
-	mSubject=0;
-    }
-    else {
-	cout <<"StiLocalTrackSeedFinder::forgetSubject(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-}
-
 
 //Non-members
 

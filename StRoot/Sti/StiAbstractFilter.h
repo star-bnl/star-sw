@@ -28,7 +28,7 @@ public:
 
     ///We must pass in valid pointers to Subject and IOBroker
     StiAbstractFilter(Subject* s, StiIOBroker* b, string name)
-	: mSubject(s), mBroker(b), mName(name) {mSubject->attach(this);}
+	: Observer(s), mBroker(b), mName(name) {mSubject->attach(this);}
 
     ///We must detach from the subject at destruction time.
     virtual ~StiAbstractFilter() {if (mSubject) {mSubject->detach(this);}}
@@ -43,32 +43,13 @@ public:
     virtual void print() const =0;
     
 protected:
-    Subject* mSubject;
     StiIOBroker* mBroker;
     string mName;
     
 private:
     StiAbstractFilter(); //Not implemented
     
-    ///Implement the update() function from the base class.
-    virtual void update(Subject*);
-    virtual void forgetSubject(Subject*);
 };
 
-template <class T>
-inline void StiAbstractFilter<T>::update(Subject* changedSubject)
-{
-    if (changedSubject==mSubject) {
-	getNewState();
-    }   
-}
-
-template <class T>
-inline void StiAbstractFilter<T>::forgetSubject(Subject* obsolete)
-{
-    if (obsolete==mSubject) {
-	mSubject=0;
-    }
-}
 
 #endif

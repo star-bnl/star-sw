@@ -119,9 +119,6 @@ class StiKalmanTrack : public StiTrack
   static void setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>*);
   static void setParameters(StiKalmanTrackFinderParameters* p);
 
-  ///Action method for polymorphic graphical behavior
-  virtual void update();
-  
   void    reset();
   
   /// Calculates and returns the momentum and error of the track 
@@ -354,12 +351,6 @@ inline void StiKalmanTrack::setFlag(long v)
 inline long StiKalmanTrack::getFlag() const 
 {
   return mFlag;
-}
-
-inline void StiKalmanTrack::update()
-{
-  //cout<<"void StiKalmanTrack::update()"<<endl;
-  return;
 }
 
 /*! 

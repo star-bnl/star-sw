@@ -1005,59 +1005,59 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 
 bool StiKalmanTrack::find(int direction)
 {
-	bool trackExtended=false;
+  bool trackExtended=false;
   setFlag(0);
   //cout << "StiKalmanTrack::find(int direction) called with direction:"<<direction<<endl;
-	if (++debugCount<20) 
-		{
-			cout << "::In-x:" << getInnerMostHitNode()->fX;
-			cout << "/Out-x:" << getOuterMostHitNode()->fX;
-			cout << "/find(OutIn)";
-		}
+  if (++debugCount<20) 
+    {
+      cout << "::In-x:" << getInnerMostHitNode()->fX;
+      cout << "/Out-x:" << getOuterMostHitNode()->fX;
+      cout << "/find(OutIn)";
+    }
   // invoke tracker to find or extend this track
   if (trackFinder->find(this,kOutsideIn))
-		{
-			// prune the undesirable nodes
-			//prune();
+    {
+      // prune the undesirable nodes
+      //prune();
 			
-			if (debugCount<20) cout<<"/fit(InOut);";
-			fit(kInsideOut);
-			trackExtended = true;
-		}			
+      if (debugCount<20) cout<<"/fit(InOut);";
+      fit(kInsideOut);
+      trackExtended = true;
+    }			
 			
-	// decide if an outward pass is needed.
-	const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
-	if (debugCount<20) 
-		{
-			cout << "//In-x:" << getInnerMostHitNode()->fX;
-			cout << "//Out-x:" << getOuterMostHitNode()->fX;
-		}
-	if (outerMostNode->fX<170. )
-		{
-			// swap the track inside-out in preparation for the outward search/extension
-			if (debugCount<20) cout << "/swap";
-			swap();      
-			setTrackingDirection(kInsideOut); 			if (debugCount<20) cout << "/find(inOut)";
-			if (trackFinder->find(this,kInsideOut))
-				{
-					if (debugCount<20) cout << "fit(OutIn)";
-					fit(kOutsideIn);                  			if (debugCount<20) cout << "/swap()";
-					trackExtended = true;
-				}
-			swap();
-			setTrackingDirection(kOutsideIn);
-		}
-	double pp[3];
-	if (debugCount<20) 
-		{
-			getInnerMostHitNode()->getGlobalMomentum(pp);
-			cout << "\nIn-x:" << getInnerMostHitNode()->fX<< " p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
-			getOuterMostHitNode()->getGlobalMomentum(pp);
-			cout << "\nOut-x:" << getOuterMostHitNode()->fX<<" p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
-		}
-	reserveHits();  
-	setFlag(1);
-	return trackExtended;
+  // decide if an outward pass is needed.
+  const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
+  if (debugCount<20) 
+    {
+      cout << "//In-x:" << getInnerMostHitNode()->fX;
+      cout << "//Out-x:" << getOuterMostHitNode()->fX;
+    }
+  if (outerMostNode->fX<190. )
+    {
+      // swap the track inside-out in preparation for the outward search/extension
+      if (debugCount<20) cout << "/swap";
+      swap();      
+      setTrackingDirection(kInsideOut); 			if (debugCount<20) cout << "/find(inOut)";
+      if (trackFinder->find(this,kInsideOut))
+	{
+	  if (debugCount<20) cout << "fit(OutIn)";
+	  fit(kOutsideIn);                  			if (debugCount<20) cout << "/swap()";
+	  trackExtended = true;
+	}
+      swap();
+      setTrackingDirection(kOutsideIn);
+    }
+  double pp[3];
+  if (debugCount<20) 
+    {
+      getInnerMostHitNode()->getGlobalMomentum(pp);
+      cout << "\nIn-x:" << getInnerMostHitNode()->fX<< " p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
+      getOuterMostHitNode()->getGlobalMomentum(pp);
+      cout << "\nOut-x:" << getOuterMostHitNode()->fX<<" p:"<<pp[0]<<" "<<pp[1]<<" "<<pp[2]<<"\n"<<endl;
+    }
+  reserveHits();  
+  setFlag(1);
+  return trackExtended;
 }
 
 void StiKalmanTrack::setParameters(StiKalmanTrackFinderParameters *parameters)

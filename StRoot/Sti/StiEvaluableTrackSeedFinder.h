@@ -80,7 +80,6 @@ private:
     StTrackPairInfo* mPair;
 };
     
-//class StiEvaluableTrackSeedFinder : public StiSeedFinder
 class StiEvaluableTrackSeedFinder : public Observer, public StiSeedFinder
 {
 public:
@@ -93,16 +92,10 @@ public:
     //Sets
 
     void setEvent(StMcEvent* mcevt=0);
-
-    //Action
     virtual bool hasMore();
     virtual StiKalmanTrack* next();
     virtual void reset();
-
-    //Implementation of Observer pattern
     void getNewState();
-    virtual void update(Subject* changedSubject);
-    virtual void forgetSubject(Subject* theObsoleteSubject);
 
 protected:
     ///Construct an evaluable track from a m.c. track
@@ -119,7 +112,6 @@ private:
     StTpcHitFilter* mTpcHitFilter;
 
     StiIOBroker* mIOBroker;
-    Subject* mSubject;
 
     unsigned int mLowerBound;
     unsigned int mMaxHits;
@@ -132,33 +124,6 @@ private:
     vector<StMcTrack*>::iterator mEndMc;
 };
 
-//inlines
-
-inline void StiEvaluableTrackSeedFinder::update(Subject* changedSubject)
-{
-    //cout <<"StiEvaluableTrackSeedFinder::update(Subject*)"<<endl;
-    if (changedSubject!=mSubject) {
-	cout <<"StiEvaluableTrackSeedFinder::update(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-    else {
-	//cout <<"getting new values"<<endl;
-	getNewState();
-	//cout <<"\tdone getting new values"<<endl;
-    }   
-}
-
-inline void StiEvaluableTrackSeedFinder::forgetSubject(Subject* obsolete)
-{
-    //cout <<"StiEvaluableTrackSeedFinder::forgetSubject(Subject*)"<<endl;
-    if (obsolete==mSubject) {
-	mSubject=0;
-    }
-    else {
-	cout <<"StiEvaluableTrackSeedFinder::forgetSubject(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-}
 
 #endif
 

@@ -14,7 +14,7 @@ using namespace std;
 #include "StiTrackFilters.h"
 #include "StiDynamicTrackFilter.h"
 
-StiDynamicTrackFilter::StiDynamicTrackFilter(StiIOBroker* b) : mSubject(b), mBroker(b)
+StiDynamicTrackFilter::StiDynamicTrackFilter(StiIOBroker* b) : Observer(b), mBroker(b)
 {
     cout <<"StiDynamicTrackFilter::StiDynamicTrackFilter()"<<endl;
     mSubject->attach(this);

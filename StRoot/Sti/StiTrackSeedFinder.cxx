@@ -16,15 +16,17 @@
 #include "StiTrackSeedFinder.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
+#include "StiIOBroker.h"
 
 ostream& operator<<(ostream& os, const StiHit& hit);
 
 StiTrackSeedFinder::StiTrackSeedFinder(StiDetectorContainer* det,
 				       StiHitContainer* h)
-    : StiSeedFinder(h), mDetStore(det)
+  : Observer(StiIOBroker::instance()),
+    StiSeedFinder(h), 
+    mDetStore(det)
 {
     mMessenger <<"StiTrackSeedFinder::StiTrackSeedFinder()"<<endl;
-    
 }
 
 StiTrackSeedFinder::~StiTrackSeedFinder()
