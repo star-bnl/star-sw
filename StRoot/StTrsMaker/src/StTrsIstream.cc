@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.1 1999/10/11 23:55:23 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.2 1999/10/12 00:07:25 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.2  1999/10/12 00:07:25  calderon
+ * Add missing <algorithm> include.
+ *
  * Revision 1.1  1999/10/11 23:55:23  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -21,6 +24,7 @@
  *
  **************************************************************************/
 #include <utility>
+#include <algorithm>
 #include "StTrsIstream.hh"
 #include "StTrsRawDataEvent.hh"
 #include "StTrsDigitalSector.hh"
