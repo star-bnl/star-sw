@@ -35,8 +35,8 @@ C Following items should be initialised from a data base.
     
       REAL SIGMA0(2), SIGMA02(2)
       DATA SIGMA0/0.0135, 0.0303/ !intrinsic resolution term inner/outer
-      REAL SPRF_DR0
-      DATA SPRF_DR0 /0.067/ !zero B-field prf drift term ;
+      REAL SPRF_DR0(3)
+      DATA SPRF_DR0 /0.0575, 0.0346, 0.024 / !zero B-field prf drift term ;
       REAL SIGMAD2(2)
       REAL SIGMA_DL
       DATA SIGMA_DL/0.035/ ! Longitudinal difusion
@@ -50,8 +50,6 @@ C Following items should be initialised from a data base.
       DATA ION_POT /28.5e-9 / ! P10 ionization potential  in GeV
       REAL WIRE_SPACE, WIRE_SPACE2
       DATA WIRE_SPACE /0.4/
-      REAL RATIO
-      DATA RATIO /1.0/
       
 C     General physical constants now in math_constants and phys_constants
 C  
@@ -62,7 +60,7 @@ C
       real Nh,Neff_b,Neff_h,siga2(2),sigb2(2),sigc2(2),sigd2(2)
       real AA, BB, CC
       real xlocal(3),Bfield(3)
-      real xlength
+      real xlength,stemp
       integer tpc_drift_volume_length
       DATA xlocal /3*0/
       Real atan
@@ -81,8 +79,15 @@ C     calculate the dip angle
       padl2(2)=padl(2)**2
       sigma02(1)=sigma0(1)**2
       sigma02(2)=sigma0(2)**2
-      sigmad2(1)=sprf_dr0**2*ratio**2
-      sigmad2(2)=sprf_dr0**2*ratio**2
+      if(abs(bfield(3)).lt.0.0002) then
+         stemp=SPRF_DR0(1)
+      else if(abs(bfield(3)).lt.2.6) then
+         stemp=SPRF_DR0(2)
+      else
+         stemp=SPRF_DR0(3)
+      endif
+      sigmad2(1)=stemp**2
+      sigmad2(2)=stemp**2
      
 
 C     Calculate spatial resolution along the padrow
