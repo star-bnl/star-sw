@@ -25,7 +25,19 @@ macro process_event_stk
   macro/global/import *
     
          
-      exec run_stk  
+ message ' !!! svt_tracker: vertex not found,  filled from MC ***'
+ 
+  cd [data]/global/vertices
+  tdm/newtable stk_vtx stk_vtx 1
+  tdm/table/rowcount stk_vtx 1
+  tdm/table/cell/putvalue 'stk_vtx[0].id' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].t' 0
+  tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
+  tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
+cd /dui
+ 
+ exec run_stk  
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
       
  NEXT_EVENT:
@@ -37,6 +49,18 @@ return
 macro process_event_sgr nev
  macro/global/import *
          
+ message ' !!! svt_tracker: vertex not found,  filled from MC ***'
+ 
+  cd [data]/global/vertices
+  tdm/newtable stk_vtx stk_vtx 1
+  tdm/table/rowcount stk_vtx 1
+  tdm/table/cell/putvalue 'stk_vtx[0].id' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].flag' 1
+  tdm/table/cell/putvalue 'stk_vtx[0].t' 0
+  tdm/table/cell/putvalue 'stk_vtx[0].x' 0.0 0.0 0.0
+  tdm/table/cell/putvalue 'stk_vtx[0].cov' 0.0 0.0 0.0 0.0 0.0 0.0 
+  cd /dui
+  
       exec run_sgr  
 	 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
         sigma vsgr = vsgr + $cptime

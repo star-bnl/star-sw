@@ -19,7 +19,7 @@ macro initialize
  
  macro process_event 
    
-   macro/global/import 
+   macro/global/import * 
      exec run_srs  [ievent]
 	 if (staf_status(1) .ne. 1) goto NEXT_EVENT
 	 
