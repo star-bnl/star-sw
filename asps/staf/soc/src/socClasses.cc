@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.29 1998/08/11 12:43:34 fisyak Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.30 1998/08/13 02:08:31 perev Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -14,7 +14,7 @@
 #ifdef WIN32
 # include <stdio.h>
 # include <iostream.h>
-#elif !defined(linux)
+#elif !defined(LINUX)
 # include <sys/stream.h>
 #else
 # include <g++/stream.h>
@@ -36,8 +36,8 @@
 	&& ( myObjs[A] != NULL ) )
 
 //:----------------------------------------------- PROTOTYPES         --
-extern "C" char *id2name(char *base, long id);
-extern "C" char *shortname(char *longname, size_t length);
+extern "C" const char *id2name(const char *base, long id);
+extern "C" const char *shortname(const char *longname, size_t length);
 
 //:#####################################################################
 //:=============================================== CLASS              ==
@@ -84,9 +84,7 @@ socObject:: socObject(const char* name, const char* type) {
 //----------------------------------
 socObject:: socObject(long n, const char* type) {
    myPtr = 0; // This must be set in derived CTOR !!!
-   char *name = id2name((char*)type,n);
-   myName = new stafString(name);
-   FREE(name);
+   myName = new stafString(id2name(type,n));
    myType = new stafString(type);
    myLock = FALSE;
    soc->signIn(this,myIdRef);
@@ -101,23 +99,10 @@ IDREF_T socObject::  idRef () {
    return myIdRef;
 }
 
-//----------------------------------
-char * socObject::  name () {
-   char *c = (char*)MALLOC(strlen(myName->show())+1);
-   strcpy(c,myName->show());
-   return c;
-}
-
-//----------------------------------
-char * socObject::  type () {
-   char *c = (char*)MALLOC(strlen(myType->show())+1);
-   strcpy(c,myType->show());
-   return c;
-}
 
 //----------------------------------
 char * socObject::  version () {
-   char *myVersion="dev";
+   const char *myVersion="dev";
    char *c = (char*)MALLOC(strlen(myVersion)+1);
    strcpy(c,myVersion);
    return c;
@@ -129,31 +114,16 @@ SOC_PTR_T socObject::  ptr () {
 }
 
 //----------------------------------
-void socObject:: lock (unsigned char lock) {
-   if(lock){
-      myLock = 1;
-   }else{
-      myLock = 0;
-   }
-}
-
-//----------------------------------
-unsigned char socObject::  lock () {
-   return (myLock>0);
-}
-
-//----------------------------------
 char * socObject:: listing () {
    char *c = 0; 
    c = (char*)MALLOC(79+100);
    memset(c,0,79);
    char l='|';
    if(lock())l='-';
-   char *n, *t, *nn, *tt;
+   char *nn, *tt;
    sprintf(c,"| %5ld %c %-15s | %-15s |"
-   		, idRef(), l, nn=shortname(n=name(),15)
-		, tt=shortname(t=type(),15));
-   FREE(n); FREE(t); FREE(nn); FREE(tt);
+   		, idRef(), l, shortname(Name(),15)
+		, shortname(Type(),15));
    return c;
 }
 
@@ -420,27 +390,25 @@ socObject* socCatalog:: getObject (IDREF_T id) {
 STAFCV_T socCatalog:: idObject (const char * name
 		, const char * type, IDREF_T& id) {
 // THIS COULD BE IMPLEMENTED BY A HASHTABLE LOOKUP !!
-   char *n, *t;
-   for( int i=0; i<count(); i++ ){
-      if( myObjs[i] ) {
-         n=myObjs[i]->name();
-	 if(  0 == strcmp(n,name) ){
-	    if( 0 == strcmp(t=myObjs[i]->type(),type) 
-	    ||  0 == strcmp("-",type) ){
-	       id = i;
-	       if(i != myObjs[i]->idRef()){	//- HACK???
-		 printf("MAJOR ERROR REPORT!!! (%d,%ld)\n",i,id=myObjs[i]->idRef());
-	       }
-	       FREE(n); FREE(t);
-	       EML_SUCCESS(STAFCV_OK);
-	    }
-	    FREE(t);
-	 }
-	 FREE(n);
-      }
+   const char *n, *t;
+   socObject *o;
+   for( int i=0; i<myCount; i++ ){
+     o = myObjs[i];
+      if( ! o) 		continue;
+      n=o->Name();
+      if (n[0] != name[0])	continue; 
+      if(strcmp(n,name) )	continue;
+      t=o->Type();
+      if (type[0]!='-') {
+        if (t[0] != type[0]) 	continue;
+        if (strcmp(t,type))	continue;} 
+      id = i;
+      if(i != o->idRef()){	//- HACK???
+	printf("MAJOR ERROR REPORT!!! (%d,%ld)\n",i,id=myObjs[i]->idRef());
+	exit(13); }
+      EML_SUCCESS(STAFCV_OK);
    }
-   id = -1; /*- SOC_E_IDREF_NOTFOUND -*/
-// EML_ERROR(OBJECT_NOT_IDED);
+   id = -1; 		/*- SOC_E_IDREF_NOTFOUND -*/
    return FALSE;	//- HACK: This error is too sensitive
 }
 

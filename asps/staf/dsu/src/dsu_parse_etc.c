@@ -414,7 +414,7 @@ void dsuTableValErr(int x) {
 }
 int dsuCutsArray(
   DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,
-  int *off, size_t *dim, size_t *array_size_t, char **typeName) {
+  int *off, size_t *dim, size_t *array_size_t, const char **typeName) {
   /* see comment uu4 */
   if(!dsColumnTypeName(typeName,dsPtr,colNum))          dsuTableValErr( 17);
   if(!dsColumnDimCount(dim,dsPtr,colNum))               dsuTableValErr( 18);
@@ -429,7 +429,7 @@ int TableValue(int *dType,char *uu,float *fv,long *iv,size_t row,
   /* Either fv or iv is filled in.  Caller knows which from dType.  This
   ** function is the workhorse for getting numbers from the current table. */
   int ii,off; size_t colSize,rowSize;
-  char *pData,*tn;
+  char *pData;const char *tn;
   size_t dim;             /* 0 for x, 1 for x[], and 2 for x[][]. */
   size_t arraysize;       /* x[arraysize] */
   if(!dsuCutsArray(tp,colNum,subscript,&off,&dim,&arraysize,&tn)) {

@@ -49,9 +49,9 @@ extern CC_P int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
 extern CC_P int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd);
 extern CC_P int dio_clearDataset(DS_DATASET_T *pDS);
 extern CC_P char* dio_mode2text(DIO_MODE_T mode);
-extern CC_P DIO_MODE_T dio_text2mode(char* text);
-extern CC_P char* dio_state2text(DIO_STATE_T state);
-extern CC_P DIO_STATE_T dio_text2state(char* text);
+extern CC_P DIO_MODE_T dio_text2mode(const char* text);
+extern CC_P const char* dio_state2text(DIO_STATE_T state);
+extern CC_P DIO_STATE_T dio_text2state(const char* text);
 
 #ifndef NOTCL
 extern CC_P int dio_tcltk_browsefile(char** name, char** file

@@ -29,7 +29,7 @@ extern "C" int topFastjoin(DS_DATASET_T *pJoinTable
 //:----------------------------------------------- MACROS             --
 #define PP printf(
 //:----------------------------------------------- PROTOTYPES         --
-extern "C" char* id2name(char* base,long id);
+extern "C" const char* id2name(const char* base,long id);
 
 //:#####################################################################
 //:=============================================== CLASS              ==
@@ -46,7 +46,7 @@ topProject:: topProject()
 topProject:: topProject(const char * name, const char * spec)
 		: socObject(name, "topProject") {
    myPtr = (SOC_PTR_T)this;
-   if( isValidSelectSpec((char*)spec) ){
+   if( isValidSelectSpec(spec) ){
       mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec, spec);
    }
@@ -76,7 +76,7 @@ char* topProject:: selectionSpecification() {
 
 //----------------------------------
 void topProject:: selectionSpecification(const char* spec) {
-   if( isValidSelectSpec((char*)spec) ){
+   if( isValidSelectSpec(spec) ){
       if(mySelectSpec) FREE(mySelectSpec);
       mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec,spec);
@@ -117,24 +117,22 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    DS_DATASET_T *pTbl1=table1->dslPointer();
    tdmTable * table2=NULL;
    DS_DATASET_T *pTbl2=NULL;
-   char *n=NULL;
+   const char *n=NULL;
    if( NULL == name ){
-//   n=(char*)id2name("projection",soc->nextIDref());
-     n=(char*)id2name("projection",111); // HACK 
+//   n=id2name("projection",soc->nextIDref());
+     n=id2name("projection",111); // HACK 
    }
    else {
-     n=(char*)name;
+     n=name;
    }
    if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsTargetTable(&pTbl2, n, n, pTbl1, NULL, NULL, 
 	     mySelectSpec) ){
-      FREE(n);
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   FREE(n);
 // table2 = new tdmTable(pTbl2);		// HACK !!!
-   char *n2=NULL;
-   char *s2=NULL;
+   const char *n2=NULL;
+   const char *s2=NULL;
    if( !dsTableName(&n2,pTbl2) 
    ||  !dsTableTypeSpecifier(&s2,pTbl2) 
    ){
@@ -557,7 +555,7 @@ topJoin:: topJoin(const char * name, const char * spec
 		: topProject()
 		, socObject(name, "topJoin") {
    myPtr = (SOC_PTR_T)this;
-   if( isValidSelectSpec((char*)spec) ){
+   if( isValidSelectSpec(spec) ){
       mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec, spec);
    }
@@ -668,26 +666,20 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
    char herb26June98;
    tdmTable * table3=NULL;
    DS_DATASET_T *pTbl3=NULL;
-   char *n=NULL;
-   if( NULL == name ){
-//   n=(char*)id2name("projection",soc->nextIDref());
-     n=(char*)id2name("join",111); // HACK 
-     herb26June98=7;
-   }
-   else {
-     n=(char*)name;
-     herb26June98=0;
+   const char *n=name;
+
+   if( !name ){
+//   n=id2name("projection",soc->nextIDref());
+     n=id2name("join",111); // HACK 
    }
    if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsTargetTable(&pTbl3, n, n, pTbl1, pTbl2, NULL, 
              mySelectSpec) ){
-      if(herb26June98) FREE(n);
       EML_ERROR(CANT_CREATE_TABLE);
    }
-   if(herb26June98) FREE(n);
 // table3 = new tdmTable(pTbl3);                // HACK !!!
-   char *n3=NULL;
-   char *s3=NULL;
+   const char *n3=NULL;
+   const char *s3=NULL;
    if( !dsTableName(&n3,pTbl3) 
    ||  !dsTableTypeSpecifier(&s3,pTbl3) 
    ){
@@ -805,7 +797,7 @@ STAFCV_T topFactory:: newProject (const char * name
       EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
-   if( ! isValidSelectSpec((char*)spec) ) {
+   if( ! isValidSelectSpec(spec) ) {
       EML_CONTEXT("ERROR: Syntax error in '%s'.\n",spec);
       EML_ERROR(INVALID_SELECT_SPEC);
    }
@@ -892,11 +884,11 @@ STAFCV_T topFactory:: newJoin (const char * name, const char * spec
       EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
-   if( ! isValidWhereClause((char*)clause) ) {
+   if( ! isValidWhereClause(clause) ) {
       EML_CONTEXT("ERROR: Invalid where-clause '%s'.\n",spec);
       EML_ERROR(INVALID_WHERE_CLAUSE);
   }
-   if( ! isValidSelectSpec((char*)spec) ) {
+   if( ! isValidSelectSpec(spec) ) {
       EML_CONTEXT("ERROR: Invalid selection spec '%s'.\n",spec);
       EML_ERROR(INVALID_SELECT_SPEC);
    }

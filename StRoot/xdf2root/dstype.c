@@ -37,7 +37,7 @@ typedef struct {
 */
 static int dsBasicInit(void);
 static int dsFirstPass(int *pSepCount, int *map,
-	int *pMapCount, int maxMapCount, char *str);
+	int *pMapCount, int maxMapCount, char *str);  /* str modif inside*/
 static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag);
 static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
@@ -213,7 +213,7 @@ int dsDumpTypes(void)
 *
 * RETURN: -1 if name collision, 0 if found or 1 if not found
 */
-int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
+int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, const char *name)
 {
 	int c;
 	size_t i;
@@ -391,7 +391,7 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
+int dsParseType(DS_TYPE_T **pType, size_t *pSize, const char *str, const char **ptr)
 {
 	int map[DS_MAX_STRUCT], nMap, nSep;
 	size_t size;
@@ -403,7 +403,7 @@ int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
 	if (nBasic == 0  && !dsBasicInit()) {
 		return FALSE;
 	}
-	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, str)) {
+	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, (char*)str)) {
 		return FALSE;
 	}
 	if (nMap == 0) {

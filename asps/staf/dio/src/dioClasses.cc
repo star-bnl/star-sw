@@ -81,7 +81,7 @@ char * dioStream::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
    char* m = dio_mode2text(mode());
-   char* s = dio_state2text(state());
+   const char* s = dio_state2text(state());
    char* l = location();
 
    cc = (char*)MALLOC(79+100);

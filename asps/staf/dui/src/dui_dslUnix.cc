@@ -31,7 +31,7 @@
 int dui_ls_l_Table(DS_DATASET_T *pDS, char*& listing)
 {
    bool_t isTable;
-   char *name, *tname;
+   const char *name, *tname;
    size_t rowcount, maxrowcount, rowsize;
 
    if( !dsIsTable(&isTable, pDS)
@@ -64,19 +64,13 @@ int dui_ls_l_Table(DS_DATASET_T *pDS, char*& listing)
 int dui_ls_ld_Dataset(DS_DATASET_T *pDS,char*& listing)
 {
    bool_t isDataset;
-   char *name;
+   const char *name;
    size_t elcount;
-#ifdef OLD_DSL
-   size_t maxelcount;
-#endif
 
    if( !dsIsDataset(&isDataset, pDS)
    ||  !isDataset
    ||  !dsDatasetName(&name,pDS)
    ||  !dsDatasetEntryCount(&elcount,pDS)
-#ifdef OLD_DSL
-   ||  !dsDatasetMaxEntryCount(&maxelcount,pDS)
-#endif /*OLD_DSL*/
    ){
       EML_PUSHERROR(INVALID_DSL_DATASET);
       return FALSE;

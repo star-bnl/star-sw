@@ -30,8 +30,8 @@ static int dsIsAcyclicR(DS_DATASET_T *dataset, DS_LIST_T *list,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsAddTable(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t nRow, char **ppData)
+int dsAddTable(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t nRow, char **ppData)
 {
 	char *pData;
 	DS_DATASET_T *pTable;
@@ -124,7 +124,7 @@ static int dsCheckDupEntry(DS_DATASET_T *pDataset)
 * RETURNS: TRUE if success else FALSE
 */
 int dsCreateDataset(DS_DATASET_T **ppDataset,
-					 size_t *tList, char *str, char **ptr)
+					 size_t *tList, const char *str, const char **ptr)
 {
 	DS_BUF_T bp;
 	DS_LIST_T list;
@@ -325,8 +325,8 @@ static int dsDatasetSpecifierR(DS_BUF_T *bp, DS_DATASET_T *pDataset,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsInitTable(DS_DATASET_T *pTable, char *tableName,
-	char *typeSpecifier, unsigned rowCount, void *pData)
+int dsInitTable(DS_DATASET_T *pTable, const char *tableName,
+	const char *typeSpecifier, unsigned rowCount, void *pData)
 {
 	if (pTable == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);

@@ -191,7 +191,7 @@ int testNatural()
  		goto fail;
  	}
  	/* get pointer to data and row count of join */
- 	if (!dsCellAddress((char **)&joinVar, pJoinTable, 0, 0) ||
+ 	if (!dsCellAddress((char**)&joinVar, pJoinTable, 0, 0) ||
  		!dsTableRowCount(&joinRowCount, pJoinTable)) {
  		dsPerror("get data pointer or row count failed");
  		goto fail;

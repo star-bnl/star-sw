@@ -41,8 +41,7 @@ public:
 
 //----------------------------------
 // Unix-Like commands
-   virtual STAFCV_T du (char *searchtype,char *name,
-                            const char * dirPath,long minsize);
+   virtual STAFCV_T du (const char * dirPath,long minsize);
    virtual STAFCV_T precious ();
    virtual STAFCV_T rm_nonprecious ();
    virtual STAFCV_T df (char *markerString);
@@ -69,8 +68,7 @@ public:
 				 // and ln to be lnmv(FALSE,xx,xx).
 //-cet-17nov97-from HJWs df,du version
    virtual void duiSprinfWithCommas(char *out,long in);
-   virtual STAFCV_T duRecurse (char *searchtype,char *name,
-                char *path,int indent,
+   virtual STAFCV_T duRecurse (char *path,int indent,
 		DS_DATASET_T *pDS, long minsize,int control);
 
 

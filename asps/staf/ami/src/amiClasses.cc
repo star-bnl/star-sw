@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.21 1998/07/29 22:59:03 dave Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.22 1998/08/13 02:07:49 perev Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -86,7 +86,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 
 //- Check number of tables in sequence.
    if ((long)tbl._length != rank()) {
-      EML_CONTEXT("ERROR: PAM = (%s) \n",name());
+      EML_CONTEXT("ERROR: PAM = (%s) \n",(char*)Name());
       EML_ERROR(WRONG_PAM_RANK);
    }
 //- Create arrays of TAS-structs for tables.
@@ -100,7 +100,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 //- Check types of tables in sequence.
       if( !((tbl._buffer[i])->isType(myTblSpecs[i])) ){
 	 EML_CONTEXT("ERROR: table #%d (%s) is wrong type\n",i
-			,(tbl._buffer[i])->name());
+			,(tbl._buffer[i])->Name());
 	 delete[] h;
 	 delete[] d;
 	 EML_ERROR(WRONG_TABLE_TYPE);
@@ -108,7 +108,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 //- Convert table objs to 2-struct (TAS-like) tables.
       if( !((tbl._buffer[i])->cvtTasStructs(h[i],d[i])) ){
 	 printf("table #%d (%s) can't be converted\n",i
-			,(tbl._buffer[i])->name());
+			,(tbl._buffer[i])->Name());
 	 delete[] h;
 	 delete[] d;
 	 EML_ERROR(TABLE_CONVERSION_FAILURE);

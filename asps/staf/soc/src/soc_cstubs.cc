@@ -63,9 +63,7 @@ socobject_name(long idref)
       EML_FAILURE(OBJECT_NOT_FOUND);
    }
 
-   char *n;
-   printf("SOC:\tObject name = %s \n",n=p->name());
-   FREE(n);
+   printf("SOC:\tObject name = %s \n",p->Name());
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -208,18 +206,16 @@ socobject_implements(long idref, char* iface)
    if( !(NULL != (p=soc->getObject(idref))) ){
       EML_FAILURE(OBJECT_NOT_FOUND);
    }
-   char *n=NULL;
    if( p->implementsInterface(iface) ){
-      printf("SOC:\tObject (%s) DOES implement (%s) \n",n=p->name()
+      printf("SOC:\tObject (%s) DOES implement (%s) \n",p->Name()
 		,iface);
       set_staf_result(1.0);
    }
    else {
-      printf("SOC:\tObject (%s) DOES NOT implement (%s) \n",n=p->name()
+      printf("SOC:\tObject (%s) DOES NOT implement (%s) \n",p->Name()
 		,iface);
       set_staf_result(0.0);
    }
-   FREE(n);
 
    EML_SUCCESS(STAFCV_OK);
 }

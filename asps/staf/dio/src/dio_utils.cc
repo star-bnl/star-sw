@@ -34,7 +34,7 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 {
    DS_DATASET_T *pEntry=NULL, *pAdded=NULL;
    bool_t isDataset, isTable;
-   char *name,*spec;
+   const char *name,*spec;
    size_t count,maxcount;
    char *pData;
 
@@ -144,7 +144,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 {
    DS_DATASET_T *pEntry=NULL, *pAdded=NULL;
    bool_t isDataset, isTable, result;
-   char *name,*spec;
+   const char *name,*spec;
    size_t count,maxcount;
    size_t allspace;
    char *pData;
@@ -317,13 +317,13 @@ char* dio_mode2text(DIO_MODE_T mode)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      DIO_MODE_T dio_text2mode(char* text)
+*:ROUTINE:      DIO_MODE_T dio_text2mode(const char* text)
 *:DESCRIPTION:  ----------
 *:ARGUMENTS:    ----------
 *:RETURN VALUE: ----------
 *:<---------------------------------------------------------------------
 */
-DIO_MODE_T dio_text2mode(char* text)
+DIO_MODE_T dio_text2mode(const char* text)
 {
 	switch(text[0]) {
 	case 'r': case 'R':		return DIO_READ_MODE;
@@ -341,7 +341,7 @@ DIO_MODE_T dio_text2mode(char* text)
 *:RETURN VALUE: text
 *:<---------------------------------------------------------------------
 */
-char* dio_state2text(DIO_STATE_T state)
+const char* dio_state2text(DIO_STATE_T state)
 {
 	switch(state) {
 	case DIO_OPEN_STATE:		return "OPENED";
@@ -355,13 +355,13 @@ char* dio_state2text(DIO_STATE_T state)
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:      DIO_STATE_T dio_text2state(char* text)
+*:ROUTINE:      DIO_STATE_T dio_text2state(const char* text)
 *:DESCRIPTION:  ----------
 *:ARGUMENTS:    ----------
 *:RETURN VALUE: state
 *:<---------------------------------------------------------------------
 */
-DIO_STATE_T dio_text2state(char* text)
+DIO_STATE_T dio_text2state(const char* text)
 {
 	switch(text[0]) {
 	case 'o': case 'O':		return DIO_OPEN_STATE;

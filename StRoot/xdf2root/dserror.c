@@ -126,8 +126,8 @@ void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
 
 	pInfo = dsErrorInfo();
 	pInfo->code = code;
-	pInfo->msg = msg == NULL ? "<nullMsg>" : msg;
-	pInfo->file = file == NULL ? "<noFile>" : file;
+	pInfo->msg = (msg == NULL) ? "<nullMsg>" : msg;
+	pInfo->file = (file == NULL) ? "<noFile>" : file;
 	pInfo->line = line;
 	return;
 }
@@ -137,7 +137,7 @@ void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
 *
 * RETURNS: none
 */
-void dsPerror(char *str)
+void dsPerror(const char *str)
 {
 	DS_ERROR_INFO_T *pInfo;
 
@@ -153,9 +153,9 @@ void dsPerror(char *str)
 *
 * RETURNS: none
 */
-const char * dsError(char *str)
+const char * dsError(const char *str)
 {
-	char b[1024];
+	static char b[1024];
 	char * buff=b;
 /*xxx	char * s;					*/
 	DS_ERROR_INFO_T *pInfo;

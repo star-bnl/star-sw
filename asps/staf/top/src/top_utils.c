@@ -2,7 +2,7 @@
 #include <string.h>
 #include "top_utils.h"
 
-top_bool isValidSelectSpec(char * spec)
+top_bool isValidSelectSpec(const char * spec)
 {
    switch (spec[0]) {
    case '{':
@@ -24,7 +24,7 @@ top_bool isValidSelectSpec(char * spec)
    return TRUE;		/* Obvious HACK */
 }
 
-top_bool isValidWhereClause(char * clause)
+top_bool isValidWhereClause(const char * clause)
 {
    switch (clause[0]) {
    case '{':

@@ -35,8 +35,8 @@ int tdm_cvtDst2st(DS_DATASET_T *pT
 		, TABLE_HEAD_ST *& tbl_h, char *& tbl_d)
 {
    TABLE_HEAD_ST header;
-   char *name=(header.name);
-   char *type=(header.type);
+   const char *name=(header.name);
+   const char *type=(header.type);
    bool_t result;
    char* pData=NULL;
 

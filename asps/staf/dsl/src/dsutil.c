@@ -25,7 +25,7 @@ general utility routines
 *
 * RETURNS: 1 if not equal, zero if equal and -1 if names collide
 */	
-int dsCmpName(char *s1, char *s2)
+int dsCmpName(const char *s1, const char *s2)
 {
 	int rtn;
 	
@@ -49,7 +49,7 @@ int dsCmpName(char *s1, char *s2)
 *
 * RETURNS: TRUE if copy successuful, FALSE if invalid name or name too long
 */
-int dsCopyName(char *dst, char *str, char **ptr)
+int dsCopyName(char *dst, const char *str, const char **ptr)
 {
 	DS_BUF_T bp;
 	int c;

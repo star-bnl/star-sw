@@ -77,24 +77,24 @@ static void dumpTypeR(DS_TYPE_T *type, char *prefix)
 */
 int dsTestApi(void)
 {
-	char buf[10], *dsName = "dsName", *name, *ptr;
+	char buf[10], *ptr, *name; const char *dsName = "dsName";
 	char *pDataOne = NULL, *pDataTwo = NULL;
-	char *specOne = "struct typeOne {float x, y, z; long data;}";
-	char *specTwo = "struct typeTwo {char name[10]; long age; short flag;}";
-	char *specThree = "struct typeThree {octet b; double d; short a[2][3];}";
+	const char *specOne = "struct typeOne {float x, y, z; long data;}";
+	const char *specTwo = "struct typeTwo {char name[10]; long age; short flag;}";
+	const char *specThree = "struct typeThree {octet b; double d; short a[2][3];}";
 	typedef struct typeTwo {char name[10]; long age; short flag;}TYPE_TWO;
 	TYPE_TWO *pRow;
-	char *tableNameOne = "tableNameOne", *tableNameTwo = "tableNameTwo";
+	const char *tableNameOne = "tableNameOne", *tableNameTwo = "tableNameTwo";
 	bool_t result;
 	size_t count, rowCountOne = 10, rowCountTwo = 13;
-	char *specifier;
+	const char *specifier;
 	size_t colNumber = 0, dims[5], size;
 	DS_DATASET_T *pDataset, *pEntry, *pTable;
 	DS_TYPE_CODE_T code;
 
 	if (!dsNewDataset(&pDataset, dsName) ||
 		!dsIsDataset(&result, pDataset) || !result ||
-		!dsDatasetName(&name, pDataset) ||
+		!dsDatasetName((const char **)&name, pDataset) ||
 		strcmp(name, dsName)) {
 		DS_TEST_FAILED("dsNewDataset");
 	}
@@ -112,9 +112,9 @@ int dsTestApi(void)
   		!dsTableMaxRowCount(&count, pTable) || count != rowCountTwo ||
 		!dsSetTableRowCount(pTable, 9) ||
 		!dsTableRowCount(&count, pTable) || count != 9 ||
-		!dsTableName(&name, pTable) || strcmp(name, tableNameTwo) ||
+		!dsTableName((const char**)&name, pTable) || strcmp(name, tableNameTwo) ||
 		!dsTableRowSize(&size, pTable) || size != sizeof(TYPE_TWO) ||
-		!dsTableTypeName(&name, pTable) || strcmp(name, "typeTwo") ||
+		!dsTableTypeName((const char**)&name, pTable) || strcmp(name, "typeTwo") ||
 		!dsTableTypeSpecifier(&specifier, pTable)) {
 		DS_TEST_FAILED("table attributes failed");
 	}
@@ -130,10 +130,10 @@ int dsTestApi(void)
 	if (!dsColumnDimCount(&count, pTable, colNumber) || count != 1 ||
 		!dsColumnDimensions(dims, pTable, colNumber) || dims[0] != 10 ||
 		!dsColumnElcount(&count, pTable, colNumber) || count != 10 ||
-		!dsColumnName(&name, pTable, colNumber) || strcmp(name, "name") ||
+		!dsColumnName((const char**)&name, pTable, colNumber) || strcmp(name, "name") ||
 		!dsColumnSize(&size, pTable, colNumber) || size != 10 ||
 		!dsColumnTypeCode(&code, pTable, colNumber) || code != DS_TYPE_CHAR ||
-		!dsColumnTypeName(&name, pTable, colNumber) || strcmp(name, "char") ||
+		!dsColumnTypeName((const char**)&name, pTable, colNumber) || strcmp(name, "char") ||
 		!dsFindColumn(&count, pTable, "flag") || count != 2) {
 		DS_TEST_FAILED("column attributes failed");
  	}
@@ -154,14 +154,14 @@ int dsTestApi(void)
 */
 int dsTestCorba()
 {
-	char *str1 = "struct test {struct s {long x, y;}z;\n"
+	const char *str1 = "struct test {struct s {long x, y;}z;\n"
 		"long l; struct k{struct s{double u, v;}news;}kk;\n"
 		"short sh[10][12]; s q; k v;}";
-	char buf[200], *ptr;
+	char buf[200];const char *ptr;
 	size_t i, n, tid;
 	DS_TYPE_T *type = NULL;
 
-	char *str2 = str1;
+	const char *str2 = str1;
 	printf("strlen %d\n\n%s\n", strlen(str1), str1);
 	
 	if (!dsParseType(&type, &n, str1, NULL)) {
@@ -280,13 +280,13 @@ int dsTestGraph(void)
 */
 int dsTestTree()
 {
-	char *ptr;
+	const char *ptr;
 	DS_DATASET_T *pDataset;
-	char *typeDef1 = "struct type1 {long v1, v2;}";
-	char *typeDef2 = "struct tableType {long v1, v2; char name[20];}";
-	char *treeDef = "event{first{table1(type1,4000), table2(tableType, 0),"
+	const char *typeDef1 = "struct type1 {long v1, v2;}";
+	const char *typeDef2 = "struct tableType {long v1, v2; char name[20];}";
+	const char *treeDef = "event{first{table1(type1,4000), table2(tableType, 0),"
 		"sub{table3(type1,5)}}, second{t1(type1, 4),t2(type1, 5)},empty{}}";
-	char *table ="table(tableType, 7)";
+	const char *table ="table(tableType, 7)";
 
 	size_t typeList[256], *pList = typeList;
 
@@ -338,7 +338,7 @@ int dsTestTree()
 */
 int dsTestDset()
 {
-	char buf[10], *ptr;
+	char buf[10]; const char *ptr;
 	char *tblDecl[] = {"struct type1 {short a;}", "struct type2 {long l;}",
 		"struct type3 {float f;}", "struct type4 {unsigned long x;}"};
 	int i, a[21];
@@ -392,20 +392,20 @@ int dsTestDset()
 */
 int dsTestType()
 {
-	char *str =	"struct test {struct s {double d; long l;}h;\n"
+      const char *str =	"struct test {struct s {double d; long l;}h;\n"
 			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
 			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
 			"\tstruct m {t w; struct s{long l;}v;}u;\n"
 			"\t m e;\n"
 			"\tchar end;}\n";
-	char *str2 =	"struct  test  {struct s {double d; long l;}h;\n"
+     const char *str2 =	"struct  test  {struct s {double d; long l;}h;\n"
 			"\tstruct z {short v; struct s{char c;}r; long t;}a;\n"
 			"\tstruct t {z r[5][20]; short y; octet z;}b;\n"
 			"\tstruct m {t w; struct\n"
 			" s{long l;}v;}u;\n"
 			"\t m e;\n"
 			"\tchar end;}\n";
-	char *ptr;
+	const char *ptr;
 	size_t i, n, tid1, tid2;
 	DS_TYPE_T *type;
 

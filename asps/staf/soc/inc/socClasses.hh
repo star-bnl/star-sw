@@ -36,12 +36,15 @@ public:
    virtual ~socObject();
 //:----------------------------------------------- ATTRIBUTES         --
    virtual IDREF_T idRef ();
-   virtual char * name ();
-   virtual char * type ();
+   virtual char * name (){return myName->copy();}
+   virtual const char * Name (){return myName->show();}
+   virtual char * type (){return myType->copy();};
+   virtual const char * Type (){return myType->show();}
    virtual char * version ();
+   virtual const char * Version (){return "dev";}
    virtual SOC_PTR_T ptr ();
-   virtual void lock (unsigned char lock);
-   virtual unsigned char lock ();
+   virtual void lock (unsigned char lock){myLock=lock;}
+   virtual unsigned char lock (){return myLock;}
    virtual char * listing ();
 
 //:----------------------------------------------- PUB FUNCTIONS      --

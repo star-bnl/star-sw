@@ -114,11 +114,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 
    size_t entries;			/* dataset dimension */
    DS_DATASET_T *pTable = NULL;		/* table ptr */
-   char *name;				/* table name */
+   const char *name;			/* table name */
    char *pData;				/* ptr to table data */
    int  *pDataI;
    size_t nrows,ncols,maxrows;		/* table dimensions */
-   char *cname;				/* column name */
+   const char *cname;				/* column name */
    DS_TYPE_CODE_T ctype;		/* column type code */
    size_t cdims, cdim[20];		/* column dimensions */
    char bspec[2048];			/* cwn spec */
@@ -159,7 +159,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
       dsPerror("dsl2cwn.E3- bad table ");
    } else {
 /*    HCDIR(cdir," "); */
-      HBNT(hid,name," ");
+      HBNT(hid,((char*)name)," ");
       for(ic=0;ic<ncols;ic++) {
 	 if( !dsColumnName(&cname, pTable, ic)
 	 ||  !dsColumnTypeCode(&ctype, pTable, ic)
@@ -169,7 +169,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	 } else {
 	    if( LAST_BTYPE(nb) != block_type(ctype) ) {
 	       if(LAST_BTYPE(nb) != UNDEFINED) {
-		  strcpy(&bspec[strlen(bspec)-1],"");
+		  bspec[strlen(bspec)-1]='\0';
 		  switch (btype[nb-1]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
 		       HBNAMC(hid,block_name(name,nb-1),pData,bspec);
@@ -201,11 +201,11 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
       strcpy(&bspec[strlen(bspec)-1],"");
       switch (btype[nb-1]) {
 	 case CHAR_BLOCK: /* should use HBNAMC */
-	   HBNAMC(hid,block_name(name,nb-1),pData,bspec);
+	   HBNAMC(hid,(block_name(name,nb-1)),pData,bspec);
 	   break;
 	 case NUMB_BLOCK:
 	   pDataI = (int *)pData;
-	   HBNAME(hid,block_name(name,nb-1),pDataI,bspec);
+	   HBNAME(hid,(block_name(name,nb-1)),pDataI,bspec);
 	   break;
 	 default:
 	    break;
@@ -221,7 +221,7 @@ long dsl2cwn(DS_DATASET_T *pDataset,long hid)
 	       } else {
 		  switch(btype[ib]) {
 		     case CHAR_BLOCK: /* should use HBNAMC */
-		       HBNAMC(hid,block_name(name,ib),pData,"$SET");
+		       HBNAMC(hid,(block_name(name,ib)),pData,"$SET");
 		       break;
 		     case NUMB_BLOCK:
 		       pDataI = (int *)pData;
@@ -277,7 +277,7 @@ CWN_BLOCK_TYPE_T block_type(DS_TYPE_CODE_T type)
 *:RETURN VALUE:	CWN spec element
 *:<---------------------------------------------------------------------
 */
-char* col2spec(char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim)
+char* col2spec(const char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim)
 {
    static char spec[64];	/* storage of spec */
    char numb[16];
@@ -343,20 +343,20 @@ char* col2spec(char *name,DS_TYPE_CODE_T type,size_t dims,size_t *dim)
 *:RETURN VALUE:	CWN block name.
 *:<---------------------------------------------------------------------
 */
-char* block_name(char *name,long n)
+char* block_name(const char *name,long n)
 {
    static char bname[16];
    int lname,i,ii;
    lname = strlen(name); if (lname > 8) lname =8;
    memset(bname,' ',15); bname[15] = '\0';
-   strncpy(bname,name,lname);
+   memcpy(bname,name,lname);
    
    if (n > 0 && n <100) {
      sprintf(bname+7,"%d",n);
      if (n < 10) bname[6] = ' ';
    }
    for (i=0,ii=0; bname[i]; i++) { if (bname[i] != ' ') bname[ii++] = bname[i];};
-   bname[ii] = '\0';
+   memset(bname+ii,' ',8-ii); bname[8]= '\0';
    return bname;
 }
 #ifndef linux

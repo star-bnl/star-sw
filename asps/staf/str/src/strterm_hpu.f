@@ -1,90 +1,90 @@
 
-	SUBROUTINE STRTERM(MSG,LINES,LUN)
+        SUBROUTINE STRTERM(MSG,LINES,LUN)
 
-	IMPLICIT NONE
-
-*  Inputs:
-	CHARACTER*(*) MSG(*) !Character string to be output.
-	INTEGER LINES !Number of lines in MSG to output.
-	INTEGER LUN !Logical unit on which to output (terminal).
-
-*  Description:
-*	Output a one-or-more-line message on a terminal with
-*	machine-independent carriage-control on a terminal.
-
-	INTEGER I
-
-	DO I=1,LINES
-	  WRITE(LUN,100) MSG(I)
-	END DO
-100	FORMAT(A) !On SGI, this is how it's done.
-
-	RETURN
-	END
-*
-	SUBROUTINE STRTERM_NOCR(MSG,LUN)
-
-	IMPLICIT NONE
+        IMPLICIT NONE
 
 *  Inputs:
-	CHARACTER*(*) MSG !Character string to be output.
-	INTEGER LUN !Logical unit on which to output (terminal).
+        CHARACTER*(*) MSG(*) !Character string to be output.
+        INTEGER LINES !Number of lines in MSG to output.
+        INTEGER LUN !Logical unit on which to output (terminal).
 
 *  Description:
-*	Output a one-line message without a following carriage return
-*	on a terminal.
+*       Output a one-or-more-line message on a terminal with
+*       machine-independent carriage-control on a terminal.
 
-	WRITE(LUN,100) MSG
-100	FORMAT(A$) !On SGI, this is how it's done.
+        INTEGER I
 
-	RETURN
-	END
-*
-	SUBROUTINE STRTERM_NOLF(MSG,LUN)
+        DO I=1,LINES
+          WRITE(LUN,100) MSG(I)
+        END DO
+100     FORMAT(A) !On SGI, this is how it's done.
 
-	IMPLICIT NONE
+        RETURN
+        END
+*
+        SUBROUTINE STRTERM_NOCR(MSG,LUN)
+
+        IMPLICIT NONE
 
 *  Inputs:
-	CHARACTER*(*) MSG !Character string to be output.
-	INTEGER LUN !Logical unit on which to output (terminal).
+        CHARACTER*(*) MSG !Character string to be output.
+        INTEGER LUN !Logical unit on which to output (terminal).
 
 *  Description:
-*	Output a one-line message without a preceding line feed
-*	on a terminal.
+*       Output a one-line message without a following carriage return
+*       on a terminal.
 
-	CHARACTER*1 VTUP(3)
-	DATA VTUP/'1B'X,'[','A'/
+        WRITE(LUN,100) MSG
+100     FORMAT(A$) !On SGI, this is how it's done.
 
-100	FORMAT(A) !On SGI, this is how it's done.
-101	FORMAT(3A$)
+        RETURN
+        END
+*
+        SUBROUTINE STRTERM_NOLF(MSG,LUN)
 
-	WRITE(LUN,101) VTUP !Cursor up one line.
-	WRITE(LUN,100) MSG
-
-	RETURN
-	END
-*
-	SUBROUTINE STRTERM_NOLFCR(MSG,LUN)
-
-	IMPLICIT NONE
+        IMPLICIT NONE
 
 *  Inputs:
-	CHARACTER*(*) MSG !Character string to be output.
-	INTEGER LUN !Logical unit on which to output (terminal).
+        CHARACTER*(*) MSG !Character string to be output.
+        INTEGER LUN !Logical unit on which to output (terminal).
 
 *  Description:
-*	Output a one-line message without a preceding line feed
-*	or a following carriage-return on a terminal.
+*       Output a one-line message without a preceding line feed
+*       on a terminal.
 
-	CHARACTER*1 VTUP(3)
-	DATA VTUP/'1B'X,'[','A'/
+        CHARACTER*1 VTUP(3)
+        DATA VTUP/'1B'X,'[','A'/
 
-100	FORMAT(A$) !On SGI, this is how it's done.
-101	FORMAT(3A$)
+100     FORMAT(A) !On SGI, this is how it's done.
+101     FORMAT(3A$)
 
-	WRITE(LUN,101) VTUP !Cursor up one line.
-	WRITE(LUN,100) MSG
+        WRITE(LUN,101) VTUP !Cursor up one line.
+        WRITE(LUN,100) MSG
 
-	RETURN
-	END
-*
+        RETURN
+        END
+*
+        SUBROUTINE STRTERM_NOLFCR(MSG,LUN)
+
+        IMPLICIT NONE
+
+*  Inputs:
+        CHARACTER*(*) MSG !Character string to be output.
+        INTEGER LUN !Logical unit on which to output (terminal).
+
+*  Description:
+*       Output a one-line message without a preceding line feed
+*       or a following carriage-return on a terminal.
+
+        CHARACTER*1 VTUP(3)
+        DATA VTUP/'1B'X,'[','A'/
+
+100     FORMAT(A$) !On SGI, this is how it's done.
+101     FORMAT(3A$)
+
+        WRITE(LUN,101) VTUP !Cursor up one line.
+        WRITE(LUN,100) MSG
+
+        RETURN
+        END
+*

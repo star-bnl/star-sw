@@ -227,7 +227,7 @@ dsuTableChform(DS_DATASET_T *pTable)
 char * 
 dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
 {
-   char *name;
+   const char *name;
    DS_TYPE_CODE_T code;
    size_t size, count, colNumber;
 

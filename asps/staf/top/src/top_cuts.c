@@ -26,7 +26,7 @@ void ErrTop(int x) {
 }
 int TopArray(
   DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,
-  int *off, size_t *dim, size_t *array_size_t, char **typeName) {
+  int *off, size_t *dim, size_t *array_size_t, const char **typeName) {
   /* see comment uu4 */
   if(!dsColumnTypeName(typeName,dsPtr,colNum))          ErrTop( 17);
   if(!dsColumnDimCount(dim,dsPtr,colNum))               ErrTop( 18);
