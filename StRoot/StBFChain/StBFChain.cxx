@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.463 2005/02/04 18:07:33 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.464 2005/02/05 00:55:03 perev Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1412,27 +1412,27 @@ Int_t StBFChain::Load()
 	  TIter next(&LoadedLibs);
 	  TObjString *LoadedLib;
 	  while ((LoadedLib = (TObjString *) next())){
-	    TString Base(gSystem->BaseName(LoadedLib->GetString().Data()));
+	    TString Base(gSystem->BaseName(LoadedLib->GetName()));
 	    Base.ReplaceAll(".so","");
 	    Base.ReplaceAll(".sl","");
 	    if (Base == libe->GetString()) goto ENDL;
 	  }
 	  //	  if (!strstr(lib,libe.Data())) {
-	  iok = gSystem->Load(libe->GetString().Data());
+	  iok = gSystem->Load(libe->GetName());
           {  TString ts("load "); ts += libe->GetString();
 	     TMemStat::PrintMem(ts.Data());
 	  }
 	  if (iok < 0)  {
 	    (void) printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
-			  ,libe->GetString().Data(),fBFC[i].Key);
+			  ,libe->GetName(),fBFC[i].Key);
 	    fBFC[i].Flag = kFALSE;
 	    status = kStErr;
+ 	    assert(iok >= 0);
 	    break;
 	  } else {
-	    (void) printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetString().Data(),
-			  gSystem->DynamicPathName(libe->GetString().Data()));
+	    (void) printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetName(),
+			  gSystem->DynamicPathName(libe->GetName()));
 	  }
-	  assert(iok >= 0);
 	ENDL: //yf ? continue;
 	  LoadedLibs.Delete();
 	}
@@ -2106,7 +2106,7 @@ void StBFChain::SetOption(const Int_t k, const Char_t *chain) {
       ParseString(fBFC[k].Opts,Opts);
       TIter next(&Opts);
       TObjString *Opt;
-      while ((Opt = (TObjString *) next())) SetOption(Opt->GetString().Data(),fBFC[k].Key);
+      while ((Opt = (TObjString *) next())) SetOption(Opt->GetName(),fBFC[k].Key);
       Opts.Delete();
     }
     fBFC[k].Flag = kTRUE;
@@ -2380,7 +2380,7 @@ void StBFChain::SetOutputFile (const Char_t *outfile){
 	  TObjString *word = 0;
 	  while ((word = (TObjString *) nextL())) {
 	    if (word->GetString().Contains(".fz")) {
-	      fFileOut = new TString(gSystem->BaseName(word->GetString().Data()));
+	      fFileOut = new TString(gSystem->BaseName(word->GetName()));
 	      break;
 	    }
 	  }
