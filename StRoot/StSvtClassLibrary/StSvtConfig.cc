@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.5 2001/09/06 15:46:13 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.6 2001/09/06 22:11:30 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.6  2001/09/06 22:11:30  caines
+ * Still fixing swapped hybrids
+ *
  * Revision 1.5  2001/09/06 15:46:13  caines
  * Swapped to many hybrids on Barrel2 ladder 8 - fixed
  *
@@ -436,7 +439,7 @@ int StSvtConfig::getHybrid(int index){
      else if ( indexsav == CurrentIndex) return 1;
   }
   
-  else if( (Barrel == 2) && (Ladder == 8)){
+  else if( (Barrel == 2) && (Ladder == 8) && (Wafer < 3)){
     if( indexsav == CurrentIndex++) return 2;
     else if ( indexsav == CurrentIndex) return 1;
 
