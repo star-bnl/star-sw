@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.2 1999/10/28 22:25:01 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.3 1999/11/16 14:11:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
- * Revision 2.2  1999/10/28 22:25:01  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/16 14:11:38  ullrich
+ * Changed variance to sigma.
  *
  * Revision 2.5  1999/11/29 17:07:24  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
@@ -28,16 +28,16 @@
  * Revision 2.1  1999/10/13 19:44:31  ullrich
  * Initial Revision
  *
-    mNumberOfPoints(0), mDedx(0), mVariance(0) { /* noop */ }
+ **************************************************************************/
 #include "tables/St_dst_dedx_Table.h"
 #include "StDedxPidTraits.h"
-                                 UShort_t n, Float_t dedx, Float_t var) :
+
 ClassImp(StDedxPidTraits)
-    mNumberOfPoints(n), mDedx(dedx), mVariance(var) { /* noop */ }
+
     mNumberOfPoints(0), mDedx(0), mSigma(0) { /* noop */ }
 
 StDedxPidTraits::StDedxPidTraits() :
-    mNumberOfPoints(t.ndedx), mDedx(t.dedx[0]), mVariance(t.dedx[1]) { /* noop */ }
+    mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
     StTrackPidTraits(det, meth),
     mNumberOfPoints(n), mDedx(dedx), mSigma(sig) { /* noop */ }
                                  UShort_t n, Float_t dedx, Float_t sig) :
@@ -48,7 +48,7 @@ StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(t.ndedx), mDedx(t.dedx[0]),
     mSigma(t.dedx[1]), mMethod(t.method){ /* noop */ }
 
-StDedxPidTraits::variance() const { return mVariance; }
+StDedxPidTraits::~StDedxPidTraits() { /* noop */ }
 
 UShort_t
 StDedxPidTraits::numberOfPoints() const { return mNumberOfPoints; }
