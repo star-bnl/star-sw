@@ -37,7 +37,7 @@
        call CsJCAL(J,2,file)
     }
     else if C=='T'                       "  any text  "
-    {  Call AgFOPEN(21-N,file,ier) 
+    {  Call ApFOPEN(21-N,file,ier) 
        if (ier!=0)  goto :e:
     } 
     else if C=='S'                       " STAF table "
@@ -90,22 +90,24 @@
    Subroutine    gstar_ReadTXT(Igate)
 *                                                                       *
 * Description: read both NEW and OLD gstar event generator text formats *
-Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;] 
+Replace [READ[DIGIT](#)#;] with _
+        [ READ(#2,ERR=:E:,END=:E:) #3
+          IF (Idebug>=#1) <W> #3
+        ] 
 *************************************************************************
    implicit      none
 +CDE,GCUNIT,GCFLAG.
 *  character*8   tit, eg_name, frame 
-   character*120 line
-   integer       LENOCC,Index,li,Ieven,Ntrac,Nvert,itr,ivt,nv,nt,Igate,
-                 LabelTr,LabelVx,ge_pid,eg_pid,StartVx,StopVx,i,
-                 eg_proc,parent
-   Real          version,east_z,east_a,west_z,west_a,sqrts,b_max,
-                 PP(3),vert(4),UBUF(10)
-   integer       istat,eg_pid,moth,daut,num(5)
-   data          num/1,1,0,0,0/
-   character     Cform*8 /'/6I 9F'/
+   Character*120 line
+   Integer       LENOCC,Index,li,Ieven,Ntrac,Nvert,itr,ivt,nv,nt,Igate,
+                 LabelTr,LabelVx,ge_pid,StartVx,StopVx,i,k,ier,eg_proc
+   Real          version,east_z,east_a,west_z,west_a,sqrts,b_max,phi,
+                 PP(3),vert(4),UBUF(10)/10*0/
+   Integer       istat,eg_pid,moth,daut,num(5)
+   Data          num/1,1,0,0,0/
+   Character     Cform*8 /'/6I 9F'/
    Real          phep,vhep
-   common/GHEPEVT/ istat,eg_pid,moth(2),daut(2),phep(5),vhep(4)
+   Common/GHEPEVT/ istat,eg_pid,moth(2),daut(2),phep(5),vhep(4)
 *
 *
    Li=21-Igate
@@ -113,7 +115,8 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
  { itr, ivt    } =  0;
 *
  WHILE itr<Ntrac | ivt<Nvert
- { line='end-of-file';   read5 (li,'(a)') Line; (1x,a)
+ { 
+   line='end-of-file';  read5 (li,'(a)') Line; (1x,a)
 
    If Line(1:5)=='GENER'
    {  
@@ -122,7 +125,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
    }
    else If Line(1:5)=='EVENT'
    { 
-     read2 (line(7:),*,end=:a:)  Ieven,Ntrac,Nvert
+     read2 (line(7:),*)  Ieven,Ntrac,Nvert
                          (' gstar_ReadNew: EVENT :',3i8,2f8.3)
      :a: if (Ieven<=-999) goto :e: " end of data "
    }
@@ -130,31 +133,30 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
    { 
      read5 (line(7:),*)  ge_pid,PP,LabelTr,StartVx,StopVx,eg_pid  
                          (16x,'TRACK :',i6,3F9.3,4i6)
-
      Call VZERO(Vert,4); Call AgSVERT(vert,-StartVx,-Igate,Ubuf,0,nv)  
      Itr += 1;           call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
    }
    else If Line(1:6)=='VERTEX'
    { 
-     read5 (line(8:),*)  Vert,LabelVx,eg_proc,parent
+     read5 (line(8:),*)  Vert,LabelVx,eg_proc,moth(1)
                          (16x,'VERTEX:',4F10.6,3i6)
-     ivt += 1;           call AgSVERT(vert,-LabelVx,-Igate,Ubuf,0,nv) 
+     Ivt += 1;           call AgSVERT(vert,-LabelVx,-Igate,Ubuf,0,nv) 
    }
    else If Line(1:6)=='HEPEVT' & itr+ivt==0  
    { *             HEPEVT text format
      read1 (line(8:),*) Ntrac,Ieven; (' gstar_Read HEPEVT:',i8,' event#',i6)
 
-     do itr=1,Ntrac
-     {  read5(li,*) istat,eg_pid,moth,daut,phep,vhep; (6i5,5F8.2,4F9.3)
-        num(3)=0;   If (itr==1) num(3)=1
+     do Itr=1,Ntrac
+     {  read5 (li,*) istat,eg_pid,moth,daut,phep,vhep; (6i5,5F8.2,4F9.3)
+        num(3)=0;    If (itr==1) num(3)=1
         Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
         check Istat==1;       Call apdg2gea (eg_pid, ge_pid)
 	if ge_pid<=0 
         {  if (Idebug>1) <W> eg_pid;(' gstar_read HEPEVT unknown particle',i6);
            ge_pid = 1000000+eg_pid
         }
-        Call AgSVERT ( vhep,  0,  -Igate,  0,  0, nv); 
-        Call AgSKINE ( phep, ge_pid,  nv, itr, 0, nt); 
+        Call AgSVERT ( vhep,  0,  -Igate,  0,  0, nv)
+        Call AgSKINE ( phep, ge_pid,  nv, itr, 0, nt)
      }  Break
    }
    else If Index(Line,'event')>0 & itr+ivt==0     
@@ -164,8 +166,25 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
      call VZERO(vert,4); call AgSVERT(vert,-1,-Igate,Ubuf,0,nv)
      do itr=1,Ntrac
      {  read5 (li,*) ge_pid,PP; (16x,i6,3F8.3)
-        call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
-     }  break
+        Call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
+     }  Break
+   }
+   else If Index(Line,'EVENT NO.')>0 & itr+ivt==0     
+   {
+     i=index(line,'EVENT NO.'); 
+     read1 (line(i+10:),*) Ieven,Ntrac;  (' iev,np=',2i6)
+     i=index(line,'B =');  
+     If i>0 { read1(line(i+3:),*) B_max; (' b=',f12.3)    }
+     i=index(line,'PHI ='); 
+     if i>0 { read1(line(i+5:),*) PHI,K; (' phi,k=',f10.3,i8) }
+     call VZERO(Vert,4); call AgSVERT(Vert,-1,-Igate,Ubuf,0,nv)
+
+     do itr=1,Ntrac
+     {  read2(li,*) ge_pid,moth,daut,Phep; (i8,4i6,5f10.5) 
+        call aGEA2PDG(ge_pid,eg_pid)
+        if (eg_pid==0) { print *,' ? ge_pid =',ge_pid; next; }
+        Call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
+     }  Break
    }
    else If LENOCC(Line)>0
    { <w> line(1:LENOCC(Line)); (' unknown line : ',a); }
@@ -183,7 +202,7 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
    Implicit   None
    Character  Cname*4,Gname*8,Gnamo*8/' '/
    Real       evtver,zproj,aproj,ztarg,atarg,sqrts,bmin,bmax,bimevt,
-              plab(4),UBUF(100),VERT(4)/4*0/
+              plab(4),UBUF(10)/10*0/,VERT(4)/4*0/
    Integer    Iprin,L,i,nptls,nptarg,nntarg,npproj,nnproj,ntry,IdPtl,
               IRC,Ipart,Nvtx,Nt,Igate,Part_Size/6/
 *
@@ -432,5 +451,26 @@ Replace [READ[DIGIT](#)#;] with [READ(#2,ERR=:E:)#3;IF(Idebug>=#1)<W>#3;]
 *
    end
 
+
+*************************************************************************
+   subroutine   A p F O P E N (li,file,ier)
+*
+* Description: open a standard fortran formattted data file.            *
+*************************************************************************
+   Implicit   None
+   Integer    LENOCC,Li,L,ier
+   Character  file*(*)
++CDE,AgCKINE,GCKINE,GCFLAG,GCUNIT.
+*
+    ier=0;  close (Li,err=:o:)
+:o: L=LENOCC(file);  Check L>0
+*
+    open (Li,file=file,form='FORMATTED',status='OLD',err=:e:)
+    If (Idebug>=2) <w> file(1:L),Li;
+       (' ApFOPEN: file ',a,' opened succesfully on unit',i3)
+    IKineOld=IKine
+    return
+:e: <w> file(1:L); (' ApFOPEN error openning file ',a); ier=1
+   end
 
 
