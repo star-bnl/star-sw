@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.cxx,v 1.2 2004/06/28 23:24:11 chunhuih Exp $
+ * $Id: StEStructTrack.cxx,v 1.3 2005/03/03 01:32:03 porter Exp $
  *
  * Author: Jeff Porter merge of code from Aya Ishihara and Jeff Reid
  *
@@ -45,6 +45,7 @@ StEStructTrack::StEStructTrack(StEStructTrack *track) : TObject() {
   mChi2 = track->Chi2();
 
   mDedx = track->Dedx();
+  mAssignedMass=track->AssignedMass();
 
   mNFitPoints = track->NFitPoints();
   mNFoundPoints = track->NFoundPoints();
@@ -87,7 +88,7 @@ void StEStructTrack::FillTransientData(){
 //----------------------------------------------------------
 void StEStructTrack::evalYt(){
 
-  float _r=mPt/0.139;
+  float _r=mPt/mAssignedMass;
   mYt = log(sqrt(1+_r*_r)+_r);
 
   mytbin=(int) floor((mYt-1.0)/0.5);
@@ -116,11 +117,11 @@ void StEStructTrack::evalFourMomentum(const float mass){
 
   float lMass=mass;
   // assume pion mass for now !
-  if(lMass==0)lMass=0.139;
+  if(lMass<=0)lMass=mAssignedMass;
 
   mFourMomentum.setPx(mPx);
   mFourMomentum.setPy(mPy);
-  mFourMomentum.setPx(mPx);
+  mFourMomentum.setPz(mPz);
   mFourMomentum.setE(sqrt(mPt*mPt+mPz*mPz+lMass*lMass));
 
 }
@@ -197,7 +198,7 @@ Float_t StEStructTrack::Mt(Float_t mass) const {
 }
 
 Float_t StEStructTrack::E(Float_t mass) const { 
-  return ((mPt*mPt)+(mPz*mPz)+(mass*mass)); 
+  return sqrt((mPt*mPt)+(mPz*mPz)+(mass*mass)); 
 }
 
 Float_t StEStructTrack::Rapidity(Float_t mass) const { 
@@ -228,7 +229,12 @@ Float_t StEStructTrack::PIDpiMinus() const {
 /**********************************************************************
  *
  * $Log: StEStructTrack.cxx,v $
+ * Revision 1.3  2005/03/03 01:32:03  porter
+ * fixed a bug setting 4-momentum and added data (+accessors)
+ * to the track class
+ *
  * Revision 1.2  2004/06/28 23:24:11  chunhuih
+ *
  * added 'const' specification to some member functions, including some of the
  * return types, so that they can be used by a const StEStructTrack object.
  *
