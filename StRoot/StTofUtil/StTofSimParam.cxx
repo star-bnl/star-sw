@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofSimParam.cxx,v 1.2 2002/01/22 07:18:08 geurts Exp $
+ * $Id: StTofSimParam.cxx,v 1.3 2003/04/22 00:03:35 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofSimParam.cxx,v $
+ * Revision 1.3  2003/04/22 00:03:35  geurts
+ * doubled the m_nphe_to_adc parameter (used in StTofSimMaker).
+ *
  * Revision 1.2  2002/01/22 07:18:08  geurts
  * doxygenized
  *
@@ -50,7 +53,7 @@ StTofSimParam::StTofSimParam(){
   m_gate_width         =  200.e-9   ;
   m_geo_from_geant     =    1.      ;
   m_GeV_2_n_photons    =    1.e+7   ;
-  m_nphe_to_adc        =    0.1     ;
+  m_nphe_to_adc        =    0.2     ;
   m_phys_noise         =    0.      ;
   m_position_tolerance =    0.3     ;
   m_slat_para          =    0.      ; // no slat response table yet.
