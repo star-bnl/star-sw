@@ -1,7 +1,7 @@
-# $Id: MakePam.mk,v 1.119 1999/09/18 00:53:38 fisyak Exp $
+# $Id: MakePam.mk,v 1.120 1999/09/18 01:12:06 fisyak Exp $
 # $Log: MakePam.mk,v $
-# Revision 1.119  1999/09/18 00:53:38  fisyak
-# Restore CPP Path to CERN include
+# Revision 1.120  1999/09/18 01:12:06  fisyak
+# Add CERN_ROOT/include
 #
 # Revision 1.118  1999/09/13 22:19:49  fisyak
 # Add inlclude and include/tables in CPP path
@@ -338,7 +338,7 @@ ifneq ($(OUT_DIR),$(STAR))
   INCLUDES += -I$(STAR)/.share/$(DOMAIN) -I$(STAR)/.share/tables
 endif                          
 CPPFLAGS += $(INCLUDES)
-FFLAGS   += -DCERNLIB_TYPE  -I$(CERN_ROOT)/include/geant321 
+FFLAGS   += -DCERNLIB_TYPE  -I$(CERN_ROOT)/include -I$(CERN_ROOT)/include/geant321 
 #                 I have idl- or g-files
 FILES_CC := $(wildcard $(addsuffix /*.cc, $(SRC_DIRS)))
 FILES_CXX:= $(wildcard $(addsuffix /*.cxx, $(SRC_DIR)))

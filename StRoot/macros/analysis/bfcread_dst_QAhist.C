@@ -1,5 +1,11 @@
-// $Id: bfcread_dst_QAhist.C,v 1.3 1999/09/09 21:18:02 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.6 1999/09/21 15:07:02 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.6  1999/09/21 15:07:02  kathy
+// change to have notes on input values at top of each macro, also clean up notes on usage and remove the usage of method St_QA_Maker::SetPntrToHistUtil which is not going to be used now that I made St_QA_Maker totally independent of the histogram printing
+//
+// Revision 1.5  1999/09/20 20:22:56  kathy
+// fix to bfcread_dst_QAhist.C to print hist at end
+//
 // Revision 1.3  1999/09/09 21:18:02  kathy
 // changed to use StIOMaker instead of StTreeMaker so that it can read as input both .dst.root and .dst.xdf files
 //
@@ -31,38 +37,60 @@
 //
 //=======================================================================
 //
-// Kathy's notes (5/13/99):
-//     - Victor's example to show how to read in a DST produced from bfc.C and
-//       - run another maker (St_QA_Maker) 
-//       - look at it using the browser
+// Kathy's notes (9/21/99):
+//   - adapted from bfcread.C macro and changed so it could read in
+//     .dst.root or .xdf.root file produced from bfc.C 
+//   - run maker (St_QA_Maker) 
+//   - draws & prints histograms from given input Maker
 //
-// This example is reading in the "dst" branch of the root file.
-// (i.e. the input file is .dst.root)
-// If you want to read in a different branch, you must change:
-//    - the input file name, e.g. *.bname.root
-//    - treeMk->SetBranch("bnameBranch",0,"r");
-//    - chain->GetDataSet("bname");
+// inputs: nevents - # events to process
+//         MainFile - *.hist.root file from bfc output
+//         MakerHist - name of Maker that you want histograms from
+//         psFile - output postscript filename
 //
-// This example has St_QA_Maker put in properly, but it is commented out.
-// Just un-comment if you want. 
-//
-// This example is for debugging/testing purposes and  therefore does
-//   not have chain->Finish(); at end
+// standard Maker names in bfc 
+//   (but if you run your own Maker here, then use whatever name you give it)
+//  geant
+//  db
+//  calib
+//  emc_raw
+//  tpc_hits
+//  svt_hits
+//  ftpc_hits
+//  tpc_tracks
+//  svt_tracks
+//  ftpc_tracks
+//  ctf
+//  mwc
+//  trg
+//  global
+//  match
+//  primary
+//  v0
+//  xi
+//  kink
+//  dst
+//  StEventMaker
+//  analysis
+//  QA
 //
 //======================================================================
 
 class StChain;
 class St_DataSet;
-St_DataSet *Event;
+
 StChain *chain;
-TBrowser *brow=0;
+St_DataSet *Event;
+
 
 void bfcread_dst_QAhist(Int_t nevents=1, 
-             const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_2a/psc0208_01_40evts.dst.root",
+             const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/set0352_01_35evts.dst.root",
+             const Char_t *MakerHist="QA",
              const Char_t *psFile="QA_hist.ps")
 {
 //
   cout << "bfcread_dst_QAhist.C, input file name       " << MainFile << endl;
+  cout << "bfcread_dst_QAhist.C, input Maker name      " << MakerHist<< endl;
   cout << "bfcread_dst_QAhist.C, output psfile name    " << psFile   << endl;
   cout << "bfcread_dst_QAhist.C, num events to process " << nevents  << endl;
 
@@ -81,23 +109,29 @@ void bfcread_dst_QAhist(Int_t nevents=1,
 // Input File Maker
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
 
-// commented out on 9/9/99 - now use StIOMaker
-//  Input Tree
-    //  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-    //treeMk->SetIOMode("r");
-    //treeMk->SetDebug();
-    //treeMk->SetBranch("*",0,"0");  	//deactivate all branches
-    //treeMk->SetBranch("dstBranch",0,"r");	//activate dstBranch
+
+// constructor for other maker (not used in chain)
+   StHistUtil   *HU  = new StHistUtil;
+
+// now must set pointer to StMaker so HistUtil can find histograms
+//  with StHistUtil methods
+// -- input any maker pointer but must cast as type StMaker
+   HU->SetPntrToMaker((StMaker *)IOMk);
 
 //  add other makers to chain:
   St_QA_Maker  *QA  = new St_QA_Maker;
-  
+
+// must set pointer to HistUtil so can use it's methods
+// 9/21/99 (KT) actually, this is not needed since I took out
+//          StHistUtil method calls from St_QA_Maker 
+//   QA->SetPntrToHistUtil(HU);
+
 // --- now execute chain member functions
   chain->Init();
  
 // method to print out list of histograms - can do this anytime after they're booked
   Int_t NoHist=0;
-  NoHist = QA->ListHists();
+  NoHist = HU->ListHists(MakerHist);
   cout << " bfcread_dst_QAhist.C, No. of Hist we have == " << NoHist << endl;
 
 // loop over events:
@@ -115,20 +149,28 @@ void bfcread_dst_QAhist(Int_t nevents=1,
   cout <<  " bfcread_dst_QAhist.C, passed chain->Make !!!" << endl ;
 
 // the following methods are already set to default values in St_QA_Maker::Init - now write over them
-  QA->SetDraw(kTRUE);
-//    QA->SetHistsNamesDraw(firstHist,lastHist);
-  QA->SetPostScriptFile(psFile);
-  QA->SetZones();
-  QA->SetPaperSize();
+   QA->SetDraw(kTRUE);
+
+// Set the default canvas style to plain (so it won't print out grey!)
+    gROOT->SetStyle("Plain");
+//    gStyle->SetOptStat(111111);
+
+    HU->SetHistsNamesDraw("*","*");
+    HU->SetPostScriptFile(psFile);
+    HU->SetZones(2,3);
+    HU->SetPaperSize();
+    HU->SetDefaultLogYList(MakerHist);
 
   Int_t numLog = 0;
-  numLog = QA->ExamineLogYList();
-  cout <<" bfcread_dst_QAhist.C, Number hist to plot with log scale = " << numLog << endl;
+  numLog = HU->ExamineLogYList();
+  cout << " bfcread_dst_QAhist.C, Number hist to plot with log scale = " << numLog << endl;
 
-// Finish method in St_QA_Maker is where the actual DrawHist is done
   chain->Finish();
   cout <<  "bfcread_dst_QAhist.C, passed chain->Finish" << endl ; 
 
+//  Now draw the actual histograms to canvas and to ps file
+    HU->DrawHists(MakerHist);
+   
 }
  
 

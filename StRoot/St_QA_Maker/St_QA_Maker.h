@@ -1,5 +1,11 @@
-//! $Id: St_QA_Maker.h,v 1.29 1999/07/17 01:51:21 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.31  1999/09/21 15:05:38  kathy
+//! comment out unneccessary method: SetPntrToHistUtil because now I'm making it totally independent of the histograms printing at the end - also put in doc directory and html file - basically empty now
+//!
+//! Revision 1.30  1999/09/20 20:12:19  kathy
+//! moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
+//!
 //! Revision 1.29  1999/07/17 01:51:21  kathy
 //! changed limits and titles of some histograms
 //!
@@ -119,12 +125,15 @@
 //! St_QA_Maker virtual base class for Maker                            //
 //!                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
 #ifndef ROOT_TH1
 #include "TH1.h"
 #endif
+
 #ifndef ROOT_TH2
 #include "TH2.h"
 #endif
@@ -132,18 +141,17 @@
 #include "TList.h"
 #include "TString.h"
 
-//  - if not using the methods of the class, then can just put class TCanvas;
-//   -  however, if we are using the methods of TCanvas, then put include "TCanvas.h"
-class TCanvas;
-
-
-
+// tell it that we're going to use method from StHistUtil class (but
+// not using them in header file, so don't need to include StHistUtil.h
+//class StHistUtil;
 
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.29 1999/07/17 01:51:21 kathy Exp $";
-  //! Histograms booking constants
+//  StHistUtil *m_PntrToHistUtil;    //! pointer to an StHistUtil
+
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $";
+//! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
   static const Float_t xminpT;
@@ -203,22 +211,6 @@ class St_QA_Maker : public StMaker {
   static const Float_t cmindedx; 
   static const Float_t cmaxdedx; 
   
-  // Data-members to make up the output Canvases and Postscript files
-  TCanvas       *m_QACanvas;       //!
-  Int_t          m_PadColumns;     // Number of the columns (TPad's) on the single Canvas
-  Int_t          m_PadRows;        // Number of the columns (TPad's) on the single Canvas
-  
-  Int_t          m_PaperWidth;     // Paper size in cm
-  Int_t          m_PaperHeight;    // Paper size in cm
-  
-  TString        m_FirstHistName;
-  TString        m_LastHistName;
-  
-  TString        m_PsFileName;     // Name of the PostScipt file to plot hist's out
-  
-  TList         *m_ListOfLog;      // list of histogram names that will be drawn with logy scale
-
-
  protected:
   
   // for method MakeEvSum - from table event_summary
@@ -382,8 +374,6 @@ class St_QA_Maker : public StMaker {
  public: 
   St_QA_Maker(const char *name="QA", const char *title="evet/QA");
   virtual       ~St_QA_Maker();
-  virtual Int_t  DrawHists();
-  virtual Int_t  ListHists();
   virtual Int_t  Init();
   virtual Int_t  Finish();
   virtual Int_t  Make();
@@ -395,6 +385,7 @@ class St_QA_Maker : public StMaker {
   virtual void   MakeHistV0(St_DataSet *dst);
   virtual void   MakeHistPID(St_DataSet *dst);
   virtual void   MakeHistVertex(St_DataSet *dst);
+  virtual void   MakeHistXi(St_DataSet *dst);
   virtual void   BookHistEvSum();
   virtual void   BookHistGlob();
   virtual void   BookHistDE();
@@ -404,24 +395,12 @@ class St_QA_Maker : public StMaker {
   virtual void   BookHistPID();
   virtual void   BookHistVertex();
   virtual void   BookHistXi();
-  virtual void   MakeHistXi(St_DataSet *dst);
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
-  virtual void   SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
-// SetZones --> divide canvas into 2 x 3 zones
-  virtual void   SetZones(Int_t columns=2, Int_t rows=3);
-// SetPaperSize -->  A4 is 20,26  US letter is 20,24
-  virtual void   SetPaperSize(Int_t width=20, Int_t height=24);
-  virtual void   SetPostScriptFile(const Char_t *psFileName="");
-  virtual void   SetDefaultLogYList();
-  virtual Int_t  AddToLogYList(const Char_t *HistName="");
-  virtual Int_t  RemoveFromLogYList(const Char_t *HistName="");
-  virtual Int_t  ExamineLogYList();
-  virtual TList*  FindHists(Char_t *histBranchName="");
-  
+//  virtual void   SetPntrToHistUtil(StHistUtil *m1);
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.29 1999/07/17 01:51:21 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.31 1999/09/21 15:05:38 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
@@ -430,14 +409,8 @@ class St_QA_Maker : public StMaker {
     
 inline void St_QA_Maker::SetDraw(Bool_t drawFlag) 
                          { drawinit = drawFlag;}
-inline void St_QA_Maker::SetHistsNamesDraw(const Char_t *firstName, const Char_t *lastName)
-                         { m_FirstHistName = firstName;  m_LastHistName  = lastName; }
-inline void St_QA_Maker::SetZones(Int_t columns, Int_t rows)
-                         { m_PadColumns =columns; m_PadRows = rows;}
-inline void St_QA_Maker::SetPaperSize(Int_t width, Int_t height)
-                         { m_PaperWidth = width; m_PaperHeight = height;}
-inline void St_QA_Maker::SetPostScriptFile(const Char_t *psFileName)
-                         { m_PsFileName = psFileName;}
+//inline void St_QA_Maker::SetPntrToHistUtil(StHistUtil *m1) 
+//                          {m_PntrToHistUtil = m1;}
 
 
 

@@ -1,9 +1,12 @@
-// $Id: bfcread_hist_list.C,v 1.3 1999/09/21 15:07:02 kathy Exp $ 
-// $Log: bfcread_hist_list.C,v $
-// Revision 1.3  1999/09/21 15:07:02  kathy
+// $Id: bfcread_hist_to_ps.C,v 1.3 1999/09/21 15:07:03 kathy Exp $ 
+// $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.3  1999/09/21 15:07:03  kathy
 // change to have notes on input values at top of each macro, also clean up notes on usage and remove the usage of method St_QA_Maker::SetPntrToHistUtil which is not going to be used now that I made St_QA_Maker totally independent of the histogram printing
 //
-// Revision 1.2  1999/09/20 20:09:01  kathy
+// Revision 1.2  1999/09/20 20:28:12  kathy
+// fix to give macro correct name
+//
+// Revision 1.1  1999/09/20 20:09:02  kathy
 // bfcread_hist_list_all now lists all histograms in hist.root file; bfcread_hist_list now only lists those that are in the Maker that is input; bfcread_hist_to_ps prints and draws the hist that are in the input Maker, bfcread_dst_QAhist.C reads .dst.root file - runs QA_Maker and prints and draws the QA histograms
 //
 //
@@ -11,16 +14,17 @@
 // owner:  Kathy Turner
 // what it does:  see below
 //=======================================================================
-// bfcread_hist_list.C 
+// bfcread_hist_to_ps.C 
 //
 // Kathy's notes (9/20/99):
 //   - adapted from bfcread.C macro and changed so it could read in
-//     .hist.root file produced from bfc.C in 99f
-//   - reads .hist.root file and prints out list of histograms from
+//     .hist.root file produced from bfc.C 
+//   - reads .hist.root file and draws & prints histograms from
 //     given input Maker
 //
 // inputs: MainFile - *.hist.root file from bfc output
 //         MakerHist - name of Maker that you want histograms from
+//         psFile - output postscript filename
 //
 // standard Maker names in bfc ==>
 //  geant
@@ -60,10 +64,11 @@ StTreeMaker *treeMk=0;
 
 //------------------------------------------------------------------------
 
-void bfcread_hist_list(
+void bfcread_hist_to_ps(
   const Char_t *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_1b/set0352_01_35evts.hist.root",
-  const Char_t *MakerHist="tpc_hits")
-{
+  const Char_t *MakerHist="QA",
+  const Char_t *psFile="QA_hist.ps")
+{             
 
 //
     gSystem->Load("St_base");
@@ -105,8 +110,32 @@ void bfcread_hist_list(
    NoHist = HU->ListHists(MakerHist);
    cout << " in bfcread_hist_list: Num of Hist = " << NoHist << endl;
       
+// Set the default canvas style to plain (so it won't print out grey!)
+    gROOT->SetStyle("Plain");
+//    gStyle->SetOptStat(111111);
+
+    HU->SetHistsNamesDraw("*","*");
+    HU->SetPostScriptFile(psFile);
+    HU->SetZones(2,3);
+    HU->SetPaperSize();
+    HU->SetDefaultLogYList(MakerHist);
+
+   Int_t numLog = 0;
+   numLog = HU->ExamineLogYList();
+   cout <<" bfcread_hist_to_ps.C, Number hist to plot with log scale = " << numLog << endl;
+
+//  Now draw the actual histograms to canvas and to ps file
+    HU->DrawHists(MakerHist);
+   
+   cout <<" bfcread_hist_to_ps.C, end of macro" << endl;
+
 }
- 
+
+
+
+
+
+
 
 
 
