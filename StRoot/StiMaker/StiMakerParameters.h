@@ -39,6 +39,8 @@ class StiMakerParameters : public TObject
   bool doStEventInput;  
   bool doPlots;
 
+  char* baseName;
+
   friend ostream& operator<<(ostream& os, const StiMakerParameters&pars);
   
   ClassDef(StiMakerParameters, 1)
