@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.7 2002/10/03 10:34:04 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.8 2002/10/31 13:41:16 oldi Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.8  2002/10/31 13:41:16  oldi
+// Histograms for vertex estimation for different sectors added.
+//
 // Revision 1.7  2002/10/03 10:34:04  oldi
 // Usage of gufld removed.
 // Magnetic field is read by StMagUtilities, now.
@@ -74,12 +77,17 @@ class StFtpcTrackMaker : public StMaker {
        TH2F          *m_phires_vs_r_east; //! phi residuals vs. r east
        TH2F          *m_rres_vs_r_west;   //! r residuals vs. r west
        TH2F          *m_phires_vs_r_west; //! phi residuals vs. r west
+
        TH2F          *m_vertex_east_xy;   //! vertex xy estimation east
        TH1F          *m_vertex_east_z;    //! vertex z estimation east
+       TH2F          *m_vertex_east_x_vs_sector; //! vertex x estimation east vs sector
+       TH2F          *m_vertex_east_y_vs_sector; //! vertex y estimation east vs sector
+       TH2F          *m_vertex_east_z_vs_sector; //! vertex z estimation east vs sector
        TH2F          *m_vertex_west_xy;   //! vertex xy estimation west
        TH1F          *m_vertex_west_z;    //! vertex z estimation west
-
-   St_fde_fdepar   *m_fdepar;   //!
+       TH2F          *m_vertex_west_x_vs_sector; //! vertex x estimation west vs sector
+       TH2F          *m_vertex_west_y_vs_sector; //! vertex y estimation west vs sector
+       TH2F          *m_vertex_west_z_vs_sector; //! vertex z estimation west vs sector
 
  public: 
                   StFtpcTrackMaker(const char *name="ftpc_tracks"); // constructor
@@ -89,7 +97,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Make();                                           // actual program
            Int_t  Finish();                                         // final cleanup
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.7 2002/10/03 10:34:04 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.8 2002/10/31 13:41:16 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
            void   MakeHistograms();                                 // makes histograms
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
