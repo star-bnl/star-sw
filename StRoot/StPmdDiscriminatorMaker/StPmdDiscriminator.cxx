@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminator.cxx,v 1.3 2003/09/02 17:58:48 perev Exp $
+ * $Id: StPmdDiscriminator.cxx,v 1.4 2003/10/14 07:26:17 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,8 +12,8 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminator.cxx,v $
- * Revision 1.3  2003/09/02 17:58:48  perev
- * gcc 3.2 updates + WarnOff
+ * Revision 1.4  2003/10/14 07:26:17  subhasis
+ * fabs changed to ::fabs
  *
  * Revision 1.2  2003/05/29 13:12:51  subhasis
  * several changes to include NN
@@ -21,7 +21,7 @@
  *
  ******************************************************/
 
-#include<Stiostream.h>
+#include<iostream.h>
 #include<assert.h>
 #include<math.h>
 #include"TROOT.h"
