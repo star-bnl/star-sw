@@ -17,6 +17,8 @@ public:
   //  ~StHbtMcEventReader();
 
   virtual StHbtEvent* ReturnHbtEvent();
+  virtual StHbtString Report();
+
 
   void SetTheMcEventMaker(StMaker*);
   StMaker* TheMcEventMaker();

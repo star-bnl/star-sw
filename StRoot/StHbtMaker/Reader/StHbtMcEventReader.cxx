@@ -112,6 +112,11 @@ StHbtMcEventReader::StHbtMcEventReader(){
 //  /* no-op *//
 //}
 //__________________
+StHbtString StHbtMcEventReader::Report(){
+  StHbtString temp = "\n This is the StHbtMcEventReader - no Early Cuts applied\n";
+  return temp;
+}
+//__________________
 StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
   cout << "StHbtMcEventReader::ReturnHbtEvent" << endl;
   

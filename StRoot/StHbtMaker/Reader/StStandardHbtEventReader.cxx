@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.6 1999/07/27 20:21:10 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.7 1999/09/03 22:39:17 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.7  1999/09/03 22:39:17  lisa
+ * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
+ *
  * Revision 1.6  1999/07/27 20:21:10  lisa
  * Franks fixes of StTrack and subsequent changes to particleCut and EventReader
  *
@@ -74,6 +77,11 @@ StStandardHbtEventReader::StStandardHbtEventReader(){
 //StStandardHbtEventReader::~StStandardHbtEventReader(){
 //  /* no-op *//
 //}
+//__________________
+StHbtString StStandardHbtEventReader::Report(){
+  StHbtString temp = "\n This is the StStandardHbtEventReader - no Early Cuts applied\n";
+  return temp;
+}
 //__________________
 StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 

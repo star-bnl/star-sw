@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.2 1999/07/06 22:33:24 lisa Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.3 1999/09/03 22:39:17 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.3  1999/09/03 22:39:17  lisa
+ * Readers now MUST have Report() methods and MAY have WriteHbtEvent() methods
+ *
  * Revision 1.2  1999/07/06 22:33:24  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -50,6 +53,7 @@ public:
   //  ~StStandardHbtEventReader();
 
   virtual StHbtEvent* ReturnHbtEvent();
+  virtual StHbtString Report();
 
   void SetTheEventMaker(StMaker*);
   StMaker* TheEventMaker();
