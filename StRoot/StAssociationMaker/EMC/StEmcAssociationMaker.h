@@ -213,8 +213,8 @@ class StEmcAssociationMaker : public StMaker
                  
                  void           printMaps();
          
-                 TMatrix        getMatrix(const char*,const char*); ///< Returns clusters association matrixes (old style association)
-                 TMatrix        getMatrix() { return mAssocPointMatrix; } ///< Returns points association matrix (old style association)
+                 TMatrix*       getMatrix(const char*,const char*); ///< Returns clusters association matrixes (old style association)
+                 TMatrix*       getMatrix() { return mAssocPointMatrix; } ///< Returns points association matrix (old style association)
                  
          multiEmcTrackCluster*  getTrackClusterMap(Int_t i)      { if(i>0 && i<=NDETECTORS) return mTrackCluster[i-1]; else return NULL; } ///< returns multimap for association betwwen MC tracks and clusters 
          multiEmcTrackCluster*  getTrackClusterMap(const char*);  ///< returns multimap for association betwwen MC tracks and clusters 
@@ -232,10 +232,10 @@ class StEmcAssociationMaker : public StMaker
                  void           fillMaps(); 
                  Bool_t         mPrint;
                  
-                 TMatrix        mAssocMatrix[NDETECTORS];
-                 TMatrix        mTrackHitEnergyRtMatrix[NDETECTORS];
-                 TMatrix        mClHitEnergyRtMatrix[NDETECTORS];
-                 TMatrix        mAssocPointMatrix;
+                 TMatrix*       mAssocMatrix[NDETECTORS];
+                 TMatrix*       mTrackHitEnergyRtMatrix[NDETECTORS];
+                 TMatrix*       mClHitEnergyRtMatrix[NDETECTORS];
+                 TMatrix*       mAssocPointMatrix;
  
          multiEmcTrackCluster*  mTrackCluster[NDETECTORS];
          multiEmcClusterTrack*  mClusterTrack[NDETECTORS];
