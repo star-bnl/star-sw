@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.61 2000/06/26 22:34:38 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.62 2000/08/10 03:49:40 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.62  2000/08/10 03:49:40  snelling
+// Added drift velocity output Info
+//
 // Revision 1.61  2000/06/26 22:34:38  snelling
 // Removed generating adcxyz table with eval switch (used to much memory)
 //
@@ -48,6 +51,7 @@
 #include "tpc/St_tfs_g2t_Module.h"
 #include "tpc/St_tfs_filt_Module.h"
 #include "tpc/St_tfs_fill_tphit_pad_tmbk_Module.h"
+#include "StTpcDb/StTpcDb.h"
 #include "TH1.h"
 
 ClassImp(St_tcl_Maker)
@@ -153,7 +157,11 @@ Int_t St_tcl_Maker::Make() {
   St_DataSet* raw_data_tpc = GetInputDS("tpc_raw");
   m_raw_data_tpc = kFALSE;
   Int_t sector_tot = 0;
-  
+
+  // write out the drift velocity
+  gMessMgr->Info() << "Drift velocity used: " << gStTpcDb->DriftVelocity() 
+		   << endm;
+ 
   if (raw_data_tpc) {// Raw data exists -> make clustering
     m_raw_data_tpc = kTRUE;
     St_DataSetIter next(raw_data_tpc);
@@ -203,7 +211,8 @@ Int_t St_tcl_Maker::Make() {
       Warning ("Make"," TPC data is empty, isumpix=%d dump event.",isumpix);
       return kStErr;
     }
-    cout << "number of estimated hits used: " << max_hit << endl;
+      gMessMgr->Info() << "number of estimated hits used: " << max_hit 
+		       << endm;
     // create tables used with a reasonable size
     tphit = new St_tcl_tphit("tphit",max_hit); 
     m_DataSet->Add(tphit);
@@ -314,7 +323,9 @@ Int_t St_tcl_Maker::Make() {
 	  
 	  Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
 	  //		       ==============================================
-	  if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
+	  if (Res_tte !=  kSTAFCV_OK) {
+	     gMessMgr->Info() << "Problem with tte_hit_match.." << endm;
+	  }
 	  if (Debug()) cout << "finish run_tte_hit_match" << endl;
 	}
       }
@@ -331,7 +342,7 @@ Int_t St_tcl_Maker::Make() {
 	max_hit = g2t_tpc_hit->GetNRows();
       }
       else {
-	cout << "No g2t_tpc_hit table!!!!!!" << endl;
+	 gMessMgr->Info() << "No g2t_tpc_hit table!!!!!!" << endm;
       }
       St_g2t_track   *g2t_track   = (St_g2t_track   *) geantI("g2t_track");
       St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geantI("g2t_vertex");
@@ -352,18 +363,19 @@ Int_t St_tcl_Maker::Make() {
 				    m_tfs_fspar,m_tfs_fsctrl,
 				    index, m_type, tphit);
 	if (Res_tfs_g2t != kSTAFCV_OK) {
-	  cout << "Problem running tfs_g2t..." << endl;
+	   gMessMgr->Info() << "Problem running tfs_g2t..." << endm;
 	}
 	else {
 	  Int_t Res_tfs_filt = tfs_filt(tphit);
 	  if ( Res_tfs_filt !=  kSTAFCV_OK){ 
-	    cout << " Problem running tfs_filt..." << endl;
+	     gMessMgr->Info() << " Problem running tfs_filt..." << endm;
 	  }
 	  
 	  Int_t Res_tfs_fill_tphit_pad_tmbk=
 	    tfs_fill_tphit_pad_tmbk(m_tpg_pad_plane,tphit);
 	  if ( Res_tfs_fill_tphit_pad_tmbk !=  kSTAFCV_OK){ 
-	    cout << " Problem running tfs_fill_tphit_pad_tmbk..." << endl;
+	     gMessMgr->Info() 
+	       << " Problem running tfs_fill_tphit_pad_tmbk..." << endm;
 	  }
 	  
 	}
@@ -375,7 +387,7 @@ Int_t St_tcl_Maker::Make() {
 //		Histograms     
   MakeHistograms(); // clustering histograms
 
-  cout << "Got through St_tcl_Maker OK." << endl;
+  gMessMgr->Info() << "Got through St_tcl_Maker OK." << endm;
 
   return kStOK;
 }
@@ -384,7 +396,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.61 2000/06/26 22:34:38 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.62 2000/08/10 03:49:40 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -434,10 +446,11 @@ void St_tcl_Maker::MakeHistograms() {
     pttphit = tphit->GetTable();
   }
   else { 
-    cout << "Warning: tphit table header does not exist "   << endl; 
+     gMessMgr->Info() << "Warning: tphit table header does not exist "  
+		      << endm; 
   }
   if (!pttphit) { 
-    cout << "Warning: tphit table does not exist " << endl; 
+     gMessMgr->Info() << "Warning: tphit table does not exist " << endm; 
   }
   else {
     for(int i=0; i < tphit->GetNRows(); i++) {
@@ -460,10 +473,12 @@ void St_tcl_Maker::MakeHistograms() {
       pttpcl = tpcluster->GetTable();
     }
     else { 
-      cout << "Warning: tphit cluster table header does not exist "   << endl; 
+       gMessMgr->Info() 
+	 << "Warning: tphit cluster table header does not exist "   << endm; 
     }
     if (!pttpcl) { 
-      cout << "Warning: tphit cluster table does not exist " << endl; 
+       gMessMgr->Info() << "Warning: tphit cluster table does not exist " 
+			<< endm; 
     }
     else {
       for(int j=0; j < tpcluster->GetNRows(); j++) {
