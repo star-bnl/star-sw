@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdTriggerDetector.cxx,v 2.1 2004/08/03 17:20:33 ullrich Exp $
+ * $Id: StFpdTriggerDetector.cxx,v 2.2 2004/08/04 17:26:07 ullrich Exp $
  *
  * Author: Akio Ogawa, Jul 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdTriggerDetector.cxx,v $
+ * Revision 2.2  2004/08/04 17:26:07  ullrich
+ * Fixed bug in assignement operator.
+ *
  * Revision 2.1  2004/08/03 17:20:33  ullrich
  * Initial Revision.
  *
@@ -20,7 +23,7 @@
 #include "tables/St_dst_TrgDet_Table.h"
 #include "StTriggerData.h"
 
-static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.1 2004/08/03 17:20:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StFpdTriggerDetector.cxx,v 2.2 2004/08/04 17:26:07 ullrich Exp $";
 
 ClassImp(StFpdTriggerDetector)
 
@@ -77,7 +80,23 @@ StFpdTriggerDetector::operator=(const StFpdTriggerDetector& det)
 {
     if (this != &det) {
 	init();
-	*this = det;
+	copy(det.mEN, det.mEN+mMaxNS, mEN);
+	copy(det.mES, det.mES+mMaxNS, mES);
+	copy(det.mET, det.mET+mMaxTB, mET);
+	copy(det.mEB, det.mEB+mMaxTB, mEB);
+	copy(det.mEPN, det.mEPN+mMaxPS, mEPN);
+	copy(det.mEPS, det.mEPS+mMaxPS, mEPS);
+	copy(det.mWN, det.mWN+mMaxNS, mWN);
+	copy(det.mWS, det.mWS+mMaxNS, mWS);
+	copy(det.mWT, det.mWT+mMaxTB, mWT);
+	copy(det.mWB, det.mWB+mMaxTB, mWB);
+	copy(det.mWPN, det.mWPN+mMaxPS, mWPN);
+	copy(det.mWPS, det.mWPS+mMaxPS, mWPS);
+	for (int i=0; i<2; i++)
+	    for (int j; j<mMaxModule; j++) {
+		for (int k=0; k<mMaxBoard; k++) mLayer1[i][j][k] = det.mLayer1[i][j][k] ;
+		mLayer2[i][j] = det.mLayer2[i][j];
+	    }
     }
     return *this;
 }
