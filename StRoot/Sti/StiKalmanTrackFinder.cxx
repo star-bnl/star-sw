@@ -173,9 +173,9 @@ void StiKalmanTrackFinder::findTracks()
     {
       cout << "StiKalmanTrackFinder::findTracks() - Run Time Error (2) :" << rte.what() << endl;
     }  
-  if (_trackFilter)
-    cout << "  Tracks Analyzed:"<< _trackFilter->getAnalyzedCount() << endl
-				 << "         Accepted:"<< _trackFilter->getAcceptedCount() << endl;
+  //if (_trackFilter)
+  //cout << "  Tracks Analyzed:"<< _trackFilter->getAnalyzedCount() << endl
+  //			 << "         Accepted:"<< _trackFilter->getAcceptedCount() << endl;
   //else
   //  cout << "SKTF::findTracks() -I- Done"<<endl;
 }
@@ -303,7 +303,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 			 iii!=hits.end();
 			 ++iii)
 		{
-			cout << **iii<<endl;
+		  //cout << **iii<<endl;
 		}
   StiKalmanTrackNode testNode;
   StiDetector * currentDet;
