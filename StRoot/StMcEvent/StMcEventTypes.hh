@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.2 2000/03/06 18:05:21 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.3 2000/03/06 20:33:08 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.3  2000/03/06 20:33:08  calderon
+ * svt layer -> svt barrel
+ *
  * Revision 2.2  2000/03/06 18:05:21  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -35,8 +38,8 @@
 #include "StMcRichHitCollection.hh"
 #include "StMcSvtHit.hh"
 #include "StMcSvtHitCollection.hh"
+#include "StMcSvtBarrelHitCollection.hh"
 #include "StMcSvtLadderHitCollection.hh"
-#include "StMcSvtLayerHitCollection.hh"
 #include "StMcSvtWaferHitCollection.hh"
 #include "StMcTpcHit.hh"
 #include "StMcTpcHitCollection.hh"
