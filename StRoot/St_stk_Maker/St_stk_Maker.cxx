@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.12 1999/03/13 00:26:48 perev Exp $
+// $Id: St_stk_Maker.cxx,v 1.13 1999/04/21 16:05:30 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.13  1999/04/21 16:05:30  fisyak
+// move stk_stkpar into Maker
+//
 // Revision 1.12  1999/03/13 00:26:48  perev
 // New maker schema
 //
@@ -86,7 +89,7 @@ ClassImp(St_stk_Maker)
   m_method = 2;
   m_fill = 1;
   m_direct = 1;
-  m_nlayers = 3;
+  m_nlayers = 4;
   m_c1norm[0] = 3.47; m_c1norm[1] =   280.; m_c1norm[2] = -13.7 ;
   m_c2norm[0] = 45.5; m_c2norm[1] = 14200.; m_c2norm[2] = -17.5;
   m_vertex = 0;
@@ -108,41 +111,50 @@ St_stk_Maker::~St_stk_Maker(){
 Int_t St_stk_Maker::Init(){
   // Create tables
   St_DataSetIter       local(GetDataBase("params"));
-  m_stk_stkpar = (St_stk_stkpar *) local("svt/stkpars/stk_stkpar");
-  stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
-  stk_stkpar->mode = m_mode;
-  stk_stkpar->method = m_method;
-  stk_stkpar->fill = m_fill;
-  stk_stkpar->direct = m_direct;
-  stk_stkpar->nlayers = m_nlayers;
-  stk_stkpar->c1norm[0] = m_c1norm[0];
-  stk_stkpar->c1norm[1] = m_c1norm[1]; 
-  stk_stkpar->c1norm[2] = m_c1norm[2];
-  stk_stkpar->c2norm[0] = m_c2norm[0];
-  stk_stkpar->c2norm[1] = m_c2norm[1];
-  stk_stkpar->c2norm[2] = m_c2norm[2];
-  stk_stkpar->vertex = m_vertex;
-  stk_stkpar->chicut[0] = m_chicut[0];
-  stk_stkpar->chicut[1] = m_chicut[1];
-  stk_stkpar->chi_filter = m_chi_filter;
-  stk_stkpar->spt_mark = m_spt_mark;
-  stk_stkpar->long_tracks = m_long_tracks;
-  stk_stkpar->th_init = m_th_init;
-  stk_stkpar->th_max = m_th_max;
-  stk_stkpar->nitermax = m_nitermax;
-  stk_stkpar->niternull = m_niternull;
-  stk_stkpar->sec_factor = m_sec_factor;
-  stk_stkpar->nlayers = 4;
-  
-  m_stk_vtx        = (St_stk_vtx *)        local("global/vertices/stk_vtx");
-  m_stk_vtx_direct = (St_stk_vtx_direct *) local("global/vertices/stk_vtx_direct");
-  m_stk_stkpar     = (St_stk_stkpar *)     local("svt/stkpars/stk_stkpar");
-  m_stk_filler     = (St_stk_filler *)     local("svt/stkpars/stk_filler");
-  m_config         = (St_svg_config *)     local("svt/svgpars/config");
-  m_geom           = (St_svg_geom *)       local("svt/svgpars/geom");
-  m_pix_info       = (St_sgr_pixmap *)     local("svt/sgrpars/pix_info");
-  
-  m_sprpar         = (St_spr_sprpar *)     local("svt/sprpars/sprpar");
+  St_DataSetIter       gime(GetDataBase("params/global/vertices"));
+  m_stk_vtx        = (St_stk_vtx *)        gime("stk_vtx");
+  m_stk_vtx_direct = (St_stk_vtx_direct *) gime("stk_vtx_direct");
+
+  gime.Reset(GetDataBase("params/svt"));
+
+  m_config         = (St_svg_config *)     gime("svgpars/config");
+  m_geom           = (St_svg_geom *)       gime("svgpars/geom");
+  m_pix_info       = (St_sgr_pixmap *)     gime("sgrpars/pix_info");
+  m_sprpar         = (St_spr_sprpar *)     gime("sprpars/sprpar");
+  m_stk_stkpar     = (St_stk_stkpar *)     gime("stkpars/stk_stkpar");
+  m_stk_filler     = (St_stk_filler *)     gime("stkpars/stk_filler");
+  m_stk_stkpar     = new St_stk_stkpar("stk_stkpar",1);
+  stk_stkpar_st stk_stkpar;
+  stk_stkpar.direct           = m_direct;      // control call to svt_tracking_direct ;
+  stk_stkpar.fill             = m_fill;        // control call to svt_tracking_fill3 ;
+  stk_stkpar.long_tracks      = m_long_tracks; // 1=get rid of short tracks ;
+  stk_stkpar.method           = m_method;      // fit as prim, secondary, etc. ;
+  stk_stkpar.mode             = m_mode;        // track pri, sec, or both, ... ;
+  stk_stkpar.ngood            = 9335576;       // number of checked tracks in svt_track ;
+  stk_stkpar.nitermax         = m_nitermax;    // max number iteration in fill3 ;
+  stk_stkpar.niternull        = m_niternull;   // max number iter without track change ;
+  stk_stkpar.nlayers          = m_nlayers;     // number of super layers ;
+  stk_stkpar.secondary        = 0;             // open gates for secondaries ;
+  stk_stkpar.spt_mark         = m_spt_mark;    // 1 = remove used space points ;
+  stk_stkpar.vertex           = m_vertex;      // control call to svt_vertex_direct ;
+  stk_stkpar.c1norm[0]        = m_c1norm[0];   // norm factors for chi1 (circle fit) ;
+  stk_stkpar.c1norm[1]        = m_c1norm[1]; 
+  stk_stkpar.c1norm[2]        = m_c1norm[2];
+  stk_stkpar.c2norm[0]        = m_c2norm[0];   // norm factors for chi from phi-z fit ;
+  stk_stkpar.c2norm[1]        = m_c2norm[1];
+  stk_stkpar.c2norm[2]        = m_c2norm[2];
+  stk_stkpar.chi_filter       = m_chi_filter;  // parameter to turn chi filtering on/off ;
+  stk_stkpar.chibreak         = 0;             // value of zchi2 that triggers sec fitting ;
+  stk_stkpar.vertex           = m_vertex;
+  stk_stkpar.chicut[0]        = m_chicut[0];   // cut on chisqr of tracks to be accepted ;
+  stk_stkpar.chicut[1]        = m_chicut[1];
+  stk_stkpar.sec_factor       = m_sec_factor;  // factor to loosen cones by for secondary ;
+  stk_stkpar.th_init          = m_th_init;     // initial th max ;
+  stk_stkpar.th_max           = m_th_max;      // largest step ;
+  stk_stkpar.th_step          = 0;             // th step ;
+  stk_stkpar.ssd_fac          = 1;             // factor to open the cones for the ssd ;
+  stk_stkpar.fast_search      = 1;             // flag for the fast search in stk_fillX.F ;
+  m_stk_stkpar->AddAt(&stk_stkpar,0);
 
   // Create Histograms
   m_q_pt      = new TH1F("StkChargeOverPt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
@@ -302,7 +314,7 @@ void St_stk_Maker::MakeHistograms() {
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.12 1999/03/13 00:26:48 perev Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.13 1999/04/21 16:05:30 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
