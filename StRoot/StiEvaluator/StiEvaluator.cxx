@@ -98,63 +98,68 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
     for (StiTrackContainer::stitrackvec::const_iterator it=trackStore->begin();
 	 it!=trackStore->end(); ++it) {
 	StiTrack* temp = (*it);
+	
 	//Now you've got the track, do what you want with it
-	StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(temp);
+	/*
+	  StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(temp);
+	  if (!track) {
+	  cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t"
+	  <<"Cast to Evaluable track failed.  ABORT"<<endl;
+	  return;
+	  }
+	*/
+	StiKalmanTrack* track = dynamic_cast<StiKalmanTrack*>(temp);
 	if (!track) {
-	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t"
-		 <<"Cast to Evaluable track failed.  ABORT"<<endl;
+	    cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
+		 <<"Cast to Kalman track failed.  ABORT"<<endl;
 	    return;
 	}
 
 	//Now we have an StiEvaluableTrack
-	StTrackPairInfo* associatedPair = track->stTrackPairInfo();
+	//StTrackPairInfo* associatedPair = track->stTrackPairInfo();
 
-	//temp test (MLM)
 	StiTrackAssociator::AssocPair asPair = associator->associate(track);	
 	StTrackPairInfo* newInfo = asPair.first;
 	if (!newInfo) {
-	    cout <<"StiEvaluator::? newInfo==0"<<endl;
+	    cout <<"StiEvaluator::evaluateForEvent().  ERROR:\tnewInfo==0"<<endl;
 	}
-	if (newInfo!=associatedPair) {
-	    cout <<"StiEvaluator::? newInfo!=associatedPair"<<endl;
-	}
+	//temp test (MLM)	
+	//if (newInfo!=associatedPair) {
+	//cout <<"StiEvaluator::? newInfo!=associatedPair"<<endl;
+	//}
 	//End temp test (MLM)
 	
-	if (!associatedPair) {
-	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t"
-		 <<"Associated Pair==0.  Abort"<<endl;
-	    return;
-	}
-	//Call some function to actually fill TTree object(s)
-	mEntry->clear();
-	mEntry->setMcTrack(associatedPair->partnerMcTrack());
-	mEntry->setGlobalTrack(associatedPair->partnerTrack());
-	mEntry->setGlobalAssoc(associatedPair);
-	mEntry->setStiTrack(track);
-	mEntry->setAssociation(asPair.second); //New 11/20/01 (MLM)
+	else {
+	    //Call some function to actually fill TTree object(s)
+	    mEntry->clear();
+	    mEntry->setMcTrack(newInfo->partnerMcTrack());
+	    mEntry->setGlobalTrack(newInfo->partnerTrack());
+	    mEntry->setGlobalAssoc(newInfo);
+	    mEntry->setStiTrack(track);
+	    mEntry->setAssociation(asPair.second); //New 11/20/01 (MLM)
+	    	    
+	    //Fill the hit entry
+	    fillHitEntry(track);
 
-
-	//Clear the hit entry
-	fillHitEntry(track);
-
-	//cout <<"Look at the array"<<endl;
-	for (unsigned int h=0; h<mEntry->hitCounter(); ++h) {
-	    TObject* temp = mEntry->array()[h];
-	    StiHitEntry* hit = static_cast<StiHitEntry*>(temp);
-	    /*cout <<"\tGlobal Pos:\t"
+	    //cout <<"Look at the array"<<endl;
+	    /*
+	      cout <<"\tGlobal Pos:\t"
+	      for (unsigned int h=0; h<mEntry->hitCounter(); ++h) {
+	      TObject* temp = mEntry->array()[h];
+	      StiHitEntry* hit = static_cast<StiHitEntry*>(temp);
 	      <<hit->hitGlobalX<<"\t"
 	      <<hit->hitGlobalY<<"\t"
 	      <<hit->hitGlobalZ<<endl;
+	      mEntry->stiTrackResX+=hit->hitLocalX-hit->nodeLocalX;
+	      mEntry->stiTrackResY+=hit->hitLocalY-hit->nodeLocalY;
+	      mEntry->stiTrackResZ+=hit->hitLocalZ-hit->nodeLocalZ;
+	      }
+	      mEntry->stiTrackResX=mEntry->stiTrackResX/mEntry->hitCounter();
+	      mEntry->stiTrackResY=mEntry->stiTrackResY/mEntry->hitCounter();
+	      mEntry->stiTrackResZ=mEntry->stiTrackResZ/mEntry->hitCounter();
 	    */
-	    mEntry->stiTrackResX+=hit->hitLocalX-hit->nodeLocalX;
-	    mEntry->stiTrackResY+=hit->hitLocalY-hit->nodeLocalY;
-	    mEntry->stiTrackResZ+=hit->hitLocalZ-hit->nodeLocalZ;
+	    mTree->Fill();
 	}
-	mEntry->stiTrackResX=mEntry->stiTrackResX/mEntry->hitCounter();
-	mEntry->stiTrackResY=mEntry->stiTrackResY/mEntry->hitCounter();
-	mEntry->stiTrackResZ=mEntry->stiTrackResZ/mEntry->hitCounter();
-	
-	mTree->Fill();
     }
 }
 
