@@ -2,7 +2,7 @@
 Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $DirPath = DirPath '.';# print "DirPath = $DirPath\n"; 
-my $Dir = "pams";                           print "Build Tables for $Dir\n";
+my $Dir = "pams";                           print "Build Tables for $Dir\n" unless ($param::quiet);
 my @idlL = find_idl($Dir);#  print "@idlL\n"; 
 my @Repo = Repository_List;# print "Repositories = |@Repo|\n";
 foreach my $Rep (@Repo) {
@@ -20,7 +20,7 @@ my $obj = $OBJ . "/pams/tables";
 my $share  = "#.share/tables";# print "share = $share\n";
 my $include = $INCLUDE . "/tables"; #print "include = $include\n";
 my $SHARE  = $DIR . "/.share/tables";
-Link $DirPath =>  $SHARE; print "Link $DirPath =>  $SHARE\n";
+Link $DirPath =>  $SHARE; print "Link $DirPath =>  $SHARE\n" unless ($param::quiet);
 my $PKG = "St_Tables";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = $PKG . "." . $env->{SUFLIB};
@@ -98,41 +98,5 @@ if ($#sources > -1) {
   
   LinkedModule $env2 $SO_PKG, @sources;
   Install $env2 $LIB, $SO_PKG;
-}
-#________________________________________
-sub script::find_idl {
-  if (defined($AFS)) {$File::Find::dont_use_nlink;}
-  @search_files   = ();
-  &File::Find::find(\&wanted_idl, @_);
-  for my $dir (@_) {
-    my $i = 0;
-    for ($i=0;$i<=$#search_files;$i++) {
-      #      print "i = ",$i, "src =", $search_files[$i],"\n";
-      my $file = $search_files[$i];
-      $file =~ s/$dir\///g;
-      $search_files[$i] = $file;
-    }
-  }
-  #  print "find_source found $#search_files + 1 files\n";
-  return @search_files;
-}
-#________________________________________
-sub script::wanted_idl {
-  #  print "wanted ",$_,"\n";
-  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
-  if ( -d $_ &&
-       (/^CVS$/ ||
-	/^exa$/ ||
-	/^inc$/ ||
-	/^doc$/ ||
-	/^run$/ ||
-	/^examples$/ ||
-	/^local$/ ||
-	/^hold$/ ||
-	/^wrk$/)
-     ) {$prune = 1; return;}
-  if (/^.*\.idl$/) {#print "$name\n";
-    push @search_files, $name; 
-  }
 }
 #________________________________________
