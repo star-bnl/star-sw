@@ -1,0 +1,19 @@
+* 9/14/98 K. Turner (for 98h)
+* Run BFC in following manner:
+* - read in g2t file
+* - run tpc fast sim 
+* - run tpc tracking
+* - write xdf file containing full directories
+
+ exec $STAR/kumacs/chain/bfc _
+   TOP=/star/u2d/akio/staf _
+   tpc_sector_first=1 _
+   tpc_sector_last=24 _
+   gstar_settings=' field_only' _
+   domain=' geometry tpc ' _
+   chain=' g2tin tpg tfs tpt tid tte_e evout' _
+   skip=0 _
+   no_events=100 _
+   input_data_file=/star/data/akio/pythia_pp_jet_10gev_with_overlap_design_L.xdf _
+   output_file=/star/data/akio/pythia_pp_jet_10gev_with_overlap_design_L_reco _
+   log =bfc_tpc_fast_sim.log
