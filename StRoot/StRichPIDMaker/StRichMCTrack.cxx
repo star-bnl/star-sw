@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichMCTrack.cxx,v 1.1 2000/06/16 02:37:11 horsley Exp $
+ * $Id: StRichMCTrack.cxx,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMCTrack.cxx,v $
- *  Revision 1.1  2000/06/16 02:37:11  horsley
- *  many additions, added features to pad plane display (MIPS, rings, etc)
- *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
+ *  Revision 2.1  2000/09/29 01:35:36  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.1  2000/06/16 02:37:11  horsley
  *  many additions, added features to pad plane display (MIPS, rings, etc)
@@ -68,6 +71,39 @@ StRichMCTrack::StRichMCTrack(StTrack* t, double b) : StRichTrack(t,b) {
   mMCStopVertex.setY(-999.0);
   mMCStopVertex.setZ(-999.0);
 }
+
+#ifdef RICH_WITH_L3_TRACKS
+StRichMCTrack::StRichMCTrack(globalTrack* t, double b) : StRichTrack(t,b) {
+  mStMcTrack     = 0;
+  mCommonTpcHits = 0;
+  mRadiatorHits  = 0;
+  mGapHits       = 0;
+  
+
+  
+  mRecoGeantPhotons.resize(0);
+  mGeantPhotons.resize(0);
+  
+  
+  // keep original tpc values
+  mImpactPoint_TPC = getImpactPoint();
+  mMomentum_TPC    = getMomentum();
+  mMIP_TPC         = getProjectedMIP();
+
+  mMCMomentum.setX(0.0);
+  mMCMomentum.setY(0.0);
+  mMCMomentum.setZ(0.0);
+
+  mMCImpactPoint.setX(-999.0);
+  mMCImpactPoint.setY(-999.0);
+  mMCImpactPoint.setZ(-999.0);
+
+  mMCStopVertex.setX(-999.0);
+  mMCStopVertex.setY(-999.0);
+  mMCStopVertex.setZ(-999.0);
+
+  mMCMIP.setX(-999.0);
+#endif
   mMCMIP.setY(-999.0);
 StRichMCTrack::~StRichMCTrack() {
   mMCMIP.setZ(-999.0);

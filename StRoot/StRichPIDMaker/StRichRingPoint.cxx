@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 1.2 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichRingPoint.cxx,v 2.0 2000/08/09 16:26:20 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
- *  Revision 1.2  2000/05/19 19:06:11  horsley
- *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+ *  Revision 2.0  2000/08/09 16:26:20  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
+ *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
+ *
+ *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
@@ -23,7 +26,7 @@
 #include "StRichMaterialsDb.h"
 #include <values.h> // Needed for MAXFLOAT
 
-				            StRichRingDefinition type) {
+#ifndef ST_NO_NAMESPACES
 using namespace units;
 
 StRichRingPoint::StRichRingPoint(StRichTrack* track, 
@@ -111,6 +114,7 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   mRefractedAway.setY(HUGE_VAL);
   mRefractedAway.setZ(HUGE_VAL);  
   
+  // use this StThreeVectorD as a return 
   mRefractedAway.setZ(MAXFLOAT);  
 }
  

@@ -1,15 +1,18 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 1.4 2000/06/16 02:37:12 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.0 2000/08/09 16:26:19 gans Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 1.4  2000/06/16 02:37:12  horsley
- *  many additions, added features to pad plane display (MIPS, rings, etc)
- *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
+ *  Revision 2.0  2000/08/09 16:26:19  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
+ *
+ *  Revision 2.5  2000/11/01 17:45:24  lasiuk
+ *  MAJOR. hitFilter overhaul. members reordered, padplane dimension kept as
+ *  a member.  addition of initTuple.  Additional dependencies of
  *  min/max algorithms
  *
  *  Revision 2.4  2000/10/19 01:13:23  horsley
@@ -27,6 +30,12 @@
 
 #include "StRrsMaker/StRichCoordinateTransform.h"
 #include "StRrsMaker/StRichMomentumTransform.h"
+ *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
+
+#ifdef RICH_WITH_L3_TRACKS
+#include "StDaqLib/L3/L3.Banks.hh"
+#endif
+
  *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
@@ -34,6 +43,7 @@
 #include "StRichTrackingControl.h"
 #define StRichPIDMaker_HH
 
+class StEvent;
 #include "TFile.h"
 using std::vector;
 #endif
@@ -67,7 +77,10 @@ class StRichPadMonitor;
   double mDefaultLongWave;
   int evtN;
   char * fileName; //!
-  
+
+    unsigned short mUseL3Tracking;
+    unsigned short mUsePrintCanvas;
+    unsigned short mUseResidNTup;
   // analysis 
   TNtuple* mPidNtuple;
   TFile*   file;
@@ -80,7 +93,10 @@ class StRichPadMonitor;
     StPionPlus*  pionplus;//!
     StKaonPlus*  kaonplus;//!
     StProton*    proton;//!
-   
+
+    // primaryTrack bined in eta from less than -1 to greater than 1,
+    // in steps of .25 eta
+    long mPrimaryTracksVEta[10];
   TpcHitVecUtilities* util; //!
 
 
@@ -95,6 +111,12 @@ class StRichPadMonitor;
   Int_t hitFilter(StThreeVector<double>& hit, StRichRingCalculator* ringCalculator, double& ang, double& dist, double cut, double& meanD);
   
     void setFileName(char *);
+    void useL3Tracking();
+    void usePrintCanvas();
+    void useResidNTup();
+    long numStPrimaryTracks(StEvent*);
+    void fillRichSoftwareMonitor(StEvent*);
+    double findL3ZVertex(globalTrack *,int);
     
     vector<StRichTrack* >& getListOfStRichTracks();
     vector<StTrack* >&     getListOfStTracks();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPIDAlgorithm.cxx,v 1.2 2000/06/16 02:37:11 horsley Exp $
+ * $Id: StRichPIDAlgorithm.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $
  *
  * Author: Matt Horsley, apr 8,2000
  ***************************************************************************
@@ -14,7 +14,7 @@
 #include "StRichPIDTraits.h"
 #include "StEvent/StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StRichPIDAlgorithm.cxx,v 1.2 2000/06/16 02:37:11 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDAlgorithm.cxx,v 2.0 2000/08/09 16:26:19 gans Exp $";
 
 StRichPIDAlgorithm::StRichPIDAlgorithm() {
   

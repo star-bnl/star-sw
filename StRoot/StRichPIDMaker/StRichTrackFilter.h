@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrackFilter.h,v 1.2 2000/05/19 19:06:11 horsley Exp $
+ * $Id: StRichTrackFilter.h,v 2.0 2000/08/09 16:26:22 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrackFilter.h,v $
+ *  Revision 2.0  2000/08/09 16:26:22  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
  *  Revision 1.2  2000/05/19 19:06:11  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
@@ -27,12 +30,13 @@ public:
   StRichTrackFilter();
   ~StRichTrackFilter();
   bool trackAcceptable();
+  bool fromPrimaryVertex(int&);  
   void setTrack(StRichTrack* );
   void setMomentum(double);
   void setImpactParameter(double);
   void setNTPCPoints(int);
   void setChi2(double);
-  
+  void setZVertex(double);
 protected:
 
 private:
@@ -46,7 +50,9 @@ private:
   double  mChiSqr;
   double  mImpactParameter;
   double  mMinNTPCHits;
-  
+  double  mPrimaryTrackSigma;
+
+  double  mZVertex;
   StThreeVector<double>  mMomentum;
   StThreeVector<double>  mMIP;
   

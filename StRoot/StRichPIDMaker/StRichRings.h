@@ -1,13 +1,16 @@
 /**********************************************************
- * $Id: StRichRings.h,v 1.2 2000/05/22 15:14:44 horsley Exp $
+ * $Id: StRichRings.h,v 2.0 2000/08/09 16:26:20 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.h,v $
- *  Revision 1.2  2000/05/22 15:14:44  horsley
- *  modified StRichRings, StRichTDrawableRings to comply with sun compiler
+ *  Revision 2.0  2000/08/09 16:26:20  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
  *
+ *  Revision 2.1  2000/09/29 01:35:38  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.2  2000/05/22 15:14:44  horsley
  *  modified StRichRings, StRichTDrawableRings to comply with sun compiler

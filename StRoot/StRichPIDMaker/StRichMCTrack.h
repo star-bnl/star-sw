@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMCTrack.h,v 1.1 2000/06/16 02:37:11 horsley Exp $
+ * $Id: StRichMCTrack.h,v 2.0 2000/08/09 16:26:18 gans Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMCTrack.h,v $
+ *  Revision 2.0  2000/08/09 16:26:18  gans
+ *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *
  *  Revision 1.1  2000/06/16 02:37:11  horsley
  *  many additions, added features to pad plane display (MIPS, rings, etc)
  *  along with Geant info. Added StMcRichTrack. Modified access to hit collection.
@@ -15,7 +18,7 @@
 #ifndef STRICHMCTRACK_H
 #define STRICHMCTRACK_H
 
-
+#include "StRichTrackingControl.h"
 #include "StParticleDefinition.hh"
 #include "StRichPIDMaker/StRichTrack.h"
 #include "StThreeVector.hh"
@@ -29,8 +32,11 @@ class StRichMCTrack : public StRichTrack {
 public:
 
   StRichMCTrack();
-  StRichMCTrack(StTrack*, double);
-  ~StRichMCTrack();
+    StRichMCTrack(StTrack*, double);
+#ifdef RICH_WITH_L3_TRACKS
+    StRichMCTrack(globalTrack*,double);
+#endif
+    ~StRichMCTrack();
  
   // monte carlo info
   void        setStMcTrack(StMcTrack* );
