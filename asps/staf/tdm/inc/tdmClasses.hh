@@ -118,6 +118,10 @@ public:
    virtual STAFCV_T cvtDslPointer(DSL_PTR_T& pDS);
    virtual STAFCV_T cvtTasStructs(TABLE_HEAD_ST *& head, char *& data);
 
+//- Test Table
+   int NaN();
+
+
 protected:
 //:----------------------------------------------- PROT VARIABLES     --
 //:**NONE**
