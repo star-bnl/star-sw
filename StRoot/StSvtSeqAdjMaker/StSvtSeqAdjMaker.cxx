@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.23 2001/08/24 20:57:45 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.24 2001/08/24 21:40:04 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.24  2001/08/24 21:40:04  caines
+ * Adjust rawHybridData not SeqHybridData in Common Mode noise subtraction
+ *
  * Revision 1.23  2001/08/24 20:57:45  caines
  * Do common mode noise suppression from first two anodes
  *
@@ -466,7 +469,7 @@ Int_t StSvtSeqAdjMaker::Make()
 	    
 	  for( int i=0; i<nSequence; i++)  length += Seq[i].length;
 	  if( length != 128) doCommon =1;
-
+	  doCommon = 1;
 	  
 	  if( doCommon){
 	    cout << "Doing Common mode average" << endl;
@@ -508,13 +511,13 @@ Int_t StSvtSeqAdjMaker::Make()
 	    TimeAv=0;
 	    TimeAvSav = 0;
 	    for( int TimeBin=0; TimeBin<128; TimeBin++){
-	      if(mCommonModeNoiseAn[TimeBin] > 50)
+	      if(mCommonModeNoiseAn[TimeBin] > 20)
 		mCommonModeNoise[TimeBin] /= mCommonModeNoiseAn[TimeBin];
 	      else  mCommonModeNoise[TimeBin] =0;
 	      
 	      if( Debug()){
 		mCommonModeCount->Fill(mCommonModeNoiseAn[TimeBin]);
-		if( index < 4 && mCommonModeNoiseAn[TimeBin] > 50){
+		if( index < 4 && mCommonModeNoiseAn[TimeBin] > 20){
 		  if( TimeLast < TimeBin-3 && TimeSum > 0){
 		    
 		    TimeAv /= TimeSum;
@@ -813,7 +816,7 @@ void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
 
   //Anode is the index into the anolist array
   
-  status= mHybridAdjData->getListSequences(iAnode,nSeqOrig,Sequence);
+  status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
 
   for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
   
