@@ -121,18 +121,21 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(const Char_t* directory) {
   IntToPtrVecShortConstIter preiter = first;
   iter++;
 
-//first, we work on the "pedestal is very near the boundary" problem
-//ie, if a pedestal is very close to 60, we want to flag this channel
+//first, we want to catch channels which flip back and forth between
+//"good" and "bad" states, ie channels whose pedestals are close to
+//the boundaries, or channels who had intermittently stuck bits.
+//For all of these channels, if they flip more than 5 times in all
+//of the analyzed runs, we flag them as bad permanently.
+  Int_t statuscounter[1000];
   for(;iter!=last;iter++) {
     tmpint = iter->first;
     vector<Short_t>* statusVector = iter->second;
     vector<Short_t>* oldStatusVector = preiter->second;
-    Short_t oldstatus, status, bitfour = 4;
-    Int_t statuscounter[1000];
+    Short_t oldstatus, status;
     for (UInt_t i = 1; i < statusVector->size(); i++) {
       oldstatus = (*oldStatusVector)[i];
       status = (*statusVector)[i];
-      if ((oldstatus & bitfour) != (status & bitfour))
+      if (oldstatus != status)
         statuscounter[i]++;
     }
     preiter = iter;
@@ -155,18 +158,11 @@ CSMStatusUtils::saveAbbreviatedStatusTablesToASCII(const Char_t* directory) {
     vector<Short_t>* statusVector = iter->second;
     vector<Short_t>* oldStatusVector = preiter->second;
     Short_t oldstatus, status;
-    Short_t bitfour = 4;
-    Short_t antibitfour = ~bitfour;
-    Int_t statuscounter[1000];
     for (UInt_t i = 1; i < statusVector->size(); i++) {
       oldstatus = (*oldStatusVector)[i];
       status = (*statusVector)[i];
-//logic is - if bit four has disagreed a lot, write it in the first
-//file.  Otherwise, if the other bits disagree, write it out, but only
-//write out bit four disagreement if it's rare.
       if ( (firstone && statuscounter[i] > 5) || 
-          ( ((oldstatus & antibitfour) != (status & antibitfour)) || 
-           ((oldstatus&bitfour)!=(status&bitfour) && (statuscounter[i]<5)) ) ) 
+           (oldstatus != status && statuscounter[i]<5) )
         ofs << i << "\t" << status << endl;
     }
     ofs.close();
@@ -353,7 +349,7 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
 //first, save it to a regular runfile
         tmpstr = plotDir;
         tmpstr += "/status/";
-        int sSTA = saveStatusTablesToASCII(tmpstr.Data(), iter->first);
+        saveStatusTablesToASCII(tmpstr.Data(), iter->first);
                 
 //now save it to a nasty htmlfile
 
@@ -368,22 +364,26 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
         
         int tmpint2=mDetectorSize;
         if(mDetectorFlavor=="bemc") tmpint2 /= 2;  //last half of channels bad
+// check if first run - if yes plot every bad tower
+// if a previous run exists just plot towers which changed status to bad,
+// unless there are more than 25 bad towers, in which case, don't,
+// since disk space is apparently "important"
 	      for (Int_t i=1; i<tmpint2+1; i++) {
 	        if ((*statusVector)[i] > 0) {
 	          htmlout << "<tr> <td> " << i << " </td> <td> "
                     << (*statusVector)[i] << " </td> <td> " << endl;
 
-// check if first run - if yes plot every bad tower
-// if a previous run exists just plot towers which changed status
 	          IntToPtrVecShortConstIter statusIter;
 	          statusIter = mRunStatusMapPtr->find(iter->first);
 	          if (statusIter != mRunStatusMapPtr->begin()) {
 	            IntToPtrVecShortConstIter preIter = statusIter;
 	            preIter--;
-	            if ((*(statusIter->second))[i] == (*(preIter->second))[i]) {
+	            if ((*(statusIter->second))[i] == (*(preIter->second))[i] ||
+                  (*(statusIter->second))[i] == 0) {
 		            htmlout << "- </td> </tr><br>" << endl;
 		            continue;
 	            }
+              if(getNumberOfChangedTowers(tmpint) > 25) continue;
 	          }
 	          Int_t bin = myHist->GetXaxis()->FindFixBin(i);
 	          TH1D *hTemp = myHist->ProjectionY("projTemp",bin,bin);
@@ -394,7 +394,7 @@ CSMStatusUtils::makeStatusPlots(const Char_t* plotDir) {
 	          c2->Update();
 	          sprintf(buffer,"%s/run%dtower%d_adc.gif",plotDir,iter->first,i);
 	          c2->SaveAs(buffer);
-	          sprintf(buffer,"./run%dtower%d_adc.gif",plotDir,iter->first,i);
+	          sprintf(buffer,"./run%dtower%d_adc.gif",iter->first,i);
 	          htmlout << "<a href=\"" << buffer << "\" > plot </a>" 
 	              << "</td> </tr>" << endl;
 	          delete hTemp;
