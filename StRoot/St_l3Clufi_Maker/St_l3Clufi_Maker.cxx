@@ -1,8 +1,11 @@
-
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.9 2000/01/28 20:41:35 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.10 2000/02/10 20:43:47 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.10  2000/02/10 20:43:47  flierl
+// new files to provide classes which fill banks into tphits. this was done
+// before by l3totphit in pams
+//
 // Revision 1.9  2000/01/28 20:41:35  flierl
 // bug fixed :  St_hit_bank[supersectorindex-1];
 //
@@ -65,20 +68,25 @@
 #include "tables/St_pixelarray_Table.h"
 #include "tables/St_hitarray_Table.h"
 #include "TH1.h"
+#include "St_l3banks_2_tphits.h"
+#include "TStopwatch.h"
+
+//TStopwatch old;
+//extern TStopwatch watchit;
+
 //Double_t* rawToGlobal (int sector, int row, double pad, double tb,
 //		       double *x, double *y, double *z);
 
 ClassImp(St_l3Clufi_Maker)
-
-    //_____________________________________________________________________________
-    St_l3Clufi_Maker::St_l3Clufi_Maker(const char *name):StMaker(name){
-    //  l3Clufi constructor
-    //
-    //  const char *name -  the name of this constructor
-    //
-    //  The first comment lines after the opening bracket
-    //  ({) of a member function are considered as a member function description 
-    //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
+//_____________________________________________________________________________
+St_l3Clufi_Maker::St_l3Clufi_Maker(const char *name):StMaker(name){
+  //  l3Clufi constructor
+  //
+  //  const char *name -  the name of this constructor
+  //
+  //  The first comment lines after the opening bracket
+  //  ({) of a member function are considered as a member function description 
+  //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
 }
 //_____________________________________________________________________________
 St_l3Clufi_Maker::~St_l3Clufi_Maker(){
@@ -289,7 +297,12 @@ Int_t St_l3Clufi_Maker::Make(){
     cout << "Start filling banks into tables..." << endl;
     
     //creat tcl_tphits table
-    St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",50000);
+    //St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",50000);
+    //tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
+    //m_DataSet->Add(stl3hit);
+
+    //creat tcl_tphits table
+    St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",400000);
     tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
     m_DataSet->Add(stl3hit);
     
@@ -316,11 +329,16 @@ Int_t St_l3Clufi_Maker::Make(){
 	    St_hitarray* bank_entries = (St_hitarray*)sec_bank_iter(secname);
 	    hitarray_st* bank_entries_st = (hitarray_st*) bank_entries->GetTable();
 	
-	    // call module which translates banks into tables
-	    l3totphit(bank_entries,stl3hit);
+	    // fill banks into tphit structs
+	    St_l3banks_2_tphits* filler = new St_l3banks_2_tphits(stl3hit,bank_entries);
+       	    filler->Filltclpoints();
+	    delete filler;
+
+	    //  call module which translates banks into tables old style
+	    // l3totphit(bank_entries,stl3hit);
 	}
 
-    // add tables to main dataset and fill histogramms
+    // fill histogramms
     for(Int_t tt=0;tt<50000;tt++)
 	{
 	    if  (l3hitst[tt].z == 0 && l3hitst[tt+1].y == 0  && l3hitst[tt+2].x == 0)
@@ -328,19 +346,18 @@ Int_t St_l3Clufi_Maker::Make(){
 		    cout << "Total number of clusters " << tt <<" ."<< endl;
 		    break;
 		}
-	    stl3hit->AddAt(&l3hitst[tt],tt);
+	    // old style
+	    //stl3hit->AddAt(&l3hitst[tt],tt);
 	    
 	    // fill histogramms
 	    x_dis->Fill(l3hitst[tt].x);
 	    y_dis->Fill(l3hitst[tt].y);
 	    z_dis->Fill(l3hitst[tt].z);
 	    charge_dis->Fill(l3hitst[tt].q);
-
 	}
     
-    // done with the whole job
-    cout << endl << "Done with l3Clufi." << endl << endl;
-    return kStOK;
+    // done with the whole job    
+    return kStOK;    
 }
 
 //_____________________________________________________________________________
