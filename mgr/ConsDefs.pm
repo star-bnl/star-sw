@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.65 2004/01/15 02:37:32 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.66 2004/01/18 15:49:36 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -64,9 +64,11 @@
     $EXTRA_CPPPATH = "";
 
     $G77           = "g77";
-    $G77FLAGS      = "-pipe -w %DEBUG -fno-second-underscore -fno-automatic -Wall -W -Wsurprising -fPIC";
-    $G77EXTEND     = "-ffixed-line-length-132"; 
-
+    $G77FLAGS      = "-w %DEBUG -fno-second-underscore -fno-automatic -Wall -W -Wsurprising -fPIC";
+    if ($STAR_HOST_SYS =~ /gcc3/) {
+      $G77FLAGS      = "-pipe " . $G77FLAGS;
+    }
+    $G77EXTEND     = "-ffixed-line-length-132";
     $CXX           = "g++";
     $CXXFLAGS      = "-fpic -w";
     $EXTRA_CXXFLAGS = "";
