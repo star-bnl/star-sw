@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbWrappedMessenger.cc,v 1.3 2001/04/23 14:01:58 porter Exp $
+ * $Id: StDbWrappedMessenger.cc,v 1.4 2001/06/05 22:08:34 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbWrappedMessenger.cc,v $
+ * Revision 1.4  2001/06/05 22:08:34  perev
+ * HP corr
+ *
  * Revision 1.3  2001/04/23 14:01:58  porter
  * fixed bug in messages
  *
@@ -77,10 +80,16 @@ printMessage(message,(const char*)lString,lineNumber,className,methodName);
 void 
 StDbWrappedMessenger::printMessage(const char* message, const char* levelString, int lineNumber, const char* className, const char* methodName) {
 
+#ifdef __hpux
+  char str[1024];
+  sprintf(str,"%s::%s line=%d %s",className,methodName,lineNumber,message);
+  mMessenger->Message(str,levelString);
+#else
   ostrstream mtxt;  
   mtxt<<className<<"::"<<methodName<<" line="<<lineNumber<<" "<<message<<ends;
   mMessenger->Message(mtxt.str(),levelString);
   mtxt.freeze(0);
+#endif /*__hpux*/
 }
 
 
