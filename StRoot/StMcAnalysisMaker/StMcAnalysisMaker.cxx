@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.17 2000/04/20 16:59:47 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.18 2000/04/20 21:31:52 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.18  2000/04/20 21:31:52  calderon
+ * More checks for the cases where a track has no partner, Thanks Janet.
+ *
  * Revision 1.17  2000/04/20 16:59:47  calderon
  * Pick up the makers with the new names
  * Change the name from "McAnalysis" to "StMcAnalysisMaker"
@@ -340,7 +343,7 @@ Int_t StMcAnalysisMaker::Make()
 
 	
 	cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
-	cout << "Momentum of First Track and of first Associated Track:" << endl;
+	cout << "Momentum of First Track and of Associated Tracks (if there are any):" << endl;
 	// Get the momentum of the track and compare it to MC Track.
 	// Use primary track if available
 	StPrimaryTrack* pTrk = dynamic_cast<StPrimaryTrack*>(firstTrack->node()->track(primary));
@@ -349,14 +352,14 @@ Int_t StMcAnalysisMaker::Make()
 	    recMom = pTrk->geometry()->momentum();
 	else
 	    recMom = firstTrack->geometry()->momentum();
-	
-	cout << "[" << abs(recMom) << ", ";
-	cout << abs((*trackBounds.first).second->partnerMcTrack()->momentum()) << "]" << endl;
-	cout << "These tracks have : \n";
-	cout << (*trackBounds.first).second->commonTpcHits() << " TPC  hits in common." << endl;
-	cout << (*trackBounds.first).second->commonSvtHits() << " SVT  hits in common." << endl;
-	cout << (*trackBounds.first).second->commonFtpcHits() <<" FTPC hits in common." << endl;
-
+	for (rcTrackMapIter trkIt=trackBounds.first; trkIt!=trackBounds.second; ++trkIt) { 
+	    cout << "[" << abs(recMom) << ", ";
+	    cout << abs((*trkIt).second->partnerMcTrack()->momentum()) << "]" << endl;
+	    cout << "These tracks have : \n";
+	    cout << (*trkIt).second->commonTpcHits() << " TPC  hits in common." << endl;
+	    cout << (*trkIt).second->commonSvtHits() << " SVT  hits in common." << endl;
+	    cout << (*trkIt).second->commonFtpcHits() <<" FTPC hits in common." << endl;
+	}
     }
     else {
 	cout << "First Node doesn't have a global Track!" << endl;
@@ -431,19 +434,28 @@ Int_t StMcAnalysisMaker::Make()
     // Example: Make 2 Histograms
     // - x and y positions of the hits from the reconstructed track.
     // - x and y positions of the hits from the  Monte Carlo  track.
-    
-    pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
-    StMcTrack* partner = (*trackBounds.first).second->partnerMcTrack();
 
+    unsigned int maxCommonTpcHits = 0;
+    StMcTrack* partner = 0;
+    pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
+    for (rcTrackMapIter rcIt = trackBounds.first;
+	 rcIt != trackBounds.second;
+	 ++rcIt) {
+	if ((*rcIt).second->commonTpcHits() >  maxCommonTpcHits) {
+	    partner = (*rcIt).second->partnerMcTrack();
+	    maxCommonTpcHits = (*rcIt).second->commonTpcHits();
+	}
+    }
     StHitIterator rcHitIt;
     StMcTpcHitIterator mcHitIt;
     StPtrVecHit theHits = firstTrack->detectorInfo()->hits(kTpcId);
     for (rcHitIt  = theHits.begin();
 	 rcHitIt != theHits.end();
 	 rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
-    for (mcHitIt  = partner->tpcHits().begin();
-	 mcHitIt != partner->tpcHits().end();
-	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
+    if (partner)
+	for (mcHitIt  = partner->tpcHits().begin();
+	     mcHitIt != partner->tpcHits().end();
+	     mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
     
     if (!theMcV0Map) {
 	gMessMgr->Warning() << "----------WARNING----------\n"
