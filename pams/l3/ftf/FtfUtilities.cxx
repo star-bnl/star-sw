@@ -11,8 +11,8 @@
 #include <stdio.h>
 #include <math.h>
 
-//void invert_matrix ( int n, float *h ) ;
-//void matrix_diagonal ( float *h, float *h11, float *h22, float *h33 ) ;
+//void invert_matrix ( int n, double *h ) ;
+//void matrix_diagonal ( double *h, double *h11, double *h22, double *h33 ) ;
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //   Invert matrix h of dimension n
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -28,15 +28,15 @@
 //     See Philip R. Bevington,"Data reduction and error analysis for 
 //     the physical science",p302 
 //
-void ftfInvertMatrix ( int n, float *h )  {
-	static float detm, dmax_, temp;
+void ftfInvertMatrix ( int n, double *h )  {
+	static double detm, dmax_, temp;
     static int i, j, k, l;
 	static int ik[3], jk[3];
 
     detm = 1.F ;
     
     for (k = 0 ; k < n ; ++k) {
-	dmax_ = (float)0.;
+	dmax_ = (double)0.;
 	j = -1 ;
 	while(j < k) {
 	    i = -1 ;
@@ -53,7 +53,7 @@ void ftfInvertMatrix ( int n, float *h )  {
 			}
 		    }
 		}
-		if (dmax_ == (float)0.) {
+		if (dmax_ == (double)0.) {
 		    printf ( "Determinant is ZERO!" );
 		    return ;
 		}
@@ -64,7 +64,7 @@ void ftfInvertMatrix ( int n, float *h )  {
 		for (j = 0 ; j < n; ++j) {
 		    temp = h[k + j * 3];
 		    h[k + j * 3] = h[i + j * 3];
-		    h[i + j * 3] = -(float)temp;
+		    h[i + j * 3] = -(double)temp;
 		}
 	    }
 	    j = jk[k];
@@ -74,13 +74,13 @@ void ftfInvertMatrix ( int n, float *h )  {
 	    for (i = 0 ; i < n; ++i) {
 		temp = h[i + k * 3];
 		h[i + k * 3] = h[i + j * 3];
-		h[i + j * 3] = -(float)temp;
+		h[i + j * 3] = -(double)temp;
 	    }
 	}
 	
 	for (i = 0 ; i < n; ++i) {
 	    if (i != k) {
-		h[i + k * 3] = -(float)h[i + k * 3] / dmax_;
+		h[i + k * 3] = -(double)h[i + k * 3] / dmax_;
 	    }
 	}
 	
@@ -106,7 +106,7 @@ void ftfInvertMatrix ( int n, float *h )  {
 	    if (j > k) {
 	       for (i = 0; i < n; ++i) {
 		      temp = h[i + k * 3];
-		      h[i + k * 3] = -(float)h[i + j * 3];
+		      h[i + k * 3] = -(double)h[i + j * 3];
 		      h[i + j * 3] = temp;
 	       }
 	   }
@@ -114,7 +114,7 @@ void ftfInvertMatrix ( int n, float *h )  {
 	   if (i > k) {
 	      for (j = 0; j < n; ++j) {
 	    	temp = h[k + j * 3];
-		    h[k + j * 3] = -(float)h[i + j * 3];
+		    h[k + j * 3] = -(double)h[i + j * 3];
 		    h[i + j * 3] = temp;
 	      }
 	   }
@@ -127,21 +127,21 @@ void ftfInvertMatrix ( int n, float *h )  {
 //    Calculation by Geary Eppley (Rice University)
 //    coded by Pablo Yepes        (Rice University)
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void ftfMatrixDiagonal ( double *h, float &h11, float &h22, float &h33 ){
+void ftfMatrixDiagonal ( double *h, double &h11, double &h22, double &h33 ){
 	double f1, f2, f3 ;
 
 	f1 = h[5]*h[6]-h[8]*h[1] ;
 	f2 = h[4]*h[8]-h[5]*h[5] ;
 	f3 = h[8]*h[0]-h[2]*h[2] ;
-	h11 = float(h[8] / ( f3 - f1 * f1 / f2 )) ;
+	h11 = double(h[8] / ( f3 - f1 * f1 / f2 )) ;
 
 	f1 = h[2]*h[1]-h[0]*h[5] ;
 	f2 = h[8]*h[0]-h[2]*h[2] ;
 	f3 = h[0]*h[4]-h[1]*h[1] ;
-	h22 = float(h[0] / ( f3 - f1 * f1 / f2 )) ;
+	h22 = double(h[0] / ( f3 - f1 * f1 / f2 )) ;
 
 	f1 = h[1]*h[5]-h[4]*h[2] ;
 	f2 = h[0]*h[4]-h[1]*h[1] ;
 	f3 = h[4]*h[8]-h[7]*h[7] ;
-	h33 = float(h[4] / ( f3 - f1 * f1 / f2 )) ;
+	h33 = double(h[4] / ( f3 - f1 * f1 / f2 )) ;
 }

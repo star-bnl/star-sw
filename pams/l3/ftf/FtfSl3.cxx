@@ -32,9 +32,19 @@
 **:           feb 14, 2000  ppy track length filled for tracks type 2 and 3
 **:           feb 17, 2000  ppy check ratiox and ratioy are no division by zero
 **:           feb 24, 2000  ppy hit id in readMezzaninne should be nHits+counter
+**:           mar 09, 2000  ppy trackLength changed to length
+**:           mar 09, 2000  ppy some changes to accomodate void pointers
+**:           mar 11, 2000  ppy fill hits
+**:           mar 29, 2000  ppy add errors to tracks in daq format
+**:           apr 06, 2000  cle change L3_CLUSTER to l3_cluster
+**:           apr 08, 2000  ppy add variables to cut cluster for high/low charge/time bin
+**:           apr 18, 2000  ppy include readout board and mezzannine in readMezzanine    
+**:                             arguments
+**:           apr 19, 2000  cs  add dEdx from Christof
+**:           apr 19, 2000  cs  discard one-apd cluster (flag == 1) in readMezzanine(...)
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
-#include <iostream.h>
+//#include <iostream.h>
 
 UINT32 swap32(unsigned int   in);
 UINT32 swap16(unsigned short in);
@@ -44,7 +54,7 @@ ClassImp(FtfSl3)
 #endif
 
 //******************************************************************
-//   fill tracks
+//   Check whether tracs are mergable
 //******************************************************************
 int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 // if ( thisTrack->nHits < 45 - para.minHitsPerTrack ) return 1 ; // no type 1 for now
@@ -118,76 +128,127 @@ int FtfSl3::canItBeMerged ( FtfTrack* tTrack ) {
 //******************************************************************
 //   fill tracks
 //******************************************************************
+int FtfSl3::fillHits ( unsigned int maxBytes, char* buff, unsigned int token ) {
+//
+//   Check enough space
+//
+   if ( (nHits-1) * sizeof(l3_cluster) + sizeof(L3_SECCD) > maxBytes ) {
+      printf ( "FtfSl3::fillHits: buffer with %d bytes too small \n", maxBytes ) ;
+      return 0 ;
+   }
+//
+//   Loop over tracks
+//
+   L3_SECCD* head = (L3_SECCD *)buff ;
+
+   head->nrClusters_in_sector = nHits ;
+   // bankHeader
+   memcpy(head->bh.bank_type,CHAR_L3_SECCD,8);
+   head->bh.bank_id    = sectorNr;
+   head->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+   head->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+   head->bh.format_number = 0;
+   head->bh.token      = token;
+   head->bh.w9         = DAQ_RAW_FORMAT_WORD9;
+   head->bh.crc        = 0; //don't know yet....
+
+    
+   l3_cluster* hitP    = (l3_cluster *)(head->cluster);
+   FtfHit *nextHit ;
+   int i ;
+   int counter = 0 ;
+
+
+   for ( i = 0 ; i < nTracks ; i++ ) {
+      for  ( nextHit = (FtfHit *)(track[i].firstHit) ;
+	    nextHit != 0 ;
+	    nextHit = (FtfHit *)nextHit->nextTrackHit) {
+         hitP->padrow  = nextHit->row ;
+         hitP->pad     = nextHit->buffer1 ;
+         hitP->time    = nextHit->buffer2 ;
+         hitP->flags   = nextHit->flags   ;
+         hitP->charge  = (short)nextHit->q  ;
+         hitP->RB_MZ   = (short)nextHit->hardwareId  ;
+         hitP->trackId = track[i].id ;
+         if ( !(nextHit->track) ) {
+            printf ( "FtfSl3:fillHits: we got a problem \n" ) ;
+         }
+	 hitP++ ;
+         counter++ ;
+      }
+   }
+//
+//   Loop over hits
+//
+   for ( i = 0 ; i < nHits ; i++ ) {
+      nextHit = &(hit[i]) ;
+      if ( nextHit->track ) continue ; 
+      hitP->padrow  = nextHit->row ;
+      hitP->pad     = nextHit->buffer1 ;
+      hitP->time    = nextHit->buffer2 ;
+      hitP->flags   = nextHit->flags   ;
+      hitP->charge  = (short)nextHit->q       ;
+      hitP->RB_MZ   = (short)nextHit->hardwareId  ;
+      hitP->trackId = 0 ;
+      hitP++ ;
+      counter++ ;
+   }
+
+   if ( counter != nHits ) {
+      printf ( "FtfSl3:fillHits: Warning! Actual number of hits written %d total nHits %d \n", 
+                                 counter, nHits );
+   }
+
+   head->bh.length = ((char *)hitP-buff) / 4 ;
+
+   return ((char *)hitP-buff) ;
+}
+//******************************************************************
+//   fill tracks
+//******************************************************************
 int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
 //
 //   Loop over tracks
 //
-    int counter1 = 0 ;
-    int counter2 = 0 ;
-    int counter3 = 0 ;
+    int counter = 0 ;
 
     short* mergeFlag = new short[nTracks] ;
-//
-//   Count tracks of each type
-//
-    int i ;
-    for ( i = 0 ; i < nTracks ; i++ ) {
-       if ( track[i].flag == 1 ) {
-	  if ( canItBeMerged ( &(track[i]) ) ) {
-	     counter1++ ;
-	     mergeFlag[i] = 1 ;
-	  }
-	  else { 
-	     counter2++ ;
-	     mergeFlag[i] = 0 ;
-	  }
-       } //  Secondaries now 
-       else counter3++ ;
-    }    
+
+    counter = nTracks ;
 //
     // this is done to ease calcultion of offsets further down.
-    unsigned int headSize1, headSize2, headSize3;
-    if(counter1) {
-	headSize1 = sizeof(struct bankHeader); }
-    else { headSize1 = 0; }
-    
-    if(counter2) {
-	headSize2 = sizeof(struct bankHeader); }
-    else { headSize2 = 0; }
+    unsigned int headSize;
 
-    if(counter3) {
-	headSize3 = sizeof(struct bankHeader); }
-    else { headSize3 = 0; }
+    if(counter) 
+      headSize = sizeof(struct bankHeader); 
+    else 
+      headSize = 0; 
 
 
-    char *pointer1 = buff + sizeof(struct L3_SECTP) ;  // type I start
+    char *pointer = buff + sizeof(struct L3_SECTP) ;  
 
-    char *pointer2 = pointer1 + headSize1 
-	               + counter1 * sizeof(struct type1_track) ; //type II
-    char *pointer3 = pointer2 + headSize2
-	               + counter2 * sizeof(struct type2_track) ; //typeIII
-    char *pointer4 = pointer3 + headSize3
-	               + counter3 * sizeof(struct type3_track) ; // end
+    char *endOfData = pointer + headSize
+	               + counter * sizeof(struct local_track) ; // end
 
-    int nBytes = (pointer4-buff) ; 
+    int nBytes = (endOfData-buff) ; 
     if ( nBytes > maxBytes ) {
        fprintf ( stderr, "FtfSl3::fillTracks: %d bytes needed, %d max, too short a buffer \n ",  nBytes, maxBytes ) ;
-       return 0 ;
+       return -1 ;
     }
 //
 //  Fill header
 //
 
     struct L3_SECTP *head = (struct L3_SECTP *)buff ;
-    int sizeWord = 4; // 4 bytes per dword in raw formats
-// bankHeader
+
+    // bankHeader
     //  head->bh.bank_type = CHAR_L3_SECTP;
     memcpy(head->bh.bank_type,CHAR_L3_SECTP,8);
     head->bh.length     = sizeof(struct L3_SECTP) / 4 ;
     head->bh.bank_id    = sectorNr;
     head->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
     head->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
-    head->bh.format_number = 0;
+    head->bh.format_number = 1; // 1 means only pointing to local_tracks
     head->bh.token      = token;
     head->bh.w9         = DAQ_RAW_FORMAT_WORD9;
     head->bh.crc        = 0; //don't know yet....
@@ -200,128 +261,64 @@ int FtfSl3::fillTracks ( int maxBytes, char* buff, unsigned int token ) {
     head->yVert  = (int)rint(para.yVertex * 1000000); 
     head->zVert  = (int)rint(para.zVertex * 1000000); 
     head->para = 1 ;
-    head->banks[0].off = (pointer1-buff)/sizeWord; ;
-    head->banks[0].len = (pointer2-pointer1)/sizeWord; ;
-    head->banks[1].off = (pointer2-buff)/sizeWord; ;
-    head->banks[1].len = (pointer3-pointer2)/sizeWord; ;
-    head->banks[2].off = (pointer3-buff)/sizeWord; ;
-    head->banks[2].len = (pointer4-pointer3)/sizeWord; ;
+    head->banks[0].off = (pointer-buff) / 4;
+    head->banks[0].len = (endOfData-pointer)/ 4 ;
+    head->banks[1].off = 0 ;
+    head->banks[1].len = 0 ;
+    head->banks[2].off = 0 ;
+    head->banks[2].len = 0 ;
+
 // done with L3_SECTP
 
 
 //  L3_STKXD banks:
 
-    struct L3_STK1D* STK1D = (struct L3_STK1D*)pointer1;
-    struct L3_STK2D* STK2D = (struct L3_STK2D*)pointer2;
-    struct L3_STK3D* STK3D = (struct L3_STK3D*)pointer3;
+    struct L3_LTD* LTD = (struct L3_LTD*)pointer;
 
-    struct type1_track* mPTrack = 
-	(struct type1_track *)(pointer1 + headSize1) ;
-    struct type2_track* uPTrack = 
-	(struct type2_track *)(pointer2 + headSize2) ;
-    struct type3_track* uSTrack = 
-	(struct type3_track *)(pointer3 + headSize3) ;
+    struct local_track* uSTrack = 
+	(struct local_track *)(pointer + headSize) ;
 
-    if(headSize1) {
-	memcpy(STK1D->bh.bank_type, CHAR_L3_STK1D, 8);
-	STK1D->bh.length     = (sizeof(struct bankHeader) + 
-	                              counter1 * sizeof(type1_track))/4 ;
-	STK1D->bh.bank_id    = sectorNr ;
-	STK1D->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
-	STK1D->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
-	STK1D->bh.format_number = 0 ;
-	STK1D->bh.token      = token ;
-	STK1D->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
-	STK1D->bh.crc = 0; // for now!!!
-    }
-    
-    if(headSize2) {
-	memcpy(STK2D->bh.bank_type, CHAR_L3_STK2D, 8);
-	STK2D->bh.length     = (sizeof(struct bankHeader) + 
-	                              counter2 * sizeof(type2_track))/4 ;
-	STK2D->bh.bank_id    = sectorNr ;
-	STK2D->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
-	STK2D->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
-	STK2D->bh.format_number = 0 ;
-	STK2D->bh.token      = token ;
-	STK2D->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
-	STK2D->bh.crc = 0; // for now!!!
-    }
 
-    if(headSize3) {
-	memcpy(STK3D->bh.bank_type, CHAR_L3_STK3D, 8);
-	STK3D->bh.length     = (sizeof(struct bankHeader) + 
-	                              counter3 * sizeof(type3_track))/4 ;
-	STK3D->bh.bank_id    = sectorNr ;
-	STK3D->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
-	STK3D->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
-	STK3D->bh.format_number = 0 ;
-	STK3D->bh.token      = token ;
-	STK3D->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
-	STK3D->bh.crc = 0; // for now!!!
+    if(headSize) {
+	memcpy(LTD->bh.bank_type, CHAR_L3_LTD, 8);
+	LTD->bh.length     = (sizeof(struct bankHeader) + 
+	                              counter * sizeof(local_track))/4 ;
+	LTD->bh.bank_id    = sectorNr ;
+	LTD->bh.format_ver = DAQ_RAW_FORMAT_VERSION ;
+	LTD->bh.byte_order = DAQ_RAW_FORMAT_ORDER ;
+	LTD->bh.format_number = 0 ;
+	LTD->bh.token      = token ;
+	LTD->bh.w9         = DAQ_RAW_FORMAT_WORD9 ;
+	LTD->bh.crc = 0; // for now!!!
     }   
 //
-    for ( i = 0 ; i < nTracks ; i++ ) {
-       if ( track[i].flag == 1 ) {
-	  if ( mergeFlag[i] ) { 
-	     mPTrack->id    = track[i].id ;
-	     mPTrack->nHits = track[i].nHits ;
-	     mPTrack->s11Xy = track[i].s11Xy ;
-	     mPTrack->s12Xy = track[i].s12Xy ;
-	     mPTrack->s22Xy = track[i].s22Xy ;
-	     mPTrack->g1Xy  = track[i].g1Xy  ;
-	     mPTrack->g2Xy  = track[i].g2Xy  ;
-	     mPTrack->s11Sz = track[i].s11Sz ;
-	     mPTrack->s12Sz = track[i].s12Sz ;
-	     mPTrack->s22Sz = track[i].s22Sz ;
-	     mPTrack->g1Sz  = track[i].g1Sz  ;
-	     mPTrack->g2Sz  = track[i].g2Sz  ;
-	     mPTrack->trackLength  = track[i].trackLength  ;
-	     mPTrack->xLastHit = track[i].lastHit->x  ;
-	     mPTrack->yLastHit = track[i].lastHit->y  ;
-	     mPTrack->innerMostRow = track[i].innerMostRow ;
-	     mPTrack->outerMostRow = track[i].outerMostRow ;
-	     mPTrack++ ;
-	  }
-	  else {
-	     uPTrack->id    = track[i].id ;
-	     uPTrack->nrec = track[i].nHits ;
-	     // chi2 * 10!!!! 
-	     uPTrack->xy_chisq = (unsigned short)rint(10 * track[i].chi2[0]
-						      /float(track[i].nHits));
-	     uPTrack->sz_chisq = (unsigned short)rint(10 * track[i].chi2[1]
-						      /float(track[i].nHits));
-	     uPTrack->dedx  = track[i].dedx ; 
-	     uPTrack->pt    = track[i].pt * float(track[i].q);   ; 
-	     uPTrack->psi   = track[i].psi  ; 
-	     uPTrack->tanl  = track[i].tanl  ; 
-	     uPTrack->z0    = track[i].z0    ; 
-	     uPTrack->trackLength  = track[i].trackLength  ;
-	     uPTrack->Errors= 0 ; // to be filled
-	     uPTrack++ ;
-	  }
-       }
+    for ( int i = 0 ; i < nTracks ; i++ ) {
        //
-       //  Secondaries now 
-       //
-       else {
-	  uSTrack->id    = track[i].id ;
-	  uSTrack->nrec = track[i].nHits ;
-	  uSTrack->xy_chisq = (unsigned short)rint(10 * track[i].chi2[0]
-						   /float(track[i].nHits));
-	  uSTrack->sz_chisq = (unsigned short)rint(10 * track[i].chi2[1]
-						      /float(track[i].nHits));
-	  uSTrack->dedx  = track[i].dedx  ; 
-	  uSTrack->pt    = track[i].pt * float(track[i].q) ; 
-	  uSTrack->psi   = track[i].psi   ; 
-	  uSTrack->tanl  = track[i].tanl  ; 
-	  uSTrack->r0    = track[i].r0    ; 
-	  uSTrack->phi0  = track[i].phi0  ; 
-	  uSTrack->z0    = track[i].z0    ; 
-	  uSTrack->trackLength  = track[i].trackLength  ;
-	  uSTrack->Errors= 0 ; // to be filled
-	  uSTrack++ ;
+       uSTrack->id    = track[i].id ;
+       if ( canItBeMerged ( &(track[i]) ) ) {
+          uSTrack->id *= -1 ;
        }
+       uSTrack->nHits = track[i].nHits ;
+       uSTrack->ndedx = track[i].nDedx;
+       uSTrack->innerMostRow = track[i].innerMostRow    ; 
+       uSTrack->outerMostRow = track[i].outerMostRow    ; 
+       uSTrack->xy_chisq = (unsigned short)rint(10 * track[i].chi2[0]
+	     /float(track[i].nHits));
+       uSTrack->sz_chisq = (unsigned short)rint(10 * track[i].chi2[1]
+	     /float(track[i].nHits));
+       uSTrack->dedx  = track[i].dedx  ; 
+       uSTrack->pt    = track[i].pt * float(track[i].q) ; 
+       uSTrack->psi   = track[i].psi   ; 
+       uSTrack->tanl  = track[i].tanl  ; 
+       uSTrack->r0    = track[i].r0    ; 
+       uSTrack->phi0  = track[i].phi0  ; 
+       uSTrack->z0    = track[i].z0    ; 
+       uSTrack->trackLength  = track[i].length  ;
+       uSTrack->dpt          = (short)(32768. * track[i].dpt / track[i].pt ) ; 
+       uSTrack->dpsi         = (short)(32768. * track[i].dpsi / fabs(track[i].psi)  ) ; 
+       uSTrack->dtanl        = (short)(32678. * track[i].dtanl / fabs(track[i].tanl) ) ;
+       uSTrack->dz0          = (short)(1024. * track[i].dz0 ) ;
+       uSTrack++ ;
     }
 //  delete array
 
@@ -445,7 +442,8 @@ int FtfSl3::setup ( int maxHitsIn, int maxTracksIn ) {
 //     ppy:    modified to look at byte order      
 //******************************************************************
 //#define TRDEBUG
-int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
+int FtfSl3::readMezzanine (int sector,        int readOutBoard,
+                           int mezzanninneNr, struct TPCMZCLD_local *mzcld) {
 
    unsigned int *tmp32;
    int row, rows;
@@ -456,7 +454,6 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
    FtfHit *hitP = &hit[nHits];
 
    counter = 0;
-
    short swapByte = 0 ;
    if     ( !checkByteOrder(mzcld->bh.byte_order) ) swapByte = 1 ;
 
@@ -481,53 +478,75 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 	 double x;
 	 double y;
 	 double z;
+         unsigned short pad ;
+         unsigned short time ;
 
 	 struct xt {
 	    unsigned short x ;
 	    unsigned short t ;
 	 } *xt ;
 	 struct c {
-	    unsigned short f ;
-	    unsigned short c ;
+	    unsigned short flags ;
+	    unsigned short charge ;
 	 } *c ;
 
 	 xt = (struct xt *) tmp32++ ;
 	 c = (struct c *) tmp32++ ;
+//
+//   Discard 1 pad clusters
+// cs: discard one-pad cluster marked by the cluster finder as such (set first bit)
+         if ( (c->flags & 1) == 1) continue;
 
-	 if ( !swapByte ) {
-	    fp = (double) xt->x / 64.0 ;
-	    ft = (double) xt->t / 64.0 ;
-	 }
-	 else {
-	    fp = (double) swap16(xt->x) / 64.0 ;
-	    ft = (double) swap16(xt->t) / 64.0 ;
-	 }
+
+         if ( !swapByte ) {
+            pad  = xt->x  ;
+            time = xt->t ;
+         }
+         else {
+            pad  = swap16(xt->x)  ;
+            time = swap16(xt->t) ;
+         }
+         fp = (double)pad / 64. ;
+         ft = (double)time/ 64. ;
+
+// Cut on timebins and clustercharge added by cle 02/21/00
+
+         if ( ft < minTimeBin ) continue ;
+	 if ( ft > maxTimeBin ) continue ;
+         if ( c->charge < minClusterCharge ) continue ;
+         if ( c->charge > maxClusterCharge ) continue ;
+//
 //	 printf("row pad td ipad itd %02d %9.5f %9.5f %6d %3d\n", row,
 //	          fp, ft, c->c , c->f) ;
 	 rawToGlobal(sector, row, fp, ft, &x, &y, &z);
 
-//	  printf(" sector row  x y  z %d  %d  %f  %f  %f  \n",
-//	   	                     sector, row, x, y, z);
-
-	 if ( (nHits+counter)>=maxHits ) {
-	    fprintf (stderr, 
-                     "Error - FtfSl3:read: Hit array too small: counter %d maxHits %d \n",
-		      counter, maxHits ) ;
-	    return -1;
-	 }
+	 //	  printf(" sector row  x y  z %d  %d  %f  %f  %f  \n",
+	 //	   	                     sector, row, x, y, z);
 
 	 hitP->id  = nHits+counter ;
 	 hitP->row = row ;
+	 hitP->sector = sector ;
 	 hitP->x   = (float) x;
 	 hitP->y   = (float) y;
 	 hitP->z   = (float) z;
 	 hitP->dx  = xyError ;
 	 hitP->dy  = xyError ;
 	 hitP->dz  = zError ;
+	 hitP->buffer1 = pad ;
+	 hitP->buffer2 = time ;
+	 hitP->flags   = c->flags ;
+	 hitP->q       = c->charge ;
+         hitP->hardwareId = readOutBoard * 16 + mezzanninneNr ;
 
 	 hitP++;
 
 	 counter++;
+
+	 if ( (nHits+counter)>maxHits ) {
+	    fprintf (stderr, "Error - FtfSl3:read: Hit array too small: counter %d maxHits %d \n",
+		  counter, maxHits ) ;
+	    return -1;
+	 }
       }
    }
    return counter;
@@ -597,6 +616,7 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 	 if ( sectorGeo[sector-1].etaMin < para.etaMin ) para.etaMin = sectorGeo[sector-1].etaMin ;
 	 if ( sectorGeo[sector-1].etaMax > para.etaMax ) para.etaMax = sectorGeo[sector-1].etaMax ;
       }
+     //rintf ( "sector %d rb %d phi min/max %f %f \n", sector, iRb, para.phiMin, para.phiMax ) ;
 
 
       if ( !(unsigned int)seclp->rb[iRb].off) continue ;
@@ -629,8 +649,9 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 	 mzcld = (struct TPCMZCLD_local *) ((char *)rbclp + off*4) ;
 
 	 if (mzcld) {
-	    nHitsOfMz = readMezzanine (sector, mzcld);
+	    nHitsOfMz = readMezzanine (sector, iRb, kMz, mzcld);
 	    if (nHitsOfMz<0) {
+	       printf ( "FtfSl3:readSector: wrong reading mezzanine \n" ) ;
 	       return -1;
 	    }
 	    nHits += nHitsOfMz;
@@ -658,6 +679,7 @@ int FtfSl3::processSector ( ){
    para.eventReset = 1 ;
    nTracks         = 0 ;
    process ( ) ;
+   if (para.dEdx) dEdx();
    //
    if ( debugLevel > 0 ) 
       printf ( " FtfSl3::process: tracks %i Time: real %f cpu %f\n", 
@@ -666,6 +688,26 @@ int FtfSl3::processSector ( ){
    //
    return 1;
 }
+
+//********************************************************************
+//     Calculates deposited Energy
+//********************************************************************
+int FtfSl3::dEdx ( ) {
+
+   for ( int i = 0 ; i<nTracks ; i++ ){
+         if (track[i].nHits<20) {
+               track[i].nDedx = 0;
+               track[i].dedx  = 0;
+               continue;
+         }
+         FtfDedx trackDedx(&track[i]);
+         trackDedx.TruncatedMean();
+
+         // HACK
+         if (track[i].nDedx<10) track[i].dedx = 0;
+   }
+  return 0;
+}
 //***************************************************************
 //   Set Default parameters
 //***************************************************************
@@ -673,9 +715,11 @@ int FtfSl3::setParameters ( ) {
 
    // FtfPara* para = &(para) ;
 
-   para.hitChi2Cut        = 400.F  ;
-   para.goodHitChi2       =  50.F  ;
-   para.trackChi2Cut      = 200.F  ;
+   xyError                = 0.3 ;
+   zError                 = 1.0 ;
+   para.hitChi2Cut        =  50.F  ;
+   para.goodHitChi2       =  10.F  ;
+   para.trackChi2Cut      =  30.F  ;
    para.maxChi2Primary    = 50.F   ;
    para.segmentRowSearchRange = 2      ;
    para.trackRowSearchRange = 3    ;
@@ -689,7 +733,7 @@ int FtfSl3::setParameters ( ) {
    para.getErrors        =  0     ;
    para.goBackwards      =  1     ;
    para.goodDistance     =  5.F   ;
-   para.mergePrimaries   =  1     ;
+   para.mergePrimaries   =  0     ;
    para.maxDistanceSegment = 50.F ;
    para.minHitsPerTrack  = 5      ;
    para.nHitsForSegment  = 2      ;
