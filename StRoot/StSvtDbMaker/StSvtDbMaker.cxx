@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.11 2004/03/24 03:36:10 caines Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.12 2004/03/30 21:16:17 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
- * Revision 1.11  2004/03/24 03:36:10  caines
- * Fix to allow to call INitRun twice as happens in MC data sometimes. Before we were deleting our own data by mistake
+ * Revision 1.12  2004/03/30 21:16:17  caines
+ * Get daq parameters
  *
  * Revision 1.10  2004/01/30 07:22:06  munhoz
  * adding rms and daq parameters reading
@@ -62,6 +62,7 @@
 #include "StDbUtilities/StCoordinates.hh"  
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StSvtClassLibrary/StSvtGeometry.hh"
+#include "StSvtClassLibrary/StSvtT0.hh"
 
 StSvtDbMaker* gStSvtDbMaker=NULL; 
 St_ObjectSet *svtSetConfig;
@@ -71,6 +72,7 @@ St_ObjectSet *svtSetRms;
 St_ObjectSet *svtSetGeom;
 St_ObjectSet *svtSetBad;
 St_ObjectSet *svtSetT0;
+St_ObjectSet *svtSetDaq;
 
 //C and fortran routines
 
@@ -163,6 +165,7 @@ Int_t StSvtDbMaker::Init()
   setSvtDriftVelocity();
   setSvtBadAnodes();
   setSvtT0();
+  setSvtDaqParameters();
 
   if( m_Mode == 1) {
     gMessMgr->Message() << 
@@ -176,12 +179,14 @@ Int_t StSvtDbMaker::Init()
 //_____________________________________________________________________________
 Int_t StSvtDbMaker::InitRun(int runumber)
 {
-  if (Debug()) gMessMgr->Debug() << "StSvtDbMaker::InitRun" << endm;
+  gMessMgr->Info() << "StSvtDbMaker::InitRun" << endm;
 
   readSvtGeometry();
   readSvtDriftVelocity();
   readSvtBadAnodes();
   readSvtT0();
+  readSvtDaqParameters();
+
   return kStOk;
 }
 
@@ -253,11 +258,12 @@ void StSvtDbMaker::setSvtConfig()
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtConfig()
-{    
-  if (mReader)
-    svtSetConfig->SetObject((TObject*)mReader->getConfiguration(),kFALSE);
+{ 
+  TObject* o;
+  if (mReader) o=(TObject*)mReader->getConfiguration();
   else if (m_Reader)
-    svtSetConfig->SetObject((TObject*)m_Reader->getConfiguration(),kFALSE);
+   o=(TObject*)m_Reader->getConfiguration();
+  if (o!=svtSetConfig->GetObject())svtSetConfig->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -269,11 +275,12 @@ void StSvtDbMaker::setSvtDriftVelocity()
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtDriftVelocity()
-{
-  if (mReader)
-    svtSetDrift->SetObject((TObject*)mReader->getDriftVelocity(),kFALSE);
+{ 
+  TObject* o;
+  if (mReader)o= (TObject*)mReader->getDriftVelocity();
   else if (m_Reader)
-    svtSetDrift->SetObject((TObject*)m_Reader->getDriftVelocity(),kFALSE);  
+    o=(TObject*)m_Reader->getDriftVelocity();  
+  if (o!=svtSetDrift->GetObject()) svtSetDrift->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -285,11 +292,12 @@ void StSvtDbMaker::setSvtPedestals()
 
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtPedestals()
-{
-  if (mReader)
-    svtSetPed->SetObject((TObject*)mReader->getPedestals(),kFALSE);
+{ 
+  TObject* o;
+  if (mReader) o=(TObject*)mReader->getPedestals();
   else if (m_Reader)
-    svtSetPed->SetObject((TObject*)m_Reader->getPedestals(),kFALSE);
+    o=(TObject*)m_Reader->getPedestals();
+  if (o!=svtSetPed->GetObject()) svtSetPed->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -302,10 +310,11 @@ void StSvtDbMaker::setSvtRms()
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtRms()
 {
-  if (mReader)
-    svtSetRms->SetObject((TObject*)mReader->getRms(),kFALSE);
+  TObject* o;
+  if (mReader) o=(TObject*)mReader->getRms();
   else if (m_Reader)
-    svtSetRms->SetObject((TObject*)m_Reader->getRms(),kFALSE);
+    o=(TObject*)m_Reader->getRms();
+  if (o!=svtSetRms->GetObject()) svtSetRms->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -318,10 +327,11 @@ void StSvtDbMaker::setSvtGeometry()
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtGeometry()
 {
-  if (mReader)
-    svtSetGeom->SetObject((TObject*)mReader->getGeometry(),kFALSE);
+  TObject* o;
+  if (mReader) o=(TObject*)mReader->getGeometry();
   else if (m_Reader)
-    svtSetGeom->SetObject((TObject*)m_Reader->getGeometry(),kFALSE);
+    o=(TObject*)m_Reader->getGeometry();
+  if (o!=svtSetGeom->GetObject()) svtSetGeom->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -334,10 +344,11 @@ void StSvtDbMaker::setSvtBadAnodes()
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtBadAnodes()
 {
-  if (mReader)
-    svtSetBad->SetObject((TObject*)mReader->getBadAnodes(),kFALSE);
+  TObject* o;
+  if (mReader) o=(TObject*)mReader->getBadAnodes();
   else if (m_Reader)
-    svtSetBad->SetObject((TObject*)m_Reader->getBadAnodes(),kFALSE);
+    o=(TObject*)m_Reader->getBadAnodes();
+  if (o!=svtSetBad->GetObject()) svtSetBad->SetObject(o);
 }
 
 //_____________________________________________________________________________
@@ -350,10 +361,27 @@ void StSvtDbMaker::setSvtT0()
 //_____________________________________________________________________________
 void StSvtDbMaker::readSvtT0()
 {    
-  if (mReader)
-    svtSetT0->SetObject((TObject*)mReader->getT0());
+  TObject* o;
+  if (mReader) o=(TObject*)mReader->getT0();
   else if (m_Reader)
-    svtSetT0->SetObject((TObject*)m_Reader->getT0());
+    o=(TObject*)m_Reader->getT0();
+  if (o!=svtSetT0->GetObject()) svtSetT0->SetObject(o);
+}
+//_____________________________________________________________________________
+void StSvtDbMaker::setSvtDaqParameters()
+{    
+  svtSetDaq = new St_ObjectSet("StSvtDaq");
+  AddConst(svtSetDaq);  
+}
+
+//_____________________________________________________________________________
+void StSvtDbMaker::readSvtDaqParameters()
+{ 
+  TObject* o; 
+  if (mReader) o=(TObject*)mReader->getDaqParameters();
+  else if (m_Reader)
+    o=(TObject*)m_Reader->getDaqParameters();
+  if (o!=svtSetDaq->GetObject()) svtSetDaq->SetObject(o);
 }
 
 //_____________________________________________________________________________
