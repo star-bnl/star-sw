@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.23 2003/09/02 17:58:54 perev Exp $
+ * $Id: StRichTrack.cxx,v 2.24 2003/10/23 04:26:28 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.24  2003/10/23 04:26:28  perev
+ *  Init to zero added
+ *
  *  Revision 2.23  2003/09/02 17:58:54  perev
  *  gcc 3.2 updates + WarnOff
  *
@@ -165,13 +168,68 @@ bool operator<(const candidate &a, const candidate &b) {return (a.second<b.secon
 
 
 StRichTrack::StRichTrack()
-    : mStTrack(0),  mPidTrait(0),  mAssociatedMIP(0), mMagneticField(0),
-      mPiondPdx(0), mKaondPdx(0), mProtondPdx(0)
+: 
+mStTrack(0),          
+mPidTrait(0), 
+mAssociatedMIP(0),  
+mMagneticField(0),
+mResidualCut(0),
+mUnCorrectedTheta(0),
+mUnCorrectedPhi(0),
+mLastHitDCA(0),
+mPath(0),
+mPhi(0),
+mTheta(0), 
+mLastRow(0),
+mFirstRow(0),
+mMaxGap(0),
+mMaxChain(0),
+mDoMomentumLoss(0),
+mEnergyLoss(0),
+mPiondPdx(0),
+mKaondPdx(0),
+mProtondPdx(0),
+mPionMass(0),
+mKaonMass(0),
+mProtonMass(0),
+mRefit(0),
+myGeometryDb(0),
+coordinateTransformation(0),
+momentumTransformation(0),
+myMaterialsDb(0)
+
 {/* nopt */}
 
 StRichTrack::StRichTrack(StThreeVectorF mom, StThreeVectorF imp)
-    : mPidTrait(0),  mAssociatedMIP(0), mPiondPdx(0), mKaondPdx(0),
-      mProtondPdx(0)
+: 
+mStTrack(0),          
+mPidTrait(0), 
+mAssociatedMIP(0),  
+mMagneticField(0),
+mResidualCut(0),
+mUnCorrectedTheta(0),
+mUnCorrectedPhi(0),
+mLastHitDCA(0),
+mPath(0),
+mPhi(0),
+mTheta(0), 
+mLastRow(0),
+mFirstRow(0),
+mMaxGap(0),
+mMaxChain(0),
+mDoMomentumLoss(0),
+mEnergyLoss(0),
+mPiondPdx(0),
+mKaondPdx(0),
+mProtondPdx(0),
+mPionMass(0),
+mKaonMass(0),
+mProtonMass(0),
+mRefit(0),
+myGeometryDb(0),
+coordinateTransformation(0),
+momentumTransformation(0),
+myMaterialsDb(0)
 {
     //
 #ifdef RICH_WITH_L3_TRACKS
@@ -187,9 +245,35 @@ StRichTrack::StRichTrack(StThreeVectorF mom, StThreeVectorF imp)
 
 #ifdef RICH_WITH_L3_TRACKS
 StRichTrack::StRichTrack(globalTrack *track, double magField)
-    : mStTrack(0),              mPidTrait(0),    mAssociatedMIP(0),
-      mMagneticField(magField), mL3Track(track),
-      mPiondEdx(0), mKaondEdx(0), mProtondEdx(0)
+: 
+mStTrack(0),          
+mPidTrait(0), 
+mAssociatedMIP(0),  
+mMagneticField(0),
+mResidualCut(0),
+mUnCorrectedTheta(0),
+mUnCorrectedPhi(0),
+mLastHitDCA(0),
+mPath(0),
+mPhi(0),
+mTheta(0), 
+mLastRow(0),
+mFirstRow(0),
+mMaxGap(0),
+mMaxChain(0),
+mDoMomentumLoss(0),
+mEnergyLoss(0),
+mPiondPdx(0),
+mKaondPdx(0),
+mProtondPdx(0),
+mPionMass(0),
+mKaonMass(0),
+mProtonMass(0),
+mRefit(0),
+myGeometryDb(0),
+coordinateTransformation(0),
+momentumTransformation(0),
+myMaterialsDb(0)
 {
     //
     // define system parameters
