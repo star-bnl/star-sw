@@ -1,6 +1,11 @@
-// $Id: StTrsMaker.cxx,v 1.45 1999/10/13 17:36:53 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.46 1999/10/21 23:50:32 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.46  1999/10/21 23:50:32  calderon
+// Changes are
+// -string for gasDb
+// -modified mDeltaRow to 0 if using SlowAnalogSignalGenerator
+//
 // Revision 1.45  1999/10/13 17:36:53  calderon
 // Fixed path to find SimpleDb files.
 //
@@ -145,7 +150,7 @@
 //
 // You must select a data base initializer method
 //#define tPC_DATABASE_PARAMETERS
-//#define rOOT_DATABASE_PARAMETERS
+//#define ROOT_DATABASE_PARAMETERS
 #define ASCII_DATABASE_PARAMETERS
 //////////////////////////////////////////////////////////////////////////
 
@@ -243,7 +248,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.45 1999/10/13 17:36:53 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.46 1999/10/21 23:50:32 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -346,7 +351,7 @@ Int_t StTrsMaker::Init()
     // Check File access
     //
     cout << "StTrsMaker::Init()" << endl;
-    string geoFile("StRoot/StTrsMaker/run/TPCgeo.conf");
+    string geoFile = "StRoot/StTrsMaker/run/TPCgeo.conf";
     if (access(geoFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endl;
 	cerr << "Exitting..." << endl;
@@ -395,11 +400,10 @@ Int_t StTrsMaker::Init()
 
    //
    // Select the gas: Ar, NeCO2, P10 available
-   string gas =("P10");
+   string gas = "P10";
    mGasDb = new StTrsDeDx(gas);
    //mGasDb->print();
-
-
+   
    /////////// Magnetic Field
    float x[3] = {0,0,0};
    float B[3];
@@ -456,6 +460,7 @@ Int_t StTrsMaker::Init()
      StTrsParameterizedAnalogSignalGenerator::instance(mGeometryDb, mSlowControlDb, mElectronicsDb, mSector);
    // Any options that are needed can go here:
    //*******************************************************
+   mAnalogSignalGenerator->setDeltaPad(2);
    }
    else {
 
@@ -478,7 +483,7 @@ Int_t StTrsMaker::Init()
    //-->StTrsSlowAnalogSignalGenerator::realShaper
    static_cast<StTrsSlowAnalogSignalGenerator*>(mAnalogSignalGenerator)->
        setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
-   mAnalogSignalGenerator->setDeltaRow(0);
+   //mAnalogSignalGenerator->setDeltaRow(0);
    mAnalogSignalGenerator->setDeltaPad(2);
    mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
@@ -547,6 +552,7 @@ Int_t StTrsMaker::Make(){
     // doing...This is a histogram diagnostic to compare
     // the GEANT hits to those produced by TRS!
 
+    
     int currentSectorProcessed = mFirstSectorToProcess;
 
     cout << "Processing sectors "
@@ -597,7 +603,7 @@ Int_t StTrsMaker::Make(){
     int  numberOfProcessedPointsInCurrentSector = 0;
     // Limit the  processing to a fixed number of segments
     //  no_tpc_hits = 4;
-      for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
+    for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
         
 // 		cout << "--> tpc_hit:  " << i << endl;
 // 		raw << tpc_hit->volume_id   << ' '
@@ -611,8 +617,8 @@ Int_t StTrsMaker::Make(){
 // 		    << tpc_hit->p[2]        << ' '  << endl;
         
 	whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-	//	PR(bsectorOfHit);
-	// cout<< mFirstSectorToProcess<<" "<< mLastSectorToProcess<<endl;
+// 	PR(bsectorOfHit);
+// 	cout<< mFirstSectorToProcess<<" "<< mLastSectorToProcess<<endl;
 	if(bsectorOfHit >= mFirstSectorToProcess &&
 	   bsectorOfHit <= mLastSectorToProcess)
 	    inRange = true;
@@ -631,7 +637,7 @@ Int_t StTrsMaker::Make(){
 	//
 	// If not in range AND there are no points processed, skip to next point
 	if(!inRange && !numberOfProcessedPointsInCurrentSector) {
-	    cout << "out of range and no points" << endl;
+	    //cout << "out of range and no points" << endl;
 	    //  tpc_hit++;
 	    continue;
 	}
@@ -664,7 +670,7 @@ Int_t StTrsMaker::Make(){
 	    StThreeVector<double> hitPosition(tpc_hit->x[0]*centimeter,
 	    				      tpc_hit->x[1]*centimeter,
 	    				      tpc_hit->x[2]*centimeter); 
-	    //PR(hitPosition);
+// 	    PR(hitPosition);
 
 // 	    // Drift Length is calculated with respect to the FG!
 // 	    double fgOffSet = (bpadrow <= mGeometryDb->numberOfInnerRows()) ?
@@ -711,9 +717,9 @@ Int_t StTrsMaker::Make(){
 	    }
 	   //
 
-//	    PR(tpc_hit->p[0]*GeV);
-//	    PR(pxPrime*GeV);
-//	    PR(hitMomentum);
+// 	    PR(tpc_hit->p[0]*GeV);
+// 	    PR(pxPrime*GeV);
+// 	    PR(hitMomentum);
 
 	    
 	    // I need PID info here, for the ionization splitting (beta gamma)!
@@ -759,10 +765,9 @@ Int_t StTrsMaker::Make(){
 // 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
            
  	    aSegment.tssSplit(mGasDb, mMagneticFieldDb, breakNumber, &comp);
-         
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-	    //copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
+// 	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
 
 	   
@@ -777,7 +782,7 @@ Int_t StTrsMaker::Make(){
 	        //
 		mChargeTransporter->transportToWire(*iter);
               
-  		//PR(*iter);
+//   		PR(*iter);
 		
 		//
 		// CHARGE COLLECTION AND AMPLIFICATION
@@ -803,7 +808,7 @@ Int_t StTrsMaker::Make(){
 	} // if (currentSector == bsectorOfHit)
 	// Otherwise, do the digitization...
 	
-     
+
 
 	//
 	// Generate the ANALOG Signals on pads
@@ -811,8 +816,10 @@ Int_t StTrsMaker::Make(){
 	cout << "--->inducedChargeOnPad()..." << endl;
 	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
 
+
 	cout << "--->sampleAnalogSignal()..." << endl;
 	mAnalogSignalGenerator->sampleAnalogSignal();
+
 
 	//
 	// Digitize the Signals
@@ -829,7 +836,9 @@ Int_t StTrsMaker::Make(){
 	// ...and digitize it
 	cout << "--->digitizeSignal()..." << endl;
 	mDigitalSignalGenerator->digitizeSignal();
+
 	cout<<"--->digitizeSignal() Finished..." << endl;
+
 	//
 	// Fill it into the event structure...
 	// and you better check the sector number!
@@ -838,7 +847,8 @@ Int_t StTrsMaker::Make(){
 	// Clear and reset for next sector:
 	mWireHistogram->clear();
 	mSector->clear();
-	
+	cout << endl;
+
 	//
 	// Go to the next sector --> should be identical to a simple increment
 	currentSectorProcessed = bsectorOfHit;
