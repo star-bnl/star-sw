@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.58 2003/10/11 04:07:48 perev Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.59 2003/10/11 08:52:46 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.59  2003/10/11 08:52:46  jcs
+// protect against divide by zero while calculating average body temperatures
+//
 // Revision 1.58  2003/10/11 04:07:48  perev
 // assert for number of east temperatures added
 //
@@ -504,7 +507,7 @@ Int_t StFtpcClusterMaker::Make()
 		 cout<<"gas->getBody4West() = "<<gas->getBody4West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
          }		 
 		 
-	 averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
+	 if (numberBodyTemperaturesWest != 0) averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
 	 if (averageBodyTemperatureWest >= dbReader->minGasTemperature() && averageBodyTemperatureWest <= dbReader->maxGasTemperature()) {
             paramReader->setGasTemperatureWest(averageBodyTemperatureWest);
 	    cout<<"Set paramReader->setGasTemperatureWest = averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
@@ -560,8 +563,9 @@ Int_t StFtpcClusterMaker::Make()
 		 numberBodyTemperaturesEast++;
 		 cout<<"gas->getBody4East() = "<<gas->getBody4East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
          }		 
-	 assert(numberBodyTemperaturesEast);	 
-	 averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
+	 if (numberBodyTemperaturesEast != 0) averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
+
+	 
 	 if (averageBodyTemperatureEast >= dbReader->minGasTemperature() && averageBodyTemperatureEast <= dbReader->maxGasTemperature()) {
              paramReader->setGasTemperatureEast(averageBodyTemperatureEast);
 	     cout<<"Set paramReader->setGasTemperatureEast = averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
