@@ -1,9 +1,6 @@
 #  $Log: MakeArch.mk,v $
-#  Revision 1.7  1998/07/01 13:40:29  fisyak
-#  Nodebug mode is -O
-#
-#  Revision 1.6  1998/07/01 12:15:55  fisyak
-#  Move NODEBUG flag in Env, variable
+#  Revision 1.8  1998/07/07 21:55:32  fisyak
+#  HPUX fixes
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
 #  Makefiles
@@ -26,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/01 13:40:29 $ 
+#             Last modification $Date: 1998/07/07 21:55:32 $ 
 #. default setings
 
 RM := rm -f
@@ -207,10 +204,10 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
   HPUX := Yess
   OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX
   ifdef GCC
-    CXXFLAGS  := -fPIC   -I/usr/include/X11R5 
-    CFLAGS   := -fPIC   -I/usr/include/X11R5 
-    LDFLAGS   := -b 
-    SOFLAGS   := -shared 
+    CXXFLAGS  := $(DEBUG) -fPIC  -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE 
+    CFLAGS    := $(DEBUG) -fPIC  -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE
+    LDFLAGS   := -b $(DEBUG) 
+    SOFLAGS   := -shared $(DEBUG) 
     CLIBS   := -L/usr/lib/Motif1.2 -L/usr/lib/X11R5 -L/usr/lib -lXm -lXt -lX11 -lg++ -lm -lPW -ldld -L/opt/CC/lib -lC.ansi -lcxx -lcl -lc
     FLIBS   :=  /opt/fortran/lib/libU77.a 
 
@@ -221,10 +218,10 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     CC      := cc
     LD      := $(CXX)
     SO      := $(CXX)
-    CXXFLAGS  := -z +Z -w 
-    CFLAGS   := -Ae -z +Z 
-    LDFLAGS   :=  -z -Wl,+s -Wl,-E 
-    SOFLAGS   :=  -b -z -Wl,+vnocompatwarnings 
+    CXXFLAGS  := $(DEBUG) -z +Z -w -Dextname  -D_HPUX_SOURCE
+    CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  -D_HPUX_SOURCE
+    LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
+    SOFLAGS   := $(DEBUG)  -b -z -Wl,+vnocompatwarnings 
     CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld
 
   else
@@ -232,16 +229,17 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     CC      := cc
     LD      := $(CXX)
     SO      := $(CXX)
-    CXXFLAGS  := +a1 -z +Z -w 
-    CFLAGS   :=  -Ae -z +Z 
-    LDFLAGS   := +a1 -z -Wl,+s -Wl,-E 
-    SOFLAGS   := -b +a1 -z 
+    CXXFLAGS  := $(DEBUG) +a1 -z +Z -w -Dextname  -D_HPUX_SOURCE
+    CFLAGS   :=  $(DEBUG) -Ae -z +Z -Dextname   -D_HPUX_SOURCE
+    LDFLAGS   := $(DEBUG) +a1 -z -Wl,+s -Wl,-E 
+    SOFLAGS   := $(DEBUG) -b +a1 -z 
     CLIBS   :=   -L/usr/lib/X11R5 -lXm -lXt -lX11 -lm -lPW -ldld
   endif
   So := sl
   FC        :=fort77
+##FLIBS     := /opt/fortran/lib/libU77.a /opt/langtools/lib/end.o
   FLIBS     := /opt/fortran/lib/libU77.a 
-  FFLAGS    := +DA1.0 +ppu +Z  +U77
+  FFLAGS    := $(DEBUG) +DA1.0 +ppu +Z  +U77
   FEXTEND   := +es
 endif
 

@@ -271,14 +271,16 @@ $(OBJ_DIR)/idl-yacc.o :  $(SRC_DIR)/idl.l $(SRC_DIR)/idl.y
         > idl-yacc.c;\
 	$(RM) y.tab.c ;\
         $(LEX) $(SRC_DIR)/idl.l;\
-        $(RM) idl-lex.c;\
-        cat lex.yy.c \
-	| sed 's/FILE \*yyin = {stdin},/FILE/' \
-ifdef HPUX
+        $(RM) idl-lex.c;
+ifndef HPUX
+	cd $(TMP_DIR); cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' \
+	> idl-lex.c;
+else
+	cd $(TMP_DIR); cat lex.yy.c | sed 's/FILE \*yyin = {stdin},/FILE/' \
 	| sed '/static void __yy__unused() { main(); }/d' \
+	> idl-lex.c;
 endif
-	> idl-lex.c;\
-        $(RM) lex.yy.c;\
+	cd $(TMP_DIR); $(RM) lex.yy.c;\
         $(CC) $(CFLAGS) -I. -I$(SRC_DIR) -c idl-yacc.c -o $(ALL_TAGS)
 #
 ###############################################################################
