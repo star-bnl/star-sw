@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.16 1999/07/14 16:47:45 fisyak Exp $
+// $Id: St_geant_Maker.h,v 1.17 1999/11/06 23:05:01 fisyak Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -17,7 +17,7 @@
 #define rootmaptable_ F77_NAME(rootmaptable,ROOTMAPTABLE)
 #define agvolume_     F77_NAME(agvolume,AGVOLUME)
 extern "C" {
-R__EXTERN  void type_of_call rootmaptable_(Char_t *,Char_t *, Char_t*, Int_t *, Char_t *);
+R__EXTERN  void type_of_call rootmaptable_(const Char_t *,const Char_t *,const Char_t*, Int_t *, Char_t *,const int ,const int, const int);
 R__EXTERN Int_t type_of_call agvolume_(St_Node**,Float_t**,Float_t**,Float_t**,
                                        Int_t*,Int_t*,Float_t**,Int_t*);
 }
@@ -65,7 +65,7 @@ static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Ch
 protected:
    static St_DataSet *fgGeom;
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.16 1999/07/14 16:47:45 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.17 1999/11/06 23:05:01 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };

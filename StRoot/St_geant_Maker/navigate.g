@@ -105,7 +105,7 @@ end
   subroutine navigate
   integer agvolume,found,node,i1,i2,moth,old
   node=0; found=0;
-  while agvolume(node,i1,i2,moth,old)>0  {  found+=1; node=found; }
+  while agvolume(node,i1,i2,moth,old,0,0,0)>0  {  found+=1; node=found; }
   print *,' found objects =',found;
   end
 
