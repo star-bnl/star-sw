@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.23 2000/04/04 23:12:08 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.24 2000/04/12 21:33:14 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.24  2000/04/12 21:33:14  calderon
+ * return warnings instead of fatal when no maps are made
+ *
  * Revision 1.23  2000/04/04 23:12:08  calderon
  * Speed up FTPC Hit association, taking advantage of hit sorting
  * and using the STL algorithm find_if.
@@ -837,30 +840,30 @@ Int_t StAssociationMaker::Make()
 	smallTpcHitMap = true;
     }
     
-    if (mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
+    if (mRcSvtHitMap->size() < parDB->reqCommonHitsSvt()) {
 	cout << " -----------  WARNING --------------- " << endl;
-	cout << "   The Tpc Hit Map is too small for   " << endl;
+	cout << "   The Svt Hit Map is too small for   " << endl;
 	cout << "   any meaningful track association.  " << endl;
 	cout << " ------------------------------------ " << endl;
-	cout << "Entries in Hit Map  : " << mRcTpcHitMap->size() << endl;
-	cout << "Required Common Hits: " << parDB->reqCommonHitsTpc() << endl;
+	cout << "Entries in Hit Map  : " << mRcSvtHitMap->size() << endl;
+	cout << "Required Common Hits: " << parDB->reqCommonHitsSvt() << endl;
 	cout << "Suggest increase distance cuts." << endl;
 	smallSvtHitMap = true;
     }
-    if (mRcTpcHitMap->size() < parDB->reqCommonHitsTpc()) {
+    if (mRcFtpcHitMap->size() < parDB->reqCommonHitsFtpc()) {
 	cout << " -----------  WARNING --------------- " << endl;
-	cout << "   The Tpc Hit Map is too small for   " << endl;
+	cout << "   The Ftpc Hit Map is too small for   " << endl;
 	cout << "   any meaningful track association.  " << endl;
 	cout << " ------------------------------------ " << endl;
-	cout << "Entries in Hit Map  : " << mRcTpcHitMap->size() << endl;
-	cout << "Required Common Hits: " << parDB->reqCommonHitsTpc() << endl;
+	cout << "Entries in Hit Map  : " << mRcFtpcHitMap->size() << endl;
+	cout << "Required Common Hits: " << parDB->reqCommonHitsFtpc() << endl;
 	cout << "Suggest increase distance cuts." << endl;
 	smallFtpcHitMap = true;
     }
 
     if (smallTpcHitMap && smallSvtHitMap && smallFtpcHitMap) {
 	cout << "No Useful Hit Map to make Track Associations" << endl;
-	return kStFatal;
+	return kStWarn;
     }
     
     //
