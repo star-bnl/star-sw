@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixF.hh,v 1.3 2000/01/31 20:53:46 lasiuk Exp $
+ * $Id: StMatrixF.hh,v 1.4 2000/02/01 16:03:02 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StMatrixF.hh,v $
- * Revision 1.3  2000/01/31 20:53:46  lasiuk
- * using std::swap
+ * Revision 1.4  2000/02/01 16:03:02  lasiuk
+ * namespace std is different on SUN CC5 and KCC.  Redefine macros!
+ *
+ * Revision 1.4  2000/02/01 16:03:02  lasiuk
+ * namespace std is different on SUN CC5 and KCC.  Redefine macros!
  *
  * Revision 1.3  2000/01/31 20:53:46  lasiuk
  * using std::swap
@@ -35,8 +38,10 @@
 #include <iostream.h>
 #include "StThreeVectorF.hh"
 
-#ifndef ST_NO_NAMESPACES
+#if !defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#if !defined(ST_NO_NAMESPACES) 
 using std::swap;
+#endif
 #endif
 #include "StLorentzVectorF.hh"
 #include "StThreeVectorD.hh"
