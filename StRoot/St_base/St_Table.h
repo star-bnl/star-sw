@@ -38,6 +38,10 @@ enum ETableBits {
 class G__DataMemberInfo;
 class St_XDFFile;
 
+extern "C" {
+   void *ReAllocate(table_head_st *h, Int_t newsize);
+}
+
 class St_Table : public St_DataSet, public TArray {
    friend class St_XDFFile;
    friend class St_DataSet;
@@ -90,6 +94,7 @@ public:
    virtual     void       ls(Int_t deep);
    virtual     Char_t    *Print(Char_t *buf,Int_t n) const ;
    virtual     void       Print(Option_t *buf="") { Print(0,0); }
+               void      *ReAllocate(Int_t newsize);
    virtual     table_head_st *GetHeader() const;
    void        MakeHeader(const Char_t *prefix,const Char_t *tablename,const Char_t *suffix, FILE *fl=0); // Create header file for STAF table class
    static Int_t MakeWrapClass(Text_t *name);
