@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.cc,v 1.7 2003/09/28 01:54:33 jeromel Exp $
+ * $Id: StMatrixD.cc,v 1.8 2003/10/07 02:52:20 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.cc,v $
+ * Revision 1.8  2003/10/07 02:52:20  perev
+ * Cleanup for Insure, no bugs
+ *
  * Revision 1.7  2003/09/28 01:54:33  jeromel
  * Possible delete of non-initialized mElement (minor)
  *
@@ -42,7 +45,7 @@
 #include "StMatrixD.hh"
 #include <math.h>
 #include <assert.h>
-
+#include <string.h>
 #ifdef __ROOT__
 #include "TBuffer.h"
 ClassImp(StMatrixD)
@@ -93,20 +96,15 @@ StMatrixD::StMatrixD(const StMatrixD& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
 {
     mElement = new double[mSize];
-
-    for(unsigned int ii=0; ii<mRow; ii++)
- 	for(unsigned int jj=0; jj<mCol; jj++)
- 	    *(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
+    memcpy(mElement,m1.mElement,mSize*sizeof(double));
 }
 
 StMatrixD::StMatrixD(const StMatrixF& m1)
     : mRow(m1.numRow()), mCol(m1.numCol()), mSize(m1.numSize())
 {
     mElement = new double[mSize];
-
-    for(int unsigned ii=0; ii<mRow; ii++)
- 	for(unsigned int jj=0; jj<mCol; jj++)
- 	    *(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
+    
+    for(unsigned int ii=0; ii<mSize; ii++) mElement[ii] = m1.mElement[ii];
 }
 
 StMatrixD& StMatrixD::operator=(const StMatrixD& m1)
@@ -115,17 +113,14 @@ StMatrixD& StMatrixD::operator=(const StMatrixD& m1)
 	return *this;
     }
     else {
-	if (mElement) delete [] mElement;
-	mSize    = m1.numRow()*m1.numCol();
-	mElement = new double[mSize];
-
+        if (mSize != m1.mSize) {
+	   delete [] mElement;
+  	   mSize    = m1.mSize;
+	   mElement = new double[mSize];
+        }
 	mRow = m1.numRow();
 	mCol = m1.numCol();
-	
-	for(unsigned int ii=0; ii<mRow; ii++)
-	    for(unsigned int jj=0; jj<mCol; jj++) {
-		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
-	    }
+	memcpy(mElement,m1.mElement,mSize*sizeof(double));
     }
     return (*this);
 
@@ -133,29 +128,22 @@ StMatrixD& StMatrixD::operator=(const StMatrixD& m1)
 
 StMatrixD& StMatrixD::operator=(const StMatrixF& m1)
 {   
-    if ((void *)&m1 == (void *)this) {
-	return *this;
+    if (mSize != m1.mSize) {
+       delete [] mElement;
+       mSize    = m1.mSize;
+       mElement = new double[mSize];
     }
-    else {
-	if (mElement) delete [] mElement;
-	mSize    = m1.numRow()*m1.numCol();
-	mElement = new double[mSize];
-
-	mRow = m1.numRow();
-	mCol = m1.numCol();
-	
-	for(unsigned int ii=0; ii<mRow; ii++)
-	    for(unsigned int jj=0; jj<mCol; jj++) {
-		*(mElement+(ii)*mCol+jj) = m1(ii+1,jj+1);
-	    }
-    }
+    mRow = m1.numRow();
+    mCol = m1.numCol();
+    for(unsigned int ii=0; ii<mSize; ii++) mElement[ii] = m1.mElement[ii];
     return (*this);
 
 }
 
+
 // Destructor
 StMatrixD::~StMatrixD() {
-  if (mElement) delete [] mElement;
+  delete [] mElement;
 }
 
 //
