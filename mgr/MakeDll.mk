@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.103 1999/08/20 13:13:29 fisyak Exp $
+# $Id: MakeDll.mk,v 1.104 1999/08/20 22:59:15 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.104  1999/08/20 22:59:15  fisyak
+# Fix problem with / in ROOT_DIR
+#
 # Revision 1.103  1999/08/20 13:13:29  fisyak
 # Devorce StAF and STAR Library
 #
@@ -657,6 +660,8 @@ test_mk:
 	@echo KUIPC_FLAGS= $(KUIPC_FLAGS)
 	@echo ROOT_DIR  = $(ROOT_DIR)
 	@echo SYS_DIR   = $(SYS_DIR)
+	@echo "TOP_DIR  = |"$(TOP_DIR)"|"
+	@echo "ROOT_DIR = |"$(ROOT_DIR)"|"
 	@echo "DIR_GEN   = |"$(DIR_GEN)"|"
 	@echo "GEN_TMP   = |"$(GEN_TMP)"|"
 	@echo "GEN_TAB   = |"$(GEN_TAB)"|"
