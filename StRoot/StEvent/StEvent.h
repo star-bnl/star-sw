@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.8 1999/05/05 22:36:39 fisyak Exp $
+ * $Id: StEvent.h,v 1.9 1999/06/16 14:22:04 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 1.8  1999/05/05 22:36:39  fisyak
- * restore relatedTracks
+ * Revision 1.9  1999/06/16 14:22:04  fisyak
+ * take out StRun from StEvent
+ *
+ * Revision 1.9  1999/06/16 14:22:04  fisyak
+ * take out StRun from StEvent
  *
  * Revision 1.8  1999/05/05 22:36:39  fisyak
  * restore relatedTracks
@@ -159,7 +162,7 @@ struct pairL : public TObject
 //		must be in here in .h
     virtual ULong_t          runNumber() const  { return mRunNumber;};             
     virtual ULong_t          triggerMask() const{ return mTriggerMask;};
-    virtual StRun*                       run() { return mRun;};
+    virtual ULong_t          bunchCrossingNumber() const { return mBunchCrossingNumber;};
     virtual Double_t         luminosity() const{ return mLuminosity;};
     virtual void     Print(Option_t *opt=""); // *MENU*
     //    virtual StRun*                       run() { return mRun;};
@@ -184,7 +187,7 @@ struct pairL : public TObject
     virtual void SetDateTime(int iDate,int iTime){mTime.Set(iDate,iTime);};// *MENU*
     virtual void SetDateTime(TDatime dt)	 {mTime=dt;};              // *MENU*
     virtual void setRunNumber(ULong_t);                                    // *MENU*
-    virtual void setRun(StRun*);                                           // *MENU*
+    virtual void setTriggerMask(ULong_t);                                  // *MENU*
     virtual void setBunchCrossingNumber(ULong_t);                          // *MENU*
     virtual void setLuminosity(Double_t);                                  // *MENU*
     //    virtual void setRun(StRun*);                                           // *MENU*
@@ -209,10 +212,8 @@ struct pairL : public TObject
     ULong_t                      mRunNumber;
     TDatime                      mTime;
 
-    StRun*                       mRun;
+    UInt_t                              numberOfPrimaryVertices() const;
     Double_t                     mLuminosity;
-    StGlobalTrackCollection*     mTracks;
-    StVertexCollection*          mVertices;
     StDstEventSummary*           mSummary;
     //    StRun*                       mRun;
     StVertex*                    mPrimaryVertex;
@@ -221,6 +222,8 @@ struct pairL : public TObject
     StFtpcHitCollection*         mFtpcHits;
     StEmcTowerHitCollection*     mEmcTowerHits;
     StEmcPreShowerHitCollection* mEmcPreShowerHits;
+    StSmdPhiHitCollection*       mSmdPhiHits;
+    StSmdEtaHitCollection*       mSmdEtaHits;
     StTriggerDetectorCollection* mTriggerDetectors;
     StGlobalTrackCollection*     mTracks;
     StVertexCollection*          mVertices;
