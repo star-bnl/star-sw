@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.44 2000/09/29 22:53:14 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.45 2000/10/12 21:01:30 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.45  2000/10/12 21:01:30  posk
+// Minor update.
+//
 // Revision 1.44  2000/09/29 22:53:14  posk
 // More histograms.
 //
@@ -56,9 +59,6 @@
 // Revision 1.30  2000/05/26 21:25:20  posk
 // Use TProfile2D class and profile projection methods.
 // Correction needed for >2 subevents.
-//
-// Revision 1.28  2000/05/03 16:38:33  posk
-// Compatable with ROOT 2.24/02.
 //
 // Revision 1.27  2000/04/13 22:34:13  posk
 // Resolution correction is now made.
@@ -250,6 +250,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
   const float dcaMax          =   1.2; 
+  const float glDcaMax        =   3.6; 
   const float chi2Min         =    0.;
   const float chi2Max         =    5.; 
   const float fitPtsMin       =    0.;
@@ -329,7 +330,7 @@ Int_t StFlowAnalysisMaker::Init() {
     
   // Distance of closest approach fro global tracks
   mHistDcaGlobal = new TH1F("Flow_DcaGlobal", "Flow_DcaGlobal",
-      nDcaBins, dcaMin, dcaMax);
+      nDcaBins, dcaMin, glDcaMax);
   mHistDcaGlobal->SetXTitle("Global Track dca (cm)");
   mHistDcaGlobal->SetYTitle("Counts");
     
@@ -597,8 +598,8 @@ Int_t StFlowAnalysisMaker::Init() {
     
   // CTB versus ZDC
   mHistCTBvsZDC2D = new TH2F("Flow_CTBvsZDC2D", "Flow_CTBvsZDC2D",
-			       300, 0, 300,
-			       250, 0, 25000);
+			       125, 0, 250,
+			       125, 0, 25000);
   mHistCTBvsZDC2D->SetXTitle("ZDC sum");
   mHistCTBvsZDC2D->SetYTitle("CTB sum");
 
@@ -924,7 +925,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.44 2000/09/29 22:53:14 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.45 2000/10/12 21:01:30 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1482,8 +1483,8 @@ Int_t StFlowAnalysisMaker::Finish() {
 	totalError = fabs(content) * sqrt((error/content)*(error/content) +
 	       (mResErr[k][j]/mRes[k][j])*(mResErr[k][j]/mRes[k][j]));
 	histFull[k].mHist_v->SetBinError(j+1, totalError);
-	cout << "##### v= (" << content << " +/- " << error << " +/- " 
-	     << totalError << ") %" << endl;
+	cout << "##### v" << j+1 << "= (" << content << " +/- " << error << 
+	  " +/- " << totalError << ") %" << endl;
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
