@@ -1,9 +1,0 @@
-/*   sl3Hit
- * Table containing hits found by l3 clusterfinder
-*/
-   struct sl3Hit{
-       short      row;        /* row number */
-       long       pad;        /* pad coordinate times 64 */
-       long	  time;       /* time coordinate times 64 */
-   };
-/*  Last mod. for sl3Hit: $Date: 1998/11/10 16:21:21 $ */
