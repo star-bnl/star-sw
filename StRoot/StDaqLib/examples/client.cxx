@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: client.cxx,v 1.1 1999/07/02 20:40:57 levine Exp $
+ * $Id: client.cxx,v 1.2 1999/07/07 19:24:37 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: sample top-level code sould be used as a tutorial
@@ -11,6 +11,10 @@
  *
  ***************************************************************************
  * $Log: client.cxx,v $
+ * Revision 1.2  1999/07/07 19:24:37  levine
+ * Added comments on using 8-bit to 10-bit translation table by popular request
+ * (well, at least one person requested this change)
+ *
  * Revision 1.1  1999/07/02 20:40:57  levine
  * Moved to examples directory from top-level
  *
@@ -29,8 +33,9 @@
 
 #include "StDaqLib/GENERIC/EventReader.hh"
 //#include "StDaqLib/TPC/MemMan.hh"
-#include "StDaqLib/TPC/trans_table.hh"
 
+#include "StDaqLib/TPC/trans_table.hh"  // this contains the 8-bit to 10-bit translation table
+                                        // for PHYSICS running
 
 
 int main(int argc, char *argv[])
@@ -112,6 +117,12 @@ int main(int argc, char *argv[])
 		printf("\tsequence timebin [%d..%d]\n\t",start,start+len-1);
 		fflush(stdout);
 		unsigned char *p = Seq[pad-1][i].FirstAdc;
+
+		// Translation from 8-bit to 10-bit ADC values is done as illustrated here
+		// The log8to10_table is defined in trans_table.hh
+		// NB this table is ONLY applicable for physics runs. Do not try to use it on
+		// pedestal or configuration runs. [MJL]
+
 		for (int j=0; j<len; j++) {
 		  ADC = log8to10_table[*(p++)];
 		  printf("%d ",ADC);
