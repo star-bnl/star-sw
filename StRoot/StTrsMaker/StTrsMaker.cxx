@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.61 2000/08/04 21:03:57 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.62 2000/08/05 18:32:58 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.62  2000/08/05 18:32:58  long
+// add check for the No.of  input hits. if(no_tpc_hits<1)return kStOK;
+//
 // Revision 1.61  2000/08/04 21:03:57  perev
 // Leaks + Clear() cleanup
 //
@@ -343,7 +346,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.61 2000/08/04 21:03:57 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.62 2000/08/05 18:32:58 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -735,6 +738,7 @@ Int_t StTrsMaker::Make(){
     int  numberOfProcessedPointsInCurrentSector = 0;
     // Limit the  processing to a fixed number of segments
     //  no_tpc_hits = 4;
+    if(no_tpc_hits<1)return kStOK;
     for (int i=1; i<=no_tpc_hits; i++,tpc_hit++){
        int id2=tpc_hit->track_p;
          int id3=tpc_track[id2-1].start_vertex_p; //  "-1" is (Fortran-->C++)
