@@ -341,8 +341,8 @@ foreach $eachSet (@Sets) {
     $produced_date  = ($$eachGeantFile)->timeS;
     
     $basename = basename("$geantFile",".fzd");
-    $geant_size = ($$eachGeantFile)->size;
-    $geantInputSize += ($geant_size)/1000000;
+    $geant_size = (($$eachGeantFile)->size)/1000000;
+    $geantInputSize += ($geant_size);
     $basename =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;
     $geantInputEvts += $3;
 
@@ -678,16 +678,14 @@ my $jarch_dir  = $prod_dir . $run_ch . "/" . "archive";
 my $jnew_dir   = $prod_dir . $run_ch . "/" . "new_jobs"; 
 my $jhold_dir  = $prod_dir . $run_ch . "/" . "jobs_hold";  
  
-  
+chdir $jhold_dir;
+if (-f $jfile_nm) {$jfile_status = "jobs_hold"};  
 chdir $jobf_dir;
 if (-f $jfile_nm) {$jfile_status = "jobfiles"};
 chdir $jarch_dir;
 if (-f $jfile_nm) {$jfile_status = "archive"};
 chdir $jnew_dir;
 if (-f $jfile_nm) {$jfile_status = "new_jobs"};
-chdir $jhold_dir;
-if (-f $jfile_nm) {$jfile_status = "jobs_hold"};    
-
  
 }
 	   
