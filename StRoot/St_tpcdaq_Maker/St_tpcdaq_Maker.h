@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.2 1999/03/15 03:24:14 perev Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.3 1999/04/07 19:48:41 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.3  1999/04/07 19:48:41  ward
+// Fixed adc mis-cast and also mis-count of pixel offset.
+//
 // Revision 1.2  1999/03/15 03:24:14  perev
 // New maker schema
 //
@@ -50,7 +53,7 @@ class St_tpcdaq_Maker : public StMaker {
    void SeqWrite(St_raw_seq *raw_seq_gen,int rownum,
                   int startTimeBin,int numberOfBinsInSequence);
    void PixelWrite(St_type_shortdata *pixel_data_gen,
-                    int rownum,char datum);
+                    int rownum,unsigned char datum);
    void PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
       int seqOffset,int nseq,int nSeqB4Offset,int pad);
    void RowWrite(St_raw_row *raw_row_gen,int rownumber,
