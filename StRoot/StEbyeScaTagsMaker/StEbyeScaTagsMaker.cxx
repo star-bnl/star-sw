@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.11 2000/02/04 22:44:30 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.12 2000/02/15 21:21:15 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.12  2000/02/15 21:21:15  jgreid
+ * added multiple primary vertex handling
+ *
  * Revision 1.11  2000/02/04 22:44:30  jgreid
  * added functionality for ScaTags to be picked up by the TagDB after filling
  *
@@ -153,14 +156,30 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event) {
   double dcaX, dcaY, dcaZ, dcaM;
   
   // temporarily use the first (currently only) primary vertex
-  StVertex *primeVertex = event.primaryVertex();
+  StVertex *primeVertex;
 
   StThreeVectorD origin(0,0,0);
   StThreeVectorD primaryVertexPosition;
 
+  // The tags are filled and put in .data for tag collection by the infrastructure
+  //  for debugging and/or test analysis runs the user can uncomment the ascii
+  //  file output code and look at the analysis results directly 
+
   // uncomment the next line (and 'outFile' << line below) to APPEND output to a file
   //  !! If this file already exists it will just add the new data to the end !!
   // ofstream outFile("EbyeSca.out",ios::app);
+
+  // Number of primary vertices
+  Int_t npvtx = event.numberOfPrimaryVertices();
+  if (npvtx == 0) return kStErr;
+  
+  // loop over these and choose the one with the most daughters,
+  //  or default to primaryVertex(0) if there is only one
+  primeVertex = event.primaryVertex(0);
+  for (Int_t i = 1 ; i < npvtx ; i++) {
+    if (event.primaryVertex(i)->numberOfDaughters() > primeVertex->numberOfDaughters())
+      primeVertex = event.primaryVertex(i);
+  } 
 
   // Loop over 'event' vertices and their primary tracks
   // ** track loop **
