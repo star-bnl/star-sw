@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3EventSummary.cxx,v 2.1 2001/08/02 01:26:31 ullrich Exp $
+ * $Id: StL3EventSummary.cxx,v 2.2 2001/08/20 21:29:53 ullrich Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3EventSummary.cxx,v $
+ * Revision 2.2  2001/08/20 21:29:53  ullrich
+ * Added method setCounters().
+ *
  * Revision 2.1  2001/08/02 01:26:31  ullrich
  * Initial Revision.
  *
@@ -20,7 +23,7 @@
 #include "StL3AlgorithmInfo.h"
 
 
-static const char rcsid[] = "$Id: StL3EventSummary.cxx,v 2.1 2001/08/02 01:26:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StL3EventSummary.cxx,v 2.2 2001/08/20 21:29:53 ullrich Exp $";
 
 ClassImp(StL3EventSummary)
 
@@ -63,6 +66,6 @@ void StL3EventSummary::addAlgorithm(StL3AlgorithmInfo *alg)
         mL3AcceptAlgorithms.push_back(alg);
 	// check for zVertex trigger and 'TRUE'-algorithm
 	if (alg->id()==1) mUnbiasedTrigger = true;
-	//if (alg->id()==XXXX) mZVertexTrigger = true;
+	if (alg->id()==5) mZVertexTrigger = true;
   }
 }

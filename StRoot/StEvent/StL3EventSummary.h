@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3EventSummary.h,v 2.1 2001/08/02 01:26:31 ullrich Exp $
+ * $Id: StL3EventSummary.h,v 2.2 2001/08/20 21:29:53 ullrich Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3EventSummary.h,v $
+ * Revision 2.2  2001/08/20 21:29:53  ullrich
+ * Added method setCounters().
+ *
  * Revision 2.1  2001/08/02 01:26:31  ullrich
  * Initial Revision.
  *
@@ -32,8 +35,8 @@ public:
     // StL3EventSummary& operator=(const StL3EventSummray&); use default
     ~StL3EventSummary() {}
 
-    unsigned int                     numberOfProcessedEvents() const;
-    unsigned int                     numberOfReconstructedEvents() const;
+    int                              numberOfProcessedEvents() const;
+    int                              numberOfReconstructedEvents() const;
     unsigned int                     numberOfTracks() const;
     unsigned int                     numberOfAlgorithms() const;
 
@@ -48,10 +51,11 @@ public:
 
     void                             addAlgorithm(StL3AlgorithmInfo*);
     void                             setNumberOfTracks(int);
+    void                             setCounters(int, int);
 
 private:
-    UInt_t   mNumberOfProcessedEvents;
-    UInt_t   mNumberReconstructedEvents;
+    Int_t    mNumberOfProcessedEvents;
+    Int_t    mNumberReconstructedEvents;
     UInt_t   mNumberOfTracks;
     UInt_t   mNumberOfAlgorithms;
     Bool_t   mZVertexTrigger;
@@ -63,10 +67,10 @@ private:
 };
 
 
-inline unsigned int
+inline int
 StL3EventSummary::numberOfProcessedEvents() const { return mNumberOfProcessedEvents; }
 
-inline unsigned int
+inline int
 StL3EventSummary::numberOfReconstructedEvents() const { return mNumberReconstructedEvents; }
 
 inline unsigned int
@@ -92,5 +96,11 @@ StL3EventSummary::algorithms() { return mL3Algorithms; }
 
 inline const StSPtrVecL3AlgorithmInfo&
 StL3EventSummary::algorithms() const { return mL3Algorithms; }
+
+inline void
+StL3EventSummary::setCounters(int nProcessed, int nReconstructed) {
+      mNumberOfProcessedEvents = nProcessed;
+      mNumberReconstructedEvents = nReconstructed;
+}
 
 #endif
