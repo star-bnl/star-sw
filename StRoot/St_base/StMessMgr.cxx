@@ -12,7 +12,34 @@ StMessage* gMessage = 0;
 //______________________________________________________________________________
 StMessMgr::StMessMgr() : ostrstream() {}
 
+//  Manager factory
+//  The default version of the manager factory provide the singleton object
+//______________________________________________________________________________
+StMessMgr*  StMessMgr::CurrentMessager() { return gMessMgr;}
+//______________________________________________________________________________
+StMessMgr*  StMessMgr::Instance() { return (gMessMgr)?gMessMgr->Instantiate():0;}
+//______________________________________________________________________________
+StMessMgr*  StMessMgr::Instance(const char *loggerName)
+{return (gMessMgr)?gMessMgr->Instantiate(loggerName):0; }
+//______________________________________________________________________________
+void        StMessMgr::SetCurrentMessager(StMessMgr *mgr){gMessMgr=mgr;}
+//______________________________________________________________________________
+StMessMgr*  StMessMgr::Instantiate()            {return gMessMgr;     }
+//______________________________________________________________________________
+StMessMgr*  StMessMgr::Instantiate(const char *){return Instantiate();}
 
+//______________________________________________________________________________
+bool  StMessMgr::isDebugEnabled()  const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isWarnEnabled()   const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isErrorEnabled()  const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isInfoEnabled()   const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isFatalEnabled()  const{ return true; }
+//______________________________________________________________________________
+bool  StMessMgr::isEnabledFor()    const{ return true; }
 
 //
 // C and Fortran routines:
@@ -219,4 +246,4 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 
 //_____________________________________________________________________________
-// $Id: StMessMgr.cxx,v 1.2 2004/05/03 20:51:54 fine Exp $
+// $Id: StMessMgr.cxx,v 1.3 2004/11/03 01:32:40 fine Exp $
