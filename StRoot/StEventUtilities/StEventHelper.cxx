@@ -568,7 +568,7 @@ int StFilterABC::fgDial=0;
 //______________________________________________________________________________
 StFilterABC::StFilterABC(const char *name):TNamed(name,"")
 {
-#ifndef R__QT
+#ifdef OLDDISPLAY
    char cbuf[200];
    sprintf(cbuf,"__StEventControlPanel__.AddFilter((TObject*)%p);",this);
    gROOT->ProcessLine(cbuf);
@@ -584,7 +584,7 @@ void StFilterABC::SetDefs()
 //______________________________________________________________________________
 void   StFilterABC::Update()
 {
-#ifndef R__QT
+#ifdef OLDDISPLAY
    char cbuf[200];
    float       *pars    = GetPars();
    const float *defs    = GetDefs();
