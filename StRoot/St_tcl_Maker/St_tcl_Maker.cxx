@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.62 2000/08/10 03:49:40 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.63 2000/08/18 02:22:52 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.63  2000/08/18 02:22:52  snelling
+// changed default behaiviour of eval switch
+//
 // Revision 1.62  2000/08/10 03:49:40  snelling
 // Added drift velocity output Info
 //
@@ -80,9 +83,9 @@ Int_t St_tcl_Maker::Init() {
 
   // set bools
   if (m_tclEvalOn) {
-    //    m_tclPixTransOn = kTRUE;
+    m_tclPixTransOn = kFALSE;
     m_tclMorphOn = kTRUE;
-    //    bWriteTNtupleOn = kTRUE; 
+    bWriteTNtupleOn = kFALSE; 
   }
 
   // 		Create tables
@@ -227,7 +230,8 @@ Int_t St_tcl_Maker::Make() {
 
     if (!adcxyz && m_tclPixTransOn) {  
       // create flat adcxyz Table for pixel viewing
-      if (Debug()) cout << "making adcxyz table with " << isumpix << " entries" << endl;
+      gMessMgr->Info() << "making adcxyz table with " << isumpix 
+		       << " entries" << endm;
       adcxyz = new St_tfc_adcxyz("adcxyz",isumpix);  
       m_DataSet->Add(adcxyz);
       adcxyz->SetNRows(0);
@@ -396,7 +400,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.62 2000/08/10 03:49:40 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.63 2000/08/18 02:22:52 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
