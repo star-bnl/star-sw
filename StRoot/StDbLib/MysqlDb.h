@@ -96,6 +96,7 @@ public:
   MysqlDb &operator<<(const MysqlBin *aBin);
   char **DecodeStrArray(const char* strinput , int &aLen) ; 
   char* CodeStrArray(const char** strarr , int aLen);
+  virtual int GetLastInsertID(){ return (int)mysql_insert_id(&mData);}
 
 protected:
   virtual void RazQuery() ;

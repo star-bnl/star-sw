@@ -23,6 +23,7 @@ protected:
  unsigned int mtableSize;
  int offsetToNextEmptyByte;
  int offsetToLast4Bytes;
+ StTypeE lastType;
 
  tableDescriptor* mcols;
  int mMax;

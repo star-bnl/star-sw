@@ -148,13 +148,43 @@ int
 mysqlAccessor::WriteDb(StDbTable* table){
   
   char* tableName = table->getTableName();
+  char index[100];
+  ostrstream os(index,100);
+  os << tableName <<"Index"<<ends;
+
+
+  table->dbStreamer(&buff,false);
+  buff.SetClientMode();
+  //  buff.WriteScalar("NULL","dataID");
+  Db.Input(tableName,&buff);
+  //Db.Release();
+  //buff.Raz();
+
+  int dataID = Db.GetLastInsertID();
+  /*
+  Db.Output(&buff);
+    buff.SetClientMode();
+    if(!buff.ReadScalar(dataID,"dataID")){
+      cerr << "WriteDb:: dataID not found in table = "<<tableName<<endl;
+      buff.Print();
+    }
+  */
+  Db.Release();
+  buff.Raz();
+
+  table->StreamAccessor(&buff,false);
+  buff.WriteScalar(dataID,"dataID");
+
+  Db.Input(index,&buff);
+  Db.Release();
+  buff.Raz();
+
   //int iversion = table->getVersion();
   //int requestTime = table->getRequestTime();
   //char* queryString = prepareDataQuery(0,iversion);
   
-  Db << "select * from " << tableName << " where null" << endsql;
+  //  Db << "select * from " << tableName << " where null" << endsql;
   //  Db.InitBuff(&buff);
-  Db.Release();
 
   
   return 1;
