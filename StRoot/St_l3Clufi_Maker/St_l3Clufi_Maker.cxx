@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.4 1999/12/07 23:13:52 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.5 1999/12/16 21:01:31 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.5  1999/12/16 21:01:31  flierl
+// feed tracker with banks instead of tcl_tphit structs
+//
 // Revision 1.4  1999/12/07 23:13:52  flierl
 // histogramms created and filled
 //
@@ -277,7 +280,7 @@ Int_t St_l3Clufi_Maker::Make(){
     m_DataSet->Add(stl3hit);
     
     //loop over hits_in_sec_xx 
-    for(Int_t sec_index=1;sec_index<=6; sec_index++)
+    for(Int_t sec_index=1;sec_index<=12; sec_index++)
 	{
 	    // get l3 dataset
 	    St_DataSet* sec_bank_set = GetInputDS("l3Clufi");
