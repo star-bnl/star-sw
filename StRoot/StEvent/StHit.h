@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 1.2 1999/02/09 21:01:24 fisyak Exp $
+ * $Id: StHit.h,v 1.3 1999/04/27 01:24:21 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 1.2  1999/02/09 21:01:24  fisyak
- * import new Torres staff
+ * Revision 1.3  1999/04/27 01:24:21  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
+ * Revision 1.5  1999/04/19 20:46:06  ullrich
+ * Made virtual class
  *
  * Revision 1.4  1999/03/23 21:51:47  ullrich
  * Removed table-based constructor.
@@ -26,12 +29,8 @@
  * version with constructors for table-based loading
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
-#include <iostream.h>
  * Revision 2.1  1999/10/28 22:25:50  ullrich
-#include "tables/dst_point.h"
 #include "StObject.h"
 class StHit : public TObject {
 #include "StThreeVectorF.hh"
@@ -39,7 +38,6 @@ class StHit : public TObject {
     StHit(const StThreeVectorF&,
 	  const StThreeVectorF&,
 	  Float_t, UChar_t = 0);
-    StHit(dst_point_st*);
     // StHit(const StSvtHit&);                  use default
     // const StHit & operator=(const StHit&);   use default
     ~StHit();
@@ -62,11 +60,9 @@ class StHit : public TObject {
     StThreeVectorF mPositionError;
     Float_t                mCharge;
     UChar_t        mTrackRefCount;    
-#ifdef __ROOT__
-	ClassDef(StHit,1)  //StHit structure
-#endif
+    ClassDef(StHit,1)  //StHit structure
   Float_t                mCharge;
-
+#ifndef __CINT__
   ClassDef(StHit,1)  //StHit structure
 protected:
     
@@ -76,7 +72,7 @@ inline const StThreeVectorF& StHit::position() const { return mPosition; }
 
 inline const StThreeVectorF& StHit::positionError() const { return mPositionError; }
 
-
+#endif
 
 inline UChar_t StHit::trackReferenceCount() const { return mTrackRefCount; }	
 

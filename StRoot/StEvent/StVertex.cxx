@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 1.2 1999/02/09 19:56:29 fisyak Exp $
+ * $Id: StVertex.cxx,v 1.3 1999/04/27 01:24:30 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,21 +13,18 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 1.2  1999/02/09 19:56:29  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:30  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.3  1999/04/19 15:54:10  genevb
  * Added momentum() to vertex classes
  *
  * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
-
-static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.2 1999/02/09 19:56:29 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.3 1999/04/27 01:24:30 fisyak Exp $";
 #include "StGlobalTrack.h"
-#ifdef __ROOT__
 
-static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.2 1999/02/09 19:56:29 fisyak Exp $";
-#endif
+static const Char_t rcsid[] = "$Id: StVertex.cxx,v 1.3 1999/04/27 01:24:30 fisyak Exp $";
 StVertex::StVertex()
 {
     mType = undefined;                           
@@ -72,6 +69,8 @@ void StVertex::setPosition(const StThreeVectorF& val) { mPosition = val; }
     StMatrixF m(3,3);
 void StVertex::setPositionError(const StThreeVectorF& val) { mPositionError = val; }  
     m(2,2) = mCovariantMatrix[2];
+void StVertex::setQualityBitmask(ULong_t val) { mQualityBitmask = val; } 
+StCollectionImp(Vertex)
       return mMomentum;
     }
 }

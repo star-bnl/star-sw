@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 1.2 1999/02/10 02:17:34 fisyak Exp $
+ * $Id: StEvent.h,v 1.3 1999/04/27 01:24:19 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 1.3  1999/04/27 01:24:19  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
  * Revision 1.2  1999/02/10 02:17:34  fisyak
  * Merging with new Torre stuff
  *
@@ -27,33 +30,33 @@
  * version with constructors for table-based loading
  *
 class StVecPtrVertex;
-#ifdef __ROOT__
 #include "TObject.h"
-#endif
+#include "TString.h"
+ * Those methods which returns references were modified to create
  * an empty collection in case the pointer is null.
-#ifndef __CINT__
-#include <utility>
-#else
-  template< class T > class utility;
-#endif
-#include <TString.h>
-#ifndef __CINT__
 #endif
  *
 #ifndef __ROOT__
 #include <time.h>
-#include "StTrackCollection.h"
-#include "StFtpcHitCollection.h"
-#include "StVertexCollection.h"
-#include "StSvtHitCollection.h"
-#include "StTpcHitCollection.h"
-#include "StEmcHitCollection.h"
-#include "StSmdHitCollection.h"
+#endif
+#include "StDstEventSummary.h"
+#include "StRun.h"
+#include "StGlobalTrack.h"
+#include "StFtpcHit.h"
+#include "StEmcHit.h"
+#include "StSmdHit.h"
 #include "StEmcPreShowerHit.h"
 #include "StSmdPhiHit.h"
 #include "StSmdEtaHit.h"
 #include "tables/dst_event_header.h"
 #include "tables/dst_event_summary.h"
+struct pairL
+using namespace std;
+    long first;
+    long second;
+    pairL(long, long);
+    pairL();
+  Long_t first;
   Long_t second;
 class StEvent : public TObject {
 };
@@ -66,14 +69,8 @@ class StEvent : public TObject {
  **************************************************************************/
 #include "StTrackDetectorInfo.h"
     Int_t operator==(const StEvent &right) const;
-#if 0
-#ifdef __CINT__
-    const TString*                type() const;
-#else
     const TString&                type() const;
-#endif
-     pair<Long_t, Long_t>             id() const;
-#endif
+    pairL                        id() const;
     Long_t                       time() const;
     ULong_t                runNumber() const;              
     ULong_t                triggerMask() const;
@@ -91,12 +88,10 @@ class StEvent : public TObject {
     StVertexCollection*          vertexCollection();
     StTriggerDetectorCollection* triggerDetectorCollection();
     StL0Trigger*                 l0Trigger();                        
-    Float_t                        beamPolarization(StBeamDirection, StBeamPolarizationAxis);
+    Float_t                      beamPolarization(StBeamDirection, StBeamPolarizationAxis);
 
-    void setType(const TString*);
-#if 0
-    void setId(const pair<Long_t, Long_t>&);
-#endif
+    void setType(const TString&);
+    void setId(const pairL&);
     void setTime(Long_t);
     void setRunNumber(ULong_t);                
     void setTriggerMask(ULong_t);              
@@ -117,10 +112,8 @@ class StEvent : public TObject {
     void setBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t);                   
     virtual void setTriggerDetectorCollection(StTriggerDetectorCollection*);      
     virtual void setL0Trigger(StL0Trigger*);                      
-    TString                       mType;
-#if 0
-    pair<Long_t, Long_t>             mId;                      
-#endif
+    TString                        mType;
+    pairL             mId;                      
     ULong_t                mRunNumber;
     Long_t                       mTime;
     ULong_t                mTriggerMask;
@@ -140,19 +133,15 @@ class StEvent : public TObject {
     StTriggerDetectorCollection* mTriggerDetectors;
     Float_t                        mBeamPolarizationEast[3];
     Float_t                        mBeamPolarizationWest[3];
-
     Float_t                      mBeamPolarizationEast[3];
     Float_t                      mBeamPolarizationWest[3];
-#ifdef __ROOT__
 	ClassDef(StEvent,1)  //StEvent structure
-#endif
     const StEvent& operator=(const StEvent&);
+
     StTriggerDetectorCollection* mTriggerDetectors;  
   ClassDef(StEvent,1)  //StEvent structure
-#if 0
 inline const TString& StEvent::type() const { return mType;}
-inline pair<Long_t, Long_t> StEvent::id() const { return mId;}
-#endif
+inline pairL StEvent::id() const { return mId;}
 inline Long_t StEvent::time() const { return mTime;}
 
 inline ULong_t StEvent::runNumber() const { return mRunNumber;}             

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.h,v 1.2 1999/02/09 21:07:38 fisyak Exp $
+ * $Id: StMwcSector.h,v 1.3 1999/04/27 01:24:21 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.h,v $
- * Revision 1.2  1999/02/09 21:07:38  fisyak
- * Import new Torre staffs
+ * Revision 1.3  1999/04/27 01:24:21  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:34  fisyak
  * New version with pointer instead referencies
@@ -20,9 +20,7 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#ifdef __ROOT__
-#include "TObject.h"
-#endif
+#define StMwcSector_hh
 class StMwcSector : public TObject {
 #include "StObject.h"
 #include "StArray.h"
@@ -40,11 +38,11 @@ public:
     void setId(Short_t);
     void setMips(Float_t);
     
-#ifdef __ROOT__
-	ClassDef(StMwcSector,1)  //StMwcSector structure
-#endif
+    ClassDef(StMwcSector,1)  //StMwcSector structure
     Short_t mId;
+    Float_t mMips;
   ClassDef(StMwcSector,1)  //StMwcSector structure
+typedef StVecPtrMwcSector StVecMwcSector;
 };
 StCollectionDef(MwcSector)
 

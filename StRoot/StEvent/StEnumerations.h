@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 1.2 1999/02/09 20:01:42 fisyak Exp $
+ * $Id: StEnumerations.h,v 1.3 1999/04/27 01:24:19 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,9 +10,25 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 1.2  1999/02/09 20:01:42  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:19  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
+ * Revision 1.4  1999/04/28 22:27:31  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.7  1999/02/26 14:02:26  ullrich
+ * Changed pragmas.
+ *
+ * Revision 1.6  1999/02/26 14:01:17  ullrich
+ * Removed enumeration StDetector (handled elsewhere).
+ *
+ * Revision 1.5  1999/02/24 02:58:30  ullrich
+ * StDetector now reflects official STAR detector numbers.
+ *
+ * Revision 1.4  1999/02/24 01:55:34  genevb
+ * Add Xi vertex type
+ *
+ * Revision 1.3  1999/02/18 15:40:06  ullrich
  * Added CINT link pragmas, detector enumeration changed but official
  * version still pending, added enum StTrackSign.
  *
@@ -20,7 +36,12 @@
  * version with constructors for table-based loading
  *
  * Revision 2.3  2000/08/17 00:12:18  ullrich
-enum StDetector {tpc, svt, emc, smd, ftpc, tof, rich};
+#ifndef StEnumeration_hh
+#define StEnumeration_hh
+ * Revision 2.9  2000/11/25 11:48:40  lasiuk
+ * Modify the StRichHitFlags to account for ambiguities
+ *
+ * Revision 2.8  2000/11/01 16:42:19  lasiuk
 #pragma link C++ enum StVertexType;
 #pragma link C++ enum StTrackSign;
  * Revision 2.6  2000/08/28 16:28:45  ullrich
@@ -28,7 +49,9 @@ enum StDetector {tpc, svt, emc, smd, ftpc, tof, rich};
 #pragma link C++ enum StDetectorId;
 #pragma link C++ enum StVertexId;
 enum StBeamPolarizationAxis {sideways, vertical, longitudinal};
-		   pileUpPrimary, V0};
+#endif
+enum StVertexType {undefined, primary, kink,
+		   twoBody, threeBody, nBody,
 		   pileUpPrimary, V0, Xi};
 #pragma link C++ enum StTrackFittingMethod;
 enum StTrackSign {negativeTrack, positiveTrack};

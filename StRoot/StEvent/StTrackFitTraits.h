@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 1.2 1999/02/09 23:11:17 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 1.3 1999/04/27 01:24:28 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 1.2  1999/02/09 23:11:17  fisyak
- * Torre stuff
+ * Revision 1.3  1999/04/27 01:24:28  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:37  fisyak
  * New version with pointer instead referencies

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 1.3 1999/02/10 02:17:37 fisyak Exp $
+ * $Id: StV0Vertex.h,v 1.4 1999/04/27 01:24:29 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,11 +13,17 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
- * Revision 1.3  1999/02/10 02:17:37  fisyak
- * Merging with new Torre stuff
+ * Revision 1.4  1999/04/27 01:24:29  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
- * Revision 1.2  1999/02/09 19:53:53  fisyak
- * Import new Torre staff
+ * Revision 1.8  1999/04/09 19:34:04  genevb
+ * Added vertex daughter functionality
+ *
+ * Revision 1.7  1999/03/23 21:47:48  ullrich
+ * Member function made virtual
+ *
+ * Revision 1.6  1999/02/21 20:32:48  genevb
+ * Improve StV0Vertex code
  *
  * Revision 1.5  1999/02/18 15:41:42  ullrich
  * Momemtum of daughter tracks added.
@@ -36,6 +42,8 @@
 #include "TObject.h"
 #endif
  * Completely Revised for New Version
+ *
+#include "tables/dst_vertex.h"
 #include "tables/dst_v0_vertex.h"
 #include "dst_vertex.h"
 
@@ -43,41 +51,47 @@
 #include <float.h>
 #endif
 
-    StV0Vertex(dst_v0_vertex_st*);
+class dst_v0_vertex_st;
 
     StV0Vertex(const dst_vertex_st&, const dst_v0_vertex_st&);
     StV0Vertex(dst_v0_vertex_st*,dst_vertex_st*);
-    Float_t dcaDaughterToPrimaryVertex(UInt_t i) const;
-    Float_t dcaDaughters() const;
-    Float_t dcaParentToPrimaryVertex() const;
+    // const StV0Vertex & operator=(const StV0Vertex&);
 
-    void setDcaDaughtersToPrimaryVertex(UInt_t, Float_t);
-    void setDcaDaughters(Float_t);
-    void setDcaParentToPrimaryVertex(Float_t);
+    virtual StGlobalTrack* daughter(StTrackSign sign, Double_t B);
+    virtual Float_t dcaDaughterToPrimaryVertex(StTrackSign sign) const;
+    virtual Float_t dcaParentToPrimaryVertex() const;
+    virtual const StThreeVectorF& momentumOfDaughter(StTrackSign sign) const;
+    virtual StThreeVectorF momentum() const;
+
+    virtual void setDcaDaughterToPrimaryVertex(StTrackSign sign, Float_t);
     virtual void setMomentumOfDaughter(StTrackSign sign, const StThreeVectorF&);
     virtual void setDcaDaughters(Float_t);
     virtual void setDcaParentToPrimaryVertex(Float_t);
     // StV0Vertex(const StV0Vertex&);            use default
-    Float_t mDcaDaughtersToPrimaryVertex[2];
-    Float_t mDcaDaughters;
-    Float_t mDcaParentToPrimaryVertex;
+    void setType(StVertexType);     // overwrite from base class          
+    StThreeVectorF   mMomentumOfDaughters[2];
+protected:
+    Float_t                mDcaDaughtersToPrimaryVertex[2];
 #ifdef __ROOT__
 	ClassDef(StV0Vertex,1)  //StV0Vertex structure
 #endif
     Float_t                mDcaDaughters;
-#ifndef __CINT__
-inline Float_t StV0Vertex::dcaDaughterToPrimaryVertex (UInt_t i) const
+    Float_t                mDcaParentToPrimaryVertex;
+  ClassDef(StV0Vertex,1)  //StV0Vertex structure
+    Float_t          mDcaParentToPrimaryVertex;
 
-    if (i < 2)
-	return mDcaDaughtersToPrimaryVertex[i];
-    else
-	return FLT_MAX;
+inline Float_t StV0Vertex::dcaDaughterToPrimaryVertex (StTrackSign sign) const
+{
+    return mDcaDaughtersToPrimaryVertex[sign];
+}
+
+inline const StThreeVectorF&
 {
     return (mMomentumOfDaughters[negativeTrack] +
             mMomentumOfDaughters[positiveTrack]);
 }
 
-#endif
+inline Float_t StV0Vertex::dcaDaughters() const { return mDcaDaughters; }
 
 inline Float_t StV0Vertex::dcaParentToPrimaryVertex() const { return mDcaParentToPrimaryVertex; }
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 1.1 1999/01/30 03:58:08 fisyak Exp $
+ * $Id: StTpcHit.h,v 1.2 1999/04/27 01:24:25 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,17 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 1.1  1999/01/30 03:58:08  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/04/27 01:24:25  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
+ * Revision 1.3  1999/04/28 22:27:37  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.6  1999/03/23 21:51:12  ullrich
+ * Added table-based class specific constructor.
+ *
+ * Revision 1.5  1999/03/04 18:17:25  ullrich
+ * Namespace std not used if ST_NO_NAMESPACES defined
  *
  * Revision 1.4  1999/03/04 15:57:04  wenaus
  * add std namespace for Sun CC5 compatibility
@@ -23,32 +32,27 @@
  * version with constructors for table-based loading
  *
 
-#ifdef __ROOT__
-#include "TObject.h"
- * Revision 2.2  1999/11/09 19:35:27  ullrich
-#ifndef __CINT__
-#include <vector>
-#else
-  template< class T > class vector;
-#endif
-#include "StHit.h"
+ *
+class StVecPtrGlobalTrack;
+#include "tables/dst_point.h"
 #include "StGlobalTrack.h"
-#include "StTrackCollection.h"
+#include "StGlobalTrack.h"
+ *
+ * Revision 2.2  1999/11/09 19:35:27  ullrich
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
     StTpcHit(const StThreeVectorF&,
 	     const StThreeVectorF&,
 	     Float_t, UChar_t = 0);
-    StTpcHit(dst_point_st* pt) : StHit(pt) {};
+    StTpcHit(dst_point_st*);
 #if 0    
     StVecPtrGlobalTrack relatedTracks(const StTrackCollection&);
 #endif
-#ifdef __ROOT__
 	ClassDef(StTpcHit,1)  //StTpcHit structure
-#endif
   StVecPtrGlobalTrack relatedTracks(const StGlobalTrackCollection&);
-
+#endif
+//______________________________________________________________
              ULong_t, Float_t, UChar_t = 0);
 StCollectionDef(TpcHit)
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.2 1999/02/10 02:17:33 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.3 1999/04/27 01:24:19 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 1.3  1999/04/27 01:24:19  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
  * Revision 1.2  1999/02/10 02:17:33  fisyak
  * Merging with new Torre stuff
  *
@@ -29,24 +32,22 @@
  * Revision 1.2  1999/01/15 22:53:39  wenaus
  *
 #include <iostream.h>
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.2 1999/02/10 02:17:33 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.3 1999/04/27 01:24:19 fisyak Exp $";
 using namespace std;
 #ifdef __ROOT__
 ClassImp(StEvent)
 
 #endif
 StEvent::StEvent()
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.2 1999/02/10 02:17:33 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.3 1999/04/27 01:24:19 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum) {
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
-    mType = hdr.event_type;
-#if 0
+    mType = TString(hdr.event_type);
 #include "StEmcCollection.h"
     init(run);
-#endif
     mType = hdr.event_type;
     mTime = hdr.time;
     mId.second = hdr.n_event[1];
@@ -135,10 +136,8 @@ Int_t StEvent::operator!=(const StEvent& e) const
 {
     return !(e == *this);   // invoke operator==()
 }
-#if 0
     os << "Id: " << e.id().first << ", " << e.id().second << endl;
     os << "Type: " << e.type() << endl;
-#endif
     os << "Run: " << e.runNumber() << endl;
     Long_t theTime = e.time();
     os << "Time: " << ctime(&theTime);  // \n provided by ctime()
@@ -146,14 +145,15 @@ Int_t StEvent::operator!=(const StEvent& e) const
     os << "Run: "  << e.runNumber() << endl;
     os << "Time: " << e.time() << endl;
     os << "Luminosity: " << e.luminosity() << endl;
-#if 0
-void StEvent::setType(const TString val) { mType = val; }
-void StEvent::setId(const pair<Long_t, Long_t>& val)
+void StEvent::setType(const TString& val) 
+{ 
+  mType = val; 
+}
+
 void StEvent::setType(const Char_t* val) { mType = val; }
 
 void StEvent::setId(const pairL& val)
 {
-#endif
 void StEvent::setTime(Long_t val) { mTime = val; }
     mId.second = val.second;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdCounter.h,v 1.2 1999/02/09 19:53:21 fisyak Exp $
+ * $Id: StVpdCounter.h,v 1.3 1999/04/27 01:24:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdCounter.h,v $
- * Revision 1.2  1999/02/09 19:53:21  fisyak
- * Import new Torre staff
+ * Revision 1.3  1999/04/27 01:24:31  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
  *
  * Revision 1.4  1999/04/28 22:27:40  fisyak
  * New version with pointer instead referencies
@@ -20,9 +20,8 @@
  * version with constructors for table-based loading
  *
  **************************************************************************/
-#ifdef __ROOT__
-#include "TObject.h"
-#endif
+#define StVpdCounter_hh
+
 class StVpdCounter : public TObject {
 #include "StObject.h"
 #include "StArray.h"
@@ -43,11 +42,10 @@ public:
     void setTime(Float_t);
     
 protected:
-#ifdef __ROOT__
-	ClassDef(StVpdCounter,1)  //StVpdCounter structure
-#endif
+    ClassDef(StVpdCounter,1)  //StVpdCounter structure
     Float_t mAdc;
-
+    Float_t mTime;
+typedef StVecPtrVpdCounter StVecVpdCounter;
 };
 StCollectionDef(VpdCounter)
 

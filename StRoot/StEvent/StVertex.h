@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.h,v 1.2 1999/02/10 02:17:40 fisyak Exp $
+ * $Id: StVertex.h,v 1.3 1999/04/27 01:24:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -15,8 +15,14 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
- * Revision 1.2  1999/02/10 02:17:40  fisyak
- * Merging with new Torre stuff
+ * Revision 1.3  1999/04/27 01:24:31  fisyak
+ * Fix intermidaiate version with pointer instead of referencies
+ *
+ * Revision 1.4  1999/04/28 22:27:39  fisyak
+ * New version with pointer instead referencies
+ *
+ * Revision 1.7  1999/04/19 15:54:10  genevb
+ * Added momentum() to vertex classes
  *
  * Revision 1.6  1999/03/23 21:47:45  ullrich
  * Member function made virtual
@@ -30,12 +36,10 @@
  * Revision 1.3  1999/01/27 12:53:39  ullrich
  * Made setType() virtual. See StV0Vertex for reason.
  *
-#ifdef __ROOT__
-#include "TObject.h"
-#endif
+ * Revision 1.2  1999/01/15 22:54:22  wenaus
  * version with constructors for table-based loading
  *
-#include "StVecPtrGlobalTrack.h"
+ * Revision 2.4  2000/02/10 18:49:08  ullrich
  * Fixed typo introduced at last check-in.
  *
 class StVertex : public TObject {
@@ -49,22 +53,24 @@ class StVertex : public TObject {
  *
     StVertex(dst_vertex_st*);
     // StVertex(const StVertex&);       use default
-    StVertexType                type();
-    StVecPtrGlobalTrack&        daughters();
-    const StGlobalTrack*        parent();
-    const StThreeVectorF& position();
-    const StThreeVectorF& positionError();
-    ULong_t               qualityBitmask();
-    Float_t                       chiSquared();         
-    Long_t                        index() {return mIndex;};
+    virtual StVertexType                type();
+    virtual StVecPtrGlobalTrack&        daughters();
+    virtual UInt_t                numberOfDaughters();
+#include "StMatrixF.hh"
+    virtual const StGlobalTrack*        parent();
+    virtual const StThreeVectorF& position();
+    virtual const StThreeVectorF& positionError();
+    virtual ULong_t               qualityBitmask();
+    virtual Float_t                       chiSquared();         
+    virtual const StGlobalTrack*        parent(){ return mParent; };
     virtual const StThreeVectorF& position() const{ return mPosition; } ;
     virtual const StThreeVectorF& positionError() const { return mPositionError; };
-    void setParent(StGlobalTrack* );         
-    void setPosition(const StThreeVectorF&);       
-    void setPositionError(const StThreeVectorF&);  
-    void setQualityBitmask(ULong_t); 
-    void setChiSquared(Float_t);     
-    void setIndex(Long_t ii) {mIndex = ii;};
+    virtual StThreeVectorF        momentum(Double_t);
+    virtual ULong_t               qualityBitmask(){ return mQualityBitmask; } ;
+    virtual Float_t                       chiSquared(){ return mChiSquared; };         
+    virtual Long_t                        index() {return mIndex;};
+    ULong_t                flag() const;
+    virtual void setType(StVertexType);           
     virtual void setParent(StGlobalTrack* );         
 protected:
     ULong_t          mIndex;
@@ -75,14 +81,19 @@ protected:
     StThreeVectorF   mPositionError;
     ULong_t          mQualityBitmask;
     Float_t                  mChiSquared;                
-#ifdef __ROOT__
-	ClassDef(StVertex,1)  //StVertex structure
-#endif
+    ClassDef(StVertex,1)  //StVertex structure
     virtual void setPositionError(const StThreeVectorF&);  
-
+    virtual void setQualityBitmask(ULong_t); 
 inline StVertexType StVertex::type() { return mType; }
 
 inline StVecPtrGlobalTrack& StVertex::daughters(){ return mDaughters; }       
+
+inline UInt_t StVertex::numberOfDaughters() { return mDaughters.size(); }
+
+    virtual void setChiSquared(Float_t);     
+    virtual void setIndex(Long_t ii) {mIndex = ii;};
+    return (i < mDaughters.size() ? mDaughters[i] : 0);
+  ClassDef(StVertex,1)  //StVertex structure
 
 inline const StGlobalTrack* StVertex::parent(){ return mParent; }          
 
