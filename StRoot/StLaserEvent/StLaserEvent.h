@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.1 1999/09/27 21:44:27 love Exp $
+//$Id: StLaserEvent.h,v 1.2 1999/12/01 15:22:38 love Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.2  1999/12/01 15:22:38  love
+//Bringing up to date with new StLaserEventMaker.  Sorry 'bout that.
+//
 //Revision 1.1  1999/09/27 21:44:27  love
 //LSEvent -> StLaserEvent
 //
@@ -25,7 +28,7 @@
 
 
 class TDirectory;
-
+class St_tpt_track;
 
 class EventHeader {
 
@@ -80,10 +83,16 @@ public:
          Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
          Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
-         Float_t phi0, Float_t r0, Float_t z0);
+         Float_t phi0, Float_t r0, Float_t z0, Int_t sector, 
+         Float_t xl, Float_t yl, Float_t zl);
 
    void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag);
+   void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
+                        Int_t row, Int_t track, Int_t flag, Int_t sector,
+                        Float_t zl, Float_t psi,
+                        Float_t dx, Float_t dz,Float_t alpha,
+                        Float_t lambda,Float_t prf,Float_t zrf);
    void          AddPixel(Int_t row,Int_t pad,Int_t time,Int_t adc,
                          Float_t x,Float_t y,Float_t z);
 
@@ -105,18 +114,22 @@ public:
 class Hit : public TObject {
 
  private:
-      Float_t fx;
-      Float_t fy;
-      Float_t fz;
-      Float_t fq;
-      Int_t   ftrack;
-      Int_t   frow;
-      Int_t   fflag;
+      Float_t fx;      Float_t fy;      Float_t fz;
+      Float_t fdx;     Float_t fdz;
+      Float_t fq;      Float_t falpha;  Float_t flambda;
+      Float_t fprf;    Float_t fzrf;
+      Float_t ftkzl;    Float_t ftkpsi;
+
+      Int_t   ftrack;  Int_t   frow;    Int_t   fflag;
+      Int_t ftksector;
 
 public:
    Hit() { }
    Hit(Float_t q,Float_t x,Float_t y,Float_t z, 
                         Int_t row, Int_t track, Int_t flag);
+   Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+  Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
+  Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
    virtual ~Hit() { }      
    ClassDef(Hit,1)  //A TPC TPhit object
 };
@@ -163,7 +176,13 @@ private:
        Float_t     fphi0;       // azimuthal angle of the first point */
        Float_t     fr0;         // r (in cyl. coord.) for the first point */
        Float_t     fz0;         // z coordinate of the first point */
-
+       Float_t     fxl;         // x of point of close app. to laser source.
+       Float_t     fyl;         // y of point of closest approach
+       Float_t     fzl;         // z of point of closest approach
+       Int_t       fsector;     // sector of laser source point.
+       virtual void  DOCA(Float_t r0,Float_t phi0,Float_t z0, Float_t psi,
+                   Float_t tanl, Float_t curvature , Int_t q,
+                   Int_t * sector, Float_t * xl, Float_t * yl, Float_t * zl);
   
 public:
    Track() { }
@@ -171,7 +190,8 @@ public:
          Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
          Float_t invp, Float_t curvature, Float_t psi, Float_t tanl,
-         Float_t phi0, Float_t r0, Float_t z0);
+         Float_t phi0, Float_t r0, Float_t z0, Int_t sector, Float_t xl,
+         Float_t yl, Float_t zl);
 
    virtual ~Track() { }
    // Float_t       GetPx() const { return fPx; }
