@@ -19,9 +19,11 @@ class StiTrackContainer;
 class StiDrawableHits;
 class StiEvaluableTrackSeedFinder;
 class StiTrackSeedFinder;
+class Sti2HitComboFilter;
 
 class StiMaker : public StMaker {
  public:
+    typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory;
     typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
     
     virtual ~StiMaker();
@@ -32,7 +34,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.11 2001/08/10 20:32:40 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.12 2001/08/15 17:54:01 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -55,20 +57,29 @@ protected:
 
 private:
 
+    //Containers
     StiHitContainer* mhitstore; //!
-    StiHitFactory* mhitfactory; //!
-    StiEvaluableTrackFactory* mtrackfactory; //!
-    StiKalmanTrackNodeFactory* mkalmantrackfactory; //!
-    StiHitFiller* mhitfiller; //!
-    StiDisplayManager* mdisplay; //!
     StiDetectorContainer* mdetector; //!
     StiTrackContainer* mtrackstore; //!
-    StiDrawableHits* mdrawablehits; //!
-    StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
+
+    //Factories
+    StiHitFactory* mhitfactory; //!
+    StiEvaluableTrackFactory* mtrackfactory; //!
+    StiKalmanTrackNodeFactory* mkalmantracknodefactory; //!
     detector_factory* mdetectorfactory; //!
     data_node_factory* mdatanodefactory; //!
-    StiTrackSeedFinder* mkalmanseedfinder; //!
     StiTrackNodeFactory* mtracknodefactory; //!
+    StiKalmanTrackFactory* mkalmantrackfactory; //!
+
+    //Display
+    StiDisplayManager* mdisplay; //!
+    StiDrawableHits* mdrawablehits; //!
+    
+    //Utilites
+    StiHitFiller* mhitfiller; //!
+    StiEvaluableTrackSeedFinder* mtrackseedfinder; //!
+    StiTrackSeedFinder* mkalmanseedfinder; //!
+    Sti2HitComboFilter* mhitcombofilter; //!
     
     char* mmaterialbuildpath; //!
     char* mdetectorbuildpath; //!
