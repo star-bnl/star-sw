@@ -1,7 +1,7 @@
 #ifndef STARVOLUME_H
 #define STARVOLUME_H
 
-/* $Id: StarVolume.h,v 1.1 2004/07/12 20:35:59 potekhin Exp $ */
+/* $Id: StarVolume.h,v 1.2 2004/09/02 23:27:15 potekhin Exp $ */
 
 ////////////////////////////////////////////////////////
 //                                                    //
@@ -10,6 +10,7 @@
 
 
 #include <TNamed.h>
+#include <THashTable.h>
 
 // 
 class StarVolume: public TNamed {
@@ -46,6 +47,8 @@ class StarVolume: public TNamed {
 
   static Int_t  _nVolumes;
   static TList  _volumes;
+
+  THashTable    _lkp;
 
   ClassDef(StarVolume,0)
     };
