@@ -56,6 +56,8 @@ public:
    virtual void         PaintPolyMarker(Int_t n, Float_t *p=0, Marker_t m=0, Option_t *opt="");
    static Float_t       Product(Float_t *v1, Float_t *v2,Int_t ndim=3);
    static Double_t      Product(Double_t *v1, Double_t *v2,Int_t ndim=3);
+   virtual Color_t      SetColorAttribute(Color_t color);
+   virtual Width_t      SetSizeAttribute(Width_t size);
    virtual Int_t        SetConnection(EShapeTypes connection=kBrik);
    virtual void         SetShape(TShape *shape);
    virtual void         SetSmooth(Bool_t smooth=kTRUE){ m_Smooth=smooth;}
