@@ -4,7 +4,7 @@ C     EGR_FILL_GLOBTRK - fills the global track table
 C<--------------------------------------------------------------------
        INTEGER FUNCTION EGR_LOAD_GLOBTRK(globtrk_h,globtrk,globtrk_aux_h,
      +     globtrk_aux,igtrk,gtrk,tphit_h,tphit,svthit_h,svthit,
-     +     covar,itpct,isvtt,ipriv)
+     +     covar,itpct,isvtt,ipriv,bfield)
        
 C>--------------------------------------------------------------------
 C
@@ -50,7 +50,7 @@ C     Local variables
       
       INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
       INTEGER imsg,ipriv
-      REAL    covar(3,3)
+      REAL    covar(3,3),bfield
       DATA    imsg /0/
 
  
@@ -67,7 +67,7 @@ C     Local variables
       globtrk(iglob).y0 = abs(gtrk(igtrk).p(2))*sin(gtrk(igtrk).p(5))+
      +     gtrk(igtrk).p(4)
       globtrk(iglob).z0 = gtrk(igtrk).p(6)
-      sgn = sign(1.0,gtrk(igtrk).p(2))
+      sgn = sign(1.0,gtrk(igtrk).p(2)*bfield)
       globtrk(iglob).psi = gtrk(igtrk).p(5)-sgn*C_PI_2
       globtrk(iglob).psi = globtrk(iglob).psi*C_DEG_PER_RAD  ! to degrees
       globtrk(iglob).psi = AMOD(globtrk(iglob).psi, 360.0)
@@ -75,8 +75,8 @@ C     Local variables
          globtrk(iglob).psi = globtrk(iglob).psi + 360.0
       endif
       globtrk(iglob).tanl = gtrk(igtrk).p(7)
-      globtrk(iglob).invpt =1.0/(C_D_CURVATURE*0.5*10.*
-     +     (abs(gtrk(igtrk).p(2))))
+      globtrk(iglob).invpt =1.0/abs(C_D_CURVATURE*bfield*
+     +     gtrk(igtrk).p(2))
       globtrk(iglob).covar_diag(1) = covar(1,1)
       globtrk(iglob).covar_diag(2) = covar(2,2)
       globtrk(iglob).covar_diag(3) = covar(3,3)

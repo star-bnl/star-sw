@@ -85,6 +85,7 @@ C ---------------------------------------------------------------------
       INTEGER nqwe,locf,ifull
       CHARACTER*132 errmsg,msg
       REAL covar(3,3),rfirst,rlast,r
+      real x(3),bfield(3)
       DATA imsg,imsgw,imsg1,imsg2,imsg3 /5*0/
       DATA imsg4,imsg5,imsg6,imsg7,imsg8 /5*0/
 
@@ -123,6 +124,12 @@ CCC  L. Ray, 9/16/98
       svt_p = malloc(mxtrack*4)
       tpc_p = malloc(mxtrack*4)
 
+      x(1) = 0
+      x(2) = 0.
+      x(3) = 0.
+      call gufld(x,bfield)
+
+      write(6,*) 'Using a field of',bfield(3),' KGauss'  
 
 C  Use the egrpar(1).scenario variable to set the running schem
 
@@ -455,15 +462,15 @@ C     Now find last point on track and calculate track length.
                   
                else
                   iret = egr_refit_track(tptrack(itpct).id,tptrack(itpct).id,
-     +                 svt(isvtt),ipriv,gtrk,
-     +                 tphit_h,tphit,privert_h,privert,svt_spt_h,svt_spt,
-     +                 svt_track_h,svt_track,svt_group_h,svt_group,
-     +                 egrpar_h,egrpar,evt_match_h,evt_match,covar)
+     +                 svt(isvtt),ipriv,gtrk,tphit_h,tphit,privert_h,
+     +                 privert,svt_spt_h,svt_spt,svt_track_h,svt_track,
+     +                 svt_group_h,svt_group,egrpar_h,egrpar,
+     +                 evt_match_h,evt_match,covar)
                   
                   iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
      +                 ,globtrk_aux,tptrack(itpct).id,gtrk,
      +                 tphit_h,tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
-     +                 ipriv)
+     +                 ipriv,bfield(3))
                endif
                tptrack(itpct).id_globtrk = globtrk_h.nok
                svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
@@ -495,7 +502,7 @@ c     mark spts as used
                
                iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
      +              ,globtrk_aux,igtrk,gtrk,tphit_h,tphit,svt_spt_h,
-     +              svt_spt,covar,itpct,isvtt,ipriv)
+     +              svt_spt,covar,itpct,isvtt,ipriv,bfield(3))
                
 c     mark spts as used
                do ient = 1, gtrk(itpct).nfit
@@ -666,7 +673,7 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                   iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
      +                 ,globtrk_aux,tptrack(itrk).id,gtrk
      +                 ,tphit_h,tphit,svt_spt_h,svt_spt,covar,itrk,isvtt,
-     +                 ipriv)
+     +                 ipriv,bfield(3))
                else
 
 
@@ -886,7 +893,8 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
                     
                     iret = egr_load_globtrk(globtrk_h,globtrk,
      +                   globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
-     +                   tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,ipriv)
+     +                   tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,ipriv,
+     +                   bfield(3))
                     
                     do ishit = 1, gtrk(igtrk).nfit
                        ient = gtrk(igtrk).ipnt(ishit)
