@@ -6,7 +6,7 @@ LATEX           = latex
 MKINDEX         = makeindex -s sclindex.sty
 PSNUP		= psnup -2 -pletter
 PSSRC		= StarClassLibraryTitle.eps StarIcon.eps helix1.eps \
-	          helix2.eps helix3.eps
+	          helix2.eps helix3.eps twoHelices.eps
 
 all:			$(TEXSRC).ps
 
