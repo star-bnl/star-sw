@@ -421,8 +421,8 @@ void StBranch::OpenTFile()
   TFile *tf= gROOT->GetFile(GetFile());
   fTFile = tf;
   if (!fTFile) fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
-  if (fTFile->IsZombie()) {
-    Error("OpenTFile","File %s NOT OPENED ***\n",fTFile->GetName());
+  if (!fTFile) {
+    Error("OpenTFile","File %s NOT OPENED ***\n",GetFile());
     Error("OpenTFile","Branch %s desactivated ***\n",GetName());
     delete fTFile; fTFile=0; SetIOMode("0");
   } else {
@@ -757,7 +757,7 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   if (dot>0) famy.Replace(dot+1,999,"");
 
   TDataSet *dsfam = fDS->Find(famy);
-  if (!dsfam) dsfam = new TDataSet(famy,fDS);
+  if (!dsfam) fDS->Add((dsfam = new TObjectSet(famy,0)));
 
   if (dsfam->Find(base))
     Warning("AddFile","File %s added twice \n",(const Char_t *)tfile);
@@ -823,11 +823,14 @@ Int_t StFile::AddWild(const Char_t *file)
 //_____________________________________________________________________________
 Int_t StFile::AddEvent(UInt_t r,UInt_t e)
 {
-  TDataSet *dsfam =   fDS->Last();  	if(!dsfam) return 1;
-  TDataSet *dsfil = dsfam->Last();	if(!dsfil) return 1;
+  TObjectSet *dsfam = (TObjectSet*)fDS->Last();	if(!dsfam) return 1;
+  TDataSet   *dsfil = dsfam->Last();		if(!dsfil) return 1;
+    
+  TDataSet   *dskey = (TDataSet*)dsfam->GetObject(); 
+  if (!dskey) { dskey = new TDataSet("uklist");dsfam->SetObject(dskey,1);} 
   char cbuf[40];
   sprintf(cbuf,".%010u.%010u",r,e);
-  new TDataSet(cbuf,dsfil);
+  new TDataSet(cbuf,dskey);
   return 0;
 }  
 //_____________________________________________________________________________
@@ -835,11 +838,12 @@ StUKey StFile::GetNextEvent()
 {
   StUKey uk(kUMAX);
   if (!fIter) 		return uk;
-  TDataSet *dsfil = **fIter;
-  if (!dsfil) 		return uk;
+  TDataSet *dsfam = **fIter;
+  if (!dsfam) 		return uk;
   uk = 0;
-  if (!dsfil->First())	return uk;
-  if (!fKeyIter) fKeyIter = new TDataSetIter(dsfil);
+  TDataSet *dskeys = (TDataSet*)dsfam->GetObject();
+  if (!dskeys)		return uk;
+  if (!fKeyIter) fKeyIter = new TDataSetIter(dskeys);
   TDataSet *dskey = fKeyIter->Next();
   if (!dskey){ uk = kUMAX; delete fKeyIter; fKeyIter=0;	return uk;}
   uk.SetKey(dskey->GetName());
@@ -897,7 +901,7 @@ void StFile::SetInfo(TDataSet *ds)
 //              ... branch name still unknown
 
     tf = TFile::Open(fname,"READ");
-    assert(!tf->IsZombie());
+    assert(tf);
     TList *kl = gFile->GetListOfKeys();
     TIter nextKey(kl);
     TKey *ky;
@@ -957,9 +961,9 @@ int    fNFiles;
       cat->fNFiles++;
 
       TFile *tf = 0;
-      if (opt && opt[0]=='r') tf = StIO::Open(fil,"update");
-      if (!tf || tf->IsZombie()) { delete tf; tf = StIO::Open(fil,"read");}
-      if (       tf->IsZombie()) { delete tf; continue;}
+      if (opt && opt[0]=='r')	tf = StIO::Open(fil,"update");
+      if (!tf) 			tf = StIO::Open(fil,"read"  );
+      if (!tf) 			continue;
 
       TList *keys = tf->GetListOfKeys();
       int nkeys=0,nreks=0;
