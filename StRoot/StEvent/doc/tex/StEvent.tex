@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.16 2000/01/27 18:38:30 ullrich Exp $
+% $Id: StEvent.tex,v 2.17 2000/01/31 13:40:40 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.16  2000/01/27 18:38:30  ullrich
-% Fixed typo in units for curvature.
+% Revision 2.17  2000/01/31 13:40:40  ullrich
+% Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -146,8 +146,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -171,8 +171,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -180,17 +180,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -205,8 +205,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.16 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/01/27 18:38:30 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.17 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/31 13:40:40 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -3841,11 +3841,89 @@ definition in the header file.
 \index{StTpcSoftwareMonitor|textbf}
 \label{sec:StTpcSoftwareMonitor}
 \begin{Entry}
-    Quality control flag (sort of). Most important: \texttt{flag()} $> 0$ good,
-    \texttt{flag()} $< 0$ bad. Contains which detectors were used in the refit,
-    the status of the refit and much more. For a detailed (and actual) description
-    see the referring reconstruction web pages.    
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StTpcSoftwareMonitor.h"+\\
     \verb+class StTpcSoftwareMonitor;+\\
+\item[Description]
+    \index{track quality flag}\index{iflag}
+\item[Public\\ Constructors]
+    \verb+StTpcSoftwareMonitor();+\\
+    \verb+StTpcSoftwareMonitor(const dst_mon_soft_tpc_st&);+\\
+\item[Public Data\\ Member]
+    \verb+Long_t n_clus_tpc_tot;+\\
+    Total number of clusters in TPC.
+    
+    \verb+Long_t n_clus_tpc_in[24];+\\
+    Total number of clusters in inner TPC sectors.
+    
+    \verb+Long_t n_clus_tpc_out[24];+\\
+    Total number of clusters in outer TPC sectors.
+    
+    \verb+Long_t n_pts_tpc_tot;+\\
+    Total number of space points in TPC.
+    
+    \verb+Long_t n_pts_tpc_in[24];+\\
+    Total number of space points in inner TPC sectors.
+    
+    This method (and the referring data member) is likely
+    to be removed in future versions.
+    
+    \verb+Long_t n_trk_tpc[2];+\\
+    Total number of tracks in TPC, tan(dip angle) $< 0$ $(\ge 0)$.
+    
+    \verb+Float_t chrg_tpc_drift[10];+\\
+    Charge deposited in TPC in along z.
+    
+    \verb+Float_t chrg_tpc_tot;+\\
+    Total charge deposition in TPC.
+    
+    \verb+Float_t chrg_tpc_in[24];+\\
+    Total charge deposition in inner TPC sectors.
+    
+\item[Related Classes] \texttt{StTptTrack} is derived from
+    \texttt{StTrack}. See there for more info.
+    
+\item[Public\\ Constructors]
+    \verb+StTptTrack();+\\
+    \verb+StTptTrack(const dst_track_st&);+\\
+    \verb+StTptTrack(const StTptTrack&);+\\
+    \verb+StTptTrack& operator=(const StTptTrack&);+\\
+\item[Public Member\\ Functions]
+    \verb+StTptTrack type() const;+\\
+    Returns always \texttt{tpt}.
+
+    \verb+const StVertex* vertex() const;+\\
+    Returns always \texttt{null}.
+\end{Entry}
+\clearpage
+
+\subsection{StTrack}
+    Track quality control flag. Below is a detailed explanation
+    provided by Helen Caines.
+    \index{track quality flag}\index{iflag}\index{flag() in StTrack}
+    
+    The most important point is: flag() $>$ 0 is good flag() $<$ 0 is
+    bad.
+    
+    flag() = \texttt{xyy}, where \texttt{x} indicates the detectors
+    included in the fit and \texttt{yy} indicates the status of the
+    fit. Positive iflag() return values are good fits, negative values
+    are bad fits.
+  
+    The first digit indicates which detectors were used in the refit:
+    \begin{description}
+    \item[x=1] TPC only 
+    \item[x=2] SVT only 
+    \item[x=3] TPC + primary vertex 
+    \item[x=4] SVT + primary vertex 
+    \item[x=5] SVT+TPC 
+    \item[x=6] SVT+TPC+primary vertex 
+    \item[x=7] FTPC only 
+    \end{description} 
+
+    If a refit is performed by egr then the last two digits are as follows.
+
     The last two digits indicate the status of the refit:
     \begin{description}
     \item[+x01] good track 
