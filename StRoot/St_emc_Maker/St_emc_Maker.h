@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.3 1998/12/21 19:45:40 fisyak Exp $
+// $Id: St_emc_Maker.h,v 1.4 1999/02/12 19:19:17 akio Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.4  1999/02/12 19:19:17  akio
+// *** empty log message ***
+//
 // Revision 1.3  1998/12/21 19:45:40  fisyak
 // Move ROOT includes to non system
 //
@@ -22,8 +25,8 @@
 #include "St_emc_pedestal_Table.h"
 #include "St_emc_adcslope_Table.h"
 #include "St_emc_calib_header_Table.h"
-#include "St_emc_hit.h"
 #include "St_emc_hits_Table.h"
+#include "StEmcHitCollection.h"
 #include "/afs/rhic/star/packages/SL98j/pams/emc/inc/emc_def.h"
 
 class St_emc_Maker : public StMaker {
