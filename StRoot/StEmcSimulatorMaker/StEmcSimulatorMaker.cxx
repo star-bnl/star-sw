@@ -274,14 +274,20 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
 
 Int_t StEmcSimulatorMaker::Make()
 {
-  //  Find  Geant  Tables
-  geaIn = GetDataSet("geant"); // Input from fzin file
+  // change order of searching 
+  static Char_t* typeOfFile[2]={"xdf", "fz"};
+  static Char_t* nameIn[2]={"event/geant/Event", "geant"};
+  //  Find  Geant  directory with hits
+  for(Int_t i=0; i<2; i++){
+     geaIn = GetDataSet(nameIn[i]);
+     if(geaIn) {
+        printf("Type of file -> %s : GEANT directory -> %s\n", typeOfFile[i], nameIn[i]);
+        break;
+     }
+  }
   if (geaIn == 0) {
-    geaIn = GetDataSet("event/geant/Event"); // Input from xdf file
-    if (geaIn == 0) {
-      gMessMgr->Error()<<"Geant Data didn't find in event/geant/Event and geant directories"<<endm;
-      return kStWarn;
-    }
+     gMessMgr->Error()<<"Geant Data didn't find in "<< nameIn[0]<<" or "<< nameIn[1]<<endm;
+     return kStWarn;
   }
 
   Int_t retBemc, retEemc;
@@ -638,8 +644,11 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.7 2001/09/22 00:29:42 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.8 2002/05/30 17:35:06 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.8  2002/05/30 17:35:06  pavlinov
+// changed the way of searching of GEANT data
+//
 // Revision 1.7  2001/09/22 00:29:42  pavlinov
 // No public constructor for StEmcGeom
 //
