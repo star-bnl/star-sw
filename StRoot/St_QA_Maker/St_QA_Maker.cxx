@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.68 1999/12/14 18:33:24 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.69 1999/12/15 17:17:33 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.69  1999/12/15 17:17:33  kathy
+// changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
+//
 // Revision 1.68  1999/12/14 18:33:24  kathy
 // removed 4 ftpc histograms as per Janet's request
 //
@@ -510,8 +513,8 @@ void St_QA_Maker::MakeHistDE() {
     for (Int_t i = 0; i < dst_dedx->GetNRows(); i++,d++) {
         if (d->det_id==1) {      
          m_ndedxT->Fill(d->ndedx);
-         m_dedx0T->Fill(d->dedx[0]*1e6);
-         m_dedx1T->Fill(d->dedx[1]*1e6);
+         m_dedx0T->Fill(d->dedx[0]);
+         m_dedx1T->Fill(d->dedx[1]);
         }
         if (d->det_id==4) {      
          m_ndedxFW->Fill(d->ndedx);

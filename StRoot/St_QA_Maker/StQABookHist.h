@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.9 1999/12/14 18:33:24 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.10 1999/12/15 17:17:33 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.10  1999/12/15 17:17:33  kathy
+//! changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
+//!
 //! Revision 1.9  1999/12/14 18:33:24  kathy
 //! removed 4 ftpc histograms as per Janet's request
 //!
@@ -44,7 +47,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.9 1999/12/14 18:33:24 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.10 1999/12/15 17:17:33 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -81,8 +84,6 @@ class StQABookHist : public StMaker {
   static const Float_t maxchisq; 
   static const Float_t minmass;  
   static const Float_t maxmass;  
-  static const Float_t mindedx;  
-  static const Float_t maxdedx;  
   static const Float_t minpnt;   
   static const Float_t maxpnt;   
   static const Float_t minleng;  
@@ -397,7 +398,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.9 1999/12/14 18:33:24 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.10 1999/12/15 17:17:33 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

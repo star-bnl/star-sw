@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.14 1999/12/14 18:33:23 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.15 1999/12/15 17:17:32 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.15  1999/12/15 17:17:32  kathy
+// changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
+//
 // Revision 1.14  1999/12/14 18:33:23  kathy
 // removed 4 ftpc histograms as per Janet's request
 //
@@ -87,8 +90,6 @@ const Float_t StQABookHist::minchisq = 0.;
 const Float_t StQABookHist::maxchisq = 10.0;
 const Float_t StQABookHist::minmass  = 0.0;
 const Float_t StQABookHist::maxmass  = 2.0;
-const Float_t StQABookHist::mindedx  = 0.0;
-const Float_t StQABookHist::maxdedx  = 0.0005*1e6; // in keV/cm
 const Float_t StQABookHist::minpnt   = 0.0;
 const Float_t StQABookHist::maxpnt   = 50.0;
 const Float_t StQABookHist::minleng  = 0.0;
@@ -233,16 +234,16 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_ndedxr=0;        //! number of tracks with dedx info
 
   m_ndedxT=0;         //! number of point to find dE/dx
-  m_dedx0T=0;         //! dE/dx [0] *1e6
-  m_dedx1T=0;         //! dE/dx [1] *1e6
+  m_dedx0T=0;         //! dE/dx [0] - mean
+  m_dedx1T=0;         //! dE/dx [1] - sigma
   
   m_ndedxFE=0;         //! number of point to find dE/dx
-  m_dedx0FE=0;         //! dE/dx [0]
-  m_dedx1FE=0;         //! dE/dx [1] 
+  m_dedx0FE=0;         //! dE/dx [0] - mean
+  m_dedx1FE=0;         //! dE/dx [1] - sigma
   
   m_ndedxFW=0;         //! number of point to find dE/dx
-  m_dedx0FW=0;         //! dE/dx [0]
-  m_dedx1FW=0;         //! dE/dx [1] 
+  m_dedx0FW=0;         //! dE/dx [0] - mean
+  m_dedx1FW=0;         //! dE/dx [1] -sigma
   
 // for method MakeHistPrim - from table primtrk
 
@@ -785,16 +786,16 @@ void StQABookHist::BookHistDE(){
   m_ndedxr  = QAH1F("QaDedxNum",     "dedx: number of tracks", 50,0., 10000.); 
 
   m_ndedxT   = QAH1F("QaDedxNdedxT", "dedx: number of point to define dE/dx, tpc", 50,0., 50.);  
-  m_dedx0T   = QAH1F("QaDedxDedx0T", "dedx: dE/dx[0]*1e6, tpc", ndedx, mindedx, maxdedx/10.);
-  m_dedx1T   = QAH1F("QaDedxDedx1T", "dedx: dE/dx[1]*1e6, tpc", ndedx, mindedx, maxdedx);
+  m_dedx0T   = QAH1F("QaDedxDedx0T", "dedx: dE/dx mean (GeV/cm), tpc", ndedx, 0., 0.0005);
+  m_dedx1T   = QAH1F("QaDedxDedx1T", "dedx: dE/dx sigma, tpc", ndedx, 0., 0.005);
   
-  m_ndedxFE   = QAH1F("QaDedxNdedxFE", "dedx: number of point to define dE/dx, ftpcE", 50,0., 50.);  
-  m_dedx0FE   = QAH1F("QaDedxDedx0FE", "dedx: dE/dx[0], ftpcE", ndedx, mindedx, maxdedx);
-  m_dedx1FE   = QAH1F("QaDedxDedx1FE", "dedx: dE/dx[1], ftpcE", ndedx, mindedx, maxdedx);
+  m_ndedxFE   = QAH1F("QaDedxNdedxFE", "dedx: number of point to define dE/dx, ftpcE", 20,0., 20.);  
+  m_dedx0FE   = QAH1F("QaDedxDedx0FE", "dedx: dE/dx mean (GeV/cm), ftpcE", ndedx,  0., 0.0005);
+  m_dedx1FE   = QAH1F("QaDedxDedx1FE", "dedx: dE/dx sigma, ftpcE", ndedx,  0., 0.005);
   
-  m_ndedxFW   = QAH1F("QaDedxNdedxFW", "dedx: number of point to define dE/dx, ftpcW", 50,0., 50.);  
-  m_dedx0FW   = QAH1F("QaDedxDedx0FW", "dedx: dE/dx[0], ftpcW", ndedx, mindedx, maxdedx);
-  m_dedx1FW   = QAH1F("QaDedxDedx1FW", "dedx: dE/dx[1], ftpcW", ndedx, mindedx, maxdedx);
+  m_ndedxFW   = QAH1F("QaDedxNdedxFW", "dedx: number of point to define dE/dx, ftpcW", 20,0., 20.);  
+  m_dedx0FW   = QAH1F("QaDedxDedx0FW", "dedx: dE/dx mean (GeV/cm), ftpcW", ndedx,  0., 0.0005);
+  m_dedx1FW   = QAH1F("QaDedxDedx1FW", "dedx: dE/dx sigma, ftpcW", ndedx, 0., 0.005);
   
 }
 //_____________________________________________________________________________
