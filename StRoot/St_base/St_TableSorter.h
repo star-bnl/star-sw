@@ -1,6 +1,6 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
 // 
-//  
+//   
 
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
 // 
@@ -57,10 +57,10 @@ class St_TableSorter : public TNamed {
     Int_t     m_colSize;      // The size of the selected column in bytes
     Int_t    *m_IndexArray;   // "parsed" indecis
     Int_t     m_colDimensions;// The number of the dimensions for array (=-1 means it is a "simple" array)
+    const Char_t *m_simpleArray;    // Pointer to the "simple" array;
     const St_Table &m_ParentTable;  // the back pointer to the sorted table
-    const Char_t *m_simpleArray;     // Pointer to the "simple" array;
-    SEARCHMETHOD  m_searchMethod;    // Function selected to serach values
-    EColumnType   m_colType;         // data type of the selected column
+    SEARCHMETHOD  m_searchMethod;   // Function selected to serach values
+    EColumnType   m_colType;        // data type of the selected column
 
     static int CompareFloat_t     (const void **, const void **);
     static int CompareInt_t       (const void **, const void **);
@@ -113,9 +113,13 @@ class St_TableSorter : public TNamed {
  public:
     St_TableSorter(const St_Table &table=*((const St_Table *)0));
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
-    St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
-    St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
-    St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+
+// The last parameter below ",const St_Table &table=*((const St_Table *)0));" 
+// is useless but was introduced to make "g++" happy.
+
+    St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0, const St_Table &table=*((const St_Table *)0));
+    St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0,const St_Table &table=*((const St_Table *)0));
+    St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0,  const St_Table &table=*((const St_Table *)0));
     virtual ~St_TableSorter();
     
     Int_t BinarySearch(Float_t  value );
