@@ -54,7 +54,6 @@ void dsu_Clear(void) {
 }
 void MakeDrawingArea(Widget parent,Dimension width,Dimension height) {
   Arg args[40]; int nn;
-  Widget drawing_a;
   XGCValues gcv;
   gDrawWrapper=Row(parent);
   nn=0;
