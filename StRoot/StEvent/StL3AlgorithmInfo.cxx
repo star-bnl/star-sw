@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3AlgorithmInfo.cxx,v 2.1 2001/08/02 01:26:31 ullrich Exp $
+ * $Id: StL3AlgorithmInfo.cxx,v 2.2 2001/08/20 21:29:00 ullrich Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,16 +10,18 @@
  ***************************************************************************
  *
  * $Log: StL3AlgorithmInfo.cxx,v $
+ * Revision 2.2  2001/08/20 21:29:00  ullrich
+ * Changed counter type from UInt_t to Int_t.
+ *
  * Revision 2.1  2001/08/02 01:26:31  ullrich
  * Initial Revision.
- *
  *
  **************************************************************************/
 
 #include <string.h>
 #include "StL3AlgorithmInfo.h"
 
-static const char rcsid[] = "$Id: StL3AlgorithmInfo.cxx,v 2.1 2001/08/02 01:26:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StL3AlgorithmInfo.cxx,v 2.2 2001/08/20 21:29:00 ullrich Exp $";
 
 ClassImp(StL3AlgorithmInfo)
 
@@ -36,7 +38,7 @@ StL3AlgorithmInfo::StL3AlgorithmInfo()
   mNumberOfBuildEvents = 0;
 }
 
-StL3AlgorithmInfo::StL3AlgorithmInfo(algorithm_data* raw)
+StL3AlgorithmInfo::StL3AlgorithmInfo(Algorithm_Data* raw)
 {
   initArrays();
   mId = raw->algId;
