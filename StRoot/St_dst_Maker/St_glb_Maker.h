@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.13 1999/02/13 20:22:32 caines Exp $
+// $Id: St_glb_Maker.h,v 1.14 1999/02/16 03:03:47 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.14  1999/02/16 03:03:47  fisyak
+// Split Make and Histograms
+//
 // Revision 1.13  1999/02/13 20:22:32  caines
 // Added exi and temp dir for when svt not there
 //
@@ -79,7 +82,7 @@ class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.13 1999/02/13 20:22:32 caines Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.14 1999/02/16 03:03:47 fisyak Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -146,7 +149,8 @@ class St_glb_Maker : public StMaker {
   static const Float_t xmaxpT;
   static const Float_t ymineta;
   static const Float_t ymaxeta;
-  
+  void              Histograms();// Histograms for global
+
  protected:
   TH2F     *m_pT_eta_rec;  //! pT versus eta Spectra for reconstructed
   TH2F     *m_pT_eta_gen;  //! pT versus eta Spectra for generated
