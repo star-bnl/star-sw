@@ -1,7 +1,7 @@
-#include <StRoot/StEEmcDbMaker/EEmcDbItem.h>
+
 class StChain;
 class StMuEmcCollection;
-class   EEmcDbItem;
+
 class StEEmcDbMaker;
 class StMuDstMaker;
 class TChain;
@@ -14,8 +14,8 @@ StChain *chain=0;
 int rdMuDst2soloPi0
 (
  TString fullName="aa2",
- int nEve=50000,
- Int_t nFiles  = 100, 
+ int nEve=50,
+ Int_t nFiles  = 10, 
  char* file="eemcCalib.lisX1M", // eemcCalib  800K eve
  char* inDir   = "./"
 ){ 
@@ -25,7 +25,7 @@ int rdMuDst2soloPi0
   //file="st_physics_5085017_raw_4010001.MuDst.root"; // prod62GeV
 
 
-  // file="R5091010muDst.lis"; // eemcCalib 28.8K eve
+   file="R5091010muDst.lis"; // eemcCalib 28.8K eve
 
   //file="R5085017muDst.lis"; //prod62
 
