@@ -41,6 +41,8 @@ private:
    Int_t               m_Mode;              //Run mode
    EDebugLevel         m_DebugLevel;        //Debug level
    St_DataSet         *m_DataSet;           //The main chain dataset structure
+   St_DataSet         *m_RunSet;            //Run
+   St_DataSet         *m_EventSet;          //Event
    St_DataSetIter     *m_RunIter;           //The parameters
    St_DataSetIter     *m_CalibIter;         //The calibration       
    St_DataSetIter     *m_EventIter;         //The Event (fruits)

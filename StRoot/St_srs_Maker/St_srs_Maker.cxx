@@ -162,29 +162,18 @@ void St_srs_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_srs_Maker::Make(){
 // Create output tables
-   const Char_t *makertype = GetTitle();
-   St_DataSet   *set = 0;
-   if (makertype && strlen(makertype)) {
-     St_DataSetIter    top(gStChain->DataSet());
-     top.Cd(gStChain->GetName()); 
-     set = top(makertype);
-     if (!set) {top.Mkdir(makertype); set = top(makertype);}
-   }
-   else set = gStChain->GetRawData();
-   St_DataSetIter raw_data(set);
-   if (!m_DataSet)  {
-     raw_data.Mkdir("svt"); 
-     m_DataSet = raw_data("svt");
+   if (!m_DataSet->GetList())  {
      St_DataSetIter local(m_DataSet);
      local.Mkdir("hits"); local.Cd("hits");
      St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",20000); local.Add(scs_spt);
      St_srs_result *srs_result = new St_srs_result("srs_result",20000); local.Add(srs_result);
      St_DataSetIter geant(gStChain->GetGeant());
      St_DataSetIter g2t(geant("Event"));
-     St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) (geant.GetTableObj("Event/g2t_svt_hit"));
+     St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("Event/g2t_svt_hit");
      Int_t res =  srs_am (srs_result,g2t_svt_hit,scs_spt,
                           m_geom,m_config,m_shape,m_srs_srspar,m_srs_direct,m_srs_activea);
    }
+     m_DataSet->ls("*");
   //  PrintInfo();
  return kSTAFCV_OK;
 }

@@ -373,12 +373,14 @@ void StChain::Init()
    StMaker *maker;
    TObject *objfirst, *objlast;
    if (! m_DataSet) m_DataSet = new St_DataSet(GetName()); 
+   SafeDelete(m_EventSet);
    if (m_File) {
      St_DataSet *set = m_File->NextEventGet(); // Get Run parameters
      if (set) {
        if (strcmp(set->GetName(),"run")==0 || 
            strcmp(set->GetName(),"Run")==0){
-          m_DataSet->Add(set); 
+          m_RunSet = set;
+          m_DataSet->Add(m_RunSet); 
           if (m_RunIter) m_RunIter->Reset(set);
           else           m_RunIter = new St_DataSetIter (set);
        }
@@ -387,6 +389,11 @@ void StChain::Init()
         delete set;
        }
      }
+   }
+   if (! m_RunSet) {
+     m_RunSet = new St_DataSet("run"); 
+     St_DataSetIter local(m_DataSet);
+     local.Add(m_RunSet);
    }
    while ((maker = (StMaker*)next())) {
      // save last created histogram in current Root directory
@@ -402,16 +409,6 @@ void StChain::Init()
          maker->Histograms()->Add(objfirst);
          objfirst = gDirectory->GetList()->After(objfirst);
       }
-     
-     if (m_DataSet) {
-       // Create the new DataSet for each new type of the maker if any
-       St_DataSetIter next(m_DataSet);
-       next.Cd(GetName());
-       const Char_t *makertype = maker->GetTitle();
-       // Test the special case
-       if (makertype && strlen(makertype))
-          next.Mkdir(maker->GetTitle());
-     }
    }
    // Save Run to XDF Output file if any
    if (m_FileOut) {
@@ -511,49 +508,31 @@ void StChain::SetDefaultParameters()
 Int_t StChain::Make(Int_t i)
 {
    m_Event = i;
-
+// Create event 
+   St_DataSetIter nextDataSet(m_DataSet);
+   nextDataSet.Cd(gStChain->GetName());
+   m_EventSet = nextDataSet("event");
+   SafeDelete(m_EventSet);
+   m_EventSet = nextDataSet.Mkdir("event");
 //   Loop on all makers
    Int_t ret;
-   TIter next(m_Makers);
+   TIter nextMaker(m_Makers);
    StMaker *maker;
-   while ((maker = (StMaker*)next())) {
+   while ((maker = (StMaker*)nextMaker())) {
+     // Create the new DataSet for each new type of the maker if any
      const Char_t *makertype = maker->GetTitle();
+     // Test the special case
+     St_DataSet *makerset = 0;
+     if (makertype && strlen(makertype))
+         makerset = nextDataSet.Mkdir(maker->GetTitle());
+     else
+         makerset = m_EventSet;
   // Call Maker
+     maker->SetDataSet(makerset);
      ret = maker->Make();
      if (gStChain->Debug()) printf("%s %i\n",maker->GetName(),ret);
      if (ret < 0) return ret;
-
-     if (m_DataSet) {
-       St_DataSetIter nextset(m_DataSet);
-        
-       // Add the result of the maker into the "its" branch of the main dataset
-       nextset.Cd(GetName());
-
-       // Test the special case
-       if (makertype && strlen(makertype)) {
-          St_DataSet *set=nextset(makertype); 
-          if (set) {
-            St_DataSet *parent = set->GetParent();
-            if (!parent) set->Add(maker->DataSet());
-	  }
-          else 
-             Error("Make","There is no directory to collect the maker \"%s\" (type \"%s\") results"
-                         ,maker->GetName(),makertype);
-        }
-        else { 
-          // special case:
-          //   replace the root dataset if any
-          St_DataSet *topset = maker->DataSet();        // Get the maker top dataset
-          if (topset) {
-            const Char_t *topsetname   = topset->GetTitle();   // Poll its name up
-            St_DataSet *chainset = nextset(topsetname); // Look up the dataset with the same name
-            if (chainset) 
-                 delete chainset;                       // Delete the obsolete dataset            
-            m_DataSet->Add(topset);                     // add the new dataset instead
-          }        
-        }
-        if (gStChain->Debug()) m_DataSet->ls(2);
-      }
+     if (gStChain->Debug()) m_DataSet->ls(2);
    }
    return 0;
 }
