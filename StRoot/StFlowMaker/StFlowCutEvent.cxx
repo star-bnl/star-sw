@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.25 2002/05/24 11:04:18 snelling Exp $
+// $Id: StFlowCutEvent.cxx,v 1.26 2002/06/07 22:18:37 kirill Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -19,6 +19,8 @@
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorF.hh"
+#include "StFlowConstants.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 #define PR(x) cout << "##### FlowCutEvent: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowCutEvent)
@@ -205,6 +207,107 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
 
 //-----------------------------------------------------------------------
 
+Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
+  // Returns kTRUE if muevent survives all the cuts
+  
+  if (!pMuEvent) return kFALSE;
+
+  if (!pMuEvent->l3EventSummary().unbiasedTrigger()) {
+    // cout << "FlowCutEvent: L3 biased trigger event " << endl;
+    return kFALSE;
+  }
+
+  // update normal event counter
+  mEventN++;
+
+  // Centrality
+  Int_t* cent;
+  Int_t centrality;
+
+  if (pMuEvent->runInfo().centerOfMassEnergy() >= 199.) {
+    if (fabs(pMuEvent->magneticField()) >= 4.) { // year=2, Au+Au, Full Field
+      cent = Flow::cent200Full;
+    } else { // year=2, Au+Au, Half Field
+      cent = Flow::cent200Half;
+    }
+  } else if (pMuEvent->runInfo().centerOfMassEnergy() <= 25.){ // year=2, 22 GeV
+    cent = Flow::cent22;
+  }
+
+  Int_t tracks =  pMuEvent->refMultNeg() + pMuEvent->refMultPos();
+
+  if      (tracks < cent[0])  { centrality = 0; }
+  else if (tracks < cent[1])  { centrality = 1; }
+  else if (tracks < cent[2])  { centrality = 2; }
+  else if (tracks < cent[3])  { centrality = 3; }
+  else if (tracks < cent[4])  { centrality = 4; }
+  else if (tracks < cent[5])  { centrality = 5; }
+  else if (tracks < cent[6])  { centrality = 6; }
+  else if (tracks < cent[7])  { centrality = 7; }
+  else if (tracks < cent[8])  { centrality = 8; }
+  else                        { centrality = 9; }
+
+  if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
+      (centrality < mCentCuts[0] || centrality > mCentCuts[1])) {
+    mCentCut++;
+    return kFALSE;
+  }
+  
+  // Multiplicity 
+  Int_t mult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
+  if (mMultCuts[1] > mMultCuts[0] && 
+      (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
+    mMultCut++;
+    return kFALSE;
+  }
+   
+  // Vertex x
+  Float_t vertexX = pMuEvent->primaryVertexPosition().x();
+  if (mVertexXCuts[1] > mVertexXCuts[0] &&
+     (vertexX < mVertexXCuts[0] || vertexX >= mVertexXCuts[1])) {
+    mVertexXCut++;
+    return kFALSE;
+  }
+
+  // Vertex y
+  Float_t vertexY = pMuEvent->primaryVertexPosition().y();
+  if (mVertexYCuts[1] > mVertexYCuts[0] &&
+     (vertexY < mVertexYCuts[0] || vertexY >= mVertexYCuts[1])) {
+    mVertexYCut++;
+    return kFALSE;
+  }
+
+  // Vertex z
+  Float_t vertexZ = pMuEvent->primaryVertexPosition().z();
+  if (mVertexZCuts[1] > mVertexZCuts[0] &&
+     (vertexZ < mVertexZCuts[0] || vertexZ >= mVertexZCuts[1])) {
+    mVertexZCut++;
+    return kFALSE;
+  }
+
+  // Trigger
+  UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
+  Float_t trigger = 10.;
+
+  switch (triggerWord) {
+  case 4096:  trigger = 1.;  break; // minbias
+  case 4352:  trigger = 2.;  break; // central
+  case 61952: trigger = 3.;  break; // laser
+  default:    trigger = 10.; break; // no clue
+  }
+
+  if (mTriggerCut && trigger != mTriggerCut) {
+    mTriggerCutN++;
+    return kFALSE;
+  }
+
+  mGoodEventN++;
+  return kTRUE;
+
+}
+  
+//-----------------------------------------------------------------------
+
 Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   // Returns kTRUE if StEvent survives this Eta symmetry cut
   // Call at the end of the event after doing CheckTrack for each track
@@ -262,6 +365,35 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
 
 //-----------------------------------------------------------------------
 
+Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
+  // Returns kTRUE if muevent survives this Eta symmetry cut
+  // Call at the end of the event after doing CheckTrack for each track
+  // If kFALSE you should delete the last event
+
+  float etaSymPosN = (float)StFlowCutTrack::EtaSymPos();
+  float etaSymNegN = (float)StFlowCutTrack::EtaSymNeg();
+  float etaSym = (etaSymPosN - etaSymNegN) / (etaSymPosN + etaSymNegN);
+  StFlowCutTrack::EtaSymClear();
+
+  const StThreeVectorF& vertex = pMuEvent->primaryVertexPosition();
+  Float_t vertexZ = vertex.z();
+  float etaSymZSlope = 0.003;
+  etaSym += (etaSymZSlope * vertexZ); // correction for acceptance
+  etaSym *= sqrt((double)(etaSymPosN + etaSymNegN)); // corrected for statistics
+
+  if (mEtaSymCuts[1] > mEtaSymCuts[0] && 
+      (etaSym < mEtaSymCuts[0] || etaSym >= mEtaSymCuts[1])) {
+    mEtaSymCutN++;
+    mGoodEventN--;
+    return kFALSE;
+  }
+
+  return kTRUE;
+
+}
+
+//-----------------------------------------------------------------------
+
 void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
 
@@ -297,6 +429,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.26  2002/06/07 22:18:37  kirill
+// Introduced MuDst reader
+//
 // Revision 1.25  2002/05/24 11:04:18  snelling
 // Added a cut to remove the events triggered by L3
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.h,v 1.15 2002/02/13 22:29:17 posk Exp $
+// $Id: StFlowCutTrack.h,v 1.16 2002/06/07 22:18:40 kirill Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -20,6 +20,7 @@
 #include "Rtypes.h"
 class StTrack;
 class StFlowPicoTrack;
+class StMuTrack;
 
 class StFlowCutTrack {
 
@@ -30,6 +31,7 @@ class StFlowCutTrack {
 
   static Int_t   CheckTrack(StTrack* pTrack);
   static Int_t   CheckTrack(StFlowPicoTrack* pPicoTrack);
+  static Int_t   CheckTrack(StMuTrack* pMuTrack);
   static void    PrintCutList();
   static UInt_t  EtaSymPos();
   static UInt_t  EtaSymNeg();
@@ -153,6 +155,9 @@ inline void StFlowCutTrack::SetEtaFtpc(Float_t lo_neg, Float_t hi_neg,
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.h,v $
+// Revision 1.16  2002/06/07 22:18:40  kirill
+// Introduced MuDst reader
+//
 // Revision 1.15  2002/02/13 22:29:17  posk
 // Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
 //
