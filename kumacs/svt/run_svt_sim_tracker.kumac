@@ -120,7 +120,7 @@
    exec create_tables_svt#sgr
    exec create_tables_svt#stk
    exec init_sgr
-   exec init_stk
+   exec init_stk#init
    exec init_stk#vtx
  endif
  
