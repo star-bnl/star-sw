@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.397 2004/03/20 01:20:54 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.398 2004/03/24 20:28:17 calderon Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -32,7 +32,7 @@
 #include "StHitFilterMaker/StHitFilterMaker.h"
 #include "StTpcHitMoverMaker/StTpcHitMoverMaker.h"
 #include "St_tpt_Maker/St_tpt_Maker.h"
-
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
@@ -1411,9 +1411,14 @@ Int_t StBFChain::Instantiate()
 	    cout << "Sti Parameters (seen in bfc):" << endl
 		 << *pars << endl;
 
-	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
+	    //if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
 	  }
-
+	  if (maker=="GenericVertex") {
+	      if (GetOption("beamLine")) {
+		  StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
+		  gvtxMk->UseBeamLine();
+	      }
+	  }
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
 	    if (maker == "StTrsMaker"){
 	      mk->SetMode(1);       // Pile-up correction
