@@ -1,0 +1,121 @@
+/***************************************************************************
+ *
+ * $Id: StSsdHit.cxx,v 2.1 1999/10/13 19:45:11 ullrich Exp $
+ *
+ * Author: Thomas Ullrich, Jan 1999
+ ***************************************************************************
+ *
+ * Description:
+ *
+ ***************************************************************************
+ *
+ * $Log: StSsdHit.cxx,v $
+ * Revision 2.1  1999/10/13 19:45:11  ullrich
+ * Initial Revision
+ *
+ * Revision 2.5  2000/01/05 16:05:37  ullrich
+ * Updated for actual use in StEvent. Unpacking changed.
+ *
+ * Revision 2.4  1999/11/09 19:35:15  ullrich
+ * Memory now allocated using StMemoryPool via overloaded new/delete
+ *
+#include "tables/dst_point.h"
+ * Added missing default constructor
+ *
+ * Revision 2.2  1999/10/28 22:26:36  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
+ *
+ * Revision 2.1  1999/10/13 19:45:11  ullrich
+ * Initial Revision
+ *
+
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.1 1999/10/13 19:45:11 ullrich Exp $";
+
+StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
+
+ClassImp(StSsdHit)
+
+StSsdHit::StSsdHit() { /* noop */ }
+
+StSsdHit::StSsdHit(const StThreeVectorF& p,
+                   const StThreeVectorF& e,
+                   ULong_t hw, Float_t q, UChar_t c)
+    : StHit(p, e, hw, q, c)
+{ /* noop */ }
+
+StSsdHit::StSsdHit(const dst_point_st& pt)
+{
+    //
+    // Unpack charge:
+    // The charge is decoded together with its error.
+    // Currently only the charge is used but the corresponding
+    // error can easily be added.
+    //
+    const ULong_t ssddq = pt.charge/(1L<<16);
+    const ULong_t ssdq  = pt.charge - ssddq*(1L<<16);
+    mCharge = Float_t(ssdq)/(1<<21);
+
+    const Float_t maxRange   = 22;
+    const Float_t mapFactor  = 23800;
+    //
+    const Float_t maxRange   = 40;
+    const Float_t mapFactor  = 16000;
+    ULong_t ssdy11 = pt.position[0]/(1L<<20);
+    ULong_t ssdz   = pt.position[1]/(1L<<10);
+    ULong_t ssdx   = pt.position[0] - (1L<<20)*ssdy11;
+    ULong_t ssdy10 = pt.position[1] - (1L<<10)*ssdz;
+    ULong_t ssdy   = ssdy11 + (1L<<10)*ssdy10;
+    mPosition.setX(Float_t(ssdx)/mapFactor - maxRange);
+    mPosition.setY(Float_t(ssdy)/mapFactor - maxRange);
+    mPosition.setZ(Float_t(ssdz)/mapFactor - maxRange);
+    
+    //
+    // Unpack error on position in xyz
+    //
+    ssdy11 = pt.pos_err[0]/(1L<<20);
+    ssdz   = pt.pos_err[1]/(1L<<10);
+    ssdx   = pt.pos_err[0] - (1L<<20)*ssdy11;
+    ssdy10 = pt.pos_err[1] - (1L<<10)*ssdz;
+    mPositionError.setZ(Float_t(ssdz)/(1L<<26));
+
+    //
+    // The hardware position stays at it is
+    //
+    mHardwarePosition = pt.hw_position;
+}
+
+StSsdHit::~StSsdHit() {/* noop */}
+
+StObject*
+}
+
+    return bits(4, 10)-1;    // bits 4-13
+StSsdHit::centralStripNSide() const
+{
+  return bits(13, 10);     // bits 13-22
+}
+
+    return bits(16, 10)-1;    // bits 16-25
+StSsdHit::centralStripPSide() const
+{
+  return bits(23, 5);      // bits 23-27
+}
+
+    return bits(14, 2);    // bits 14-15
+StSsdHit::clusterSizeNSide() const
+{
+    return bits(28, 2);    // bits 28-29
+}
+
+    return bits(26, 2);    // bits 26-27
+}
+
+ULong_t
+StSsdHit::matchingQualityFactor() const
+{
+    return bits(28, 4);    // bits 28-31
+StSsdHit::clusterSizePSide() const
+
+{
+    return bits(30, 2);    // bits 30-31
+}
