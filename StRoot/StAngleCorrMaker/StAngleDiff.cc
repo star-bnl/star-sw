@@ -21,38 +21,31 @@
 #include "StEvent/StGlobalTrack.hh"
 #include "StThreeVector.hh"
 #include <stdio.h>
+#include <math.h>
 
-//double StAngleDiff::phiDiff(StGlobalTrack *track1, StGlobalTrack *track2) {
 double StAngleDiff::phiDiff(StThreeVector<double> m1, 
 			    StThreeVector<double> m2) {
   // calculates difference in phi angles between two tracks
-  // 0 < phidiff < 2pi
-  // requires bfield, see Thomas for this !!!
-  //  
-  //  const double  bField = 0.5*tesla;
-  //  StThreeVector<double> m1 = track1->helix().momentum(bField);
+  // 0 < phidiff < pi
+
   double phi1  = m1.phi();
-  //  StThreeVector<double> m2 = track2->helix().momentum(bField);
   double phi2  = m2.phi();
 
-  double phidiff = phi1-phi2;
-  if (phidiff < 0) {
-    phidiff =+ 2.*pi ;
-  }
+  if (phi1< 0) phi1 = phi1 + 2.*pi;
+  if (phi2< 0) phi2 = phi2 + 2.*pi;
 
+  double phidiff = fabs(phi1-phi2);
+  if (phidiff > pi) {
+      phidiff = 2.*pi - phidiff ;
+   }
   return phidiff ;
 };
 
-//double StAngleDiff::alphaDiff(StGlobalTrack *track1, StGlobalTrack *track2) {
  double StAngleDiff::alphaDiff(StThreeVector<double> m1, 
 			       StThreeVector<double> m2) {
   // calculates  angle between the momenta of two tracks
   // 0 < alphadiff < 2pi
-  // requires bfield, see Thomas for this !!!
-  //  
-   //  const double  bField = 0.5*tesla;
-   //  StThreeVector<double> m1 = track1->helix().momentum(bField); 
-   //  StThreeVector<double> m2 = track2->helix().momentum(bField);
+
   double p1 = abs(m1);
   double p2 = abs(m2);
   double alphadiff=acos((m1.x()*m2.x()+m1.y()*m2.y()+m1.z()*m2.z())/(p1*p2));
@@ -60,13 +53,12 @@ double StAngleDiff::phiDiff(StThreeVector<double> m1,
   return alphadiff;
 };
 
-double  StAngleDiff::weightPhi(double phidiff) {
+double  StAngleDiff::weightPhiDiff(StThreeVector<double> m1, 
+			       StThreeVector<double> m2) {
   // placeholder for two-track acceptance function
 
   double weight = 1;
-  if (phidiff < 0.02 ) {
-    weight = 0.;
-  }
+  if (phiDiff(m1,m2) < 0.02 ) weight = 0.0 ;
   return weight;
 };
 

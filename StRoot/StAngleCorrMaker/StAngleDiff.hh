@@ -9,7 +9,7 @@ public:
 
   double phiDiff(StThreeVector<double> m1, StThreeVector<double> m2) ;
   double alphaDiff(StThreeVector<double> m1, StThreeVector<double> m2) ;
-  double weightPhi(double phidiff) ;
+  double weightPhiDiff(StThreeVector<double> m1, StThreeVector<double> m2) ;
   double weightAlpha(double alphadiff) ;
  
 protected:

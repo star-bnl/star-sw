@@ -1,5 +1,4 @@
 
-
 #ifndef StAngleCorrMaker_HH
 #define StAngleCorrMaker_HH
 
@@ -20,7 +19,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-#include "tables/HighPtTag.h"
+//#include "tables/HighPtTag.h"
 
 #include <TOrdCollection.h>
 
@@ -40,11 +39,13 @@ private:
   int mNumberEvents ;
 
   void MakeHistograms();
-  void analyseRealPairs();
+  void analyseRealPairs(StEvent&, int);
 
 protected:
   // maker generates some histograms
   TH1F* mHistPhiNumerator;
+  TH1F* mHistPhiDenominator;
+
 
 public:
 

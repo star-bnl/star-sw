@@ -27,43 +27,45 @@
 
 #define TRACKSMAX 100000 
 
-static const char rcsid[] = "$Id: StAngleCorrMaker.cxx,v 1.1 1999/04/28 01:08:01 didenko Exp $";
-
-void summarizeEvent(StEvent& event);
-
-long countPrimaryPairs(StEvent& event, int eventNumber, TOrdCollection* trackpool);
-
 Int_t StAngleCorrMaker::Init() {
+
   // set up a TOrdCollection as a pool of tracks
   // StTrackForPool has momentum and event number information
-  //
+
   mCollectionOfTracks= new TOrdCollection(TRACKSMAX);
+
   // book an histogram for the numerator of the angular correlation
-  mHistPhiNumerator = new TH1F("phiNumerator","number of pairs in real events",
-			       180,0.,180.);
+  int nbin = 180;
+  float lbin =0. ;
+  float ubin = 180.;
+  mHistPhiNumerator = new TH1F("phiNumerator",
+			       "relative phi in real events",
+			       nbin,lbin,ubin);
+  mHistPhiDenominator = new TH1F("phiDenominator",
+				 "relative phi in real events",
+			         nbin,lbin,ubin);
+
   return StMaker::Init();
 }
 
 Int_t StAngleCorrMaker::Make() {
+
   StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
   if (! evMaker->event()) return kStOK; // If no event, we're done
   StEvent& ev = *(evMaker->event());
-  StRun& run = *(evMaker->run());
-  int eventNumber = evMaker->GetNumber();
-  cout <<" event number " <<  eventNumber << endl;
-  // OK, we've got the event. Pass it and process it.
-  summarizeEvent(ev);
 
-  long npair = countPrimaryPairs(ev,eventNumber,mCollectionOfTracks);
-  cout << "Primary pairs: " << npair << endl;
+  int eventNumber = evMaker->GetNumber();
+  // process all posssible pairs of primary tracks
+  // fill histograms, and add tracks to pool of tracks
+  //
+  analyseRealPairs(ev,eventNumber);
 
   return kStOK;
 }
 
 
 StAngleCorrMaker::StAngleCorrMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
-  drawinit = kFALSE;
-  
+  drawinit = kFALSE;  
 }
 
 StAngleCorrMaker::~StAngleCorrMaker() {
@@ -72,7 +74,7 @@ StAngleCorrMaker::~StAngleCorrMaker() {
 
 void StAngleCorrMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAngleCorrMaker.cxx,v 1.1 1999/04/28 01:08:01 didenko Exp $\n");
+  printf("* $Id: StAngleCorrMaker.cxx,v 1.2 1999/04/28 15:14:49 ogilvie Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -83,6 +85,8 @@ void StAngleCorrMaker::Clear(Option_t *opt) {
 }
 
 Int_t StAngleCorrMaker::Finish() {
+  // draw histograms
+  mHistPhiNumerator->Draw();
   return kStOK;
 }
 
