@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.54 2000/08/18 20:30:16 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.55 2000/08/18 20:53:31 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.55  2000/08/18 20:53:31  lansdell
+// fixed probability of fit bug
+//
 // Revision 1.54  2000/08/18 20:30:16  lansdell
 // added global track probability of fit histogram; extra, empty page is currently printed for some reason, still checking
 //
@@ -388,7 +391,8 @@ void StEventQAMaker::MakeHistGlob() {
 
       // calculate the probability of a fit being correct
       // number of degrees of freedom = fitpoints-5 (5 params constrain track)
-      Double_t probability = TMath::Prob(chisq0,2*globtrk->fitTraits().numberOfFitPoints()-5);
+      Double_t ndf = 2*globtrk->fitTraits().numberOfFitPoints()-5;
+      Double_t probability = TMath::Prob(chisq0*ndf,ndf);
       m_globtrk_fit_prob->Fill(probability);
 
 // now fill all TPC histograms ------------------------------------------------
