@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cc,v 1.3 1999/02/23 16:13:26 genevb Exp $
+ * $Id: StXiVertex.cc,v 1.4 1999/02/24 01:55:35 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cc,v $
+ * Revision 1.4  1999/02/24 01:55:35  genevb
+ * Add Xi vertex type
+ *
  * Revision 1.3  1999/02/23 16:13:26  genevb
  * Add v0 pointers for xi's outside constructor
  *
@@ -25,12 +28,12 @@
 #include <iostream.h>
 #include "StEvent/StXiVertex.hh"
 
-static const char rcsid[] = "$Id: StXiVertex.cc,v 1.3 1999/02/23 16:13:26 genevb Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cc,v 1.4 1999/02/24 01:55:35 genevb Exp $";
 
 StXiVertex::StXiVertex() : 
  StVertex()
 {
-    mType = threeBody;			// always
+    mType = Xi;			// always
     mDcaBachelorToPrimaryVertex = 0;
     mMomentumOfBachelor = StThreeVector<float>();
     mDcaDaughters = 0;
@@ -41,7 +44,7 @@ StXiVertex::StXiVertex() :
 StXiVertex::StXiVertex(dst_xi_vertex_st* xivtx, dst_vertex_st* vtx) :
  StVertex(vtx)
 {
-    mType = threeBody;			// always
+    mType = Xi;			// always
     mDcaBachelorToPrimaryVertex = xivtx->b_b;
     mMomentumOfBachelor.setX(xivtx->px_b);
     mMomentumOfBachelor.setY(xivtx->py_b);

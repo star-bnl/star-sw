@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.hh,v 1.3 1999/02/18 15:40:06 ullrich Exp $
+ * $Id: StEnumerations.hh,v 1.4 1999/02/24 01:55:34 genevb Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,10 +10,13 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.hh,v $
- * Revision 1.3  1999/02/18 15:40:06  ullrich
- * Added CINT link pragmas, detector enumeration changed but official
- * version still pending, added enum StTrackSign.
+ * Revision 1.4  1999/02/24 01:55:34  genevb
+ * Add Xi vertex type
  *
+ * Revision 1.5  1999/02/24 02:58:30  ullrich
+ * StDetector now reflects official STAR detector numbers.
+ *
+ * Revision 1.4  1999/02/24 01:55:34  genevb
  * Add Xi vertex type
  *
  * Revision 1.3  1999/02/18 15:40:06  ullrich
@@ -38,7 +41,7 @@ enum StDetector {tpc, svt, ssd, ftpcEast, ftpcWest, rich, tof,
 #pragma link C++ enum StTrackSign;
 #endif
 
-		   pileUpPrimary, V0};
+enum StBeamDirection {east, west};
 
 enum StBeamPolarizationAxis {sideways, vertical, longitudinal};
 
