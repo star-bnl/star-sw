@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.28 2002/03/01 14:22:20 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.29 2002/03/05 16:51:35 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.29  2002/03/05 16:51:35  jcs
+// force data type definitions to avoid compiler warnings (this is a correct
+// but inelegant fix which must be changed)
+//
 // Revision 1.28  2002/03/01 14:22:20  jcs
 // add additional histograms to monitor cluster finding
 //
@@ -1261,7 +1265,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  thispoint->SetSector(iSec+1);
 	  thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
 	  thispoint->SetNumberBins(Peak->Sequence.Length);
-	  thispoint->SetMaxADC(Peak->PeakHeight);
+	  thispoint->SetMaxADC((long)Peak->PeakHeight);
 	  thispoint->SetCharge(ChargeSum);
 	  thispoint->SetX(Peak->x);
 	  thispoint->SetY(Peak->y);
@@ -1711,9 +1715,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      thispoint->SetSector(iSec+1);
 	      thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
 	      thispoint->SetNumberBins(Peak[iPeakIndex].Sequence.Length);
-	      thispoint->SetMaxADC(Peak[iPeakIndex].PeakHeight);
-	      thispoint->SetCharge(ChargeSum*Peak[iPeakIndex].PeakHeight
-				   /PeakHeightSum);
+	      thispoint->SetMaxADC((long)Peak[iPeakIndex].PeakHeight);
+	      thispoint->SetCharge(ChargeSum*(long)(Peak[iPeakIndex].PeakHeight
+				   /PeakHeightSum));
 	      thispoint->SetX(Peak[iPeakIndex].x);
 	      thispoint->SetY(Peak[iPeakIndex].y);
 	      thispoint->SetZ(Peak[iPeakIndex].z);
