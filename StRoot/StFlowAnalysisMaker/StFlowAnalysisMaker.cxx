@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.26 2000/03/28 23:25:36 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.27 2000/04/13 22:34:13 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.27  2000/04/13 22:34:13  posk
+// Resolution correction is now made.
+//
 // Revision 1.26  2000/03/28 23:25:36  posk
 // Allow multiple instances.
 //
@@ -38,20 +41,11 @@
 // Revision 1.18  2000/01/27 00:04:29  posk
 // Corrected error in pt plots.
 //
-// Revision 1.17  2000/01/24 23:02:11  posk
-// Merged updates
-//
-// Revision 1.16  2000/01/14 02:09:24  snelling
-// Fixed small typo (,)
-//
 // Revision 1.15  2000/01/14 01:35:52  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
 //
 // Revision 1.14  2000/01/14 01:13:34  snelling
 // modified spt (sum pt) to mpt (mean pt) because FlowTag changed
-//
-// Revision 1.13  2000/01/13 21:50:22  posk
-// Updates and corrections.
 //
 // Revision 1.12  1999/12/21 01:19:26  posk
 // Added more histograms.
@@ -83,9 +77,6 @@
 // Revision 1.3  1999/08/24 18:02:37  posk
 // Calculates event plane resolution.
 // Added macros for plotting histograms.
-//
-// Revision 1.2  1999/08/13 21:12:00  posk
-// corrections and polishing
 //
 // Revision 1.1.1.1  1999/08/09 19:50:37  posk
 //
@@ -201,7 +192,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.26 2000/03/28 23:25:36 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.27 2000/04/13 22:34:13 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -628,7 +619,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
 
-      // Flow observed projections
+      // Flow observed profiles
       histTitle = new TString("Flow_vObsEta_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -1018,7 +1009,7 @@ Int_t StFlowAnalysisMaker::Finish() {
       histFull[k].histFullHar[j].mHist_vObs2D->
  	Divide(histFull[k].histFullHar[j].mHistSum_v2D, histYield2DZero,1.,1.);
 
-      // Clone the _vObs histograms to make the _v histograms
+      // Clone the _vObs2D histogram to make the v2D histogram
       histFull[k].histFullHar[j].mHist_v2D = 
 	(TH2F*)histFull[k].histFullHar[j].mHist_vObs2D->Clone();
       histTitle = new TString("Flow_v2D_Sel");
@@ -1030,25 +1021,26 @@ Int_t StFlowAnalysisMaker::Finish() {
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_v2D);
 
-      histFull[k].histFullHar[j].mHist_vEta =
-	(TProfile*)histFull[k].histFullHar[j].mHist_vObsEta->Clone();
+      // Creat the 1D v histograms
       histTitle = new TString("Flow_vEta_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHist_vEta->SetName(histTitle->Data());
-      histFull[k].histFullHar[j].mHist_vEta->SetTitle(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_vEta = new
+	TH1F(histTitle->Data(), histTitle->Data(), 2*nEtaBins, etaMin, etaMax);
+      histFull[k].histFullHar[j].mHist_vEta->SetXTitle("Pseudorapidity");
+      histFull[k].histFullHar[j].mHist_vEta->SetYTitle("Flow (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vEta);
 
-      histFull[k].histFullHar[j].mHist_vPt =
-	(TProfile*)histFull[k].histFullHar[j].mHist_vObsPt->Clone();
       TString* histTitle = new TString("Flow_vPt_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHist_vPt->SetName(histTitle->Data());
-      histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
+      histFull[k].histFullHar[j].mHist_vPt = new
+	TH1F(histTitle->Data(), histTitle->Data(), 2*nPtBins, ptMin, ptMax);
+      histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
+      histFull[k].histFullHar[j].mHist_vPt->SetYTitle("Flow (%)");
       delete histTitle;
       AddHist(histFull[k].histFullHar[j].mHist_vPt);
 
@@ -1058,8 +1050,26 @@ Int_t StFlowAnalysisMaker::Finish() {
 
       if (mRes[k][j] != 0.) {
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
-	histFull[k].histFullHar[j].mHist_vEta->Scale(1. / mRes[k][j]);
-	histFull[k].histFullHar[j].mHist_vPt-> Scale(1. / mRes[k][j]);
+	int n, entries;
+	float content, error;                   // convert to 1D
+	for (n = 0; n < 2*nEtaBins+2 ; n++) {
+	  content = histFull[k].histFullHar[j].mHist_vObsEta->GetBinContent(n);
+	  error   = histFull[k].histFullHar[j].mHist_vObsEta->GetBinError(n);
+	  histFull[k].histFullHar[j].mHist_vEta->SetBinContent(n, content);
+	  histFull[k].histFullHar[j].mHist_vEta->SetBinError(n, error);
+	}
+	entries = histFull[k].histFullHar[j].mHist_vObsEta->GetEntries();
+	histFull[k].histFullHar[j].mHist_vEta->SetEntries(entries);
+	for (n = 0; n < 2*nPtBins+2 ; n++) {
+	  content = histFull[k].histFullHar[j].mHist_vObsPt->GetBinContent(n);
+	  error   = histFull[k].histFullHar[j].mHist_vObsPt->GetBinError(n);
+	  histFull[k].histFullHar[j].mHist_vPt->SetBinContent(n, content);
+	  histFull[k].histFullHar[j].mHist_vPt->SetBinError(n, error);
+	}
+	entries = histFull[k].histFullHar[j].mHist_vObsPt->GetEntries();
+	histFull[k].histFullHar[j].mHist_vPt->SetEntries(entries);
+	histFull[k].histFullHar[j].mHist_vEta-> Scale(1. / mRes[k][j]);
+	histFull[k].histFullHar[j].mHist_vPt -> Scale(1. / mRes[k][j]);
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
