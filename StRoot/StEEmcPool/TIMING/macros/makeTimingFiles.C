@@ -38,7 +38,7 @@ void makeTimingFiles( Char_t *file="R6020047.lis",
   
 
   // load my analysis library
-  gSystem->Load("StEEmcPooltimingCalibration");  
+  gSystem->Load("StEEmcPoolTIMING");  
 
 
   StChain *myChain = new StChain("myChain");
