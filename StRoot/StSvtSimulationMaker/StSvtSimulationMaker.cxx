@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.4 2001/03/15 15:12:09 bekele Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.5 2001/03/19 22:25:53 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
+ * Revision 1.5  2001/03/19 22:25:53  caines
+ * Catch wrong wafer ids more elegantly
+ *
  * Revision 1.4  2001/03/15 15:12:09  bekele
  * added a method to fill the whole SVT hybrid with background
  *
@@ -354,7 +357,7 @@ Int_t StSvtSimulationMaker::createBackGrData(double backgsigma)
 		 //cout<<"an = "<<an<<" "<<"time = "<<tim<<endl;
 		 //cout<<mSvtSimulation->makeGausDev(backgsigma)<<endl;
 
-                double back,rem;
+                double back;
                  back = mSvtSimulation->makeGausDev(backgsigma);
                  mAdcArray[an*128 + tim] = back;
  		 
@@ -385,7 +388,8 @@ Int_t StSvtSimulationMaker::Make()
   if(Debug()) gMessMgr->Debug() <<"In StSvtSimulationMaker::Make()"<<endm;
 
   int volId ,barrel, layer, ladder, wafer, hybrid;
-  double x,y,z,px,py,pz;
+  double px,py,pz;
+  StThreeVector<double> xVec(0,0,0);
 
   if (counter)
     for(int i = 0; i < mNumOfHybrids; i++)
@@ -458,12 +462,15 @@ Int_t StSvtSimulationMaker::Make()
 	{
 	  volId = trk_st[j].volume_id;
 	  if( volId > 7000) continue; // SSD hit
-	  x = trk_st[j].x[0];    y = trk_st[j].x[1];   z = trk_st[j].x[2];
+	  xVec.setX( trk_st[j].x[0]);
+	  xVec.setY( trk_st[j].x[1]);
+	  xVec.setZ( trk_st[j].x[2]);
+	  
 	  px = trk_st[j].p[0];  py = trk_st[j].p[1];  pz = trk_st[j].p[2];
 	  // mEnergy =  trk_st[j].de*1e9;
 	  mEnergy =  96000;
 
-	  waferCoordArray[j] = mSvtSimulation->toLocalCoord(x,y,z,mCoordTransform); 
+	  waferCoordArray[j] = mSvtSimulation->toLocalCoord(xVec,mCoordTransform); 
 
 	  layer = waferCoordArray[j].layer(); ladder = waferCoordArray[j].ladder();
 	  wafer = waferCoordArray[j].wafer(); hybrid = waferCoordArray[j].hybrid();     
@@ -485,6 +492,7 @@ Int_t StSvtSimulationMaker::Make()
 
 	  if( 1000*layer+100*wafer+ladder !=volId){
 	    cout << "trouble" << endl;
+	    continue;
 	  }
 	  int index = mSvtSimPixelColl->getHybridIndex(barrel,ladder,wafer,hybrid);
 
@@ -498,7 +506,7 @@ Int_t StSvtSimulationMaker::Make()
 	    mSvtSimPixelColl->put_at(mSvtSimDataPixels,index);
 	  }
 	 
-	  fillEval(barrel,ladder,wafer,hybrid,waferCoordArray[j]);
+	  fillEval(barrel,ladder,wafer,hybrid,waferCoordArray[j],xVec);
 
 	  mSvtSimulation->calcAngles(mSvtGeom,px,py,pz,layer,ladder,wafer);
       
@@ -589,7 +597,7 @@ Int_t StSvtSimulationMaker::doOneHit(StSvtHybridPixels* SvtSimDataPixels)
 
 //____________________________________________________________________________
 
-Int_t StSvtSimulationMaker::fillEval(int barrel,int ladder,int wafer,int hybrid, StSvtWaferCoordinate& waferCoord)
+Int_t StSvtSimulationMaker::fillEval(int barrel,int ladder,int wafer,int hybrid, StSvtWaferCoordinate& waferCoord, StThreeVector<double>& xVec)
 { 
   int index = mSvtGeantHitColl->getHybridIndex(barrel,ladder,wafer,hybrid);
   
@@ -604,6 +612,7 @@ Int_t StSvtSimulationMaker::fillEval(int barrel,int ladder,int wafer,int hybrid,
   mSvtGeantHit->setGeantHit(counter[index],waferCoord);
   ++counter[index];
   mSvtGeantHit->setNumOfHits(counter[index]);
+  mSvtGeantHit->setGlobalCoord(counter[index],xVec);
     
   return kStOK;
 }

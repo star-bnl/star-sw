@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.1 2000/11/30 20:47:48 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.2 2001/03/19 22:25:53 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.2  2001/03/19 22:25:53  caines
+ * Catch wrong wafer ids more elegantly
+ *
  * Revision 1.1  2000/11/30 20:47:48  caines
  * First version of Slow Simulator - S. Bekele
  *
@@ -18,11 +21,17 @@
 #ifndef STSVTGEANTHITS_HH
 #define STSVTGEANTHITS_HH
 
-#include "StSvtClassLibrary/StSvtHybridObject.hh"
-
 #define MAX_HITS 50
 
+#include "StSvtClassLibrary/StSvtHybridObject.hh"
+#include <vector>
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+#endif
+#include "StThreeVector.hh"
+
 class StSvtWaferCoordinate;
+class StGlobalCoordinate;
 
 class StSvtGeantHits : public StSvtHybridObject
 {
@@ -32,19 +41,23 @@ public:
 
   void setNumOfHits(int nhits);
   void setGeantHit(int index , StSvtWaferCoordinate& waferCoord);
+  void setGlobalCoord(int index, StThreeVector<double>& x);
 
   int numberOfHits();
   StSvtWaferCoordinate* waferCoordinate();
+  StGlobalCoordinate*   globalCoordinate();
 
 private:
 
   int mNumOfHits;
   StSvtWaferCoordinate* mWaferCoord;  //!
+  StGlobalCoordinate*   mGlobalCoord; //!
  
   ClassDef(StSvtGeantHits,1)
 };
 
 inline int StSvtGeantHits::numberOfHits(){return mNumOfHits;}
 inline StSvtWaferCoordinate* StSvtGeantHits::waferCoordinate(){return mWaferCoord;}
+inline StGlobalCoordinate* StSvtGeantHits::globalCoordinate(){return mGlobalCoord;}
 
 #endif
