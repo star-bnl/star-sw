@@ -1,6 +1,9 @@
-* $Id: svttgeo.g,v 1.16 2001/09/05 23:02:19 nevski Exp $
+* $Id: svttgeo.g,v 1.17 2001/09/10 16:24:54 nevski Exp $
 *
 * $Log: svttgeo.g,v $
+* Revision 1.17  2001/09/10 16:24:54  nevski
+* bug fix - outer radius for a single ladder corrected
+*
 * Revision 1.16  2001/09/05 23:02:19  nevski
 * svt geometry version 2 - as it is built
 *
@@ -457,8 +460,8 @@ Block SVTT is the mother of all SVT volumes
 *
 * The SVT layers 
 *
+      radmax=svtg_rSizeMax
       Do ilayer = 1, min(6,nint(svtg_Nlayer))
-         radmax=svtg_rSizeMax
          if (ilayer<6) then
             USE SVTL layer=ilayer+1
             radmax=svtl_radius
@@ -523,7 +526,8 @@ Block SLYD is a single SVT layer
         if (rmax>radmax-ladthk) print *,' SVT warning: layer overlap = ',
                                 ilayer,rmax,radmax-ladthk
         rmax=min(rmax,radmax-ladthk)
-
+        if (Rmax<Rmin)   print *,' SVT error: bad geometry parameters =',
+                                ilayer,rmin,rmax
       Shape    TUBE rmin=rmin  rmax=rmax  dz=swca_Length/2
 
       Create   SLSD
