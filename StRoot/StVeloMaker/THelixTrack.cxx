@@ -33,6 +33,13 @@ THelixTrack::THelixTrack(const double *xyz,const double *dir,double rho,const do
   Set(xyz,dir,rho,hxyz);
 }
 //_____________________________________________________________________________
+THelixTrack::THelixTrack(const THelixTrack &from)
+{
+  int n = (char*)&fKind - (char*)fX + sizeof(fKind);
+  memcpy(fX,from.fX,n);
+}
+
+//_____________________________________________________________________________
 THelixTrack::THelixTrack(const double *pnts,int npnts, int rowsize)
 //
 //    ******************************************************************
@@ -55,8 +62,8 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
 //    ******************************************************************
 //
 {
-   double xm=0,ym=0,xxm=0,yym=0,xym=0,rrm=0,rrxm=0,rrym=0;
-   double x,y,z,s,Xcd,Ycd,Rhoc,Rhoc2,dR,Rho,xyz[3],res,resmax;
+   double xm,ym,xxm,yym,xym,rrm,rrxm,rrym;
+   double x,y,z,x1st,y1st,s,Xcd,Ycd,Rhoc,Rhoc2,dR,Rho,xyz[3],res,resmax;
    int ip,np,lv,maxres;
 
 
@@ -67,12 +74,14 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
 
    for (int iter=0; iter <3; iter++) {
      np = 0;
+     xm=0,ym=0,xxm=0,yym=0,xym=0,rrm=0,rrxm=0,rrym=0;
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
      {
        if (ign[ip]) 	break;
        np++;
        x = pnts[lv+0];  
        y = pnts[lv+1];  
+       if (np==1) {x1st=x; y1st=y;}
        xm   += x;   ym  += y;
        xxm  += x*x; yym += y*y; xym += x*y;
        rrm  += 0.5*(x*x+y*y);
@@ -88,16 +97,35 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      double det = (xxm*yym-xym*xym);
      double a   = (rrxm*yym-rrym*xym);
      double b   = (rrym*xxm-rrxm*xym);
-     double ab  = sqrt(a*a+b*b);
+     double ab2  = (a*a+b*b);
+     double ab  = sqrt(ab2);
 
-     Xcd = a/ab; if (det<0) Xcd = -Xcd;  
-     Ycd = b/ab; if (det<0) Ycd = -Ycd;  
-     Rhoc2 = det*det/(a*a+b*b);   
-     Rhoc = sqrt(Rhoc2);   
-     double c = 2.*((xm*Xcd+ym*Ycd)-rrm*Rhoc);
-     dR = -c/(1.+sqrt(1.-Rhoc*c));
-     Rho = Rhoc/(1.+dR*Rhoc);
-
+     if (fabs(det) < ab ) { 	//small Rhoc
+       Xcd = a/ab; if (det<0) Xcd = -Xcd;  
+       Ycd = b/ab; if (det<0) Ycd = -Ycd;  
+       Rhoc2 = det*det/(ab2);   
+       Rhoc = sqrt(Rhoc2);   
+       double c = 2.*((xm*Xcd+ym*Ycd)-rrm*Rhoc);
+       dR = -c/(1.+sqrt(1.-Rhoc*c));
+       Rho = Rhoc/(1.+dR*Rhoc);
+     } else {			//big Rhoc
+       Xcd = a/det;   
+       Ycd = b/det;   
+       double Rc2 = (ab2)/(det*det);
+       double Rc  = sqrt(Rc2);
+       double c = 2.*((xm*Xcd+ym*Ycd)-rrm);
+       dR = -c/(Rc+sqrt(Rc*Rc-c));
+       Rho = 1./(Rc+dR);
+       ab = sqrt(Xcd*Xcd+Ycd*Ycd);
+       double r1st = sqrt(x1st*x1st + y1st*y1st);
+       if (ab < 0.001*r1st) {
+         Xcd = -x1st/r1st;
+         Ycd = -y1st/r1st;
+       } else {
+         Xcd = Xcd/ab;
+         Ycd = Ycd/ab;
+       }  
+     }
 
      fX[0] = -dR*Xcd;
      fX[1] = -dR*Ycd;
@@ -109,15 +137,18 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
 
 
      Set(fX,fP,Rho,0);
+     THelixTrack temp(*this);
 
-
-     double zm=0,sm=0,zs=0,ss=0;
+     double zm=0,sm=0,zs=0,ss=0,s0;
+     double fullen = 1.e+10;
+     if (fabs(Rho)>1./fullen) fullen = 2.*M_PI/fabs(Rho);
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
      {
        if (ign[ip]) 	break;
        z = pnts[lv+2];  
-       s = Step(pnts+lv); 
-       stp[ip] = s;
+       s = temp.Step(pnts+lv); 
+       if (fabs(s*fCosL) > fabs(s*fCosL-fullen)) s = s-fullen/fCosL;
+       temp.Move(s); s0 += s; stp[ip] = s0;
        zm += z; sm += s; ss += s*s; zs += z*s; 
      }
      zm /= np; sm /= np; ss /= np; zs /= np; 
@@ -128,7 +159,6 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      double p[3] = {fP[0],fP[1],Z1};
 
      Set(fX,p,Rho,0);
-
      maxres = 0;resmax = 0; res=0;
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
      {
@@ -140,6 +170,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
        res += rs;
      }
      res /= np;
+     if (resmax < 1.e-6) 	break;
      if (resmax < 9*res) 	break;
      if (np <= 3)		break;
      ign[maxres] = 1;
@@ -244,6 +275,16 @@ double THelixTrack::Step(double step, double *xyz, double *dir) const
 
   return step;
 }
+//_____________________________________________________________________________
+double THelixTrack::Move(double step) 
+{
+  Step(step,fX,fP);
+  fHXP[0] = fH[1]*fP[2] - fH[2]*fP[1];
+  fHXP[1] = fH[2]*fP[0] - fH[0]*fP[2];
+  fHXP[2] = fH[0]*fP[1] - fH[1]*fP[0];
+  return step;
+}
+
 //_____________________________________________________________________________
 double THelixTrack::Step(double stmax,const  double *surf, int nsurf,
                          double *xyz, double *dir) const
@@ -422,7 +463,7 @@ double THelixTrack::Step(const double *point,double *xyz, double *dir) const
 //_____________________________________________________________________________
 void THelixTrack::Streamer(TBuffer &){}
 //_____________________________________________________________________________
-void THelixTrack::Print() const
+void THelixTrack::Print(Option_t *) const
 {
   printf("\n THelixTrack::this = %p\n",this);
   printf(" THelixTrack::fX[3] = { %f , %f ,%f }\n",fX[0],fX[1],fX[2]);
