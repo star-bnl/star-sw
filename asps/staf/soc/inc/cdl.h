@@ -39,7 +39,7 @@ typedef
 #ifdef HPUX
    shl_t 
 #endif
-#if defined(SUN) || defined(SGI)
+#if defined(SUN) || defined(SGI) || defined(SGI64)
    int *
 #endif
 #if defined(ALPHA_OSF) || defined(AIX)
