@@ -54,10 +54,11 @@ extern "C" long l3Hit2TpcHit_(
 //    
 // rotate these coordinates 
 //
+     tpHit[j].id  = j + 1 ;
      tpHit[j].row = sl3Hit[j].row;
 //
      tpHit[j].x = l3Geom->sinPhi[is]*xCart+l3Geom->cosPhi[is]*yCart;
-     tpHit[j].y = l3Geom->sinPhi[is]*yCart+l3Geom->cosPhi[is]*xCart;
+     tpHit[j].y = l3Geom->sinPhi[is]*yCart-l3Geom->cosPhi[is]*xCart;
 //    
 //  calculate time-direction 
 //

@@ -40,7 +40,6 @@ struct sl3TpcPara {
    float      MaxSliceTanL ;     /* Maximum Tanl value for merger */
    float      SDPsiMaxMerge ;    /* Maximum psi  distance to merge primaries */
    float      SDTanlMaxMerge ;   /* Maximum tanl distance to merge primaries */
- */
    float      sectorPhiMin[24];   /*  Phi Min for each sector */
    float      sectorPhiMax[24];   /*  Phi Max for each sector */
    float      sectorEtaMin[24];   /*  Eta Min for each sector */

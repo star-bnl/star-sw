@@ -45,7 +45,7 @@ public:
          return 1 ;
       }
    //
-   //   
+   // 
       if ( ctrl->phiMin > ctrl->phiMax ) {
          cout<<" thm: phiMin > PhiMax "<<endl;
          return 1 ;
