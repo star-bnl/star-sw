@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.21 2001/10/05 20:19:38 dunlop Exp $
+ * $Id: StMagUtilities.cxx,v 1.22 2001/10/06 06:14:06 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.22  2001/10/06 06:14:06  jeromel
+ * Sorry for multiple commits but ... added one more comment line.
+ *
  * Revision 1.21  2001/10/05 20:19:38  dunlop
  * Made default BMap + Padrow13 + Twist + Clock.
  * Made selection logic symmetric
@@ -171,28 +174,28 @@ void StMagUtilities::Init ( Int_t mode )
   Float_t  B[3], X[3] = { 0, 0, 0 } ;
   Float_t  OmegaTau ;                       // OmegaTau carries the sign opposite of B for an electron
 
-// Default behavior: no bits set gives you this default
-// To turn on and off individual distortions, set these higher bits
+  // Default behavior: no bits set gives you this default
+  // To turn on and off individual distortions, set these higher bits
   mDistortionMode = mode;
   
   if (!(mode & (kBMap | kPadrow13 | kTwist | kClock | kMembrane | kEndcap))) {
-      printf("Default configuration:\n");
-      
+      printf("StMagUtilities::Init : Default configuration\n");
       mDistortionMode |= kBMap;
       mDistortionMode |= kPadrow13;
       mDistortionMode |= kClock;
       mDistortionMode |= kTwist;
-      
+  } else {
+    printf("StMagUtilities::Init : Using option 0x%X\n",mode);
   }
  
   ReadField() ;                             // Read the Magnetic and Electric Field Data Files
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
   // Mode = 0 is for Year 1 running, Mode = 1 is for year 2 running (different cathode potentials)
-// Old comment
+  // Old comment
   // We reserved 3 bits for the option so we can extend up to 111=7 => 8 options (0 to 7)
   // 
-// End of old comment
+  // End of old comment
 
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
