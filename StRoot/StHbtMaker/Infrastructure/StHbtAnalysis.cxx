@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.17 2001/04/05 21:57:45 laue Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.18 2001/05/25 23:23:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.18  2001/05/25 23:23:59  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.17  2001/04/05 21:57:45  laue
  * current pico-event becomes a member of the analysis (mPicoEvent) and gets
  * an access-function (CurrentPicoEvent)
@@ -97,6 +100,7 @@
 #include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 
 #ifdef __ROOT__ 
 ClassImp(StHbtAnalysis)
@@ -145,6 +149,25 @@ void FillHbtParticleCollection(StHbtParticleCut*         partCut,
 	bool tmpPassV0 = pCut->Pass(pParticle);
 	pCut->FillCutMonitor(pParticle,tmpPassV0);
 	if (tmpPassV0){
+	  StHbtParticle* particle = new StHbtParticle(pParticle,partCut->Mass());
+	  partCollection->push_back(particle);
+	}
+      }
+      break;
+    }
+  case hbtKink:          // cut is cutting on Kinks  -- mal 25May2001
+    {
+      StHbtKinkCut* pCut = (StHbtKinkCut*) partCut;
+      StHbtKink* pParticle;
+      StHbtKinkIterator pIter;
+      StHbtKinkIterator startLoop = hbtEvent->KinkCollection()->begin();
+      StHbtKinkIterator endLoop   = hbtEvent->KinkCollection()->end();
+      // this following "for" loop is identical to the one above, but because of scoping, I can's see how to avoid repitition...
+      for (pIter=startLoop;pIter!=endLoop;pIter++){
+	pParticle = *pIter; 
+	bool tmpPass = pCut->Pass(pParticle);
+	pCut->FillCutMonitor(pParticle,tmpPass);
+	if (tmpPass){
 	  StHbtParticle* particle = new StHbtParticle(pParticle,partCut->Mass());
 	  partCollection->push_back(particle);
 	}

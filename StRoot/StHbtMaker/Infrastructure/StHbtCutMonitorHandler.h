@@ -6,6 +6,7 @@
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
+#include "StHbtMaker/Infrastructure/StHbtKink.hh"
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorCollection.hh"
 #include "StHbtMaker/Base/StHbtCutMonitor.hh"
 
@@ -27,6 +28,7 @@ class StHbtCutMonitorHandler{
   void FillCutMonitor(const StHbtEvent* event, bool pass); 
   void FillCutMonitor(const StHbtTrack* track, bool pass); 
   void FillCutMonitor(const StHbtV0* v0, bool pass); 
+  void FillCutMonitor(const StHbtKink* kink, bool pass); 
   void Finish();
   
  private:

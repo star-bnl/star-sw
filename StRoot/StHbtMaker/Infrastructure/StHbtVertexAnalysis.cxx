@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtVertexAnalysis.cxx,v 1.4 2000/08/31 22:31:32 laue Exp $
+ * $Id: StHbtVertexAnalysis.cxx,v 1.5 2001/05/25 23:24:00 lisa Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtVertexAnalysis.cxx,v $
+ * Revision 1.5  2001/05/25 23:24:00  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.4  2000/08/31 22:31:32  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -30,6 +33,7 @@
 #include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVector.hh"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollectionVectorHideAway.hh"
 

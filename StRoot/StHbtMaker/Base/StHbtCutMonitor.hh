@@ -5,6 +5,7 @@
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
+#include "StHbtMaker/Infrastructure/StHbtKink.hh"
 
 class StHbtCutMonitor{
   
@@ -33,6 +34,11 @@ public:
   virtual void Fill(const StHbtV0*) { 
 #ifdef STHBTDEBUG
     cout << " *** no user defined Fill(const StHbtV0Track*), take from base class" << endl;
+#endif
+  }
+  virtual void Fill(const StHbtKink*) { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtKink*), take from base class" << endl;
 #endif
   }
   virtual void Finish() { 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.30 2001/05/15 15:30:18 rcwells Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.31 2001/05/25 23:24:01 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.31  2001/05/25 23:24:01  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.30  2001/05/15 15:30:18  rcwells
  * Added magnetic field to StHbtEvent
  *
@@ -151,6 +154,7 @@
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+#include "StHbtMaker/Infrastructure/StHbtKinkCollection.hh"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"  
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 
@@ -182,7 +186,7 @@ StStandardHbtEventReader::~StStandardHbtEventReader(){
   if (mEventCut) delete mEventCut;
   if (mTrackCut) delete mTrackCut;
   if (mV0Cut) delete mV0Cut;
-
+  if (mKinkCut) delete mKinkCut;
 
 }
 //__________________
@@ -208,6 +212,13 @@ StHbtString StStandardHbtEventReader::Report(){
   temp += "\n---> V0Cuts in Reader: ";
   if (mV0Cut) {
     temp += mV0Cut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> KinkCuts in Reader: ";
+  if (mKinkCut) {
+    temp += mKinkCut->Report();
   }
   else {
     temp += "NONE";
@@ -590,6 +601,24 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i(%i) V0s pushed into collection \n",
 	 hbtEvent->V0Collection()->size(),
 	 v0Maker->GetNV0());
+
+  // Now do the Kink Stuff - mal 25May2001
+  StKinkVertex* starKink;
+  StHbtKink* hbtKink;
+  for (unsigned long int icount=0; icount<(unsigned long int)rEvent->kinkVertices().size(); icount++)
+    {
+      StKinkVertex* starKink = rEvent->kinkVertices()[icount];
+      hbtKink = new StHbtKink(*starKink, vp);
+      // before pushing onto the StHbtKinkCollection, make sure this kink passes any front-loaded cuts...
+      if (mKinkCut){
+	if (!(mKinkCut->Pass(hbtKink))){                  // kink failed - the "continue" will skip the push_back
+	  delete hbtKink;
+	  continue;
+	}
+      }
+      hbtEvent->KinkCollection()->push_back(hbtKink);
+    }
+  cout << "Number of StHbtKinks in HbtEvent: " << hbtEvent->KinkCollection()->size() << endl;
 
   // There might be event cuts that modify the collections of Tracks or V0 in the event.
   // These cuts have to be done after the event is built. That's why we have the event cut

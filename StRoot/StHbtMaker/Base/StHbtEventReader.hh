@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.9 2001/05/10 21:00:24 laue Exp $
+ * $Id: StHbtEventReader.hh,v 1.10 2001/05/25 23:23:58 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.10  2001/05/25 23:23:58  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.9  2001/05/10 21:00:24  laue
  * new member 'mDebug' in order to reduce output
  *
@@ -56,6 +59,7 @@
 #include "StHbtMaker/Base/StHbtEventCut.h"
 #include "StHbtMaker/Base/StHbtTrackCut.h"
 #include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 
 class StHbtEventReader {
 
@@ -63,12 +67,13 @@ protected:
   StHbtEventCut* mEventCut;     //!
   StHbtTrackCut* mTrackCut; //!
   StHbtV0Cut* mV0Cut; //!
+  StHbtKinkCut* mKinkCut; //!
   int mReaderStatus;     // 0="good"
   int mDebug;
 public:
   // even tho it's only a base class and never constructed, if you don't have an implementation,
   // you get "StHbtEventReader type_info node" upon dynamical loading
-  StHbtEventReader() : mEventCut(0), mTrackCut(0), mV0Cut(0), mDebug(1) { /* no-op */ }
+  StHbtEventReader() : mEventCut(0), mTrackCut(0), mV0Cut(0), mKinkCut(0), mDebug(1) { /* no-op */ }
   virtual ~StHbtEventReader(){/* no-op */}
 
   virtual StHbtEvent* ReturnHbtEvent() =0;
@@ -89,9 +94,11 @@ public:
   virtual void SetEventCut(StHbtEventCut* ecut){mEventCut=ecut;}
   virtual void SetTrackCut(StHbtTrackCut* pcut){mTrackCut=pcut;}
   virtual void SetV0Cut(StHbtV0Cut* pcut){mV0Cut=pcut;}
+  virtual void SetKinkCut(StHbtKinkCut* pcut){mKinkCut=pcut;}
   virtual StHbtEventCut* EventCut(){return mEventCut;}
   virtual StHbtTrackCut* TrackCut(){return mTrackCut;}
   virtual StHbtV0Cut*    V0Cut(){return mV0Cut;}
+  virtual StHbtKinkCut*    KinkCut(){return mKinkCut;}
 
   /* control of debug informations print out, my rule is: */
   /* 0: no output at all                                  */
@@ -125,6 +132,13 @@ inline StHbtString StHbtEventReader::Report(){
   temp += "\n---> V0Cuts in Reader: ";
   if (mV0Cut) {
     temp += mV0Cut->Report();
+  }
+  else {
+    temp += "NONE";
+  }
+  temp += "\n---> KinkCuts in Reader: ";
+  if (mKinkCut) {
+    temp += mKinkCut->Report();
   }
   else {
     temp += "NONE";

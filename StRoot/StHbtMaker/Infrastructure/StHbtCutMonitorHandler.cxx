@@ -69,6 +69,23 @@ void StHbtCutMonitorHandler::FillCutMonitor(const StHbtV0* v0, bool pass) {
   }
 }
 // ---------------------------------------------------------------------------
+void StHbtCutMonitorHandler::FillCutMonitor(const StHbtKink* kink, bool pass) { 
+  if (mCollectionsEmpty) return;
+  StHbtCutMonitorIterator iter;
+  StHbtCutMonitor* CM;
+  if ( pass) {
+    for (iter=mPassColl->begin(); iter!=mPassColl->end(); iter++){
+      CM = *iter;
+      CM->Fill(kink);
+    }
+  } else {
+    for (iter=mFailColl->begin(); iter!=mFailColl->end(); iter++){
+      CM = *iter;
+      CM->Fill(kink);
+    }
+  }
+}
+// ---------------------------------------------------------------------------
 void StHbtCutMonitorHandler::Finish() { 
   StHbtCutMonitorIterator iter;
   for (iter=mPassColl->begin(); iter!=mPassColl->end(); iter++){

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.14 2001/05/23 00:19:05 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.15 2001/05/25 23:23:59 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.15  2001/05/25 23:23:59  lisa
+ * Added in StHbtKink stuff
+ *
  * Revision 1.14  2001/05/23 00:19:05  lisa
  * Add in Smearing classes and methods needed for momentum resolution studies and correction
  *
@@ -78,6 +81,7 @@
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
+#include "StHbtMaker/Infrastructure/StHbtKink.hh"
 #include "StPhysicalHelixD.hh"
 // ***
 class StHbtHiddenInfo;
@@ -87,6 +91,7 @@ public:
   StHbtParticle();
   StHbtParticle(const StHbtTrack* const hbtTrack, const double& mass);
   StHbtParticle(const StHbtV0* const hbtV0, const double& mass);
+  StHbtParticle(const StHbtKink* const hbtKink, const double& mass);
   ~StHbtParticle();
 
   const StHbtLorentzVector& FourMomentum() const;
@@ -104,7 +109,7 @@ public:
 
   StHbtTrack* Track() const;
   StHbtV0* V0() const;
-
+  StHbtKink* Kink() const;
 
   const StHbtThreeVector& NominalTpcExitPoint() const;     // position track exits TPC assuming start at (0,0,0)
   const StHbtThreeVector& NominalTpcEntrancePoint() const; // position track crosses IFC assuming start at (0,0,0)
@@ -125,6 +130,7 @@ public:
 private:
   StHbtTrack* mTrack;  // copy of the track the particle was formed of, else Null
   StHbtV0* mV0;        // copy of the v0 the particle was formed of, else Null
+  StHbtKink* mKink;        // copy of the v0 the particle was formed of, else Null
 
   StHbtLorentzVector mFourMomentum;
   StPhysicalHelixD mHelix;
@@ -156,5 +162,7 @@ inline void StHbtParticle::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo)
 // ***
 
 inline void StHbtParticle::ResetFourMomentum(const StHbtLorentzVector& vec){mFourMomentum = vec;}
+
+inline StHbtKink* StHbtParticle::Kink() const { return mKink; }
 
 #endif
