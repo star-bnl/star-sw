@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.73 2003/11/07 17:33:19 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.74 2003/11/09 20:58:33 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.74  2003/11/09 20:58:33  jeromel
+// new timestamps
+//
 // Revision 1.73  2003/11/07 17:33:19  perev
 // Add more clear message if no timestamp
 //
@@ -83,23 +86,24 @@ static Int_t AliasDate(const char *alias);
 static Int_t AliasTime(const char *alias);
 
 static const char *aliases[]={
-"sd97",   "sd98",   "year_1a","year_1b","year_1c",
-"es99",   "er99",   "dc99"   ,"year_1d","year_1e",
-"year_1h","year_2a", "year_2b", "year2001", "year2003", "y2003x",
-0};   
+   "sd97",     "sd98", "year_1a", "year_1b",  "year_1c",
+   "es99",     "er99",    "dc99", "year_1d",  "year_1e",
+"year_1h",  "year_2a", "year_2b","year2001", "year2003", 
+ "y2003x",   "y2003a",  "y2003b",   "y2004",         0
+};   
 
 static const int   dates[]=  {
-19970101, 19980101, 19990101, 19990501, 19991001,
-19990615, 19990616, 19991206, 19991101, 19991201,
-20000614, 20010610, 20010501, 20010615, 20021115, 20021115, 
-0
+ 19970101,   19980101,  19990101,  19990501,   19991001,
+ 19990615,   19990616,  19991206,  19991101,   19991201,
+ 20000614,   20010610,  20010501,  20010615,   20021115, 
+ 20021115,   20021115,  20021115,  20031120,         0
 };
 
 static const int   times[]=  {
-       0,        0,        0,        0,        0,
-       0,   120000,    80000,        0,        0,
-  175430,        0,        0,        0,        0,        0,
-       0
+        0,          0,         0,         0,          0,
+        0,     120000,     80000,         0,          0,
+   175430,          0,         0,         0,          0,        
+        0,          0,         0,         0
 };
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
