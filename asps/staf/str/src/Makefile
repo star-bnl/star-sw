@@ -97,6 +97,10 @@ strterm_sun.f : strterm_sgi.f
 	rm -f strterm_sun.f
 	ln -s strterm_sgi.f strterm_sun.f
 
-strterm_hpu.f : strterm_sgi.f
-	rm -f strterm_hpu.f
-	ln -s strterm_sgi.f strterm_hpu.f
+strtermc_sun.c : strtermc_sgi.c
+	rm -f strtermc_sun.c
+	ln -s strtermc_sgi.c strtermc_sun.c
+
+strbyte_sun.c : strbyte_sgi.c
+	rm -f strbyte_sun.c
+	ln -s strbyte_sgi.c strbyte_sun.c
