@@ -473,6 +473,7 @@ CC        xsum, ysum, zsum
 
 CC  Declare called CERNLIB Function:
       REAL PROB
+      REAL*8 DCOSD, DSIND
 
 CC  Load Constants:
 CC    DATA LIFC  /0.0133/   ! TPC Inner Field Cage radiation thickness
@@ -1933,6 +1934,7 @@ CC  Local Variable Type Declarations:
       REAL*8  R,a,b,c,invc,signa,signb,cut,a1,b1
       REAL*8  phi0,phiDCA,xi,epsq
       INTEGER  q
+      REAL*8 DCOSD, DSIND
 
       DATA cut /1.0D-03/
 C      DATA ka  /0.000299792458/
@@ -1955,8 +1957,8 @@ CC    Find radius of helix, center of circle projection onto x-y plane,
 CC    and x,y coordinates of DCA point on helix.
 
       R     = pt/dabs(ka*dble(q)*bfld)
-      xc(1) = x0 + R*dcosd(psi - epsq*90.0)
-      xc(2) = y0 + R*dsind(psi - epsq*90.0)
+      xc(1) = x0 + R*dcosd(dble(psi - epsq*90.0))
+      xc(2) = y0 + R*dsind(dble(psi - epsq*90.0))
       a = xp(1) - xc(1)
       b = xp(2) - xc(2)
       a1 = dabs(a)
@@ -2049,6 +2051,7 @@ CC  Local Variable Type Declarations:
 
       REAL*8  psi,tanl,x0,y0,z0,xp(2),x(4)
       REAL*8  px,py,cut,d,m1,m2,pdu
+      REAL*8 DCOSD, DSIND
       DATA cut /1.0D-7/
 
 CC  Determine if special cases apply:
@@ -2310,6 +2313,7 @@ c  Local variables:
         real*8 E(3,3),Exx,Exy,Exz,Eyy,Eyz,Ezz,E_inv(3,3),detE
         real*8 Sigxv,Sigyv,Sigzv
         real*8 ex,ey,ez
+        REAL*8 DCOSD, DSIND
 
 c  Convention: L=angle lambda, V=angle phi
 

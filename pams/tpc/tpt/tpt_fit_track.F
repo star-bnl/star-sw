@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.19 2001/07/31 21:59:44 hardtke Exp $
+* $Id: tpt_fit_track.F,v 1.20 2004/02/12 15:43:24 fisyak Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.20  2004/02/12 15:43:24  fisyak
+* Add type for DCOSD, DSIND, ATAND for g77
+*
 * Revision 1.19  2001/07/31 21:59:44  hardtke
 * For victors error routine, need to take sqrt of matrix elements
 *
@@ -85,6 +88,7 @@ C     Fits a helix to the TPC track ipt
 #include "tcl_tphit.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_track_pointers.inc"
+      real*8 atand
 C______________________________________________________________________
 
       RECORD /table_head_st/    tpar_h

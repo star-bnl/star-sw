@@ -60,7 +60,7 @@ C
       REAL    sl,langle, xalimit, yalimit, zalimit
       REAL    psilimit, tanllimit, dif(3)
       LOGICAL more
-
+      real*8 sind, cosd
 
       DATA xalimit,yalimit,zalimit,psilimit,tanllimit/1.5,1.5,1.5,0.5,.01/
 
