@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.92 1999/06/27 22:44:02 fisyak Exp $
+# $Id: MakeDll.mk,v 1.93 1999/06/28 00:18:39 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.93  1999/06/28 00:18:39  fisyak
+# Remove CVS from directory list
+#
 # Revision 1.92  1999/06/27 22:44:02  fisyak
 # Merge StRootEvent and StEvent
 #
@@ -237,7 +240,7 @@ FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/*,$(suffixes)))
 ALL_DIRS  :=$(strip $(sort $(dir $(wildcard $(addprefix $(SRC_DIR)/*/*,$(suffixes))))))
 ifneq (,$(ALL_DIRS))
 ALL_DIRS  := $(subst / , ,$(ALL_DIRS) )
-ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold), $(ALL_DIRS)))
+ALL_DIRS  := $(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold CVS), $(ALL_DIRS)))
 endif
 ifneq (,$(ALL_DIRS))
 FILES_ALL += $(foreach dir, $(ALL_DIRS), $(wildcard $(addprefix $(dir)/*,$(suffixes))))
