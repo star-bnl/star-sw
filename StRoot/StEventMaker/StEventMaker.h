@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.6 2001/05/17 22:46:38 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.7 2001/09/12 23:49:22 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.7  2001/09/12 23:49:22  ullrich
+ * Removed code to build StRun and StRunSummary.
+ *
  * Revision 2.6  2001/05/17 22:46:38  ullrich
  * Removed loading of event summary params.
  *
@@ -41,7 +44,6 @@
 
 #include "StEventMaker/StEventManager.hh"
 class StEvent;
-class StRun;
 class StTrack;
 
 class StEventMaker : public StMaker {
@@ -54,12 +56,11 @@ public:
     virtual void            setEventManager(StEventManager* mgr); 
     virtual StEventManager* eventManager();
     virtual StEvent*        event();
-    virtual StRun*          run();
     virtual void            Clear(const char* opt="");
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.6 2001/05/17 22:46:38 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.7 2001/09/12 23:49:22 ullrich Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -70,26 +71,21 @@ public:
     Bool_t  doLoadSsdHits;         //!
     Bool_t  doLoadTptTracks;       //!
     
-    Bool_t  doPrintRunInfo;        //! lots of screen output
     Bool_t  doPrintEventInfo;      //! lots of screen output
     Bool_t  doPrintMemoryInfo;     //! 
     Bool_t  doPrintCpuInfo;        //!
     
 protected:
-    Int_t     makeRun();
     Int_t     makeEvent();
-    Bool_t    isNewRun();
     StEvent*  getStEventInstance();
     
-    void   printRunInfo();
     void   printEventInfo();
     void   printTrackInfo(StTrack*);
     
 private:
     StEventManager*       mEventManager;		//!
     StEvent*              mCurrentEvent;                //!
-    StRun*                mCurrentRun; 			//!
     Bool_t                mCreateEmptyInstance;         //!
-    ClassDef(StEventMaker, 1)
+    ClassDef(StEventMaker, 2)
 };
 #endif
