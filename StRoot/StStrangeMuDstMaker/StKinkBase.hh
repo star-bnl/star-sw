@@ -13,7 +13,7 @@
 #include "StKinkI.hh"
 #include "StStrangeMuDst.hh"
 
-class StKinkBase : public StKinkI , public StStrangeMuDst {
+class StKinkBase : public StStrangeMuDst , public StKinkI {
 public:
   StKinkBase() {}
   virtual ~StKinkBase() {}
@@ -50,7 +50,7 @@ protected:
   Float_t  mPositionZ;
 
 // Corresponding ClassImp presently in StKinkMuDst.cc
-ClassDef(StKinkBase,5)
+ClassDef(StKinkBase,6)
 };
 
 inline Int_t StKinkBase::geantIdParent() const
@@ -86,8 +86,11 @@ inline Float_t StKinkBase::positionZ() const
 
 
 /***********************************************************************
- * $Id: StKinkBase.hh,v 3.3 2003/05/30 21:20:18 genevb Exp $
+ * $Id: StKinkBase.hh,v 3.4 2003/10/20 17:20:18 perev Exp $
  * $Log: StKinkBase.hh,v $
+ * Revision 3.4  2003/10/20 17:20:18  perev
+ * Change the order of inheritance and increased version numbers
+ *
  * Revision 3.3  2003/05/30 21:20:18  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

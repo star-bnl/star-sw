@@ -14,7 +14,7 @@
 class StMcVertex;
 class StMcTrack;
 
-class StV0Mc : public virtual StV0I, public StStrangeMuDst {
+class StV0Mc : public StStrangeMuDst, public virtual StV0I {
 
 public:
   StV0Mc();
@@ -90,7 +90,7 @@ protected:
   Float_t  mPositionZ;
 
 private:
-  ClassDef(StV0Mc,4)
+  ClassDef(StV0Mc,5)
 };
 
 inline Int_t StV0Mc::decayMode() const
@@ -142,8 +142,11 @@ inline Float_t StV0Mc::positionZ() const
 
 
 /***********************************************************************
- * $Id: StV0Mc.hh,v 3.2 2003/05/30 21:20:20 genevb Exp $
+ * $Id: StV0Mc.hh,v 3.3 2003/10/20 17:20:18 perev Exp $
  * $Log: StV0Mc.hh,v $
+ * Revision 3.3  2003/10/20 17:20:18  perev
+ * Change the order of inheritance and increased version numbers
+ *
  * Revision 3.2  2003/05/30 21:20:20  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

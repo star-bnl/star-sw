@@ -15,7 +15,7 @@
 class StVertex;
 class StV0Vertex;
 
-class StV0MuDst : public virtual StV0I, public StStrangeMuDst {
+class StV0MuDst : public StStrangeMuDst, public virtual StV0I {
 public:
   StV0MuDst();
   ~StV0MuDst();
@@ -99,7 +99,7 @@ protected:
   UShort_t mNumDedxPos;
   UShort_t mNumDedxNeg;
 
-  ClassDef(StV0MuDst,5)
+  ClassDef(StV0MuDst,6)
 };
 
 inline StV0MuDst::StV0MuDst(StV0Vertex* v1,StStrangeEvMuDst* e1) : StV0I()
@@ -148,8 +148,11 @@ inline Float_t StV0MuDst::lenDedxNeg() const { return (mNumDedxNeg/100); }
 
 
 /***********************************************************************
- * $Id: StV0MuDst.hh,v 3.6 2003/05/30 21:20:20 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.7 2003/10/20 17:20:18 perev Exp $
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.7  2003/10/20 17:20:18  perev
+ * Change the order of inheritance and increased version numbers
+ *
  * Revision 3.6  2003/05/30 21:20:20  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

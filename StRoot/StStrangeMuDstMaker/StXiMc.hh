@@ -14,7 +14,7 @@
 #include "StDecayMode.hh"
 
 
-class StXiMc : public virtual StXiI, public StKinkMc {
+class StXiMc : public StKinkMc, public virtual StXiI {
 public:
   StXiMc();
   StXiMc(StMcVertex*, StMcTrack*, StStrangeEvMuDst*);
@@ -66,7 +66,7 @@ public:
 
 protected:
   Int_t v0;
-  ClassDef(StXiMc,5)
+  ClassDef(StXiMc,6)
 };
 
 inline Int_t   StXiMc::charge() const {return parentCharge();}
@@ -96,8 +96,11 @@ inline Int_t   StXiMc::decayMode() const {return StKinkMc::decayMode();}
 
 
 /***********************************************************************
- * $Id: StXiMc.hh,v 3.6 2003/08/26 22:36:28 genevb Exp $
+ * $Id: StXiMc.hh,v 3.7 2003/10/20 17:20:19 perev Exp $
  * $Log: StXiMc.hh,v $
+ * Revision 3.7  2003/10/20 17:20:19  perev
+ * Change the order of inheritance and increased version numbers
+ *
  * Revision 3.6  2003/08/26 22:36:28  genevb
  * Calculate Xi momenta at/near primary vertex
  *
