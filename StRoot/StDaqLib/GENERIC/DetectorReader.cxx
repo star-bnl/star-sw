@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.14 2004/02/18 20:17:48 ward Exp $
+ * $Id: DetectorReader.cxx,v 1.15 2004/02/18 20:17:51 ward Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,7 +12,7 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
- * Revision 1.14  2004/02/18 20:17:48  ward
+ * Revision 1.15  2004/02/18 20:17:51  ward
  * Access SSD data in makers.
  *
  * Revision 1.13  2003/03/24 18:12:15  ward
