@@ -1,5 +1,8 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.17 2004/02/13 21:13:13 oldi Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.18 2004/03/02 15:56:41 jcs Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.18  2004/03/02 15:56:41  jcs
+// Fill dst_mon-soft_ftpc table
+//
 // Revision 1.17  2004/02/13 21:13:13  oldi
 // Protection against missing FTPC DAQ data added.
 //
@@ -78,6 +81,8 @@
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcTrackMaker/StFtpcTrackingParams.hh"
 
+#include "tables/St_dst_mon_soft_ftpc_Table.h"
+
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -111,6 +116,7 @@ Int_t StFtpcGlobalMaker::Init(){
 Int_t StFtpcGlobalMaker::Make(){
   PrintInfo();  
   int iMake = kStOK;
+  Int_t iftpc;
 
 #ifdef REFIT_FTPC_TRACKS
   // if FTPC tracking is done before the primary vertex is found, 
@@ -196,6 +202,23 @@ Int_t StFtpcGlobalMaker::Make(){
   AddData(dst_point);
   dst_point_st *point = dst_point->GetTable();
 
+  St_dst_mon_soft_ftpc *dst_mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
+  AddData(dst_mon_soft_ftpc);
+  dst_mon_soft_ftpc->SetNRows(1);
+  // Initialize dst_mon_soft_ftpc table
+  // mon_soft_ftpc[1].n_clus_ftpc[iftpc] is not used
+  dst_mon_soft_ftpc_st *mon_soft_ftpc = dst_mon_soft_ftpc->GetTable();
+  for (iftpc=0;iftpc<2;iftpc++) {
+    mon_soft_ftpc[0].n_clus_ftpc[iftpc] = 0;	  
+    mon_soft_ftpc[0].n_pts_ftpc[iftpc] = 0;   
+    mon_soft_ftpc[0].n_trk_ftpc[iftpc] = 0;
+    mon_soft_ftpc[0].chrg_ftpc_tot[iftpc] = 0.;   
+    mon_soft_ftpc[0].hit_frac_ftpc[iftpc] = 0.; 
+    mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] = 0.;
+    mon_soft_ftpc[0].res_pad_ftpc[iftpc] = 0.;   
+    mon_soft_ftpc[0].res_drf_ftpc[iftpc] = 0.;
+  }  
+
   St_dst_dedx *dst_dedx = new St_dst_dedx("dst_dedx",nfptrack); 
   AddData(dst_dedx);
   dst_dedx_st *dedx = dst_dedx->GetTable();
@@ -259,6 +282,11 @@ Int_t StFtpcGlobalMaker::Make(){
       // end of processing current hit
     }  // end of processing all hits on track
     
+      if (globtrk[iglobtrk].det_id == 5 ) iftpc = 0;
+      if (globtrk[iglobtrk].det_id == 4 ) iftpc = 1;
+      mon_soft_ftpc[0].n_trk_ftpc[iftpc]++;
+
+    
     //  Track finding and track fitting method 
     //   (Method: FTPC Conformal Mapping - set bit 10 )          
     //   (Fitter: kHelix2StepId)
@@ -273,6 +301,7 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  Number of points used in fit
     globtrk[iglobtrk].n_fit_point  = track->GetHits()->GetEntriesFast();
+
 
     //  Charge 
     globtrk[iglobtrk].icharge = track->GetCharge();
@@ -338,6 +367,9 @@ Int_t StFtpcGlobalMaker::Make(){
     globtrk[iglobtrk].chisq[1]      = track->GetChiSq()[1]
       / (globtrk[iglobtrk].n_fit_point - 2);
 
+     mon_soft_ftpc[0].res_pad_ftpc[iftpc] += globtrk[iglobtrk].chisq[0];
+     mon_soft_ftpc[0].res_drf_ftpc[iftpc] += globtrk[iglobtrk].chisq[1];
+
     //  Locate last (outer) hit on current track
     StFtpcPoint *outer = (StFtpcPoint *)track->GetHits()->First();
     globtrk[iglobtrk].x_last[0] = outer->GetX();
@@ -381,6 +413,7 @@ Int_t StFtpcGlobalMaker::Make(){
       *  globtrk[iglobtrk].invptout;
 
     globtrk[iglobtrk].length  = track->GetTrackLength();
+    mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] += globtrk[iglobtrk].length;
 
     globtrk[iglobtrk].impact  = track->GetDca();
 
@@ -402,7 +435,6 @@ Int_t StFtpcGlobalMaker::Make(){
     if (fabs((float) globtrk[iglobtrk].invpt) >= 999999.)  {
       globtrk[iglobtrk].iflag   = -799;
     }
-
 
     //  Fill dst_dedx table  
 
@@ -458,6 +490,14 @@ Int_t StFtpcGlobalMaker::Make(){
       else {
 	point[ipnt].id_track    = 0;
       }
+
+      //   Sum for dst_mon_soft_ftpc table
+      // Historically Ftpc West was the first FTPC but since the TPC fills east first
+      // the FTPC must do the same
+      if (hit->GetDetectorId() == 5) iftpc=0;
+      if (hit->GetDetectorId() == 4) iftpc=1;
+      if ( point[ipnt].id_track != 0) mon_soft_ftpc[0].hit_frac_ftpc[iftpc]++;
+      mon_soft_ftpc[0].n_pts_ftpc[iftpc]++;
       
       point[ipnt].hw_position = hit->GetHardwarePosition();
       
@@ -516,6 +556,7 @@ Int_t StFtpcGlobalMaker::Make(){
       point[ipnt].charge  =
 	(hit->GetFlags()<<16)
 	+ hit->GetCharge();
+      mon_soft_ftpc[0].chrg_ftpc_tot[iftpc] += hit->GetCharge();
       
     }  // end of loop over all hits
     
@@ -526,6 +567,19 @@ Int_t StFtpcGlobalMaker::Make(){
 
   } // end of if (ftpcTracks->GetEntriesFast >0) [only write hits if some tracks were found]
 
+
+    // Compute dst_mon_soft_ftpc table averages if tracks are found
+    for (iftpc=0;iftpc<2;iftpc++) {
+       if ( mon_soft_ftpc[0].n_pts_ftpc[iftpc] != 0 ){
+	  mon_soft_ftpc[0].hit_frac_ftpc[iftpc] = mon_soft_ftpc[0].hit_frac_ftpc[iftpc]/mon_soft_ftpc[0].n_pts_ftpc[iftpc];
+       }	       
+       if ( mon_soft_ftpc[0].n_trk_ftpc[iftpc] != 0 ){
+	   mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] = mon_soft_ftpc[0].avg_trkL_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+           mon_soft_ftpc[0].res_pad_ftpc[iftpc] = mon_soft_ftpc[0].res_pad_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+           mon_soft_ftpc[0].res_drf_ftpc[iftpc] = mon_soft_ftpc[0].res_drf_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+       }
+    }       
+       	    
   return iMake;
 }
 //_____________________________________________________________________________
