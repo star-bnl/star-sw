@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.cxx,v 1.9 2003/09/17 02:54:37 jeromel Exp $
+ * $Id: StMuDst2StEventMaker.cxx,v 1.10 2003/10/14 14:35:53 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDst2StEventMaker.h"
@@ -45,7 +45,7 @@ int StMuDst2StEventMaker::Make(){  ///< create a StEvent from the muDst and put 
       StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
       if(!hd) { hd = new StEvtHddr();  AddData(hd); }
       hd->SetGMTime(mStEvent->time());
-      hd->SetRunNumber(mStEvent->runInfo()->runId());
+      if(mStEvent->runInfo()) hd->SetRunNumber(mStEvent->runInfo()->runId());
       AddData(mStEvent);     // add StEvent to the .data tree
     }
 
@@ -133,6 +133,9 @@ ClassImp(StMuDst2StEventMaker)
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.cxx,v $
+ * Revision 1.10  2003/10/14 14:35:53  laue
+ * Alex Suaide EMC updates
+ *
  * Revision 1.9  2003/09/17 02:54:37  jeromel
  * Name clash. Added warning in case this happens in future
  *
