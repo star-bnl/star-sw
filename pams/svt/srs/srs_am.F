@@ -2566,11 +2566,15 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             zero(2) = 0.
             zero(3) = 0.
             iret= svtltog(dxp,dx,geom(iwafer).id)
+
             spt(ispt).de(1)      = svt_hit(ihit).de ! energy loss
             spt(ispt).de(2)      = 0. ! error on energy loss)
-            spt(ispt).cov(1)     = abs(dx(1))
-            spt(ispt).cov(2)     = abs(dx(2))
-            spt(ispt).cov(3)     = abs(dx(3))
+            spt(ispt).cov(1)     = abs(dx(1)-geom(iwafer).x(1))
+            spt(ispt).cov(1)     = spt(ispt).cov(1)*spt(ispt).cov(1)
+            spt(ispt).cov(2)     = abs(dx(2)-geom(iwafer).x(2))
+            spt(ispt).cov(2)     = spt(ispt).cov(2)*spt(ispt).cov(2)
+            spt(ispt).cov(3)     = abs(dx(3)-geom(iwafer).x(3))
+            spt(ispt).cov(3)     = spt(ispt).cov(3)*spt(ispt).cov(3)
             spt(ispt).res(1)     = 0.
             spt(ispt).res(2)     = 0.
             spt(ispt).res(3)     = 0.
