@@ -1,7 +1,7 @@
 #!/usr/local/bin/tcsh
-#  $Id: reco,v 1.4 1998/08/21 15:44:48 fisyak Exp $
-#  $Log: reco,v $
-#  Revision 1.4  1998/08/21 15:44:48  fisyak
+#  $Id: reco_ds,v 1.1 1998/08/21 15:44:48 fisyak Exp $
+#  $Log: reco_ds,v $
+#  Revision 1.1  1998/08/21 15:44:48  fisyak
 #  Add reco_ds
 #
 #  Revision 1.3  1998/08/19 21:41:41  fisyak
@@ -48,9 +48,9 @@ echo Starting job execution at `date`
 set first      = 1
 set no_events  = 20
 set size       = 80
-set prefix_in  = /star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/
+set prefix_in  = /disk1/star/tss/
 set input_file = auau_ce_b0-2_0001_0020
-set dir_out    = /star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/reco
+set dir_out    = /star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/reco_2
 while ( $#argv > 0 )
         switch ($1)
         case -f:        # set first
@@ -107,7 +107,7 @@ debug on
    input_data_prefix=${prefix_in} _ 
    input_data_file=${input_file}.xdf _ 
    output_file=${dir_out}/${input_file} _ 
-   log=\$DQS_STDOUT 
+   log=\\\$DQS_STDOUT 
 exit 
 EOF
 time  staf -w 0 -b batch_${first}.kumac >& ${log}

@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.20  1998/08/21 15:44:47  fisyak
+#  Add reco_ds
+#
 #  Revision 1.19  1998/08/13 02:48:46  perev
 #  cleanup
 #
@@ -38,7 +41,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/13 02:48:46 $ 
+#             Last modification $Date: 1998/08/21 15:44:47 $ 
 #. default setings
 
 RM := rm -f
@@ -94,10 +97,10 @@ LEXLIB   := -ll
 
 DEBUG := -g 
 ifdef NODEBUG
-  DEBUG := -O
+  DEBUG := -O2
 endif
 ifdef nodebug
-  DEBUG := -O
+  DEBUG := -O2
 endif
 
 ifneq (,$(findstring $(STAF_ARCH),intel_wnt))
@@ -174,7 +177,7 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   CERN_LEVEL :=pgf98
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX
   STRID    := lnx
-  FC       := pgf77
+  FC       := /usr/pgi/linux86/bin/pgf77
   LD       := $(CXX)
   SO	   := $(CXX)
   CXXFLAGS := $(DEBUG) -fPIC
@@ -356,7 +359,7 @@ ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   SOFLAGS  :=  $(DEBUG)  -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
-
+  NOROOT   := YES
 endif
 
 CPPFLAGS := $(filter-out HP-UX,$(CPPFLAGS) $(OSFID))
