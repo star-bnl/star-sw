@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRootEventManager.cc,v 2.12 2003/09/02 17:58:09 perev Exp $
+ * $Id: StRootEventManager.cc,v 2.13 2004/08/28 18:52:03 fisyak Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StRootEventManager.cc,v $
+ * Revision 2.13  2004/08/28 18:52:03  fisyak
+ * Replace StEvent Hit containers if there are entries in the corrensponding tables
+ *
  * Revision 2.12  2003/09/02 17:58:09  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -95,6 +98,7 @@ _NAME2_(TABLE_TYPE,_st)* StRootEventManager::_NAME2_(returnTable_,TABLE_TYPE)(lo
   const char *nm =  _QUOTE_(TABLE_NAME);\
   const char *nt =  _QUOTE_(TABLE_TYPE);\
   St_DataSetIter *Dst = (St_DataSetIter*)&mDst;\
+  if (! Dst->Pwd()) {nentries = 0; return table;}\
   tableWrap = (_NAME2_(St_,TABLE_TYPE) *) (*Dst)[nt];\
   if (!tableWrap && nm[0]!='-') tableWrap = (_NAME2_(St_,TABLE_TYPE) *) (*Dst)[nm];\
   if (tableWrap) {\
@@ -142,6 +146,7 @@ StRootEventManager::returnTable_dst_globtrk(long& nentries) const
     const char *nm =  "globtrk";
     const char *nt =  "St_dst_track";
     St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    if (! Dst->Pwd()) {nentries = 0; return table;}
     tableWrap = (St_dst_track*) (*Dst)[nt];
     if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
     if (tableWrap) {
@@ -164,6 +169,7 @@ StRootEventManager::returnTable_dst_primtrk(long& nentries) const
     const char *nm =  "primtrk";
     const char *nt =  "St_dst_track";
     St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    if (! Dst->Pwd()) {nentries = 0; return table;}
     tableWrap = (St_dst_track*) (*Dst)[nt];
     if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
     if (tableWrap) {
@@ -208,6 +214,7 @@ StRootEventManager::returnTable_EstGlobal(long& nentries) const
     const char *nm =  "EstGlobal";
     const char *nt =  "St_dst_track";
     St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    if (! Dst->Pwd()) {nentries = 0; return table;}
     tableWrap = (St_dst_track*) (*Dst)[nt];
     if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
     if (tableWrap) {
@@ -230,6 +237,7 @@ StRootEventManager::returnTable_EstPrimary(long& nentries) const
     const char *nm =  "EstPrimary";
     const char *nt =  "St_dst_track";
     St_DataSetIter *Dst = (St_DataSetIter*)&mDst;
+    if (! Dst->Pwd()) {nentries = 0; return table;}
     tableWrap = (St_dst_track*) (*Dst)[nt];
     if (!tableWrap && nm[0]!='-') tableWrap = (St_dst_track*) (*Dst)[nm];
     if (tableWrap) {

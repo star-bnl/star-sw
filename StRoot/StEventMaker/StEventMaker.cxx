@@ -44,7 +44,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.71 2004/08/13 18:45:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.72 2004/08/28 18:52:02 fisyak Exp $";
 
 //______________________________________________________________________________
 static int badDstTrack(dst_track_st *t)
@@ -1059,20 +1059,22 @@ StEventMaker::makeEvent()
             StTpcHit *tpcHit;
             begin = index[kTpcId].first;
             end   = index[kTpcId].first+index[kTpcId].second;
-            StTpcHitCollection *tpcHitColl = new StTpcHitCollection;
-            for (i=begin; i<end; i++) {
+	    if (begin < end) {
+	      StTpcHitCollection *tpcHitColl = new StTpcHitCollection;
+	      for (i=begin; i<end; i++) {
                 tpcHit = new StTpcHit(dstPoints[i]);
                 if (tpcHitColl->addHit(tpcHit)) {
-                    id = dstPoints[i].id_track;
-		    for (k=0; k<infomap[id].size(); k++)
-			infomap[id][k]->addHit(tpcHit);
+		  id = dstPoints[i].id_track;
+		  for (k=0; k<infomap[id].size(); k++)
+		    infomap[id][k]->addHit(tpcHit);
 		}
                 else {
-                    nfailed++;
-                    delete tpcHit;
+		  nfailed++;
+		  delete tpcHit;
                 }
-            }
-            mCurrentEvent->setTpcHitCollection(tpcHitColl);
+	      }
+	      mCurrentEvent->setTpcHitCollection(tpcHitColl);
+	    }
             if (nfailed)
                 gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                                     << " TPC hits, wrong hardware address." << endm;
@@ -1087,20 +1089,22 @@ StEventMaker::makeEvent()
             StSvtHit *svtHit;
             begin = index[kSvtId].first;
             end   = index[kSvtId].first+index[kSvtId].second;
-            StSvtHitCollection *svtHitColl = new StSvtHitCollection;
-            for (i=begin; i<end; i++) {
+	    if (begin < end) {
+	      StSvtHitCollection *svtHitColl = new StSvtHitCollection;
+	      for (i=begin; i<end; i++) {
                 svtHit = new StSvtHit(dstPoints[i]);
                 if (svtHitColl->addHit(svtHit)) {
-                    id = dstPoints[i].id_track;
-		    for (k=0; k<infomap[id].size(); k++)
-			infomap[id][k]->addHit(svtHit);
+		  id = dstPoints[i].id_track;
+		  for (k=0; k<infomap[id].size(); k++)
+		    infomap[id][k]->addHit(svtHit);
 		}
                 else {
-                    nfailed++;
-                    delete svtHit;
+		  nfailed++;
+		  delete svtHit;
                 }
-            }
-            mCurrentEvent->setSvtHitCollection(svtHitColl);
+	      }
+	      mCurrentEvent->setSvtHitCollection(svtHitColl);
+	    }
             if (nfailed)
                 gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                                     << " SVT hits, wrong hardware address." << endm;
@@ -1115,20 +1119,22 @@ StEventMaker::makeEvent()
             StSsdHit *ssdHit;
             begin = index[kSsdId].first;
             end   = index[kSsdId].first+index[kSsdId].second;
-            StSsdHitCollection *ssdHitColl = new StSsdHitCollection;
-            for (i=begin; i<end; i++) {
+	    if (begin < end) {
+	      StSsdHitCollection *ssdHitColl = new StSsdHitCollection;
+	      for (i=begin; i<end; i++) {
                 ssdHit = new StSsdHit(dstPoints[i]);
                 if (ssdHitColl->addHit(ssdHit)) {
-                    id = dstPoints[i].id_track;
-		    for (k=0; k<infomap[id].size(); k++)
-			infomap[id][k]->addHit(ssdHit);
+		  id = dstPoints[i].id_track;
+		  for (k=0; k<infomap[id].size(); k++)
+		    infomap[id][k]->addHit(ssdHit);
                 }
                 else {
-                    nfailed++;
-                    delete ssdHit;
+		  nfailed++;
+		  delete ssdHit;
                 }
-            }
-            mCurrentEvent->setSsdHitCollection(ssdHitColl);
+	      }
+	      mCurrentEvent->setSsdHitCollection(ssdHitColl);
+	    }
             if (nfailed)
                 gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                                     << " SSD hits, wrong hardware address." << endm;
@@ -1141,38 +1147,44 @@ StEventMaker::makeEvent()
             info    = 0;
             nfailed = 0;
             StFtpcHit *ftpcHit;
-            StFtpcHitCollection *ftpcHitColl = new StFtpcHitCollection;
+            StFtpcHitCollection *ftpcHitColl = 0;
             // west
             begin = index[kFtpcWestId].first;
             end   = index[kFtpcWestId].first+index[kFtpcWestId].second;
-            for (i=begin; i<end; i++) {
+	    if (begin < end) {
+	      ftpcHitColl = new StFtpcHitCollection;
+	      for (i=begin; i<end; i++) {
                 ftpcHit = new StFtpcHit(dstPoints[i]);
                 if (ftpcHitColl->addHit(ftpcHit)) {
-                    id = dstPoints[i].id_track;
-		    for (k=0; k<infomap[id].size(); k++)
-			infomap[id][k]->addHit(ftpcHit);
+		  id = dstPoints[i].id_track;
+		  for (k=0; k<infomap[id].size(); k++)
+		    infomap[id][k]->addHit(ftpcHit);
                 }
                 else {
-                    nfailed++;
-                    delete ftpcHit;
+		  nfailed++;
+		  delete ftpcHit;
                 }
-            }
-            // east
+	      }
+	    }
+	      // east
             begin = index[kFtpcEastId].first;
             end   = index[kFtpcEastId].first+index[kFtpcEastId].second;
-            for (i=begin; i<end; i++) {
+	    if (begin < end) {
+	      if (! ftpcHitColl) ftpcHitColl = new StFtpcHitCollection;
+	      for (i=begin; i<end; i++) {
                 ftpcHit = new StFtpcHit(dstPoints[i]);
                 if (ftpcHitColl->addHit(ftpcHit)) {
-                    id = dstPoints[i].id_track;
-		    for (k=0; k<infomap[id].size(); k++)
-			infomap[id][k]->addHit(ftpcHit);
+		  id = dstPoints[i].id_track;
+		  for (k=0; k<infomap[id].size(); k++)
+		    infomap[id][k]->addHit(ftpcHit);
                 }
                 else {
-                    nfailed++;
-                    delete ftpcHit;
+		  nfailed++;
+		  delete ftpcHit;
                 }
-            }
-            mCurrentEvent->setFtpcHitCollection(ftpcHitColl);
+	      }
+	    }
+            if (ftpcHitColl) mCurrentEvent->setFtpcHitCollection(ftpcHitColl);
             if (nfailed)
                 gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot store " << nfailed
                                     << " FTPC hits, wrong hardware address." << endm;
@@ -1669,8 +1681,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.71 2004/08/13 18:45:44 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.72 2004/08/28 18:52:02 fisyak Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.72  2004/08/28 18:52:02  fisyak
+ * Replace StEvent Hit containers if there are entries in the corrensponding tables
+ *
  * Revision 2.71  2004/08/13 18:45:44  ullrich
  * Set vertex-used-in-fit flag for primary tracks.
  *
