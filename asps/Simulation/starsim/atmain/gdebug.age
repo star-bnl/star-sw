@@ -1,0 +1,41 @@
+* $Id: gdebug.age,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Log: gdebug.age,v $
+* Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
+* Revision 1.1  2001/02/27 10:14:50  nevski
+*  first working release
+*
+      SUBROUTINE GDEBUG
+************************************************************************
+*             Standard GEANT debug                                     *
+*          ==>Called by : <USER>,GUSTEP                                *
+************************************************************************
+#include "geant321/gcflag.inc"
+#include "geant321/gckine.inc"
+#include "geant321/gctrak.inc"
+*
+*             Debug/plot event
+            IF (IDEBUG=0) Return
+*
+C.      Store space point VECT in banks JXYZ
+        IF (ISWIT(2)=1 | ISWIT(2)=4 | ISWIT(3)=1)  Call GSXYZ
+
+C.      Print track and volume parameters at current point
+        IF (ISWIT(2)=2)                            Call GPCXYZ
+
+C.      Print kinematics of secondary tracks at the current interaction point
+        IF (ISWIT(1)=2)                            Call GPGKIN
+
+C.      Online display of the track trajectory
+        IF (ISWIT(2)=3) then
+           IF(ISWIT(4)=3 & CHARGE=0) RETURN
+                                                   Call GDCXYZ
+                                                   Call IGSA(0)
+        ELSE IF(ISWIT(2)=4) THEN
+C.      Store space point VECT in banks JXYZ
+           IF(ISTOP.NE.0)                          Call GDTRAK(' ')
+        ENDIF
+*
+      END
+
+
