@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.45 2004/09/10 22:07:44 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.46 2004/11/11 19:58:14 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.46  2004/11/11 19:58:14  jeromel
+ * Added thereIsTriggerData() check and logic for return kStErr (BT 478)
+ *
  * Revision 1.45  2004/09/10 22:07:44  perev
  * more defence agains corrupted DAQ data
  *
@@ -270,19 +273,25 @@ int StDAQReader::readEvent()
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0){
-    (void) printf("<Warning: StDAQReader::readEvent()> found event with token==0\n");
+    (void) printf("StDAQReader::readEvent: found event with token==0\n");
     m_ZeroTokens++;
     // return kStErr;  // Herb, July 5 2000
   }
 
-  if (fTPCReader&&TPCPresent  ())       fTPCReader ->Update();
-  if (fFTPCReader&&FTPCPresent())	fFTPCReader->Update();  
-  if (fTRGReader&&TRGPresent  ())       fTRGReader ->Update();
-  if (fSVTReader&&SVTPresent  ()) 	fSVTReader ->Update();
-  if (fSSDReader&&SSDPresent  ())       fSSDReader ->Update();
-  if (fEMCReader&&EMCPresent  ()) 	fEMCReader ->Update();
-  if (fEEMCReader&&EMCPresent ()) 	fEEMCReader->Update();
-  if (fPMDReader&&PMDPresent  ()) 	fPMDReader ->Update();
+  if (fTPCReader  && TPCPresent() )     fTPCReader ->Update();
+  if (fFTPCReader && FTPCPresent())	fFTPCReader->Update();  
+  if (fTRGReader  && TRGPresent() ){     
+                                        fTRGReader ->Update();
+					if ( ! fTRGReader->thereIsTriggerData() ){
+					  (void) printf("StDAQReader::readEvent: No or bad TRG data - Skipping event\n");
+					  return kStErr;
+					}
+  }
+  if (fSVTReader  && SVTPresent() ) 	fSVTReader ->Update();
+  if (fSSDReader  && SSDPresent() )     fSSDReader ->Update();
+  if (fEMCReader  && EMCPresent() ) 	fEMCReader ->Update();
+  if (fEEMCReader && EMCPresent() ) 	fEEMCReader->Update();
+  if (fPMDReader  && PMDPresent() ) 	fPMDReader ->Update();
 
 //	Trigger Summary, code provided by Herb
   Bank_DATAP *datap = (Bank_DATAP*)(fEventReader->getDATAP());
