@@ -20,7 +20,8 @@ if ($pwd =~ '^/afs/') {$File::Find::dont_use_nlink;}
 
 my $DEBUG = "-g";
 @search_files   = ();
-if (defined($ARG{NODEBUG})) {$DEBUG = "-O2";}
+if (defined($ARG{NODEBUG})) {$DEBUG = "-O2" ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
+if (defined($ARG{DEBUG})) {$DEBUG = $ARG{DEBUG} ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
 my $O        = "o";
 my $A        = "a";
 my $Cxx      = "cxx";
@@ -67,6 +68,7 @@ my $LINKCOM  = "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
 my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
 my $GEANT3COM= "%GEANT3 %< -o %<.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %<.F -o %>";
 my $INCLUDE_PATH  = $INCLUDE;
+my $Salt = undef;
 $_ = $STAR_HOST_SYS;
 print "System: ", $_,"\n" unless ($param::quiet);
 if (/^i386_/) {
@@ -233,18 +235,36 @@ $OSFID .= " " . $STAR_SYS;
 if ($STAR_SYS ne $STAR_HOST_SYS) {$OSFID .= " " . $STAR_HOST_SYS;}
 my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
 $CPPFLAGS .= " -D" . join (" -D", split (" ",$FLAGS));
+if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS} ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{CPP}))      {$CPP = $ARG{CPP} ; print "set CPP = $CPP\n" unless ($param::quiet);}
+if (defined($ARG{CC}))       {$CC = $ARG{CC} ; print "set CC = $CC\n" unless ($param::quiet);}
+if (defined($ARG{CCFLAGS}))  {$CCFLAGS = $ARG{CCFLAGS} ; print "set CCFLAGS = $CCFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{CLIBS}))    {$CLIBS = $ARG{CLIBS} ; print "set CLIBS = $CLIBS\n" unless ($param::quiet);}
+if (defined($ARG{CXX}))      {$CXX = $ARG{CXX} ; print "set CXX = $CXX\n" unless ($param::quiet);}
+if (defined($ARG{CXXFLAGS})) {$CXXFLAGS = $ARG{CXXFLAGS} ; print "set CXXFLAGS = $CXXFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{FC}))       {$FC = $ARG{FC} ; print "set FC = $FC\n" unless ($param::quiet);}
+if (defined($ARG{FFLAGS}))   {$FFLAGS = $ARG{FFLAGS} ; print "set FFLAGS = $FFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{FLIBS}))    {$FLIBS = $ARG{FLIBS} ; print "set FLIBS = $FLIBS\n" unless ($param::quiet);}
+if (defined($ARG{LD}))       {$LD = $ARG{LD} ; print "set LD = $DEBUG\n" unless ($param::quiet);}
+if (defined($ARG{LDFLAGS}))  {$LDFLAGS = $ARG{LDFLAGS} ; print "set LDFLAGS = $LDFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{EXEFLAGS})) {$EXEFLAGS = $ARG{EXEFLAGS} ; print "set EXEFLAGS = $EXEFLAGS\n" unless ($param::quiet);}
+if (defined($ARG{Libraries})){$Libraries = $ARG{Libraries} ; print "set Libraries = $Libraries\n" unless ($param::quiet);}
+if (defined($ARG{LIBS}))     {$LIBS = $ARG{LIBS} ; print "set LIBS = $LIBS\n" unless ($param::quiet);}
+if (defined($ARG{LIBPATH}))  {$LIBPATH = $ARG{LIBPATH} ; print "set LIBPATH = $LIBPATH\n" unless ($param::quiet);}
+if (defined($ARG{SO}))       {$SO = $ARG{SO} ; print "set SO = $SO\n" unless ($param::quiet);}
+if (defined($ARG{SOFLAGS}))  {$SOFLAGS = $ARG{SOFLAGS} ; print "set SOFLAGS = $SOFLAGS\n" unless ($param::quiet);}
+
 if (! $param::quiet) {
   print "STAR     = \t$STAR\n";
   print "DEBUG    = \t$DEBUG\n";
   print "CPPFLAGS = \t$CPPFLAGS\n";
-  print "FFLAGS   = \t$FFLAGS  \n";
   print "CPP      = \t$CPP    \nCPPFLAGS = \t$CPPFLAGS\n"; 
   print "CC       = \t$CC     \tCCFLAGS  = \t$CFLAGS     \tCLIBS    =\t$CLIBS\n"; 
   print "CXX      = \t$CXX    \tCXXFLAGS = \t$CXXFLAGS\n";
   print "FC       = \t$FC     \nFFLAGS   = \t$FFLAGS     \tFLIBS    =\t$FLIBS\n"; 
   print "LD       = \t$LD     \tLDFLGAS  = \t$LDFLAGS    \nEXEFLAGS =\t$EXEFLAGS\n";
   print "LIBPATH  = \t$LIBPATH\tLIBS     = \t$LIBS       \nLibraries=\t$Libraries\n";
-  print "SO       = \t$SO     \tSOFLGAS  = \t$SOFLAGS\n";
+  print "SO       = \t$SO     \tSOFLAGS  = \t$SOFLAGS\n";
 }
 my $ROOTLIBS;
 my $RINTLIBS;
@@ -258,17 +278,25 @@ print "CPPPATH  = \t$CPPPATH\n" unless ($param::quiet);
 Repository ($STAR);# unless $param::noRepository;
 (my $DirPath  = cwd()) =~ s/\/$//g;
 my @Repo = Repository_List; 
+print "Build directory: $DirPath;" unless ($param::quiet);
+if (defined($ARG{Salt})) {$Salt = $ARG{Salt} ; print "set Salt = $Salt\n" unless ($param::quiet);}
 if ($#Repo > -1) {
-  print "Build directory: $DirPath;" unless ($param::quiet);
   print "\tRepositories:  \"@Repo\";" unless ($param::quiet);
-  Salt("user"); print "\tSet Salt to \"$param::salt\"\n" unless ($param::quiet);
+  if (!$Salt) {$Salt = "user";}
 }
-my $build  = "." . $STAR_HOST_SYS; print "build for $build\n" unless ($param::quiet);
+if ($Salt) {Salt($Salt); print "\tSet Salt to \"$param::salt\"" unless ($param::quiet);}
+my $build  = "." . $STAR_HOST_SYS; print "\nbuild for $build\n" unless ($param::quiet);
 $BUILD  = "#" . $build;
-$LIB    = $BUILD . "/lib";
-$BIN    = $BUILD . "/bin"; 
-$OBJ    = $BUILD . "/obj";
-my $obj = $build . "/obj";
+if ($DEBUG eq "-g" || $#Repo > -1) {
+  $LIB    = $BUILD . "/lib";
+  $BIN    = $BUILD . "/bin"; 
+  $OBJ    = $BUILD . "/obj";
+}
+else {
+  $LIB    = $BUILD . "/LIB";
+  $BIN    = $BUILD . "/BIN"; 
+  $OBJ    = $BUILD . "/OBJ";
+}
 $LIBPATH = $LIB;
 Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n" unless ($param::quiet);
 if ($STAR_HOST_SYS !~ /^intel_wnt/) {
@@ -402,7 +430,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	  next if $inc !~ /\.h$/ && $inc !~ /\.hh$/;
 	  push @incsDb, $db_dir . "/" . $sub_dir . "/" . $inc;
 	}
-	if ($#incsDb > -1) {
+	if ($#incsDb > -1 && ! $param::rflag) {
 	  my $inc_sub_dir = $INCLUDE . "/" . $sub_dir; #print "Install in $inc_sub_dir : @incsDb\n";
 	  Install $env $inc_sub_dir, @incsDb;
 	} 
@@ -440,7 +468,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	    push @incT, $sub_DIR ."/" . $inc;# print "+++ add $inc\n";
 	  }
 	}
-	if ($#incT > -1) {Install $env $INCLUDE, @incT;}
+	if ($#incT > -1 && ! $param::rflag) {Install $env $INCLUDE, @incT;}
       }
       opendir (DIR, $sub_DIR) or die "Can't open $sub_DIR\n";
       my @subsubdirS = readdir DIR;
@@ -461,7 +489,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	      if ($idl =~ /\.idl$/ ) {   
 		push @idlT, $subsub_DIR ."/" . $idl; #print "+++ add $idl\n";   
 	      }   
-	      if ($#idlT > -1) {Install $env $INCLUDE, @idlT;} 
+	      if ($#idlT > -1 && ! $param::rflag) {Install $env $INCLUDE, @idlT;} 
 	    }   
 	    next;   
 	  }   
@@ -475,7 +503,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 		push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
 	      }
 	    }
-	    if ($#incT > -1) {Install $env $INCLUDE, @incT;}
+	    if ($#incT > -1 && ! $param::rflag) {Install $env $INCLUDE, @incT;}
 	    next;
 	  }
 	  if (($sub_dir =~ /^sim$/ || $sub_dir =~ /^gen$/) &&
@@ -500,7 +528,7 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
   }
 }
 my @Targets = ();
-foreach $dir ("asps/rexe",@subdirs) {#,"cern/geant321","cern/minicern") {
+foreach $dir ("asps/rexe","asps/Rexe","asps/geant",@subdirs) {#,"cern/geant321","cern/minicern") {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }
@@ -510,4 +538,3 @@ Default qw (   .  );
 Build  @Targets;
 #________________________________________________________________________________
 __END__;
-
