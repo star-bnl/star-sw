@@ -1,5 +1,8 @@
-* $Id: quick_sort.F,v 1.3 1998/08/16 16:59:01 perev Exp $
+* $Id: quick_sort.F,v 1.4 1998/09/21 19:30:47 perev Exp $
 * $Log: quick_sort.F,v $
+* Revision 1.4  1998/09/21 19:30:47  perev
+* Simple tests added
+*
 * Revision 1.3  1998/08/16 16:59:01  perev
 * Increase stack 20->40
 *
@@ -27,11 +30,18 @@ C Inputs:
       INTEGER el2           ! Element to sort on (from second row of table)
       INTEGER table(*)      ! table to be sorted.
 C
-      INTEGER loc,bytes,len
+      INTEGER loc,bytes,len,itst
 C
 
       bytes = abs(loc(table(2))-loc(table(1)))
-      len =   abs((loc(el2) - loc(el1(1)))/bytes)
+      len   = abs((loc(el2) - loc(el1(1)))/bytes)
+      itst  = abs((loc(el1) - loc(table(1))))/bytes
+      if (itst .ge. len) then
+         write(*,*) 'Quick_Sort ***ERROR** Wrong Arguments'
+         Quick_Sort = -1
+         return
+      endif
+
       call  TSORTI (table, len, NROWS, el1)
       Quick_Sort = tls_sort_normal_cv
       return
@@ -56,7 +66,13 @@ C
       INTEGER        LT(40),RT(40)
       INTEGER        R,RT
 C
-      N = NCOL
+      if(NCOL.le.1) return
+      do I=1,NCOL-1
+        if (WORD(1,I).GT.WORD(1,I+1)) go to 1
+      enddo
+      return
+      
+   1  N = NCOL
       LEVEL = 1
       LT(1) = 1
       RT(1) = N

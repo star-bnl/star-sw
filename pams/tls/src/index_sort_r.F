@@ -1,5 +1,8 @@
-* $Id: index_sort_r.F,v 1.3 1998/08/16 16:59:00 perev Exp $
+* $Id: index_sort_r.F,v 1.4 1998/09/21 19:30:46 perev Exp $
 * $Log: index_sort_r.F,v $
+* Revision 1.4  1998/09/21 19:30:46  perev
+* Simple tests added
+*
 * Revision 1.3  1998/08/16 16:59:00  perev
 * Increase stack 20->40
 *
@@ -79,8 +82,13 @@ C
       REAL           A(*),X
       INTEGER        W, R, LT(40), RT(40), IND(N)
 *--------------------------------------------------------------------------
+      if (N.le.1) return
+      do I=1,N-1
+        if (A(IND(i)).gt.A(IND(i+1))) go to 1
+      enddo
+      return
 
-      LEVEL = 1
+  1   LEVEL = 1
       LT(1) = 1
       RT(1) = N
   100 L = LT(LEVEL)
