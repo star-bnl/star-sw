@@ -32,3 +32,20 @@ Parameter::Parameter(const Parameter & parameter)
 Parameter::~Parameter()
 {}
 
+
+ParameterFactory::ParameterFactory(const string& newName,
+				     int original,
+				     int incremental, 
+				     int maxInc)
+  : StiObjectFactoryInterface<Parameter>(newName, 
+					  original, 
+					  incremental, 
+					  maxInc)
+{
+  initialize();
+}
+
+ParameterFactory::~ParameterFactory()
+{
+  // cout <<"ParameterFactory::~ParameterFactory()"<<endl;
+}

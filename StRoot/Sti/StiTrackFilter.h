@@ -3,6 +3,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include "StiObjectFactoryInterface.h"
 
 class StiTrack;
 /*! Base class defining a track filtering mechanism
@@ -36,6 +37,7 @@ public:
 
     StiTrackFilter();
   
+    virtual void initialize();
     virtual bool accept(StiTrack * track) const =0;
 
     bool filter(StiTrack * track);
@@ -87,5 +89,29 @@ inline int StiTrackFilter::getAcceptedTrackCount() const
 {
   return acceptedTrackCount;
 }
+
+/*! StiTrackFilter factory
+ */
+class StiTrackFilterFactory : public StiObjectFactoryInterface<StiTrackFilter>
+{
+public:
+    ///This is the only constructor available.
+    StiTrackFilterFactory(const string& newName, 
+			  int original=-1, int 
+			  incremental=-1, 
+			  int maxInc=-1);
+    ///Default destructor.
+    virtual ~StiTrackFilterFactory();
+    
+protected:
+    ///Return a pointer to a new StiTrackFilter object on the heap.
+    virtual void * makeNewObject() const
+      {
+	return 0;
+      }
+    
+private:
+    StiTrackFilterFactory(); //Not implemented
+};
 
 #endif

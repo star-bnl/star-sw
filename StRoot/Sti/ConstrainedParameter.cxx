@@ -32,3 +32,20 @@ ConstrainedParameter::ConstrainedParameter(const ConstrainedParameter & paramete
 
 ConstrainedParameter::~ConstrainedParameter()
 {}
+
+ConstrainedParameterFactory::ConstrainedParameterFactory(const string& newName,
+							 int original,
+							 int incremental, 
+							 int maxInc)
+  : ParameterFactory(newName, 
+		     original, 
+		     incremental, 
+		     maxInc)
+{
+  initialize();
+}
+
+ConstrainedParameterFactory::~ConstrainedParameterFactory()
+{
+  // cout <<"ConstrainedParameterFactory::~ConstrainedParameterFactory()"<<endl;
+}

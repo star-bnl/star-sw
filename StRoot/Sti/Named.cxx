@@ -17,22 +17,22 @@ void Named::setName(const string & newName)
     _name = newName;
 }
 
-const string Named::getName()
+const string Named::getName() const
 {
     return string(_name);
 }
 
-bool Named::isNamed()
+bool Named::isNamed() const
 {
    return (_name.size()>0 && _name!=" ");
 }
 
-bool Named:: isName(const string & aName)
+bool Named:: isName(const string & aName) const
 {
    return _name==aName;
 }
 
-bool Named::isNamedAs(const Named & named)
+bool Named::isNamedAs(const Named & named) const
 {
   return _name==named._name;
 }
