@@ -79,9 +79,13 @@ C<----------------------------------------------------------------------
       REAL      xlocal(3), bfield(3), bscale
       REAL      ptotp2, ptotn2, pdotn, eprp, eprn, epip, epin
 
+      LOGICAL   first
+
       DATA      xlocal /3*0./
 C-----------------------------------------------------------------------
 c*** pgj: copy parameters
+
+      first = .true.
 
       do i=1,MXDET
         dca_max(i) = exipar(i).dca_max
@@ -100,7 +104,7 @@ c*** pgj: get magnetic field via call to gufld
 c*** pgj: current row counts
 
       n_v = vertex_h.nok
-      n_xi = exiaux_h.nok
+      n_xi = xi_vertex_h.nok
 
 c      exiaux_h.nok = 0
 
@@ -322,7 +326,6 @@ c*** wkw: breakout if n_xi=maxlen
                 endif
 
                 vertex_h.nok = n_v
-                exiaux_h.nok = n_xi
                 xi_vertex_h.nok = n_xi
 
 c*** pgj: fill vertex table
@@ -401,41 +404,55 @@ c*** pgj: fill auxiliary table
                 xi_vertex(n_xi).py_b  = pb(2)
                 xi_vertex(n_xi).pz_b  = pb(3)
 
-c*** pgj: fill exiaux table
+c*** pgj: fill exiaux table if present (note: default allocation is 1)
 
-                exiaux(n_xi).id      = n_xi
-                exiaux(n_xi).id_xi   = id_vertex + n_xi
-                exiaux(n_xi).id_b    = globtrk(i).id
-                exiaux(n_xi).id_v0   = id_v0
-                exiaux(n_xi).det_id  = 100*idet_b+vertex(k).det_id
-c                exiaux(n_xi).gpid_b  =
-c                exiaux(n_xi).ndegf   =
-                exiaux(n_xi).charge  = globtrk(i).icharge
-                exiaux(n_xi).dca     = dca
-                exiaux(n_xi).rv      = rv
-                exiaux(n_xi).b_xi    = bxi
-                exiaux(n_xi).b_b     = bb
-                exiaux(n_xi).b_v0    = bv0
-c                exiaux(n_xi).sag_b   =
-                exiaux(n_xi).px      = pxi(1)
-                exiaux(n_xi).py      = pxi(2)
-                exiaux(n_xi).pz      = pxi(3)
-                exiaux(n_xi).px_b    = pb(1)
-                exiaux(n_xi).py_b    = pb(2)
-                exiaux(n_xi).pz_b    = pb(3)
-                exiaux(n_xi).px_v    = pv0(1)
-                exiaux(n_xi).py_v    = pv0(2)
-                exiaux(n_xi).pz_v    = pv0(3)
-                exiaux(n_xi).ptarm   = pper
-                exiaux(n_xi).alpha   = (ppar-npar)/(ppar+npar)
-                exiaux(n_xi).mass_xi = sqrt((ela+epi)**2 - ptot_2)
-                exiaux(n_xi).mass_om = sqrt((ela+ek)**2  - ptot_2)
-                exiaux(n_xi).mass_v0 = v0_mass
-                exiaux(n_xi).tau_xi  = exiaux(n_xi).mass_xi*rv/ptot     
-                exiaux(n_xi).tau_om  = exiaux(n_xi).mass_om*rv/ptot 
-                exiaux(n_xi).rap_xi  = 0.5*log((exi+pxi(3))/(exi-pxi(3)))
-                exiaux(n_xi).rap_om  = 0.5*log((eom+pxi(3))/(eom-pxi(3)))
-c                exiaux(n_xi).costh   =
+                if( exiaux_h.maxlen .eq. 1 ) then
+                  if( first ) then
+                    write(6,*) 
+     >                'EXI - Warning: exi_aux table will not be filled'
+                    first = .false.
+                  endif
+                elseif( n_xi .le. exiaux_h.maxlen ) then
+                  exiaux_h.nok = n_xi
+                  exiaux(n_xi).id      = n_xi
+                  exiaux(n_xi).id_xi   = id_vertex + n_xi
+                  exiaux(n_xi).id_b    = globtrk(i).id
+                  exiaux(n_xi).id_v0   = id_v0
+                  exiaux(n_xi).det_id  = 100*idet_b+vertex(k).det_id
+c                  exiaux(n_xi).gpid_b  =
+c                  exiaux(n_xi).ndegf   =
+                  exiaux(n_xi).charge  = globtrk(i).icharge
+                  exiaux(n_xi).dca     = dca
+                  exiaux(n_xi).rv      = rv
+                  exiaux(n_xi).b_xi    = bxi
+                  exiaux(n_xi).b_b     = bb
+                  exiaux(n_xi).b_v0    = bv0
+c                  exiaux(n_xi).sag_b   =
+                  exiaux(n_xi).px      = pxi(1)
+                  exiaux(n_xi).py      = pxi(2)
+                  exiaux(n_xi).pz      = pxi(3)
+                  exiaux(n_xi).px_b    = pb(1)
+                  exiaux(n_xi).py_b    = pb(2)
+                  exiaux(n_xi).pz_b    = pb(3)
+                  exiaux(n_xi).px_v    = pv0(1)
+                  exiaux(n_xi).py_v    = pv0(2)
+                  exiaux(n_xi).pz_v    = pv0(3)
+                  exiaux(n_xi).ptarm   = pper
+                  exiaux(n_xi).alpha   = (ppar-npar)/(ppar+npar)
+                  exiaux(n_xi).mass_xi = sqrt((ela+epi)**2 - ptot_2)
+                  exiaux(n_xi).mass_om = sqrt((ela+ek)**2  - ptot_2)
+                  exiaux(n_xi).mass_v0 = v0_mass
+                  exiaux(n_xi).tau_xi  = exiaux(n_xi).mass_xi*rv/ptot     
+                  exiaux(n_xi).tau_om  = exiaux(n_xi).mass_om*rv/ptot 
+                  exiaux(n_xi).rap_xi  = 0.5*log((exi+pxi(3))/(exi-pxi(3)))
+                  exiaux(n_xi).rap_om  = 0.5*log((eom+pxi(3))/(eom-pxi(3)))
+c                  exiaux(n_xi).costh   =
+                else
+                  if( first ) then
+                    write(6,*) 'EXI - Warning: exi_aux table overflow'
+                    first = .false.
+                  endif
+                endif
 
               ENDIF				! bxi and iflag check
 
