@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.8 1998/04/13 16:03:49 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.9 1998/04/26 02:49:36 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.9  1998/04/26 02:49:36  fisyak
+#  Fix fortran dependencies
+#
 #  Revision 1.8  1998/04/13 16:03:49  fisyak
 #  Correct HPUX flags
 #
@@ -47,7 +50,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/04/13 16:03:49 $ 
+#             Last modification $Date: 1998/04/26 02:49:36 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -101,12 +104,15 @@ endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp_ux102 hp_ux102_aCC))
 CXX        := /opt/aCC/bin/aCC
 #CXXFLAGS   +=  -z +Z -w                              # from ROOT
-CXXFLAGS   += -w -z +Z +DAportable -Dextname                 # P.Nevski
+#CXXFLAGS   += -w -z +Z +DAportable -Dextname                 # P.Nevski
+CXXFLAGS   += -w -z +Z -Dextname                      # Brian
 CC         := cc
 #CFLAGS     += +DAportable +Z  -Wl,+s,+b${STAR_LIB} -Ae    # from DSPACK
-CFLAGS     +=  +z -Aa +DAportable -D_HPUX_SOURCE -Dextname          # P.Nevski 
+#CFLAGS     +=  +z -Aa +DAportable -D_HPUX_SOURCE -Dextname          # P.Nevski 
+CFLAGS     +=  +z -Aa -D_HPUX_SOURCE -Dextname          # Brian
 FC         := /opt/fortran/bin/fort77
-FFLAGS     += +DAportable +U77 +ppu +B +Z                    # from DSPACK
+#FFLAGS     += +DAportable +U77 +ppu +B +Z                    # from DSPACK
+FFLAGS     += +U77 +ppu +B +Z                    # Brian
 F_EXTENDED := +es
 LDFLAGS    += -b                                     # from DSPACK 
 LD         := ld                                     # from DSPACK
@@ -128,7 +134,9 @@ CXXFLAGS   +=  -32 ${CFLAGS} -xansi -w
 ARFLAGS    :=     slrvu
 LD         := CC
 LDFLAGS    += -32 -shared
-        LD_LIBS    := -lsun -lftn -lm -lc -lPW -lmalloc
+LD_LIBS    := -lsun -lftn -lm -lc -lPW -lmalloc
+LDS        := $(FC)
+LDS_FLAGS  := $(LDFLAGS)
 OPSYS      := IRIX53
 CPPFLAGS   += -DCERNLIB_SGI -DCERNLIB_UNIX
 endif
@@ -161,7 +169,7 @@ ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_64))
 CXX        :=  CC
 CXXFLAGS   += -64
 CFLAGS     += -64
-FFLAGS     += -64 -Nn20000 -O2
+FFLAGS     += -64 -Nn20000 #-O2
 F_EXTENDED := -extend_source
 LDFLAGS    += -64 -shared
 LD_LIBS    := -lXext -lm
@@ -171,7 +179,7 @@ endif
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),i386_linux2))
 #  ====================
-FFLAGS     +=-w -O2 
+FFLAGS     +=-w #-O2 
 F_EXTENDED :=-e 
 LDFLAGS    += -shared
 LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt
@@ -208,7 +216,7 @@ CXXFLAGS   += -KPIC                        # V.P.
 LDFLAGS    += -G
 LDS        := $(CXX)
 LDS_FLAGS   := -g -t -z muldefs
-LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb
+LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb -lsunmath
 CC_LIBS    := -L/usr/ucblib -R/usr/ucblib -lm -ldl -lform -lmalloc
 CPPFLAGS   += -DCERNLIB_SUN -DCERNLIB_SOLARIS -DCERNLIB_UNIX
 endif 
