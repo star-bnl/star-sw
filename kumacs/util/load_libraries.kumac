@@ -1,4 +1,5 @@
 * 28Jul98 K. Turner - separate from bfc_util.kumac
+* 25Aug98 K. Turner - load db libraries & all run/params tables
 * ************************************************************
 *************************************************************
 ******************************************************************
@@ -35,6 +36,11 @@
    enddo
    vec/cre make_done
  endif
+ 
+ make db
+ cd run
+ call par2mem
+ cd /dui
  
  return
  
