@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.10 1999/02/24 12:49:04 ullrich Exp $
+ * $Id: StGlobalTrack.cc,v 1.11 1999/03/23 22:00:09 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.10  1999/02/24 12:49:04  ullrich
- * Added argument (h) to constructor needed to instatiate helix
+ * Revision 1.11  1999/03/23 22:00:09  ullrich
+ * Minor mods.
  *
  * Revision 1.12  1999/04/08 14:58:32  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -49,10 +49,10 @@
  * Revision 1.2  1999/01/15 22:53:44  wenaus
  * version with constructors for table-based loading
  *
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.10 1999/02/24 12:49:04 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.11 1999/03/23 22:00:09 ullrich Exp $";
 #include "StEvent/StGlobalTrack.hh"
 StGlobalTrack::StGlobalTrack()
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.10 1999/02/24 12:49:04 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.11 1999/03/23 22:00:09 ullrich Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
@@ -69,9 +69,33 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk,
 			     int h) : 
     StTrack(trk, curvature, dip, phase, origin, h), mPidTraits(*this)
 {  
-  if (mTpcDedx) { delete mTpcDedx; mTpcDedx=0; }
-  if (mFtpcDedx) { delete mFtpcDedx; mFtpcDedx=0; }
-  if (mSvtDedx) { delete mSvtDedx; mSvtDedx=0; }
+    mFtpcDedx = 0;
+    mSvtDedx = 0; 
+    mLength = trk->length;
+}
+
+StGlobalTrack::~StGlobalTrack() {
+    //
+    //   If a track gets deleted make sure
+    //   that the reference counters of the
+    //   related hits get decreased.
+    //   Don't use the removeXxxHit() methods
+    //   here since they are too slow.
+    //
+    StVecPtrTpcHitIterator i;  
+    StVecPtrSvtHitIterator j; 
+    StVecPtrFtpcHitIterator k;
+    int counter;
+    for(i = mTpcHits.begin(); i != mTpcHits.end(); i++) {
+	counter = (*i)->trackReferenceCount();
+	(*i)->setTrackReferenceCount(counter > 0 ? counter-1 : 0);
+    }
+    for(j = mSvtHits.begin(); j != mSvtHits.end(); j++) {
+	counter = (*j)->trackReferenceCount();
+	(*j)->setTrackReferenceCount(counter > 0 ? counter-1 : 0);
+    }
+    for(k = mFtpcHits.begin(); k != mFtpcHits.end(); k++) {
+	counter = (*k)->trackReferenceCount();
 	(*k)->setTrackReferenceCount(counter > 0 ? counter-1 : 0);
     }
     
