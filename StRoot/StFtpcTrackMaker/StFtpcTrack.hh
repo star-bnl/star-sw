@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.hh,v 1.18 2003/01/20 09:16:33 oldi Exp $
+// $Id: StFtpcTrack.hh,v 1.19 2003/09/16 15:27:02 jcs Exp $
 // $Log: StFtpcTrack.hh,v $
+// Revision 1.19  2003/09/16 15:27:02  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.18  2003/01/20 09:16:33  oldi
 // Calculation of residuals simplified.
 //
@@ -293,106 +296,6 @@ protected:
   ClassDef(StFtpcTrack, 1)    // Ftpc track class  
 };
 
-
-inline void StFtpcTrack::CalcGlobResiduals()
-{
-  // calulates the global fit residuals for each point on track
-
-  CalcResiduals((Bool_t)kFALSE);
-}
-
-
-inline void StFtpcTrack::CalcPrimResiduals()
-{
-  // calulates the primary fit residuals for each point on track
-
-  CalcResiduals((Bool_t)kTRUE);
-}
-
-
-inline Double_t StFtpcTrack::GetMeanAlpha()
-{
-  // Returns mean phi angle of track.
-
-  Double_t phi = mAlphaFirst+mAlphaLast;
-  
-  if (phi >= 2*TMath::Pi()) phi -= 2*TMath::Pi();
-  else if (phi <= -2*TMath::Pi())  phi += 2*TMath::Pi();
-
-  return phi/2.;
-}
-
-
-inline Double_t StFtpcTrack::GetPt() const
-{
-  // Returns transverse momentum.
-
-  return TMath::Sqrt(mP.X() * mP.X() + mP.Y() * mP.Y());
-}
-
-
-inline Double_t StFtpcTrack::GetP() const
-{
-  // Returns total momentum.
-
-  return TMath::Sqrt(mP.X() * mP.X() + mP.Y() * mP.Y() + mP.Z() * mP.Z());
-}
-
-
-inline Double_t StFtpcTrack::GetPseudoRapidity() const
-{
-  // Returns the pseudo rapidity of the particle.
-
-  return 0.5 * TMath::Log((GetP() + GetPz()) / (GetP() - GetPz()));  
-}
-
-
-inline Double_t StFtpcTrack::GetEta() const
-{
-  // This function returns the value of GetPseudoRapidity().
-  
-  return GetPseudoRapidity();
-}
-
-
-inline Double_t StFtpcTrack::GetRapidity() const
-{
-  // Returns the rapidity of the particle with the assumption that the particle is a pion (+/-).
-
-  return 0.5 * TMath::Log((M_PION_PLUS + GetPz()) / (M_PION_PLUS - GetPz()));
-}
-
-
-// momentum fit functions
-
-inline StThreeVector<Double_t> StFtpcTrack::helixMomentum() const
-{
-  return mHelixMomentum;
-}
-
-
-inline StThreeVector<Double_t> StFtpcTrack::momentum() const
-{
-  return mFullMomentum;
-}
-
-
-inline Double_t StFtpcTrack::chi2Rad() const
-{
-  return mChi2Rad;
-}
-
-
-inline Double_t StFtpcTrack::chi2Lin() const
-{
-  return mChi2Lin;
-}
-
-
-inline StThreeVector<Double_t> StFtpcTrack::localMomentum(Double_t s)
-{
-  return momentumAt(s, mZField);
-}
 
 
 #endif

@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.cc,v 1.16 2003/01/16 18:04:32 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.17 2003/09/16 15:27:01 jcs Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.17  2003/09/16 15:27:01  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.16  2003/01/16 18:04:32  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -2070,6 +2073,49 @@ void StFtpcDisplay::DeleteGeant()
   if (geant_value_minus) {
     delete[] geant_value_minus;
     geant_value_minus = 0;
+  }
+
+  return;
+}
+
+void StFtpcDisplay::DrawNodes()
+{
+  // Draw nodes in the right canvases and clears the canvases before.
+  mX_Y_Zplus->cd();
+  mNode1->cd();
+  mNode1->Draw("");
+
+  mX_Y_Zminus->cd();
+  mNode2->cd();
+  mNode2->Draw("");
+
+  mX_Y_Z->cd();
+  mNode0->cd();
+  mNode0->Draw("");
+
+  return;
+}
+
+
+void StFtpcDisplay::DeleteAll() 
+{
+  // Deletes objects of found and geant tracks.
+
+  DeleteFound();
+  DeleteGeant();
+}
+
+
+void StFtpcDisplay::OnOff(Bool_t on)
+{
+  // Prints "On" or "Off".
+
+  if (on) {
+    cout << "On" << endl;
+  }
+  
+  else {
+    cout << "Off" << endl;
   }
 
   return;

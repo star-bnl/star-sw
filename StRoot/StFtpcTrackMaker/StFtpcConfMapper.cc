@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.24 2003/01/21 10:04:13 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.25 2003/09/16 15:27:01 jcs Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.25  2003/09/16 15:27:01  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.24  2003/01/21 10:04:13  jcs
 // initialize variables to eliminate compiler warnings for NODEBUG=yes
 //
@@ -1973,6 +1976,213 @@ void StFtpcConfMapper::SettingInfo()
   gMessMgr->Message("", "I", "OST") << "Subsequent padrows to look for next track point:     " << mRowScopeTrack[1] << " / " << mRowScopeTrack[0] << endm;
   gMessMgr->Message("", "I", "OST") << "Adjacent phi segments to look for next point:        " << mPhiScope[1] << " / " << mPhiScope[0] << endm;
   gMessMgr->Message("", "I", "OST") << "Adjacent eta segments to look for next point:        " << mEtaScope[1] << " / " << mEtaScope[0] << endm;
+
+  return;
+}
+
+
+void StFtpcConfMapper::TwoCycleTracking()
+{
+  // Tracking in 2 cycles:
+  // 1st cycle: tracking with vertex constraint
+  // 2nd cycle: without vertex constraint (of remaining clusters)Begin_Html<a name="settings"></a>End_Html
+
+  MainVertexTracking();
+  FreeTracking();
+  return;
+}
+
+
+void StFtpcConfMapper::NonVertexTracking()
+{
+  // "Shortcut" to FreeTracking().
+
+  FreeTracking();
+}
+
+
+void StFtpcConfMapper::RemoveTrack(StFtpcTrack *track)
+{
+  // Removes track from ObjArry and takes care that the points are released again.
+
+  track->SetProperties(kFALSE, -1); // release points
+  mTrack->Remove(track);           // actual removement of TObjArray
+  delete track;                    // delete track
+
+  return;
+}
+
+
+Int_t StFtpcConfMapper::GetRowSegm(StFtpcConfMapPoint *hit)
+{
+ // Returns number of pad segment of a specific hit.
+
+  return hit->GetPadRow() - 1;  // fPadRow (1-20) already segmented, only offset substraction
+}
+
+
+Int_t StFtpcConfMapper::GetRow(Int_t segm)
+{
+  // Returns the row number of a given row segment.
+
+  return segm + 1;
+}
+
+
+Int_t StFtpcConfMapper::GetPhiSegm(StFtpcConfMapPoint *hit)
+{
+  // Returns number of phi segment of a specific hit.
+  
+  return (Int_t)(hit->GetPhi()  * mNumPhiSegment / (2.*TMath::Pi())); // fPhi has no offset but needs to be segmented (this is done by type conversion to Int_t)
+}
+
+
+Double_t StFtpcConfMapper::GetPhi(Int_t segm)
+{
+  // Returns the angle phi of a given segment.
+
+  return 2 * TMath::Pi() * segm / (Double_t)mNumPhiSegment;
+}
+
+
+Int_t StFtpcConfMapper::GetEtaSegm(StFtpcConfMapPoint *hit)
+{
+  // Returns number of eta segment of a specific hit.
+
+
+  Double_t eta;
+  Int_t eta_segm;
+  
+  if ((eta = hit->GetEta()) > 0.) {  // positive values
+    eta_segm = (Int_t)((eta - mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2.); // Only use n_eta_segm/2. bins because of negative eta values.
+  }
+
+  else {                             // negative eta values
+    eta_segm = (Int_t)((-eta - mEtaMin) * mNumEtaSegment/(mEtaMax - mEtaMin) /2. + mNumEtaSegment/2.);
+  }
+  
+  return eta_segm;
+}
+
+
+Double_t StFtpcConfMapper::GetEta(Int_t segm)
+{
+  // Returns the pseudorapidity eta of the given segment.
+
+  Bool_t minus_sign = (Bool_t)kFALSE;
+
+  if (segm >= mNumEtaSegment/2.) {
+    minus_sign = (Bool_t)kTRUE;
+    segm -= mNumEtaSegment/2;
+  }
+
+  if (minus_sign) {
+    return -segm * (mEtaMax - mEtaMin)/ (2. * mNumEtaSegment) + mEtaMin;
+  }
+
+  else {
+    return +segm * (mEtaMax - mEtaMin)/ (2. * mNumEtaSegment) + mEtaMin;
+  }
+}
+
+
+Int_t StFtpcConfMapper::GetSegm(StFtpcConfMapPoint *h)
+{
+  // Calculates segment of a given hit.
+
+  return GetSegm(GetRowSegm(h), GetPhiSegm(h), GetEtaSegm(h));
+}
+
+
+Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta_segm)
+{
+  // Calculates the volume segment number from the segmented volumes (segm = segm(pad,phi,eta)).
+
+  Int_t segm = row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
+
+  if (segm < 0 || segm >= mBounds) {
+    gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")! Garbage segment returned." << endm;
+    return mBounds;
+  }
+
+  else return segm;
+}
+
+
+Int_t StFtpcConfMapper::GetRowSegm(Int_t segm)
+{
+  // Returns number of pad segment of a specifiv segment.
+  return (segm - GetEtaSegm(segm) - GetPhiSegm(segm)) / (mNumPhiSegment * mNumEtaSegment);
+}
+
+
+Int_t StFtpcConfMapper::GetPhiSegm(Int_t segm)
+{
+  // Returns number of phi segment of a specifiv segment.
+  return (segm - GetEtaSegm(segm)) % (mNumPhiSegment * mNumEtaSegment) / (mNumEtaSegment);
+}
+
+
+Int_t StFtpcConfMapper::GetEtaSegm(Int_t segm)
+{
+  // Returns number of eta segment of a specifiv segment.
+
+  return (segm % (mNumPhiSegment * mNumEtaSegment)) % (mNumEtaSegment);
+}
+
+
+Double_t const StFtpcConfMapper::GetPhiDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+{
+  // Returns the difference in angle phi of the two given clusters.
+  // Normalizes the result to the arbitrary angle between two subsequent padrows.
+
+  Double_t angle = TMath::Abs(hit1->GetPhi() - hit2->GetPhi());
+
+  if (angle > TMath::Pi()) {
+    angle = 2*TMath::Pi() - angle;
+  }
+
+  return angle / (TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow()));
+}
+
+
+Double_t const StFtpcConfMapper::GetEtaDiff(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+{
+  // Returns the difference in pseudrapidity eta of the two given clusters.
+  // Normalizes the result to the arbitrary pseudorapidity between two subsequent padrows.
+
+  return (TMath::Abs(hit1->GetEta() - hit2->GetEta())) / (TMath::Abs(hit1->GetPadRow() - hit2->GetPadRow()));
+}
+
+
+Double_t const StFtpcConfMapper::GetClusterDistance(const StFtpcConfMapPoint *hit1, const StFtpcConfMapPoint *hit2)
+{
+  // Returns the distance of two clusters measured in terms of angle phi and pseudorapidity eta weighted by the
+  // maximal allowed values for phi and eta.
+
+  return TMath::Sqrt(TMath::Power(GetPhiDiff(hit1, hit2)/mMaxCircleDist[mVertexConstraint], 2) + TMath::Power(GetEtaDiff(hit1, hit2)/mMaxLengthDist[mVertexConstraint], 2));
+}
+
+
+Double_t const StFtpcConfMapper::GetDistanceFromFit(const StFtpcConfMapPoint *hit)
+{
+  // Returns the distance of the given cluster to the track to which it probably belongs.
+  // The distances to the circle and length fit are weighted by the cuts on these values.
+  // Make sure that the variables mCircleDist and mLengthDist for the hit are set already.
+
+  return TMath::Sqrt(TMath::Power((hit->GetCircleDist() / mMaxCircleDist[mVertexConstraint]), 2) + TMath::Power((hit->GetLengthDist() / mMaxLengthDist[mVertexConstraint]), 2));
+}
+
+
+void StFtpcConfMapper::AdjustTrackNumbers(Int_t first_split)
+{
+  // After split tracks are merged the size of the ObjArry holding the tracks needs to be changed.
+  // Afterwards the tracknumbers need to be changed to be the number of the slot of the array again.
+
+  mTrack->Compress();
+  mTrack->Expand(mTrack->GetLast()+1);
+  
+  for (Int_t i = first_split; i < mTrack->GetEntriesFast(); ((StFtpcTrack*)mTrack->At(i))->SetTrackNumber(i), i++);
 
   return;
 }

@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.25 2002/11/28 09:39:33 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.26 2003/09/16 15:27:02 jcs Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.26  2003/09/16 15:27:02  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.25  2002/11/28 09:39:33  oldi
 // Problem in momentum fit eliminated. Negative vertex Id is not used anymore.
 // It was used do decide for global or primary fit.
@@ -1156,4 +1159,18 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, Bool_
     gMessMgr->Message("", "W", "OST") << "Tracks not written (No tracks found!)." << endm;
     return -1;
   }
+}
+
+Int_t StFtpcTracker::WriteTracksAndClusters()
+{
+  // Writes tracks and clusters in ROOT file.
+  // In the moment this makes no sense because the important information
+  // about momentum of tracks and coordinates of clusters or stored in
+  // StThreeVerctor<double> which does not inherit from TObject. So it
+  // is not written out!
+
+  mHit->Write();
+  mTrack->Write();
+  
+  return 0;
 }

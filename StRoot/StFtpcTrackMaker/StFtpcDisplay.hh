@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.hh,v 1.10 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcDisplay.hh,v 1.11 2003/09/16 15:27:02 jcs Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.11  2003/09/16 15:27:02  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.10  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -149,47 +152,5 @@ public:
 };
 
  
-inline void StFtpcDisplay::DrawNodes()
-{
-  // Draw nodes in the right canvases and clears the canvases before.
-  mX_Y_Zplus->cd();
-  mNode1->cd();
-  mNode1->Draw("");
-
-  mX_Y_Zminus->cd();
-  mNode2->cd();
-  mNode2->Draw("");
-
-  mX_Y_Z->cd();
-  mNode0->cd();
-  mNode0->Draw("");
-
-  return;
-}
-
-
-inline void StFtpcDisplay::DeleteAll() 
-{
-  // Deletes objects of found and geant tracks.
-
-  DeleteFound();
-  DeleteGeant();
-}
-
-
-inline void StFtpcDisplay::OnOff(Bool_t on)
-{
-  // Prints "On" or "Off".
-
-  if (on) {
-    cout << "On" << endl;
-  }
-  
-  else {
-    cout << "Off" << endl;
-  }
-
-  return;
-}
 
 #endif

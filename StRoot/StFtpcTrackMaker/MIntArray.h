@@ -1,5 +1,8 @@
-// $Id: MIntArray.h,v 1.4 2001/07/12 08:24:12 oldi Exp $
+// $Id: MIntArray.h,v 1.5 2003/09/16 15:27:01 jcs Exp $
 // $Log: MIntArray.h,v $
+// Revision 1.5  2003/09/16 15:27:01  jcs
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.4  2001/07/12 08:24:12  oldi
 // New function CountAppearance() introduced.
 //
@@ -52,54 +55,6 @@ public:
 };
 
 
-inline void MIntArray::AddLast(Int_t value) 
-{
-  // Adds the value after the last entry of the array.
-  // Therefore the array size has to be increased by one.
-
-  Set(GetSize() + 1);
-  AddAt(value, GetSize() - 1);
-}
-
-
-inline Int_t MIntArray::AtLast()
-{
-  // Returns the value of the last array element.
-
-  return At(GetSize()-1);
-}
-
-
-inline Int_t MIntArray::AtFirst()
-{
-  // Returns the value of the last array element.
-
-  return At(0);
-}
-
-
-inline void MIntArray::Fill(Int_t value)
-{
-  // Fills the whole array with the value 'value'.
-
-  for (Int_t i = 0; i < GetSize(); AddAt(value, i), i++);
-
-  return;
-}
-
-
-inline void MIntArray::SetFill(Int_t size, Int_t value)
-{
-  // Set the array size to 'size' and fill the whole array with 'value'.
-
-  if (GetSize() > 0) {
-    Set(0);
-  }
-  
-  for (Int_t i = 0; i < size; AddLast(value), i++);
-
-  return;
-}
 
 
 #endif
