@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cc,v 1.3 1999/05/20 21:42:55 ogilvie Exp $
+ * $Id: StTpcDedxPid.cc,v 1.4 1999/05/22 17:56:19 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cc,v $
+ * Revision 1.4  1999/05/22 17:56:19  ogilvie
+ * made static data members public
+ *
  * Revision 1.3  1999/05/20 21:42:55  ogilvie
  * *** empty log message ***
  *
@@ -98,6 +101,7 @@ double StTpcDedxPid::meanPidFunction(double mass) const
     
     // double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
     // double bpar[3] = {0.174325e-06,-2.71889, 776.626} ;
+
     double gamma =sqrt(pow(momentum/mass,2)+1.);
     double beta = sqrt(1. - 1./pow(gamma,2));
     double rise = mTpcDedxRise*pow(beta*gamma,2);
