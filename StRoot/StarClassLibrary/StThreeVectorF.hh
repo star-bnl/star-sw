@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.hh,v 1.10 2004/10/17 03:20:41 perev Exp $
+ * $Id: StThreeVectorF.hh,v 1.11 2004/10/26 17:33:16 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.hh,v $
+ * Revision 1.11  2004/10/26 17:33:16  perev
+ * check for x,y=0 added
+ *
  * Revision 1.10  2004/10/17 03:20:41  perev
  * Error check improved
  *
@@ -228,6 +231,7 @@ inline float StThreeVectorF::cosTheta() const
 
 inline float StThreeVectorF::phi() const
 {
+    if (fabs(mX1)+fabs(mX2)<=1.e-12) return 0;
     return atan2(mX2, mX1);
 }
 
