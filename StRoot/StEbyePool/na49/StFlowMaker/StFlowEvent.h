@@ -1,27 +1,12 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.4 2002/03/23 22:54:28 posk Exp $
+// $Id: StFlowEvent.h,v 1.5 2002/09/11 21:33:43 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
 //////////////////////////////////////////////////////////////////////
 //
 // Description: A subset of StEvent with flow functions
-//
-//////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowEvent.h,v $
-// Revision 1.4  2002/03/23 22:54:28  posk
-// More 40 GeV compatability.
-//
-// Revision 1.3  2001/11/06 17:05:30  posk
-// New 40 Gev centrality bins. Using only sin terms at 40 GeV.
-//
-// Revision 1.2  2001/05/14 23:04:33  posk
-// Can select PID for event plane particles. Protons not used for 1st har.
-// event plane.
-//
-// Revision 1.18  2000/10/12 22:46:36  snelling
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -197,3 +182,23 @@ inline void  StFlowEvent::SetPid(const Char_t* pid)  {
 inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 
 #endif
+
+//////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowEvent.h,v $
+// Revision 1.5  2002/09/11 21:33:43  posk
+// Different S2 cuts for the two beam energies.
+//
+// Revision 1.4  2002/03/23 22:54:28  posk
+// More 40 GeV compatability.
+//
+// Revision 1.3  2001/11/06 17:05:30  posk
+// New 40 Gev centrality bins. Using only sin terms at 40 GeV.
+//
+// Revision 1.2  2001/05/14 23:04:33  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
+//
+// Revision 1.18  2000/10/12 22:46:36  snelling
+//
+//////////////////////////////////////////////////////////////////////

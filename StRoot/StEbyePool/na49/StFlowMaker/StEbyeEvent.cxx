@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.cxx,v 1.4 2002/03/23 22:54:26 posk Exp $
+ * $Id: StEbyeEvent.cxx,v 1.5 2002/09/11 21:33:41 posk Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  +         Art Poskanzer, LBNL Nov. 2000
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.cxx,v $
+ * Revision 1.5  2002/09/11 21:33:41  posk
+ * Different S2 cuts for the two beam energies.
+ *
  * Revision 1.4  2002/03/23 22:54:26  posk
  * More 40 GeV compatability.
  *
@@ -75,13 +78,19 @@ Float_t StEbyeEvent::Centrality() {
   
   Float_t evetoCal;
   Int_t centrality;
-  Float_t ZdcDividers[] = {9250.,14670.,21190.,26080.,29340.};
+  Float_t ZdcDividers40[] = {1398.,2586.,4191.,5436.,6406.};
+  Float_t ZdcDividers160[] = {9250.,14670.,21190.,26080.,29340.};
 
+  Float_t *ZdcDividers;
+  if(mRunID >= 3003  && mRunID <= 3166) 
+    ZdcDividers = ZdcDividers40;
+  else
+    ZdcDividers = ZdcDividers160;
 
   //1996 data set
   if (mRunID > 1389 && mRunID < 1614) {evetoCal = mEveto;}
   //1999 40GeV data set
-  else if (mRunID > 3003  && mRunID < 3166) {evetoCal = mEveto + 5052.;}
+  else if (mRunID > 3003  && mRunID < 3166) {evetoCal = mEveto;}
   //2000 data set
   else if (mRunID >  4016 && mRunID < 4102) {evetoCal = mEveto*.89227 + 4171.;}
   //anything else
