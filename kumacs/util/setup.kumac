@@ -43,8 +43,7 @@ macro dir
  macro/global/create geant_Event [geantE]/Event
  macro/global/create raw_data    [event]/raw_data 
  macro/global/create data        [event]/data
- macro/global/create dst         [event]/dst
-   
+ macro/global/create dst         [event]/data/global/dst   
 ***************** make directories *************************************
    
 * top level directories--------------------------
@@ -92,9 +91,11 @@ macro dir
    endif   
   if [sys]=global then
     mkdir  [data]/global/vertices
+    mkdir  [dst]
+
   elseif [sys]=ebye then
     mkdir [data]/ebye/sca
-  else
+  elseif [sys]<>global then
     mkdir  [data]/[sys]/hits
   endif
  endfor
