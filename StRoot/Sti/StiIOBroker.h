@@ -151,6 +151,14 @@ public:
 
     //Track Filter parameters (filter)
 
+    //This enum must be identical to the one in StiDynamicTrackFilter.h
+    enum FilterType {kPtFilter=0, kEtaFilter=1, kChi2Filter=2, kNptsFilter=3, kNFitPtsFilter=4,
+		     kNGapsFilter=5, kFitPointRatioFilter=6, kPrimaryDcaFilter=7};
+    
+    virtual void addFilterType(FilterType) = 0;
+    virtual void clearFilterTypes() = 0;
+    virtual const vector<int>& filterTypes() const = 0;
+
     virtual void setFilterPtMin(double) = 0;
     virtual double filterPtMin() const = 0;
 
@@ -162,6 +170,24 @@ public:
     
     virtual void setFilterEtaMax(double) = 0;
     virtual double filterEtaMax() const = 0;
+    
+    virtual void setFilterChi2Max(double) = 0;
+    virtual double filterChi2Max() const = 0;
+
+    virtual void setFilterNptsMin(unsigned int) = 0;
+    virtual unsigned int filterNptsMin() const = 0;
+
+    virtual void setFilterNFitPtsMin(unsigned int) = 0;
+    virtual unsigned int filterNFitPtsMin() const = 0;
+
+    virtual void setFilterNGapsMax(unsigned int) = 0;
+    virtual unsigned int filterNGapsMax() const = 0;
+
+    virtual void setFilterFitPointRatioMin(double) = 0;
+    virtual double filterFitPointRatioMin() const = 0;
+    
+    virtual void setFilterPrimaryDcaMax(double) = 0;
+    virtual double filterPrimaryDcaMax() const = 0;
     
 protected:
     
@@ -212,12 +238,22 @@ inline ostream& operator<<(ostream& os, const StiIOBroker& b)
        <<"ktfMaxNullCount():\t"<<b.ktfMaxNullCount()<<endl
        <<"ktfMaxContiguousNullCount():\t"<<b.ktfMaxContiguousNullCount()<<endl
        <<"ltmDeltaR():\t"<<b.ltmDeltaR()<<endl
+
+       <<"filterTypes():\t";
+    copy( b.filterTypes().begin(), b.filterTypes().end(), ostream_iterator<int>(os, " "));
+    os <<endl
+	
        <<"filterPtMin():\t"<<b.filterPtMin()<<endl
        <<"filterPtMax():\t"<<b.filterPtMax()<<endl
        <<"filterEtaMin():\t"<<b.filterEtaMin()<<endl
-       <<"filterEtaMax():\t"<<b.filterEtaMax()<<endl;
+       <<"filterEtaMax():\t"<<b.filterEtaMax()<<endl
+       <<"filterChi2Max():\t"<<b.filterChi2Max()<<endl
+       <<"filterNptsMin():\t"<<b.filterNptsMin()<<endl
+       <<"filterNFitPtsMin():\t"<<b.filterNFitPtsMin()<<endl
+       <<"filterNGapsMax():\t"<<b.filterNGapsMax()<<endl
+       <<"filterFitPointRatioMin():\t"<<b.filterFitPointRatioMin()<<endl
+       <<"filterPrimaryDcaMax():\t"<<b.filterPrimaryDcaMax()<<endl;
     
-
     return os;
 }
 

@@ -43,7 +43,7 @@ StiCodedDetectorBuilder::~StiCodedDetectorBuilder(){
 void StiCodedDetectorBuilder::init(){
     
     cout <<"StiCodedDetectorBuilder::init()"<<endl;
-    cout <<"Build Materiasl"<<endl;
+    cout <<"Build Materials"<<endl;
     buildMaterials();
     cout <<"Done building materials"<<endl;
     cout <<"Build Shapes"<<endl;
