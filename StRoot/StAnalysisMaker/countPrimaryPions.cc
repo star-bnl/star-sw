@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: countPrimaryPions.cc,v 2.2 2000/01/25 03:11:58 ogilvie Exp $
+ * $Id: countPrimaryPions.cc,v 2.3 2000/02/27 20:50:39 ogilvie Exp $
  *
  * Author: Craig Ogilvie, MIT, Dec 199
  ***************************************************************************
@@ -15,7 +15,7 @@
 #include "StParticleTable.hh"
 #include "StTpcDedxPidAlgorithm.h"
 
-static const char rcsid[] = "$Id: countPrimaryPions.cc,v 2.2 2000/01/25 03:11:58 ogilvie Exp $";
+static const char rcsid[] = "$Id: countPrimaryPions.cc,v 2.3 2000/02/27 20:50:39 ogilvie Exp $";
 
 long countPrimaryPions(StEvent& event)
 {
@@ -42,34 +42,19 @@ long countPrimaryPions(StEvent& event)
        track = *iter;
        if (track==0) continue;
       
-       StTpcDedxPidAlgorithm tpcDedx;
-       StDedxPidTraits* dedxPidTr;
+       StTpcDedxPidAlgorithm tpcDedxAlgorithm;
        //
-       // now get collection of pid traits of track, dedx, tof etc.
+       // now apply pid algorithm tpcDedxAlgorithm, which finds the tpc dedx
+       // object in the collection of pidTraits, and initializes
+       // the data members of the algorithm
+       // which can then be accessed through member functions
+       // of the algorithm e.g. numberOfSigma
+       // guess is currently not used
        //
-       StSPtrVecTrackPidTraits& traits=track->pidTraits();
-
-       for (int itrait = 0; itrait < traits.size(); itrait++){
-           dedxPidTr = 0;
-	   if (traits[itrait]->detector() == kTpcId) {
-	     //
-	     // tpc pid trait
-	     //
-             StTrackPidTraits* thisTrait = traits[itrait];
-	     //
-	     // perform cast to make the pid trait a dedx trait
-	     //
-	     dedxPidTr = dynamic_cast<StDedxPidTraits*>(thisTrait);
-	   }
-	   // container of traits contains several possible de/dx methods
-           if (dedxPidTr &&  dedxPidTr->method() == kTruncatedMeanId) {
-	     // next line is necessary to allow tpcDedx functions
-	       const StParticleDefinition *guess = track->pidTraits(tpcDedx);
-	       double deviant = tpcDedx.numberOfSigma(particle); 
-	       if (fabs(deviant) < 3) counter++;
-	       // counts for both charge signs of particle
-	   }
-       }  
+       const StParticleDefinition *guess = track->pidTraits(tpcDedxAlgorithm);
+       double deviant = tpcDedxAlgorithm.numberOfSigma(particle); 
+       if (fabs(deviant) < 3) counter++;
+	       // counts for both charge signs of particle          
     }
     return counter;
 }
