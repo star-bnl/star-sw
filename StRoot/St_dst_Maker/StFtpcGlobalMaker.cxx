@@ -1,5 +1,11 @@
-// $Id: StFtpcGlobalMaker.cxx,v 1.15 2003/12/04 14:49:30 jcs Exp $
+// $Id: StFtpcGlobalMaker.cxx,v 1.16 2004/02/12 18:38:21 oldi Exp $
 // $Log: StFtpcGlobalMaker.cxx,v $
+// Revision 1.16  2004/02/12 18:38:21  oldi
+// Removal of intermediate tables to store FTPC hits and tracks.
+// Now the TObjArray's of hits and tracks are passed directly to
+// StFtpcGlobalMaker.cxx and StFtpcPrimaryMaker.cxx where they are (still)
+// copied into the dst tables.
+//
 // Revision 1.15  2003/12/04 14:49:30  jcs
 // activate Markus' code to fill values at outermost point on ftpc tracks
 //
@@ -65,6 +71,8 @@
 #include "StFtpcGlobalMaker.h"
 #include "StFtpcTrackMaker/StFtpcVertex.hh"
 #include "StFtpcTrackMaker/StFtpcTracker.hh"
+#include "StFtpcTrackMaker/StFtpcTrack.hh"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcTrackMaker/StFtpcTrackingParams.hh"
 
 #include "StChain.h"
@@ -130,35 +138,34 @@ Int_t StFtpcGlobalMaker::Make(){
   }
 #endif
 
-  St_DataSet *ftpc_tracks = GetDataSet("ftpc_tracks");
-  if (!ftpc_tracks) {
-    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): ftpc_tracks is missing" << endm;
+  TObjectSet* objSetClusters = (TObjectSet*)GetDataSet("ftpcClusters");
+  TObjArray *ftpcHits = (TObjArray*)objSetClusters->GetObject();
+  if (!ftpcHits) {
+    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): TObjArray of ftpc hits is missing" << endm;
     return kStWarn;
   }
-  St_fpt_fptrack *fpt_fptrack = 0;
-  fpt_fptrack = (St_fpt_fptrack *) ftpc_tracks->Find("fpt_fptrack");
-  if (!fpt_fptrack) {
-    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): fpt_fptrack is missing" << endm;
-    return kStWarn;
-  }
-  Int_t nfptrack = fpt_fptrack->GetNRows();
-  fpt_fptrack_st *fptrack = fpt_fptrack->GetTable();
-  
-  St_DataSet *ftpc_hits   = GetDataSet("ftpc_hits");
-  if (!ftpc_hits) {
-    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): ftpc_hits is missing" << endm;
-    return kStWarn;
-  }
-  St_fcl_fppoint *fcl_fppoint = 0;
-  fcl_fppoint = (St_fcl_fppoint *) ftpc_hits->Find("fcl_fppoint");
-  if (!fcl_fppoint) {
-    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): fcl_fppoint is missing" << endm;
-    return kStWarn;
-  }
-  Int_t nfppoint = fcl_fppoint->GetNRows();
-  fcl_fppoint_st *fppoint = fcl_fppoint->GetTable();
 
+  TObjectSet* objSetTracks = (TObjectSet*)GetDataSet("ftpcTracks");
+  if (!objSetTracks) { // this had to be introduced since in cases of a bad vertex there's not even an empty TObjArray written 
+    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): TObjectSet of ftpc tracks is missing" << endm;
+    return kStWarn;
+  }
+  TObjArray *ftpcTracks = (TObjArray*)objSetTracks->GetObject();
+  if (!ftpcTracks) {
+    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): TObjArray of ftpc tracks is missing" << endm;
+    return kStWarn;
+  }
+
+  TObjectSet* objSetVertex = (TObjectSet*)GetDataSet("ftpcVertex");
+  StFtpcVertex *ftpcVertex = (StFtpcVertex*)objSetVertex->GetObject();
+  if (!ftpcVertex) {
+    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): StFtpcVertex is missing" << endm;
+    return kStWarn;
+  }
+  
   Int_t iglobtrk = 0;
+  Int_t nfptrack = ftpcTracks->GetEntriesFast();
+  Int_t nfppoint = ftpcHits->GetEntriesFast();
   St_dst_track *dst_track=0;
   St_DataSet *match = GetDataSet("match");
   if (match) {
@@ -188,29 +195,29 @@ Int_t StFtpcGlobalMaker::Make(){
   m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");
   fde_fdepar_st *fdepar = m_fdepar->GetTable();
 
-  gMessMgr->Message("", "I", "OST") << "Global fit for FTPC tracks not redone, because vertex used for tracking was the primary vertex." << endm;
-
 #ifdef REFIT_FTPC_TRACKS
   // Redo unconstrained fit with primary vertex instead of preVertex
   StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
   gMessMgr->Info() << "Using primary vertex: "<< *refit_vertex << endm;
   Bool_t bench = (Bool_t)false;
-  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, fcl_fppoint, fpt_fptrack, bench, 
+  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, ftpcHits, ftpcTracks, bench, 
 					      StFtpcTrackingParams::Instance()->MaxDca(0));
-  refitter->GlobalFitAnddEdxAndWrite(fpt_fptrack);
+  refitter->GlobalFitAnddEdx();
+  ftpcVertex = refit_vertex;
   delete refitter;
   delete refit_vertex;
 #endif
 
-  const int  MAXHITS = 10;       // Maximum number of hits on an FTPC track
-  Int_t ihit, iPoint;
+  Int_t ihit, iPoint, itrk;
 
   // Loop over all tracks in FTPC track table
-  for (Int_t itrk=0; itrk<nfptrack; itrk++,iglobtrk++,idedx++) {
+  for (itrk=0; itrk<ftpcTracks->GetEntriesFast(); itrk++, iglobtrk++, idedx++) {
 
+    StFtpcTrack* track = (StFtpcTrack*)ftpcTracks->At(itrk);
+    
     //  Primary key
     globtrk[iglobtrk].id      = iglobtrk + 1;
-    fptrack[itrk].id_globtrk = globtrk[iglobtrk].id; 
+    track->SetGlobalTrackId(globtrk[iglobtrk].id); 
 
     //  initialize map (=0 for global tracks = unconstrained fit)
     globtrk[iglobtrk].map[0] = 0;
@@ -222,34 +229,25 @@ Int_t StFtpcGlobalMaker::Make(){
     globtrk[iglobtrk].det_id   = 0;
 
     //  Loop over all hits on track 
-    for (ihit=0; ihit<MAXHITS; ihit++) {
-      if (fptrack[itrk].hitid[ihit] > -1){
-	//         hitid array filled by FORTRAN routine, must -1 for C routine
-	iPoint =  fptrack[itrk].hitid[ihit] - 1;
-	if (globtrk[iglobtrk].det_id == 0 ) { 
-	  //                 Save first hit on current track and determine detector id
-	  globtrk[iglobtrk].x_first[0]    = 
-	    fppoint[iPoint].x;
-	  globtrk[iglobtrk].x_first[1]    = 
-	    fppoint[iPoint].y;
-	  globtrk[iglobtrk].x_first[2]    = 
-	    fppoint[iPoint].z ;
-	  //                 Rows 1->10 FTPC West  det_id= kFtpcWestId
-	  if (fppoint[iPoint].row >= 1 && fppoint[iPoint].row <= 10) {
-	    globtrk[iglobtrk].det_id  = kFtpcWestId;    // West
-	  }
-	  //                 Rows 11->20 FTPC East  det_id=kFtpcEastId  
-	  else if (fppoint[iPoint].row >= 11 && fppoint[iPoint].row <=20) {
-	    globtrk[iglobtrk].det_id  = kFtpcEastId;   // East
-	  }
-	}
-	globtrk[iglobtrk].map[0] |= (1<<fppoint[iPoint].row);
+    // Note that hits are counted from inside to outside => inner = last, outer = last
+    for (ihit=track->GetHits()->GetEntriesFast()-1; ihit>=0; ihit--) {
+      StFtpcPoint *point = (StFtpcPoint*)track->GetHits()->At(ihit);
+	
+      if (globtrk[iglobtrk].det_id == 0 ) { 
+	//                 Save first hit on current track and determine detector id
+	globtrk[iglobtrk].x_first[0]    = point->GetX();
+	globtrk[iglobtrk].x_first[1]    = point->GetY();
+	globtrk[iglobtrk].x_first[2]    = point->GetZ();
 
-	fppoint[iPoint].row = fppoint[iPoint].row + 100*globtrk[iglobtrk].id;
-
-      }  // end of processing current hit
+	globtrk[iglobtrk].det_id  = point->GetDetectorId();
+      }
+      
+      globtrk[iglobtrk].map[0] |= (1<<point->GetPadRow());
+      
+      point->SetPadRow(point->GetPadRow() + 100*globtrk[iglobtrk].id);
+      // end of processing current hit
     }  // end of processing all hits on track
-
+    
     //  Track finding and track fitting method 
     //   (Method: FTPC Conformal Mapping - set bit 10 )          
     //   (Fitter: kHelix2StepId)
@@ -257,37 +255,37 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  Geant particle ID number for mass hypothesis used in tracking
     //   (Currently not set for FTPC)                               
-    globtrk[iglobtrk].pid    = 0;
+    globtrk[iglobtrk].pid = 0;
 
     //  Number of points 
-    globtrk[iglobtrk].n_point = fptrack[itrk].nrec;
+    globtrk[iglobtrk].n_point = track->GetHits()->GetEntriesFast();
 
     //  Number of points used in fit
-    globtrk[iglobtrk].n_fit_point  = fptrack[itrk].nfit;
+    globtrk[iglobtrk].n_fit_point  = track->GetHits()->GetEntriesFast();
 
     //  Charge 
-    globtrk[iglobtrk].icharge      = fptrack[itrk].q;
+    globtrk[iglobtrk].icharge = track->GetCharge();
 
     //  If this is a primary track candidate
-    globtrk[iglobtrk].id_start_vertex  = 10*fptrack[itrk].id_start_vertex;
+    globtrk[iglobtrk].id_start_vertex  = 10*ftpcVertex->GetId();
 
 
     //  radius at start of track (cm) 
     globtrk[iglobtrk].r0   = 
-      ::sqrt(fptrack[itrk].v[0]*fptrack[itrk].v[0]
-	   + fptrack[itrk].v[1]*fptrack[itrk].v[1]);
+      ::sqrt(track->GetFirstPointOnTrack().X()*track->GetFirstPointOnTrack().X()
+	   + track->GetFirstPointOnTrack().Y()*track->GetFirstPointOnTrack().Y());
 
     //  azimuthal angle at start of track (deg)
     globtrk[iglobtrk].phi0 = 
-      atan2(fptrack[itrk].v[1],fptrack[itrk].v[0])
+      atan2(track->GetFirstPointOnTrack().Y(),track->GetFirstPointOnTrack().X())
       * C_DEG_PER_RAD;
 
     //  z-coordinate at start of track 
-    globtrk[iglobtrk].z0 = fptrack[itrk].v[2];
+    globtrk[iglobtrk].z0 = track->GetFirstPointOnTrack().Z();
 
     //  momentum angle at start 
     globtrk[iglobtrk].psi = 
-      atan2(fptrack[itrk].p[1],fptrack[itrk].p[0]);
+      atan2(track->GetPy(),track->GetPx());
     if (globtrk[iglobtrk].psi < 0.0) {
       globtrk[iglobtrk].psi = 
 	globtrk[iglobtrk].psi + C_2PI;
@@ -296,16 +294,14 @@ Int_t StFtpcGlobalMaker::Make(){
       globtrk[iglobtrk].psi * C_DEG_PER_RAD; 
 
     //  1/pt at start 
-    globtrk[iglobtrk].invpt =  
-      1./::sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
-	      +fptrack[itrk].p[1]*fptrack[itrk].p[1]);
+    globtrk[iglobtrk].invpt = 1./track->GetPt();
 
     //  tan(dip) = pz/pt at start
-    globtrk[iglobtrk].tanl  = fptrack[itrk].p[2]  
+    globtrk[iglobtrk].tanl  = track->GetPz()  
       *  globtrk[iglobtrk].invpt;
 
     //  curvature 
-    globtrk[iglobtrk].curvature =  fptrack[itrk].curvature;
+    globtrk[iglobtrk].curvature =  track->curvature();
 
     //  covariance matrix 
     //  (currently not set for FTPC) 
@@ -326,38 +322,29 @@ Int_t StFtpcGlobalMaker::Make(){
     globtrk[iglobtrk].covar[14] = 0;
 
     //  chi-square fit
-    globtrk[iglobtrk].chisq[0]      = fptrack[itrk].chisq[0]
+    globtrk[iglobtrk].chisq[0]      = track->GetChiSq()[0]
       / (globtrk[iglobtrk].n_fit_point - 3);
-    globtrk[iglobtrk].chisq[1]      = fptrack[itrk].chisq[1]
+    globtrk[iglobtrk].chisq[1]      = track->GetChiSq()[1]
       / (globtrk[iglobtrk].n_fit_point - 2);
 
-    //  Locate last hit on current track
-    for (ihit=MAXHITS-1; ihit>=0; ihit--) {
-      if (fptrack[itrk].hitid[ihit] > -1) {
-	//            hitid array filled by FORTRAN routine, must -1 for C routine
-	iPoint =  fptrack[itrk].hitid[ihit] - 1;
-	globtrk[iglobtrk].x_last[0]     = 
-	  fppoint[iPoint].x;
-	globtrk[iglobtrk].x_last[1]     =  
-	  fppoint[iPoint].y;
-	globtrk[iglobtrk].x_last[2]     = 
-	  fppoint[iPoint].z;
-	break;
-      }
-    }
+    //  Locate last (outer) hit on current track
+    StFtpcPoint *outer = (StFtpcPoint *)track->GetHits()->First();
+    globtrk[iglobtrk].x_last[0] = outer->GetX();
+    globtrk[iglobtrk].x_last[1] = outer->GetY();
+    globtrk[iglobtrk].x_last[2] = outer->GetZ();
 
     //  radius at end of track (cm) 
     globtrk[iglobtrk].r0out   = 
-      ::sqrt( globtrk[iglobtrk].x_last[0]* globtrk[iglobtrk].x_last[0]
-	   + globtrk[iglobtrk].x_last[1]*globtrk[iglobtrk].x_last[1]);
+      ::sqrt(track->GetLastPointOnTrack().X()*track->GetLastPointOnTrack().X()
+	   + track->GetLastPointOnTrack().Y()*track->GetLastPointOnTrack().Y());
 
     //  azimuthal angle at end of track (deg)
     globtrk[iglobtrk].phi0out = 
-      atan2(globtrk[iglobtrk].x_last[1],globtrk[iglobtrk].x_last[0])
+      atan2(track->GetLastPointOnTrack().Y(),track->GetLastPointOnTrack().X())
       * C_DEG_PER_RAD;
 
     //  z-coordinate at end of track 
-    globtrk[iglobtrk].z0out = globtrk[iglobtrk].x_last[2];
+    globtrk[iglobtrk].z0out = track->GetLastPointOnTrack().Z();
 
     // For Kalman fitting 'inner' and 'outer' momenta differ.
     // For FTPC fitting they are the same,
@@ -365,7 +352,7 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  momentum angle at end 
     globtrk[iglobtrk].psiout = 
-      atan2(fptrack[itrk].p[1],fptrack[itrk].p[0]);
+      atan2(track->GetPy(),track->GetPx());
     if (globtrk[iglobtrk].psiout < 0.0) {
       globtrk[iglobtrk].psiout = 
 	globtrk[iglobtrk].psiout + C_2PI;
@@ -375,23 +362,28 @@ Int_t StFtpcGlobalMaker::Make(){
 
     //  1/pt at end 
     globtrk[iglobtrk].invptout =  
-      1./::sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
-	      +fptrack[itrk].p[1]*fptrack[itrk].p[1]);
+      1./::sqrt(track->GetPx()*track->GetPx()
+	      +track->GetPy()*track->GetPy());
 
     //  tan(dip) = pz/pt at end
-    globtrk[iglobtrk].tanlout  = fptrack[itrk].p[2]  
+    globtrk[iglobtrk].tanlout  = track->GetPz()  
       *  globtrk[iglobtrk].invptout;
 
-    globtrk[iglobtrk].length  = fptrack[itrk].length;
+    globtrk[iglobtrk].length  = track->GetTrackLength();
 
-    globtrk[iglobtrk].impact  = fptrack[itrk].impact;
+    globtrk[iglobtrk].impact  = track->GetDca();
 
     //  Maximum number of points 
-    globtrk[iglobtrk].n_max_point  = fptrack[itrk].nmax;
+    globtrk[iglobtrk].n_max_point  = track->GetNMax();
+
+    /// assume global tracking and vertex was found
+    Int_t flag;
+    if (track->ComesFromMainVertex()) flag = 1;
+    else flag = 0;
 
     // bitmask quality information
     globtrk[iglobtrk].iflag = 
-      700 + fptrack[itrk].flag;
+      700 + flag;
     if (fabs((float) globtrk[iglobtrk].icharge) != 1. ) {
       globtrk[iglobtrk].iflag   =  
 	-globtrk[iglobtrk].iflag + 20;
@@ -413,8 +405,8 @@ Int_t StFtpcGlobalMaker::Make(){
     else
       dedx[idedx].method = kUndefinedMethodId;
 
-    dedx[idedx].ndedx = fptrack[itrk].ndedx;
-    dedx[idedx].dedx[0] = fptrack[itrk].dedx;
+    dedx[idedx].ndedx = track->GetNumdEdxHits();
+    dedx[idedx].dedx[0] = track->GetdEdx();
     dedx[idedx].dedx[1] = 0;
 
   }    // End of processing current track
@@ -422,117 +414,106 @@ Int_t StFtpcGlobalMaker::Make(){
   dst_track->SetNRows(iglobtrk);
   dst_dedx->SetNRows(idedx);
 
-  // Now save all hits
+  gMessMgr->Info() << "StFtpcGlobalMaker: " << itrk << " global Ftpc tracks written to DST tables." << endm;
+ 
+  // Now save all hits, but only if tracks were found.
+  // (If the tracker didn't run at all, no tracks neither hits are written, anyway.
+  //  In the case where the tracker DID run, but didn't find tracks, 
+  //  we don't want to write the hits either.)
 
-  Int_t ipnt = 0;
-  Int_t det_id=0;
+  if (ftpcTracks->GetEntriesFast() > 0) {
+    Int_t ipnt = 0;
+    
+    const float FTPC_FAC = 2380.0; // Multiplication factor to achieve 4 micron accuracy
+    const float FTPC_MIN = -270.0;   // Minimum FTPC z-coordinate
+    const float FTPC_MAX =  270.0;   // Maximum FTPC z-coordinate
+    
+    const int two10 =    1024;    // 2**10
+    const int two17 =  131072;    // 2**17
+    const int two20 = 1048576;    // 2**20
+    
+    unsigned int ftpcx, ftpcy, ftpcz;
+    unsigned int ftpcy10, ftpcy11;
+    
+    //  Loop over all hits
+    
+    for (iPoint=0; iPoint<ftpcHits->GetEntriesFast(); iPoint++,ipnt++) {
+      StFtpcPoint *hit = (StFtpcPoint*)ftpcHits->At(iPoint);
+      
+      if (hit->GetPadRow() >= 101) {
+	point[ipnt].id_track    = hit->GetPadRow()/100;
+	hit->SetPadRow(hit->GetPadRow()%100);   
+      }
+      else {
+	point[ipnt].id_track    = 0;
+      }
+      
+      point[ipnt].hw_position = hit->GetHardwarePosition();
+      
+      //         Fill space point position coordinates
+      if (hit->GetX() > FTPC_MIN && hit->GetX() < FTPC_MAX){
+	ftpcx = (int) (FTPC_FAC*(hit->GetX() + FTPC_MAX));
+      }
+      else {
+	ftpcx = 0;
+      }
+      if (hit->GetY() > FTPC_MIN && hit->GetY() < FTPC_MAX){
+	ftpcy = (int) (FTPC_FAC*(hit->GetY() + FTPC_MAX));
+      }
+      else {
+	ftpcy = 0;
+      }
+      if (hit->GetZ() > FTPC_MIN && hit->GetZ() < FTPC_MAX){
+	ftpcz = (int) (FTPC_FAC*(hit->GetZ() + FTPC_MAX));
+      }
+      else {
+	ftpcz = 0;
+      }
+      ftpcy10 = ftpcy/two10;
+      ftpcy11 = ftpcy - two10*ftpcy10;
+      point[ipnt].position[0] = ftpcx + (two20*ftpcy11);
+      point[ipnt].position[1] = ftpcy10 + (two10*ftpcz);
+      
+      
+      //         Fill space point position errors (0.0 <= error < 8.0)
+      if (hit->GetXerr() >= 0.0 && hit->GetXerr() < 8.0){
+	ftpcx =  (long) (two17*hit->GetXerr());
+      }
+      else {
+	ftpcx = 0;
+      }
+      if (hit->GetYerr() >= 0.0 && hit->GetYerr() < 8.0){
+	ftpcy = (long) (two17*hit->GetYerr());
+      }
+      else {
+	ftpcy = 0;
+      }
+      if (hit->GetZerr() >= 0.0 && hit->GetZerr() < 8.0){
+	ftpcz =  (long) (two17*hit->GetZerr());
+      }
+      else {
+	ftpcz = 0;
+      }
+      ftpcy10 = ftpcy/two10;
+      ftpcy11 = ftpcy - (two10*ftpcy10);
+      point[ipnt].pos_err[0] = ftpcx + (two20*ftpcy11);
+      point[ipnt].pos_err[1] = ftpcy10 + (two10*ftpcz);
+      
+      //        Fill charge and flags for cluster
+      //                     bits 0-15    charge (sum of adc channels)
+      //                     bits 16-31   flags  (see fcl_fppoint.idl)
+      point[ipnt].charge  =
+	(hit->GetFlags()<<16)
+	+ hit->GetCharge();
+      
+    }  // end of loop over all hits
+    
+    dst_point->SetNRows(ipnt);
 
-  const float FTPC_FAC = 2380.0; // Multiplication factor to achieve 4 micron accuracy
-  const float FTPC_MIN = -270.0;   // Minimum FTPC z-coordinate
-  const float FTPC_MAX =  270.0;   // Maximum FTPC z-coordinate
+  gMessMgr->Info() << "StFtpcGlobalMaker: " << iPoint << " Ftpc hits written to DST tables." << endm;
+ 
 
-
-  const int two10 =    1024;    // 2**10
-  const int two17 =  131072;    // 2**17
-  const int two20 = 1048576;    // 2**20
-
-  unsigned int ftpcx, ftpcy, ftpcz;
-  unsigned int ftpcy10, ftpcy11;
-
-  //  Loop over all hits
-
-  for (iPoint=0; iPoint<nfppoint; iPoint++,ipnt++) {
-    if (fppoint[iPoint].row >=101) {
-      point[ipnt].id_track    = fppoint[iPoint].row/100;
-      fppoint[iPoint].row = fppoint[iPoint].row%100;   
-    }
-    else {
-      point[ipnt].id_track    = 0;
-    }
-
-    //                 Rows 1->10 FTPC West  det_id = kFtpcWestId
-    if (fppoint[iPoint].row >= 1 && fppoint[iPoint].row <= 10) {
-      det_id = kFtpcWestId;
-    }
-    //                 Rows 11->20 FTPC East  det_id=kFtpcEastId  
-    else if (fppoint[iPoint].row >= 11 && fppoint[iPoint].row <=20 ) {
-      det_id = kFtpcEastId;
-    }
-    else {
-      gMessMgr->Message("", "I", "OST") <<"StFtpcGlobalMaker: fppoint["<<iPoint<<"].row  = "<<fppoint[iPoint].row<<" is out of range"<< endm;
-    }
-    //    hw_position  (32 bits)
-    //            bits  0-3   det_id
-    //            bits 4-10   FTPC pad plane (1-20)
-    //            bits 11-20  Sector number within pad-plane (1-6)
-    //            bits 21-24  number of pads in cluster
-    //            bits 25-31  number of consecutive timebins in cluster
-    point[ipnt].hw_position =
-      (fppoint[iPoint].n_bins<<25)
-      + (fppoint[iPoint].n_pads<<21)
-      + (fppoint[iPoint].sector<<11)
-      + (fppoint[iPoint].row<<4)
-      + det_id;
-
-    //         Fill space point position coordinates
-    if (fppoint[iPoint].x > FTPC_MIN && fppoint[iPoint].x < FTPC_MAX){
-      ftpcx = (int) (FTPC_FAC*(fppoint[iPoint].x + FTPC_MAX));
-    }
-    else {
-      ftpcx = 0;
-    }
-    if (fppoint[iPoint].y > FTPC_MIN && fppoint[iPoint].y < FTPC_MAX){
-      ftpcy = (int) (FTPC_FAC*(fppoint[iPoint].y + FTPC_MAX));
-    }
-    else {
-      ftpcy = 0;
-    }
-    if (fppoint[iPoint].z > FTPC_MIN && fppoint[iPoint].z < FTPC_MAX){
-      ftpcz = (int) (FTPC_FAC*(fppoint[iPoint].z + FTPC_MAX));
-    }
-    else {
-      ftpcz = 0;
-    }
-    ftpcy10 = ftpcy/two10;
-    ftpcy11 = ftpcy - two10*ftpcy10;
-    point[ipnt].position[0] = ftpcx + (two20*ftpcy11);
-    point[ipnt].position[1] = ftpcy10 + (two10*ftpcz);
-
-
-    //         Fill space point position errors (0.0<= error < 8.0)
-    if (fppoint[iPoint].x_err >= 0.0 && fppoint[iPoint].x_err < 8.0){
-      ftpcx =  (long) (two17*fppoint[iPoint].x_err);
-    }
-    else {
-      ftpcx = 0;
-    }
-    if (fppoint[iPoint].y_err >= 0.0 && fppoint[iPoint].y_err < 8.0){
-      ftpcy = (long) (two17*fppoint[iPoint].y_err);
-    }
-    else {
-      ftpcy = 0;
-    }
-    if (fppoint[iPoint].z_err >= 0.0 && fppoint[iPoint].z_err < 8.0){
-      ftpcz =  (long) (two17*fppoint[iPoint].z_err);
-    }
-    else {
-      ftpcz = 0;
-    }
-    ftpcy10 = ftpcy/two10;
-    ftpcy11 = ftpcy - (two10*ftpcy10);
-    point[ipnt].pos_err[0] = ftpcx + (two20*ftpcy11);
-    point[ipnt].pos_err[1] = ftpcy10 + (two10*ftpcz);
-
-    //        Fill charge and flags for cluster
-    //                     bits 0-15    charge (sum of adc channels)
-    //                     bits 16-31   flags  (see fcl_fppoint.idl)
-    point[ipnt].charge  =
-      (fppoint[iPoint].flags<<16)
-      + fppoint[iPoint].charge;
-
-  }  // end of loop over all hits
-
-  dst_point->SetNRows(ipnt);
+  } // end of if (ftpcTracks->GetEntriesFast >0) [only write hits if some tracks were found]
 
   return iMake;
 }

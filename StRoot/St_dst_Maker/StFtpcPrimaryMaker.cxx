@@ -1,5 +1,11 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.16 2003/12/04 14:49:30 jcs Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.17 2004/02/12 18:38:21 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.17  2004/02/12 18:38:21  oldi
+// Removal of intermediate tables to store FTPC hits and tracks.
+// Now the TObjArray's of hits and tracks are passed directly to
+// StFtpcGlobalMaker.cxx and StFtpcPrimaryMaker.cxx where they are (still)
+// copied into the dst tables.
+//
 // Revision 1.16  2003/12/04 14:49:30  jcs
 // activate Markus' code to fill values at outermost point on ftpc tracks
 //
@@ -76,6 +82,8 @@
 #include "StMessMgr.h"
 
 #include "StFtpcTrackMaker/StFtpcVertex.hh"
+#include "StFtpcTrackMaker/StFtpcTrack.hh"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcTrackMaker/StFtpcTracker.hh"
 #include "StFtpcTrackMaker/StFtpcTrackingParams.hh"
 
@@ -107,25 +115,7 @@ Int_t StFtpcPrimaryMaker::Make(){
     gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): primary is missing" << endm;
     return kStWarn;
   }
-  
-  St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
-  if (!vertex) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): vertex is missing" << endm;
-    return kStWarn;
-  }
-  
-  dst_vertex_st *primvtx = vertex->GetTable();
-  
-  if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
-    for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,primvtx++){
-      if( primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1 ) break;
-    }
-  }
-  if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): primary vertex is missing" << endm;
-    return kStWarn;
-  }
-  
+
   St_DataSet *match = GetDataSet("match");
   if (!match) {
     gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): match is missing" << endm;
@@ -137,42 +127,43 @@ Int_t StFtpcPrimaryMaker::Make(){
     gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): globtrk is missing" << endm;
     return kStWarn;
   }
-  
-  St_DataSet *track_data = GetDataSet("ftpc_tracks");
-  if (!track_data) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): ftpc_tracks is missing" << endm;
+
+  TObjectSet* objSetClusters = (TObjectSet*)GetDataSet("ftpcClusters");
+  TObjArray *ftpcHits = (TObjArray*)objSetClusters->GetObject();
+  if (!ftpcHits) {
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjArray of ftpc hits is missing" << endm;
     return kStWarn;
   }
-  St_fpt_fptrack *tracks = (St_fpt_fptrack *)track_data->Find("fpt_fptrack");
-  if (!tracks) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): tracks is missing" << endm;
+
+  TObjectSet* objSetTracks = (TObjectSet*)GetDataSet("ftpcTracks");
+  if (!objSetTracks) { // this had to be introduced since in cases of a bad vertex there's not even an empty TObjArray written 
+    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): TObjectSet of ftpc tracks is missing" << endm;
     return kStWarn;
   }
-  
-  St_DataSet *hit_data = GetDataSet("ftpc_hits");
-  if (!hit_data) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): ftpc_hits is missing" << endm;
+  TObjArray *ftpcTracks = (TObjArray*)objSetTracks->GetObject();
+  if (!ftpcTracks) {
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjArray of ftpc tracks is missing" << endm;
     return kStWarn;
   }
-  St_fcl_fppoint *points = (St_fcl_fppoint *)hit_data->Find("fcl_fppoint");
-  if (!points) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): points is missing" << endm;
+
+  // assume found primary vertex earlier already
+  TObjectSet* objSetVertex = (TObjectSet*)GetDataSet("ftpcVertex");
+  StFtpcVertex *ftpcVertex = (StFtpcVertex*)objSetVertex->GetObject();
+  if (!ftpcVertex) {
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): StFtpcVertex is missing" << endm;
     return kStWarn;
   }
   
   // Refit FTPC tracks with primary vertex
-  StFtpcVertex *refit_vertex = new StFtpcVertex(primvtx);
   Bool_t bench = (Bool_t)false;
-  StFtpcTracker *refitter = new StFtpcTracker(refit_vertex, points, tracks, bench, 
+  StFtpcTracker *refitter = new StFtpcTracker(ftpcVertex, ftpcHits, ftpcTracks, bench, 
 					      StFtpcTrackingParams::Instance()->MaxDca(0));
-  refitter->PrimaryFitAndWrite(tracks);
+  refitter->PrimaryFit();
   delete refitter;
-  delete refit_vertex;
 
   // Increase size or create primtrk to hold all FTPC primary tracks
   
-  Int_t No_of_Tracks = 0;
-  No_of_Tracks += tracks->GetNRows();
+  Int_t No_of_Tracks = ftpcTracks->GetEntriesFast();
   
   St_dst_track *primtrk=0;
   Int_t No_of_primary_tracks = 0;
@@ -189,66 +180,72 @@ Int_t StFtpcPrimaryMaker::Make(){
   }
   
   // Create pointers to all FTPC track tables
-  
-  fpt_fptrack_st *trk = tracks->GetTable();
+
   dst_track_st *ptrk = primtrk->GetTable();
   ptrk = ptrk + No_of_primary_tracks;
   dst_track_st *gtrk = globtrk->GetTable();
   
   // Loop over FTPC tracks and store all primary tracks in primtrk
   
-  Int_t nrows=0;
   Int_t iglobtrk=0;
-  for( Int_t no_rows=0; no_rows<No_of_Tracks; no_rows++,trk++){
+  Int_t itrk = 0;
+  for (itrk=0; itrk<ftpcTracks->GetEntriesFast(); itrk++) {
     
-    if ( trk->flag == 1) { 
+    StFtpcTrack *track = (StFtpcTrack*)ftpcTracks->At(itrk);
+
+    if (track->ComesFromMainVertex()) { 
       
-      ptrk->r0    = ::sqrt(trk->v[0]*trk->v[0] + trk->v[1]*trk->v[1]);
-      ptrk->phi0  = atan2(trk->v[1],trk->v[0]) * C_DEG_PER_RAD;
-      ptrk->z0    = trk->v[2];
-      ptrk->psi   = atan2(trk->p[1],trk->p[0]);
+      ptrk->r0    = ::sqrt(track->GetFirstPointOnTrack().X()*track->GetFirstPointOnTrack().X() 
+			   + track->GetFirstPointOnTrack().Y()*track->GetFirstPointOnTrack().Y());
+      ptrk->phi0  = atan2(track->GetFirstPointOnTrack().Y(),track->GetFirstPointOnTrack().X()) * C_DEG_PER_RAD;
+      ptrk->z0    = track->GetFirstPointOnTrack().Z();
+      ptrk->psi   = atan2(track->GetPy(),track->GetPx());
       if ( ptrk->psi < 0.0 ) {
 	ptrk->psi = ptrk->psi + C_2PI;
       }
       ptrk->psi = ptrk->psi * C_DEG_PER_RAD;
-      ptrk->invpt = 1./::sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
-      ptrk->tanl  = trk->p[2] * ptrk->invpt;
-      ptrk->curvature = trk->curvature;
+      ptrk->invpt = 1./track->GetPt();
+      ptrk->tanl  = track->GetPz() * ptrk->invpt;
+      ptrk->curvature = track->curvature();
 
 
       Int_t i = 0;
       for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
       
-      iglobtrk=trk->id_globtrk-1;
+      iglobtrk = track->GetGlobalTrackId()-1;
       
       for (i=0; i<3; i++) {
 	ptrk->x_first[i] = gtrk[iglobtrk].x_first[i];
 	ptrk->x_last[i] = gtrk[iglobtrk].x_last[i];
       }
-      
-      ptrk->r0out    = gtrk[iglobtrk].r0out;
-      ptrk->phi0out  = gtrk[iglobtrk].phi0out;
-      ptrk->z0out    = gtrk[iglobtrk].z0out;
+
+      ptrk->r0out   = 
+	::sqrt(track->GetLastPointOnTrack().X()*track->GetLastPointOnTrack().X()
+	       + track->GetLastPointOnTrack().Y()*track->GetLastPointOnTrack().Y());
+      ptrk->phi0out = 
+	atan2(track->GetLastPointOnTrack().Y(),track->GetLastPointOnTrack().X())
+	* C_DEG_PER_RAD;
+      ptrk->z0out = track->GetLastPointOnTrack().Z();
 
       // For Kalman fitting 'inner' and 'outer' momenta differ.
       // For FTPC fitting they are the same,
       // so fill with the 'inner' values.
-      ptrk->psiout   = atan2(trk->p[1],trk->p[0]);
+      ptrk->psiout   = atan2(track->GetPy(), track->GetPx());
       if ( ptrk->psiout < 0.0 ) {
 	ptrk->psiout = ptrk->psiout + C_2PI;
       }
       ptrk->psiout = ptrk->psiout * C_DEG_PER_RAD;
-      ptrk->invptout = 1./::sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
-      ptrk->tanlout  = trk->p[2] * ptrk->invptout;
+      ptrk->invptout = 1./track->GetPt();
+      ptrk->tanlout  = track->GetPz() * ptrk->invptout;
       
-      ptrk->length    = trk->length;
-      ptrk->impact    = trk->impact;
+      ptrk->length    = track->GetTrackLength();
+      ptrk->impact    = track->GetDca();
       
       ptrk->map[0]    = gtrk[iglobtrk].map[0] + 1 ;
       ptrk->map[1]    = gtrk[iglobtrk].map[1];
       
-      ptrk->id        = trk->id_globtrk;
-      ptrk->iflag     = 800 + trk->flag;
+      ptrk->id        = track->GetGlobalTrackId();
+      ptrk->iflag     = 800 + 1; // this is a primary track
       ptrk->det_id    = gtrk[iglobtrk].det_id;
       ptrk->method    = gtrk[iglobtrk].method;
       ptrk->pid       = gtrk[iglobtrk].pid;
@@ -257,18 +254,19 @@ Int_t StFtpcPrimaryMaker::Make(){
       ptrk->n_max_point = gtrk[iglobtrk].n_max_point;
       ptrk->n_fit_point = gtrk[iglobtrk].n_fit_point + 1;
       
-      ptrk->chisq[0]  = trk->chisq[0]/(ptrk->n_fit_point-3);
-      ptrk->chisq[1]  = trk->chisq[1]/(ptrk->n_fit_point-2);
+      ptrk->chisq[0]  = track->GetChiSq()[0]/(ptrk->n_fit_point-3);
+      ptrk->chisq[1]  = track->GetChiSq()[1]/(ptrk->n_fit_point-2);
       
-      ptrk->icharge  = trk->q;
-      ptrk->id_start_vertex =  10*trk->id_start_vertex;
+      ptrk->icharge  = track->GetCharge();
+      ptrk->id_start_vertex =  10*ftpcVertex->GetId();
       
       ptrk++;
-      nrows++;
     }
   }
   
-  primtrk->SetNRows(No_of_primary_tracks + nrows);
+  primtrk->SetNRows(No_of_primary_tracks + itrk);
+
+  gMessMgr->Info() << "StFtpcPrimaryMaker: " << itrk << " primary Ftpc tracks written to DST tables." << endm;
   
   return kStOK;
 }
