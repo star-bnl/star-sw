@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.17 1999/10/22 00:00:13 calderon Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.18 1999/10/22 15:51:47 calderon Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.18  1999/10/22 15:51:47  calderon
+ * Remove ifdefs for erf.  Problem is solved by loading libm at the
+ * macro level.
+ *
  * Revision 1.17  1999/10/22 00:00:13  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -86,15 +90,6 @@
 
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dstlan_(float *);
-//extern "C"  float erf_(float*);
-#ifdef HPUX
-#ifdef __ROOT__
-// erf() is not loaded in root4star in HP because it is an archived library.
-#include "TMath.h"
-#define erf(x) TMath::Erf(x)
-#define erfc(x) TMath::Erfc(x)
-#endif
-#endif
 
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);

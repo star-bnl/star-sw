@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.16 1999/10/22 00:00:15 calderon Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.17 1999/10/22 15:51:48 calderon Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
+ * Revision 1.17  1999/10/22 15:51:48  calderon
+ * Remove ifdefs for erf.  Problem is solved by loading libm at the
+ * macro level.
+ *
  * Revision 1.16  1999/10/22 00:00:15  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -94,14 +98,6 @@
 #include "SystemOfUnits.h"
 #include "StTrsWireHistogram.hh"
 
-#ifdef HPUX
-#ifdef __ROOT__
-// erf() is not loaded in root4star in HP because it is an archived library.
-#include "TMath.h"
-#define erf(x) TMath::Erf(x)
-#define erfc(x) TMath::Erfc(x)
-#endif
-#endif
 
 StTrsWireHistogram* StTrsWireHistogram::mInstance = 0; // static data member
 HepJamesRandom  StTrsWireHistogram::mEngine;

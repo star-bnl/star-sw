@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.19 1999/10/22 00:00:15 calderon Exp $
+ * $Id: StTrsSlowAnalogSignalGenerator.cc,v 1.20 1999/10/22 15:51:48 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsSlowAnalogSignalGenerator.cc,v $
+ * Revision 1.20  1999/10/22 15:51:48  calderon
+ * Remove ifdefs for erf.  Problem is solved by loading libm at the
+ * macro level.
+ *
  * Revision 1.19  1999/10/22 00:00:15  calderon
  * -added macro to use Erf instead of erf if we have HP and Root together.
  * -constructor with char* for StTrsDedx so solaris doesn't complain
@@ -102,15 +106,6 @@
 #include "StCoordinates.hh"
 
 #include "StTrsSlowAnalogSignalGenerator.hh"
-
-#ifdef HPUX
-#ifdef __ROOT__
-// erf() is not loaded in root4star in HP because it is an archived library.
-#include "TMath.h"
-#define erf(x) TMath::Erf(x)
-#define erfc(x) TMath::Erfc(x)
-#endif
-#endif
 
 //static const double symGausAppFactor  = (M_SQRT1_2*M_2_SQRTPI/(2.*mSigma1));
 //static const double tau1              = mSigma1;
