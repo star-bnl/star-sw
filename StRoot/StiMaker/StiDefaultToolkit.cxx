@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.22 2004/08/12 14:06:19 pruneau Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.23 2004/09/15 21:34:40 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.23  2004/09/15 21:34:40  pruneau
+ * Increased maximum allocation for track factory.
+ *
  * Revision 2.22  2004/08/12 14:06:19  pruneau
  * doubled StiKalmanTrackNode factory allocation
  *
@@ -212,11 +215,11 @@ Factory<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
   cout << "StiDefaultToolkit::getTrackFactory() -I- "; 
   if (_guiEnabled)
     {
-      _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,5000,10);
+      _trackFactory = new VectorizedFactory<StiRootDrawableKalmanTrack,StiKalmanTrack>("StiRDKalmanTrackFactory",10000,10000,10);
     }
   else // no gui needed
     {	
-      _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,5000,10);
+      _trackFactory = new VectorizedFactory<StiKalmanTrack,StiKalmanTrack>("StiKalmanTrackFactory",10000,10000,10);
     }
   return _trackFactory;
 }
