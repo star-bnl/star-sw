@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.hh,v 1.21 2002/03/21 18:49:31 laue Exp $
+ * $Id: StHbtTrack.hh,v 1.22 2003/03/18 14:41:48 kisiel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtTrack.hh,v $
+ * Revision 1.22  2003/03/18 14:41:48  kisiel
+ * Bugfix update for the theoretical part of the code. Reverts the changes to the Lednicky weight calculator, as the previuos one had problems with strong interaction
+ *
  * Revision 1.21  2002/03/21 18:49:31  laue
  * updated for new MuDst reader
  *
@@ -134,7 +137,8 @@ public:
   StHbtTrack(const StMuDst* dst, const StMuTrack* t);
 #endif
   StHbtTrack(const StEvent*, const StTrack*);
-  ~StHbtTrack(){/* no-op*/};
+  ~StHbtTrack();
+//    ~StHbtTrack(){/* no-op*/};
 
   short TrackType() const;
   short Charge() const;
@@ -240,7 +244,8 @@ private:
 
   /* Th stuff */
   // Fab private : add mutable
-  mutable StHbtHiddenInfo* mHiddenInfo; //!
+  //  mutable 
+  StHbtHiddenInfo* mHiddenInfo; //!
   /***/
 
   friend class StHbtIOBinary;

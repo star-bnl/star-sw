@@ -1,9 +1,9 @@
 *
-* $Id: FsiTools.F,v 1.2 2002/12/12 16:59:34 kisiel Exp $
+* $Id: FsiTools.F,v 1.3 2003/03/18 14:41:49 kisiel Exp $
 *
 * $Log: FsiTools.F,v $
-* Revision 1.2  2002/12/12 16:59:34  kisiel
-* Update of the Theoretical part. Add Lambda-Lambda system. New momentum resolution parametrization.
+* Revision 1.3  2003/03/18 14:41:49  kisiel
+* Bugfix update for the theoretical part of the code. Reverts the changes to the Lednicky weight calculator, as the previuos one had problems with strong interaction
 *
 * Revision 1.1.1.1  1996/04/01 15:01:55  mclareni
 * Mathlib gen
@@ -74,11 +74,11 @@ c       CALL MTLPRT(NAME,'C305.1',ERRTXT)
       END
 
 *
-* $Id: FsiTools.F,v 1.2 2002/12/12 16:59:34 kisiel Exp $
+* $Id: FsiTools.F,v 1.3 2003/03/18 14:41:49 kisiel Exp $
 *
 * $Log: FsiTools.F,v $
-* Revision 1.2  2002/12/12 16:59:34  kisiel
-* Update of the Theoretical part. Add Lambda-Lambda system. New momentum resolution parametrization.
+* Revision 1.3  2003/03/18 14:41:49  kisiel
+* Bugfix update for the theoretical part of the code. Reverts the changes to the Lednicky weight calculator, as the previuos one had problems with strong interaction
 *
 * Revision 1.1.1.1  1996/04/01 15:02:02  mclareni
 * Mathlib gen

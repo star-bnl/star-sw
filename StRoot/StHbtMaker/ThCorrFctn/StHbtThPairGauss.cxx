@@ -44,6 +44,9 @@ void StHbtThPairGauss::Set(const StHbtPair* aPair){
   SetPosition();
   BoostPosition();
 
+  mMomParCalculated=0;
+  mPosParCalculated=0;
+
   mMeasPair=aPair;
   mWeightOk=false;
 

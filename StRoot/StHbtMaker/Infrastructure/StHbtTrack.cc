@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.15 2003/01/31 19:57:15 magestro Exp $
+ * $Id: StHbtTrack.cc,v 1.16 2003/03/18 14:41:48 kisiel Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.16  2003/03/18 14:41:48  kisiel
+ * Bugfix update for the theoretical part of the code. Reverts the changes to the Lednicky weight calculator, as the previuos one had problems with strong interaction
+ *
  * Revision 1.15  2003/01/31 19:57:15  magestro
  * Cleared up simple compiler warnings on i386_linux24
  *
@@ -84,7 +87,10 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mMap[0] = t.mMap[0];
   mMap[1] = t.mMap[1];
   mTrackId = t.mTrackId;
-  mHiddenInfo = t.mHiddenInfo;
+  if (t.ValidHiddenInfo())
+    mHiddenInfo = t.getHiddenInfo()->clone();
+  else 
+    mHiddenInfo = NULL;
 };
 //___________________________________________________
 #ifdef __ROOT__
@@ -505,3 +511,8 @@ void StHbtTrack::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHidde
 bool StHbtTrack::ValidHiddenInfo() const { if (mHiddenInfo) return true; else return false; }
 StHbtHiddenInfo* StHbtTrack::getHiddenInfo() const {return mHiddenInfo;}
 
+StHbtTrack::~StHbtTrack()
+{
+   if (mHiddenInfo)
+     delete mHiddenInfo;
+}
