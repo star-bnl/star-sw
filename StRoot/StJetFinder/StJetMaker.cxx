@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.4 2003/05/09 20:48:19 thenry Exp $
+ * $Id: StJetMaker.cxx,v 1.5 2003/06/25 23:04:26 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -52,6 +52,7 @@
 #include "StSpinMaker/StJet.h"
 #include "StEmcPoint.h"
 #include "StFourPMaker.h"
+#include "StJetOutputMaker.h"
 
 ClassImp(StJetMaker)
   
@@ -71,6 +72,7 @@ StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker,
     saveEMC = false;
     muEmcCol = new StMuEmcCollection();
     neverSave = false;
+    maker = NULL;
 }
 
 void StJetMaker::SetSaveEventWithNoJets(bool saveIt)
@@ -174,6 +176,7 @@ Int_t StJetMaker::Make() {
   }
   if(muDstMaker->muDst()->numberOfPrimaryTracks() <= 0) return kStOk;
 
+  /*
   // fill jetEvent 
   int res;
   res = jetEvent->fill(event, mudst);
@@ -181,7 +184,8 @@ Int_t StJetMaker::Make() {
     mBadCounter++;
     return kStOK;
   }
-  
+  */  
+
   // Get geant info, if any, and fill geant branch
 #ifdef _GEANT_
   TDataSet *geantBranch = GetInputDS("geantBranch");
@@ -239,16 +243,18 @@ Int_t StJetMaker::Make() {
     {
       muDstJets->addProtoJet(*it);
     }
-    //cout << "Number Jets Found: " << muDstJets->nJets() << endl;
-    //for(int i = 0; i < muDstJets->nJets(); i++)
-    //{
-    //StJet* jet = (StJet*) muDstJets->jets()->At(i);
-    //cout << "Pt of Jet " << i << " = " << jet->Pt() << endl;
-    //cout << "Eta of Jet " << i << " = " << jet->Eta() << endl;
-    //cout << "Phi of Jet " << i << " = " << jet->Phi() << endl;
-    //}
+    cout << "Number Jets Found: " << muDstJets->nJets() << endl;
+    for(int i = 0; i < muDstJets->nJets(); i++)
+    {
+      StJet* jet = (StJet*) muDstJets->jets()->At(i);
+      cout << "E of Jet " << i << " = " << jet->E() << endl;
+      cout << "Eta of Jet " << i << " = " << jet->Eta() << endl;
+      cout << "Phi of Jet " << i << " = " << jet->Phi() << endl;
+    }
   }
 
+  StJetOutputMaker* mkr = dynamic_cast<StJetOutputMaker*>(maker);
+  if(mkr != NULL) mkr->doMake();
   //write out to file
   if(saveEventWithNoJets)
   {

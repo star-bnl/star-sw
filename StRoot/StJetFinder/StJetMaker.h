@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.4 2003/05/09 20:48:19 thenry Exp $
+ * $Id: StJetMaker.h,v 1.5 2003/06/25 23:04:35 thenry Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.5  2003/06/25 23:04:35  thenry
+ * Added proxy make option
+ *
  * Revision 1.4  2003/05/09 20:48:19  thenry
  * removed "../" from #include lines
  *
@@ -88,6 +91,7 @@ public:
     };
     int firstNumJets(void) 
       { return firstanalyzer()->getmuDstJets()->nJets(); };
+    void SetMaker(StMaker *_maker) { maker = _maker; };
 
 protected:
     void InitFile(void);
@@ -95,9 +99,6 @@ protected:
 
     StMuEmcCollection* muEmcCol; //!
     jetBranchesMap jetBranches;  
-    //StppJetAnalyzer **jetBranches; //!
-    //char** names;                  //!
-    //Int_t numJetBranches;          
     bool saveEventWithNoJets;
     int maxEventsPerFile;	   //!      
     int eventFileCounter;	   //!
@@ -108,6 +109,8 @@ protected:
 protected:
     StFourPMaker*   fourPMaker;   //!
     StMuDstMaker*   muDstMaker;   //!
+    StMaker*        maker;        //!
+
 private:
     const char*     outName;      //!
     StMuDst*        mudst;        //!
@@ -130,6 +133,18 @@ private:
     ClassDef(StJetMaker,1)
 	};
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
