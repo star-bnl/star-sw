@@ -24,11 +24,11 @@ enum StDetectorId {
   kTpcSsdId    = kTpcSsdIdentifier,
   kTpcSvtId    = kTpcSvtIdentifier,        
   kTpcSsdSvtId = kTpcSsdSvtIdentifier,        
-  kSsdSvtId    = kSsdSvtIdentifier,       
-  kEventVtxId  = kEventVertexIdentifier,
-  kV0VtxId     = kV0DecayIdentifier,
-  kXiVtxId     = kXiDecayIdentifier,
-  kKinkVtxId   = kKinkDecayIdentifier,
-  kOtherVtxId  = kOtherTypeIdentifier
+  kSsdSvtId    = kSsdSvtIdentifier  
 };
+
+
+
+
+
 

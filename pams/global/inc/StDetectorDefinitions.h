@@ -54,12 +54,3 @@
 #define kTpcSsdSvtIdentifier          23
 #define kSsdSvtIdentifier             24
 
-/* numbering scheme for vertex types */
-
-#define kEventVertexIdentifier         1
-#define kV0DecayIdentifier             2
-#define kXiDecayIdentifier             3
-#define kKinkDecayIdentifier           4
-#define kOtherTypeIdentifier           5
-
-
