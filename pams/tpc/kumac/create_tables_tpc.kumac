@@ -122,23 +122,30 @@ macro/global/import *
     tdm/newtable tphit     tcl_tphit     200000
     tdm/newtable tphitau   tcl_tphit_aux 200000
     tdm/newtable index     tcl_tpc_index 200000
-
-  cd [data]/tpc/hits
-  
-    tdm/newtable tpcluster tcl_tpcluster   200000
-    tdm/newtable tpseq     tcl_tp_seq     2000000
+    tdm/newtable tpcluster tcl_tpcluster 200000
+    tdm/newtable tpseq     tcl_tp_seq    2000000
     
-
-  cd [params]/tpc
-  mkdir tclpars
-  cd tclpars
- 
-     tdm/newtable tcl_sector_index tcl_sector_index 1  
+* Need for slow simulator stuff:
+ cd [params]/tpc
+   mkdir tclpars
+   cd tclpars 
+   tdm/newtable tcl_sector_index tcl_sector_index 1  
       
-  cd /dui
+ cd /dui
 
 return
+ 
+* ----------------------------------------------------
+ macro tcc
+  macro/global/import *
 
+   cd [data]/tpc/hits
+   newtable tpmorphology tcc_morphology 200000
+   tdm/table/rowcount tpmorphology 0
+  
+   cd /dui
+  
+ return
 *----------------------------------------------------
 
 macro tcl_slow_old

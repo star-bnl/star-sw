@@ -5,8 +5,6 @@ macro/global/import *
 
 message 'start tid_run'
 
- alias/create STAFCV_OK  1
- alias/create STAFCV_BAD 0
 
 *call the de/dx calculation
   ami/module/call tde_new [params]/tpc/tidpars/tdeparm _

@@ -7,8 +7,6 @@ macro/global/import *
 message 'start tfs_run'
 
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
 
   ami/module/call tfs_g2t _
 	 [geant_Event]/g2t_tpc_hit _
@@ -41,6 +39,9 @@ message 'start tfs_run'
 return
 
 **************************************************************************
+
+
+
 
 
 

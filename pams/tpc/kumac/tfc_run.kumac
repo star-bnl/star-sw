@@ -10,9 +10,6 @@ macro/global/import *
 
   message 'start tfc_run'
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
-
   ami/module/call xyz_
        [geometry]/tpc/tpgpar/tpg_pad_plane_
        [geometry]/tpc/tpgpar/tpg_detector_
@@ -39,9 +36,7 @@ macro run_newtab tpc_sector_first=1 tpc_sector_last=24
   macro/global/import *
   message 'start tfc_run_newtab'
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
-  
+
   do j = [tpc_sector_first],[tpc_sector_last] 
      cd  [params]/tpc/tfcpars
      rowcount tfc_sector_index 1
@@ -82,8 +77,6 @@ macro run_reformat_newtab
   macro/global/import *
   message 'start run_reformat_newtab'
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
   
   do j = 1,24 
      cd  [params]/tpc/tfcpars
@@ -121,6 +114,12 @@ return
 
 
 ***********************************************************************
+
+
+
+
+
+
 
 
 

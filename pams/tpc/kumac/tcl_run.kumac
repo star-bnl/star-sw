@@ -2,16 +2,14 @@
 * *************************************************************************
  
  macro run_tcl tpc_sector_first=1 tpc_sector_last=24 
-macro/global/import *
+   
+   macro/global/import *
 
-message 'start run_tcl'
+message 'call tcl_run#run_tcl'
 
   cd /dui
   tdm/table/rowcount [data]/tpc/hits/tpseq     0
   tdm/table/rowcount [data]/tpc/hits/tpcluster 0
-
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
 
 do j = [tpc_sector_first],[tpc_sector_last] 
   cd  [params]/tpc/tclpars
@@ -45,56 +43,56 @@ do j = [tpc_sector_first],[tpc_sector_last]
 
 return
  
- 
-**************************************************************************
- 
- 
-macro run_tcl_make_clusters
-macro/global/import *
-
-message 'start run_tcl_make_clusters'
-
+* ********************************************************************
+ macro run_tcc tpc_sector_first=1 tpc_sector_last=24 
+   
+   macro/global/import *
+          
+  message 'call tcl_run#run_tcc'
+  
+  do j = [tpc_sector_first],[tpc_sector_last] 
+    
+  * set current sector
+  mess 'setting sector to '[j]
+  cd [params]/tpc/tccpars
+  tdm/table/cell/putvalue 'tcc_cluster_index[0].current_sector' [j]
   cd /dui
-  tdm/table/rowcount [data]/tpc/hits/tpseq     0
-  tdm/table/rowcount [data]/tpc/hits/tpcluster 0
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
+    ami/module/call tcc_
+          [raw_data]/tpc/Sector_[j]/pixel_data_in_
+          [raw_data]/tpc/Sector_[j]/pixel_data_out_
+          [data]/tpc/hits/tpseq_
+          [data]/tpc/hits/tpcluster_
+          [data]/tpc/hits/tpmorphology_
+          [params]/tpc/tccpars/tcc_params_
+          [params]/tpc/tccpars/tcc_cluster_index
+  
+  
+   if ( staf_status(1) .ne. STAFCV_OK) then
+     message 'Problem running tcc...'
+   endif
 
-  ami/module/call tcl_make_clusters_
-        [geometry]/tpc/tpgpar/tpg_pad_plane_
-        [raw_data]/tpc/pixels/tppad_
-        [raw_data]/tpc/pixels/tppixel_
-        [raw_data]/tpc/pixels/tpmcpix_
-        [data]/tpc/hits/tpcluster_
-        [data]/tpc/hits/tpseq
-
-  if ( staf_status(1) .ne. STAFCV_OK) then
-	message 'Problem running tcl_make_clusters...'
-  endif
-
-
+ enddo  
+ 
+ 
   RTRN:
 
-  message 'finish run_tcl_make_clusters'
+  message 'finish run_tcc'
 
 return
- 
  
 ************************************************************************
 
 macro run_tph tpc_sector_first=1 tpc_sector_last=24 
 macro/global/import *
 
- message 'start run_tph'
+ message 'call tcl_run#run_tph'
 
   cd /dui
   
   tdm/table/rowcount [data]/tpc/hits/tphit 0
   tdm/table/rowcount [data]/tpc/hits/tphitau 0
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
 
  do j = [tpc_sector_first],[tpc_sector_last]
     k = [j]
@@ -130,19 +128,51 @@ enddo
 
  return
  
+**************************************************************************
+ 
+ 
+macro run_tcl_make_clusters
+macro/global/import *
+
+message 'call tcl_run#run_tcl_make_clusters'
+
+  cd /dui
+  tdm/table/rowcount [data]/tpc/hits/tpseq     0
+  tdm/table/rowcount [data]/tpc/hits/tpcluster 0
+
+
+
+  ami/module/call tcl_make_clusters_
+        [geometry]/tpc/tpgpar/tpg_pad_plane_
+        [raw_data]/tpc/pixels/tppad_
+        [raw_data]/tpc/pixels/tppixel_
+        [raw_data]/tpc/pixels/tpmcpix_
+        [data]/tpc/hits/tpcluster_
+        [data]/tpc/hits/tpseq
+
+  if ( staf_status(1) .ne. STAFCV_OK) then
+	message 'Problem running tcl_make_clusters...'
+  endif
+
+
+  RTRN:
+
+  message 'finish run_tcl_make_clusters'
+
+return
+ 
 ************************************************************************
 
 macro run_tpham 
 macro/global/import *
 
-message 'start run_tpham'
+message 'call tcl_run#run_tpham'
 
   cd /dui
   tdm/table/rowcount [data]/tpc/hits/tphit 0
   tdm/table/rowcount [data]/tpc/hits/tphitau 0
 
-  alias/create STAFCV_OK 1
-  alias/create STAFCV_BAD 0
+
 
   ami/module/call tpham_
         [params]/tpc/tclpars/tclpar_
