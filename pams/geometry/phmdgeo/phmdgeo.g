@@ -1,5 +1,9 @@
-* $Id: phmdgeo.g,v 1.10 2004/03/31 14:45:33 potekhin Exp $
+* $Id: phmdgeo.g,v 1.11 2004/03/31 16:42:05 potekhin Exp $
 * $Log: phmdgeo.g,v $
+* Revision 1.11  2004/03/31 16:42:05  potekhin
+* Changed Dipak's comment to reflect the actual number
+* modified in the previous check-in
+*
 * Revision 1.10  2004/03/31 14:45:33  potekhin
 * A recent change in coordinates by Subhasis,
 * based upon a survey.
@@ -11,15 +15,18 @@
 *    sensitive medium
 * 2. Proper mixture of Ar+CO2(70:30) has been introduced.
 *
+*
 *****************************************************************
  Module  PHMDGEO  is the geometry of photon multiplicity detector
 *****************************************************************
+*
 * Modified: 26th March 2004, Two changes made: Dipak
-* 1. Z-distance changed from 535cm to 542cm according to this year
-*  PMD servey data.
+* 1. Z-distance changed from 535cm to 539cm
+*    according to this year PMD servey data.
+*
 * 2. Gap between two halves of PMD changed from 0.3 cm to 1cm
 *
-* modified: 18th July 2003: Tapan, Dipak
+* Modified: 18th July 2003: Tapan, Dipak
 * Two modifications:
 * 1. CUTGAM and CUTELE values are introduced in the
 *    sensitive medium
