@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotMinBias.C,v 1.2 2001/03/06 17:33:02 posk Exp $
+// $Id: plotMinBias.C,v 1.3 2001/08/17 22:15:15 posk Exp $
 //
 // Author:       Sergei Voloshin and Art Poskanzer, Sep. 2000
 // Description:  Macro to add centrality-selected histograms together with
@@ -18,6 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotMinBias.C,v $
+// Revision 1.3  2001/08/17 22:15:15  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.2  2001/03/06 17:33:02  posk
 // All macros now work.
 //
@@ -37,6 +40,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 Int_t  runNumber      = 0;
 const  Int_t nCens    = 6;
 TFile* histFile[nCens];

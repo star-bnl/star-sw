@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.2 2001/05/14 23:15:20 posk Exp $
+// $Id: doFlowEvents.C,v 1.3 2001/08/17 22:14:42 posk Exp $
 //
 // Description: 
 // Chain to read events from microDST files into StFlowEvent and analyze.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.3  2001/08/17 22:14:42  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.2  2001/05/14 23:15:20  posk
 // Lower pt uppers for centralities 1 and 2.
 //
@@ -42,6 +45,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 class    StChain;
 StChain  *chain=0;
 TBrowser *b=0;
@@ -155,13 +159,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   //
 
   // Set the event cuts
-//   StFlowCutEvent::SetCent(4, 4);
+//    StFlowCutEvent::SetCent(4, 4);
 //    StFlowCutEvent::SetMult(10, 10000);
+//    StFlowCutEvent::SetFinalMult(6, 10000);
 //    StFlowCutEvent::SetVertexX(-3.6, 3.6);
 //    StFlowCutEvent::SetVertexY(-3.5, 3.5);
 //    StFlowCutEvent::SetVertexZ(-579.8, -578.);
 //    StFlowCutEvent::SetEtaSym(0., 0.);
-  
+
   // Set the track cuts
 //    StFlowCutTrack::SetFitPtsV1(20, 200);
 //    StFlowCutTrack::SetFitPtsV2(20, 200);
@@ -181,25 +186,41 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
 //   StFlowEvent::SetYCut(0., 0., 0, 0); // harmonic 1, selection 1
 //   StFlowEvent::SetYCut(0., 0., 1, 0); // harmonic 2, selection 1
 //   StFlowEvent::SetYCut(0., 0., 2, 0); // harmonic 3, selection 1
-//   StFlowEvent::SetYCut(0., 0., 0, 1); // harmonic 1, selection 2
-//   StFlowEvent::SetYCut(0., 0., 1, 1); // harmonic 2, selection 2
-//   StFlowEvent::SetYCut(0., 0., 2, 1); // harmonic 3, selection 2
+//    StFlowEvent::SetYCut(2.5, 4., 0, 1); // harmonic 1, selection 2
+//    StFlowEvent::SetYCut(1.8, 3.5, 1, 1); // harmonic 2, selection 2
+//    StFlowEvent::SetYCut(2.5, 4., 2, 1); // harmonic 3, selection 2
 
-//    StFlowEvent::SetPtCut(0.05, 1., 0, 0);
-//    StFlowEvent::SetPtCut(0.05, 1., 1, 0);
+//   StFlowEvent::SetPtCut(0.05, 1., 0, 0);
+//   StFlowEvent::SetPtCut(0.05, 1., 1, 0);
 //   StFlowEvent::SetPtCut(0., 2., 2, 0);
-//    StFlowEvent::SetPtCut(0.05, 1., 0, 1);
-//    StFlowEvent::SetPtCut(0.05, 1., 1, 1);
+//   StFlowEvent::SetPtCut(0.05, 1., 0, 1);
+//   StFlowEvent::SetPtCut(0.05, 1., 1, 1);
 //   StFlowEvent::SetPtCut(0., 2., 2, 1);
 
-//   StFlowEvent::SetMeanSinCosCut(-0.15, 0.15);
+  if (Flow::eBeam == 40) {
+    StFlowCutEvent::SetVertexZ(-581.7, -580.5);
+//    StFlowEvent::SetYCut(2.5, 4., 0, 1); // harmonic 1, selection 2
+//    StFlowEvent::SetYCut(1.8, 3.5, 1, 1); // harmonic 2, selection 2
+//    StFlowEvent::SetYCut(2.5, 4., 2, 1); // harmonic 3, selection 2
+    StFlowEvent::SetYCut(3., 5., 0, 1); // harmonic 1, selection 2
+//    StFlowEvent::SetYCut(1.8, 4., 1, 1); // harmonic 2, selection 2
+    StFlowEvent::SetYCut(3., 5., 1, 1); // harmonic 2, selection 2
+    StFlowEvent::SetPtCut(0., 0.5, 1, 1);
+    StFlowEvent::SetYCut(3., 5., 2, 1); // harmonic 3, selection 2
+    StFlowCutEvent::SetEtaSym(0.36, 0.84);
+  }
+
+//   StFlowEvent::SetMeanSinCosCut(-0.1, 0.1);
 
   // Use weights in the event plane calcualtion
   StFlowEvent::SetPtWgt();
   StFlowEvent::SetYWgt();
 
+  // Calculate v2 from the 1st harmonic event plane
+  //StFlowAnalysisMaker::SetV21();
+
   // Make striped subevents
-  //StFlowEvent::SetStripes(2);  // either 1 or 2
+  // StFlowEvent::SetStripes(1);  // either 1 or 2
 
   // Particles for the event plane
   // particles:  pi+, pi-, pi, e-, e+, pbar, proton
@@ -209,7 +230,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList)
   //  StFlowEvent::SetProbPid();
   
   //
-  // Chain Make()
   // Event loop
   //
   int istat=0, i=1;
@@ -272,9 +292,12 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*muDST.root";
 
   //LBL
-  Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std+";
-  //Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std-";
-  //Char_t* filePath="/auto/pdsfdv03/na49/160GeV/std+cen";
+  Char_t* filePath="/auto/na49/160GeV/std+";
+  //Char_t* filePath="/auto/na49/160GeV/std-";
+  //Char_t* filePath="/auto/na49/160GeV/std+cen";
+  //Char_t* filePath="/auto/na49/40GeV/std+";
+  //Char_t* filePath="/auto/na49/40GeV/std-";
+  //Char_t* filePath="/auto/na49/40GeV/cen";
   Char_t* fileExt="*muDST.root";
 
   doFlowEvents(nevents, filePath, fileExt);

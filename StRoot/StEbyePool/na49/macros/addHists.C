@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: addHists.C,v 1.4 2001/05/14 23:18:22 posk Exp $
+// $Id: addHists.C,v 1.5 2001/08/17 22:14:40 posk Exp $
 //
 // Author:       Art Poskanzer, Feb 2001
 // Description:  Macro to add histograms together with weighting.
@@ -12,6 +12,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: addHists.C,v $
+// Revision 1.5  2001/08/17 22:14:40  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.4  2001/05/14 23:18:22  posk
 // Uses yield weighting.
 //
@@ -29,6 +32,8 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
+
 // // pions
 // .x addHists.C(11,21,31,41)
 // .x addHists.C(12,22,32,42)
@@ -45,8 +50,6 @@
 // .x addHists.C(55,65,85)
 // .x addHists.C(56,66,86)
 
-gROOT->Reset();
-
 Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t thirdRunNo,
 	       Int_t outputRunNo) {
   // Combines three files.
@@ -58,8 +61,8 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t thirdRunNo,
 
 Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
 
-  bool   stripes = kFALSE;
-  //bool   stripes = kTRUE;
+  //bool   stripes = kFALSE;
+  bool   stripes = kTRUE;
   TFile* histFile[3];
   char   firstRunName[6];
   char   firstRunName[30];
@@ -68,7 +71,7 @@ Int_t addHists(Int_t firstRunNo, Int_t secondRunNo, Int_t outputRunNo=99) {
   char   outputRunName[6];
   char   outputRunName[30];
   int    nSels = 2;
-  int    nHars = 6;
+  int    nHars = 3;
   TH1*   hist[2];
   TH2*   yieldPartHist[2];
   

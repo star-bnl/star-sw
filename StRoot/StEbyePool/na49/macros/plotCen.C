@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.3 2001/05/14 23:22:47 posk Exp $
+// $Id: plotCen.C,v 1.4 2001/08/17 22:15:03 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.4  2001/08/17 22:15:03  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.3  2001/05/14 23:22:47  posk
 // Minor changes.
 //
@@ -34,6 +37,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 const  Int_t nCens = 6;
 int    runNumber   = 0;
 char   runName[6];
@@ -48,6 +52,8 @@ char   tmp[10];
 
 TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
 
+  int  eBeam = 158; //for 158 GeV data
+  //int  eBeam = 40;  //for 40 GeV data
   bool multiGraph;
   bool doubleGraph;
   bool singleGraph;
@@ -190,6 +196,9 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   float Ycm     =  2.92;
   TString* histProjName = NULL;
 
+  if(eBeam == 40) {
+    Ycm = 2.24;
+  }
   // construct histName and histProjName
   char sel[2];
   sprintf(sel,"%d",selN);

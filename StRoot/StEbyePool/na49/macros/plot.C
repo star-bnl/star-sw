@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.4 2001/05/14 23:22:42 posk Exp $
+// $Id: plot.C,v 1.5 2001/08/17 22:14:57 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.5  2001/08/17 22:14:57  posk
+// Updated to also do 40 GeV.
+//
 // Revision 1.4  2001/05/14 23:22:42  posk
 // Minor changes.
 //
@@ -32,6 +35,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 #include <math.h> 
 //const Int_t nHars    = 6;
 const  Int_t nHars    = 3;
@@ -46,6 +50,8 @@ char   tmp[10];
 
 TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 
+  int  eBeam = 158; //for 158GeV data
+  //int  eBeam = 40;  //for 40GeV data
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
   if (selN == 0) multiGraph = kTRUE;
@@ -187,6 +193,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   int   n_qBins =    50;
   float Ycm     =  2.92;
   TString* histProjName = NULL;
+
+  if(eBeam == 40) Ycm = 2.24;
 
   // set row and column numbers
   char* cp = strstr(shortName[pageNumber],"Subs");
@@ -345,12 +353,15 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  TF1* pionLine = new TF1("pionLine", BetheBlochFunc, -2., 5., 1);
 	  TF1* protLine = new TF1("protLine", BetheBlochFunc, -2., 5., 1);
 	  TF1* elecLine = new TF1("elecLine", BetheBlochFunc, -2., 5., 1);
+	  TF1* kaonLine = new TF1("kaonLine", BetheBlochFunc, -2., 5., 1);
 	  double pionMass = 0.1396;
 	  double protMass = 0.9383;
 	  double elecMass = 0.00051;
+	  double kaonMass = 0.4937;
 	  pionLine->SetParameters(&pionMass);
 	  protLine->SetParameters(&protMass);
 	  elecLine->SetParameters(&elecMass);
+	  kaonLine->SetParameters(&kaonMass);
 	  gStyle->SetOptStat(10);
 	  hist2D->Draw("COLZ");
 	  pionLine->Draw("SAME");
@@ -360,6 +371,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	  hist2D->SetMaximum(20.);
 	  hist2D->SetMinimum(-20.);
 	  gStyle->SetOptStat(0);
+	  hist2D->Draw("COLZ");
+	} else if (strstr(shortName[pageNumber],"Mean_")!=0) { // meanSinCos
+	  hist2D->SetMaximum(0.2);
+	  hist2D->SetMinimum(-0.2);
+	  gStyle->SetOptStat(10);
 	  hist2D->Draw("COLZ");
 	} else {                                               // other 2D
 	  gStyle->SetOptStat(10);
@@ -430,6 +446,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->Draw("E1");
 	func_q->SetLineStyle(kDotted);
 	func_q->Draw("same");
+      } else if (strstr(shortName[pageNumber],"CosPhiLab")!=0) {  // CosPhiLab
+	TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
+	gStyle->SetOptStat(0);
+	hist->Draw();
+	lineZeroHar->Draw();
       } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // Phi distibutions
        	hist->SetMinimum(0.9*(hist->GetMinimum()));
 	if (strstr(shortName[pageNumber],"Weight")!=0) {
@@ -474,11 +495,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	hist->SetMarkerColor(2);
 	hist->Draw();
 	lineDiagonal->Draw();
-      } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
-	TLine* lineZeroHar = new TLine(0.5, 0., 6.5, 0.);
-	gStyle->SetOptStat(0);
-	hist->Draw();
-	lineZeroHar->Draw();
       } else if (strstr(shortName[pageNumber],"PidMult")!=0) {  // PID Mult
 	gPad->SetLogy();
 	gStyle->SetOptStat(0);
