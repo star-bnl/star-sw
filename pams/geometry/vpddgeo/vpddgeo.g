@@ -1,7 +1,8 @@
-* $Id: vpddgeo.g,v 1.14 2004/07/06 20:47:53 geurts Exp $
+* $Id: vpddgeo.g,v 1.15 2004/07/08 01:50:42 potekhin Exp $
 * $Log: vpddgeo.g,v $
-* Revision 1.14  2004/07/06 20:47:53  geurts
-* *** empty log message ***
+* Revision 1.15  2004/07/08 01:50:42  potekhin
+* reverting changes by Frank, as I separated
+* them into a new source file
 *
 * Revision 1.13  2004/03/24 23:32:47  potekhin
 * Moved the numerical data introduced by Bill Llope in
@@ -584,8 +585,8 @@ Block VPBI is the empty space inside of the FEE box
      ElecWid=20.3
      ElecThck=0.17
      ElecLen=5.1
-*     Create VFEE  dx=ElecWid/2 dy=ElecThck/2 dz=ElecLen/2
-     Create and Position VFEE x=-(vpdg_BXwidth-vpdg_BXthick-ElecWid)/2+2.54,
+     Create VFEE  dx=ElecWid/2 dy=ElecThck/2 dz=ElecLen/2
+     Position VFEE x=-(vpdg_BXwidth-vpdg_BXthick-ElecWid)/2+2.54,
                    y=(vpdg_BXheight-vpdg_BXthick)/2-1.77,
                    z=-(vpdg_BXlength-vpdg_BXthick-ElecLen)/2
 Endblock
@@ -600,8 +601,7 @@ Block VFEE is the FEE inside the box
       Component H    A=1      Z=1    W=0.4*14*1./174.
       Component O    A=16     Z=8    W=0.4*4*16./174.
       Mixture   G10  Dens=1.7
-*fg      Shape     BOX  dx=0 dy=0 dz=0
-      Shape     BOX   dx=ElecWid/2 dy=ElecThck/2 dz=ElecLen/2
+      Shape     BOX  dx=0 dy=0 dz=0
       Create    VLEM
        ElecThck= 0.17 
       Position  VLEM y=ElecThck+(0.7/2) x=-7.0 z=2 
@@ -623,10 +623,7 @@ EndBlock
 *
 Block VLEM is a Lemo connector on the FEE boards
       Attribute VLEM seen=1   colo=3
-*fg      Shape     BOX   dx=0 dy=0 dz=0
-      Shape     BOX    dx=(0.68/2 + (0.9-0.72)/2),
-                       dy=(0.68/2),
-                       dz=(2.0/2 + (0.8+1.0)/2)
+      Shape     BOX   dx=0 dy=0 dz=0
       Create and Position    VPIP  x=(0.9-0.72)/2 y=0 z=(0.8+1.0)/2,
                                    Rmin=0.62/2 Rmax=0.68/2 dz=2.0/2
 EndBlock
