@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.43 1999/09/26 02:59:54 fine Exp $
+// $Id: makedoc.C,v 1.44 1999/10/03 00:09:53 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.44  1999/10/03 00:09:53  fine
+// New classes docs StMicky and StCL have been introduced
+//
 // Revision 1.43  1999/09/26 02:59:54  fine
 // html for RMath has been introduced
 //
@@ -74,6 +77,7 @@
    }
    else {
      gSystem->Load("St_base");
+     gSystem->Load("St_baseTest");
      gSystem->Load("xdf2root");
      gSystem->Load("St_Tables");
    
@@ -110,7 +114,8 @@
     sourcedir += ":";
     sourcedir = STAR;
     sourcedir += "/StRoot/St_base:";
-    sourcedir += ":";
+    sourcedir = STAR;
+    sourcedir += "/StRoot/St_baseTest:";
     sourcedir += STAR;
     sourcedir += "/.share/tables:";
     sourcedir += STAR;
@@ -151,6 +156,8 @@
     lookup += STAR;
     lookup += "/StRoot/St_base:";
     lookup += STAR;
+    lookup += "/StRoot/St_baseTest:";
+    lookup += STAR;
     lookup += "/StRoot/St_TLA_Maker:";
     lookup += STAR;
     lookup += "/StRoot/St_io_Maker:";
@@ -176,7 +183,7 @@
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = { "St_TableSorter","RMath"
+  Char_t *classes[] = { "St_TableSorter","StCL", "StMicky", "St_tableDescriptor"
                        ,"St_XDFFile",    "St_Module",       "St_Table"
                        ,"St_DataSet",    "St_DataSetIter", "St_FileSet"
                        ,"StParticleView","St_ObjectSet",    "St_Node",     "St_NodePosition"
@@ -191,7 +198,7 @@
                        ,"StEventDisplayMaker"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 36;
+  Int_t nclass = 38;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
@@ -228,6 +235,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
   cout << " Making HTML's for macros" << endl;
+  html.Convert("../test/micky.C","\"Micky\" to test the <matrix> and <triangilar matrix> methods");
   html.Convert("../graphics/PadBrowser.C","How to use St_geom_Maker and StPadDisplayMaker");
   html.Convert("../graphics/basic3dPrimitives.C","An example of the basic 3D STAR object");
   html.Convert("../graphics/EventPanel.C","An example of the ToolBar to control an applications");
@@ -253,7 +261,7 @@
   html.Convert("../bfc.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./bfcx.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
-  html.Convert("./STAR_Demos.C","The source of the STAR_demos macro");
+  html.Convert("./../STAR_Demos.C","The source of the STAR_demos macro");
   html.Convert("../graphics/STAR_shapes.C","Test for the basic STAR GEOMETRY classes");
   html.Convert("../graphics//StarView.C","How to Draw the local STAR 3D geometry");
   html.Convert("../graphics/StarWebView.C","How to Draw the remote STAR 3D geometry");
