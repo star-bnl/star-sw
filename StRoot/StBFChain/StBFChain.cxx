@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.148 2000/10/27 16:30:46 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.149 2000/11/02 15:59:26 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -96,6 +96,7 @@ Bfc_st BFC[] = {
   {"TrsOut"      ,""  ,"","Tree"                                ,"","","Write Trs output to StTree",kFALSE},
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
+  {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -178,7 +179,7 @@ Bfc_st BFC[] = {
   {"scf"      ,"","svtChain",""                ,"St_scf_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"scm"      ,"","svtChain",""                ,"St_scm_Maker","St_tpc,St_svt,StSsdClusterMaker","",kFALSE},
   {"sce"      ,"","svtChain",""                   ,"St_sce_Maker","St_tpc,St_svt,StSsdEvalMaker","",kFALSE},
-  {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt"                          ,"StMaker","StChain","",kFALSE},
+  {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
   {"fss"         ,"ftpc_raw","ftpcChain","SCL,Simu"       ,"St_fss_Maker","St_ftpc,St_fss_Maker","",kFALSE},
   {"Fcl"         ,"ftpc_hits","ftpcChain","SCL"
                           ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,St_ftpc,StFtpcClusterMaker","",kFALSE},
@@ -430,6 +431,7 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
+	  if (maker == "St_tpt_Maker" && !GetOption("ExB")) mk->SetMode(1); // Al Saulys request
 	  if (maker == "St_tpcdaq_Maker") {
 	    if (GetOption("Trs")) mk->SetMode(1); // trs
 	    else                  mk->SetMode(0); // daq
@@ -450,7 +452,7 @@ Int_t StBFChain::Instantiate()
 	    EvMk->doLoadTpcHits  = kFALSE;
 	    EvMk->doLoadFtpcHits = kFALSE;
 	    EvMk->doLoadSvtHits  = kFALSE;
-	    EvMk->doLoadSsdHits = kFALSE;
+	    EvMk->doLoadSsdHits  = kFALSE;
 	  }
 	}
         else status = kStErr;
