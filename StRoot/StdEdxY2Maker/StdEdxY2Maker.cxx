@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.45 2004/11/24 02:40:46 jeromel Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.46 2004/11/24 19:48:38 jeromel Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -816,8 +816,16 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 	  if (N > 0) {
 	    I70A /= N; D70A /= N;
-	    D70A  = TMath::Sqrt(D70A - I70A*I70A);
-	    D70A /= I70A;
+
+	    // Arguably, negative D70A is more than odd considering the
+	    // definition but a Sqrt( -0.0000 ) is detected by Insure so
+	    // the addition of this check. 
+	    D70A  = D70A - I70A*I70A;
+	    if (D70A > 0.0){
+	      D70A = TMath::Sqrt(D70A)/I70A;
+	    } else {
+	      D70A = 0;
+	    }
 	    dedx.id_track  =  Id;
 	    dedx.det_id    =  kTpcId;    // TPC track 
 	    dedx.method    =  kOtherMethodIdentifier; // == kTruncatedMeanId+1;
