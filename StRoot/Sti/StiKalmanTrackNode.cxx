@@ -526,14 +526,31 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   location (x,y,z) of the track near the given vertex.
 */
 void StiKalmanTrackNode::propagate(const StiKalmanTrackNode *pNode, 
-				   const StiHit * vertex)
+																	 const StiHit * vertex)
 {
   // adopt the state of the parent node
   setState(pNode);
-  double dAlpha = -fAlpha;
-  if (fabs(dAlpha)>1e-4) rotate(dAlpha);
-  // propagate position
-  propagate(vertex->x());
+  //double dAlpha = -fAlpha;
+	cout << "fX,fP0,fP1,fP2,fP3,fP4:"
+			 << fX <<" "
+			 << fP0<<" "
+			 << fP1<<" "
+			 << fP2<<" "
+			 << fP3<<" "
+			 << fP4<<endl;
+  //if (fabs(dAlpha)>1e-4) rotate(dAlpha);
+	double locVx = cos(fAlpha)*vertex->x() + sin(fAlpha)*vertex->y();
+  //propagate(vertex->x());
+	cout <<"locVx:"<<locVx<<endl;
+  propagate(locVx);
+	cout << "fX,fP0,fP1,fP2,fP3,fP4:"
+			 << fX <<" "
+			 << fP0<<" "
+			 << fP1<<" "
+			 << fP2<<" "
+			 << fP3<<" "
+			 << fP4<<endl;
+	cout<<"===================================================="<<endl;
   // propagate error
   propagateError();
 }

@@ -249,36 +249,20 @@ class StiKalmanTrack : public StiTrack
   /// Method to insert a hit in this track
   StiKalmanTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
   
-  /// 
+  /// Remove given hit from this track
   void removeHit(StiHit *h);
   
   /// Remove all hits and nodes currently associated with this track.
   void removeAllHits();
   
   /// Work method used to find the node containing the given hit.
-  /*!
-    Current implementation only considers the first child of each node
-    and must therefore be revised.
-  */
   StiKalmanTrackNode * findHit(StiHit * h);
   
   /// Convenience method to initialize a track based on seed information 
-  /*! Method to initialize this track based on given arguments. 
-    curvature : estimated curvature of the track
-    tanl      : tangent of the estimated pitch angle of this track
-    origin    : 3-coordinates of the origin of this track
-    hitvector : stl vector containing a series of hits to be inserted in this track
-    
-    This method gets node from the node factory and inserts the given hits 
-    in those nodes in the given sequence assumed (but not checked) to be 
-    in radially decreasing order. The kalman state of each track node is set
-    on the basis of the curvature, tanl, and origin provided. The error matrix
-    of each node is set a diagonal matrix with unit value.
-  */
   void initialize(double curvature,
-		  double tanl,
-		  const StThreeVectorD& origin,
-		  const hitvector &);
+									double tanl,
+									const StThreeVectorD& origin,
+									const hitvector &);
   
   /// Work method returns the node closest to the given position.
   /*! Work method returns the node closest to the given position. 
@@ -312,10 +296,10 @@ class StiKalmanTrack : public StiTrack
   double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
 
-  void find(int direction=kOutsideIn);
+  bool find(int direction=kOutsideIn);
   void prune();
   void reserveHits();
-  void extendToVertex(StiHit* vertex);
+  bool extendToVertex(StiHit* vertex);
 
   void setFlag(long v);
   long getFlag() const;

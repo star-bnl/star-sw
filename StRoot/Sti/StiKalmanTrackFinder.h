@@ -48,7 +48,7 @@ public:
     virtual void findNextTrack();
     virtual void fitNextTrack();
     virtual void findNextTrackSegment();
-    virtual void find(StiTrack *track, int direction);
+    virtual bool find(StiTrack *track, int direction);
     
     virtual void reset();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher
@@ -96,6 +96,7 @@ private:
     int       visitedDet ;
     int       position;
     int       lastMove;
+		int       nAdded;
     
     double    chi2;
     double    bestChi2;
