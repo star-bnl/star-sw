@@ -1,5 +1,9 @@
-// $Id: St_tcl_Maker.cxx,v 1.53 1999/12/07 23:49:35 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.54 2000/01/31 21:29:19 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.54  2000/01/31 21:29:19  snelling
+// Made CC5 compatible (strstr in CC5 returns const char* if called
+// as strstr(const char*, const char *))
+//
 // Revision 1.53  1999/12/07 23:49:35  snelling
 // Fixed Linux warnings
 //
@@ -323,7 +327,7 @@ Int_t St_tcl_Maker::Make() {
     Int_t isumseq = 0;
 
     while ((sector=next())) {// loop over sectors
-      Char_t *name= 0;
+      const Char_t *name= 0;
       if ((name = strstr(sector->GetName(),"Sector"))) {
 	// look for the sector number
 	name  = strchr(name,'_')+1; Int_t indx = atoi(name);
@@ -379,7 +383,7 @@ Int_t St_tcl_Maker::Make() {
     next.Reset();
 
     while ((sector=next())) {  // loop over sectors
-      Char_t *name= 0;
+     const  Char_t *name = 0;
       if ((name = strstr(sector->GetName(),"Sector"))) {
 	// look for the sector number
 	name  = strchr(name,'_') + 1; 
@@ -529,7 +533,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.53 1999/12/07 23:49:35 snelling Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.54 2000/01/31 21:29:19 snelling Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
