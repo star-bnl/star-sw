@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.2 1999/07/06 22:33:23 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.3 1999/09/01 19:04:54 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.3  1999/09/01 19:04:54  lisa
+ * update Particle class AND add parity cf and Randys Coulomb correction
+ *
  * Revision 1.2  1999/07/06 22:33:23  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -27,6 +30,7 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
+#include "StPhysicalHelixD.hh"
 
 class StHbtParticle{
 public:
@@ -36,11 +40,16 @@ public:
 
   StHbtLorentzVector FourMomentum() const;
 
+  StPhysicalHelixD& Helix();
+
+
 private:
   StHbtLorentzVector mFourMomentum;
+  StPhysicalHelixD mHelix;
+
 };
 
 inline StHbtLorentzVector StHbtParticle::FourMomentum() const {return mFourMomentum;}
-
+inline StPhysicalHelixD& StHbtParticle::Helix() {return mHelix;}
 
 #endif
