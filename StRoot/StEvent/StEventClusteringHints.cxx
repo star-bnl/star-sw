@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventClusteringHints.cxx,v 2.1 2001/04/06 17:47:20 ullrich Exp $
+ * $Id: StEventClusteringHints.cxx,v 2.2 2001/04/20 00:50:48 ullrich Exp $
  *
  * Author: Thomas Ullrich, Apr 2001
  ***************************************************************************
@@ -10,13 +10,17 @@
  ***************************************************************************
  *
  * $Log: StEventClusteringHints.cxx,v $
+ * Revision 2.2  2001/04/20 00:50:48  ullrich
+ * Added new query methods.
+ *
  * Revision 2.1  2001/04/06 17:47:20  ullrich
  * Initial Revision
  *
  **************************************************************************/
 #include "StEventClusteringHints.h"
+#include <algorithm>
 
-static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.1 2001/04/06 17:47:20 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventClusteringHints.cxx,v 2.2 2001/04/20 00:50:48 ullrich Exp $";
 
 ClassImp(StEventClusteringHints)
 
@@ -96,10 +100,49 @@ StEventClusteringHints::setBranch(const char* classname, const char* branchname)
     (*mNameMap)[string(classname)] = string(branchname);
 }
 
+vector<string>
+StEventClusteringHints::listOfBranches() const
+{
+    vector<string> result, tmp;
+    map<string,string>::iterator i;
+    for (i = mNameMap->begin(); i != mNameMap->end(); i++)
+	tmp.push_back(i->second);
+    sort(tmp.begin(), tmp.end());
+    insert_iterator<vector<string> > ins(result, result.begin());
+    unique_copy(tmp.begin(), tmp.end(), ins);
+    return result;
+}
+
+vector<string>
+StEventClusteringHints::listOfClasses() const
+{
+    vector<string> result;
+    map<string,string>::iterator i;
+    for (i = mNameMap->begin(); i != mNameMap->end(); i++)
+	result.push_back(i->first);
+    sort(result.begin(), result.end());    
+    return result;
+}
+
+vector<string>
+StEventClusteringHints::listOfClasses(const char* branchname) const
+{
+    vector<string> result;
+    map<string,string>::iterator i;
+    for (i = mNameMap->begin(); i != mNameMap->end(); i++)
+	if (string(branchname) == i->second) result.push_back(i->first);
+    sort(result.begin(), result.end());    
+    return result;
+}
+
 void
 StEventClusteringHints::print(ostream& os)
 {
-    map<string,string>::iterator i;
-    for (i = mNameMap->begin(); i != mNameMap->end(); i++)
-	os << i->first << " -> " << i->second << endl;
+    vector<string> branches = listOfBranches();
+    for (unsigned int j=0; j<branches.size(); j++) {
+	vector<string> classes = listOfClasses(branches[j].c_str());
+	cout << branches[j] << endl;
+	for (unsigned int k=0; k<classes.size(); k++)
+	    cout << '\t' << classes[k] << endl;
+    }
 }
