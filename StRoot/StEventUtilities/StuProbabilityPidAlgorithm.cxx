@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.13 2000/08/23 01:18:13 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.14 2000/08/23 15:15:33 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.14  2000/08/23 15:15:33  aihong
+ * *** empty log message ***
+ *
  * Revision 1.13  2000/08/23 01:18:13  aihong
  * remove a bug
  *
@@ -227,13 +230,6 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
     rig=double(p.mag()/charge);
     pt=double(p.perp());
 
-
-
-
-    //----------------get all info. I want for a track. now do PID
-
-   if (dedx<mDedxEnd){
-
     rig=fabs(rig); 
     dedx = (dedx>mDedxStart) ? dedx : mDedxStart;
     rig  = (rig >mRigStart)  ? rig  : mRigStart;
@@ -243,6 +239,13 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 
     pt   = (pt  >mPtStart)   ? pt   : mPtStart;
     pt   = (pt  <mPtEnd  )   ? pt   : mPtEnd*0.9999;
+
+
+    //----------------get all info. I want for a track. now do PID
+
+   if (dedx<mDedxEnd){
+
+
 
    if (mDynamicallyCalculatePID)
       fillPIDByCalculation(charge, dca, nhits, pt, dedx, rig);
