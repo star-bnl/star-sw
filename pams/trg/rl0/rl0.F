@@ -39,13 +39,14 @@ C-----------------------------------------------------------------------
 *--
 *--   SET VARIOUS CONSTANTS FOR THE RUNS
 *--
-*      write (6,*) 'NEW: Im In!'
+
+
       if ( First ) then
          First = .false.
 *--
          if   (Mwccal(1).fit(1) .eq. 0 
      +         .or.    Mwccal(1).fit(2) .eq. 0) then
-            write (6,*) 'MWC:No Calibration File'
+            write (6,*) 'MWC:No Calibration File',Mwccal(1).fit(1), Mwccal(1).fit(2)
             RL0 = STAFCV_BAD
             return
          endif
@@ -62,7 +63,7 @@ C-----------------------------------------------------------------------
          Max_mwc_eta = mwc_geo(1).neta
          Max_mwc_phi = mwc_geo(1).nphi
 
-         write (9,*) Max_ctb_phi, Max_ctb_eta, Max_mwc_phi, Max_mwc_eta
+*--         write (9,*) Max_ctb_phi, Max_ctb_eta, Max_mwc_phi, Max_mwc_eta
 
 *--
 *--      set default value for the control table
@@ -75,12 +76,10 @@ C-----------------------------------------------------------------------
          ctb_div_eta = ctr(1).ctb_phi_pixels
 
          if (mwc_div_phi.eq.0 .or. (mwc_div_eta.eq.0)) then
-            write (6,*) 'RL0:Using default mwc pixel size (4x4)'
             mwc_div_phi = 4
             mwc_div_eta = 4
          endif
          if (ctb_div_phi.eq.0 .or. (ctb_div_eta.eq.0)) then
-            write (6,*) 'RL0:Using default ctb pixel size (4x4)'
             ctb_div_phi = 4
             ctb_div_eta = 4
          endif
@@ -102,12 +101,17 @@ C-----------------------------------------------------------------------
       enddo
 *--
       do iz = 1, 2
-         do ieta = 1, Max_mwc_eta
-            do iphi = 1, Max_mwc_phi
+         do ieta = 1, 320
+            do iphi = 1, 12
                Raw_mwc ( iz, iphi, ieta ) = 0
             enddo
          enddo
       enddo  
+
+      do iset = 1, 64
+           L0(1).fpga1_ctb(iset) = 0 
+           L0(1).fpga1_mwc(iset) = 0 
+      enddo
 *--
 *--
 *--     Fill CTB array
@@ -120,9 +124,9 @@ C-----------------------------------------------------------------------
      +          .and. ieta .ge. 1 .and. ieta .le. Max_ctb_eta) then
                  
                Raw_ctb (iphi,ieta) = Ctb_raw(i).adc
-               write (9,*) 'CTB ', iphi, ieta, Raw_ctb(iphi,ieta)
+*--               write (9,*) 'CTB ', iphi, ieta, Raw_ctb(iphi,ieta)
             else
-               write ( 6, * ) iphi, ' or ',ieta, ' are too high an index '
+*--               write ( 6, * ) iphi, ' or ',ieta, ' are too high an index '
             endif
          enddo
       endif
@@ -130,9 +134,13 @@ C-----------------------------------------------------------------------
 *--
 *--     Fill MWC array
 *--
+*-- 2/8/99 d.e. russ changed (sector .le. 192) to (sector .le. 48)
+*--        (no longer 16 sets of 20 wires but 4 sets of 80 wires/sector)
+*--
       if (mwc_raw_h.nok .gt. 0) then
+*--         write (9,*) 'MWC:... ', mwc_raw_h.nok
          do i = 1, mwc_raw_h.nok
-            if (mwc_raw(i).sector .le. 192) then
+            if (mwc_raw(i).sector .le. 48) then
                iz = 1
             else
                iz = 2
@@ -151,21 +159,11 @@ C-----------------------------------------------------------------------
             if (iphi .ge. 1 .and. iphi .le. Max_mwc_phi  
      +      .and. ieta .ge. 1 .and. ieta .le. 2*Max_mwc_eta 
      +      .and. iz   .ge. 1 .and. iz   .le. 2 ) then
-
-************************************************************
-**** There is a SERIOUS problem here. mwc_raw(i).adc DOES  *
-**** NOT EXIST, as far as I can tell. I commented the line *
-**** out and added mwc_raw(i).count just to get rl0 to     *
-**** compile. This will need to be checked thoroughly to   *
-**** make sure code is behaving correctly. -ZM 2-16-98     *
-************************************************************
-*   Code being checked - DR 
-***********************************************************
                Raw_mwc (iz,iphi,ieta) = mwc_raw(i).count
-               write (9,*) 'MWC ',iz, iphi, ieta, raw_mwc(iz,iphi,ieta)
+*               write (9,*) 'MWC ',iz, iphi, ieta, raw_mwc(iz,iphi,ieta)
             else
-               write ( 6, * ) 'MWC:',isector,index,
-     +         iz,' or ',iphi, ' or ',ieta, ' are too high an index '
+*               write ( 6, * ) 'MWC:',isector,index,
+*     +         iz,' or ',iphi, ' or ',ieta, ' are too high an index '
             endif
          enddo
       endif
@@ -187,14 +185,14 @@ C-----------------------------------------------------------------------
      +                      ctbcal(1).fit(2)
                  if (ctb_mult .le. 0) ctb_mult = 0
                  sum = sum + ctb_mult
-                 write(17,*) 'CTB: eta',ieta,'   phi',iphi,
-     +               '  set eta',set_eta,' set phi',set_phi,
-     +               '  net set',iset+1,'  sum:',sum
+*                 write(17,*) 'CTB: eta',ieta,'   phi',iphi,
+*     +               '  set eta',set_eta,' set phi',set_phi,
+*     +               '  net set',iset+1,'  sum:',sum
               enddo
            enddo
            iset = iset + 1
            L0(1).fpga1_ctb(iset) = sum
-           write (19,*) iset, 'CTB ', L0(1).fpga1_ctb(iset)
+*           write (19,*) iset, 'CTB ', L0(1).fpga1_ctb(iset)
         enddo
       enddo 
 *--
@@ -211,25 +209,25 @@ C-----------------------------------------------------------------------
      +            set_phi * (Max_mwc_phi/mwc_div_phi)
                   do ieta = 1+(set_eta-1)*(Max_mwc_eta/mwc_div_eta),
      +               set_eta * (Max_mwc_eta/mwc_div_eta)
-                     fwh = raw_mwc(iz,iphi,ieta)/20.0
-                     if (raw_mwc(iz,iphi,ieta) .ge. 16) fwh = 0.80
-                     mwc_mult = 20*(-(alog(1-fwh))) 
-                     if (ieta .le. 8) then
-                        fact = 1.231 + 0.036*ieta
+                     fwh = raw_mwc(iz,iphi,ieta)/80.0
+                     if (raw_mwc(iz,iphi,ieta) .ge. 64) fwh = 0.80
+                     mwc_mult = 80*(-(alog(1-fwh))) 
+                     if (ieta .le. 2) then
+                        fact = 1.231 + 0.144*ieta
                      else
-                        fact = 1.55 + 0.068*ieta
+                        fact = 1.55 + 0.272*ieta
                      endif
                      mwc_mult = mwc_mult/fact
                      if (mwc_mult .lt. 0) mwc_mult = 0
                      sum = sum + mwc_mult
-                     write(17,*) 'MWC: eta',ieta,'   phi',iphi,
-     +                  '  set eta',set_eta,' set phi',set_phi,
-     +                  '  net set',iset+1,'  sum:',sum
+*                     write(17,*) 'MWC: eta',ieta,'   phi',iphi,
+*     +                  '  set eta',set_eta,' set phi',set_phi,
+*     +                  '  net set',iset+1,'  sum:',sum
                   enddo
                enddo
                iset = iset + 1
                L0(1).fpga1_mwc(iset) = sum
-               write (19,*) iset, 'MWC ', L0(1).fpga1_mwc(iset)
+*               write (19,*) iset, 'MWC ', L0(1).fpga1_mwc(iset)
             enddo
          enddo
       enddo
@@ -242,26 +240,26 @@ C-----------------------------------------------------------------------
          do iset = (iz-1)*mwc_div_phi*mwc_div_eta+1,
      +      iz*mwc_div_phi*mwc_div_eta
             sum = sum + L0(1).fpga1_mwc(iset)
-            write (22,*) 'MWC',iset,l0(1).fpga1_mwc(iset),sum
+*            write (22,*) 'MWC',iset,l0(1).fpga1_mwc(iset),sum
          enddo
          gain = ctr(1).fpga_gain(1)
          L0(1).mwc_tot(iz) = sum * gain
       enddo
-      write (22,*) 'mwc_tot ', l0(1).mwc_tot(1), l0(1).mwc_tot(2) 
+*      write (22,*) 'mwc_tot ', l0(1).mwc_tot(1), l0(1).mwc_tot(2) 
 *--
 *--   DSM SUMMING FOR CTB (SUM OVER PHI)
 *--
       do iloop = 1, 2
          sum = 0
-         do iset = (iloop-1)*ctb_div_phi*ctb_div_eta+1,
-     +      iloop*ctb_div_phi*ctb_div_eta
+         do iset = (iloop-1)*ctb_div_phi*(ctb_div_eta/2)+1,
+     +      iloop*ctb_div_phi*(ctb_div_eta/2)
             sum = sum + L0(1).fpga1_ctb(iset)
-            write (22,*) 'CTB',iset,l0(1).fpga1_ctb(iset),sum
+*            write (22,*) 'CTB',iset,l0(1).fpga1_ctb(iset),sum
          enddo 
          gain = ctr(1).fpga_gain(1)
          L0(1).ctb_tot(iloop) = sum * gain 
       enddo
-      write (22,*) 'ctb_tot ',l0(1).ctb_tot(1), l0(1).ctb_tot(2)
+*      write (22,*) 'ctb_tot ',l0(1).ctb_tot(1), l0(1).ctb_tot(2)
 *--
 *--    MWC/CTB ratio and Total Multiplicity
 *--
@@ -277,13 +275,13 @@ C-----------------------------------------------------------------------
       forward  = L0(1).ctb_tot(1) + L0(1).mwc_tot(1)
       backward = L0(1).ctb_tot(2) + L0(1).mwc_tot(2) 
       L0(1).fob = forward/backward            
-      write (22,*) l0(1).mwc_ctb, l0(1).tot_mul, l0(1).fob
+*      write (22,*) l0(1).mwc_ctb, l0(1).tot_mul, l0(1).fob
 *--
 *--
       L0_h.nok = 1
       rl0 =  STAFCV_OK
 
-*      write (6,*) 'Im out'
+
 *--
 *--    That's it
 *--
