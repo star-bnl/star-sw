@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.6 2000/04/13 18:08:21 fine Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.7 2000/08/01 12:33:05 hummler Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.7  2000/08/01 12:33:05  hummler
+// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
+// use fcl_fppoint table only in Maker
+//
 // Revision 1.6  2000/04/13 18:08:21  fine
 // Adjusted for ROOT 2.24
 //
@@ -14,12 +18,15 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StFtpcClusterFinder.hh"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "math_constants.h"
 #include <math.h>
 
-StFtpcClusterFinder::StFtpcClusterFinder()
+StFtpcClusterFinder::StFtpcClusterFinder(TClonesArray *pointarray)
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
+
+mPoint = pointarray;
 }
 
 StFtpcClusterFinder::~StFtpcClusterFinder()
@@ -27,18 +34,17 @@ StFtpcClusterFinder::~StFtpcClusterFinder()
 //   cout << "StFtpcClusterFinder destructed" << endl;
 }
 
-StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
-					   fcl_det_st *det,
-					   fcl_padtrans_st *padtrans,
-					   fcl_zrow_st *zrow,
-					   fcl_ampoff_st *ampoff,
-					   fcl_ampslope_st *ampslope,
-					   fcl_timeoff_st *timeoff,
-					   St_fcl_fppoint *fcl_fppoint,
-					   int padtransRows,
-					   int ampslopeRows,
-					   int ampoffRows,
-					   int timeoffRows)
+int StFtpcClusterFinder::search(StFTPCReader *reader,
+				fcl_det_st *det,
+				fcl_padtrans_st *padtrans,
+				fcl_zrow_st *zrow,
+				fcl_ampoff_st *ampoff,
+				fcl_ampslope_st *ampslope,
+				fcl_timeoff_st *timeoff,
+				int padtransRows,
+				int ampslopeRows,
+				int ampoffRows,
+				int timeoffRows)
 {
   double *pradius, *pdeflection;
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
@@ -80,28 +86,28 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
   if(padtransRows<1)
     {
       printf("Couldn't find magboltz data table, exiting!\n");
-      return NULL;
+      return 0;
     }
 
   /* is calibration amplitude slope database loaded, if not load */
   if(ampslopeRows<1)
     {
       printf("Couldn't find calibration amplitude slope table, exiting!\n");
-      return NULL;
+      return 0;
     }
 
   /* is calibration amplitude offset database loaded, if not load */
   if(ampoffRows<1)
     {
       printf("Couldn't find calibration amplitude offset data table, exiting!\n");
-      return NULL;
+      return 0;
     }
 
   /* is calibration time offset database loaded, if not load */
   if(timeoffRows<1)
     {
 	  printf("Couldn't find calibration time offset data table, exiting!\n");
-	  return NULL;
+	  return 0;
     }
 
   /* allocate memory for padtrans table */
@@ -111,21 +117,21 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
   if(pradius == NULL || pdeflection == 0)
     {
       printf("Padtrans memory allocation failed, exiting!\n");
-      return NULL;
+      return 0;
     }
 
   /* integrate padtrans table from magboltz database */
   if(!calcpadtrans(det, padtrans, pradius, pdeflection))
     {
       printf("Couldn't calculate padtrans table, exiting!\n");
-      return NULL;
+      return 0;
     }
 
   /* initialize CUC memory handling */
   if(!cucInit(CUCMemory, CUCMemoryArray, &CUCMemoryPtr))
     {
       printf("Couldn't initialize CUC memory, exiting!\n");
-      return NULL;
+      return 0;
     }
 
   /* calculate fastlog lookup */
@@ -195,15 +201,11 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 			  // cluster processing: increment cluster counter 
 			  clusters ++;
 
-			  int numbuf=fcl_fppoint->GetNRows();
-			  int maxbuf=fcl_fppoint->GetTableSize();
-		
 			  // cluster processing: call hitfinder 
 			  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
 				       pradius, pdeflection, 
 				       det, zrow,
-				       fastlog, &numbuf, 
-				       &maxbuf, fcl_fppoint->GetTable(),
+				       fastlog,
 				       ampslope, ampoff, timeoff)
 			     )
 			    {
@@ -211,7 +213,6 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 			      printf("Hitfinder failed! Cluster is lost.\n");
 #endif
 			    }
-			  fcl_fppoint->SetNRows(numbuf);
 			}
 		      DeleteCUC=CurrentCUC;
 		      // bypass CurrentCUC in CUC list 
@@ -229,7 +230,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 				  &CUCMemoryPtr, DeleteCUC))
 			{
 			  printf("Fatal memory management error.\n");
-			  return NULL;
+			  return 0;
 			}
 		    }
 		  LastCUC=CurrentCUC;
@@ -418,7 +419,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 				  printf("Previous cluster is now lost.\n");
 #endif
 				  CurrentCUC=LastCUC;
-				  return NULL;
+				  return 0;
 				}
 			      else
 				{
@@ -516,15 +517,11 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 		  // cluster processing: increment cluster counter 
 		  clusters ++;
 		  
-		  int numbuf=fcl_fppoint->GetNRows();
-		  int maxbuf=fcl_fppoint->GetTableSize();
-		  
 		  // cluster processing: call hitfinder 
 		  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
 			       pradius, pdeflection, 
 			       det, zrow,
-			       fastlog, &numbuf, 
-			       &maxbuf, fcl_fppoint->GetTable(),
+			       fastlog, 
 			       ampslope, ampoff, timeoff)
 		     )
 		    {
@@ -532,7 +529,6 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 		      printf("Hitfinder failed! Cluster is lost.\n");
 #endif
 		    }
-		  fcl_fppoint->SetNRows(numbuf);
 		}
 	      DeleteCUC=CurrentCUC;
 	      // bypass CurrentCUC in CUC list 
@@ -550,7 +546,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 			  &CUCMemoryPtr, DeleteCUC))
 		{
 		  printf("Fatal memory management error.\n");
-		  return NULL;
+		  return 0;
 		}
 	      LastCUC=CurrentCUC;
 	    }
@@ -558,7 +554,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 	} // end of: for(iSec...)
     } // end of: for(iRow...)
 
-  printf("StFtpcClusterFinder Found %d clusters and processed to %d hits.\n", clusters,(int) fcl_fppoint->GetNRows() );
+  printf("StFtpcClusterFinder Found %d clusters and processed to %d hits.\n", clusters,(int) mPoint->GetEntriesFast() );
   
 #ifdef DEBUGFILE
   fclose(fin);
@@ -642,7 +638,7 @@ StFtpcCluster *StFtpcClusterFinder::search(StFTPCReader *reader,
 #ifdef DEBUG 
   cout<<"finished running cluster search"<<endl;
 #endif
-  StFtpcCluster *dummy;
+  int dummy=1;
   return dummy;
 }
 
@@ -654,9 +650,6 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 				 FCL_DET_ST *det, 
 				 FCL_ZROW_ST *zrow, 
 				 float fastlog[256],
-				 int *point_nok,
-				 int *point_maxlen,
-				 FCL_FPPOINT_ST *fppoint,
 				 FCL_AMPSLOPE_ST *ampslope,
 				 FCL_AMPOFF_ST *ampoff,
 				 FCL_TIMEOFF_ST *timeoff
@@ -868,8 +861,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 	}
     }
   if(!fitPoints(Cluster, iRow, iSec, pRadius, pDeflection, Peaks, 
-		iNumPeaks, det, zrow, fastlog, point_nok,
-		point_maxlen, fppoint, timeoff))
+		iNumPeaks, det, zrow, fastlog, timeoff))
     {
 #ifdef DEBUG
       printf("Point fitting failed! Cluster is lost.\n");
@@ -979,9 +971,6 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				  FCL_DET_ST *det, 
 				  FCL_ZROW_ST *zrow, 
 				  float fastlog[256], 
-				  int *point_nok,
-				  int *point_maxlen,
-				  FCL_FPPOINT_ST *fppoint,
 				  FCL_TIMEOFF_ST *timeoff)
 {
   int iADCValue, iADCPlus, iADCMinus;
@@ -1178,20 +1167,25 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	}
 
 
-      if(*point_nok < *point_maxlen - 1 && !isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
+      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
 	{
-	  /* fill point table */
-	  fppoint[*point_nok].row=iRow+1;           
-	  fppoint[*point_nok].sector=iSec+1;
-	  fppoint[*point_nok].n_pads=Cluster->EndPad +1 - Cluster->StartPad;
-	  fppoint[*point_nok].n_bins=Peak->Sequence.Length;
-	  fppoint[*point_nok].max_adc=(long int) Peak->PeakHeight;
-	  fppoint[*point_nok].charge=ChargeSum;
-	  fppoint[*point_nok].x=Peak->x;
-	  fppoint[*point_nok].y=Peak->y;
-	  fppoint[*point_nok].z=Peak->z;
-	  fppoint[*point_nok].s_phi=Peak->PadSigma*det[0].rad_per_pad;
-	  fppoint[*point_nok].s_r=Peak->TimeSigma*Peak->Rad/Peak->TimePosition;
+	  // create new point
+	  Int_t numPoint = mPoint->GetEntriesFast();
+	  TClonesArray &pointInit = *mPoint;
+	  new(pointInit[numPoint]) StFtpcPoint();
+	  StFtpcPoint *thispoint = (StFtpcPoint *) mPoint->At(numPoint);
+
+	  thispoint->SetPadRow(iRow+1);           
+	  thispoint->SetSector(iSec+1);
+	  thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
+	  thispoint->SetNumberBins(Peak->Sequence.Length);
+	  thispoint->SetMaxADC(Peak->PeakHeight);
+	  thispoint->SetCharge(ChargeSum);
+	  thispoint->SetX(Peak->x);
+	  thispoint->SetY(Peak->y);
+	  thispoint->SetZ(Peak->z);
+	  thispoint->SetSigmaPhi(Peak->PadSigma*det[0].rad_per_pad);
+	  thispoint->SetSigmaR(Peak->TimeSigma*Peak->Rad/Peak->TimePosition);
 	  fDriftLength = det[0].r_out - Peak->Rad;
           fPhiError = det[0].pad_err_diff[0] 
 	      + fDriftLength*det[0].pad_err_diff[1] 
@@ -1199,27 +1193,27 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
           fRadError = det[0].time_err_diff[0] 
 	      + fDriftLength*det[0].time_err_diff[1] 
 	      + fDriftLength*fDriftLength*det[0].time_err_diff[2];
-	  if(fppoint[*point_nok].n_pads==2)
+	  if(thispoint->GetNumberPads()==2)
 	    {
 	      fPhiError = sqrt(fPhiError * fPhiError
 			       + det[0].pad_err_2mean * det[0].pad_err_2mean);
 	    }
-	  if(fppoint[*point_nok].n_pads==3 && iUseGauss & 1 == 1)
+	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 1)
 	    {
 	      fPhiError = sqrt(fPhiError * fPhiError
 			       + det[0].pad_err_3gauss * det[0].pad_err_3gauss);
 	    }
-	  if(fppoint[*point_nok].n_pads==3 && iUseGauss & 1 == 0)
+	  if(thispoint->GetNumberPads()==3 && iUseGauss & 1 == 0)
 	    {
 	      fPhiError = sqrt(fPhiError * fPhiError
 			       + det[0].pad_err_3mean * det[0].pad_err_3mean);
 	    }
 
-	  fppoint[*point_nok].flags=0;
+	  thispoint->SetFlags(0);
 
 	  if(iADCValue>254)
 	    {
-	      fppoint[*point_nok].flags=4;
+	      thispoint->SetFlags(4);
 	      fPhiError = sqrt(fPhiError * fPhiError
 			       + det[0].pad_err_sat * det[0].pad_err_sat);
 	      fRadError = sqrt(fRadError * fRadError
@@ -1227,7 +1221,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    }	  
 	  if(Cluster->CutOff==1)
 	    {
-	      fppoint[*point_nok].flags=fppoint[*point_nok].flags | 16;
+	      thispoint->SetFlags(thispoint->GetFlags() | 16);
 	      fPhiError = sqrt(fPhiError * fPhiError
 			       + det[0].pad_err_cutoff * det[0].pad_err_cutoff);
 	      fRadError = sqrt(fRadError * fRadError
@@ -1240,20 +1234,20 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 	    / (pRadius[10]-pRadius[20]);
 
-	  fppoint[*point_nok].x_err = 
-	      sqrt(fRadError*cos(Peak->Phi)*fRadError*cos(Peak->Phi) 
-		   + fPhiError*sin(Peak->Phi)*fPhiError*sin(Peak->Phi));
-	  fppoint[*point_nok].y_err = 
-	      sqrt(fRadError*sin(Peak->Phi)*fRadError*sin(Peak->Phi) 
-		   + fPhiError*cos(Peak->Phi)*fPhiError*cos(Peak->Phi));
-	  fppoint[*point_nok].z_err = det[0].z_err;
-
-	  (*point_nok)++;
+	  thispoint->SetXerr(sqrt(fRadError*cos(Peak->Phi)
+				  *fRadError*cos(Peak->Phi) 
+				  + fPhiError*sin(Peak->Phi)
+				  *fPhiError*sin(Peak->Phi)));
+	  thispoint->SetYerr(sqrt(fRadError*sin(Peak->Phi)
+				  *fRadError*sin(Peak->Phi) 
+				  + fPhiError*cos(Peak->Phi)
+				  *fPhiError*cos(Peak->Phi)));
+	  thispoint->SetZerr(det[0].z_err);
 	}
       else
 	{
 #ifdef DEBUG
-	  printf("fppoint table is full. Point not stored.\n");
+	  printf("Cluster fitting error. Point not stored.\n");
 #endif
 	}
     } /* end of: if(iNumPeaks == 1) */
@@ -1600,23 +1594,30 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  
 	  /* in very complicated clusters some hits may have been unfolded
 	     with errors while the rest of the cluster is okay, don't fill 
-	     these hits into tables: */
-	  if(*point_nok < *point_maxlen - 1 && !isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) && !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
+	     these hits into array: */
+	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) && !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
 	    {
-	      /* fill point table */
-	      fppoint[*point_nok].row=iRow+1;           
-	      fppoint[*point_nok].sector=iSec+1;
-	      fppoint[*point_nok].n_pads=Cluster->EndPad +1 - Cluster->StartPad;
-	      fppoint[*point_nok].n_bins=Peak[iPeakIndex].Sequence.Length;
-	      fppoint[*point_nok].max_adc=(long int) Peak[iPeakIndex].PeakHeight;
-	      fppoint[*point_nok].charge
-		=(long int)(ChargeSum*Peak[iPeakIndex].PeakHeight/PeakHeightSum);
-	      fppoint[*point_nok].x=Peak[iPeakIndex].x;
-	      fppoint[*point_nok].y=Peak[iPeakIndex].y;
-	      fppoint[*point_nok].z=Peak[iPeakIndex].z;
-	      fppoint[*point_nok].s_phi=Peak[iPeakIndex].PadSigma*det[0].rad_per_pad;
-	      fppoint[*point_nok].s_r=Peak[iPeakIndex].TimeSigma
-		* Peak[iPeakIndex].Rad/Peak[iPeakIndex].TimePosition;
+	      // create new point
+	      Int_t numPoint = mPoint->GetEntriesFast();
+	      TClonesArray &pointInit = *mPoint;
+	      new(pointInit[numPoint]) StFtpcPoint();
+	      StFtpcPoint *thispoint = (StFtpcPoint *) mPoint->At(numPoint);
+	      
+	      thispoint->SetPadRow(iRow+1);           
+	      thispoint->SetSector(iSec+1);
+	      thispoint->SetNumberPads(Cluster->EndPad +1 - Cluster->StartPad);
+	      thispoint->SetNumberBins(Peak[iPeakIndex].Sequence.Length);
+	      thispoint->SetMaxADC(Peak[iPeakIndex].PeakHeight);
+	      thispoint->SetCharge(ChargeSum*Peak[iPeakIndex].PeakHeight
+				   /PeakHeightSum);
+	      thispoint->SetX(Peak[iPeakIndex].x);
+	      thispoint->SetY(Peak[iPeakIndex].y);
+	      thispoint->SetZ(Peak[iPeakIndex].z);
+	      thispoint->SetSigmaPhi(Peak[iPeakIndex].PadSigma
+				     *det[0].rad_per_pad);
+	      thispoint->SetSigmaR(Peak[iPeakIndex].TimeSigma
+				   * Peak[iPeakIndex].Rad
+				   /Peak[iPeakIndex].TimePosition);
 
 	      fDriftLength = det[0].r_out - Peak[iPeakIndex].Rad;
 	      fPhiError = det[0].pad_err_diff[0] 
@@ -1627,7 +1628,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 		  + fDriftLength*fDriftLength*det[0].time_err_diff[2];
 	      
 	      /* clusters are unfolded */ 
-	      fppoint[*point_nok].flags=1;
+	      thispoint->SetFlags(1);
 	      fPhiError = sqrt(fPhiError * fPhiError
 			       + det[0].pad_err_unfold * det[0].pad_err_unfold);
 	      fRadError = sqrt(fRadError * fRadError
@@ -1635,7 +1636,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      
 	      if(iADCValue>254)
 		{
-		  fppoint[*point_nok].flags=5;
+		  thispoint->SetFlags(5);
 		  fPhiError = sqrt(fPhiError * fPhiError
 				   + det[0].pad_err_sat * det[0].pad_err_sat);
 		  fRadError = sqrt(fRadError * fRadError
@@ -1643,7 +1644,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 		}	  
 	      if(BadFit==1)
 		{
-		  fppoint[*point_nok].flags=fppoint[*point_nok].flags | 8;
+		  thispoint->SetFlags(thispoint->GetFlags() | 8);
 		  fPhiError = sqrt(fPhiError * fPhiError
 				   + det[0].pad_err_bad * det[0].pad_err_bad);
 		  fRadError = sqrt(fRadError * fRadError
@@ -1651,7 +1652,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 		}	  
 	      if(iNumUnfoldLoops == MAXLOOPS)
 		{
-		  fppoint[*point_nok].flags=fppoint[*point_nok].flags | 10;
+		  thispoint->SetFlags(thispoint->GetFlags() | 10);
 		  fPhiError = sqrt(fPhiError * fPhiError
 				   + det[0].pad_err_failed * det[0].pad_err_failed);
 		  fRadError = sqrt(fRadError * fRadError
@@ -1659,7 +1660,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 		}	  
 	      if(Cluster->CutOff==1)
 		{
-		  fppoint[*point_nok].flags=fppoint[*point_nok].flags | 16;
+		  thispoint->SetFlags(thispoint->GetFlags() | 16);
 		  fPhiError = sqrt(fPhiError * fPhiError
 				   + det[0].pad_err_cutoff * det[0].pad_err_cutoff);
 		  fRadError = sqrt(fRadError * fRadError
@@ -1672,19 +1673,15 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 		/ (pRadius[10]-pRadius[20]);
 
-	      fppoint[*point_nok].x_err = 
-		sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
-		     *fRadError*cos(Peak[iPeakIndex].Phi) 
-		     + fPhiError*sin(Peak[iPeakIndex].Phi)
-		     *fPhiError*sin(Peak[iPeakIndex].Phi));
-	      fppoint[*point_nok].y_err = 
-		sqrt(fRadError*sin(Peak[iPeakIndex].Phi)
-		     *fRadError*sin(Peak[iPeakIndex].Phi) 
-		     + fPhiError*cos(Peak[iPeakIndex].Phi)
-		     *fPhiError*cos(Peak[iPeakIndex].Phi));
-	      fppoint[*point_nok].z_err = det[0].z_err;
-	      
-	      (*point_nok)++;
+	      thispoint->SetXerr(sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
+				      *fRadError*cos(Peak[iPeakIndex].Phi) 
+				      + fPhiError*sin(Peak[iPeakIndex].Phi)
+				      *fPhiError*sin(Peak[iPeakIndex].Phi)));
+	      thispoint->SetYerr(sqrt(fRadError*sin(Peak[iPeakIndex].Phi)
+				      *fRadError*sin(Peak[iPeakIndex].Phi) 
+				      + fPhiError*cos(Peak[iPeakIndex].Phi)
+				      *fPhiError*cos(Peak[iPeakIndex].Phi)));
+	      thispoint->SetZerr(det[0].z_err);
 	    }
 	} /* end of: for(iPeakIndex=0;... */
     } /*end of: if(iNumPeaks==1) ... else { */

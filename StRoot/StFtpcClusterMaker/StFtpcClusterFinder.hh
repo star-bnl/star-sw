@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.hh,v 1.4 2000/01/27 09:47:18 hummler Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.5 2000/08/01 12:33:05 hummler Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.5  2000/08/01 12:33:05  hummler
+// Write points to TObjectArray of StFtpcPoints in ClusterFinder,
+// use fcl_fppoint table only in Maker
+//
 // Revision 1.4  2000/01/27 09:47:18  hummler
 // implement raw data reader, remove type ambiguities that bothered kcc
 //
@@ -24,13 +28,10 @@
 #include "fcl_timeoff.h"
 #include "fcl_ampoff.h"
 #include "fcl_ampslope.h"
-#include "fcl_fppoint.h"
-#include "tables/St_fcl_fppoint_Table.h"
+#include "TClonesArray.h"
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StFTPCReader.h"
-
-#include "StFtpcCluster.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -91,26 +92,28 @@ typedef struct
 
 class StFtpcClusterFinder
 {
+
  private:
   TPCSequence test;
+  TClonesArray *mPoint;
+
  public:
-  StFtpcClusterFinder();
+  StFtpcClusterFinder(TClonesArray *pointarray);
   ~StFtpcClusterFinder();
-  StFtpcCluster *search(StFTPCReader *reader,
-			fcl_det_st *det,
-			fcl_padtrans_st *padtrans,
-			fcl_zrow_st *zrow,
-			fcl_ampoff_st *ampoff,
-			fcl_ampslope_st *ampslope,
-			fcl_timeoff_st *timeoff,
-			St_fcl_fppoint *fcl_fppoint,
-			int padtransRows,
-			int ampslopeRows,
-			int ampoffRows,
-			int timeoffRows);
-  int findHits(TClusterUC *Cluster, int, int, double*, double*, FCL_DET_ST*, FCL_ZROW_ST*, float *, int *, int *, FCL_FPPOINT_ST*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*, FCL_TIMEOFF_ST*);//!
+  int search(StFTPCReader *reader,
+	     fcl_det_st *det,
+	     fcl_padtrans_st *padtrans,
+	     fcl_zrow_st *zrow,
+	     fcl_ampoff_st *ampoff,
+	     fcl_ampslope_st *ampslope,
+	     fcl_timeoff_st *timeoff,
+	     int padtransRows,
+	     int ampslopeRows,
+	     int ampoffRows,
+	     int timeoffRows);
+  int findHits(TClusterUC *Cluster, int, int, double*, double*, FCL_DET_ST*, FCL_ZROW_ST*, float *, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*, FCL_TIMEOFF_ST*);//!
   int getSeqPeaksAndCalibAmp(TPCSequence*, int, int, int, TPadPeak*, int*, FCL_AMPSLOPE_ST*, FCL_AMPOFF_ST*);//!
-  int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, FCL_DET_ST*, FCL_ZROW_ST*, float*, int*, int*, FCL_FPPOINT_ST*, FCL_TIMEOFF_ST*);//!
+  int fitPoints(TClusterUC*, int, int, double*, double*, TPeak*, int, FCL_DET_ST*, FCL_ZROW_ST*, float*, FCL_TIMEOFF_ST*);//!
   int padtrans(TPeak*, int, int, FCL_DET_ST*, FCL_ZROW_ST*, double*, double*);//!
   float gauss_2d(int, int, float, float, float, float, float);//!
   float sigmax(float);//!
