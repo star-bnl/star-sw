@@ -10,12 +10,12 @@ use Sys::Hostname;
 my $EMAIL = "starreco\@bnl.gov";
 #-----------------------------------------------------------------------
 
-my $TOP_DIR = "/disk00000/star/test/dev/";
+my $TOP_DIR = "/star/rcf/disk00000/star/test/dev/";
 my @Process = ("tfs", "trs", "tss");
 my $Nevent = 10;
 my @gyear = ("y1b", "y2a");
 my @dir_year = ("/year_1b/", "/year_2a/");
-my $input_dir = "/disk0/star/test/venus412/b0_3";
+my $input_dir = "/star/rcf/disk0/star/test/venus412/b0_3";
 my $sec;
 my $min;
 my $hour;
