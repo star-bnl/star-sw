@@ -2,7 +2,7 @@
 #define ROOT_Stt_PolyLine3D
 
 // ***********************************************************************
-// $Id: St_PolyLine3D.h,v 1.2 2003/08/02 02:51:59 perev Exp $ 
+// $Id: St_PolyLine3D.h,v 1.1 2004/08/08 21:50:47 fisyak Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -84,6 +84,9 @@ public:
 };
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.h,v $
+// Revision 1.1  2004/08/08 21:50:47  fisyak
+// Eliminate Star2Root library, move St_PolyLine3D to StEventDisplayMaker
+//
 // Revision 1.2  2003/08/02 02:51:59  perev
 // warnOff
 //
