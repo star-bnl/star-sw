@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.cxx,v 1.4 2002/06/12 01:40:31 jklay Exp $                                    
+ * $Id: StHiAnalysis.cxx,v 1.5 2002/06/12 01:42:27 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiAnalysis.cxx,v $
+ * Revision 1.5  2002/06/12 01:42:27  jklay
+ * Bug fix
+ *
  * Revision 1.4  2002/06/12 01:40:31  jklay
  * Filling of event variables after cuts
  *
@@ -623,7 +626,7 @@ StHiAnalysis::fillEventHistograms()
      if(CutRc::AcceptCent(mHiMicroEvent)) { //Want uncut vertex distribution for selected trgword and centrality
        h3VertexXYZ->Fill(xvtx,yvtx,zvtx);
      }
-     if(CutRc::AcceptVertexZ(mHiMicroEvent) { //Want uncut centrality distributions for selected trgword and vertexZ
+     if(CutRc::AcceptVertexZ(mHiMicroEvent)) { //Want uncut centrality distributions for selected trgword and vertexZ
       h1FlowCent->Fill(flowCent);
       h2ZDCSumVsCTB->Fill(CTB,ZDCSum);
      }
