@@ -2,17 +2,17 @@
 *
 *  Table: spaceChargeCor
 *
-*       description: Table for Space Charge correction
-*                    has values for each field setting
+*       description: Table for Space Charge Corrections
 */ 
 
 
 struct spaceChargeCor { 
 
-   double  fullFieldB;   /* -1 Field  */
-   double  halfFieldB;   /* - 0.5 Field  */
-   double  zeroField;   /*  0 Field */
-   double  halfFieldA;   /* + 0.5 Field */
-   double  fullFieldA;   /* + 1 Field  */
+   double  fullFieldB;   /* Negative Full Field Correction  */
+   double  halfFieldB;   /* Negative Half Field Correction  */
+   double  zeroField;   /*  Zero Field " "  */
+   double  halfFieldA;   /*  Postive Half " " */
+   double  fullFieldA;   /*  Postive Full " " */
+   double  satRate;   /* Saturation Rate Hz  */
 
  };  
