@@ -18,6 +18,7 @@
 #include "Api.h"
 #include "StDbBroker.h"
 
+
 ClassImp(StDbBroker)
 //______________________________________________________________________________
 //the only remaining St_Table dependence is in this function 
@@ -95,14 +96,37 @@ void * StDbBroker::Use()
   datetime[1]=time;
   uint nRows=0;
 
+  
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
       m_descriptor[i].name[19]='\0';
   }
 
-void *pDbData = ::DbUse(&nRows, datetime, (const char*)m_tableName,(const char*)m_structName,m_nElements,m_sizeOfStruct,m_descriptor);
+
+  // Check if request is a "hierarchy" : if so send request to "params" DB
+  char* id = strstr(m_tableName,"_hierarchy");
+  if(id){
+    char* tmpName = new char[strlen(m_tableName)+1];
+    strcpy(tmpName,m_tableName);
+    char* id2 = strstr(tmpName,"_hierarchy");
+    *id2 = '\0';
+    m_database = new char[strlen(tmpName)+1];
+    strcpy(m_database,tmpName);
+    *id2='_';
+    delete [] tmpName;
+  }
+
+  void *pDbData;
   
-//cout << "found nRows "<<nRows<<" of " << m_structName<<" structure"<<endl;
+  if(id || strcmp(m_database,"params")==0){
+    
+  pDbData = ::DbUse(&nRows, datetime, (const char*)m_tableName,(const char*)m_structName,m_nElements,m_sizeOfStruct,m_descriptor);
+
+  } else { 
+
+  pDbData = ::DbRead(&nRows, datetime,(const char*)m_tableName,(const char*)m_structName,m_nElements,m_sizeOfStruct,m_descriptor,(const char*)m_database, (const char*)m_tableVersion );
+
+}
 
   if (pDbData==NULL)
     {
@@ -126,6 +150,9 @@ void *pDbData = ::DbUse(&nRows, datetime, (const char*)m_tableName,(const char*)
 //______________________________________________________________________________
 int StDbBroker::DbInit(const char * dbName)
 {  return ::DbInit(dbName) ;}
+
+
+
 
 
 

@@ -38,8 +38,11 @@ class StDbBroker  {
     UInt_t       m_EndDate;     // end date
     UInt_t       m_EndTime;     // end time
 
+    char*        m_tableVersion; // name of the version of the table
+    char*        m_database;     // name of the database for this table
+
   public:
-    StDbBroker(){}
+    StDbBroker(): m_tableVersion(0), m_database(0) {}
 
     virtual ~StDbBroker(){}
     
@@ -83,9 +86,18 @@ class StDbBroker  {
                                      {m_nElements=nElements; m_descriptor = D;}
 
     void   SetTableName(const Char_t *table_name)
-                                          {m_tableName=strdup(table_name);};
+                                  {m_tableName=new char[strlen(table_name)+1]; 
+                                  strcpy(m_tableName,table_name);};
     void   SetStructName(const Char_t *struct_name)
-                                          {m_structName=strdup(struct_name);};
+                                {m_structName=new char[strlen(struct_name)+1];
+                                strcpy(m_structName,struct_name);};
+    void  SetVersionName(const char *version) 
+                                 {m_tableVersion= new char[strlen(version)+1];
+                                  strcpy(m_tableVersion,version);}
+    void  SetDataBaseName(const char *dbName) 
+                                 {m_database= new char[strlen(dbName)+1]; 
+                                  strcpy(m_database,dbName);}
+                                           
     void   SetStructSize(UInt_t size)     {m_sizeOfStruct=size;    };
     void   SetNRows(UInt_t nRows)         {m_nRows = nRows;        }
     void   SetBeginDate(UInt_t BeginDate) {m_BeginDate = BeginDate;}
@@ -114,6 +126,16 @@ extern "C" void *DbUse(unsigned int*,           //&nRows,
 		       unsigned int,           //nVar
 		       unsigned int,           //sizeOfStruct
 		       StDbBroker::Descriptor *d);
+
+extern "C" void *DbRead(unsigned int*,           //&nRows,
+		       unsigned int *,         //datetime[4]
+		       const char *,  //tableName
+		       const char *,  //StructName
+		       unsigned int,           //nVar
+		       unsigned int,           //sizeOfStruct
+		       StDbBroker::Descriptor *d,
+               const char*,            //  database Name
+               const char*);           // versionName
 
 extern "C" int DbInit(const char *);  		//dbInit
 
