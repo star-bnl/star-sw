@@ -37,7 +37,8 @@ class StScmWafer
   int             convertDigitToAnalog(double PairCreationEnergy);
   int             convertUFrameToLocal(sdm_geom_par_st *geom_par);
   int             convertLocalToGlobal();
-  
+  int             printborder();
+ 
  private:
   StScmWafer(const StScmWafer & originalWafer);
   StScmWafer& operator=(const StScmWafer originalWafer);
