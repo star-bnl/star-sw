@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.18 1999/01/21 02:46:38 fine Exp $
+// $Id: St_XDFFile.h,v 1.19 1999/01/21 18:12:48 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.19  1999/01/21 18:12:48  fine
+// Browse and dir methods have been introduced
+//
 // Revision 1.18  1999/01/21 02:46:38  fine
 // New method dir and Browse to navigate XDF files
 //
@@ -86,6 +89,7 @@ class St_XDFFile : public TObject
     virtual Int_t       OpenXDF(TInetAddress address, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(const char *host, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
+    virtual Bool_t    IsFolder(){ return fFile?kTRUE:kFALSE;}
     virtual St_DataSet *NextEventGet();                                         // create St_DataSet and read the next event in it.
     virtual St_DataSet *NextEventList();
     virtual Int_t       NextEventPut(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
