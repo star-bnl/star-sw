@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.16 2000/09/26 20:51:37 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.17 2000/10/12 22:46:35 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.17  2000/10/12 22:46:35  snelling
+// Added support for the new pDST's and the probability pid method
+//
 // Revision 1.16  2000/09/26 20:51:37  posk
 // Updated documentation.
 //
@@ -169,6 +172,7 @@ Float_t StFlowEvent::mAntiDeuteronCuts[2]  = {-3., 3.};
 Float_t StFlowEvent::mElectronCuts[2]      = {-3., 3.};
 Float_t StFlowEvent::mPositronCuts[2]      = {-3., 3.};
 Bool_t  StFlowEvent::mPtWgt                = kFALSE;
+Bool_t  StFlowEvent::mProbPid              = kFALSE;
 
 //-----------------------------------------------------------
 
@@ -395,6 +399,17 @@ void StFlowEvent::MakeSubEvents() {
 //-----------------------------------------------------------------------
 
 void StFlowEvent::SetPids() {
+     if (mProbPid) {
+       SetPidsProb();
+     }  
+     else {
+       SetPidsDeviant();
+     }
+}
+
+//-----------------------------------------------------------------------
+
+void StFlowEvent::SetPidsDeviant() {
   
   StFlowTrackIterator itr;
 
@@ -500,6 +515,64 @@ void StFlowEvent::SetPids() {
     if (!bPiPlus && !bPiMinus && !bProton && !bAntiProton && 
 	!bKplus && !bKminus && !bDeuteron && !bAntiDeuteron && 
 	!bElectron && bPositron) { strcpy(pid, "e+"); } 
+
+    pFlowTrack->SetPid(pid);
+
+  }
+}
+
+//-----------------------------------------------------------------------
+
+void StFlowEvent::SetPidsProb() {
+  
+  StFlowTrackIterator itr;
+
+  for (itr = TrackCollection()->begin(); 
+       itr != TrackCollection()->end(); itr++) {
+
+    StFlowTrack* pFlowTrack = *itr;
+    Char_t pid[10] = "none";
+
+    if (
+	pFlowTrack->MostLikelihoodPID() == 8 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "pi+"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 9 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "pi-"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 14 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "proton"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 15 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "pbar"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 11 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "k+"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 12 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "k-"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 45 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "d"); } 
+//      if (
+//  	pFlowTrack->MostLikelihoodPID() == &&  
+//  	pFlowTrack->MostLikelihoodProb() > 0.9
+//  	) { strcpy(pid, "dbar"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 3 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "e-"); } 
+    if (
+	pFlowTrack->MostLikelihoodPID() == 2 &&  
+	pFlowTrack->MostLikelihoodProb() > 0.9
+	) { strcpy(pid, "e+"); } 
 
     pFlowTrack->SetPid(pid);
 

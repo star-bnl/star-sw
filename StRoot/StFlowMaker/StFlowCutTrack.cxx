@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.16 2000/08/31 18:58:19 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.17 2000/10/12 22:46:33 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.17  2000/10/12 22:46:33  snelling
+// Added support for the new pDST's and the probability pid method
+//
 // Revision 1.16  2000/08/31 18:58:19  posk
 // For picoDST, added version number, runID, and multEta for centrality.
 // Added centrality cut when reading picoDST.
@@ -158,6 +161,71 @@ Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
 
   // eta
   float eta = p.pseudoRapidity();
+  if (mEtaCuts[1] > mEtaCuts[0] && 
+      (eta < mEtaCuts[0] || eta >= mEtaCuts[1])) {
+    mEtaCutN++;
+    return kFALSE;
+  }
+
+  // Increment counters for Eta symmetry cut
+  if (eta > 0.) { mEtaSymPosN++;
+  } else { mEtaSymNegN++; }
+  mGoodTrackN++;
+  return kTRUE;
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* gTrack) {
+  // Returns kTRUE if the StEvent track survives all the cuts
+
+  mTrackN++;
+  
+  // Fit Points
+  Int_t nFitPoints = gTrack->fitTraits().numberOfFitPoints();
+  if (mFitPtsCuts[1] > mFitPtsCuts[0] && 
+      (nFitPoints < mFitPtsCuts[0] || nFitPoints >= mFitPtsCuts[1])) {
+    mFitPtsCutN++;
+    return kFALSE;
+  }
+
+  // Fit points / max points
+  Int_t nMaxPoints = gTrack->numberOfPossiblePoints();
+  float fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.0;
+  if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
+      (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
+    mFitOverMaxCutN++;
+    return kFALSE;
+  }
+
+  // ChiSq
+  float chiSq = (float)(gTrack->fitTraits().chi2());
+  if (mChiSqCuts[1] > mChiSqCuts[0] && 
+      (chiSq < mChiSqCuts[0] || chiSq >= mChiSqCuts[1])) {
+    mChiSqCutN++;
+    return kFALSE;
+  }
+
+  // dca
+  float dca = gTrack->impactParameter();
+  if (mDcaCuts[1] > mDcaCuts[0] && 
+      (dca < mDcaCuts[0] || dca >= mDcaCuts[1])) {
+    mDcaCutN++;
+    return kFALSE;
+  }
+
+  StThreeVectorD g = gTrack->geometry()->momentum();
+
+  // pt
+  float pt = g.perp();
+  if (mPtCuts[1] > mPtCuts[0] && 
+      (pt < mPtCuts[0] || pt >= mPtCuts[1])) {
+    mPtCutN++;
+    return kFALSE;
+  }
+
+  // eta
+  float eta = g.pseudoRapidity();
   if (mEtaCuts[1] > mEtaCuts[0] && 
       (eta < mEtaCuts[0] || eta >= mEtaCuts[1])) {
     mEtaCutN++;
