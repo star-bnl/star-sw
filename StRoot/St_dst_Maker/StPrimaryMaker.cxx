@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.27 1999/12/17 22:27:22 margetis Exp $
+// $Id: StPrimaryMaker.cxx,v 1.28 2000/01/26 23:41:47 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.28  2000/01/26 23:41:47  caines
+// Prob cuts set to 10 as in global fit
+//
 // Revision 1.27  1999/12/17 22:27:22  margetis
 // selection of primtrk is based on id_start_vertex (dca) not iflag
 //
@@ -202,8 +205,8 @@ Int_t StPrimaryMaker::Init(){
     memset(&row,0,sizeof(row));
     row.mxtry =    10;
     row.minfit =    5;
-    row.prob[0] =   2;
-    row.prob[1] =   2;
+    row.prob[0] =   10;
+    row.prob[1] =   10;
     row.debug[0] =  1;
     row.svtchicut = 0;
     row.usetpc    = 2;
