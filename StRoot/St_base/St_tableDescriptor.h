@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.h,v 1.7 2000/01/24 03:55:48 fine Exp $
+// $Id: St_tableDescriptor.h,v 1.8 2000/02/29 01:54:49 fine Exp $
 #ifndef STAR_St_tableDescriptor
 #define STAR_St_tableDescriptor
 
@@ -18,6 +18,7 @@ class St_tableDescriptor : public St_Table {
     St_tableDescriptor(TClass *classPtr);
    ~St_tableDescriptor();
     TString CreateLeafList() const;
+    virtual  Int_t Compare(St_tableDescriptor *compTable);
     tableDescriptor_st *GetTable(){ return (tableDescriptor_st *)s_Table;}                                            
              void        LearnTable(const St_Table *parentTable);
              void        LearnTable(TClass *classPtr);
@@ -60,6 +61,9 @@ inline  void   St_tableDescriptor::SetColumnType(EColumnType type,Int_t column) 
 
 //______________________________________________________________________________
 // $Log: St_tableDescriptor.h,v $
+// Revision 1.8  2000/02/29 01:54:49  fine
+// St_Table -> turn automatic schema evolution for table version 2 and above
+//
 // Revision 1.7  2000/01/24 03:55:48  fine
 // new nethod CreateLeafList() to create text descriptor compatible with TBranch ctor
 //
