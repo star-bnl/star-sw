@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.19  1998/08/13 02:48:46  perev
+#  cleanup
+#
 #  Revision 1.18  1998/08/10 23:23:03  fisyak
 #  add CERNLIB_SOLARISPC
 #
@@ -35,13 +38,14 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/10 23:23:03 $ 
+#             Last modification $Date: 1998/08/13 02:48:46 $ 
 #. default setings
 
 RM := rm -f
 MV := mv -f
 RMDIR := rm -rf
 CP := cp
+CD := cd
 LN := ln -sf
 SLASH :=/
 MKDIR := mkdir -p
@@ -54,7 +58,11 @@ LOUT := -o
   Cxx   :=cxx
   So    :=so
 
-CERN_LEVEL :=pro
+CERN_LEVEL =pro
+CERN_STAF = $(CERN)/$(CERN_LEVEL)
+STAF_CERN_INCS = $(STAF_CERN)/include/cfortran 
+STAF_CERN_LIBS = $(shell cernlib geant321 pawlib graflib mathlib)
+
 MOTIF :=YES
 GCC      :=  gcc
 CC       :=  $(GCC)
@@ -321,9 +329,9 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   FFLAGS   :=  $(DEBUG)  -KPIC -w 
   FEXTEND  :=  -e
   CFLAGS   :=  $(DEBUG)  -KPIC 
-  CXXFLAGS :=  $(DEBUG)  -KPIC 
-  LDFLAGS  :=  $(DEBUG)  -Bstatic
-  EXEFLAGS :=  $(DEBUG)  -Bdynamic -t
+  CXXFLAGS :=  $(DEBUG)  -KPIC  
+  LDFLAGS  :=  $(DEBUG)  -Bstatic 
+  EXEFLAGS :=  $(DEBUG)  -Bdynamic -t 
   SOFLAGS  :=  $(DEBUG) -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath

@@ -174,13 +174,11 @@ $(ALL_LNK_DIRS) : $(OUT_DIR)/% : $(OUT_DIR)/.$(STAF_ARCH)/%
 	$(LN)  $(OUT_DIR)/.@sys/$(STEM) $(OUT_DIR)/$(STEM)
 
 show: 
-	@echo EXPERIMENT	:= $(EXPERIMENT)
 	@echo STAF_SYS		:= $(STAF_SYS)
 	@echo STAF_ANA		:= $(STAF_ANA)
 	@echo STAF_SYS_INCS	:= $(STAF_SYS_INCS)
 	@echo STAF_SYS_LIBS	:= $(STAF_SYS_LIBS)
 	@echo MAKE        	:= $(MAKE)
-	@echo STAF_HOME   	:= $(STAF_HOME)
 	@echo INP_DIR     	:= $(INP_DIR) 
 	@echo OUT_DIR     	:= $(OUT_DIR) 
 	@echo ASPS        	:= $(ASPS)
