@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.21 2002/09/20 02:19:32 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.0 2002/12/04 16:50:59 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.0  2002/12/04 16:50:59  pruneau
+ * introducing version 2.0
+ *
  * Revision 1.21  2002/09/20 02:19:32  calderon
  * Quick hack for getting code for review:
  * The filler now checks the global Dca for the tracks and only fills
@@ -118,26 +121,27 @@ using namespace std;
 #include "StPrimaryVertex.h"
 #include "StEventTypes.h"
 #include "StDetectorId.h"
+#include "StHelix.hh"
 
 #include "StEventUtilities/StuFixTopoMap.cxx"
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
-#include "Sti/StiGeometryTransform.h"
+/////#include "Sti/StiGeometryTransform.h"
 #include "Sti/StiDedxCalculator.h"
 
 //StiMaker
-#include "StiStEventFiller.h"
+#include "StiMaker/StiStEventFiller.h"
 
 StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 {
-	//temp, make sure we're not constructing extra copies...
-	//cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
+  //temp, make sure we're not constructing extra copies...
+  //cout <<"StiStEventFiller::StiStEventFiller()"<<endl;
   dEdxTpcCalculator.setFractionUsed(.6);
   dEdxSvtCalculator.setFractionUsed(.6);
   dEdxTpcCalculator.setDetectorFilter(kTpcId);
   dEdxSvtCalculator.setDetectorFilter(kSvtId);
-
+  
   helix = new StHelix(0.,0.,0.,StThreeVector<double>(-999,-999,-999));
   //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
   //mResMaker.setDetector(kSvtId);
@@ -153,19 +157,23 @@ StiStEventFiller::~StiStEventFiller()
 //Helper functor, gotta live some place else, just a temp. test of StiTrack::stHits() method
 struct StreamStHit
 {
-    void operator()(const StHit* h) {
-      //cout << "DetectorId: " << (unsigned long) h->detector();
-	if (const StTpcHit* hit = dynamic_cast<const StTpcHit*>(h)) {
-	    cout <<hit->position() << " Sector: " << hit->sector() << " Padrow: " << hit->padrow() << endl;
-	}
-	else if (const StSvtHit* hit = dynamic_cast<const StSvtHit*>(h)) {
-	  //cout << hit->position() << " layer: " << hit->layer() << " ladder: " << hit->ladder()
-	  // << " wafer: " << hit->wafer() << " barrel: " << hit->barrel() << endl;
-	}
-	else {	
-	  //cout << hit->position() << endl;
-	}
-    }
+  void operator()(const StHit* h) 
+  {
+    //cout << "DetectorId: " << (unsigned long) h->detector();
+    if (const StTpcHit* hit = dynamic_cast<const StTpcHit*>(h)) 
+      {
+	cout <<hit->position() << " Sector: " << hit->sector() << " Padrow: " << hit->padrow() << endl;
+      }
+    else if (const StSvtHit* hit = dynamic_cast<const StSvtHit*>(h)) 
+      {
+	cout << hit->position() << " layer: " << hit->layer() << " ladder: " << hit->ladder()
+	     << " wafer: " << hit->wafer() << " barrel: " << hit->barrel() << endl;
+      }
+    else 
+      {	
+	cout << hit->position() << endl;
+      }
+  }
 };
 
 /*! 
@@ -455,10 +463,10 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     else
 	node = kTrack->getInnerMostHitNode();
     double phase;
-    StThreeVectorF origin(node->fX,node->fP0,node->fP1);
-    origin.rotateZ(node->fAlpha);
+    StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
+    origin.rotateZ(node->getRefAngle());
     StThreeVectorF p = node->getGlobalMomentumF();
-    short int h = (node->getCharge()*StiKalmanTrackNode::getFieldConstant() <= 0) ? 1 : -1;
+    short int h = node->getHelicity();
     phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
     phase += h*halfpi;
     double curv=fabs(node->getCurvature());
@@ -528,9 +536,8 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
 	return;	
     }
     StiKalmanTrackNode* node = kTrack->getInnerMostHitNode();
-    double alpha, xRef, x[5], covM[15], dEdxNode, chi2node;
-    node->get(alpha,xRef,x,covM,dEdxNode,chi2node);
-    //cout <<"GetAlpha: "<<alpha<<" Alpha: "<<node->fAlpha<<endl;
+    double alpha, xRef, x[5], covM[15], chi2node;
+    node->get(alpha,xRef,x,covM,chi2node);
     float chi2[2];
     chi2[0] = chi2node; // change: perhaps use chi2node instead of track->getChi2()?
     chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
@@ -614,7 +621,14 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track){
     //
     // above is no longer used, instead use kITKalmanfitId as fitter and tpcOther as finding method
     
-    unsigned short int mStiEncoded = kITKalmanFitId + (1<< tpcOther);
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    //BUGBUGBUGBUGBUGBUGBUGBUGBU
+    unsigned short int mStiEncoded = 0;////kITKalmanFitId + (1<< tpcOther);
     unsigned short int bit = 1<< tpcOther;
     gTrack->setEncodedMethod(mStiEncoded);
 //     cout <<"Encoded Method ID: "<<mStiEncoded
@@ -680,10 +694,19 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
     const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
     StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
     // construct a Helix using Ben's Routines
-    StiGeometryTransform* transformer = StiGeometryTransform::instance();
+    //StiGeometryTransform* transformer = StiGeometryTransform::instance();
     //StThreeVector<double> dummyVec(-999,-999,-999);
     //StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
-    transformer->operator()(node, helix);
+    //transformer->operator()(node, helix);
+    //=====
+    StThreeVector<double> origin(node->getRefPosition(), node->getY(),node->getZ());
+    origin.rotateZ(node->getRefAngle());
+    *helix = StHelix(node->getCurvature(),
+		     node->getDipAngle(),
+		     node->getPhase(),
+		     origin,
+		     int(node->getHelicity()));
+
     // these next lines are just to keep prototypes right, Ben uses StPhysicalHelix<double>
     // but StEvent uses StThreeVectorF for persistency...
     const StThreeVectorF& vxF = mEvent->primaryVertex()->position();

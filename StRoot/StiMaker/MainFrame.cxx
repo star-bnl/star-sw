@@ -1,5 +1,5 @@
 //MainFrame.cxx
-
+#include <stdexcept>
 #include <iostream.h>
 #include <algorithm>
 using std::find_if;
@@ -37,12 +37,10 @@ using std::find_if;
 #include "StiGui/StiDrawable.h"
 #include "StiGui/StiRootDisplayManager.h"
 #include "StiGui/StiGuiIOBroker.h"
-
-//StiMaker
-#include "StiMaker.h"
 #include "MainFrame.h"
 #include "StiOptionFrame.h"
 #include "Sti/StiDefaultTrackFilter.h"
+#include "MessengerOptionsDialog.h"
 
 MainFrame* MainFrame::s_instance = 0;
 
@@ -363,7 +361,6 @@ void MainFrame::CloseWindow()
     // Got close message for this MainFrame. Terminate the application
     // or returns from the TApplication event loop (depending on the
     // argument specified in TApplication::Run()).
-    StiMaker::kill();
     gApplication->Terminate(0);
 }
 
@@ -391,8 +388,11 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	    }
 	    else if (parm1 == M_Tracking_ResetEvent) {
 		setCurrentDetectorToDefault();
-		StiMaker::instance()->Clear();
-		StiMaker::instance()->Make();
+		StiToolkit     * toolkit = StiToolkit::instance();
+		toolkit->getTrackFinder()->reset();
+		toolkit->getDisplayManager()->reset();
+		toolkit->getDisplayManager()->draw();
+		toolkit->getDisplayManager()->update();
 		showCurrentDetector();
 	    }
 	    else if (parm1 == M_Tracking_EventStep) {
@@ -424,7 +424,8 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		}
 		break;
 		//Mike's stuff here:
-	      case M_Messenger:	new TestMsgBox(fClient->GetRoot(), this, 400, 200);break;
+	      case M_Messenger:	new MessengerOptionsDialog(fClient->GetRoot(), this, 400, 200);break;
+		//new TestMsgBox(fClient->GetRoot(), this, 400, 200);break;
 	      case M_ShowRootColors: ShowRootColors();	break;
 	      case M_DisplayOptions: new EntryTestDlg(fClient->GetRoot(), this); break;
 	      case M_SeedFinderOptions: new SeedFinderIO(fClient->GetRoot(), this);break;
@@ -467,8 +468,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_DetNavigate_SetLayer:    setLayer();	break;
 	      case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
 	      case M_Tracking_ToggleFitFind:toggleFitFind();break;
-	      case M_TrackingSwitch_NextDetector:	StiMaker::instance()->defineNextTrackStep(StepByDetector);break;
-	      case M_TrackingSwitch_ScanLayer:StiMaker::instance()->defineNextTrackStep(StepByLayer);break;
+	      case M_TrackingSwitch_NextDetector:	
+		StiToolkit::instance()->getTrackFinder()->setTrackingMode(StepByDetector);break;
+	      case M_TrackingSwitch_ScanLayer:
+		StiToolkit::instance()->getTrackFinder()->setTrackingMode(StepByLayer);break;
 	      case M_Tracking_DoTrackStep:doNextTrackStep();break;
 	      case M_Tracking_FinishTrack:finishTrack();	break;
 	      case M_Tracking_FinishEvent:finishEvent();	break;
@@ -512,73 +515,80 @@ void MainFrame::testDraw()
 
 void MainFrame::setView(StiView* view)
 {
-    if (mView!=0) {
-	delete mView;
-    }
-    mView=view;
+  if (mView!=0) {
+    delete mView;
+  }
+  mView=view;
 }
 
 void MainFrame::doNextTrackStep()
 {
-    setCurrentDetectorToDefault();
-    StiMaker::instance()->doNextTrackStep();
-    showCurrentDetector();
+  setCurrentDetectorToDefault();
+  StiToolkit::instance()->getTrackFinder()->findNextTrackSegment();
+  showCurrentDetector();
 }
 
 void MainFrame::finishTrack()
 {
-    // cout <<"MainFrame::finishTrack()"<<endl;
-    setCurrentDetectorToDefault();
-    StiMaker::instance()->finishTrack();
-    showCurrentDetector();
-    // cout <<"\tMainFramefinishTrack() done"<<endl;
+  // cout <<"MainFrame::finishTrack()"<<endl;
+  setCurrentDetectorToDefault();
+  StiToolkit::instance()->getTrackFinder()->findNextTrack();
+  showCurrentDetector();
+  // cout <<"\tMainFrame::finishTrack() done"<<endl;
 }
 
 void MainFrame::finishEvent()
 {
-    setCurrentDetectorToDefault();
-    StiMaker::instance()->finishEvent();
-    showCurrentDetector();
+  cout<<"MainFrame::finishEvent() - INFO - Started"<<endl;
+  setCurrentDetectorToDefault();
+  StiToolkit::instance()->getTrackFinder()->findTracks();
+  showCurrentDetector();
+  cout<<"MainFrame::finishEvent() - INFO - Done"<<endl;
 }
 
 void MainFrame::stepToNextEvent()
 {
-    setCurrentDetectorToDefault();    
-    mchain->Clear();
-    mchain->Make();
-    showCurrentDetector();
+  cout <<"MainFrame::stepToNextEvent() - INFO - Started"<<endl;
+  setCurrentDetectorToDefault();    
+  if (!mchain)
+    throw runtime_error("MainFrame::stepToNextEvent() - FATAL - mchain==0");
+  mchain->Clear();
+  mchain->Make();
+  showCurrentDetector();
+  cout <<"MainFrame::stepToNextEvent() - INFO - Done"<<endl;
 }
 
 void MainFrame::stepThroughNEvents()
 {
-    setCurrentDetectorToDefault();    
-    cout <<"\nEnter number of events to process (int) "<<endl;
-    int nevents;
-    cin >> nevents;
-    for (int i=0; i<nevents; ++i) {
-	mchain->Clear();
-	mchain->Make();
-	showCurrentDetector();
+  setCurrentDetectorToDefault();    
+  cout <<"\nEnter number of events to process (int) "<<endl;
+  int nevents;
+  cin >> nevents;
+  for (int i=0; i<nevents; ++i) 
+    {
+      mchain->Clear();
+      mchain->Make();
+      showCurrentDetector();
     }
 }
 
 void MainFrame::printFactorySize()
 {
-    StiMaker::instance()->printStatistics();
+  //StiToolkit::instance()->printStatistics();
 }
 
 void MainFrame::setAllVisible()
 {
-    StiRootDisplayManager::instance()->setVisible(true);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+  StiRootDisplayManager::instance()->setVisible(true);
+  StiRootDisplayManager::instance()->draw();
+  StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setAllInvisible()
 {
-    StiRootDisplayManager::instance()->setVisible(false);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+  StiRootDisplayManager::instance()->setVisible(false);
+  StiRootDisplayManager::instance()->draw();
+  StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSkeletonView()
@@ -635,18 +645,16 @@ void MainFrame::setTpcInvisible()
 
 void MainFrame::setIfcVisible()
 {
-    cout <<"MainFrame::setIfcVisible(). Not yet implemented"<<endl;
-    StiRootDisplayManager::instance()->setVisible("Ifc",true);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+  StiRootDisplayManager::instance()->setVisible("Ifc",true);
+  StiRootDisplayManager::instance()->draw();
+  StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setIfcInvisible()
 {
-    cout <<"MainFrame::setIfcInvisible(). Not yet implemented"<<endl;
-    StiRootDisplayManager::instance()->setVisible("Ifc",false);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+  StiRootDisplayManager::instance()->setVisible("Ifc",false);
+  StiRootDisplayManager::instance()->draw();
+  StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::printDisplayManager()
@@ -657,12 +665,12 @@ void MainFrame::printDisplayManager()
 //This is a memory leak, so don't push it too far!
 void MainFrame::ShowRootColors()
 {
-    TCanvas* colorCanvas = new TCanvas("colorCanvas","MC Track Color Scheme", 100,100,200,400);
-    colorCanvas->Draw();
-    
-    double xstart = .1;
-    double ystart = .9;
-    double dx = .8;
+  TCanvas* colorCanvas = new TCanvas("colorCanvas","MC Track Color Scheme", 100,100,200,400);
+  colorCanvas->Draw();
+  
+  double xstart = .1;
+  double ystart = .9;
+  double dx = .8;
     double dy = .1;
     double deltay = .15;
     
@@ -706,9 +714,9 @@ void MainFrame::setLayer()
     double position;
     cin >>position;
     cout <<"Setting to  position:\t"<<position<<endl;
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    rdet.setToDetector(position);
-    StiDetector* layer = *rdet;
+    StiDetectorContainer*rdet = StiToolkit::instance()->getDetectorContainer();
+    rdet->setToDetector(position);
+    StiDetector* layer = **rdet;
     if (!layer) {
 	cout <<"Error in setSectorAndPadrow"<<endl;
 	return;
@@ -729,10 +737,9 @@ void MainFrame::setLayerAndAngle()
     double angle;
     cin >> angle;
     cout <<"Setting to  position:\t"<<position<<"\tangle:\t"<<angle<<endl;
-
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    rdet.setToDetector(position, angle);
-    StiDetector* layer = *rdet;
+    StiDetectorContainer*rdet = StiToolkit::instance()->getDetectorContainer();
+    rdet->setToDetector(position, angle);
+    StiDetector* layer = **rdet;
     if (!layer) {
 	cout <<"Error in setSectorAndPadrow"<<endl;
 	return;
@@ -746,9 +753,8 @@ void MainFrame::moveOut()
     //cout <<"Function Not Currently Implemented"<<endl;
     //cout <<"MainFrame::moveOut()"<<endl;
     setCurrentDetectorToDefault();
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    cout <<"\t DetectorContainer returned: "<<rdet.moveOut()<<endl;
-    //rdet.moveOut();
+    StiDetectorContainer*rdet = StiToolkit::instance()->getDetectorContainer();
+    cout <<"\t DetectorContainer returned: "<<rdet->moveOut()<<endl;
     showCurrentDetector();
     //cout <<"\t Leaving MainFrame::moveOut()"<<endl;
 }
@@ -789,13 +795,10 @@ void MainFrame::printHitContainerForDetector()
 {
     StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
     StiDetector* layer = *rdet;
-    
-    if (!layer) {
-	cout <<"Error! printHitContainerForDetector(): Failed to get detector"<<endl;
-	return;
-    }
-    cout << StiMaker::instance()->hitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
-							layer->getPlacement()->getCenterRadius() )
+    if (!layer)
+      throw runtime_error("MainFrame::printHitContainerForDetector() - FATAL - Failed to get detector");
+    cout << StiToolkit::instance()->getHitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
+							     layer->getPlacement()->getCenterRadius() )
 	 <<endl;
 }
 
@@ -805,19 +808,13 @@ void MainFrame::showCurrentDetector()
     StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
     StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     
-    if (!layer) {
-	cout <<"Error! MainFrame::showCurrentDetector(): ";
-	cout <<"Failed to get drawable detector"<<endl;
-	return;
-    }
+    if (!layer) 
+      throw runtime_error("MainFrame::showCurrentDetector() - FATAL - Failed to get drawable detector");
     layer->setVisibility(true);
     layer->setColor(2);
-    
     cout<<"MainFrame::showCurrentDetector() - Layer:"<<*layer<<endl;
     StiRootDisplayManager::instance()->draw();
     StiRootDisplayManager::instance()->update();
-    
-    return;
 }
 
 void MainFrame::memoryInfo()
@@ -828,92 +825,93 @@ void MainFrame::memoryInfo()
 
 void MainFrame::setCurrentDetectorToDefault()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    //cout <<"MainFrame::setCurrentDetectorToDefault()"<<endl;
-    if (!mView) {
-	cout <<"Error: mView not defined.  abort"<<endl;
-	return;
-    }
-    mView->setToDefault();
+  //cout <<"MainFrame::setCurrentDetectorToDefault()"<<endl;
+  if (!mView) 
+    throw runtime_error("MainFrame::setCurrentDetectorToDefault() - FATAL -  mView not defined.  abort");
+  mView->setToDefault();
 }
 
 void StiZoomSkeletonView::setToDefault()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
-    if (!layer) {
-	cout <<"Error! MainFrame::setCurrentDetectorToDefault():";
-	cout <<"Failed to get drawable detector"<<endl;
-	return;
-    }
-    layer->setColor(1);
-    
-    //Keep all silicon layers visible
-    const string& name = layer->StiDrawable::name();
-    string::size_type where = name.find("Svt");
-
-    if ( where != name.npos && layer->isOn() ) {
-	layer->setVisibility(true);
-	return;
-    }
-
-    //Keep Tpc layer 45 visible
-    where = name.find("Tpc");
-    string::size_type where2 = name.find("Padrow_1/");
-    if (where!=name.npos && where2!=name.npos && layer->isOn()) {
-	layer->setVisibility(true);
-    }
-    else {    //else, hide!
-	layer->setVisibility(false);
-    }
+  //cout <<"StiZoomSkeletonView::setToDefault() - INFO - Started"<<endl;
+  StiDetectorContainer * rdet = StiDetectorContainer::instance();
+  if (!rdet)
+    throw runtime_error("StiZoomSkeletonView::setToDefault() - FATAL - rdet==0");
+  //cout << "StiZoomSkeletonView::setToDefault() - INFO - Get a layer"<<endl;
+  
+  StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(**rdet);
+  if (!layer) 
+    throw runtime_error("StiZoomSkeletonView::setToDefault() - FATAL -  layer==0");
+  layer->setColor(1);
+  //Keep all silicon layers visible
+  //cout << "StiZoomSkeletonView::setToDefault() - INFO - Look for svt"<<endl;
+  const string& name = layer->StiDrawable::name();
+  //cout << "StiZoomSkeletonView::setToDefault() - INFO - Look for svt location"<<endl;
+  string::size_type where = name.find("Svt");
+  //cout << "StiZoomSkeletonView::setToDefault() - INFO - set visibili"<<endl;
+  if ( where != name.npos && layer->isOn() ) {
+    layer->setVisibility(true);
+    return;
+  }
+  cout << "StiZoomSkeletonView::setToDefault() - INFO - Look for tpc"<<endl;
+  //Keep Tpc layer 45 visible
+  where = name.find("Tpc");
+  string::size_type where2 = name.find("Padrow_1/");
+  if (where!=name.npos && where2!=name.npos && layer->isOn()) {
+    layer->setVisibility(true);
+  }
+  else {    //else, hide!
+    layer->setVisibility(false);
+  }
 }
 
 void StiSkeletonView::setToDefault()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
-    if (!layer) {
-	cout <<"Error! MainFrame::setCurrentDetectorToDefault() Error:\t";
-	cout <<"Failed to get drawable detector"<<endl;
-	return;
+  //cout <<"StiSkeletonView::setToDefault()------ - INFO - Started"<<endl;
+  StiDetectorContainer * rdet = StiToolkit::instance()->getDetectorContainer();
+  if (!rdet)
+      throw runtime_error("StiSkeletonView::setToDefault() - FATAL - rdet==0");
+  StiDetector * det = **rdet;
+  if (!det)
+    throw runtime_error("StiSkeletonView::setToDefault() - FATAL - det==0");
+  StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(det);
+  if (!layer) 
+    {
+      cout <<"Name:"<<layer->getName()<<endl;
+      throw runtime_error("StiSkeletonView::setToDefault() - FATAL -  layer==0");
     }
-    layer->setColor(1);
-    
-    //Keep all active silicon layers visible
-    const string& name = layer->StiDrawable::name();
-    string::size_type where = name.find("Svt");
-    
-    if ( where != name.npos && layer->isOn() ) {
-	layer->setVisibility(true);
-	return;
-    }
-
-    //Keep Tpc layer 45 visible
-    where = name.find("Tpc");
-    string::size_type where2 = name.find("Padrow_45");
-    if (where!=name.npos && where2!=name.npos && layer->isOn()) {
-	layer->setVisibility(true);
-    }
-    else {    //else, hide!
-	layer->setVisibility(false);
-    }
+  layer->setColor(1);
+  //Keep all active silicon layers visible
+  const string& name = layer->StiDrawable::name();
+  cout<<"StiSkeletonView::setToDefault() - info - layer2"<<endl;
+  string::size_type where = name.find("Svt");
+  if ( where != name.npos && layer->isOn() ) {
+    layer->setVisibility(true);
+    return;
+  }
+  //Keep Tpc layer 45 visible
+  where = name.find("Tpc");
+  string::size_type where2 = name.find("Padrow_45");
+  if (where!=name.npos && where2!=name.npos && layer->isOn()) {
+    layer->setVisibility(true);
+  }
+  else {    //else, hide!
+    layer->setVisibility(false);
+  }
 }
 
 void StiManualView::setToDefault()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
-    if (!layer) {
-	cout <<"Error! MainFrame::setCurrentDetectorToDefault():";
-	cout <<"Failed to get drawable detector"<<endl;
-	return;
-    }
-    layer->setColor(1);
+  StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+  StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
+  if (!layer) 
+    throw runtime_error("StiManualView::setToDefault() - FATAL - Failed to get drawable detector");
+  layer->setColor(1);
 }
 
 void MainFrame::printHits()
 {
-    cout <<*(StiMaker::instance()->hitContainer())<<endl;
+  cout <<*(StiToolkit::instance()->getHitContainer())<<endl;
 }
 
 void MainFrame::toggleFitFind()
@@ -934,7 +932,7 @@ void MainFrame::toggleFitFind()
 
 void MainFrame::printVertices()
 {
-    cout <<StiMaker::instance()->hitContainer()->vertices()<<endl;
+  cout <<StiToolkit::instance()->getHitContainer()->vertices()<<endl;
 }
 
 // Non members
@@ -1056,7 +1054,7 @@ Bool_t Navigator::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 }
 
 // -----------------
-
+/*
 TestMsgBox::TestMsgBox(const TGWindow *p, const TGWindow *main,
                        UInt_t w, UInt_t h, UInt_t options) :
     TGTransientFrame(p, main, w, h, options),
@@ -1236,7 +1234,7 @@ void TestMsgBox::updateMessenger()
 	}
     }
 }
-
+*/
 //-----------------
 
 DetectorActivator::DetectorActivator(const TGWindow *p, const TGWindow *main,

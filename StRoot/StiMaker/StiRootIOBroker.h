@@ -11,7 +11,7 @@
 //Sti
 #include "Sti/StiIOBroker.h"
 
-class StiRootIOBroker : public StiIOBroker
+class StiRootIOBroker : public StiIOBroker, public TObject
 {
 public:
     

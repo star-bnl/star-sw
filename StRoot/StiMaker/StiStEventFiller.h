@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 1.7 2002/08/22 21:46:00 pruneau Exp $
+ * $Id: StiStEventFiller.h,v 2.0 2002/12/04 16:51:01 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.0  2002/12/04 16:51:01  pruneau
+ * introducing version 2.0
+ *
  * Revision 1.7  2002/08/22 21:46:00  pruneau
  * Made a fix to StiStEventFiller to remove calls to StHelix and StPhysicalHelix.
  * Currently there is one instance of StHelix used a calculation broker to
@@ -53,27 +56,23 @@
 #define StiStEventFiller_HH
 #include <map>
 using std::map;
-//Doxygen class header...
+#include "Sti/StiDedxCalculator.h"
+class StEvent;
+class StTrackNode;
+class StTrackDetectorInfo;
+class StTrack;
+class StiTrackContainer;
+class StiTrack;
+class StiKalmanTrack;
+class StHelix;
+
 /*! \class StiStEventFiller
     StiStEventFiller is a utilitity class meant to properly convert StiTrack
     objects into StTrack (Global/Primary) objects and hang these on the StEvent
     Track-node.
 
     \author Manuel Calderon de la Barca Sanchez (Yale Software)
-    \note 
  */
-#include "Sti/StiDedxCalculator.h"
-///////#include "StPhysicalHelix.hh"
-#include "StHelix.hh"
-
-class StEvent;
-class StTrackNode;
-class StiTrackContainer;
-class StiTrack;
-class StiKalmanTrack;
-class StiDedxCalculator;
-
-
 class StiStEventFiller
 {
 public:

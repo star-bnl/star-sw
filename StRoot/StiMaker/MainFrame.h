@@ -275,7 +275,8 @@ private:
     TGTextButton* fNextEventButton;
 
     StiView* mView;
-    
+    ///StiDetectorContainer * _detectorContainer;
+
     ClassDef(MainFrame,1)
 	};
 
@@ -313,7 +314,7 @@ private:
 
 public:
     Navigator(const TGWindow *p, const TGWindow *main, UInt_t w, UInt_t h,
-	       UInt_t options = kVerticalFrame);
+	      UInt_t options = kVerticalFrame);
     virtual ~Navigator();
     
     virtual void CloseWindow();
@@ -331,7 +332,7 @@ typedef vector<MessengerPair> MsgPairVec;
 #else
 class MsgPairVec;
 #endif
-
+/*
 class TestMsgBox : public TGTransientFrame
 {
 private:
@@ -355,7 +356,7 @@ public:
     virtual void CloseWindow();
     virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
 };
-
+*/
 #ifndef __CINT__
 typedef pair<string, TGCheckButton*> DetectorActivatePair;
 #else

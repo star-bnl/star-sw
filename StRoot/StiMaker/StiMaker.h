@@ -25,72 +25,42 @@ class StMcEvent;
 class StiTrackMerger;
 class StiIOBroker;
 class StiToolkit;
-class StiStEventFiller;
 
-class StiMaker : public StMaker {
+class StiMaker : public StMaker 
+{
  public:
     
     virtual ~StiMaker();
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
+    virtual Int_t InitDetectors();
     virtual Int_t InitRun(int);
     virtual Int_t Make();
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.48 2002/10/04 01:54:51 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 2.0 2002/12/04 16:50:56 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
-public:
-
-    //Singleton access
     static StiMaker* instance();
     static void kill();
-
-    //Gets/sets
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
-    void setEvaluationFileName(const char*);
-
-    StiHitContainer* hitContainer() const;
-    void printStatistics() const;
-    
-    //Used for stepping to next action (via MainFrame class)
-    void doNextTrackStep();
-    void finishTrack();
-    void finishEvent();
-    void defineNextTrackStep(StiFindStep);
-
-    //Temporary definition to defaut cvs/DEV mismatch
-    void doNextAction() {}; //
-
     StiIOBroker* getIOBroker();
 
 protected:
     StiMaker(const char* name = "StiMaker");
 
-
 private:
 
     static StiMaker* sinstance; //!
-    
-		bool eventIsFinished;
+    bool eventIsFinished;
     bool initialized;
-    string mEvalFileName; //!
-    
     StiIOBroker * ioBroker;
     StiToolkit  * toolkit;
-    StiKalmanTrackFinder * tracker;
-    
-    //EventFiller
-    StiStEventFiller* mStEventFiller; //!
-
-    StEvent* mevent; //!
-    StMcEvent* mMcEvent; //!
+    StiTrackFinder * tracker;
     StMcEventMaker* mMcEventMaker; //!
     StAssociationMaker* mAssociationMaker; //!
-
     ClassDef(StiMaker, 1)
-      
 };
 
 //inlines
@@ -98,11 +68,6 @@ private:
 inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
 {
     mMcEventMaker = val;
-}
-
-inline void StiMaker::setEvaluationFileName(const char* val)
-{
-    mEvalFileName=val;
 }
 
 inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
