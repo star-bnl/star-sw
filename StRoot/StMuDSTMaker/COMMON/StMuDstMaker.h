@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.21 2003/09/02 17:58:44 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.22 2003/09/19 01:45:18 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -126,7 +126,7 @@ class StMuDstMaker : public StMaker {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.21 2003/09/02 17:58:44 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.22 2003/09/19 01:45:18 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -144,8 +144,8 @@ private:
   enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
 
-  StMuDst* mStMuDst;
   StEvent* mStEvent;
+  StMuDst* mStMuDst;
   StStrangeMuDstMaker* mStStrangeMuDstMaker;
   StIOMaker* mIOMaker;
   StTreeMaker* mTreeMaker;
@@ -203,7 +203,8 @@ private:
   void clear(TClonesArray* t, int& counter);
   void del(TClonesArray* t, int& counter);
   void clear();
-
+  
+  void zeroArrays();
   void createArrays();
   TClonesArray* clonesArray(TClonesArray*& p, const char* type, int size, int& counter);
 
@@ -292,6 +293,11 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.22  2003/09/19 01:45:18  jeromel
+ * A few problems hopefully fixed i.e. one constructor lacked zeroing
+ * emcArrays were not  zeroed, mStMuDst not zeroed.
+ * For maintainability zeroArrays() added.
+ *
  * Revision 1.21  2003/09/02 17:58:44  perev
  * gcc 3.2 updates + WarnOff
  *

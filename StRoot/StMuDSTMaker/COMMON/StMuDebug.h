@@ -29,16 +29,21 @@
 /** 
     @class StMuDebug 
     Helper class used to control the amount of output. 
-    All datamembers and functions are static, so you can use them everywhere using 'StMuDebug::xxxxx()`
+    All datamembers and functions are static, so you can use them everywhere using 
+    'StMuDebug::xxxxx()`
     So far I was using 3 debug levels:
-    1 : typical used for io that is generated once, e.g. in the constructor or init function
-    2 : typical used for io that is generated repeatedly, but in a moderate amount, e.g. printing the event number in an event loop
-    3 : typical used for io that is generated very frequently, e.g. printing pT when looping over all tracks
+    1 : typical used for io that is generated once, e.g. in the constructor or init 
+        function
+    2 : typical used for io that is generated repeatedly, but in a moderate amount, 
+        e.g. printing the event number in an event loop
+    3 : typical used for io that is generated very frequently, e.g. printing pT 
+        when looping over all tracks
     0 or negative debug levels means debug output switched off
 
     You can use the debug level as:
         if ( StMuDebug::level()>2 ) { ... } 
-    However you will also find macros 'DEBUGMESSAGE(<string>)` or `IFDEBUG(<cmd>)` which I frequently use to automatically print the 
+    However you will also find macros 'DEBUGMESSAGE(<string>)` or 
+    `IFDEBUG(<cmd>)` which I frequently use to automatically print the 
     name of actual scope
 
 */
@@ -68,6 +73,11 @@ class StMuDebug : public TObject{
 /***********************************************************************
  *
  * $Log: StMuDebug.h,v $
+ * Revision 1.5  2003/09/19 01:45:18  jeromel
+ * A few problems hopefully fixed i.e. one constructor lacked zeroing
+ * emcArrays were not  zeroed, mStMuDst not zeroed.
+ * For maintainability zeroArrays() added.
+ *
  * Revision 1.4  2002/08/27 19:05:56  laue
  * Minor updates to make the muDst from simulation work
  *

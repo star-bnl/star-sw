@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.32 2003/09/07 03:49:03 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.33 2003/09/19 01:45:18 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -70,13 +70,17 @@ ClassImp(StMuDstMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   The default constructor as it is right now was written in order to run the StMuDstMaker during reconstruction in the bfc.
-   Since the PID table that is needed for muDst production is not passed as an argument to the bfc, this default constructor
-   sets a specific PID table. This table has to be updated when changing to a new production version.
+   The default constructor as it is right now was written in order to run 
+   the StMuDstMaker during reconstruction in the bfc.
+   Since the PID table that is needed for muDst production is not passed as 
+   an argument to the bfc, this default constructor
+   sets a specific PID table. This table has to be updated when changing to 
+   a new production version.
    Also, the standard track and l3 track filters are set.
  */
 StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
-  mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
+  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0), 
+  mIOMaker(0), mTreeMaker(0),
   mIoMode(1), mIoNameMode((int)ioTreeMaker),
   mTrackType(256), mReadTracks(1), 
   mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
@@ -89,10 +93,15 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   streamerOff();
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+
+
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
-  
+  if ( ! mStMuDst || ! mEmcUtil)
+    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",PF);
+
+  zeroArrays();
   createArrays();
 
 
@@ -104,11 +113,21 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 
 
 }
+
+
+void StMuDstMaker::zeroArrays()
+{
+  for ( int i=0; i<__NARRAYS__; i++) {  arrays[i]=0;} 
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i]=0;}
+  for ( int i=0; i<__NEMCARRAYS__; i++){ emcArrays[i] = 0;}
+}
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StMaker(name), 
-  mStEvent(0), mStStrangeMuDstMaker(0), mIOMaker(0), mTreeMaker(0),
+  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
+  mIOMaker(0), mTreeMaker(0),
   mIoMode(mode), mIoNameMode(nameMode),
   mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
   mTrackType(256), mReadTracks(1), 
@@ -121,15 +140,16 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
   
-  for ( int i=0; i<__NARRAYS__; i++) { arrays[i]=0;} 
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i]=0;}
-
   setProbabilityPidFile();
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
+  if ( ! mStMuDst || ! mEmcUtil)
+    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",PF);
 
+  
+  zeroArrays();
   createArrays();
   
 }
@@ -158,8 +178,9 @@ StMuDstMaker::~StMuDstMaker() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/** Switch of the TObject part of some streamers, so that only the datTClonesamenbers of the derived classes are written to disk, but not the data 
-    members of the base class TObject
+/** Switch of the TObject part of some streamers, so that only the 
+    datTClonesamenbers of the derived classes are written to disk, but not 
+    the data members of the base class TObject
 */ 
 void  StMuDstMaker::streamerOff() {
   StStrangeMuDst::Class()->IgnoreTObjectStreamer();
@@ -250,9 +271,12 @@ TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int 
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   The Init() routine is used to establish contact to other makers. As it is STAR habit (but really really bad coding) we identify the 
-   other makers by names (instead of passing pointers). Here, the names are hard-wired because they have to be identical to the names 
-   the bfc is assining to the makers. Do not alter these names unless you know what you are doing.
+   The Init() routine is used to establish contact to other makers. As it is STAR 
+   habit (but really really bad coding) we identify the 
+   other makers by names (instead of passing pointers). Here, the names are 
+   hard-wired because they have to be identical to the names 
+   the bfc is assining to the makers. Do not alter these names unless you know 
+   what you are doing.
 */
 int StMuDstMaker::Init(){
   DEBUGMESSAGE2("");
@@ -277,9 +301,10 @@ void StMuDstMaker::Clear(const char *){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
-   Depending on ioMode, calling Make() will initiate the StMuDstMaker to read or write the next event. After the Make() function has finished,
-   a call to muDst() will return a pointer to an object od type StMuDst. This object will hold the current event if the io was successful, 
-   or return a null pointer.
+   Depending on ioMode, calling Make() will initiate the StMuDstMaker to read or 
+   write the next event. After the Make() function has finished,
+   a call to muDst() will return a pointer to an object od type StMuDst. This object 
+   will hold the current event if the io was successful, or return a null pointer.
 */
 int StMuDstMaker::Make(){
   DEBUGMESSAGE2("");
@@ -889,6 +914,11 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.33  2003/09/19 01:45:18  jeromel
+ * A few problems hopefully fixed i.e. one constructor lacked zeroing
+ * emcArrays were not  zeroed, mStMuDst not zeroed.
+ * For maintainability zeroArrays() added.
+ *
  * Revision 1.32  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
