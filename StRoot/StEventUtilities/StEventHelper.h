@@ -210,7 +210,7 @@ class StMuDstFilterHelper : public StFilterABC { // An example of default filter
 public:
    		StMuDstFilterHelper(const char *name);
                ~StMuDstFilterHelper();
-virtual float        *GetPars() const {return (float*)(&fpCutHigh+1);}
+virtual float        *GetPars() const {return (float*)(&fFirst+1);}
 virtual const float  *GetDefs() const;
 virtual const char  **GetNams() const;
 virtual Int_t         AcceptCB(StPoints3DABC *pnt) ;
@@ -223,7 +223,7 @@ protected:
 
 private:
   float fFirst; 
-
+  float fEncodedMethod;  // encoding method
   float fpCutHigh;       // high momentum cut for RICH/Upsilon candidates 
   float fnHitsCutHighP;  // nHits cut for all tracks
 
