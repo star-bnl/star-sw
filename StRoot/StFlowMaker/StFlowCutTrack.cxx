@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.7 2000/02/29 22:00:52 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.8 2000/03/02 23:02:42 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.8  2000/03/02 23:02:42  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.7  2000/02/29 22:00:52  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -41,18 +44,18 @@
 #include <stdlib.h>
 #include "StEvent.h"
 #include "StEventTypes.h"
-#include "StFlowCutTrack.hh"
-#include "StFlowMaker.hh"
+#include "StFlowCutTrack.h"
+#include "StFlowMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVectorD.hh"
 #define PR(x) cout << "##### FlowCutTrack: " << (#x) << " = " << (x) << endl;
 
-//ClassImp(StFlowCutTrack)
+ClassImp(StFlowCutTrack)
 
 //-----------------------------------------------------------------------
 
-Int_t   StFlowCutTrack::mFitPtsCuts[2]     = {15, 200};
+Int_t   StFlowCutTrack::mFitPtsCuts[2]     = {0, 0};
 Float_t StFlowCutTrack::mFitOverMaxCuts[2] = {0.55, 2.};
 
 UInt_t  StFlowCutTrack::mTrackN            = 0;     

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.hh,v 1.10 2000/02/29 22:00:56 posk Exp $
+// $Id: StFlowTrack.h,v 1.1 2000/03/02 23:02:57 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -8,7 +8,10 @@
 // Description: part of StFlowTrackCollection
 //////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowTrack.hh,v $
+// $Log: StFlowTrack.h,v $
+// Revision 1.1  2000/03/02 23:02:57  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.10  2000/02/29 22:00:56  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -45,11 +48,11 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#ifndef StFlowTrack_hh
-#define StFlowTrack_hh
+#ifndef StFlowTrack_h
+#define StFlowTrack_h
 #include <string.h>
 #include "Rtypes.h"
-#include "StFlowConstants.hh"
+#include "StFlowConstants.h"
 
 class StFlowTrack{
 

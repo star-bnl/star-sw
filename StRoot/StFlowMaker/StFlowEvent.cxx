@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.16 2000/02/29 22:00:53 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.1 2000/03/02 23:02:48 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,7 +9,10 @@
 //
 //////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowEvent.cc,v $
+// $Log: StFlowEvent.cxx,v $
+// Revision 1.1  2000/03/02 23:02:48  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.16  2000/02/29 22:00:53  posk
 // Made SetPhiWeight inline, changed ImpactPar to Dca, etc.
 //
@@ -74,13 +77,15 @@
 #if !defined(ST_NO_NAMESPACES)
 using std::random_shuffle;
 #endif
-#include "StFlowEvent.hh"
-#include "StFlowTrackCollection.hh"
-#include "StFlowConstants.hh"
+#include "StFlowEvent.h"
+#include "StFlowTrackCollection.h"
+#include "StFlowConstants.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "TVector2.h"
 #define PR(x) cout << "##### FlowEvent: " << (#x) << " = " << (x) << endl;
+
+ClassImp(StFlowEvent)
 
 Float_t  StFlowEvent::mEtaCuts[2][Flow::nHars][Flow::nSels] = {{{0.,0.5},
 								{0.,0.},

@@ -1,15 +1,15 @@
 Maker:		StFlowMaker
 Files:		StFlowMaker.cxx
-		StFlowMaker.hh
-		StFlowEvent.cc
-		StFlowEvent.hh
-		StFlowTrackCollection.hh
-		StFlowTrack.hh
+		StFlowMaker.h
+		StFlowEvent.cxx
+		StFlowEvent.h
+		StFlowTrackCollection.h
+		StFlowTrack.h
 		StFlowCutEvent.cxx
-		StFlowCutEvent.hh
+		StFlowCutEvent.h
 		StFlowCutTrack.cxx
-		StFlowCutTrack.hh
-		StFlowConstants.hh
+		StFlowCutTrack.h
+		StFlowConstants.h
 Authors		Raimond Snellings and Art Poskanzer
 		with lots of help from Glenn Cooper 
 Date:		Dec 1999

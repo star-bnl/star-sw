@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.hh,v 1.4 1999/12/15 22:01:23 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.1 2000/03/02 23:02:40 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -12,7 +12,10 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Log: StFlowCutEvent.hh,v $
+// $Log: StFlowCutEvent.h,v $
+// Revision 1.1  2000/03/02 23:02:40  posk
+// Changed extensions from .hh and .cc to .h and .cxx .
+//
 // Revision 1.4  1999/12/15 22:01:23  posk
 // Added StFlowConstants.hh
 //
@@ -74,6 +77,7 @@ class StFlowCutEvent {
   static UInt_t  mEtaSymCutN;            // number not accepted
   static Float_t mEtaSymCuts[2];         // range
 
+  ClassDef(StFlowCutEvent,1)             // macro for rootcint
 }; 
 
 inline void StFlowCutEvent::SetMult(const Int_t lo, const Int_t hi) {
