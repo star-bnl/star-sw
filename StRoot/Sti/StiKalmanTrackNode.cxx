@@ -444,20 +444,26 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 		r0sq= x0*x0+y0*y0;
 		if (r0sq<=0.)
 		    {
+#ifdef DEBUG
 			cout << "SKTN::propagate() - r0sq<=0" << endl;
+#endif
 			return -1;
 		    }
 		a = 0.5*(r0sq+L*L-R*R);
 		if (a<=0.)
 		    {
+#ifdef DEBUG
 			cout << "SKTN::propagate() - a<=0" << endl;
+#endif
 			return -1;
 		    }
 		b = L*L/(a*a);
 		sq = b*r0sq-1;
 		if (sq<0)
 		    {
+#ifdef DEBUG
 			cout << "SKTN::propagate() - sq<0" << endl;
+#endif
 			return -1;
 		    }
 		sq = sqrt(sq);				

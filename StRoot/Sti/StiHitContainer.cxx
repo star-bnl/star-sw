@@ -332,16 +332,17 @@ void StiHitContainer::sortHits()
 
 void StiHitContainer::partitionUsedHits()
 {
-    hitmap::iterator it;
-
-    for (it=mmap.begin(); it!=mmap.end(); ++it) {
+    for (hitmap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	hitvector& tempvec = (*it).second.theHitVec;
+	
 #ifdef DEBUG
 	mMessenger <<"-- Hits before partition --"<<endl;
 	mMessenger <<(*it).second.theHitVec<<endl;
 #endif
-	(*it).second.theEffectiveEnd =
-	    stable_partition(tempvec.begin(), (*it).second.theEffectiveEnd, StiHitIsUsed() );
+	
+	hitvector::iterator where =
+	    stable_partition(tempvec.begin(), tempvec.end(), StiHitIsUsed() );
+	(*it).second.theEffectiveEnd = where;
 	
 #ifdef DEBUG
 	mMessenger <<"-- Hits after partition --"<<endl;

@@ -26,8 +26,8 @@ void StiKalmanTrack::reset()
 //Null implementation, meant to be overwritten by graphical derived class
 void StiKalmanTrack::update()
 {
-	//cout<<"void StiKalmanTrack::update()"<<endl;
-	return;
+    //cout<<"void StiKalmanTrack::update()"<<endl;
+    return;
 }
 
 void StiKalmanTrack::setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>* val)
@@ -358,7 +358,7 @@ void StiKalmanTrack::initialize(double curvature,
     StiKalmanTrackNode * node  = 0;
     StiKalmanTrackNode * pNode = 0;
     int i =0;
-		eta = 0.;
+    eta = 0.;
     //cout <<"\tAdd Hits"<<endl;
     for (it=v.begin(); it!=v.end(); ++it)
 	{
@@ -378,9 +378,9 @@ void StiKalmanTrack::initialize(double curvature,
 		}
 	    node->reset();
 	    if (pNode==0)
-				alphaP = -99999.; // no parent, set crazy value
+		alphaP = -99999.; // no parent, set crazy value
 	    else
-				alphaP = pNode->fAlpha; // value of the parent
+		alphaP = pNode->fAlpha; // value of the parent
 	    if (alphaP!=alpha)
 		{
 		    //cout << "=================alphaP/alpha:" << alphaP;
@@ -510,22 +510,24 @@ StThreeVector<double> StiKalmanTrack::getMomentumAtOrigin()
     StiKalmanTrackNode * n = f->getObject();
     n->reset();
     n->setState(lastNode);
-		try
-			{
-				n->propagate(0,0,0);
+    try
+	{
+	    n->propagate(0,0,0);
 				
-				double p[3];
-				double e[6];
-				n->getMomentum(p,e);
-				StThreeVector<double> p3(p[0],p[1],p[2]);
-				p3.rotateZ(n->fAlpha);
-				return p3;
-			}
-		catch (runtime_error & rte) 
-			{
-				cout << "SKT::getMomentumAtOrigin() - runtime_error - " << rte.what() << endl;
-				return -1;
-			}
+	    double p[3];
+	    double e[6];
+	    n->getMomentum(p,e);
+	    StThreeVector<double> p3(p[0],p[1],p[2]);
+	    p3.rotateZ(n->fAlpha);
+	    return p3;
+	}
+    catch (runtime_error & rte) 
+	{
+#ifdef DEBUG
+	    cout << "SKT::getMomentumAtOrigin() - runtime_error - " << rte.what() << endl;
+#endif
+	    return -1;
+	}
 }
 
 double  StiKalmanTrack::getMass() const   

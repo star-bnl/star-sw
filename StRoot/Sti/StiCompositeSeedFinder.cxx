@@ -150,7 +150,7 @@ void StiCompositeSeedFinder::build()
 	}
     }
     
-    sf->print();        
+    //sf->print();        
     mSeedVec.push_back(sf);
     
     return;

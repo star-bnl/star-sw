@@ -24,10 +24,11 @@ using std::vector;
 
 class StiTrack;
 
-class StiTrackContainer
+typedef vector<StiTrack*> stitrackvec;
+
+class StiTrackContainer : public stitrackvec
 {
 public:
-    typedef vector<StiTrack*> stitrackvec;
 
     friend class nobody;
     
@@ -35,26 +36,12 @@ public:
     static StiTrackContainer* instance();
     static void kill();
 
-    //Mimic STL interface
-    void push_back(StiTrack*);
-    void clear();
-    void clearAndDestroy();
-    unsigned int size() const;
-
-    //Iterator bounds, etc
-    stitrackvec::const_iterator begin() const;
-    stitrackvec::const_iterator end() const;
-    
-    stitrackvec::const_reverse_iterator rbegin() const;
-    stitrackvec::const_reverse_iterator rend() const;
-    
 protected:
     StiTrackContainer();
     virtual ~StiTrackContainer();
 
 private:
     static StiTrackContainer* sinstance;
-    stitrackvec mvec; 
 };
 
 #endif

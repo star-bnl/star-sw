@@ -213,11 +213,15 @@ void StiKalmanTrackFinder::doNextTrackStep()
 	}
     catch (runtime_error & rte)
 	{
+#ifdef DEBUG
 	    cout << "RunTime Error Exception: " << rte.what();
+#endif
 	}
     catch (exception & e)
 	{
+#ifdef DEBUG
 	    cout << "Exception: " << e.what();
+#endif
 	}
 }
 
@@ -352,7 +356,9 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
 	}
     catch (exception & e)
 	{
+#ifdef DEBUG
 	    cout << "SKTF::findTrack() exception: " << e.what();
+#endif
 	}
     pruneNodes(lastNode);
     reserveHits(track->getLastNode());

@@ -215,16 +215,13 @@ public:
 
     //Iterator interface:
 
-    ///Return a boolean that reflects whether there are more hits available
-    /// in the specified sub-volume.
+    ///Return a boolean that reflects whether there are more hits available in the specified sub-volume.
     bool hasMore() const;
 
-    ///Return a pointer to the StiHit object currently pointed to from the
-    /// specified sub-volume.
+    ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
     StiHit* getCurrentHit(); //get current
 
-    ///Return a pointer to the StiHit object currently pointed to from the
-    /// specified sub-volume.
+    ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
     StiHit* getHit();  //get current hit and increment
 
     //Add vertex information
@@ -283,7 +280,7 @@ inline const hitmap& StiHitContainer::hits() const
 /*! The distance is specified in STAR units (cm).
   deltaD corresponds to the distance along the detector plane, e.g.,
   distance along a TPC padrow.  If one is interested in points that are
-  withing +- 7.2 cm from a given value of local y (see StiHit), one would
+  within +- 7.2 cm from a given value of local y (see StiHit), one would
   call setDetlaD(7.2).  
   A call to setDeltaD() sets the value of deltaD until either: \n
   1) another call to setDeltaD() is made or \n
