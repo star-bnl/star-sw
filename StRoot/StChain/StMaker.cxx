@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.144 2004/04/09 01:59:00 jeromel Exp $
+// $Id: StMaker.cxx,v 1.145 2004/04/09 21:10:20 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -512,7 +512,8 @@ void StMaker::StartMaker()
   }
   /*if (GetNumber()>3)*/ 
   if (fMemStatMake && GetNumber()>20) fMemStatMake->Start();
-  else              printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+  else              
+    if (GetDebug()) printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
   
 
@@ -530,7 +531,8 @@ void StMaker::EndMaker(int ierr)
   
   /*if (GetNumber()>3)*/ 
   if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
-  else              printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
+  else               
+    if (GetDebug()) printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
 
   StopTimer();
@@ -1232,6 +1234,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.145  2004/04/09 21:10:20  jeromel
+// Print Info only in debug mode
+//
 // Revision 1.144  2004/04/09 01:59:00  jeromel
 // Bug fix.
 //
