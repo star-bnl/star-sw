@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.19 1999/01/28 17:09:59 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.20 1999/02/05 17:58:18 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.20  1999/02/05 17:58:18  fisyak
+// Spiros correction to evr
+//
 // Revision 1.19  1999/01/28 17:09:59  fisyak
 // Add ftpc to software monitor
 //
@@ -371,12 +374,22 @@ Int_t St_glb_Maker::Make(){
       cout << " finished calling egr_fitter" << endl;
     }
 #if 1
-    // track_propogator
+    // evr
+    cout << "run_evr: calling evr_am" << endl;
+    Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
+    // track_propagator
     St_dst_track *globtrk2     = new St_dst_track("globtrk2",100000);
     dst.Add(globtrk2);
     *globtrk2  = *globtrk;
     cout << " Calling track_propagator " << endl;
-
+    if (m_tp_param && vertex) {
+      egr_propagate_st *tp_param = m_tp_param->GetTable();
+      tp_param->iflag =   m_flag;
+      if (m_flag == 1 || m_flag == 2) {
+	dst_vertex_st *vrtx = vertex->GetTable();
+	memset(tp_param->x,vrtx->x,3*sizeof(Float_t));  
+      }
+    }
     Int_t Res_tp = track_propagator(globtrk2,m_tp_param,globtrk);
 
     if (Res_tp !=  kSTAFCV_OK) {
@@ -403,16 +416,13 @@ Int_t St_glb_Maker::Make(){
       cout <<" finished calling egr_fitter - second time" << endl;
     }
 #endif
-    // evr
-    cout << "run_evr: calling evr_am" << endl;
-    Int_t Res_evr = evr_am(m_evr_evrpar,m_egr_egrpar,primtrk,vertex);
     // ev0
     cout << "Calling ev0..." << endl;
     if (! ev0out) {ev0out = new St_ev0_aux("ev0out",100000); dst.Add(ev0out);}
     St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",100000);
     dst.Add(ev0track2);
     if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
-    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk2,vertex,ev0out,ev0track2);
+    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,ev0out,ev0track2);
     //ev0d
     St_dst_v0_vertex *dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",100000);
     dst.Add(dst_v0_vertex);
@@ -600,7 +610,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.19 1999/01/28 17:09:59 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.20 1999/02/05 17:58:18 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
