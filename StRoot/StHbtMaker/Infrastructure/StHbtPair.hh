@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.hh,v 1.5 2000/01/25 17:35:17 laue Exp $
+ * $Id: StHbtPair.hh,v 1.6 2000/02/13 21:13:34 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.hh,v $
+ * Revision 1.6  2000/02/13 21:13:34  lisa
+ * changed ambiguous StHbtPair::fourMomentum() to fourMomentumSum() and fourMomentumDiff() and fixed related bug in QvecCorrFctn
+ *
  * Revision 1.5  2000/01/25 17:35:17  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -65,7 +68,8 @@ public:
   void SetTrack1(const StHbtParticle* trkPtr);
   void SetTrack2(const StHbtParticle* trkPtr);
 
-  StHbtLorentzVector fourMomentum() const;
+  StHbtLorentzVector fourMomentumDiff() const;
+  StHbtLorentzVector fourMomentumSum() const;
   double qInv() const;
   double kT()   const;
   double mInv() const;

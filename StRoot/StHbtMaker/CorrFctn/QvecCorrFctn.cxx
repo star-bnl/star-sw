@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: QvecCorrFctn.cxx,v 1.4 2000/01/25 17:34:45 laue Exp $
+ * $Id: QvecCorrFctn.cxx,v 1.5 2000/02/13 21:13:32 lisa Exp $
  *
  * Author: Randy Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: QvecCorrFctn.cxx,v $
+ * Revision 1.5  2000/02/13 21:13:32  lisa
+ * changed ambiguous StHbtPair::fourMomentum() to fourMomentumSum() and fourMomentumDiff() and fixed related bug in QvecCorrFctn
+ *
  * Revision 1.4  2000/01/25 17:34:45  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -112,13 +115,13 @@ StHbtString QvecCorrFctn::Report(){
 }
 //____________________________
 void QvecCorrFctn::AddRealPair(const StHbtPair* pair){
-  double Q = fabs(pair->fourMomentum().vect().mag());
+  double Q = fabs(pair->fourMomentumDiff().vect().mag());
   mNumerator->Fill(Q);
 }
 //____________________________
 void QvecCorrFctn::AddMixedPair(const StHbtPair* pair){
   double weight = 1.0;
-  double Q = fabs(pair->fourMomentum().vect().mag());
+  double Q = fabs(pair->fourMomentumDiff().vect().mag());
   mDenominator->Fill(Q,weight);
 }
 

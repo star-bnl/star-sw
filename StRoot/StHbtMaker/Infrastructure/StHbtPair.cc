@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.6 1999/07/29 16:16:34 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.7 2000/02/13 21:13:33 lisa Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.7  2000/02/13 21:13:33  lisa
+ * changed ambiguous StHbtPair::fourMomentum() to fourMomentumSum() and fourMomentumDiff() and fixed related bug in QvecCorrFctn
+ *
  * Revision 1.6  1999/07/29 16:16:34  lisa
  * Selemons upgrade of StHbtPair class
  *
@@ -75,9 +78,16 @@ double StHbtPair::kT() const
   return (tmp);
 }
 //_________________
-StHbtLorentzVector StHbtPair::fourMomentum() const
+// get rid of ambiguously-named method fourMomentum() and replace it with
+// fourMomentumSum() and fourMomentumDiff() - mal 13feb2000
+StHbtLorentzVector StHbtPair::fourMomentumSum() const
 {
   StHbtLorentzVector temp = mTrack1->FourMomentum()+mTrack2->FourMomentum();
+  return temp;
+}
+StHbtLorentzVector StHbtPair::fourMomentumDiff() const
+{
+  StHbtLorentzVector temp = mTrack1->FourMomentum()-mTrack2->FourMomentum();
   return temp;
 }
 
