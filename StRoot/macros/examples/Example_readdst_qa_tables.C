@@ -1,5 +1,8 @@
-// $Id: Example_readdst_qa_tables.C,v 1.1 1999/06/22 21:25:29 kathy Exp $
+// $Id: Example_readdst_qa_tables.C,v 1.2 1999/07/13 01:13:01 kathy Exp $
 // $Log: Example_readdst_qa_tables.C,v $
+// Revision 1.2  1999/07/13 01:13:01  kathy
+// moved rch.C to obsolete, put in id,log,owner into HbtExample, removed loading of StRootEvent and changed default input file in bfcread.C and Example_readdst_qa_tables.C
+//
 // Revision 1.1  1999/06/22 21:25:29  kathy
 // example to read read dst.root file and print out info about tables
 //
@@ -31,7 +34,6 @@ void Example_readdst_qa_tables(Int_t nevents=1, const char
     gSystem->Load("St_Tables");
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
 
     cout << "  .. Example_readdst_qa_tables.C, have loaded libraries " << endl;
 
@@ -134,3 +136,5 @@ dst_track_st *sth = glob->GetTable();
 
 
         
+
+

@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.16 1999/06/27 22:45:34 fisyak Exp $
+// $Id: bfcread.C,v 1.17 1999/07/13 01:13:02 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.17  1999/07/13 01:13:02  kathy
+// moved rch.C to obsolete, put in id,log,owner into HbtExample, removed loading of StRootEvent and changed default input file in bfcread.C and Example_readdst_qa_tables.C
+//
 // Revision 1.16  1999/06/27 22:45:34  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -54,13 +57,15 @@ void Load(){
     gSystem->Load("StChain");
     gSystem->Load("St_Tables");
     gSystem->Load("StTreeMaker");
-//    gSystem->Load("St_QA_Maker");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StRootEvent");
+
+//    gSystem->Load("StarClassLibrary");
+//  gSystem->Load("St_QA_Maker");
+
+
     cout << "  .. bfcread.C, have loaded libraries " << endl;
 }
 void bfcread(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.dst.root")
+*MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root")
 
 {
 //

@@ -1,3 +1,13 @@
+// $Id: StHbtExample.C,v 1.2 1999/07/13 01:13:02 kathy Exp $
+// $Log: StHbtExample.C,v $
+// Revision 1.2  1999/07/13 01:13:02  kathy
+// moved rch.C to obsolete, put in id,log,owner into HbtExample, removed loading of StRootEvent and changed default input file in bfcread.C and Example_readdst_qa_tables.C
+//
+
+//======================================================================
+// owner:  Mike Lisa
+// what it does: 
+//=======================================================================
 
 class StChain;
 StChain *chain=0;    // NOTE - chain needs to be declared global so for StHbtEventReader
@@ -172,3 +182,7 @@ void StHbtExample(Int_t nevents=1,
   } // Event Loop
   chain->Finish(); // This should call the Finish() method in ALL makers
 }
+
+
+
+
