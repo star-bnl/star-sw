@@ -1,6 +1,10 @@
-// $Id: StFtpcFastSimu.hh,v 1.3 2000/01/03 12:48:59 jcs Exp $
+// $Id: StFtpcFastSimu.hh,v 1.4 2000/02/02 15:20:37 hummler Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.4  2000/02/02 15:20:37  hummler
+// correct acceptance at sector boundaries,
+// take values from fcl_det
+//
 // Revision 1.3  2000/01/03 12:48:59  jcs
 // Add CVS Id strings
 //
@@ -14,6 +18,7 @@
 #include "ffs_gaspar.h"
 #include "ffs_gepoint.h"
 #include "fcl_fppoint.h"
+#include "fcl_det.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -63,7 +68,8 @@ class StFtpcFastSimu
 		 int ffs_gepoint_maxlen,
 		 FCL_FPPOINT_ST* fcl_fppoint,
 		 int *fcl_fppoint_nok,
-		 int fcl_fppoint_maxlen);
+		 int fcl_fppoint_maxlen,
+		 FCL_DET_ST* fcl_det);
   ~StFtpcFastSimu();
   int ffs_gen_padres(int *g2t_ftp_hit_nok, 
 		     G2T_FTP_HIT_ST *g2t_ftp_hit, 
@@ -98,7 +104,8 @@ class StFtpcFastSimu
 		    float *st_dev_y,  
 		    HepRandom quasiRandom);
   int ffs_ini(FFS_FSPAR_ST *ffs_fspar,   
-	      FFS_GASPAR_ST *ffs_gaspar);
+	      FFS_GASPAR_ST *ffs_gaspar,
+	      FCL_DET_ST* fcl_det);
   int ffs_merge_tagger(int *ffs_gepoint_nok,
 		       int ffs_gepoint_maxlen,
 		       FFS_GEPOINT_ST *ffs_gepoint,
