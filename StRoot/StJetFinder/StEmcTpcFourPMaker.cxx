@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.10 2003/07/24 22:11:17 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.11 2003/07/30 20:33:36 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -94,6 +94,7 @@ StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name,
   maxHits = 4800;
   fakePoints.resize(maxHits);
   useType = Hits;
+  EMCSanityThreshold = 200.0;
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
@@ -115,6 +116,11 @@ Int_t StEmcTpcFourPMaker::Make() {
   cout << "EtaShift: " << etaShift << endl;
   double HSMDR = SMDR/2.0;
   long nTracks = uDst->numberOfPrimaryTracks();
+  numCoincidences = 0;
+  sumPtTracks = 0.0;
+  sumEMC = 0.0;
+  sumSubtracted = 0.0;
+  sumTheorySubtracted = 0.0;
 
   // Calculate trackEmcPhi (Phi of the track at the radius of the EMC SMD)
   // pt=BeR, pt=0.3BR, pt GeV/c, B Tesla, R meters, R = pt/(Be) = pt/(0.3B)
@@ -126,6 +132,7 @@ Int_t StEmcTpcFourPMaker::Make() {
     double R = pt/(0.3*mField);
     if(R < HSMDR) // just forget the track if it doesn't get to EMC radius. 
       continue;
+    sumPtTracks += pt;
     binmap.insertTrack(track, i);
   }
 
@@ -189,6 +196,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 	{
 	  StMuEmcPoint* point = muEmc->getPoint(i);
 	  binmap.insertPoint(point, i);
+	  sumEMC += point->getEnergy();
 	}
       if(useType == Clusters) for(int i = 0; i < numClusters; i++)
 	{
@@ -200,6 +208,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 	  point.setPhi(cluster->getPhi());
 	  point.setEnergy(cluster->getEnergy());
 	  binmap.insertPoint(&point, i);
+	  sumEMC += point.getEnergy();
 	}
     }
   else // useType == Hits
@@ -227,11 +236,16 @@ Int_t StEmcTpcFourPMaker::Make() {
 	  point.setPhi(phi);
 	  point.setEnergy(energy);
 	  binmap.insertPoint(&point, pointIndex);
+	  sumEMC += point.getEnergy();
 	}
     }
 
+  // Now Bail if the energy is absurd
+  if(sumEMC >= EMCSanityThreshold) return kStOK; 
+
   // Connect the points with the tracks when they are within radiussqr 
   binmap.correlate(radiussqr);
+  numCoincidences = binmap.t2p.size(); // == binmap.pt2.size();
 
   // Veto the guess of Tpc particle identification using the 
   // Point correlations
@@ -295,18 +309,21 @@ Int_t StEmcTpcFourPMaker::Make() {
 	      if(point.E() > deposit)
 		{
 		  point.SubE(deposit);
+		  sumSubtracted += deposit;
 		  deposit = 0;
 		  break;
 		}
 	      else
 		{
 		  deposit -= point.E();
+		  sumSubtracted += point.E();
 		  point.SetE(0);
 		}
 	    }
 	  pointsDist.clear();
 	  lasttrack = (*trackit).first;
 	  deposit = (binmap.moddTracks[lasttrack]).depE();
+	  sumTheorySubtracted += deposit;
 	}
 
       StProjectedTrack& track = binmap.moddTracks[(*trackit).first];
