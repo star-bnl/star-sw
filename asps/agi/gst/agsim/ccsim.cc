@@ -210,7 +210,7 @@ extern "C" int  tdm_clear_all_  (char* path, int lp)
      for (j=mm[l]+1; j< ds->elcount; j++)
      {
        if (!(dt=ds->p.link[j])) continue;
-       if (dt->tid==NULL)       { mm[l]=j; du=dt; break; }
+       if (! dt->tid)       { mm[l]=j; du=dt; break; }
        dt->elcount=0; printf(" clearing table %20s \n",dt->name);
      }
      /* new dataset found  - and selected */
