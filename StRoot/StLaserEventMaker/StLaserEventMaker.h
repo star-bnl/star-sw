@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.8 2001/12/12 19:39:24 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.9 2001/12/14 17:30:16 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.9  2001/12/14 17:30:16  pfachini
+// Adding two histograms to the laserhist.*.*.root file
+//
 // Revision 1.8  2001/12/12 19:39:24  pfachini
 // Changes to automate the drift velocity calculation
 //
@@ -58,10 +61,12 @@ enum { maxNofTracks = 8000};
 
 class StLaserEventMaker : public StMaker {
 private:
+  TH1* fzLaser;
   TH1* fzlWestHigh;
   TH1* fzlWestLow;
   TH1* fzlEastHigh;
   TH1* fzlEastLow;
+  TH1* driftVelocityRec;
   TH1* numberTracks;
   Bool_t   mHistOut;
   Int_t m_runno;          //Run number to put on events (derive from filename)
@@ -126,7 +131,7 @@ public:
   double driftVelocityReco;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.8 2001/12/12 19:39:24 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.9 2001/12/14 17:30:16 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
