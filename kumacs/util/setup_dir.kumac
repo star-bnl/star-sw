@@ -1,0 +1,20 @@
+**************************************************************************
+
+macro init
+
+* Create Directories
+
+cd /dui
+mkdir DummyTables
+mkdir Geometry
+mkdir Switches
+mkdir G2tOutput
+mkdir ProducedData
+mkdir ProducedData/Pixels
+mkdir ProducedData/Clusters
+mkdir ProducedData/Hits
+cd /dui
+
+return
+*----------------------------------------------------------
+
