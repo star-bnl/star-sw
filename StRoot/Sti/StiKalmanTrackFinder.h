@@ -20,7 +20,8 @@ class StiKalmanTrackFinder : public StiTrackFinder
     virtual void findTracks();
     virtual bool isValid(bool debug=false) const; //Check if everything is kosher    
     virtual void doNextAction();
-
+    virtual bool hasMore();
+    
     virtual void setElossCalculated(bool option);
     virtual void setMCSCalculated(bool option);
     void   setMassHypothesis(double m);
