@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.43 2002/01/11 16:44:12 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.44 2002/01/31 23:50:28 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.44  2002/01/31 23:50:28  ullrich
+ * More filling of StRunInfo (by J. Gans).
+ *
  * Revision 2.43  2002/01/11 16:44:12  ullrich
  * Fill bunch crossing numbers in StEventInfo.
  *
@@ -185,7 +188,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.43 2002/01/11 16:44:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.44 2002/01/31 23:50:28 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -971,14 +974,16 @@ StEventMaker::makeEvent()
     
     //
     //  This part of run info is filled every event
-    //  NOT ENABLED YET ...
     //
-//     StDetectorDbRichScalers richScalers(this);
-//     mCurrentRunInfo->setZdcWestRate(richScalers.getZDCWest());
-//     mCurrentRunInfo->setZdcEastRate(richScalers.getZDCEast());
-//     mCurrentRunInfo->setZdcCoincidenceRate(richScalers.getZDCX());
-//     mCurrentRunInfo->setBackgroundRate(richScalers.getMult());
-//     mCurrentRunInfo->setL0RateToRich(richScalers.getL0());
+    StDetectorDbRichScalers* richScalers = StDetectorDbRichScalers::instance();
+    if (richScalers) {
+	mCurrentRunInfo->setZdcWestRate(richScalers->getZDCWest());
+	mCurrentRunInfo->setZdcEastRate(richScalers->getZDCEast());
+	mCurrentRunInfo->setZdcCoincidenceRate(richScalers->getZDCX());
+	mCurrentRunInfo->setBackgroundRate(richScalers->getMult());
+	mCurrentRunInfo->setL0RateToRich(richScalers->getL0());
+	mCurrentRunInfo->setBbcCoincidenceRate(richScalers->getBBCX());
+    }
     
     if (mCurrentRunInfo)
 	mCurrentEvent->setRunInfo(new StRunInfo(*mCurrentRunInfo));
