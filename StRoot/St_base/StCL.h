@@ -5,8 +5,11 @@
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: StCL.h,v 1.8 1999/12/08 18:08:03 fine Exp $
+// $Id: StCL.h,v 1.9 1999/12/17 23:28:39 fine Exp $
 // $Log: StCL.h,v $
+// Revision 1.9  1999/12/17 23:28:39  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
 // Revision 1.8  1999/12/08 18:08:03  fine
 // void * zero operation have been introduced
 //
@@ -495,5 +498,4 @@ inline void **StCL::vzero(void **a, int n1)
   if (n1 <= 0) return 0;
   return (void **)memset(a,0,n1*sizeof(void *));
 }
-
 #endif

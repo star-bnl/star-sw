@@ -20,7 +20,7 @@
 // * purpose.  It is provided "as is" without express or implied warranty.
 // ************************************************************************
 //
-// $Id: Axis3D.cxx,v 1.13 1999/12/16 00:40:17 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.14 1999/12/17 23:28:44 fine Exp $ 
 //
 
 #include <iostream.h>
@@ -175,18 +175,11 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
    static Int_t pxold, pyold;
    static Int_t px0, py0;
    static Int_t linedrawn;
-//   Float_t temp;
-#if 0
-   if (!fZoomMode && gPad->GetView()) {
-      gPad->GetView()->ExecuteRotateView(event, px, py);
-      return;
-   }
-#else
+
    if (!fZoomMode) return;
-#endif
 
    // something to zoom ?
-//   fPad->SetCursor(kCross);
+
    gPad->SetCursor(kCross);
    
    switch (event) {
@@ -228,7 +221,7 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
 
         for (i =0; i<3;i++) oldSize[i] = size[i]= (max[i]-min[i])/2;
 
-        // If there was a small motion move the center only, do not change a scale
+        // If there was a small motion, move the center only, do not change a scale
         if (TMath::Abs(px-px0)+TMath::Abs(py - py0) > 4 ) {
            Float_t newEdge[3];
            for (i =0; i<3;i++) size[i] = -1;
@@ -255,16 +248,10 @@ void TAxis3D::ExecuteEvent(Int_t event, Int_t px, Int_t py)
                size[i] = oldSize[i];
            }
 #if 0
-          if (x1 < x0) {temp = x0; x0 = x1; x1 = temp;}
-          if (y1 < y0) {temp = y0; y0 = y1; y1 = temp;}
-          gPad->Range(x0,y0,x1,y1);
-          if (fZooms < kMAXZOOMS-1) {
-             fZooms++;
-             fZoomX0[fZooms] = x0;
-             fZoomY0[fZooms] = y0;
-             fZoomX1[fZooms] = x1;
-             fZoomY1[fZooms] = y1;
-          }
+          if (fZooms == kMAXZOOMS) fZoom = 0;
+          fZooms++;
+          memcpy(fZoomMin[fZooms],min,3*sizeof(Float_t));
+          memcpy(fZoomMax[fZooms],max,3*sizeof(Float_t));
 #endif
         }
         for (i =0; i<3;i++) {
@@ -307,9 +294,13 @@ void TAxis3D::Paint(Option_t *)
 //______________________________________________________________________________
 void TAxis3D::PaintAxis(TGaxis *axis, Float_t ang)
 {
-//*-*-*-*-*-*-*Draw the axis for legos and surface plots*-*-*-*-*-*-*-*-*-*
-//*-*          =========================================
+//*-*-*-*-*-*-*Draw the axis for TView object *-*-*-*-*-*-*-*-*-*
+//*-*          ==============================
+//*-* The original idea belongs:
 //*-*
+//*-* void THistPainter::PaintLegoAxis(TGaxis *axis, Float_t ang) 
+//*-*
+
  
     static Float_t epsil = 0.001;
  
@@ -328,7 +319,7 @@ void TAxis3D::PaintAxis(TGaxis *axis, Float_t ang)
  
     TView *view = gPad->GetView();
     if (!view) {
-        Error("PaintLegoAxis", "no TView in current pad");
+        Error("PaintAxis", "no TView in current pad");
         return;
     }
 
@@ -698,6 +689,9 @@ TAxis3D *TAxis3D::ToggleZoom(TVirtualPad *pad)
 //_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.14  1999/12/17 23:28:44  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
 // Revision 1.13  1999/12/16 00:40:17  fine
 // new comment-html-gif file introduced
 //

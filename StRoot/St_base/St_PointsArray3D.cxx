@@ -196,7 +196,8 @@ Int_t St_PointsArray3D::DistancetoPrimitive(Int_t px, Int_t py)
    Float_t dpoint;
    Float_t xndc[3];
    Int_t x1,y1;
-   for (i=0;i<Size();i++) {
+   Int_t size = Size();
+   for (i=0;i<size;i++) {
       view->WCtoNDC(&fP[3*i], xndc);
       x1     = gPad->XtoAbsPixel(xndc[0]);
       y1     = gPad->YtoAbsPixel(xndc[1]);

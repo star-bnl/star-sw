@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.43 1999/12/12 01:07:22 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.44 1999/12/17 23:28:45 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -47,6 +47,7 @@
 #include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
 #include "St_Table3Points.h"
+#include "St_Table3PackedPoints.h"
 #include "StVirtualEventFilter.h"
 #include "St_Table.h"
 #include "St_TableSorter.h"
@@ -795,13 +796,20 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
   Int_t totalHits = 0;
   St_Table &ttt = *((St_Table *)points);
   TString tr = keyColumn; 
+  const Char_t *packedList[] = {"dst_point"};
+  const Int_t lPackedList = sizeof(packedList)/sizeof(Char_t *);
+  Bool_t packed = kFALSE;
+  Int_t i = 0;
+  for (i = 0; i< lPackedList && !packed ;i++) {
+    if (!strcmp(ttt.GetType(),packedList[i])) packed = kTRUE;
+  }
   if (ttt.GetNRows() ) {
     St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
     Color_t hitColor = kGreen;
-    Style_t hitStyle = 1;
+    Style_t hitStyle = 20;
     Width_t hitSize  = 2;
-    Int_t i = 0;
+    i = 0;
     Int_t nextKeyIndx = 0;
     Int_t maxTrackCounter = track2Line->CountKeys();
     for (i=0;i<maxTrackCounter;i++) 
@@ -810,23 +818,32 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
        if (filter) hitColor =  filter->Channel(track2Line,nextKeyIndx,hitSize,hitStyle); //
        if (filter->IsOff() ) break;                                                     //
        // ----------------------------------------------------------------------------- //
-       if (hitColor > 0) {
-           St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
-                                             nextKeyIndx,
-                                             keyPositions[0],keyPositions[1],keyPositions[2]);
-         m_HitCollector->Add(hitsPoints);    // Collect to remove  
-         St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
-         hitsShape->SetVisibility(1);            hitsShape->SetColorAttribute(hitColor);
-         hitsShape->SetStyleAttribute(hitStyle); hitsShape->SetSizeAttribute(hitSize);
-         // Create a node to hold it
-         St_Node *thisHit = new St_Node("tableHits",points->GetName(),hitsShape);
-           thisHit->Mark();
-           thisHit->SetVisibility();
-         St_NodePosition *pp = m_EventsNode->Add(thisHit); 
-         Int_t s = hitsPoints->Size();
-         totalHits   += s;
-         nextKeyIndx += s; 
-         if (!pp && totalHits) printf(" no track position %d\n",totalHits);
+       if (hitColor > 0 && keyPositions[0]) {
+           St_Table3Points *hitsPoints = 0;
+           if (packed)  
+               hitsPoints = new St_Table3PackedPoints(track2Line,
+                                                nextKeyIndx,
+                                                keyPositions[0]);
+           else if (keyPositions[1] && keyPositions[2])
+               hitsPoints = new St_Table3Points(track2Line,
+                                                nextKeyIndx,
+                                                keyPositions[0],keyPositions[1],keyPositions[2]);
+           else { hitColor = -1; break; }
+         if (hitsPoints) {
+           m_HitCollector->Add(hitsPoints);    // Collect to remove  
+           St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
+           hitsShape->SetVisibility(1);            hitsShape->SetColorAttribute(hitColor);
+           hitsShape->SetStyleAttribute(hitStyle); hitsShape->SetSizeAttribute(hitSize);
+           // Create a node to hold it
+           St_Node *thisHit = new St_Node("tableHits",points->GetName(),hitsShape);
+             thisHit->Mark();
+             thisHit->SetVisibility();
+           St_NodePosition *pp = m_EventsNode->Add(thisHit); 
+           Int_t s = hitsPoints->Size();
+           totalHits   += s;
+           nextKeyIndx += s; 
+           if (!pp && totalHits) printf(" no track position %d\n",totalHits);
+         }
        }
        else if (hitColor == -1) break;
        else {
@@ -941,6 +958,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.44  1999/12/17 23:28:45  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
 // Revision 1.43  1999/12/12 01:07:22  fine
 // remove the compilation warnings
 //

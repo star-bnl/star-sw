@@ -1,8 +1,27 @@
-
 #ifndef ROOT_St_PolyLine3D
 #define ROOT_St_PolyLine3D
 
-//+SEQ,CopyRight,T=NOINCLUDE.
+// ***********************************************************************
+// $Id: St_PolyLine3D.h,v 1.8 1999/12/17 23:28:40 fine Exp $ 
+// ***********************************************************************
+// * Defines 3D polyline base class to construct STAR "event" geometry
+// * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
+// * Author                  Valerie Fine  (fine@bnl.gov)
+// * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// *
+// * Permission to use, copy, modify and distribute this software and its
+// * documentation for any purpose is hereby granted without fee,
+// * provided that the above copyright notice appear in all copies and
+// * that both that copyright notice and this permission notice appear
+// * in supporting documentation.  Brookhaven National Laboratory makes no
+// * representations about the suitability of this software for any
+// * purpose.  It is provided "as is" without express or implied warranty.
+// ************************************************************************
+ 
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -59,8 +78,13 @@ public:
         virtual Int_t     SetPoints(Int_t n, Float_t *p=0, Option_t *option="") {return m_Points ? m_Points->SetPoints(n,p,option): 0;}
 
 
-        ClassDef(St_PolyLine3D,1)  //A 3-D PolyLine
+        ClassDef(St_PolyLine3D,1)  //Defines 3D polyline base class to construct STAR "event" geometry
 };
-
+//__________________________________________________________________________
+// $Log: St_PolyLine3D.h,v $
+// Revision 1.8  1999/12/17 23:28:40  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
+//__________________________________________________________________________
 #endif
 

@@ -1,3 +1,23 @@
+// $Id: St_PolyLineShape.cxx,v 1.20 1999/12/17 23:28:41 fine Exp $ 
+// ***********************************************************************
+// *  C++ class library to define an abstract 3D shape os STAR "event" geometry
+// * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
+// * Author                  Valerie Fine  (fine@bnl.gov)
+// * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// *
+// * Permission to use, copy, modify and distribute this software and its
+// * documentation for any purpose is hereby granted without fee,
+// * provided that the above copyright notice appear in all copies and
+// * that both that copyright notice and this permission notice appear
+// * in supporting documentation.  Brookhaven National Laboratory makes no
+// * representations about the suitability of this software for any
+// * purpose.  It is provided "as is" without express or implied warranty.
+// ************************************************************************
+
 #include "St_PolyLineShape.h"
 
 #include "St_Points3D.h"
@@ -839,3 +859,12 @@ void St_PolyLineShape::Sizeof3D() const
   }
   else Error("Sizeof3D()","buffer size has not been defined yet");
 }
+
+//______________________________________________________________________________
+// $Log: St_PolyLineShape.cxx,v $
+// Revision 1.20  1999/12/17 23:28:41  fine
+// clean up for the sake of docs + new class St_Table3DPackedPoints introduced
+//
+//______________________________________________________________________________
+
+

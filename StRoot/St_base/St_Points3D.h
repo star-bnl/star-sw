@@ -1,5 +1,24 @@
-
-//+SEQ,CopyRight,T=NOINCLUDE.
+#ifndef ROOT_St_Points3D
+#define ROOT_St_Points3D
+// $Id: St_Points3D.h,v 1.5 1999/12/17 23:28:40 fine Exp $ 
+// ***********************************************************************
+// *  C++ class to define the abstract array of 3D points
+// * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
+// * Author                  Valerie Fine  (fine@bnl.gov)
+// * Copyright(c) 1997~1999  Valerie Fine  (fine@bnl.gov)
+// *
+// * This program is distributed in the hope that it will be useful,
+// * but WITHOUT ANY WARRANTY; without even the implied warranty of
+// * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// *
+// * Permission to use, copy, modify and distribute this software and its
+// * documentation for any purpose is hereby granted without fee,
+// * provided that the above copyright notice appear in all copies and
+// * that both that copyright notice and this permission notice appear
+// * in supporting documentation.  Brookhaven National Laboratory makes no
+// * representations about the suitability of this software for any
+// * purpose.  It is provided "as is" without express or implied warranty.
+// ************************************************************************
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -8,8 +27,6 @@
 // A 3-D PolyLine.                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef ROOT_St_Points3D
-#define ROOT_St_Points3D
 
 #ifndef ROOT_TPoints3DABC
 #include "TPoints3DABC.h"
@@ -63,7 +80,7 @@ public:
         virtual Int_t     SetPoints(Int_t n, Float_t *p=0, Option_t *option="");
         virtual Int_t     Size() const;
 
-        ClassDef(St_Points3D,1)  //A 3-D PolyLine
+        ClassDef(St_Points3D,1)  // Defines the abstract array of 3D points
 };
 
 inline Int_t     St_Points3D::DistancetoPrimitive(Int_t px, Int_t py) {return fPoints?fPoints->DistancetoPrimitive(px,py):99999;}
