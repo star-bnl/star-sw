@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: summarizeEvent.cc,v 2.1 1999/11/16 12:28:44 ullrich Exp $
+ * $Id: summarizeEvent.cc,v 2.2 2000/01/05 16:06:27 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: summarizeEvent.cc,v $
- * Revision 2.1  1999/11/16 12:28:44  ullrich
- * Corrected typo and added print-out of number of primary tracks.
+ * Revision 2.2  2000/01/05 16:06:27  ullrich
+ * Added SSD hits.
  *
  * Revision 2.1  1999/11/16 12:28:44  ullrich
  * Corrected typo and added print-out of number of primary tracks.
@@ -27,7 +27,7 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.1 1999/11/16 12:28:44 ullrich Exp $";
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 2.2 2000/01/05 16:06:27 ullrich Exp $";
 
 void
 summarizeEvent(StEvent& event, Int_t &nevents)
@@ -60,6 +60,9 @@ summarizeEvent(StEvent& event, Int_t &nevents)
     
     gMessMgr->QAInfo() << "# SVT hits:       "
 		       << (event.svtHitCollection() ? event.svtHitCollection()->numberOfHits() : 0) << endm;
+    
+    gMessMgr->QAInfo() << "# SSD hits:       "
+		       << (event.ssdHitCollection() ? event.ssdHitCollection()->numberOfHits() : 0) << endm;
     
     gMessMgr->QAInfo() << "# FTPC hits:      "
 		       << (event.ftpcHitCollection() ? event.ftpcHitCollection()->numberOfHits() : 0) << endm;
