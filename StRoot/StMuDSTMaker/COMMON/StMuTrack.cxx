@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.12 2004/04/14 14:21:53 jeromel Exp $
+ * $Id: StMuTrack.cxx,v 1.13 2004/08/07 02:44:05 mvl Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -32,7 +32,6 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
   mType = track->type();
   mFlag = track->flag();
   mTopologyMap = track->topologyMap();
-  mNHitsPoss = track->numberOfPossiblePoints(kTpcId);
 
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
@@ -68,11 +67,37 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
   if ( track->detectorInfo() ) {
     mFirstPoint = track->detectorInfo()->firstPoint();
     mLastPoint = track->detectorInfo()->lastPoint();
-    mNHits = track->detectorInfo()->numberOfPoints(kTpcId);
+    mNHits = track->detectorInfo()->numberOfPoints();
   } 
 
+  mNHitsPoss = track->numberOfPossiblePoints();
+  int tpc_hits;
+  // This only handles new data. 
+  // Need to think of backward compatibiltiy mode (old StEvent)
+  // Also what about initialisation for odl MuDst files?
+  mNHitsPossTpc=0;
+  if ( (tpc_hits=track->numberOfPossiblePoints(kTpcId)) )
+    mNHitsPossTpc=tpc_hits; 
+  else if ( (tpc_hits=track->numberOfPossiblePoints(kFtpcEastId)) )
+    mNHitsPossTpc=(1 << 7) + tpc_hits;
+  else if ( (tpc_hits=track->numberOfPossiblePoints(kFtpcEastId)) ) 
+    mNHitsPossTpc=(2 << 7) + tpc_hits;
 
-  mNHitsFit = track->fitTraits().numberOfFitPoints(kTpcId);
+  mNHitsPossInner=track->numberOfPossiblePoints(kSvtId) & 0x7;
+  mNHitsPossInner|=(track->numberOfPossiblePoints(kSsdId) & 0x3) << 3;
+
+  mNHitsFit = track->fitTraits().numberOfFitPoints();
+  mNHitsFitTpc=0;
+  if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kTpcId)) ) 
+    mNHitsFitTpc=tpc_hits; 
+  else if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kFtpcEastId)) ) 
+    mNHitsFitTpc=(1 << 7) + tpc_hits;
+  else if ( (tpc_hits=track->fitTraits().numberOfFitPoints(kFtpcEastId)) ) 
+    mNHitsFitTpc=(2 << 7) + tpc_hits;
+
+  mNHitsFitInner=track->fitTraits().numberOfFitPoints(kSvtId) & 0x7;
+  mNHitsFitInner|=(track->fitTraits().numberOfFitPoints(kSsdId) & 0x3) << 3;
+
   mChiSqXY = track->fitTraits().chi2(0);
   mChiSqZ = track->fitTraits().chi2(1);
 
@@ -102,9 +127,71 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
 
   if ( track->outerGeometry() ) 
     mOuterHelix = StMuHelix(track->outerGeometry()->helix(),event->runInfo()->magneticField());
-};
+}
 
+unsigned short StMuTrack::nHitsPoss(StDetectorId det) const {
 
+  // Backward compatibility for old files
+  if (mNHitsPossTpc==255) {
+    if (det==kTpcId || det==kFtpcEastId || det==kFtpcWestId)
+      return mNHitsPoss;
+    else 
+      return 0;
+  }
+
+  // New situation: decode point counts
+  switch (det) {
+  case kTpcId:
+    return ((mNHitsPossTpc & 0x80)==0)*mNHitsPoss;
+    break;
+  case kFtpcEastId:
+    return ((mNHitsPossTpc & 0xB0)==1)*(mNHitsPoss & 0x3F);
+    break;
+  case kFtpcWestId:
+    return ((mNHitsPossTpc & 0xB0)==2)*(mNHitsPoss & 0x3F);
+    break;
+  case kSvtId:
+    return (mNHitsPossInner & 0x7);
+    break;
+  case kSsdId:
+    return ((mNHitsPossInner & 0xB) >> 3);
+    break;
+  default:
+    return 0;
+  }
+
+}
+
+unsigned short StMuTrack::nHitsFit(StDetectorId det) const {
+  // Backward compatibility for old files
+  if (mNHitsFitTpc==255) {
+    if (det==kTpcId || det==kFtpcEastId || det==kFtpcWestId)
+      return mNHitsFit;
+    else 
+      return 0;
+  }
+
+  // New situation: decode point counts
+  switch (det) {
+  case kTpcId:
+    return ((mNHitsFitTpc & 0x80)==0)*mNHitsFit;
+    break;
+  case kFtpcEastId:
+    return ((mNHitsFitTpc & 0xB0)==1)*(mNHitsFit & 0x3F);
+    break;
+  case kFtpcWestId:
+    return ((mNHitsFitTpc & 0xB0)==2)*(mNHitsFit & 0x3F);
+    break;
+  case kSvtId:
+    return (mNHitsFitInner & 0x7);
+    break;
+  case kSsdId:
+    return ((mNHitsFitInner & 0xB) >> 3);
+    break;
+  default:
+    return 0;
+  }
+}
 
 StThreeVectorD StMuTrack::dca(const StEvent* event, const StTrack* track) {
   double pathlength = track->geometry()->helix().pathLength( event->primaryVertex()->position() );
@@ -181,6 +268,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.13  2004/08/07 02:44:05  mvl
+ * Added support for fitted and possible points in different detectors, for ITTF
+ *
  * Revision 1.12  2004/04/14 14:21:53  jeromel
  * Not sure why I made it - but better to preserve the sign
  *
