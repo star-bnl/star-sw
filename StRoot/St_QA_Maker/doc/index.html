@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Current Available Macros</title>
-<!-- Changed by: Kathleen R. Turner, 21-Sep-1999 -->
+<!-- Changed by: Kathleen R. Turner, 24-Sep-1999 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -49,17 +49,255 @@
 <p>
 <!-- Content -->
 
+
+<font  size ="+1" color="red"> Described in this Document:  <font  size ="+1" color="black"> 
+<font  size ="+1" color="blue">
+  <ul>
+   <li>      
+      The classes in the St_QA_Maker directory -  <a href="#doc1"> Go </A> 
+   <li>
+      Methods in these classes -  <a href="#doc2"> Go </A> 
+      <ul>
+        <li> St_QA_Maker - description of methods -  <a href="#doc2a"> Go </A> 
+        <li> StHistUtil - description and details on usage of methods -  <a href="#doc2b"> Go </A> 
+      </ul>
+   <li>
+      Standard Maker Names in BFC -  <a href="#doc3"> Go </A> 
+   <li>
+     Library macros that use the code in St_QA_Maker -  <a href="#doc4"> Go </A> 
+  </ul>
+<font  size ="+1" color="black"> 
+
+
 <hr>
 
 <h3>
   
-  Example macros are:
+<p>
+<a name="doc1">
+<font  size ="+1" color="blue"> The 3 classes in the St_QA_Maker directory are: <font  size ="+1" color="black"> 
+    <ul>
+      <li> <font  size ="+1" color="red"> St_QA_Maker <font  size ="+1" color="black"> 
+             <ul>
+               <li>
+                 books and fills histograms from tables which are on the DST 
+               <li>
+                 this is the main histogramming package for Quality Assurance of Offline production
+              </ul>
+       <li> <font  size ="+1" color="red"> StHistUtil <font  size ="+1" color="black">
+              <ul>
+                <li> provides histogram utilities to find,list,print histograms 
+                <li> this class is NOT a Maker
+                <li> NOTE! Methods can be used by all Makers to find,list,print,draw histograms!
+              </ul>
+      <li> <font  size ="+1" color="red"> St_QATestTables_Maker <font  size ="+1" color="black">
+              <ul>
+               <li> calculates some QA quantities 
+               <li> this Maker is an example and is not used at this point
+              </ul>
+    </ul>
+  
+<hr>
+<p>
+<a name="doc2">
+<font  size ="+1" color="blue"> Methods in these classes:<font  size ="+1" color="black"> 
    <ul>
-    <li> bfcread_hist_list_all.C
-    <li> bfcread_hist_list.C
-    <li> bfcread_hist_to_ps.C
-    <li> bfcread_dst_QAhist.C
+<a name="doc2a">
+      <li><font  size ="+1" color="green">  St_QA_Maker - methods  <font  size ="+1" color="black"> 
+         <ul>
+            <li> Init - runs the following methods to book histograms for each DST table:
+  <h4>
+  <pre>
+    BookHistEvSum();  - table event_summary
+    BookHistGlob();   - table globtrk
+    BookHistPrim();   - table dst_dedx
+    BookHistDE();     - table primtrk
+    BookHistGen();    - table particle
+    BookHistV0();     - table dst_v0_vertex
+    BookHistPID();    - table primtrk & dst_dedx
+    BookHistVertex(); - table dst_vertex
+    BookHistXi();     - table dst_xi_vertex
+    BookHistPoint();  - table point
+    BookHistKink();   - table kinkVertex
+    BookHistL3();     - table l3Track
+    BookHistV0Eval(); - table ev0_eval
+    BookHistRich();   - table g2t_rch_hit
+  </pre>
+  </h4>
+             <li>Make - runs the following methods to fill  histograms for each DST table:
+
+  <h4>
+  <pre>
+    MakeHistEvSum();  - table event_summary
+    MakeHistGlob();   - table globtrk
+    MakeHistPrim();   - table dst_dedx
+    MakeHistDE();     - table primtrk
+    MakeHistGen();    - table particle
+    MakeHistV0();     - table dst_v0_vertex
+    MakeHistPID();    - table primtrk & dst_dedx
+    MakeHistVertex(); - table dst_vertex
+    MakeHistXi();     - table dst_xi_vertex
+    MakeHistPoint();  - table point
+    MakeHistKink();   - table kinkVertex
+    MakeHistL3();     - table l3Track
+    MakeHistV0Eval(); - table ev0_eval
+    MakeHistRich();   - table g2t_rch_hit
+  </pre>
+   </h4>
+
+            <li>Finish -  doesn't do much of anything...
+
+         </ul>
+
+ <p>
+ <p>
+<a name="doc2b">
+      <li> <font  size ="+1" color="green"> StHistUtil - methods <font  size ="+1" color="black"> 
+
+         <ul>
+
+  <li> virtual void    
+    <font  size ="+1" color="red">SetPntrToMaker<font  size ="+1" color="black">(StMaker *m1);<br>
+       &nbsp - must input the pointer to a Maker (and cast as type StMaker) so that you can
+                use the StHistUtil methods <br>
+       &nbsp - do this FIRST!
+  <li> virtual TList*  
+    <font  size ="+1" color="red">FindHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp - looks for histograms from the Maker "dirName" which it takes as input <br>
+     &nbsp - searches first under the Maker and if they're not there, looks under the histogram
+             directory <br>
+     &nbsp - returns pointer to list of histograms <br>
+     &nbsp - you don't need to call this explicitly, since ListHists & DrawHists call it for you
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">ListHists<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp - finds histograms (FindHist) for given input Maker "dirName" and then lists the titles 
+
+  <li> virtual Int_t  
+    <font  size ="+1" color="red">DrawHists<font  size ="+1" color="black">(Char_t *dirName="QA"); <br>
+     &nbsp -  finds histograms (FindHist) for given input Maker "dirName" and then prints & draws them <br>
+     &nbsp -  uses settings and lists from the methods listed below<br>
+     &nbsp -  sets all statistics on using SetOptStat(111111) <br>
+     &nbsp - if it's a 2D histogram, prints it as a "box" plot <br>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetDefaultLogYList<font  size ="+1" color="black">(Char_t *dirName="QA");<br>
+     &nbsp -  sets a default list of histograms, for given input
+              Maker "dirName", that should be
+              drawn in logY scale <br>
+     &nbsp - only has default list for "QA" maker so far <br>
+     &nbsp - call this method *before* DrawHists
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">AddToLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -  adds "HistName" histogram name to list of those that
+           will be drawn in logY scale <br>
+     &nbsp - creates list if there isn't one already <br>
+     &nbsp - call this method *before* DrawHists <br>
+  <li> virtual Int_t   
+    <font  size ="+1" color="red">RemoveFromLogYList<font  size ="+1" color="black">(const Char_t *HistName="");<br>
+     &nbsp -   removes "HistName" histogram name to list of those that
+           will be drawn in logY scale <br>
+     &nbsp - first checks if there is a list <br>
+     &nbsp - call this method *before* DrawHists <br>
+   <li> virtual Int_t   
+    <font  size ="+1" color="red">ExamineLogYList();<font  size ="+1" color="black"><br>
+     &nbsp - prints out list of histograms that will be drawn in logY scale  <br>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetHistsNamesDraw<font  size ="+1" color="black">(const Char_t *firstName="*", 
+    const Char_t *lastName="*");<br>
+      &nbsp - sets first and last histogram names to be drawn,printed <br>
+      &nbsp - default is to draw,print them all <br>
+      &nbsp - DrawHists uses these names and only draws,prints the ones between the list  <br>
+  <li> virtual void    
+    <font  size ="+1" color="red">SetZones<font  size ="+1" color="black">(Int_t columns=2, Int_t rows=3);   <br>
+       &nbsp - zone setting for drawing,printing histograms <br>
+       &nbsp - default is 2 columns by 3 rows <br>
+       &nbsp - these settings are used by DrawHists method
+  <li> virtual void    
+    <font  size ="+1" color="red">SetPaperSize<font  size ="+1" color="black">(Int_t width=20, Int_t height=24); 
+     // A4 is 20,26  US letter is 20,24<br>
+       &nbsp - set paper size to draw,print histograms to <br>
+       &nbsp - default is US size <br>
+       &nbsp - these settings are used by DrawHists method
+  <li> virtual void    
+    <font  size ="+1" color="red">SetPostScriptFile<font  size ="+1" color="black">(const Char_t *psFileName="");<br>
+       &nbsp - set output postscript file name to print histograms to <br>
+       &nbsp - this filename is  used by DrawHists method
+         </ul>
+     </ul>
+
+<hr>
+<p>
+<a name="doc3">
+ <font  size ="+1" color="blue">
+ Standard Maker Names in BFC: <br>
+ &nbsp (use these as input to StHistUtil methods shown above)
+<font  size ="+1" color="black">
+ <h4>
+ <pre>
+  geant
+  db
+  calib
+  emc_raw
+  tpc_hits
+  svt_hits
+  ftpc_hits
+  tpc_tracks
+  svt_tracks
+  ftpc_tracks
+  ctf
+  mwc
+  trg
+  global
+  match
+  primary
+  v0
+  xi
+  kink
+  dst
+  StEventMaker
+  analysis
+  QA
+ </pre>
+ </h4>
+ 
+
+<hr>
+<p>
+<a name="doc4">
+<font  size ="+1" color="blue">
+  Library macros that use the code are (**)
+<font  size ="+1" color="black">
+   <ul>
+    <li> <font  size ="+1" color="red"> bfc.C <font  size ="+1" color="black"> <br>
+          &nbsp  - St_QA_Maker class runs during production to book & fill QA_Maker histograms
+            from dst tables
+    <li>  <font  size ="+1" color="red">bfcread_hist_list_all.C - <font  size ="+1" color="black"> <br>
+          &nbsp  - reads .hist.root file produced from bfc.C <br>
+          &nbsp  - lists all histograms (from all Makers) <br>
+          &nbsp  - shows how to do this in macro - not using utilities
+    <li>  <font  size ="+1" color="red">bfcread_hist_list.C  <font  size ="+1" color="black"> <br>
+           &nbsp  - reads .hist.root file produced from bfc.C and lists histograms for
+                    given Maker <br>
+           &nbsp - uses SetPntrToMaker, ListHists methods
+    <li>  <font  size ="+1" color="red">bfcread_hist_to_ps.C <font  size ="+1" color="black">  <br>
+          &nbsp   - reads .hist.root file produced from bfc.C  <br>
+          &nbsp   -  lists,draws,prints histograms for given Maker<br>
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
+    <li>  <font  size ="+1" color="red">bfcread_dst_QAhist.C <font  size ="+1" color="black"> <br>
+          &nbsp   -  reads .dst.root file or .dst.xdf file produced from bfc.C <br>
+          &nbsp   - creates chain and then runs the St_QA_Maker for Nevents <br>
+          &nbsp   -  lists,draws,prints histograms from QA-Maker   <br>                  
+          &nbsp  - uses SetPntrToMaker, ListHists,SetHistsNamesDraw,SetPostScriptFile, <br>
+                 &nbsp &nbsp SetZones,SetPaperSize,SetDefaultLogYList,ExamineLogYList,DrawHists methods
    </ul>
+
+<p>
+ <font  size ="+1" color="red">
+ ** NOTE!  
+<font  size ="+1" color="black">
+By looking at the bfcread_dst_QAHist.C macro, one can see how to use the StHistUtil
+    methods to find histograms after any Maker is used, and list or print & draw them.
+
 
 </h3>
 
