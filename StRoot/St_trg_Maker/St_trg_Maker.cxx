@@ -1,146 +1,10 @@
-// $Id: St_trg_Maker.cxx,v 1.40 2003/01/16 13:32:32 ward Exp $
-// $Log: St_trg_Maker.cxx,v $
-// Revision 1.40  2003/01/16 13:32:32  ward
-// Accomodation of the new trgStructures.h.
-//
-// Revision 1.37  2002/04/09 00:01:37  ward
-// Bug fix in Vladimir2Herbert().
-//
-// Revision 1.36  2002/02/19 18:34:44  ward
-// Changes from Jenn Klay: EMC unpacker rewritten, updated dsm-to-patch conversion to match offline software.
-//
-// Revision 1.35  2001/12/04 18:24:13  jeromel
-// Small modif of return value to make Insure happy.
-//
-// Revision 1.34  2001/10/16 20:26:02  ward
-// New code from Jennifer Klay for unpacking EMC data.
-//
-// Revision 1.33  2001/09/11 21:49:46  ward
-// Changes to StDaqLib/TRG for running year 2000 data.
-//
-// Revision 1.32  2001/09/04 20:06:33  ward
-// I had a typo in the previous correction.
-//
-// Revision 1.31  2001/09/04 20:02:49  ward
-// Correction in ctb_dsm_2001.map copied into maker code.
-//
-// Revision 1.30  2001/09/03 19:09:39  ward
-// Runtime selection of 2000 or 2001 trigger data format.
-//
-// Revision 1.29  2001/08/22 15:16:30  ward
-// Changed the laser flag from x9001 to x9009.
-//
-// Revision 1.28  2001/08/15 17:12:18  ward
-// m_Mode third bit means pass pulser events.
-//
-// Revision 1.27  2001/07/25 19:10:53  ward
-// New function InitCtbArrays2001 for ctb_dsm_2001.map.
-//
-// Revision 1.26  2001/07/18 20:12:15  ward
-// New trigger information for DST tables.
-//
-// Revision 1.25  2001/07/12 17:40:34  ward
-// New version of trgStructures.h, and modifications to other code in support thereof.
-//
-// Revision 1.24  2001/01/18 16:55:05  ward
-// Corrections in Vladimir2Herbert from Vladimir Morozov.
-//
-// Revision 1.23  2001/01/16 20:27:53  ward
-// npre=5 npost=5 instead of 0 in St_trg_Maker::HandleMwc
-//
-// Revision 1.22  2001/01/10 18:12:12  ward
-// MWC corrections from Vladimir Morozov.
-//
-// Revision 1.21  2001/01/02 18:10:44  ward
-// Pablo Yepes' modifications in support of CTU simulations.
-//
-// Revision 1.20  2000/10/02 19:41:54  ward
-// Added DSMInput and DetectorBusy to trigger DST output (dst_L0_Trigger).
-//
-// Revision 1.19  2000/08/19 19:51:55  ward
-// Change physics mask from 0x2XXX to 0x4XXX.
-//
-// Revision 1.18  2000/08/16 01:28:40  ward
-// Report TrgActionWd as diagnostic for oo.
-//
-// Revision 1.17  2000/08/15 19:41:32  ward
-// Configuration via m_mode of which event types are skipped.
-//
-// Revision 1.16  2000/08/13 18:32:59  ward
-// Returns kStErr for laser events.
-//
-// Revision 1.15  2000/07/27 18:06:18  ward
-// Put TriggerWd into DST instead of TrgToken (for Jan Belewski).
-//
-// Revision 1.14  2000/07/19 22:03:43  ward
-// Switch from non-attenuated to attenuated ZDC.
-//
-// Revision 1.13  2000/07/13 18:48:23  ward
-// Fixed ZDC indices according to email from Javier.
-//
-// Revision 1.12  2000/06/25 23:51:03  fisyak
-// Replace assert by return of kStErr
-//
-// Revision 1.11  2000/05/16 02:01:46  fisyak
-// Correction for removed  trg_fillDst
-//
-// Revision 1.10  2000/05/04 22:25:21  ward
-// New 3d DST tables, and some support for sim.
-//
-// Revision 1.9  2000/02/25 17:58:41  ward
-// Changed array sizes for ctb and mwc.  Thx to Joakim Nystrand.
-//
-// Revision 1.8  2000/02/04 18:57:17  ward
-// Added dst_L1_Trigger and dst_L2_Trigger to output.
-//
-// Revision 1.7  2000/01/26 18:55:37  ward
-// Changed name of L0 table from TrgDet2 to L0_Trigger.
-//
-// Revision 1.6  2000/01/24 20:35:39  ward
-// Access trigger data.
-//
-// Revision 1.5  1999/07/15 13:58:32  perev
-// cleanup
-//
-// Revision 1.4  1999/07/11 19:32:42  druss
-// Change DST table from dst_TriggerDetectors to dst_TrgDet.
-// The classname can only be 19 letters long.
-//
-// also put the m_Dataset->add line before the PAM is called.
-// SPIROS is checking in the change to the actual idl file (part of global)
-//
-// Revision 1.3  1999/06/24 18:02:46  druss
-// add a line to make sure that the table exists...
-//
-// Revision 1.2  1999/03/14 00:25:40  perev
-// New makers
-//
-// Revision 1.1  1999/02/06 01:51:22  yepes
-// Add trg maker
-//
-// Revision 1.7  1998/10/31 00:25:45  fisyak
-// Makers take care about branches
-//
-// Revision 1.6  1998/10/06 18:00:29  perev
-// cleanup
-//
-// Revision 1.5  1998/10/02 13:46:08  fine
-// DataSet->DataSetIter
-//
-// Revision 1.4  1998/08/14 15:25:58  fisyak
-// add options
-//
-// Revision 1.3  1998/08/10 02:32:07  fisyak
-// Clean up
-//
-// Revision 1.2  1998/07/20 15:08:15  fisyak
-// Add tcl and tpt
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_trg_Maker class for Makers                                        //
+// CVS history moved at the bottom                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
+
 #include "iostream.h"
 #include "St_trg_Maker.h"
 #include "StChain.h"
@@ -150,7 +14,7 @@
 #include "tables/St_dst_L0_Trigger_Table.h" // 24dec99
 #include "tables/St_dst_L1_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_L2_Trigger_Table.h" // 02feb00
-#include "tables/St_dst_TrgDet_Table.h" // 24dec99
+#include "tables/St_dst_TrgDet_Table.h"     // 24dec99
 #include "tables/St_ctu_raw_Table.h"
 #include "tables/St_mwc_raw_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
@@ -158,24 +22,30 @@
 
 #include "trgStructures.h"
 typedef struct {
-  EvtDescData    EvtDesc;  /* L1 Event Descriptor Data */  
-  TrgSumData     TrgSum;   /* summary data */
-  RawTrgDet      RAW[PREPOST];      /* For simplicity, I assume that you don't want pre and post history. */
+  EvtDescData    EvtDesc;           /* L1 Event Descriptor Data */  
+  TrgSumData     TrgSum;            /* summary data */
+  RawTrgDet      RAW[PREPOST];      /* For simplicity, I assume that you don't 
+				       want pre and post history. */
 } MarilynMonroe;
 MarilynMonroe *gs;
 
+
 #include "trgStructures2000.h"
 typedef struct {
-  EvtDescData2000    EvtDesc;  /* L1 Event Descriptor Data */  
-  TrgSumData2000     TrgSum;   /* summary data */
-  RawTrgDet2000      RAW[PREPOST];      /* For simplicity, I assume that you don't want pre and post history. */
+  EvtDescData2000    EvtDesc;       /* L1 Event Descriptor Data */  
+  TrgSumData2000     TrgSum;        /* summary data */
+  RawTrgDet2000      RAW[PREPOST];  /* For simplicity, I assume that you don't 
+				       want pre and post history. */
 } MarilynMonroe2000;
 MarilynMonroe2000 *gs2000;
+
+
 
 ClassImp(St_trg_Maker)
 #define PP printf(
 #define SANITYCheck(name,value) \
  if (name != value) {cout << "Value of "#name" = |" << name << "| instead of expected "#value << endl; return  kStErr;}
+
 
 //_____________________________________________________________________________
 St_trg_Maker::St_trg_Maker(const char *name):StMaker(name){
@@ -207,7 +77,8 @@ Int_t St_trg_Maker::Init(){
 #include "duplicated.code"
 
 ////////////////////////////////////////////////////////////////////////////////////////
-void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
+void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) 
+{
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();
   tt->TriggerActionWd  = 0;
@@ -219,22 +90,33 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   tt->MWC_CTB_moment   = 0;
 }
 
+/// Decode pBankTRGD and return the value of the year associated to the dataset
 int St_trg_Maker::YearOfData(St_DataSet *herb) 
 {
   unsigned char *data;
   StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
-  StTRGReader *trgReader = fromVictor->getTRGReader(); assert(trgReader);
+  StTRGReader *trgReader  = fromVictor->getTRGReader(); assert(trgReader);
   assert(trgReader->thereIsTriggerData());
-  data=(unsigned char*)(trgReader->fTRGImpReader->pBankTRGD);
-  data+=40; // Skip the 10 word DAQ bank header
-  data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
+  data  =(unsigned char*)(trgReader->fTRGImpReader->pBankTRGD);
+  data +=40;                                  // Skip the 10 word DAQ bank header
+  data +=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
+
   if(*data==0x12) return 2000;
   if(*data==0x13) return 2001;
   if(*data==0x20) return 2003;
   assert(0);  // Should not be here.  My ne dolshnie byt6 zdes6.
+
   return 0;   // to make insure happy
 }
 
+/*!
+
+  Get the DataSet associated with the DAQReader. Based on the decoded
+  year, returns  St_trg_Maker::Daq2000 St_trg_Maker::Daq (for year 2001)
+  both in duplicated.code (beware of macro replacement SWITCH() ) or 
+  St_trg_Maker::Daq2003 located in year2003.cxx .
+
+*/
 Int_t St_trg_Maker::Make(){
   static char initializationDone=0;
   St_dst_TrgDet     *dst1 = new St_dst_TrgDet("TrgDet",1);         if(!dst1) return kStWarn; dst1->SetNRows(1);
@@ -246,37 +128,52 @@ Int_t St_trg_Maker::Make(){
   m_DataSet->Add(dst3);
   m_DataSet->Add(dst4);
 
-  St_DataSet *herb = GetDataSet("StDAQReader");
-  if(herb) {
-    switch(YearOfData(herb)) {
+  St_DataSet *DAQdset = GetDataSet("StDAQReader");
+  if(DAQdset) {
+    switch(YearOfData(DAQdset)) {
       case 2000:
-        PP"This is St_trg_Maker, analyzing year 2000 trigger data.\n");
-        if(!initializationDone) { InitCtbArrays(); initializationDone=7; }
-        return Daq2000(herb,dst1,dst2,dst3,dst4);
+        PP"St_trg_Maker:: Make()  : analyzing year 2000 trigger data.\n");
+        if(!initializationDone) { 
+	  InitCtbArrays(); initializationDone=7; 
+	}
+        return Daq2000(DAQdset,dst1,dst2,dst3,dst4);
         break;
+
       case 2001:
-        PP"This is St_trg_Maker, analyzing year 2001 trigger data.\n");
-        if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
-        return Daq(herb,dst1,dst2,dst3,dst4);
+        PP"St_trg_Maker:: Make()  : analyzing year 2001 trigger data.\n");
+        if(!initializationDone) { 
+	  InitCtbArrays2001(); 
+	  initializationDone=7; 
+	}
+        return Daq(DAQdset,dst1,dst2,dst3,dst4);
         break;
+
       case 2003:
-        PP"This is St_trg_Maker, analyzing year 2003 trigger data.\n");
-        if(!initializationDone) { InitCtbArrays2001(); /* use 2001 for 2003 */ initializationDone=7; }
-        return Daq2003(herb,dst1,dst2,dst3,dst4);
+        PP"St_trg_Maker:: Make()  : analyzing year 2003 trigger data.\n");
+        if(!initializationDone) { 
+	  InitCtbArrays2001(); /* use 2001 for 2003 */ 
+	  initializationDone=7; 
+	}
+        return Daq2003(DAQdset,dst1,dst2,dst3,dst4);
         break;
+
       default: assert(0);
     }
+
   } else {
     if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
     return Sim(dst1,dst2,dst3,dst4);
   }
 }
+
+
 void St_trg_Maker::TakeCareOfL1andL2Sim(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
   // Like the rest of the sim stuff, this needs to be filled in.
-    printf ( "we are in TakeCareOfL1andL2Sim\n" ) ;
+  printf ( "we are in TakeCareOfL1andL2Sim\n" ) ;
 }
+
+
 int St_trg_Maker::HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1) {
-//
   if ( !dst1 ) {
      printf ( "St_trg_Maker::HandleCtu: dst1 not found \n" ) ;
      return 0 ;
@@ -1078,3 +975,149 @@ void St_trg_Maker::InitMwcArrays(void) {
   auxmwcmap[30] =  57;
   auxmwcmap[31] =  56;
 }
+
+
+
+
+// $Id: St_trg_Maker.cxx,v 1.41 2003/01/21 01:31:57 jeromel Exp $
+// $Log: St_trg_Maker.cxx,v $
+// Revision 1.41  2003/01/21 01:31:57  jeromel
+// Minor changes in messaging (small request from Janet) to bring some consistency.
+// doxygenized the .h
+//
+// Revision 1.40  2003/01/16 13:32:32  ward
+// Accomodation of the new trgStructures.h.
+//
+// Revision 1.37  2002/04/09 00:01:37  ward
+// Bug fix in Vladimir2Herbert().
+//
+// Revision 1.36  2002/02/19 18:34:44  ward
+// Changes from Jenn Klay: EMC unpacker rewritten, updated dsm-to-patch conversion to match offline software.
+//
+// Revision 1.35  2001/12/04 18:24:13  jeromel
+// Small modif of return value to make Insure happy.
+//
+// Revision 1.34  2001/10/16 20:26:02  ward
+// New code from Jennifer Klay for unpacking EMC data.
+//
+// Revision 1.33  2001/09/11 21:49:46  ward
+// Changes to StDaqLib/TRG for running year 2000 data.
+//
+// Revision 1.32  2001/09/04 20:06:33  ward
+// I had a typo in the previous correction.
+//
+// Revision 1.31  2001/09/04 20:02:49  ward
+// Correction in ctb_dsm_2001.map copied into maker code.
+//
+// Revision 1.30  2001/09/03 19:09:39  ward
+// Runtime selection of 2000 or 2001 trigger data format.
+//
+// Revision 1.29  2001/08/22 15:16:30  ward
+// Changed the laser flag from x9001 to x9009.
+//
+// Revision 1.28  2001/08/15 17:12:18  ward
+// m_Mode third bit means pass pulser events.
+//
+// Revision 1.27  2001/07/25 19:10:53  ward
+// New function InitCtbArrays2001 for ctb_dsm_2001.map.
+//
+// Revision 1.26  2001/07/18 20:12:15  ward
+// New trigger information for DST tables.
+//
+// Revision 1.25  2001/07/12 17:40:34  ward
+// New version of trgStructures.h, and modifications to other code in support thereof.
+//
+// Revision 1.24  2001/01/18 16:55:05  ward
+// Corrections in Vladimir2Herbert from Vladimir Morozov.
+//
+// Revision 1.23  2001/01/16 20:27:53  ward
+// npre=5 npost=5 instead of 0 in St_trg_Maker::HandleMwc
+//
+// Revision 1.22  2001/01/10 18:12:12  ward
+// MWC corrections from Vladimir Morozov.
+//
+// Revision 1.21  2001/01/02 18:10:44  ward
+// Pablo Yepes' modifications in support of CTU simulations.
+//
+// Revision 1.20  2000/10/02 19:41:54  ward
+// Added DSMInput and DetectorBusy to trigger DST output (dst_L0_Trigger).
+//
+// Revision 1.19  2000/08/19 19:51:55  ward
+// Change physics mask from 0x2XXX to 0x4XXX.
+//
+// Revision 1.18  2000/08/16 01:28:40  ward
+// Report TrgActionWd as diagnostic for oo.
+//
+// Revision 1.17  2000/08/15 19:41:32  ward
+// Configuration via m_mode of which event types are skipped.
+//
+// Revision 1.16  2000/08/13 18:32:59  ward
+// Returns kStErr for laser events.
+//
+// Revision 1.15  2000/07/27 18:06:18  ward
+// Put TriggerWd into DST instead of TrgToken (for Jan Belewski).
+//
+// Revision 1.14  2000/07/19 22:03:43  ward
+// Switch from non-attenuated to attenuated ZDC.
+//
+// Revision 1.13  2000/07/13 18:48:23  ward
+// Fixed ZDC indices according to email from Javier.
+//
+// Revision 1.12  2000/06/25 23:51:03  fisyak
+// Replace assert by return of kStErr
+//
+// Revision 1.11  2000/05/16 02:01:46  fisyak
+// Correction for removed  trg_fillDst
+//
+// Revision 1.10  2000/05/04 22:25:21  ward
+// New 3d DST tables, and some support for sim.
+//
+// Revision 1.9  2000/02/25 17:58:41  ward
+// Changed array sizes for ctb and mwc.  Thx to Joakim Nystrand.
+//
+// Revision 1.8  2000/02/04 18:57:17  ward
+// Added dst_L1_Trigger and dst_L2_Trigger to output.
+//
+// Revision 1.7  2000/01/26 18:55:37  ward
+// Changed name of L0 table from TrgDet2 to L0_Trigger.
+//
+// Revision 1.6  2000/01/24 20:35:39  ward
+// Access trigger data.
+//
+// Revision 1.5  1999/07/15 13:58:32  perev
+// cleanup
+//
+// Revision 1.4  1999/07/11 19:32:42  druss
+// Change DST table from dst_TriggerDetectors to dst_TrgDet.
+// The classname can only be 19 letters long.
+//
+// also put the m_Dataset->add line before the PAM is called.
+// SPIROS is checking in the change to the actual idl file (part of global)
+//
+// Revision 1.3  1999/06/24 18:02:46  druss
+// add a line to make sure that the table exists...
+//
+// Revision 1.2  1999/03/14 00:25:40  perev
+// New makers
+//
+// Revision 1.1  1999/02/06 01:51:22  yepes
+// Add trg maker
+//
+// Revision 1.7  1998/10/31 00:25:45  fisyak
+// Makers take care about branches
+//
+// Revision 1.6  1998/10/06 18:00:29  perev
+// cleanup
+//
+// Revision 1.5  1998/10/02 13:46:08  fine
+// DataSet->DataSetIter
+//
+// Revision 1.4  1998/08/14 15:25:58  fisyak
+// add options
+//
+// Revision 1.3  1998/08/10 02:32:07  fisyak
+// Clean up
+//
+// Revision 1.2  1998/07/20 15:08:15  fisyak
+// Add tcl and tpt
+//
