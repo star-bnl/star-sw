@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.29 1999/03/22 14:45:23 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.30 1999/04/06 19:40:08 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.30  1999/04/06 19:40:08  nevski
+// variable size volumes
+//
 // Revision 1.29  1999/03/22 14:45:23  nevski
 // geometry tree corrected
 //
@@ -436,7 +439,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.29 1999/03/22 14:45:23 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.30 1999/04/06 19:40:08 nevski Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -709,17 +712,20 @@ void St_geant_Maker::Call(const Char_t *name)
 //_____________________________________________________________________________
 void St_geant_Maker::Work()
 {  
+  struct   Medium 
+    { Char_t name[20]; Int_t nmat, isvol, ifield; Float_t fieldm; };
   St_Node  *node=0;
-  Float_t  *volu=0, *position=0, *mother=0;
+  Float_t  *volu=0, *position=0, *mother=0, *p=0;
   Int_t    who=0, irot=0, mcopy=0, ivol=0;
   Int_t    nvol=cnum->nvolum;
   Float_t  theta1,phi1, theta2,phi2, theta3,phi3, type;
 
   TObjArray nodes(nvol+1);
-
+  new TGeometry("STAR","nash STAR");
+ 
   printf(" looping on agvolume \n");
   //   ======================================================
-  while (agvolume_(&node,&volu,&position,&mother,&who,&mcopy)) 
+  while (agvolume_(&node,&volu,&position,&mother,&who,&mcopy,&p)) 
   { // ======================================================
   
     typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
@@ -727,9 +733,10 @@ void St_geant_Maker::Work()
     TShape*  t;
     shapes   shape   = (shapes) volu[1];
     Int_t    nin     = 0;
-    Int_t    np      = (int)volu[4];
-    Float_t* p       = volu+6;
-    Float_t* att     = volu+6+np; 
+    Int_t    medium  = (Int_t)  volu[3]; 
+    Int_t    np      = (Int_t)  volu[4];
+    Float_t* p0      = volu+6;
+    Float_t* att     = volu+6+np;
     Char_t   name[]  = {0,0,0,0,0};
     Char_t   nick[]  = {0,0,0,0,0};
     float    xx[3]   = {0.,0.,0.};
@@ -740,7 +747,7 @@ void St_geant_Maker::Work()
    {
     strncpy(name,(const Char_t*)(volu-5),4);
     t=(TShape*)gGeometry->GetListOfShapes()->FindObject(name);
-    // printf(" found object %s %d \n",name,t);
+    printf(" found object %s %d %f %f \n",name,t,p0[0],p[0]);
     if (!t) 
     { switch (shape) 
       { case BOX:  t=new TBRIK(name,"BRIK","void",
@@ -792,6 +799,7 @@ void St_geant_Maker::Work()
     // to build a compressed tree, name should be checked for repetition
     newNode = new St_Node(name,nick,t);
     newNode -> SetVisibility(att[1]);
+    //if newNode -> Flag();
 
 //  --------------------
     nodes[who]=newNode;
@@ -809,6 +817,7 @@ void St_geant_Maker::Work()
     node = newNode;
   };
   fNode=node;
+  gGeometry->GetListOfNodes()->Add(node);
 }
 
 //------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.10 1999/03/11 00:15:23 perev Exp $
+// $Id: St_geant_Maker.h,v 1.11 1999/04/06 19:40:09 nevski Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -10,15 +10,18 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
+ class St_Node;
+
 #ifndef __CINT__
 #include "fortranc.h"
 #define rootmaptable_ F77_NAME(rootmaptable,ROOTMAPTABLE)
+#define agvolume_     F77_NAME(agvolume,AGVOLUME)
 extern "C" {
 R__EXTERN  void type_of_call rootmaptable_(Char_t *,Char_t *, Char_t*, Int_t *, Char_t *);
+R__EXTERN Int_t type_of_call agvolume_(St_Node**,Float_t**,Float_t**,
+                                       Float_t**,Int_t*,Int_t*,Float_t**);
 }
 #endif
-
-class St_Node;
 
 #endif
 class TRotMatrix;

@@ -32,9 +32,9 @@
  end
 *
 *----------------------------------------------------------------------------
- function agvolume(node,par,pos,mot,who,mcopy)
+ function agvolume(node,par,pos,mot,who,mcopy,par1)
 +CDE,TYPING,GCBANK,GCVOLU,GCUNIT.
- integer  agvolume,node,par,pos,mot,old,LOCB
+ integer  agvolume,node,par,pos,mot,old,LOCB,par1
 *
  Integer k,n,mother,daughter,where,who,copy,found,ier,ia,mcopy,nvol
  Integer item(20),count(20),list(20),nodes(0:20),
@@ -72,6 +72,7 @@
    Lnam(k)=IQ(JVOLUM+who); Lnum(k)=copy; Lvol(k)=who;
 
    Call GLVOLU(k,Lnam, Lnum, ier)
+   par1=LOCB(Q(LQ(JGPAR-Nlevel)+1))
    call UHTOC(Lnam(k),4,cn,4)
 *   if (count(k)<0) print *,count(k),copy,Nlevel,(GRMAT(i,Nlevel),i=1,9);
 *   if (count(k)=-30 & iax(k)==2) _
