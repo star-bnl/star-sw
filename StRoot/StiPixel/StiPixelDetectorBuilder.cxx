@@ -46,7 +46,7 @@ void StiPixelDetectorBuilder::buildDetectors(StMaker&source)
   setNSectors(1,18);
   
   //_gas is the gas that the pixel detector lives in
-  _gas            = add(new StiMaterial("PixelAir",     0.49919,  1., 0.001205, 30420.*0.001205, 5.) );
+  _gas            = add(new StiMaterial("PixelAir",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
   //_fcMaterial is the (average) material that makes up the detector elements.  Here I use ~silicon
   StiMaterial * material = add(new StiMaterial("PixelSi", 14.,  28.0855,   2.33,     21.82,   14.*12.*1e-9) );
 

@@ -104,7 +104,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 				 << _geometry->getBarrelRadius(layer+1) << endl;
 
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Materials" << endl;
-  _gasMat    = add(new StiMaterial("Air",     0.49919,  1.,       0.001205, 30420.*0.001205, 5.) );
+  _gasMat    = add(new StiMaterial("Air",7.3, 14.61, 0.001205, 30420.*0.001205, 7.3*12.e-9));
   _siMat     = add(new StiMaterial("Si",     14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
   _hybridMat = add(new StiMaterial("Hybrid", 14.,      28.0855,   2.33,     21.82,           14.*12.*1e-9) );
   cout << "StiSvtDetectorBuilder::buildDetectors() -I- Define Svt Shapes" << endl;

@@ -28,7 +28,7 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s)
   float thickness = 0.076;
   float dPhi=M_PI/6.;
   float depth = 200.; // was 20...
-  _pipeMaterial = add(new StiMaterial("Be", 4.,9.010, 1.848, 65.19, 4.*12.) );  
+  _pipeMaterial = add(new StiMaterial("Be", 4.,9.010, 1.848, 65.19, 4.*12.e-9) );  
   _vacuumMaterial = add(new StiMaterial("Vaccum",0., 1., 0., 1e30, 0.)  );
 
   //Instantiate energy loss detector for beam pipe material  
