@@ -79,6 +79,10 @@ CPPFLAGS += -D__ROOT__
 #	Skip up to the end
 #
 FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx))
+ifeq ($(PKGNAME),xdf2root)
+FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
+INPUT_DIRS := $(STAR)/asps/staf/dsl/src
+endif
 DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))
 
@@ -86,7 +90,7 @@ ifneq (,$(DOIT))
 DEP_DIR := $(SYS_DIR)/dep/$(PKGNAME)
 
 OUPUT_DIRS := $(LIB_DIR) $(OBJ_DIR) $(DEP_DIR) $(BIN_DIR) $(TMP_DIR) $(GEN_DIR) $(SRC_DIR) 
-INPUT_DIRS := $(SRC_DIR) $(SRM_DIR) 
+INPUT_DIRS += $(SRC_DIR) $(SRM_DIR) 
 
 # 	Make dirs before make real work. Othervice VPATH does not see
 #    	non existing directories
