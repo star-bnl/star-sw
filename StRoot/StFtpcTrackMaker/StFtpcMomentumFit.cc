@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.1 2000/05/10 13:39:19 oldi Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.2 2000/07/21 09:48:16 hummler Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.2  2000/07/21 09:48:16  hummler
+// calculate correct chisquare
+//
 // Revision 1.1  2000/05/10 13:39:19  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -22,6 +25,7 @@
 #include "StFtpcMomentumFit.hh"
 #include "SystemOfUnits.h"
 #include "PhysicalConstants.h"
+#include "StMessMgr.h"
 //#ifdef __ROOT__
 #ifndef gufld
 #define gufld gufld_
@@ -552,18 +556,37 @@ int StFtpcMomentumFit::CircleFit(double x[],double y[], double xw[], double yw[]
   
   // compute chi2
   double chi2 =0;
-  double wchi2=0;
+  double variance=0;
+//   double wchi2=0;
+//   for(i=0;i<num;i++)
+//     {
+//       x[i] = x[i] + xav;
+//       y[i] = y[i] + yav;
+      
+//       double err = R - sqrt(xw[i]*(x[i]-xc)*xw[i]*(x[i]-xc) 
+// 			    + yw[i]*(y[i]-yc)*yw[i]*(y[i]-yc));
+//       chi2 += err*err;
+//       wchi2 += xw[i]*xw[i]+yw[i]*yw[i];
+//     }
+//   chi2 *= num / wchi2;
+
+
   for(i=0;i<num;i++)
     {
       x[i] = x[i] + xav;
       y[i] = y[i] + yav;
       
-      double err = R - sqrt(xw[i]*(x[i]-xc)*xw[i]*(x[i]-xc) 
-			    + yw[i]*(y[i]-yc)*yw[i]*(y[i]-yc));
+      double err = R - sqrt((x[i]-xc)*(x[i]-xc)+(y[i]-yc)*(y[i]-yc));
       chi2 += err*err;
-      wchi2 += xw[i]*xw[i]+yw[i]*yw[i];
+      if(i>0)
+	{
+	  // approximation for sigma r, more precise using atan...
+	  variance += 1/(xw[i]*xw[i])+1/(yw[i]*yw[i]);
+	}
     }
-  chi2 *= num / wchi2;
+  variance /= (num-1);
+  chi2 /= variance;
+
   
   mXCenter=xc;
   mYCenter=yc;
@@ -576,7 +599,7 @@ int StFtpcMomentumFit::CircleFit(double x[],double y[], double xw[], double yw[]
 void StFtpcMomentumFit::LineFit(double *xval, double *yval, double *zval, double *xw, double *yw, int num)
 {
   double x_ss=0, x_sang=0, x_sz=0, x_szang=0, x_szz=0;
-  double angle=0, weight, t;
+  double weight, t;
   int i;
   
   for(i=0; i<num; i++)
@@ -620,17 +643,37 @@ void StFtpcMomentumFit::LineFit(double *xval, double *yval, double *zval, double
       mArcSlope=0;
     }
 
-  double chi2, wchi2;
+  double chi2=0, variance=0;
   for(i=0;i<num;i++)
     {      
-      angle = atan((xval[i]-mXCenter)/(yval[i]-mYCenter));
-      weight = sqrt(xw[i]*cos(angle)*xw[i]*cos(angle)
-		    +yw[i]*sin(angle)*yw[i]*sin(angle));
-      double err = weight*(angle - (mArcOffset + mArcSlope*zval[i]));
+      double angle = atan((yval[i]-mYCenter)/(xval[i]-mXCenter));
+      if(xval[i]-mXCenter<0)
+	angle+=pi;
+      else if(yval[i]-mYCenter<0)
+	angle+=twopi;
+      double lastangle = mArcOffset + mArcSlope*zval[i];
+      // shift into same phase
+      if(i!=0)
+	{
+	  if(angle>lastangle+pi)
+	    angle-=twopi;
+	  if(angle<lastangle-pi)
+	    angle+=twopi;
+	}
+      double err = (angle - (mArcOffset + mArcSlope*zval[i]));
       chi2 += err*err;
-      wchi2 += weight*weight;
+      if(i>0)
+	{
+	  // approximation for sigma r, more precise using atan...
+	  double temp= ((1/xw[i]*1/xw[i])+(1/yw[i]*1/yw[i]))
+	    *((mArcSlope*(zval[i]-zval[0]))*(mArcSlope*(zval[i]-zval[0])))
+	    /((xval[i]-xval[0])*(xval[i]-xval[0])+(yval[i]-yval[0])*(yval[i]-yval[0]));
+	  variance+= temp;
+	}
     }
-  chi2 *= num / wchi2;
+  variance/=(num-1);
+  chi2/=variance;
+
 
   mChi2Lin = chi2;
 }
