@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.12 2000/02/14 20:50:29 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $
  *
  * Author: Jon Gans
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.12  2000/02/14 20:50:29  lasiuk
- * use DAQ/sim interface with a switch settable at the c'tor
+ * Revision 1.13  2000/02/21 23:20:10  lasiuk
+ * debug output formatting and reduce output to screen
+ *
+ * Revision 1.15  2000/04/05 21:25:18  lasiuk
+ * with CF
  *
  * Revision 1.14  2000/03/12 23:49:26  lasiuk
  * order of arguments for the reader
@@ -124,7 +127,7 @@ Int_t StRchMaker::Make() {
     // Create the table...right now with the maximum number of entries
     // this is cleaned up immediately
     //
-    cout << "Try allocalte richPixelTable" << endl;
+    //cout << "Try allocalte richPixelTable" << endl;
     St_dst_rch_pixel* richPixelTable =
 	new St_dst_rch_pixel("dst_rch_pixel",mNumberOfPads);
 
@@ -167,21 +170,21 @@ Int_t StRchMaker::Make() {
 		    //
 		    // add to the table
 		    //
-		    richPixelTable->AddAt(&aPixel, currentTableRow);
+		    richPixelTable->AddAt(aPixel, currentTableRow);
 		    currentTableRow++;
 								   theADCValue));
 			//
 		    if (theADCValue > 10) {
-			cout << "row: "  << iRow
-			     << " pad: " << iPad
+			cout << "pad: "  << iPad
+			     << " row: " << iRow
 			     << " adc: " << theADCValue
 			     << " code " << codedValue << endl;
 			
 			short decodepad = (codedValue         & 0xff);
 			short decoderow = ((codedValue >> 8)  & 0xff);
 			short decodeadc = ((codedValue >> 16) & 0x3ff);
-			cout << decoderow << "/"
-			     << decodepad << "/"
+			cout << decodepad << "/"
+			     << decoderow << "/"
 			     << decodeadc << endl;
 		    }
 #ifdef RCH_HISTOGRAM
@@ -224,16 +227,16 @@ Int_t StRchMaker::Make() {
 //     }
 	mTheRichReader = 0;
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.12 2000/02/14 20:50:29 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.12 2000/02/14 20:50:29 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.12 2000/02/14 20:50:29 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.12 2000/02/14 20:50:29 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 
