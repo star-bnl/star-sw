@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.316 2003/01/17 18:09:12 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.317 2003/01/23 22:53:57 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -455,7 +455,7 @@ Bfc_st BFC1[] = {
 
   {"EMCmDST"  ,"","MuDSTChain","MuDSTDeps,EmcUtil",                     "StEmcMicroDstMaker","StMuDSTMaker",
                                                                                  "Writes EMC MuDST",kFALSE},
-  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,StrngMuDST",                        "StMuDstMaker","StMuDSTMaker",
+  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,EmcUtil,StrngMuDST",                "StMuDstMaker","StMuDSTMaker",
                                                                               "Writes Common MuDST",kFALSE},
 
 
@@ -918,7 +918,7 @@ Bfc_st BFC2[] = {
 
   {"EMCmDST"  ,"","MuDSTChain","MuDSTDeps,EmcUtil",                     "StEmcMicroDstMaker","StMuDSTMaker",
                                                                                  "Writes EMC MuDST",kFALSE},
-  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,StrngMuDST",                        "StMuDstMaker","StMuDSTMaker",
+  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,EmcUtil,StrngMuDST",                "StMuDstMaker","StMuDSTMaker",
                                                                               "Writes Common MuDST",kFALSE},
 
 
