@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.3 2004/06/22 16:49:04 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.4 2004/07/21 14:13:01 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -24,8 +24,11 @@ class dEdx_t : public TObject {
   Int_t    sector;
   Int_t    row;
   Int_t    pad;
+  Int_t    Npads;
+  Int_t    Ntbins;
   Double_t ZdriftDistance;     // drift distance
   Double_t ZdriftDistanceO2;     // ZdriftDistance*ppmOxygenIn
+  Double_t ZdriftDistanceO2W;     // ZdriftDistance*ppmOxygenIn*ppmWaterOut
   Double_t dE;
   Double_t dx;
   Double_t dx0;    // stright line approximation
@@ -100,8 +103,9 @@ class StTpcdEdxCorrection : public TObject {
     ktpcGas              ,
     ktpcPressure         ,
     ktpcMethaneIn        ,
-    ktpcGasTemperature        ,
-    ktpcWaterOut 
+    ktpcGasTemperature   ,
+    ktpcWaterOut         ,
+    kTpcPadTBins
   };
     //  ktrigDetSums      ,
     //  ktpcGainMonitor   ,
@@ -122,6 +126,7 @@ class StTpcdEdxCorrection : public TObject {
   void SettpcMethaneIn         (St_tpcCorrection   *m = 0);
   void SettpcGasTemperature         (St_tpcCorrection   *m = 0);
   void SettpcWaterOut         (St_tpcCorrection   *m = 0);
+  void SetTpcPadTBins         (St_tpcCorrection   *m = 0);
   //  void SettrigDetSums          (St_trigDetSums      *m = 0);
   //  void SettpcGainMonitor       (St_tpcGainMonitor   *m = 0);
   
@@ -140,6 +145,7 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC *tpcMethaneIn()        {return m_tpcMethaneIn;}
   St_tpcCorrectionC *tpcGasTemperature()        {return m_tpcGasTemperature;}
   St_tpcCorrectionC *tpcWaterOut()        {return m_tpcWaterOut;}
+  St_tpcCorrectionC *TpcPadTBins()        {return m_TpcPadTBins;}
   //  St_trigDetSums    *trigDetSums()     {return m_trigDetSums;}
   //  St_tpcGainMonitor *tpcGainMonitor()  {return m_tpcGainMonitor;}
   Int_t Debug()                            {return m_Debug;}
@@ -158,6 +164,7 @@ class StTpcdEdxCorrection : public TObject {
   St_tpcCorrectionC   *m_tpcMethaneIn;         //!
   St_tpcCorrectionC   *m_tpcGasTemperature;    //!
   St_tpcCorrectionC   *m_tpcWaterOut;          //!
+  St_tpcCorrectionC   *m_TpcPadTBins;          //!
   St_trigDetSums      *m_trigDetSums;          //!
   trigDetSums_st      *m_trig;                 //!
   //  St_tpcGainMonitor   *m_tpcGainMonitor;       //!

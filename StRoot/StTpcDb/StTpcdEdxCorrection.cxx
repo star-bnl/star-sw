@@ -18,8 +18,10 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
   m_Multiplicity(0),m_AdcCorrection(0),
   m_zCorrection(0),m_dXCorrection (0),
   m_TpcdEdxCor(0),m_TpcLengthCorrection(0),
-  m_tpcGas(0),m_tpcPressure(0), m_tpcMethaneIn(0), m_tpcGasTemperature(0), m_tpcWaterOut(0), m_Debug(debug),
-  m_trigDetSums(0), m_trig(0)//,m_tpcGainMonitor(0)  
+  m_tpcGas(0),m_tpcPressure(0), m_tpcMethaneIn(0), 
+  m_tpcGasTemperature(0), m_tpcWaterOut(0), m_TpcPadTBins(0), 
+  m_trigDetSums(0), m_trig(0),//,m_tpcGainMonitor(0)  
+  m_Debug(debug)
 {
   assert(gStTpcDb);
   if (!m_Mask) {
@@ -27,6 +29,7 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
     SETBIT(m_Mask,ktpcMethaneIn); 
     SETBIT(m_Mask,ktpcGasTemperature); 
     SETBIT(m_Mask,ktpcWaterOut); 
+    SETBIT(m_Mask,kTpcPadTBins); 
     SETBIT(m_Mask,kAdcCorrection); 
     SETBIT(m_Mask,kTpcSecRow); 
     SETBIT(m_Mask,kDrift);
@@ -79,6 +82,14 @@ StTpcdEdxCorrection::StTpcdEdxCorrection(Int_t option, Int_t debug) :
 	cout << "=== tpcWaterOut is missing ===" << endl;
       }
       SettpcWaterOut(tpcWaterOut);
+    }
+    if (TESTBIT(m_Mask,kTpcPadTBins)) {
+      gMessMgr->Warning() << "StTpcdEdxCorrection: TpcPadTBins is ON" << endm;
+      St_tpcCorrection *TpcPadTBins = (St_tpcCorrection *) tpc_calib->Find("TpcPadTBins");
+      if (!TpcPadTBins) {
+	cout << "=== TpcPadTBins is missing ===" << endl;
+      }
+      SetTpcPadTBins(TpcPadTBins);
     }
   }
   if (TESTBIT(m_Mask,kDrift)) {
@@ -143,10 +154,10 @@ StTpcdEdxCorrection::~StTpcdEdxCorrection() {
   SafeDelete(m_tpcMethaneIn);
   SafeDelete(m_tpcGasTemperature);
   SafeDelete(m_tpcWaterOut);
+  SafeDelete(m_TpcPadTBins);
 }
 //________________________________________________________________________________
 Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) { 
-  Int_t iok = -1;
   Double_t dEU = CdEdx.dE;
   Double_t dE  = dEU;
   Double_t dER = dE;
@@ -193,17 +204,11 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
     }
   }
   if (m_AdcCorrection) {
-#if 0
-    Int_t nc = m_AdcCorrection->GetNRows() - 2;
-    if (nc >= 0) {
-      // correction using positive tracks with built it drift time correction
-      // x:x*pow(10.,mu+7.6e-7*y); x = predicted; y = DriftLength*ppOx
-      dE = 1.e-6*m_AdcCorrection->CalcCorrection(nc+kTpcOutIn,1.e6*dE);
-    }
-#else
     Double_t ADC = dE/mAdc2GeV[kTpcOutIn];
     dE = mAdc2GeV[kTpcOutIn]*m_AdcCorrection->CalcCorrection(kTpcOutIn,ADC);
-#endif
+  }
+  if (m_TpcPadTBins) {
+    dE *= TMath::Exp(-m_TpcPadTBins->CalcCorrection(kTpcOutIn,CdEdx.Npads*CdEdx.Ntbins));
   }
   dER = dE;
   Double_t gc = 1;
@@ -212,7 +217,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
     gc =  gain->GainScale[row-1];
     CdEdx.SigmaFee = gain->GainRms[row-1];
   }
-  if (gc < 0.0) return iok;;
+  if (gc <= 0.0) return 1;;
   dE *= gc;
   dES = dE;
   dE *= PressureScale; 
@@ -221,8 +226,10 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   dET = dE;
   dEM = dE;
   Double_t ZdriftDistanceO2 = 0;
+  Double_t ZdriftDistanceO2W = 0;
   if (m_tpcGas) {
     ZdriftDistanceO2 = ZdriftDistance*(*m_tpcGas)[0].ppmOxygenIn;
+    ZdriftDistanceO2W = ZdriftDistanceO2*(*m_tpcGas)[0].ppmWaterOut;
     if (m_drift) {// Blair correction 
       //	    Double_t DriftCorr = cor->a[1]*(ZdriftDistanceO2 - cor->a[0]);
       //	    dE *= TMath::Exp(-DriftCorr);
@@ -231,10 +238,13 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   }
   dEO = dE;
   if (m_zCorrection) {
-    tpcCorrection_st *cor = ((St_tpcCorrection *)  m_zCorrection->Table())->GetTable() + kTpcOutIn;
-    if (cor->min > 0 && cor->min > ZdriftDistance) return iok;;
-    if (cor->max > 0 && ZdriftDistance > cor->max) return iok;;
-    dE *= TMath::Exp(-m_zCorrection->CalcCorrection(kTpcOutIn,ZdriftDistance));
+    Int_t kOffSet = kTpcOutIn;
+    tpcCorrection_st *cor = ((St_tpcCorrection *)  m_zCorrection->Table())->GetTable();
+    if (cor->nrows == 45) kOffSet = row - 1;
+    cor += kOffSet;
+    if (cor->min > 0 && cor->min > ZdriftDistance) return 2;;
+    if (cor->max > 0 && ZdriftDistance > cor->max) return 2;;
+    dE *= TMath::Exp(-m_zCorrection->CalcCorrection(kOffSet,ZdriftDistance));
   }
   dEZ = dE;
   if (m_dXCorrection) {
@@ -246,7 +256,9 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
     dE *= TMath::Exp(-dXCorr);
   }
   dEX = dE;
-  if (dE <= 0 || dx <= 0) return iok;;
+  if (dE <= 0 || dx <= 0) {
+    return 3;
+  }
   CdEdx.dE      = dE; // corrected
   CdEdx.dEU     = dEU; // uncorrected
   CdEdx.dER     = dER; // row correction
@@ -258,6 +270,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   CdEdx.dEZ     = dEZ; // Drift Distance
   CdEdx.dEX     = dEX; // dE correction
   CdEdx.ZdriftDistanceO2 = ZdriftDistanceO2;
+  CdEdx.ZdriftDistanceO2W = ZdriftDistanceO2W;
   CdEdx.dEdx    = CdEdx.dE/CdEdx.dx;
   CdEdx.dEdxL   = TMath::Log(CdEdx.dEdx);
   CdEdx.dEUdx   = CdEdx.dEU/CdEdx.dx;
@@ -279,8 +292,7 @@ Int_t  StTpcdEdxCorrection::dEdxCorrection(dEdx_t &CdEdx) {
   CdEdx.dEXdxL  = TMath::Log(CdEdx.dEXdx);
   CdEdx.dEMdx   = CdEdx.dEM/CdEdx.dx;
   CdEdx.dEMdxL  = TMath::Log(CdEdx.dEMdx);
-  iok = 0;
-  return iok;
+  return 0;
 }
 #define PrPP(A,B) {if (B)  gMessMgr->Warning() << "StTpcdEdxCorrection: " << (#A) << " correction has been set" << endm;}
 #define PrPD(A,B) {if (B) {gMessMgr->Warning() << "StTpcdEdxCorrection: " << (#A) << " correction has been set" << endm; \
@@ -298,6 +310,7 @@ void StTpcdEdxCorrection::SettpcPressure          (St_tpcCorrection *m) {PrPD(tp
 void StTpcdEdxCorrection::SettpcMethaneIn         (St_tpcCorrection *m) {PrPD(tpcMethaneIn ,m); if (m) m_tpcMethaneIn= new St_tpcCorrectionC(m);}          
 void StTpcdEdxCorrection::SettpcGasTemperature         (St_tpcCorrection *m) {PrPD(tpcGasTemperature ,m); if (m) m_tpcGasTemperature= new St_tpcCorrectionC(m);}          
 void StTpcdEdxCorrection::SettpcWaterOut         (St_tpcCorrection *m) {PrPD(tpcWaterOut ,m); if (m) m_tpcWaterOut= new St_tpcCorrectionC(m);}          
+void StTpcdEdxCorrection::SetTpcPadTBins         (St_tpcCorrection *m) {PrPD(TpcPadTBins ,m); if (m) m_TpcPadTBins= new St_tpcCorrectionC(m);}          
 //void StTpcdEdxCorrection::SettrigDetSums          (St_trigDetSums      *m = 0) {PrPD(SettrigDetSums        ,m); m_trigDetSums = m;}
 //void StTpcdEdxCorrection::SettpcGainMonitor       (St_tpcGainMonitor   *m = 0) {PrPD(SettpcGainMonitor     ,m); m_tpcGainMonitor = m;}
 #undef PrPP
