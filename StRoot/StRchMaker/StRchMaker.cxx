@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.3 2000/09/29 18:59:31 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 2.4 2000/11/01 16:50:32 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -220,10 +220,10 @@ Int_t StRchMaker::Make() {
     //
     // Pause for Event Display Inspection
     //
-//       cout << "Next Event? <ret>: " << endl;
-//       do {
-//         if(getchar()) break;
-//       } while (true);
+//        cout << "Next Event? <ret>: " << endl;
+//        do {
+//          if(getchar()) break;
+//        } while (true);
 
     //
     // Try get StEvent Structure
@@ -360,7 +360,6 @@ Int_t StRchMaker::Make() {
 		// the first 8 bits for the Pad (0-159)
 		// the next  8 bits for the Row (0-96)
 		// the next 11 bits for the ADC (0-1023)
-		
 		if(theADCValue) {
 		    unsigned long codedValue = 0;
 		    codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
@@ -793,20 +792,24 @@ void StRchMaker::fillStEvent()
 		// Add it
 		richCollection->addHit(thePersistentHit);
 	    }
+
+	    //
 	    // Fill in the stuff missing in the constructor
+	    //
+
 	    richCollection->getRichHits().back()->setClusterNumber(mTheHits[ii]->clusterNumber());
 	    richCollection->getRichHits().back()->setReservedLong(mTheHits[ii]->flags());	    
 	    richCollection->getRichHits().back()->local() 
 		= StThreeVectorF(mTheHits[ii]->local().x(),
 				 mTheHits[ii]->local().y(),
 				 mTheHits[ii]->local().z());
+	    richCollection->getRichHits().back()->setNumberOfPads(mTheHits[ii]->numberOfPads());
 	    
 	    richCollection->getRichHits().back()->internal() 
 		= StThreeVectorF( mTheHits[ii]->internal().x(),
 				  mTheHits[ii]->internal().y(),
 				  mTheHits[ii]->internal().z());
 	}
-        
     }
 
     //
@@ -840,7 +843,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.3 2000/09/29 18:59:31 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.4 2000/11/01 16:50:32 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -885,10 +888,8 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 2.3  2000/09/29 18:59:31  lasiuk
- * addition of software monitor
- * write flags in persistent hit (reservedLong)
- * Histodefintions
+ * Revision 2.4  2000/11/01 16:50:32  lasiuk
+ * set the number of pads used in constructing a hit
  *
  * Revision 2.4  2000/11/01 16:50:32  lasiuk
  * set the number of pads used in constructing a hit
