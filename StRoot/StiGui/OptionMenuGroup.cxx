@@ -86,7 +86,7 @@ void OptionMenuGroup::setMessengerOptions()
 void OptionMenuGroup::setSeedFinderOptions()
 {	
   cout << "OptionMenuGroup::setSeedFinderOptions() -I- Started" <<endl;
-  EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getTrackSeedFinder()->getParameters() );
+  EditableParameters * pars = dynamic_cast<EditableParameters *>( getToolkit()->getTrackSeedFinder()->getParameters() );
   if (pars)
     {
       new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
@@ -100,22 +100,14 @@ void OptionMenuGroup::setSeedFinderOptions()
 void OptionMenuGroup::setTrackFinderOptions()
 {
   cout << "OptionMenuGroup::setTrackFinderOptions() -I- Started" <<endl;
-  EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getTrackFinder()->getParameters() );
-  if (pars)
-    new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
-  else
-    cout << "OptionMenuGroup::setTrackFinderOptions() -E- Kalman Finder options not available"<<endl;
+	new StiOptionFrame(getClient()->GetRoot(), getDisplay(), &getToolkit()->getTrackFinder()->getParameters() );
   cout << "OptionMenuGroup::setTrackFinderOptions() -I- Done" <<endl;
 }
 
 void OptionMenuGroup::setTrackFitterOptions()
 {
   cout << "OptionMenuGroup::setTrackFitterOptions() -I- Started" <<endl;
-  EditableParameters * pars = dynamic_cast<EditableParameters *>(getToolkit()->getTrackFitter()->getParameters() );
-  if (pars)
-    new StiOptionFrame(getClient()->GetRoot(), getDisplay(), pars);
-  else
-    cout << "OptionMenuGroup::setTrackFitterOptions() -E- Kalman Fitter options not available"<<endl;
+	new StiOptionFrame(getClient()->GetRoot(), getDisplay(), &getToolkit()->getTrackFitter()->getParameters() );
   cout << "OptionMenuGroup::setTrackFitterOptions() -I- Done" <<endl;
 }
 
