@@ -93,6 +93,10 @@ void StiKalmanTrackFinderParameters::initialize()
                             "maxChi2ForSelection",   
                             &maxChi2ForSelection, 
                             5., 0.5, 200., 0.1, 0)); 
+  add(f->getInstance()->set("maxChi2Vertex",  
+                            "maxChi2Vertex",   
+                            &maxChi2Vertex, 
+                            10000., 0., 20000., 0.1, 0)); 
   add(f->getInstance()->set("massHypothesis", 
                             "massHypothesis",  
                             &massHypothesis,  

@@ -426,8 +426,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit * vertex)
 {
   setState(parentNode);
-  double locVx = _cosAlpha*vertex->x() + _sinAlpha*vertex->y();
-  if (propagate(locVx,0) < 0)
+  //double locVx = _cosAlpha*vertex->x() + _sinAlpha*vertex->y();
+  if (propagate(vertex->x(),kPlanar) < 0)
     return false; // track does not reach vertex "plane"
   propagateError();
   _hit = vertex;
@@ -661,8 +661,8 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dy=hit->y()-_p0;
   double dz=hit->z()-_p1;
   double cc= (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
-  if (!hit->detector())
-    cout << " dy:"<<dy << " dz:"<<dz<< " sqrt(dy^2+dz^2):" << sqrt(dy*dy+dz*dz) << " CHI2:"<< cc <<endl;
+  //if (!hit->detector())
+  //  cout << " dy:"<<dy << " dz:"<<dz<< " sqrt(dy^2+dz^2):" << sqrt(dy*dy+dz*dz) << " CHI2:"<< cc <<endl;
   MESSENGER <<"evaluateChi2() -I- Done"<<cc<<endl;
   return cc;
 }
