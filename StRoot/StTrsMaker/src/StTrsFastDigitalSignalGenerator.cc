@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.9 1999/02/04 18:35:24 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.10 1999/02/10 04:24:50 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,10 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.9  1999/02/04 18:35:24  lasiuk
- * digital sector removed from constructor;
- * fillSector() added in base class
+ * Revision 1.10  1999/02/10 04:24:50  lasiuk
+ * sleep/unistd
  *
+ * Revision 1.11  1999/02/10 20:55:16  lasiuk
+ * Feb 10,1999
+ *
+ * Revision 1.10  1999/02/10 04:24:50  lasiuk
  * sleep/unistd
  *
  * Revision 1.9  1999/02/04 18:35:24  lasiuk
@@ -50,6 +53,8 @@
  * Revision 1.2  1998/11/04 18:51:27  lasiuk
  * initialization in base class
  * incorporate electronics db
+ * sector by reference
+ *
  * Revision 1.1  1998/06/30 22:46:49  lasiuk
  * Initial Revision
  *
@@ -91,7 +96,7 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
 	mInstance = new StTrsFastDigitalSignalGenerator(el, sec);
     }
     // else  do nothing
-    cout << "Got to StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
+    
     return mInstance;
 }
     cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
@@ -155,14 +160,14 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		}
 	    PR(digitalPadData.size());
 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
-		//cout << (ii) << '\t' << (reinterpret_cast<int>(digitalPadData[ii])) << '\t' << (reinterpret_cast<int>(digitalPadZeros[ii])) << endl;
 		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
 	    }
-	    cout << endl;
-
+	    } // the iterator
 	    // print it out:
 // 	    PR(digitalPadData.size());
 // 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
+	    sleep(2);
+// 	    }
 	    
 	    currentPad.clear();
 	    pair<digitalTimeBins*, digitalTimeBins*> tmp(&digitalPadData, &digitalPadZeros);
