@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.8 2000/06/15 18:51:32 willson Exp $
+ * $Id: StHbtPairCut.h,v 1.9 2000/06/29 23:01:10 finch Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.9  2000/06/29 23:01:10  finch
+ * added an extra base class for Parity Computations
+ *
  * Revision 1.8  2000/06/15 18:51:32  willson
  * Cuts and Correlation function information moved from StBaseAnalysis
  * to the derived analysis classes.  Global functions installed in
@@ -69,6 +72,7 @@
 #include <string>
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
+#include "StHbtMaker/Infrastructure/StParityTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
 
@@ -80,6 +84,7 @@ public:
   StHbtPairCut(const StHbtPairCut& c); // copy constructor
   virtual ~StHbtPairCut(){/* no-op */};  // destructor
 
+  virtual void ParityPairCuts(ParityBuff*, ParityBuff*) { /* no-op */ }
   virtual bool Pass(const StHbtPair* pair) =0;  // true if passes, false if not
 
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
