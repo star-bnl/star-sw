@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.15 1999/03/03 14:20:22 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.16 1999/04/11 00:32:54 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.16  1999/04/11 00:32:54  lasiuk
+ * ?reported hang from Herb...check diagnostics.
+ * Seems okay.
+ *
  * Revision 1.15  1999/03/03 14:20:22  lasiuk
  * set remaining time bins to zero when all full?
  *
@@ -131,7 +135,7 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 
 	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad);
 	    if(!currentPad.size()) continue;
- //  	    cout << "dig() r/p " << irow << '/' << ipad << endl;
+   	    //cout << "dig() r/p " << irow << '/' << ipad << endl;
 	    // Make sure the digital Pad is clear!
 	    digitalPadData.clear();
 	    digitalPadZeros.clear();
