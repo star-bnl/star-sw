@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.31 2004/05/05 22:01:44 jwebb Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.32 2004/05/14 20:55:34 balewski Exp $
  
 
 #include <time.h>
@@ -30,6 +30,7 @@
 #include "tables/St_eemcDbPMTstat_Table.h"
 #include "tables/St_kretDbBlobS_Table.h"
 #include "cstructs/eemcConstDB.hh"
+#include "cstructs/kretConstDB.hh"
 
 //#include <iostream>
 
@@ -264,7 +265,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runNumber)
 
   printf("%s::InitRun()  Found %d EEMC related tables for the present time stamp\n",GetName(),nFound);
 
-  return kStOK;
+  return StMaker::InitRun(runNumber);
 }  
 
 
@@ -569,8 +570,20 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
   assert(nFiber==0);
   
   //  printf("dataS='%s'\n",mDbFiberConfBlob->dataS);
-  char *blob=mDbFiberConfBlob->dataS;
-  
+
+  /// if the contents of the mDbFiberConfBlob is the same
+  //  for a new runs
+  /// the data is not fetched you are left with the stale data
+  /// And since strtok overwrites its argument the next call to
+  /// mOptimizeFibers fails
+  /// Cheers
+  ///     Piotr
+
+  static char blobBuffer[KRETmxBlobSlen+1];
+  char  *blob = blobBuffer;
+  int   len = strnlen(mDbFiberConfBlob->dataS,KRETmxBlobSlen ); 
+  strncpy(blob,mDbFiberConfBlob->dataS,len);
+ 
   blob=strtok(blob,";"); // init iterator
   if(strstr(blob,"<ver1>")==0) {
     printf("%s::mOptimizeFibers() FATAL, missing opening key for DB mDbFiberConfBlob->dataS\n",GetName());
@@ -801,7 +814,7 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
     if (sec1>sec2 ) isec+=12;
     
     if( isec <0 ) continue;
-    if( isec >=  mNSector) continue;
+    if( isec >=  mNSector) continue; 
     nd++;
 
     //-- Copy the database record read in from the file into
@@ -851,6 +864,9 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.32  2004/05/14 20:55:34  balewski
+// fix to process many runs, by Piotr
+//
 // Revision 1.31  2004/05/05 22:01:44  jwebb
 // byStrip[] is now initialized when reading database from a file.
 //
