@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.16 2003/09/10 19:47:39 perev Exp $
+ * $Id: StTpcDbMaker.h,v 1.17 2004/01/14 22:54:31 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.17  2004/01/14 22:54:31  fisyak
+ * Add hooks for Pedestal and tpcGain
+ *
  * Revision 1.16  2003/09/10 19:47:39  perev
  * ansi corrs
  *
@@ -168,7 +171,7 @@ class StTpcDbMaker : public StMaker {
   Int_t m_dvtype;  //! 0= use all, 1=only StTpcT0Maker, 2=only laser;
  protected:
  public: 
-                  StTpcDbMaker(const char *name="TLA");
+                  StTpcDbMaker(const char *name="TpcDb");
    virtual       ~StTpcDbMaker();
    virtual Int_t Init();
    virtual Int_t InitRun(int runnumber);
@@ -182,7 +185,7 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.16 2003/09/10 19:47:39 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.17 2004/01/14 22:54:31 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };

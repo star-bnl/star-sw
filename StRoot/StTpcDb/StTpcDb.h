@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.23 2002/04/02 00:16:31 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.24 2004/01/14 22:54:30 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.24  2004/01/14 22:54:30  fisyak
+ * Add hooks for Pedestal and tpcGain
+ *
  * Revision 1.23  2002/04/02 00:16:31  hardtke
  * New class that gets hit errors from database
  *
@@ -100,6 +103,8 @@
 #include "StRTpcFieldCage.h"
 #include "StRTpcHitErrors.h"
 #include "St_DataSet.h"
+#include "St_tpcPedestalC.h"
+#include "St_tpcGainC.h"
 class StMaker;
 class St_tpcDriftVelocity;
 class St_trgTimeOffset;
@@ -121,13 +126,13 @@ class StTpcDb {
  StTpcGlobalPositionI* GlobPos; //!
  StTpcFieldCageI*      FC;
  StTpcHitErrorsI*      hitErrors;
- St_DataSet*           tpc[3];        //!
- St_DataSet*           trg[3];        //!
+ St_DataSet*           tpctrg[3];     //!
  St_tpcDriftVelocity*  dvel;          //!
  St_trgTimeOffset*     toff;          //!
  St_dst_L0_Trigger*    trigtype;      //!
  // StTpcCoordinateTransform* transform; //!
-
+ St_tpcPedestalC*      mPedestal;      //!
+ St_tpcGainC*          mGain;          //!
  protected:
    StTpcDb() {}
    void GetDataBase(StMaker* maker);
@@ -148,6 +153,9 @@ class StTpcDb {
    StTpcT0I* T0(int sector);
    StTpcSectorPositionI* SectorPosition(int sector);
    St_Table *getTpcTable(int i);
+   St_tpcPedestalC *Pedestal();
+   St_tpcGainC     *tpcGain();
+   TTable          *FindTable(const Char_t *name, Int_t dbIndex=kCalibration);
    //small pieces of data:
    float DriftVelocity();
    float triggerTimeOffset();
