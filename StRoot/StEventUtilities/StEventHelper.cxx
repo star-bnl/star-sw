@@ -30,15 +30,26 @@ void Break(){printf("InBreak\n");}
 
 class StEventInspector : public TMemberInspector {
 public:
-StEventInspector(TExMap *map,Int_t &count):fCount(count){fMap = map;};
-virtual ~StEventInspector(){};
+StEventInspector(TExMap *map,Int_t &count,const char *opt="");
+virtual ~StEventInspector(){delete fSkip;};
 virtual void Inspect(TClass* cl, const char* parent, const char* name, void* addr);
         void CheckIn(TObject *obj,const char *bwname="");
 
 Int_t &fCount;
 TExMap *fMap;
+TRegexp *fSkip;
+TString fOpt;
+
 };      
 
+//______________________________________________________________________________
+StEventInspector::StEventInspector(TExMap *map,Int_t &count,const char *opt):fCount(count)
+{  
+  fMap = map;
+  fSkip = 0;
+  fOpt = opt;
+  if (fOpt.Length()) fSkip = new TRegexp(fOpt.Data());
+}
 //______________________________________________________________________________
 void StEventInspector::Inspect(TClass* kl, const char* tit , const char* name, void* addr)
 {
@@ -117,6 +128,8 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
   TObject *inobj=0;
   if (obj->InheritsFrom(StRefArray::Class())) return;  
   if (obj->InheritsFrom( StObjLink::Class())) return;  
+  int n;
+  if (fSkip && (fSkip->Index(obj->ClassName(),&n)>=0))	return;   
 
   if (obj->InheritsFrom(TCollection::Class())){
     TCollection *tcol = (TCollection*)obj;  
@@ -160,11 +173,11 @@ void StEventInspector::CheckIn(TObject *obj,const char *bwname)
 //______________________________________________________________________________
 ClassImp(StEventHelper)
 //______________________________________________________________________________
-StEventHelper::StEventHelper(const TObject *evt)
+StEventHelper::StEventHelper(const TObject *evt,const char *opt)
 {
    fMap = new TExMap();
    fObject = 0;
-   Reset(evt);
+   Reset(evt,opt);
 }
 //______________________________________________________________________________
 StEventHelper::~StEventHelper()
@@ -177,7 +190,7 @@ void StEventHelper::Clear(Option_t *opt)
 {
 }
 //______________________________________________________________________________
-void StEventHelper::Reset(const TObject *evt)
+void StEventHelper::Reset(const TObject *evt,const char *opt)
 {
    if (fObject == evt) return;
    fObject = (TObject *)evt;
@@ -185,8 +198,8 @@ void StEventHelper::Reset(const TObject *evt)
    fMap->Delete();
    if (!fObject) return;
    int kount=0;
-   StEventInspector insp(fMap,kount);
-   char cbuf[100];
+   StEventInspector insp(fMap,kount,opt);
+   char cbuf[1024];
    
    fObject->ShowMembers(insp,cbuf);
 }

@@ -31,7 +31,7 @@ TExMap *fMap;
 
 public:
 
-    StEventHelper(const TObject *evt=0);
+    StEventHelper(const TObject *evt=0,const char *opt="");
     virtual ~StEventHelper();
     TObjArray *SelConts (const char *sel=".*");
     TObjArray *SelTracks(Int_t th);
@@ -39,7 +39,7 @@ public:
     TObjArray *SelVertex(const char *sel,Int_t thFlag);
     virtual void ls(Option_t* option="") const;
     virtual void Clear(Option_t *opt="");
-    void Reset(const TObject *evt=0);
+    void Reset(const TObject *evt=0,const char *opt="");
 private:
 
 ClassDef(StEventHelper,0)    
@@ -49,9 +49,11 @@ class StPoints3DABC : public TPoints3DABC
 {
 public:
    StPoints3DABC(const char *name="",const char *title="",TObject *obj=0)
-   {fSize=0; fXYZ=0;
-    if (obj && (!name || !name[0])) name = obj->GetName();
-    fName=name;fTitle=title;fObj = obj;}
+   { fSize=0; fXYZ=0;
+     char buf[200];
+     if (obj && (!name || !name[0])) {
+       sprintf(buf,"%s(%p)",obj->GetName(),obj);name = buf;}
+     fName=name;fTitle=title;fObj = obj;}
 
   ~StPoints3DABC(){delete [] fXYZ;};
 
