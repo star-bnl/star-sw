@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.10 2004/08/12 17:22:31 fisyak Exp $
+ * $Id: StTrackFitTraits.h,v 2.11 2004/08/13 18:15:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.11  2004/08/13 18:15:42  ullrich
+ * Added +1 to the number of fit points when bool flag is set.
+ *
  * Revision 2.10  2004/08/12 17:22:31  fisyak
  * Switch to automatic streamer for version >4 to account new no. of fit points definition
  *
@@ -90,9 +93,11 @@ public:
     StParticleDefinition*  pidHypothesis() const;
     StMatrixF              covariantMatrix() const;
     double                 chi2(unsigned int = 0) const;
+    bool                   primaryVertexUsedInFit() const;
 
     void                   clearCovariantMatrix();
     void                   setNumberOfFitPoints(unsigned char, StDetectorId);
+    void                   setPrimaryVertexUsedInFit(bool);
     
 protected:
     UShort_t mPidHypothesis;       // GeantId
@@ -102,9 +107,10 @@ protected:
     UChar_t  mNumberOfFitPointsFtpcEast;
     UChar_t  mNumberOfFitPointsSvt;
     UChar_t  mNumberOfFitPointsSsd;
+    Bool_t   mPrimaryVertexUsedInFit;
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,5) 
+    ClassDef(StTrackFitTraits,6) 
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 2.13 2004/08/12 17:22:31 fisyak Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.14 2004/08/13 18:15:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
+ * Revision 2.14  2004/08/13 18:15:42  ullrich
+ * Added +1 to the number of fit points when bool flag is set.
+ *
  * Revision 2.13  2004/08/12 17:22:31  fisyak
  * Switch to automatic streamer for version >4 to account new no. of fit points definition
  *
@@ -68,7 +71,7 @@ using std::copy;
 
 ClassImp(StTrackFitTraits)
 
-static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.13 2004/08/12 17:22:31 fisyak Exp $";
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.14 2004/08/13 18:15:42 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
 {
@@ -79,6 +82,7 @@ StTrackFitTraits::StTrackFitTraits()
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mPrimaryVertexUsedInFit = false;
     fill_n(mChi2, 2, 0);
 }
 
@@ -93,6 +97,7 @@ StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mPrimaryVertexUsedInFit = false;
 }
 
 StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
@@ -107,6 +112,7 @@ StTrackFitTraits::StTrackFitTraits(unsigned short pid, unsigned short nfp,
     mNumberOfFitPointsFtpcEast = 0;
     mNumberOfFitPointsSvt = 0;
     mNumberOfFitPointsSsd = 0;
+    mPrimaryVertexUsedInFit = false;
 }
 
 StTrackFitTraits::~StTrackFitTraits() {/* noop */}
@@ -114,18 +120,20 @@ StTrackFitTraits::~StTrackFitTraits() {/* noop */}
 unsigned short
 StTrackFitTraits::numberOfFitPoints() const
 {
+    unsigned short result;
     if (mNumberOfFitPoints) {
-	return (numberOfFitPoints(kTpcId) +
-		numberOfFitPoints(kSvtId) +
-		numberOfFitPoints(kSsdId));
+	result = numberOfFitPoints(kTpcId) +
+	    numberOfFitPoints(kSvtId) +
+	    numberOfFitPoints(kSsdId);
     }
     else {
-	return (numberOfFitPoints(kTpcId) +
-		numberOfFitPoints(kFtpcWestId) +
-		numberOfFitPoints(kFtpcEastId) +
-		numberOfFitPoints(kSvtId) +
-		numberOfFitPoints(kSsdId));	
+	result = numberOfFitPoints(kTpcId) +
+	    numberOfFitPoints(kFtpcWestId) +
+	    numberOfFitPoints(kFtpcEastId) +
+	    numberOfFitPoints(kSvtId) +
+	    numberOfFitPoints(kSsdId);	
     }
+    return mPrimaryVertexUsedInFit ? result+1 : result;
 }
 
 unsigned short
@@ -213,6 +221,10 @@ StTrackFitTraits::covariantMatrix() const
     return m;
 }
 
+bool
+StTrackFitTraits::primaryVertexUsedInFit() const
+{return mPrimaryVertexUsedInFit;}
+
 void
 StTrackFitTraits::clearCovariantMatrix() {mCovariantMatrix.Set(0);}
 
@@ -240,6 +252,11 @@ StTrackFitTraits::setNumberOfFitPoints(unsigned char val, StDetectorId det)
 	break;
     }
 }
+
+void
+StTrackFitTraits:: setPrimaryVertexUsedInFit(bool val)
+{mPrimaryVertexUsedInFit = val;}
+
 //______________________________________________________________________________
 void StTrackFitTraits::Streamer(TBuffer &R__b)
 {
