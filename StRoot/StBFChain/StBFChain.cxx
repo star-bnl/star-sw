@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.431 2004/08/10 00:33:55 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.432 2004/08/10 20:24:50 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -155,13 +155,13 @@ Bfc_st BFC1[] = {
   // B2001 is a base-chain for 2001 (with tpc+rhic).
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
-  {"P2001"       ,""  ,"","B2001,l3onl,ToF,Corr2,OSpaceZ","",""
+  {"P2001"       ,""  ,"","B2001,l3onl,tofDat,Corr2,OSpaceZ","",""
                                                ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
-  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,ToF,emcDY2,Corr2,OSpaceZ","",""
+  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Corr2,OSpaceZ","",""
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains
-  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,ToF,emcDY2,Corr2","",""
+  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,tofDat,emcDY2,Corr2","",""
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
@@ -725,13 +725,13 @@ Bfc_st BFC2[] = {
   // B2001 is a base-chain for 2001 (with tpc+rhic).
   {"B2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
-  {"P2001"       ,""  ,"","B2001,l3onl,ToF,Corr2,OSpaceZ","",""
+  {"P2001"       ,""  ,"","B2001,l3onl,tofDat,Corr2,OSpaceZ","",""
                                                ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
-  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,ToF,emcDY2,Corr2,OSpaceZ","",""
+  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Corr2,OSpaceZ","",""
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains
-  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,ToF,emcDY2,Corr2","",""
+  {"pp2001"      ,""  ,"","ppOpt,B2001,-PreVtx,l3onl,tofDat,emcDY2,Corr2","",""
                                                                         ,"pp 2001 (+ l3, tof, emc)",kFALSE},
   {"pp2001a"     ,""  ,"","pp2001,svt_daq,SvtD,ftpc","",""
                                                              ,"pp 2001 (+ ftpc, svt, l3, tof, emc)",kFALSE},
