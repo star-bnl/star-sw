@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.29 2003/02/25 19:28:38 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.30 2003/07/30 22:05:28 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -333,7 +333,15 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StEvent* pEvent) {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  /// Tpc
+  if (((StFlowCutTrack::EtaSymPosTpc() == 0 || StFlowCutTrack::EtaSymNegTpc() == 0) &&     // at least one half is empty
+       !(StFlowCutTrack::EtaSymPosTpc() == 0 &&  StFlowCutTrack::EtaSymNegTpc() == 0)) ||  // but not both halves 
+      ((StFlowCutTrack::EtaSymPosFtpc() == 0 || StFlowCutTrack::EtaSymNegFtpc() == 0) &&   // at least one FTPC is empty
+       !(StFlowCutTrack::EtaSymPosFtpc() == 0 && StFlowCutTrack::EtaSymNegFtpc() == 0))) { // but not both FTPCs 
+      // This looks ugly because there is no XOR and events w/o the FTPC or TPC switched on will be cut, otherwise.
+    return kFALSE; // possible beam gas event
+  }
+
+  // Tpc
   float etaSymPosTpcN = (float)StFlowCutTrack::EtaSymPosTpc();
   float etaSymNegTpcN = (float)StFlowCutTrack::EtaSymNegTpc();
   float etaSymTpc = (etaSymPosTpcN - etaSymNegTpcN) / (etaSymPosTpcN + etaSymNegTpcN);
@@ -380,7 +388,15 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StFlowPicoEvent* pPicoEvent) {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  /// Tpc
+  if (((StFlowCutTrack::EtaSymPosTpc() == 0 || StFlowCutTrack::EtaSymNegTpc() == 0) &&     // at least one half is empty
+       !(StFlowCutTrack::EtaSymPosTpc() == 0 &&  StFlowCutTrack::EtaSymNegTpc() == 0)) ||  // but not both halves 
+      ((StFlowCutTrack::EtaSymPosFtpc() == 0 || StFlowCutTrack::EtaSymNegFtpc() == 0) &&   // at least one FTPC is empty
+       !(StFlowCutTrack::EtaSymPosFtpc() == 0 && StFlowCutTrack::EtaSymNegFtpc() == 0))) { // but not both FTPCs 
+      // This looks ugly because there is no XOR and events w/o the FTPC or TPC switched on will be cut, otherwise.
+    return kFALSE; // possible beam gas event
+  }
+
+  // Tpc
   float etaSymPosTpcN = (float)StFlowCutTrack::EtaSymPosTpc();
   float etaSymNegTpcN = (float)StFlowCutTrack::EtaSymNegTpc();
   float etaSymTpc = (etaSymPosTpcN - etaSymNegTpcN) / (etaSymPosTpcN + etaSymNegTpcN);
@@ -424,7 +440,15 @@ Bool_t StFlowCutEvent::CheckEtaSymmetry(StMuEvent* pMuEvent) {
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event
 
-  /// Tpc
+  if (((StFlowCutTrack::EtaSymPosTpc() == 0 || StFlowCutTrack::EtaSymNegTpc() == 0) &&     // at least one half is empty
+       !(StFlowCutTrack::EtaSymPosTpc() == 0 &&  StFlowCutTrack::EtaSymNegTpc() == 0)) ||  // but not both halves 
+      ((StFlowCutTrack::EtaSymPosFtpc() == 0 || StFlowCutTrack::EtaSymNegFtpc() == 0) &&   // at least one FTPC is empty
+       !(StFlowCutTrack::EtaSymPosFtpc() == 0 && StFlowCutTrack::EtaSymNegFtpc() == 0))) { // but not both FTPCs 
+      // This looks ugly because there is no XOR and events w/o the FTPC or TPC switched on will be cut, otherwise.
+    return kFALSE; // possible beam gas event
+  }
+
+  // Tpc
   float etaSymPosTpcN = (float)StFlowCutTrack::EtaSymPosTpc();
   float etaSymNegTpcN = (float)StFlowCutTrack::EtaSymNegTpc();
   float etaSymTpc = (etaSymPosTpcN - etaSymNegTpcN) / (etaSymPosTpcN + etaSymNegTpcN);
@@ -502,6 +526,10 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.30  2003/07/30 22:05:28  oldi
+// To get rid of beam gas events events with one empty FTPC or one empty half of
+// the TPC are removed.
+//
 // Revision 1.29  2003/02/25 19:28:38  posk
 // Changed a few unimportant default cuts.
 //
