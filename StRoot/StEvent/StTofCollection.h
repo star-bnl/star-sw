@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCollection.h,v 2.6 2003/05/23 16:10:59 ullrich Exp $
+ * $Id: StTofCollection.h,v 2.7 2003/05/23 20:06:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.h,v $
+ * Revision 2.7  2003/05/23 20:06:12  ullrich
+ * Restore plural for data members.
+ *
  * Revision 2.6  2003/05/23 16:10:59  ullrich
  * Changed name of access functions.
  *
@@ -80,8 +83,8 @@ public:
     bool dataPresent()     const;
     
 private:
-    StSPtrVecTofSlat           mTofSlat;
-    StSPtrVecTofCell           mTofCell;
+    StSPtrVecTofSlat           mTofSlats;
+    StSPtrVecTofCell           mTofCells;
     StSPtrVecTofHit            mTofHits;
     StSPtrVecTofData           mTofData;
   
