@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_browse.C,v 1.2 1999/06/07 21:10:36 kathy Exp $
+// $Id: Example_read_dst_browse.C,v 1.3 1999/10/07 14:13:10 kathy Exp $
 // $Log: Example_read_dst_browse.C,v $
+// Revision 1.3  1999/10/07 14:13:10  kathy
+// changes to Example macros to make them work in dev - mostly changes were correcting input file name
+//
 // Revision 1.2  1999/06/07 21:10:36  kathy
 // fixing up macros - removed or renamed some, fixed others so the default input file is there
 //
@@ -31,7 +34,7 @@ gSystem->Load("St_base");
 gSystem->Load("St_Tables");
 
 TFile *root_file=0;
-root_file  =  new TFile("/disk00000/star/test/new/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root","read");
+root_file  =  new TFile("/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.root","read");
 root_file.ls();
 root_file.Dump();
 TBrowser browser1;

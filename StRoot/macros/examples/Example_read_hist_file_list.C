@@ -1,5 +1,8 @@
-// $Id: Example_read_hist_file_list.C,v 1.2 1999/06/24 20:24:56 kathy Exp $
+// $Id: Example_read_hist_file_list.C,v 1.3 1999/10/07 14:13:10 kathy Exp $
 // $Log: Example_read_hist_file_list.C,v $
+// Revision 1.3  1999/10/07 14:13:10  kathy
+// changes to Example macros to make them work in dev - mostly changes were correcting input file name
+//
 // Revision 1.2  1999/06/24 20:24:56  kathy
 // updated comment lines at top
 //
@@ -13,7 +16,7 @@
 //           http://root.cern.ch/root/roottalk/roottalk99/1228.html
 //=========================================================================
 
-void draw_hist(const char* filein="/star/u2e/liq/rootc/beam_gas_1.hist.root")
+void Example_read_hist_file_list(const char* filein="Kathy_hist.root")
 {
 TFile* fin = new TFile(filein) ;
 
@@ -41,6 +44,6 @@ if ( (strcmp(obj->IsA()->GetName(),"TProfile")!=0)
  printf("Histo name:%s title:%s\n",obj->GetName(),obj->GetTitle());
  }
 
- cout << " finish draw_hist " << endl;
+ cout << " finished macro " << endl;
 }
 
