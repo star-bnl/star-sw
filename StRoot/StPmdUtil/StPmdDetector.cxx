@@ -1,6 +1,6 @@
 /*******************************************************
  *
- * $Id: StPmdDetector.cxx,v 1.3 2003/10/14 10:16:50 subhasis Exp $
+ * $Id: StPmdDetector.cxx,v 1.4 2004/06/29 17:31:41 perev Exp $
  *
  * Author:  Subhasis Chattopadhyay, July 2002
  *******************************************************
@@ -9,6 +9,9 @@
  *
  *********************************************************
  * $Log: StPmdDetector.cxx,v $
+ * Revision 1.4  2004/06/29 17:31:41  perev
+ * Zeroing in ctr added and tests for null pointers
+ *
  * Revision 1.3  2003/10/14 10:16:50  subhasis
  * zeroed before delete
  *
@@ -24,12 +27,22 @@
 
 ClassImp(StPmdDetector)
 
-StPmdDetector::StPmdDetector() { /* noop */ }
+StPmdDetector::StPmdDetector() 
+{
+  mDetectorId=0;
+  mNumberOfModules=0;
+    
+  memset(mModules_NHit,0,12*sizeof(*mModules_NHit));
+  memset(mModules     ,0,12*sizeof(*mModules     ));
+  mClusters=0;    
+}
 
 StPmdDetector::StPmdDetector(Int_t id, unsigned int n)
 {
+    mClusters = 0;
     mDetectorId = id;
     mNumberOfModules = n;
+    memset(mModules_NHit,0,12*sizeof(*mModules_NHit));
     for(int i=0; i<12;i++)
     {
       StPmdModule * module = new StPmdModule();
@@ -103,8 +116,8 @@ StPmdDetector::cluster() {return mClusters;}
 void
 StPmdDetector::setCluster(StPmdClusterCollection* val)
 {
-    if (mClusters) mClusters=0;
-    if (mClusters) delete mClusters;
+//VP    if (mClusters) mClusters=0;
+    delete mClusters;
     mClusters = val;
 }
 
