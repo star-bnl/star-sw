@@ -286,6 +286,7 @@ Int_t St_Module::CheckParameters(const Char_t *names[])
  //                                                                //
  ////////////////////////////////////////////////////////////////////
    Int_t errcode = 0;
+   printf ("CheckParameters of module %s \n",GetName());
    if (st_Params) {
      for (Int_t i=0;i<fN;i++)
        if (!st_Params[i]) { 

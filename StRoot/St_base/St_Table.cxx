@@ -108,7 +108,7 @@ St_Table::St_Table(const St_Table &table)
 //______________________________________________________________________________
 St_Table &St_Table::operator=(const St_Table &rhs)
 {
-   // St_Table assignment operator.
+   // St_Table assingment operator.
    if (this != &rhs)
       Set(rhs.fN, rhs.s_Table);
    return *this;
@@ -136,7 +136,7 @@ void St_Table::Adopt(Int_t n, Char_t *arr)
 //______________________________________________________________________________
 void St_Table::AddAt(ULong_t *row, Int_t i)
 {
-   // Add long c at position i. Check for out of bounds.
+   // Add one element (row) of structure at position i. Check for out of bounds.
  
    if (!BoundsOk("St_Table::AddAt", i))
       i = 0;
@@ -255,6 +255,7 @@ void St_Table::LinkHeader()
 //______________________________________________________________________________
 void St_Table::ls(Option_t *option)
 {
+  printf(" St_Table::ls()\n");
   TNamed::ls(option);
   IncreaseDirLevel();
   IndentLevel();
@@ -545,13 +546,14 @@ void St_Table::StafStreamer(Char_t *structname, FILE *fl)
 
    fprintf(fp, "#include \"%s%s%s.h\"\n",prefix,tablename,suffix);
    fprintf(fp, "#include \"%s%s%s.h\"\n",prefix,tablename,suffix);
+   fprintf(fp, "#include \"Stypes.h\"\n");
    fprintf(fp, "/////////////////////////////////////////////////////////////////////////\n");
    fprintf(fp, "//\n");
    fprintf(fp, "//  Class %s wraps the STAF table %s \n",thisclassname,datatype);
    fprintf(fp, "//  It has been generated \"by automatic\". Please don\'t change it \"by hand\"\n");
    fprintf(fp, "//\n");
    fprintf(fp, "///////////////////////////////////////////////////////////////////////// \n\n");
-   fprintf(fp, "ClassImp(%s%s)\n",prefix,tablename);
+   fprintf(fp, "TableImp(%s)\n",tablename);
 
    fprintf(fp, "//_______________________________________");
    fprintf(fp, "_______________________________________\n");
