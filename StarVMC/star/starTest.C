@@ -1,5 +1,8 @@
-// $Id: starTest.C,v 1.4 2004/07/16 22:50:34 potekhin Exp $
+// $Id: starTest.C,v 1.5 2004/09/02 23:22:43 potekhin Exp $
 // $Log: starTest.C,v $
+// Revision 1.5  2004/09/02 23:22:43  potekhin
+// Improved loading and logic
+//
 // Revision 1.4  2004/07/16 22:50:34  potekhin
 // Added a log tag
 //
@@ -35,8 +38,8 @@
   TString St_base   = star_lib;
   TString StarClassLibrary = star_lib;
 
-  StMcEvent+="/StMcEvent.so";
-  St_base  +="/St_base.so";
+  StMcEvent       +="/StMcEvent.so";
+  St_base         +="/St_base.so";
   StarClassLibrary+="/StarClassLibrary.so";
 
   gSystem->Load("../lib/.rh80_gcc32/libvmcApp.so");
@@ -44,9 +47,9 @@
   gSystem->Load("../lib/.rh80_gcc32/libecal.so");
   gSystem->Load("../lib/.rh80_gcc32/libinterfaces.so");
 
-  //  gSystem->Load(St_base);
-  //  gSystem->Load(StarClassLibrary);
-  //  gSystem->Load(StMcEvent);
+  gSystem->Load(St_base);
+  gSystem->Load(StarClassLibrary);
+  gSystem->Load(StMcEvent);
 
 
   // Configure various parameters
@@ -59,19 +62,15 @@
   StarMCApplication* appl =
     new StarMCApplication("StarMCApplication", "Testing the STAR VMC application");
 
-  StarTpc* tpc = new StarTpc();
-  cout<<"tpc "<<tpc<<endl;
-  appl->AddModule(tpc);
-
-  StarEcal* ecal = new StarEcal();
-  cout<<"ecal "<<ecal<<endl;
-  appl->AddModule(ecal);
+  StarTpc*  tpc  = new StarTpc();  cout<<"tpc " <<tpc<<endl;  appl->AddModule(tpc);
+  StarEcal* ecal = new StarEcal(); cout<<"ecal "<<ecal<<endl; appl->AddModule(ecal);
 
   TGeant3* geant3 = new TGeant3("TGeant3"); 
   cout << "TGeant3 object has been created." << endl;
 
   if(StarConfiguration::isExternal())  geant3->SetRootGeometry();
 
+  // G3 steering
   geant3->SetDRAY(1);
   geant3->SetHADR(1);
   geant3->SetLOSS(1);
@@ -95,8 +94,14 @@
   appl->InitDisplay();
   appl->SetFinishEventCB(StMcEventInterface::FinishEventCB);
 
+  // define which processes we consider as interesting
+  appl->SetInterest("Decay");
+  appl->SetInterest("Compton scattering");
+  appl->SetInterest("Positron annihilation");
+  appl->SetInterest("Photoelectric effect");
+  appl->SetInterest("Bremstrahlung");
 
-  system("date");
-  appl->RunMC(StarConfiguration::getTriggers());
-  system("date");
+  //  system("date");
+  //  appl->RunMC(StarConfiguration::getTriggers());
+  //  system("date");
 }  
