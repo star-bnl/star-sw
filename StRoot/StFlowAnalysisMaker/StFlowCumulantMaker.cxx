@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.19 2004/12/09 23:47:08 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.20 2004/12/17 15:50:09 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -11,7 +11,10 @@
 //                refer to Phy. Rev. C63 (2001) 054906 (old new method)
 //                and      Phy. Rev. C64 (2001) 054901 (new new method)
 //                and      nucl-ex/0110016             (Practical Guide)
+//                and      PRy. Rev. C66 (2002) 014905 (directed flow from elliptic flow v1{3})
 //                Eq. numbers are from the PG or new new if not specified.
+//
+//               Anything that has "Mix" in it is for v1{3} calculation 
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -96,6 +99,10 @@ Int_t StFlowCumulantMaker::Init() {
   if (pFlowSelect->PtMaxPart()) {
     ptMaxPart = pFlowSelect->PtMaxPart();
   }
+        nPtBinsPart = Flow::nPtBinsPart;
+  if (pFlowSelect->PtBinsPart()) {
+    nPtBinsPart = pFlowSelect->PtBinsPart();
+  }
 
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }  
@@ -107,9 +114,9 @@ Int_t StFlowCumulantMaker::Init() {
   r0 = 1.5; // this number should be small, but it could bring numerical 
                   // error if it is too small.
   r0Sq = r0 * r0;
+  r0Mix= 3.;  //r0 for v1{3} calculation
 
-  m_M = 1;  // if m_M = 2, what measured is v2, v4, v6... etc. for harmonic 1,2,3
-            // m_M = 2 is not working. Do not know why at the moment.
+  m_M = 1;  // if m_M = 2, what measured is v2{v1v1v2}, v4{v2v2v4}, v6{v3v3v6}... etc. 
   
   bool noDenomFileWarned = kFALSE;
   TString* histTitle;
@@ -119,6 +126,18 @@ Int_t StFlowCumulantMaker::Init() {
     // for each selection
     histFull[k].mHistCumul = new TProfile*[Flow::nCumulDiffOrders];
     
+    // mixed cumulant. (1st har mix with 2nd har. for v1 analysis).
+    //we study 3-part v1 only, so we do not need sth. like nCumulDiffOrders as above.
+    histTitle = new TString("Flow_CumulMix");
+    histTitle->Append("_Sel");                      
+    *histTitle +=k+1;
+    histFull[k].mHistCumulMix = 	
+	new TProfile(histTitle->Data(), histTitle->Data(), Flow::nHars, 0.5,
+		     (float)(Flow::nHars) + 0.5, -1.*FLT_MAX, FLT_MAX, "");
+    histFull[k].mHistCumulMix->SetXTitle("place for saving mixed cumulant");
+    delete histTitle;    
+
+
     for (int ord = 0; ord < Flow::nCumulDiffOrders; ord++) {
       char theCumulOrder[2]; // if >10, need to use char*
       sprintf(theCumulOrder,"%d",(ord+1)*2);
@@ -141,6 +160,14 @@ Int_t StFlowCumulantMaker::Init() {
       histTitle->Append("_Har");
       *histTitle += j+1;
       histFull[k].histFullHar[j].mHistMultSum =
+        new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+      delete histTitle;
+
+      histTitle = new TString("Flow_CumulMeanWgtSqrSum_Sel");
+      *histTitle +=k+1;
+      histTitle->Append("_Har");
+      *histTitle +=j+1;
+      histFull[k].histFullHar[j].mHistMeanWgtSqrSum =
         new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
       delete histTitle;
 
@@ -187,7 +214,7 @@ Int_t StFlowCumulantMaker::Init() {
 	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHistCumul2D[ord] =	
 	  new TProfile2D(histTitle->Data(),histTitle->Data(), mNEtaBins,
-			 mEtaMin, mEtaMax, Flow::nPtBins, Flow::ptMin,
+			 mEtaMin, mEtaMax, nPtBinsPart, Flow::ptMin,
 			 ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetXTitle((char*)xLabel.Data());
 	histFull[k].histFullHar[j].mHistCumul2D[ord]->SetYTitle("Pt (GeV/c)");
@@ -212,13 +239,57 @@ Int_t StFlowCumulantMaker::Init() {
 	histTitle->Append("_Har");
 	*histTitle += j+1;
 	histFull[k].histFullHar[j].mHistCumulPt[ord] =  
-	  new TProfile(histTitle->Data(), histTitle->Data(), Flow::nPtBins,
+	  new TProfile(histTitle->Data(), histTitle->Data(), nPtBinsPart,
 		       Flow::ptMin, ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
 	histFull[k].histFullHar[j].mHistCumulPt[ord]->SetXTitle("Pt (GeV/c)");
 	delete histTitle;
 	
       }
       
+
+      // for mixing 1st and 2nd harmonic. only coutHars=1 is meaningful.
+	histTitle = new TString("Flow_CumulMix2D");
+	histTitle->Append("_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+        histFull[k].histFullHar[j].mHistCumulMix2D  =  
+	  new TProfile2D(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
+			 Flow::etaMin, Flow::etaMax, nPtBinsPart, Flow::ptMin,
+			 ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
+	histFull[k].histFullHar[j].mHistCumulMix2D->SetXTitle((char*)xLabel.Data());
+	histFull[k].histFullHar[j].mHistCumulMix2D->SetYTitle("Pt (GeV)");
+	delete histTitle;
+
+
+	histTitle = new TString("Flow_CumulMixEta");
+	histTitle->Append("_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mHistCumulMixEta =  
+	  new TProfile(histTitle->Data(),histTitle->Data(), Flow::nEtaBins,
+		       Flow::etaMin, Flow::etaMax, -1.*FLT_MAX, FLT_MAX, "");
+	histFull[k].histFullHar[j].mHistCumulMixEta->SetXTitle((char*)xLabel.Data());
+	delete histTitle;
+
+
+	histTitle = new TString("Flow_CumulMixPt");
+	histTitle->Append("_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mHistCumulMixPt =  
+	  new TProfile(histTitle->Data(), histTitle->Data(), nPtBinsPart,
+		       Flow::ptMin, ptMaxPart, -1.*FLT_MAX, FLT_MAX, "");
+	histFull[k].histFullHar[j].mHistCumulMixPt->SetXTitle("Pt (GeV)");
+	delete histTitle;
+
+	////////////////////////////////
+
+
+
+
 
       histFull[k].histFullHar[j].mCumulG0Denom = 
 	new TProfile*[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
@@ -255,9 +326,7 @@ Int_t StFlowCumulantMaker::Init() {
 	delete histTitle;
 	
 	// Open the file and get the histograms 
-	// do not move this section [ROOT bug] 
-// 	TFile f;
-// 	if(!noDenomFileWarned) f("denominator.root","R");
+	// do not modify this section [ROOT bug] 
 	TFile f("denominator.root","R");
 	if (f.IsOpen()) {
 	  
@@ -286,6 +355,8 @@ Int_t StFlowCumulantMaker::Init() {
 
 	}
 	
+
+
 	double theTempPhi = twopi*((double)qIndex) /  // Eq. (PG5)
 	  ((double)Flow::nCumulDiff_qMax); 
 	double theRz = r0*::sqrt((double)cumulIndex);
@@ -293,6 +364,113 @@ Int_t StFlowCumulantMaker::Init() {
 	histFull[k].histFullHar[j].mDiffYz[pq] = theRz*sin(theTempPhi);
       }
       
+
+
+
+      histFull[k].histFullHar[j].mCumulG0MixDenom = 
+	new   TProfile*[Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax];
+
+      histFull[k].histFullHar[j].mHistCumulIntegG0MixSum =
+        new       TH1D*[Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax];
+
+
+    for (int pq  = 0; pq < Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax ; pq++) { 
+
+	
+	TString* histTitleIntegDenomMix; //for read in
+	
+	int pIndex = (pq/Flow::nCumulMixHar_qMax);
+        int qIndex        = pq%Flow::nCumulMixHar_qMax;
+	
+	char pIndexChar[2];
+        char qIndexChar[2]; // if >10, need to use char*
+	sprintf(pIndexChar,"%d",pIndex); 
+        sprintf(qIndexChar,"%d",qIndex);
+	
+
+
+	histTitle = new TString("Flow_CumulMixDenom");
+	histTitle->Append("_GenFunIdxp");
+	histTitle->Append(*pIndexChar);
+	histTitle->Append("_GenFunIdxq");
+	histTitle->Append(*qIndexChar);
+	histTitle->Append("_Sel");
+	*histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mCumulG0MixDenom[pq] =
+	  new TProfile(histTitle->Data(),histTitle->Data(), 1,0., 1., -1.*FLT_MAX, FLT_MAX, "");
+	histFull[k].histFullHar[j].mCumulG0MixDenom[pq]->SetYTitle("<G>");
+	histTitleIntegDenomMix = new TString(histTitle->Data());
+	delete histTitle;
+								     
+
+  	histTitle = new TString("Flow_CumulIntegG0MixSum");
+	histTitle->Append("_GenFunIdxp");
+	histTitle->Append(*pIndexChar);
+	histTitle->Append("_GenFunIdxq");
+	histTitle->Append(*qIndexChar);
+	histTitle->Append("_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mHistCumulIntegG0MixSum[pq] =
+          new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+        delete histTitle;   
+
+
+	histFull[k].histFullHar[j].mCumulIntegG0Mix[pq] = 0.;
+
+
+	TFile f("denominator.root","R");
+	if (f.IsOpen()) {
+	  
+	  f.cd();
+	  TProfile* tempDenomMixProfile = 
+	    dynamic_cast<TProfile*>(f.Get(histTitleIntegDenomMix->Data()));
+	  if (!tempDenomMixProfile) {
+	    cout << "##### FlowCumulantAnalysis: can not find " <<
+	      histTitleIntegDenomMix->Data() << endl;
+	    return kFALSE;
+	  }   
+	  delete  histTitleIntegDenomMix;     
+
+	  histFull[k].histFullHar[j].mCumulG0MixDenomRead[pq]
+	    = tempDenomMixProfile->GetBinContent(1);
+	  
+	  f.Close();
+	  
+	} else {
+
+	  if(!noDenomFileWarned) {
+	    gMessMgr->Info("##### FlowCumulantAnalysis:denominator.root is not present, assumming this run is just for producing denominator.root. That means cumulant flow result with mixed harmonics in flow.cumulant.root is nonsense for this run. ");
+	    noDenomFileWarned = kTRUE;
+	  }
+	  histFull[k].histFullHar[j].mCumulG0MixDenomRead[pq] = 1.; 
+
+	}
+								     
+								    
+    }
+
+
+
+    for (int p = 0; p < Flow::nCumulMixHar_pMax; p++){ //v1{3} paper Eq (29)
+      histFull[k].histFullHar[j].mMixX1z[p]=r0Mix*cos( pi*((double)p)/4. ); 
+      histFull[k].histFullHar[j].mMixY1z[p]=r0Mix*sin( pi*((double)p)/4. ); 
+    }
+
+    for (int q = 0; q < Flow::nCumulMixHar_qMax; q++){
+      histFull[k].histFullHar[j].mMixX2z[q]=r0Mix*cos( pi*((double)q)/2. ); 
+      histFull[k].histFullHar[j].mMixY2z[q]=r0Mix*sin( pi*((double)q)/2. ); 
+    }
+
+
+
+
+
+
+
       // ***  for integrated flow  ***
 
       histFull[k].histFullHar[j].mHistCumulIntegG0Sum =
@@ -333,11 +511,13 @@ Int_t StFlowCumulantMaker::Init() {
       
       histFull[k].histFullHar[j].mMultSum       = 0.;
       histFull[k].histFullHar[j].mNEvent        = 0;
+      histFull[k].histFullHar[j].mMeanWgtSqrSum = 0.;
+
     }
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.19 2004/12/09 23:47:08 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.20 2004/12/17 15:50:09 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -355,6 +535,7 @@ void StFlowCumulantMaker::FillFromFlowEvent() {
       
       // full event quantities
       mMult[k][j]       = pFlowEvent->Mult(pFlowSelect);
+      mSqrtOfSumWgtSqr[k][j] = ::sqrt(pFlowEvent->SumWeightSquare(pFlowSelect));
       
     }
   }
@@ -372,15 +553,30 @@ void StFlowCumulantMaker::FillEventHistograms() {
       
       histFull[k].histFullHar[j].mMultSum       += (float)mMult[k][j];
       histFull[k].histFullHar[j].mNEvent++;
+      histFull[k].histFullHar[j].mMeanWgtSqrSum += 
+         (mSqrtOfSumWgtSqr[k][j]*mSqrtOfSumWgtSqr[k][j])/(float)mMult[k][j];
+
       
       for (int pq = 0; pq < Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax; pq++) {   
-
 	  histFull[k].histFullHar[j].mCumulIntegG0[pq] += 
 	    pFlowEvent->G_New( pFlowSelect,  
 			       histFull[k].histFullHar[j].mIntegXz[pq], 
 			       histFull[k].histFullHar[j].mIntegYz[pq] );
-	
       }
+
+      for (int pq  = 0; pq < Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax ; pq++) { 
+	int pIndex = pq/Flow::nCumulMixHar_qMax;
+        int qIndex = pq%Flow::nCumulMixHar_qMax;
+         if (j ==0) 	  //only for v1
+         histFull[k].histFullHar[j].mCumulIntegG0Mix[pq] +=
+	    pFlowEvent->G_Mix( pFlowSelect,        
+                               histFull[k].histFullHar[j].mMixX1z[pIndex],
+                               histFull[k].histFullHar[j].mMixY1z[pIndex],
+                               histFull[k].histFullHar[j].mMixX2z[qIndex],
+                               histFull[k].histFullHar[j].mMixY2z[qIndex] );
+     }
+
+
     }
   }
   
@@ -403,14 +599,22 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 
   double* evtG[Flow::nSels][Flow::nHars];
   double* theCrossterm[Flow::nSels][Flow::nHars];
-  double  theSqrtOfSumWgtSqr[Flow::nSels][Flow::nHars];
   
+  double* evtGMix[Flow::nSels][Flow::nHars];
+  double* theCrosstermMix[Flow::nSels][Flow::nHars];
+
+
+
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) { 
        evtG[k][j] = 
 	new double[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
        theCrossterm[k][j]    = 
         new double[Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax];
+       evtGMix[k][j] = 
+	new double[Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax];
+       theCrosstermMix[k][j]    = 
+        new double[Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax];
     }
   }
 
@@ -419,7 +623,6 @@ void StFlowCumulantMaker::FillParticleHistograms() {
       pFlowSelect->SetSelection(k);
       pFlowSelect->SetHarmonic(j);
       
-      theSqrtOfSumWgtSqr[k][j] = ::sqrt(pFlowEvent->SumWeightSquare(pFlowSelect));
       
       for (int pq = 0; pq < Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
 	
@@ -429,7 +632,24 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 			      histFull[k].histFullHar[j].mDiffYz[pq] )) ;
 	theCrossterm[k][j][pq] =evtG[k][j][pq];
         histFull[k].histFullHar[j].mCumulG0Denom[pq]->Fill(0.5,evtG[k][j][pq]);
-      } 
+      }
+
+
+    for (int pq  = 0; pq < Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax ; pq++) { 
+	int pIndex = pq/Flow::nCumulMixHar_qMax;
+        int qIndex = pq%Flow::nCumulMixHar_qMax;
+        if (j ==0) //only for v1	  
+	evtGMix[k][j][pq] =
+	    pFlowEvent->G_Mix( pFlowSelect,        
+                               histFull[k].histFullHar[j].mMixX1z[pIndex],
+                               histFull[k].histFullHar[j].mMixY1z[pIndex],
+                               histFull[k].histFullHar[j].mMixX2z[qIndex],
+                               histFull[k].histFullHar[j].mMixY2z[qIndex] );
+	theCrosstermMix[k][j][pq] =evtGMix[k][j][pq];
+        histFull[k].histFullHar[j].mCumulG0MixDenom[pq]->Fill(0.5,evtGMix[k][j][pq]);
+    }  
+
+ 
     }
   }
 
@@ -445,31 +665,21 @@ void StFlowCumulantMaker::FillParticleHistograms() {
       pFlowSelect->SetSelection(k);
       double cumuTemp[Flow::nCumulDiffOrders];
       double cumuTempFlip[Flow::nCumulDiffOrders];
+      double cumuTempMix;
+      double cumuTempMixFlip;
       double order = 0.;
-      double phiWgt = 0.;
+      double phiWgt = 1.;
+      double phiWgtRaw = 1.; //no ptwgt or eta wgt folded in.
       for (int j = 0; j < Flow::nHars; j++) {
 	bool oddHar = (j+1) % 2;
 	pFlowSelect->SetHarmonic(j);
 	order  = (double)(j+1);
 	
  	if (pFlowSelect->Select(pFlowTrack)) {
-// 	  // Get detID
-// 	  StDetectorId detId;
-// 	  if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId) || 
-// 	      (pFlowTrack->TopologyMap().data(0) == 0 && 
-// 	       pFlowTrack->TopologyMap().data(1) == 0)) {
-// 	    // Tpc track, or TopologyMap not available
-// 	    detId = kTpcId;
-// 	  } else if (pFlowTrack->TopologyMap().trackFtpcEast()) {
-// 	    detId = kFtpcEastId;
-// 	  } else if (pFlowTrack->TopologyMap().trackFtpcWest()) {
-// 	    detId = kFtpcWestId;
-// 	  } else {
-// 	    detId = kUnknownId;
-// 	  }
 	  
 	  // Get phiWgt
 	  phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+          phiWgtRaw = pFlowEvent->PhiWeightRaw(k, j, pFlowTrack);
 	}
 	
 	// Caculate v for all particles selected for correlation analysis
@@ -518,6 +728,137 @@ void StFlowCumulantMaker::FillParticleHistograms() {
 	    
 	  }
 	  
+
+
+
+
+
+
+
+
+
+
+	  //////////////////Begining of the block for v1{3} hist fill//////////////////
+
+	  if (j==0){ //Har 1 only
+
+	  double DpxMix[Flow::nCumulMixHar_pMax]; 
+	  double DpyMix[Flow::nCumulMixHar_pMax]; 
+
+	  double DpqxMix[Flow::nCumulMixHar_pMax][Flow::nCumulMixHar_qMax]; 
+	  double DpqyMix[Flow::nCumulMixHar_pMax][Flow::nCumulMixHar_qMax]; 
+
+
+
+	  for (int p = 0; p < Flow::nCumulMixHar_pMax; p++) {
+	    DpxMix[p] = 0.;  DpyMix[p] = 0.;}
+	  
+	  for (int pq = 0; pq < Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax; pq++) {
+
+        	int pIndex = pq/Flow::nCumulMixHar_qMax;
+                int qIndex = pq%Flow::nCumulMixHar_qMax;
+
+	    if ( (pFlowSelect->SelectPart(pFlowTrack)) && 
+		 (pFlowSelect->Select(pFlowTrack)) ) { // rm autocorrelation
+
+	      double etaWgt = (oddHar) ? ( (eta>0) ? (pFlowEvent->EtaAbsWgtValue(eta)) :  (-1.*(pFlowEvent->EtaAbsWgtValue(eta))) ) : 1.;
+
+	  double ptWgt  = pFlowEvent->PtAbsWgtValue(pt);
+
+          double detectorV1Wgt = 1.;
+
+	  if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId) ||  
+	      (pFlowTrack->TopologyMap().data(0) == 0 && 
+	       pFlowTrack->TopologyMap().data(1) == 0)) {
+	    // hits in Tpc or TopologyMap not available
+	    detectorV1Wgt =pFlowEvent->V1TPCDetctWgtG_Mix(k);
+	  } else if (pFlowTrack->TopologyMap().trackFtpcEast() ) {
+	    detectorV1Wgt =pFlowEvent->V1FtpcEastDetctWgtG_Mix(k);
+          } else if (pFlowTrack->TopologyMap().trackFtpcWest() ) { 
+	    detectorV1Wgt =pFlowEvent->V1FtpcWestDetctWgtG_Mix(k);
+       }
+
+
+          double detectorV2Wgt = 1.;
+
+	  if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId) ||  
+	      (pFlowTrack->TopologyMap().data(0) == 0 && 
+	       pFlowTrack->TopologyMap().data(1) == 0)) {
+	    // hits in Tpc or TopologyMap not available
+	    detectorV2Wgt =pFlowEvent->V2TPCDetctWgtG_Mix(k);
+	  } else if (pFlowTrack->TopologyMap().trackFtpcEast() ) {
+	    detectorV2Wgt =pFlowEvent->V2FtpcEastDetctWgtG_Mix(k);
+          } else if (pFlowTrack->TopologyMap().trackFtpcWest() ) { 
+	    detectorV2Wgt =pFlowEvent->V2FtpcWestDetctWgtG_Mix(k);
+       }
+
+
+
+
+		theCrosstermMix[k][j][pq] = evtGMix[k][j][pq] / 
+               (1. + (phiWgtRaw*etaWgt*detectorV1Wgt/mMult[k][j]) * 
+    (2.* histFull[k].histFullHar[j].mMixX1z[pIndex] * cos(phi * order) + 
+    2.*  histFull[k].histFullHar[j].mMixY1z[pIndex] * sin(phi * order) ) 
+                    + (phiWgtRaw*ptWgt*detectorV2Wgt/mMult[k][j]) * 
+    (2.* histFull[k].histFullHar[j].mMixX2z[qIndex] * cos(phi * order*2.) + 
+     2.* histFull[k].histFullHar[j].mMixY2z[qIndex] * sin(phi * order*2.) ) );
+
+	    }
+
+	    // for writting out <G(p,q)>, the denominator 
+	    
+         DpqxMix[pIndex][qIndex] = theCrosstermMix[k][j][pq] * cos(order * phi)/
+                          histFull[k].histFullHar[j].mCumulG0MixDenomRead[pq];
+         DpqyMix[pIndex][qIndex] = theCrosstermMix[k][j][pq] * sin(order * phi)/
+                          histFull[k].histFullHar[j].mCumulG0MixDenomRead[pq];
+	    
+	  }
+
+	  
+
+	  for (int p=0; p< Flow::nCumulMixHar_pMax; p++){
+    DpxMix[p]=(1./(4.*r0Mix))*( DpqxMix[p][0]-DpqxMix[p][2]+DpqyMix[p][1]-DpqyMix[p][3]);
+    DpyMix[p]=(1./(4.*r0Mix))*( DpqyMix[p][0]-DpqyMix[p][2]+DpqxMix[p][3]-DpqxMix[p][1]);
+	  } 
+	  
+
+	  cumuTempMix = (1./(4.*r0Mix))*(DpxMix[0]-DpyMix[2]-DpxMix[4]+DpyMix[6]);
+
+          cumuTempMixFlip = cumuTempMix;
+	  
+	  if (eta < 0 && oddHar) {
+	    cumuTempMixFlip *= -1.;
+	  }
+
+
+	    histFull[k].histFullHar[j].mHistCumulMix2D->
+	      Fill(yOrEta, pt, cumuTempMix*profScale); 
+	    histFull[k].histFullHar[j].mHistCumulMixEta->
+	      Fill(yOrEta, cumuTempMix*profScale); 
+	    histFull[k].histFullHar[j].mHistCumulMixPt->
+	      Fill(pt, cumuTempMixFlip*profScale); 
+
+      	    histFull[k].mHistCumulMix->Fill(order,cumuTempMixFlip*profScale); //only order ==1 get filled anyway.
+
+	  }
+
+	  ////////////////End the block for v1{3} hist fill///////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	  if (m_M==1) {
 	    cumuTemp[0] = ((2.*Dp[1-1])-(0.5*Dp[2-1]))/r0Sq; // (B9, PG12)
 	    cumuTemp[1] = ((-2.*Dp[1-1])+Dp[2-1])/(r0Sq*r0Sq);
@@ -584,6 +925,26 @@ Int_t StFlowCumulantMaker::Finish() {
 if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
       AddHist(histFull[k].mHist_v[ord]);
     }
+
+
+      ///////////// mixed harmonic for v1{3}
+      histTitle = new TString("Flow_CumulMix_v_Sel");
+      *histTitle +=k+1;   
+      histFull[k].mHistMix_v = 
+	new  TH1D(*(histFull[k].mHistCumulMix->ProjectionX(histTitle->Data(),"e")));
+      histFull[k].mHistMix_v->SetTitle(histTitle->Data());
+      histFull[k].mHistMix_v->SetXTitle("place for v1 from mixed harmonic");
+      histFull[k].mHistMix_v->SetYTitle("v (%)");
+      delete histTitle;
+
+      histFull[k].mHistMix_v->Scale(1./profScale);
+      AddHist(histFull[k].mHistMix_v);
+
+      ///////////////
+
+
+
+
     
     double  meanIntegV[Flow::nHars];     // V**1
     double  meanIntegV2[Flow::nHars];    // V**2
@@ -593,6 +954,11 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
     double  cumulInteg2[Flow::nHars];
     double  cumulInteg3[Flow::nHars];
     
+
+    double cumulIntegMix[Flow::nHars];
+    double meanIntegVMix[Flow::nHars];
+
+
     for (int j = 0; j < Flow::nHars; j++) {
       meanIntegV[j]  = 0.;
       meanIntegV2[j] = 0.;
@@ -601,6 +967,8 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
       cumulInteg1[j] = 0.;
       cumulInteg2[j] = 0.;
       cumulInteg3[j] = 0.;
+      cumulIntegMix[j] = 0.;
+      meanIntegVMix[j] = 0.;
     }
     
     for (int j = 0; j < Flow::nHars; j++) {
@@ -614,6 +982,11 @@ if (ord>0)  histFull[k].mHist_v[ord]->Scale(1./profScale);
 	 SetBinContent(1,double(histFull[k].histFullHar[j].mMultSum));
        histFull[k].histFullHar[j].mHistNEvent->
 	 SetBinContent(1,double(histFull[k].histFullHar[j].mNEvent));
+       histFull[k].histFullHar[j].mHistMeanWgtSqrSum->
+	 SetBinContent(1,double(histFull[k].histFullHar[j].mMeanWgtSqrSum));
+
+
+
 
       double CpInteg[Flow::nCumulIntegOrders]; // Cp in (B4, PG6)
       
@@ -749,6 +1122,125 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vPt[ord]->Scale(1./profScale);
 	AddHist(histFull[k].histFullHar[j].mHist_vPt[ord]);
       }
     }
+
+
+
+
+    /////////////  mixed har for v1{3}
+
+    for (int j = 0; j < Flow::nHars; j++) {
+      if (j != 0) continue; //only j==0 makes sense for mixed har.
+          
+      double mAvMult = // average multiplicity
+	float(histFull[k].histFullHar[j].mMultSum)/
+	(float(histFull[k].histFullHar[j].mNEvent));
+
+
+      double mAveMeanWgtSqr = // <w**2>
+	float(histFull[k].histFullHar[j].mMeanWgtSqrSum)/
+        (float(histFull[k].histFullHar[j].mNEvent));
+
+
+       double  CpqMix[Flow::nCumulMixHar_pMax][Flow::nCumulMixHar_qMax];//(30)
+	  for (int pq = 0; pq < Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax; pq++) {
+        	int pIndex = pq/Flow::nCumulMixHar_qMax;
+                int qIndex = pq%Flow::nCumulMixHar_qMax;
+
+	histFull[k].histFullHar[j].mHistCumulIntegG0MixSum[pq]->
+          SetBinContent(1,histFull[k].histFullHar[j].mCumulIntegG0Mix[pq]);
+	histFull[k].histFullHar[j].mCumulIntegG0Mix[pq] /=  //<G(z1,z2)>
+	  float(histFull[k].histFullHar[j].mNEvent);    
+
+        CpqMix[pIndex][qIndex]=mAvMult*(pow(histFull[k].histFullHar[j].mCumulIntegG0Mix[pq], 1./mAvMult) -1.); //Mix (21)
+        
+	  }
+
+	  double CpxMix[Flow::nCumulMixHar_pMax];
+          double CpyMix[Flow::nCumulMixHar_pMax];
+
+          for (int p =0; p<Flow::nCumulMixHar_pMax; p++){//Mix (31)
+	    CpxMix[p] = (1./(4.*r0Mix))*(CpqMix[p][0] - CpqMix[p][2]);
+	    CpyMix[p] = (1./(4.*r0Mix))*(CpqMix[p][3] - CpqMix[p][1]);
+	  }
+
+         
+          cumulIntegMix[j] = (1./(4.*r0Mix*r0Mix))*( // Mix (32)
+                        CpxMix[0]-CpyMix[1]-CpxMix[2]+CpyMix[3]
+			+CpxMix[4]-CpyMix[5]-CpxMix[6]+CpyMix[7]);
+
+
+ 
+	  double  tempMeanV = pow(-1.*cumulInteg2[1]*mAveMeanWgtSqr*mAveMeanWgtSqr,1./4.); // <wgt*v2>
+	  double  tempMeanVMixSq = cumulIntegMix[j]/tempMeanV; //(24)
+
+	  if (tempMeanVMixSq>0.)
+    meanIntegVMix[j] = sqrt(tempMeanVMixSq);//(24)
+          else cout<<"### <wgt*v1>**2 = "<<tempMeanVMixSq<<" < 0. failed "<<endl;
+
+
+	histTitle = new TString("Flow_CumulMix_v2D_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mHistMix_v2D = 
+	  new TH2D(*(histFull[k].histFullHar[j].mHistCumulMix2D->
+		     ProjectionXY(histTitle->Data(),"e")));
+	histFull[k].histFullHar[j].mHistMix_v2D->SetTitle(histTitle->Data());
+	histFull[k].histFullHar[j].mHistMix_v2D->SetXTitle((char*)xLabel.Data());
+	histFull[k].histFullHar[j].mHistMix_v2D->SetYTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mHistMix_v2D->SetZTitle("v (%)");
+	delete histTitle;
+
+        histFull[k].histFullHar[j].mHistMix_v2D->Scale(1./profScale);
+
+	histTitle = new TString("Flow_CumulMix_vEta_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mHistMix_vEta = 
+	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulMixEta->
+		      ProjectionX(histTitle->Data(),"e")));
+	histFull[k].histFullHar[j].mHistMix_vEta->SetTitle(histTitle->Data());
+	histFull[k].histFullHar[j].mHistMix_vEta->SetXTitle((char*)xLabel.Data());
+	histFull[k].histFullHar[j].mHistMix_vEta->SetYTitle("v (%)");
+	delete histTitle;
+	
+        histFull[k].histFullHar[j].mHistMix_vEta->Scale(1./profScale);
+
+
+	histTitle = new TString("Flow_CumulMix_vPt_Sel");
+        *histTitle +=k+1;
+	histTitle->Append("_Har");
+        *histTitle +=j+1;
+	histFull[k].histFullHar[j].mHistMix_vPt = 
+	  new  TH1D(*(histFull[k].histFullHar[j].mHistCumulMixPt->
+		      ProjectionX(histTitle->Data(),"e")));
+	histFull[k].histFullHar[j].mHistMix_vPt->SetTitle(histTitle->Data());
+	histFull[k].histFullHar[j].mHistMix_vPt->SetXTitle("Pt (GeV)");
+	histFull[k].histFullHar[j].mHistMix_vPt->SetYTitle("v (%)");
+	delete histTitle;
+	
+        histFull[k].histFullHar[j].mHistMix_vPt->Scale(1./profScale);
+
+	histFull[k].histFullHar[j].mHistMix_v2D->Scale(1./(tempMeanV*meanIntegVMix[j]*perCent)); 
+	histFull[k].histFullHar[j].mHistMix_vEta->Scale(1./(tempMeanV*meanIntegVMix[j]*perCent));
+	histFull[k].histFullHar[j].mHistMix_vPt->Scale(1./(tempMeanV*meanIntegVMix[j]*perCent)); 
+     histFull[k].mHistMix_v->Scale(1./(tempMeanV*meanIntegVMix[j]*perCent)); 
+
+	AddHist(histFull[k].histFullHar[j].mHistMix_v2D);
+	AddHist(histFull[k].histFullHar[j].mHistMix_vEta);
+	AddHist(histFull[k].histFullHar[j].mHistMix_vPt);
+        AddHist(histFull[k].mHistMix_v);
+
+    } 
+    ///////end of block for v1{3}
+
+
+
+
+
+
+
     
     if (m_M==1) {
       
@@ -840,11 +1332,16 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vPt[ord]->Scale(1./profScale);
   
   // Write most histograms
   TFile histFile("flow.cumulant.root", "RECREATE");
-  TList* hisList = GetHistList(); 
+  //  TList* hisList = GetHistList(); 
+  TList* hisList = GetList(); 
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       for (int pq = 0; pq <  Flow::nCumulDiffOrders*Flow::nCumulDiff_qMax; pq++) {
 	hisList->Remove(histFull[k].histFullHar[j].mCumulG0Denom[pq]);
+      }
+      for (int pq  = 0; pq < Flow::nCumulMixHar_pMax*Flow::nCumulMixHar_qMax ; pq++) { 
+      hisList->Remove(histFull[k].histFullHar[j].mCumulG0MixDenom[pq]);
+      XpqYpqDenomNames->AddLast(histFull[k].histFullHar[j].mCumulG0MixDenom[pq]);
       }
     }
   }
@@ -856,21 +1353,30 @@ if (ord>0) histFull[k].histFullHar[j].mHist_vPt[ord]->Scale(1./profScale);
   (*cumulConstants)(3)=double(Flow::nPhiBins);
   (*cumulConstants)(4)=double(Flow::nPhiBinsFtpc);
   (*cumulConstants)(5)=double(mNEtaBins);
-  (*cumulConstants)(6)=double(Flow::nPtBins);
+  (*cumulConstants)(6)=double(nPtBinsPart);
   (*cumulConstants)(7)=double(Flow::nCumulIntegOrders);
   (*cumulConstants)(8)=double(Flow::nCumulInteg_qMax);
   (*cumulConstants)(9)=double(Flow::nCumulDiffOrders);
   (*cumulConstants)(10)=double(Flow::nCumulDiff_qMax);
-  (*cumulConstants)(11)=r0;
-  (*cumulConstants)(12)=m_M;
-  (*cumulConstants)(13)=(strlen(pFlowSelect->PidPart()) != 0) ? 1 : 0;//1,pidflow
-  (*cumulConstants)(14)=double(profScale);//1,pidflow
+  (*cumulConstants)(11)=double(Flow::nCumulMixHar_pMax);
+  (*cumulConstants)(12)=double(Flow::nCumulMixHar_qMax);
+  (*cumulConstants)(13)=r0;
+  (*cumulConstants)(14)=m_M;
+  (*cumulConstants)(15)=(strlen(pFlowSelect->PidPart()) != 0) ? 1 : 0;//1,pidflow
+  (*cumulConstants)(16)=r0Mix;
+  (*cumulConstants)(17)=double(profScale);
 
-  cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
+    cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
+  //  cumulConstants->SetName("CumulConstants");
+  hisList->AddLast(cumulConstants);
 
   TObjString* cumulMethodTag 
        = new TObjString( "cumulNew" );
-  cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
+
+
+    cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
+  //  cumulMethodTag->SetName("CumulMethodTag");
+  hisList->AddLast(cumulMethodTag);
 
   hisList->Write();
   
@@ -908,6 +1414,9 @@ void StFlowCumulantMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.20  2004/12/17 15:50:09  aihong
+// check in v1{3} code
+//
 // Revision 1.19  2004/12/09 23:47:08  posk
 // Minor changes in code formatting.
 // Added hist for TPC primary dca to AnalysisMaker.

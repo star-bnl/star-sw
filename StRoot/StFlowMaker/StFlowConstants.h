@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.19 2004/12/07 23:08:10 posk Exp $
+// $Id: StFlowConstants.h,v 1.20 2004/12/17 15:50:08 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -34,6 +34,8 @@ class Flow{
     nCumulInteg_qMax  = 8,
     nCumulDiffOrders  = 2,
     nCumulDiff_qMax   = 8,
+    nCumulMixHar_pMax = 8, // for directed flow. Eq.(29) in Borghini v1 paper
+    nCumulMixHar_qMax = 4,  // for directed flow
     nCents            = 9,
     zdcsmd_nPsiBins   = 64
   };
@@ -68,6 +70,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.20  2004/12/17 15:50:08  aihong
+// check in v1{3} code
+//
 // Revision 1.19  2004/12/07 23:08:10  posk
 // Only odd and even phiWgt hists. If the old phiWgt file contains more than
 // two harmonics, only the first two are read. Now writes only the first two.
