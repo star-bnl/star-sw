@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.295 2002/05/18 01:01:26 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.296 2002/05/22 21:14:21 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1355,6 +1355,20 @@ Char_t *StBFChain::GetOptionString(const Char_t *Opt)
 
 //_____________________________________________________________________________
 /// Scan all flags, check if they are correct, manipulate the comment if necessary
+/*!
+  This method checks if the options passed are correct and/or sorts out
+  the extraneous information passed through the comment if applies. Two
+  special flags exists, that is, dbv and sdt for database interraction ...
+  - The <tt>dbv</tt> tag is used to setup the end-time for entries (time after 
+    which any database insertions will be ignored). It used to provide a 
+    mechanism by which we can run production with a stable set of calibration 
+    constant and still allow for development value insertion to get in.
+  - The <tt>sdt</tt> tag is used to setup the database look-up time stamp
+    that is, on which date to look at the database. This is usefull if we
+    want to decouple Geant geometry and database calibration constants. 
+    This may also be used to get database values when you do not run over
+    a raw data file. 
+*/
 void StBFChain::SetFlags(const Char_t *Chain)
 {
   Int_t k;
