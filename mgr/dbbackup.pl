@@ -1,6 +1,6 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbbackup.pl,v 1.3 1999/07/09 13:10:26 wenaus Exp $
+# $Id: dbbackup.pl,v 1.4 1999/07/10 13:15:33 wenaus Exp $
 #
 ######################################################################
 #
@@ -13,6 +13,9 @@
 # Usage:    dbbackup.pl 
 #
 # $Log: dbbackup.pl,v $
+# Revision 1.4  1999/07/10 13:15:33  wenaus
+# Use full mysqldump path
+#
 # Revision 1.3  1999/07/09 13:10:26  wenaus
 # Keep backups permanently once a month
 #
@@ -41,7 +44,7 @@ foreach $db ( keys %dbToBackup ) {
     $yr=$yr+1900;
     $cdate = sprintf("%4.4d%2.2d%2.2d",$yr,$mo,$dy);
     $fname = "$db-$cdate.sql.gz";
-    $out = `mysqldump --opt $db | gzip > $backupDir/$fname`;
+    $out = `/usr/local/mysql/bin/mysqldump --opt $db | gzip > $backupDir/$fname`;
     if ( $out ne '' ) {print $out}
 
     ## Keep the backup permanently once a month
