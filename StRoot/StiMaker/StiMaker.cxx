@@ -59,7 +59,7 @@ void StiMaker::kill()
 
 StiMaker::~StiMaker() 
 {
-    delete mhitstore;
+    StiHitContainer::kill();
     mhitstore = 0;
     delete mhitfactory;
     mhitfactory = 0;
@@ -70,6 +70,7 @@ StiMaker::~StiMaker()
     StiDetectorLayerContainer::kill();
     mdetector = 0;
     StiTrackContainer::kill();
+    mtrackstore = 0;
 }
 
 void StiMaker::Clear(const char*)
