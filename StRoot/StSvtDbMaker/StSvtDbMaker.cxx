@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.2 2002/01/31 17:57:17 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.3 2002/02/05 23:30:52 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.3  2002/02/05 23:30:52  caines
+ * fixing configuration bug
+ *
  * Revision 1.2  2002/01/31 17:57:17  munhoz
  * removed incorrect line
  *
@@ -47,9 +50,9 @@ StSvtDbMaker::StSvtDbMaker(const char *name):StMaker(name)
 //_____________________________________________________________________________
 StSvtDbMaker::~StSvtDbMaker()
 {
-  delete m_Reader;
-  delete mReader;
-  delete mWriter;
+  //delete m_Reader;
+  //if (mReader) delete mReader;
+  //if (mWriter) delete mWriter;
 }
 
 //_____________________________________________________________________________
@@ -68,7 +71,7 @@ Int_t StSvtDbMaker::Init()
 }
 
 //_____________________________________________________________________________
-void StSvtDbMaker::setSvtDb_Reader()
+void StSvtDbMaker::setSvtDb_Reader()  
 {
   if (Debug()) gMessMgr->Debug() << "StSvtDbMaker::set_SvtDb_Reader" << endm;
   m_Reader = new St_SvtDb_Reader();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.1 2001/10/29 18:53:14 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.2 2002/02/05 23:30:52 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.2  2002/02/05 23:30:52  caines
+ * fixing configuration bug
+ *
  * Revision 1.1  2001/10/29 18:53:14  munhoz
  * starting SVT Data base
  *
@@ -75,18 +78,18 @@ StSvtConfig* St_SvtDb_Reader::getConfiguration()
 
   svtConfiguration_st* config = configuration->GetTable();
 
-  cout << config->numberOfBarrels << endl;
-  cout << config->numberOfLadders << endl;
-  cout << config->numberOfWafers << endl;
-  cout << config->numberOfHybrids << endl;
+  cout << "numberOfBarrels = " << config->numberOfBarrels << endl;
+  cout << "numberOfLadders = "  << config->numberOfLadders << endl;
+  cout << "numberOfWafers = "  << config->numberOfWafers << endl;
+  cout << "numberOfHybrids = "  << config->numberOfHybrids << endl;
   
-  cout << config->numberOfLaddersPerBarrel[0] << endl;
-  cout << config->numberOfLaddersPerBarrel[1] << endl;
-  cout << config->numberOfLaddersPerBarrel[2] << endl;
-  cout << config->numberOfWafersPerLadder[0] << endl;
-  cout << config->numberOfWafersPerLadder[1] << endl;
-  cout << config->numberOfWafersPerLadder[2] << endl;
-  cout << config->numberOfHybridsPerWafer << endl;
+  cout << "numberOfLaddersPerBarrel[0] = "  << config->numberOfLaddersPerBarrel[0] << endl;
+  cout << "numberOfLaddersPerBarrel[1] = "  << config->numberOfLaddersPerBarrel[1] << endl;
+  cout << "numberOfLaddersPerBarrel[2] = "  << config->numberOfLaddersPerBarrel[2] << endl;
+  cout << "numberOfWafersPerLadder[0] = "  << config->numberOfWafersPerLadder[0] << endl;
+  cout << "numberOfWafersPerLadder[1] = "  << config->numberOfWafersPerLadder[1] << endl;
+  cout << "numberOfWafersPerLadder[2] = "  << config->numberOfWafersPerLadder[2] << endl;
+  cout << "numberOfHybridsPerWafer = "  << config->numberOfHybridsPerWafer << endl;
 
   mSvtConfig = new StSvtConfig();
 
@@ -102,6 +105,8 @@ StSvtConfig* St_SvtDb_Reader::getConfiguration()
   //temporary. Must read electronics db and fill these quantities
   mSvtConfig->setNumberOfAnodes(240);
   mSvtConfig->setNumberOfTimeBins(128);
+
+  mSvtConfig->setConfiguration();
 
   return mSvtConfig;
 }
@@ -303,7 +308,7 @@ StSvtGeometry* St_SvtDb_Reader::getGeometry()
 	  waferGeom->setTransverseDirection(position->transverseDirection[0],position->transverseDirection[1],position->transverseDirection[2]);
 	  waferGeom->setCenterPosition(position->centerPosition[0],position->centerPosition[1],position->centerPosition[2]);
 
-	  cout << "index = "  << index << ", x = " << position->centerPosition[0] << endl;
+	  //cout << "index = "  << index << ", x = " << position->centerPosition[0] << endl;
 
 	  svtGeom->put_at(waferGeom,index);
 
