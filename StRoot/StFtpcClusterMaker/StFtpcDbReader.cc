@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.8 2001/08/21 19:51:06 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.9 2001/10/19 09:40:11 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.9  2001/10/19 09:40:11  jcs
+// tZero now in data base in ftpcElectronics
+//
 // Revision 1.8  2001/08/21 19:51:06  jcs
 // correct value of sizeOfTimebin now in MySQL database - remove from code
 //
@@ -42,7 +45,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcAmpSlope      *ampslope,
                                St_ftpcAmpOffset     *ampoffset,
                                St_ftpcTimeOffset    *timeoffset,
-                               St_ftpcDriftField    *driftfield)
+                               St_ftpcDriftField    *driftfield,
+                               St_ftpcElectronics  *electronics)
 {
 
   //  just copy dimensions table start to pointer
@@ -148,7 +152,13 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
 
-    mTZero              = 1.937;
+  //  just copy electronics table start to pointer
+  ftpcElectronics_st* electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  if(electronicsTable){
+   mTZero = electronicsTable->tZero;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
+  }
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
@@ -161,7 +171,8 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcdVDriftdP     *dvdriftdp,
                                St_ftpcdDeflectiondP *ddeflectiondp,
                                St_ftpcGas           *gas,
-                               St_ftpcDriftField    *driftfield)
+                               St_ftpcDriftField    *driftfield,
+                               St_ftpcElectronics   *electronics)
 {
 
   //  just copy dimensions table start to pointer
@@ -267,7 +278,15 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
 
-    mTZero              = 1.937;
+  //  just copy electronics table start to pointer
+  ftpcElectronics_st* electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
+  if(electronicsTable){
+   mTZero = electronicsTable->tZero;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
+  }
+
+cout<<" electronicsTable->tZero = "<<mTZero<<endl;  //JCS
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }

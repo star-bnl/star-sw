@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.7 2001/04/23 20:34:40 oldi Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.8 2001/10/19 09:42:34 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.8  2001/10/19 09:42:34  jcs
+// tZero now in data base in ftpcElectronics
+//
 // Revision 1.7  2001/04/23 20:34:40  oldi
 // Output sent to StMessMgr now.
 //
@@ -63,7 +66,8 @@ m_deflection(0),
 m_dvdriftdp(0),
 m_ddeflectiondp(0),
 m_gas(0),
-m_driftfield(0)
+m_driftfield(0),
+m_electronics(0)
 {
 }
 //_____________________________________________________________________________
@@ -104,6 +108,7 @@ Int_t StFtpcSlowSimMaker::Init(){
   m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
+  m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
 
   
   // Create Histograms    
@@ -154,7 +159,8 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                   m_dvdriftdp,
                                                   m_ddeflectiondp,
                                                   m_gas,
-                                                  m_driftfield);
+                                                  m_driftfield,
+                                                  m_electronics);
 
     StFtpcSlowSimulator *slowsim = new StFtpcSlowSimulator(geantReader,
 							   paramReader, 
