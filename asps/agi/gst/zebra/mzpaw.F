@@ -1,38 +1,21 @@
-*
-* $Id: mzpaw.F,v 1.5 1998/07/20 20:17:32 perev Exp $
-*
+* $Id: mzpaw.F,v 1.6 2000/01/09 21:30:48 nevski Exp $
 * $Log: mzpaw.F,v $
-* Revision 1.5  1998/07/20 20:17:32  perev
-* Mods for exe SGI64 and HP rubber Zebra
+* Revision 1.6  2000/01/09 21:30:48  nevski
+* fortran-style memgetf
 *
-* Revision 1.4  1998/06/05 20:55:36  perev
-* AGI commit
-*
-* Revision 1.3  1998/04/16 16:58:07  fisyak
-* 2nd pass with gstar
-*
-*
-#include "zebra/pilot.h"
-*CMZ :          06/12/97  11.36.55  by  Pavel Nevski
-*-- Author :
       SUBROUTINE MZPAW (NWORDS,CHOPT)
- 
 C-    Initialize the store /PAWC/ of at least 10000 words;
- 
-      COMMON /PAWC/  NWPAW,IXPAWC,IHBOOK,IXHIGZ,IXKU,IFENCE(5)
-     +,              LMAIN, IPAW(9989)
 C--------------------------------------------------------------------
+*CDE,PAWC. - some variables are renamed !  (wws->ipaw etc)
+      COMMON /PAWC/  NWPAW,IXPAWC,IHBOOK,IXHIGZ,IXKU,IFENCE(5),
+     +               LMAIN, IPAW(9989)
       CHARACTER*(*) CHOPT
- 
+
       NW   = abs (NWORDS)
       NW   = max (NW,100000)
-      I1   = LOCF(IPAW(1))
-      I2   = memget (NW*4+1000)
-      I2   = iudivd (i2,4)
-      if (i2 .le. i1) then
-        write(*,*) 'MZPAW. Error: No or Wrong space ',i1,i2,NW
-        stop 
-      endif
+      I1   = LOCF(IPAW)
+      I2   = MEMGETF (NW+1000)
+      If (I2.LT.I1) PRINT *,' MZPAW: requested memory not found '
       LL   = max    (I2-I1,0)
       NW   = NW + LL
       KWW  = LL + 100
@@ -48,3 +31,5 @@ c
       IXKU   = 0
       RETURN
       END
+
+

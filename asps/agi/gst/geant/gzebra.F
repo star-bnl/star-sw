@@ -1,30 +1,8 @@
-*
-* $Id: gzebra.F,v 1.7 2000/01/07 01:04:49 nevski Exp $
-*
+* $Id: gzebra.F,v 1.8 2000/01/09 21:30:48 nevski Exp $
 * $Log: gzebra.F,v $
-* Revision 1.7  2000/01/07 01:04:49  nevski
-* iudivd typed
+* Revision 1.8  2000/01/09 21:30:48  nevski
+* fortran-style memgetf
 *
-* Revision 1.6  2000/01/07 00:57:15  nevski
-*  iudivd typed
-*
-* Revision 1.5  2000/01/06 22:09:19  nevski
-* unlimited track/vertex version
-*
-* Revision 1.4  1998/08/20 16:51:28  perev
-*  decrease default size geant=1Mw paw=1Mw
-*
-* Revision 1.3  1998/07/20 20:17:30  perev
-* Mods for exe SGI64 and HP rubber Zebra
-*
-* Revision 1.2  1998/04/16 16:59:50  fisyak
-* 2nd pass with gstar
-*
-*
-#include "geant321/pilot.h"
-*CMZ :          07/12/97  17.29.02  by  Pavel Nevski
-*CMZ :  3.21/02 29/03/94  15.41.19  by  S.Giani
-*-- Author :
       SUBROUTINE GZEBRA(NZEB)
 C.
 C.    ******************************************************************
@@ -38,10 +16,9 @@ C.    *       Modifications:                                           *
 C.    *   PN: Ellastic zebra inspired by V.Perevozchikov               *
 C.    ******************************************************************
 C.
-#include "atcdes/typing.inc"
 #include "geant321/gcbank.inc"
 #include "geant321/gcflag.inc"
-       INTEGER I1,I2,Itry,LL,KWW,memget,LOCF,NZEB,iudivd
+       INTEGER I1,I2,Itry,LL,KWW,MEMGETF,LOCF,NZEB
 C.
 C.    ------------------------------------------------------------------
 C.
@@ -49,10 +26,9 @@ C.
        NZEBRA = max(NZEBRA,1000000)
        I1     = LOCF   (IQ)
        Do iTry=0,5
-          I2  = memget (NZEBRA*4+1000)
-          I2  = iudivd (I2,4)
-          If (I2.GT.I1) GO TO 11
-          NZEBRA = (NZEBRA/1500)*1000
+          I2  = MEMGETF (NZEBRA+1000)
+          IF (I2.GT.I1) GO TO 11
+          NZEBRA = (NZEBRA/15000)*10000
           PRINT *,'* GZEBRA: requested memory size reduced to ',
      >               Nzebra,' *'
        enddo
@@ -71,8 +47,4 @@ C
        CALL GWORK  (KWBANK-100)
 C
       END
-
-
-
-
 
