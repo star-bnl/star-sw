@@ -1,7 +1,7 @@
-// $Id: StdEdxY2Maker.cxx,v 1.39 2004/09/25 01:25:20 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.40 2004/09/30 15:29:42 fisyak Exp $
 //#define dChargeCorrection
-#define SpaceChargeQdZ
-#define CompareWithToF
+//#define SpaceChargeQdZ
+//#define CompareWithToF
 #include <Stiostream.h>		 
 #include "StdEdxY2Maker.h"
 // ROOT
