@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.h,v 1.4 2004/02/20 20:30:45 magestro Exp $
+ * $Id: calculateEventPlaneEventCut.h,v 1.5 2004/06/25 13:18:01 magestro Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.h,v $
+ * Revision 1.5  2004/06/25 13:18:01  magestro
+ * Added implementation for class methods
+ *
  * Revision 1.4  2004/02/20 20:30:45  magestro
  * Added Vz, multiplicity event cuts
  *
@@ -76,6 +79,11 @@ private:   //
 #endif
 
 };
+
+inline void calculateEventPlaneEventCut::SetEventMult(const int& lo, const int& hi)
+    {mEventMult[0]=lo; mEventMult[1]=hi;}
+inline void calculateEventPlaneEventCut::SetVertZPos(const float& lo, const float& hi)
+    {mVertZPos[0]=lo; mVertZPos[1]=hi;}
 
 inline int  calculateEventPlaneEventCut::NEventsPassed() {return mNEventsPassed;}
 inline int  calculateEventPlaneEventCut::NEventsFailed() {return mNEventsFailed;}
