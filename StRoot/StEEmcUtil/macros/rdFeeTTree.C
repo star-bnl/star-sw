@@ -4,12 +4,13 @@ class EEfeeRunDescr;
 
 TFile *f;
 
-void rdFeeTTree() {
-  gSystem->Load("St_base");
-    gSystem->Load("StEEmcUtil");
-    
-  //TFile   *f  = new TFile("myFeeMC-minb200-100.root");
-  TFile   *f  = new TFile("run00006.root");
+void rdFeeTTree(int max=200000) {
+  gSystem->Load("StRoot/StEEmcUtil/EEfeeRaw/libEEfeeRaw.so");
+  
+  TString fname="run00006.root";
+  fname="miniDaq/feb24/run00003.root";
+
+  TFile   *f  = new TFile(fname);
   TTree   *t  = (TTree *)f->Get("fee");
   TBranch *bd = t->GetBranch("desc");
   TBranch *be = t->GetBranch("evt");
@@ -27,8 +28,8 @@ void rdFeeTTree() {
   for(Int_t i=0; i<nentries; i++) {
     nbe += be->GetEntry(i);
     nbd += bd->GetEntry(i);
-    des->print();
-    eve->print();
+    if(i%1000==0)des->print();
+    //eve->print();
     if(i>=max) break;
   }
 

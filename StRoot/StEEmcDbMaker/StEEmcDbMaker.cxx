@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.3 2003/02/18 22:01:40 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.4 2003/03/07 15:35:44 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.4  2003/03/07 15:35:44  balewski
+// towards EEMC daq reader
+//
 // Revision 1.3  2003/02/18 22:01:40  balewski
 // fixes
 //
@@ -151,7 +154,7 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
 
 
 const StEEmcDbIndexItem1*  
-StEEmcDbMaker::getT(int sec, int sub, int eta){
+StEEmcDbMaker::getT(int sec, char sub, int eta){
   char name[20];
   sprintf(name,"%2.2dT%c%2.2d",sec,sub,eta);
   int index=EEname2Index(name);
@@ -311,8 +314,6 @@ void  StEEmcDbMaker::mOptimizeDb(){
   for(i=0; i<mNSector; i++) {
     eemcDbADCconf_st *t= mDbADCconf[i];
     if(t==0) continue;
- 
-    //    printf("full name===%s===\n\n",t->name);
     
     for(j=0;j<EEMCDbMaxAdc; j++) { // loop within sector
       char *name=t->name+j*EEMCDbMaxName;
