@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowMaker.hh
-//  $Id: StFlowMaker.hh,v 1.3 1999/11/24 18:17:15 posk Exp $
+//  $Id: StFlowMaker.hh,v 1.4 1999/11/30 18:52:54 snelling Exp $
 //
 // Description: 
 //  Interface to StEvent for StFlowEvent and base class for
@@ -18,6 +18,9 @@
 //
 // History:
 //  $Log: StFlowMaker.hh,v $
+//  Revision 1.4  1999/11/30 18:52:54  snelling
+//  First modification for the new StEvent
+//
 //  Revision 1.3  1999/11/24 18:17:15  posk
 //  Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -33,13 +36,10 @@
 
 #include <iostream.h>
 #include <stdlib.h>
-#include "StChain.h"
 #include "StMaker.h"
-#include "StEvent.h"
-#include "FlowTag.h"
 #include "TString.h"
 class StFlowEvent;
-///#include "StFlowEvent.hh"
+class StEvent;
 
 class StFlowMaker : public StMaker {
 

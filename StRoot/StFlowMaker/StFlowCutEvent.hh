@@ -1,18 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.hh,v 1.2 1999/11/24 18:17:10 posk Exp $
+// $Id: StFlowCutEvent.hh,v 1.3 1999/11/30 18:52:48 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
 // Description:  Class for applying flow event cuts
 //               If lo >= hi no cut is applied
 //               All functions and data members are static
-//               Therefor, no need to instantiate
+//               Therefore, no need to instantiate
 //               Just use StFlowCutEvent::func();
 //
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.hh,v $
+// Revision 1.3  1999/11/30 18:52:48  snelling
+// First modification for the new StEvent
+//
 // Revision 1.2  1999/11/24 18:17:10  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -67,7 +70,6 @@ class StFlowCutEvent {
   static UInt_t  mEtaSymCutN;            // number not accepted
   static Float_t mEtaSymCuts[2];         // range
 
-  //ClassDef(StFlowCutEvent,1)           // macro for rootcint
 }; 
 
 inline void StFlowCutEvent::SetMult(const Int_t lo, const Int_t hi) {

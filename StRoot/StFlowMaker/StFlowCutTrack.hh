@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.hh,v 1.2 1999/11/24 18:17:11 posk Exp $
+// $Id: StFlowCutTrack.hh,v 1.3 1999/11/30 18:52:50 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Nov 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.hh,v $
+// Revision 1.3  1999/11/30 18:52:50  snelling
+// First modification for the new StEvent
+//
 // Revision 1.2  1999/11/24 18:17:11  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -30,7 +33,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "Rtypes.h"
-class StGlobalTrack;
+class StPrimaryTrack;
 class StFlowTrack;
 class StFlowCutTrack {
 
@@ -42,7 +45,7 @@ class StFlowCutTrack {
   static void  SetFitOverMaxPts(Float_t lo, Float_t hi);
   static void  SetEta(Float_t lo, Float_t hi, Int_t selN, Int_t harN);
   static void  SetPt(Float_t lo, Float_t hi, Int_t selN, Int_t harN);
-  static Int_t CheckTrack(StGlobalTrack* pTrack);
+  static Int_t CheckTrack(StPrimaryTrack* pTrack);
   static Int_t SelectTrack(StFlowTrack* pFlowTrack, Int_t selN, Int_t harN);
   static void  PrintCutList();
   static Int_t EtaSymPos();

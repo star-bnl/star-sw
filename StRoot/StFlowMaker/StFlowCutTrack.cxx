@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.2 1999/11/24 18:17:11 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.3 1999/11/30 18:52:49 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.3  1999/11/30 18:52:49  snelling
+// First modification for the new StEvent
+//
 // Revision 1.2  1999/11/24 18:17:11  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -24,8 +27,9 @@
 #include <iostream.h>
 #include <iomanip.h>
 #include <stdlib.h>
+#include "StEvent.h"
+#include "StEventTypes.h"
 #include "StFlowCutTrack.hh"
-#include "StGlobalTrack.h"
 #include "StFlowTrack.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -73,23 +77,20 @@ const Double_t bField = 0.5*tesla;
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* pTrack) {
+Int_t StFlowCutTrack::CheckTrack(StPrimaryTrack* pTrack) {
   // Returns kTRUE if the track survives all the cuts
   mTrackN++;
   
   // Fit Points
-  StTrackFitTraits& fitTraits = pTrack->fitTraits();
-  Int_t nFitPoints = fitTraits.numberOfFitPoints();
+  Int_t nFitPoints = pTrack->fitTraits().numberOfFitPoints();
   if (mFitPtsCuts[1] > mFitPtsCuts[0] && 
       (nFitPoints < mFitPtsCuts[0] || nFitPoints >= mFitPtsCuts[1])) {
     mFitPtsCutN++;
     return kFALSE;
   }
-  
+
   // Fit points / max points
-  Int_t nMaxPoints = fitTraits.numberOfPossiblePoints();
-  //PR(nMaxPoints);
-  //Float_t fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.;
+  Int_t nMaxPoints = pTrack->numberOfPossiblePoints();
   Float_t fitOverMax = (nMaxPoints) ? (float)nFitPoints/(float)nMaxPoints : 0.8;
   if (mFitOverMaxCuts[1] > mFitOverMaxCuts[0] && 
       (fitOverMax < mFitOverMaxCuts[0] || fitOverMax >= mFitOverMaxCuts[1])) {
@@ -97,8 +98,9 @@ Int_t StFlowCutTrack::CheckTrack(StGlobalTrack* pTrack) {
     return kFALSE;
   }
 
+
   // Increment counters for Eta symmetry cut
-  StThreeVectorD p = pTrack->helix().momentum(bField); 
+  StThreeVectorD p = pTrack->geometry()->helix().momentum(bField); 
   if (p.pseudoRapidity() > 0.) {
     mEtaSymPosN++;
   } else {

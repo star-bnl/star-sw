@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.hh,v 1.1 1999/11/11 23:09:00 posk Exp $
+// $Id: StFlowTrackCollection.hh,v 1.2 1999/11/30 18:52:56 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.hh,v $
+// Revision 1.2  1999/11/30 18:52:56  snelling
+// First modification for the new StEvent
+//
 // Revision 1.1  1999/11/11 23:09:00  posk
 // Rearrangement of files.
 //
@@ -24,18 +27,18 @@
 #ifndef StFlowTrackCollection_hh
 #define StFlowTrackCollection_hh
 #include "StFlowTrack.hh"
-#include <list>
+#include <vector>
 
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<StFlowTrack*, allocator<StFlowTrack*> > StFlowTrackCollection;
-typedef list<StFlowTrack*, allocator<StFlowTrack*> >::iterator StFlowTrackIterator;
+typedef vector<StFlowTrack*, allocator<StFlowTrack*> > StFlowTrackCollection;
+typedef vector<StFlowTrack*, allocator<StFlowTrack*> >::iterator StFlowTrackIterator;
 #else
-typedef list<StFlowTrack*>            StFlowTrackCollection;
-typedef list<StFlowTrack*>::iterator  StFlowTrackIterator;
+typedef vector<StFlowTrack*>            StFlowTrackCollection;
+typedef vector<StFlowTrack*>::iterator  StFlowTrackIterator;
 #endif
 
 #endif

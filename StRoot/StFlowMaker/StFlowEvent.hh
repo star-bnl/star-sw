@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.2 1999/11/24 18:17:14 posk Exp $
+// $Id: StFlowEvent.hh,v 1.3 1999/11/30 18:52:52 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.3  1999/11/30 18:52:52  snelling
+// First modification for the new StEvent
+//
 // Revision 1.2  1999/11/24 18:17:14  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -41,6 +44,7 @@ public:
 
   StFlowTrackCollection* TrackCollection() const;
 
+  void     MakeSubEvents();
   void     SetEventNumber(const UInt_t&);
   void     SetOrigTrackN(const UInt_t&);
   void     SetPhiWeight(const Double_t* pPhiWgt);
@@ -69,7 +73,7 @@ private:
   enum {nHars = 4, nSels=2, nSubs = 2};
   enum {nPhiBins = 60};
   /// typedef Double_t PhiWgt_t[nSel][nHars][nPhiBins];
-  Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event palne isotropic
+  Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event plane isotropic
 
 };
 
@@ -83,3 +87,4 @@ inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
 inline  UInt_t StFlowEvent::EventNumber() const {return mEventNumber;}
 
 #endif
+
