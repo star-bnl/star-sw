@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.380 2004/02/11 18:50:20 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.381 2004/02/12 00:34:57 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -301,6 +301,9 @@ Bfc_st BFC1[] = {
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
+  {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
+                                                              "Load MuDST misc. dependencies (all)",kFALSE},
+  {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil","",               "StMuDSTMaker","Load MuDST library",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -472,13 +475,13 @@ Bfc_st BFC1[] = {
                                                                                 "... SSD Evaluator",kFALSE},
 
 
-  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
+  {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
-  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xi2"         ,"xi2","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
-  {"V0svt"       ,"v0svt","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
+  {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
-  {"Xisvt"       ,"xisvt","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xisvt"       ,"xisvt","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
                                                               "Special: use estGlobal from StEvent",kFALSE},
 
 
@@ -531,15 +534,9 @@ Bfc_st BFC1[] = {
 
 
   {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
-  {"MuDSTDeps","","","","",                                  "StEvent,StEventUtilities,StStrangeMuDstMaker",
-                                                                   "MuDST misc. dependencies (all)",kFALSE},
-  {"StrngMuDST","","","",                                       "StStrangeMuDstMaker","StStrangeMuDstMaker",
-                                                                            "Load Stangeness MuDST",kFALSE},
-
-  {"EMCmDST"  ,"","MuDSTChain","MuDSTDeps,EmcUtil",                     "StEmcMicroDstMaker","StMuDSTMaker",
-                                                                                 "Writes EMC MuDST",kFALSE},
-  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,EmcUtil,StrngMuDST",                "StMuDstMaker","StMuDSTMaker",
-                                                                              "Writes Common MuDST",kFALSE},
+  {"StrngMuDST","","MuDSTDeps","",              "StStrangeMuDstMaker","","Creates Stangeness MuDST",kFALSE},
+  {"EMCmDST"   ,"","MuDSTChain","MuDst",                "StEmcMicroDstMaker","","Creates EMC MuDST",kFALSE},
+  {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST",         "StMuDstMaker","","Writes Common MuDST",kFALSE},
 
 
 
@@ -842,6 +839,9 @@ Bfc_st BFC2[] = {
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"l3Util"      ,""  ,"","",""                                         ,"Stl3Util","Load Stl3Util",kFALSE},
+  {"MuDSTDeps"   ,""  ,"","StEvent","",                              "StEventUtilities,StStrangeMuDstMaker",
+                                                              "Load MuDST misc. dependencies (all)",kFALSE},
+  {"MuDST"       ,""  ,"","MuDSTDeps,EmcUtil","",               "StMuDSTMaker","Load MuDST library",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -1012,10 +1012,14 @@ Bfc_st BFC2[] = {
                                                                                 "... SSD Evaluator",kFALSE},
 
 
-  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
+  {"V02"         ,"v02","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
                                                                             "Find V0s from StEvent",kFALSE},
-  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
+  {"Xi2"         ,"xi2","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
                                                                          "Xis AND V0s from StEvent",kFALSE},
+  {"V0svt"       ,"v0svt","","db,MuDST","StV0FinderMaker","StSecondaryVertexMaker",
+                                                              "Special: use estGlobal from StEvent",kFALSE},
+  {"Xisvt"       ,"xisvt","","db,MuDST","StXiFinderMaker","StSecondaryVertexMaker",
+                                                              "Special: use estGlobal from StEvent",kFALSE},
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,PreEcl,EmcUtil",      "StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -1066,15 +1070,9 @@ Bfc_st BFC2[] = {
 
 
   {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
-  {"MuDSTDeps","","","","",                                  "StEvent,StEventUtilities,StStrangeMuDstMaker",
-                                                                   "MuDST misc. dependencies (all)",kFALSE},
-  {"StrngMuDST","","","",                                       "StStrangeMuDstMaker","StStrangeMuDstMaker",
-                                                                            "Load Stangeness MuDST",kFALSE},
-
-  {"EMCmDST"  ,"","MuDSTChain","MuDSTDeps,EmcUtil",                     "StEmcMicroDstMaker","StMuDSTMaker",
-                                                                                 "Writes EMC MuDST",kFALSE},
-  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps,EmcUtil,StrngMuDST",                "StMuDstMaker","StMuDSTMaker",
-                                                                              "Writes Common MuDST",kFALSE},
+  {"StrngMuDST","","MuDSTDeps","",              "StStrangeMuDstMaker","","Creates Stangeness MuDST",kFALSE},
+  {"EMCmDST"   ,"","MuDSTChain","MuDst",                "StEmcMicroDstMaker","","Creates EMC MuDST",kFALSE},
+  {"CMuDST"    ,"","MuDSTChain","MuDst,StrngMuDST",         "StMuDstMaker","","Writes Common MuDST",kFALSE},
 
 
 
