@@ -31,20 +31,12 @@ struct DetectorMapKey {
   double z;
 };
 
-// Structure for material map key
-struct MaterialMapKey {
-    MaterialMapKey::MaterialMapKey(const char *str){ strncpy(name, str, 127); }
-    MaterialMapKey::MaterialMapKey(){}
-    bool operator==(const MaterialMapKey&) const;
-    bool operator<(const MaterialMapKey&) const;
-    char name[128];
-};
-
-struct ShapeMapKey {
-    ShapeMapKey::ShapeMapKey(const char *str){ strncpy(name, str, 127); }
-    ShapeMapKey::ShapeMapKey(){}
-    bool operator==(const ShapeMapKey&) const;
-    bool operator<(const ShapeMapKey&) const;
+// Structure for material, shape, or detector name map key
+struct NameMapKey {
+    NameMapKey::NameMapKey(const char *str){ strncpy(name, str, 127); }
+    NameMapKey::NameMapKey(){}
+    bool operator==(const NameMapKey&) const;
+    bool operator<(const NameMapKey&) const;
     char name[128];
 };
 

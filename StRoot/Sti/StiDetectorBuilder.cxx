@@ -5,22 +5,43 @@ StiDetectorBuilder::StiDetectorBuilder(){
 }
 
 StiDetectorBuilder::~StiDetectorBuilder(){
-  detectorIterator iterator = mDetectorVector.begin();
+  detectorIterator iterator = mDetectorMap.begin();
 
-  while(iterator != mDetectorVector.end()){
-    StiDetector *pDetector = *(iterator++);
+  while(iterator != mDetectorMap.end()){
+    StiDetector *pDetector = (iterator++)->second;
     delete pDetector;
   }
 }
 
 bool StiDetectorBuilder::hasMore() const {
-  return mDetectorIterator != mDetectorVector.end();
+  return mDetectorIterator != mDetectorMap.end();
 } // hasMore()
 
 void StiDetectorBuilder::fillNext(StiDetector *detector){
   if(hasMore()){
-    StiDetector *pDetector = *(mDetectorIterator++);
+    StiDetector *pDetector = (mDetectorIterator++)->second;
     detector->copy(*pDetector);
     detector->build(NULL);
   }
 } // fillNext()
+
+StiMaterial* StiDetectorBuilder::findMaterial(const char *szName) const{
+  
+  materialMap::const_iterator where = mMaterialMap.find(NameMapKey(szName));
+  return (where!= mMaterialMap.end()) ? (*where).second : 0;
+
+} // findMaterial()
+
+StiShape* StiDetectorBuilder::findShape(const char *szName) const{
+
+  shapeMap::const_iterator where = mShapeMap.find(NameMapKey(szName));
+  return (where!=mShapeMap.end()) ? (*where).second: 0;
+
+} // findShape()
+
+StiDetector* StiDetectorBuilder::findDetector(const char *szName) const{
+
+  detectorMap::const_iterator where = mDetectorMap.find(NameMapKey(szName));
+  return (where!=mDetectorMap.end()) ? (*where).second: 0;
+
+} // findDetector()

@@ -16,14 +16,15 @@ class StiShape;
 
 // Set up stl maps for by-name lookup of shapes and materials.
 // Not used for placements because they are unique to each detector.
-typedef map<MaterialMapKey, StiMaterial*> materialMap;
+typedef map<NameMapKey, StiMaterial*> materialMap;
 typedef materialMap::value_type materialMapValType;
 
-typedef map<ShapeMapKey, StiShape*> shapeMap;
+typedef map<NameMapKey, StiShape*> shapeMap;
 typedef shapeMap::value_type shapeMapValType;
 
-typedef vector<StiDetector*> detectorVector;
-typedef detectorVector::iterator detectorIterator;
+typedef map<NameMapKey, StiDetector*> detectorMap;
+typedef detectorMap::const_iterator detectorIterator;
+typedef detectorMap::value_type detectorMapValType;
 
 class StiDetectorBuilder{
 
@@ -35,8 +36,12 @@ public:
     virtual void init() = 0;
 
     // accessors
-    detectorVector getDetectors(){ return mDetectorVector; }
-    
+    detectorMap getDetectors(){ return mDetectorMap; }
+
+    virtual StiMaterial *findMaterial(const char *szName) const;
+    virtual StiShape    *findShape(const char *szName) const;
+    virtual StiDetector *findDetector(const char *szName) const;
+
     // mutators
 
     // iterators
@@ -49,10 +54,11 @@ protected:
     virtual void buildShapes() = 0;
     virtual void buildDetectors() = 0;
 
-    materialMap      mMaterialMap;
-    shapeMap         mShapeMap;
-    detectorVector   mDetectorVector;
-    detectorIterator mDetectorIterator;
+    materialMap         mMaterialMap;
+    shapeMap            mShapeMap;
+    detectorMap         mDetectorMap;
+    detectorIterator    mDetectorIterator;
+
 };
 
 #endif // ifndef STI_DETECTOR_BUILDER_H

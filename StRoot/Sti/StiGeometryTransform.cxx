@@ -36,6 +36,7 @@
 #include "StiHit.h"
 #include "StiHitContainer.h"
 #include "StiGeometryTransform.h"
+#include "StiDetectorFinder.h"
 
 StiGeometryTransform* StiGeometryTransform::sinstance = 0;
 
@@ -364,6 +365,13 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
       }
     */
 
+    // find detector for this hit
+    StiDetectorFinder *pFinder = StiDetectorFinder::instance();
+    char szBuf[100];
+    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(),
+           (int) tpchit->sector());
+    stihit->setDetector( pFinder->findDetector(szBuf) );
+
     return;
 }
 
@@ -394,6 +402,14 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
                 svthit->position().y() * sin(dRefAngle) );
   stihit->setY(-svthit->position().x() * sin(dRefAngle) +
                 svthit->position().y() * cos(dRefAngle) );
+
+  // find detector for this hit
+  StiDetectorFinder *pFinder = StiDetectorFinder::instance();
+  char szBuf[100];
+  sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", (int) svthit->layer(),
+          (int) svthit->ladder());
+  stihit->setDetector( pFinder->findDetector(szBuf) );
+  
 }
 void StiGeometryTransform::operator() (const StiHit* stihit, StSvtHit* svthit){
 }
@@ -419,6 +435,13 @@ void StiGeometryTransform::operator() (const StSsdHit* ssdhit, StiHit* stihit){
                 ssdhit->position().y() * sin(dRefAngle) );
   stihit->setY(-ssdhit->position().x() * sin(dRefAngle) +
                 ssdhit->position().y() * cos(dRefAngle) );
+
+  // find detector for this hit
+  StiDetectorFinder *pFinder = StiDetectorFinder::instance();
+  char szBuf[100];
+  sprintf(szBuf, "Svg/Layer_7/Ladder_%d/Ladder", (int) ssdhit->ladder());
+  stihit->setDetector( pFinder->findDetector(szBuf) );
+
 }
 
 void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
@@ -427,31 +450,57 @@ void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 void StiGeometryTransform::operator() (const StiTrackNode *pTrackNode,
                                        StHelix *pHelix){
 
+  cout << "StiTrackNode: x=" << pTrackNode->fX 
+       << ", alpha=" << pTrackNode->fAlpha
+       << ", y=" << pTrackNode->fP0
+       << ", z=" << pTrackNode->fP1
+       << ", c*x0=" << pTrackNode->fP2
+       << ", c=" << pTrackNode->fP3
+       << ", tanL=" << pTrackNode->fP4 << endl;
+
   // first, calculate the helix origin in global coords
   StThreeVector<double> origin(pTrackNode->fX, pTrackNode->fP0,
                                pTrackNode->fP1);
-  origin.rotateZ(- pTrackNode->fAlpha);
+  cout << "Before rotation: x=" << origin.x()
+       << ", y=" << origin.y()
+       << ", z=" << origin.z() << endl;
+  origin.rotateZ(pTrackNode->fAlpha);
+  cout << "After rotation: x=" << origin.x()
+       << ", y=" << origin.y()
+       << ", z=" << origin.z() << endl;
 
   // dip angle & curvature easy
+  cout << "tanDip=" << pTrackNode->fP4 << endl;
   double dDip = atan(pTrackNode->fP4);
+  cout << "dip=" << dDip << endl;
   double dCurvature = pTrackNode->fP3;
 
   // now calculate azimuthal angle of the helix origin wrt the helix axis
   // in _local_ coordinates.  
   double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
-  double dDeltaY = sqrt(1/(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
+  double dDeltaY = sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
       (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
+  cout << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
   double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
   // now change to global coords
   dPhi -= pTrackNode->fAlpha;
   while(dPhi<0.){      dPhi += 2.*M_PI; };
   while(dPhi>2.*M_PI){ dPhi -= 2.*M_PI; };
+  cout << "phi=" << dPhi << endl;
 
   // finally, need the sense of rotation.  Here we need the fact that
   // the track model assumes outward tracks (positive local x coord of mtm).
   int iH = dCurvature>0 ? 1 : -1;
 
   pHelix->setParameters( fabs(dCurvature), dDip, dPhi, origin, iH );
+
+  cout << "StHelix: x0=" << pHelix->x(0)
+       << ", y0=" << pHelix->y(0)
+       << ", z0=" << pHelix->z(0)
+       << ", c=" << pHelix->curvature()
+       << ", phi0=" << pHelix->phase()
+       << ", dip=" << pHelix->dipAngle()
+       << ", h=" << pHelix->h() << endl;
 }
 
 //Go from global->Sti, expect refAngle positive

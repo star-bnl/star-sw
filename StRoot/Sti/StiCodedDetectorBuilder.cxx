@@ -15,9 +15,11 @@
 
 StiCodedDetectorBuilder::StiCodedDetectorBuilder(){
   init();
+  cout << "################################StiCodedDetectorBuilder()" << endl;
 }
 
 StiCodedDetectorBuilder::~StiCodedDetectorBuilder(){
+  cout << "################################~StiCodedDetectorBuilder()" << endl;
 }
 
 void StiCodedDetectorBuilder::init(){
@@ -26,7 +28,7 @@ void StiCodedDetectorBuilder::init(){
   buildShapes();
   buildDetectors();
 
-  mDetectorIterator = mDetectorVector.begin();
+  mDetectorIterator = mDetectorMap.begin();
 
 } // init()
 
@@ -47,7 +49,7 @@ void StiCodedDetectorBuilder::buildMaterials(){
     pMaterial->setRadLength(aRadLengths[iMaterial]);
     pMaterial->setDensity(aDensities[iMaterial]);
     
-    MaterialMapKey key(pMaterial->getName());
+    NameMapKey key(pMaterial->getName());
     mMaterialMap.insert( materialMapValType(key, pMaterial) );
 
   }
@@ -83,7 +85,7 @@ void StiCodedDetectorBuilder::buildShapes(){
                          pPadPlane->numberOfPadsAtRow(iPadrow + 1) / 2.);
 
     sprintf(szName, "Tpc/Padrow_%d", iPadrow + 1);
-    ShapeMapKey key(szName);
+    NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
   } // for iPadrow
@@ -119,7 +121,7 @@ void StiCodedDetectorBuilder::buildShapes(){
     }
 
     sprintf(szName, "Svg/Layer_%d/Ladder", iLayer + 1);
-    ShapeMapKey key(szName);
+    NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
     // now do hybrids
@@ -127,7 +129,7 @@ void StiCodedDetectorBuilder::buildShapes(){
 
     pShape = new StiPlanarShape( ssdWaferShape.shape[1] * nWafers, 0.1, 1.);
     sprintf(szName, "Svg/Layer_%d/Hybrid", iLayer + 1);
-    ShapeMapKey key2(szName);
+    NameMapKey key2(szName);
     mShapeMap.insert( shapeMapValType(key2, pShape) );
 
   } // for iLayer
@@ -147,7 +149,7 @@ void StiCodedDetectorBuilder::buildShapes(){
   pShape->setOpeningAngle( M_PI/6. );
   pShape->setOuterRadius(pDimensions->ifcRadius() + pShape->getThickness()/2.);
 
-  ShapeMapKey key("Ifc/Nomex");
+  NameMapKey key("Ifc/Nomex");
   mShapeMap.insert( shapeMapValType(key, pShape) );
 
 } // buildShapes()
@@ -194,13 +196,14 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pDetector->setIsContinuousMedium(true);
       pDetector->setIsDiscreteScatterer(false);
 
-      pDetector->setMaterial(NULL);
+      pDetector->setMaterial(pGas);
       pDetector->setGas(pGas);
 
       pDetector->setShape(pShape);
       pDetector->setPlacement(pPlacement);
 
-      mDetectorVector.push_back(pDetector);
+      NameMapKey key(szName);
+      mDetectorMap.insert( detectorMapValType(key, pDetector) );
 
     }// for iSector
 
@@ -250,11 +253,10 @@ void StiCodedDetectorBuilder::buildDetectors(){
       // ladder
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
-      float fLadderPhi = pGeometryTransform->phiForSector(iLadder + 1, 
-                                                          nLadders);
-      if(iLayer%2==1){ fLadderPhi += fDeltaPhi/2.; }
+      float fLadderPhi = pGeometryTransform->phiForSector(
+          2*(iLadder + 1) - iLayer%2, 2*nLadders);
 
-      if(iLadder < nLadders - 1){
+      if(iLayer < nLayers - 1){
         pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.); 
       }else{ // svt ladders have slight tilt
         pPlacement->setCenterRep(fLadderPhi, fLadderRadius, 0.09); 
@@ -276,7 +278,8 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pLadder->setShape(pLadderShape);
       pLadder->setPlacement(pPlacement);
 
-      mDetectorVector.push_back(pLadder);
+      NameMapKey key(szName);
+      mDetectorMap.insert( detectorMapValType(key, pLadder) );
 
       if(iLayer == nLayers - 1){ continue; }
 
@@ -303,8 +306,9 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pHybrid1->setShape(pHybridShape);
       pHybrid1->setPlacement(pPlacement);
 
-      mDetectorVector.push_back(pHybrid1);
-      
+      NameMapKey key1(szName);
+      mDetectorMap.insert( detectorMapValType(key1, pHybrid1) );
+
       // hybrid 2
 
       pPlacement = new StiPlacement;
@@ -320,7 +324,8 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pHybrid2->setName(szName);
       pHybrid2->setPlacement(pPlacement);
 
-      mDetectorVector.push_back(pHybrid2);
+      NameMapKey key2(szName);
+      mDetectorMap.insert( detectorMapValType(key2, pHybrid2) );
     } // for iLadder
   } // for iLayer
       
@@ -361,24 +366,10 @@ void StiCodedDetectorBuilder::buildDetectors(){
     pDetector->setGas(pGas);
     pDetector->setMaterial(pMaterial);
     
-    mDetectorVector.push_back(pDetector);
+    NameMapKey key(szName);
+    mDetectorMap.insert( detectorMapValType(key, pDetector) );
     
   } // for iSector
 
 } // buildDetectors()
 
-StiMaterial* StiCodedDetectorBuilder::findMaterial(const char *szName) const{
-  
-  materialMap::const_iterator where = mMaterialMap.find(
-      MaterialMapKey(szName));
-  return (where!= mMaterialMap.end()) ? (*where).second : 0;
-
-} // findMaterial()
-
-StiShape* StiCodedDetectorBuilder::findShape(const char *szName) const{
-
-  shapeMap::const_iterator where = mShapeMap.find(ShapeMapKey(szName));
-  if(where!=mShapeMap.end()){ return where->second; }
-
-  return 0;
-} // findShape()

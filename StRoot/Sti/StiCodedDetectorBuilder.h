@@ -23,7 +23,7 @@ public:
     void init();
 
     // accessors
-    
+
     // mutators
 
     // iterators
@@ -35,9 +35,6 @@ protected:
     void buildMaterials();
     void buildShapes();
     void buildDetectors();
-
-    StiMaterial *findMaterial(const char *szName) const;
-    StiShape *findShape(const char *szName) const;
     
 };
 
