@@ -1,10 +1,13 @@
-// $Id: St_geant_Maker.cxx,v 1.2 1998/10/31 00:26:17 fisyak Exp $
-// $Log: St_geant_Maker.cxx,v $
-// Revision 1.2  1998/10/31 00:26:17  fisyak
+// $Id: St_geom_Maker.cxx,v 1.1 1998/10/31 00:28:31 fisyak Exp $
+// $Log: St_geom_Maker.cxx,v $
+// Revision 1.1  1998/10/31 00:28:31  fisyak
 // Makers take care about branches
 //
-// Revision 1.1  1998/10/12 14:34:18  fisyak
-// new geant Maker
+// Revision 1.6  1998/10/06 18:00:29  perev
+// cleanup
+//
+// Revision 1.5  1998/10/02 13:46:08  fine
+// DataSet->DataSetIter
 //
 // Revision 1.4  1998/08/14 15:25:58  fisyak
 // add options
@@ -17,54 +20,44 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_geant_Maker class for Makers                                        //
+// St_geom_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "St_geant_Maker.h"
+#include "St_geom_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-ClassImp(St_geant_Maker)
+ClassImp(St_geom_Maker)
+
 //_____________________________________________________________________________
-  St_geant_Maker::St_geant_Maker(const char *name, const char *title):
+St_geom_Maker::St_geom_Maker(const char *name, const char *title):
 StMaker(name,title){
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_geant_Maker::~St_geant_Maker(){
-  SafeDelete(m_DataSet); 
+St_geom_Maker::~St_geom_Maker(){
 }
 //_____________________________________________________________________________
-void St_geant_Maker::Clear(Option_t *option){
-  SafeDelete(m_DataSet); 
-}
-
-//_____________________________________________________________________________
-Int_t St_geant_Maker::Finish(){ 
- Clear();
- return kStOK;
-}
-//_____________________________________________________________________________
-Int_t St_geant_Maker::Init(){
+Int_t St_geom_Maker::Init(){
 // Create tables
    St_DataSetIter       local(gStChain->DataSet("params"));
 // Create Histograms    
-   StMaker::Init();
-   return kStOK;
+   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_geant_Maker::Make(){
+Int_t St_geom_Maker::Make(){
 //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
 }
  return kStOK;
 }
 //_____________________________________________________________________________
-void St_geant_Maker::PrintInfo(){
-  printf("***************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.2 1998/10/31 00:26:17 fisyak Exp $\n");
+void St_geom_Maker::PrintInfo(){
+  printf("**************************************************************\n");
+  printf("* $Id: St_geom_Maker.cxx,v 1.1 1998/10/31 00:28:31 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
-  printf("***************************************************************\n");
+  printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
+
 

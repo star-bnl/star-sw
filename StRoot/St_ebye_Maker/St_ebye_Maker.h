@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.3 1998/10/06 18:00:36 perev Exp $
+// $Id: St_ebye_Maker.h,v 1.4 1998/10/31 00:26:13 fisyak Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.4  1998/10/31 00:26:13  fisyak
+// Makers take care about branches
+//
 // Revision 1.3  1998/10/06 18:00:36  perev
 // cleanup
 //
@@ -48,8 +51,7 @@ class St_ebye_Maker : public StMaker {
                St_sca_out *m_sca_ensemble_ave;            //!
  protected:
  public: 
-                  St_ebye_Maker();
-                  St_ebye_Maker(const char *name, const char *title);
+                  St_ebye_Maker(const char *name="ebye", const char *title="event/data/ebye");
    virtual       ~St_ebye_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();

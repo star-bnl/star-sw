@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.5 1998/10/06 18:00:35 perev Exp $
+// $Id: St_ebye_Maker.cxx,v 1.6 1998/10/31 00:26:13 fisyak Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.6  1998/10/31 00:26:13  fisyak
+// Makers take care about branches
+//
 // Revision 1.5  1998/10/06 18:00:35  perev
 // cleanup
 //
@@ -61,7 +64,8 @@ m_sca_ensemble_ave(0)
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
-St_ebye_Maker::St_ebye_Maker(const char *name, const char *title):StMaker(name,title),
+St_ebye_Maker::St_ebye_Maker(const char *name, const char *title):
+StMaker(name,title),
 m_sca_switch(0),
 m_sca_const(0),
 m_sca_filter_const(0),
@@ -82,8 +86,8 @@ St_ebye_Maker::~St_ebye_Maker()
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::Init(){
 // Create tables
-   St_DataSet *params = gStChain->GetParams();
-   St_DataSetIter    local(gStChain->GetParams());
+   St_DataSet *params = gStChain->DataSet("params");
+   St_DataSetIter    local(params);
 //--  sca_init#make_dir
 //--  Check "ebye"
    St_DataSet *ebye = local("ebye");
@@ -133,7 +137,7 @@ Int_t St_ebye_Maker::Make(){
    m_DataSet->Add(m_sca_prior);
    m_DataSet->Add(m_sca_ensemble_ave);
 
-   St_DataSetIter local(gStChain->DataSet());
+   St_DataSetIter local(gStChain->DataSet("dst"));
    m_dst_event_summary = (St_foo_dst_event_summary *) local("output/sumout");
    m_dsttrack = (St_foo_dst_track *) local("output/trkout");
    if (!m_dsttrack || !m_dsttrack->HasData()) {
@@ -164,7 +168,7 @@ Int_t St_ebye_Maker::Make(){
 //_____________________________________________________________________________
 void St_ebye_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.5 1998/10/06 18:00:35 perev Exp $\n");
+  printf("* $Id: St_ebye_Maker.cxx,v 1.6 1998/10/31 00:26:13 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

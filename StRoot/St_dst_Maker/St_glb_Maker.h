@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.3 1998/10/06 18:00:34 perev Exp $
+// $Id: St_glb_Maker.h,v 1.4 1998/10/31 00:26:13 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.4  1998/10/31 00:26:13  fisyak
+// Makers take care about branches
+//
 // Revision 1.3  1998/10/06 18:00:34  perev
 // cleanup
 //
@@ -35,12 +38,11 @@ class St_ev0_ev0par;
 class St_mft_control;
 class St_ev0_ev0par;
 class St_mft_control; 
-class St_dst_run_header;
 class St_particle_dst_param;
 class St_dst_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.3 1998/10/06 18:00:34 perev Exp $";
+// static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.4 1998/10/31 00:26:13 fisyak Exp $";
    // egr
    Int_t         m_scenario;   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
                                //    EGR will refit the TPC tracks, reproducing the parameters in tptrack.
@@ -90,12 +92,10 @@ class St_dst_Maker : public StMaker {
    St_ev0_ev0par  *m_ev0par;      //!
    St_mft_control *m_magf;        //!
    St_egr_egrpar  *m_egr_egrpar;  //!
-   St_dst_run_header *m_run_header;//!
    St_particle_dst_param *m_particle_dst_param; //!
  protected:
  public: 
-                  St_dst_Maker();
-                  St_dst_Maker(const char *name, const char *title);
+                  St_dst_Maker(const char *name="dst", const char *title="event/data/global");
    virtual       ~St_dst_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();

@@ -1,14 +1,16 @@
 {
   gROOT.Reset();
-  Char_t *libs[] = {"St_base","xdf2root","St_Tables", 
-  "libmsg","libtls","tpc.sl","St_tpc","svt.sl","St_svt","StChain"};
+  Char_t *libs[] = { "St_base","xdf2root","St_Tables"
+                    ,"libmsg", "libtls",  "tpc.sl","St_tpc"
+                    ,"svt.sl", "St_svt",  "StChain"};
   
  TString AFS; // STAR root directory
 
  Char_t *suffix=0;
   Int_t nlist = 10;
   Bool_t NT=kFALSE;
-  if (strcmp(gSystem.GetName(),"WinNT") == 0 ) {
+  if (strcmp(gSystem.GetName(),"WinNT") == 0 )
+  {
      NT=kTRUE;
      gSystem.Load("Root_html");
      AFS = "//sol/afs_rhic";
@@ -104,7 +106,7 @@
     gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
   }
   
-  html->SetSourceDir(lookup);
+  html->SetSourceDir(lookup.Data());
 
   if (NT) 
      html->SetOutputDir("J:/Public/STAF/draft/base/html");

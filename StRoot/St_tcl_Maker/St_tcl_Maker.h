@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.3 1998/10/06 18:00:48 perev Exp $
+// $Id: St_tcl_Maker.h,v 1.4 1998/10/31 00:26:22 fisyak Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.4  1998/10/31 00:26:22  fisyak
+// Makers take care about branches
+//
 // Revision 1.3  1998/10/06 18:00:48  perev
 // cleanup
 //
@@ -53,8 +56,7 @@ class St_tcl_Maker : public StMaker {
                St_tfs_fsctrl    *m_tfs_fsctrl;  //! TFS control switches
  protected:
  public: 
-                  St_tcl_Maker();
-                  St_tcl_Maker(const char *name, const char *title);
+                  St_tcl_Maker(const char *name="tpc_hits", const char *title="event/data/tpc/hits");
    virtual       ~St_tcl_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
