@@ -1,10 +1,10 @@
 #  Make STAF (STAR) executable
 
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
-include $(STAF_MAKE_HOME)/MakeEnv.mk
-include $(STAF_MAKE_HOME)/MakeArch.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking

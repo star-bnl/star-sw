@@ -1,5 +1,8 @@
-# $Id: MakeAsp.mk,v 1.16 1998/11/17 02:27:04 fisyak Exp $
+# $Id: MakeAsp.mk,v 1.17 1998/12/12 00:58:33 fisyak Exp $
 # $Log: MakeAsp.mk,v $
+# Revision 1.17  1998/12/12 00:58:33  fisyak
+# remove STAF
+#
 # Revision 1.16  1998/11/17 02:27:04  fisyak
 # Add log
 #
@@ -14,8 +17,8 @@ ifdef ifMAKESTAFLOGON
 endif
 #
 
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
 
 
@@ -25,8 +28,8 @@ SUFF_IDL := idl
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-include $(STAF_MAKE_HOME)/MakeEnv.mk
-include $(STAF_MAKE_HOME)/MakeArch.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -417,7 +420,7 @@ show:
 	@echo MAKE        	:= $(MAKE)
 	@echo MAKEFLAGS   	:= $(MAKEFLAGS)
 	@echo MAKEFILES   	:= $(MAKEFILES)
-	@echo STAF_MAKE_HOME   	:= $(STAF_MAKE_HOME)
+	@echo STAR_MAKE_HOME   	:= $(STAR_MAKE_HOME)
 	@echo SUFF_IDM    	:= $(SUFF_IDM) 
 	@echo SUFF_IDL    	:= $(SUFF_IDL) 
 	@echo So    		:= $(So) 

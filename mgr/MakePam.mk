@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.72 1998/12/11 22:21:18 fisyak Exp $
+# $Id: MakePam.mk,v 1.73 1998/12/12 00:58:36 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.73  1998/12/12 00:58:36  fisyak
+# remove STAF
+#
 # Revision 1.72  1998/12/11 22:21:18  fisyak
 # Remove doublet in idl and inc directories
 #
@@ -93,14 +96,14 @@
 # Revision 1.40  1998/08/10 23:20:53  fisyak
 # Add test for base and tables
 #
-ifndef STAF_MAKE_HOME
-  STAF_MAKE_HOME := $(STAR)/mgr
+ifndef STAR_MAKE_HOME
+  STAR_MAKE_HOME := $(STAR)/mgr
 endif
 
 ASU_MALLOC_OFF :=YES
 
-include $(STAF_MAKE_HOME)/MakeEnv.mk
-include $(STAF_MAKE_HOME)/MakeArch.mk
+include $(STAR_MAKE_HOME)/MakeEnv.mk
+include $(STAR_MAKE_HOME)/MakeArch.mk
 
 ifdef SILENT
   .SILENT:
@@ -187,10 +190,10 @@ endif
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/idl)
+SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/idl))
 SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/idl)))
 IDL_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
-SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/inc)
+SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/inc))
 SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/inc)))
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
 
@@ -436,6 +439,7 @@ $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
 	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
 	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
 	@echo "}" >> $(GEN_TAB)/gentable.C;
+	cat $(GEN_TAB)/gentable.C;
 	cd $(GEN_TAB); root.exe -b -q /dev/null > /dev/null ; $(RM) gentable.C
 endif #NOROOT
 endif #ALL_TAB
@@ -694,7 +698,7 @@ test_dir:
 	@echo sources       = $(sources)
 	@echo SRC_DIRS      = $(SRC_DIRS)
 	@echo FILES_init    = $(FILES_init)
-	@echo STAF_MAKE_HOME= $(STAF_MAKE_HOME)
+	@echo STAR_MAKE_HOME= $(STAR_MAKE_HOME)
 	@echo CERNLIB       = $(MAKECERNLIB)
 	@echo FILES_O       = $(FILES_O) 
 ifdef NT

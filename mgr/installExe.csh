@@ -19,14 +19,14 @@ set OUT = $cwd
 
 # define where all Make*.mk are. Here the place is the same as input area
 
-if ( ! $?STAF_MAKE_HOME )  then
+if ( ! $?STAR_MAKE_HOME )  then
   if ( -e $cwd/mgr/MakeArch.mk ) then
-    setenv STAF_MAKE_HOME $cwd/mgr
+    setenv STAR_MAKE_HOME $cwd/mgr
   else
-    setenv STAF_MAKE_HOME ${STAR}/mgr
+    setenv STAR_MAKE_HOME ${STAR}/mgr
   endif
 endif
-echo Use makefiles from $STAF_MAKE_HOME
+echo Use makefiles from $STAR_MAKE_HOME
 
 # define STAF SYS area
  setenv STAF_SYS $cwd
@@ -34,15 +34,15 @@ echo Use makefiles from $STAF_MAKE_HOME
 # setup stage: create OUTPUT directories and logon file makestaflogon.mk
 #  info about INP_DIR and OUT_DIR is saved into this file
 
-gmake -f ${STAF_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
+gmake -f ${STAR_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 
 #real run of makefile. It creates executable
 
-gmake -f ${STAF_MAKE_HOME}/MakeGe3.mk INP_DIR=${INP} OUT_DIR=${OUT} geant3
+gmake -f ${STAR_MAKE_HOME}/MakeGe3.mk INP_DIR=${INP} OUT_DIR=${OUT} geant3
 rehash
 
-gmake -f ${STAF_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG Staf
+gmake -f ${STAR_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG Staf
 
 
 

@@ -14,21 +14,21 @@ endif
 set OUT = $cwd
 
 # define where all Make*.mk are. Here the place is the same as input area
-if ( ! ${?STAF_MAKE_HOME} ) then
+if ( ! ${?STAR_MAKE_HOME} ) then
   if ( -f $cwd/MakeRexe.mk ) then
-    setenv STAF_MAKE_HOME $cwd
+    setenv STAR_MAKE_HOME $cwd
   endif
 endif
-if ( ! ${?STAF_MAKE_HOME} ) then
+if ( ! ${?STAR_MAKE_HOME} ) then
   if ( -f $cwd/mgr/MakeRexe.mk ) then
-    setenv STAF_MAKE_HOME $cwd/mgr
+    setenv STAR_MAKE_HOME $cwd/mgr
   endif
 endif
-if ( ! ${?STAF_MAKE_HOME} ) then
-  setenv STAF_MAKE_HOME ${STAR}/mgr
+if ( ! ${?STAR_MAKE_HOME} ) then
+  setenv STAR_MAKE_HOME ${STAR}/mgr
 endif
 
-echo Use makefiles from $STAF_MAKE_HOME
+echo Use makefiles from $STAR_MAKE_HOME
 
 # define STAF SYS area
  setenv STAF_SYS $cwd
@@ -36,7 +36,7 @@ echo Use makefiles from $STAF_MAKE_HOME
 # setup stage: create OUTPUT directories and logon file makestaflogon.mk
 #  info about INP_DIR and OUT_DIR is saved into this file
 
-gmake -f ${STAF_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
+gmake -f ${STAR_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 set StarBin = ${OUT}/.${STAR_SYS}/bin
 if ( ! -f  $StarBin/root4star) ln -s $StarBin/Root.exe $StarBin/root4star 
@@ -44,7 +44,7 @@ if ( ! -f  $StarBin/root4star) ln -s $StarBin/Root.exe $StarBin/root4star
 #real run of makefile. It creates executable
 
 
-gmake -f ${STAF_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} 
+gmake -f ${STAR_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} 
 
 
 
