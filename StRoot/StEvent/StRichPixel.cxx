@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.cxx,v 2.2 1999/10/28 22:26:22 ullrich Exp $
+ * $Id: StRichPixel.cxx,v 2.3 2000/01/10 17:12:21 lasiuk Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.cxx,v $
+ * Revision 2.3  2000/01/10 17:12:21  lasiuk
+ * remove dst_rch_pixel dependency;
+ * change stored data to a single long;
+ * modify unpacking routines;
+ *
  * Revision 2.2  1999/10/28 22:26:22  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
@@ -18,23 +23,17 @@
  *
  **************************************************************************/
 #include "StRichPixel.h"
-#include "tables/St_dst_rch_pixel_Table.h"
 
-static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.2 1999/10/28 22:26:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.3 2000/01/10 17:12:21 lasiuk Exp $";
 
 ClassImp(StRichPixel)
 
 StRichPixel::StRichPixel()
-{
-    mPad = mAdc = 0;
-}
+    : mPackedData(0)
+{ /* nopt */ }
 
-StRichPixel::StRichPixel(UShort_t pad, UShort_t adc)
-   : mPad(pad), mAdc(adc)
-{ /* noop */ }
-
-StRichPixel::StRichPixel(const dst_rch_pixel_st& p)
-   : mPad(p.pad), mAdc(p.adc)
+StRichPixel::StRichPixel(ULong_t rawData)
+   : mPackedData(rawData)
 { /* noop */ }
 
 StRichPixel::~StRichPixel() { /* noop */ }
@@ -42,8 +41,7 @@ StRichPixel::~StRichPixel() { /* noop */ }
 Int_t
 StRichPixel::operator==(const StRichPixel& p) const
 {
-    return p.mPad  == mPad &&
-           p.mAdc == mAdc;
+    return (p.mPackedData  == mPackedData);
 }
 
 Int_t
@@ -53,19 +51,19 @@ StRichPixel::operator!=(const StRichPixel& p) const
 }
 
 UShort_t
-StRichPixel::module() const
+StRichPixel::pad() const
 {
-    return mPad>>10;
+    return (mPackedData & 0xff);  // first 8 bits
 }
 
 UShort_t
-StRichPixel::channel() const
+StRichPixel::row() const
 {
-    return mPad & 0x3ff;
+    return ( (mPackedData>>8) & 0xff);  // second 8 bits
 }
 
 UShort_t
 StRichPixel::adc()  const
 {
-    return mAdc;
+    return ( (mPackedData>>16) & 0x3ff); // 10bits
 }

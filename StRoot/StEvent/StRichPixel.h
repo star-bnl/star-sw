@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.h,v 2.1 1999/10/13 19:43:36 ullrich Exp $
+ * $Id: StRichPixel.h,v 2.2 2000/01/10 17:12:21 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.h,v $
+ * Revision 2.2  2000/01/10 17:12:21  lasiuk
+ * remove dst_rch_pixel dependency;
+ * change stored data to a single long;
+ * modify unpacking routines;
+ *
  * Revision 2.1  1999/10/13 19:43:36  ullrich
  * Initial Revision
  *
@@ -20,13 +25,10 @@
 #include "StObject.h"
 #include "StEnumerations.h"
 
-class dst_rch_pixel_st;
-
 class StRichPixel : public StObject {
 public:
     StRichPixel();
-    StRichPixel(UShort_t, UShort_t);      // pad, adc
-    StRichPixel(const dst_rch_pixel_st&);
+    StRichPixel(ULong_t packedData);
     // StRichPixel(const StRichPixel&);            use default
     // StRichPixel& operator=(const StRichPixel&); use default
     ~StRichPixel();
@@ -34,13 +36,12 @@ public:
     Int_t operator==(const StRichPixel&) const;
     Int_t operator!=(const StRichPixel&) const;
 
-    UShort_t  module() const;
-    UShort_t  channel() const;
+    UShort_t  pad() const;
+    UShort_t  row() const;
     UShort_t  adc() const;
     
 protected:
-    UShort_t  mPad;
-    UShort_t  mAdc;
+    ULong_t  mPackedData;
     
     ClassDef(StRichPixel,1)
 };
