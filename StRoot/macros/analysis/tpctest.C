@@ -1,5 +1,8 @@
-// $Id: tpctest.C,v 1.4 1999/03/17 02:59:47 fisyak Exp $
+// $Id: tpctest.C,v 1.5 1999/03/31 13:53:31 fisyak Exp $
 // $Log: tpctest.C,v $
+// Revision 1.5  1999/03/31 13:53:31  fisyak
+// Set exactly no field option
+//
 // Revision 1.4  1999/03/17 02:59:47  fisyak
 // New makers
 //
@@ -110,6 +113,7 @@ void start(){
   geant->LoadGeometry("detp geometry field_only");
   
 #endif
+  StMagF         *field   = new StMagFC("field","STAR no field",0.);
   StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
   
   St_tcl_Maker *tpc_hits = new St_tcl_Maker("tpc_hits");
@@ -238,8 +242,10 @@ void draw_event(){
     for(int mm=0;mm<75;mm++)ntkpt[mm] = 0;
     Int_t k=0, savnum[75]; 
     Int_t oldie=0, itkno =0;
+    Int_t j=0;
     for (i = 0;i<nhits;i++){
-      h= hit1[sortrk->GetIndex(i)];
+      j = sortrk->GetIndex(i);
+      h= hit1+j;
       if(h->z > zmin && h->z < zmax){
 	pts[3*k]=h->x; pts[3*k+1]=h->y; pts[3*k+2]=h->z;
 	k++;
