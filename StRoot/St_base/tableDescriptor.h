@@ -43,7 +43,7 @@ typedef struct tableDescriptor_st {
     char         *m_ColumnName; /* The name of this data-member                                          */
     unsigned int *m_IndexArray; /* The array of the sizes for each dimensions m_IndexArray[m_Dimensions] */
 #else
-    char         m_ColumnName[20];  /* The name of this data-member                                          */
+    char         m_ColumnName[32];  /* The name of this data-member: see dstype.h for dsl compatible mode */
     unsigned int m_IndexArray[2];   /* The array of the sizes for each dimensions m_IndexArray[m_Dimensions] */
 #endif
     unsigned int m_Offset;      /* The first byte in the row of this column                              */

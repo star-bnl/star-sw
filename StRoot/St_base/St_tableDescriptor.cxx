@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.5 1999/09/13 13:28:27 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.6 1999/12/03 20:51:27 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.6  1999/12/03 20:51:27  fine
+// change the data-member name size from 20 to 32 to be in line with dstype.h
+//
 // Revision 1.5  1999/09/13 13:28:27  fine
 // One cast int -> uint introduced to avoid compiler warnings
 //
@@ -95,7 +98,7 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
     memset(&elementDescriptor,0,sizeof(tableDescriptor_st));
     varname = (Char_t *) member->GetName();
 #ifdef NORESTRICTIONS
-//  This is remove to introduce an artificial restriction demanded by STAR database group
+//  This is remove to introduce an artificial restriction demanded by STAR infrastructure group
                                              elementDescriptor.m_ColumnName = StrDup(varname);
 #else
                                              elementDescriptor.m_ColumnName[0] = '\0';
