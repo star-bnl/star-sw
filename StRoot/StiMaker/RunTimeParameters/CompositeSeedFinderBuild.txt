@@ -7,8 +7,6 @@
 theStringVecSize:		2
 //The ordering defines the order of seed finder execution
 
-//theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt  StRoot/StiMaker/RunTimeParameters/InnerSeedFinder.txt
-
-theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt
+theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt  StRoot/StiMaker/RunTimeParameters/InnerSeedFinder.txt
 
 //theStringVec:	StRoot/StiMaker/RunTimeParameters/OuterSeedFinder.txt  StRoot/StiMaker/RunTimeParameters/CollinearSeedFinder.txt
