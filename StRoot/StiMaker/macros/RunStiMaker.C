@@ -114,11 +114,6 @@ void RunStiMaker(Int_t nevents=1,
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
     
-    anaMk->setMaterialBuildPath("/scr20/ittf/StiGeometryParameters/Materials");
-    anaMk->setDetectorBuildPath("/scr20/ittf/StiGeometryParameters/Detectors");
-    enum StTrackType {global, primary, tpt, secondary};
-    //anaMk->setDrawableStTrackType(primary);
-    anaMk->setDrawableStTrackType(global);
     anaMk->setMcEventMaker(mcEventReader);
     if (simulated) {
 	anaMk->setAssociationMaker(assocMaker);
