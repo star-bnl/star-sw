@@ -176,7 +176,10 @@ for my $class (@classes) {
 	(my $global = $class) =~ s/St_//g;
 	print Out "#pragma link C++ global $global;\n"; print  "#pragma link C++ global $global;\n";
       }
-      else {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
+      else {
+       if ($class =~ /-$/) {print Out "#pragma link C++ class $class;\n"; print  "#pragma link C++ class $class;\n";}
+       else {print Out "#pragma link C++ class $class+;\n"; print  "#pragma link C++ class $class+;\n";}
+      }
       $class_written{$class} = "YES";
     }
   }
