@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.17 2001/07/31 23:21:42 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.18 2001/08/03 20:33:55 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.18  2001/08/03 20:33:55  lansdell
+// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
+//
 // Revision 2.17  2001/07/31 23:21:42  lansdell
 // added last point, hit-helix histos
 //
@@ -132,6 +135,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
 
 
 //  - Zero all histogram pointers
+
+  mNullPrimVtxMult = 0;
 
 // for method MakeGlob - from table globtrk
   m_globtrk_tot=0;
@@ -278,7 +283,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pT_eta_recT = 0;
   m_pT_eta_recFE = 0;
   m_pT_eta_recFW = 0;
-  m_globtrk_xf_yfT = 0;
+  m_globtrk_xf_yfTE = 0;
+  m_globtrk_xf_yfTW = 0;
   m_globtrk_xf_yfFE = 0;
   m_globtrk_xf_yfFW = 0;
   m_tanl_zfT  = 0;
@@ -472,7 +478,8 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_ppT_eta_recT = 0;
   m_ppT_eta_recFE = 0;
   m_ppT_eta_recFW = 0;
-  m_primtrk_xf_yfT = 0;
+  m_primtrk_xf_yfTE = 0;
+  m_primtrk_xf_yfTW = 0;
   m_primtrk_xf_yfFE = 0;
   m_primtrk_xf_yfFW = 0;
   m_ptanl_zfT  = 0;
@@ -582,6 +589,11 @@ void StQABookHist::BookHist(Int_t histsSet){
 
   QAH::preString = QAHistType;
 //book histograms --------------
+  if (histsSet==1) {
+    mNullPrimVtxMult = QAH::H1F("QaNullPrimVtxMult","event primary vertex check",40,-2,2);
+    mNullPrimVtxMult->SetXTitle("has primary vertex? (yes = 1, no = -1)");
+    mNullPrimVtxMult->SetYTitle("# of events");
+  }
   BookHistPoint();
   BookHistRich();
   BookHistEMC();
@@ -734,10 +746,13 @@ void StQABookHist::BookHistGlob(){
     m_pT_eta_recT->SetXTitle("eta");
     m_pT_eta_recT->SetYTitle(" log pT (MeV)");
 
-  m_globtrk_xf_yfT = QAH::H2F("QaGtrkXfYfT",  "globtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
-    m_globtrk_xf_yfT->SetXTitle("x first");
-    m_globtrk_xf_yfT->SetYTitle("y first");
+  m_globtrk_xf_yfTE = QAH::H2F("QaGtrkXfYfTE",  "globtrk: Y vs X of first hit on trk, tpc east", 40,-200.,200.,40,-200.,200.);
+    m_globtrk_xf_yfTE->SetXTitle("x first");
+    m_globtrk_xf_yfTE->SetYTitle("y first");
 
+  m_globtrk_xf_yfTW = QAH::H2F("QaGtrkXfYfTW",  "globtrk: Y vs X of first hit on trk, tpc west", 40,-200.,200.,40,-200.,200.);
+    m_globtrk_xf_yfTW->SetXTitle("x first");
+    m_globtrk_xf_yfTW->SetYTitle("y first");
 
   m_tanl_zfT = QAH::H2F("QaGtrkTanlzf","globtrk: tanl(dip) vs. (zfirst-zvtx)/arc length, tpc,tpc+svt",60,-3.,3.,60,-3.,3.);
     m_tanl_zfT->SetXTitle("(zfirst-zvtx)/arc length");
@@ -1180,9 +1195,12 @@ void StQABookHist::BookHistPrim(){
   m_ppT_eta_recT = QAH::H2F("QaPtrkPtVsEtaT","primtrk: log pT vs eta, tpc", 20,-2.,2.,40,1.,4.);
     m_ppT_eta_recT->SetXTitle("eta");
     m_ppT_eta_recT->SetYTitle(" log pT (MeV)");
-  m_primtrk_xf_yfT = QAH::H2F("QaPtrkXfYfT",  "primtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
-    m_primtrk_xf_yfT->SetXTitle("x first");
-    m_primtrk_xf_yfT->SetYTitle("y first");
+  m_primtrk_xf_yfTE = QAH::H2F("QaPtrkXfYfTE",  "primtrk: Y vs X of first hit on trk, tpc east", 40,-200.,200.,40,-200.,200.);
+    m_primtrk_xf_yfTE->SetXTitle("x first");
+    m_primtrk_xf_yfTE->SetYTitle("y first");
+  m_primtrk_xf_yfTW = QAH::H2F("QaPtrkXfYfTW",  "primtrk: Y vs X of first hit on trk, tpc west", 40,-200.,200.,40,-200.,200.);
+    m_primtrk_xf_yfTW->SetXTitle("x first");
+    m_primtrk_xf_yfTW->SetYTitle("y first");
   m_ptanl_zfT = QAH::H2F("QaPtrkTanlzf","primtrk: tanl(dip) versus zfirst-zvtx, tpc,tpc+svt",60,-3.,3.,60,-3.,3.);
     m_ptanl_zfT->SetXTitle("zfirst-zvtx");
     m_ptanl_zfT->SetYTitle("tanl");

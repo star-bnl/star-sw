@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.16 2001/07/31 23:21:42 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.17 2001/08/03 20:33:55 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.17  2001/08/03 20:33:55  lansdell
+// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
+//
 // Revision 2.16  2001/07/31 23:21:42  lansdell
 // added last point, hit-helix histos
 //
@@ -137,19 +140,22 @@ Int_t StEventQAMaker::Make() {
       BookHist();
     }
     // only process if a primary vertex exists !!!
+    if (event->info()->type() == "NONE") {
+      histsSet = 1;
+    } else {
+      // process Monte Carlo events
+      histsSet = 0;
+    }
     if (event->primaryVertex()) {
       multiplicity = event->trackNodes().size();
+      int makeStat = StQAMakerBase::Make();
       mNullPrimVtx->Fill(1);
-      if (event->info()->type() == "NONE") {
-        histsSet = 1;
-      } else {
-        // process Monte Carlo events
-	histsSet = 0;
-      }
-      return StQAMakerBase::Make();
+      hists->mNullPrimVtxMult->Fill(1);
+      return makeStat;
     } else {
       gMessMgr->Warning("StEventQAMaker::Make(): no primary vertex found!");
       mNullPrimVtx->Fill(-1);
+      hists->mNullPrimVtxMult->Fill(-1);
       return kStOk;
     }
   } else {
@@ -402,8 +408,12 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_chisq1T->Fill(chisq1);
         hists->m_chisq1TTS->Fill(chisq1,1.);
 
-        hists->m_globtrk_xf_yfT->Fill(firstPoint.x(),
-			       firstPoint.y());
+	if (firstPoint.z()<0)
+	  hists->m_globtrk_xf_yfTE->Fill(firstPoint.x(),
+					 firstPoint.y());
+	else
+	  hists->m_globtrk_xf_yfTW->Fill(firstPoint.x(),
+					 firstPoint.y());
         hists->m_eta_trklengthT->Fill(eta,globtrk->length());
         hists->m_npoint_lengthT->Fill(globtrk->length(),
 	      		       Float_t(detInfo->numberOfPoints()));
@@ -930,8 +940,12 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pchisq1TTS->Fill(chisq1,1.);
 
 // these are for TPC & FTPC
-	  hists->m_primtrk_xf_yfT->Fill(firstPoint.x(),
-				 firstPoint.y());
+	  if (firstPoint.z()<0)
+	    hists->m_primtrk_xf_yfTE->Fill(firstPoint.x(),
+					   firstPoint.y());
+	  else
+	    hists->m_primtrk_xf_yfTW->Fill(firstPoint.x(),
+					   firstPoint.y());
 	  hists->m_peta_trklengthT->Fill(eta,primtrk->length());
 	  hists->m_pnpoint_lengthT->Fill(primtrk->length(),
 				  Float_t(detInfo->numberOfPoints()));
