@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.4 1998/08/20 21:30:17 sakrejda Exp $
+* $Id: tcl_clusters_in_row.F,v 1.5 1998/11/30 19:10:34 sakrejda Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.5  1998/11/30 19:10:34  sakrejda
+* double declaration for ide2 removed (found by Valeri)
+*
 * Revision 1.4  1998/08/20 21:30:17  sakrejda
 * printing replaced by a message call
 *
@@ -157,7 +160,7 @@ c
 
 c local variables:
 c
-        integer ide1, ide2
+        integer ide1
         integer ipad_seq
         integer iptr
 	integer iseq
