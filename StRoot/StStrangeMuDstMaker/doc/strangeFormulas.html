@@ -60,6 +60,7 @@
 <a href="#loading">Loading</a><br>
 <a href="#using">Using</a><br>
 <a href="#technical">Technical</a><br>
+<a href="#formulas">Formulas</a><br>
 </center>
 
 <p>
@@ -288,6 +289,179 @@ values if they decide to add more complicated formulas using these formulas.
 <p>
 </ul>
 
+
+<hr width=10% align=left>
+<a name="formulas"><h2>Available Formulas</h2></a>
+
+<ul>
+<li>Particle Mass Formulas
+<pre>
+mLambda
+mAntiLambda
+mK0Short
+mProton
+mAntiProton
+mPiPlus
+mPiMinus
+mKaonMinus
+mXiMinus (only loaded for Xi's)
+mOmegaMinus (only loaded for Xi's)
+</pre>
+<p>
+
+<li>Event Formulas
+<pre>
+Event.run()
+Event.event()
+Event.primaryVertexX()
+Event.primaryVertexY()
+Event.primaryVertexZ()
+</pre>
+<p>
+
+<li>V0 Formulas (only loaded if V0 branch present in micro-DST)
+<pre>
+-- decay parameters --
+V0.decayLengthV0()
+V0.decayVertexV0X()
+V0.decayVertexV0Y()
+V0.decayVertexV0Z()
+V0.dcaV0Daughters()
+V0.dcaV0ToPrimVertex()
+V0.dcaPosToPrimVertex()
+V0.dcaNegToPrimVertex()
+V0.cTauLambda()
+V0.cTauK0Short()
+
+-- momentum --
+V0.momPosX()
+V0.momPosY()
+V0.momPosZ()
+V0.ptPos()
+V0.Ptot2Pos()
+V0.ptotPos()
+V0.momNegX()
+V0.momNegY()
+V0.momNegZ()
+V0.ptNeg()
+V0.Ptot2Neg()
+V0.ptotNeg()
+V0.momV0X()
+V0.momV0Y()
+V0.momV0Z()
+V0.Pt2V0()
+V0.ptV0()
+V0.Ptot2V0()
+V0.ptotV0()
+V0.MomPosAlongV0()
+V0.MomNegAlongV0()
+V0.alphaV0()
+V0.ptArmV0()
+
+-- energy --
+V0.eLambda()
+V0.eK0Short()
+V0.ePosProton()
+V0.eNegAntiProton()
+V0.ePosPion()
+V0.eNegPion()
+
+-- mass --
+V0.massLambda()
+V0.massAntiLambda()
+V0.massK0Short()
+
+-- rapidity --
+V0.rapLambda()
+V0.rapK0Short()
+
+-- topology maps --
+* = <b>Pos</b> or <b>Neg</b>
+V0.topologyMap*.data(i), i=0...1
+V0.topologyMap*.bit(i), i=0...63
+V0.topologyMap*.ftpcFormat()
+V0.topologyMap*.primaryVertexUsed()
+V0.topologyMap*.turnAroundFlag()
+V0.topologyMap*.hasHitInSvtLayer(i), i=1...6
+V0.topologyMap*.numOfSvtHits()
+V0.topologyMap*.hasHitInSsd()
+V0.topologyMap*.hasHitInTpcRow(i), i=1...45
+V0.topologyMap*.numOfTpcHits()
+V0.topologyMap*.hasHitInMwpc()
+V0.topologyMap*.hasHitInCtb()
+V0.topologyMap*.hasHitInTofPatch()
+V0.topologyMap*.hasHitInRich()
+V0.topologyMap*.hasHitInBarrelEmc()
+V0.topologyMap*.hasHitInEndcapEmc()
+</pre>
+<p>
+
+<li>Xi Formulas (only loaded if Xi branch present in micro-DST)
+<pre>
+-- V0 formulas --
+Just as for V0 above, but with <b>Xi.</b> replacing <b>V0.</b> --
+
+-- decay parameters --
+Xi.decayLengthXi()
+Xi.decayVertexXiX()
+Xi.decayVertexXiY()
+Xi.decayVertexXiZ()
+Xi.dcaXiDaughters()
+Xi.dcaXiToPrimVertex()
+Xi.dcaBachelorToPrimVertex()
+Xi.cTauXi()
+Xi.cTauOmega()
+
+-- momentum --
+Xi.momBachelorX()
+Xi.momBachelorY()
+Xi.momBachelorZ()
+Xi.ptBachelor()
+Xi.Ptot2Bachelor()
+Xi.ptotBachelor()
+Xi.momXiX()
+Xi.momXiY()
+Xi.momXiZ()
+Xi.Pt2Xi()
+Xi.ptXi()
+Xi.Ptot2Xi()
+Xi.ptotXi()
+Xi.MomBachelorAlongXi()
+Xi.MomV0AlongXi()
+Xi.alphaXi()
+Xi.ptArmXi()
+
+-- energy --
+Xi.eXi()
+Xi.eOmega()
+Xi.eBachelorPion()
+Xi.eBachelorKaon()
+
+-- mass --
+Xi.massXi()
+Xi.massOmega()
+
+-- rapidity --
+Xi.rapXi()
+Xi.rapOmega()
+
+-- misc --
+Xi.charge()
+Xi.keyBachelor()
+
+-- topology maps --
+* = <b>Pos</b> or <b>Neg</b> (for V0 daughters) or <b>Bachelor</b>
+Otherwise, just as for V0 above, but with <b>Xi.</b> replacing <b>V0.</b>
+</pre>
+<p>
+
+<li>Kink Formulas (only loaded if Kink branch present in micro-DST)
+<pre>
+-- None at present --
+</pre>
+<p>
+
+</ul>
 
 <P>
 

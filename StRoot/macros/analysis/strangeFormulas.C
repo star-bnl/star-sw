@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 1.5 2000/04/13 18:30:26 genevb Exp $
+// $Id: strangeFormulas.C,v 1.6 2000/04/13 19:33:44 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 1.6  2000/04/13 19:33:44  genevb
+// StRoot/macros/analysis/
+//
 // Revision 1.5  2000/04/13 18:30:26  genevb
 // Better handling of backward compatibility
 //
@@ -24,6 +27,7 @@
 //          a tree (tree name assumed to be "StrangeMuDst"), or
 //          the name of such a file. In the latter two cases, a
 //          pointer to the strangeness TTree is returned.
+//          See documentation for more information.
 // examples:
 //        .x strangeFormulas.C("myfile.root");
 //          Opens a file named "myfile.root", loads the formulas needed,
@@ -130,12 +134,6 @@ Int_t strangeFormulas(TTree* tree) {
     gROOT->GetListOfFunctions()->Add(f1);
     f1 = new TTreeFormula("V0.decayVertexV0Z()",
       "V0.mDecayVertexV0Z",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.dcaV0Daughters()",
-      "V0.mDcaV0Daughters",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("V0.dcaV0Daughters()",
-      "V0.mDcaV0Daughters",tree);
     gROOT->GetListOfFunctions()->Add(f1);
     f1 = new TTreeFormula("V0.dcaV0Daughters()",
       "V0.mDcaV0Daughters",tree);
@@ -425,12 +423,6 @@ Int_t strangeFormulas(TTree* tree) {
     gROOT->GetListOfFunctions()->Add(f1);
     f1 = new TTreeFormula("Xi.decayVertexV0Z()",
       "Xi.mDecayVertexV0Z",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaV0Daughters()",
-      "Xi.mDcaV0Daughters",tree);
-    gROOT->GetListOfFunctions()->Add(f1);
-    f1 = new TTreeFormula("Xi.dcaV0Daughters()",
-      "Xi.mDcaV0Daughters",tree);
     gROOT->GetListOfFunctions()->Add(f1);
     f1 = new TTreeFormula("Xi.dcaV0Daughters()",
       "Xi.mDcaV0Daughters",tree);
