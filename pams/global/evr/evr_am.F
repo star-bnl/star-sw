@@ -340,8 +340,29 @@ CC  B-field obtained via gufld call
       xlocal(3) = 0.
 
       call gufld(xlocal,bfield)
-      write(6,*) 'Using a field of',bfield(3),' KGauss'
+      write(6,*) 'EVR: Using a field of',bfield(3),' KGauss'
       b = bfield(3)
+
+C>>>  TEST PRINT OUT
+C      write(6,990) xlocal(1),b
+C990   Format(1x,'EVR: xlocal(1),b=',2F20.16)
+C      write(6,*) 'EVR: evrpar.ptmin      = ',evrpar(1).ptmin
+C      write(6,*) 'EVR: evrpar.fitoption  = ',evrpar(1).fitoption
+C      write(6,*) 'EVR: evrpar.covariance = ',evrpar(1).covariance
+C      write(6,*) 'EVR: evrpar.cutxy      = ',evrpar(1).cutxy
+C      write(6,*) 'EVR: evrpar.cutz       = ',evrpar(1).cutz
+C      write(6,*) 'EVR: evrpar.cut2       = ',evrpar(1).cut2
+C      write(6,*) 'EVR: evrpar.cut3       = ',evrpar(1).cut3
+C      write(6,*) 'EVR: evrpar.vcut       = ',evrpar(1).vcut
+C      zsum(1) = sind(30.0)
+C      zsum(2) = cosd(30.0)
+C      write(6,*) 'EVR: sind, cosd=',zsum(1),zsum(2)
+C      write(6,*) 'EVR: pi        =',C_PI
+C      write(6,*) 'EVR: curvature =',C_D_CURVATURE
+C      write(6,*) 'EVR: 2*pi      =',C_2PI
+C      write(6,*) 'EVR: sqrt(2)   =',C_SQRT2
+C      write(6,*) 'EVR: pion mass =',M_PION_PLUS
+C>>>  TEST PRINT OUT
 
 CC  Check for fixed vertex
       do i = 1,privert_h.nok
@@ -392,7 +413,7 @@ CC  the array 'dettrkcounter,' for track/detector segment counting:
      6   kSsdSvtId    .gt. 0 .and. kSsdSvtId    .le.maxdettypes) then 
          Continue
       else
-         write(6,*) 'Detector ID values out of range (1,30) - STOP'
+         write(6,*) 'EVR: Detector ID values out of range (1,30) - STOP'
          evr_am = STAFCV_BAD
          Return
       end if
@@ -428,8 +449,8 @@ C=== use only global tracks, i.e. dst_track instances ====
         k = 0
 
         if (ntrk.lt.5) then
-           write(6,*) 'Not enough initial global tracks to find '
-           write(6,*) 'the vertex, ntrk=',ntrk
+           write(6,*) 'EVR: Not enough initial global tracks to find '
+           write(6,*) 'EVR: the vertex, ntrk=',ntrk
            evr_am = STAFCV_BAD  
            return
         endif
@@ -494,6 +515,13 @@ CC  uncertainty at the DCA to the primary vertex.
               phi0(k)= x(4)
               tanl(k) = tanla
               sigma(k) = sig
+
+C>>> TEST OUTPUT
+C      write(6,992) psi,ppt,tanla,xx0,yy0,zz0
+C      write(6,993) LRAD,x(1),x(2),x(3),x(4),sig
+C992   Format('EVR:SIG1',6E12.4)
+C993   Format('EVR:SIG2',6E12.4)
+C>>>  End test output
 
 CCC  Include track fit error covariance matrix contributions to the
 CCC  track position uncertainty at the DCA point:
@@ -609,7 +637,7 @@ CC  Compute partial derivatives:
                     end do
                  end do
                  if(derrorsq .le. 0.0) then
-                    write(6,*) 'Track position error-sq .le. 0.0 ',
+                    write(6,*) 'EVR: Track position error-sq .le. 0.0 ',
      1                 'using covar()-USE Default:',derrorsq
                     derror = sigdef
                  else
@@ -654,9 +682,9 @@ CC                            ! the remainder of tracks are skipped.
            if(globtrk_h.nok .ne. 0) then
               ntrkratio = float(ntrk)/float(globtrk_h.nok)
            end if
-           write(6,*) 'Not enough global tracks after ptmin,z '
-           write(6,*) 'and beampipe cuts to find the vertex:'
-           write(6,*) 'ntrk,ntrkratio = ',ntrk,ntrkratio
+           write(6,*) 'EVR: Not enough global tracks after ptmin,z '
+           write(6,*) 'EVR: and beampipe cuts to find the vertex:'
+           write(6,*) 'EVR: ntrk,ntrkratio = ',ntrk,ntrkratio
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
@@ -674,6 +702,12 @@ CCC  Determine initial, rough z-coordinate of vertex and put in 'seed'
            seed=0.5*float(i) - 200.25      ! Put seed at center of bin.   
          endif
         enddo   
+
+CCC  Print z bins:
+C        do i = 300,500
+C           write(6,*) 'EVR: zsum for i = ',i,zsum(i)
+C        end do
+C        write(6,*) 'EVR: seed = ', seed
 
 CC  Load default vertex position:
         xv = xp(1)
@@ -710,7 +744,7 @@ CCC  Load initial seed value into table privert:
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
-           write(6,*) 'Privert table is full - cannot load vertex:',
+           write(6,*) 'EVR:Privert table is full - cannot load vertex:',
      1                 index
            evr_am = STAFCV_BAD
            Return
@@ -738,8 +772,8 @@ CCC  track parameters into temporary arrays:
            if(globtrk_h.nok .ne. 0) then
               ntrkratio = float(k)/float(globtrk_h.nok)
            end if
-           write(6,*) 'EVR_AM: too few trks for EVR_VERTEX_FIT'
-           write(6,*) 'after cutxy,cutz; k,ratio=',k,ntrkratio
+           write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
+           write(6,*) 'EVR: after cutxy,cutz; k,ratio=',k,ntrkratio
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
@@ -785,7 +819,7 @@ CCC  Load first iteration vertex value into table privert:
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
-           write(6,*) 'Privert table is full - cannot load vertex:',
+           write(6,*) 'EVR:Privert table is full - cannot load vertex:',
      1                 index
            evr_am = STAFCV_BAD
            Return
@@ -850,8 +884,8 @@ C** straight line tracks, i.e. can put e.g. pt=1 then
            if(globtrk_h.nok .ne. 0) then
               ntrkratio = float(k)/float(globtrk_h.nok)
            end if
-           write(6,*) 'EVR_AM: too few trks for EVR_VERTEX_FIT'
-           write(6,*) 'after cut2; k,ratio=',k,ntrkratio
+           write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
+           write(6,*) 'EVR: after cut2; k,ratio=',k,ntrkratio
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
@@ -897,7 +931,7 @@ CCC  Load second iteration vertex value into table privert:
            privert(index).chisq(2) = 0.0
            privert(index).id_aux_ent  = 0
         else
-           write(6,*) 'Privert table is full - cannot load vertex:',
+           write(6,*) 'EVR:Privert table is full - cannot load vertex:',
      1                 index
            evr_am = STAFCV_BAD
            Return
@@ -964,8 +998,8 @@ CC                                              ! in final vertex fit
            if(globtrk_h.nok .ne. 0) then
               ntrkratio = float(k)/float(globtrk_h.nok)
            end if
-           write(6,*) 'EVR_AM: too few trks for EVR_VERTEX_FIT'
-           write(6,*) 'after cut3; k,ratio=',k,ntrkratio
+           write(6,*) 'EVR: too few trks for EVR_VERTEX_FIT'
+           write(6,*) 'EVR: after cut3; k,ratio=',k,ntrkratio
            if(globtrk_h.nok .lt. ntrkcut) then
               evr_am = STAFCV_BAD
            else
@@ -1041,7 +1075,7 @@ CC  Fill covariance error matrix in units of cm^2:
         privert(index).chisq(2) = PROB(chisq,k-1)
         privert(index).id_aux_ent  = 0
       else
-           write(6,*) 'Privert table is full - cannot load vertex:',
+           write(6,*) 'EVR:Privert table is full - cannot load vertex:',
      1                 index
            evr_am = STAFCV_BAD
            Return
@@ -1110,7 +1144,7 @@ C               ! DCA to primary vertex .lt.evrpar(1).vcut
         end do
 
 CCC  Write out the counted number of primary track candidates:
-        write(6,*) 'EVR_AM: #primary track candidates = ',j
+        write(6,*) 'EVR: #primary track candidates = ',j
 
       end if
 
@@ -1424,7 +1458,7 @@ CC  Determine if special cases apply:
             end if
 
             if(abs(abs(pdu)-1.0) .gt. 0.0001) then
-               write(6,*) 'EVR_AM: Direction cosines .ne. +/-1,=',pdu
+               write(6,*) 'EVR: Direction cosines .ne. +/-1,=',pdu
             end if
 
             x(3) = z0 + pdu*d*tanl
@@ -1515,12 +1549,21 @@ C      DATA sqrt2  /1.4142135/
 
       if(cospr .eq. 0.0) then
          sigma_estimate = trans_pathL*fac*sqrt2*
-     1         theta_mcs(M_PION_PLUS,1.0,ptot,LIFC,1.0,1)
+     1         theta_mcs(0.14,1.0,ptot,LIFC,1.0,1)
       else
          Leff = LIFC/abs(cospr)
          sigma_estimate = trans_pathL*fac*sqrt2*
-     1         theta_mcs(M_PION_PLUS,1.0,ptot,Leff,1.0,1)
+     1         theta_mcs(0.14,1.0,ptot,Leff,1.0,1)
       end if
+
+C>>>  TEST OUTPUT
+C      if(LIFC.gt.0.0) then
+C         write(6,990) pt,x0,y0,psi,tanl,trans_pathL
+C         write(6,991) phi0,cospr,M_PION_PLUS,ptot,sigma_estimate
+C990      Format('EVR:SIG3',6E12.4)
+C991      Format('EVR:SIG4',5E12.4)
+C      end if
+C>>>
 
       Return
       END
@@ -1590,6 +1633,14 @@ CCC   Begin Calculation, if L or LR = 0.0, set theta_mcs to zero and return:
             theta_mcs = theta_fac1*abs(charge)*sqrt(LFAC)
      1      *(1.0 + LOGFAC1*log(LFAC))/(1000.0*momentum*beta)
          end if
+
+C>>>  TEST OUTPUT
+C      write(6,990) L,LR,LFAC,momentum,mass,E
+C      write(6,991) formula_type,gamma,beta,charge,LOGFAC1,theta_fac1,
+C     1             theta_mcs
+C990   Format('EVR:SIG5',6E12.4)
+C991   Format('EVR:SIG6',I2,6E11.3)
+C>>>
 
       end if
 
@@ -1676,6 +1727,11 @@ CC  Initialize all output quantities:
       end if
 
 	do k=1,nt			! Master loop over tracks
+C>>>  TEST OUTPUT
+C>>>          write(6,991) k,vtrv(1,k),vtrv(2,k),vtrv(3,k),
+C>>>     1                   vtrv(4,k),vtrv(5,k),vtrv(6,k)
+C>>>991       Format(1x,'EVR:k,vt=',I4,6E11.3)
+C>>>  TEST OUTPUT
 	  sinV=sind(vtrv(1,k))
 	  cosV=cosd(vtrv(1,k))
 	  cosL=1.0/(sqrt(1.0 + vtrv(2,k)**2))
@@ -1685,7 +1741,9 @@ CC  Initialize all output quantities:
 	  Y0= vtrv(5,k)
 	  Z0= vtrv(6,k)
           sigma2 = vtrv(3,k)*vtrv(3,k)
-          if(sigma2 .eq. 0.0) sigma2 = 1.0
+C>>>          if(sigma2 .eq. 0.0) sigma2 = 1.0
+C>>>   Try a lower cut-off on sigma
+          if(sigma2.lt.0.0025) sigma2 = 0.0025
 
 c  Calculate the matrix elements of Ti (individual transformation matrices)
 c  in the document Mi is the same as Ti
@@ -1740,10 +1798,10 @@ c  Calcualate the determinant
      >      G(2,1)*(G(1,2)*G(3,3)-G(1,3)*G(3,2))+
      >      G(3,1)*(G(1,2)*G(2,3)-G(1,3)*G(2,2))
 	IF(abs(DET).LT.1.0E-25) THEN
-	    write(6,*) ' V_F:  determinant too small   det=',det
-	    write(6,*) (G(1,k),k=1,3)
-	    write(6,*) (G(2,k),k=1,3)
-	    write(6,*) (G(3,k),k=1,3)
+	    write(6,*) 'EVR: V_F: determinant too small, det=',det
+	    write(6,*) 'EVR:', (G(1,k),k=1,3)
+	    write(6,*) 'EVR:', (G(2,k),k=1,3)
+	    write(6,*) 'EVR:', (G(3,k),k=1,3)
             xv = -99999.    !  Identify this as a failed fit attempt
 	    GO TO 999
 	END IF
@@ -1756,13 +1814,37 @@ c  Calcualate the determinant
 	G_inv(3,1)=+(G(2,1)*G(3,2)-G(2,2)*G(3,1))/det
 	G_inv(3,2)=-(G(1,1)*G(3,2)-G(1,2)*G(3,1))/det
 	G_inv(3,3)=+(G(1,1)*G(2,2)-G(1,2)*G(2,1))/det
+C>>>  TEST PRINT OUT
+C      write(6,*) 'EVR: G=',G(1,1),G(1,2),G(1,3)
+C      write(6,*) 'EVR: G=',G(2,1),G(2,2),G(2,3)
+C      write(6,*) 'EVR: G=',G(3,1),G(3,2),G(3,3)
+C      write(6,*) 'EVR: G_inv=',G_inv(1,1),G_inv(1,2),G_inv(1,3)
+C      write(6,*) 'EVR: G_inv=',G_inv(2,1),G_inv(2,2),G_inv(2,3)
+C      write(6,*) 'EVR: G_inv=',G_inv(3,1),G_inv(3,2),G_inv(3,3)
+C      write(6,*) 'EVR: H=',H(1),H(2),H(3)
+CC  Compute G_inv*G to see if the inverse matrix is ok:
+C        do i = 1,3
+C           do j = 1,3
+C              unit(i,j) = 0.0
+C           end do
+C        end do
+C        do i = 1,3
+C           do j = 1,3
+C              do k = 1,3
+C                 unit(i,j) = unit(i,j) + G_inv(i,k)*G(k,j)
+C              end do
+C           end do
+C        end do
+C        write(6,*) 'EVR: G_inv*G=',unit(1,1),unit(1,2),unit(1,3)
+C        write(6,*) 'EVR: G_inv*G=',unit(2,1),unit(2,2),unit(2,3)
+C        write(6,*) 'EVR: G_inv*G=',unit(3,1),unit(3,2),unit(3,3)
 
 c  The vertex vector = The inverted G matrix times the H vector
 
 	Xv=G_inv(1,1)*H(1)+G_inv(1,2)*H(2)+G_inv(1,3)*H(3)
 	Yv=G_inv(2,1)*H(1)+G_inv(2,2)*H(2)+G_inv(2,3)*H(3)	
 	Zv=G_inv(3,1)*H(1)+G_inv(3,2)*H(2)+G_inv(3,3)*H(3)	
-        write(6,*) ' Estimated Vertex:',Xv,Yv,Zv
+        write(6,*) 'EVR: Estimated Vertex:',Xv,Yv,Zv
 
 CC  Compute Chi-Square of fit to vertex, return the total chi-square value:
         do k = 1,nt
@@ -1790,10 +1872,10 @@ c  Calcualate the determinant
      >      E(2,1)*(E(1,2)*E(3,3)-E(1,3)*E(3,2))+
      >      E(3,1)*(E(1,2)*E(2,3)-E(1,3)*E(2,2))
         IF(abs(detE).LT.1.0E-25) THEN
-            write(6,*) 'COV :  determinant too small   det=',detE
-            write(6,*) (E(1,k),k=1,3)
-            write(6,*) (E(2,k),k=1,3)
-            write(6,*) (E(3,k),k=1,3)
+            write(6,*) 'EVR: COV determinant too small, det=',detE
+            write(6,*) 'EVR:', (E(1,k),k=1,3)
+            write(6,*) 'EVR:', (E(2,k),k=1,3)
+            write(6,*) 'EVR:', (E(3,k),k=1,3)
             yv = -99999.  !  Identify this as a failed fit for the
 CCC                       !  covariance matrix calculation.
             GO TO 999
@@ -1808,6 +1890,23 @@ CCC                       !  covariance matrix calculation.
         E_inv(3,2)=-(E(1,1)*E(3,2)-E(1,2)*E(3,1))/detE
         E_inv(3,3)=+(E(1,1)*E(2,2)-E(1,2)*E(2,1))/detE
 
+C  Compute E_inv*E to see if the inverse matrix is ok:
+C        do i = 1,3
+C           do j = 1,3
+C              unit(i,j) = 0.0
+C           end do
+C        end do
+C        do i = 1,3
+C           do j = 1,3
+C              do k = 1,3
+C                 unit(i,j) = unit(i,j) + E_inv(i,k)*E(k,j)
+C              end do
+C           end do
+C        end do
+C        write(6,*) 'EVR: E_inv*E=',unit(1,1),unit(1,2),unit(1,3)
+C        write(6,*) 'EVR: E_inv*E=',unit(2,1),unit(2,2),unit(2,3)
+C        write(6,*) 'EVR: E_inv*E=',unit(3,1),unit(3,2),unit(3,3)
+                                                                 
 CC  Load the covariance matrix elements:
 
         cov(1) = E_inv(1,1)
@@ -1822,8 +1921,8 @@ CC  Load the covariance matrix elements:
         if(cov(1) .ge. 0.0) Sigxv = sqrt(cov(1))
         if(cov(3) .ge. 0.0) Sigyv = sqrt(cov(3))
         if(cov(6) .ge. 0.0) Sigzv = sqrt(cov(6))
-        write(6,*) ' Diagonal Errors:', Sigxv,Sigyv,Sigzv
-        write(6,*) ' COV=',cov(1),cov(2),cov(3),cov(4),cov(5),cov(6)
+        write(6,*) 'EVR: Diagonal Errors:', Sigxv,Sigyv,Sigzv
+        write(6,*) 'EVR: COV=',cov(1),cov(2),cov(3),cov(4),cov(5),cov(6)
 999	Return
 	END
 
