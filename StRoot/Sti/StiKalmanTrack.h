@@ -21,6 +21,7 @@
 //Sti
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
+#include "StThreeVectorD.hh"
 //STD
 #include <math.h>
 #include <vector>
