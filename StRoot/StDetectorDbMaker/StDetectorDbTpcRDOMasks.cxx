@@ -71,8 +71,11 @@ StDetectorDbTpcRDOMasks::StDetectorDbTpcRDOMasks(){
     mTable = 0;
 };
 	
-/// Default destructor, does nothing
-StDetectorDbTpcRDOMasks::~StDetectorDbTpcRDOMasks(){};
+/// Default destructor,
+StDetectorDbTpcRDOMasks::~StDetectorDbTpcRDOMasks(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// boolen that returns status of sector and rdo
 /// 1 is on, 0 for off

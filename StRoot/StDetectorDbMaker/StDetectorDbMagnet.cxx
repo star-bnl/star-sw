@@ -159,8 +159,11 @@ unsigned int StDetectorDbMagnet::getRunNumber(){
     return value;
 };
 
-/// Default destructor, does nothing
-StDetectorDbMagnet::~StDetectorDbMagnet(){};
+/// Default destructor
+StDetectorDbMagnet::~StDetectorDbMagnet(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// outputs to ostream the entire class
 ostream& operator<<(ostream& os, StDetectorDbMagnet& v){

@@ -53,8 +53,11 @@ StDetectorDbBeamInfo::StDetectorDbBeamInfo(){
     mTable = 0;
 };
 
-/// Default destructor, does nothing
-StDetectorDbBeamInfo::~StDetectorDbBeamInfo(){};
+/// Default destructor
+StDetectorDbBeamInfo::~StDetectorDbBeamInfo(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 unsigned int StDetectorDbBeamInfo::getRunNumber(){
     unsigned int value = 0;
