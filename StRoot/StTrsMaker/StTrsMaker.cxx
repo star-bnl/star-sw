@@ -1,7 +1,7 @@
-// $Id: StTrsMaker.cxx,v 1.41 1999/10/04 16:09:51 long Exp $
+// $Id: StTrsMaker.cxx,v 1.42 1999/10/04 16:13:14 long Exp $
 //
 // $Log: StTrsMaker.cxx,v $
-// Revision 1.41  1999/10/04 16:09:51  long
+// Revision 1.42  1999/10/04 16:13:14  long
 // minor change on how to loop over geant hits
 //
 //
@@ -217,7 +217,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.41 1999/10/04 16:09:51 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.42 1999/10/04 16:13:14 long Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -369,8 +369,8 @@ Int_t StTrsMaker::Init()
    // set status:
    mChargeTransporter->setChargeAttachment(false); // used to be true
    mChargeTransporter->setGatingGridTransparency(false);
-   mChargeTransporter->setTransverseDiffusion(false);  // used to be true
-   mChargeTransporter->setLongitudinalDiffusion(false); // used to be true
+   mChargeTransporter->setTransverseDiffusion(true);  // used to be true
+   mChargeTransporter->setLongitudinalDiffusion(true); // used to be true
    mChargeTransporter->setExB(false);
 
    if(mUseParameterizedSignalGenerator) {
