@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.16 2003/03/13 21:21:26 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.17 2003/03/14 19:02:20 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.17  2003/03/14 19:02:20  pruneau
+ * various minor updates
+ *
  * Revision 2.16  2003/03/13 21:21:26  pruneau
  * getPhase() fixed. MUST inclde -helicity()*pi/2
  *
@@ -748,37 +751,21 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(StDetectorId detectorId) co
   StiKTNForwardIterator end = it.end();
   //vector<StHit*> hits;
   vector<StiKalmanTrackNode*> nodeVec;
-  while (it!=end) {
-
-    //make sure node has a hit
-    /*
-    const StiKalmanTrackNode * node = &*it;
-    StiHit* hit = node.getHit();
-    if (hit && hit->detector() != NULL && hit->getEloss()>0.) {
-      if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
-	{//Tpc Hit requested and found
-	nodeVec.push_back(node);
-	}
-      else if (detectorId==kSvtId && strstr(hit->detector()->getName().c_str(), "Svt")!=NULL)
-	{//Svt hit requested and found
-	nodeVec.push_back(node);
-	}
-    }
-    */
-    const StiKalmanTrackNode& node = *it;
-    StiHit* hit = node.getHit();
-    if((&node)->getHit()!=hit) TRACKMESSENGER <<"Danger, Will Robinson! Danger!"<<endl;
-    if (hit && hit->detector() != NULL && hit->getEloss()>0.) {
-      if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
-	{//Tpc Hit requested and found
-	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
-	}
-      else if (detectorId==kSvtId && strstr(hit->detector()->getName().c_str(), "Svt")!=NULL)
-	{//Svt hit requested and found
-	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
-	}
-    }
-
+  while (it!=end) 
+    {
+      const StiKalmanTrackNode& node = *it;
+      StiHit* hit = node.getHit();
+      //if((&node)->getHit()!=hit) TRACKMESSENGER <<"Danger, Will Robinson! Danger!"<<endl;
+      if (hit && hit->detector() != NULL && node.getDedx()>0.) {
+	if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
+	  {//Tpc Hit requested and found
+	    nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+	  }
+	else if (detectorId==kSvtId && strstr(hit->detector()->getName().c_str(), "Svt")!=NULL)
+	  {//Svt hit requested and found
+	    nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+	  }
+      }
     ++it;
   }
   
@@ -889,10 +876,10 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	dy=tNode->_p0- localVertex.y();
 	dz=tNode->_p1- localVertex.z();
 	d= sqrt(dx*dx+dy*dy+dz*dz);
-	cout << " dx:"<< dx
+	/*	cout << " dx:"<< dx
 	<< " dy:"<< dy
 	<< " dz:"<< dz
-	<< " d: "<< d<<endl;
+	<< " d: "<< d<<endl;*/
 	_dca = sqrt(dy*dy+dz*dz);
 
       if (chi2<pars->maxChi2Vertex)
