@@ -1,10 +1,13 @@
-  //$Id: St_srs_Maker.cxx,v 1.23 2000/06/23 16:52:41 fisyak Exp $
+//$Id: St_srs_Maker.cxx,v 1.24 2001/04/20 14:36:22 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.24  2001/04/20 14:36:22  caines
+//Added code to do pp pile up
+//
 //Revision 1.23  2000/06/23 16:52:41  fisyak
 //remove params
 //
@@ -20,11 +23,22 @@
 //Revision 1.19  1999/12/23 16:38:48  caines
 //Added cvs ID strings
 //
+
+#include "StDbUtilities/StSvtCoordinateTransform.hh"
+#include "StDbUtilities/StSvtWaferCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
+#include "StMessMgr.h"
 #include "St_srs_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+#include "St_ObjectSet.h"
+#include "TString.h"
+
+#include "StSvtClassLibrary/StSvtConfig.hh"
 #include "svt/St_svg_am_Module.h"
 #include "svt/St_srs_am_Module.h"
+#include "tables/St_g2t_vertex_Table.h"
+#include "tables/St_g2t_track_Table.h"
 ClassImp(St_srs_Maker)
 
 //_____________________________________________________________________________
@@ -43,6 +57,24 @@ St_srs_Maker::~St_srs_Maker(){
 //_____________________________________________________________________________
 Int_t St_srs_Maker::Init(){
 
+  //Get configuration setup
+
+   St_DataSet *dataSet = GetDataSet("StSvtConfig");
+   
+   if (dataSet){
+    setConfig((StSvtConfig*)(dataSet->GetObject()));
+   }
+   else{
+     dataSet = new St_ObjectSet("StSvtConfig");
+     AddConst(dataSet);  
+     mConfig = new StSvtConfig();
+     setConfig("FULL");
+     mConfig->setConfiguration(mConfigString.Data());
+     dataSet->SetObject((TObject*)mConfig);
+     
+   }
+   mCoordTransform =  new StSvtCoordinateTransform();
+
 // 		Create tables
    St_DataSetIter       local(GetInputDB("svt"));
 
@@ -51,6 +83,7 @@ Int_t St_srs_Maker::Init(){
    m_shape       = (St_svg_shape   *) local("svgpars/shape");
    m_config      = (St_svg_config  *) local("svgpars/config");
    m_geom        = (St_svg_geom    *) local("svgpars/geom");
+
    if (!m_geom) {
      if (!(m_shape && m_config)){
        cout << " St_params_Maker:tpg_pad_plane or tpg_detector do not exist" << endl;
@@ -120,6 +153,11 @@ Int_t St_srs_Maker::Make()
     
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
+  g2t_svt_hit_st *GeantHit = g2t_svt_hit->GetTable();
+  St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) geant("g2t_vertex");
+  g2t_vertex_st *GeantVertex = g2t_vertex->GetTable(); 
+  St_g2t_track *g2t_track = (St_g2t_track *) geant("g2t_track");
+  g2t_track_st *GeantTrack = g2t_track->GetTable(); 
   if (g2t_svt_hit ) {
     
     res =  srs_am (srs_result,  g2t_svt_hit, scs_spt,
@@ -128,14 +166,54 @@ Int_t St_srs_Maker::Make()
     if(res!=kSTAFCV_OK) return kStWarn;
     if (Debug()) m_DataSet->ls("*");
   }
+
+
+  srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
+  svg_shape_st* mSvtShape  = m_shape->GetTable();
+  svg_geom_st* mSvtGeom   = m_geom->GetTable();
+
+  mCoordTransform->setParamPointers(mSvtSrsPar, mSvtGeom, mSvtShape, mConfig);
+
+  int MaxTimeBucket = (int)(3.*mSvtSrsPar[0].fsca/mSvtSrsPar[0].vd);
+  StSvtWaferCoordinate WaferCoord;
+  StGlobalCoordinate GlobalCoord;
+  int VertexId;
+  double TimeBucketShift;
   
-//		Fill histograms
+//		Fill histograms and cope with pile up events
 
   if( scs_spt->GetNRows()){
 
     scs_spt_st  *spc   = scs_spt->GetTable();
     for (Int_t i = 0; i < scs_spt->GetNRows(); i++,spc++){
-
+      
+      if( spc->id_wafer < 7000){
+	
+	VertexId=GeantTrack[spc->id_mctrack-1].start_vertex_p-1;
+	TimeBucketShift =  GeantVertex[VertexId].ge_tof*mSvtSrsPar[0].fsca;
+	// Shuffle space points if a pile up event
+	GlobalCoord.position().setX(spc->x[0]);
+	GlobalCoord.position().setY(spc->x[1]);
+	GlobalCoord.position().setZ(spc->x[2]);
+	//cout << GlobalCoord ;
+	mCoordTransform->operator()(GlobalCoord,WaferCoord);
+	WaferCoord.setTimeBucket(WaferCoord.timebucket()+TimeBucketShift);
+	if( WaferCoord.timebucket() < 0. || WaferCoord.timebucket() > MaxTimeBucket){
+	  spc->flag = -77;
+	  gMessMgr->Warning() << " Moved hit off of wafer" << endl;
+	  continue;
+	}
+	else{
+	  mCoordTransform->operator()(WaferCoord,GlobalCoord);
+	  // cout << GlobalCoord << endl;
+	  
+	  if( GlobalCoord.position().x() < -99){
+	    spc->flag = -77;
+	    cout << " Moved hit off of wafer" << endl;
+	    continue;
+	  }
+	}
+      }
       int lader = spc->id_wafer -((int)spc->id_wafer/1000)*1000;
       lader = lader -(int)(lader/100)*100;
       float ladder = (float) lader;
@@ -173,3 +251,20 @@ Int_t St_srs_Maker::Make()
 }
 //_____________________________________________________________________________
 
+//_____________________________________________________________________________
+
+Int_t St_srs_Maker::setConfig(StSvtConfig* config)
+{
+  mConfigString = TString(config->getConfiguration());
+  mConfig = config;
+  return kStOK;
+}
+//_____________________________________________________________________________
+
+Int_t St_srs_Maker::setConfig(const char* config)
+{
+
+  gMessMgr->Message() <<"St_srs_Maker:Setting configuration to "<< config << endm;
+  mConfigString = config;
+  return kStOK;
+}
