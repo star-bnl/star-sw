@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.10 1999/02/09 19:14:50 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.11 1999/02/12 02:50:31 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.11  1999/02/12 02:50:31  fisyak
+# Fix St_Tables, single module
+#
 # Revision 1.10  1999/02/09 19:14:50  fisyak
 # Add objy
 #
@@ -242,4 +245,4 @@ ifdef NT
 BIN_DIR := $(SYS_DIR)/bin
 endif
 
-STAR_OBJ_DIR := $(STAR)/obj/$(PKG)
+STAR_OBJ_DIR := $(STAR)/.$(STAR_HOST_SYS)/obj/$(PKG)

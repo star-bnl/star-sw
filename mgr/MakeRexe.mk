@@ -1,4 +1,9 @@
-#  Make STAF (STAR) executable
+# $Id: MakeRexe.mk,v 1.11 1999/02/12 02:50:33 fisyak Exp $
+# $Log: MakeRexe.mk,v $
+# Revision 1.11  1999/02/12 02:50:33  fisyak
+# Fix St_Tables, single module
+#
+#  Make root4star executable
 
 ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
@@ -38,9 +43,9 @@ FSL := $(FOR72) $(FFLAGS)   $(CPPFLAGS)   $(SOFLAGS)
 
 
 #	OUT dirs
-OBJ_DIR := $(OUT_DIR)/.$(STAF_ARCH)/obj/rexe
-DEP_DIR := $(OUT_DIR)/.$(STAF_ARCH)/dep/rexe
-EXE_DIR := $(OUT_DIR)/.$(STAF_ARCH)/bin
+OBJ_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)/obj/rexe
+DEP_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)/dep/rexe
+EXE_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)/bin
 check   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR)) 
 check   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR)) 
 check   := $(shell test -d $(EXE_DIR) || mkdir -p $(EXE_DIR)) 
@@ -79,6 +84,16 @@ INCL  := $(addprefix -I,$(INCL))
 
 #STAF  = YES
 CCload = YES
+
+# static linking of SCL and StEvent needed with current Solaris compiler
+ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
+  STEVENT_OBJS =  $(wildcard $(STAR)/.$(STAR_HOST_SYS)/obj/StSclRoot/*.o \
+$(STAR)/.$(STAR_HOST_SYS)/obj/StSclRoot/Templates.DB/*.o) $(wildcard \
+$(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/*.o \
+$(STAR)/.$(STAR_HOST_SYS)/obj/StEvent/Templates.DB/*.o)
+else
+  STEVENT_OBJS = 
+endif
 
 
 
@@ -120,8 +135,8 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 
 
 
-root4star: $(FILES_O)
-	$(DOEXE)  $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
+root4star: $(FILES_O) $(STEVENT_OBJS)
+	$(DOEXE) $(STEVENT_OBJS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 #
 #
@@ -195,7 +210,7 @@ show:
 	@echo INP_DIR=$(INP_DIR)
 	@echo OUT_DIR=$(OUT_DIR)
 	@echo CC=$(CC)
-	@echo STAF_ARCH=$(STAF_ARCH)
+	@echo STAR_HOST_SYS=$(STAR_HOST_SYS)
 	@echo FILES_O=$(FILES_O)
 	@echo FILES_D=$(FILES_D)
 	@echo NAMES_O=$(NAMES_O)

@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.62 1999/02/10 14:12:42 fisyak Exp $
+# $Id: MakeDll.mk,v 1.63 1999/02/12 02:50:30 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.63  1999/02/12 02:50:30  fisyak
+# Fix St_Tables, single module
+#
 # Revision 1.62  1999/02/10 14:12:42  fisyak
 # Turn on StEventReaderMaker and StTrsMaker
 #
@@ -128,7 +131,8 @@ endif
 #	Includes
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StSclRoot) StRoot .share .share/tables pams inc 
+INC_NAMES := $(addprefix StRoot/,St_base StChain xdf2root StSclRoot) \
+              StRoot .share .share/tables .share/$(PKG) pams inc 
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
@@ -137,7 +141,8 @@ INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
 INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/src
 
-INCINT := $(INC_DIRS)
+INCINT := $(INC_DIRS) 
+#INCINT := $(wildcard $(ROOTSYS)/cint/stl) $(INC_DIRS)
 ifdef NT
 INC_DIRS := $(INC_DIRS) $(SUNRPC)
 endif
@@ -244,6 +249,9 @@ endif
 ifdef FILES_MOD
   NAMES_MOD      := $(subst _Module,,$(subst St_,,$(basename $(notdir $(FILES_MOD)))))
   FILES_MOD_H    := $(addprefix $(SRC_DIR)/St_,$(addsuffix _Module.h,$(NAMES_MOD)))
+  STAR_SRC       := $(subst $(ROOT_DIR),$(STAR),$(SRC_DIR))
+  FILES_MOD_HS   := $(wildcard $(STAR_SRC)/St_*_Module.h)
+  NAMES_MOD_HS   := $(subst _Module,,$(subst St_,,$(basename $(notdir $(FILES_MOD_HS)))))
   FILES_CINT_MOD := $(addprefix $(GEN_DIR)/St_,$(addsuffix _ModuleCint.cxx,$(NAMES_MOD)))
   FILES_CINT_MOD :=$(GEN_DIR)/$(PKG)_Cint.cxx
   FILES_H        := $(filter-out $(FILES_MOD_H), $(FILES_H))
@@ -290,9 +298,9 @@ FILES_CINTH:= $(subst .cxx,.h,$(FILES_CINT))
 FILES_CINT += $(FILES_CINT_ORD) $(FILES_CINT_DEF) $(FILES_CINT_MOD)  
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .$(O), $(notdir $(basename $(FILES_SRC) $(FILES_ORD) $(FILES_CINT)))))
 FILES_O := $(sort $(FILES_O))
-STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/*.$(O))
-FILTER  := $(addprefix %/,$(notdir $(FILES_O)))
-STAR_FILES_O := $(filer-out $(FILTER),$(STAR_FILES_O))
+STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Module*.$(O) $(STAR_OBJ_DIR)/St_*Table*.$(O) $(STAR_OBJ_DIR)/*Cint.$(O))
+FILTER  := $(addprefix  $(STAR_OBJ_DIR)/,$(notdir $(FILES_O)))
+STAR_FILES_O := $(filter-out $(FILTER),$(STAR_FILES_O))
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_O)))))
 
 ifeq (,$(FILES_O))
@@ -389,16 +397,17 @@ else
 	$(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF))
 endif
 
-$(FILES_CINT_MOD) : $(FILES_MOD_H)
+$(FILES_CINT_MOD) : $(FILES_MOD_H) $(FILES_MOD_HS)
 	$(COMMON_LINKDEF)
-	@for p in $(NAMES_MOD); do echo "#pragma link C++ class St_$${p}-;" >> $(LINKDEF) ; \
-                                   echo "#pragma link C++ global   $${p};" >> $(LINKDEF) ; \
-                                done
+	@for p in $(NAMES_MOD) $(NAMES_MOD_HS);\
+         do echo "#pragma link C++ class St_$${p}-;" >> $(LINKDEF) ; \
+            echo "#pragma link C++ global   $${p};" >> $(LINKDEF) ; \
+         done
 	@echo "#endif"                                  >> $(LINKDEF);
 	@$(CAT) $(LINKDEF);
 ifndef NT
 	cd $(GEN_DIR); \
-        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
+        $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(sort $(notdir $(FILES_MOD_H) $(FILES_MOD_HS))) $(notdir $(LINKDEF))
 else
 	pushd $(subst /,\\,$(subst \,/,$(GEN_DIR) & )) \
         $(ROOTCINT) -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT -D__ROOT__ $(INCINT) $(notdir $(FILES_MOD_H)) $(notdir $(LINKDEF))
@@ -410,14 +419,15 @@ Libraries : $(MY_SO)
 
 ifndef NT
 
-$(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.o)
+$(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))  $(STAR_FILES_O)
+
 ifneq ($(STAR_SYS),hp_ux102)   
 	cd $(OBJ_DIR); \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS) $(LIBRARY); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS)  $(LIBRARY); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 else  # hp_ux102
 	cd $(OBJ_DIR); \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) *.o $(LIBRARY); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) *.$(O) $(LIBRARY); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 endif # hp_ux102
 else # NT
@@ -486,14 +496,14 @@ ifndef NT
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
-$(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
+$(OBJ_DIR)/%.$(O):%.g $(GEN_DIR)/geant3.def
 	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
-$(OBJ_DIR)/%.o: %.F
-	$(FC)  $(CPPFLAGS)  $(INCLUDES) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
-	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).o; $(RM) $(OBJ_DIR)/$(STEM).o
+$(OBJ_DIR)/%.$(O): %.F
+	$(FC)  $(CPPFLAGS)  $(INCLUDES) $(FFLAGS) $(FEXTEND)   -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).$(O)
+	$(AR) $(ARFLAGS) $(LIB_PKG) $(OBJ_DIR)/$(STEM).$(O); $(RM) $(OBJ_DIR)/$(STEM).$(O)
 endif #/* NT */
-$(OBJ_DIR)/%.o: %.cdf
+$(OBJ_DIR)/%.$(O): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
 include $(STAR_MAKE_HOME)/MakeDep.mk
 endif
@@ -597,3 +607,8 @@ endif #/* NT */
 	@echo QWE         := "|"$(QWE)"|"
 	@echo NQWE        := $(NQWE)
 	@echo LIBRARY     := $(LIBRARY)
+	@echo STAR_OBJ_DIR:= $(STAR_OBJ_DIR)
+	@echo STAR_FILES_O:= $(STAR_FILES_O)
+	@echo FILES_MOD_HS:= $(FILES_MOD_HS)
+	@echo STAR_SRC    := $(STAR_SRC)
+	@echo NAMES_MOD_HS:= $(NAMES_MOD_HS)
