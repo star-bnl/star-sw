@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.23 2000/06/27 07:28:07 levine Exp $
+ * $Id: EventReader.cxx,v 1.24 2000/08/28 22:19:12 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.24  2000/08/28 22:19:12  ward
+ * Skip corrupted events. StDaqLib/GENERIC/EventReader.cxx & StDAQMaker/StDAQReader.cxx.
+ *
  * Revision 1.23  2000/06/27 07:28:07  levine
  * changed EventInfo access functions to fill in, print Token
  *
@@ -710,4 +713,103 @@ void EventReader::fprintError(int err, char *file, int line, char *userstring)
   if (err<0 || err>MX_MESSAGE) return; //protect against bad error code
   fprintf(logfd,"%s  %s::%d   %s\n",err_string[err-1],file,line,userstring);
   fflush(logfd);
+}
+
+///////// Stuff below here is from Herb Ward, Aug 28 2000,  /////////////////////////////////
+///////// for detection of corruption in .daq files. www   //////////////////////////////////
+#define PP printf(
+char EventReader::eventIsCorrupted(int herbFd,long offset) {
+  char returnValue;
+  offset+=60; // Skip the LRHD, and go directly to DATAP.
+  strcpy(mLastBank,"???"); mWordIndex=-1;
+  returnValue = BankOrItsDescendentsIsBad(herbFd,offset);
+  if(returnValue) {
+    PP"StDaqLib/EventReader::eventIsCorrupted: bank pointed to by data word %d of bank %s.\n",mWordIndex+1,mLastBank);
+  }
+  return returnValue;
+}
+char *EventReader::ConvertToString(unsigned long  *input) {
+  static char rv[20];
+  char *cc,*dd;
+  cc=(char*)input;
+  dd=rv;
+  while(isupper(*cc)||isdigit(*cc)||*cc=='_') *(dd++)=*(cc++); *dd=0;
+  if(strlen(rv)>10) { PP"What?\n"); exit(2); }
+  return rv;
+}
+void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
+  *beg=-123; *end=-123;
+  assert(strcmp(xx,  "TPCMZP"));
+  if(!strcmp(xx,   "DATAP")) { *beg=7; *end=26; }
+  if(!strcmp(xx,    "RICP")) { *beg=1; *end=36; }
+  if(!strcmp(xx,"RICCRAMP")) { *beg=1; *end=16; }
+  if(!strcmp(xx,    "TRGP")) { *beg=1; *end= 2; }
+  if(!strcmp(xx,    "TPCP")) { *beg=1; *end=48; }
+  if(!strcmp(xx, "TPCSECP")) { *beg=1; *end=24; }
+  if(!strcmp(xx,  "TPCRBP")) { *beg=1; *end= 6; }
+  if(!strcmp(xx,"L3_SECTP")) { *beg=9; *end=14; }
+  if(!strcmp(xx, "L3_SECP")) { *beg=6; *end=11; }
+  if(!strcmp(xx,    "L3_P")) { *beg=6; *end=57; }
+  (*beg)--; (*end)--;
+  if((*beg)<0||(*end)<0) {
+    printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
+    *beg=0; *end=0; return;
+  }
+  if(*beg>=*end) assert(0);
+  if((*end-*beg)%2!=1) assert(0);
+}
+void EventReader::Swap4(ulong *data) {
+  char *hh,temp[4];
+  hh=(char*)data;
+  temp[0]=hh[3]; temp[1]=hh[2]; temp[2]=hh[1]; temp[3]=hh[0];
+  *data=*((ulong*)temp);
+}
+#define DATA 400 /* number of words */
+/* comment 12c  It is not a pointer bank.  We've already looked at the header, that's all we can do
+for a generic bank. */
+char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // Boolean value.
+  ulong header[10],data[DATA];
+  char doTheByteSwap=FALSE,lastletter,bankname[25];
+  int i,beg,end,numberOfDataWords,bytesRead;
+
+
+  if(lseek(herbFd,currentOffset,SEEK_SET)!=currentOffset) return TRUE;
+  bytesRead=read(herbFd,header,10*sizeof(ulong));
+  if(bytesRead!=10*sizeof(ulong)) return TRUE;
+
+  strcpy(bankname,ConvertToString(header));
+  // PP"BBB bankname = %s\n",bankname);
+  if(strlen(bankname)<3) return TRUE;
+  lastletter=bankname[strlen(bankname)-1];
+
+  if(header[5]==0x01020304) doTheByteSwap=TRUE; else if(header[5]!=0x04030201) return TRUE;
+
+  /* KEEP ALL CHECKS OF THE HEADER ABOVE THIS LINE. see comment 12c */
+
+  if(lastletter!='P') return FALSE; /* see comment 12c */
+
+  if(doTheByteSwap) for(i=0;i<10;i++) Swap4(header+i);
+  assert(header[5]==0x04030201); /* We have enought corruption checks above that this shouldn't happen. */
+
+  numberOfDataWords=header[2]-10; assert(numberOfDataWords<=DATA);
+  if(!strcmp(bankname,"TPCMZP")) { beg=0; end=numberOfDataWords-1; }
+  else WhereAreThePointers(&beg,&end,bankname); 
+  assert(end<=numberOfDataWords);
+
+
+  bytesRead=read(herbFd,data,numberOfDataWords*sizeof(ulong));
+  if(bytesRead!=numberOfDataWords*sizeof(ulong)) return TRUE;
+  if(doTheByteSwap) for(i=0;i<numberOfDataWords;i++) Swap4(data+i);
+
+  if(!strcmp(bankname,"TPCMZP")) {
+    if(data[5]!=0&&(data[1]==0||data[3]==0)) return TRUE; /* TPCADCX should be present only if SEQD & ADCD are too. */
+  }
+
+  for(i=beg;i<end;i+=2) {
+    if(data[i+1]==0) continue; /* len is 0 */
+    strncpy(mLastBank,bankname,25);
+    mWordIndex=i; // mWordIndex is 1 off from the DAQ Data Format document (starts from 0 instead of 1).
+    if(BankOrItsDescendentsIsBad(herbFd,4*data[i]+currentOffset)) return TRUE;
+  }
+  return FALSE;
 }

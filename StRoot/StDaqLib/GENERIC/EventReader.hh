@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.11 2000/06/27 07:27:25 levine Exp $
+ * $Id: EventReader.hh,v 1.12 2000/08/28 22:19:12 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,6 +21,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.12  2000/08/28 22:19:12  ward
+ * Skip corrupted events. StDaqLib/GENERIC/EventReader.cxx & StDAQMaker/StDAQReader.cxx.
+ *
  * Revision 1.11  2000/06/27 07:27:25  levine
  * Added Token to EventInfo struct
  *
@@ -420,6 +423,7 @@ public:
   char err_string[MX_MESSAGE][30];
 
   int MemUsed();              
+  char eventIsCorrupted(int fdes,long offsetInFile); // Herb, Aug 28 2000
 
 protected:
   char *DATAP;             // Pointer to the memory mapped buffer
@@ -442,6 +446,12 @@ private:
   int errnum;
   char errstr0[250];
   int runnum;
+  char *ConvertToString(unsigned long  *input); // Herb, Aug 28 2000
+  void WhereAreThePointers(int *beg,int *end,char *xx); // Herb, Aug 28 2000
+  void Swap4(ulong *data); // Herb, Aug 28 2000
+  char BankOrItsDescendentsIsBad(int fd,long currentOffset); // Herb, Aug 28 2000
+  char mLastBank[30]; //!
+  int mWordIndex; //!
   // later storage for detector buffers
 };
 
