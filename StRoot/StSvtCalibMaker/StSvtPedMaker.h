@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.h,v 1.4 2003/09/10 19:47:34 perev Exp $
+ * $Id: StSvtPedMaker.h,v 1.5 2003/12/01 00:19:43 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.h,v $
+ * Revision 1.5  2003/12/01 00:19:43  caines
+ * Version of pedestal maker to go with EMbedding
+ *
  * Revision 1.4  2003/09/10 19:47:34  perev
  * ansi corrs
  *
@@ -43,6 +46,7 @@ class StSvtHybridPixels2;
 class StSvtHybridCollection;
 class StSvtHybridData;
 class StSvtData;
+class StSvtConfig;
 
 class StSvtPedMaker : public StMaker {
  private:
@@ -63,6 +67,8 @@ class StSvtPedMaker : public StMaker {
   TObjectSet           *fPedSet2;   //! 
   TObjectSet           *fPedRmsSet;     //! 
 
+  StSvtConfig                  *mConfig; //!
+
   pedestalType fType;  //!                 
 
  protected:
@@ -73,6 +79,7 @@ class StSvtPedMaker : public StMaker {
   Int_t  SetType(pedestalType option);
   pedestalType  GetType(){return fType;}
 
+  virtual Int_t  getConfig();
   virtual Int_t  SetSvtData();
   virtual Int_t  SetSvtPed();
   virtual Int_t  SetSvtPed2ndOrd();
@@ -91,7 +98,7 @@ class StSvtPedMaker : public StMaker {
   virtual Int_t  ResetPed();
   virtual Int_t  Finish();
   virtual void   PrintInfo();
-  ClassDef(StSvtPedMaker,0)   //StAF chain virtual base class for Makers
+  ClassDef(StSvtPedMaker,2)   //StAF chain virtual base class for Makers
 };
 
 #endif
