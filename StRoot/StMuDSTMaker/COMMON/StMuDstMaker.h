@@ -1,1114 +1,328 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.36 2004/09/18 01:30:19 jeromel Exp $
+ * $Id: StMuDstMaker.h,v 1.37 2004/09/18 20:35:09 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
- *
- **************************************************************************/
-#include "TRegexp.h"
-#include "Stiostream.h"
-#include "Stsstream.h"
-#include "StChain.h"
-#include "StEvent/StEvent.h"
-#include "StEvent/StTrack.h"
-#include "StEvent/StTrackNode.h"
-#include "StEvent/StRichSpectra.h"
-#include "StEvent/StDetectorState.h"
-#include "StEvent/StEventTypes.h"
-#include "StEvent/StRunInfo.h"
-#include "StEvent/StEventInfo.h"
+ ***************************************************************************/
+#ifndef StMuDstMaker_hh
+#define StMuDstMaker_hh
 
-#include "StEventUtilities/StuRefMult.hh"
-#include "StEventUtilities/StuProbabilityPidAlgorithm.h"
+#include <string>
 
-#include "StarClassLibrary/StPhysicalHelixD.hh"
-#include "StarClassLibrary/StTimer.hh"
-
-#include "StIOMaker/StIOMaker.h"
-#include "StTreeMaker/StTreeMaker.h"
-
-#include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
-#include "StStrangeMuDstMaker/StStrangeEvMuDst.hh"
-#include "StStrangeMuDstMaker/StV0MuDst.hh"
-#include "StStrangeMuDstMaker/StV0Mc.hh"
-#include "StStrangeMuDstMaker/StXiMuDst.hh"
-#include "StStrangeMuDstMaker/StXiMc.hh"
-#include "StStrangeMuDstMaker/StKinkMuDst.hh"
-#include "StStrangeMuDstMaker/StKinkMc.hh"
-#include "StStrangeMuDstMaker/StStrangeCuts.hh"
-
-
-#include "StMuException.hh"
-#include "StMuEvent.h"
-#include "StMuTrack.h"
-#include "StMuDebug.h"
-#include "StMuCut.h"
-#include "StMuFilter.h"
-#include "StMuL3Filter.h"
-#include "StMuChainMaker.h"
-#include "StMuEmcCollection.h"
-#include "StMuEmcUtil.h"
-#include "StMuPmdCollection.h"
-#include "StMuPmdUtil.h"
-#include "StMuTofHit.h"
-#include "StMuTofHitCollection.h"
-#include "StMuTofUtil.h"
-
-#include "StMuDstMaker.h"
-#include "StMuDst.h"
-
-#include "TFile.h"
-#include "TTree.h"
-#include "TClass.h"
-#include "TChain.h"
-#include "TStreamerInfo.h"
-#include "TClonesArray.h"
-
-#include "THack.h"
-ClassImp(StMuDstMaker)
-
-#if !(ST_NO_NAMESPACES)
-  using namespace units;
+#ifndef ST_NO_NAMESPACES
+using namespace std;
 #endif
 
+#include "StMaker.h"
+#include "StChain.h"
+#include "StIOInterFace.h"
+#include "St_DataSetIter.h"
 
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
+#include "StMuArrays.h"
+
+#include "StMuFilter.h"
+#include "StMuL3Filter.h"
+
+
+class StMuEvent;
+class StMuDst;
+class StMuCut;
+
+class StEvent;
+class StTrackNode;
+class StTrack;
+class StRichSpectra;
+class StDetectorState;
+class StL3AlgorithmInfo;
+
+class StuProbabilityPidAlgorithm;
+
+class StIOMaker;
+class StTreeMaker;
+
+/// strangeness group stuff
+class StStrangeEvMuDst;
+class StStrangeMuDstMaker;
+class StV0MuDst;
+class StV0Mc;
+class StXiMuDst;
+class StXiMc;
+class StKinkMuDst;
+class StKinkMc;
+class StStrangeAssoc;
+class StStrangeCuts;
+
+
+
+/// emc stuff
+#include "StMuEmcCollection.h"
+class StMuEmcUtil;
+
+/// PMD by Supriya Das
+#include "StMuPmdCollection.h"
+class StMuPmdUtil;
+
+// tof stuff
+class StMuTofHit;
+class StMuTofHitCollection;
+class StTofCollection;
+class StTofDataCollection;
+class StMuTofUtil;
+
+class TFile;
+class TTree;
+class TChain;
+class TClonesArray;
+
 /**
-   The default constructor as it is right now was written in order to run
-   the StMuDstMaker during reconstruction in the bfc.
-   Since the PID table that is needed for muDst production is not passed as
-   an argument to the bfc, this default constructor
-   sets a specific PID table. This table has to be updated when changing to
-   a new production version.
-   Also, the standard track and l3 track filters are set.
- */
-StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
-  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
-  mIOMaker(0), mTreeMaker(0),
-  mIoMode(1), mIoNameMode((int)ioTreeMaker),
-  mTrackType(256), mReadTracks(1),
-  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mTrackFilter(0), mL3TrackFilter(0),
-  mCurrentFile(0),
-  mChain (0), mTTree(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4),
-  mProbabilityPidAlgorithm(0)
-{
-  assignArrays();
+   \class StMuDstMaker
 
-  mDirName="./";
-  mFileName="";
-  streamerOff();
-  zeroArrays();
-  if (mIoMode==ioRead) openRead();
-  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
+   Class to create and read STAR's common micro dst (StMuDst)
 
-  mEventCounter=0;
-  mStMuDst = new StMuDst();
-  mEmcUtil = new StMuEmcUtil();
-  mPmdUtil = new StMuPmdUtil();
-  mTofUtil = new StMuTofUtil();
-  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil  || ! mTofUtil )
-    throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
+   This class is a true maker in the STAR sense. It inherits from "StMaker" and implements
+   the functions "int Init()", "void Clear()", int Make()", and "int Finish()" in order to
+   run as part of an "StChain". Please refer to the STAR Computing Web pages in case you do
+   not know what "StMaker" and "StChain" mean.
 
-
-  createArrays();
-
-
-  setProbabilityPidFile();
-  StMuL3Filter* l3Filter = new StMuL3Filter(); setL3TrackFilter(l3Filter);
-  StMuFilter* filter = new StMuFilter();       setTrackFilter(filter);
-  FORCEDDEBUGMESSAGE("ATTENTION: use standard MuFilter");
-  FORCEDDEBUGMESSAGE("ATTENTION: use standard l3 MuFilter");
-
-
-}
-
-/*!
- * This method assigns individual TCloneArrays location from one
- * big global one. Dirty init MUST follow the order in StMuArrays.
- * This allows for block initialization/zeroing without problems
- * or side effects such as the one cause by array boundary overwrite
- * if the first TClone in a list of declared variables is used.
- */
-void StMuDstMaker::assignArrays()
-{
-  mArrays         = mAArrays       + 0;
-  mStrangeArrays  = mArrays        + __NARRAYS__;
-  mEmcArrays      = mStrangeArrays + __NSTRANGEARRAYS__;
-  mPmdArrays      = mEmcArrays     + __NEMCARRAYS__;
-  mTofArrays      = mPmdArrays     + __NPMDARRAYS__;
-}
-
-void StMuDstMaker::zeroArrays()
-{
-  memset(mAArrays,0,sizeof(void*)*__NALLARRAYS__);
-  memset(mStatusArrays,(char)1,sizeof(mStatusArrays) ); //default all ON
-
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-/*!
-  Selecting SetBranchStatus for particular MuDst branches
-  Special names:
-   MuEventAll - all branches related to StMuEvent
-   StrangeAll - all branches related to StrangeMuDst
-   EmcAll     - all branches related to Emc
-   PmdAll     - all branches related to Pmd
-   TofAll     - all branches related to Tof
-
-  By default all branches of MuDst are read. If user wants to read only some of
-  them, then:
-   SetStatus("*",0)           // all branches off
-   SetStatus("MuEventAll",1)  // all standard MuEvent branches ON
-   SetStatus("StrangeAll",1)  // all standard Strange branches ON
-   SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
-   SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
-   SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
-
-   SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON
-
-  Names of branches look StMuArrays::arrayTypes[]
 */
-void StMuDstMaker::SetStatus(const char *arrType,int status)
-{
-  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll", 0};
-  static const int   specIndex[]={
-    0,
-    __NARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
-    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
-    -1};
-
-  if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
-  for (int i=0;specNames[i];i++) {
-    if (strcmp(arrType,specNames[i])) continue;
-    char *sta=mStatusArrays+specIndex[i];
-    int   num=specIndex[i+1]-specIndex[i];
-    memset(sta,status,num);
-    printf("StMuDstMaker::SetStatus %d to %s\n",status,specNames[i]);
-    return;
-  }
-
-  TRegexp re(arrType,1);
-  for (int i=0;i<__NALLARRAYS__;i++) {
-    Ssiz_t len;
-    if (!re.Index(StMuArrays::arrayTypes[i],&len))	continue;
-    printf("StMuDstMaker::SetStatus %d to %s\n",status,StMuArrays::arrayTypes[i]);
-    mStatusArrays[i]=status;
-  }
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const char* fileName, const char* filter, int maxFiles, const char* name) : StIOInterFace(name),
-  mStEvent(0), mStMuDst(0), mStStrangeMuDstMaker(0),
-  mIOMaker(0), mTreeMaker(0),
-  mIoMode(mode), mIoNameMode(nameMode),
-  mDirName(dirName), mFileName(fileName), mFilter(filter), mMaxFiles(maxFiles),
-  mTrackType(256), mReadTracks(1),
-  mReadV0s(1), mReadXis(1), mReadKinks(1), mFinish(0),
-  mTrackFilter(0), mL3TrackFilter(0),
-  mSplit(99), mCompression(9), mBufferSize(65536*4),
-  mProbabilityPidAlgorithm(0)
-{
-  assignArrays();
-  streamerOff();
-  zeroArrays();
-  if (mIoMode==ioRead) openRead();
-  if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
-
-  setProbabilityPidFile();
-
-  mEventCounter=0;
-  mStMuDst = new StMuDst();
-  mEmcUtil = new StMuEmcUtil();
-  mPmdUtil = new StMuPmdUtil();
-  mTofUtil = new StMuTofUtil();
-
-  createArrays();
-
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StMuDstMaker::~StMuDstMaker() {
-  DEBUGMESSAGE1("");
-  clear(999);
-  delete mStMuDst;
-  delete mTofUtil;
-  DEBUGMESSAGE3("after arrays");
-  saveDelete(mProbabilityPidAlgorithm);
-  saveDelete(mTrackFilter);
-  saveDelete(mL3TrackFilter);
-  DEBUGMESSAGE3("after filter");
-  if (mIoMode== ioWrite ) closeWrite();
-  if (mIoMode== ioRead ) closeRead();
-  DEBUGMESSAGE3("after close");
-  saveDelete(mChain);
-//VP  saveDelete(mTTree);
-  DEBUGMESSAGE3("out");
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-/** Switch of the TObject part of some streamers, so that only the
-    datTClonesamenbers of the derived classes are written to disk, but not
-    the data members of the base class TObject
-*/
-void  StMuDstMaker::streamerOff() {
-  StStrangeMuDst::Class()->IgnoreTObjectStreamer();
-  StV0MuDst::Class()->IgnoreTObjectStreamer();
-  StXiMuDst::Class()->IgnoreTObjectStreamer();
-  StKinkMuDst::Class()->IgnoreTObjectStreamer();
-  StV0Mc::Class()->IgnoreTObjectStreamer();
-  StXiMc::Class()->IgnoreTObjectStreamer();
-  StKinkMc::Class()->IgnoreTObjectStreamer();
-  StMuTrack::Class()->IgnoreTObjectStreamer();
-  StMuHelix::Class()->IgnoreTObjectStreamer();
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::createArrays() {
-  /// all stuff
-  for ( int i=0; i<__NALLARRAYS__; i++) {
-    DEBUGVALUE2(mAArrays[i]);
-    clonesArray(mAArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
-    DEBUGVALUE2(mAArrays[i]);
-  }
-  mStMuDst->set(this);
-  // commecnted to include tof again (subhasis)
-  // mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::clear(int del){
-  DEBUGMESSAGE2("");
-  /// from muDst
-  int dell = 1; if (del) dell = 999;
-
-  for ( int i=0; i<__NALLARRAYS__; i++) {
-    clear(mAArrays[i],StMuArrays::arrayCounters[i],dell);
-  }
-  DEBUGMESSAGE2("out");
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
-{
-//	del == 0 : objects are flat, standard Clear()
-//	del == 1 : objects are complex, destructor must be called
-//      del >  1 : all objects(hidden too)  must be destroed
-//  complexity of this clear related to complexity of using TClonesArray
-//  in TTree. Othervice leak as a punishment.
-
-  enum { kRea=0, kWrt=1,kDel=2,kDtr=4};
-  DEBUGMESSAGE3("");
-  counter=0;
-  if (!t)  	      return;
-  int kase = 0;
-  if (mIoMode==ioWrite) kase |= kWrt;
-  if (del    ==1      ) kase |= kDel;
-  if (del     >1      ) kase |= kDtr;
-
-  switch (kase) {
-
-  case 0:
-       t->Clear();    break;
-
-  case kWrt:
-  case kWrt|kDel:
-       t->Delete();   break;
-
-  case kWrt|kDtr:
-       delete t; t=0; break;
-
-  case kRea|kDel:
-       THack::ClearClonesArray(t);
-       break;
-
-  case kRea|kDtr:
-       THack::DeleteClonesArray(t);
-       t = 0;
-       break;
-  default: assert(0);
-  }
-
-  DEBUGMESSAGE3("out");
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-TClonesArray* StMuDstMaker::clonesArray(TClonesArray*& p, const char* type, int size, int& counter) {
-  DEBUGMESSAGE2("");
-  if (p) return p;
-  DEBUGVALUE2(type);
-  p = new TClonesArray(type, size);
-  counter=0;
-  return p;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-/**
-   The Init() routine is used to establish contact to other makers. As it is STAR
-   habit (but really really bad coding) we identify the
-   other makers by names (instead of passing pointers). Here, the names are
-   hard-wired because they have to be identical to the names
-   the bfc is assining to the makers. Do not alter these names unless you know
-   what you are doing.
-*/
-int StMuDstMaker::Init(){
-  DEBUGMESSAGE2("");
-  mIOMaker = (StIOMaker*)GetMaker("IOMaker");
-  mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
-  mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
-  TObjectSet *muDstSet =  AddObj(mStMuDst,".const");   ///< added for Valeri to be able to pick it up in other makers
-  if (muDstSet ) muDstSet ->SetName("muDst");          ///< added for Valeri to be able to pick it up in other makers
-
-  return 0;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::Clear(const char *){
-  DEBUGMESSAGE2("");
-  clear();
-  DEBUGMESSAGE3("out");
-}
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-/**
-   Depending on ioMode, calling Make() will initiate the StMuDstMaker to read or
-   write the next event. After the Make() function has finished,
-   a call to muDst() will return a pointer to an object od type StMuDst. This object
-   will hold the current event if the io was successful, or return a null pointer.
-*/
-int StMuDstMaker::Make(){
-  DEBUGMESSAGE2("");
-  StTimer timer;
-  timer.start();
-  clear();
-  try {
-    if (mIoMode == ioWrite) write();
-    if (mIoMode == ioRead)  read();
-  }
-  catch(StMuExceptionEOF e) {
-    e.print();
-    return kStEOF;
-  }
-  catch(StMuException e) {
-    e.print();
-    return kStERR;
-  }
-  DEBUGVALUE2(timer.elapsedTime());
-  return kStOK;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fill(){
-  DEBUGMESSAGE2("");
-  mStEvent = (StEvent*) GetInputDS("StEvent");
-  if (!mStEvent) {
-    DEBUGMESSAGE2("no StEvent");
-    return;
-  }
-  /// once per event the pid algorithm has to be set up
-  /// we make it static for the StMuTrack, because all tracks use the same instance
-  if (mProbabilityPidAlgorithm) delete mProbabilityPidAlgorithm;
-  mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm(*mStEvent);
-  StMuTrack::setProbabilityPidAlgorithm(mProbabilityPidAlgorithm);
-  StMuTrack::setProbabilityPidCentrality(uncorrectedNumberOfNegativePrimaries(*mStEvent));
-  try {
-    fillTrees(mStEvent);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::write(){
-  DEBUGMESSAGE2("");
-  try {
-    fill();
-  }
-  catch (StMuException e) {
-    return;
-  }
-
-  string ioMakerFileName;
-  string theFileName("/dev/null");
-  DEBUGVALUE2(mIoNameMode);
-  switch (mIoNameMode) {
-  case ioFix:
-    DEBUGMESSAGE2("===> ioFix\n");
-    theFileName = buildFileName( mDirName+"/", basename(mFileName),".MuDst.root");
-    break;
-  case ioIOMaker:
-    DEBUGMESSAGE2("===> ioIOMaker\n");
-    ioMakerFileName = string(mIOMaker->GetFile());
-    DEBUGVALUE2(ioMakerFileName);
-    theFileName = buildFileName( mDirName+"/", basename(ioMakerFileName),".MuDst.root");
-    break;
-  case ioTreeMaker:
-    //    ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
-    ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
-    theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root");
-    break;
-  default:
-    DEBUGMESSAGE("do not know where to get the filename from");
-  }
-
-  DEBUGVALUE2(theFileName.c_str());
-
-  if (theFileName != mCurrentFileName) {
-    closeWrite();
-    openWrite(theFileName);
-    mCurrentFileName = theFileName;
-  }
-
-  DEBUGMESSAGE2("now fill tree");
-  mTTree->Fill();
-  DEBUGMESSAGE2("tree filled");
-
-  return;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-int StMuDstMaker::Finish() {
-  DEBUGMESSAGE2("");
-  if (mFinish) {
-    for ( int i=0; i<10; i++) {
-      cout << "why are you calling the Finish() again  ???????" << endl;
-      cout << "are you the stupid chain destructor ???????????" << endl;
-    }
-  }
-  else {
-    if (mIoMode== ioWrite ) closeWrite();
-    if (mIoMode== ioRead ) closeRead();
-    mFinish = true;
-  }
-  DEBUGMESSAGE3("out");
-  return 0;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::setBranchAddresses(TChain* chain) {
-  // all stuff
-  if (!chain) return;
-  chain->SetBranchStatus("*",0);
-  TString ts;
-  for ( int i=0; i<__NALLARRAYS__; i++) {
-    if (mStatusArrays[i]==0) continue;
-    const char *bname=StMuArrays::arrayNames[i];
-    TBranch *tb = chain->GetBranch(bname);
-    if(!tb) {Warning("setBranchAddresses","Branch name %s does not exist",bname);continue;}
-    ts = bname; ts +="*";
-    chain->SetBranchStatus (ts,1);
-    chain->SetBranchAddress(bname,mAArrays+i);
-    assert(tb->GetAddress() == (char*)(mAArrays+i));
-  }
-
-  mTTree = mChain->GetTree();
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-int StMuDstMaker::openRead() {
-  DEBUGVALUE2(mDirName.c_str());
-  DEBUGVALUE2(mFileName.c_str());
-  DEBUGVALUE2(mFilter.c_str());
-
-  StMuChainMaker chainMaker("MuDst");
-  mChain = chainMaker.make(mDirName, mFileName, mFilter, mMaxFiles);
-
-  if (mChain){
-    DEBUGVALUE3(mChain);
-    setBranchAddresses(mChain);
-
-    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
-    //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
-  }
-
-  return 0;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::read(){
-  if (!mChain){
-    DEBUGMESSAGE2("ATTENTION: No StMuChain ... results won't be exciting (nothing to do)");
-    return;
-  }
-
-  DEBUGMESSAGE2("");
-  if (mChain->GetCurrentFile()) {
-    DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
-  }
-  int bytes = 0;
-  while (bytes==0 ) {
-    DEBUGVALUE3(mEventCounter);
-    if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
-    bytes = mChain->GetEntry(mEventCounter++);
-    DEBUGVALUE3(bytes);
-  }
-  if (GetDebug()>1) printArrays();
-  mStMuDst->set(this);
-  fillHddr();
-  return;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::closeRead(){
-  DEBUGMESSAGE2("");
-  if (mChain) mChain->Delete();
-  mChain = 0;
- }
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::openWrite(string fileName) {
-  DEBUGVALUE2(fileName.c_str());
-  // creat a Picoevent and and output file
-  DEBUGMESSAGE2("now create file");
-  mCurrentFile = new TFile(fileName.c_str(),"RECREATE","StMuDst");
-
-  if (!mCurrentFile) throw StMuExceptionNullPointer("no file openend",__PRETTYF__);
-
-  mCurrentFile->SetCompressionLevel(mCompression);
-
-  // Create a ROOT Tree and one superbranch
-  DEBUGMESSAGE2("now create trees and branches");
-
-  TBranch* branch;
-  int bufsize = mBufferSize;
-  if (mSplit) bufsize /= 4;
-
-  //  all stuff
-  mTTree = new TTree("MuDst", "StMuDst",mSplit);
-  mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
-  DEBUGMESSAGE2("all arrays");
-  for ( int i=0; i<__NALLARRAYS__; i++) {
-    if (mStatusArrays[i]==0) continue;
-    branch = mTTree->Branch(StMuArrays::arrayNames[i],&mAArrays[i], bufsize, mSplit);
-  }
-
-  mCurrentFileName = fileName;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::closeWrite(){
-  cout << __PRETTYF__ << endl;
-  if (mTTree && mCurrentFile) {
-    cout << " ##### " << __PRETTYF__ << endl;
-    cout << " ##### File=" << mCurrentFile->GetName() << " ";
-    cout << " NumberOfEvents= " << mTTree->GetEntries() << " ";
-    cout << " ##### " << endl;
-  }
-  if (mTTree) mTTree->AutoSave();
-  mTTree = 0;
-  if (mCurrentFile) mCurrentFile->Close();
-  mCurrentFile = 0;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
-  DEBUGMESSAGE2("");
-
- try {
-    fillEvent(ev);
-    fillL3AlgorithmInfo(ev);
-    fillDetectorStates(ev);
-    fillEmc(ev);
-    fillPmd(ev);
-    fillTof(ev);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
-
-  try {
-    fillTracks(ev,mTrackFilter);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
-
-  try {
-    fillL3Tracks(ev, mL3TrackFilter);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
-
-  try {
-    fillStrange(mStStrangeMuDstMaker);
-  }
-  catch(StMuException e) {
-    e.print();
-    throw e;
-  }
-}
-
-
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillEvent(StEvent* ev, StMuCut* cut) {
-  DEBUGMESSAGE2("");
-  StMuEvent *typeOfEvent=0;
-  if (!ev) throw StMuExceptionNullPointer("no StEvent",__PRETTYF__);
-  StTimer timer;
-  timer.start();
-  if (!cut || cut->pass(ev)) {
-    DEBUGMESSAGE3("");
-    addType(mArrays[muEvent],ev,typeOfEvent);
-  }
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillEmc(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  StEmcCollection* emccol=(StEmcCollection*)ev->emcCollection();
-  if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",__PRETTYF__);
-  StTimer timer;
-  timer.start();
-
-  TClonesArray *tca = mEmcArrays[muEmc];
-  new((*tca)[0]) StMuEmcCollection();
-  StMuEmcCollection* muEmcColl = (StMuEmcCollection*)tca->At(0);
-  if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",__PRETTYF__);
-  mEmcUtil->fillMuEmc(muEmcColl,emccol);
-
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillPmd(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  StPhmdCollection* phmdColl=(StPhmdCollection*)ev->phmdCollection();
-  if (!phmdColl)  return; //throw StMuExceptionNullPointer("no StPhmdCollection",__PRETTYF__);
-  StTimer timer;
-  timer.start();
-
-  TClonesArray *tca = mPmdArrays[muPmd];
-  new((*tca)[0]) StMuPmdCollection();
-  StMuPmdCollection* muPmdColl = (StMuPmdCollection*)tca->At(0);
-  if (!muPmdColl) throw StMuExceptionNullPointer("no StMuPmdCollection",__PRETTYF__);
-  mPmdUtil->fillMuPmd(phmdColl,muPmdColl);
-
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-
-void StMuDstMaker::fillTof(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  StTofCollection *tofcol = ev->tofCollection();
-  if( !ev || !tofcol || !tofcol->dataPresent() )
-    return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
-  StTimer timer;
-  timer.start();
-
-  // fill tofHit
-  StMuTofHitCollection muTofHitColl;
-  mTofUtil->fillMuTofHit(&muTofHitColl, tofcol);
-  for(size_t i=0; i < muTofHitColl.size(); i++) {
-    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl.getHit(i);
-    addType( mTofArrays[muTofHit], *tofMuHit );
-  }
-
-  // fill tofData
-  StSPtrVecTofData &tofData = tofcol->tofData();
-  for(size_t i=0; i < tofData.size(); i++) {
-    addType( mTofArrays[muTofData], *tofData[i] );
-  }
-
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillL3AlgorithmInfo(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  if ( !ev->l3Trigger() ) return;
-  if ( !ev->l3Trigger()->l3EventSummary()) return;
-
-  StTimer timer;
-  timer.start();
-  StL3EventSummary* l3 = ev->l3Trigger()->l3EventSummary();
-  int n = l3->numberOfAlgorithms();
-  for (int i=0; i<n; i++) {
-    if (l3->algorithms()[i]->accept())
-      addType( mArrays[muAccept], *l3->algorithms()[i] );
-    else
-      addType( mArrays[muReject], *l3->algorithms()[i] );
-  }
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillTracks(StEvent* ev, StMuCut* cut) {
-  DEBUGMESSAGE2("");
-  StTimer timer;
-  timer.start();
-
-  StSPtrVecTrackNode& nodes= ev->trackNodes();
-  DEBUGVALUE2(nodes.size());
-  for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
-    addTrackNode(ev, *iter, cut, mArrays[muGlobal], mArrays[muPrimary], mArrays[muOther], false);
-  }
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillL3Tracks(StEvent* ev, StMuCut* cut) {
-  DEBUGMESSAGE2("");
-  if (!ev->l3Trigger()) return;
-
-  StTimer timer;
-  timer.start();
-  StSPtrVecTrackNode& nodes= ev->l3Trigger()->trackNodes();
-  DEBUGVALUE2(nodes.size());
-  for (StSPtrVecTrackNodeConstIterator iter=nodes.begin(); iter!=nodes.end(); iter++) {
-    addTrackNode(ev, *iter, cut, mArrays[muL3], 0, 0, true );
-  }
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillDetectorStates(StEvent* ev) {
-  DEBUGMESSAGE2("");
-  StTimer timer;
-  timer.start();
-  for (int i=0; i<StMuArrays::arraySizes[muState]; i++) {
-    StDetectorState* state = ev->detectorState((StDetectorId) i);
-    if (state) {
-      addType( mArrays[muState], *state );
-    }
-  }
-  timer.stop();
-  DEBUGVALUE2(timer.elapsedTime());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut,
-				  TClonesArray* gTCA, TClonesArray* pTCA, TClonesArray* oTCA, bool l3) {
-  DEBUGMESSAGE3("");
-  const StTrack* tr=0;
-
-  /// do global track
-  int index2Global =-1;
-  if (gTCA) {
-    tr= node->track(global);
-    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, cut, -1, l3);
-  }
-  /// do primary track track
-  int index;
-  if (pTCA) {
-    tr = node->track(primary);
-    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, cut, index2Global, l3);
-  }
-  /// all other tracks
-  if (oTCA) {
-    size_t nEntries = node->entries();
-    for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
-      tr = node->track(j);
-      if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
-	index = addTrack(oTCA, ev, tr, cut, index2Global, l3);
-      }
-    }
-  }
-}
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-//---------------------------------------------------------------------
-int StMuDstMaker::addTrack(TClonesArray* tca, const StEvent*event, const StTrack* track, StMuCut* cut, int index2Global, bool l3) {
-  DEBUGMESSAGE3("");
-  StRichSpectra typeOfStRichSpectra;
-  int index = -1;
-  int index2RichSpectra=-1;
-  /// if (!tca || !track) return index; /// I made sure that the array anf the track is there
-  int counter = tca->GetEntries();
-  try{
-    if (cut && !cut->pass(track)) throw StMuExceptionBadValue("failed track cut",__PRETTYF__);
-    // add StRichSpectra if StRichPidTraits are found
-    // we have to do this more elegant
-    StRichSpectra* rich = richSpectra(track);
-    if (rich) {
-      index2RichSpectra  =  addType( mArrays[muRich], *rich );
-    }
-    new((*tca)[counter]) StMuTrack(event, track, index2Global, index2RichSpectra, l3);
-    index = counter;
-  }
-  catch (StMuException e) {
-    IFDEBUG3(e.print());
-  }
-  return index;  /// return index to self if newly created, else return -1;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-StRichSpectra* StMuDstMaker::richSpectra(const StTrack* track) {
-  DEBUGMESSAGE3("");
-  const StPtrVecTrackPidTraits& traits = track->pidTraits(kRichId);
-  for (StPtrVecTrackPidTraitsConstIterator traitIter=traits.begin();traitIter!=traits.end();++traitIter) {
-    StRichPidTraits* pid = dynamic_cast<StRichPidTraits*>(*traitIter);
-    if (pid) return pid->getRichSpectra();
-  }
-  return 0;
-}
-void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
-  DEBUGMESSAGE2("");
-  /// now fill the strangeness stuff
-  if (!maker) throw StMuExceptionNullPointer("no StrangeMuDstMaker",__PRETTYF__);
-
-  StStrangeEvMuDst *ev=0;
-  StV0MuDst *v0=0;
-  StStrangeAssoc *assoc=0;
-  StXiMuDst *xi=0;
-  StKinkMuDst *kink=0;
-  StV0Mc *v0Mc=0;
-  StXiMc *xiMc=0;
-  StKinkMc *kinkMc=0;
-  TCut *strangeCut=0;
-
-  addType(maker->GetEvClonesArray(),  mStrangeArrays[0],ev);
-  addType(maker->GetEvMcArray(),      mStrangeArrays[1],ev);
-
-  addType(maker->GetV0ClonesArray(),  mStrangeArrays[2],v0);
-  addType(maker->GetV0McArray(),      mStrangeArrays[3],v0Mc);
-  addType(maker->GetV0AssocArray(),   mStrangeArrays[4],assoc);
-
-  addType(maker->GetXiClonesArray(),  mStrangeArrays[5],xi);
-  addType(maker->GetXiMcArray(),      mStrangeArrays[6],xiMc);
-  addType(maker->GetXiAssocArray(),   mStrangeArrays[7],assoc);
-
-  addType(maker->GetKinkClonesArray(),mStrangeArrays[8],kink);
-  addType(maker->GetKinkMcArray(),    mStrangeArrays[9],kinkMc);
-  addType(maker->GetKinkAssocArray(), mStrangeArrays[10],assoc);
-
-  addType(maker->GetCutsArray(), mStrangeArrays[11],strangeCut);
-
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-template <class T>
-int StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t) {
-  if (tcaFrom && tcaTo) {
-    int n = tcaFrom->GetEntries();
-    int counter = tcaTo->GetEntries();
-    for (int i=0; i<n;i++) {
-	// old     new((*tcaTo)[counter++]) T( (T&)*tcaFrom->UncheckedAt(i) );
-	new((*tcaTo)[counter++]) T( *(T*)(void*)tcaFrom->UncheckedAt(i) );
-    }
-  }
-  return 0;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-// int StMuDstMaker::addType(TClonesArray* tcaTo , StMuEmcCollection *t) {
-//   int counter =-1;
-//   if (tcaTo) {
-//     counter = tcaTo->GetEntries();
-
-//     new((*tcaTo)[counter]) StMuEmcCollection();
-//   }
-//   return counter;
-// }
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-template <class T>
-int StMuDstMaker::addType(TClonesArray* tcaTo ,T &t) {
-  int counter =-1;
-  if (tcaTo) {
-    counter = tcaTo->GetEntries();
-    new((*tcaTo)[counter]) T( t );
-  }
-  return counter;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-template <class T, class U>
-int StMuDstMaker::addType(TClonesArray* tcaTo ,U &u,T *t) {
-  int counter =-1;
-  if (tcaTo) {
-    counter = tcaTo->GetEntries();
-    DEBUGMESSAGE2("");
-    new((*tcaTo)[counter]) T(u);
-  }
-  return counter;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-string StMuDstMaker::buildFileName(string dir, string fileName, string extention){
-  DEBUGMESSAGE3(dir.c_str());
-  DEBUGMESSAGE3(fileName.c_str());
-  DEBUGMESSAGE3(extention.c_str());
-  fileName = dir + fileName + extention;
-  while (fileName.find("//")!=string::npos) {
-    int pos = fileName.find("//");
-    fileName.erase(pos,1);
-  }
-  return fileName;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-string StMuDstMaker::basename(string s){
-  DEBUGVALUE3(s.c_str());
-  string name(s);
-  DEBUGVALUE3(name.c_str());
-  size_t pos;
-  pos = name.find_last_of("/");
-  if (pos!=string::npos ) name.erase(0, pos );
-  DEBUGVALUE3(name.c_str());
-  pos = name.find_first_of(".");
-  if (pos!=string::npos ) name.erase(pos,name.length()-pos );
-  DEBUGVALUE3(name.c_str());
-  return name;
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-string StMuDstMaker::dirname(string s){
-  string name(s);
-  DEBUGVALUE3(name.c_str());
-  size_t pos;
-  pos = name.find_last_of("/");
-
-  if (pos != string::npos ) name.erase(pos, name.length());
-  if (name == s) name =".";
-
-  name=name+"/";
-  DEBUGVALUE3(name);
-  return name;
-}
-
-void StMuDstMaker::setProbabilityPidFile(const char* file) {
-  ostrstream flnm;
-
-  if ( ! file ){
-    const char *PIDtable="PIDTableP01gl.root";
-
-    flnm << getenv("STAR") << "/StarDb/dEdxModel/" << PIDtable << ends;
-    FORCEDDEBUGMESSAGE("ATTENTION: pid table hardwired to " << flnm.str() );
-
-  } else {
-    flnm << file << ends;
-    FORCEDDEBUGMESSAGE("Using pid table to user value " << flnm.str() );
+class StMuDstMaker : public StIOInterFace {
+ public:
+    /// Default constructor
+    StMuDstMaker(const char* name="MuDst");
+    /// Constructor
+    StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10,
+		 const char* name="MuDst" );
+    ~StMuDstMaker();
+
+  virtual int Init();
+  virtual void Clear(Option_t *option="");
+  virtual int  Make();
+  virtual int  Finish();
+          void printArrays();
+          void SetStatus(const char *arrType,int status);
+	    /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
+  void setTrackFilter(StMuCut* c);
+  StMuFilter* trackFilter();
+  /// Set the track filter used for L3 tracks when creating muDsts from StEvent and writing to disk.
+  void setL3TrackFilter(StMuCut* c);
+  StMuL3Filter* l3TrackFilter();
+  /// Set the file from where the PID probability tables should be read.
+  /**
+      Set the file from where the PID probability tables should be read.
+      These tables might change from production version to production version.
+      It is the reposibility of who ever creates muDsts to make sure the right tables
+      are used. So far, Aihong was providing these files.
+      Thanks, Aihong.
+      Note that this method hard code the file name if the argument is not give.
+      The default is currently
+
+          getenv("STAR") << "/StarDb/dEdxModel/" << PIDtable
+
+      where PIDtable=PIDTableP01gl.root . This will later change with possibly
+      a database approach.
+
+  */
+  void setProbabilityPidFile(const char* file=NULL);
+  /// Returns pointer to the StMuDst object, the transient class that holds all the TClonesArrays and has access functions to the tracks, v0s, etc.
+  /// Returns null pointer if no StMuDst available.
+  StMuDst* muDst();
+  /// In read mode, returns pointer to the chain of .MuDst.root files that where selected.
+  TChain* chain();
+  /// Returns pointer to the current TTree, the top level io structure that holds the event, track, v0, etc. information in branches of that tree.
+  TTree* tree();
+
+  /// Sets the split level for the file and all branches. Please refer to the ROOT manual (http://root.cern.ch) for more information.
+  void setSplit(int=99);
+  /// Sets the buffer size for all branches.
+  void setBufferSize(int=65536*4);
+  /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level.
+  void setCompression(int comp=9);
+
+  StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
+  StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
+
+  virtual const char *GetCVS() const {  ///< Returns version tag.
+
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.37 2004/09/18 20:35:09 jeromel Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;
   }
 
 
-  if (mProbabilityPidAlgorithm)
-    mProbabilityPidAlgorithm->readParametersFromFile(flnm.str());
-}
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StMuDstMaker::printArrays()
-{
-// all stuff
-  TClonesArray *tcl;
-  for ( int i=0; i<__NALLARRAYS__; i++) {
-    if (mStatusArrays[i]==0) continue;
-    tcl = mAArrays[i];
-    printf(" Array %s\t = %s::%s(%d)\n",
-    StMuArrays::arrayNames[i],
-    tcl->ClassName(),tcl->GetName(),tcl->GetEntriesFast());
-  }
-
-}
-//-----------------------------------------------------------------------
-void StMuDstMaker::fillHddr()
-{
+protected:
+  enum ioMode {ioRead, ioWrite};
+  /** Specifies the way the output file name is contructed when creating muDsts.
+      ioFix = use filename specified in when calling the constructor, right in the
+      same output file for all input files.
+      ioIOMaker = create one output file per input file, derive output filename
+      from current input file of the StIOMaker.
+      ioTreeMaker = create one output file per input file, derive output filename
+      from current input file of the StTreeMaker.
+  */
+  enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
 
-  StMuEvent 		*me = mStMuDst->event();
-  StEventInfo 		&ei = me->eventInfo();
-  StRunInfo 		&ri = me->runInfo();
-  StEvtHddr *hd = GetEvtHddr();
+  StEvent* mStEvent;
+  StMuDst* mStMuDst;
+  StStrangeMuDstMaker* mStStrangeMuDstMaker;
+  StIOMaker* mIOMaker;
+  StTreeMaker* mTreeMaker;
+  StMuEmcUtil* mEmcUtil;
+  StMuPmdUtil* mPmdUtil;
+  StMuTofUtil* mTofUtil;
 
-  hd->SetRunNumber(ei.runId())	;
-  hd->SetEventType(ei.type().Data());
-  hd->SetTriggerMask(ei.triggerMask())	;
-//hd->SetInputTriggerMask(???);
-  hd->SetBunchCrossingNumber(ei.bunchCrossingNumber(0),ei.bunchCrossingNumber(1));
-  hd->SetCenterOfMassEnergy(ri.centerOfMassEnergy());
-//hd->SetBImpact  (float b)  	;
-//hd->SetPhiImpact(float p)  	;
-//hd->SetPhImpact (float p)  	;
-//hd->SetAEast(int a)		;
-//hd->SetZEast(int z)		;
-//hd->SetAWest(int a)		;
-//hd->SetZWest(int z)		;
-//hd->SetLuminosity(float lu)	;
-  hd->SetGMTime((unsigned int)ei.time());
-  hd->SetProdDateTime(ri.productionTime());
-//hd->SetIventNumber(int iv)	;
-  hd->SetEventSize(ei.eventSize());
-  hd->SetEventNumber(ei.id())	;
-//hd->SetGenerType(int g);
-}
+  int mIoMode;
+  int mIoNameMode;
+  string mDirName;
+  string mFileName;
+  string mFilter;
+  int mMaxFiles;
+
+  unsigned int mTrackType;
+  bool mReadTracks;
+  bool mReadV0s;
+  bool mReadXis;
+  bool mReadKinks;
+  bool mFinish;
+
+  StMuCut* mTrackFilter;
+  StMuCut* mL3TrackFilter;
+
+  TFile* mCurrentFile;
+  string mCurrentFileName;
+
+  TChain* mChain;
+  TTree* mTTree;
+
+  int mEventCounter;
+  int mSplit;
+  int mCompression;
+  int mBufferSize;
+
+  StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
+
+
+#define saveDelete(t) { delete t; t=0;}
+
+  //! protected:
+
+virtual void openWrite(string fileName);
+virtual   void write();
+virtual   void closeWrite();
+
+  void streamerOff();
+
+virtual   int openRead();
+virtual   void read();
+void setBranchAddresses();
+virtual   void closeRead();
+
+  void setBranchAddresses(TChain*);
+
+  void clear(TClonesArray* &t, int& counter,int del=1);
+  void clear(int del=0);
+
+  void assignArrays();
+  void zeroArrays();
+  void createArrays();
+  TClonesArray* clonesArray(TClonesArray*& p, const char* type, int size, int& counter);
+
+  void fill();
+  void fillTrees(StEvent* ev, StMuCut* cut=0);
+  void fillEvent(StEvent* ev, StMuCut* cut=0);
+  void fillPmd(StEvent* ev);
+  void fillEmc(StEvent* ev);
+  void fillStrange(StStrangeMuDstMaker*);
+  void fillL3Tracks(StEvent* ev, StMuCut* cut=0);
+  void fillTracks(StEvent* ev, StMuCut* cut=0);
+  void fillDetectorStates(StEvent* ev);
+  void fillL3AlgorithmInfo(StEvent* ev);
+  void fillTof(StEvent* ev);
+  void fillHddr();
+
+  template <class T, class U> int addType(TClonesArray* tcaTo  , U &u, T *t);
+  template <class T>          int addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t);
+  template <class T>          int addType(TClonesArray* tcaTo  , T &t);
+  void addTrackNode(const StEvent* ev, const StTrackNode* node, StMuCut* cut, TClonesArray* gTCA=0, TClonesArray* pTCA=0, TClonesArray* oTCA=0, bool l3=false);
+  int  addTrack(TClonesArray* tca, const StEvent* event, const StTrack* track, StMuCut* cut, int index2Global, bool l3=false);
+/*   int addType(TClonesArray* tcaTo , StMuEmcCollection t); */
+
+  StRichSpectra* richSpectra(const StTrack* track);
+
+  void setStEvent(StEvent*);
+  StEvent* stEvent();
+  void setStStrangeMuDstMaker(StStrangeMuDstMaker*);
+  StStrangeMuDstMaker* stStrangeMuDstMaker();
+
+  unsigned int trackType();
+  bool readTracks();
+  bool readV0s();
+  bool readXis();
+  bool readKinks();
+  void setTrackType(unsigned int);
+  void setReadTracks(bool);
+  void setReadV0s(bool);
+  void setReadXis(bool);
+  void setReadKinks(bool);
+
+  string basename(string);
+  string dirname(string);
+  string buildFileName(string dir, string fileName, string extention);
+
+  friend class StMuDst;
+  friend class StMuDstFilterMaker;
+
+  // Beware that this was added to counteract contiguous memory.
+  // See implementation for caveat
+  TClonesArray*  mAArrays         [__NALLARRAYS__];
+  TClonesArray** mArrays;       //[__NARRAYS__       ];
+  TClonesArray** mStrangeArrays;//[__NSTRANGEARRAYS__];
+  TClonesArray** mEmcArrays;    //[__NEMCARRAYS__    ];
+  TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
+  TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
+  char           mStatusArrays    [__NALLARRAYS__    ];
+
+  ClassDef(StMuDstMaker, 0)
+};
+
+inline StMuDst* StMuDstMaker::muDst() { return mStMuDst;}
+inline TChain* StMuDstMaker::chain() { return mChain; }
+inline TTree* StMuDstMaker::tree() { return mTTree; }
+inline void StMuDstMaker::setTrackFilter(StMuCut* c) { mTrackFilter=c;}
+inline void StMuDstMaker::setL3TrackFilter(StMuCut* c) { mL3TrackFilter=c;}
+inline StMuFilter* StMuDstMaker::trackFilter() { return (StMuFilter*)mTrackFilter;}
+inline StMuL3Filter* StMuDstMaker::l3TrackFilter() { return (StMuL3Filter*)mL3TrackFilter;}
+inline void StMuDstMaker::setStStrangeMuDstMaker(StStrangeMuDstMaker* s) {mStStrangeMuDstMaker=s;}
+inline StStrangeMuDstMaker* StMuDstMaker::stStrangeMuDstMaker() {return mStStrangeMuDstMaker;}
+inline void StMuDstMaker::setTrackType(unsigned int t) {mTrackType=t;}
+inline unsigned int StMuDstMaker::trackType() {return mTrackType;}
+
+inline bool StMuDstMaker::readTracks() { return mReadTracks;}
+inline bool StMuDstMaker::readV0s() { return mReadV0s;}
+inline bool StMuDstMaker::readXis() { return mReadXis;}
+inline bool StMuDstMaker::readKinks() { return mReadKinks;}
+inline void StMuDstMaker::setReadTracks(bool b) { mReadTracks=b;}
+inline void StMuDstMaker::setReadV0s(bool b) { mReadV0s=b;}
+inline void StMuDstMaker::setReadXis(bool b) { mReadXis=b;}
+inline void StMuDstMaker::setReadKinks(bool b) { mReadKinks=b;}
+
+inline void StMuDstMaker::setSplit(int split) { mSplit = split;}
+inline void StMuDstMaker::setCompression(int comp) { mCompression = comp;}
+inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
+
+
+#endif
+
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
- * Revision 1.36  2004/09/18 01:30:19  jeromel
- * Missing comment :-(  ... Modified for big array, used ** and p assignement to avoid later problems.
+ * Revision 1.37  2004/09/18 20:35:09  jeromel
+ * Little bit baffled by what CVS did around here
+ * http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StMuDSTMaker/COMMON/StMuDstMaker.h.diff?r1=1.35&r2=1.36
+ * but re-comitting without the mess up (seems like source and h were merged)
  *
- * Revision 1.61  2004/09/18 01:28:11  jeromel
+ * Revision 1.35  2004/09/18 01:28:18  jeromel
  * *** empty log message ***
  *
- * Revision 1.60  2004/05/04 13:26:23  jeromel
- * Oops .. Conflict resolution fixed.
- *
- * Revision 1.59  2004/05/04 13:17:11  jeromel
- * Changed to the documentation in doxygen format
- *
- * Revision 1.58  2004/05/04 00:09:23  perev
+ * Revision 1.34  2004/05/04 00:09:17  perev
  *
  * //  Selecting SetBranchStatus for particular MuDst branches
  * //  Special names:
@@ -1130,163 +344,91 @@ void StMuDstMaker::fillHddr()
  * //  Names of branches look StMuArrays::arrayTypes[]
  * //  It allows to speed up reading MuDst significantly
  *
- * Revision 1.57  2004/04/26 00:13:28  perev
+ * Revision 1.33  2004/04/26 00:13:28  perev
  * Cleanup+simplification
  *
- * Revision 1.56  2004/04/20 18:42:47  perev
+ * Revision 1.32  2004/04/20 18:42:40  perev
  * remove redundant arrays
  *
- * Revision 1.55  2004/04/15 00:25:49  perev
+ * Revision 1.31  2004/04/15 00:26:14  perev
  * fillHddr() added to fill time stamp ...
  *
- * Revision 1.54  2004/04/14 17:15:56  subhasis
- * Xin's TOF reinclusion
- *
- * Revision 1.53  2004/04/09 22:03:50  subhasis
+ * Revision 1.30  2004/04/09 22:03:47  subhasis
  * after tof createevent fix by Xin
  *
- * Revision 1.52  2004/04/09 03:36:14  jeromel
+ * Revision 1.29  2004/04/09 03:36:15  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.
  *
- * Revision 1.51  2004/04/06 01:48:09  perev
- * Small leak + incorrect filing StMuTofHitCollection
- *
- * Revision 1.50  2004/04/02 03:24:54  jeromel
+ * Revision 1.28  2004/04/02 03:24:54  jeromel
  * Changes implements PMD and TOF.  TOF is clearly incomplete.
  *
- * Revision 1.49  2004/02/17 05:05:35  jeromel
- * One more hidden one found post-commit
- *
- * Revision 1.48  2004/02/17 04:56:36  jeromel
+ * Revision 1.27  2004/02/17 04:56:36  jeromel
  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
  * internal __PRETTYF__, return NULL if no case selected (+message) and protected against
  * NULL mChain.
  *
- * Revision 1.47  2003/11/17 22:16:55  perev
- * THack::DeleteClonesArray used for deleting, to avoid ROOT bad features
- *
- * Revision 1.46  2003/11/10 04:07:47  perev
- * again clear improved to avoid leaks
- *
- * Revision 1.45  2003/11/09 01:02:59  perev
+ * Revision 1.26  2003/11/09 01:02:59  perev
  * more sofisticated clear() to fix leaks
  *
- * Revision 1.44  2003/11/03 22:24:45  perev
- * TClones::Clear added into StMuDstMaker::clear to avoid empty ebjects writing
- *
- * Revision 1.43  2003/10/30 20:08:13  perev
+ * Revision 1.25  2003/10/30 20:08:13  perev
  * Check of quality added
  *
- * Revision 1.42  2003/10/28 00:03:46  perev
- * remove some debug lines
- *
- * Revision 1.41  2003/10/27 23:54:33  perev
+ * Revision 1.24  2003/10/27 23:54:33  perev
  * weird template bug fized and templates simplified
  *
- * Revision 1.40  2003/10/23 04:08:29  perev
- * use SetBranchStatus fixed
- *
- * Revision 1.39  2003/10/20 19:50:13  perev
+ * Revision 1.23  2003/10/20 19:50:13  perev
  * workaround added for TClonesArray::Delete + some cleanup of MuEmc
  *
- * Revision 1.38  2003/10/15 17:34:16  laue
- * StMuDstMaker:  Reading fixed. Delete() changed back to Clear()
- * StMuEmcCollection: Re-implemented the DeleteThis() function,
- *                    This hoopefully fixed the memory leak when
- *                    writing MuDst again.
- * StMuTimer: ClassDef/ClassImp
- *
- * Revision 1.37  2003/10/12 03:43:56  perev
- * LeakOff TClonesArray::Clear replaced to Delete
- *
- * Revision 1.36  2003/10/08 21:17:15  laue
- * StMuEmcUtil updates from Alex Suaide
- * StMuDst and StMuDstMaker fixes to take the double inheritance of the
- * StKinkMuDsts into account. A void* had to be introduced when casting
- * TObject* to StKinkMuDst*.
- *
- * Revision 1.35  2003/10/03 15:26:07  laue
- * some moe arrays initialized
- *
- * Revision 1.34  2003/09/28 21:10:59  jeromel
- * More data members zeroed (would cause a crash on exit)
- *
- * Revision 1.33  2003/09/19 01:45:18  jeromel
+ * Revision 1.22  2003/09/19 01:45:18  jeromel
  * A few problems hopefully fixed i.e. one constructor lacked zeroing
  * emcArrays were not  zeroed, mStMuDst not zeroed.
  * For maintainability zeroArrays() added.
  *
- * Revision 1.32  2003/09/07 03:49:03  perev
- * gcc 3.2 + WarnOff
- *
- * Revision 1.31  2003/09/02 17:58:44  perev
+ * Revision 1.21  2003/09/02 17:58:44  perev
  * gcc 3.2 updates + WarnOff
  *
- * Revision 1.30  2003/08/04 14:38:10  laue
- * Alex Suaide's updated for the EMC. Now EEMC is included.
+ * Revision 1.20  2003/04/15 18:48:36  laue
+ * Minor changes to be able to filter MuDst.root files and an example
+ * how to do this. The StMuDstFilterMaker is just an example, it has to be
+ * customized (spoilers, chrome weels, etc.) by the user.
  *
- * Revision 1.29  2003/03/25 19:08:06  laue
- * added StMuDst into TDataSet so that Valeri can pick it up for his
- * StEventDisplayMaker
- *
- * Revision 1.28  2003/03/06 01:34:18  laue
- * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
- * only year1 Au+Au 130GeV data
- *
- * Revision 1.27  2003/02/20 15:29:42  laue
- * StMuTriggerIdCollection added
- *
- * Revision 1.26  2003/02/19 15:38:10  jeromel
+ * Revision 1.19  2003/02/19 15:38:10  jeromel
  * Modifications made to account for the new location of the PIDTable file.
  * The setProbabilityPidFile() method has been modified to take care of a default
  * file loading if unspecified. Messages will be displayed appropriatly.
  * Macros mdoofied to not call the method (leave it handled through the default
  * file).
  *
- * Revision 1.25  2003/02/07 23:47:53  laue
- * New EMC code. TObject arrays replaced by TClonesArrays (thanks to Alex)
- *
- * Revision 1.23  2003/02/05 22:10:00  laue
- * delete emc collection after being copied (when creating mudst)
- *
- * Revision 1.21  2003/01/29 03:04:57  laue
+ * Revision 1.18  2003/01/29 03:04:57  laue
  * !!DIRTY FIX FOR StMuEmcCollection
  * !! Was memor leaking. Leak fixed, but slow and dirty.
  * !! Propose to change the structure as soon as possible.
  *
- * Revision 1.20  2003/01/09 18:59:45  laue
+ * Revision 1.17  2003/01/23 21:59:50  laue
+ * Modification to compile on Solaris.
+ *
+ * Revision 1.16  2003/01/09 18:59:45  laue
  * initial check in of new EMC classes and the changes required
  *
- * Revision 1.19  2002/11/27 15:07:31  laue
- * fix to run with standard root
+ * Revision 1.15  2002/11/08 14:18:59  laue
+ * saveDelete(<T>) added, sets pointer=null after delete
  *
- * Revision 1.18  2002/11/07 17:12:22  laue
- * Comment changed.
+ * Revision 1.14  2002/09/11 21:02:41  laue
+ * added cut on track encoded method for ITTF
  *
- * Revision 1.17  2002/08/27 19:05:56  laue
- * Minor updates to make the muDst from simulation work
- *
- * Revision 1.16  2002/08/20 19:55:49  laue
+ * Revision 1.13  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *
- * Revision 1.15  2002/05/20 18:57:18  laue
- * update for Christof
- *
- * Revision 1.14  2002/05/20 17:23:31  laue
+ * Revision 1.12  2002/05/20 17:23:31  laue
  * StStrangeCuts added
  *
- * Revision 1.13  2002/05/04 23:56:30  laue
+ * Revision 1.11  2002/05/04 23:56:30  laue
  * some documentation added
  *
- * Revision 1.12  2002/04/26 21:02:56  jeromel
- * Bug fix in dirname(). Still cannot get the arg3 bla/test.root mechanism to work
- * (but it does neither for everything else). Will come back to it.
- *
- * Revision 1.11  2002/04/23 21:35:32  laue
- * Changed name of StStraMuDstMaker to 'strangeMuDst' so that it can get picked
- * from the bfc.
+ * Revision 1.10  2002/04/26 20:57:31  jeromel
+ * Added GetCVS()
  *
  * Revision 1.9  2002/04/11 14:19:30  laue
  * - update for RH 7.2
@@ -1305,32 +447,14 @@ void StMuDstMaker::fillHddr()
  * Revision 1.5  2002/03/27 00:50:11  laue
  * bux fix from earlier check in
  *
+ * Revision 1.4  2002/03/26 19:33:15  laue
+ * minor updates
+ *
  * Revision 1.3  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *
  * Revision 1.2  2002/03/08 20:04:31  laue
  * change from two trees to 1 tree per file
  *
- * Revision 1.1  2002/03/08 17:04:17  laue
- * initial revision
- *
  *
  **************************************************************************/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
