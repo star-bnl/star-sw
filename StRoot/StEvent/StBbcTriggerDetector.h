@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StBbcTriggerDetector.h,v 2.6 2004/02/11 01:42:09 ullrich Exp $
+ * $Id: StBbcTriggerDetector.h,v 2.7 2004/08/03 17:22:16 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StBbcTriggerDetector.h,v $
+ * Revision 2.7  2004/08/03 17:22:16  ullrich
+ * Major update by Akio and Marco.
+ *
  * Revision 2.6  2004/02/11 01:42:09  ullrich
  * Added new constructor to load data from StTriggerData.
  *
@@ -88,13 +91,14 @@ public:
     int   tdcEarliestEast(); // 2002 = common start = smaller channel is earlier
     int   tdcEarliestWest(); // 2003 = common stop  = larger channel os earlier
     float zVertex(); //z vertex in cm
-  
+    unsigned short onlineTimeDifference() const; // z vertex from Layer2 DSM in channel 
+ 
     void  setAdc(unsigned int, unsigned short);
     void  setTdc(unsigned int, unsigned short);
     void  setRegister(unsigned int, unsigned short);
     void  setPedestal(unsigned int, unsigned short);
     void  setScalar(unsigned int, unsigned int);
-    
+    void  setOnlineTimeDifference(unsigned short);
     void  dump();
     
     unsigned int   year() const;
@@ -113,8 +117,8 @@ protected:
     UShort_t mPed[mMaxPedData];
     UShort_t mScl[mMaxScalars];
     UInt_t   mYear;
-    
-    ClassDef(StBbcTriggerDetector,3)
+    UInt_t   mDSMVTX;
+    ClassDef(StBbcTriggerDetector,4)
 };
 
 inline unsigned int
@@ -146,5 +150,11 @@ StBbcTriggerDetector::year() const {return mYear;}
 
 inline void
 StBbcTriggerDetector::setYear(unsigned int v) {mYear = v;}
+
+inline unsigned short
+StBbcTriggerDetector::onlineTimeDifference() const {return mDSMVTX;}
+
+inline void
+StBbcTriggerDetector::setOnlineTimeDifference(unsigned short v) {mDSMVTX = v;}
 
 #endif

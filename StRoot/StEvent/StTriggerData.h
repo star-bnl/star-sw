@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.7 2004/07/20 18:02:26 jeromel Exp $
+ * $Id: StTriggerData.h,v 2.8 2004/08/03 17:22:16 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.8  2004/08/03 17:22:16  ullrich
+ * Major update by Akio and Marco.
+ *
  * Revision 2.7  2004/07/20 18:02:26  jeromel
  * Updates from Akio to fix CTB issues.
  *
@@ -42,6 +45,7 @@
 
 #include "StObject.h"
 #include "StEnumerations.h"
+#include "StMessMgr.h"
 
 class StTriggerData : public StObject {
 public:
@@ -55,11 +59,19 @@ public:
     virtual unsigned int version() const = 0;          // TrgDataType Version Number 
     virtual unsigned int numberOfPreXing() const = 0;  // # of pre xing data for detectors
     virtual unsigned int numberOfPostXing() const = 0; // # of post xing data for detectors
+
     // generic trigger infomations
     virtual unsigned int token() const = 0;
     virtual unsigned int triggerWord() const = 0;
     virtual unsigned int actionWord() const = 0;  
-    virtual unsigned int busyStatus() const;
+    virtual unsigned short busyStatus() const;
+    virtual unsigned short dsmInput() const;
+    virtual unsigned short trgToken() const;
+    virtual unsigned short dsmAddress() const;
+    virtual unsigned short mAddBits() const;
+    virtual unsigned short bcData(int channel) const;
+
+    // bunch and spin bits
     virtual unsigned int bunchCounterHigh() const;
     virtual unsigned int bunchCounterLow() const;
     virtual unsigned int bunchId48Bit() const;
@@ -80,13 +92,19 @@ public:
     virtual unsigned short vertexDSM(int channel) const;
     virtual unsigned short ctbLayer1DSM(int channel) const;
     virtual unsigned short ctbLayer2DSM(int channel) const;
+    virtual unsigned short bemcLayer1DSM(int channel, int prepost=0) const;
+    virtual unsigned short eemcLayer1DSM(int channel, int prepost=0) const;
     virtual unsigned short emcLayer2DSM(int channel) const;
-    virtual unsigned short fpdLayer2DSM(int channel) const;
+    virtual unsigned short fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost=0) const;
+    virtual unsigned short fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepsot=0) const;
+    virtual unsigned short fpdLayer2DSMRaw(int channel) const;
+    virtual unsigned short fpdLayer2DSM(StBeamDirection eastwest, int module) const;
 
     // CTB
     virtual unsigned short ctbRaw(int address, int prepost=0) const;
     virtual unsigned short ctb(int pmt, int prepost=0) const;
     virtual unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
+    virtual unsigned short ctbSum(int prepost=0) const;
 
     // MWC
     virtual unsigned short mwc(int sector, int prepost=0) const;
@@ -98,16 +116,19 @@ public:
     virtual unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
     virtual unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
+    virtual unsigned short zdcHardwareSum(int prepost=0) const;
 
     //ZDCSMD
     virtual unsigned short zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost=0) const;
   
     // EMC
-    virtual unsigned short bemcHighTower(int eta, int phi, int prepost=0) const;
-    virtual unsigned short bemcJetPatch (int eta, int phi, int prepost=0) const;
-    virtual unsigned short eemcHighTower(int eta, int phi, int prepost=0) const;
-    virtual unsigned short eemcJetPatch (int eta, int phi, int prepost=0) const;
-    
+    virtual unsigned char bemcHighTower(int patch_id, int prepost=0) const;
+    virtual unsigned char bemcJetPatch (int patch_id, int prepost=0) const;
+    virtual unsigned char eemcHighTower(int patch_id, int prepost=0) const;
+    virtual unsigned char eemcJetPatch (int patch_id, int prepost=0) const;
+    virtual unsigned char bemcHighestTowerADC(int prepost=0) const;
+    virtual unsigned char eemcHighestTowerADC(int prepost=0) const;
+
     // BBC bbcTDC
     virtual unsigned short bbcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     virtual unsigned short bbcTDC(StBeamDirection eastwest, int pmt, int prepost=0) const;
@@ -132,6 +153,9 @@ protected:
     float mZdcVertexZ;
     int prepostAddress(int prepost) const; //get pre&post xsing addess, return negative if bad.
         
+    // Service routine to decode EMC layer0 DSM info into 12bit input values
+    unsigned short decodeEmc12bit(const int dsm, const int channel, const unsigned char *raw) const;
+
     ClassDef(StTriggerData,2) 
 };
 
@@ -142,7 +166,12 @@ protected:
 inline int StTriggerData::year() const {return mYear;}
 inline float StTriggerData::zdcVertexZ() const {return mZdcVertexZ;}
 inline void StTriggerData::setZdcVertexZ(float val) {mZdcVertexZ = val;}
-inline unsigned int StTriggerData::busyStatus() const {return 0;}
+inline unsigned short StTriggerData::dsmInput() const {return 0;}
+inline unsigned short StTriggerData::trgToken() const {return 0;}
+inline unsigned short StTriggerData::dsmAddress() const {return 0;}
+inline unsigned short StTriggerData::mAddBits() const {return 0;}
+inline unsigned short StTriggerData::bcData(int address) const {return 0;}
+inline unsigned short StTriggerData::busyStatus() const {return 0;}
 inline unsigned int StTriggerData::bunchCounterHigh() const {return 0;}
 inline unsigned int StTriggerData::bunchCounterLow() const {return 0;}
 inline unsigned int StTriggerData::bunchId48Bit() const {return 0;}
@@ -160,11 +189,17 @@ inline unsigned short StTriggerData::lastDSM(int channel) const {return 0;};
 inline unsigned short StTriggerData::vertexDSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::ctbLayer1DSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::ctbLayer2DSM(int channel) const {return 0;}
+inline unsigned short StTriggerData::bemcLayer1DSM(int channel, int prepost) const {return 0;}
+inline unsigned short StTriggerData::eemcLayer1DSM(int channel, int prepost) const {return 0;}
 inline unsigned short StTriggerData::emcLayer2DSM(int channel) const {return 0;}
-inline unsigned short StTriggerData::fpdLayer2DSM(int channel) const {return 0;}
+inline unsigned short StTriggerData::fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost) const {return 0;}
+inline unsigned short StTriggerData::fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepost) const {return 0;}
+inline unsigned short StTriggerData::fpdLayer2DSMRaw(int channel) const {return 0;}
+inline unsigned short StTriggerData::fpdLayer2DSM(StBeamDirection eastwest, int module) const {return 0;}
 inline unsigned short StTriggerData::ctbRaw(int address, int prepost) const {return 0;}
 inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::ctbTraySlat(int tray, int slat, int prepost) const {return 0;}
+inline unsigned short StTriggerData::ctbSum(int prepost) const {return 0;}
 inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAtAddress(int address, int prepost) const {return 0;}
@@ -172,11 +207,14 @@ inline unsigned short StTriggerData::zdcUnAttenuated(StBeamDirection eastwest, i
 inline unsigned short StTriggerData::zdcAttenuated(StBeamDirection eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcTDC(StBeamDirection eastwest, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcHardwareSum(int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcSMD(StBeamDirection eastwest, int verthori, int strip, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bemcHighTower(int eta, int phi, int prepost) const {return 0;}
-inline unsigned short StTriggerData::bemcJetPatch (int eta, int phi, int prepost) const {return 0;}
-inline unsigned short StTriggerData::eemcHighTower(int eta, int phi, int prepost) const {return 0;}
-inline unsigned short StTriggerData::eemcJetPatch (int eta, int phi, int prepost) const {return 0;}
+inline unsigned char  StTriggerData::bemcHighTower(int patch_id, int prepost) const {return 0;}
+inline unsigned char  StTriggerData::bemcJetPatch (int patch_id, int prepost) const {return 0;}
+inline unsigned char  StTriggerData::eemcHighTower(int patch_id, int prepost) const {return 0;}
+inline unsigned char  StTriggerData::eemcJetPatch (int patch_id, int prepost) const {return 0;}
+inline unsigned char  StTriggerData::bemcHighestTowerADC(int prepost) const {return 0;}
+inline unsigned char  StTriggerData::eemcHighestTowerADC(int prepost) const {return 0;}
 inline unsigned short StTriggerData::bbcADC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bbcTDC(StBeamDirection eastwest, int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::bbcADCSum(StBeamDirection eastwest, int prepost) const {return 0;}

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 2.4 2004/02/11 01:42:09 ullrich Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.5 2004/08/03 17:21:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
+ * Revision 2.5  2004/08/03 17:21:15  ullrich
+ * Fpd as trigger detector added.
+ *
  * Revision 2.4  2004/02/11 01:42:09  ullrich
  * Added new constructor to load data from StTriggerData.
  *
@@ -40,6 +43,7 @@
 #include "StVpdTriggerDetector.h"
 #include "StZdcTriggerDetector.h"
 #include "StEmcTriggerDetector.h"
+#include "StFpdTriggerDetector.h"
 
 class dst_TrgDet_st;
 class StTriggerData;
@@ -65,6 +69,8 @@ public:
     const StZdcTriggerDetector& zdc() const;
     StEmcTriggerDetector&       emc();
     const StEmcTriggerDetector& emc() const;
+    StFpdTriggerDetector&       fpd();
+    const StFpdTriggerDetector& fpd() const;
     
 protected:
     StCtbTriggerDetector mCtb;
@@ -73,7 +79,8 @@ protected:
     StZdcTriggerDetector mZdc;
     StBbcTriggerDetector mBbc;
     StEmcTriggerDetector mEmc;
+    StFpdTriggerDetector mFpd;
     
-    ClassDef(StTriggerDetectorCollection,3)
+    ClassDef(StTriggerDetectorCollection,4)
 };
 #endif

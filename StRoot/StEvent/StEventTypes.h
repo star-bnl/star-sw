@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.26 2004/04/19 17:37:32 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.27 2004/08/03 17:23:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.27  2004/08/03 17:23:47  ullrich
+ * Added include file for StFpdTriggerDetector.
+ *
  * Revision 2.26  2004/04/19 17:37:32  ullrich
  * Updated to include recent additions to StEvent.
  *
@@ -116,6 +119,7 @@
 #include "StEstGlobalTrack.h"
 #include "StEstPrimaryTrack.h"
 #include "StFpdCollection.h"
+#include "StFpdTriggerDetector.h"
 #include "StFtpcHit.h"
 #include "StFtpcHitCollection.h"
 #include "StFtpcPlaneHitCollection.h"

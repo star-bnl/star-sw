@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.h,v 2.6 2004/07/20 18:02:26 jeromel Exp $
+ * $Id: StTriggerData2003.h,v 2.7 2004/08/03 17:22:16 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.h,v $
+ * Revision 2.7  2004/08/03 17:22:16  ullrich
+ * Major update by Akio and Marco.
+ *
  * Revision 2.6  2004/07/20 18:02:26  jeromel
  * Updates from Akio to fix CTB issues.
  *
@@ -54,6 +57,14 @@ public:
     unsigned int token() const;
     unsigned int triggerWord() const;
     unsigned int actionWord() const;      
+    unsigned short busyStatus() const;
+    unsigned short dsmInput() const;
+    unsigned short trgToken() const;
+    unsigned short dsmAddress() const;
+    unsigned short mAddBits() const;
+    unsigned short bcData(int channel) const;
+
+    // bunch and spin bits
     unsigned int bunchCounterHigh() const;
     unsigned int bunchCounterLow() const;
     unsigned int bunchId48Bit() const;
@@ -70,12 +81,21 @@ public:
         
     // High Level Trigger info
     unsigned short tcuBits() const;
-    
+    unsigned short lastDSM(int address) const;
+    unsigned short bemcLayer1DSM(int channel, int prepost=0) const;
+    unsigned short eemcLayer1DSM(int channel, int prepost=0) const;
+    unsigned short emcLayer2DSM(int channel) const;
+    unsigned short fpdLayer1DSMRaw(StBeamDirection eastwest, int channel, int prepost=0) const;
+    unsigned short fpdLayer1DSM(StBeamDirection eastwest, int module, int board, int prepost=0) const;
+    unsigned short fpdLayer2DSMRaw(int channel) const;
+    unsigned short fpdLayer2DSM(StBeamDirection eastwest, int module) const;
+
     // CTB
     unsigned short ctbRaw(int address, int prepost=0) const;
     unsigned short ctb(int pmt, int prepost=0) const;
     unsigned short ctbTraySlat(int tray, int slat, int prepost=0) const;
-    
+    unsigned short ctbSum(int prepost=0) const;
+
     // MWC
     unsigned short mwc(int pmt, int prepost=0) const;
 
@@ -98,7 +118,16 @@ public:
     unsigned short zdcAttenuated(StBeamDirection eastwest, int prepost=0) const;
     unsigned short zdcADC(StBeamDirection eastwest, int pmt, int prepost=0) const;
     unsigned short zdcTDC(StBeamDirection eastwest, int prepost=0) const;
+    unsigned short zdcHardwareSum(int prepost=0) const;
     
+    // EMC
+    unsigned char bemcHighTower(int patch_id, int prepost=0) const;
+    unsigned char bemcJetPatch (int patch_id, int prepost=0) const;
+    unsigned char eemcHighTower(int patch_id, int prepost=0) const;
+    unsigned char eemcJetPatch (int patch_id, int prepost=0) const;
+    unsigned char bemcHighestTowerADC(int prepost=0) const;
+    unsigned char eemcHighestTowerADC(int prepost=0) const;
+ 
     // experts only
     char* getTriggerStructure();
     TrgDataType2003* getTriggerStructure2003();  

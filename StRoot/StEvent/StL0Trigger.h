@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.8 2003/07/29 19:50:53 ullrich Exp $
+ * $Id: StL0Trigger.h,v 2.9 2004/08/03 17:22:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.9  2004/08/03 17:22:16  ullrich
+ * Major update by Akio and Marco.
+ *
  * Revision 2.8  2003/07/29 19:50:53  ullrich
  * Fix for spin bits added.
  *
@@ -49,12 +52,14 @@
 
 class dst_L0_Trigger_st;
 class dst_TrgDet_st;
+class StTriggerData;
 
 class StL0Trigger : public StTrigger {
 public:
-     StL0Trigger();
-void set(const dst_L0_Trigger_st*);
-void set(const dst_TrgDet_st    *);
+    StL0Trigger();
+    void set(const dst_L0_Trigger_st*);
+    void set(const dst_TrgDet_st    *);
+    void set(const StTriggerData    *);
     // StL0Trigger(const StL0Trigger&);            use default
     // StL0Trigger& operator=(const StL0Trigger&); use default
     ~StL0Trigger();
@@ -99,6 +104,8 @@ void set(const dst_TrgDet_st    *);
     
 protected:
     enum {mMaxPixels = 32, mMaxLastDsm = 8, mMaxBcData = 16};
+
+private:    
     Int_t         mCoarsePixelArray[mMaxPixels];
     Int_t         mMwcCtbMultiplicity;
     Int_t         mMwcCtbDipole;

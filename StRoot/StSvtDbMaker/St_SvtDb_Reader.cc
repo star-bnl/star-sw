@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.12 2004/07/31 00:50:29 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.14 2004/08/03 20:39:27 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.14  2004/08/03 20:39:27  caines
+ * Check for null pointer in case AnodeCorr not there
+ *
  * Revision 1.12  2004/07/31 00:50:29  munhoz
  * adding anode drift veloc correction factor
  *
@@ -202,7 +205,11 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 {
   gMessMgr->Info() << "St_SvtDb_Reader::getDriftVelocityAverage" << endm;
 
+  StSvtHybridCollection* AnodeDriftCorrColl =  getAnodeDriftCorr();
+
+
   St_svtDriftVelAvg *driftVelocity;
+  
   const int dbIndex = kCalibration;
 
   svtDriftVelAvg_st *driftVeloc;
@@ -210,6 +217,7 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 
   char path[100];
   int index;
+  double v3;
 
   for (int barrel = 1;barrel <= mSvtConfig->getNumberOfBarrels();barrel++) {
     for (int ladder = 1;ladder <= mSvtConfig->getNumberOfLadders(barrel);ladder++) {
@@ -259,7 +267,18 @@ void St_SvtDb_Reader::getDriftVelocityAverage(StSvtHybridCollection* svtDriftVel
 	  
 	  // loop over anodes
 	  for (int anode=1;anode<=mSvtConfig->getNumberOfAnodes();anode++) {
-	    hybridDriftVeloc->setV3(driftVeloc->averageDriftVelocity,anode);
+
+	    if( AnodeDriftCorrColl){
+	      StSvtHybridAnodeDriftCorr* DriftCorr = 
+		(StSvtHybridAnodeDriftCorr*)AnodeDriftCorrColl->at(index);
+	      v3 = driftVeloc->averageDriftVelocity*
+		DriftCorr->getValue(anode);
+	    }
+	    else{
+	      v3 = driftVeloc->averageDriftVelocity;
+	    }
+	    
+	    hybridDriftVeloc->setV3(v3,anode);
 	  }
 
 	  if ((index==0) || (index==431)) 
