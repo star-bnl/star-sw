@@ -3,6 +3,26 @@
 //                                                             
 // StEmcTriggerMaker A. A. P. Suaide (C) 2001  
 //                                                             
+//   Update: 22-Feb-2002 
+//	     J.L. Klay (LBNL)
+//
+//   This class now creates histograms of the (10-bit to 6-bit compressed)
+//   DAQ data and the TRG 6-bit ADC data so that comparisons
+//   can be made.  
+//
+//   In order to run on *event.root files, just load the library and call:
+//     StEmcTriggerMaker* trigger=new StEmcTriggerMaker("bemctrigger");
+//     trigger->SetHistFileName(outfile);
+//
+//   In order to run on *.daq files, make sure to load the St_trg_Maker
+//   and StEmcCalibrationMaker libraries and then to call them in this
+//   order:
+//   	St_trg_Maker* trg=new St_trg_Maker("trigger");
+//      trg->SetMode(1);
+//      StEmcPreCalibrationMaker* precalib=new StEmcPreCalibrationMaker("precalib",1);
+//      StEmcTriggerMaker* trigger=new StEmcTriggerMaker("bemctrigger");
+//      trigger->SetHistFileName(outfile);
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -24,6 +44,8 @@ ClassImp(StEmcTriggerMaker)
 StEmcTriggerMaker::StEmcTriggerMaker(char *name):StMaker(name)
 {
   TitleHist="BEMC";
+
+  HistFileName = "StEmcTriggerMaker.hist.root";
   
   Float_t et[]={0,25,50,75,100,125,150,175,200,225,250};
   TArrayF t((Int_t)11,et);
@@ -46,6 +68,7 @@ StEmcTriggerMaker::~StEmcTriggerMaker()
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Init()
 {
+
   TString a="Et - "+TitleHist;
   EtHist=new TH1F("EtHist",a.Data(),50,0,500);
   EtHist->SetFillColor(13);
@@ -76,15 +99,41 @@ Int_t StEmcTriggerMaker::Init()
   HTxPatch->SetXTitle("HT Thr (GeV)");
   HTxPatch->SetYTitle("Patch Thr (GeV)");
 
-  a="HT trigger - "+TitleHist; 
-  HT2D = new TH2F("HTtrigger",a.Data(),300,-0.5,299.5,64,0,64); 
+  a="High Tower 6bit ADC from DAQ";
+  DAQHTower = new TH2F("DAQHTower",a.Data(),300,-0.5,299.5,64,-0.5,63.5);
+  DAQHTower->SetXTitle("Tower/Patch Number");
+  DAQHTower->SetYTitle("6bit ADC");
+
+  a="6bit ADC Patch Sum from DAQ";
+  DAQPatch = new TH2F("DAQPatch",a.Data(),300,-0.5,299.5,64,-0.5,63.5);
+  DAQPatch->SetXTitle("Tower/Patch Number");
+  DAQPatch->SetYTitle("6bit ADC");
+
+  a="High Tower 6bit ADC from TRG";
+  TRGHTower = new TH2F("TRGHTower",a.Data(),300,-0.5,299.5,64,-0.5,63.5);
+  TRGHTower->SetXTitle("Tower/Patch Number");
+  TRGHTower->SetYTitle("6bit ADC");
+
+  a="6bit ADC Patch Sum from TRG";
+  TRGPatch = new TH2F("TRGPatch",a.Data(),300,-0.5,299.5,64,-0.5,63.5);
+  TRGPatch->SetXTitle("Tower/Patch Number");
+  TRGPatch->SetYTitle("6bit ADC");
+
+  a="TRG High Tower 6bit ADC vs. DAQ High Tower 6bit ADC";  
+  TRGHTxDAQHT = new TH2F("TRGHTxDAQHT",a.Data(),64,-0.5,63.5,64,-0.5,63.5);
+  TRGHTxDAQHT->SetXTitle("6bit DAQ HT ADC");
+  TRGHTxDAQHT->SetYTitle("6bit TRG HT ADC");
+
+  a="TRG 6bit Patch ADC Sum vs. DAQ 6bit ADC Patch Sum";  
+  TRGPAxDAQPA = new TH2F("TRGPAxDAQPA",a.Data(),64,-0.5,63.5,64,-0.5,63.5);
+  TRGPAxDAQPA->SetXTitle("6bit DAQ ADC Patch Sum");
+  TRGPAxDAQPA->SetYTitle("6bit TRG ADC Patch Sum");
+
   return StMaker::Init();
 }  
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Make()
 {
-
-// Check if there is any pi0 present in the event generator level
 
   StEvent* event=(StEvent*)GetInputDS("StEvent");
   if(!event) 
@@ -98,6 +147,12 @@ Int_t StEmcTriggerMaker::Make()
     cout <<"No EMC\n";
     return kStWarn;
   }
+  StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
+  if (!theTriggers) {
+    printf("StEvent::TriggerDetectorCollection is missing\n");
+    return kStWarn;
+  }
+
   BemcTrigger=new StBemcTrigger(GetDate(),GetTime());
   BemcTrigger->SetEmcCollection(emc);
   BemcTrigger->SetThreshold(EtTh,RatioTh,HighTowerTh,PatchTh,JetTh);
@@ -106,26 +161,23 @@ Int_t StEmcTriggerMaker::Make()
   AddData(BemcTrigger->EmcTrigger);
   AddData(BemcTrigger->PatchTrigger);
   AddData(BemcTrigger->JetTrigger);
-  FillHistograms();
+  FillHistograms(theTriggers);
   
   return kStOK;
 }
 //_____________________________________________________________________________
-void StEmcTriggerMaker::FillHistograms()
+void StEmcTriggerMaker::FillHistograms(StTriggerDetectorCollection* theTriggers)
 {
 
+  cout << "Filling Histograms..." << endl;
   St_emcTrigger* trigger=BemcTrigger->EmcTrigger;
   emcTrigger_st* table=trigger->GetTable();
   
   St_emcPatchTrigger* patch=BemcTrigger->PatchTrigger;
   emcPatchTrigger_st* pa=patch->GetTable();
-  
-  for(Int_t i=0;i<300;i++)
-  {
-    HT2D->Fill((Float_t)i,(Float_t)pa[i].HighTowerAdc6bits);
-    //cout <<" i = "<<i<<"  HT = "<<pa[i].HighTowerAdc6bits<<endl;
-  }
-  
+
+  StEmcTriggerDetector &theEmcTrg = theTriggers->emc();
+
   Int_t set=table[0].NEtThresholds;
   Int_t sra=table[0].NRatioThresholds;
   Int_t sht=table[0].NHighTowerThresholds;
@@ -156,19 +208,43 @@ void StEmcTriggerMaker::FillHistograms()
     for(Int_t j=0;j<spa;j++)
       if(table[0].HighTowerBits[i]==1 && table[0].PatchBits[j]==1) 
         HTxPatch->Fill(table[0].HighTowerThresholds[i],table[0].PatchThresholds[j]);
+
+  for (Int_t j=0;j<300;j++) {
+    Float_t PADAQ=pa[j].PatchAdcSum6bits;
+    Float_t HTDAQ=pa[j].HighTowerAdc6bits;
+
+    Float_t PATRG=theEmcTrg.patch(j);
+    Float_t HTTRG=theEmcTrg.highTower(j);
+
+    DAQHTower->Fill((Float_t)j,HTDAQ);
+    DAQPatch->Fill((Float_t)j,PADAQ);
+    TRGHTower->Fill((Float_t)j,HTTRG);
+    TRGPatch->Fill((Float_t)j,PATRG);
+    TRGHTxDAQHT->Fill(HTDAQ,HTTRG);
+    TRGPAxDAQPA->Fill(PADAQ,PATRG);
+  }
+
 }
 
 //_____________________________________________________________________________
 Int_t StEmcTriggerMaker::Finish()
 {  
-  TFile f("StEmcTriggerMaker.hist.root","RECREATE");
+  TFile f(HistFileName.Data(),"RECREATE");
   EtHist->Write();
   RatioHist->Write();
   HighTowerHist->Write();
   PatchHist->Write();
   JetHist->Write();
   HTxPatch->Write();
+  DAQHTower->Write();
+  DAQPatch->Write();
+  TRGHTower->Write();
+  TRGPatch->Write();
+  TRGHTxDAQHT->Write();
+  TRGPAxDAQPA->Write();
   f.Close();
   return StMaker::Finish();
 }
+
+
 
