@@ -286,12 +286,18 @@ Int_t   St_PolyLine3D::SetNumberOfAttributes(Int_t n)
 //______________________________________________________________________________
 void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 {
-//
-//  Axis draw three axis  Ox,   Oy,    Oz   with thre different colors:
-//                       red   gree   blue
-// as follows:
-//  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/Axice.gif.gif"> </P> End_Html // 
-//
+///////////////////////////////////////////////////////////////////////////////
+//                                                                           //
+//  Axis() draws three axice  Ox,   Oy,    Oz   with three different colors: //
+//                           red   gree   blue                               //
+// as follows:                                                               //
+//  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/Axice.gif.gif"> </P> End_Html  // 
+//                                                                           //
+//   TVirualPad - the point to TPad objest these axice will be drawn into    //
+//              = 0 (= gPad, by default)                                     //
+//   width      - the axis width in pixel (= 2 by default)                   //
+//                                                                           //
+///////////////////////////////////////////////////////////////////////////////
    TVirtualPad *pad = p;
    TVirtualPad *savpad = 0;
    if (pad && pad != gPad) {
@@ -308,7 +314,7 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
    //       Axis / Cube
    
    const Float_t arrowLegthFactor = 0.25;
-   const Float_t arrowWidthFactor = 0.5;
+   const Float_t arrowWidthFactor = 0.25;
 
    TView *view = pad->GetView();
    if (view) {
@@ -356,8 +362,8 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
                                               //            
       lx->SetBit(kCanDelete);
       lx->SetColorAttribute(kRed);
-      lx->SetSizeAttribute(2);
-      lx->SetWidthFactor(width);
+      lx->SetSizeAttribute(width);
+// for future      lx->SetWidthFactor(width);
       lx->Draw();
 
       //___________  Y axis ____________
@@ -381,9 +387,9 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
       ly->SetNextPoint(x,y,z);               //     --------> finish it
                                              //            
       ly->SetColorAttribute(kGreen);
-      ly->SetSizeAttribute(2);
+      ly->SetSizeAttribute(width);
       ly->SetBit(kCanDelete);
-      ly->SetWidthFactor(width);
+// for future       ly->SetWidthFactor(width);
       ly->Draw();
 
       //___________  Z axis ____________
@@ -409,8 +415,8 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 
       lz->SetBit(kCanDelete);
       lz->SetColorAttribute(kBlue);
-      lz->SetSizeAttribute(2);
-      lz->SetWidthFactor(width);
+      lz->SetSizeAttribute(width);
+// for future       lz->SetWidthFactor(width);
       lz->Draw();
    }
    if (savpad) savpad->cd();
