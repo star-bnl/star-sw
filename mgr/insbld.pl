@@ -245,9 +245,9 @@ if($COMPIL){
 	    close(FO);
 	}
 	print " - Formatting now ...\n";
-	system("$FRMTPRGM $dir/$FILOUT $dir/$FLNM");
+	system("$FRMTPRGM $dir/$FILOUT $FLNM");
 	if( -e "$dir/$FLNM"){
-	    print " - All done. $dir/$FLNM is ready\n";
+	    print " - All done. $FLNM is ready\n";
 	} else {
 	    print " * Problem : Preceeding action did not create $FLNM\n";
 	}
