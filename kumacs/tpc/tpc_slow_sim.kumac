@@ -1,6 +1,6 @@
 ************************************************************************
 ************************************************************************
-macro run_
+macro tpc_slow_sim__
           input_g2t_file=gstar_ven_phys_on_auau_2central.xdr_
           num_events=1_
           tpc_sector_first=18_
@@ -24,15 +24,14 @@ message ' *** TPC Sector first,last --> '  [tpc_sector_first],[tpc_sector_last]
 message ' *** Magnetic Field -->        '  [magfield]
 message ' *** Ntuple ID # -->           '  [nid]
 message ' *** Table to write to ntup --> ' [table]
-
  
 * global macros
-  exec [UTIL]setup_global_macros 
-  macro/global/import UTIL,TPC_PAMS,G2T 
+  exec $STAR/kumacs/util/setup_global_macros
+  macro/global/import KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC 
 
 * generic inits
-  exec [UTIL]setup_dir
-  exec [UTIL]input_g2t_file#init [G2T][input_g2t_file]
+  exec [KUMACS_UTIL]setup_dir
+  exec [KUMACS_UTIL]input_g2t_file#init [DATA_SAMPLES][input_g2t_file]
 
 * tpc slow sim init
   exec tpc_slow_sim_initialize [tpc_sector_first] [tpc_sector_last] _
@@ -42,7 +41,7 @@ message ' *** Table to write to ntup --> ' [table]
 * read event and then process thru tpc slow sim
   do i=1,[num_events]
     message ' processing event ' [i]
-    exec [UTIL]input_g2t_file#read
+    exec [KUMACS_UTIL]input_g2t_file#read
     exec tpc_slow_sim_process_event [i] [nid] [table] 
   enddo
 
@@ -52,7 +51,7 @@ return
 ************************************************************************
 ************************************************************************
 ************************************************************************
-
+************************************************************************
 *--------------------------------------------------------------------
 
 macro tpc_slow_sim_initialize_
@@ -65,23 +64,25 @@ macro tpc_slow_sim_initialize_
 
     message ' Initializing for tpc slow simulator '
 
-    macro/global/import UTIL,TPC_PAMS,G2T 
+  macro/global/import KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC 
+
+
 
 
 *
 *  create tables
-    exec [UTIL]create_tables_tpc_slow_sim#tss
-    exec [UTIL]create_tables_tpc_slow_sim#tfc
-    exec [UTIL]create_tables_tpc_slow_sim#tcl
+    exec [KUMACS_TPC]create_tables_tpc_slow_sim#tss
+    exec [KUMACS_TPC]create_tables_tpc_slow_sim#tfc
+    exec [KUMACS_TPC]create_tables_tpc_slow_sim#tcl
 
 *   initialization for tpc slow simulator
-    exec [TPC_PAMS]tpg_init#init
-    exec [TPC_PAMS]tss_init#init _
+    exec [PAMS_TPC_KUMAC]tpg_init#init
+    exec [PAMS_TPC_KUMAC]tss_init#init _
                       [tpc_sector_first] [tpc_sector_last] [magfield]
-    exec [TPC_PAMS]tcl_init#init
+    exec [PAMS_TPC_KUMAC]tcl_init#init
 
 
-    exec [UTIL]write_table_to_ntuple#init_memory [nid] [table]
+    exec [KUMACS_UTIL]write_table_to_ntuple#init_memory [nid] [table]
 
  return
 
@@ -93,27 +94,28 @@ macro tpc_slow_sim_process_event_
             table
 
 
-   macro/global/import UTIL,TPC_PAMS,G2T 
+
+   macro/global/import KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC 
 
    message ' TPC slow sim: Processing Event # ' [nev]
 
 
 * call tssam - simulated tpc pixels
-  exec [TPC_PAMS]tss_run#run
+  exec [PAMS_TPC_KUMAC]tss_run#run
 
 * call xyz - reordered tpc pixels with more info
-  exec [TPC_PAMS]tfc_run#run 
+  exec [PAMS_TPC_KUMAC]tfc_run#run 
 
 * call tcl_make_clusters - tpc cluster finder
-  exec [TPC_PAMS]tcl_run#run_tcl_make_clusters
+  exec [PAMS_TPC_KUMAC]tcl_run#run_tcl_make_clusters
 
 * call tpham - tpc hit finder
-  exec [TPC_PAMS]tcl_run#run_tpham 
+  exec [PAMS_TPC_KUMAC]tcl_run#run_tpham 
 
 
 * write  tphit table to ntuple in memory
   if [nev]=1 then
-    exec [UTIL]write_table_to_ntuple#write_event_memory [nid] [table]
+    exec [KUMACS_UTIL]write_table_to_ntuple#write_event_memory [nid] [table]
   endif
 
 
