@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.8 1999/07/16 15:23:17 fisyak Exp $
+// $Id: St_geom_Maker.cxx,v 1.9 1999/11/12 18:25:51 fine Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.9  1999/11/12 18:25:51  fine
+// Take in account GEANT maker
+//
 // Revision 1.8  1999/07/16 15:23:17  fisyak
 // Switch TWebFile => TFile
 //
@@ -112,6 +115,9 @@ Int_t St_geom_Maker::Init() {
   fileName += GetName();
   TWebFile *f =  new TWebFile(fileName.Data());
 #endif
+  // Check whether GEANT maker is present
+  if (GetMaker("geant"))  return StMaker::Init();
+
   TString fileName = "$STAR/StDb/geometry/star.root.y1a";
   gSystem->ExpandPathName(fileName);
   TFile    *f = new TFile(fileName);
