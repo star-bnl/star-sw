@@ -1,0 +1,23 @@
+                StuCutEvent and StuCutTrack
+
+ Classes for applying StEvent cuts.
+ All functions and data members are static.
+ Therefore, there is no need to instantiate.
+ Just use StuCutEvent::func(); or StuCutTrack::func(); .
+ The reason for making them static was to keep counters of the number of 
+	events and tracks removed by each cut.
+ Call the PrintCutList functions in Finish to print these counters.
+
+ Right now the event cuts are on multiplicity and primary vertex position.
+ The track cuts are on fit points and the ratio of fit point to max points.
+ It is set up so that other cuts can be easily added. If lo >= hi on a cut
+ the cut is not applied.
+
+ In CheckEvent and CheckTrack the calling argument is a pointer to the event
+	or track.
+
+ CutTrack also stores the number of tracks with positive and negative
+ pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are used to 
+ calculate (Pos - Neg) / (Pos + Neg) and put a cut on this ratio. The purpose
+ is to eliminate beam-gas background where most of the particles would go one
+ way or the other.
