@@ -44,7 +44,7 @@ StSpaceChargeEbyEMaker::StSpaceChargeEbyEMaker(const char *name):StMaker(name),
 
   HN=32;  // max events used, cannot exceed 32 used in header file
   MINTRACKS=1500;
-  SCALER_ERROR = 0.0003; // by eye from hist: SCvsZDCEpW.gif
+  SCALER_ERROR = 0.0004; // by eye from hist: SCvsZDCEpW.gif
 
   // MAXDIFFE is maximum different in sc from last ebye sc
   MAXDIFFE =   SCALER_ERROR;
@@ -544,8 +544,11 @@ float StSpaceChargeEbyEMaker::FakeAutoSpaceCharge() {
   return sc;
 }
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.cxx,v 1.1 2004/06/30 23:16:00 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.cxx,v 1.2 2004/07/01 01:46:04 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.cxx,v $
+// Revision 1.2  2004/07/01 01:46:04  genevb
+// Slightly larger margin for full vs half field differences
+//
 // Revision 1.1  2004/06/30 23:16:00  genevb
 // Introduction of StSpaceChargeEbyEMaker
 //
