@@ -275,24 +275,28 @@ Int_t StSvtdEdxMaker::Make()
        //
        float dEdx=0;
        float dEdxError=0;
-       for (jj=0; jj<numberOfPointsOnTrack; jj++) {
-	 dEdx      += ::log(spacePointsCharge[jj]);
-	 dEdxError += ::log(spacePointsCharge[jj]);
+       if (numberOfPointsOnTrack) {
+	 for (jj=0; jj<numberOfPointsOnTrack; jj++) {
+           float qwe = ::log(spacePointsCharge[jj]);
+	   dEdx      += qwe;
+	   dEdxError += qwe*qwe;
+	 }
+
+	 //
+	 // Normalize to the number of Points
+	 //
+	 dEdx      /= numberOfPointsOnTrack;
+	 dEdxError /= numberOfPointsOnTrack;      
+	 dEdxError = dEdxError - (dEdx * dEdx);
+         if (dEdxError <=1.e-10) dEdxError=1.e-10;
+	 dEdxError = ::sqrt(dEdxError);
+	 dEdx = exp(dEdx);
+	 dEdxError = dEdx*dEdxError;
+
+	 // Assign to tables
+	 //
+
        }
-       
-       //
-       // Normalize to the number of Points
-       //
-       dEdx      /= numberOfPointsOnTrack;
-       dEdxError /= numberOfPointsOnTrack;      
-       
-       dEdx = exp(dEdx);
-       dEdxError = ::sqrt(exp(dEdxError));
-       
-       // Assign to tables
-       //
-       
-       dEdxError = exp(dEdxError) - (dEdx * dEdx);
        svtTrack[ii].dedx[0] = dEdx;
        svtTrack[ii].dedx[1] = dEdxError;
        
