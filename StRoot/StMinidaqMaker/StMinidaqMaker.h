@@ -17,8 +17,9 @@ class St_tcl_sector_index;
 
 class StMinidaqMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.7 1999/04/08 16:29:53 sakrejda Exp $";
+// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.8 1999/06/18 21:35:06 perev Exp $";
 // St_stk_stkpar *m_stk_stkpar;  	//! pointer to stk parameters
+   Int_t m_init;			//! init counter
    St_type_structtbl *m_tpc_gain;   	//! pointer to the gain table
    Int_t m_first_sector; 		// The first sector
    Int_t m_last_sector;  		// The last sector
