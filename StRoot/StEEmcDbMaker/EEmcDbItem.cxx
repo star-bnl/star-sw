@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.6 2004/02/26 04:21:17 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.7 2004/03/12 02:24:10 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -63,10 +63,12 @@ int EEmcDbItem::importAscii(FILE *fd){
      2 : valid input
   */
 
+  clear();
   const int mx=1000;
   char buf[mx];
   
   char * ret=fgets(buf,mx,fd);
+ 
   if(ret==0) return 0;
 
   if(buf[0]=='#') return 1;
@@ -75,7 +77,7 @@ int EEmcDbItem::importAscii(FILE *fd){
   if(ret1==0) return -1;
 
   int n=0; 
-  //  printf("aaa name='%s' n=%d\n",name,name[0]);
+  // printf("aaa name='%s' n=%d\n",name,name[0]);
   if(name0[2]=='U' || name0[2]=='V') { 
     n=sscanf(buf,"%s %d %d %d %c %d %f %f %f %x %x %s %d",name,&crate,&chan,&sec,&plane,&strip,&gain,&ped,&thr,&stat,&fail,tube,&key);
   }
@@ -86,8 +88,9 @@ int EEmcDbItem::importAscii(FILE *fd){
     return -3;
 
 
+
   if(n!=13) return -1000-n;
-  //  print();
+  //    print();
   return 2;
 }
 
@@ -176,6 +179,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.7  2004/03/12 02:24:10  balewski
+// to synchronize
+//
 // Revision 1.6  2004/02/26 04:21:17  balewski
 // read ASCII dump
 //
