@@ -1,5 +1,8 @@
-* $Id: tph_get_cls_data.F,v 1.1 1998/01/27 00:49:17 fisyak Exp $
+* $Id: tph_get_cls_data.F,v 1.2 1998/08/27 16:59:54 love Exp $
 * $Log: tph_get_cls_data.F,v $
+* Revision 1.2  1998/08/27 16:59:54  love
+* Check tpmcpix table before accessing
+*
 * Revision 1.1  1998/01/27 00:49:17  fisyak
 * Split sources
 *
@@ -151,9 +154,10 @@ C-----------------------------------------------------------------------
 
            ldatum = tppixel(jpix).datum
 c
-c          for MC data!
+c          for MC data! [ Then you should check it - WAL ]
 c
-           ktrk = tpmcpix(jpix).mcid
+           ktrk=0
+	   if(tpmcpix_h.nok.ge.jpix)ktrk = tpmcpix(jpix).mcid
            itrk(iclspix) = ktrk
 c new way to unpack data
            kseqpix = ldatum/numseq_factor
@@ -189,9 +193,10 @@ c itdc(iclspix-1) = itdc(iclspix)-1
      +		- tdc_factor*itdc(iclspix-1)
               ipad(iclspix) = ipad(iclspix-1)
 c
-c             for MC data!
+c             for MC data!  [Again reference needs to be checked-WAL]
 c
-              ktrk = tpmcpix(jpix).mcid
+	      ktrk=0
+	      if(tpmcpix_h.nok.ge.jpix)ktrk = tpmcpix(jpix).mcid
               itrk(iclspix) = ktrk
            enddo
         enddo
