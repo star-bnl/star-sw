@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeCuts.cc,v 3.2 2002/04/30 16:02:47 genevb Exp $
+ * $Id: StStrangeCuts.cc,v 3.3 2002/05/10 20:57:06 genevb Exp $
  *
  * Author: Gene Van Buren, UCLA, 26-May-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeCuts.cc,v $
+ * Revision 3.3  2002/05/10 20:57:06  genevb
+ * Minor update
+ *
  * Revision 3.2  2002/04/30 16:02:47  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -41,6 +44,7 @@ ClassImp(StStrangeCuts)
 //_____________________________________________________________________________
 StStrangeCuts::StStrangeCuts() : TOrdCollection(0), update(kFALSE) {
   SetOwner();
+  TCut::Class()->IgnoreTObjectStreamer();
 }
 //_____________________________________________________________________________
 StStrangeCuts::~StStrangeCuts() {
@@ -137,7 +141,6 @@ void StStrangeCuts::UpdateArray(TClonesArray* cutsArray) {
 }
 //_____________________________________________________________________________
 void StStrangeCuts::UnknownCuts() {
-  printf("YYYYYYYYYYYYYYYYYYYy\n");
   Clear();
   Add(unknownCut);
 }
