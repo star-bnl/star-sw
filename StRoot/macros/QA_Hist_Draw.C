@@ -37,20 +37,26 @@ void QA_Hist_Draw(
   // file1.ls();
   TList *keys = file1.GetListOfKeys();
   if (keys) {
-    QACanvas = new TCanvas("CanvasName","Canvas Title");
+    const Int_t xSize = 2;
+    const Int_t ySize = 3;
+    const Int_t numPads = xSize*ySize;
+
+    Int_t width  = 20;
+    Int_t height = 27;
     gStyle->SetOptStat(0);
-    Int_t width  = 16;
-    Int_t height = 10;
     gStyle->SetPaperSize(width, height);
+    QACanvas = new TCanvas("Banner","Canvas Title",30*height,30*width);
     TPostScript p5(exPsFile);
     TH1F dummy("QA","MDC2",1,0,1);
  // Create banner page   
 //    QACanvas->Range(0,0,1,1);
     QACanvas->SetFillColor(19);
     QACanvas->SetBorderSize(2);
+
+    p5->NewPage();
    
     dummy.SetMinimum(0);
-    dummy.Draw();
+//    dummy.Draw();
     gStyle->SetOptStat(111111);
     TString banner  =  "Input: \"";
     banner += exFileName;
@@ -95,7 +101,19 @@ void QA_Hist_Draw(
    pl->Draw();
    QACanvas->Modified();
    QACanvas->Update();
-   p5.NewPage();
+
+//   delete QACanvas;
+
+   p5->NewPage();
+
+   QACanvas = new TCanvas("CanvasName","Canvas Title",30*width,30*height);
+   QACanvas->SetFillColor(19);
+   QACanvas->SetBorderSize(2);
+   QACanvas->Divide(xSize,ySize);
+
+   p5->NewPage();
+
+   Int_t padCount = 0;
   //_____________________
   // Create an itertor
     TIter nextKey(keys);
@@ -113,6 +131,12 @@ void QA_Hist_Draw(
             if (strcmp(obj->GetName(),lastHistName)==0) started = kFALSE;
             histCounter++;
             printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
+            if (padCount == numPads) {
+                p5->NewPage();
+                padCount=0;
+            }
+            QACanvas->cd(++padCount);
+
             obj->Draw();   
             if (gPad) {
               gPad->Modified();
