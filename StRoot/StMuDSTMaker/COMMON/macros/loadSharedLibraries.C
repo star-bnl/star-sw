@@ -18,6 +18,7 @@ void loadSharedLibraries() {
   gSystem->Load("StBichsel");
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
+  gSystem->Load("StDbLib");
   gSystem->Load("StEmcUtil");
   gSystem->Load("StTofUtil");
   gSystem->Load("StPmdUtil");
