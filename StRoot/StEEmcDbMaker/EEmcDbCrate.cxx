@@ -1,4 +1,4 @@
-// $Id: EEmcDbCrate.cxx,v 1.2 2004/03/28 04:09:08 balewski Exp $
+// $Id: EEmcDbCrate.cxx,v 1.3 2004/03/30 04:44:57 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +53,19 @@ void EEmcDbCrate::clear() {
 void EEmcDbCrate::setName(char *text) {
   strncpy(name,text,CrateNameLen-1); 
 }
+
+//--------------------------------------------------
+//--------------------------------------------------
+void EEmcDbCrate::setAll(char *buf   ) {
+  //printf("buf='%s'\n",buf);
+  int ret=sscanf(buf,"%s %d %d %d %d %d %c",name,&crID,&crIDswitch,&fiber,&nCh,&nHead,&type);
+  //  printf("ret=%d\n",ret);
+  assert(ret==7);
+}
+
+
+
+
 
 
 #if 0
@@ -115,6 +128,9 @@ int EEmcDbCrate::importAscii(FILE *fd){
 
 
 // $Log: EEmcDbCrate.cxx,v $
+// Revision 1.3  2004/03/30 04:44:57  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2004/03/28 04:09:08  balewski
 // storage of EEMC raw data, not finished
 //

@@ -19,9 +19,8 @@ class EEmcDbCrate {
   void clear();
   void print() const;
   void setName(char *text);
+  void setAll(char *buff);
   int isEmpty() const;
-  //  void exportAscii(FILE *fd) const;
-  // int  importAscii(FILE *fd);
 };
 
 #endif 

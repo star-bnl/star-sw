@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.16 2004/03/19 21:31:53 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.17 2004/03/30 04:44:57 balewski Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -41,6 +41,7 @@ class eemcDbADCconf_st;
 class eemcDbPMTcal_st;
 class eemcDbPMTped_st;
 class eemcDbPMTstat_st;
+class kretDbBlobS_st;
 
 class  StEEmcDbIndexItem1;
 class  EEmcDbCrate;
@@ -56,7 +57,7 @@ class DbFlavor {
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.16 2004/03/19 21:31:53 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.17 2004/03/30 04:44:57 balewski Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -64,8 +65,7 @@ class StEEmcDbMaker : public StMaker {
   unsigned int myTimeStampUnix;
   void mReloadDb(); ///< reads data from STAR-DB
   void mOptimizeDb(); ///< creates local fast look-up tables
-  void mReloadCrateDb2003(); ///< dedicated access to fiber mapping
-  void mReloadCrateDb2004(); ///< dedicated access to fiber mapping
+  void mOptimizeCrates(); ///< decodes crates -->fiber map
   
   // pointers to Db tables for each sector
   int *mDbsectorID; //!
@@ -73,6 +73,7 @@ class StEEmcDbMaker : public StMaker {
   eemcDbPMTcal_st   **mDbPMTcal ; //!
   eemcDbPMTped_st   **mDbPMTped ; //!
   eemcDbPMTstat_st  **mDbPMTstat ; //!
+  kretDbBlobS_st  *mDbCrateConfBlob; //!
   
   // local fast look-up tables
   //old, to be revised,jb
@@ -90,10 +91,8 @@ class StEEmcDbMaker : public StMaker {
   int nFound;
   TString dbName; //name of the DB used 
   DbFlavor dbFlavor; // used if flavor is requested
-
-  //  template <class St_T, class T_st> T_st * getTable(TDataSet *eedb, int secID, TString tabName);
-
-  template <class St_T, class T_st> void  getTable(TDataSet *eedb, int secID, TString tabName, TString mask,  T_st **outTab);
+  
+  template <class St_T, class T_st> void getTable(TDataSet *eedb, int secID, TString tabName, TString mask, T_st **outTab);
   
 
  protected:
@@ -137,7 +136,7 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.16 2004/03/19 21:31:53 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.17 2004/03/30 04:44:57 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -148,6 +147,9 @@ class StEEmcDbMaker : public StMaker {
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.17  2004/03/30 04:44:57  balewski
+// *** empty log message ***
+//
 // Revision 1.16  2004/03/19 21:31:53  balewski
 // new EEMC data decoder
 //
