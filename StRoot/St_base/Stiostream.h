@@ -16,14 +16,14 @@
   Description is as follow
  
   <UL>
-  <LI><U>pre-ANSI iostream class</BR>
+  <LI><U>pre-ANSI iostream class</U><BR>
   This class combines the istream and ostream classes. You use it to carry
   out bidirectional operations (inserting into and extracting from a single
   sequence of characters).
  
   <LI><U>ANSI iostream</U><BR>
   The class basic_iostream inherits a number of functions from classes
-  basic_ostream<charT, traits> and basic_istream<charT, traits>. They assist
+  <TT>basic_ostream&lt;charT, traits&gt;</TT> and <TT>basic_istream&lt;charT, traits&gt;</TT>. They assist
   in formatting and interpreting sequences of characters controlled by a
   stream buffer. Two groups of functions share common properties, the formatted
   functions and the unformatted functions.
