@@ -109,8 +109,8 @@ MatchedTrk:: MatchedTrk(StPrimaryMaker* head, int *ipar, float *fpar, CtbRespons
     if(d2.first>=0 || d2.second<=0) {
       n5++;
       head->hmtr[0]->Fill(5);
-      printf("WARN MatchTrk , unexpected solution for track crossing CTB\n"
-	     " tack=%d, d2.firts=%f, second=%f, track ignored\n",
+      printf("WARN MatchTrk , unexpected solution for track crossing CTB\n");
+      printf(" tack=%d, d2.firts=%f, second=%f, track ignored\n",
 	     l,d2.first, d2.second);
     }
     
