@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.12 1999/11/13 23:31:34 fine Exp $
+// $Id: PadControlPanel.C,v 1.13 1999/11/30 03:00:00 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -25,9 +25,18 @@
 //  --------------------
 //   gROOT->LoadMacro("PadControlPanel.C");
 //
-//  Afterthat one may "click" <4 views> button to get from the single "view"
+//  After that one may "click" <4 views> button to get from the single "view"
 //  the expanded view as follows:
 //  begin_html  <P ALIGN=CENTER> <IMG SRC="gif/FourStarView.gif" ></P> end_html
+//  To cutomize the default bar the dirived class with the custom void UserBar()
+//  method can be done.
+//         TControlBar *Bar(){ return fBar;}  
+//  method can be used.
+//
+//  Example:
+//    TControlBar *myBar =   __aa__.Bar();
+//     myBar->AddButton("My custom","printf(\"here is my custom action\n\");","To add your own action replace the second parameter"); 
+//
 //  Note:  If you don't like what it does make your private copy 
 //  ====   change it with your favorite text editor and load it right
 //         away.
@@ -35,9 +44,22 @@
 //
 ///////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////
+//
+//  PadControl panel is the set of the static methods to control 
+//  TView of any "current" TPad with some "primitive"
+//  operation:
+//
+///////////////////////////////////////////////////////////////////////
+
 class StPadControlPanel {
   private:
    TControlBar *fBar;  
+  protected:
+   //_______________________________________________________________________________________
+   void Bar(const Char_t *buttonName, const Char_t *statement,const Char_t *tipText)
+   {   fBar->AddButton(buttonName,statement,tipText); }
+
   public:
 StPadControlPanel() { fBar=PadControlPanel();}
 //_______________________________________________________________________________________
@@ -65,23 +87,43 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar = new TControlBar("vertical", "Pad Control Panel");
    bar->AddButton("Black background", "StPadControlPanel::SetBackround(kBlack);", "Change the backgroung color to black");
    bar->AddButton("White background", "StPadControlPanel::SetBackround(19);", "Change the backgroung color to white");
+   bar->AddSeparator();
 //   bar->AddButton("Set background", "StPadControlPanel::SetBackroundStyle();", "Change the backgroung color to white");
    bar->AddButton("Adjust scales","StPadControlPanel::AdjustScales();","Adjust the scales of all three axice");
    bar->AddButton("Centered","StPadControlPanel::Centered3DImages();","Place (0,0,0) into the center of the view port");
    bar->AddButton("Scale +","StPadControlPanel::Inscrease3DScale();","Change the scale of the image");
    bar->AddButton("Scale -","StPadControlPanel::Decrease3DScale();","Change the scale of the image");
+   bar->AddSeparator();
    bar->AddButton("Top View","StPadControlPanel::TopView();","Show the top view");
    bar->AddButton("Side View","StPadControlPanel::SideView();","Show the side view");
    bar->AddButton("Front View","StPadControlPanel::FrontView();","Show the front view");
    bar->AddButton("4 views","StPadControlPanel::MakeFourView();","4 view");
+   bar->AddSeparator();
    bar->AddButton("Add Axes","StPadControlPanel::AddAxes();","Add 3D axes to the current TPad view");
+   bar->AddButton("Add Rulers","StPadControlPanel::AddRulers();","Add 3D axis / ruler to the current TPad view");
+   bar->AddSeparator();
 
+   bar->AddButton("Next event","chain->MakeEvent();","Make next event and draw it");
+   if (chain && chain->Maker("EventDisplay")) 
+     bar->AddButton("ReDraw canvas","((StEventDisplayMaker *)(chain->Maker(\"EventDisplay\")))->ReDraw();",
+                    "ReDraw canvas to take in account new options");
+
+
+   // UserBars();
 
    bar->Show();
    return bar;
 }
 //_______________________________________________________________________________________
 ~StPadControlPanel(){ if(fBar) delete fBar; fBar = 0;}
+//_______________________________________________________________________________________
+ TControlBar *Bar() const { return fBar;}  
+//_______________________________________________________________________________________
+ virtual void UserBars(){
+  // User may overload this method to add his own buttons
+  printf("Please, overload me\n");   
+ }
+
 //_______________________________________________________________________________________
 static void SetBackround(Color_t color, TVirtualPad *pad=0)
 {
@@ -133,6 +175,45 @@ static void FrontView(TVirtualPad *pad=0){
 //_______________________________________________________________________________________
 static void TopView(TVirtualPad *pad=0){
   RotateView(270.0,0.0,pad);
+}
+//_______________________________________________________________________________________
+static void AddRulers()
+{
+  TAxis3D *axis = new TAxis3D;
+  axis->SetBit(kCanDelete);
+  axis->Draw();
+}
+
+//_______________________________________________________________________________________
+static void AddGrid()
+{ 
+  TVirtualPad *thisPad = gPad;
+
+  if (thisPad) {
+ 
+    TView *view = thisPad->GetView(); 
+    if (!view) return;
+    Float_t min[3],max[3];
+    view->GetRange(min,max);
+
+    TList *list      = thisPad->GetListOfPrimitives();
+    TString histName = thisPad->GetName();
+    TH2F *m_DummyHist = 0; 
+    const Char_t *dummyName = "Axis3D";
+    histName += dummyName;
+    m_DummyHist = list->FindObject(histName.Data());
+    if (!m_DummyHist) { 
+      m_DummyHist = new TH2F(histName.Data(),"",1,min[0],max[0],1,min[1],max[1]);
+      m_DummyHist->SetDirectory(0);
+      m_DummyHist->Draw("surf,same");
+    }
+    m_DummyHist->GetXaxis()->SetLimits(min[0],max[0]);
+    m_DummyHist->GetYaxis()->SetLimits(min[1],max[1]);
+    m_DummyHist->GetZaxis()->SetLimits(min[2],max[2]);
+ 
+    thisPad->Modified();
+    thisPad->Update();
+  }
 }
 //_______________________________________________________________________________________
 static void AdjustScales()
@@ -280,6 +361,9 @@ StPadControlPanel __aa__;
 void PadControlPanel(){}
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.13  1999/11/30 03:00:00  fine
+// Ruler button has been introduced
+//
 // Revision 1.12  1999/11/13 23:31:34  fine
 // Constant kWhite has been replaced with number 19 due some bug wity 2.23
 //
@@ -316,8 +400,4 @@ void PadControlPanel(){}
 // Revision 1.1  1999/05/29 20:55:11  fine
 // macro to control any 3D view
 //
-//
-//  PadControl panel is the set of the static methods to control 
-//  TView of any "current" TPad with some "primitive"
-//  operation:
-//
+
