@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StMuPmdCollection.cxx,v 1.4 2004/05/02 04:10:14 perev Exp $
+ * $Id: StMuPmdCollection.cxx,v 1.5 2004/08/17 17:42:30 mvl Exp $
  *
  * Class : StMuPmdCollection
  * Author: Supriya Das & Subhasis Chattopadhyay
@@ -8,6 +8,9 @@
  * Description: This class holds the PMD clusters for MuDst
  * ****************************************************************
  * $Log: StMuPmdCollection.cxx,v $
+ * Revision 1.5  2004/08/17 17:42:30  mvl
+ * Removed warning message for empty Pmd collection + corrected some range checking
+ *
  * Revision 1.4  2004/05/02 04:10:14  perev
  * private => protected
  *
@@ -116,7 +119,7 @@ unsigned int StMuPmdCollection::unpackbits(unsigned char *data, unsigned int nbi
 
 int StMuPmdCollection::getNClusters(int detector)
 {
-  if(detector<pmd && detector>cpv) return 0;
+  if(detector<pmd || detector>cpv) return 0;
   TClonesArray *tca =NULL;
   if(detector>=pmd && detector <= cpv) tca = mPmdClusters[detector-pmd];
 
@@ -127,14 +130,14 @@ int StMuPmdCollection::getNClusters(int detector)
     //cout << "Got tca"<<endl;
     return tca->GetEntries();
   } else  {
-    cout << "StMuPmdCollection::getNClusters No tca" << endl;
+    //cout << "StMuPmdCollection::getNClusters No tca" << endl;
     return 0;
   }
 }
 
 StMuPmdCluster* StMuPmdCollection::getCluster(int clusterId,int detector)
 {
-  if(detector<pmd && detector>cpv) return NULL;
+  if(detector<pmd || detector>cpv) return NULL;
   TClonesArray *tca = NULL;
   if(detector>=pmd && detector <= cpv) tca = mPmdClusters[detector-pmd];
   int counter = tca->GetEntries();
@@ -144,7 +147,7 @@ StMuPmdCluster* StMuPmdCollection::getCluster(int clusterId,int detector)
 
 void StMuPmdCollection::addCluster(int detector)
 {
-  if(detector<pmd && detector>cpv) return;
+  if(detector<pmd || detector>cpv) return;
   TClonesArray *tca =NULL;
   if(detector>=pmd && detector <= cpv) tca = mPmdClusters[detector-pmd];
   /*
