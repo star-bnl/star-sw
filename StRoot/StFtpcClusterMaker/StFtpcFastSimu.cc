@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.30 2004/01/28 02:04:43 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.31 2004/02/12 19:38:46 oldi Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.31  2004/02/12 19:38:46  oldi
+// Removal of intermediate tables.
+//
 // Revision 1.30  2004/01/28 02:04:43  jcs
 // replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
 //
@@ -164,9 +167,28 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   for (Int_t i = 0; i < nPoints; i++) {
     // use (default) copy constructor for StFtpcGeantPoint
     geantarray->AddAt(new StFtpcGeantPoint(mGeantPoint[i]), i);
+    // as StFtpcPoint is in different package, we have to copy data 
+    // from StFtpcReducedPoint
+    // hgrrrumpf!!! Holm
+    // It's not clear to me if this is still necessary since StFtpcReducePoint was eliminated. 
+    // oldi 01/28/2004
     pointarray->AddAt(new StFtpcConfMapPoint(), i);
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetX(mPoint[i].GetX());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetY(mPoint[i].GetY());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetZ(mPoint[i].GetZ());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetXerr(mPoint[i].GetXerr());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetYerr(mPoint[i].GetYerr());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetZerr(mPoint[i].GetZerr());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetPadRow(mPoint[i].GetPadRow());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetSector(mPoint[i].GetSector());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetNumberPads(mPoint[i].GetNumberPads());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetNumberBins(mPoint[i].GetNumberBins());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetMaxADC(mPoint[i].GetMaxADC());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetCharge(mPoint[i].GetCharge());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetFlags(mPoint[i].GetFlags());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetSigmaPhi(mPoint[i].GetSigmaPhi());
+    ((StFtpcConfMapPoint *)pointarray->At(i))->SetSigmaR(mPoint[i].GetSigmaR());
   }
-
   
   delete[] mGeantPoint;
   delete[] mPoint;

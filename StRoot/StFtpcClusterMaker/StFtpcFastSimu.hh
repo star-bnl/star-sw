@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.hh,v 1.16 2004/01/28 02:04:43 jcs Exp $
+// $Id: StFtpcFastSimu.hh,v 1.17 2004/02/12 19:38:46 oldi Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.17  2004/02/12 19:38:46  oldi
+// Removal of intermediate tables.
+//
 // Revision 1.16  2004/01/28 02:04:43  jcs
 // replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
 //
@@ -58,7 +61,6 @@
 #ifndef STAR_StFtpcFastSimu
 #define STAR_StFtpcFastSimu
 #include "ffs_gepoint.h"
-#include "fcl_fppoint.h"
 #include "TObjArray.h"
 #include "StFtpcGeantPoint.hh"
 #include "StFtpcTrackMaker/StFtpcConfMapPoint.hh"
