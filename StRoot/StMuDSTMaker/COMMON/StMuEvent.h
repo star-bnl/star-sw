@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.2 2002/03/20 16:04:11 laue Exp $
+ * $Id: StMuEvent.h,v 1.3 2002/08/20 19:55:49 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -24,19 +24,14 @@
 //#include "StarClassLibrary/StThreeVectorD.hh"
 
 class StEvent;
-/* class StTrack; */
-/* class StV0MuDst; */
-/* class StXiMuDst; */
-/* class StV0Vertex; */
-/* class StXiVertex; */
-/* class StKinkVertex; */
-/* class StSPtrVecTrackNode; */
-/* class StTrackNode; */
-/* class StRichSpectra; */
-/* class StDetectorState; */
-
 class StMuCut;
 
+/**
+   @class StMuEvent
+   The StMuEvent class holds the event-wise information of the STAR's common muDst.  
+   Most of its data members are classes from the StEvent package.
+   Please refer to the StEvent manual for information on these classes.
+ */
 class StMuEvent : public TObject {
  public:
   StMuEvent();
@@ -57,21 +52,27 @@ class StMuEvent : public TObject {
   StL0Trigger& l0Trigger(); 
   StMuL3EventSummary& l3EventSummary();
 
+  /// Reference multiplicity of positive particles as defined in StEventUtilities/StuRefMult.hh
   unsigned short refMultPos();
+  /// Reference multiplicity of negative particles as defined in StEventUtilities/StuRefMult.hh
   unsigned short refMultNeg();
+  /// Reference multiplicity of charged particles as defined in StEventUtilities/StuRefMult.hh
   unsigned short refMult();
+  /// Currently not filled properly.
   double reactionPlane(unsigned short);
+  /// Currently not filled properly.
   double reactionPlanePtWgt(unsigned short);
   double magneticField();
   double zdcAdcAttentuatedSumWest();
   double zdcAdcAttentuatedSumEast();
   double ctbMultiplicity();
+  ///    The StMuDst is supposed to be structured in 'physical events'.  Therefore there is only 1 primary vertex per mu event.
   StThreeVectorF primaryVertexPosition();
  private:
   void clear();
   void fill(const StEvent*);
 
-  /// classes that we just takes from StEvent
+  // classes that we just takes from StEvent
   StRunInfo mRunInfo;
   StEventInfo mEventInfo;
   StEventSummary mEventSummary;
@@ -129,6 +130,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.3  2002/08/20 19:55:49  laue
+ * Doxygen comments added
+ *
  * Revision 1.2  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.3 2002/04/01 22:42:30 laue Exp $
+ * $Id: StMuTrack.h,v 1.4 2002/08/20 19:55:49 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -19,6 +19,7 @@
 #include "StarClassLibrary/StPhysicalHelixD.hh"
 #include "StarClassLibrary/StThreeVectorD.hh"
 #include "StarClassLibrary/StThreeVectorF.hh"
+#include "StarClassLibrary/SystemOfUnits.h"
 
 #include "TObject.h"
 
@@ -66,6 +67,7 @@ public:
   double pt() const;
   double phi() const;
   double eta() const;
+  double length() const;
   StTrackTopologyMap topologyMap() const;
   Short_t charge() const;
   StThreeVectorF p() const;
@@ -156,8 +158,6 @@ inline StThreeVectorF StMuTrack::dca() const {return mDCA;}
 inline StThreeVectorF StMuTrack::dcaGlobal() const {return mDCAGlobal;}
 inline StThreeVectorF StMuTrack::firstPoint() const {return mFirstPoint;}
 inline StThreeVectorF StMuTrack::lastPoint() const {return mLastPoint;}
-inline StPhysicalHelixD StMuTrack::helix() const {return StPhysicalHelixD(mHelix.p(),mHelix.origin(), mHelix.b()*kilogauss, mHelix.q());}  
-inline StPhysicalHelixD StMuTrack::outerHelix() const {return StPhysicalHelixD(mOuterHelix.p(),mOuterHelix.origin(), mOuterHelix.b()*kilogauss, mOuterHelix.q());}  
 //!inline StPhysicalHelixD StMuTrack::helix() const {return mHelix;}
 //!inline StPhysicalHelixD StMuTrack::outerHelix() const {return mOuterHelix;}
 inline void StMuTrack::setProbabilityPidAlgorithm(StuProbabilityPidAlgorithm* p) { mProbabilityPidAlgorithm=p;}
@@ -172,6 +172,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.4  2002/08/20 19:55:49  laue
+ * Doxygen comments added
+ *
  * Revision 1.3  2002/04/01 22:42:30  laue
  * improved chain filter options
  *

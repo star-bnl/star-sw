@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.12 2002/05/20 17:23:31 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.13 2002/08/20 19:55:49 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -53,43 +53,69 @@ class TTree;
 class TChain;
 class TClonesArray;
 
-
+/**
+   @class StMuDstMaker
+   Class to create and read STAR's common micro dst (StMuDst)
+   
+   This class is a true maker in the STAR sense. It inherits from "StMaker" and implements the functions "int Init()", "void Clear()",
+   int Make()", and "int Finish()" in order to run as part of an "StChain". Please refer to the STAR Computing Web pages in case you do not 
+   know what "StMaker" and "StChain" mean.
+   
+*/
 class StMuDstMaker : public StMaker {
  public:
-  StMuDstMaker(const char* name="MuDst");
-  StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10 );
-  ~StMuDstMaker();
-  
+    /// Default constructor
+    StMuDstMaker(const char* name="MuDst");
+    /// Constructor
+    StMuDstMaker(int mode, int nameMode, const char* dirName="./", const char* fileName="", const char* filter=".", int maxfiles=10 );
+    ~StMuDstMaker();
+    
   int Init();
   void Clear();
   int Make();
   int Finish();
 
+  /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
   void setTrackFilter(StMuCut* c);
+  /// Set the track filter used for L3 tracks when creating muDsts from StEvent and writing to disk.
   void setL3TrackFilter(StMuCut* c);
+  /// Set the file from where the PID probability tables should be read. 
+  /** Set the file from where the PID probability tables should be read. These tables might change from production version to production version.
+      It is the reposibility of who ever creates muDsts to make sure the right tables are used. So far, Aihong was providing these files. Thanks,Aihong. 
+  */
   void setProbabilityPidFile(const char* file);
-
+  /// Returns pointer to the StMuDst object, the transient class that holds all the TClonesArrays and has access functions to the tracks, v0s, etc. 
+  /// Returns null pointer if no StMuDst available.
   StMuDst* muDst();
+  /// In read mode, returns pointer to the chain of .MuDst.root files that where selected. 
   TChain* chain();
+  /// Returns pointer to the current TTree, the top level io structure that holds the event, track, v0, etc. information in branches of that tree.
   TTree* tree();
 
+  /// Sets the split level for the file and all branches. Please refer to the ROOT manual (http://root.cern.ch) for more information.
   void setSplit(int=99);
+  /// Sets the buffer size for all branches. 
   void setBufferSize(int=65536*4);
+  /// Sets the compression level for the file and all branches. 0 means no compression, 9 is the higher compression level. 
   void setCompression(int comp=9);
-
+  /// Returns version tag.
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.12 2002/05/20 17:23:31 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.13 2002/08/20 19:55:49 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
 
 private:
   enum ioMode {ioRead, ioWrite};
+  /** Specifies the way the output file name is contructed when creating muDsts. 
+      ioFix = use filename specified in when calling the constructor, right in the same output file for all input files. 
+      ioIOMaker = create one output file per input file, derive output filename from current input file of the StIOMaker.
+      ioTreeMaker = create one output file per input file, derive output filename from current input file of the StTreeMaker.
+  */
   enum ioNameMode {ioFix=0, ioIOMaker, ioTreeMaker};
 
 
   StMuDst* mStMuDst;
-
   StEvent* mStEvent;
   StStrangeMuDstMaker* mStStrangeMuDstMaker;
   StIOMaker* mIOMaker;
@@ -222,6 +248,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.13  2002/08/20 19:55:49  laue
+ * Doxygen comments added
+ *
  * Revision 1.12  2002/05/20 17:23:31  laue
  * StStrangeCuts added
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.5 2002/05/04 23:56:29 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.6 2002/08/20 19:55:48 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -122,6 +122,7 @@ TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFile
 
   if (file!="") {
     if (file.find(".lis")!=string::npos) fromList(file, maxFiles);
+    if (file.find(".files")!=string::npos) fromList(file, maxFiles);
     if (file.find(".MuDst.root")!=string::npos) fromFile(file, maxFiles);
   }
   else {
@@ -251,6 +252,9 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.6  2002/08/20 19:55:48  laue
+ * Doxygen comments added
+ *
  * Revision 1.5  2002/05/04 23:56:29  laue
  * some documentation added
  *

@@ -8,12 +8,16 @@
 #include "StMuDebug.h"
 ClassImp(StMuDebug)
 
-unsigned int StMuDebug::mDebug=2;
+/// default debug level is 2 
+int StMuDebug::mDebug=2;
 
 
 /***********************************************************************
  *
  * $Log: StMuDebug.cxx,v $
+ * Revision 1.2  2002/08/20 19:55:48  laue
+ * Doxygen comments added
+ *
  * Revision 1.1  2002/03/08 17:04:17  laue
  * initial revision
  *

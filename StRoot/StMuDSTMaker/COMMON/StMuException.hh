@@ -12,7 +12,11 @@
 		       
 
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};
-
+/** 
+    @class StMuException
+    Just a small helper class (and a few macros) to easily create a set of exceptions.
+    Using the "THROW(...)" macro the exceptions datamember mIn will hold the name of the scope that was throwing the exception.
+*/
 class StMuException {
 protected:
   StMuExceptionTypes mException;
@@ -25,23 +29,6 @@ public:
   virtual void print() { cout << "*** StMuException #" <<  (unsigned long)mException << " *** " << mIn << " *** " << message() << " ***" << endl; }
   virtual StMuExceptionTypes type() { return mException; }
 };
-
-// class StMuExceptionUnknown : public StMuException {
-//   StMuExceptionUnknown() : StMuException(kUnknown, const char* m="", const char* in="???") { /* no-op */ }
-// };
-// class StMuExceptionNullPointer : public StMuException {
-//   StMuExceptionNullPointer() : StMuException(kNullPointer, const char* m="", const char* in="???") { /* no-op */ }
-// };
-// class StMuExceptionBadValue : public StMuException {
-//   StMuExceptionBadValue() : StMuException(kBadValue, const char* m="", const char* in="???") { /* no-op */ }
-// };
-// class StMuExceptionkBadFlag : public StMuException {
-//   StMuExceptionBadFlag() : StMuException(kBadFlag, const char* m="", const char* in="???") { /* no-op */ }
-// };
-// class StMuExceptionEOF : public StMuException {
-//   StMuExceptionEOF() : StMuException(kEOF, const char* m="", const char* in="???") { /* no-op */ }
-// };
-  
 
 EXE(Unknown);
 EXE(NullPointer);
