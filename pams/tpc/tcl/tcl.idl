@@ -10,7 +10,7 @@
 #include "raw_seq.idl"
 #include "type_shortdata.idl"
 #include "tcl_tpcluster.idl"
-#include "tcl_tpseq.idl"
+#include "tcl_tp_seq.idl"
 
 interface tcl : amiModule{
 	STAFCV_T call (
@@ -26,10 +26,10 @@ interface tcl : amiModule{
 		, in raw_seq  	    raw_seq_out
 		, in type_shortdata pixel_data_out
 		, inout tcl_tpcluster tpcluster
-		, inout tcl_tpseq     tpseq
+		, inout tcl_tp_seq     tpseq
 		);
 };
-/* last modified $Date: 1998/05/21 01:10:48 $ */
+/* last modified $Date: 1998/05/22 00:18:16 $ */
 
 		
 		
