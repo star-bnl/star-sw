@@ -1,6 +1,10 @@
-// $Id: StFtpcV0.hh,v 1.3 2000/01/03 13:16:12 jcs Exp $
+// $Id: StFtpcV0.hh,v 1.4 2000/11/16 12:48:16 jcs Exp $
 //
 // $Log: StFtpcV0.hh,v $
+// Revision 1.4  2000/11/16 12:48:16  jcs
+// Save FTPC vzero inforamtion in correct banks
+// Use correct FTPC track class
+//
 // Revision 1.3  2000/01/03 13:16:12  jcs
 // Add CVS Id strings
 //
@@ -24,12 +28,13 @@
 
 #include "StMatrix.hh"
   
-#include "StFtpcTrack.hh"
+//#include "StFtpcTrackMaker/StFtpcTrack.hh"
+#include "StFtpcV0Track.hh"
 
-class StFtpcV0: public StFtpcTrack
+class StFtpcV0: public StFtpcV0Track
 {
 public:
-  StFtpcV0(StFtpcTrack track1,StFtpcTrack track2);
+  StFtpcV0(StFtpcV0Track track1,StFtpcV0Track track2);
   ~StFtpcV0();
 
   //DATA MEMBERS
@@ -43,8 +48,8 @@ public:
   StThreeVector<double> mMomentum;
   StDouble mDca;  // distance of closest approch of the two daughters
 
-  StFtpcTrack mTrack1;
-  StFtpcTrack mTrack2;
+  StFtpcV0Track mTrack1;
+  StFtpcV0Track mTrack2;
 
   //MEMBER FUNCTIONS
  public:
