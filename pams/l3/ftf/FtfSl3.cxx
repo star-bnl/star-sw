@@ -514,7 +514,7 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 
 	 counter++;
 	 if ( (nHits+counter)>maxHits ) {
-	    fprintf (stderr, "Error - FtfSl3:read: Hit array too small: counter %d maxHits %d \n",
+	    fprintf (stderr, "Error - FtfSl3:read: Hit array too small: nHits+counter %d maxHits %d \n",
 		  counter, maxHits ) ;
 	    return -1;
 	 }
@@ -587,7 +587,6 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 	 if ( sectorGeo[sector-1].etaMin < para.etaMin ) para.etaMin = sectorGeo[sector-1].etaMin ;
 	 if ( sectorGeo[sector-1].etaMax > para.etaMax ) para.etaMax = sectorGeo[sector-1].etaMax ;
       }
-      printf ( "sector %d rb %d phi min/max %f %f \n", sector, iRb, para.phiMin, para.phiMax ) ;
 
 
       if ( !(unsigned int)seclp->rb[iRb].off) continue ;
