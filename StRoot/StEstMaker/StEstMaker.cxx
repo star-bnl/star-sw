@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.18 2002/11/21 23:02:48 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.19 2003/04/14 18:31:10 munhoz Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.19  2003/04/14 18:31:10  munhoz
+ * allow 1 hit tracks
+ *
  * Revision 1.18  2002/11/21 23:02:48  caines
  * Fix helicity initialization for TPC tracks and no longer use assumed vertex if one isnt there
  *
@@ -304,7 +307,7 @@ Int_t StEstMaker::Init(){
 
   // superpass settings
 
-  mNSuperPass = 2;
+  mNSuperPass = 3;
   mSegments = new StEstSegments*[mNSuperPass];
   for (i=0;i<mNSuperPass;i++) mSegments[i] = new StEstSegments;
 
@@ -326,14 +329,14 @@ Int_t StEstMaker::Init(){
   mSegments[1]->slay[1]=1;
   mSegments[1]->slay[0]=1;
 
-//   mSegments[2]->chisqcut = 30;
-//   mSegments[2]->minhits=1;
-//   mSegments[2]->rminTPC=500;
-//   mSegments[2]->minTPChits=0;
-//   mSegments[2]->slay[3]=1;
-//   mSegments[2]->slay[2]=1;
-//   mSegments[2]->slay[1]=1;
-//   mSegments[2]->slay[0]=1;
+   mSegments[2]->chisqcut = 100;
+   mSegments[2]->minhits=1;
+   mSegments[2]->rminTPC=2000;
+   mSegments[2]->minTPChits=0;
+   mSegments[2]->slay[3]=0;
+   mSegments[2]->slay[2]=1;
+   mSegments[2]->slay[1]=1;
+   mSegments[2]->slay[0]=1;
   
 
 //   mSegments[3]->chisqcut = 30;
