@@ -71,6 +71,14 @@ int getrusage();
 
 #endif /* HPUX ***************************************************************/
 
+#ifdef Linux /* Linux definitions **********************************************/
+
+#include <sys/types.h>
+#include <sys/times.h>
+#include <sys/param.h>
+
+#endif /* Linux ***************************************************************/
+
 
 void tpt_cpu_( i, seconds, delta_seconds )
 int	*i;
