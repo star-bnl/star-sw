@@ -271,7 +271,7 @@ void StEventQAMaker::MakeHistEvSum() {
 	tpcChgEast += tpcMon->chrg_tpc_in[i]+tpcMon->chrg_tpc_out[i];
     }
     m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,(float) eventClass);
-    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/ftpcMon->chrg_ftpc_tot[0],
+    m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[1]/(ftpcMon->chrg_ftpc_tot[0]+1.e-10),
       (float) eventClass);
   }
 }
@@ -2009,8 +2009,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.49 2003/09/19 22:58:11 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.50 2003/10/25 00:48:49 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.50  2003/10/25 00:48:49  perev
+// Protect chrg_ftpc_tot[0]=0 (1/0)
+//
 // Revision 2.49  2003/09/19 22:58:11  genevb
 // Initialize pointers to zero, some doxygenization
 //
