@@ -153,7 +153,7 @@ void St_io_Maker::Clear(Option_t *option)
          if (branches) {
            TIter next(branches);
            while (nextb = (TBranch *)next())  
-                  nextb->GetFile()->Flush();
+                  if(nextb->GetFile()) nextb->GetFile()->Flush();
          }
        }
     }
@@ -341,7 +341,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.9 1999/02/28 23:23:20 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.10 1999/03/03 04:09:55 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
