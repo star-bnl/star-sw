@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 1.3 2000/03/13 21:50:35 lasiuk Exp $
+ * $Id: StRichPadMonitor.cxx,v 1.4 2000/04/05 16:02:09 lasiuk Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,8 +7,8 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 1.3  2000/03/13 21:50:35  lasiuk
- * coordinates
+ * Revision 1.4  2000/04/05 16:02:09  lasiuk
+ * GEANT info now drawable
  *
  * Revision 1.3  2000/03/13 21:50:35  lasiuk
  * coordinates
@@ -31,8 +31,16 @@
 #include "StRichGeometryDb.h"
 #include "StRichCoordinateTransform.h"
 #include "StRichSinglePixel.h"
+#include "StRichSingleMCPixel.h"
 #include "StRichDrawableTPad.h"
+#include "StRichDrawableMCTPad.h"
+#include "StRichDrawableTG2T.h"
+// #include "StRichTControl.h"
+
+//#include "StRichDrawableTHit.h"
+#include "StRchMaker/StRichDrawableTHit.h"
 #include "StRichPadMonitorText.h"
+
 StRichPadMonitor* StRichPadMonitor::mInstance = 0;
 
 StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
@@ -56,6 +64,8 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
     // make the text window
     mTextWindow = new StRichPadMonitorText();
     StRichDrawableTPad::setPadMonitorText(mTextWindow);
+    StRichDrawableTG2T::setPadMonitor(this);
+//     StRichTControl::setPadMonitor(this);
     //
     // make the boundaries of the detector
     mRowPitch  = mGeometryDb->rowPitch();  //.84;
@@ -86,10 +96,10 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
     double yci = -mGeometryDb->quadrantY0(4)-.5*mRowPitch; //1.5;
     double xci = mGeometryDb->quadrantX0(4)-.5*mPadPitch;  //1.5;
 
-    cout << "yco (41.82) " << yco << endl;
-    cout << "yci (1.5)   " << yci << endl;
-    cout << "xco (65.5)  " << xco << endl;
-    cout << "xci (1.5)   " << xci << endl;
+//     cout << "yco (41.82) " << yco << endl;
+//     cout << "yci (1.5)   " << yci << endl;
+//     cout << "xco (65.5)  " << xco << endl;
+//     cout << "xci (1.5)   " << xci << endl;
 
     TLine aLine;
     aLine.SetLineWidth(2);
@@ -120,6 +130,13 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
 
     // color scale
     drawColorBox();
+
+    //
+    // Make controls
+    // mControls;
+//     StRichTControl* g2tControl = new StRichTControl(1.5,43,5.5,48,"g2t");
+//     g2tControl->SetTextColor(2);
+//     g2tControl->Draw();
 }
 
 void StRichPadMonitor::drawColorBox()
@@ -128,7 +145,7 @@ void StRichPadMonitor::drawColorBox()
     double upperX = 77.;
     double lowerY = -35;
     double upperY;
-    cout << "Draw Colors! " << endl;
+    //cout << "Draw Colors! " << endl;
     for(int ii=0; ii<1024; ii++) {
 	upperY = lowerY + .07; 
 	mColorBoxes.Add(new TBox(lowerX,lowerY,upperX,upperY));
@@ -138,9 +155,8 @@ void StRichPadMonitor::drawColorBox()
 	    mTextLabels.Add( new TPaveText((lowerX-7),(lowerY-2),(lowerX-2),(lowerY+1)) );
 	    char text[5];
 	    sprintf(text,"%d",ii);
-	    //((TPaveText*)mTextLabels.Last())->SetLabel(text);
-	    ((TPaveText*)mTextLabels.Last())->AddText(text);
-	    ((TPaveText*)mTextLabels.Last())->Draw();
+	    dynamic_cast<TPaveText*>(mTextLabels.Last())->AddText(text);
+	    dynamic_cast<TPaveText*>(mTextLabels.Last())->Draw();
 	}
 	lowerY = upperY;
     }
@@ -148,37 +164,65 @@ void StRichPadMonitor::drawColorBox()
 
 StRichPadMonitor::~StRichPadMonitor()
 {
-    clearPads();
+    this->clearAll();
+    // must delete
+    // mColorBoxes
+    // mTextLabels
     delete mRichCanvas;
 }
 
+void StRichPadMonitor::clearAll()
+{
+    this->clearPads();
+    this->clearG2T();
+    this->clearHits();
+}
 void StRichPadMonitor::clearPads()
 {
-    cout << "StRichPadMonitor::clearPads()" << endl;
-  // Delete the allocated space
-  //for(int ii=0; ii<mAllFilledPads.size(); ii++) {
-  PR(mAllFilledPads.GetEntries());
+    //cout << "StRichPadMonitor::clearPads()" << endl;
 
-  for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
-    (mAllFilledPads[ii])->Delete();	    
-  }
-  mAllFilledPads.Clear();
-  PR(mAllFilledPads.GetEntries());
-  mAllFilledPads.Expand(0);
-  PR(mAllFilledPads.GetEntries());
+    for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
+	(mAllFilledPads[ii])->Delete();	    
+    }
+    mAllFilledPads.Clear();
+    mAllFilledPads.Expand(0);
+}
+
+void StRichPadMonitor::clearG2T()
+{
+    //cout << "StRichPadMonitor::clearGeant()" << endl;
+    //PR(mG2TSegments.GetEntries());
+
+    for(int ii=0; ii< mG2TSegments.GetEntries(); ii++) {
+	(mG2TSegments[ii])->Delete();	    
+    }
+    mG2TSegments.Clear();
+    mG2TSegments.Expand(0);
+}
+
+void StRichPadMonitor::clearHits()
+{
+    //cout << "StRichPadMonitor::clearHits()" << endl;
+    //PR(mHits.GetEntries());
+
+    for(int ii=0; ii< mHits.GetEntries(); ii++) {
+	(mHits[ii])->Delete();	    
+    }
+    mHits.Clear();
+    mHits.Expand(0);
 }
 
 void StRichPadMonitor::drawPads()
 {
-//     cout << "StRichPadMonitor::drawPads()" << endl;
-//     for(int ii=0; ii<mAllFilledPads.size(); ii++) {
+    //cout << "StRichPadMonitor::drawPads()" << endl;
     for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
 	(mAllFilledPads[ii])->Draw();
     }
 }
 
 void
-StRichPadMonitor::calculatePadPosition(StRichSinglePixel* pad, double* xl, double* yl, double* xu, double* yu)
+StRichPadMonitor::calculatePadPosition(const StRichSinglePixel* pad,
+				       double* xl, double* yl, double* xu, double* yu)
 {
     // use coordinate tform here
     StRichRawCoordinate raw(pad->pad(), pad->row());
@@ -194,7 +238,20 @@ StRichPadMonitor::calculatePadPosition(StRichSinglePixel* pad, double* xl, doubl
     *xl = *xu - mPadWidth;
 }
 
-void StRichPadMonitor::drawPad(StRichSinglePixel pad)
+void StRichPadMonitor::drawPad(const StRichSingleMCPixel& mcPad)
+{
+    // Make it a drawable pad
+    // Coordinate Transform
+    double xl,xu,yl,yu;
+    calculatePadPosition(&mcPad,&xl,&yl,&xu,&yu);
+    StRichDrawableMCTPad* dtp = new StRichDrawableMCTPad(xl,yl,xu,yu,&mcPad);
+    dtp->SetFillColor(GetColorAttribute(mcPad.amplitude())); // scale by ADC color
+    dtp->SetLineColor(2);  // black
+    dtp->Draw();
+    mAllFilledPads.Add(dtp);
+}
+
+void StRichPadMonitor::drawPad(const StRichSinglePixel& pad)
 {
     // Make it a drawable pad
     // Coordinate Transform
@@ -204,10 +261,59 @@ void StRichPadMonitor::drawPad(StRichSinglePixel pad)
     dtp->SetFillColor(GetColorAttribute(pad.amplitude())); // scale by ADC color
     dtp->SetLineColor(2);  // black
     dtp->Draw();
-//     mAllFilledPads.push_back(dtp);
-//     PR(mAllFilledPads.size());
     mAllFilledPads.Add(dtp);
-//     PR(mAllFilledPads.GetEntries());
+}
+
+void StRichPadMonitor::drawG2T(const StRichG2TInfo& g2t)
+{
+    // Letter
+    //
+    StRichDrawableTG2T* ttx = new StRichDrawableTG2T(g2t);
+    ttx->SetTextSize(.03);
+    ttx->SetTextColor(1);
+    ttx->Draw();
+    mG2TSegments.Add(ttx);
+}
+
+void StRichPadMonitor::drawGeantGroup(int trackp, int color)
+{
+    //
+    // Loop over all mG2TSegments
+    //cout << "#mG2tSegments= " << mG2TSegments.GetEntries() << endl;
+    for(int ii=0; ii<mG2TSegments.GetEntries(); ii++) {
+ 	if(dynamic_cast<StRichDrawableTG2T*>(mG2TSegments.At(ii))->mTrackp == trackp) {
+	    int currentColor =
+		dynamic_cast<StRichDrawableTG2T*>(mG2TSegments.At(ii))->GetTextColor();
+	    switch(currentColor) {
+	    case 1:
+		currentColor = 2;
+		break;
+	    case 2:
+		currentColor = 1;
+		break;
+	    default:
+		currentColor = 1;
+		break;
+	    }		
+ 	    dynamic_cast<StRichDrawableTG2T*>(mG2TSegments.At(ii))->SetTextColor(currentColor);
+	    dynamic_cast<StRichDrawableTG2T*>(mG2TSegments.At(ii))->Paint();
+ 	}
+    }
+     this->update();
+}
+
+void StRichPadMonitor::drawHit(StRichHit* hit)
+{
+#ifndef SUN
+    // Letter
+    //
+    //cout << "StRichPadMonitor::drawHit() " << *hit << endl;
+    StRichDrawableTHit* thit = new StRichDrawableTHit(*hit);
+    thit->SetMarkerSize(3);
+    thit->SetMarkerColor(1);
+    thit->Draw();
+    mHits.Add(thit);
+#endif
 }
 
 
