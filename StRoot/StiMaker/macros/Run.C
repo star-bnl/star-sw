@@ -23,7 +23,10 @@ void loadLibrairies(bool doProfile)
 		 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
 		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
-		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator","StiMaker",
+		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator",
+		 //"StiAps",
+		 "StiMaker",
+		 "StFtpcClusterMaker",		 
 		 "StiTpc","StiSvt","StiEmc","StiFtpc","StMiniMcEvent","StMiniMcMaker","last"};
 
   int i=0;  
@@ -43,7 +46,7 @@ void loadLibrairies(bool doProfile)
   cout <<"Run.C::loadLibrairies() - INFO - Done"<<endl;
 }
 
-void RunMany(int firstEvent = 0, 
+void RunMany(int firstEvent = 0,
 	     int nEvents    = 100,
 	     const char * filePrefix = "rcf",
 	     const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
@@ -61,6 +64,7 @@ void RunMany(int firstEvent = 0,
 	     bool useSvt=false,
 	     bool useEmc=false,
 	     bool useFtpc=false,
+	     bool useAps=false,
 	     bool useResidualCalculator=false,
 	     bool doProfile=false	 )
 {
@@ -82,6 +86,7 @@ void RunMany(int firstEvent = 0,
       useSvt,
       useEmc,
       useFtpc,
+      useAps,
       useResidualCalculator,
       doProfile);
 }
@@ -104,6 +109,7 @@ void RunResiduals(int firstEvent = 0,
 		  bool useSvt=false,
 		  bool useEmc=false,
 		  bool useFtpc=false,
+		  bool useAps=false,
 		  bool useResidualCalculator=true,
 		  bool doProfile=false	 )
 {
@@ -125,21 +131,26 @@ void RunResiduals(int firstEvent = 0,
       useSvt,
       useEmc,
       useFtpc,
+      useAps,
       useResidualCalculator,
       doProfile);
 }
 
-void RunGui(int firstEvent = 0, 
+void RunGui(int firstEvent = 0,
 	    int nEvents    = 1,
 	    const char * filePrefix = "rcf",
-	    const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
-	    const char * file="rcf0183_02_300evts.geant.root",
+	    const char* path= "/star/data25/reco/pp200/pythia/default/minbias/year2001/hadronic_on/trs_gh/",
+	    const char* file ="pds0200_100_1000evts.event.root",
+	    //const char * path= "/data/r23b/star/hijingAuau/200GeV/b0_20/standard/2001/Unknown/",
+	    //const char * file="rcf0183_02_300evts.geant.root",
 	    bool useGui=true,
 	    bool useMcAsRec=false,
 	    bool doPlots=true,
 	    bool doSimulation=true,
-	    bool doAssociation=true,
-	    bool doMiniMcEvent=true,
+	    bool doAssociation=false,
+	    bool doMiniMcEvent=false,
+	    //bool doAssociation=true,
+	    //bool doMiniMcEvent=true,
 	    bool doDst=false,
 	    bool doStEventOutput=false,
 	    bool doStEventInput=true,
@@ -147,10 +158,12 @@ void RunGui(int firstEvent = 0,
 	    bool useSvt=false,
 	    bool useEmc=false,
 	    bool useFtpc=false,
+	    bool useAps=true,
 	    bool useResidualCalculator=false,
-	    bool doProfile=false	 )
+	    bool doProfile=false
+	    )
 {
-  Run(firstEvent,
+    Run(firstEvent,
       nEvents,
       filePrefix,
       path,
@@ -168,6 +181,7 @@ void RunGui(int firstEvent = 0,
       useSvt,
       useEmc,
       useFtpc,
+      useAps,
       useResidualCalculator,
       doProfile);
 } 
@@ -189,10 +203,11 @@ void Run(int firstEvent,
 	 bool doStEventInput,
 	 bool useTpc,
 	 bool useSvt,
-	 bool useEmc=false,
-	 bool useFtpc=false,
-	 bool useResidualCalculator=false,
-	 bool doProfile=false	 )
+	 bool useEmc,
+	 bool useFtpc,
+	 bool useAps,
+	 bool useResidualCalculator,
+	 bool doProfile	 )
 {
   const char *fileList[]={0,0};
   if (strncmp(path,"GC",2)==0) 
@@ -220,6 +235,7 @@ void Run(int firstEvent,
       useSvt,
       useEmc,
       useFtpc,
+      useAps,
       useResidualCalculator,
       doProfile);
 }
@@ -241,6 +257,7 @@ void Run(Int_t firstEvent,
 	 bool useSvt,
 	 bool useEmc,
 	 bool useFtpc,
+	 bool useAps,
 	 bool useResidualCalculator,
 	 bool doProfile)
 {
@@ -259,7 +276,8 @@ void Run(Int_t firstEvent,
   pars->useTpc          = useTpc;
   pars->useSvt          = useSvt;
   pars->useEmc          = useEmc;
-  pars->useFtpc         = useFtpc;  
+  pars->useFtpc         = useFtpc;
+  //pars->useAps          = useAps;
   pars->useResidualCalculator = useResidualCalculator;
   miniChain->run(firstEvent,nEvents,filePrefix,fileList);
 }
