@@ -10,7 +10,7 @@
 
 #define ClassDef(a,b)
 
-struct vector {
+struct twoVectorL3 {
     double x;
     double y;
 };
@@ -36,7 +36,7 @@ class FtfDedx {
    float     fCutHigh ;    // Truncated Mean: higher cut in %
    short     fNTruncate ;  // Pablo: # points to truncate in dEdx
    float     fDriftLoss ;  // corr. factor for drift length dependence of charge loss in m^-1
-   struct vector fUnitVec[24];
+   struct twoVectorL3 fUnitVec[24];
 
    ClassDef(FtfDedx,1)
 };
