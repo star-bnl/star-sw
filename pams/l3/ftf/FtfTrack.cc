@@ -113,9 +113,6 @@ void FtfTrack::add ( FtfTrack *piece )
   g1Xy  += piece->g1Xy   ;
   g2Xy  += piece->g2Xy   ;
 
-  double ddXy  =   s11Xy * s22Xy - square ( s12Xy ) ;
-  double a1Xy  = ( g1Xy * s22Xy - g2Xy * s12Xy ) / ddXy ;
-  double a2Xy  = ( g2Xy * s11Xy - g1Xy * s12Xy ) / ddXy ;
 //
 //     Now in the sz plane
 //
@@ -126,9 +123,6 @@ void FtfTrack::add ( FtfTrack *piece )
      g1Sz  += piece->g1Sz   ;
      g2Sz  += piece->g2Sz   ;
 
-     double dd_sz  = s11Sz * s22Sz - square ( s12Sz ) ;
-     double a1_sz  = ( g1Sz * s22Sz - g2Sz * s12Sz ) / dd_sz ;
-     double a2_sz  = ( g2Sz * s11Sz - g1Sz * s12Sz ) / dd_sz ;
    }
 //
 //  Add space points to first track
@@ -716,7 +710,7 @@ FtfHit *FtfTrack::seekNextHit ( VOLUME  *volume,
 				int     n_r_steps,
 				int which_function ) {
 #define N_LOOP 9 
-   int loop_eta[N_LOOP] = { 0, 0, 0, 1, 1, 1,-1,-1,-1 } ;
+   int loop_eta[N_LOOP] = { 0, 0, 0,-1,-1,-1, 1, 1, 1 } ;
    int loop_phi[N_LOOP] = { 0,-1, 1, 0,-1, 1, 0,-1, 1 };
 
 
@@ -953,6 +947,7 @@ int FtfTrack::segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ){
 //
 //   For second hit onwards check the difference in angle 
 //   between the last two track segments
+//
       if ( nHits > 1 ) {
 	 dx     = candidateHit->x - baseHit->x ;
          dy     = candidateHit->y - baseHit->y ;

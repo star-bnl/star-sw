@@ -62,8 +62,8 @@ float FtfFinder::process (  ) {
 //   if ( para.dEdx ) dEdx ( ) ;
 
    totalTime = time ( ) ;
-   if ( para.infoLevel > 0 )
-      printf ( "ftf time: %7.3f \n ", totalTime ) ;
+// if ( para.infoLevel > 0 )
+//    printf ( "ftf time: %7.3f \n ", totalTime ) ;
    return totalTime ;
 } 
 //********************************************************************
@@ -309,8 +309,8 @@ int FtfFinder::reset (void)
 //
 //   Set # hits & tracks to zero
 //
-   nHits   = 0 ;
-   nTracks = 0 ;
+// nHits   = 0 ;
+// nTracks = 0 ;
 //
 //    Set initialization flag to true
 //
@@ -392,7 +392,7 @@ int FtfFinder::setPointers ( )
       r             = (float)sqrt ( r2 ) ;
       phi           = (float)atan2(thisHit->y,thisHit->x) + para.phiShift ;
       if ( phi < 0 ) phi = phi + twoPi ;
-      eta           = (float)seta(r,thisHit->z) ;
+      eta           = (float)seta(r,(thisHit->z-para.zVertex)) ;
 
       if ( para.szFitFlag ) {
         thisHit->s  = 0.F ;
@@ -413,7 +413,7 @@ int FtfFinder::setPointers ( )
 
       thisHit->phiIndex = (int)( (thisHit->phi-para.phiMin)/para.phiSlice + 1);
       if ( thisHit->phiIndex < 1 || thisHit->phiIndex > para.nPhi ) {
-         if ( para.infoLevel > 0 ) {
+         if ( para.infoLevel > 2 ) {
 	      printf ( " \n === > Hit %d has Phi = %f  ", thisHit->id, 
                                                           thisHit->phi ) ;
               printf ( " \n Phi index %d out of range  ", thisHit->phiIndex ) ;
@@ -427,7 +427,7 @@ int FtfFinder::setPointers ( )
 
     thisHit->etaIndex = (int)((thisHit->eta - para.etaMin)/para.etaSlice + 1);
     if ( thisHit->etaIndex < 1 || thisHit->etaIndex > para.nEta ) {
-       if ( para.infoLevel > 0 ) {
+       if ( para.infoLevel > 2 ) {
           printf ( " \n === > Hit %d has Eta = %f  ", thisHit->id, 
                                                      thisHit->eta ) ;
           printf ( " \n Eta min/max %f %f ", para.etaMin, para.etaMax ) ;

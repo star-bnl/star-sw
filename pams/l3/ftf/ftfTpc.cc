@@ -40,12 +40,9 @@ extern "C" long type_of_call ftfTpc_(
 //
 //    Set parameters
 //
+  tracker.nTracks = 0 ;
   tracker.para.setDefaults ( ) ;
   ftfSetParameters ( para ) ;
-//
-//    Reset tracker
-//
-  tracker.reset ( ) ;
 //
 //   Check there is something coming in
 //
@@ -204,18 +201,38 @@ extern "C" long type_of_call ftfTpc_(
 //
      tracker.nHits  = nSectorHits[sectorIndex] ;
      tracker.hit    = pHit[sectorIndex] ;
-     nTracksLast    = tracker.nTracks ;
-     float sectorTime = tracker.process ( ) ;
+     for ( int iSlice = 0 ; iSlice < para->numberTrackingSlices ; iSlice++ ) {
+        if ( sector < 12 ) {
+           tracker.para.etaMin = para->TrackingSlices[iSlice] ;
+           tracker.para.etaMax = para->TrackingSlices[iSlice+1] ;
+        }
+        else {
+           tracker.para.etaMin = -para->TrackingSlices[iSlice+1] ;
+           tracker.para.etaMax = -para->TrackingSlices[iSlice] ;
+        }
+//
+        nTracksLast    = tracker.nTracks ;
+//
+//    Reset tracker
+//
+        tracker.reset ( ) ;
+
+        float sectorTime = tracker.process ( ) ;
+        if ( para->infoLevel > 1 ) {
+           printf ( " Sector %d, Division %d(%f-%f), time %f \n", sector+1, iSlice, 
+                                 tracker.para.etaMin, tracker.para.etaMax, sectorTime ) ;
+        }
 //
 //    Fill monitoring table
 //
-     if ( monCounter < monitor_h->maxlen ) {
-        monitor[monCounter].sector  = sector + 1 ;
-        monitor[monCounter].nPoints = nSectorHits[sectorIndex] ;
-        monitor[monCounter].nTracks = tracker.nTracks - nTracksLast ;
-        monitor[monCounter].sTime   = sectorTime ;
-        monCounter++ ;
-        monitor_h->nok = monCounter ;
+        if ( monCounter < monitor_h->maxlen ) {
+           monitor[monCounter].sector  = sector + 1 ;
+           monitor[monCounter].nPoints = nSectorHits[sectorIndex] ;
+           monitor[monCounter].nTracks = tracker.nTracks - nTracksLast ;
+           monitor[monCounter].sTime   = sectorTime ;
+           monCounter++ ;
+           monitor_h->nok = monCounter ;
+        }
      }
   }
 //
@@ -323,6 +340,7 @@ extern "C" long type_of_call ftfTpc_(
       tracker.para.dphiMerge       = para->SDPsiMaxMerge;
       tracker.para.szErrorScale    = para->ErrorScaleSz;
       tracker.para.xyErrorScale    = para->ErrorScaleXy;
+      tracker.para.zVertex         = para->zVertex;
 
       tracker.para.goBackwards     = 1 ;
 
