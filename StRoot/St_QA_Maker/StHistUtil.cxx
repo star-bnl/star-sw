@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.20 1999/12/21 15:50:32 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.21 1999/12/22 16:32:28 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.21  1999/12/22 16:32:28  kathy
+// check if histogram has entries before setting logY scale
+//
 // Revision 1.20  1999/12/21 15:50:32  kathy
 // got page numbers to print out properlycvs -n update - thanks Jeff & Valery!
 //
@@ -248,7 +251,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	}
 	graphPad->cd(++padCount);
           gPad->SetLogy(0);
-	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName())){
+	if (m_ListOfLog && m_ListOfLog->FindObject(obj->GetName()) && ((TH1 *)obj)->GetEntries()){
 	  gPad->SetLogy(1);
           cout << "StHistUtil::DrawHists -- Will draw in log scale: " << obj->GetName() <<endl;
         }
