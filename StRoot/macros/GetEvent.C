@@ -36,7 +36,7 @@ void GetEvent(const Char_t *testedMakerName = "geant",Int_t numberOfEvent=1,Int_
   if (gClassTable->GetID("StChain") < 0) Load();
 
   const Char_t *FileOut = "/afs/rhic/star/data/samples/hijet-g2t.root";
-  if (FileOut) root_out  =  new TFile(FileOut,"UPDATE");
+  if (FileOut) root_out  =  new TFile(FileOut);
 
   if (chain) delete chain;
   chain = new StChain("bfc");
@@ -44,7 +44,7 @@ void GetEvent(const Char_t *testedMakerName = "geant",Int_t numberOfEvent=1,Int_
   St_io_Maker *in    = new St_io_Maker("Input","all");
  //  St_TLA_Maker   *geant = new St_TLA_Maker(testedMakerName,"event/geant/Event");
  // St_TLA_Maker    *dst   = new St_TLA_Maker("dst","event/geant/Event");
-   in->MakeDoc(); 
+//   in->MakeDoc(); 
 
   TTree *tree = 0;
   if (root_out) tree=(TTree *)root_out->Get("Output");
@@ -56,7 +56,8 @@ void GetEvent(const Char_t *testedMakerName = "geant",Int_t numberOfEvent=1,Int_
        TIter next(list);
        TBranch *nextb = 0;
        while (nextb = (TBranch *)next()) 
-          cout << "Branch: <"<< nextb->GetName() << ">"
+          cout << "Branch: <"<< nextb->GetName() << ">;"
+               << "  File: <"<< nextb->GetFileName() << ">;"
                << " Entries: " << nextb->GetEntries()
                << "; Last event number: "<< nextb->GetEventNumber() << endl;    
      }
