@@ -1,8 +1,8 @@
 /* Generated particle table
-   $Id: particle.idl,v 1.1 1998/04/10 18:07:10 nevski Exp $ 
+   $Id: particle.idl,v 1.2 1998/04/10 18:11:55 nevski Exp $ 
    $Log: particle.idl,v $
-   Revision 1.1  1998/04/10 18:07:10  nevski
-   HEPEVT particle table
+   Revision 1.2  1998/04/10 18:11:55  nevski
+   *** empty log message ***
 
    Revision 1.1  1998/02/10 15:12:41  fisyak
    Particle table
