@@ -1,7 +1,10 @@
-* $Id: tte.F,v 1.4 1998/02/13 19:33:05 fisyak Exp $
+* $Id: tte.F,v 1.5 1998/03/04 21:45:04 hardtke Exp $
 * $Log: tte.F,v $
-* Revision 1.4  1998/02/13 19:33:05  fisyak
-* zerov => vzero
+* Revision 1.5  1998/03/04 21:45:04  hardtke
+* change pid in tte_eval to long and fill table entry
+*
+* Revision 1.5  1998/03/04 21:45:04  hardtke
+* change pid in tte_eval to long and fill table entry
 *
 * Revision 1.4  1998/02/13 19:33:05  fisyak
 * zerov => vzero
@@ -566,6 +569,7 @@ c          find a parent track for this point
          eval(eval_h.nok).pyvg=g2t_track(ii).p(2)
          eval(eval_h.nok).pzvg=g2t_track(ii).p(3)
          eval(eval_h.nok).ptvg=sqrt(g2t_track(ii).p(1)**2+
+     >                              g2t_track(ii).p(2)**2)
          Ipart=g2t_track(ii).ge_pid
 c         write(6,*) 'particle_id', ipart
 c         call GFPART(Ipart,CHPart,ITRTyp,Amass,Charge,Tlife,Ub,Nb)
