@@ -1,6 +1,6 @@
 //*-- Author : Valeri Fine (fine@bnl.gov)
 // 
-// $Id: StHistCollectorMaker.cxx,v 2.4 2000/12/01 02:16:42 fine Exp $
+// $Id: StHistCollectorMaker.cxx,v 2.5 2000/12/02 01:03:10 fine Exp $
 //
 ////////////////////////////////////////////////////////////////////////////
 //                                                                        //
@@ -43,13 +43,22 @@ StHistCollectorMaker::~StHistCollectorMaker(){ }
 //_____________________________________________________________________________
 Int_t StHistCollectorMaker::Init(){
 // Create the dataset to merger the coming histograms
-   fMergedSet = new TDataSet("Merged");
-   AddConst(fMergedSet);
+   if (fMergedSet) delete fMergedSet;
+   fMergedSet = 0;
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t StHistCollectorMaker::Make(){
  //  Make - this methoid is called in loop for each event
+  static const char *datasetName = "Merged";
+  if (!fMergedSet) {
+    // Qurey one's "Mergeg" dataset (assuming I/O maker)
+    // to take over
+    fMergedSet = GetDataSet(datasetName);
+    if (!fMergedSet) fMergedSet = new TDataSet(datasetName);
+    fMergedSet->Shunt(0);
+    AddConst(fMergedSet);
+  }
   AddHists();
   return kStOK;
 }
@@ -139,6 +148,9 @@ void  StHistCollectorMaker::UpdateHists(TObjectSet *oldSet,TObjectSet *newSet)
 }
 
 // $Log: StHistCollectorMaker.cxx,v $
+// Revision 2.5  2000/12/02 01:03:10  fine
+// Recursive collection of histogram introduced
+//
 // Revision 2.4  2000/12/01 02:16:42  fine
 // the performance issue resolved
 //
