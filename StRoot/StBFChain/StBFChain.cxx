@@ -143,7 +143,7 @@ BfcItem BFC[] = {
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
-  {"rich"        ,"","","sim_T,globT"                      ,"StRrsMaker,StRchMaker","StRchMaker","",kFALSE},
+  {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
@@ -356,6 +356,10 @@ Int_t StBFChain::Instantiate()
 	if (mk && maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	if (mk && maker == "St_tpcdaq_Maker") {
 	  if (GetOption("Trs")) mk->SetMode(1); // trs
+	  else                  mk->SetMode(0); // daq
+	}
+	if (mk && maker == "StRchMaker") {
+	  if (GetOption("Rrs")) mk->SetMode(1); // rrs
 	  else                  mk->SetMode(0); // daq
 	}
 	if (saveMk) saveMk->cd();
@@ -681,8 +685,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.86 2000/04/27 19:25:07 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.87 2000/05/01 22:28:23 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.87  2000/05/01 22:28:23  fisyak
+// Update from James C Dunlop for RICH
+//
 // Revision 1.86  2000/04/27 19:25:07  fisyak
 // Add dependence StRchMaker versus StRrsMaker shared library
 //
