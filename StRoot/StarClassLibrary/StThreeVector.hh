@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.1 1999/01/30 03:59:05 fisyak Exp $
+ * $Id: StThreeVector.hh,v 1.2 1999/02/14 23:11:48 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,8 +15,11 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.1  1999/01/30 03:59:05  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/14 23:11:48  fisyak
+ * Fixes for Rootcint
+ *
+ * Revision 1.5  1999/10/15 15:46:54  ullrich
+ * Changed output format in operator<<
  *
  * Revision 1.4  1999/06/04 18:00:05  ullrich
  * Added new constructor which takes C-style array as argument.
@@ -24,7 +27,7 @@
  * as lvalues.
  *
  * Revision 1.3  1999/02/17 11:42:19  ullrich
-
+ * Removed specialization for 'long double'.
  *
  * Revision 1.2  1999/02/14 23:11:48  fisyak
  * Fixes for Rootcint
@@ -36,7 +39,7 @@
  * Initial Revision
  *
  **************************************************************************/
-
+#ifndef ST_THREE_VECTOR_HH
 #define ST_THREE_VECTOR_HH
 #ifndef __CINT__
 #include <iostream.h>
@@ -143,7 +146,7 @@ public:
     StThreeVector<T> cross(const StThreeVector<double>&) const;
        
     bool operator == (const StThreeVector<float>& v) const;
-
+    bool operator != (const StThreeVector<float>& v) const;
     StThreeVector<T>& operator+= (const StThreeVector<float>&);
     StThreeVector<T>& operator-= (const StThreeVector<float>&);
     
@@ -720,14 +723,14 @@ template<class T>
 inline StThreeVector<T> operator* (double c, const StThreeVector<T>& v)
 {
     return StThreeVector<T>(v) *= c;
-#ifdef __HP_aCC
-#ifndef FOR_HELIX
-ostream&  operator<<(ostream& os, const StThreeVector<long double>& v)
-{
-    return os << '(' << (static_cast<double>(v.x())) << ", " << (static_cast<double>(v.y())) << ", " << (static_cast<double>(v.z())) << ')';
 }
-#endif
-#endif
+
+
+// #ifdef __HP_aCC
+// #ifndef FOR_HELIX
+// ostream&  operator<<(ostream& os, const StThreeVector<long double>& v)
+// {
+//     return os << '(' << (static_cast<double>(v.x())) << ", " << (static_cast<double>(v.y())) << ", " << (static_cast<double>(v.z())) << ')';
 // }
 // #endif
 // #endif
@@ -740,7 +743,7 @@ inline StThreeVector<T> operator/ (const StThreeVector<T>& v, X c)
     return os << '(' << v.x() << ", " << v.y() << ", " << v.z() << ')';
 ostream&  operator<<(ostream& os, const StThreeVector<T>& v)
 {
-
+    return os << v.x() << '\t' << v.y() << '\t' << v.z();
 }
 
 template<class T>

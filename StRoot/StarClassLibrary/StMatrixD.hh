@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.hh,v 1.1 1999/01/30 03:59:03 fisyak Exp $
+ * $Id: StMatrixD.hh,v 1.2 1999/02/14 23:11:44 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.hh,v $
- * Revision 1.1  1999/01/30 03:59:03  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/14 23:11:44  fisyak
+ * Fixes for Rootcint
+ *
+ * Revision 1.2  1999/02/14 23:11:44  fisyak
+ * Fixes for Rootcint
  *
  * Revision 1.1  1999/01/30 03:59:03  fisyak
  * Root Version of StarClassLibrary
@@ -75,7 +78,11 @@ public:
     // classes for implementing m[i][j]
     class StMatrixRowD {
     public:
+	StMatrixRowD(StMatrixD&, size_t);
 	double& operator[](size_t);
+    private:
+#ifndef __CINT__
+	StMatrixD& _a;
 #else
 	StMatrixD* _a;
 #endif
@@ -83,7 +90,12 @@ public:
     };
     class StMatrixRowConstD {
     public:
+	StMatrixRowConstD (const StMatrixD&, size_t);
 	const double & operator[](size_t) const;
+    private:
+#ifndef __CINT__
+	const StMatrixD& _a;
+#else
         const StMatrixD* _a;
 #endif
 

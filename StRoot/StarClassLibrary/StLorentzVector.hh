@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVector.hh,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StLorentzVector.hh,v 1.2 1999/02/14 23:11:42 fisyak Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -20,9 +20,12 @@
  ***************************************************************************
  *
  * $Log: StLorentzVector.hh,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.2  1999/02/14 23:11:42  fisyak
+ * Fixes for Rootcint
  *
+ *
+ * Revision 1.4  1999/04/14 23:12:07  fisyak
+ * Add __CINT__ to handle references
  *
  * Revision 1.3  1999/02/17 11:38:36  ullrich
  * Removed specialization for 'long double'.
@@ -692,12 +695,12 @@ inline StLorentzVector<T> operator* (double c, const StLorentzVector<T>& v)
 
 template<class T, class X>
 inline StLorentzVector<T> operator/ (const StLorentzVector<T>& v, X c)
-#ifdef __HP_aCC
-ostream& operator<< (ostream& os, const StLorentzVector<long double>& v)
 {
-  return os << '(' << v.vect() << ',' << (static_cast<double>(v.t())) << ')';
-}
-#endif
+    return StLorentzVector<T>(v) /= c;
+
+// #ifdef __HP_aCC
+// ostream& operator<< (ostream& os, const StLorentzVector<long double>& v)
+// {
 //   return os << '(' << v.vect() << ',' << (static_cast<double>(v.t())) << ')';
 // }
 // #endif
