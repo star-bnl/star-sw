@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.44 2003/08/29 13:01:18 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.45 2003/08/29 19:34:22 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.45  2003/08/29 19:34:22  suaide
+// small modification in the histogram binning
+//
 // Revision 1.44  2003/08/29 13:01:18  suaide
 // QA Histograms fixed. Histogram bin size fixed
 //
@@ -150,10 +153,6 @@ program
 Int_t StEmcADCtoEMaker::Init()
 {     
   //Making QA histgrams
-  //const Int_t   nx[] = {40,40,300,20,12,12,12,12};
-  //const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
-  //const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
-  //const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
 	
 	mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
  
@@ -185,12 +184,10 @@ Int_t StEmcADCtoEMaker::Init()
     TArrayF PhiB(nSub+1,mGeo[i]->PhiB());
     
     TArrayF EtaBins(2*nEta+2);
-    //Int_t nchannelsEta=2*nEta+2;
     for(Int_t j=0;j<2*nEta+2;j++)
     {
       if (j<nEta+1) EtaBins[j]=-EtaB[nEta-j];
       else EtaBins[j]=EtaB[j-nEta-1];
-      //if(i==2) cout <<"j "<<j<<"  EtaBin = "<<EtaBins[j]<<endl;
     } 
     
     TArrayF PhiBins1(60*(nSub+1));
@@ -201,8 +198,12 @@ Int_t StEmcADCtoEMaker::Init()
       {
         Float_t center;
         mGeo[i]->getPhiModule(m,center);
-        PhiBins1[j]=center+PhiB[s-1];
-        //cout <<"j = "<<j<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<endl;
+        PhiBins1[j]=center-PhiB[s-1];
+        Float_t ee,pp;
+        Int_t id;
+        //if(i==3 && s<=nSub) mGeo[i]->getId(m,1,s,id);
+        //if(i==3 && s<=nSub) mGeo[i]->getEtaPhi(id,ee,pp);
+        //if(i==3 && s<=nSub) cout <<"j = "<<j<<"  center = "<<center<<"  DPhi = "<<PhiB[s-1]<<"  m = "<<m<<"  s = "<<s<<"  PhiBins1 = "<<PhiBins1[j]<<"  phi = "<<pp<<endl;
         j++;
       }
       
@@ -223,7 +224,6 @@ Int_t StEmcADCtoEMaker::Init()
       }
       if(ktmp!=-1)
       {
-        //cout << ktmp<<"  "<<phitmp<<endl;
         PhiBins[j]=phitmp;
         again=kTRUE;
         PhiBins1[ktmp]=999;
@@ -242,7 +242,6 @@ Int_t StEmcADCtoEMaker::Init()
     TString title_a= detname[i] + " ADC distribution";
     TString title_a1= detname[i] +" ADC distribution (log10)";
     TString title_e1= detname[i] +" Energy distribution";
-    //Float_t rpi = M_PI + 0.00001; 
     mHits[i]   = new TH2F(name_h,title_h,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mEnergyHist[i] = new TH2F(name_e,title_e,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
     mAdc[i]    = new TH2F(name_a,title_a,2*nEta+2-1,EtaBins.GetArray(),60*(nSub+1)-1,PhiBins.GetArray());
