@@ -1,7 +1,10 @@
-* $Id: btofgeo2.g,v 1.6 2004/02/12 18:59:56 llope Exp $
+* $Id: btofgeo2.g,v 1.7 2004/02/25 19:21:33 llope Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
+* Revision 1.7  2004/02/25 19:21:33  llope
+* fine-tuning TOFp and TOFr for Run-IV - use choice=7 for these
+*
 * Revision 1.6  2004/02/12 18:59:56  llope
 * modifications for run4 MRPC positioning inside TOFr-prime
 *
@@ -46,6 +49,9 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *                             introduced for the TOFr geometry. Common
 *                             material definitions moved to the top.
 *            12 Feb  2004 WJL- modifications for run-4 TOFr' geometry
+*            23 Feb  2004 WJL- fine-tuning of run-4 geometry
+*                                 use choice==7 for run-4
+*                                 BTOG_posit1b reflects move of TOFp in run-IV
 *
 *
 *******************************************************************************
@@ -64,7 +70,7 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *
 *   Data Base interface staff:
       Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2, 
-                       tofrver }
+                       posit1b }
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -121,10 +127,11 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
-         choice    = 6         ! 1=CTB, 2=TOF, 3=25% TOF, 4=1 tray-TOFp, 5=1 tray-TOFr, 6=Full-TOFr
+         choice    = 7         ! 1=CTB, 2=Full-TOFp, 3=25% TOFp, 4=1 tray-TOFp, 
+                               ! 5=1 tray-TOFr, 6=Full-TOFr, 7=TOFp+TOFrp Run-IV
          posit1    = 32        ! TOFp tray position for choice 4 or 5
          posit2    = 23        ! TOFr tray position for choice 5 
-         tofrver   = 4         ! 3=TOFr (Run-3), 4=TOFrp (Run-4)
+         posit1b   = 33        ! TOFp tray position for choice 7 (run-IV)
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height(8.89)
@@ -305,7 +312,7 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          FEEH   =  0.15   ! tofr fee pcb thickness
          HBWid  =  0.635  ! the slim honeycomb support box width
          NGap   = 6       ! Number of gaps in MRPC
-         TrayEdgeZ = 3.0*2.54 ! tray posn along rail wrt TPC centerplane (Z)
+         TrayEdgeZ = (3.0*2.54)+1.0   ! tray posn along rail wrt TPC centerplane (Z)
       EndFill
 *         NPad   = 6       ! Number of pads within a MRPC
 *
@@ -350,12 +357,14 @@ Block BTOF is the whole CTF system envelope
       Material  Air
       Medium    Standard
       Shape     Tube      rmin=btog_Rmin  Rmax=btog_Rmax  dz=btog_dz
-      choice = 1
-      if (btog_choice == 2) choice=btog_choice
-      if (btog_choice == 6) choice=btog_choice
-      Create and Position BTOH  z=+btog_dz/2    alphay=180
-      choice=btog_choice
-      Create and Position BTOH  z=-btog_dz/2
+      choice = 1                                     ! ctb
+      if (btog_choice == 2) choice=btog_choice       ! full tofp
+      if (btog_choice == 6) choice=btog_choice       ! full tofr
+!      print *,' Positioning West Barrel, choice=',choice
+      Create and Position BTOH  z=+btog_dz/2    alphay=180   ! West barrel
+      choice=btog_choice                   
+!      print *,' Positioning East Barrel, choice=',choice
+      Create and Position BTOH  z=-btog_dz/2                 ! East barrel
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -375,6 +384,9 @@ Block BTOH is a half of trigger system (west-east)
          if (choice==5 & is==btog_posit1)    tof=1
          if (choice==5 & is==btog_posit2)    tof=2
          if (choice==6)                      tof=2
+         if (choice==7 & is==btog_posit1b)   tof=1		!TOFp posn in Run-IV
+         if (choice==7 & is==btog_posit2)    tof=3		!TOFrp posn in Run-IV!
+!         print *,' Positioning Tray, choice,is,tof=',choice,is,tof
          Create and Position BSEC  alphaz = 102+6*is
       enddo
 EndBlock
@@ -425,7 +437,7 @@ Block BXTR  is a Main TRay covering box for CTB or TOF
                           dz=tray_length/2  
       if (tof==1) then
          Create and Position BTTC
-      else if (tof==2) then
+      else if (tof>=2) then
          Create and Position BRTC
          Create and Position BUPC  X=(tray_Height-tray_WallThk)/2
       else
@@ -550,14 +562,8 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
       Shape      BOX      dx=tray_Height/2-tray_WallThk,
                           dy=tray_Width/2-tray_WallThk,
                           dz=tray_Length/2-tray_WallThk
-*     Shape      BOX      dx=,
-*                         dy=,
-*                         dz=
-
      Create and Position BGMT konly='MANY'
 
-*
-*
 *---- create and position TOFr modules
 * 
 * Change the new geometry to honeycomb support of long slim box by
@@ -567,7 +573,7 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
 
       Create BRMD
 
-	if (btog_tofrver==3) then
+	if (tof==2) then
       z0 = tray_Length/2 - 0.05
 *      x0 = -(btog_Rmin+tray_SupFullH+tray_StripT+tray_Height/2) - 1.5
       x0 = -3.66
@@ -576,7 +582,7 @@ Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run
                            Z=z0-modr_mrpcZ(i) ,
                            alphay=modr_mrpcA(i)
       enddo
-	elseif (btog_tofrver==4) then
+	elseif (tof==3) then
       z0 = tray_Length/2 - 0.05 - mod4_TrayEdgeZ
       x0 = -3.66
       do i=1,32
