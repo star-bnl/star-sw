@@ -109,8 +109,7 @@ void StiTrackSeedFinder::print() const
 
 bool StiTrackSeedFinder::hasMore()
 {
-    return (miterator!=miterator.end());
-    //return ( miterator.current() < miterator.size() );
+    return ( miterator.valid()==true && miterator!=miterator.end());
 }
 
 //Loop on combinations until we get a valid one
@@ -134,6 +133,9 @@ StiKalmanTrack* StiTrackSeedFinder::next()
 	    go=false; //We found a good track, return it.  Else, we keep searching combinations
 	    cout <<"Found a good track, return it"<<endl;
 	}
+	else {
+	    cout <<"track==0"<<endl;
+	}
 	++miterator;
     }
     return track;
@@ -142,7 +144,7 @@ StiKalmanTrack* StiTrackSeedFinder::next()
 //check points in a given combination, return track if accepted
 StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
 {
-    //cout <<"StiTrackSeedFinder::makeTrack()"<<endl;
+    cout <<"StiTrackSeedFinder::makeTrack()"<<endl;
     //Construct Track fromt these points
     StiKalmanTrack* track = 0;
     if (vec.size()<3) {
@@ -161,12 +163,16 @@ StiKalmanTrack* StiTrackSeedFinder::makeTrack(const tvector& vec) const
     }
     if (go) { //They're all good
 	mdrawablehits->fillHitsForDrawing();
-	//Fit points to helix, etc
 	track = mtrackfactory->getObject();
 	track->reset();
 	//Setup DetectorContainer to inner-most point
 	//This assumes outside in tracking, can be made to switch on direction
-	StiDetectorContainer::instance()->setToDetector( vec.front()->detector() );
+	StiDetector* layer = vec.front()->detector();
+	if (!layer) {
+	    cout <<"StiTrackSeedFinder::makeTrack(). ERROR:\thit has no detector!"<<endl;
+	    return track;
+	}
+	StiDetectorContainer::instance()->setToDetector( layer );
     }
     else {
 	cout <<"Combination Failed"<<endl;

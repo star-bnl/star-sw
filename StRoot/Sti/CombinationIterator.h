@@ -8,6 +8,9 @@
 
   This class meets the requirements of an STL input iterator and can thus be used in any STL agloorthim
   that requires only an input iterator (e.g., find, find_if, etc).
+
+  Additionally, we define validity via bool valid() s.t. the iterator is vailid iff each set is non-empty
+
 */
 
 //Templated, 3/29/01, MLM
@@ -36,6 +39,9 @@ public:
   
     //Return number of possible combinations
     int size() const;
+
+    //check that each vector of points has size>0
+    bool valid() const;
   
     //Access to end, marks termination of forward traversal
     const tvector::const_iterator& end() const;
@@ -174,6 +180,18 @@ void CombinationIterator<T>::init()
 	(*it).init();
     }
     return;
+}
+
+template <class T>
+bool CombinationIterator<T>::valid() const
+{
+    bool ok = true;
+    for (vector_entry_vector::const_iterator it=mvector.begin(); it!=mvector.end(); ++it) {
+	if ( (*it).endIt - (*it).beginIt <=1) {
+	    ok = false;
+	}
+    }
+    return ok;
 }
 
 template <class T>
