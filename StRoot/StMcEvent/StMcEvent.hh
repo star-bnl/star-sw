@@ -1,6 +1,9 @@
 /***************************************************************************
  *
- * StMcEvent.hh
+ * $Id: StMcEvent.hh,v 1.2 1999/07/28 20:27:32 calderon Exp $
+ * $Log: StMcEvent.hh,v $
+ * Revision 1.2  1999/07/28 20:27:32  calderon
+ * Version with SL99f libraries
  *
  * 
  **************************************************************************/
@@ -13,6 +16,7 @@
 #include "StMcEvent/StMcVertexCollection.hh"
 #include "StMcEvent/StMcSvtHitCollection.hh"
 #include "StMcEvent/StMcTpcHitCollection.hh"
+
 
 #include "tables/g2t_event.h"
 

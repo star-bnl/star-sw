@@ -7,15 +7,14 @@
 #define StMcHit_hh
 
 #include <iostream.h>
-#include "StThreeVector.hh"
 #include "tables/g2t_hits.h"
 
 class StMcTrack;
-
+class StThreeVectorF;
 class StMcHit {
 public:
     StMcHit();
-    StMcHit(const StThreeVector<float>&,
+    StMcHit(const StThreeVectorF&,
 	  float, float,
 	  StMcTrack*);
     StMcHit(g2t_hits_st*);
@@ -29,20 +28,20 @@ public:
 
   // "Get" Methods
 
-    virtual const StThreeVector<float>& position() const;
+    virtual const StThreeVectorF& position() const;
     virtual float                       dE() const;
     virtual float                       dS() const;
     virtual StMcTrack*                  parentTrack() const;	
 
   // "Set" Methods
 
-    virtual void setPosition(const StThreeVector<float>&);
+    virtual void setPosition(const StThreeVectorF&);
     virtual void setdE(float);
     virtual void setdS(float);
     virtual void setParentTrack(StMcTrack*);
     
 protected:
-    StThreeVector<float> mPosition;
+    StThreeVectorF       mPosition;
     float                mdE;
     float                mdS;
     StMcTrack*           mParentTrack;
@@ -50,7 +49,7 @@ protected:
 
 ostream&  operator<<(ostream& os, const StMcHit&);
 
-inline const StThreeVector<float>& StMcHit::position() const { return mPosition; }
+inline const StThreeVectorF& StMcHit::position() const { return mPosition; }
 
 inline float StMcHit::dE() const { return mdE; }
 

@@ -3,12 +3,14 @@
  * StMcSvtHit.cc
  *
  **************************************************************************/
+#include "StThreeVectorF.hh"
+
 #include "StMcEvent/StMcSvtHit.hh"
 #include "StMcEvent/StMcTrack.hh"
 
-static const char rcsid[] = "$Id: StMcSvtHit.cc,v 1.1.1.1 1999/07/13 18:16:15 uid2620 Exp $";
+static const char rcsid[] = "$Id: StMcSvtHit.cc,v 1.2 1999/07/28 20:27:34 calderon Exp $";
 
-StMcSvtHit::StMcSvtHit(const StThreeVector<float>& p,
+StMcSvtHit::StMcSvtHit(const StThreeVectorF& p,
 		       const float de, const float ds,
 		       StMcTrack* parent)  : StMcHit(p, de, ds, parent)
 { /* noop */ }

@@ -3,12 +3,13 @@
  * StMcHit.cc
  *
  **************************************************************************/
+#include "StThreeVectorF.hh"
 
 #include "StMcEvent/StMcHit.hh"
 #include "StMcEvent/StMcTrack.hh"
 
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 1.1.1.1 1999/07/13 18:10:12 uid2620 Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 1.2 1999/07/28 20:27:33 calderon Exp $";
 
 StMcHit::StMcHit()
 {
@@ -18,7 +19,7 @@ StMcHit::StMcHit()
     
 }
 
-StMcHit::StMcHit(const StThreeVector<float>& p,
+StMcHit::StMcHit(const StThreeVectorF& p,
 		 float de, float ds, StMcTrack* parent)
     : mPosition(p), mdE(de), mdS(ds), mParentTrack(parent)
 { /* noop */ }
@@ -49,7 +50,7 @@ int StMcHit::operator!=(const StMcHit& h) const
     return !(*this == h);  // use operator==()
 }
 
-void StMcHit::setPosition(const StThreeVector<float>& val) { mPosition = val; }
+void StMcHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
 
 void StMcHit::setdE(float val) { mdE = val; }
 

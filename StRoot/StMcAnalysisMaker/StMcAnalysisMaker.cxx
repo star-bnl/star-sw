@@ -1,6 +1,10 @@
 /*************************************************
  *
- * StMcAnalysisMaker.cxx
+ * $Id: StMcAnalysisMaker.cxx,v 1.2 1999/07/28 20:27:30 calderon Exp $
+ * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.2  1999/07/28 20:27:30  calderon
+ * Version with SL99f libraries
+ *
  *
  * Examples that use the structures of
  * StMcEvent and StAssociationMaker
@@ -20,7 +24,6 @@
 #include "StMcAnalysisMaker.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
-#include "StThreeVector.hh"
 #include "StPhysicalHelixD.hh"
 
 #include "StChain/StChain.h"
@@ -31,6 +34,10 @@
 #include "StAssociationMaker/StSubDetector.hh"
 #include "StAssociationMaker/StTrackPairInfo.hh"
 
+#define USING_PERSISTENT
+#ifndef USING_PERSISTENT
+#include "StThreeVector.hh"
+
 #include "StEvent/StEvent.hh"
 #include "StEvent/StTpcHit.hh"
 #include "StEvent/StVecPtrTpcHit.hh"
@@ -38,6 +45,14 @@
 #include "StEvent/StTrackCollection.hh"
 #include "StEvent/StVertex.hh"
 #include "StEvent/StVertexCollection.hh"
+#else
+#include "StThreeVectorF.hh"
+
+#include "StEvent/StEvent.h"
+#include "StEvent/StTpcHit.h"
+#include "StEvent/StGlobalTrack.h"
+#include "StEvent/StVertex.h"
+#endif
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcTpcHit.hh"
@@ -48,7 +63,6 @@
 #include "StMcEvent/StMcVertexCollection.hh"
 
 #include "StEventMaker/StEventMaker.h"
-
 #include "StMcEventMaker/StMcEventMaker.h"
 
 // Define data Members for the histograms
@@ -106,7 +120,12 @@ Int_t StMcAnalysisMaker::Make()
     // Get the pointers we need, we have to use the titles we gave them in the
     // macro.  I just used the defaults.
     StEvent* rEvent = 0;
-    rEvent = ((StEventMaker*) gStChain->Maker("events"))->event();
+#ifndef USING_PERSISTENT
+    rEvent = ((StEventReaderMaker*) gStChain->Maker("events"))->event();
+#else
+    rEvent = (StEvent*) GetInputDS("StEvent");
+#endif
+
     StMcEvent* mEvent = 0;
     mEvent = ((StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
     StAssociationMaker* assoc = 0;
@@ -183,7 +202,7 @@ Int_t StMcAnalysisMaker::Make()
     pair<trackMapIter,trackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
     
     // Calculate the momentum of the track at the start vertex and compare it to MC Track
-    StPhysicalHelix& helix = (*trackBounds.first).first->helix();
+    StPhysicalHelixD& helix = (*trackBounds.first).first->helix();
     double s = helix.pathLength(firstTrack->startVertex()->position()); // path length at start vertex
     double B = 0.5*tesla;  // magnetic field
 
@@ -213,14 +232,14 @@ Int_t StMcAnalysisMaker::Make()
     coordMcPartner->SetXTitle("X (cm)");
     coordMcPartner->SetYTitle("Y (cm)");
 
-    StVecPtrTpcHitIterator rcHitIt;
+    //    StVecPtrTpcHitIterator rcHitIt;
     StMcTpcHitIterator mcHitIt;
     const StVecPtrTpcHit& theHits = firstTrack->tpcHits();
     // Again run into the problem that StVecPtrTpcHitConstIterator doesn't exist yet.
-//     for (int i =0; i<theHits.size(); i++) coordRec->Fill(theHits[i]->position().x(),theHits[i]->position().y());
-    for (rcHitIt  = firstTrack->tpcHits().begin();
-	     rcHitIt != firstTrack->tpcHits().end();
-	     rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
+    for (unsigned int i =0; i<theHits.size(); i++) coordRec->Fill(theHits[i]->position().x(),theHits[i]->position().y());
+//     for (rcHitIt  = firstTrack->tpcHits().begin();
+// 	     rcHitIt != firstTrack->tpcHits().end();
+// 	     rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
     for (mcHitIt  = partner->tpcHits()->begin();
 	     mcHitIt != partner->tpcHits()->end();
 	     mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
