@@ -3,6 +3,9 @@
  **************************************************************************
  *
  * $Log: StSsdPointMaker.cxx,v $
+ * Revision 1.2  2004/07/20 14:04:02  croy
+ * Use of new database structure definitions related to SSD config
+ *
  * Revision 1.1  2004/03/12 06:12:37  jeromel
  * Peer review closed. Yuri/Frank.
  *
@@ -21,25 +24,36 @@
 #include "StMessMgr.h"
 
 #include "StSsdBarrel.hh"
-#include "tables/St_spa_strip_Table.h"
-#include "tables/St_scf_cluster_Table.h"
-#include "tables/St_scm_spt_Table.h"
-
-#include "tables/St_sdm_geom_par_Table.h" //needed to call StTable->GetTable()
+#include "StSsdLadder.hh"
 #include "StEvent.h"
 #include "StSsdHitCollection.h"
 #include "StSsdDynamicControl.h"
 #include "StSsdClusterControl.h"
-
+#include "tables/St_spa_strip_Table.h" //needed to call StTable->GetTable()
+#include "tables/St_scf_cluster_Table.h"
+#include "tables/St_scm_spt_Table.h"
+#include "tables/St_slsCtrl_Table.h"
+#include "tables/St_clusterControl_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_ssdConfiguration_Table.h"
+#include "tables/St_ssdWafersPosition_Table.h"
+#include "tables/St_ssdLaddersPosition_Table.h"
+#include "tables/St_ssdSectorsPosition_Table.h"
+#include "tables/St_ssdBarrelPosition_Table.h"
 
 ClassImp(StSsdPointMaker)
 //_____________________________________________________________________________
 StSsdPointMaker::StSsdPointMaker(const char *name):
 StMaker(name),
-m_geom_par(0),
 m_noise(0),
+m_noise2(0),
 m_condition_db(0),
-m_geom(0)
+m_dimensions(0),
+m_configuration(0),
+m_wafpos(0),
+m_ladpos(0),
+m_secpos(0),
+m_barpos(0)
 
 {
 }
@@ -48,37 +62,38 @@ StSsdPointMaker::~StSsdPointMaker(){
 }
 //_____________________________________________________________________________
 Int_t StSsdPointMaker::Init(){
-  if (Debug())  gMessMgr->Debug() << "In StSsdPointMaker::Make() ... "
+  if (Debug())  gMessMgr->Debug() << "In StSsdPointMaker::Init() ... "
                                << GetName() << endm;
+
+
+
+
+
+  // A GARDER POUR UNE LECTURE DIRECTE EN DB PLUS TARD
+//   St_DataSet *mondataset = GetInputDB("Geometry/");
+//   St_DataSetIter       moniterateur(mondataset);
+//   St_slsCtrl      *monessai;
+//   monessai     = (St_slsCtrl      *)moniterateur("slsCtrl");
+  
   // 		Create tables
   St_DataSet *svtparams = GetInputDB("svt");
   St_DataSetIter       local(svtparams);
-
-  // Replace tables for dynamic parameters with default values
-  mDynamicControl = new StSsdDynamicControl();
-  mDynamicControl->printParameters();
-
-  // Replace tables for control parameters
-  mClusterControl = new StSsdClusterControl();
-  // Set Control Parameters  
-  // Former Scf
-  mClusterControl->setHighCut(5.0);
-  mClusterControl->setTestTolerance(0.2);
-  // Former Scm
-  mClusterControl->setClusterTreat(13);
-  mClusterControl->setAdcTolerance(0.2);
-  mClusterControl->setMatchMean(0.);
-  mClusterControl->setMatchSigma(8.);
-  mClusterControl->printParameters();
-  // End of Setting Cluster Control parameters
-
-  m_geom_par     = (St_sdm_geom_par      *)local("ssd/sdm_geom_par");
   m_condition_db = (St_sdm_condition_db  *)local("ssd/sdm_condition_db");
-  m_geom         = (St_svg_geom          *)local("svgpars/geom");
   m_noise        = (St_sdm_calib_db      *)local("ssd/sdm_calib_db");
-
-  if ((!m_geom_par)||(!m_geom)) {
-    gMessMgr->Error() << "No  access to geometry parameters" << endm;
+  m_dimensions   = (St_ssdDimensions     *)local("ssd/ssdDimensions");
+  m_configuration= (St_ssdConfiguration  *)local("ssd/ssdConfiguration");
+  m_wafpos       = (St_ssdWafersPosition *)local("ssd/ssdWafersPosition");
+  m_noise2       = (St_ssdStripCalib     *)local("ssd/ssdStripCalib");
+ 
+  St_slsCtrl *control;
+  control = (St_slsCtrl *)local("ssd/slsCtrl");
+  if (!control) {
+    gMessMgr->Error() << "No  access to slsCtrl table" << endm;
+  }   
+  St_clusterControl  *clusterCtrl;
+  clusterCtrl = (St_clusterControl *)local("ssd/clusterControl");
+  if (!clusterCtrl) {
+    gMessMgr->Error() << "No  access to clusterControl table" << endm;
   }   
   if (!m_condition_db) {
     gMessMgr->Error() << "No  access to condition database" << endm;
@@ -86,6 +101,24 @@ Int_t StSsdPointMaker::Init(){
   if (!m_noise) {
     gMessMgr->Error() << "No  access to noise condition" << endm;
   }
+  if (!m_dimensions) {
+    gMessMgr->Error() << "No  access to ssdDimensions table" << endm;
+  }
+  if (!m_configuration) {
+    gMessMgr->Error() << "No  access to ssdConfiguration table" << endm;
+  }
+  if (!m_wafpos) {
+    gMessMgr->Error() << "No  access to ssdWafersPosition table" << endm;
+  }
+
+  // Replace tables for dynamic parameters with default values
+  mDynamicControl = new StSsdDynamicControl(control);
+  mDynamicControl->printParameters();
+  // Replace tables for control parameters
+  mClusterControl = new StSsdClusterControl(clusterCtrl);
+  mClusterControl->setHighCut(3);
+  mClusterControl->printParameters();
+  // End of Setting Cluster Control parameters
   if ((!mDynamicControl)||(!mClusterControl)) {
     gMessMgr->Error() << "No  access to control parameters" << endm;
   } 
@@ -130,7 +163,7 @@ Int_t StSsdPointMaker::Make()
   // 		Create output tables
   Int_t res = 0; 
   
-  St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip/.data/spa_strip");
+  St_spa_strip *spa_strip = (St_spa_strip *)GetDataSet("spa_strip");
   if (!spa_strip){
     gMessMgr->Warning("StSsdPointMaker: no input (fired strip for the SSD)");
     return kStErr;
@@ -143,22 +176,24 @@ Int_t StSsdPointMaker::Make()
   if(mCurrentEvent) mSsdHitColl = mCurrentEvent->ssdHitCollection();
   else              mSsdHitColl = 0;
   
-  sdm_geom_par_st  *geom_par = m_geom_par->GetTable();
-
-  if ((!geom_par)||(!geom_par)){
-    gMessMgr->Error() << "No geometry or control parameters " << endm;
+  ssdDimensions_st  *dimensions = m_dimensions->GetTable();
+  ssdConfiguration_st  *configuration = m_configuration->GetTable();
+  if ((!dimensions)||(!configuration)){
+    gMessMgr->Error() << "No geometry or configuration parameters " << endm;
     return kStErr;
   }
 
   cout<<"#################################################"<<endl;
   cout<<"####     START OF NEW SSD POINT MAKER        ####"<<endl;
   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;  
-  StSsdBarrel *mySsd = new StSsdBarrel(geom_par);
-  mySsd->initLadders(m_geom);
+  StSsdBarrel *mySsd = new StSsdBarrel(dimensions,configuration);
+  mySsd->initLadders(m_wafpos);
   int stripTableSize = mySsd->readStripFromTable(spa_strip);
   cout<<"####        NUMBER OF SPA STRIPS "<<stripTableSize<<"        ####"<<endl;
+  //  mySsd->writeNoiseToFile(spa_strip);
   mySsd->sortListStrip();
-  int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
+  //int noiseTableSize = mySsd->readNoiseFromTable(m_noise,mDynamicControl);
+  int noiseTableSize = mySsd->readNoiseFromTable(m_noise2,mDynamicControl);
   cout<<"####       NUMBER OF DB ENTRIES "<<noiseTableSize<<"       ####"<<endl;
   int nClusterPerSide[2];
   nClusterPerSide[0] = 0;
@@ -167,14 +202,17 @@ Int_t StSsdPointMaker::Make()
   cout<<"####      NUMBER OF CLUSTER P SIDE "<<nClusterPerSide[0]<<"      ####"<<endl;
   cout<<"####      NUMBER OF CLUSTER N SIDE "<<nClusterPerSide[1]<<"      ####"<<endl;
   mySsd->sortListCluster();
-  int nPackage = mySsd->doClusterMatching(geom_par,mClusterControl);
+  debugUnPeu(mySsd);
+  int nPackage = mySsd->doClusterMatching(dimensions,mClusterControl);
   cout<<"####   -> "<<nPackage<<" PACKAGES IN THE SSD           ####"<<endl;
   mySsd->convertDigitToAnalog(mDynamicControl);
-  mySsd->convertUFrameToOther(geom_par);
+  mySsd->convertUFrameToOther(dimensions);
   int nSptWritten = mySsd->writePointToContainer(scm_spt,mSsdHitColl);
   cout<<"####   -> "<<nSptWritten<<" HITS WRITTEN INTO TABLE       ####"<<endl;
   if(mSsdHitColl) 
     cout<<"####   -> "<<mSsdHitColl->numberOfHits()<<" HITS WRITTEN INTO CONTAINER   ####"<<endl;
+  else 
+    cout<<" ######### NO SSD HITS WRITTEN INTO CONTAINER   ####"<<endl;
   scm_spt->Purge();
   cout<<"####        END OF SSD NEW POINT MAKER       ####"<<endl;
   cout<<"#################################################"<<endl;
@@ -276,6 +314,15 @@ void StSsdPointMaker::writeScmCtrlHistograms()
 
   ScmCtrlFile->Close();
 }
+
+void StSsdPointMaker::debugUnPeu(StSsdBarrel *mySsd)
+{
+  int monladder,monwafer;
+  monladder=12;
+  monwafer=9;
+  mySsd->debugUnPeu(monladder,monwafer);
+}
+
 //_____________________________________________________________________________
 void StSsdPointMaker::PrintInfo()
 {

@@ -38,26 +38,38 @@ class TH1F;
 class TH1S;
 class TH2S;
 
-class St_sdm_geom_par;
 class St_sdm_calib_db;
 class St_sdm_condition_db;
-class St_svg_geom;
+class St_ssdDimensions;
+class St_ssdConfiguration;
+class St_ssdWafersPosition;
+class St_ssdLaddersPosition;
+class St_ssdSectorsPosition;
+class St_ssdBarrelPosition;
+class St_ssdStripCalib;
+
 class StEvent;
 class StSsdHitCollection;
 class StSsdDynamicControl;
 class StSsdClusterControl;
+class StSsdBarrel;
 
 class StSsdPointMaker : public StMaker {
  private:
-  St_sdm_geom_par      *m_geom_par;    //!
-  St_sdm_calib_db      *m_noise;       //!
-  St_sdm_condition_db  *m_condition_db;//!
-  St_svg_geom          *m_geom;        //!
+  St_sdm_calib_db       *m_noise;         //!< Pointer to the calib_db table (noise values) 
+  St_ssdStripCalib      *m_noise2;        //!< Pointer to the ssdStripCalib table (noise values) 
+  St_sdm_condition_db   *m_condition_db;  //!< Pointer to the condition_db table (active/inactive strip)
+  St_ssdDimensions      *m_dimensions;    //!< Pointer to the ssdDimensions table (wafer size)
+  St_ssdConfiguration   *m_configuration; //!< Pointer to the ssdConfiguration table (ladder on/off)
+  St_ssdWafersPosition  *m_wafpos;        //!< Pointer to the ssdWaferPosition table (wafer positions)
+  St_ssdLaddersPosition *m_ladpos;        //!< Pointer to the ssdLadderPosition table (ladder positions)
+  St_ssdSectorsPosition *m_secpos;        //!< Pointer to the ssdSectorPosition table (sector positions)
+  St_ssdBarrelPosition  *m_barpos;        //!< Pointer to the ssdBarrelPosition table (barrel positions)
   void makeScfCtrlHistograms();        //!
   void writeScfCtrlHistograms();       //!
   void makeScmCtrlHistograms();        //!
   void writeScmCtrlHistograms();       //!
-
+  void debugUnPeu(StSsdBarrel *mySsd); 
  protected:
 
   StEvent                *mCurrentEvent;   //!
@@ -89,7 +101,7 @@ class StSsdPointMaker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const 
-     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.1 2004/03/12 06:12:37 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: StSsdPointMaker.h,v 1.2 2004/07/20 14:04:10 croy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StSsdPointMaker, 1)   //StAF chain virtual base class for Makers
 };

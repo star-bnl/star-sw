@@ -12,9 +12,11 @@
 #ifndef STAR_StSsdDynamicControl
 #define STAR_StSsdDynamicControl
 
+class St_slsCtrl;
 class StSsdDynamicControl{
  public:
   StSsdDynamicControl();
+  StSsdDynamicControl(St_slsCtrl *slsCtrl);
   ~StSsdDynamicControl();
   
   int       getNElectronInAMip();
@@ -37,7 +39,14 @@ class StSsdDynamicControl{
   int       mADCDynamic;         //!   Dynamic range of the ADC  in mip 
   int       mA128Dynamic;        //!   Dynamic range of the readout chip in mip
   int       mNBitEncoding;       //!   Number of adc bit for encoding
+  int       mNStripInACluster;   //!   Number of strips in a cluster
   double    mPairCreationEnergy; //!   Energy required to create a e+e-pair(GeV)     
+  double    mparDiffP;           //!              
+  double    mparDiffN;           //!
+  double    mparIndRightP;       //!      
+  double    mparIndRightN;       //!
+  double    mparIndLeftP;        //!
+  double    mparIndLeftN;        //!
   float     mDAQCutValue;        //!   DAQ cut in sigma unit equi. S/N
 };
 

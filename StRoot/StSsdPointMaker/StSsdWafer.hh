@@ -1,7 +1,26 @@
+/*!
+ * \class StSsdWafer
+ * \author to be filled - doc by L.Martin
+ * \date 02/27/04 for the documentation
+
+This class is the description of the SSD wafer objects.
+A wafer is made of :
+
+- An unique Id
+- Some geometrical information such as the transverse,drift and normal vectors, the position of its center
+- Two lists of strips
+- Two lists of clusters
+- A list of packages (matchable clusters)
+- A list of points deduced from the packages
+
+The Clusters are first found on both sides of the wafer. The clusters are then combined into packages. The packages are then solved and the points
+ deduced from the packages. The point coordinates can be transformed from the UV frame to the local (wafer) frame and the global frame.
+ */
 #ifndef STSSDWAFER_HH
 #define STSSDWAFER_HH
 
-class sdm_geom_par_st;
+class ssdDimensions_st;
+class ssdConfiguration_st;
 class StSsdStrip;
 class StSsdStripList;
 class StSsdCluster;
@@ -22,19 +41,19 @@ class StSsdWafer
                     StSsdWafer(const StSsdWafer & originalWafer);
                     StSsdWafer& operator=(const StSsdWafer originalWafer);
 
-  void              init(int rId, float *rD, float *rT, float *rN, float *rX);
+  void              init(int rId, double *rD, double *rT, double *rN, double *rX);
 
-  StSsdStripList*   getStripP();
-  StSsdStripList*   getStripN();
-  StSsdClusterList* getClusterP();
-  StSsdClusterList* getClusterN();
-  StSsdPackageList* getPackage();
-  StSsdPointList*   getPoint();
+  StSsdStripList*   getStripP();   //!< Returns the P-side strip list attached to this wafer
+  StSsdStripList*   getStripN();   //!< Returns the N-side strip list attached to this wafer
+  StSsdClusterList* getClusterP(); //!< Returns the P-side cluster list attached to this wafer
+  StSsdClusterList* getClusterN(); //!< Returns the N-side cluster list attached to this wafer
+  StSsdPackageList* getPackage();  //!< Returns the package list attached to this wafer
+  StSsdPointList*   getPoint();    //!< Returns the point list attached to this wafer
 
-  void              addStrip(StSsdStrip *ptr, int iSide);
-  void              addCluster(StSsdCluster *ptr, int iSide);
-  void              addPackage(StSsdPackage *ptr);
-  void              addPoint(StSsdPoint *ptr);
+  void              addStrip(StSsdStrip *ptr, int iSide);     //!< Attaches the ptr strip on the iSide of the wafer
+  void              addCluster(StSsdCluster *ptr, int iSide); //!< Attaches the ptr cluster on the iSide of the wafer
+  void              addPackage(StSsdPackage *ptr);            //!< Attaches the ptr package on that wafer
+  void              addPoint(StSsdPoint *ptr);                //!< Attaches the ptr point on that wafer
 
   void              setSigmaStrip(int iStrip, int iSide, int iSigma, StSsdDynamicControl *dynamicControl);
 
@@ -44,22 +63,24 @@ class StSsdWafer
 
   void              doClusterisation(int *numberOfCluster, StSsdClusterControl *clusterControl);
 
-  int               doFindPackage(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl); 
-  int               doSolvePerfect(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl);
+  int               doFindPackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl); 
+  int               doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
   void              doStatPerfect(int nPerfectPoint, StSsdClusterControl *clusterControl);
-  int               doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl);
+  int               doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl);
   int               convertDigitToAnalog(double PairCreationEnergy);
-  int               convertUFrameToLocal(sdm_geom_par_st *geom_par);
+  int               convertUFrameToLocal(ssdDimensions_st *dimensions);
   int               convertLocalToGlobal();
   int               printborder();
-
+  void              debugStrips();
+  void              debugClusters();
+  int               getIdWafer();
  private:
 
-  int                mId;
-  float             *mD;
-  float             *mT;
-  float             *mN;
-  float             *mX;
+  int                mId;           //!< Id of the wafer
+  float             *mD;            //!< Vector defining the drift direction
+  float             *mT;            //!< Vector defining the transverse direction
+  float             *mN;            //!< Vector defining the normal direction
+  float             *mX;            //!< Vector defining the center of the wafer
   float              mPerfectMean;
   float              mPerfectSigma;
 //   int            *mDeadStripP;
@@ -72,11 +93,12 @@ class StSsdWafer
   StSsdPackageList  *mPackage;
   StSsdPointList    *mPoint;
 
-  int               doFindCluster(StSsdClusterControl *clusterControl, int iSide);
-  int               doClusterSplitting(StSsdClusterControl *clusterControl, int iSide);
-
-  int               geoMatched(sdm_geom_par_st *geom_par, StSsdCluster *ptr1, StSsdCluster *ptr2);
-  int               setMatcheds(sdm_geom_par_st *geom_par, StSsdPoint *Spt, StSsdCluster *pMatched, StSsdCluster *nMatched);
+  int               doFindCluster(StSsdClusterControl *clusterControl, int iSide);      //!< Does the cluster finding
+  int               doClusterSplitting(StSsdClusterControl *clusterControl, int iSide); //!< Tries to split some clusters
+  //! Determines if two clusters are geometricaly compatible
+  int               geoMatched(ssdDimensions_st *dimensions, StSsdCluster *ptr1, StSsdCluster *ptr2); 
+  int               setMatcheds(ssdDimensions_st *dimensions, StSsdPoint *Spt, StSsdCluster *pMatched, StSsdCluster *nMatched);
   double            matchDistr(StSsdClusterControl *clusterControl, double x);
 };
+inline int StSsdWafer::getIdWafer() { return mId; } 
 #endif

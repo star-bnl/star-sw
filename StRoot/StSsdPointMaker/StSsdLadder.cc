@@ -1,6 +1,7 @@
 #include "StSsdLadder.hh"
 #include "StSsdWafer.hh"
-#include "tables/St_svg_geom_Table.h"
+#include <Stiostream.h>
+#include "tables/St_ssdWafersPosition_Table.h"
 
 StSsdLadder::StSsdLadder(int rLadderNumb,int rSsdLayer,int rNWaferPerLadder,int rNStripPerSide)
 {
@@ -30,20 +31,20 @@ StSsdLadder::~StSsdLadder()
     delete mWafers[iWaf];
 }
 
-void StSsdLadder::initWafers(St_svg_geom *geom_class)
+void StSsdLadder::initWafers(St_ssdWafersPosition *wafpos)
 {
-  svg_geom_st *geom =  geom_class->GetTable();
+  ssdWafersPosition_st *wpos =  wafpos->GetTable();
   int idWafer = 0;
   int iWaf    = 0;
-  for (int i = 0; i < geom_class->GetNRows(); i++)
+  for (int i = 0; i < wafpos->GetNRows(); i++)
     {
-      idWafer = geom[i].id;
+      idWafer = wpos[i].id;
       iWaf = idWaferToWaferNumb(idWafer);
       if (
 	  (idWafer > mSsdLayer*1000)&&
 	  (mLadderNumb == idWafer - mSsdLayer*1000 - (iWaf+1)*100 - 1)
 	  )
-	mWafers[iWaf]->init(idWafer, geom[i].d, geom[i].t, geom[i].n, geom[i].x);
+	mWafers[iWaf]->init(idWafer, wpos[i].driftDirection, wpos[i].transverseDirection, wpos[i].normalDirection, wpos[i].centerPosition);
     }
 }
 
@@ -58,4 +59,18 @@ int StSsdLadder::waferNumbToIdWafer(int waferNumb)
   int iL = mLadderNumb+1;                          // iL:1->20
   int iW = waferNumb+1;                            // iW:1->16
   return mSsdLayer*1000 + iW*100 + iL;
+}
+
+void StSsdLadder::debugUnPeu(int monwafer)
+{
+  for (int j=0;j<this->getWaferPerLadder();j++) 
+    {
+      if (this->mWafers[j]->getIdWafer()==this->waferNumbToIdWafer(monwafer)) 
+	{
+	  cout<<" Wafer "<<monwafer<<" found with id :"<<this->mWafers[j]->getIdWafer()<<endl;
+	  this->mWafers[j]->debugStrips();
+	  this->mWafers[j]->debugClusters();
+	}
+    }
+
 }

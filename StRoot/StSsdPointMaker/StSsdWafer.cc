@@ -1,7 +1,8 @@
 #include "StSsdWafer.hh"
 
 #include <Stiostream.h>
-#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_ssdDimensions_Table.h"
+#include "tables/St_ssdConfiguration_Table.h"
 
 #include "StSsdStripList.hh"
 #include "StSsdStrip.hh"
@@ -58,7 +59,12 @@ StSsdWafer::~StSsdWafer()
   delete    mPoint;
 }
 
-void StSsdWafer::init(int rId, float *rD, float *rT, float *rN, float *rX)
+/*!
+The wafer initialisation. The geom info is taken from the method arguments. The lists are built.
+Only the WafersPosition are used at the moment. This part should be updated to take into account
+the relative position of the ladders, sectors and barrel.
+ */
+void StSsdWafer::init(int rId, double *rD, double *rT, double *rN, double *rX)
 {
   if (rId != mId)
     cout<<" Can not initialize wafer number : "<<mId<<" with "<<rId<<"\n";
@@ -67,10 +73,10 @@ void StSsdWafer::init(int rId, float *rD, float *rT, float *rN, float *rX)
 //       cout<<" Okay to initialize wafer number : "<<mId<<" with "<<rId<<"\n";
       for (int i = 0; i < 3; i++)
 	{
-	  mD[i] = rD[i];
-	  mT[i] = rT[i];
-	  mN[i] = rN[i];
-	  mX[i] = rX[i];
+	  mD[i] = (float)rD[i];
+	  mT[i] = (float)rT[i];
+	  mN[i] = (float)rN[i];
+	  mX[i] = (float)rX[i];
 	}
     }
 }
@@ -93,7 +99,64 @@ StSsdPackageList* StSsdWafer::getPackage()
 StSsdPointList*   StSsdWafer::getPoint()
 {  return mPoint; }  
 
+void StSsdWafer::debugStrips()
+{
+  StSsdStrip *currentStripP;
+  cout<<"List of "<<mStripP->getSize()<<" strips on the P side "<<endl;
+  if (mStripP->getSize()>0) currentStripP = mStripP->first();
+  for (int i=0;i<mStripP->getSize();i++) {
+    cout<<" id,sig,noise : "<<currentStripP->getNStrip()
+	<<" "<<currentStripP->getDigitSig()
+	<<" "<<currentStripP->getSigma()<<endl;
+    if (currentStripP!=mStripP->last()) currentStripP = mStripP->next(currentStripP);
+  }
 
+  StSsdStrip *currentStripN;
+  cout<<"List of "<<mStripN->getSize()<<" strips on the N side "<<endl;
+  if (mStripN->getSize()>0) currentStripN = mStripN->first();
+  for (int i=0;i<mStripN->getSize();i++) {
+    cout<<" id,sig,noise : "<<currentStripN->getNStrip()
+	<<" "<<currentStripN->getDigitSig()
+	<<" "<<currentStripN->getSigma()<<endl;
+    if (currentStripN!=mStripN->last()) currentStripN = mStripN->next(currentStripN);
+  }
+}
+void StSsdWafer::debugClusters()
+{
+  StSsdCluster *currentClusterP;
+  cout<<"List of "<<mClusterP->getSize()<<" clusters on the P side "<<endl;
+  if (mClusterP->getSize()>0) currentClusterP = mClusterP->first();
+  for (int i=0;i<mClusterP->getSize();i++) {
+    cout<<"N,Size,FirstStrip,StripMean,TotAdc,FirstAdc,LastAdc,TotNoise : "<<currentClusterP->getNCluster()
+	<<" "<<currentClusterP->getClusterSize()
+	<<" "<<currentClusterP->getFirstStrip()
+	<<" "<<currentClusterP->getStripMean()
+	<<" "<<currentClusterP->getTotAdc()
+	<<" "<<currentClusterP->getFirstAdc()
+	<<" "<<currentClusterP->getLastAdc()
+	<<" "<<currentClusterP->getTotNoise()<<endl;
+    if (currentClusterP!=mClusterP->last()) currentClusterP = mClusterP->next(currentClusterP);
+  }
+
+  StSsdCluster *currentClusterN;
+  cout<<"List of "<<mClusterN->getSize()<<" clusters on the P side "<<endl;
+  if (mClusterN->getSize()>0) currentClusterN = mClusterN->first();
+  for (int i=0;i<mClusterN->getSize();i++) {
+    cout<<"N,Size,FirstStrip,StripMean,TotAdc,FirstAdc,LastAdc,TotNoise : "<<currentClusterN->getNCluster()
+	<<" "<<currentClusterN->getClusterSize()
+	<<" "<<currentClusterN->getFirstStrip()
+	<<" "<<currentClusterN->getStripMean()
+	<<" "<<currentClusterN->getTotAdc()
+	<<" "<<currentClusterN->getFirstAdc()
+	<<" "<<currentClusterN->getLastAdc()
+	<<" "<<currentClusterN->getTotNoise()<<endl;
+    if (currentClusterN!=mClusterN->last()) currentClusterN = mClusterN->next(currentClusterN);
+  }
+
+}
+/*!
+A new strip is added to the wafer by calling the StripList method.
+ */
 void StSsdWafer::addStrip(StSsdStrip *ptr, int iSide)
 {
   if (iSide)
@@ -102,6 +165,9 @@ void StSsdWafer::addStrip(StSsdStrip *ptr, int iSide)
     { mStripP->addNewStrip(ptr); }
 }
 
+/*!
+A new cluster is added to the wafer by calling the ClusterList method.
+ */
 void StSsdWafer::addCluster(StSsdCluster *ptr, int iSide)
 {
   if (iSide)
@@ -110,9 +176,15 @@ void StSsdWafer::addCluster(StSsdCluster *ptr, int iSide)
     { mClusterP->addNewCluster(ptr); }
 }
 
+/*!
+A new package is added to the wafer by calling the PackageList method.
+ */
 void StSsdWafer::addPackage(StSsdPackage *ptr)
 {  mPackage->addNewPackage(ptr); }
 
+/*!
+A new point is added to the wafer by calling the PointList method.
+ */
 void StSsdWafer::addPoint(StSsdPoint *ptr)
 {  mPoint->addNewPoint(ptr); }
 
@@ -124,22 +196,37 @@ void StSsdWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, StSsdDynamicCo
     { mStripP->setSigma(iStrip, iSigma, dynamicControl); }
 }
 
+/*!
+The strips of both sides are sorted
+ */
 void StSsdWafer::sortStrip()
 {
   mStripP->sortStrip();
   mStripN->sortStrip();
 }
 
+/*!
+The clusters of both sides are sorted
+ */
 void StSsdWafer::sortCluster()
 {
   mClusterP->sortCluster();
   mClusterN->sortCluster();
 }
 
+/*!
+The points are sorted by what ??
+ */
 void StSsdWafer::sortPoint()
 {  mPoint->sortPoint(); }
 
 
+/*!
+Does the cluster finding in two steps for both sides :
+
+- a cluster finding
+- a cluster splitting  
+ */
 void StSsdWafer::doClusterisation(int *NClusterPerSide, StSsdClusterControl *clusterControl)
 {
   int iSide = 0;
@@ -150,6 +237,15 @@ void StSsdWafer::doClusterisation(int *NClusterPerSide, StSsdClusterControl *clu
   NClusterPerSide[1] = doClusterSplitting(clusterControl, iSide);
 }
 
+/*!
+Does the cluster finding on the iSide. 
+The strip list is scanned by increasing order (the list is assumed to be sorted). 
+For a given strip (CurrentStrip) if its signal is above a given number of time its noise value a cluster list is formed. 
+The strip list is scanned backward then forward to add the consecutive strips with a signal. The new cluster is updated 
+each time a new strip is added. The scan starts with the first strip of the list and ends with the last strip. 
+The threshold for the creation of a new cluster is given by SsdClusterControl.highCut.
+The SsdClusterControl table seems to be useless in this method (cleaning needed ?) 
+ */
 int StSsdWafer::doFindCluster(StSsdClusterControl *clusterControl, int iSide)
 {
   StSsdStripList   *CurrentStripList   =  0;
@@ -229,6 +325,11 @@ int StSsdWafer::doFindCluster(StSsdClusterControl *clusterControl, int iSide)
   return nCluster;
 }
 
+/*!
+Does the cluster splitting on the side iSide. For each cluster in the cluster list, the array of signal values is built 
+and transmitted to the splitCluster method. This method seems to remove clusters and not to add new clusters resulting 
+from a cluster splitting into several.
+ */
 int StSsdWafer::doClusterSplitting(StSsdClusterControl *clusterControl, int iSide)
 {
   StSsdStripList   *CurrentStripList   =  0;
@@ -274,7 +375,11 @@ int StSsdWafer::doClusterSplitting(StSsdClusterControl *clusterControl, int iSid
   return CurrentClusterList->getSize();
 }
 
-int StSsdWafer::doFindPackage(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl)
+/*!
+Determines the packages by comparing the cluster lists built for both sides. 
+Still a mystery for me...
+ */
+int StSsdWafer::doFindPackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl)
 {
   StSsdPackageList *currentPackageList = 0;
   StSsdCluster     *currentClusterP    = 0;
@@ -313,7 +418,7 @@ int StSsdWafer::doFindPackage(sdm_geom_par_st *geom_par, StSsdClusterControl *cl
       scanClusterN = currentClusterN ;
       while (scanClusterN)
 	{
-	  if (geoMatched(geom_par, scanClusterP, scanClusterN))
+	  if (geoMatched(dimensions, scanClusterP, scanClusterN))
 	    {
 	      matchedOk++;
 	      currentPackage->addNewMatched(scanClusterN, maxMatchedInPackage);
@@ -331,7 +436,7 @@ int StSsdWafer::doFindPackage(sdm_geom_par_st *geom_par, StSsdClusterControl *cl
 	  numScanClusterN = numLastMatchedN;
 	  while (scanClusterN)
 	    {
-	      if (geoMatched(geom_par, scanClusterP, scanClusterN)) 
+	      if (geoMatched(dimensions, scanClusterP, scanClusterN)) 
 		{
 		  keepPackage = 1;
 		  nextMatchedN = scanClusterN;
@@ -390,7 +495,7 @@ int StSsdWafer::doFindPackage(sdm_geom_par_st *geom_par, StSsdClusterControl *cl
   return numPackage;
 }
 
-int StSsdWafer::doSolvePerfect(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl)
+int StSsdWafer::doSolvePerfect(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl)
 {
   int nPerfect = 0;
   StSsdPackage *currentPackage = 0;
@@ -408,7 +513,7 @@ int StSsdWafer::doSolvePerfect(sdm_geom_par_st *geom_par, StSsdClusterControl *c
 	{
           StSsdPoint *newPoint = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 11);
           newPoint->setFlag(100);
-          setMatcheds(geom_par, newPoint, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPoint, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPoint->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPoint);
           nPerfect++;
@@ -442,7 +547,7 @@ void StSsdWafer::doStatPerfect(int nPerfectPoint, StSsdClusterControl *clusterCo
   mPerfectSigma = store/nPerfectPoint;
 }
 
-int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *clusterControl)
+int StSsdWafer::doSolvePackage(ssdDimensions_st *dimensions, StSsdClusterControl *clusterControl)
 {
   int nSolved = 0;
   StSsdPackage *currentPackage = 0;
@@ -462,13 +567,13 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
       else if(!strcmp(currentKind,"1p1n2n"))// case (1-2)A final check Ok
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 12);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0]-Adc[2], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  12);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
@@ -478,13 +583,13 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n"))// case (1-2)AS final check Ok
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  21);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]);
           newPointA->setFlag(100);
  	  mPoint->addNewPoint(newPointA);
 
  	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  21);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
  	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
           newPointB->setFlag(100);
  	  mPoint->addNewPoint(newPointB);
@@ -494,19 +599,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
       else if(!strcmp(currentKind,"1p1n2n3n"))// case (1-3)A
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 13);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0]-Adc[2]-Adc[3], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  13);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0]-Adc[1]-Adc[3], Adc[2]);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  13);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
  	  newPointC->setEnergyLoss(Adc[0]-Adc[1]-Adc[2], Adc[3]);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
@@ -516,19 +621,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n3p1n"))// case (1-3)AS
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]-Adc[3]);
           newPointA->setFlag(100);
  	  mPoint->addNewPoint(newPointA);
 
  	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
  	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]-Adc[3]);
           newPointB->setFlag(100);
  	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]-Adc[0]-Adc[2]);
           newPointC->setFlag(100);
  	  mPoint->addNewPoint(newPointC);
@@ -538,13 +643,13 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p2n"))//        case (2-2)A checked
   	{
  	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  221);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  221);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[3], Adc[2]);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
@@ -554,13 +659,13 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n"))//        case (2-2)AP checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  222);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  222);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointB->setEnergyLoss(Adc[2], Adc[4]);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
@@ -570,22 +675,22 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n"))//        case (2-2)B checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  223);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
  	  mPoint->addNewPoint(newPointD);
 
@@ -622,22 +727,22 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p2n3n"))//        case (2-3)A checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
   	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
   	  newPointC->setEnergyLoss(Adc[3]-Adc[5], Adc[2]);
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
 
@@ -674,22 +779,22 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3p2n"))//        case (2-3)AP checked
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
    	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
    	  newPointC->setEnergyLoss(Adc[2], Adc[4]-Adc[5]);
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(4));
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
 
@@ -726,26 +831,26 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p2n3n"))//        case (2-3)B
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
   	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
   	  newPointC->setEnergyLoss(Adc[0]-Adc[1], Adc[3]);
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  mPoint->addNewPoint(newPointE);
 
 // traitement propre aux space points..(probabilite)
@@ -794,26 +899,26 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3p1n2n"))//        case (3-2)BP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
   	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(5), currentPackage->getMatched(1));
   	  newPointD->setEnergyLoss(Adc[5], Adc[1]-Adc[0]);
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(4));
  	  mPoint->addNewPoint(newPointE);
 
 // traitement propre aux space points..(probabilite)
@@ -862,25 +967,25 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3n"))//        case (2-3)BS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
   	  newPointC->setEnergyLoss(Adc[3]-Adc[6],Adc[1]);
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
   	  newPointD->setEnergyLoss(Adc[3]-Adc[6], Adc[2]);
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
           newPointE->setFlag(100);
  	  mPoint->addNewPoint(newPointE);
 
@@ -930,25 +1035,25 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3p2n"))//        case (3-2)BSP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0]-Adc[6], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3]-Adc[6], Adc[2]);
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
           newPointE->setFlag(100);
  	  mPoint->addNewPoint(newPointE);
 
@@ -998,19 +1103,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3n"))//        case (2-3)C
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLoss(Adc[2]-Adc[5], Adc[4]);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
  	  newPointD->setEnergyLoss(Adc[2]-Adc[4], Adc[5]);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
@@ -1021,19 +1126,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p2n3p2n"))//       case (3-2)CP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointC->setEnergyLoss(Adc[3], Adc[2]-Adc[5]);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
  	  newPointD->setEnergyLoss(Adc[5], Adc[2]-Adc[3]);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
@@ -1044,19 +1149,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p3n"))//        case (2-3)CS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0]-Adc[2], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0]-Adc[1], Adc[2]);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(5));
  	  newPointD->setEnergyLoss(Adc[4], Adc[3]);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
@@ -1067,19 +1172,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n3p1n2n"))//      case (3-2)CPS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
  	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]);
           newPointB->setFlag(100);
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  32);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(6));
  	  newPointD->setEnergyLoss(Adc[4], Adc[6]);
           newPointD->setFlag(100);
  	  mPoint->addNewPoint(newPointD);
@@ -1090,27 +1195,27 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p1n2n3n"))//        case (2-3)D
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  mPoint->addNewPoint(newPointE);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
@@ -1160,27 +1265,27 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3p1n2n"))//        case (3-2)DP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
 	  mPoint->addNewPoint(newPointB);
 
  	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(1));
  	  mPoint->addNewPoint(newPointE);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  23);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(2));
  	  mPoint->addNewPoint(newPointF);
 
 // traitement propre aux space points..(probabilite)
@@ -1230,19 +1335,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p2n3n3p3n"))//        case (3-3)A
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointC->setEnergyLoss(Adc[3], Adc[2]);
 	  newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(3));
  	  newPointE->setEnergyLoss(Adc[6], Adc[3]);
 	  newPointE->setFlag(100);
  	  mPoint->addNewPoint(newPointE);
@@ -1253,19 +1358,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3p2n3n"))//        case (3-3)AP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
 	  newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(7));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(7));
  	  newPointE->setEnergyLoss(Adc[5], Adc[7]);
 	  newPointE->setFlag(100);
  	  mPoint->addNewPoint(newPointE);
@@ -1276,28 +1381,28 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p2n3n3p2n3n"))//    case (3-3)B
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointC->setEnergyLoss(Adc[3], Adc[2]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(5));
  	  newPointD->setEnergyLoss(Adc[3], Adc[5]);
 	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(2));
  	  newPointE->setEnergyLoss(Adc[6], Adc[2]);
  	  mPoint->addNewPoint(newPointE);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointF->setEnergyLoss(Adc[6], Adc[5]);
  	  mPoint->addNewPoint(newPointF);
 
@@ -1325,28 +1430,28 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3n3p2n3n"))//    case (3-3)BP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
  	  newPointD->setEnergyLoss(Adc[2], Adc[5]);
 	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(4));
  	  newPointE->setEnergyLoss(Adc[6], Adc[4]);
  	  mPoint->addNewPoint(newPointE);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointF->setEnergyLoss(Adc[6], Adc[5]);
  	  mPoint->addNewPoint(newPointF);
 
@@ -1374,27 +1479,27 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3p2n3n"))//    case (3-3)BS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(8));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(8));
  	  newPointF->setEnergyLoss(Adc[6], Adc[8]);
  	  newPointF->setFlag(100);
  	  mPoint->addNewPoint(newPointF);
@@ -1423,27 +1528,27 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3n3p3n"))//    case (3-3)BSP
  	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
 	  mPoint->addNewPoint(newPointC);
 
  	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
  	  mPoint->addNewPoint(newPointD);
 
  	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(6));
  	  newPointF->setEnergyLoss(Adc[7], Adc[6]);
           newPointF->setNMatched(33);
  	  newPointF->setFlag(100);
@@ -1473,19 +1578,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p2n3n3p3n"))//    case (3-3)C
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[4], Adc[2]);
           newPointD->setFlag(100);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(3));
  	  newPointF->setEnergyLoss(Adc[7], Adc[3]);
           newPointF->setFlag(100);
 	  mPoint->addNewPoint(newPointF);
@@ -1497,19 +1602,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3p1n2n3n"))//    case (3-3)CS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointD->setEnergyLoss(Adc[2], Adc[4]);
           newPointD->setFlag(100);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(5), currentPackage->getMatched(8));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(5), currentPackage->getMatched(8));
  	  newPointF->setEnergyLoss(Adc[5], Adc[8]);
           newPointF->setFlag(100);
 	  mPoint->addNewPoint(newPointF);
@@ -1521,28 +1626,28 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p2n3n3p2n3n"))//   case (3-3)D
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[4], Adc[2]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  newPointE->setEnergyLoss(Adc[4], Adc[3]);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
  	  newPointF->setEnergyLoss(Adc[7], Adc[2]);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(3));
  	  newPointG->setEnergyLoss(Adc[7], Adc[3]);
 	  mPoint->addNewPoint(newPointG);
 
@@ -1571,28 +1676,28 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3n3p1n2n3n"))// case (3-3)DP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(5));
  	  newPointD->setEnergyLoss(Adc[2], Adc[5]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(6), currentPackage->getMatched(4));
  	  newPointF->setEnergyLoss(Adc[6], Adc[4]);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointG->setEnergyLoss(Adc[6], Adc[5]);
 	  mPoint->addNewPoint(newPointG);
 
@@ -1621,27 +1726,27 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3p1n2n3n"))// case (3-3)DS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(9));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(6), currentPackage->getMatched(9));
  	  newPointG->setEnergyLoss(Adc[6], Adc[9]);
           newPointG->setFlag(100);
 	  mPoint->addNewPoint(newPointG);
@@ -1671,27 +1776,27 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p1n2n3n3p3n"))//case (3-3)DSP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  newPointD->setEnergyLoss(Adc[4], Adc[1]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointE->setEnergyLoss(Adc[4], Adc[2]);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(3));
  	  newPointG->setEnergyLoss(Adc[8], Adc[3]);
           newPointG->setFlag(100);
 	  mPoint->addNewPoint(newPointG);
@@ -1721,19 +1826,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2p1n2n3n3p3n"))//   case (3-3)E
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
  	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(5));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(6), currentPackage->getMatched(5));
  	  newPointE->setEnergyLoss(Adc[6], Adc[5]);
           newPointE->setFlag(100);
 	  mPoint->addNewPoint(newPointE);
@@ -1744,19 +1849,19 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p2n3p2n3n"))//   case (3-3)EP
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointC->setEnergyLoss(Adc[3], Adc[2]);
           newPointC->setFlag(100);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(7));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(5), currentPackage->getMatched(7));
  	  newPointE->setEnergyLoss(Adc[5], Adc[7]);
           newPointE->setFlag(100);
 	  mPoint->addNewPoint(newPointE);
@@ -1767,37 +1872,37 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3n3p2n3n"))//  case (3-3)F
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
  	  newPointE->setEnergyLoss(Adc[3], Adc[6]);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(2));
  	  newPointF->setEnergyLoss(Adc[7], Adc[2]);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(6));
  	  newPointG->setEnergyLoss(Adc[7], Adc[6]);
 	  mPoint->addNewPoint(newPointG);
 
@@ -1836,42 +1941,42 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p1n2n3n3p2n3n"))//  case (3-3)G
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
  	  newPointC->setEnergyLoss(Adc[0], Adc[3]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  newPointD->setEnergyLoss(Adc[4], Adc[1]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointE->setEnergyLoss(Adc[4], Adc[2]);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  newPointF->setEnergyLoss(Adc[4], Adc[3]);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(2));
  	  newPointG->setEnergyLoss(Adc[8], Adc[2]);
 	  mPoint->addNewPoint(newPointG);
 
 	  StSsdPoint *newPointH = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(3));
  	  newPointH->setEnergyLoss(Adc[8], Adc[3]);
 	  mPoint->addNewPoint(newPointH);
 
@@ -1914,42 +2019,42 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n2p1n2n3n3p1n2n3n"))//  case (3-3)GS
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0],  Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(3), currentPackage->getMatched(1));
  	  newPointC->setEnergyLoss(Adc[3], Adc[1]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(3), currentPackage->getMatched(2));
  	  newPointD->setEnergyLoss(Adc[3], Adc[2]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(3), currentPackage->getMatched(6));
  	  newPointE->setEnergyLoss(Adc[3], Adc[6]);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(7), currentPackage->getMatched(1));
  	  newPointF->setEnergyLoss(Adc[7], Adc[1]);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(7), currentPackage->getMatched(2));
  	  newPointG->setEnergyLoss(Adc[7], Adc[2]);
 	  mPoint->addNewPoint(newPointG);
 
 	  StSsdPoint *newPointH = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointH, currentPackage->getMatched(7), currentPackage->getMatched(6));
+          setMatcheds(dimensions, newPointH, currentPackage->getMatched(7), currentPackage->getMatched(6));
  	  newPointH->setEnergyLoss(Adc[7], Adc[6]);
 	  mPoint->addNewPoint(newPointH);
 
@@ -1992,47 +2097,47 @@ int StSsdWafer::doSolvePackage(sdm_geom_par_st *geom_par, StSsdClusterControl *c
         else if(!strcmp(currentKind,"1p1n2n3n2p1n2n3n3p1n2n3n"))// case (3-3)H
   	{
 	  StSsdPoint *newPointA = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
  	  newPointA->setEnergyLoss(Adc[0], Adc[1]);
 	  mPoint->addNewPoint(newPointA);
 
 	  StSsdPoint *newPointB = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
  	  newPointB->setEnergyLoss(Adc[0], Adc[2]);
 	  mPoint->addNewPoint(newPointB);
 
 	  StSsdPoint *newPointC = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
  	  newPointC->setEnergyLoss(Adc[0], Adc[3]);
 	  mPoint->addNewPoint(newPointC);
 
 	  StSsdPoint *newPointD = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointD, currentPackage->getMatched(4), currentPackage->getMatched(1));
  	  newPointD->setEnergyLoss(Adc[4], Adc[1]);
 	  mPoint->addNewPoint(newPointD);
 
 	  StSsdPoint *newPointE = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointE, currentPackage->getMatched(4), currentPackage->getMatched(2));
  	  newPointE->setEnergyLoss(Adc[4], Adc[2]);
 	  mPoint->addNewPoint(newPointE);
 
 	  StSsdPoint *newPointF = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointF, currentPackage->getMatched(4), currentPackage->getMatched(3));
  	  newPointF->setEnergyLoss(Adc[4], Adc[3]);
 	  mPoint->addNewPoint(newPointF);
 
 	  StSsdPoint *newPointG = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(1));
+          setMatcheds(dimensions, newPointG, currentPackage->getMatched(8), currentPackage->getMatched(1));
  	  newPointG->setEnergyLoss(Adc[8], Adc[1]);
 	  mPoint->addNewPoint(newPointG);
 
 	  StSsdPoint *newPointH = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(2));
+          setMatcheds(dimensions, newPointH, currentPackage->getMatched(8), currentPackage->getMatched(2));
  	  newPointH->setEnergyLoss(Adc[8], Adc[2]);
 	  mPoint->addNewPoint(newPointH);
 
 	  StSsdPoint *newPointI = new StSsdPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 33);
-          setMatcheds(geom_par, newPointI, currentPackage->getMatched(8), currentPackage->getMatched(3));
+          setMatcheds(dimensions, newPointI, currentPackage->getMatched(8), currentPackage->getMatched(3));
  	  newPointI->setEnergyLoss(Adc[8], Adc[3]);
 	  mPoint->addNewPoint(newPointI);
 
@@ -2096,13 +2201,13 @@ int StSsdWafer::convertDigitToAnalog(double PairCreationEnergy)
 }
 
 
-int StSsdWafer::convertUFrameToLocal(sdm_geom_par_st *geom_par)
+int StSsdWafer::convertUFrameToLocal(ssdDimensions_st *dimensions)
 {
   StSsdPoint *currentPoint = mPoint->first();
   while(currentPoint)
     {
-      currentPoint->setXl(currentPoint->getPositionU(0)/2.+currentPoint->getPositionU(1)/2.-geom_par[0].L_wafer_act_l+geom_par[0].L_wafer_act_w*tan(geom_par[0].L_stereo_angle),0);
-      currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(geom_par[0].L_stereo_angle)),1);
+      currentPoint->setXl(currentPoint->getPositionU(0)/2.+currentPoint->getPositionU(1)/2.-dimensions[0].waferHalfActLength+dimensions[0].waferHalfActWidth*tan(dimensions[0].stereoAngle),0);
+      currentPoint->setXl((currentPoint->getPositionU(1)-currentPoint->getPositionU(0))/(2*tan(dimensions[0].stereoAngle)),1);
       currentPoint = mPoint->next(currentPoint);
     }
   return 1;
@@ -2115,7 +2220,8 @@ int StSsdWafer::convertLocalToGlobal()
   float delta = 0;
   while(currentPoint)
     {
-      B[0]=currentPoint->getXl(0)+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
+      // sign (-) of B[0] : temporarily fixed - order of strip readout has to be reversed 
+      B[0]=-currentPoint->getXl(0)+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
       B[1]=currentPoint->getXl(1)+mT[0]*mX[0]+mT[1]*mX[1]+mT[2]*mX[2]; 
       B[2]=currentPoint->getXl(2)+mN[0]*mX[0]+mN[1]*mX[1]+mN[2]*mX[2];
 
@@ -2257,11 +2363,13 @@ StSsdWafer& StSsdWafer::operator=(const StSsdWafer originalWafer)
   return *this;
 }
 
-
-int StSsdWafer::geoMatched(sdm_geom_par_st *geom_par, StSsdCluster *ptr1, StSsdCluster *ptr2)
+/*!
+Determines if two clusters can be matched based on geometrical considerations
+ */
+int StSsdWafer::geoMatched(ssdDimensions_st *dimensions, StSsdCluster *ptr1, StSsdCluster *ptr2)
 {
   int geomatched = 0;
-  int numStrip = int((2*geom_par[0].L_wafer_act_w*tan(geom_par[0].L_stereo_angle)/geom_par[0].L_strip_pitch)+1);
+  int numStrip = int((2*dimensions[0].waferHalfActWidth*tan(dimensions[0].stereoAngle)/dimensions[0].stripPitch)+1);
   if ( (!ptr1) || (!ptr2) )
     geomatched = 0;
   else if((ptr2->getStripMean() > ( ptr1->getStripMean() - numStrip))
@@ -2270,10 +2378,13 @@ int StSsdWafer::geoMatched(sdm_geom_par_st *geom_par, StSsdCluster *ptr1, StSsdC
   return geomatched;
 }
 
-int StSsdWafer::setMatcheds(sdm_geom_par_st *geom_par, StSsdPoint *Point, StSsdCluster *pMatched, StSsdCluster *nMatched)
+/*!
+Must be useful but for what ???
+ */
+int StSsdWafer::setMatcheds(ssdDimensions_st *dimensions, StSsdPoint *Point, StSsdCluster *pMatched, StSsdCluster *nMatched)
 {// strip(1) -> Upos(0)...
-  Point->setPositionU((pMatched->getStripMean()-1)*geom_par[0].L_strip_pitch,0);
-  Point->setPositionU((nMatched->getStripMean()-1)*geom_par[0].L_strip_pitch,1);
+  Point->setPositionU((pMatched->getStripMean()-1)*dimensions[0].stripPitch,0);
+  Point->setPositionU((nMatched->getStripMean()-1)*dimensions[0].stripPitch,1);
 
   // for evaluation only !!!
   int pHitIndex   = 0;
