@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.45 2000/06/23 15:44:24 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.46 2000/07/26 19:57:50 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.46  2000/07/26 19:57:50  lansdell
+// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
+//
 // Revision 1.45  2000/06/23 15:44:24  lansdell
 // restore PID method to using global tracks & retitle PID histogram
 //
@@ -145,6 +148,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "StQABookHist.h"
+#include "StMultiH1F.h"
 
 // tables  from geant
 //#include "tables/St_g2t_vertex_Table.h"
@@ -209,8 +213,7 @@ const Float_t StQABookHist::cmaxdedx =  0.1e-04*1e6; // change from GeV to keV p
 ClassImp(StQABookHist)
   
 //_____________________________________________________________________________
-StQABookHist::StQABookHist(const char *name, const char *title, const char* type)
-     : StMaker(name,title), QAHistType(type) {
+StQABookHist::StQABookHist(const char *name, const char *title, const char* type) : StMaker(name,title), QAHistType(type) {
 
 //  - zero all pointers defined in the header file
 
@@ -220,6 +223,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_glb_trk_tot_sm=0;       //! # tracks total from globtrk, small range
   m_glb_trk_plusminus=0;    //! # trks pos/neg. 
   m_glb_trk_plusminus_sm=0; //! # trks pos/neg., small range
+  m_glb_trk_chg=0;          //! all charge east/west, tpc
   m_glb_trk_prim=0;         //! # trks from primaries
   m_glb_trk_prim_sm=0;      //! # trks from primaries, small range
   m_vert_total=0;    //! total number of vertices
@@ -228,13 +232,12 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_mean_pt_sm=0;    //! mean pt value, small range
   m_mean_eta=0;      //! mean eta value 
   m_rms_eta=0;       //! rms eta value 
+  m_prim_vrtr=0;     //! primary vrtx r position
   m_prim_vrtx0=0;    //! primary vrtx x position
   m_prim_vrtx1=0;    //! primary vrtx y position
   m_prim_vrtx2=0;    //! primary vrtx z position
 
-  
 // for method MakeGlob - from table globtrk
-
   m_globtrk_tot=0;
   m_globtrk_tot_sm=0;
   m_globtrk_good=0;
@@ -272,6 +275,10 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_glb_phi0T=0;
   m_glb_z0T=0;
   m_glb_curvT=0;
+  m_glb_rfT=0;
+  m_glb_rfFE=0;
+  m_glb_rfFW=0;
+  m_glb_padfT=0;  
   m_glb_xf0=0;
   m_glb_xfT=0;
   m_glb_xfFE=0;
@@ -284,6 +291,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_glb_zfT=0; 
   m_glb_zfFE=0; 
   m_glb_zfFW=0;
+  m_glb_f0=0;
   m_glb_radfT=0;
   m_glb_radfFE=0;
   m_glb_radfFW=0;
@@ -323,12 +331,14 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_glb_phi0TS=0;     
   m_glb_z0TS=0;       
   m_glb_curvTS=0;     
+  m_glb_rfTS=0;       
   m_glb_xfTS=0;       
   m_glb_yfTS=0;       
   m_glb_zfTS=0;       
   m_glb_xf0TS=0;      
   m_glb_yf0TS=0;      
   m_glb_zf0TS=0;      
+  m_glb_f0TS=0;      
   m_glb_radfTS=0;     
   m_psiTS=0;          
   m_tanlTS=0;         
@@ -367,6 +377,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq1_dipT = 0;
   m_chisq0_zfT = 0;
   m_chisq1_zfT = 0;
+  m_chisq0_phiT = 0;
   m_nfptonpt_momT = 0;
   m_nfptonpt_etaT = 0;
 
@@ -385,10 +396,10 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq1_dipTS = 0;
   m_chisq0_zfTS = 0;
   m_chisq1_zfTS = 0;
+  m_chisq0_phiTS = 0;
   m_nfptonpt_momTS = 0;
   m_nfptonpt_etaTS = 0;
 
-  
 // for method MakeDE - from table dst_dedx
   m_ndedxr=0;        //! number of tracks with dedx info
 
@@ -405,7 +416,6 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_dedx1FW=0;         //! dE/dx [1] -sigma
   
 // for method MakeHistPrim - from table primtrk
-
   m_primtrk_tot=0;
   m_primtrk_tot_sm=0;
   m_primtrk_good=0;
@@ -447,6 +457,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_prim_zfT=0; 
   //m_prim_zfFE=0; 
   //m_prim_zfFW=0;
+  m_prim_f0=0;
   m_prim_radfT=0;
   //m_prim_radfFE=0;
   //m_prim_radfFW=0;
@@ -490,9 +501,10 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_prim_yfTS=0;       
   m_prim_zfTS=0;       
   m_prim_xf0TS=0;      
-  m_prim_yf0TS=0;      
-  m_prim_zf0TS=0;      
-  m_prim_radfTS=0;     
+  m_prim_yf0TS=0;
+  m_prim_zf0TS=0;
+  m_prim_f0TS=0;
+  m_prim_radfTS=0;
   m_ppsiTS=0;          
   m_ptanlTS=0;         
   m_prim_thetaTS=0;    
@@ -551,8 +563,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_pnfptonpt_momTS = 0;
   m_pnfptonpt_etaTS = 0;
 
-
-  // for method MakeHistGen - from table particle
+// for method MakeHistGen - from table particle
   m_H_pT_eta_gen=0; //! pT versus eta Spectra for generated
   m_H_pT_gen=0;     //! pT Spectra for generated
   m_H_pT_genT=0;    //! pT Spectra for generated, tpc
@@ -565,7 +576,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_H_ncpart=0;     //! number of charged e,mu,proton,kaon,pion
   m_H_ncpart_sm=0;  //! number of charged e,mu,proton,kaon,pion,small range
 
-  // for MakeHistPID - from tables primtrk & dst_dedx 
+// for MakeHistPID - from tables primtrk & dst_dedx 
   m_p_dedx_rec=0;   //! dedx vs p
   
   // for method MakeHistVertex - from table dst_vertex
@@ -594,7 +605,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_xi_ma_hist=0;    //! Xi Mass
   m_kink_tot=0;      //! number of kinks  
 
-  // for method MakeHistPoint
+// for method MakeHistPoint
   m_pnt_tot=0;     //! number of hits
   m_pnt_tot_med=0; //! number of hits, med range
   m_pnt_tot_sm=0;  //! number of hits, small range
@@ -605,15 +616,14 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_pnt_ftpcE=0;   //! number of hits ftpcE
   m_pnt_ftpcW=0;   //! number of hits ftpcW
 
-  // for method MakeHistRich
+// for method MakeHistRich
   m_rich_tot=0;   //! number of rich hits
 
-  // for method MakeHistEval  
+// for method MakeHistEval  
   m_geant_reco_pvtx_x=0;  //! prim vtx x, diff geant - reco
   m_geant_reco_pvtx_y=0;  //! prim vtx y, diff geant - reco
   m_geant_reco_pvtx_z=0;  //! prim vtx z, diff geant - reco
   m_geant_reco_vtx_z_z=0; //! prim vtx z, diff geant - reco vs reco z
-
 }
 //_____________________________________________________________________________
 Int_t StQABookHist::Init(){
@@ -696,90 +706,85 @@ TH2F* StQABookHist::QAH2F(const Text_t* name, const Text_t* title,
 
 }
 //_____________________________________________________________________________
+TH2F* StQABookHist::QAMH1F(const Text_t* name, const Text_t* title,
+   Int_t nbinsx, Axis_t xlow, Axis_t xup,
+   Int_t nbinsy, Axis_t ylow, Axis_t yup) {
 
+  return (TH2F*) (new StMultiH1F(NameIt(name),TitleIt(title),nbinsx,xlow,xup,nbinsy,ylow,yup));
+
+}
+//_____________________________________________________________________________
 void StQABookHist::BookHistEvSum(){
   
 // for method MakeEvSum - from table event_summary
 
-  m_trk_tot_gd    = QAH1F("QaEvsumTrkGoodDTotal",
-                   "evsum: num good global tracks over total",  55,0.,1.1);
+  m_trk_tot_gd     = QAH1F("QaEvsumTrkGoodDTotal","evsum: num good global tracks over total",55,0.,1.1);
     m_trk_tot_gd->SetXTitle("number of good/total tracks");
-
-  m_glb_trk_tot      = QAH1F("QaEvsumTrkTot","evsum: num tracks total ",
-                             ntrk, 0., 10000.);
-  m_glb_trk_tot_sm   = QAH1F("QaEvsumTrkTotsm","evsum: num tracks total ",
-                             ntrk, 0., 20.);
-
-  m_glb_trk_plusminus     = QAH1F("QaEvsumPlusMinusTrk", "evsum: num pos. over neg trks",
-                             ntrk,0.8,1.4);
-  m_glb_trk_plusminus_sm  = QAH1F("QaEvsumPlusMinusTrksm", "evsum: num pos. over neg trks",
-                             ntrk,0.,4.);
-
-  m_glb_trk_prim       = QAH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",
-                             80, 0.,4000.);
-  m_glb_trk_prim_sm    = QAH1F("QaEvsumTrkPrimsm","evsum: num good tracks from primaries ",
-                             80, 0.,20.);
-	  
-  m_vert_total    = QAH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,2000.);
-  m_vert_total_sm = QAH1F("QaEvsumVertTotsm", "evsum: total num of vertices",80,0.,20.);
- 
-  m_mean_pt       = QAH1F("QaEvsumMeanPt",   "evsum: mean pt", nmnpt, 0., 2.0);
-  m_mean_pt_sm    = QAH1F("QaEvsumMeanPtsm",   "evsum: mean pt", nmnpt, 0., 0.5);
-
-  m_mean_eta   = QAH1F("QaEvsumMeanEta",  "evsum: mean eta", nmneta, -0.4,0.4);
-  m_rms_eta    = QAH1F("QaEvsumRmsEta",   "evsum: rms eta", nmneta, 0.,2.5);
-
-  m_prim_vrtx0 = QAH1F("QaEvsumPrimVertX","evsum: X of primary vertex", 40, -1.,1.);
-  m_prim_vrtx1 = QAH1F("QaEvsumPrimVertY","evsum: Y of primary vertex", 40,-1.,1.);
-  m_prim_vrtx2 = QAH1F("QaEvsumPrimVertZ","evsum: Z of primary vertex", nxyz,-50., 50.);
-
-  
+  m_glb_trk_tot    = QAH1F("QaEvsumTrkTot","evsum: num tracks total ",ntrk,0.,10000.);
+  m_glb_trk_tot_sm = QAH1F("QaEvsumTrkTotsm","evsum: num tracks total ",ntrk,0.,20.);
+  m_glb_trk_plusminus     = QAH1F("QaEvsumPlusMinusTrk","evsum: num pos. over neg trks",ntrk,0.8,1.4);
+  m_glb_trk_plusminus_sm  = QAH1F("QaEvsumPlusMinusTrksm","evsum: num pos. over neg trks",ntrk,0.,4.);
+  m_glb_trk_chg    = QAH1F("QaEvsumTotChg","softmon: all charge east/west,tpc",60,-3,3);
+  m_glb_trk_prim   = QAH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",80,0.,4000.);
+  m_glb_trk_prim_sm       = QAH1F("QaEvsumTrkPrimsm","evsum: num good tracks from primaries ",80,0.,20.);
+  m_vert_total     = QAH1F("QaEvsumVertTot","evsum: total num of vertices",80,0.,2000.);
+  m_vert_total_sm  = QAH1F("QaEvsumVertTotsm","evsum: total num of vertices",80,0.,20.);
+  m_mean_pt        = QAH1F("QaEvsumMeanPt","evsum: mean pt", nmnpt,0.,2.0);
+  m_mean_pt_sm     = QAH1F("QaEvsumMeanPtsm","evsum: mean pt", nmnpt,0.,0.5);
+  m_mean_eta   = QAH1F("QaEvsumMeanEta","evsum: mean eta", nmneta,-0.4,0.4);
+  m_rms_eta    = QAH1F("QaEvsumRmsEta","evsum: rms eta", nmneta,0.,2.5);
+  m_prim_vrtr  = QAH1F("QaEvsumPrimVertR","evsum: R of primary vertex",40,-1.,1.);
+  m_prim_vrtx0 = QAH1F("QaEvsumPrimVertX","evsum: X of primary vertex",40,-1.,1.);
+  m_prim_vrtx1 = QAH1F("QaEvsumPrimVertY","evsum: Y of primary vertex",40,-1.,1.);
+  m_prim_vrtx2 = QAH1F("QaEvsumPrimVertZ","evsum: Z of primary vertex",nxyz,-50.,50.);
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistGlob(){
   
 // for method MakeGlob - from table globtrk
 
-// 1D general
+// general
 
-  m_globtrk_tot     = QAH1F("QaGtrkTot",  "globtrk: tot num tracks - all",40,0.,10000.);
-  m_globtrk_tot_sm  = QAH1F("QaGtrkTotsm",  "globtrk: tot num tracks - all",40,0.,20.);
-
-  m_globtrk_iflag   = QAH1F("QaGtrkFlag", "globtrk: iflag - all ",200,-999.,1001.);
-
-  m_globtrk_good    = QAH1F("QaGtrkGood", "globtrk: tot good tracks - all",40,0.,10000.);
-  m_globtrk_good_sm = QAH1F("QaGtrkGoodsm", "globtrk: tot good tracks - all",40,0.,20.);
-  
+  m_globtrk_tot     = QAH1F("QaGtrkTot","globtrk: tot num tracks - all",40,0.,10000.);
+  m_globtrk_tot_sm  = QAH1F("QaGtrkTotsm","globtrk: tot num tracks - all",40,0.,20.);
+  m_globtrk_iflag   = QAH1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
+  m_globtrk_good    = QAH1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
+  m_globtrk_good_sm = QAH1F("QaGtrkGoodsm","globtrk: tot good tracks - all",40,0.,20.);
   m_det_id          = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
-
-  m_dcaToBeamXY = QAH2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
-
-  m_dcaToBeamZ1 = QAH1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
-  m_dcaToBeamZ2 = QAH1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
-  m_dcaToBeamZ3 = QAH1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
-  m_zDcaTanl    = QAH2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl",80,-20,20,32,-4,4);
-  m_zDcaZf      = QAH2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
-  m_zDcaPsi     = QAH2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
-  m_zDcaPhi0    = QAH2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
+  m_dcaToBeamXY     = QAH2F("QaGtrkDcaBeamXY","globtrk: xy-DCA to Beam Axis (z=0)",80,-4,4,80,-4,4);
+  m_dcaToBeamZ1     = QAH1F("QaGtrkDcaBeamZ1","globtrk: z-DCA to Beam Axis, coarse scale",100,-200,0);
+  m_dcaToBeamZ2     = QAH1F("QaGtrkDcaBeamZ2","globtrk: z-DCA to Beam Axis, coarse scale",100,0,200);
+  m_dcaToBeamZ3     = QAH1F("QaGtrkDcaBeamZ3","globtrk: z-DCA to Beam Axis, near z=0",80,-20,20);
+  m_zDcaTanl        = QAH2F("QaGtrkZdcaTanl","globtrk: z-DCA to Beam Axis vs tanl",80,-20,20,32,-4,4);
+  m_zDcaZf          = QAH2F("QaGtrkZdcaZf","globtrk: z-DCA to Beam Axis vs z-first",80,-20,20,50,-300,300);
+  m_zDcaPsi         = QAH2F("QaGtrkZdcaPsi","globtrk: z-DCA to Beam Axis vs psi",80,-20,20,64,0,360);
+  m_zDcaPhi0        = QAH2F("QaGtrkZdcaPhi0","globtrk: z-DCA to Beam Axis vs azimuth (phi0) at start",80,-20,20,64,0,360);
 
 // 1D tpc
 
   m_pointT      = QAH1F("QaGtrkNPntT",   "globtrk: N points on trk,tpc", 50, 0.,50.);
   m_max_pointT  = QAH1F("QaGtrkNPntMaxT","globtrk: N max pnts on trk, tpc", 50, 0.,100.);
   m_fit_pointT  = QAH1F("QaGtrkNPntFitT","globtrk: N fit pnts on trk, tpc", 50, 0.,50.);
-  m_glb_ratioT  = QAH1F("QaGtrkRnfT",    "globtrk: ratio Nfit/tot pnt, tpc", 55, 0., 1.1);
+  m_glb_ratioT  = QAH1F("QaGtrkRnfT",    "globtrk: ratio Nfit/tot pnt, tpc", 55,0.,1.1);
+    m_glb_ratioT->SetMinimum(10);
   m_glb_ratiomT = QAH1F("QaGtrkRnmT",    "globtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
+    m_glb_ratioT->SetMinimum(10);
   m_glb_chargeT = QAH1F("QaGtrkChrgT",   "globtrk: charge, tpc ", 20,-2.,2.);
   m_glb_r0T     = QAH1F("QaGtrkR0T",     "globtrk: radius at start (cm), tpc ", 50,0.,200.);
+    m_glb_r0T->SetMinimum(100);
   m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth (phi) at start (deg,force 0,360), tpc ", 64,0.,360.);
   m_glb_z0T     = QAH1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
+    m_glb_z0T->SetMinimum(500);
   m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: log10 curvature (1/cm), tpc ", 80,-3.5,0.5);
+  m_glb_rfT     = QAH1F("QaGtrkRfT",     "globtrk: radial position of first hit, tpc", 100,40.,200.);
+  m_glb_padfT   = QAH1F("QaGtrkPadfT",   "globtrk: padrow of first hit on trk, tpc", 45,0.,45.);
+  m_glb_f0      = QAMH1F("QaGtrkf0",     "globtrk: first point: hit-helix, tpc",60,-3.,3.,3,-0.5,2.5);
   m_glb_xfT     = QAH1F("QaGtrkXfT",     "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
-  m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: x of first hit - on helix at start, tpc",60,-3.,3.);
+  m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: first point: x_hit - x_helix, tpc",60,-3.,3.);
   m_glb_yfT     = QAH1F("QaGtrkYfT",     "globtrk: y of first hit on trk, tpc", 50,-200.,200.);
-  m_glb_yf0     = QAH1F("QaGtrkYf0",     "globtrk: y of first hit - on helix at start, tpc",60,-3.,3.);
+  m_glb_yf0     = QAH1F("QaGtrkYf0",     "globtrk: first point: y_hit - y_helix, tpc",60,-3.,3.);
   m_glb_zfT     = QAH1F("QaGtrkZfT",     "globtrk: z of first hit on trk, tpc", 50,-300.,300.);
-  m_glb_zf0     = QAH1F("QaGtrkZf0",     "globtrk: z of first hit - on helix at start, tpc",60,-3.,3.);
+  m_glb_zf0     = QAH1F("QaGtrkZf0",     "globtrk: first point: z_hit - z_helix, tpc",60,-3.,3.);
   m_glb_radfT   = QAH1F("QaGtrkRT",      "globtrk: radial position of first hit, tpc", 50,0.,200.);
   m_lengthT     = QAH1F("QaGtrkLengthT", "globtrk: track length, tpc", 50,0.,300.);
   m_psiT        = QAH1F("QaGtrkPsiT",    "globtrk: psi, tpc (deg)", 64, 0.,360.);
@@ -788,8 +793,8 @@ void StQABookHist::BookHistGlob(){
   m_etaT        = QAH1F("QaGtrkEtaT",    "globtrk: eta, tpc",40,-2.,2.);
   m_pTT         = QAH1F("QaGtrkPtT",     "globtrk: pT, tpc",50,0.,5.);
   m_momT        = QAH1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,5.);
-  m_chisq0T     = QAH1F("QaGtrkChisq0T", "globtrk: chisq0 - xy, tpc", 50, 0.,5.);
-  m_chisq1T     = QAH1F("QaGtrkChisq1T", "globtrk: chisq1 - z, tpc", 50, 0.,5.);
+  m_chisq0T     = QAH1F("QaGtrkChisq0T", "globtrk: chisq0, tpc", 50, 0.,5.);
+  m_chisq1T     = QAH1F("QaGtrkChisq1T", "globtrk: chisq1, tpc", 50, 0.,5.);
   m_glb_impactT = QAH1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
   m_glb_impactrT = QAH1F("QaGtrkImpactrT", "globtrk: impact param from prim vtx, tpc",100,0.,500.0);
 
@@ -805,8 +810,8 @@ void StQABookHist::BookHistGlob(){
     m_globtrk_xf_yfT->SetYTitle("y first");
 
 
-  m_tanl_zfT = QAH2F("QaGtrkTanlzf","globtrk: tanl(dip) versus zfirst, tpc",50,-250.,250.,60,-3.,3.);
-    m_tanl_zfT->SetXTitle("zfirst");
+  m_tanl_zfT = QAH2F("QaGtrkTanlzf","globtrk: tanl(dip) versus zfirst-zvtx, tpc",50,-250.,250.,60,-3.,3.);
+    m_tanl_zfT->SetXTitle("zfirst-zvtx");
     m_tanl_zfT->SetYTitle("tanl");
 
   m_mom_trklengthT = QAH2F("QaGtrkPVsTrkLength","globtrk: log mom vs trk length, tpc",
@@ -845,7 +850,7 @@ void StQABookHist::BookHistGlob(){
     m_chisq1_etaT->SetXTitle("eta");
     m_chisq1_etaT->SetYTitle("chisq1");
 
-  m_chisq0_dipT = QAH2F("QaGtrkChi0TanlT","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
+  m_chisq0_dipT = QAH2F("QaGtrkChi0TanlT","globtrk: Chisq0 vs tanl(dip), tpc",20,-3.2,3.2,20,0.,5.);
     m_chisq0_dipT->SetXTitle("dip angle");
     m_chisq0_dipT->SetYTitle("chisq0");
 
@@ -860,6 +865,10 @@ void StQABookHist::BookHistGlob(){
   m_chisq1_zfT = QAH2F("QaGtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
     m_chisq1_zfT->SetXTitle("zfirst");
     m_chisq1_zfT->SetYTitle("chisq1");
+
+  m_chisq0_phiT = QAH2F("QaGtrkChi0PhiT","globtrk: Chisq0 vs phi, tpc",20,0.,360,20,0.,5.);
+    m_chisq0_etaT->SetXTitle("phi");
+    m_chisq0_etaT->SetYTitle("chisq0");
 
   m_nfptonpt_momT = QAH2F("QaGtrkRPntMomT","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc",40,1.,4.,50,0.,1.2005); 
      m_nfptonpt_momT->SetXTitle("log P (MeV)");
@@ -881,12 +890,17 @@ void StQABookHist::BookHistGlob(){
   m_max_pointTS  = QAH1F("QaGtrkNPntMaxTS","globtrk: N max pnts on trk, tpc+svt", 50, 0.,100.);
   m_fit_pointTS  = QAH1F("QaGtrkNPntFitTS","globtrk: N fit pnts on trk, tpc+svt", 60, 0.,60.);
   m_glb_ratioTS  = QAH1F("QaGtrkRnfTS",    "globtrk: ratio Nfit/tot pnt, tpc+svt", 55, 0., 1.1);
+    m_glb_ratioTS->SetMinimum(10);
   m_glb_ratiomTS = QAH1F("QaGtrkRnmTS",    "globtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.1);
   m_glb_chargeTS = QAH1F("QaGtrkChrgTS",   "globtrk: charge, tpc+svt ", 20,-2.,2.);
   m_glb_r0TS     = QAH1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 50,0.,200.);
+    m_glb_r0TS->SetMinimum(100);
   m_glb_phi0TS   = QAH1F("QaGtrkPhi0TS",   "globtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_glb_z0TS     = QAH1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
+    m_glb_z0TS->SetMinimum(500);
+  m_glb_rfTS     = QAH1F("QaGtrkRfTS",     "globtrk: radial position of first hit, tpc+svt", 100,40,200.);
   m_glb_curvTS   = QAH1F("QaGtrkCurvTS",   "globtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
+  m_glb_f0TS     = QAMH1F("QaGtrkf0TS",    "globtrk: first point: hit-helix, tpc+svt",50,-5.,5.,3,-0.5,2.5);
   m_glb_xfTS     = QAH1F("QaGtrkXfTS",     "globtrk: x of first hit on trk, tpc+svt", 50,-200.,200.);
   m_glb_xf0TS    = QAH1F("QaGtrkXf0TS",    "globtrk: x of first hit - on helix at start, tpc+svt",50,-5.,5.);
   m_glb_yfTS     = QAH1F("QaGtrkYfTS",     "globtrk: y of first hit on trk, tpc+svt", 50,-200.,200.);
@@ -901,8 +915,8 @@ void StQABookHist::BookHistGlob(){
   m_etaTS        = QAH1F("QaGtrkEtaTS",    "globtrk: eta, tpc+svt",40,-2.,2.);
   m_pTTS         = QAH1F("QaGtrkPtTS",     "globtrk: pT, tpc+svt",50,0.,5.);
   m_momTS        = QAH1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,5.);
-  m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0 - xy, tpc+svt", 50, 0.,5.);
-  m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,5.);
+  m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0, tpc+svt", 50, 0.,5.);
+  m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1, tpc+svt", 50, 0.,5.);
   m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt",
                             120,-3.0,3.0);
   m_glb_impactrTS = QAH1F("QaGtrkImpactrTS", "globtrk: impact param from prim vtx, tpc+svt",
@@ -919,28 +933,23 @@ void StQABookHist::BookHistGlob(){
     m_globtrk_xf_yfTS->SetXTitle("x first");
     m_globtrk_xf_yfTS->SetYTitle("y first");
 
-
-  m_tanl_zfTS = QAH2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus zfirst, tpc+svt",50,-250.,250.,60,-3.,3.);
-    m_tanl_zfTS->SetXTitle("zfirst");
+  m_tanl_zfTS = QAH2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus zfirst-zvtx, tpc+svt",50,-250.,250.,60,-3.,3.);
+    m_tanl_zfTS->SetXTitle("zfirst-zvtx");
     m_tanl_zfTS->SetYTitle("tanl");
 
-  m_mom_trklengthTS = QAH2F("QaGtrkPVsTrkLTS","globtrk: log mom vs trk length, tpc+svt",
-			     50,0.,250.,40,1.,4.);
+  m_mom_trklengthTS = QAH2F("QaGtrkPVsTrkLTS","globtrk: log mom vs trk length, tpc+svt",50,0.,250.,40,1.,4.);
     m_mom_trklengthTS->SetXTitle("trk length");  
     m_mom_trklengthTS->SetYTitle("log P (MeV)");
 
-  m_eta_trklengthTS = QAH2F("QaGtrkLVEtaTS","globtrk: trk length vs eta, tpc+svt",
-			     20,-2.,2.,50,0.,250.);
+  m_eta_trklengthTS = QAH2F("QaGtrkLVEtaTS","globtrk: trk length vs eta, tpc+svt",20,-2.,2.,50,0.,250.);
     m_eta_trklengthTS->SetXTitle("eta");
     m_eta_trklengthTS->SetYTitle("length");
 
-  m_npoint_lengthTS = QAH2F("QaGtrkNPntLTS","globtrk: N pnts vs length, tpc+svt",
-			     25,0.,250.,25,0.,50.);
+  m_npoint_lengthTS = QAH2F("QaGtrkNPntLTS","globtrk: N pnts vs length, tpc+svt",25,0.,250.,25,0.,50.);
     m_npoint_lengthTS->SetXTitle("trk length");
     m_npoint_lengthTS->SetYTitle("Npoints on trk");
 
-  m_fpoint_lengthTS = QAH2F("QaGtrkFitPntLTS","globtrk: N fit pnts vs length, tpc+svt",
-			     25,0.,250.,25,0.,50.);
+  m_fpoint_lengthTS = QAH2F("QaGtrkFitPntLTS","globtrk: N fit pnts vs length, tpc+svt",25,0.,250.,25,0.,50.);
     m_fpoint_lengthTS->SetXTitle("trk length");
     m_fpoint_lengthTS->SetYTitle("Npoints on trk");
 
@@ -960,7 +969,7 @@ void StQABookHist::BookHistGlob(){
     m_chisq1_etaTS->SetXTitle("eta");
     m_chisq1_etaTS->SetYTitle("chisq1");
 
-  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,5.);
+  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc+svt",20,-3.2,3.2,20,0.,5.);
     m_chisq0_dipTS->SetXTitle("dip angle");
     m_chisq0_dipTS->SetYTitle("chisq0");
 
@@ -975,6 +984,10 @@ void StQABookHist::BookHistGlob(){
   m_chisq1_zfTS = QAH2F("QaGtrkChi1zfTS","globtrk: Chisq1 vs zfirst, tpc+svt",20,-250.,250.,20,0.,5.);
     m_chisq1_zfTS->SetXTitle("zfirst");
     m_chisq1_zfTS->SetYTitle("chisq1");
+
+  m_chisq0_phiTS = QAH2F("QaGtrkChi0PhiTS","globtrk: Chisq0 vs phi, tpc+svt",20,0.,360,20,0.,5.);
+    m_chisq0_etaTS->SetXTitle("phi");
+    m_chisq0_etaTS->SetYTitle("chisq0");
 
   m_nfptonpt_momTS = QAH2F("QaGtrkRPntMomTS","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc+svt",40,1.,4.,50,0.,1.2005); 
      m_nfptonpt_momTS->SetXTitle("log P (MeV)");
@@ -1003,6 +1016,8 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratiomFW = QAH1F("QaGtrkRnmFW",     "globtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_glb_chargeFE = QAH1F("QaGtrkChrgFE",    "globtrk: charge, ftpc east ", 20,-2.,2.);
   m_glb_chargeFW = QAH1F("QaGtrkChrgFW",    "globtrk: charge, ftpc west ", 20,-2.,2.);
+  m_glb_rfFE     = QAH1F("QaGtrkRfFE",      "globtrk: radial position of first hit, ftpc east", 100,40,200.);
+  m_glb_rfFW     = QAH1F("QaGtrkRfFW",      "globtrk: radial position of first hit, ftpc west", 100,40,200.);
   m_glb_xfFE     = QAH1F("QaGtrkXfFE",      "globtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_glb_xfFW     = QAH1F("QaGtrkXfFW",      "globtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
   m_glb_yfFE     = QAH1F("QaGtrkYfFE",      "globtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
@@ -1021,52 +1036,39 @@ void StQABookHist::BookHistGlob(){
   m_pTFW         = QAH1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,5.);
   m_momFE        = QAH1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0 - xy, ftpc east", 50, 0.,5000.);
-  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0 - xy, ftpc west", 50, 0.,5000.);
-  m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1 - z, ftpc east", 50, 0.,500.);
-  m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1 - z, ftpc west", 50, 0.,500.);
+  m_chisq0FE     = QAH1F("QaGtrkChisq0FE",  "globtrk: chisq0, ftpc east", 50, 0.,5000.);
+  m_chisq0FW     = QAH1F("QaGtrkChisq0FW",  "globtrk: chisq0, ftpc west", 50, 0.,5000.);
+  m_chisq1FE     = QAH1F("QaGtrkChisq1FE",  "globtrk: chisq1, ftpc east", 50, 0.,500.);
+  m_chisq1FW     = QAH1F("QaGtrkChisq1FW",  "globtrk: chisq1, ftpc west", 50, 0.,500.);
 
 // 2D - ftpc
 
-   m_pT_eta_recFE = 
-      QAH2F("QaGtrkPtVsEtaFE","globtrk: log pT vs eta, ftpcE",20,-5.,0.,40,1.,4.);
-   m_pT_eta_recFW = 
-      QAH2F("QaGtrkPtVsEtaFW","globtrk: log pT vs eta, ftpcW",20,0.,5.,40,1.,4.);
-
+   m_pT_eta_recFE = QAH2F("QaGtrkPtVsEtaFE","globtrk: log pT vs eta, ftpcE",20,-5.,0.,40,1.,4.);
+   m_pT_eta_recFW = QAH2F("QaGtrkPtVsEtaFW","globtrk: log pT vs eta, ftpcW",20,0.,5.,40,1.,4.);
   m_globtrk_xf_yfFE = QAH2F("QaGtrkXfYfFE","globtrk: Y vs X of first hit on trk, ftpcE", 40,-40.,40.,40,-40.,40.);
     m_globtrk_xf_yfFE->SetXTitle("x first");
     m_globtrk_xf_yfFE->SetYTitle("y first");
   m_globtrk_xf_yfFW = QAH2F("QaGtrkXfYfFW","globtrk: Y vs X of first hit on trk, ftpcW", 40,-40.,40.,40,-40.,40.);
     m_globtrk_xf_yfFW->SetXTitle("x first");
     m_globtrk_xf_yfFW->SetYTitle("y first");
-
-  m_eta_trklengthFE = QAH2F("QaGtrkLengthVEtaFE","globtrk: trk length vs eta, ftpcE",
-			     25,-4.5,-2.,30,0.,120.);
+  m_eta_trklengthFE = QAH2F("QaGtrkLengthVEtaFE","globtrk: trk length vs eta, ftpcE",25,-4.5,-2.,30,0.,120.);
     m_eta_trklengthFE->SetXTitle("eta");
     m_eta_trklengthFE->SetYTitle("length");
-  m_eta_trklengthFW = QAH2F("QaGtrkLengthVEtaFW","globtrk: trk length vs eta, ftpcW",
-			     25,2.,4.5,30,0.,120.);
+  m_eta_trklengthFW = QAH2F("QaGtrkLengthVEtaFW","globtrk: trk length vs eta, ftpcW",25,2.,4.5,30,0.,120.);
     m_eta_trklengthFW->SetXTitle("eta");
     m_eta_trklengthFW->SetYTitle("length");
-
-  m_npoint_lengthFE = QAH2F("QaGtrkNPntLengthFE","globtrk: N pnts vs length, ftpcE",
-			     30,0.,120.,15,0.,15.);
+  m_npoint_lengthFE = QAH2F("QaGtrkNPntLengthFE","globtrk: N pnts vs length, ftpcE",30,0.,120.,15,0.,15.);
     m_npoint_lengthFE->SetXTitle("trk length");
     m_npoint_lengthFE->SetYTitle("Npoints on trk");
-  m_npoint_lengthFW = QAH2F("QaGtrkNPntLengthFW","globtrk: N pnts vs length, ftpcW",
-			     30,0.,120.,15,0.,15.);
+  m_npoint_lengthFW = QAH2F("QaGtrkNPntLengthFW","globtrk: N pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_npoint_lengthFW->SetXTitle("trk length");
     m_npoint_lengthFW->SetYTitle("Npoints on trk");
-
-  m_fpoint_lengthFE = QAH2F("QaGtrkFitPntLengthFE","globtrk: N fit pnts vs length, ftpcE",
-			     30,0.,120.,15,0.,15.);
+  m_fpoint_lengthFE = QAH2F("QaGtrkFitPntLengthFE","globtrk: N fit pnts vs length, ftpcE",30,0.,120.,15,0.,15.);
     m_fpoint_lengthFE->SetXTitle("trk length");
     m_fpoint_lengthFE->SetYTitle("Npoints on trk");
-  m_fpoint_lengthFW = QAH2F("QaGtrkFitPntLengthFW","globtrk: N fit pnts vs length, ftpcW",
-			     30,0.,120.,15,0.,15.);
+  m_fpoint_lengthFW = QAH2F("QaGtrkFitPntLengthFW","globtrk: N fit pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_fpoint_lengthFW->SetXTitle("trk length");
     m_fpoint_lengthFW->SetYTitle("Npoints on trk");
-
 }
 //____________________________________________________
 void StQABookHist::BookHistPrim(){
@@ -1074,15 +1076,14 @@ void StQABookHist::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot     = QAH1F("QaPtrkTot",   "primtrk: tot num tracks - all",100,0.,5000.);
-  m_primtrk_tot_sm  = QAH1F("QaPtrkTotsm", "primtrk: tot num tracks - all",100,0.,20.);
+  m_primtrk_tot     = QAH1F("QaPtrkTot",   "primtrk: tot num tracks",100,0.,5000.);
+  m_primtrk_tot_sm  = QAH1F("QaPtrkTotsm", "primtrk: tot num tracks",100,0.,20.);
   m_primtrk_iflag   = QAH1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,801.);
-  m_primtrk_good    = QAH1F("QaPtrkGood",  "primtrk: tot num good tracks - all",50,0.,2500.);
-  m_primtrk_good_sm = QAH1F("QaPtrkGoodsm","primtrk: tot num good tracks - all",50,0.,20.);
+  m_primtrk_good    = QAH1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,2500.);
+  m_primtrk_good_sm = QAH1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,20.);
   m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID good tracks - all",25,0.,25.);
 
 // 1D tpc
-
   m_ppointT      = QAH1F("QaPtrkNPntT",   "primtrk: N points on trk,tpc", 60, 0.,60.);
   m_pmax_pointT  = QAH1F("QaPtrkNPntMaxT","primtrk: N max pnts on trk, tpc", 50, 0.,100.);
   m_pfit_pointT  = QAH1F("QaPtrkNPntFitT","primtrk: N fit pnts on trk, tpc", 60, 0.,60.);
@@ -1093,12 +1094,13 @@ void StQABookHist::BookHistPrim(){
   m_prim_phi0T   = QAH1F("QaPtrkPhi0T",   "primtrk: azimuth (phi) at start (deg,force 0,360), tpc ", 64,0.,360.);
   m_prim_z0T     = QAH1F("QaPtrkZ0T",     "primtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
   m_prim_curvT   = QAH1F("QaPtrkCurvT",   "primtrk: log10 curvature (1/cm), tpc ", 80,-3.5,0.5);
+  m_prim_f0      = QAMH1F("QaPtrkf0",     "primtrk: first point: hit-helix, tpc",60,-3.,3.,3,-0.5,2.5);
   m_prim_xfT     = QAH1F("QaPtrkXfT",     "primtrk: x of first hit on trk, tpc", 50,-200.,200.);
-  m_prim_xf0     = QAH1F("QaPtrkXf0",     "primtrk: x of first hit - on helix at start, tpc",60,-3.,3.);
+  m_prim_xf0     = QAH1F("QaPtrkXf0",     "primtrk: first point: x_hit - x_helix, tpc",60,-3.,3.);
   m_prim_yfT     = QAH1F("QaPtrkYfT",     "primtrk: y of first hit on trk, tpc", 50,-200.,200.);
-  m_prim_yf0     = QAH1F("QaPtrkYf0",     "primtrk: y of first hit - on helix at start, tpc",60,-3.,3.);
+  m_prim_yf0     = QAH1F("QaPtrkYf0",     "primtrk: first point: y_hit - y_helix, tpc",60,-3.,3.);
   m_prim_zfT     = QAH1F("QaPtrkZfT",     "primtrk: z of first hit on trk, tpc", 50,-200.,200.);
-  m_prim_zf0     = QAH1F("QaPtrkZf0",     "primtrk: z of first hit - on helix at start, tpc",60,-3.,3.);
+  m_prim_zf0     = QAH1F("QaPtrkZf0",     "primtrk: first point: z_hit - z_helix, tpc",60,-3.,3.);
   m_prim_radfT   = QAH1F("QaPtrkRT",      "primtrk: radial position of first hit, tpc", 50,0.,200.);
   m_plengthT     = QAH1F("QaPtrkLengthT", "primtrk: track length, tpc", 50,0.,300.);
   m_ppsiT        = QAH1F("QaPtrkPsiT",    "primtrk: psi, tpc (deg)", 36, 0.,360.);
@@ -1107,91 +1109,68 @@ void StQABookHist::BookHistPrim(){
   m_petaT        = QAH1F("QaPtrkEtaT",    "primtrk: eta, tpc",40,-2.,2.);
   m_ppTT         = QAH1F("QaPtrkPtT",     "primtrk: pT, tpc",50,0.,5.);
   m_pmomT        = QAH1F("QaPtrkPT",      "primtrk: momentum, tpc",50,0.,5.);
-  m_pchisq0T     = QAH1F("QaPtrkChisq0T", "primtrk: chisq0 - xy, tpc", 50, 0.,5.);
-  m_pchisq1T     = QAH1F("QaPtrkChisq1T", "primtrk: chisq1 - z, tpc", 50, 0.,5.);
+  m_pchisq0T     = QAH1F("QaPtrkChisq0T", "primtrk: chisq0, tpc", 50, 0.,5.);
+  m_pchisq1T     = QAH1F("QaPtrkChisq1T", "primtrk: chisq1, tpc", 50, 0.,5.);
   m_prim_impactT = QAH1F("QaPtrkImpactT", "primtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
   m_prim_impactrT = QAH1F("QaPtrkImpactrT", "primtrk: impact param from prim vtx, tpc",100,0.,10.);
 
 // 2D - tpc
-
   m_ppT_eta_recT = QAH2F("QaPtrkPtVsEtaT","primtrk: log pT vs eta, tpc", 20,-2.,2.,40,1.,4.);
     m_ppT_eta_recT->SetXTitle("eta");
     m_ppT_eta_recT->SetYTitle(" log pT (MeV)");
-
   m_primtrk_xf_yfT = QAH2F("QaPtrkXfYfT",  "primtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
     m_primtrk_xf_yfT->SetXTitle("x first");
     m_primtrk_xf_yfT->SetYTitle("y first");
-
-  m_ptanl_zfT = QAH2F("QaPtrkTanlzf","primtrk: tanl(dip) versus zfirst, tpc",50,-250.,250.,60,-3.,3.);
-    m_ptanl_zfT->SetXTitle("zfirst");
+  m_ptanl_zfT = QAH2F("QaPtrkTanlzf","primtrk: tanl(dip) versus zfirst-zvtx, tpc",50,-250.,250.,60,-3.,3.);
+    m_ptanl_zfT->SetXTitle("zfirst-zvtx");
     m_ptanl_zfT->SetYTitle("tanl");
-
-  m_pmom_trklengthT = QAH2F("QaPtrkPVsTrkLength","primtrk: log mom vs trk length, tpc",
-			     50,0.,250.,40,1.,4.);
+  m_pmom_trklengthT = QAH2F("QaPtrkPVsTrkLength","primtrk: log mom vs trk length, tpc",50,70.,350.,40,1.,4.);
     m_pmom_trklengthT->SetXTitle("trk length");  
     m_pmom_trklengthT->SetYTitle("log P (MeV)");
-
-  m_peta_trklengthT = QAH2F("QaPtrkLengthVEtaT","primtrk: trk length vs eta, tpc",
-			     20,-2.,2.,50,0.,250.);
+  m_peta_trklengthT = QAH2F("QaPtrkLengthVEtaT","primtrk: trk length vs eta, tpc",20,-2.,2.,50,70.,350.);
     m_peta_trklengthT->SetXTitle("eta");
     m_peta_trklengthT->SetYTitle("length");
-
-  m_pnpoint_lengthT = QAH2F("QaPtrkNPntLengthT","primtrk: N pnts vs length, tpc",
-			     25,0.,250.,25,0.,50.);
+  m_pnpoint_lengthT = QAH2F("QaPtrkNPntLengthT","primtrk: N pnts vs length, tpc",25,70.,350.,25,0.,50.);
     m_pnpoint_lengthT->SetXTitle("trk length");
     m_pnpoint_lengthT->SetYTitle("Npoints on trk");
-
-  m_pfpoint_lengthT = QAH2F("QaPtrkFitPntLengthT","primtrk: N fit pnts vs length, tpc",
-			     25,0.,250.,25,0.,50.);
+  m_pfpoint_lengthT = QAH2F("QaPtrkFitPntLengthT","primtrk: N fit pnts vs length, tpc",25,70.,350.,25,0.,50.);
     m_pfpoint_lengthT->SetXTitle("trk length");
     m_pfpoint_lengthT->SetYTitle("Npoints on trk");
-
   m_pchisq0_momT = QAH2F("QaPtrkChi0MomT","primtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,5.);
     m_pchisq0_momT->SetXTitle("log P (MeV)");
     m_pchisq0_momT->SetYTitle("chisq0") ;
-
   m_pchisq1_momT = QAH2F("QaPtrkChi1MomT","primtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,5.);
     m_pchisq1_momT->SetXTitle("log P (MeV)");
     m_pchisq1_momT->SetYTitle("chisq1");
-
   m_pchisq0_etaT = QAH2F("QaPtrkChi0EtaT","primtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,5.);
     m_pchisq0_etaT->SetXTitle("eta");
     m_pchisq0_etaT->SetYTitle("chisq0");
-
   m_pchisq1_etaT = QAH2F("QaPtrkChi1EtaT","primtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,5.);
     m_pchisq1_etaT->SetXTitle("eta");
     m_pchisq1_etaT->SetYTitle("chisq1");
-
-  m_pchisq0_dipT = QAH2F("QaPtrkChi0TanlT","primtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
+  m_pchisq0_dipT = QAH2F("QaPtrkChi0TanlT","primtrk: Chisq0 vs tanl(dip), tpc",20,-3.2,3.2,20,0.,5.);
     m_pchisq0_dipT->SetXTitle("dip angle");
     m_pchisq0_dipT->SetYTitle("chisq0");
-
-  m_pchisq1_dipT = QAH2F("QaPtrkChi1TanlT","primtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,5.);
+  m_pchisq1_dipT = QAH2F("QaPtrkChi1TanlT","primtrk: Chisq1 vs tanl(dip), tpc",20,-3.2,3.2,20,0.,5.);
     m_pchisq1_dipT->SetXTitle("dip angle");
     m_pchisq1_dipT->SetYTitle("chisq1");
-
-  m_pchisq0_zfT = QAH2F("QaPtrkChi0zfT","primtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
+  m_pchisq0_zfT = QAH2F("QaPtrkChi0zfT","primtrk: Chisq0 vs zfirst, tpc",20,-200.,200.,20,0.,5.);
     m_pchisq0_zfT->SetXTitle("zfirst");
     m_pchisq0_zfT->SetYTitle("chisq0");
-
-  m_pchisq1_zfT = QAH2F("QaPtrkChi1zfT","primtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,5.);
+  m_pchisq1_zfT = QAH2F("QaPtrkChi1zfT","primtrk: Chisq1 vs zfirst, tpc",20,-200.,200.,20,0.,5.);
     m_pchisq1_zfT->SetXTitle("zfirst");
     m_pchisq1_zfT->SetYTitle("chisq1");
-
   m_pnfptonpt_momT = QAH2F("QaPtrkRPntMomT","primtrk: ratio Nfitpnt,Npnt vs log mom., tpc",40,1.,4.,50,0.,1.2005); 
      m_pnfptonpt_momT->SetXTitle("log P (MeV)");
      m_pnfptonpt_momT->SetYTitle("Ratio Nfitpnt/Npnt");
-
   m_pnfptonpt_etaT = QAH2F("QaPtrkRPntEtaT","primtrk: ratio Nfitpnt,Npnt vs Eta, tpc",40,-2.,2.,50,0.,1.2005); 
      m_pnfptonpt_etaT->SetXTitle("eta");
      m_pnfptonpt_etaT->SetYTitle("Ratio Nfitpnt/Npnt");
-
   m_ppsi_phiT = QAH2F("QaPtrkPsiPhiT","primtrk: psi vs phi, tpc",36, 0.,360.,36,0.,360.);
      m_ppsi_phiT->SetXTitle("phi");
      m_ppsi_phiT->SetYTitle("psi");
 
 // 1D tpc + silicon (svt+ssd)
-
   m_ppointTS      = QAH1F("QaPtrkNPntTS",   "primtrk: N points on trk,tpc+svt", 60, 0.,60.);
   m_pmax_pointTS  = QAH1F("QaPtrkNPntMaxTS","primtrk: N max pnts on trk, tpc+svt", 50, 0.,100.);
   m_pfit_pointTS  = QAH1F("QaPtrkNPntFitTS","primtrk: N fit pnts on trk, tpc+svt", 60, 0.,60.);
@@ -1202,12 +1181,13 @@ void StQABookHist::BookHistPrim(){
   m_prim_phi0TS   = QAH1F("QaPtrkPhi0TS",   "primtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_prim_z0TS     = QAH1F("QaPtrkZ0TS",     "primtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
   m_prim_curvTS   = QAH1F("QaPtrkCurvTS",   "primtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
+  m_prim_f0TS     = QAMH1F("QaPtrkf0TS",    "primtrk: first point: hit-helix, tpc+svt",50,-5.,5.,3,-0.5,2.5);
   m_prim_xfTS     = QAH1F("QaPtrkXfTS",     "primtrk: x of first hit on trk, tpc+svt", 50,-200.,200.);
-  m_prim_xf0TS    = QAH1F("QaPtrkXf0TS",    "primtrk: x of first hit - on helix at start, tpc+svt",50,-5.,5.);
+  m_prim_xf0TS    = QAH1F("QaPtrkXf0TS",    "primtrk: first point: y_hit - y_helix, tpc+svt",50,-5.,5.);
   m_prim_yfTS     = QAH1F("QaPtrkYfTS",     "primtrk: y of first hit on trk, tpc+svt", 50,-200.,200.);
-  m_prim_yf0TS    = QAH1F("QaPtrkYf0TS",    "primtrk: y of first hit - on helix at start, tpc+svt",50,-5.,5.);
+  m_prim_yf0TS    = QAH1F("QaPtrkYf0TS",    "primtrk: first point: y_hit - y_helix, tpc+svt",50,-5.,5.);
   m_prim_zfTS     = QAH1F("QaPtrkZfTS",     "primtrk: z of first hit on trk, tpc+svt", 50,-200.,200.);
-  m_prim_zf0TS    = QAH1F("QaPtrkZf0TS",    "primtrk: z of first hit - on helix at start, tpc+svt",50,-5.,5.);
+  m_prim_zf0TS    = QAH1F("QaPtrkZf0TS",    "primtrk: first point: z_hit - z_helix, tpc+svt",50,-5.,5.);
   m_prim_radfTS   = QAH1F("QaPtrkRTS",      "primtrk: radial position of first hit, tpc+svt", 50,0.,200.);
   m_plengthTS     = QAH1F("QaPtrkLengthTS", "primtrk: track length, tpc+svt", 50,0.,300.);
   m_ppsiTS        = QAH1F("QaPtrkPsiTS",    "primtrk: psi, tpc+svt (deg) ", 36, 0.,360.);
@@ -1216,94 +1196,69 @@ void StQABookHist::BookHistPrim(){
   m_petaTS        = QAH1F("QaPtrkEtaTS",    "primtrk: eta, tpc+svt",40,-2.,2.);
   m_ppTTS         = QAH1F("QaPtrkPtTS",     "primtrk: pT, tpc+svt",50,0.,5.);
   m_pmomTS        = QAH1F("QaPtrkPTS",      "primtrk: momentum, tpc+svt",50,0.,5.);
-  m_pchisq0TS     = QAH1F("QaPtrkChisq0TS", "primtrk: chisq0 - xy, tpc+svt", 50, 0.,5.);
-  m_pchisq1TS     = QAH1F("QaPtrkChisq1TS", "primtrk: chisq1 - z, tpc+svt", 50, 0.,5.);
-  m_prim_impactTS = QAH1F("QaPtrkImpactTS", "primtrk: log10 impact param from prim vtx, tpc+svt",
-                            120,-3.0,3.0);
-  m_prim_impactrTS = QAH1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",
-                            100,0.,10.);
+  m_pchisq0TS     = QAH1F("QaPtrkChisq0TS", "primtrk: chisq0, tpc+svt", 50, 0.,5.);
+  m_pchisq1TS     = QAH1F("QaPtrkChisq1TS", "primtrk: chisq1, tpc+svt", 50, 0.,5.);
+  m_prim_impactTS = QAH1F("QaPtrkImpactTS", "primtrk: log10 impact param from prim vtx, tpc+svt",120,-3.0,3.0);
+  m_prim_impactrTS = QAH1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",100,0.,10.);
 
 // 2D - tpc + silicon (svt + ssd)
-
   m_ppT_eta_recTS = QAH2F("QaPtrkPtVsEtaTS","primtrk: log pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
     m_ppT_eta_recTS->SetXTitle("eta");
     m_ppT_eta_recTS->SetYTitle(" log pT (MeV)");
-
   m_primtrk_xf_yfTS = QAH2F("QaPtrkXfYfTS",  "primtrk: Y vs X of first hit on trk, tpc+svt", 40,-200.,200.,40,-200.,200.);
     m_primtrk_xf_yfTS->SetXTitle("x first");
     m_primtrk_xf_yfTS->SetYTitle("y first");
-
-  m_ptanl_zfTS = QAH2F("QaPtrkTanlzfTS","primtrk: tanl(dip) versus zfirst, tpc+svt",50,-250.,250.,60,-3.,3.);
-    m_ptanl_zfTS->SetXTitle("zfirst");
+  m_ptanl_zfTS = QAH2F("QaPtrkTanlzfTS","primtrk: tanl(dip) versus zfirst-zvtx, tpc+svt",50,-250.,250.,60,-3.,3.);
+    m_ptanl_zfTS->SetXTitle("zfirst-zvtx");
     m_ptanl_zfTS->SetYTitle("tanl");
-
-  m_pmom_trklengthTS = QAH2F("QaPtrkPVsTrkLTS","primtrk: log mom vs trk length, tpc+svt",
-			     50,0.,250.,40,1.,4.);
+  m_pmom_trklengthTS = QAH2F("QaPtrkPVsTrkLTS","primtrk: log mom vs trk length, tpc+svt",50,70.,350.,40,1.,4.);
     m_pmom_trklengthTS->SetXTitle("trk length");  
     m_pmom_trklengthTS->SetYTitle("log P (MeV)");
-
-  m_peta_trklengthTS = QAH2F("QaPtrkLVEtaTS","primtrk: trk length vs eta, tpc+svt",
-			     20,-2.,2.,50,0.,250.);
+  m_peta_trklengthTS = QAH2F("QaPtrkLVEtaTS","primtrk: trk length vs eta, tpc+svt",20,-2.,2.,50,70.,350.);
     m_peta_trklengthTS->SetXTitle("eta");
     m_peta_trklengthTS->SetYTitle("length");
-
-  m_pnpoint_lengthTS = QAH2F("QaPtrkNPntLTS","primtrk: N pnts vs length, tpc+svt",
-			     25,0.,250.,25,0.,50.);
+  m_pnpoint_lengthTS = QAH2F("QaPtrkNPntLTS","primtrk: N pnts vs length, tpc+svt",25,70.,350.,25,0.,50.);
     m_pnpoint_lengthTS->SetXTitle("trk length");
     m_pnpoint_lengthTS->SetYTitle("Npoints on trk");
-
-  m_pfpoint_lengthTS = QAH2F("QaPtrkFitPntLTS","primtrk: N fit pnts vs length, tpc+svt",
-			     25,0.,250.,25,0.,50.);
+  m_pfpoint_lengthTS = QAH2F("QaPtrkFitPntLTS","primtrk: N fit pnts vs length, tpc+svt",25,70.,350.,25,0.,50.);
     m_pfpoint_lengthTS->SetXTitle("trk length");
     m_pfpoint_lengthTS->SetYTitle("Npoints on trk");
-
   m_pchisq0_momTS = QAH2F("QaPtrkChi0MomTS","primtrk: Chisq0 vs log mom, tpc+svt",40,1.,4.,50,0.,5.);
     m_pchisq0_momTS->SetXTitle("log P (MeV)");
     m_pchisq0_momTS->SetYTitle("chisq0") ;
-
   m_pchisq1_momTS = QAH2F("QaPtrkChi1MomTS","primtrk: Chisq1 vs log mom, tpc+svt",40,1.,4.,50,0.,5.);
     m_pchisq1_momTS->SetXTitle("log P (MeV)");
     m_pchisq1_momTS->SetYTitle("chisq1");
-
   m_pchisq0_etaTS = QAH2F("QaPtrkChi0EtaTS","primtrk: Chisq0 vs eta, tpc+svt",20,-2.,2.,20,0.,5.);
     m_pchisq0_etaTS->SetXTitle("eta");
     m_pchisq0_etaTS->SetYTitle("chisq0");
-
   m_pchisq1_etaTS = QAH2F("QaPtrkChi1EtaTS","primtrk: Chisq1 vs eta, tpc+svt",20,-2.,2.,20,0.,5.);
     m_pchisq1_etaTS->SetXTitle("eta");
     m_pchisq1_etaTS->SetYTitle("chisq1");
-
-  m_pchisq0_dipTS = QAH2F("QaPtrkChi0TanlTS","primtrk: Chisq0 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,5.);
+  m_pchisq0_dipTS = QAH2F("QaPtrkChi0TanlTS","primtrk: Chisq0 vs tanl(dip), tpc+svt",20,-3.2,3.2,20,0.,5.);
     m_pchisq0_dipTS->SetXTitle("dip angle");
     m_pchisq0_dipTS->SetYTitle("chisq0");
-
-  m_pchisq1_dipTS = QAH2F("QaPtrkChi1TanlTS","primtrk: Chisq1 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,5.);
+  m_pchisq1_dipTS = QAH2F("QaPtrkChi1TanlTS","primtrk: Chisq1 vs tanl(dip), tpc+svt",20,-3.2,3.2,20,0.,5.);
     m_pchisq1_dipTS->SetXTitle("dip angle");
     m_pchisq1_dipTS->SetYTitle("chisq1");
-
-  m_pchisq0_zfTS = QAH2F("QaPtrkChi0zfTS","primtrk: Chisq0 vs zfirst, tpc+svt",20,-250.,250.,20,0.,5.);
+  m_pchisq0_zfTS = QAH2F("QaPtrkChi0zfTS","primtrk: Chisq0 vs zfirst, tpc+svt",20,-200.,200.,20,0.,5.);
     m_pchisq0_zfTS->SetXTitle("zfirst");
     m_pchisq0_zfTS->SetYTitle("chisq0");
-
-  m_pchisq1_zfTS = QAH2F("QaPtrkChi1zfTS","primtrk: Chisq1 vs zfirst, tpc+svt",20,-250.,250.,20,0.,5.);
+  m_pchisq1_zfTS = QAH2F("QaPtrkChi1zfTS","primtrk: Chisq1 vs zfirst, tpc+svt",20,-200.,200.,20,0.,5.);
     m_pchisq1_zfTS->SetXTitle("zfirst");
     m_pchisq1_zfTS->SetYTitle("chisq1");
-
   m_pnfptonpt_momTS = QAH2F("QaPtrkRPntMomTS","primtrk: ratio Nfitpnt,Npnt vs log mom., tpc+svt",40,1.,4.,50,0.,1.2005); 
-     m_pnfptonpt_momTS->SetXTitle("log P (MeV)");
-     m_pnfptonpt_momTS->SetYTitle("Ratio Nfitpnt/Npnt");
-
+    m_pnfptonpt_momTS->SetXTitle("log P (MeV)");
+    m_pnfptonpt_momTS->SetYTitle("Ratio Nfitpnt/Npnt");
   m_pnfptonpt_etaTS = QAH2F("QaPtrkRPntEtaTS","primtrk: ratio Nfitpnt,Npnt vs Eta, tpc+svt",40,-2.,2.,50,0.,1.2005); 
-     m_pnfptonpt_etaTS->SetXTitle("eta");
-     m_pnfptonpt_etaTS->SetYTitle("Ratio Nfitpnt/Npnt");
-
+    m_pnfptonpt_etaTS->SetXTitle("eta");
+    m_pnfptonpt_etaTS->SetYTitle("Ratio Nfitpnt/Npnt");
   m_ppsi_phiTS = QAH2F("QaPtrkPsiPhiTS","primtrk: psi vs phi, tpc+svt",36, 0.,360.,36,0.,360.);
-     m_ppsi_phiTS->SetXTitle("phi");
-     m_ppsi_phiTS->SetYTitle("psi");
+    m_ppsi_phiTS->SetXTitle("phi");
+    m_ppsi_phiTS->SetYTitle("psi");
 
 /* These are FTPC histograms. The FTPC doesn't do primary tracking yet.
 // 1D ftpc
-
   m_ppointFE      = QAH1F("QaPtrkNPntFE",    "primtrk: N points on trk,ftpc east", 15, 0.,15.);
   m_ppointFW      = QAH1F("QaPtrkNPntFW",    "primtrk: N points on trk,ftpc west", 15, 0.,15.);
   m_pmax_pointFE  = QAH1F("QaPtrkNPntMaxFE", "primtrk: N max pnts on trk, ftpc east", 15, 0.,15.);
@@ -1316,6 +1271,8 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratiomFW = QAH1F("QaPtrkRnmFW",     "primtrk: ratio Nfit/max pnt, ftpc west", 55, 0., 1.1);
   m_prim_chargeFE = QAH1F("QaPtrkChrgFE",    "primtrk: charge, ftpc east ", 20,-2.,2.);
   m_prim_chargeFW = QAH1F("QaPtrkChrgFW",    "primtrk: charge, ftpc west ", 20,-2.,2.);
+  m_prim_radfFE   = QAH1F("QaPtrkRFE",       "primtrk: radial position of first hit, ftpc east", 40,0.,40.);
+  m_prim_radfFW   = QAH1F("QaPtrkRFW",       "primtrk: radial position of first hit, ftpc west", 40,0.,40.);
   m_prim_xfFE     = QAH1F("QaPtrkXfFE",      "primtrk: x of first hit on trk, ftpc east", 50,-200.,200.);
   m_prim_xfFW     = QAH1F("QaPtrkXfFW",      "primtrk: x of first hit on trk, ftpc west", 50,-200.,200.);
   m_prim_yfFE     = QAH1F("QaPtrkYfFE",      "primtrk: y of first hit on trk, ftpc east", 50,-200.,200.);
@@ -1334,49 +1291,36 @@ void StQABookHist::BookHistPrim(){
   m_ppTFW         = QAH1F("QaPtrkPtFW",      "primtrk: pT, ftpc west",50,0.,5.);
   m_pmomFE        = QAH1F("QaPtrkPFE",       "primtrk: momentum, ftpc east ",50,0.,5.);
   m_pmomFW        = QAH1F("QaPtrkPFW",       "primtrk: momentum, ftpc west ",50,0.,5.);
-  m_pchisq0FE     = QAH1F("QaPtrkChisq0FE",  "primtrk: chisq0 - xy, ftpc east", 50, 0.,5000.);
-  m_pchisq0FW     = QAH1F("QaPtrkChisq0FW",  "primtrk: chisq0 - xy, ftpc west", 50, 0.,5000.);
-  m_pchisq1FE     = QAH1F("QaPtrkChisq1FE",  "primtrk: chisq1 - z, ftpc east", 50, 0.,500.);
-  m_pchisq1FW     = QAH1F("QaPtrkChisq1FW",  "primtrk: chisq1 - z, ftpc west", 50, 0.,500.);
+  m_pchisq0FE     = QAH1F("QaPtrkChisq0FE",  "primtrk: chisq0, ftpc east", 50, 0.,5000.);
+  m_pchisq0FW     = QAH1F("QaPtrkChisq0FW",  "primtrk: chisq0, ftpc west", 50, 0.,5000.);
+  m_pchisq1FE     = QAH1F("QaPtrkChisq1FE",  "primtrk: chisq1, ftpc east", 50, 0.,500.);
+  m_pchisq1FW     = QAH1F("QaPtrkChisq1FW",  "primtrk: chisq1, ftpc west", 50, 0.,500.);
 
 // 2D - ftpc
-
-  m_ppT_eta_recFE = 
-    QAH2F("QaPtrkPtVsEtaFE","primtrk: log pT vs eta, ftpcE",20,-5.,0.,40,1.,4.);
-  m_ppT_eta_recFW = 
-    QAH2F("QaPtrkPtVsEtaFW","primtrk: log pT vs eta, ftpcW",20,0.,5.,40,1.,4.);
-
+  m_ppT_eta_recFE = QAH2F("QaPtrkPtVsEtaFE","primtrk: log pT vs eta, ftpcE",20,-5.,0.,40,1.,4.);
+  m_ppT_eta_recFW = QAH2F("QaPtrkPtVsEtaFW","primtrk: log pT vs eta, ftpcW",20,0.,5.,40,1.,4.);
   m_primtrk_xf_yfFE = QAH2F("QaPtrkXfYfFE","primtrk: Y vs X of first hit on trk, ftpcE", 40,-40.,40.,40,-40.,40.);
     m_primtrk_xf_yfFE->SetXTitle("x first");
     m_primtrk_xf_yfFE->SetYTitle("y first");
   m_primtrk_xf_yfFW = QAH2F("QaPtrkXfYfFW","primtrk: Y vs X of first hit on trk, ftpcW", 40,-40.,40.,40,-40.,40.);
     m_primtrk_xf_yfFW->SetXTitle("x first");
     m_primtrk_xf_yfFW->SetYTitle("y first");
-
-  m_peta_trklengthFE = QAH2F("QaPtrkLengthVEtaFE","primtrk: trk length vs eta, ftpcE",
-			     25,-4.5,-2.,30,0.,120.);
+  m_peta_trklengthFE = QAH2F("QaPtrkLengthVEtaFE","primtrk: trk length vs eta, ftpcE",25,-4.5,-2.,30,0.,120.);
     m_peta_trklengthFE->SetXTitle("eta");
     m_peta_trklengthFE->SetYTitle("length");
-  m_peta_trklengthFW = QAH2F("QaPtrkLengthVEtaFW","primtrk: trk length vs eta, ftpcW",
-			     25,2.,4.5,30,0.,120.);
+  m_peta_trklengthFW = QAH2F("QaPtrkLengthVEtaFW","primtrk: trk length vs eta, ftpcW",25,2.,4.5,30,0.,120.);
     m_peta_trklengthFW->SetXTitle("eta");
     m_peta_trklengthFW->SetYTitle("length");
-
-  m_pnpoint_lengthFE = QAH2F("QaPtrkNPntLengthFE","primtrk: N pnts vs length, ftpcE",
-			     30,0.,120.,15,0.,15.);
+  m_pnpoint_lengthFE = QAH2F("QaPtrkNPntLengthFE","primtrk: N pnts vs length, ftpcE",30,0.,120.,15,0.,15.);
     m_pnpoint_lengthFE->SetXTitle("trk length");
     m_pnpoint_lengthFE->SetYTitle("Npoints on trk");
-  m_pnpoint_lengthFW = QAH2F("QaPtrkNPntLengthFW","primtrk: N pnts vs length, ftpcW",
-			     30,0.,120.,15,0.,15.);
+  m_pnpoint_lengthFW = QAH2F("QaPtrkNPntLengthFW","primtrk: N pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_pnpoint_lengthFW->SetXTitle("trk length");
     m_pnpoint_lengthFW->SetYTitle("Npoints on trk");
-
-  m_pfpoint_lengthFE = QAH2F("QaPtrkFitPntLengthFE","primtrk: N fit pnts vs length, ftpcE",
-			     30,0.,120.,15,0.,15.);
+  m_pfpoint_lengthFE = QAH2F("QaPtrkFitPntLengthFE","primtrk: N fit pnts vs length, ftpcE",30,0.,120.,15,0.,15.);
     m_pfpoint_lengthFE->SetXTitle("trk length");
     m_pfpoint_lengthFE->SetYTitle("Npoints on trk");
-  m_pfpoint_lengthFW = QAH2F("QaPtrkFitPntLengthFW","primtrk: N fit pnts vs length, ftpcW",
-			     30,0.,120.,15,0.,15.);
+  m_pfpoint_lengthFW = QAH2F("QaPtrkFitPntLengthFW","primtrk: N fit pnts vs length, ftpcW",30,0.,120.,15,0.,15.);
     m_pfpoint_lengthFW->SetXTitle("trk length");
     m_pfpoint_lengthFW->SetYTitle("Npoints on trk");
 */

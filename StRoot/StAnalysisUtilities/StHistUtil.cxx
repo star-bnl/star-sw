@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.22 2000/07/07 23:22:22 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.23 2000/07/26 19:57:48 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.23  2000/07/26 19:57:48  lansdell
+// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
+//
 // Revision 1.22  2000/07/07 23:22:22  lansdell
 // added year1 PrintList option for QA and EventQA histograms
 //
@@ -232,6 +235,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   gStyle->SetPaperSize(m_PaperWidth,m_PaperHeight); 
 
   gStyle->SetOptStat(111111);
+  gStyle->SetStatStyle(0);
+
 //
 
 //setup canvas
@@ -399,8 +404,11 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 
 // actually draw,print
           if (chkdim == 2) obj->Draw("box");
-          else 
-              obj->Draw();   
+          else {
+	    TH1F *tempHist = (TH1F*)obj;
+	    tempHist->SetLineWidth(5);
+	    tempHist->Draw();
+	  }
 	  if (gPad) gPad->Update();
         }
       }
@@ -690,28 +698,25 @@ Int_t StHistUtil::AddHists(TList *dirList,Int_t numHistCopy)
   Int_t histAddCount = 0;
 
   if (dirList){
-   if (numHistCopy < 0) numHistCopy = dirList->GetSize();
-   TIter nextObj(dirList);
-   TObject *obj = 0;
+    if (numHistCopy < 0) numHistCopy = dirList->GetSize();
+    TIter nextObj(dirList);
+    TObject *obj = 0;
 
     while ((obj = nextObj())) {
-     if (obj->InheritsFrom("TH1")) {
-      
+      if (obj->InheritsFrom("TH1")) {
 // now want to add these histograms to the copied ones:
-      Int_t imk = 0;
-      for (imk=0;imk<numHistCopy;imk++) {
-       if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {       
-	 //	cout << "  ---- hist num to add --- " << imk << endl;
-         newHist[imk]->Add((TH1 *)obj);
-         histAddCount++;
-	 // cout << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endl;
+	Int_t imk = 0;
+	for (imk=0;imk<numHistCopy;imk++) {
+	  if (strcmp( (newHist[imk]->GetName()), (obj->GetName()) )==0) {
+	    //cout << "  ---- hist num to add --- " << imk << endl;
+	    newHist[imk]->Add((TH1 *)obj);
+	    histAddCount++;
+	    //cout << " !!! Added histograms with Name: " << newHist[imk]->GetName() <<  endl;
 
-
-       } // strcmp
-      }  // loop over imk
-     }   // if obj inherits from th1
+	  } // strcmp
+	}  // loop over imk
+      }   // if obj inherits from th1
     }    //while
-
   } //dirlist
 
   cout << " StHistUtil::AddHists: Total No. Histograms Added  = " << 
@@ -1020,171 +1025,181 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
     type = "StE";
 
    TString sdefList[] = {
+ "QaInnerSectorDeDx",
+ "QaOuterSectorDeDx",
+ "QaDedxAllSectors",
  "QaGtrkDetId",
  "QaGtrkFlag",
+ "QaGtrkf0",
+ "QaGtrkf0TS",
  "QaGtrkXf0",
- "QaGtrkYf0",
- "QaGtrkZf0",
- "QaGtrkImpactT",
- "QaGtrkNPntT",
- "QaGtrkNPntMaxT",
- "QaGtrkNPntFitT",
- "QaGtrkPtT",
- "QaGtrkPT",
- "QaGtrkR0T",
- "QaGtrkZ0T",
- "QaGtrkCurvT",
- "QaGtrkXfT",
- "QaGtrkYfT",
- "QaGtrkZfT",
- "QaGtrkRT",
- "QaGtrkRnfT",
- "QaGtrkRnmT",
- "QaGtrkTanlT",
- "QaGtrkThetaT",
- "QaGtrkEtaT",
- "QaGtrkLengthT",
- "QaGtrkChisq0T",
- "QaGtrkChisq1T",
- "QaGtrkImpactrT",
  "QaGtrkXf0TS",
+ "QaGtrkYf0",
  "QaGtrkYf0TS",
+ "QaGtrkZf0",
  "QaGtrkZf0TS",
+ "QaGtrkImpactT",
  "QaGtrkImpactTS",
+ "QaGtrkNPntT",
  "QaGtrkNPntTS",
- "QaGtrkNPntMaxTS",
- "QaGtrkNPntFitTS",
- "QaGtrkPtTS",
- "QaGtrkPTS",
- "QaGtrkR0TS",
- "QaGtrkZ0TS",
- "QaGtrkCurvTS",
- "QaGtrkXfTS",
- "QaGtrkYfTS",
- "QaGtrkZfTS",
- "QaGtrkRTS",
- "QaGtrkRnfTS",
- "QaGtrkRnmTS",
- "QaGtrkTanlTS",
- "QaGtrkThetaTS",
- "QaGtrkEtaTS",
- "QaGtrkLengthTS",
- "QaGtrkChisq0TS",
- "QaGtrkChisq1TS",
- "QaGtrkImpactrTS",
  "QaGtrkNPntFE",
- "QaGtrkNPntMaxFE",
- "QaGtrkNPntFitFE",
- "QaGtrkPtFE",
- "QaGtrkPFE",
- "QaGtrkXfFE",
- "QaGtrkYfFE",
- "QaGtrkZfFE",
- "QaGtrkRFE",
- "QaGtrkRnfFE",
- "QaGtrkRnmFE",
- "QaGtrkTanlFE",
- "QaGtrkThetaFE",
- "QaGtrkEtaFE",
- "QaGtrkLengthFE",
  "QaGtrkNPntFW",
+ "QaGtrkNPntMaxT",
+ "QaGtrkNPntMaxTS",
+ "QaGtrkNPntMaxFE",
  "QaGtrkNPntMaxFW",
+ "QaGtrkNPntFitT",
+ "QaGtrkNPntFitTS",
+ "QaGtrkNPntFitFE",
  "QaGtrkNPntFitFW",
+ "QaGtrkPtT",
+ "QaGtrkPtTS",
+ "QaGtrkPtFE",
  "QaGtrkPtFW",
+ "QaGtrkPT",
+ "QaGtrkPTS",
+ "QaGtrkPFE",
  "QaGtrkPFW",
+ "QaGtrkR0T",
+ "QaGtrkR0TS",
+ "QaGtrkZ0T",
+ "QaGtrkZ0TS",
+ "QaGtrkCurvT",
+ "QaGtrkCurvTS",
+ "QaGtrkRfT",
+ "QaGtrkRfTS",
+ "QaGtrkPadfT",
+ "QaGtrkXfT",
+ "QaGtrkXfTS",
+ "QaGtrkXfFE",
  "QaGtrkXfFW",
+ "QaGtrkYfT",
+ "QaGtrkYfTS",
+ "QaGtrkYfFE",
  "QaGtrkYfFW",
- "QaGtrkZfFW",
+ "QaGtrkZfT",
+ "QaGtrkZfTS",
+ "QaGtrkZfFE",
+ "QaGtrkRT",
+ "QaGtrkRTS",
+ "QaGtrkRFE",
  "QaGtrkRFW",
+ "QaGtrkRnfT",
+ "QaGtrkRnfTS",
+ "QaGtrkRnfFE",
  "QaGtrkRnfFW",
+ "QaGtrkRnmT",
+ "QaGtrkRnmTS",
+ "QaGtrkRnmFE",
  "QaGtrkRnmFW",
+ "QaGtrkTanlT",
+ "QaGtrkTanlTS",
+ "QaGtrkTanlFE",
  "QaGtrkTanlFW",
+ "QaGtrkThetaT",
+ "QaGtrkThetaTS",
+ "QaGtrkThetaFE",
  "QaGtrkThetaFW",
+ "QaGtrkEtaT",
+ "QaGtrkEtaTS",
+ "QaGtrkEtaFE",
  "QaGtrkEtaFW",
+ "QaGtrkLengthT",
+ "QaGtrkLengthTS",
+ "QaGtrkLengthFE",
  "QaGtrkLengthFW",
+ "QaGtrkChisq0T",
+ "QaGtrkChisq0TS",
+ "QaGtrkChisq1T",
+ "QaGtrkChisq1TS",
+ "QaGtrkImpactrT",
+ "QaGtrkImpactrTS",
 
  "QaPtrkDetId",
  "QaPtrkFlag",
+ "QaPtrkf0",
+ "QaPtrkf0TS",
  "QaPtrkXf0",
- "QaPtrkYf0",
- "QaPtrkZf0",
- "QaPtrkImpactT",
- "QaPtrkNPntT",
- "QaPtrkNPntMaxT",
- "QaPtrkNPntFitT",
- "QaPtrkPtT",
- "QaPtrkPT",
- "QaPtrkR0T",
- "QaPtrkZ0T",
- "QaPtrkCurvT",
- "QaPtrkXfT",
- "QaPtrkYfT",
- "QaPtrkZfT",
- "QaPtrkRT",
- "QaPtrkRnfT",
- "QaPtrkRnmT",
- "QaPtrkTanlT",
- "QaPtrkThetaT",
- "QaPtrkEtaT",
- "QaPtrkLengthT",
- "QaPtrkChisq0T",
- "QaPtrkChisq1T",
- "QaPtrkImpactrT",
  "QaPtrkXf0TS",
+ "QaPtrkYf0",
  "QaPtrkYf0TS",
+ "QaPtrkZf0",
  "QaPtrkZf0TS",
+ "QaPtrkImpactT",
  "QaPtrkImpactTS",
+ "QaPtrkNPntT",
  "QaPtrkNPntTS",
+ "QaPtrkNPntMaxT",
  "QaPtrkNPntMaxTS",
+ "QaPtrkNPntFitT",
  "QaPtrkNPntFitTS",
+ "QaPtrkPtT",
  "QaPtrkPtTS",
+ "QaPtrkPT",
  "QaPtrkPTS",
+ "QaPtrkR0T",
  "QaPtrkR0TS",
+ "QaPtrkZ0T",
  "QaPtrkZ0TS",
+ "QaPtrkCurvT",
  "QaPtrkCurvTS",
+ "QaPtrkXfT",
  "QaPtrkXfTS",
+ "QaPtrkYfT",
  "QaPtrkYfTS",
+ "QaPtrkZfT",
  "QaPtrkZfTS",
+ "QaPtrkRT",
  "QaPtrkRTS",
+ "QaPtrkRnfT",
  "QaPtrkRnfTS",
+ "QaPtrkRnmT",
  "QaPtrkRnmTS",
+ "QaPtrkTanlT",
  "QaPtrkTanlTS",
+ "QaPtrkThetaT",
  "QaPtrkThetaTS",
+ "QaPtrkEtaT",
  "QaPtrkEtaTS",
+ "QaPtrkLengthT",
  "QaPtrkLengthTS",
+ "QaPtrkChisq0T",
  "QaPtrkChisq0TS",
+ "QaPtrkChisq1T",
  "QaPtrkChisq1TS",
+ "QaPtrkImpactrT",
  "QaPtrkImpactrTS",
+
 /* These are FTPC histograms. Currently, the FTPC doesn't do primary tracking...
  "QaPtrkNPntFE",
- "QaPtrkNPntMaxFE",
- "QaPtrkNPntFitFE",
- "QaPtrkPtFE",
- "QaPtrkPFE",
- "QaPtrkXfFE",
- "QaPtrkYfFE",
- "QaPtrkZfFE",
- "QaPtrkRFE",
- "QaPtrkRnfFE",
- "QaPtrkRnmFE",
- "QaPtrkTanlFE",
- "QaPtrkThetaFE",
- "QaPtrkEtaFE",
- "QaPtrkLengthFE",
  "QaPtrkNPntFW",
+ "QaPtrkNPntMaxFE",
  "QaPtrkNPntMaxFW",
+ "QaPtrkNPntFitFE",
  "QaPtrkNPntFitFW",
+ "QaPtrkPtFE",
  "QaPtrkPtFW",
+ "QaPtrkPFE",
  "QaPtrkPFW",
+ "QaPtrkXfFE",
  "QaPtrkXfFW",
+ "QaPtrkYfFE",
  "QaPtrkYfFW",
+ "QaPtrkZfFE",
  "QaPtrkZfFW",
+ "QaPtrkRFE",
  "QaPtrkRFW",
+ "QaPtrkRnfFE",
  "QaPtrkRnfFW",
+ "QaPtrkRnmFE",
  "QaPtrkRnmFW",
+ "QaPtrkTanlFE",
  "QaPtrkTanlFW",
+ "QaPtrkThetaFE",
  "QaPtrkThetaFW",
+ "QaPtrkEtaFE",
  "QaPtrkEtaFW",
+ "QaPtrkLengthFE",
  "QaPtrkLengthFW",
 */
  "QaDedxNum",
@@ -1209,14 +1224,19 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
 
   //  else 
   //  { cout << " StHistUtil::SetDefaultLogYList - no hist set in def logy list " << endl; } 
-  //   cout <<  " !! HERE I AM1 " << lengofList << endl ;
 
   Int_t numLog = 0;
 
   if (lengofList) {
     Int_t ilg = 0;
     for (ilg=0;ilg<lengofList;ilg++) {
-      TString listString = type+sdefList[ilg];
+      TString listString;
+      if ((sdefList[ilg] != "QaInnerSectorDeDx") &&
+	  (sdefList[ilg] != "QaOuterSectorDeDx") &&
+	  (sdefList[ilg] != "QaDedxAllSectors"))
+	listString = type+sdefList[ilg];
+      else
+	listString = sdefList[ilg];
      numLog = AddToLogYList((const Char_t *)listString);
      cout <<  " !!! adding histogram " << listString << " to LogY list "  << endl ;
     }
@@ -1281,6 +1301,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
  "TabQaEvsumTrkTotsm",
  "TabQaEvsumPlusMinusTrk",
  "TabQaEvsumPlusMinusTrksm",
+ "TabQaEvsumTotChg",
  "TabQaEvsumMeanPt",
  "TabQaEvsumMeanPtsm",
  "TabQaGtrkGood",
@@ -1294,6 +1315,8 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
  "TabQaGtrkPhi0T",
  "TabQaGtrkZ0T",
  "TabQaGtrkCurvT",
+ "TabQaGtrkRfT",
+ "TabQaGtrkPadfT",
  "TabQaGtrkXfT",
  "TabQaGtrkXf0",
  "TabQaGtrkYfT",
@@ -1301,6 +1324,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
  "TabQaGtrkZfT",
  "TabQaGtrkZf0",
  "TabQaGtrkRT",
+ "TabQaGtrkf0",
  "TabQaGtrkLengthT",
  "TabQaGtrkPsiT",
  "TabQaGtrkTanlT",
@@ -1419,6 +1443,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "TabQaEvsumTrkTotsm",
      "TabQaEvsumPlusMinusTrk",
      "TabQaEvsumPlusMinusTrksm",
+     "TabQaEvsumTotChg",
      "TabQaEvsumTrkPrim",
      "TabQaEvsumTrkPrimsm",
      "TabQaEvsumVertTot",
@@ -1427,6 +1452,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "TabQaEvsumMeanPtsm",
      "TabQaEvsumMeanEta",
      "TabQaEvsumRmsEta",
+     "TabQaEvsumPrimVertR",
      "TabQaEvsumPrimVertX",
      "TabQaEvsumPrimVertY",
      "TabQaEvsumPrimVertZ",
@@ -1446,6 +1472,9 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "TabQaGtrkPhi0T",
      "TabQaGtrkZ0T",
      "TabQaGtrkCurvT",
+     "TabQaGtrkRfT",
+     "TabQaGtrkPadfT",
+     "TabQaGtrkf0",
      "TabQaGtrkXfT",
      "TabQaGtrkXf0",
      "TabQaGtrkYfT",
@@ -1479,6 +1508,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "TabQaGtrkChi1TanlT",
      "TabQaGtrkChi0zfT",
      "TabQaGtrkChi1zfT",
+     "TabQaGtrkChi0PhiT",
      "TabQaGtrkRPntMomT",
      "TabQaGtrkRPntEtaT",
      "TabQaGtrkPsiPhiT",
@@ -1504,6 +1534,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "TabQaPtrkYf0",
      "TabQaPtrkZfT",
      "TabQaPtrkZf0",
+     "TabQaPtrkf0",
      "TabQaPtrkRT",
      "TabQaPtrkLengthT",
      "TabQaPtrkPsiT",
@@ -1585,14 +1616,18 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
    lengofList = sizeof(sdefList5)/4;  
   }
 
-// St_QA_Maker histograms without svt and ftpc histograms
+// St_QA_Maker histograms without the svt and ftpc histograms
   if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"year1")==0) {
     Char_t* sdefList6[] = {
+     "QaInnerSectorDeDx",
+     "QaOuterSectorDeDx",
+     "QaDedxAllSectors",
      "StEQaEvsumTrkGoodDTotal",
      "StEQaEvsumTrkTot",
      "StEQaEvsumTrkTotsm",
      "StEQaEvsumPlusMinusTrk",
      "StEQaEvsumPlusMinusTrksm",
+     "StEQaEvsumTotChg",
      "StEQaEvsumTrkPrim",
      "StEQaEvsumTrkPrimsm",
      "StEQaEvsumVertTot",
@@ -1601,6 +1636,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaEvsumMeanPtsm",
      "StEQaEvsumMeanEta",
      "StEQaEvsumRmsEta",
+     "StEQaEvsumPrimVertR",
      "StEQaEvsumPrimVertX",
      "StEQaEvsumPrimVertY",
      "StEQaEvsumPrimVertZ",
@@ -1628,6 +1664,9 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaGtrkPhi0T",
      "StEQaGtrkZ0T",
      "StEQaGtrkCurvT",
+     "StEQaGtrkRfT",
+     "StEQaGtrkPadfT",
+     "StEQaGtrkf0",
      "StEQaGtrkXfT",
      "StEQaGtrkXf0",
      "StEQaGtrkYfT",
@@ -1661,6 +1700,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaGtrkChi1TanlT",
      "StEQaGtrkChi0zfT",
      "StEQaGtrkChi1zfT",
+     "StEQaGtrkChi0PhiT",
      "StEQaGtrkRPntMomT",
      "StEQaGtrkRPntEtaT",
      "StEQaGtrkPsiPhiT",
@@ -1686,6 +1726,7 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
      "StEQaPtrkYf0",
      "StEQaPtrkZfT",
      "StEQaPtrkZf0",
+     "StEQaPtrkf0",
      "StEQaPtrkRT",
      "StEQaPtrkLengthT",
      "StEQaPtrkPsiT",
@@ -1749,6 +1790,162 @@ void StHistUtil::SetDefaultPrintList(Char_t *dirName, Char_t *analType)
     };
    sdefList = sdefList6;
    lengofList = sizeof(sdefList6)/4;  
+  }
+
+// St_QA_Maker histograms for QA shift
+  if (strcmp(dirName,"QA")==0 && strcmp(analType,"qa_shift")==0) {
+    Char_t* sdefList7[] = {
+     "TabQaEvsumTrkGoodDTotal",
+     "TabQaEvsumTrkTot",
+     "TabQaEvsumTotChg",
+     "TabQaEvsumTrkPrim",
+     "TabQaEvsumMeanPt",
+     "TabQaEvsumPrimVertR",
+     "TabQaEvsumPrimVertZ",
+     "TabQaGtrkRnfT",
+     "TabQaGtrkR0T",
+     "TabQaGtrkPhi0T",
+     "TabQaGtrkZ0T",
+     "TabQaGtrkRfT",
+     "TabQaGtrkf0",
+     "TabQaGtrkLengthT",
+     "TabQaGtrkPsiT",
+     "TabQaGtrkTanlT",
+     "TabQaGtrkEtaT",
+     "TabQaGtrkPtT",
+     "TabQaGtrkChisq0T",
+     "TabQaGtrkImpactT",
+     "TabQaGtrkImpactrT",
+     "TabQaGtrkPtVsEtaT",
+     "TabQaGtrkTanlzf",
+     "TabQaGtrkLengthVEtaT",
+     "TabQaGtrkNPntLengthT",
+     "TabQaGtrkFitPntLengthT",
+     "TabQaGtrkChi0EtaT",
+     "TabQaGtrkChi0PhiT",
+     "TabQaGtrkRPntMomT",
+     "TabQaGtrkRPntEtaT",
+     "TabQaPtrkTot",
+     "TabQaPtrkGood",
+     "TabQaPtrkNPntT",
+     "TabQaPtrkNPntFitT",
+     "TabQaPtrkRnfT",
+     "TabQaPtrkPhi0T",
+     "TabQaPtrkXfT",
+     "TabQaPtrkYfT",
+     "TabQaPtrkZfT",
+     "TabQaPtrkf0",
+     "TabQaPtrkRT",
+     "TabQaPtrkPsiT",
+     "TabQaPtrkTanlT",
+     "TabQaPtrkPtT",
+     "TabQaPtrkChisq0T",
+     "TabQaPtrkChisq1T",
+     "TabQaPtrkImpactT",
+     "TabQaPtrkImpactrT",
+     "TabQaPtrkPtVsEtaT",
+     "TabQaPtrkTanlzf",
+     "TabQaPtrkLengthVEtaT",
+     "TabQaPtrkNPntLengthT",
+     "TabQaPtrkChi0EtaT",
+     "TabQaPtrkChi1EtaT",
+     "TabQaPtrkRPntMomT",
+     "TabQaPtrkRPntEtaT",
+     "TabQaPtrkPsiPhiT",
+     "TabQaPidGlobtrkDstdedxPVsDedx",
+     "TabQaVtxNum",
+     "TabQaV0Vtx",
+     "TabQaV0LambdaMass",
+     "TabQaV0K0Mass",
+     "TabQaXiVtxTot",
+     "TabQaXiaMass",
+     "TabQaKinkTot"
+    };
+   sdefList = sdefList7;
+   lengofList = sizeof(sdefList7)/4;  
+  }
+
+// St_QA_Maker histograms for QA shift
+  if (strcmp(dirName,"EventQA")==0 && strcmp(analType,"qa_shift")==0) {
+    Char_t* sdefList8[] = {
+     "QaDedxAllSectors",
+     "StEQaEvsumTrkGoodDTotal",
+     "StEQaEvsumTrkTot",
+     "StEQaEvsumTotChg",
+     "StEQaEvsumTrkPrim",
+     "StEQaEvsumMeanPt",
+     "StEQaEvsumPrimVertR",
+     "StEQaEvsumPrimVertZ",
+     "StEQaGtrkDcaBeamXY",
+     "StEQaGtrkDcaBeamZ1",
+     "StEQaGtrkDcaBeamZ2",
+     "StEQaGtrkDcaBeamZ3",
+     "StEQaGtrkZdcaTanl",
+     "StEQaGtrkZdcaZf",
+     "StEQaGtrkZdcaPsi",
+     "StEQaGtrkZdcaPhi0",
+     "StEQaGtrkRnfT",
+     "StEQaGtrkR0T",
+     "StEQaGtrkPhi0T",
+     "StEQaGtrkZ0T",
+     "StEQaGtrkRfT",
+     "StEQaGtrkPadfT",
+     "StEQaGtrkf0",
+     "StEQaGtrkLengthT",
+     "StEQaGtrkPsiT",
+     "StEQaGtrkTanlT",
+     "StEQaGtrkEtaT",
+     "StEQaGtrkPtT",
+     "StEQaGtrkChisq0T",
+     "StEQaGtrkImpactT",
+     "StEQaGtrkImpactrT",
+     "StEQaGtrkPtVsEtaT",
+     "StEQaGtrkTanlzf",
+     "StEQaGtrkLengthVEtaT",
+     "StEQaGtrkNPntLengthT",
+     "StEQaGtrkFitPntLengthT",
+     "StEQaGtrkChi0EtaT",
+     "StEQaGtrkChi0PhiT",
+     "StEQaGtrkRPntMomT",
+     "StEQaGtrkRPntEtaT",
+     "StEQaPtrkTot",
+     "StEQaPtrkGood",
+     "StEQaPtrkNPntT",
+     "StEQaPtrkNPntFitT",
+     "StEQaPtrkRnfT",
+     "StEQaPtrkPhi0T",
+     "StEQaPtrkXfT",
+     "StEQaPtrkYfT",
+     "StEQaPtrkZfT",
+     "StEQaPtrkf0",
+     "StEQaPtrkRT",
+     "StEQaPtrkPsiT",
+     "StEQaPtrkTanlT",
+     "StEQaPtrkPtT",
+     "StEQaPtrkChisq0T",
+     "StEQaPtrkChisq1T",
+     "StEQaPtrkImpactT",
+     "StEQaPtrkImpactrT",
+     "StEQaPtrkPtVsEtaT",
+     "StEQaPtrkTanlzf",
+     "StEQaPtrkLengthVEtaT",
+     "StEQaPtrkNPntLengthT",
+     "StEQaPtrkChi0EtaT",
+     "StEQaPtrkChi1EtaT",
+     "StEQaPtrkRPntMomT",
+     "StEQaPtrkRPntEtaT",
+     "StEQaPtrkPsiPhiT",
+     "StEQaPidGlobtrkDstdedxPVsDedx",
+     "StEQaVtxNum",
+     "StEQaV0Vtx",
+     "StEQaV0LambdaMass",
+     "StEQaV0K0Mass",
+     "StEQaXiVtxTot",
+     "StEQaXiaMass",
+     "StEQaKinkTot"
+    };
+   sdefList = sdefList8;
+   lengofList = sizeof(sdefList8)/4;
   }
 
   Int_t numPrt = 0;

@@ -1,5 +1,8 @@
-// $Id: StHistMaker.cxx,v 1.1 2000/06/23 21:16:18 kathy Exp $
+// $Id: StHistMaker.cxx,v 1.2 2000/07/26 19:57:50 lansdell Exp $
 // $Log: StHistMaker.cxx,v $
+// Revision 1.2  2000/07/26 19:57:50  lansdell
+// new histograms and functionality added (e.g., overlay several histograms, new printlist option qa_shift)
+//
 // Revision 1.1  2000/06/23 21:16:18  kathy
 // code that will collect all histograms that were added together in StHistUtil::AddHists - has to be in a maker in order to write it out
 //
@@ -48,7 +51,7 @@ Int_t StHistMaker::Make(){
 
   cout << " StHistMaker::Make  " << endl;
   cout << "This is the array " << mHArray << endl;
-  for (int i=0; i<321; ++i) {
+  for (int i=0; i<512; i++) {
     AddHist(mHArray[i]);
   }
 
