@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.1 2000/12/07 11:14:21 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.2 2001/01/25 17:49:09 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.2  2001/01/25 17:49:09  lmartin
+ * Method Setup removed
+ * Methods defined as public methods of StEstTracker class
+ * Input tables passed as method arguments rather than instantiated into the methods
+ *
  * Revision 1.1  2000/12/07 11:14:21  lmartin
  * First CVS commit
  *
@@ -17,53 +22,38 @@
 #include "StThreeVectorD.hh"
 #include "math_constants.h"
 #include "phys_constants.h"
-#include "tables/St_dst_vertex_Table.h"
-#include "StSvtClassLibrary/StSvtHybridCollection.hh"
-#include "StEstMaker.h"
+#include "StEstTracker.h"
 #include "StHelix.hh"
 #include "StThreeVector.hh"
+#include "StEstParams.hh"
+#include "Infrastructure/StEstWafer.hh"
+#include "Infrastructure/StEstBranch.hh"
+#include "Infrastructure/StEstHit.hh"
+#include "Infrastructure/StEstTrack.hh"
+#include "Infrastructure/StEstTPCTrack.hh"
+#include "tables/St_dst_vertex_Table.h"
+#include "tables/St_svg_geom_Table.h"
+#include "tables/St_svg_shape_Table.h"
+#include "tables/St_svg_config_Table.h"
+#include "tables/St_scs_spt_Table.h"
+#include "tables/St_tpt_track_Table.h"
+#include "tables/St_tcl_tphit_Table.h"
+#include "tables/St_tte_eval_Table.h"
+#include "tables/St_g2t_track_Table.h"
+#include "tables/St_g2t_vertex_Table.h"
 
 #include "StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
 
-int StEstMaker::Setup(){
+int StEstTracker::VertexSetup(St_dst_vertex *preVertex){
 
-  long  IsolatedSvtHits;
- 
-  IsolatedSvtHits=0;
-  if(mParams[0]->debug>2)
-    cout<<"Init ****START****"<<endl;
-
-  SVTInit();
-  TPCInit();
-  VertexSetup();
-  
-  
-  mNTrack = mNTPCTrack;
-  mTrack = new StEstTrack*[mNTPCTrack];
-  if(!mTrack){
-    cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::Init mTrack = new StEstTrack*[ "<< mNTPCTrack<<"];"<<endl;
-    return 1;
-  }
-
-  BranchInit();
-
-if (mParams[0]->debug>2) cout << "Init ****STOP****"<<endl;  
-  
-  return StMaker::Init();
-}
-
- 
-void StEstMaker::VertexSetup(){
-
-
+  cout<<"StEstTracker::VertexSetup"<<endl;
   StThreeVectorD* xg = new StThreeVectorD(0,0,0);
   StThreeVectorD* xl = new StThreeVectorD(0,0,0);
 
-  St_dst_vertex  *preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
+  //  St_dst_vertex  *preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
   
   if( preVertex){
     dst_vertex_st *preVtxPtr = preVertex->GetTable();
@@ -77,18 +67,26 @@ void StEstMaker::VertexSetup(){
       }
     }
   }
-
+  else cout<<"StEstTracker::VertexSetup : Prevertex not found. Main vertex set to (0,0,0)"<<endl;
   mVertex = new StEstHit(9999,xg,xl,1,1,mIndexWaf[0]);
   
-  return;
+  return kStOK;
 }
 
-void StEstMaker::BranchInit(){
+int StEstTracker::BranchInit(){
 
   int i;
   StEstBranch *branch;
 
-
+  cout<<"StEstTracker::BranchInit starting"<<endl;
+  mNTrack = mNTPCTrack;
+  mTrack = new StEstTrack*[mNTPCTrack];
+  if(!mTrack){
+    cerr<<"ERROR!!! not enough memory"<<endl;
+    cerr<<"StEstMaker::Init mTrack = new StEstTrack*[ "<< mNTPCTrack<<"];"<<endl;
+    return 1;
+  }
+  
   for (i=0;i<mNTPCTrack;i++) {
     mTrack[i] = new StEstTrack(mParams[0]->maxbranches,mTPCTrack[i]);
     if (mTrack[i]==NULL)
@@ -111,27 +109,20 @@ void StEstMaker::BranchInit(){
 	  cout<<" Branch added"<<endl;
 	StThreeVector<double> a(mVertex->mXG->z(),mVertex->mXG->y(),mVertex->mXG->z());
   	if (mTPCTrack[i]->GetFlag()>=0) {
- 	  dca_all->Fill((float) mTPCTrack[i]->GetHelix()->distance(a));
- 	  if (mTPCTrack[i]->mType==1) dca_pri->Fill((float) mTPCTrack[i]->GetHelix()->distance(a));
- 	  if (mTPCTrack[i]->mType==2) dca_sec->Fill((float) mTPCTrack[i]->GetHelix()->distance(a));
-
 	  // First the branch is refitted without the tpc hits only.
 	  // The fit results (chisq,chisql,chisqc,ndofl,ndofc) are
 	  // assigned to the tpc track
 	  int fitstatus;
 	  fitstatus=0;
  	  if (mTPCTrack[i]->GetHelix()->distance(a)<3.) 
-	    RefitBranch2(branch,NULL,-1,1,&fitstatus);
+	    RefitBranch(branch,NULL,-1,1,&fitstatus);
 	  else
-	    RefitBranch2(branch,NULL,-1,0,&fitstatus);
-
-	  Initfitstatus->Fill(float (fitstatus));
-
+	    RefitBranch(branch,NULL,-1,0,&fitstatus);
+	if(mParams[0]->debug>3)
+	  cout<<" Branch refitted"<<endl;
 	  //	  branch->mTrack->mTPCTrack->mChiSq = branch->GetChiSq();
 	  //	  branch->mTrack->mTPCTrack->mChiSqCir = branch->GetChiSqCir();
 	  //	  branch->mTrack->mTPCTrack->mChiSqLin = branch->GetChiSqLin();
-	  mChiLin->Fill((float)branch->mTrack->mTPCTrack->mChiSqLin/(branch->mTrack->mTPCTrack->mNHits-2),1);
-	  mChiCir->Fill((float)branch->mTrack->mTPCTrack->mChiSqCir/(branch->mTrack->mTPCTrack->mNHits-3),1);
 	  // here we copy the new helix and attach it to the track
 	  StHelix *helix_for_track = new StHelix(*branch->GetHelix());
 	  mTrack[i]->SetHelix(helix_for_track);
@@ -140,11 +131,16 @@ void StEstMaker::BranchInit(){
     }
   }
 
-  return;
+  cout<<"StEstTracker::BranchInit stopped"<<endl;
+  return kStOK;
 }
   
 
-int StEstMaker::SVTInit(){
+int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
+			  St_svg_shape*   Stsvgshape,
+			  St_svg_config*   Stsvgconf,
+			  St_scs_spt*   Stscsspt)
+{
 
   if (mParams[0]->debug>2) 
     cout << "SVTInit **** START ****"<<endl;  
@@ -158,71 +154,35 @@ int StEstMaker::SVTInit(){
   StThreeVectorD *nn;
     
   svg_geom_st*   svggeom;
-  St_svg_geom*   Stsvggeom;
-
-  St_svg_shape*   Stsvgshape;
-
   svg_config_st*   svgconf;
-  St_svg_config*   Stsvgconf;
-
   scs_spt_st*   scsspt;
-  St_scs_spt*   Stscsspt;
+  svg_shape_st*    svgshape;
 
   if (mParams[0]->debug>2) 
     cout << "SVTInit **** Getting data from tables ***"<<endl;  
 
 
-// 		Create tables
-  St_DataSetIter       local(GetInputDB("svt"));
-
- // getting data from tables
- // Figure out what geometry is needed look for raw data and look at setup if it there
-
-  Stsvggeom  =0;
-  
-  St_DataSet *svt = GetDataSet("StSvtAnalResults");
-  StSvtHybridCollection* SvtCluColl =0;
-  if( svt)
-    SvtCluColl = (StSvtHybridCollection*)(svt->GetObject());
-
-  if( SvtCluColl){
-    if(  !strncmp(SvtCluColl->getConfiguration(), "Y1L", strlen("Y1L"))){
-      Stsvggeom        = (St_svg_geom  *) local("svgpars/geomy1l");
-    }
-  }
-  
-  if(!Stsvggeom)  Stsvggeom = (St_svg_geom *)local("svgpars/geom");
-
   svggeom   = Stsvggeom->GetTable();
-  
-  maxl=Stsvggeom->GetNRows(); 
-  
-  Stsvgshape = (St_svg_shape *)local("svgpars/shape");
-  mSvgShape   = Stsvgshape->GetTable();
-  
-  Stsvgconf = (St_svg_config *)local("svgpars/config");
+  mNWafers=Stsvggeom->GetNRows();
+  svgshape   = Stsvgshape->GetTable();
   svgconf   = Stsvgconf->GetTable();
-
-
   // Now get hits
-  svt  = GetInputDS("svt_hits");
-
-  Stscsspt = (St_scs_spt *)svt->Find("scs_spt");
   scsspt   = Stscsspt->GetTable();
 
 
-  if (mParams[0]->debug>2) 
-    cout << "SVTInit **** Creating wafers ****"<<endl;  
-
-  mIndexWaf  =  new StEstWafer*[maxl];
+  if (mParams[0]->debug>0) 
+    cout << "SVTInit **** Creating "<<mNWafers<<" wafers ****"<<endl;  
+  mIndexGeom = new StEstIndexGeom(mParams[0]->nphibins, mParams[0]->nzbins);
+  mIndexWaf  =  new StEstWafer*[mNWafers];
+  //  cout<<"--------------------> StEstInit : mIndexWaf="<<mIndexWaf<<endl;
   if(!mIndexWaf){
     cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::SVTInit mIndexWaf = new StEstWafer*["<<maxl<<"];"<<endl;
+    cerr<<"StEstMaker::SVTInit mIndexWaf = new StEstWafer*["<<mNWafers<<"];"<<endl;
     return 1;
   }
 
   if (mParams[0]->debug>2) 
-    cout << "SVTInit **** Loop over the wafers **** : "<<maxl<<endl;  
+    cout << "SVTInit **** Loop over the wafers **** : "<<mNWafers<<endl;  
 
   // We scan once the scs_spt table the count the number of hits in each 
   // wafer and allocate suited memory space for the hits in the wafer object.
@@ -232,7 +192,7 @@ int StEstMaker::SVTInit(){
       HitPerWafer[scsspt[il].id_wafer]++; 
     }
   }
-  for(il=0; il<maxl; il++){ // loop over the wafers
+  for(il=0; il<mNWafers; il++){ // loop over the wafers
     
     mWafId2IndexWaf[svggeom[il].id]=il;
 
@@ -250,12 +210,12 @@ int StEstMaker::SVTInit(){
     // fill object mIndexGeom
     lay=mIndexWaf[il]->GetLayer();
 
-    zmin = (long)floor((mIndexWaf[il]->GetX()->z() - mSvgShape[shape].shape[1])/mParams[0]->zbin) + mParams[0]->nzbins/2;
-    zmax = (long)floor((mIndexWaf[il]->GetX()->z() + mSvgShape[shape].shape[1])/mParams[0]->zbin) + mParams[0]->nzbins/2;
+    zmin = (long)floor((mIndexWaf[il]->GetX()->z() - svgshape[shape].shape[1])/mParams[0]->zbin) + mParams[0]->nzbins/2;
+    zmax = (long)floor((mIndexWaf[il]->GetX()->z() + svgshape[shape].shape[1])/mParams[0]->zbin) + mParams[0]->nzbins/2;
     phi0 = ( atan2(mIndexWaf[il]->GetX()->y(),mIndexWaf[il]->GetX()->x()) + M_PI)*C_DEG_PER_RAD;
     r = sqrt(mIndexWaf[il]->GetX()->x() * mIndexWaf[il]->GetX()->x() + 
 	     mIndexWaf[il]->GetX()->y() * mIndexWaf[il]->GetX()->y());
-    dphi=atan(mSvgShape[shape].shape[0]/r)*C_DEG_PER_RAD;
+    dphi=atan(svgshape[shape].shape[0]/r)*C_DEG_PER_RAD;
     pmin= (long)floor((phi0-dphi)/mParams[0]->phibin);
     if(pmin<0)
       pmin+=mParams[0]->nphibins;
@@ -276,7 +236,7 @@ int StEstMaker::SVTInit(){
       if ((il%10)==0)
 	cout << "Wafer #"<<svggeom[il].id<<" coord: "<<mIndexWaf[il]->GetX()->x()<<"  "<<mIndexWaf[il]->GetX()->y()<<"  "<<mIndexWaf[il]->GetX()->z()<<endl;  
 
-  } // end of for(il=0; il<maxl; il++)
+  } // end of for(il=0; il<mNWafers; il++)
   
   
   // neighbours wafers
@@ -286,7 +246,7 @@ int StEstMaker::SVTInit(){
   if (mParams[0]->debug>2) 
     cout << "SVTInit **** Finding neighbouring wafers ****"<<endl;  
 
-  for (il=0; il<maxl; il++) {
+  for (il=0; il<mNWafers; il++) {
     lay=(int)svggeom[il].id/1000;
     if(lay==8)
       lay=7;
@@ -316,17 +276,27 @@ int StEstMaker::SVTInit(){
 	maxlad=lad+1;
 	minlad=lad-1;
 	lay2=lay;
+
 	break;
       }	
 
     //    if(minlad<1)
     //      minlad=svgconf->n_ladder[lay2-1];
-    if(minlad<1)
-      minlad=svgconf->n_ladder[lay2-1]+svgconf->n_ladder[lay-1];
+    if(minlad<1) {
+      if (lay<7)
+        minlad=svgconf->n_ladder[lay2-1]+svgconf->n_ladder[lay-1];
+      else
+        minlad=svgconf->n_ladder[lay-1];
+    }
     //    if(maxlad>svgconf->n_ladder[lay2-1])
     //      maxlad=1;
-    if(maxlad>svgconf->n_ladder[lay2-1]+svgconf->n_ladder[lay-1])
-      maxlad=1;
+    if (lay<7) {
+      if(maxlad>svgconf->n_ladder[lay2-1]+svgconf->n_ladder[lay-1]) maxlad=1;
+    }
+    else {
+      if(maxlad>svgconf->n_ladder[lay-1]) maxlad=1;
+    }
+
     if(maxwaf<=svgconf->n_wafer[lay-1])
       {
 	mIndexWaf[il]->neighbour[0]=mIndexWaf[mWafId2IndexWaf[lay2*1000+maxwaf*100+maxlad]];
@@ -354,7 +324,7 @@ int StEstMaker::SVTInit(){
 	mIndexWaf[il]->neighbour[7]=NULL;
 
       }
-  } // end of for(il=0; il<maxl; il++)
+  } // end of for(il=0; il<mNWafers; il++)
   
 
   // get SVT hits for each wafer
@@ -391,12 +361,6 @@ int StEstMaker::SVTInit(){
 	jl=mWafId2IndexWaf[scsspt[il].id_wafer];
 	lay = mIndexWaf[jl]->GetLayer();
 	
-	// A.M. 
-	//svthitsxy->Fill(scsspt[il].x[0], scsspt[il].x[1], 1.);
-	//if(lay==3)
-	// all_z_4l->Fill(scsspt[il].x[2], 1.);
-	// A.M. END
-	
 	xg = new StThreeVectorD(scsspt[il].x[0],scsspt[il].x[1],scsspt[il].x[2]);
 	xl = new StThreeVectorD(scsspt[il].xl[0],scsspt[il].xl[1],0);
 	
@@ -418,16 +382,18 @@ int StEstMaker::SVTInit(){
 	ill++;
       }
     }
-  if(mParams[0]->debug>2)
+
+  if(mParams[0]->debug>0)
     cout << "SVTInit **** Maximum number of hits per wafer=" << maxwaf << " ****" <<endl;
   
-  if(mParams[0]->debug>2)
+  if(mParams[0]->debug>0)
     cout << "SVTInit *** STOP ***"<<endl;  
   
   return 0;
 }
  
-int StEstMaker::TPCInit(){
+int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
+			  St_tcl_tphit* Sttphit){
 
   if(mParams[0]->debug>1)
     cout << "TPCInit *** START ***"<<endl;  
@@ -443,25 +409,13 @@ int StEstMaker::TPCInit(){
   float b[3];
   gufld(x,b);
 
-  cout << " Using a field of" << b[2] << endl;
+  cout << " Using a field of " << b[2] << endl;
 
   // reading tables with TPC data
 
   tpt_track_st*    tptrack;
-  St_tpt_track*    Sttptrack;
-
-  tcl_tphit_st*    tphit;
-  St_tcl_tphit*    Sttphit;
-
-
-  St_DataSet     *tpc  = GetInputDS("tpc_tracks");
-
-  Sttptrack    = (St_tpt_track *)tpc->Find("tptrack");
   tptrack      = Sttptrack->GetTable();
-
-  tpc  = GetInputDS("tpc_hits");
-
-  Sttphit      = (St_tcl_tphit *)tpc->Find("tphit");
+  tcl_tphit_st*    tphit;
   tphit        = Sttphit->GetTable();
 
   // first loop to determine the number (MaxTPCTrack) of good TPC tracks 
@@ -513,14 +467,7 @@ int StEstMaker::TPCInit(){
       dip = atan(tptrack[il].tanl);
       h = ((b[2] * tptrack[il].q) > 0 ? -1 : 1);
       phase = (tptrack[il].psi)/C_DEG_PER_RAD-h*M_PI_2;
-      // not needed here. 
-      /*      if(phase>2*M_PI)
-	phase-=2*M_PI;
-      if(phase>M_PI)
-	phase-=2*M_PI;
-      if(phase<-M_PI)
-      phase+=2*M_PI;*/
-      
+
       hel = new StHelix(c,dip,phase,orig,h);
       if(!hel) {
 	cerr<<"ERROR!!! not enough memory"<<endl;
@@ -543,7 +490,6 @@ int StEstMaker::TPCInit(){
       mTPCTrack[RowToFill]->mChiSqLin = tptrack[il].chisq[1];
       mTPCTrack[RowToFill]->mChiSqCir = tptrack[il].chisq[0];
       
-      //mchicirchilin->Fill((float)tptrack[il].chisq[0],(float)tptrack[il].chisq[1],1);
       
       mTptIndex[tptrack[il].id]=RowToFill;
       RowToFill++;
@@ -564,7 +510,7 @@ int StEstMaker::TPCInit(){
       if(kl<mParams[0]->maxtpchits && kl>=0) {
 	xhit = new StThreeVectorD(tphit[il].x,tphit[il].y,tphit[il].z);
 	xdhit = new StThreeVectorD(tphit[il].dx,tphit[il].dy,tphit[il].dz);
-	if(!mTPCTrack[jl]->AddHit(kl,xhit,xdhit,tphit[il].row,tphit[il].flag,tphit[il].track)) {
+	if(!mTPCTrack[jl]->AddHit(kl,xhit,xdhit,tphit[il].row,tphit[il].flag)) {
 	  cout<<"ERROR!!! StEstMaker::TPCInit too many hits for TPCTrack["<<jl<<"] = " \
 	      <<mTPCTrack[jl]->GetNHits()<<endl;
 	  return 1;
@@ -595,7 +541,10 @@ int StEstMaker::TPCInit(){
 }
 
 
-int StEstMaker::SetupMc(){
+int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
+			  St_tte_eval* Stevaltrk, 
+			  St_g2t_track* Stg2ttrack,
+			  St_g2t_vertex* Stg2tvertex){
 
   int i, j, IsolatedSvtHits;
   int Parent_p;
@@ -615,27 +564,21 @@ int StEstMaker::SetupMc(){
     return 1;
   }
 
-  int* mctest = new int[mNTPCTrack*10];
+  //  int* mctest = new int[mNTPCTrack*10];
 
   for (i=0;i<mNTPCTrack*10;i++) {
     Eval_id_mctrk2est_Track[i]=-1;
-    mctest[i] = 0;
+    //    mctest[i] = 0;
   }
 
   
-  St_DataSet     *tpc  = GetInputDS("tpc_tracks");
-  St_tte_eval*   Stevaltrk    = (St_tte_eval *)tpc->Find("evaltrk");
   tte_eval_st*   evaltrk      = Stevaltrk->GetTable();
-
-  St_DataSet     *geant  = GetInputDS("geant");
-  St_g2t_track*   Stg2t_track    = (St_g2t_track *)geant->Find("g2t_track");
-  g2t_track_st*   g2t_track      = Stg2t_track->GetTable();
-  St_g2t_vertex*   Stg2t_vertex    = (St_g2t_vertex *)geant->Find("g2t_vertex");
-  g2t_vertex_st*   g2t_vertex      = Stg2t_vertex->GetTable();
+  g2t_track_st*   g2t_track      = Stg2ttrack->GetTable();
+  g2t_vertex_st*   g2t_vertex      = Stg2tvertex->GetTable();
 
   for(i=0; i<Stevaltrk->GetNRows(); i++) {
     if(evaltrk[i].mtrk<mNTPCTrack*10) {
-      mctest[evaltrk[i].mtrk]++;
+      //      mctest[evaltrk[i].mtrk]++;
       // filling translation table; index is mcid, content is id of TPC track
       Eval_id_mctrk2est_Track[evaltrk[i].mtrk] = mTptIndex[evaltrk[i].rtrk];
       if (mTptIndex[evaltrk[i].rtrk]!=-1) {
@@ -646,10 +589,10 @@ int StEstMaker::SetupMc(){
 	if (evaltrk[i].vid!=1) {
 	  mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mType=2;
 	  if (mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mPid==5 || mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mPid==6) {
-	    for (j=0; j<Stg2t_vertex->GetNRows();j++) 
+	    for (j=0; j<Stg2tvertex->GetNRows();j++) 
 	      if (g2t_vertex[j].id==mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mVid)
 		Parent_p=g2t_vertex[j].parent_p;
-	    for (j=0; j<Stg2t_track->GetNRows();j++) {
+	    for (j=0; j<Stg2ttrack->GetNRows();j++) {
 	      if (g2t_track[j].id==Parent_p) {
 		mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mParentPid=g2t_track[j].ge_pid;
 		if(mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mParentPid==8 || mTPCTrack[mTptIndex[evaltrk[i].rtrk]]->mParentPid==9) 
@@ -683,9 +626,6 @@ int StEstMaker::SetupMc(){
       }
   }
   
-  St_scs_spt*     Stscsspt;
-  St_DataSet     *svt  = GetInputDS("svt_hits");
-  Stscsspt    = (St_scs_spt *)svt->Find("scs_spt");
   scs_spt_st*     scsspt;
   scsspt      = Stscsspt->GetTable();
   int HitLayer;
@@ -749,15 +689,6 @@ int StEstMaker::SetupMc(){
   }
   return 0;
 }
- 
-
-
-
-
-
- 
-
- 
  
  
 
