@@ -296,8 +296,8 @@ Bool_t StXiFinderMaker::UseV0() {
 
   for (k=0; k<trks; k++)
      {if (UsingITTFTracks() == kUseBOTH)
-						   {if ((v0Vtx->dcaDaughters() <= 0) && (trk[k]->encodedMethod() != ITTFflag)) continue;
-									 if ((v0Vtx->dcaDaughters() >= 0) && (trk[k]->encodedMethod() == ITTFflag)) continue;
+						   {if ((v0Vtx->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
+									 if ((v0Vtx->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
 									 }
 					 StTrackGeometry* bachGeom=trk[k]->geometry();/////Added Julien.
       if (bachGeom == NULL) {printf("CAUTION : pointer bachGeom is null.\n");return usedV0;}
@@ -664,8 +664,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.3 2003/04/30 20:38:22 perev Exp $
+// $Id: StXiFinderMaker.cxx,v 1.4 2003/05/02 21:21:08 lbarnby Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.4  2003/05/02 21:21:08  lbarnby
+// Now identify ITTF tracks by fittingMethod() equal to  kITKalmanFitId
+//
 // Revision 1.3  2003/04/30 20:38:22  perev
 // Warnings cleanup. Modified lines marked VP
 //
