@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99  
-// $Id: SetObjectFilter.C,v 1.3 1999/12/06 04:46:56 fine Exp $
+// $Id: SetObjectFilter.C,v 1.4 2000/08/10 17:09:30 fine Exp $
 //___________________________________________________________________
 void SetObjectFilter()
 {
@@ -23,7 +23,7 @@ void SetObjectFilter()
    // You should adjust the type of filter below
    //________________________________________________
    //
-      StVirtualEventFilter *localFilter = (StVirtualFilter *)trackFilter;
+      StTrackFilter *localFilter = (StVirtualEventFilter *)trackFilter;
    //________________________________________________
    Int_t tr_p[]={39250,39344};
    Int_t ltr_p = sizeof(tr_p)/sizeof(int);
@@ -47,6 +47,9 @@ void SetObjectFilter()
 }
 
 // $Log: SetObjectFilter.C,v $
+// Revision 1.4  2000/08/10 17:09:30  fine
+// Wensheng example has been fixed
+//
 // Revision 1.3  1999/12/06 04:46:56  fine
 // Bug fixes
 //

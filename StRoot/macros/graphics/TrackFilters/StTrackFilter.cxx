@@ -1,6 +1,6 @@
 #include "StTrackFilter.h"
-#include "St_TableSorter.h"
-#include "St_TableIter.h"
+#include "TTableSorter.h"
+#include "TTableIter.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_tcl_tphit_Table.h"
@@ -92,7 +92,7 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &siz
  long track_p = hit[rowNumber].track_p; //  Id of parent track 
  if (m_G2t_track) {
 
-   St_TableIter &nextTrack = *m_NextG2tTrack;
+   TTableIter &nextTrack = *m_NextG2tTrack;
    St_g2t_track &track     = *((St_g2t_track*)m_G2t_track->GetTable());
    Int_t indxColor         =  nextTrack[0];
    
@@ -106,7 +106,7 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &siz
        if (track_p != track[indxRow].id) continue;
 
        if (m_G2t_vertex && track[indxRow].stop_vertex_p) {
-          St_TableIter nextVertex(m_G2t_vertex,track[indxRow].stop_vertex_p);
+          TTableIter nextVertex(m_G2t_vertex,track[indxRow].stop_vertex_p);
 
           if (nextVertex.GetNRows() > 0) {
              St_g2t_vertex &vertex = *((St_g2t_vertex*)m_G2t_vertex->GetTable());
@@ -136,7 +136,7 @@ Int_t StTrackFilter::SubChannel(St_g2t_tpc_hit &hit, Int_t rowNumber,Size_t &siz
 }
 
 //_____________________________________________________________________________
-Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Size_t &size,Style_t &style)
+Int_t StTrackFilter::Channel(const TTableSorter *tableObject,Int_t index,Size_t &size,Style_t &style)
 {
   //
   // This is an example how one can separate tableObject's by the table "name"
@@ -149,7 +149,7 @@ Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Size_
 
  if( mStr == "g2t_track" && !m_G2t_track) {
    if (m_NextG2tTrack) delete m_NextG2tTrack;
-   m_NextG2tTrack = new St_TableIter(tableObject,m_Ge_pid);
+   m_NextG2tTrack = new TTableIter(tableObject,m_Ge_pid);
    m_G2t_track = tableObject;
  }
  else if( mStr == "g2t_vertex" && !m_G2t_vertex) {
@@ -171,7 +171,7 @@ Int_t StTrackFilter::Channel(const St_TableSorter *tableObject,Int_t index,Size_
 }
 
 //_____________________________________________________________________________
-Int_t StTrackFilter::Channel(const St_Table *tableObject,Int_t rowNumber,Size_t &size,Style_t &style)
+Int_t StTrackFilter::Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style)
 {
   // Introduce in here your own rule to select a particular row of the given tableObjectvertex
   //
