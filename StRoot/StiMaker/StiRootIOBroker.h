@@ -148,6 +148,13 @@ public:
 
     // Track Filter (filter)
     
+    //This enum must be identical to the one in StiDynamicTrackFilter.h
+    //enum FilterType {kPtFilter=0, kEtaFilter=1, kChi2Filter=2, kNptsFilter=3, kNFitPtsFilter=4,
+    //kNGapsFilter=5, kFitPointRatioFilter=6, kPrimaryDcaFilter=7};
+    virtual void addFilterType(FilterType t) {mFilterTypes.push_back(t); notify();}
+    virtual void clearFilterTypes() {mFilterTypes.clear();notify();}
+    virtual const vector<int>& filterTypes() const {return mFilterTypes;}
+    
     virtual void setFilterPtMin(double);
     virtual double filterPtMin() const;
 
@@ -160,6 +167,23 @@ public:
     virtual void setFilterEtaMax(double);
     virtual double filterEtaMax() const;
 
+    virtual void setFilterChi2Max(double);
+    virtual double filterChi2Max() const;
+
+    virtual void setFilterNptsMin(unsigned int);
+    virtual unsigned int filterNptsMin() const;
+
+    virtual void setFilterNFitPtsMin(unsigned int);
+    virtual unsigned int filterNFitPtsMin() const;
+
+    virtual void setFilterNGapsMax(unsigned int);
+    virtual unsigned int filterNGapsMax() const;
+
+    virtual void setFilterFitPointRatioMin(double);
+    virtual double filterFitPointRatioMin() const;
+    
+    virtual void setFilterPrimaryDcaMax(double);
+    virtual double filterPrimaryDcaMax() const;
     
 protected:
     friend class StiIOBroker;
@@ -210,10 +234,18 @@ protected:
     double mLTMDeltaR;
 
     //Filter
-    double mPtMin;
-    double mPtMax;
-    double mEtaMin;
-    double mEtaMax;
+    vector<int> mFilterTypes;
+    double mFilterPtMin;
+    double mFilterPtMax;
+    double mFilterEtaMin;
+    double mFilterEtaMax;
+    double mFilterChi2Max;
+    unsigned int mFilterNptsMin;
+    unsigned int mFilterNFitPtsMin;
+    unsigned int mFilterNGapsMax;
+    double mFilterFitPointRatioMin;
+    double mFilterPrimaryDcaMax;
+
     
 private:
     ClassDef(StiRootIOBroker, 1)
@@ -591,46 +623,106 @@ inline double StiRootIOBroker::ltmDeltaR() const
 }
 
 inline void StiRootIOBroker::setFilterPtMin(double v) {
-    mPtMin=v;
+    mFilterPtMin=v;
     notify();
 }
 
 inline double StiRootIOBroker::filterPtMin() const
 {
-    return mPtMin;
+    return mFilterPtMin;
 }
 
 inline void StiRootIOBroker::setFilterPtMax(double v)
 {
-    mPtMax=v;
+    mFilterPtMax=v;
     notify();
 }
 
 inline double StiRootIOBroker::filterPtMax() const
 {
-    return mPtMax;
+    return mFilterPtMax;
 }
 
 inline void StiRootIOBroker::setFilterEtaMin(double v)
 {
-    mEtaMin=v;
+    mFilterEtaMin=v;
     notify();
 }
 
 inline double StiRootIOBroker::filterEtaMin() const
 {
-    return mEtaMin;
+    return mFilterEtaMin;
 }
     
 inline void StiRootIOBroker::setFilterEtaMax(double v)
 {
-    mEtaMax = v;
+    mFilterEtaMax = v;
     notify();
 }
 
 inline double StiRootIOBroker::filterEtaMax() const
 {
-    return mEtaMax;
+    return mFilterEtaMax;
+}
+
+inline void StiRootIOBroker::setFilterChi2Max(double v)
+{
+    mFilterChi2Max = v;
+    notify();}
+
+inline double StiRootIOBroker::filterChi2Max() const
+{
+    return mFilterChi2Max;
+}
+
+inline void StiRootIOBroker::setFilterNptsMin(unsigned int v)
+{
+    mFilterNptsMin = v;
+    notify();}
+
+inline unsigned int StiRootIOBroker::filterNptsMin() const
+{
+    return mFilterNptsMin;
+}
+
+inline void StiRootIOBroker::setFilterNFitPtsMin(unsigned int v)
+{
+    mFilterNFitPtsMin = v;
+    notify();}
+
+inline unsigned int StiRootIOBroker::filterNFitPtsMin() const
+{
+    return mFilterNFitPtsMin;
+}
+
+inline void StiRootIOBroker::setFilterNGapsMax(unsigned int v)
+{
+    mFilterNGapsMax = v;
+    notify();}
+
+inline unsigned int StiRootIOBroker::filterNGapsMax() const
+{
+    return mFilterNGapsMax;
+}
+
+inline void StiRootIOBroker::setFilterFitPointRatioMin(double v)
+{
+    mFilterFitPointRatioMin = v;
+    notify();}
+
+inline double StiRootIOBroker::filterFitPointRatioMin() const
+{
+    return mFilterFitPointRatioMin;
+}
+    
+inline void StiRootIOBroker::setFilterPrimaryDcaMax(double v)
+{
+    mFilterPrimaryDcaMax = v;
+    notify();}
+
+inline double StiRootIOBroker::filterPrimaryDcaMax() const
+{
+    return mFilterPrimaryDcaMax;
 }
 
 #endif
