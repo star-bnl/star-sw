@@ -1,6 +1,9 @@
 // *-- Author : Jan Balewski 
-// $Id: StppLMVevalMaker.cxx,v 1.4 2001/04/24 15:54:49 balewski Exp $
+// $Id: StppLMVevalMaker.cxx,v 1.5 2001/04/24 21:58:26 balewski Exp $
 // $Log: StppLMVevalMaker.cxx,v $
+// Revision 1.5  2001/04/24 21:58:26  balewski
+// *** empty log message ***
+//
 // Revision 1.4  2001/04/24 15:54:49  balewski
 // *** empty log message ***
 //
@@ -81,6 +84,8 @@ Int_t StppLMVevalMaker::Init(){
   he[4] =(TH1F*)new TH2F("2dz","dz vs. NchG",50,-0.5,49.5,50,-3.,3.);
   he[5] =(TH1F*)new TH2F("2dr","dRxy vs. NchG",50,-0.5,49.5,50,.0,6.);
 
+  he[6] =(TH1F*)new TH2F("2dz","dz vs. zG",50,-0.5,49.5,50,-25.,35.);
+
   // h1 = new TH1F("trg_out","Trigger decision",10, -1.5, 8.5);
   //h1->SetXTitle(" trigger ") ;
   //h1->SetYTitle(" Number of events ") ;
@@ -137,6 +142,8 @@ Int_t StppLMVevalMaker::Make(){
     he[3]->Fill(dz);
     ((TH2*) he[4])->Fill(NchG,dz);
     ((TH2*) he[5])->Fill(NchG,drxy);
+    ((TH2*) he[6])->Fill(z_true,dz);
+
   }
     
 
