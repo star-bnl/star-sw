@@ -1,4 +1,4 @@
-void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/tfs_dst/")
+void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/tfs_dst/",const Char_t *root_file="b0_3_y1a_off.root")
 {
 //Char_t *xdffilename="/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tfs_dst/psc148_02_48evts_h_dst.xdf"
   gROOT->Reset();
@@ -13,80 +13,80 @@ void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/h
     if (gSystem.Load("xdf2root.so"))      printf(" Loading DLL \"xdf2root.so\" failed \n");
     if (gSystem.Load("St_Tables.so"))    printf(" Loading DLL \"St_Tables.so\" failed \n");
   }
-
  // Create "histograms"
-   
-   Bool_t drawinit=kFALSE;
-   Int_t npT = 100;
-   Int_t neta = 40;
-   Float_t minpT = 0.0;
-   Float_t maxpT = 10.0;
-   Float_t mineta = -2.0;
-   Float_t maxeta =  2.0;
-   m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
+  TFile  *root_out = 0;
+  root_out = new TFile(root_file,"RECREATE");
+  Bool_t drawinit=kFALSE;
+  Int_t npT = 100;
+  Int_t neta = 40;
+  Float_t minpT = 0.0;
+  Float_t maxpT = 10.0;
+  Float_t mineta = -2.0;
+  Float_t maxeta =  2.0;
+  m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
                            neta,mineta,maxeta,npT,minpT,maxpT);
-   m_pT_eta_rec->SetXTitle("eta");
-   m_pT_eta_rec->SetYTitle("pT (GeV)");
-   c1 = new TCanvas("c1","Particle pT by reading STAF table: \"globtrk.h\"",20,10,600,400);
-   c1->SetGrid();
-   m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
-                           neta,mineta,maxeta,npT,minpT,maxpT);
-   c1->SetLogz();
+  m_pT_eta_rec->SetXTitle("eta");
+  m_pT_eta_rec->SetYTitle("pT (GeV)");
+  c1 = new TCanvas("c1","Particle pT by reading STAF table: \"globtrk.h\"",20,10,600,400);
+  c1->SetGrid();
+  m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
+			  neta,mineta,maxeta,npT,minpT,maxpT);
+  c1->SetLogz();
 #if 0
-   c2 = new TCanvas("c2","Particle eta by reading STAF table: \"hepe_gent.h\"",20,410,600,400);
-   c2->SetGrid();
-   m_pT_eta_gen->SetXTitle("eta");
-   m_pT_eta_gen->SetYTitle("pT (GeV)");
+  c2 = new TCanvas("c2","Particle eta by reading STAF table: \"hepe_gent.h\"",20,410,600,400);
+  c2->SetGrid();
+  m_pT_eta_gen->SetXTitle("eta");
+  m_pT_eta_gen->SetYTitle("pT (GeV)");
 #endif
-   m_No   = new TH1F("No","number of points",50,0,50);
-   m_NoF  = new TH1F("NoF","number of points used in fit",50,0,50);
-   m_Leng = new TH1F("Leng","track length from first to last point",100,0,100);
-   m_NDF  = new TH1F("NDF","No. deg. of freedom for track fit.",100,0,100);
-   m_chi2 = new TH2F("chi2","Chi-square for fit in x-y vs path-z",50,0,100,50,0,100);
+  m_No   = new TH1F("No","number of points",50,0,50);
+  m_NoF  = new TH1F("NoF","number of points used in fit",50,0,50);
+  m_Leng = new TH1F("Leng","track length from first to last point",100,0,100);
+  m_NDF  = new TH1F("NDF","No. deg. of freedom for track fit.",100,0,100);
+  m_chi2 = new TH2F("chi2","Chi-square for fit in x-y vs path-z",50,0,100,50,0,100);
  
-   m_pT   = new TH1F("pT","pT distribution",npT,minpT,maxpT);
-   m_pT->SetFillColor(16);
-   m_pT->SetMarkerStyle(21);
-   m_pT->SetMarkerSize(0.2);
-   c3 = new TCanvas("c3","pT distribution by reading STAF table: \"globtrk.h\"",700,10,600,400);
-   c3->SetLogy();
+  m_pT   = new TH1F("pT","pT distribution",npT,minpT,maxpT);
+  m_pT->SetFillColor(16);
+  m_pT->SetMarkerStyle(21);
+  m_pT->SetMarkerSize(0.2);
+  c3 = new TCanvas("c3","pT distribution by reading STAF table: \"globtrk.h\"",700,10,600,400);
+  c3->SetLogy();
 
-   m_pTL  = new TH1F("pTL","pT distribution with length gt 15 cm",npT,minpT,maxpT);
-   m_pTL->SetFillColor(42);
-   m_pTN  = new TH1F("pTN","pT distribution with NDF gt 10",npT,minpT,maxpT);
-   m_pTN->SetFillColor(46);
-   m_pTC  = new TH1F("pTC","pT distribution with chisq/NDF lt 3",npT,minpT,maxpT);
-   m_pTC->SetFillColor(50);
-   m_eta  = new TH1F("eta","eta distribution",neta,mineta,maxeta);
-   m_eta->SetFillColor(16);
-   m_eta->SetMarkerStyle(21);
-   m_eta->SetMarkerSize(0.2);
+  m_pTL  = new TH1F("pTL","pT distribution with length gt 15 cm",npT,minpT,maxpT);
+  m_pTL->SetFillColor(42);
+  m_pTN  = new TH1F("pTN","pT distribution with NDF gt 10",npT,minpT,maxpT);
+  m_pTN->SetFillColor(46);
+  m_pTC  = new TH1F("pTC","pT distribution with chisq/NDF lt 3",npT,minpT,maxpT);
+  m_pTC->SetFillColor(50);
+  m_eta  = new TH1F("eta","eta distribution",neta,mineta,maxeta);
+  m_eta->SetFillColor(16);
+  m_eta->SetMarkerStyle(21);
+  m_eta->SetMarkerSize(0.2);
 
-   c4     = new TCanvas("c4","eta distribution by reading STAF table: \"globtrk.h\"",700,410,600,400);
-   m_etaL  = new TH1F("etaL","eta distribution with length gt 15 cm",neta,mineta,maxeta);
-   m_etaL->SetFillColor(42);
-   m_etaN  = new TH1F("etaN","eta distribution with NDF gt 10",neta,mineta,maxeta);
-   m_etaN->SetFillColor(46);
-   m_etaC  = new TH1F("etaC","eta distribution with chisq/NDF lt 3",neta,mineta,maxeta);
-   m_etaC->SetFillColor(50);
+  c4     = new TCanvas("c4","eta distribution by reading STAF table: \"globtrk.h\"",700,410,600,400);
+  m_etaL  = new TH1F("etaL","eta distribution with length gt 15 cm",neta,mineta,maxeta);
+  m_etaL->SetFillColor(42);
+  m_etaN  = new TH1F("etaN","eta distribution with NDF gt 10",neta,mineta,maxeta);
+  m_etaN->SetFillColor(46);
+  m_etaC  = new TH1F("etaC","eta distribution with chisq/NDF lt 3",neta,mineta,maxeta);
+  m_etaC->SetFillColor(50);
 
 //*-* Create a canvas to show the result (based on  root/tutorials/hsum.C )
 
 //      c1->Divide(1,2);
-   TSlider *slider = 0;
+  TSlider *slider = 0;
 
-   St_DataSet *event = 0;
-   gBenchmark->Start("hsum");
-   St_FileSet dstdirs(Path);
-   St_DataSetIter nextxdf(&dstdirs,0);
-   St_DataSet *set = 0; 
-   St_XDFFile *xdf = 0;
-   TString  path = Path;
-   while (set = nextxdf()){
-     if (strcmp(set->GetTitle(),"file") == 0){
-       printf ("Title = %s Name = %s\n",set->GetTitle(),set->GetName());
-       if (strstr(set->GetName(),"dst.xdf")){
-         if (xdf) delete xdf;
+  St_DataSet *event = 0;
+  gBenchmark->Start("hsum");
+  St_FileSet dstdirs(Path);
+  St_DataSetIter nextxdf(&dstdirs,0);
+  St_DataSet *set = 0; 
+  St_XDFFile *xdf = 0;
+  TString  path = Path;
+  while (set = nextxdf()){
+    if (strcmp(set->GetTitle(),"file") == 0){
+      printf ("Title = %s Name = %s\n",set->GetTitle(),set->GetName());
+      if (strstr(set->GetName(),"dst.xdf")){
+	if (xdf) delete xdf;
 	 path = Path;
 	 path +=  set->Path();
 	 Char_t *xdffilename= path.Data();
@@ -205,6 +205,7 @@ void ana(const Char_t *Path="/disk1/star/auau200/hijing135/default/b0_3/year1a/h
        }
      }
    }
+   root_out->Write();
    printf("\n");
    gBenchmark->Show("hsum");
    printf(" This is a finish \n");

@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.23 1998/11/06 01:42:18 fisyak Exp $
+// $Id: bfc.C,v 1.24 1998/11/07 02:45:05 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.24  1998/11/07 02:45:05  fisyak
+// cleanup analysis
+//
 // Revision 1.23  1998/11/06 01:42:18  fisyak
 // Add ana.C
 //
@@ -103,15 +106,6 @@ void bfc(
   //  gSystem->Load("St_fss_Maker.so");
   //  gSystem->Load("St_fcl_Maker.so");
   //  gSystem->Load("St_fpt_Maker.so");
-#if 0
-         const Char_t *fileinp = 
-"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/g2t/psc091_03_34evts.xdf";
-         const Char_t *fileout=
-"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts.xdf";
-         const Char_t *FileOut=
-"/disk1/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/root/psc091_03_34evts.root";
-         const Int_t  Nevents=1000;
-#endif
   St_XDFFile   *xdf_in   = 0;
   if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
   St_XDFFile  *xdf_out   = 0;

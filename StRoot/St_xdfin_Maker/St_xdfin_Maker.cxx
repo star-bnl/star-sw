@@ -91,8 +91,6 @@ Int_t St_xdfin_Maker::Make(){
         ret = kStOK;
         break;
       }   
-      Warning("Init","The first record has no \"run / Run\" dataset");
-      SafeDelete(set);
      // Drop any ROSIE_RESET or SLOW_CONTROL records.
       if (strcmp(set->GetName(),"ROSIE_RESET")==0){
         SafeDelete(set);
