@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.9 2002/02/22 20:12:10 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.10 2002/05/06 00:36:12 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.10  2002/05/06 00:36:12  munhoz
+ * correct hybrid swapping
+ *
  * Revision 1.9  2002/02/22 20:12:10  caines
  * Add getLayer() call
  *
@@ -217,24 +220,6 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     break;
   }
 
-  if( (barrelID == 2) && (ladderID == 1) && (waferID > 3)){
-    if( hybridID ==1) index++;
-    if( hybridID ==2) index --;
-  }
-  
-  else if( (barrelID == 2) && (ladderID == 8) && (waferID < 4)){
-    if( hybridID ==1) index++;
-    if( hybridID ==2) index --;
-  }
-
-  else if( (barrelID == 3) && (ladderID == 16) && (waferID > 4)){
-    index -= 14;
-  }
-  else if( (barrelID == 3) && (ladderID == 15) && (waferID > 4)){
-    index += 14;
-  }
-
-
   if ( !strncmp(mConfig, "SYST", strlen("SYST")) ) {
     if      ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 1)) index = 0;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 2)) index = 1;
@@ -352,28 +337,7 @@ int StSvtConfig::getProperHybridIndex(int barrelID, int ladderID, int waferID, i
   
   //Returns the index that the barrel,ladder,wafer and hybrid should be if
   // things werent swapped around
-  int index = getHybridIndex( barrelID, ladderID, waferID,  hybridID);
-  
-  if ( !strncmp(mConfig, "FULL", strlen("FULL")) ) {
-    
-    if( (barrelID == 2) && (ladderID == 1) && (waferID > 3)){
-      if( hybridID ==1) index--;
-      if( hybridID ==2) index++;
-    }
-  
-    else if( (barrelID == 2) && (ladderID == 8) && (waferID < 4)){
-      if( hybridID ==1) index--;
-      if( hybridID ==2) index ++;
-    }
-    
-    else if( (barrelID == 3) && (ladderID == 16) && (waferID > 4)){
-      index += 14;
-  }
-    else if( (barrelID == 3) && (ladderID == 15) && (waferID > 4)){
-      index -= 14;
-    }
-  }
-  
+  int index = getHybridIndex( barrelID, ladderID, waferID,  hybridID);  
   
   return index;
 }
@@ -436,10 +400,7 @@ int StSvtConfig::getLadder(int index){
   // Cope with switch readout in real data
 
   indexsav = index;
-  if( index> 425) indexsav -= 14;
-  else if( index> 411 && index < 418) indexsav += 14;
   
-
   for( i=0; i< Barrel-1; i++){
     CurrentIndex += getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
       getNumberOfHybrids();
@@ -462,8 +423,6 @@ int StSvtConfig::getWafer(int index){
 
   
   indexsav = index;
-  if( index> 425) indexsav -= 14;
-  else if( index> 411 && index < 418) indexsav += 14;
 
   for( i=0; i< Barrel-1; i++){
     CurrentIndex += getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
@@ -492,8 +451,6 @@ int StSvtConfig::getHybrid(int index){
 
   
   indexsav = index;
-  if( index> 425) indexsav -= 14;
-  else if( index> 411 && index < 418) indexsav += 14;
 
   for( i=0; i< Barrel-1; i++){
     CurrentIndex += getNumberOfLadders(i+1)*getNumberOfWafers(i+1)*
@@ -507,19 +464,7 @@ int StSvtConfig::getHybrid(int index){
   for(i=0; i<Wafer-1; i++){
     CurrentIndex += getNumberOfHybrids();
   }
-
-  
-  if( (Barrel == 2) && (Ladder == 1) && (Wafer > 3)){
-     if( indexsav == CurrentIndex++) return 2;
-     else if ( indexsav == CurrentIndex) return 1;
-  }
-  
-  else if( (Barrel == 2) && (Ladder == 8) && (Wafer < 4)){
-    if( indexsav == CurrentIndex++) return 2;
-    else if ( indexsav == CurrentIndex) return 1;
-
-  }
- 
+   
   if( indexsav == CurrentIndex++) return 1;
   else if ( indexsav == CurrentIndex) return 2;
  
