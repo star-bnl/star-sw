@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.16 2002/06/22 17:53:32 lisa Exp $
+ * $Id: StHbtAnalysis.h,v 1.17 2002/11/03 16:38:54 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.17  2002/11/03 16:38:54  magestro
+ * New MakePairs() method, new StHbtPicoEventCollectionVectorHideAway data member
+ *
  * Revision 1.16  2002/06/22 17:53:32  lisa
  * implemented switch to allow user to require minimum number of particles in First and Second ParticleCollections - default value is zero so if user does not Set this value then behaviour is like before
  *
@@ -114,9 +117,10 @@
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
 #include "StHbtMaker/Infrastructure/StHbtCorrFctnCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtPicoEventCollection.hh"
+#include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh"
 #include "StHbtMaker/Infrastructure/StHbtPicoEvent.hh"
 
-//#include <string>
+class StHbtPicoEventCollectionVectorHideAway;
 
 
 class StHbtAnalysis : public StHbtBaseAnalysis {
@@ -167,6 +171,9 @@ public:
 protected:
 
   void AddEventProcessed();
+  void MakePairs(const char* type,StHbtParticleCollection*,StHbtParticleCollection* p2=0);
+
+  StHbtPicoEventCollectionVectorHideAway* mPicoEventCollectionVectorHideAway;
 
   StHbtPairCut*             mPairCut;
   StHbtCorrFctnCollection*  mCorrFctnCollection;
