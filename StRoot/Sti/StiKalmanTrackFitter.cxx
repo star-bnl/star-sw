@@ -42,6 +42,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   bool direction = (trackingDirection==fitDirection);
   double chi2;
   int status = 0;
+  bool started = false;
   if (direction) {
     first = track->begin();
     last  = track->end();
@@ -50,40 +51,41 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
     first = track->rbegin();
   }
   if (debug()) cout << "StiKalmanTrackFitter::fit set direction T/F= " << trackingDirection << "\t" << fitDirection << endl;
-  StiKalmanTrackNode *pNode = 0;
   for (source=first;source!=last;source++) {
-    targetNode = &(*source);
+    if (direction) {
+      if ((*source).getChildCount()<=0) break;
+      targetNode= static_cast<StiKalmanTrackNode*>((*source).getFirstChild());
+    }
+    else 
+      targetNode= static_cast<StiKalmanTrackNode*>((*source).getParent());
+    if (! targetNode) break;
     targetDet = targetNode->getDetector();
     targetHit = targetNode->getHit();
-    if (!pNode && !targetHit)	continue;
     //begin refit at first hit
-    if (pNode) {
-      if (targetDet)
-	status = targetNode->propagate(pNode,targetDet,fitDirection);	// hit
-      else if (targetHit)
-	status = targetNode->propagate(pNode,targetHit,fitDirection);  // vertex
-      if (status) 		goto ENDLB;
-    }
-    else  {
-      targetNode->resetError();
-      if (debug()) {
-	targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
-	targetNode->PrintpT("S");
-      }
-    }
+    if (!targetHit && !started)	goto ENDLB;
+    if (!started) {started = true; (*source).resetError();}
+    // evolve state from that of source using dets source to target
+    targetNode->setChi2(1e52);
+    if (targetDet)
+      status = targetNode->propagate(&(*source),targetDet,fitDirection);	// hit
+    else if (targetHit)
+      status = targetNode->propagate(&(*source),targetHit,fitDirection);  // vertex
+    if (status) 		goto ENDLB;
     // if targetNode has hit, get chi2 and update track parameters accordingly
     if (!targetHit) 		goto ENDLB;
     if (targetNode->nudge())	goto ENDLB;
     chi2 = targetNode->evaluateChi2(targetHit);
-    targetNode->setChi2(1e52);
     if (!(chi2<_pars.getMaxChi2()))goto ENDLB;
     status = targetNode->updateNode();
     if (status) 			goto ENDLB;
     targetNode->setChi2(chi2);
-    pNode = targetNode;
     //cout<<"=="<<endl;
   ENDLB:
-    if (debug()) cout << Form("%5d ",status) << StiKalmanTrackNode::Comment() << endl;
+    if (debug()) {
+      if (status) cout << "failed";
+      else        cout << "passed";
+      cout <<"\t" << StiKalmanTrackNode::Comment() << endl;
+    }
   }
 }
 
