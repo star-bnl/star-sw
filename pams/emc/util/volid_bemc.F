@@ -10,7 +10,7 @@
       enddo
       if(ivid.ne.0)then
          write(*,*) '***VOLID_BEMC -- error decoding BEMC volume_id...',ivid
-         STOP
+         RETURN
       end if
       rl     = emc_chid(1)        ! right/left: =1 for Z>0, and =2 for Z<0
       eta    = emc_chid(2)        ! pseudorapidity bin number [1,20]
@@ -37,8 +37,8 @@
          module=phi+60
          sub=mod(sub+1,2)+1
       else
-         write(*,*) '***VOLID_BSMD -- error decoding BSMD volume_id...',ivid
-         STOP
+         write(*,*) '***VOLID_BEMC -- error decoding BEMC volume_id...',ivid
+         RETURN
       endif
 *      print *,'BEMC:module,eta,sub,dep',module,eta,sub,dep
       return

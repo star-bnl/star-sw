@@ -8,8 +8,8 @@
       enddo
       if(ivid.ne.0)then
          type *,'VOLID_EEMC -- error decoding EEMC volume_id...',ivid
-         STOP
-      end if
+         return
+      endif
       rl  = emc_chid(1)        ! right/left: =1 for Z>0, and =2 for Z<0
       phi = emc_chid(2)        ! module phi [1,60]
       eta = emc_chid(3)        ! pseudorapidity bin number [1,12]
