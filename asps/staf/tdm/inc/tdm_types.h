@@ -49,7 +49,7 @@ typedef struct tdm_data_t {		/* generic data type */
       float *f;
       double *d;
       void *v;
-   };
+   }data;
 }TDM_DATA_T;
 
 /* HACK --- This is not consistant with the IDL file */
@@ -69,7 +69,7 @@ typedef struct tdm_celldata_t {		/* generic cell data type */
       float *f;
       double *d;
       void *v;
-   };
+   }data;
 }TDM_CELLDATA_T;
 
 typedef struct tdm_column_t {

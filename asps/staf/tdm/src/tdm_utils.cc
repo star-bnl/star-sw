@@ -113,48 +113,48 @@ void tdm_printCell(FILE *stream, TDM_CELLDATA_T *data
    switch(col->code) {
 
    case DS_TYPE_CHAR:
-      fprintf(stream, "\t%s", data->c);
+      fprintf(stream, "\t%s", data->data.c);
       break;
 
    case DS_TYPE_OCTET:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%u", data->o[i]);
+	 fprintf(stream, "\t%u", data->data.o[i]);
       }
       break;
 
    case DS_TYPE_SHORT:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%hd", data->s[i]);
+	 fprintf(stream, "\t%hd", data->data.s[i]);
       }
       break;
 
    case DS_TYPE_U_SHORT:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%hu", data->us[i]);
+	 fprintf(stream, "\t%hu", data->data.us[i]);
       }
       break;
 
    case DS_TYPE_LONG:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%ld", data->l[i]);
+	 fprintf(stream, "\t%ld", data->data.l[i]);
       }
       break;
 
    case DS_TYPE_U_LONG:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%lu", data->ul[i]);
+	 fprintf(stream, "\t%lu", data->data.ul[i]);
       }
       break;
 
    case DS_TYPE_FLOAT:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%g", data->f[i]);
+	 fprintf(stream, "\t%g", data->data.f[i]);
       }
       break;
 
    case DS_TYPE_DOUBLE:
       for (i = 0; i < count; i++) {
-	 fprintf(stream, "\t%g", data->d[i]);
+	 fprintf(stream, "\t%g", data->data.d[i]);
       }
       break;
 

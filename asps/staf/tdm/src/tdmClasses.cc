@@ -33,6 +33,8 @@
 
 //:----------------------------------------------- PROTOTYPES         --
 extern CC_P int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
+extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
+		, unsigned int count , void *data);
 
 //:=============================================== CLASS              ==
 // tdmObject
@@ -263,8 +265,10 @@ unsigned char tdmTable:: isType (const char * aType) {
 //----------------------------------
 STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 
-   size_t i;
+   size_t i,j;
    DS_TYPE_T *type;
+   char *pCellData;
+
    if( !dsTypePtr(&type,pDSthis->tid)) {
       EML_ERROR(BAD_TABLE_TYPE);
    }
@@ -272,10 +276,24 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    if(ifirst < 0 || ii <= ifirst){
       EML_ERROR(INVALID_TABLE_ROW);
    }
+   pCellData = (char*)pDSthis->p.data;
+   pCellData += ifirst*rowSize();
    for( i=ifirst;i<MIN(ii,ifirst+nrows);i++){
       fprintf(stdout," %6X:",i);
-      dsPrintData(stdout, type, 1, 
-		(char *)pDSthis->p.data +i*type->size);
+/*REPLACE *** dsPrintData with dsuPrintData ***
+      dsPrintData(stdout, type
+		, 1 
+		, (char *)pDSthis->p.data +i*type->size);
+*/
+/*REPLACE *** dsuPrintData with dsPrintData ***
+      for(j=0;j<columnCount();j++){
+	 dsuPrintData(stdout, columnTypeCode(j), columnElcount(j)
+			, pCellData);
+	 pCellData += columnSize(j);
+      }
+*/
+      dsPrintData(stdout, type, 1, pCellData);
+      pCellData += rowSize();
       fprintf(stdout,"\n");
    }
    
@@ -404,20 +422,22 @@ long tdmTable:: columnElcount (long ncol) {
 STAFCV_T tdmTable:: getCell (TDM_CELLDATA_T& data
 		, long nrow, long ncol) {
    if( !VALID_CELL(nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
-   data.v = cellAddress(nrow,ncol);
+   data.data.v = cellAddress(nrow,ncol);
    data._d = columnTypeCode(ncol);
    data._maximum = data._length = data._size = columnSize(ncol);
    EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
 }
 
+//----------------------------------
 STAFCV_T tdmTable:: putCell (const TDM_CELLDATA_T& data
 		, long nrow, long ncol) {
    if( !VALID_CELL(nrow,ncol) ) EML_ERROR(INVALID_TABLE_CELL);
    void *pData = cellAddress(nrow,ncol);
-   memcpy(pData,data.v,columnSize(ncol));
+   memcpy(pData,data.data.v,columnSize(ncol));
    EML_SUCCESS(NORMAL_SUCCESSFUL_COMPLETION);
 }
 
+//----------------------------------
 STAFCV_T tdmTable:: getData (TDM_DATABLOCK_T& data) {
    size_t nrows,mxrow,rsize;
    char* pData;
