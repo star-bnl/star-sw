@@ -4,7 +4,6 @@
 **:           7/06/99  ppy initial version
 **:           7/07/99  ppy Replace SL3Hit with SL3BUFFER
 **:--------------------------------------------------------------------*/
-#include "t2lConstants.h"
 #include "t2l.h"
 #include "l3Point.h"
 #include "l3Hit2TpcHit.h"

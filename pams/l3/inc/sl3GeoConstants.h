@@ -1,20 +1,17 @@
 #include <math.h>
 
-#ifndef THLCONSTANTS
-#define THLCONSTANTS
+#ifndef SL3GEOCONSTANTS
+#define SL3GEOCONSTANTS
 //
 //    Values copied from the tpg_detector table
 //
   static double vDrift         = 5.4716e+06;  // cms/s
   static double clockFrecuency = 1.3359e+07 ; // 1/s
-//  static double triggerOffset  = 1.7e-06 ; // time diff between the event and theRDO trigger
   static double triggerOffset  = 0. ; // time diff between the event and theRDO trigger
-//
-  static double driftLength = 211.0 - vDrift * triggerOffset ;
-  //static double driftLength = 0. ;
+  static double driftLength = 208.0  ;
   static double timeScale   = driftLength / (512. - clockFrecuency * triggerOffset) ;
-  //static double timeScale   = 1. ;
   static double offset      = 0. ;
+  static double lengthPerTb = driftLength / 348. ;
 
 
 /* statics
@@ -53,7 +50,7 @@
    };
 //
 /* sector-rotation factors */
-   static float SectorSinus [] =
+   static float SectorSin [] =
    {
   /*  30 deg each segment */
       0.866025404F,  /*  60 deg */
@@ -69,7 +66,7 @@
       0.866025404F,  /* 120 deg */
       1.0F           /*  90 deg */
    };
-   static float SectorCosinus [] =
+   static float SectorCos [] =
    {
       0.5F,          /*  60 */
       0.866025404F,  /*  30 */
