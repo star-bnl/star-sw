@@ -25,7 +25,9 @@ StiSsdHitLoader::StiSsdHitLoader(StiHitContainer* hitContainer,
 StiSsdHitLoader::~StiSsdHitLoader()
 {}
 
-void StiSsdHitLoader::loadHits(StEvent* source)
+void StiSsdHitLoader::loadHits(StEvent* source,
+			       Filter<StiTrack> * trackFilter, 
+			       Filter<StiHit> * hitFilter)
 {
   _messenger <<"StiSsdHitLoader::loadHits(StEvent* source) - INFO - Starting"<<endl;
   double nhit=0;
@@ -74,5 +76,8 @@ void StiSsdHitLoader::operator() (const StSsdHit* ssdhit, StiHit* stiHit)
   // needs an implementation
 }
 
-void StiSsdHitLoader::loadMcHits(StMcEvent* source)
+void StiSsdHitLoader::loadMcHits(StMcEvent* source,
+				 bool useMcAsRec,
+				 Filter<StiTrack> * trackFilter, 
+				 Filter<StiHit> * hitFilter)
 {}

@@ -27,8 +27,13 @@ public:
 			Factory<StiHit>      * hitFactory,
 			StiDetectorBuilder   * detector);
 	virtual ~StiSvtHitLoader();
-	virtual void loadHits(StEvent* source);
-	virtual void loadMcHits(StMcEvent* source,bool useMcAsRec);
+	virtual void loadHits(StEvent* source,
+			      Filter<StiTrack> * trackFilter, 
+			      Filter<StiHit> * hitFilter);
+	virtual void loadMcHits(StMcEvent* source,
+				bool useMcAsRec,
+				Filter<StiTrack> * trackFilter, 
+				Filter<StiHit> * hitFilter);
 };
 
 #endif
