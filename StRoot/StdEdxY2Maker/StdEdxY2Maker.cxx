@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.8 2002/11/18 19:51:47 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.9 2002/11/18 21:32:18 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -79,10 +79,10 @@ extern   void Landau(Double_t x, Double_t *val);
 extern  Double_t SumSeries(const Double_t &X,const Int_t &N,const Double_t *params);
 extern  Double_t SumSeries(const Double_t &X,const Int_t &N,const Float_t *params);
 enum ESector  {kTpcOuter = 0, kTpcInner = 1};
-dEdx_t CdEdx[60]; // corrected
-dEdx_t FdEdx[60]; // fit
-Int_t  NdEdx = 0;
-dEdx_t dEdxS[60]; // dEdx sorted
+static Int_t  NdEdx = 0;
+static dEdx_t CdEdx[60]; // corrected
+static dEdx_t FdEdx[60]; // fit
+static dEdx_t dEdxS[60]; // dEdx sorted
 
 const static Int_t NoSector = 24;
 const static Int_t NoRow    = 45;
