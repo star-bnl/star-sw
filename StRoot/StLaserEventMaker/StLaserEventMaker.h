@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.2 1999/11/30 14:34:34 love Exp $
+// $Id: StLaserEventMaker.h,v 1.3 2000/02/15 21:01:26 love Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.3  2000/02/15 21:01:26  love
+// Maximum tracks upped to 1000
+//
 // Revision 1.2  1999/11/30 14:34:34  love
 // Corrections to make CC5 compile.  DOCA routine added.
 //
@@ -31,7 +34,7 @@ class St_tpt_pars;
 class TTree;
 class StLaserEvent;
 
-enum { maxNofTracks = 350}; 
+enum { maxNofTracks = 1000}; 
 
 class StLaserEventMaker : public StMaker {
 private:
@@ -66,7 +69,7 @@ public:
   virtual void   Set_laser(Bool_t m=kTRUE){m_mklaser = m;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.2 1999/11/30 14:34:34 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.3 2000/02/15 21:01:26 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
