@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.44 2001/03/07 20:43:46 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.45 2001/03/21 23:06:13 didenko Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.45  2001/03/21 23:06:13  didenko
+// Set time for year to 20000614.175430 instead of 20000501.0
+//
 // Revision 1.44  2001/03/07 20:43:46  perev
 // assert for wrong time added
 //
@@ -99,11 +102,11 @@ static const char *aliases[]={
 static const int   dates[]=  {
 19970101, 19980101, 19990101, 19990501, 19991001,
 19990615, 19990616, 19991206, 19991101, 19991201,
-20000501, 20010610, 20010501, 0};
+20000614, 20010610, 20010501, 0};
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
-       0,        0,        0,        0};
+  175430,        0,        0,        0};
 
 enum eDBMAKER {kUNIXOBJ = 0x2000};
 
