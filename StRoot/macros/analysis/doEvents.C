@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.25 1999/07/16 15:13:05 fisyak Exp $
+// $Id: doEvents.C,v 1.26 1999/07/19 22:23:19 fisyak Exp $
 // $Log: doEvents.C,v $
-// Revision 1.25  1999/07/16 15:13:05  fisyak
-// clean up
+// Revision 1.26  1999/07/19 22:23:19  fisyak
+// Remove EventDisplay
+//
+// Revision 1.26  1999/07/19 22:23:19  fisyak
+// Remove EventDisplay
 //
 // Revision 1.25  1999/07/16 15:13:05  fisyak
 // clean up
@@ -146,8 +149,8 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
 //  gSystem->Load("StEventReaderMaker");
-  gSystem->Load("St_geom_Maker");
-  gSystem->Load("StEventDisplayMaker");
+  //  gSystem->Load("St_geom_Maker");
+  //  gSystem->Load("StEventDisplayMaker");
   gSystem->Load("StAnalysisMaker");
 //  gSystem->Load("St_geom_Maker");
 //  gSystem->Load("StEventDisplayMaker");
@@ -160,7 +163,7 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   StFile *setFiles= new StFile();
 
   for (int ifil=0; fileList[ifil]; ifil++)
-  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
+  { setFiles->AddFile(fileList[ifil]);}
   // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
   IOMk->SetDebug();
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
@@ -169,7 +172,7 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
 
 // 		Sample analysis maker
   StAnalysisMaker *analysisMaker = new StAnalysisMaker ("analysis");
-  StEventDisplayMaker *disp  = new StEventDisplayMaker;
+
 
 //  Event Display Maker
   //  StEventDisplayMaker *disp  = new StEventDisplayMaker;
@@ -199,7 +202,7 @@ EventLoop: if (i <= nevents && !istat) {
     cout << "============================ Event " << i << " finish" << endl;
   if (nevents > 1) {
     chain->Clear();
-       gROOT->LoadMacro("PadControlPanel.C");
+    chain->Finish();
        b = new TBrowser;
     if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
