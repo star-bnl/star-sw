@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEventsOut.C,v 1.1 2000/04/25 21:01:33 perev Exp $
+// $Id: doEventsOut.C,v 1.2 2000/04/28 03:47:42 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -125,7 +125,7 @@ void doEventsOut(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // WriteOut StEvent
     StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
     outMk->SetIOMode("w");
-    outMk->SetBranch("eventBranch","EvOut.root","w");
+    outMk->SetBranch("eventBranch","test.event.root","w");
     outMk->IntoBranch("eventBranch","StEvent");
     //
     // Initialize chain
@@ -190,6 +190,9 @@ void doEventsOut(Int_t nevents,const Char_t *path,const Char_t *file,const char 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEventsOut.C,v $
+// Revision 1.2  2000/04/28 03:47:42  perev
+// Change EvOut.root name to more regular
+//
 // Revision 1.1  2000/04/25 21:01:33  perev
 // example macro for writing StEvent
 //
