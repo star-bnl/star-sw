@@ -41,13 +41,24 @@ Int_t StMuEEmcCrateTimingMaker::Init() {
   mOutputTree->Branch("chanint",totalIntegral,"chanint[kludge]/F");
   mOutputTree->Branch("chanerr",totalError,"chanerr[kludge]/F");
   mOutputTree->Branch("delay",&mTimeDelay,"delay/F");
+  mOutputTree->Branch("channelIds",channelIds,"channelIds[kludge]/I");
+  mOutputTree->Branch("crateIds",crateIds,"crateIds[kludge]/I");
+  mOutputTree->Branch("mPhase",&mPhase,"mPhase/I");// for selecting which channels
+  mOutputTree->Branch("mCycle",&mCycle,"mCycle/I");
   mOutputFile->cd();
   TString tmpstr = "histograms for " + mFlavor + " crate channels";
-  cratehist = new TH2F("cratehistogram",tmpstr.Data(),MxMapmtFeeCh,
-                        -0.5,MxMapmtFeeCh + 0.5,500,0,500);
+
+  /// Histogram of ADC response vs channel 
+  cratehist = new TH2F("cratehistogram",tmpstr.Data(),MxMapmtFeeCh,-0.5,MxMapmtFeeCh + 0.5,500,0,500);
   cratehist->GetXaxis()->SetTitle("crate channel id");
   cratehist->GetYaxis()->SetTitle("adc");
-  for(int i=0; i<MxMapmtFeeCh; i++) totalIntegral[i] = 0;
+
+  /// Initialize output arrays to zero
+  for(int i=0; i<MxMapmtFeeCh; i++) {
+    totalIntegral[i] = 0;
+    totalError[i]=0;
+    channelIds[i]=0;
+  }
 
   return 0;
 }
@@ -115,8 +126,8 @@ Int_t StMuEEmcCrateTimingMaker::Make(){
 
 
   ///
-  /// Looks to me like crates will be mapped as follows in 
-  /// the TTree array
+  /// Looks to me like tower crates will be mapped as follows in 
+  /// the TTree array.
   ///
   /// crate 1 = elements 00-11
   /// crate 2 = elements 12-23
@@ -127,10 +138,9 @@ Int_t StMuEEmcCrateTimingMaker::Make(){
   ///
 
 
-  ///
+
   /// Loop over all blocks within the mapmt or tower data
-  ///
-  for(int icr=0;icr<eE->getNBlocks();icr++) {
+  for(int icr=0; icr < eE->getNBlocks(); icr++ ) {
 
     if(eE->isCrateVoid(icr)) continue;
     const UShort_t* data=eE->data(icr);
@@ -140,18 +150,33 @@ Int_t StMuEEmcCrateTimingMaker::Make(){
     /// Loop over every 16 channels in mapmt box or tower crate
     ///
     for(int i=mPhase;i<eE->sizeData(icr);i+=mCycle,j++) {
+      
       if(i>=MaxMapmtCrateCh) continue; // ignore nonexistient channels
       float adc=data[i];
       int k=(icr*MaxMapmtCrateCh+i)/16;
       assert(k>=0 && k<MxMapmtFeeCh);
       cratehist->Fill(j,adc);
+      /// Store the channel ID associated with
+      /// the jth histogram bin (redundant, but
+      /// for now safer...)
+      channelIds[j]=i;
+      crateIds[j]=icr;
+
     }  
 
   }
   return kStOK;
 }
 
+
+// ----------------------------------------------------------------------------
 Int_t StMuEEmcCrateTimingMaker::Finish() {
+
+
+  /// Final processing.  Loop over all channels in the channel histogram,
+  /// and determine the number of ADC hits exceeding a user-specified cut
+  /// above pedestal.
+
 
   /// ASCII output file
   TString outputFile = mDirectory + "/eemc" + mFlavor + "Crates-timeDelay";
@@ -223,6 +248,7 @@ Int_t StMuEEmcCrateTimingMaker::Finish() {
             
       ofs << chanId << "\t" << setprecision(5) << nHitsAbovePedestal/totalIntegral[MxMapmtFeeCh-1] << endl;
     }
+
   }
   ofs.close();
   

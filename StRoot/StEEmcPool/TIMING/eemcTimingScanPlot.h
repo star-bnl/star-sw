@@ -1,7 +1,12 @@
 /*
  * eemcTimingScanPlot 
  *
- * \author Dave Relyea
+ * \author Dave Relyea 
+ *
+ * $Log: eemcTimingScanPlot.h,v $
+ * Revision 1.3  2005/02/01 23:35:46  jwebb
+ * Added channel/crate ID's to the plots.
+ *
  *
  */
 
@@ -39,6 +44,10 @@ class eemcTimingScanPlot : public TObject {
   /// Normalize pre/postshower boxes to a common
   /// maximum value.
   void normalizePreshower();
+  /// Add a TLegend to the plots
+  void legend();
+  /// Suppress zeros
+  void suppressZeros();
 
   /// Show errorbars (not yet implemented)
   void errors();
@@ -51,6 +60,9 @@ class eemcTimingScanPlot : public TObject {
   Bool_t mNormalize;
   Bool_t mNormalizePreshower;
   Bool_t mErrors;
+  Bool_t mLegend;
+  Bool_t mSuppressZeros;
+
 
   
   ClassDef(eemcTimingScanPlot,0)
@@ -60,5 +72,7 @@ inline void eemcTimingScanPlot::setAxisRange(Float_t min,Float_t max){ mAxisMin=
 inline void eemcTimingScanPlot::normalize() { mNormalize=true; }
 inline void eemcTimingScanPlot::normalizePreshower() { mNormalizePreshower = true; }
 inline void eemcTimingScanPlot::errors() { mErrors=0; Warning("errors","errorbars not yet implemented"); }
+inline void eemcTimingScanPlot::legend() { mLegend=1; }
+inline void eemcTimingScanPlot::suppressZeros() { mSuppressZeros = 1; }
 
 #endif

@@ -21,5 +21,6 @@ void plotTiming(TString directory = "crate1/") {
   eemcTimingScanPlot tsp;
   tsp.setAxisRange(0.,55.); 
   tsp.normalize();
+  tsp.legend(); 
   tsp.scan(directory);
 }
