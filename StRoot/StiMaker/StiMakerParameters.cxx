@@ -33,6 +33,7 @@ ostream& operator<<(ostream& os, const StiMakerParameters&pars)
        << "                          Use SSD :" << pars.useSsd  <<endl
        << "                          Use TPC :" << pars.useTpc  <<endl
        << "                         Use FTPC :" << pars.useFtpc <<endl
+       << "                        Use Pixel :" << pars.usePixel <<endl
        << "            UseResidualCalculator :" << pars.useResidualCalculator << endl
        << "                          Use GUI :" << pars.useGui  <<endl
        << "Use MC HITS As Reconstructed Hits :" << pars.useMcAsRec << endl

@@ -3,6 +3,9 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.126  2003/05/06 16:48:10  mmiller
+// Incorporated StiPixel.  usePixel==false by default.
+//
 // Revision 1.125  2003/05/06 15:36:36  mmiller
 // Committing changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
 // Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
@@ -118,6 +121,7 @@
 #include "StiTpc/StiTpcDetectorGroup.h"
 #include "StiSvt/StiSvtDetectorGroup.h"
 #include "StiEmc/StiEmcDetectorGroup.h"
+#include "StiPixel/StiPixelDetectorGroup.h"
 #include "Sti/StiKalmanTrackNode.h"
 #include "Sti/StiTrackingPlots.h"
 #include "Sti/StiKalmanTrack.h"
@@ -225,12 +229,19 @@ Int_t StiMaker::InitDetectors()
       _toolkit->add(group = new StiSvtDetectorGroup(true));
       group->setGroupId(kSvtId);
     }
+  if (_pars->usePixel)
+      {
+	  cout<<"StiMaker::Init() -I- Adding detector group:PIXEL"<<endl;
+	  _toolkit->add(group = new StiPixelDetectorGroup(true));
+	  group->setGroupId(9999);
+      }
+  
   if (_pars->useFtpc)
-    {
-      cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
-      _toolkit->add(group = new StiFtpcDetectorGroup(true));
-      group->setGroupId(kFtpcWestId);
-    }
+      {
+	  cout<<"StiMaker::Init() -I- Adding detector group:FTPC"<<endl;
+	  _toolkit->add(group = new StiFtpcDetectorGroup(true));
+	  group->setGroupId(kFtpcWestId);
+      }
   if (_pars->useEmc)
     {
       cout<<"StiMaker::Init() -I- Adding detector group:BEMC"<<endl;
