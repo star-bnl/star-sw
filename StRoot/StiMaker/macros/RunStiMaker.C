@@ -82,17 +82,17 @@ void RunStiMaker(Int_t nevents=1,
     gSystem->Load("StAssociationMaker");
 
     if (optimized) {
-	cout <<"Loading Sti"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/Sti.so"); //For optimized
+	cout <<"Loading Optimized Sti"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/Sti.so");
 	
-	cout <<"Loading StiGui"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/StiGui"); //For optimized
+	cout <<"Loading Optimized StiGui"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/StiGui");
 	
-	cout <<"Loading StiEvaluator"<<endl;
+	cout <<"Loading Optimized StiEvaluator"<<endl;
 	gSystem->Load(".i386_redhat61/LIB/StiEvaluator");
 	
-	cout <<"Loading StiMaker"<<endl;
-	gSystem->Load(".i386_redhat61/LIB/StiMaker"); //For optimized
+	cout <<"Loading Optimized StiMaker"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/StiMaker");
     }
     else {
 	cout <<"Loading Sti"<<endl;
@@ -168,6 +168,8 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setKTFMinContiguousHitCount(2);
     stiIO->setKTFMaxNullCount(40);
     stiIO->setKTFMaxContiguousNullCount(25);
+    stiIO->setKTFMinSearchRadius(.1); //cm
+    stiIO->setKTFMaxSearchRadius(10.); //cm
 	
     //Set Local Track Seed Finder (LTSF) run-time values
     stiIO->setLTSFZWindow(5.);

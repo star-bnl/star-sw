@@ -110,6 +110,18 @@ public:
     virtual void setKTFMaxContiguousNullCount(unsigned int); 
     virtual unsigned int ktfMaxContiguousNullCount() const;
 
+    //Min search radius to be passed to track finder
+    virtual void setKTFMinSearchRadius(double);
+    virtual double ktfMinSearchRadius() const;
+    
+    //Maxs search radius to be passed to track finder
+    virtual void setKTFMaxSearchRadius(double);
+    virtual double ktfMaxSearchRadius() const;
+
+    //Use helix extrapolation (defaults to line)
+    virtual void setKTFUseHelixExtrapolation(bool);
+    virtual bool ktfUseHelixExtrapolation() const;
+
 protected:
     friend class StiIOBroker;
     
@@ -145,6 +157,9 @@ protected:
     unsigned int mKTFMinContiguousHitCount;
     unsigned int mKTFMaxNullCount;
     unsigned int mKTFMaxContiguousNullCount;
+    double mKTFMinSearchRadius;
+    double mKTFMaxSearchRadius;
+    bool mKTFUseHelixExtrapolation;
     
 private:
     ClassDef(StiRootIOBroker, 1)
@@ -409,6 +424,39 @@ inline void StiRootIOBroker::setKTFMaxContiguousNullCount(unsigned int val)
 inline unsigned int StiRootIOBroker::ktfMaxContiguousNullCount() const
 {
     return mKTFMaxContiguousNullCount;
+}
+
+inline void StiRootIOBroker::setKTFMinSearchRadius(double val)
+{
+    mKTFMinSearchRadius = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ktfMinSearchRadius() const
+{
+    return mKTFMinSearchRadius;
+}
+
+inline void StiRootIOBroker::setKTFMaxSearchRadius(double val)
+{
+    mKTFMaxSearchRadius = val;
+    notify();
+}
+
+inline double StiRootIOBroker::ktfMaxSearchRadius() const
+{
+    return mKTFMaxSearchRadius;
+}
+
+inline void StiRootIOBroker::setKTFUseHelixExtrapolation(bool val)
+{
+    mKTFUseHelixExtrapolation = val;
+    notify();
+}
+
+inline bool StiRootIOBroker::ktfUseHelixExtrapolation() const
+{
+    return mKTFUseHelixExtrapolation;
 }
 
 #endif
