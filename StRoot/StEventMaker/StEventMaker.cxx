@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.31 2001/02/22 05:02:40 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.32 2001/05/17 22:46:37 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.32  2001/05/17 22:46:37  ullrich
+ * Removed loading of event summary params.
+ *
  * Revision 2.31  2001/02/22 05:02:40  ullrich
  * Added new protected method getStEventInstance().
  * Modified maker to allow multiple calls of Make() within
@@ -146,7 +149,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.31 2001/02/22 05:02:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.32 2001/05/17 22:46:37 ullrich Exp $";
 
 ClassImp(StEventMaker)
   
@@ -157,7 +160,6 @@ StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
     mEventManager->setMaker(this);
     mCurrentRun = 0;
     mCurrentEvent = 0;
-    mDstSummaryParam = 0;
     doLoadTpcHits     = kTRUE;
     doLoadFtpcHits    = kTRUE;
     doLoadSvtHits     = kTRUE;
@@ -253,10 +255,6 @@ StEventMaker::Make()
             AddRunCont(mCurrentRun);
         else
             gMessMgr->Warning() << "StEventMaker::Make(): no StRun object created." << endm;
-
-        status = loadRunConstants();
-        if (status != kStOK)
-            gMessMgr->Warning() << "StEventMaker::Make(): cannot load run constants." << endm;
     }
     
     //
@@ -309,44 +307,6 @@ StEventMaker::isNewRun()
     }
     else
         return kFALSE;   // nothing we can do anyhow
-}
-
-Int_t
-StEventMaker::loadRunConstants()
-{
-    //
-    //  Load run constants. So far there is only the dst_summary_param
-    //  table we have to handle. Create a new event manager to not
-    //  screw up thing in outer scope.
-    //
-    if (mDstSummaryParam) return kStOK;
-    StEventManager* theEventManager = new StRootEventManager();
-    theEventManager->setMaker(this);
-    long nrows;
-    
-    //  1st suppose we are in bfc
-    if (theEventManager->openEvent("dst/.runco") != oocError) {
-        mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
-        theEventManager->closeEvent();
-        if (mDstSummaryParam) {
-	    delete theEventManager;
-	    return kStOK;
-	}
-    }
-    
-    //  2nd suppose we are in doEvents
-    if (theEventManager->openEvent("dstRunco") != oocError) {
-        mDstSummaryParam = theEventManager->returnTable_dst_summary_param(nrows);
-        theEventManager->closeEvent();
-        if (mDstSummaryParam)  {
-	    delete theEventManager;
-	    return kStOK;
-	}
-    }
-
-    gMessMgr->Warning() << "StEventMaker::loadRunConstants(): cannot find dst_summary_param" << endm;
-    delete theEventManager;
-    return kStWarn;
 }
 
 Int_t
@@ -424,8 +384,8 @@ StEventMaker::makeEvent()
     mCurrentEvent = getStEventInstance();
     if (dstEventHeader)
 	mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
-    if (dstEventSummary && mDstSummaryParam)
-	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary, *mDstSummaryParam));
+    if (dstEventSummary)
+	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary));
         
     //
     //  Setup the software monitors.

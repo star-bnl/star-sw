@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.5 2001/02/22 04:59:16 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.6 2001/05/17 22:46:38 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
+ * Revision 2.6  2001/05/17 22:46:38  ullrich
+ * Removed loading of event summary params.
+ *
  * Revision 2.5  2001/02/22 04:59:16  ullrich
  * Added protected method getStEventInstance().
  *
@@ -37,7 +40,6 @@
 #include "StMaker.h"
 
 #include "StEventMaker/StEventManager.hh"
-class dst_summary_param_st;
 class StEvent;
 class StRun;
 class StTrack;
@@ -57,7 +59,7 @@ public:
        
     virtual const char *GetCVS() const
     {
-	static const char cvs[]="$Id: StEventMaker.h,v 2.5 2001/02/22 04:59:16 ullrich Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="$Id: StEventMaker.h,v 2.6 2001/05/17 22:46:38 ullrich Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
     }
 
@@ -77,7 +79,6 @@ protected:
     Int_t     makeRun();
     Int_t     makeEvent();
     Bool_t    isNewRun();
-    Int_t     loadRunConstants();
     StEvent*  getStEventInstance();
     
     void   printRunInfo();
@@ -88,7 +89,6 @@ private:
     StEventManager*       mEventManager;		//!
     StEvent*              mCurrentEvent;                //!
     StRun*                mCurrentRun; 			//!
-    dst_summary_param_st* mDstSummaryParam;             //!
     Bool_t                mCreateEmptyInstance;         //!
     ClassDef(StEventMaker, 1)
 };
