@@ -7,8 +7,11 @@ Bichsel::Bichsel(const Char_t *tag) : m_Tag(tag), m_dEdxParameterization(0) {
 }
 //________________________________________________________________________________
 Double_t  Bichsel::GetI70(Double_t log10bg, Double_t log2dx, Int_t kase)  {
-  return m_dEdxParameterization->GetI70(log10bg,log2dx,kase)
-    *TMath::Exp(TofCorrection(log10bg));
+  Double_t Value = m_dEdxParameterization->GetI70(log10bg,log2dx,kase);
+#ifdef TOFCORRECTION
+  Value *= TMath::Exp(TofCorrection(log10bg));
+#endif
+  return  Value;
 }
 //________________________________________________________________________________
 Double_t  Bichsel::TofCorrection(Double_t log10bg) {
