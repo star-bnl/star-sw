@@ -55,15 +55,15 @@ double StDetectorDbSpaceCharge::getSpaceChargeCorrection(double scaleFactor){
     double value = 0;
     if(mSpaceCharge){
 
-	if(scaleFactor == -1.0)
+	if(scaleFactor < -.75 && scaleFactor > -1.25)
 	    value = mSpaceCharge->fullFieldB;
-	else if(scaleFactor == -0.5)
+	else if(scaleFactor < -0.25)
 	    value = mSpaceCharge->halfFieldB;
-	else if(scaleFactor == 0)
+	else if(scaleFactor < .25)
 	    value = mSpaceCharge->zeroField;
-	else if(scaleFactor == 0.5)
+	else if(scaleFactor < 0.75)
 	    value = mSpaceCharge->halfFieldA;
-	else if(scaleFactor == 1.0)
+	else if(scaleFactor < 1.25)
 	    value = mSpaceCharge->fullFieldA;
     }
 	
