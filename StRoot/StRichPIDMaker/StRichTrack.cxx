@@ -1,10 +1,14 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.13 2000/12/08 06:32:02 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.14 2000/12/08 15:01:07 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.14  2000/12/08 15:01:07  horsley
+ *  pion switch in getNew, Orig hits
+ *  case -221: -> case -211:
+ *
  *  Revision 2.13  2000/12/08 06:32:02  lasiuk
  *  correctedMomentum()
  *  xcorrection
@@ -502,7 +506,7 @@ double StRichTrack::getEnergyLoss() const {
 int StRichTrack::getOrigConstHits(int particleType) const {
 
     switch(particleType) {
-    case -221:
+    case -211:
 	return mOrigPiConstHits;
     case -321:
 	return mOrigKConstHits;
@@ -519,7 +523,7 @@ int StRichTrack::getOrigConstHits(int particleType) const {
 int StRichTrack::getNewConstHits(int particleType) const {
 
     switch(particleType) {
-    case -221:
+    case -211:
 	return mNewPiConstHits;
     case -321:
 	return mNewKConstHits;
@@ -536,7 +540,7 @@ int StRichTrack::getNewConstHits(int particleType) const {
 int StRichTrack::getOrigTotHits(int particleType) const {
 
     switch(particleType) {
-    case -221:
+    case -211:
 	return mOrigPiTotHits;
     case -321:
 	return mOrigKTotHits;
@@ -553,7 +557,7 @@ int StRichTrack::getOrigTotHits(int particleType) const {
 int StRichTrack::getNewTotHits(int particleType) const {
 
     switch(particleType) {
-    case -221:
+    case -211:
 	return mNewPiTotHits;
     case -321:
 	return mNewKTotHits;
@@ -571,7 +575,7 @@ void StRichTrack::assignHits(int consthits, int tothits, int refit, int particle
 
     switch(particleType) {
 
-    case -221: // pion
+    case -211: // pion
 	if (refit==0) {	// no refit
 	    mOrigPiConstHits = consthits;
 	    mOrigPiTotHits = tothits;
