@@ -1,5 +1,8 @@
-* $Id: tcl_get_row_seq.F,v 1.5 1999/10/05 00:47:04 snelling Exp $
+* $Id: tcl_get_row_seq.F,v 1.6 1999/10/07 03:21:36 snelling Exp $
 * $Log: tcl_get_row_seq.F,v $
+* Revision 1.6  1999/10/07 03:21:36  snelling
+* changes related to StMessage
+*
 * Revision 1.5  1999/10/05 00:47:04  snelling
 * the tdc range saga continues
 *
@@ -218,7 +221,7 @@ c Check for overrun of the local array:
                  IF ( Nseqs+1 .GT. Nseqs_max ) THEN
                     write(132,*) 
      &                   'TCL_GET_ROW_SEQ - Nseqs_max is too small'
-                    call StError(132)
+                    call StError(m132)
                     TCL_Get_Row_Seq = .FALSE. !Fail.
                     RETURN
                  END IF

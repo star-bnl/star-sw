@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.6 1999/10/05 00:47:14 snelling Exp $
+* $Id: tph_get_cluster_data.F,v 1.7 1999/10/07 03:21:38 snelling Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.7  1999/10/07 03:21:38  snelling
+* changes related to StMessage
+*
 * Revision 1.6  1999/10/05 00:47:14  snelling
 * the tdc range saga continues
 *
@@ -167,8 +170,8 @@ C-----------------------------------------------------------------------
            iclspix = iclspix + 1
 
 	   if (iclspix .gt. nclpix_max) then
-              write(132,*) 'TPHAM-!-TMP too many pixels!'
-              call StError(132)
+              write(m132,*) 'TPHAM-!-TMP too many pixels!'
+              call StError(m132)
               return
 	   endif
 
@@ -200,8 +203,8 @@ C Step through one sequence on one pad:
            do indx = jpix+1, jpix+kseqpix-1
               iclspix = iclspix + 1
 	      if (iclspix .gt. nclpix_max) then
-                 write(132,*) 'TPHAM-!-TMP too many pixels!'
-                 call StError(132)
+                 write(m132,*) 'TPHAM-!-TMP too many pixels!'
+                 call StError(m132)
                  return
 	      endif
               ldatum = pixel_data(indx).data

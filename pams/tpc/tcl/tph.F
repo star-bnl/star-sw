@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.18 1999/10/05 00:47:06 snelling Exp $
+* $Id: tph.F,v 1.19 1999/10/07 03:21:37 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.19  1999/10/07 03:21:37  snelling
+* changes related to StMessage
+*
 * Revision 1.18  1999/10/05 00:47:06  snelling
 * the tdc range saga continues
 *
@@ -399,13 +402,13 @@ c ??? Check index?
      +,				    ipad_hi, itdc_lo, itdc_hi)
             endif
               if(itdc_hi .gt. 511) then
-                 write(m132,*) itdc_hi,'itdc_hi'
-                 call StMessage(m132)
+                 write(m132,*) 'TPH - itdc_hi', itdc_hi
+                 call StWarning(m132)
                  itdc_hi = 511
               endif
               if(itdc_lo .lt. 0) then
-                 write(m132,*) itdc_lo,'itdc_lo'
-                 call StMessage(m132)
+                 write(m132,*) 'TPH - itdc_lo', itdc_lo
+                 call StWarning(m132)
                  itdc_lo = 0
               endif
 
@@ -413,17 +416,18 @@ C Rai: patch from Bill Love, we might have to think of a better way
 C             skip clusters on the end pads.
               if(ipad_lo .eq. 1)then
                  if(debug) then
-                    write(m132,1)irow
-                    call StMessage(m132)
+                    write(m132,1) irow
+                    call StWarning(m132)
                  endif
                  go to 999
- 1               format(' TPH - dropping pad 1 cluster in row',i5)
+ 1               format(' TPH - dropping pad 1 cluster in row: ',i5)
               elseif(ipad_hi.eq.npads)then
                  if(debug) then
-                    write(m132,2)npads,irow
-                    call StMessage(m132)
+                    write(m132,2) npads, irow
+                    call StWarning(m132)
                  endif
- 2               format(' TPH - drop end pad cluster, pad',i5,' row',i5)
+ 2               format(' TPH - drop end pad cluster, pad: ',i5,
+     &                ' row: ',i5)
                  go to 999
               endif
 
@@ -470,7 +474,7 @@ c  to cluster in TPCLUSTER table....
            do ihit=1,nhits
               if (tphit_h.nok .ge. tphit_h.maxlen) then
 c ??? Direct write is forbidden
-                 write(m132,*)'TPHIT table full - quitting at cluster',
+                 write(m132,*)'TPH table full - quitting at cluster: ',
      &                jtpcl
                  call StWarning(m132)
                  return
@@ -597,21 +601,21 @@ c     also put q (magnitude of hit) into units of energy loss
 
 c+liq
 c     begin to fill the tcl_hitclus table (tphitclus)
-              if(tclpar(1).mc.gt.1)then
-	         if (tphitclus_h.nok.ge.tphitclus_h.maxlen) then
+              if(tclpar(1).mc .gt. 1) then
+	         if (tphitclus_h.nok .ge. tphitclus_h.maxlen) then
 c ??? Direct write is forbidden
                	   write(m132,*)
-     &                   'TPHITCLUS table full - quitting at cluster', 
+     &                   'TPH hitclus table full - quitting at cluster', 
      &                   jtpcl
                    call StWarning(m132)
 	           return		
         	 endif	
 		
-                if(nhits.eq.1)then
-                   ipad_hit_lo(ihit)=ipad_lo
-                   ipad_hit_hi(ihit)=ipad_hi
-                   itdc_hit_lo(ihit)=itdc_lo
-                   itdc_hit_hi(ihit)=itdc_hi
+                if(nhits .eq. 1) then
+                   ipad_hit_lo(ihit) = ipad_lo
+                   ipad_hit_hi(ihit) = ipad_hi
+                   itdc_hit_lo(ihit) = itdc_lo
+                   itdc_hit_hi(ihit) = itdc_hi
                 endif
 c fill the tphitclus table
                 tphitclus_h.nok = tphitclus_h.nok + 1
@@ -646,7 +650,7 @@ c fill the tphitclus table
 c-liq
           enddo
 
-          else if (isec.gt.CurrentSector) then
+          else if (isec .gt. CurrentSector) then
            goto 555           
           else         ! isec < Current Sector
            continue

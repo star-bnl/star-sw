@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.17 1999/10/05 00:47:10 snelling Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.18 1999/10/07 03:21:38 snelling Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.18  1999/10/07 03:21:38  snelling
+* changes related to StMessage
+*
 * Revision 1.17  1999/10/05 00:47:10  snelling
 * the tdc range saga continues
 *
@@ -315,10 +318,10 @@ C time direction no longer a projection - WAL 13 Feb 98
            endif
         enddo
 	if (adc_sum .eq. 0.) then
-c        changed StError Message to limit both lines with one call
-           write(m132(1),*)'TPHAM - Hey -- ADCSUM=0!!!!'
-           write(m132(2),*) 'number of pixels in cluster = ',nclspix
-           call Message(m132,2,-1)
+           write(m132,*) 'TPH Fit_I_Cluster - ADCSUM = 0!!!!'
+           call StWarning(m132)
+           write(m132,*) 'number of pixels in empty cluster = ', nclspix
+           call StWarning(m132)
            ierr = 1
            return
         endif
@@ -441,14 +444,14 @@ c  switch if interested in real data (or real data performance)
            do ipix=1,nclspix
               ktrk=itrk(ipix)
               mtrk=iucomp(ktrk,imc_track,nmc_tracks)
-              if (mtrk.eq.0) then
-                 if (nmc_tracks.lt.nmc_tracks_max) then
+              if (mtrk .eq. 0) then
+                 if (nmc_tracks .lt. nmc_tracks_max) then
                     nmc_tracks=nmc_tracks+1
                     imc_track(nmc_tracks) = ktrk
                     nocc_track(nmc_tracks) = 1
                  else           ! too many contributing tracks... forget it
-                    write(m132,*) 'TPHAM-I-2MANY, ntrk.gt.max'
-                    call StMessage(m132)
+                    write(m132,*) 'TPH FitI_Cluster: to many tracks'
+                    call StWarning(m132)
                  endif
               else
                  nocc_track(mtrk) = nocc_track(mtrk)+1

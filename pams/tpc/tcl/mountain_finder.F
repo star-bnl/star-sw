@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.8 1999/10/05 00:46:59 snelling Exp $
+* $Id: mountain_finder.F,v 1.9 1999/10/07 03:21:34 snelling Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.9  1999/10/07 03:21:34  snelling
+* changes related to StMessage
+*
 * Revision 1.8  1999/10/05 00:46:59  snelling
 * the tdc range saga continues
 *
@@ -270,8 +273,8 @@ c
 c Check that temporary arrays for hit are large enough to prevent
 c overflows; otherwise, print msg. and protect ourselves as best we can:
 	if ((2*iclosest_pad-1)*(2*iclosest_tdc-1).gt.nclpix_max) then
-           write(m132,*) 'TPHAM-I-2MANY pix in temp hit'
-           call StMessage(m132)
+           write(m132,*) 'TPH - MF - To many pix in temp hit'
+           call StWarning(m132)
            iclosest_pad = INT(SQRT(FLOAT(nclpix_max))+1.)/2
            iclosest_tdc = iclosest_pad
         end if
@@ -678,7 +681,7 @@ c Load the assigned pixels:
 c
 c Guarantee that arrays won't overrun:
                   if (nclspix_temp.ge.nclpix_max) then
-                     write(m132,*) 'TPHAM - Too many pixels in hit ?'
+                     write(m132,*) 'TPH - MF - Too many pixels in hit ?'
                      call StWarning(m132)
                      goto 99
                   end if
@@ -737,7 +740,7 @@ c-liq
 c
 c Should *not* be possible...
             nhits = nhits - 1
-            write(m132,*) 'TPHAM - No pixels in hit ?'
+            write(m132,*) 'TPH - MF - No pixels in hit ?'
             call StWarning(m132)
          end if
       end do   ! i=1,nmax

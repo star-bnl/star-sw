@@ -1,5 +1,8 @@
-* $Id: tph_fit_cluster.F,v 1.5 1999/10/05 00:47:08 snelling Exp $
+* $Id: tph_fit_cluster.F,v 1.6 1999/10/07 03:21:37 snelling Exp $
 * $Log: tph_fit_cluster.F,v $
+* Revision 1.6  1999/10/07 03:21:37  snelling
+* changes related to StMessage
+*
 * Revision 1.5  1999/10/05 00:47:08  snelling
 * the tdc range saga continues
 *
@@ -166,8 +169,8 @@ c----------------------------------------------------------------
      +           irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
      +           ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
             if (nhits .gt. max_hits_in_cluster) then 
-               write(132,*) 'TPHAM - array overrun! - fix this!'
-               call StError(132)
+               write(m132,*) 'TPHAM - array overrun! - fix this!'
+               call StError(m132)
             endif
          endif
          if (nhits .eq. 0) then

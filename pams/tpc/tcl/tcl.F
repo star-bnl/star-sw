@@ -1,5 +1,8 @@
-* $Id: tcl.F,v 1.5 1999/10/05 00:47:02 snelling Exp $
+* $Id: tcl.F,v 1.6 1999/10/07 03:21:35 snelling Exp $
 * $Log: tcl.F,v $
+* Revision 1.6  1999/10/07 03:21:35  snelling
+* changes related to StMessage
+*
 * Revision 1.5  1999/10/05 00:47:02  snelling
 * the tdc range saga continues
 *
@@ -187,10 +190,7 @@ c
 
 C----------------------------------------------------------------------
         CHARACTER*132 m132
-	INTEGER IDE1, IDE2
-	SAVE    IDE1, IDE2
-	DATA    IDE1,IDE2 /0,0/
-           
+
 C----------------------------------------------------------------------
 c functions (some of which are only hypothetical):
 c
@@ -203,26 +203,23 @@ c	INTEGER TPG_Nsectors
 C----------------------------------------------------------------------
 
 	Tcl = STAFCV_OK
-        call Msg_Enable( 'TCL-E1' )
-        call Msg_Enable( 'TCL-E2' )
 
         sector = tcl_sector_index(1).CurrentSector
-        If (raw_sec_m(sector).RowRefOut.ne.'N') then
+        if (raw_sec_m(sector).RowRefOut.ne.'N') then
 CDH loop backwards now since the data is packed that way
-           DO Row = Nrows,(Nrows_in+1),-1
+           DO Row = Nrows, (Nrows_in+1), -1
 c
 c Look for clusters in any row with a sequence on at least one pad:
 c
              row_table = Nrows - row + 1     
-             if (raw_row_out(row_table).RowID.ne.row) then
-                   write(m132,*) 
-     & 'TCL-E2 raw_row_out table has incorrect format.' 
-                    CALL Message( m132,
-     &                   1, IDE2 )
-              tcl = STAFCV_BAD
-              return
+             if (raw_row_out(row_table).RowID .ne. row) then
+                write(m132,*) 
+     &               'TCL-E2 raw_row_out table has incorrect format.' 
+                call StError(m132)
+                tcl = STAFCV_BAD
+                return
              endif
-             If (raw_row_out(row_table).padref.ne.'N') then
+             if (raw_row_out(row_table).padref .ne. 'N') then
 c Find pixel clusters in each row:
                  TAS_Code = tcl_clusters_in_row( Sector, Row 
      &                , pad_plane_h, pad_plane
@@ -233,13 +230,12 @@ c Find pixel clusters in each row:
      &                , pixel_data_out_h, pixel_data_out 
      &                , tpcluster_h, tpcluster, tpseq_h, tpseq)
     
-                 IF ( TAS_Code .NE. STAFCV_OK ) THEN
-                   write(m132,*) 'TCL-E1 Failed.' 
-                    CALL Message( m132,
-     &                   1, IDE1 )
+                 if ( TAS_Code .ne. STAFCV_OK ) then
+                    write(m132,*) 'TCL-E1 Failed.' 
+                    call StError(m132)
                     Tcl = TAS_Code
-                    RETURN
-                 END IF
+                    return
+                 endif
               END IF            ! padref.ne.'N'
            END DO               !Row = 1, Nrows
         Endif                   !RowRefOut.ne.'N', data exists for this sector
@@ -253,15 +249,14 @@ c
 c Look for clusters in any row with a sequence on at least one pad:
 c
              row_table = Nrows_in - row + 1     
-             if (raw_row_in(row_table).RowID.ne.row) then
-                   write(m132,*) 'TCL-E2 raw_row_in table has'// 
-     &                            'incorrect format.' 
-                    CALL Message( m132,
-     &                   1, IDE2 )
-              tcl = STAFCV_BAD
-              return
+             if (raw_row_in(row_table).RowID .ne. row) then
+                write(m132,*) 'TCL-E2 raw_row_in table has' 
+     &               //'incorrect format.' 
+                call StError(m132)
+                tcl = STAFCV_BAD
+                return
              endif
-             If (raw_row_in(row_table).padref.ne.'N') then
+             if (raw_row_in(row_table).padref.ne.'N') then
 c Find pixel clusters in each row:
                  TAS_Code = tcl_clusters_in_row( Sector, Row 
      &                , pad_plane_h, pad_plane
@@ -273,16 +268,14 @@ c Find pixel clusters in each row:
      &                , tpcluster_h, tpcluster, tpseq_h, tpseq)
     
                  IF ( TAS_Code .NE. STAFCV_OK ) THEN
-                   write(m132,*) 'TCL-E1 Failed.' 
-                    CALL Message( m132,
-     &                   1, IDE1 )
+                    write(m132,*) 'TCL-E1 Failed.' 
+                    call StError(m132)
                     Tcl = TAS_Code
                     RETURN
                  END IF
               END IF            ! padref.ne.'N'
            END DO               !Row = 1, Nrows
         Endif                   !RowRefIn.ne.'N', data exists for this sector
-
         
 	RETURN
 	END
