@@ -27,6 +27,7 @@ enum {kStSorted = 0x00100000};
  public:
  
  static Int_t    Write    (TFile *file, const Char_t *name, ULong_t  ukey, TObject  *obj);
+ static TObject *Read     (TFile *file, const Char_t *name);
  static TObject *Read     (TFile *file, const Char_t *name, ULong_t  ukey);
  static ULong_t GetNextKey(TFile *file, const Char_t *name, ULong_t  ukey);
  static TObject *ReadNext (TFile *file, const Char_t *name, ULong_t &ukey);
