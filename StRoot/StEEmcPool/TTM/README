@@ -43,8 +43,6 @@ PARAMETERS: user may change >almost< everything
                      to e.g. reduce fiducial volume         
   
      mFileName       (default lowercase(MakerName)+".root") changeable with SetFileName
-     
-     mDebugLevel     (default kWarning) changeable with SetDebugLevel
 
 =============================================================================================  
 EXAMPLE:
