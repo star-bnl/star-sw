@@ -10,7 +10,7 @@ Replace[LIST #;] with [ #1 _
  "vector "   vdist,vscale,vadd,vmod,sortzv,vfill,Ublank,Ufill,Uzero,IuLast,
  "vector "   SBIT0,SBIT1,SBYT,JBIT,JBYT,UCTOH,UHTOC,PROB,FREQ,
              DENLAN,DSTLAN,DIFLAN,XM1LAN,XM2LAN,RANLAN,
-             RNDM,RDMIN,RDMOUT,SORTZV,
+             RNDM,RDMIN,RDMOUT,SORTZV,RNGAMA,
              CHISIN,VDOT,VADD,VSCALE,CROSS,
              VMOD,VDIST,VDOTN2,VSUB,VUNIT,
              BESJ0,BESJ1,BESY0,BESY1,BESI0,BESI1,BESK0,BESK1,
