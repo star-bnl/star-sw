@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.18 2002/04/04 01:42:34 jeromel Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.19 2003/04/30 18:05:55 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.19  2003/04/30 18:05:55  fisyak
+ * Add P03ia flag, which fixes P03ia MuDst
+ *
  * Revision 2.18  2002/04/04 01:42:34  jeromel
  * Extra fix for multiple instantiation (and multiple delete).
  *
@@ -85,9 +88,10 @@
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
-
+#include "StBichsel/Bichsel.h"
+static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.18 2002/04/04 01:42:34 jeromel Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.19 2003/04/30 18:05:55 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -163,8 +167,13 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
     double z;
     if (mTrack && mTraits->length() > 0) {
       momentum  = abs(mTrack->geometry()->momentum());
+#ifndef P03ia
       dedx_expected = 1.e-6*BetheBloch::Sirrf(momentum/particle->mass(),mTraits->length(),
 					      abs(particle->pdgEncoding())==11);
+#else
+      if (! m_Bichsel) m_Bichsel = new Bichsel();
+      dedx_expected = 1.e-6*m_Bichsel->GetI70(TMath::Log10(momentum/particle->mass()),1.0);
+#endif 
       dedx_resolution = mTraits->errorOnMean();
       if (dedx_resolution <= 0) dedx_resolution = sigmaPidFunction(particle) ;
     }
