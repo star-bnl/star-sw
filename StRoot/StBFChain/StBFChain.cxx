@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.24 1999/11/09 01:51:08 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.25 1999/11/10 00:10:52 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.25  1999/11/10 00:10:52  fisyak
+// Valery's fix for fzin
+//
 // Revision 1.24  1999/11/09 01:51:08  fisyak
 // Fix Files, introduce tables and tls as separated option
 //
@@ -553,6 +556,7 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   else {
     if (Outfile) FileOut = new TString(Outfile);
     else {
+      InFile = new TString(Infile);
       FileOut = new TString(gSystem->BaseName(InFile->Data()));
       FileOut->ReplaceAll("*","");
       FileOut->ReplaceAll("..",".");
