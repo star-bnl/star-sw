@@ -296,6 +296,15 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   tNode   = 0;
   tDet    = 0;
   leadDet = sDet;
+
+	////
+  vector<StiHit*> & hits = _hitContainer->getHits();
+	for (vector<StiHit*>::const_iterator iii=hits.begin();
+			 iii!=hits.end();
+			 ++iii)
+		{
+			cout << **iii<<endl;
+		}
   StiKalmanTrackNode testNode;
   StiDetector * currentDet;
   while (!trackDone) 
@@ -321,6 +330,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  testNode.reset();
 	  testNode.setChi2(1e50);
 	  position = testNode.propagate(sNode,tDet);
+		debug = false;
 	  if (position<0)
 	    { // not reaching this detector layer - stop track
 	      if(debug)cout << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
@@ -328,79 +338,103 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	    }
 	  else if (position<=kEdgeZplus) 
 	    { 
+				//cout << "position<=kEdgeZplus" << endl;
 	      testNode.setDetector(tDet);
 	      bool active = tDet->isActive();
 	      if (active&&(testNode.nullCount<_pars.maxNullCount&&testNode.contiguousNullCount<_pars.maxContiguousNullCount)) 
-		{ 
-		  // active detector may have a hit
-		  vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode);
-		  vector<StiHit*>::iterator hitIter;
-		  for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
-		    {
-		      stiHit = *hitIter;
-		      chi2 = testNode.evaluateChi2(stiHit);
-		      if (chi2<maxChi2 && chi2<testNode.getChi2())
-			{
-			  testNode.setHit(stiHit); testNode.setChi2(chi2);
-			}
-		    } 
-
-		  /*
-		    _hitContainer->setRefPoint(testNode);
-		  while (_hitContainer->hasMore()) 
-		  {  
-		  stiHit = _hitContainer->getHit();if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
-		  chi2 = testNode.evaluateChi2(stiHit);
-		  //if (chi2<_pars.maxChi2ForSelection && chi2<testNode.getChi2())
-		  if (chi2<maxChi2 && chi2<testNode.getChi2())
-		  {
-		  testNode.setHit(stiHit); testNode.setChi2(chi2);
-		  }
-		  }
-		  */
-		}
-	      StiKalmanTrackNode * node = _trackNodeFactory->getInstance();if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
+					{ 
+						// active detector may have a hit
+						vector<StiHit*> & candidateHits = _hitContainer->getHits(testNode,true);
+						//vector<StiHit*> & candidateHits = _hitContainer->getHits(tDet);
+						vector<StiHit*>::iterator hitIter;
+						//cout << "---------  candidates:"<< candidateHits.size() << endl;
+						for (hitIter=candidateHits.begin();hitIter!=candidateHits.end();++hitIter)
+							{
+								stiHit = *hitIter;
+								chi2 = testNode.evaluateChi2(stiHit);
+								if (chi2<maxChi2 && chi2<testNode.getChi2())
+									{
+										testNode.setHit(stiHit); testNode.setChi2(chi2);
+									}
+							} 
+					}
+	      StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
+				if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
 	      node->reset();
 	      *node = testNode;
 	      sNode = track->add(node);
+				bool gotHit=false;
 	      if (node->getHit())
-		{
-		  nAdded++;
-		  node->hitCount = sNode->hitCount+1;
-		  node->contiguousHitCount = sNode->contiguousHitCount+1; 
-		  if (node->contiguousHitCount>_pars.minContiguousHitCountForNullReset)
-		    node->contiguousNullCount = 0;
-		  else
-		    node->contiguousNullCount = sNode->contiguousNullCount;
-		  node->nullCount = sNode->nullCount;
-		}
+					{
+						nAdded++;
+						node->hitCount = sNode->hitCount+1;
+						node->contiguousHitCount = sNode->contiguousHitCount+1; 
+						if (node->contiguousHitCount>_pars.minContiguousHitCountForNullReset)
+							node->contiguousNullCount = 0;
+						else
+							node->contiguousNullCount = sNode->contiguousNullCount;
+						node->nullCount = sNode->nullCount;
+						gotHit = true;
+					}
 	      else if (position>0 || !active) // detectors edge - don't really expect a hit here
-		{
-		  node->nullCount           = sNode->nullCount;
-		  node->contiguousNullCount = sNode->contiguousNullCount;
-		  node->hitCount            = sNode->hitCount;
-		  node->contiguousHitCount  = 0;
-		} 
+					{
+						node->nullCount           = sNode->nullCount;
+						node->contiguousNullCount = sNode->contiguousNullCount;
+						node->hitCount            = sNode->hitCount;
+						node->contiguousHitCount  = 0;   
+					} 
 	      else // there should have been a hit but we found none
-		{
-		  node->nullCount           = sNode->nullCount+1;
-		  node->contiguousNullCount = sNode->contiguousNullCount+1;
-		  node->hitCount            = sNode->hitCount;
-		  node->contiguousHitCount  = 0;
-		} 
-	      leadDet = sNode->getDetector(); break;
+					{
+						node->nullCount           = sNode->nullCount+1;
+						node->contiguousNullCount = sNode->contiguousNullCount+1;
+						node->hitCount            = sNode->hitCount;
+						node->contiguousHitCount  = 0;
+					} 
+				leadDet = sNode->getDetector();
+				//break;
+				
+				double cut = 3.;
+					if (gotHit || testNode._refX>cut)
+					{
+						//cout << "gotHit || testNode._refX>"<< cut << endl;
+						break;//scanning is done
+					}
+					else
+						{
+							//cout << "no HIT && _refX<="<<cut << endl;
+							
+							if (lastMove==0)
+								{
+									_detectorContainer->movePlusPhi();//cout << " MOVE PLUS PHI for r<="<<cut<<endl;
+									lastMove=1;
+								}
+							else if (lastMove==1)
+								{
+									_detectorContainer->moveMinusPhi();// cout << " MOVE MINUS PHI for r<="<<cut<<endl;
+									lastMove=-1;
+								}
+							else
+								{
+									//cout << " NO MORE MOVES LEFT" << endl;
+									break;
+								}
+							
+							//break;
+					}
 	    }
 	  else if ( (position==kEdgePhiPlus || position==kMissPhiPlus)  && lastMove>=0 )
 	    {
+				//cout << " testNode._refX:" << testNode._refX << endl;
 	      //cout << " MOVE PLUS PHI"<<endl;
 	      _detectorContainer->movePlusPhi(); lastMove++;
 	    }
 	  else if ( (position==kEdgePhiMinus || position==kMissPhiMinus) && lastMove<=0)
 	    {
-	      //cout << " MOVE MINUUS PHI"<<endl;
+				//cout << " testNode._refX:" << testNode._refX << endl;
+	      //cout << " MOVE MINUS PHI"<<endl;
 	      _detectorContainer->moveMinusPhi(); lastMove--;
 	    }
-	  if (abs(lastMove)>2) break;
+	  if (abs(lastMove)>4) break; // xxxxxxx 
 	  nextDet = **_detectorContainer;
 	  if (nextDet==0 || tDet==nextDet) 
 	    { //cout <<" SCANNING DONE"<<endl;
