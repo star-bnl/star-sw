@@ -54,6 +54,43 @@ Int_t St_srs_Maker::Init(){
    m_x_vs_y->SetYTitle("y cm");
    m_x_vs_y->SetXTitle("x cm");
 
+   m_waf_no1 = new TH2F("si_layer1"," Si z vs ladder no.",
+                           100,-25.,25.,100,0.5,4.5);
+   m_waf_no1->SetYTitle("ladder no");
+   m_waf_no1->SetXTitle("Z cm");
+
+   m_waf_no2 = new TH2F("si_layer2"," Si z vs ladder no.",
+			100,-25.,25.,100,0.5,4.5);
+   m_waf_no2->SetYTitle("ladder no");
+   m_waf_no2->SetXTitle("Z cm");
+
+   m_waf_no3 = new TH2F("si_layer3"," Si z vs ladder no.",
+			100,-25.,25.,100,0.5,6.5);
+   m_waf_no3->SetYTitle("ladder no");
+   m_waf_no3->SetXTitle("Z cm");
+
+   m_waf_no4 = new TH2F("si_layer4"," Si z vs ladder no.",
+			100,-25.,25.,100,0.5,6.5);
+   m_waf_no4->SetYTitle("ladder no");
+   m_waf_no4->SetXTitle("Z cm");
+
+   m_waf_no5 = new TH2F("si_layer5"," Si z vs ladder no.",
+			100,-25.,25.,100,0.5,7.5);
+   m_waf_no5->SetYTitle("ladder no");
+   m_waf_no5->SetXTitle("Z cm");
+
+   m_waf_no6 = new TH2F("si_layer6"," Si z vs ladder no.",
+			100,-25.,25.,100,0.5,7.5);
+   m_waf_no6->SetYTitle("ladder no");
+   m_waf_no6->SetXTitle("Z cm");
+
+   m_waf_no7 = new TH2F("si_layer7"," Si z vs ladder no.",
+			100,-40.,40.,100,0.5,20.5);
+   m_waf_no7->SetYTitle("ladder no");
+   m_waf_no7->SetXTitle("Z cm");
+
+   
+
    return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -63,8 +100,7 @@ Int_t St_srs_Maker::Make()
 // 		Create output tables
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",20000);       m_DataSet->Add(scs_spt);
   St_srs_result *srs_result = new St_srs_result("srs_result",20000); m_DataSet->Add(srs_result);
-  
-  
+    
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
   if (g2t_svt_hit ) {
@@ -83,6 +119,34 @@ Int_t St_srs_Maker::Make()
     scs_spt_st  *spc   = scs_spt->GetTable();
     for (Int_t i = 0; i < scs_spt->GetNRows(); i++,spc++){
       m_x_vs_y->Fill(spc->x[0],spc->x[1]);
+
+      int lader = spc->id_wafer -((int)spc->id_wafer/1000)*1000;
+      lader = lader -(int)(lader/100)*100;
+      float ladder = (float) lader;
+      if( 999 < spc->id_wafer && spc->id_wafer <1999){
+	m_waf_no1->Fill(spc->x[2],ladder);
+      }
+      else if( 1999 < spc->id_wafer && spc->id_wafer <2999){
+	m_waf_no2->Fill(spc->x[2],ladder);
+      }
+      else if( 2999 < spc->id_wafer && spc->id_wafer <3999){
+	m_waf_no3->Fill(spc->x[2],ladder);
+      }
+      
+      else if( 3999 < spc->id_wafer && spc->id_wafer <4999){
+	m_waf_no4->Fill(spc->x[2],ladder);
+      }
+      else if( 4999 < spc->id_wafer && spc->id_wafer <5999){
+	m_waf_no5->Fill(spc->x[2],ladder);
+      }
+      else if( 5999 < spc->id_wafer && spc->id_wafer <6999){
+	m_waf_no6->Fill(spc->x[2],ladder);
+      }
+      else if( 6999 < spc->id_wafer && spc->id_wafer <8999){
+	m_waf_no7->Fill(spc->x[2],ladder);
+      }
+
+
     }
   }
     
