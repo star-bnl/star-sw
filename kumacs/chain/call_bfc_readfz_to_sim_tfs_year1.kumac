@@ -15,7 +15,7 @@
    chain=' fzin rg2t insvt tpg tfs ems evout' _
    skip=0 _
    no_events=1 _
-   input_data_file=/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.fzd
+   input_data_file=/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.fzd _
    output_file=auau_ce_b0-2_1001_1050_year1.xdf _
    log=bfc_readfz_to_sim_tfs_year1.log
 
