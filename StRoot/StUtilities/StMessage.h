@@ -1,5 +1,8 @@
-// $Id: StMessage.h,v 1.9 2001/05/14 20:53:20 genevb Exp $
+// $Id: StMessage.h,v 1.10 2001/05/16 15:18:50 genevb Exp $
 // $Log: StMessage.h,v $
+// Revision 1.10  2001/05/16 15:18:50  genevb
+// Need include for TROOT
+//
 // Revision 1.9  2001/05/14 20:53:20  genevb
 // Add features to examine memory use, switch from TDatime to time_t
 //
@@ -43,6 +46,9 @@
 #ifndef ClassStMessage
 #define ClassStMessage
 
+#ifdef __ROOT__
+#include "TROOT.h"
+#endif
 #include <time.h>
 
 class StMessage {
