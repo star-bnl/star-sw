@@ -1,12 +1,12 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.3 2000/01/27 17:09:59 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.4 2000/02/08 16:36:47 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
- * Revision 1.3  2000/01/27 17:09:59  lasiuk
- * modify to work stand-alone from ROOT
+ * Revision 1.4  2000/02/08 16:36:47  lasiuk
+ * Bring into line with HP
  *
  *
  * Revision 1.5  2000/02/08 19:53:43  lasiuk
@@ -54,7 +54,7 @@
     StRichWriter::StRichWriter(StRichPadPlane* aPadPlane)
 	: mStorage(aPadPlane)
     { /* nopt */ }
-	cerr << "WARNING::StRichWriter::getInstance()" << endl;
+    
     StRichWriter* StRichWriter::getInstance()
     {
 	//cerr << "WARNING::StRichWriter::getInstance()" << endl;

@@ -1,11 +1,11 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.5 2000/01/28 20:35:08 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.6 2000/02/08 16:36:49 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.5  2000/01/28 20:35:08  lasiuk
- * namespace std is NOT in!
+ * Revision 1.6  2000/02/08 16:36:49  lasiuk
+ * Bring into line with HP
  *
  *
  * Revision 1.8  2000/02/12 21:54:25  lasiuk
@@ -24,7 +24,7 @@
 #include <iostream.h>
 #define rICH_DIAGNOSTIC 1
 #define rICH_DECODE_DATA 1
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#define rICH_WITH_PADMONITOR 1
 #define rICH_WITH_RINGS 1
 
 #include "StChain.h"
@@ -263,8 +263,19 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    << " eg_lab= "    << track[(rch_hit->track_p-1)].eg_label
 		    << " egpid= "     << track[(rch_hit->track_p-1)].eg_pid << endl;
 // 			    << tpc_hit[zz].x[1] << " "
+// 			    << tpc_hit[zz].x[2] << " ";
 		mFilter( hit );
-	    
+		PR(hit.volumeID());
+		if ( hit.volumeID() != "RCSI" ) { 
+		    mIonize( hit );		 
+		
+		else {
+#endif
+		    // check if it is photon
+		    if ( hit.dE() > 0 ) 
+			mInduceSignal ( hit );
+		    //
+// 		    cout << "RGAP" << "ii/size " << ii << " " << theList.size() << endl;
 			mInduceSignal(hit);
 			theList.push_back(new StRichMiniHit(hit.position(),
 							    hit.momentum(),
