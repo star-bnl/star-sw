@@ -1,5 +1,7 @@
 #ifndef StiKalmanTrackNode_H
 #define StiKalmanTrackNode_H 1
+#define STI_NODE_DEBUG
+
 #include <Stiostream.h>
 #include <stdlib.h>
 #include <stdexcept>
@@ -117,10 +119,13 @@ public:
     {
       return _chi2;
     }
-  void setChi2(double chi2)
-    {
-      _chi2 = chi2;
-    }
+#ifdef STI_NODE_DEBUG
+  void setChi2(double chi2);
+#endif  
+#ifndef STI_NODE_DEBUG
+  void setChi2(double chi2){_chi2 = chi2;}
+#endif  
+
   StThreeVector<double>getPoint() const;
   StThreeVector<double>getGlobalPoint() const;
   /// Calculates and returns the momentum and error of the track at this node in global coordinates.
@@ -557,7 +562,7 @@ inline const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTr
   _c42  = n._c42;
   _c43  = n._c43;
   _c44  = n._c44;
-  _chi2 = n._chi2;
+  setChi2(n._chi2);
   eyy   = n.eyy;
   ezz   = n.ezz;
   hitCount = n.hitCount;

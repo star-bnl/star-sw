@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.43 2004/10/26 06:45:41 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.44 2004/10/27 03:25:54 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.44  2004/10/27 03:25:54  perev
+ * Version V3V
+ *
  * Revision 2.43  2004/10/26 06:45:41  perev
  * version V2V
  *
@@ -648,19 +651,15 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     throw runtime_error("StiStEventFiller::fillGeometry() -F- track==0");
 
 
-  StiKalmanTrackNode* node;
-  if (outer)
-    node = track->getOuterMostHitNode();
-  else
-    node = track->getInnerMostHitNode();
+  StiKalmanTrackNode* node = track->getInnOutMostNode(outer,2);
   StiHit *ihit = node->getHit();
   StThreeVectorF origin(node->getX(),node->getY(),node->getZ());
   StThreeVectorF hitpos(ihit->x()   ,ihit->y()   ,ihit->z()   );
   double dif = (hitpos-origin).mag();
   if (dif>5.) {
-    printf("*** DIFF TOO BIG %g\n",dif);
+    printf("*** DIFF TOO BIG %g chi2 = %g\n",dif,node->getChi2());
     printf("H=%g %g %g N =%g %g %g\n",hitpos.x(),hitpos.y(),hitpos.z(),origin.x(),origin.y(),origin.z());
-  //assert(dif<5.);
+//    assert(dif<5.);
   }
   origin.rotateZ(node->getRefAngle());
 
@@ -713,7 +712,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiKalmanTrack* track){
   geantIdPidHyp = 9;
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
-  StiKalmanTrackNode* node = track->getInnerMostHitNode();
+  StiKalmanTrackNode* node = track->getInnerMostHitNode(2);
   double alpha, xRef, x[5], covM[15], chi2node;
   node->get(alpha,xRef,x,covM,chi2node);
   float chi2[2];
@@ -924,7 +923,7 @@ void StiStEventFiller::stEventFitPoints(StiKalmanTrack* track, int *nFitPoints)
 	if (ktn.getChi2() > maxChi2)	continue;
         StiHit *stih = ktn.getHit();
         if (!stih)			continue;
-	const StHit* hit = (const StHit*)stih->stHit();
+	const StHit* hit = dynamic_cast<const StHit*>(stih->stHit());
         if (!hit) 			continue;
           // use StDetectorId's and accumulate
 	StDetectorId detId = hit->detector();
@@ -940,7 +939,7 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
     }
   StiKalmanTrackNode*	node;
 
-  node = track->getInnerMostHitNode(); // changed to InnerMostHitNode()...
+  node = track->getInnerMostHitNode(2); // changed to InnerMostHitNode()...
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
 

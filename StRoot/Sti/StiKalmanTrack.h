@@ -209,15 +209,19 @@ class StiKalmanTrack : public StiTrack
 	StiKTNBidirectionalIterator begin() const;
 	StiKTNBidirectionalIterator end() const;
 
+   /// Accessor method returns the inner/outer most node associated with the track.
+   /// inot: 0=inner, 1=outer; 
+   /// qua : 0=nocheck, 1=with hit inside, 2=and chi2 non infinit
+   StiKalmanTrackNode * getInnOutMostNode(int inot,int qua)  const;
    /// Accessor method returns the outer most node associated with the track.
    StiKalmanTrackNode * getOuterMostNode()  const;
    /// Accessor method returns the inner most node associated with the track.
    StiKalmanTrackNode * getInnerMostNode()   const;
 
    /// Accessor method returns the outer most hit node associated with the track.
-   StiKalmanTrackNode * getOuterMostHitNode()  const;
+   StiKalmanTrackNode * getOuterMostHitNode(int qua=1)  const;
    /// Accessor method returns the inner most hit node associated with the track.
-   StiKalmanTrackNode * getInnerMostHitNode()   const;
+   StiKalmanTrackNode * getInnerMostHitNode(int qua=1)   const;
 
    /// Accessor method returns the first node associated with the track.
    StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
@@ -555,6 +559,7 @@ inline StiKTNBidirectionalIterator StiKalmanTrack::end() const
   if (!firstNode)
     throw runtime_error("StiKalmanTrack::end() - ERROR - firstNode==0");
   return StiKTNBidirectionalIterator(lastNode);
+//VP  return StiKTNBidirectionalIterator(0);
 }
 
 /*! Accessor method to get the dca.

@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.38 2004/10/26 21:52:07 pruneau Exp $
- * $Id: StiKalmanTrack.cxx,v 2.38 2004/10/26 21:52:07 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.39 2004/10/27 03:25:49 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.39 2004/10/27 03:25:49 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.39  2004/10/27 03:25:49  perev
+ * Version V3V
+ *
  * Revision 2.38  2004/10/26 21:52:07  pruneau
  * No truncation but bad hits dropped
  *
@@ -678,10 +681,10 @@ int StiKalmanTrack::getFitPointCount()    const
 */
 double StiKalmanTrack::getTrackLength() const
 {
-  StiKalmanTrackNode * inNode = getInnerMostHitNode();
+  StiKalmanTrackNode * inNode = getInnerMostHitNode(2);
   StThreeVectorD in(inNode->getX(),inNode->getY(),inNode->getZ());
   in.rotateZ(inNode->getRefAngle());
-  StiKalmanTrackNode * otNode = getOuterMostHitNode();
+  StiKalmanTrackNode * otNode = getOuterMostHitNode(2);
   StThreeVectorD ot(otNode->getX(),otNode->getY(),otNode->getZ());
   ot.rotateZ(otNode->getRefAngle());
   StPhysicalHelixD hlx(fabs(inNode->getCurvature()),
@@ -783,23 +786,24 @@ double StiKalmanTrack::getTrackRadLength() const
 	 \return inner most hit node on this track
 	 \throws logic_error
 */
-StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
+StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
   if (firstNode==0 || lastNode==0)
 		{
-		  //cout << "StiKalmanTrack::getOuterMostHitNode() -E- firstNode||lastNode==0" << endl;
-		  throw runtime_error("StiKalmanTrack::getOuterMostHitNode() -E- firstNode||lastNode==0");
+		  //cout << "StiKalmanTrack::getInnOutMostHitNode() -E- firstNode||lastNode==0" << endl;
+		  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
 		}
   StiKTNBidirectionalIterator it;
   
   StiKalmanTrackNode *node;
-  if (trackingDirection==kOutsideIn)
+  if (trackingDirection!=kOutsideIn) inot = !inot;
+  if (inot)
     {
       for (it=begin();it!=end();it++)
 				{
 	  node = &*it;
-	  if (!node->getHit()) 		continue;
-          if (node->getChi2()>10000.) 	continue;
+	  if (qua   && !node->getHit()) 	continue;
+          if (qua>1 && node->getChi2()>10000.) 	continue;
 	  return node;
 				}
     }
@@ -808,13 +812,17 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
       for (it=end();it!=begin();it--)
       {
 	  node = &*it;
-	  if (!node->getHit()) 		continue;
-          if (node->getChi2()>10000.) 	continue;
+	  if (qua   && !node->getHit()) 	continue;
+          if (qua>1 && node->getChi2()>10000.) 	continue;
 	  return node;
       }
     }
-  //cout << "StiKalmanTrack::getOuterMostHitNode() -E- Track has no hit" << endl;
-  throw runtime_error("StiKalmanTrack::getOuterMostHitNode() -E- Track has no hit");
+  //cout << "StiKalmanTrack::getInnOutMostHitNode() -E- Track has no hit" << endl;
+  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- Track has no hit");
+}
+StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode(int qua)  const
+{
+  return getInnOutMostNode(1,qua);
 }
 
 
@@ -828,38 +836,9 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 	 \return outer most hit node on this track
 */
 
-StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
+StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode(int qua)   const
 {
-  if (firstNode==0 || lastNode==0)
-    {
-      //cout << "StiKalmanTrack::getInnerMostHitNode() -E- firstNode||lastNode==0" << endl;
-      throw runtime_error("StiKalmanTrack::getInnerMostHitNode() -E- firstNode||lastNode==0");
-    }
-  StiKTNBidirectionalIterator it;
-  
-  StiKalmanTrackNode *node;
-  if (trackingDirection==kInsideOut)
-    {
-      for (it=begin();it!=end();it++)
-	{
-	  node = &*it;
-	  if (!node->getHit()) 		continue;
-          if (node->getChi2()>10000.) 	continue;
-	  return node;
-	}
-    }
-  else
-    {	
-      for (it=end();it!=begin();it--)
-	{
-	  node = &*it;
-	  if (!node->getHit()) 		continue;
-          if (node->getChi2()>10000.) 	continue;
-	  return node;
-	}
-    }
-  //cout << "StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit" << endl;
-  throw runtime_error("StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit");
+  return getInnOutMostNode(0,qua);
 }
 
 /*! Return true if inner most hit associated with this track is main vertex.
