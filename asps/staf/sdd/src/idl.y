@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.24 2000/03/27 01:49:47 fine Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.25 2000/04/14 23:34:58 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -810,7 +810,6 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
     FF"  );\n");
-  }
     FF"  Int_t operator()(\n");
 /*    for(i=1;i<gNIncFile;i++) {
        FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
@@ -821,6 +820,7 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
     FF"  );\n");
+  }
   FF"\n");
   FF"// Calling the wrapped STAF module\n");
   FF"\n");
