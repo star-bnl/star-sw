@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.118 2001/09/17 13:37:57 fisyak Exp $
+# $Id: Construct,v 1.119 2001/12/19 20:48:28 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -293,7 +293,7 @@ foreach my $dir( "pams", "StRoot" ,"StPiD" ) {
 print "subdirs = @subdirs\n" if $param::debug;
 my @Targets = ();
 
-foreach $dir( "asps/rexe", "asps/staf/sdd","StDb", @subdirs ) {
+foreach $dir( "asps/rexe", "asps/staf/sdd", "asps/Jprof", "StDb", @subdirs ) {
     if ( -d $dir ) {
         print "Add dir : $dir\n" if $param::debug;
         push @Targets, $OBJ . "/" . $dir . "/Conscript";
