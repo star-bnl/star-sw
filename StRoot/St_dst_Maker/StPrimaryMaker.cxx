@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.14 1999/10/19 00:11:30 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.15 1999/10/27 19:31:16 nystrand Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.15  1999/10/27 19:31:16  nystrand
+// Added call to lmv
+//
 // Revision 1.14  1999/10/19 00:11:30  fisyak
 // Remove aux tables
 //
@@ -63,6 +66,8 @@
 #include "global/St_evr_am_Module.h"
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
+
+long lmv(St_dst_track *track, St_dst_vertex *vertex);
 
 //class St_tcl_tpcluster;
 //class St_scs_cluster;
@@ -203,11 +208,21 @@ Int_t StPrimaryMaker::Make(){
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
   
-  // evr
-  if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
-  
-  iRes = evr_am(m_evr_evrpar,globtrk,vertex);
-  //	 ================================================
+
+  // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
+  long NGlbTrk = tptrack->GetNRows();
+  if( NGlbTrk < 15 ){
+    // lmv
+    if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
+    iRes = lmv(globtrk,vertex);
+    //   ================================================
+  }
+  else{    
+    // evr
+    if(Debug()) gMessMgr->Debug() << "run_evr: calling evr_am" << endm;
+    iRes = evr_am(m_evr_evrpar,globtrk,vertex);
+    //	 ================================================
+  }
   
   if (iRes !=kSTAFCV_OK) return kStWarn;
   
