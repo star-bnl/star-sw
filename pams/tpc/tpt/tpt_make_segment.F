@@ -1,6 +1,37 @@
+* $Id: tpt_make_segment.F,v 1.2 1998/01/27 00:35:49 fisyak Exp $
+* $Log: tpt_make_segment.F,v $
+* Revision 1.2  1998/01/27 00:35:49  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_MAKE_SEGMENT(ntrk,hit_h,hit,tpar_h,tpar,
      >                                        pad_pl_h,pad_pl,trk,
      >                        next_hit,slice_loc,slice_pnt,ipass)
+C>----------------------------------------------------------------------
+C
+C TPT_MAKE_SEGMENT - generate one segment starting from a given root
+C
+C DESCRIPTION:
+C Routine generates a track segment asuming it starts at the vertex 
+C and uses linear extrapolation to update track parameters. Once a
+C new point is found the outermost point is dropped and the new one
+C is used to evaluate track parameters.
+C 
+C INPUT PARAMETERS:
+C  tpar_h    - header for the tptpar (tracking parameters) table
+C  tpar     - tracking parameters table
+C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
+C  pad_pl   - pad_plane geometry table
+C  hit_h     - header for the tphit (tpc hits) table
+C  hit      - rows of the tphit table
+C  loc_hit  - pointers to the tphit table sorted according to the 
+C             row/sec field
+C  tpstart  - pointers to first hits in every row/sector
+C  tpcount  - # of hits in a given row/sector
+C  ntrk     - current track number
+C
+C OUTPUT ARGUMENTS:
+C  trk      - structure of reconstructed segments
+C<---------------------------------------------------------------------
 C
 C Modified: 13-NOV-1997 by R.Bossingham
 C           Eliminate unused variables.

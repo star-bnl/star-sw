@@ -1,3 +1,8 @@
+* $Id: tpt_load_track.F,v 1.2 1998/01/27 00:35:49 fisyak Exp $
+* $Log: tpt_load_track.F,v $
+* Revision 1.2  1998/01/27 00:35:49  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_LOAD_TRACK(ipt,track_h,track,trk)
 C>--------------------------------------------------------------------
 C

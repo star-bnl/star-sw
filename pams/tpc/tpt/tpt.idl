@@ -1,6 +1,6 @@
-/*	tpt_am.idl
+/*	tpt.idl
 *
-*	Module: tpt_am
+*	Module: tpt
 *	description: TPC tracking
 */
 #include "PAM.idl"
@@ -9,7 +9,7 @@
 #include "tcl_tphit.idl"
 #include "tpt_track.idl"
 
-interface tpt_am : amiModule{
+interface tpt : amiModule{
 	STAFCV_T call
 		( in    tpt_pars tpar
 		, in    tpg_pad_plane pad_pl

@@ -1,3 +1,8 @@
+* $Id: tpt_rad_comp.F,v 1.2 1998/01/27 00:35:52 fisyak Exp $
+* $Log: tpt_rad_comp.F,v $
+* Revision 1.2  1998/01/27 00:35:52  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_RAD_COMP(i,j)
       IMPLICIT NONE
 

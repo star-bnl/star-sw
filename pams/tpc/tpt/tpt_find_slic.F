@@ -1,3 +1,8 @@
+* $Id: tpt_find_slic.F,v 1.2 1998/01/27 00:35:45 fisyak Exp $
+* $Log: tpt_find_slic.F,v $
+* Revision 1.2  1998/01/27 00:35:45  fisyak
+* Split sources
+*
       integer function tpt_find_slic(z,nzslic,islic)
 C
 C Modified: 13-NOV-1997 by R.Bossingham

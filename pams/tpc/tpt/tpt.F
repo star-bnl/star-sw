@@ -1,7 +1,12 @@
-      INTEGER FUNCTION TPT_AM(tpar_h,tpar,pad_pl_h,pad_pl,
+* $Id: tpt.F,v 1.2 1998/01/27 00:35:42 fisyak Exp $
+* $Log: tpt.F,v $
+* Revision 1.2  1998/01/27 00:35:42  fisyak
+* Split sources
+*
+      INTEGER FUNCTION TPT(tpar_h,tpar,pad_pl_h,pad_pl,
      >                               hit_h,hit,track_h, track)
 C
-C TPT_AM - main track finding 
+C TPT - main track finding 
 C
 C DESCRIPTION:
 C Sets up corespondence between the hit id and the entry in the tphit
@@ -30,7 +35,7 @@ C           Eliminate unused variable.
 C
       IMPLICIT NONE
 
-#include "tpt_am.inc"
+#include "tpt.inc"
 
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
@@ -75,7 +80,7 @@ C     initialize timing counters
       endif
 
 C     set return value to normal success
-      tpt_am = STAFCV_OK
+      tpt = STAFCV_OK
 C     set counter for number of rows of good data to 0
       track_h.nok = 0
 C     preset all the hit(i).track to 0
@@ -115,7 +120,7 @@ c     Set up tables so that hit could be found within rows and sectors
 
       if(iret.ne.0) then
             write(6,*) 'unable to set pointers to hits'
-            tpt_am=STAFCV_BAD
+            tpt=STAFCV_BAD
             return
       else 
             if(tpar(ipass).debug(1).eq.1) then
@@ -151,7 +156,7 @@ C     Then do the regular segment formation from what is left out.
       if(iret.ne.STAFCV_OK) then
 C           failed while generating segments
             write(6,*) 'problem in segment finding'
-            tpt_am=STAFCV_BAD
+            tpt=STAFCV_BAD
             return
       endif
       if(tpar(ipass).debug(1).eq.1) then
@@ -171,7 +176,7 @@ C             extend track segments crossing the sector boundries
               if(iret.ne.STAFCV_OK) then
 C               failed while extending segments
                 write(6,*) 'problem in extending segments'
-                tpt_am=STAFCV_BAD
+                tpt=STAFCV_BAD
                 return
               endif
               if(tpar(ipass).merge.eq.1) then
@@ -185,7 +190,7 @@ C                 merge pieces of tracks together
                   time_merge = time_now
                   if(iret.eq.STAFCV_BAD) then
                     write(6,*) 'problems in segment merging'
-                    tpt_am=STAFCV_BAD
+                    tpt=STAFCV_BAD
                   endif
               endif
       endif
@@ -210,7 +215,7 @@ C     Set up tables so that hit could be found within rows and sectors
 
         if(iret.ne.0) then
             write(6,*) 'unable to set pointers to hits'
-            tpt_am=STAFCV_BAD
+            tpt=STAFCV_BAD
             return
         else 
             if(tpar(ipass).debug(1).eq.1) then

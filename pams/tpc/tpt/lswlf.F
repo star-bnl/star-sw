@@ -1,3 +1,8 @@
+* $Id: lswlf.F,v 1.2 1998/01/27 00:35:42 fisyak Exp $
+* $Log: lswlf.F,v $
+* Revision 1.2  1998/01/27 00:35:42  fisyak
+* Split sources
+*
       INTEGER FUNCTION LSWLF(X,Y,W,N,A,B,CHISQ,SIGA,SIGB)
 C>--------------------------------------------------------------
 C

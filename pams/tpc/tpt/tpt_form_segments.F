@@ -1,3 +1,8 @@
+* $Id: tpt_form_segments.F,v 1.2 1998/01/27 00:35:47 fisyak Exp $
+* $Log: tpt_form_segments.F,v $
+* Revision 1.2  1998/01/27 00:35:47  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_FORM_SEGMENTS(hit_h,hit,
      >                                   track_h,track,
      >                                   tpar_h,tpar,
@@ -5,6 +10,37 @@
      >                                   loc_hit,tpstart,tpcount,trk,
      >                                   next_hit,slice_loc,slice_pnt,
      >	                                 ipass,what)
+C>--------------------------------------------------------------------
+C
+C TPT_FORM_SEGMENTS - segment formation with the linear extrapolation
+C
+C DESCRIPTION:
+C Start from the outermost row in every sector and work your way
+C towards the TPC center. Find all the 3-hit links from every hit
+C that has not been used so far (tpt_find_root) and try to build track
+C segments starting from them. For every point select 
+C the best reconstructed
+C fragment and forget about all the others. Use the linear extrapolation
+C when calculating predictions.
+C
+C INPUT ARGUMENTS:
+C  tpar_h    - header for the tptpar (tracking parameters) table
+C  tpar     - tracking parameters table
+C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
+C  pad_pl   - pad_plane geometry table
+C  hit_h     - header for the tphit (tpc hits) table
+C  hit      - rows of the tphit table
+C  loc_hit  - pointers to the tphit table sorted according to the 
+C	      row/sec field
+C  tpstart  - pointers to first hits in every row/sector
+C  tpcount  - count of hits for every row/sector
+C
+C OUTPUT ARGUMENTS:
+C  track_h   - header for the tptrack (reconstructed tracks) table
+C  track    - rows of the tptrack table
+C  trk      - structure with # of entries equal to number of generated
+C             track segments. Carries pointers to the hits on tracks
+C             and preliminary track parameters
 C
 C Modified: 13-NOV-1997 by R.Bossingham
 C           Eliminate unused variables.

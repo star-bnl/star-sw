@@ -1,3 +1,8 @@
+* $Id: tpt_hit_pnt.F,v 1.2 1998/01/27 00:35:48 fisyak Exp $
+* $Log: tpt_hit_pnt.F,v $
+* Revision 1.2  1998/01/27 00:35:48  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_HIT_PNT(hit_h,hit,list_hits)
 C>---------------------------------------------------------------------
 C

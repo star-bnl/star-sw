@@ -1,3 +1,8 @@
+* $Id: tpt_fit_uv.F,v 1.2 1998/01/27 00:35:47 fisyak Exp $
+* $Log: tpt_fit_uv.F,v $
+* Revision 1.2  1998/01/27 00:35:47  fisyak
+* Split sources
+*
       integer function tpt_fit_uv(x0,y0,iflag,x,y,at,bt)
       implicit none
 #include "PAM.inc"

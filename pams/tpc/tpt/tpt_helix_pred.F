@@ -1,3 +1,8 @@
+* $Id: tpt_helix_pred.F,v 1.2 1998/01/27 00:35:48 fisyak Exp $
+* $Log: tpt_helix_pred.F,v $
+* Revision 1.2  1998/01/27 00:35:48  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_HELIX_PRED(itrk,pad_pl_h,pad_pl,trk,isect,
      >                                irow,tpar_h,tpar,np,xp,yp,ipass)
 C>--------------------------------------------------------------------

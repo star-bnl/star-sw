@@ -1,6 +1,38 @@
+* $Id: tpt_project.F,v 1.2 1998/01/27 00:35:50 fisyak Exp $
+* $Log: tpt_project.F,v $
+* Revision 1.2  1998/01/27 00:35:50  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_PROJECT(itrk,hit_h,hit,track_h,track,
      >                 tpar_h,tpar,pad_pl_h,pad_pl,trk,next_hit,
      >                 slice_loc,slice_pnt,ipass)
+C>--------------------------------------------------------------------
+C
+C TPT_PROJECT - adds more points to the itrk track
+C
+C DESCRIPTION:
+C Two neighbouring sectors as wee as the one in which the segment is
+C are searched for hits that are within tolerances.
+C
+C INPUT ARGUMENTS:
+C  itrk     - track number of a track to be extended
+C  hit_h     - header for the tphit (tpc hits) table
+C  hit      - rows of the tphit table
+C  track_h   - header for the tptrack (reconstructed tracks) table
+C  track    - rows of the tptrack table
+C  tpar_h    - header for the tptpar (tracking parameters) table
+C  tpar     - tracking parameters table
+C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
+C  pad_pl   - pad_plane geometry table
+C  loc_hit  - pointers to the tphit table sorted according to the row/sec field
+C  tpstart  - pointers to first hits in every row/sector
+C  tpcount  - count of hits for every row/sector
+C  trk      - structure of reconstructed segments
+C
+C OUTPUT ARGUMENTS:
+C  trk      - structure of reconstructed segments
+C AUTHOR:
+C<---------------------------------------------------------------------
 C
 C Modified: 13-NOV-1997 by R.Bossingham
 C           Eliminate unused variables.

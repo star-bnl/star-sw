@@ -1,3 +1,8 @@
+* $Id: tpt_find_outlier.F,v 1.2 1998/01/27 00:35:44 fisyak Exp $
+* $Log: tpt_find_outlier.F,v $
+* Revision 1.2  1998/01/27 00:35:44  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_FIND_OUTLIER(ipt,trk
      >       ,xcir,ycir,zcir,wcir,wlin,ncir,tpar_h,tpar,ibad,ipass)
 C>--------------------------------------------------------------------

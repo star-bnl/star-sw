@@ -1,3 +1,12 @@
+* $Id: tpt_extend_segments.F,v 1.2 1998/01/27 00:35:44 fisyak Exp $
+* $Log: tpt_extend_segments.F,v $
+* Revision 1.2  1998/01/27 00:35:44  fisyak
+* Split sources
+*
+      INTEGER FUNCTION TPT_EXTEND_SEGMENTS(hit_h,hit,track_h,track,
+     >                             tpar_h,tpar,pad_pl_h,pad_pl,trk,
+     >                             next_hit,slice_loc,slice_pnt,
+     >                             last_track,ipass)
 C>--------------------------------------------------------------------
 C
 C TPT_EXTEND_SEGMENTS -  extends segments starting from the longest one
@@ -30,10 +39,6 @@ C  trk      - structure of reconstructed segments
 C AUTHOR:
 C
 C<--------------------------------------------------------------------
-      INTEGER FUNCTION TPT_EXTEND_SEGMENTS(hit_h,hit,track_h,track,
-     >                             tpar_h,tpar,pad_pl_h,pad_pl,trk,
-     >                             next_hit,slice_loc,slice_pnt,
-     >                             last_track,ipass)
 C
 C Modified: 13-NOV-1997 by R.Bossingham
 C           Eliminate unused variables.

@@ -1,3 +1,8 @@
+* $Id: tpt_cross_fact.F,v 1.2 1998/01/27 00:35:44 fisyak Exp $
+* $Log: tpt_cross_fact.F,v $
+* Revision 1.2  1998/01/27 00:35:44  fisyak
+* Split sources
+*
       INTEGER FUNCTION TPT_CROSS_FACT(idet,xnew,ynew,xold,yold,cf,theta)
 C>------------------------------------------------------------------------
 C
