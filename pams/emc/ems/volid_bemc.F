@@ -1,8 +1,8 @@
-      subroutine volid_bemc(ivid,eta,phi,dep)
+      subroutine volid_bemc(ivid,eta,phi,dep,shift)
       implicit none
       integer emc_ivid(5)/10000000,100000,100,10,1/ ! matched with AGI and G2T
       integer ivid, eta, phi, dep, emc_chid(5), i, rl, sphi
-      integer shift /51/
+      real shift
 
       do i = 1,5
          emc_chid(i) = ivid/emc_ivid(i)
@@ -18,21 +18,19 @@
       sphi = emc_chid(4)        ! d(eta)=0.1 tower number [1,10]
       dep  = emc_chid(5)        ! depth section [1,2]
 c      print *,'BEMC:rl,eta,phi,sphi,dep',rl,eta,phi,sphi,dep
+      print *,'shift  --->',shift
       if(rl.eq.0) then
          rl=2
          phi=phi+(shift-75)/6
-         if(phi.gt.60) then
+         if(phi.gt.120) then
             phi=phi-60
-         elseif(phi.le.0) then
-            phi=60-phi
+         elseif(phi.le.60) then
+            phi=phi+60
          endif
       endif
-      if(rl.eq.1) then
-         phi=phi*2-2+sphi
-      elseif(rl.eq.2) then
+      phi=2*phi-2+sphi
+      if(rl.eq.2) then
          eta=-eta
-c         phi=(120-phi)*2+3-sphi
-         phi=238-(120-phi)*2+sphi
       endif
 c      print *,'BEMC:eta,phi',eta,phi
       return
