@@ -6,6 +6,12 @@
 #include <math.h>
 #include <string>
 
+//Root (Temp)
+#include "TCanvas.h"
+#include "TPolyMarker3D.h"
+#include "TNode.h"
+#include "TTUBE.h"
+
 // StRoot
 #include "StChain.h"
 #include "St_DataSet.h"
@@ -20,15 +26,17 @@
 #include "StEventTypes.h"
 
 // Sti
-#include "Sti/StiGeometryTransform.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHitFiller.h"
 #include "Sti/StiDetectorContainer.h"
-#include "Sti/StiDrawableDetector.h"
 #include "Sti/StiTrackContainer.h"
+#include "Sti/StiGeometryTransform.h"
+
+//StiGui
+#include "StiGui/StiDrawableDetector.h"
+#include "StiGui/StiDisplayManager.h"
 
 // StiMaker
-#include "StiDisplayManager.h"
 #include "StiMaker.h"
 
 StiMaker* StiMaker::sinstance = 0;
@@ -89,28 +97,26 @@ Int_t StiMaker::Init()
     //Ben, uncomment the next line to produce seg-fualt, and then look at StiGeometryTransform constructor.  MLM
     //StiGeometryTransform* trans = StiGeometryTransform::instance();
     
-    mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
-
     mtrackstore = StiTrackContainer::instance();
     mhitstore = StiHitContainer::instance();
     mhitfactory = new StiHitFactory("HitFactory");
 
+    mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
     mdisplay->cd();
     mdisplay->draw();
     mdisplay->update();
-
-    mdetector = StiDetectorContainer::instance();
-
+    
+    
     //Must build Polygons and Materials before detectors
+    mdetector = StiDetectorContainer::instance();
     mdetector->buildPolygons(mpolygonbuildpath);
     mdetector->buildMaterials(mmaterialbuildpath);
     mdetector->buildDetectors(mdetectorbuildpath);
     mdetector->reset();
     mdetector->print();
-    
+      
     mdisplay->draw();
     mdisplay->update();
-
     
     //mhitfiller = new StiHitFiller();
     //mhitfiller->addDetector(kTpcId);

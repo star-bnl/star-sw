@@ -8,14 +8,16 @@
 #include "TControlBar.h"
 #include "StiMaker.h"
 
+//Sti
 #include "Sti/StiDetector.h"
-#include "Sti/StiDrawableDetector.h"
 #include "Sti/StiDetectorContainer.h"
 
+//StiGui
+#include "StiGui/StiDrawableDetector.h"
+#include "StiGui/StiDisplayManager.h"
 
-#include "StiDisplayManager.h"
+//StiMaker
 #include "StiControlBar.h"
-//#include "TestActionClass.h"
 
 int StiControlBar::mevent = 0;
 StChain* StiControlBar::mchain = 0;
