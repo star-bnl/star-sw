@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.70 2003/09/02 17:59:31 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.71 2004/01/14 22:29:35 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.71  2004/01/14 22:29:35  fisyak
+// Add IdTruth
+//
 // Revision 1.70  2003/09/02 17:59:31  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -344,6 +347,10 @@ Int_t St_tcl_Maker::Make() {
 	St_DataSetIter sect(sector);
 	St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
 	St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
+	St_type_shortdata  *pixel_indx_in  = (St_type_shortdata *) sect("pixel_indx_in");
+	St_type_shortdata  *pixel_indx_out = (St_type_shortdata *) sect("pixel_indx_out");
+	if (! pixel_indx_in  ) {pixel_indx_in  = new St_type_shortdata("pixel_indx_in",1);  AddGarb(pixel_indx_in);}
+	if (! pixel_indx_out ) {pixel_indx_out = new St_type_shortdata("pixel_indx_out",1); AddGarb(pixel_indx_out);}
 	sector_tot++;
 
 	//      TPH
@@ -356,6 +363,7 @@ Int_t St_tcl_Maker::Make() {
 	  Int_t tph_res = tph(m_tcl_sector_index, m_tclpar,m_tsspar,
 			      m_tpg_pad_plane,
 			      pixel_data_in, pixel_data_out,
+			      pixel_indx_in, pixel_indx_out,
 			      tpseq, tpcluster, tphit);
 	  if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
 	}
@@ -475,7 +483,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.70 2003/09/02 17:59:31 perev Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.71 2004/01/14 22:29:35 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
