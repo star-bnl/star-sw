@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.3 1999/11/05 22:26:01 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.4 1999/11/18 18:18:17 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.4  1999/11/18 18:18:17  kathy
+// adding default logY hist list for EventQA histogram set
+//
 // Revision 1.3  1999/11/05 22:26:01  kathy
 // now allow setting of global title from a method
 //
@@ -469,7 +472,35 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "QaParticleVtxZ"
    };
   sdefList = sdefList1;
-  lengofList = sizeof(sdefList1)/4;
+  lengofList = sizeof(sdefList1)/4;  
+  }
+
+  if (strcmp(dirName,"EventQA")==0) {
+   Char_t* sdefList2[] = {
+ "EQaGlobtrkDetId",
+ "EQaGlobtrkFlag",
+ "EQaGlobtrkNPnt",
+ "EQaGlobtrkNPntMax",
+ "EQaGlobtrkNPntFit",
+ "EQaGlobtrkPt",
+ "EQaGlobtrkP",
+ "EQaGlobtrkXf0",
+ "EQaGlobtrkXf",
+ "EQaGlobtrkYf0",
+ "EQaGlobtrkYf",
+ "EQaGlobtrkZf0",
+ "EQaGlobtrkZf",
+ "EQaGlobtrkR",
+ "EQaGlobtrkRnf",
+ "EQaGlobtrkTanl ",
+ "EQaGlobtrkTheta ",
+ "EQaGlobtrkEta",
+ "EQaGlobtrkLength",
+ "EQaGlobtrkImpact",
+ "EQaGlobtrkNdof",
+   };
+  sdefList = sdefList2;
+  lengofList = sizeof(sdefList2)/4;  
   }
 
   //  else 
