@@ -26,7 +26,9 @@
 	float rapidity_lb; /* Calculated rapidity of parent */
 	float rapidity_k0; /* Calculated rapidity of parent */
 	float rapidity_true; /* Real rapidity of parent */
-
+	float inv_mass_la; /*  invariant mass if lambda */
+	float inv_mass_lb; /*  invariant mass if anti-lambda */
+	float inv_mass_k0; /*  invariant mass if k0 */
    } ;
-/*  Last mod. for ev0_eval:   $Date: 1998/05/08 15:36:27 $ */
+/*  Last mod. for ev0_eval:   $Date: 1998/05/28 21:05:52 $ */
 
