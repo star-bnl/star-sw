@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.2 2000/09/08 18:55:53 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.3 2000/12/08 18:37:22 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.3  2000/12/08 18:37:22  genevb
+// Change kTofPatchId->kTofId
+//
 // Revision 2.2  2000/09/08 18:55:53  lansdell
 // turned on FTPC primary track histograms
 //
@@ -212,7 +215,7 @@ void StEventQAMaker::MakeHistGlob() {
       if (globtrk->topologyMap().numberOfHits(kRichId)>0) hists->m_det_id->Fill(kRichId);
       if (globtrk->topologyMap().numberOfHits(kFtpcWestId)>0) hists->m_det_id->Fill(kFtpcWestId);
       if (globtrk->topologyMap().numberOfHits(kFtpcEastId)>0) hists->m_det_id->Fill(kFtpcEastId);
-      if (globtrk->topologyMap().numberOfHits(kTofPatchId)>0) hists->m_det_id->Fill(kTofPatchId);
+      if (globtrk->topologyMap().numberOfHits(kTofId)>0) hists->m_det_id->Fill(kTofId);
       if (globtrk->topologyMap().numberOfHits(kCtbId)>0) hists->m_det_id->Fill(kCtbId);
       if (globtrk->topologyMap().numberOfHits(kSsdId)>0) hists->m_det_id->Fill(kSsdId);
       if (globtrk->topologyMap().numberOfHits(kBarrelEmcTowerId)>0) hists->m_det_id->Fill(kBarrelEmcTowerId);
@@ -566,7 +569,7 @@ void StEventQAMaker::MakeHistPrim() {
 	if (primtrk->topologyMap().numberOfHits(kRichId)>0) hists->m_pdet_id->Fill(kRichId);
 	if (primtrk->topologyMap().numberOfHits(kFtpcWestId)>0) hists->m_pdet_id->Fill(kFtpcWestId);
 	if (primtrk->topologyMap().numberOfHits(kFtpcEastId)>0) hists->m_pdet_id->Fill(kFtpcEastId);
-	if (primtrk->topologyMap().numberOfHits(kTofPatchId)>0) hists->m_pdet_id->Fill(kTofPatchId);
+	if (primtrk->topologyMap().numberOfHits(kTofId)>0) hists->m_pdet_id->Fill(kTofId);
 	if (primtrk->topologyMap().numberOfHits(kCtbId)>0) hists->m_pdet_id->Fill(kCtbId);
 	if (primtrk->topologyMap().numberOfHits(kSsdId)>0) hists->m_pdet_id->Fill(kSsdId);
 	if (primtrk->topologyMap().numberOfHits(kBarrelEmcTowerId)>0) hists->m_pdet_id->Fill(kBarrelEmcTowerId);
