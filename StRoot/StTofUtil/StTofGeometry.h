@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.3 2003/04/15 03:24:18 geurts Exp $
+ * $Id: StTofGeometry.h,v 1.4 2003/07/02 20:55:03 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.4  2003/07/02 20:55:03  geurts
+ * changed all InitXXX() methods from private to public
+ *
  * Revision 1.3  2003/04/15 03:24:18  geurts
  * many, many changes:
  * . updated and extended StructSlatHit, introduced tofSlatHitVector and Iterator
@@ -121,10 +124,6 @@ class StTofGeometry{
   unsigned short mTofSlatMap[42];    //! slatId-to-daq map (derived from mTofDaqMap)
 
   int calcSlatId(const int iphi, const int ieta) const;
-  void initGeomFromXdf(const Char_t* = 
-		       "/afs/rhic/star/users/geurts/public/dbase/ctg_pars.xdf");
-  void initGeomFromDbase(StMaker*);
-  void initDaqMap();
 
  public:
   StTofGeometry();
@@ -134,6 +133,10 @@ class StTofGeometry{
   bool Debug();
   void init();         // init the dbase and get the data from it
   void init(StMaker*); // init the dbase and get the data from it
+  void initGeomFromXdf(const Char_t* = 
+		       "/afs/rhic/star/users/geurts/public/dbase/ctg_pars.xdf");
+  void initGeomFromDbase(StMaker*);
+  void initDaqMap();
   StructTofParam tofParam() const; // geometry access member
 
   // return slat geometry of slatId
