@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.4 1999/07/17 00:32:07 genevb Exp $
+* $Id: tph_get_cluster_data.F,v 1.5 1999/10/01 03:16:57 snelling Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.5  1999/10/01 03:16:57  snelling
+* changed range for TDC from 1-512 to 0-511 (itdc_lo, itdc_hi) also in comments
+*
 * Revision 1.4  1999/07/17 00:32:07  genevb
 * Use StMessMgr
 *
@@ -49,8 +52,8 @@ C     itrk:         Track ID for MC data
 C     npix_seq:	(added 23 Nov 94) number of pixels in segment on each pad
 C     ipad_lo:      pad number lower limit for cluster
 C     ipad_hi:      pad number upper limit for cluster
-C     itdc_lo:      TDC lower limit (1-512) for cluster
-C     itdc_hi:      TDC upper limit (1-512) for cluster
+C     itdc_lo:      TDC lower limit (0-511) for cluster
+C     itdc_hi:      TDC upper limit (0-511) for cluster
 C
 C  Returns:
 C       Contained in the output arguments...

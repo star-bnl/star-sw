@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.15 1999/09/05 05:09:35 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.16 1999/10/01 03:16:57 snelling Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.16  1999/10/01 03:16:57  snelling
+* changed range for TDC from 1-512 to 0-511 (itdc_lo, itdc_hi) also in comments
+*
 * Revision 1.15  1999/09/05 05:09:35  sakrejda
 * Changed StError call:
 *          call StError('TPHAM - Hey -- ADCSUM=0!!!!')
@@ -81,8 +84,8 @@ C     irow:           Row number for cluster
 C     isec:           Sector number for cluster
 C     ipad_lo:        pad number lower limit for cluster
 C     ipad_hi:        pad number upper limit for cluster
-C     itdc_lo:        TDC lower limit (1-512) for cluster
-C     itdc_hi:        TDC upper limit (1-512) for cluster
+C     itdc_lo:        TDC lower limit (0-511) for cluster
+C     itdc_hi:        TDC upper limit (0-511) for cluster
 C
 C   Output arguments : 
 C

@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.16 1999/08/25 21:27:12 liq Exp $
+* $Id: tph.F,v 1.17 1999/10/01 03:16:55 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.17  1999/10/01 03:16:55  snelling
+* changed range for TDC from 1-512 to 0-511 (itdc_lo, itdc_hi) also in comments
+*
 * Revision 1.16  1999/08/25 21:27:12  liq
 * add new table tphitclus
 *
@@ -392,15 +395,15 @@ c ??? Check index?
      +,				    nclpix_max, npix_seq, ipad_lo
      +,				    ipad_hi, itdc_lo, itdc_hi)
             endif
-              if(itdc_hi.gt.512) then
+              if(itdc_hi.gt.511) then
                  write(m132,*) itdc_hi,'itdc_hi'
                  call StMessage(m132)
-                 itdc_hi=512
+                 itdc_hi=511
               endif
-              if(itdc_lo.lt.1) then
+              if(itdc_lo.lt.0) then
                  write(m132,*) itdc_lo,'itdc_lo'
                  call StMessage(m132)
-                 itdc_lo=1
+                 itdc_lo=0
               endif
 
 C Rai: patch from Bill Love, we might have to think of a better way
