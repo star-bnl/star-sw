@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.36 2003/10/08 21:17:15 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.37 2003/10/12 03:43:56 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -236,7 +236,7 @@ void StMuDstMaker::clear(){
 void StMuDstMaker::clear(TClonesArray* t, int& counter){
   DEBUGMESSAGE3("");
   if (t) { 
-    t->Clear(""); 
+    t->Delete(); 
     counter=0;
   }
  DEBUGMESSAGE3("out");
@@ -915,6 +915,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.37  2003/10/12 03:43:56  perev
+ * LeakOff TClonesArray::Clear replaced to Delete
+ *
  * Revision 1.36  2003/10/08 21:17:15  laue
  * StMuEmcUtil updates from Alex Suaide
  * StMuDst and StMuDstMaker fixes to take the double inheritance of the
