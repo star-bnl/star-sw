@@ -1,5 +1,8 @@
-* $Id: tgc_time_to_z.F,v 1.5 1999/07/26 21:17:25 sakrejda Exp $
+* $Id: tgc_time_to_z.F,v 1.6 1999/07/27 15:27:00 sakrejda Exp $
 * $Log: tgc_time_to_z.F,v $
+* Revision 1.6  1999/07/27 15:27:00  sakrejda
+* time to z and z to time changed to match Tom's notation, easier to follow, phase forced to 0, it has to be added to the tpg_detector table
+*
 * Revision 1.5  1999/07/26 21:17:25  sakrejda
 * z<->time changedto follow Tom's formula
 *
@@ -50,14 +53,15 @@ C     z - z coodinate in the local coordinate system
          dvel_local   = dvel
          clock_local  = clock
          z_offset     = z_inner_offset
-         t0_offset    = -trigger_offset
+         t0_offset    = trigger_offset
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
 
 
       zoff=0
       if(padrow.lt.14)zoff=z_offset
-      z = dvel_local*((float(time)-1.0)/clock_local) - int(t0_offset*clock_local-1.0)*dvel_local/clock_local-zoff
+c     t0_offset has to be a multiple of a time-bin duration.      
+      z = dvel_local*float(time-1.0)/clock_local + t0_offset*dvel_local - zoff
 
       tgc_time_to_z = STAFCV_OK      
 
