@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.7 2000/01/26 22:31:25 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.8 2000/01/28 18:51:26 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.8  2000/01/28 18:51:26  flierl
+// delete Stpixel .... created memory leak
+//
 // Revision 1.7  2000/01/26 22:31:25  flierl
 // make cc5 happy. change char to cons char
 //
@@ -196,14 +199,14 @@ Int_t St_l3Clufi_Maker::Make(){
 					    output_name[13] = sec_char;
 					}
 				    // allocate the table where the out bank will go for this supersector
-				    St_hit_bank[supersectorindex] = new St_hitarray(output_name,50000);
-				    St_hit_bank_this = St_hit_bank[supersectorindex];
+				    St_hit_bank[supersectorindex-1] = new St_hitarray(output_name,50000);
+				    St_hit_bank_this = St_hit_bank[supersectorindex-1];
 				    hit_bank_this_st = (hitarray_st*) St_hit_bank_this->GetTable();
 				    // fill TPCSECLP bankheader with 1,3,5 ... or 23
 				    hit_bank_this_st[3].data = (supersectorindex*2-1);
 				   
 				    // add out table to the main dataset visible with browser after bfc
-				    m_DataSet->Add(St_hit_bank[supersectorindex]);
+				    m_DataSet->Add(St_hit_bank[supersectorindex-1]);
 				    //m_DataSet->ls("*");
 
 				}
@@ -272,6 +275,8 @@ Int_t St_l3Clufi_Maker::Make(){
 			    //cout << "Done with this sector. " << endl;
 			}// if ((name = strstr(sector->GetName(),"Sector"))) 
 		}// while ( (sector = next()) && sectorindex<12 )
+	    // free memory
+	    delete Stpixel;
 	} //  if (raw_data_tpc) 
    
 
