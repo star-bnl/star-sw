@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.13 1999/05/13 19:57:27 fine Exp $
+// $Id: St_Node.h,v 1.14 1999/05/18 20:26:29 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.14  1999/05/18 20:26:29  fine
+// comments clean up
+//
 // Revision 1.13  1999/05/13 19:57:27  fine
 // St_Node  the TShape list has been introduced, St_Node file format has been changed
 //
@@ -74,7 +77,7 @@ class TList;
 
 class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill { 
  protected:
-   TShape         *fShape;         //Pointer to "master" shape definition
+   TShape         *fShape;         //Pointer to the "master" shape definition
    TList          *fListOfShapes;  //Pointer to the list of the shape definitions
    TString         fOption;        //List of options if any
    Int_t           fVisibility;    //Visibility flag
