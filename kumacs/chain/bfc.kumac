@@ -67,7 +67,7 @@
 * chain=' g2t tpg tfs tpt tte_e evout'_
  
 MACRO bfc _
-   TOP=.  _
+   TOP=$STAR  _
    adcxyzon=0 _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
