@@ -20,8 +20,6 @@ StHbtPicoEvent.o \
 gamovCorrect.o \
 StHbtParticle.o \
 StHbtIO.o \
-franks1Histo.o \
-franks2Histo.o \
 franks1HistoD.o \
 franks2HistoD.o \
 StHbtMaker.o \
