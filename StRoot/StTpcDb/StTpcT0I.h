@@ -1,7 +1,7 @@
 #ifndef __STTPCT0I__
 #define __STTPCT0I__
 #include <TObject.h>
-#include <StTpcPadPlaneI.h>
+#include "StTpcPadPlaneI.h"
 
 class StTpcT0I : public TObject {
 

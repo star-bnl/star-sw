@@ -1,6 +1,6 @@
 #ifndef __STRTPCELECTRONICS__
 #define __STRTPCELECTRONICS__
-#include <StTpcElectronicsI.h>
+#include "StTpcElectronicsI.h"
 #include "StDbLib/Geometry/tpcElectronics.h"
 
 class StRTpcElectronics : public StTpcElectronicsI {

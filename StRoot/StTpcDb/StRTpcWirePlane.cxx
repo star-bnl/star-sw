@@ -1,4 +1,4 @@
-#include <StRTpcWirePlane.h>
+#include "StRTpcWirePlane.h"
 
 ClassImp(StRTpcWirePlane)
 float  StRTpcWirePlane::anodeWireRadius() const {

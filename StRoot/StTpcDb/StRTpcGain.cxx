@@ -1,4 +1,4 @@
-#include <StRTpcGain.h>
+#include "StRTpcGain.h"
 
 ClassImp(StRTpcGain)
 

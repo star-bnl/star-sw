@@ -1,6 +1,6 @@
 #ifndef __STRTPCWIREPLANE__
 #define __STRPCWIREPLANE__
-#include <StTpcWirePlaneI.h>
+#include "StTpcWirePlaneI.h"
 #include "StDbLib/Geometry/tpcWirePlanes.h"
 
 class StRTpcWirePlane : public StTpcWirePlaneI {

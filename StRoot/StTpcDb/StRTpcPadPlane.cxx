@@ -1,4 +1,4 @@
-#include <StRTpcPadPlane.h>
+#include "StRTpcPadPlane.h"
 #include <iostream.h>
 
 ClassImp(StRTpcPadPlane)

@@ -1,7 +1,7 @@
 #ifndef __STTPCGAINI__
 #define __STTPCGAINI__
 #include <TObject.h>
-#include <StTpcPadPlaneI.h>
+#include "StTpcPadPlaneI.h"
 
 class StTpcGainI : public TObject {
 
