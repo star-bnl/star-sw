@@ -144,6 +144,7 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     
     fDetectorViewMenu = new TGPopupMenu(fClient->GetRoot());
     fDetectorViewMenu->AddEntry("Skeleton View", M_DetView_SkeletonView);
+    fDetectorViewMenu->AddEntry("Zoom Skeleton View",M_DetView_ZoomSkeletonView);
     fDetectorViewMenu->AddPopup("&All",mAllViewMenu);
     fDetectorViewMenu->AddPopup("&Tpc",mTpcViewMenu);
     fDetectorViewMenu->AddPopup("&Svt",mSvtViewMenu);
@@ -160,7 +161,6 @@ MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
     fDetectorMenu = new TGPopupMenu(fClient->GetRoot());
     fDetectorMenu->AddLabel("Access to the Detector Model");
     fDetectorMenu->AddSeparator();
-    fDetectorMenu->AddEntry("&Draw TestObject", M_Draw_TestObject);
     fDetectorMenu->AddPopup("&Navigate", mNavigateMenu);
     fDetectorMenu->AddPopup("&Visibility", fDetectorViewMenu);
 
@@ -440,6 +440,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		setSkeletonView();
 		break;
 
+	    case M_DetView_ZoomSkeletonView:
+		setZoomSkeletonView();
+		break;
+
 	    case M_DetNavigate_MoveIn:
 		moveIn();
 		break;
@@ -588,6 +592,13 @@ void MainFrame::setSkeletonView()
     StiDisplayManager::instance()->update();
 }
 
+void MainFrame::setZoomSkeletonView()
+{
+    StiDisplayManager::instance()->setZoomSkeletonView();
+    StiDisplayManager::instance()->draw();
+    StiDisplayManager::instance()->update();
+}
+
 void MainFrame::setSvtVisible()
 {
     StiDisplayManager::instance()->setSvtVisible();
@@ -619,7 +630,7 @@ void MainFrame::setTpcInvisible()
 void MainFrame::setIfcVisible()
 {
     cout <<"MainFrame::setIfcVisible(). Not yet implemented"<<endl;
-    //StiDisplayManager::instance()->setIfcVisible();
+    StiDisplayManager::instance()->setIfcVisible();
     StiDisplayManager::instance()->draw();
     StiDisplayManager::instance()->update();
 }
@@ -627,7 +638,7 @@ void MainFrame::setIfcVisible()
 void MainFrame::setIfcInvisible()
 {
     cout <<"MainFrame::setIfcInvisible(). Not yet implemented"<<endl;
-    //StiDisplayManager::instance()->setIfcInvisible();
+    StiDisplayManager::instance()->setIfcInvisible();
     StiDisplayManager::instance()->draw();
     StiDisplayManager::instance()->update();
 }
