@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.38 2003/12/24 21:30:45 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.39 2004/02/02 20:21:42 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.39  2004/02/02 20:21:42  ward
+ * Passing Token 0 events, on request of J. Lauret.
+ *
  * Revision 1.38  2003/12/24 21:30:45  perev
  * Cleanup of DAQ
  *
@@ -235,7 +238,7 @@ int StDAQReader::readEvent()
   if(fEventReader->eventIsCorrupted(fFd,oldOffset)) return kStErr; // Herb, Aug 28 2000
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
-  if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
+  // if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
   if (fTPCReader&&TPCPresent  ())       fTPCReader ->Update();
   if (fFTPCReader&&FTPCPresent())	fFTPCReader->Update();  
