@@ -1,3 +1,9 @@
+// $Id: V0PhysicalConstants.hh,v 1.2 2000/01/03 13:16:21 jcs Exp $
+//
+// $Log: V0PhysicalConstants.hh,v $
+// Revision 1.2  2000/01/03 13:16:21  jcs
+// Add CVS Id strings
+//
 ///////////////////////////////////////////////////////////
 //  This is an extension of the physical constansts of the 
 //    StarClassLibrary.  I try to use the same dotation.

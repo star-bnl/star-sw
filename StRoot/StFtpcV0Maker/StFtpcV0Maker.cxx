@@ -1,3 +1,9 @@
+// $Id: StFtpcV0Maker.cxx,v 1.7 2000/01/03 13:16:15 jcs Exp $
+//
+// $Log: StFtpcV0Maker.cxx,v $
+// Revision 1.7  2000/01/03 13:16:15  jcs
+// Add CVS Id strings
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StFtpcV0Maker                                                         //
