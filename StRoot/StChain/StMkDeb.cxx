@@ -26,6 +26,22 @@ int StMkDeb::Register  (StMaker *mk)
 } 
 
 //_____________________________________________________________________________
+void StMkDeb::Cancel(const TObject *mk)
+{
+  int i = fgArr->IndexOf(mk);
+  fgArr->AddAt(0,i);
+} 
+//_____________________________________________________________________________
+void StMkDeb::Cancel(StMaker *mk)
+{
+  int id = int(((TObject*)mk)->TObject::GetUniqueID())-1;
+  if (id<0) return;
+  ((TObject*)mk)->TObject::SetUniqueID(0);
+  TObject *to = fgArr->At(id);
+  if (to != mk)  delete to;
+  fgArr->AddAt(0,id);
+} 
+//_____________________________________________________________________________
 int StMkDeb::SetCurrent(const TObject *mk, int kind)
 {
   if (fgCurr<-1) Ready();
@@ -59,6 +75,9 @@ void StMkDeb::Ready()
   int lst = fgArr->GetLast();
   for (int i=0;i<=lst; i++) {
     TObject *to = fgArr->At(i);
+    if (!to) continue;
+    if (!to->TObject::TestBit(TObject::kNotDeleted)) {fgArr->AddAt(0,i); continue;}
+    if (to->IsA() == TNamed::Class()) continue;
     TString ts(to->ClassName());
     ts += "::";
     ts += to->GetName();
