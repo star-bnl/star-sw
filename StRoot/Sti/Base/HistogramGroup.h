@@ -5,6 +5,7 @@
 #include "Sti/Base/Vectorized.h"
 #include <TH1.h>
 #include <TH2.h>
+#include <TH3.h>
 #include <TFile.h>
 
 class HistogramGroup : public Named, public Described, public Vectorized<TH1>
@@ -30,6 +31,18 @@ class HistogramGroup : public Named, public Described, public Vectorized<TH1>
 			      int ny, 
 			      double yMin,
 			      double yMax);
+
+  TH3D * HistogramGroup::book(const string &title, 
+			      const string & description, 
+			      int nx, 
+			      double xMin,
+			      double xMax,
+			      int ny, 
+			      double yMin,
+			      double yMax,
+			      int nz, 
+			      double zMin,
+			      double zMax);
 
 };
 
