@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.10 2001/04/26 22:37:56 perev Exp $
+// $Id: St_trg_Maker.h,v 1.11 2001/07/25 19:10:53 ward Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.11  2001/07/25 19:10:53  ward
+// New function InitCtbArrays2001 for ctb_dsm_2001.map.
+//
 // Revision 1.10  2001/04/26 22:37:56  perev
 // HPcorrs
 //
@@ -70,12 +73,13 @@ class St_trg_Maker : public StMaker {
    Bool_t drawinit;
    StDAQReader *fVictorPrelim; //!
    StTRGReader *fVictor;       //!
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.10 2001/04/26 22:37:56 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.11 2001/07/25 19:10:53 ward Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    void dumpDataToScreenAndExit();
    void InitMwcArrays();
    void InitCtbArrays();
+   void InitCtbArrays2001(); // For data taken 2001 and (?) after. 
    Int_t SanityCheck();
    int auxctbmap[16],ctbmap[120][2];  // Hardcoded from ctb_dsm.map.
    int auxmwcmap[32],mwcmap[24][4];  // Hardcoded from mwc_dsm.map.
@@ -103,7 +107,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.10 2001/04/26 22:37:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.11 2001/07/25 19:10:53 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };
