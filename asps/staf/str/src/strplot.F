@@ -1,5 +1,5 @@
-	SUBROUTINE STR_Axis_Tick( Xmin, Xmax, Max_Nticks, Nticks, Xtick, 
-      & Nlabels, Xlabel, Clabel, Iscale, Cexponent )
+*
+	SUBROUTINE STR_Axis_Tick( Xmin, Xmax, Max_Nticks, Nticks, Xtick, Nlabels, Xlabel, Clabel, Iscale, Cexponent )
 
 	IMPLICIT NONE
 
@@ -131,230 +131,230 @@ C	  Number X axis every other tick -- but is even or odd better?
 303	FORMAT( 'STR_Axis_Tick-T1 (3) DigErrEven:' E15.8 '  DigErrOdd:' E15.8 )
 
 
-        IF ( ABS( DigErrOdd - DigErrEven ) .LT. 0.0005 ) THEN !Either is just as good.
+	  IF ( ABS( DigErrOdd - DigErrEven ) .LT. 0.0005 ) THEN !Either is just as good.
 
-*          If the X range includes zero, pick odd or even to put a label at zero (!!):
-          IF ( (Xmin.LE.0.) .AND. (Xmax.GE.0.) ) THEN !Zero is included -- center up on zero:
-            Odd = .TRUE. !Start odd, then toggle each time.
-#ifndef PGI
-            DO Itick = 1, Nticks_All
-*              X in WorldCoords:
-              XP = FLOAT( Itick - 1 ) * DXtick + XRmin
-              IF      ( XP .LT. Xmin ) THEN !Wouldn't plot this one.
-              ELSE IF ( XP .GT. Xmax ) THEN !Wouldn't plot this one.
-              ELSE !(Would try to) Plot this one:
-                IF ( ABS(XP) .LT. 0.0005 ) THEN !Close enough to zero:
-                  First_is_Odd = Odd !Start this way: odd or not odd.
-                  Even_Odd_Selection_Made = .TRUE.
-                END IF
-              END IF
-              Odd = .NOT. Odd
-            END DO
-#endif
-*          If the X range includes one, and not zero, pick odd or even to put a label at one:
-          ELSE IF ( (Xmin.LE.1.) .AND. (Xmax.GE.1.) ) THEN !One is included -- center up on one:
-            Odd = .TRUE. !Start odd, then toggle each time.
-            DO Itick = 1, Nticks_All
-*              X in WorldCoords:
-              XP = FLOAT( Itick - 1) * DXtick + XRmin
-              IF      ( XP .LT. Xmin ) THEN !Wouldn't plot this one.
-              ELSE IF ( XP .GT. Xmax ) THEN !Wouldn't plot this one.
-              ELSE !(Would try to) Plot this one:
-                IF ( ABS(XP-1.0) .LT. 0.0005 ) THEN !Close enough to one:
-                  First_is_Odd = Odd !Start this way: odd or not odd.
-                  Toggling_from_one = .TRUE.
-                  Even_Odd_Selection_Made = .TRUE.
-                END IF
-              END IF
-              Odd = .NOT. Odd
-            END DO
+*	    If the X range includes zero, pick odd or even to put a label at zero (!!):
+	    IF ( (Xmin.LE.0.) .AND. (Xmax.GE.0.) ) THEN !Zero is included -- center up on zero:
+	      Odd = .TRUE. !Start odd, then toggle each time.
+	      DO Itick = 1, Nticks_All
+*	        X in WorldCoords:
+	        XP = FLOAT( Itick - 1 ) * DXtick + XRmin
+	        IF      ( XP .LT. Xmin ) THEN !Wouldn't plot this one.
+	        ELSE IF ( XP .GT. Xmax ) THEN !Wouldn't plot this one.
+	        ELSE !(Would try to) Plot this one:
+	          IF ( ABS(XP) .LT. 0.0005 ) THEN !Close enough to zero:
+	            First_is_Odd = Odd !Start this way: odd or not odd.
+	            Even_Odd_Selection_Made = .TRUE.
+	          END IF
+	        END IF
+	        Odd = .NOT. Odd
+	      END DO
 
-          END IF !(Xmin.LE.0.).AND.(Xmax.GE.0)
+*	    If the X range includes one, and not zero, pick odd or even to put a label at one:
+	    ELSE IF ( (Xmin.LE.1.) .AND. (Xmax.GE.1.) ) THEN !One is included -- center up on one:
+	      Odd = .TRUE. !Start odd, then toggle each time.
+	      DO Itick = 1, Nticks_All
+*	        X in WorldCoords:
+	        XP = FLOAT( Itick - 1) * DXtick + XRmin
+	        IF      ( XP .LT. Xmin ) THEN !Wouldn't plot this one.
+	        ELSE IF ( XP .GT. Xmax ) THEN !Wouldn't plot this one.
+	        ELSE !(Would try to) Plot this one:
+	          IF ( ABS(XP-1.0) .LT. 0.0005 ) THEN !Close enough to one:
+	            First_is_Odd = Odd !Start this way: odd or not odd.
+	            Toggling_from_one = .TRUE.
+	            Even_Odd_Selection_Made = .TRUE.
+	          END IF
+	        END IF
+	        Odd = .NOT. Odd
+	      END DO
 
-        ELSE IF (DigErrOdd .LT. DigErrEven) THEN !Do Odd ticks (1st tick, etc.):
-          First_is_Odd=.TRUE.
-          Even_Odd_Selection_Made=.TRUE.
-        ELSE !Do Even ticks (2nd tick, etc.):
-          First_is_Odd=.FALSE.
-          Even_Odd_Selection_Made=.TRUE.
-        END IF
+	    END IF !(Xmin.LE.0.).AND.(Xmax.GE.0)
 
-        IF (.NOT.Even_Odd_Selection_Made) THEN !The question is still not resolved:
-          First_is_Odd=.TRUE.
-        END IF !.NOT.Even_Odd_Selection_Made
+	  ELSE IF (DigErrOdd .LT. DigErrEven) THEN !Do Odd ticks (1st tick, etc.):
+	    First_is_Odd=.TRUE.
+	    Even_Odd_Selection_Made=.TRUE.
+	  ELSE !Do Even ticks (2nd tick, etc.):
+	    First_is_Odd=.FALSE.
+	    Even_Odd_Selection_Made=.TRUE.
+	  END IF
 
-      ELSE !Always output the tick labels -- not enough to skip:
-        Toggling=.FALSE. !Don't toggle -- Each tick gets labelled.
-        Toggling_from_one=.FALSE.
-        First_is_Odd=.TRUE.
+	  IF (.NOT.Even_Odd_Selection_Made) THEN !The question is still not resolved:
+	    First_is_Odd=.TRUE.
+	  END IF !.NOT.Even_Odd_Selection_Made
 
-      END IF
+	ELSE !Always output the tick labels -- not enough to skip:
+	  Toggling=.FALSE. !Don't toggle -- Each tick gets labelled.
+	  Toggling_from_one=.FALSE.
+	  First_is_Odd=.TRUE.
 
-*      Adjust the X scale to be divisible by three and choose one of three formats:
-      IF (Iscale.EQ.0) THEN
-        IXformat=1
-      ELSE IF (Iscale.EQ.3) THEN !Special case -- allow thousands:
-        IXformat=3
-        Iscale=0 !Don't scale.
-      ELSE IF (Iscale.GT.0) THEN
-        IXformat=MOD(Iscale,3)+1
-        IF (IXformat.LE.0) THEN
-          WRITE(M132,501) IXformat, Iscale
-          CALL MESSAGE(M132,1,-1)
-          IXformat=1
-        ELSE
-          Iscale =3*((Iscale)/3)
-        END IF
-      ELSE
-        IXformat=MOD(-Iscale+1,3)+1
-        IF (IXformat.LE.0) THEN
-          WRITE(M132,501) IXformat, Iscale
-          CALL MESSAGE(M132,1,-1)
-          IXformat=1
-        ELSE
-          Iscale =3*((Iscale-2)/3)
-        END IF
-      END IF
-501      FORMAT( 'STR_Axis_Tick-E1  Invalid format index:'I11'  Iscale:'I11)
+	END IF
 
-
-      IF ( MSG_Enabled( 'STR_Axis_Tick-T1', IDT1 ) ) THEN
-        WRITE(M132,304) Iscale, IXformat, Xformat(IXformat)
-        CALL MESSAGE(M132,1,IDT1)
-      END IF
-304      FORMAT( 'STR_Axis_Tick-T1 (4) Iscale:' I3'  IXformat:' I2'  Xformat[' A '].' )
+*	Adjust the X scale to be divisible by three and choose one of three formats:
+	IF (Iscale.EQ.0) THEN
+	  IXformat=1
+	ELSE IF (Iscale.EQ.3) THEN !Special case -- allow thousands:
+	  IXformat=3
+	  Iscale=0 !Don't scale.
+	ELSE IF (Iscale.GT.0) THEN
+	  IXformat=MOD(Iscale,3)+1
+	  IF (IXformat.LE.0) THEN
+	    WRITE(M132,501) IXformat, Iscale
+	    CALL MESSAGE(M132,1,-1)
+	    IXformat=1
+	  ELSE
+	    Iscale =3*((Iscale)/3)
+	  END IF
+	ELSE
+	  IXformat=MOD(-Iscale+1,3)+1
+	  IF (IXformat.LE.0) THEN
+	    WRITE(M132,501) IXformat, Iscale
+	    CALL MESSAGE(M132,1,-1)
+	    IXformat=1
+	  ELSE
+	    Iscale =3*((Iscale-2)/3)
+	  END IF
+	END IF
+501	FORMAT( 'STR_Axis_Tick-E1  Invalid format index:'I11'  Iscale:'I11)
 
 
-      Label_On = First_is_Odd
-      Nlabels = 0
-      DO Itick = 1, Nticks_All
-*        X in WorldCoords:
-        XP = FLOAT( Itick - 1 ) * DXtick + XRmin
-        IF      ( XP .LT. Xmin ) THEN !Don't plot this one.
-        ELSE IF ( XP .GT. Xmax ) THEN !Don't plot this one.
-        ELSE IF ( Nlabels .GE. Max_Nticks ) THEN
-        ELSE !(try to) Plot this one:
-          IF (Label_On) THEN
-            Nlabels = Nlabels + 1
-            XS = XP/(10.**Iscale)
-            IF ( ABS(XS) .GE. XSmax(IXformat) ) THEN !This protects against rare "overflows".
-              WRITE(C6,Xformat(IXformat+1)) XS
-            ELSE                                !"Normal" case:
-              WRITE(C6,Xformat(IXformat)) XS
-            END IF
-            Xlabel( Nlabels ) = XP
-            Clabel( Nlabels ) = C6
-          END IF
-        END IF
-        IF (Toggling) THEN !Toggling is enabled -- every other tick gets labelled.
-          Label_On=.NOT.Label_On
-        END IF
-      END DO
+	IF ( MSG_Enabled( 'STR_Axis_Tick-T1', IDT1 ) ) THEN
+	  WRITE(M132,304) Iscale, IXformat, Xformat(IXformat)
+	  CALL MESSAGE(M132,1,IDT1)
+	END IF
+304	FORMAT( 'STR_Axis_Tick-T1 (4) Iscale:' I3'  IXformat:' I2'  Xformat[' A '].' )
 
 
-*      Make the X scale exponent:
-      IF (Iscale.NE.0) THEN !Only put up the scale if not unity:
-        IF (Iscale.LT.-9) THEN
-          WRITE(C3,'(I3)') Iscale
-        ELSE IF (Iscale.LT.0) THEN
-          WRITE(C3,'(I2)') Iscale
-        ELSE IF (Iscale.LT.10) THEN
-          WRITE(C3,'(I1)') Iscale
-        ELSE IF (Iscale.LT.100) THEN
-          WRITE(C3,'(I2)') Iscale
-        ELSE
-          C3='big'
-        END IF
+	Label_On = First_is_Odd
+	Nlabels = 0
+	DO Itick = 1, Nticks_All
+*	  X in WorldCoords:
+	  XP = FLOAT( Itick - 1 ) * DXtick + XRmin
+	  IF      ( XP .LT. Xmin ) THEN !Don't plot this one.
+	  ELSE IF ( XP .GT. Xmax ) THEN !Don't plot this one.
+	  ELSE IF ( Nlabels .GE. Max_Nticks ) THEN
+	  ELSE !(try to) Plot this one:
+	    IF (Label_On) THEN
+	      Nlabels = Nlabels + 1
+	      XS = XP/(10.**Iscale)
+	      IF ( ABS(XS) .GE. XSmax(IXformat) ) THEN !This protects against rare "overflows".
+	        WRITE(C6,Xformat(IXformat+1)) XS
+	      ELSE                                !"Normal" case:
+	        WRITE(C6,Xformat(IXformat)) XS
+	      END IF
+	      Xlabel( Nlabels ) = XP
+	      Clabel( Nlabels ) = C6
+	    END IF
+	  END IF
+	  IF (Toggling) THEN !Toggling is enabled -- every other tick gets labelled.
+	    Label_On=.NOT.Label_On
+	  END IF
+	END DO
 
-        Cexponent = C3
 
-      END IF !Iscale.NE.0
+*	Make the X scale exponent:
+	IF (Iscale.NE.0) THEN !Only put up the scale if not unity:
+	  IF (Iscale.LT.-9) THEN
+	    WRITE(C3,'(I3)') Iscale
+	  ELSE IF (Iscale.LT.0) THEN
+	    WRITE(C3,'(I2)') Iscale
+	  ELSE IF (Iscale.LT.10) THEN
+	    WRITE(C3,'(I1)') Iscale
+	  ELSE IF (Iscale.LT.100) THEN
+	    WRITE(C3,'(I2)') Iscale
+	  ELSE
+	    C3='big'
+	  END IF
 
+	  Cexponent = C3
 
-
-      RETURN
-
-      END
+	END IF !Iscale.NE.0
 
 
 
+	RETURN
 
-      SUBROUTINE STR_Scale_Tick(Amin, Amax, Nticks, Iscale)
+	END
 
-      IMPLICIT NONE
+
+
+
+*
+	SUBROUTINE STR_Scale_Tick(Amin, Amax, Nticks, Iscale)
+
+	IMPLICIT NONE
 
 *  Input/outputs:
-      REAL Amin !Lower Bound
-      REAL Amax !Upper Bound
+	REAL Amin !Lower Bound
+	REAL Amax !Upper Bound
 
 *  Outputs:
-      INTEGER Nticks
-      INTEGER Iscale !The tens-exponent of the scaled range.
+	INTEGER Nticks
+	INTEGER Iscale !The tens-exponent of the scaled range.
 
 *  Description:
-*      Automatically determine the number (and spacing) of ticks to 
-*      use on a scale with range (Amin, Amax).  The range may be slightly
-*      extended, if necessary.  Iscale is a power of ten which, when applied
-*      to Amin and Amax, reduces the range to (-10,10) or less, but not less
-*      than (-1,1).
+*	Automatically determine the number (and spacing) of ticks to 
+*	use on a scale with range (Amin, Amax).  The range may be slightly
+*	extended, if necessary.  Iscale is a power of ten which, when applied
+*	to Amin and Amax, reduces the range to (-10,10) or less, but not less
+*	than (-1,1).
 
 
-      INTEGER IS0,ISL,IS,ISR
-      REAL AS,AS0,ASL,DIFF,EXTEND
+	INTEGER IS0,ISL,IS,ISR
+	REAL AS,AS0,ASL,DIFF,EXTEND
 
-      INTEGER Ntick_patterns_P
-      PARAMETER (Ntick_patterns_P=12)
-      INTEGER DTICKS(Ntick_patterns_P)
+	INTEGER Ntick_patterns_P
+	PARAMETER (Ntick_patterns_P=12)
+	INTEGER DTICKS(Ntick_patterns_P)
 
-*      DATA DTICKS/ 9,  7, 11, 7,  9, 11, 6, 7,  8,  9/ !Don't include the ends.
-      DATA DTICKS/11,  9, 13, 9, 11, 13, 8, 9, 10, 11
-     1                 ,12, 13 / !Include the ends.
+*	DATA DTICKS/ 9,  7, 11, 7,  9, 11, 6, 7,  8,  9/ !Don't include the ends.
+	DATA DTICKS/11,  9, 13, 9, 11, 13, 8, 9, 10, 11
+     1	           ,12, 13 / !Include the ends.
 
 
-      DIFF=Amax-Amin !Declared range.
+	DIFF=Amax-Amin !Declared range.
 
-      IF (DIFF.LT.0.010) THEN !Special action:
-        EXTEND=(0.010-DIFF)/2. !Extend upper & lower bounds by this.
-        Amin=Amin-EXTEND
-        Amax=Amax+EXTEND
-        DIFF=0.010
-      END IF
+	IF (DIFF.LT.0.010) THEN !Special action:
+	  EXTEND=(0.010-DIFF)/2. !Extend upper & lower bounds by this.
+	  Amin=Amin-EXTEND
+	  Amax=Amax+EXTEND
+	  DIFF=0.010
+	END IF
 
-      AS=LOG10(DIFF) !Orders-of-magnitude spanned.
-      IS=INT(AS)     !Integer orders-of-magnitude (scale).
-      IF (FLOAT(IS).LT.AS) IS=IS+1 !Ensure it's greater than or equal to AS.
+	AS=LOG10(DIFF) !Orders-of-magnitude spanned.
+	IS=INT(AS)     !Integer orders-of-magnitude (scale).
+	IF (FLOAT(IS).LT.AS) IS=IS+1 !Ensure it's greater than or equal to AS.
 
-*      Get "cleanly extended" upper limit:
-      ASL=Amax/(10.**IS) !Scaled upper limit: (-1.0,1.0)
-      ISL=INT(ASL*10.)   !Integer scaled upper limit: (-10,10)
-      IF (FLOAT(ISL)/10..LT.ASL) ISL=ISL+1 !Ensure integer exceeds real.
-      ASL=FLOAT(ISL)*10.**IS/10.  !Cleanly-extended upper limit.
+*	Get "cleanly extended" upper limit:
+	ASL=Amax/(10.**IS) !Scaled upper limit: (-1.0,1.0)
+	ISL=INT(ASL*10.)   !Integer scaled upper limit: (-10,10)
+	IF (FLOAT(ISL)/10..LT.ASL) ISL=ISL+1 !Ensure integer exceeds real.
+	ASL=FLOAT(ISL)*10.**IS/10.  !Cleanly-extended upper limit.
 
-*      Get "cleanly extended" lower limit:
-      AS0=Amin/(10.**IS) !Scaled lower limit: (-1.0,1.0)
-      IS0=INT(AS0*10.)   !Integer scaled lower limit: (-10,10)
-      IF (FLOAT(IS0)/10..GT.AS0) IS0=IS0-1 !Ensure integer does not exceed real.
-      AS0=FLOAT(IS0)*10.**IS/10.  !Cleanly-extended lower limit.
+*	Get "cleanly extended" lower limit:
+	AS0=Amin/(10.**IS) !Scaled lower limit: (-1.0,1.0)
+	IS0=INT(AS0*10.)   !Integer scaled lower limit: (-10,10)
+	IF (FLOAT(IS0)/10..GT.AS0) IS0=IS0-1 !Ensure integer does not exceed real.
+	AS0=FLOAT(IS0)*10.**IS/10.  !Cleanly-extended lower limit.
 
-      ISR=ISL-IS0  !Scaled-integer-range
+	ISR=ISL-IS0  !Scaled-integer-range
 
-      IF (ISR.LE.0) THEN
-        Nticks=5
-      ELSE IF (ISR.LE.Ntick_patterns_P) THEN
-        Nticks=DTICKS(ISR)
-      ELSE
-        Nticks=ISR-1
-        DO WHILE (Nticks.GT.11)
-          Nticks=Nticks/2
-        END DO
-      END IF
+	IF (ISR.LE.0) THEN
+	  Nticks=5
+	ELSE IF (ISR.LE.Ntick_patterns_P) THEN
+	  Nticks=DTICKS(ISR)
+	ELSE
+	  Nticks=ISR-1
+	  DO WHILE (Nticks.GT.11)
+	    Nticks=Nticks/2
+	  END DO
+	END IF
 
-*      Return the cleanly-extended range:
-      Amin=AS0
-      Amax=ASL
+*	Return the cleanly-extended range:
+	Amin=AS0
+	Amax=ASL
 
-*      Return the scale (exponent):
-      Iscale=IS
+*	Return the scale (exponent):
+	Iscale=IS
 
-      RETURN
-      END
+	RETURN
+	END
