@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.19 2000/02/23 21:39:21 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.20 2000/02/23 21:55:40 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.20  2000/02/23 21:55:40  yepes
+// fix problem with null data set
+//
 // Revision 1.19  2000/02/23 21:39:21  yepes
 // fix MakeOnline for case when no Online data
 //
@@ -135,6 +138,11 @@ Int_t St_l3t_Maker::MakeOnLine(){
 // get l3 dataset
    St_DataSet* sec_bank_set = 0 ;
    sec_bank_set = GetInputDS("l3Clufi");
+   if ( !sec_bank_set ) {
+      fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
+      return kStWarn;
+   }
+
    if ( !sec_bank_set->GetListSize() ) {
       fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
       return kStWarn;
