@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.25 1999/09/13 15:05:29 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.26 1999/09/17 21:28:11 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.26  1999/09/17 21:28:11  fisyak
+// Add l3Track to dst
+//
 // Revision 1.25  1999/09/13 15:05:29  caines
 // Added creation of garb(tphit) and garb(tptrack) so its possible to
 // run with TPC turned off
@@ -77,7 +80,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.25 1999/09/13 15:05:29 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.26 1999/09/17 21:28:11 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -98,6 +101,7 @@ Int_t St_dst_Maker::Init(){
     "kink:",   "kinkVertex",
     "geant:",  "particle", "g2t_rch_hit",
     "trg:",    "TrgDet",
+    "l3Tracks:","l3Track",
     0};
   
   if (!fSelect) fSelect = todst;   
