@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.85 1999/02/16 15:37:37 fisyak Exp $
+# $Id: MakePam.mk,v 1.86 1999/02/19 14:40:13 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.86  1999/02/19 14:40:13  fisyak
+# remove extra dependencies for idls
+#
 # Revision 1.85  1999/02/16 15:37:37  fisyak
 # Clean up HP stuff
 #
@@ -524,7 +527,8 @@ $(FILES_ICC) : $(GEN_DIR)/%_i.cc : %.idl
 ifndef NOROOT
 	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
 endif
-	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
+#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;
+	$(RM) *.h *.inc *.template *.cxx; 
 $(FILES_IH)  : $(GEN_DIR)/%.h    : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
 	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
@@ -532,23 +536,26 @@ $(FILES_IH)  : $(GEN_DIR)/%.h    : %.idl
 ifndef NOROOT
 	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
 endif
-	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
+#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
+	$(RM) *.h *.inc *.template *.cxx;
 $(FILES_INC) : $(GEN_DIR)/%.inc  : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
 	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
 	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
 ifndef NOROOT
-	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+#	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
 endif
-	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
+#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
+	$(RM) *.h *.inc *.template *.cxx;
 $(FILES_MHH) : $(GEN_DIR)/St_%_Module.h  : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
 	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
 	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
 ifndef NOROOT
-	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
+#	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
 endif
-	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
+#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
+	$(RM) *.h *.inc *.template *.cxx;
 $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
 	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
@@ -556,7 +563,8 @@ $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
 ifndef NOROOT
 	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
 endif
-	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
+#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
+	$(RM) *.h *.inc *.template *.cxx;
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 ifndef NT
 	$(RM)  $(GEN_DIR)/$(STEM)_i.cc
@@ -567,7 +575,8 @@ ifndef NT
         > $(GEN_DIR)/$(STEM).didl; 
 	cd $(GEN_TMP); $(STIC) -q $(STICFLAGS) $(1ST_DEPS) >>  $(GEN_DIR)/$(STEM).didl; 
 	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
-	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         $(RM) *.h *.inc *.template;
+#	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
+	$(RM) *.h *.inc *.template;
 else
 	@echo PLEASE, Run this make with UNIX first !
 endif #/* NT */
