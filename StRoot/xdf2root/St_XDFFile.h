@@ -1,8 +1,14 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.20 1999/02/25 15:44:33 fine Exp $
+// $Id: St_XDFFile.h,v 1.21 1999/03/02 03:19:03 fine Exp $
 // $Log: St_XDFFile.h,v $
-// Revision 1.20  1999/02/25 15:44:33  fine
-// author's name has been introduced for HTML doc
+// Revision 1.21  1999/03/02 03:19:03  fine
+// re-commit, the obsolte version was in use
+//
+// Revision 1.19  1999/01/21 18:12:48  fine
+// Browse and dir methods have been introduced
+//
+// Revision 1.18  1999/01/21 02:46:38  fine
+// New method dir and Browse to navigate XDF files
 //
 // Revision 1.17  1998/12/19 02:54:05  fine
 // ST_XDFFile::NextEventList() - fast scan of the XDF files method has been introduced
@@ -52,7 +58,7 @@ class St_DataSet;
 class TClass;
 
 
-class St_XDFFile 
+class St_XDFFile : public TObject
  {
   private:
     FILE 		*fFile;  	// pointer to C file descriptor 
@@ -64,7 +70,8 @@ class St_XDFFile
     const Char_t        *fMethodName;   // The name of the current method (to debug code)
     TSocket             *fSocket;       // Socket to XDF I/O
     Int_t                fRecordCount;  // No. of records read/written
-    Int_t                fDebug;        // Debug Level
+    St_DataSet          *fBrowsable;    // The pointer to the record selected with ROOT Browser
+
   protected:
     static St_DataSet   *MakeDataSet(DS_DATASET_T *ds);    // DS_DATASET_T -> St_DataSet. Create St_DataSet object from DS_DATASET_T C-structure
     static DS_DATASET_T *MakeDataSet(St_DataSet *dataset); // St_DataSet -> DS_DATASET_T. Create DS_DATASET_T C-structure from St_DataSet object
@@ -74,26 +81,24 @@ class St_XDFFile
     St_XDFFile();                                          // Default ctor
     St_XDFFile(const Char_t *filename,const Char_t *mode="r");                  // Create object and open file
     virtual ~St_XDFFile();
+    virtual void        Browse(TBrowser *b);
     virtual Int_t       CloseXDF();                                             // close the XDF file (it is called from dtor)
+    static  Int_t       dir(const Char_t *filename, UInt_t firstRecord=1, UInt_t numberOfRecords=1);
             Int_t       GetErrorCode() const { return fErrorCode;}
     virtual const Char_t *GetName() const { return fName;}
+    virtual St_DataSet *GetSelected() { St_DataSet *s = fBrowsable; fBrowsable=0; return s;}
     virtual Int_t       OpenXDF(const Char_t *filename,const Char_t *mode="r"); // Open file and read create the "root" St_DataSet (it is called from ctor)
     virtual Int_t       OpenXDF(TInetAddress address, const char *service,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(TInetAddress address, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(const char *host, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
-    virtual St_DataSet *ReadEvent();                                         // create St_DataSet and read the next event in it.
-    virtual St_DataSet *NextEventGet(){return ReadEvent();};                                         // create St_DataSet and read the next event in it.
+    virtual Bool_t    IsFolder(){ return fFile?kTRUE:kFALSE;}
+    virtual St_DataSet *NextEventGet();                                         // create St_DataSet and read the next event in it.
     virtual St_DataSet *NextEventList();
-    virtual Int_t       WriteEvent(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
-    virtual Int_t       NextEventPut(St_DataSet *dataset){return WriteEvent(dataset);};                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
+    virtual Int_t       NextEventPut(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       GetCount(){return fRecordCount;}
-    virtual Int_t       GetDebug(){return fDebug;};
-    virtual Int_t       Debug(){return GetDebug();};
-    virtual void        SetDebug(Int_t dbl=1){fDebug=dbl;};
     static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
     static  St_DataSet *GetXdFile(const Char_t *filename);                      // open, read and close file file
-
     ClassDef(St_XDFFile,0)
 
 };
