@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.22 2002/04/18 23:38:21 jeromel Exp $
+ * $Id: StEventTypes.h,v 2.23 2003/01/30 18:37:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
+ * Revision 2.23  2003/01/30 18:37:55  ullrich
+ * Added Phmd and TriggerId stuff.
+ *
  * Revision 2.22  2002/04/18 23:38:21  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -122,6 +125,12 @@
 #include "StL3SoftwareMonitor.h"
 #include "StMeasuredPoint.h"
 #include "StMwcTriggerDetector.h"
+#include "StPhmdCollection.h"
+#include "StPhmdDetector.h"
+#include "StPhmdHit.h"
+#include "StPhmdModule.h"
+#include "StPhmdCluster.h"
+#include "StPhmdClusterCollection.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
 #include "StPsd.h"
@@ -173,6 +182,8 @@
 #include "StTrackTopologyMap.h"
 #include "StTrigger.h"
 #include "StTriggerDetectorCollection.h"
+#include "StTriggerIdCollection.h"
+#include "StTriggerId.h"
 #include "StV0Vertex.h"
 #include "StVertex.h"
 #include "StVpdTriggerDetector.h"
