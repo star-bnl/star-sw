@@ -1,4 +1,4 @@
-// $Id: EEmcDbItem.cxx,v 1.3 2003/12/01 05:01:40 balewski Exp $
+// $Id: EEmcDbItem.cxx,v 1.4 2003/12/04 18:27:46 balewski Exp $
 
 #include <stdio.h>
 #include <string.h>
@@ -55,19 +55,30 @@ void EEmcDbItem::clear() {
   key=-999;
 }
 
+
 //--------------------------------------------------
 //--------------------------------------------------
 void EEmcDbItem::setDefaultTube(int cr_off) {
   if(name[2]=='T') return; // do nothing for towers
-  char text[100], box[100];
-  int icr=(crate-cr_off)%4;
-  sprintf(box,"S%d",icr+1);
-  if (icr==3)sprintf(box,"P1");
-  int mapmt=1+(chan/16);
-  int pix=1+chan%16;
-  sprintf(text,"%2.2d%2s-%2.2d-%2.2d%c",sec,box,mapmt,pix,EEMCDbStringDelim);
-  //printf("\ncrate=%d, chan=%d '%s'-->'%s'\n",crate,chan,name,text);
-  setTube(text);
+  // view from the front of MAPMT , the same for Left & right column
+  int ch2pix[16]={13, 14, 15, 16,   9, 10, 11, 12,   5, 6, 7, 8,   1,2,3,4};
+  
+  int iCrate=crate-cr_off;
+  int iTube=chan/16;
+  int tubeID=(iTube<=5) ? 2*iTube+1 :14-  2*(iTube-5); // tube ID counting from 1
+  int cwID=tubeID+ 12*(iCrate%8); // offset for every pair of subsectors, not used
+
+  int secID=1 + ((iCrate/4)+11)%12;
+  assert(secID==sec);
+
+  int iBox=iCrate%4;
+  int iPix=chan%16;
+  int pixID=ch2pix[iPix]; 
+  char text[100], boxName[100];
+  sprintf(boxName,"S%d",iBox+1); // true for SMD
+  if (iBox==3)sprintf(boxName,"P1"); // Pre/Post box
+  sprintf(text,"%2.2d%2s-%2.2d:%2.2d%c",secID,boxName,tubeID,pixID,EEMCDbStringDelim);
+setTube(text);
 }
 //--------------------------------------------------
 //--------------------------------------------------
@@ -111,6 +122,9 @@ void EEmcDbItem::setName(char *text) {
 }
 
 // $Log: EEmcDbItem.cxx,v $
+// Revision 1.4  2003/12/04 18:27:46  balewski
+// added MAPMT pixel names
+//
 // Revision 1.3  2003/12/01 05:01:40  balewski
 // DB & SMD
 //
