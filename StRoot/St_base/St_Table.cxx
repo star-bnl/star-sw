@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.34 1998/12/30 22:30:18 fine Exp $ 
+// $Id: St_Table.cxx,v 1.35 1999/01/27 15:30:36 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.35  1999/01/27 15:30:36  fine
+// ArrayIndex is renamed to ArrayLayout to reflect its function
+//
 // Revision 1.34  1998/12/30 22:30:18  fine
 // St_Table::PrintHrader method has been introduced
 //
@@ -113,13 +116,26 @@ void *ReAllocate(table_head_st *header, Int_t newsize)
 
 
 //______________________________________________________________________________
-static void ArrayIndex(Int_t *index,Int_t *size, Int_t dim)
+static void ArrayLayout(Int_t *layout,Int_t *size, Int_t dim)
 {
-  if (dim && index && size) {
-    if (++index[dim-1] >= size[dim-1]) {
-        index[dim-1] = 0;
+  //
+  // ArrayLayout - calculates the array layout recursively
+  //
+  // Input:
+  // -----
+  // dim   - dimension of the targeted array
+  // size  - the max index for each dimension
+  //
+  // Output:
+  // ------
+  // layout - the "start index" for each dimension of an array
+  //
+
+  if (dim && layout && size) {
+    if (++layout[dim-1] >= size[dim-1]) {
+        layout[dim-1] = 0;
         dim--;
-        ArrayIndex(index,size, dim);
+        ArrayLayout(layout,size, dim);
     }
   }
 }
@@ -629,12 +645,12 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
          // Add the dimensions to "array" members 
          Int_t dim = member->GetArrayDim();
          Int_t indx = 0;
-         Int_t *arrayIndex = 0;
+         Int_t *arrayLayout = 0;
          Int_t *arraySize = 0;
          if (dim) {
-           arrayIndex = new Int_t[dim];
+           arrayLayout = new Int_t[dim];
            arraySize  = new Int_t[dim];          
-           memset(arrayIndex,0,dim*sizeof(Int_t));
+           memset(arrayLayout,0,dim*sizeof(Int_t));
          }
          Int_t arrayLength  = 1;
          while (indx < dim ){
@@ -659,8 +675,8 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
            else              cout << "\t" << setw(strlen(member->GetName())) << " ";
 //           if (dim && indexOffset) {
            if (dim) {
-                for (Int_t i=0;i<dim;i++) cout << "["<<arrayIndex[i]<<"]";
-                ArrayIndex(arrayIndex,arraySize,dim);
+                for (Int_t i=0;i<dim;i++) cout << "["<<arrayLayout[i]<<"]";
+                ArrayLayout(arrayLayout,arraySize,dim);
            }
            cout << "\t";
            if ( strlen(member->GetName())+3*dim < 8) cout << "\t";
@@ -810,12 +826,12 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
          // Add the dimensions to "array" members 
          Int_t dim = member->GetArrayDim();
          Int_t indx = 0;
-         Int_t *arrayIndex = 0;
+         Int_t *arrayLayout = 0;
          Int_t *arraySize = 0;
          if (dim) {
-           arrayIndex = new Int_t[dim];
+           arrayLayout = new Int_t[dim];
            arraySize  = new Int_t[dim];          
-           memset(arrayIndex,0,dim*sizeof(Int_t));
+           memset(arrayLayout,0,dim*sizeof(Int_t));
          }
          Int_t arrayLength  = 1;
          while (indx < dim ){
@@ -845,10 +861,10 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
 
            if (dim) {
               for (Int_t i=0;i<dim;i++) {
-                out << "["<<arrayIndex[i]<<"]";
+                out << "["<<arrayLayout[i]<<"]";
                 fieldLen -= 3;
              }
-             ArrayIndex(arrayIndex,arraySize,dim);
+             ArrayLayout(arrayLayout,arraySize,dim);
            }
 
          // Generate "="

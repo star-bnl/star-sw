@@ -8,14 +8,14 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_NodeView                                                         //
+// St_NodeView                                                          //
 //                                                                      //
-// St_NodeView class is a special kind of St_DataSet with one extra    //
+// St_NodeView class is a special kind of St_DataSet with one extra     //
 // pointer to wrap any TObject onto St_DataSet object                   //
 //                                                                      //
 //  BE CAREFUL !!!                                                      //
 //  One has to use it carefully no conrol over that extra object        //
-//  is perfomred. This means: the onject m_Obj data-member points to can//
+//  is performed. This means: the onject m_Obj data-member points to can//
 //  be destroyed with no this kbject notifying.                         //
 //  There is no tool /protection to check whether m_Obj is till alive.  //
 //  It is one's  code responsilitiy                                     //
