@@ -3,7 +3,6 @@
 #include "StTree.h"
 #include "TRegexp.h"
 #include "TKey.h"
-#include "TRFIOFile.h"
 
 const char* TFOPT[9] = {"0","READ","RECREATE","UPDATE",
                         "0","READ","RECREATE","UPDATE",0};
@@ -18,18 +17,6 @@ return (c) ? (c-RWU)&3 : 0;
 //		Local functions
 static TString GetBranchByFile(const Char_t *file);
 static int AreSimilar(const Char_t *fileA, const Char_t *fileB);
-
-extern "C" {
-   int rfio_open(const char *filepath, int flags, int mode);
-   int rfio_close(int s);
-   int rfio_read(int s, char *ptr, int size);
-   int rfio_write(int s, char *ptr, int size);
-   int rfio_lseek(int s, int offset, int how);
-   int rfio_access(const char *filepath, int mode);
-   int rfio_unlink(const char *filepath);
-   int rfio_parse(const char *name, char **host, char **path);
-};
-
 
 ClassImp(StIOEvent)
 StIOEvent::StIOEvent():TObject(){fObj=(TObject*)(-1);};
@@ -93,11 +80,8 @@ TObject *StIO::Read(TFile *file, const Char_t *name)
 
   if (!gFile) { printf("<StIO::Read> No file open \n"); goto RETURN;}
     
-  if (name[0]=='*') {
-       key = (TKey*)gDirectory->GetListOfKeys()->At(0);
-       if (strcmp(".StreamerList",key->GetName())==0)
-       key = (TKey*)gDirectory->GetListOfKeys()->At(1);
-  }
+  if (name[0]=='*') 
+       key = (TKey*)gDirectory->GetListOfKeys()->First();
   else key = (TKey*)gDirectory->GetListOfKeys()->FindObject(name);
 
   if (!key)  { printf("<StIO::Read> Key %s not found\n",name); goto RETURN; }
@@ -165,45 +149,8 @@ TObject *StIO::ReadNext(TFile *file, const Char_t *name, ULong_t  &ukey)
   if (ukey==kUMAX) return 0;
   return Read(file,name,ukey);
 }
-//_______________________________________________________________________________
-TString StIO::RFIOName(const char *name)
-{
-  TString file(name);
-  TNamed *tn;
-  TList *rfiomap = (TList *)gROOT->GetListOfSpecials()->FindObject(".rfiomap");
-  if (file.Contains(".daq")) rfiomap = 0;	//no RFIO for .daq 
-  if (rfiomap) {	// check the map
-    TIter next(rfiomap);
-    while ((tn = (TNamed*)next())) {//matching loop 
-      int n = strlen(tn->GetName());
-      if (!n) 					continue;
-      if (strncmp(file,tn->GetName(),n))	continue;
-      file.Replace(0,0,tn->GetTitle());
-      break;
-    }	//end matching loop
-  }  //end check the map
-  return file;  
-}
-//_______________________________________________________________________________
-TFile *StIO::Open(const char *name, Option_t *option,const char *title,Int_t compress)
-{
-  TString file = RFIOName(name);
-  TFile *tf = TFile::Open(file,option,title,compress);
-  if (!tf  || !tf->IsZombie()) return tf;
-  delete tf;
-  return 0; 
-}
-//_______________________________________________________________________________
-Int_t StIO::IfExi(const char *name)
-{
-  TString file = RFIOName(name);
 
-  if (strncmp(file,"rfio:",5)) 
-     return StIO::IfExi(file);
-  else 
-     return !::rfio_access((const char*)file, kFileExists);
 
-}
 //===============================================================================
 
 ClassImp(StBranch)
@@ -270,7 +217,7 @@ Char_t * newFile = gSystem->ConcatFileName(outDir,intBas);
 SetIOMode("0");
 if (intBas == outBas) SetIOMode("r");
 if (intBas == outBas || outBas.IsNull()) 	goto RETN00;
-if (!StIO::IfExi(newFile)) 			goto RETN99;
+if (gSystem->AccessPathName(newFile)) 		goto RETN99;
 RETN00: fFile = newFile;
 printf("<StBranch::UpdateFile> Branch=%s file %s\n",GetName(),newFile); 
 RETN99: delete [] newFile;
@@ -434,7 +381,7 @@ void StBranch::OpenTFile()
   if (fTFile) return;
   TFile *tf= gROOT->GetFile(GetFile());
   fTFile = tf;
-  if (!fTFile) fTFile = StIO::Open(GetFile(),TFOPT[fIOMode],GetName());
+  if (!fTFile) fTFile = new TFile(GetFile(),TFOPT[fIOMode],GetName());
   if (fTFile->IsZombie()) {
     Error("OpenTFile","File %s NOT OPENED ***\n",fTFile->GetName());
     Error("OpenTFile","Branch %s desactivated ***\n",GetName());
@@ -751,7 +698,7 @@ Int_t StFile::AddFile(const Char_t *file,const Char_t *branch)
   
   tfile = file; gSystem->ExpandPathName(tfile);
   
-  if (!StIO::IfExi(tfile)) {// file does not exist
+  if (gSystem->AccessPathName(tfile)) {// file does not exist
     Warning("AddFile","*** IGNORED *** File %s does NOT exist \n",
     (const Char_t*)tfile);
     return kStWarn;}
@@ -946,8 +893,8 @@ int    fNFiles;
       cat->fNFiles++;
 
       TFile *tf = 0;
-      if (opt && opt[0]=='r') tf = StIO::Open(fil,"update");
-      if (!tf || tf->IsZombie()) { delete tf; tf = StIO::Open(fil,"read");}
+      if (opt && opt[0]=='r') tf = new TFile(fil,"update");
+      if (!tf || tf->IsZombie()) { delete tf; tf = new TFile(fil,"read");}
       if (       tf->IsZombie()) { delete tf; continue;}
 
       TList *keys = tf->GetListOfKeys();
