@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.14 2000/03/30 22:32:07 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.15 2000/06/13 13:04:21 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.15  2000/06/13 13:04:21  genevb
+// Fixed bug with not finding primary vertex
+//
 // Revision 1.14  2000/03/30 22:32:07  genevb
 // Fixed a typo
 //
@@ -141,11 +144,10 @@ Int_t StXiMaker::Make(){
   
   if (!globtrk || !vertex || !dst_v0_vertex) return kStWarn;
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
-    for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
-    }
-  }
+  for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++) {
+  // Above loop runs until primary vertex is found. When found, the code
+  // below is executed, and a "break;" gets out of the for-loop. If no
+  // primary vertex is found, the loop just ends normally, doing nothing.
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
     Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
     if (xi_limit < 250) xi_limit=250;
@@ -159,7 +161,9 @@ Int_t StXiMaker::Make(){
     if (iRes != kSTAFCV_OK) {
       gMessMgr->Warning("StXiMaker::Make(): Problem on return from EXI");
     }
-  }
+    break;
+  } // If-then block if primary vertex found
+  } // For-loop to find primary vertex
   return iMake;
 }
 
