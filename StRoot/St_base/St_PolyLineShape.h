@@ -46,6 +46,7 @@ public:
    virtual void         SetShape(TShape *shape);
    virtual void         SetSmooth(Bool_t smooth=kTRUE){ m_Smooth=smooth;}
    virtual void         SetWidthFactor(Float_t fact=1.0){m_WidthFactor = fact;} //*MENU 
+   virtual void         Sizeof3D() const;
    ClassDef(St_PolyLineShape,0)
 };
 

@@ -235,7 +235,8 @@ void St_PolyLineShape::Paint(Option_t *opt)
   if (!strstr(opt, "x3d"))
      m_Line->Paint(opt);
   else
-     Paint3d(opt);
+     m_Line->Paint(opt);
+//     Paint3d(opt);
 }
 
 //______________________________________________________________________________
@@ -328,4 +329,12 @@ void St_PolyLineShape::SetShape(TShape *shape)
 { 
    SafeDelete(m_Shape)
    m_Shape = shape; 
+}
+
+//______________________________________________________________________________
+void St_PolyLineShape::Sizeof3D() const
+{
+//*-*-*-*-*-*-*Return total X3D size of this shape with its attributes*-*-*-*-*-*
+//*-*          =======================================================
+  if (m_Line)  m_Line->Sizeof3D();
 }
