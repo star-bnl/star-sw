@@ -1,6 +1,9 @@
-//&Id$
+// 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
+//Revision 1.3  2000/01/12 21:54:08  love
+//Changed first line from //&Id$ to //$Id:
+//
 //Revision 1.2  1999/12/01 15:22:38  love
 //Bringing up to date with new StLaserEventMaker.  Sorry 'bout that.
 //
