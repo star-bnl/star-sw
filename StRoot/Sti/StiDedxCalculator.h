@@ -30,7 +30,10 @@
 using std::vector;
 #include <math.h>
 
+#include "StDetectorId.h"
+
 class StiTrackNode;
+class StiKalmanTrackNode;
 class StiTrack;
 
 class StiDedxCalculator 
@@ -38,7 +41,7 @@ class StiDedxCalculator
  public:
 
     ///For internal convenience.
-    typedef vector<StiTrackNode*> StiTrackNodeVec;
+    typedef vector<StiKalmanTrackNode*> StiKalmanTrackNodeVec;
     ///For internal convenience.
     typedef vector<double> DoubleVec;
     
@@ -52,15 +55,17 @@ class StiDedxCalculator
 
     ///Set the truncation fraction.
     void setFractionUsed(double);
+    void setDetectorFilter(StDetectorId detector);
 
     //Action
     
     ///Calculate Dedx for the track.
-    virtual float getDedx(const StiTrack* track);
+    virtual float getDedx(const StiKalmanTrack* track);
 
  private:
 
     double mFraction;
+    StDetectorId mDetector;
     DoubleVec mVector;
 };
 
@@ -76,8 +81,9 @@ class StiDedxCalculator
 struct NodeDedxCalculator
 {
     ///Perform the dedx calculation for a given TrackNode.
-    double operator()(const StiTrackNode*);
+    double operator()(const StiKalmanTrackNode*);
 };
+
 
 //inlines
 
@@ -91,6 +97,10 @@ struct NodeDedxCalculator
 inline void StiDedxCalculator::setFractionUsed(double val)
 {
     mFraction = val;
+}
+inline void StiDedxCalculator::setDetectorFilter(StDetectorId detector)
+{
+    mDetector = detector;
 }
 
 #endif
