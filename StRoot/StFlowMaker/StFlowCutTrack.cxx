@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.5 2000/01/13 22:19:17 posk Exp $
+// $Id: StFlowCutTrack.cxx,v 1.6 2000/02/11 20:53:08 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.6  2000/02/11 20:53:08  posk
+// Commented out random_shuffle and cout formatting so as to work under CC5.
+//
 // Revision 1.5  2000/01/13 22:19:17  posk
 // Updates and corrections.
 //
@@ -112,10 +115,12 @@ void StFlowCutTrack::PrintCutList() {
   cout << "#######################################################" << endl;
   cout << "# Track Cut List:" << endl;
   cout << "#   FitPts cuts= " << mFitPtsCuts[0] << ", " << mFitPtsCuts[1] 
-       << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
+    //       << " :\t " << setprecision(4) << (float)mFitPtsCutN/(float)mTrackN/perCent 
+       << " :\t " << (float)mFitPtsCutN/(float)mTrackN/perCent 
        << "% cut" << endl;
   cout << "#   FitOverMax cuts= " << mFitOverMaxCuts[0] << ", " 
-       << mFitOverMaxCuts[1] << " :\t " << setprecision(4)
+    //       << mFitOverMaxCuts[1] << " :\t " << setprecision(4)
+       << mFitOverMaxCuts[1] << " :\t " 
        << (float)mFitOverMaxCutN/(float)mTrackN/perCent << "% cut" << endl;
   cout << "# Good Tracks = " << (float)mGoodTrackN/(float)mTrackN/perCent
        << "%" << endl;

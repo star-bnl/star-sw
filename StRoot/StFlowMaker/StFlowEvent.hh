@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.hh,v 1.7 2000/01/31 22:16:59 posk Exp $
+// $Id: StFlowEvent.hh,v 1.8 2000/02/11 20:53:09 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.hh,v $
+// Revision 1.8  2000/02/11 20:53:09  posk
+// Commented out random_shuffle and cout formatting so as to work under CC5.
+//
 // Revision 1.7  2000/01/31 22:16:59  posk
 // CC5 compliant.
 //
@@ -48,10 +51,6 @@
 #include "Rtypes.h"
 #include "SystemOfUnits.h"
 class TVector2;
-
-#if !defined(ST_NO_NAMESPACES)
-using std::random_shuffle;
-#endif
 
 class StFlowEvent{
 

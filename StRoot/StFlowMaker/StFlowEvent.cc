@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.12 2000/01/31 22:16:58 posk Exp $
+// $Id: StFlowEvent.cc,v 1.13 2000/02/11 20:53:09 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.13  2000/02/11 20:53:09  posk
+// Commented out random_shuffle and cout formatting so as to work under CC5.
+//
 // Revision 1.12  2000/01/31 22:16:58  posk
 // CC5 compliant.
 //
@@ -56,10 +59,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
-//#if  defined(__sun) && ! defined(__GNUG__)
-//#if defined(__SUNPRO_CC) && __SUNPRO__CC < 0x500
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
+//#if defined(__SUNPRO_CC)
 #include <ospace/stl/src/randgen.cpp>
+#endif
+#if !defined(ST_NO_NAMESPACES)
+using std::random_shuffle;
 #endif
 #include "StFlowEvent.hh"
 #include "StFlowTrackCollection.hh"
@@ -205,13 +210,13 @@ TVector2 StFlowEvent::Q(Int_t harN, Int_t selN, Int_t subN) {
   mQ.Set(0., 0.);
   if (!checkInput(harN, selN, subN)) return mQ;
   double mQx=0., mQy=0.;
-  float order = (float)(harN + 1);
+  double order = (double)(harN + 1);
 
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
     if (pFlowTrack->Select(harN, selN, subN)) {
-      float mPhi = pFlowTrack->Phi();
+      double mPhi = pFlowTrack->Phi();
       double phiWgt = PhiWeight(mPhi, selN, harN);
       if (pFlowTrack->Eta() < 0. && (harN+1) % 2 == 1) phiWgt *= -1.;
       mQx += phiWgt * cos(mPhi * order);
@@ -246,7 +251,7 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
   TVector2 mQ  = Q(harN, selN, subN);
   UInt_t mMult = Mult(harN, selN, subN);
   
-  return (mMult) ? mQ.Mod() / sqrt((float)mMult) : 0.;
+  return (mMult) ? mQ.Mod() / sqrt((double)mMult) : 0.;
 }
 
 //-----------------------------------------------------------------------
@@ -259,8 +264,8 @@ void StFlowEvent::SetSelections() {
   StFlowTrackIterator itr;
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
     StFlowTrack* pFlowTrack = *itr;
-    Float_t mEta = pFlowTrack->Eta();
-    Float_t mPt  = pFlowTrack->Pt();
+    Double_t mEta = pFlowTrack->Eta();
+    Float_t  mPt  = pFlowTrack->Pt();
     for (int selN = 0; selN < nSels; selN++) {
       for (int harN = 0; harN < nHars; harN++) {
 
@@ -294,7 +299,7 @@ void StFlowEvent::MakeSubEvents() {
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
   int harN, selN, subN = 0;
 
-  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+  //random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
 
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
