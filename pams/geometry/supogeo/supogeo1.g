@@ -1,3 +1,10 @@
+* $Id: supogeo1.g,v 1.2 2003/08/05 23:40:00 potekhin Exp $
+*
+* $Log: supogeo1.g,v $
+* Revision 1.2  2003/08/05 23:40:00  potekhin
+* Added a print statment to better identify this module
+* at compile time within GSTAR, added log and id tags
+*
 ******************************************************************************
 Module   SUPOGEO1  is the geometry of the Forward TPC supports in STAR
 Author   Holm Huemmler
@@ -90,6 +97,7 @@ Endfill
 *
 	pos=(smai_ZMin+smai_ZMax)/2
 
+	write(*,*) 'Corrected SUPOGEO'
 	create   SUPO
 
 * N.B. this variable --pos-- is (erroneously) overwritten
@@ -103,7 +111,7 @@ Endfill
 	pos=(smai_ZMin+smai_ZMax)/2
 * another bug fix: the signs of "pos" on the following line were incorrect: --max--
         position SUPO in CAVE z=-pos             konly='MANY'
-	position SUPO in CAVE z= pos ThetaZ=180 konly='MANY' 
+	position SUPO in CAVE z= pos ThetaZ=180  konly='MANY' 
 *  
 * ----------------------------------------------------------------------------
 Block SUPO is the FTPC support mother volume
