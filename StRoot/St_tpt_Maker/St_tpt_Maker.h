@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.5 1999/01/08 23:19:42 sakrejda Exp $
+// $Id: St_tpt_Maker.h,v 1.6 1999/01/12 19:50:20 sakrejda Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.6  1999/01/12 19:50:20  sakrejda
+// QA histograms added to the tpt maker
+//
 // Revision 1.5  1999/01/08 23:19:42  sakrejda
 // histogramming added
 //
@@ -39,7 +42,7 @@ class St_tpt_Maker : public StMaker {
  private:
                Bool_t drawinit;
 	       Bool_t m_iftte;
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.5 1999/01/08 23:19:42 sakrejda Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.6 1999/01/12 19:50:20 sakrejda Exp $";
                St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
@@ -51,6 +54,10 @@ class St_tpt_Maker : public StMaker {
                void              MakeHistograms();// Histograms for tracking
  protected:
 	       TH1F *m_hits_on_track; //!number of hits assigned to a reconstructed track
+	       TH1F *m_hits_in_fit;   //!number of hits used in a fit
+               TH1F *m_azimuth;       //!azimuthal angle
+               TH1F *m_tan_dip;       //!tangent of the dip angle
+               TH1F *m_r0;            //!radius for the first point
  public: 
                   St_tpt_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
    virtual       ~St_tpt_Maker();

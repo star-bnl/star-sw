@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.12 1999/01/08 23:19:42 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.13 1999/01/12 19:50:19 sakrejda Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.13  1999/01/12 19:50:19  sakrejda
+// QA histograms added to the tpt maker
+//
 // Revision 1.12  1999/01/08 23:19:42  sakrejda
 // histogramming added
 //
@@ -122,7 +125,10 @@ Int_t St_tpt_Maker::Init(){
   }
   // Create Histograms
 m_hits_on_track = new TH1F("hits_on_track","Number of hits on reconstructed tracks",50,.5,50.5);
-   
+m_hits_in_fit   = new TH1F("hits_in_fit","Number of hits used in the momentum fit",50,.5,50.5);
+m_azimuth       = new TH1F("azimuth","Azimuthal distribution of tracks",60,0.,360.0);
+m_tan_dip       = new TH1F("tan_dip","Distribution of the dip angle",100,-1.5,1.5);
+m_r0            = new TH1F("r0","Radius for the first point",100,50.0,200);
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -189,20 +195,28 @@ void St_tpt_Maker::MakeHistograms() {
   // Create an iterator
 St_DataSetIter tpc_tracks(gStChain->DataSet("tpc_tracks"));
 //Get the table:
-St_tte_mctrk *mct = 0;
-mct =  (St_tte_mctrk *) tpc_tracks.Find("mctrk");
- if (mct) {
-tte_mctrk_st *t = mct->GetTable();
- for(Int_t i=0; i<mct->GetNRows();i++,t++) {
-Float_t nr = t->nrec1;
-m_hits_on_track->Fill(nr);
+St_tpt_track *tpr = 0;
+tpr               = (St_tpt_track *) tpc_tracks.Find("tptrack");
+ if (tpr) {
+tpt_track_st *r = tpr->GetTable();
+ for(Int_t i=0; i<tpr->GetNRows();i++,r++){
+Int_t flag = r->flag;
+Float_t rnrec = r->nrec;
+Float_t rnfit = r->nfit;
+ if(flag>0) {
+m_hits_on_track->Fill(rnrec);
+m_hits_in_fit->Fill(rnfit);
+m_azimuth->Fill(r->psi);
+m_tan_dip->Fill(r->tanl);      
+m_r0->Fill(r->r0);
+ }         
  }
  }
 }
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.12 1999/01/08 23:19:42 sakrejda Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.13 1999/01/12 19:50:19 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
