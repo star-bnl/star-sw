@@ -18,7 +18,10 @@ static StMagF *gMagfield = 0;
 //________________________________________
 void type_of_call agufld_(Float_t *x, Float_t *b)
 {
-  if (!gMagfield) gMagfield = new StMagFCM(" Star Full Field","/afs/rhic/star/packages/dev/StDb/StMagF/bfp112.map",kConMesh,1.0);
+  if (!gMagfield) 
+    gMagfield = new StMagFCM("Star Full Field",
+			     "/afs/rhic/star/packages/dev/StDb/StMagF/bfp112.map",
+			     kConMesh,1.0);
   gMagfield->Field(x,b);
 }
 
@@ -41,7 +44,7 @@ void StMagF::Agufld(Float_t *x, Float_t *b)
       printf("Undefined MagF Field called, returning 0\n");
     }
     else if(fMap==kConst){
-       gMagfield = new StMagFC("Uniform Field","Fixed",kConst,1.0);
+       gMagfield = new StMagFC("Uniform Field","Fixed", 1.0);
        gMagfield->Field(x,b);
     }
     else if(fMap==kConMesh){
@@ -65,6 +68,7 @@ StMagFC::StMagFC(const char *name, const char *title,const Float_t factor)
   : StMagF(name,title,kConst,factor)
 {
   printf("Constant Field %s created: map= %d, factor= %f\n",fName.Data(),fMap,fFactor);
+
 }
 
 //________________________________________
@@ -87,7 +91,9 @@ StMagFCM::StMagFCM(const char *name, const char *title, const EField map,
 		 const Float_t factor)
   : StMagF(name,title,map,factor)
 {
-  printf("Constant Mesh Field %s created: map= %d, factor= %f, file= %s\n",fName.Data(),fMap,fFactor,fTitle.Data());
+  printf("Constant Mesh Field %s created: map= %d, factor= %f, file= %s\n",
+	 fName.Data(),fMap,fFactor,fTitle.Data());
+  ReadField();
 }
 
 //________________________________________
@@ -108,11 +114,11 @@ void StMagFCM::Field(Float_t *x, Float_t *b)
   phideg=phi*180/TMath::Pi();
   if(phideg<0) phideg=phideg+360.0;
 
-  if(fZbeg<=z && z<fZbeg+fZdel*(fZn-1)
-     &&  ( fRbeg <= r && r < fRbeg+fRdel*(fRn-1) )) {
+  if(fZbeg<=z && z<fZbeg+fZdel*(fZn-1) && r<fRbeg+fRdel*(fRn-1) ) {
 
     xl[0]=phideg-fPbeg;
     xl[1]=r-fRbeg;
+    if (xl[1]<0) xl[1] = 0;
     xl[2]=z-fZbeg;
     
     // --- start with x
