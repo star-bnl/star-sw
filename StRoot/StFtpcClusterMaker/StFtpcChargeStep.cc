@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.10 2001/04/24 13:12:54 oldi Exp $
+// $Id: StFtpcChargeStep.cc,v 1.11 2001/07/12 10:30:47 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.11  2001/07/12 10:30:47  jcs
+// change computing of average to use bins 50-99 instead of bins 0-49
+//
 // Revision 1.10  2001/04/24 13:12:54  oldi
 // Typo fixed.
 //
@@ -168,7 +171,7 @@ int StFtpcChargeStep::histogram(int setPressure)
 
   // find charge step roughly
   float average=0;
-  for(i=0; i<50; i++)
+  for(i=50; i<100; i++)
     {  
       average+=proHisto->GetBinContent(i);
     }
@@ -285,12 +288,11 @@ int StFtpcChargeStep::histogram(int setPressure)
     gMessMgr->Message("", "I", "OST") << "StFtpcChargeStep did not set normalized pressure to " << newPressure << " (still at " << mParam->normalizedNowPressure() << ")" << endm;
 
     if (mHisto->GetEntries() > 10000) {
-      gMessMgr->Message("", "I", "OST") << "because the method of writing the value to the database has to be switched on." << endm;
+      gMessMgr->Message("", "I", "OST") << "because only histogram requested" << endm;
     }
     
     else {
       gMessMgr->Message("", "I", "OST") << "because chargestep histo has " << mHisto->GetEntries() << " entries up to now (at least 10000 entries are necessary)" << endm;
-      gMessMgr->Message("", "I", "OST") << "and the method of writing the value to the database has to be switched on." << endm;
     }
   }
 
