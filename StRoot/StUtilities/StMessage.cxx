@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.13 1999/08/10 22:07:35 genevb Exp $
+// $Id: StMessage.cxx,v 1.14 1999/09/10 21:05:55 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.14  1999/09/10 21:05:55  genevb
+// Some workarounds for RedHat6.0
+//
 // Revision 1.13  1999/08/10 22:07:35  genevb
 // Added QAInfo message types
 //
@@ -68,8 +71,11 @@ ClassImp(StMessage)
 
 //_____________________________________________________________________________
 StMessage::StMessage(char *mess, char *ty, char* opt) :
-type(new char(toupper(*ty))),
+type(new char[2]),
 messTime() {
+  char* type1 = type;
+  *type1 = *ty;
+  *(++type1) = 0;
   static char space = ' ';
   size_t len = strlen(opt);
   option = new char[len];
@@ -117,8 +123,8 @@ int StMessage::Print(int nChars) {
     addedMessage = messCounter->str();
   } else {
     if (nChars>0) {
-      if (messBuffer.tellp() > nChars)
-        messBuffer.seekp(nChars);   // set end-of-string at nChars
+      if (messBuffer.tellp() >= nChars)
+        messBuffer.seekp(nChars-1);   // set end-of-string at nChars
       int noReturns = strcspn(messBuff,endofline);
       if (noReturns < messBuffer.tellp()) messBuffer.seekp(noReturns);
     } else
@@ -140,7 +146,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.13 1999/08/10 22:07:35 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.14 1999/09/10 21:05:55 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

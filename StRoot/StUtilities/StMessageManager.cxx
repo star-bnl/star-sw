@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.21 1999/08/12 22:34:28 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.22 1999/09/10 21:05:55 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.22  1999/09/10 21:05:55  genevb
+// Some workarounds for RedHat6.0
+//
 // Revision 1.21  1999/08/12 22:34:28  genevb
 // Additional crash protection for Linux when omitting parameter strings (opt=strlen(mess))
 //
@@ -99,7 +102,6 @@ static char emptyString[] = "";
 static char oOpt[] = "O";
 static char otsOpt[] = "OTS";
 static char eOpt[] = "E";
-static const size_t oSize = 25;
 #ifdef LINUX
 static int sMessLength;
 static const int maxLOMP = 1024;
@@ -173,11 +175,17 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
 #endif
   size_t messlen = strlen(mess);
   if ((len1>1) && (messlen > len1)) strcpy(&(mess[len1]),emptyString);
-  if ((((size_t) type)==messlen) || (len2<=0) || (len2>oSize)) type=emptyString;
-  else if (strlen(type) > len2) strcpy(&(type[len2]),emptyString);
+  if ((((size_t) type)==messlen) || (len2<=0)) type=emptyString;
+  else if (((size_t) type) < messlen) {
+    strcpy(&(mess[(size_t) type]),emptyString);
+    type=emptyString;
+  } else if (strlen(type) > len2) strcpy(&(type[len2]),emptyString);
   if ((((size_t) opt)==messlen) || (((size_t) opt)==(messlen+1)) ||
-      (((size_t) opt)==1) || (len3<=0) || (len3>oSize)) opt=oOpt;
-  else if ((opt) && (strlen(opt) > len3)) strcpy(&(opt[len3]),emptyString);
+      (((size_t) opt)==1) || (len3<=0)) opt=oOpt;
+  else if (((size_t) opt) < messlen) {
+    strcpy(&(mess[(size_t) opt]),emptyString);
+    opt=oOpt;
+  } else if ((opt) && (strlen(opt) > len3)) strcpy(&(opt[len3]),emptyString);
   gMessMgr->Message(mess,type,opt);
 }
 //________________________________________
@@ -187,8 +195,11 @@ void type_of_call StInfo_(char* mess, char* opt, size_t len1, size_t len2) {
 #endif
   size_t messlen = strlen(mess);
   if ((len1>1) && (messlen > len1)) strcpy(&(mess[len1]),emptyString);
-  if ((((size_t) opt)==messlen) || (len2<=0) || (len2>oSize)) opt=oOpt;
-  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((((size_t) opt)==messlen) || (len2<=0)) opt=oOpt;
+  else if (((size_t) opt) < messlen) {
+    strcpy(&(mess[(size_t) opt]),emptyString);
+    opt=oOpt;
+  } else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"I",opt);
 }
 //________________________________________
@@ -198,8 +209,11 @@ void type_of_call StWarning_(char* mess, char* opt, size_t len1, size_t len2) {
 #endif
   size_t messlen = strlen(mess);
   if ((len1>1) && (messlen > len1)) strcpy(&(mess[len1]),emptyString);
-  if ((((size_t) opt)==messlen) || (len2<=0) || (len2>oSize)) opt=eOpt;
-  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((((size_t) opt)==messlen) || (len2<=0)) opt=eOpt;
+  else if (((size_t) opt) < messlen) {
+    strcpy(&(mess[(size_t) opt]),emptyString);
+    opt=eOpt;
+  } else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"W",opt);
 }
 //________________________________________
@@ -209,8 +223,11 @@ void type_of_call StError_(char* mess, char* opt, size_t len1, size_t len2) {
 #endif
   size_t messlen = strlen(mess);
   if ((len1>1) && (messlen > len1)) strcpy(&(mess[len1]),emptyString);
-  if ((((size_t) opt)==messlen) || (len2<=0) || (len2>oSize)) opt=eOpt;
-  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((((size_t) opt)==messlen) || (len2<=0)) opt=eOpt;
+  else if (((size_t) opt) < messlen) {
+    strcpy(&(mess[(size_t) opt]),emptyString);
+    opt=eOpt;
+  } else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"E",opt);
 }
 //________________________________________
@@ -220,8 +237,11 @@ void type_of_call StDebug_(char* mess, char* opt, size_t len1, size_t len2) {
 #endif
   size_t messlen = strlen(mess);
   if ((len1>1) && (messlen > len1)) strcpy(&(mess[len1]),emptyString);
-  if ((((size_t) opt)==messlen) || (len2<=0) || (len2>oSize)) opt=oOpt;
-  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((((size_t) opt)==messlen) || (len2<=0)) opt=oOpt;
+  else if (((size_t) opt) < messlen) {
+    strcpy(&(mess[(size_t) opt]),emptyString);
+    opt=oOpt;
+  } else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"D",opt);
 }
 //________________________________________
@@ -231,8 +251,11 @@ void type_of_call QAInfo_(char* mess, char* opt, size_t len1, size_t len2) {
 #endif
   size_t messlen = strlen(mess);
   if ((len1>1) && (messlen > len1)) strcpy(&(mess[len1]),emptyString);
-  if ((((size_t) opt)==messlen) || (len2<=0) || (len2>oSize)) opt=otsOpt;
-  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  if ((((size_t) opt)==messlen) || (len2<=0)) opt=otsOpt;
+  else if (((size_t) opt) < messlen) {
+    strcpy(&(mess[(size_t) opt]),emptyString);
+    opt=oOpt;
+  } else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
   gMessMgr->Message(mess,"Q",opt);
 }
 //________________________________________
@@ -365,8 +388,10 @@ void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
   gMessage = new StMessage(mess, type, opt);
   endm = gMessage;
   if (!strchr(opt,'-')) {
+#ifndef i386_redhat60
     messList.push_back(gMessage);
     messCollection[typeN]->push_back(gMessage);
+#endif
   }
   if (curType) {
     delete [] curType;
@@ -579,7 +604,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.21 1999/08/12 22:34:28 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.22 1999/09/10 21:05:55 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
