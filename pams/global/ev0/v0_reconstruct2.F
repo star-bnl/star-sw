@@ -21,6 +21,8 @@ C     Modifications:
 C         1.  Removed use of obsolete table evr_privert; L.Ray, 8/19/98
 C----------------------------------------------------------------------
 #include "PAM.inc"
+#include "StDetectorId.inc"
+#include "StVertexId.inc"
 #include "dst_vertex.inc"
 #include "dst_v0_vertex.inc"
 #include "ev0_ev0par2.inc"
@@ -70,7 +72,8 @@ CC:  Load Primary vertex position coordinates:
       mainv(2) = 0.0
       mainv(3) = 0.0
          do i = 1,vertex_h.nok
-            if(vertex(i).vtx_id .eq. 1 .and. vertex(i).iflag .eq. 1) then
+            if(vertex(i).vtx_id .eq. kEventVtxId
+     +           .and. vertex(i).iflag .eq. 1) then
                mainv(1) = vertex(i).x
                mainv(2) = vertex(i).y
                mainv(3) = vertex(i).z
@@ -103,9 +106,11 @@ C--   calculate impact parameter at main vertex--- wkw
            
 
 C--   skip all tracks with impact parameter .lt. dcapnmin
-           if( trak(i).det_id .eq. 1 )then
+           if( trak(i).det_id .eq. kTpcId )then
                  det_id_i = 1
-           elseif( trak(i).det_id .eq. 2 ) then
+           elseif( trak(i).det_id .eq. kSvtId .or.
+     +                trak(i).det_id .eq.  kSsdSvtId .or.
+     )                trak(i).det_id .eq. kSsdId )then
                  det_id_i = 2
            else
                  det_id_i = 3
@@ -126,14 +131,16 @@ C******************
 
 *     second track is a negative
               IF(trak(j).q .gt.0) GOTO 20
+              if( trak(i).det_id .eq. kTpcId )then
+                 det_id_i = 1
+              elseif( trak(i).det_id .eq. kSvtId .or.
+     +                trak(i).det_id .eq.  kSsdSvtId .or.
+     +                trak(i).det_id .eq. kSsdId )then
+                 det_id_i = 2
+              else
+                 det_id_i = 3
+              endif
 
-                 if( trak(j).det_id .eq. 1 )then
-                     det_id = 1
-                 elseif( trak(j).det_id .eq. 2 ) then
-                     det_id = 2
-                 else
-                     det_id = 3
-                 endif
 C******************
 C-- skip all SVT only tracks
 c           if(det_id.eq.2)go to 20
@@ -318,10 +325,9 @@ C---- find square of impact param of reconstructed particle------
                        
                        ev0out_h.nok= ev0out_h.nok+1
                        vertex_h.nok = vertex_h.nok +1
-                       if (ok.gt.ev0out_h.maxlen .or.
-     +                      vertex_h.nok .eq.  vertex_h.maxlen) then
+                       if (ok.ge.ev0out_h.maxlen .or.
+     +                      vertex_h.nok .gt.  vertex_h.maxlen) then
                           write(6,*) 'Too many v0s'
-                          
                           return ! wkw
                        endif
                        vertex(vertex_h.nok).x=xpp(1)
@@ -329,8 +335,8 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).z=xpp(3)
                        vertex(vertex_h.nok).iflag = 0
                        vertex(vertex_h.nok).det_id = 
-     +                      trak(i).det_id+(10.*trak(j).det_id)
-                       vertex(vertex_h.nok).vtx_id= 2
+     +                      (100*trak(i).det_id)+trak(j).det_id
+                       vertex(vertex_h.nok).vtx_id= kV0VtxId
                        vertex(vertex_h.nok).sigma(1) = 0
                        vertex(vertex_h.nok).sigma(2) = 0
                        vertex(vertex_h.nok).sigma(3) = 0

@@ -40,6 +40,7 @@ C<----------------------------------------------------------------------
 #include "ev0_am2.inc"
 #include "phys_constants.inc"
 #include "math_constants.inc"
+#include "StDetectorId.inc"
 
       INTEGER nok
       INTEGER i
@@ -80,15 +81,26 @@ C convert to Tesla
         nok=0
         if((globtrk_h.nok).eq.0) return
         DO i=1,globtrk_h.nok
-           if (globtrk(i).iflag .gt. 0 .and. globtrk(i).det_id .lt. 4) then
-              nok=nok+1
-              IF(nok .ge. trak_h.maxlen)   GOTO 35
-              trak(nok).id  = globtrk(i).id
-              trak(nok).det_id = globtrk(i).det_id
-              trak(nok).r0   = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
-              trak(nok).phi  = atan2(globtrk(i).y0,globtrk(i).x0)
-              trak(nok).z0   = globtrk(i).z0
-              trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
+           if (globtrk(i).iflag .gt. 0 .and. 
+     +          globtrk(i).det_id .eq. kTpcId .or.
+     +          globtrk(i).det_id .eq. kSvtId .or.  
+     +          globtrk(i).det_id .eq. kSsdId .or.
+     +          globtrk(i).det_id .eq. kTpcSsdId .or.
+     +          globtrk(i).det_id .eq. kTpcSvtId .or.
+     +          globtrk(i).det_id .eq. kTpcSsdSvtId .or.
+     +          globtrk(i).det_id .eq. kSsdSvtId) then
+             IF(nok .ge. trak_h.maxlen)   then
+                write(6,*) 'Internal track table too small quiting'
+                EV0_AM2= STAFCV_BAD
+                return
+             endif
+             nok=nok+1
+             trak(nok).id  = globtrk(i).id
+             trak(nok).det_id = globtrk(i).det_id
+             trak(nok).r0   = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
+             trak(nok).phi  = atan2(globtrk(i).y0,globtrk(i).x0)
+             trak(nok).z0   = globtrk(i).z0
+             trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
               trak(nok).tanl= globtrk(i).tanl
               trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
      +             *globtrk(i).invpt)
