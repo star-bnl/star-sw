@@ -4,8 +4,11 @@
 #include "tables/St_ftpcGasSystem_Table.h"
 #include "tables/St_tpcGas_Table.h"
 
-/* !
-  The class holds the FTPC Gas system database values needed in the chain. It is a singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). If no data exists all values return 0. To use:
+/*!
+  The class holds the FTPC Gas system database values needed in the chain. It is a 
+  singleton which requires manual updating, usually taken care of in StDetectorDbMaker.cxx::Make(). 
+  If no data exists all values return 0. To use:
+
   #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
   StDetectorFTPCGas * gas = StDetectorDbFTPCGas::instance();
   cout << *gas << endl;
@@ -13,7 +16,8 @@
 
   or any other access methods.
 
-  Do not use the update function unless you know what you are doing. It should not cause a problem, it will just access the database more often than needed.
+  Do not use the update function unless you know what you are doing. It should not cause a 
+  problem, it will just access the database more often than needed.
 */
 
 /// Initilizes singleton pointer
@@ -193,6 +197,20 @@ double StDetectorDbFTPCGas::getBody4East(){
     return value;
 };
 
+double StDetectorDbFTPCGas::getBody5East(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body5East;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody6East(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body6East;
+    return value;
+};
+
 /// Gasout West (ElementID=2)
 double StDetectorDbFTPCGas::getGasOutWest(){
     double value = 0;
@@ -229,6 +247,20 @@ double StDetectorDbFTPCGas::getBody4West(){
     return value;
 };
 
+double StDetectorDbFTPCGas::getBody5West(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body5West;
+    return value;
+};
+
+double StDetectorDbFTPCGas::getBody6West(){
+    double value = 0;
+    if(mGasOut)
+	value = mGasOut->body6West;
+    return value;
+};
+
 /// Barometric Presure
 double StDetectorDbFTPCGas::getBarometricPressure(){
     double value = 0;
@@ -251,11 +283,15 @@ ostream& operator<<(ostream& os, StDetectorDbFTPCGas& v){
     os << "West Body2  = " << v.getBody2West() << endl;
     os << "West Body3  = " << v.getBody3West() << endl;
     os << "West Body4  = " << v.getBody4West() << endl;
+    os << "West Body5  = " << v.getBody5West() << endl;
+    os << "West Body6  = " << v.getBody6West() << endl;
     os << "East GasOut = " << v.getGasOutEast() << endl;
     os << "East Body1  = " << v.getBody1East() << endl;
     os << "East Body2  = " << v.getBody2East() << endl;
     os << "East Body3  = " << v.getBody3East() << endl;
     os << "East Body4  = " << v.getBody4East() << endl;
+    os << "East Body5  = " << v.getBody5East() << endl;
+    os << "East Body6  = " << v.getBody6East() << endl;
     os << "BarometricPressure = " << v.getBarometricPressure() << endl;
     
     return os;
