@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.30 2001/09/03 19:09:39 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.31 2001/09/04 20:02:49 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.31  2001/09/04 20:02:49  ward
+// Correction in ctb_dsm_2001.map copied into maker code.
+//
 // Revision 1.30  2001/09/03 19:09:39  ward
 // Runtime selection of 2000 or 2001 trigger data format.
 //
@@ -561,7 +564,7 @@ static int call=0;
   ctbmap[101-1][1-1]=226;
   ctbmap[102-1][1-1]=225;
   ctbmap[103-1][1-1]=224;
-  ctbmap[104-1][1-1]=239;
+  ctbmap[104-1][1-1]=238;
   ctbmap[105-1][1-1]=239;
   ctbmap[106-1][1-1]=237;
   ctbmap[107-1][1-1]=236;
