@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.15 2003/03/06 01:34:18 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.16 2003/03/19 18:58:04 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -222,9 +222,9 @@ void StMuChainMaker::fromDir(string dir, int maxFiles) {
 #include "TSQLServer.h"
 #include "TSQLResult.h"
 #include "TSQLRow.h"
-void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { ///< no yet implemented
+void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { 
   DEBUGMESSAGE2("");
-  TSQLServer* server = TSQLServer::Connect("mysql://duvall.star.bnl.gov:3306/FileCatalog","","");
+  TSQLServer* server = TSQLServer::Connect("mysql://duvall.star.bnl.gov:3306/FileCatalog_BNL","","");
   if ( !server ) DEBUGMESSAGE("could not connect to server");
 
   /// get machine name 
@@ -334,6 +334,10 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.16  2003/03/19 18:58:04  laue
+ * StMuChainMaker: updates for moved file catalog
+ * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
+ *
  * Revision 1.15  2003/03/06 01:34:18  laue
  * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
  * only year1 Au+Au 130GeV data
