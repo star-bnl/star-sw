@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.12 2000/05/18 18:12:06 posk Exp $
+// $Id: doFlowEvents.C,v 1.13 2000/05/19 22:17:43 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -37,6 +37,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.13  2000/05/19 22:17:43  posk
+// Correct default input file.
+//
 // Revision 1.12  2000/05/18 18:12:06  posk
 // Updated to doEvents.C
 //
@@ -133,7 +136,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowTagMaker");
-  gSystem->Load("StFlowAnalysisMaker");
+  //gSystem->Load("StFlowAnalysisMaker");
   
   // Make a chain with a file list
   chain  = new StChain("StChain");
@@ -202,7 +205,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //      FlowMakers with the corresponding selection objects.
   //
   StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
-  StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+  //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   
   // Make Selection objects and instantiate Makers
   //StFlowSelection flowSelect;
@@ -225,7 +228,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //flowMaker->NanoEventWrite(kTRUE);
   flowMaker->SetNanoEventFileName(); 
   //flowMaker->SetNanoEventFileName("flownanoevent.root"); 
-  flowMaker->FlowEventWrite(kTRUE);
+  //flowMaker->FlowEventWrite(kTRUE);
   //flowMaker->FlowEventRead(kTRUE);
   
   // Set Debug status
@@ -309,8 +312,8 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, c
 void doFlowEvents(const Int_t nevents)
 {
   // Commit to cvs with these defaults:
-  //const Char_t *filePath="-";
-  //const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
+  const Char_t *filePath="-";
+  const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
   
   // BNL
   //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
@@ -327,8 +330,8 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* filePath="./";
   //Char_t* fileExt="*.event.root";
   
-  Char_t* filePath="./";
-  Char_t* fileExt="flownanoevent.root";
+  //Char_t* filePath="./";
+  //Char_t* fileExt="flownanoevent.root";
   
   // LBNL
   //Char_t* filePath="/data06/snelling/flow/";
