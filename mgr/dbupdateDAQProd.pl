@@ -29,7 +29,7 @@ my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetD = (
 #             "P00hg/2000/06",
-             "P00hg/2000/07",
+             "P00hi/2000/07",
              "P00hi/2000/08", 
              "P00hi/2000/09", 
 );
