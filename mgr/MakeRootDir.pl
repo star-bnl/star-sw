@@ -11,7 +11,8 @@
 #
 
 chomp($PWD = `pwd`);
-$SYS=$ENV{STAR_SYS};
+$SYS  = $ENV{STAR_HOST_SYS};
+$SSYS = $ENV{STAR_SYS};
 $PATH = $ENV{GROUP_DIR};
 $LNDIR= "$PATH/lndir";
 
@@ -24,15 +25,19 @@ if( ! -d ".$SYS"){     mkdir(".$SYS",0775);}
 if( ! -d ".$SYS"){     die ".$SYS does not exists. Could not create it\n";}
 
 if( $PWD =~ m|^/afs|){ 
-    print "AFS tree\n";
-    $ANFS = ".\@sys";
-    $FLINK= 1;
+    if ( $SSYS ne $SYS ){
+	$ANFS = ".$SYS";
+	$FLINK= 0;
+    } else {
+	print "AFS tree\n";
+	$ANFS = ".\@sys";
+	$FLINK= 1;
+    }
 } else {
     print "NFS tree\n";
     $ANFS = ".$SYS";
     $FLINK= 0;    
 }
-
 
 
 # Startup values for directory names
