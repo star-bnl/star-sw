@@ -70,7 +70,7 @@ ostream& operator<<(ostream&, const StiHit&);
 
 ClassImp(StiMaker)
   
-StiMaker::StiMaker(const Char_t *name) : 
+    StiMaker::StiMaker(const Char_t *name) : 
 	StMaker(name),
 	initialized(0),
 	mEvalFileName("empty"),
@@ -85,7 +85,7 @@ StiMaker::StiMaker(const Char_t *name) :
 {
     cout <<"StiMaker::StiMaker()"<<endl;
     sinstance = this;
-		toolkit = StiDefaultToolkit::instance();
+    toolkit = StiDefaultToolkit::instance();
 }
 
 StiMaker* StiMaker::instance()
@@ -95,97 +95,97 @@ StiMaker* StiMaker::instance()
 
 void StiMaker::kill()
 {
-	if (sinstance) {
-		delete sinstance;
-		sinstance = 0;
-	}
-	return;
+    if (sinstance) {
+	delete sinstance;
+	sinstance = 0;
+    }
+    return;
 }
 
 StiMaker::~StiMaker() 
 {
-	cout <<"StiMaker::~StiMaker()"<<endl;
+    cout <<"StiMaker::~StiMaker()"<<endl;
 	
-	Messenger::kill();
+    Messenger::kill();
 }
 
 void StiMaker::Clear(const char*)
 {
-	if (initialized) 
-		{
-			initialized = true;
-			toolkit->getHitContainer()->clear();
-			toolkit->getDetectorContainer()->reset();
-			toolkit->getHitFactory()->reset();
-			toolkit->getTrackFactory()->reset();
-			toolkit->getTrackNodeFactory()->reset();
-			toolkit->getTrackContainer()->clear();
-			if (ioBroker->useGui()) 
-				toolkit->getDisplayManager()->reset();
-    }
+    if (initialized) 
+	{
+	    initialized = true;
+	    toolkit->getHitContainer()->clear();
+	    toolkit->getDetectorContainer()->reset();
+	    toolkit->getHitFactory()->reset();
+	    toolkit->getTrackFactory()->reset();
+	    toolkit->getTrackNodeFactory()->reset();
+	    toolkit->getTrackContainer()->clear();
+	    if (ioBroker->useGui()) 
+		toolkit->getDisplayManager()->reset();
+	}
     StMaker::Clear();
 }
 
 Int_t StiMaker::Finish()
 {
-	return StMaker::Finish();
+    return StMaker::Finish();
 }
 
 Int_t StiMaker::Init()
 {
-	return kStOk;
+    return kStOk;
 }
 
 Int_t StiMaker::InitRun(int run)
 {
-  if (!initialized)
-    {
-      cout <<"\n --- StiMaker::InitRun(): Building --- \n"<<endl;
-      initialized=true;
-      
-      Messenger::init();
-      Messenger::setRoutingMask(0);
-      
-      ioBroker = toolkit->getIOBroker();
-      cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
-      if (ioBroker->useGui()) 
+    if (!initialized)
 	{
-	  cout <<"--- Display Manager will be set" << endl;
-	  toolkit->getDisplayManager()->cd();
-	  cout <<"--- Display Manager Ready" << endl;
-	}
-      else
-	cout <<"--- Display Manager will not be used" << endl;
-      if (ioBroker->simulated()==true)
-	{
-	  if (mAssociationMaker)
-	    cout << "AssociationMaker Defined" << endl;
-	  else
-	    cout << "---- AssociationMaker NOT Defined" << endl;
+	    cout <<"\n --- StiMaker::InitRun(): Building --- \n"<<endl;
+	    initialized=true;
+      
+	    Messenger::init();
+	    Messenger::setRoutingMask(0);
+      
+	    ioBroker = toolkit->getIOBroker();
+	    cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
+	    if (ioBroker->useGui()) 
+		{
+		    cout <<"--- Display Manager will be set" << endl;
+		    toolkit->getDisplayManager()->cd();
+		    cout <<"--- Display Manager Ready" << endl;
+		}
+	    else
+		cout <<"--- Display Manager will not be used" << endl;
+	    if (ioBroker->simulated()==true)
+		{
+		    if (mAssociationMaker)
+			cout << "AssociationMaker Defined" << endl;
+		    else
+			cout << "---- AssociationMaker NOT Defined" << endl;
 	  
-		StiEventAssociator::instance(mAssociationMaker);
-		StiEvaluator::instance(mEvalFileName);
-	  //toolkit->setAssociationMaker(mAssociationMaker);
-	  //toolkit->getEvaluator(mEvalFileName);
-	  cout <<"--- Evaluator Ready" << endl;
-	}
-      else
-	cout <<"--- Evaluator will not be used" << endl;
-      tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
-      //StiStEventFiller
-      mStEventFiller = new StiStEventFiller();
+		    StiEventAssociator::instance(mAssociationMaker);
+		    StiEvaluator::instance(mEvalFileName);
+		    //toolkit->setAssociationMaker(mAssociationMaker);
+		    //toolkit->getEvaluator(mEvalFileName);
+		    cout <<"--- Evaluator Ready" << endl;
+		}
+	    else
+		cout <<"--- Evaluator will not be used" << endl;
+	    tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
+	    //StiStEventFiller
+	    mStEventFiller = new StiStEventFiller();
       
-      cout <<"--- Tracker Ready" << endl;
-      if (ioBroker->useGui()) 
-	{
-	  toolkit->getDisplayManager()->setSkeletonView();
-	  toolkit->getDisplayManager()->draw();
-	  toolkit->getDisplayManager()->update();
-	  //toolkit->getDisplayManager()->print();
+	    cout <<"--- Tracker Ready" << endl;
+	    if (ioBroker->useGui()) 
+		{
+		    toolkit->getDisplayManager()->setSkeletonView();
+		    toolkit->getDisplayManager()->draw();
+		    toolkit->getDisplayManager()->update();
+		    //toolkit->getDisplayManager()->print();
+		}
+	    cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
 	}
-      cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
-    }
-  return StMaker::InitRun(run);
+    return StMaker::InitRun(run);
 }
 
 Int_t StiMaker::Make()
@@ -194,59 +194,59 @@ Int_t StiMaker::Make()
     StEvent* rEvent = 0;
     rEvent = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
     StMcEvent* mc = 0;
-		if (rEvent) 
-			{
-				mevent = rEvent;
-				cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
+    if (rEvent) 
+	{
+	    mevent = rEvent;
+	    cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
 			 
-				//Fill hits, organize the container
-				toolkit->getHitFiller()->setEvent(mevent);
-				toolkit->getHitFiller()->fillHits(toolkit->getHitContainer(), toolkit->getHitFactory());
+	    //Fill hits, organize the container
+	    toolkit->getHitFiller()->setEvent(mevent);
+	    toolkit->getHitFiller()->fillHits(toolkit->getHitContainer(), toolkit->getHitFactory());
 				
-				cout <<"StiMaker::Make()\tsortHits"<<endl;
-				toolkit->getHitContainer()->sortHits();
-				cout <<"\tdone"<<endl;
-				cout <<"StiMaker::Make()\tCall StiHitContainer::update()"<<endl;
-				toolkit->getHitContainer()->update();
-				cout <<"\tdone\nStiMaker::Make()\tCall TrackSeedFinder-reset "<<endl;
-				//Init seed finder for start
-				StiSeedFinder * seedFinder = toolkit->getTrackSeedFinder();
-				if (seedFinder)
-					seedFinder->reset();
-				else
-					{
-						cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
-					}
+	    cout <<"StiMaker::Make()\tsortHits"<<endl;
+	    toolkit->getHitContainer()->sortHits();
+	    cout <<"\tdone"<<endl;
+	    cout <<"StiMaker::Make()\tCall StiHitContainer::update()"<<endl;
+	    toolkit->getHitContainer()->update();
+	    cout <<"\tdone\nStiMaker::Make()\tCall TrackSeedFinder-reset "<<endl;
+	    //Init seed finder for start
+	    StiSeedFinder * seedFinder = toolkit->getTrackSeedFinder();
+	    if (seedFinder)
+		seedFinder->reset();
+	    else
+		{
+		    cout << "StiMaker::Make() - FATAL - seedFinder==0" << endl;
+		}
 
-				cout<<"\tdone" << endl;
-				if (ioBroker->simulated()) 
-					{
-						if (!mMcEventMaker)
-							{
-								cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
-								return 0;
-							}
-						mc = mMcEventMaker->currentMcEvent();
-						mMcEvent = mc;
-						if (mc==0)
-							{
-								cout <<"StiMaker::Make(). ERROR!\tMcEvent==0"<<endl;
-								return 0;
-							}
-						StiEvaluableTrackSeedFinder* temp;
-						temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(toolkit->getTrackSeedFinder());
-						if (temp!=0) 
-							temp->setEvent(mc);
-					}
-				//Now we can loop, if we're not using the gui
-				if (!ioBroker->useGui()) 
-					finishEvent();
-			}
-    if (ioBroker->useGui()==true) 
+	    cout<<"\tdone" << endl;
+	    if (ioBroker->simulated()) 
+		{
+		    if (!mMcEventMaker)
 			{
-				toolkit->getDisplayManager()->draw();
-				toolkit->getDisplayManager()->update();
+			    cout <<"StiMaker::Make(). ERROR!\tmMcEventMaker==0"<<endl;
+			    return 0;
 			}
+		    mc = mMcEventMaker->currentMcEvent();
+		    mMcEvent = mc;
+		    if (mc==0)
+			{
+			    cout <<"StiMaker::Make(). ERROR!\tMcEvent==0"<<endl;
+			    return 0;
+			}
+		    StiEvaluableTrackSeedFinder* temp;
+		    temp = dynamic_cast<StiEvaluableTrackSeedFinder*>(toolkit->getTrackSeedFinder());
+		    if (temp!=0) 
+			temp->setEvent(mc);
+		}
+	    //Now we can loop, if we're not using the gui
+	    if (!ioBroker->useGui()) 
+		finishEvent();
+	}
+    if (ioBroker->useGui()==true) 
+	{
+	    toolkit->getDisplayManager()->draw();
+	    toolkit->getDisplayManager()->update();
+	}
     return kStOK;
 }
 
@@ -260,7 +260,7 @@ void StiMaker::printStatistics() const
 void StiMaker::finishEvent()
 {
     cout <<"StiMaker::finishEvent()"<<endl;
-    cout <<mevent->numberOfPrimaryVertices()<<endl;
+ cout <<mevent->numberOfPrimaryVertices()<<endl;
     
     StTimer clock;
     clock.start();
@@ -279,13 +279,13 @@ void StiMaker::finishEvent()
 			}
 		bool useExtendToVertex=true;
 		if (useExtendToVertex)
-			{
-				StiHit * vertex = toolkit->getHitFactory()->getObject();
-				StThreeVectorF& vp = mevent->primaryVertex()->position();
-				StThreeVectorF& ve = mevent->primaryVertex()->positionError();
-				vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
-				tracker->extendTracksToVertex(*vertex);
-			}
+		    {
+			StiHit * vertex = toolkit->getHitFactory()->getObject();
+			const StThreeVectorF& vp = mevent->primaryVertex()->position();
+			const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
+			vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
+			tracker->extendTracksToVertex(vertex);
+		    }
 		clock.start();
 		mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
 		clock.stop();
