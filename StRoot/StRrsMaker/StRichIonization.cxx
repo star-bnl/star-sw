@@ -1,5 +1,5 @@
 /*********************************************************************
- * $Id: StRichIonization.cxx,v 1.4 2000/02/08 23:51:13 lasiuk Exp $
+ * $Id: StRichIonization.cxx,v 1.5 2000/02/11 21:11:37 lasiuk Exp $
  *
  * Description:
  *  StRichIonization simulates the charged particle track through the gas.
@@ -22,9 +22,12 @@
  *
  *********************************************************************
  * $Log: StRichIonization.cxx,v $
- * Revision 1.4  2000/02/08 23:51:13  lasiuk
- * removal of rrs macro---CC4.2 cannot handle it!
+ * Revision 1.5  2000/02/11 21:11:37  lasiuk
+ * use new name in physics db interface
  *
+ *
+ * Revision 1.6  2000/02/14 01:14:06  lasiuk
+ * add track_p to GHit c'tor
  *
  * Revision 1.5  2000/02/11 21:11:37  lasiuk
  * use new name in physics db interface
@@ -50,8 +53,8 @@
 #include "StRichIonization.h"
 #include "StRichPhysicsDb.h"
 
-    mAverageNumberOfInteractions = mPhysicsDb->averageNumberOfInteractions();
-    mMaximumElectronEnergy       = mPhysicsDb->maximumElectronEnergy();
+#ifdef RICH_WITH_VIEWER
+#include "StRichViewer.h"
 #endif
 
 StRichIonization::StRichIonization()
@@ -82,7 +85,7 @@ StRichIonization::~StRichIonization() { /* nopt */ }
 	y = hit.position().y()  +  t * hit.cosY();
 	z = hit.position().z()  +  t * hit.cosZ();
 	x = hit->position().x()  +  t * hit->cosX();
-	p = mRandom.Flat(1.0) * mPhysicsDb->maximumElectronEnergy();
+	y = hit->position().y()  +  t * hit->cosY();
 	z = hit->position().z()  +  t * hit->cosZ();
 	
 	//p = random.Flat(1.0) * mPhysicsDb->e_max;
