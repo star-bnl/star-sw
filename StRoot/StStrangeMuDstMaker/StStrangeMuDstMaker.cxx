@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.8 2001/01/04 01:03:23 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.9 2001/01/30 04:06:54 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.9  2001/01/30 04:06:54  genevb
+// Better handling of file switches
+//
 // Revision 3.8  2001/01/04 01:03:23  genevb
 // Add CheckFile() for creating sub-dsts
 //
@@ -435,12 +438,15 @@ void StStrangeMuDstMaker::SetStFiles () {
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::OpenFile() {
-  char* option=0;
-  if (rw == StrangeRead)
-    option = "READ";
-  else if (rw == StrangeWrite)
-    option = "RECREATE";
-  else
+  char option[16];
+  char inout[16];
+  if (rw == StrangeRead) {
+    sprintf(option,"READ");
+    sprintf(inout,"reading");
+  } else if (rw == StrangeWrite) {
+    sprintf(option,"RECREATE");
+    sprintf(inout,"writing");
+  } else
     return kStOk;
     
   if( ! (muDst = new TFile(file[evT],option)) ) {
@@ -449,8 +455,8 @@ Int_t StStrangeMuDstMaker::OpenFile() {
     return kStErr;
   }
   if (rw == StrangeWrite) muDst->SetFormat(1);   // Necessary to read MuDst in plain root
-  gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file:\n  "
-                   << file[evT] << endm;     
+  gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file for " << inout
+                   << ":\n  " << file[evT] << endm;     
   return kStOk;
 }
 //_____________________________________________________________________________
