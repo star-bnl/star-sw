@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.34 2002/04/22 09:53:45 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.35 2002/06/04 12:33:09 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.35  2002/06/04 12:33:09  putschke
+// new 2-dimenisional hitfinding algorithm
+// correct error in padposition numbering
+//
 // Revision 1.34  2002/04/22 09:53:45  jcs
 // correct errors in calculation of cluster phi angle for ftpc east (Frank Simon)
 //
@@ -305,15 +309,16 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 			  clusters ++;
 
 			  // cluster processing: call hitfinder 
-			  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
-				       pradius, pdeflection, 
-				       fastlog)
-			     )
-			    {
+			  if (geometryCut(CurrentCUC))
+			    if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
+					 pradius, pdeflection, 
+					 fastlog)
+			       )
+			      {
 #ifdef DEBUG
-			      printf("Hitfinder failed! Cluster is lost.\n");
+				printf("Hitfinder failed! Cluster is lost.\n");
 #endif
-			    }
+			      }
 			}
 		      DeleteCUC=CurrentCUC;
 		      // bypass CurrentCUC in CUC list 
@@ -619,15 +624,16 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 		  clusters ++;
 		  
 		  // cluster processing: call hitfinder 
-		  if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
+		  if (geometryCut(CurrentCUC))
+		    if(!findHits(CurrentCUC, iRowBuf, iSecBuf, 
 			       pradius, pdeflection, 
 			       fastlog)
-		     )
-		    {
+		       )
+		      {
 #ifdef DEBUG
-		      printf("Hitfinder failed! Cluster is lost.\n");
+			printf("Hitfinder failed! Cluster is lost.\n");
 #endif
-		    }
+		      }
 		}
 	      DeleteCUC=CurrentCUC;
 	      // bypass CurrentCUC in CUC list 
@@ -745,6 +751,39 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   return dummy;
 }
 
+bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
+{
+ 
+  int seqlength=0;
+  int minTimebin=256;
+  int maxTimebin=0;
+
+  for(int iPad=Cluster->StartPad; iPad<=Cluster->EndPad; iPad++)
+    {
+      for(int iSequence = 0; iSequence < Cluster->NumSequences; iSequence++)
+	{
+	  if(Cluster->SequencePad[iSequence] == iPad)
+	    {
+	      if (Cluster->Sequence[iSequence].Length > seqlength)
+		seqlength=Cluster->Sequence[iSequence].Length;
+	      if (Cluster->Sequence[iSequence].startTimeBin<minTimebin)
+		minTimebin=Cluster->Sequence[iSequence].startTimeBin;
+	      if ((Cluster->Sequence[iSequence].startTimeBin+Cluster->Sequence[iSequence].Length) > maxTimebin)
+		maxTimebin=(Cluster->Sequence[iSequence].startTimeBin+Cluster->Sequence[iSequence].Length);
+	    }
+	}
+    }
+
+  if (minTimebin>135) return true;
+  else if ((minTimebin>50 && minTimebin<=135) && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthMed 
+	   && seqlength<mMaxTimelengthMed)
+    return true;
+  else if (minTimebin>5 && minTimebin<=50 && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
+    return true;
+  else
+    return false;
+}
+
 int StFtpcClusterFinder::findHits(TClusterUC *Cluster, 
 				 int iRow, 
 				 int iSec, 
@@ -752,210 +791,128 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 				 double *pDeflection, 
 				 float fastlog[256])
 {
-  int iPad, iSequence; 
-  int iPadPeaks, iThisPadPeaks;
-  int iNewPeakLoop, iOldPeakLoop;
-  int iNumPeaks, iOldPeakstore, iNewPeakstore;
-  int iPeakCompare;
-  TPadPeak PadPeaks[2][MAXSEQPEAKS];
+
+  int iNumPeaks; 
+  int i,k;
+
+  bool PeakFound;
+
+  //const int DeltaTime=2;
+  //const int DeltaPad=2;
+
+#ifdef DEBUG
+  printf("starting hitfinder\n");
+#endif
+
   TPeak Peaks[MAXPEAKS];
+  float TClSearch [162][258]; 
+
+  for (int i=0;i<162;i++)
+    for (int j=0;j<258;j++)
+      TClSearch[i][j]=0; 
+
+  float cTemp;
 
   iNumPeaks=0;
-  iPadPeaks=0;
-  iOldPeakstore=0;
-/*   printf("starting hitfinder\n"); */
 
-  for(iPad=Cluster->StartPad; iPad<=Cluster->EndPad; iPad++)
+  // read out cluster and fill window with gain correction
+  // =====================================================
+
+   for(int iPad=Cluster->StartPad; iPad<=Cluster->EndPad; iPad++)
     {
-      /* set index for alternating use of sequencepeak array */
-      iNewPeakstore=(iOldPeakstore+1)&1;
-      
-      iThisPadPeaks=0;
-
-      /* loop over sequences as they need not be in ascending order, */
-      /* if cluster is deformed. */
-      for(iSequence = 0; 
-          iSequence < Cluster->NumSequences; iSequence++)
+      for(int iSequence = 0; iSequence < Cluster->NumSequences; iSequence++)
 	{
 	  if(Cluster->SequencePad[iSequence] == iPad)
 	    {
-	      /* now looping over sequences in pad order */
-	      /* get peaks for this sequence */
-	      getSeqPeaksAndCalibAmp(&(Cluster->Sequence[iSequence]), 
-                                     iRow,
-				     iSec*mDb->numberOfPads(), iPad,
-				     PadPeaks[iNewPeakstore], &iThisPadPeaks
-#ifdef DEBUGFILE
-				     , fin
-#endif
-				     );
-	      /* peaks are appended to peak list for this pad */
-	    }
-	}
-      
-
-      /* loop over peaks on this pad */ 
-      for(iNewPeakLoop=0; iNewPeakLoop < iThisPadPeaks; iNewPeakLoop++)
-	{
-	  /* if peak is not matched => slope=0 => reprocessing */
-	  PadPeaks[iNewPeakstore][iNewPeakLoop].slope=0;
-	  
-	  for(iOldPeakLoop=0; iOldPeakLoop < iPadPeaks; iOldPeakLoop++)
-	    {
-	      iPeakCompare=PadPeaks[iNewPeakstore][iNewPeakLoop].Timebin - 
-		PadPeaks[iOldPeakstore][iOldPeakLoop].Timebin;
-	      if(   ((iPeakCompare <= 1+PadPeaks[iNewPeakstore][iNewPeakLoop].width) 
-		     && (iPeakCompare >= 0)) 
-		 || ((iPeakCompare >=-1-PadPeaks[iOldPeakstore][iOldPeakLoop].width) 
-		     && (iPeakCompare <= 0)))
+	      for(int iIndex=0; iIndex< Cluster->Sequence[iSequence].Length; iIndex++)
 		{
-		  /* now we found a matching sequence peak  */
-		  /* is the local cluster slope rising */
-		  if(PadPeaks[iOldPeakstore][iOldPeakLoop].height <= 
-		     PadPeaks[iNewPeakstore][iNewPeakLoop].height)
-		    {
-		      /* if slope is 0 keep the old slope */
-		      /* otherwise flat tops will be split in 2 hits */ 
-		      if(PadPeaks[iOldPeakstore][iOldPeakLoop].height == 
-			 PadPeaks[iNewPeakstore][iNewPeakLoop].height)
-			{
-			  PadPeaks[iNewPeakstore][iNewPeakLoop].slope = 
-			    PadPeaks[iOldPeakstore][iOldPeakLoop].slope;
-			}
-		      else
-			{
-			  /* yes, set slope to rising */
-			  PadPeaks[iNewPeakstore][iNewPeakLoop].slope=1;
-			}
-		    }
-		  else
-		    {
-		      /* slope is falling */
-		      PadPeaks[iNewPeakstore][iNewPeakLoop].slope=-1;
-
-		      /* was the slope rising before? */
-		      if(PadPeaks[iOldPeakstore][iOldPeakLoop].slope > 0)
-			{
-			  /* yes, peak is found */
-			  Peaks[iNumPeaks].pad=iPad-1;
-			  Peaks[iNumPeaks].Timebin
-			    =PadPeaks[iOldPeakstore][iOldPeakLoop].
-			    Timebin;
-			  Peaks[iNumPeaks].Sequence = 
-			    PadPeaks[iOldPeakstore][iOldPeakLoop].Sequence;
-			  iNumPeaks++;
-			  /* check if peak memory full */ 
-			  if(iNumPeaks>MAXPEAKS)
-			    {
-#ifdef DEBUG
-			      printf("Sick cluster. %d are too many peaks.\n",
-				     iNumPeaks);
-#endif
-			      return FALSE;
-			    }
-
-			}
-		    }
-		  /* set slope to 0 to mark old peak as used */
-		  PadPeaks[iOldPeakstore][iOldPeakLoop].slope=0;
+		  {
+		    cTemp=((float)(unsigned int)(Cluster->Sequence[iSequence].FirstAdc[iIndex])
+			    * mDb->amplitudeSlope(iSec*mDb->numberOfPads()+iPad,iRow) 
+			    + mDb->amplitudeOffset(iSec*mDb->numberOfPads()+iPad,iRow));
+		    Cluster->Sequence[iSequence].FirstAdc[iIndex]=(unsigned char) cTemp;
+		    TClSearch[iPad][Cluster->Sequence[iSequence].startTimeBin+iIndex]=cTemp;
+		  }
 		}
-	    } /* end of: for(iOldPeakLoop...) */
-	  /* is this peak unmatched, then reprocess */
-
-	  if(PadPeaks[iNewPeakstore][iNewPeakLoop].slope == 0)
-	    {
-	      /* default for an unmatched peak is rising */
-	      PadPeaks[iNewPeakstore][iNewPeakLoop].slope=1;
-	      
-	      for(iSequence = 0; iSequence < Cluster->NumSequences; iSequence++)
-		{
-		  if((Cluster->SequencePad[iSequence] == iPad - 1) && 
-		     (Cluster->Sequence[iSequence].startTimeBin <= 
-		      PadPeaks[iNewPeakstore][iNewPeakLoop].Timebin) && 
-		     (Cluster->Sequence[iSequence].startTimeBin + 
-		      Cluster->Sequence[iSequence].Length > 
-		      PadPeaks[iNewPeakstore][iNewPeakLoop].Timebin) &&
-		     (Cluster->Sequence[iSequence]
-		      .FirstAdc[PadPeaks[iNewPeakstore][iNewPeakLoop].Timebin
-			       - Cluster->Sequence[iSequence].startTimeBin] >= 
-		      (unsigned char) PadPeaks[iNewPeakstore][iNewPeakLoop].height))
-		    {
-		      PadPeaks[iNewPeakstore][iNewPeakLoop].slope=-1;
-		    }
-		}
-	    }
-	} /* end of: for(iNewPeakLoop...) */
-      /* all new peaks have been matched */
-      /* check for unmatched old peaks with rising slope */
-      /* make them hits, too, if their right neighbor pixel is lower */
-      for(iOldPeakLoop=0; iOldPeakLoop < iPadPeaks; iOldPeakLoop++)
-	{
-	  if(PadPeaks[iOldPeakstore][iOldPeakLoop].slope > 0)
-	    {
-	      /* find neighbor pixel */ 
-	      for(iSequence = 0; iSequence < Cluster->NumSequences; iSequence++)
-		{
-		  if((Cluster->SequencePad[iSequence] == iPad) && 
-		     (Cluster->Sequence[iSequence].startTimeBin <= 
-		      PadPeaks[iOldPeakstore][iOldPeakLoop].Timebin) && 
-		     (Cluster->Sequence[iSequence].startTimeBin + 
-		      Cluster->Sequence[iSequence].Length > 
-		      PadPeaks[iOldPeakstore][iOldPeakLoop].Timebin) &&
-		     (Cluster->Sequence[iSequence]
-		      .FirstAdc[PadPeaks[iOldPeakstore][iOldPeakLoop].Timebin
-			       - Cluster->Sequence[iSequence].startTimeBin] >= 
-		      (unsigned char) PadPeaks[iOldPeakstore][iOldPeakLoop].height))
-		    {
-		      PadPeaks[iOldPeakstore][iOldPeakLoop].slope = -1;
-		    }
-		}
-	    }
-	  if(PadPeaks[iOldPeakstore][iOldPeakLoop].slope > 0)
-	    {	  
-	      Peaks[iNumPeaks].pad = iPad-1;
-	      Peaks[iNumPeaks].Timebin = 
-		PadPeaks[iOldPeakstore][iOldPeakLoop].Timebin;
-	      Peaks[iNumPeaks].Sequence = 
-		PadPeaks[iOldPeakstore][iOldPeakLoop].Sequence;
-	      iNumPeaks++;
-	      
-	      
-	      /* check if peak memory full */ 
-	      if(iNumPeaks>MAXPEAKS)
-		{
-#ifdef DEBUG
-		  printf("Sick cluster. %d are too many peaks.\n", iNumPeaks);
-#endif
-		  return FALSE;
-		}
-	    }
-	}
-      iPadPeaks=iThisPadPeaks;
-      iOldPeakstore=iNewPeakstore;
-    }/* end of: for(iPad...) */
-  /* check if there are peaks left over with rising slope */ 
-  /* make them hits, too */
-  for(iOldPeakLoop=0; iOldPeakLoop < iPadPeaks; iOldPeakLoop++)
-    {
-      if(PadPeaks[iOldPeakstore][iOldPeakLoop].slope > 0)
-	{
-	  Peaks[iNumPeaks].pad = iPad-1;
-	  Peaks[iNumPeaks].Timebin = 
-	    PadPeaks[iOldPeakstore][iOldPeakLoop].Timebin;
-	  Peaks[iNumPeaks].Sequence = 
-	    PadPeaks[iOldPeakstore][iOldPeakLoop].Sequence;
-	  iNumPeaks++;
-	  
-	  /* check if peak memory full */ 
-	  if(iNumPeaks>MAXPEAKS)
-	    {
-#ifdef DEBUG
-	      printf("Sick cluster. %d are too many peaks.\n", iNumPeaks);
-#endif
-	      return FALSE;
 	    }
 	}
     }
+
+   // check each cluster pixel for local maximum
+   // ==========================================
+
+   float cl_charge;
+
+  for(int iPad=Cluster->StartPad; iPad<=Cluster->EndPad; iPad++)
+    {
+      for(int iSequence = 0; iSequence < Cluster->NumSequences; iSequence++)
+	{
+	  if(Cluster->SequencePad[iSequence] == iPad)
+	    {
+	      for(int iTime=Cluster->Sequence[iSequence].startTimeBin; iTime <=Cluster->Sequence[iSequence].startTimeBin+Cluster->Sequence[iSequence].Length; iTime++)
+		{
+
+		  // ------------------------------------------------------------------
+
+		  PeakFound=true;
+		  cl_charge=0;
+
+		  // search window
+		  // =============
+
+		  // check if > MaximumPad/Time
+		   for (i=iPad-DeltaPad;i<=iPad+DeltaPad && iPad+DeltaPad<=160;i++)
+		     {
+		      for (k=iTime-DeltaTime;k<=iTime+DeltaTime && iTime+DeltaTime<=256;k++)
+			{
+			  if (i<iPad+DeltaPad && i>iPad-DeltaPad && k<iTime+DeltaTime && k>iTime-DeltaTime)
+			    cl_charge=cl_charge+TClSearch[i][k];
+
+			  if (TClSearch[iPad][iTime]>=TClSearch[i][k]+1.25 && TClSearch[iPad][iTime]>0 
+			      && TClSearch[i][k]>0)
+			    {
+			    }
+			  else if (TClSearch[iPad][iTime]<TClSearch[i][k] && TClSearch[i][k]>0 && TClSearch[i][k]>0)
+			    {
+			      PeakFound=false;
+			    }
+			}
+		    }
+		  
+		  // if local maximum Found make Peak
+		  // ================================
+
+		   if (PeakFound && cl_charge>30 && iNumPeaks<160)
+		   //if (PeakFound && cl_charge>30 && iNumPeaks<MAXPEAKS)
+		    {
+		      
+		      if (iNumPeaks>0)
+			{
+			  if ((Peaks[iNumPeaks-1].Timebin!=iTime && Peaks[iNumPeaks-1].Timebin!=iTime-1 && Peaks[iNumPeaks-1].Timebin!=iTime+1) || Peaks[iNumPeaks-1].pad!=iPad )
+			    {
+			      Peaks[iNumPeaks].pad=iPad;
+			      Peaks[iNumPeaks].Timebin=iTime;
+			      Peaks[iNumPeaks].Sequence=Cluster->Sequence[iSequence];
+			      iNumPeaks++;
+			    }
+			}
+		      else
+			{
+			  Peaks[iNumPeaks].pad=iPad;
+			  Peaks[iNumPeaks].Timebin=iTime;
+			  Peaks[iNumPeaks].Sequence=Cluster->Sequence[iSequence];
+			  iNumPeaks++;
+			}
+		    }
+		  
+		  // ------------------------------------------------------------------ 
+
+		}
+	    }
+	  
+	}
+    }
+
   if(!fitPoints(Cluster, iRow, iSec, pRadius, pDeflection, Peaks, 
 		iNumPeaks, fastlog))
     {
@@ -964,7 +921,7 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 #endif
       return FALSE;
     }
-
+  
 #ifdef DEBUGFILE
   for(iOldPeakLoop=0; iOldPeakLoop<iNumPeaks; iOldPeakLoop++)
     {
@@ -976,82 +933,6 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
     }
 #endif
 
-  return TRUE;
-}
-
-int StFtpcClusterFinder::getSeqPeaksAndCalibAmp(TPCSequence *Sequence,
-                                               int iRow,
-					       int iSeqTimesPads,
-					       int iPad,
-					       TPadPeak *Peak, 
-					       int *pNumPeaks)
-{
-  int bSlope=0;
-  int iIndex, iPadIndex;
-  int iWidth;
-  unsigned char cLastADC, cTemp;
-  
-  cLastADC=0;
-  iWidth=0;
-  iPadIndex=iSeqTimesPads+iPad;
-  
-  for(iIndex=0; (iIndex< Sequence->Length) && (Sequence->startTimeBin+iIndex>=MINTIMEBIN) ; iIndex++)
-    {
-      cTemp=(unsigned char)((float)(unsigned int)(Sequence->FirstAdc[iIndex])
-			    * mDb->amplitudeSlope(iPadIndex,iRow) 
-			    + mDb->amplitudeOffset(iPadIndex,iRow));
-      Sequence->FirstAdc[iIndex]=cTemp;
-
-      if(cTemp < cLastADC)
-	{
-	  if(bSlope > 0)
-	    {
-	      /* peak is found */
-
-	      Peak[*pNumPeaks].Sequence = *Sequence;
-	      Peak[*pNumPeaks].Timebin = Sequence->startTimeBin+iIndex-1;
-	      Peak[*pNumPeaks].height = cLastADC;
-	      Peak[*pNumPeaks].width = iWidth;
-	      if(*pNumPeaks < MAXSEQPEAKS - 1)
-		{
-		  (*pNumPeaks)++;
-		}
-	    }
-	  bSlope = -1;
-	  iWidth=0;
-	}
-      else
-	{
-	  if(cTemp != cLastADC)
-	    {	     
-	      bSlope = 1;
-	      iWidth=0;
-	    }
-	  else
-	    {
-	      iWidth++;
-	    }
-	}
-
-#ifdef DEBUGFILE
-      fprintf(fin, "%d %d %d\n", iPad, Sequence->startTimeBin+iIndex, (int)cTemp);
-#endif
-
-      cLastADC=cTemp;
-    }    
-  if(bSlope > 0)
-    {
-	      Peak[*pNumPeaks].Sequence = *Sequence;
-	      Peak[*pNumPeaks].Timebin =
-		Sequence->startTimeBin+Sequence->Length-1;
-	      Peak[*pNumPeaks].height = 
-		Sequence->FirstAdc[Sequence->Length-1];
-	      Peak[*pNumPeaks].width = iWidth;
-	      if(*pNumPeaks < MAXSEQPEAKS - 1)
-		{
-		  (*pNumPeaks)++;
-		}
-    }
   return TRUE;
 }
 
@@ -1261,9 +1142,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 !isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
 	 && Peak->Rad <= mDb->sensitiveVolumeOuterRadius() && Peak->Rad >= mDb->sensitiveVolumeInnerRadius() )
 */
-      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma)
-	 && (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
-	 && Peak->Sequence.Length<=MAXTIMELENGTH )
+      if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) && !isnan(Peak->TimeSigma))
+	//&& (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
+	//&& Peak->Sequence.Length<=MAXTIMELENGTH )
 
 	{
 	  // create new point
@@ -1712,9 +1593,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
              && Peak[iPeakIndex].Rad >= mDb->sensitiveVolumeInnerRadius() )
 */
           if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) 
-	     &&	!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma)
-	     && (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
-	     && Peak[iPeakIndex].Sequence.Length<=MAXTIMELENGTH)
+	     &&	!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))
+	    //&& (Cluster->EndPad +1 - Cluster->StartPad)<=MAXPADLENGTH 
+	    //&& Peak[iPeakIndex].Sequence.Length<=MAXTIMELENGTH)
 	    {
 
 	      // fill QA histograms
@@ -1873,7 +1754,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 
   /* calculate phi angle from pad position */
   Peak->Phi = mDb->radiansPerBoundary() / 2 
-    + (Peak->PadPosition + 0.5) * mDb->radiansPerPad()
+    + ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
     + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
 			   + mDb->radiansPerBoundary())+halfpi;
 
@@ -1881,7 +1762,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
    /* (not yet understood where and why pad numbers were inverted) */
    if (iRow >= 10) {
        Peak->Phi = mDb->radiansPerBoundary() / 2 
-         + (159.5 - Peak->PadPosition)* mDb->radiansPerPad()
+         + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
          - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
          + mDb->radiansPerBoundary())+halfpi;
    }
