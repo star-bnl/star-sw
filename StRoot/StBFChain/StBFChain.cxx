@@ -143,7 +143,7 @@ BfcItem BFC[] = {
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
-  {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
+  {"rich"        ,"","","sim_T,globT"                      ,"StRrsMaker,StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
@@ -653,8 +653,11 @@ void StBFChain::SetDataBases(const Char_t* TimeStamp){
 void StBFChain::SetTreeOptions()
 {
   treeMk->SetBranch("histBranch");
-  treeMk->SetBranch("runcoBranch");
-  if (GetOption("dst"))      treeMk->IntoBranch("dstBranch","dst");
+  
+  if (GetOption("dst"))      {
+    treeMk->IntoBranch("dstBranch","dst");
+    treeMk->SetBranch("runcoBranch");
+  }
   if (GetOption("Event") && GetOption("EvOut"))  
                              treeMk->IntoBranch("eventBranch","StEvent");
   if (GetOption("AllEvent")) {
@@ -678,8 +681,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.85 2000/04/15 20:48:11 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.86 2000/04/27 19:25:07 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.86  2000/04/27 19:25:07  fisyak
+// Add dependence StRchMaker versus StRrsMaker shared library
+//
 // Revision 1.85  2000/04/15 20:48:11  fisyak
 // Add svt for PreVtx
 //
