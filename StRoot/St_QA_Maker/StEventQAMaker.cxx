@@ -182,6 +182,12 @@ Int_t StEventQAMaker::Make() {
 	 evClasses[nEvClasses] = 3;
 	 nEvClasses++;
        }
+       if ((nEvClasses==0) && (isTriggerInRange(trigId,1000,1999))) {
+         mTrigWord->Fill(4.); // "pp Physics"
+	 evClasses[nEvClasses] = 1;
+	 nEvClasses++;
+         histsSet = StQA_pp;
+       }
       } else {  // No trigger info!
        gMessMgr->Warning("StEventQAMaker::Make(): No trigger info");
       }
@@ -2003,8 +2009,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.46 2003/02/28 16:01:07 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.47 2003/04/14 15:20:38 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.47  2003/04/14 15:20:38  genevb
+// Add pp 2003 trigger (first attempt)
+//
 // Revision 2.46  2003/02/28 16:01:07  genevb
 // Further improvements for previous check-in
 //
