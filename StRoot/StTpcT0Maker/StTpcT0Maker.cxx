@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.3 2000/08/28 17:42:29 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.4 2000/09/01 21:24:28 hardtke Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.4  2000/09/01 21:24:28  hardtke
+// Add kluge to evade infrastructure bug
+//
 // Revision 1.3  2000/08/28 17:42:29  hardtke
 // Add new histogram
 //
@@ -156,6 +159,18 @@ Int_t StTpcT0Maker::Make(){
   tcl->AllOn();
   if (t0result->GetEntries()>=desiredEntries){
     gMessMgr->Info() << "StTpcT0Maker::Sufficient Statistics, Ending Chain" << endm;
+  if (t0result->GetEntries()>minEntries){
+    if (t0result->GetRMS()<maxRMS){
+     WriteTableToFile();
+    }
+    else{
+      gMessMgr->Error() << "StTpcT0Maker::t0 unstable. RMS = " << t0result->GetRMS() << " micro-seconds. No table will be written" << endm;
+    }
+  }
+  else {
+   gMessMgr->Error() << "StTpcT0Maker::Insufficient statistics for velocity determination.  Only " << t0result->GetEntries() << " entries. No table will be written" << endm;
+  }
+  minEntries = 9999;
     return kStEOF;
   }
   return kStOK;
@@ -182,7 +197,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.3 2000/08/28 17:42:29 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.4 2000/09/01 21:24:28 hardtke Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
