@@ -1,3 +1,10 @@
+* $Id: svttgeo.g,v 1.12 2000/01/22 17:42:21 nevski Exp $
+*
+* $Log: svttgeo.g,v $
+* Revision 1.12  2000/01/22 17:42:21  nevski
+* clean up unused variables
+*
+*
 *******************************************************************************
 Module  SVTTGEO  is the SVT geometry for STAR
    Author  Pavel Nevski, Ken Wilson
@@ -61,7 +68,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
                        SBRG,SBRM,SBRI,SOES,SIES,SOSM,SISM,SCRW,
                        SGLA,SFMO,SFLM,SFDM,SFSW,SFSD,SFSM,
                        SFSS,SFCP,SFCF,SFCT,SFCX,SFCW,
-                       SBSP,SAKM,SCKM,SBSR,SBCR,SBSC,SBRX,SBRL,
+                       SBSP,SAKM,SCKM,SBSR,SBCR,SBRX,SBRL,
                        SBMM,SBMO,SBMI,SMRD,SALM,SISH,SSSH,SOSH
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
@@ -117,7 +124,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
       Real	     cone_len,cone_sin,cone_cos,rmin,rmax,zmin,zmax,angle
       Real           xpos,ypos,zpos,clearence,rin,rou,elethk,tabLen
       Real           endrng_z,brack_z,screw_z,ir_rmin,ang,wafpckLen,dthk,radtilt
-      Real           xbuf, ybuf, zbuf, phi, xbuf1, xbuf2
+      Real           xbuf, phi, xbuf1, xbuf2
 *
 *******************************************************************************
 *
