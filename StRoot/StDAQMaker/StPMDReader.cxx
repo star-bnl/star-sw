@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPMDReader.cxx,v 1.2 2003/12/10 10:31:01 subhasis Exp $
+ *$Id: StPMDReader.cxx,v 1.3 2004/05/14 21:44:31 perev Exp $
  * 
  * StPMDReader.cxx
  * Author: Susanta and Subhasis 
@@ -8,6 +8,9 @@
  * Description: Offline Wrapper for DAQ PMD reader classes
  **************************************************************************
  *$Log: StPMDReader.cxx,v $
+ *Revision 1.3  2004/05/14 21:44:31  perev
+ *Check non existing PMDImpReader added
+ *
  *Revision 1.2  2003/12/10 10:31:01  subhasis
  *loop for No of channels read is changed to PMD_CRAMS_CH_MAX
  *
@@ -23,9 +26,7 @@
 typedef EventInfo DAQEventInfo;
   
 StPMDReader::StPMDReader(StDAQReader *daqr) {
-  fPMDImpReader=0;
-   fDAQReader = daqr;
-  delete fPMDImpReader;
+  fDAQReader = daqr;
   fPMDImpReader = ::getPMDReader(daqr->getEventReader());
   
   getPMD_ADC();
@@ -37,7 +38,6 @@ StPMDReader::~StPMDReader() {
 }
 
 int StPMDReader::close() {
-//  delete fEMCImpReader; fEMCImpReader=0;
   return 1;
 }
 
@@ -58,12 +58,13 @@ int StPMDReader::Update() {
 */
 int StPMDReader::NPMDHits()
  {
-   return fPMDImpReader->NPMDHits();
+   return (fPMDImpReader) ? fPMDImpReader->NPMDHits():0;
  }
 
 void  StPMDReader::getPMD_ADC()
 {
-	mPmd= fPMDImpReader->getPMD_ADC();
+  if (fPMDImpReader) {mPmd = fPMDImpReader->getPMD_ADC();}
+  else               {memset(&mPmd,0,sizeof(mPmd));     }
 }
 
 int StPMDReader::getNoOfChannelsInCramBlock(int sec, int cram, int blk)
