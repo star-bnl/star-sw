@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.7 2004/01/22 14:20:36 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.8 2004/01/22 14:42:59 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.8  2004/01/22 14:42:59  jml
+ * fixed the logging
+ *
  * Revision 1.7  2004/01/22 14:20:36  jml
  * Added cluster reading
  *
@@ -399,7 +402,9 @@ Int_t StRTSClientFCFMaker::Make()
 
       // Do daq file cluster after burner
       if(n_daq_file_cl > 0) {
-	n_burned_daq_file_cl=0;
+	if(n_burned_daq_file_cl == -1) 
+	  n_burned_daq_file_cl=0;
+
 	fcf_after.burn(daq_file_resptr[s][pr]);
 
 	while(fcf_after.next(&h)) {
@@ -413,7 +418,9 @@ Int_t StRTSClientFCFMaker::Make()
 
       // Do croat cluster after burner if have croat clusters...
       if(n_croat_cl > 0) {
-	n_burned_croat_cl = 0;
+	if(n_burned_croat_cl == -1) 
+	  n_burned_croat_cl = 0;
+
 	fcf_after.burn(croat_resptr[s][pr]);
 		
 	while(fcf_after.next(&h)) {
@@ -431,7 +438,7 @@ Int_t StRTSClientFCFMaker::Make()
 	int e = fcf_after.compare(daq_file_resptr[s][pr],
 				  croat_resptr[s][pr]);
 	if(e == 0) {
-	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)",s,pr);
+	  printf("FCFMaker: mismatch between daq_file & calculated clusters (s=%d, pr=%d)\n",s,pr);
 	  equal = 0;
 	}
       }
