@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.24 2003/01/21 02:47:59 jeromel Exp $
+// $Id: StLaserEventMaker.cxx,v 1.25 2003/01/29 20:35:06 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.25  2003/01/29 20:35:06  pfachini
+// Introducing a sanity check: table written out only if drift velocit > 5.0 cm/us
+//
 // Revision 1.24  2003/01/21 02:47:59  jeromel
 // Prevent spurious crash and modify messaging. Fixed minTracks using enum.
 //
@@ -724,15 +727,26 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Finish() {
   if (numberTracks){
-    if (numberTracks->GetMean()>= minValidTracks){
-      WriteTableToFile();
-    } else{
-      gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of " << minValidTracks << "tracks requested for good laser events. No table will be written" << endm;
+    if (numberTracks->GetMean() >= minValidTracks) {
+      velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
+      velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
+      //Now correcting for the clock...
+      velocityEast = velocityEast*clock/clockNominal;
+      velocityWest = velocityWest*clock/clockNominal;
+      velocityEast = velocityEast/1000000.0;
+      velocityWest = velocityWest/1000000.0;
+      if ((velocityWest > 5.) && (velocityEast > 5.)) {
+	WriteTableToFile();
+      } else {
+	gMessMgr->Error() << "StLaserEventMaker::no laser events. Drift Velocity East = " << velocityEast << " and Drift Velocity West = " << velocityWest << " which is lower than the minimum of " << " 5.0 cm/us" << endm;
+      }
+    } else {
+      gMessMgr->Error() << "StLaserEventMaker::no laser events. Number Tracks = " << numberTracks->GetRMS() << " which is lower than the minimum of " << minValidTracks << "tracks requested for good laser events. No table will be written" << endm;  
     }
   } else {
     gMessMgr->Error() << "StLaserEventMaker:: completly empty. Are sure you called this maker on laser events ?? No table will be written ... " << endm;
   }
-
+  
   if (mHistOut){
     WriteHistFile();
   }
@@ -743,7 +757,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.24 2003/01/21 02:47:59 jeromel Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.25 2003/01/29 20:35:06 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -769,17 +783,12 @@ void StLaserEventMaker::WriteTableToFile(){
 }
 
  St_tpcDriftVelocity* StLaserEventMaker::driftTable(){
-   double velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
-   double velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
-   //Now correcting for the clock...
-   velocityEast = velocityEast*clock/clockNominal;
-   velocityWest = velocityWest*clock/clockNominal;
    St_tpcDriftVelocity* table = new St_tpcDriftVelocity("tpcDriftVelocity",1);
    tpcDriftVelocity_st* row = table->GetTable();
    row->cathodeDriftVelocityEast = 0.0;
    row->cathodeDriftVelocityWest = 0.0;
-   row->laserDriftVelocityEast = velocityEast/1000000.0;
-   row->laserDriftVelocityWest = velocityWest/1000000.0;
+   row->laserDriftVelocityEast = velocityEast;
+   row->laserDriftVelocityWest = velocityWest;
    table->SetNRows(1);
    return table;
  }

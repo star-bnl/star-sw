@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.16 2003/01/21 02:48:07 jeromel Exp $
+// $Id: StLaserEventMaker.h,v 1.17 2003/01/29 20:35:32 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.17  2003/01/29 20:35:32  pfachini
+// Introducing a sanity check: table written out only if drift velocit > 5.0 cm/us
+//
 // Revision 1.16  2003/01/21 02:48:07  jeromel
 // enum added
 //
@@ -142,9 +145,11 @@ public:
   double driftVelocityReco;
   double clock;
   double clockNominal;
+  double velocityEast;
+  double velocityWest;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.16 2003/01/21 02:48:07 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.17 2003/01/29 20:35:32 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
