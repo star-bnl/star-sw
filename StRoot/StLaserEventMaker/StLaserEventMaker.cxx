@@ -1,7 +1,7 @@
-// $Id: StLaserEventMaker.cxx,v 1.13 2001/12/12 22:50:44 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.14 2001/12/14 17:30:16 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.13  2001/12/12 22:50:44  pfachini
-// Writing laserhits.*.*.root to ./StarDb/Calibrations/tpc/ for tests
+// Revision 1.14  2001/12/14 17:30:16  pfachini
+// Adding two histograms to the laserhist.*.*.root file
 //
 // Revision 1.10  2001/11/28 19:14:47  jeromel
 // Fixed default values for Laser calibration.
@@ -128,16 +128,20 @@ Int_t StLaserEventMaker::Init(){
 
 //  Create histograms
   cout << "Making Histograms" << endl;
+  fzLaser = new TH1F("fzLaser","fzLaser",100,-200,200);
   fzlWestHigh = new TH1F("fzlEastHigh","fzlEastHigh",100,165,190);
   fzlWestLow = new TH1F("fzlEastLow","fzlEastLow",100,15,40);
   fzlEastHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,-190,-165);
   fzlEastLow = new TH1F("fzlWestLow","fzlWestLow",100,-40,-15);
   numberTracks = new TH1F("numberTracks","numberTracks",100,0,2000);
+  driftVelocityRec = new TH1F("driftVelocityRec","driftVelocityRec",100,5000000,6000000);
+  AddHist(fzLaser);
   AddHist(fzlEastHigh);
   AddHist(fzlEastLow);
   AddHist(fzlWestHigh);
   AddHist(fzlWestLow);
   AddHist(numberTracks);
+  AddHist(driftVelocityRec);
   date = 0;
   time = 0;
 
@@ -219,6 +223,7 @@ void StLaserEventMaker::MakeHistograms() {
       m_runno = GetRunNumber();
       Float_t m_drivel = gStTpcDb->DriftVelocity();
       driftVelocityReco = m_drivel;
+      driftVelocityRec->Fill(driftVelocityReco);
       Float_t m_tzero = gStTpcDb->Electronics()->tZero();
       Float_t m_clock = gStTpcDb->Electronics()->samplingFrequency();
       Float_t m_trigger = gStTpcDb->triggerTimeOffset();
@@ -318,6 +323,7 @@ void StLaserEventMaker::MakeHistograms() {
 	 if (fzl > 15 && fzl < 40 && nfits > 15) fzlWestLow->Fill(fzl);
 	 if (fzl > -190 && fzl < -165 && nfits > 15) fzlEastHigh->Fill(fzl);
 	 if (fzl > -40 && fzl < -15 && nfits > 15) fzlEastLow->Fill(fzl);
+	 fzLaser->Fill(fzl);
 	 }
      } //end of itrk for loop 
      numberTracks->Fill(ngtk);
@@ -673,7 +679,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.13 2001/12/12 22:50:44 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.14 2001/12/14 17:30:16 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -681,7 +687,7 @@ void StLaserEventMaker::PrintInfo() {
 //_____________________________________________________________________________
 void StLaserEventMaker::WriteTableToFile(){
   char filename[80]; 
-  sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocity.%08d.%06d.C",date,time);
+  sprintf(filename,"./StarDb/Calibrations/tpc/tpcDriftVelocityLaser.%08d.%06d.C",date,time);
   TString dirname = gSystem->DirName(filename);
   if (gSystem->OpenDirectory(dirname.Data())==0) { 
     if (gSystem->mkdir(dirname.Data())) {
