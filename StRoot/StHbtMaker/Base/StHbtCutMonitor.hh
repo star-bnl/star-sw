@@ -5,8 +5,9 @@ class StHbtEvent;
 class StHbtTrack;
 class StHbtV0;
 class StHbtKink;
-
+class StHbtPair; // Gael 12/04/02
 #include "StHbtMaker/Infrastructure/StHbtString.hh"
+#include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh" // Gael 19/06/02
 
 class StHbtCutMonitor{
   
@@ -42,6 +43,25 @@ public:
     cout << " *** no user defined Fill(const StHbtKink*), take from base class" << endl;
 #endif
   }
+  //-----------------------------------Gael 12/04/02------------------------------------
+  virtual void Fill(const StHbtPair*) { 
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtPair*), take from base class" << endl;
+#endif
+  }
+  //-----------------------------------Gael 19/06/02------------------------------------
+  virtual void Fill(const StHbtParticleCollection*) {
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtParticleCollection*), take from base class" << endl;
+#endif
+  }
+  //-----------------------------------Gael 19/06/02------------------------------------
+  virtual void Fill(const StHbtEvent*,const StHbtParticleCollection*) {
+#ifdef STHBTDEBUG
+    cout << " *** no user defined Fill(const StHbtEvent*,const StHbtParticleCollection*), take from base class" << endl;
+#endif
+  }
+  // -------------------------------------------------------------------------------------
   virtual void Finish() { 
 #ifdef STHBTDEBUG
     cout << " *** no user defined Finish(), take from base class" << endl;
