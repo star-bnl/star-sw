@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.5 2001/05/30 17:45:55 perev Exp $
+ * $Id: StXiVertex.h,v 2.6 2001/06/10 21:03:32 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.6  2001/06/10 21:03:32  perev
+ * Solaris: consting
+ *
  * Revision 2.5  2001/05/30 17:45:55  perev
  * StEvent branching
  *
@@ -59,7 +62,7 @@ public:
     const StThreeVectorF& momentumOfBachelor() const;
     StThreeVectorF        momentumOfV0() const;
     StThreeVectorF        momentum() const;
-    StV0Vertex*           v0Vertex() const;
+    StV0Vertex*           v0Vertex();
     StTrack*              bachelor();
     double                chargeOfBachelor();
 
