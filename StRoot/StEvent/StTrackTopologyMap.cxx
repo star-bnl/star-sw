@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.cxx,v 2.11 2001/04/05 04:00:58 ullrich Exp $
+ * $Id: StTrackTopologyMap.cxx,v 2.12 2001/04/24 21:32:07 genevb Exp $
  *
  * Author: Thomas Ullrich, Aug 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.cxx,v $
+ * Revision 2.12  2001/04/24 21:32:07  genevb
+ * Additional helper functions
+ *
  * Revision 2.11  2001/04/05 04:00:58  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -54,7 +57,7 @@ using std::adjacent_difference;
 using std::max_element;
 #endif
 
-static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.11 2001/04/05 04:00:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackTopologyMap.cxx,v 2.12 2001/04/24 21:32:07 genevb Exp $";
 
 ClassImp(StTrackTopologyMap)
 
@@ -95,6 +98,12 @@ StTrackTopologyMap::primaryVertexUsed() const { return bit(0); }
 bool
 StTrackTopologyMap::turnAroundFlag() const { return bit(62); }
 
+bool
+StTrackTopologyMap::hasHitInDetector(StDetectorId id) const
+{
+    return ((numberOfHits(id)) ? 1U : 0U);
+}
+    
 bool
 StTrackTopologyMap::hasHitInSvtLayer(unsigned int layer) const
 {
@@ -180,6 +189,42 @@ StTrackTopologyMap::numberOfHits(StDetectorId id) const
         break;
     }
     return n;
+}
+
+bool
+StTrackTopologyMap::trackTpcOnly() const
+{
+    return ((hasHitInDetector(kTpcId)) & ~(hasHitInDetector(kSvtId)));
+}
+
+bool
+StTrackTopologyMap::trackSvtOnly() const
+{
+    return ((hasHitInDetector(kSvtId)) & ~(hasHitInDetector(kTpcId)));
+}
+
+bool
+StTrackTopologyMap::trackTpcSvt() const
+{
+    return ((hasHitInDetector(kTpcId)) & (hasHitInDetector(kSvtId)));
+}
+
+bool
+StTrackTopologyMap::trackFtpcEast() const
+{
+    return (hasHitInDetector(kFtpcEastId));
+}
+
+bool
+StTrackTopologyMap::trackFtpcWest() const
+{
+    return (hasHitInDetector(kFtpcWestId));
+}
+
+bool
+StTrackTopologyMap::trackFtpc() const
+{
+    return ((hasHitInDetector(kFtpcWestId)) | (hasHitInDetector(kFtpcWestId)));
 }
 
 int
