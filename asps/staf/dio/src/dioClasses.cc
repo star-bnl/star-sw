@@ -75,7 +75,8 @@ char * dioStream::  listing () {
    char* m = dio_mode2text(mode());
    char* s = dio_state2text(state());
    char* l = location();
-   char* ll="                           ";
+   char ll[28];
+   strcpy(ll,"                           ");
    strncpy(ll,l,strlen(ll)-1);
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
@@ -86,6 +87,15 @@ char * dioStream::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char dioStream :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("dioStream",iface)
+   ||  socObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
+//----------------------------------
 STAFCV_T dioStream:: close () {
 
    if( !(DIO_CLOSE_STATE != myState) ){
@@ -216,6 +226,15 @@ char * dioFileStream::  location () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char dioFileStream:: implementsInterface (const char * iface) {
+   if( 0 == strcmp("dioFileStream",iface)
+   ||  dioStream::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
+//----------------------------------
 STAFCV_T dioFileStream:: close () {
 
    DIO_STATE_T saveState=myState;
@@ -313,6 +332,14 @@ long dioTapeStream::  bufferSize () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char dioTapeStream:: implementsInterface (const char * iface) {
+   if( 0 == strcmp("dioTapeStream",iface)
+   ||  dioStream::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 //:----------------------------------------------- PROT FUNCTIONS     --
 //:----------------------------------------------- PRIV FUNCTIONS     --
 
@@ -386,6 +413,15 @@ long dioSockStream::  maxHandshakes () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char dioSockStream:: implementsInterface (const char * iface) {
+   if( 0 == strcmp("dioSockStream",iface)
+   ||  dioStream::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
+//----------------------------------
 STAFCV_T dioSockStream:: acknowledgeRequest() {
 
     bool_t  ak=TRUE;
@@ -501,7 +537,7 @@ STAFCV_T dioSockStream:: getEvent (tdmDataset* destination) {
    if( 0 < maxHandshakes() ){
       if( !requestAcknowledge() ){
 	 if( maxHandshakes() > 1 ){
-	    EML_LOG_ERROR(RETRYING_HANDSHAKE);
+	    EML_WARNING(RETRYING_HANDSHAKE);
 	 }
 	 else {
 	    EML_ERROR(HANDSHAKE_FAILED);
@@ -586,6 +622,15 @@ dioFactory:: ~dioFactory() {
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//----------------------------------
+//- override socObject::implementsInterface
+unsigned char dioFactory :: implementsInterface (const char * iface) {
+   if( 0 == strcmp(type(),iface)
+   ||  socFactory::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 //----------------------------------
 char * dioFactory:: list () {
 

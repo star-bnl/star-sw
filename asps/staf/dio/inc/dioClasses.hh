@@ -18,8 +18,7 @@
 #include "dsxdr.h"
 #include "asuLib.h"
 #include "socLib.h"
-#include "dui_types.h"
-#include "dui_globals.h"
+#include "duiLib.h"
 #include "dio_types.h"
 
 //:=============================================== CLASS              ==
@@ -38,6 +37,9 @@ public:
    virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
    virtual STAFCV_T close ();
    virtual STAFCV_T getEvent (tdmDataset* destination);
    virtual STAFCV_T open (DIO_MODE_T mode);
@@ -68,7 +70,8 @@ public:
    virtual char * location();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-//:- override virtuals
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
    virtual STAFCV_T close ();
    virtual STAFCV_T open (DIO_MODE_T mode);
 
@@ -98,7 +101,8 @@ public:
    virtual char * location();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-//:**NONE**
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
 
 protected:
 //:----------------------------------------------- PRIV VARIABLES     --
@@ -130,6 +134,9 @@ public:
    virtual char * location();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
     virtual STAFCV_T acknowledgeRequest();
     virtual STAFCV_T requestAcknowledge();
 
@@ -163,6 +170,8 @@ public:
 //:**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
    virtual char * list ();
 
 //:- Stream ------------------------------------

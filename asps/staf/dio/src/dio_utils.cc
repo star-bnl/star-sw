@@ -11,6 +11,7 @@
 
 /*-------------------------------------------- INCLUDES             --*/
 #include "dstype.h"
+#define DSL
 #include "asuLib.h"
 #include "emlLib.h"
 #include "dio_types.h"
@@ -41,7 +42,7 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
    ||  !dsIsTable(&isTable,pAdd)
    ||  !(isDataset || isTable)
    ){
-      EML_DSPERROR("bad DS_DATASET_T pointer");
+      EML_WARNING("bad DS_DATASET_T pointer");
       return FALSE;
    }
 
@@ -54,7 +55,7 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
       &&  (NULL != pAdded)
       ){
 	 if( !dsFreeDataset(pAdded) ){
-	    EML_DSPERROR("can't free dataset");
+	    EML_WARNING("can't free dataset");
 	    return FALSE;
          }
 	 pAdded = NULL;
@@ -67,7 +68,7 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
       &&  (NULL != pAdded)
       ){
 	 if( !dsFreeDataset(pAdded) ){
-	    EML_DSPERROR("can't free table");
+	    EML_WARNING("can't free table");
 	    return FALSE;
          }
 	 pAdded = NULL;
@@ -87,8 +88,8 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
       ||  !dsFindEntry(&pAdded,pDS,name)
 #endif  /*OLD_DSL*/
       ){
-	 EML_PRINTF("dataset = (%s)\n",pAdd->name);
-         EML_DSPERROR("can't add dataset");
+	 EML_MESSAGE("dataset = (%s)\n",pAdd->name);
+         EML_WARNING("can't add dataset");
 /*^^^ DEBUG - remove only tables?
          return FALSE;
 ^^^*/
@@ -99,8 +100,8 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
          if( !dsDatasetEntry(&pEntry,pAdd,(size_t)i)
          ||  !dio_addHierarchy(pAdded,pEntry)
          ){
-	    EML_PRINTF("entry = (%s)\n",pEntry->name);
-            EML_DSPERROR("can't add entry");
+	    EML_MESSAGE("entry = (%s)\n",pEntry->name);
+            EML_WARNING("can't add entry");
          }
       }
 /*-" Add a table. \n "-*/
@@ -115,8 +116,8 @@ int dio_addHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
       ||  !dsFindEntry(&pAdded,pDS,name)
       ||  !dsSetTableRowCount(pAdded,count)
       ){
-	 EML_PRINTF("table = (%s)\n",pAdd->name);
-	 EML_DSPERROR("can't add table");
+	 EML_MESSAGE("table = (%s)\n",pAdd->name);
+	 EML_WARNING("can't add table");
 	 return FALSE;
       }
    }
@@ -153,7 +154,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
    ||  !dsIsTable(&isTable,pAdd)
    ||  !(isDataset || isTable)
    ){
-      EML_DSPERROR("bad DS_DATASET_T pointer");
+      EML_WARNING("bad DS_DATASET_T pointer");
       return FALSE;
    }
 /* Add Dataset */
@@ -162,7 +163,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
       ||  !dsDatasetEntryCount(&count,pAdd)
       ||  !dsDatasetMaxEntryCount(&maxcount,pAdd)
       ){
-	 EML_DSPERROR("bad dataset");
+	 EML_WARNING("bad dataset");
 	 return FALSE;
       }
       if( !dsFindEntry(&pAdded,pDS,name) ){
@@ -174,7 +175,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	 ||  !dsFindEntry(&pAdded,pDS,name)
 #endif  /*OLD_DSL*/
 	 ){
-	    EML_DSPERROR("can't map dataset");
+	    EML_WARNING("can't map dataset");
 	    return FALSE;
 	 }
       }
@@ -187,7 +188,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	 if( !dsDatasetEntry(&pEntry,pAdd,(size_t)i)
 	 ||  !dio_mapHierarchy(pAdded,pEntry)
 	 ){
-	    EML_DSPERROR("can't map entry");
+	    EML_WARNING("can't map entry");
 	 }
       }
 /* Add Table */
@@ -198,7 +199,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	 ||  !dsTableMaxRowCount(&maxcount,pAdd)
 	 ||  !(0<=count && count<=maxcount)
 	 ){
-	    EML_DSPERROR("bad table");
+	    EML_WARNING("bad table");
 	    return FALSE;
 	 }
 	 if( !dsFindEntry(&pAdded,pDS,name) ){
@@ -208,7 +209,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    ||  !dsSetTableRowCount(pAdded,maxcount)
 	    ){
 	       if( 0 == maxcount )return TRUE; /* SPECIAL CASE */
-	       EML_DSPERROR("can't map table");
+	       EML_WARNING("can't map table");
 	       return FALSE;
 	    }
 	    pAdd->p.data = pData; /* Evil DSL HACK */
@@ -219,13 +220,13 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    ||  !result
 	    ||  !dsTableMaxRowCount(&allspace,pAdded)
 	    ){
-	       EML_DSPERROR("can't map table");
+	       EML_WARNING("can't map table");
 	       return FALSE;
 	    }
 /* Grow the destination table. */
 	    if( allspace < maxcount ){
 	       if( !dsReallocTable(pAdded,maxcount) ){
-		  EML_DSPERROR("can't reallocate table");
+		  EML_WARNING("can't reallocate table");
 		  return FALSE;
 	       }
 	    }
@@ -233,7 +234,7 @@ int dio_mapHierarchy(DS_DATASET_T *pDS,DS_DATASET_T *pAdd)
 	    if( !dsTableDataAddress(&pData,pAdded)
 	    ||  !dsSetTableRowCount(pAdded,maxcount)
 	    ){
-	       EML_DSPERROR("can't map table");
+	       EML_WARNING("can't map table");
 	       return FALSE;
 	    }
 	    pAdd->p.data = pData; /* Evil DSL HACK */
@@ -262,14 +263,14 @@ int dio_clearDataset(DS_DATASET_T *pDS)
    ||  !dsIsTable(&isTable,pDS)
    ||  !(isDataset || isTable)
    ){
-      EML_DSPERROR("corrupt DS_DATASET_T pointer");
+      EML_WARNING("corrupt DS_DATASET_T pointer");
       return FALSE;
    }
 
 /* Handle datasets recursively. */
    if(isDataset){
       if( !dsDatasetEntryCount(&count,pDS) ){
-	 EML_DSPERROR("error clearing dataset");
+	 EML_WARNING("error clearing dataset");
 	 return FALSE;
       }
       for( i=0;i<count;i++ ){
@@ -277,7 +278,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 	 if( !dsDatasetEntry(&pEntry,pDS,(size_t)i)
 	 ||  !dio_clearDataset(pEntry)
 	 ){
-	    EML_DSPERROR("error clearing entry");
+	    EML_WARNING("error clearing entry");
 	    return FALSE;
 	 }
       }
@@ -285,7 +286,7 @@ int dio_clearDataset(DS_DATASET_T *pDS)
 /* Zero out table data. */
    else if(isTable){
       if( !dsSetTableRowCount(pDS,0) ){
-	 EML_DSPERROR("error clearing table");
+	 EML_WARNING("error clearing table");
 	 return FALSE;
       }
    }
