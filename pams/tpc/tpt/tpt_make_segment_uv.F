@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.5 1998/04/22 15:57:58 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.6 1998/04/22 20:02:19 didenko Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.6  1998/04/22 20:02:19  didenko
+* replacing real to float
+*
 * Revision 1.5  1998/04/22 15:57:58  sakrejda
 * write to unit 6 replaced by message calls
 *
@@ -128,7 +131,7 @@ C
          do while (ns.eq.0)
 C           find what is the parametrisation for the row ir1 in 
 C           sector isect
-            iret = tgc_row_par(isect,real(ir1),as,bs,dummy,dummy)
+            iret = tgc_row_par(isect,float(ir1),as,bs,dummy,dummy)
 C           find what is the prediction for this row
             iret = tpt_ptcrs_uv_p(as,bs,-1.0,at,bt,x0,y0,xp,yp)
 C           check whether there is a crossing point
@@ -161,7 +164,7 @@ C	       boundaries and find which boundary is closer
                sector_change=.true.
                lsec=15-isect
                if(lsec.ge.12) lsec=lsec-12
-               phi=real(lsec)*C_PI/6.0+C_PI/12.0
+               phi=float(lsec)*C_PI/6.0+C_PI/12.0
                dist1=-1.0
                dist2=-1.0
                iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
@@ -172,7 +175,7 @@ C	       boundaries and find which boundary is closer
                   dist1=dist2
                  endif 
                endif
-               phi=real(lsec-1)*C_PI/6.0+C_PI/12.0
+               phi=float(lsec-1)*C_PI/6.0+C_PI/12.0
                iret = tpt_ptcrs_uv_p(-tan(phi),1.0,0,at,bt,x0,y0,xp,yp)
                if(iret.eq.STAFCV_OK)then
                  dist2=(xlast-xp(1))**2+(ylast-yp(1))**2
