@@ -186,8 +186,8 @@ BfcItem BFC[] = {
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"PostEmc"   ,"PostChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"  ,"StMaker","StChain","",kFALSE},
-  {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain","emh"                    ,"StPreEclMaker","StPreEclMaker","",kFALSE},
+  {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"Rrs"         ,"","","sim_T,Simu"                                  ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
   {"l3"          ,"l3Chain","","l3cl,l3t"                                   ,"StMaker","StChain","",kFALSE},
@@ -803,5 +803,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.125 2000/07/30 21:29:03 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.126 2000/08/04 12:51:33 fisyak Exp $
 //_____________________________________________________________________
