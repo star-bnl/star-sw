@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.8 1999/06/27 22:45:30 fisyak Exp $
+// $Id: StSmdstMaker.cxx,v 1.9 1999/06/28 00:07:57 fisyak Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.9  1999/06/28 00:07:57  fisyak
+// Fix typo with size()
+//
 // Revision 1.8  1999/06/27 22:45:30  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -217,7 +220,7 @@ Int_t StSmdstMaker::FillV0Table() {
      printf("StSmdstMaker: Warning - no vertex collection in event.\n");
      return kStOK;
    }
-   if (vertices->size()) {
+   if (!vertices->size()) {
      printf("StSmdstMaker: Warning - no vertices in event.\n");
      return kStOK;
    }
@@ -448,7 +451,7 @@ void StSmdstMaker::FillXiHistograms() {
      printf("StSmdstMaker: Warning - no vertex collection in event.\n");
      return;
    }
-   if (vertices->size()) {
+   if (!vertices->size()) {
      printf("StSmdstMaker: Warning - no vertices in event.\n");
      return;
    }
@@ -511,7 +514,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.8 1999/06/27 22:45:30 fisyak Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.9 1999/06/28 00:07:57 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
