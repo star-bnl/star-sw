@@ -1,10 +1,10 @@
-// $Id: StEEsoloPi0Maker.h,v 1.4 2004/08/26 04:39:40 balewski Exp $
+// $Id: StEEsoloPi0Maker.h,v 1.5 2004/09/03 04:50:52 balewski Exp $
 
 #ifndef STAR_StEEsoloPi0Maker
 #define STAR_StEEsoloPi0Maker
 
 /*!
- *                                                                     
+ *                          
  * \class  StEEsoloPi0Maker
  * \author Balewski
  * \date   
@@ -23,7 +23,9 @@ class StMuDstMaker;
 class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
  private:
   StMuDstMaker* mMuDstMaker;
-  int   unpackMuDst();
+  bool unpackMuEemc(); // EEMC data
+  bool unpackMuTrig(); // BBC, CTB
+
   int MCflag;
 
   // ideal calibration used by Fast simulator 
@@ -34,7 +36,6 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
   // old:
   int getEEmcAdc();
   float getCtbSum();
-  bool getTrig();
 
  public: 
   StEEsoloPi0Maker(const char *self="stEEsoloPi0", const char* muDstMakerName="muDstMaker");
@@ -49,7 +50,7 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEsoloPi0Maker.h,v 1.4 2004/08/26 04:39:40 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEsoloPi0Maker.h,v 1.5 2004/09/03 04:50:52 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -60,6 +61,9 @@ class StEEsoloPi0Maker : public StMaker, public  EEsoloPi0 {
 
 
 // $Log: StEEsoloPi0Maker.h,v $
+// Revision 1.5  2004/09/03 04:50:52  balewski
+// big clenup
+//
 // Revision 1.4  2004/08/26 04:39:40  balewski
 // towards pi0
 //

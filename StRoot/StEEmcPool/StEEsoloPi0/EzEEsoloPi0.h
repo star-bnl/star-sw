@@ -3,9 +3,9 @@
 
 #ifndef EzEEsoloPi0_h
 #define EzEEsoloPi0_h
-/*********************************************************************
- * $Id: EzEEsoloPi0.h,v 1.1 2004/08/26 04:39:40 balewski Exp $
- *********************************************************************
+/**************************************************************
+ * $Id: EzEEsoloPi0.h,v 1.2 2004/09/03 04:50:52 balewski Exp $
+ **************************************************************
  * \class  
  * \author Balewski
  * \date   
@@ -15,7 +15,7 @@
  Only ezTree data are decoded by this class 
  Uses EEtowers class to do any analysis
  *
- *********************************************************************/
+ ***********************************************************/
 
 #include "TObject.h"
 #include "EEsoloPi0.h"
@@ -30,6 +30,7 @@ class EzEEsoloPi0 :public TObject, public  EEsoloPi0{
   void unpackEzTree();
   void unpackEzTail(); //T,P,Q,R
   void unpackEzSmd(); // U,V
+  void unpackEzTrig(); // BBC, CTB
 
   EEmcEventHeader *eHead;
   EEfeeRawEvent  *eEve;
@@ -48,6 +49,9 @@ class EzEEsoloPi0 :public TObject, public  EEsoloPi0{
 
 /*****************************************************************
  * $Log: EzEEsoloPi0.h,v $
+ * Revision 1.2  2004/09/03 04:50:52  balewski
+ * big clenup
+ *
  * Revision 1.1  2004/08/26 04:39:40  balewski
  * towards pi0
  *

@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.6 2004/08/26 04:39:40 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.7 2004/09/03 04:50:52 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -45,14 +45,12 @@ EEsoloPi0::EEsoloPi0(){
   set(0,0,0);
   printf("EEsoloPi0() constructed\n");
   nClust=0; 
-
   
   float XscaleFactor=1;
   float XseedEnergy=0.8;
   float XshapeLimit=.7;
   float XmassLo=0.07, XmassHi=0.22;
   set(XscaleFactor, XseedEnergy,XshapeLimit,XmassLo,XmassHi);
-  memset(soloMipDb,0,sizeof(soloMipDb));
   memset(hA,0, sizeof(hA));
   memset(hR,0, sizeof(hR));
   memset(hM,0, sizeof(hM));
@@ -92,8 +90,9 @@ void EEsoloPi0::init(){
   hA[7]=new TH1F ("ctbSum","CTB ADC sum", 2000,-.5,9999.5);
 
 
+
   if(HList) {
-    for(i=0;i<=7;i++) {
+    for(i=0;i<=14;i++) {
       if(hA[i]==0) continue;
       HList->Add(hA[i]);
     }  
@@ -126,6 +125,7 @@ void EEsoloPi0::init(){
   hR[14]=new TH1F ("0ytw","Yield of clusters, "+C+ttt+";X= iphi+(Eta-1)*60, spiral",721,-.5,720.5); 
 
   hR[15]=(TH1F*)new TH2F ("0d-E","Distance (cm) vs. 2clust energy (GeV), "+C+ttt,50,0,Emax,100,0.,100);
+
 
   hR[24]=new TH1F ("0Ang","Opening angle/rad of pairs "+C+ttt,50,0.,.7);
   hR[25]=(TH1F*)new TH2F ("invH","Time (minutes) vs. Invariant mass of 2 gammas (GeV)",75,0.,1.5,50,0,100);
@@ -175,7 +175,6 @@ void EEsoloPi0::init(){
 
 //-------------------------------------------------
 //-------------------------------------------------
-//-------------------------------------------------
 void EEsoloPi0::clear(){
   if( nClust>1) {// preserve a random cluster from previous event
     int j=rand()%nClust;
@@ -184,6 +183,7 @@ void EEsoloPi0::clear(){
   memset(soloMip,0,sizeof(soloMip));
   memset(clust,0,sizeof(clust));
   nClust=0;
+
 }
 
 //-------------------------------------------------
@@ -232,27 +232,37 @@ void EEsoloPi0::print(){
 //---------------------------------------------------
 int  EEsoloPi0:: findTowerClust() {
   assert(seedEnergy>0);  // makes no sense to set it lower
+  //..... some histos
+  int k;
+  float totEner=0;
+  for(k=0;k<MxTw;k++) {
+    float ene=soloMip[k].e;
+    if(ene<=0) continue;
+    // printf("ispir=%d, e=%f\n",k,soloMip[k].e);
+    hA[0]->Fill(ene);
+    totEner+=ene;
+  }
+  hA[1]->Fill(totEner);
+  
   //............  search for hight towers
   while(1) {
     float maxE=seedEnergy;
     int k0,k1=-1;
     for(k0=0;k0<MxTw;k0++) {
-      //if(soloMip[k0].e>0) printf("k0=%d, e=%f\n",k0,soloMip[k0].e);
       if(soloMip[k0].e<maxE) continue;
       if(soloMip[k0].key>0) continue; // droped marked towers
       k1=k0;
       maxE=soloMip[k0].e;
     }
     if(k1<0) break; // no cluster found
-    // printf("iCl=%d, k1=%d energy=%f\n",nClust,k1,soloMip[k1].e);
-    
-     clust[nClust].k1=k1;
-     clust[nClust].eH=soloMip[k1].e;
-     nClust++;
-     soloMip[k1].id=nClust;
-     tagCluster(k1);     
+    //  printf("iCl=%d, ispir=%d energy=%f\n",nClust,k1,soloMip[k1].e);
+    clust[nClust].k1=k1;
+    clust[nClust].eH=soloMip[k1].e;
+    nClust++;
+    soloMip[k1].id=nClust;
+    tagCluster(k1);     
   }
-  //  printf("nClust=%d\n",nClust);
+  // printf("nClust=%d\n",nClust);
   //if(nClust<2) return ;
   
   //............  sum energy of clusters, find centroid
@@ -279,7 +289,7 @@ int  EEsoloPi0:: findTowerClust() {
   nClust=nClustG;
     
   hA[4]->Fill(nClust);
-  //  printf("doneE nCl=%d %f %d\n",nClust,clust[0].eC,clust[0].k1);
+  //printf("doneE nCl=%d %f %d\n",nClust,clust[0].eC,clust[0].k1);
   return nClust;
 }
 
@@ -439,11 +449,12 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
   TVector3 r1=geom-> getDirection( c1->feta, c1->fphi);
   TVector3 r2=geom-> getDirection( c2->feta, c2->fphi);
   
-  
   TVector3  p1=e1* r1.Unit();
   TVector3  p2=e2* r2.Unit();
   
   float opAngle=p1.Angle(p2);
+  // printf("-->%.1f\n", opAngle/3.1416*180);
+
   h[6]->Fill(opAngle);
 
   TVector3 p12=p1+p2;
@@ -509,9 +520,8 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
     h[10]->Fill(p12.Pt());
     h[14]->Fill(kk1);
     h[14]->Fill(kk2);
-    h[24]->Fill(opAngle);
-
     ((TH2F*) h[15])->Fill(e12,d12);
+    h[24]->Fill(opAngle);
        
     float zE=fabs(c1->eC - c2->eC)/(c1->eC + c2->eC);
     h[26]->Fill(zE);
@@ -530,6 +540,9 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
 
 /*****************************************************************
  * $Log: EEsoloPi0.cxx,v $
+ * Revision 1.7  2004/09/03 04:50:52  balewski
+ * big clenup
+ *
  * Revision 1.6  2004/08/26 04:39:40  balewski
  * towards pi0
  *
@@ -537,99 +550,18 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
 
 
   
-#if 0
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-int EEsoloPi0::getTowerAdc(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int ctbMin, int ctbMax ){
-  static int time0=-1;
-  if(time0<0) time0=eHead->getTimeStamp();
-  timeSec=eHead->getTimeStamp()-time0;
-  int n1=0,n2=0;
 
-  if(eTrig) { // check CTB multiplicity 
-    // Find number of ctb slats which fired
-    int ctbSum=0;
-    int isl;
-    for ( isl = 0; isl < 240; isl++ ) {
-      ctbSum+= eTrig -> CTB[isl];
-    }
-    // printf("ctbSum=%d \n",ctbSum);
-    hA[7]->Fill(ctbSum); 
-    if(ctbSum<ctbMin || ctbSum>ctbMax) return 0;
-  }
-
-  clear();
 
 #if 0
   float adc2gev[MaxEtaBins]={ // ideal gain (ch/GeV)
     18.938, 20.769,  22.650,  24.575,
     26.539,  28.514, 30.493, 32.473,
     34.438, 36.387, 38.28, 40.146 };
-#endif 
-  int ic;
-  float totEner=0;
 
-
-  for(ic=0;ic<feeEve->block->GetEntries();ic++) {
-    EEfeeDataBlock *b=(EEfeeDataBlock *)feeEve->block->At(ic);
-    if( !b->isValid() ) continue;
-
-    int crateID=b->getCrateID();    
-    if(crateID>MaxTwCrateID) continue; // just tower crates
-    n1++;
-    int chan;
-    UShort_t* data=b->getData();
-    int nd=b->getValidDataLen();
-    
-
-    for(chan=0;chan<nd;chan++) {
-      const  EEmcDbItem  *x=db->getByCrate(crateID,chan);
-      if(x==0) continue; 
-      if(x->fail ) continue; // drop broken channels
-
-      float value=data[chan]; // raw ADC 
-      if(value <x->thr) continue;
-      n2++;
-      
-      int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
-      //printf("ii=%d '%s' --> %f th=%f\n",ii,x->name,value,x->thr);
-      value-=x->ped;
-
-
-      // if(ii>500) continue;
-      //      if(ii==533 || ii==341) continue;
-      //      if(ii==533) printf("ii=%d '%s'\n",ii, x->name);
-      //if(ii==341) printf("ii=%d '%s'\n",ii, x->name);
-
-       //      printf("     sec=%d sub=%c etaBin=%d enerRaw=%f ii=%d\n",ih, secH->getID(), sub, eta,enerRaw,ii);
-      assert(ii>=0 && ii<MxTw);
-
-      //float recoEner=value/adc2gev[x->eta-1]/scaleFactor; // ideal
-
-      if(x->gain<=0 ) continue; // gains not avaliable
       if(strstr(x->name,"01TA05")) continue;
       if(strstr(x->name,"11TD09")) continue;
       if(strstr(x->name,"09TB06")) continue;
 
-      float recoEner=value/x->gain/scaleFactor; // ideal
-      totEner+=recoEner;
-      soloMip[ii].e= recoEner;
-      if (soloMipDb[ii]==0) soloMipDb[ii]=x;
-
-      float etaCenter=geom->getEtaMean(x->eta-1);
-      hA[0]->Fill(recoEner);
-
-      hA[5]->Fill(recoEner/cosh(etaCenter));
-
-    }
-  }
-  
-  printf(" n1=%d, n2=%d\n",n1,n2);
-  hA[1]->Fill(totEner);
-  return 1;
-
-}
 
 #endif
 
