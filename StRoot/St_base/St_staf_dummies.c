@@ -1,4 +1,4 @@
-/* $Id: St_staf_dummies.c,v 1.12 2000/01/12 18:07:24 fine Exp $ */
+/* $Id: St_staf_dummies.c,v 1.13 2000/01/18 23:00:43 fine Exp $ */
 /*void ami(){}*/
 #include "table_header.h"
 #include "fortranc.h"
@@ -44,7 +44,9 @@ float type_of_call RG32(int *c){
 }
 #endif
 /* $Log: St_staf_dummies.c,v $
- * Revision 1.12  2000/01/12 18:07:24  fine
- * cvs symbols have been added and copyright class introduced
+ * Revision 1.13  2000/01/18 23:00:43  fine
+ * fix comment
  * */
+/* Revision 1.12  2000/01/12 18:07:24  fine */
+/*  cvs symbols have been added and copyright class introduced */
 #endif
