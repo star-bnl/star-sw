@@ -472,7 +472,7 @@ Block SVTD is an active wafer volume
       call      GSTPAR (%Imed,'STRA',1.)
 
 *     The following is the corrected hits definition: 25-dec-98 (PN)
-      HITS    SVTD   Z:.001:   Y:.001:   X:.001:     Ptot:18:(0,100),
+      HITS    SVTD   Z:.001:S  Y:.001:   X:.001:     Ptot:18:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:22:(0,0.1) 
 

@@ -305,7 +305,7 @@ block TPAD is a real padrow with dimensions defined at positioning time
       HITS    TPAD   Z:.0005:S  Y:.0005:  X:.0005:   cx:10:   cy:10:   cz:10:,
                      LPtot:18:(-3,2)      Sleng:.1:(0,500),
                      ToF:16:(0,1.e-6)     LGAM:16:(-2,2),    
-                     Step:11:(0,5)        USER:21:(-0.1,0.1) 
+                     Step:11:(0,5)        USER:21:(-.01,.01) 
 *
 *     HITS     TPAD  xx:16:SHX(-250,250)  yy:16:(-250,250)   zz:32:(-250,250),
 *                    px:20:(-100,100)     py:20:(-100,100)   pz:20:(-100,100),
@@ -514,7 +514,7 @@ Block TMSE  is a single sensitive volume
 
 *WJL shape definition was Iaxis=2 Ndiv=2
       SHAPE     division  Iaxis=3 Ndiv=160
-      HITS    TMSE   Z:.01:   Y:.01:   X:.01:    Sleng:0.1:(0,500),  
+      HITS    TMSE   Z:.01:S  Y:.01:   X:.01:    Sleng:0.1:(0,500),  
                      cx:10:   cy:10:   cz:10:    Step:.01:,  
                      ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
                      LGAM:16:(-2,2)    Elos:16:(0,0.01) 
