@@ -45,11 +45,11 @@ public:
   void Done(void);
 // fill event
   BOOL FillEvent();
-  BOOL TpcTrackFrame::FillEvent(  
-			      TABLE_HEAD_ST     *tphit_h,      
-			      TCL_TPHIT_ST      *table ,
-			      int FirstSector,
-			      int NumberOfSectors);
+  BOOL FillEvent(  
+	      TABLE_HEAD_ST     *tphit_h,      
+	      TCL_TPHIT_ST      *table ,
+	      int FirstSector,
+	      int NumberOfSectors);
 //
   int FillResultTable( TABLE_HEAD_ST *hit_h,   TCL_TPHIT_ST *tphit, 
                        TABLE_HEAD_ST *track_h, TPT_TRACK_ST *tracks);
