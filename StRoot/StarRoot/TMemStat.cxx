@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.8 2003/10/25 03:20:09 jeromel Exp $
+ * $Id: TMemStat.cxx,v 1.9 2004/04/07 18:14:22 perev Exp $
  *
  ***************************************************************************
  *
@@ -54,7 +54,7 @@ void TMemStat::Stop()
   Double_t dif = Used() - fLast;
 
   //printf("DEBUG >> time distance between two stops Used=%f Last=%f\n",Used(),fLast);
-  if ( dif < LOWEST_VAL )  dif  = 0.0;
+  if ( fabs(dif) < LOWEST_VAL )  dif  = 0.0;
   if ( dif < fMin )        fMin = dif;
   if ( dif > fMax )        fMax = dif;
 
@@ -70,8 +70,8 @@ void TMemStat::Print(const char *) const
   Double_t rms  = ::sqrt(fabs(fRms/fTally - aver*aver));
 
   //printf("DEBUG :: %.10f %d %.10f %.10f\n",fAver,fTally,fRms,aver);
-  if ( aver < LOWEST_VAL ) aver = 0.0;
-  if ( rms  < LOWEST_VAL ) rms  = 0.0;
+  if ( fabs(aver) < LOWEST_VAL ) aver = 0.0;
+  if ( rms        < LOWEST_VAL ) rms  = 0.0;
 
   printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
 	 GetName(),fTally,fMin,aver,fMax,rms);
@@ -81,7 +81,7 @@ void TMemStat::Summary()
 {
 #define NUMTICKS (40+4*12+5)
 
-  Double_t dmin=1.e+33,daver=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
+  Double_t dmin=1.e+33,daver=0,dmed=0,dmax=-1.e+33,drms=0,dtally=0,dmp;
   int i;
 
   if(!fgList) return;
@@ -95,22 +95,25 @@ void TMemStat::Summary()
   TListIter next(fgList); 
   TMemStat  *m;
   while((m = (TMemStat*)next())){
-    if(!m->fTally)	continue;
+    if(m->fTally<3)	continue;
+    m->fAver -= m->fMin + m->fMax;
+    m->fTally-=2;
     m->Print();
     dtally++;
     if (m->fMin < dmin) dmin=m->fMin;
     if (m->fMax > dmax) dmax=m->fMax;
     dmp = m->fAver/m->fTally;
     daver += dmp; 
-    drms  += dmp*dmp;
+    drms  += fabs(m->fRms/m->fTally-dmp*dmp);
+    
   }
   if(!dtally) return;
 
   for( i=0 ; i < NUMTICKS ; i++) printf("-");
   printf("\n");
 
-  daver /= dtally;
-  drms   = ::sqrt(fabs(drms/dtally-daver*daver));
+  //VP daver /= dtally;
+  drms   = ::sqrt(fabs(drms));
   printf("%40.40s(%d)%12.6f%12.6f%12.6f%12.6f\n",
 	  "Total",(int)dtally,dmin,daver,dmax,drms);
 
