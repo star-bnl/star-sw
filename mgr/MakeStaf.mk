@@ -109,7 +109,7 @@ ifdef PKG
 endif
 #
 ##	Temporary remove of some ASPs
-ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50 hp_ux102))
+ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50 i386_redhat51 hp_ux102))
   ASPS := $(filter-out tbr,$(ASPS))
 endif
   ASPS := $(filter-out str,$(ASPS))
@@ -188,6 +188,6 @@ show:
 	@echo INC_GEN_DIR       := $(INC_GEN_DIR)
 	@echo LN       		:= $(LN)
 	@echo MKDIR       	:= $(MKDIR)
-
+	$(MAKE) -f $(STAF_MAKE_HOME)/MakeAsp.mk show 
 
 

@@ -38,26 +38,39 @@ char *tcpCodeStr(int code);
 int tcpConnect(char *hostName, int serverPort, int *pSocket);
 int tcpServer(int serverPort, int (*serverFcn)(), int spawn);
 int tcpStartServer(int serverPort, int *pSocket); /* blocks until connect */
-#ifdef __sgi
-int tcpRead(void *pFd, void *buf, u_int nbytes);
-int tcpWrite(void *pFd, void *buf, u_int nbytes);
-#else /*IRIX*/
 
-#ifdef SUN
-int tcpRead(void *pFd, char *buf, int nbytes);
-int tcpWrite(void *pFd, char *buf, int nbytes);
-#else
-int tcpRead(int *pFd, char *buf, int nbytes);
-int tcpWrite(int *pFd, char *buf, int nbytes);
-#endif /*SUN*/
-#endif /*IRIX*/
 
-#ifndef sun
-/*-cet01b-char *memset(char *ptr, int val, int nbyte); */
+#ifdef                                                  __sun
+#define TCPREAD  int (*)(void *, char *, int)
+#define TCPWRITE int (*)(void *, char *, int)
 #endif
 
+#ifdef                                                  __sgi
+#define TCPREAD  int (*)(void *, void *, u_int)
+#define TCPWRITE int (*)(void *, void *, u_int)
+#endif
+
+#ifdef                                                  Linux
+#if defined(i386_linux2) || defined(i386_redhat50)
+#define TCPREAD  int (*)(...)             
+#define TCPWRITE int (*)(...)             
+#endif
+#ifdef i386_redhat51
+#define TCPREAD  int (*)(char *, char *, int)             /*JCS*/
+#define TCPWRITE int (*)(char *, char *, int)             /*JCS*/
+#endif
+#endif /*Linux/
+
+#ifndef TCPREAD
+#define TCPREAD  int (*)(int  *, char *, int)
+#define TCPWRITE int (*)(int  *, char *, int)
+#endif                                                 /*JCS*/
+
+int tcpRead (int  *fd, char *buf, int len);
+int tcpWrite(int  *fd, char *buf, int len);
+
 #ifndef WIN32
-#ifndef linux
+#ifndef Linux
   int read(int fd, char *buf, int nbytes);
   int socket(int domain, int type, int protocol);
   int write(int fd, char *buf, int nbytes);

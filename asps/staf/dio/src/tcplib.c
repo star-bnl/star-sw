@@ -32,20 +32,11 @@ typedef unsigned int u_int;
 #include <netdb.h>
 #endif						/* VXWORKS */
 #include <sys/ioctl.h>
-#ifdef						sun
+#ifdef						__sun
 #include <sys/filio.h>    /* contains definition of FIONREAD */
 #endif						/* sun */
 #include "tcplib.h"
 
-#ifdef sun
-#ifdef i386
-#define s5x86
-#endif
-#endif
-
-/* #ifdef craig
-int connect(int socket, struct sockaddr *name, int namelen);
-#endif */
 
 #define INET_ADDR_ERROR -1
 #define PP printf(
@@ -144,47 +135,18 @@ int *pSocket;
 /**********************************************************************
 *
 */
-#ifdef sun4os5
-int tcpRead(void *herb, char *buf, int len)
-#else
-#ifdef							__sgi
-int tcpRead(void *herb, void *buf, u_int len)
-#else							/*__sgi*/
-#ifdef							s5x86
-int tcpRead(void *herb, char *buf, int len)
-#else							/*s5x86*/
-int tcpRead(int *fd, char *buf, int len)
-#endif							/*s5x86*/
-#endif							/*__sgi*/
-#endif							/*sun4os5*/
+ int tcpRead(int *fd, char *buf, int len)
 {
-#ifdef sun4os5
-        int *fd=herb;  /* To compile on intel Solaris.  */
-#endif
-#ifdef s5x86
-        int *fd=herb;  /* To compile on intel Solaris.  */
-#endif
-#ifdef __sgi
-        int *fd=herb;  /* To compile on irix.  */
-#endif
-        int locallen, timeout = 0;
+        int locallen, timeout = 3;
 
         ioctl(*fd, FIONREAD, (caddr_t)&locallen);
 
-        while (locallen < 1 && timeout < 30)
+        while (locallen < 1 && timeout-- )
         {
-           if (timeout <20)
-#ifdef sun
-              usleep(100000);
-#else
-              sleep(0);
-#endif
-           else
               sleep(1);
-           timeout++;
            ioctl(*fd, FIONREAD, (caddr_t)&locallen);
         }
-        if (timeout >= 30) return -1;
+        if (timeout <= 0) return -1;
 
 /*
         printf("timeout,len,locallen: %d %d %d\n ", timeout, len, locallen);
@@ -203,42 +165,12 @@ int tcpRead(int *fd, char *buf, int len)
 *
 *
 */
-#ifdef sun4os5
-int tcpWrite(void *herb, char *buf, int len)
-#else
-#ifdef							__sgi
-int tcpWrite(void *herb, void *buf, u_int len)
-#else							/*__sgi*/
-#ifdef s5x86
-int tcpWrite(void *herb, char *buf, int len)
-#else							/*s5x86*/
 int tcpWrite(int *fd, char *buf, int len)
-#endif							/*s5x86*/
-#endif							/*__sgi*/
-#endif							/*sun4os5*/
 {
         int i, cnt;
-#ifdef sun4os5
-        int *fd=herb;   /* to compile on irix */
-#endif
-#ifdef s5x86
-        int *fd=herb;   /* to compile on irix */
-#endif
-#ifdef __sgi
-        int *fd=herb;   /* to compile on irix */
-        char *herb2;     
-        herb2=buf;
-#endif
 
-#ifdef __sgi
-        for (cnt = len; cnt > 0; cnt -= i, herb2 += i) {
-		buf=herb2;
-#else
         for (cnt = len; cnt > 0; cnt -= i, buf += i) {
-#endif
-                if ((i = write(*fd, buf, cnt)) == -1) {
-                        return (-1);
-                }
+	  if ((i = write(*fd, buf, cnt)) == -1) return (-1);
         }
         return len;
 }
