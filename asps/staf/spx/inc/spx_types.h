@@ -25,44 +25,37 @@
 extern CC_P int spx_init();
 extern CC_P int spx_start();
 extern CC_P int spx_stop();
-extern CC_P void spx_def_();
 
 #ifndef NOKUIP
-extern CC_P void kam_spx_deletedummy_();
-extern CC_P void kam_spx_deletegrid_();
-extern CC_P void kam_spx_finddummy_();
-extern CC_P void kam_spx_findgrid_();
+extern CC_P void spx_def_();
+
+extern CC_P void kam_spx_count_();
 extern CC_P void kam_spx_list_();
-extern CC_P void kam_spx_listobjects_();
 extern CC_P void kam_spx_newdummy_();
 extern CC_P void kam_spx_newgrid_();
-extern CC_P void kam_spx_count_();
-extern CC_P void kam_spxdummy_ncalls_();
 extern CC_P void kam_spxdummy_hello_();
+extern CC_P void kam_spxdummy_ncalls_();
 extern CC_P void kam_spxdummy_null_();
 extern CC_P void kam_spxdummy_time_();
 extern CC_P void kam_spxgrid_get_();
 extern CC_P void kam_spxgrid_height_();
 extern CC_P void kam_spxgrid_set_();
 extern CC_P void kam_spxgrid_width_();
-extern CC_P int kam_spx_deletedummy();
-extern CC_P int kam_spx_deletegrid();
-extern CC_P int kam_spx_finddummy();
-extern CC_P int kam_spx_findgrid();
-extern CC_P int kam_spx_list();
-extern CC_P int kam_spx_listobjects();
-extern CC_P int kam_spx_newdummy();
-extern CC_P int kam_spx_newgrid();
-extern CC_P int kam_spx_count();
-extern CC_P int kam_spxdummy_ncalls();
-extern CC_P int kam_spxdummy_hello();
-extern CC_P int kam_spxdummy_null();
-extern CC_P int kam_spxdummy_time();
-extern CC_P int kam_spxgrid_get();
-extern CC_P int kam_spxgrid_height();
-extern CC_P int kam_spxgrid_set();
-extern CC_P int kam_spxgrid_width();
 #endif /*NOKUIP*/
+
+extern CC_P STAFCV_T spx_count();
+extern CC_P STAFCV_T spx_list();
+extern CC_P STAFCV_T spx_newdummy(char* name);
+extern CC_P STAFCV_T spx_newgrid(char* name, short height, short width);
+extern CC_P STAFCV_T spxdummy_hello(char* name, char* message);
+extern CC_P STAFCV_T spxdummy_ncalls(char* name);
+extern CC_P STAFCV_T spxdummy_null(char* name);
+extern CC_P STAFCV_T spxdummy_time(char* name);
+extern CC_P STAFCV_T spxgrid_get(char* name,short m,short n);
+extern CC_P STAFCV_T spxgrid_height(char* name);
+extern CC_P STAFCV_T spxgrid_set(char* name, short m, short n
+		, long value);
+extern CC_P STAFCV_T spxgrid_width(char* name);
 
 #endif /* SPX_TYPES_H */
 
