@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * $Id: StEbye2ptMaker.h,v 1.3 2000/09/19 19:49:50 jgreid Exp $
+ * $Id: StEbye2ptMaker.h,v 1.4 2000/09/20 00:53:50 jgreid Exp $
  *
  * Author: Jeff Reid, UW
  *         with design advice from Thomas Ullrich, Yale
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.h,v $
- * Revision 1.3  2000/09/19 19:49:50  jgreid
- * added functionality for urgent analysis - DNP2000
+ * Revision 1.4  2000/09/20 00:53:50  jgreid
+ * fixed sorting to work properly with event cuts
  *
  * Revision 1.2  2000/08/14 22:05:20  jseger
  * Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
@@ -55,7 +55,7 @@ public:
     void SetEbye2ptFileName(const Char_t* name="Ebye2pt.root");    
     void          EbyeDSTRead(Bool_t flag=kFALSE);
     virtual const char *GetCVS() const
-    {static const char cvs[]="$Id: StEbye2ptMaker.h,v 1.3 2000/09/19 19:49:50 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="$Id: StEbye2ptMaker.h,v 1.4 2000/09/20 00:53:50 jgreid Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
@@ -82,8 +82,8 @@ private:
   Char_t           mEbye2ptFileName[74];    //2pt histogram file name 
   StEbyeEvent*     EbyeDSTBranch;
   StEbyeEvent*     mEbyeEvent;
-  Int_t            mIndex[100000];
-  Int_t            mSortArray[100000];
+  Int_t            mIndex[110000];
+  Int_t            mSortArray[1100000];
   Int_t  	   mthisEventBinNumber;
   Int_t	   	   mpreviousEventBinNumber;
   TTree*           pEbyeTree;               // pointer to EbyeDST Tree 
