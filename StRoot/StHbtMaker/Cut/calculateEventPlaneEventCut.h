@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: calculateEventPlaneEventCut.h,v 1.3 2004/02/17 17:05:37 jeromel Exp $
+ * $Id: calculateEventPlaneEventCut.h,v 1.4 2004/02/20 20:30:45 magestro Exp $
  *
  * Author: Randall Wells, Ohio State, rcwells@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: calculateEventPlaneEventCut.h,v $
+ * Revision 1.4  2004/02/20 20:30:45  magestro
+ * Added Vz, multiplicity event cuts
+ *
  * Revision 1.3  2004/02/17 17:05:37  jeromel
  * Bug fix
  *
@@ -25,11 +28,6 @@
 
 #ifndef calculateEventPlaneEventCut_hh
 #define calculateEventPlaneEventCut_hh
-
-// do I need these lines ?
-//#ifndef StMaker_H
-//#include "StMaker.h"
-//#endif
 
 #include "StMaker.h"
 
@@ -50,6 +48,9 @@ public:
   int NEventsPassed();
   int NEventsFailed();
 
+  void SetEventMult(const int& lo,const int& hi);
+  void SetVertZPos(const float& lo, const float& hi);
+
   void SetFlowMaker(char* title);
   void SetFlowAnalysisMaker(char* title);
   void FillFromHBT(const int& hbt);
@@ -62,6 +63,9 @@ public:
 private:   // 
   StFlowMaker* mFlowMaker;                 //!
   StFlowAnalysisMaker* mFlowAnalysisMaker; //!
+
+  int mEventMult[2];      // range of multiplicity
+  float mVertZPos[2];     // range of z-position of vertex
 
   int mFromHBT;
   long mNEventsPassed;
