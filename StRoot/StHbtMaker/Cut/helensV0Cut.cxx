@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.1 1999/09/23 23:28:03 lisa Exp $
+ * $Id: helensV0Cut.cxx,v 1.2 1999/10/05 11:37:38 lisa Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.cxx,v $
+ * Revision 1.2  1999/10/05 11:37:38  lisa
+ * Helens realistic V0Cut and Franks memory-sealed McReader
+ *
  * Revision 1.1  1999/09/23 23:28:03  lisa
  * add helensV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
  *
@@ -32,6 +35,7 @@ helensV0Cut::helensV0Cut(){
 //------------------------------
 bool helensV0Cut::Pass(const StHbtV0* V0){
   static int V0Count=0;
+  int inMassRange;
 
 
   /*
@@ -47,7 +51,28 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
     cout << " * ptArmV0 " << V0->ptArmV0();
     cout << " * alphaV0 " << V0->alphaV0();
   */
-  bool goodPID = ((V0->dcaV0Daughters()   > mdcaV0daughters[0]) &&
+
+
+  inMassRange=0;
+  // Find out what particle is desired
+
+  if( strstr(V0Type,"k") || strstr(V0Type,"K")){
+     if( V0->massK0Short() < (mMass+mV0MassRange[1]) && 
+	 V0->massK0Short() > (mMass-mV0MassRange[0]) ) inMassRange=1;
+  }
+  else if( (strstr(V0Type,"anti") || strstr(V0Type,"ANTI"))){
+     if( V0->massAntiLambda() < (mMass+mV0MassRange[1]) && 
+	 V0->massAntiLambda() > (mMass-mV0MassRange[0]) ) inMassRange=1;
+  }
+  else if( (strstr(V0Type,"ambda") || strstr(V0Type,"AMBDA"))){
+     if( V0->massLambda() < (mMass+mV0MassRange[1]) && 
+	 V0->massLambda() > (mMass-mV0MassRange[0]) ) inMassRange=1;
+  }
+
+
+
+  bool goodPID = ( inMassRange &&
+		  (V0->dcaV0Daughters()   > mdcaV0daughters[0]) &&
                   (V0->dcaV0Daughters()   < mdcaV0daughters[1]) &&
                   (V0->dcaV0ToPrimVertex()   > mdcaV0ToPrimVertex[0]) &&
                   (V0->dcaV0ToPrimVertex()   < mdcaV0ToPrimVertex[1]) &&

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.h,v 1.1 1999/09/23 23:28:03 lisa Exp $
+ * $Id: helensV0Cut.h,v 1.2 1999/10/05 11:37:40 lisa Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: helensV0Cut.h,v $
+ * Revision 1.2  1999/10/05 11:37:40  lisa
+ * Helens realistic V0Cut and Franks memory-sealed McReader
+ *
  * Revision 1.1  1999/09/23 23:28:03  lisa
  * add helensV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
  *
@@ -38,7 +41,8 @@ public:
 
   virtual StHbtString Report();
 
-
+  void SetV0Type(const char* type);
+  void SetV0MassRange(const float& lo, const float& hi);
   void SetdcaV0daughters(const float& lo, const float& hi);
   void SetdcaV0ToPrimVertex(const float& lo, const float& hi);
   void SetdecayLengthV0(const float& lo, const float& hi);
@@ -56,6 +60,7 @@ public:
 
 private:   // here are the quantities we want to cut on...
 
+  float             mV0MassRange[2];        //Invariant mass limits
   float             mdcaV0daughters[2];     //DCA between 2 tracks
   float             mdcaV0ToPrimVertex[2];  //DCA between V0 and event vertex
   float             mdecayLengthV0[2];      //decay length from prim. vertex
@@ -71,12 +76,16 @@ private:   // here are the quantities we want to cut on...
   long              mNV0sPassed;
   long              mNV0sFailed;
 
+  char*             V0Type;                // String selecting v0 (la,antil,k0)
+
   ClassDef(helensV0Cut, 1)
 
 };
 
 inline void helensV0Cut::SetMass(const double& mass) {mMass = mass;}
 
+inline void helensV0Cut::SetV0MassRange(const float& lo, const float& hi) {
+mV0MassRange[0] =lo; mV0MassRange[1]=hi;}
 inline void helensV0Cut::SetdcaV0daughters(const float& lo, const float& hi)
 {mdcaV0daughters[0]=lo; mdcaV0daughters[1]=hi;}
 inline void helensV0Cut::SetdcaV0ToPrimVertex(const float& lo, const float& hi)
@@ -103,4 +112,10 @@ inline void helensV0Cut::SetPt(const float& lo, const float& hi)
 inline void helensV0Cut::SetRapidity(const float& lo,const float& hi)
 {mRapidity[0]=lo; mRapidity[1]=hi;}
 
+inline void helensV0Cut::SetV0Type(const char* type)
+{V0Type = type;}
+
 #endif
+
+
+
