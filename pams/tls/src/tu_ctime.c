@@ -40,6 +40,8 @@ void tu_ctime();
 #endif /* VMS */
 
 
+
+
 #ifdef VMS
 void tu_ctime( i, c )
 int *i;
@@ -51,7 +53,7 @@ struct dsc$descriptor *c;
 #endif /* VMS */
 
 void tu_ctime_( i, c, clen )
-int *i;
+time_t *i;
 char *c;
 int clen;
 {
