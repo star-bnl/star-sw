@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.hh,v 1.3 2001/10/04 02:56:26 caines Exp $
+ * $Id: StSvtConfig.hh,v 1.4 2002/02/22 20:12:15 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.hh,v $
+ * Revision 1.4  2002/02/22 20:12:15  caines
+ * Add getLayer() call
+ *
  * Revision 1.3  2001/10/04 02:56:26  caines
  * Fix some of the hybrid swapping indexing
  *
@@ -62,6 +65,7 @@ public:
   int getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
   int getProperHybridIndex(int barrelID, int ladderID, int waferID, int hybridID);
   int getBarrel(int index);
+  int getLayer(int index);
   int getLadder(int index);
   int getWafer(int index);
   int getHybrid(int index);
