@@ -39,6 +39,7 @@ public:
   // common object containers
   virtual StiMasterDetectorBuilder * getDetectorBuilder();
   virtual StiDetectorContainer     * getDetectorContainer();
+  virtual StiDetectorGroups<StEvent,StMcEvent> * getDetectorGroups();
   virtual StiHitContainer          * getHitContainer();
   virtual StiHitContainer          * getMcHitContainer();
   virtual StiTrackContainer        * getTrackContainer();
@@ -46,7 +47,7 @@ public:
   
   // service and convenience class objects.
   virtual StiDetectorFinder      * getDetectorFinder();
-  virtual StiTrackSeedFinder          * getTrackSeedFinder();
+  virtual StiTrackSeedFinder     * getTrackSeedFinder();
   virtual StiTrackFinder         * getTrackFinder();
   virtual StiTrackFitter         * getTrackFitter();
   virtual StiTrackMerger         * getTrackMerger();
@@ -96,6 +97,7 @@ public:
   // common object containers 
   StiMasterDetectorBuilder     * _detectorBuilder;
   StiDetectorContainer         * _detectorContainer;
+  StiDetectorGroups<StEvent,StMcEvent> * _detectorGroups;  
   StiHitContainer              * _hitContainer;
   StiHitContainer              * _mcHitContainer;
   StiTrackContainer            * _trackContainer;

@@ -14,6 +14,7 @@
 #include "StiGui/StiDrawable.h"
 #include "StiGui/DrawingPolicy.h"
 #include "StiGui/StiDetectorView.h"
+#include "StiGui/StiDetectorViews.h"
 #include "StiGui/DefaultDrawingPolicy.h"
 #include "StiGui/StiRootDrawableHits.h"
 #include "TGClient.h"
@@ -66,6 +67,7 @@ EventDisplay(const string& name, const string & description, StiToolkit * toolki
   StIOMaker                * getIoMaker();
   StiToolkit               * getToolkit();
   StiDetectorContainer     * getDetectorContainer();
+  StiDetectorViews         * getDetectorViews();
   StiHitContainer          * getHitContainer();
   StiHitContainer          * getMcHitContainer();
   StiTrackContainer        * getTrackContainer();
@@ -113,7 +115,7 @@ EventDisplay(const string& name, const string & description, StiToolkit * toolki
   // _hitDrawingPolicies( new DrawingPolicies("HitDrawingPolicies") ),
   //  _trackDrawingPolicies( new DrawingPolicies("TrackDrawingPolicies") ),
   //  _mcTrackDrawingPolicies( new DrawingPolicies("McTrackDrawingPolicies") ),
-  //vector<StiDetectorView*> _detectorViews; 
+  StiDetectorViews *  _detectorViews; 
   EventDisplayParameters * _options;
   Messenger & _messenger;  
   StiRootDrawableHits _usedHits;

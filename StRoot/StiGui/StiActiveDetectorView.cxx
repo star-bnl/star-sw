@@ -1,16 +1,16 @@
-#include "StiGui/StiAllVisibleDetectorView.h"
+#include "StiGui/StiActiveDetectorView.h"
 #include "StiGui/StiRootDrawableDetector.h"
 
-StiAllVisibleDetectorView::StiAllVisibleDetectorView(const string & name, 
-						     const string & description, 
-						     StiDetectorBuilder*builder)
+StiActiveDetectorView::StiActiveDetectorView(const string & name, 
+					     const string & description, 
+					     StiDetectorBuilder*builder)
   : StiDetectorView(name,description,builder)
 {}
 
-StiAllVisibleDetectorView::~StiAllVisibleDetectorView()
+StiActiveDetectorView::~StiActiveDetectorView()
 {}
 
-void StiAllVisibleDetectorView::activate()
+void StiActiveDetectorView::activate()
 {
   StiDetector * detector;
   StiRootDrawableDetector* rootDrawableDetector;
@@ -21,7 +21,7 @@ void StiAllVisibleDetectorView::activate()
       for (int sector=0;sector<nSectors;sector++)
 	{
 	  detector = getBuilder()->getDetector(row,sector);
-	  if (detector)
+	  if (detector && detector->isActive() )
 	    {
 	      rootDrawableDetector = static_cast<StiRootDrawableDetector*>(detector);
 	      if (rootDrawableDetector)

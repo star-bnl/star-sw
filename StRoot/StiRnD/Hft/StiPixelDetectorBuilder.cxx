@@ -19,8 +19,8 @@
 #include "StiPixelDetectorBuilder.h" 
 #include "StiPixelIsActiveFunctor.h"
 
-StiPixelDetectorBuilder::StiPixelDetectorBuilder()
-  : StiDetectorBuilder("PixelBuilder")
+StiPixelDetectorBuilder::StiPixelDetectorBuilder(bool active)
+  : StiDetectorBuilder("PixelBuilder",active)
 {
     //Parameterized hit error calculator.  Given a track (dip, cross, pt, etc) returns average error
     //once you actually want to do tracking, the results depend strongly on the numbers below.

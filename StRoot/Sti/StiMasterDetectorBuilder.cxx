@@ -1,8 +1,8 @@
 #include "StiMasterDetectorBuilder.h"
 #include "Sti/Base/Messenger.h"
 
-StiMasterDetectorBuilder::StiMasterDetectorBuilder()
-  : StiDetectorBuilder("MasterDetectorBuilder")
+StiMasterDetectorBuilder::StiMasterDetectorBuilder(bool active)
+  : StiDetectorBuilder("MasterDetectorBuilder",active)
 {}
 
 StiMasterDetectorBuilder::~StiMasterDetectorBuilder()
@@ -90,5 +90,5 @@ StiDetector * StiMasterDetectorBuilder::next()
 
 void StiMasterDetectorBuilder::add(StiDetectorBuilder *builder)
 {
-  this->Vectorized<StiDetectorBuilder>::add(builder);
+  push_back(builder);
 }

@@ -1,7 +1,7 @@
 #include "StiSsd/StiSsdDetectorBuilder.h" 
 
-StiSsdDetectorBuilder::StiSsdDetectorBuilder()
-  : StiDetectorBuilder("SsdBuilder")
+StiSsdDetectorBuilder::StiSsdDetectorBuilder(bool active)
+  : StiDetectorBuilder("SsdBuilder",active)
 {}
 
 StiSsdDetectorBuilder::~StiSsdDetectorBuilder()

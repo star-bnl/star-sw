@@ -8,7 +8,7 @@ class StiSsdDetectorBuilder : public StiDetectorBuilder
 
 public:
     // constructors
-    StiSsdDetectorBuilder();
+    StiSsdDetectorBuilder(bool active);
     virtual ~StiSsdDetectorBuilder(); 
     virtual void buildMaterials();
     virtual void buildShapes();

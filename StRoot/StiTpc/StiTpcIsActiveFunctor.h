@@ -39,8 +39,8 @@ protected:
 ///Function returns the rdo board number for a given 
 ///padrow index. 
 ///Range of map used is 1-45. 
-int StiTpcIsActiveFunctor::rdoForPadrow(int iPadrow){
-  ++iPadrow;
+int StiTpcIsActiveFunctor::rdoForPadrow(int iPadrow)
+{
   int iRdo = 0;
   if (iPadrow>0&&iPadrow<=8){
     iRdo = 1;

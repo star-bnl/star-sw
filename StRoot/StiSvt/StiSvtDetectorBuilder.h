@@ -19,7 +19,7 @@ class StiSvtDetectorBuilder : public StiDetectorBuilder
 {
 	
  public:
-	StiSvtDetectorBuilder();
+	StiSvtDetectorBuilder(bool active);
 	virtual ~StiSvtDetectorBuilder(); 
 	virtual void loadDb();
 	virtual void buildMaterials();

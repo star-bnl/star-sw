@@ -9,7 +9,7 @@
 StiPixelDetectorGroup::StiPixelDetectorGroup(bool active)
     : StiDetectorGroup<StEvent,StMcEvent>("Pixel",
 					  active?new StiPixelHitLoader():0,
-					  new StiPixelDetectorBuilder(),0,0)
+					  new StiPixelDetectorBuilder(active),0,0)
 {
     //_hitLoader->setDetector(_detectorBuilder);
 }

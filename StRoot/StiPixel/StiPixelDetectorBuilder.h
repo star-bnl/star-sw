@@ -9,7 +9,7 @@ class StiPixelDetectorBuilder : public StiDetectorBuilder
 
 public:
     // constructors
-    StiPixelDetectorBuilder();
+    StiPixelDetectorBuilder(bool active);
     virtual ~StiPixelDetectorBuilder(); 	
     virtual void loadDb();
     virtual void buildMaterials();

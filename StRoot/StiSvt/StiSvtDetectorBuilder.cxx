@@ -21,11 +21,11 @@
 #include <stdio.h>
 #include "Sti/StiHitErrorCalculator.h"
 
-StiSvtDetectorBuilder::StiSvtDetectorBuilder()
-  : StiDetectorBuilder("SvtBuilder")
+StiSvtDetectorBuilder::StiSvtDetectorBuilder(bool active)
+  : StiDetectorBuilder("SvtBuilder",active)
 {
   _calc = new StiDefaultHitErrorCalculator();
-  _calc->set(1.,1.,1.,1.,1.,1.);
+  _calc->set(0.1,0.,0.,0.1,0.,0.);
 }
 
 StiSvtDetectorBuilder::~StiSvtDetectorBuilder()
@@ -48,7 +48,8 @@ void StiSvtDetectorBuilder::buildShapes()
   int nLayers = getNRows();
   for(int layer = 0; layer<nLayers; layer++)
     {
-      int nWafers = _config->getNumberOfWafers(layer/2);
+      int nWafers = _config->getNumberOfWafers(1+layer/2);
+      cout << " layer:"<<layer<<" nWafrers:"<<nWafers<<endl;
       // Si wafer
       sprintf(name, "Svt/Layer_%d/Wafers", layer);
 
@@ -119,13 +120,17 @@ void StiSvtDetectorBuilder::buildDetectors()
 	  StiDetector *pLadder = _detectorFactory->getInstance();
 	  pLadder->setName(name);
 	  pLadder->setIsOn(true);
-	  pLadder->setIsActive(new StiSvtIsActiveFunctor);
+	  if (_active)
+	    pLadder->setIsActive(new StiSvtIsActiveFunctor);
+	  else
+	    pLadder->setIsActive(new StiNeverActiveFunctor);
 	  pLadder->setIsContinuousMedium(true);
 	  pLadder->setIsDiscreteScatterer(true);
 	  pLadder->setGas(_gasMat);
 	  pLadder->setMaterial(_siMat);
 	  pLadder->setShape(_waferShape[layer]);
-	  pLadder->setPlacement(pPlacement);
+	  pLadder->setPlacement(pPlacement); 
+	  pLadder->setHitErrorCalculator(_calc);
 	  add(layer,ladder,pLadder);
 
 	  double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;

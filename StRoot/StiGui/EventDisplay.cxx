@@ -8,7 +8,7 @@
 #include "StiGui/StiRootDrawableTrack.h"
 #include "StiGui/FileMenuGroup.h"
 #include "StiGui/OptionMenuGroup.h"
-///#include "StiGui/ViewMenuGroup.h"
+#include "StiGui/ViewMenuGroup.h"
 #include "StiGui/NavigationMenuGroup.h"
 #include "StiGui/TrackingMenuGroup.h"
 #include "StiGui/PrintMenuGroup.h"
@@ -60,13 +60,18 @@ EventDisplay::EventDisplay(const string& name, const string & description, StiTo
     _defaultMcTrackDrawingPolicy(0),
     _messenger(*Messenger::instance(MessageType::kTrackMessage))  //needs a fix...
 {
-  cout << "EventDisplay::EventDisplay( ) -I- Started"<<endl;
-  _detectorContainer = toolkit->getDetectorContainer();
-  _hitContainer      = toolkit->getHitContainer();
-  _mcHitContainer    = toolkit->getMcHitContainer();
-  _trackContainer    = toolkit->getTrackContainer();
-  _mcTrackContainer  = toolkit->getMcTrackContainer();
+  cout << "EventDisplay::EventDisplay( ) -I- Started/Done"<<endl;
+}
+
+void EventDisplay::initialize()
+{
+  _detectorContainer = _toolkit->getDetectorContainer();
+  _hitContainer      = _toolkit->getHitContainer();
+  _mcHitContainer    = _toolkit->getMcHitContainer();
+  _trackContainer    = _toolkit->getTrackContainer();
+  _mcTrackContainer  = _toolkit->getMcTrackContainer();
   _options = new EventDisplayParameters();
+  _detectorViews = new StiDetectorViews("Views","Detector Views");
   Observer * obs = dynamic_cast<Observer *>(this);
   dynamic_cast<Subject*>(_options)->attach(obs);
   createFilters();
@@ -74,7 +79,7 @@ EventDisplay::EventDisplay(const string& name, const string & description, StiTo
   createMenu();
   createCanvasFrame();  
   AddFrame(_trackingMenuGroup->getCompositeFrame(), new TGLayoutHints(kLHintsBottom | kLHintsExpandX, 0, 0, 1, 0));
-  SetWindowName(description.c_str());
+  SetWindowName(getDescription().c_str());
   MapSubwindows();
   Resize(GetDefaultSize());
   MapWindow();
@@ -92,16 +97,16 @@ void EventDisplay::createMenu()
   TGLayoutHints * menuBarLayout  = new TGLayoutHints(kLHintsTop | kLHintsLeft | kLHintsExpandX,0, 0, 1, 1);
   TGLayoutHints * helpItemLayout = new TGLayoutHints(kLHintsTop | kLHintsRight);
   _fileMenuGroup = new FileMenuGroup("File","File",this,0);
-  _optionMenuGroup= new OptionMenuGroup("Option","Option",this,100);
-  //_viewMenuGroup= new ViewMenuGroup("View","View",this,200);
-  _navigationMenuGroup= new NavigationMenuGroup("Navigation","Navigation",this,300);
-  _trackingMenuGroup= new TrackingMenuGroup("Tracking","Tracking",this,400);
-  _printMenuGroup= new PrintMenuGroup("Print","Print",this,500);
-  _helpMenuGroup= new HelpMenuGroup("Help","Help",this,600);
+  _optionMenuGroup= new OptionMenuGroup("Option","Option",this,1000);
+  _viewMenuGroup= new ViewMenuGroup("View","View",this,2000);
+  _navigationMenuGroup= new NavigationMenuGroup("Navigation","Navigation",this,3000);
+  _trackingMenuGroup= new TrackingMenuGroup("Tracking","Tracking",this,4000);
+  _printMenuGroup= new PrintMenuGroup("Print","Print",this,5000);
+  _helpMenuGroup= new HelpMenuGroup("Help","Help",this,6000);
   TGMenuBar * menuBar = new TGMenuBar(this, 1, 1, kHorizontalFrame);
   _fileMenuGroup->create(menuBar,menuItemLayout); 
   _optionMenuGroup->create(menuBar,menuItemLayout);
-  //_viewMenuGroup->create(menuBar,menuItemLayout);  
+  _viewMenuGroup->create(menuBar,menuItemLayout);  
   _navigationMenuGroup->create(menuBar,menuItemLayout);
   _trackingMenuGroup->create(menuBar,menuItemLayout);
   _printMenuGroup->create(menuBar,menuItemLayout);
@@ -147,7 +152,7 @@ Bool_t EventDisplay::ProcessMessage(Long_t msg, Long_t option1, Long_t option2)
 	case kCM_MENU:
 	  _fileMenuGroup->dispatch(option1);
 	  _optionMenuGroup->dispatch(option1);
-	  //_viewMenuGroup->dispatch(option1);
+	  _viewMenuGroup->dispatch(option1);
 	  _navigationMenuGroup->dispatch(option1);
 	  _trackingMenuGroup->dispatch(option1);
 	  _printMenuGroup->dispatch(option1);
@@ -173,12 +178,12 @@ void EventDisplay::draw()
   if (view) view->GetRange(pmin,pmax);
   gPad->Clear();
   
-  if (!_initialized)
-    {
+  //  if (!_initialized)
+  // {
       cout << "EventDisplay::draw() -I- Initialize detector display"<<endl;
       draw(_detectorContainer);
       _initialized = true;
-    }
+      //}
 
   if (_options->getDetectorVisible())_node->Draw();
   if (_options->getHitVisible())    draw(_hitContainer,  _hitFilter,  _hitDrawingPolicy, _usedHits,_unusedHits);
@@ -196,6 +201,7 @@ void EventDisplay::draw()
 
 void EventDisplay::draw(StiDetectorContainer * detectorContainer)
 {
+  _node->Clear();
   StiDetector * detector; 
   StiRootDrawableDetector* rootDrawableDetector;
   StiMasterDetectorBuilder * master = getToolkit()->getDetectorBuilder();
@@ -215,21 +221,6 @@ void EventDisplay::draw(StiDetectorContainer * detectorContainer)
 		  rootDrawableDetector = static_cast<StiRootDrawableDetector*>(detector);
 		  if (rootDrawableDetector)
 		    {
-		      if (row==0 || row==(nRows-1) )
-			rootDrawableDetector->setVisible(true);
-		      else
-			rootDrawableDetector->setVisible(false);
-		      
-		      //temp hack (MLM 04/14/03)
-		      string name = (*bIter)->getName();
-		      //cout <<"\tTest detector:\t"<<name<<endl;
-		      unsigned int found = name.find("Ftpc");
-		      unsigned int found2 = name.find("Pixel");
-		      unsigned int found3 = name.find("Svt");
-		      if (found!=name.npos || found2!=name.npos || found3!=name.npos) { //it'sone of these
-			  rootDrawableDetector->setVisible(true);
-		      }
-		      
 		      const StThreeVector<double>& pos = rootDrawableDetector->position();
 		      _node->Add(rootDrawableDetector->volume(), 
 				 pos.x(),
@@ -491,6 +482,10 @@ EventDisplayParameters * EventDisplay::getOptions()
   return _options;
 }
 
+StiDetectorViews * EventDisplay::getDetectorViews()
+{
+  return _detectorViews;
+}
 
 void EventDisplay::setStChain(StChain * chain)
 {

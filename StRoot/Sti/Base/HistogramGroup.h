@@ -1,14 +1,14 @@
 #ifndef HistogramGroup_H_Included 
 #define HistogramGroup_H_Included 
+#include <vector>
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#include "Sti/Base/Vectorized.h"
 #include <TH1.h>
 #include <TH2.h>
 #include <TH3.h>
 #include <TFile.h>
 
-class HistogramGroup : public Named, public Described, public Vectorized<TH1>
+class HistogramGroup : public Named, public Described, public vector<TH1*>
 {
  public: 
   HistogramGroup();
@@ -18,6 +18,7 @@ class HistogramGroup : public Named, public Described, public Vectorized<TH1>
   void write(const string & fileName, const string &option="RECREATE");  
   void write();
   void reset();
+  TH1 * add(TH1*histo);
   TH1D * HistogramGroup::book(const string &title, 
 			      const string & description, 
 			      int n, 
@@ -46,5 +47,9 @@ class HistogramGroup : public Named, public Described, public Vectorized<TH1>
 
 };
 
-
+inline TH1 * HistogramGroup::add(TH1*histo)
+{
+  push_back(histo);
+  return histo;
+}
 #endif

@@ -1,16 +1,16 @@
-#include "StiGui/StiAllVisibleDetectorView.h"
+#include "StiGui/StiSkeletonDetectorView.h"
 #include "StiGui/StiRootDrawableDetector.h"
 
-StiAllVisibleDetectorView::StiAllVisibleDetectorView(const string & name, 
+StiSkeletonDetectorView::StiSkeletonDetectorView(const string & name, 
 						     const string & description, 
 						     StiDetectorBuilder*builder)
   : StiDetectorView(name,description,builder)
 {}
 
-StiAllVisibleDetectorView::~StiAllVisibleDetectorView()
+StiSkeletonDetectorView::~StiSkeletonDetectorView()
 {}
 
-void StiAllVisibleDetectorView::activate()
+void StiSkeletonDetectorView::activate()
 {
   StiDetector * detector;
   StiRootDrawableDetector* rootDrawableDetector;
@@ -26,7 +26,10 @@ void StiAllVisibleDetectorView::activate()
 	      rootDrawableDetector = static_cast<StiRootDrawableDetector*>(detector);
 	      if (rootDrawableDetector)
 		{
-		  rootDrawableDetector->setVisible(true);
+		  if (row==0 || row==nRows-1)
+		    rootDrawableDetector->setVisible(true);
+		  else
+		    rootDrawableDetector->setVisible(false);
 		}
 	    }
 	}

@@ -10,7 +10,7 @@
 StiSvtDetectorGroup::StiSvtDetectorGroup(bool active)
   : StiDetectorGroup<StEvent,StMcEvent>("SVT",
 					active?new StiSvtHitLoader():0,
-					new StiSvtDetectorBuilder(),0,0)
+					new StiSvtDetectorBuilder(active),0,0)
 {}
 
 StiSvtDetectorGroup::~StiSvtDetectorGroup()

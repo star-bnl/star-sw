@@ -13,7 +13,7 @@ class StiStarDetectorBuilder : public StiDetectorBuilder
 {
   
  public:
-  StiStarDetectorBuilder();
+  StiStarDetectorBuilder(bool active);
   virtual ~StiStarDetectorBuilder(); 
   virtual void loadDb();
   virtual void buildMaterials();

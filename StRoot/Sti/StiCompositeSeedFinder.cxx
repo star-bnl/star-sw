@@ -40,7 +40,7 @@ bool StiCompositeSeedFinder::hasMore()
 {
   _messenger <<"StiCompositeSeedFinder::hasMore() -I- Started"<<endl;
   bool has_more;
-  if (_currentTrackSeedFinder != Vectorized<StiTrackSeedFinder>::end())
+  if (_currentTrackSeedFinder != this->vector<StiTrackSeedFinder*>::end())
     has_more = (*_currentTrackSeedFinder)->hasMore();
   else
     has_more = false;
@@ -63,10 +63,10 @@ void StiCompositeSeedFinder::reset()
 {
   _messenger <<"StiCompositeSeedFinder::reset() -I- Started"<<endl;
   //reset all!
-  for (vector<StiTrackSeedFinder*>::iterator it=Vectorized<StiTrackSeedFinder>::begin(); 
-			 it!=Vectorized<StiTrackSeedFinder>::end(); ++it)
+  for (vector<StiTrackSeedFinder*>::iterator it=this->vector<StiTrackSeedFinder*>::begin(); 
+       it!=this->vector<StiTrackSeedFinder*>::end(); ++it)
     (*it)->reset();
-  _currentTrackSeedFinder = Vectorized<StiTrackSeedFinder>::begin();
+  _currentTrackSeedFinder = this->vector<StiTrackSeedFinder*>::begin();
   _messenger <<"StiCompositeSeedFinder::reset() -I- Done"<<endl;
 }
 

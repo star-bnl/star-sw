@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StiDefaultToolkit.cxx,v 2.15 2003/05/06 15:36:36 mmiller Exp $
+ * $Id: StiDefaultToolkit.cxx,v 2.16 2003/05/07 03:06:32 pruneau Exp $
  *
  * @file  StiDefaultToolkit.cxx
  * @brief Default Implementation of the StiToolkit Abstract interface
@@ -19,6 +19,9 @@
  ***************************************************************************
  *
  * $Log: StiDefaultToolkit.cxx,v $
+ * Revision 2.16  2003/05/07 03:06:32  pruneau
+ * *** empty log message ***
+ *
  * Revision 2.15  2003/05/06 15:36:36  mmiller
  * Committing changes to turn on multiple regions (StiPlacement::StiRegion -> kMidRapidity, kForwardRapidity, etc).
  * Also added a point to StiToolkit for StiMaker.  This allows for the req. GetDataSet calls in the FTPC code.
@@ -79,6 +82,7 @@
 #include "Sti/StiLocalTrackMerger.h"
 #include "Sti/StiDefaultTrackFilter.h"
 #include "Sti/StiDetectorGroup.h"
+#include "Sti/StiDetectorGroups.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "Sti/StiHitErrorCalculator.h"
 #include "Sti/StiResidualCalculator.h"
@@ -113,13 +117,14 @@ StiDefaultToolkit::StiDefaultToolkit()
   _trackFinder(0),
   _trackFitter(0),
   _trackMerger(0),
-	_vertexFinder(0),
+  _vertexFinder(0),
   _hitLoader(0),
   _associationMaker(0)
 {
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Started"<<endl;
   Messenger::init(0);
   //Messenger::setRoutingMask(0);
+  _detectorGroups = new StiDetectorGroups<StEvent,StMcEvent>("StarDetectorGroups","StarDetectorGroups");
   cout<<"StiDefaultToolkit::StiDefaultToolkit() -I- Done"<<endl;
 };
 
@@ -233,10 +238,15 @@ Factory<StiKalmanTrackNode>* StiDefaultToolkit::getTrackNodeFactory()
   return _trackNodeFactory;	
 }
 
+StiDetectorGroups<StEvent,StMcEvent> * StiDefaultToolkit::getDetectorGroups()
+{
+  return _detectorGroups;
+}
+
 
 void StiDefaultToolkit::add(StiDetectorGroup<StEvent,StMcEvent>* detectorGroup)
 {
-  //_detectorGroups.push_back(detectorGroup);
+  _detectorGroups->push_back(detectorGroup);
   StiMasterHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * masterLoader;
   masterLoader = static_cast<StiMasterHitLoader<StEvent,StMcEvent,StiDetectorBuilder> *>(getHitLoader());
   StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * loader = detectorGroup->getHitLoader();
@@ -264,7 +274,7 @@ StiMasterDetectorBuilder * StiDefaultToolkit::getDetectorBuilder()
 {  
   if (_detectorBuilder)
     return _detectorBuilder;
-  _detectorBuilder = new StiMasterDetectorBuilder();
+  _detectorBuilder = new StiMasterDetectorBuilder(true);
   return _detectorBuilder;
 }
 
