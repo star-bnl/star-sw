@@ -187,6 +187,8 @@ void MiniChain::setupGui()
   cout <<"MiniChain::setupGui -I- Done"<<endl;
 }
 
+
+
 /*!
   Setup the desired output. In principle, one should be
   able to request StEvent, StMiniMcEvent, as well as  
@@ -198,6 +200,8 @@ void MiniChain::setupOutput(const char * filePrefix,
 {
   cout <<"MiniChain::setupOutput -I- Started"<<endl;
 
+  bool useExplicitName=true;
+  
   //make local copies
   TString inputfile = infile;
   TString outdir = fileTemplate;
@@ -208,7 +212,9 @@ void MiniChain::setupOutput(const char * filePrefix,
     {
       //no outfile specified, so now make output from input file names
       outdir = "./";
+      //remove inputfile.Last('/')+1 characters, starting at 0....
       templateFile=inputfile.Remove(0,inputfile.Last('/')+1);
+      useExplicitName=false;
     }
 
 
@@ -218,22 +224,26 @@ void MiniChain::setupOutput(const char * filePrefix,
     }
   else
     {
-      outdir.Remove(outdir.Last('/')+1,outdir.Capacity());
+      outdir.Remove(outdir.Last('/')+1,outdir.Capacity()-outdir.Last('/'));
+      cout <<"Directory for output: "<<outdir<<endl;
     }
 
   //make minimc file
   //Since miniMcMaker redefines names, pass it what it expects....
+  // a simple prefix + input file name
   TString miniMcName= infile;
   //get rid of any directory part...
   if(miniMcName.Last('/')!=-1) miniMcName.Remove(0,miniMcName.Last('/')+1);
   miniMcName.Prepend("Sti_");
 
-  
-  //Now make output file name for StEvent file
-  templateFile.ReplaceAll("geant.root","event.root"); //replace "geant" if it's there
-  TString eventName = templateFile.ReplaceAll(".event.root","_sti.event.root");
-  //.event.root now replaced with _sti.event.root
-  
+  TString eventName=templateFile;
+  if(!useExplicitName)
+    {
+     //Now make output file name for StEvent file
+     eventName.ReplaceAll("geant.root","event.root"); //replace "geant" if it's there
+     eventName.ReplaceAll(".event.root","_sti.event.root");
+     //.event.root now replaced with _sti.event.root
+    }
 
   
   if (_pars->doStEventOutput) 
@@ -257,7 +267,6 @@ void MiniChain::setupOutput(const char * filePrefix,
       minimcMaker->setDebug();
 
       minimcMaker->setOutDir(outdir);
-      cout <<"MiniMc to be written out, file : "<<outdir<<miniMcName<<endl;
       minimcMaker->setFileName(miniMcName);
     }
   else
