@@ -174,7 +174,7 @@ class StV0FinderMaker : public StMaker {
   //end Betty
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.7 2004/03/03 01:46:13 cmironov Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StV0FinderMaker.h,v 1.8 2004/04/02 08:56:22 faivre Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  protected:
   virtual Int_t Prepare();         //!
@@ -206,6 +206,7 @@ class StV0FinderMaker : public StMaker {
   Int_t useRotating;		   //!
   int det_id_v0;		   //!
   int ITTFflag;		           //!
+  int TPTflag;                     //!
   
   int maxtracks;                   //!
   StTrack** trk;                   //!
@@ -226,8 +227,11 @@ class StV0FinderMaker : public StMaker {
 #endif
 
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.h,v 1.7 2004/03/03 01:46:13 cmironov Exp $
+// $Id: StV0FinderMaker.h,v 1.8 2004/04/02 08:56:22 faivre Exp $
 // $Log: StV0FinderMaker.h,v $
+// Revision 1.8  2004/04/02 08:56:22  faivre
+// Use actual TPT flag rather than "not ITTF" for TPT tracks.
+//
 // Revision 1.7  2004/03/03 01:46:13  cmironov
 // (J.L. commit)
 // Modified doxygen documentation (was not taken before). Indentation
