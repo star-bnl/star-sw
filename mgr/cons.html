@@ -12,27 +12,137 @@
 
 	<LI><A HREF="#NAME">NAME</A>
 	<LI><A HREF="#DESCRIPTION">DESCRIPTION</A>
-	<LI><A HREF="#B_Cons_A_Software_Construction_">&lt;STRONG&gt;Cons: A Software Construction System&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Introduction_">&lt;STRONG&gt;Introduction&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Why_Cons_Why_not_Make_">&lt;STRONG&gt;Why Cons? Why not Make?&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Keeping_it_simple_">&lt;STRONG&gt;Keeping it simple&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Building_large_trees_still_ju">&lt;STRONG&gt;Building large trees-still just as simple&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_A_Model_for_sharing_files_">&lt;STRONG&gt;A Model for sharing files&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Separating_source_and_build_tr">&lt;STRONG&gt;Separating source and build trees&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Variant_builds_">&lt;STRONG&gt;Variant builds&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Signatures_">&lt;STRONG&gt;Signatures&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Code_Repositories_">&lt;STRONG&gt;Code Repositories&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Default_targets_">&lt;STRONG&gt;Default targets&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Selective_builds_">&lt;STRONG&gt;Selective builds&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Build_Pruning_">&lt;STRONG&gt;Build Pruning&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Backing_builds_">&lt;STRONG&gt;Backing builds&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Temporary_overrides_">&lt;STRONG&gt;Temporary overrides&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_More_on_construction_environme">&lt;STRONG&gt;More on construction environments:Default construction variables&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Default_construction_methods_">&lt;STRONG&gt;Default construction methods&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Extending_Cons_">&lt;STRONG&gt;Extending Cons&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Invoking_Cons_">&lt;STRONG&gt;Invoking Cons&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Using_and_writing_dependency_s">&lt;STRONG&gt;Using and writing dependency scanners&lt;/STRONG&gt;</A>
-	<LI><A HREF="#B_Support_and_Suggestions_">&lt;STRONG&gt;Support and Suggestions&lt;/STRONG&gt;</A>
+	<LI><A HREF="#Cons_A_Software_Construction_Sy">Cons: A Software Construction System</A>
+	<LI><A HREF="#Introduction">Introduction</A>
+	<LI><A HREF="#Why_Cons_Why_not_Make_">Why Cons? Why not Make?</A>
+	<UL>
+
+		<LI><A HREF="#Build_complexity">Build complexity</A>
+		<LI><A HREF="#Build_reproducibility">Build reproducibility</A>
+		<LI><A HREF="#Variant_builds">Variant builds</A>
+		<LI><A HREF="#Repositories">Repositories</A>
+	</UL>
+
+	<LI><A HREF="#Keeping_it_simple">Keeping it simple</A>
+	<UL>
+
+		<LI><A HREF="#Perl_scripts">Perl scripts</A>
+		<LI><A HREF="#Hello_World_">Hello, World!</A>
+		<LI><A HREF="#Construction_environments">Construction environments</A>
+		<LI><A HREF="#Automatic_and_complete_dependenc">Automatic and complete dependency analysis</A>
+		<LI><A HREF="#Automatic_global_build_sequencin">Automatic global build sequencing</A>
+	</UL>
+
+	<LI><A HREF="#Building_large_trees_still_just">Building large trees-still just as simple</A>
+	<UL>
+
+		<LI><A HREF="#A_hierarchy_of_build_scripts">A hierarchy of build scripts</A>
+		<LI><A HREF="#The_Build_command">The Build command</A>
+		<LI><A HREF="#Relative_top_relative_and_abso">Relative, top-relative, and absolute file names</A>
+		<LI><A HREF="#Scope_of_variables">Scope of variables</A>
+		<LI><A HREF="#The_Export_command">The Export command</A>
+		<LI><A HREF="#The_Import_command">The Import command</A>
+		<LI><A HREF="#Build_script_evaluation_order">Build script evaluation order</A>
+	</UL>
+
+	<LI><A HREF="#A_Model_for_sharing_files">A Model for sharing files</A>
+	<UL>
+
+		<LI><A HREF="#Some_simple_conventions">Some simple conventions</A>
+		<LI><A HREF="#Clean_understandable_location_">Clean, understandable, location-independent scripts</A>
+	</UL>
+
+	<LI><A HREF="#Separating_source_and_build_tree">Separating source and build trees</A>
+	<UL>
+
+		<LI><A HREF="#Separating_build_and_source_dire">Separating build and source directories using the Link command</A>
+	</UL>
+
+	<LI><A HREF="#Variant_builds">Variant builds</A>
+	<UL>
+
+		<LI><A HREF="#Hello_World_for_baNaNa_and_peA">Hello, World! for baNaNa and peAcH OS's</A>
+		<LI><A HREF="#Variations_on_a_theme">Variations on a theme</A>
+	</UL>
+
+	<LI><A HREF="#Signatures">Signatures</A>
+	<UL>
+
+		<LI><A HREF="#MD5_cryptographic_signatures">MD5 cryptographic signatures</A>
+	</UL>
+
+	<LI><A HREF="#Code_Repositories">Code Repositories</A>
+	<UL>
+
+		<LI><A HREF="#Repository">Repository</A>
+		<LI><A HREF="#Finding_the_Construct_file_in_a_">Finding the Construct file in a Repository</A>
+		<LI><A HREF="#Repository_source_files">Repository source files</A>
+		<LI><A HREF="#Repository_derived_files">Repository derived files</A>
+		<LI><A HREF="#Local_copies_of_files">Local copies of files</A>
+		<LI><A HREF="#Repository_dependency_analysis">Repository dependency analysis</A>
+		<LI><A HREF="#Repository_List">Repository_List</A>
+		<LI><A HREF="#Repository_interaction_with_othe">Repository interaction with other Cons features</A>
+	</UL>
+
+	<LI><A HREF="#Default_targets">Default targets</A>
+	<LI><A HREF="#Selective_builds">Selective builds</A>
+	<UL>
+
+		<LI><A HREF="#Selective_targeting">Selective targeting</A>
+		<LI><A HREF="#No_special_targets">No ``special'' targets</A>
+	</UL>
+
+	<LI><A HREF="#Build_Pruning">Build Pruning</A>
+	<LI><A HREF="#Temporary_overrides">Temporary overrides</A>
+	<UL>
+
+		<LI><A HREF="#Overriding_environment_variables">Overriding environment variables</A>
+		<LI><A HREF="#The_Override_command">The Override command</A>
+	</UL>
+
+	<LI><A HREF="#More_on_construction_environment">More on construction environments</A>
+	<UL>
+
+		<LI><A HREF="#Default_construction_variables">Default construction variables</A>
+	</UL>
+
+	<LI><A HREF="#Default_construction_methods">Default construction methods</A>
+	<UL>
+
+		<LI><A HREF="#The_C_new_constructor">The &lt;CODE&gt;new&lt;/CODE&gt; constructor</A>
+		<LI><A HREF="#The_C_clone_method">The &lt;CODE&gt;clone&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_copy_method">The &lt;CODE&gt;copy&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Install_method">The &lt;CODE&gt;Install&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_InstallAs_method">The &lt;CODE&gt;InstallAs&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Precious_method">The &lt;CODE&gt;Precious&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Command_method">The &lt;CODE&gt;Command&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Objects_method">The &lt;CODE&gt;Objects&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Program_method">The &lt;CODE&gt;Program&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Library_method">The &lt;CODE&gt;Library&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Module_method">The &lt;CODE&gt;Module&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Depends_method">The &lt;CODE&gt;Depends&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Ignore_method">The &lt;CODE&gt;Ignore&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Salt_method">The &lt;CODE&gt;Salt&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_UseCache_method">The &lt;CODE&gt;UseCache&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_SourcePath_method">The &lt;CODE&gt;SourcePath&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_ConsPath_method">The &lt;CODE&gt;ConsPath&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_SplitPath_method">The &lt;CODE&gt;SplitPath&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_DirPath_method">The &lt;CODE&gt;DirPath&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_FilePath_method">The &lt;CODE&gt;FilePath&lt;/CODE&gt; method</A>
+		<LI><A HREF="#The_C_Help_method">The &lt;CODE&gt;Help&lt;/CODE&gt; method</A>
+	</UL>
+
+	<LI><A HREF="#Extending_Cons">Extending Cons</A>
+	<UL>
+
+		<LI><A HREF="#Overriding_construction_variable">Overriding construction variables</A>
+		<LI><A HREF="#Adding_new_methods">Adding new methods</A>
+		<LI><A HREF="#Overriding_methods">Overriding methods</A>
+	</UL>
+
+	<LI><A HREF="#Invoking_Cons">Invoking Cons</A>
+	<LI><A HREF="#Using_and_writing_dependency_sca">Using and writing dependency scanners</A>
+	<LI><A HREF="#Support_and_Suggestions">Support and Suggestions</A>
 </UL>
 <!-- INDEX END -->
 
@@ -51,40 +161,38 @@ by <STRONG>html2pod</STRONG>, thanks to Ulrich Pfiefer. Later revisions were cre
 
 <P>
 <HR>
-<H1><A NAME="B_Cons_A_Software_Construction_">&lt;STRONG&gt;Cons: A Software Construction System&lt;/STRONG&gt;</A></H1>
+<H1><A NAME="Cons_A_Software_Construction_Sy">Cons: A Software Construction System</A></H1>
 <P>
-by Bob Sidebotham <EM>rns@fore.com</EM>
+by Bob Sidebotham, et al. <EM>cons-discuss@gnu.org</EM>
 
 
-
-<P>
-A guide and reference for version 1.8-dev
 
 <P>
-Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
+A guide and reference for version 2.0
 
 <P>
-Permission to use, copy, modify and distribute this software and its
-documentation for any purpose and without fee is hereby granted, provided
-that the above copyright notice appear in all copies and that both that
-copyright notice and this permission notice appear in supporting
-documentation, and that the name of FORE Systems, Inc. (``FORE Systems'')
-not be used in advertising or publicity pertaining to distribution of the
-software without specific, written prior permission.
+Copyright (c) 1996-2000 Free Software Foundation, Inc.
 
 <P>
-FORE SYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
-INCLUDING ANY WARRANTIES REGARDING INTELLECTUAL PROPERTY RIGHTS AND ALL
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-IN NO EVENT SHALL FORE SYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
-DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
-TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.
+This program is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2 of the License, or (at your option)
+any later version.
+
+<P>
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+more details.
+
+<P>
+You should have received a copy of the GNU General Public License along
+with this program; see the file COPYING. If not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 <P>
 <HR>
-<H1><A NAME="B_Introduction_">&lt;STRONG&gt;Introduction&lt;/STRONG&gt;</A></H1>
+<H1><A NAME="Introduction">Introduction</A></H1>
 <P>
 <STRONG>Cons</STRONG> is a system for constructing, primarily, software, but is quite different
 from previous software construction systems. Cons was designed from the
@@ -116,14 +224,15 @@ document.
 
 <P>
 <HR>
-<H1><A NAME="B_Why_Cons_Why_not_Make_">&lt;STRONG&gt;Why Cons? Why not Make?&lt;/STRONG&gt;</A></H1>
+<H1><A NAME="Why_Cons_Why_not_Make_">Why Cons? Why not Make?</A></H1>
 <P>
 Cons is a <STRONG>make</STRONG> replacement. In the following paragraphs, we look at a few of the
 undesirable characteristics of make--and typical build environments based
 on make--that motivated the development of Cons.
 
-<DL>
-<DT><STRONG><A NAME="item_Build">Build complexity</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Build_complexity">Build complexity</A></H2>
 <P>
 Traditional make-based systems of any size tend to become quite complex.
 The original make utility and its derivatives have contributed to this
@@ -139,7 +248,9 @@ extended language. Often, builds are done in multiple passes in order to
 provide appropriate products from one directory to another directory. This
 represents a further increase in build complexity.
 
-<DT><STRONG>Build reproducibility </STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Build_reproducibility">Build reproducibility</A></H2>
 <P>
 The bane of all makes has always been the correct handling of dependencies.
 Most often, an attempt is made to do a reasonable job of dependencies
@@ -152,7 +263,9 @@ example, is rebuilt and then ``snapped'' into place, the timestamps on its
 newly created files may well be earlier than the last local build, since it
 was built before it became visible.
 
-<DT><STRONG><A NAME="item_Variant">Variant builds</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Variant_builds">Variant builds</A></H2>
 <P>
 Make provides only limited facilities for handling variant builds. With the
 proliferation of hardware platforms and the need for debuggable vs.
@@ -165,7 +278,9 @@ isn't used, it's also virtually impossible to guarantee at any given time
 which variant is present in the tree, without resorting to a complete
 rebuild.
 
-<DT><STRONG><A NAME="item_Repositories">Repositories</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Repositories">Repositories</A></H2>
 <P>
 Make provides only limited support for building software from code that
 exists in a central repository directory structure. The VPATH feature of
@@ -179,16 +294,20 @@ depend on the local file get rebuilt properly. This isn't possible with
 VPATH, without coding a lot of complex repository knowledge directly into
 the makefiles.
 
-<H1><A NAME="B_Keeping_it_simple_">&lt;STRONG&gt;Keeping it simple&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Keeping_it_simple">Keeping it simple</A></H1>
 <P>
 A few of the difficulties with make have been cited above. In this and
 subsequent sections, we shall introduce Cons and show how these issues are
 addressed.
 
-<DT><STRONG><A NAME="item_Perl">Perl scripts</A></STRONG><DD>
 <P>
-Cons is Perl-based. That is, Cons scripts--<CODE>Conscript</CODE> and <CODE>Construct</CODE>
-files, the equivalent to <CODE>makefiles</CODE>--are all written in Perl. This provides an immediate benefit: the language
+<HR>
+<H2><A NAME="Perl_scripts">Perl scripts</A></H2>
+<P>
+Cons is Perl-based. That is, Cons scripts--<EM>Conscript</EM> and <EM>Construct</EM>
+files, the equivalent to <EM>Makefile</EM> or <EM>makefile</EM>--are all written in Perl. This provides an immediate benefit: the language
 for writing scripts is a familiar one. Even if you don't happen to be a
 Perl programmer, it helps to know that Perl is basically just a simple
 declarative language, with a well-defined flow of control, and familiar
@@ -198,7 +317,9 @@ syntax introduced for Cons. The use of Perl as a scripting language
 simplifies the task of expressing the appropriate solution to the often
 complex requirements of a build.
 
-<DT><STRONG><A NAME="item_Hello">Hello, World!</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Hello_World_">Hello, World!</A></H2>
 <P>
 To ground the following discussion, here's how you could build the <STRONG>Hello,
 World!</STRONG> C application with Cons:
@@ -208,15 +329,16 @@ World!</STRONG> C application with Cons:
   Program $env 'hello', 'hello.c';
 </PRE>
 <P>
-If you install this script in a directory, naming the script <CODE>Construct,</CODE>
-and create the <CODE>hello.c</CODE> source file in the same directory, then you can type <CODE>cons hello</CODE> to build the application:
+If you install this script in a directory, naming the script <EM>Construct</EM>, and create the <EM>hello.c</EM> source file in the same directory, then you can type <CODE>cons hello</CODE> to build the application:
 
 <P>
 <PRE>  % cons hello
   cc -c hello.c -o hello.o
   cc -o hello hello.o
 </PRE>
-<DT><STRONG><A NAME="item_Construction">Construction environments</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Construction_environments">Construction environments</A></H2>
 <P>
 A key simplification of Cons is the idea of a <STRONG>construction environment</STRONG>. A construction environment is an <STRONG>object</STRONG> characterized by a set of key/value pairs and a set of <STRONG>methods. </STRONG>In order to tell Cons how to build something, you invoke the appropriate
 method via an appropriate construction environment. Consider the following
@@ -235,7 +357,7 @@ example:
 In this case, rather than using the default construction environment, as
 is, we have overridden the value of <CODE>CC</CODE> so that the GNU C Compiler equivalent is used, instead. Since this version
 of <STRONG>Hello, World!</STRONG> requires a library,
-<CODE>libworld.a</CODE>, we have specified that any program linked in this environment should be
+<EM>libworld.a</EM>, we have specified that any program linked in this environment should be
 linked with that library. If the library exists already, well and good, but
 if not, then we'll also have to include the statement:
 
@@ -254,14 +376,17 @@ Now if you type <CODE>cons hello</CODE>, the library will be built before the pr
   ranlib libworld.a
   gcc -o hello hello.o libworld.a
 </PRE>
-<DT><STRONG><A NAME="item_Automatic">Automatic and complete dependency analysis</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Automatic_and_complete_dependenc">Automatic and complete dependency analysis</A></H2>
 <P>
 With Cons, dependencies are handled automatically. Continuing the previous
-example, note that when we modify <CODE>world.c</CODE>, <CODE>world.o</CODE> is recompiled,
-<CODE>libworld.a</CODE> recreated, and <CODE>hello</CODE> relinked:
+example, note that when we modify <EM>world.c</EM>, <EM>world.o</EM> is recompiled,
+<EM>libworld.a</EM> recreated, and <EM>hello</EM> relinked:
 
 <P>
-<PRE>  % touch world.c
+<PRE>  % vi world.c
+    [EDIT]
   % cons hello
   gcc -c world.c -o world.o
   ar r libworld.a world.o
@@ -270,24 +395,25 @@ example, note that when we modify <CODE>world.c</CODE>, <CODE>world.o</CODE> is 
   gcc -o hello hello.o libworld.a
 </PRE>
 <P>
-This is a relatively simple example: Cons ``knows'' world.o depends upon
-<CODE>world.c</CODE>, because the dependency is explicitly set up by the <CODE>Library</CODE>
-method. It also knows that <CODE>libworld.a</CODE> depends upon <CODE>world.o</CODE> and that
-<CODE>hello</CODE> depends upon <CODE>libworld.a</CODE>, all for similar reasons.
+This is a relatively simple example: Cons ``knows'' <EM>world.o</EM> depends upon
+<EM>world.c</EM>, because the dependency is explicitly set up by the <CODE>Library</CODE>
+method. It also knows that <EM>libworld.a</EM> depends upon <EM>world.o</EM> and that
+<EM>hello</EM> depends upon <EM>libworld.a</EM>, all for similar reasons.
 
 <P>
-Now it turns out that <CODE>hello.c</CODE> also includes the interface definition file, <CODE>world.h</CODE>:
+Now it turns out that <EM>hello.c</EM> also includes the interface definition file, <EM>world.h</EM>:
 
 <P>
-<PRE>  % touch world.h
+<PRE>  % emacs world.h
+    [EDIT]
   % cons hello
   gcc -c hello.c -o hello.o
   gcc -o hello hello.o libworld.a
 </PRE>
 <P>
-How does Cons know that <CODE>hello.c</CODE> includes <CODE>world.h</CODE>, and that <CODE>hello.o</CODE>
+How does Cons know that <EM>hello.c</EM> includes <EM>world.h</EM>, and that <EM>hello.o</EM>
 must therefore be recompiled? For now, suffice it to say that when
-considering whether or not <CODE>hello.o</CODE> is up-to-date, Cons invokes a scanner for its dependency, <CODE>hello.c</CODE>. This scanner enumerates the files included by <CODE>hello.c</CODE> to come up with a list of further dependencies, beyond those made explicit
+considering whether or not <EM>hello.o</EM> is up-to-date, Cons invokes a scanner for its dependency, <EM>hello.c</EM>. This scanner enumerates the files included by <EM>hello.c</EM> to come up with a list of further dependencies, beyond those made explicit
 by the Cons script. This process is recursive: any files included by
 included files will also be scanned.
 
@@ -299,7 +425,9 @@ it before it decides that nothing has to be done (although not necessarily
 more time than make!). The good news is that Cons makes it very easy to
 intelligently subset your build, when you are working on localized changes.
 
-<DT><STRONG>Automatic global build sequencing</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Automatic_global_build_sequencin">Automatic global build sequencing</A></H2>
 <P>
 Because Cons does full and accurate dependency analysis, and does this
 globally, for the entire build, Cons is able to use this information to
@@ -310,16 +438,22 @@ builds. As a result, all of the complexity involved in making sure that a
 build is organized correctly--including multi-pass hierarchical builds--is
 eliminated. We'll discuss this further in the next sections.
 
-<H1><A NAME="B_Building_large_trees_still_ju">&lt;STRONG&gt;Building large trees--still just as simple&lt;/STRONG&gt;</A></H1>
-<DT><STRONG><A NAME="item_A">A hierarchy of build scripts</A></STRONG><DD>
+<P>
+<HR>
+<H1><A NAME="Building_large_trees_still_just">Building large trees--still just as simple</A></H1>
+<P>
+<HR>
+<H2><A NAME="A_hierarchy_of_build_scripts">A hierarchy of build scripts</A></H2>
 <P>
 A larger build, in Cons, is organized by creating a hierarchy of <STRONG>build
-scripts</STRONG>. At the top of the tree is a script called <CODE>Construct</CODE>. The rest of the scripts, by convention, are each called <CODE>Conscript</CODE>. These scripts are connected together, very simply, by the <A HREF="#item_Build">Build</A>, <CODE>Export</CODE>, and
+scripts</STRONG>. At the top of the tree is a script called <EM>Construct</EM>. The rest of the scripts, by convention, are each called <EM>Conscript</EM>. These scripts are connected together, very simply, by the <CODE>Build</CODE>, <CODE>Export</CODE>, and
 <CODE>Import</CODE> commands.
 
-<DT><STRONG><A NAME="item_The">The Build command</A></STRONG><DD>
 <P>
-The <A HREF="#item_Build">Build</A> command takes a list of <CODE>Conscript</CODE> file names, and arranges for them to be included in the build. For example:
+<HR>
+<H2><A NAME="The_Build_command">The Build command</A></H2>
+<P>
+The <CODE>Build</CODE> command takes a list of <EM>Conscript</EM> file names, and arranges for them to be included in the build. For example:
 
 <P>
 <PRE>  Build qw(
@@ -331,12 +465,12 @@ The <A HREF="#item_Build">Build</A> command takes a list of <CODE>Conscript</COD
 </PRE>
 <P>
 This is a simple two-level hierarchy of build scripts: all the subsidiary
-<CODE>Conscript</CODE> files are mentioned in the top-level <CODE>Construct</CODE> file. Notice that not all directories in the tree necessarily have build
+<EM>Conscript</EM> files are mentioned in the top-level <EM>Construct</EM> file. Notice that not all directories in the tree necessarily have build
 scripts associated with them.
 
 <P>
 This could also be written as a multi-level script. For example, the
-<CODE>Construct</CODE> file might contain this command:
+<EM>Construct</EM> file might contain this command:
 
 <P>
 <PRE>  Build qw(
@@ -346,7 +480,7 @@ This could also be written as a multi-level script. For example, the
   );
 </PRE>
 <P>
-and the <CODE>Conscript</CODE> file in the <CODE>drivers</CODE> directory might contain this:
+and the <EM>Conscript</EM> file in the <EM>drivers</EM> directory might contain this:
 
 <P>
 <PRE>  Build qw(
@@ -362,21 +496,25 @@ component that needs to be incorporated into a build tree, for example,
 might hook into the build tree in one place, but define its own
 construction hierarchy.
 
-<DT><STRONG><A NAME="item_Relative">Relative, top-relative, and absolute file names</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Relative_top_relative_and_abso">Relative, top-relative, and absolute file names</A></H2>
 <P>
 You may have noticed that the file names specified to the Build command are
 relative to the location of the script it is invoked from. This is
 generally true for other filename arguments to other commands, too,
 although we might as well mention here that if you begin a file name with a
 hash mark, ``#'', then that file is interpreted relative to the top-level
-directory (where the Construct file resides). And, not surprisingly, if you
-begin it with ``/'', then it is considered to be an absolute pathname. This
-is true even on systems which use a back slash rather than a forward slash
-to name absolute paths.
+directory (where the
+<EM>Construct</EM> file resides). And, not surprisingly, if you begin it with ``/'', then it
+is considered to be an absolute pathname. This is true even on systems
+which use a back slash rather than a forward slash to name absolute paths.
 
-<DT><STRONG><A NAME="item_Scope">Scope of variables</A></STRONG><DD>
 <P>
-Each <CODE>Conscript</CODE> file, and also the top-level <CODE>Construct</CODE> file, begins life in a separate Perl package. Except for the <CODE>Construct</CODE> file, which gets some of the command line arguments, the symbol table for
+<HR>
+<H2><A NAME="Scope_of_variables">Scope of variables</A></H2>
+<P>
+Each <EM>Conscript</EM> file, and also the top-level <EM>Construct</EM> file, begins life in a separate Perl package. Except for the <EM>Construct</EM> file, which gets some of the command line arguments, the symbol table for
 each script is empty. All of the variables that are set, therefore, are set
 by the script itself--not by some external script. Variables can be
 explicitly <STRONG>imported</STRONG>
@@ -385,7 +523,9 @@ by a script from its parent script. To import a variable, it must have been
 therefore possible to determine, from looking at a single script, exactly
 where each variable in that script is set.
 
-<DT><STRONG>The Export command</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_Export_command">The Export command</A></H2>
 <P>
 The <CODE>Export</CODE> command is used as in the following example:
 
@@ -397,9 +537,7 @@ The <CODE>Export</CODE> command is used as in the following example:
   Build qw( util/Conscript );
 </PRE>
 <P>
-The values of the simple variables mentioned in the <CODE>Export</CODE> list will be squirreled away by any subsequent <A HREF="#item_Build">Build</A> commands. The <CODE>Export</CODE> command will only export Perl<STRONG><PRE> scalar
-</PRE>
-</STRONG> variables, that is, variables whose name begins with <CODE>$</CODE>. Other variables, objects, etc. can be exported by reference--but all
+The values of the simple variables mentioned in the <CODE>Export</CODE> list will be squirreled away by any subsequent <CODE>Build</CODE> commands. The <CODE>Export</CODE> command will only export Perl <STRONG>scalar</STRONG> variables, that is, variables whose name begins with <CODE>$</CODE>. Other variables, objects, etc. can be exported by reference--but all
 scripts will refer to the same object, and this object should be considered
 to be read-only by the subsidiary scripts and by the original exporting
 script. It's acceptable, however, to assign a new value to the exported
@@ -416,10 +554,12 @@ sequence, for example, is OK:
 <P>
 It doesn't matter whether the variable is set before or after the <CODE>Export</CODE>
 command. The important thing is the value of the variable at the time the
-<A HREF="#item_Build">Build</A> command is executed. This is what gets squirreled away. Any subsequent <CODE>Export</CODE> commands, by the way, invalidate the first: you must mention all the
+<CODE>Build</CODE> command is executed. This is what gets squirreled away. Any subsequent <CODE>Export</CODE> commands, by the way, invalidate the first: you must mention all the
 variables you wish to export on each <CODE>Export</CODE> command.
 
-<DT><STRONG>The Import command</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_Import_command">The Import command</A></H2>
 <P>
 Variables exported by the <CODE>Export</CODE> command can be imported into subsidiary scripts by the <CODE>Import</CODE> command. The subsidiary script always imports variables directly from the
 superior script. Consider this example:
@@ -451,15 +591,17 @@ will supply both <CODE>$ENV</CODE> and <CODE>$INCLUDE</CODE> to the subsidiary f
 </PRE>
 <P>
 Needless to say, the variables may be modified locally before invoking
-<A HREF="#item_Build">Build</A> on the subsidiary script.
+<CODE>Build</CODE> on the subsidiary script.
 
-<DT><STRONG>Build script evaluation order</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Build_script_evaluation_order">Build script evaluation order</A></H2>
 <P>
 The only constraint on the ordering of build scripts is that superior
 scripts are evaluated before their inferior scripts. The top-level
-<CODE>Construct</CODE> file, for instance, is evaluated first, followed by any inferior scripts.
+<EM>Construct</EM> file, for instance, is evaluated first, followed by any inferior scripts.
 This is all you really need to know about the evaluation order, since order
-is generally irrelevant. Consider the following <A HREF="#item_Build">Build</A>
+is generally irrelevant. Consider the following <CODE>Build</CODE>
 command:
 
 <P>
@@ -475,8 +617,12 @@ We've chosen to put the script names in alphabetical order, simply because
 that's the most convenient for maintenance purposes. Changing the order
 will make no difference to the build.
 
-<H1><A NAME="B_A_Model_for_sharing_files_">&lt;STRONG&gt;A Model for sharing files&lt;/STRONG&gt;</A></H1>
-<DT><STRONG><A NAME="item_Some">Some simple conventions</A></STRONG><DD>
+<P>
+<HR>
+<H1><A NAME="A_Model_for_sharing_files">A Model for sharing files</A></H1>
+<P>
+<HR>
+<H2><A NAME="Some_simple_conventions">Some simple conventions</A></H2>
 <P>
 In any complex software system, a method for sharing build products needs
 to be established. We propose a simple set of conventions which are trivial
@@ -485,13 +631,13 @@ to implement with Cons, but very effective.
 <P>
 The basic rule is to require that all build products which need to be
 shared between directories are shared via an intermediate directory. We
-have typically called this <CODE>export</CODE>, and, in a C environment, provided conventional sub-directories of this
-directory, such as <CODE>include</CODE>, <CODE>lib</CODE>,
-<CODE>bin</CODE>, etc.
+have typically called this <EM>export</EM>, and, in a C environment, provided conventional sub-directories of this
+directory, such as <EM>include</EM>, <EM>lib</EM>,
+<EM>bin</EM>, etc.
 
 <P>
-These directories are defined by the top-level <CODE>Construct</CODE> file. A simple
-<CODE>Construct</CODE> file for a <STRONG>Hello, World!</STRONG> application, organized using multiple directories, might look like this:
+These directories are defined by the top-level <EM>Construct</EM> file. A simple
+<EM>Construct</EM> file for a <STRONG>Hello, World!</STRONG> application, organized using multiple directories, might look like this:
 
 <P>
 <PRE>  # Construct file for Hello, World!
@@ -524,7 +670,7 @@ These directories are defined by the top-level <CODE>Construct</CODE> file. A si
   );
 </PRE>
 <P>
-The <CODE>world</CODE> directory's <CODE>Conscript</CODE> file looks like this:
+The <EM>world</EM> directory's <EM>Conscript</EM> file looks like this:
 
 <P>
 <PRE>  # Conscript file for directory world
@@ -540,7 +686,7 @@ The <CODE>world</CODE> directory's <CODE>Conscript</CODE> file looks like this:
   Library $CONS 'libworld.a', 'world.c';
 </PRE>
 <P>
-and the <CODE>hello</CODE> directory's <CODE>Conscript</CODE> file looks like this:
+and the <EM>hello</EM> directory's <EM>Conscript</EM> file looks like this:
 
 <P>
 <PRE>  # Conscript file for directory hello
@@ -558,7 +704,7 @@ and the <CODE>hello</CODE> directory's <CODE>Conscript</CODE> file looks like th
 To construct a <STRONG>Hello, World!</STRONG> program with this directory structure, go to the top-level directory, and
 invoke <CODE>cons</CODE> with the appropriate arguments. In the following example, we tell Cons to
 build the directory
-<CODE>export</CODE>. To build a directory, Cons recursively builds all known products within
+<EM>export</EM>. To build a directory, Cons recursively builds all known products within
 that directory (only if they need rebuilding, of course). If any of those
 products depend upon other products in other directories, then those will
 be built, too.
@@ -575,30 +721,36 @@ be built, too.
   cc -o hello/hello hello/hello.o -Lexport/lib -lworld
   Install hello/hello as export/bin/hello
 </PRE>
-<DT><STRONG><A NAME="item_Clean">Clean, understandable, location-independent scripts</A></STRONG><DD>
 <P>
-You'll note that the two <CODE>Conscript</CODE> files are very clean and to-the-point. They simply specify products of the
+<HR>
+<H2><A NAME="Clean_understandable_location_">Clean, understandable, location-independent scripts</A></H2>
+<P>
+You'll note that the two <EM>Conscript</EM> files are very clean and to-the-point. They simply specify products of the
 directory and how to build those products. The build instructions are
 minimal: they specify which construction environment to use, the name of
 the product, and the name of the inputs. Note also that the scripts are
 location-independent: if you wish to reorganize your source tree, you are
-free to do so: you only have to change the <CODE>Construct</CODE> file (in this example), to specify the new locations of the <CODE>Conscript</CODE> files. The use of an export tree makes this goal easy.
+free to do so: you only have to change the <EM>Construct</EM> file (in this example), to specify the new locations of the <EM>Conscript</EM> files. The use of an export tree makes this goal easy.
 
 <P>
-Note, too, how Cons takes care of little details for you. All the <CODE>export</CODE>
+Note, too, how Cons takes care of little details for you. All the <EM>export</EM>
 directories, for example, were made automatically. And the installed files
 were really hard-linked into the respective export directories, to save
 space and time. This attention to detail saves considerable work, and makes
 it even easier to produce simple, maintainable scripts.
 
-<H1><A NAME="B_Separating_source_and_build_tr">&lt;STRONG&gt;Separating source and build trees&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Separating_source_and_build_tree">Separating source and build trees</A></H1>
 <P>
 It's often desirable to keep any derived files from the build completely
 separate from the source files. This makes it much easier to keep track of
 just what is a source file, and also makes it simpler to handle <STRONG>variant</STRONG>
 builds, especially if you want the variant builds to co-exist.
 
-<DT><STRONG><A NAME="item_Separating">Separating build and source directories using the Link command</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Separating_build_and_source_dire">Separating build and source directories using the Link command</A></H2>
 <P>
 Cons provides a simple mechanism that handles all of these requirements.
 The
@@ -609,7 +761,7 @@ The
 </PRE>
 <P>
 The specified directories are ``linked'' to the specified source directory.
-Let's suppose that you setup a source directory, <CODE>src</CODE>, with the sub-directories <CODE>world</CODE> and <CODE>hello</CODE> below it, as in the previous example. You could then substitute for the
+Let's suppose that you setup a source directory, <EM>src</EM>, with the sub-directories <EM>world</EM> and <EM>hello</EM> below it, as in the previous example. You could then substitute for the
 original build lines the following:
 
 <P>
@@ -619,7 +771,7 @@ original build lines the following:
   );
 </PRE>
 <P>
-Notice that you treat the <CODE>Conscript</CODE> file as if it existed in the build directory. Now if you type the same
+Notice that you treat the <EM>Conscript</EM> file as if it existed in the build directory. Now if you type the same
 command as before, you will get the following results:
 
 <P>
@@ -637,9 +789,9 @@ command as before, you will get the following results:
 <P>
 Again, Cons has taken care of the details for you. In particular, you will
 notice that all the builds are done using source files and object files
-from the build directory. For example, <CODE>build/world/world.o</CODE> is compiled from
-<CODE>build/world/world.c</CODE>, and <CODE>export/include/world.h</CODE> is installed from
-<CODE>build/world/world.h</CODE>. This is accomplished on most systems by the simple expedient of ``hard''
+from the build directory. For example, <EM>build/world/world.o</EM> is compiled from
+<EM>build/world/world.c</EM>, and <EM>export/include/world.h</EM> is installed from
+<EM>build/world/world.h</EM>. This is accomplished on most systems by the simple expedient of ``hard''
 linking the required files from each source directory into the appropriate
 build directory.
 
@@ -651,16 +803,20 @@ case, any hard link will be lost. Cons will detect this condition the next
 time the source file is needed, and will relink it appropriately.
 
 <P>
-You'll also notice, by the way, that <STRONG>no</STRONG> changes were required to the underlying <CODE>Conscript</CODE> files. And we can go further, as we shall see in the next section.
+You'll also notice, by the way, that <STRONG>no</STRONG> changes were required to the underlying <EM>Conscript</EM> files. And we can go further, as we shall see in the next section.
 
-<H1><A NAME="B_Variant_builds_">&lt;STRONG&gt;Variant builds&lt;/STRONG&gt;</A></H1>
-<DT><STRONG>Hello, World! for baNaNa and peAcH OS's</STRONG><DD>
+<P>
+<HR>
+<H1><A NAME="Variant_builds">Variant builds</A></H1>
+<P>
+<HR>
+<H2><A NAME="Hello_World_for_baNaNa_and_peA">Hello, World! for baNaNa and peAcH OS's</A></H2>
 <P>
 Variant builds require just another simple extension. Let's take as an
 example a requirement to allow builds for both the baNaNa and peAcH
 operating systems. In this case, we are using a distributed file system,
 such as NFS to access the particular system, and only one or the other of
-the systems has to be compiled for any given invocation of <CODE>cons</CODE>. Here's one way we could set up the <CODE>Construct</CODE> file for our <STRONG>Hello, World!</STRONG>
+the systems has to be compiled for any given invocation of <CODE>cons</CODE>. Here's one way we could set up the <EM>Construct</EM> file for our <STRONG>Hello, World!</STRONG>
 application:
 
 <P>
@@ -722,12 +878,14 @@ application for that platform:
   cc -o build/peach/hello/hello build/peach/hello/hello.o -Lexport/peach/lib -lworld
   Install build/peach/hello/hello as export/peach/bin/hello
 </PRE>
-<DT><STRONG><A NAME="item_Variations">Variations on a theme</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Variations_on_a_theme">Variations on a theme</A></H2>
 <P>
 Other variations of this model are possible. For example, you might decide
 that you want to separate out your include files into platform dependent
 and platform independent files. In this case, you'd have to define an
-alternative to <CODE>$INCLUDE</CODE> for platform-dependent files. Most <CODE>Conscript</CODE>
+alternative to <CODE>$INCLUDE</CODE> for platform-dependent files. Most <EM>Conscript</EM>
 files, generating purely platform-independent include files, would not have
 to change.
 
@@ -741,12 +899,16 @@ these different types of systems, but, as we'll see in the next section,
 it's not <STRONG>essential</STRONG> to do this, since Cons is pretty smart about rebuilding things when you
 change options.
 
-<H1><A NAME="B_Signatures_">&lt;STRONG&gt;Signatures&lt;/STRONG&gt;</A></H1>
-<DT><STRONG><A NAME="item_MD5">MD5 cryptographic signatures</A></STRONG><DD>
+<P>
+<HR>
+<H1><A NAME="Signatures">Signatures</A></H1>
+<P>
+<HR>
+<H2><A NAME="MD5_cryptographic_signatures">MD5 cryptographic signatures</A></H2>
 <P>
 Whenever Cons creates a derived file, it stores a <STRONG>signature</STRONG> for that file. The signature is stored in a separate file, one per
-directory. After the previous example was compiled, the <CODE>.consign</CODE> file in the
-<CODE>build/peach/world</CODE> directory looked like this:
+directory. After the previous example was compiled, the <EM>.consign</EM> file in the
+<EM>build/peach/world</EM> directory looked like this:
 
 <P>
 <PRE>  world.o:834179303 23844c0b102ecdc0b4548d1cd1cbd8c6
@@ -756,19 +918,20 @@ directory. After the previous example was compiled, the <CODE>.consign</CODE> fi
 The first number is a timestamp--for a UNIX systems, this is typically the
 number of seconds since January 1st, 1970. The second value is an MD5
 checksum. The <STRONG>Message Digest Algorithm</STRONG> is an algorithm that, given an input string, computes a strong
-cryptographic signature for that string. The MD5 checksum stored in the <CODE>.consign</CODE> file is, in effect, a digest of all the dependency information for the
-specified file. So, for example, for the file <CODE>world.o</CODE>, this includes at least the file <CODE>world.c</CODE>, and also any header files that Cons knows about that are included,
-directly or indirectly by <CODE>world.c</CODE>. Not only that, but the actual command line that was used to generate <CODE>world.o</CODE> is also fed into the computation of the signature. Similarly, <CODE>libworld.a</CODE> gets a signature which ``includes'' all the signatures of its constituents
+cryptographic signature for that string. The MD5 checksum stored in the <EM>.consign</EM> file is, in effect, a digest of all the dependency information for the
+specified file. So, for example, for the
+<EM>world.o</EM> file, this includes at least the <EM>world.c</EM> file, and also any header files that Cons knows about that are included,
+directly or indirectly by <EM>world.c</EM>. Not only that, but the actual command line that was used to generate <EM>world.o</EM> is also fed into the computation of the signature. Similarly, <EM>libworld.a</EM> gets a signature which ``includes'' all the signatures of its constituents
 (and hence, transitively, the signatures of <STRONG>their</STRONG> constituents), as well as the command line that created the file.
 
 <P>
 The signature of a non-derived file is computed, by default, by taking the
 current modification time of the file and the file's entry name (unless
-there happens to be a current <CODE>.consign</CODE> entry for that file, in which case that signature is used).
+there happens to be a current <EM>.consign</EM> entry for that file, in which case that signature is used).
 
 <P>
 Notice that there is no need for a derived file to depend upon any
-particular <CODE>Construct</CODE> or <CODE>Conscript</CODE> file--if changes to these files affect the file in question, then this will
+particular <EM>Construct</EM> or <EM>Conscript</EM> file--if changes to these files affect the file in question, then this will
 be automatically reflected in its signature, since relevant parts of the
 command line are included in the signature. Unrelated changes will have no
 effect.
@@ -776,9 +939,9 @@ effect.
 <P>
 When Cons considers whether to derive a particular file, then, it first
 computes the expected signature of the file. It then compares the file's
-last modification time with the time recorded in the <CODE>.consign</CODE> entry, if one exists. If these times match, then the signature stored in
+last modification time with the time recorded in the <EM>.consign</EM> entry, if one exists. If these times match, then the signature stored in
 the
-<CODE>.consign</CODE> file is considered to be accurate. If the file's previous signature does
+<EM>.consign</EM> file is considered to be accurate. If the file's previous signature does
 not match the new, expected signature, then the file must be rederived.
 
 <P>
@@ -818,7 +981,9 @@ Notice how Cons recompiles at the appropriate times:
   cc -c hello.c -o hello.o
   cc -o hello hello.o
 </PRE>
-<H1><A NAME="B_Code_Repositories_">&lt;STRONG&gt;Code Repositories&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Code_Repositories">Code Repositories</A></H1>
 <P>
 Many software development organizations will have one or more central
 repository directory trees containing the current source code for one or
@@ -827,15 +992,17 @@ executables. In order to reduce unnecessary recompilation, it is useful to
 use files from the repository to build development software--assuming, of
 course, that no newer dependency file exists in the local build tree.
 
-<DT><STRONG><A NAME="item_Repository">Repository</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Repository">Repository</A></H2>
 <P>
 Cons provides a mechanism to specify a list of code repositories that will
 be searched, in-order, for source files and derived files not found in the
 local build directory tree.
 
 <P>
-The following lines in a <CODE>Construct</CODE> file will instruct Cons to look first under the <CODE>/usr/experiment/repository</CODE> directory and then under the
-<CODE>/usr/product/repository</CODE> directory:
+The following lines in a <EM>Construct</EM> file will instruct Cons to look first under the <EM>/usr/experiment/repository</EM> directory and then under the
+<EM>/usr/product/repository</EM> directory:
 
 <P>
 <PRE>  Repository qw (
@@ -855,24 +1022,28 @@ Cons maintains one global list of repositories directories. Cons will
 eliminate the current directory, and any non-existent directories, from the
 list.
 
-<DT><STRONG><A NAME="item_Finding">Finding the Construct file in a Repository</A></STRONG><DD>
 <P>
-Cons will also search for <CODE>Construct</CODE> and <CODE>Conscript</CODE> files in the repository tree or trees. This leads to a chicken-and-egg
-situation, though: how do you look in a repository tree for a <CODE>Construct</CODE> file if the
-<CODE>Construct</CODE> file tells you where the repository is? To get around this, repositories
+<HR>
+<H2><A NAME="Finding_the_Construct_file_in_a_">Finding the Construct file in a Repository</A></H2>
+<P>
+Cons will also search for <EM>Construct</EM> and <EM>Conscript</EM> files in the repository tree or trees. This leads to a chicken-and-egg
+situation, though: how do you look in a repository tree for a <EM>Construct</EM> file if the
+<EM>Construct</EM> file tells you where the repository is? To get around this, repositories
 may be specified via <CODE>-R</CODE> options on the command line:
 
 <P>
 <PRE>  % cons -R /usr/experiment/repository -R /usr/product/repository .
 </PRE>
 <P>
-Any repository directories specified in the <CODE>Construct</CODE> or <CODE>Conscript</CODE>
+Any repository directories specified in the <EM>Construct</EM> or <EM>Conscript</EM>
 files will be appended to the repository directories specified by
 command-line <CODE>-R</CODE> options.
 
-<DT><STRONG>Repository source files</STRONG><DD>
 <P>
-If the source code (include the <CODE>Conscript</CODE> file) for the library version of the <EM>Hello, World!</EM> C application is in a repository (with no derived files), Cons will use the
+<HR>
+<H2><A NAME="Repository_source_files">Repository source files</A></H2>
+<P>
+If the source code (include the <EM>Conscript</EM> file) for the library version of the <EM>Hello, World!</EM> C application is in a repository (with no derived files), Cons will use the
 repository source files to create the local object files and executable
 file:
 
@@ -890,7 +1061,8 @@ Creating a local source file will cause Cons to rebuild the appropriate
 derived file or files:
 
 <P>
-<PRE>  % touch world.c
+<PRE>  % pico world.c
+    [EDIT]
   % cons -R /usr/src_only/repository hello
   gcc -c world.c -o world.o
   ar r libworld.a world.o
@@ -903,21 +1075,23 @@ And removing the local source file will cause Cons to revert back to
 building the derived files from the repository source:
 
 <P>
-<PRE>  % touch -R /usr/src_only/repository hello world.c
-  % cons hello
+<PRE>  % rm world.c
+  % cons -R /usr/src_only/repository hello
   gcc -c /usr/src_only/world.c/repository -o world.o
   ar r libworld.a world.o
   ar: creating libworld.a
   ranlib libworld.a
   gcc -o hello hello.o libworld.a
 </PRE>
-<DT><STRONG>Repository derived files</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Repository_derived_files">Repository derived files</A></H2>
 <P>
 If a repository tree contains derived files (usually object files,
 libraries, or executables), Cons will perform its normal signature
 calculation to decide whether the repository file is up-to-date or a
 derived file must be built locally. This means that, in order to ensure
-correct signature calculation, a repository tree must also contain the <CODE>.consign</CODE>
+correct signature calculation, a repository tree must also contain the <EM>.consign</EM>
 files that were created by Cons when generating the derived files.
 
 <P>
@@ -936,28 +1110,29 @@ result to the repository):
   gcc -o hello hello.o libworld.a
 </PRE>
 <P>
-(This is safe even if the <CODE>Construct</CODE> file lists the <CODE>/usr/all/repository</CODE>
-directory in a <A HREF="#item_Repository">Repository</A> command because Cons will remove the current directory from the repository
+(This is safe even if the <EM>Construct</EM> file lists the <EM>/usr/all/repository</EM>
+directory in a <CODE>Repository</CODE> command because Cons will remove the current directory from the repository
 list.)
 
 <P>
-Now if we want to build a copy of the application with our own <CODE>hello.c</CODE>
+Now if we want to build a copy of the application with our own <EM>hello.c</EM>
 file, we only need to create the one necessary source file, and use the
 <CODE>-R</CODE> option to have Cons use other files from the repository:
 
 <P>
 <PRE>  % mkdir $HOME/build1
   % cd $HOME/build1
-  % touch hello.c
+  % ed hello.c
+    [EDIT]
   % cons -R /usr/all/repository hello
   gcc -c hello.c -o hello.o
   gcc -o hello hello.o /usr/all/repository/libworld.a
 </PRE>
 <P>
-Notice that Cons has not bothered to recreate a local <CODE>libworld.a</CODE> library (or recompile the <CODE>world.o</CODE> module), but instead uses the already-compiled version from the repository.
+Notice that Cons has not bothered to recreate a local <EM>libworld.a</EM> library (or recompile the <EM>world.o</EM> module), but instead uses the already-compiled version from the repository.
 
 <P>
-Because the MD5 signatures that Cons puts in the <CODE>.consign</CODE> file contain timestamps for the derived files, the signature timestamps
+Because the MD5 signatures that Cons puts in the <EM>.consign</EM> file contain timestamps for the derived files, the signature timestamps
 must match the file timestamps for a signature to be considered valid.
 
 <P>
@@ -973,9 +1148,11 @@ behavior may be altered by specifying:
 This tells Cons to ignore timestamps when deciding whether a signature is
 valid. (Note that avoiding this sanity check means there must be proper
 control over the repository tree to ensure that the derived files cannot be
-modified without updating the <CODE>.consign</CODE> signature.)
+modified without updating the <EM>.consign</EM> signature.)
 
-<DT><STRONG><A NAME="item_Local">Local copies of files</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Local_copies_of_files">Local copies of files</A></H2>
 <P>
 If the repository tree contains the complete results of a build, and we try
 to build from the repository without any files in our local tree, something
@@ -988,17 +1165,17 @@ moderately surprising happens:
   cons: &quot;hello&quot; is up-to-date.
 </PRE>
 <P>
-Why does Cons say that the <CODE>hello</CODE> program is up-to-date when there is no
-<CODE>hello</CODE> program in the local build directory? Because the repository (not the local
-directory) contains the up-to-date <CODE>hello</CODE> program, and Cons correctly determines that nothing needs to be done to
+Why does Cons say that the <EM>hello</EM> program is up-to-date when there is no
+<EM>hello</EM> program in the local build directory? Because the repository (not the local
+directory) contains the up-to-date <EM>hello</EM> program, and Cons correctly determines that nothing needs to be done to
 rebuild this up-to-date copy of the file.
 
 <P>
 There are, however, many times in which it is appropriate to ensure that a
 local copy of a file always exists. A packaging or testing script, for
-example, may assume that certain generated files exist locally Instead of
+example, may assume that certain generated files exist locally. Instead of
 making these subsidiary scripts aware of the repository directory, the
-<A HREF="#item_Local">Local</A> command may be added to a <CODE>Construct</CODE> or <CODE>Conscript</CODE> file to specify that a certain file or files must appear in the local build
+<CODE>Local</CODE> command may be added to a <EM>Construct</EM> or <EM>Conscript</EM> file to specify that a certain file or files must appear in the local build
 directory:
 
 <P>
@@ -1017,12 +1194,12 @@ program from the repository copy (telling you that it is doing so):
 </PRE>
 <P>
 Notice that, because the act of making the local copy is not considered a
-``build'' of the <CODE>hello</CODE> file, Cons still reports that it is up-to-date.
+``build'' of the <EM>hello</EM> file, Cons still reports that it is up-to-date.
 
 <P>
 Creating local copies is most useful for files that are being installed
 into an intermediate directory (for sharing with other directories) via the
-<CODE>Install</CODE> command. Accompanying the <CODE>Install</CODE> command for a file with a companion <A HREF="#item_Local">Local</A> command is so common that Cons provides a
+<CODE>Install</CODE> command. Accompanying the <CODE>Install</CODE> command for a file with a companion <CODE>Local</CODE> command is so common that Cons provides a
 <CODE>Install_Local</CODE> command as a convenient way to do both:
 
 <P>
@@ -1036,16 +1213,18 @@ is exactly equivalent to:
   Local '#export/hello';
 </PRE>
 <P>
-Both the <A HREF="#item_Local">Local</A> and <CODE>Install_Local</CODE> commands update the local <CODE>.consign</CODE>
+Both the <CODE>Local</CODE> and <CODE>Install_Local</CODE> commands update the local <EM>.consign</EM>
 file with the appropriate file signatures, so that future builds are
 performed correctly.
 
-<DT><STRONG>Repository dependency analysis</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Repository_dependency_analysis">Repository dependency analysis</A></H2>
 <P>
 Due to its built-in scanning, Cons will search the specified repository
-trees for included <CODE>.h</CODE> files. Unless the compiler also knows about the repository trees, though,
-it will be unable to find <CODE>.h</CODE> files that only exist in a repository. If, for example, the <CODE>hello.c</CODE> file includes the
-<CODE>hello.h</CODE> file in its current directory:
+trees for included <EM>.h</EM> files. Unless the compiler also knows about the repository trees, though,
+it will be unable to find <EM>.h</EM> files that only exist in a repository. If, for example, the <EM>hello.c</EM> file includes the
+<EM>hello.h</EM> file in its current directory:
 
 <P>
 <PRE>  % cons -R /usr/all/repository hello
@@ -1062,7 +1241,7 @@ appropriate <CODE>-I</CODE> flags to the compilation commands. This means that t
 <CODE>CPPPATH</CODE> variable in the construct environment must explicitly specify all
 subdirectories which are to be searched for included files, including the
 current directory. Consequently, we can fix the above example by changing
-the environment creation in the <CODE>Construct</CODE> file as follows:
+the environment creation in the <EM>Construct</EM> file as follows:
 
 <P>
 <PRE>  $env = new cons(
@@ -1084,7 +1263,7 @@ The order of the <CODE>-I</CODE> flags replicates, for the C preprocessor, the s
 search path that Cons uses for its own dependency analysis. If there are
 multiple repositories and multiple <CODE>CPPPATH</CODE>
 directories, Cons will append the repository directories to the beginning
-of each <CODE>CPPPATH</CODE> directory, rapidly multiplying the number of <CODE>-I</CODE> flags. As an extreme example, a <CODE>Construct</CODE> file containing:
+of each <CODE>CPPPATH</CODE> directory, rapidly multiplying the number of <CODE>-I</CODE> flags. As an extreme example, a <EM>Construct</EM> file containing:
 
 <P>
 <PRE>  Repository qw(
@@ -1101,7 +1280,7 @@ of each <CODE>CPPPATH</CODE> directory, rapidly multiplying the number of <CODE>
 Would yield a compilation command of:
 
 <P>
-<PRE>        cc -Ia -I/u1/a -I/u2/a -Ib -I/u1/b -I/u2/b -Ic -I/u1/c -I/u2/c -c hello.c -o hello.o
+<PRE>  cc -Ia -I/u1/a -I/u2/a -Ib -I/u1/b -I/u2/b -Ic -I/u1/c -I/u2/c -c hello.c -o hello.o
 </PRE>
 <P>
 Because Cons relies on the compiler's <CODE>-I</CODE> flags to communicate the order in which repository directories must be
@@ -1124,9 +1303,11 @@ Consequently, when using repository trees in Cons,
 <P>
 <PRE>  #include &lt;file.h&gt;     /* USE ANGLE-BRACKETS INSTEAD */
 </PRE>
-<DT><STRONG><A NAME="item_Repository_List">Repository_List</A></STRONG><DD>
 <P>
-Cons provides a <A HREF="#item_Repository_List">Repository_List</A> command to return a list of all repository directories in their current
+<HR>
+<H2><A NAME="Repository_List">Repository_List</A></H2>
+<P>
+Cons provides a <CODE>Repository_List</CODE> command to return a list of all repository directories in their current
 search order. This can be used for debugging, or to do more complex Perl
 stuff:
 
@@ -1134,7 +1315,9 @@ stuff:
 <PRE>  @list = Repository_List;
   print join(' ', @list), &quot;\n&quot;;
 </PRE>
-<DT><STRONG>Repository interaction with other Cons features</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Repository_interaction_with_othe">Repository interaction with other Cons features</A></H2>
 <P>
 Cons' handling of repository trees interacts correctly with other Cons
 features--which is to say, it generally does what you would expect.
@@ -1145,7 +1328,9 @@ with the 'Link' command. A repository tree may contain one or more
 subdirectories for version builds established via <CODE>Link</CODE> to a source subdirectory. Cons will search for derived files in the
 appropriate build subdirectories under the repository tree.
 
-<H1><A NAME="B_Default_targets_">&lt;STRONG&gt;Default targets&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Default_targets">Default targets</A></H1>
 <P>
 Until now, we've demonstrated invoking Cons with an explicit target to
 build:
@@ -1164,18 +1349,15 @@ specifying '.' (the current directory) will build everything:
 <PRE>  % cons .              # builds everything under the top-level directory
 </PRE>
 <P>
-Adding the <A HREF="#item_Default">Default</A> method to any Construct or Conscript file will add the specified targets to
-a list of default targets. Cons will build these defaults if there are no
-targets specified on the command line. So adding the following line to the
-top-level Construct file will mimic Make's typical behavior of building
-everything by default:
+Adding the <CODE>Default</CODE> method to any <EM>Construct</EM> or <EM>Conscript</EM> file will add the specified targets to a list of default targets. Cons will
+build these defaults if there are no targets specified on the command line.
+So adding the following line to the top-level <EM>Construct</EM> file will mimic Make's typical behavior of building everything by default:
 
 <P>
 <PRE>  Default '.';
 </PRE>
 <P>
-The following would add the <CODE>hello</CODE> and <CODE>goodbye</CODE> commands (in the same directory as the Construct or Conscript file) to the
-default list:
+The following would add the <EM>hello</EM> and <EM>goodbye</EM> commands (in the same directory as the <EM>Construct</EM> or <EM>Conscript</EM> file) to the default list:
 
 <P>
 <PRE>  Default qw(
@@ -1184,15 +1366,19 @@ default list:
   );
 </PRE>
 <P>
-The <CODE>default</CODE> method may be used more than once to add targets to the default list.
+The <CODE>Default</CODE> method may be used more than once to add targets to the default list.
 
-<H1><A NAME="B_Selective_builds_">&lt;STRONG&gt;Selective builds&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Selective_builds">Selective builds</A></H1>
 <P>
 Cons provides two methods for reducing the size of given build. The first
 is by specifying targets on the command line, and the second is a method
 for pruning the build tree. We'll consider target specification first.
 
-<DT><STRONG><A NAME="item_Selective">Selective targeting</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Selective_targeting">Selective targeting</A></H2>
 <P>
 Like make, Cons allows the specification of ``targets'' on the command
 line. Cons targets may be either files or directories. When a directory is
@@ -1201,65 +1387,67 @@ product--that Cons knows about--in the specified directory and below. For
 example:
 
 <P>
-<PRE>  cons build/hello/hello.o
+<PRE>  % cons build/hello/hello.o
 </PRE>
 <P>
-means build<CODE>hello.o</CODE> and everything that <CODE>hello.o</CODE> might need. This is from a previous version of the <STRONG>Hello, World!</STRONG> program in which <CODE>hello.o</CODE>
-depended upon <CODE>export/include/world.h</CODE>. If that file is not up-to-date (because someone modified <CODE>src/world/world.h)</CODE>, then it will be rebuilt, even though it is in a directory remote from <CODE>build/hello</CODE>.
+means build <EM>hello.o</EM> and everything that <EM>hello.o</EM> might need. This is from a previous version of the <STRONG>Hello, World!</STRONG> program in which <EM>hello.o</EM>
+depended upon <EM>export/include/world.h</EM>. If that file is not up-to-date (because someone modified <EM>src/world/world.h)</EM>, then it will be rebuilt, even though it is in a directory remote from <EM>build/hello</EM>.
 
 <P>
 In this example:
 
 <P>
-<PRE>  cons build
+<PRE>  % cons build
 </PRE>
 <P>
-Everything in the <CODE>build</CODE> directory is built, if necessary. Again, this may cause more files to be
-built. In particular, both <CODE>export/include/world.h</CODE>
-and <CODE>export/lib/libworld.a</CODE> are required by the <CODE>build/hello</CODE> directory, and so they will be built if they are out-of-date.
+Everything in the <EM>build</EM> directory is built, if necessary. Again, this may cause more files to be
+built. In particular, both <EM>export/include/world.h</EM>
+and <EM>export/lib/libworld.a</EM> are required by the <EM>build/hello</EM> directory, and so they will be built if they are out-of-date.
 
 <P>
 If we do, instead:
 
 <P>
-<PRE>  cons export
+<PRE>  % cons export
 </PRE>
 <P>
 then only the files that should be installed in the export directory will
 be rebuilt, if necessary, and then installed there. Note that <CODE>cons build</CODE>
-might build files that <CODE>cons export</CODE> doesn't build, and <STRONG>vice-versa</STRONG>.
+might build files that <CODE>cons export</CODE> doesn't build, and vice-versa.
 
-<DT><STRONG><A NAME="item_No">No ``special'' targets</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="No_special_targets">No ``special'' targets</A></H2>
 <P>
 With Cons, make-style ``special'' targets are not required. The simplest
-analog with Cons is to use special <CODE>export</CODE> directories, instead. Let's suppose, for example, that you have a whole
+analog with Cons is to use special <EM>export</EM> directories, instead. Let's suppose, for example, that you have a whole
 series of unit tests that are associated with your code. The tests live in
 the source directory near the code. Normally, however, you don't want to
 build these tests. One solution is to provide all the build instructions
 for creating the tests, and then to install the tests into a separate part
-of the tree. If we install the tests in a top-level directory called <CODE>tests</CODE>, then:
+of the tree. If we install the tests in a top-level directory called <EM>tests</EM>, then:
 
 <P>
-<PRE>  cons tests
+<PRE>  % cons tests
 </PRE>
 <P>
 will build all the tests.
 
 <P>
-<PRE>  cons export
+<PRE>  % cons export
 </PRE>
 <P>
 will build the production version of the system (but not the tests), and:
 
 <P>
-<PRE>  cons build
+<PRE>  % cons build
 </PRE>
 <P>
 should probably be avoided (since it will compile tests unecessarily).
 
 <P>
 If you want to build just a single test, then you could explicitly name the
-test (in either the <CODE>tests</CODE> directory or the <CODE>build</CODE> directory). You could also aggregate the tests into a convenient hierarchy
+test (in either the <EM>tests</EM> directory or the <EM>build</EM> directory). You could also aggregate the tests into a convenient hierarchy
 within the tests directory. This hierarchy need not necessarily match the
 source hierarchy, in much the same manner that the include hierarchy
 probably doesn't match the source hierarchy (the include hierarchy is
@@ -1270,7 +1458,7 @@ If you want to build absolutely everything in the tree (subject to whatever
 options you select), you can use:
 
 <P>
-<PRE>  cons .
+<PRE>  % cons .
 </PRE>
 <P>
 This is not particularly efficient, since it will redundantly walk all the
@@ -1278,29 +1466,31 @@ trees, including the source tree. The source tree, of course, may have
 buildable objects in it--nothing stops you from doing this, even if you
 normally build in a separate build tree.
 
-<H1><A NAME="B_Build_Pruning_">&lt;STRONG&gt;Build Pruning&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Build_Pruning">Build Pruning</A></H1>
 <P>
 In conjunction with target selection, <STRONG>build pruning</STRONG> can be used to reduce the scope of the build. In the previous peAcH and
 baNaNa example, we have already seen how script-driven build pruning can be
 used to make only half of the potential build available for any given
 invocation of <CODE>cons</CODE>. Cons also provides, as a convenience, a command line convention that
-allows you to specify which <CODE>Conscript</CODE> files actually get ``built''--that is, incorporated into the build tree.
+allows you to specify which <EM>Conscript</EM> files actually get ``built''--that is, incorporated into the build tree.
 For example:
 
 <P>
-<PRE>  cons build +world
+<PRE>  % cons build +world
 </PRE>
 <P>
 The <CODE>+</CODE> argument introduces a Perl regular expression. This must, of course, be
 quoted at the shell level if there are any shell meta-characters within the
-expression. The expression is matched against each <CODE>Conscript</CODE>
-file which has been mentioned in a <A HREF="#item_Build">Build</A> statement, and only those scripts with matching names are actually
+expression. The expression is matched against each <EM>Conscript</EM>
+file which has been mentioned in a <CODE>Build</CODE> statement, and only those scripts with matching names are actually
 incorporated into the build tree. Multiple such arguments are allowed, in
 which case a match against any of them is sufficient to cause a script to
 be included.
 
 <P>
-In the example, above, the <CODE>hello</CODE> program will not be built, since Cons will have no knowledge of the script <CODE>hello/Conscript</CODE>. The <CODE>libworld.a</CODE>
+In the example, above, the <EM>hello</EM> program will not be built, since Cons will have no knowledge of the script <EM>hello/Conscript</EM>. The <EM>libworld.a</EM>
 archive will be built, however, if need be.
 
 <P>
@@ -1321,11 +1511,9 @@ obviously, we recommend that you do not use build pruning (it's perfectly
 OK to use during integration, however, for checking compilation, etc. Just
 be sure to do an unconstrained build before committing the integration).
 
-<H1><A NAME="B_Backing_builds_">&lt;STRONG&gt;Backing builds&lt;/STRONG&gt;</A></H1>
 <P>
-T.B.S.
-
-<H1><A NAME="B_Temporary_overrides_">&lt;STRONG&gt;Temporary overrides&lt;/STRONG&gt;</A></H1>
+<HR>
+<H1><A NAME="Temporary_overrides">Temporary overrides</A></H1>
 <P>
 Cons provides a very simple mechanism for overriding aspects of a build.
 The essence is that you write an override file containing one or more
@@ -1333,20 +1521,23 @@ The essence is that you write an override file containing one or more
 <CODE>cons</CODE>:
 
 <P>
-<PRE>  cons -o over export
+<PRE>  % cons -o over export
 </PRE>
 <P>
-will build the <CODE>export</CODE> directory, with all derived files subject to the overrides present in the
-file <CODE>over</CODE>. If you leave out the <CODE>-o</CODE> option, then everything necessary to remove all overrides will be rebuilt.
+will build the <EM>export</EM> directory, with all derived files subject to the overrides present in the <EM>over</EM> file. If you leave out the <CODE>-o</CODE> option, then everything necessary to remove all overrides will be rebuilt.
 
-<DT><STRONG><A NAME="item_Overriding">Overriding environment variables</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Overriding_environment_variables">Overriding environment variables</A></H2>
 <P>
 The override file can contain two types of overrides. The first is incoming
-environment variables. These are normally accessible by the <CODE>Construct</CODE>
+environment variables. These are normally accessible by the <EM>Construct</EM>
 file from the <CODE>%ENV</CODE> hash variable. These can trivially be overridden in the override file by
 setting the appropriate elements of <CODE>%ENV</CODE> (these could also be overridden in the user's environment, of course).
 
-<DT><STRONG>The Override command</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_Override_command">The Override command</A></H2>
 <P>
 The second type of override is accomplished with the <CODE>Override</CODE> command, which looks like this:
 
@@ -1370,13 +1561,13 @@ Let's suppose that we have a construction environment like this:
   );
 </PRE>
 <P>
-Then if we have an override file <CODE>over</CODE> containing this command:
+Then if we have an override file <EM>over</EM> containing this command:
 
 <P>
 <PRE>  Override '\.o$', COPT =&gt; '-O', CDBG =&gt; '';
 </PRE>
 <P>
-then any <CODE>cons</CODE> invocation with <CODE>-o over</CODE> that creates <CODE>.o</CODE> files via this environment will cause them to be compiled with <CODE>-O </CODE>and no <CODE>-g</CODE>. The override could, of course, be restricted to a single directory by the
+then any <CODE>cons</CODE> invocation with <CODE>-o over</CODE> that creates <EM>.o</EM> files via this environment will cause them to be compiled with <CODE>-O </CODE>and no <CODE>-g</CODE>. The override could, of course, be restricted to a single directory by the
 appropriate selection of a regular expression.
 
 <P>
@@ -1405,13 +1596,18 @@ For temporary use, however, they are exactly what you want.
 
 <P>
 Note that it is still useful to provide, say, the ability to create a fully
-optimized version of a system for production use--from the <CODE>Construct</CODE> and
-<CODE>Conscript</CODE> files. This way you can tailor the optimized system to the platform. Where
+optimized version of a system for production use--from the <EM>Construct</EM> and
+<EM>Conscript</EM> files. This way you can tailor the optimized system to the platform. Where
 optimizer trade-offs need to be made (particular files may not be compiled
 with full optimization, for example), then these can be recorded for
 posterity (and reproducibility) directly in the scripts.
 
-<H1><A NAME="B_More_on_construction_environme">&lt;STRONG&gt;More on construction environments:Default construction variables&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="More_on_construction_environment">More on construction environments</A></H1>
+<P>
+<HR>
+<H2><A NAME="Default_construction_variables">Default construction variables</A></H2>
 <P>
 We have mentioned, and used, the concept of a <STRONG>construction environment</STRONG>, many times in the preceding pages. Now it's time to make this a little
 more concrete. With the following statement:
@@ -1419,7 +1615,6 @@ more concrete. With the following statement:
 <P>
 <PRE>  $env = new cons();
 </PRE>
-<DT><STRONG><A NAME="item_Default">Default construction variables</A></STRONG><DD>
 <P>
 a reference to a new, default construction environment is created. This
 contains a number of construction variables and some methods. At the
@@ -1430,12 +1625,14 @@ follows:
 <PRE>  CC            =&gt; 'cc',
   CFLAGS        =&gt; '',
   CCCOM         =&gt; '%CC %CFLAGS %_IFLAGS -c %&lt; -o %&gt;',
+  INCDIRPREFIX  =&gt; '-I',
   CXX           =&gt; '%CC',
   CXXFLAGS      =&gt; '%CFLAGS',
   CXXCOM        =&gt; '%CXX %CXXFLAGS %_IFLAGS -c %&lt; -o %&gt;',
   LINK          =&gt; '%CXX',
   LINKCOM       =&gt; '%LINK %LDFLAGS -o %&gt; %&lt; %_LDIRS %LIBS',
   LINKMODULECOM =&gt; '%LD -r -o %&gt; %&lt;',
+  LIBDIRPREFIX  =&gt; '-L',
   AR            =&gt; 'ar',
   ARFLAGS       =&gt; 'r',
   ARCOM         =&gt; &quot;%AR %ARFLAGS %&gt; %&lt;\n%RANLIB %&gt;&quot;,
@@ -1459,9 +1656,11 @@ overridden in the default:
 <PRE>  CC            =&gt; 'cl',
   CFLAGS        =&gt; '/nologo',
   CCCOM         =&gt; '%CC %CFLAGS %_IFLAGS /c %&lt; /Fo%&gt;',
+  INCDIRPREFIX  =&gt; '/I',
   LINK          =&gt; 'link',
   LINKCOM       =&gt; '%LINK %LDFLAGS /out:%&gt; %&lt; %_LDIRS %LIBS',
   LINKMODULECOM =&gt; '%LD /r /o %&gt; %&lt;',
+  LIBDIRPREFIX  =&gt; '/LIBPATH:',
   AR            =&gt; 'lib',
   ARFLAGS       =&gt; '/nologo ',
   ARCOM         =&gt; &quot;%AR %ARFLAGS /out:%&gt; %&lt;&quot;,
@@ -1485,7 +1684,7 @@ the corresponding object files. For example:
 <PRE>  Objects $env 'foo.c', 'bar.c';
 </PRE>
 <P>
-This will arrange to produce, if necessary, <CODE>foo.o</CODE> and <CODE>bar.o</CODE>. The command invoked is simply <CODE>%CCOM</CODE>, which expands through substitution, to the appropriate external command
+This will arrange to produce, if necessary, <EM>foo.o</EM> and <EM>bar.o</EM>. The command invoked is simply <CODE>%CCOM</CODE>, which expands through substitution, to the appropriate external command
 required to build each object. We will explore the substitution rules
 further under the <CODE>Command</CODE> method, below.
 
@@ -1508,18 +1707,29 @@ this purpose). Some internal variables, such as <CODE>_IFLAGS</CODE> are created
 environment.
 
 <P>
+The <CODE>CFLAGS</CODE>, <CODE>LDFLAGS</CODE>, and <CODE>ARFLAGS</CODE> variables all supply a place for passing options to the compiler, loader,
+and archiver, respectively. Less obviously, the <CODE>INCDIRPREFIX</CODE> variable specifies the option string to be appended to the beginning of
+each include directory so that the compiler knows where to find <EM>.h</EM> files. Similarly, the <CODE>LIBDIRPREFIX</CODE>
+variable specifies the option string to be appended to the beginning of
+each directory that the linker should search for libraries.
+
+<P>
 Another variable, <CODE>ENV</CODE>, is used to determine the system environment during the execution of an
 external command. By default, the only environment variable that is set is <CODE>PATH</CODE>, which is the execution path for a UNIX command. For the utmost
 reproducibility, you should really arrange to set your own execution path,
-in your top-level <CODE>Construct</CODE> file (or perhaps by importing an appropriate construction package with the
+in your top-level <EM>Construct</EM> file (or perhaps by importing an appropriate construction package with the
 Perl <CODE>use</CODE>
 command). The default variables are intended to get you off the ground.
 
-<H1><A NAME="B_Default_construction_methods_">&lt;STRONG&gt;Default construction methods&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Default_construction_methods">Default construction methods</A></H1>
 <P>
 The list of default construction methods includes the following:
 
-<DT><STRONG>The new constructor</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_new_constructor">The &lt;CODE&gt;new&lt;/CODE&gt; constructor</A></H2>
 <P>
 The <CODE>new</CODE> method is a Perl object constructor. That is, it is not invoked via a
 reference to an existing construction environment <STRONG>reference</STRONG>, but, rather statically, using the name of the Perl <STRONG>package</STRONG> where the constructor is defined. The method is invoked like this:
@@ -1534,7 +1744,9 @@ providing name/value pairs in an override list. Note that to override any
 command environment variable (i.e. anything under <CODE>ENV</CODE>), you will have to override all of them. You can get around this
 difficulty by using the <CODE>copy</CODE> method on an existing construction environment.
 
-<DT><STRONG>The clone method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_clone_method">The &lt;CODE&gt;clone&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>clone</CODE> method creates a clone of an existing construction environment, and can be
 called as in the following example:
@@ -1548,7 +1760,9 @@ environment from the original. If you just want a new name for the same
 environment (which may be helpful when exporting environments to existing
 components), you can just use simple assignment.
 
-<DT><STRONG>The copy method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_copy_method">The &lt;CODE&gt;copy&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>copy</CODE> method extracts the externally defined construction variables from an
 environment and returns them as a list of name/value pairs. Overrides can
@@ -1574,7 +1788,9 @@ example, if you really want to override just the
 This will leave anything else that might be in the default execution
 environment undisturbed.
 
-<DT><STRONG>The Install method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Install_method">The &lt;CODE&gt;Install&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Install</CODE> method arranges for the specified files to be installed in the specified
 directory. The installation is optimized: the file is not copied if it can
@@ -1587,9 +1803,11 @@ different method to install the file. It is called as follows:
 <P>
 Note that, while the files to be installed may be arbitrarily named, only
 the last component of each name is used for the installed target name. So,
-for example, if you arrange to install <CODE>foo/bar</CODE> in <CODE>baz</CODE>, this will create a file <CODE>bar</CODE> in directory <CODE>baz</CODE> (not <CODE>foo/bar</CODE>).
+for example, if you arrange to install <EM>foo/bar</EM> in <EM>baz</EM>, this will create a <EM>bar</EM> file in the <EM>baz</EM> directory (not <EM>foo/bar</EM>).
 
-<DT><STRONG>The InstallAs method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_InstallAs_method">The &lt;CODE&gt;InstallAs&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>InstallAs</CODE> method arranges for the specified source <CODE>file(s)</CODE> to be
 installed as the specified target <CODE>file(s).</CODE> Multiple files
@@ -1602,20 +1820,20 @@ follows:
 <CODE>InstallAs</CODE> works in two ways:
 
 <P>
-Single File Install:
+Single file install:
 
 <P>
 <PRE>  InstallAs $env TgtFile, SrcFile;
 </PRE>
 <P>
-Multiple File Install:
+Multiple file install:
 
 <P>
 <PRE>  InstallAs $env ['tgt1', 'tgt2'], ['src1', 'src2'];
 </PRE>
 <P>
-<PRE>  Or, even as:
-</PRE>
+Or, even as:
+
 <P>
 <PRE>  @srcs = qw(src1 src2 src3);
   @tgts = qw(tgt1 tgt2 tgt3);
@@ -1624,14 +1842,24 @@ Multiple File Install:
 <P>
 Both the target and the sources lists should be of the same length.
 
-<DT><STRONG>The Precious method</STRONG><DD>
 <P>
-The <CODE>Precious</CODE> method asks cons not to delete the given file or list of files before
-building them again. This is especially useful for allowing incremental
-updates to libraries or debug information files which are updated rather
-than rebuilt anew each time. Cons will still delete the files when the <CODE>-r</CODE> flag is specified.
+<HR>
+<H2><A NAME="The_C_Precious_method">The &lt;CODE&gt;Precious&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>Precious</CODE> method asks cons not to delete the specified file or list of files before
+building them again. It is invoked as:
 
-<DT><STRONG>The Command method</STRONG><DD>
+<P>
+<PRE>  Precious &lt;files&gt;;
+</PRE>
+<P>
+This is especially useful for allowing incremental updates to libraries or
+debug information files which are updated rather than rebuilt anew each
+time. Cons will still delete the files when the <CODE>-r</CODE> flag is specified.
+
+<P>
+<HR>
+<H2><A NAME="The_C_Command_method">The &lt;CODE&gt;Command&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Command</CODE> method is a catchall method which can be used to arrange for any external
 command to be called to update the target. For this command, a target file
@@ -1665,18 +1893,17 @@ target mentioned).
 
 <DT><STRONG><A NAME="item__0">%0</A></STRONG><DD>
 <P>
-Same as <CODE>%</CODE>&gt;.
+Same as <CODE>%&amp;gt;</CODE>.
 
-<DT><STRONG><A NAME="item__1_">%1,</A></STRONG><DD>
+<DT><STRONG><A NAME="item__1_">%1, %2, ..., %9</A></STRONG><DD>
 <P>
-%2, ..., <CODE>%9</CODE> These refer to the first through ninth input file,
-respectively.
+These refer to the first through ninth input file, respectively.
 
-<DT><STRONG><A NAME="item_C">C&lt;%&lt;&gt;</A></STRONG><DD>
+<DT><STRONG><A NAME="item__lt">%lt</A></STRONG><DD>
 <P>
 The full set of inputs. If any of these have been used anywhere else in the
-current command line (via <CODE>%1</CODE>, <CODE>%2</CODE>, etc.), then those will be deleted from the list provided by <CODE>%&lt;</CODE>. Consider the following command found in a
-<CODE>Conscript</CODE> file in the directory <CODE>test</CODE>:
+current command line (via <CODE>%1</CODE>, <CODE>%2</CODE>, etc.), then those will be deleted from the list provided by <CODE>%&amp;lt;</CODE>. Consider the following command found in a
+<EM>Conscript</EM> file in the <EM>test</EM> directory:
 
 <P>
 <PRE>  Command $env 'tgt', qw(foo bar baz), qq(
@@ -1686,9 +1913,8 @@ current command line (via <CODE>%1</CODE>, <CODE>%2</CODE>, etc.), then those wi
   );
 </PRE>
 <P>
-If <CODE>tgt</CODE> needed to be updated, then this would result in the execution of the
-following commands, assuming that no remapping has been established for
-directory <CODE>test</CODE>:
+If <EM>tgt</EM> needed to be updated, then this would result in the execution of the
+following commands, assuming that no remapping has been established for the <EM>test</EM> directory:
 
 <P>
 <PRE>  echo test/bar test/baz -i test/foo &gt; test/tgt
@@ -1701,7 +1927,8 @@ Any of the above pseudo variables may be followed immediately by one of the
 following suffixes to select a portion of the expanded path name:
 
 <P>
-<PRE>  C&lt;:b&gt;    the directory plus the file name stripped of any suffix
+<PRE>  C&lt;:a&gt;    the absolute path to the file name
+  C&lt;:b&gt;    the directory plus the file name stripped of any suffix
   C&lt;:d&gt;    the directory
   C&lt;:f&gt;    the file name
   C&lt;:s&gt;    the file name suffix
@@ -1775,7 +2002,7 @@ interpolation:
 </PRE>
 <P>
 If there are shell meta characters anywhere in the expanded command line,
-such as <CODE>&lt;</CODE>, <CODE></CODE>&gt;, quotes, or semi-colon, then the command will actually be executed by
+such as <CODE>&amp;lt;</CODE>, <CODE>&amp;gt;</CODE>, quotes, or semi-colon, then the command will actually be executed by
 invoking a shell. This means that a command such as:
 
 <P>
@@ -1803,9 +2030,11 @@ list in square brackets. Hence the following command:
 </PRE>
 <P>
 could be used in a case where the command <CODE>gen</CODE> creates two files, both
-<CODE>foo.h</CODE> and <CODE>foo.c</CODE>.
+<EM>foo.h</EM> and <EM>foo.c</EM>.
 
-<DT><STRONG>The Objects method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Objects_method">The &lt;CODE&gt;Objects&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Objects</CODE> method arranges to create the object files that correspond to the specified
 source files. It is invoked as shown below:
@@ -1814,21 +2043,20 @@ source files. It is invoked as shown below:
 <PRE>  @files = Objects $env &lt;source or object files&gt;;
 </PRE>
 <P>
-Under Unix, source files ending in <CODE>.s</CODE> and <CODE>.c</CODE> are currently supported, and will be compiled into a name of the same file
-ending in <CODE>.o</CODE>. By default, all files are created by invoking the external command which
-results from expanding the <CODE>CCOM</CODE> construction variable, with <CODE>%&lt;</CODE> and
-<CODE>%</CODE>&gt; set to the source and object files, respectively (see the <CODE>Command</CODE>
-method for expansion details) . The variable <CODE>CPPPATH</CODE> is also used when scanning source files for dependencies. This is a colon
+Under Unix, source files ending in <EM>.s</EM> and <EM>.c</EM> are currently supported, and will be compiled into a name of the same file
+ending in <EM>.o</EM>. By default, all files are created by invoking the external command which
+results from expanding the <CODE>CCOM</CODE> construction variable, with <CODE>%&amp;lt;</CODE> and <CODE>%&amp;gt;</CODE> set to the source and object files, respectively (see the <CODE>Command</CODE> method for expansion details) . The variable <CODE>CPPPATH</CODE> is also used when scanning source files for dependencies. This is a colon
 separated list of pathnames, and is also used to create the construction
-variable <CODE>_IFLAGS,</CODE>
-which will contain the appropriate list of -<CODE>I</CODE> options for the compilation. Any relative pathnames in <CODE>CPPPATH</CODE> is interpreted relative to the directory in which the associated
+variable <CODE>_IFLAGS,</CODE> which will contain the appropriate list of -<CODE>I</CODE> options for the compilation. Any relative pathnames in <CODE>CPPPATH</CODE> is interpreted relative to the directory in which the associated
 construction environment was created (absolute and top-relative names may
 also be used). This variable is used by
 <CODE>CCOM</CODE>. The behavior of this command can be modified by changing any of the
-variables which are interpolated into <CODE>CCOM</CODE>, such as <CODE>CC</CODE>, <CODE>CFLAGS</CODE>, and, indirectly, <CODE>CPPPATH</CODE>. It's also possible to replace the value of
-<CODE>CCOM</CODE>, itself. As a convenience, this file returns the list of object filenames.
+variables which are interpolated into <CODE>CCOM</CODE>, such as <CODE>CC</CODE>,
+<CODE>CFLAGS</CODE>, and, indirectly, <CODE>CPPPATH</CODE>. It's also possible to replace the value of <CODE>CCOM</CODE>, itself. As a convenience, this file returns the list of object filenames.
 
-<DT><STRONG>The Program method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Program_method">The &lt;CODE&gt;Program&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Program</CODE> method arranges to link the specified program with the specified object
 files. It is invoked in the following manner:
@@ -1841,14 +2069,16 @@ Source files may be specified in place of objects files--the <CODE>Objects</CODE
 method will be invoked to arrange the conversion of all the files into
 object files, and hence all the observations about the <CODE>Objects</CODE> method, above, apply to this method also. The actual linking of the program
 will be handled by an external command which results from expanding the <CODE>LINKCOM</CODE>
-construction variable, with <CODE>%&lt;</CODE> set to the object files to be linked (in the order presented), and <CODE>%</CODE>&gt; set to the target (see the <CODE>Command</CODE> method for expansion details). The user may set additional variables in the
+construction variable, with <CODE>%&amp;lt;</CODE> set to the object files to be linked (in the order presented), and <CODE>%&amp;gt;</CODE> set to the target (see the <CODE>Command</CODE> method for expansion details). The user may set additional variables in the
 construction environment, including <CODE>LINK</CODE>, to define which program to use for linking, <CODE>LIBPATH</CODE>, a colon-separated list of library search paths, for use with library
 specifications of the form <EM>-llib</EM>, and <CODE>LIBS</CODE>, specifying the list of libraries to link against (in either <EM>-llib</EM> form or just as pathnames. Relative pathnames in both <CODE>LIBPATH</CODE> and <CODE>LIBS</CODE> are interpreted relative to the directory in which the associated
 construction environment created (absolute and top-relative names may also
 be used). Cons automatically sets up dependencies on any libraries
 mentioned in <CODE>LIBS</CODE>: those libraries will be built before the command is linked.
 
-<DT><STRONG>The Library method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Library_method">The &lt;CODE&gt;Library&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Library</CODE> method arranges to create the specified library from the specified object
 files. It is invoked as follows:
@@ -1862,7 +2092,7 @@ method will be invoked to arrange the conversion of all the files into
 object files, and hence all the observations about the <CODE>Objects</CODE> method, above, apply to this method also. The actual creation of the
 library will be handled by an external command which results from expanding
 the <CODE>ARCOM</CODE>
-construction variable, with <CODE>%&lt;</CODE> set to the library members (in the order presented), and <CODE>%</CODE>&gt; to the library to be created (see the <CODE>Command</CODE>
+construction variable, with <CODE>%&amp;lt;</CODE> set to the library members (in the order presented), and <CODE>%&amp;gt;</CODE> to the library to be created (see the <CODE>Command</CODE>
 method for expansion details). The user may set variables in the
 construction environment which will affect the operation of the command.
 These include <CODE>AR</CODE>, the archive program to use, <CODE>ARFLAGS</CODE>, which can be used to modify the flags given to the program specified by <CODE>AR</CODE>, and
@@ -1878,7 +2108,9 @@ single archive command. Note, however, that if you prune a build so that
 only part of a library is specified, then only that part of the library
 will be generated (the rest will disappear!).
 
-<DT><STRONG>The Module method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Module_method">The &lt;CODE&gt;Module&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Module</CODE> method is a combination of the <CODE>Program</CODE> and <CODE>Command</CODE>
 methods. Rather than generating an executable program directly, this
@@ -1892,7 +2124,9 @@ module. The method is invoked as follows:
 This command is useful in instances where you wish to create, for example,
 dynamically loaded modules, or statically linked code libraries.
 
-<DT><STRONG>The Depends method</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Depends_method">The &lt;CODE&gt;Depends&lt;/CODE&gt; method</A></H2>
 <P>
 The <CODE>Depends</CODE> method allows you to specify additional dependencies for a target. It is
 invoked as follows:
@@ -1907,17 +2141,164 @@ dependencies are calculated automatically from a combination of the
 explicit dependencies set up by the method invocation or by scanning source
 files.
 
-<H1><A NAME="B_Extending_Cons_">&lt;STRONG&gt;Extending Cons&lt;/STRONG&gt;</A></H1>
-<DT><STRONG>Overriding construction variables</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="The_C_Ignore_method">The &lt;CODE&gt;Ignore&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>Ignore</CODE> method allows you to ignore explicitly dependencies that Cons infers on its
+own. It is invoked as follows:
+
+<P>
+<PRE>  Ignore &lt;patterns&gt;;
+</PRE>
+<P>
+This can be used to avoid recompilations due to changes in system header
+files or utilities that are known to not affect the generated targets.
+
+<P>
+If, for example, a program is built in an NFS-mounted directory on multiple
+systems that have different copies of <EM>stdio.h</EM>, the differences will affect the signatures of all derived targets built
+from source files that <CODE>#include &amp;lt;stdio.h&amp;gt;</CODE>. This will cause all those targets to be rebuilt when changing systems. If
+this is not desirable behavior, then the following line will remove the
+dependencies on the <EM>stdio.h</EM> file:
+
+<P>
+<PRE>  Ignore '^/usr/include/stdio\.h$';
+</PRE>
+<P>
+Note that the arguments to the <CODE>Ignore</CODE> method are regular expressions, so special characters must be escaped and
+you may wish to anchor the beginning or end of the expression with <CODE>^</CODE> or <CODE>$</CODE> characters.
+
+<P>
+<HR>
+<H2><A NAME="The_C_Salt_method">The &lt;CODE&gt;Salt&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>Salt</CODE> method adds a constant value to the signature calculation for every derived
+file. It is invoked as follows:
+
+<P>
+<PRE>  Salt $string;
+</PRE>
+<P>
+Changing the Salt value will force a complete rebuild of every derived
+file. This can be used to force rebuilds in certain desired circumstances.
+For example,
+
+<P>
+<PRE>  Salt `uname -s`;
+</PRE>
+<P>
+Would force a complete rebuild of every derived file whenever the operating
+system on which the build is performed (as reported by <CODE>uname
+-s</CODE>) changes.
+
+<P>
+<HR>
+<H2><A NAME="The_C_UseCache_method">The &lt;CODE&gt;UseCache&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>UseCache</CODE> method instructs Cons to maintain a cache of derived files, to be shared
+among separate build trees of the same project.
+
+<P>
+<PRE>  UseCache(&quot;cache/&lt;buildname&gt;&quot;) || warn(&quot;cache directory not found&quot;);
+</PRE>
+<P>
+<HR>
+<H2><A NAME="The_C_SourcePath_method">The &lt;CODE&gt;SourcePath&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>SourcePath</CODE> mathod returns the real source path name of a file, as opposted to the path
+name within a build directory. It is invoked as follows:
+
+<P>
+<PRE>  $path = SourcePath &lt;buildpath&gt;;
+</PRE>
+<P>
+<HR>
+<H2><A NAME="The_C_ConsPath_method">The &lt;CODE&gt;ConsPath&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>ConsPath</CODE> method returns true if the supplied path is a derivable file, and returns
+undef (false) otherwise. It is invoked as follows:
+
+<P>
+<PRE>  $result = ConsPath &lt;path&gt;;
+</PRE>
+<P>
+<HR>
+<H2><A NAME="The_C_SplitPath_method">The &lt;CODE&gt;SplitPath&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>SplitPath</CODE> method looks up multiple path names in a string separated by the default
+path separator for the operating system (':' on UNIX systems, ';' on
+Windows NT), and returns the fully-qualified names. It is invoked as
+follows:
+
+<P>
+<PRE>  @paths = SplitPath &lt;pathlist&gt;;
+</PRE>
+<P>
+The <CODE>SplitPath</CODE> method will convert names prefixed '#' to the appropriate top-level build
+name (without the '#') and will convert relative names to top-level names.
+
+<P>
+<HR>
+<H2><A NAME="The_C_DirPath_method">The &lt;CODE&gt;DirPath&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>DirPath</CODE> method returns the build path <CODE>name(s)</CODE> of a directory or list
+of directories. It is invoked as follows:
+
+<P>
+<PRE>  $cwd = DirPath &lt;paths&gt;;
+</PRE>
+<P>
+The most common use for the <CODE>DirPath</CODE> method is:
+
+<P>
+<PRE>  $cwd = DirPath '.';
+</PRE>
+<P>
+to fetch the path to the current directory of a subsidiary <EM>Conscript</EM>
+file.
+
+<P>
+<HR>
+<H2><A NAME="The_C_FilePath_method">The &lt;CODE&gt;FilePath&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>FilePath</CODE> method returns the build path <CODE>name(s)</CODE> of a file or list of
+files. It is invoked as follows:
+
+<P>
+<PRE>  $file = FilePath &lt;path&gt;;
+</PRE>
+<P>
+<HR>
+<H2><A NAME="The_C_Help_method">The &lt;CODE&gt;Help&lt;/CODE&gt; method</A></H2>
+<P>
+The <CODE>Help</CODE> method specifies help text that will be displayed when the user invokes <CODE>cons -h</CODE>. This can be used to provide documentation of specific targets, values,
+build options, etc. for the build tree. It is invoked as follows:
+
+<P>
+<PRE>  Help &lt;helptext&gt;;
+</PRE>
+<P>
+The <CODE>Help</CODE> method may only be called once, and should typically be specified in the
+top-level <EM>Construct</EM> file.
+
+<P>
+<HR>
+<H1><A NAME="Extending_Cons">Extending Cons</A></H1>
+<P>
+<HR>
+<H2><A NAME="Overriding_construction_variable">Overriding construction variables</A></H2>
 <P>
 There are several ways of extending Cons, which vary in degree of
 difficulty. The simplest method is to define your own construction
 environment, based on the default environment, but modified to reflect your
 particular needs. This will often suffice for C-based applications. You can
 use the <CODE>new</CODE> constructor, and the <CODE>clone</CODE> and <CODE>copy</CODE> methods to create hybrid environments. These changes can be entirely
-transparent to the underlying <CODE>Conscript</CODE> files.
+transparent to the underlying <EM>Conscript</EM> files.
 
-<DT><STRONG><A NAME="item_Adding">Adding new methods</A></STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Adding_new_methods">Adding new methods</A></H2>
 <P>
 For slightly more demanding changes, you may wish to add new methods to the
 <CODE>cons</CODE> package. Here's an example of a very simple extension,
@@ -1951,21 +2332,22 @@ For a small improvement in generality, the <CODE>BINDIR</CODE> variable could be
 environment--as
 <CODE>%BINDIR</CODE>.
 
-<DT><STRONG>Overriding methods</STRONG><DD>
+<P>
+<HR>
+<H2><A NAME="Overriding_methods">Overriding methods</A></H2>
 <P>
 Instead of adding the method to the <CODE>cons</CODE> name space, you could define a new package which inherits existing methods
 from the <CODE>cons</CODE> package and overrides or adds others. This can be done using Perl's
 inheritance mechanisms.
 
 <P>
-The following example defines a new package cons::switch which overrides
-the standard <CODE>Library</CODE> method. The overridden method builds linked library modules, rather than
+The following example defines a new package <CODE>cons::switch</CODE> which overrides the standard <CODE>Library</CODE> method. The overridden method builds linked library modules, rather than
 library archives. A new constructor is provided. Environments created with
-this Constructor will have the new library method; others won't.
+this constructor will have the new library method; others won't.
 
 <P>
 <PRE>  package cons::switch;
-  BEGIN {@ISA = `cons'}
+  BEGIN {@ISA = 'cons'}
 </PRE>
 <P>
 <PRE>  sub new {
@@ -1991,17 +2373,31 @@ This functionality could be invoked as in the following example:
   ...
   Library $env 'lib.o', 'foo.c', 'bar.c';
 </PRE>
-<H1><A NAME="B_Invoking_Cons_">&lt;STRONG&gt;Invoking Cons&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Invoking_Cons">Invoking Cons</A></H1>
 <P>
 The <CODE>cons</CODE> command is usually invoked from the root of the build tree. A
-<CODE>Construct</CODE> file must exist in that directory. If the <CODE>-f</CODE> argument is used, then an alternate <CODE>Construct</CODE> file may be used (and, possibly, an alternate root, since <CODE>cons</CODE> will cd to <CODE>Construct</CODE> file's containing directory).
+<EM>Construct</EM> file must exist in that directory. If the <CODE>-f</CODE> argument is used, then an alternate <EM>Construct</EM> file may be used (and, possibly, an alternate root, since <CODE>cons</CODE> will cd to <EM>Construct</EM> file's containing directory).
 
 <P>
 If <CODE>cons</CODE> is invoked from a child of the root of the build tree with the <CODE>-t</CODE> argument, it will walk up the directory hierarchy looking for a
-<CODE>Construct</CODE> file. (An alternate name may still be specified with <CODE>-f</CODE>.) The targets supplied on the command line will be modified to be relative
-to the discovered <CODE>Construct</CODE> file. For example, invoking <CODE>cons</CODE> in ``root/libfoo/sub'' with <CODE>cons -t target</CODE> is identical to invoking it in ``root'' with <CODE>cons libfoo/sub/target</CODE>. (Assuming there is a <CODE>Construct</CODE>
-file in ``root''. If there are any <A HREF="#item_Default">Default</A> targets specified in the directory hierarchy's <CODE>Construct</CODE> or <CODE>Conscript</CODE> files, only the default targets at or below the directory from which <CODE>cons -t</CODE>
-was invoked will be built.
+<EM>Construct</EM> file. (An alternate name may still be specified with <CODE>-f</CODE>.) The targets supplied on the command line will be modified to be relative
+to the discovered <EM>Construct</EM> file. For example, from a directory containing a top-level <EM>Construct</EM> file, the following invocation:
+
+<P>
+<PRE>  % cd libfoo/subdir
+  % cons -t target
+</PRE>
+<P>
+is exactly equivalent to:
+
+<P>
+<PRE>  % cons libfoo/subdir/target
+</PRE>
+<P>
+If there are any <CODE>Default</CODE> targets specified in the directory hierarchy's
+<EM>Construct</EM> or <EM>Conscript</EM> files, only the default targets at or below the directory from which <CODE>cons -t</CODE> was invoked will be built.
 
 <P>
 The command is invoked as follows:
@@ -2019,12 +2415,12 @@ Build the specified target. If <EM>target</EM> is a directory, then recursively 
 
 <DT><STRONG><A NAME="item__pattern">+pattern</A></STRONG><DD>
 <P>
-Limit the <CODE>Conscript</CODE> files considered to just those that match <EM>pattern</EM>, which is a Perl regular expression. Multiple <CODE>+</CODE> arguments are accepted.
+Limit the <EM>Conscript</EM> files considered to just those that match <EM>pattern</EM>, which is a Perl regular expression. Multiple <CODE>+</CODE> arguments are accepted.
 
 <DT><STRONG><A NAME="item_name">name=&lt;val&gt;</A></STRONG><DD>
 <P>
 Sets <EM>name</EM> to value <EM>val</EM> in the <CODE>ARG</CODE> hash passed to the top-level
-<CODE>Construct</CODE> file.
+<EM>Construct</EM> file.
 
 <DT><STRONG><A NAME="item__cc">-cc</A></STRONG><DD>
 <P>
@@ -2053,20 +2449,20 @@ Enable dependency debugging.
 
 <DT><STRONG><A NAME="item__f">-f &lt;file&gt;</A></STRONG><DD>
 <P>
-Use the specified file instead of <CODE>Construct</CODE> (but first change to containing directory of <EM>file</EM>).
+Use the specified file instead of <EM>Construct</EM> (but first change to containing directory of <EM>file</EM>).
 
 <DT><STRONG><A NAME="item__h">-h</A></STRONG><DD>
 <P>
 Show a help message local to the current build if one such is defined, and
 exit.
 
-<DT><STRONG><A NAME="item__o">-o &lt;file&gt;</A></STRONG><DD>
-<P>
-Read override file <EM>file</EM>.
-
 <DT><STRONG><A NAME="item__k">-k</A></STRONG><DD>
 <P>
 Keep going as far as possible after errors.
+
+<DT><STRONG><A NAME="item__o">-o &lt;file&gt;</A></STRONG><DD>
+<P>
+Read override file <EM>file</EM>.
 
 <DT><STRONG><A NAME="item__p">-p</A></STRONG><DD>
 <P>
@@ -2084,10 +2480,6 @@ Show products and where they are defined. No build is attempted.
 <P>
 Don't be verbose about Installing and Removing targets.
 
-<DT><STRONG><A NAME="item__wf">-wf &lt;file&gt;</A></STRONG><DD>
-<P>
-Write all filenames considered into <EM>file</EM>.
-
 <DT><STRONG><A NAME="item__r">-r</A></STRONG><DD>
 <P>
 Remove construction products associated with &lt;targets&gt;. No build is
@@ -2099,9 +2491,8 @@ Search for files in <EM>repos</EM>. Multiple <STRONG>-R</STRONG>  <EM>repos</EM>
 
 <DT><STRONG><A NAME="item__t">-t</A></STRONG><DD>
 <P>
-Traverse up the directory hierarchy looking for a Construct file, if none
-exists in the current directory. Targets will be modified to be relative to
-the Construct file.
+Traverse up the directory hierarchy looking for a <EM>Construct</EM> file, if none exists in the current directory. Targets will be modified to
+be relative to the <EM>Construct</EM> file.
 
 <DT><STRONG><A NAME="item__v">-v</A></STRONG><DD>
 <P>
@@ -2111,49 +2502,56 @@ Show <CODE>cons</CODE> version and continue processing.
 <P>
 Show <CODE>cons</CODE> version and exit.
 
+<DT><STRONG><A NAME="item__wf">-wf &lt;file&gt;</A></STRONG><DD>
+<P>
+Write all filenames considered into <EM>file</EM>.
+
 <DT><STRONG><A NAME="item__x">-x</A></STRONG><DD>
 <P>
 Show a help message similar to this one, and exit.
 
 </DL>
 <P>
-And <EM>construct-args</EM> can be any arguments that you wish to process in the Construct file. Note
-that there should be a <STRONG>--</STRONG> separating the arguments to cons and the arguments that you wish to process
-in the Construct file.
+And <EM>construct-args</EM> can be any arguments that you wish to process in the
+<EM>Construct</EM> file. Note that there should be a <STRONG>--</STRONG> separating the arguments to cons and the arguments that you wish to process
+in the <EM>Construct</EM> file.
 
 <P>
 Processing of <EM>construct-args</EM> can be done by any standard package like
 <STRONG>Getopt</STRONG> or its variants, or any user defined package. <STRONG>cons</STRONG> will pass in the <EM>construct-args</EM> as <STRONG>@ARGV</STRONG> and will not attempt to interpret anything after the <STRONG>--</STRONG>.
 
 <P>
-<PRE>    cons -R /usr/local/repository -d os=solaris +driver -- -c test -f DEBUG
+<PRE>  % cons -R /usr/local/repository -d os=solaris +driver -- -c test -f DEBUG
 </PRE>
 <P>
 would pass the following to cons
 
 <P>
-<PRE>    -R /usr/local/repository -d os=solaris +driver
+<PRE>  -R /usr/local/repository -d os=solaris +driver
 </PRE>
 <P>
-and the following, to the top level Construct file as <STRONG>@ARGV</STRONG>
+and the following, to the top level <EM>Construct</EM> file as <STRONG>@ARGV</STRONG>
 
 
 
 <P>
-<PRE>    -c test -f DEBUG
+<PRE>  -c test -f DEBUG
 </PRE>
 <P>
-Note that <CODE>cons -r .</CODE> is equivalent to a full recursive <CODE>make clean</CODE>, but requires no support in the <CODE>Construct</CODE> file or any <CODE>Conscript</CODE> files. This is most useful if you are compiling files into source
-directories (if you separate the <CODE>build</CODE>/<CODE>export</CODE> directories, then you can just remove the directories).
+Note that <CODE>cons -r .</CODE> is equivalent to a full recursive <CODE>make clean</CODE>, but requires no support in the <EM>Construct</EM> file or any <EM>Conscript</EM>
+files. This is most useful if you are compiling files into source
+directories (if you separate the <EM>build</EM> and <EM>export</EM> directories, then you can just remove the directories).
 
 <P>
 The options <CODE>-p</CODE>, <CODE>-pa</CODE>, and <CODE>-pw</CODE> are extremely useful for use as an aid in reading scripts or debugging
-them. If you want to know what script installs <CODE>export/include/foo.h</CODE>, for example, just type:
+them. If you want to know what script installs <EM>export/include/foo.h</EM>, for example, just type:
 
 <P>
-<PRE>  cons -pw export/include/foo.h
+<PRE>  % cons -pw export/include/foo.h
 </PRE>
-<H1><A NAME="B_Using_and_writing_dependency_s">&lt;STRONG&gt;Using and writing dependency scanners&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Using_and_writing_dependency_sca">Using and writing dependency scanners</A></H1>
 <P>
 QuickScan allows simple target-independent scanners to be set up for source
 files. Only one QuickScan scanner may be associated with any given source
@@ -2163,7 +2561,7 @@ file and environment.
 QuickScan is invoked as follows:
 
 <P>
-<PRE>        QuickScan CONSENV CODEREF, FILENAME [, PATH]
+<PRE>  QuickScan CONSENV CODEREF, FILENAME [, PATH]
 </PRE>
 <P>
 The subroutine referenced by CODEREF is expected to return a list of
@@ -2187,21 +2585,30 @@ search path is, currently, colon separated. This may not make the NT camp
 happy.
 
 <P>
-Here's a real example, taken from a Construct file here:
+Here's a real example, taken from a <EM>Construct</EM> file here:
 
 <P>
-sub cons::SMFgen { <CODE>my($env,</CODE> @tables) = @_; foreach
-<CODE>$t</CODE> (@tables) { $env-&gt;QuickScan(sub { /\b\S*?\.smf\b/g },
-``$t.smf'', $env-&gt;{SMF_INCLUDE_PATH}); $env-&gt;Command(
-[``$t.smdb.cc'',``$t.smdb.h'',``$t.snmp.cc'',``$t.ami.cc'',
-``$t.http.cc''], ``$t.smf'', <CODE>q(</CODE> smfgen %(
-<CODE>%SMF_INCLUDE_OPT</CODE> %) %&lt; ) ); } }
-
+<PRE>  sub cons::SMFgen {
+      my($env, @tables) = @_;
+      foreach $t (@tables) {
+          $env-&gt;QuickScan(sub { /\b\S*?\.smf\b/g }, &quot;$t.smf&quot;,
+                          $env-&gt;{SMF_INCLUDE_PATH});
+          $env-&gt;Command(
+              [&quot;$t.smdb.cc&quot;,&quot;$t.smdb.h&quot;,&quot;$t.snmp.cc&quot;,&quot;$t.ami.cc&quot;, &quot;$t.http.cc&quot;],
+              &quot;$t.smf&quot;,
+              q(
+                smfgen %( %SMF_INCLUDE_OPT %) %&lt;
+              )
+          );
+      }
+  }
+</PRE>
 <P>
-[NOTE that the form $env-&gt;QuickScan ... and $env-&gt;Command ... should
-not be necessary, but, for some reason, is required for this particular
-invocation. This appears to be a bug in Perl or a misunderstanding on my
-part; this invocation style does not always appear to be necessary.]
+[NOTE that the form <CODE>$env-&amp;gt;QuickScan ...</CODE>  and <CODE>$env-&amp;gt;Command
+...</CODE> should not be necessary, but, for some reason, is required for this
+particular invocation. This appears to be a bug in Perl or a
+misunderstanding on my part; this invocation style does not always appear
+to be necessary.]
 
 <P>
 This finds all names of the form &lt;name&gt;.smf in the file. It will
@@ -2220,9 +2627,14 @@ code reference, and also (unecessarily, in this case) reads the whole file
 itself:
 
 <P>
-sub myscan { <CODE>my(@includes);</CODE> do { <CODE>push(@includes,</CODE>
-/\b\S*?\.smf\b/g); } while &lt;SCAN&gt;; <CODE>@includes</CODE> }
-
+<PRE>  sub myscan {
+      my(@includes);
+      do {
+          push(@includes, /\b\S*?\.smf\b/g);
+      } while &lt;SCAN&gt;;
+      @includes
+  }
+</PRE>
 <P>
 Note that the order of the loop is reversed, with the loop test at the end.
 This is because the first line is already read for you. This scanner can be
@@ -2231,20 +2643,21 @@ attached to a source file by:
 <P>
 <PRE>    QuickScan $env \myscan, &quot;$_.smf&quot;;
 </PRE>
-<H1><A NAME="B_Support_and_Suggestions_">&lt;STRONG&gt;Support and Suggestions&lt;/STRONG&gt;</A></H1>
+<P>
+<HR>
+<H1><A NAME="Support_and_Suggestions">Support and Suggestions</A></H1>
 <P>
 Cons is maintained by the user community. To subscribe, send mail to
-<STRONG>cons-discuss-request@eng.fore.com</STRONG> with body <STRONG>subscribe</STRONG>.
+<STRONG>cons-discuss-request@gnu.org</STRONG> with body <STRONG>subscribe</STRONG>.
 
 <P>
 Please report any bugs/fixes/suggestions through the <A
-HREF="mailto:cons-discuss@eng.fore.com">cons-discuss@eng.fore.com</A>
-mailing list.
+HREF="mailto:cons-discuss@gnu.org">cons-discuss@gnu.org</A> mailing list.
 
 <P>
 The Official cons site is: <A
 HREF="http://www.dsmit.com/cons/">http://www.dsmit.com/cons/</A>
-</DL>
+
 </BODY>
 
 </HTML>
