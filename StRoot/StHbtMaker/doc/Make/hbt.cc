@@ -148,7 +148,7 @@ int main(int argc, char* argv[]) {
   } // Event Loop
   iret = hbtMaker->Finish();
 
- ((MinvCorrFctn*)hbtMaker->HbtManager()->Analysis(0)->CorrFctn(0))->Difference()->Draw();
+ ((MinvCorrFctn*)((StHbtAnalysis*)hbtMaker->HbtManager()->Analysis(0))->CorrFctn(0))->Difference()->Draw();
 
  return 0;
 } // main

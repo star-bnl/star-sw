@@ -91,6 +91,7 @@ StHbtAnalysis* phiAnal3;
 StHbtAnalysis* phiAnalCopy;
 StHbtAnalysis* deltaAnal;
 StHbtAnalysis* rhoAnal;
+StHbtAnalysis* lambdaAnal;
 
 // File-scope stuff needed by setFiles, nextFile. Someone ambitious
 // can clean this up by putting it all into a nice clean class.
@@ -454,12 +455,12 @@ cout << "READER SET UP.... " << endl;
  //franksPairCut* phiPairCut = new franksPairCut;  // use "frank's" pair cut object
  phiAnal->SetPairCut(phiPairCut);         // this is the pair cut for this analysis
  // 4) set the number of events to mix (per event)
- phiAnal->SetNumEventsToMix(25); 
+ phiAnal->SetNumEventsToMix(10); 
  // ********************************************************************
  // 5) now set up the correlation functions that this analysis will make
  // ********************************************************************
  // define example Minv correlation function
- MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",100,0.95,1.20); 
+ MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",200,0.95,1.25); 
  phiAnal->AddCorrFctn(MinvCF);   // adds the just-defined correlation function to the analysis
 
  MinvCorrFctnArmenteros* MinvCFArm = new MinvCorrFctnArmenteros("ArmenterosPodolanski",200,-1.,1.,300,0.,.3); 
@@ -495,10 +496,38 @@ cout << "READER SET UP.... " << endl;
  // 6) add the Analysis to the AnalysisCollection
  TheManager->AddAnalysis(phiAnal);
 
- //phiAnalCopy = new StHbtAnalysis( *phiAnal );
- //TheManager->AddAnalysis(phiAnalCopy);
+ // ********************************************* // 
+ // * franks lambda analysis - by Frank Laue, OSU //
+ // ********************************************* // 
+ //StHbtAnalysis* lambdaAnal = new StHbtAnalysis( *phiAnal );
+ lambdaAnal = new StHbtAnalysis( *phiAnal );
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetNSigmaPion(-1000.0,1000.0); // proton
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetNSigmaKaon(-1000.0,1000.0);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetNSigmaProton(-3.0,3.0);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetP(0.,2.);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetPt(0.,2.);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetCharge(-1);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetMass(0.938);
+ ((franksTrackCut*)lambdaAnal->FirstParticleCut())->SetDCA(10.0,50.);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetNSigmaPion(-3.0,3.0); //pion
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetNSigmaKaon(-1000.0,1000.0);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetNSigmaProton(-1000.0,1000.0);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetP(0.,2.);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetPt(0.,2.);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetCharge(-1);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetMass(0.139);
+ ((franksTrackCut*)lambdaAnal->SecondParticleCut())->SetDCA(10.0,50.);
+ TheManager->AddAnalysis(lambdaAnal);
  
- 
+ // ********************************************* // 
+ // * franks lambda analysis - by Frank Laue, OSU //
+ // ********************************************* // 
+ StHbtAnalysis* lambdaAnal2 = new StHbtAnalysis( *lambdaAnal );
+ delete  ((franksPairCut*)lambdaAnal2->PairCut());
+ franksPairCut* lambdaAnal2PairCut = new franksPairCut;  // use "frank's" pair cut object
+ lambdaAnal2->SetPairCut(lambdaAnal2PairCut);            // this is the pair cut for this analysis
+ //TheManager->AddAnalysis(lambdaAnal2);
+
  // ****************************************** // 
  // * franks rho analysis - by Frank Laue, OSU //
  // ****************************************** // 
@@ -602,6 +631,7 @@ cout << "READER SET UP.... " << endl;
  chain->Init(); // This should call the Init() method in ALL makers
  chain->PrintInfo();
  
+ // exit(); 
  for (Int_t iev=0;iev<nevents; iev++) {
    cout << "StHbtExample -- Working on eventNumber " << iev << endl;
    chain->Clear();
@@ -610,9 +640,6 @@ cout << "READER SET UP.... " << endl;
      cout << "Bad return code!" << endl;
      break;
    }
-   
-   
-   
  } // Event Loop
  chain->Finish(); // This should call the Finish() method in ALL makers
 
