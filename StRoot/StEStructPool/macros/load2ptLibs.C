@@ -1,6 +1,7 @@
 void load2ptLibs(){
 
 
+    gSystem->Load("libTable.so");
     gSystem->Load("libPhysics.so");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
