@@ -29,6 +29,8 @@ void DrawDstHist(
          << "                      );" << endl 
          << " Note: firstHistName = \"*\" is by default and means ALL histograms from the file should be drawn" << endl
          << " ----- lastHistName  = \"*\" is by default and means ALL histograms by the end of file should be drawn" << endl
+         << "       fileName      - may define either file or entire directory tree." << endl
+         << "                       For the directory all files from that will be used." << endl
          << endl ;
   if (gClassTable->GetID("StChain") < 0) Load();
   //  check file first
