@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.18 2003/10/25 00:15:02 fisyak Exp $
+ * $Id: StContainers.h,v 2.19 2004/03/01 17:44:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.19  2004/03/01 17:44:37  fisyak
+ * Add Print method
+ *
  * Revision 2.18  2003/10/25 00:15:02  fisyak
  * remove StPhmdHit and StPhmdCluster added by mistake
  *
@@ -100,6 +103,8 @@ class StV0Vertex;
 class StXiVertex;
 class StKinkVertex;
 class StL3AlgorithmInfo;
+class StPhmdHit;
+class StPhmdCluster;
 
 StCollectionDef(Object)
 StCollectionDef(CalibrationVertex)

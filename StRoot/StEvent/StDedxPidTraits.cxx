@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.10 2003/04/30 18:05:55 fisyak Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.11 2004/03/01 17:44:37 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.11  2004/03/01 17:44:37  fisyak
+ * Add Print method
+ *
  * Revision 2.10  2003/04/30 18:05:55  fisyak
  * Add P03ia flag, which fixes P03ia MuDst
  *
@@ -45,9 +48,10 @@
 #include "StDedxPidTraits.h"
 #include "StBichsel/Bichsel.h"
 #include "TMath.h"
+#include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.10 2003/04/30 18:05:55 fisyak Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.11 2004/03/01 17:44:37 fisyak Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
@@ -148,4 +152,14 @@ StDedxPidTraits::method() const
         break;
     }
 }
+//________________________________________________________________________________
+void StDedxPidTraits::Print(Option_t *opt) const {
+  cout << "StDedxPidTraits : \t method" << method()
+       << "\t encodedMethod :  " << encodedMethod()
+       << "\t numberOfPoints : " << numberOfPoints() 
+       << "\t length : "         << length()         
+       << "\t mean : "           << mean()           
+       << "\t errorOnMean : "    << errorOnMean()  << endl;
+       
+ }
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.10 2002/11/15 20:38:36 fisyak Exp $
+ * $Id: StDedxPidTraits.h,v 2.11 2004/03/01 17:44:38 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.11  2004/03/01 17:44:38  fisyak
+ * Add Print method
+ *
  * Revision 2.10  2002/11/15 20:38:36  fisyak
  * Set class version 2 for new calibration scheme
  *
@@ -66,6 +69,7 @@ public:
     float            length() const;
     float            mean() const;
     float            errorOnMean() const;
+    void             Print(Option_t *opt = "") const;
     
 protected:
     UShort_t mNumberOfPoints;
