@@ -73,14 +73,31 @@ enum ETTI { kUnknown=0,
       kUChar  = 11,  kUShort  = 12,  kUInt    = 13,  kULong   = 14};
 
 const char* NTTI[] = {"Unknown"
-,"Char_t"	,"Short_t"	,"Int_t"	,"Long_t"	,"Float_t"
-,"Wrong"	,"Wrong"	,"Double_t"	,"Wrong_t"	,"Wrong_t"
-,"UChar_t"	,"UShort_t"	,"UInt_t"       ,"ULong_t"	,0 
-,"Wrong_t"      ,"Wrong_t"      ,"Wrong_t"      ,"Wrong_t"      ,"Wrong_t"      
-,"Char_t*"	,"Short_t*"	,"Int_t*"	,"Long_*t"	,"Float_t*"
-,"Wrong_t*"	,"Wrong_t*"	,"Double_t*"	,"Wrong_t*"	,"Wrong_t*"
-,"UChar_t*"	,"UShort_t*"	,"UInt_t*"	,"ULong_t*"	,0};
-
+,"Char_t"	 ,"Short_t"	   ,"Int_t"	   ,"Long_t"	    ,"Float_t"
+,"_______"	 ,"_______" 	   ,"Double_t"	   ,"_______"	    ,"_______"
+,"UChar_t"	 ,"UShort_t"	   ,"UInt_t"       ,"ULong_t"	    ,"_______" 
+,"_______"       ,"_______"        ,"_______"      ,"_______"       ,"_______"      
+,"Char_t*"	 ,"Short_t*"	   ,"Int_t*"	   ,"Long_*t"	    ,"Float_t*"
+,"_______*"	 ,"_______*"	   ,"Double_t*"	   ,"_______*"	    ,"_______*"
+,"UChar_t*"	 ,"UShort_t*"	   ,"UInt_t*"	   ,"ULong_t*"	    ,"_______*"
+,"_______"       ,"_______"        ,"_______"      ,"_______"       ,"_______"      
+,"char"  	 ,"short"  	   ,"int"  	   ,"long"  	    ,"float"  
+,"_____"	 ,"_____"	   ,"double"  	   ,"_____"  	    ,"_____"  
+,"uchar"  	 ,"ushort"  	   ,"uint"         ,"ulong"  	    ,"_____"   
+,"_____"         ,"_____"          ,"_____"        ,"_____"         ,"_____"        
+,"char*"  	 ,"short*"  	   ,"int*"  	   ,"long_*t"	    ,"float*"  
+,"_____*"  	 ,"_____*"  	   ,"double*"  	   ,"_____*"  	    ,"_____*"  
+,"uchar*"  	 ,"ushort*"  	   ,"uint*"  	   ,"ulong*"  	    ,"_____*"  
+,"_____"         ,"_____"          ,"_____"        ,"_____"         ,"_____"        
+,"char"  	 ,"short"  	   ,"int"  	   ,"long"  	    ,"float"  
+,"_____"	 ,"_____"	   ,"double"  	   ,"_____"  	    ,"_____"  
+,"unsigned char" ,"unsigned short" ,"unsigned int" ,"unsigned long" ,"_____"   
+,"_____"         ,"_____"          ,"_____"        ,"_____"         ,"_____"        
+,"char*"  	 ,"short*"  	   ,"int*"  	   ,"long_*t"	    ,"float*"  
+,"_____*"  	 ,"_____*"  	   ,"double*"  	   ,"_____*"  	    ,"_____*"  
+,"unsigned char*","unsigned short*","unsigned int*","unsigned long*","_____*"  
+,"_____"         ,"_____"          ,"_____"        ,"_____"         ,"_____"        
+,0};
 
 
 
@@ -308,6 +325,7 @@ void TTreeIter::GetInfo(const TBranch *tbp, const char *&tyName
               if (!se) { tyName = si->GetName(); }
               else     { tyName = se->GetTypeName();}
              }
+              if (strcmp("TClonesArray",tyName)==0 && tb->GetSplitLevel()) tyName=0;
               break;
 #endif
      case 2: max = 0; tyName = "Int_t"; return;
@@ -395,7 +413,8 @@ TTreeIterCast &TTreeIter::operator() (const TString varname)
 //______________________________________________________________________________
 TTreeIterCast &TTreeIter::operator() (const char *varname)
 {
-   void *addr = Void(varname);
+   Void(varname);
+   void *addr = fCast.Addr();
    if (fCint)  {
      fCint = 0;
      TTreeIterCast *v =(TTreeIterCast*)addr;
@@ -498,8 +517,13 @@ const char *TTreeIter::IsCorrupted() const
 {
 
   int n = fMemList.GetEntriesFast();
+  Assert(n>=0 && n<10000);
   for (int i=0;i<n;i++) {
     TTreeIterMem *t = (TTreeIterMem*)fMemList.UncheckedAt(i);
+    Assert(t);
+    Assert(t->fMem);
+    Assert(t->fSize>0);
+
     char *perev = t->fMem+t->fSize;
     if (strcmp(perev,"Perev") ==0 ) continue;
     Error("IsCorrupted","Branch=%s Units=%d Mem=%p ***\n",t->GetName(),fUnits,perev);
@@ -585,7 +609,7 @@ Int_t TTreeIter::TypeSize(Int_t ity)
 //______________________________________________________________________________
 Int_t  TTreeIter::TypeCode(const char *typeName)
 {
-   for (int i=1; NTTI[i]; i++) {if (strcmp(typeName,NTTI[i])==0) return i;}
+   for (int i=1; NTTI[i]; i++) {if (strcmp(typeName,NTTI[i])==0) return i%20;}
 // printf("*** TypeCode ERROR: %s is UNKNOWN ***\n",typeName);
    return 0;
 } 
