@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.21 2001/10/24 04:05:56 porter Exp $
+ * $Id: StDbBroker.h,v 1.22 2001/10/26 15:44:02 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.22  2001/10/26 15:44:02  porter
+ * add query by runNumber
+ *
  * Revision 1.21  2001/10/24 04:05:56  porter
  * added zombie designation per Victor's suggestion
  *
@@ -140,6 +143,8 @@ struct oldDescriptor {
     UInt_t       m_endTimeStamp; // unix endTime
     UInt_t       m_requestTimeStamp; // unix requestTime
 
+    UInt_t       m_runNumber;  // run number of queries of runlog
+
     char*        m_tableVersion; // name of the version of the table
     char*        m_database;     // name of the database for this table
     char*        m_ParentType;   // named dbType when "top" db is domain-level
@@ -154,6 +159,7 @@ struct oldDescriptor {
     int           buildNodes(StDbConfigNode* node, int pID);
 
     Bool_t         m_isZombie;
+   
 
   public:
 
@@ -217,6 +223,7 @@ struct oldDescriptor {
     };
 
     void   SetDateTime(UInt_t date,UInt_t time);
+    void   SetRunNumber(UInt_t runNumber);
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
     void   SetDictionary(Descriptor *D)
