@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.3 2003/12/03 11:50:29 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.4 2004/03/11 11:29:46 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.4  2004/03/11 11:29:46  subhasis
+ *Changes made for PMD run config
+ *
  *Revision 1.3  2003/12/03 11:50:29  subhasis
  *Comment header changed by Supriya
  *
@@ -21,6 +24,10 @@
 #include "StPmdReadMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
+
+#include "StDbLib/StDbManager.hh"
+#include "StDbLib/StDbTable.h"
+#include "StDbLib/StDbConfigNode.hh"
 
 #include "StGlobals.hh"
 #include "StPmdUtil/StPmdCollection.h"
@@ -44,13 +51,12 @@
 #include "StBFChain.h"
 //
 ClassImp(StPmdReadMaker) // macro
-   
-//FILE *fp = fopen("checking.dat","w");
-
+  
+  
 //-----------------------------------------------------------------
-
+  
 StPmdReadMaker::StPmdReadMaker(const char *name)
-  : StMaker(name)
+    : StMaker(name)
 {
   mThePmdReader=NULL;
   mEvtPmdCollection=NULL;
@@ -63,176 +69,218 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
   m_PmdCalibConst=NULL;
   mPmdGeom = new StPmdGeom();
   mPmdDBUtil = new StPmdDBUtil();
-
+  mChainTh=0;
+  mCalibFlag=kFALSE;
+  
 }
 
 //-----------------------------------------------------------------
 
 StPmdReadMaker::~StPmdReadMaker() {
-if(mPmdGeom){mPmdGeom=0; delete mPmdGeom;}
-if(mPmdDBUtil){mPmdDBUtil=0; delete mPmdDBUtil;}
-if(mThePmdReader)delete mThePmdReader;
-if(mTheDataReader)delete mTheDataReader;
-if(mThePmdData)delete mThePmdData;
-if(mPmdEvent)delete mPmdEvent;
-if(mCpvEvent)delete mCpvEvent;
-if(mPmdCollection)delete mPmdCollection;
-if(mDb)delete mDb;
-if(m_PmdCalibConst)delete m_PmdCalibConst;
+  if(mPmdGeom){mPmdGeom=0; delete mPmdGeom;}
+  if(mPmdDBUtil){mPmdDBUtil=0; delete mPmdDBUtil;}
+  if(mThePmdReader)delete mThePmdReader;
+  if(mTheDataReader)delete mTheDataReader;
+  if(mThePmdData)delete mThePmdData;
+  if(mPmdEvent)delete mPmdEvent;
+  if(mCpvEvent)delete mCpvEvent;
+  if(mPmdCollection)delete mPmdCollection;
+  if(mDb)delete mDb;
+  if(m_PmdCalibConst)delete m_PmdCalibConst;
 }
 
 //-----------------------------------------------------------------
 
 Int_t StPmdReadMaker::Init() {
-if(mPmdPrint)gMessMgr->Info("StPmdReaderMaker::Init()");
-  //moved to Make(), Later on will be kept in InitRun, if needed
-  //    ReadCalibrationsConst();
-
-    
+  if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Init()");
+  
   return StMaker::Init();
 }
 //-----------------------------------------------------------------
 Int_t StPmdReadMaker::InitRun(Int_t runnr) {
-  ReadCalibrationsConst();
-  return StMaker::InitRun(runnr);
+  if(mPmdPrint)gMessMgr->Info("StPmdReaderMaker::InitRun()");
+  
+  mRunNumber = runnr;
 
+  if(mRunNumber < 5034042) mVmeCond = 1;
+  else if(mRunNumber >= 5034042 && mRunNumber < 5049020) mVmeCond = 2;
+  else mVmeCond = 3;
+
+ if(mPmdPrint) cout<<"Run Number, VME Condition : "<<mRunNumber<<" "<<mVmeCond<<endl;
+					 
+  ReadCalibrationsConst();
+ 
+  return StMaker::InitRun(runnr);
 }
+
 //------------------------------------------------------------------
 Int_t StPmdReadMaker::Make() {
+  if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Make()");
 
-if(mPmdPrint)gMessMgr->Info("StPmdReaderMaker::Make()");
-  //cout<<"calib const to be read "<<endl;
   mThePmdData   = GetDataSet("StDAQReader");
-
+  
   if(!mThePmdData) {
-gMessMgr->Info("StPmdReaderMaker::Make()");
-gMessMgr->Info("DataSet: StDAQReader not there()");
-gMessMgr->Info("Skip this event");
-return kStWarn;
-  }
-  else{gMessMgr->Info("GOT DaqReader dataset");}
-
-  mTheDataReader = (StDAQReader*)(mThePmdData->GetObject());
-  if(!mTheDataReader) {
-gMessMgr->Info("StPmdReaderMaker::Make()");
-gMessMgr->Info("DataSet: PMDData not there()");
-gMessMgr->Info("Skip this event");
-return kStWarn;
-  }
-  else{gMessMgr->Info("GOT DaqReader object, look for PMD**");}
-  // Will be ON once Victor fixes PMD present in StDAQMaker
-	    
-  /*	    if ( !(mTheDataReader->PMDPresent())) {
-	    cout << "StPmdreaderMaker::Maker()\n";
-	    cout << "\tPMD  not in datastream\n";
-	    cout << "\tSkip this event\n" << endl;
-	    return kStWarn;
-	    }
-	    else{cout<<"PMD prsent seen from datareader"<<endl;}
-  */
-  mThePmdReader = mTheDataReader->getPMDReader();
-
-  if(mThePmdReader) {
-  //printf("**********NPMDHITS==%d\n", mThePmdReader->NPMDHits() );
-  }
-  else {
-gMessMgr->Info("StPmdReaderMaker::Make()");
-gMessMgr->Info("Could not get PMD Reader");
-gMessMgr->Info("Skip this event");
+    gMessMgr->Info("StPmdReadMaker::Make()");
+    gMessMgr->Info("DataSet: StDAQReader not there()");
+    gMessMgr->Info("Skip this event");
     return kStWarn;
   }
-
+  else{gMessMgr->Info("GOT DaqReader dataset");}
+  
+  mTheDataReader = (StDAQReader*)(mThePmdData->GetObject());
+  if(!mTheDataReader) {
+    gMessMgr->Info("StPmdReadMaker::Make()");
+    gMessMgr->Info("DataSet: PMDData not there()");
+    gMessMgr->Info("Skip this event");
+    return kStWarn;
+  }
+  else{gMessMgr->Info("GOT DaqReader object, look for PMD**");}
+ 
+  if ( !(mTheDataReader->PMDPresent())) {
+    cout << "StPmdreaderMaker::Maker()\n";
+    cout << "\tPMD  not in datastream\n";
+    cout << "\tSkip this event\n" << endl;
+    return kStWarn;
+  }
+  else{cout<<"PMD present seen from datareader"<<endl;}
+  
+  mThePmdReader = mTheDataReader->getPMDReader();
+  
+  if(mThePmdReader) {
+    //printf("**********NPMDHITS==%d\n", mThePmdReader->NPMDHits() );
+  }
+  else {
+    gMessMgr->Info("StPmdReaderMaker::Make()");
+    gMessMgr->Info("Could not get PMD Reader");
+    gMessMgr->Info("Skip this event");
+    return kStWarn;
+  }
+  
   int adc[2*PMD_CRAMS_MAX*2*(PMD_CRAMS_CH_MAX)];
-
-
+  
+  
   int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
-  //if(ret!=kStOK){gMessMgr->Info("Problem in getting PMD data:GetData");return kStWarn;} 
+  
   cout<<"No of cells = "<<ret<<endl;
-
+  
   Int_t result=ApplyMapping(&adc[0]);
-  if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");return kStWarn;} 
-
-
+  if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
+  return kStWarn;
+  } 
+  
+  
   //	if(mThePmdReader) {
   //	    delete mThePmdReader;
   //	}
   //	mThePmdReader = 0;
-
-
+  
+  
   return kStOK;
 }
 
 
 Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 {
-
+  mPmdGeom->readBoardDetail(mRunNumber); //!Read status of the FEE boards to apply proper mapping 
+  
   mPmdCollection = new StPmdCollection("PmdCollection");
   m_DataSet->Add(mPmdCollection);
-  StPmdDetector* det0 = mPmdCollection->detector(0);
-  StPmdDetector* det1 = mPmdCollection->detector(1);
-
-  Int_t supmod,row,col;
+  StPmdDetector* det0 = mPmdCollection->detector(0); //! Collection for CPV
+  StPmdDetector* det1 = mPmdCollection->detector(1); //! Collection for PMD
+  
+  Int_t Chain_No,supmod,row,col,SubDet;
   int AddCh_Count=0;
-  Int_t TotalHit=0;	
-  for(int SEC=0; SEC < PMD_SECTOR; SEC++){
+   for(int SEC=0; SEC < PMD_SECTOR; SEC++){
     for(int CRAM=0; CRAM < PMD_CRAMS_MAX; CRAM++){
       for(int BLOCK=0; BLOCK < PMD_CRAMS_BLOCK; BLOCK++){
 	for(int CHANNEL=0; CHANNEL < PMD_CRAMS_CH_MAX; CHANNEL++){
-	  Int_t Chain_No=(CRAM+1)+(SEC*PMD_CRAMS_MAX)+(BLOCK*2*PMD_CRAMS_MAX);
 	  Int_t channel=CHANNEL+1;
+	  
+	  //Added for diffrent VME Crate conditions ////////////
+
+	  switch (mVmeCond){
+	    
+	  case 1: 
+	    {
+	      if(SEC==0){
+		if(BLOCK==0)Chain_No=25+CRAM;
+		if(BLOCK==1)Chain_No=37+CRAM;
+	      }	
+              else return kStOK;	      
+	    }
+	    break; 
+	  case 2: 
+	    {
+	      Chain_No=(CRAM+1)+(SEC*PMD_CRAMS_MAX)+(BLOCK*2*PMD_CRAMS_MAX);
+	    }
+	    break;
+	  case 3:
+	    {
+	      if(SEC==0 && BLOCK==0 && CRAM==9) Chain_No = 39;
+	      else if(SEC==0 && BLOCK==0 && CRAM==10) Chain_No = 40;
+	      else Chain_No=(CRAM+1)+(SEC*PMD_CRAMS_MAX)+(BLOCK*2*PMD_CRAMS_MAX); 
+	    }
+	    break;
+	  }
+	  //   VME Condition Ends ///////////////////////////////////
+	  
+	  // Setting the SubDetector No.
+	  
+	  if (Chain_No >= 1 && Chain_No < 25) SubDet = 2; //! Chains from PMD 	  
+	  if (Chain_No >= 25 && Chain_No <= 48) SubDet = 1; //! Chains from CPV
+
+          // Apply Mapping to get the sm, row and col here
+	  // 	  
 	  mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row);
 	  Int_t DaqADC=adc[AddCh_Count];
 	  AddCh_Count++;
-	  // apply calib const here
-	  //
+	  
 	  if(DaqADC>0){
-	    TotalHit++;
-	    Float_t calib=1.;
-	    if(supmod<=(2*PMD_CRAMS_MAX) && row <=PMD_ROW_MAX && col <=PMD_COL_MAX){
-	    	Int_t brdno=0;
-		mPmdDBUtil->BoardNumber(supmod-1,row-1,col-1,brdno);
-		Int_t brdch=0;
-		mPmdDBUtil->ChannelInBoard(supmod-1,row-1,col-1,brdch);
+	    
+	  // Apply uniformity calibration here
+	  //
+	    if(mCalibFlag){
+	      Float_t calib = 0;
 
-	    	//if(brdno>0 && brdch>0)calib=m_MipPeak[brdno][brdch];
-	    	if(brdno>0 && brdch>0)calib=m_PmdCalibConst[brdno-1].MipPeakPosition[brdch];
-	         }
-	    if(calib!=0)DaqADC=(Int_t)(DaqADC*calib);
-
+	      if(supmod<=(2*PMD_CRAMS_MAX) && row <=PMD_ROW_MAX && col <=PMD_COL_MAX){
+		
+		Int_t stCalib = GetCalib(supmod,row,col,calib); 
+		if(stCalib != kStOK)gMessMgr->Info("Problem in getting Calibration Constant");
+		if(calib!=0)DaqADC=(Int_t)(DaqADC*calib);
+  	      } //Check on overflow of supmod, row col
+	    } // Calibration flag     
+	    
 	    // Converting ADC to Edep
-
 	    Float_t edep=0;
-	 
 	    mPmdGeom-> ADC2Edep(DaqADC, edep);
-
 	    if(edep<0) edep=0;
-
+	    
 	    //Fill StPmdHit
 	    StPmdHit *pmdhit = new StPmdHit();
 	    if(supmod>PMD_CRAMS_MAX)supmod-=PMD_CRAMS_MAX;
-	    pmdhit->setGsuper(Int_t(supmod));     //! filling supermodule no
-	    pmdhit->setSubDetector(Int_t(BLOCK+1)); //! filling subdetector
+	    pmdhit->setGsuper(Int_t(supmod));      //! filling supermodule no
+	    pmdhit->setSubDetector(Int_t(SubDet)); //! filling subdetector
 	    pmdhit->setRow(Int_t(row));            //! filling row
 	    pmdhit->setColumn(Int_t(col));         //! filling col
-	    pmdhit->setAdc(Int_t(DaqADC));       //! filling ADC   
+	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
 	    pmdhit->setEdep(Float_t(edep));        //! filling energy   
-	    if(BLOCK==0)det0->addHit(pmdhit);
-	    if(BLOCK==1)det1->addHit(pmdhit);
+	    if(SubDet==1)det0->addHit(pmdhit);
+	    if(SubDet==2)det1->addHit(pmdhit);
 	    if(mPmdPrint)cout<<"Applymap:Chain "<<Chain_No<<"channel "<<channel<<"supmod "<<supmod<<"col  "<<col<<" row "<<row<<"ADC "<<DaqADC<<"BLOCK "<<BLOCK<<endl;	
-	  }
-
-	}
-      }
-    }
-  }
-
-  if(mPmdPrint)cout<<"StEvent to be called **"<<endl;
+	  } //Check on non zero DaqADC
+	  
+	} //CHANNEL
+      } //BLOCK
+    } //C-RAM
+   } //SEC
+  
+  if(mPmdPrint)gMessMgr->Info("StEvent to be called **");
   Int_t testevt=fillStEvent(det0,det1);
-  if(testevt!=kStOK)cout<<"problem in fillStEvent"<<endl;
-
+  if(testevt!=kStOK)gMessMgr->Info("Problem in fillStEvent");
+  
   return kStOK;
 }
-
+//-------------------------------------------------------------------------
 
 Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det)
 {
@@ -241,18 +289,19 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
   if(!currevent){
     gMessMgr->Info("NO STEVENT**");
     //	   StEvent *currevent=new StEvent();
-
+    
     return kStWarn;
   }
   // Create PhmdCollection, first Maker in Chain, so here it is created
   mEvtPmdCollection = new StPhmdCollection();
   currevent->setPhmdCollection(mEvtPmdCollection);
+ 
   //Set the Detectors to PhmdCollection
   if(mEvtPmdCollection){
     mPmdEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdId)); 
     mCpvEvent = mEvtPmdCollection->detector(StDetectorId(kPhmdCpvId));
   }
-   
+  
   //  if(!mEvtPmdCollection){
   //  cout<<"No PMDCOLLECTION **, Creating one"<<endl;
   //  mEvtPmdCollection = new StPhmdCollection();
@@ -264,7 +313,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
   for(Int_t id=1;id<(PMD_CRAMS_MAX+1);id++){
 
     //Fill StEvent info for PMD and CPV, first PMD(subdet=1)
-    Int_t subdet=1;
+    
     StPmdModule * pmd_mod=pmd_det->module(id);
     Int_t nmh1=pmd_det->module_hit(id);
 
@@ -275,41 +324,47 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
 	{
 	  spmcl1 = (StPmdHit*)next();
 	  if(spmcl1){
-	    Int_t gsuper=spmcl1->Gsuper();
+            Int_t subdet=spmcl1->SubDetector();
+      	    Int_t gsuper=spmcl1->Gsuper();
 	    Int_t col=spmcl1->Column();
 	    Int_t row=spmcl1->Row();
 	    Float_t edep=spmcl1->Edep();
 	    Int_t adc=spmcl1->Adc();
+	    
 	    //! Filling PmdHit for StEvent
+	    
 	    StPhmdHit *phit = new StPhmdHit();
-	    phit->setSuperModule(Int_t(gsuper-1));     // filling supermodule no (range 0-11)
-	    phit->setSubDetector(Int_t(subdet)); // filling subdetector
-	    phit->setRow(Int_t(row));            // filling row
-	    phit->setColumn(Int_t(col));         // filling col
-	    phit->setEnergy(edep);              // filling energy
-	    phit->setAdc(adc);              // filling ADC
- //fprintf(fp,"%d %d %d %d %f %d\n", subdet,gsuper-1,row,col,edep,adc);	    
+	    phit->setSuperModule(Int_t(gsuper-1)); // filling supermodule no (range 0-11)
+	    phit->setSubDetector(Int_t(subdet));   // filling subdetector
+	    phit->setRow(Int_t(row));              // filling row
+	    phit->setColumn(Int_t(col));           // filling col
+	    phit->setEnergy(edep);                 // filling energy
+	    phit->setAdc(adc);                     // filling ADC
+	    
 	    if(mPmdEvent)mPmdEvent->addHit(phit);
 	  }
 	}
     }
 
-    //CPVV    //////
+    //Now CPV (subdet=2)    //////
+    
     Int_t nmh2=cpv_det->module_hit(id);
     StPmdModule * cpv_mod=cpv_det->module(id);
+    
     if(nmh2>0){
-      subdet=2;
       TIter next(cpv_mod->Hits());
       StPmdHit *spmcl2;
       for(Int_t im=0; im<nmh2; im++)
 	{
 	  spmcl2 = (StPmdHit*)next();
 	  if(spmcl2){
+            Int_t subdet=spmcl2->SubDetector();
 	    Int_t gsuper=spmcl2->Gsuper();
 	    Int_t col=spmcl2->Column();
 	    Int_t row=spmcl2->Row();
 	    Float_t edep=spmcl2->Edep();
 	    Int_t adc=spmcl2->Adc();
+	    
 	    StPhmdHit *phit = new StPhmdHit();
 
 	    phit->setSuperModule(Int_t(gsuper-1));
@@ -318,6 +373,7 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
 	    phit->setColumn(Int_t(col));
 	    phit->setEnergy(edep);
 	    phit->setAdc(adc);              
+	    
 	    if(mCpvEvent)mCpvEvent->addHit(phit);
 	  }
 	}
@@ -325,27 +381,23 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_det
   }
   return kStOK;
 }
-
+//------------------------------------------------------------------
 
 Int_t StPmdReadMaker::Finish() {
-
-//fclose(fp);
-
+  if(mPmdPrint)gMessMgr->Info("StPmdReadMaker::Finish()");
+  
   return StMaker::Finish();
 }
+//------------------------------------------------------------------
 
-
-
-/*!
-  This method obtains the calibration constants for applying uniformity
-*/
+//! This method obtains the calibration constants for applying uniformity
 Bool_t StPmdReadMaker::ReadCalibrationsConst()
 {
   mDb=NULL;
   TString DbName = "Calibrations/pmd/";
   mDb=GetInputDB(DbName.Data());
   if(!mDb) return kFALSE;
-  	  
+
   //getting tables ////////////////////////////////////////////////////
 	
   pmdCalSummary_st* pmdcalsum = NULL;
@@ -358,24 +410,19 @@ Bool_t StPmdReadMaker::ReadCalibrationsConst()
   if(a) pmdcalibst = a->GetTable();
   if(!pmdcalibst) return kFALSE;
   m_PmdCalibConst=pmdcalibst;		
-
-  /*
-  //loop over all boards and all channels //
-  Int_t MAX_BRD= 1296;
- 
-    for(Int_t id=1;id<=MAX_BRD;id++)
-    {
-      for(Int_t ich=0;ich<PMD_BOARD_CH_MAX;ich++){
-	Float_t c = pmdcalibst[id-1].MipPeakPosition[ich];
-	cout<<"id-1, ich "<<id-1<<" "<<ich<<"calib "<<c<<endl;
-
-//	m_MipPeak[id-1][ich]=c;
-      }
-
-    }
- //
-  */
-
+  
   return kTRUE;
 }
+//------------------------------------------------------------------
+Int_t StPmdReadMaker::GetCalib(int supmod,int row,int col,float& calib){
 
+    Int_t brdno=0;
+    mPmdDBUtil->BoardNumber(supmod-1,row-1,col-1,brdno);
+    
+    Int_t brdch=0;
+    mPmdDBUtil->ChannelInBoard(supmod-1,row-1,col-1,brdch);
+    
+    if(brdno>0 && brdch>0) calib=m_PmdCalibConst[brdno-1].MipPeakPosition[brdch];
+   
+return kStOK;    
+}
