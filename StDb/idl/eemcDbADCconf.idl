@@ -8,8 +8,8 @@
 
 struct eemcDbADCconf { 
 
-   char  name[16000];   /*   sector/subsector/tower or strip or preTower ...  */
-   long  crate[1000];   /*   crate holding FEEs  */
+   char  name[16000];   /*    sector/subsector/tower or strip or preTower ...  */
+   long  crate[1000];   /*   slot  */
    long  channel[1000];   /*   channel  */
    char  comment[160];   /*   comment  */
 
