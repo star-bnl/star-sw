@@ -26,7 +26,9 @@ endif
 #
 # Determine STAF_ARCH variable.
 #
-STAF_ARCH := $(shell sys)
+ifndef STAF_ARCH
+   STAF_ARCH := $(shell sys)
+endif
 #
 
 UNAMES := $(shell uname -s)

@@ -12,7 +12,6 @@ SUFF_IDL := idl
 ###	Suppress all imlicit rules
 .SUFFIXES:
 
-include $(STAF_HOME)/MakeEnv.mk
 include $(STAF_HOME)/MakeArch.mk
 
 #
