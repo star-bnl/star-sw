@@ -19,10 +19,10 @@ void RunStiMaker(Int_t nevents=1,
 //const char *MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_04_01/*.event.root")
 
 //This file points to 30 events of 10 neg muons w/ pt=.9
-const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+//const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
 
 //This file points to 110 events from mevsim (homebrew had. cocktail)
-//const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
+const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
 
 //This file points to a nightly low density hadronic cocktail reconstruction.
 //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
@@ -169,67 +169,6 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
      }
      iev++; goto EventLoop;
  }
-    
-    //Now we can do diagnostics
-    /*! if (draw==false) {
-      cout <<"\n\n***** Processed "<<iev-1<<" events with ";
-      cout <<TestTree->GetEntries()<<" tracks ******\n"<<endl;
-      
-      //This needs to be done by hand (ugly!):
-      TH1D* gids = new TH1D("gids","Geant Id",101, -.5, 100.5);
-      TestTree->Draw("mcTrackId>>gids");
-      cout <<"\tGeant Id:\tNumber of Tracks"<<endl;
-      cout <<"\t---------\t----------------"<<endl;
-      for (int i=0; i<gids->GetNbinsX(); ++i) {
-      if (gids->GetBinContent(i)>0.) {
-      cout <<"\t"<<gids->GetBinCenter(i)<<"\t\t"<<gids->GetBinContent(i)<<endl;
-      }
-      }
-      cout <<endl;
-      
-      cout <<"\t\tVariable\tMean\t\tRMS"<<endl;
-      cout <<"\t\t--------\t----\t\t---\n"<<endl;
-      
-      cout <<"ITTF Tracks"<<endl;
-      
-      canvas1 = new TCanvas("canvas1","ITTF Track Benchmarks",100,50,800,700);
-      canvas1->Divide(2,2);
-      
-      canvas1->cd(1);
-      TestTree->Draw("stiTrackPt");
-      htemp->SetXTitle("Pt (GeV)");
-      cout <<"\t\tPt\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
-      
-      canvas1->cd(2);
-      //TestTree->Draw("stiTrackEta");
-      //htemp->SetXTitle("Eta");
-      
-      canvas1->cd(3);
-      TestTree->Draw("stiTrackChi2");
-      htemp->SetXTitle("Chi2");
-      cout <<"\t\tChi2\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
-      
-      cout <<"Global Tracks"<<endl;
-      
-      canvas2 = new TCanvas("canvas2","Global Track Benchmarks",150,50,850,700);
-      canvas2->Divide(2,2);
-      
-      canvas2->cd(1);
-      TestTree->Draw("globalTrackPt");
-      htemp->SetXTitle("Pt (GeV)");
-      cout <<"\t\tPt\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
-      
-      canvas2->cd(2);
-      TestTree->Draw("globalTrackEta");
-      htemp->SetXTitle("Eta");
-      
-      canvas2->cd(3);
-      TestTree->Draw("globalTrackChi2");
-      htemp->SetXTitle("Chi2");
-      cout <<"\t\tChi2\t\t"<<htemp->GetMean()<<"\t\t"<<htemp->GetRMS()<<endl;
-      
-      }
-    */
  
  return;
 }

@@ -3,10 +3,13 @@
 
 hitFilterType:		 StTpcPadrowHitFilter
 
+//Only associations with commonHits g.t. this value will be used
+lowerBound:		 5
+
 //min padrow
-mMinPadrow:		10
+mMinPadrow:		20
 //mMinPadrow:		1
 
 //max padrow
-mMaxPadrow:		35
-//mMaxPadrow:		45
+//mMaxPadrow:		35
+mMaxPadrow:		45
