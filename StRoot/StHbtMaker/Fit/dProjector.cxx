@@ -14,6 +14,9 @@
 #ifdef __ROOT__
 ClassImp(dProjector)
 #endif
+
+#define __ABS__(x) (x>0) ? x : -x
+
   
 //___________________
 dProjector::dProjector(dFitter3d* dFitter) 
@@ -66,9 +69,9 @@ TH1D* dProjector::get1dProjection(TString axis, double xmin, double xmax, double
   double proMin = 0.0 ;
   double proMax = 0.0 ;
   char* axistitle = new char[20] ;
-  if (axis == "x")        {  proNbins = abs(xmaxBin-xminBin)+1 ;  proMin = xmin ; proMax = xmax ; strcpy(axistitle,mRatio->GetXaxis()->GetTitle()) ; }
-  else if (axis == "y")   {  proNbins = abs(ymaxBin-yminBin)+1 ;  proMin = ymin ; proMax = ymax ; strcpy(axistitle,mRatio->GetYaxis()->GetTitle()) ; }
-  else if (axis == "z")   {  proNbins = abs(zmaxBin-zminBin)+1 ;  proMin = zmin ; proMax = zmax ; strcpy(axistitle,mRatio->GetZaxis()->GetTitle()) ; }
+  if (axis == "x")        {  proNbins = __ABS__(xmaxBin-xminBin)+1 ;  proMin = xmin ; proMax = xmax ; strcpy(axistitle,mRatio->GetXaxis()->GetTitle()) ; }
+  else if (axis == "y")   {  proNbins = __ABS__(ymaxBin-yminBin)+1 ;  proMin = ymin ; proMax = ymax ; strcpy(axistitle,mRatio->GetYaxis()->GetTitle()) ; }
+  else if (axis == "z")   {  proNbins = __ABS__(zmaxBin-zminBin)+1 ;  proMin = zmin ; proMax = zmax ; strcpy(axistitle,mRatio->GetZaxis()->GetTitle()) ; }
   else { cout << "Wrong axis in projector, this should not happen ! "<< endl ; return 0; } ;
 
   // create 1d histo
@@ -83,7 +86,7 @@ TH1D* dProjector::get1dProjection(TString axis, double xmin, double xmax, double
   m1dfit->SetName(fittitle);
   m1dfit->SetLineColor(2) ;
   m1dfit->SetLineStyle(2) ;
-  m1dfit->SetLineWidth(0.5) ;
+  m1dfit->SetLineWidth(5) ;
   m1dnor = new TH1D("my1dnor","my1dnor",proNbins,proMin,proMax) ;
   char normtitle[20] ; sprintf(normtitle,"norm%s%d\n",axis.Data(),ran) ;
   m1dnor->SetName(normtitle);
@@ -152,18 +155,18 @@ TH2D* dProjector::get2dProjection(TString axis, double xmin, double xmax, double
 
     if (axis == "x")        
 	{  
-	    proNbinsX = abs(ymaxBin-yminBin)+1 ;  proMinX = ymin ; proMaxX = ymax ; strcpy(axistitleX,mRatio->GetYaxis()->GetTitle()) ; 
-	    proNbinsY = abs(zmaxBin-zminBin)+1 ;  proMinY = zmin ; proMaxY = zmax ; strcpy(axistitleY,mRatio->GetZaxis()->GetTitle()) ; 
+	    proNbinsX = __ABS__(ymaxBin-yminBin)+1 ;  proMinX = ymin ; proMaxX = ymax ; strcpy(axistitleX,mRatio->GetYaxis()->GetTitle()) ; 
+	    proNbinsY = __ABS__(zmaxBin-zminBin)+1 ;  proMinY = zmin ; proMaxY = zmax ; strcpy(axistitleY,mRatio->GetZaxis()->GetTitle()) ; 
 	}
     else if (axis == "y")   
 	{  
-	    proNbinsX = abs(zmaxBin-zminBin)+1 ;  proMinX = zmin ; proMaxX = zmax ; strcpy(axistitleX,mRatio->GetZaxis()->GetTitle()) ; 
-	    proNbinsY = abs(xmaxBin-xminBin)+1 ;  proMinY = xmin ; proMaxY = xmax ; strcpy(axistitleY,mRatio->GetXaxis()->GetTitle()) ;
+	    proNbinsX = __ABS__(zmaxBin-zminBin)+1 ;  proMinX = zmin ; proMaxX = zmax ; strcpy(axistitleX,mRatio->GetZaxis()->GetTitle()) ; 
+	    proNbinsY = __ABS__(xmaxBin-xminBin)+1 ;  proMinY = xmin ; proMaxY = xmax ; strcpy(axistitleY,mRatio->GetXaxis()->GetTitle()) ;
 	}
     else if (axis == "z")   
 	{  
-	    proNbinsX = abs(xmaxBin-xminBin)+1 ;  proMinX = xmin ; proMaxX = xmax ; strcpy(axistitleX,mRatio->GetXaxis()->GetTitle()) ; 
-	    proNbinsY = abs(ymaxBin-yminBin)+1 ;  proMinY = ymin ; proMaxY = ymax ; strcpy(axistitleY,mRatio->GetYaxis()->GetTitle()) ;
+	    proNbinsX = __ABS__(xmaxBin-xminBin)+1 ;  proMinX = xmin ; proMaxX = xmax ; strcpy(axistitleX,mRatio->GetXaxis()->GetTitle()) ; 
+	    proNbinsY = __ABS__(ymaxBin-yminBin)+1 ;  proMinY = ymin ; proMaxY = ymax ; strcpy(axistitleY,mRatio->GetYaxis()->GetTitle()) ;
 	}
 
     else { cout << "Wrong axis in projector, this should not happen ! "<< endl ; return 0; } ;

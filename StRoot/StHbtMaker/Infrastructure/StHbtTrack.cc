@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.11 2001/12/14 23:11:30 fretiere Exp $
+ * $Id: StHbtTrack.cc,v 1.12 2002/02/04 18:58:33 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.12  2002/02/04 18:58:33  laue
+ * *** empty log message ***
+ *
  * Revision 1.11  2001/12/14 23:11:30  fretiere
  * Add class HitMergingCut. Add class fabricesPairCut = HitMerginCut + pair purity cuts. Add TpcLocalTransform function which convert to local tpc coord (not pretty). Modify StHbtTrack, StHbtParticle, StHbtHiddenInfo, StHbtPair to handle the hit information and cope with my code
  *
@@ -178,7 +181,7 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   StPionPlus* Pion = StPionPlus::instance();
   StKaonPlus* Kaon = StKaonPlus::instance();
   StProton* Proton = StProton::instance();
-
+ 
  
 
   // OK let's go...
@@ -191,7 +194,7 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mNSigmaPion = PidAlgorithm->numberOfSigma(Pion);
   mNSigmaKaon = PidAlgorithm->numberOfSigma(Kaon);
   mNSigmaProton = PidAlgorithm->numberOfSigma(Proton);
-  StDedxPidTraits* tTrait = PidAlgorithm->traits();
+  const StDedxPidTraits* tTrait = PidAlgorithm->traits();
   if(tTrait) {mdEdx = tTrait->mean();}
   else{
     mdEdx = 0;
