@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVertex.cxx,v 2.4 2000/01/11 19:22:12 ullrich Exp $
+ * $Id: StVertex.cxx,v 2.5 2000/02/10 16:32:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVertex.cxx,v $
- * Revision 2.4  2000/01/11 19:22:12  ullrich
- * Added non-const parent() method.
+ * Revision 2.5  2000/02/10 16:32:19  ullrich
+ * flag changed from unsigned to signed long
  *
  * Revision 2.5  2000/02/10 16:32:19  ullrich
  * flag changed from unsigned to signed long
@@ -43,7 +43,7 @@ using std::copy;
 
 ClassImp(StVertex)
 
-static const char rcsid[] = "$Id: StVertex.cxx,v 2.4 2000/01/11 19:22:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StVertex.cxx,v 2.5 2000/02/10 16:32:19 ullrich Exp $";
 
 StVertex::StVertex()
 {
@@ -80,7 +80,7 @@ StVertex::operator==(const StVertex& v) const
 Int_t
 StVertex::operator!=(const StVertex& v) const
 {
-ULong_t
+    return !(v == *this);
 }
 
 Long_t
@@ -112,7 +112,7 @@ StTrack*
 StVertex::parent() { return mParent; }
 
 const StTrack*
-StVertex::setFlag(ULong_t val) { mFlag = val; }
+StVertex::parent() const { return mParent; }
 
 void
 StVertex::setFlag(Long_t val) { mFlag = val; }
