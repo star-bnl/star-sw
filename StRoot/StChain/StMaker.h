@@ -36,8 +36,29 @@ class TMemStat;
 class StEvtHddr;
 
 class StMessMgr;
-class StTurnLogger;
 
+#ifndef __CINT__
+#ifdef LOGGERMESSAGE
+#error An attempt to redefine the LOGGERMESSAGE macro
+#else
+#  define LOGGERMESSAGE(MESSAGELEVEL)                            \
+   GetLogger(ClassName())->MESSAGELEVEL("",__FUNCTION__, __LINE__) 
+
+#  define LOG_INFO  LOGGERMESSAGE(Info)
+#  define LOG_WARN  LOGGERMESSAGE(Warning)
+#  define LOG_ERROR LOGGERMESSAGE(Error)
+#  define LOG_FATAL LOGGERMESSAGE(Fatal)
+#  define LOG_DEBUG LOGGERMESSAGE(Debug)
+#  define LOG_QA    LOGGERMESSAGE(QAInfo)
+
+#define STAR_INFO(name) \
+   GetLogger(_QUITE_(name))->MESSAGELEVEL__FUNCTION__, __LINE__) 
+
+#define MSG_INFO(name) \
+   GetLogger(_QUITE_(name))->MESSAGELEVEL__FUNCTION__, __LINE__) 
+
+#endif
+#endif 
 class StTestMaker;
 class StMaker : public TDataSet{
 
@@ -72,12 +93,10 @@ protected:
    TMemStat       *fMemStatMake;        //!TMemStat for Make
    TMemStat       *fMemStatClear;       //!TMemStat for Clear
 
-   mutable StMessMgr      *fLogger;             // This object logger instance
-   mutable StTurnLogger   *fLoggerHold;         // hold the pointer to the previous StMessMgr
+   StMessMgr      *fLogger;
 
 protected:
-//   inline StMessMgr    *GetLogger(){return fLogger;}
-   inline StMessMgr    *GetLogger() const {return fLogger;}
+   inline StMessMgr    *GetLogger(){return fLogger;}
 public:
 
    /// Constructor & Destructor
@@ -208,7 +227,7 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.71 2004/11/13 00:28:57 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.68 2004/09/01 22:09:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -266,17 +285,8 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.71 2004/11/13 00:28:57 fine Exp $
+// $Id: StMaker.h,v 1.68 2004/09/01 22:09:56 perev Exp $
 // $Log: StMaker.h,v $
-// Revision 1.71  2004/11/13 00:28:57  fine
-// move the logger instantiation away of the ctor to be able to get the csubclass name
-//
-// Revision 1.70  2004/11/04 22:26:38  fine
-// populate the package with save/restore the logger and edit some messages
-//
-// Revision 1.69  2004/11/03 01:30:29  fine
-// remove the redundant logger macro. They have been moved to the abstarct messager
-//
 // Revision 1.68  2004/09/01 22:09:56  perev
 // new methods SetAttr and IAttr,DAttr,SAttr added
 //

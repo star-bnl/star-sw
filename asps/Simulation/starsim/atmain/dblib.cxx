@@ -1,7 +1,12 @@
 /*
-** $Id: dblib.cxx,v 1.2 2004/03/01 17:26:33 fisyak Exp $
+** $Id: dblib.cxx,v 1.3 2004/11/24 00:08:35 potekhin Exp $
 **
 ** $Log: dblib.cxx,v $
+** Revision 1.3  2004/11/24 00:08:35  potekhin
+** Corrected one typo which misused the ostrstream declaration,
+** deleted an extra parenthesis and added two buffers that were
+** hereto undeclared. The code now compiles on 7.2/2.96.
+**
 ** Revision 1.2  2004/03/01 17:26:33  fisyak
 ** Get rid of staf
 **
@@ -158,7 +163,7 @@ int my_query(ostringstream *Query);
 #        include <stdlib.h>
 #        include <string.h>
 #        include <strstream.h>
-int my_query(ostringstream *Query);
+int my_query(ostrstream *Query);
 #endif
 
 #include "mysql.h"
@@ -207,7 +212,7 @@ const char * queryStr(ostringstream *Q) {
 int my_query(ostrstream *Query) {
   return mysql_real_query(&mysql,Query->str(),Query->pcount()-1);
 }
-const char * queryStr(ostrstream *Q) { return Q->str()); }
+const char * queryStr(ostrstream *Q) { return Q->str(); }
 #endif
 //------------------------------------------------------------------------------/
 //
@@ -1277,6 +1282,7 @@ void dbwrite(persistent *Pobj)
   Query << "dummy initialization needed for seekp(0) call"<<ends;
 #else //.h for gcc-2 and SunOS
   const int MAXBUF=1024;
+  char buf[MAXBUF];
   ostrstream Query(buf,MAXBUF);
 #endif
 
@@ -2595,6 +2601,7 @@ int num_struct;
   Query << "neccessary dummy initialization - can't call seekp(0) on an empty sstream object "<<ends;
 #else //.h for gcc-2 and SunOS
   const int MAXBUF=1024;
+  char buf[MAXBUF];
   ostrstream Query(buf,MAXBUF);
 #endif
 

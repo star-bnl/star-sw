@@ -133,7 +133,6 @@ Bool_t StEmcADCtoEMaker::prepareEnvironment()
 Bool_t StEmcADCtoEMaker::makeBemc()
 {
   mBemcData->setDate(GetDate());
-  mBemcData->getTables()->loadTables((StMaker*)this);
   
   // Try DAQ First  
   TDataSet* TheData   = GetDataSet("StDAQReader");

@@ -84,6 +84,24 @@ public:
 
     friend ostream& operator<<(ostream&os, const StiDetector & det);
 
+    void setKey(int index,int value)
+      {
+	switch (index)
+	  {
+	  case 1: _key1 = value; break;
+	  case 2: _key2 = value; break;
+	  }
+      }
+
+    int getKey(int index) const 
+      {
+	switch (index)
+	  {
+	  case 1: return _key1;
+	  case 2: return _key2;
+	  }
+	return -1;
+      }
 
  protected:
     
@@ -125,6 +143,8 @@ public:
     /// Detector group identifier.
     int _groupId;
     const StiTrackingParameters * _pars;
+    int _key1, _key2;
+
 };
 
 inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * calculator)

@@ -1,8 +1,5 @@
-* $Id: sisdgeo1.g,v 1.4 2004/10/28 22:01:32 potekhin Exp $
+* $Id: sisdgeo1.g,v 1.3 2004/10/26 21:15:28 potekhin Exp $
 * $Log: sisdgeo1.g,v $
-* Revision 1.4  2004/10/28 22:01:32  potekhin
-* Corrected a typo and improved the diagnostic message
-*
 * Revision 1.3  2004/10/26 21:15:28  potekhin
 * Changed the print statement to look nicer,
 * and noted that the radius of the mother volume has been
@@ -112,7 +109,7 @@ Module  SISDGEO1  is the Silicon Strip Detector
         smLen    = 101.9      ! structure mother length 
         ssLen    = 95./20.    ! length of a subvolume of the structure
         wpLen    = 68.8       ! length of wafer pack
-        sdlen    = 4.2        ! length of one strip detector (along beam axis)
+        sdlen    = 4.2        ! lenght of one strip detector (along beam axis)
         tilt     = 5.0        ! tiling angle (degrees)
         cprad    = 0.1        ! cooling pipe outer radius
         cpral    = 0.09       ! cooling pipe inner radius
@@ -199,7 +196,7 @@ Module  SISDGEO1  is the Silicon Strip Detector
         Component O   A=16     Z=8    W=0.4*4*16./174.
         Mixture   G5   Dens=0.85
 
-      write(*,*) 'Level 1 of the SSD geometry'
+      write(*,*) 'Version sisdgeo1 of the SSD geometry'
       Create and Position SFMO in SVTT
 *******************************************************************************
 *

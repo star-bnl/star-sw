@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.93 2004/11/11 18:14:56 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.92 2004/08/24 20:24:34 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -172,8 +172,7 @@ Int_t StFlowMaker::Make() {
     
     if (mPicoEventWrite) FillPicoEvent();
   }
-  if (Debug()) PrintSubeventMults();
-
+  
   
   UInt_t flowEventMult;
   if (!pFlowEvent) { flowEventMult = 0; }
@@ -222,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.93 2004/11/11 18:14:56 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.92 2004/08/24 20:24:34 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -2114,9 +2113,6 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
-// Revision 1.93  2004/11/11 18:14:56  posk
-// Added a debug print statement.
-//
 // Revision 1.92  2004/08/24 20:24:34  oldi
 // Minor modifications to avoid compiler warnings.
 // Small bug fix (didn't affect anyone yet).

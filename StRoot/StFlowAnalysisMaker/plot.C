@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.58 2004/11/11 18:25:43 posk Exp $
+// $Id: plot.C,v 1.57 2004/03/11 18:00:05 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -165,11 +165,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_MultEta",
     "Flow_MultPart",
     "Flow_DcaGlobal_Tpc",
-    "Flow_Dca1_Tpc",
-    "Flow_Dca2_Tpc",
-    "Flow_Dca3_Tpc",
-    "Flow_Dca4_Tpc",
-    "Flow_Dca5_Tpc",
     "Flow_Chi2_Tpc",
     "Flow_FitPts_Tpc",
     "Flow_MaxPts_Tpc",
@@ -876,9 +871,6 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
-// Revision 1.58  2004/11/11 18:25:43  posk
-// Minor updates.
-//
 // Revision 1.57  2004/03/11 18:00:05  posk
 // Added Random Subs analysis method.
 //

@@ -10,11 +10,12 @@ StEEmcDbMaker  *myDb;
 StMuDstMaker* muMk;
 StChain *chain=0;
 
-int rdMu2soloPi0( 
- TString fullName="mc12",
- int nEve=40000,
+
+int rdMu2soloPi0(
+ TString fullName="mc7",
+ int nEve=2000000,
  Int_t nFiles  = 5000,
- char* file="inpMC/10.lis", 
+ char* file="inpMC/130.lis", 
  char* inDir   = "./",
  char* outDir   = "outPi0/"
 ){ 
@@ -40,6 +41,9 @@ int rdMu2soloPi0(
   printf("total eve in chain =%d\n",nEntries);
 
   St_db_Maker *stDb = new St_db_Maker("StarDb", "MySQL:StarDb");
+  stDb->SetDateTime(20031120,0);
+  // stDb->SetFlavor("sim","eemcPMTcal");
+  //  stDb->SetFlavor("sim","eemcPIXcal");
 
   myDb=new StEEmcDbMaker("eemcDb");
   // myDb->setSectors(5,8);
@@ -47,17 +51,7 @@ int rdMu2soloPi0(
   myMk3=new StEEsoloPi0Maker("soloPi0","MuDst");
   TObjArray  HList;
   myMk3->SetHList(&HList);
-
-#if 1  // flags for M-C events
-  stDb->SetDateTime(20031120,0);
-  stDb->SetFlavor("sim","eemcPMTcal");
-  stDb->SetFlavor("sim","eemcPIXcal");
-  stDb->SetFlavor("sim","eemcPMTped");
-  stDb->SetFlavor("sim","eemcPMTstat");
-  stDb->SetFlavor("sim","eemcPMTname");
-  stDb->SetFlavor("sim","eemcADCconf");
   myMk3->SetMCflag();
-#endif
   
   gMessMgr->SwitchOff("D");
   gMessMgr->SwitchOn("I");
@@ -75,7 +69,7 @@ int rdMu2soloPi0(
     chain->Clear();
     stat = chain->Make();
 
-    if(eventCounter%3000!=0)continue;
+    if(eventCounter%300!=0)continue;
 
     printf("\n\n ====================%d  processing  ==============\n", eventCounter);
 
