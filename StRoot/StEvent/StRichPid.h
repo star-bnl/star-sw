@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.h,v 2.3 2000/11/21 19:47:36 lasiuk Exp $
+ * $Id: StRichPid.h,v 2.4 2000/11/25 11:51:52 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichPid.h,v $
- * Revision 2.3  2000/11/21 19:47:36  lasiuk
- * add the d information for each hit
- * use the TArrayF
+ * Revision 2.4  2000/11/25 11:51:52  lasiuk
+ * remove D vector and replace with a container of StRichPhotonInfo
  *
  * Revision 2.4  2000/11/25 11:51:52  lasiuk
  * remove D vector and replace with a container of StRichPhotonInfo
@@ -31,8 +30,6 @@
  * Initial Revision.
  *
  ***************************************************************************/
-#include "TArrayF.h"
-
 #ifndef StRichPid_hh
 #define StRichPid_hh
 
@@ -61,9 +58,9 @@ public:
     Int_t operator==(const StRichPid&) const;
 
     const StPtrVecRichHit&      getAssociatedRichHits() const;
-    TArrayF& getDVector();
-    float    getD(int);   // should be constant
-    void     addNormalizedD(float);
+    StPtrVecRichHit&            getAssociatedRichHits();
+    void                        addHit(StRichHit*);
+
     const StSPtrVecRichPhotonInfo& getPhotonInfo();
     StRichPhotonInfo*              getPhotonInfo(int);   // should be constant
     void     addPhotonInfo(StRichPhotonInfo*);
@@ -106,7 +103,8 @@ public:
     void unSetBit(StRichPidFlag);
     
 private:
-    StPtrVecRichHit     mAssociatedHits;
+    StParticleDefinition*  mParticleType;//!
+    Int_t               mParticleNumber;
     
     StPtrVecRichHit         mAssociatedHits;
     StSPtrVecRichPhotonInfo mPhotonInfo;
@@ -122,8 +120,6 @@ private:
     Float_t  mTruncatedArea;
     UShort_t mTruncatedHits;
     Float_t  mTruncatedDensity;
-    TArrayF mDDistribution;
-    
     
     unsigned long mFlags;
 
