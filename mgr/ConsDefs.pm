@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.25 2000/09/20 13:11:16 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.26 2000/09/20 13:19:37 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -163,7 +163,7 @@
    }
    else {
      if ($PGI) {$CLIBS    = "-L" . $PGI . "/linux86/lib";}
-     $CLIBS . = " -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
+     $CLIBS .= " -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
    }
    if (/^i386_linux2/) {$FLIBS   .= " -lI77 -lF77";}
    if (defined($ARG{INSURE})){
