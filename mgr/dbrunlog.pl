@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.1 1999/07/07 13:19:30 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.2 1999/07/09 12:42:31 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
+# Revision 1.2  1999/07/09 12:42:31  wenaus
+# Change default seq limits
+#
 # Revision 1.1  1999/07/07 13:19:30  wenaus
 # real data log
 #
@@ -73,10 +76,10 @@ Commissioning forum</a> -
 Old log</a>
 </font></center>
 <p>
-Links at right give access to event summaries and allow editing/deleting
+Links at right (you need a wide window) give access to event summaries and allow editing/deleting
 of run log entries. To kill a junk entry like a 'testing' comment,
 edit it and set status=-1 (if you just delete it it will reappear if
-the database is rebuilt from the entry log)
+the database is rebuilt from the entry log). Updated hourly.
 <p><hr>
 <p><pre>
 END
@@ -281,11 +284,11 @@ print <<END;
 <table border=0 width="100%"><tr><td align=right>
 Threshold high <input type="text" name="thrhi" value=12 size=4>
 </td><td align=right>
-Sequence limit high <input type="text" name="seqhi" value=4 size=4>
+Sequence limit high <input type="text" name="seqhi" value=3 size=4>
 </td></tr><tr><td align=right>
 Threshold low <input type="text" name="thrlo" value=4 size=4>
 </td><td align=right>
-Sequence limit low <input type="text" name="seqlo" value=1 size=4>
+Sequence limit low <input type="text" name="seqlo" value=0 size=4>
 </td></tr></table>
 </td>
 </tr><tr>
