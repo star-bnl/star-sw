@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.1 2000/06/15 20:04:54 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.2 2000/07/03 02:07:56 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.2  2000/07/03 02:07:56  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
  *
@@ -333,7 +336,7 @@ void StSvtSeqAdjMaker::MakeHistograms(int index,int Anode){
 
   StSequence* svtSequence;
   
-  mHybridData = (StSvtHybridData *)mSvtEvent->At(index);
+  mHybridData = (StSvtHybridData *)mSvtEvent->at(index);
   if( !mHybridData) return;
   
   

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridStat2.hh,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridStat2.hh,v 1.2 2000/07/03 02:07:54 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridStat2.hh,v $
+ * Revision 1.2  2000/07/03 02:07:54  perev
+ * StEvent: vector<TObject*>
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -31,9 +34,9 @@ public:
 
   StSvtHybridStat2& operator = (const StSvtHybridStat2&);
 
-  StSvtHybridPixels* get0thMom(int time2) {return (StSvtHybridPixels*)m0->At(time2);}
-  StSvtHybridPixels* get1stMom(int time2) {return (StSvtHybridPixels*)m1->At(time2);}
-  StSvtHybridPixels* get2ndMom(int time2) {return (StSvtHybridPixels*)m2->At(time2);}
+  StSvtHybridPixels* get0thMom(int time2) {return (StSvtHybridPixels*)m0->at(time2);}
+  StSvtHybridPixels* get1stMom(int time2) {return (StSvtHybridPixels*)m1->at(time2);}
+  StSvtHybridPixels* get2ndMom(int time2) {return (StSvtHybridPixels*)m2->at(time2);}
 
   float getMean(int anode, int time, int time2);
   float getRMS(int anode, int time, int time2);

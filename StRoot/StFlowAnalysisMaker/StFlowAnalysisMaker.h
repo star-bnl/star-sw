@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.16 2000/06/30 14:51:19 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.17 2000/07/03 02:07:49 perev Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.17  2000/07/03 02:07:49  perev
+// StEvent: vector<TObject*>
+//
 // Revision 1.16  2000/06/30 14:51:19  posk
 // Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
 //
@@ -101,7 +104,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.16 2000/06/30 14:51:19 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.17 2000/07/03 02:07:49 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -111,17 +114,17 @@ private:
   void     FillEventHistograms();
   void     FillParticleHistograms();
 
-  TVector2 mQ[Flow::nSels][Flow::nHars];                     // flow vector
-  Float_t  mPsi[Flow::nSels][Flow::nHars];                   // event plane angle
-  UInt_t   mMult[Flow::nSels][Flow::nHars];                  // multiplicity
-  Float_t  mMeanPt[Flow::nSels][Flow::nHars];                // mean Pt
-  Float_t  m_q[Flow::nSels][Flow::nHars];                    // Q/sqrt(Mult)
-  TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      // flow vector subs
-  Float_t  mPsiSub[Flow::nSels*Flow::nSubs][Flow::nHars];    // plane angle subs
-  Float_t  mMeanPtSub[Flow::nSels*Flow::nSubs][Flow::nHars]; // mean Pt subs
-  UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   // multiplicity subs
-  Float_t  mRes[Flow::nSels][Flow::nHars];      // event plane resolution
-  Float_t  mResErr[Flow::nSels][Flow::nHars];   // event plane resolution error
+  TVector2 mQ[Flow::nSels][Flow::nHars];                     //! flow vector
+  Float_t  mPsi[Flow::nSels][Flow::nHars];                   //! event plane angle
+  UInt_t   mMult[Flow::nSels][Flow::nHars];                  //! multiplicity
+  Float_t  mMeanPt[Flow::nSels][Flow::nHars];                //! mean Pt
+  Float_t  m_q[Flow::nSels][Flow::nHars];                    //! Q/sqrt(Mult)
+  TVector2 mQSub[Flow::nSels*Flow::nSubs][Flow::nHars];      //! flow vector subs
+  Float_t  mPsiSub[Flow::nSels*Flow::nSubs][Flow::nHars];    //! plane angle subs
+  Float_t  mMeanPtSub[Flow::nSels*Flow::nSubs][Flow::nHars]; //! mean Pt subs
+  UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
+  Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
+  Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
  
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
   FlowTag_st*      pFlowTag;    //! pointer to StEvent

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.56 2000/06/20 14:11:46 kathy Exp $
+// $Id: doEvents.C,v 1.57 2000/07/03 02:08:00 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -74,8 +74,8 @@ void Help()
 void doEvents(Int_t, const Char_t **, const Char_t *qaflag = "");
 
 void doEvents(Int_t nevents=2, 
-              const Char_t *path="-",
-              const Char_t *file="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *path="/afs/rhic/star/data/samples/gstar.dst.root",
+              const Char_t *file="",
               const Char_t *qaflag = "off", 
               const Int_t wrStEOut = 0);
 
@@ -267,6 +267,8 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
       fileListQQ=0;
     } else if (path[0]=='-') {
 	fileListQQ[0]=file;
+    } else if (!file[0]) {
+	fileListQQ[0]=path;
     } else {
 	fileListQQ[0] = gSystem->ConcatFileName(path,file);
     }
@@ -276,8 +278,11 @@ void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
-// Revision 1.56  2000/06/20 14:11:46  kathy
-// now unpack BfcStatus table in doEvents so people can see if maker errors exist
+// Revision 1.57  2000/07/03 02:08:00  perev
+// StEvent: vector<TObject*>
+//
+// Revision 1.57  2000/07/03 02:08:00  perev
+// StEvent: vector<TObject*>
 //
 // Revision 1.56  2000/06/20 14:11:46  kathy
 // now unpack BfcStatus table in doEvents so people can see if maker errors exist

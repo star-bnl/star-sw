@@ -1,6 +1,6 @@
 #include "StAzimuthalAngle.h"
-#include <TH1.h>
-
+#include "TH1.h"
+#include "TMath.h"
 
 StAzimuthalAngle::~StAzimuthalAngle() {}
 
@@ -43,7 +43,7 @@ StAzimuthalAngle::func(StTrackForPool* t1, StTrackForPool* t2)
   if (phi1 < 0.0) {phi1 = phi1 + 2.*pi;}
   if (phi2 < 0.0) {phi2 = phi2 + 2.*pi;}
   
-  Double_t phidiff = fabs(phi1-phi2);
+  Double_t phidiff = TMath::Abs(phi1-phi2);
   
   if (phidiff > pi) 
     {

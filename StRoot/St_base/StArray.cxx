@@ -3,7 +3,6 @@
 #include "StArray.h"
 #include "TDatime.h"
 #include "TBrowser.h"
-#include "TRandom.h"
 
 //TObjArray *StRegistry::fgReg  = 0;
 //Int_t      StRegistry::fgFree = 0;
@@ -181,7 +180,6 @@ void StObjArray::Streamer(TBuffer &b)
    Int_t nobjects;
    if (b.IsReading()) {
       Version_t v = b.ReadVersion(); if (v){/*touch*/}
-      fName.Streamer(b);
       clear();
       b >> nobjects;
       if (!nobjects) return;
@@ -190,7 +188,6 @@ void StObjArray::Streamer(TBuffer &b)
          b >> obj;  push_back(obj);}
    } else {
       b.WriteVersion(IsA());
-      fName.Streamer(b);
       nobjects = size();
       b << nobjects;
 
@@ -205,19 +202,21 @@ void StObjArray::Streamer(TBuffer &b)
 //______________________________________________________________________________
 void StObjArray::Browse(TBrowser *b)
 {
-  enum { maxBrowsable =  10 };
+  enum { maxBrowsable =  50 };
 
    // Browse this collection (called by TBrowser).
    // If b=0, there is no Browse call TObject::Browse(0) instead.
    //         This means TObject::Inspect() will be invoked indirectly
  
    if (!b) return;
-   TObject *obj;
+   TObject *obj=0;
     
    Int_t counter = 0;
    Int_t totalSize = size();
    for (int i=0; i<totalSize && ++counter <  maxBrowsable ; i++) {
-       TString browseName = obj->GetName();
+       obj = at(i); if (!obj) continue;
+       TString browseName(obj->GetName());
+       if (browseName.IsNull()) browseName = obj->ClassName();
        char buffer[100];
        sprintf(buffer,"_%d(%d)",counter,totalSize);
        browseName += buffer;
@@ -230,24 +229,17 @@ Bool_t StObjArray::IsFolder(){ return size();}
 //______________________________________________________________________________
 void StObjArray::random_shuffle(int start,int end)
 {
-  static TRandom *ran = 0;
-  if(!ran) ran = new TRandom();
-  int lst = size()-1;
-  if (start > lst)	return;
+  
+  int lst = size();
+  if (start >= lst)	return;
   if (end   > lst) 	end = lst;
-  if (start >= end)	return;
+  ::random_shuffle(begin()+start,begin()+end);
 
-  for (int i=start; i<end; i++) {
-    int j = i + (int)(ran->Rndm()*(end-i+1)); 
-    if (i==j) 	continue;
-    TObject *ti = (*this)[i];
-    TObject *tj = (*this)[j];
-    (*this)[j] = ti;
-    (*this)[i] = tj;
-  }    
 }
 //______________________________________________________________________________
 ClassImp(StRefArray)
+StRefArray::StRefArray(Int_t sz):StObjArray(sz){};
+StRefArray::StRefArray(const StRefArray &from):StObjArray(from){};
 
 //______________________________________________________________________________
 void StRefArray::Streamer(TBuffer &R__b)
@@ -316,16 +308,13 @@ void StRefArray::Streamer(TBuffer &R__b)
 //______________________________________________________________________________
 ClassImp(StStrArray)
 //______________________________________________________________________________
-StStrArray::StStrArray(const Char_t *name)
+StStrArray::StStrArray(const Char_t *name,Int_t sz):StObjArray(sz)
 { 
 //NONMONO  StRegistry::SetColl(this);
   if (name) SetName(name); 
 }
 //______________________________________________________________________________
-StStrArray::StStrArray(const StStrArray &from )
-{ 
-  *this = from;
-}
+StStrArray::StStrArray(Int_t sz):StObjArray(sz){}
 //______________________________________________________________________________
  void StStrArray::operator=(const StStrArray &a)
 {
@@ -348,13 +337,13 @@ StStrArray::StStrArray(const StStrArray &from )
    VecTObjIter it;
    if(!lst) lst = fst;
    for (it = fst; it < lst; it++) delete *it;
-   return VecTObj::erase(fst,lst);
+   return fV.erase(fst,lst);
 }
 //______________________________________________________________________________
  void StStrArray::clear()
 { 
   erase(begin(),end());
-  VecTObj::clear();
+  fV.clear();
 } 
 //______________________________________________________________________________
 //NONMONO void StStrArray::Book(TObject* obj,int idx)
@@ -418,8 +407,11 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
-// $Id: StArray.cxx,v 1.28 2000/06/19 01:28:25 perev Exp $
+// $Id: StArray.cxx,v 1.29 2000/07/03 02:07:58 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.29  2000/07/03 02:07:58  perev
+// StEvent: vector<TObject*>
+//
 // Revision 1.28  2000/06/19 01:28:25  perev
 // STL StEvent
 //

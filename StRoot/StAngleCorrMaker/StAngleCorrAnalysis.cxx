@@ -52,9 +52,6 @@ StAngleCorrAnalysis::StAngleCorrAnalysis(TString analysisName)
   ON=1;
   OFF=0;
   
-  FALSE=0;
-  TRUE=1;
-  
   track1Cuts = new StTrackCuts();
   track2Cuts = new StTrackCuts();
 
@@ -330,7 +327,7 @@ StAngleCorrAnalysis::AnalyseRealPairs()
       while (counter2 < numberOfTracks2) 
 	{
 	  tr2=mCollectionOfTracks2.GetTrack(counter2);
-	  if (IdenticalTrackCheck(tr1,tr2)==FALSE) 
+	  if (IdenticalTrackCheck(tr1,tr2)==kFALSE) 
 	    {
 	      RelativeAngle(tr1,tr2,signal);
 	      if (diagnostics) {if (Diagnose(DiagnoseSignal) != NULL) Diagnose(DiagnoseSignal)->Fill(tr1,tr2);}
@@ -397,7 +394,7 @@ StAngleCorrAnalysis::AnalyseBackgroundPairs()
 	      trCounter2 = ran->Rndm()*mBackgroundTracks2.GetTracks(evCounter2).Size();
 	      tr1 = mBackgroundTracks1.GetTrack(evCounter1,trCounter1);
 	      tr2 = mBackgroundTracks2.GetTrack(evCounter2,trCounter2);
-	      if (IdenticalTrackCheck(tr1,tr2)==FALSE) 
+	      if (IdenticalTrackCheck(tr1,tr2)==kFALSE) 
 		{
 		  RelativeAngle(tr1,tr2,background);	
 		  if (diagnostics) {if (Diagnose(DiagnoseBackground) != NULL) Diagnose(DiagnoseBackground)->Fill(tr1,tr2);}
