@@ -149,6 +149,18 @@ macro svm
  cd [dst]
 
   tdm/newtable event_summary   dst_event_summary   1
+
+ cd /dui
+
+ return
+ 
+*------------------------------------------------------------------*
+ macro fill_dst_event_header
+
+ macro/global/import *
+
+ cd [dst]
+
   tdm/newtable event_header    dst_event_header    1
 
  cd /dui
@@ -160,11 +172,21 @@ macro svm
 
  macro/global/import *
 
-
-
  cd [run_dst]
 
   tdm/newtable run_summary   dst_run_summary   1
+
+ cd /dui
+
+ return
+
+*------------------------------------------------------------------*
+ macro fill_dst_run_header
+
+ macro/global/import *
+
+ cd [run_dst]
+
   tdm/newtable run_header    dst_run_header    1
 
  cd /dui

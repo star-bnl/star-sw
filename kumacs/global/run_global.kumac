@@ -117,11 +117,15 @@
 * fill_dst_event_summary
   exec create_tables_global#fill_dst_event_summary
 
+* dst_event_header
+   exec create_tables_global#fill_dst_event_header
+
 * fill_dst_run_summary
    exec create_tables_global#fill_dst_run_summary
-*   exec create_tables_global#fill_dst_tof
-   exec init_dst#init_rhead
 
+* dst_run_header
+   exec create_tables_global#fill_dst_run_header
+   exec init_dst#init_rhead
 
 ***************************************************************
 *  Run global
