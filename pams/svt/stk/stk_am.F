@@ -102,7 +102,7 @@ c     initialization phase
      4        vtx_direct_h,        vtx_direct )
          if (status.ne.stafcv_ok) then
 c            stk_am = status
-            write(mess,1001) 'svd','stk_am_vertex_direct'
+            write(mess,1001) 'SVT','stk_am_vertex_direct'
             call StError(mess)
             return
          end if
@@ -119,7 +119,7 @@ c modified to add the stkpar table as argument.
      6            stkpar_h,            stkpar )
          if (status.ne.stafcv_ok) then
 c            stk_am = status
-            write(mess,1001) 'std','stk_am_direct'
+            write(mess,1001) 'SVT','stk_am_direct'
             call StError(mess)
             return
          end if
@@ -132,7 +132,7 @@ c            stk_am = status
      5           mctrack_h,           mctrack )
          if (status.ne.stafcv_ok) then
             stk_am = status
-            write(mess,1001) 'stdf','stk_am_fit'
+            write(mess,1001) 'SVT','stk_am_fit'
             call StError(mess)
             return
          end if
@@ -144,7 +144,7 @@ c            stk_am = status
      4            mckine_h,            mckine )
          if (status.ne.stafcv_ok) then
 c            stk_am = status
-            write(mess,1001) 'stdk','stk_am_kine'
+            write(mess,1001) 'SVT','stk_am_kine'
             call StError(mess)
             return
          end if
@@ -162,7 +162,7 @@ c     normal reconstruction loop. (wkw)
      4            groups_h,            groups ,
      5             track_h,             track )
                if (status.ne.stafcv_ok) then
-                  write(mess,1001) 'stfit','stk_am_fit'
+                  write(mess,1001) 'SVT','stk_am_fit'
                   call StError(mess)
                end if
                status = STK_AM_SELECT(
@@ -171,7 +171,7 @@ c     normal reconstruction loop. (wkw)
      3            groups_h,            groups ,
      4             track_h,             track )
                if (status.ne.stafcv_ok) then
-                  write(mess,1001) 'sts','stk_am_select'
+                  write(mess,1001) 'SVT','stk_am_select'
                   call StError(mess)
                end if
 
@@ -312,7 +312,7 @@ c               filler(1).th87  =    th
      7              geom_h,              geom ,
      8            stkpar_h,            stkpar )
                   if (status.ne.stafcv_ok) then
-                     write(mess,1001) 'stf','stk_am_fill3'
+                     write(mess,1001) 'SVT','stk_am_fill3'
                      call StError(mess)
                      track_h.nok = oldcandidate
                      groups_h.nok = oldgroups
@@ -329,7 +329,7 @@ c               filler(1).th87  =    th
      7             geom_h,              geom,
      8           stkpar_h,            stkpar )
                   if (status.ne.stafcv_ok) then
-                     write(mess,1001) 'stf','stk_am_fill4'
+                     write(mess,1001) 'SVT','stk_am_fill4'
                      call StError(mess)
                      track_h.nok = oldcandidate
                      groups_h.nok = oldgroups
@@ -344,7 +344,7 @@ c               filler(1).th87  =    th
      4            groups_h,            groups ,    
      5             track_h,             track )
                if (status.ne.stafcv_ok) then
-                  write(mess,1001) 'stfit','stk_am_fit'
+                  write(mess,1001) 'SVT','stk_am_fit'
                   call StError(mess)
                end if
             
@@ -354,7 +354,7 @@ c               filler(1).th87  =    th
      3            groups_h,            groups ,
      4             track_h,             track )
                if (status.ne.stafcv_ok) then
-                  write(mess,1001) 'sts','stk_am_select'
+                  write(mess,1001) 'SVT','stk_am_select'
                   call StError(mess)
                end if
                write(mess,*)'Found ',track_h.nok-oldcandidate
@@ -448,7 +448,7 @@ c     filler(1).th65  =    th
      7              geom_h,              geom ,
      8            stkpar_h,             stkpar)
                         if (status.ne.stafcv_ok) then
-                           write(mess,1001) 'stf','stk_am_fill3'
+                           write(mess,1001) 'SVT','stk_am_fill3'
                            call StError(mess)
                            track_h.nok = oldcandidate
                            groups_h.nok = oldgroups
@@ -465,7 +465,7 @@ c     filler(1).th65  =    th
      7              geom_h,              geom, 
      8            stkpar_h,             stkpar)
                         if (status.ne.stafcv_ok) then
-                           write(mess,1001) 'stf','stk_am_fill4'
+                           write(mess,1001) 'SVT','stk_am_fill4'
                            call StError(mess)
                            track_h.nok = oldcandidate
                            groups_h.nok = oldgroups
@@ -480,7 +480,7 @@ c     filler(1).th65  =    th
      4            groups_h,            groups ,
      5             track_h,             track )
                      if (status.ne.stafcv_ok) then
-                        write(mess,1001) 'stfit','stk_am_fit'
+                        write(mess,1001) 'SVT','stk_am_fit'
                         call StError(mess)
                      end if
                      
@@ -490,7 +490,7 @@ c     filler(1).th65  =    th
      3            groups_h,            groups ,
      4             track_h,             track )
                      if (status.ne.stafcv_ok) then
-                        write(mess,1001) 'sts','stk_am_select'
+                        write(mess,1001) 'SVT','stk_am_select'
                         call StError(mess)
                      end if
                      write(mess,*)'Found ',track_h.nok-oldcandidate
@@ -527,7 +527,7 @@ c     sgr may have been called
      4              kine_h,              kine )
          if (status.ne.stafcv_ok) then
             stk_am = status
-            write(mess,1001) 'stkin','stk_am_kine'
+            write(mess,1001) 'SVT','stk_am_kine'
             call StError(mess)
             return
          end if

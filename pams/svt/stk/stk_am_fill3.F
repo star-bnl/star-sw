@@ -90,16 +90,16 @@ C     RETURN:
 C     =======
 C     FORMAT:
 C     =======
- 1000 format(1x,'f-stk_am_fill: no rows in spt - abort event.')
- 1001 format(1x,'f-stk_am_fill: no rows in vtx - abort event.')
- 1003 format(1x,'f-stk_am_fill: no rows in filler -',
+ 1000 format(1x,'SVT stk_am_fill: no rows in spt - abort event.')
+ 1001 format(1x,'SVT stk_am_fill: no rows in vtx - abort event.')
+ 1003 format(1x,'SVT stk_am_fill: no rows in filler -',
      &     'will use defaults parameters.')
- 1004 format(1x,'f-stk_am_fill: no rows in config - abort event.')
- 1005 format(1x,'f-stk_am_fill: layer number out of bounds at label:'
+ 1004 format(1x,'SVT stk_am_fill: no rows in config - abort event.')
+ 1005 format(1x,'SVT stk_am_fill: layer number out of bounds at label:'
      &      ,i5)
- 1006 format(1x,'f-stk_am_fill: no space points on layer :',i5)
- 1007 format(1x,'f-stk_am_fill: too many track candidates: ',i8)
- 1008 format(1x,'f-stk_am_fill: ilayer2 error: ',i3)
+ 1006 format(1x,'SVT stk_am_fill: no space points on layer :',i5)
+ 1007 format(1x,'SVT stk_am_fill: too many track candidates: ',i8)
+ 1008 format(1x,'SVT stk_am_fill: ilayer2 error: ',i3)
 
 
 C     EXECUTABLE CODE:
@@ -192,7 +192,7 @@ clm the number of layers is hardwired because of the SSD
                ilist = 0
                do iwafer2 = waferi(ilayer2-1)+1, waferi(ilayer2)
                   if (ilayer2.ne.geom(iwafer2).layer) then
-                     call StError(' une erreur est survenu - crash...')
+                     call StError('SVT une erreur est survenu - crash...')
                      stop
                   end if
                   x(1,ilayer2) = geom(iwafer2).x(1)
@@ -316,7 +316,7 @@ C     &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
      &           .and.config(1).n_layer.eq.7) then
 * it is ok : the SSD is in but we do not want to use the hits
             else
-               write(myString,*) ' fatal mis-match'
+               write(myString,*) 'SVT fatal mis-match'
                write(myString,*) 'idw,ly,w,ld,w2,id:', 
      &              kwafer,ilayer,iwafer1,iladder,
      &              iwafer2, geom(iwafer2).id
@@ -1115,7 +1115,8 @@ c     consider track candidate for storage
                      groups(n_groups).id2 = ispts(k)
                      n_groups = n_groups + 1
                      if( n_groups .gt. groups_h.maxlen) then
-                        write(myString,*)'Too many groups', n_groups
+                        write(myString,*)'SVT stk -Too many groups', 
+     &                       n_groups
                         call StError(myString)
                         done(1)   = .true.
                         done(2)   = .true.

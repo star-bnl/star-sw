@@ -76,7 +76,7 @@ C     =======
 
 C     EXECUTABLE CODE:
 C     ================
-      call StInfo('STK_AM_HELIX: Starting ##############################')
+c      call StInfo('STK_AM_HELIX: Starting ##############################')
 
       stk_am_helix = stafcv_ok
 
@@ -204,7 +204,7 @@ c     update nok
       ctrack_h.nok       = itrack
       vtx_h.nok          = 1
 
-      call StInfo('STK_AM_HELIX: Stopping ##############################')
+c      call StInfo('STK_AM_HELIX: Stopping ##############################')
       STK_AM_HELIX=STAFCV_OK
       RETURN
       END
