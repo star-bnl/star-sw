@@ -45,27 +45,36 @@ const int MAXNUMOFTRACKS= 10000;
 const int SIZETRKIDCHECK= 1000;
 
 ClassImp(StKinkMaker)
+
 //=======================================================================
-  StKinkMaker::StKinkMaker(const char *name, TrackerUsage use):StMaker(name),m_tkfpar(0)
+  StKinkMaker::StKinkMaker(const char *name):StMaker(name),m_tkfpar(0)
 {
-  mTrack1=0;          
-  mTrack2=0;   
-  mGlobalTrks=0;
+  mTrack1     = 0;          
+  mTrack2     = 0;   
+  mGlobalTrks = 0;
   mParentTrackCandidate=0;             
   mDaughterTrackCandidate=0;
-  event=0;
-  kinkVertex=0;
-  ITTFflag=kITKalmanFitId;
-  SetTrackerUsage(use);// defaul TPT
-  mBfield = -2.;//arbitrary value, normalized after ...neat (gene)
+  mUseTracker = kTrackerUseBOTH;
+  event       = 0;
+  kinkVertex  = 0;
+  mBfield     = -2.;   // arbitrary value, normalized after ...neat (gene)
 }
 //=======================================================================
 StKinkMaker::~StKinkMaker(){
 }
 
 //======================================================================
+
+/*!
+
+  Init() will aslo initialize the track type to select on. 
+  See SetTrackerUsage(). Note that the steering of how to call
+  SetTrackerUsage() is done through StBFChain and the maker m_Mode
+  mechanism. Refer to SetTrackerUsage() method for more explaination.
+
+*/
 Int_t StKinkMaker::Init(){
-    m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
+  m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
   {
     tkf_tkfpar_st parRow;  
     memset(&parRow,0,m_tkfpar->GetRowSize());
@@ -86,6 +95,12 @@ Int_t StKinkMaker::Init(){
     parRow.distanceKinkDaughterZ     =  20.;
     m_tkfpar->AddAt(&parRow, 0);
   }
+
+  // m_Mode -> SetTrackerUsage()
+  if      (m_Mode == 1) SetTrackerUsage(kTrackerUseTPT);
+  else if (m_Mode == 2) SetTrackerUsage(kTrackerUseITTF);
+  else if (m_Mode == 3) SetTrackerUsage(kTrackerUseBOTH);
+
   AddRunCont(m_tkfpar);
   return StMaker::Init();
 }
@@ -118,14 +133,14 @@ Int_t StKinkMaker::Make(){//called for each event
   }
   mEventVertex = vrtx->position(); //StThreeVectorD
  
- //### global tracks to use
+  //### global tracks to use
   StSPtrVecTrackNode& theNodes = event->trackNodes();
   nNodes = theNodes.size();
   mGlobalTrks=0;
   for (i=0;i<nNodes;i++){
     for (j=0; j<theNodes[i]->entries(global);j++){
       StTrack* trk = theNodes[i]->track(global,j);
-      if(!acceptTrack(trk,ITTFflag,UseTracker))continue;
+      if( !acceptTrack(trk) )continue;
 
      //******* find the magnetic field
       StTrackGeometry* trkGeom = trk->geometry();
@@ -157,7 +172,7 @@ Int_t StKinkMaker::Make(){//called for each event
   }   //for each node
   //***************************************************************************************
   // cout<<" magnetic field="<<mBfield<<endl;
-//******* erase existing kinks; because everything runs in chain, the tkf makes its own kinks
+  //******* erase existing kinks; because everything runs in chain, the tkf makes its own kinks
   StSPtrVecKinkVertex& kinkVertices = event->kinkVertices();
   /* TMemStat memStat("kinkVertices");
   kinkVertices.getEntries();
@@ -415,9 +430,8 @@ Int_t StKinkMaker::Make(){//called for each event
 //######################### DONE!!! ###############################################
      
 
-//============_ fill event ===============================================================
-
-  void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry *myParentGeometry11){
+/// Event filling
+void StKinkMaker::FillEvent(StTrackGeometry *myDaughterGeometry1,StTrackGeometry *myParentGeometry11){
 
   kinkVertex = new StKinkVertex();
   StThreeVectorF pMomMinusdMom = mParentMoment - mDaughterMoment;
@@ -514,16 +528,59 @@ Int_t StKinkMaker::Make(){//called for each event
   kinkVertex->setPosition(mKinkVertex);	
 }
 
-//=================================
-bool StKinkMaker::acceptTrack(StTrack *trk, int ITTFflag,int UseTracker){
-//### cut: track type
-      if ((trk->fittingMethod() !=ITTFflag && (UseTracker == kTrackerUseITTF))||
-	  (trk->fittingMethod() ==ITTFflag && (UseTracker == kTrackerUseTPT)) ||
-            trk->flag()<=0){
-         return false;}
-      else return true;
+
+/*!
+  Track acceptance filter
+  fittingMethod() as defined in pams/global/inc/StTrackMethod.h 
+  (values themselves are defined in pams/global/inc/StTrackDefinitions.h)
+  while mUseTracker is defined as SetTrackerUsage(). Note, TPT
+  tracks set as kHelix3DIdentifier but for safety purposes, 
+  kTrackerUseTPT will consider any tracks not being kITKalmanFitId.
+*/
+bool StKinkMaker::acceptTrack(StTrack *trk)
+{
+  //cout << "DEBUG Track [" << trk->fittingMethod() << "] [" << trk->flag() << "] FitIds [" 
+  //     << kKalmanFitId << "] [" << kITKalmanFitId << "] selector [" << mUseTracker << "]" << endl;
+
+  // cut on flag
+  if (trk->flag() <= 0) return false;
+
+  // on fittingMethod() 
+  if  (  ( trk->fittingMethod() != kITKalmanFitId  && (mUseTracker == kTrackerUseTPT  || mUseTracker == kTrackerUseBOTH) ) ||
+  	 ( trk->fittingMethod() == kITKalmanFitId  && (mUseTracker == kTrackerUseITTF || mUseTracker == kTrackerUseBOTH) ) ){
+    return true;
+  } else {
+    return false;
+  }
+
+
+  //if ((trk->fittingMethod() != kITKalmanFitId && (mUseTracker == kTrackerUseITTF))||
+  //    (trk->fittingMethod() == kITKalmanFitId && (mUseTracker == kTrackerUseTPT)) ||
+  //    trk->flag()<=0){
+  //  return false;}
+  //else return true;
 }
-//================================
 
 
+/*!
+
+  Sets the tracker track-selection flag according to convention defined 
+  enumeration in StV0FinderMaker.h . One should not confuse this value
+  with the value of the controlling parameter m_Mode setting calling
+  this method as follow
+
+  m_Mode=0 00 Leaves mUseTracker as default i.e. kTrackerUseBOTH (see ctor)
+  m_Mode=1 01 sets mUseTracker to kTrackerUseTPT
+  m_Mode=2 10 Sets mUseTracker to kTrackerUseITTF
+  m_Mode=3 11 Sets mUseTracker to kTrackerUseBOTH (bitmask)
+
+  See Init() for how this is set. The m_Mode convention would allow for 
+  easier extension to yet another track-selection flags.
+     
+*/
+void StKinkMaker::SetTrackerUsage(Int_t opt)
+{
+  mUseTracker=opt;
+  gMessMgr->Info() << "StKinkMaker::SetTrackerUsage : Setting option to " << mUseTracker << endm;
+}
 		
