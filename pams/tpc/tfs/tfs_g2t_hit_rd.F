@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.6 1998/12/13 21:36:14 sakrejda Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.7 1998/12/16 18:29:01 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.7  1998/12/16 18:29:01  sakrejda
+* references to the central membrane deleted - pavel takes care of it in gstar
+*
 * Revision 1.6  1998/12/13 21:36:14  sakrejda
 * parameters and constants cleaned up, bmpar removed
 *
@@ -114,12 +117,6 @@ C Local variables
       integer ih, jrow, jsect, nok,ierr
 
       real x, dx, y, dy
-
-C     central membrane width = 25 microns -- Aleph Handbook V.13
-C     central membrane width = 76 microns -- TPC geometry proposal by Iwona S.
-      real central_membrane
-      parameter (central_membrane=0.0076)
-
       integer idI1
       character*132 m132  ! And some message-generating space.
       data idI1 /0/
@@ -171,11 +168,6 @@ C     IMS 04/01/98
 C     Add initialisation of dq to that
             tphit(nok).dq         = 0 
 
-            if( abs( g2t_hit(ih).x(3) ) .le. central_membrane ) then
-C     this hit is in the central membrane
-               tphit(nok).flag = tphit(nok).flag + 6
-            endif
-            
 C     a unique pointer for this hit ( offset = 0 for single event )
             tphit(nok).id = nok
 
