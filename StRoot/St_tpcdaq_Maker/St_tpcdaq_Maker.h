@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.27 2001/02/13 18:28:39 fisyak Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.28 2001/02/15 22:25:30 fisyak Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.28  2001/02/15 22:25:30  fisyak
+// Add l3 option
+//
 // Revision 1.27  2001/02/13 18:28:39  fisyak
 // Step back with switching calibration
 //
@@ -186,13 +189,17 @@ class St_tpcdaq_Maker : public StMaker {
      printf("St_tpcdaq_Maker::SetConfig, getting data from %s.\n",gConfig);
    }
    Char_t   *GetConfig() {return gConfig;}
-   virtual void SetMode(Int_t mode=0) {m_Mode=mode; mode ? SetConfig("trs"): SetConfig("daq");} 
+   virtual void SetMode(Int_t mode=0) {
+     m_Mode=mode; 
+     if (m_Mode == 1) SetConfig("trs");
+     else {if (m_Mode == 2)  SetConfig("l3"); else  SetConfig("daq");}
+   }  
    virtual       ~St_tpcdaq_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.27 2001/02/13 18:28:39 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.28 2001/02/15 22:25:30 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };

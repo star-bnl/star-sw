@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.64  2001/02/15 22:25:29  fisyak
+// Add l3 option
+//
 // Revision 1.63  2001/02/13 18:36:24  fisyak
 // Clean GAIN_LINE_SIZE
 //
@@ -208,7 +211,6 @@ ClassImp(St_tpcdaq_Maker)
 
 // We switched to the IO maker, so this is obsolete.  #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StDAQReader.h"
-char gDAQ; /* This is TRUE if using DAQ, FALSE if using Trs. */
 StDAQReader *victorPrelim;
 StTPCReader *victor;
 int gSector;
@@ -254,14 +256,12 @@ Int_t St_tpcdaq_Maker::Init() {
                             "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
                             "pix vs ADC value" , 255 , 1.0 , 255.0 );
-  if(!strcmp(GetConfig(),"daq")) { // Update this for embedding.
-    gDAQ=7; 
+  if(m_Mode == 0 || m_Mode == 2) { // Update this for embedding.
     herb=GetDataSet("StDAQReader");
     assert(herb);
     victorPrelim=(StDAQReader*)(herb->GetObject());
     assert(victorPrelim);
-  } else if(!strcmp(GetConfig(),"trs")) {
-    gDAQ=0;
+  } else if(m_Mode == 1) {// Trs
   } else {
      PP"-----------------------------------------------------------------\n");
      PP"The second argument of St_tpcdaq_Maker::St_tpcdaq_Maker() must be\n");
@@ -381,7 +381,7 @@ void St_tpcdaq_Maker::RowWrite(St_raw_row *raw_row_gen,int rownumber,
 }
 int St_tpcdaq_Maker::getSector(Int_t isect) {
   int rv=0;
-  if(gDAQ) {         // Use DAQ.
+  if(m_Mode != 1) {         // Use DAQ.
     gSector=isect;
   } else {           // Use TRS.
     mZsr=mTdr->getZeroSuppressedReader(isect);
@@ -391,7 +391,7 @@ int St_tpcdaq_Maker::getSector(Int_t isect) {
 }
 int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
   int rv; unsigned char *padlistPrelim;
-  if(gDAQ) { // Use DAQ.
+  if(m_Mode != 1) { // Use DAQ.
     rv=victor->getPadList(gSector,whichPadRow,padlistPrelim);
     *padlist=padlistPrelim;
     return rv;
@@ -442,7 +442,7 @@ void St_tpcdaq_Maker::AsicThresholds(float gain,int *nseqOld,StSequence **lst) {
 #endif
 int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequence **lst) {
   int rv,nseqPrelim; TPCSequence *lstPrelim;
-  if(gDAQ) { // Use DAQ.
+  if(m_Mode != 1) { // Use DAQ.
     rv=victor->getSequences(gSector,row,pad,nseqPrelim,lstPrelim);
     *nseq=nseqPrelim;
     *lst=(StSequence*)lstPrelim;
@@ -666,9 +666,10 @@ int St_tpcdaq_Maker::Output() {
 #endif
 #ifdef GAIN_CORRECTION
           assert(pad>0&&pad<=182);
-          Double_t gaincorrection = 1;
-          if(gDAQ && fGain[ipadrow][pad-1] > 0.125 || fGain[ipadrow][pad-1] <8.0)  
-	    gaincorrection = fGain[ipadrow][pad-1];
+          Double_t gaincorrection = 1; // L3
+          if (fGain[ipadrow][pad-1] < 0.125 || fGain[ipadrow][pad-1] > 8.0)  continue;
+//        if (m_Mode == 2) gaincorrection = 1; // Trs
+          if (m_Mode == 0) gaincorrection = fGain[ipadrow][pad-1];
 #endif
           numberOfUnskippedSeq++;
           for(ibin=0;ibin<seqLen;ibin++) {
@@ -721,7 +722,7 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
-  if(gDAQ) return 0;
+  if(m_Mode != 1) return 0;
  St_ObjectSet *trsEvent=(St_ObjectSet*)GetDataSet("Event"); if(!trsEvent) return 1;
  mEvent=(StTpcRawDataEvent*)(trsEvent->GetObject());   if(!mEvent) return 3;
  mTdr = new StTrsDetectorReader(mEvent); assert(mTdr);
@@ -732,7 +733,7 @@ Int_t St_tpcdaq_Maker::Make() {
   printf("I am Ronald McDonald. (Mar 7 2000).  St_tpcdaq_Maker::Make().\n"); 
   mErr=0;
   errorCode=GetEventAndDecoder();
-  if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
+  if(m_Mode != 1) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
     printf("Error: St_tpcdaq_Maker no event from TRS (%d).\n",errorCode);
