@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.33 1999/03/17 19:23:49 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.34 1999/03/24 01:17:07 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.34  1999/03/24 01:17:07  sakrejda
+// tss_pars added to the xyz_newtab call
+//
 // Revision 1.33  1999/03/17 19:23:49  sakrejda
 // unpacking of raw data into adcxyz table with an on/off switch added
 //
@@ -524,7 +527,7 @@ Int_t St_tcl_Maker::Make(){
                             m_tcl_sector_index,raw_sec_m,
                             raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
                             raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-                            adcxyz);
+                            adcxyz,m_tsspar);
         if (res!=kSTAFCV_OK) Warning("Make","xyz_newtab == %d",res);
 	}
 
@@ -622,7 +625,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.33 1999/03/17 19:23:49 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.34 1999/03/24 01:17:07 sakrejda Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

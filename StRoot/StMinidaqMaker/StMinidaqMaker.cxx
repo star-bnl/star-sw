@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.5 1999/03/17 02:02:31 fisyak Exp $
+// $Id: StMinidaqMaker.cxx,v 1.6 1999/03/24 01:17:01 sakrejda Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.6  1999/03/24 01:17:01  sakrejda
+// tss_pars added to the xyz_newtab call
+//
 // Revision 1.5  1999/03/17 02:02:31  fisyak
 // New scheme
 //
@@ -475,7 +478,7 @@ void StMinidaqMaker::MakeHistograms(){
                                    m_tfc_sector_index,raw_sec_m,
                                    raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
                                    raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
-                                   adcxyz);
+                                   adcxyz,m_tsspar);
            if(res!=kSTAFCV_OK) Warning("Make","xyz_newtab==%d",res);
 	 }
        }
@@ -495,7 +498,7 @@ void StMinidaqMaker::MakeHistograms(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.5 1999/03/17 02:02:31 fisyak Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.6 1999/03/24 01:17:01 sakrejda Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

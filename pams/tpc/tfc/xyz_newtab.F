@@ -1,5 +1,8 @@
-* $Id: xyz_newtab.F,v 1.2 1998/12/17 19:33:53 sakrejda Exp $
+* $Id: xyz_newtab.F,v 1.3 1999/03/24 01:20:53 sakrejda Exp $
 * $Log: xyz_newtab.F,v $
+* Revision 1.3  1999/03/24 01:20:53  sakrejda
+* tss_pars added to the xyz_newtab call
+*
 * Revision 1.2  1998/12/17 19:33:53  sakrejda
 * unused geometry tables deleted from the header
 *
@@ -23,7 +26,7 @@ CC:                     This version of xyz is modified to read the new
 CC:                     data table format.
 CC:<--------------------------------------------------------------------
 
-      INTEGER*4 FUNCTION XYZ_NEWTAB(
+      INTEGER FUNCTION XYZ_NEWTAB(
      3         detector_h,          detector ,
      4         tcl_sector_index_h,   tcl_sector_index,
      5         raw_sec_m_h,         raw_sec_m,
@@ -35,7 +38,10 @@ CC:<--------------------------------------------------------------------
      7         raw_pad_out_h,       raw_pad_out,
      8         raw_seq_out_h,       raw_seq_out,
      9         pixel_data_out_h,    pixel_data_out,
-     6         adcxyz_h,            adcxyz ) 
+     6         adcxyz_h,            adcxyz, 
+     +         tsspar_h,            tsspar
+     7     ) 
+
       IMPLICIT NONE
 #include "xyz_newtab.inc"
 #include "mapping_arrays_inverted.inc"
@@ -95,8 +101,10 @@ CC:>--------------------------------------------------------------------
 	real		Xlocal(3)	! local cartesian coordinates
 	real		Xglobal(3)	! global cartesian coordinates
         real            dummy           ! dummy argument for the tgc calls
+        real            dvel            ! drift velocity
 
 	logical		first_call/.true./
+	save		first_call
 
 c       local bookkeeping variables
 	INTEGER Ipix                 !Offset into raw pixel table, tppixel.
@@ -118,7 +126,9 @@ c -----	TPG function calls
 	integer		tgc_pad_to_x
 	integer		tgc_local_to_global
         integer         tgc_time_to_z
-	save		first_call
+        integer tgc_drift_velocity    !function that returns as a first
+c                                     !argument the drift velocity
+c                                     !two next arguments dummy          
 
 	if (first_call) then
 	  first_call = .false.
@@ -226,6 +236,10 @@ c mal 31aug97
 *	      Xlocal(3) = adcxyz(adcxyz_h.nok).bucket * time_bucket
               istatus = tgc_time_to_z(adcxyz(adcxyz_h.nok).bucket,1,1,1,
      +                                Xlocal(3))
+
+              istatus = tgc_drift_velocity(dvel,dummy,dummy)
+              Xlocal(3) = Xlocal(3) - 3.0*tsspar(1).tau*dvel* 1.0e-6
+
 	      istatus = tgc_local_to_global (adcxyz(adcxyz_h.nok).sector,
      +        Xlocal, Xglobal)
 
