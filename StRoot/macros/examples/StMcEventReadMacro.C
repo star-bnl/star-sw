@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.11 2000/01/19 21:00:40 kathy Exp $
+// $Id: StMcEventReadMacro.C,v 1.12 2000/04/12 17:39:02 kathy Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.12  2000/04/12 17:39:02  kathy
+// change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
+//
 // Revision 1.11  2000/01/19 21:00:40  kathy
 // update macros to use standard default xdf files in /afs/rhic/star/data/samples
 //
@@ -62,7 +65,8 @@ const char *MainFile=
 // Load all the System libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+    gSystem->Load("libsim_Tables");
+    
     gSystem->Load("StUtilities");
 
     gSystem->Load("StIOMaker");
