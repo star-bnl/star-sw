@@ -1,17 +1,20 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.9 2000/04/03 16:21:12 laue Exp $
+ * $Id: StHbtMaker.cxx,v 1.10 2001/06/22 15:38:01 jeromel Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
  *
  * Description: part of STAR HBT Framework: StHbtMaker package
  *              Maker class is the interface with root4star/Maker framework
- *
+ * 
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.10  2001/06/22 15:38:01  jeromel
+ * This is a test. Ignore
+ *
  * Revision 1.9  2000/04/03 16:21:12  laue
  * some include files changed
  *
