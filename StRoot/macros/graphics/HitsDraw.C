@@ -6,8 +6,11 @@
 // begin_html
 // Full text of this macro can be downloaded from the repository: <a href = "http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/macros/HitsDraw.C">HitsDraw.C</a> 
 // end_html
-// $Id: HitsDraw.C,v 1.6 1999/07/09 17:54:12 fine Exp $
+// $Id: HitsDraw.C,v 1.7 1999/11/11 20:28:24 fisyak Exp $
 // $Log: HitsDraw.C,v $
+// Revision 1.7  1999/11/11 20:28:24  fisyak
+// Remove BFC.C
+//
 // Revision 1.6  1999/07/09 17:54:12  fine
 // A example of selecting subdetectors and range was introduced
 //
@@ -135,8 +138,8 @@ void HitsDraw(){
 //
 // Read XDF file with some table information
 //_______________________________________
-   St_XDFFile file("/disk00000/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tss_dst/set184_01_48evts.p1.xdf");
-
+  //   St_XDFFile file("/disk00000/star/auau200/hijing135/default/b0_3/year2a/hadronic_on/tss_dst/set184_01_48evts.p1.xdf");
+   St_XDFFile file("/disk00000/star/test/dev/trs_Linux/Fri/year_1b/set0352_01_35evts.dst.xdf"); 
   // skip first record 
   St_DataSet *skip = file.NextEventGet();
   if (skip) delete skip;
@@ -163,6 +166,10 @@ void HitsDraw(){
 //        float   x[3];           // coordinate (Cartesian)
 // }
   points = (St_g2t_tpc_hit *)next(table);
+  if (!points) {
+    next.Du();
+    return;
+  }
   points->Print(0,10);
   g2t_tpc_hit_st *p = 0;
   if (points) 
