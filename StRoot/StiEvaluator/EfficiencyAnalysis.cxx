@@ -2,6 +2,9 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.10  2004/07/28 18:29:52  perev
+// Defence against Zombie in TFile::Open
+//
 // Revision 1.9  2004/05/03 23:41:08  perev
 // Possible non init WarnOff
 //
@@ -1392,7 +1395,7 @@ int EfficiencyAnalysis::writeHistograms() {
     // must open file in update mode, as all the efficiency analysis
     // classes will write into the same file.
     TFile* efficiencyfile = TFile::Open(mFileName,"UPDATE");
-    
+    assert(efficiencyfile && !efficiencyfile->IsZombie());
     rawMcPiKP->Write();
     accMcPiKP->Write();
     matMcPiKP->Write();
