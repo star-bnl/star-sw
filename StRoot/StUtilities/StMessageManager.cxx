@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.30 2000/03/01 05:54:59 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.31 2000/05/23 19:03:38 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.31  2000/05/23 19:03:38  genevb
+// Correct interface for MessageOut(), update docs
+//
 // Revision 1.30  2000/03/01 05:54:59  genevb
 // Further refinements to FORTRAN routines
 //
@@ -225,8 +228,8 @@ void type_of_call Msg_Disable_(const char* mess, size_t len) {
   }
 }
 //________________________________________
-void type_of_call MessageOut( const char *msg, int* lines, size_t len ) {
-  Message_(msg,lines,0,len);
+void type_of_call MessageOut( const char *msg ) {
+  gMessMgr->Message(msg);
 }
 //________________________________________
 void type_of_call StCaller(const char* mess, const char* typString,
@@ -682,7 +685,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.30 2000/03/01 05:54:59 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.31 2000/05/23 19:03:38 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
