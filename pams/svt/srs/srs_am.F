@@ -62,6 +62,7 @@ c       flag=0 unperturbed hit                                                 c
 c       flag=1 merged hit                                                      c
 c       Merging will take place if the table entry srspar.merge = 1            c
 c       (The default is 1)                                                     c
+c       id_globtrk initialized to zero when filling scs_spt LM sept-98         c
 c------------------------------------------------------------------------------c
       INTEGER*4 FUNCTION SRS_AM(
      1            result_h,            result ,
@@ -684,6 +685,7 @@ c       fill the spt table for tracking
 	   spt(spt_h.nok).cov(3)=covar(3)
 	   spt(spt_h.nok).id_mctrack=svt_hit(ihit).track_p
 	   spt(spt_h.nok).id_track=0
+	   spt(spt_h.nok).id_globtrk=0
 	   spt(spt_h.nok).de(1)=svt_hit(ihit).de
 	   spt(spt_h.nok).de(2)=0
 c	   spt(spt_h.nok).id_cluster=svt_hit(ihit).id_spt
@@ -2343,6 +2345,7 @@ c     to spt, will set errors to zero
          spt(ihit).cov(3)     = 0.                  ! error on x(3)
          spt(ihit).flag       = 0                   ! quality of space point - perfect
          spt(ihit).id         = ihit                ! sequential index
+         spt(ihit).id_globtrk = 0                   ! initialized to zero.
          spt(ihit).id_track   = 0                   ! link to reconstructed track - 
                                                         ! to   be left empty here
          spt(ihit).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
@@ -2515,6 +2518,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).cov(3)     = abs(dx(3))
             spt(ispt).flag       = 0 ! quality of space point - perfect
             spt(ispt).id         = ihit ! sequential index
+            spt(ispt).id_globtrk = 0 ! link to global track 
             spt(ispt).id_track   = 0 ! link to reconstructed track 
             spt(ispt).id_mctrack = svt_hit(ihit).track_p! link to monte carlo track
             spt(ispt).id_cluster = svt_hit(ihit).id ! link to mchits_svt
