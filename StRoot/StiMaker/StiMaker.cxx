@@ -360,15 +360,15 @@ Int_t StiMaker::Make()
 	    finishEvent();
 	    // cout <<"\tStiMaker::Maker().  FinishEvent. done"<<endl;
 	}
+	
     }
-
+    
     if (StiIOBroker::instance()->useGui()==true) {
 	// cout <<"StiMaker::Make.  Draw/update"<<endl;
 	mdisplay->draw();
 	mdisplay->update();
 	// cout <<"\tStiMaker::Make.  Draw/update. done"<<endl;
     }
-
     return kStOK;
 }
 
