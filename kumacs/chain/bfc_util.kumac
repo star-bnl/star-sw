@@ -69,6 +69,7 @@
 *                             from par2mem, so have to change calls to
 *                              global init kumacs
 *                             
+* editted 8/28/98 K. Turner - changed names of macros in init_dst
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -256,9 +257,9 @@ macro bfc_init _
     (dmsft) exec create_tables_global#dst_monitor_soft_filler
     (dmhrd) 
     (desum) exec create_tables_global#fill_dst_event_summary
-            exec init_dst#init_esum
+            exec init_dst#init_ehead
     (drsum) exec create_tables_global#fill_dst_run_summary
-	    exec init_dst#init_rsum
+	    exec init_dst#init_rhead
     (fzout) user/output o [output_fzd_file]
     (evout)
             if output_xdf_file="" then
@@ -390,7 +391,7 @@ ABEND:
     (fpt_s) exec fpt_run#run_slow_sim
     (fte_s) exec fte_run#run_slow_sim
       (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
-      (evr)    exec run_evr
+      (evr)    exec run_evr#run
       (egr)    exec run_egr#egr	|  Event Global Refit
       (ev0)    exec run_ev0#ev0_am           |  V0 Finder 
     (ev0_e)    exec run_ev0#ev0_eval2  
