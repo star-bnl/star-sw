@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.47 2003/12/09 19:29:39 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.48 2004/01/14 22:46:45 fisyak Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.48  2004/01/14 22:46:45  fisyak
+ * replace iostream by Stiostream.h
+ *
  * Revision 1.47  2003/12/09 19:29:39  calderon
  * Changes to check the volume id of FTPC hits.
  * new volume id's run from 1000 to 2906 (they include the sectors).
@@ -170,11 +173,7 @@
  *
  *
  *************************************************/
-#include <iostream>
-#ifndef ST_NO_NAMESPACES
-using std::ostream;
-using std::cout;
-#endif
+#include "Stiostream.h"
 #include <stdlib.h>
 #include <string>
 #include <algorithm>
@@ -225,7 +224,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.47 2003/12/09 19:29:39 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.48 2004/01/14 22:46:45 fisyak Exp $";
 ClassImp(StMcEventMaker)
 
 
