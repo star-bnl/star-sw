@@ -88,7 +88,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.6 1998/05/29 23:18:43 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.7 1998/06/05 02:07:16 fisyak Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -1603,6 +1603,7 @@ int main(int nnn,char *aaa[]) {
     for(i=1;i<gNInFile;i++) { PP"%s",gInFile[i]); if(i<gNInFile-1) PP" "); }
     PP"\n");
 }
+  fflush(stdout); 
   exit(0);
 }
 yyerror(char *s) {
