@@ -195,7 +195,11 @@ C--mark default primary tracks
            dr=sqrt( (x0(i)-xv)*(x0(i)-xv)+(y0(i)-yv)*(y0(i)-yv)
      +          +(z0(i)-zv)*(z0(i)-zv) )
            if(dr.lt.evrpar(1).vcut) then
+            if(k.gt.0)then                   ! WJL
+             if(gindex(k).gt.0)then          ! WJL
               globtrk(gindex(k)).id_start_vertex = 1
+             end if                          ! WJL
+            end if                           ! WJL
            endif
  235    continue
         
