@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.13 2003/03/11 23:04:31 posk Exp $
+// $Id: plotCen.C,v 1.14 2003/03/17 20:46:57 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -421,15 +421,31 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptFit(111);
       hist->Draw("E1");
     } else if (strstr(shortName[pageNumber],"_q")!=0) {   // q distibution
-      double area = hist->Integral() * qMax / (float)n_qBins; 
-      cout << "  Area = " << area << endl;
-      TF1* func_q = new TF1("func_q", "[0]*2.*x*exp(-x*x)", 0., qMax);
-      func_q->SetParameter(0, area);
-      gStyle->SetOptStat(100110);
+      gStyle->SetOptStat(10);
       gStyle->SetOptFit(111);
-      hist->Draw("E1");
-      func_q->SetLineStyle(kDotted);
-      func_q->Draw("same");
+      double area = hist->Integral() * qMax / (float)n_qBins; 
+      TString* histMulName = new TString("Flow_Mul_Sel");
+      histMulName->Append(*sel);
+      histMulName->Append("_Har");
+      histMulName->Append(*har);
+      TH1* histMult = dynamic_cast<TH1*>(histFile[fileN]->Get(histMulName->Data()));
+      if (!histMult) {
+	cout << "### Can't find histogram " << histMulName->Data() << endl;
+	return can;
+      }
+      delete histMulName;
+      float mult = histMult->GetMean();
+      TF1* fit_q = new TF1("qDist", qDist, 0., qMax, 4);
+      fit_q->SetParNames("v", "mult", "area", "g");
+      float qMean = hist->GetMean();
+      float v2N = (qMean > 1.) ? qMean - 1. : 0.;
+      float vGuess = 100. * sqrt(v2N / mult);
+      fit_q->SetParameters(vGuess, mult, area, 0.3); // initial values
+      fit_q->SetParLimits(1, 1, 1);             // mult is fixed
+      fit_q->SetParLimits(2, 1, 1);             // area is fixed
+      //fit_q->FixParameter(3, 0.6);              // g is fixed
+      hist->Fit("qDist");
+      fit_q->Draw("same");
     } else if (strstr(shortName[pageNumber],"Phi")!=0) {  // Phi distibutions
       hist->SetMinimum(0.9*(hist->GetMinimum()));
       if (strstr(shortName[pageNumber],"Weight")!=0) {
@@ -490,18 +506,15 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
       gStyle->SetOptStat(0);
       hist->Draw();
       lineZeroHar->Draw();
-//       v   = hist->GetBinContent(2);                       // output v values
-//       err = hist->GetBinError(2);
-	for (int n=1; n < 4; n++) {
-	  v   = hist->GetBinContent(n);                       // output v values
-	  err = hist->GetBinError(n);
-	  if (n==2) cout << " v2 = " << v << " +/- " << err << endl;
-	  if (TMath::IsNaN(v)) {
-	    hist->SetBinContent(n, 0.);
-	    hist->SetBinError(n, 0.);
-	  }
+      for (int n=1; n < 4; n++) {
+	v   = hist->GetBinContent(n);                       // output v values
+	err = hist->GetBinError(n);
+	if (n==2) cout << " v2 = " << v << " +/- " << err << endl;
+	if (TMath::IsNaN(v)) {
+	  hist->SetBinContent(n, 0.);
+	  hist->SetBinError(n, 0.);
 	}
-	//cout << "  v2 = " << v << " +/- " << err << endl;
+      }
     } else {                                              // all other 1D
       gStyle->SetOptStat(100110);
       hist->Draw(); 
@@ -533,6 +546,19 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 
 //-----------------------------------------------------------------------
 
+static Double_t qDist(double* q, double* par) {
+  // Calculates the q distribution given the parameters v, mult, area, g
+
+  double sig2 = 0.5 * (1. + par[3]);
+  double expo = (par[1]*par[0]*par[0]/10000. + q[0]*q[0]) / (2*sig2);
+  Double_t dNdq = par[2] * (q[0]*exp(-expo)/sig2) * 
+    TMath::BesselI0(q[0]*par[0]/100.*sqrt(par[1])/sig2);
+
+  return dNdq;
+}
+
+//-----------------------------------------------------------------------
+
 static Double_t SubCorr(double* x, double* par) {
   // Calculates the cos(n(Psi_a - Psi_b)) distribution by fitting chi of JYO
   // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6, with corrs.
@@ -553,6 +579,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.14  2003/03/17 20:46:57  posk
+// Improved fit to q dist.
+//
 // Revision 1.13  2003/03/11 23:04:31  posk
 // Includes scalar product hists.
 //
