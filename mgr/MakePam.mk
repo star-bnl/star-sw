@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.41 1998/08/12 22:15:05 fisyak Exp $
+# $Id: MakePam.mk,v 1.42 1998/08/17 14:44:28 didenko Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.42  1998/08/17 14:44:28  didenko
+# ****
+#
 # Revision 1.41  1998/08/12 22:15:05  fisyak
 # Add check for %_i.cc
 #
@@ -267,10 +270,57 @@ $(FILES_TAH) : $(GEN_TAB)/%.h : %.idl
 	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
 $(FILES_TAI) : $(GEN_TAB)/%.inc : %.idl
 	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
-$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : %.idl
-	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
-$(FILES_THH) : $(GEN_TAB)/St_%_Table.h   : %.idl
-	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
+#$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : %.idl
+#	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
+$(GEN_TAB)/.rootrc:
+	@echo "# ROOT Environment settings are handled via the class TEnv. To see" > $(ALL_TAGS)
+	@echo "# which values are active do: gEnv->Print(). ">>  $(ALL_TAGS)
+ 
+	@echo "# Path used by dynamic loader to find shared libraries and macros ">>  $(ALL_TAGS)
+	@echo "# Paths are different for Unix and Windows. The example shows the defaults">>  $(ALL_TAGS)
+	@echo "# for all ROOT applications for either Unix or Windows.">>  $(ALL_TAGS)
+	@echo "Unix.*.Root.DynamicPath:    .:$(ROOTSYS)/lib:.$(STAR_SYS)/lib:$(STAR_LIB):$(STAF_LIB)">>  $(ALL_TAGS)
+	@echo "Unix.*.Root.MacroPath:      .:./StRoot/macros:$(STAR)/StRoot/macros:$(STAR)/StRoot/test:$(STAR)/.share/tables:$(ROOTSYS)/macros">>  $(ALL_TAGS)
+	@echo "WinNT.*.Root.DynamicPath:   ./;$(ROOTSYS)/star/bin;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$(ROOTSYS);$(ROOTSYS)/bin;$(PATH)">>  $(ALL_TAGS)
+	@echo "WinNT.*.Root.MacroPath:     ./;$(home)/root/macros;$(ROOTSYS)/tutorials;$(ROOTSYS)/star/macros;//Sol/afs_rhic/star/packages/dev/.intel_wnt/bin;$(ROOTSYS)/macros">>  $(ALL_TAGS)
+	@echo "# Show where library or macro is found (in path specified above)">>  $(ALL_TAGS)
+	@echo "Root.ShowPath:           false">>  $(ALL_TAGS)
+ 
+	@echo "# Activate memory statistics (size and cnt is used to trap allocation of">>  $(ALL_TAGS)
+	@echo "# blocks of a certain size after cnt times)">>  $(ALL_TAGS)
+	@echo "Root.MemStat:            0">>  $(ALL_TAGS)
+	@echo "Root.MemStat.size:      -1">>  $(ALL_TAGS)
+	@echo "Root.MemStat.cnt:       -1">>  $(ALL_TAGS)
+	@echo "Root.ObjectStat:         1">>  $(ALL_TAGS)
+ 
+	@echo "# Rint (interactive ROOT executable) specific alias, logon and logoff macros">>  $(ALL_TAGS)
+	@echo "Rint.Logon:              ./gentable.C">>  $(ALL_TAGS)
+	@echo "Rint.History:             /dev/null">>  $(ALL_TAGS)
+
+$(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
+	@echo "{" >   $(GEN_TAB)/gentable.C;
+	@echo "   gSystem->Load(\"libasu.so\");" >> $(GEN_TAB)/gentable.C;
+	@echo "   gSystem->Load(\"libdsl.so\");" >> $(GEN_TAB)/gentable.C;
+	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
+	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
+	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
+	echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
+	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
+	@echo "}" >> $(GEN_TAB)/gentable.C;
+	cd $(GEN_TAB); root.exe -b -q /dev/null ; $(RM) gentable.C
+#$(FILES_THH) : $(GEN_TAB)/St_%_Table.h   : %.idl
+#	cp  $(1ST_DEPS) $(GEN_TAB)/ ; cd $(GEN_TAB); $(STIC) -r -H -q $(STICFLAGS) $(STEM).idl; $(RM) $(STEM).idl
+$(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
+	@echo "{" >   $(GEN_TAB)/gentable.C;
+	@echo "   gSystem->Load(\"libasu.so\");" >> $(GEN_TAB)/gentable.C;
+	@echo "   gSystem->Load(\"libdsl.so\");" >> $(GEN_TAB)/gentable.C;
+	@echo "   gSystem->Load(\"St_base.so\");" >> $(GEN_TAB)/gentable.C;
+	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
+	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
+	echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
+	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
+	@echo "}" >> $(GEN_TAB)/gentable.C;
+	cd $(GEN_TAB); root.exe -b -q /dev/null ; $(RM) gentable.C
 endif #ALL_TAB
 #--- compilation -
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
@@ -324,7 +374,7 @@ $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
         cp $(STEM)_i.cc  $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/; $(RM) *.*;
 #       cp St_$(STEM)_Module.cxx $(GEN_DIR)/; $(RM) *.*;
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
-	rm $(GEN_DIR)/$(STEM)_i.cc
+	$(RM)  $(GEN_DIR)/$(STEM)_i.cc
 	cp  $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);\
         $(STIC) -q $(STICFLAGS) $(1ST_DEPS); \
         gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(1ST_DEPS) | \
