@@ -33,9 +33,8 @@ char gPs[PS],gSumCol[100];
 #define NOTUSED 0
 #define XtCP XtCallbackProc
 #define TEXT_SIZE_PART_1 400
-#define TEXT_SIZE_PART_2 4000
+#define TEXT_SIZE_PART_2 14000
 #define TEXT_SIZE_PART_3 50000
-#define MAX_LINES_CLICK_PART 400
 int gNPs,gNWin,gNGraphicsUp,gHistWhLine;
 size_t gLast;
 Widget gVer2;
@@ -44,8 +43,8 @@ Widget gVer2;
 #define GRAPHHITE 400
 #define HILITE_TURN_ON 0
 #define HILITE_TOGGLE  1
-#define WIN_TYPE_PRIMARY  0
-#define WIN_TYPE_DATASET  1
+#define WIN_TYPE_D_TREE  0
+#define WIN_TYPE_PRIMARY  1
 #define WIN_TYPE_TABLE    2
 #define WIN_TYPE_GRAPHICS 3
 
@@ -60,7 +59,8 @@ Widget gVer2;
 
 #define COL 58  /* number of columns in table window, lower 2 parts */
 #define WIDE 10  /* width (chars) for each column in write part of table win */
-#define MCOL 4  /* max columns allowed to be selected in table win */
+#define MCOL_INIT 4
+#define MCOL 12  /* max columns allowed to be selected in table win */
 #define EXT 13 /* length of constant beginning part of header info */
                /* (WFW+1)*NWF+EXT < COL */
 size_t LastRow(myBool,int);
@@ -83,13 +83,16 @@ typedef struct {
   char   tableName[NAME];
   char   textTop[TEXT_SIZE_PART_1],textClickPart[TEXT_SIZE_PART_2];
   char   *textOutput;
-  int    nLineClickPart; /* BBB compare to MAX_LINES_CLICK_PART */
+  int    nlcpwtto; /* num line clickable part window type table only */
+  /* BBB compare to MAX_LINES_CLICK_PART */
   int    tlm[MAX_LINES_CLICK_PART]; /* See 6tx.  This is wh_gDs or colNum. */
   int    wh_gDs;  /* See 7tx. */
-  int    nRowsWritePart;
+  int    width,ncol,nRowsWritePart;
   Widget shell,txtWidClickH,txtWidWriteH,rowWidget,rad[NUM_RADIO];
   Widget txtWidTop,txtWidClick,txtWidWrite;
   myBool isHilited[MAX_LINES_CLICK_PART],useCuts;
+  int hlLst[MAX_LINES_CLICK_PART]; /* in order that user clicked on them */
+  int nhlLst;
   int    subscript[MAX_LINES_CLICK_PART]; /* see comment 8tx */
   size_t nRow;
   int    whichRadio; /* 0 to NUM_RADIO-1, good if win_type==WIN_TYPE_TABLE */
