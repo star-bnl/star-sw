@@ -1,7 +1,7 @@
-// $Id: StMaker.cxx,v 1.7 1998/09/22 01:32:35 fine Exp $
+// $Id: StMaker.cxx,v 1.8 1998/09/22 01:39:07 fine Exp $
 // $Log: StMaker.cxx,v $
-// Revision 1.7  1998/09/22 01:32:35  fine
-// StMaker::MakeDoc() method has been introduced to generate HTML docs for all base classes and Makers
+// Revision 1.8  1998/09/22 01:39:07  fine
+// Some make up
 //
 // Revision 1.6  1998/08/18 14:05:02  fisyak
 // Add to bfc dst
@@ -163,8 +163,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
  //         *  St_DataSet  St_DataSetIter St_FileSet     *
  //         *  StMaker     StChain                       *
  //
- // stardir - the "root" directory to look up the sunbdirectoes as follows.
- // outdir  - directory to write the generated HTML and Postscript files in to
+ // stardir - the "root" directory to lookup the subdirectories as follows.
+ // outdir  - directory to write the generated HTML and Postscript files into
  //
  //            The following subdirectories are used to look it up:
  //            $(stardir) + "StRoot/base"
@@ -221,8 +221,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir)
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = {"St_XDFFile",  "St_Module",   "St_Table"
-                       ,"St_DataSet", "St_DataSetIter","St_FileSet"
+  Char_t *classes[] = { "St_XDFFile",  "St_Module",      "St_Table"
+                       ,"St_DataSet",  "St_DataSetIter", "St_FileSet"
                        ,"StMaker",     "StChain"
                        ,"table_head_st"
                       };
