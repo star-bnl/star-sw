@@ -82,9 +82,9 @@ u_short EEMC_Reader::getEemcData(int fiber,int channel, char type) {
 
 }
 
-  
 
-EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP) 
+
+EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP)
 {
   Bank_DATAP *datap = (Bank_DATAP*) er->getDATAP();
   ::emcReader((char*)datap); // ::emcReader saves data in a static global, and gives it
@@ -92,16 +92,17 @@ EEMC_Reader::EEMC_Reader(EventReader *er, Bank_EEMCP *pEEMCP)
 
   pBankEEMCP = pEEMCP; //copy into class data member for use by other methods
   ercpy = er; // squirrel away pointer eventreader for our friends
-  
+
   if (!pBankEEMCP->test_CRC()) printf("CRC error in EEMCP: %s %d\n",__FILE__,__LINE__) ;
 
   ////////////////////////////////////////////////////////////////////////////////
   // Swapping is done in ::emcReader().  This is not usual StDaqLib practice,
-  // but it does allow maximum re-use of DAQ's Event Pool code 
+  // but it does allow maximum re-use of DAQ's Event Pool code
   // if (pBankEEMCP->swap() < 0)  printf("swap error in EEMCP: %s %d\n",__FILE__,__LINE__) ;
   ////////////////////////////////////////////////////////////////////////////////
- 
+
   pBankEEMCP->header.CRC = 0;
 
 }
+
 
