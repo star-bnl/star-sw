@@ -1,7 +1,7 @@
-// $Id: StSvtSimulationMaker.h,v 1.13 2004/07/01 13:54:29 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.14 2004/07/09 00:17:45 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
-// Revision 1.13  2004/07/01 13:54:29  caines
-// Changes to the simulation maker from the review
+// Revision 1.14  2004/07/09 00:17:45  caines
+// Code no longer kill code is things go wrong, also  by default dont do anthing if SVT not there
 //
 // Revision 1.12  2004/03/30 21:27:12  caines
 // Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
@@ -172,7 +172,7 @@ class StSvtSimulationMaker : public StMaker
     
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.13 2004/07/01 13:54:29 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.14 2004/07/09 00:17:45 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,3)
 
