@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.12 1999/01/20 23:44:48 fine Exp $
+// $Id: StMaker.h,v 1.13 1999/02/27 20:13:46 fine Exp $
 // $Log: StMaker.h,v $
+// Revision 1.13  1999/02/27 20:13:46  fine
+// Total job time and relative time have been introduced
+//
 // Revision 1.12  1999/01/20 23:44:48  fine
 // The special Input/Output makers and the static variable StChain::g_Chain have been introduced
 //
@@ -99,6 +102,8 @@ public:
    virtual void   SetBranch();
    virtual void   SetTree(TTree *tree=0){ m_Tree = tree;}
    virtual void   StartTimer(Bool_t reset = kFALSE){m_Timer.Start(reset);}
+   virtual Double_t RealTime(){ return m_Timer.RealTime();}
+   virtual Double_t CpuTime() { return m_Timer.CpuTime();}
    virtual void   StopTimer(){m_Timer.Stop();}
    virtual void   PrintTimer(Option_t *option="");
    virtual void   SetChainAddress(TChain *chain);

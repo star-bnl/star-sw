@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.28 1999/02/27 18:13:40 fine Exp $
+// $Id: StChain.cxx,v 1.29 1999/02/27 20:13:45 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.29  1999/02/27 20:13:45  fine
+// Total job time and relative time have been introduced
+//
 // Revision 1.28  1999/02/27 18:13:40  fine
 // Bug fixed: SetEvent(i) has been introduced for Make(i) method
 //
@@ -279,7 +282,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.28 1999/02/27 18:13:40 fine Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.29 1999/02/27 20:13:45 fine Exp $"),
 m_VersionTag("$Name:  $"),
 m_DateTime(),
 mProcessTime()
@@ -495,7 +498,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.28 1999/02/27 18:13:40 fine Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.29 1999/02/27 20:13:45 fine Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -666,9 +669,28 @@ Int_t StChain::Finish()
 
    TIter next(m_Makers);
    StMaker *maker;
+   Double_t totalCpuTime = 0;
+   Double_t totalRealTime = 0;
    while ((maker = (StMaker*)next())) {
       if ( maker->Finish() ) nerr++;
       maker->PrintTimer();
+      totalCpuTime  += maker->CpuTime();
+      totalRealTime += maker->RealTime();
+   }
+   Printf("------------------------------------------------------------------");
+   Printf("%-10s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
+                               ,GetName(),totalRealTime,totalCpuTime);
+   Printf("------------------------------------------------------------------");
+   // Print realtive time
+   if (totalCpuTime && totalRealTime) {
+     next.Reset();
+     while ((maker = (StMaker*)next())) {
+        Printf("%-10s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
+               ,maker->GetName()
+               ,100*maker->RealTime()/totalRealTime
+               ,100*maker->CpuTime()/totalCpuTime);
+     }
+     Printf("------------------------------------------------------------------");
    }
    return nerr;
 }
