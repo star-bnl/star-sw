@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.17 2000/01/05 22:12:03 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.18 2000/01/10 21:59:17 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.18  2000/01/10 21:59:17  kathy
+// must now load St_global when running St_QA_Maker
+//
 // Revision 1.17  2000/01/05 22:12:03  kathy
 // changed input file to current one
 //
@@ -118,6 +121,7 @@ void bfcread_dst_QAhist(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
+  gSystem->Load("St_global");
 
 // force the directory name for histograms since this macro is 
 // specifically for running St_QA_Maker
