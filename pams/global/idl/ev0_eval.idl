@@ -2,33 +2,25 @@
 *   Table: ev0_eval
 */
    struct ev0_eval {
-	long id; /* Primary key */
+	long id; /* Primary key (same as in dst_v0_vertex) */
 	long itrue; /* Evaluation flag for vertex */
-	long pid; /* pid (geant) of parent track */
-	long pid_pos; /* pid (geant) of pos track */
-	long pid_neg; /* pid (geant) of neg track */
+	long id_parent; /* id (geant) of parent track (g2t_track.id)*/
+	long id_pos; /* id (geant) of pos track (g2t_track.id) */
+	long id_neg; /* id (geant) of neg track (g2t_track.id) */
+	long vid; /* vertex id (geant) (g2t_vertex.id) */
 	long pid_true; /* true pid (geant) of parent track */
 	long pid_pos_true; /* true pid (geant) of pos track */
 	long pid_neg_true; /* true pid (geant) of neg track */
-	float x;
-	float y; /* V0 coords */
-	float z;
 	float x_true; 
 	float y_true; /* Real decay vertex */
 	float z_true; 
-	float px;
-	float py; /* Calculated momentum of parent */
-	float pz; 
-	float px_true;
-	float py_true; /* Real parent momentum */
-	float pz_true;
-	float rapidity_la; /* Calculated rapidity of parent */
-	float rapidity_lb; /* Calculated rapidity of parent */
-	float rapidity_k0; /* Calculated rapidity of parent */
+	float pos_px_true;
+	float pos_py_true; /* Real parent momentum */
+	float pos_pz_true;
+	float neg_px_true;
+	float neg_py_true; /* Real parent momentum */
+	float neg_pz_true;
 	float rapidity_true; /* Real rapidity of parent */
-	float inv_mass_la; /*  invariant mass if lambda */
-	float inv_mass_lb; /*  invariant mass if anti-lambda */
-	float inv_mass_k0; /*  invariant mass if k0 */
    } ;
-/*  Last mod. for ev0_eval:   $Date: 1998/05/28 21:05:52 $ */
+/*  Last mod. for ev0_eval:   $Date: 1999/06/25 22:50:40 $ */
 
