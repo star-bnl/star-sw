@@ -16,6 +16,15 @@
       sphi = emc_chid(4)        ! d(eta)=0.1 tower number [1,10]
       dep  = emc_chid(5)        ! depth section [1,2]
 c      print *,'BEMC:rl,eta,phi,sphi,dep',rl,eta,phi,sphi,dep
+      if(rl.eq.0) then
+         rl=2
+         phi=phi+(shift-75)/6
+         if(phi.gt.60) then
+            phi=phi-60
+         elseif(phi.le.0) then
+            phi=60-phi
+         endif
+      endif
       if(rl.eq.1) then
          phi=phi*2-2+sphi
       elseif(rl.eq.2) then

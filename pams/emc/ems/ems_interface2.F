@@ -36,10 +36,10 @@ C
       REAL    de
 
 c---- Tags
-      integer tbemc(-20:20,120,2)
-      integer tbsmd(-10:10,60,3,75)
-      integer teemc(-12:12,60,0:3)
-      integer tesmd(2,60,100,100)
+      integer tbemc(-20:20,240,2)
+      integer tbsmd(-10:10,120,3,75)
+      integer teemc(-12:12,120,0:3)
+      integer tesmd(2,60,200,100)
 
 c---- start executable statements...
       write(*,*) 'EMS_INTERFACE2:starting...'
@@ -49,7 +49,7 @@ c----
 c---- Barrel EMC/PRS
 c----
       if(ems_control(1).bemc_on.eq.1) then
-         call vzero(tbemc, 41*120*2)
+         call vzero(tbemc, 41*240*2)
          nout     = 0
          do ihit = 1, g2t_emc_hit_h.nok
             ivid = g2t_emc_hit(ihit).volume_id            
@@ -90,7 +90,7 @@ c----
 c---- Barrel SMD
 c----
       if(ems_control(1).bsmd_on.eq.1) then
-         call vzero(tbsmd, 21*60*3*75)
+         call vzero(tbsmd, 21*120*3*75)
          nout     = 0
          do ihit = 1, g2t_smd_hit_h.nok
             ivid = g2t_smd_hit(ihit).volume_id            
@@ -120,7 +120,7 @@ c----
 c---- Endcap EMC/PRS
 c----
       if(ems_control(1).eemc_on.eq.1) then
-         call vzero(teemc, 25*60*4)
+         call vzero(teemc, 25*120*4)
          nout     = 0
          do ihit = 1, g2t_eem_hit_h.nok
             ivid = g2t_eem_hit(ihit).volume_id            
@@ -165,7 +165,7 @@ c---- Endcap SMD
 c----
       if(ems_control(1).esmd_on.eq.1) then
          nout     = 0
-         call vzero(tesmd, 2*60*100*100)
+         call vzero(tesmd, 2*60*200*100)
          do ihit = 1, g2t_esm_hit_h.nok
             ivid = g2t_esm_hit(ihit).volume_id            
             de = g2t_esm_hit(ihit).de
