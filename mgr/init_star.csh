@@ -1,4 +1,7 @@
 #  $Log: init_star.csh,v $
+#  Revision 1.3  1998/02/12 13:35:09  fisyak
+#  Add versioning, new Makefile with domain/package libraries
+#
 #  Revision 1.2  1998/02/10 00:06:10  fisyak
 #  SL98a second version
 #
@@ -10,7 +13,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/10 00:06:10 $ 
+#             Last modification $Date: 1998/02/12 13:35:09 $ 
 #! /bin/csh -f
 #. default setings
 	setenv CC        gcc
@@ -18,6 +21,7 @@
 	setenv CXX       gcc
 	setenv CXXFLAGS "-fpic -w"
         setenv STAR_LD_LIBRARY_PATH ""
+        setenv ARFLAGS rvu
 switch ($SYS_HOST_STAR)
     case "rs_aix31":
 #  ====================
@@ -71,7 +75,7 @@ switch ($SYS_HOST_STAR)
 	setenv FFLAGS    "+ppu -K +z -w"
 	setenv F_EXTENDED +es
 	setenv CPPFLAGS   -Dextname
-	setenv ARFLAGS     slrv
+	setenv ARFLAGS     slrvu
 	setenv RANLIB      /bin/true
 	setenv LD         CC
 	setenv LDFLAGS   "-b -z"
@@ -106,7 +110,8 @@ switch ($SYS_HOST_STAR)
 #   breaksw
     case "sgi_53":
 #  ====================
-	setenv FFLAGS     "-Nn20000 -static -trapuv -u -KPIC"
+	setenv FFLAGS     "-Nn20000 -static -trapuv -KPIC"
+#                                                  -u
 	setenv F_EXTENDED  -extend_source
 	setenv CC           cc
 	setenv CFLAGS     "-ansi -KPIC -kpicopt -w"
@@ -114,7 +119,7 @@ switch ($SYS_HOST_STAR)
 	setenv CXX         CC
 	setenv CXXFLAGS   "-32 ${CFLAGS} -xansi -w"
 #                                               -use_cfront 
-	setenv ARFLAGS     slrv
+	setenv ARFLAGS     slrvu
 #	setenv LD          ld
 	setenv LD          CC
 	setenv LDFLAGS    "-32 -shared"
@@ -126,7 +131,8 @@ switch ($SYS_HOST_STAR)
 #   breaksw
     case "sgi_64":
 #  =============-32-=======
-	setenv FFLAGS     "-32 -Nn20000 -static -trapuv -u -KPIC"
+	setenv FFLAGS     "-32 -Nn20000 -static -trapuv -KPIC"
+#                                                       -u
 	setenv F_EXTENDED  -extend_source
 	setenv CC           cc
 	setenv CFLAGS     "-32 -ansi -KPIC -kpicopt -w"	

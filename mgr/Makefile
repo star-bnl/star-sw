@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.6  1998/02/12 13:35:09  fisyak
+#  Add versioning, new Makefile with domain/package libraries
+#
 #  Revision 1.5  1998/02/10 00:06:07  fisyak
 #  SL98a second version
 #
@@ -13,7 +16,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/10 00:06:07 $ 
+#             Last modification $Date: 1998/02/12 13:35:09 $ 
 #.SILENT:
 ALL_DEPS  = $^
 FIRST_DEP = $<
@@ -23,49 +26,110 @@ STIC     = stic
 PWD      = /bin/pwd
 CWD     := $(shell $(PWD))
 EMPTY   :=
+FOUR    :=4
+LBRAKET :="("
+RBRAKET :=")"
 ifndef MAKEFILE
-  MAKEFILE = $(STAR)/mgr/Makefile
+	MAKEFILE = $(STAR)/mgr/Makefile
 endif
 ifndef INP_DIR
-  override INP_DIR := $(CWD)
+	override INP_DIR := $(CWD)
 endif
 NAME    := $(notdir $(INP_DIR))
 # define level pams -> domain -> package from *.idl and *.g files
+#======================= level ===========================
+PAMS    :=pams
+DIR_LIST:= $(subst /, ,$(INP_DIR)) 
+pams    := $(findstring $(PAMS),$(DIR_LIST))
+ifeq ($(EMPTY),$(pams)) # ROOT level
+	LEVEL   :=0
+	ROOT:=$(INP_DIR)
+	SUBDIRS :=$(PAMS)
+else
+	LIST    := $(DIR_LIST)
+	N       := $(words $(LIST))
+	SN      := $(word  $(N), $(DIR_LIST))
+	DIRS    := $(strip $(wildcard *))
+	SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
+	SUBDIRS := $(filter-out staf,$(SUBDIRS))
+	SUBDIRS := $(filter-out sys, $(SUBDIRS))
+	SUBDIRS := $(filter-out inc, $(SUBDIRS))
+	SUBDIRS := $(filter-out idl, $(SUBDIRS))
+	SUBDIRS := $(filter-out doc, $(SUBDIRS))
+	SUBDIRS := $(filter-out CVS, $(SUBDIRS))
+	SUBDIRS := $(filter-out wrk, $(SUBDIRS))
+	SUBDIRS := $(filter-out src, $(SUBDIRS))
+	SUBDIRS := $(filter-out exa, $(SUBDIRS))
+	SUBDIRS := $(strip $(sort $(SUBDIRS)))
+ifeq ($(PAMS), $(strip $(SN)))                #pams level
+		LEVEL   :=1
+		ROOT    := $(shell cd $(INP_DIR)/../; $(PWD))
+else                             #domain level
+		LIST    := $(filter-out $(SN), $(LIST))
+		N       := $(words  $(LIST))
+		SN_1    := $(word  $(N), $(DIR_LIST))
+ifeq ($(PAMS), $(strip $(SN_1))) 
+			LEVEL   :=2
+#                       default is domain
+			ROOT    := $(shell cd $(INP_DIR)/../../; $(PWD))
+			DOM_DIR := $(CWD)
+			PKG     := $(notdir $(DOM_DIR))
+ifeq (gen,$(PKG))
+				PKG     :=
+endif
+else                             #package level
+			LIST    := $(filter-out $(SN_1), $(LIST))
+			N       := $(words  $(LIST))
+			SN_2    := $(word  $(N), $(DIR_LIST))
+			PKG     := $(NAME)
+ifeq ($(PAMS),$(strip $(SN_2))) #subpackage level
+				LEVEL   :=3
+				ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
+				DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
+				SUBDIRS:=
+else
+				LIST    := $(filter-out $(SN_2), $(LIST))
+				N       := $(words  $(LIST))
+				SN_3    := $(word  $(N), $(DIR_LIST))
+ifeq ($(PAMS),$(strip $(SN_3)))
+				LEVEL   :=4
+				ROOT    := $(shell cd $(INP_DIR)/../../../../; $(PWD))
+				DOM_DIR := $(shell cd $(INP_DIR)/../../; $(PWD))
+				PKG     := $(notdir $(shell cd $(INP_DIR)/../; $(PWD)))
+else
+				LEVEL   :=-1
+				ROOT    :=$(INP_DIR)
+				SUBDIRS :=$(PAMS)
+endif
+endif
+endif
+endif
+endif
+ifndef OUT_DIR
+	override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
+endif
+ifeq ($(NAME),$(PKG))
+	SUBDIRS :=
+endif
+LIB_DIR := $(OUT_DIR)/$(SYS_HOST_STAR)
+DOMAIN  := $(notdir $(DOM_DIR))
+OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
+DIR_GEN := $(OUT_DIR)/share
+GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
+DOM_DIRS:= $(filter-out CVS, $(shell cd $(ROOT)/pams; ls))
+#.
 SRC_DIR := $(INP_DIR)
-SUBDIRS :=
-# default is domain
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*.idl) 
-FILES_G  := $(wildcard $(SRC_DIR)/*/*.g)
-ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # domain level ?
-ROOT    := $(shell cd $(INP_DIR)/../../; $(PWD))
-DOM_DIR := $(shell cd $(INP_DIR); $(PWD))
-sources := $(SRC_DIR)/*
-else # module level
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*.idl)  
-FILES_G  := $(wildcard $(SRC_DIR)/*.g)
-ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # module level
-ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
-DOM_DIR := $(shell cd $(INP_DIR)/../; $(PWD))
-sources := $(SRC_DIR)
-else # pams level
-FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(SRC_DIR)/*/*/*.idl)  
-FILES_G  := $(wildcard $(SRC_DIR)/*/*/*.g)
-ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))  # pam level
-DIRS    := $(strip $(wildcard *))
-SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
-SUBDIRS := $(filter-out staf,$(SUBDIRS))
-SUBDIRS := $(filter-out sys, $(SUBDIRS))
-SUBDIRS := $(filter-out inc, $(SUBDIRS))
-SUBDIRS := $(filter-out idl, $(SUBDIRS))
-SUBDIRS := $(filter-out doc, $(SUBDIRS))
-SUBDIRS := $(filter-out CVS, $(SUBDIRS))
-SUBDIRS := $(filter-out wrk, $(SUBDIRS))
-SUBDIRS := $(filter-out src, $(SUBDIRS))
-SUBDIRS := $(filter-out exa, $(SUBDIRS))
-SUBDIRS := $(strip $(sort $(SUBDIRS)))
-endif                                              # pam level
-endif                                              # module level
-endif                                              # domain level     
+IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
+ifneq ($(EMPTY),$(IDLS))
+FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
+endif
+FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
+#=========================================================
+ifeq ($(LEVEL),$(FOUR))
+.PHONY               : default
+all:
+	@echo "Please run make in parent directory"
+else
 ifeq ($(EMPTY),$(SUBDIRS))
 #          I have no subdrs
 # all files:
@@ -73,29 +137,23 @@ ifeq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G)))
 #                 I have NO idl- and NO g-files
 .PHONY               : default
 all:
-	@echo "Nothing to do for domain/module" $(NAME)
+	@echo "Nothing to do for domain/module" $(PKG)
 else
-ifndef OUT_DIR
-  override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
-endif
+#                                                       $(IDL_DIRS)
 ifndef RANLIB
-  override RANLIB := /bin/true
+			override RANLIB := /bin/true
 endif
-DOMAIN  := $(notdir $(DOM_DIR))
-DOM_DIRS:= $(addprefix $(ROOT)/pams/,$(shell cd $(INP_DIR)/../; ls))
+#.
+sources := $(strip $(sort $(dir $(wildcard $(SRC_DIR)/*.* $(SRC_DIR)/*/*.*))))
+SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
 IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(STAR)/pams/*/idl)
 INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(STAR)/pams/*/inc)
-LIB_DIR := $(OUT_DIR)/$(SYS_HOST_STAR)
-OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
-DIR_GEN := $(OUT_DIR)/share
-GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
-VPATH   := $(wildcard $(sources)) $(GEN_DIR) $(OBJ_DIR)
+VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(OBJ_DIR)
 VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
-#                                                       $(IDL_DIRS)
 #                 I have idl- or g-files
-FILES_CC := $(wildcard $(sources)/*.cc)
-FILES_C  := $(wildcard $(sources)/*.c)
-FILES_F  := $(wildcard $(sources)/*.F)
+FILES_CC := $(wildcard $(addsuffix /*.cc, $(SRC_DIRS)))
+FILES_C  := $(wildcard $(addsuffix /*.c , $(SRC_DIRS)))
+FILES_F  := $(wildcard $(addsuffix /*.F , $(SRC_DIRS)))
 
 NAMES_IDM:= $(basename $(notdir $(FILES_IDM)))
 NAMES_G  := $(basename $(notdir $(FILES_G)))
@@ -108,19 +166,29 @@ FILES_H  := $(addprefix $(GEN_DIR)/, $(addsuffix .h,   $(NAMES_IDM)))
 FILES_CA := $(addprefix $(GEN_DIR)/, $(addsuffix _i.cc,$(NAMES_IDM)))
 FILES_O  := $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_F) $(NAMES_f) \
                                                        $(NAMES_C) $(NAMES_CC)))
+ifeq ($(DOMAIN),gen)
+ifneq ($(PKG),$(EMPTY))
+		PKG_LIB := lib$(PKG).a
+endif
+else
+ifneq ($(DOMAIN),$(EMPTY))
+		PKG_LIB := lib$(DOMAIN).a
+endif
+endif
+ifneq ($(EMPTY),$(PKG))
+	PKG_SL  := $(PKG).sl
+endif
 MKDEPFLAGS:= -traditional -MG -MM -x c
 ifndef NODEPEND
 FILES_D  :=                          $(addsuffix .d,   $(basename $(FILES_O)))
+FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_G)))
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FILES_CA)))))
 ifneq (,$(NAMES_IDM))
-FILES_O  += $(addprefix $(OBJ_DIR)/, $(NAME)_init.o)                      
+FILES_K  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.o)
+FILES_O  += $(FILES_K)
 endif
-ifndef NODEPEND
-FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
-endif
-#
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I, $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(SYS_STAR),hp_ux102)
@@ -140,38 +208,39 @@ ifndef CERN_LIBS
 endif
 ifndef LIBRARIES
 ifeq ($(LIB_STAR),$(LIB_DIR))
-  LIBRARIES :=  $(LIB_STAR)/lib$(NAME).a  -L$(STAR)/staf/$(SYS_HOST_STAR)  -lmsg   
+		LIBRARIES :=  $(LIB_STAR)/$(PKG_LIB)  -L$(STAR)/staf/$(SYS_HOST_STAR)  -lmsg   
 else
-  LIBRARIES :=  $(LIB_DIR)/lib$(NAME).a $(LIB_STAR)/lib$(NAME).a -L$(STAR)/staf/$(SYS_HOST_STAR) -lmsg   
+		LIBRARIES :=  $(LIB_DIR)/$(PKG_LIB) $(LIB_STAR)/$(PKG_LIB) -L$(STAR)/staf/$(SYS_HOST_STAR) -lmsg   
 endif
 endif
 #-------------------------------rules-------------------------------
 # phony - not a file
-.PHONY               : workdirs  $(NAME) depend clean test
-all                  : workdirs $(GEN_DIR)/$(NAME)_init.cc $(NAME)  
-$(NAME)              : $(LIB_DIR)/lib$(NAME).a $(LIB_DIR)/$(NAME).sl
-$(LIB_DIR)/lib$(NAME).a $(LIB_DIR)/$(NAME).sl: $(FILES_O) 
-	$(AR) $(ARFLAGS) $(LIB_DIR)/lib$(DOMAIN).a $(FILES_O)
-	$(RANLIB)        $(LIB_DIR)/lib$(DOMAIN).a
-	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(NAME).sl \
+.PHONY               : workdirs  $(PKG) depend clean test
+all                  : workdirs $(GEN_DIR)/$(PKG)_init.cc $(PKG)  
+$(PKG)               : $(LIB_DIR)/$(PKG_SL)
+$(LIB_DIR)/lib$(PKG).a $(LIB_DIR)/$(PKG_SL): $(FILES_O) 
+#	test -f $(LIB_DIR)/lib$(PKG).a || $(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB)
+	$(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB) $(FILES_O)
+#	$(RANLIB)        $(LIB_DIR)/$(PKG_LIB)
+	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(PKG_SL) \
          $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
 #--------- module ---------
-$(GEN_DIR)/$(NAME)_init.cc: $(GEN_DIR) $(FILES_IDM) 
+$(GEN_DIR)/$(PKG)_init.cc: $(GEN_DIR) $(FILES_IDM) 
 	@if [ -f $(ALL_TAGS) ]; then  rm $(ALL_TAGS) ; fi
-	@echo '/* '$(NAME)' package interface to STAF */' > $(ALL_TAGS)
+	@echo '/* '$(PKG)' package interface to STAF */' > $(ALL_TAGS)
 	@echo '/* automatically generated file */'       >> $(ALL_TAGS)
 ifneq ($(NAMES_IDM),)
 	@for p in $(NAMES_IDM); do echo $p; echo '#include "'$$p'.h"'   >> $(ALL_TAGS) ; done
-	@echo 'extern "C" int  $(NAME)_init (void);'     >> $(ALL_TAGS)
-	@echo 'extern "C" int  $(NAME)_start(void);'     >> $(ALL_TAGS)
-	@echo 'extern "C" int  $(NAME)_stop (void);'     >> $(ALL_TAGS)
-	@echo 'extern "C" void $(NAME)_init_();  '       >> $(ALL_TAGS)
-	@echo 'void $(NAME)_init_() {$(NAME)_start();}'  >> $(ALL_TAGS)
-	@echo 'int  $(NAME)_init () { return 1; }'       >> $(ALL_TAGS)
-	@echo 'int  $(NAME)_start() {'                   >> $(ALL_TAGS)
+	@echo 'extern "C" int  $(PKG)_init (void);'     >> $(ALL_TAGS)
+	@echo 'extern "C" int  $(PKG)_start(void);'     >> $(ALL_TAGS)
+	@echo 'extern "C" int  $(PKG)_stop (void);'     >> $(ALL_TAGS)
+	@echo 'extern "C" void $(PKG)_init_();  '       >> $(ALL_TAGS)
+	@echo 'void $(PKG)_init_() {$(PKG)_start();}'  >> $(ALL_TAGS)
+	@echo 'int  $(PKG)_init () { return 1; }'       >> $(ALL_TAGS)
+	@echo 'int  $(PKG)_start() {'                   >> $(ALL_TAGS)
 	@for p in $(NAMES_IDM); do echo "      $${p}_load_ami(ami);" >> $(ALL_TAGS) ; done
 	@echo '                       return 1; }'       >> $(ALL_TAGS)
-	@echo 'int  $(NAME)_stop () { return 1; }'       >> $(ALL_TAGS)
+	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(ALL_TAGS)
 endif    #
 
 #--------  idm, idl --------
@@ -234,8 +303,7 @@ clean_share:
 clean_obj:
 	rm -rf $(OBJ_DIR) 
 clean_lib:
-	rm -rf $(LIB_DIR)/$(NAME).sl $(LIB_DIR)/$(DOMAIN).a
-#-----test variables------------------------
+	rm -rf $(LIB_DIR)/$(PKG_SL) $(LIB_DIR)/$(DOMAIN).a
 #-----dependencies--------------------------
 ifneq ($(EMPTY), $(strip $(FILES_D)))
 include $(FILES_D)
@@ -244,23 +312,21 @@ ifneq ($(EMPTY), $(strip $(FILES_DM)))
 include $(FILES_DM)
 endif       # 
 endif # NO idl- or g-files
+else
+#      I_have_subdirs
+all:  $(addsuffix _all, $(SUBDIRS))
+%_all:
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) all 
+test: $(addsuffix _test, $(SUBDIRS))
+%_test: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) test 
+clean: $(addsuffix _clean, $(SUBDIRS))
+%_clean: 
+	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
+endif # end if of SUBDIR loop
+endif # LEVEL 4
+#-----test variables------------------------
 test: test_dir test_files test_mk
-test_dir:
-	@echo "ROOT      =" $(ROOT)
-	@echo "CWD       =" $(CWD)  
-	@echo "NAME      =" $(NAME) 
-	@echo "DOMAIN    =" $(DOMAIN)
-	@echo "INP_DIR   =" $(INP_DIR)
-	@echo "DOM_DIR   =" $(DOM_DIR)
-	@echo "DOM_DIRS  =" $(DOM_DIRS)
-	@echo "OUT_DIR   =" $(OUT_DIR)
-	@echo "SRC_DIR   =" $(SRC_DIR)
-	@echo "IDL_DIR   =" $(IDL_DIR)
-	@echo "IDL_DIRS  =" $(IDL_DIRS)
-	@echo "INC_DIRS  =" $(INC_DIRS)
-	@echo "LIB_DIR   =" $(LIB_DIR)
-	@echo "OBJ_DIR   =" $(OBJ_DIR)
-	@echo "GEN_DIR   =" $(GEN_DIR)
 test_files:
 	@echo "FILES_IDM =" $(FILES_IDM)
 	@echo "FILES_G   =" $(FILES_G)
@@ -301,15 +367,32 @@ test_mk:
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "LIBRARIES =" $(LIBRARIES)
 	@echo "DIRS      =" $(DIRS)
-else
-#      I_have_subdirs
-all:  $(addsuffix _all, $(SUBDIRS))
-%_all:
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) all 
-test: $(addsuffix _test, $(SUBDIRS))
-%_test: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) test 
-clean: $(addsuffix _clean, $(SUBDIRS))
-%_clean: 
-	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
-endif # end if of SUBDIR loop
+test_dir:
+	@echo "CWD       =" $(CWD)  
+	@echo "ROOT      =" $(ROOT)
+	@echo "DOMAIN    =" $(DOMAIN)
+	@echo "NAME      =" $(NAME) 
+	@echo "PGK       =" $(PKG) 
+	@echo "PKG_SL    =" $(PKG_SL)
+	@echo "PKG_LIB   =" $(PKG_LIB)
+	@echo "INP_DIR   =" $(INP_DIR)
+	@echo "DOM_DIR   =" $(DOM_DIR)
+	@echo "DOM_DIRS  =" $(DOM_DIRS)
+	@echo "INP_DIR   =" $(INP_DIR)
+	@echo "DOM_DIR   =" $(DOM_DIR)
+	@echo "DOM_DIRS  =" $(DOM_DIRS)
+	@echo "OUT_DIR   =" $(OUT_DIR)
+	@echo "SRC_DIR   =" $(SRC_DIR)
+	@echo "IDL_DIRS  =" $(IDL_DIRS)
+	@echo "INC_DIRS  =" $(INC_DIRS)
+	@echo "LIB_DIR   =" $(LIB_DIR)
+	@echo "OBJ_DIR   =" $(OBJ_DIR)
+	@echo "GEN_DIR   =" $(GEN_DIR)
+	@echo "SRC_DIRS  =" $(SRC_DIRS)
+	@echo "INP_DIR   =" $(INP_DIR)
+	@echo "DIR_LIST  =" $(DIR_LIST)
+	@echo "LIST      =" $(LIST)
+	@echo "LEVEL     =" $(LEVEL)
+	@echo "SUBDIRS   =" $(SUBDIRS)
+	@echo "sources   =" $(sources)
+	@echo "SRC_DIRS  =" $(SRC_DIRS)
