@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.21 2000/05/31 19:24:49 dunlop Exp $
+ * $Id: StRrsMaker.cxx,v 1.22 2000/06/16 15:37:10 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 1.22  2000/06/16 15:37:10  lasiuk
+ * simple/single for pad monitor correction
+ *
  * Revision 1.21  2000/05/31 19:24:49  dunlop
  * Backwards compatibility when g2t_rch_hit is in dst branch
  *
@@ -672,6 +675,7 @@ Int_t StRrsMaker::Make()
     unsigned int theADCValue = 0;
     anIDList     aListOfMCInfo;
     anIDList::const_iterator listIter;
+
 #ifdef RICH_WITH_PADMONITOR
     cout << "Get Instance of Pad Monitor" << endl;
     StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
@@ -698,7 +702,7 @@ Int_t StRrsMaker::Make()
 #endif // DIAGNOSTIC
 		
 #ifdef RICH_WITH_PADMONITOR
- 		StRichSimpleMCPixel anMCPixel(iCol,iRow,theADCValue,aListOfMCInfo);
+ 		StRichSingleMCPixel anMCPixel(iCol,iRow,theADCValue,aListOfMCInfo);
  		thePadMonitor->drawPad(anMCPixel);
 #endif // PAD MONITOR
 // #ifdef RICH_DIAGNOSTIC
