@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.1 2000/01/25 08:04:37 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.2 2000/01/25 16:58:10 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.2  2000/01/25 16:58:10  jcs
+// replace c system includes with c++ system includes
+//
 // Revision 1.1  2000/01/25 08:04:37  jcs
 // convert c to c++
 //
@@ -42,8 +45,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////
 // ------- System includes --------------
-#include <stdio.h>
-#include <stdlib.h>
+#include <iostream.h>
 #include <math.h>
 // ------- STAF/ROOT generated includes ------- 
 #include "fill_ftpc_dst.h"
