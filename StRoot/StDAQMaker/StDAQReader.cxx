@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.18 2000/06/30 21:53:40 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.19 2000/07/06 20:39:28 fisyak Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.19  2000/07/06 20:39:28  fisyak
+ * Herb correction for Token '0' events
+ *
  * Revision 1.18  2000/06/30 21:53:40  perev
  * L3 stuff added
  *
@@ -153,6 +156,7 @@ int StDAQReader::readEvent()
   if(fEventReader->errorNo()) return kStErr;  
   fOffset = fEventReader->NextEventOffset();
   *fEventInfo = fEventReader->getEventInfo();
+  if(fEventInfo->Token==0) return kStErr;  // Herb, July 5 2000
 
   if (fTPCReader) 	fTPCReader ->Update();
   if (fFTPCReader)	fFTPCReader->Update();
