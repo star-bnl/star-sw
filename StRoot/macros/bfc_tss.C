@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.7 1999/02/28 02:14:32 fisyak Exp $
+// $Id: bfc_tss.C,v 1.8 1999/03/01 19:09:24 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -37,7 +37,7 @@ void Load(){
     gSystem->Load("St_trg_Maker");
     gSystem->Load("St_l3");
     gSystem->Load("St_l3t_Maker");
-    gSystem->Load("StRchMaker");
+    //    gSystem->Load("StRchMaker");
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
@@ -100,7 +100,7 @@ bfc_tss (const Int_t Nevents=1000,
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
   St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
-  StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
+  //  StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
   St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
   St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
   St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
