@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuRefMult.hh,v 1.4 2001/11/14 19:28:18 calderon Exp $
+ * $Id: StuRefMult.hh,v 1.5 2001/11/14 19:47:08 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez Aug 2000
  ***************************************************************************
@@ -17,6 +17,11 @@
  ***************************************************************************
  *
  * $Log: StuRefMult.hh,v $
+ * Revision 1.5  2001/11/14 19:47:08  calderon
+ * replace
+ * StPrimaryVertex* -> const StPrimaryVertex*
+ * everywhere for constistency
+ *
  * Revision 1.4  2001/11/14 19:28:18  calderon
  * Made the functions take as argument a const StEvent&, as per Mike's request.
  * It is actually better to do this, as the function does not change the StEvent
@@ -47,7 +52,7 @@
 inline unsigned int
 uncorrectedNumberOfNegativePrimaries(const StEvent& evt)
 {
-    StPrimaryVertex* primVtx = evt.primaryVertex();
+    const StPrimaryVertex* primVtx = evt.primaryVertex();
 
     if (!primVtx) return 0;
     
@@ -67,7 +72,7 @@ uncorrectedNumberOfNegativePrimaries(const StEvent& evt)
 inline unsigned int
 uncorrectedNumberOfPositivePrimaries(const StEvent& evt)
 {
-    StPrimaryVertex* primVtx = evt.primaryVertex();
+    const StPrimaryVertex* primVtx = evt.primaryVertex();
 
     if (!primVtx) return 0;
     
@@ -87,7 +92,7 @@ uncorrectedNumberOfPositivePrimaries(const StEvent& evt)
 inline unsigned int
 uncorrectedNumberOfPrimaries(const StEvent& evt)
 {
-    StPrimaryVertex* primVtx = evt.primaryVertex();
+    const StPrimaryVertex* primVtx = evt.primaryVertex();
     
     if (!primVtx) return 0;
     
