@@ -1,14 +1,17 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 2.1 2000/09/29 01:35:36 horsley Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.2 2000/10/02 23:06:33 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
- *  Revision 2.1  2000/09/29 01:35:36  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/10/02 23:06:33  horsley
+ *  *** empty log message ***
  *
+ *  Revision 2.2  2000/10/02 23:06:33  horsley
+ *  *** empty log message ***
+ *
+ *  Revision 2.1  2000/09/29 01:35:36  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
@@ -32,13 +35,11 @@ StRichMaterialsDb* StRichMaterialsDb::p2Db = 0;
 StRichMaterialsDb::StRichMaterialsDb() {
   my_fill();
 }
-  // mShortestWavelength = 169.0*nanometer; // --> outer ring
 
 void StRichMaterialsDb::my_fill() {
   mVersion = 1.0;
-  mShortestWavelength = 159.0*nanometer;    // --> outer ring
-  //  here we are allowing for a shorter wavelenght to take into account
-  // the cleaner liquid provided by Brian's liquid cleaner
+ 
+  mLongestWavelength  = 220.0*nanometer;    // --> inner ring
   mMeanWavelength     = 177.4*nanometer;    // --> mode frequency  
   mShortestWavelength = 160.0*nanometer;    // --> outer ring
  
@@ -188,6 +189,10 @@ double StRichMaterialsDb::outerWavelength() {
   return mOuterWave;
 }
 
+
+void StRichMaterialsDb::setWavelengthRange(double shortwave, double longwave) {
+  mInnerWave = longwave;
+  mOuterWave = shortwave;
 
   cout << "StRichMaterialsDb::setWavelenghtRange() ---> using wavelengths " 
        <<  mInnerWave/nanometer  << "  nm     and " 

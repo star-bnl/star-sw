@@ -1,15 +1,18 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.2 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.3 2000/10/02 23:06:33 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 2.2  2000/09/29 01:35:37  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.3  2000/10/02 23:06:33  horsley
+ *  *** empty log message ***
  *
+ *  bins for <d> and sigma_d added.
+ *  TPC hits for RICH tracks written out.
+ *  (file) ptr checked before writing ntuple.
+ *  check flags on Hits instead of ADC value
  *
  *  Revision 2.5  2000/11/01 17:45:24  lasiuk
  *  MAJOR. hitFilter overhaul. members reordered, padplane dimension kept as
@@ -97,6 +100,9 @@ class StSPtrVecRichHit;
   int nnegprimaries;
   int mNumberOf1GeV;
   int mNumberOfRingHits;
+  int nrichtracks;
+  
+  
   double mShortWave;
   double mLongWave;
     // Track
@@ -222,6 +228,14 @@ protected:
     void fillMcPhotonNtuple(StMcEvent*, const StSPtrVecRichCluster*, const StSPtrVecRichHit*);
     void fillMcPixelNtuple(const StSPtrVecRichPixel*);
     void fillGeantHitNtuple();
+
+    void getGeantPhotonInfo(StRichMCTrack* richTrack, StMcTrack* photon, float& wave, float& gpsi, float& z);
+  
+    bool makeTrackAssociations(StMcEvent*, const StSPtrVecRichHit* hits); 
+
+    StMcTrack*     getStMcTrack(StRichMCHit* , StMcEvent* , St_g2t_track*);
+    StThreeVectorF getTheGeantHitOnPadPlane(StMcTrack*, StThreeVectorF&);
+
 
 
 
