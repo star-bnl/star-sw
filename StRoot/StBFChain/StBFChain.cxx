@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.272 2002/02/19 18:41:40 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.273 2002/02/20 01:14:58 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -20,6 +20,7 @@
 #include "St_tcl_Maker/St_tcl_Maker.h"
 #include "St_tpt_Maker/St_tpt_Maker.h"
 #include "St_dst_Maker/StPrimaryMaker.h"
+#include "St_dst_Maker/StVertexMaker.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC[] = {
@@ -323,16 +324,18 @@ Bfc_st BFC[] = {
                                                                                     "EMC raw chain",kFALSE},
 
 
-  {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
+  {"global"      ,"globalChain","","globT,Match,vertex,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
 
   {"point"      ,"point","globalChain","SCL,tables,tls","StPointlMaker","St_global,St_dst_Maker","",kFALSE},
-  {"Primary"     ,"primary","globalChain","SCL,globT,tls"
+  {"Vertex"     ,"vertex","globalChain","SCL,tls"
+                           ,"StVertexMaker","St_svt,St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
+  {"Primary"    ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"V0"         ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Xi"         ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"fpt"      ,"ftpc_tracks","ftpcChain","SCL"          
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
@@ -365,6 +368,7 @@ Bfc_st BFC[] = {
   {"l3cl"        ,"","l3Chain","l3_T"               ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3Chain","l3_T"                       ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"l3onl"       ,"","",""                            ,"Stl3RawReaderMaker","Stl3RawReaderMaker","",kFALSE},
+  {"l3count"     ,"","",""                              ,"Stl3CounterMaker","Stl3RawReaderMaker","",kFALSE},
 
   {"analysis"    ,"","","Event"          ,"StAnalysisMaker","StAnalysisMaker","Example of Analysis",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
@@ -604,16 +608,16 @@ Int_t StBFChain::Instantiate()
 	if (mk) {
 	  if (GetOption("pp") ) {                           // pp specific stuff
 	    if (maker == "StTrsMaker") mk->SetMode(1);      // Pile-up correction
-	    if (maker == "StPrimaryMaker"){
-	      mk->SetMode(15);                              // Switch vertex finder to ppLMV
+	    if (maker == "StVertexMaker"){
+	      mk->SetMode(1);                               // Switch vertex finder to ppLMV
 	      if( GetOption("beamLine")){
-		StPrimaryMaker *pMk = (StPrimaryMaker*) mk;
+		StVertexMaker *pMk = (StVertexMaker*) mk;
 		pMk->SetBeam4ppLMV();                       // Add beam-line constrain
 	      }
 	    }
 	  }
-	  if ((maker == "StPrimaryMaker"  || maker == "StPreVertexMaker") &&
-	      GetOption("VtxOffSet")) mk->SetMode(2);
+	  if ((maker == "StVertexMaker"  || maker == "StPreVertexMaker") &&
+	      GetOption("VtxOffSet")) mk->SetMode(2);  
 
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2);
