@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.3 2000/01/07 23:21:17 laue Exp $
+ * $Id: StHbtPairCut.h,v 1.4 2000/03/16 01:54:37 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.4  2000/03/16 01:54:37  laue
+ * Copy constructor added to all the cut base classes and to the
+ * corrfctn base class
+ *
  * Revision 1.3  2000/01/07 23:21:17  laue
  * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
  * 1.) unnecessary includes of 'StMaker.h' deleted
@@ -58,12 +62,15 @@ class StHbtPairCut : public StHbtCutMonitorHandler {
 public:
 
   StHbtPairCut(){/* no-op */};   // default constructor. - Users should write their own
+  StHbtPairCut(const StHbtPairCut& c); // copy constructor
   virtual ~StHbtPairCut(){/* no-op */};  // destructor
 
   virtual bool Pass(const StHbtPair* pair) =0;  // true if passes, false if not
 
   //  virtual string Report() =0;    // user-written method to return string describing cuts
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
+  virtual void EventBegin(const StHbtEvent*) { /* no-op */ }
+  virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
 
 #ifdef __ROOT__
   ClassDef(StHbtPairCut, 0)
@@ -75,7 +82,9 @@ public:
 protected:
   StHbtAnalysis* myAnalysis;
 
-
 };
+
+
+inline StHbtPairCut::StHbtPairCut(const StHbtPairCut& c) : StHbtCutMonitorHandler() { myAnalysis = 0; }
 
 #endif
