@@ -23,43 +23,43 @@ void dsuPrintData(FILE *stream, DS_TYPE_CODE_T code
          
       case DS_TYPE_OCTET:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%u", p.o[i]);
+            fprintf( stream,  "%10u", p.o[i]);
          }
          break;
          
       case DS_TYPE_SHORT:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%hd", p.s[i]);
+            fprintf( stream,  "%10hd", p.s[i]);
          }
          break;
          
       case DS_TYPE_U_SHORT:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%hu", p.us[i]);
+            fprintf( stream,  "%10hu", p.us[i]);
          }
          break;
          
       case DS_TYPE_LONG:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%ld", p.l[i]);
+            fprintf( stream,  "%10ld", p.l[i]);
          }
          break;
          
       case DS_TYPE_U_LONG:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%lu", p.ul[i]);
+            fprintf( stream,  "%10lu", p.ul[i]);
          }
          break;
          
       case DS_TYPE_FLOAT:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%g", p.f[i]);
+            fprintf( stream,  "|% 12.5g", p.f[i]);
          }
          break;
          
       case DS_TYPE_DOUBLE:
          for (i = 0; i < count; i++) {
-            fprintf( stream,  "\t%g", p.d[i]);
+            fprintf( stream,  "|% 12.5g", p.d[i]);
          }
          break;
          
