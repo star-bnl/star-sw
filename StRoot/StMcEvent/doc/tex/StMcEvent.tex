@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.7 2003/05/15 18:29:04 calderon Exp $
+% $Id: StMcEvent.tex,v 2.8 2003/10/08 20:27:17 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.8  2003/10/08 20:27:17  calderon
+% Update documentation on FTPC, CTB, BEMC hits.
+%
 % Revision 2.7  2003/05/15 18:29:04  calderon
 % Added data members from modified g2t_event table:
 % Event Generator Final State Tracks, N Binary Collisions,
@@ -349,11 +352,8 @@ The functions that have this convention are:
 	\item \texttt{StMcRichHit::row()}
 \end{itemize}
 
-Note that in \StMcEvent\ there are no sectors for the FTPC.  This is due to the
-fact that the determination of the sector for FTPC hits is strongly dependent
-on the field and is done during reconstruction.  Therefore, FTPC hits
-at the Monte Carlo level only know which plane they belong to, but know
-nothing about sectors.
+As of October 2003, the volume Id of the FTPC hits also contains a sector.  However the hits
+are still only contained by a collection based on the plane.
 
 \subsection {References and Pointers}
 Part of the goal of \StMcEvent\ is the use of pointers and references
@@ -842,8 +842,29 @@ members and methods of the maker that you will find useful are:
 
     \verb+Bool_t  doUseBemc;+\\
 	Load Bemc hits in the run (default = true).  If you do not want to
-	look at Bemc hits, switch this off.  This also loads hits from
-	Bprs, Bsmde, and Bsmdp detectors.
+	look at Bemc hits, switch this off.  This loads the barrel towers.
+
+    \verb+Bool_t  doUseBsmd;+\\
+	Load Shower Max hits in the run (default = true).  This loads hits from
+	Bsmde, and Bsmdp detectors.
+
+    \verb+Bool_t  doUseCtb;+\\
+	Load CTB hits in the run (default = true).  If you do not want to
+	look at CTB hits, switch this off.
+
+    \verb+Bool_t  doUseTofp;+\\
+	Load TOFp hits in the run (default = true).  If you do not want to
+	look at TOFp hits, switch this off.
+
+    \verb+Bool_t  doUseTof;+\\
+	Load TOFr hits in the run (default = true).  If you do not want to
+	look at TOFr hits, switch this off.
+
+    \verb+Bool_t  doUsePixel;+\\
+	Load Pixel hits in the run (default = true).  If you do not want to
+	look at Pixel hits, switch this off.  The pixel is under development
+        (August 2003), so Pixel hits will not be found in general purpose
+        simulation files for a while.
 
 \item[Public Member\\ Functions]
     \verb+StMcEvent*  currentMcEvent();+\\
@@ -899,6 +920,9 @@ the event generator.
 The switches to turn on/off the loading of the different detector hits
 have been added for convenience.  The first version of the classes
 for the EMC hits implemented by Aleksei Pavlinov are now also included.
+
+The TOF classes have been added in Aug 2003, as well as the development
+classes for the Pixel detector.
 
 For corrections to this manual, typos, suggestions, etc. send an email
 to
@@ -1018,13 +1042,23 @@ the header file.
     \index{sub, EMC}
 
     \verb+float dE() const;+\\
-    Returns the energy deposiotion of the hit.
+    Returns the energy deposition of the hit.
     \index{dE, EMC}
+
+    \verb+StMcTrack*  parentTrack() const;+\\
+    Returns the pointer to the track which generated this hit.
+    \index{parentTrack, EMC}
 
 \item[Public Member\\ Operators]
     \verb+ostream&  operator<<(ostream& os, const StMcCalorimeterHit\&);+\\
     Allows to write some relevant information directly to an output
     stream.
+    \verb+void operator+=(const StMcCalorimeterHit\&);+\\
+    Allows to incrementally add energy to a calorimeter hit from another
+    calorimeter hit.
+    \verb+void operator==(const StMcCalorimeterHit\&);+\\
+    Compares two calorimeter hits, they're equal when the module, eta, sub
+    and parent track pointers are found to be equal.
 
 \item[Examples]
 {\footnotesize
@@ -1051,6 +1085,92 @@ PositionOfHits(StMcTrack *track)
 }%footnotesize
 \end{Entry}
 \clearpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: StMcCtbHit
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{StMcCtbHit}
+\index{StMcCtbHit|textbf}
+\label{sec:StMcCtbHit}
+\begin{Entry}
+\item[Summary]
+    \name{StMcCtbHit} represents a CTB hit.
+\item[Synopsis]
+    \verb+#include "StMcCtbHit.hh"+\\
+    \verb+class StMcCtbHit;+\\
+
+\item[Description]
+Like most of the hit classes, it represents the Geant hit its related detector, in
+this case the CTB.
+\item[Persistence]
+    None
+
+\item[Related Classes]
+The class to hold these hits is \name{StMcCtbHitCollection}, which holds them in a flat
+array, no further hierarchy.
+\item[Public\\ Constructors]
+    \verb+StMcCtbHit(const StThreeVectorF& x,const StThreeVectorF& p,
+	     const float de, const float ds,  const long key, const long id, StMcTrack* parent)+\\
+    Create an instance of \name{StMcCtbHit} with position \name{x},
+    local momentum \name{p}, energy deposited \name{de}, pathlength \name{ds},
+    key and id for proper assignment of pointers and the pointer to the partent track..
+
+    \verb+StMcCtbHit(g2t_ctf_hit_st*)+\\
+    Create an instance of \name{StMcCtbHit} from the geant tables, this is the
+    standard way in \name{StMcEventMaker}.
+
+\item[Public Member\\ Functions]
+    \verb+void get_slat_tray(unsigned int & slat, unsigned int & tray) const;+\\
+    Puts the corresponding slat and tray of the hit in the variables entered as arguments to the function.
+
+    \verb+float tof() const;+\\
+    Returns the Time of Flight of the particle to the detector hit volume.
+
+\end{Entry}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+%    Reference: className
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{className}
+\index{className|textbf}
+\label{sec:className}
+\begin{Entry}
+\item[Summary]
+
+\item[Synopsis]
+    \verb+#include "className.hh"+\\
+    \verb+class className;+\\
+
+\item[Description]
+
+\item[Persistence]
+    None
+
+\item[Related Classes]
+
+\item[Public\\ Constructors]
+
+\item[Public Member\\ Functions]
+
+\item[Public Member\\ Operators]
+
+\item[Public Functions]
+
+\item[Public Operators]
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
+//  What the example does
+//
+
+\end{verbatim}
+}%footnotesize
+
+\end{Entry}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %    Reference: StMcEmcHitCollection
@@ -1496,8 +1616,8 @@ void printEvent(StMcEvent *event)
 
 \item[Related Classes]
     \name{StMcFtpcHit} is derived directly from \name{StMcHit}.
-    The hits are kept according to sector.
-    They are stored by pointer in a container for each sector
+    The hits are kept according to plane.
+    They are stored by pointer in a container for each plane
     (see \ref{sec:containers}).  The way to get the hits for a
     certain plane (1-20) starting
     from the top level \name{StMcEvent} pointer is:
@@ -1523,8 +1643,10 @@ void printEvent(StMcEvent *event)
 \item[Public Member\\ Functions]
 
     \verb+unsigned long plane() const;+\\
-    Returns the number of the plane (1-20) in which a hit is found. 
+    Returns the number of the plane (1-10 for West Ftpc, 11-20 for East Ftpc) in which a hit is found. 
     \index{plane, FTPC}
+    \verb+unsigend long sector() const;+\\
+    Returns the sector (1-6) in which a hit is found.  The volume Id to allow this was introduced on Oct. 2003.
 
 \item[Public Member\\ Operators]
     \verb+ostream&  operator<<(ostream& os, const StMcFtpcHit\&);+\\
