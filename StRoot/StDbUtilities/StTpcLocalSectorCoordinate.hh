@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- * $Id: StTpcLocalSectorCoordinate.hh,v 1.3 2003/09/02 17:57:51 perev Exp $
+ * $Id: StTpcLocalSectorCoordinate.hh,v 1.4 2004/03/05 17:22:55 fisyak Exp $
  *
  * Author: brian Jan 26, 1999
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTpcLocalSectorCoordinate.hh,v $
+ * Revision 1.4  2004/03/05 17:22:55  fisyak
+ * Add TPC transformations for direction, aligned sectors, protection in order to stay in the same sector when moving from/to Pad coordinates
+ *
  * Revision 1.3  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -42,40 +45,29 @@
  **********************************************************************/
 #ifndef ST_TPC_LOCAL_SECTOR_COORDINATE_HH
 #define ST_TPC_LOCAL_SECTOR_COORDINATE_HH
-
 #include <Stiostream.h>
-
 #include "StThreeVector.hh"
 
 class StTpcLocalSectorCoordinate
 {
 public:
-    StTpcLocalSectorCoordinate();
-    StTpcLocalSectorCoordinate(const double, const double, const double, const int);
-    StTpcLocalSectorCoordinate(const StThreeVector<double>&, const int);
+  StTpcLocalSectorCoordinate(const double x=0, const double y=0, const double z=0, const int sect=0) : 
+    mPosition(x,y,z), mFromSector(sect) {}
+  StTpcLocalSectorCoordinate(const StThreeVector<double>& position, const int sect) :
+    mPosition(position), mFromSector(sect) {}
+  virtual ~StTpcLocalSectorCoordinate() {}
+  int operator==(const StTpcLocalSectorCoordinate&) const;
+  int operator!=(const StTpcLocalSectorCoordinate&) const;
+  
+  // access functions provided by StThreeVector
+  const StThreeVector<double>& position()  const { return(mPosition); }
+  int  fromSector()                 const { return(mFromSector); }
+  StThreeVector<double>& position()              { return(mPosition); }
 
-    virtual ~StTpcLocalSectorCoordinate();
-    //StTpcLocalSectorCoordinate(const StTpcLocalCoordinate&);
-    //StTpcLocalSectorCoordinate& operator=(const StTpcLocalCoordinate&);
-
-    int operator==(const StTpcLocalSectorCoordinate&) const;
-    int operator!=(const StTpcLocalSectorCoordinate&) const;
-     
-    // access functions provided by StThreeVector
-    const StThreeVector<double>& position()  const;
-    int  fromSector()                 const;
-    StThreeVector<double>& position();
-
-private:
-    StThreeVector<double> mPosition;
-    int            mFromSector;
-    
+protected:
+  StThreeVector<double> mPosition;
+  int            mFromSector;
 };
-
-inline const StThreeVector<double>& StTpcLocalSectorCoordinate::position() const { return(mPosition); }
-inline StThreeVector<double>& StTpcLocalSectorCoordinate::position() { return(mPosition); }
-inline int StTpcLocalSectorCoordinate::fromSector() const { return(mFromSector); }//HL
-
 // Non-member
 ostream& operator<<(ostream&, const StTpcLocalSectorCoordinate&);
 #endif
