@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.51 2003/06/20 00:12:51 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.52 2003/06/26 18:27:16 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -143,7 +143,7 @@
     #  ============================================================
     # Platform support should be concentrated here
     #  ============================================================
-    if (/^i386_/ || /^rh/) {
+    if ($STAR_HOST_SYS =~ /^i386_/ || $STAR_HOST_SYS =~ /^rh/) {
         #
         # Case linux
         #
@@ -225,7 +225,7 @@
 	    $CLIBS .= " -L/usr/X11R6/lib -lXt -lXpm -lX11 ".
 		" -lm -ldl  -rdynamic ";
         }
-        if (/^i386_linux2/) { $FLIBS .= " -lI77 -lF77"; }
+        if ($STAR_SYS =~ /^i386_linux2/) { $FLIBS .= " -lI77 -lF77"; }
 
         if ( defined($ARG{INSURE}) or defined($ENV{INSURE}) ) {
             print "Use INSURE++\n";
