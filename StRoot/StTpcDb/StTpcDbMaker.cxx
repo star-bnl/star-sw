@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.31 2003/04/10 21:30:59 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.32 2004/05/03 23:29:28 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.32  2004/05/03 23:29:28  perev
+ * WarnOff
+ *
  * Revision 1.31  2003/04/10 21:30:59  hardtke
  * Allow multiple InitRun calls
  *
@@ -95,6 +98,7 @@
  **************************************************************************/
 
 #define StTpc_STATIC_ARRAYS
+#include <assert.h>
 #include "TCL.h"
 #include "StTpcDbMaker.h"
 #include "StChain.h"
@@ -344,7 +348,7 @@ int type_of_call tpc_pad_time_offset_(int *isec, int *irow, int *ipad, float *t0
 }
 int type_of_call tpc_rdo_mask_(int *isect, int* irow){
   StDetectorDbTpcRDOMasks* mask = StDetectorDbTpcRDOMasks::instance ();
-  int RDO;
+  int RDO=0;
   if (*irow>=1&&*irow<=8){
     RDO = 1;
   }
@@ -363,6 +367,7 @@ int type_of_call tpc_rdo_mask_(int *isect, int* irow){
   else if (*irow>37&&*irow<=45){
     RDO = 6;
   }
+  assert(RDO);
   return (int)mask->isOn(*isect,RDO);
 } 
   
