@@ -1,7 +1,7 @@
-* $Id: tte.F,v 1.9 1998/04/16 21:16:11 sakrejda Exp $
+* $Id: tte.F,v 1.10 1998/04/17 10:48:04 didenko Exp $
 * $Log: tte.F,v $
-* Revision 1.9  1998/04/16 21:16:11  sakrejda
-* primary vertex field of tte_mctrack updated following changes in gstar
+* Revision 1.10  1998/04/17 10:48:04  didenko
+* _ is added to event_number
 *
 * Revision 1.9  1998/04/16 21:16:11  sakrejda
 * primary vertex field of tte_mctrack updated following changes in gstar
@@ -148,7 +148,7 @@ c                                              <-> real hit assignement
       real      dedxbig, dedxsum
       integer   event_number
       data      event_number /0/
-      save      event number
+      save      event_number
 
 c     message related variables
       character*132 m132(10)                ! for messages
