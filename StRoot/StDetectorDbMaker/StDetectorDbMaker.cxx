@@ -4,6 +4,7 @@
 #include "StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMagnet.h"
 #include "StDetectorDbClock.h"
+#include "StDetectorDbSpaceCharge.h"
 
 #include "StEvent/StEvent.h"
 #include "StEvent/StDetectorState.h"
@@ -32,6 +33,10 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     magnet->update(this);
 
+    // Update Space Charge Correction (must be done after magnet)
+    StDetectorDbSpaceCharge* spaceCharge = StDetectorDbSpaceCharge::instance();
+    spaceCharge->update(this);
+    
     // Update Clock Frequency
     StDetectorDbClock* clock = StDetectorDbClock::instance();
     clock->update(this);
