@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.13 1999/11/09 20:38:28 fisyak Exp $
+// $Id: St_ebye_Maker.cxx,v 1.14 2000/06/26 22:13:29 fisyak Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.14  2000/06/26 22:13:29  fisyak
+// remove params
+//
 // Revision 1.13  1999/11/09 20:38:28  fisyak
 // Change tables names
 //
@@ -116,7 +119,7 @@ Int_t St_ebye_Maker::Init(){
     cout << " ===> <St_ebye_Maker::Init()>: Created run header table" << endl;
   }
   // Create tables
-  St_DataSet *params = GetDataBase("params/ebye");
+  St_DataSet *params = GetDataBase("ebye");
   assert(params);
 
   if (GetDebug()>2) {

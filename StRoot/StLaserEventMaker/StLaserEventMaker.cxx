@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.5 2000/04/24 14:36:34 love Exp $
+// $Id: StLaserEventMaker.cxx,v 1.6 2000/06/26 22:11:40 fisyak Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.6  2000/06/26 22:11:40  fisyak
+// remove params
+//
 // Revision 1.5  2000/04/24 14:36:34  love
 // Write clock, drivel, tzero on Event Header.  truncate psi angles to 0-180 range
 // Expand doca to do straight tracks and do 12 laser sectors, add z cut.
@@ -43,7 +46,7 @@
 #include "StLaserEvent/StLaserEvent.h"
 #include "tables/St_type_index_Table.h"
 #include "StTpcDb/StTpcDb.h"
-
+#include "TMath.h"
 ClassImp(StLaserEventMaker)
 
 //_____________________________________________________________________________
@@ -61,31 +64,33 @@ ClassImp(StLaserEventMaker)
 StLaserEventMaker::~StLaserEventMaker(){}
 //_____________________________________________________________________________
 void StLaserEventMaker::Clear(Option_t *option){
-  event->Clear(option);
+  if (event) event->Clear(option);
   StMaker::Clear(option);
 }
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Init(){
   // Create tables
   
-  St_DataSet *tpcpars = GetInputDB("params/tpc");
-  assert(tpcpars);
-  
-  St_DataSetIter       gime(tpcpars);
   
 // 		TPG parameters
-   m_tpg_pad_plane = (St_tpg_pad_plane *) gime("tpgpar/tpg_pad_plane");
-   if (!(m_tpg_pad_plane)) Error("Init","tpc/tpgpar is not initialized. \n");
+   m_tpg_pad_plane =(St_tpg_pad_plane *) GetChain()->FindObject("tpg_pad_plane");
+   if (!m_tpg_pad_plane) Error("Init","tpc/tpgpar is not initialized. \n");
    assert(m_tpg_pad_plane);
     
 
 // 		TCL parameters
-  m_type = (St_tcl_tpc_index_type *) gime("tclpars/type");
+  TDataSet *tpcpars = GetInputDB("tpc/tclpars");
+  assert(tpcpars);
+  
+  TDataSetIter       gime(tpcpars);
+  m_type = (St_tcl_tpc_index_type *) gime("type");
   if (!m_type) Error("Init"," Clustering parameters have not been initialized");
   assert(m_type);
   
 // 		TPT parameters
-  m_tpt_pars  = (St_tpt_pars* ) gime("tptpars/tpt_pars" );
+  tpcpars = GetInputDB("tpc/tptpars");
+  gime.Reset(tpcpars);
+  m_tpt_pars  = (St_tpt_pars* ) gime("tpt_pars");
   if (!(m_tpt_pars)) 
     Error("Init", "tpt parameters have not been initialized" );
   assert(m_tpt_pars);
@@ -102,11 +107,11 @@ Int_t StLaserEventMaker::Init(){
 //_____________________________________________________________________________
 Int_t StLaserEventMaker::Make(){
   
-  St_DataSet *tpc_data =  GetInputDS("tpc_hits"); 
+  TDataSet *tpc_data =  GetInputDS("tpc_hits"); 
   if (!tpc_data) return 0;
   
 // 		Clusters exist -> do tracking
-  St_DataSetIter gime(tpc_data);
+  TDataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
   //  St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
   //  if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
@@ -151,7 +156,7 @@ Int_t StLaserEventMaker::Make(){
 
      //  Make the "laser"  TTree  Should be controllable.
      // Create an iterator for the track dataset
-     St_DataSetIter tpc_tracks(m_DataSet);
+     TDataSetIter tpc_tracks(m_DataSet);
 	St_tpt_track * n_track = (St_tpt_track *) tpc_tracks["tptrack"];
           Int_t ntks=n_track->GetNRows();
 	  //Create matching arrays to hold the sector and laser source
@@ -170,9 +175,9 @@ Int_t StLaserEventMaker::Make(){
      St_tfc_adcxyz  *n_adc = 0;
      St_tcl_tphit  *n_hit = 0;
      St_tcl_tpcluster *n_clus  = 0;
-     St_DataSet *tpc_hits = GetDataSet("tpc_hits");
+     TDataSet *tpc_hits = GetDataSet("tpc_hits");
      if (tpc_hits) {
-        St_DataSetIter tpc_data(tpc_hits);
+        TDataSetIter tpc_data(tpc_hits);
         n_hit      = (St_tcl_tphit *) tpc_data["tphit"];
         n_clus     = (St_tcl_tpcluster *)  tpc_data["tpcluster"];
      }
@@ -229,9 +234,9 @@ Int_t StLaserEventMaker::Make(){
       delete [] yl;
       delete [] zl;
      // Find the adc table.
-     St_DataSet *tpc_raw = GetDataSet("tpc_raw");
+     TDataSet *tpc_raw = GetDataSet("tpc_raw");
      if(tpc_raw){
-        St_DataSetIter tpcadc(tpc_raw);
+        TDataSetIter tpcadc(tpc_raw);
         n_adc = (St_tfc_adcxyz *) tpcadc["adcxyz"];
      }
      if(n_adc){
@@ -345,7 +350,7 @@ Int_t StLaserEventMaker::Make(){
           if((x*px+y*py)<0) sign=-1.0;
           disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0)); 
           z = z0 + sign*tanl*disxy;
-          if(fabs(z-zpt[iz])<5.0){
+          if(TMath::Abs(z-zpt[iz])<5.0){
 	    Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
 	    if (disq<test) {
 	      test=disq; 

@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.13 1999/07/15 13:57:48 perev Exp $
+// $Id: St_ctf_Maker.cxx,v 1.14 2000/06/26 22:13:06 fisyak Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.14  2000/06/26 22:13:06  fisyak
+// remove params
+//
 // Revision 1.13  1999/07/15 13:57:48  perev
 // cleanup
 //
@@ -99,26 +102,29 @@ Int_t St_ctf_Maker::Init(){
   int iInit=0;
 
 // Create tables
-  St_DataSet *ctfpars = GetInputDB("params/ctf");
-  assert (ctfpars);
-  St_DataSetIter       gime(ctfpars);
-  m_ctb          = (St_ctg_geo      *) gime("ctg/ctb");
-  m_ctb_slat_phi = (St_ctg_slat_phi *) gime("ctg/ctb_slat_phi");
-  m_ctb_slat_eta = (St_ctg_slat_eta *) gime("ctg/ctb_slat_eta");
-  m_ctb_slat     = (St_ctg_slat     *) gime("ctg/ctb_slat");
+  St_DataSet *ctfg = GetInputDB("ctf/ctg");
+  assert (ctfg);
+  St_DataSetIter       gime(ctfg);
+  m_ctb          = (St_ctg_geo      *) gime("ctb");
+  m_ctb_slat_phi = (St_ctg_slat_phi *) gime("ctb_slat_phi");
+  m_ctb_slat_eta = (St_ctg_slat_eta *) gime("ctb_slat_eta");
+  m_ctb_slat     = (St_ctg_slat     *) gime("ctb_slat");
 
   Int_t Res_ctg_ctb  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
   if (Res_ctg_ctb!=kSTAFCV_OK) iInit = kStWarn;
-  m_tof          = (St_ctg_geo      *) gime("ctg/tof");
-  m_tof_slat_phi = (St_ctg_slat_phi *) gime("ctg/tof_slat_phi");
-  m_tof_slat_eta = (St_ctg_slat_eta *) gime("ctg/tof_slat_eta");
-  m_tof_slat     = (St_ctg_slat     *) gime("ctg/tof_slat");
+  m_tof          = (St_ctg_geo      *) gime("tof");
+  m_tof_slat_phi = (St_ctg_slat_phi *) gime("tof_slat_phi");
+  m_tof_slat_eta = (St_ctg_slat_eta *) gime("tof_slat_eta");
+  m_tof_slat     = (St_ctg_slat     *) gime("tof_slat");
 
   Int_t Res_ctg_tof  =  ctg (m_tof,m_tof_slat_phi,m_tof_slat_eta,m_tof_slat);
   // Special treatment for double names
   //  m_cts          = (St_cts_mpara    *) params("ctf/cts")->GetList()->FindObject("cts");
-  m_cts_ctb          = (St_cts_mpara    *) gime("ctf/cts/cts_ctb");
-  m_cts_tof          = (St_cts_mpara    *) gime("ctf/cts/cts_tof");
+  St_DataSet *ctfs = GetInputDB("ctf/cts");
+  assert (ctfs);
+  gime.Reset(ctfs);
+  m_cts_ctb          = (St_cts_mpara    *) gime("cts_ctb");
+  m_cts_tof          = (St_cts_mpara    *) gime("cts_tof");
   // Create Histograms  
   m_adcc  = new TH1F("CtfCtbrawAdc","CTB ADCs",128,0.,1024.);
   m_adct  = new TH1F("CtfTofrawAdc","TOF ADCs",128,0.,2048.);

@@ -1,6 +1,9 @@
-// $Id: StFtpcV0Maker.cxx,v 1.7 2000/01/03 13:16:15 jcs Exp $
+// $Id: StFtpcV0Maker.cxx,v 1.8 2000/06/26 22:10:55 fisyak Exp $
 //
 // $Log: StFtpcV0Maker.cxx,v $
+// Revision 1.8  2000/06/26 22:10:55  fisyak
+// remove params
+//
 // Revision 1.7  2000/01/03 13:16:15  jcs
 // Add CVS Id strings
 //
@@ -45,7 +48,6 @@ StFtpcV0Maker::~StFtpcV0Maker(){
 //_____________________________________________________________________________
 Int_t StFtpcV0Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->DataSet("params"));
 	
 
 // Create Histograms   

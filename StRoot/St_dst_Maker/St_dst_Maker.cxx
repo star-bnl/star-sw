@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.48 2000/05/12 20:01:12 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.49 2000/06/26 22:13:18 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.49  2000/06/26 22:13:18  fisyak
+// remove params
+//
 // Revision 1.48  2000/05/12 20:01:12  lbarnby
 // StRoot/St_dst_Maker
 //
@@ -147,7 +150,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.48 2000/05/12 20:01:12 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.49 2000/06/26 22:13:18 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -396,7 +399,7 @@ Int_t  St_dst_Maker::Filler(){
     else {globtrk     = new St_dst_track("globtrk", No_of_Tracks); dstI.Add(globtrk);}
     dst_dedx->ReAllocate(No_of_Tracks);
    
-    St_DataSet *ftpcpars = GetInputDB("params/ftpc");
+    St_DataSet *ftpcpars = GetInputDB("ftpc");
     assert(ftpcpars);
     St_DataSetIter gime(ftpcpars);
     m_fdepar = (St_fde_fdepar *) gime("fdepars/fdepar");

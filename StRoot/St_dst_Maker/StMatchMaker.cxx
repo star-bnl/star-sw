@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.25 2000/06/22 16:57:41 wdeng Exp $
+// $Id: StMatchMaker.cxx,v 1.26 2000/06/26 22:13:18 fisyak Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.26  2000/06/26 22:13:18  fisyak
+// remove params
+//
 // Revision 1.25  2000/06/22 16:57:41  wdeng
 // Move globtrk length calculation from StPrimaryMaker to StMatchMaker.
 //
@@ -427,7 +430,7 @@ Int_t StMatchMaker::Init(){
   AddRunCont(m_egr_egrpar);
  
 
-  St_DataSetIter  svtpars(GetInputDB("params/svt"));
+  St_DataSetIter  svtpars(GetInputDB("svt"));
   m_svt_shape      = (St_svg_shape   *) svtpars("svgpars/shape");
   m_svt_config     = (St_svg_config  *) svtpars("svgpars/config");
   m_svt_geom       = (St_svg_geom    *) svtpars("svgpars/geom");

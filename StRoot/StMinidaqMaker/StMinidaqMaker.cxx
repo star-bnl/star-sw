@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.17 2000/02/03 20:47:40 fisyak Exp $
+// $Id: StMinidaqMaker.cxx,v 1.18 2000/06/26 22:12:08 fisyak Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.18  2000/06/26 22:12:08  fisyak
+// remove params
+//
 // Revision 1.17  2000/02/03 20:47:40  fisyak
 // CC5 fixes
 //
@@ -121,7 +124,7 @@ Int_t StMinidaqMaker::Init() {
   //Tell me I am here
   cout<<"Init miniDAQ maker"<<endl;
   // access to tsspar
-  St_DataSet *tpc = GetDataBase("params/tpc");
+  St_DataSet *tpc = GetDataBase("tpc");
   assert(tpc);
   St_DataSetIter       local(tpc);
    St_DataSet *tsspars = local("tsspars");
@@ -363,7 +366,7 @@ void StMinidaqMaker::TransferData(){
               Int_t k;
               k = indx; if (k == m_first_sector) k = - indx;
                //store sector no. into tfc_sector_index table
-	      // St_DataSetIter sectpp(GetDataBase("params/tpc/tfcpars"));
+	      // St_DataSetIter sectpp(GetDataBase("tpc/tfcpars"));
               // m_tfc_sector_index= (St_tcl_sector_index *) sectpp("tfc_sector_index");
               tcl_sector_index_st *tfcss=m_tfc_sector_index->GetTable();
               tfcss->CurrentSector=k;

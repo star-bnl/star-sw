@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.16 2000/05/12 20:32:46 fisyak Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.17 2000/06/26 22:14:18 fisyak Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.17  2000/06/26 22:14:18  fisyak
+// remove params
+//
 // Revision 1.16  2000/05/12 20:32:46  fisyak
 // Add ClassImp, new rootcint requires them
 //
@@ -129,7 +132,6 @@ Int_t St_l3Clufi_Maker::Init(){
   //  see: begin_html <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> end_html   //
 
   // Create tables
-  St_DataSetIter       local(GetDataBase("params"));
   // Create Histograms 
   x_dis = new TH1F("L3ClufiTphitx","x coordinate of hits",400,-200,200);
   y_dis = new TH1F("L3ClufiTphity","y coordinate of hits",400,-200,200);

@@ -20,7 +20,7 @@ void type_of_call lovefield_(Float_t *x, Float_t *b)
 {
   if (!gMagfield) 
     new StMagFCM("Star Full Field",
-		 "$STAR/StDb/params/StMagF/bfp112.map",
+		 "$STAR/StarDb/StMagF/bfp112.map",
 		 kConMesh,1.0);
   gMagfield->Field(x,b);
 }
@@ -48,7 +48,7 @@ void StMagF::Agufld(Float_t *x, Float_t *b)
        gMagfield->Field(x,b);
     }
     else if(fMap==kConMesh){
-       gMagfield = new StMagFCM(" Star Full Field","$STAR/StDb/params/StMagF/bfp112.map",kConMesh,1.0);
+       gMagfield = new StMagFCM(" Star Full Field","$STAR/StarDb/StMagF/bfp112.map",kConMesh,1.0);
        gMagfield->Field(x,b);
     }
   }
