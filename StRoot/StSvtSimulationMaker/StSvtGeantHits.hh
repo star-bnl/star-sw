@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.2 2001/03/19 22:25:53 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.3 2001/03/22 20:46:21 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.3  2001/03/22 20:46:21  caines
+ * Expand MAX_HIT so high multiplicty events work
+ *
  * Revision 1.2  2001/03/19 22:25:53  caines
  * Catch wrong wafer ids more elegantly
  *
@@ -21,7 +24,7 @@
 #ifndef STSVTGEANTHITS_HH
 #define STSVTGEANTHITS_HH
 
-#define MAX_HITS 50
+#define MAX_HITS 100
 
 #include "StSvtClassLibrary/StSvtHybridObject.hh"
 #include <vector>
