@@ -1,4 +1,5 @@
 #include "StiKalmanTrackFinderParameters.h"
+#include "tables/St_KalmanTrackFinderParameters_Table.h"
 #include "Sti/StiToolkit.h" 
 #include "Sti/Base/Factory.h" 
 #include "Sti/Base/EditableParameter.h" 
@@ -24,6 +25,23 @@ const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=
   _editable = p._editable; 
   return *this; 
 } 
+
+/// Set the parameter values according to the given databse object
+const StiKalmanTrackFinderParameters & StiKalmanTrackFinderParameters::operator=(const KalmanTrackFinderParameters_st & p) 
+{ 
+  useMcAsRec      = p.useMcAsRec;
+  elossCalculated = p.elossCalculated;
+  mcsCalculated   = p.mcsCalculated; 
+  field           = p.field; 
+  maxNullCount    = p.maxNullCount;
+  maxContiguousNullCount            = p.maxContiguousNullCount; 
+  minContiguousHitCountForNullReset = p.minContiguousHitCountForNullReset;
+  maxChi2Vertex   = p.maxChi2Vertex;
+  massHypothesis  = p.massHypothesis;
+  return *this; 
+} 
+
+
  
 void StiKalmanTrackFinderParameters::initialize() 
 { 
@@ -109,3 +127,22 @@ void StiKalmanTrackFinderParameters::initialize()
   //                          1., 0., 20., 0.1, 0)); 
   //
 } 
+
+
+void StiKalmanTrackFinderParameters::load(TDataSet * ds)
+{
+	// validate source
+	if (!ds) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet * ds)");
+	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+	cout << " <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"<<endl;
+	ds->ls(3);
+	// 	
+	St_KalmanTrackFinderParameters * a = static_cast<St_KalmanTrackFinderParameters*>(ds->Find("KalmanTrackFinderParameters" ));
+  if (!a) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet * ds) -E- a==0");
+	KalmanTrackFinderParameters_st * b = a->GetTable();
+	if (!b) throw runtime_error("StiKalmanTrackFinderParameters::load(TDataSet * ds) -E- b==0");
+	*this = *b;
+}

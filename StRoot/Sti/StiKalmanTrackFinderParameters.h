@@ -2,9 +2,12 @@
 #define StiKalmanTrackFinderParameters_H 1
 
 #include "Sti/Base/EditableParameters.h"
+#include "TDataSet.h"
+
 class StiKalmanTrackFinder;
 class StiKalmanTrackNode;
 class StiKalmanTrack;
+class KalmanTrackFinderParameters_st;
 
 class StiKalmanTrackFinderParameters : public EditableParameters
 {
@@ -13,6 +16,7 @@ public:
   StiKalmanTrackFinderParameters(const StiKalmanTrackFinderParameters & pars);
   ~StiKalmanTrackFinderParameters();
   const StiKalmanTrackFinderParameters & operator=(const StiKalmanTrackFinderParameters & p);
+  const StiKalmanTrackFinderParameters & operator=(const KalmanTrackFinderParameters_st & p);
 
   void setUseTrackFilter(bool option);
   void setElossCalculated(bool option);
@@ -22,22 +26,16 @@ public:
   void setMinContiguousHitCount(int count);
   void setMaxNullCount(int count);
   void setMaxContiguousNullCount(int count);
-  //void setMaxChi2ForSelection(double chi);
-  //void setMinSearchWindow(double val);
-  //void setMaxSearchWindow(double val);
-  //void setSearchWindowScale(double val);
   bool getUseTrackFilter() const; 
   double getMinSearchWindow() const;
   double getMaxSearchWindow() const;
   double getSearchWindowScale() const;
   double getMassHypothesis() const;
-  //double getOuterScaling() const;
-  //double getInnerScaling() const;
-
   void   initialize();
   friend class StiKalmanTrackFinder;
   friend class StiKalmanTrack;
   friend class StiKalmanTrackNode;
+	void load(TDataSet*);
   
  protected:
   bool   useMcAsRec;
@@ -48,14 +46,8 @@ public:
   int    maxNullCount;
   int    maxContiguousNullCount; 
   int    minContiguousHitCountForNullReset;
-  //double minSearchWindow;
-  //double maxSearchWindow;
-  //double searchWindowScale;
-  //double maxChi2ForSelection;
   double maxChi2Vertex;
   double massHypothesis;
-  //double outerScaling;
-  //double innerScaling;
 };
 
 //inline  double StiKalmanTrackFinderParameters::getOuterScaling() const
