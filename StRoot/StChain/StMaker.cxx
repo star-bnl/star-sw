@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.24 1999/03/28 02:57:51 perev Exp $
+// $Id: StMaker.cxx,v 1.25 1999/04/16 14:22:00 fisyak Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.25  1999/04/16 14:22:00  fisyak
+// replace break in Makers loop from ==kStErr to >kStWarn to account EOF
+//
 // Revision 1.24  1999/03/28 02:57:51  perev
 // Add .const in searching path in GetDataSet
 //
@@ -58,10 +61,11 @@
 
 StMaker *StMaker::fgStChain = 0;
 
+ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.24 1999/03/28 02:57:51 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.25 1999/04/16 14:22:00 fisyak Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -335,7 +339,7 @@ Int_t StMaker::Make()
      
      if (Debug()) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
-     if (ret==kStErr) { if (Debug()) maker->ls(3); return ret;}
+     if (ret>kStWarn) { if (Debug()) maker->ls(3); return ret;}
    }
    return kStOK;
 }
@@ -355,8 +359,12 @@ StMaker *StMaker::GetMaker(const St_DataSet *ds)
 }
 //_____________________________________________________________________________
 EDataSetPass StMaker::ClearDS (St_DataSet* ds,void * )
-{  ds->Clear("Garbage");
-   return kContinue; 
+{
+  static TClass *tabClass = 0;
+  if (!tabClass) tabClass  = gROOT->GetClass("St_Table");
+
+  if (ds->InheritsFrom(tabClass)) ds->Clear("Garbage");
+  return kContinue; 
 }
 //_____________________________________________________________________________
 void StMaker::PrintInfo() const
