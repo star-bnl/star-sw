@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.75 1999/01/20 02:16:51 fisyak Exp $
+# $Id: MakePam.mk,v 1.76 1999/01/21 02:15:31 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.76  1999/01/21 02:15:31  fisyak
+# New StChain w/o automatical streamer generation
+#
 # Revision 1.75  1999/01/20 02:16:51  fisyak
 # Active STAR_HOST_SYS for egcs
 #
@@ -425,28 +428,28 @@ $(GEN_TAB)/.rootrc:
 	@echo 'Root.ObjectStat:         1'>>  $(ALL_TAGS)
  
 	@echo '# Rint (interactive ROOT executable) specific alias, logon and logoff macros'>>  $(ALL_TAGS)
-	@echo 'Rint.Logon:              ./gentable.C'>>  $(ALL_TAGS)
 	@echo 'Rint.History:             /dev/null'>>  $(ALL_TAGS)
 
 $(FILES_TAB) : $(GEN_TAB)/St_%_Table.cxx : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc
-	@echo "{" >   $(GEN_TAB)/gentable.C;
-	@echo "   gSystem->Load(\"St_base\");" >> $(GEN_TAB)/gentable.C;
-	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
-	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
-	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
-	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
-	@echo "}" >> $(GEN_TAB)/gentable.C;
-	cd $(GEN_TAB); root.exe -b -q /dev/null > /dev/null; $(RM) gentable.C
+	@echo "{" >   $(GEN_TAB)/$(STEM).C;
+	@echo "   gSystem->Load(\"St_base\");" >> $(GEN_TAB)/$(STEM).C;
+	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/$(STEM).C;
+	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/$(STEM).C;
+	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/$(STEM).C;
+	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/$(STEM).C;
+	@echo "}" >> $(GEN_TAB)/$(STEM).C;
+#	cat $(GEN_TAB)/$(STEM).C;
+	cd $(GEN_TAB); root.exe -b  $(STEM).C -q > /dev/null; $(RM) $(STEM).C
 $(FILES_THH) : $(GEN_TAB)/St_%_Table.h : $(GEN_TAB)/%.h $(GEN_TAB)/.rootrc 
-	@echo "{" >   $(GEN_TAB)/gentable.C;
-	@echo "   gSystem->Load(\"St_base\");" >> $(GEN_TAB)/gentable.C;
-	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/gentable.C;
-	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/gentable.C;
-	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/gentable.C;
-	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/gentable.C;
-	@echo "}" >> $(GEN_TAB)/gentable.C;
-	cat $(GEN_TAB)/gentable.C;
-	cd $(GEN_TAB); root.exe -b -q /dev/null > /dev/null ; $(RM) gentable.C
+	@echo "{" >   $(GEN_TAB)/$(STEM).C;
+	@echo "   gSystem->Load(\"St_base\");" >> $(GEN_TAB)/$(STEM).C;
+	@echo "#pragma Ccomment on"  >> $(GEN_TAB)/$(STEM).C;
+	@echo "G__loadfile(\"$(GEN_TAB)/$(STEM).h\");" >> $(GEN_TAB)/$(STEM).C;
+	@echo "St_Table tabs(\"$(STEM)\",1);" >> $(GEN_TAB)/$(STEM).C;
+	@echo "tabs.StafStreamer();" >> $(GEN_TAB)/$(STEM).C;
+	@echo "}" >> $(GEN_TAB)/$(STEM).C;
+#	cat $(GEN_TAB)/$(STEM).C;
+	cd $(GEN_TAB); root.exe -b $(STEM).C -q  > /dev/null ; $(RM) $(STEM).C
 endif #NOROOT
 endif #ALL_TAB
 #--- compilation -
