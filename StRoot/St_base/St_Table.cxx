@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.43 1999/02/17 16:09:41 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.44 1999/02/17 22:38:23 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.44  1999/02/17 22:38:23  fisyak
+// Victor fix for short print out
+//
 // Revision 1.43  1999/02/17 16:09:41  fisyak
 // Fix Adopt
 //
@@ -178,7 +181,7 @@ static void AsString(void *buf, const char *name, Int_t width=0)
    else if (!strcmp("unsigned short", name))
       cout <<  setw(width) <<  hex << *(unsigned short *)buf;
    else if (!strcmp("short", name))
-      cout <<  setw(width) <<  hex << *(short *)buf;
+      cout <<  setw(width) <<  *(short *)buf;
    else if (!strcmp("unsigned char", name))
       cout <<  setw(width) <<  *(unsigned char *)buf;
    else if (!strcmp("char", name))
