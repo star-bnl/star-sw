@@ -38,6 +38,7 @@
 #define CUTS_WIDTH 50
 /******************************************************  GLOBALS  **/
 extern int gNDs;
+int gTruncateStrings=7;
 int gLastWhWin=-10,gDone2,gDone;
 myBool gBlurb2,gBlurb1;
 char *gBlurb7="Click on the abbreviation (to\n\
@@ -699,8 +700,13 @@ void RunValue(size_t row) {
     }
     sprintf(format,"%%%ds",WIDE);
     if(gStrValueWrapper) {
-      gStr[WIDE-1]='\0';
-      for(tt=WIDE-2;tt>=0;tt--) { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
+      if(gTruncateStrings) {
+        gStr[WIDE-1]='\0';
+        for(tt=WIDE-2;tt>=0;tt--) { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
+      } else {
+        for(tt=strlen(gStr)-1;tt>=0;tt--) 
+              { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
+      }
       sprintf(tt2,format,gStr);
     } else {
       Format(WIDE-1,tmp,val); sprintf(tt2,format,tmp);
@@ -886,6 +892,15 @@ void SkipCB(Widget w,caddr_t cld,caddr_t cad) {
   gCalculateAverages=FALSE;
   SaveValueOfCalcAve();
 }
+void NotTruncCB(Widget w,caddr_t cld,caddr_t cad) {
+ gTruncateStrings=0;
+ Say("\
+ Warning: This destroys alignment of the columns\n\
+ in all browser windows.\n");
+}
+void TruncCB(Widget w,caddr_t cld,caddr_t cad) {
+  gTruncateStrings=7;
+}
 void SigFigCB(Widget w,caddr_t cld,caddr_t cad) { /* pops it up */
   Say("This does not work yet.");
   /* XtPopup(gSigFigScalePopup,XtGrabNone); */
@@ -978,6 +993,8 @@ void CreateMenuItems(Widget mbar,int type) {
       MakeMenuItem(NOTUSED,mpane,"Calc averages (slower)",(XtCP)DoCB);
     }
     if(type==WIN_TYPE_TABLE) {
+      MakeMenuItem(NOTUSED,mpane,"Do not truncate strings",(XtCP)NotTruncCB);
+      MakeMenuItem(NOTUSED,mpane,"Truncate strings",(XtCP)TruncCB);
       MakeMenuItem(NOTUSED,mpane,"Format of numerical output",(XtCP)SigFigCB);
       MakeMenuItem(NOTUSED,mpane,"Bottom part longer (may be iterated)",
         (XtCP)BotLongerCB);
