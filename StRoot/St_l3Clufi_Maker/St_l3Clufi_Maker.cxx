@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.3 1999/11/29 23:08:12 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.4 1999/12/07 23:13:52 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.4  1999/12/07 23:13:52  flierl
+// histogramms created and filled
+//
 // Revision 1.3  1999/11/29 23:08:12  flierl
 // minor changes in variable names
 //
@@ -46,8 +49,9 @@
 #include "l3/St_l3totphit_Module.h"
 #include "tables/St_pixelarray_Table.h"
 #include "tables/St_hitarray_Table.h"
-Double_t* rawToGlobal (int sector, int row, double pad, double tb,
-		       double *x, double *y, double *z);
+#include "TH1.h"
+//Double_t* rawToGlobal (int sector, int row, double pad, double tb,
+//		       double *x, double *y, double *z);
 
 ClassImp(St_l3Clufi_Maker)
 
@@ -82,7 +86,11 @@ Int_t St_l3Clufi_Maker::Init(){
 
     // Create tables
     St_DataSetIter       local(GetDataBase("params"));
-    // Create Histograms    
+    // Create Histograms 
+    x_dis = new TH1F("L3ClufiTphitx","x coordinate of hits",400,-200,200);
+    y_dis = new TH1F("L3ClufiTphity","y coordinate of hits",400,-200,200);
+    z_dis = new TH1F("L3ClufiTphitz","z coordinate of hits",400,-400,400);
+    charge_dis =  new TH1F("L3ClufiTphitcharge","charge of hits",40,-10,10);
     return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -267,7 +275,7 @@ Int_t St_l3Clufi_Maker::Make(){
     St_tcl_tphit* stl3hit = new St_tcl_tphit("L3hit",50000);
     tcl_tphit_st* l3hitst = (tcl_tphit_st*) stl3hit->GetTable();
     m_DataSet->Add(stl3hit);
-
+    
     //loop over hits_in_sec_xx 
     for(Int_t sec_index=1;sec_index<=6; sec_index++)
 	{
@@ -295,7 +303,7 @@ Int_t St_l3Clufi_Maker::Make(){
 	    l3totphit(bank_entries,stl3hit);
 	}
 
-    // add tables to dataset
+    // add tables to main dataset and fill histogramms
     for(Int_t tt=0;tt<50000;tt++)
 	{
 	    if  (l3hitst[tt].z == 0 && l3hitst[tt+1].y == 0  && l3hitst[tt+2].x == 0)
@@ -304,6 +312,13 @@ Int_t St_l3Clufi_Maker::Make(){
 		    break;
 		}
 	    stl3hit->AddAt(&l3hitst[tt],tt);
+	    
+	    // fill histogramms
+	    x_dis->Fill(l3hitst[tt].x);
+	    y_dis->Fill(l3hitst[tt].y);
+	    z_dis->Fill(l3hitst[tt].z);
+	    charge_dis->Fill(l3hitst[tt].q);
+
 	}
     
     // done with the whole job
@@ -405,7 +420,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_inner_rows(){
 				    // some output
 				    //if ((innerrow[rowindex].RowId) ==13)
 				    //{
-				    Int_t according_timebucket = (Int_t) timebucketoffset + pixelindex;
+				    //Int_t according_timebucket = (Int_t) timebucketoffset + pixelindex;
 				    /*cout << "Sector: " << sector->GetName() << "   Row: " << (Int_t) (innerrow[rowindex].RowId);
 				    cout << "    Pad: " << Int_t (padin[padindex+(innerrow[rowindex].ipad)].PadId)  <<  "   ADC: ";
 				    cout << adc_value << "   Time: " << according_timebucket << endl; */
@@ -509,7 +524,7 @@ Int_t St_l3Clufi_Maker::Fill_pixel_of_outer_rows(){
 					    pixelst[pixelarrayindex].data = 0; 
 					}
 				    // some output
-				    Int_t according_timebucket = (Int_t) timebucketoffset + pixelindex;
+				    //Int_t according_timebucket = (Int_t) timebucketoffset + pixelindex;
 				    
 					
 				    /*cout << "Sector: " << sector->GetName() << "   Row: " << (Int_t) (outerrow[rowindex2].RowId);
