@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 1.4 2000/05/23 16:55:40 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 1.5 2000/05/31 19:26:15 dunlop Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,11 +11,14 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 1.4  2000/05/23 16:55:40  lasiuk
- * Incorporate new MC info
- * add clone() where necessary
- * accomodate name changes
+ * Revision 1.5  2000/05/31 19:26:15  dunlop
+ * Filling non-ctor entries in persistent hits + support for this
  *
+ *
+ * Revision 2.2  2000/09/29 19:04:40  lasiuk
+ * hit calculation factorized to allow
+ * deconvolution.  A flag was added to denote
+ * this process (eDeconvolution).
  * MC info restored in classifyHit() member
  * cut parameters (for decon) added in initializeCutParameters()
  * startAmplitude set to 0.  This keeps track of the local
@@ -543,6 +546,9 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 		mTheHits.push_back(new StRichSimpleHit);
 	    }
 	    mTheHits.back()->internal() = StThreeVector<double>(x/sum,y/sum,0);
+	    // just temporary
+	    mTheHits.back()->localError() = StThreeVector<double>(0,0,0);
+	    
 	    mTheHits.back()->setCharge(sum);
 	    mTheHits.back()->setClusterNumber(mThePixels[jj-1]->clusterNumber());
 	    mTheHits.back()->setMaxAmplitude(maxAmp);
@@ -748,19 +754,35 @@ bool StRichClusterAndHitFinder::makeHitsFromPixelMatrix()
     return true;
     // -- too close to existing hits
     //
+    for(size_t ii=0; ii<mTheHits.size(); ii++) {
 	if( abs(info->position() - mTheHits[ii]->internal()) < 1 ) {
 	    status = false;
 // 	    double distance = abs(info->position() - mTheHits[ii]->internal());
 // 	    PR(distance);
 	    break;
 	}
+    }
     
 //     cout << "useTheMovingMatrix::call classify HitType" << endl;
 //     PR(status);
     if(status) {
+	this->classifyHitType(aVectorOfPixels);
 	mTheHits.back()->setBit(eDeconvoluted);
-{
+    }
     
+    return status;
+}
+
+    StRichCoordinateTransform* myTransform =
+	StRichCoordinateTransform::getTransform(mGeometryDb);
+{
+//     cout << "StRichClusterAndHitFinder::calculateHitsInLocalCoordinates()" << endl;
+    // Loop over hits:
+
+    StRichLocalCoordinate local;
+    
+	(*myTransform)(raw,local);
+    for(size_t ii =0; ii<mTheHits.size(); ii++) {
 	StRichRawCoordinate raw(mTheHits[ii]->internal().x(),
 				mTheHits[ii]->internal().y());
 	(*mTransform)(raw,local);

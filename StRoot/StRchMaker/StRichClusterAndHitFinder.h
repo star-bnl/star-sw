@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.h,v 1.3 2000/05/23 16:55:44 lasiuk Exp $
+ * $Id: StRichClusterAndHitFinder.h,v 1.4 2000/05/31 19:26:15 dunlop Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,11 +11,14 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.h,v $
- * Revision 1.3  2000/05/23 16:55:44  lasiuk
- * Incorporate new MC info
- * add clone() where necessary
- * accomodate name changes
+ * Revision 1.4  2000/05/31 19:26:15  dunlop
+ * Filling non-ctor entries in persistent hits + support for this
  *
+ * startAmplitude set to 0.  This keeps track of the local
+ * max of the hit now.
+ *
+ * Revision 2.1  2000/09/13 21:00:42  lasiuk
+ * Begin modification for cluster/hit deconvolution
  * - remove matrix interface
  * - add necessary members
  * - unify cog calculation
@@ -95,7 +98,8 @@ class StRichClusterAndHitFinder {
     bool makeHitsFromPixelMatrix();
 #endif
     void loadPixels(vector<StRichSinglePixel>&);
-
+    void loadPixels(vector<StRichSinglePixel*>&);
+    //
     void addSinglePixel(StRichSinglePixel*);
     void setBorderFlags();
     
