@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/03/99  (E-mail: fine@bnl.gov)
-// $Id: MarkSensors.C,v 1.2 1999/05/06 03:21:24 fisyak Exp $
+// $Id: MarkSensors.C,v 1.3 1999/05/21 15:33:52 kathy Exp $
 // $Log: MarkSensors.C,v $
+// Revision 1.3  1999/05/21 15:33:52  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.2  1999/05/06 03:21:24  fisyak
 // synchronize FTPC and TPC slow/fast
 //
@@ -13,6 +16,10 @@
 // Revision 1.2  1999/03/29 19:17:54  fine
 // x3d view has been activated. Some improvement as well
 //
+//=======================================================================
+// owner:  Valery Fine
+// what it does: 
+//=======================================================================
 {
  // example to show how to generate the STAR/GEANT geometry sub-structure
  // To run this example one needs the access to Internet

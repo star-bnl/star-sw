@@ -1,3 +1,12 @@
+// $Id: MakeHists.cxx,v 1.8 1999/05/21 15:33:51 kathy Exp $
+// $Log: MakeHists.cxx,v $
+// Revision 1.8  1999/05/21 15:33:51  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
 //*-- Author :    Valery Fine   21/07/98  (E-mail:fine@bnl.gov)
 // #include "St_mevsim_Module.h"
 void MakeHists(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf")

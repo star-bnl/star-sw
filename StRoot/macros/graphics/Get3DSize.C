@@ -1,3 +1,12 @@
+// $Id: Get3DSize.C,v 1.3 1999/05/21 15:33:50 kathy Exp $
+// $Log: Get3DSize.C,v $
+// Revision 1.3  1999/05/21 15:33:50  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: V. Fine
+// what it does: This macro prints out the sizes of the sekected 3d pad
+//=======================================================================
 {
   // This macro prints out the sizes of the sekected 3d pad
   if (gPad) {

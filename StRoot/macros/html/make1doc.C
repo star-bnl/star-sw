@@ -1,3 +1,12 @@
+// $Id: make1doc.C,v 1.3 1999/05/21 15:33:59 kathy Exp $
+// $Log: make1doc.C,v $
+// Revision 1.3  1999/05/21 15:33:59  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
 void make1doc(const Char_t *docname,const Char_t *doctitle)
 {
   gROOT.Reset();

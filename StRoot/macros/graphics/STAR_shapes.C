@@ -1,11 +1,18 @@
+// $Id: STAR_shapes.C,v 1.4 1999/05/21 15:33:53 kathy Exp $
+// $Log: STAR_shapes.C,v $
+// Revision 1.4  1999/05/21 15:33:53  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 {
-// 
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
 // Based on Begin_html <a href = "http://root.cern.ch/root/html/examples/shapes.C.html">shapes.C</a>
 // end_html
-// 
-   //
-   // To see the output of this macro, click begin_html <a href="gif/shapes.gif" >here</a> end_html
+//
+// To see the output of this macro, click begin_html <a href="gif/shapes.gif" >here</a> end_html
+//=======================================================================
+// owner:  Valery Fine
+// what it does: 
+//=======================================================================
    //
    gROOT->Reset();
    gSystem->Load("St_base");

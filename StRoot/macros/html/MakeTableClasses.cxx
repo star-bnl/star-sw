@@ -1,3 +1,12 @@
+// $Id: MakeTableClasses.cxx,v 1.2 1999/05/21 15:33:51 kathy Exp $
+// $Log: MakeTableClasses.cxx,v $
+// Revision 1.2  1999/05/21 15:33:51  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
 void MakeTableClasses(){
 //  gROOT->Reset();
 //#pragma Ccomment on

@@ -1,3 +1,12 @@
+// $Id: STAR_Demos.C,v 1.7 1999/05/21 15:33:52 kathy Exp $
+// $Log: STAR_Demos.C,v $
+// Revision 1.7  1999/05/21 15:33:52  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner:  Valery Fine
+// what it does: 
+//=======================================================================
 {
 //
 // This macro generates a Controlbar menu: To see the output, click begin_html <a href="gif/demos.gif" >here</a> end_html

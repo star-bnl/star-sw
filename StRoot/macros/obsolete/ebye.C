@@ -1,5 +1,8 @@
-// $Id: ebye.C,v 1.7 1999/02/16 22:35:04 dhammika Exp $
+// $Id: ebye.C,v 1.8 1999/05/21 15:33:58 kathy Exp $
 // $Log: ebye.C,v $
+// Revision 1.8  1999/05/21 15:33:58  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.7  1999/02/16 22:35:04  dhammika
 // cleaned up a little bit
 //
@@ -22,6 +25,10 @@
 //
 // Revision 1.1  1998/08/05 14:33:40  fisyak
 // Add ebye
+//=======================================================================
+// owner: Jeff Reid 
+// what it does: 
+//=======================================================================
 //
 #ifdef   DEBUG
 #undef   DEBUG 

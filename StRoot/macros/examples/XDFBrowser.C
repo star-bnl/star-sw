@@ -1,3 +1,12 @@
+// $Id: XDFBrowser.C,v 1.4 1999/05/21 15:33:55 kathy Exp $
+// $Log: XDFBrowser.C,v $
+// Revision 1.4  1999/05/21 15:33:55  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Valery Fine
+// what it does: 
+//=======================================================================
 //*-- Author :    Valery Fine   21/01/99
 class St_XDFFile;
 TBrowser *xdfbrow;

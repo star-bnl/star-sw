@@ -1,9 +1,16 @@
 //*CMZ :          01/04/99  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: LoopOverDst.C,v 1.1 1999/04/01 19:39:29 fine Exp $
+// $Id: LoopOverDst.C,v 1.2 1999/05/21 15:33:51 kathy Exp $
 // $Log: LoopOverDst.C,v $
+// Revision 1.2  1999/05/21 15:33:51  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.1  1999/04/01 19:39:29  fine
 // Macro to lopp over the dst MDC@ files
 //
+//=======================================================================
+// owner: Valery Fine
+// what it does:  Loop over dst files created during MDC2
+//=======================================================================
 // Loop over dst files created during MDC2
 TCanvas *QACanvas = 0;
 TBrowser *QABrowser = 0;

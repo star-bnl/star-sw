@@ -1,7 +1,18 @@
 /***************************************************************************
  *
- * $Id: rch.C,v 1.2 1999/02/13 00:17:43 lyons Exp $
+ * $Id: rch.C,v 1.3 1999/05/21 15:34:00 kathy Exp $
+ * $Log: rch.C,v $
+ * Revision 1.3  1999/05/21 15:34:00  kathy
+ * made sure Log & Id are in each file and also put in standard comment line with name of owner
  *
+ * Revision 1.2  1999/02/13 00:17:43  lyons
+ * Small clean up... untested
+ *
+ * Revision 1.1  1999/02/12 23:58:47  lyons
+ * UNTESTED VERSION, but should hopefully work.
+ * Should execute the StRchMaker after creating a sufficient chain.
+ *
+ *************************************************************************** *
  * Author: Dan Lyons
  ***************************************************************************
  *
@@ -15,16 +26,12 @@
  *
  * 
  ***************************************************************************
- *
- * $Log: rch.C,v $
- * Revision 1.2  1999/02/13 00:17:43  lyons
- * Small clean up... untested
- *
- * Revision 1.1  1999/02/12 23:58:47  lyons
- * UNTESTED VERSION, but should hopefully work.
- * Should execute the StRchMaker after creating a sufficient chain.
- *
- **************************************************************************/
+ * **************************************************************************/
+
+//=======================================================================
+// owner: Gene Van Buren
+// what it does: 
+//=======================================================================
 
 
 // Emulate BFC... from bfc.C:

@@ -1,3 +1,13 @@
+// $Id: Example_readfz_plot.C,v 1.2 1999/05/21 15:33:49 kathy Exp $
+// $Log: Example_readfz_plot.C,v $
+// Revision 1.2  1999/05/21 15:33:49  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
+//=======================================================================
+// owner: Pavel Nevski ?
+// what it does: 
+//=======================================================================
+
 // readfz_plot.C
 //
 // reads in geant fz file, gives a browser and then you can make a plot

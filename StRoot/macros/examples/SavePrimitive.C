@@ -1,5 +1,8 @@
-// $Id: SavePrimitive.C,v 1.3 1998/12/27 03:17:43 fine Exp $
+// $Id: SavePrimitive.C,v 1.4 1999/05/21 15:33:53 kathy Exp $
 // $Log: SavePrimitive.C,v $
+// Revision 1.4  1999/05/21 15:33:53  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.3  1998/12/27 03:17:43  fine
 // STAR_shapes to test two brand new classes: St_Node St_NodePosition
 //
@@ -63,6 +66,10 @@
 // Revision 1.7  1998/08/10 02:35:13  fisyak
 // add laser
 //
+//=======================================================================
+// owner:  Valery Fine
+// what it does: 
+//=======================================================================
 {
   gSystem->Load("St_base");
   gSystem->Load("StChain");

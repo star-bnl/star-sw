@@ -1,5 +1,8 @@
-// $Id: geant.C,v 1.9 1999/05/06 03:21:28 fisyak Exp $
+// $Id: geant.C,v 1.10 1999/05/21 15:33:58 kathy Exp $
 // $Log: geant.C,v $
+// Revision 1.10  1999/05/21 15:33:58  kathy
+// made sure Log & Id are in each file and also put in standard comment line with name of owner
+//
 // Revision 1.9  1999/05/06 03:21:28  fisyak
 // synchronize FTPC and TPC slow/fast
 //
@@ -26,6 +29,10 @@
 //
 // Revision 1.1  1999/01/05 01:38:03  fisyak
 // geant with St_Nodes
+//=======================================================================
+// owner: Pavel Nevski
+// what it does: 
+//=======================================================================
 //
 #define gtrack
 TBrowser *b = 0;
