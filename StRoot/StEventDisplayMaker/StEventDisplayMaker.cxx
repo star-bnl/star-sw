@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.45 1999/12/19 00:12:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.46 1999/12/20 20:28:52 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -765,7 +765,8 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            int h = t.q > 0 ? -1 : 1;  
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
            StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
-	   Int_t nSteps = Int_t(12*t.length*t.curvature + 1); 
+//	   Int_t nSteps = Int_t(12*t.length*t.curvature + 1); 
+	   Int_t nSteps = Int_t(36*t.length*t.curvature + 1); 
 	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
@@ -958,6 +959,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.46  1999/12/20 20:28:52  fine
+// adjust some parameteres
+//
 // Revision 1.45  1999/12/19 00:12:45  fine
 // some corrections for the packed tables
 //
