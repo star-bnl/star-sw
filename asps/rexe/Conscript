@@ -22,7 +22,7 @@ my @h_files = find_hfiles($Dir);#   $i = 0; for my $s (@h_files) {print "i=",$i+
 #$CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH} . ":" . $env->{ENV}->{STAF} . "/inc"; 
 $CPPPATH = "#asps/agi:#asps/agi/gst:" . $env->{CPPPATH};# . ":" . $env->{ENV}->{STAF} . "/inc"; 
 #  $env->{ENV}->{CERN_ROOT} .  "/src/graflib/higz";
-$CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DSTAF -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
+$CPPFLAGS = $env->{CPPFLAGS} . " -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
 if ($STAR_SYS =~ /egcs$/) {$CPPFLAGS .= " -DPrivateMalloc";}
 print "build $pkg with cons\n";
 print "CPPPATH = \t$CPPPATH \nCPPFLAGS = \t$CPPFLAGS\n";
