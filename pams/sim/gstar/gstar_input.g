@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.30 2000/02/17 17:01:21 nevski Exp $
+* $Id: gstar_input.g,v 1.31 2000/02/25 02:26:35 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.31  2000/02/25 02:26:35  nevski
+* debugging print commented out
+*
 * Revision 1.30  2000/02/17 17:01:21  nevski
 * agcuser common changed
 *
@@ -171,7 +174,7 @@
    Call RZCDIR(CWD, 'R')
    Call RZCDIR(CDIR,' ')
    Call  HCDIR(CDIR,' ')
-   Call RZCDIR(' ', 'P')
+*  Call RZCDIR(' ', 'P')
    Call HRin  (Id,  99999,Igate*1000) 
    Call HRin  (Id-1,99999,Igate*1000) 
    if (Irec(Igate)=<0) then
