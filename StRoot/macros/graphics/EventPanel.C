@@ -8,10 +8,14 @@
    bar->AddButton("Help on Demos",".x demoshelp.C", "Click Here For Help on Running the Demos");
    bar->AddButton("browser",     "{b = new TBrowser(\"HALL\");}", "Start the ROOT Browser");
    bar->AddButton("Print view port size",   ".x Get3DSize.C", "Print the total size of all 3D axice");
-   bar->AddButton("Read StEvent",".x EventRead.C","Read StEvent objects from root file");
+   bar->AddButton("Read StEvent",".x EventRead.C(1,\"gtrack.event.root\")","Read StEvent objects from root file");
+   bar->AddButton("Make StEvent with tfs",".x bfc.C(1,\"gstar tfs\")","Make StEvent objects with tfs");
+   bar->AddButton("Make StEvent with trs",".x bfc.C(1,\"gstar trs\")","Make StEvent objects with trs");
+   bar->AddButton("Make StEvent with tss",".x bfc.C(1,\"gstar tss\")","Make StEvent objects with tss");
    bar->AddButton("Draw ALL TPC hits",".x DrawTpcHits.C","Draw the global tracks by its helix object");
    bar->AddButton("Draw tracks",".x DrawTrackTpcHits.C","Draw the global tracks by its helix object");
    bar->AddButton("Draw g2t_tpc_hits",".x HitsDraw.C","Read STAF tables from XDF file and draw \"g2t_tpc_hits\" hits");
+   bar->AddButton("Add Axice","St_PolyLine3D::Axis();","Add 3D axice to the cuurent TPad view");
    bar->Show();
    gROOT->LoadMacro("PadControlPanel.C");
    gROOT->SaveContext();
