@@ -2,7 +2,7 @@
 #
 #  
 #
-# dbupdateProd.pl - script to update Production FileCatalog and JobStatus
+# dbupdateDAQProd.pl - script to update Production FileCatalog and JobStatus
 #
 # L.Didenko
 ############################################################################
@@ -14,7 +14,7 @@ use File::Find;
 use Net::FTP;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
-require "dbOnLineSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbOnLineSetup.pl";
 
 my $debugOn=0;
 
