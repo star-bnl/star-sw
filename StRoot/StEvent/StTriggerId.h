@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerId.h,v 2.4 2003/09/02 17:58:06 perev Exp $
+ * $Id: StTriggerId.h,v 2.5 2004/10/11 23:00:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, January 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerId.h,v $
+ * Revision 2.5  2004/10/11 23:00:20  ullrich
+ * Add copy constructor and assign. op., implement ostream op., define to enum.
+ *
  * Revision 2.4  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -29,43 +32,61 @@
 #include <Stiostream.h>
 #include <vector>
 
-#define TRIGGER_ID_DIM 32
-
 class StTriggerId : public StObject {
 public:
     StTriggerId();
+    StTriggerId(const StTriggerId &id);
+    const StTriggerId &operator=(const StTriggerId &id);
     ~StTriggerId();
 	
     unsigned int mask() const;
     
+    unsigned int maxTriggerIds() const;
     bool isTrigger(unsigned int id) const;
     
     unsigned int version(unsigned int id) const;
     unsigned int nameVersion(unsigned int id) const;
     unsigned int thresholdVersion(unsigned int id) const;
     unsigned int prescaleVersion(unsigned int id) const;    
-    
+
+    unsigned int triggerId(const int idx) const;    
     vector<unsigned int> triggerIds() const;  
 
 
     void setMask(unsigned int);
     void addTrigger(unsigned int, unsigned int,
-		    unsigned int, unsigned int, unsigned int);
+	          unsigned int, unsigned int, unsigned int);
+
+    friend ostream& operator<<(ostream&, const StTriggerId&);
     
 private:
     unsigned int index(unsigned int) const;
     
+protected:
+    enum {mMaxTriggerIds = 32};
+
 private:
     UInt_t       mIdx;    //!
     UInt_t       mMask;
-    UInt_t       mId[TRIGGER_ID_DIM];
-    UInt_t	 mVersion[TRIGGER_ID_DIM];
-    UInt_t	 mNameVersion[TRIGGER_ID_DIM];
-    UInt_t	 mThresholdVersion[TRIGGER_ID_DIM];
-    UInt_t	 mPrescaleVersion[TRIGGER_ID_DIM];
+    UInt_t       mId[mMaxTriggerIds];
+    UInt_t       mVersion[mMaxTriggerIds];
+    UInt_t       mNameVersion[mMaxTriggerIds];
+    UInt_t       mThresholdVersion[mMaxTriggerIds];
+    UInt_t       mPrescaleVersion[mMaxTriggerIds];
     
-    ClassDef(StTriggerId,2)
+    ClassDef(StTriggerId,3)
 };
 
-ostream& operator<<(ostream&, const StTriggerId&);
+inline unsigned int
+StTriggerId::maxTriggerIds() const {return  mMaxTriggerIds;}
+
+inline unsigned int
+StTriggerId::triggerId(const int idx) const
+{
+    if (idx>=0 && idx<mMaxTriggerIds)
+        return mId[idx];
+    else
+        return 0;
+}
+
 #endif
