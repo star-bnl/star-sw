@@ -34,7 +34,9 @@
  *              also finished XXX_DATA_OFFSET and RAW_XXX_LEN for passing data from
  *              dsm
  *  30Aug03 JMN Added RAW_MAX_LEN being maximum length possible in chain block transfer
- *  14Sep03 JMN added new dsmMemcpy2Buf
+ *  14Sep03 JMN Added new dsmMemcpy2Buf
+ *  02Nov03 JMN Modified dsmMemcpy2Buf to ensure dsmData is 8-byte aligned.
+ *  04Nov03 EGJ Modified RawTrgDet to add in ZDCSMD[32]
  */
 
 #ifndef trgStructures2004_h
@@ -42,15 +44,15 @@
 
 #define y4MAX_L0_DATA_BLOCKS    11              /* Maximum number of L0 Data Blocks:  current + npre + npost */
 #define y4MAX_RAW_DATA_BLOCKS   11              /* Maximum number of Raw Data Blocks:  current + npre + npost */
-#define y4FORMAT_VERSION   0x20                 /* Format Version number for trigger data */
-#define y4EV_DESC_LEN      sizeof(EvtDescData)  /* Number of bytes in event descriptor */
-#define y4L0DSM_DATA_LEN   sizeof(L0_DSM_Data)  /* Size of data block in L0 DSM Tree */
-#define y4RAW_DET_DATA_LEN sizeof(RawTrgDet)    /* Size of Raw Detector Data from CTB, MWC with headers */
-#define y4TRG_SUM_LEN      sizeof(TrgSumData)   /* Number of bytes in the trigger summary for DAQ with headers */
+#define y4FORMAT_VERSION   0x21                 /* Format Version number for trigger data */
+#define y4EV_DESC_LEN      sizeof(EvtDescData2004)  /* Number of bytes in event descriptor */
+#define y4L0DSM_DATA_LEN   sizeof(L0_DSM_Data2004)  /* Size of data block in L0 DSM Tree */
+#define y4RAW_DET_DATA_LEN sizeof(RawTrgDet2004)    /* Size of Raw Detector Data from CTB, MWC with headers */
+#define y4TRG_SUM_LEN      sizeof(TrgSumData2004)   /* Number of bytes in the trigger summary for DAQ with headers */
 
-#define y4L1_DATA_LEN  (EV_DESC_LEN+TRG_SUM_LEN)   /* Size of data passed from L1ANA to L2 */ 
-#define y4TRG_EVT_LEN  (L1_DATA_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN))  /* Max size of a trigger event */
-#define y4TDI_EVT_LEN  (EV_DESC_LEN+TRG_SUM_LEN+(MAX_RAW_DATA_BLOCKS*RAW_DET_DATA_LEN)) /* size of event sent to TDI */
+#define y4L1_DATA_LEN  (y4EV_DESC_LEN+y4TRG_SUM_LEN)   /* Size of data passed from L1ANA to L2 */ 
+#define y4TRG_EVT_LEN  (y4L1_DATA_LEN+(y4MAX_RAW_DATA_BLOCKS*y4RAW_DET_DATA_LEN))  /* Max size of a trigger event */
+#define y4TDI_EVT_LEN  (y4EV_DESC_LEN+y4TRG_SUM_LEN+(y4MAX_RAW_DATA_BLOCKS*y4RAW_DET_DATA_LEN)) /* size of event sent to TDI */
 
 #define y4L0_SUM_LEN           148              /* Number of bytes in L0 Summary + Header */
 #define y4L1_SUM_LEN           132              /* Number of bytes in L1 Summary + Header */
@@ -58,24 +60,24 @@
 #define y4L0_REG_LEN            16              /* Number of bytes in L0 Register + Header */
 
 #define y4RAW_MAX_LEN          272              /* Maximum length of any Chain Block Transfer */
-#define y4CTB_DATA_OFFSET        8              /* Number of bytes CTB Raw data is offset in raw trigger structure */
-#define y4RAW_CTB_LEN          256              /* Number of bytes in raw CTB DSMs */
-#define y4MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
-#define y4RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
-#define y4BCE_DATA_OFFSET      408              /* Number of bytes BMC Raw data is offset in raw trigger structure */
-#define y4RAW_BCE_LEN          240  
-#define y4BCW_DATA_OFFSET      648
-#define y4RAW_BCW_LEN          240 
-#define y4BC1_DATA_OFFSET      888
-#define y4RAW_BC1_LEN           96 
-#define y4EEC_DATA_OFFSET      992
-#define y4RAW_EEC_LEN          176 
-#define y4FPE_DATA_OFFSET     1176              /* everything after this will have to be re-done */
-#define y4RAW_FPE_LEN          208
-#define y4FPW_DATA_OFFSET     1384
-#define y4RAW_FPW_LEN          208
-#define y4BBC_DATA_OFFSET     1600
-#define y4RAW_BBC_LEN          144              /* Number of bytes in BBC and ZDC raw data structures */
+//#define CTB_DATA_OFFSET        8              /* Number of bytes CTB Raw data is offset in raw trigger structure */
+//#define RAW_CTB_LEN          256              /* Number of bytes in raw CTB DSMs */
+//#define MWC_DATA_OFFSET      272              /* Number of bytes MWC Raw data is offset in raw trigger structure */
+//#define RAW_MWC_LEN          128              /* Number of bytes in raw CTB DSMs */
+//#define BCE_DATA_OFFSET      408              /* Number of bytes BMC Raw data is offset in raw trigger structure */
+//#define RAW_BCE_LEN          240  
+//#define BCW_DATA_OFFSET      648
+//#define RAW_BCW_LEN          240 
+//#define BC1_DATA_OFFSET      888
+//#define RAW_BC1_LEN           96 
+//#define EEC_DATA_OFFSET      992
+//#define RAW_EEC_LEN          176 
+//#define FPE_DATA_OFFSET     1176              /* everything after this will have to be re-done */
+//#define RAW_FPE_LEN          208
+//#define FPW_DATA_OFFSET     1384
+//#define RAW_FPW_LEN          208
+//#define BBC_DATA_OFFSET     1600
+//#define RAW_BBC_LEN          176              /* Number of bytes in BBC and ZDC raw data structures */
 
 
 #define y4ADD_BIT_PILEUP         0              /* Contamination/Pileup bit in event descriptor add-bits */
@@ -198,10 +200,10 @@ typedef struct {
 
 /*  Trigger Event Structure */
 
-struct TrgDataType2004{
+typedef struct {
   EvtDescData2004    EvtDesc;               /* L1 Event Descriptor Data */  
   TrgSumData2004     TrgSum;                /* Summary data */
   RawTrgDet2004      rawTriggerDet[y4MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History */
-};         /* 20056 bytes */
+} TrgDataType2004;         /* 19704 bytes */
 
 #endif
