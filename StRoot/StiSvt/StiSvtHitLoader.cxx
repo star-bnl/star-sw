@@ -27,7 +27,9 @@ StiSvtHitLoader::StiSvtHitLoader(StiHitContainer* hitContainer,
 StiSvtHitLoader::~StiSvtHitLoader()
 {}
 
-void StiSvtHitLoader::loadHits(StEvent* source)
+void StiSvtHitLoader::loadHits(StEvent* source,
+			       Filter<StiTrack> * trackFilter, 
+			       Filter<StiHit> * hitFilter)
 {
   return;
   _messenger <<"StiSvtHitLoader::loadHits() - Started"<<endl;
@@ -97,7 +99,10 @@ void StiSvtHitLoader::loadHits(StEvent* source)
 }
 	
 
-void StiSvtHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
+void StiSvtHitLoader::loadMcHits(StMcEvent* source,
+				 bool useMcAsRec,
+				 Filter<StiTrack> * trackFilter, 
+				 Filter<StiHit> * hitFilter)
 {
   return;
 }

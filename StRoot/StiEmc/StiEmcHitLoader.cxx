@@ -27,7 +27,9 @@ StiEmcHitLoader::StiEmcHitLoader(StiHitContainer* hitContainer,
 StiEmcHitLoader::~StiEmcHitLoader()
 {}
 
-void StiEmcHitLoader::loadHits(StEvent* source)
+void StiEmcHitLoader::loadHits(StEvent* source,
+			       Filter<StiTrack> * trackFilter, 
+			       Filter<StiHit> * hitFilter)
 {
   StiHit* stiHit;
   StiDetector*detector=0;// kaboum
@@ -54,7 +56,10 @@ void StiEmcHitLoader::loadHits(StEvent* source)
     }  
 }
 
-void StiEmcHitLoader::loadMcHits(StMcEvent* source,bool useMcAsRec)
+void StiEmcHitLoader::loadMcHits(StMcEvent* source,
+				 bool useMcAsRec,
+				 Filter<StiTrack> * trackFilter, 
+				 Filter<StiHit> * hitFilter)
 {
   return;
 }
