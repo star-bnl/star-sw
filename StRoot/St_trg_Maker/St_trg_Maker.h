@@ -76,6 +76,7 @@ class St_trg_Maker : public StMaker {
    void ZdcDaq    (St_dst_TrgDet *dst);
    void ZdcDaq2000(St_dst_TrgDet *dst);
    void ZdcDaq2003(St_dst_TrgDet *dst);
+   void BbcDaq2003(St_dst_TrgDet *dst);
 
    int Daq    (St_DataSet*,St_dst_TrgDet*,St_dst_L0_Trigger*,St_dst_L1_Trigger*,St_dst_L2_Trigger*);
    int Daq2000(St_DataSet*,St_dst_TrgDet*,St_dst_L0_Trigger*,St_dst_L1_Trigger*,St_dst_L2_Trigger*);
@@ -89,7 +90,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t Make();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.18 2003/01/21 01:31:57 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.19 2003/01/23 00:01:58 jeromel Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
@@ -99,8 +100,11 @@ class St_trg_Maker : public StMaker {
 #endif
 
 
-// $Id: St_trg_Maker.h,v 1.18 2003/01/21 01:31:57 jeromel Exp $
+// $Id: St_trg_Maker.h,v 1.19 2003/01/23 00:01:58 jeromel Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.19  2003/01/23 00:01:58  jeromel
+// Bbc
+//
 // Revision 1.18  2003/01/21 01:31:57  jeromel
 // Minor changes in messaging (small request from Janet) to bring some consistency.
 // doxygenized the .h
