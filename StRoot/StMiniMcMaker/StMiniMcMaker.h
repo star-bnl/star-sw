@@ -46,6 +46,7 @@ class StThreeVectorF;
 class StTpcDedxPidAlgorithm;
 class StuProbabilityPidAlgorithm;
 class StTpcHit;
+class StDedxPidTraits;
 
 // typdef's
 #ifndef __CINT__
@@ -113,7 +114,7 @@ class StMiniMcMaker : public StMaker{
   PAIRHIT          findFirstLastFitHit(const StTrack*);
 
   Float_t          computeXY(const StThreeVectorF*, const StTrack*);
-  Float_t          computeDedx(const StTrack*);
+  StDedxPidTraits* findDedxPidTraits(const StTrack*);
   //pair<Float_t,Float_t>  computeProj(const StThreeVectorF*,const StTrack*);
   Float_t          computeZDca(const StThreeVectorF*,const StTrack*);
 
