@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.22 2001/05/14 19:39:18 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.23 2001/06/07 10:30:42 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.23  2001/06/07 10:30:42  flierl
+// switch off writing into tables
+//
 // Revision 1.22  2001/05/14 19:39:18  flierl
 // fix severe bug : wrong adc values were extracted from rawdata
 //
@@ -376,7 +379,7 @@ Int_t St_l3Clufi_Maker::Make(){
     /// 
     // fill clusters into tables : the same format offline clusterfinder tcl uses
     ///
-    if (l3ClufiDebug || 1)
+    if (l3ClufiDebug)
 	{
 	    WriteClustersIntoTables() ;
 	}
