@@ -94,7 +94,7 @@ class StEmcEnergy : public TObject
 			   Int_t   mNTracks;         
             
        Float_t   mMcChHadEnergyInBtow[4800];
-       
+       Float_t   mGeantEmEtInBtow[4800];
        StEmcGeom *mBemcGeom; //!
             
        Float_t   trackEff(StTrack*, UInt_t);
@@ -102,6 +102,7 @@ class StEmcEnergy : public TObject
           void   chHadEnergyInBtow();
           void   q0HadEnergyInBtow();
           void   emEnergyInBtow();
+          void   geantEmEtInBtow(Int_t=0);
                              
           void   mcEnergyInBtow();
                
