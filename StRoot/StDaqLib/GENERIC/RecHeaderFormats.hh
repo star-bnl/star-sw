@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.4 2000/01/19 16:20:22 levine Exp $
+ * $Id: RecHeaderFormats.hh,v 1.5 2001/06/26 17:01:42 jcs Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.5  2001/06/26 17:01:42  jcs
+ * set FTP_TIMEBINS to correct number of FTPC timebins
+ *
  * Revision 1.4  2000/01/19 16:20:22  levine
  * #define FTP_MZPADS suppiled in this version
  *
@@ -36,7 +39,7 @@ typedef short INT16;  // SHORT according to data format
 #define TPC_MXSEQUENCE 31
 
 #define FTP_SECTORS 60
-#define FTP_TIMEBINS 512
+#define FTP_TIMEBINS 256
 #define FTP_PADROWS 2
 #define FTP_MAXPADS 160
 #define FTP_MZPADS 320
