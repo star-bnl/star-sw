@@ -1,8 +1,12 @@
 //
-// $Id: TestEvalIT.C,v 1.4 2002/06/18 20:25:12 pruneau Exp $
+// $Id: TestEvalIT.C,v 1.5 2002/06/21 22:06:46 andrewar Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.5  2002/06/21 22:06:46  andrewar
+// Add command line flag for Sti track/ Tpt track association: associateStiTrack
+// (=1 for StiTracks)....A. Rose, 6.21.2002
+//
 // Revision 1.4  2002/06/18 20:25:12  pruneau
 // Changed TestEvalIT.C to have nevent==1 imply GUI mode
 //
@@ -71,21 +75,22 @@ void TestEvalIT(Int_t, const Char_t **, const Char_t *qaflag = "");
 //const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
 
 void TestEvalIT(Int_t nevents=10,
-								//const Char_t *path="/star/data13/reco/dev/2002/01/",
-								//const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
-								//const Char_t *path = "data/simple_geant/DEV_10_8_01/",
-								const Char_t *path= "/star/data17/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gl/",
+		//const Char_t *path="/star/data13/reco/dev/2002/01/",
+	        //const Char_t *path = "/star/data22/ITTF/data/simple_geant/DEV_10_8_01/",
+		//const Char_t *path = "data/simple_geant/DEV_10_8_01/",
+		const Char_t *path= "/star/data17/reco/auau200/hijing/b0_20/standard/year2001/hadronic_on/trs_gl/",
+			
+		const Char_t *file="rcf0183_20_300evts.geant.root",
 								
-								const Char_t *file="rcf0183_20_300evts.geant.root",
+		//const Char_t *file="*3007007*.event.root",
+		//const Char_t *file= "muon_10_neg.event.root",
 								
-								//const Char_t *file="*3007007*.event.root",
-								//const Char_t *file= "muon_10_neg.event.root",
-								
-								const Char_t *qaflag = "off",
-								const Int_t wrStEOut = 0);
+		const Char_t *qaflag = "off",
+		const Int_t wrStEOut = 0,
+		const int   associateStiTrack=1);
 
 // ------------------ Here is the actual method -----------------------------------------
-void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Int_t wrStEOut)
+void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const Int_t wrStEOut, const int associateStiTrack)
 {
 	Int_t theRunNumber=0;
 	bool simulated = true;
@@ -289,7 +294,7 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
 
 	if (simulated) {
 		assocMakerIt = new StAssociationMaker();
-		assocMakerIt->useInTracker();
+		if(associateStiTrack) assocMakerIt->useInTracker();
 		assocMakerIt->SetDebug();
 	}
 
@@ -333,7 +338,7 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
 //--------------------------------------------------------------------------
 
 void TestEvalIT(const Int_t nevents, const Char_t *path, const Char_t *file,
-								const Char_t *qaflag, const Int_t wrStEOut)
+		const Char_t *qaflag, const Int_t wrStEOut, const int associateStiTrack)
 {
 	if (nevents==-1) { Help(); return;}
 
@@ -347,7 +352,7 @@ void TestEvalIT(const Int_t nevents, const Char_t *path, const Char_t *file,
 	} else {
 		fileListQQ[0] = gSystem->ConcatFileName(path,file);
 	}
-	TestEvalIT(nevents,fileListQQ,qaflag,wrStEOut);
+	TestEvalIT(nevents,fileListQQ,qaflag,wrStEOut, associateStiTrack);
 }
 
 
