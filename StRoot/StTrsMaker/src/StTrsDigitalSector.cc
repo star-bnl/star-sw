@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.cc,v 1.1 1999/01/18 10:23:51 lasiuk Exp $
+ * $Id: StTrsDigitalSector.cc,v 1.2 1999/01/18 21:02:47 lasiuk Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.cc,v $
- * Revision 1.1  1999/01/18 10:23:51  lasiuk
- * initial Revision
+ * Revision 1.2  1999/01/18 21:02:47  lasiuk
+ * comment diagnostics
  *
  * Revision 1.2  1999/01/18 21:02:47  lasiuk
  * comment diagnostics
@@ -27,7 +27,7 @@ StTrsDigitalSector::StTrsDigitalSector(StTpcGeometry* geoDb)
 {
     digitalTimeBins  timeBins;
     digitalPadRow    padRow;
-	cout << " NumberOfPadsAtRow(" << irow << "): " << geoDb->numberOfPadsAtRow(irow+1) << endl;
+    int              irow;
 
     for(irow=0; irow< geoDb->numberOfRows(); irow++) {
 	//cout << " NumberOfPadsAtRow(" << irow << "): " << geoDb->numberOfPadsAtRow(irow+1) << endl;
@@ -36,10 +36,10 @@ StTrsDigitalSector::StTrsDigitalSector(StTpcGeometry* geoDb)
 	mSector.push_back(padRow);
     }
 
-    cout << "  NumberOfRows in Sector: " << mSector.size() << endl;
-    for(int ii=0; ii<mSector.size(); ii++) {
- 	cout << "  PadsInRow(" << ii << "): " << mSector[ii].size() << endl;
-    }
+    
+    // tmp
+    // check size at creation?
+//     cout << "  NumberOfRows in Sector: " << mSector.size() << endl;
 //     for(int ii=0; ii<mSector.size(); ii++) {
 //  	cout << "  PadsInRow(" << ii << "): " << mSector[ii].size() << endl;
 //     }
