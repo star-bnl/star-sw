@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.68 2002/01/21 01:35:07 balewski Exp $
+// $Id: StPrimaryMaker.cxx,v 1.69 2002/01/24 01:59:49 genevb Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.69  2002/01/24 01:59:49  genevb
+// Add use of vertexSeed from database for ppLMV
+//
 // Revision 1.68  2002/01/21 01:35:07  balewski
 // Optional beam line constrain was added to ppLMV
 //
@@ -234,6 +237,8 @@
 #include "CtbResponse.h" // for recon of pileup in pp
 #include "MatchedTrk.h" // for recon of pileup in pp
 
+#include "tables/St_vertexSeed_Table.h"
+
 #ifndef  gufld 
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
@@ -263,6 +268,7 @@ ClassImp(StPrimaryMaker)
   zCutppLMV=0; // turn off ppLMV  as default
   UnSetBeam4ppLMV(); // turn off adding beam line to ppLMV  as default (1)
   embedVerts = kFALSE;
+  seed = kTRUE; // use vertex seed from database by default
 
 }
 //_____________________________________________________________________________
@@ -625,6 +631,15 @@ Int_t StPrimaryMaker::Make(){
 
       St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
       Int_t mdate = db->GetDateTime().GetDate();
+
+      if (seed) {
+        TDataSet* dbDataSet = GetDataBase("Calibrations/rhic");
+        vertexSeed_st* vSeed =
+          ((St_vertexSeed*) (dbDataSet->FindObject("vertexSeed")))->GetTable();
+        SetBeam4ppLMV_db((int) (vSeed->weight), vSeed->x0, vSeed->y0,
+	              vSeed->dxdz, vSeed->dydz);
+      }
+
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
  
       //SetBeam4ppLMV(0.0,0.3,0.0001, 0.0001);
