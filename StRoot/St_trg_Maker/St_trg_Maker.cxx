@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.34 2001/10/16 20:26:02 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.35 2001/12/04 18:24:13 jeromel Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.35  2001/12/04 18:24:13  jeromel
+// Small modif of return value to make Insure happy.
+//
 // Revision 1.34  2001/10/16 20:26:02  ward
 // New code from Jennifer Klay for unpacking EMC data.
 //
@@ -241,7 +244,9 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   tt->MWC_CTB_topology = 0;
   tt->MWC_CTB_moment   = 0;
 }
-char St_trg_Maker::IsYear2000Data(St_DataSet *herb) {
+
+char St_trg_Maker::IsYear2000Data(St_DataSet *herb) 
+{
   unsigned char *data;
   StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
   StTRGReader *trgReader = fromVictor->getTRGReader(); assert(trgReader);
@@ -252,7 +257,9 @@ char St_trg_Maker::IsYear2000Data(St_DataSet *herb) {
   if(*data==0x12) return 7; // TRUE
   if(*data==0x13) return 0; // FALSE
   assert(0);  // Should not be here.  Eto nehoroshoe mesto etogo fajla.
+  return 0;   // to make insure happy
 }
+
 Int_t St_trg_Maker::Make(){
   static char initializationDone=0;
   St_dst_TrgDet     *dst1 = new St_dst_TrgDet("TrgDet",1);         if(!dst1) return kStWarn; dst1->SetNRows(1);
