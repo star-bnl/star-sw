@@ -1,5 +1,8 @@
-// $Id: StTpcEval.C,v 1.2 2000/05/25 20:59:19 snelling Exp $
+// $Id: StTpcEval.C,v 1.3 2000/06/22 18:11:13 snelling Exp $
 // $Log: StTpcEval.C,v $
+// Revision 1.3  2000/06/22 18:11:13  snelling
+// Fixed DataBase and EMC dependencies
+//
 // Revision 1.2  2000/05/25 20:59:19  snelling
 // Added switches to macro to enable different modes of running
 //
@@ -46,6 +49,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     gSystem->Load("StIOMaker");
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker"); 
+    gSystem->Load("St_emc_Maker");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
@@ -55,12 +59,12 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     chain->SetDebug();
    
     // MySQL DB
-    const char *mainDB = "MySQL:Geometry_tpc";
-    St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
+    const char *mainDB = "MySQL:StarDb";
+    St_db_Maker *dbMk = new St_db_Maker("StarDb",mainDB);
     //    dbMk->SetDebug();
   
-    const char *calibDB = "MySQL:Calibrations_tpc";
-    St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
+    //    const char *calibDB = "MySQL:Calibrations_tpc";
+    //    St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
     //    calibMk->SetDebug();
   
     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
