@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.14 2000/04/17 20:14:42 calderon Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.15 2000/05/25 20:51:31 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.15  2000/05/25 20:51:31  hardtke
+ * make z-to-time functions public, use correct t0s, get rid of spurious 0.5
+ *
  * Revision 1.14  2000/04/17 20:14:42  calderon
  * fix bug, did not remove all use of matrices in last step of
  * rotation from local sector -> local.
@@ -527,9 +530,14 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
 double StTpcCoordinateTransform::zFromTB(const int tb) const
 {
     double timeBin = tb; // to avoid using const_cast<int> & static_cast<double>
-    double z = 
-      gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
-        (-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
+    //    double z = 
+    //      gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
+      //        (-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
+       double z = 
+         gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
+	 (gTpcDbPtr->triggerTimeOffset()*1e6 +  // units are s
+	  gTpcDbPtr->Electronics()->tZero() +   // units are us 
+            (timeBin)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
    
     return(z);
 }
@@ -542,8 +550,9 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
    
    
     double time = (
-		   (gTpcDbPtr->Electronics()->tZero()) +
-		   ( z / (gTpcDbPtr->DriftVelocity()*1e-6))
+	 -1*(gTpcDbPtr->triggerTimeOffset()*1e6 +  // units are s
+	  gTpcDbPtr->Electronics()->tZero())   // units are us 
+	 + ( z / (gTpcDbPtr->DriftVelocity()*1e-6))
 		   ); // tZero + (z/v_drift); the z already has the proper offset
     
   return((int)(time/(mTimeBinWidth)));//time bin starts at 0,HL,9/1/99

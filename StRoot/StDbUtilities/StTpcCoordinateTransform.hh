@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.4 2000/04/13 22:57:53 calderon Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.5 2000/05/25 20:51:31 hardtke Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.5  2000/05/25 20:51:31  hardtke
+ * make z-to-time functions public, use correct t0s, get rid of spurious 0.5
+ *
  * Revision 1.4  2000/04/13 22:57:53  calderon
  * use lookup table of sines and cosines instead of calculating them
  * each time
@@ -144,6 +147,8 @@ public:
 
     StThreeVector<double> sector12Coordinate(StThreeVector<double>&, int*);
     StThreeVector<double> padCentroid(StTpcLocalSectorCoordinate&, int*, int*)  ;
+    int      tBFromZ(const double)                                   const;
+    double   zFromTB(const int)                   const;
     
 private:
     // Transformation Routines!!
@@ -153,13 +158,11 @@ private:
     // Raw Data (pad row timebin or drift L From tpc local sector Coordinates
     int      rowFromLocal(const StThreeVector<double>&)              const;
     int      padFromLocal(const StThreeVector<double>&, const int)   const;
-    int      tBFromZ(const double)                                   const;
 
     // tpc local sector Coordinates from Raw Data
     StThreeVector<double> xyFromRaw(const StTpcPadCoordinate&)      ;
     double                yFromRow(const int)                  const;
     double                xFromPad(const int, const int)       const;
-    double                zFromTB(const int)                   const;
     
     // (3d)rotations   From means "From the TPC local  Coordinates to Tpc Local  Sector Coordinates "     
   //    "to" means " from Tpc local sector  Coordinates to  TPC local  Coordinates "
@@ -188,3 +191,6 @@ private:
 };
 
 #endif
+
+
+
