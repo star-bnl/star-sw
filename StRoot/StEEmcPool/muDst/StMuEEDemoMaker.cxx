@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.7 2004/04/12 16:20:10 balewski Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.8 2004/10/21 13:31:40 balewski Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -64,7 +64,7 @@ Int_t StMuEEDemoMaker::Make(){
     return kStErr;
   }
   
-  StMuEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
   if (!emc) {
     printf(" No EMC data for this event\n");
      return kStOK;
@@ -184,6 +184,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.8  2004/10/21 13:31:40  balewski
+// to match new name of emcCollection in muDst
+//
 // Revision 1.7  2004/04/12 16:20:10  balewski
 // DB cleanup & update
 //

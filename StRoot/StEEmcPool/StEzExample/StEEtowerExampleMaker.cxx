@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEtowerExampleMaker.cxx,v 1.1 2004/06/06 04:54:08 balewski Exp $
+// $Id: StEEtowerExampleMaker.cxx,v 1.2 2004/10/21 13:31:28 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -74,7 +74,7 @@ Int_t StEEtowerExampleMaker::unpackMuDst(){
   gMessMgr->Message("","D") <<GetName()<<"::::getAdc() is called "<<endm;
 
   // Access to muDst .......................
-  StMuEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->muEmcCollection();
   if (!emc) {
     gMessMgr->Message("","W") <<"No EMC data for this event"<<endm;    return kStOK;
   }
@@ -109,6 +109,9 @@ Int_t StEEtowerExampleMaker::unpackMuDst(){
 
 
 // $Log: StEEtowerExampleMaker.cxx,v $
+// Revision 1.2  2004/10/21 13:31:28  balewski
+// to match new name of emcCollection in muDst
+//
 // Revision 1.1  2004/06/06 04:54:08  balewski
 // dual analyzis
 //
