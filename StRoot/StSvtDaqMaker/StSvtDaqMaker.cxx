@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.2 2000/06/25 20:40:16 caines Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.3 2000/07/01 20:14:06 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.3  2000/07/01 20:14:06  caines
+ * Removed unneccesary delete that was crashing code
+ *
  * Revision 1.2  2000/06/25 20:40:16  caines
  * Add debugging statements and protection against SVT not being there
  *
@@ -186,7 +189,7 @@ Int_t StSvtDaqMaker::Reset()
 {
   if (Debug()) gMessMgr->Debug()<< "StSvtDaqMaker::Reset" << endm;
 
-  Clear();
+  //Clear();
 
   if (fSvtSet) {
     fSvtSet->Delete();
@@ -214,7 +217,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.2 2000/06/25 20:40:16 caines Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.3 2000/07/01 20:14:06 caines Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
