@@ -381,8 +381,12 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 }
 
 //----------------------------------
-char * tdmTable:: printRow (long nrow) {
-   return NULL;
+char * 
+tdmTable::printRow (long nrow) {
+  // Just to hush pedantic compilers
+  static void *pn = &nrow;
+  
+  return NULL;
 }
 
 //----------------------------------
@@ -656,6 +660,9 @@ tdmDataset:: tdmDataset(const DS_DATASET_T *pDS)
 //----------------------------------
 tdmDataset:: tdmDataset(const char* name, long setDim)
 		: socObject(name, "tdmDataset") {
+  // Just to hush pedantic compilers
+  static void *ps = &setDim;
+
    myPtr = (SOC_PTR_T)this;
    pDSthis = NULL;
 #ifndef	OLD_DSL
@@ -731,19 +738,32 @@ unsigned char tdmDataset :: implementsInterface (const char * iface) {
 }
 
 STAFCV_T tdmDataset:: addDataset (const char * name, long setDim) {
+  // Just to hush pedantic compilers
+  static void *pn = &name;
+  static void *ps = &setDim;
+
 //BUG- add dsAddDataset functionality
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T tdmDataset:: addTable (const char * name, const char * spec
-		, long rows) {
+STAFCV_T 
+tdmDataset::addTable (const char * name, const char * spec, long rows) {
+  // Just to hush pedantic compilers
+  static void *pn = &name;
+  static void *ps = &spec;
+  static void *pr = &rows;
+  
+
 //BUG- add dsAddTable functionality
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
 STAFCV_T tdmDataset:: getEntryType (char *& type, long num) {
+  // Just to hush pedantic compilers
+  static void *pn = &num;
+
 //BUG- should return "table" or "dataset"
    type = NULL;
    EML_ERROR(NOT_YET_IMPLEMENTED);
@@ -752,6 +772,9 @@ STAFCV_T tdmDataset:: getEntryType (char *& type, long num) {
 //----------------------------------
 STAFCV_T tdmDataset:: getDatasetEntry (tdmDataset*& dataset
 		, long num) {
+  // Just to hush pedantic compilers
+  static void *pn = &num;
+
 //BUG- add dsDatasetEntry functionality for dataset
    dataset = NULL;
    EML_ERROR(NOT_YET_IMPLEMENTED);
@@ -765,6 +788,9 @@ STAFCV_T tdmDataset:: cvtDslPointer(DSL_PTR_T& pDS) {
 
 //----------------------------------
 STAFCV_T tdmDataset:: getTableEntry (tdmTable*& table, long num) {
+  // Just to hush pedantic compilers
+  static void *pn = &num;
+
 //BUG- add dsDatasetEntry functionality for table
    table = NULL;
    EML_ERROR(NOT_YET_IMPLEMENTED);
@@ -773,15 +799,22 @@ STAFCV_T tdmDataset:: getTableEntry (tdmTable*& table, long num) {
 //----------------------------------
 STAFCV_T tdmDataset:: findDatasetEntry (tdmDataset*& dataset
 		, const char * name) {
+  // Just to hush pedantic compilers
+  static void *pn = &name;
+
 //BUG- add dsFindEntry functionality for dataset
    dataset = NULL;
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T tdmDataset:: findTableEntry (tdmTable*& table
-		, const char * name) {
-//BUG- add dsFindEntry functionality for table
+STAFCV_T 
+tdmDataset::findTableEntry (tdmTable*& table, const char * name) 
+{
+  // Just to hush pedantic compilers
+  static void *pn = &name;
+
+  //BUG- add dsFindEntry functionality for table
    table = NULL;
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
