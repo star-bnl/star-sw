@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.67 1999/09/13 13:30:46 fine Exp $
+// $Id: StMaker.cxx,v 1.68 1999/09/13 16:39:24 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.68  1999/09/13 16:39:24  fine
+// MakeDoc ExpandPath removed to keep path short
+//
 // Revision 1.67  1999/09/13 13:30:46  fine
 // non-active new method MakeAssociatedClassList to be introduced new release
 //
@@ -746,24 +749,24 @@ MakeAssociatedClassList(const Char_t classDir=0)
       ifstream headerFile(n);
       headerFile >> nextSymbol;
 
-      |<====================================+
-      |                                     |
- $-->(1)<===+                               |
-      | ' ' |                               |
-      |---->|                               |
-      |"class"                              |
-      |------>(2)<===+                      |
-               | ' ' |                      |
-               |---->|                      | 
-               | name                       |
-               |------>(3)<===+             |
-                        | ' ' |             | 
-                        |---->|             | 
-                        | eol               | 
-                        |------>(4)-------->|
-                        |        | add2list    
-                        |  ":"   |
-                        |------->|
+      |<===========================================+
+      |                                            |
+ $-->(1)<===+                                      |
+      | ' ' |                                      |
+      |---->|                                      |
+      |"class"   ' '                               |
+      |------>(2)--->(3)<===+                      |
+                      | ' ' |                      |
+                      |---->|                      | 
+                      | name                       |
+                      |------>(4)<===+             |
+                               | ' ' |             | 
+                               |---->|             | 
+                               | ";"               | 
+                               |------>(5)-------->|
+                               |        | add2list    
+                               |  ":"   |
+                               |------->|
       switch (status) {
         case 1:
            if (*nextSym == ' ') break;            
@@ -905,14 +908,6 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   
 //  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
 
-#if 0
-  lookup += delim;
-  lookup += STAR;
-  lookup += "/StRoot/";
-  lookup += classname;
-#endif
-
-  gSystem->ExpandPathName(lookup);
   lookup.ReplaceAll("//StRoot/","/StRoot/");
   gHtml->SetSourceDir(lookup);
 
