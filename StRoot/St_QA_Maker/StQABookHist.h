@@ -1,5 +1,8 @@
-// $Id: StQABookHist.h,v 2.5 2001/05/16 20:57:03 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.6 2001/05/23 00:14:53 lansdell Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.6  2001/05/23 00:14:53  lansdell
+// more changes for qa_shift histograms
+//
 // Revision 2.5  2001/05/16 20:57:03  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -46,7 +49,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.5 2001/05/16 20:57:03 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.6 2001/05/23 00:14:53 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -267,6 +270,7 @@ class StQABookHist : public TObject {
   TH2F     *m_eta_trklengthFW; //! trk length vs. eta, ftpc west
   TH2F     *m_fpoint_lengthT;  //! num fit points vs length, tpc
   TH2F     *m_fpoint_lengthTS; //! num fit points vs length, tpc+svt
+  TH2F     *m_fpoint_lengthTTS;//! num fit points vs length, tpc,tpc+svt
   TH2F     *m_npoint_lengthT;  //! tot num points vs length, tpc
   TH2F     *m_npoint_lengthTS; //! tot num points vs length, tpc+svt
   TH2F     *m_npoint_lengthFE; //! tot num points vs length, ftpc east
@@ -462,6 +466,7 @@ class StQABookHist : public TObject {
   TH2F     *m_peta_trklengthFW; //! trk length vs. eta, ftpc west
   TH2F     *m_pfpoint_lengthT;  //! num fit points vs length, tpc
   TH2F     *m_pfpoint_lengthTS; //! num fit points vs length, tpc+svt
+  TH2F     *m_pfpoint_lengthTTS;//! num fit points vs length, tpc
   TH2F     *m_pnpoint_lengthT;  //! tot num points vs length, tpc
   TH2F     *m_pnpoint_lengthTS; //! tot num points vs length, tpc+svt
   TH2F     *m_pnpoint_lengthFE; //! tot num points vs length, ftpc east

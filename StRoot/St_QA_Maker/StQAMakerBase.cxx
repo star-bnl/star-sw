@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.cxx,v 2.6 2001/05/16 20:57:03 lansdell Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.7 2001/05/23 00:14:53 lansdell Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.7  2001/05/23 00:14:53  lansdell
+// more changes for qa_shift histograms
+//
 // Revision 2.6  2001/05/16 20:57:03  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -100,18 +103,18 @@ Int_t StQAMakerBase::Make(){
   MakeHistEvSum();
   // histograms from table globtrk
   MakeHistGlob();
-  // histograms from table dst_dedx
-  MakeHistDE();
-  // histograms from table primtrk
+  // histograms from table primtrk - must be done after global tracks
   MakeHistPrim();
   // histograms from table primtrk & dst_dedx
   MakeHistPID();
-  // histograms from table dst_vertex,dst_v0_vertex,dst_xi_vertex,dst_kinkVertex
-  MakeHistVertex();
+  // histograms from table dst_dedx
+  MakeHistDE();
   // histograms from table point
   MakeHistPoint();
   // histograms from table g2t_rch_hit
   MakeHistRich();
+  // histograms from table dst_vertex,dst_v0_vertex,dst_xi_vertex,dst_kinkVertex
+  MakeHistVertex();
   // histograms from EMC in StEvent
   MakeHistEMC();
   // histograms from geant and reco tables 

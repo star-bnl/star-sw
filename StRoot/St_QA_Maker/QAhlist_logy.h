@@ -1,5 +1,8 @@
-// $Id: QAhlist_logy.h,v 2.3 2001/05/16 20:57:03 lansdell Exp $
+// $Id: QAhlist_logy.h,v 2.4 2001/05/23 00:14:52 lansdell Exp $
 // $Log: QAhlist_logy.h,v $
+// Revision 2.4  2001/05/23 00:14:52  lansdell
+// more changes for qa_shift histograms
+//
 // Revision 2.3  2001/05/16 20:57:03  lansdell
 // new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
 //
@@ -249,7 +252,6 @@
  "QaPtrkLengthFW",
 */
  "QaDedxNum",
- "QaDedxBBTTS",
  "QaDedxDedx0T", 
  "QaDedxDedx0F",
  "QaDedxDedx1T",
@@ -265,4 +267,11 @@
  "QaVtxZ",
  "QaVtxChisq",
  "QaV0VtxZDist",
- "QaV0VtxRDist"
+ "QaV0VtxRDist",
+
+ "bemcAdc",
+ "bsmdeAdc",
+ "bsmdpAdc",
+ "bemcClNum",
+ "bemcClEnergy",
+ "EmcCat4_Point_Energy"
