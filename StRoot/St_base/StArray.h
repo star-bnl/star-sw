@@ -73,6 +73,7 @@ virtual        ~StObjArray(){delete fObjArr;};
         virtual TObject* At(Int_t idx) const {return fObjArr->At(idx);};
         virtual TObject* Before(TObject* obj) const {return fObjArr->Before(obj);};
            virtual Int_t BinarySearch(TObject* obj, Int_t upto = kMaxInt) const {return fObjArr->BinarySearch(obj,upto);};
+            virtual void Browse(TBrowser *b);
            virtual void Clear(Option_t* option=""){fObjArr->Clear(option);};
             virtual void Compress(){fObjArr->Compress();};
             virtual void Delete(Option_t* option){fObjArr->Delete(option);};
