@@ -124,12 +124,16 @@ int StHbtIOBinary::readV0List(StHbtEvent& ev, unsigned short v0Version){
   ev.V0Collection()->clear(); 
   colSizeType NV0sInCollection;
   iret =  read( NV0sInCollection);
-#ifdef STHBTDEBUG
   cout << " reading " << NV0sInCollection << " V0s " << endl;
-#endif
   if ( !(mIStream->good()) ) {
     cout << "StHbtEvent input operator finds stream in bad state ! " << endl;
     return ioERR;
+  }
+  if (NV0sInCollection > 1e7) {
+    for ( int i=0; i<10; i++) {
+      cout << " StHbtIOBinaryReader::readV0List(...) - unreasonable number of V0s, returning ioERR " << endl;
+    }
+    return(ioERR);
   }
   for (unsigned int iv0=0; iv0<NV0sInCollection; iv0++){
     StHbtV0* v0 = new StHbtV0;
