@@ -1,3 +1,5 @@
+//                DrawDstHists.C
+//-------------------------------------------------------------
 //  
 //  
 //
@@ -33,7 +35,7 @@ void Load()
 //   *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
 
 void DrawDstHist(
-     Int_t nevproc=4,
+     Int_t nevproc=100,
      const Char_t *firstHistName="*",
      const Char_t *lastHistName="*",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
@@ -121,9 +123,13 @@ void DrawDstHist(
 
 // now setup the rest of the Makers in the chain 
     St_QA_Maker *QA   = new St_QA_Maker;
+
+// the following methods are already set to default values in St_QA_Maker constructor:
     QA->SetHistsNames(firstHistName,lastHistName);
-    QA->SetDraw();
+    QA->SetDraw(kTrue);
     QA->SetPostScriptFile(psFile);
+    QA->SetZones();
+    QA->SetPaperSize();
 //    input->MakeDoc(); 
   }
 
@@ -146,6 +152,11 @@ void DrawDstHist(
   chain->Finish();
   cout <<  " !!! passed chain->Finish" << endl ;
 
+// method to print out list of histograms:
+   Int_t NoHist=0;
+   NoHist = QA->ListHists();
+   cout << " No. of Hist we have == " << NoHist << endl;
+
   if (QABrowser) delete QABrowser;
 //  QABrowser = new TBrowser;
 
@@ -153,5 +164,8 @@ void DrawDstHist(
   delete [] exPsFile;
 //  cout <<  " !!! This is last line of macro" << endl ;
 }
+
+
+
 
 
