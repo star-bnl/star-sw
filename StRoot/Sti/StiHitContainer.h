@@ -81,9 +81,6 @@
 
   \note StiHitContainer does not own the hits that it stores.
 
-  \note See the documentation of the methods push_back() sortHits() and
-  setRefPoint() for performance guaruntees.
-
   \warning  struct MapKeyLessThan is used for ordering the HitMapKey objects.
   For a map, this means that this less-than operation is also used to defined
   equality.  Because this involves operations on doubles that are not
@@ -106,24 +103,20 @@
 
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
+#include "Sti/Base/Filter.h"
+#include "Sti/Base/Factory.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/StiHit.h"
-
-using std::map;
-using std::vector;
-
-class StiKalmanTrackNode;
-class StiHit;
-class StiDetector;
-class Messenger;
+#include "Sti/StiDetector.h"
+#include "Sti/StiKalmanTrackNode.h"
+using namespace std;
 
 ///We define this globally for convenience of users.
-typedef vector<StiHit*> HitVectorType;
 struct VectorAndEnd
 {	
     VectorAndEnd() {theEffectiveEnd=theHitVec.end();}
-    HitVectorType theHitVec;
-    HitVectorType::iterator theEffectiveEnd;
+    vector<StiHit*> theHitVec;
+    vector<StiHit*>::iterator theEffectiveEnd;
 };
 
 ///We define this globally for convenience of users.
@@ -136,174 +129,141 @@ class StiHitContainer : public Named, public Described
 {
 public:
     
-    StiHitContainer(const string & name, const string & description);
-    virtual ~StiHitContainer();
-    ///Set the half-width of the search window in distance along the pad.
-    void setDeltaD(double);
-    ///Set the half-width of the search window in distance along global z.
-    void setDeltaZ(double);
-    ///Return the value of deltaD (cm).
-    double deltaD() const;
-    ///Return the value of deltaZ (cm).
-    double deltaZ() const;
-    ///Provide for drawable derived class(es?)
-    virtual void update();
-    //STL wrappers
-    ///Add a hit to the container.
-    virtual void push_back(StiHit*);
-    ///Return the total number of hits in the container.
-    virtual unsigned int size() const;
-    ///Declare all hits as unused.
-    virtual void reset();
-    ///Clear all hits from the container.
-    virtual void clear();
-    ///Sort all of the hits in the container.
-    virtual void sortHits();
-    ///Ignore hits marked as used (std::stable_partition)
-    void partitionUsedHits();
-    ///Return a const reference to a vector of hits.
-    const HitVectorType& hits(double refangle, double position);
-    ///Return a reference to the vectore of hits, or iterators marking it's bounds
-    HitVectorType& hits(const StiDetector*);
-    HitVectorType::iterator hitsBegin(const StiDetector*);
-    HitVectorType::iterator hitsEnd(const StiDetector*);
-    ///Get all hits into a simple vector
-    HitVectorType getAllHits();
-    ///Return a const reference ot the hit-vector map.
-    const HitMapToVectorAndEndType& hits() const;
-    HitMapToVectorAndEndType& hits();
-    ///Set the reference point to define sub-volume of hits to be accessed.
-    void setRefPoint(StiHit* ref, bool fetchAll=false);
-    ///Set the reference point to define sub-volume of hits to be accessed.
-    void setRefPoint(double position, double refAngle, double y, double z, bool fetchAll=false);
-    ///Set reference point to be the location of the given node
-    void setRefPoint(StiKalmanTrackNode &, bool fetchAll=false);
-    ///Return a boolean that reflects whether there are more hits available in the specified sub-volume.
-    bool hasMore() const;
-    ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
-    StiHit* getCurrentHit(); //get current
-    ///Return a pointer to the StiHit object currently pointed to from the specified sub-volume.
-    StiHit* getHit();  //get current hit and increment
-    ///Return the number of hits satisfying the current reference and search domain.
-    int getHitCandidateCount() const;  
-    ///Add a vertex to the hit-container.
-    void addVertex(StiHit*); //push_back
-    ///Return the number of vertices stored in the container.
-    unsigned int numberOfVertices() const;
-    ///Return a const reference to the a vector of vertices.
-    const HitVectorType& vertices() const;
-protected:
-    Messenger& mMessenger;
-private:
-    //Vertex implementation
-    HitVectorType mvertexvec; //! Container for primary vertices
-    //static StiHitContainer* sinstance;
-    friend ostream& operator<<(ostream&, const StiHitContainer&);
-    HitMapToVectorAndEndType::key_type mkey; //store a map key member to avoid constructor call per hit
-    double mdeltad; //Search limit in local d-direction
-    double mdeltaz; //Search limit in local z-direction
-    //Used to search for points that satisfy users query
-    StiHit* mminpoint;
-    StiHit* mmaxpoint;
-    StiHit mUtilityHit;
-    HitVectorType::iterator mstart;
-    HitVectorType::iterator mstop;
-    //Used to return points that satisfy users query
-    HitVectorType::const_iterator mcurrent;
-    HitVectorType mcandidatevec; //! container of candidate points near to ref
-    HitMapToVectorAndEndType mmap; //! the hit container
+  StiHitContainer(const string & name, const string & description, Factory<StiHit> *factory);
+  virtual ~StiHitContainer();
+  virtual void add(StiHit*);
+  virtual unsigned int size() const;
+  virtual void reset();
+  virtual void clear();
+  //Sort all of the hits in the container.
+  virtual void sortHits();
+  //Ignore hits marked as used (std::stable_partition)
+  void partitionUsedHits();
+  vector<StiHit*> & getHits();
+  vector<StiHit*> & getHits(Filter<StiHit> & filter);
+  vector<StiHit*> & getHits(StiHit& ref, double dY, double dZ, bool fetchAll=false);
+  vector<StiHit*> & getHits(double position, double refAngle, double y, double z, 
+			    double dY, double dZ, bool fetchAll=false);
+  vector<StiHit*> & getHits(StiKalmanTrackNode &, bool fetchAll=false);
+  vector<StiHit*> & getHits(double refangle, double position);
+  vector<StiHit*> & getHits(const StiDetector*);
+  vector<StiHit*>::iterator hitsBegin(const StiDetector*);
+  vector<StiHit*>::iterator hitsEnd(const StiDetector*);
+  const HitMapToVectorAndEndType& hits() const;
+  HitMapToVectorAndEndType& hits();
+  StiHit * getNearestHit(StiHit& ref, double dY, double dZ, bool fetchAll=false);
+  StiHit * getNearestHit(double position, double refAngle, double y, double z, 
+			 double dY, double dZ, bool fetchAll=false);
+  /// Get the hit factory
+  Factory<StiHit> * getHitFactory();
+  /// Get a hit instance from the factory
+  StiHit * getHit();
+ protected:
+  // Utility key used in hit retrieval (avoid constructor call per search)
+  HitMapToVectorAndEndType::key_type _key; 
+  // Utility hit used as a minimum position in searches
+  StiHit _minPoint;
+  // Utility hit used as a maximum position in searches
+  StiHit _maxPoint;
+  // Utility hit used as the reference in searches
+  StiHit _utilityHit;
+  // Utility iterator to mark the position of a hit vector (avoid constructor call per search)
+  vector<StiHit*>::iterator _start;
+  // Utility iterator to mark the position of a hit vector (avoid constructor call per search)
+  vector<StiHit*>::iterator _stop;
+  // Utility hit vector used to return hits  (avoid constructor call per search)
+  vector<StiHit*> _selectedHits; //!
+  // Actual Hit container used for storage of all hits
+  HitMapToVectorAndEndType _map; //!
+  Factory<StiHit> * _hitFactory;
+  // Utility ostream operator
+  friend ostream& operator<<(ostream&, const StiHitContainer&);
+
+ private:
+  StiHitContainer();
 };
 
 inline const HitMapToVectorAndEndType& StiHitContainer::hits() const 
 {
-    return mmap;
+  return _map;
 }
 
 inline HitMapToVectorAndEndType& StiHitContainer::hits()
 {
-    return mmap;
+  return _map;
 }
 
-/*! The distance is specified in STAR units (cm).
-  deltaD corresponds to the distance along the detector plane, e.g.,
-  distance along a TPC padrow.  If one is interested in points that are
-  within +- 7.2 cm from a given value of local y (see StiHit), one would
-  call setDetlaD(7.2).  
-  A call to setDeltaD() sets the value of deltaD until either: \n
-  1) another call to setDeltaD() is made or \n
-  2) the StiHitContainer instance is deleted.\n
+/// Get hits satisfying the given position and search radius.
+/// Position specified with "position,refAngle,y,z"
+/// Search radius specified with dY,dZ
+inline vector<StiHit*> & StiHitContainer::getHits(double position, double refAngle,double y, double z, 
+						  double dY, double dZ, bool fetchAll)
+{
+  _utilityHit.set(position,refAngle,y,z);
+  return getHits(_utilityHit,dY,dZ,fetchAll);
+}
+
+/// Get hits satisfying the given position and search radius specified with a Kalman track node
+inline vector<StiHit*> & StiHitContainer::getHits(StiKalmanTrackNode & node, bool fetchAll)
+{
+  _utilityHit.set(node.getRefPosition(),node.getRefAngle(),node.getY(),node.getZ());
+  return getHits(_utilityHit,node.getWindowY(),node.getWindowZ(), fetchAll);
+}
+
+/*! Get all hits from the specified detector component
+  The values of refangle and position are used to fill an existing
+  HitMapToVectorAndEndTypeKey object.  This object is used to key the retrieval of a vector
+  of hits associated with the specified position.  For more on the
+  definition of refangle and position, please see StiHit documentation.\n
+  A call to hits(double,double) corresponds to the retrieval of an object
+  from an STL map based on a key.  Such a retrieval is guarunteed to be of
+  O(logN) time complexity, where N is the number of keys in the map.  For
+  our practices, N is roughly equal to (TPC) 12*45 + (SVT layer 1) 2*4 +
+  (SVT layer 2) 2*6 + (SVT layer 3) 2*8 + (SSD) 20.
  */
-inline void StiHitContainer::setDeltaD(double val) 
+inline vector<StiHit*>& StiHitContainer::getHits(double refangle, double position)
 {
-    mdeltad = val;
+    _key.refangle = refangle;
+    _key.position = position; 
+    return _map[_key].theHitVec;
 }
 
-/*! The distance is specified in STAR units (cm).
-  deltaZ corresponds to the distance along z in global STAR coordinations.
-  If one is interested in points that are
-  withing +- 7.2 cm from a given value of global z (see StiHit), one would
-  call setDetlaZ(7.2).  
-  A call to setDeltaZ() sets the value of deltaD until either: \n
-  1) another call to setDeltaZ() is made or \n
-  2) the StiHitContainer instance is deleted.\n
- */
-inline void StiHitContainer::setDeltaZ(double val) 
+/// Get all hits from the specified detector component
+inline vector<StiHit*>& StiHitContainer::getHits(const StiDetector* layer)
 {
-    mdeltaz = val;
+    _key.refangle = layer->getPlacement()->getCenterRefAngle();
+    _key.position = layer->getPlacement()->getCenterRadius();
+    return _map[_key].theHitVec;
 }
 
-inline double StiHitContainer::deltaD() const 
+
+inline StiHit * StiHitContainer::getNearestHit(double position, double refAngle, double y, double z, 
+					       double dY, double dZ, bool fetchAll)
 {
-    return mdeltad;
+  _utilityHit.set(position,refAngle,y,z);
+  return getNearestHit(_utilityHit,dY,dZ,fetchAll);
 }
 
-inline double StiHitContainer::deltaZ() const 
-{
-    return mdeltaz;
+inline Factory<StiHit> * StiHitContainer::getHitFactory()
+{  
+  if (_hitFactory) 
+    return _hitFactory;
+  else
+    throw runtime_error("StiHitContainer::getHitFactory() -I- _hitFactory is null");
 }
 
-inline int StiHitContainer::getHitCandidateCount() const
+inline StiHit * StiHitContainer::getHit()
 {
-  return mcandidatevec.size();
+  StiHit * hit = getHitFactory()->getInstance();
+  hit->reset();
+  return hit;
 }
 
-inline bool StiHitContainer::hasMore() const
-{
-    return (mcurrent!=mcandidatevec.end()) ? true : false;
-}
-
-///Return without incrementing.
-inline StiHit* StiHitContainer::getCurrentHit()
-{
-    return (*mcurrent);
-}
-
-///Return and increment.
-inline StiHit* StiHitContainer::getHit()
-{
-    return (*(mcurrent++));
-}
-
-/*! Each vertex can be mapped to a StiHit object
-*/
-inline void StiHitContainer::addVertex(StiHit* val)
-{
-    mvertexvec.push_back(val);
-}
-
-inline unsigned int StiHitContainer::numberOfVertices() const
-{
-    return mvertexvec.size();
-}
-
-/*! The vertices are stored in a single std::vector<StiHit*> object.
- */
-inline const HitVectorType& StiHitContainer::vertices() const
-{
-    return mvertexvec;
-}
-
-ostream& operator<<(ostream&, const HitVectorType&);
+ostream& operator<<(ostream&, const vector<StiHit*>&);
 ostream& operator<<(ostream&, const StiHitContainer&);
+
+
+
+
 
 #endif
