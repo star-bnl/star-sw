@@ -1,5 +1,8 @@
-// $Id: EEmcMCData.cxx,v 1.5 2003/03/22 19:37:33 balewski Exp $
+// $Id: EEmcMCData.cxx,v 1.6 2003/03/26 21:16:59 balewski Exp $
 // $Log: EEmcMCData.cxx,v $
+// Revision 1.6  2003/03/26 21:16:59  balewski
+// swap U & V on Wei-Ming request
+//
 // Revision 1.5  2003/03/22 19:37:33  balewski
 // *** empty log message ***
 //
@@ -273,8 +276,8 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       case 7:
       case 10:
 	switch(plane) {
-	case 3:  det = kEEmcMCSmdVStripId; break;
-	case 1:  det = kEEmcMCSmdUStripId; break;
+	case 1:  det = kEEmcMCSmdVStripId; break; 
+	case 3:  det = kEEmcMCSmdUStripId; break; 
 	default: det = kUnknownId;         break;
 	}
 	break;
@@ -283,8 +286,8 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       case 8:
       case 11:
 	switch(plane) {
-	case 1:  det = kEEmcMCSmdVStripId; break;
-	case 2:  det = kEEmcMCSmdUStripId; break;
+	case 2:  det = kEEmcMCSmdVStripId; break;
+	case 1:  det = kEEmcMCSmdUStripId; break;
 	default: det = kUnknownId;         break;
 	}
 	break;
@@ -293,8 +296,8 @@ EEmcMCData::readEventFromChain(StMaker *myMk)
       case 9:
       case 12:
 	switch(plane) {
-	case 2:  det = kEEmcMCSmdVStripId; break;
-	case 3:  det = kEEmcMCSmdUStripId; break;
+	case 3:  det = kEEmcMCSmdVStripId; break;
+	case 2:  det = kEEmcMCSmdUStripId; break;
 	default: det = kUnknownId;         break;
 	}
 	break;
