@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.20 2000/04/25 18:27:48 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.21 2000/06/05 22:13:53 vanyashi Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.21  2000/06/05 22:13:53  vanyashi
+ * added const needed for tableDescriptor
+ *
  * Revision 1.20  2000/04/25 18:27:48  porter
  * Added flavor and production time as query fields to pass to db-api
  *
@@ -207,7 +210,7 @@ unsigned int numElements = mdescriptor->NumberOfColumns();
    } else {
      char* lengthString=new char[100];
      ostrstream os(lengthString,100);
-     unsigned int* index = mdescriptor->IndexArray(i);
+     const unsigned int* index = mdescriptor->IndexArray(i);
      for(int k=0; k<(int)mdescriptor->Dimensions(i)-1;k++) 
        os<<index[k]<<",";
      os<<index[mdescriptor->Dimensions(i)-1]<<ends;
