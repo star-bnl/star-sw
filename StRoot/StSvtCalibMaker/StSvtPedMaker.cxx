@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.5 2003/07/18 18:31:49 perev Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.6 2003/12/01 00:19:43 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.6  2003/12/01 00:19:43  caines
+ * Version of pedestal maker to go with EMbedding
+ *
  * Revision 1.5  2003/07/18 18:31:49  perev
  * test for nonexistance of XXXReader added
  *
@@ -44,6 +47,8 @@
 #include "StSvtClassLibrary/StSvtHybridPixels2.hh"
 #include "StSvtClassLibrary/StSvtHybridStat.hh"
 #include "StSvtClassLibrary/StSvtHybridStat2.hh"
+#include "StSvtClassLibrary/StSvtConfig.hh"
+#include "StSvtDaqMaker/StSvtHybridDaqPed.hh"
 
 ClassImp(StSvtPedMaker)
 
@@ -61,9 +66,10 @@ ClassImp(StSvtPedMaker)
   fSvtPed   = NULL;   
   fSvtPedRms= NULL;   
   fSvtData  = NULL;    
+  mConfig   = NULL;
 }
 
-//_____________________________________________________________________________
+//______________________________________________________________________________
 StSvtPedMaker::~StSvtPedMaker()
 {
   delete fStat;     
@@ -79,9 +85,10 @@ StSvtPedMaker::~StSvtPedMaker()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::Init()
 {
-  //  cout << "StSvtPedMaker::Init" << endl;
+  //cout << "StSvtPedMaker::Init" << endl;
 
   SetSvtData();
+  getConfig();
   
   SetSvtPed();
 
@@ -89,6 +96,42 @@ Int_t StSvtPedMaker::Init()
 
   return StMaker::Init();
 }
+
+//____________________________________________________________________________
+Int_t StSvtPedMaker::getConfig()
+{
+  mConfig=NULL;
+  St_DataSet *dataSet = NULL;
+  dataSet = GetDataSet("StSvtConfig");
+
+  if (!dataSet)
+    {
+      gMessMgr->Warning() << " No SvtConfig  data set" << endm;
+      dataSet = new St_ObjectSet("StSvtConfig");                                                               
+      AddConst(dataSet);
+      mConfig=NULL;
+    }
+
+  mConfig=((StSvtConfig*)(dataSet->GetObject()));  
+
+  if (!mConfig) {
+    gMessMgr->Warning() << "SvtConfig data set is empty- using raw data"<< endm;
+    mConfig=new StSvtConfig();
+
+    if (!fSvtData) //this should not be used- for backward compatibility
+      {
+	gMessMgr->Warning() << "no raw data -seting default full configuration" << endm;
+	mConfig->setConfiguration("FULL");
+      } else mConfig->setConfiguration(fSvtData->getConfiguration());
+   
+    dataSet->SetObject(mConfig);
+  }
+  
+  
+ 
+  return kStOK;
+}
+
 
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::SetType(pedestalType option)
@@ -107,9 +150,9 @@ Int_t StSvtPedMaker::SetSvtData()
   St_DataSet *dataSet;
 
   dataSet = GetDataSet("StSvtRawData");
-  assert(dataSet);
+  //assert(dataSet);
   fSvtData = (StSvtData*)(dataSet->GetObject());
-  assert(fSvtData);
+  //assert(fSvtData);
 
   return kStOK;
 }
@@ -117,7 +160,7 @@ Int_t StSvtPedMaker::SetSvtData()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::SetSvtPed()
 {
-  fSvtStat = new StSvtHybridCollection(fSvtData->getConfiguration());
+  fSvtStat = new StSvtHybridCollection(mConfig->getConfiguration());
 
   St_DataSet *dataSet;
   dataSet = (TObjectSet*)GetDataSet("StSvtPedestal");
@@ -126,7 +169,7 @@ Int_t StSvtPedMaker::SetSvtPed()
     fPedSet = new TObjectSet("StSvtPedestal");
     AddConst(fPedSet);
 
-    fSvtPed = new StSvtHybridCollection(fSvtData->getConfiguration());
+    fSvtPed = new StSvtHybridCollection(mConfig->getConfiguration());
     fPedSet->SetObject((TObject*)fSvtPed);
     assert(fSvtPed);
   }
@@ -141,12 +184,12 @@ Int_t StSvtPedMaker::SetSvtPed()
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::SetSvtPed2ndOrd()
 {
-  fSvtStat2 = new StSvtHybridCollection(fSvtData->getConfiguration());
+  fSvtStat2 = new StSvtHybridCollection(mConfig->getConfiguration());
 
   fPedSet2 = new TObjectSet("StSvtPedestal2ndOrd");
   AddConst(fPedSet2);    
 
-  fSvtPed2 = new StSvtHybridCollection(fSvtData->getConfiguration());
+  fSvtPed2 = new StSvtHybridCollection(mConfig->getConfiguration());
   fPedSet2->SetObject((TObject*)fSvtPed2);
   assert(fSvtPed2);
 
@@ -163,7 +206,7 @@ Int_t StSvtPedMaker::SetSvtRMSPed()
     fPedRmsSet = new TObjectSet("StSvtRMSPedestal");
     AddConst(fPedRmsSet);
 
-    fSvtPedRms = new StSvtHybridCollection(fSvtData->getConfiguration());
+    fSvtPedRms = new StSvtHybridCollection(mConfig->getConfiguration());
     fPedRmsSet->SetObject((TObject*)fSvtPedRms);
     assert(fSvtPedRms);
   }
@@ -553,20 +596,24 @@ Int_t StSvtPedMaker::WriteRMSToFile(const char* fileName, char* option)
 Int_t StSvtPedMaker::ReadFromFile(const char* fileName)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::ReadFromFile" << endm;
-
+ 
   TFile *file = new TFile(fileName);
+  if (file->IsZombie()){
+    gMessMgr->Info() << "Error reading file:" <<fileName<< endm;
+    return kStOk;
+  }
   char name[20];
-
-  for (int barrel = 1;barrel <= fSvtData->getNumberOfBarrels();barrel++) {
-    for (int ladder = 1;ladder <= fSvtData->getNumberOfLadders(barrel);ladder++) {
-      for (int wafer = 1;wafer <= fSvtData->getNumberOfWafers(barrel);wafer++) {
-    	for (int hybrid = 1;hybrid <= fSvtData->getNumberOfHybrids();hybrid++) {
-
-	  if (fSvtData->getHybridIndex(barrel, ladder, wafer, hybrid) < 0) continue;
+ 
+  for (int barrel = 1;barrel <= mConfig->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mConfig->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mConfig->getNumberOfWafers(barrel);wafer++) {
+    	for (int hybrid = 1;hybrid <= mConfig->getNumberOfHybrids();hybrid++) {
+	  //cout<<"chp1"<<endl;
+	  if (mConfig->getHybridIndex(barrel, ladder, wafer, hybrid) < 0) continue;
 
 	  sprintf(name,"Ped_%d_%d_%d_%d",barrel, ladder, wafer, hybrid);
 	  fPed = (StSvtHybridPed*)file->Get(name);
-
+	  
 	  if (fPed) {
 	    if (fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)))
 	      delete fSvtPed->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid));
@@ -585,28 +632,33 @@ Int_t StSvtPedMaker::ReadFromFile(const char* fileName)
 //_____________________________________________________________________________
 Int_t StSvtPedMaker::ReadRMSFromFile(const char* fileName)
 {
-  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::ReadFromFile" << endm;
+  if (Debug()) gMessMgr->Debug() << "StSvtPedMaker::ReadRMSFromFile" << endm;
 
   TFile *file = new TFile(fileName);
+  if (file->IsZombie()){
+    gMessMgr->Info() << "Error reading file:" <<fileName<< endm;
+    return kStOk;
+    }
   char name[20];
 
-  for (int barrel = 1;barrel <= fSvtData->getNumberOfBarrels();barrel++) {
-    for (int ladder = 1;ladder <= fSvtData->getNumberOfLadders(barrel);ladder++) {
-      for (int wafer = 1;wafer <= fSvtData->getNumberOfWafers(barrel);wafer++) {
-    	for (int hybrid = 1;hybrid <= fSvtData->getNumberOfHybrids();hybrid++) {
+  for (int barrel = 1;barrel <= mConfig->getNumberOfBarrels();barrel++) {
+    for (int ladder = 1;ladder <= mConfig->getNumberOfLadders(barrel);ladder++) {
+      for (int wafer = 1;wafer <= mConfig->getNumberOfWafers(barrel);wafer++) {
+    	for (int hybrid = 1;hybrid <= mConfig->getNumberOfHybrids();hybrid++) {
 
-	  if (fSvtData->getHybridIndex(barrel, ladder, wafer, hybrid) < 0) continue;
+	  if (mConfig->getHybridIndex(barrel, ladder, wafer, hybrid) < 0) continue;
 
 	  sprintf(name,"Ped_%d_%d_%d_%d",barrel, ladder, wafer, hybrid);
 	  fPedRms = (StSvtHybridPixels*)file->Get(name);
-
+ 	  
 	  if (fPedRms) {
-	    if (fSvtPedRms->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid)))
-	      delete fSvtPedRms->at(fSvtPed->getHybridIndex(barrel, ladder, wafer, hybrid));
+	    if (fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid)))
+	      delete fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid));
 	    fSvtPedRms->at(fSvtPedRms->getHybridIndex(barrel, ladder, wafer, hybrid)) = fPedRms;
+	    
 	  }
 	}
-      }
+      } 
     }
   }
 
@@ -655,7 +707,7 @@ Int_t StSvtPedMaker::Finish()
 void StSvtPedMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtPedMaker.cxx,v 1.5 2003/07/18 18:31:49 perev Exp $\n");
+  printf("* $Id: StSvtPedMaker.cxx,v 1.6 2003/12/01 00:19:43 caines Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
