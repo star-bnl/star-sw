@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.8 2003/03/25 18:30:21 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.9 2003/03/26 21:16:42 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.9  2003/03/26 21:16:42  balewski
+// *** empty log message ***
+//
 // Revision 1.8  2003/03/25 18:30:21  balewski
 // towards EEMC daq reader
 //
@@ -104,7 +107,7 @@ Int_t St2eemcFeeRawMaker::Init(){
 //___________________________________________________
 //___________________________________________________
 
-Int_t St2eemcFeeRawMaker::InitRun  (int runumber){
+Int_t St2eemcFeeRawMaker::InitRun  (int runNumber){
 
   StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
   assert(mEvent); // fix your chain or open the right event file
@@ -117,8 +120,10 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runumber){
   sprintf(text," M-C event file, run=%d , created by %s",mEvent->runId(),GetName());
   mrunTT->setComment(text);
   mrunTT->print();  
-  
-    return kStOK;
+ 
+ printf("\n%s::InitRun(%d) list  DB content \n",GetName(),runNumber);
+ meeDb->print();
+  return kStOK;
 }
 
 
@@ -181,16 +186,17 @@ Int_t St2eemcFeeRawMaker::Make(){
       int sub= emcTowerHits[j]->sub()+'A';
       int eta= emcTowerHits[j]->eta()+1;
       float energy=emcTowerHits[j]->energy();
-      //     float energy= emcTowerHits[j]->energy(); // not used
-      // printf("%d sec=%d sub=%c eta=%d adc=%d energy =%g\n", j,sec,sub,eta,adc,energy);
+          
       const StEEmcDbIndexItem1 *dbItem=meeDb->getT(sec,sub,eta);
       assert(dbItem); //  fatal error in EEmcDb-maker
  
       int chan=dbItem->chan;
       int slot=dbItem->crate;        
-      adc=adc+(int)dbItem->ped; // add pedestal for each channel
+      //      adc=adc+(int)dbItem->ped; // add pedestal for each channel
+      // tmp
 
-      //printf("j=%d, sec=%d, sub=%c, eta=%d adc=%d  -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,slot,chan);
+      printf("j=%d, sec=%d, sub=%c, eta=%d rawAdc=%d energy =%g -->crate/chan=%d/%d\n",j,sec,sub,eta,adc,energy,slot,chan);
+
 
       // record this entry
       if(adc<=0) continue;
