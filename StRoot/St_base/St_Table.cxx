@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.85 1999/10/17 23:19:41 fine Exp $ 
+// $Id: St_Table.cxx,v 1.86 1999/10/22 22:53:17 fine Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -38,6 +38,7 @@
 #include "St_tableDescriptor.h"
 #include "StBufferAbc.h"
 
+#include "TGaxis.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TProfile.h"
@@ -2642,6 +2643,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.86  1999/10/22 22:53:17  fine
+// TGaxis include added
+//
 // Revision 1.85  1999/10/17 23:19:41  fine
 // The draft os St_Table::Append has been added
 //
