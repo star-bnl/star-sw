@@ -57,11 +57,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   Bool_t goProj;
   goProj = kFALSE;
 
-  if (finite(s1) != 0 && finite(s2) != 0) 
-  {
-    cout << "Track couldn't be projected!" << endl;
-    return kFALSE;
-  } 
+  if (finite(s1) == 0 && finite(s2) == 0) return kFALSE; // Track couldn't be projected!
 
   if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
                     // first point of track. The smaller solution is taken when both are positive
@@ -112,11 +108,7 @@ Bool_t StEmcPosition::projTrack(StThreeVectorD* atFinal, StThreeVectorD* momentu
   Bool_t goProj;
   goProj = kFALSE;
 
-  if (finite(s1) != 0 && finite(s2) != 0) 
-  {
-    cout << "Track couldn't be projected!" << endl;
-    return kFALSE;
-  } 
+  if (finite(s1) == 0 && finite(s2) == 0) return kFALSE; // Track couldn't be projected!
 
   if (option == 1)  // Selects positive path lenght to project track forwards along its helix relative to
                     // first point of track. The smaller solution is taken when both are positive
