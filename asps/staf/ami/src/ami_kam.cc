@@ -35,11 +35,15 @@
 *:* AMI/COUNT
 *:<---------------------------------------------------------------------
 */
-void kam_ami_count_(){kam_ami_count();}
-int kam_ami_count()
+void kam_ami_count_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
+	STAFCV_T status = ami_count();
+}
+/*------------------------------------*/
+STAFCV_T ami_count()
+{
    printf("AMI:\tObject count = %d \n",ami->count());
    EML_SUCCESS(STAFCV_OK);
 }
@@ -53,11 +57,15 @@ int kam_ami_count()
 *:* AMI/LIST
 *:<---------------------------------------------------------------------
 */
-void kam_ami_list_(){kam_ami_list();}
-int kam_ami_list()
+void kam_ami_list_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
+	STAFCV_T status = ami_list();
+}
+/*------------------------------------*/
+STAFCV_T ami_list()
+{
    printf("%s",ami->list());
    EML_SUCCESS(STAFCV_OK);
 }
@@ -71,28 +79,31 @@ int kam_ami_list()
 *:* AMI/MODULE/RANK
 *:<---------------------------------------------------------------------
 */
-void kam_ami_call_(){kam_ami_call();}
-int kam_ami_call()
+void kam_ami_call_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
-   char* name = ku_gets();	/* PAM name */
-   STRING_SEQ_T tables;		/* table names */
+   char* pname = ku_gets();	/* PAM name */
+   char **tnames;		/* array of TABLE names */
+
+   tnames = new char*[npars-1];
+   for( int np=1;np<npars;np++ ){
+      tnames[np-1] = ku_gets();
+   }
+	STAFCV_T status = ami_call(pname,npars-1,tnames);
+}
+/*------------------------------------*/
+STAFCV_T ami_call(char* name,long ntabs,char **tnames)
+{
+   STRING_SEQ_T tbls;		/* table names */
 
 //- Get table names. -**
-   tables._length = tables._maximum = npars - 1;
-   tables._buffer = new char*[tables._length];
-   for( int i=0;i<tables._length;i++ ){
-      tables._buffer[i] = NULL;
-      char* tbl = ku_gets();
-      tables._buffer[i] = new char[strlen(tbl) +1];
-      strcpy(tables._buffer[i],tbl);
-   }
+   tbls._length = tbls._maximum = ntabs;
+   tbls._buffer = tnames;
 
 //- Tell the AMI Broker to invoke the PAM.
 //- WARNING!!! - PAM status already recorded!!!
-   ami->callInvoker(name, tables);
-   return TRUE;
-// if( !ami->callInvoker(name, tables) ){
+   return ami->callInvoker(name, tbls);
+// if( !ami->callInvoker(name, tbls) ){
 //    EML_ERROR(KAM_METHOD_FAILURE);
 // }
 // EML_SUCCESS(STAFCV_OK);
@@ -108,12 +119,16 @@ int kam_ami_call()
 *:* AMI/MODULE/RANK PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_rank_(){kam_amiinvoker_rank();}
-int kam_amiinvoker_rank()
+void kam_amiinvoker_rank_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
+	STAFCV_T status = amiinvoker_rank(name);
+}
+/*------------------------------------*/
+STAFCV_T amiinvoker_rank(char* name)
+{
    amiInvoker* pam;		/* amiInvoker object */
 
    if( !ami->findInvoker(name, pam) ){
@@ -133,13 +148,17 @@ int kam_amiinvoker_rank()
 *:<---------------------------------------------------------------------
 */
 /*=HACK========================== THIS SUBROUTINE SHOULD BE CHANGED. =*/
-void kam_amiinvoker_show_(){kam_amiinvoker_show();}
-int kam_amiinvoker_show()
+void kam_amiinvoker_show_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
    char* opts = ku_gets();	/* Options */
 
+	STAFCV_T status = amiinvoker_show(name, opts);
+}
+/*------------------------------------*/
+STAFCV_T amiinvoker_show(char* name, char* opts)
+{
    amiInvoker* pam;		/* amiInvoker object */
 
    if( !ami->findInvoker(name, pam) ){
@@ -171,12 +190,16 @@ int kam_amiinvoker_show()
 *:* AMI/MODULE/INIT PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_init_(){kam_amiinvoker_init();}
-int kam_amiinvoker_init()
+void kam_amiinvoker_init_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
+	STAFCV_T status = amiinvoker_init(name);
+}
+/*------------------------------------*/
+STAFCV_T amiinvoker_init(char* name)
+{
    EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
 }
 
@@ -189,12 +212,16 @@ int kam_amiinvoker_init()
 *:* AMI/MODULE/START PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_start_(){kam_amiinvoker_start();}
-int kam_amiinvoker_start()
+void kam_amiinvoker_start_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
+	STAFCV_T status = amiinvoker_start(name);
+}
+/*------------------------------------*/
+STAFCV_T amiinvoker_start(char* name)
+{
    EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
 }
 
@@ -207,12 +234,16 @@ int kam_amiinvoker_start()
 *:* AMI/MODULE/STOP PAM
 *:<---------------------------------------------------------------------
 */
-void kam_amiinvoker_stop_(){kam_amiinvoker_stop();}
-int kam_amiinvoker_stop()
+void kam_amiinvoker_stop_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char* name = ku_gets();	/* PAM name */
 
+	STAFCV_T status = amiinvoker_stop(name);
+}
+/*------------------------------------*/
+STAFCV_T amiinvoker_stop(char* name)
+{
    EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
 }
 
