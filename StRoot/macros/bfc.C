@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.117 1999/11/07 02:26:42 fisyak Exp $
+// $Id: bfc.C,v 1.118 1999/11/11 01:46:37 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -94,11 +94,13 @@ void bfc(const Int_t First,
   Int_t iInit = chain->Init();
   // skip if any
   St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
-  StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
   St_XDFFile *xdf_out = chain->GetXdfOut();
   if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
   if (geant && First > 1) geant->Skip(First-1);
-  if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
+  else {
+    StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
+    if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
+  }
   TBenchmark evnt;
   Int_t iMake = 0, i = First;
  EventLoop: if (i <= Last && iMake < kStEOF) {
