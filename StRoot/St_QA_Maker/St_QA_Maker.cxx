@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.104 2000/07/28 19:25:21 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.105 2000/07/31 19:29:49 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.105  2000/07/31 19:29:49  lansdell
+// primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
+//
 // Revision 1.104  2000/07/28 19:25:21  lansdell
 // added histogram of number of events without a primary vertex
 //
@@ -402,6 +405,7 @@ Int_t St_QA_Maker::Make(){
       for (Int_t i=0; i<vertex->GetNRows(); i++, tt++) {
 	if (tt->iflag==1 && tt->vtx_id==kEventVtxId) {
 	  foundPrimVtx = kTRUE;
+	  mNullPrimVtx->Fill(1);
 	  return StQABookHist::Make();
 	}
       }
@@ -409,7 +413,7 @@ Int_t St_QA_Maker::Make(){
   }
   if (foundPrimVtx == kFALSE) {
     cout << "Error in St_QA_Maker::Make(): no primary vertex found!" << endl;
-    mNullPrimVtx->Fill(0);
+    mNullPrimVtx->Fill(-1);
     return kStOk;
   }
   else {

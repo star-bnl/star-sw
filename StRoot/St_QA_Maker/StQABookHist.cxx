@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.47 2000/07/28 19:25:20 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.48 2000/07/31 19:29:48 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.48  2000/07/31 19:29:48  lansdell
+// primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
+//
 // Revision 1.47  2000/07/28 19:25:20  lansdell
 // added histogram of number of events without a primary vertex
 //
@@ -636,9 +639,6 @@ Int_t StQABookHist::Init(){
   cout << " In StQABookHist::Init  " << endl;
 
 //book histograms --------------
-  mNullPrimVtx = new TH1F("QaNullPrimVtx","num. of events missing primary vertex",5,-1,1);
-  mNullPrimVtx->SetYTitle("# of events");
-
   BookHistEvSum();
   BookHistGlob();
   BookHistPrim();
@@ -722,8 +722,12 @@ TH2F* StQABookHist::QAMH1F(const Text_t* name, const Text_t* title,
 
 }
 //_____________________________________________________________________________
-void StQABookHist::BookHistEvSum(){
-  
+void StQABookHist::BookHistEvSum(){  
+
+  mNullPrimVtx = QAH1F("QaNullPrimVtx","event primary vertex check",40,-2,2);
+  mNullPrimVtx->SetXTitle("has primary vertex? (yes = 1, no = -1)");
+  mNullPrimVtx->SetYTitle("# of events");
+
 // for method MakeEvSum - from table event_summary
 
   m_trk_tot_gd     = QAH1F("QaEvsumTrkGoodDTotal","evsum: num good global tracks over total",55,0.,1.1);
