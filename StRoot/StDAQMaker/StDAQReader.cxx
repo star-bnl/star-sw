@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.9 1999/09/24 01:22:52 fisyak Exp $
+ * $Id: StDAQReader.cxx,v 1.10 1999/12/15 18:40:59 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.10  1999/12/15 18:40:59  perev
+ * Keep undeleted all DAQ wrapper classes
+ *
  * Revision 1.9  1999/09/24 01:22:52  fisyak
  * Reduced Include Path
  *
@@ -60,44 +63,47 @@ StDAQReader::StDAQReader(const char *file)
   fRICHReader = 0;
   fOffset = 0;
   fFile = 0;
-  if (!file || !file[0]) return;
   fEventInfo = new DAQEventInfo;
   memset(fEventInfo,0,sizeof(DAQEventInfo));
   assert(sizeof(DAQEventInfo)==sizeof(EventInfo));
-
-  assert(!open(file));
   setTPCVersion();
+
+  if(file && file[0]) open(file);
 }
 
 //_____________________________________________________________________________
 int StDAQReader::open(const char *file)
 {
-  delete [] fFile;
-  fFile = new char[strlen(file)+1];
-  strcpy(fFile,file);
-
+  assert(file);
+  if (fFd!=(-1) && fFile && strcmp(file,fFile)==0) return 0;
   close();
-  fFd = ::open(file,O_RDONLY);
+  fFile = new char[strlen(file)+1];  strcpy(fFile,file);
+
+  fFd = ::open(fFile,O_RDONLY);
    if (fFd==-1) { 
-     printf("<StDAQReader::open>  %s %s ",file, strerror( errno ) );
+     printf("<StDAQReader::open>  %s %s ",fFile, strerror( errno ) );
      return kStErr;
   }
-   
+  fOffset =0;   
   return 0;  
 }
 //_____________________________________________________________________________
 int StDAQReader::close()
 {
-  delete fEventReader; fEventReader = 0;
+  delete [] fFile; fFile=0;
   if (fFd != (-1)) ::close(fFd);
   fFd = -1;
+  delete fEventReader;	fEventReader 	= 0;  
+
+  if(fTPCReader) 	fTPCReader ->close();  
+//if (fRICHReader) 	fRICHReader->close();  
+  fOffset = -1;
   return 0;
 }
 //_____________________________________________________________________________
 StDAQReader::~StDAQReader()
 {
-  if (fFd != (-1)) ::close(fFd);
-  delete fEventReader;
+  close();
 }
 //_____________________________________________________________________________
 int StDAQReader::readEvent()
@@ -204,36 +210,41 @@ void StTPCReader::Update()
 }
 //_____________________________________________________________________________
 StTPCReader::~StTPCReader()
+{ close();}
+
+//_____________________________________________________________________________
+int StTPCReader::close()
 {
-  delete fTPCImpReader;
-}
+  delete fZeroSuppressedReader;	fZeroSuppressedReader 	= 0;
+  delete fADCRawReader ;	fADCRawReader 		= 0;
+  delete fPedestalReader ;	fPedestalReader 	= 0;
+  delete fPedestalRMSReader;	fPedestalRMSReader 	= 0;
+  delete fGainReader;		fGainReader 		= 0;
+  delete fCPPReader;		fCPPReader 		= 0;
+  delete fBadChannelReader;	fBadChannelReader 	= 0;
+  delete fTPCImpReader;  	fTPCImpReader  		= 0;
+  fSector=-1999;
+  return 0;
+ }
 //_____________________________________________________________________________
 void StTPCReader::setSector(int sector)
 {
   if (sector == fSector) return;
 
-  delete fZeroSuppressedReader;
-  delete fADCRawReader ;
-  delete fPedestalReader ;
-  delete fPedestalRMSReader;
-  delete fGainReader;
-  delete fCPPReader;
-  delete fBadChannelReader;
+  delete fZeroSuppressedReader;	fZeroSuppressedReader 	= 0;
+  delete fADCRawReader ;	fADCRawReader 		= 0;
+  delete fPedestalReader ;	fPedestalReader 	= 0;
+  delete fPedestalRMSReader;	fPedestalRMSReader 	= 0;
+  delete fGainReader;		fGainReader 		= 0;
+  delete fCPPReader;		fCPPReader 		= 0;
+  delete fBadChannelReader;	fBadChannelReader 	= 0;
 
   if (sector == -1) {
    delete fTPCImpReader;
    fTPCImpReader = ::getDetectorReader(fDAQReader->fEventReader,fDAQReader->fTPCVersion);
    fSector = -1999;
+   return;
   }
-
-  fZeroSuppressedReader = 0;
-  fADCRawReader 	= 0;
-  fPedestalReader 	= 0;
-  fPedestalRMSReader 	= 0;
-  fGainReader 		= 0;
-  fCPPReader 		= 0;
-  fBadChannelReader 	= 0;
-  if (sector == -1) return;
 
   fSector = sector;
 

@@ -25,11 +25,13 @@ StDAQMaker::~StDAQMaker()
 {
 delete fDAQReader;
 delete fEvtHddr;
+delete fDAQReaderSet;
 }
 //_____________________________________________________________________________
 Int_t StDAQMaker::Init()
 {
-  fDAQReaderSet = new St_ObjectSet("StDAQReader");
+  if (fDAQReaderSet) return 0;
+  fDAQReaderSet = new St_ObjectSet("StDAQReader",0,kFALSE);
   AddConst(fDAQReaderSet); SetOutput(fDAQReaderSet);	//Declare for output
 
   fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
@@ -44,18 +46,18 @@ Int_t StDAQMaker::Init()
 //_____________________________________________________________________________
 Int_t StDAQMaker::Open(const char*)
 {
-  if (fDAQReader) return 0;
-  printf("*** StDAQMaker::Init:  Open Input file %s ***\n",GetFile());
-  fDAQReader = new StDAQReader(GetFile());
-  fDAQReaderSet->SetObject((TObject*)fDAQReader);
+  if (fDAQReader && fDAQReader->isOpened()) return 0;
+  printf("*** StDAQMaker::Open:  Open Input file %s ***\n",GetFile());
+  if(!fDAQReader) fDAQReader = new StDAQReader();
+  fDAQReader->open(GetFile());
+  fDAQReaderSet->SetObject((TObject*)fDAQReader,kFALSE);
   return 0;
 }
 //_____________________________________________________________________________
 void StDAQMaker::Close(Option_t *)
 {
   Clear();
-  m_ConstSet->Delete();
-  delete fDAQReader; 	fDAQReader	=0;
+  fDAQReader->close();
 }
 //_____________________________________________________________________________
 Int_t StDAQMaker::Skip(int nskip){
@@ -82,7 +84,6 @@ Int_t StDAQMaker::Make(){
   StTPCReader *myTPCReader = fDAQReader->getTPCReader();
   for (int sector =1; sector <=12; sector++)
   {
-    TPCSequence *SeqData = 0;
     unsigned char* padList;
     for (int padRow=1; padRow<=45; padRow++)
     {
