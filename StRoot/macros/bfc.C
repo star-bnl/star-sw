@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.106 1999/09/02 16:13:52 fine Exp $
+// $Id: bfc.C,v 1.107 1999/09/03 01:02:28 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -90,6 +90,25 @@ void bfc(const Int_t First,
   chain->Set_IO_Files(infile,outfile);
 
   chain->Load();
+  if (chain->GetOption(kTCL) && chain->GetOption(kEval)) {
+    St_tcl_Maker *tclMk= (St_tcl_Maker *) chain->GetMaker("tpc_hits");
+    if (tclMk) {
+	tclMk->tclPixTransOn(); //Turn on flat adcxyz table
+	tclMk->tclEvalOn();     //Turn on the hit finder evaluation
+    }
+  }
+  if (chain->GetOption(kTPT)) {
+    St_tpt_Maker *tptMk= (St_tpt_Maker *) chain->GetMaker("tpc_tracks");
+    if (tptMk && chain->GetOption(kMINIDAQ))  tptMk->Set_final(kTRUE);// Turn on the final ntuple.
+    if (tptMk && chain->GetOption(kEval)) {
+	tptMk->tteEvalOn();   //Turn on the tpc evaluation
+	tptMk->tptResOn();    // Turn on the residual table
+    }
+  }
+  if (chain->GetOption(kV0) && chain->GetOption(kEval)) {
+    StV0Maker    *v0Mk = (StV0Maker *) chain->GetMaker("v0");
+    if (v0Mk) 	v0Mk->ev0EvalOn();   //Turn on the ev0 evaluatio
+  }
   {
     TDatime t;
     printf ("QAInfo:Run is started at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
