@@ -123,7 +123,7 @@ public:
     void moveMinusPhi();
 
     ///Set iterators to the detector nearest to the passed StiDetector pointer.
-    void setToDetector(StiDetector* layer);
+    void setToDetector(const StiDetector* layer);
     
     ///Set iterators to the first detector in the radial layer closest to the
     ///specified position.
