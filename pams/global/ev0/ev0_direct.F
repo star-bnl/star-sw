@@ -42,13 +42,14 @@ C   Error conditions    : bad if hit.id .ne. row position
 C<----------------------------------------------------------------------
       IMPLICIT NONE
 #include "ev0_direct.inc"
+#include "math_constants.inc"
 
 
       integer i,j,k,nok,charge,svtnok,tpcnok
-      real pt,rr,raddeg,pi
+      real pt,rr
 
-      pi = acos(-1.0)
-      raddeg = 180./pi
+*      pi = acos(-1.0)
+*      raddeg = 180./pi
       
       nok = 0
       svtnok = 0
@@ -111,10 +112,10 @@ C  set return code to normal success
                   globtrk(nok).r0   = sqrt((svt_hit(k).x(1))**2.
      >                 +(svt_hit(k).x(2))**2.)
                   globtrk(nok).phi0 = atan2( svt_hit(k).x(2), 
-     >                 svt_hit(k).x(1) )*raddeg
+     >                 svt_hit(k).x(1) )*C_DEG_PER_RAD
                   globtrk(nok).z0   = svt_hit(k).x(3)
                   globtrk(nok).psi  = atan2( svt_hit(k).p(2),
-     >                 svt_hit(k).p(1) )*raddeg
+     >                 svt_hit(k).p(1) )*C_DEG_PER_RAD
                   globtrk(nok).tanl = (svt_hit(k).p(3) )/pt
                   globtrk(nok).invpt= 1./pt
                   globtrk(nok).sflag = 1
@@ -166,10 +167,10 @@ C  set return code to normal success
                globtrk(nok).r0   = sqrt((tpc_hit(k).x(1))**2.
      >              +(tpc_hit(k).x(2))**2.)
                globtrk(nok).phi0 = atan2( tpc_hit(k).x(2), 
-     >              tpc_hit(k).x(1) )*raddeg
+     >              tpc_hit(k).x(1) )*C_DEG_PER_RAD
                globtrk(nok).z0   = tpc_hit(k).x(3)
                globtrk(nok).psi  = atan2( tpc_hit(k).p(2),
-     >              tpc_hit(k).p(1) )*raddeg
+     >              tpc_hit(k).p(1) )*C_DEG_PER_RAD
                globtrk(nok).tanl = (tpc_hit(k).p(3) )/pt
                globtrk(nok).invpt= 1./pt
                globtrk(nok).sflag = 1

@@ -259,11 +259,13 @@ C   Created  JAN-1992 S.Margetis
 C   Error conditions : None
 C   Status	     : Tested
 C---------------------------------------------------------------------
+#include "math_constants.inc"
+
       REAL r,xc(2),x(2),trk1(6),trk2(6)
-      REAL xi,yi,dphi,ds,sinl,cosl,bphi,pi,h,dsy,dsx
+      REAL xi,yi,dphi,ds,sinl,cosl,bphi,h,dsy,dsx
       REAL axb,arg,adb
 
-      pi = acos(-1.0)
+C*      pi = acos(-1.0)
 C-----calculate the distance ds and the angle between old/new position
       xi = trk1(1)*cos(trk1(2))
       yi = trk1(1)*sin(trk1(2))
@@ -278,7 +280,8 @@ C-----calculate the distance ds and the angle between old/new position
       elseif( arg .lt. 0 .and. adb .gt. 0) then
          dphi = asin(arg)
       else
-         dphi = 2*pi - acos(adb)
+*         dphi = 2*pi - acos(adb)
+         dphi = C_2PI - acos(adb)
       endif
 
       
@@ -293,11 +296,15 @@ C-----calculate the new track parameters
       trk2(2)=atan2( x(2),x(1) )
       trk2(4)=trk1(4)+dphi
       h = -1.0*trk1(6)
-      bphi = trk1(4) -(h*pi/2.)
-      if( bphi .gt. 2.*pi) then
-         bphi = bphi - 2.*pi
+*      bphi = trk1(4) -(h*pi/2.)
+      bphi = trk1(4) -(h*C_PI_2)
+*      if( bphi .gt. 2.*pi) then
+      if( bphi .gt. C_2PI) then
+*         bphi = bphi - 2.*pi
+         bphi = bphi - C_2PI
       elseif( bphi .lt. 0) then
-         bphi = bphi + 2.*pi
+*         bphi = bphi + 2.*pi
+         bphi = bphi + C_2PI
       endif
      
       dsx = (((x(1)-xi)/r)+cos(bphi))
@@ -308,14 +315,17 @@ C-----calculate the new track parameters
       if( dsy .gt. 0) then
          ds = ( acos(dsx) - bphi)/cosl*h
       elseif( dsx .gt. 0 .and. dsy .lt. 0) then
-         ds = ( 2.*pi + asin(dsy) - bphi)/cosl*h
+*         ds = ( 2.*pi + asin(dsy) - bphi)/cosl*h
+         ds = ( C_2PI + asin(dsy) - bphi)/cosl*h
       elseif( dsx .lt. 0 .and. dsy .lt. 0) then
-         ds = ( (2.*pi-acos(dsx)) - bphi)/cosl*h
+*         ds = ( (2.*pi-acos(dsx)) - bphi)/cosl*h
+         ds = ( (C_2PI-acos(dsx)) - bphi)/cosl*h
       endif
 
       if( ds .gt. 0) then
          if( dsy .gt. 0) then
-         ds = ( 2.*pi + acos(dsx) - bphi)/cosl*h
+*         ds = ( 2.*pi + acos(dsx) - bphi)/cosl*h
+         ds = ( C_2PI + acos(dsx) - bphi)/cosl*h
       elseif( dsx .gt. 0 .and. dsy .lt. 0) then
          ds = (  asin(dsy) - bphi)/cosl*h
       elseif( dsx .lt. 0 .and. dsy .lt. 0) then
