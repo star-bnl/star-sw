@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.27 1999/04/30 13:15:56 fisyak Exp $
+// $Id: St_DataSetIter.cxx,v 1.28 1999/05/14 21:28:30 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.28  1999/05/14 21:28:30  fine
+// Reset - protection against of the ZERO pointer has been introduced
+//
 // Revision 1.27  1999/04/30 13:15:56  fisyak
 // Ad StObject, modification StArray for StRootEvent
 //
@@ -591,7 +594,7 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
     fWorkingDataSet = fRootDataSet;
     if (fNext)
         fNext->Reset();
-    else if (fRootDataSet->GetList() )
+    else if (fRootDataSet && fRootDataSet->GetList() )
         fNext = new TIter(fRootDataSet->GetList() );
   }
   // set the new value of the maximum depth to bypass
