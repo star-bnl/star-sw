@@ -114,7 +114,7 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 // simulation global
 #ifdef FCF_SIM_ON
 static u_int *simout ;
-static struct fcfPixAnnotate pixStruct[183][512] ;
+static fcfPixAnnotate pixStruct[183][512];
 #endif
 
 
@@ -123,9 +123,6 @@ static struct fcfPixAnnotate pixStruct[183][512] ;
 
 #ifndef __ROOT__
 struct fcfPixAnnotate fcfPixA[45][182][512] ;
-#else
-St_fcfPixel *fcfPixA = 0;
-TDataSet    *fcfPixATop = 0;
 #endif
 
 #endif
@@ -1139,43 +1136,15 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		
 		}
 
-#ifdef FCF_ANNOTATE_CLUSTERS
-#ifdef __ROOT__
-		fcfPixA = 0;
-                if (fcfPixATop) {
-                  fcfPixA = (St_fcfPixel *) fcfPixATop->Find(Form("fcfPixA%i_%i",sb,row));
-                  if (! fcfPixA) {
-                    fcfPixA = new St_fcfPixel(Form("fcfPixA%i_%i",sb,row),1000);
-                    fcfPixATop->Add(fcfPixA);
-		  }
-		}
-#endif
+#if defined(FCF_ANNOTATE_CLUSTERS) && !defined(__ROOT__)
 		for(i=1;i<=182;i++) {
 			for(j=0;j<512;j++) {
 				if(pixStruct[i][j].adc) {
-#ifndef __ROOT__
 					fcfPixA[row-1][i-1][j] = pixStruct[i][j] ;
-#else
-					if(fcfPixA) {
-					fcfPixel_st pix;
-
-					pix.pad = i;
-					pix.tbin = j;
-					pix.adc  = pixStruct[i][j].adc;
-					pix.cl_id = pixStruct[i][j].cl_id;
-					pix.id_simtrk = pixStruct[i][j].id_simtrk;
-					fcfPixA->AddAt(&pix);
-
-					}
-
-#endif
 				}
 			}
 		}
-
 #endif
-
-
 		}
 
 #endif	// FCF_SIM_ON!
