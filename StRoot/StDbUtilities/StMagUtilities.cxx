@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.48 2004/03/16 20:44:00 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.49 2004/04/01 22:19:18 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,11 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.49  2004/04/01 22:19:18  jhthomas
+ * Update Omega Tau parameters to Run IV values.
+ * Increase speed of space charge calculation with new Relaxation Algorithm.
+ * Start to build 3D space charge capabilities.  This is a work in progress.
+ *
  * Revision 1.48  2004/03/16 20:44:00  jhthomas
  * Various minor bug fixes.  Add new (faster) 2D Bfield distortion routines.
  * Improve spacecharge calculation so it is faster.
@@ -215,19 +220,19 @@ Bit counting starts at 0 for the chain option flag (...,3,2,1,0) <br>
 <p>
 
 To do:  <br>
-- Finish pulling parameters out of DB rather than from #define. 
-- Use Magnet current rather than MagFactor
 - Add a routine to distort the track if we are given a Geant Vector full of points == a track
 - Add simulated B field map in the regions where the field is not mapped.
+- Tilted CM and endcap parameters from DB
+- Spacecharge blob at negative X parameters from DB
 
 */
 
+#include "StMagUtilities.h"
 #include "TFile.h"
 #include "TCanvas.h"
-#include "TMatrixD.h"
+#include "TMatrix.h"
 #include "TGraphErrors.h"
 #include "TF1.h"
-#include "StMagUtilities.h"
 #include "StTpcDb/StTpcDb.h"
 #include "tables/St_MagFactor_Table.h"
 #include "StDetectorDbMaker/StDetectorDbSpaceCharge.h"
@@ -335,13 +340,6 @@ void StMagUtilities::GetShortedRing ()
   Resistor = shortTable->resistor ;   // M-Ohm value of added external resistor to resistor chain 
 }
 
-/* Wish list for when the DB code is updated.
-  fShortedRing   =  StDetectorDbFieldCageShort::instance() ; //copy comments
-  Ring           =  fShortedRing->getRing();
-  Resistor       =  fShortedRing->getResistor();
-  cout << "Ring = " << Ring << "  Resistor = " << Resistor << endl ;
-}
-*/
 
 //________________________________________
 
@@ -426,8 +424,15 @@ void StMagUtilities::CommonStart ( Int_t mode )
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
   // Instead, we will use scaled values from Amendolia et al NIM A235 (1986) 296 and include their
   // characterization of the electron drift velocity tensor with different omega-tau's in different directions.
-  Float_t TensorV1    =  1.34 ;  // Drift velocity tensor term: in the ExB direction
-  Float_t TensorV2    =  1.11 ;  // Drift velocity tensor term: direction perpendicular to Z and ExB
+  // Float_t TensorV1    =  1.34 ;  // Drift velocity tensor term: in the ExB direction
+  // Float_t TensorV2    =  1.11 ;  // Drift velocity tensor term: direction perpendicular to Z and ExB
+  // Gene Van Buren's work with the shorted ring and/or shifted GG values has determined the following numbers in STAR
+  // Float_t TensorV1    =  1.36 ;  // Drift velocity tensor term: in the ExB direction
+  // Float_t TensorV2    =  1.11 ;  // Drift velocity tensor term: direction perpendicular to Z and ExB
+  // Gene's error bars are +- 0.03 on the term in the ExB diretion and +-0.06 in the perpendicular direction
+  // To reinforce the fact that these numbers are only good to 2 or 3 percent I am going to round off Gene's numbers
+  Float_t TensorV1    =  1.35 ;  // Drift velocity tensor term: in the ExB direction
+  Float_t TensorV2    =  1.10 ;  // Drift velocity tensor term: direction perpendicular to Z and ExB
 
   StarMagE   =  TMath::Abs((CathodeV-GG)/TPC_Z0) ;         // STAR Electric Field (V/cm) Magnitude
   OmegaTau   =  -10.0 * B[2] * StarDriftV / StarMagE ;     // B in kGauss, note the sign of B is important 
@@ -618,7 +623,7 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
 	  Xprime1[i] = Xprime2[i];
       }
   }
-
+    
   if (mDistortionMode & kIFCShift) { 
       UndoIFCShiftDistortion ( Xprime1, Xprime2 ) ;
       for (unsigned int i=0; i<3; ++i) {
@@ -638,6 +643,12 @@ void StMagUtilities::UndoDistortion( const Float_t x[], Float_t Xprime[] )
       for (unsigned int i=0; i<3; ++i) {
 	  Xprime1[i] = Xprime2[i];
       }
+  }
+
+  if ((mDistortionMode & kSpaceCharge) && (mDistortionMode & kSpaceChargeR2)) {
+      cout << "StMagUtilities ERROR **** Do not use kSpaceCharge and kspaceChargeR2 at the same time" << endl ;
+      cout << "StMagUtilities ERROR **** These routines have overlapping functionality." << endl ;
+      exit(1) ;
   }
 
   if (mDistortionMode & kShortedRing) { 
@@ -758,9 +769,9 @@ void StMagUtilities::Undo2DBDistortion( const Float_t x[], Float_t Xprime[] )
 }
 
 
-/// B field distortions (Table) - calculate the distortions due to the shape of the B field
+/// 3D - B field distortions (Table) - calculate the distortions due to the shape of the B field
 /*! 
-    Distortions are calculated and then stored in a table.  This method requires
+    Distortions are calculated in 3D and then stored in a table.  This method requires
     about 1 minute of CPU time to generate the table but it is very fast after the
     table has been created.  Use it when you have a large number of points ( > 10,000 ).
 */
@@ -846,14 +857,15 @@ void StMagUtilities::FastUndoBDistortion( const Float_t x[], Float_t Xprime[] )
 }
 
 
-/// 2D - faster- B field distortions (Table) - calculate the distortions due to the shape of the B field
+/// 2D - faster - B field distortions (Table) - calculate the distortions due to the shape of the B field
 /*! 
     Distortions are calculated and then stored in a table.  This calculation uses a 2D
     magnetic field which is phi symmetric.  The real 3D field has a slight twist that
-    is not important and can be accounted for in the Twist distortion, anyway.  I recommend
-    using this faste version (JT). This method requires about 10 seconds of CPU time to 
-    generate the table but it is very fast after the table has been created.  
-    Use it when you have a large number of points ( > 10,000 ).
+    may be important for high precision work.  I recommend using this faster version (JT) 
+    if you don't care about distortions smaller than 200 microns. 
+    This method requires about 10 seconds of CPU time to generate the table but it is 
+    very fast after the table has been created. Use it when you have a large number 
+    of points ( > 10,000 ).
 */
 void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] )
 {
@@ -947,6 +959,11 @@ void StMagUtilities::FastUndo2DBDistortion( const Float_t x[], Float_t Xprime[] 
 
 
 /// Twist distortion
+/*!
+    Remove the effects of a simple "twist" of the TPC in the magnet.  If there is
+    an angle between the E and B fields, there will be a distortion in the recorded
+    tracks.  This routine takes out that distortion.
+ */
 void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
 {
 
@@ -976,6 +993,12 @@ void StMagUtilities::UndoTwistDistortion( const Float_t x[], Float_t Xprime[] )
 #define  NZDRIFT       15               // Dimension of the vector to contain ZDriftArray
 
 /// Pad row 13 distortion
+/*!
+    Remove the effect of the mechanical imperfections between the inner sectors
+    and the outer sectors.  There is a gap between the sectors that allow E field
+    lines to leak out of the anode and gated grid region.  HHWieman has modelled this
+    effect and his solution is used to remove the distortions.
+ */
 void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
 {
 
@@ -1067,6 +1090,15 @@ void StMagUtilities::UndoPad13Distortion( const Float_t x[], Float_t Xprime[] )
 
 
 /// Clock distortion
+/*!
+    The East endwheel of the TPC and the West endwheel of the TPC are not perfectly aligned.
+    They were inserted separately into the TPC field cage tube.  They are aligned at the outer
+    diameter (4 meters) to within about 1 mm.  This causes a slight misalingment of the relative
+    coordinate systems.  By convention, we assume that one end is perfect and attribute all of 
+    the error to a rotation of the other end ... however, the method (and the DB) allow you to
+    input a rotation angle for each end, if you wish.  Note: this is a coordinate transformation
+    and not a distortion correction.  It is here for historical reasons.
+ */
 void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
 {
 
@@ -1089,6 +1121,9 @@ void StMagUtilities::UndoClockDistortion( const Float_t x[], Float_t Xprime[] )
 
 
 /// Membrane distortion
+/*!
+
+ */
 void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[] )
 {
 
@@ -1122,6 +1157,9 @@ void StMagUtilities::UndoMembraneDistortion( const Float_t x[], Float_t Xprime[]
 
 
 /// Endcap distortion
+/*!
+
+ */
 void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
 {
 
@@ -1154,10 +1192,14 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[], Float_t Xprime[] )
 //________________________________________
 
 
+/// IFC Shift Distortion
 /*! 
-  IFC distortion
-  Electrostatic equations solved in Rectangular Coodinates by Jim Thomas
-  Updated to work in cylindrical coordinates by Jamie Dunlop  11/01/2001
+    The Inner field cage of the TPC is not perfectly aligned with the outer field cage 
+    of the TPC.  They are shifted along the Z axis by about 1 mm.  This causes a tilting 
+    of the equi-potential lines inside the TPC and therefore a DCA error at the vertex.  
+    The distortion is anti- symmetric in Z. 
+    Electrostatic equations solved in Rectangular Coodinates by Jim Thomas
+    Updated to work in cylindrical coordinates by Jamie Dunlop  11/01/2001
 */
 void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[] )
 { 
@@ -1178,6 +1220,8 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 	      r = eRadius[j] ;
 	      shiftEr[i][j] = 0.0 ; 	    
               if (r < IFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+              if (r > OFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+              if (z > TPC_Z0)    continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
 	      Double_t IntegralOverZ = 0.0 ;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
@@ -1227,10 +1271,12 @@ void StMagUtilities::UndoIFCShiftDistortion( const Float_t x[], Float_t Xprime[]
 //________________________________________
 
 
+/// Space Charge Correction 
 /*!
-  Space Charge distortion using a uniform distribution of charge per unit volume
-  Electrostatic equations solved by Jamie Dunlop  11/01/2001
-  Updated to include linear increase of charge from endcap to CM by Jim Thomas 12/18/2001
+    Space Charge distortion assuming a uniform distribution of charge per unit volume
+    in the TPC.  We now know that this is not a good assumption but the code is here
+    for legacy reasons.  Electrostatic equations solved by Jamie Dunlop  11/01/2001
+    Updated to include linear increase of charge from endcap to CM by Jim Thomas 12/18/2001
 */
 void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprime[] )
 { 
@@ -1251,6 +1297,8 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 	      r = eRadius[j] ;
 	      spaceEr[i][j] = 0.0 ; 
               if (r < IFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+              if (r > OFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+              if (z > TPC_Z0)    continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
 	      Double_t IntegralOverZ = 0.0 ;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
@@ -1312,21 +1360,25 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
 //________________________________________
 
 
+/// 1/R**2 SpaceCharge Distortion
 /*!
-  Space Charge distortion using space charge from a real event (~1/R**2 distribution)
-  Electrostatic equations solved by relaxtion.  Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
-  Charge density has 1/R**2 distribution but also includes linear increase of charge from endcap to CM 
+  Space Charge distortion using space charge from a real event.  Any charge distribution can 
+  be simulated by this method.  However, the best charge distribution is Howard's fit to 
+  HiJet events.  It is approximately independent due to the Bjorken Plateau a mid-rapidity.  The 
+  radial distribution is approximately 1/R**2, however we use a better parameterization in the code.
+  Many different charge distributions are hidden in the comments of the code.  All candidate distributions
+  have been integrated over Z to simulate the linear increase of space charge in Z due to the slow 
+  drift velocity of the ions.  Electrostatic equations solved by relaxtion.  
+  Original work by H. H. Wieman, N. Smirnov, and J. Thomas 
 */
 void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xprime[] )
 { 
   
-  const Int_t     ROWS        =  129 ;  // (2**n + 1)    old = 32
-  const Int_t     COLUMNS     =  257 ;  // (2**m + 1)    old = 43
-  const Int_t     ITERATIONS  =  100 ;  // old = 1000 
+  const Int_t     ROWS        =  129 ;  // (2**n + 1)    
+  const Int_t     COLUMNS     =  257 ;  // (2**m + 1) 
+  const Int_t     ITERATIONS  =  100 ;  // About 0.1 seconds per iteration
   const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
-  const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
-  const Double_t  Four        =  2.0 + 2.0*Ratio ;
 
   Float_t   Er_integral, Ephi_integral ;
   Double_t  r, phi, z ;
@@ -1335,8 +1387,8 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 
   if ( DoOnce == 0 )
     {
-      TMatrixD  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
-      TMatrixD  ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
+      TMatrix  ArrayV(ROWS,COLUMNS), Charge(ROWS,COLUMNS) ;
+      TMatrix  ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
       Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
       //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.      
 
@@ -1352,6 +1404,7 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      Rlist[i] = Radius ;
 	    }
 	}      
+
       for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
 	{
 	  Double_t zed = j*GRIDSIZEZ ;
@@ -1377,63 +1430,9 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      // Charge(i,j) = zterm / ( ( 1/IFCRadius - 1/OFCRadius) * ( Radius*Radius*Radius ) ) ; 
 	    } // All cases normalized to have same total charge as the Uniform Charge case == 1.0
 	}
-      //Solve Poisson's equation in cylindrical coordinates by relaxation technique
-      //Allow for different size grid spacing in R and Z directions
-      //Use a binary expansion of the matrix to speed up the solution of the problem
-      for ( Int_t one = 32 ; one > 0 ; one/=2 )
-	{
-	  for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
-	    {
-	      for ( Int_t j = one ; j < COLUMNS-1 ; j+=one )  
-		{
-		  for ( Int_t i = one ; i < ROWS-1 ; i+=one )  
-		    {
-		      Float_t Radius = IFCRadius + i*GRIDSIZER ;
-		      ArrayV(i,j) = ( ArrayV(i+one,j) + ArrayV(i-one,j) + Ratio*ArrayV(i,j+one) + Ratio*ArrayV(i,j-one) ) 
-			+ ArrayV(i+one,j)*GRIDSIZER*one/(2*Radius) - ArrayV(i-one,j)*GRIDSIZER*one/(2*Radius)
-			+ Charge(i,j)*GRIDSIZER*GRIDSIZER*one*one  ;
-		      ArrayV(i,j) *=  1.0/Four ;
-		      if ( k == ITERATIONS && one > 1 ) 
-			{ 
-			  ArrayV(i+one/2,j)       = ( ArrayV(i+one,j) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i+one/2,j+one/2) = ( ArrayV(i+one,j+one) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i+one/2,j-one/2) = ( ArrayV(i+one,j-one) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i,j+one/2)       = ( ArrayV(i,j+one) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i,j-one/2)       = ( ArrayV(i,j-one) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i-one/2,j)       = ( ArrayV(i-one,j) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i-one/2,j+one/2) = ( ArrayV(i-one,j+one) + ArrayV(i,j) ) / 2 ;
-			  ArrayV(i-one/2,j-one/2) = ( ArrayV(i-one,j-one) + ArrayV(i,j) ) / 2 ;
-			}
-		    }
-		}
-	    }
-	}      
-      //Differentiate V(r) and solve for E(r) using special equations for the first and last row
-      //Integrate E(r)/E(z) from point of origin to pad plane
-      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
-	{	  
-	  // Differentiate in R
-	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
-	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
-	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
-	  // Integrate over Z
-	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
-	    {
-	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
-	      EroverEz(i,j) = 0.0 ;
-	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
-		{ 
-		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
-		  if ( Index != 4 )  Index = 4; else Index = 2 ;
-		}
-	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
-	      if ( Index == 2 ) EroverEz(i,j)  +=  
-				  (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
-				      (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
-	    }
-	}
+
+      PoissonRelaxation( ArrayV, Charge, EroverEz, ROWS, COLUMNS, ITERATIONS ) ;
+
       //Interpolate results onto standard grid for Electric Fields
       Int_t ilow=0, jlow=0 ;
       Float_t save_Er[2] ;	      
@@ -1454,7 +1453,9 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 	      spaceR2Er[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
 	    }
 	}
+
       DoOnce = 1 ;      
+
     }
   
   r      =  TMath::Sqrt( x[0]*x[0] + x[1]*x[1] ) ;
@@ -1493,11 +1494,13 @@ void StMagUtilities::UndoSpaceChargeR2Distortion( const Float_t x[], Float_t Xpr
 //________________________________________
 
 
+/// Shorted Ring Distortion
 /*!
-  Shorted Ring Distortion 
-  This codes assumes that the shorted ring is on the EAST end of the TPC.
-  Electrostatic Equations from SN0253 by Howard Wieman.
-  Note that we use Howards funny coordinate system where Z==0 at the GG.
+    This codes assumes that the shorted ring is on the EAST end of the TPC.  If additional shorts
+    develop in the future, the code should be modified to take this into account by communicating
+    with the TPC conditions database.
+    Electrostatic Equations from SN0253 by Howard Wieman.
+    Note that we use Howard's funny coordinate system where Z==0 at the GG.
 */
 void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprime[] )
 { 
@@ -1533,6 +1536,8 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 	      r = eRadius[j] ;
 	      shortEr[i][j] = 0.0 ; 	    
               if (r < IFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+              if (r > OFCRadius) continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
+              if (z > TPC_Z0)    continue; //VP defence against divergency. Not sure if correct.  JT - Yes, OK.
 	      Double_t IntegralOverZ = 0.0 ;
 	      for ( Int_t n = 1 ; n < Nterms ; ++n ) 
 		{
@@ -1595,118 +1600,168 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
 //________________________________________
 
   
+/// Tilted Endcap and Central Membrane Distortion
 /*!
-  Tilted Endap and Central Membrane 
-  Electrostatic equations solved by relaxtion.  Original work by Jim Thomas, 1/5/2004
+    Electrostatic equations solved by relaxation.  Original work by Jim Thomas, 1/5/2004
 */
 void StMagUtilities::UndoTiltDistortion( const Float_t x[], Float_t Xprime[] )
 { 
+     
+  const Int_t   ROWS        =   97  ;  // ( 3 * 2**n + 1 )  eg. 13, 25, 49, 97, 193 
+  const Int_t   COLUMNS     =  193  ;  // ( 3 * 2**m + 1 )  eg. 13, 25, 49, 97, 193
+  const Int_t   PHISLICES   =   12  ;  // ( 3 * 2**k )      et. 6, 12, 24, 48
+  const Int_t   ITERATIONS  =  100  ;  
+  const Float_t GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Float_t GRIDSIZEPHI =  2.0*TMath::Pi() / PHISLICES ;
+  const Float_t GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
 
-  const Int_t     ROWS        =   31  ;
-  const Int_t     COLUMNS     =   43  ;
-  const Int_t     ITERATIONS  =  1000 ;
-  const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
-  const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
-  const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
-  const Double_t  Four        =  2.0 + 2.0*Ratio ;
+  TMatrix  *ArrayofArrayV[PHISLICES], *ArrayofEroverEz[PHISLICES], *ArrayofEPhioverEz[PHISLICES] ;
+  TMatrix  *ArrayofCharge[PHISLICES] ;
 
-  Float_t   Er_integral, Ephi_integral ;
-  Double_t  r, phi, z ;
+  Float_t  Er_integral, Ephi_integral ;
+  Float_t  r, phi, z ;
+  Float_t  Rlist[ROWS], Zedlist[COLUMNS] , Philist[PHISLICES] ;
 
   static Int_t DoOnce = 0 ;
 
   if ( DoOnce == 0 )
     {
-
-      TMatrixD  ArrayV(ROWS,COLUMNS), ArrayE(ROWS,COLUMNS), EroverEz(ROWS,COLUMNS) ;
-      Float_t   Rlist[ROWS], Zedlist[COLUMNS] ;
       
-      //Fill boundary of arrays with error potentials and "volume" of array with approximate solutions to aid convergence. 
-      for ( Int_t i = 0 ; i < ROWS ; i++ )  
+      for ( Int_t i = 0 ; i < PHISLICES ; i++ )
 	{
-	  Double_t Radius = IFCRadius + i*GRIDSIZER ;
-	  Rlist[i] = Radius ;
-	  for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions *and* candidate solution
+	  ArrayofArrayV[i]     =  new TMatrix(ROWS,COLUMNS) ;
+	  ArrayofCharge[i]     =  new TMatrix(ROWS,COLUMNS) ;
+	  ArrayofEroverEz[i]   =  new TMatrix(ROWS,COLUMNS) ;
+	  ArrayofEPhioverEz[i] =  new TMatrix(ROWS,COLUMNS) ;
+	}
+
+      for ( Int_t k = 0 ; k < PHISLICES ; k++ )
+	{
+	  TMatrix &ArrayV    =  *ArrayofArrayV[k] ;
+	  TMatrix &Charge    =  *ArrayofCharge[k] ;
+	  Philist[k] = k * GRIDSIZEPHI ;
+	  //Fill arrays with initial conditions.  V on the boundary and Charge in the volume.
+	  for ( Int_t i = 0 ; i < ROWS ; i++ )  
 	    {
-  	      Double_t zed = j*GRIDSIZEZ ;
-	      Zedlist[j]   = zed ;
-	      ArrayV(i,j)  = Radius*zed/(TPC_Z0*OFCRadius) ; // INsert linearly decreasing trial solution, too.
-	      // Force zero error potential on the IFC
-	      if ( i == 0 ) ArrayV(i,j) = 0.0 ;  
-	      // Force zero error potential on CM
-	      if ( j == 0 && ( i != 0 && i != (ROWS-1) ) ) ArrayV(i,j) = 0.0 ;  
-	      // Force zero error potential on OFC
-	      if ( i == (ROWS-1) ) ArrayV(i,j) = 0.0 ;
-            }
+	      Rlist[i] = IFCRadius + i*GRIDSIZER ;
+	      for ( Int_t j = 0 ; j < COLUMNS ; j++ )  ArrayV(i,j) = 0 ;
+	      for ( Int_t j = 0 ; j < COLUMNS ; j++ )  // Fill Vmatrix with Boundary Conditions
+		{
+		  Zedlist[j] = j * GRIDSIZEZ ; // West end only for now
+		  ArrayV(i,j) = 0.0 ; // Watch definition of k versus sector number ... could be confusing.
+
+		  if ( i == 0 )  // Shorted ring for JT test
+		    {
+		      if ( (float)j/(float)(COLUMNS-1) < 0.934 )
+			{
+			  //ArrayV(i,j) = StarMagE*Pitch*GridRatio*(float)j/(float)(COLUMNS-1) ;
+			  ArrayV(i,j) = 0.0 ;  // with external resistor   
+			}
+		      else
+			{
+			  //ArrayV(i,j) = StarMagE*Pitch*GridRatio*((float)j/(float)(COLUMNS-1)-1) ;
+			  ArrayV(i,j) = StarMagE*1.15 * -1 ; // with external resistor
+			}
+		    }
+
+                  /*
+		  // Begin Tilted Endcap
+		  if ( j == (COLUMNS-1) ) ArrayV(i,j)  = 0.1*StarMagE*TMath::Sin(Philist[k])*Rlist[i]/OFCRadius ; 
+		  // Force zero error on IFC (for the tilted endcap problem)
+		  if ( i == 0 && ( j != 0 && j != (COLUMNS-1) ) ) ArrayV(i,j) = 0.0 ;
+		  if ( i == 0 && ( j == 0 || j == (COLUMNS-1) ) ) ArrayV(i,j) /= 2.0 ;
+		  // Force zero error potential on CM
+		  if ( j == 0 && ( i != 0 && i != (ROWS-1) ) ) ArrayV(i,j) = 0.0 ;  
+		  // Force zero error potential on OFC
+		  if ( i == (ROWS-1) && ( j != 0 && j != (COLUMNS-1) ) ) ArrayV(i,j) = 0.0 ;
+		  if ( i == (ROWS-1) && ( j == 0 || j == (COLUMNS-1) ) ) ArrayV(i,j) /= 2.0 ;
+		  // End Tilted Endcap
+		  */
+		  /*
+		  // Begin Tilted CM
+		  const Float_t GRIDSIZEPHI =  2.0*TMath::Pi() / PHISLICES ;
+		  if ( j == 0 ) ArrayV(i,j)  = 0.1*StarMagE*TMath::Sin(Philist[k])*Rlist[i]/OFCRadius ; 
+		  // Force zero error on IFC (for the tilted CM problem)
+		  if ( i == 0 && ( j != 0 && j != (COLUMNS-1) ) ) ArrayV(i,j) = 0.0 ;
+		  if ( i == 0 && ( j == 0 || j == (COLUMNS-1) ) ) ArrayV(i,j) /= 2.0 ;
+		  // Force zero error potential on the endcap
+		  if ( j == COLUMNS-1 && ( i != 0 && i != (ROWS-1) ) ) ArrayV(i,j) = 0.0 ;  
+		  // Force zero error potential on OFC
+		  if ( i == (ROWS-1) && ( j != 0 && j != (COLUMNS-1) ) ) ArrayV(i,j) = 0.0 ;
+		  if ( i == (ROWS-1) && ( j == 0 || j == (COLUMNS-1) ) ) ArrayV(i,j) /= 2.0 ;
+		  // End Tilted Endcap
+		  */
+		}
+	    }      
+	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )    
+	    {
+	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ ) 
+		{ 
+		  Charge(i,j) = 0.0 ;
+		}
+	    }
+	  
 	}      
       
-      //Solve Laplace's equation in cylindrical coordinates by relaxation technique
+      //Solve Poisson's equation in 3D cylindrical coordinates by relaxation technique
       //Allow for different size grid spacing in R and Z directions
-
-      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
-	{
-	  for ( Int_t j = 1 ; j < COLUMNS-1 ; j++ )  
-	    {
-	      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  
-		{
-		  Double_t Radius = IFCRadius + i*GRIDSIZER ;
-		  ArrayV(i,j) = ( ArrayV(i+1,j) + ArrayV(i-1,j) + Ratio*ArrayV(i,j+1) + Ratio*ArrayV(i,j-1) ) 
-		                + ArrayV(i+1,j)*GRIDSIZER/(2*Radius) - ArrayV(i-1,j)*GRIDSIZER/(2*Radius)  ;
-		  ArrayV(i,j) *=  1.0/Four ;
-		}
-	    } 
-	}
-
-      //Differentiate V(r) and solve for E(r) using special equations for the first and last row
-      //Integrate E(r)/E(z) from point of origin to pad plane
-
-      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
-	{	  
-	  // Differentiate in R
-	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
-	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
-	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
-	  // Integrate over Z
-	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
-	    {
-	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
-	      EroverEz(i,j) = 0.0 ;
-	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
-		{ 
-		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,(COLUMNS-1)+j-k)/(-1*StarMagE) ;
-		  if ( Index != 4 )  Index = 4; else Index = 2 ;
-		}
-	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
-	      if ( Index == 2 ) EroverEz(i,j)  +=  
-				  (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
-				      (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
-	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
-	    }
-	}
+      
+      Poisson3DRelaxation( ArrayofArrayV, ArrayofCharge, ArrayofEroverEz, ArrayofEPhioverEz, ROWS, COLUMNS, PHISLICES, ITERATIONS ) ;
 
       //Interpolate results onto standard grid for Electric Fields
 
-      Int_t ilow=0, jlow=0 ;
-      Float_t save_Er[2] ;	      
-      for ( Int_t i = 0 ; i < neZ ; ++i ) 
+      const Int_t   ORDER = 1 ;                    // Linear interpolation
+      Int_t   ilow = 0, jlow = 0, klow = 0 ;
+      Float_t save_Er[ORDER+1], saved_Er[ORDER+1] ;
+      Float_t save_Ephi[ORDER+1], saved_Ephi[ORDER+1] ;
+
+      for ( Int_t k = 0 ; k < nePhi ; k++ )
 	{
-	  // Apply correction to EAST end of TPC, only.  Return 0 if on the West end.
-	  z = TMath::Abs(eZList[i]) ;
-	  for ( Int_t j = 0 ; j < neR ; ++j ) 
-	    { // Linear interpolation
-	      r = eRadius[j] ;
-	      Search( ROWS,   Rlist, r, ilow ) ;  // Note switch - R in rows and Z in columns
-	      Search( COLUMNS, Zedlist, z, jlow ) ;
-	      if ( ilow < 0 ) ilow = 0 ;  // artifact of Root's binsearch, returns -1 if out of range
-	      if ( jlow < 0 ) jlow = 0 ;   
-	      if ( ilow + 1  >=  ROWS - 1 ) ilow =  ROWS - 2 ;	      
-	      if ( jlow + 1  >=  COLUMNS - 1 ) jlow =  COLUMNS - 2 ; 
-	      save_Er[0] = EroverEz(ilow,jlow) + (EroverEz(ilow,jlow+1)-EroverEz(ilow,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
-	      save_Er[1] = EroverEz(ilow+1,jlow) + (EroverEz(ilow+1,jlow+1)-EroverEz(ilow+1,jlow))*(z-Zedlist[jlow])/GRIDSIZEZ ;
-	      tiltEr[i][j] = save_Er[0] + (save_Er[1]-save_Er[0])*(r-Rlist[ilow])/GRIDSIZER ;
-	      if ( eZList[i] > 0 ) tiltEr[i][j] = 0.0 ;  // Force West end to zero !!!!
+	  phi = ePhiList[k] ;
+	  if ( phi >= 2*TMath::Pi() ) phi = phi - 2*TMath::Pi() ;
+	  if ( phi < 0 ) phi = phi + 2*TMath::Pi() ;	  
+	  Search( PHISLICES, Philist, phi, klow ) ;
+	  if ( klow < 0 ) klow = 0 ;   
+	  if ( klow + ORDER  >=  PHISLICES - 1 ) klow =  PHISLICES - ORDER - 1 ; 
+	  for ( Int_t i = 0 ; i < neZ ; i++ ) 
+	    {
+	      // Apply correction to WEST end of TPC, only.  Return 0 if on the EAST end.
+	      z = TMath::Abs(eZList[i]) ;
+	      Search( COLUMNS, Zedlist, z, ilow ) ;
+	      if ( ilow < 0 ) ilow = 0 ;  
+	      if ( ilow + ORDER  >=  COLUMNS - 1 )   ilow =  COLUMNS - ORDER - 1 ;	      
+	      for ( Int_t j = 0 ; j < neR ; j++ ) 
+		{ 
+		  r = eRadius[j] ;
+		  Search( ROWS,   Rlist, r, jlow ) ;  
+		  if ( jlow < 0 ) jlow = 0 ;   
+		  if ( jlow + ORDER  >=  ROWS - 1 )   jlow =  ROWS - ORDER - 1 ; 
+		  for ( Int_t kk = klow ; kk < klow + ORDER + 1 ; kk++ )
+		    {
+		      TMatrix &EroverEz    =  *ArrayofEroverEz[kk] ;    // Note that these are arrays with Fortran ordering
+		      TMatrix &EphioverEz  =  *ArrayofEPhioverEz[kk] ;  // Note that these are arrays with Fortran ordering
+		      for ( Int_t ii= ilow ; ii < ilow + ORDER + 1 ; ii++ )
+			{
+			  save_Er[ii-ilow]     =  Interpolate( &Rlist[jlow], &EroverEz(jlow,ii), ORDER, r )   ;
+			  save_Ephi[ii-ilow]   =  Interpolate( &Rlist[jlow], &EphioverEz(jlow,ii), ORDER, r )   ;
+			}
+		      saved_Er[kk-klow]     = Interpolate( &Zedlist[ilow], save_Er, ORDER, z )   ; 
+		      saved_Ephi[kk-klow]   = Interpolate( &Zedlist[ilow], save_Ephi, ORDER, z )   ; 
+		    }
+		  tiltEr[i][k][j]   = Interpolate( &Philist[klow], saved_Er, ORDER, phi )    ;
+		  tiltEphi[i][k][j] = Interpolate( &Philist[klow], saved_Ephi, ORDER, phi )  ;
+		  if ( eZList[i] < 0 ) tiltEr[i][k][j] = 0.0 ;  // Force EAST end to zero !!!!
+		  if ( eZList[i] < 0 ) tiltEphi[i][k][j] = 0.0 ;  // Force EAST end to zero !!!!
+		}
 	    }
+	}
+
+      for ( Int_t i = 0 ; i < PHISLICES ; i++ )
+	{
+	  ArrayofArrayV[i]     -> Delete() ;
+	  ArrayofCharge[i]     -> Delete() ;
+	  ArrayofEroverEz[i]   -> Delete() ;
+	  ArrayofEPhioverEz[i] -> Delete() ;
 	}
 
       DoOnce = 1 ;      
@@ -1720,8 +1775,7 @@ void StMagUtilities::UndoTiltDistortion( const Float_t x[], Float_t Xprime[] )
   if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
   if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
 
-  Interpolate2DEdistortion( r, z, tiltEr, Er_integral ) ;
-  Ephi_integral = 0.0 ;  // E field is symmetric in phi
+  Interpolate3DEdistortion( r, phi, z, tiltEr, tiltEphi, Er_integral, Ephi_integral ) ;
 
   // Subtract to Undo the distortions
   if ( r > 0.0 ) 
@@ -2104,7 +2158,7 @@ void StMagUtilities::Interpolate2DEdistortion( const Float_t r, const Float_t z,
 }
 
 /// Interpolate the E field map - 3D interpolation
-void StMagUtilities::Interpolate3DEdistortion( const Float_t r, const Float_t phi, const Float_t z, 
+void StMagUtilities::Interpolate3DEdistortion( const Float_t r, const Float_t phi, const Float_t z,
 					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
                                              Float_t &Er_value, Float_t &Ephi_value )
 {
@@ -2226,6 +2280,278 @@ void StMagUtilities::Search( Int_t N, Float_t Xarray[], Float_t x, Int_t &low )
 
 }
 
+
+//________________________________________
+
+
+/// Solve Poisson's Equation by Relaxation Technique
+/*!
+    Solve Poissons equation in a cylindrical coordinate system.  The ArrayV matrix must be filled with the boundary
+    conditions on the first and last rows, and the first and last columns.  The remainder of the array can be blank
+    or contain a preliminary guess at the solution.  The Charge matrix contains the enclosed spacecharge density at 
+    each point.  The charge density matrix can be full of zero's if you wish to solve Laplaces equation however
+    it should not contain random numbers or you will get random numbers back as a solution.
+
+    Poisson's equation is solved by iteratively relaxing the matrix to the final solution.  In order to speed up the
+    convergence to the best solution, this algorithm does a binary expansion of the solution space.  First it solves
+    the problem on a very sparse grid by skipping rows and columns in the original matrix.  Then it doubles the number 
+    of points and solves the problem again.  Then it doubles the number of points and solves the problem again.  This 
+    happens several times until the maximum number of points has been included in the array.  
+  
+    NOTE: In order for this algorith to work, the number of rows and columns must be a power of 2 plus one.  
+    So ROWS == 2**M + 1 and COLUMNS == 2**N + 1.  The number of ROWS and COLUMNS can be different.
+ */
+void StMagUtilities::PoissonRelaxation( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz,
+					const Int_t ROWS, const Int_t COLUMNS, const Int_t ITERATIONS )
+{
+
+  const Float_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Float_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+  const Float_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
+  const Float_t  Four        =  2.0 + 2.0*Ratio ;
+
+  TMatrix  ArrayE(ROWS,COLUMNS) ;
+
+  //Check that number of ROWS and COLUMNS is suitable for a binary expansion
+
+  if ( TMath::Log(ROWS-1) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log(ROWS-1) / TMath::Log(2) ) )
+    { cout << "StMagUtilities::PoissonRelaxation - Error in the number of ROWS.  Must be 2**M - 1" << endl ; exit(1) ; }
+  if ( TMath::Log(COLUMNS-1) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log(COLUMNS-1) / TMath::Log(2) ) )
+    { cout << "StMagUtilities::PoissonRelaxation - Error in the number of COLUMNS.  Must be 2**N - 1" << endl ; exit(1) ; }
+  
+  //Solve Poisson's equation in cylindrical coordinates by relaxation technique
+  //Allow for different size grid spacing in R and Z directions
+  //Use a binary expansion of the matrix to speed up the solution of the problem
+
+  for ( Int_t one = TMath::Min(ROWS-1,COLUMNS-1)/4 ; one > 0 ; one/=2 )
+    {
+      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
+	{
+	  for ( Int_t j = one ; j < COLUMNS-1 ; j+=one )  
+	    {
+	      for ( Int_t i = one ; i < ROWS-1 ; i+=one )  
+		{
+		  Float_t Radius = IFCRadius + i*GRIDSIZER ;
+		  ArrayV(i,j) = ( ArrayV(i+one,j) + ArrayV(i-one,j) + Ratio*ArrayV(i,j+one) + Ratio*ArrayV(i,j-one) ) 
+		    + ArrayV(i+one,j)*GRIDSIZER*one/(2*Radius) - ArrayV(i-one,j)*GRIDSIZER*one/(2*Radius)
+		    + Charge(i,j)*GRIDSIZER*GRIDSIZER*one*one  ;
+		  ArrayV(i,j) *=  1.0/Four ;
+		  if ( k == ITERATIONS && one > 1 ) 
+		    { 
+		      ArrayV(i+one/2,j)       = ( ArrayV(i+one,j) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i+one/2,j+one/2) = ( ArrayV(i+one,j+one) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i+one/2,j-one/2) = ( ArrayV(i+one,j-one) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i,j+one/2)       = ( ArrayV(i,j+one) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i,j-one/2)       = ( ArrayV(i,j-one) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i-one/2,j)       = ( ArrayV(i-one,j) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i-one/2,j+one/2) = ( ArrayV(i-one,j+one) + ArrayV(i,j) ) / 2 ;
+		      ArrayV(i-one/2,j-one/2) = ( ArrayV(i-one,j-one) + ArrayV(i,j) ) / 2 ;
+		    }
+		}
+	    }
+	}
+    }      
+
+  //Differentiate V(r) and solve for E(r) using special equations for the first and last row
+  //Integrate E(r)/E(z) from point of origin to pad plane
+
+  for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
+    {	  
+      // Differentiate in R
+      for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
+      ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
+      ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
+      // Integrate over Z
+      for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+	{
+	  Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+	  EroverEz(i,j) = 0.0 ;
+	  for ( Int_t k = j ; k < COLUMNS ; k++ ) 
+	    { 
+	      EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
+	      if ( Index != 4 )  Index = 4; else Index = 2 ;
+	    }
+	  if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
+	  if ( Index == 2 ) EroverEz(i,j)  +=  
+			      (GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	  if ( j == COLUMNS-2 ) EroverEz(i,j) =  
+				  (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	  if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
+	}
+    }
+
+}
+
+
+//________________________________________
+
+
+/// 3D - Solve Poisson's Equation in 3D by Relaxation Technique
+/*!
+    NOTE: In order for this algorith to work, the number of rows and columns must be three times a power of 2 plus one.  
+    So ROWS == 3 * 2**M + 1 and COLUMNS == 3 * 2**N + 1.  The number of ROWS and COLUMNS can be different.
+ */
+void StMagUtilities::Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **ArrayofCharge, TMatrix **ArrayofEroverEz, 
+					  TMatrix **ArrayofEPhioverEz,
+					  const Int_t ROWS, const Int_t COLUMNS, const Int_t PHISLICES, const Int_t ITERATIONS )
+{
+
+  const Float_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
+  const Float_t  GRIDSIZEPHI =  2.0*TMath::Pi() / PHISLICES ;
+  const Float_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
+  const Float_t  RatioPhi    =  GRIDSIZER*GRIDSIZER / (GRIDSIZEPHI*GRIDSIZEPHI) ;
+  const Float_t  RatioZ      =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
+
+  TMatrix ArrayE(ROWS,COLUMNS) ;
+
+  //Check that the number of ROWS and COLUMNS is suitable for a binary expansion
+  if ( TMath::Log((ROWS-1)/3) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log((ROWS-1)/3) / TMath::Log(2) ) )
+    { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of ROWS.  Must be 3 * 2**M - 1" << endl ; exit(1) ; }
+  if ( TMath::Log((COLUMNS-1)/3) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log((COLUMNS-1)/3) / TMath::Log(2) ) )
+    { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of COLUMNS.  Must be 3 * 2**N - 1" << endl ; exit(1) ; }
+  if ( TMath::Log(PHISLICES/3) / TMath::Log(2) != (int)( 1.0e-6 + TMath::Log(PHISLICES/3) / TMath::Log(2) ) )
+    { cout << "StMagUtilities::Poisson3DRelaxation - Error in the number of PHISLICES.  Must be 3 * 2**N" << endl ; exit(1) ; }
+  
+  //Solve Poisson's equation in cylindrical coordinates by relaxation technique
+  //Allow for different size grid spacing in R and Z directions
+  //Use a binary expansion of the matrix to speed up the solution of the problem
+
+  Int_t loops, m_one = PHISLICES, i_one = (ROWS-1)/4 , j_one = (COLUMNS-1)/4 ;
+  loops = TMath::Max(i_one, j_one) ;      // Calculate the number of loops for the binary expansion
+  loops = TMath::Max(loops, m_one ) ;
+  loops = 1 + (int) ( TMath::Log(loops)/TMath::Log(2) ) ;
+
+  for ( Int_t count = 0 ; count < loops ; count++ )
+    {
+      for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
+	{
+	  for ( Int_t m = 0 ; m < PHISLICES ; m+=m_one )
+	    {
+	      TMatrix &ArrayV    =  *ArrayofArrayV[m] ;
+	      TMatrix &ArrayVP   =  *ArrayofArrayV[(m+m_one)%PHISLICES] ;
+	      TMatrix &ArrayVM   =  *ArrayofArrayV[(m-m_one+PHISLICES)%PHISLICES] ;
+	      TMatrix &Charge    =  *ArrayofCharge[m] ;
+	      for ( Int_t j = j_one ; j < COLUMNS-1 ; j+=j_one )  
+		{
+		  for ( Int_t i = i_one ; i < ROWS-1 ; i+=i_one )  
+		    {
+		      Float_t Radius = IFCRadius + i*GRIDSIZER ;
+		      ArrayV(i,j) = ( ArrayV(i+i_one,j) + ArrayV(i-i_one,j) + RatioZ*ArrayV(i,j+j_one) + RatioZ*ArrayV(i,j-j_one) ) 
+			+ ArrayV(i+i_one,j)*GRIDSIZER*i_one/(2*Radius) - ArrayV(i-i_one,j)*GRIDSIZER*i_one/(2*Radius)
+			+ ArrayVP(i,j)*RatioPhi*i_one*i_one/(Radius*Radius) + ArrayVM(i,j)*RatioPhi*i_one*i_one/(Radius*Radius)
+			+ Charge(i,j)*GRIDSIZER*GRIDSIZER*i_one*i_one  ;
+		      ArrayV(i,j) *=  1.0/( 2.0 + 2.0*RatioZ + 2.0*RatioPhi*i_one*i_one/(Radius*Radius) ) ;
+		      if ( k == ITERATIONS )  
+			{ // Copy low resolution solution into higher resolution array by linear interpolation
+			  if ( i_one > 1 ) 
+			    ArrayV(i+i_one/2,j)              = ( ArrayV(i+i_one,j)       + ArrayV(i,j) ) / 2 ;
+			  if ( i_one > 1 && j_one > 1 ) 
+			    ArrayV(i+i_one/2,j+j_one/2)      = ( ArrayV(i+i_one,j+j_one) + ArrayV(i,j) ) / 2 ;
+			  if ( j_one > 1 ) 
+			    ArrayV(i,j+j_one/2)              = ( ArrayV(i,j+j_one)       + ArrayV(i,j) ) / 2 ;
+			  if ( i == i_one && i_one > 1 ) 
+			    ArrayV(i-i_one/2,j)              = ( ArrayV(0,j)             + ArrayV(i_one,j) ) / 2 ;
+			  if ( j == j_one && j_one > 1 ) 
+			    ArrayV(i,j-j_one/2)              = ( ArrayV(i,0)             + ArrayV(i,j_one) ) / 2 ;
+			  if ( i == i_one && i_one > 1 && j == j_one && j_one > 1 ) 
+			    ArrayV(i-i_one/2,j-j_one/2)      = ( ArrayV(0,0)             + ArrayV(i_one,j_one) ) / 2 ;
+			  if ( m_one > 1 ) 
+			    {
+			      TMatrix &ArrayVPHalf = *ArrayofArrayV[(m+m_one/2)%PHISLICES] ;
+			      ArrayVPHalf(i,j)                   = ( ArrayVP(i,j)             + ArrayV(i,j) ) / 2 ;
+			      if ( i_one > 1 ) 
+				ArrayVPHalf(i+i_one/2,j)         = ( ArrayVP(i+i_one,j)       + ArrayV(i,j) ) / 2 ;
+			      if ( i_one > 1 && j_one > 1 ) 
+				ArrayVPHalf(i+i_one/2,j+j_one/2) = ( ArrayVP(i+i_one,j+j_one) + ArrayV(i,j) ) / 2 ;
+			      if ( j_one > 1 ) 
+				ArrayVPHalf(i,j+j_one/2)         = ( ArrayVP(i,j+j_one)       + ArrayV(i,j) ) / 2 ;
+			      if ( i == i_one && i_one > 1 ) 
+				ArrayVPHalf(i-i_one/2,j)         = ( ArrayVPHalf(0,j)         + ArrayVPHalf(i_one,j) ) / 2 ;
+			      if ( j == j_one && j_one > 1 ) 
+				ArrayVPHalf(i,j-j_one/2)         = ( ArrayVPHalf(i,0)         + ArrayVPHalf(i,j_one) ) / 2 ;
+			      if ( i == i_one && i_one > 1 && j == j_one && j_one > 1 ) 
+				ArrayVPHalf(i-i_one/2,j-j_one/2) = ( ArrayVPHalf(0,0)         + ArrayVPHalf(i_one,j_one) ) / 2 ;
+			    }
+			}
+		    }
+		}
+	    }
+	}      
+      if ( count == 0 ) m_one = m_one / 3 ; else m_one = m_one / 2 ; if ( m_one < 1 ) m_one = 1 ;
+      if ( count == 0 ) i_one = i_one / 3 ; else i_one = i_one / 2 ; if ( i_one < 1 ) i_one = 1 ;
+      if ( count == 0 ) j_one = j_one / 3 ; else j_one = j_one / 2 ; if ( j_one < 1 ) j_one = 1 ;
+    }
+
+  //Differentiate V(r) and solve for E(r) using special equations for the first and last row
+  //Integrate E(r)/E(z) from point of origin to pad plane
+
+  for ( Int_t m = 0 ; m < PHISLICES ; m++ )
+    {
+      TMatrix &ArrayV    =  *ArrayofArrayV[m] ;
+      TMatrix &EroverEz  =  *ArrayofEroverEz[m] ;
+      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
+	{	  
+	  // Differentiate in R
+	  for ( Int_t i = 1 ; i < ROWS-1 ; i++ )  ArrayE(i,j) = -1 * ( ArrayV(i+1,j) - ArrayV(i-1,j) ) / (2*GRIDSIZER) ;
+	  ArrayE(0,j)      =  -1 * ( -0.5*ArrayV(2,j) + 2.0*ArrayV(1,j) - 1.5*ArrayV(0,j) ) / GRIDSIZER ;  
+	  ArrayE(ROWS-1,j) =  -1 * ( 1.5*ArrayV(ROWS-1,j) - 2.0*ArrayV(ROWS-2,j) + 0.5*ArrayV(ROWS-3,j) ) / GRIDSIZER ; 
+	  // Integrate over Z
+	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+	    {
+	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+	      EroverEz(i,j) = 0.0 ;
+	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
+		{ 
+		  EroverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
+		  if ( Index != 4 )  Index = 4; else Index = 2 ;
+		}
+	      if ( Index == 4 ) EroverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
+	      if ( Index == 2 ) EroverEz(i,j)  +=  
+				(GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-2 ) EroverEz(i,j) =  
+				    (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-1 ) EroverEz(i,j) =  0.0 ;
+	    }
+	}
+    }
+
+  //Differentiate V(r) and solve for E(phi) 
+  //Integrate E(r)/E(z) from point of origin to pad plane
+
+  for ( Int_t m = 0 ; m < PHISLICES ; m++ )
+    {
+      TMatrix &ArrayVP     =  *ArrayofArrayV[(m+1)%PHISLICES] ;
+      TMatrix &ArrayVM     =  *ArrayofArrayV[(m-1+PHISLICES)%PHISLICES] ;
+      TMatrix &EPhioverEz  =  *ArrayofEPhioverEz[m] ;
+      for ( Int_t j = COLUMNS-1 ; j >= 0 ; j-- )  // Count backwards to facilitate integration over Z
+	{	  
+	  // Differentiate in Phi
+	  for ( Int_t i = 0 ; i < ROWS ; i++ )  
+	    {
+	      Float_t Radius = IFCRadius + i*GRIDSIZER ;
+	      ArrayE(i,j) = -1 * ( ArrayVP(i,j) - ArrayVM(i,j) ) / (2*Radius*GRIDSIZEPHI) ;
+	    }
+	  // Integrate over Z
+	  for ( Int_t i = 0 ; i < ROWS ; i++ ) 
+	    {
+	      Int_t Index = 1 ;   // Simpsons rule if N=odd.  If N!=odd then add extra point by trapezoidal rule.  
+	      EPhioverEz(i,j) = 0.0 ;
+	      for ( Int_t k = j ; k < COLUMNS ; k++ ) 
+		{ 
+		  EPhioverEz(i,j)  +=  Index*(GRIDSIZEZ/3.0)*ArrayE(i,k)/(-1*StarMagE) ;
+		  if ( Index != 4 )  Index = 4; else Index = 2 ;
+		}
+	      if ( Index == 4 ) EPhioverEz(i,j)  -=  (GRIDSIZEZ/3.0)*ArrayE(i,COLUMNS-1)/ (-1*StarMagE) ;
+	      if ( Index == 2 ) EPhioverEz(i,j)  +=  
+				(GRIDSIZEZ/3.0)*(0.5*ArrayE(i,COLUMNS-2)-2.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-2 ) EPhioverEz(i,j) =  
+				    (GRIDSIZEZ/3.0)*(1.5*ArrayE(i,COLUMNS-2)+1.5*ArrayE(i,COLUMNS-1))/(-1*StarMagE) ;
+	      if ( j == COLUMNS-1 ) EPhioverEz(i,j) =  0.0 ;
+	    }
+	}
+    }
+
+}
 
 //________________________________________
 
