@@ -14,9 +14,12 @@
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
 //                    The class provides an interface to the standard "C/C++"
 //
-// qsort and bsearch subroutine (for further information see your local C/C++ docs)
+// qsort and bsearch subroutines (for further information see your local C/C++ docs)
 // =====     =======
 //
+//  - This class DOESN'T change / touch the "host" table  itself
+//    For any St_Table object one can create as many different "sorter"
+//    as he/she finds useful for his/her code
 //  - Any instance of this class is meaningful as long as the "host" object
 //    "St_Table" does exist and is not changed
 //  - Any attempt to access this St_TableSorter after the "host" object deleted
@@ -26,8 +29,6 @@
 //  - Any instance (object) of this class is NOT deleted "by automatic" just
 //    the "host object "St_Table" deleted. It is the responsibility of the user's code
 //    keeping St_TableSorter and the the "host" St_Table objects consistent.
-//  - For any St_Table object one can create as many different "sorter" as he/she finds
-//    useful for his/her code
 //
 // "To do" list
 //
