@@ -20,6 +20,7 @@
 #include "StEventTypes.h"
 
 // Sti
+#include "Sti/StiGeometryTransform.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHitFiller.h"
 #include "Sti/StiDetectorContainer.h"
@@ -85,6 +86,9 @@ Int_t StiMaker::Finish()
 
 Int_t StiMaker::Init()
 {
+    //Ben, uncomment the next line to produce seg-fualt, and then look at StiGeometryTransform constructor.  MLM
+    //StiGeometryTransform* trans = StiGeometryTransform::instance();
+    
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
 
     mtrackstore = StiTrackContainer::instance();
@@ -106,6 +110,7 @@ Int_t StiMaker::Init()
     
     mdisplay->draw();
     mdisplay->update();
+
     
     //mhitfiller = new StiHitFiller();
     //mhitfiller->addDetector(kTpcId);
