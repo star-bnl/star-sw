@@ -87,8 +87,8 @@ RICH_Reader::RICH_Reader(EventReader *er, Bank_RICP *pRICP)
   // Stuff jon is adding
   
   // Initialize RichDATA array to 0's
-  for(int i = 0 ; i < 96 ; i++)
-    for(int j = 0 ; j < 24 ; j++)
+  for(int i = 0 ; i < 160 ; i++) //96
+      for(int j = 0 ; j < 96 ; j++) //24
       jon.RichMatrix[i][j] = 0;
   
   
@@ -99,8 +99,10 @@ RICH_Reader::RICH_Reader(EventReader *er, Bank_RICP *pRICP)
   
  }
   
-unsigned short RICH_Reader::GetADCFromCoord(int x,int y){
-  return jon.RichMatrix[x][y];}
+unsigned short RICH_Reader::GetADCFromCoord(int x,int y)
+{
+  return jon.RichMatrix[x][y];
+}
 
 unsigned short RICH_Reader::GetADCFromCramChannel(int cramBlock,int channelNum){
   return jon.RichMatrix[ cramBlock / 6 ][ cramBlock * 6 + channelNum % 6  ];}
@@ -114,20 +116,3 @@ const char * RICH_Reader::GetBankType(){
 int RICH_Reader::IsByteSwapped(){
   return jon.ByteSwapped; }
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

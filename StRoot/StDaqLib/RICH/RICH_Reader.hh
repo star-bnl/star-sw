@@ -23,8 +23,10 @@
 
 #define RICH_CRAM_BANKS 8   /* data banks lowest level */
 #define TIC_NUM_CRAMS   4
+#define RICH_NUM_CRAMS  8
 #define MAX_NUM_CRAMS   8
-#define MAX_CHANNEL_NUM 575  
+#define MAX_CHANNEL_NUM 960
+//#define MAX_CHANNEL_NUM 575  
   
 struct offlen {
   unsigned int off;
@@ -52,6 +54,13 @@ struct RICDATAD: public Bank{
                  // RICDATAD->header.BankLenth - sizeof(RICHDATAD->header)/4
 };
 
+struct RichDATA{
+  char * BankType; // Will be filled with a 9 char array (8 letters + NULL)
+  unsigned int ByteSwapped ; // Should be 0x04030302
+  unsigned int EventNumber;
+  unsigned short RichMatrix[ MAX_CHANNEL_NUM / 6 + 1] [ RICH_NUM_CRAMS * 6] ; // Matrix of ADC's in Physical Positions
+};
+
 
 class RICH_Reader{
   void ProcessEvent(const Bank_RICP * RichPTR);
@@ -62,28 +71,24 @@ RICH_Reader(EventReader *er, Bank_RICP *pRICP);
 
 ~RICH_Reader(){}; 
 
-unsigned short GetADCFromCoord(int x,int y);
-unsigned short GetADCFromCramChannel(int cramBlock,int channelNum);
-unsigned int GetEventNumber();
-
-const char * GetBankType();
-
-int IsByteSwapped();
+    unsigned short GetADCFromCoord(int x,int y);
+    unsigned short GetADCFromCramChannel(int cramBlock,int channelNum);
+    unsigned int GetEventNumber();
+    
+    const char * GetBankType();
+    
+    int IsByteSwapped();
 
 protected:
 
-// copy of EventReader pointer
-EventReader *ercpy;
+    // copy of EventReader pointer
+    EventReader *ercpy;
 
-// Bank Pointers
-struct Bank_RICP *pBankRICP;
-
-struct RichDATA{
-  char * BankType; // Will be filled with a 9 char array (8 letters + NULL)
-  unsigned int ByteSwapped ; // Should be 0x04030302
-  unsigned int EventNumber;
-  unsigned short RichMatrix[ MAX_CHANNEL_NUM / 6 + 1] [ TIC_NUM_CRAMS * 6] ; // Matrix of ADC's in Physical Positions
-} jon;                                                                        // in tic, each row is 96 channels
+    // Bank Pointers
+    struct Bank_RICP *pBankRICP;
+    
+    RichDATA jon;
+                                                                      // in tic, each row is 96 channels
                                                                               // and it takes 6 rows to fit each cramBank
 
 };
