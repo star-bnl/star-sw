@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   02/12/99
-// $Id: TurnDisplay.C,v 1.4 1999/12/19 00:12:34 fine Exp $
+// $Id: TurnDisplay.C,v 1.5 1999/12/27 20:54:39 fine Exp $
   StEventDisplayMaker *dsMaker = 0;
   StVirtualEventFilter *trackFilter;
 //___________________________________________________________________
@@ -26,6 +26,9 @@ void TurnDisplay(const Char_t *filterName=0) {
 
              // Activate some filter channels
              dsMaker->SetFilter(trackFilter,StEventDisplayMaker::kTable);    
+             trackFilter->TurnOn();
+
+             trackFilter = (StVirtualEventFilter *)filterClass->New();
              dsMaker->SetFilter(trackFilter,StEventDisplayMaker::kTptTrack); 
            } 
            else {
@@ -33,7 +36,10 @@ void TurnDisplay(const Char_t *filterName=0) {
              dsMaker->SetTableFlag();
            }
        }
-       else dsMaker->SetTableFlag();
+       else {
+          dsMaker->SetTableFlag();
+          dsMaker->SetTptTrackFlag();
+       }
 
         // define "Event" geometry (the objects to be drawn out)
         //  This is under construction !!!!
@@ -53,9 +59,10 @@ void TurnDisplay(const Char_t *filterName=0) {
        //      contain 3 columns associated with x,y,z and 
        //      foreing key to link all points together
 
-       dsMaker->AddName("g2t_tpc_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
-       dsMaker->AddName("g2t_svt_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
+       //dsMaker->AddName("g2t_tpc_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
+       // dsMaker->AddName("g2t_svt_hit(track_p,x[0]:x[1]:x[2])");   //Add the tables to the Event Display list
        dsMaker->AddName("tphit(id_globtrk,x:y:z)");               //Add the tables to the Event Display list
+       dsMaker->AddName("scs_spt(id_globtrk,x[0]:x[1]:x[2])");    //Add the tables to the Event Display list
 
        // extra table to check packed options
        // http://www.star.bnl.gov/STAR/html/comp_l/root/html/egr_globtrk_st.html
@@ -78,10 +85,14 @@ void TurnDisplay(const Char_t *filterName=0) {
      //___________________________________________________________________
        if (trackFilter) trackFilter->TurnOn(); 
        dsMaker->SetDebug();     
+       dsMaker->TurnOn();
     }
   }
 //__________________________________________________________________________
 // $Log: TurnDisplay.C,v $
+// Revision 1.5  1999/12/27 20:54:39  fine
+// it shows how to active the ttrack points
+//
 // Revision 1.4  1999/12/19 00:12:34  fine
 // some corrections for the packed tables
 //
