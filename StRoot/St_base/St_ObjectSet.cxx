@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_ObjectSet.cxx,v 1.6 1999/05/07 17:53:18 fine Exp $
+// $Id: St_ObjectSet.cxx,v 1.7 1999/05/07 21:35:32 fine Exp $
 // $Log: St_ObjectSet.cxx,v $
+// Revision 1.7  1999/05/07 21:35:32  fine
+// Fix some first implemenation bugs
+//
 // Revision 1.6  1999/05/07 17:53:18  fine
 // owner bit has been introduced to deal with the embedded objects
 //
@@ -61,10 +64,9 @@ TObject *St_ObjectSet::SetObject(TObject *obj,Bool_t makeOwner)
   // - Return the previous embedded object if any
   //
    TObject *oldObject = fObj;
-   Delete();
-   if (IsOwner()) oldObject = 0; // the object has been killed
+   if (IsOwner()) { delete oldObject; oldObject = 0;} // the object has been killed
    fObj = obj;  
-   if (makeOwner) DoOwner(makeOwner);
+   DoOwner(makeOwner);
    return oldObject;
 }
 //______________________________________________________________________________
