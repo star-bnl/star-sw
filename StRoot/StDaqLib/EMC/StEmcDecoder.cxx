@@ -63,7 +63,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   int Init_Crate_tmp[]={2260,2420,2580,2740,2900,3060,3220,3380,3540,3700,
                         3860,4020,4180,4340,4500,2180,2020,1860,1700,1540,
                         1380,1220,1060,900,740,580,420,260,100,2340};
-  Init_Crate=Init_Crate_tmp;
+  for(int i=0;i<30;i++) Init_Crate[i]=Init_Crate_tmp[i];
   
 
   // which crate is connected to each TDC channel. See log book for details
@@ -71,42 +71,42 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
-    TDC_Crate=TDC_Crate_tmp;
+    for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];
     goto SMD;
   }
   if(date == 20011224 && time <=163000)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
-    TDC_Crate=TDC_Crate_tmp;  
+    for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];  
     goto SMD;
   }
   if(date == 20011224 && time >163000)
   {
     int TDC_Crate_tmp[]= {18,17,16,29,30,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
-    TDC_Crate=TDC_Crate_tmp;      
+    for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
   }
   if(date == 20011225 && time <=073000)
   {
     int TDC_Crate_tmp[]= {18,17,16,29,30,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
-    TDC_Crate=TDC_Crate_tmp;      
+    for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
   }
   if(date == 20011225 && time >073000)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
-    TDC_Crate=TDC_Crate_tmp;      
+    for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
   }
   if(date >= 20011226)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
-    TDC_Crate=TDC_Crate_tmp;      
+    for(int i=0;i<30;i++) TDC_Crate[i]=TDC_Crate_tmp[i];      
     goto SMD;
   }
    
@@ -128,7 +128,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
                               {91,92,93,94,95,96,97,98,99,100,101,102,103,104,105},          //RDO 6
                               {106,107,108,109,110,111,112,113,114,115,116,117,118,119,120}  //RDO 7
                               }; 
-    SmdModules=SmdModules_tmp;
+    for(int i=0;i<8;i++) for(int j=0;j<15;j++) SmdModules[i][j]=SmdModules_tmp[i][j];
     goto FEE;
   }
   
@@ -144,7 +144,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
                               {91,92,93,94,95,96,97,98,99,100,101,102,103,104,105},          //RDO 6
                               {106,107,108,109,110,111,112,113,114,115,116,117,118,119,120}  //RDO 7
                               }; 
-    SmdModules=SmdModules_tmp;
+    for(int i=0;i<8;i++) for(int j=0;j<15;j++) SmdModules[i][j]=SmdModules_tmp[i][j];
     goto FEE;
   }
 
@@ -152,17 +152,21 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   int FEE1_tmp[4]={1,4,3,2};
   int FEE2_tmp[4]={2,1,4,3};
   int FEE3_tmp[4]={3,2,1,4};
-  FEE1=FEE1_tmp;
-  FEE2=FEE2_tmp;
-  FEE3=FEE3_tmp;
-
+  for(int i=0;i<8;i++) 
+	{
+		FEE1[i]=FEE1_tmp[i];
+  	FEE2[i]=FEE2_tmp[i];
+  	FEE3[i]=FEE3_tmp[i];
+  }
   int connector1_tmp[20]={1,1,2,3,4,4,5,6,7,7,8,9,10,10,11,12,13,13,14,15};
   int connector2_tmp[20]={1,2,2,3,4,5,5,6,7,8,8,9,10,11,11,12,13,14,14,15};
   int connector3_tmp[20]={1,2,3,3,4,5,6,6,7,8,9,9,10,11,12,12,13,14,15,15};
-  connector1=connector1_tmp;
-  connector2=connector2_tmp;
-  connector3=connector3_tmp;
-  
+  for(int i=0;i<20;i++) 
+	{
+  	connector1[i]=connector1_tmp[i];
+  	connector2[i]=connector2_tmp[i];
+  	connector3[i]=connector3_tmp[i];
+  }
   ///////////////////////////////////////////////////////////////////////
   return;
 }
