@@ -237,6 +237,9 @@ Int_t St_trg_Maker::Make(){
     if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
     return Sim(dst1,dst2,dst3,dst4);
   }
+
+  return kStOk; // To hush Insure++.
+
 }
 
 
@@ -1052,8 +1055,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.49 2004/03/09 18:19:06 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.50 2004/03/09 18:38:43 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.50  2004/03/09 18:38:43  ward
+// Take care of Insure warning.
+//
 // Revision 1.49  2004/03/09 18:19:06  ward
 // Added pedestal and noise capability to the SSD reader.
 //
