@@ -53,3 +53,13 @@ void gStiEulerMatrixForRoot(double phi, double* xx)
     xx[7]=0.;
     xx[8]=1.;
 }
+
+int StiRootDrawable::getColor() const
+{
+  return mnode->GetLineColor();
+}
+
+bool StiRootDrawable::isVisible() const
+{
+  return mnode->GetVisibility()==TVolume::kBothVisible;
+}

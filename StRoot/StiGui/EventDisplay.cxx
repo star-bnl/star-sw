@@ -81,9 +81,8 @@ EventDisplay::EventDisplay(const string& name, const string & description, StiTo
 
 EventDisplay::~EventDisplay()
 {}
-void EventDisplay::showCurrentDetector()
-{
-}
+
+
 void EventDisplay::createMenu()
 {
   //cout << " EventDisplay::createMenu() -I- Started"<<endl;
@@ -139,6 +138,7 @@ Bool_t EventDisplay::ProcessMessage(Long_t msg, Long_t option1, Long_t option2)
 	{
 	case kCM_BUTTON:
 	  _trackingMenuGroup->dispatch(option1);
+	  _navigationMenuGroup->dispatch(option1);
 	  break;
 	case kCM_MENUSELECT:
 	  break;
@@ -169,6 +169,7 @@ void EventDisplay::draw()
   _canvas->Update();
   if (!_initialized)
     {
+      cout << "EventDisplay::draw() -I- Initialize detector display"<<endl;
       draw(_detectorContainer);
       _initialized = true;
     }
@@ -197,21 +198,22 @@ void EventDisplay::draw(StiDetectorContainer * detectorContainer)
 	  int nSectors = (*bIter)->getNSectors(row);
 	  for (int sector=0;sector<nSectors;sector++)
 	    {
-	      if (row==0 || row==(nRows-1) )
+	      detector = (*bIter)->getDetector(row,sector);
+	      if (detector)
 		{
-		  detector = (*bIter)->getDetector(row,sector);
-		  if (detector)
+		  rootDrawableDetector = static_cast<StiRootDrawableDetector*>(detector);
+		  if (rootDrawableDetector)
 		    {
-		      rootDrawableDetector = static_cast<StiRootDrawableDetector*>(detector);
-		      if (rootDrawableDetector)
-			{
-			  const StThreeVector<double>& pos = rootDrawableDetector->position();
-			  _node->Add(rootDrawableDetector->volume(), 
-				     pos.x(),
-				     pos.y(),
-				     pos.z(),
-				     rootDrawableDetector->rotation());
-			}
+		      if (row==0 || row==(nRows-1) )
+			rootDrawableDetector->setVisible(true);
+		      else
+			rootDrawableDetector->setVisible(false);
+		      const StThreeVector<double>& pos = rootDrawableDetector->position();
+		      _node->Add(rootDrawableDetector->volume(), 
+				 pos.x(),
+				 pos.y(),
+				 pos.z(),
+				 rootDrawableDetector->rotation());
 		    }
 		}
 	    }

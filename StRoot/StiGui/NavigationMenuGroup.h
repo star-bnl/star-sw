@@ -8,7 +8,7 @@ class NavigationMenuGroup : public MenuGroup
 
   enum cmds
     {
-      _cmdMoveIn=1, _cmdMoveOut, _cmdMovePlusPhi, _cmdMoveMinusPhi, _cmdSetLayer, _cmdSetLayerAndAngle
+      _cmdNavigator=1, _cmdMoveIn, _cmdMoveOut, _cmdMovePlusPhi, _cmdMoveMinusPhi, _cmdSetLayer, _cmdSetLayerAndAngle
     };
 
   NavigationMenuGroup(const string & name, 
@@ -21,14 +21,19 @@ class NavigationMenuGroup : public MenuGroup
 
   
  protected:
-
+  void showCurrentDetector();
+  void hideCurrentDetector();
   void moveIn();
   void moveOut();
   void movePlusPhi();
-  void moveMinuPhi();
+  void moveMinusPhi();
   void setLayer();
   void setLayerAndAngle();
+  void launchNavigator();
+  TGCompositeFrame * getCompositeFrame();
 
+  bool _visibleSave;
+  int  _colorSave;
 };
 
 #endif
