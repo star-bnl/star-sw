@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMCTrack.h,v 2.1 2000/09/29 01:35:36 horsley Exp $
+ * $Id: StRichMCTrack.h,v 2.2 2000/12/08 20:10:36 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMCTrack.h,v $
+ *  Revision 2.2  2000/12/08 20:10:36  horsley
+ *  updated monte carlo functions,data  members
+ *
  *  Revision 2.1  2000/09/29 01:35:36  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
@@ -55,6 +58,7 @@ public:
   void  setGeantImpactPointAtRadiator(StThreeVectorF& mcImpactPoint);
 
   StThreeVectorF&  getGeantMomentumAtRadiator();
+  StThreeVectorF&  getGeantMomentumAtPadPlane();
   StThreeVectorF&  getGeantImpactPointAtRadiator();
   StThreeVectorF&  getGeantMIP();
 
@@ -85,6 +89,8 @@ protected:
   // monte carlo
   StMcTrack* mStMcTrack;
 
+  
+  StThreeVectorF  mcMomentumAtPadPlane;
   StThreeVectorF  mMCImpactPoint;
   StThreeVectorF  mMCMomentum;
   StThreeVectorF  mMCMIP;

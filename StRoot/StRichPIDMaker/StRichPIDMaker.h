@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.10 2000/12/08 04:54:57 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.11 2000/12/08 20:10:36 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.11  2000/12/08 20:10:36  horsley
+ *  updated monte carlo functions,data  members
+ *
  *  Revision 2.10  2000/12/08 04:54:57  lasiuk
  *  hit filter changed for refit
  *  fillCorrectedNTuple
@@ -377,7 +380,7 @@ public:
     void fillMcPixelNtuple(const StSPtrVecRichPixel*);
     void fillGeantHitNtuple();
 
-    void getGeantPhotonInfo(StRichMCTrack* richTrack, StMcTrack* photon, float& wave, float& gpsi, float& z);
+    void getGeantPhotonInfo(StRichMCTrack* richTrack, StMcTrack* photon, float& wave, float& gpsi, float& z, float& gtheta, float& gphottheta);
   
     bool makeTrackAssociations(StMcEvent*, const StSPtrVecRichHit* hits); 
 
