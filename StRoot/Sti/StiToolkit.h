@@ -46,7 +46,6 @@ class 	StiTrackFinder;
 class 	StiTrackFitter;
 class 	StiTrackMerger;
 class   StiVertexFinder;
-class   StiDisplayManager;
 class   StAssociationMaker;
 class   EditableParameter;
 
@@ -81,7 +80,6 @@ public:
   virtual StiTrackFitter       * getTrackFitter()=0;
   virtual StiTrackMerger       * getTrackMerger()=0;
 	virtual StiVertexFinder      * getVertexFinder()=0;
-  virtual StiDisplayManager    * getDisplayManager()=0;
   virtual StAssociationMaker * getAssociationMaker()=0;
   virtual void setAssociationMaker(StAssociationMaker * a)=0;
   virtual StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder> * getHitLoader()=0;
