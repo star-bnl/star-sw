@@ -855,7 +855,7 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
   else printf("<I> Picture unavailable : mCompare is zero \n");
 }
 
-void StEmcSimulatorMaker::printSimulator(Int_t det=0)
+void StEmcSimulatorMaker::printSimulator(Int_t det)
 {
   Int_t ind1=det-1, ind2 = det-1;
   if(det==0) { // all detector
@@ -948,8 +948,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.14 2003/01/17 00:44:20 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.15 2003/01/17 21:21:28 suaide Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.15  2003/01/17 21:21:28  suaide
+// small bug fixed to compile on Solaris
+//
 // Revision 1.14  2003/01/17 00:44:20  suaide
 // Added new EMC database scheme
 //
