@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.20 1998/12/19 02:54:04 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.21 1998/12/30 22:28:59 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.21  1998/12/30 22:28:59  fine
+// St_XDFFile Some protection against of the wrong tables has been introduced
+//
 // Revision 1.20  1998/12/19 02:54:04  fine
 // ST_XDFFile::NextEventList() - fast scan of the XDF files method has been introduced
 //
@@ -306,7 +309,9 @@ St_DataSet *St_XDFFile::NextEventGet()
 //______________________________________________________________________________
 St_DataSet *St_XDFFile::NextEventList()
 {
- // 
+ //   STILL UNDER CONSTRUCTION !!!!
+ //   This method requires a special version of dsl library
+ //   -----------------------------------------------------
  //  NextEventList()
  // 
  //  The NextEventGet reads the next XDR events and creats St_DataSet object
@@ -392,11 +397,20 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       TClass *cl = gROOT->GetClass(classname);
       if (cl) {
         table = (St_Table *)cl->New();
-
-        table->SetTablePointer(data);
-        table->SetName(name);
-        table->SetfN(nrows);
-        table->SetUsedRows(nrows);
+        // check the real table size against of the "dictionary" size
+        cl = table->GetRowClass();
+        UInt_t cCount;
+        dsTableColumnCount(&cCount, ds);
+        if (cl->GetNdata() == cCount) {
+          table->SetTablePointer(data);
+          table->SetName(name);
+          table->SetfN(nrows);
+          table->SetUsedRows(nrows);
+        }
+        else {
+         table->PrintHeader();
+         Printf(" ** Error ** The number <%d> of the current columns in the <%s> table definition mismatched the number <%d> of the columns read from the <%s> file\n",cl->GetNdata(),cCount,type);
+        }
       }
       else 
       {
