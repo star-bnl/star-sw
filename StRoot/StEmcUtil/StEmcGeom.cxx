@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.cxx,v 1.14 2001/09/28 23:54:37 pavlinov Exp $
+ * $Id: StEmcGeom.cxx,v 1.15 2003/01/17 00:45:38 suaide Exp $
  *
  * Author: Aleksei Pavlinov , June 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.cxx,v $
+ * Revision 1.15  2003/01/17 00:45:38  suaide
+ * Default option for geometry is Y2003
+ *
  * Revision 1.14  2001/09/28 23:54:37  pavlinov
  * Change dtor
  *
@@ -927,7 +930,7 @@ StEmcGeom::getGeantGeometryTable()
 {
   // 24-apr-2000 for MDC4
   // Will be work if BFC has name "bfc" !!! Be carefull
-  mGeantGeom = 0;
+  mGeantGeom = NULL;
   mCalg = 0;
   mCalr = 0;
   mCalg_st = 0;
@@ -937,7 +940,7 @@ StEmcGeom::getGeantGeometryTable()
 
   if(mChain) mGeantGeom = mChain->GetDataSet(".const/geom");
 
-  if(mGeantGeom != 0) {
+  if(mGeantGeom) {
     mCalg    = (St_calb_calg   *) mGeantGeom->Find("calb_calg");
     if(mCalg) {
       mCalg_st = mCalg->GetTable();
@@ -950,14 +953,17 @@ StEmcGeom::getGeantGeometryTable()
   }
   if(!mCalg_st || !mCalr_st) {
     mMode.Append(" : No table");
-    //    printf("StEmcGeom::getGeantGeometryTable() could not find geom\n");
-    //printf("StEmcGeom::getGeantGeometryTable() create own calb_calg/r\n");
+        printf("StEmcGeom::getGeantGeometryTable() could not find geom\n");
+    printf("StEmcGeom::getGeantGeometryTable() create own calb_calg/r\n");
     mCalg = new St_calb_calg("calg", 1);
     mCalr = new St_calb_calr("calr", 1);
     mCalg_st = mCalg->GetTable();
     mCalr_st = mCalr->GetTable();
     // For year2001 configuration only
-    mCalg_st[0].shift[0]=21.0;
+    //mCalg_st[0].shift[0]=21.0;
+    //mCalg_st[0].shift[1]=0.0;
+    // For year2003 configuration only
+    mCalg_st[0].shift[0]=0.0;
     mCalg_st[0].shift[1]=0.0;
   }
 }
