@@ -1,7 +1,7 @@
-// $Id: St_emc_Maker.h,v 1.5 1999/07/01 16:17:57 pavlinov Exp $
+// $Id: St_emc_Maker.h,v 1.6 1999/07/02 03:01:56 pavlinov Exp $
 // $Log: St_emc_Maker.h,v $
-// Revision 1.5  1999/07/01 16:17:57  pavlinov
-// class StEmcGeom was created and maker was remade for new maker scheme
+// Revision 1.6  1999/07/02 03:01:56  pavlinov
+// Little corrections for Linux
 //
 // Revision 1.4  1999/02/12 19:19:17  akio
 // *** empty log message ***
