@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.26 1998/06/26 19:54:39 ward Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.27 1998/07/14 01:25:00 perev Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -141,7 +141,7 @@ unsigned char socObject::  lock () {
 //----------------------------------
 char * socObject:: listing () {
    char *c = 0; 
-   c = (char*)MALLOC(79);
+   c = (char*)MALLOC(79+100);
    memset(c,0,79);
    char l='|';
    if(lock())l='-';
@@ -201,7 +201,7 @@ long socFactory :: maxCount () {
 char * socFactory::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)MALLOC(79);
+   cc = (char*)MALLOC(79+100);
    memset(cc,0,79);
    sprintf(cc,"%s %ld/%ld obj.s",c,count(),maxCount());
    FREE(c);
@@ -219,12 +219,14 @@ unsigned char socFactory :: implementsInterface (const char * iface) {
 
 //----------------------------------
 char * socFactory :: list () {
-   char *c=NULL;
-   c = (char*)MALLOC(80*(4+(unsigned int)maxCount()));
    char *l=NULL;	// individual line
    socObject *o;	// object
+   char *c=NULL;
+
+   c = (char*)MALLOC(80*(4+myCount+1)+1);
    char *cc;
-   sprintf(c,
+
+   strcpy (c,
 		"+-------+-----------------+-----------------"
 		"+----------------------------------\n"
 		"| IDREF | NAME:OBJECT     | TYPE:CLASS      "
@@ -232,17 +234,19 @@ char * socFactory :: list () {
 		"+-------+-----------------+-----------------"
 		"+----------------------------------\n"
    );
+  
    int lc=3;		// line count
-   for( int i=0;i<count();i++ ){
-      if( (NULL != (o = soc->getObject(entryID(i)))) ){
-	 l = o->listing();
+   for( int i=0;i<myCount;i++ ){
+      o = soc->getObject(entryID(i)); 
+      if (o) {
+      	 l = o->listing();
 	 cc = c + (80*lc++);
 	 sprintf(cc,"%-79s\n",l);
 	 FREE(l);
       }
    }
    cc = c + (80*lc++);
-   sprintf(cc,
+   strcpy(cc,
 		"+-------+-----------------+-----------------"
 		"+----------------------------------\n"
    );
@@ -303,11 +307,12 @@ IDREF_T socFactory :: entryID (long n) {
 socCatalog:: socCatalog() 
         : socFactory(OBJ_MAX_COUNT)
 	, socObject((IDREF_T)0) {
+
    myPtr = (SOC_PTR_T)this;
    myObjs = new socObject* [maxCount()];
    nextIDRef = FIRST_IDREF;
    IDREF_T id;
-   signIn(this,id);
+//VP   signIn(this,id);
 }
 
 //----------------------------------
@@ -439,18 +444,21 @@ STAFCV_T socCatalog:: idObject (const char * name
 //- OVER-RIDE socFactory:: list()
 char * socCatalog :: list () {
 
-   char *c = socFactory::list();
-
-   char *cc = (char*)MALLOC(strlen(c) +1 +162);
-
-   sprintf(cc, 
+   char tit[]=
 		"\n"
 		"+-------------------------------------------"
 		"-----------------------------------\n"
 		"|******************* "
 		"SOC - Service & Object Catalog listing"
 		" *******************\n"
-		"%s\n",c);
+		"%s\n";
+   
+   
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 + strlen(tit));
+
+   sprintf(cc,tit,c); 
    FREE(c);
    return cc;
 }

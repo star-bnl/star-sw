@@ -41,7 +41,6 @@ duiFactory:: duiFactory(const char * name)
    myPtr = (SOC_PTR_T)this;
 //- normal object factory stuff
    lock(TRUE);
-
 //- specific to DUI
    myCwd=NULL;
    myCwd = (char*)MALLOC(strlen(name) +2);

@@ -83,13 +83,10 @@ char * dioStream::  listing () {
    char* m = dio_mode2text(mode());
    char* s = dio_state2text(state());
    char* l = location();
-   char ll[28];
-   strcpy(ll,"                           ");
-   strncpy(ll,l,strlen(ll)-1); 
-   cc = (char*)MALLOC(79);
+
+   cc = (char*)MALLOC(79+100);
    memset(cc,0,79);
-   if(strlen(ll)>24) ll[24]=0; // hjw 980118
-   sprintf(cc,"%s (%c,%c) %s",c,m[0],s[0],ll);
+   sprintf(cc,"%s (%c,%c) %-24s",c,m[0],s[0],l);
    FREE(c);
    FREE(l);
    return cc;
@@ -383,9 +380,7 @@ dioSockStream:: ~dioSockStream() {
 char * dioSockStream::  location () {
    char * h=host();
    long p=port();
-   char * cc;
-   cc = (char*)MALLOC(strlen(h)+5 +1);
-   memcpy(cc,0,strlen(cc) +1);
+   char *cc = (char*)MALLOC(strlen(h)+5 +1);
    sprintf(cc,"%s:%4d",h,p);
    FREE(h);
    return cc;
@@ -679,18 +674,20 @@ unsigned char dioFactory :: implementsInterface (const char * iface) {
 //----------------------------------
 char * dioFactory:: list () {
 
-   char *c = socFactory::list();
-
-   char *cc = (char*)MALLOC(strlen(c) +1 +162);
-
-   sprintf(cc, 
+   char tit[] =
                 "\n"
                 "+-------------------------------------------"
                 "-----------------------------------\n"
                 "|********************* "
                 "DIO - Dataset Input/Output listing"
                 " *********************\n"
-                "%s\n",c);
+                "%s\n";
+
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 + strlen(tit));
+
+   sprintf(cc,tit,c);
    FREE(c);
    return cc;
 

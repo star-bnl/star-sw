@@ -285,10 +285,7 @@ char * tdmTable::  typeSpecifier () {
 char * tdmTable::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)MALLOC(100); /*fix write bad  -akio*/
-   memset(cc,0,100);        /*fix write bad -akio*/
-   /* cc = (char*)MALLOC(79);*/
-   /* memset(cc,0,79);       */
+   cc = (char*)MALLOC(79+100); /*fix write bad  -akio*/
    sprintf(cc,"%s %ld/%ld rows; %ld bytes",c,rowCount()
 		,maxRowCount() ,rowSize());
    FREE(c);
@@ -317,8 +314,8 @@ unsigned char tdmTable:: isType (const char * aType) {
 STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
 
   FILE *gg,*ff; long i; DS_TYPE_T *dstype; char *pCellData; char *c=NULL;
-  char colListCopy[COLLIST+1],tmp[80],haveSetMask=0,mask[MCIF];
-  char nformat[10],format[10];
+  char colListCopy[COLLIST+1],tmp[100],haveSetMask=0,mask[MCIF];
+  char nformat[100],format[100];
   char *col[NCOL],line[LINESIZE+2],linecopy[LINESIZE+2],*cc,*dd;
   int maxlineindex,pass,size[MCIF],imask,nmask,ncol,lineindex;
 
@@ -1065,19 +1062,19 @@ tdmTable* tdmFactory:: getTable (IDREF_T id) {
 
 //----------------------------------
 char * tdmFactory:: list () {
-
-   char *c = socFactory::list();
-
-   char *cc = (char*)MALLOC(strlen(c) +1 +162);
-
-   sprintf(cc, 
+   char tit[] = 
                 "\n"
                 "+-------------------------------------------"
                 "-----------------------------------\n"
 		"|******************** "
 		"TDM - Table & Dataset Memory listing"
 		" ********************\n"
-                "%s\n",c);
+                "%s\n";
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 +strlen(tit));
+
+   sprintf(cc,tit,c);
    FREE(c);
    return cc;
 
@@ -1159,10 +1156,8 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    while ( !isalnum(buff[0]) && !(buff[0] == '_') ) buff++;
    lbuff = 0;
    while ( isalnum(buff[lbuff]) || (buff[lbuff] == '_') ) lbuff++;
-   name = (char*)MALLOC(lbuff+1);
-   strncpy(name,buff,lbuff); 
-   name[lbuff]=0; /* hjw 19Feb98 */
-   name[lbuff] = 0;
+   name = (char*)MALLOC(lbuff+1); 
+   name[0]=0; strncat(name,buff,lbuff); 
    EML_SUCCESS(STAFCV_OK);
 }
 

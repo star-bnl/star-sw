@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.19 1998/05/18 13:03:36 dave Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.20 1998/07/14 01:24:53 perev Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -64,8 +64,7 @@ FNC_PTR_T amiInvoker::  pFunction () {
 char * amiInvoker::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)MALLOC(79);
-   memset(cc,0,79);
+   cc = (char*)MALLOC(79+100);
    sprintf(cc,"%s %ld arg.s",c,rank());
    FREE(c);
    return cc;
@@ -230,9 +229,8 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       cc = strchr(tnames._buffer[i],'(');
       b = strlen(tnames._buffer[i]);
       if( cc )b = (int)(cc - c);
-      table_name = (char*)MALLOC(b +1); memset(table_name,0,b+1);
-      strncpy(table_name,tnames._buffer[i],b); 
-      table_name[b]=0; /* hjw 19Feb98 */
+      table_name = (char*)MALLOC(b +1); 
+      table_name[0]=0;strncat(table_name,tnames._buffer[i],b); 
       if( b < (long)strlen(tnames._buffer[i]) ){
 	 table_size = atoi(tnames._buffer[i] + b + 1);
       }
@@ -306,19 +304,20 @@ amiInvoker * amiBroker:: getInvoker (IDREF_T id) {
 
 //----------------------------------
 char * amiBroker:: list () {
-
-   char *c = socFactory::list();
-
-   char *cc = (char*)MALLOC(strlen(c) +1 +162);
-
-   sprintf(cc, 
+   char tit[] =
                 "\n"
                 "+-------------------------------------------"
                 "-----------------------------------\n"
                 "|****************** "
                 "AMI - Analysis Module Interface listing"
                 " *******************\n"
-                "%s\n",c);
+                "%s\n";
+   
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 +strlen(tit));
+
+   sprintf(cc,tit,c); 
    FREE(c);
    return cc;
 

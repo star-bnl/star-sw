@@ -49,8 +49,7 @@ char * spxDummy::  listing () {
    myNCalls++;
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)MALLOC(79);
-   memset(cc,0,79);
+   cc = (char*)MALLOC(79+100);
    sprintf(cc,"%s %d calls",c,nCalls());
    FREE(c);
    return cc;
@@ -124,7 +123,7 @@ short spxGrid::  width () {
 char * spxGrid::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)MALLOC(79);
+   cc = (char*)MALLOC(79+100);
    memset(cc,0,79);
    sprintf(cc,"%s Size = (%d, %d)",c,height(),width());
    FREE(c);
@@ -266,18 +265,20 @@ STAFCV_T spxFactory:: getGrid (IDREF_T id, spxGrid*& grid) {
 //----------------------------------
 //- OVER-RIDE socFactory:: list()
 char * spxFactory:: list () {
-   char *c = socFactory::list();
-
-   char *cc = (char*)MALLOC(strlen(c) +1 +162);
-
-   sprintf(cc, 
+   char tit[] =
 		"\n"
                 "+-------------------------------------------"
                 "-----------------------------------\n"
                 "|******************* "
                 "SPX - Service Package eXample listing"
                 " ********************\n"
-                "%s\n",c);
+                "%s\n";
+   
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 +strlen(tit));
+
+   sprintf(cc,tit,c);
    FREE(c);
    return cc;
 }
