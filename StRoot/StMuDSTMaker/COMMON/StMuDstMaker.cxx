@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.58 2004/05/04 00:09:23 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.59 2004/05/04 13:17:11 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -134,36 +134,39 @@ void StMuDstMaker::zeroArrays()
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/*!
+  Selecting SetBranchStatus for particular MuDst branches
+  Special names:
+   MuEventAll - all branches related to StMuEvent
+   StrangeAll - all branches related to StrangeMuDst
+   EmcAll     - all branches related to Emc
+   PmdAll     - all branches related to Pmd
+   TofAll     - all branches related to Tof
+
+  By default all branches of MuDst are read. If user wants to read only some of
+  them, then:
+   SetStatus("*",0)           // all branches off
+   SetStatus("MuEventAll",1)  // all standard MuEvent branches ON
+   SetStatus("StrangeAll",1)  // all standard Strange branches ON
+   SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
+   SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
+   SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
+ 
+   SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON  
+
+  Names of branches look StMuArrays::arrayTypes[]
+*/
 void StMuDstMaker::SetStatus(const char *arrType,int status)
 {
-//  Selecting SetBranchStatus for particular MuDst branches
-//  Special names:
-//  MuEventAll - all branches related to StMuEvent
-//  StrangeAll - all branches related to StrangeMuDst
-//  EmcAll     - all branches related to Emc
-//  PmdAll     - all branches related to Pmd
-//  TofAll     - all branches related to Tof
-//  By default all branches of MuDst are read. If user wants to read only some of
-//  them, then:
-//  SetStatus("*",0)           // all branches off
-//  SetStatus("MuEventAll",1)  // all standard MuEvent branches ON
-//  SetStatus("StrangeAll",1)  // all standard Strange branches ON
-//  SetStatus("EmcAll"    ,1)  // all standard Emc     branches ON
-//  SetStatus("PmdAll"    ,1)  // all standard Pmd     branches ON
-//  SetStatus("TofAll"    ,1)  // all standard Tof     branches ON
-//  
-//  SetStatus("XiAssoc"    ,1) // Strange branch "XiAssoc" is ON  
-//  Names of branches look StMuArrays::arrayTypes[]
-
-static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll", 0};
-static const int   specIndex[]={
-  0, 
-  __NARRAYS__,
-  __NARRAYS__+__NSTRANGEARRAYS__,
-  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
-  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
-  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
-  -1};
+  static const char *specNames[]={"MuEventAll","StrangeAll","EmcAll","PmdAll","TofAll", 0};
+  static const int   specIndex[]={
+    0, 
+    __NARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__,
+    __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__,
+    -1};
 
   if (strncmp(arrType,"St",2)==0) arrType+=2;  //Ignore first "St"
   for (int i=0;specNames[i];i++) {
@@ -493,8 +496,12 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   if (!chain) return;
   chain->SetBranchStatus("*",0);
   TString ts;
+<<<<<<< StMuDstMaker.cxx
+  for ( int i=0; i<__NARRAYS__; i++) {
+=======
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
+>>>>>>> 1.58
     const char *bname=StMuArrays::arrayNames[i];
     TBranch *tb = chain->GetBranch(bname);
     if(!tb) {Warning("setBranchAddresses","Branch name %s does not exist",bname);continue;}
@@ -1076,7 +1083,11 @@ void StMuDstMaker::fillHddr()
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.59  2004/05/04 13:17:11  jeromel
+ * Changed to the documentation in doxygen format
+ *
  * Revision 1.58  2004/05/04 00:09:23  perev
+ *
  * //  Selecting SetBranchStatus for particular MuDst branches
  * //  Special names:
  * //  MuEventAll - all branches related to StMuEvent
