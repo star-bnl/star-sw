@@ -76,6 +76,8 @@ public:
 
     void operator() (const StiKalmanTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
 
+    void operator() (const StTrack*, StiKalmanTrack*);
+    
     //Point Transform Functors
     
     //refAngle is always defined [0,2pi] by each sector of the detector.

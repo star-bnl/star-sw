@@ -49,7 +49,6 @@ public:
 
 protected:
     StiEvaluableTrack* makeTrack(StTrack*);
-    void operator() (const StTrack* st, StiKalmanTrack* sti);
     
 private:
     StEvent* mevent; //cache pointer
