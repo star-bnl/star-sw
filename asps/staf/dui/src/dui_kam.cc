@@ -126,6 +126,23 @@ STAFCV_T dui_ln(char* fromPath, char* toPath)
    }
    EML_SUCCESS(STAFCV_OK);
 }
+void kam_dui_append_()
+{
+   long npars = ku_npar();      /* number of KUIP parameters */
+   char*  fromPath = ku_gets();	/* path */
+   char*  toPath = ku_gets();	/* path */
+
+	STAFCV_T status = dui_append(fromPath, toPath);
+}
+STAFCV_T dui_append(char* fromPath, char* toPath)
+{
+   if(strstr(fromPath,".")) EML_FAILURE(DONT_USE_DOTS);
+   if(strstr(  toPath,".")) EML_FAILURE(DONT_USE_DOTS);
+   if( !dui->append(fromPath,toPath) ){
+      EML_FAILURE(METHOD_FAILURE);
+   }
+   EML_SUCCESS(STAFCV_OK);
+}
 
 /*
 *:>---------------------------------------------------------------------

@@ -46,6 +46,7 @@ public:
    virtual STAFCV_T cd (const char * dirPath);
    virtual STAFCV_T ln (const char * fromPath, const char * toPath); 
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);
+   virtual STAFCV_T append (const char * fromPath, const char * toPath);
    virtual char * ls (const char * path);
    virtual STAFCV_T mkdir (const char * dirPath);
    virtual STAFCV_T mv (const char * fromPath, const char * toPath);

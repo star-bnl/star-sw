@@ -15,7 +15,7 @@
 >GUIDANCE
 Dataset_Unix_like_Interface commands.
 .
- #(@)$Id: dui_def.cdf,v 1.8 1998/03/16 01:38:52 fisyak Exp $  Edited by Bill Love - 24 Feb 1998
+ #(@)$Id: dui_def.cdf,v 1.9 1998/04/13 21:58:48 ward Exp $  Edited by Bill Love - 24 Feb 1998
 .
 DUI is an Analysis Service Package (ASP) for the Standard Analysis
 Framework (StAF). An ASP is a package of object interfaces which plug
@@ -113,6 +113,50 @@ SEE ALSO:
 .
 >ACTION kam_dui_cd_%C
 **
+** ---------------------------------------------------------------------
+** DUI/APPEND SOURCE TARGET
+>COMMAND APPEND
+>PARAMETERS
+SOURCE  'Source table name' C
+TARGET  'Target table/dataset name' C
+>GUIDANCE
+Appends SOURCE to the end of TARGET.
+.
+DESCRIPTION: 
+.
+Appends SOURCE to the end of TARGET.
+TARGET must already exist.
+.
+ARGUMENTS: 
+.
+   SOURCE - Source table name.  The name of an existing table.
+.
+   TARGET - Appendee.
+.
+RETURN:
+.
+   Success (STAFCV_OK) or failure (STAFCV_BAD) of the 
+   duiFactory::APPEND
+   method is pushed onto the STAF_STATUS stack (see SOC).
+.
+EXAMPLES: 
+.
+EG1. Append harry onto the end of bob.
+.
+   StAF> DUI/APPEND harry bob
+.
+EXCEPTIONS: 
+.
+ SRC_NOT_FOUND - The source table doesn't exist.
+ TGT_DOES_NOT_EXIST - The target table doesn't exist.
+.
+BUGS: 
+.
+   None, it was written by Herb.
+.
+>ACTION kam_dui_append_%C
+**
+** ---------------------------------------------------------------------
 ** ---------------------------------------------------------------------
 ** DUI/CP SOURCE TARGET
 >COMMAND CP
