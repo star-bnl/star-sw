@@ -12,15 +12,13 @@
 #include "EMC_SmdReader.hh"
 #define MAX_ADC 0xFFF
 
-
 void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR) 
-{
+{    
   // will process the event to fill the arrays for different detectors.
   //Towers
   EMC_BarrelReader* barreltowerreader = new EMC_BarrelReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
   int towerresult = barreltowerreader->ProcessBarrelTower(EmcPTR);
   mTheTowerAdcR=barreltowerreader->getBTOWERADCR();
-
   if(!towerresult)
   {
     cout<<" Barrel TOWER processing is not successful**"<<endl;
@@ -34,7 +32,7 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR)
   delete barreltowerreader;barreltowerreader=0;
 
   //SMDs
-/*  EMC_SmdReader* barrelsmdreader = new EMC_SmdReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
+  EMC_SmdReader* barrelsmdreader = new EMC_SmdReader(ercpy, const_cast<Bank_EMCP *>(EmcPTR));
   int smdresult = barrelsmdreader->ProcessBarrelSmd(EmcPTR);
   mTheSmdAdcR=barrelsmdreader->getBSMDADCR();
 
@@ -47,7 +45,7 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR)
   {
     mSmdPresent=true;
   }
-  delete barrelsmdreader;barrelsmdreader=0;*/
+  delete barrelsmdreader;barrelsmdreader=0;
 }
 
 //EMC_Reader::~EMC_Reader(){}
@@ -60,27 +58,14 @@ EMC_Reader::EMC_Reader(EventReader *er, Bank_EMCP *pEMCP)
   printf("This is the EMC_Reader ctor in %s.\n",__FILE__); 
   
   pBankEMCP->header.BankType[7]=0;
-  
   cout<<"header bank type "<<pBankEMCP->header.BankType<<endl;
  
   if (!pBankEMCP->test_CRC()) printf("CRC error in EMCP: %s %d\n",__FILE__,__LINE__) ;
-  
   if (pBankEMCP->swap() < 0)  printf("swap error in EMCP: %s %d\n",__FILE__,__LINE__) ;
  
   pBankEMCP->header.CRC = 0;
-
-  int Token = pBankEMCP->header.Token;
-  int test0 = mTheTowerAdcR.TDCErrorFlag;
-  int test1 = mTheTowerAdcR.DetFlag;
-  int test2 = mTheTowerAdcR.ReceivedByteCount;
-  cout <<"  Token = "<<Token
-       <<"  test0 = "<<test0
-       <<"  test1 = "<<test1
-       <<"  test2 = "<<test2<<endl;
-       
-
+  int Token = pBankEMCP->header.Token;       
   Bank_DATAP *dp = (Bank_DATAP *)ercpy->getDATAP();
-
   if(Token !=dp->header.Token) printf("Token mismatch between global %d and RICH %d\n",dp->header.Token,Token);
   
   ProcessEvent(pBankEMCP); 
@@ -171,7 +156,7 @@ int EMC_Reader::getSMDE_ADC(int modInd,int stripInd,unsigned short& ADC )
     } 
     else 
     {
-      ADC = mTheSmdAdcR.SmdE_ADCMatrix[modInd][stripInd];
+      ADC = mTheSmdAdcR.SmdE_ADCMatrix[modInd-1][stripInd-1];
       return 1;  // 1 is good
     }
   } 
@@ -202,7 +187,7 @@ int EMC_Reader::getSMDP_ADC(int modInd,int binInd,int stripInd,unsigned short& A
   
 int EMC_Reader::getSMD_ADC(int index, int fiber,unsigned short& ADC )
 {
-  // index and fiber is index starting with 1
+  // index and fiber is index starting with 0
   if(mSmdPresent) 
   {
     if(strncmp(mTheSmdAdcR.BankType,"BSMDADCR",8)) 
@@ -212,7 +197,7 @@ int EMC_Reader::getSMD_ADC(int index, int fiber,unsigned short& ADC )
     } 
     else 
     {
-      ADC=mTheSmdAdcR.SMDADCArray[fiber-1][index-1];
+      ADC=mTheSmdAdcR.SMDADCArray[fiber][index];
       return 1;   // 1 is good
     }
   } 
@@ -225,7 +210,8 @@ int EMC_Reader::getSMD_TIMEBIN(int fiber, unsigned int& TimeBin)
   {
     if(strncmp(mTheSmdAdcR.BankType,"BSMDADCR",8)) 
     {
-      cout<<" getSMDE_ADC::error in header name**"<<endl;
+      //cout<<" getSMDE_ADC::error in header name**"<<endl;
+      TimeBin=999;
       return 0;
     } 
     else 
