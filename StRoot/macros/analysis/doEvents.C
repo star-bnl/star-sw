@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.81 2003/02/27 17:01:06 fine Exp $
+// $Id: doEvents.C,v 1.82 2003/04/26 03:36:25 jeromel Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -98,13 +98,13 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   while(fileList[ilist]){ 
       cout << " doEvents -  input fileList = " << fileList[ilist] << endl;
       ilist++; 
-    }
+  }
   cout << " doEvents -  input qaflag   = " << qaflag << endl;
  
-    //
-    // First load some shared libraries we need
-    //
-
+  //
+  // First load some shared libraries we need
+  //
+  gSystem->Load("libStar");
     gSystem->Load("St_base");
     gSystem->Load("StChain");
 
@@ -116,12 +116,14 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     gSystem->Load("StIOMaker");
     gSystem->Load("StTreeMaker");
     gSystem->Load("StarClassLibrary");
+    gSystem->Load("StTriggerDataMaker");    
     gSystem->Load("StEvent");
     gSystem->Load("StEventUtilities");
     gSystem->Load("StMagF");
     gSystem->Load("StAnalysisMaker");
-    
-//		DB ON
+
+
+    //		DB ON
     if (tflag.Contains("dbon") || eventDisplay ) {
       gSystem->Load("libtpc_Tables");
       gSystem->Load("StDbLib.so");
@@ -132,7 +134,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
       gSystem->Load("StDetectorDbMaker");
      }
 
-//   		Special libraries for EventDisplay
+    // Special libraries for EventDisplay
     if (eventDisplay) {//EventDisplay on
        gSystem->Load("St_g2t");
        gSystem->Load("geometry");
@@ -319,6 +321,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.82  2003/04/26 03:36:25  jeromel
+// Forgot to commit
+//
 // Revision 1.81  2003/02/27 17:01:06  fine
 // the secondary filter in example has been disabled by default
 //
