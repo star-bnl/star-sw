@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.149 2001/01/24 21:15:16 fisyak Exp $
+// $Id: bfc.C,v 1.150 2001/01/31 17:12:02 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -55,7 +55,7 @@ void Load(){
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Last,
-	 const Char_t *Chain="gstar Cy2a tfs",
+	 const Char_t *Chain="gstar Cy2b tfs",
 	 const Char_t *infile=0,
 	 const Char_t *outfile=0,
 	 const Char_t *TreeFile=0)
@@ -218,7 +218,7 @@ void bfc(const Int_t First,
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
-	  const Char_t *Chain="gstar Cy2a tfs evout",
+	  const Char_t *Chain="gstar Cy2b tfs evout",
 	  const Char_t *infile=0, 
 	  const Char_t *outfile=0, 
 	  const Char_t *TreeFile=0)

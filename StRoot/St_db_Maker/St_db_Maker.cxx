@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.41 2000/11/07 15:02:05 fisyak Exp $
+// $Id: St_db_Maker.cxx,v 1.42 2001/01/31 17:12:05 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.42  2001/01/31 17:12:05  fisyak
+// Introduce year-2b for STAR 2001
+//
 // Revision 1.41  2000/11/07 15:02:05  fisyak
 // Fix typo
 //
@@ -84,16 +87,16 @@ static time_t mkgmt(int date,int time);
 static const char *aliases[]={
 "sd97",   "sd98",   "year_1a","year_1b","year_1c",
 "es99",   "er99",   "dc99"   ,"year_1d","year_1e",
-"year_1h","year_2a", 0};   
+"year_1h","year_2a", "year_2b", 0};   
 
 static const int   dates[]=  {
 19970101, 19980101, 19990101, 19990501, 19991001,
 19990615, 19990616, 19991206, 19991101, 19991201,
-20000501, 20010610, 0};
+20000501, 20010610, 20010501, 0};
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
-       0,        0,        0};
+       0,        0,        0,        0};
 
 /////////////////////////////////////////////////////////////////////////
 //                                          
