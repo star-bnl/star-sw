@@ -1,9 +1,9 @@
-//StiEvaluator.h
+//StiDefaultEvaluator.h
 // A.Rose (WSU)]
 //8/01
 
-#ifndef StiEvaluator_HH
-#define StiEvaluator_HH
+#ifndef StiDefaultEvaluator_HH
+#define StiDefaultEvaluator_HH
 
 //std
 #include <string>
@@ -12,8 +12,9 @@ using std::string;
 //ROOT
 #include "TObject.h"
 
-//StiEvaluator
+//StiDefaultEvaluator
 #include "TreeEntryClasses.h"
+#include "../Sti/StiEvaluator.h"
 
 //forward declarations (must #include these in the source file)
 class StiTrackContainer;
@@ -29,23 +30,20 @@ class StiHit;
 class StiKalmanTrackNode;
 class trackPing;
 
-class StiEvaluator
+class StiDefaultEvaluator : public StiEvaluator
 {
 public:
-    static StiEvaluator* instance(const string val="empty");
+    static StiDefaultEvaluator* instance(const string val="empty");
     static void kill();
     
     friend class nobody;
     
-    void evaluateForEvent(const StiTrackContainer*);
+    void evaluate(const StiTrackContainer*);
     
-private:
-    //singleton stuff
-    StiEvaluator(); //Not implemented
-    StiEvaluator(const string&); //Must pass file-name
-    virtual ~StiEvaluator(); 
-    
-    static StiEvaluator* sinstance;
+    StiDefaultEvaluator(); //Not implemented
+    StiDefaultEvaluator(const string&); //Must pass file-name
+    virtual ~StiDefaultEvaluator(); 
+    static StiDefaultEvaluator* sinstance;
     
 private:
     void build();

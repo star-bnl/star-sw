@@ -16,6 +16,7 @@ using namespace std;
 
 class StiTrackAssociator;
 class StiTrack;
+class StMcEvent;
 class StMcTrack;
 class StGlobalTrack;
 class StiTrackContainer;

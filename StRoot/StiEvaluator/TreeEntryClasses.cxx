@@ -33,7 +33,7 @@ using namespace std;
 //StiEvaluator includes
 #include "StiEventAssociator.h"
 #include "StiTrackPairInfo.h"
-#include "StiEvaluator.h"
+#include "Sti/StiEvaluator.h"
 #include "TreeEntryClasses.h"
 
 ClassImp(StiHitEntry)
