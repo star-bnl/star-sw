@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.23 1999/11/02 01:49:26 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.24 1999/11/04 01:49:47 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.24  1999/11/04 01:49:47  fine
+// tpt_track drawing is turned On
+//
 // Revision 1.23  1999/11/02 01:49:26  fine
 // A special case for tpt_track table has been introduced
 //
@@ -456,7 +459,8 @@ Int_t StEventDisplayMaker::Make()
          if (Debug()) Warning("Make","No object \"%s\" found",foundName);
          continue;
       }
-      if (event->InheritsFrom("St_Table") && type == 5) {
+      if (event->InheritsFrom("St_Table") && (( type == 5) || (type == 1)) ) 
+      {
         //  ----- Draw "table" events -------------------------- //
           m_Table = (St_Table *)event;                           //
           totalCounter += MakeTable((const Char_t **)positions); //
@@ -849,6 +853,7 @@ Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFi
        nextKeyIndx       = track2Line->CountKey(newID,nextKeyIndx,kFALSE); 
        // -------------------------- hits filter ---------------------------- //
        if (filter) hitColor =  filter->Filter(track2Line,i,hitSize,hitStyle); //
+       if (filter->IsOff() ) break;                                           //
        // ------------------------------------------------------------------- //
        if (hitColor > 0) {
            St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
@@ -923,6 +928,7 @@ void StEventDisplayMaker::PrintFilterStatus()
                                  ,  "Track Svt Hits"
                                  ,  "Track Ftpc Hits" 
                                  ,  "St_Table generic object" 
+                                 ,  "tpt_track table object" 
                                 } ;
    
   Int_t i;
