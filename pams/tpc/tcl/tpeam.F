@@ -151,6 +151,8 @@ c
             endif
          endif
 
+         call hcdir('//ntup',' ')
+
          ihisto = ihisto+1
          call hbookn(200+ihisto,'Hit Info',nvar,'ntup',8000,
      +           chtags)
@@ -351,6 +353,7 @@ C----------------------------------------------------------------------
 
 C----------------------------------------------------------------------
 
+        call hcdir('//ntup',' ')
         call hrend('ntup')
         close(23)
 
