@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.173 2001/02/15 22:03:19 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.174 2001/02/16 17:27:05 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -129,13 +129,14 @@ Bfc_st BFC[] = {
   {"tpc_T"       ,""  ,"","",""                                  ,"libtpc_Tables","Load tpc_Tables",kFALSE},
   {"trg_T"       ,""  ,"","",""                                  ,"libtrg_Tables","Load trg_Tables",kFALSE},
   {"vpd_T"       ,""  ,"","",""                                  ,"libvpd_Tables","Load vpd_Tables",kFALSE},
-  {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
+  {"Utilities   ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"vpd"         ,""  ,"","vpd_T",""                                                   ,"St_vpd","",kFALSE},
   {"tls"         ,""  ,"","",""                                                           ,"tls","",kFALSE},
   {"daq"         ,""  ,"","",""                         ,"StDaqLib,StDAQMakerLib","Load StDAQMaker",kFALSE},
   {"SCL"         ,""  ,"","",""                         ,"StarClassLibrary","Load StarClassLibrary",kFALSE},
   {"SvtCL"       ,""  ,"","",""                                             ,"StSvtClassLibrary","",kFALSE},
   {"TbUtil"      ,""  ,"","sim_T,tpc_t,globT,SCL",""    ,"StTableUtilities","Load StTableUtilities",kFALSE},
+  {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -206,11 +207,11 @@ Bfc_st BFC[] = {
                                   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
   {"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
-  {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
-  {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
+  {"ems","emc_raw","emcChain","geant,emc_T,EmcUtil","St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
+  {"emh" ,"emc_hits","emcChain","geant,emc_T,tpc_T,EmcUtil","St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
-  {"emcSim" ,"emcRaw","emcY2","geant,emc_T","StEmcSimulatorMaker","StMcEvent,StEmcUtil,StEmcSimulatorMaker", 
+  {"emcSim" ,"emcRaw","emcY2","geant,emc_T,EmcUtil","StEmcSimulatorMaker","StMcEvent,StEmcSimulatorMaker", 
                                                                            "New simulator for BEMC",kFALSE},
   {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL,dEdx"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
@@ -230,10 +231,10 @@ Bfc_st BFC[] = {
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl"        ,"StMaker","StChain","",kFALSE},
+  {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
                                          "StPreEclMaker,StEmcSimulatorMaker,St_emc,St_ems_Maker","",kFALSE},
-  {"Epc"         ,"epc","PostChain","PreEcl,Match"                    ,"StEpcMaker","StEpcMaker","",kFALSE},
+  {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
   {"rich"        ,"RichChain","","rch,RichPiD",                    "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rch"         ,"","RichChain","sim_T,globT"             ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
@@ -263,7 +264,7 @@ Bfc_st BFC[] = {
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
-  {"McEvent"     ,"","McChain","Event",              "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
+  {"McEvent"     ,"","McChain","Event,EmcUtil",      "StMcEventMaker","StMcEvent,StMcEventMaker","",kFALSE},
   {"McAss"       ,"","McChain","McEvent",              "StAssociationMaker","StAssociationMaker","",kFALSE},
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
