@@ -830,8 +830,9 @@ Int_t StFile::AddFile(const char *file,const char *opt)
   if (twice) {
     if (!remove) {
        // compare the full path
-       if (tit == twice->GetTitle() )
-          Warning("AddFile","File %s added twice \n",(const char *)tfile);
+       // if (tit == twice->GetTitle() )
+          Warning("AddFile","File \"%s\" added twice. First found as \"%s\", it is \"%s\" now. \n"
+                ,(const char *)base, twice->GetTitle(), (const char *)tit );
     } else       { delete twice; return 0;}
   }
   //  TDataSet *dss = dsfam->First();
