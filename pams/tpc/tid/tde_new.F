@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.11 1999/04/13 13:49:55 ogilvie Exp $
+* $Id: tde_new.F,v 1.12 1999/04/25 04:25:08 sakrejda Exp $
 * $Log: tde_new.F,v $
+* Revision 1.12  1999/04/25 04:25:08  sakrejda
+* protected against accidental runs with no field
+*
 * Revision 1.11  1999/04/13 13:49:55  ogilvie
 * Shortened several lines to less than 72 characters
 *
@@ -140,7 +143,8 @@ C Abort if there are too many TPC tracks to work with
          return
       endif
 
-      call gufld(xlocal,bfield) 
+      call gufld(xlocal,bfield)
+      if(abs(bfield(3)).lt.0.00001) return 
 
       
 c
@@ -302,6 +306,7 @@ c check on quality of hit before including it into dedx
 c but currently (June 98) merged hits are filtered out before
 c they reach tde_new
 c
+c             write(6,*)'flag',hit(loc_hit(l)).flag ,ds
              if ((hit(loc_hit(l)).flag.eq.0).and.(nde.lt.ndemax)) then
                     nde=nde+1
                     dedx(nde).length=ds
@@ -337,6 +342,7 @@ c
 		last=0
             endif     
          end do
+c         write(6,*) 'sort', nde,dedx(1).adedx,dedx(2).adedx
          iret=tls_Quick_Sort_r(nde,dedx(1).adedx,
      >        dedx(2).adedx,dedx)
 c
@@ -429,7 +435,7 @@ c            hstep(2)=hxmax/100.
      >        hparam,hstep,hpmin,hpmax,hsig,hchi2)
             track(j).dedx(1)=hparam(2)
             track(j).dedx(2)=hsig(2)
-            write(6,*) 'resoultion' , hsig(2)/hparam(2)
+c            write(6,*) 'resoultion' , hsig(2)/hparam(2)
             call hdelet(hhid)
          endif
 c
