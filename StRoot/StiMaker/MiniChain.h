@@ -5,6 +5,7 @@ class StChain;
 class StiMaker;
 class MiniChainParameters;
 class StiDefaultToolkit;
+class StIOMaker;
 
 class MiniChain : public TObject
 {
@@ -32,7 +33,7 @@ class MiniChain : public TObject
   StChain             * _chain;
   StiMaker            * _stiMaker;
   StIOMaker           * _ioMaker;
-	StiDefaultToolkit   * _toolkit;
+  StiDefaultToolkit   * _toolkit;
 
   ClassDef(MiniChain, 1)
 };
