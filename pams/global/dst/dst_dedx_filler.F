@@ -12,6 +12,7 @@ CC:<--------------------------------------------------------------------
      4          dst_dedx_h,          dst_dedx ) 
       IMPLICIT NONE
 #include "dst_dedx_filler.inc"
+#include "StDetectorId.inc"
 CC:>--------------------------------------------------------------------
 CC: ROUTINE:    DST_DEDX_FILLER
 CC: DESCRIPTION:
@@ -76,8 +77,8 @@ c
                  dst_dedx_h.nok = dst_dedx_h.nok + 1
                  j = dst_dedx_h.nok
                  dst_dedx(j).id_track  =  tpt_track(k).id_globtrk
-                 dst_dedx(j).det_id    =  1    ! TPC track 
-                 dst_dedx(j).iflag     =  tpc_dedx(i).iflag
+                 dst_dedx(j).det_id    =  kTpcId    ! TPC track 
+                 dst_dedx(j).method    =  tpc_dedx(i).method
                  dst_dedx(j).ndedx     =  tpc_dedx(i).ndedx
                  dst_dedx(j).dedx(1)   =  tpc_dedx(i).dedx(1)
                  dst_dedx(j).dedx(2)   =  tpc_dedx(i).dedx(2)
@@ -102,8 +103,8 @@ CC:  Loop thru all rows in stk_track:
             dst_dedx_h.nok = dst_dedx_h.nok + 1
             j = dst_dedx_h.nok
             dst_dedx(j).id_track  =  stk_track(i).id_globtrk
-            dst_dedx(j).det_id    =  2    ! SVT track
-            dst_dedx(j).iflag     =  0
+            dst_dedx(j).det_id    =  kSvtId    ! SVT track
+            dst_dedx(j).method     =  0
             dst_dedx(j).ndedx     =  0
             dst_dedx(j).dedx(1)   =  stk_track(i).dedx(1)
             dst_dedx(j).dedx(2)   =  stk_track(i).dedx(2)
