@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSignal.cc,v 1.3 2001/08/13 15:34:18 bekele Exp $
+ * $Id: StSvtSignal.cc,v 1.4 2001/11/06 20:12:06 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtSignal.cc,v $
+ * Revision 1.4  2001/11/06 20:12:06  caines
+ * Add include for new compiler
+ *
  * Revision 1.3  2001/08/13 15:34:18  bekele
  * Debugging tools added
  *
@@ -21,13 +24,12 @@
  *
  **************************************************************************/
 
-#include <iostream.h>
 #include <math.h>
 
 #include "StSvtElectronCloud.hh"
 #include "StSvtSignal.hh"
 
-//ClassImp(StSvtSignal)
+
 
 StSvtSignal::StSvtSignal()
 {
