@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesEventCut.cxx,v 1.3 1999/07/19 14:24:04 hardtke Exp $
+ * $Id: mikesEventCut.cxx,v 1.4 1999/07/24 16:24:20 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: mikesEventCut.cxx,v $
+ * Revision 1.4  1999/07/24 16:24:20  lisa
+ * adapt StHbtMaker to dev version of library - solaris still gives problems with strings
+ *
  * Revision 1.3  1999/07/19 14:24:04  hardtke
  * modifications to implement uDST
  *
@@ -39,7 +42,7 @@ mikesEventCut::mikesEventCut(){
 bool mikesEventCut::Pass(const StHbtEvent* event){
   int mult =  event->NumberOfTracks();
   double VertexZPos = event->PrimVertPos().z();
-  //  cout << "mikesEventCut::Pass -- mult, VertexZPos : " << mult << VertexZPos << endl;
+  cout << "mikesEventCut::Pass -- mult, VertexZPos : " << mult << " " << VertexZPos << endl;
   bool goodEvent =
     ((mult > mEventMult[0]) && 
      (mult < mEventMult[1]) && 

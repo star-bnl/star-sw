@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.4 1999/07/19 14:24:07 hardtke Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.5 1999/07/24 16:24:25 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.5  1999/07/24 16:24:25  lisa
+ * adapt StHbtMaker to dev version of library - solaris still gives problems with strings
+ *
  * Revision 1.4  1999/07/19 14:24:07  hardtke
  * modifications to implement uDST
  *
@@ -39,16 +42,18 @@
 
 // these StEvent files keep oscillating between ".hh" and ".h" files
 // fortunately, they are used only here
-/* .h files
-   #include "StEvent.h"
-   #include "StGlobalTrack.h"
-   #include "StTpcDedxPid.h"
-   #include "StDedxPid.h"
+
+#include "StEvent.h"
+#include "StGlobalTrack.h"
+#include "StTpcDedxPid.h"
+#include "StDedxPid.h"
+
+/* .hh files
+   #include "StEvent/StEvent.hh"
+   #include "StEvent/StGlobalTrack.hh"
+   #include "StEvent/StTpcDedxPid.hh"
+   #include "StEvent/StDedxPid.hh"
 */
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
-#include "StEvent/StTpcDedxPid.hh"
-#include "StEvent/StDedxPid.hh"
 //
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
@@ -99,11 +104,16 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   
   StGlobalTrack* rTrack;
   cout << "StStandardHbtReader::ReturnHbtEvent - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
-  // what the hell is this?  StHbtTrackCollection dummyTrackCollection;
-  int icount=0;
-  for (StTrackIterator iter=rEvent->trackCollection()->begin();
-       iter!=rEvent->trackCollection()->end();iter++){
-    //    cout << "Doing track number " << ++icount << endl;
+
+
+  // UNBELIEVABLY the star software cannot even handle its own iterators.  So the following line does not compile.
+  //  for (StTrackIterator iter=rEvent->trackCollection()->begin();
+  //    iter!=rEvent->trackCollection()->end();iter++){
+
+  // gotta do it this way (incredibly)
+  StTrackIterator iter=rEvent->trackCollection()->begin();
+  for (int icount=0; icount<mult; icount++, iter++){
+
     rTrack = *iter;
     int nhits = rTrack->numberOfTpcHits();
     //    cout << "nhits\t" << nhits << endl;

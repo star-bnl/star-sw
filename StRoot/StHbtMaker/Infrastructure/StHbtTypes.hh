@@ -42,10 +42,13 @@ class StHbtString; //!
  * from sofi more easily.
  */
 
-//#include "StThreeVectorD.hh"  <-- Yuri would like it to look like this, but does not work now.
-#include "StThreeVector.hh"
-typedef StThreeVector<double> StHbtThreeVector;//!
-#include "StLorentzVector.hh"
-typedef StLorentzVector<double> StHbtLorentzVector;//!
+//#include "StThreeVector.hh"
+//typedef StThreeVector<double> StHbtThreeVector;//!
+#include "StThreeVectorD.hh"
+typedef StThreeVectorD StHbtThreeVector;//!
+//#include "StLorentzVector.hh"
+//typedef StLorentzVector<double> StHbtLorentzVector;//!
+#include "StLorentzVectorD.hh"
+typedef StLorentzVectorD StHbtLorentzVector;//!
 
 #endif
