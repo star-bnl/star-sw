@@ -1,18 +1,27 @@
 /***************************************************************************
  *
- * $Id: NonId3DCorrFctn.cxx,v 1.1 2001/04/03 21:02:50 kisiel Exp $
+ * $Id: NonId3DCorrFctn.cxx,v 1.2 2001/04/05 22:05:59 kisiel Exp $
  *
- * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
+ * Author: Adam Kisiel, Warsaw University of Technology
  ***************************************************************************
  *
- * Description: part of STAR HBT Framework: StHbtMaker package
- *   a simple Q-invariant correlation function           
+ * Description: part of STAR HBT FRAMEWORK
+ *   The correlation function for non-identical particle
+ *   correlations. Uses selection on pair kinematics
+ *   to perform a "3D-like" analysis.
  *
  ***************************************************************************
  *
  * $Log: NonId3DCorrFctn.cxx,v $
+ * Revision 1.2  2001/04/05 22:05:59  kisiel
+ * Fix for the Insure++ warnings,
+ *   and change the name of the developer, so that
+ *   it is clear who to blame :)
+ *
  * Revision 1.1  2001/04/03 21:02:50  kisiel
- * The correlation function for non-identical particle
+ *
+ *
+ *   The correlation function for non-identical particle
  *   correlations. Uses selection on pair kinematics
  *   to perform a "3D-like" analysis.
  *
@@ -427,13 +436,25 @@ void NonId3DCorrFctn::Write(){
 
 //____________________________
 StHbtString NonId3DCorrFctn::Report(){
-  string stemp = "Qinv Correlation Function Report:\n";
-  char ctemp[100];
-  sprintf(ctemp,"Number of entries in numerator:\t%E\n",0);
+  string stemp = "Non-Identical 3D Correlation Function Report:\n";
+  char ctemp[1000];
+  sprintf(ctemp,"Number of entries in out numerator:\t%E\n",mHOutKSame->GetEntries());
   stemp += ctemp;
-  sprintf(ctemp,"Number of entries in denominator:\t%E\n",0);
+  sprintf(ctemp,"Number of entries in out denominator:\t%E\n",mHOutKDiff->GetEntries());
   stemp += ctemp;
-  sprintf(ctemp,"Number of entries in ratio:\t%E\n",0);
+  sprintf(ctemp,"Number of entries in out ratio:\t%E\n",mRatOut->GetEntries());
+  stemp += ctemp;
+  sprintf(ctemp,"Number of entries in side numerator:\t%E\n",mHSideKSame->GetEntries());
+  stemp += ctemp;
+  sprintf(ctemp,"Number of entries in side denominator:\t%E\n",mHSideKDiff->GetEntries());
+  stemp += ctemp;
+  sprintf(ctemp,"Number of entries in side ratio:\t%E\n",mRatSide->GetEntries());
+  stemp += ctemp;
+  sprintf(ctemp,"Number of entries in long numerator:\t%E\n",mHLongKSame->GetEntries());
+  stemp += ctemp;
+  sprintf(ctemp,"Number of entries in long denominator:\t%E\n",mHLongKDiff->GetEntries());
+  stemp += ctemp;
+  sprintf(ctemp,"Number of entries in long ratio:\t%E\n",mRatLong->GetEntries());
   stemp += ctemp;
   StHbtString returnThis = stemp;
   return returnThis;
