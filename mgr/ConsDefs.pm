@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.21 2000/07/21 23:11:08 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.22 2000/07/31 21:59:46 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -100,6 +100,7 @@
  $GEANT3COM.="%GEANT3 %< -o %>.F && %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>.F -o %>";
  $INCLUDE_PATH  = $INCLUDE;
  $Salt = undef;
+ if (!$OPTSTAR) {$OPTSTAR = "/opt/star";}
  if (!$STAR_SYS) {
    $STAR_SYS = `sys`; chop($STAR_SYS); $STAR_HOST_SYS = $STAR_SYS;
  }
@@ -178,7 +179,7 @@
    if ($PGI) {
      $FC       = "pgf77";
      $FLIBS    = "-L/usr/pgi/linux86/lib -lpgftnrtl -lpgc";
-     $FLIBS   .= " -L/opt/star/lib -lpgf77S -lpgf77A";
+     $FLIBS   .= " -L" . $OPTSTAR . "/lib -lpgf77S -lpgf77A";
      $FFLAGS   = "-DPGI";  
      $FEXTEND  = "-Mextend";
    }
@@ -230,7 +231,7 @@
      $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
    }
    $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
-   $EXTRA_CPPPATH = ":/usr/openwin/include";
+   $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
    $CC        = "/opt/WS5.0/bin/cc";
    $CXX       = "/opt/WS5.0/bin/CC";
    $FC        = "/opt/WS5.0/bin/f77";
@@ -238,11 +239,11 @@
    $R_CPPFLAGS  = "-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
    $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
 #   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/WS5.0/SC5.0/lib -lCstd -liostream -lCrun";
-   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/star/lib -lCstd -liostream -lCrun";
-#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/opt/star/lib -lCstd -liostream -lCrun";
+   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
+#   $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FLIBS     = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
    $XLIBS     = $ROOTSYS . "/lib/libXpm.a -L/usr/openwin/lib -lX11";
-   $SYSLIBS   = "-lm -ldl -lnsl -lsocket -L/opt/star/lib -lCstd -liostream -lCrun";
+   $SYSLIBS   = "-lm -ldl -lnsl -lsocket -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
    $FFLAGS    = "-KPIC -w";
    $FEXTEND   = "-e";
    $CFLAGS    = "-KPIC";
@@ -277,7 +278,7 @@
      $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS";
    }
    $OSFID    .= "SUN Solaris sun sun4os5 sun4x_56";
-   $EXTRA_CPPPATH = ":/usr/openwin/include";
+   $EXTRA_CPPPATH = $main::PATH_SEPARATOR . "/usr/openwin/include";
    $CC        = "cc";
    $CXX       = "CC";
    $FC        = "f77";
@@ -462,7 +463,7 @@
 		'ASCOM'        => '%AS %%DEBUG ASFLAGS %< -o %>',
 		'PREFLIB'      => 'lib',
 		'SUFLIB'       => $A,
-		'SUFLIBS'      => "." . $SOEXT . ":." . $A,
+		'SUFLIBS'      => "." . $SOEXT . $main::PATH_SEPARATOR . "." . $A,
 		'SUFSOLIB'     => $SOEXT,
 		'SUFEXE'       => $EXESUF,
 		'SUFMAP'       => {
@@ -496,7 +497,8 @@
 				     'STAR_BIN' => $STAR_BIN,
 				     'TEMP' => $TEMP,
 				     'TMP'  => $TMP,
-				     'STAR_SYS' => $STAR_HOST_SYS
+				     'STAR_SYS' => $STAR_HOST_SYS,
+				     'OPTSTAR' => $OPTSTAR
 				   }
 );
  push(@param::defaults, @params);
