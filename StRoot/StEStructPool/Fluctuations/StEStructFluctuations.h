@@ -82,6 +82,10 @@ class StEStructFluct {
     TH1F *multPMinus;
     TH1F *multPDiff;
 
+    TH1F *ptAll;
+    TH1F *ptPlus;
+    TH1F *ptMinus;
+
   // Here is the object I use to hold the binned tracks.
     multStruct      *ms;
     
@@ -91,13 +95,16 @@ class StEStructFluct {
     char *mKey;
     int   mTotBins;
     float mEtaMin, mEtaMax;
+    float mPtMin,  mPtMax;
 
     void  initArrays();
     void  deleteArrays();
     void  initHistograms();
     void  deleteHistograms();
 
-    StEStructFluct( char *key, int totBins, float EtaMin, float EtaMax );
+    StEStructFluct( char *key, int totBins,
+                    float EtaMin, float EtaMax,
+                    float PtMin,  float PtMax );
     virtual ~StEStructFluct();
 
 
@@ -121,6 +128,7 @@ class StEStructFluct {
     void fillEtaZ( float z, float eta,
                    int maxFitPoints, int foundPoints, int nFitPoints,
                    int iF, int iL );
+    void fillPtHist( double pt, int sign );
 
     ClassDef(StEStructFluct,1)
 };
