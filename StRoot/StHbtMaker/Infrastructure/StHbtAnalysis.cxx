@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.2 1999/07/06 22:33:22 lisa Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.3 1999/10/04 15:38:53 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.3  1999/10/04 15:38:53  lisa
+ * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
+ *
  * Revision 1.2  1999/07/06 22:33:22  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -56,6 +59,16 @@ StHbtAnalysis::~StHbtAnalysis(){
     delete *piter;
   }
   delete mMixingBuffer;
+}
+//______________________
+StHbtCorrFctn* StHbtAnalysis::CorrFctn(int n){  // return pointer to n-th correlation function
+  if ( n<0 || n > mCorrFctnCollection->size() )
+    return NULL;
+  StHbtCorrFctnIterator iter=mCorrFctnCollection->begin();
+  for (int i=0; i<n ;i++){
+    iter++;
+  }
+  return *iter;
 }
 //____________________________
 StHbtString StHbtAnalysis::Report()
