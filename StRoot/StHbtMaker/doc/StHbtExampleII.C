@@ -1,6 +1,7 @@
 // example how to access memberfunctions from a correlation function 
 // ((MinvCorrFctn*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(0))->Difference()->Draw()
-// ((MinvCorrFctnY_vs_Pt*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(1))->Difference()->Draw()
+// ((MinvCorrFctnY_vs_Pt*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(2))->Difference()->Draw("colz")
+// ((MinvCorrFctnArmenteros*) ((StHbtMaker*) chain->GetMaker("HBT"))->HbtManager()->Analysis(0)->CorrFctn(1))->Difference()->Draw("colz")
 
 // examples to access member function from cutMonitors (here the member functions return a pointer to a histogram)  
 // ((trackCutMonitor_P_vs_Dedx*)phiAnal->FirstParticleCut()->PassMonitor(0))->Histo()->Draw()
@@ -13,9 +14,15 @@
 #define STEVENTREADER 1 
 #define MCEVENTREADER 0 
 #define ASSOCIATIONREADER 0
+#define XDFREADER 0
+#define GSTARTXTREADER 0
 
-#define ASCIIWRITER 0
+#define ASCIIWRITER 1
 #define ASCIIREADER 0
+
+#define BINARYWRITER 1
+#define BINARYREADER 0
+
 #if ASCIIREADER
 #define STEVENT 0
 #define MCEVENT 0  
@@ -23,11 +30,8 @@
 #define STEVENTREADER 0
 #define MCEVENTREADER 0  
 #define ASSOCIATIONREADER 0
-#define ASCIIWRITER 0
 #endif
 
-#define BINARYWRITER 1
-#define BINARYREADER 0
 #if BINARYREADER
 #define STEVENT 0
 #define MCEVENT 0  
@@ -35,7 +39,6 @@
 #define STEVENTREADER 0
 #define MCEVENTREADER 0  
 #define ASSOCIATIONREADER 0
-#define BINARYWRITER 0
 #endif
 
 #define ANALYSIS
@@ -148,8 +151,11 @@ gSystem->Load("StUtilities");  // new addition 22jul99
 gSystem->Load("StTreeMaker");
 gSystem->Load("StIOMaker");
 gSystem->Load("StarClassLibrary");
+#if XDFREADER
+gSystem->Load("xdf2root");
+gSystem->Load("St_xdfin_Maker");
+#endif
 gSystem->Load("StEvent");
-//gSystem->Load("StEventReaderMaker");
 gSystem->Load("StEventMaker");
 gSystem->Load("StMcEvent"); 
 gSystem->Load("StMcEventMaker"); 
@@ -207,8 +213,11 @@ cout << " files open" << endl;
 ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
 cout << " files open" << endl;
 #endif
-
-
+#if XDFREADER
+StIOMaker* ioMaker = new StIOMaker("IO","r",setFiles,"bfcTree");
+ioMaker->SetDebug();
+ioMaker->SetBranch("*",0,"r"); //activate EventBranch
+#endif
 
 // ***********
 // Event Maker 
@@ -245,7 +254,6 @@ StHbtManager* TheManager = hbtMaker->HbtManager();
 // ***********************
 // setup HBT event readers   
 // ***********************
-
 #if STEVENTREADER    
 // *****************************************
 // set up StHbtMcEventReader as Event Reader
@@ -284,27 +292,27 @@ cout << "READER SET UP.... " << endl;
 #endif
 
 #if ASCIIWRITER
+ StHbtAsciiReader* asciiWriter = new StHbtAsciiReader;
+ asciiWriter->SetFileName("test1.asc");
+ TheManager->AddEventWriter(asciiWriter);
 // set up the front loaded cuts
- mikesEventCut* frontLoadedEventCut = new mikesEventCut;
- frontLoadedEventCut->SetEventMult(0,100000);      // selected multiplicity range
- frontLoadedEventCut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
- Reader->SetEventCut(frontLoadedEventCut);
- franksTrackCut* frontLoadedTrackCut = new franksTrackCut;
- frontLoadedTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
- frontLoadedTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
- frontLoadedTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- frontLoadedTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
- frontLoadedTrackCut->SetP(0.0,2.0);               // range in P
- frontLoadedTrackCut->SetPt(0.0,2.0);              // range in Pt
- frontLoadedTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
- frontLoadedTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
- frontLoadedTrackCut->SetCharge(0);                // no cut on charge
- frontLoadedTrackCut->SetMass(0.494);              // kaon mass
- //Reader->SetTrackCut(frontLoadedTrackCut);
+ mikesEventCut* asciiFrontLoadedEventCut = new mikesEventCut;
+ asciiFrontLoadedEventCut->SetEventMult(0,100000);      // selected multiplicity range
+ asciiFrontLoadedEventCut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
+ asciiWriter->SetEventCut(asciiFrontLoadedEventCut);
+ franksTrackCut* asciiFrontLoadedTrackCut = new franksTrackCut;
+ asciiFrontLoadedTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ asciiFrontLoadedTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
+ asciiFrontLoadedTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+ asciiFrontLoadedTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
+ asciiFrontLoadedTrackCut->SetP(0.0,2.0);               // range in P
+ asciiFrontLoadedTrackCut->SetPt(0.0,2.0);              // range in Pt
+ asciiFrontLoadedTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
+ asciiFrontLoadedTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
+ asciiFrontLoadedTrackCut->SetCharge(0);                // no cut on charge
+ asciiFrontLoadedTrackCut->SetMass(0.494);              // kaon mass
+ //asciiWriter->SetTrackCut(asciiFrontLoadedTrackCut);
  //   set up a microDstWriter 
- StHbtAsciiReader* Writer = new StHbtAsciiReader;
- Writer->SetFileName("/direct/star+data01/pwg/hbt/Phi/Acceptance/test1.asc");
- TheManager->SetEventWriter(Writer);
  cout << "WRITER SET UP.... " << endl;
 #endif
 #if ASCIIREADER
@@ -314,38 +322,51 @@ cout << "READER SET UP.... " << endl;
  TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
- 
 #if BINARYWRITER
- // set up the front loaded cuts
- mikesEventCut* frontLoadedEventCut = new mikesEventCut;
- frontLoadedEventCut->SetEventMult(0,100000);      // selected multiplicity range
- frontLoadedEventCut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
- Reader->SetEventCut(frontLoadedEventCut);
- franksTrackCut* frontLoadedTrackCut = new franksTrackCut;
- frontLoadedTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
- frontLoadedTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
- frontLoadedTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
- frontLoadedTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
- frontLoadedTrackCut->SetP(0.0,1.0);               // range in P
- frontLoadedTrackCut->SetPt(0.0,1.0);              // range in Pt
- frontLoadedTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
- frontLoadedTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
- frontLoadedTrackCut->SetCharge(0);                // no cut on charge
- frontLoadedTrackCut->SetMass(0.494);              // kaon mass
- // Reader->SetTrackCut(frontLoadedTrackCut);
  //   set up a microDstWriter 
- StHbtBinaryReader* Writer = new StHbtBinaryReader;
- Writer->SetFileName("/star/rcf/pwg/hbt/Phi/Acceptance/test1.bin");
- TheManager->SetEventWriter(Writer);
+ StHbtBinaryReader* binaryWriter = new StHbtBinaryReader;
+ binaryWriter->SetFileName("test1.bin");
+ TheManager->AddEventWriter(binaryWriter);
+ // set up the front loaded cuts
+ mikesEventCut* binaryFrontLoadedEventCut = new mikesEventCut;
+ binaryFrontLoadedEventCut->SetEventMult(0,100000);      // selected multiplicity range
+ binaryFrontLoadedEventCut->SetVertZPos(-35.0,35.0);    // selected range of vertex z-position
+ binaryWriter->SetEventCut(binaryFrontLoadedEventCut);
+ franksTrackCut* binaryFrontLoadedTrackCut = new franksTrackCut;
+ binaryFrontLoadedTrackCut->SetNSigmaPion(-1000.0,1000.0);   // number of Sigma in TPC dEdx away from nominal pion dEdx
+ binaryFrontLoadedTrackCut->SetNSigmaKaon(-3.,3.);   // number of Sigma in TPC dEdx away from nominal kaon dEdx
+ binaryFrontLoadedTrackCut->SetNSigmaProton(-1000.0,1000.0); // number of Sigma in TPC dEdx away from nominal proton dEdx
+ binaryFrontLoadedTrackCut->SetNHits(5,1000);           // range on number of TPC hits on the track
+ binaryFrontLoadedTrackCut->SetP(0.0,1.0);               // range in P
+ binaryFrontLoadedTrackCut->SetPt(0.0,1.0);              // range in Pt
+ binaryFrontLoadedTrackCut->SetRapidity(-1.5,1.5);       // range in rapidity
+ binaryFrontLoadedTrackCut->SetDCA(0.0,2.);              // range in Distance of Closest Approach to primary vertex
+ binaryFrontLoadedTrackCut->SetCharge(0);                // no cut on charge
+ binaryFrontLoadedTrackCut->SetMass(0.494);              // kaon mass
+ binaryWriter->SetTrackCut(binaryFrontLoadedTrackCut);
  cout << "WRITER SET UP.... " << endl;
 #endif
 #if BINARYREADER
  //   set up a microDstWriter 
  StHbtBinaryReader* Reader = new StHbtBinaryReader;
- Reader->SetFileName("/star/rcf/pwg/hbt/Phi/Acceptance/test1.bin");
+ Reader->SetFileName("test1.bin");
  TheManager->SetEventReader(Reader);
  cout << "READER SET UP.... " << endl;
 #endif
+#if XDFREADER  
+ // set up StHbtXDFReader as Event Reader
+ StHbtXDFReader* Reader = new StHbtXDFReader("evgen","evgen/particle");
+ Reader->AddAcceptedParticle(-321);  // kaon+
+ Reader->AddAcceptedParticle(+321);  // kaon-
+ Reader->AddAcceptedMother(333);     // phi 
+ TheManager->SetEventReader(Reader);
+ cout << "READER SET UP.... " << endl;
+#endif
+#if GSTARTXTREADER
+ StHbtGstarTxtReader* Reader = new StHbtGstarTxtReader;
+ Reader->SetFileName("/star/rcf/pwg/hbt/GstarTextFiles/blended_events.txt");
+ TheManager->SetEventReader(Reader);
+#endif 
 
     
  // define example particle cut and cut monitors to use in the analyses
@@ -361,11 +382,12 @@ cout << "READER SET UP.... " << endl;
  aTrackCut->SetDCA(0.0,.5);             // range in Distance of Closest Approach to primary vertex
  aTrackCut->SetCharge(+1);              // want positive kaons
  aTrackCut->SetMass(0.494);             // kaon mass
- // example cut monitor
- trackCutMonitor_P_vs_Dedx* aDedxMoniPos = new trackCutMonitor_P_vs_Dedx(+1,"P_vs_Dedx +","Momentum (GeV/c) vs Energy loss (a.u.)",
-									 100,0.,1.2,100,0.,1e-5);
- trackCutMonitor_P_vs_Dedx* aDedxMoniNeg = new trackCutMonitor_P_vs_Dedx(-1,"P_vs_Dedx -","Momentum (GeV/c) vs Energy loss (a.u.)",
-									 100,0.,1.2,100,0.,1e-5);
+ // define example track cut monitor
+ trackCutMonitor_P_vs_Dedx* aDedxMoniPos = new trackCutMonitor_P_vs_Dedx(+1,"P_vs_Dedx +","Momentum (GeV/c) vs Energy loss (a.u.)",100,0.,1.2,100,0.,1e-5);
+ trackCutMonitor_P_vs_Dedx* aDedxMoniNeg = new trackCutMonitor_P_vs_Dedx(-1,"P_vs_Dedx -","Momentum (GeV/c) vs Energy loss (a.u.)",100,0.,1.2,100,0.,1e-5);
+ // define example v0 cut monitor
+ v0CutMonitor_ArmenterosPodolanski* aArmPodMoni = new v0CutMonitor_ArmenterosPodolanski("ArmenterosPodolanski","ArmenterosPodolanski",100,-20.,20.,100,-20.,20.);
+
  // now, we define another analysis that runs simultaneously with the previous one.
  // this one looks at K+K- correlations (so NONidentical particles) in invariant mass
  
@@ -415,6 +437,7 @@ cout << "READER SET UP.... " << endl;
  trackCutMonitor_P_vs_Dedx* dedxMoniNegPass = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniNeg);
  trackCutMonitor_P_vs_Dedx* dedxMoniNegFail = new  trackCutMonitor_P_vs_Dedx( *aDedxMoniNeg);
  antikaonTrkcut->AddCutMonitor( dedxMoniNegPass, dedxMoniNegFail);
+
  // 3) set the Pair cuts for the analysis
  mikesPairCut* phiPairCut = new mikesPairCut;  // use "frank's" pair cut object
  //franksPairCut* phiPairCut = new franksPairCut;  // use "frank's" pair cut object
@@ -429,6 +452,9 @@ cout << "READER SET UP.... " << endl;
  // define example Minv correlation function
  MinvCorrFctn* MinvCF = new MinvCorrFctn("Minv",100,0.98,1.18); 
  phiAnal->AddCorrFctn(MinvCF);   // adds the just-defined correlation function to the analysis
+
+ MinvCorrFctnArmenteros* MinvCFArm = new MinvCorrFctnArmenteros("ArmenterosPodolanski",200,-1.,1.,300,0.,.3); 
+ phiAnal->AddCorrFctn(MinvCFArm);   // adds the just-defined correlation function to the analysis
  
  MinvCFY_vs_Pt = new MinvCorrFctnY_vs_Pt("MinvCF dn/d(Y_vs_Pt)",31, -1.5, 1.5, 20, 0., 2. ); // defines a Minv function
  phiAnal->AddCorrFctn(MinvCFY_vs_Pt);   // adds the just-defined correlation function to the analysis
