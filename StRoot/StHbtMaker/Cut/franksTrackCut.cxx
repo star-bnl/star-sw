@@ -38,6 +38,7 @@ franksTrackCut::franksTrackCut(){
   mNSigmaAntiProton[0]   = 0.;  mNSigmaAntiProton[1]   = 0.;
   mEta[0]      = -1e9;   mEta[1]      = +1e9; 
   mRapidity[0] = -1e9;   mRapidity[1] = +1e9; 
+  mP[0] = -1e9;  mP[1] = +1e9;
   mPt[0] = -1e9;  mPt[1] = +1e9;
   mPx[0] = -1e9;  mPx[1] = +1e9;
   mPy[0] = -1e9;  mPy[1] = +1e9;
