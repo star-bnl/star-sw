@@ -5,6 +5,7 @@
 #include "StiConstants.h"
 
 #include "StiTrackNode.h"
+#include "StiKalmanTrackNode.h"
 #include "StiObjectFactory.h"
 
 class StiSeedFinder;
@@ -17,8 +18,6 @@ class StMagUtilities;
 class StiTrackFinder 
 {
 public:
-    
-    typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
     
     //_c-tor/d-tor__________________________________________________
     StiTrackFinder();
@@ -36,7 +35,7 @@ public:
     void setGeometryContainer(StiDetectorContainer* geometry);
     void setHitContainer(StiHitContainer * hitContainer);
     void setTrackContainer(StiTrackContainer * newTrackContainer);
-    void setTrackNodeFactory(StiTrackNodeFactory * factory);
+    void setTrackNodeFactory(StiKalmanTrackNodeFactory * factory);
     void setMagneticField(StMagUtilities * magField);
     
     void setTrackFiltering(bool option);
@@ -48,7 +47,7 @@ public:
     StiDetectorContainer      * getGeometryContainer()  const;
     StiHitContainer           * getHitContainer()       const;
     StiTrackContainer         * getTrackContainer()     const;
-    StiTrackNodeFactory       * getTrackNodeFactory()   const;
+    StiKalmanTrackNodeFactory * getTrackNodeFactory()   const;
     StMagUtilities            * getMagneticField()      const;
     
     
@@ -67,7 +66,7 @@ protected:
     
     //Objects not owned by this class
     StiSeedFinder             * trackSeedFinder;
-    StiTrackNodeFactory       * trackNodeFactory;
+    StiKalmanTrackNodeFactory * trackNodeFactory;
     StMagUtilities            * magField;
     StiDetectorContainer      * geometryContainer;
     StiHitContainer           * hitContainer;
@@ -114,7 +113,7 @@ inline  void StiTrackFinder::setMCSCalculated(bool option)
   mcsCalculated   = option; 
 }
 
-inline StiTrackFinder::StiTrackNodeFactory * StiTrackFinder::getTrackNodeFactory() const
+inline StiKalmanTrackNodeFactory* StiTrackFinder::getTrackNodeFactory() const
 {
   return  trackNodeFactory;
 }

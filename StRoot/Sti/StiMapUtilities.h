@@ -67,6 +67,12 @@ struct StizHitLessThan
 };
 
 
+struct SameStHit
+{
+    bool operator() (const StiHit*) const;
+    StHit* stHit;
+};
+
 #endif
 
 

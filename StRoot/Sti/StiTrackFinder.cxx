@@ -118,7 +118,7 @@ void StiTrackFinder::setTrackSeedFinder(StiSeedFinder * finder)
     }
 }
 
-void StiTrackFinder::setTrackNodeFactory(StiTrackNodeFactory * factory)
+void StiTrackFinder::setTrackNodeFactory(StiKalmanTrackNodeFactory * factory)
 {
     if (factory!=0) {
 	trackNodeFactory = factory;

@@ -14,7 +14,6 @@
 class StiKalmanTrack : public StiTrack 
 {
  public:
-  //  typedef StiObjectFactory<StiKalmanKalmanTrackNode> StiKalmanKalmanTrackNodeFactory;
   
   // constructor/destructor/copy/etc
   
@@ -25,7 +24,9 @@ class StiKalmanTrack : public StiTrack
   virtual ~StiKalmanTrack()
     {
     };
-  
+
+    static void setKalmanTrackNodeFactory(StiKalmanTrackNodeFactory*);
+    
   // Action methods
   // Implementation of virtua methods inherited
   // from StiTrack
@@ -69,10 +70,10 @@ class StiKalmanTrack : public StiTrack
   StThreeVector<double> getPointNear(double x) const;
   StThreeVector<double> getGlobalPointNear(double x) const;
   
-  // static StiTrackNodeFactory * trackNodeFactory; // moved to base class...
-  
- protected:
-  
+protected:
+    
+  static StiKalmanTrackNodeFactory * trackNodeFactory;
+
   StiKalmanTrackNode * firstNode;
   StiKalmanTrackNode * lastNode;
   double svtDedx;

@@ -5,6 +5,7 @@
 //Std
 #include <iostream>
 #include <math.h>
+#include <map>
 
 //StEvent
 #include "StEventTypes.h"
@@ -16,6 +17,7 @@
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
+#include "StiHitContainer.h"
 #include "StiEvaluableTrack.h"
 #include "StiStTrackFilter.h"
 #include "StiGeometryTransform.h"
@@ -80,8 +82,7 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
     while (go && mcurrent!=mend) {
 	track = (*mcurrent)->track(mtype);
 	if (track && track->flag()>=0) {
-	    go=false;
-	    //mtrackpair->second = track;
+	    go=false;	    //mtrackpair->second = track;
 	    ++mcurrent;
 	    returntrack = makeTrack(track);
 	}
@@ -97,78 +98,51 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StTrack* sttrack)
     track->setStTrack(sttrack);
 
     //ATTENTION CLAUDE: Uncomment the following to seed KalmanTrack and investigate problems!
-    /*
-      const StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-      StiDetector* layer = *rdet;
-      this->operator()(sttrack, track, layer);
-    */
+    this->operator()(sttrack, track);
     
     return track;
 }
 
-void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack* sti, const StiDetector* layer)
+void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack* sti)
 {
     //cout <<"StiEvaluableTrackSeedFinder::operator()(StTrack*, StiKalmanTrack*, StiDetector*)"<<endl;
-    //Set x and refAngle
-    double x = layer->getPlacement()->getCenterRadius();
-    double refAngle = layer->getPlacement()->getCenterRefAngle();
-    //cout <<"x: "<<x<<"\trefAngle: "<<refAngle<<endl;
-    
-    //Now get the helix
-    StPhysicalHelixD sthelix = st->geometry()->helix();
-    
-    //Establish the origin in TpcCoordinates
-    const StThreeVectorD& stHelixoriginD = sthelix.origin();
-    StThreeVectorD originD( sthelix.xcenter(), sthelix.ycenter(), stHelixoriginD.z() );
-    //cout <<"originD: "<<originD<<endl;
-    
-    //Transform origin to StiCoordinates
-    StThreeVectorD stioriginD = StiGeometryTransform::instance()->operator()(originD, refAngle);
-    //cout <<"stioriginD: "<<stioriginD<<endl;
-    
-    double curvature = sthelix.curvature();
-    //cout <<"curvature: "<<curvature<<endl;
-    double tanLambda = tan(sthelix.dipAngle());
-    //cout <<"tanLambda: "<<tanLambda<<endl;
-    double eta = curvature*originD.x();
-    //cout <<"eta: "<<eta<<endl;
-    double y = originD.y() - 1./curvature*sqrt(1.- (curvature*x*eta)*(curvature*x*eta));
-    //cout <<"y: "<<y<<endl;
-    double z = originD.z() - tanLambda/curvature*asin(curvature*x-eta);
-    //cout <<"z: "<<z<<endl;
-    //double state[5];
-    double origin[3];
-    origin[0] = originD.x();
-    origin[1] = originD.y();
-    origin[2] = originD.z();
-    //state[0] = y;
-    //state[1] = z;
-    //state[2] = eta;
-    //state[3] = curvature;
-    //state[4] = tanLambda;
-
-    //cout <<"Set State"<<endl;
-    double dstate[15];
-    for (int i=0; i<15; ++i) {dstate[i]=1.;} //Dummy errors, all the same
-    //cout <<"Set Errors"<<endl;
-    
     //now get hits
     StPtrVecHit hits = st->detectorInfo()->hits();
     sort( hits.begin(), hits.end(), StHitRadiusGreaterThan() );
-    //cout <<"Sorted Hits"<<endl;
+    //sort( hits.begin(), hits.end(), StHitRadiusLessThan() );
     hitvector hitvec;
     
     for (vector<StHit*>::iterator it=hits.begin(); it!=hits.end(); ++it) {
-	//Transform to StiHit
-	//StiHit* temp = new StiHit(); //This is a total memory leak, only temporary
-	StiHit* temp = mhitfactory->getObject();
 	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
 	if (!hit) {
 	    cout <<"Error: cast failed"<<endl;
+	    sti=0;
+	    return;
 	}
 	else {
-	    StiGeometryTransform::instance()->operator()(hit, temp);
-	    hitvec.push_back(temp);
+	    //Find StiHit for this StHit
+	    pair<double, double> myPair = StiGeometryTransform::instance()->angleAndPosition(hit);
+	    double refAngle=myPair.first;
+	    double position=myPair.second;
+	    
+	    const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
+	    if (stiHits.size()==0) {
+		cout <<"Error, no StiHits for this sector, padrow"<<endl;
+		sti=0;
+		return;
+	    }
+	    
+	    SameStHit mySameStHit;
+	    mySameStHit.stHit = hit;
+	    hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(), mySameStHit);
+	    if (where==stiHits.end()) {
+		cout <<"Error, no StiHit with this StHit was found"<<endl;
+		sti=0;
+		return;
+	    }
+	    else {
+		hitvec.push_back(*where);
+	    }
 	}
     }
     
@@ -176,19 +150,30 @@ void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack*
     //for (hitvector::const_iterator it=hitvec.begin(); it!=hitvec.end(); ++it) {
     //cout <<(*(*it))<<endl;
     //}
-    //cout <<"Passing State"<<endl;
-    //for (int i=0; i<5; ++i) {
-    //cout <<"state["<<i<<"]:\t"<<state[i]<<endl;
-    //}
-    //for (int i=0; i<15; ++i) {
-    //cout <<"dstate["<<i<<"]:\t"<<dstate[i]<<endl;
-    //}
     
-    //That's it, seed the track and go home
-    sti->initialize(eta,
-		    curvature, 
-		    tanLambda,
-		    hitvec);
-    //cout <<"Initialized StiKalmanTrack"<<endl;
+    //Now get the helix
+    StPhysicalHelixD sthelix = st->geometry()->helix();
+      
+    //Establish the origin in TpcCoordinates
+    const StThreeVectorD& stHelixOriginD = sthelix.origin();
+    
+    double curvature = sthelix.curvature();
+    if (sthelix.h()<0) {
+	curvature=curvature*-1.;
+    }
+    //cout <<"curvature: "<<curvature<<endl;
+    
+    double tanLambda = tan(sthelix.dipAngle());
+    //cout <<"tanLambda: "<<tanLambda<<endl;
+
+    sti->initialize(curvature, tanLambda, stHelixOriginD, hitvec);
+
+    //Test track!
+    cout <<"Test the track:"<<endl;
+    for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
+	//for (double xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
+	StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
+	cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
+    }
     
 }

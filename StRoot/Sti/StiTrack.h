@@ -49,7 +49,6 @@ public:
     void  setStatus(int v)      ;  // status of track
     void  setVertex(StiHit *v);
   
-    static StiTrackNodeFactory * trackNodeFactory;
 
 protected:
     int    q;          // charge of the track 
