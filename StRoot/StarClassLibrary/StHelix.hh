@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelix.hh,v 1.8 2003/10/30 20:06:46 perev Exp $
+ * $Id: StHelix.hh,v 1.9 2004/12/02 02:51:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1997
  ***************************************************************************
@@ -18,6 +18,10 @@
  ***************************************************************************
  *
  * $Log: StHelix.hh,v $
+ * Revision 1.9  2004/12/02 02:51:16  ullrich
+ * Added option to pathLenghth() and distance() to search for
+ * DCA only within one period. Default stays as it was.
+ *
  * Revision 1.8  2003/10/30 20:06:46  perev
  * Check of quality added
  *
@@ -79,7 +83,7 @@ public:
     pair<double, double> pathLength(double r, double x, double y);
     
     /// path length at distance of closest approach to a given point
-    double       pathLength(const StThreeVector<double>& p) const;
+    double       pathLength(const StThreeVector<double>& p, bool scanPeriods = true) const;
     
     /// path length at intersection with plane
     double       pathLength(const StThreeVector<double>& r,
@@ -92,7 +96,7 @@ public:
     pair<double, double> pathLengths(const StHelix&) const;
     
     /// minimal distance between point and helix
-    double       distance(const StThreeVector<double>&) const;    
+    double       distance(const StThreeVector<double>& p, bool scanPeriods = true) const;    
     
     /// checks for valid parametrization
     bool         valid(double world = 1.e+5) const;
