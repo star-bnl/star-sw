@@ -1,7 +1,15 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.16 2001/04/27 18:41:48 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.17 2002/04/11 22:11:11 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.17  2002/04/11 22:11:11  calderon
+ * Changes to incorporate association of tracks from Sti
+ * Basically all that was needed was to add a flag to switch between
+ * Sti and regular EGR global tracks, and based on this flag, one looks for
+ * the proper bits to be set in the StTrack::encodedMethod() member function.
+ * Current default behaviour is still to use EGR global tracks, and the modification
+ * is done in the macro with a call to StAssociationMaker::useInTracker()
+ *
  * Revision 1.16  2001/04/27 18:41:48  calderon
  * Update with switches to use L3 Trigger.
  *
@@ -406,6 +414,7 @@ class StAssociationMaker : public StMaker {
     virtual Int_t Make();
     virtual Int_t Finish();
     void useL3Trigger() {mL3TriggerOn = true;}
+    void useInTracker() {mInTrackerOn = true;}
     TH2F*     mTpcLocalHitResolution;    //! Diff btw local  x and z coords of TPC hits.
     TH2F*     mSvtHitResolution;         //! Diff btw global x and z coords of SVT hits.
     TH2F*     mFtpcHitResolution;        //! Diff btw global r and phi coords of FTPC hits.
@@ -449,8 +458,9 @@ private:
 
     Bool_t drawinit;
     bool              mL3TriggerOn; //!
+    bool              mInTrackerOn; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.16 2001/04/27 18:41:48 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.17 2002/04/11 22:11:11 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
