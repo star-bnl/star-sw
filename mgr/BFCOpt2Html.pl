@@ -17,7 +17,7 @@ $OUT= shift(@ARGV) if (@ARGV);
 if( ! defined($IN) ){  $IN  = "StRoot/StBFChain/StBFChain.cxx";}
 if( ! defined($OUT)){  $OUT = "StRoot/StBFChain/doc/index.html";}
 
-open(FI,"$IN");
+if ( ! open(FI,"$IN") ){ die "Could not open $IN for reading\n";}
 
 $parse = 0;
 while ( defined($line = <FI>) ){
@@ -83,7 +83,7 @@ for ($i=0 ; $i <= $#lines ; $i++){
 undef(@lines);
 
 
-open(FO,">$OUT");
+if ( ! open(FO,">$OUT") ){ die "Could not open $OUT for writing\n";}
 print FO
     "<head><title>BFChain Options</title></head>\n",
     "<html>\n",
