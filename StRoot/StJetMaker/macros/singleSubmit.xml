@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<job  minFilesPerProcess="1" maxFilesPerProcess="10" fileListSyntax="rootd" simulateSubmission="true">
+
+   <command>
+            stardev
+            root4star -q -b /star/u/mmiller/data05/scheduler/macros/RunJetFinderScheduler.C\(1e9,\"./$FILELIST\"\,\"./processed/\"\)
+  </command>
+   <!-- please change the output paths to valid folders where you have write permission -->
+   <output fromScratch="*" toURL="file:/star/u/mmiller/data05/scheduler/processed/" />
+   <stdout URL="file:/star/u/mmiller/data05/scheduler/processed/sched$JOBID.out"/>
+   <stderr URL="file:/star/u/mmiller/data05/scheduler/processed/sched$JOBID.out"/>
+
+   <input URL="file:/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150005*.MuDst.root" />
+
+<!-- <input URL="catalog:star.bnl.gov?collision=auau200,production=P02gc,filetype=daq_reco_mudst" preferStorage="local" nFiles="1000" /> -->
+
+</job>

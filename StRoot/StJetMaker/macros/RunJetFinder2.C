@@ -5,11 +5,11 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(int nevents=100,
+void RunJetFinder2(int nevents=10,
 		   const char* dir = "",
 		   const char* file = "/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/135/st_physics_adc_5135068_raw_2050001.MuDst.root",
-		   const char *filter = "",
-		   const char *outfile="./4150010_raw_0030061")
+		   const char* outfile = "jets_out.root",
+		   const char *filter = "")
 {
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
@@ -60,15 +60,11 @@ void RunJetFinder2(int nevents=100,
     //Instantiate the StEmcTpcFourPMaker
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
-    //emcFourPMaker->UseSimpleADCCal(); //turn this on for simulation only!
-    //emcFourPMaker->UsePedSubKludge();
     emcFourPMaker->setMaxPoints(150);
     emcFourPMaker->setMinPointThreshold(.3);
 
     //Instantiate the JetMaker
-    char* emcOutfile = new char[256];
-    strcpy(emcOutfile, outfile); strcat(emcOutfile, "emc");
-    StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", emcFourPMaker, muDstMaker, emcOutfile);
+    StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
 
     //Now setup two jet analyses that use the same track/jet cuts
     
@@ -96,7 +92,7 @@ void RunJetFinder2(int nevents=100,
     cpars->setRequireStableMidpoints(true);
     cpars->setDoSplitMerge(true);
     cpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, cpars, "MkConeJetsPt02R07");
+    emcJetMaker->addAnalyzer(anapars, cpars, emcFourPMaker, "MkConeJetsPt02R07");
 
     //Setup the cone finder (See StJetFinder/StCdfChargedConeJetFinder.h -> class StCdfChargedConePars)
     StCdfChargedConePars* ccdfpars = new StCdfChargedConePars();
@@ -105,13 +101,13 @@ void RunJetFinder2(int nevents=100,
     ccdfpars->setSeedEtMin(1.0);
     ccdfpars->setAssocEtMin(0.1);
     ccdfpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, ccdfpars, "MkCdfChargedJetsPt02R07");
+    emcJetMaker->addAnalyzer(anapars, ccdfpars, emcFourPMaker, "MkCdfChargedJetsPt02R07");
 
     //Setup the kt=finder (See StJetFinder/StKtCluFinder.h -> class StKtCluPars)
     StKtCluPars* ktpars = new StKtCluPars();
     ktpars->setR(1.0);
     ktpars->setDebug(false);
-    emcJetMaker->addAnalyzer(anapars, ktpars, "MkKtJet");
+    emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
     
     chain->Init();
     chain->PrintInfo();
