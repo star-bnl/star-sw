@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.10 1999/10/01 21:16:03 wdeng Exp $
+// $Id: StMatchMaker.cxx,v 1.11 1999/10/29 23:23:25 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.11  1999/10/29 23:23:25  caines
+// Removed scenario methods
+//
 // Revision 1.10  1999/10/01 21:16:03  wdeng
 // Take out dst auxiliary table.
 //
@@ -72,7 +75,6 @@ ClassImp(StMatchMaker)
   m_est_ctrl(0)
 {
   drawinit=kFALSE;
-  m_scenario  = 0;
   m_svtchicut = 0;
   m_useglobal = 4;
   m_usesvt    = 0;
@@ -341,8 +343,7 @@ Int_t StMatchMaker::Init(){
     row.minfit	 =          2; // min no. of points on track ;
     row.mxtry	 =         10; // max no. of attempts to fit ;
     row.useglobal	 =          2; // set if to usematching to be used ;
-    row.scenario	 =          0; // Specifies egr running scenarios ;
-    row.useemc	 =          0; // set if EMC used in refit ;
+      row.useemc	 =          0; // set if EMC used in refit ;
     row.usesvt	 =          0; // set if SVT used in refit ;
     row.usetof	 =          0; // set if TOF used in refit ;
   // Helix
@@ -355,7 +356,6 @@ Int_t StMatchMaker::Init(){
     row.svtchicut	 =  0; // SVT chi2 cut for adding SVT-only tracks ;
   //Kalman
   //row.useglobal =     4;
-  //  row.scenario  = m_scenario;
   //  row.svtchicut = m_svtchicut;
   //  row.useglobal = m_useglobal;
   //  row.usetpc    = m_usetpc;
