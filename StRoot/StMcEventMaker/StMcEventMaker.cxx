@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.26 2000/05/04 22:46:39 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.27 2000/05/11 14:40:29 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.27  2000/05/11 14:40:29  calderon
+ * Added switches to do/do not load hit information from different detectors.
+ * By default, all the detectors' hit information is loaded.
+ *
  * Revision 1.26  2000/05/04 22:46:39  calderon
  * pdg Id is now read in the track constructor for all tracks
  *
@@ -140,7 +144,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.26 2000/05/04 22:46:39 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.27 2000/05/11 14:40:29 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -153,12 +157,14 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title):StMaker(name
     // - set all pointers defined in the header file to zero
 
     mCurrentMcEvent = 0; //! I think this tells root not to parse it 
-    doPrintEventInfo  = kFALSE;  // TMP
+    doPrintEventInfo  = kFALSE;  
     doPrintMemoryInfo = kFALSE;  
     doPrintCpuInfo    = kFALSE; 
-
+    doUseTpc          = kTRUE;
+    doUseSvt	      = kTRUE;
+    doUseFtpc	      = kTRUE;
+    doUseRich         = kTRUE;
 }
-
 //_____________________________________________________________________________
 
 
@@ -176,9 +182,14 @@ StMcEventMaker::~StMcEventMaker()
 
 void StMcEventMaker::Clear(const char*)
 {
+    if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();    
     // StMcEventMaker - Clear,
     delete mCurrentMcEvent;
     mCurrentMcEvent = 0;
+    if (doPrintMemoryInfo) {
+	StMemoryInfo::instance()->snapshot();
+	StMemoryInfo::instance()->print();
+    }
     StMaker::Clear();
 }
 
@@ -211,10 +222,7 @@ Int_t StMcEventMaker::Make()
     // StMcEventMaker - Make; fill StMcEvent objects
     StTimer timer;
     if (doPrintCpuInfo) timer.start();
-//     if (doPrintMemoryInfo) {
-// 	StMemoryInfo::instance()->snapshot();
-// 	StMemoryInfo::instance()->print();
-//     }
+    if (doPrintMemoryInfo) StMemoryInfo::instance()->snapshot();
     
     cout << "Inside StMcEventMaker::Make()" << endl;
     // We're supposed to get the dataset from the chain. I don't know how yet. I think it is:
@@ -372,10 +380,16 @@ Int_t StMcEventMaker::Make()
 	
 	if (eventTable)
 	    mCurrentMcEvent = new StMcEvent(eventTable);
-	else 
-	    mCurrentMcEvent = new StMcEvent;
-	if (mCurrentMcEvent) cout << "****  Defined new StMcEvent" << endl;
+	else {
+	    gMessMgr->Warning() << "StMcEventMaker::Make(): g2t_event Table not found.  Using default constructor." << endm;
+	    mCurrentMcEvent = new StMcEvent;  
+	}
 	
+	if (mCurrentMcEvent) cout << "****  Created new StMcEvent" << endl;
+	else {
+	    gMessMgr->Warning() << "Could not create StMcEvent! Exit from StMcEventMaker." << endm;
+	    return kStWarn;
+	}
 	//______________________________________________________________________
 	// Step 2 - Fill Vertices - we do not fill parent/daughters until Step 3
 	
@@ -465,9 +479,9 @@ Int_t StMcEventMaker::Make()
 	    if ((motherIndex > 0) && (motherIndex < NGeneratorTracks))
 		if (motherIndex > gtrk) 
 		    gMessMgr->Warning()
-			<< "Wrong ordering!  Track " << gtrk+1 << "from particle table: "
+			<< "Wrong ordering!  Track " << gtrk+1 << " from particle table: "
 			<< "Can't assign mother track " << motherIndex
-			<< "because it has not been created yet!" << endm;
+			<< " because it has not been created yet!" << endm;
 		else egTrk->setParent(ttempParticle[motherIndex]);
 	    
 	} // Generator Tracks Loop
@@ -556,6 +570,7 @@ Int_t StMcEventMaker::Make()
 		    StMcTrackIterator trkToErase = find (mCurrentMcEvent->tracks().begin(),
 							 mCurrentMcEvent->tracks().end(),
 							 ttempParticle[iEventGeneratorLabel]);
+		    delete *trkToErase;
 		    mCurrentMcEvent->tracks().erase(trkToErase);
 		}
 		               		    
@@ -602,7 +617,7 @@ Int_t StMcEventMaker::Make()
 	//
 	// TPC Hits
 	//
-	
+	if (doUseTpc) {
 	long NHits = g2t_tpc_hitTablePointer->GetNRows();
 	long iTrkId = 0;
 	long nBadVolId = 0;
@@ -618,8 +633,12 @@ Int_t StMcEventMaker::Make()
 	    
 	    th = new StMcTpcHit(&tpcHitTable[ihit]);
 	    
-	    if(!mCurrentMcEvent->tpcHitCollection()->addHit(th)) // adds hit th to collection
+	    if(!mCurrentMcEvent->tpcHitCollection()->addHit(th)) {// adds hit th to collection
 		nBadVolId++;
+		delete th;
+		th = 0;
+		continue;
+	    }
 	    // point hit to its parent and add it to collection
 	    // of the appropriate track
 	    
@@ -643,14 +662,16 @@ Int_t StMcEventMaker::Make()
 		sort (tpcHits.begin(), tpcHits.end(), compMcTpcHit() );
 	        
 	    }
-	
+	}
 	//
 	// SVT Hits
 	//
+	if (doUseSvt) {
 	if (g2t_svt_hitTablePointer) {
-	    NHits = g2t_svt_hitTablePointer->GetNRows();
-	    iTrkId = 0;
-	    nBadVolId = 0;
+	    long NHits = g2t_svt_hitTablePointer->GetNRows();
+	    long iTrkId = 0;
+	    long nBadVolId = 0;
+	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
 		if (svtHitTable[ihit].volume_id < 1101 || svtHitTable[ihit].volume_id > 9000) {
 		    nBadVolId++;
@@ -694,12 +715,17 @@ Int_t StMcEventMaker::Make()
 	else {
 	    cout << "No SVT Hits in this file" << endl;
 	}
+	} // do use svt
 	
+	//
 	// FTPC Hits
+	//
+	if (doUseFtpc) {
 	if (g2t_ftp_hitTablePointer) {
-	    NHits = g2t_ftp_hitTablePointer->GetNRows();
-	    iTrkId = 0;
-	    nBadVolId = 0;
+	    long  NHits = g2t_ftp_hitTablePointer->GetNRows();
+	    long  iTrkId = 0;
+	    long  nBadVolId = 0;
+	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
 		if (ftpHitTable[ihit].volume_id < 101 || ftpHitTable[ihit].volume_id > 210) {
 		    nBadVolId++;
@@ -708,8 +734,12 @@ Int_t StMcEventMaker::Make()
 
 		fh = new StMcFtpcHit(&ftpHitTable[ihit]);
 
-		if (!mCurrentMcEvent->ftpcHitCollection()->addHit(fh)) // adds hit fh to collection
+		if (!mCurrentMcEvent->ftpcHitCollection()->addHit(fh)){ // adds hit fh to collection
 		    nBadVolId++;
+		    delete fh;
+		    fh = 0;
+		    continue;
+		}
 		// point hit to its parent and add it to collection
 		// of the appropriate track
 		
@@ -733,12 +763,17 @@ Int_t StMcEventMaker::Make()
 	else {
 	    cout << "No FTPC Hits in this file" << endl;
 	}
-	
+	}// do use ftpc
+
+	//
 	// RICH Hits
+	//
+	if (doUseRich) {
 	if (g2t_rch_hitTablePointer) {
-	    NHits = g2t_rch_hitTablePointer->GetNRows();
-	    iTrkId = 0;
-	    nBadVolId = 0;
+	    long  NHits = g2t_rch_hitTablePointer->GetNRows();
+	    long  iTrkId = 0;
+	    long  nBadVolId = 0;
+	    long ihit;
 	    for(ihit=0; ihit<NHits; ihit++) {
 		if (rchHitTable[ihit].volume_id < 257 // 2^8 + 1 
 		    || ftpHitTable[ihit].volume_id > 2560) { // 10*2^8
@@ -765,7 +800,7 @@ Int_t StMcEventMaker::Make()
 	else {
 	    cout << "No RICH Hits in this file" << endl;
 	}
-	
+	} // do use rich
 	
 	ttemp.clear();
 	
