@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.16 2002/08/20 19:55:49 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.17 2002/08/27 19:05:56 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -455,6 +455,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   catch(StMuException e) {
     e.print();
+    throw e;
   }
   
   try {
@@ -462,6 +463,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   catch(StMuException e) {
     e.print();
+    throw e;
   }
 
   try {
@@ -469,6 +471,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   catch(StMuException e) {
     e.print();
+    throw e;
   }
 
   try {
@@ -476,6 +479,7 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
   }
   catch(StMuException e) {
     e.print();
+    throw e;
   }
 }
 
@@ -760,6 +764,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.17  2002/08/27 19:05:56  laue
+ * Minor updates to make the muDst from simulation work
+ *
  * Revision 1.16  2002/08/20 19:55:49  laue
  * Doxygen comments added
  *

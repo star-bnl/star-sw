@@ -15,6 +15,7 @@
 #define DEBUGMESSAGE1(x) if (StMuDebug::level()>=1) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
 #define DEBUGMESSAGE2(x) if (StMuDebug::level()>=2) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
 #define DEBUGMESSAGE3(x) if (StMuDebug::level()>=3) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << x << endl;
+#define FORCEDDEBUGVALUE(x)  cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE(x)  if (StMuDebug::level()>0)    cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE1(x) if (StMuDebug::level()>=1) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
 #define DEBUGVALUE2(x) if (StMuDebug::level()>=2) cout << "##### " << __PRETTY_FUNCTION__ << "##### " << (#x) << "=" << x << endl;
@@ -67,6 +68,9 @@ class StMuDebug : public TObject{
 /***********************************************************************
  *
  * $Log: StMuDebug.h,v $
+ * Revision 1.4  2002/08/27 19:05:56  laue
+ * Minor updates to make the muDst from simulation work
+ *
  * Revision 1.3  2002/08/20 19:55:48  laue
  * Doxygen comments added
  *
