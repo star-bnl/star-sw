@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.32 1999/11/11 17:29:10 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.33 1999/11/12 05:27:32 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -772,10 +772,12 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
         // ------------------------------------------------------------------------ //
         if (trackColor > 0) {
            tpt_track_st &t = *(track+i);
-           const float rad = 3.1415926/180.;
+           const float pi2 = 3.1415926/2.;
+           const float rad = pi2/90.;
            float angle =  t.phi0 * rad;
+           int h = t.q > 0 ? -1 : 1;  
            StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
-           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad,vector);           
+           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
 	   Int_t nSteps = Int_t(4*t.length*t.curvature + 1); 
 	   Float_t step = t.length / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
@@ -950,6 +952,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 // --  end of filter list --
 
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.33  1999/11/12 05:27:32  fine
+// phase parameter for  StHelix fixed. Thanks  Wensheng and Thomas
+//
 // Revision 1.32  1999/11/11 17:29:10  fine
 // typo Filer replaced with Filter
 //
