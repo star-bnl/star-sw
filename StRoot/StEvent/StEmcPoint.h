@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.6 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StEmcPoint.h,v 2.7 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.7  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.6  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -83,12 +86,13 @@ public:
 
     void addNeighbor(const StEmcPoint*);
     
-    int                  nTracks() const;
+    int                  nTracks() const;  // *MENU*
     StPtrVecTrack&       track();
     const StPtrVecTrack& track() const;
     
     void addTrack(StTrack*);
-    
+  // 11-nov-03 by PAI
+    void print();      // *MENU*    
 protected:
     Float_t            mEnergy;
     Float_t            mChiSquare;

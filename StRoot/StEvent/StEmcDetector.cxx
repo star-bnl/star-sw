@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.10 2003/10/02 22:34:05 jeromel Exp $
+ * $Id: StEmcDetector.cxx,v 2.11 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
+ * Revision 2.11  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.10  2003/10/02 22:34:05  jeromel
  * LEAK_SCOPE patch (Alex)
  *
@@ -45,8 +48,10 @@
 #include "StEmcRawHit.h"
 #include "StEmcModule.h"
 #include "StEmcClusterCollection.h"
+#include <TBrowser.h>
+#include <StAutoBrowse.h>
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.10 2003/10/02 22:34:05 jeromel Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.11 2004/07/20 17:07:49 perev Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -81,8 +86,6 @@ StEmcDetector::Zero()
 }
 
 
-
-
 bool
 StEmcDetector::addHit(StEmcRawHit* hit)
 {
@@ -109,6 +112,33 @@ StEmcDetector::numberOfHits() const
     unsigned int sum = 0;
     for (unsigned int m=0;m<mNumberOfModules;m++) sum+= mModules[m]->hits().size();
     return sum;
+}
+
+void
+StEmcDetector::printNumberOfHits() const 
+{
+  printf(" Detector %i : nhits %i\n", int(mDetectorId), numberOfHits()); 
+  return;
+}
+
+double 
+StEmcDetector::getEnergy(const int pri) const
+{
+    float e = 0., eM = 0.;
+    for (unsigned int m=0;m<mNumberOfModules;m++) {
+      if(mModules[m]->numberOfHits()==0) continue; 
+      eM = mModules[m]->getEnergy();
+      e += eM;
+      if(pri>1) {
+        if(eM !=0 ) printf("%3i(m) : e %9.4f ", m+1, eM);
+        if(eM < 0.) printf(" !!");
+        printf("\n");
+      }
+    }
+
+    if(pri>0) printf("det %i : energy %9.4f GeV/c \n", int(mDetectorId), e);
+
+    return e;
 }
 
 StEmcModule*
@@ -149,4 +179,26 @@ StEmcDetector::setModule(StEmcModule* val,int IdMod)
         mModules[IdMod] = val;
       }
    }
+}
+
+bool  StEmcDetector::IsFolder() const
+{
+  if(numberOfHits()) return kTRUE;
+  else               return kFALSE;
+}
+
+void
+StEmcDetector::Browse(TBrowser *b)
+{
+  char name[10];
+    for (unsigned int m=0;m<mNumberOfModules;m++) {
+      if(mModules[m]->IsFolder()) {
+	// 1 var; module[01] -> mHits 
+	// StAutoBrowse::Browse(mModules[m], b); 
+	// 2 var; mHits StEmcModule
+        sprintf(name,"Module%3.3i",m+1);
+	b->Add(mModules[m],name); 
+      }
+    }
+    StAutoBrowse::Browse(mClusters, b);
 }

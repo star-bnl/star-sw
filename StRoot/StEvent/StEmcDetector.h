@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcDetector.h,v 2.5 2003/09/12 21:54:53 jeromel Exp $
+ * $Id: StEmcDetector.h,v 2.6 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.h,v $
+ * Revision 2.6  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.5  2003/09/12 21:54:53  jeromel
  * Zeroing
  *
@@ -52,6 +55,8 @@ public:
     
     bool          addHit(StEmcRawHit*);
     unsigned int  numberOfHits() const;
+    void    printNumberOfHits() const; // *MENU*
+    double  getEnergy(const int pri=0) const; // *MENU*
     
     StEmcModule*       module(unsigned int);
     const StEmcModule* module(unsigned int) const;
@@ -61,6 +66,9 @@ public:
 
     void setCluster(StEmcClusterCollection*);
     void setModule(StEmcModule*,int);
+  // 17-sep-03  
+    virtual bool  IsFolder() const;    
+    virtual void  Browse(TBrowser *b);
     void Zero();
     
 private:
