@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Current Available Macros</title>
-<!-- Changed by: Kathleen R. Turner,  3-Dec-1999 -->
+<!-- Changed by: Kathleen R. Turner, 11-Jan-2000 -->
 </head>
 <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
 <basefont face="verdana,arial,helvetica,sans-serif">
@@ -81,9 +81,12 @@
     <ul>
       <li> <font  size ="+1" color="red"> St_QA_Maker <font  size ="+1" color="black"> 
              <ul>
+               <li> ! Important note (11jan00) - to use St_QA_Maker class, you must also
+                    load the St_global library, since the function pams/global/egr/prop_one_track.c
+                    is needed
                <li>
-                 books (using StQABookHist methods) and contains filling methods for
-                  histograms from dst Table data structures
+                 books (using StQABookHist methods) and fills histograms (using separate filling
+                  methods) from dst Table data structures
                <li>
                  inherits from StQABookHist
               </ul>
