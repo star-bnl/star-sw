@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPhysicalHelix.cc,v 1.3 1999/02/24 11:42:18 ullrich Exp $
+ * $Id: StPhysicalHelix.cc,v 1.4 2002/02/20 00:56:23 ullrich Exp $
  *
  * Author: Brian Lasiuk, Sep 1997
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPhysicalHelix.cc,v $
+ * Revision 1.4  2002/02/20 00:56:23  ullrich
+ * Added methods to calculate signed DCA.
+ *
  * Revision 1.3  1999/02/24 11:42:18  ullrich
  * Fixed bug in momentum().
  *
@@ -64,7 +67,7 @@ StPhysicalHelix::StPhysicalHelix(double c, double d, double phase,
 
 StThreeVector<double> StPhysicalHelix::momentum(double B) const
 {
-    if(mSingularity)
+    if (mSingularity)
 	return(StThreeVector<double>(0,0,0));
     else {
 #ifndef ST_NO_NAMESPACES
@@ -93,4 +96,54 @@ StThreeVector<double> StPhysicalHelix::momentumAt(double S, double B)
 int StPhysicalHelix::charge(double B) const
 {
     return (B > 0 ? -mH : mH);
+}
+
+double StPhysicalHelix::geometricSignedDistance(double x, double y)  
+{
+    // Geometric signed distance
+    double thePath = this->pathLength(x,y);
+    StThreeVector<double> DCA2dPosition = this->at(thePath);
+    DCA2dPosition.setZ(0);
+    StThreeVector<double> position(x,y,0);
+    StThreeVector<double> DCAVec = (DCA2dPosition-position);
+    StThreeVector<double> momVec;
+    // Deal with straight tracks
+    if (this->mSingularity) {
+	momVec = this->at(1)- this->at(0);
+	momVec.setZ(0);
+    }
+    else {
+	momVec = this->momentumAt(thePath,1./tesla); // Don't care about Bmag.  Helicity is what matters.
+	momVec.setZ(0);
+    }
+    
+    double cross = DCAVec.x()*momVec.y() - DCAVec.y()*momVec.x();
+    double theSign = (cross>=0) ? 1. : -1.;
+    return theSign*DCAVec.perp();
+}
+
+double StPhysicalHelix::curvatureSignedDistance(double x, double y) 
+{
+    // Protect against mH = 0 or zero field
+    if (this->mSingularity || fabs(this->mH)<=static_cast<double>(0)) {
+	return (this->geometricSignedDistance(x,y));
+    }
+    else {
+	return (this->geometricSignedDistance(x,y))/(this->mH);
+    }
+    
+}
+
+double StPhysicalHelix::geometricSignedDistance(const StThreeVector<double>& pos) 
+{
+    double sdca2d = this->geometricSignedDistance(pos.x(),pos.y());
+    double theSign = (sdca2d>=0) ? 1. : -1.;
+    return (this->distance(pos))*theSign;
+}
+
+double StPhysicalHelix::curvatureSignedDistance(const StThreeVector<double>& pos) 
+{
+    double sdca2d = this->curvatureSignedDistance(pos.x(),pos.y());
+    double theSign = (sdca2d>=0) ? 1. : -1.;
+    return (this->distance(pos))*theSign;
 }
