@@ -275,12 +275,16 @@ void FtfPara::read ( char* inputFile ) {
 }
 
 void FtfPara::write ( char* outputFile ) {
-
    FILE* dataFile = fopen( outputFile, "w");
    if (dataFile == NULL) {
       printf ( "FtfPara::write: Error opening output file %s \n ", outputFile ) ;
       return ;
    }
+   write ( dataFile ) ;
+   fclose ( dataFile ) ;
+}
+
+void FtfPara::write ( FILE* dataFile ) {
 
    fprintf ( dataFile, "infoLevel            %10d \n", infoLevel ) ;
    fprintf ( dataFile, "segmentRowSearch     %10d  \n", segmentRowSearchRange ) ;
@@ -293,7 +297,7 @@ void FtfPara::write ( char* outputFile ) {
    fprintf ( dataFile, "minHitsPerTrack      %10d  \n", minHitsPerTrack ) ;
    fprintf ( dataFile, "modRow               %10d  \n", modRow ) ;
    fprintf ( dataFile, "nHitsForSegment      %10d  \n", nHitsForSegment ) ;
-   fprintf ( dataFile, "minHitsForFit        %10d  \n", minHitsForFit   ) ;
+// fprintf ( dataFile, "minHitsForFit        %10d  \n", minHitsForFit   ) ;
    fprintf ( dataFile, "nEta                 %10d  \n", nEta            ) ;
    fprintf ( dataFile, "nPhi                 %10d  \n", nPhi            ) ;
    fprintf ( dataFile, "deta                 %10.2e\n", deta         ) ;
@@ -339,8 +343,6 @@ void FtfPara::write ( char* outputFile ) {
    fprintf ( dataFile, "phiVertex            %10.2e\n", phiVertex          ) ;
    fprintf ( dataFile, "rVertex              %10.2e\n", rVertex            ) ;
    fprintf ( dataFile, "maxTime              %10.2e\n", maxTime            ) ;
-
-   fclose ( dataFile ) ;
 }
 
 void FtfPara::setDefaults (void)
@@ -400,7 +402,7 @@ void FtfPara::setDefaults (void)
    bField            = 0.5F   ;
    phiShift          = 0.0    ;
    
-   ptMinHelixFit     = 100.F  ;
+   ptMinHelixFit     = 0.F  ;
    rVertex           = 0.F    ;
    xVertex           = 0.F    ;
    yVertex           = 0.F    ;

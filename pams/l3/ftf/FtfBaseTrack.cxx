@@ -755,6 +755,9 @@ int FtfBaseTrack::extraRCyl ( double &r,  double &phi, double &z,
    sfac = sqrt( fac1 ) ;
 //  
 //  If they don't intersect return
+//  Trick to solve equation of intersection of two circles
+//  rotate coordinates to have both circles with centers on x axis
+//  pretty simple system of equations, then rotate back
 //  
    if ( fabs(sfac-rc) > r || fabs(sfac+rc) < r ) {
 //    printf ( "particle does not intersect \n" ) ;
@@ -776,8 +779,9 @@ int FtfBaseTrack::extraRCyl ( double &r,  double &phi, double &z,
     
    if ( td < 0 ) td = td + 2. * M_PI ;
    deltat = fmod((-q*td + q*tPhi0),2*M_PI) ;
-   if ( deltat < 0.      ) deltat += 2. * M_PI ;
-   if ( deltat > 2.*M_PI ) deltat -= 2. * M_PI ;
+
+// if ( deltat < 0.      ) deltat += 2. * M_PI ;
+// if ( deltat > 2.*M_PI ) deltat -= 2. * M_PI ;
    z = z0 + rc * tanl * deltat ;
 // 
 //    That's it
@@ -944,8 +948,8 @@ void FtfBaseTrack::updateToRadius  ( double radius ) {
 
    int ok = extraRCyl ( radius,  phiExtra, zExtra, rCircle, xCircleCenter, yCircleCenter ) ;
    if ( ok ) {
-      printf ( "FtfBaseTrack::updateToRadius: track %d does not intersect radius %f\n", 
-                id, radius ) ;
+//    printf ( "FtfBaseTrack::updateToRadius: track %d does not intersect radius %f\n", 
+//              id, radius ) ;
       return ;
    }
 
