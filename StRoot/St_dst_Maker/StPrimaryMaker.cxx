@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.52 2001/04/09 19:27:44 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.53 2001/04/11 22:55:43 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.53  2001/04/11 22:55:43  wdeng
+// Plug in egr_primfit
+//
 // Revision 1.52  2001/04/09 19:27:44  fisyak
 // modification for new evr
 //
@@ -182,6 +185,7 @@
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
 #include "global/St_egr_impactcl_Module.h"
+#include "global/St_egr_primfit_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 
 #define gufld   gufld_
@@ -505,10 +509,8 @@ Int_t StPrimaryMaker::Make(){
 
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
-      iRes = egr_fitter (tphit,    vertex,       tptrack, tpc_groups,
-			 scs_spt, m_egr2_egrpar, stk_track, svt_groups,
-			 evt_match, primtrk);
-      //	   ======================================================
+      iRes = egr_primfit(vertex, m_egr2_egrpar, globtrk, primtrk);
+      //    ======================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
       if (iRes !=kSTAFCV_OK){
