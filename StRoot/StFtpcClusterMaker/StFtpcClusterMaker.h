@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.13 2001/10/19 09:41:22 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.14 2001/10/29 12:53:23 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.14  2001/10/29 12:53:23  jcs
+// select FTPC drift maps according to flavor of magnetic field
+//
 // Revision 1.13  2001/10/19 09:41:22  jcs
 // tZero now in data base in ftpcElectronics
 //
@@ -78,7 +81,7 @@ class St_ftpcElectronics;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.13 2001/10/19 09:41:22 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.14 2001/10/29 12:53:23 jcs Exp $";
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
    St_ftpcFastSimPars   *m_fastsimpars;           //!
@@ -111,11 +114,12 @@ class StFtpcClusterMaker : public StMaker {
  public: 
                   StFtpcClusterMaker(const char *name="ftpc_hits");
    virtual       ~StFtpcClusterMaker();
+   virtual Int_t InitRun(int);
    virtual Int_t Init();
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.13 2001/10/19 09:41:22 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.14 2001/10/29 12:53:23 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };
