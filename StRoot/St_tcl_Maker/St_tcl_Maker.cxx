@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.22 1999/02/26 17:25:30 kathy Exp $
+// $Id: St_tcl_Maker.cxx,v 1.23 1999/02/27 23:10:48 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.23  1999/02/27 23:10:48  sakrejda
+// auxiliary hit table eliminated
+//
 // Revision 1.22  1999/02/26 17:25:30  kathy
 // fix histograms
 //
@@ -175,7 +178,7 @@ Int_t St_tcl_Maker::Make(){
   St_DataSetIter local(m_DataSet);
   if (!m_DataSet->GetList()) {// If DataSet list empty then create it
     St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
-    St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",max_hit);   local.Add(tphitau);
+    St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",1);   local.Add(tphitau);
     //    St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     local.Add(index);
     St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
     St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      local.Add(tpseq);
@@ -266,7 +269,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.22 1999/02/26 17:25:30 kathy Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.23 1999/02/27 23:10:48 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
