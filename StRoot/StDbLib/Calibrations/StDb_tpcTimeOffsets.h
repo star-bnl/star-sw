@@ -16,6 +16,7 @@ public:
 
   StDb_tpcTimeOffsets(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcTimeOffsets(StDb_tpcTimeOffsets& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcTimeOffsets *a = c.getTable();
                                      if(a)mstruct=new tpcTimeOffsets(*a);};
 

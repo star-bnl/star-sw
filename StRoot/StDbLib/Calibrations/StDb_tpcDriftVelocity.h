@@ -16,6 +16,7 @@ public:
 
   StDb_tpcDriftVelocity(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_tpcDriftVelocity(StDb_tpcDriftVelocity& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      tpcDriftVelocity *a = c.getTable();
                                      if(a)mstruct=new tpcDriftVelocity(*a);};
 

@@ -16,6 +16,7 @@ public:
 
   StDb_dedxPidAmpDb(const char* name): StDbTableComponent(name),mstruct(0) {}; 
   StDb_dedxPidAmpDb(StDb_dedxPidAmpDb& c) : StDbTableComponent(c) {
+                                     mstruct=0;
                                      dedxPidAmpDb *a = c.getTable();
                                      if(a)mstruct=new dedxPidAmpDb(*a);};
 
