@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.4 2001/04/25 14:17:16 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.5 2001/05/23 00:14:27 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.5  2001/05/23 00:14:27  lansdell
+// added some logx code
+//
 // Revision 2.4  2001/04/25 14:17:16  genevb
 // Reduced line width for newer Root
 //
@@ -967,15 +970,33 @@ void StHistUtil::SetDefaultLogXList(Char_t *dirName)
   if (Debug())
     cout << " **** Now in StHistUtil::SetDefaultLogXList  **** " << endl;
 
+  TString type;
 
-  Char_t **sdefList=0;
-  Int_t lengofList = 0;
+  if (!strcmp(dirName,"QA"))
+    type = "Tab";
+  if (!strcmp(dirName,"EventQA"))
+    type = "StE";
+
+  Char_t* sdefList[] = {
+    #include "St_QA_Maker/QAhlist_logx.h"
+  };
+
+  Int_t lengofList = sizeof(sdefList)/4;
   Int_t numLog = 0;
   Int_t ilg = 0;
   for (ilg=0;ilg<lengofList;ilg++) {
-    numLog = AddToLogXList(sdefList[ilg]);
-    if (Debug())
-      cout <<  " !!! adding histogram " << sdefList[ilg] << " to LogX list "  << endl ;
+    TString listString;
+    if ((sdefList[ilg] != "QaInnerSectorDeDx") &&
+	(sdefList[ilg] != "QaOuterSectorDeDx") &&
+	(sdefList[ilg] != "QaDedxAllSectors")) {
+      for (Int_t k=0; k<numOfPosPrefixes; k++) {
+        ((listString = type) += possiblePrefixes[k]) += sdefList[ilg];
+        numLog = AddToLogXList(listString.Data());
+      }
+    } else {
+      listString = sdefList[ilg];
+      numLog = AddToLogXList(listString.Data());
+    }
   }
 
   cout <<  " !!!  StHistUtil::SetDefaultLogXList, # histogram put in list " << numLog << endl;
