@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichSimpleHit.h,v 1.3 2000/05/31 19:26:15 dunlop Exp $
+ * $Id: StRichSimpleHit.h,v 2.0 2000/08/09 16:22:12 gans Exp $
  *
  * Description:
  *   Definition of the Hit object as reconstructed by
@@ -7,9 +7,12 @@
  *
  ***************************************************************
  * $Log: StRichSimpleHit.h,v $
- * Revision 1.3  2000/05/31 19:26:15  dunlop
- * Filling non-ctor entries in persistent hits + support for this
+ * Revision 2.0  2000/08/09 16:22:12  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
+ * Revision 2.1  2000/09/29 19:01:26  lasiuk
+ * enumerated types added for flags
+ * c'tor includes cp from persistent hit
  * number of pads added as a member
  *
  * Revision 2.0  2000/08/09 16:22:12  gans
@@ -36,7 +39,7 @@
 #include <iostream.h>
 #include <vector>
 
-#include "StRichHit.h"
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
 using std::vector;
 #endif
 

@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichSinglePixelCollection.cxx,v 1.3 2000/05/23 16:56:01 lasiuk Exp $
+ * $Id: StRichSinglePixelCollection.cxx,v 2.0 2000/08/09 16:22:13 gans Exp $
  *
  * Description:
  *  Container for cluster finder which allows access in
@@ -11,6 +11,9 @@
  ****************************************************************
  *
  * $Log: StRichSinglePixelCollection.cxx,v $
+ * Revision 2.0  2000/08/09 16:22:13  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
  * Revision 1.3  2000/05/23 16:56:01  lasiuk
  * Incorporate new MC info
  * add clone() where necessary

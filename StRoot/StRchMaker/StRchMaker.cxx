@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.25 2000/06/16 20:52:14 dunlop Exp $
+ * $Id: StRchMaker.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.25  2000/06/16 20:52:14  dunlop
- * Fixed another segfault when dataset not present
+ * Revision 2.0  2000/08/09 16:22:11  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
+ *
+ * Revision 2.0  2000/08/09 16:22:11  gans
+ * Cosmetic Changes. Naming convention for TDrawable objects
  *
  * Revision 1.25  2000/06/16 20:52:14  dunlop
  * Fixed another segfault when dataset not present
@@ -95,9 +98,10 @@
 #include "StRrsMaker/StRichPadPlane.h"
 #include "StRrsMaker/StRichSinglePixel.h"
 #include "StRrsMaker/StRichSingleMCPixel.h"
+
 // Database
-#ifdef RCH_WITH_PAD_MONITOR
-#include "StRrsMaker/StRichPadMonitor.h"
+#include "StRrsMaker/StRichGeometryDb.h"
+#include "StRichDisplayActivate.h"
 
 #ifdef RICH_WITH_PAD_MONITOR
 #include "StRichDisplayMaker/StRichPadMonitor.h"
@@ -119,8 +123,8 @@
 //idl in $STAR/include/../pams/global/idl/dst_rch_pixel.idl
 #include "dst_rch_pixel.h"
 ClassImp(StRchMaker) // macro
-StRchMaker::StRchMaker(const char *name, int daq, int matrix, int cf)
-    : StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
+   
+//-----------------------------------------------------------------
 
     StRchMaker::StRchMaker(const char *name, int daq, int matrix, int cf)
 	: StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
@@ -184,7 +188,32 @@ Int_t StRchMaker::Init() {
 
     mhc            = new TH1F("hcharge","Hit Charge",50,0,500);
     mhmc           = new TH1F("hmaxadc","Hit max ADC",50,0,500);
-
+    mhc2m          = new TH1F("hq2maxadc","Hit q/maxADC",50,0,5);
+#endif
+    
+    if (mPedestalSubtract) {
+	ifstream pedfile;
+	pedfile.open(mPedestalFile);
+	if (!pedfile) {
+	    cout << "Couldn't open ped file: " << mPedestalFile << endl;
+	}
+	else {
+	    
+	    for (unsigned int channelnum=0; channelnum<960; ++channelnum) {
+		for (unsigned int cramblock=0; cramblock<16; ++cramblock) {
+		    pedfile >> mPedestal[channelnum/6][95 - (cramblock*6 + channelnum%6)] 
+			    >> mSigma[channelnum/6][95 - (cramblock*6 + channelnum%6)];
+		}
+	    }
+	    pedfile.close();
+	    cout << "Read pedestals" << endl;
+	    
+  	    for (unsigned int pad=0; pad < 160; ++pad) {
+  		for (unsigned int row=0; row < 96; ++row) {
+		    //	    cout << " pad " << pad << " row " << row << " ped " << mPedestal[pad][row] << " sig " << mSigma[pad][row] << endl;
+  		}
+  	    }
+	}
 	
    }
     
@@ -264,10 +293,10 @@ Int_t StRchMaker::Make() {
 	    }
 	    else {
 		cout << "** StEvent RichClusters DOES NOT Exist" << endl;
-	     cout << "** StEvent richCollection DOES NOT Exist" << endl;
-	     cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
-	     cout << "** StEvent RichClusterCollection DOES NOT Exist" << endl;
-	     cout << "** StEvent RichHitCollection DOES NOT Exist" << endl;
+	    }
+	}
+	else {
+	    cout << "** StEvent richCollection DOES NOT Exist" << endl;
 	    cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
 	    cout << "** StEvent RichClusterCollection DOES NOT Exist" << endl;
 	    cout << "** StEvent RichHitCollection DOES NOT Exist" << endl;
@@ -292,6 +321,7 @@ Int_t StRchMaker::Make() {
 	    St_ObjectSet *rrsEvent =
 		(St_ObjectSet*)GetDataSet("Rrs/.const/richPixels");
 	    if(!rrsEvent) {
+		cout << "StRchMaker::Maker()\n";
 		cout << "\tDataSet: rrsEvent not there\n";
 		cout << "\tSkip this event\n" << endl;
 		clearPadMonitor();
@@ -301,6 +331,7 @@ Int_t StRchMaker::Make() {
 	    StRichPadPlane* theRichSimData =
 		(StRichPadPlane*)(rrsEvent->GetObject());
 	    if(!theRichSimData) {
+		cout << "StRchMaker::Maker()\n";
 		cout << "\tRichSimData: not there\n";
 		cout << "\tSkip this event\n" << endl;
 		clearPadMonitor();
@@ -312,6 +343,8 @@ Int_t StRchMaker::Make() {
 	    cout << "DAQ" << endl;
 	    mTheRichData   = GetDataSet("StDAQReader");
 	    if(!mTheRichData) {
+		cout << "StRchMaker::Maker()\n";
+		cout << "\t DataSet: StDAQReader not there\n";
 		cout << "\tSkip this event\n" << endl;
 		clearPadMonitor();
 		
@@ -320,12 +353,14 @@ Int_t StRchMaker::Make() {
 
 	    mTheDataReader = (StDAQReader*)(mTheRichData->GetObject());
 	    if(!mTheDataReader) {
+		cout << "StRchMaker::Maker()\n";
 		cout << "\tStDAQReader*: not there\n";
 		cout << "\tSkip this event\n" << endl;
 		clearPadMonitor();
 		return kStWarn;
 	    }
 	    if (!(mTheDataReader->RICHPresent())) {
+		cout << "StRchMaker::Maker()\n";
 		cout << "\tRICH not in datastream\n";
 		cout << "\tSkip this event\n" << endl;
 		clearPadMonitor();
@@ -338,8 +373,80 @@ Int_t StRchMaker::Make() {
 	    cout << "Got the Reader " << endl;
 	}
 	else {
+	    cout << "StRchMaker::Make()\n";
 	    cout << "\tCould not get a Reader\n";
 	    cout << "\tSkip Event" << endl;
+	    clearPadMonitor();
+	    return kStWarn;
+	}
+
+	for(int iPad=0; iPad<mPads; iPad++) {  //x--> 160
+	    for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
+	    
+		unsigned long theADCValue =
+		    mTheRichReader->GetADCFromCoord(iPad,iRow);
+		
+		if (mPedestalSubtract && (iPad == 0) &&  (iRow%6==5)) {
+		    unsigned long theCut = static_cast<unsigned long>(mPedestal[iPad][iRow] + mSigma[iPad][iRow]);
+			
+			if (theADCValue > theCut) {
+			    theADCValue -= static_cast<unsigned long>(mPedestal[iPad][iRow]);
+			}
+			else {
+			    theADCValue = 0;
+			}
+		}
+		
+		
+		//pack adc/row/pad into a single long.  Use:
+		// the first 8 bits for the Pad (0-159)
+		// the next  8 bits for the Row (0-96)
+		// the next 11 bits for the ADC (0-1023)
+		
+		if(theADCValue) {
+		    unsigned long codedValue = 0;
+		    codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
+		    
+		    //
+		    // fill the pixel store
+		    //
+		    if(dynamic_cast<StRrsReader*>(mTheRichReader)) {
+			// ...from simulation
+			anIDList mcInfo =
+			    dynamic_cast<StRrsReader*>(mTheRichReader)->GetMCDetectorInfo(iPad, iRow);
+			mPixelStore.push_back(new StRichSingleMCPixel(iPad,
+								      iRow,
+								      theADCValue,
+								      mcInfo));
+		    }
+		    else {
+			// ...from data
+			mPixelStore.push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
+		    }
+#ifdef RCH_DEBUG
+		    if (theADCValue > 0) {
+			raw << "pad: "  << iPad
+			    << " row: " << iRow
+			    << " adc: " << theADCValue
+			    << " code " << codedValue << endl;
+			
+			unsigned long decodepad;
+			unsigned long decoderow;
+			unsigned long decodeadc;
+			if(adcDecoder(codedValue,&decodepad,&decoderow,&decodeadc)) {
+			    raw << decodepad << "/"
+				<< decoderow << "/"
+				<< decodeadc << endl;
+			}
+		    }
+#endif	    
+#ifdef RCH_HISTOGRAM
+		    mRawData[0] = iRow;
+		    mRawData[1] = iPad;
+		    mRawData[2] = theADCValue;
+		    mRawData[3] = mEventNumber;
+		    mPadPlane->Fill(mRawData);
+#endif
 		} // if (theADCvalue) ?fill the dst structure 
 	    } // loop over rows
 	} // loop over pads
@@ -347,66 +454,62 @@ Int_t StRchMaker::Make() {
     
     //
     // If the StRichPixelCollection hasn't been retrieved from StEvent
-
-    for(int iPad=0; iPad<mPads; iPad++) {  //x--> 160
-	for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
-	    
-	    unsigned long theADCValue =
-		mTheRichReader->GetADCFromCoord(iPad,iRow);
+    // the interface must be used to access the pixels
+    // --> Fill the pixel Store
+    //
+    else {
+	const StSPtrVecRichPixel& thePixels = mTheRichCollection->getRichPixels();
+	for (
+	    StSPtrVecRichPixelConstIterator iter = thePixels.begin();
+	    iter != thePixels.end();
+	    ++iter) {
+	    UShort_t iPad = (*iter)->pad();
+	    UShort_t iRow = (*iter)->row();
+	    UShort_t theADCValue = (*iter)->adc();
+	    if (mPedestalSubtract && (iPad==0) && (iRow%6==5)) {
+		unsigned long theCut = static_cast<unsigned long>(mPedestal[iPad][iRow] + mPedestalSubtract* mSigma[iPad][iRow]);
+		if (theADCValue > theCut) {
+		    theADCValue -= static_cast<unsigned long>(mPedestal[iPad][iRow]);
+		}
+		else {
+		    theADCValue = 0;
+		}
+		
+	    }
 	    if (theADCValue) {
-	    //pack adc/row/pad into a single long.  Use:
-	    // the first 8 bits for the Pad (0-159)
-	    // the next  8 bits for the Row (0-96)
-	    // the next 11 bits for the ADC (0-1023)
 		
-	    if(theADCValue) {
-		unsigned long codedValue = 0;
-		codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
+		StRichMCPixel* p = dynamic_cast<StRichMCPixel*>(*iter);
 		
-		//
-		// fill the pixel store
-		//
-		if(dynamic_cast<StRrsReader*>(mTheRichReader)) {
-		    // ...from simulation
-		    anIDList mcInfo =
-			dynamic_cast<StRrsReader*>(mTheRichReader)->GetMCDetectorInfo(iPad, iRow);
-		    mPixelStore.push_back(new StRichSingleMCPixel(iPad,
-								  iRow,
-								  theADCValue,
+		if (p) {
+		    anIDList mcInfo;
+		    
+		    const StSPtrVecRichMCInfo& theInfo = p->getMCInfo();
+		    for (StSPtrVecRichMCInfoConstIterator i = theInfo.begin();
+			 i != theInfo.end();
+			 ++i) {
+			int id = (*i)->id();
+			int gid = (*i)->gid();
+			int trackp = (*i)->trackp();
+			int charge = static_cast<int>((*i)->charge());
+			StRichSignalType process = static_cast<StRichSignalType>((*i)->process());
+			
+			mcInfo.push_back(
+			    
+			    StRichID(id,
+				     gid,
+				     trackp,
+				     charge,
+				     process
+				)
 			    );
 		    }
 		    mPixelStore.push_back(new StRichSingleMCPixel(iPad,iRow,theADCValue,
-		    // ...from data
 								  mcInfo));
 		}
-#ifdef RCH_DEBUG
-		if (theADCValue > 0) {
-		    raw << "pad: "  << iPad
-			<< " row: " << iRow
-			<< " adc: " << theADCValue
-			<< " code " << codedValue << endl;
-			
-		    unsigned long decodepad;
-		    unsigned long decoderow;
-		    unsigned long decodeadc;
-		    if(adcDecoder(codedValue,&decodepad,&decoderow,&decodeadc)) {
-			raw << decodepad << "/"
-			    << decoderow << "/"
-			    << decodeadc << endl;
-		    }
+		else {
+		    mPixelStore.push_back(new StRichSinglePixel(iPad,iRow,theADCValue));
 		}
-#endif	    
-#ifdef RCH_HISTOGRAM
-		mRawData[0] = iRow;
-		mRawData[1] = iPad;
-		mRawData[2] = theADCValue;
-		mRawData[3] = mEventNumber;
-		mPadPlane->Fill(mRawData);
-#endif
-	    } // if (theADCvalue) ?fill the dst structure 
-	} // loop over rows
-    } // loop over pads
-	
+	    }
 	}
     }
     
@@ -439,7 +542,7 @@ Int_t StRchMaker::Make() {
     //
     cout << "At the cluster finder" << endl;
     mClusterFinder->clearAndDestroyAll();
-#ifdef RCH_WITH_PAD_MONITOR
+    mClusterFinder->loadPixels(mPixelStore);
     mClusterFinder->setBorderFlags();
     
 #ifdef RICH_WITH_PAD_MONITOR
@@ -447,7 +550,7 @@ Int_t StRchMaker::Make() {
     StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
     //
     // Clears The Old Data.Must be done here and RRS maker
-    
+    //
     thePadMonitor->clearHits();
     thePadMonitor->clearTracks();
     cout << "mDaq = " << mDaq << endl;
@@ -503,7 +606,7 @@ Int_t StRchMaker::Make() {
     // - histogram and padMonitor
     //
 
-#ifdef RCH_WITH_PAD_MONITOR
+    //HitVector
     mTheHits = mClusterFinder->getHits();
 
 #ifdef RICH_WITH_PAD_MONITOR
@@ -513,7 +616,7 @@ Int_t StRchMaker::Make() {
     }
     thePadMonitor->update();
 #endif
-   // cluster
+
    
 #ifdef RCH_HISTOGRAM
     // cluster
@@ -559,6 +662,19 @@ Int_t StRchMaker::Make() {
     mSimpleHitCollection->mTheHits = mTheHits;
     PR(mSimpleHitCollection->mTheHits.size());
     
+    //
+    // Write the hits into StEvent: StRichHitCollection
+    //
+    // If any is present, clear it.
+    if (mPixelCollectionPresent || mClusterCollectionPresent || 
+	mHitCollectionPresent) {
+	// 	StSPtrVecRichPixel& thePixels = mTheRichCollection->getRichPixels();
+  	//thePixels.clear();
+  	//StSPtrVecRichCluster& theClusters = mTheRichCollection->getRichClusters();
+  	//theClusters.clear();
+  	//StSPtrVecRichHit& theHits = mTheRichCollection->getRichHits();
+  	//theHits.clear();
+//	
 	//delete mTheRichCollection;
 	mTheRichCollection = 0;
     }
@@ -602,9 +718,11 @@ void StRchMaker::fillStEvent()
 	richCollection = mTheRichCollection;
     }
 
-    if(!(richCollection->pixelsPresent())) {
+    //
+    // Add all the pixels...ordered from the ClusterFinder
     //
 //    if(!(richCollection->pixelsPresent())) {
+    if (1) {
 	cout << " StRchMaker::fill the pixels" << endl;
 	StRichSinglePixelCollection thePixels = mClusterFinder->getPixels();
 	PR(thePixels.size());
@@ -640,7 +758,8 @@ void StRchMaker::fillStEvent()
     }
     
     //
-    if(!richCollection->clustersPresent()) {
+    // Add the clusters
+    //
     //PR(richCollection->clustersPresent());
 //    if(!richCollection->clustersPresent()) {
     if(1) {
@@ -662,7 +781,8 @@ void StRchMaker::fillStEvent()
     }
 
     //
-    if(!richCollection->hitsPresent()) {
+    // Add the hits
+    // USE THE OUTPUT from the Cluster finder explicitly
     //
 //    if(!richCollection->hitsPresent()) {
     if(1) {
@@ -744,10 +864,10 @@ void StRchMaker::fillStEvent()
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.25 2000/06/16 20:52:14 dunlop Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.25 2000/06/16 20:52:14 dunlop Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $\n");
+{
+    printf("**************************************************************\n");
+    printf("* $Id: StRchMaker.cxx,v 2.0 2000/08/09 16:22:11 gans Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -767,6 +887,26 @@ Int_t StRchMaker::Finish() {
     cout << "close the Histogram files!!!!!!" << endl;
     mRchNTupleFile->Write();
     mRchNTupleFile->Close();
+#endif
+    return StMaker::Finish();
+}
+
+void StRchMaker::setPedestalSubtract (int v, const char* file="/home/daq/data/crams_1172044.ped") 
+{
+    mPedestalSubtract = v;
+    if (mPedestalSubtract) {
+	mPedestalFile = file;
+    }
+    
+}
+
+
+
+void StRchMaker::clearPadMonitor(){
+#ifdef RICH_WITH_PAD_MONITOR
+    StRichPadMonitor* thePadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
+    thePadMonitor->clearAll();
+#endif  
 }
 
 
