@@ -59,13 +59,14 @@ ttmexample
   // now we add Makers to the chain...  some of that is black magic to me :) 
   muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);  // muDST main chain
   StMuDbReader  *db          = StMuDbReader::instance();                        // need the database
-  StEEmcDbMaker *eemcDbMaker =new StEEmcDbMaker("eemcDb");                      // need EEMC database  
   St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");       // need the database (???)
+  StEEmcDbMaker *eemcDbMaker =new StEEmcDbMaker("eemcDb");                      // need EEMC database , no need for tricks,JB 
 
   // now comment in/out/change the below if you want it your way
   eemcDbMaker->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
-  eemcDbMaker->setTimeStampDay(20040331);  // format: yyyymmdd
-  eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor (if needed)
+  // JB, use DB tricks when necessary
+  // eemcDbMaker->setTimeStampDay(20040331);  // format: yyyymmdd
+  // eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor (if needed)
 
   // finally after so many lines we arrive at the good stuff
   ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
