@@ -14,6 +14,7 @@
 * 7/13/98 - K. Turner - change to use bfc macros
 * 7/30/98 - K. Turner - change to use new utility kumacs
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
+* 8/10/98 - K. Turner - fixed for change to tpg_init
 * 
 ************************************************************************
 ************************************************************************
@@ -96,7 +97,8 @@
   
 
 * tpc geometry init
-   exec tpg_init#init
+  exec tpg_init#read
+  exec tpg_init#tpg_main
   
 * tpc cluster init for fast sim tracking!
     exec create_tables_tpc#tcl_fast
