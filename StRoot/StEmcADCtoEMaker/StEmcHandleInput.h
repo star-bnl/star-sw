@@ -31,7 +31,7 @@ private:
 protected:
     
 public: 
-    StEmcHandleInput(const StEvent*, const StEMCReader*, const TDataSet*);
+    StEmcHandleInput(StEvent*, StEMCReader*, TDataSet*);
     virtual       ~StEmcHandleInput();
     virtual Int_t  ProcessInput();
     void clear();

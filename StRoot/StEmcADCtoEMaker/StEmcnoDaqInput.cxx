@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcnoDaqInput.cxx,v 1.2 2001/07/19 19:36:31 subhasis Exp $
+ * $Id: StEmcnoDaqInput.cxx,v 1.3 2001/07/19 19:56:20 subhasis Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -33,7 +33,7 @@ ClassImp(StEmcnoDaqInput) // macro
 
 //--------------------------------------------------------------
 
-    StEmcnoDaqInput::StEmcnoDaqInput(const StEvent*event, const StEMCReader* emcreader,const TDataSet* calibdb)
+    StEmcnoDaqInput::StEmcnoDaqInput(StEvent*event, StEMCReader* emcreader,TDataSet* calibdb)
       : mevent(event), mTheEmcReader(emcreader),m_calibdb(calibdb)
 {
 }

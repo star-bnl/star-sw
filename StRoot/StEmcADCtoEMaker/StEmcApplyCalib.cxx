@@ -24,7 +24,7 @@ ClassImp(StEmcApplyCalib) // macro
    
 //--------------------------------------------------------------
 
-    StEmcApplyCalib::StEmcApplyCalib(const StEvent*event,const TDataSet* calibdb)
+    StEmcApplyCalib::StEmcApplyCalib(StEvent*event,TDataSet* calibdb)
       : mevent(event), m_calibdb(calibdb)
 {
 }
@@ -74,7 +74,7 @@ Int_t StEmcApplyCalib::Calibrate_Tower(StEmcHandleDB* db,StEmcCollection* emccol
         StEmcModule* module1 = detector1->module(j);
         StSPtrVecEmcRawHit& rawHit1=module1->hits();
  
-        for(Int_t k1=0;k1<rawHit1.size();k1++)
+        for(UInt_t k1=0;k1<rawHit1.size();k1++)
         {
              Int_t m1, e1, s1;
               m1=(Int_t)rawHit1[k1]->module();
@@ -114,7 +114,7 @@ Int_t StEmcApplyCalib::Calibrate_Smd(StEmcHandleDB* db,StEmcCollection* emccoll)
         StEmcModule* module1 = detector1->module(j);
         StSPtrVecEmcRawHit& rawHit1=module1->hits();
  
-        for(Int_t k1=0;k1<rawHit1.size();k1++)
+        for(UInt_t k1=0;k1<rawHit1.size();k1++)
         {
              Int_t m1, e1, s1;
               m1=(Int_t)rawHit1[k1]->module();

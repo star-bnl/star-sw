@@ -38,7 +38,7 @@ private:
 protected:
     
 public: 
-    StEmcnoDaqInput(const StEvent*, const StEMCReader*,const TDataSet*);
+    StEmcnoDaqInput(StEvent*,StEMCReader*,TDataSet*);
     virtual       ~StEmcnoDaqInput();
     virtual Int_t  ProcessInput();
 protected:

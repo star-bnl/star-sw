@@ -36,7 +36,7 @@ private:
 protected:
     
 public: 
-    StEmcTowerInput(const StEvent*, const StEMCReader*,const TDataSet*);
+    StEmcTowerInput(StEvent*, StEMCReader*,TDataSet*);
     virtual       ~StEmcTowerInput();
     virtual Int_t  ProcessInput();
     Int_t subtract_pedestals(StEmcHandleDB*);
