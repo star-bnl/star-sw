@@ -658,7 +658,7 @@ const float  *StFilterDef::GetDefs() const
   return defs;   
 }   
 //______________________________________________________________________________
-Int_t StFilterDef::AcceptCB(StPoints3DABC *pnt) 
+Int_t StFilterDef::Accept(StPoints3DABC *pnt) 
 {
    static TRandom rrr;
    float x,y,z,r2xy,phid,len,pt,q;
