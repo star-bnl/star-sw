@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.2 2001/01/25 17:49:09 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.3 2001/01/28 22:18:27 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.3  2001/01/28 22:18:27  lmartin
+ * References to the data member mEvalTrack of StEstHit object removed.
+ *
  * Revision 1.2  2001/01/25 17:49:09  lmartin
  * Method Setup removed
  * Methods defined as public methods of StEstTracker class
@@ -651,7 +654,6 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
 	for(j=0; j<8; j++) {
 	  if(Eval_mchits[Eval_id_mctrk2est_Track[scsspt[i].id_mctrack]][j]==NULL){
 	    Eval_mchits[Eval_id_mctrk2est_Track[scsspt[i].id_mctrack]][j]=mSvtHit[i];
-	    Eval_mchits[Eval_id_mctrk2est_Track[scsspt[i].id_mctrack]][j]->mEvalTrack = Eval_id_mctrk2est_Track[scsspt[i].id_mctrack];
 	    break;
 	  }
 	}
@@ -664,7 +666,6 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
 	  for(j=0; j<8; j++) {
 	    if(Eval_mchits[Eval_id_mctrk2est_Track[mTPCTrack[ChargedParent]->GetMcId()]][j]==NULL){
 	      Eval_mchits[Eval_id_mctrk2est_Track[mTPCTrack[ChargedParent]->GetMcId()]][j]=mSvtHit[i];
-	      Eval_mchits[Eval_id_mctrk2est_Track[mTPCTrack[ChargedParent]->GetMcId()]][j]->mEvalTrack = Eval_id_mctrk2est_Track[mTPCTrack[ChargedParent]->GetMcId()];
 	      break;
 	    }
 	  }	
