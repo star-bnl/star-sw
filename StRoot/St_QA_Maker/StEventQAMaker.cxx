@@ -1,105 +1,3 @@
-// $Id: StEventQAMaker.cxx,v 2.32 2002/02/05 22:27:30 jeromel Exp $
-// $Log: StEventQAMaker.cxx,v $
-// Revision 2.32  2002/02/05 22:27:30  jeromel
-// Modifications from David H. Int() -> InitRun().
-//
-// Revision 2.31  2001/12/28 09:19:12  genevb
-// Adjustments for pp running
-//
-// Revision 2.30  2001/12/20 03:11:07  genevb
-// pp trigger words 0x2XXX
-//
-// Revision 2.29  2001/11/20 21:53:45  lansdell
-// added x-y dist of hits, tpc east&west histos
-//
-// Revision 2.28  2001/11/02 21:57:44  genevb
-// Fix mistake in trigger word histogram
-//
-// Revision 2.27  2001/11/02 20:50:03  genevb
-// Changed histogram ranges for momenta
-//
-// Revision 2.26  2001/10/31 22:08:40  suaide
-// fixed EMC histograms
-//
-// Revision 2.25  2001/10/24 20:11:49  genevb
-// Fixed trigger issue for year 1
-//
-// Revision 2.24  2001/10/15 16:15:02  pavlinov
-// Clenup EMC stuff for production
-//
-// Revision 2.23  2001/09/10 18:00:12  genevb
-// Another trigger word
-//
-// Revision 2.22  2001/09/01 14:24:40  genevb
-// Allow trigger word=0 for MC data
-//
-// Revision 2.21  2001/08/31 21:29:50  genevb
-// Check if trigger info exists
-//
-// Revision 2.20  2001/08/29 20:45:15  genevb
-// Trigger word histos
-//
-// Revision 2.19  2001/08/23 17:57:36  genevb
-// Added SVT hit flag
-//
-// Revision 2.18  2001/08/07 07:51:27  lansdell
-// primvtx check for different multiplicities crashed for MC data, now fixed
-//
-// Revision 2.17  2001/08/03 20:33:55  lansdell
-// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
-//
-// Revision 2.16  2001/07/31 23:21:42  lansdell
-// added last point, hit-helix histos
-//
-// Revision 2.15  2001/05/25 17:46:59  lansdell
-// commented out unnecessary emccol cout statement
-//
-// Revision 2.14  2001/05/25 16:31:20  lansdell
-// more updates to qa shift histograms
-//
-// Revision 2.13  2001/05/24 01:48:13  lansdell
-// qa_shift histograms updated
-//
-// Revision 2.12  2001/05/23 00:14:52  lansdell
-// more changes for qa_shift histograms
-//
-// Revision 2.11  2001/05/16 20:57:03  lansdell
-// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
-//
-// Revision 2.10  2001/05/02 16:10:46  lansdell
-// changed some histogram limits
-//
-// Revision 2.9  2001/05/01 15:17:36  genevb
-// Execute EMC code only if EMC libs loaded
-//
-// Revision 2.8  2001/04/30 19:09:27  genevb
-// Catch missing EMC info
-//
-// Revision 2.7  2001/04/28 22:05:13  genevb
-// Added EMC histograms
-//
-// Revision 2.6  2001/04/25 21:35:25  genevb
-// Added V0 phi distributions
-//
-// Revision 2.5  2001/04/24 22:53:51  lansdell
-// Removed redundant radial position of first hit histograms
-//
-// Revision 2.4  2001/04/24 21:33:05  genevb
-// Use det_id to identify detectors, and some cleanup
-//
-// Revision 2.3  2000/12/08 18:37:22  genevb
-// Change kTofPatchId->kTofId
-//
-// Revision 2.2  2000/09/08 18:55:53  lansdell
-// turned on FTPC primary track histograms
-//
-// Revision 2.1  2000/09/01 16:59:02  genevb
-// Change for V0 plots
-//
-// Revision 2.0  2000/08/25 16:02:39  genevb
-// New revision: new structure, multiplicity classes
-//
-//
 ///////////////////////////////////////////////////////////////////////////
 //                                                                       //
 //  StEventQAMaker class for QA Histograms using StEvent                 //
@@ -133,6 +31,7 @@
 #include "StarClassLibrary/BetheBloch.h"
 
 static StEmcGeom* emcGeom[4];
+
 // These are the mean z positions of the FTPC padrows (1-20).
 // The width of each padrow in z is 2 cm.
 static float ftpcPadrowZPos[20] = {162.75,171.25,184.05,192.55,205.35,
@@ -142,17 +41,21 @@ static float ftpcPadrowZPos[20] = {162.75,171.25,184.05,192.55,205.35,
 
 ClassImp(StEventQAMaker)
 
+
 //_____________________________________________________________________________
 StEventQAMaker::StEventQAMaker(const char *name, const char *title) :
  StQAMakerBase(name,title,"StE") {
   
 }
 
+
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Finish() {
 
   return StMaker::Finish();
 }
+
+
 //_____________________________________________________________________________
 Int_t StEventQAMaker::Init() {
   return StQAMakerBase::Init();
@@ -160,11 +63,13 @@ Int_t StEventQAMaker::Init() {
 
 
 //_____________________________________________________________________________
+/// StEventQAMaker - InitRun; Book histograms, set defaults for member functions
 Int_t StEventQAMaker::InitRun(int runnumber) {
 
-// StEventQAMaker - InitRun; book histograms and set defaults for member functions
-
-  mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
+  if(! mHitHist){
+    mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
+  }
+  
   if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
     for(Int_t i=0; i<4; i++) {emcGeom[i] = StEmcGeom::getEmcGeom(i+1);} // 3-oct-2001 by PAI
   }
@@ -172,8 +77,8 @@ Int_t StEventQAMaker::InitRun(int runnumber) {
 }
 
 //_____________________________________________________________________________
+/// StEventQAMaker - Make; fill histograms
 Int_t StEventQAMaker::Make() {
-// StEventQAMaker - Make; fill histograms
   
   n_prim_good = 0;
   n_glob_good = 0;
@@ -256,9 +161,10 @@ Int_t StEventQAMaker::Make() {
   }
 }
 
+
 //_____________________________________________________________________________
+/// Fill histograms for event summary
 void StEventQAMaker::MakeHistEvSum() {
-  // Fill histograms for event summary
 
   //PrintInfo();
   if (Debug()) 
@@ -279,6 +185,7 @@ void StEventQAMaker::MakeHistEvSum() {
     m_glb_trk_chgF->Fill(ftpcMon->chrg_ftpc_tot[0]/ftpcMon->chrg_ftpc_tot[1],multClass);
   }
 }
+
 
 //-----------------------------------------------------------------
 void StEventQAMaker::MakeHistGlob() {
@@ -357,13 +264,13 @@ void StEventQAMaker::MakeHistGlob() {
       double S = geom->helix().pathLength(0,0);
       StThreeVectorD dcaToBeam = geom->helix().at(S);
 
-// from Lanny on 2 Jul 1999 9:56:03
-//1. x0,y0,z0 are coordinates on the helix at the starting point, which
-//   should be close to the first TPC hit position assigned to the track.
-//   The latter, different quantity is in x_first[3].
-
-// from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
-// so it doesn't need to be calculated here 
+      // from Lanny on 2 Jul 1999 9:56:03
+      //1. x0,y0,z0 are coordinates on the helix at the starting point, which
+      //   should be close to the first TPC hit position assigned to the track.
+      //   The latter, different quantity is in x_first[3].
+      
+      // from Helen on 14 Jul 1999 - she now fills chisq0,1 with chisq/dof
+      // so it doesn't need to be calculated here 
 
       // check if the track has hits in a detector -CPL
       if (map.hasHitInDetector(kUnknownId)) hists->m_det_id->Fill(kUnknownId);
@@ -417,12 +324,12 @@ void StEventQAMaker::MakeHistGlob() {
       Double_t probability = TMath::Prob(chisq0*ndf,ndf);
       hists->m_globtrk_fit_prob->Fill(probability);
 
-// now fill all TPC histograms ------------------------------------------------
+      // now fill all TPC histograms ------------------------------------------------
       if (map.trackTpcOnly()) {
 
 	cnttrkgT++;
 	cnttrkgTTS++;
-// these are TPC only
+	// these are TPC only
 	// m_glb_f0 uses hist class StMultiH1F
         hists->m_glb_f0->Fill(dif.x(),0.);
         hists->m_glb_f0->Fill(dif.y(),1.);
@@ -550,8 +457,8 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_psi_phiT->Fill(phi_deg,psi_deg);
       }
 
-// now fill all TPC+SVT histograms --------------------------------------------
-
+      // now fill all TPC+SVT histograms --------------------------------------------
+      
       else if (map.trackTpcSvt()) {
 
 	cnttrkgTS++;
@@ -678,7 +585,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_psi_phiTS->Fill(phi_deg,psi_deg);
       }
 
-// now fill all FTPC East histograms ------------------------------------------
+      // now fill all FTPC East histograms ------------------------------------------
       else if (map.trackFtpcEast()) {
 
 	cnttrkgFE++;
@@ -753,7 +660,7 @@ void StEventQAMaker::MakeHistGlob() {
         hists->m_npoint_lengthFE->Fill(globtrk->length(),
 	      		       Float_t(detInfo->numberOfPoints()));
       }
-// now fill all FTPC West histograms ------------------------------------------
+      // now fill all FTPC West histograms ------------------------------------------
       else if (map.trackFtpcWest()) {
 
 	cnttrkgFW++;
@@ -832,8 +739,9 @@ void StEventQAMaker::MakeHistGlob() {
 }
 
 //_____________________________________________________________________________
+/// histograms filled in MakeHistPID() method
 void StEventQAMaker::MakeHistDE() {
-  // histograms filled in MakeHistPID() method
+
 }
 
 //_____________________________________________________________________________
@@ -1302,6 +1210,8 @@ void StEventQAMaker::MakeHistPrim() {
   // MakeHistPrim() must be called after MakeHistGlob for the following to work
   hists->m_primglob_good->Fill((Float_t)n_prim_good/(Float_t)n_glob_good);
 }
+
+
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPID() {
 
@@ -1438,11 +1348,11 @@ void StEventQAMaker::MakeHistVertex() {
   StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
   hists->m_v0->Fill(v0Vtx.size());
 
-//  static TH1F v0PhiHist("voph","v0 Phi Hist",36,0.,360.);
-//  static TH1F v0PhiHist2("voph2","v0 Phi Hist2",36,180.,540.);
-//  static TSpectrum v0PhiSpec;
-//  v0PhiHist.Reset();
-//  v0PhiHist2.Reset();
+  //  static TH1F v0PhiHist("voph","v0 Phi Hist",36,0.,360.);
+  //  static TH1F v0PhiHist2("voph2","v0 Phi Hist2",36,180.,540.);
+  //  static TSpectrum v0PhiSpec;
+  //  v0PhiHist.Reset();
+  //  v0PhiHist2.Reset();
 
   for (UInt_t k=0; k<v0Vtx.size(); k++) {
     StV0Vertex *v0 = v0Vtx[k];
@@ -1484,9 +1394,9 @@ void StEventQAMaker::MakeHistVertex() {
 	Float_t r_dist = sqrt(pow(v0->position().x()-primVtx->position().x(),2)+
 			      pow(v0->position().y()-primVtx->position().y(),2));
 	hists->m_vtx_r_dist->Fill(r_dist);
-//        v0PhiHist.Fill(phi);
-//        if (phi<180.) phi += 360.;
-//        v0PhiHist2.Fill(phi);
+	//        v0PhiHist.Fill(phi);
+	//        if (phi<180.) phi += 360.;
+	//        v0PhiHist2.Fill(phi);
       }
     }
   }
@@ -1691,6 +1601,7 @@ void StEventQAMaker::MakeHistPoint() {
   hists->m_pnt_tot_med->Fill(totalHits);
   hists->m_pnt_tot_sm->Fill(totalHits);
 }
+
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistRich() {
@@ -1904,3 +1815,107 @@ void StEventQAMaker::MakeHistEval() {
 }
 
 //_____________________________________________________________________________
+// $Id: StEventQAMaker.cxx,v 2.33 2002/02/10 16:48:28 jeromel Exp $
+// $Log: StEventQAMaker.cxx,v $
+// Revision 2.33  2002/02/10 16:48:28  jeromel
+// Attempt to prevent re-creation of mHitHist.
+//
+// Revision 2.32  2002/02/05 22:27:30  jeromel
+// Modifications from David H. Int() -> InitRun().
+//
+// Revision 2.31  2001/12/28 09:19:12  genevb
+// Adjustments for pp running
+//
+// Revision 2.30  2001/12/20 03:11:07  genevb
+// pp trigger words 0x2XXX
+//
+// Revision 2.29  2001/11/20 21:53:45  lansdell
+// added x-y dist of hits, tpc east&west histos
+//
+// Revision 2.28  2001/11/02 21:57:44  genevb
+// Fix mistake in trigger word histogram
+//
+// Revision 2.27  2001/11/02 20:50:03  genevb
+// Changed histogram ranges for momenta
+//
+// Revision 2.26  2001/10/31 22:08:40  suaide
+// fixed EMC histograms
+//
+// Revision 2.25  2001/10/24 20:11:49  genevb
+// Fixed trigger issue for year 1
+//
+// Revision 2.24  2001/10/15 16:15:02  pavlinov
+// Clenup EMC stuff for production
+//
+// Revision 2.23  2001/09/10 18:00:12  genevb
+// Another trigger word
+//
+// Revision 2.22  2001/09/01 14:24:40  genevb
+// Allow trigger word=0 for MC data
+//
+// Revision 2.21  2001/08/31 21:29:50  genevb
+// Check if trigger info exists
+//
+// Revision 2.20  2001/08/29 20:45:15  genevb
+// Trigger word histos
+//
+// Revision 2.19  2001/08/23 17:57:36  genevb
+// Added SVT hit flag
+//
+// Revision 2.18  2001/08/07 07:51:27  lansdell
+// primvtx check for different multiplicities crashed for MC data, now fixed
+//
+// Revision 2.17  2001/08/03 20:33:55  lansdell
+// added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
+//
+// Revision 2.16  2001/07/31 23:21:42  lansdell
+// added last point, hit-helix histos
+//
+// Revision 2.15  2001/05/25 17:46:59  lansdell
+// commented out unnecessary emccol cout statement
+//
+// Revision 2.14  2001/05/25 16:31:20  lansdell
+// more updates to qa shift histograms
+//
+// Revision 2.13  2001/05/24 01:48:13  lansdell
+// qa_shift histograms updated
+//
+// Revision 2.12  2001/05/23 00:14:52  lansdell
+// more changes for qa_shift histograms
+//
+// Revision 2.11  2001/05/16 20:57:03  lansdell
+// new histograms added for qa_shift printlist; some histogram ranges changed; StMcEvent now used in StEventQA
+//
+// Revision 2.10  2001/05/02 16:10:46  lansdell
+// changed some histogram limits
+//
+// Revision 2.9  2001/05/01 15:17:36  genevb
+// Execute EMC code only if EMC libs loaded
+//
+// Revision 2.8  2001/04/30 19:09:27  genevb
+// Catch missing EMC info
+//
+// Revision 2.7  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
+// Revision 2.6  2001/04/25 21:35:25  genevb
+// Added V0 phi distributions
+//
+// Revision 2.5  2001/04/24 22:53:51  lansdell
+// Removed redundant radial position of first hit histograms
+//
+// Revision 2.4  2001/04/24 21:33:05  genevb
+// Use det_id to identify detectors, and some cleanup
+//
+// Revision 2.3  2000/12/08 18:37:22  genevb
+// Change kTofPatchId->kTofId
+//
+// Revision 2.2  2000/09/08 18:55:53  lansdell
+// turned on FTPC primary track histograms
+//
+// Revision 2.1  2000/09/01 16:59:02  genevb
+// Change for V0 plots
+//
+// Revision 2.0  2000/08/25 16:02:39  genevb
+// New revision: new structure, multiplicity classes
+//
