@@ -18,7 +18,7 @@ created June 1, 1998 supposely
 *       air     C    SiO2   C6F14   CH4     C     Cu    SiO2    CH4    Al
 *             Radl?                       Radl?
 *
-    Integer    N,i
+    Integer    N,i,IsOpt
     Parameter (N=11)
 *
     real ppckov(N)       / 5.63e-9, 5.77e-9, 5.9e-9, 6.05e-9, 6.2e-9,
@@ -68,12 +68,17 @@ created June 1, 1998 supposely
    Begin   
 
     fill RICH  ! Cerenkov detector parameters
+        version = 1    ! complexity version
         rpos = 235     ! distance to center  
         dx   = 49.45   ! rich half width
         dy   = 11.325  ! rich half thickness
         dz   = 73.15   ! rich half length
-        phi  = 240     ! rich athimutal position
+        phi  = 300     ! rich athimutal position
 
+    USE RICH
+    isopt=0
+    if (rich_version>1) isopt=1
+*
 *   call  AgSSTEP(RICHSTEP) 
 *
 *   special material definition here:
@@ -201,14 +206,16 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     block OQUA e me scelto per labellare il quarzo opaco
     material  opaco  
-    medium    Opaco_quartz    Isvol=1  
+    medium    Opaco_quartz    Isvol=Isopt  
     Attribute OQUA   seen=1   colo=2
     shape     BOX    dx=20.65 dy=0.2   dz=66.5
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
+    if (isopt>0) then
     HITS  OQUA  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
                 Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
                 ptot:32:(0,200)   Eloss:32:(0,0.1) 
-    endblock
+    endif  
+endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *   A big piece consisting out of 3 tiles connected with opaco glue
 *   actual tile size is
@@ -252,14 +259,15 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 block rGAP is METANOL gap
     material  Methane       
-    Medium    Methane_Gap    Isvol=1
+    Medium    Methane_Gap    Isvol=Isopt
     Attribute RGAP  seen=1   colo=4
     shape     BOX   dx=42.45  dy=0.2   dz=66.15
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
+    if (Isopt>0) then
     HITS rGAP  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
                Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
                ptot:32:(0,200)   Eloss:32:(0,0.1) 
-
+    endif
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
@@ -301,7 +309,8 @@ Block rCSI is Cesium Iodide
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_CSI,EFFIC_CSI,RINDEX_methane)
     HITS rCSI  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
                Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
-               ptot:32:(0,200)   USER:32:(0,0.1) 
+               ptot:32:(0,200)   USER:32:(-.01,.01) 
+
 endblock
 *- - - - - - - - - - - - - - - - - - - - - - - - - - -
 * 1330 /2 = 66.5 bigger than inside box 
@@ -324,7 +333,8 @@ endblock
     block FREO is FREON
     component C     A=12  Z=6  W=6
     component F     A=19  Z=9  W=14
-    mixture   freon DENS=1.7
+    mixture   freon DENS=1.7   Isvol=Isopt
+
     attribute FREO  seen=1    colo=3
     shape     BOX   dx=20.15  dy=0.5   dz=65.5
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_FREON,EFFIC_all,RINDEX_FREON)
@@ -333,6 +343,11 @@ endblock
        Create and Position SPAC  x=+6.7 z=(5-i)*14.4 ort=zxy
        Create and Position SPAC  x=-6.7 z=(5-i)*14.4 ort=zxy
     enddo
+    if (Isopt>0) then
+    HITS FREO  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
+               Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
+               ptot:32:(0,200)   Eloss:32:(0,0.1) 
+    endif  
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * 9 spacers center is z=0
@@ -356,7 +371,7 @@ endblock
 *    attribute SPAC seen=1 colo=2
 *    shape TUBE rmin=0 Rmax=0.0020 dy= 66.15
 *endblock
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 end
 
 
@@ -382,8 +397,8 @@ end
       Integer JJ
       Real    HIT
 
-      if Ipart != 50 { hit=0; AdEStep = 0; return }
-      hit = vect(7)
+      if Ipart != 50 { hit=AdEStep; return }
+      hit = -VECT(7)
       end 
       
  
