@@ -1,5 +1,8 @@
-// $Id: tagFiller.cc,v 1.1 1999/02/12 02:10:47 wenaus Exp $
+// $Id: tagFiller.cc,v 1.2 1999/03/30 15:33:43 wenaus Exp $
 // $Log: tagFiller.cc,v $
+// Revision 1.2  1999/03/30 15:33:43  wenaus
+// eliminate obsolete branch methods
+//
 // Revision 1.1  1999/02/12 02:10:47  wenaus
 // add tagFiller.cc
 //
@@ -27,10 +30,11 @@
 #include "StEvent/StEvent.hh"
 #include "tables/HighPtTag.h"
 #include "SystemOfUnits.h"
-static const char rcsid[] = "$Id: tagFiller.cc,v 1.1 1999/02/12 02:10:47 wenaus Exp $";
+static const char rcsid[] = "$Id: tagFiller.cc,v 1.2 1999/03/30 15:33:43 wenaus Exp $";
 #include "HighPtTag.h"
 void tagFiller(StEvent& event, HighPtTag_st& hptTag)
 
+  /*
   // get pt thresholds from somewhere!
   float ptThres[4];
   ptThres[0] = .5;
@@ -49,17 +53,17 @@ void tagFiller(StEvent& event, HighPtTag_st& hptTag)
   for (itr = tracks->begin(); itr != tracks->end(); itr++) {
     trk = *itr;
     pt = trk->helix().momentum(bField).perp();
-    /*
-    cout << "Track pt " << pt/GeV
-         << " p " << trk->helix().momentum(bField).magnitude()
-         << " dip " << trk->helix().dipAngle()
-         << " rad " << 1./trk->helix().curvature()*centimeter
-         << " phase " << trk->helix().phase()
-         << " x " << trk->helix().origin().x()/centimeter
-         << " y " << trk->helix().origin().y()/centimeter
-         << " z " << trk->helix().origin().z()/centimeter
-         << endl;
-    */
+
+//    cout << "Track pt " << pt/GeV
+//         << " p " << trk->helix().momentum(bField).magnitude()
+//         << " dip " << trk->helix().dipAngle()
+//         << " rad " << 1./trk->helix().curvature()*centimeter
+//         << " phase " << trk->helix().phase()
+//         << " x " << trk->helix().origin().x()/centimeter
+//         << " y " << trk->helix().origin().y()/centimeter
+//         << " z " << trk->helix().origin().z()/centimeter
+//         << endl;
+    ptThres[1] = 1.;
     for (ii=0; ii<4; ii++) {
       if (pt>ptThres[ii]) {
         hptTag.Ntracks_gt_thres[ii]++;
@@ -71,6 +75,7 @@ void tagFiller(StEvent& event, HighPtTag_st& hptTag)
     hptTag.Ntracks_gt_thres[1] << " " <<
     hptTag.Ntracks_gt_thres[2] << " " <<
     hptTag.Ntracks_gt_thres[3] << " " << endl;
+*/
 	hptTag.Ntracks_gt_thres[1] << " " <<
 	hptTag.Ntracks_gt_thres[2] << " " <<
 	hptTag.Ntracks_gt_thres[3] << " " << endl;

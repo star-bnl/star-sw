@@ -1,6 +1,9 @@
-// $Id: StAnalysisMaker.h,v 1.2 1999/02/12 02:00:27 wenaus Exp $
+// $Id: StAnalysisMaker.h,v 1.3 1999/03/30 15:33:43 wenaus Exp $
 //
 // $Log: StAnalysisMaker.h,v $
+// Revision 1.3  1999/03/30 15:33:43  wenaus
+// eliminate obsolete branch methods
+//
 // Revision 1.2  1999/02/12 02:00:27  wenaus
 // Incorporate tag loading example
 //
@@ -51,9 +54,7 @@ public:
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
-  virtual void   MakeBranch();
   virtual void   PrintInfo();
-  virtual void   SetBranch();
   virtual Int_t  Finish();
 
   // Tag accessor

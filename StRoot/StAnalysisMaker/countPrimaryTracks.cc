@@ -1,5 +1,8 @@
-// $Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:22 wenaus Exp $
+// $Id: countPrimaryTracks.cc,v 1.4 1999/03/30 15:33:43 wenaus Exp $
 // $Log: countPrimaryTracks.cc,v $
+// Revision 1.4  1999/03/30 15:33:43  wenaus
+// eliminate obsolete branch methods
+//
 // Revision 1.3  1999/02/22 20:49:22  wenaus
 // Protect against null primary vertex
 //
@@ -25,12 +28,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "StEvent/StEvent.hh"
  *
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:22 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.4 1999/03/30 15:33:43 wenaus Exp $";
 #include "StEventTypes.h"
 
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:22 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.4 1999/03/30 15:33:43 wenaus Exp $";
+  long counter = 0;
   // First, we have to establish a primary vertex.
     //  in many different ways. Here we demonstrate
+  /*
   // Count vertex daughters, and arbitrarily set the primary vertex
   // to be the vertex with the most daughters
   StVertexCollection* vertices = event.vertexCollection();
@@ -58,7 +63,6 @@ static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:2
   }
 
   // Thomas's Example 1
-  long counter = 0;
   StTrackCollection *tracks = event.trackCollection();
   StTrackIterator iter;
   StGlobalTrack *track;
@@ -71,6 +75,7 @@ static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.3 1999/02/22 20:49:2
         vertex->type() == primary)
       counter++;
   }
+  */
   return counter;
 	     << "tracks from different methods." << endl;
 
