@@ -79,6 +79,7 @@ f/call py_init(4)
 * end of processing
  
  exec write_table_to_file#close pyfile
+ f/call pystat(1)
  
  return
  
