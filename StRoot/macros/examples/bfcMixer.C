@@ -7,7 +7,7 @@
 //
 //
 //
-// $Id: bfcMixer.C,v 1.8 2000/09/18 14:47:19 pfachini Exp $
+// $Id: bfcMixer.C,v 1.9 2001/01/25 18:06:29 pfachini Exp $
 //////////////////////////////////////////////////////////////////////////
 
 TBrowser *b = 0;
@@ -34,11 +34,11 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer(const Int_t Nevents=9999,
+void bfcMixer(const Int_t Nevents=2,
              const Char_t *kind1="fz",
-             const Char_t *file1="/star/rcf/data06/reco/embedding/fz/pi-/st_physics_1185015_raw_0002.fz",
+             const Char_t *file1="/star/u2c/pfachini/workdir/SpectraChain/fz/st_physics_1243031_raw_0029.fz",
              const Char_t *kind2="daq",
-             const Char_t *file2="/star/rcf/data08/daq/2000/07/st_physics_1185015_raw_0002.daq")
+             const Char_t *file2="/star/rcf/data06/reco/embedding/test/st_physics_1243031_raw_0029.daq")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -60,7 +60,7 @@ void bfcMixer(const Int_t Nevents=9999,
   if (!strcmp(kind2,"daq")) {
     chain2 = new StBFChain("Two");
     saveMk = chain2->cd();
-    chain2->SetFlags("in db"); //  
+    chain2->SetFlags("in db debug"); //  
     chain2->Set_IO_Files(file2);
     chain2->Load();
     chain2->Instantiate();
@@ -70,7 +70,7 @@ void bfcMixer(const Int_t Nevents=9999,
     kind1="trs";
     chain1 = new StBFChain("One");
     saveMk = chain1->cd();
-    chain1->SetFlags("fzin gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq"); // 
+    chain1->SetFlags("fzin debug gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq"); // 
     chain1->Set_IO_Files(file1);
     chain1->Load();
     chain1->Instantiate();
@@ -97,7 +97,7 @@ void bfcMixer(const Int_t Nevents=9999,
   //chain3->SetFlags("P00h NoInput -xin GeantOut -QA -EventQA debug");
   //chain3->SetFlags("P00h NoInput l3 -in -xin -tags AllEvent");
   //chain3->SetFlags("P00h NoInput DbV0713 -y1h -in -xin -tags AllEvent");
-  chain3->SetFlags("NoInput DbV0819 ry1h in tpc_daq tpc global dst Kalman Tree GeantOut AllEvent");
+  chain3->SetFlags("NoInput ry1h in tpc_daq tpc global dst Kalman Tree GeantOut AllEvent");   
   //ry1h,in,tpc_daq,tpc,rich,trg,Cdst,Kalman,tags,Tree,evout
   TString OutputFileName(gSystem->BaseName(file2));
   OutputFileName.ReplaceAll("*","");
