@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.15 1999/12/15 17:17:32 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.16 1999/12/15 18:31:05 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.16  1999/12/15 18:31:05  kathy
+// added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
+//
 // Revision 1.15  1999/12/15 17:17:32  kathy
 // changed the dedx histograms to the scale GeV/cm - which is the scale in the dst table
 //
@@ -161,6 +164,10 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_glb_chargeT=0;
   m_glb_chargeFE=0;
   m_glb_chargeFW=0;
+  m_glb_r0T=0;
+  m_glb_phi0T=0;
+  m_glb_z0T=0;
+  m_glb_curvT=0;
   m_glb_xf0=0;
   m_glb_xfT=0;
   m_glb_xfFE=0;
@@ -477,7 +484,7 @@ void StQABookHist::BookHistGlob(){
 // 1D general
 
   m_globtrk_tot   = QAH1F("QaGtrkTot",  "globtrk: tot # tracks",40,0.,10000.);
-  m_globtrk_iflag = QAH1F("QaGtrkFlag", "globtrk: iflag ",200,-999.,1001.);
+  m_globtrk_iflag = QAH1F("QaGtrkFlag", "globtrk: iflag ",160,-799.,801.);
 
   m_globtrk_good  = QAH1F("QaGtrkGood", "globtrk: tot # good tracks",40,0.,10000.);  
   m_det_id        = QAH1F("QaGtrkDetId",   "globtrk: Detector ID for tracks",25,0.,25.);
@@ -491,6 +498,10 @@ void StQABookHist::BookHistGlob(){
   m_glb_ratioT  = QAH1F("QaGtrkRnfT",    "globtrk: ratio Nfit/tot pnt, tpc", 55, 0., 1.1);
   m_glb_ratiomT = QAH1F("QaGtrkRnmT",    "globtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_glb_chargeT = QAH1F("QaGtrkChrgT",   "globtrk: charge, tpc ", 20,-2.,2.);
+  m_glb_r0T     = QAH1F("QaGtrkR0T",     "globtrk: radius at start (cm), tpc ", 50,0.,200.);
+  m_glb_phi0T   = QAH1F("QaGtrkPhi0T",   "globtrk: azimuth ang at start (deg), tpc ", 36,0.,360.);
+  m_glb_z0T     = QAH1F("QaGtrkZ0T",     "globtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
+  m_glb_curvT   = QAH1F("QaGtrkCurvT",   "globtrk: curvature (1/cm), tpc ", 50,0.,.1);
   m_glb_xfT     = QAH1F("QaGtrkXfT",     "globtrk: x of first hit on trk, tpc", 50,-200.,200.);
   m_glb_xf0     = QAH1F("QaGtrkXf0",     "globtrk: x of first hit - on helix at start, tpc",50,-5.,5.);
   m_glb_yfT     = QAH1F("QaGtrkYfT",     "globtrk: y of first hit on trk, tpc", 50,-200.,200.);
@@ -673,7 +684,7 @@ void StQABookHist::BookHistPrim(){
 
 // 1D
   m_primtrk_tot   = QAH1F("QaPtrkTot",  "primtrk: tot # tracks",40,0.,10000.);
-  m_primtrk_iflag = QAH1F("QaPtrkFlag", "primtrk: iflag ",200,-999.,1001.);
+  m_primtrk_iflag = QAH1F("QaPtrkFlag", "primtrk: iflag ",160,-799.,801.);
 
   m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot # good tracks",40,0.,10000.);  
   m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID for tracks",25,0.,25.);

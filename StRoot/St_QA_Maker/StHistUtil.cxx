@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.13 1999/12/13 20:08:37 lansdell Exp $
+// $Id: StHistUtil.cxx,v 1.14 1999/12/15 18:31:05 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.14  1999/12/15 18:31:05  kathy
+// added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
+//
 // Revision 1.13  1999/12/13 20:08:37  lansdell
 // added pt vs eta in ftpc histogram to match table QA changes; updated logy scale histograms
 //
@@ -477,6 +480,9 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkNPntFitT",
  "TabQaGtrkPtT",
  "TabQaGtrkPT",
+ "TabQaGtrkR0T",
+ "TabQaGtrkZ0T",
+ "TabQaGtrkCurvT",
  "TabQaGtrkXfT",
  "TabQaGtrkYfT",
  "TabQaGtrkZfT",
