@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.3 2004/07/16 15:06:08 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.4 2004/07/16 18:28:18 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,10 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.4  2004/07/16 18:28:18  dongx
+ * -Tofp Slewing function changed in AuAu200 GeV Run IV
+ * -Include those runs with eastern PVPD dead
+ *
  * Revision 1.3  2004/07/16 15:06:08  dongx
  * Z correction function separated for TOFp and TOFr.
  * Use a new one for RunIV AuAu 200GeV runs
@@ -129,6 +133,8 @@ private:
     Bool_t     mYear3;
     Bool_t     mYear4;
 
+    Bool_t     mEastPVPDValid; // 022-035 east pVPD dead
+
     Bool_t     mValidCalibPar;
     Bool_t     mValidStartTime;
 
@@ -161,7 +167,7 @@ private:
     Bool_t            mOuterGeometry;
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.3 2004/07/16 15:06:08 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.4 2004/07/16 18:28:18 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofCalibMaker,2)
 };
