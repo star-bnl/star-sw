@@ -255,6 +255,9 @@ void StiGeometryTransform::operator() (const StPrimaryVertex* vtx, StiHit* stihi
 
 void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
 {
+    //We'll temporarily keep
+    stihit->setStHit(const_cast<StTpcHit*>(tpchit));
+
     //Change if we change numbering scheme
     double refangle = gRefAnleForSector( tpchit->sector() );
     double pos = mpadrowradiusmap[ tpchit->padrow() ];
@@ -268,21 +271,21 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     //Transform 
     tpcTransform->operator()(gHit, lsHit);
 
-    //Careful, we have to swap z for all hits, and x and y for hits with global z>0
-
+    //Careful, we have to swap z for all hits, and x and y
+    
     //Keep z in global coordinates
     stihit->setZ( tpchit->position().z() );
 
-    //Take x -> -x, then swap x for y
+    //Swap x for y, 
     if (tpchit->position().z() >0) {
 	stihit->setX( lsHit.position().y() );
-	stihit->setY( -1.*lsHit.position().x() );
+	stihit->setY( lsHit.position().x() );
     }
 
-    //Swap x for y, 
+    //Take x -> -x, then swap x for y
     else {
 	stihit->setX( lsHit.position().y() );
-	stihit->setY( lsHit.position().x() );
+	stihit->setY( -1.*lsHit.position().x() );
     }
 
     /*

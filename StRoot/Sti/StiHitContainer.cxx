@@ -165,12 +165,19 @@ void StiHitContainer::print(double refangle, double position)
     mkey.refangle = refangle;
     mkey.position = position;
     hitmap::const_iterator where = mmap.find(mkey);
+    
     if (where==mmap.end()) {
 	//cout <<"StiHitContainer::print(double, double) !! Error. key:\t"<<mkey<<" not found"<<endl;
 	cout <<"No Hits For DetectorMapKey:\t"<<mkey<<endl;
 	return;
     }
+    
     const hitvector& tempvec = (*where).second;
+    if (tempvec.size()==0) {
+	cout <<"No Hits For DetectorMapKey:\t"<<mkey<<endl;
+	return;
+    }
+    
     for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++)    {
 	cout <<*(*it)<<endl;
     }
