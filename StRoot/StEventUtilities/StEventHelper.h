@@ -62,6 +62,7 @@ public:
              virtual Float_t GetZ(Int_t idx) const {return fXYZ[idx*3+2];}
              virtual Int_t   Size() const          {return fSize;}
              virtual TObject *GetObject() const    {return fObj;}
+                     void    Add(StPoints3DABC *add);
 
 // Dummies
                virtual Int_t DistancetoPrimitive(Int_t px, Int_t py){return -1;}
@@ -84,6 +85,7 @@ protected:
  TString fName;
  TString fTitle;
  Int_t     fSize;
+ Int_t     fN;
  Float_t  *fXYZ;
  TObject  *fObj;
  ClassDef(StPoints3DABC,0)    
