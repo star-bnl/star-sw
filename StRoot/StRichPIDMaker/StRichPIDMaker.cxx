@@ -1,14 +1,16 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.11 2000/11/01 17:45:21 lasiuk Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 lasiuk Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
- * Revision 2.11  2000/11/01 17:45:21  lasiuk
- * MAJOR. hitFilter overhaul. members reordered, padplane dimension kept as
- * a member.  addition of initTuple.  Additional dependencies of
- * min/max algorithms
+ * Revision 2.12  2000/11/07 14:11:39  lasiuk
+ * initCutParameters() and diagnositis print added.
+ * bins for <d> and sigma_d added.
+ * TPC hits for RICH tracks written out.
+ * (file) ptr checked before writing ntuple.
+ * check flags on Hits instead of ADC value
  *
  * Revision 2.21  2000/11/27 17:19:40  lasiuk
  * fill the constant area in teh PID structure
@@ -118,10 +120,12 @@ using std::max;
 #include "StRichTrackingControl.h"
 #include "StRichMcSwitch.h"
 #define myrICH_WITH_NTUPLE 1
-#include "StEvent/StTpcDedxPidAlgorithm.h"
-#include "StEvent/StEventTypes.h"
-#include "StEvent/StRichPidTraits.h"
-#include "StEvent/StRichPid.h"
+
+// StChain, etc...
+#include "StChain.h"
+#include "St_DataSet.h"
+#include "St_DataSetIter.h"
+#include "StMessMgr.h"
 
 // root
 #include "TH1.h"
@@ -161,40 +165,86 @@ using std::max;
 #include "PhysicalConstants.h"
 
 // StEvent
-  // initialize cuts
-  mPtCut = 0.0; // GeV/c
-  mEtaCut = 0.5; 
-  mLastHitCut = 160.0*centimeter;
-  mDcaCut = 3.0*centimeter;
-  mFitPointsCut = 20;
-  mAdcCut = 300; 
-  mPathCut = 500*centimeter;
-  mPadPlaneCut = 2.0*centimeter;
-  mRadiatorCut = 2.0*centimeter;
+#include "StEventTypes.h"
+#include "StRichPid.h"
+#include "StRichPhotonInfo.h"
+#include "StRichPidTraits.h"
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 lasiuk Exp $";
 
-  mThresholdMomentum=.5*GeV;
 #include "StEventMaker/StRootEventManager.hh"
 
 // StRrsMaker, StRchMaker
 #include "StRrsMaker/StRichGeometryDb.h"
+#include "StRrsMaker/StRichCoordinateTransform.h"
+#include "StRrsMaker/StRichEnumeratedTypes.h"
+#include "StRchMaker/StRichSimpleHitCollection.h"
+
+// StRichPIDmaker
+#include "StRichRingCalculator.h"
+#include "StRichRingDefinition.h"
+#include "StRichTrack.h"
+#include "StRichMCTrack.h"
+
+#ifdef myRICH_WITH_MC
+// StMCEvent
+#include "StMcEvent/StMcEventTypes.hh"
+#include "StMcEventMaker/StMcEventMaker.h"
+
+// StAssociationMaker
+#include "StAssociationMaker/StAssociationMaker.h"
+#include "StAssociationMaker/StTrackPairInfo.hh"
+
+// g2t tables
+    mVertexWindow = 100.*centimeter;
+#endif
+
+// magnetic field map
+//#include "StarCallf77.h"
+    mPtCut = 0.*GeV; // GeV/c
+//extern "C" {void gufld(Float_t *, Float_t *);}
+
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.12 2000/11/07 14:11:39 lasiuk Exp $";
+
+StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
+  drawinit = kFALSE;
+  fileName = 0;
+  kWriteNtuple=writeNtuple;
+
+  //
+  // initialize cuts, values and parameters for processing
+  //
+  
+  this->initCutParameters();
+    mPtCut = 0.5*GeV; // GeV/c
+}
+
+StRichPIDMaker::~StRichPIDMaker() {}
+
+void StRichPIDMaker::initCutParameters() {
+    //
+    // Event Level
+    //
+    mVertexWindow = 200.*centimeter;
+
+    //
+    // Hit Level (Depracated)
+    //
+    mAdcCut = 300; 
+
+    //
+    // Track Level
+    //
     mPtCut = 0.0*GeV; // GeV/c
     mEtaCut = 0.5; 
-    mRefit = false;
-
     mLastHitCut = 160.0*centimeter;
     mDcaCut = 3.0*centimeter;
     mFitPointsCut = 20;
     mPathCut = 500*centimeter;
-    mDoGapCorrection      = true;
-    mPionSaturatedArea    = 100.0;
-    mKaonSaturatedArea    = 100.0;
-    mProtonSaturatedArea  = 100.0;
-    
     mPadPlaneCut = 2.0*centimeter;
     mRadiatorCut = 2.0*centimeter;
 
     mThresholdMomentum=.3*GeV;
-    mListOfParticles[2]  = proton;
+
     //
     // Convergence parameter for psi determination
     pion    = StPionMinus::instance();
@@ -202,6 +252,14 @@ using std::max;
     proton  = StAntiProton::instance();
 }
     mListOfParticles.clear();
+    mListOfParticles.resize(3);
+    mListOfParticles[0]   = pion;
+    mListOfParticles[1]   = kaon;
+    mListOfParticles[2]   = proton;
+    
+    mMaterialDb = StRichMaterialsDb::getDb();
+    mGeometryDb = StRichGeometryDb::getDb(); 
+    mCoordinateTransformation = StRichCoordinateTransform::getTransform(mGeometryDb);
     mMomentumTransformation = StRichMomentumTransform::getTransform(mGeometryDb);
     mPadMonitor = 0;
     
@@ -210,15 +268,15 @@ using std::max;
 
     mDoGapCorrection      = true;
     mPionSaturatedArea    = 100.0;
-    if (mDefaultShortWave != mShortWave && mDefaultLongWave != mLongWave) {
+    mKaonSaturatedArea    = 100.0;
+    mProtonSaturatedArea  = 100.0;
     
     //
     // hard coded values for now!
+    // this->setWaveLenght(small,large)
     // can be used to change wavelenghts
-    mPadPlaneDimension = mGeometryDb->padPlaneDimension();
-    
-    cout << " mGeometryDb->padPlaneDimension() " << mPadPlaneDimension << endl;
-    
+    //
+    mDefaultShortWave = 160.0e-7;
     mDefaultLongWave  = 200.0e-7;
     
     if ( (mDefaultShortWave != mShortWave) &&
@@ -315,6 +373,83 @@ Int_t StRichPIDMaker::Make() {
     if (!richCollection) {
 	cout << "StRichPIDMaker::Make()\n";
 	cout << "\tERROR: Cannot get richCollection from StEvent\n";
+	cout << "\tSkip Event" << endl;
+	return kStWarn;
+    }
+
+    const StSPtrVecRichHit*     pRichHits      = 0;
+    const StSPtrVecRichCluster* pRichClusters  = 0;
+    const StSPtrVecRichPixel*   pRichPixels    = 0;
+    
+    int myRichHits   = 0;
+    int myRichPixels = 0;
+    
+    if (richCollection->pixelsPresent()) {
+	myRichPixels = richCollection->getRichPixels().size();
+	const StSPtrVecRichPixel& richPixels =
+	    richCollection->getRichPixels();
+	pRichPixels = &richPixels;
+#ifdef  myRICH_WITH_NTUPLE
+	int adcsum       = 0;
+	StSPtrVecRichPixelConstIterator i;
+	for (i=pRichPixels->begin(); i != pRichPixels->end(); ++i) {
+	    adcsum += (*i)->adc();
+	}
+#endif
+    }
+    
+    if (richCollection->clustersPresent()) {
+	const StSPtrVecRichCluster& richClusters =
+	    richCollection->getRichClusters();
+	pRichClusters = &richClusters;
+    }
+    
+    if (richCollection->hitsPresent()) {
+	const StSPtrVecRichHit& richHits =
+	    richCollection->getRichHits();
+	pRichHits = &richHits;
+	if(pRichHits)
+	    myRichHits = pRichHits->size();
+    }
+    
+    
+	cout << "StRichPIDMaker:Make()\n";
+	cout << "\tNo StTpcHitCollection\n";
+	cout << "\tTry make one" << endl;
+    mNumberOfPrimaries  = this->fillTrackList(rEvent,pRichHits);
+    mRichTracks = mListOfStRichTracks.size();
+
+	cout << "\tMake an StRootEventManager" << endl;
+    //
+    // Check if the tpcHitCollection Exists
+    // If it does, be sure the hits which
+	cout << "\tInquiry to the .dst" << endl;
+    // otherwise, put them there
+    //
+    size_t ii;
+	    cout << "\tCannot Open dataset \"dst\"" << endl;
+	//cout << "\tNo StTpcHitCollection\n";
+	//cout << "\tTry make one" << endl;
+	StTpcHitCollection* theTpcHitCollection = new StTpcHitCollection();
+	rEvent->setTpcHitCollection(theTpcHitCollection);
+
+	//cout << "\tMake an StRootEventManager" << endl;
+	StRootEventManager* theEvtManager = new StRootEventManager();
+	theEvtManager->setMaker(this);
+
+	//cout << "\tQuery to the .dst" << endl;
+	int status = theEvtManager->openEvent("dst");
+	if(status == oocError) {
+	    cout << "StRichPIDMaker::Make()\n";
+	    cout << "\tWARNING:\n";
+	    cout << "\tCannot Open dataset \"dst\"";
+	    cout << "\tCannot make the StTpcHitCollection\n" << endl;
+	}
+	else {
+	    long nrows;
+	    dst_point_st* dstPoints = theEvtManager->returnTable_dst_point(nrows);
+
+		    for(int i=0; i<nrows; i++) {
 		cout << "StRichPIDMaker::Make()\n";
 		cout << "\tWARNING: Cannot get the dstPoints\n";
 		cout << "\tContinuing..." << endl;
@@ -324,11 +459,27 @@ Int_t StRichPIDMaker::Make() {
 		    StTrack* currentTrack = mListOfStRichTracks[ii]->getStTrack();
 		    if(!currentTrack->detectorInfo()) {
 			cout << "StRichPIDMaker::Make()\n";
+			cout << "\tWARNING: No detectorInfo()\n";
 			cout << "\tassocciated with the track.  Continuing..." << endl;
 			continue;
-    for (size_t ii=0; ii<mListOfStRichTracks.size(); ii++) {     
+		    }
 		    
-	
+		    unsigned short trackKey = currentTrack->key(); 
+		    for(int i=0; i<nrows; i++) { //nrows
+			
+			// access it later
+			//
+			if(theTpcHitCollection->addHit(tpcHit)) {
+			
+		    } // loop over the hits
+    // This is the main PID loop
+		} // loop over the Rich Tracks
+			
+		delete theEvtManager;
+		theEvtManager=0;
+	    } // else Got 'em
+	} // else 
+    } // check on the tpcHitCollection
 
     //
     // The StTpcHitCollection should exist at this
@@ -416,12 +567,17 @@ Int_t StRichPIDMaker::Make() {
     // 	  this->hitFilter(pRichHits,ringCalc);
     // 	  delete ringCalc;  ringCalc = 0;
     // 	}
+    //       }
+    //   }
     //   if (kWriteNtuple) this->fillCorrectedNtuple();
-    cout << "StRichPIDMaker::Finish()  writing file to tape" << endl;
-    file->Write();
-    file->Close();
-    delete file;
-    file = 0;
+	//
+	    cout << "StRichPIDMaker::Make()\n";
+	    cout << "\tCannot fill the PidTrait to the StTrack" << endl;
+	    cout << "\tContinuing..." << endl;
+	}
+	richTrack = 0;
+    }
+
     // 
     // end of PID loop
     //
@@ -506,9 +662,9 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	    StRichTrack* tempTrack   = new StRichTrack(track,mMagField);
     if (!makeTrackAssociations(mEvent,pRichHits)) {
 
-//     ofstream os("/dev/null",ios::app);
-//     os << "**PDG " <<  ringCalculator->
-// 	getRing(eInnerRing)->getParticleType()->pdgEncoding() << endl;
+	    if(this->checkTrack(tempTrack)) {
+
+		//
 		// set the eAssociatedMIP flag
 		//
 		tempTrack->assignMIP(richHits);
@@ -529,7 +685,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	    }
 	}
 	//	if (tempTrack->geometry()->charge() < 0) {
-//     os << "Track Momentum: " << ( abs(trackMomentum) ) << endl;
+	if (tempEvent->primaryVertex()->daughter(ii)->geometry()->charge() < 0) {
 	    mNegativePrimaries++;
 	}
     }
@@ -543,8 +699,19 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	return kStWarn;
     }
 #endif
+    
+    return mNumberOfPrimaries;
+}
 
-//     os << "CENTRAL HIT: " << central << endl; 
+
+void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
+			       StRichRingCalculator* ringCalculator) {
+
+//      ofstream os("data.txt",ios::app);
+//      os << "**PDG " <<  ringCalculator->
+//  	getRing(eInnerRing)->getParticleType()->pdgEncoding() << endl;
+
+    //
     // make sure the hits exist
     //
     if(!richHits) {
@@ -556,7 +723,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
     StThreeVectorF pointOnRing;
 
     StRichTrack* currentTrack = ringCalculator->getRing(eInnerRing)->getTrack();
-//     os << "particleType " << particleType << endl;
+    if(!currentTrack) {
 	cout << "StRichPIDMaker::hitFilter()\n";
 	cout << "\tERROR no track" << endl;
 	return;
@@ -567,21 +734,17 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 
 //     PR( abs(trackMomentum) );
 	cout << "\tCentral Hit is not classified by the\n";
-//     os << "Drawing central " << central << endl;
+	cout << "\tStRichClusterAndHitFinder as a MIP\n";
     if(!checkTrackMomentum(abs(trackMomentum))) return;
     
     StRichHit* centralHit = currentTrack->getAssociatedMIP();
     if(!centralHit) {
-//     os << "LOOP OVER HITS start" << endl;
+	cout << "StRichPIDMaker::hitFilter()\n";
 	cout << "\tERROR no associated MIP" << endl;
 	return;
-    float distHits[28];
+    }
 
     //
-    // TBA a data member
-    //
-    double mPrecision = 100*micrometer;
-    
     // IF the 
     if( !centralHit->isSet(eMip) ) {
 	cout << "StRichPIDMaker::hitFilter()\n";
@@ -594,7 +757,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
     //
     // simple counters for # photons per ring
     //
-	if (! this->checkHit( (*hitIter) ) ) continue;
+    int pi=0;
     int pi2=0;
     int ka=0;
     int ka2=0;
@@ -616,8 +779,8 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 //      os << "particleType " << particleType << endl;
 
 
-// 	os << "\n***\noldsigma " << oldsigma << endl;
-// 	os << "looping hit" << hit << endl;
+//      os << "Drawing central " << central << endl;
+#ifdef RICH_WITH_PAD_MONITOR 
     mPadMonitor->drawMarker(central);
 #endif
     
@@ -628,7 +791,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 #endif
 
     //
-// 	os << "referenceLine " << referenceLine << endl;
+    // loop over hits
     StSPtrVecRichHitConstIterator hitIter;
     for (hitIter = richHits->begin();
 	 hitIter != richHits->end(); hitIter++) {
@@ -636,24 +799,24 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	if( (*hitIter) == centralHit) continue;
 	if ( !(*hitIter)->isSet(ePhotoElectron) ) continue;
 
-	float idist = ringCalculator->getInnerDistance(hit,innerAngle);
-// 	os << "idist " << idist << "\tinnerAngle " << innerAngle << endl;
+	ringCalculator->clear();  
+	StThreeVectorF hit = (*hitIter)->local();
 
 	//
 	// we are waiting for the database
-// 	    os << "StRichPIDMaker::hitFilter()\n";
-// 	    os << "\tPANIC\n";
-// 	    os << "\tINITIAL ANGLE DOES NOT CORRESPOND";
-// 	    os << "\tTO A POINT ON THE PAD PLANE. SKIP" << endl;
+	//
+	if( hit.x()<-65 ) continue;
+
+	//
 	// OLD VARIABLE CALCULATION
 	//
-// 	os << "pointOnRing" << pointOnRing << endl;
+	innerDistance = ringCalculator->getInnerDistance(hit,innerAngle);
 	outerDistance = ringCalculator->getOuterDistance(hit,outerAngle);
 	mPadMonitor->drawMarker(hit,26);
-// 	os << "ringPointLine " << ringPointLine << endl;
+	ringWidth     = ringCalculator->getRingWidth();
 	double quartzPath    = ringCalculator->getMeanPathInQuartz();
  	float idist = ringCalculator->getInnerDistance(hit,innerAngle);
-// 	os << "psi " << psi << endl;
+	
 	double olddist  = ((outerDistance/ringWidth > 1 &&
 			    (innerDistance/ringWidth < outerDistance/ringWidth )) ? 
 			   (-1.0):(1.0))*innerDistance/ringWidth;
@@ -673,11 +836,11 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	// the line from the MIP to the hit
 	// 
 	StThreeVectorF referenceLine = (hit-central);
-// 	os << "sineTheta* (" << signOfTheta << ") " << sineTheta << endl;
+//  	os << "referenceLine " << referenceLine << endl;
 #ifdef RICH_WITH_PAD_MONITOR 
 	//mPadMonitor->drawLine(central,hit);
 #endif
-	// 	os << "minDistToRefLine " << minDistToRefLine << endl;
+	//
 	// Find the minimum distance to the InnerRing
 	// from the hit
 	//
@@ -692,7 +855,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 //  	    os << "\tTO A POINT ON THE PAD PLANE. SKIP" << endl;
 	    continue;
 	}
-// 	os << "initial step " << step << endl;
+//  	os << "pointOnRing" << pointOnRing << endl;
 
 	StThreeVectorF ringPointLine = pointOnRing - central;
 //  	os << "ringPointLine " << ringPointLine << endl;
@@ -712,13 +875,14 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	//        B = referenceLine
 	//
 	// z component =
-	    ctr++; // os << "ctr* " << ctr << "\t" << "psi " << psi << endl;
+	//               AxBy - AyBx
+	//
 
 	int signOfTheta =
-// 	    os << "newPointOnRing " << newPointOnRing << endl;
+	    sign(ringPointLine.x()*referenceLine.y() - ringPointLine.y()*referenceLine.x());
 	double sineTheta = abs( (ringPointLine.unit()).cross(referenceLine.unit()) ); 
-// 		os << "StRichPIDMaker::hitFilter()\n";
-// 		os << "REFRACTED AWAY" << endl;
+//  	os << "sineTheta* (" << signOfTheta << ") " << sineTheta << endl;
+
 	float minDistToRefLine =
 	    fabs(ringPointLine.mag())* sineTheta;
 // 	os << "minDistToRefLine " << minDistToRefLine << endl;
@@ -730,13 +894,13 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 
 	double step      = 1.*degree;
 	double maxChange = 5.*degree;
-// 	    os << "sineNewTheta (" << signOfNewTheta << ") " << sineTheta << endl;
+
 	//
 	// take the initial step according to the sign of theta
 	//
 	
-// 	    os << "newDistToRefLine " << newDistToRefLine << endl;
-// 	    os << "sineTheta " << sineTheta << endl;
+	if(signOfTheta<0) step *= -1.;
+//  	os << "initial step " << step << endl;
 
 	int ctr = 0;
 	while (anotherIteration && ctr<maxIterForInitialPsi) {
@@ -746,7 +910,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	    //
 // 		    if(psi>0 && psi>M_PI) {
 // 			os << "Adjustment (-1)" << endl;
-// 	    os << "step " << step << endl;
+// 			psi -= (2.*M_PI);
 // 			step *= -1.;
 // 		    }
 // 		    if(psi<0 && psi< (-1.*M_PI) ) {
@@ -762,13 +926,13 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	    ringCalculator->getRing(eInnerRing)->getPoint(psi,newPointOnRing);
 //  	    os << "newPointOnRing " << newPointOnRing << endl;
 	    if(newPointOnRing.x() == FLT_MAX) {
-// 		    os << "BRAKES step " << step << endl;
+//  		os << "StRichPIDMaker::hitFilter()\n";
 //  		os << "REFRACTED AWAY" << endl;
 		psi -= step;
 		step *= 0.5;
 		continue;
 	    }
-// 	    os << "step " << step << endl;
+
 	    ringPointLine = newPointOnRing - central;
 
 	    int signOfNewTheta =
@@ -780,7 +944,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	    double newDistToRefLine = 
 		abs(ringPointLine)* sineTheta;
 
-// 	os << "Drawing innerRingPoint " << innerRingPoint << endl;
+//  	    os << "newDistToRefLine " << newDistToRefLine << endl;
 //  	    os << "sineTheta " << sineTheta << endl;
 
 	    if(ctr > maxIterForRingPsi)
@@ -788,7 +952,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 
 	    if (newDistToRefLine<mPrecision) {
 		convergence = true;
-// 	os << "current best guess for psi " << psi << endl;
+		break;
 	    }
 		    
 //  	    os << "step " << step << endl;
@@ -807,8 +971,8 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 		    min(maxChange,(step*1.2)) : max(-1.*maxChange,step*1.2);
 
 		if(newDistToRefLine < 3.*centimeter) {
-// 		os << "An OuterRingPoint DOES NOT EXIST with this psi..( "
-// 		   << iterationNumber << ")" << endl;
+//  		    os << "BRAKES step " << step << endl;
+		    step = (step>0) ?
 			min(1.*degree,step) : max(-1.*degree,step);
 		}
 
@@ -816,9 +980,9 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 //  	    os << "step " << step << endl;
 
 	    minDistToRefLine = newDistToRefLine;
-// 	os << "old psi " << psi << endl;
+		    
 	};
-// 	os << "new (starting) psi " << psi << endl;
+
 	if(!convergence) continue;
 
 	//
@@ -827,7 +991,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	StThreeVectorF innerRingPoint = newPointOnRing;
 //  	os << "Drawing innerRingPoint " << innerRingPoint << endl;
 #ifdef RICH_WITH_PAD_MONITOR 
-// 	    os << "ERROR: PANIC BAD POINT...continue" << endl;
+	//mPadMonitor->drawMarker(innerRingPoint,22);
 #endif
 	//
 	// Given an initial guess for psi, find the "line of constant psi"
@@ -837,9 +1001,9 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 		
 	//
 	// determine the outerRingPoint with the corresponding Psi
-// 	os << "consPsiVector " << consPsiVector << endl;
+	//
 	StThreeVectorF outerRingPoint;
-// 	mPadMonitor->drawLine(innerRingPoint,outerRingPoint);
+
 	int iterationNumber = 0;
 	double littleStep   = 1.*degree;
 	double modifiedPsi = psi;
@@ -868,12 +1032,12 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	ringCalculator->getRing(eInnerRing)->getPoint(psi,innerRingPoint);
 	ringCalculator->getRing(eOuterRing)->getPoint(psi,outerRingPoint);
 
-// 	os << "sineTheta2 (" << signOfTheta << ") " << sineTheta << endl;
+	if( (fabs(outerRingPoint.x()  > mPadPlaneDimension.x())) ||
 	mPadMonitor->drawMarker(innerRingPoint,2,1);
 	mPadMonitor->drawMarker(outerRingPoint,2,1);
 	    (fabs(innerRingPoint.y()) > mPadPlaneDimension.y())  ) {
 //  	    os << "ERROR: PANIC BAD POINT...continue" << endl;
-// 	os << "minDistToConsPsiRefLine " << minDistToConsPsiRefLine << endl;
+	    continue;
 	}
 
 
@@ -884,7 +1048,7 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	StThreeVectorF consPsiVector = outerRingPoint - innerRingPoint; 
 //  	os << "consPsiVector " << consPsiVector << endl;
 #ifdef RICH_WITH_PAD_MONITOR 
-// 	os << "initial step " << step << endl;
+//  	mPadMonitor->drawLine(innerRingPoint,outerRingPoint);
 // 	mPadMonitor->drawMarker(innerRingPoint,2,1);
 // 	mPadMonitor->drawMarker(outerRingPoint,2,1);
 #endif
@@ -908,12 +1072,12 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	// z component =
 	//               AxBy - AyBx
 	//
-// 	    os << "newInnerPointOnRing " << newInnerPointOnRing << endl;
-// 	    os << "newOuterPointOnRing " << newOuterPointOnRing << endl;
+	
+	signOfTheta =
 	    sign(consPsiRefLine.x()*consPsiVector.y() -
 		 consPsiRefLine.y()*consPsiVector.x());
 	sineTheta = abs( (consPsiRefLine.unit()).cross(consPsiVector.unit()) ); 
-// 		os << "REFRACTED AWAY" << endl;
+//  	os << "sineTheta2 (" << signOfTheta << ") " << sineTheta << endl;
 		
 	double minDistToConsPsiRefLine =
 	    abs(consPsiRefLine) * sineTheta; 
@@ -934,12 +1098,12 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	while (anotherIteration || ctr<maxIterForRingPsi) {
 
 	    //
-// 	    os << "sineTheta 2*(" << signOfNewTheta << ") " << sineTheta << endl;
+	    // make sure you are in range
 	    //
 // 		    if(psi>0 && psi>M_PI) {
 // 			os << "Adjustment (-2)  psi " << psi << endl;
 // 			psi -= (2.*M_PI);
-// 	    os << "newMinDistToConsPsiRefLine " << newMinDistToConsPsiRefLine << endl;
+// 			step *= -1.;
 // 		    }
 // 		    if(psi<0 && psi< (-1.*M_PI) ) {
 // 			os << "Adjustment (+2)  psi " << psi << endl;
@@ -963,20 +1127,20 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 		step *=0.5;
 		continue;
 	    }
-// 		    os << "BRAKES(2) " << endl;
+		    
 	    consPsiRefLine = hit - newInnerPointOnRing;
 	    consPsiVector  = newOuterPointOnRing - newInnerPointOnRing; 
 
 	    //
 	    //        ^   ^
 	    // | A |  A x B
-// 	    os << "step " << step << endl;
+	    //
 	    // where:
 	    //        A = consPsiRefLine
 	    //        B = consPsiVector
 	    
-// 	os << "minDistToConsPsiRefLine " << minDistToConsPsiRefLine << endl;
-// 	os << "psi " << psi << endl;
+	    int signOfNewTheta =
+		sign(consPsiRefLine.x()*consPsiVector.y() -
 		     consPsiRefLine.y()*consPsiVector.x());
 	    sineTheta = abs( (consPsiRefLine.unit()).cross(consPsiVector.unit()) ); 
 //  	    os << "sineTheta 2*(" << signOfNewTheta << ") " << sineTheta << endl;
@@ -991,24 +1155,24 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 
 	    if(newMinDistToConsPsiRefLine < mPrecision) {
 		convergence = true;
-// 	os << "photonNumber " << photonNumber << endl;
-// 	os << "abs(lengthOfD) " << abs(lengthOfD) << endl;
-// 	os << "consPsiVector " << abs(consPsiVector) << endl;
+		break;
+	    }
+
 	    if( (signOfTheta != signOfNewTheta) ||
 		( (signOfTheta == signOfNewTheta) &&
 		  (newMinDistToConsPsiRefLine > minDistToConsPsiRefLine) ) ) {
 		//wrong way
 		signOfTheta = signOfNewTheta;
-// 	os << "abs(hitDVector) " << abs(hitDVector) << endl;
-// 	os << "consPsiRefLine " << consPsiRefLine << endl;
+		step *= -0.5;
+	    }
 	    else {
 		// make the step size bigger if we are moving
 		// in the right direction
 		step = (step>0) ?
-// 	os << "cosineOfD " << cosineOfD << endl;
+		    min(maxChange,(step*1.2)) : max(-1.*maxChange,step*1.2);
 
 		if(newMinDistToConsPsiRefLine < 3.*centimeter) {
-// 	os << "normalizedD " <<  normalizedD << endl;
+	mPadMonitor->drawMarker(newInnerPointOnRing,2,1);
 	StThreeVectorF hitDVector = hit - innerRingPoint;
 	    }
 
@@ -1028,38 +1192,38 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	
 	//
 	// Calculated Quantities
-	
+	//
 	
 	//
-	distHits[9]  = hit.x();
-	distHits[10] = hit.y();
+	// ring width
+	//
 	StThreeVectorF lengthOfD = newOuterPointOnRing - newInnerPointOnRing;
 //  	os << "photonNumber " << photonNumber << endl;
-	distHits[11] = central.x();
-	distHits[12] = central.y();
+//  	os << "abs(lengthOfD) " << abs(lengthOfD) << endl;
+//  	os << "consPsiVector " << abs(consPsiVector) << endl;
 
-	distHits[13] = trackMomentum.x();
-	distHits[14] = trackMomentum.y();
-	distHits[15] = trackMomentum.z();
+	//
+	// distance to hit at constant psi
+	//
 
 	StThreeVectorF hitDVector = hit - newInnerPointOnRing;
 
-	distHits[16] = ringCalculator->getRing(eInnerRing)->getTrack()->getTheta()/degree;
-	distHits[17] = mEventN;
+//  	os << "abs(hitDVector) " << abs(hitDVector) << endl;
+//  	os << "consPsiRefLine " << consPsiRefLine << endl;
 		
-	distHits[18] = photonNumber;
+	int signOfD = sign(lengthOfD*hitDVector);
 		
-	distHits[19] = mipResidual.x();
-	distHits[20] = mipResidual.y();
-	distHits[21] = abs(mipResidual);
-	
-	distHits[22] = particleType;
-	distHits[23] = cosineOfD;
-	distHits[24] = minDistToConsPsiRefLine;
-	
-	distHits[25] = abs(trackMomentum);
-	distHits[26] = currentTrack->getStTrack()->geometry()->helix().h();
-	distHits[27] = mVertexPos.z();
+	float cosineOfD = lengthOfD.unit()*hitDVector.unit();
+//  	os << "cosineOfD " << cosineOfD << endl;
+
+	double normalizedD = signOfD * (abs(hitDVector)/abs(lengthOfD));		
+//  	os << "normalizedD " <<  normalizedD << endl;
+
+#ifdef RICH_WITH_PAD_MONITOR
+	if(normalizedD>0 && normalizedD<1)
+	    mPadMonitor->drawMarker(hit,29,1.2,3);
+#endif
+
 
 #ifdef myRICH_WITH_NTUPLE
 	distHits[0] = innerRingPoint.x();
@@ -1068,9 +1232,42 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	distHits[3] = outerRingPoint.y();
 	distHits[4] = psi;
 	distHits[5] = abs(lengthOfD);
-	double sigmaOfD = .96;
-	double meanOfD  = .65;
+	distHits[6] = normalizedD;
+
 	// OLD labels
+	distHits[7] = olddist;
+	distHits[8] = oldsigma;
+	distHits[9] = meanAngle; // the old psi
+	//
+	// the photon
+	distHits[10]  = hit.x();
+	distHits[11] = hit.y();
+	//
+	// the MIP
+	distHits[12] = central.x();
+	distHits[13] = central.y();
+	
+	distHits[14] = trackMomentum.x();
+	distHits[15] = trackMomentum.y();
+	distHits[16] = trackMomentum.z();
+
+	// Track incident angle
+	//theta = acos(-pz/sqrt(px**2+py**2+pz**2))
+	distHits[17] = ringCalculator->getRing(eInnerRing)->getTrack()->getTheta()/degree;
+	distHits[18] = mEventN;
+	
+	distHits[19] = photonNumber;
+	
+	double trackDipAngle = atan(trackMomentum.x()/trackMomentum.z())/degree;
+	distHits[21] = mipResidual.y();
+	distHits[22] = abs(mipResidual);
+	int charge, bin;
+	distHits[23] = particleType;
+	if(trackDipAngle<-10)
+	    bin = 0;
+	else if(trackDipAngle>-10 && trackDipAngle<-5)
+	    bin = 1;
+	else if(trackDipAngle>-5 && trackDipAngle<0)
 	    bin = 2;
 	else if(trackDipAngle>0 && trackDipAngle<5)
 	    bin = 3;
@@ -1140,9 +1337,9 @@ Int_t StRichPIDMaker::fillTrackList(StEvent* tempEvent, const StSPtrVecRichHit* 
 	
 	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1Sigmap);
 	    if( fabs(sigma)<2 ) (*hitIter)->setBit(e2Sigmap);
-//     cout << "pi= " << pi << " pi2s= " << pi2 << endl;
-//     cout << "ka= " << ka << " ka2s= " << ka2 << endl;
-//     cout << "pr= " << pr << endl;
+// 	    if( (*hitIter)->isSet(eAssignedToRingp) )
+// 		(*hitIter)->setBit(eMultiplyAssignedToRing);
+	//
 	    (*hitIter)->setBit(eAssignedToRingp);
 		    (*hitIter)->setBit(eInMultipleAreap);
 // 	    if( fabs(sigma)<1 ) (*hitIter)->setBit(e1Sigmap);
@@ -1348,7 +1545,14 @@ void StRichPIDMaker::tagMips(StEvent* tempEvent, StSPtrVecRichHit* hits) {
 
 		StRichTrack* tempTrack = new StRichTrack(track,mMagField);
 		/// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! path length hard coded!!!!!!!!!
-    
+		if ( checkTrack(tempTrack) )  {
+		    StThreeVectorF trackPredictor = tempTrack->getProjectedMIP();
+		    StThreeVectorF testThisResidual;
+		    StRichHit* mAssociatedMIP = 0;
+		    float smallestResidual = 3.0*centimeter;
+		    float adcCut = 300;
+
+		    StSPtrVecRichHitIterator hitIter;
 		    for (hitIter = hits->begin(); hitIter != hits->end(); ++hitIter) {
 			testThisResidual = ((*hitIter)->local() - trackPredictor);      
 			if ( (testThisResidual.perp() < smallestResidual) &&
@@ -1360,7 +1564,9 @@ void StRichPIDMaker::tagMips(StEvent* tempEvent, StSPtrVecRichHit* hits) {
 		    // mAssociatedMIP->setMipFlag();
 		    mAssociatedMIP = 0;
 		}
-	cout << "\tWARNING! Cannot get B field from event->summary().  Use B= " << mMagField << endl;
+		delete tempTrack;
+	    }
+	}
     }
 }
 
@@ -1550,6 +1756,7 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
 	    }
 	    
 	    pid->setTruncatedHits(hitsInConstantArea);
+	    pid->setTruncatedDensity(hitsInConstantArea/pid->getTruncatedArea());
   mPadMonitor->clearTracks();
   mPadMonitor->drawZVertex(mVertexPos.z(),mNumberOfPrimaries,mRichTracks);
   mPadMonitor->drawEventInfo(rEvent->runId(),rEvent->id());
@@ -1563,7 +1770,68 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
   mPadMonitor->hiLiteHits(eInAreaPi);
   //mPadMonitor->hiLiteHits();
   mPadMonitor->hiLiteHits(e2SigmaPi);
+//   mPadMonitor->hiLiteHits(e2SigmaK);
+//   mPadMonitor->hiLiteHits(e2Sigmap);
+  mPadMonitor->drawRingInfo();
+  mPadMonitor->update();  
+  if (kCreatePsFile) {
+      cout << "print it...." << endl;
+      mPadMonitor->printCanvas("/afs/rhic/star/users/lasiuk/sd/",fileName,rEvent->id());
+  }
+  }
+}
+
+void StRichPIDMaker::drawPadPlane(StEvent* rEvent, bool kCreatePsFile) {
+
+#ifdef RICH_WITH_PAD_MONITOR 
+  
+//   StThreeVectorF VertexPos(-999,-999,-999);
+//   if (rEvent->primaryVertex()) {
+//     VertexPos = rEvent->primaryVertex()->position();
+//   } 
+
+   mPadMonitor = StRichPadMonitor::getInstance(mGeometryDb);
+   mPadMonitor->clearTracks();
+   mPadMonitor->drawZVertex(mVertexPos.z(),mNumberOfPrimaries,mRichTracks);
+   mPadMonitor->drawEventInfo(rEvent->runId(),rEvent->id());
+   mPadMonitor->drawFileName(fileName);
+   
+   for (size_t trackIndex=0; trackIndex<mListOfStRichTracks.size(); trackIndex++) {
+     mPadMonitor->addTrack(mListOfStRichTracks[trackIndex]);
+   }
+   
+   mPadMonitor->drawRings();
+   mPadMonitor->hiLiteHits(eInAreaPi);
+   //mPadMonitor->hiLiteHits();
+   mPadMonitor->hiLiteHits(e2SigmaPi);
+   //   mPadMonitor->hiLiteHits(e2SigmaK);
+   //   mPadMonitor->hiLiteHits(e2Sigmap);
+   mPadMonitor->drawRingInfo();
+   mPadMonitor->update();  
+   if (kCreatePsFile) {
+     cout << "print it...." << endl;
+     mPadMonitor->printCanvas("~anyDirectory",fileName,rEvent->id());
+   }
+#endif 
+}
+
+//
+// THE Cuts
+// Cut values can be set at the macro level here
+// Make sure to respect units
+//
+
 void StRichPIDMaker::printCutParameters(ostream& os) const
+{
+    os << "<d>  "     << "\t" << "sigma_d"    << endl;
+    os << "Negatives" << endl;
+    os << meanD[0][0] << "\t" << sigmaD[0][0] << endl;
+    os << meanD[1][0] << "\t" << sigmaD[1][0] << endl;
+    os << meanD[2][0] << "\t" << sigmaD[2][0] << endl;
+    os << meanD[3][0] << "\t" << sigmaD[3][0] << endl;
+    os << meanD[4][0] << "\t" << sigmaD[4][0] << endl;
+    os << meanD[5][0] << "\t" << sigmaD[5][0] << endl;
+
     os << "Positives" << endl;
     os << meanD[0][1] << "\t" << sigmaD[0][1] << endl;
     os << meanD[1][1] << "\t" << sigmaD[1][1] << endl;
@@ -1572,7 +1840,6 @@ void StRichPIDMaker::printCutParameters(ostream& os) const
     os << meanD[4][1] << "\t" << sigmaD[4][1] << endl;
     os << meanD[5][1] << "\t" << sigmaD[5][1] << endl;
     os << "----------------------------------------------" << endl;
-void StRichPIDMaker::setAdcCut(int cut) {mAdcCut = cut;}
     os << "----------------------------------------------\n" << endl;
     os << "++++++++++++++++++++++++++++++++++++++++++++++" << endl;
     os << "Convergence Precision:" << endl;
@@ -2905,10 +3172,10 @@ StRichPIDMaker::fillCorrectedNtuple() {
       trackArray[counter++] = mMaterialDb->outerWavelength()/nanometer; // 57 
       if (counter != entries) {
 	cout<< "StRichPIDMaker:: fillPIDNtuple. counter = " << counter << "   --> abort." << endl; abort();} 
-    file = new TFile("/star/rcf/scratch/lasiuk/distance.root","RECREATE");
+      trackCorrectedNtuple->Fill(trackArray);
     }
   }
-    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx");
+}
       trackArray[counter++] = PionTotalArea;
       trackArray[counter++] = PionConstantArea;  
       trackArray[counter++] = PionTotalAreaAngle;
