@@ -58,11 +58,12 @@
 //          Int_t index =  sorter(id); // Look for the row index with id "nearest" to 5
 //                                     // using the internal "BinarySearch" method
 //
-//    3. Some usefule medthod of this class:
+//    3. Some useful methods of this class:
 //
 //        3.1. CountKeys()
 //        3.2  CountKey(const void *key, Int_t firstIndx=0,Bool_t bSearch=kTRUE,Int_t *firstRow=0)
 //        3.3. FindFirstKey(const void *key)
+//        3.4. GetIndex(UInt_t sortedIndex)    
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -462,6 +463,7 @@ Int_t St_TableSorter::BSearch(const void *value) {
 //_____________________________________________________________________________
 Int_t St_TableSorter::GetIndex(UInt_t sortedIndex) const
 {
+  // returns the original index of the row by its sorted index
    Int_t indx = -1;
    if (sortedIndex < UInt_t(m_numberOfRows) )  {
      void *p = m_SortIndex[sortedIndex];
