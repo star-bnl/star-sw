@@ -31,16 +31,16 @@
 *                      **  ***     ***  **
 *                     **                 **
 
-	SUBROUTINE MESSAGE(MSG,LINES,ID)
+	SUBROUTINE Message( MSG, LINES, ID )
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 
-*   Input/Output argument:
+*   Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set by MESSAGE on first call by
                        !looking up or entering the prefix contained in MSG
@@ -49,9 +49,11 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments:  none
+*   Outputs:  none
 
-*   Functional Description:
+*   Brief description:  Display and log a message.
+
+*   Description:
 *	Conditionally display a message MSG, containing LINES lines of up to
 *	132 characters each on the terminal and the journal, if enabled by a
 *	call to MSG_JOURNAL_ON.  The message is displayed unless disabled.
@@ -85,18 +87,20 @@
 	RETURN
 	END
 
-	SUBROUTINE MESSAGE_OUT(MSG,LINES)
+	SUBROUTINE Message_Out( MSG, LINES )
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES !Number of lines in MSG.
 
-*   Output arguments:  none
+*   Outputs:  none
 
-*   Functional Description:
+*   Brief description:  Display and log a message, bypassing MSG accounting.
+
+*   Description:
 *	Always display a message MSG, containing LINES lines of up to
 *	132 characters each on the terminal and the journal, if
 *	enabled by a call to MSG_JOURNAL_ON.  Displaying is unnaffected
@@ -122,10 +126,12 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input: 
 	INTEGER ID !Fast-reference msg ID of a message to be checked.
 
-*  Functional description:
+*  Brief description:  Abort program if abort limit reached.
+
+*  Description:
 *	Check the specified message-prefix's (ID) abort limit.  If it
 *	has been reached, display a message, then output the summary
 *	to the journal file, then abort.
@@ -157,14 +163,16 @@
 	END
 
 
-	SUBROUTINE MSG_COUNT(PREFIX)
+	SUBROUTINE MSG_Count( PREFIX )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*   Functional Description:
+*  Brief description:  Enable counting for a prefix.
+
+*  Description:
 *	Enable counting, and continue displaying the message
 *	recognized by PREFIX.  Has no effect if counting
 *	has not been disabled.
@@ -212,20 +220,22 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_DISABLE(PREFIX)
+	SUBROUTINE MSG_Disable( PREFIX )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*   Functional Description:
+*  Brief description:  Disable message-display for a specified prefix.
+
+*  Description:
 *	Disable displaying, but continue counting the message
 *	recognized by PREFIX.
 
-*   Return conditions:  none
+*  Return conditions:  none
 
-*   Error conditions:  none
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -265,16 +275,16 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_DISPLAY(MSG,LINES,ID)
+	SUBROUTINE MSG_Display( MSG, LINES, ID )
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 
-*   Input/Output argument:
+*   Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set by MESSAGE on first call by
                        !looking up or entering the prefix contained in MSG
@@ -283,9 +293,11 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments: none
+*   Outputs: none
 
-*   Functional Description:
+*   Brief description:  Display a message on the terminal (only).
+
+*   Description:
 *	Conditionally display & count a message MSG, containing LINES lines
 *	of up to 132 characters each, on the terminal.
 
@@ -317,17 +329,44 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_DISPLAY_AND_ECHO(MSG,LINES,LUN,ID)
+	SUBROUTINE MSG_Display_Out(MSG,LINES)
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*   Inputs:
+	CHARACTER*(*) MSG(*) !1 or more line character-string message
+	                     !submitted for display.
+	INTEGER LINES  !Number of lines in MSG.
+
+*   Outputs: none
+
+*   Brief description:  Display a message on the terminal (only);  bypass accounting.
+
+*   Description:
+*	Display a message MSG, containing LINES lines of up to
+*	132 characters each, on the terminal.
+
+*   Return conditions: none
+
+	INCLUDE 'msg_inc'
+
+*	Display message on terminal:
+	CALL MSG_TO_LUN_OUT(MSG,LINES,MSG_TL)
+
+	RETURN
+	END
+
+	SUBROUTINE MSG_Display_and_Echo( MSG, LINES, LUN, ID )
+
+	IMPLICIT NONE
+	
+*   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 	INTEGER LUN  !FORTRAN logical unit number for MSG to be echoed to.
 
-*   Input/Output argument:
+*   Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set by MESSAGE on first call by
                        !looking up or entering the prefix contained in MSG
@@ -336,9 +375,11 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments: none
+*   Outputs: none
 
-*   Functional Description:
+*   Brief description:  Display a message on the terminal and echo on a FORTRAN LUN.
+
+*   Description:
 *	Conditionally display and count a message MSG, containing LINES lines
 *	of up to 132 characters each, on the terminal, and echo the display on
 *	FORTRAN logical unit LUN.
@@ -371,19 +412,21 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_DISPLAY_AND_ECHO_OUT(MSG,LINES,LUN)
+	SUBROUTINE MSG_Display_and_Echo_Out( MSG, LINES, LUN )
 
 	IMPLICIT NONE
 
-*   Input arguments:
+*   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 	INTEGER LUN  !FORTRAN logical unit number for MSG to be echoed to.
 
-*   Output arguments: none
+*   Outputs: none
 
-*   Functional Description:
+*   Brief description:  Display a message, echo on a FORTRAN LUN, and bypass accounting.
+
+*   Description:
 *	Display a message MSG, containing LINES lines of up to
 *	132 characters each, on the terminal, and echo the display on
 *	FORTRAN logical unit LUN.
@@ -401,46 +444,23 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_DISPLAY_OUT(MSG,LINES)
-
-	IMPLICIT NONE
-	
-*   Input arguments:
-	CHARACTER*(*) MSG(*) !1 or more line character-string message
-	                     !submitted for display.
-	INTEGER LINES  !Number of lines in MSG.
-
-*   Output arguments: none
-
-*   Functional Description:
-*	Display a message MSG, containing LINES lines of up to
-*	132 characters each, on the terminal.
-
-*   Return conditions: none
-
-	INCLUDE 'msg_inc'
-
-*	Display message on terminal:
-	CALL MSG_TO_LUN_OUT(MSG,LINES,MSG_TL)
-
-	RETURN
-	END
-
-	SUBROUTINE MSG_ENABLE(PREFIX)
+	SUBROUTINE MSG_Enable( PREFIX )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*   Functional Description:
+*  Brief description:  Enable message-display for a specified prefix.
+
+*  Description:
 *	Enable message-output for the STAR-standard message with
 *	stored prefix PREFIX.  Has no effect if message-display
 *	has not been disabled.
 
-*   Return conditions:  none
+*  Return conditions:  none
 
-*   Error conditions:  none
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -489,14 +509,14 @@
 	RETURN
 	END
 
-	LOGICAL FUNCTION MSG_ENABLED(PREFIX,ID)
+	LOGICAL FUNCTION MSG_Enabled( PREFIX, ID )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*   Input/Output argument:
+*  Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set on first call by
                        !looking up or entering the prefix contained in MSG
@@ -505,18 +525,20 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
-*	Returns the message-enabled-status for the STAR-standard message with
-*	stored prefix PREFIX, message-index ID.  If the message is not
+*  Brief description:  Return enabled-status for a prefix;  define new prefix "enabled".
+
+*  Description:
+*	Returns the message-display-enabled-status for the STAR-standard message
+*	with stored prefix PREFIX, message-index ID.  If the message is not
 *	defined, it is defined and enabled, with counting turned on.
 
-*   Return conditions:
+*  Return conditions:
 *	.TRUE. if the message is enabled (active),
 *	.FALSE. if the message is disabled (inactive).
 
-*   Error conditions:  none
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -545,14 +567,14 @@
 	RETURN
 	END
 
-	LOGICAL FUNCTION MSG_ENABLED_TRACE(PREFIX,ID)
+	LOGICAL FUNCTION MSG_Enabled_Trace( PREFIX, ID )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*   Input/Output argument:
+*  Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set on first call by
                        !looking up or entering the prefix contained in MSG
@@ -561,9 +583,11 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Return enabled-status for a prefix;  define new prefix "disabled".
+
+*  Description:
 *	Returns the message-enabled-status for the STAR-standard message with
 *	stored prefix PREFIX, message-index ID.  If the message is not
 *	defined, it is defined, but not enabled nor does it count, until
@@ -639,15 +663,18 @@
 
 	IMPLICIT NONE
 
-*   Output arguments:
+*  Outputs:
 	INTEGER Terminal_LUN !FORTRAN logical unit number of terminal
 	                     !for output, typically 6.
 	INTEGER Journal_LUN  !FORTRAN logical unit number of journal file.
 
-*   Functional Description:
-*	Get the message handler LUNs and pass them to the caller.
+*  Brief description:  Get in-use terminal and journal FORTRAN LUNs.
 
-*   Error conditions: none
+*  Description:
+*	Get the message handler terminal and journal LUNs and pass them
+*	to the caller.
+
+*  Error conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -658,17 +685,20 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_INI(JOURNAL_LUN)
+	SUBROUTINE MSG_Ini( JOURNAL_LUN )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER JOURNAL_LUN !FORTRAN logical unit number of journal file.
 
-*  Functional description:
-*	Initialize the STAR-standard message-handling package.
+*  Brief description:  MSG package initializion and journal-LUN specification.
+
+*  Description:
+*	Initialize the STAR-standard message-handling package and set the
+*	journal LUN.
 	
-*   Error conditions:  none
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -692,20 +722,20 @@
 
 	END
 
-	LOGICAL FUNCTION MSG_JOURNAL_CLOSE()
+	LOGICAL FUNCTION MSG_Journal_Close()
 
 	IMPLICIT NONE
 
-*   Returned value:   STAR standard return condition, see below.
+*  Brief description:  Close the MSG journal file.
 
-*   Functional Description:
+*  Description:
 *	Call this subroutine to close the message journal file.
 *	Disables message-logging in the journal file.
 *	Returns .TRUE. if the file was successfully closed,
 *	returns .FALSE. if the file could not be closed (probably
 *	because it was not opened)
 
-*   Return conditions:
+*  Return conditions:
 *	.TRUE. for successful close of journal file.
 *	.FALSE. for close failure of journal file.
 
@@ -733,17 +763,19 @@
 
 	END
 
-	SUBROUTINE MSG_JOURNAL_OFF
+	SUBROUTINE MSG_Journal_Off
 
 	IMPLICIT NONE
 
-*   Input arguments:  none
-*   Output arguments: none
+*  Inputs:  none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Disable journal logging of messages.
+
+*  Description:
 *	Call this subroutine to disable the message journal file.
 
-*   Error conditions: none
+*  Error conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -752,17 +784,19 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_JOURNAL_ON
+	SUBROUTINE MSG_Journal_On
 
 	IMPLICIT NONE
 
-*   Input arguments:  none
-*   Output arguments: none
+*  Inputs:  none
+*  Outputs: none
 
-*   Functional Description:
-*	Call this subroutine to enable the message journal file.
+*  Brief description:  (Re)enable journal logging of messages.
 
-*   Error conditions: none
+*  Description:
+*	Call this subroutine to (Re)enable the message journal file.
+
+*  Error conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -771,16 +805,18 @@
 	RETURN
 	END
 
-	LOGICAL FUNCTION MSG_JOURNAL_OPEN(FILE_NAME)
+	LOGICAL FUNCTION MSG_Journal_Open( FILE_NAME )
 
 	IMPLICIT NONE
 
-*   Input argument:
+*  Input:
 	CHARACTER*(*) FILE_NAME !The journal file-name.
 
-*   Returned value:   STAR standard return condition, see below.
+*  Returned value:   STAR standard return condition, see below.
 
-*   Functional Description:
+*  Brief description:  Open a message-logging journal file.
+
+*  Description:
 *	Call this subroutine to specify FILE_NAME as the
 *	message journal file and to open that file.
 *	Returns .TRUE. if the file was successfully opened
@@ -788,7 +824,7 @@
 *	returns .FALSE. if the file could not be opened, and
 *	disables message-logging in the journal file.
 
-*   Return conditions:
+*  Return conditions:
 *	.TRUE. for successful open of journal file.
 *	.FALSE. for open failure of journal file.
 
@@ -847,14 +883,16 @@
 
 	END
 
-	SUBROUTINE MSG_JOURNAL_PAGE
+	SUBROUTINE MSG_Journal_Page
 
 	IMPLICIT NONE
+
+*  Brief description:  Send a form-feed to the journal file.
 	
-*   Functional Description:
+*  Description:
 *	Write a form-feed to the journal file, if open & enabled.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -868,16 +906,18 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_LUN_PAGE(LUN)
+	SUBROUTINE MSG_LUN_Page( LUN )
 
 	IMPLICIT NONE
 
 	INTEGER LUN  !FORTRAN logical unit number.
+
+*  Brief description:  Send a form-feed to a FORTRAN LUN.
 	
-*   Functional Description:
+*  Description:
 *	Write a form-feed to the device openned on LUN.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -889,14 +929,16 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_Name_Node(Node_name)
+	SUBROUTINE MSG_Name_Node( Node_name )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) Node_name
 
-*  Functional description:
+*  Brief description:  Specify the local (ASCII) node name for node-time stamping.
+
+*  Description:
 *	Enters the ASCII node-name in the msg package, for use
 *	in node-stamping (along with the time-stamp) journal
 *	entries of message-occurrances.
@@ -908,20 +950,22 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_NOCOUNT(PREFIX)
+	SUBROUTINE MSG_NoCount( PREFIX )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*   Functional Description:
-*	Disable counting, but continue displaying the message
-*	recognized by PREFIX (unless display is also disabled).
+*  Brief description:  Disable MSG counting of a previously disabled prefix.
 
-*   Return conditions:  none
+*  Description:
+*	Disable counting for PREFIX if displaying for PREFIX is
+*	already disabled.  Otherwise do nothing.
 
-*   Error conditions:  none
+*  Return conditions:  none
+
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -962,19 +1006,21 @@
 	RETURN
 	END
 
-	INTEGER FUNCTION MSG_RC_JOURNAL_CLOSE()
+	INTEGER FUNCTION MSG_RC_Journal_Close()
 
 	IMPLICIT NONE
 
-*   Returned value:   STAR standard return condition, see below.
+*  Returned value:   STAR standard return condition, see below.
 
-*   Functional Description:
+*  Brief description:  Return-code version of MSG_Journal_Close.
+
+*  Description:
 *	Call this subroutine to close the message journal file.
 *	Disables message-logging in the journal file.
 *	This is the same as MSG_JOURNAL_CLOSE, but implemented
 *	as an integer function returning a "code".
 
-*   Return conditions:
+*  Return conditions:
 *	MSG_CLOSED_RC for successful close of journal file.
 *	MSG_NOT_CLOSED_RC for close failure of journal file.
 
@@ -992,22 +1038,24 @@
 
 	END
 
-	INTEGER FUNCTION MSG_RC_JOURNAL_OPEN(FILE_NAME)
+	INTEGER FUNCTION MSG_RC_Journal_Open( FILE_NAME )
 
 	IMPLICIT NONE
 
-*   Input argument:
+*  Input:
 	CHARACTER*(*) FILE_NAME !The journal file-name.
 
-*   Returned value:   STAR standard return condition, see below.
+*  Returned value:   STAR standard return condition, see below.
 
-*   Functional Description:
+*  Brief description:  Return-code version of MSG_Journal_Open
+
+*  Description:
 *	Call this subroutine to specify FILE_NAME as the
 *	message journal file and to open that file.
 *	This is the same as MSG_JOURNAL_OPEN, but implemented
 *	as an integer function returning a "code".
 
-*   Return conditions:
+*  Return conditions:
 *	MSG_OPENED_RC for successful open of journal file.
 *	MSG_NOT_OPENED_RC for open failure of journal file.
 
@@ -1029,11 +1077,13 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) Prefix !A STAR-standard message prefix.
 	INTEGER Limit !Maximum no. of times to display a message before aborting.
 
-*   Functional Description:
+*  Brief description:  Set abort limit for a prefix.
+
+*  Description:
 *	Set the abort limit for the message recognized by Prefix;
 *	Program termination results when the prefix's
 *	count has exceeded Limit.  Wildcards are permitted.
@@ -1100,10 +1150,12 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) COM !Command-string describing features to be set.
 
-*   Functional Description:
+*  Brief description:  ASCII-string command interface to control MSG.
+
+*  Description:
 *	Set the MSG package parameters on individual messages, referenced
 *	by prefix, according to arguments contained in a single character-
 *	string command contained in COM.  Commands take these forms:
@@ -1239,15 +1291,17 @@
 
 	END
 
-	SUBROUTINE MSG_Set_From_File(LUN)
+	SUBROUTINE MSG_Set_From_File( LUN )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER LUN !FORTRAN Logical Unit Number, on which a command (ASCII)
 	            !file should be (already) open.
 
-*  Functional description:
+*  Brief description:  ASCII-file command interface to control MSG.
+
+*  Description:
 *	Reads lines from LUN and interprets them as MSG_SET_BY_COMMAND commands
 *	until either an <EOF> or a line containing MSG_EXIT is encountered.
 
@@ -1273,18 +1327,20 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 	INTEGER LIMIT !Maximum no. of times to display a message.
 
-*   Functional Description:
+*  Brief description:  Set auto-disable count limit for a prefix.
+
+*  Description:
 *	Set the count limit for the message recognized by PREFIX;
 *	displays of the specified message are disabled once its
 *	count has exceeded LIMIT.  Wildcards are permitted.
 
-*   Return conditions:  none
+*  Return conditions:  none
 
-*   Error conditions:  none
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -1335,23 +1391,25 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_SET_LUN(TERMINAL_LUN,JOURNAL_LUN)
+	SUBROUTINE MSG_Set_LUN( TERMINAL_LUN, JOURNAL_LUN )
 
 	IMPLICIT NONE
 
-*   Input arguments:
+*  Inputs:
 	INTEGER TERMINAL_LUN !FORTRAN logical unit number of terminal
 	                     !for output, typically 6.
 	INTEGER JOURNAL_LUN  !FORTRAN logical unit number of journal file.
 
-*   Output arguments:  none
+*  Outputs:  none
 
-*   Functional Description:
+*  Brief description:  Set the terminal and journal LUNs for MSG.
+
+*  Description:
 *	Set the message handler LUNs.  The caller specifies
 *	the FORTRAN logical unit number of the terminal in
 *	TERMINAL_LUN and the journal file in JOURNAL_LUN.
 
-*   Error conditions: none
+*  Error conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1366,15 +1424,17 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER Page_Length  !Length of summary page (lines).
 
-*   Functional Description:
+*  Brief description:  Set the MSG summary table page length.
+
+*  Description:
 *	Set the number of lines per page for the summary output.
 
-*   Return conditions:  none
+*  Return conditions:  none
 
-*   Error conditions:  none
+*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -1383,41 +1443,45 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_SUMMARY(LUN)
+	SUBROUTINE MSG_Summary( LUN )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER LUN !Device on which the summary is output.
 
-*   Functional Description:
+*  Brief description:  Generate an MSG summary table on a FORTRAN LUN.
+
+*  Description:
 *	Output a summary of the STAR-standard errors on the specified LUN.
 
-*   Return conditions:  none
+*  Return conditions:  none
 
-*   Error conditions:  none
+*  Error conditions:  none
 
 	CALL MSG_SUMMARY_EVENT(LUN,0) !No column of normalized entries.
 
 	RETURN
 	END
 
-	SUBROUTINE MSG_SUMMARY_EVENT(LUN,EVENTS)
+	SUBROUTINE MSG_Summary_Event( LUN, EVENTS )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER LUN !Device on which the summary is output.
 	INTEGER EVENTS !Number of events by which to normalize.
 
-*   Functional Description:
+*  Brief description:  Generate an MSG summary table with a frequency column on a FORTRAN LUN.
+
+*  Description:
 *	Output a summary of the STAR-standard errors on the specified LUN.
 *	Include a column of normalized occurances of each message,
 *	which consists of a column of the number of occurances of each
 *	message, divided by EVENTS.  If EVENTS is not positive, then the
 *	column is ommitted.
 
-*   Return conditions:  none
+*  Return conditions:  none
 
 *   Error conditions:  none
 
@@ -1587,17 +1651,19 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_TIME_STAMP(LUN)
+	SUBROUTINE MSG_Time_Stamp( LUN )
 
 	IMPLICIT NONE
 	INTEGER LUN
 
-*   Input arguments:
+*  Inputs:
 *	LUN -- FORTRAN logical unit number for time-stamp to be written on.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Write a node and time (real and CPU) stamp to a FORTRAN LUN, if new.
+
+*  Description:
 *	"Stamp" the date and time on a line on FORTRAN logical unit LUN.
 *	"Stamp" the node-name on the same line, if node-name has been specified
 *	with a "call msg_name_node(<node_name>)".
@@ -1608,7 +1674,7 @@
 *	this subroutine.  eg, a call to this routine in a tight loop will
 *	only produce an actual time-stamp once each second.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1659,17 +1725,19 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_TIME_STAMP_OUT(LUN)
+	SUBROUTINE MSG_Time_Stamp_Out( LUN )
 
 	IMPLICIT NONE
 	INTEGER LUN
 
-*   Input arguments:
+*  Inputs:
 *	LUN -- FORTRAN logical unit number for time-stamp to be written on.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Write a node and time (real and CPU) stamp to a FORTRAN LUN, always.
+
+*  Description:
 *	"Stamp" the date and time on a line on FORTRAN logical unit LUN.
 *	"Stamp" the node-name on the same line, if node-name has been specified
 *	with a "call msg_name_node(<node_name>)".
@@ -1678,7 +1746,7 @@
 
 *	Always produces output.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1711,16 +1779,16 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_TO_JOURNAL(MSG,LINES,ID)
+	SUBROUTINE MSG_to_Journal( MSG, LINES, ID )
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 
-*   Input/Output argument:
+*  Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set by MESSAGE on first call by
                        !looking up or entering the prefix contained in MSG
@@ -1729,13 +1797,15 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Write a message to the journal (only), if enabled.
+
+*  Description:
 *	Conditionally display & count a message MSG, containing LINES lines
 *	of up to 132 characters each, on the journal file, if open & enabled.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1763,22 +1833,24 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_TO_JOURNAL_OUT(MSG,LINES)
+	SUBROUTINE MSG_to_Journal_Out( MSG, LINES )
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Write a message to the journal (only);  bypass accounting.
+
+*  Description:
 *	Unconditionally display a message MSG, containing LINES lines
 *	of up to 132 characters each, on the journal file, if open & enabled.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1791,17 +1863,17 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_TO_LUN(MSG,LINES,LUN,ID)
+	SUBROUTINE MSG_to_LUN( MSG, LINES, LUN, ID )
 
 	IMPLICIT NONE
 	
-*   Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
 	INTEGER LINES  !Number of lines in MSG.
 	INTEGER LUN  !FORTRAN logical unit number for MSG to be sent to.
 
-*   Input/Output argument:
+*  Input/Output:
 	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
                        !before first call, set by MESSAGE on first call by
                        !looking up or entering the prefix contained in MSG
@@ -1810,13 +1882,15 @@
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Write a message to a FORTRAN LUN, if enabled.
+
+*  Description:
 *	Conditionally display & count a message MSG, containing LINES lines
 *	of up to 132 characters each, on LUN.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1844,24 +1918,26 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_TO_LUN_OUT(MSG,LINES,LUN)
+	SUBROUTINE MSG_to_LUN_Out( MSG, LINES, LUN )
 
 	IMPLICIT NONE
 	CHARACTER*(*) MSG(*)
 	INTEGER LINES,LUN
 
-*   Input arguments:
+*  Inputs:
 *	MSG -- 1 or more line character-string message submitted for display.
 *	LINES -- Number of lines in MSG.
 *	LUN -- FORTRAN logical unit number for MSG to be written to.
 
-*   Output arguments: none
+*  Outputs: none
 
-*   Functional Description:
+*  Brief description:  Write a message to a FORTRAN LUN;  bypass accounting.
+
+*  Description:
 *	Display a message MSG, containing LINES lines of up to
 *	132 characters each, on FORTRAN logical unit LUN.
 
-*   Return conditions: none
+*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 

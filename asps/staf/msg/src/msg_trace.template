@@ -36,12 +36,13 @@
 *	with fast-reference IDs (instead of -1), or they may contribute
 *	significantly to CPU usage.
 
-*	  Note:  Use Message inside of a MSG_Enabled_Trace block, since
-*	  MSG_Enabled_Trace does not ever perform msg accounting -- it only tests
-*	  the enabled status of the specified prefix: '<Subroutine Name>-T1'
-*	  If Message_Out is used instead of Message (as would occur inside
-*	  a MSG_Enabled block), then msg accounting is never performed
-*	  for this message.
+*	  Note:  Use Message inside of a MSG_Enabled_Trace block,
+*	  since MSG_Enabled_Trace does not perform msg accounting
+*	  on an "Inactive" prefix -- it only tests the enabled
+*	  status of the specified prefix: '<Subroutine Name>-T1'
+*	  If Message_Out is used instead of Message (as would occur
+*	  inside a MSG_Enabled block), then msg accounting is never
+*	  performed for this message.
 *	  If the prefix '<Subroutine Name>-T1' is undefined when this
 *	  call occurs, it gets defined, and is initialized to be Inactive.
 *	  The trace will become active only on a specific request, or

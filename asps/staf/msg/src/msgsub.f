@@ -31,28 +31,30 @@
 *                      **  ***     ***  **
 *                     **                 **
 
-	SUBROUTINE MSG_CHECK(MSG,ID,ACTIVE,COUNTING)
+	SUBROUTINE MSG_Check( MSG, ID, ACTIVE, COUNTING )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) MSG !A STAR-standard message, with prefix.
 	                  !MSG can be just a prefix.
 
-*  Input/output argument:
+*  Input/output:
 	INTEGER ID !STAR-standard message ID.  Set to zero by caller 
                    !before first call, set by MESSAGE on first call by
                    !looking up or entering the prefix contained in MSG
                    !(prefix is everything before the first space) in
 	           !the index of STAR-standard message prefixes.
 
-*  Output arguments:
+*  Outputs:
 	LOGICAL ACTIVE !Flag set to .TRUE. if the message selected
                        !(by prefix and/or ID) is active.
 	LOGICAL COUNTING !Flag set to .TRUE. if the message selected
                          !(by prefix and/or ID) is enabled for counting.
 
-*   Functional Description:
+*  Brief description:  Lookup a prefix, define new ones, return fast-ref ID.
+
+*   Description:
 *	Find the character string consisting of MSG's prefix in the
 *	index of STAR-standard message prefixes (sic).  If found
 *	in the index, return the index ID and the flags ACTIVE
@@ -207,18 +209,20 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_ENTER(PREFIX,ID)
+	SUBROUTINE MSG_Enter( PREFIX, ID )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*  Output argument:
+*  Output:
 	INTEGER ID !STAR-standard message ID of the newly-entered
 	           !message-prefix PREFIX, or zero if no more room.
 
-*   Functional Description:
+*  Brief description:  Define new prefixes and assign fast-ref IDs.
+
+*   Description:
 
 *	Enter the STAR-standard message prefix into the index.
 *	If there is no more room in the index, display a message
@@ -264,21 +268,23 @@
 	RETURN
 	END
 
-	LOGICAL FUNCTION MSG_FIND(PREFIX,ID,ACTIVE,COUNTING)
+	LOGICAL FUNCTION MSG_Find( PREFIX, ID, ACTIVE, COUNTING )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) PREFIX !A STAR-standard message prefix.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER ID       !STAR-standard message ID.
 	LOGICAL ACTIVE   !Flag set to .TRUE. if the message selected
                          !(by PREFIX and/or ID) is active.
 	LOGICAL COUNTING !Flag set to .TRUE. if the message selected
                          !(by PREFIX and/or ID) is enabled for counting.
 
-*   Functional Description:
+*  Brief description:  Lookup a prefix in the MSG prefix index, return fast-ref ID.
+
+*   Description:
 
 *	Find the character string PREFIX in the index of
 *	STAR-standard message prefixes (sic).  If found
@@ -343,17 +349,19 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_GET_PREFIX(MSG,PREFIX)
+	SUBROUTINE MSG_Get_Prefix( MSG, PREFIX )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) MSG !A STAR-standard message, with prefix.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) PREFIX !The STAR-standard message-prefix from MSG.
 
-*   Functional Description:
+*  Brief description:  Strip the prefix off a message and return it.
+
+*   Description:
 *	Extract the STAR-standard prefix from the character string MSG
 *	and return it in PREFIX.
 
@@ -419,14 +427,16 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_INCR(ID)
+	SUBROUTINE MSG_Incr( ID )
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER ID !STAR-standard message-ID -- must be valid.
 
-*  Functional description:
+*  Brief description:  Increment a prefix's counter, referenced by ID.
+
+*  Description:
 *	Increment the counter for the STAR-standard-message indexed
 *	by ID.
 
@@ -437,20 +447,21 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_PARSE_PREFIX
-     1	          (Prefix,Prefix_stripped,Prefix_number)
+	SUBROUTINE MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) Prefix !STAR-standard messsage prefix.
 
-*  Output arguments:
+*  Outputs:
 	CHARACTER*(*) Prefix_stripped !Prefix stripped of trailing digits.
 	INTEGER Prefix_number !Prefix trailing digits, decoded as integer.
 	                      !If there are no trailing digits, set to zero.
 
-*  Functional description:
+*  Brief description:  Parse a prefix into a string and a number.
+
+*  Description:
 *	Parse the specified STAR-standard message prefix "Prefix" into two
 *	components:
 *	1)	The prefix without trailing digits,
