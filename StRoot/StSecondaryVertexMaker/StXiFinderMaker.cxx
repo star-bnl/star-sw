@@ -3,6 +3,11 @@
 /// StXiFinderMaker class (finds Xi secondary vertices)                ///
 ///                                                                    ///
 //////////////////////////////////////////////////////////////////////////
+//
+//  Cuts can be found in the code by comments beginning with "Cut:"
+//
+//
+
 
 #include "StXiFinderMaker.h"
 #include "StMessMgr.h"
@@ -247,69 +252,58 @@ Bool_t StXiFinderMaker::UseV0() {
 
 
   /// Variables:
-  StPhysicalHelixD /**trkHelix,*/tmpHelix;
-  StThreeVectorD xpp,pp,impact,tmp3V;
-  TVector2 /**rk,xck,*/tmp2V;
-  StLorentzVectorD posVec,negVec;
-  double mlam,mala;
   unsigned int k;
-  ///pairD paths,path2;
+  int iflag1,i,charge,tries,negKey,posKey;
+  double mlam,mala,ptV0,ptBach,radiusBach,rsq;
+  StPhysicalHelixD /**trkHelix,*/tmpHelix;
+  StThreeVectorF xPvx;
+  StThreeVectorD xpp,pp,impact,tmp3V,xV0,pV0,dpV0;
+  StLorentzVectorD posVec,negVec;
   
-  StThreeVectorF xV0, pV0;
-  
-  // Subroutine casc_geom
-  double xd, yd, atmp, btmp, ctmp, dtmp, abtmp, xOut[2], yOut[2], dist;
-  double xc, yc, rsq;
+  //Subroutine casc_geom
+  double xc,yc,xd,yd,atmp,btmp,ctmp,dtmp,abtmp,xOut[2],yOut[2],dist;
   
   //Subroutine update_track_param
-  double arg, rr, xi, yi, axb, ds, dz;
+  double arg,axb,ds,dz;
   StThreeVectorF xOrig;
   
-  //Subroutine track_mom
-  double pt;
-  
   //After subroutine track_mom
-  double dv0dotdb, denom, s2, valid, xAns, yAns, yy, zz, s1, check;
-  StThreeVectorF pBach, diffc, batv, v0atv;
+  double dv0dotdb,denom,s2,valid,xAns,yAns,yy,zz,s1;
+  StThreeVectorF pBach,diffc,batv,v0atv;
   
   //Bloc 5bis
-  double dca, bxi,ptot_b2,epi,ek,ptot_v02,ela,ptot_2,ptot,exi,eom,bdotx,vdotx,ppar,npar,pper,bBach,bV0;
-  StThreeVectorF /**xpp,*/ pXi;
+  double dca,bxi,bBach,bV0;
+  //double ptot_b2,epi,ek,ptot_v02,ela,ptot_2,ptot,exi,eom,bdotx,vdotx,ppar,npar,pper;
+  StThreeVectorF pXi;
   
   //Function helixDCA
-  double pt_tmp, bcharge_tmp, curvature_tmp, dip_tmp, phase_tmp;
   int h_tmp;
+  double pt_tmp,bcharge_tmp,curvature_tmp,dip_tmp,phase_tmp;
   StThreeVectorD origin_tmp;
   
   //Rotating
-  double epsDipAngle, cstPsi;
-  StThreeVectorF epsOrigin, epsMomentum, cstOrigin;
+  double epsDipAngle,cstPsi;
+  StThreeVectorF epsOrigin,epsMomentum,cstOrigin;
   
 
+  // All the stuff without which you can't even begin to work
   StSPtrVecXiVertex& xiVertices = *vecXi;
-  
-  
-  int iflag=0,iflag1=0;
-  int i, charge, tries;
-  double rv;
-  StThreeVectorF xPvx;
-  xPvx=mainv;
-  
   charge=0;
-
-  int negKey, posKey;
+  xPvx=mainv;
   negKey=v0Vertex->daughter(negative)->key();
   posKey=v0Vertex->daughter(positive)->key();
-  
-  // Xi cut parameters using detector id from V0
-
-  parsXi = exipar->GetTable(det_id_v0-1);
-
+  parsXi = exipar->GetTable(det_id_v0-1); //Xi cut parameters using detector id from V0
   xV0=v0Vertex->position();
   pV0=v0Vertex->momentum();
+  dpV0.setX(pV0.x()/abs(pV0));
+  dpV0.setY(pV0.y()/abs(pV0));
+  dpV0.setZ(pV0.z()/abs(pV0));
+  ptV0=::sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
   impact = xV0-xPvx;
+  //Cut: V0 decay length
   if (impact.mag2() < (parsXi->rv_v0*parsXi->rv_v0)) return usedV0;
   
+  // All the stuff needed to make rotating simpler inside the loop
   epsDipAngle=1.;
   epsOrigin.setX(1.);
   epsOrigin.setY(1.);
@@ -355,6 +349,7 @@ Bool_t StXiFinderMaker::UseV0() {
   mala = (posVec+negVec).m();
   Bool_t alaCand = (TMath::Abs(mala-lambda_mass_c2) < parsXi->dmass);
   
+  //Cut: Lambda invariant mass
   AssignSign:
   if (alaCand)
      {charge=1;
@@ -389,151 +384,201 @@ Bool_t StXiFinderMaker::UseV0() {
       bachGeom->setDipAngle(epsDipAngle*trk[k]->geometry()->dipAngle());
       bachGeom->setOrigin(cstOrigin+epsOrigin.pseudoProduct(trk[k]->geometry()->origin()));
       bachGeom->setMomentum(epsMomentum.pseudoProduct(trk[k]->geometry()->momentum()));
-      if (charge*bachGeom->charge() > 0)
-         {//Check that ITTF and TPT tracks/V0's are not combined together.
-          if (GetTrackerUsage() == kTrackerUseBOTH)
-             {if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
-              if ((v0Vertex->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
-              }
-          //Check that the bachelor is not one of the V0's daughters.
-          if (trk[k]->key() == negKey) continue;
-          if (trk[k]->key() == posKey) continue;
-          ///trkHelix=heli[k];
-          ///"heli" and "trk" : cf StRoot/St_dst_Maker/StV0FinderMaker.cxx (STAT).
-          
-          //Determine detector id of pair for parsXi
-          det_id_xi=TMath::Max(det_id_v0,detId[k]);
-          //Xi cut parameters
-          parsXi=exipar->GetTable(det_id_xi-1);
-          
-          //Cut on number of hits
-          //if (hits[k] >= parsXi->n_point)
-          //`struct exi_exipar_st' has no member named `n_point'
-
-
-
-          // Beginning of the big(est) block inserted from StXiVertexFinder.cxx
-          bachGeom2->setCharge(bachGeom->charge());
-          bachGeom2->setHelicity(bachGeom->helicity());
-          bachGeom2->setCurvature(bachGeom->curvature());
-          bachGeom2->setPsi(bachGeom->psi());
-          bachGeom2->setDipAngle(bachGeom->dipAngle());
-          bachGeom2->setOrigin(bachGeom->origin());
-          bachGeom2->setMomentum(bachGeom->momentum());
-          if ((bachGeom->origin().x()==0) && (bachGeom->origin().y()==0) && (bachGeom->origin().z()==0))
-             {gMessMgr->Info()<<"StXiFinderMaker : CAUTION : bachelor candidate has all parameters = 0."<<endm;
-              continue;
-              }
-          
-          //Calculation of the 2 intersection points between bachelor circle and V0 straight line
-          
-          // Subroutine casc_geom
-          iflag1=0;
-          xc=bachGeom->origin().x()-bachGeom->helicity()*TMath::Sin(bachGeom->psi())/bachGeom->curvature();
-          yc=bachGeom->origin().y()+bachGeom->helicity()*TMath::Cos(bachGeom->psi())/bachGeom->curvature();
-          xd=xV0.x()-xc;
-          yd=xV0.y()-yc;
-          rsq=1/(bachGeom->curvature()*bachGeom->curvature());
-          xOut[0]=0;
-          yOut[0]=0;
-          xOut[1]=0;
-          yOut[1]=0;
-          if (pV0.x() != 0)
-             {atmp=pV0.y()/pV0.x();
-              btmp=-atmp*xd+yd;
-              dtmp=atmp*atmp+1.;
-              ctmp=dtmp*rsq-btmp*btmp;
-              if (ctmp < 0)
-                 {dist=fabs(xd*pV0.y()-yd*pV0.x())/::sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
-                  if (dist >= (1/bachGeom->curvature()+parsXi->dca_max)) iflag1=5;
+      //Check that the sign of the bachelor is the one we want.
+      if (charge*bachGeom->charge() < 0) continue;
+      //Check that ITTF and TPT tracks/V0's are not combined together.
+      if (GetTrackerUsage() == kTrackerUseBOTH)
+         {if ((v0Vertex->dcaDaughters() <= 0) && (trk[k]->fittingMethod() != ITTFflag)) continue;
+          if ((v0Vertex->dcaDaughters() >= 0) && (trk[k]->fittingMethod() == ITTFflag)) continue;
+          }
+      //Check that the bachelor is not one of the V0's daughters.
+      if (trkID[k] == negKey) continue;
+      if (trkID[k] == posKey) continue;
+      ///trkHelix=heli[k];
+      
+      //Determine detector id of pair for parsXi
+      det_id_xi=TMath::Max(det_id_v0,detId[k]);
+      //Xi cut parameters
+      parsXi=exipar->GetTable(det_id_xi-1);
+      
+      //Book a temporary clone of the bachelor helix, whose origin will be moved
+      bachGeom2->setCharge(bachGeom->charge());
+      bachGeom2->setHelicity(bachGeom->helicity());
+      bachGeom2->setCurvature(bachGeom->curvature());
+      bachGeom2->setPsi(bachGeom->psi());
+      bachGeom2->setDipAngle(bachGeom->dipAngle());
+      bachGeom2->setOrigin(bachGeom->origin());
+      bachGeom2->setMomentum(bachGeom->momentum());
+      if ((bachGeom->origin().x()==0) && (bachGeom->origin().y()==0) && (bachGeom->origin().z()==0))
+         {gMessMgr->Info()<<"StXiFinderMaker : CAUTION : bachelor candidate has all parameters = 0."<<endm;
+          continue;
+          }
+      ptBach=pt[k];
+      radiusBach=1./bachGeom->curvature();
+      rsq=radiusBach*radiusBach;
+      
+      // Calculation of the 2 intersection points between bachelor circle and V0 straight line
+      //Subroutine casc_geom
+      iflag1=2;
+      xc=bachGeom->origin().x()-bachGeom->helicity()*radiusBach*TMath::Sin(bachGeom->psi());
+      yc=bachGeom->origin().y()+bachGeom->helicity()*radiusBach*TMath::Cos(bachGeom->psi());
+      xd=xV0.x()-xc;
+      yd=xV0.y()-yc;
+      xOut[0]=0.;
+      yOut[0]=0.;
+      xOut[1]=0.;
+      yOut[1]=0.;
+      if (pV0.x() != 0)
+         {atmp=pV0.y()/pV0.x();
+          btmp=-atmp*xd+yd;
+          dtmp=atmp*atmp+1.;
+          ctmp=dtmp*rsq-btmp*btmp;
+          if (ctmp < 0)
+             {dist=fabs(xd*pV0.y()-yd*pV0.x())/ptV0;
+              if (dist >= (radiusBach+parsXi->dca_max)) iflag1=0;
+                  else
+                 {iflag1=1;
+                  ctmp=::sqrt(rsq/(atmp*atmp+1.));
+                  dtmp=-atmp*ctmp;
+                  btmp=dtmp*xd+ctmp*yd;
+                  if (btmp > 0.)
+                     {xOut[0]=dtmp+xc;
+                      yOut[0]=ctmp+yc;
+                      }
                       else
-                     {iflag1=3;
-                      ctmp=::sqrt(rsq/(atmp*atmp+1.));
-                      dtmp=-atmp*ctmp;
-                      btmp=dtmp*xd+ctmp*yd;
-                      if (btmp > 0.)
-                         {xOut[0]=dtmp+xc;
-                          yOut[0]=ctmp+yc;
-                          }
-                          else
-                         {xOut[0]=-dtmp+xc;
-                          yOut[0]=-ctmp+yc;
-                          }
+                     {xOut[0]=-dtmp+xc;
+                      yOut[0]=-ctmp+yc;
                       }
                   }
+              }
+              else
+             {if (ctmp == 0) iflag1=1;
+              ctmp=::sqrt(ctmp);
+              abtmp=atmp*btmp;
+              btmp=btmp+yc;
+              xOut[0]=(-abtmp+ctmp)/dtmp+xc;
+              xOut[1]=(-abtmp-ctmp)/dtmp+xc;
+              yOut[0]=atmp*(xOut[0]-xc)+btmp;
+              yOut[1]=atmp*(xOut[1]-xc)+btmp;
+              }
+          }
+          else //pV0.x()==0
+         {xOut[0]=xV0.x();
+          xOut[1]=xV0.x();
+          ctmp=rsq-xd*xd;
+          if (ctmp <= 0)
+             {dist=fabs(xd*pV0.y()-yd*pV0.x())/ptV0;
+              if (dist >= (radiusBach+parsXi->dca_max)) iflag1=0;
                   else
-                 {if (ctmp == 0) iflag1=3;
-                  ctmp=::sqrt(ctmp);
-                  abtmp=atmp*btmp;
-                  btmp=btmp+yc;
-                  xOut[0]=(-abtmp+ctmp)/dtmp+xc;
-                  xOut[1]=(-abtmp-ctmp)/dtmp+xc;
-                  yOut[0]=atmp*(xOut[0]-xc)+btmp;
-                  yOut[1]=atmp*(xOut[1]-xc)+btmp;
+                 {iflag1=1;
+                  yOut[0]=yc;
+                  if (xV0.x() > xc) xOut[0]=xc+radiusBach;
+                     else xOut[0]=xc-radiusBach;
                   }
               }
-              else // pV0.x()==0
-             {xOut[0]=xV0.x();
-              xOut[1]=xV0.x();
-              ctmp=rsq-xd*xd;
-              if (ctmp <= 0)
-                 {dist=fabs(xd*pV0.y()-yd*pV0.x())/::sqrt(pV0.x()*pV0.x()+pV0.y()*pV0.y());
-                  if (dist >= (1/bachGeom->curvature()+parsXi->dca_max)) iflag1=5;
-                      else
-                     {iflag1=3;
-                      yOut[0]=yc;
-                      if (xV0.x() > xc) xOut[0]=xc+1/bachGeom->curvature();
-                         else xOut[0]=xc-1/bachGeom->curvature();
-                      }
-                  }
-                  else
-                 {if (ctmp == 0) iflag1=3;
-                  ctmp=::sqrt(ctmp);
-                  yOut[0]=yc+ctmp;
-                  yOut[1]=yc-ctmp;
-                  }
+              else
+             {if (ctmp == 0) iflag1=1;
+              ctmp=::sqrt(ctmp);
+              yOut[0]=yc+ctmp;
+              yOut[1]=yc-ctmp;
               }
-          // End of casc_geom
-          if (iflag1 == 5) continue; //No intersection points
-
-         
-          // Loop over the 2 intersection points between bachelor circle and V0 straight line
-          for (i=0;i<2;i++)
-             {tries=1;
-              StThreeVectorF dpV0;
-              dpV0.setX(pV0.x()/abs(pV0));
-              dpV0.setY(pV0.y()/abs(pV0));
-              dpV0.setZ(pV0.z()/abs(pV0));
+          }
+      //End of casc_geom
+      //Cut: drop candidate if no intersection point in 2D between V0 and bachelor trajectories
+      if (iflag1 == 0) continue; //No intersection points
+      
+      // Loop over the (1 or) 2 intersection points between bachelor circle and V0 straight line
+      for (i=0;i<iflag1;i++)
+         {//Subroutine update_track_param
+          axb=(bachGeom->origin().x()-xc)*(yOut[i]-yc)-(bachGeom->origin().y()-yc)*(xOut[i]-xc);
+          arg=axb/rsq;
+          if (arg > 1.) arg=1.;
+          if (arg < -1.) arg=-1.;
+          ds=radiusBach*TMath::ASin(arg);
+          dz=ds*TMath::Tan(bachGeom->dipAngle());
+          xOrig.setX(xOut[i]);
+          if (xOut[i] == 0.) xOrig.setX(0.01);
+          xOrig.setY(yOut[i]);
+          xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*(Bfield/tesla)/fabs(bachGeom->charge()*(Bfield/tesla)))*dz); //Field wanted in tesla
+          bachGeom2->setOrigin(xOrig);
+          bachGeom2->setPsi(bachGeom->psi()+TMath::ASin(arg));
+          //End of update_track_param
+          
+          //Subroutine track_mom
+          xOrig=bachGeom2->momentum();
+          xOrig.setX(ptBach*TMath::Cos(bachGeom2->psi()));
+          xOrig.setY(ptBach*TMath::Sin(bachGeom2->psi()));
+          //End of track_mom
+          
+          pBach.setX(xOrig.x()/abs(xOrig));
+          pBach.setY(xOrig.y()/abs(xOrig));
+          pBach.setZ(xOrig.z()/abs(xOrig));
+          dv0dotdb=dpV0.x()*pBach.x()+dpV0.y()*pBach.y()+dpV0.z()*pBach.z();
+          diffc.setX(xV0.x()-xOut[i]);
+          diffc.setY(xV0.y()-yOut[i]);
+          diffc.setZ(xV0.z()-bachGeom2->origin().z());
+          //s1 and s2 are the distances from a point on the lines to the
+          // closest distance of approach of the lines in space
+          denom=dv0dotdb*dv0dotdb-1.;
+          s2=(dpV0.x()*dv0dotdb-pBach.x())*diffc.x() + (dpV0.y()*dv0dotdb-pBach.y())*diffc.y() + (dpV0.z()*dv0dotdb-pBach.z())*diffc.z();
+          s2=s2/denom;
+          //Check validity of linear approx. (distance moved in x and y << r1)
+          // If only mildly invalid, re-try starting with new point (up to 3 tries)
+          tries=1;
+          valid=fabs(s2*s2*(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
+          //Cut: drop candidate if linear approximation too bad to determine the dca
+          while ((valid < (0.0004*rsq)) && (tries < 4) && (valid > (rsq*1.e-6)))
+             {tries++;
+              batv.setX(pBach.x()*s2+xOut[i]);
+              batv.setY(pBach.y()*s2+yOut[i]);
+              batv.setZ(pBach.z()*s2+bachGeom2->origin().z());
               
+              //Subroutine ev0_project_track
+              dtmp=xc-batv.x();
+              atmp=yc-batv.y();
+              if (atmp == 0.)
+                 {if (dtmp >= 0) xAns=xc-radiusBach;
+                     else xAns=xc+radiusBach;
+                  yAns=yc;
+                  }
+                  else
+                 {ctmp=dtmp/atmp;
+                  yy=radiusBach/::sqrt(ctmp*ctmp+1.);
+                  zz=ctmp*yy;
+                  if (atmp > 0.)
+                     {xAns=-zz+xc;
+                      yAns=-yy+yc;
+                      }
+                      else
+                     {xAns=zz+xc;
+                      yAns=yy+yc;
+                      }
+                  }
+              //End of ev0_project_track
+              xOut[i]=xAns;
+              yOut[i]=yAns;
               
               //Subroutine update_track_param
-              rr=::sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
-              xi=bachGeom->origin().x();
-              yi=bachGeom->origin().y();
-              axb=(xi-xc)*(yOut[i]-yc)-(yi-yc)*(xOut[i]-xc);
+              axb=(bachGeom->origin().x()-xc)*(yOut[i]-yc)-(bachGeom->origin().y()-yc)*(xOut[i]-xc);
               arg=axb/rsq;
               if (arg > 1.) arg=1.;
               if (arg < -1.) arg=-1.;
-              ds=TMath::ASin(arg)/bachGeom->curvature();
+              ds=radiusBach*TMath::ASin(arg);
               dz=ds*TMath::Tan(bachGeom->dipAngle());
               xOrig.setX(xOut[i]);
               if (xOut[i] == 0.) xOrig.setX(0.01);
               xOrig.setY(yOut[i]);
-	      // Here I want the field in tesla
-              xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*(Bfield/tesla)/fabs(bachGeom->charge()*(Bfield/tesla)))*dz);
+              xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*(Bfield/tesla)/fabs(bachGeom->charge()*(Bfield/tesla)))*dz); //Field wanted in tesla
               bachGeom2->setOrigin(xOrig);
               bachGeom2->setPsi(bachGeom->psi()+TMath::ASin(arg));
-              //End of update_track_param
+              //End of update_track_param                  
 
-              
               //Subroutine track_mom
               xOrig=bachGeom2->momentum();
-              pt=::sqrt(xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y());
-              xOrig.setX(pt*TMath::Cos(bachGeom2->psi()));
-              xOrig.setY(pt*TMath::Sin(bachGeom2->psi()));
+              xOrig.setX(ptBach*TMath::Cos(bachGeom2->psi()));
+              xOrig.setY(ptBach*TMath::Sin(bachGeom2->psi()));
               //End of track_mom
               
-
               pBach.setX(xOrig.x()/abs(xOrig));
               pBach.setY(xOrig.y()/abs(xOrig));
               pBach.setZ(xOrig.z()/abs(xOrig));
@@ -541,198 +586,107 @@ Bool_t StXiFinderMaker::UseV0() {
               diffc.setX(xV0.x()-xOut[i]);
               diffc.setY(xV0.y()-yOut[i]);
               diffc.setZ(xV0.z()-bachGeom2->origin().z());
-              //s1 and s2 are the distances from a point on the lines to the
-              // closest distance of approach of the lines in space
               denom=dv0dotdb*dv0dotdb-1.;
               s2=(dpV0.x()*dv0dotdb-pBach.x())*diffc.x() + (dpV0.y()*dv0dotdb-pBach.y())*diffc.y() + (dpV0.z()*dv0dotdb-pBach.z())*diffc.z();
               s2=s2/denom;
-              //Check validity of linear approx. (distance moved in x and y << r1)
-              // If only mildly invalid, re-try starting with new point (up to 3 tries)
-              valid=fabs(s2*::sqrt(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
-              while ((valid < (0.02/bachGeom->curvature())) && (tries < 4) && (valid > (0.001/bachGeom->curvature())))
-                 {tries++;
-                  batv.setX(pBach.x()*s2+xOut[i]);
-                  batv.setY(pBach.y()*s2+yOut[i]);
-                  batv.setZ(pBach.z()*s2+bachGeom2->origin().z());
-                  
-                  
-                  //Subroutine ev0_project_track
-                  dtmp=xc-batv.x();
-                  atmp=yc-batv.y();
-                  if (atmp == 0.)
-                     {if (dtmp >= 0) xAns=xc-1/bachGeom->curvature();
-                         else xAns=xc+1/bachGeom->curvature();
-                      yAns=yc;
-                      }
-                      else
-                     {ctmp=dtmp/atmp;
-                      yy=1/(bachGeom->curvature()*::sqrt(ctmp*ctmp+1.));
-                      zz=ctmp*yy;
-                      if (atmp > 0.)
-                         {xAns=-zz+xc;
-                          yAns=-yy+yc;
-                          }
-                          else
-                         {xAns=zz+xc;
-                          yAns=yy+yc;
-                          }
-                      }
-                  //End of ev0_project_track
-                  xOut[i]=xAns;
-                  yOut[i]=yAns;
-                  
-                  
-                  //Subroutine update_track_param
-                  rr=::sqrt(bachGeom->origin().x()*bachGeom->origin().x()+bachGeom->origin().y()*bachGeom->origin().y());
-                  xi=bachGeom->origin().x();
-                  yi=bachGeom->origin().y();
-                  axb=(xi-xc)*(yOut[i]-yc)-(yi-yc)*(xOut[i]-xc);
-                  arg=axb/rsq;
-                  if (arg > 1.) arg=1.;
-                  if (arg < -1.) arg=-1.;
-                  ds=TMath::ASin(arg)/bachGeom->curvature();
-                  dz=ds*TMath::Tan(bachGeom->dipAngle());
-                  xOrig.setX(xOut[i]);
-                  if (xOut[i] == 0.) xOrig.setX(0.01);
-                  xOrig.setY(yOut[i]);
-		  // Here I want the field in tesla
-                  xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*(Bfield/tesla)/fabs(bachGeom->charge()*(Bfield/tesla)))*dz);
-                  bachGeom2->setOrigin(xOrig);
-                  bachGeom2->setPsi(bachGeom->psi()+TMath::ASin(arg));
-                  //End of update_track_param                  
-
-                  
-                  //Subroutine track_mom
-                  xOrig=bachGeom2->momentum();
-                  pt=::sqrt(xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y());
-                  xOrig.setX(pt*TMath::Cos(bachGeom2->psi()));
-                  xOrig.setY(pt*TMath::Sin(bachGeom2->psi()));
-                  //End of track_mom
-                  
-                  pBach.setX(xOrig.x()/abs(xOrig));
-                  pBach.setY(xOrig.y()/abs(xOrig));
-                  pBach.setZ(xOrig.z()/abs(xOrig));
-                  dv0dotdb=dpV0.x()*pBach.x()+dpV0.y()*pBach.y()+dpV0.z()*pBach.z();
-                  diffc.setX(xV0.x()-xOut[i]);
-                  diffc.setY(xV0.y()-yOut[i]);
-                  diffc.setZ(xV0.z()-bachGeom2->origin().z());
-                  //s1 and s2 are the distances from a point on the lines to the
-                  // closest distance of approach of the lines in space
-                  denom=dv0dotdb*dv0dotdb-1.;
-                  s2=(dpV0.x()*dv0dotdb-pBach.x())*diffc.x() + (dpV0.y()*dv0dotdb-pBach.y())*diffc.y() + (dpV0.z()*dv0dotdb-pBach.z())*diffc.z();
-                  s2=s2/denom;
-                  //Check validity of linear approx. (distance moved in x and y << r1)
-                  // If only mildly invalid, re-try starting with new point (up to 3 tries)
-                  valid=fabs(s2*::sqrt(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
-                  }//End of the while-loop.
-              if ((valid < (0.02/bachGeom->curvature())) && (tries < 4))
-                 {batv.setX(pBach.x()*s2+xOut[i]);
-                  batv.setY(pBach.y()*s2+yOut[i]);
-                  batv.setZ(pBach.z()*s2+bachGeom2->origin().z());
-                  //Beginning of block 5.
-                  s1=(pBach.x()*dv0dotdb-dpV0.x())*diffc.x() + (pBach.y()*dv0dotdb-dpV0.y())*diffc.y() + (pBach.z()*dv0dotdb-dpV0.z())*diffc.z();
-                  s1=-s1/denom;
-                  v0atv.setX(dpV0.x()*s1+xV0.x());
-                  v0atv.setY(dpV0.y()*s1+xV0.y());
-                  v0atv.setZ(dpV0.z()*s1+xV0.z());
-                  //Check that V0 points away from Xi vertex
-                  check=(xV0.x()-v0atv.x())*pV0.x() + (xV0.y()-v0atv.y())*pV0.y() + (xV0.z()-v0atv.z())*pV0.z();
-                  //End of block 5 and beginning of block 5bis.
-                  
-                  if (check > 0.0)
-                     {dca=::sqrt((v0atv.x()-batv.x())*(v0atv.x()-batv.x()) + (v0atv.y()-batv.y())*(v0atv.y()-batv.y()) + (v0atv.z()-batv.z())*(v0atv.z()-batv.z()));
-                      xpp.setX((v0atv.x()+batv.x())/2.);
-                      xpp.setY((v0atv.y()+batv.y())/2.);
-                      xpp.setZ((v0atv.z()+batv.z())/2.);
-                      rv=::sqrt((xpp.x()-xPvx.x())*(xpp.x()-xPvx.x())+(xpp.y()-xPvx.y())*(xpp.y()-xPvx.y())+(xpp.z()-xPvx.z())*(xpp.z()-xPvx.z()));
-                      //decide here if it is a good candidate
-                      if ((dca<=parsXi->dca_max) && (rv>parsXi->rv_xi))
-                         {//calculate xi impact parameter
-                          pXi.setX(pV0.x()+xOrig.x());
-                          pXi.setY(pV0.y()+xOrig.y());
-                          pXi.setZ(pV0.z()+xOrig.z());
-                          //Check that Xi points away from primary vertex
-                          check=(xpp.x()-xPvx.x())*pXi.x()+(xpp.y()-xPvx.y())*pXi.y()+(xpp.z()-xPvx.z())*pXi.z();
-                          if (check < 0.0)
-                              iflag=2;
-                              else
-                             {//helixDCA(charge,xpp,pXi,bxi);
-                              //helixDCA is defined in exi_c_utils.cc (pams/global/exi/).
-                              pt_tmp = ::sqrt(pXi.x()*pXi.x()+pXi.y()*pXi.y());
-			      //Here I want the field on kGauss
-                              bcharge_tmp = charge*(Bfield/kilogauss);
-                              curvature_tmp = TMath::Abs(bcharge_tmp)*C_D_CURVATURE/pt_tmp;
-                              dip_tmp = atan(pXi.z()/pt_tmp);
-                              h_tmp = ((bcharge_tmp > 0) ? -1 : 1);
-                              phase_tmp = atan2(pXi.y(),pXi.x())-(h_tmp*C_PI_2);
-                              origin_tmp.setX(xpp.x());
-                              origin_tmp.setY(xpp.y());
-                              origin_tmp.setZ(xpp.z());
-                              StHelixD *globHelix = new StHelixD(curvature_tmp, dip_tmp, phase_tmp, origin_tmp, h_tmp);
-                              bxi=globHelix->distance(xPvx);
-                              delete globHelix;
-                              globHelix=0;
-                              if (bxi <= parsXi->bxi_max) iflag=0;
-                                 else iflag=1;
-                              }
-                          if (iflag == 0)
-                             {//calculate parent and daughter kinematics
-                              ptot_b2=xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y()+xOrig.z()*xOrig.z();
-                              epi=::sqrt(ptot_b2+M_PION_MINUS*M_PION_MINUS);
-                              ek=::sqrt(ptot_b2+M_KAON_MINUS*M_KAON_MINUS);
-                              ptot_v02=pV0.x()*pV0.x()+pV0.y()*pV0.y()+pV0.z()*pV0.z();
-                              ela=::sqrt(ptot_v02+M_LAMBDA*M_LAMBDA);
-                              ptot_2=pXi.x()*pXi.x()+pXi.y()*pXi.y()+pXi.z()*pXi.z();
-                              ptot=::sqrt(ptot_2);
-                              exi=::sqrt(ptot_2+M_XI_MINUS*M_XI_MINUS);
-                              eom=::sqrt(ptot_2+M_OMEGA_MINUS*M_OMEGA_MINUS);
-                              //calculate Armenteros variables
-                              bdotx=xOrig.x()*pXi.x()+xOrig.y()*pXi.y()+xOrig.z()*pXi.z();
-                              vdotx=pV0.x()*pXi.x()+pV0.y()*pXi.y()+pV0.z()*pXi.z();
-                              if (bachGeom->charge() > 0)
-                                 {ppar=bdotx/ptot;
-                                  npar=vdotx/ptot;
-                                  pper=::sqrt(ptot_b2-ppar*ppar);
-                                  }
-                                  else
-                                 {ppar=vdotx/ptot;
-                                  npar=bdotx/ptot;
-                                  pper=::sqrt(ptot_v02-ppar*ppar);
-                                  }
-                              //calculate daughter impact parameters
-                              bBach=trk[k]->impactParameter();
-                              bV0=fabs(v0Vertex->dcaParentToPrimaryVertex());
-                              xiVertex = new StXiVertex();
-                              xiVertex->setPosition(xpp);
-                              xiVertex->addDaughter(trk[k]);
-                              xiVertex->setDcaBachelorToPrimaryVertex(trk[k]->impactParameter());
-                              xiVertex->setMomentumOfBachelor(xOrig);
-                              xiVertex->setDcaDaughters(dca);
-                              xiVertex->setDcaParentToPrimaryVertex(bxi);
-                              xiVertex->setV0Vertex(v0Vertex);
-                              
-                              //Set chi2 to trace SVT usage
-                              long int v0ChiSq = -1*(long int)v0Vertex->chiSquared();
-                              if(detId[k]==2 || detId[k]==3)
-                                 {//if an SVT track was used on bachelor set the last bit to 1
-                                  v0ChiSq |=((long int)1 << 0);
-                                  }
-                              v0ChiSq *=-1;
-                              xiVertex->setChiSquared((float)v0ChiSq);
-                              
-                              xiVertices.push_back(xiVertex);
-                              usedV0 = kTRUE;
-                              } //End if (bxi and iflag check)
-                          } //End if (dca and rv)
-                      } //End if (check>0 : V0 pointing away from Xi)
-                  } //End if (valid && tries<4)
-              if (iflag1 == 3) break; //There is only 1 intersection point
-              } //End loop over 2 intersection points
-          // End of the big(est) block inserted from StXiVertexFinder.cxx
-
-
-
-          } // charge sign
+              valid=fabs(s2*s2*(pBach.x()*pBach.x()+pBach.y()*pBach.y()));
+              }//End of the while-loop.
+          //Cut: (same as above) drop candidate if linear approximation too bad to determine the dca
+          if ((valid < (0.0004*rsq)) && (tries < 4))
+             {batv.setX(pBach.x()*s2+xOut[i]);
+              batv.setY(pBach.y()*s2+yOut[i]);
+              batv.setZ(pBach.z()*s2+bachGeom2->origin().z());
+              //Beginning of block 5.
+              s1=(pBach.x()*dv0dotdb-dpV0.x())*diffc.x() + (pBach.y()*dv0dotdb-dpV0.y())*diffc.y() + (pBach.z()*dv0dotdb-dpV0.z())*diffc.z();
+              s1=-s1/denom;
+              v0atv.setX(dpV0.x()*s1+xV0.x());
+              v0atv.setY(dpV0.y()*s1+xV0.y());
+              v0atv.setZ(dpV0.z()*s1+xV0.z());
+              //End of block 5 and beginning of block 5bis.
+              //Cut: remove if V0 points away from Xi vertex
+              if (((xV0.x()-v0atv.x())*pV0.x() + (xV0.y()-v0atv.y())*pV0.y() + (xV0.z()-v0atv.z())*pV0.z()) <= 0.) continue;
+              dca=(v0atv.x()-batv.x())*(v0atv.x()-batv.x()) + (v0atv.y()-batv.y())*(v0atv.y()-batv.y()) + (v0atv.z()-batv.z())*(v0atv.z()-batv.z());
+              xpp.setX((v0atv.x()+batv.x())/2.);
+              xpp.setY((v0atv.y()+batv.y())/2.);
+              xpp.setZ((v0atv.z()+batv.z())/2.);
+              //Cut: dca Xi daughters
+              if (dca > (parsXi->dca_max*parsXi->dca_max)) continue;
+              //Cut: Xi decay length
+              if (((xpp.x()-xPvx.x())*(xpp.x()-xPvx.x())+(xpp.y()-xPvx.y())*(xpp.y()-xPvx.y())+(xpp.z()-xPvx.z())*(xpp.z()-xPvx.z())) <= (parsXi->rv_xi*parsXi->rv_xi)) continue;
+              //Calculate xi impact parameter
+              pXi.setX(pV0.x()+xOrig.x());
+              pXi.setY(pV0.y()+xOrig.y());
+              pXi.setZ(pV0.z()+xOrig.z());
+              //Cut: remove if Xi points away from primary vertex
+              if (((xpp.x()-xPvx.x())*pXi.x()+(xpp.y()-xPvx.y())*pXi.y()+(xpp.z()-xPvx.z())*pXi.z()) < 0.0) continue;
+              //Function helixDCA(charge,xpp,pXi,bxi);
+              //helixDCA is defined in exi_c_utils.cc (pams/global/exi/).
+              pt_tmp = ::sqrt(pXi.x()*pXi.x()+pXi.y()*pXi.y());
+              bcharge_tmp = charge*(Bfield/kilogauss); //Field wanted in kGauss
+              curvature_tmp = TMath::Abs(bcharge_tmp)*C_D_CURVATURE/pt_tmp;
+              dip_tmp = atan(pXi.z()/pt_tmp);
+              h_tmp = ((bcharge_tmp > 0) ? -1 : 1);
+              phase_tmp = atan2(pXi.y(),pXi.x())-(h_tmp*C_PI_2);
+              origin_tmp.setX(xpp.x());
+              origin_tmp.setY(xpp.y());
+              origin_tmp.setZ(xpp.z());
+              StHelixD *globHelix = new StHelixD(curvature_tmp, dip_tmp, phase_tmp, origin_tmp, h_tmp);
+              bxi=globHelix->distance(xPvx);
+              delete globHelix;
+              globHelix=0;
+              //End of helixDCA
+              //Cut: dca Xi to primary vertex
+              if (bxi > parsXi->bxi_max) continue;
+              //Calculate parent and daughter kinematics
+              /*ptot_b2=xOrig.x()*xOrig.x()+xOrig.y()*xOrig.y()+xOrig.z()*xOrig.z();
+              epi=::sqrt(ptot_b2+M_PION_MINUS*M_PION_MINUS);
+              ek=::sqrt(ptot_b2+M_KAON_MINUS*M_KAON_MINUS);
+              ptot_v02=pV0.x()*pV0.x()+pV0.y()*pV0.y()+pV0.z()*pV0.z();
+              ela=::sqrt(ptot_v02+M_LAMBDA*M_LAMBDA);
+              ptot_2=pXi.x()*pXi.x()+pXi.y()*pXi.y()+pXi.z()*pXi.z();
+              ptot=::sqrt(ptot_2);
+              exi=::sqrt(ptot_2+M_XI_MINUS*M_XI_MINUS);
+              eom=::sqrt(ptot_2+M_OMEGA_MINUS*M_OMEGA_MINUS);
+              //Calculate Armenteros variables
+              bdotx=xOrig.x()*pXi.x()+xOrig.y()*pXi.y()+xOrig.z()*pXi.z();
+              vdotx=pV0.x()*pXi.x()+pV0.y()*pXi.y()+pV0.z()*pXi.z();
+              if (bachGeom->charge() > 0)
+                 {ppar=bdotx/ptot;
+                  npar=vdotx/ptot;
+                  pper=::sqrt(ptot_b2-ppar*ppar);
+                  }
+                  else
+                 {ppar=vdotx/ptot;
+                  npar=bdotx/ptot;
+                  pper=::sqrt(ptot_v02-ppar*ppar);
+                  }*/
+              //Calculate daughter impact parameters
+              bBach=trk[k]->impactParameter();
+              bV0=fabs(v0Vertex->dcaParentToPrimaryVertex());
+              xiVertex = new StXiVertex();
+              xiVertex->setPosition(xpp);
+              xiVertex->addDaughter(trk[k]);
+              xiVertex->setDcaBachelorToPrimaryVertex(trk[k]->impactParameter());
+              xiVertex->setMomentumOfBachelor(xOrig);
+              xiVertex->setDcaDaughters(::sqrt(dca));
+              xiVertex->setDcaParentToPrimaryVertex(bxi);
+              xiVertex->setV0Vertex(v0Vertex);
+              
+              ///Begin Betty
+              //Set chi2 to trace SVT usage
+              long int v0ChiSq = -1*(long int)v0Vertex->chiSquared();
+              if(detId[k]==2 || detId[k]==3)
+                 {//if an SVT track was used on bachelor set the last bit to 1
+                  v0ChiSq |=((long int)1 << 0);
+                  }
+              v0ChiSq *=-1;
+              xiVertex->setChiSquared((float)v0ChiSq);
+              ///End Betty
+              
+              xiVertices.push_back(xiVertex);
+              usedV0 = kTRUE;
+              } //End if (valid && tries<4)
+          } //End loop over 2 intersection points
       } // k-Loop
   delete bachGeom;
   bachGeom=0;
@@ -747,8 +701,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.15 2004/02/02 12:10:54 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.16 2004/02/03 14:29:36 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.16  2004/02/03 14:29:36  faivre
+// Spring-cleaning 2 months early ;-)  Algo strictly equivalent to previous one although huge reshaping.
+//
 // Revision 1.15  2004/02/02 12:10:54  faivre
 // XiFinder now able to run on muDsts as well :-)   + update user-friendliness.
 //
