@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.7 2004/02/24 15:53:22 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.8 2004/03/30 21:27:12 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
- * Revision 1.7  2004/02/24 15:53:22  caines
- * Read all params from database
+ * Revision 1.8  2004/03/30 21:27:12  caines
+ * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * Revision 1.6  2003/07/31 19:18:09  caines
  * Petrs improved simulation code

@@ -1,7 +1,7 @@
-// $Id: StSvtSimulationMaker.h,v 1.11 2004/02/24 15:53:22 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.12 2004/03/30 21:27:12 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
-// Revision 1.11  2004/02/24 15:53:22  caines
-// Read all params from database
+// Revision 1.12  2004/03/30 21:27:12  caines
+// Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
 //
 // Revision 1.10  2004/01/22 16:30:47  caines
 // Getting closer to a final simulation
@@ -160,7 +160,7 @@ class StSvtSimulationMaker : public StMaker
     
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.11 2004/02/24 15:53:22 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.12 2004/03/30 21:27:12 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,3)
 

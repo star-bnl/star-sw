@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSimulationMaker.cxx,v 1.20 2004/02/24 15:53:22 caines Exp $
+ * $Id: StSvtSimulationMaker.cxx,v 1.21 2004/03/30 21:27:12 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtSimulationMaker.cxx,v $
- * Revision 1.20  2004/02/24 15:53:22  caines
- * Read all params from database
+ * Revision 1.21  2004/03/30 21:27:12  caines
+ * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
  *
  * Revision 1.19  2004/01/27 02:45:42  perev
  * LeakOff
@@ -238,7 +238,7 @@ Int_t StSvtSimulationMaker::InitRun(int runumber)
   getSvtGeometry();
   getSvtDriftSpeeds();
   getSvtT0();
-  getPedestalOffset();
+  if (getPedestalOffset()!=kStOk) return kStErr;
 
   setSvtPixelData();
   //Set up coordinate transformation 
@@ -392,8 +392,11 @@ Int_t  StSvtSimulationMaker::getPedestalOffset()
   assert(dataSet);
 
   StSvtDaq *daq = (StSvtDaq*)dataSet->GetObject();
-  assert(daq);
-
+  if (daq==NULL){
+    gMessMgr->Error()<<"BIG TROUBLE:No DAQ parameters are empty!!!!"<<endm;
+    return kStErr;
+    }
+		    
   mPedOffset=daq->getPedOffset();
 
   return kStOk;
