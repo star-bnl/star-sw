@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.4 2001/05/16 18:34:18 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.5 2001/05/17 21:09:15 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.5  2001/05/17 21:09:15  jcs
+// macro for calculating FTPC drift map calibration files using StMagUtilities
+//
 // Revision 1.4  2001/05/16 18:34:18  jcs
 // select timestamp
 //
@@ -16,10 +19,19 @@
 // owner:  Janet Seyboth  (jcs@mppmu.mpg.de)
 // what it does: compute drift map for FTPCs
 //
+//    const Int_t      map     = 2           use mapped field values
+//                             = 1           use constant field values
+//    const Float_t   |factor| > 0.8         scale from full field
+//                    factor   > 0           normal field
+//                    factor   < 0           reversed field
+//                                           factor is the field scaling factor
+//
+//    Default:  const Int_t   map    = 2
+//              const Float_t factor = 1.0
 //   
 //======================================================================
 
-void FtpcDriftMapMaker(const Char_t *FieldType="FullField")
+void FtpcDriftMapMaker(const Int_t map=2, const Float_t factor=1.0)
 {
     if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
     gSystem->Load("St_base");
@@ -44,21 +56,8 @@ void FtpcDriftMapMaker(const Char_t *FieldType="FullField")
   St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
   //  dbMk->SetDateTime(20001100,10000);
   dbMk->SetDateTime("year_2b");
+  dbMk->Init();
+  dbMk->Make();
 
-//  StMagFMaker *magFMk = new StMagFMaker("magF");
-  Float_t Scale = 1.0;
-  TString FieldName("STAR full field");
-  if (FieldType == "FieldOff")     {Scale = 0.00002; FieldName = "STAR no field";}
-  if (FieldType == "HalfField")    {Scale = 0.5;     FieldName = "STAR Normal field";}
-  if (FieldType == "ReverseField") {Scale = - Scale; FieldName += " Reverse";}
-cout<<" FieldType "<<FieldType<<" Scale "<<Scale<<endl;
-  StMagFC *magFCMk = new StMagFC("field",FieldName.Data(),Scale);
-  StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker("ftpcDriftMap");
-  dbMk->SetDebug();
-//magFCMk->SetDebug();
-//ftpcDriftMapMk->SetDebug();
-//chain->SetDebug();
-  chain->Init();
-  chain->Make();
+  StFtpcDriftMapMaker *ftpcDriftMapMk = new StFtpcDriftMapMaker(map,factor);
 }
-
