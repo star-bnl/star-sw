@@ -1,15 +1,16 @@
 -*- mode:outline -*-
-Time-stamp: <99/12/01 21:36:36 ullrich>
+Time-stamp: <00/01/11 17:56:57 ullrich>
 
 * StEvent Online Info 
 
-The StEvent documentation is currently revised and changes frequently.
-A version of the current documentation in PDF format is under cvs control. Use
+The StEvent documentation changes frequently.
 
-     cvs co StRoot/StEvent/doc/tex/StEvent.pdf
+The most easy way to get a print ready manual is is to pick up the
+PS version of the manual at the following URL:
+http://www.star.bnl.gov/STARAFS/comp/root/special_docs.html
+At the moment pdf format is not supported on this page.
 
-to retrieve the file. It should be up to date but you better check.
-In order to obtain always the most up-to-date version do the following:
+In order to manually create an up-to-date version do the following:
 
      mkdir wrk
      cd wrk
@@ -17,7 +18,8 @@ In order to obtain always the most up-to-date version do the following:
      cd StRoot/StEvent/doc/tex
      make
 
-This creates a PS file StEvent.ps which you can print easily. This requires that you have a complete version of LaTeX installed on your system.
+This creates a PS file StEvent.ps which you can print easily. This requires
+that you have a complete version of LaTeX installed on your system.
 Optionally you can also create directly a pdf file StEvent.pdf:
 
 make pdf
