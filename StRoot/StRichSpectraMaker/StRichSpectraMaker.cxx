@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.18 2003/09/02 17:58:55 perev Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.19 2004/01/14 22:50:43 fisyak Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
+ * Revision 1.19  2004/01/14 22:50:43  fisyak
+ * Add include of <algorithm>
+ *
  * Revision 1.18  2003/09/02 17:58:55  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -83,6 +86,7 @@
 #include <assert.h>
 #include <float.h>
 #include <vector>
+#include <algorithm>
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -781,7 +785,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.18 2003/09/02 17:58:55 perev Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.19 2004/01/14 22:50:43 fisyak Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
