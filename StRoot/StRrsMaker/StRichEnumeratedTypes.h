@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichEnumeratedTypes.h,v 2.1 2000/09/13 20:59:05 lasiuk Exp $
+ * $Id: StRichEnumeratedTypes.h,v 2.2 2001/02/07 16:09:27 lasiuk Exp $
  *
  * Description:
  *   Enumerated type definitions
@@ -7,6 +7,9 @@
  ****************************************************************
  *
  * $Log: StRichEnumeratedTypes.h,v $
+ * Revision 2.2  2001/02/07 16:09:27  lasiuk
+ * add flags for charged sharing (pixels)
+ *
  * Revision 2.1  2000/09/13 20:59:05  lasiuk
  * add cluster/hit flags
  *
@@ -33,7 +36,7 @@
 //
 // Bit operations for the cluster finder
 //
-enum StRichSinglePixelFlag {eUsed=1, eBorder=2, eGood=4, eIsolated=8, eLocalMaximum=16, eNotACentralMaximum=32, eMaxHasAVerticalNeighbor=64, eMaxHasAHorizontalNeighbor=128};
+enum StRichSinglePixelFlag {eUsed=1, eBorder=2, eGood=4, eIsolated=8, eLocalMaximum=16, eNotACentralMaximum=32, eMaxHasAVerticalNeighbor=64, eMaxHasAHorizontalNeighbor=128, eSaturatedPixel=256, eToBeUsedOnce=512, eToBeUsedTwice=1024,eCurrentLocalMaximum=2048};
 
 //
 // MC flags for repsonsible particle
