@@ -24,6 +24,8 @@ void StiDefaultMutableTreeNode::reset()
     children.clear();
 }
 
+
+
 void StiDefaultMutableTreeNode::set(int depth)
 {
     mDepth = depth;

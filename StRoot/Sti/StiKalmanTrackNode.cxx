@@ -24,7 +24,10 @@ bool StiKalmanTrackNode::elossCalculated = false;
 bool StiKalmanTrackNode::mcsCalculated   = false;
 double StiKalmanTrackNode::kField = 0.5;
 double StiKalmanTrackNode::massHypothesis = 0.13957018;
-double StiKalmanTrackNode::unitCharge = 1;
+
+int StiKalmanTrackNode::minContiguousHitCountForNullReset = 2;
+int StiKalmanTrackNode::maxNullCount = 40;  
+int StiKalmanTrackNode::maxContiguousNullCount = 25;
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::reset()
@@ -63,6 +66,14 @@ void StiKalmanTrackNode::reset()
   fChi2  = 0;
   // dedx information
   fdEdx = 0.;
+
+	// path length for this node
+	pathLength = 0.;
+	
+	hitCount = 0;
+	nullCount = 0;
+	contiguousHitCount = 0;
+	contiguousNullCount = 0;
 }
 
 
@@ -176,6 +187,13 @@ void StiKalmanTrackNode::setAsCopyOf(const StiKalmanTrackNode * node)
   fC42  = node->fC42;
   fC43  = node->fC43;
   fC44  = node->fC44;
+
+	pathLength;
+	
+	hitCount   = node->hitCount;
+	nullCount  = node->nullCount;
+	contiguousHitCount  =  node->contiguousHitCount;
+	contiguousNullCount =  node->contiguousNullCount;
 }
 
 //_____________________________________________________________________________
@@ -475,7 +493,8 @@ void  StiKalmanTrackNode::propagate(double xk,
 	double dddd = c1*r2 + c2*r1;
 	if (fabs(dddd)<1e-20)
 		{
-			*(Messenger::instance(MessageType::kNodeMessage)) << "StiKalmanTrackNode::propagate() - dddd==0  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<";
+			*(Messenger::instance(MessageType::kNodeMessage)) 
+				<< "StiKalmanTrackNode::propagate() - dddd==0";
 			dddd = 1e-20;
 		}
   fP1 = fP1 + dx*(c1+c2)/(dddd)*fP4; 
@@ -732,6 +751,37 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   // *** fCzz+=d2y*sa*sa*fT*fT/(1.- r1*r1);
 }
 
+//_____________________________________________________________________________
+void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
+{
+	// set counters of the newChild node
+	if (newChild->hit!=0)
+		{
+			// newChild has an associate hit
+			newChild->hitCount += hitCount;
+			newChild->contiguousHitCount += contiguousHitCount; 
+			if (contiguousHitCount>minContiguousHitCountForNullReset)
+				newChild->contiguousNullCount = 0;
+			else
+				newChild->contiguousNullCount = contiguousNullCount;
+			newChild->nullCount = nullCount;
+		}
+	else
+		{
+			// a null hit
+			newChild->nullCount           += nullCount;
+			newChild->contiguousNullCount += contiguousNullCount;
+			newChild->hitCount             = hitCount;
+			newChild->contiguousHitCount   = contiguousHitCount; 
+		}
+	// insert the newChild node as a child to this
+  if(newChild != 0 && newChild->getParent() == this)
+    insert(newChild, getChildCount() - 1);
+  else
+    insert(newChild, getChildCount());
+}
+
+
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::extendToVertex() //throw (Exception)
@@ -747,36 +797,43 @@ void StiKalmanTrackNode::extendToVertex() //throw (Exception)
   propagate(xv,0.,0.);
 }
 
+//_____________________________________________________________________________
 void StiKalmanTrackNode::setElossCalculated(bool option)
 {
 	elossCalculated = option;
 }
 
+//_____________________________________________________________________________
 void StiKalmanTrackNode::setMCSCalculated(bool option)
 {
     mcsCalculated = option;
 }
 
+//_____________________________________________________________________________
 bool StiKalmanTrackNode::getElossCalculated()
 {
 	return elossCalculated;
 }
 
+//_____________________________________________________________________________
 bool StiKalmanTrackNode::getMCSCalculated()
 {
     return mcsCalculated;
 }
 
+//_____________________________________________________________________________
 void   StiKalmanTrackNode::setMassHypothesis(double m) 
 {
  	massHypothesis=m;
 }
 
+//_____________________________________________________________________________
 double StiKalmanTrackNode::getMassHypothesis() 
 { 
 	return massHypothesis;
 }
 
+//_____________________________________________________________________________
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
 	// print to the ostream "os" the parameters of this node 
@@ -821,7 +878,17 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 }
 
 
+//_____________________________________________________________________________
+void StiKalmanTrackNode::setTargetDet(StiDetector * target)
+{
+	targetDet = target;
+}
 
+//_____________________________________________________________________________
+StiDetector * StiKalmanTrackNode::getTargetDet()
+{
+	return targetDet;
+}
 
 
 

@@ -64,9 +64,7 @@ class StiKalmanTrackFinder : public StiTrackFinder
 	bool   singleNodeDescent;
 	double massHypothesis;
 	double maxChi2ForSelection;
-	int minContiguousHitCountForNullReset;
-	int maxNullCount;  
-	int maxContiguousNullCount;
+
 	
 	void printState();
 
@@ -74,10 +72,10 @@ class StiKalmanTrackFinder : public StiTrackFinder
 	
 	StiFindStep mode;
 	int       state;
-	int       hitCount;
-	int       nullCount; 
-	int       contiguousHitCount;	
-	int       contiguousNullCount;	
+	//int       hitCount;
+	//int       nullCount; 
+	//int       contiguousHitCount;	
+	//int       contiguousNullCount;	
 	int       visitedDet ;
 	int       position;
 	int       lastMove;
@@ -95,7 +93,7 @@ class StiKalmanTrackFinder : public StiTrackFinder
 	StiHit * hit;
 	StiDetector * sDet;
 	StiDetector * tDet;
-	const StiDetector * leadDet;
+	StiDetector * leadDet;
 	bool trackDone;
 	bool scanningDone;
 	bool hasHit;
