@@ -22,7 +22,7 @@ void StObjLink::Streamer(TBuffer &R__b)
 
    } else {
 
-     if (!fLink) R__b << UInt_t(0);
+     if (!fLink || fLink->IsZombie()) R__b << UInt_t(0);
      else        fLink->Ztreamer(R__b);
    }
 }
