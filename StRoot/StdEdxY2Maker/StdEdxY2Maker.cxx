@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.7 2002/11/11 17:24:28 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.8 2002/11/18 19:51:47 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -9,7 +9,7 @@
 #define  DriftDistanceCorrection
 //#define  MultiplicityCorrection
 //#define  XYZcheck
-#define  SpaceChargeStudy
+//#define  SpaceChargeStudy
 //#define  GetTpcGainMonitor
 //#define UseI60
 #include <iostream.h>
@@ -710,7 +710,7 @@ Int_t StdEdxY2Maker::Make(){
 	  for (int j = 0; j< numberOfPadrows; j++) {
 	    StTpcPadrowHitCollection *rowCollection = TpcHitCollection->sector(i)->padrow(j);
 	    if (rowCollection) {
-	      Int_t NoHits = rowCollection->hits().size();
+	      UInt_t NoHits = rowCollection->hits().size();
 	      for (int k = 0; k < NoHits; k++) {
 		StTpcHit* tpcHit = TpcHitCollection->sector(i)->padrow(j)->hits().at(k);
 		SpaceChargeT->Fill(tpcHit->position().perp(),tpcHit->position().z(),tpcHit->charge());
@@ -729,19 +729,37 @@ Int_t StdEdxY2Maker::Make(){
   for (unsigned int i=0; i < nTracks; i++) {
     StGlobalTrack* gTrack = 
       static_cast<StGlobalTrack*>(trackNode[i]->track(global));
+    StPtrVecHit hvec = gTrack->detectorInfo()->hits(kTpcId);
+    if (! hvec.size()) continue;
     StPrimaryTrack* pTrack = 
       static_cast<StPrimaryTrack*>(trackNode[i]->track(primary));
     StTptTrack   *tTrack =
       static_cast<StTptTrack   *>(trackNode[i]->track(tpt));
-    StThreeVectorD p3;
-    if (pTrack && pTrack->flag() > 0) p3 = pTrack->geometry()->momentum();
     if (gTrack && gTrack->flag() > 0) {
-      gTrack->pidTraits().clear(); gTrack->pidTraits().resize(0);
-      if (pTrack) {pTrack->pidTraits().clear(); pTrack->pidTraits().resize(0);}
-      if (tTrack) {tTrack->pidTraits().clear(); tTrack->pidTraits().resize(0);}
+      // clean up old Tpc traits if any
+      //      gTrack->pidTraits().clear(); gTrack->pidTraits().resize(0);
+      //      if (pTrack) {pTrack->pidTraits().clear(); pTrack->pidTraits().resize(0);}
+      //      if (tTrack) {tTrack->pidTraits().clear(); tTrack->pidTraits().resize(0);}
+      StTrack *track;
+      for (int l = 0; l < 3; l++) {
+	if (l == 0) track = gTrack;
+	if (l == 1) track = pTrack;
+	if (l == 2) track = tTrack;
+	if (track) {
+	  StSPtrVecTrackPidTraits traits = track->pidTraits();
+	  unsigned int size = traits.size();
+	  if (size) {
+	    for (unsigned int i = 0; i < size; i++) {
+	      StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
+	      if (! pid) continue;
+	      if (pid->detector() != kTpcId) continue;
+	      traits[i]->makeZombie(1);
+	    }
+	  }
+	}
+      }
       Int_t Id = gTrack->key();
       Int_t NoFitPoints = gTrack->fitTraits().numberOfFitPoints();
-      StPtrVecHit hvec = gTrack->detectorInfo()->hits(kTpcId);
       NdEdx = 0;
       Double_t TrackLength70 = 0, TrackLength = 0;
 #ifdef UseI60
@@ -1071,17 +1089,6 @@ Int_t StdEdxY2Maker::Make(){
       if (tTrack) tTrack->addPidTraits(new StProbPidTraits(NdEdx,kTpcId,NHYPS,Chisq));
       //    if (primtrkC && iprim >= 0&& m_Calibration > 0) {
       //      if (m_Calibration != 0 && bField && pTrack) Histogramming(gTrack);
-#if 0
-      if (Debug()) {
-	StPtrVecTrackPidTraits traits = gTrack->pidTraits(kTpcId);
-	StProbPidTraits *pidprob = 0;
-	unsigned int size = traits.size();
-	for (unsigned int i = 0; i < traits.size(); i++) {
-	  pidprob = dynamic_cast<StProbPidTraits*>(traits[i]);
-	  if (pidprob) break;
-	}
-      }
-#endif
       if (m_Calibration != 0) Histogramming(gTrack);
     }
   }
@@ -1114,7 +1121,6 @@ void StdEdxY2Maker::SortdEdx(Int_t N, dEdx_t *dE, dEdx_t *dES) {
   }
 }
 //________________________________________________________________________________
-//_____________________________________________________________________________
 void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
   StThreeVectorD g3 = gTrack->geometry()->momentum(); // p of global track
   Double_t pMomentum = g3.mag();
@@ -1140,6 +1146,8 @@ void StdEdxY2Maker::Histogramming(StGlobalTrack* gTrack) {
 #endif
   if (size) {
     for (unsigned int i = 0; i < traits.size(); i++) {
+      if (! traits[i]) continue;
+      if ( traits[i]->IsZombie()) continue;
       pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
       if (pid) {
 	if (pid->method() == kTruncatedMeanIdentifier) {
@@ -1568,7 +1576,7 @@ Double_t StdEdxY2Maker::CalcCorrection(const tpcCorrection_st *cor,const Double_
 }
 //________________________________________________________________________________
 void Landau(Double_t x, Double_t *val){
-  // TMath::Log from Landua
+  // TMath::Log from Landau
   //  TF1 *LandauF = new TF1("LandauF","exp([0]-0.5*((x-[1])/[2])*((x-[1])/[2])+exp([3]-0.5*((x-[4])/[5])*((x-[4])/[5])))");
   static Double_t params[6] = {
    -3.93739e+00,//    1  p0           5.96123e-03   2.40826e-06  -8.19249e-03
