@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.16 1999/02/25 20:55:31 love Exp $
+// $Id: St_tpt_Maker.cxx,v 1.17 1999/02/26 00:08:18 didenko Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.17  1999/02/26 00:08:18  didenko
+// fixed bug
+//
 // Revision 1.16  1999/02/25 20:55:31  love
 // ntuple named final added
 //
@@ -210,11 +213,14 @@ Int_t St_tpt_Maker::Make(){
 }
 void St_tpt_Maker::MakeHistograms() {
    // go get event number from the event data
+  Int_t evno = 0;
   St_DataSet *raw = gStChain->DataSet("tpc_raw");
-  St_DataSetIter nex(raw);
-  St_type_index *I1 = (St_type_index *) nex("TPC_DATA/IT1");
-  type_index_st *ii = I1->GetTable();
-  Int_t evno = ii->data_row;
+  if (raw) {
+    St_DataSetIter nex(raw);
+    St_type_index *I1 = (St_type_index *) nex("TPC_DATA/IT1");
+    type_index_st *ii = I1->GetTable();
+    evno = ii->data_row;
+  }
   // Create an iterator
   St_DataSetIter tpc_tracks(m_DataSet);
   //Get the track table:
@@ -238,53 +244,58 @@ void St_tpt_Maker::MakeHistograms() {
    }
   //  Make the "Final" hit and track ntuple  Should be controllable.
   if (m_mkfinal) {
-  St_DataSetIter tpc_data(gStChain->DataSet("tpc_hits"));
-  St_tpt_track *n_track    = (St_tpt_track *) tpc_tracks["tracks/tptrack"];
-  St_tcl_tphit  *n_hit      = (St_tcl_tphit *) tpc_data["hits/tphit"];
-  St_tcl_tpcluster *n_clus  = (St_tcl_tpcluster *)  tpc_data["hits/tpcluster"];
-  St_tcl_tphit_aux *n_hitau = (St_tcl_tphit_aux *) tpc_data["hits/tphitau"];
-
-  if(n_hit){
-   tcl_tphit_st *h = n_hit->GetTable(); 
-   for (int i = 0;i<n_hit->GetNRows();i++,h++){
-     tcl_tphit_aux_st *au =  n_hitau->GetTable();
-     for(int iau=0;iau<n_hitau->GetNRows();iau++,au++){
-       if(au->id != h->id) continue;
-       // cluster variable is one more than row num in cluster table
-       tcl_tpcluster_st *clu = n_clus->GetTable();
-       clu += h->cluster -1;
-       if(h->track/1000 != 0){
-	 //find the track, if any
-         tpt_track_st *t = n_track->GetTable(); 
-         for(int itk=0;itk<n_track->GetNRows();itk++,t++){
-           if(t->id != h->track/1000) continue;
- //   TNtuple *final = new TNtuple("final","Tpctest tracks and hits",
- //     "evno:alpha:lambda:row:x:y:z:track:cluster:q:xave:sigma:zrf:prf:nfit:invp:psi:phi0:r0:tanl:z0:chisqxy:chisqz:nseq");
-
-             Float_t row[] = {evno,h->alpha,h->lambda,
+    St_tcl_tphit  *n_hit = 0;
+    St_tcl_tpcluster *n_clus  = 0;
+    St_tcl_tphit_aux *n_hitau = 0;
+    St_DataSet *tpc_hits = gStChain->DataSet("tpc_hits");
+    if (tpc_hits) {
+      St_DataSetIter tpc_data(tpc_hits);
+      n_hit      = (St_tcl_tphit *) tpc_data["hits/tphit"];
+      n_clus     = (St_tcl_tpcluster *)  tpc_data["hits/tpcluster"];
+      n_hitau    = (St_tcl_tphit_aux *) tpc_data["hits/tphitau"];
+    }
+    if(n_hit){
+      St_tpt_track * n_track    = (St_tpt_track *) tpc_tracks["tracks/tptrack"];
+      tcl_tphit_st *h = n_hit->GetTable(); 
+      for (int i = 0;i<n_hit->GetNRows();i++,h++){
+	tcl_tphit_aux_st *au =  n_hitau->GetTable();
+	for(int iau=0;iau<n_hitau->GetNRows();iau++,au++){
+	  if(au->id != h->id) continue;
+	  // cluster variable is one more than row num in cluster table
+	  tcl_tpcluster_st *clu = n_clus->GetTable();
+	  clu += h->cluster -1;
+	  if(h->track/1000 != 0){
+	    //find the track, if any
+	    tpt_track_st *t = n_track->GetTable(); 
+	    for(int itk=0;itk<n_track->GetNRows();itk++,t++){
+	      if(t->id != h->track/1000) continue;
+	      //   TNtuple *final = new TNtuple("final","Tpctest tracks and hits",
+	      //     "evno:alpha:lambda:row:x:y:z:track:cluster:q:xave:sigma:zrf:prf:nfit:invp:psi:phi0:r0:tanl:z0:chisqxy:chisqz:nseq");
+	      
+	      Float_t row[] = {evno,h->alpha,h->lambda,
+			       h->row,h->x,h->y,h->z,h->track,h->cluster,h->q,
+			       au->xave,au->sigma,h->zrf,h->prf,
+			       t->nfit,t->invp,t->psi,t->phi0,t->r0,t->tanl,
+			       t->z0,t->chisq[0],t->chisq[1],clu->nseq};
+	      m_final->Fill(row);
+	    } //end of itk for loop
+	  } //end of if h->track/1000 
+	  else{
+	    Float_t row[] = {evno,h->alpha,h->lambda,
                              h->row,h->x,h->y,h->z,h->track,h->cluster,h->q,
-                             au->xave,au->sigma,h->zrf,h->prf,
-                              t->nfit,t->invp,t->psi,t->phi0,t->r0,t->tanl,
-	                      t->z0,t->chisq[0],t->chisq[1],clu->nseq};
-             m_final->Fill(row);
-	 } //end of itk for loop
-       } //end of if h->track/1000 
-       else{
-             Float_t row[] = {evno,h->alpha,h->lambda,
-                             h->row,h->x,h->y,h->z,h->track,h->cluster,h->q,
-                              au->xave,au->sigma,h->zrf,h->prf,0,0,0,0,0,
-	                      0,0,0,0,clu->nseq};
-             m_final->Fill(row);
-       } // end of no track else
-     } // end of hit_aux table loop
-   }  // end of hit loop
-  }
+			     au->xave,au->sigma,h->zrf,h->prf,0,0,0,0,0,
+			     0,0,0,0,clu->nseq};
+	    m_final->Fill(row);
+	  } // end of no track else
+	} // end of hit_aux table loop
+      }  // end of hit loop
+    }
   }// end of if on m_mkfinal flag.
 }  // end of MakeHistograms member.
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.16 1999/02/25 20:55:31 love Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.17 1999/02/26 00:08:18 didenko Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
