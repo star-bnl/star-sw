@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.39 1999/08/19 21:09:51 sakrejda Exp $
+// $Id: St_tpt_Maker.cxx,v 1.40 1999/09/04 15:42:41 fine Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.40  1999/09/04 15:42:41  fine
+// St_XDFFIle include has been removed to break dependences
+//
 // Revision 1.39  1999/08/19 21:09:51  sakrejda
 // limit on annoying messages set to 10
 //
@@ -121,7 +124,6 @@
 #include "St_tpt_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
 #include "StUtilities/StMessMgr.h"
 #include "tpc/St_tcl_Module.h"
 #include "tpc/St_tph_Module.h"
@@ -186,7 +188,7 @@ gMessMgr->SetLimit("TPTOUT2-E1",10);
     Error("Init", "tpt parameters have not been initialized" );
   assert(m_tpt_pars && m_tpt_spars);
   
-// 		TTE parameters
+// 	 	TTE parameters
   m_tte_control = (St_tte_control *) gime("ttepars/tte_control");
   assert(m_tte_control);
   
