@@ -318,7 +318,7 @@ CDFtoC: $(FILES_C_CDF)
 IdlToH: $(FILES_IDH)
 
 #lib : CDFtoC IdlToH $(MY_LIB)
-lib : CDFtoC IdlToH $(MY_LIB) $(MY_SO)
+lib :  $(MY_LIB) $(MY_SO)
 
 $(MY_LIB) : $(FILES_O)
 	$(AR) $(ARFLAGS) $(MY_LIB) $(addprefix $(OBJ_DIR)/,$(FILES_O))
@@ -332,7 +332,7 @@ $(MY_SO) : $(FILES_O)
 $(SRC_GEN_DIR)/%.c : %.cdf
 	kuipc -c $(ALL_DEPS) $(SRC_GEN_DIR)/$(STEM).c
 
-$(SRC_GEN_DIR)%.c : %.y
+$(SRC_GEN_DIR)/%.c : %.y
 	cd $(TMP_DIR);\
 	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(SRC_GEN_DIR)/$(STEM).c
 
@@ -341,6 +341,8 @@ $(SRC_GEN_DIR)%.c : %.y
 	$(YACC) $(ALL_DEPS) ; mv y.tab.c $(SRC_GEN_DIR)/$(STEM).c
 
 %.o : %.c 
+	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
+%.o : $(SRC_GEN_DIR)/%.c 
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
 
 %.o : %.cc 
