@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcHit.cc,v 2.3 2000/04/17 23:01:15 calderon Exp $
+ * $Id: StMcHit.cc,v 2.4 2000/04/18 00:55:14 calderon Exp $
  * $Log: StMcHit.cc,v $
+ * Revision 2.4  2000/04/18 00:55:14  calderon
+ * added printout of local momentum to operator<<
+ *
  * Revision 2.3  2000/04/17 23:01:15  calderon
  * Added local momentum to hits as per Lee's request
  *
@@ -25,7 +28,7 @@
 
 #include "tables/St_g2t_hits_Table.h"
 
-static const char rcsid[] = "$Id: StMcHit.cc,v 2.3 2000/04/17 23:01:15 calderon Exp $";
+static const char rcsid[] = "$Id: StMcHit.cc,v 2.4 2000/04/18 00:55:14 calderon Exp $";
 
 StMcHit::StMcHit()
     : mPosition(0.,0.,0.), mdE(0),mdS(0),mParentTrack(0)
@@ -79,6 +82,7 @@ void StMcHit::setParentTrack(StMcTrack* val) { mParentTrack = val; }
 ostream& operator<<(ostream& os, const StMcHit& h)
 {
     os << "Position: " << h.position() << endl;
+    os << "Local Momentum: " << h.localMomentum() << endl; 
     os << "dE: " << h.dE() << endl;
     os << "dS: " << h.dS() << endl;
     return os;
