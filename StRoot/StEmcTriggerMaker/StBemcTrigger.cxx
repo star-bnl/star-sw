@@ -1,5 +1,5 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.4 2001/10/12 23:13:55 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.5 2001/10/14 21:42:27 suaide Exp $
 //
 //    
 
@@ -143,6 +143,7 @@ void StBemcTrigger::MakeTrigger()
     Int_t ti=0;
     patchRows[patch-1].PatchAdcSum12bits=0;
     
+    Float_t eta=0,phi=0,eta1=0,phi1=0;
     for(Int_t k=0;k<16;k++)
     {
        Int_t positionInCrate=k+subpatch;
@@ -157,7 +158,13 @@ void StBemcTrigger::MakeTrigger()
        }
        Patch[patch-1]+=e8bits[id-1];
        patchRows[patch-1].PatchAdcSum12bits+=(Int_t)adc12bits[id-1];
+       geo->getEtaPhi(id,eta1,phi1);
+       eta+=eta1;
+       phi+=phi1;
     }
+    patchRows[patch-1].Eta=eta/16;
+    patchRows[patch-1].Phi=phi/16;
+    
     patchRows[patch-1].HighTowerAdc12bits=(Int_t)HT[patch-1];
     
     HT[patch-1]*=sin(theta);   // et
