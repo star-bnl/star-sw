@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.20 2004/09/22 19:24:55 perev Exp $
+ * $Id: StPmdClustering.cxx,v 1.21 2004/11/14 22:56:07 jeromel Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.21  2004/11/14 22:56:07  jeromel
+ * Subhasis changes (BT 489)
+ *
  * Revision 1.20  2004/09/22 19:24:55  perev
  * Leak fixed + mess with i,j indexes
  *
@@ -113,8 +116,8 @@ StPmdGeom *geom=new StPmdGeom(); //! utility class
 //! constructor for getting PMD and CPV detectors
 
   StPmdClustering::StPmdClustering(StPmdDetector *pmd_det, StPmdDetector *cpv_det):StPmdAbsClustering(pmd_det,cpv_det){
-// m_pmd_det=pmd_det;
-// m_cpv_det=cpv_det;
+ m_pmd_det=pmd_det;
+ m_cpv_det=cpv_det;
 }
 
 
@@ -318,7 +321,7 @@ void StPmdClustering::arrange(Int_t incr)
  * Cluster positions,strengths,and widths has has been calculated
  * by adopting minimization process. */
 
-void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod, Int_t idet,StPmdClusterCollection *pmdclus)
+void StPmdClustering::refclust(StPmdDetector* m_pmd_det0,Int_t incr, Int_t supmod, Int_t idet,StPmdClusterCollection *pmdclus)
 {
   Int_t clno, i, j, k, i1, i2, id, icl, ncl[2000], iordR[2000], itest, ihld;
   Int_t ig, nsupcl;
@@ -382,7 +385,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	printclust(supmod,clno,pclust);
 	
 	//Get StPmdHit* corresponding to the co-ordinate of single cell
-	StPmdHit* phit = GetHit(m_pmd_det,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
+	StPmdHit* phit = GetHit(m_pmd_det0,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
 	if(phit)pclust->addHitCollection(phit);
 	
       }
@@ -396,7 +399,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	  y1=coord[1][i1][i2]; z1=d[i1][i2];
 	  
 	  //Get StPmdHit* corresponding to the co-ordinate of first cell
-	  StPmdHit* phit = GetHit(m_pmd_det,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
+	  StPmdHit* phit = GetHit(m_pmd_det0,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
 	  if(phit)pclust->addHitCollection(phit);
 	  
 	  id=id+1; i1=inford[1][id]; i2=inford[2][id];
@@ -404,7 +407,7 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	  
 	  
 	  //Get StPmdHit* corresponding to the co-ordinate of second cell
-	  phit = GetHit(m_pmd_det,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
+	  phit = GetHit(m_pmd_det0,supmod,crd_org[0][i1][i2],crd_org[1][i1][i2]);
 	  if(phit)pclust->addHitCollection(phit);
 	  
 	  /*****  Adding for calculating Spread of the cluster *****/
@@ -571,14 +574,14 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 
 		//  dist=Dist(x[jk], y[jk], xc[k], yc[k]); 
 		//  if(dist < 2.8){ //changed from 2.1 to 2.8 : dipak
-		//    StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
+		//    StPmdHit* phit = GetHit(m_pmd_det0,supmod,x_org[jk],y_org[jk]);
 		 //   if(phit)pclust->addHitCollection(phit);
 		    // attach the hits
 		 // } // if dist loop
 		
 	   if(take_cell[jk]==k)
              {
-               StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
+               StPmdHit* phit = GetHit(m_pmd_det0,supmod,x_org[jk],y_org[jk]);
                if(phit)pclust->addHitCollection(phit);
              }
 			
