@@ -32,6 +32,7 @@ BfcItem BFC[] = {
   {"Y1d"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1d parameters",kFALSE},
   {"Y1e"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1e parameters",kFALSE},
   {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
+  {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 2a parameters",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"C H A I N S ","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -47,6 +48,8 @@ BfcItem BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,qa,tags,Tree,svt" ,"","","Turn on chain y2a",kFALSE},
+  {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,Cdst,qa,tags,Tree,evout" ,"",""
+                                                           ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -542,47 +545,45 @@ void StBFChain::SetFlags(const Char_t *Chain)
 void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
   // define input file
   if (infile) fInFile = new TString(infile);
-  if (!fInFile && !GetOption("NoInput")) {
-    if (GetOption("miniDAQ")) {
+  if (!GetOption("NoInput")) {
+    if (!fInFile && GetOption("miniDAQ")) {
       fInFile = new TString("/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf"); // laser data
       printf ("Use default input file %s for %s \n",fInFile->Data(),"miniDAQ");
     }
-    else {
-      if (GetOption("fzin")) {
-	fInFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
-	if (GetOption("y1h")) fInFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
-	else 
+    if (!fInFile && GetOption("fzin")) {
+      fInFile = new TString("/star/rcf/simu/cocktail/hadronic/default/lowdensity/");
+      if (GetOption("y1h")) fInFile->Append("year_1h/hadronic_on/Gstardata/rcf0078/hc_lowdensity.400_evts.fz");
+      else 
 	if (GetOption("y2a")) fInFile->Append("year_2a/hadronic_on/Gstardata/rcf0079/hc_lowdensity.400_evts.fz");
 	else {printf ("for fzin Option In file has not been defined. Exit!\n"); gSystem->Exit(1);}
-	printf ("Use default input file %s for %s \n",fInFile->Data(),"fzin");
-      }
-      else {
-	if (GetOption("doEvents")){
-	  fInFile = new TString("/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
-	  printf ("Use default input file %s for %s \n",fInFile->Data(),"doEvent");
-	}
-	else { 
-	  if (!GetOption("gstar")) {
-	    fInFile = new TString("/afs/rhic/star/data/samples/hijet-g2t.xdf");	       // g2t xdf file
-	    printf ("Use default input file %s for %s \n",fInFile->Data(),"xin");
-	  }
-	}
-      }
+      printf ("Use default input file %s for %s \n",fInFile->Data(),"fzin");
     }
-  }
-  if (fInFile) {
-    if (!GetOption("fzin")) {
-      fSetFiles= new StFile();
-      TString *Files[80];
-      Int_t NParsed = ParseString((const TString )*fInFile,Files);
-      Int_t i;
-      for (i=0;i<=NParsed;i++) {
-	if (!strstr(Files[i]->Data(),"*") &&
-	    gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
-	  printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
-	  gSystem->Exit(1); 
+    if (!fInFile && GetOption("doEvents")){
+      fInFile = new TString("/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
+      printf ("Use default input file %s for %s \n",fInFile->Data(),"doEvent");
+    }
+    if (!fInFile && GetOption("in")) {
+      fInFile = new TString("/star/rcf/daq/2000/02/st_physics_1054031_raw_000*.daq"); 
+      printf ("Use default DAQ input file %s\n",fInFile->Data());
+    }
+    if (!fInFile && !GetOption("gstar")) {
+      fInFile = new TString("/afs/rhic/star/data/samples/hijet-g2t.xdf");	       // g2t xdf file
+      printf ("Use default input file %s for %s \n",fInFile->Data(),"xin");
+    }
+    if (fInFile) {
+      if (!GetOption("fzin")) {
+	fSetFiles= new StFile();
+	TString *Files[80];
+	Int_t NParsed = ParseString((const TString )*fInFile,Files);
+	Int_t i;
+	for (i=0;i<=NParsed;i++) {
+	  if (!strstr(Files[i]->Data(),"*") &&
+	      gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
+	    printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
+	    gSystem->Exit(1); 
+	  }
+	  else fSetFiles->AddFile(Files[i]->Data());
 	}
-	else fSetFiles->AddFile(Files[i]->Data());
       }
     }
   }
@@ -630,7 +631,8 @@ void StBFChain::SetGeantOptions(){
 		GetOption("DC99"))   geantMk->LoadGeometry("detp geometry YEAR_1A"); 
       else {if (GetOption("Y1b"))    geantMk->LoadGeometry("detp geometry YEAR_1B");
       else {if (GetOption("Y1c"))    geantMk->LoadGeometry("detp geometry YEAR_1C");
-      else {if (GetOption("Y1h"))    geantMk->LoadGeometry("detp geometry YEAR_1H");
+      else {if (GetOption("Y1h") || 
+		GetOption("RY1h"))   geantMk->LoadGeometry("detp geometry YEAR_1H");
       else {if (GetOption("Y2a"))    geantMk->LoadGeometry("detp geometry YEAR_2A");
       else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}
       if (GetOption("gstar")) {
@@ -713,8 +715,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.94 2000/05/31 16:30:23 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.95 2000/06/05 22:44:40 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.95  2000/06/05 22:44:40  fisyak
+// Add chain P00h for year 1 data production
+//
 // Revision 1.94  2000/05/31 16:30:23  fisyak
 // Put l3 back into default chain
 //
