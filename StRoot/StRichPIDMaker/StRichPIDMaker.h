@@ -1,18 +1,23 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.6 2000/11/07 14:11:43 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.7 2000/11/21 16:24:22 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 2.6  2000/11/07 14:11:43  lasiuk
- *  initCutParameters() and diagnositis print added.
- *  bins for <d> and sigma_d added.
- *  TPC hits for RICH tracks written out.
- *  (file) ptr checked before writing ntuple.
- *  check flags on Hits instead of ADC value
+ *  Revision 2.7  2000/11/21 16:24:22  horsley
+ *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
+ *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
+ *  typo corrected.
  *
+ *  Revision 2.8  2000/11/21 19:50:35  lasiuk
+ *  add stthreevectorf
+ *
+ *  Revision 2.7  2000/11/21 16:24:22  horsley
+ *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
+ *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
+ *  typo corrected.
  *
  *  Revision 2.6  2000/11/07 14:11:43  lasiuk
  *  initCutParameters() and diagnositis print added.
@@ -63,7 +68,7 @@
 using std::vector;
 #endif
 
-//#include "StRichMcSwitch.h"
+#include "StParticleTypes.hh"
 #include "StThreeVectorD.hh"
 #include "StThreeVectorF.hh"
 #include "StRichTrackFilter.h"
@@ -120,6 +125,11 @@ private:
     vector<StParticleDefinition* > mListOfParticles; //!
 
     bool  mRefit;
+    bool  mDoGapCorrection;
+
+    double mPionSaturatedArea;
+    double mKaonSaturatedArea;
+    double mProtonSaturatedArea;
 
     bool   mPrintThisEvent;
 
@@ -352,6 +362,7 @@ public:
     void fillRichSoftwareMonitor(StEvent*);
 
 #ifdef  myRICH_WITH_MC
+    void fillMcTrackNtuple(const StSPtrVecRichCluster*);
     void fillMcPhotonNtuple(StMcEvent*, const StSPtrVecRichCluster*, const StSPtrVecRichHit*);
     void fillMcPixelNtuple(const StSPtrVecRichPixel*);
     void fillGeantHitNtuple();

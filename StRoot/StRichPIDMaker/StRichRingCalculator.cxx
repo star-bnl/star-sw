@@ -1,13 +1,18 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.4 2000/11/01 17:40:49 lasiuk Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.5 2000/11/21 16:24:23 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 2.4  2000/11/01 17:40:49  lasiuk
- *  add const to access member functions
+ *  Revision 2.5  2000/11/21 16:24:23  horsley
+ *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
+ *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
+ *  typo corrected.
  *
+ *  Revision 2.5  2000/11/21 16:24:23  horsley
+ *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
+ *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
  *  typo corrected.
  *
  *  Revision 2.4  2000/11/01 17:40:49  lasiuk
@@ -36,35 +41,47 @@
  *
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  *  initial revision
+ **********************************************************/
+
+#include "StRichRingCalculator.h"
+#include "StRichRingDefinition.h" 
+#include "StRichArea.h"
+#include "StRichMaterialsDb.h"
 
 
 
-    mInnerRing = new StRichRingPoint(track,eInnerRing);
-    mOuterRing = new StRichRingPoint(track,eOuterRing);
-    mMeanRing  = new StRichRingPoint(track,eMeanRing);
- 
-    mInnerMinimization = new StRichMinimization(mInnerRing);
-    mMeanMinimization  = new StRichMinimization(mMeanRing);
-    mOuterMinimization = new StRichMinimization(mOuterRing);
-  
-    mConstantAreaAngle=M_PI;
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
+StRichRingCalculator::StRichRingCalculator(StRichTrack* track) {
+  init(track);
+}
 
 
-StRichRingCalculator::StRichRingCalculator(StRichTrack* track,
-					   StParticleDefinition* particle) {
+
 StRichRingCalculator::StRichRingCalculator(StRichTrack* track, StParticleDefinition* particle)  {
-    mInnerRing = new StRichRingPoint(track,eInnerRing);
-    mOuterRing = new StRichRingPoint(track,eOuterRing);
-    mMeanRing  = new StRichRingPoint(track,eMeanRing);
- 
-    mInnerMinimization = new StRichMinimization(mInnerRing);
-    mMeanMinimization  = new StRichMinimization(mMeanRing);
-    mOuterMinimization = new StRichMinimization(mOuterRing);
+  init(track);
+  setParticleType(particle);
+}
+
+
+void StRichRingCalculator::init(StRichTrack* track) {
+  mInnerRing = new StRichRingPoint(track,eInnerRing);
+  mOuterRing = new StRichRingPoint(track,eOuterRing);
+  mMeanRing  = new StRichRingPoint(track,eMeanRing);
+  
   mInnerMinimization = new StRichMinimization(mInnerRing);
-    mConstantAreaAngle=M_PI;
-    setParticleType(particle);
+  mMeanMinimization  = new StRichMinimization(mMeanRing);
+  mOuterMinimization = new StRichMinimization(mOuterRing);
+  
+  mConstantAreaAngle=M_PI;
+  
+  mMonteCarloSwitch = false;
+  mDrawRingPoints=false;
 
   mRichMaterialsDb = StRichMaterialsDb::getDb();
+  mRichGeometryDb  = StRichGeometryDb::getDb();
 
   mMonteCarloArea.Set(18);
 }
@@ -85,33 +102,65 @@ StRichRingCalculator::~StRichRingCalculator() {
     delete mMeanMinimization;
 
     mInnerMinimization = 0;
-double StRichRingCalculator::calculateArea(double cut=0, bool gapCorrection=true) {
-    
+    mOuterMinimization = 0;
+    mMeanMinimization  = 0;
 }
 
-  mTotalAngle = areaCalc.getTotalAngle();
-  double area = areaCalc.calculateArea(cut);
-  mTotalConstantAngle = areaCalc.getTotalConstantAngle();
-  }
 
-  // clear vector of points
-  vectorOfPtsToDraw     = areaCalc.getPtsToDraw();
-  mTotalAngleOnPadPlane = areaCalc.getTotalAngleOnPadPlane();
-}
-  return area;
-  mDrawRingPoints = flag;
-}
-double StRichRingCalculator::calculateConstantArea(double cut, bool
-						   gapCorrection, double& totArea) {
+double StRichRingCalculator::calculateArea(bool gapCorrection, double angleCut, int npoints) {
+  
   StRichArea areaCalc(mInnerRing,mOuterRing);
   areaCalc.correctForGap(gapCorrection);
+  areaCalc.setPoints(npoints);
 
-  double area           = areaCalc.calculateConstantArea(cut);
+  areaCalc.drawAreaRingPoints(mDrawRingPoints);
+  
+  double constantArea = this->getNormalArea();
+  double temp =0;
+  temp = areaCalc.calculateArea(constantArea,angleCut);
+  
+  mConstantAreaAngle = areaCalc.getConstantAreaAngle();
+
+  mTotalArea  = areaCalc.getTotalArea();
+  mTotalAngle = areaCalc.getTotalAngle();
+  mTotalAreaOnPadPlane  = areaCalc.getTotalAreaOnPadPlane();
   mTotalAngleOnPadPlane = areaCalc.getTotalAngleOnPadPlane();
-  mConstantAreaAngle    = areaCalc.getConstantAreaAngle();  
-  totArea               = areaCalc.getTotalArea();
+  mTotalAreaOnActivePadPlane  = areaCalc.getTotalAreaOnActivePadPlane();
+  mTotalAngleOnActivePadPlane = areaCalc.getTotalAngleOnActivePadPlane();
 
-  return area;
+  mTotalConstantArea = areaCalc.getTotalConstantArea();
+  mTotalConstantAngle = areaCalc.getTotalConstantAngle();
+  mTotalConstantAreaOnPadPlane  = areaCalc.getTotalConstantAreaOnPadPlane();
+  mTotalConstantAngleOnPadPlane = areaCalc.getTotalConstantAngleOnPadPlane();
+  mTotalConstantAreaOnActivePadPlane  = areaCalc.getTotalConstantAreaOnActivePadPlane();
+  mTotalConstantAngleOnActivePadPlane = areaCalc.getTotalConstantAngleOnActivePadPlane();
+  
+  if (mMonteCarloSwitch) {
+    areaCalc.getMonteCarloArea(angleCut,mMonteCarloArea,10000); 
+    mMonteCarloPoints = areaCalc.getMonteCarloPoints();
+  }
+
+  //
+  // clear vector of points
+  //
+  vectorOfPtsToDraw.clear();
+  vectorOfPtsToDraw.resize(0);
+  vectorOfPtsToDraw  = areaCalc.getPtsToDraw();
+
+ 
+  return mTotalArea;
+}
+
+void StRichRingCalculator::drawRingPoints(bool flag) {
+  mDrawRingPoints = flag;
+}
+
+TArrayD StRichRingCalculator::getMonteCarloArea() {
+  return mMonteCarloArea;
+}
+
+
+vector<StThreeVectorF>&  StRichRingCalculator::getMonteCarloPoints() {
   return mMonteCarloPoints;
 }
 
@@ -170,8 +219,54 @@ void StRichRingCalculator::clear() {
   closestInnerRingPoint = temp;
   closestOuterRingPoint = temp;
   closestMeanRingPoint  = temp;
-vector<StThreeVectorF >&
-StRichRingCalculator::getPtsToDraw() { return vectorOfPtsToDraw;}
+   
+  mMeanPathInRadiator = 0.0;
+  mMeanPathInQuartz   = 0.0;  
+}
+
+vector<StRichAreaSegment >& StRichRingCalculator::getPtsToDraw() { return vectorOfPtsToDraw;}
+
+
+
+double StRichRingCalculator::getNormalArea() {
+
+  double normalArea=0;
+
+
+  if (mInnerRing && mInnerRing->getParticleType() &&
+      mInnerRing->getTrack() &&  mInnerRing->getTrack()->fastEnough( mInnerRing->getParticleType())) {
+
+    double mass = mInnerRing->getParticleType()->mass();
+    double p    = mInnerRing->getTrack()->getMomentum().mag();
+    double beta = p/sqrt(p*p + mass*mass);
+
+    // detector parameters used in light propagation to pad plane depth
+    double depthRad  = mRichGeometryDb->radiatorDimension().z()*centimeter;  
+    double depthQuar = mRichGeometryDb->quartzDimension().z()*centimeter;
+    double depthProx = mRichGeometryDb->proximityGap()*centimeter;
+    
+    double freon[2];
+    freon[0] = mRichMaterialsDb->indexOfRefractionOfC6F14At(mRichMaterialsDb->innerWavelength());
+    freon[1] = mRichMaterialsDb->indexOfRefractionOfC6F14At(mRichMaterialsDb->outerWavelength());
+    
+    double quartz[2];
+    quartz[0] = mRichMaterialsDb->indexOfRefractionOfQuartzAt(mRichMaterialsDb->innerWavelength());
+    quartz[1] = mRichMaterialsDb->indexOfRefractionOfQuartzAt(mRichMaterialsDb->outerWavelength());
+    
+    double methane[2];
+    methane[0] = mRichMaterialsDb->indexOfRefractionOfMethaneAt(mRichMaterialsDb->innerWavelength());
+    methane[1] = mRichMaterialsDb->indexOfRefractionOfMethaneAt(mRichMaterialsDb->outerWavelength());
+    
+    
+    double radii[2];
+    for (int i=0;i<2;i++) {
+      double cAngle = acos(1.0/(freon[i]*beta));
+      double qAngle = asin((freon[i]/quartz[i])*sin(cAngle));
+      double mAngle = asin((quartz[i]/methane[i])*sin(qAngle));
+      if (i==0) {radii[i] = depthQuar*tan(qAngle) + depthProx*tan(mAngle);}
+      else {radii[i] = depthRad*tan(cAngle) + depthQuar*tan(qAngle) + depthProx*tan(mAngle);}
+    }
+    normalArea = M_PI*(radii[1]*radii[1] - radii[0]*radii[0]);
   }
 
   return normalArea;
