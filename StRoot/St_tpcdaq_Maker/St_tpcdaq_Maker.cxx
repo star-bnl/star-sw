@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.32  1999/08/07 16:44:37  ward
+// Default ctor from Yuri.
+//
 // Revision 1.31  1999/07/29 23:07:05  ward
 // Fixed bug in noise suppression.  Put gConfig back.
 //
@@ -127,18 +130,13 @@ ClassImp(St_tpcdaq_Maker)
 char gDAQ; /* This is TRUE if using DAQ, FALSE if using Trs. */
 StDAQReader *victorPrelim;
 StTPCReader *victor;
-char gConfig[50];
 int gSector;
 // obsolete since we are moving to StIOMaker ZeroSuppressedReader *gZsr;  
 // obsolete since we are moving to StIOMaker DetectorReader *gDetectorReader;
 
-St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name,daqOrTrs) 
+St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
-  if(daqOrTrs) {
-    printf("St_tpcdaq_Maker constructor, getting data from %s.\n",daqOrTrs);
-    strcpy(gConfig,daqOrTrs);
-  } else strcpy(gConfig,"error44u");
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -157,13 +155,13 @@ Int_t St_tpcdaq_Maker::Init() {
                             "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
                             "pix vs ADC value" , 255 , 1.0 , 255.0 );
-  if(!strcmp(gConfig,"daq")) { // Update this for embedding.
+  if(!strcmp(GetConfig(),"daq")) { // Update this for embedding.
     gDAQ=7; 
     herb=GetDataSet("StDAQReader");
     assert(herb);
     victorPrelim=(StDAQReader*)(herb->GetObject());
     assert(victorPrelim);
-  } else if(!strcmp(gConfig,"trs")) {
+  } else if(!strcmp(GetConfig(),"trs")) {
     gDAQ=0;
   } else {
      PP"-----------------------------------------------------------------\n");

@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.9 1999/07/29 00:49:54 fisyak Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.10 1999/08/07 16:44:37 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.10  1999/08/07 16:44:37  ward
+// Default ctor from Yuri.
+//
 // Revision 1.9  1999/07/29 00:49:54  fisyak
 // Add default ctor
 //
@@ -64,6 +67,7 @@ typedef struct {
 #endif
 class St_tpcdaq_Maker : public StMaker {
  private:
+   Char_t            *gConfig; //!
    StTpcRawDataEvent *mEvent; //!
    void MakeHistograms();
 #ifdef TRS_SIMPLE
@@ -115,12 +119,17 @@ class St_tpcdaq_Maker : public StMaker {
    int getSequences(int whichPadRow,int pad,int *nseq,StSequence **seqList);
    void SetNoiseEliminationStuff(tpcdaq_noiseElim*);
    void WriteStructToScreenAndExit(tpcdaq_noiseElim*);
+   void SetConfig(Char_t *conf) {gConfig = conf;  
+     printf("St_tpcdaq_Maker::SetConfig, getting data from %s.\n",gConfig);
+   }
+   Char_t   *GetConfig() {return gConfig;}
+   virtual void SetMode(Int_t mode=0) {m_Mode=mode; mode ? SetConfig("trs"): SetConfig("daq");} 
    virtual       ~St_tpcdaq_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.9 1999/07/29 00:49:54 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.10 1999/08/07 16:44:37 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
