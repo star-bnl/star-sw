@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.35  1998/12/04 01:17:30  fisyak
+#  fix for fortran source in StRoot
+#
 #  Revision 1.34  1998/12/02 20:42:37  perev
 #  cleanup
 #
@@ -181,7 +184,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/02 20:42:37 $ 
+#           Last modification $Date: 1998/12/04 01:17:30 $ 
 #  default setings
 # Current Working Directory
 #
@@ -229,6 +232,7 @@ ifndef INP_DIR
   INP_DIR := $(CWD)
 endif           
 NAME    := $(notdir $(INP_DIR))
+MAKEFLG := $(filter-out w, $(MAKEFLAGS))
 # define level pams -> domain -> package from *.idl and *.g files
 #======================= level ===========================
 PAMS    := $(findstring /pams,$(INP_DIR))
@@ -366,41 +370,42 @@ St_%_Maker:
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/St_$(STEM)_Maker  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/$(SO_SUBDIR)/St_$(STEM)_Maker.$(So)
 endif
 %_all:  $(BASE)
-	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) $(MAKEFLG) 
 test:  $(BASE) $(addsuffix _test, $(SUBDIRS))
 %_test: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) test $(MAKEFLG) 
 clean: $(addsuffix _clean, $(SUBDIRS))
 %_clean: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKEFLG) 
 clean_lib: $(addsuffix _clean_lib, $(SUBDIRS))
 %_clean_lib: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_lib $(MAKEFLG) 
 clean_share: $(addsuffix _clean_share, $(SUBDIRS))
 %_clean_share: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean_share $(MAKEFLG) 
 clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 %_clean_obj: 
-	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKFLAGS) 
+	$(MAKE)  -f $(Makeloop) -C $(STEM) clean $(MAKEFLG) 
 else # I have no subdirs
 PKG     := $(notdir $(shell $(PWD)))
 GEN_DIR := $(ROOT_DIR)/.share/$(PKG)
 GEN_TAB := $(DIR_GEN)/tables
 .PHONY               : default clean clean_lib clean_share clean_obj test
 all:
-	$(MAKE)  -f $(MakePam) $(MAKFLAGS)
+	$(MAKE)  -f $(MakePam) $(MAKEFLG)
 ifndef NOROOT
-	$(MAKE)  -f $(MakeDll) $(MAKFLAGS) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
+	$(MAKE)  -f $(MakeDll) $(MAKEFLG) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
  endif
-clean:;      $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean
-clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_lib
-clean_share:;$(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_share
-clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKFLAGS)  clean_obj
-clean_test:; $(MAKE)  -f $(MakePam) $(MAKFLAGS)  test
+clean:;      $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean
+clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_lib
+clean_share:;$(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_share
+clean_obj:;  $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_obj
+clean_test:; $(MAKE)  -f $(MakePam) $(MAKEFLG)  test
 endif
 endif
 test: test_level
 test_level:
+	@echo "MAKEFLG  = |"$(MAKEFLG)"|"
 	@echo "PWD       = |"$(PWD)"|"
 	@echo "LEVEL     = |"$(LEVEL)"|"
 	@echo "SUBDIRS   = |"$(SUBDIRS)"|"

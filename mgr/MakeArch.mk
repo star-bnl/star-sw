@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.48  1998/12/04 01:17:29  fisyak
+#  fix for fortran source in StRoot
+#
 #  Revision 1.47  1998/12/02 20:42:10  perev
 #  cleanup
 #
@@ -122,9 +125,10 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/02 20:42:10 $ 
+#             Last modification $Date: 1998/12/04 01:17:29 $ 
 #. default setings
 
+MAKE  := gmake
 PWD   := pwd
 GETCWD:= getcwd
 UNAME := uname
