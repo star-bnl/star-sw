@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.66 2004/08/10 12:42:10 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.67 2004/09/03 20:36:22 perev Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.67  2004/09/03 20:36:22  perev
+// Big LeakOff + mem optimisation
+//
 // Revision 1.66  2004/08/10 12:42:10  jcs
 // move DEBUGFILE and tracking method define statements from .h to .cxx
 //
@@ -292,8 +295,8 @@
 #include <Stiostream.h>
 #include <math.h>
 
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
+#include "TDataSet.h"
+#include "TDataSetIter.h"
 #include "StSoftwareMonitor.h"
 #include "StFtpcSoftwareMonitor.h"
 
@@ -334,7 +337,7 @@ StFtpcTrackMaker::~StFtpcTrackMaker()
 Int_t StFtpcTrackMaker::InitRun(Int_t run) {
 
   // get ftpc calibration db
-  St_DataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
+  TDataSet *ftpcCalibrationsDb = GetDataBase("Calibrations/ftpc");
 
   if (!ftpcCalibrationsDb){
     gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Calibrations" << endm;
@@ -343,7 +346,7 @@ Int_t StFtpcTrackMaker::InitRun(Int_t run) {
     return kStWarn;
   }
 
-  St_DataSetIter ftpcCalibrations(ftpcCalibrationsDb);
+  TDataSetIter ftpcCalibrations(ftpcCalibrationsDb);
 
   // get run dependend tracking parameters from database
   StFtpcTrackingParams::Instance(kTRUE, 
@@ -359,12 +362,12 @@ Int_t StFtpcTrackMaker::Init()
   // Initialisation.
 
   // get ftpc parameters
-  St_DataSet *ftpcParsDb = GetInputDB("ftpc");
+  TDataSet *ftpcParsDb = GetInputDB("ftpc");
   assert(ftpcParsDb);
-  St_DataSetIter ftpcPars(ftpcParsDb);
+  TDataSetIter ftpcPars(ftpcParsDb);
 
   // get ftpc geometry
-  St_DataSet *ftpcGeometryDb = GetDataBase("Geometry/ftpc");
+  TDataSet *ftpcGeometryDb = GetDataBase("Geometry/ftpc");
 
   if (!ftpcGeometryDb){
     gMessMgr->Warning() << "StFtpcTrackMaker::Error Getting FTPC database: Geometry" << endm;
@@ -373,7 +376,7 @@ Int_t StFtpcTrackMaker::Init()
     return kStWarn;
   }
 
-  St_DataSetIter ftpcGeometry(ftpcGeometryDb);
+  TDataSetIter ftpcGeometry(ftpcGeometryDb);
 
   // get tracking parameters from database
   StFtpcTrackingParams::Instance(Debug(),
@@ -450,7 +453,6 @@ Int_t StFtpcTrackMaker::Init()
 
   return StMaker::Init();
 }
-
 //_____________________________________________________________________________
 Int_t StFtpcTrackMaker::Make()
 {
@@ -471,26 +473,26 @@ Int_t StFtpcTrackMaker::Make()
 
   StEvent *event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );    
 
-  StFtpcVertex *vertex = new StFtpcVertex(); // create vertex (all parameters set to 0)
+  StFtpcVertex vertex; // create vertex (all parameters set to 0)
 
   // Use Primary vertex if it exists
   StPrimaryVertex *vtx = 0;
 
   if ((vtx = event->primaryVertex(0))) {        
     if (vtx->type() == kEventVtxId && vtx->flag() == 1) {
-      *vertex = StFtpcVertex(vtx);	  
+      vertex = StFtpcVertex(vtx);	  
     }       
   } 
 
-  if (vertex->GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
+  if (vertex.GetIFlag() == 0) { // Otherwise use TPC preVertex if it exists
 
     //pointer to preVertex dataset
-    St_DataSet *preVertex = GetDataSet("preVertex");
+    TDataSet *preVertex = GetDataSet("preVertex");
     
     if (preVertex) {
       
       //iterator
-      St_DataSetIter preVertexI(preVertex);
+      TDataSetIter preVertexI(preVertex);
       
       //pointer to preVertex
       St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
@@ -501,33 +503,33 @@ Int_t StFtpcTrackMaker::Make()
 	
 	if (preVtxPtr->iflag == 101) {
 
-	  *vertex = StFtpcVertex(preVtxPtr);
+	  vertex = StFtpcVertex(preVtxPtr);
 	  break;
 	}
       }
     }  // end of if (preVertex)
   } // end of else (preVertex)
   
-  if (Int_t problem = vertex->CheckVertex()) {
+  if (Int_t problem = vertex.CheckVertex()) {
     return problem;
   }
 
-  StFtpcConfMapper *tracker = new StFtpcConfMapper(ftpcHits, vertex, kTRUE);
+  StFtpcConfMapper tracker(ftpcHits, &vertex, kTRUE);
   
   // tracking 
   if (StFtpcTrackingParams::Instance()->MagFieldFactor() == 0.) {
-    tracker->NoFieldTracking();
+    tracker.NoFieldTracking();
   }
   
   else {
 #ifdef TWOCYCLETRACKING
-    tracker->TwoCycleTracking();
+    tracker.TwoCycleTracking();
     if (Debug()) {
        gMessMgr->Info() << "StFtpcTrackMaker: Using TwoCycleTracking"<<endm;
      }       
 #endif    
 #ifdef LASERTRACKING
-    tracker->LaserTracking();
+    tracker.LaserTracking();
     if (Debug()) {
        gMessMgr->Info() << "StFtpcTrackMaker: Using LaserTracking"<<endm;
      }       
@@ -535,18 +537,18 @@ Int_t StFtpcTrackMaker::Make()
   }
   
   // for the line above you have these possibilities
-  //tracker->MainVertexTracking();
-  //tracker->FreeTracking();
-  //tracker->TwoCycleTracking();
-  //tracker->NoFieldTracking();
-  //tracker->LaserTracking();
+  //tracker.MainVertexTracking();
+  //tracker.FreeTracking();
+  //tracker.TwoCycleTracking();
+  //tracker.NoFieldTracking();
+  //tracker.LaserTracking();
   
   // coordinate transformation due to rotation and shift of TPC with respect to the magnet 
   // (= global coordinate system). 
   // Since the simulator incorporates these transformations, the distinction between simulated
   // and real events isn't necessary any more. 
       
-  TObjArray *clusters = tracker->GetClusters();
+  TObjArray *clusters = tracker.GetClusters();
   StFtpcPoint *point;
     
   // loop over all clusters
@@ -557,10 +559,10 @@ Int_t StFtpcTrackMaker::Make()
   }
 
   // momentum fit, dE/dx calculation
-  tracker->GlobalFitAnddEdx();
+  tracker.GlobalFitAnddEdx();
 
-  if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
-    tracker->EstimateVertex(tracker->GetVertex(), 1);
+  if (tracker.GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
+    tracker.EstimateVertex(tracker.GetVertex(), 1);
   }
 
   StFtpcSoftwareMonitor* ftpcMon = NULL;
@@ -571,51 +573,50 @@ Int_t StFtpcTrackMaker::Make()
        event->softwareMonitor()->setFtpcSoftwareMonitor(ftpcMon);
      }      
   }       	       
-  FillMonSoftFtpc(event,tracker,ftpcMon);
+  FillMonSoftFtpc(event,&tracker,ftpcMon);
 
-  // write global tracks, do primary fit, write primary tracks
-  StFtpcTrackToStEvent *trackToStEvent = new StFtpcTrackToStEvent();
-  trackToStEvent->FillEvent(event, tracker->GetTracks());  
-  tracker->PrimaryFit();
-  trackToStEvent->FillEventPrimaries(event, tracker->GetTracks());
-  delete trackToStEvent;
-
+  {
+    // write global tracks, do primary fit, write primary tracks
+    StFtpcTrackToStEvent trackToStEvent;
+    trackToStEvent.FillEvent(event, tracker.GetTracks());  
+    tracker.PrimaryFit();
+    trackToStEvent.FillEventPrimaries(event, tracker.GetTracks());
+  }
   if (Debug()) {
-    gMessMgr->Message("", "I", "OS") << "Total time consumption         " << tracker->GetTime() << " s." << endm;
+    gMessMgr->Message("", "I", "OS") << "Total time consumption         " << tracker.GetTime() << " s." << endm;
     StFtpcTrackingParams::Instance()->PrintParams();
-    tracker->TrackingInfo();
+    tracker.TrackingInfo();
   }
   
   else {
-    tracker->TrackingInfo();
+    tracker.TrackingInfo();
   }
 
 #ifdef DEBUGFILE
   Double_t vertexPos[6] = {0.,0.,0.,0.,0.,0.};
   
   cout<<"LASER : No FTPC to global transformation !!!"<<endl;
-  
-  StFtpcClusterDebug *cldebug=new StFtpcClusterDebug((int) GetRunNumber(),(int) GetEventNumber());
-  //cout<<"Debug fill tracktree"<<endl;
-  cldebug->filltracktree(tracker->GetTracks(),vertexPos);
-  //if (cldebug->drawvertexhisto!=0)
-  //   cldebug->drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
-  
-  delete cldebug;
+  {  
+    StFtpcClusterDebug cldebug((int) GetRunNumber(),(int) GetEventNumber());
+    //cout<<"Debug fill tracktree"<<endl;
+    cldebug.filltracktree(tracker.GetTracks(),vertexPos);
+    //if (cldebug.drawvertexhisto!=0)
+    //   cldebug.drawvertex(m_vertex_east,m_vertex_west,m_vtx_pos);
+  }
 #endif  
   
   /*
   // Track Display
   
   // Uncomment this block if you want to see (I mean see!) the found tracks.
-  
-  StFtpcDisplay *display = new StFtpcDisplay(tracker->GetClusters(), tracker->GetTracks());
-  //display->TrackInfo();
-  //display->Info();
-  //display->ShowClusters();
-  //display->ShowTracks();
-  display->WriteData("ftpc_display.root");
-  delete display;
+  {
+    StFtpcDisplay display(tracker.GetClusters(), tracker.GetTracks());
+    //display.TrackInfo();
+    //display.Info();
+    //display.ShowClusters();
+    //display.ShowTracks();
+    display.WriteData("ftpc_display.root");
+  }
   */
   
   /*
@@ -624,39 +625,38 @@ Int_t StFtpcTrackMaker::Make()
   // Uncomment this block to get information about the quality 
   // of the found tracks in comparison to the simulated input event.
 
-  St_DataSet *ftpc_data = GetDataSet("ftpc_hits");
+  TDataSet *ftpc_data = GetDataSet("ftpc_hits");
 
   if (!ftpc_data) {
     gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
     return kStWarn;
   }
 
-  StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, 
+  {StFtpcTrackEvaluator eval                            (geant, 
 							ftpc_data, 
-							tracker->GetVertex(), 
-							tracker->GetClusters(), 
-							tracker->GetTracks(), 
+							tracker.GetVertex(), 
+							tracker.GetClusters(), 
+							tracker.GetTracks(), 
 							"ftpc_evaluator.root", 
 							"RECREATE");
     
   // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
   // evaluated by the TrackEvaluator.  
-  //eval->ShowTracks();
-
-  delete eval;
+  //eval.ShowTracks();
+  }
   */
   
-  if (tracker->GetNumberOfTracks() > 0) { // only done when some tracks found
-    MakeHistograms(tracker);
+  if (tracker.GetNumberOfTracks() > 0) { // only done when some tracks found
+    MakeHistograms(&tracker);
   }
   
-  delete tracker;
-  delete vertex;
   
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) completed." << endm;
   
   return kStOK;;
 }
+
+
 
 //_____________________________________________________________________________
 void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
@@ -828,7 +828,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.66 2004/08/10 12:42:10 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.67 2004/09/03 20:36:22 perev Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {

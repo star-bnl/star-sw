@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.25 2004/02/12 19:38:46 oldi Exp $
+// $Id: StFtpcClusterMaker.h,v 1.26 2004/09/03 20:35:04 perev Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.26  2004/09/03 20:35:04  perev
+// Big LeakOff + mem optimisation
+//
 // Revision 1.25  2004/02/12 19:38:46  oldi
 // Removal of intermediate tables.
 //
@@ -127,7 +130,7 @@ class TObjArray;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.25 2004/02/12 19:38:46 oldi Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.26 2004/09/03 20:35:04 perev Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -155,6 +158,8 @@ class StFtpcClusterMaker : public StMaker {
    StFtpcHitCollection* mFtpcHitColl;    //!
    TObjArray*           mHitArray;       //!
   
+
+   char             m_ThBeg[1];
    TH1F            *m_cluster_radial_West; //! radial position of clusters in FTPC West
    TH1F            *m_cluster_radial_East; //! radial position of clusters in FTPC East
    TH1F            *m_chargestep_West; //! FTPC West charge step
@@ -175,6 +180,7 @@ class StFtpcClusterMaker : public StMaker {
    TH1F            *m_maxadc_East;
    TH1F            *m_charge_West;
    TH1F            *m_charge_East;
+   char             m_ThEnd[1];
 
  public: 
                   StFtpcClusterMaker(const char *name="ftpc_hits");
@@ -184,7 +190,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.25 2004/02/12 19:38:46 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.26 2004/09/03 20:35:04 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };

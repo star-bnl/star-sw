@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.31 2004/02/12 19:37:09 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.32 2004/09/03 20:36:22 perev Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.32  2004/09/03 20:36:22  perev
+// Big LeakOff + mem optimisation
+//
 // Revision 1.31  2004/02/12 19:37:09  oldi
 // *** empty log message ***
 //
@@ -198,7 +201,6 @@ StFtpcConfMapper::StFtpcConfMapper()
 
   mLaser = (Bool_t)kFALSE;
 
-  mHit     = 0;
   mVolume  = 0;
 
   mVertexConstraint = (Bool_t)kTRUE;
@@ -211,7 +213,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *inputHits, MIntArray *good_hits, S
 {
   // Constructor to fill in evaluated hits.
 
-  if (bench) {
+  if (mBench) {                 
     mBench->Start("init");
   }
 
@@ -239,6 +241,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *inputHits, MIntArray *good_hits, S
   mClustersUnused = n_goodclusters;
   mBadClusters = 0;
 
+//VP   Dangerous play. mHit already set in base class and here reseting again
   mHit = new TObjArray(n_goodclusters);    // create TObjArray
   mHitsCreated = (Bool_t)kTRUE;
   Int_t good_hits_counted = 0;
@@ -247,8 +250,8 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *inputHits, MIntArray *good_hits, S
     StFtpcConfMapPoint *point = (StFtpcConfMapPoint*)inputHits->At(i);
 
     if (good_hits->At(i) == 1) {
-      mHit->AddAt(new StFtpcConfMapPoint(point, mVertex), good_hits_counted);
-      StFtpcConfMapPoint* hit = (StFtpcConfMapPoint *)mHit->At(good_hits_counted);
+      StFtpcConfMapPoint *hit = new StFtpcConfMapPoint(point, mVertex);
+      mHit->AddAt(hit, good_hits_counted);
       hit->SetHitNumber(i);
       if (hit->GetUnusableForTrackingFlag()) mBadClusters++;
       good_hits_counted++;
@@ -283,7 +286,7 @@ StFtpcConfMapper::StFtpcConfMapper(TObjArray *hits, StFtpcVertex *vertex, Bool_t
 {
   // Constructor which needs a ClonesArray of hits as an input.
 
-  if (bench) { 
+  if (mBench) {                
     mBench->Start("init");
   }
 
@@ -339,7 +342,7 @@ StFtpcConfMapper::~StFtpcConfMapper()
 
   if (mVolume) {
     mVolume->Delete();
-    delete mVolume;
+    delete mVolume; mVolume=0;
   }
 }
 
@@ -1205,8 +1208,8 @@ void StFtpcConfMapper::MergeSplitTracks(StFtpcTrack *t1, StFtpcTrack *t2)
   TObjArray *t1_points = t1->GetHits();
   TObjArray *t2_points = t2->GetHits();
 
-  mTrack->AddAt(new StFtpcTrack(new_track_number), new_track_number);
-  StFtpcTrack *track = (StFtpcTrack *)mTrack->At(new_track_number);
+  StFtpcTrack *track = new StFtpcTrack(new_track_number);
+  mTrack->AddAt(track, new_track_number);
 
   TObjArray *trackpoint = track->GetHits();
   trackpoint->Expand(mMaxFtpcRow);
@@ -1318,7 +1321,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   // This function takes as input a point in the Ftpc which acts as starting point for a new track.
   // It forms tracklets then extends them to tracks.
 
-  Double_t *coeff = 0;
+  Double_t *coeff = 0,coeffT[6];
   //Double_t chi2[2];
 
   StFtpcConfMapPoint *closest_hit = 0;
@@ -1327,9 +1330,8 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
   Int_t point;
   Int_t tracks = GetNumberOfTracks();
   if (tracks >= mTrack->GetSize()) mTrack->Expand(mTrack->GetSize()+1000);
-
-  mTrack->AddAt(new StFtpcTrack(tracks), tracks);
-  track = (StFtpcTrack *)mTrack->At(tracks);
+  track = new StFtpcTrack(tracks);
+  mTrack->AddAt(track, tracks);
   TObjArray *trackpoint = track->GetHits();
 
   track->AddPoint(hit);
@@ -1392,7 +1394,7 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       // create tracks 
       for (point = mTrackletLength[mVertexConstraint]; point < mMaxFtpcRow; point++) {
 	
-	if (!coeff) coeff = new Double_t[6];
+	if (!coeff) coeff = coeffT;
 	//Double_t chi_circ = track->GetChi2Circle();
 	//Double_t chi_len  = track->GetChi2Length();
 	
@@ -1447,7 +1449,6 @@ void StFtpcConfMapper::CreateTrack(StFtpcConfMapPoint *hit)
       }
       
       // cleanup
-      delete[] coeff; 
       coeff = 0;
     } 
   } 	
@@ -1730,7 +1731,7 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
 
   Int_t point;
   Int_t number_of_points = track->GetNumberOfPoints();
-  Double_t *coeff = 0;
+  Double_t *coeff = 0,coeffT[6];
 
   StFtpcConfMapPoint *closest_hit;
   StFtpcConfMapPoint *hit;
@@ -1770,7 +1771,7 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
 
 	else { // usual event
 
-	  if (!coeff) coeff = new Double_t[6];
+	  if (!coeff) coeff = coeffT;
 	  StraightLineFit(track, coeff);
 	  
 	  if ((closest_hit = GetNextNeighbor(hit, coeff, (Bool_t)direction))) {
@@ -1794,10 +1795,7 @@ Bool_t StFtpcConfMapper::TrackExtension(StFtpcTrack *track)
   }    
 
   // cleanup
-  if (coeff) {
-    delete[] coeff; 
-    coeff = 0;
-  }
+  coeff = 0;
 
   if (track->GetNumberOfPoints() - number_of_points) {
     

@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.cc,v 1.33 2004/05/07 14:58:22 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.34 2004/09/03 20:36:23 perev Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.34  2004/09/03 20:36:23  perev
+// Big LeakOff + mem optimisation
+//
 // Revision 1.33  2004/05/07 14:58:22  oldi
 // Deletion of track array added again, since it doesn't go into a DataSet anymore.
 // Minor clean-ups.
@@ -153,6 +156,8 @@
 //----------Copyright:     &copy MDO Production 1999
 
 #include <math.h>
+#include "TArrayD.h"
+#include "TArrayI.h"
 #include "StFtpcTracker.hh"
 #include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
@@ -185,8 +190,9 @@ StFtpcTracker::StFtpcTracker()
   mHit    = 0;
   mTrack  = 0;
 
-  mHitsCreated = (Bool_t)kFALSE;
+  mHitsCreated   = (Bool_t)kFALSE;
   mVertexCreated = (Bool_t)kFALSE;
+  mTrackCreated  = (Bool_t)kFALSE;
 
   mMaxDca = 100.;
 }
@@ -208,7 +214,7 @@ StFtpcTracker::StFtpcTracker(TObjArray *hits, StFtpcVertex *vertex, Bool_t bench
   mMaxDca = max_Dca;
   mTrack = new TObjArray(2000);
   mTrack->SetOwner(kTRUE);
-
+  mTrackCreated = 1;
   mVertex = vertex;
   mVertexCreated = (Bool_t)kFALSE;
 
@@ -228,8 +234,9 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, TObjArray *hit, TObjArray *tr
 
   mVertex = vertex;
   mHit = hit;
-  mHitsCreated = (Bool_t) kFALSE;
+  mHitsCreated   = (Bool_t) kFALSE;
   mVertexCreated = (Bool_t) kFALSE;
+  mTrackCreated  = (Bool_t) kFALSE;
   mTrack = track;
   mMaxDca = max_Dca;
 
@@ -243,22 +250,22 @@ StFtpcTracker::~StFtpcTracker()
 {
   // delete everything
 
-  if (mTrack) {	 
+  if (mTrack && mTrackCreated) {	 
     mTrack->Delete();	 
-    delete mTrack;	 
+    delete mTrack; mTrack=0;	 
   }
 
-  if (mHitsCreated) {
+  if (mHit && mHitsCreated) {
     mHit->Delete();
-    delete mHit;
+    delete mHit; mHit=0;
   }
 
   if (mVertex && mVertexCreated) {
-    delete mVertex;
+    delete mVertex; mVertex=0;
   }
 
   if (mBench) {
-    delete mBench;
+    delete mBench; mBench=0;
   }
  
   delete mVertexEast;
@@ -306,7 +313,7 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 					   Char_t sector, UChar_t iterations)
 {
   StFtpcVertex v = *vertex;
-  TObjArray *tracks = new TObjArray[GetNumberOfTracks()];
+  TObjArray tracks(GetNumberOfTracks());
 
   for (Int_t tt = 0; tt < GetNumberOfTracks(); tt++) {
     // loop over all tracks
@@ -316,13 +323,13 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
     if (track->GetSector() == sector) {
       // fill matching tracks to new array
 
-      tracks->AddLast(track);
+      tracks.AddLast(track);
     }
   }
 
   for (Int_t i = 0; i < iterations; i++) {
 
-    StFtpcVertex v_new(tracks, &v, hemisphere);
+    StFtpcVertex v_new(&tracks, &v, hemisphere);
     v = v_new;
   }
 
@@ -339,7 +346,7 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 {
   StFtpcVertex v = *vertex;
 
-  TObjArray *tracks = new TObjArray[GetNumberOfTracks()];
+  TObjArray tracks(GetNumberOfTracks());
 
   for (Int_t tt = 0; tt < GetNumberOfTracks(); tt++) {
     // loop over all tracks
@@ -350,17 +357,15 @@ StFtpcVertex StFtpcTracker::EstimateVertex(StFtpcVertex *vertex, Char_t hemisphe
 	track->GetMeanAlpha() >= lowAngle && track->GetMeanAlpha() < highAngle) {
       // fill matching tracks to new array
 
-      tracks->AddLast(track);
+      tracks.AddLast(track);
     }
   }
 
   for (Int_t i = 0; i < iterations; i++) {
-    StFtpcVertex v_new(tracks, &v, hemisphere);
+    StFtpcVertex v_new(&tracks, &v, hemisphere);
     v = v_new;
   }
-  
-  delete tracks;
-  
+    
   return v;
 }
 
@@ -382,9 +387,10 @@ void StFtpcTracker::CalcEnergyLoss()
   Int_t all_hit;          // total number of hits
   Int_t acc_hit;          // accepted number of hits
   
-  Double_t *dedx_arr;     // tmp array to store delta_E of hits on a track
+  Double_t *dedx_arr=0;   // tmp array to store delta_E of hits on a track
+  TArrayD dedx_arrT;
   Int_t *index_arr = 0;
-  
+  TArrayI index_arrT;
   StFtpcTrack *track;     // track
   StFtpcPoint *hit;       // hit
   
@@ -394,7 +400,8 @@ void StFtpcTracker::CalcEnergyLoss()
   Double_t dedx_mean;
   
   // variables for full chamber truncation 
-  Double_t *weighted;
+  Double_t *weighted=0;
+  TArrayD weightedT;
   Double_t average_dedx;
   Int_t n_tracked;
   Int_t n_untracked;
@@ -419,12 +426,12 @@ void StFtpcTracker::CalcEnergyLoss()
   n_tracked = 0;
   
   // tmp array to store delta_E of hits on a track 
-  dedx_arr = new Double_t[StFtpcTrackingParams::Instance()->MaxHit()];
-  index_arr = new Int_t[StFtpcTrackingParams::Instance()->MaxHit()];
-  
-  for (int go = 0; go < StFtpcTrackingParams::Instance()->MaxHit(); go++) {
-    dedx_arr[go] = 0.;
-  }
+  int nMaxHit = StFtpcTrackingParams::Instance()->MaxHit();
+  if (dedx_arrT.GetSize()<nMaxHit) dedx_arrT.Set(nMaxHit);
+  dedx_arrT.Reset();
+  dedx_arr  = dedx_arrT.GetArray();;
+  if (index_arrT.GetSize()<nMaxHit) index_arrT.Set(nMaxHit);
+  index_arr = index_arrT.GetArray();
 
   // loop over all tracks inside the FTPC for each track 
   // possible to limit number of tracks for processing 
@@ -548,15 +555,13 @@ void StFtpcTracker::CalcEnergyLoss()
 
   if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
     gMessMgr->Message("", "I", "OS") << "Using truncated mean over whole chamber method by R. Witt." << endm;
+    int nClusters = GetNumberOfClusters();
+    if (weightedT.GetSize() <nClusters)  weightedT.Set(nClusters);
+    weighted =weightedT.GetArray();
+    if (index_arrT.GetSize()<nClusters) index_arrT.Set(nClusters);
+    index_arr = index_arrT.GetArray();
     
-    weighted = new Double_t[GetNumberOfClusters()];
-    if (index_arr) delete[] index_arr; // This line was missing; new index_arr was invoked twice
-    index_arr = new Int_t[GetNumberOfClusters()];
-    
-    for(ihit=0; ihit<GetNumberOfClusters(); ihit++) {
-      weighted[ihit] = 0;
-      index_arr[ihit] = -2;
-    }
+    weightedT.Reset();index_arrT.Reset(-2);
     
     average_dedx=0;
     
@@ -685,17 +690,13 @@ void StFtpcTracker::CalcEnergyLoss()
       track->SetNumdEdxHits(acc_hit);
     }
     
-    delete[] weighted;
   } 
 
   if (StFtpcTrackingParams::Instance()->DebugLevel() < 11) {
     gMessMgr->Message("", "I", "OS") << " total charges in 2 FTPCs " << total_charge << endm;
     gMessMgr->Message("", "I", "OS") << " processed tracks = " << itrk_ok << endm;
   }
-  
-  delete[] dedx_arr;    // release the dedx_arr array
-  delete[] index_arr;   // release the dedx_arr array
-    
+      
   return;
 }
 
@@ -734,7 +735,7 @@ void StFtpcTracker::Sorter(Double_t *arr, Int_t *index, Int_t len)
 Int_t StFtpcTracker::Fit(Bool_t primary_fit)
 {
   if (mTrack) {
-    StFtpcTrack *track;
+    StFtpcTrack *track=0;
     
     for (Int_t i=0; i<mTrack->GetEntriesFast(); i++) {
       track = (StFtpcTrack *)mTrack->At(i);
@@ -767,9 +768,10 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     Int_t all_hit;          // total number of hits
     Int_t acc_hit;          // accepted number of hits
   
-    Double_t *dedx_arr;     // tmp array to store delta_E of hits on a track
+    Double_t *dedx_arr=0;     // tmp array to store delta_E of hits on a track
+    TArrayD dedx_arrT;
     Int_t *index_arr;
-  
+    TArrayI  index_arrT; 
     StFtpcTrack *track;     // track
     StFtpcPoint *hit;       // hit
   
@@ -779,7 +781,8 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     Double_t dedx_mean;
   
     // variables for full chamber truncation 
-    Double_t *weighted;
+    TArrayD weightedT;
+    Double_t *weighted=0;
     Double_t average_dedx;
     Int_t n_tracked;
     Int_t n_untracked;
@@ -789,13 +792,13 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
     n_tracked = 0;
   
     // tmp array to store delta_E of hits on a track 
-    dedx_arr = new Double_t[StFtpcTrackingParams::Instance()->MaxHit()];
-    index_arr = new Int_t[StFtpcTrackingParams::Instance()->MaxHit()];
+    int nMaxHit = StFtpcTrackingParams::Instance()->MaxHit();
+    if (dedx_arrT.GetSize()<nMaxHit) dedx_arrT.Set(nMaxHit);
+    dedx_arrT.Reset();
+    dedx_arr = dedx_arrT.GetArray();;
+    if (index_arrT.GetSize()<nMaxHit) index_arrT.Set(nMaxHit);
+    index_arr = index_arrT.GetArray();
     
-    for (int go = 0; go < StFtpcTrackingParams::Instance()->MaxHit(); go++) {
-      dedx_arr[go] = 0.;
-    }
-
     // loop over all tracks inside the FTPC for each track 
     // possible to limit number of tracks for processing 
     for (itrk = 0; itrk < TMath::Min(GetNumberOfTracks(), StFtpcTrackingParams::Instance()->MaxTrack()); itrk++) {
@@ -895,10 +898,11 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 
     if(StFtpcTrackingParams::Instance()->IdMethod() == 1) {
       gMessMgr->Message("", "I", "OS") << "Using truncated mean over whole chamber method by R. Witt." << endm;
-    
-      weighted = new Double_t[GetNumberOfClusters()];
-      if (index_arr) delete[] index_arr; // This line was missing; new index_arr was invoked twice
-      index_arr = new Int_t[GetNumberOfClusters()];
+      int nClusters=GetNumberOfClusters();
+      if (weightedT.GetSize()<nClusters) weightedT.Set(nClusters);
+      weighted = weightedT.GetArray();
+      if (index_arrT.GetSize()<nClusters) index_arrT.Set(nClusters);
+      index_arr = index_arrT.GetArray();
     
       for(ihit=0; ihit<GetNumberOfClusters(); ihit++) {
 	weighted[ihit] = 0;
@@ -1034,11 +1038,8 @@ Int_t StFtpcTracker::FitAnddEdx(Bool_t primary_fit)
 	track->SetNumdEdxHits(acc_hit);
       }
     
-      delete[] weighted;
     } 
 
-    delete[] dedx_arr;    // release the dedx_arr array
-    delete[] index_arr;   // release the dedx_arr array
 
     if(mBench) {
       mBench->Stop("fit");
