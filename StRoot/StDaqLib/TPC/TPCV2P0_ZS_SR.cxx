@@ -15,6 +15,10 @@
 // cannot contain the scope of the "for" loop index within parenthesis.
 // So if the next loop uses same index, it cannot be Declared again.
 // I made 2 for rcg  and marked them both in  the code.
+// 20-Jun-99 MJL corrected Iwona's fix, which depends on the "leak" out of the
+// 'for' scope to define the variable elsewhere. At the very least this makes 
+// gdb very confused. Now the offending rcb is defined outside the scope of
+// all for loops
 
 TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det)
 {
@@ -36,9 +40,9 @@ int TPCV2P0_ZS_SR::initialize()
       Pad_array[row][pad].seq= (Sequence *)0;
     }
   }
-
+  int rcb; // define for following for loops
   // store pointers to the ADCD, ADCX, SEQD banks
-  for(int rcb = 0; rcb < 6; rcb++)
+  for(rcb = 0; rcb < 6; rcb++)
   {
     for(int mz = 0; mz < 3; mz++)
     {
