@@ -55,12 +55,12 @@
 * 
 * 
 * 
-MACRO bfc _
+MACRO bfc_mdc _
    TOP=$STAR  _
    adcxyzon=0 _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
-   domain='geometry tpc svt global' _
+   domain='geometry sim/g2t sim/gstar tpc svt global' _
    chain='gethij gst svg tpg srs tss'_ 
    first=401 _
    no_events=200 _
@@ -80,6 +80,7 @@ if [no_in_bunch]>[nsplit] then | split mode
 endif
  macro/global/create input_file       [input_file]              'Input file name'
  macro/global/create output_file      [output_file]             'Output file name'
+ macro/global/create output_fzd_file  [output_fzd_file]         'Output file name'
  macro/global/create adcxyzon         [adcxyzon]                'flag'
  macro/global/create tpc_sector_first [tpc_sector_first]        'first sector in TPC'
  macro/global/create tpc_sector_last  [tpc_sector_last]         'last sector in TPC'
@@ -104,7 +105,12 @@ message ' *** Output file name              --> ' [output_file]
  exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=[chain]
 
  macro/global/import *
-  
+ if $index([chain],gethij)>0 then
+* skip input event if any
+   do ievent = [f],[first]-1
+     exec [TOP]/kumacs/chain/bfc_util#bfc_process chain=gethij
+   enddo
+ endif 
  *****************************************
  *  MAIN EVENT LOOP 
  *****************************************
@@ -119,6 +125,8 @@ message ' *** Output file name              --> ' [output_file]
    i2 = $format([iev2],i4.4)
    output_file = [prefix_out]_[i1]_[i2].xdf
    exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=evout  
+   output_fzd_file = [prefix_out]_[i1]_[i2].fzd
+   exec [TOP]/kumacs/chain/bfc_util#bfc_init chain=fzd  
    do ievent=[iev1],[iev2]
 * clean tables
      tabclear [event]
