@@ -110,7 +110,18 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   hgc2->Draw();
   hstc2->Draw("SAME");
 
-  
+  canvas5 = new TCanvas("canvas5", "Track Residuals", 130,80,830,720);
+  canvas5->Divide(2,2);
+  canvas5->cd(1);
+  hresx=new TH1F("hresx","StiTrack Residual in X",256,-10,10);
+  TestTree->Draw("stiTrackResX >> hresx","","goff");
+  hresx->Draw();
+  hresy=new TH1F("hresy","StiTrack Residual in Y",256,-10,10);
+  TestTree->Draw("stiTrackResY >> hresy","","goff");
+  hresy->Draw();
+  hresz=new TH1F("hresx","StiTrack Residual in Z",256,-10,10);
+  TestTree->Draw("stiTrackResZ >> hresZ","","goff");
+  hresz->Draw();
 
 
   //f->Close();
