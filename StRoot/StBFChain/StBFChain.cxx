@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.404 2004/04/02 03:23:31 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.405 2004/04/03 02:50:34 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -219,6 +219,7 @@ Bfc_st BFC1[] = {
   {"Debug"       ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
+  {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
@@ -768,6 +769,7 @@ Bfc_st BFC2[] = {
   {"Debug"       ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug1"      ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
+  {"noRepeat"    ,""  ,"",""                                        ,"","","No repeat in Messenger",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
@@ -1703,10 +1705,11 @@ Int_t StBFChain::Instantiate()
   PrintInfo();
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's inv
-  if (GetOption("MakeDoc")) MakeDoc();
-  if (GetOption("Debug"))  SetDEBUG(1);
-  if (GetOption("Debug1")) SetDEBUG(1);
-  if (GetOption("Debug2")) SetDEBUG(2);
+  if (GetOption("MakeDoc"))  MakeDoc();
+  if (GetOption("Debug"))    SetDEBUG(1);
+  if (GetOption("Debug1"))   SetDEBUG(1);
+  if (GetOption("Debug2"))   SetDEBUG(2);
+  if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats(); 
   return status;
 }
 
