@@ -60,8 +60,16 @@ int Bank_TRGD::HerbSwap2003(char *ptr) {
   swapHerb2bytes(&(gs2003->TrgSum.L2SumHeader),1);
   swapHerb4bytes(&(gs2003->TrgSum.L2Result[0]),32);
   
+  // Herb, Mar 25 2003.  The npre/npost numbers in the 
+  // trigger data (5/5) do not agree with the bank len in the TRGD header.  The bank len shows room for only
+  // 1 event, not 1+5+5 events.  I'm getting a seg vio -- so probably the npre/npost numbers are incorrect.
+  // So, here I override them, setting them each to zero.  End of transmission, beam me up.
+  gs2003->EvtDesc.npre=0; gs2003->EvtDesc.npost=0;
+
   numToSwap=1+gs2003->EvtDesc.npost+gs2003->EvtDesc.npre; assert(numToSwap<50&&numToSwap>0);
   assert(numToSwap>=0&&numToSwap<=PREPOST);
+
+
   for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
     swapHerb2bytes(&(gs2003->RAW[i].RawDetBytes),1);
     swapHerb2bytes(&(gs2003->RAW[i].CTBdataBytes),1);
